@@ -285,7 +285,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 				return(false);
 			}
 		}
-		if( itm && (itm->GetItem()->Click.Type == ET_EquipClick) && !(item_slot < 22 || item_slot == 9999) ){
+		if( itm && (itm->GetItem()->Click.Type == ET_EquipClick) && !(item_slot <= MainAmmo || item_slot == MainPowerSource) ){
 			if (CastToClient()->GetClientVersion() < EQClientSoF) {
 				// They are attempting to cast a must equip clicky without having it equipped
 				LogFile->write(EQEMuLog::Error, "HACKER: %s (account: %s) attempted to click an equip-only effect on item %s (id: %d) without equiping it!", CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
@@ -1195,7 +1195,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 		uint32 recastdelay = 0;
 		uint32 recasttype = 0;
 
-		for(int r = 0; r < MAX_AUGMENT_SLOTS; r++) {
+		for (int r = 0; r < EmuConstants::ITEM_COMMON_SIZE; r++) {
 			const ItemInst* aug_i = inst->GetAugment(r);
 
 			if(!aug_i)
@@ -5018,7 +5018,7 @@ bool Mob::IsCombatProc(uint16 spell_id) {
 
 		for (int i = 0; i < MAX_PROCS; i++){
 			if (PermaProcs[i].spellID == spell_id || SpellProcs[i].spellID == spell_id 
-				|| SkillProcs[i].spellID == spell_id || RangedProcs[i].spellID == spell_id){
+				 || RangedProcs[i].spellID == spell_id){
 				return true;
 			}
 		}
@@ -5075,7 +5075,7 @@ bool Mob::AddDefensiveProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id
 {
 	if(spell_id == SPELL_UNKNOWN)
 		return(false);
-
+	
 	int i;
 	for (i = 0; i < MAX_PROCS; i++) {
 		if (DefensiveProcs[i].spellID == SPELL_UNKNOWN) {

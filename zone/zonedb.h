@@ -43,9 +43,25 @@ struct DBnpcspellseffects_entries_Struct {
 
 struct DBnpcspells_Struct {
 	uint32	parent_list;
-	int16	attack_proc;
+	uint16	attack_proc;
 	uint8	proc_chance;
+	uint16	range_proc;
+	int16	rproc_chance;
+	uint16	defensive_proc;
+	int16	dproc_chance;
 	uint32	numentries;
+	uint32	fail_recast;
+	uint32	engaged_no_sp_recast_min;
+	uint32	engaged_no_sp_recast_max;
+	uint8	engaged_beneficial_self_chance;
+	uint8	engaged_beneficial_other_chance;
+	uint8	engaged_detrimental_chance;
+	uint32  pursue_no_sp_recast_min;
+	uint32  pursue_no_sp_recast_max;
+	uint8   pursue_detrimental_chance;
+	uint32  idle_no_sp_recast_min;
+	uint32  idle_no_sp_recast_max;
+	uint8	idle_beneficial_chance;
 	DBnpcspells_entries_Struct entries[0];
 };
 
@@ -90,7 +106,7 @@ struct PetInfo {
 	uint32	Mana;
 	float	size;
 	SpellBuff_Struct	Buffs[BUFF_COUNT];
-	uint32	Items[MAX_WORN_INVENTORY];
+	uint32	Items[EmuConstants::EQUIPMENT_SIZE];
 	char	Name[64];
 };
 

@@ -266,6 +266,7 @@ struct StatBonuses {
 
 	int16	StrikeThrough;						// PoP: Strike Through %
 	int16	MeleeMitigation;					//i = Shielding
+	int16	MeleeMitigationEffect;				//i = Spell Effect Melee Mitigation
 	int16	CriticalHitChance[HIGHEST_SKILL+2];	//i
 	int16	CriticalSpellChance;				//i
 	int16	SpellCritDmgIncrease;				//i
@@ -275,7 +276,8 @@ struct StatBonuses {
 	int16	CriticalHealOverTime;				//i
 	int16	CriticalDoTChance;					//i
 	int16	CrippBlowChance;					//
-	int16	AvoidMeleeChance;					//AvoidMeleeChance/10 == % chance i = Avoidance
+	int16	AvoidMeleeChance;					//AvoidMeleeChance/10 == % chance i = Avoidance (item mod)
+	int16	AvoidMeleeChanceEffect;				//AvoidMeleeChance Spell Effect
 	int16	RiposteChance;						//i
 	int16	DodgeChance;						//i
 	int16	ParryChance;						//i

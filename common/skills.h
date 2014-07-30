@@ -53,7 +53,8 @@ enum SkillUseTypes : uint32
 /*13879*/	SkillDivination,
 /*13880*/	SkillDodge,
 /*13881*/	SkillDoubleAttack,
-/*13882*/	SkillDragonPunch,				/*13924	SkillTailRake*/
+/*13882*/	SkillDragonPunch,
+/*13924*/	SkillTailRake = SkillDragonPunch, // Iksar Monk equivilent
 /*13883*/	SkillDualWield,
 /*13884*/	SkillEagleStrike,
 /*13885*/	SkillEvocation,
@@ -199,7 +200,7 @@ typedef enum {
 	DIVINATION				= 18,
 	DODGE					= 19,
 	DOUBLE_ATTACK			= 20,
-	DRAGON_PUNCH			= 21	,	//aka Tail Rake
+	DRAGON_PUNCH			= 21,	//aka Tail Rake
 	DUAL_WIELD				= 22,
 	EAGLE_STRIKE			= 23,
 	EVOCATION				= 24,

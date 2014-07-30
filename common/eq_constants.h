@@ -138,45 +138,86 @@ enum ItemUseTypes : uint8
 };
 
 /*
-**	Augmentation use types (in-work)
+**	Augmentation use type bitmasks (1-based)
 **
 **	(ref: dbstr_us.txt)
 **
 */
-enum AugmentationUseTypes : uint32 {
-	AugTypeNone = 0,				// not 100% sure on this...
-	AugTypeGeneralSingleStat,		/*1^16^1 (General: Single Stat)^0*/
-	AugTypeGeneralMultipleStat,		/*2^16^2 (General: Multiple Stat)^0*/
-	AugTypeGeneralSpellEffect,		/*3^16^3 (General: Spell Effect)^0*/
-	AugTypeWeaponGeneral,			/*4^16^4 (Weapon: General)^0*/
-	AugTypeWeaponElemDamage,		/*5^16^5 (Weapon: Elem Damage)^0*/
-	AugTypeWeaponBaseDamage,		/*6^16^6 (Weapon: Base Damage)^0*/
-	AugTypeGeneralGroup,			/*7^16^7 (General: Group)^0*/
-	AugTypeGeneralRaid,				/*8^16^8 (General: Raid)^0*/
-	AugTypeGeneralDragonsPoints,	/*9^16^9 (General: Dragons Points)^0*/
-	AugTypeCraftedCommon,			/*10^16^10 (Crafted: Common)^0*/
-	AugTypeCraftedGroup1,			/*11^16^11 (Crafted: Group)^0*/
-	AugTypeCraftedRaid1,			/*12^16^12 (Crafted: Raid)^0*/
-	AugTypeEnergeiacGroup,			/*13^16^13 (Energeiac: Group)^0*/
-	AugTypeEnergeiacRaid,			/*14^16^14 (Energeiac: Raid)^0*/
-	AugTypeEmblem,					/*15^16^15 (Emblem)^0*/
-	AugTypeCraftedGroup2,			/*16^16^16 (Crafted: Group)^0*/
-	AugTypeCraftedRaid2,			/*17^16^17 (Crafted: Raid)^0*/
-	AugTypeUnknown1,				/*18^16^18^0*/
-	AugTypeUnknown2,				/*19^16^19^0*/
-	AugTypeOrnamentation,			/*20^16^20 (Ornamentation)^0*/
-	AugTypeSpecialOrnamentation,	/*21^16^21 (Special Ornamentation)^0*/
-	AugTypeUnknown3,				/*22^16^22^0*/
-	AugTypeUnknown4,				/*23^16^23^0*/
-	AugTypeUnknown5,				/*24^16^24^0*/
-	AugTypeUnknown6,				/*25^16^25^0*/
-	AugTypeUnknown7,				/*26^16^26^0*/
-	AugTypeUnknown8,				/*27^16^27^0*/
-	AugTypeUnknown9,				/*28^16^28^0*/
-	AugTypeUnknown10,				/*29^16^29^0*/
-	AugTypeEpic25,					/*30^16^30^0*/
-	AugTypeTest,					/*31^16^Test^0*/ // listed as 31^16^31^0 in 5-10 client
-	_AugTypeCount
+enum AugmentationUseTypeBitmasks : uint32 {
+	AugUseNone					= 0x00000000,
+	AugUseGeneralSingleStat		= 0x00000001,	/*1^16^1 (General: Single Stat)^0*/
+	AugUseGeneralMultipleStat	= 0x00000002,	/*2^16^2 (General: Multiple Stat)^0*/
+	AugUseGeneralSpellEffect	= 0x00000004,	/*3^16^3 (General: Spell Effect)^0*/
+	AugUseWeaponGeneral			= 0x00000008,	/*4^16^4 (Weapon: General)^0*/
+	AugUseWeaponElemDamage		= 0x00000010,	/*5^16^5 (Weapon: Elem Damage)^0*/
+	AugUseWeaponBaseDamage		= 0x00000020,	/*6^16^6 (Weapon: Base Damage)^0*/
+	AugUseGeneralGroup			= 0x00000040,	/*7^16^7 (General: Group)^0*/
+	AugUseGeneralRaid			= 0x00000080,	/*8^16^8 (General: Raid)^0*/
+	AugUseGeneralDragonsPoints	= 0x00000100,	/*9^16^9 (General: Dragons Points)^0*/
+	AugUseCraftedCommon			= 0x00000200,	/*10^16^10 (Crafted: Common)^0*/
+	AugUseCraftedGroup1			= 0x00000400,	/*11^16^11 (Crafted: Group)^0*/
+	AugUseCraftedRaid1			= 0x00000800,	/*12^16^12 (Crafted: Raid)^0*/
+	AugUseEnergeiacGroup		= 0x00001000,	/*13^16^13 (Energeiac: Group)^0*/
+	AugUseEnergeiacRaid			= 0x00002000,	/*14^16^14 (Energeiac: Raid)^0*/
+	AugUseEmblem				= 0x00004000,	/*15^16^15 (Emblem)^0*/
+	AugUseCraftedGroup2			= 0x00008000,	/*16^16^16 (Crafted: Group)^0*/
+	AugUseCraftedRaid2			= 0x00010000,	/*17^16^17 (Crafted: Raid)^0*/
+	AugUseUnknown1				= 0x00020000,	/*18^16^18^0*/
+	AugUseUnknown2				= 0x00040000,	/*19^16^19^0*/
+	AugUseOrnamentation			= 0x00080000,	/*20^16^20 (Ornamentation)^0*/
+	AugUseSpecialOrnamentation	= 0x00100000,	/*21^16^21 (Special Ornamentation)^0*/
+	AugUseUnknown3				= 0x00200000,	/*22^16^22^0*/
+	AugUseUnknown4				= 0x00400000,	/*23^16^23^0*/
+	AugUseUnknown5				= 0x00800000,	/*24^16^24^0*/
+	AugUseUnknown6				= 0x01000000,	/*25^16^25^0*/
+	AugUseUnknown7				= 0x02000000,	/*26^16^26^0*/
+	AugUseUnknown8				= 0x04000000,	/*27^16^27^0*/
+	AugUseUnknown9				= 0x08000000,	/*28^16^28^0*/
+	AugUseUnknown10				= 0x10000000,	/*29^16^29^0*/
+	AugUseEpic25				= 0x20000000,	/*30^16^30^0*/
+	AugUseTest					= 0x40000000,	/*31^16^Test^0*/ // listed as 31^16^31^0 in 5-10 client
+	AugUseAll					= 0xFFFFFFFF
+};
+
+/*
+**	Augmentation use types (enumerated)
+**
+*/
+enum AugmentationUseTypes : uint8 {
+	AugTypeNone = 0,
+	AugTypeGeneralSingleStat,
+	AugTypeGeneralMultipleStat,
+	AugTypeGeneralSpellEffect,
+	AugTypeWeaponGeneral,
+	AugTypeWeaponElemDamage,
+	AugTypeWeaponBaseDamage,
+	AugTypeGeneralGroup,
+	AugTypeGeneralRaid,
+	AugTypeGeneralDragonsPoints,
+	AugTypeCraftedCommon,
+	AugTypeCraftedGroup1,
+	AugTypeCraftedRaid1,
+	AugTypeEnergeiacGroup,
+	AugTypeEnergeiacRaid,
+	AugTypeEmblem,
+	AugTypeCraftedGroup2,
+	AugTypeCraftedRaid2,
+	AugTypeUnknown1,
+	AugTypeUnknown2,
+	AugTypeOrnamentation,
+	AugTypeSpecialOrnamentation,
+	AugTypeUnknown3,
+	AugTypeUnknown4,
+	AugTypeUnknown5,
+	AugTypeUnknown6,
+	AugTypeUnknown7,
+	AugTypeUnknown8,
+	AugTypeUnknown9,
+	AugTypeUnknown10,
+	AugTypeEpic25,
+	AugTypeTest,
+	_AugTypeCount,
+	AugTypeAll = 255
 };
 
 /*
@@ -735,10 +776,11 @@ enum MaterialUseSlots : uint8
 	_MaterialInvalid = 255
 };
 
+/*
 // Used for worn NPC inventory tracking. NPCs don't use
 // augments, so only the basic slots need to be kept track of.
 #define MAX_WORN_INVENTORY	22
-
+*/
 
 /*
 **	Inventory Slot Equipment Enum
@@ -768,42 +810,109 @@ enum MaterialUseSlots : uint8
 **
 */
 
+enum InventoryMapTypes : int16 {
+	MapPossessions = 0,
+	MapBank,
+	MapSharedBank,
+	MapTrade,
+	MapWorld,
+	MapLimbo,
+	MapTribute,
+	MapTrophyTribute,
+	MapGuildTribute,
+	MapMerchant,
+	MapDeleted,
+	MapCorpse,
+	MapBazaar,
+	MapInspect,
+	MapRealEstate,
+	MapViewMODPC,
+	MapViewMODBank,
+	MapViewMODSharedBank,
+	MapViewMODLimbo,
+	MapAltStorage,
+	MapArchived,
+	MapMail,
+	MapGuildTrophyTribute,
+	MapKrono,
+	MapOther,
+	_MapCount
+};
+
+enum InventoryMainTypes : int16 {
+	MainCharm = 0,
+	MainEar1,
+	MainHead,
+	MainFace,
+	MainEar2,
+	MainNeck,
+	MainShoulders,
+	MainArms,
+	MainBack,
+	MainWrist1,
+	MainWrist2,
+	MainRange,
+	MainHands,
+	MainPrimary,
+	MainSecondary,
+	MainFinger1,
+	MainFinger2,
+	MainChest,
+	MainLegs,
+	MainFeet,
+	MainWaist,
+	MainPowerSource = 9999, // temp
+	MainAmmo = 21, // temp
+	MainGeneral1,
+	MainGeneral2,
+	MainGeneral3,
+	MainGeneral4,
+	MainGeneral5,
+	MainGeneral6,
+	MainGeneral7,
+	MainGeneral8,
+	//MainGeneral9,
+	//MainGeneral10,
+	MainCursor,
+	_MainCount
+};
+
 enum InventorySlot
 {
 	////////////////////////
 	// Equip slots
 	////////////////////////
 
-	SLOT_CHARM		= 0,
-	SLOT_EAR01		= 1,
-	SLOT_HEAD		= 2,
-	SLOT_FACE		= 3,
-	SLOT_EAR02		= 4,
-	SLOT_NECK		= 5,
-	SLOT_SHOULDER	= 6,
-	SLOT_ARMS		= 7,
-	SLOT_BACK		= 8,
-	SLOT_BRACER01	= 9,
-	SLOT_BRACER02	= 10,
-	SLOT_RANGE		= 11,
-	SLOT_HANDS		= 12,
-	SLOT_PRIMARY	= 13,
-	SLOT_SECONDARY	= 14,
-	SLOT_RING01		= 15,
-	SLOT_RING02		= 16,
-	SLOT_CHEST		= 17,
-	SLOT_LEGS		= 18,
-	SLOT_FEET		= 19,
-	SLOT_WAIST		= 20,
-	SLOT_AMMO		= 21,
+	//SLOT_CHARM		= 0,
+	//SLOT_EAR01		= 1,
+	//SLOT_HEAD		= 2,
+	//SLOT_FACE		= 3,
+	//SLOT_EAR02		= 4,
+	//SLOT_NECK		= 5,
+	//SLOT_SHOULDER	= 6,
+	//SLOT_ARMS		= 7,
+	//SLOT_BACK		= 8,
+	//SLOT_BRACER01	= 9,
+	//SLOT_BRACER02	= 10,
+	//SLOT_RANGE		= 11,
+	//SLOT_HANDS		= 12,
+	//SLOT_PRIMARY	= 13,
+	//SLOT_SECONDARY	= 14,
+	//SLOT_RING01		= 15,
+	//SLOT_RING02		= 16,
+	//SLOT_CHEST		= 17,
+	//SLOT_LEGS		= 18,
+	//SLOT_FEET		= 19,
+	//SLOT_WAIST		= 20,
+	//SLOT_AMMO		= 21,
 
 	////////////////////////
 	// All other slots
 	////////////////////////
-	SLOT_PERSONAL_BEGIN = 22,
-	SLOT_PERSONAL_END = 29,
+	//SLOT_PERSONAL_BEGIN = 22,
+	//SLOT_PERSONAL_END = 29,
 
-	SLOT_CURSOR		= 30,
+	//SLOT_CURSOR		= 30,
 
 	SLOT_CURSOR_END	= (int16)0xFFFE,	// Last item on cursor queue
 	// Cursor bag slots are 331->340 (10 slots)
@@ -830,11 +939,21 @@ enum InventorySlot
 
 	// Slot used in OP_TradeSkillCombine for world tradeskill containers
 	SLOT_TRADESKILL = 1000,
-	SLOT_AUGMENT = 1001,
-	SLOT_POWER_SOURCE = 9999,
+	SLOT_AUGMENT = 1001//,
+	//SLOT_POWER_SOURCE = 9999//,
 	// Value recognized by client for destroying an item
-	SLOT_INVALID = (int16)0xFFFF
+	//SLOT_INVALID = (int16)0xFFFF
 };
 
+#define INVALID_INDEX	-1
+#define NOT_USED		0
+#define NO_ITEM			0
+
+// yes..these are redundant... but, they help to identify and define what is actually being performed
+// plus, since they're pre-op's, they don't affect the actual binary size
+#define MAP_BEGIN	0
+#define MAIN_BEGIN	0
+#define SUB_BEGIN	0
+#define AUG_BEGIN	0
 
 #endif

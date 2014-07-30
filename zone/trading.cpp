@@ -87,7 +87,7 @@ void Trade::AddEntity(uint16 from_slot_id, uint16 trade_slot_id)
 
 	// Item always goes into trade bucket from cursor
 	Client* client = owner->CastToClient();
-	const ItemInst* inst = client->GetInv().GetItem(SLOT_CURSOR);
+	const ItemInst* inst = client->GetInv().GetItem(MainCursor);
 	if (!inst) {
 		client->Message(13, "Error: Could not find item on your cursor!");
 		return;
@@ -105,7 +105,7 @@ void Trade::AddEntity(uint16 from_slot_id, uint16 trade_slot_id)
 	}
 	else
 	{
-		if (client->GetInv().GetItem(SLOT_CURSOR)->GetID() != client->GetInv().GetItem(trade_slot_id)->GetID()) {
+		if (client->GetInv().GetItem(MainCursor)->GetID() != client->GetInv().GetItem(trade_slot_id)->GetID()) {
 			client->Kick();
 			return;
 		}
@@ -146,13 +146,13 @@ void Trade::SendItemData(const ItemInst* inst, int16 dest_slot_id)
 	Client* with = mob->CastToClient();
 	Client* trader = owner->CastToClient();
 	if (with && with->IsClient()) {
-		with->SendItemPacket(dest_slot_id -IDX_TRADE,inst,ItemPacketTradeView);
+		with->SendItemPacket(dest_slot_id - EmuConstants::TRADE_BEGIN, inst, ItemPacketTradeView);
 		if (inst->GetItem()->ItemClass == 1) {
 			for (uint16 i=0; i<10; i++) {
 				uint16 bagslot_id = Inventory::CalcSlotId(dest_slot_id, i);
 				const ItemInst* bagitem = trader->GetInv().GetItem(bagslot_id);
 				if (bagitem) {
-					with->SendItemPacket(bagslot_id-IDX_TRADE,bagitem,ItemPacketTradeView);
+					with->SendItemPacket(bagslot_id - EmuConstants::TRADE_BEGIN, bagitem, ItemPacketTradeView);
 				}
 			}
 		}
@@ -318,7 +318,7 @@ void Client::ResetTrade() {
 		{
 			bool is_arrow = (TempItem->ItemType == ItemTypeArrow) ? true : false;
 			int freeslotid = GetInv().FindFreeSlot(ins->IsType(ItemClassContainer), true, TempItem->Size, is_arrow);
-			if (freeslotid == SLOT_INVALID)
+			if (freeslotid == INVALID_INDEX)
 			{
 				DropInst(ins);
 			}
@@ -441,14 +441,14 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 
 						if(QSPLT) {
 							qsaudit->items[parent_offset].to_id	= this->character_id;
-							qsaudit->items[parent_offset].to_slot = SLOT_CURSOR;
+							qsaudit->items[parent_offset].to_slot = MainCursor;
 
 							if(inst->IsType(ItemClassContainer)) {
 								for(uint8 bagslot_idx = 0; bagslot_idx < inst->GetItem()->BagSlots; bagslot_idx++) {
 									const ItemInst* bag_inst = inst->GetItem(bagslot_idx);
 
 									if(bag_inst == nullptr) { continue; }
-									int16 to_bagslot_id = Inventory::CalcSlotId(SLOT_CURSOR, bagslot_idx);
+									int16 to_bagslot_id = Inventory::CalcSlotId(MainCursor, bagslot_idx);
 
 									qsaudit->items[++parent_offset].to_id = this->character_id;
 									qsaudit->items[parent_offset].to_slot = to_bagslot_id;
@@ -465,14 +465,14 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 
 					if(QSPLT) {
 						qsaudit->items[parent_offset].to_id	= this->character_id;
-						qsaudit->items[parent_offset].to_slot = SLOT_CURSOR;
+						qsaudit->items[parent_offset].to_slot = MainCursor;
 
 						if(inst->IsType(ItemClassContainer)) {
 							for(uint8 bagslot_idx = 0; bagslot_idx < inst->GetItem()->BagSlots; bagslot_idx++) {
 								const ItemInst* bag_inst = inst->GetItem(bagslot_idx);
 
 								if(bag_inst == nullptr) { continue; }
-								int16 to_bagslot_id = Inventory::CalcSlotId(SLOT_CURSOR, bagslot_idx);
+								int16 to_bagslot_id = Inventory::CalcSlotId(MainCursor, bagslot_idx);
 
 								qsaudit->items[++parent_offset].to_id = this->character_id;
 								qsaudit->items[parent_offset].to_slot = to_bagslot_id;
@@ -2214,7 +2214,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 
 	if(!item || !Quantity || !Price || !QtyBuyerWants) return;
 
-	if(m_inv.HasItem(ItemID, Quantity, invWhereWorn|invWherePersonal|invWhereCursor) == SLOT_INVALID) {
+	if (m_inv.HasItem(ItemID, Quantity, invWhereWorn | invWherePersonal | invWhereCursor) == INVALID_INDEX) {
 		Message(13, "You do not have %i %s on you.", Quantity, item->Name);
 		return;
 	}
@@ -2264,7 +2264,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 			int16 SellerSlot = m_inv.HasItem(ItemID, 1, invWhereWorn|invWherePersonal|invWhereCursor);
 
 			// This shouldn't happen, as we already checked there was space in the Buyer's inventory
-			if(SellerSlot == SLOT_INVALID) {
+			if (SellerSlot == INVALID_INDEX) {
 
 				if(i > 0) {
 					// Set the Quantity to the actual number we successfully transferred.
@@ -2316,7 +2316,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 			// Find the slot on the seller that has a stack of at least 1 of the item
 			int16 SellerSlot = m_inv.HasItem(ItemID, 1, invWhereWorn|invWherePersonal|invWhereCursor);
 
-			if(SellerSlot == SLOT_INVALID) {
+			if (SellerSlot == INVALID_INDEX) {
 				_log(TRADING__BARTER, "Unexpected error while moving item from seller to buyer.");
 				Message(13, "Internal error while processing transaction.");
 				return;

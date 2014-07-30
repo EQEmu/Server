@@ -46,7 +46,6 @@
 #include "LauncherList.h"
 #include "ucs.h"
 #include "queryserv.h"
-#include "socket_server.h"
 
 #ifdef _WINDOWS
 	#define snprintf	_snprintf
@@ -61,7 +60,6 @@ extern ClientList client_list;
 extern LauncherList launcher_list;
 extern UCSConnection UCSLink;
 extern QueryServConnection QSLink;
-extern Socket_Server_Connection SSLink;
 extern volatile bool	RunLoops;
 
 ConsoleList console_list;
@@ -265,12 +263,6 @@ bool Console::Process() {
 			QSLink.SetConnection(tcpc);
 			tcpc = 0;
 		}  
-		else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeSocket_Server)
-		{
-			_log(WORLD__CONSOLE, "New Socket Server Connection from %s:%d", inet_ntoa(in), GetPort());
-			SSLink.SetConnection(tcpc);
-			tcpc = 0;
-		}
 		else {
 			_log(WORLD__CONSOLE,"Unsupported packet mode from %s:%d", inet_ntoa(in), GetPort());
 		}

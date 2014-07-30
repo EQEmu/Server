@@ -48,7 +48,7 @@ public:
 	//abstract virtual function implementations requird by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill);
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false);
-	virtual bool Attack(Mob* other, int Hand = SLOT_PRIMARY, bool FromRiposte = false, bool IsStrikethrough = false, 
+	virtual bool Attack(Mob* other, int Hand = MainPrimary, bool FromRiposte = false, bool IsStrikethrough = false, 
 		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr);
 	virtual bool HasRaid() { return false; }
 	virtual bool HasGroup() { return (GetGroup() ? true : false); }
@@ -273,11 +273,11 @@ protected:
 	std::map<uint32,MercTimer> timers;
 
 	uint16	skills[HIGHEST_SKILL+1];
-	uint32	equipment[MAX_WORN_INVENTORY];	//this is an array of item IDs
-	uint16	d_meele_texture1;			//this is an item Material value
-	uint16	d_meele_texture2;			//this is an item Material value (offhand)
-	uint8	prim_melee_type;			//Sets the Primary Weapon attack message and animation
-	uint8	sec_melee_type;				//Sets the Secondary Weapon attack message and animation
+	uint32	equipment[EmuConstants::EQUIPMENT_SIZE];	//this is an array of item IDs
+	uint16	d_meele_texture1;							//this is an item Material value
+	uint16	d_meele_texture2;							//this is an item Material value (offhand)
+	uint8	prim_melee_type;							//Sets the Primary Weapon attack message and animation
+	uint8	sec_melee_type;								//Sets the Secondary Weapon attack message and animation
 
 private:
 

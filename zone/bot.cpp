@@ -237,7 +237,7 @@ void Bot::SetBotSpellID(uint32 newSpellID) {
 uint32 Bot::GetBotArcheryRange() {
 	uint32 result = 0;
 
-	ItemInst* rangeItem = GetBotItem(SLOT_RANGE);
+	ItemInst* rangeItem = GetBotItem(MainRange);
 
 	if(!rangeItem)
 		return 0;
@@ -257,7 +257,7 @@ uint32 Bot::GetBotArcheryRange() {
 		archeryColor = botweapon->Color;
 		range =+ botweapon->Range;
 
-		rangeItem = GetBotItem(SLOT_AMMO);
+		rangeItem = GetBotItem(MainAmmo);
 		if(rangeItem)
 			botweapon = rangeItem->GetItem();
 
@@ -280,8 +280,8 @@ void Bot::ChangeBotArcherWeapons(bool isArcher) {
 		|| (GetClass()==SHADOWKNIGHT) || (GetClass()==ROGUE))
 	{
 		if(!isArcher) {
-			BotAddEquipItem(SLOT_PRIMARY, GetBotItemBySlot(SLOT_PRIMARY));
-			BotAddEquipItem(SLOT_SECONDARY, GetBotItemBySlot(SLOT_SECONDARY));
+			BotAddEquipItem(MainPrimary, GetBotItemBySlot(MainPrimary));
+			BotAddEquipItem(MainSecondary, GetBotItemBySlot(MainSecondary));
 			//archerbot->SendWearChange(MATERIAL_PRIMARY);
 			//archerbot->SendWearChange(MATERIAL_SECONDARY);
 			SetAttackTimer();
@@ -290,11 +290,11 @@ void Bot::ChangeBotArcherWeapons(bool isArcher) {
 		else {
 			//archerbot->SendWearChange(MATERIAL_PRIMARY);
 			//archerbot->SendWearChange(MATERIAL_SECONDARY);
-			BotRemoveEquipItem(SLOT_PRIMARY);
-			BotRemoveEquipItem(SLOT_SECONDARY);
+			BotRemoveEquipItem(MainPrimary);
+			BotRemoveEquipItem(MainSecondary);
 			//archerbot->SendBotArcheryWearChange(MATERIAL_PRIMARY, archeryMaterial, archeryColor);
-			BotAddEquipItem(SLOT_AMMO, GetBotItemBySlot(SLOT_AMMO));
-			BotAddEquipItem(SLOT_SECONDARY, GetBotItemBySlot(SLOT_RANGE));
+			BotAddEquipItem(MainAmmo, GetBotItemBySlot(MainAmmo));
+			BotAddEquipItem(MainSecondary, GetBotItemBySlot(MainRange));
 			SetAttackTimer();
 			Say("My bow is true and ready.");
 		}
@@ -1291,7 +1291,7 @@ void Bot::GenerateArmorClass()
 uint16 Bot::GetPrimarySkillValue()
 {
 	SkillUseTypes skill = HIGHEST_SKILL; //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
-	bool equiped = m_inv.GetItem(SLOT_PRIMARY);
+	bool equiped = m_inv.GetItem(MainPrimary);
 
 	if(!equiped)
 	{
@@ -1299,7 +1299,7 @@ uint16 Bot::GetPrimarySkillValue()
 	}
 	else
 	{
-		uint8 type = m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType; //is this the best way to do this?
+		uint8 type = m_inv.GetItem(MainPrimary)->GetItem()->ItemType; //is this the best way to do this?
 		switch(type)
 		{
 			case ItemType1HSlash: // 1H Slashing
@@ -2630,7 +2630,7 @@ void Bot::LoadPet() {
 			NPC *pet = GetPet()->CastToNPC();
 			SpellBuff_Struct petBuffs[BUFF_COUNT];
 			memset(petBuffs, 0, sizeof(petBuffs));
-			uint32 petItems[MAX_WORN_INVENTORY];
+			uint32 petItems[EmuConstants::EQUIPMENT_SIZE];
 
 			LoadPetBuffs(petBuffs, PetSaveId);
 			LoadPetItems(petItems, PetSaveId);
@@ -2747,7 +2747,7 @@ void Bot::LoadPetItems(uint32* petItems, uint32 botPetSaveId) {
 			int ItemCount = 0;
 
 			while(DataRow = mysql_fetch_row(DatasetResult)) {
-				if(ItemCount == MAX_WORN_INVENTORY)
+				if(ItemCount == EmuConstants::EQUIPMENT_SIZE)
 					break;
 
 				petItems[ItemCount] = atoi(DataRow[0]);
@@ -2785,7 +2785,7 @@ void Bot::SavePet() {
 		uint32 botPetId = pet->CastToNPC()->GetPetSpellID();
 		char* tempPetName = new char[64];
 		SpellBuff_Struct petBuffs[BUFF_COUNT];
-		uint32 petItems[MAX_WORN_INVENTORY];
+		uint32 petItems[EmuConstants::EQUIPMENT_SIZE];
 
 		pet->GetPetState(petBuffs, petItems, tempPetName);
 
@@ -2867,7 +2867,7 @@ void Bot::SavePetItems(uint32* petItems, uint32 botPetSaveId) {
 		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 		int ItemCount = 0;
 
-		while(ItemCount < MAX_WORN_INVENTORY) {
+		while (ItemCount < EmuConstants::EQUIPMENT_SIZE) {
 			if(petItems[ItemCount] > 0) {
 				if(!database.RunQuery(Query, MakeAnyLenString(&Query, "INSERT INTO botpetinventory (BotPetsId, ItemId) VALUES(%u, %u);", botPetSaveId, petItems[ItemCount]), TempErrorMessageBuffer)) {
 					errorMessage = std::string(TempErrorMessageBuffer);
@@ -3189,12 +3189,12 @@ void Bot::BotRangedAttack(Mob* other) {
 		return;
 	}
 
-	ItemInst* rangedItem = GetBotItem(SLOT_RANGE);
+	ItemInst* rangedItem = GetBotItem(MainRange);
 	const Item_Struct* RangeWeapon = 0;
 	if(rangedItem)
 		RangeWeapon = rangedItem->GetItem();
 
-	ItemInst* ammoItem = GetBotItem(SLOT_AMMO);
+	ItemInst* ammoItem = GetBotItem(MainAmmo);
 	const Item_Struct* Ammo = 0;
 	if(ammoItem)
 		Ammo = ammoItem->GetItem();
@@ -3304,7 +3304,7 @@ void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 
 	int damage = 0;
 	uint32 hate = 0;
-	int Hand = 13;
+	int Hand = MainPrimary;
 	if (hate == 0 && weapon_damage > 1) hate = weapon_damage;
 
 	if(weapon_damage > 0){
@@ -3363,7 +3363,7 @@ void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 		damage = -5;
 
 	if(skillinuse == SkillBash){
-		const ItemInst* inst = GetBotItem(SLOT_SECONDARY);
+		const ItemInst* inst = GetBotItem(MainSecondary);
 		const Item_Struct* botweapon = 0;
 		if(inst)
 			botweapon = inst->GetItem();
@@ -3413,17 +3413,17 @@ void Bot::ApplySpecialAttackMod(SkillUseTypes skill, int32 &dmg, int32 &mindmg) 
 		case SkillFlyingKick:
 		case SkillRoundKick:
 		case SkillKick:
-			item_slot = SLOT_FEET;
+			item_slot = MainFeet;
 		break;
 
 		case SkillBash:
-			item_slot = SLOT_SECONDARY;
+			item_slot = MainSecondary;
 		break;
 
 		case SkillDragonPunch:
 		case SkillEagleStrike:
 		case SkillTigerClaw:
-			item_slot = SLOT_HANDS;
+			item_slot = MainHands;
 		break;
 	}
 
@@ -3775,27 +3775,27 @@ void Bot::AI_Process() {
 
 				//try main hand first
 				if(attack_timer.Check()) {
-					Attack(GetTarget(), SLOT_PRIMARY);
+					Attack(GetTarget(), MainPrimary);
 
-					ItemInst *wpn = GetBotItem(SLOT_PRIMARY);
-					TryWeaponProc(wpn, GetTarget(), SLOT_PRIMARY);
+					ItemInst *wpn = GetBotItem(MainPrimary);
+					TryWeaponProc(wpn, GetTarget(), MainPrimary);
 
 					bool tripleSuccess = false;
 
 					if(BotOwner && GetTarget() && CanThisClassDoubleAttack()) {
 
 						if(BotOwner && CheckBotDoubleAttack()) {
-							Attack(GetTarget(), SLOT_PRIMARY, true);
+							Attack(GetTarget(), MainPrimary, true);
 						}
 
 						if(BotOwner && GetTarget() && GetSpecialAbility(SPECATK_TRIPLE) && CheckBotDoubleAttack(true)) {
 							tripleSuccess = true;
-							Attack(GetTarget(), SLOT_PRIMARY, true);
+							Attack(GetTarget(), MainPrimary, true);
 						}
 
 						//quad attack, does this belong here??
 						if(BotOwner && GetTarget() && GetSpecialAbility(SPECATK_QUAD) && CheckBotDoubleAttack(true)) {
-							Attack(GetTarget(), SLOT_PRIMARY, true);
+							Attack(GetTarget(), MainPrimary, true);
 						}
 					}
 
@@ -3807,15 +3807,15 @@ void Bot::AI_Process() {
 						if(MakeRandomInt(0, 100) < flurrychance)
 						{
 							Message_StringID(MT_NPCFlurry, YOU_FLURRY);
-							Attack(GetTarget(), SLOT_PRIMARY, false);
-							Attack(GetTarget(), SLOT_PRIMARY, false);
+							Attack(GetTarget(), MainPrimary, false);
+							Attack(GetTarget(), MainPrimary, false);
 						}
 					}
 
 					int16 ExtraAttackChanceBonus = spellbonuses.ExtraAttackChance + itembonuses.ExtraAttackChance + aabonuses.ExtraAttackChance;
 
 					if (GetTarget() && ExtraAttackChanceBonus) {
-						ItemInst *wpn = GetBotItem(SLOT_PRIMARY);
+						ItemInst *wpn = GetBotItem(MainPrimary);
 						if(wpn){
 							if(wpn->GetItem()->ItemType == ItemType2HSlash ||
 								wpn->GetItem()->ItemType == ItemType2HBlunt ||
@@ -3823,7 +3823,7 @@ void Bot::AI_Process() {
 							{
 								if(MakeRandomInt(0, 100) < ExtraAttackChanceBonus)
 								{
-									Attack(GetTarget(), SLOT_PRIMARY, false);
+									Attack(GetTarget(), MainPrimary, false);
 								}
 							}
 						}
@@ -3843,7 +3843,7 @@ void Bot::AI_Process() {
 
 				//now off hand
 				if(GetTarget() && attack_dw_timer.Check() && CanThisClassDualWield()) {
-					const ItemInst* instweapon = GetBotItem(SLOT_SECONDARY);
+					const ItemInst* instweapon = GetBotItem(MainSecondary);
 					const Item_Struct* weapon = 0;
 					//can only dual wield without a weapon if you're a monk
 					if(instweapon || (botClass == MONK)) {
@@ -3870,14 +3870,14 @@ void Bot::AI_Process() {
 
 							if (random < DualWieldProbability){ // Max 78% of DW
 
-								Attack(GetTarget(), SLOT_SECONDARY);	// Single attack with offhand
+								Attack(GetTarget(), MainSecondary);	// Single attack with offhand
 
-								ItemInst *wpn = GetBotItem(SLOT_SECONDARY);
-								TryWeaponProc(wpn, GetTarget(), SLOT_SECONDARY);
+								ItemInst *wpn = GetBotItem(MainSecondary);
+								TryWeaponProc(wpn, GetTarget(), MainSecondary);
 
 								if( CanThisClassDoubleAttack() && CheckBotDoubleAttack()) {
 									if(GetTarget() && GetTarget()->GetHP() > -10)
-										Attack(GetTarget(), SLOT_SECONDARY);	// Single attack with offhand
+										Attack(GetTarget(), MainSecondary);	// Single attack with offhand
 								}
 							}
 						}
@@ -4096,14 +4096,14 @@ void Bot::PetAIProcess() {
 					if(!botPet->BehindMob(botPet->GetTarget(), botPet->GetX(), botPet->GetY()) && botPet->GetTarget()->IsEnraged())
 						return;
 
-					if(botPet->Attack(GetTarget(), SLOT_PRIMARY))			// try the main hand
+					if(botPet->Attack(GetTarget(), MainPrimary))	// try the main hand
 						if (botPet->GetTarget())					// Do we still have a target?
 						{
 							// We're a pet so we re able to dual attack
 							int32 RandRoll = MakeRandomInt(0, 99);
 							if (botPet->CanThisClassDoubleAttack() && (RandRoll < (botPet->GetLevel() + NPCDualAttackModifier)))
 							{
-								if(botPet->Attack(botPet->GetTarget(), 13))
+								if(botPet->Attack(botPet->GetTarget(), MainPrimary))
 								{}
 							}
 						}
@@ -4145,13 +4145,13 @@ void Bot::PetAIProcess() {
 								float DualWieldProbability = (botPet->GetSkill(SkillDualWield) + botPet->GetLevel()) / 400.0f;
 								DualWieldProbability -= MakeRandomFloat(0, 1);
 								if(DualWieldProbability < 0){
-									botPet->Attack(botPet->GetTarget(), 14);
+									botPet->Attack(botPet->GetTarget(), MainSecondary);
 									if (botPet->CanThisClassDoubleAttack())
 									{
 										int32 RandRoll = MakeRandomInt(0, 99);
 										if (RandRoll < (botPet->GetLevel() + 20))
 										{
-											botPet->Attack(botPet->GetTarget(), 14);
+											botPet->Attack(botPet->GetTarget(), MainSecondary);
 										}
 									}
 								}
@@ -4411,7 +4411,7 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
 
 				ItemInst* inst = database.CreateItem(item_id, charges, aug[0], aug[1], aug[2], aug[3], aug[4]);
 				if(inst) {
-					int16 put_slot_id = SLOT_INVALID;
+					int16 put_slot_id = INVALID_INDEX;
 					if(instnodrop || ((slot_id >= 0) && (slot_id <= 21) && inst->GetItem()->Attuneable))
 						inst->SetInstNoDrop(true);
 					if(color > 0)
@@ -4429,7 +4429,7 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
 					safe_delete(inst);
 
 					// Save ptr to item in inventory
-					if (put_slot_id == SLOT_INVALID) {
+					if (put_slot_id == INVALID_INDEX) {
 						LogFile->write(EQEMuLog::Error,
 							"Warning: Invalid slot_id for item in inventory: botid=%i, item_id=%i, slot_id=%i",
 							this->GetBotID(), item_id, slot_id);
@@ -4595,7 +4595,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		uint32 spawnedbotid = 0;
 		spawnedbotid = this->GetBotID();
 
-		inst = GetBotItem(SLOT_HANDS);
+		inst = GetBotItem(MainHands);
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
@@ -4604,7 +4604,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			}
 		}
 
-		inst = GetBotItem(SLOT_HEAD);
+		inst = GetBotItem(MainHead);
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
@@ -4613,7 +4613,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			}
 		}
 
-		inst = GetBotItem(SLOT_ARMS);
+		inst = GetBotItem(MainArms);
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
@@ -4622,7 +4622,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			}
 		}
 
-		inst = GetBotItem(SLOT_BRACER01);
+		inst = GetBotItem(MainWrist1);
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
@@ -4631,7 +4631,9 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			}
 		}
 
-		inst = GetBotItem(SLOT_BRACER02);
+		/*
+		// non-live behavior
+		inst = GetBotItem(MainWrist2);
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
@@ -4639,8 +4641,9 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 				ns->spawn.colors[MaterialWrist].color	= GetEquipmentColor(MaterialWrist);
 			}
 		}
+		*/
 
-		inst = GetBotItem(SLOT_CHEST);
+		inst = GetBotItem(MainChest);
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
@@ -4649,7 +4652,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			}
 		}
 
-		inst = GetBotItem(SLOT_LEGS);
+		inst = GetBotItem(MainLegs);
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
@@ -4658,7 +4661,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			}
 		}
 
-		inst = GetBotItem(SLOT_FEET);
+		inst = GetBotItem(MainFeet);
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
@@ -4667,7 +4670,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			}
 		}
 
-		inst = GetBotItem(SLOT_PRIMARY);
+		inst = GetBotItem(MainPrimary);
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
@@ -4677,7 +4680,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			}
 		}
 
-		inst = GetBotItem(SLOT_SECONDARY);
+		inst = GetBotItem(MainSecondary);
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
@@ -6009,7 +6012,7 @@ void Bot::FinishTrade(Client* client, BotTradeType tradeType) {
 		else if(tradeType == BotTradeClientNoDropNoTrade) {
 			// Items being traded are found on the Client's cursor slot, slot id 30. This item can be either a single item or it can be a bag.
 			// If it is a bag, then we have to search for items in slots 331 thru 340
-			PerformTradeWithClient(SLOT_CURSOR, SLOT_CURSOR, client);
+			PerformTradeWithClient(MainCursor, MainCursor, client);
 
 			// TODO: Add logic here to test if the item in SLOT_CURSOR is a container type, if it is then we need to call the following:
 			// PerformTradeWithClient(331, 340, client);
@@ -6038,7 +6041,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 				charges[i] = inst->GetCharges();
 			}
 
-			if(i == SLOT_CURSOR)
+			if (i == MainCursor)
 				UpdateClient = true;
 
 			//EQoffline: will give the items to the bots and change the bot stats
@@ -6046,7 +6049,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 				std::string TempErrorMessage;
 				const Item_Struct* mWeaponItem = inst->GetItem();
 				bool failedLoreCheck = false;
-				for(int m=0; m<MAX_AUGMENT_SLOTS; ++m) {
+				for (int m = 0; m<EmuConstants::ITEM_COMMON_SIZE; ++m) {
 					ItemInst *itm = inst->GetAugment(m);
 					if(itm)
 					{
@@ -6075,17 +6078,17 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 						if((mWeaponItem->Slots & (1 << j))) {
 							how_many_slots++;
 							if(!GetBotItem(j)) {
-								if(j == SLOT_PRIMARY) {
+								if(j == MainPrimary) {
 									if((mWeaponItem->ItemType == ItemType2HSlash) || (mWeaponItem->ItemType == ItemType2HBlunt) || (mWeaponItem->ItemType == ItemType2HPiercing)) {
-										if(GetBotItem(SLOT_SECONDARY)) {
+										if(GetBotItem(MainSecondary)) {
 											if(mWeaponItem && (mWeaponItem->ItemType == ItemType2HSlash) || (mWeaponItem->ItemType == ItemType2HBlunt) || (mWeaponItem->ItemType == ItemType2HPiercing)) {
-												if(client->CheckLoreConflict(GetBotItem(SLOT_SECONDARY)->GetItem())) {
+												if(client->CheckLoreConflict(GetBotItem(MainSecondary)->GetItem())) {
 													failedLoreCheck = true;
 												}
 											}
 											else {
-												ItemInst* remove_item = GetBotItem(SLOT_SECONDARY);
-												BotTradeSwapItem(client, SLOT_SECONDARY, 0, remove_item, remove_item->GetItem()->Slots, &TempErrorMessage, false);
+												ItemInst* remove_item = GetBotItem(MainSecondary);
+												BotTradeSwapItem(client, MainSecondary, 0, remove_item, remove_item->GetItem()->Slots, &TempErrorMessage, false);
 											}
 										}
 									}
@@ -6095,7 +6098,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 									}
 									break;
 								}
-								else if(j == SLOT_SECONDARY) {
+								else if(j == MainSecondary) {
 									if(inst->IsWeapon()) {
 										if(CanThisClassDualWield()) {
 											BotTradeAddItem(mWeaponItem->ID, inst, inst->GetCharges(), mWeaponItem->Slots, j, &TempErrorMessage);
@@ -6111,10 +6114,10 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 										success = true;
 									}
 									if(success) {
-										if(GetBotItem(SLOT_PRIMARY)) {
-											ItemInst* remove_item = GetBotItem(SLOT_PRIMARY);
+										if(GetBotItem(MainPrimary)) {
+											ItemInst* remove_item = GetBotItem(MainPrimary);
 											if((remove_item->GetItem()->ItemType == ItemType2HSlash) || (remove_item->GetItem()->ItemType == ItemType2HBlunt) || (remove_item->GetItem()->ItemType == ItemType2HPiercing)) {
-												BotTradeSwapItem(client, SLOT_PRIMARY, 0, remove_item, remove_item->GetItem()->Slots, &TempErrorMessage, false);
+												BotTradeSwapItem(client, MainPrimary, 0, remove_item, remove_item->GetItem()->Slots, &TempErrorMessage, false);
 											}
 										}
 										break;
@@ -6133,7 +6136,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 							if((mWeaponItem->Slots & (1 << j))) {
 								swap_item = GetBotItem(j);
 								failedLoreCheck = false;
-								for(int k=0; k<MAX_AUGMENT_SLOTS; ++k) {
+								for (int k = 0; k<EmuConstants::ITEM_COMMON_SIZE; ++k) {
 									ItemInst *itm = swap_item->GetAugment(k);
 									if(itm)
 									{
@@ -6146,28 +6149,28 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 									failedLoreCheck = true;
 								}
 								if(!failedLoreCheck) {
-									if(j == SLOT_PRIMARY) {
+									if(j == MainPrimary) {
 										if((mWeaponItem->ItemType == ItemType2HSlash) || (mWeaponItem->ItemType == ItemType2HBlunt) || (mWeaponItem->ItemType == ItemType2HPiercing)) {
-											if(GetBotItem(SLOT_SECONDARY)) {
-												if(client->CheckLoreConflict(GetBotItem(SLOT_SECONDARY)->GetItem())) {
+											if(GetBotItem(MainSecondary)) {
+												if(client->CheckLoreConflict(GetBotItem(MainSecondary)->GetItem())) {
 													failedLoreCheck = true;
 												}
 												else {
-													ItemInst* remove_item = GetBotItem(SLOT_SECONDARY);
-													BotTradeSwapItem(client, SLOT_SECONDARY, 0, remove_item, remove_item->GetItem()->Slots, &TempErrorMessage, false);
+													ItemInst* remove_item = GetBotItem(MainSecondary);
+													BotTradeSwapItem(client, MainSecondary, 0, remove_item, remove_item->GetItem()->Slots, &TempErrorMessage, false);
 												}
 											}
 										}
 										if(!failedLoreCheck) {
-											BotTradeSwapItem(client, SLOT_PRIMARY, inst, swap_item, mWeaponItem->Slots, &TempErrorMessage);
+											BotTradeSwapItem(client, MainPrimary, inst, swap_item, mWeaponItem->Slots, &TempErrorMessage);
 											success = true;
 										}
 										break;
 									}
-									else if(j == SLOT_SECONDARY) {
+									else if(j == MainSecondary) {
 										if(inst->IsWeapon()) {
 											if(CanThisClassDualWield()) {
-												BotTradeSwapItem(client, SLOT_SECONDARY, inst, swap_item, mWeaponItem->Slots, &TempErrorMessage);
+												BotTradeSwapItem(client, MainSecondary, inst, swap_item, mWeaponItem->Slots, &TempErrorMessage);
 												success = true;
 											}
 											else {
@@ -6176,13 +6179,13 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 											}
 										}
 										else {
-											BotTradeSwapItem(client, SLOT_SECONDARY, inst, swap_item, mWeaponItem->Slots, &TempErrorMessage);
+											BotTradeSwapItem(client, MainSecondary, inst, swap_item, mWeaponItem->Slots, &TempErrorMessage);
 											success = true;
 										}
-										if(success && GetBotItem(SLOT_PRIMARY)) {
-											ItemInst* remove_item = GetBotItem(SLOT_PRIMARY);
+										if(success && GetBotItem(MainPrimary)) {
+											ItemInst* remove_item = GetBotItem(MainPrimary);
 											if((remove_item->GetItem()->ItemType == ItemType2HSlash) || (remove_item->GetItem()->ItemType == ItemType2HBlunt) || (remove_item->GetItem()->ItemType == ItemType2HPiercing)) {
-												BotTradeSwapItem(client, SLOT_PRIMARY, 0, remove_item, remove_item->GetItem()->Slots, &TempErrorMessage, false);
+												BotTradeSwapItem(client, MainPrimary, 0, remove_item, remove_item->GetItem()->Slots, &TempErrorMessage, false);
 											}
 										}
 										break;
@@ -6441,12 +6444,12 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 	FaceTarget(GetTarget());
 
 	ItemInst* weapon = nullptr;
-	if(Hand == SLOT_PRIMARY) {
-		weapon = GetBotItem(SLOT_PRIMARY);
+	if(Hand == MainPrimary) {
+		weapon = GetBotItem(MainPrimary);
 		OffHandAtk(false);
 	}
-	if(Hand == SLOT_SECONDARY) {
-		weapon = GetBotItem(SLOT_SECONDARY);
+	if(Hand == MainSecondary) {
+		weapon = GetBotItem(MainSecondary);
 		OffHandAtk(true);
 	}
 
@@ -6513,7 +6516,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 
 		int ucDamageBonus = 0;
 
-		if( Hand == SLOT_PRIMARY && GetLevel() >= 28 && IsWarriorClass() )
+		if( Hand == MainPrimary && GetLevel() >= 28 && IsWarriorClass() )
 		{
 			// Damage bonuses apply only to hits from the main hand (Hand == 13) by characters level 28 and above
 			// who belong to a melee class. If we're here, then all of these conditions apply.
@@ -6526,7 +6529,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		}
 #endif
 		//Live AA - Sinister Strikes *Adds weapon damage bonus to offhand weapon.
-		if (Hand==SLOT_SECONDARY) {
+		if (Hand==MainSecondary) {
 			if (aabonuses.SecondaryDmgInc || itembonuses.SecondaryDmgInc || spellbonuses.SecondaryDmgInc){
 
 				ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const Item_Struct*) nullptr );
@@ -6583,7 +6586,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		if (damage == -3) {
 			if (FromRiposte) return false;
 			else {
-				if (Hand == SLOT_SECONDARY) {// Do we even have it & was attack with mainhand? If not, don't bother with other calculations
+				if (Hand == MainSecondary) {// Do we even have it & was attack with mainhand? If not, don't bother with other calculations
 					//Live AA - SlipperyAttacks
 					//This spell effect most likely directly modifies the actual riposte chance when using offhand attack.
 					int16 OffhandRiposteFail = aabonuses.OffhandRiposteFail + itembonuses.OffhandRiposteFail + spellbonuses.OffhandRiposteFail;
@@ -7160,7 +7163,7 @@ int16 Bot::GetBotFocusEffect(BotfocusType bottype, uint16 spell_id) {
 				}
 			}
 
-			for(int y = 0; y < MAX_AUGMENT_SLOTS; ++y)
+			for (int y = 0; y < EmuConstants::ITEM_COMMON_SIZE; ++y)
 			{
 				ItemInst *aug = nullptr;
 				aug = ins->GetAugment(y);
@@ -7732,18 +7735,18 @@ int16 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 }
 
 //proc chance includes proc bonus
-float Bot::GetProcChances(float ProcBonus, uint16 weapon_speed, uint16 hand) {
+float Bot::GetProcChances(float ProcBonus, uint16 hand) {
 	int mydex = GetDEX();
 	float ProcChance = 0.0f;
-
+	uint16 weapon_speed = 0;
 	switch (hand) {
-		case SLOT_PRIMARY:
+		case MainPrimary:
 			weapon_speed = attack_timer.GetDuration();
 			break;
-		case SLOT_SECONDARY:
+		case MainSecondary:
 			weapon_speed = attack_dw_timer.GetDuration();
 			break;
-		case SLOT_RANGE:
+		case MainRange:
 			weapon_speed = ranged_timer.GetDuration();
 			break;
 	}
@@ -7860,9 +7863,9 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 
 	if(damage > 0 && (aabonuses.ShieldBlock || spellbonuses.ShieldBlock || itembonuses.ShieldBlock)
 		&& (!other->BehindMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
-		bool equiped = GetBotItem(SLOT_SECONDARY);
+		bool equiped = GetBotItem(MainSecondary);
 		if(equiped) {
-			uint8 shield = GetBotItem(SLOT_SECONDARY)->GetItem()->ItemType;
+			uint8 shield = GetBotItem(MainSecondary)->GetItem()->ItemType;
 			float bonusShieldBlock = 0.0f;
 			if(shield == ItemTypeShield) {
 
@@ -7875,9 +7878,9 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 
 	if(damage > 0 && (aabonuses.TwoHandBluntBlock || spellbonuses.TwoHandBluntBlock || itembonuses.TwoHandBluntBlock)
 		&& (!other->BehindMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
-		bool equiped2 = GetBotItem(SLOT_PRIMARY);
+		bool equiped2 = GetBotItem(MainPrimary);
 		if(equiped2) {
-			uint8 TwoHandBlunt = GetBotItem(SLOT_PRIMARY)->GetItem()->ItemType;
+			uint8 TwoHandBlunt = GetBotItem(MainPrimary)->GetItem()->ItemType;
 			float bonusStaffBlock = 0.0f;
 			if(TwoHandBlunt == ItemType2HBlunt) {
 
@@ -8015,7 +8018,7 @@ void Bot::DoRiposte(Mob* defender) {
 	if (!defender)
 		return;
 
-	defender->Attack(this, SLOT_PRIMARY, true);
+	defender->Attack(this, MainPrimary, true);
 
 	//double riposte
 	int16 DoubleRipChance = defender->GetAABonuses().GiveDoubleRiposte[0] +
@@ -8025,7 +8028,7 @@ void Bot::DoRiposte(Mob* defender) {
 	if(DoubleRipChance && (DoubleRipChance >= MakeRandomInt(0, 100))) {
 		mlog(COMBAT__ATTACKS, "Preforming a double riposte (%d percent chance)", DoubleRipChance);
 
-		defender->Attack(this, SLOT_PRIMARY, true);
+		defender->Attack(this, MainPrimary, true);
 	}
 
 	//Double Riposte effect, allows for a chance to do RIPOSTE with a skill specfic special attack (ie Return Kick).
@@ -8049,7 +8052,7 @@ void Bot::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 		hate = hate_override;
 
 	if(skill == SkillBash) {
-		const ItemInst* inst = GetBotItem(SLOT_SECONDARY);
+		const ItemInst* inst = GetBotItem(MainSecondary);
 		const Item_Struct* botweapon = 0;
 		if(inst)
 			botweapon = inst->GetItem();
@@ -8063,7 +8066,7 @@ void Bot::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 
 	min_damage += min_damage * GetMeleeMinDamageMod_SE(skill) / 100;
 
-	if(HitChance && !who->CheckHitChance(this, skill, SLOT_PRIMARY))
+	if(HitChance && !who->CheckHitChance(this, skill, MainPrimary))
 		max_damage = 0;
 
 	else{
@@ -8120,7 +8123,7 @@ void Bot::TryBackstab(Mob *other, int ReuseTime) {
 	bool bIsBehind = false;
 	bool bCanFrontalBS = false;
 
-	const ItemInst* inst = GetBotItem(SLOT_PRIMARY);
+	const ItemInst* inst = GetBotItem(MainPrimary);
 	const Item_Struct* botpiercer = nullptr;
 	if(inst)
 		botpiercer = inst->GetItem();
@@ -8192,7 +8195,7 @@ void Bot::TryBackstab(Mob *other, int ReuseTime) {
 		}
 	}
 	else { //We do a single regular attack if we attack from the front without chaotic stab
-		Attack(other, 13);
+		Attack(other, MainPrimary);
 	}
 }
 
@@ -8206,11 +8209,11 @@ void Bot::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 	int32 primaryweapondamage = 0;
 	int32 backstab_dmg = 0;
 
-	ItemInst* botweaponInst = GetBotItem(SLOT_PRIMARY);
+	ItemInst* botweaponInst = GetBotItem(MainPrimary);
 	if(botweaponInst) {
 		primaryweapondamage = GetWeaponDamage(other, botweaponInst);
 		backstab_dmg = botweaponInst->GetItem()->BackstabDmg;
-		for(int i = 0; i < MAX_AUGMENT_SLOTS; ++i)
+		for (int i = 0; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
 		{
 			ItemInst *aug = botweaponInst->GetAugment(i);
 			if(aug)
@@ -8276,7 +8279,7 @@ void Bot::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 
 void Bot::RogueAssassinate(Mob* other)
 {
-	ItemInst* botweaponInst = GetBotItem(SLOT_PRIMARY);
+	ItemInst* botweaponInst = GetBotItem(MainPrimary);
 	if(botweaponInst) {
 		if(GetWeaponDamage(other, botweaponInst)) {
 			other->Damage(this, 32000, SPELL_UNKNOWN, SkillBackstab);
@@ -8366,10 +8369,10 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		if(level >= RuleI(Combat, NPCBashKickLevel)){
 			bool canBash = false;
 			if((GetRace() == OGRE || GetRace() == TROLL || GetRace() == BARBARIAN) // Racial Slam
-						|| (m_inv.GetItem(SLOT_SECONDARY) && m_inv.GetItem(SLOT_SECONDARY)->GetItem()->ItemType == ItemTypeShield) //Using Shield
-						|| (m_inv.GetItem(SLOT_PRIMARY) && (m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HSlash
-							|| m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HBlunt
-							|| m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HPiercing)
+						|| (m_inv.GetItem(MainSecondary) && m_inv.GetItem(MainSecondary)->GetItem()->ItemType == ItemTypeShield) //Using Shield
+						|| (m_inv.GetItem(MainPrimary) && (m_inv.GetItem(MainPrimary)->GetItem()->ItemType == ItemType2HSlash
+							|| m_inv.GetItem(MainPrimary)->GetItem()->ItemType == ItemType2HBlunt
+							|| m_inv.GetItem(MainPrimary)->GetItem()->ItemType == ItemType2HPiercing)
 							&& GetAA(aa2HandBash) >= 1)) { //Using 2 hand weapon, but has AA 2 Hand Bash
 				canBash = true;
 			}
@@ -8393,10 +8396,10 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 	case PALADIN:
 		if(level >= RuleI(Combat, NPCBashKickLevel)){
 			if((GetRace() == OGRE || GetRace() == TROLL || GetRace() == BARBARIAN) // Racial Slam
-						|| (m_inv.GetItem(SLOT_SECONDARY) && m_inv.GetItem(SLOT_SECONDARY)->GetItem()->ItemType == ItemTypeShield) //Using Shield
-						|| (m_inv.GetItem(SLOT_PRIMARY) && (m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HSlash
-							|| m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HBlunt
-							|| m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HPiercing)
+						|| (m_inv.GetItem(MainSecondary) && m_inv.GetItem(MainSecondary)->GetItem()->ItemType == ItemTypeShield) //Using Shield
+						|| (m_inv.GetItem(MainPrimary) && (m_inv.GetItem(MainPrimary)->GetItem()->ItemType == ItemType2HSlash
+							|| m_inv.GetItem(MainPrimary)->GetItem()->ItemType == ItemType2HBlunt
+							|| m_inv.GetItem(MainPrimary)->GetItem()->ItemType == ItemType2HPiercing)
 							&& GetAA(aa2HandBash) >= 1)) { //Using 2 hand weapon, but has AA 2 Hand Bash
 				skill_to_use = SkillBash;
 			}
@@ -8443,8 +8446,8 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		{
 			DoAnim(animTailRake);
 
-			if(GetWeaponDamage(target, GetBotItem(SLOT_SECONDARY)) <= 0 &&
-				GetWeaponDamage(target, GetBotItem(SLOT_SHOULDER)) <= 0){
+			if(GetWeaponDamage(target, GetBotItem(MainSecondary)) <= 0 &&
+				GetWeaponDamage(target, GetBotItem(MainShoulders)) <= 0){
 				dmg = -5;
 			}
 			else{
@@ -8519,7 +8522,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		{
 			DoAnim(animKick);
 
-			if(GetWeaponDamage(target, GetBotItem(SLOT_FEET)) <= 0){
+			if(GetWeaponDamage(target, GetBotItem(MainFeet)) <= 0){
 				dmg = -5;
 			}
 			else{
@@ -8991,14 +8994,14 @@ void Bot::SetAttackTimer() {
 	Timer* TimerToUse = nullptr;
 	const Item_Struct* PrimaryWeapon = nullptr;
 
-	for (int i=SLOT_RANGE; i<=SLOT_SECONDARY; i++) {
+	for (int i=MainRange; i<=MainSecondary; i++) {
 
 		//pick a timer
-		if (i == SLOT_PRIMARY)
+		if (i == MainPrimary)
 			TimerToUse = &attack_timer;
-		else if (i == SLOT_RANGE)
+		else if (i == MainRange)
 			TimerToUse = &ranged_timer;
-		else if(i == SLOT_SECONDARY)
+		else if(i == MainSecondary)
 			TimerToUse = &attack_dw_timer;
 		else	//invalid slot (hands will always hit this)
 			continue;
@@ -9009,7 +9012,7 @@ void Bot::SetAttackTimer() {
 			ItemToUse = ci->GetItem();
 
 		//special offhand stuff
-		if(i == SLOT_SECONDARY) {
+		if(i == MainSecondary) {
 			//if we have a 2H weapon in our main hand, no dual
 			if(PrimaryWeapon != nullptr) {
 				if(	PrimaryWeapon->ItemClass == ItemClassCommon
@@ -9103,7 +9106,7 @@ void Bot::SetAttackTimer() {
 			TimerToUse->SetAtTrigger(speed, true);
 		}
 
-		if(i == SLOT_PRIMARY)
+		if(i == MainPrimary)
 			PrimaryWeapon = ItemToUse;
 	}
 }
@@ -11551,10 +11554,10 @@ bool Bot::CheckLoreConflict(const Item_Struct* item) {
 		return false;
 
 	if (item->LoreGroup == -1)	// Standard lore items; look everywhere except the shared bank, return the result
-		return (m_inv.HasItem(item->ID, 0, invWhereWorn) != SLOT_INVALID);
+		return (m_inv.HasItem(item->ID, 0, invWhereWorn) != INVALID_INDEX);
 
 	//If the item has a lore group, we check for other items with the same group and return the result
-	return (m_inv.HasItemByLoreGroup(item->LoreGroup, invWhereWorn) != SLOT_INVALID);
+	return (m_inv.HasItemByLoreGroup(item->LoreGroup, invWhereWorn) != INVALID_INDEX);
 }
 
 bool Bot::GroupHasClass(Group* group, uint8 classId) {
@@ -12160,7 +12163,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				bool is2Hweapon = false;
 				for(int i=0; i<22; ++i)
 				{
-					if((i == 14) && is2Hweapon) {
+					if((i == MainSecondary) && is2Hweapon) {
 						continue;
 					}
 
@@ -12178,12 +12181,12 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						c->Message(15, "I need something for my %s (Item %i)", equipped[i], i);
 						continue;
 					}
-					if((i == 13) && ((item2->ItemType == ItemType2HSlash) || (item2->ItemType == ItemType2HBlunt) || (item2->ItemType == ItemType2HPiercing))) {
+					if((i == MainPrimary) && ((item2->ItemType == ItemType2HSlash) || (item2->ItemType == ItemType2HBlunt) || (item2->ItemType == ItemType2HPiercing))) {
 						is2Hweapon = true;
 					}
 
 					char* itemLink = 0;
-					if((i == 0) || (i == 11) || (i == 13) || (i == 14) || (i == 21)) {
+					if((i == MainCharm) || (i == MainRange) || (i == MainPrimary) || (i == MainSecondary) || (i == MainAmmo)) {
 						if (c->GetClientVersion() >= EQClientSoF)
 						{
 							MakeAnyLenString(&itemLink, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%05X" "%08X",
@@ -12300,7 +12303,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			// Don't allow the player to remove a lore item they already possess and cause a crash
 			bool failedLoreCheck = false;
 			if(itminst) {
-				for(int m=0; m<MAX_AUGMENT_SLOTS; ++m) {
+				for (int m = 0; m<EmuConstants::ITEM_COMMON_SIZE; ++m) {
 					ItemInst *itma = itminst->GetAugment(m);
 					if(itma)
 					{
@@ -12317,7 +12320,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				if(itm) {
 					c->PushItemOnCursor(*itminst, true);
 					Bot *gearbot = c->GetTarget()->CastToBot();
-					if((slotId == SLOT_RANGE)||(slotId == SLOT_AMMO)||(slotId == SLOT_PRIMARY)||(slotId == SLOT_SECONDARY)) {
+					if((slotId == MainRange)||(slotId == MainAmmo)||(slotId == MainPrimary)||(slotId == MainSecondary)) {
 						gearbot->SetBotArcher(false);
 					}
 					gearbot->RemoveBotItemBySlot(slotId, &TempErrorMessage);
@@ -12330,30 +12333,31 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					gearbot->BotRemoveEquipItem(slotId);
 					gearbot->CalcBotStats();
 					switch(slotId) {
-						case 0:
-						case 1:
-						case 2:
-						case 3:
-						case 4:
-						case 5:
-						case 8:
-						case 9:
-						case 10:
-						case 11:
-						case 13:
-						case 14:
-						case 15:
-						case 16:
-						case 17:
-						case 20:
-						case 21:
+						case MainCharm:
+						case MainEar1:
+						case MainHead:
+						case MainFace:
+						case MainEar2:
+						case MainNeck:
+						case MainBack:
+						case MainWrist1:
+						case MainWrist2:
+						case MainRange:
+						case MainPrimary:
+						case MainSecondary:
+						case MainFinger1:
+						case MainFinger2:
+						case MainChest:
+						case MainWaist:
+						//case MainPowerSource:
+						case MainAmmo:
 							gearbot->Say("My %s is now unequipped.", equipped[slotId]);
 							break;
-						case 6:
-						case 7:
-						case 12:
-						case 18:
-						case 19:
+						case MainShoulders:
+						case MainArms:
+						case MainHands:
+						case MainLegs:
+						case MainFeet:
 							gearbot->Say("My %s are now unequipped.", equipped[slotId]);
 							break;
 						default:
@@ -12362,30 +12366,31 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				}
 				else {
 					switch(slotId) {
-						case 0:
-						case 1:
-						case 2:
-						case 3:
-						case 4:
-						case 5:
-						case 8:
-						case 9:
-						case 10:
-						case 11:
-						case 13:
-						case 14:
-						case 15:
-						case 16:
-						case 17:
-						case 20:
-						case 21:
+						case MainCharm:
+						case MainEar1:
+						case MainHead:
+						case MainFace:
+						case MainEar2:
+						case MainNeck:
+						case MainBack:
+						case MainWrist1:
+						case MainWrist2:
+						case MainRange:
+						case MainPrimary:
+						case MainSecondary:
+						case MainFinger1:
+						case MainFinger2:
+						case MainChest:
+						case MainWaist:
+						//case MainPowerSource:
+						case MainAmmo:
 							c->GetTarget()->Say("My %s is already unequipped.", equipped[slotId]);
 							break;
-						case 6:
-						case 7:
-						case 12:
-						case 18:
-						case 19:
+						case MainShoulders:
+						case MainArms:
+						case MainHands:
+						case MainLegs:
+						case MainFeet:
 							c->GetTarget()->Say("My %s are already unequipped.", equipped[slotId]);
 							break;
 						default:
@@ -16270,8 +16275,8 @@ void EntityList::BotPickLock(Bot* rogue)
 			curdist += (tmp * tmp);
 			if((zdiff < 10) && (curdist <= 130)) {
 				// All rogue items with lock pick bonuses are hands or primary
-				const ItemInst* item1 = rogue->GetBotItem(SLOT_HANDS);
-				const ItemInst* item2 = rogue->GetBotItem(SLOT_PRIMARY);
+				const ItemInst* item1 = rogue->GetBotItem(MainHands);
+				const ItemInst* item2 = rogue->GetBotItem(MainPrimary);
 
 				float bonus1 = 0.0f;
 				float bonus2 = 0.0f;
@@ -16500,14 +16505,14 @@ int Bot::GetRawACNoShield(int &shield_ac)
 {
 	int ac = itembonuses.AC + spellbonuses.AC;
 	shield_ac = 0;
-	ItemInst* inst = GetBotItem(SLOT_SECONDARY);
+	ItemInst* inst = GetBotItem(MainSecondary);
 	if(inst)
 	{
 		if(inst->GetItem()->ItemType == ItemTypeShield)
 		{
 			ac -= inst->GetItem()->AC;
 			shield_ac = inst->GetItem()->AC;
-			for(uint8 i = 0; i < MAX_AUGMENT_SLOTS; i++)
+			for (uint8 i = 0; i < EmuConstants::ITEM_COMMON_SIZE; i++)
 			{
 				if(inst->GetAugment(i))
 				{

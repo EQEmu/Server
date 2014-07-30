@@ -599,7 +599,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Flesh To Bone");
 #endif
 				if(IsClient()){
-					ItemInst* transI = CastToClient()->GetInv().GetItem(SLOT_CURSOR);
+					ItemInst* transI = CastToClient()->GetInv().GetItem(MainCursor);
 					if(transI && transI->IsType(ItemClassCommon) && transI->IsStackable()){
 						uint32 fcharges = transI->GetCharges();
 							//Does it sound like meat... maybe should check if it looks like meat too...
@@ -609,7 +609,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 								strstr(transI->GetItem()->Name, "Flesh") ||
 								strstr(transI->GetItem()->Name, "parts") ||
 								strstr(transI->GetItem()->Name, "Parts")){
-								CastToClient()->DeleteItemInInventory(SLOT_CURSOR, fcharges, true);
+								CastToClient()->DeleteItemInInventory(MainCursor, fcharges, true);
 								CastToClient()->SummonItem(13073, fcharges);
 							}
 							else{
@@ -1159,7 +1159,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 						if (SummonedItem) {
 							c->PushItemOnCursor(*SummonedItem);
-							c->SendItemPacket(SLOT_CURSOR, SummonedItem, ItemPacketSummonItem);
+							c->SendItemPacket(MainCursor, SummonedItem, ItemPacketSummonItem);
 							safe_delete(SummonedItem);
 						}
 						SummonedItem = database.CreateItem(spell.base[i], charges);
@@ -2200,7 +2200,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Rampage");
 #endif
 				if(caster)
-					entity_list.AEAttack(caster, 30, 13, 0, true); // on live wars dont get a duration ramp, its a one shot deal
+					entity_list.AEAttack(caster, 30, MainPrimary, 0, true); // on live wars dont get a duration ramp, its a one shot deal
 
 				break;
 			}
@@ -2983,7 +2983,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 	if (SummonedItem) {
 		Client *c=CastToClient();
 		c->PushItemOnCursor(*SummonedItem);
-		c->SendItemPacket(SLOT_CURSOR, SummonedItem, ItemPacketSummonItem);
+		c->SendItemPacket(MainCursor, SummonedItem, ItemPacketSummonItem);
 		safe_delete(SummonedItem);
 	}
 
@@ -5070,7 +5070,7 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 				}
 			}
 
-			for(int y = 0; y < MAX_AUGMENT_SLOTS; ++y)
+			for (int y = 0; y < EmuConstants::ITEM_COMMON_SIZE; ++y)
 			{
 				if (SympatheticProcList.size() > MAX_SYMPATHETIC)
 					continue;
@@ -5226,7 +5226,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 				}
 			}
 
-			for(int y = 0; y < MAX_AUGMENT_SLOTS; ++y)
+			for (int y = 0; y < EmuConstants::ITEM_COMMON_SIZE; ++y)
 			{
 				ItemInst *aug = nullptr;
 				aug = ins->GetAugment(y);
@@ -5264,7 +5264,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 		}
 
 		//Tribute Focus
-		for(int x = TRIBUTE_SLOT_START; x < (TRIBUTE_SLOT_START + MAX_PLAYER_TRIBUTES); ++x)
+		for(int x = EmuConstants::TRIBUTE_BEGIN; x <= EmuConstants::TRIBUTE_END; ++x)
 		{
 			TempItem = nullptr;
 			ItemInst* ins = GetInv().GetItem(x);
@@ -5765,8 +5765,6 @@ int32 Mob::GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spel
 	int value = 0;
 
 	if (spellbonuses.FocusEffects[type]){
-		uint32 buff_count = GetMaxTotalSlots();
-		for(int i = 0; i < buff_count; i++){
 
 			int32 tmp_focus = 0;
 			int tmp_buffslot = -1;
@@ -5799,7 +5797,7 @@ int32 Mob::GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spel
 				CheckNumHitsRemaining(NUMHIT_MatchingSpells, tmp_buffslot);
 		}
 
-	}
+	
 	return value;
 }
 

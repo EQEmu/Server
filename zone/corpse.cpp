@@ -367,9 +367,9 @@ Corpse::Corpse(Client* client, int32 in_rezexp)
 		for(i = 0; i <= 30; i++)
 		{
 			if(i == 21 && client->GetClientVersion() >= EQClientSoF) {
-				item = client->GetInv().GetItem(9999);
+				item = client->GetInv().GetItem(MainPowerSource);
 				if((item && (!client->IsBecomeNPC())) || (item && client->IsBecomeNPC() && !item->GetItem()->NoRent)) {
-					std::list<uint32> slot_list = MoveItemToCorpse(client, item, 9999);
+					std::list<uint32> slot_list = MoveItemToCorpse(client, item, MainPowerSource);
 					removed_list.merge(slot_list);
 				}
 
@@ -421,7 +421,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp)
 
 		if(cursor) { // all cursor items should be on corpse (client < SoF or RespawnFromHover = false)
 			while(!client->GetInv().CursorEmpty())
-				client->DeleteItemInInventory(SLOT_CURSOR, 0, false, false);
+				client->DeleteItemInInventory(MainCursor, 0, false, false);
 		}
 		else { // only visible cursor made it to corpse (client >= Sof and RespawnFromHover = true)
 			std::list<ItemInst*>::const_iterator start = client->GetInv().cursor_begin();
@@ -999,12 +999,8 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		end = itemlist.end();
 
 		uint8 containercount = 0;
-		int corpselootlimit;
 
-		if(client->GetClientVersion() >= EQClientRoF) { corpselootlimit = 34; }
-		else if(client->GetClientVersion() >= EQClientSoF) { corpselootlimit = 32; }
-		else if(client->GetClientVersion() == EQClientTitanium) { corpselootlimit = 31; }
-		else { corpselootlimit = 30; }
+		int corpselootlimit = EQLimits::InventoryMapSize(MapCorpse, client->GetClientVersion());
 
 		for(; cur != end; ++cur) {
 			ServerLootItem_Struct* item_data = *cur;
@@ -1013,7 +1009,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 			// Dont display the item if it's in a bag
 
 			// Added cursor queue slots to corpse item visibility list. Nothing else should be making it to corpse.
-			if(!IsPlayerCorpse() || item_data->equipSlot <= 30 || item_data->equipSlot == 9999 || tCanLoot>=3 ||
+			if(!IsPlayerCorpse() || item_data->equipSlot <= MainCursor || item_data->equipSlot == MainPowerSource || tCanLoot>=3 ||
 				(item_data->equipSlot >= 8000 && item_data->equipSlot <= 8999)) {
 				if(i < corpselootlimit) {
 					item = database.GetItem(item_data->item_id);
@@ -1145,7 +1141,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 
 		if(inst->IsAugmented())
 		{
-			for(int i=0; i<MAX_AUGMENT_SLOTS; i++)
+			for (int i = 0; i<EmuConstants::ITEM_COMMON_SIZE; i++)
 			{
 				ItemInst *itm = inst->GetAugment(i);
 				if(itm)
@@ -1227,11 +1223,11 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 		if(lootitem->auto_loot)
 		{
 			if(!client->AutoPutLootInInventory(*inst, true, true, bag_item_data))
-				client->PutLootInInventory(SLOT_CURSOR, *inst, bag_item_data);
+				client->PutLootInInventory(MainCursor, *inst, bag_item_data);
 		}
 		else
 		{
-			client->PutLootInInventory(SLOT_CURSOR, *inst, bag_item_data);
+			client->PutLootInInventory(MainCursor, *inst, bag_item_data);
 		}
 		// Update any tasks that have an activity to loot this item.
 		if(RuleB(TaskSystem, EnableTaskSystem))
@@ -1331,17 +1327,13 @@ void Corpse::QueryLoot(Client* to) {
 	cur = itemlist.begin();
 	end = itemlist.end();
 
-	int corpselootlimit;
-
-	if (to->GetClientVersion() >= EQClientSoF) { corpselootlimit = 32; }
-	else if (to->GetClientVersion() == EQClientTitanium) { corpselootlimit = 31; }
-	else { corpselootlimit = 30; }
+	int corpselootlimit = EQLimits::InventoryMapSize(MapCorpse, to->GetClientVersion());
 
 	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* sitem = *cur;
 
 		if (IsPlayerCorpse()) {
-			if (sitem->equipSlot >= 251 && sitem->equipSlot <= 340)
+			if (sitem->equipSlot >= EmuConstants::GENERAL_BAGS_BEGIN && sitem->equipSlot <= EmuConstants::CURSOR_BAG_END)
 				sitem->lootslot = 0xFFFF;
 			else
 				x < corpselootlimit ? sitem->lootslot = x : sitem->lootslot = 0xFFFF;

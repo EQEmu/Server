@@ -137,7 +137,7 @@ public:
 	//abstract virtual function implementations requird by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill);
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false);
-	virtual bool Attack(Mob* other, int Hand = 13, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false,
+	virtual bool Attack(Mob* other, int Hand = MainPrimary, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false,
 		ExtraAttackOptions *opts = nullptr);
 	virtual bool HasRaid() { return (GetRaid() ? true : false); }
 	virtual bool HasGroup() { return (GetGroup() ? true : false); }
@@ -167,7 +167,7 @@ public:
 	uint16 BotGetSpells(int spellslot) { return AIspells[spellslot].spellid; }
 	uint16 BotGetSpellType(int spellslot) { return AIspells[spellslot].type; }
 	uint16 BotGetSpellPriority(int spellslot) { return AIspells[spellslot].priority; }
-	virtual float GetProcChances(float ProcBonus, uint16 weapon_speed, uint16 hand);
+	virtual float GetProcChances(float ProcBonus, uint16 hand);
 	virtual bool AvoidDamage(Mob* other, int32 &damage, bool CanRiposte);
 	virtual int GetMonkHandToHandDamage(void);
 	virtual bool TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse);

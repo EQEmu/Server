@@ -266,7 +266,7 @@ void Merc::CalcItemBonuses(StatBonuses* newbon) {
 
 	unsigned int i;
 	//should not include 21 (SLOT_AMMO)
-	for (i=0; i<SLOT_AMMO; i++) {
+	for (i=0; i<MainAmmo; i++) {
 		if(equipment[i] == 0)
 			continue;
 		const Item_Struct * itm = database.GetItem(equipment[i]);
@@ -277,7 +277,7 @@ void Merc::CalcItemBonuses(StatBonuses* newbon) {
 	//Power Source Slot
 	/*if (GetClientVersion() >= EQClientSoF)
 	{
-		const ItemInst* inst = m_inv[9999];
+		const ItemInst* inst = m_inv[MainPowerSource];
 		if(inst)
 			AddItemBonuses(inst, newbon);
 	}*/
@@ -1653,24 +1653,24 @@ void Merc::AI_Process() {
 
 				//try main hand first
 				if(attack_timer.Check()) {
-					Attack(GetTarget(), SLOT_PRIMARY);
+					Attack(GetTarget(), MainPrimary);
 
 					bool tripleSuccess = false;
 
 					if(GetOwner() && GetTarget() && CanThisClassDoubleAttack()) {
 
 						if(GetOwner()) {
-							Attack(GetTarget(), SLOT_PRIMARY, true);
+							Attack(GetTarget(), MainPrimary, true);
 						}
 
 						if(GetOwner() && GetTarget() && GetSpecialAbility(SPECATK_TRIPLE)) {
 							tripleSuccess = true;
-							Attack(GetTarget(), SLOT_PRIMARY, true);
+							Attack(GetTarget(), MainPrimary, true);
 						}
 
 						//quad attack, does this belong here??
 						if(GetOwner() && GetTarget() && GetSpecialAbility(SPECATK_QUAD)) {
-							Attack(GetTarget(), SLOT_PRIMARY, true);
+							Attack(GetTarget(), MainPrimary, true);
 						}
 					}
 
@@ -1682,8 +1682,8 @@ void Merc::AI_Process() {
 						if(MakeRandomInt(0, 100) < flurrychance)
 						{
 							Message_StringID(MT_NPCFlurry, YOU_FLURRY);
-							Attack(GetTarget(), SLOT_PRIMARY, false);
-							Attack(GetTarget(), SLOT_PRIMARY, false);
+							Attack(GetTarget(), MainPrimary, false);
+							Attack(GetTarget(), MainPrimary, false);
 						}
 					}
 
@@ -1692,7 +1692,7 @@ void Merc::AI_Process() {
 					if (GetTarget() && ExtraAttackChanceBonus) {
 								if(MakeRandomInt(0, 100) < ExtraAttackChanceBonus)
 								{
-									Attack(GetTarget(), SLOT_PRIMARY, false);
+									Attack(GetTarget(), MainPrimary, false);
 								}
 							}
 				}
@@ -1727,11 +1727,11 @@ void Merc::AI_Process() {
 
 							if (random < DualWieldProbability){ // Max 78% of DW
 
-								Attack(GetTarget(), SLOT_SECONDARY);	// Single attack with offhand
+								Attack(GetTarget(), MainSecondary);	// Single attack with offhand
 
 								if( CanThisClassDoubleAttack()) {
 									if(GetTarget() && GetTarget()->GetHP() > -10)
-										Attack(GetTarget(), SLOT_SECONDARY);	// Single attack with offhand
+										Attack(GetTarget(), MainSecondary);	// Single attack with offhand
 								}
 							}
 						}
@@ -2640,7 +2640,7 @@ int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 		int16 focus_max_real = 0;
 
 		//item focus
-		for(int x =0; x < MAX_WORN_INVENTORY; ++x)
+		for (int x = 0; x < EmuConstants::EQUIPMENT_SIZE; ++x)
 		{
 			TempItem = nullptr;
 			if (equipment[x] == 0)

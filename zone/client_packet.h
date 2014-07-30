@@ -288,3 +288,4 @@
 	void Handle_OP_MercenaryTimerRequest(const EQApplicationPacket *app);
 	void Handle_OP_OpenInventory(const EQApplicationPacket *app);
 	void Handle_OP_OpenContainer(const EQApplicationPacket *app);
+	void Handle_OP_ClientTimeStamp(const EQApplicationPacket *app);

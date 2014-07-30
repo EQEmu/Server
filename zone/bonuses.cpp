@@ -139,28 +139,28 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 
 	unsigned int i;
 	//should not include 21 (SLOT_AMMO)
-	for (i=0; i<21; i++) {
+	for (i = MainCharm; i < MainAmmo; i++) {
 		const ItemInst* inst = m_inv[i];
 		if(inst == 0)
 			continue;
 		AddItemBonuses(inst, newbon);
 
 		//Check if item is secondary slot is a 'shield'. Required for multiple spelll effects.
-		if (i == 14 && (m_inv.GetItem(14)->GetItem()->ItemType == ItemTypeShield))
+		if (i == MainSecondary && (m_inv.GetItem(MainSecondary)->GetItem()->ItemType == ItemTypeShield))
 			ShieldEquiped(true);
 	}
 
 	//Power Source Slot
 	if (GetClientVersion() >= EQClientSoF)
 	{
-		const ItemInst* inst = m_inv[9999];
+		const ItemInst* inst = m_inv[MainPowerSource];
 		if(inst)
 			AddItemBonuses(inst, newbon);
 	}
 
 	//tribute items
-	for (i = 0; i < MAX_PLAYER_TRIBUTES; i++) {
-		const ItemInst* inst = m_inv[TRIBUTE_SLOT_START + i];
+	for (i = 0; i < EmuConstants::TRIBUTE_SIZE; i++) {
+		const ItemInst* inst = m_inv[EmuConstants::TRIBUTE_BEGIN + i];
 		if(inst == 0)
 			continue;
 		AddItemBonuses(inst, newbon, false, true);
@@ -528,7 +528,7 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 	if (!isAug)
 	{
 		int i;
-		for(i = 0; i < MAX_AUGMENT_SLOTS; i++) {
+		for (i = 0; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
 			AddItemBonuses(inst->GetAugment(i),newbon,true);
 		}
 	}
@@ -544,7 +544,7 @@ void Client::CalcEdibleBonuses(StatBonuses* newbon) {
 
 	bool food = false;
 	bool drink = false;
-	for (i = 22; i <= 29; i++)
+	for (i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_BAGS_BEGIN; i++)
 	{
 		if (food && drink)
 			break;
@@ -560,7 +560,7 @@ void Client::CalcEdibleBonuses(StatBonuses* newbon) {
 			AddItemBonuses(inst, newbon);
 		}
 	}
-	for (i = 251; i <= 330; i++)
+	for (i = EmuConstants::GENERAL_BAGS_BEGIN; i <= EmuConstants::GENERAL_BAGS_END; i++)
 	{
 		if (food && drink)
 			break;
@@ -879,7 +879,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				newbon->PetMaxHP += base1;
 				break;
 			case SE_AvoidMeleeChance:
-				newbon->AvoidMeleeChance += base1;
+				newbon->AvoidMeleeChanceEffect += base1;
 				break;
 			case SE_CombatStability:
 				newbon->CombatStability += base1;
@@ -974,7 +974,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				newbon->FlurryChance += base1;
 				break;
 			case SE_PetFlurry:
-				newbon->PetFlurry = base1;
+				newbon->PetFlurry += base1;
 				break;
 			case SE_BardSongRange:
 				newbon->SongRange += base1;
@@ -988,6 +988,14 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			case SE_CrippBlowChance:
 				newbon->CrippBlowChance += base1;
 				break;
+
+			case SE_HitChance:
+			{
+				if(base2 == -1)
+					newbon->HitChanceEffect[HIGHEST_SKILL+1] += base1;
+				else
+					newbon->HitChanceEffect[base2] += base1;
+			}
 
 			case SE_ProcOnKillShot:
 				for(int i = 0; i < MAX_SPELL_TRIGGER*3; i+=3)
@@ -1367,6 +1375,10 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				}
 				break;
 			}
+
+			case SE_MeleeMitigation:
+				newbon->MeleeMitigationEffect -= base1;
+				break;
 
 		}
 	}
@@ -1788,7 +1800,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_MeleeMitigation:
 				//for some reason... this value is negative for increased mitigation
-				newbon->MeleeMitigation -= effect_value;
+				newbon->MeleeMitigationEffect -= effect_value;
 				break;
 
 			case SE_CriticalHitChance:
@@ -1833,16 +1845,14 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_AvoidMeleeChance:
 			{
-				//multiplier is to be compatible with item effects, watching for overflow too
-				effect_value = effect_value<3000? effect_value * 10 : 30000;
 				if (RuleB(Spells, AdditiveBonusValues) && item_bonus)
-					newbon->AvoidMeleeChance += effect_value;
+					newbon->AvoidMeleeChanceEffect += effect_value;
 
-				else if((effect_value < 0) && (newbon->AvoidMeleeChance > effect_value))
-					newbon->AvoidMeleeChance = effect_value;
+				else if((effect_value < 0) && (newbon->AvoidMeleeChanceEffect > effect_value))
+					newbon->AvoidMeleeChanceEffect = effect_value;
 
-				else if(newbon->AvoidMeleeChance < effect_value)
-					newbon->AvoidMeleeChance = effect_value;
+				else if(newbon->AvoidMeleeChanceEffect < effect_value)
+					newbon->AvoidMeleeChanceEffect = effect_value;
 				break;
 			}
 
@@ -2972,7 +2982,7 @@ void NPC::CalcItemBonuses(StatBonuses *newbon)
 {
 	if(newbon){
 
-		for(int i = 0; i < MAX_WORN_INVENTORY; i++){
+		for(int i = 0; i < EmuConstants::EQUIPMENT_SIZE; i++){
 			const Item_Struct *cur = database.GetItem(equipment[i]);
 			if(cur){
 				//basic stats
@@ -3091,7 +3101,7 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y)
 		}
 
 		//iterate all augments
-		for(int x = 0; x < MAX_AUGMENT_SLOTS; ++x)
+		for (int x = 0; x < EmuConstants::ITEM_COMMON_SIZE; ++x)
 		{
 			ItemInst * a_inst = inst->GetAugment(x);
 			if(!a_inst)
@@ -3160,7 +3170,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 			uint16 oldexp = inst->GetExp();
 
 			parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, inst, nullptr, "", 0);
-			if(i < 22 || i == 9999) {
+			if(i <= MainAmmo || i == MainPowerSource) {
 				parse->EventItem(EVENT_EQUIP_ITEM, this, inst, nullptr, "", i);
 			}
 
@@ -3170,7 +3180,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 				update_slot = true;
 			}
 		} else {
-			if(i < 22 || i == 9999) {
+			if(i <= MainAmmo || i == MainPowerSource) {
 				parse->EventItem(EVENT_EQUIP_ITEM, this, inst, nullptr, "", i);
 			}
 
@@ -3178,7 +3188,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 		}
 
 		//iterate all augments
-		for(int x = 0; x < MAX_AUGMENT_SLOTS; ++x)
+		for (int x = 0; x < EmuConstants::ITEM_COMMON_SIZE; ++x)
 		{
 			ItemInst *a_inst = inst->GetAugment(x);
 			if(!a_inst)
@@ -3588,9 +3598,9 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_MeleeMitigation:
-					spellbonuses.MeleeMitigation = effect_value;
-					itembonuses.MeleeMitigation = effect_value;
-					aabonuses.MeleeMitigation = effect_value;
+					spellbonuses.MeleeMitigationEffect = effect_value;
+					itembonuses.MeleeMitigationEffect = effect_value;
+					aabonuses.MeleeMitigationEffect = effect_value;
 					break;
 
 				case SE_CriticalHitChance:
@@ -3610,9 +3620,9 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_AvoidMeleeChance:
-					spellbonuses.AvoidMeleeChance = effect_value;
-					aabonuses.AvoidMeleeChance = effect_value;
-					itembonuses.AvoidMeleeChance = effect_value;
+					spellbonuses.AvoidMeleeChanceEffect = effect_value;
+					aabonuses.AvoidMeleeChanceEffect = effect_value;
+					itembonuses.AvoidMeleeChanceEffect = effect_value;
 					break;
 
 				case SE_RiposteChance:
