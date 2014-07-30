@@ -1,5 +1,60 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/27/2014 ==
+Uleat: More updates to the dictionary. Added a 'constants' file for each client translator..these will tie-in to the dictionary. Started
+replacement of hard-coded numeric values with a pre-defined constant. This will help in the transition.
+
+== 07/16/2014 ==
+Uleat: Initial commit of new client/server 'dictionaries' - work in-progress... Changed equipment slot references to reflect new naming
+conventions. Lua enumerations maintain both the old and new names as to not break existing scripts..but, the old names are deprecated.
+
+
+== 07/14/2014 ==
+KLS: Changes to CMake build
+	-Lua builds by default now
+	-Common has been renamed common
+	-Binary files will now be put into ${CMAKE_BINARY_DIR}/bin instead of ${CMAKE_BINARY_DIR}/Bin
+	The last two are of note to people on non-windows systems as case sensitivity is important.  Edit your scripts accordingly, thank you.
+
+
+== 07/10/2014 ==
+Kayen: Updated table npc_spells to now support defensive and ranged procs. 
+Note: Proc rate modifier work as it does for spell effects (ie 200 = 200% baseline chance modifier)
+Table is also now contains 12 AI spell casting variables that can be set to fine tune casting behaviors per spell set.
+Global default rules have also been added that can further fine tune all content if no specific variables are set.
+
+Descriptions of new AI casting fields in npc_spells
+'fail_recast' AI spell recast time(MS) when an spell is cast but fails (ie stunned)
+'engaged_no_sp_recast_min' AI spell recast time(MS) checked when no spell is cast while engaged in combat. (min time in random)
+'engaged_no_sp_recast_max' AI spell recast time(MS) checked when no spell is cast while engaged in combat. (max time in random)
+'engaged_b_self_chance' Chance during first AI Cast check to do a beneficial spell on self (ie check to heal self)
+'engaged_b_other_chance' Chance during second AI Cast check to do a beneficial spell on others.(ie check to heal others)
+'engaged_d_chance' 'Chance during third AI Cast check to do a determental spell on others (ie check to nuke others)
+'pursue_no_sp_recast_min' AI spell recast time(MS) checked when no spell is cast while chasing target. (min time in random)
+'pursue_no_sp_recast_max' AI spell recast time(MS) checked when no spell is cast while chasing target. (max time in random)
+'pursue_d_chance' Chance while chasing target to cast a detrimental spell.
+'idle_no_sp_recast_min' AI spell recast time(MS) checked when no spell is cast while idle. (min time in random)
+'idle_no_sp_recast_max' AI spell recast time(MS) checked when no spell is cast while idle. (max time in random)
+'idle_b_chance' Chance to cast a beneficial spell while idle (ie cast heal on self while out of combat).
+
+Kayen: Updated table npc_types, adding field 'ranged_type' and 'ammo_idfile'
+'ranged_type' Will set what skill / animation is used when NPC uses a ranged attacked (special ability 11)
+'ammo_idfile' Will set what projectile graphic an NPC uses in a ranged attacked (special ability 11) Format IT#### (same as item 'idfile')
+(*Set to IT11118 for some fun*)
+Added parameters: SPECATK_RANGED_ATK = 11
+Param0: Min Ranged distance (default: 25)
+Param1: Max Ranged distance (default: 250)
+Param2: Percent Chance to Hit modifier
+Param3: Percent Total Damage modifier
+
+Kayen: Updated to Chance to Hit code with how bonuses are applied to be consistent for all effects.
+Added field to npc_types 'Avoidance' which will modify chance to avoid melee 
+Added rules to set max and min chance to hit from melee/ranged (Default 95% / 5%)
+
+Required SQL: utils/sql/git/required/2014_07_10_npc_spells.sql
+Optional SQL: utils/sql/git/optional/2014_07_10_AICastingRules.sql
+
+
 == 07/5/2014 ==
 Kayen: Updated SE_Sanctuary - Adjust way hate lowering effect worked to be more accurate
 Kayen: Updated SE_SympatheticProc - Revised proc rate formula to be accurate to live.

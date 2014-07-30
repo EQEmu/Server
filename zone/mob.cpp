@@ -238,9 +238,6 @@ Mob::Mob(const char* in_name,
 		RangedProcs[j].spellID = SPELL_UNKNOWN;
 		RangedProcs[j].chance = 0;
 		RangedProcs[j].base_spellID = SPELL_UNKNOWN;
-		SkillProcs[j].spellID = SPELL_UNKNOWN;
-		SkillProcs[j].chance = 0;
-		SkillProcs[j].base_spellID = SPELL_UNKNOWN;
 	}
 
 	for (i = 0; i < _MaterialCount; i++)
@@ -1955,14 +1952,14 @@ void Mob::SetAttackTimer() {
 	Timer* TimerToUse = nullptr;
 	const Item_Struct* PrimaryWeapon = nullptr;
 
-	for (int i=SLOT_RANGE; i<=SLOT_SECONDARY; i++) {
+	for (int i=MainRange; i<=MainSecondary; i++) {
 
 		//pick a timer
-		if (i == SLOT_PRIMARY)
+		if (i == MainPrimary)
 			TimerToUse = &attack_timer;
-		else if (i == SLOT_RANGE)
+		else if (i == MainRange)
 			TimerToUse = &ranged_timer;
-		else if(i == SLOT_SECONDARY)
+		else if(i == MainSecondary)
 			TimerToUse = &attack_dw_timer;
 		else	//invalid slot (hands will always hit this)
 			continue;
@@ -1983,7 +1980,7 @@ void Mob::SetAttackTimer() {
 		}
 
 		//special offhand stuff
-		if(i == SLOT_SECONDARY) {
+		if(i == MainSecondary) {
 			//if we have a 2H weapon in our main hand, no dual
 			if(PrimaryWeapon != nullptr) {
 				if(	PrimaryWeapon->ItemClass == ItemClassCommon
@@ -2062,7 +2059,7 @@ void Mob::SetAttackTimer() {
 				if(IsClient())
 				{
 					float max_quiver = 0;
-					for(int r = SLOT_PERSONAL_BEGIN; r <= SLOT_PERSONAL_END; r++)
+					for(int r = EmuConstants::GENERAL_BEGIN; r <= EmuConstants::GENERAL_END; r++)
 					{
 						const ItemInst *pi = CastToClient()->GetInv().GetItem(r);
 						if(!pi)
@@ -2086,7 +2083,7 @@ void Mob::SetAttackTimer() {
 			TimerToUse->SetAtTrigger(speed, true);
 		}
 
-		if(i == SLOT_PRIMARY)
+		if(i == MainPrimary)
 			PrimaryWeapon = ItemToUse;
 	}
 
@@ -2097,8 +2094,8 @@ bool Mob::CanThisClassDualWield(void) const {
 		return(GetSkill(SkillDualWield) > 0);
 	}
 	else if(CastToClient()->HasSkill(SkillDualWield)) {
-		const ItemInst* pinst = CastToClient()->GetInv().GetItem(SLOT_PRIMARY);
-		const ItemInst* sinst = CastToClient()->GetInv().GetItem(SLOT_SECONDARY);
+		const ItemInst* pinst = CastToClient()->GetInv().GetItem(MainPrimary);
+		const ItemInst* sinst = CastToClient()->GetInv().GetItem(MainSecondary);
 
 		// 2HS, 2HB, or 2HP
 		if(pinst && pinst->IsWeapon()) {
@@ -3033,7 +3030,7 @@ void Mob::TriggerDefensiveProcs(const ItemInst* weapon, Mob *on, uint16 hand, in
 	if (!on)
 		return;
 
-	on->TryDefensiveProc(weapon, this, hand, damage);
+	on->TryDefensiveProc(weapon, this, hand);
 
 	//Defensive Skill Procs
 	if (damage < 0 && damage >= -4) {
@@ -4702,12 +4699,43 @@ uint16 Mob::GetSkillByItemType(int ItemType)
 			return Skill2HBlunt;
 		case ItemType2HPiercing:
 			return Skill1HPiercing; // change to 2HPiercing once activated
+		case ItemTypeBow:
+			return SkillArchery;
+		case ItemTypeLargeThrowing:
+		case ItemTypeSmallThrowing:
+			return SkillThrowing;
 		case ItemTypeMartial:
 			return SkillHandtoHand;
 		default:
 			return SkillHandtoHand;
 	}
 	return SkillHandtoHand;
+ }
+
+uint8 Mob::GetItemTypeBySkill(SkillUseTypes skill)
+{
+	switch (skill)
+	{
+		case SkillThrowing:
+			return ItemTypeSmallThrowing;
+		case SkillArchery:
+			return ItemTypeArrow;
+		case Skill1HSlashing:
+			return ItemType1HSlash;
+		case Skill2HSlashing:
+			return ItemType2HSlash;
+		case Skill1HPiercing:
+			return ItemType1HPiercing;
+		case Skill1HBlunt:
+			return ItemType1HBlunt;
+		case Skill2HBlunt:
+			return ItemType2HBlunt;
+		case SkillHandtoHand:
+			return ItemTypeMartial;
+		default:
+			return ItemTypeMartial;
+	}
+	return ItemTypeMartial;
  }
 
 

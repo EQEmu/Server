@@ -349,7 +349,7 @@ void Object::Close() {
 		ItemInst* container = this->m_inst;
 		if(container != nullptr)
 		{
-			for (uint8 i = 0; i < MAX_ITEMS_PER_BAG; i++)
+			for (uint8 i = SUB_BEGIN; i < EmuConstants::ITEM_CONTAINER_SIZE; i++)
 			{
 				ItemInst* inst = container->PopItem(i);
 				if(inst != nullptr)
@@ -456,7 +456,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			// the client updates itself and takes care of sending "duplicate lore item" messages
 			if(sender->CheckLoreConflict(m_inst->GetItem())) {
 				int16 loreslot = sender->GetInv().HasItem(m_inst->GetItem()->ID, 0, invWhereBank);
-				if(loreslot != SLOT_INVALID) // if the duplicate is in the bank, delete it.
+				if (loreslot != INVALID_INDEX) // if the duplicate is in the bank, delete it.
 					sender->DeleteItemInInventory(loreslot);
 				else
 					cursordelete = true;	// otherwise, we delete the new one
@@ -470,11 +470,11 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			parse->EventPlayer(EVENT_PLAYER_PICKUP, sender, buf, 0, &args);
 
 			// Transfer item to client
-			sender->PutItemInInventory(SLOT_CURSOR, *m_inst, false);
-			sender->SendItemPacket(SLOT_CURSOR, m_inst, ItemPacketTrade);
+			sender->PutItemInInventory(MainCursor, *m_inst, false);
+			sender->SendItemPacket(MainCursor, m_inst, ItemPacketTrade);
 
 			if(cursordelete)	// delete the item if it's a duplicate lore. We have to do this because the client expects the item packet
-				sender->DeleteItemInInventory(SLOT_CURSOR);
+				sender->DeleteItemInInventory(MainCursor);
 
 			if(!m_ground_spawn)
 				safe_delete(m_inst);

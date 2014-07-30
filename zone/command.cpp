@@ -2957,9 +2957,9 @@ void command_peekinv(Client *c, const Seperator *sep)
 		}
 		if(c->GetClientVersion() >= EQClientSoF)
 		{
-			const ItemInst* inst = client->GetInv().GetItem(9999);
+			const ItemInst* inst = client->GetInv().GetItem(MainPowerSource);
 			item = (inst) ? inst->GetItem() : nullptr;
-			c->Message((item==0), "InvSlot: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", 9999,
+			c->Message((item==0), "InvSlot: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", MainPowerSource,
 			((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
 			((item==0)?"null":item->Name), 0x12,
 			((item==0)?0:inst->GetCharges()));
@@ -2977,12 +2977,12 @@ void command_peekinv(Client *c, const Seperator *sep)
 		if(client->GetInv().CursorEmpty()) { // Display 'front' cursor slot even if 'empty' (item(30[0]) == null)
 			if (c->GetClientVersion() >= EQClientSoF)
 			{
-				c->Message((item==0), "CursorSlot: %i, Depth: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", SLOT_CURSOR,i,
+				c->Message((item == 0), "CursorSlot: %i, Depth: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", MainCursor, i,
 					0, 0x12, 0, "null", 0x12, 0);
 			}
 			else
 			{
-				c->Message((item==0), "CursorSlot: %i, Depth: %i, Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i", SLOT_CURSOR,i,
+				c->Message((item == 0), "CursorSlot: %i, Depth: %i, Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i", MainCursor, i,
 					0, 0x12, 0, "null", 0x12, 0);
 			}
 		}
@@ -2992,14 +2992,14 @@ void command_peekinv(Client *c, const Seperator *sep)
 				item = (inst) ? inst->GetItem() : nullptr;
 				if (c->GetClientVersion() >= EQClientSoF)
 				{
-					c->Message((item==0), "CursorSlot: %i, Depth: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", SLOT_CURSOR,i,
+					c->Message((item == 0), "CursorSlot: %i, Depth: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", MainCursor, i,
 						((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
 						((item==0)?"null":item->Name), 0x12,
 						((item==0)?0:inst->GetCharges()));
 				}
 				else
 				{
-					c->Message((item==0), "CursorSlot: %i, Depth: %i, Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i", SLOT_CURSOR,i,
+					c->Message((item == 0), "CursorSlot: %i, Depth: %i, Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i", MainCursor, i,
 						((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
 						((item==0)?"null":item->Name), 0x12,
 						((item==0)?0:inst->GetCharges()));
@@ -3007,21 +3007,21 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 				if (inst && inst->IsType(ItemClassContainer) && i==0) { // 'CSD 1' - only display contents of slot 30[0] container..higher ones don't exist
 					for (uint8 j=0; j<10; j++) {
-						const ItemInst* instbag = client->GetInv().GetItem(SLOT_CURSOR, j);
+						const ItemInst* instbag = client->GetInv().GetItem(MainCursor, j);
 						item = (instbag) ? instbag->GetItem() : nullptr;
 						if (c->GetClientVersion() >= EQClientSoF)
 						{
 							c->Message((item==0), "   CursorBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i",
-								Inventory::CalcSlotId(SLOT_CURSOR, j),
-								SLOT_CURSOR, j, ((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
+								Inventory::CalcSlotId(MainCursor, j),
+								MainCursor, j, ((item == 0) ? 0 : item->ID), 0x12, ((item == 0) ? 0 : item->ID),
 								((item==0)?"null":item->Name), 0x12,
 								((item==0)?0:instbag->GetCharges()));
 						}
 						else
 						{
 							c->Message((item==0), "   CursorBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i",
-								Inventory::CalcSlotId(SLOT_CURSOR, j),
-								SLOT_CURSOR, j, ((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
+								Inventory::CalcSlotId(MainCursor, j),
+								MainCursor, j, ((item == 0) ? 0 : item->ID), 0x12, ((item == 0) ? 0 : item->ID),
 								((item==0)?"null":item->Name), 0x12,
 								((item==0)?0:instbag->GetCharges()));
 						}
@@ -3034,7 +3034,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 	if (bAll || (strcasecmp(sep->arg[1], "trib")==0)) {
 		// Active tribute effect items
 		bFound = true;
-		for (int16 i=TRIBUTE_SLOT_START; i<(TRIBUTE_SLOT_START + MAX_PLAYER_TRIBUTES); i++) {
+		for (int16 i = EmuConstants::TRIBUTE_BEGIN; i <= EmuConstants::TRIBUTE_END; i++) {
 			const ItemInst* inst = client->GetInv().GetItem(i);
 			item = (inst) ? inst->GetItem() : nullptr;
 			if (c->GetClientVersion() >= EQClientSoF)
@@ -3533,7 +3533,7 @@ void command_equipitem(Client *c, const Seperator *sep)
 {
 	uint32 slot_id = atoi(sep->arg[1]);
 	if (sep->IsNumber(1) && (slot_id>=0) && (slot_id<=21)) {
-		const ItemInst* from_inst = c->GetInv().GetItem(SLOT_CURSOR);
+		const ItemInst* from_inst = c->GetInv().GetItem(MainCursor);
 		const ItemInst* to_inst = c->GetInv().GetItem(slot_id); // added (desync issue when forcing stack to stack)
 		bool partialmove = false;
 		int16 movecount;
@@ -3541,7 +3541,7 @@ void command_equipitem(Client *c, const Seperator *sep)
 		if (from_inst && from_inst->IsType(ItemClassCommon)) {
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_MoveItem, sizeof(MoveItem_Struct));
 			MoveItem_Struct* mi	= (MoveItem_Struct*)outapp->pBuffer;
-			mi->from_slot		= SLOT_CURSOR;
+			mi->from_slot		= MainCursor;
 			mi->to_slot			= slot_id;
 			// mi->number_in_stack	= from_inst->GetCharges(); // replaced with con check for stacking
 
@@ -4698,7 +4698,7 @@ void command_goto(Client *c, const Seperator *sep)
 
 void command_iteminfo(Client *c, const Seperator *sep)
 {
-	const ItemInst* inst = c->GetInv()[SLOT_CURSOR];
+	const ItemInst* inst = c->GetInv()[MainCursor];
 
 	if (!inst)
 		c->Message(13, "Error: You need an item on your cursor for this command");

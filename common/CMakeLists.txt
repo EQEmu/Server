@@ -14,6 +14,7 @@ SET(common_sources
 	emu_opcodes.cpp
 	EmuTCPConnection.cpp
 	EmuTCPServer.cpp
+	eq_dictionary.cpp
 	EQDB.cpp
 	EQDBRes.cpp
 	eqemu_exception.cpp
@@ -71,6 +72,7 @@ SET(common_sources
 	patches/SoD.cpp
 	patches/SoF.cpp
 	patches/RoF.cpp
+	#patches/RoF2.cpp
 	patches/Titanium.cpp
 	patches/Underfoot.cpp
 	SocketLib/Base64.cpp
@@ -111,6 +113,7 @@ SET(common_headers
 	EmuTCPConnection.h
 	EmuTCPServer.h
 	eq_constants.h
+	eq_dictionary.h
 	eq_packet_structs.h
 	EQDB.h
 	EQDBRes.h
@@ -189,15 +192,18 @@ SET(common_headers
 	ZoneNumbers.h
 	platform.h
 	patches/Client62.h
+	patches/Client62_constants.h
 	patches/Client62_itemfields.h
 	patches/Client62_ops.h
 	patches/Client62_structs.h
 	patches/patches.h
 	patches/SoD.h
+	patches/SoD_constants.h
 	patches/SoD_itemfields.h
 	patches/SoD_ops.h
 	patches/SoD_structs.h
 	patches/SoF.h
+	patches/SoF_constants.h
 	patches/SoF_itemfields.h
 	patches/SoF_opcode_list.h
 	patches/SoF_ops.h
@@ -206,14 +212,22 @@ SET(common_headers
 	patches/SSDefine.h
 	patches/SSRegister.h
 	patches/RoF.h
+	patches/RoF_constants.h
 	patches/RoF_itemfields.h
 	patches/RoF_ops.h
 	patches/RoF_structs.h
+	#patches/RoF2.h
+	#patches/RoF2_constants.h
+	#patches/RoF2_itemfields.h
+	#patches/RoF2_ops.h
+	#patches/RoF2_structs.h
 	patches/Titanium.h
+	patches/Titanium_constants.h
 	patches/Titanium_itemfields.h
 	patches/Titanium_ops.h
 	patches/Titanium_structs.h
 	patches/Underfoot.h
+	patches/Underfoot_constants.h
 	patches/Underfoot_itemfields.h
 	patches/Underfoot_ops.h
 	patches/Underfoot_structs.h
@@ -238,16 +252,19 @@ SOURCE_GROUP(Patches FILES
 	patches/Client62.h
 	patches/Client62_itemfields.h
 	patches/Client62_ops.h
+	patches/Client62_constants.h
 	patches/Client62_structs.h
 	patches/patches.h
 	patches/SoD.h
 	patches/SoD_itemfields.h
 	patches/SoD_ops.h
+	patches/SoD_constants.h
 	patches/SoD_structs.h
 	patches/SoF.h
 	patches/SoF_itemfields.h
 	patches/SoF_opcode_list.h
 	patches/SoF_ops.h
+	patches/SoF_constants.h
 	patches/SoF_structs.h
 	patches/SSDeclare.h
 	patches/SSDefine.h
@@ -255,20 +272,29 @@ SOURCE_GROUP(Patches FILES
 	patches/RoF.h
 	patches/RoF_itemfields.h
 	patches/RoF_ops.h
+	patches/RoF_constants.h
 	patches/RoF_structs.h
+	#patches/RoF2.h
+	#patches/RoF2_itemfields.h
+	#patches/RoF2_ops.h
+	#patches/RoF2_constants.h
+	#patches/RoF2_structs.h
 	patches/Titanium.h
 	patches/Titanium_itemfields.h
 	patches/Titanium_ops.h
+	patches/Titanium_constants.h
 	patches/Titanium_structs.h
 	patches/Underfoot.h
 	patches/Underfoot_itemfields.h
 	patches/Underfoot_ops.h
+	patches/Underfoot_constants.h
 	patches/Underfoot_structs.h
 	patches/Client62.cpp
 	patches/patches.cpp
 	patches/SoD.cpp
 	patches/SoF.cpp
 	patches/RoF.cpp
+	#patches/RoF2.cpp
 	patches/Titanium.cpp
 	patches/Underfoot.cpp
 )
@@ -315,11 +341,12 @@ SOURCE_GROUP(TinyXML FILES
 
 INCLUDE_DIRECTORIES(Patches SocketLib StackWalker TinyXML)
 
-ADD_LIBRARY(Common ${common_sources} ${common_headers})
+ADD_LIBRARY(common ${common_sources} ${common_headers})
 
 IF(UNIX)
 	ADD_DEFINITIONS(-fPIC)
+	#TODO: Add "patches/RoF2.cpp" when it becomes active
 	SET_SOURCE_FILES_PROPERTIES("patches/SoD.cpp" "patches/SoF.cpp" "patches/RoF.cpp" "patches/Underfoot.cpp" PROPERTIES COMPILE_FLAGS -O0)
 ENDIF(UNIX)
 
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/Bin)
+SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)

@@ -605,7 +605,7 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 
 	// now the inventory
 	std::string invquery;
-	for (int16 i=0; i<=2270;)
+	for (int16 i=EmuConstants::POSSESSIONS_BEGIN; i<=EmuConstants::BANK_BAGS_END;)
 	{
 		const ItemInst* newinv = inv->GetItem(i);
 		if (!newinv)
@@ -622,14 +622,16 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 #endif
 		}
 
-		if(i==30){ //end of standard inventory/cursor, jump to internals of bags/cursor
-			i = 251;
+		if (i == EmuConstants::CURSOR) {
+			i = EmuConstants::GENERAL_BAGS_BEGIN;
 			continue;
-		} else if(i==340){ //end of internals of bags/cursor, jump to bank slots
-			i = 2000;
+		}
+		else if (i == EmuConstants::CURSOR_BAG_END) {
+			i = EmuConstants::BANK_BEGIN;
 			continue;
-		} else if(i==2023){ //end of bank slots, jump to internals of bank bags
-			i = 2031;
+		}
+		else if (i == EmuConstants::BANK_END) {
+			i = EmuConstants::BANK_BAGS_BEGIN;
 			continue;
 		}
 

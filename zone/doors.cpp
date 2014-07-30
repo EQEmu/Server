@@ -162,7 +162,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 			{
 				if(!sender->KeyRingCheck(RuleI(Adventure, ItemIDToEnablePorts)))
 				{
-					if(sender->GetInv().HasItem(RuleI(Adventure, ItemIDToEnablePorts)) == SLOT_INVALID)
+					if (sender->GetInv().HasItem(RuleI(Adventure, ItemIDToEnablePorts)) == INVALID_INDEX)
 					{
 						sender->Message_StringID(13, DUNGEON_SEALED);
 						safe_delete(outapp);
@@ -195,11 +195,11 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 	uint8 keepoffkeyring = GetNoKeyring();
 	uint32 haskey = 0;
 	uint32 playerkey = 0;
-	const ItemInst *lockpicks = sender->GetInv().GetItem(SLOT_CURSOR);
+	const ItemInst *lockpicks = sender->GetInv().GetItem(MainCursor);
 
 	haskey = sender->GetInv().HasItem(keyneeded, 1);
 
-	if(haskey != SLOT_INVALID)
+	if (haskey != INVALID_INDEX)
 	{
 		playerkey = keyneeded;
 	}

@@ -311,6 +311,19 @@ RULE_INT ( Spells, FRProjectileItem_NPC, 80684) // Item id for NPC Fire 'spell p
 RULE_BOOL ( Spells, UseLiveSpellProjectileGFX, false) // Use spell projectile graphics set in the spells_new table (player_1). Server must be using UF+ spell file.
 RULE_BOOL ( Spells, FocusCombatProcs, false) //Allow all combat procs to receive focus effects.
 RULE_BOOL ( Spells, PreNerfBardAEDoT, false) //Allow bard AOE dots to damage targets when moving.
+RULE_INT ( Spells, AI_SpellCastFinishedFailRecast, 800) // AI spell recast time(MS) when an spell is cast but fails (ie stunned).
+RULE_INT ( Spells, AI_EngagedNoSpellMinRecast, 500) // AI spell recast time(MS) check when no spell is cast while engaged. (min time in random)
+RULE_INT ( Spells, AI_EngagedNoSpellMaxRecast, 1000) // AI spell recast time(MS) check when no spell is cast engaged.(max time in random)
+RULE_INT ( Spells, AI_EngagedBeneficialSelfChance, 100) // Chance during first AI Cast check to do a beneficial spell on self.
+RULE_INT ( Spells, AI_EngagedBeneficialOtherChance, 25) // Chance during second AI Cast check to do a beneficial spell on others.
+RULE_INT ( Spells, AI_EngagedDetrimentalChance, 20) // Chance during third AI Cast check to do a determental spell on others.
+RULE_INT ( Spells, AI_PursueNoSpellMinRecast, 500) // AI spell recast time(MS) check when no spell is cast while chasing target. (min time in random)
+RULE_INT ( Spells, AI_PursueNoSpellMaxRecast, 2000) // AI spell recast time(MS) check when no spell is cast while chasing target. (max time in random)
+RULE_INT ( Spells, AI_PursueDetrimentalChance, 90) // Chance while chasing target to cast a detrimental spell.
+RULE_INT ( Spells, AI_IdleNoSpellMinRecast, 500) // AI spell recast time(MS) check when no spell is cast while idle. (min time in random)
+RULE_INT ( Spells, AI_IdleNoSpellMaxRecast, 2000) // AI spell recast time(MS) check when no spell is cast while chasing target. (max time in random)
+RULE_INT ( Spells, AI_IdleBeneficialChance, 100) // Chance while idle to do a beneficial spell on self or others.
+
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Combat )
@@ -345,6 +358,8 @@ RULE_REAL ( Combat, HitBonusPerLevel, 1.2) //You gain this % of hit for every le
 RULE_REAL ( Combat, WeaponSkillFalloff, 0.33) //For every weapon skill point that's not maxed you lose this % of hit
 RULE_REAL ( Combat, ArcheryHitPenalty, 0.25) //Archery has a hit penalty to try to help balance it with the plethora of long term +hit modifiers for it
 RULE_REAL ( Combat, AgiHitFactor, 0.01)
+RULE_REAL ( Combat, MinChancetoHit, 5.0) //Minimum % chance to hit with regular melee/ranged 
+RULE_REAL ( Combat, MaxChancetoHit, 95.0) //Maximum % chance to hit with regular melee/ranged
 RULE_INT ( Combat, MinRangedAttackDist, 25) //Minimum Distance to use Ranged Attacks
 RULE_BOOL ( Combat, ArcheryBonusRequiresStationary, true) //does the 2x archery bonus chance require a stationary npc
 RULE_REAL ( Combat, ArcheryBaseDamageBonus, 1) // % Modifier to Base Archery Damage (.5 = 50% base damage, 1 = 100%, 2 = 200%)

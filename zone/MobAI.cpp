@@ -824,17 +824,17 @@ void Client::AI_Process()
 
 			if(GetTarget() && !IsStunned() && !IsMezzed() && !GetFeigned()) {
 				if(attack_timer.Check()) {
-					Attack(GetTarget(), 13);
+					Attack(GetTarget(), MainPrimary);
 					if(GetTarget()) {
 						if(CheckDoubleAttack()) {
-							Attack(GetTarget(), 13);
+							Attack(GetTarget(), MainPrimary);
 							if(GetTarget()) {
 								bool triple_attack_success = false;
 								if((((GetClass() == MONK || GetClass() == WARRIOR || GetClass() == RANGER || GetClass() == BERSERKER)
 									&& GetLevel() >= 60) || GetSpecialAbility(SPECATK_TRIPLE))
 									&& CheckDoubleAttack(true))
 								{
-									Attack(GetTarget(), 13, true);
+									Attack(GetTarget(), MainPrimary, true);
 									triple_attack_success = true;
 								}
 
@@ -848,15 +848,15 @@ void Client::AI_Process()
 										if(MakeRandomInt(0, 100) < flurrychance)
 										{
 											Message_StringID(MT_NPCFlurry, YOU_FLURRY);
-											Attack(GetTarget(), 13, false);
-											Attack(GetTarget(), 13, false);
+											Attack(GetTarget(), MainPrimary, false);
+											Attack(GetTarget(), MainPrimary, false);
 										}
 									}
 
 									int16 ExtraAttackChanceBonus = spellbonuses.ExtraAttackChance + itembonuses.ExtraAttackChance + aabonuses.ExtraAttackChance;
 
 									if (ExtraAttackChanceBonus && GetTarget()) {
-										ItemInst *wpn = GetInv().GetItem(SLOT_PRIMARY);
+										ItemInst *wpn = GetInv().GetItem(MainPrimary);
 										if(wpn){
 											if(wpn->GetItem()->ItemType == ItemType2HSlash ||
 												wpn->GetItem()->ItemType == ItemType2HBlunt ||
@@ -864,7 +864,7 @@ void Client::AI_Process()
 											{
 												if(MakeRandomInt(0, 100) < ExtraAttackChanceBonus)
 												{
-													Attack(GetTarget(), 13, false);
+													Attack(GetTarget(), MainPrimary, false);
 												}
 											}
 										}
@@ -903,10 +903,10 @@ void Client::AI_Process()
 
 					if(MakeRandomFloat(0.0, 1.0) < DualWieldProbability)
 					{
-						Attack(GetTarget(), 14);
+						Attack(GetTarget(), MainSecondary);
 						if(CheckDoubleAttack())
 						{
-							Attack(GetTarget(), 14);
+							Attack(GetTarget(), MainSecondary);
 						}
 
 					}
@@ -1145,14 +1145,14 @@ void Mob::AI_Process() {
 					if(IsNPC()) {
 						int16 n_atk = CastToNPC()->GetNumberOfAttacks();
 						if(n_atk <= 1) {
-							Attack(target, 13);
+							Attack(target, MainPrimary);
 						} else {
 							for(int i = 0; i < n_atk; ++i) {
-								Attack(target, 13);
+								Attack(target, MainPrimary);
 							}
 						}
 					} else {
-						Attack(target, 13);
+						Attack(target, MainPrimary);
 					}
 
 					if (target) {
@@ -1164,16 +1164,16 @@ void Mob::AI_Process() {
 								|| GetSpecialAbility(SPECATK_QUAD))
 								//check double attack, this is NOT the same rules that clients use...
 								&& RandRoll < (GetLevel() + NPCDualAttackModifier)) {
-							Attack(target, 13);
+							Attack(target, MainPrimary);
 							// lets see if we can do a triple attack with the main hand
 							//pets are excluded from triple and quads...
 							if ((GetSpecialAbility(SPECATK_TRIPLE) || GetSpecialAbility(SPECATK_QUAD))
 									&& !IsPet() && RandRoll < (GetLevel() + NPCTripleAttackModifier)) {
-								Attack(target, 13);
+								Attack(target, MainPrimary);
 								// now lets check the quad attack
 								if (GetSpecialAbility(SPECATK_QUAD)
 										&& RandRoll < (GetLevel() + NPCQuadAttackModifier)) {
-									Attack(target, 13);
+									Attack(target, MainPrimary);
 								}
 							}
 						}
@@ -1319,13 +1319,13 @@ void Mob::AI_Process() {
 						float DualWieldProbability = (GetSkill(SkillDualWield) + GetLevel()) / 400.0f;
 						if(MakeRandomFloat(0.0, 1.0) < DualWieldProbability)
 						{
-							Attack(target, 14);
+							Attack(target, MainSecondary);
 							if (CanThisClassDoubleAttack())
 							{
 								int32 RandRoll = MakeRandomInt(0, 99);
 								if (RandRoll < (GetLevel() + 20))
 								{
-									Attack(target, 14);
+									Attack(target, MainSecondary);
 								}
 							}
 						}
@@ -1897,7 +1897,7 @@ void NPC::AI_Event_SpellCastFinished(bool iCastSucceeded, uint8 slot) {
 			AIautocastspell_timer->Start(recovery_time, false);
 		}
 		else
-			AIautocastspell_timer->Start(800, false);
+			AIautocastspell_timer->Start(AISpellVar.fail_recast, false);
 		casting_spell_AIindex = AIspells.size();
 	}
 }
@@ -1910,13 +1910,13 @@ bool NPC::AI_EngagedCastCheck() {
 		mlog(AI__SPELLS, "Engaged autocast check triggered. Trying to cast healing spells then maybe offensive spells.");
 
 		// try casting a heal or gate
-		if (!AICastSpell(this, 100, SpellType_Heal | SpellType_Escape | SpellType_InCombatBuff)) {
+		if (!AICastSpell(this, AISpellVar.engaged_beneficial_self_chance, SpellType_Heal | SpellType_Escape | SpellType_InCombatBuff)) {
 			// try casting a heal on nearby
-			if (!entity_list.AICheckCloseBeneficialSpells(this, 25, MobAISpellRange, SpellType_Heal)) {
+			if (!entity_list.AICheckCloseBeneficialSpells(this, AISpellVar.engaged_beneficial_other_chance, MobAISpellRange, SpellType_Heal)) {
 				//nobody to heal, try some detrimental spells.
-				if(!AICastSpell(GetTarget(), 20, SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm | SpellType_Root)) {
+				if(!AICastSpell(GetTarget(), AISpellVar.engaged_detrimental_chance, SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm | SpellType_Root)) {
 					//no spell to cast, try again soon.
-					AIautocastspell_timer->Start(RandomTimer(500, 1000), false);
+					AIautocastspell_timer->Start(RandomTimer(AISpellVar.engaged_no_sp_recast_min, AISpellVar.engaged_no_sp_recast_max), false);
 				}
 			}
 		}
@@ -1931,9 +1931,9 @@ bool NPC::AI_PursueCastCheck() {
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
 		mlog(AI__SPELLS, "Engaged (pursuing) autocast check triggered. Trying to cast offensive spells.");
-		if(!AICastSpell(GetTarget(), 90, SpellType_Root | SpellType_Nuke | SpellType_Lifetap | SpellType_Snare | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff)) {
+		if(!AICastSpell(GetTarget(), AISpellVar.pursue_detrimental_chance, SpellType_Root | SpellType_Nuke | SpellType_Lifetap | SpellType_Snare | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff)) {
 			//no spell cast, try again soon.
-			AIautocastspell_timer->Start(RandomTimer(500, 2000), false);
+			AIautocastspell_timer->Start(RandomTimer(AISpellVar.pursue_no_sp_recast_min, AISpellVar.pursue_no_sp_recast_max), false);
 		} //else, spell casting finishing will reset the timer.
 		return(true);
 	}
@@ -1946,11 +1946,11 @@ bool NPC::AI_IdleCastCheck() {
 		std::cout << "Non-Engaged autocast check triggered: " << this->GetName() << std::endl;
 #endif
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
-		if (!AICastSpell(this, 100, SpellType_Heal | SpellType_Buff | SpellType_Pet)) {
+		if (!AICastSpell(this, AISpellVar.idle_beneficial_chance, SpellType_Heal | SpellType_Buff | SpellType_Pet)) {
 			if(!entity_list.AICheckCloseBeneficialSpells(this, 33, MobAISpellRange, SpellType_Heal | SpellType_Buff)) {
 				//if we didnt cast any spells, our autocast timer just resets to the
 				//last duration it was set to... try to put up a more reasonable timer...
-				AIautocastspell_timer->Start(RandomTimer(1000, 5000), false);
+				AIautocastspell_timer->Start(RandomTimer(AISpellVar.idle_no_sp_recast_min, AISpellVar.idle_no_sp_recast_max), false);
 			}	//else, spell casting finishing will reset the timer.
 		}	//else, spell casting finishing will reset the timer.
 		return(true);
@@ -2024,7 +2024,7 @@ bool Mob::Flurry(ExtraAttackOptions *opts)
 		int num_attacks = GetSpecialAbilityParam(SPECATK_FLURRY, 1);
 		num_attacks = num_attacks > 0 ? num_attacks : RuleI(Combat, MaxFlurryHits);
 		for (int i = 0; i < num_attacks; i++)
-			Attack(target, 13, false, false, false, opts);
+			Attack(target, MainPrimary, false, false, false, opts);
 	}
 	return true;
 }
@@ -2073,14 +2073,14 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 			if (m_target == GetTarget())
 				continue;
 			if (CombatRange(m_target)) {
-				Attack(m_target, 13, false, false, false, opts);
+				Attack(m_target, MainPrimary, false, false, false, opts);
 				index_hit++;
 			}
 		}
 	}
 
 	if (RuleB(Combat, RampageHitsTarget) && index_hit < rampage_targets)
-		Attack(GetTarget(), 13, false, false, false, opts);
+		Attack(GetTarget(), MainPrimary, false, false, false, opts);
 
 	return true;
 }
@@ -2099,7 +2099,7 @@ void Mob::AreaRampage(ExtraAttackOptions *opts)
 	index_hit = hate_list.AreaRampage(this, GetTarget(), rampage_targets, opts);
 
 	if(index_hit == 0) {
-		Attack(GetTarget(), 13, false, false, false, opts);
+		Attack(GetTarget(), MainPrimary, false, false, false, opts);
 	}
 }
 
@@ -2340,11 +2340,44 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 		std::cout << " (not found)";
 	std::cout << std::endl;
 #endif
-	int16 attack_proc_spell = -1;
+	uint16 attack_proc_spell = -1;
 	int8 proc_chance = 3;
+	uint16 range_proc_spell = -1;
+	int16 rproc_chance = 0;
+	uint16 defensive_proc_spell = -1;
+	int16 dproc_chance = 0;
+	uint32 _fail_recast = 0;
+	uint32 _engaged_no_sp_recast_min = 0;
+	uint32 _engaged_no_sp_recast_max = 0;
+	uint8 _engaged_beneficial_self_chance = 0;
+	uint8 _engaged_beneficial_other_chance = 0;
+	uint8 _engaged_detrimental_chance = 0;
+	uint32 _pursue_no_sp_recast_min = 0;
+	uint32 _pursue_no_sp_recast_max = 0;
+	uint8 _pursue_detrimental_chance = 0;
+	uint32 _idle_no_sp_recast_min = 0;
+	uint32 _idle_no_sp_recast_max = 0;
+	uint8 _idle_beneficial_chance = 0;
+
 	if (parentlist) {
 		attack_proc_spell = parentlist->attack_proc;
 		proc_chance = parentlist->proc_chance;
+		range_proc_spell = parentlist->range_proc;
+		rproc_chance = parentlist->rproc_chance;
+		defensive_proc_spell = parentlist->defensive_proc;
+		dproc_chance = parentlist->dproc_chance;
+		_fail_recast = parentlist->fail_recast;
+		_engaged_no_sp_recast_min = parentlist->engaged_no_sp_recast_min;
+		_engaged_no_sp_recast_max = parentlist->engaged_no_sp_recast_max;
+		_engaged_beneficial_self_chance = parentlist->engaged_beneficial_self_chance;
+		_engaged_beneficial_other_chance = parentlist->engaged_beneficial_other_chance;
+		_engaged_detrimental_chance = parentlist->engaged_detrimental_chance;
+		_pursue_no_sp_recast_min = parentlist->pursue_no_sp_recast_min;
+		_pursue_no_sp_recast_max = parentlist->pursue_no_sp_recast_max;
+		_pursue_detrimental_chance = parentlist->pursue_detrimental_chance;
+		_idle_no_sp_recast_min = parentlist->idle_no_sp_recast_min;
+		_idle_no_sp_recast_max = parentlist->idle_no_sp_recast_max;
+		_idle_beneficial_chance = parentlist->idle_beneficial_chance;
 		for (i=0; i<parentlist->numentries; i++) {
 			if (GetLevel() >= parentlist->entries[i].minlevel && GetLevel() <= parentlist->entries[i].maxlevel && parentlist->entries[i].spellid > 0) {
 				if (!IsSpellInList(spell_list, parentlist->entries[i].spellid))
@@ -2361,6 +2394,36 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 		attack_proc_spell = spell_list->attack_proc;
 		proc_chance = spell_list->proc_chance;
 	}
+
+	if (spell_list->range_proc >= 0) {
+		range_proc_spell = spell_list->range_proc;
+		rproc_chance = spell_list->rproc_chance;
+	}
+
+	if (spell_list->defensive_proc >= 0) {
+		defensive_proc_spell = spell_list->defensive_proc;
+		dproc_chance = spell_list->dproc_chance;
+	}
+
+	//If any casting variables are defined in the current list, ignore those in the parent list.
+	if (spell_list->fail_recast || spell_list->engaged_no_sp_recast_min || spell_list->engaged_no_sp_recast_max 
+		|| spell_list->engaged_beneficial_self_chance || spell_list->engaged_beneficial_other_chance || spell_list->engaged_detrimental_chance
+		|| spell_list->pursue_no_sp_recast_min || spell_list->pursue_no_sp_recast_max || spell_list->pursue_detrimental_chance
+		|| spell_list->idle_no_sp_recast_min || spell_list->idle_no_sp_recast_max || spell_list->idle_beneficial_chance) {
+		_fail_recast = spell_list->fail_recast;
+		_engaged_no_sp_recast_min = spell_list->engaged_no_sp_recast_min;
+		_engaged_no_sp_recast_max = spell_list->engaged_no_sp_recast_max;
+		_engaged_beneficial_self_chance = spell_list->engaged_beneficial_self_chance;
+		_engaged_beneficial_other_chance = spell_list->engaged_beneficial_other_chance;
+		_engaged_detrimental_chance = spell_list->engaged_detrimental_chance;
+		_pursue_no_sp_recast_min = spell_list->pursue_no_sp_recast_min;
+		_pursue_no_sp_recast_max = spell_list->pursue_no_sp_recast_max;
+		_pursue_detrimental_chance = spell_list->pursue_detrimental_chance;
+		_idle_no_sp_recast_min = spell_list->idle_no_sp_recast_min;
+		_idle_no_sp_recast_max = spell_list->idle_no_sp_recast_max;
+		_idle_beneficial_chance = spell_list->idle_beneficial_chance;
+	}
+
 	for (i=0; i<spell_list->numentries; i++) {
 		if (GetLevel() >= spell_list->entries[i].minlevel && GetLevel() <= spell_list->entries[i].maxlevel && spell_list->entries[i].spellid > 0) {
 			AddSpellToNPCList(spell_list->entries[i].priority,
@@ -2371,9 +2434,30 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 	}
 	std::sort(AIspells.begin(), AIspells.end(), Compare_AI_Spells);
 
-	if (attack_proc_spell > 0)
+	if (IsValidSpell(attack_proc_spell))
 		AddProcToWeapon(attack_proc_spell, true, proc_chance);
 
+	if (IsValidSpell(range_proc_spell))
+		AddRangedProc(range_proc_spell, (rproc_chance + 100));
+
+	if (IsValidSpell(defensive_proc_spell))
+		AddDefensiveProc(defensive_proc_spell, (dproc_chance + 100));
+
+	//Set AI casting variables
+
+	AISpellVar.fail_recast = (_fail_recast) ? _fail_recast : RuleI(Spells, AI_SpellCastFinishedFailRecast);
+	AISpellVar.engaged_no_sp_recast_min = (_engaged_no_sp_recast_min) ? _engaged_no_sp_recast_min : RuleI(Spells, AI_EngagedNoSpellMinRecast);
+	AISpellVar.engaged_no_sp_recast_max = (_engaged_no_sp_recast_max) ? _engaged_no_sp_recast_max : RuleI(Spells, AI_EngagedNoSpellMaxRecast);
+	AISpellVar.engaged_beneficial_self_chance = (_engaged_beneficial_self_chance) ? _engaged_beneficial_self_chance : RuleI(Spells, AI_EngagedBeneficialSelfChance);
+	AISpellVar.engaged_beneficial_other_chance = (_engaged_beneficial_other_chance) ? _engaged_beneficial_other_chance : RuleI(Spells, AI_EngagedBeneficialOtherChance);
+	AISpellVar.engaged_detrimental_chance = (_engaged_detrimental_chance) ? _engaged_detrimental_chance : RuleI(Spells, AI_EngagedDetrimentalChance);
+	AISpellVar.pursue_no_sp_recast_min = (_pursue_no_sp_recast_min) ? _pursue_no_sp_recast_min : RuleI(Spells, AI_PursueNoSpellMinRecast);
+	AISpellVar.pursue_no_sp_recast_max = (_pursue_no_sp_recast_max) ? _pursue_no_sp_recast_max : RuleI(Spells, AI_PursueNoSpellMaxRecast);
+	AISpellVar.pursue_detrimental_chance = (_pursue_detrimental_chance) ? _pursue_detrimental_chance : RuleI(Spells, AI_PursueDetrimentalChance);
+	AISpellVar.idle_no_sp_recast_min = (_idle_no_sp_recast_min) ? _idle_no_sp_recast_min : RuleI(Spells, AI_IdleNoSpellMinRecast);
+	AISpellVar.idle_no_sp_recast_max = (_idle_no_sp_recast_max) ? _idle_no_sp_recast_max : RuleI(Spells, AI_IdleNoSpellMaxRecast);
+	AISpellVar.idle_beneficial_chance = (_idle_beneficial_chance) ? _idle_beneficial_chance : RuleI(Spells, AI_IdleBeneficialChance);
+	
 	if (AIspells.size() == 0)
 		AIautocastspell_timer->Disable();
 	else
@@ -2568,13 +2652,29 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
 		MYSQL_RES *result;
 		MYSQL_ROW row;
 
-		if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, parent_list, attack_proc, proc_chance from npc_spells where id=%d", iDBSpellsID), errbuf, &result)) {
+		if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, parent_list, attack_proc, proc_chance, range_proc, rproc_chance, defensive_proc, dproc_chance, fail_recast, engaged_no_sp_recast_min, engaged_no_sp_recast_max, engaged_b_self_chance, engaged_b_other_chance, engaged_d_chance, pursue_no_sp_recast_min, pursue_no_sp_recast_max, pursue_d_chance, idle_no_sp_recast_min, idle_no_sp_recast_max, idle_b_chance from npc_spells where id=%d", iDBSpellsID), errbuf, &result)) {
 			safe_delete_array(query);
 			if (mysql_num_rows(result) == 1) {
 				row = mysql_fetch_row(result); 
 				uint32 tmpparent_list = atoi(row[1]);
-				int16 tmpattack_proc = atoi(row[2]);
+				uint16 tmpattack_proc = atoi(row[2]);
 				uint8 tmpproc_chance = atoi(row[3]);
+				uint16 tmprange_proc = atoi(row[4]);
+				int16 tmprproc_chance = atoi(row[5]);
+				uint16 tmpdefensive_proc = atoi(row[6]);
+				int16 tmpdproc_chance = atoi(row[7]);
+				uint32 tmppfail_recast = atoi(row[8]);
+				uint32 tmpengaged_no_sp_recast_min = atoi(row[9]);
+				uint32 tmpengaged_no_sp_recast_max = atoi(row[10]);
+				uint8 tmpengaged_b_self_chance = atoi(row[11]);
+				uint8 tmpengaged_b_other_chance = atoi(row[12]);
+				uint8 tmpengaged_d_chance = atoi(row[13]);
+				uint32 tmppursue_no_sp_recast_min = atoi(row[14]);
+				uint32 tmppursue_no_sp_recast_max = atoi(row[15]);
+				uint8 tmppursue_d_chance = atoi(row[16]);
+				uint32 tmpidle_no_sp_recast_min = atoi(row[17]);
+				uint32 tmpidle_no_sp_recast_max = atoi(row[18]);
+				uint8 tmpidle_b_chance = atoi(row[19]);
 				mysql_free_result(result);
 				if (RunQuery(query, MakeAnyLenString(&query, "SELECT spellid, type, minlevel, maxlevel, manacost, recast_delay, priority, resist_adjust from npc_spells_entries where npc_spells_id=%d ORDER BY minlevel", iDBSpellsID), errbuf, &result)) {
 					safe_delete_array(query);
@@ -2584,6 +2684,22 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
 					npc_spells_cache[iDBSpellsID]->parent_list = tmpparent_list;
 					npc_spells_cache[iDBSpellsID]->attack_proc = tmpattack_proc;
 					npc_spells_cache[iDBSpellsID]->proc_chance = tmpproc_chance;
+					npc_spells_cache[iDBSpellsID]->range_proc = tmprange_proc;
+					npc_spells_cache[iDBSpellsID]->rproc_chance = tmpdproc_chance;
+					npc_spells_cache[iDBSpellsID]->defensive_proc = tmpdefensive_proc;
+					npc_spells_cache[iDBSpellsID]->dproc_chance = tmpdproc_chance;
+					npc_spells_cache[iDBSpellsID]->fail_recast = tmppfail_recast;
+					npc_spells_cache[iDBSpellsID]->engaged_no_sp_recast_min = tmpengaged_no_sp_recast_min;
+					npc_spells_cache[iDBSpellsID]->engaged_no_sp_recast_max = tmpengaged_no_sp_recast_max;
+					npc_spells_cache[iDBSpellsID]->engaged_beneficial_self_chance = tmpengaged_b_self_chance;
+					npc_spells_cache[iDBSpellsID]->engaged_beneficial_other_chance = tmpengaged_b_other_chance;
+					npc_spells_cache[iDBSpellsID]->engaged_detrimental_chance = tmpengaged_d_chance;
+					npc_spells_cache[iDBSpellsID]->pursue_no_sp_recast_min = tmppursue_no_sp_recast_min;
+					npc_spells_cache[iDBSpellsID]->pursue_no_sp_recast_max = tmppursue_no_sp_recast_max;
+					npc_spells_cache[iDBSpellsID]->pursue_detrimental_chance = tmppursue_d_chance;
+					npc_spells_cache[iDBSpellsID]->idle_no_sp_recast_min = tmpidle_no_sp_recast_min;
+					npc_spells_cache[iDBSpellsID]->idle_no_sp_recast_max = tmpidle_no_sp_recast_max;
+					npc_spells_cache[iDBSpellsID]->idle_beneficial_chance = tmpidle_b_chance;
 					npc_spells_cache[iDBSpellsID]->numentries = mysql_num_rows(result);
 					int j = 0;
 					while ((row = mysql_fetch_row(result))) {

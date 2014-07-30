@@ -8,6 +8,7 @@
 #include "SoF.h"
 #include "SoD.h"
 #include "RoF.h"
+//#include "RoF2.h"
 
 void RegisterAllPatches(EQStreamIdentifier &into) {
 	Client62::Register(into);
@@ -16,6 +17,7 @@ void RegisterAllPatches(EQStreamIdentifier &into) {
 	SoD::Register(into);
 	Underfoot::Register(into);
 	RoF::Register(into);
+	//RoF2::Register(into);
 }
 
 void ReloadAllPatches() {
@@ -25,4 +27,5 @@ void ReloadAllPatches() {
 	SoD::Reload();
 	Underfoot::Reload();
 	RoF::Reload();
+	//RoF2::Reload();
 }

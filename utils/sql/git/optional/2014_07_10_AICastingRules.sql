@@ -1,0 +1,15 @@
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:AI_SpellCastFinishedFailRecast','800', 'AI spell recast time(MS) when an spell is cast but fails (ie stunned)');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:AI_EngagedNoSpellMinRecast','500', 'AI spell recast time(MS) check when no spell is cast while engaged. (min time in random)');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:AI_EngagedNoSpellMaxRecast','1000','AI spell recast time(MS) check when no spell is cast engaged.(max time in random)');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:AI_EngagedBeneficialSelfChance,','100', 'Chance during first AI Cast check to do a beneficial spell on self.');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:AI_EngagedBeneficialOtherChance','25', 'Chance during second AI Cast check to do a beneficial spell on others.');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:AI_EngagedDetrimentalChance','20','Chance during third AI Cast check to do a determental spell on others.');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:AI_PursueNoSpellMinRecast','500', 'AI spell recast time(MS) check when no spell is cast while chasing target. (min time in random)');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:AI_PursueNoSpellMaxRecast','2000','AI spell recast time(MS) check when no spell is cast while chasing target. (max time in random)');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:AI_PursueDetrimentalChance','90','Chance while chasing target to cast a detrimental spell.');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:AI_IdleNoSpellMinRecast','500','AI spell recast time(MS) check when no spell is cast while idle. (min time in random)');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:AI_IdleNoSpellMaxRecast','2000','AI spell recast time(MS) check when no spell is cast while chasing target. (max time in random)');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:AI_IdleBeneficialChance','100','Chance while idle to do a beneficial spell on self or others.');
+
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Combat:MinChancetoHit','5','Minimum % chance to hit with regular melee/ranged.');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Combat:MaxChancetoHit','95','Maximum % chance to hit with regular melee/ranged.');
