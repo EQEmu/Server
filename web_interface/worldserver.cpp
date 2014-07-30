@@ -30,14 +30,8 @@
 #include "../common/packet_functions.h"
 #include "../common/md5.h"
 #include "../common/packet_dump.h"
-#include "../common/web_interface_utils.h"
 #include "worldserver.h"
-
-struct per_session_data_eqemu {
-	bool auth;
-	std::string uuid;
-	std::list<std::string> *send_queue;
-};
+#include "web_interface.h"
 
 extern std::map<std::string, per_session_data_eqemu*> sessions;
 
@@ -65,18 +59,74 @@ void WorldServer::Process(){
 		switch(pack->opcode) {
 			case 0: { break; }
 			case ServerOP_KeepAlive: { break; }
-			case ServerOP_WIWorldResponse: {
-				/* Generic Response routine: web_interface server recieves packet from World - 
-					Relays data back to client
-				*/
-				_log(WEB_INTERFACE__ERROR, "WI Recieved packet from world 0x%04x, size %d", pack->opcode, pack->size);
-				WI_Client_Request_Struct* WICR = (WI_Client_Request_Struct*)pack->pBuffer;
-				std::string Data;
-				Data.assign(WICR->JSON_Data, pack->size - 64);
-				/* Check if Session is Valid before sending data back*/
-				if (sessions[WICR->Client_UUID]){
-					sessions[WICR->Client_UUID]->send_queue->push_back(Data.c_str()); 
+			case ServerOP_WIRemoteCallResponse: {
+				char *id = nullptr;
+				char *session_id = nullptr;
+				char *error = nullptr;
+
+				id = new char[pack->ReadUInt32() + 1];
+				pack->ReadString(id);
+
+				session_id = new char[pack->ReadUInt32() + 1];
+				pack->ReadString(session_id);
+
+				error = new char[pack->ReadUInt32() + 1];
+				pack->ReadString(error);
+
+				uint32 param_count = pack->ReadUInt32();
+				std::vector<std::string> params;
+				for(uint32 i = 0; i < param_count; ++i) {
+					char *p = new char[pack->ReadUInt32() + 1];
+					pack->ReadString(p);
+					params.push_back(p);
+					safe_delete_array(p);
 				}
+
+				//send the response to client...
+				rapidjson::StringBuffer s;
+				rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+				writer.StartObject();
+				writer.String("id");
+				if(strlen(id) == 0) {
+					writer.Null();
+				} else {
+					writer.String(id);
+				}
+
+				if(strlen(error) != 0) {
+					writer.String("error");
+					writer.Bool(true);
+
+					writer.String("result");
+					writer.StartArray();
+					if(params.size() > 0) {
+						writer.String(params[0].c_str());
+					} else {
+						writer.String("");
+					}
+					writer.EndArray();
+				} else {
+					writer.String("error");
+					writer.Null();
+					writer.String("result");
+					writer.StartArray();
+					uint32 p_sz = (uint32)params.size();
+					for(uint32 i = 0; i < p_sz; ++i) {
+						writer.String(params[i].c_str());
+					}
+					writer.EndArray();
+				}
+
+				writer.EndObject();
+
+				if(sessions.count(session_id) != 0) {
+					per_session_data_eqemu *session = sessions[session_id];
+					session->send_queue->push_back(s.GetString());
+				}
+
+				safe_delete_array(id);
+				safe_delete_array(session_id);
+				safe_delete_array(error);
 				break;
 			}
 		}

@@ -15,37 +15,20 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#ifndef WI_WEB_INTERFACE_H
-#define WI_WEB_INTERFACE_H
+#ifndef WORLD_REMOTE_CALL_H
+#define WORLD_REMOTE_CALL_H
 
-#include "../common/debug.h"
-#include "../common/opcodemgr.h"
-#include "../common/EQStreamFactory.h"
-#include "../common/rulesys.h"
-#include "../common/servertalk.h"
-#include "../common/platform.h"
-#include "../common/crash.h"
-#include "../common/EQEmuConfig.h"
-#include "../common/web_interface_utils.h"
-#include "../common/StringUtil.h"
-#include "../common/uuid.h"
-#include "worldserver.h"
-#include "lib/libwebsockets.h"
-#include "rapidjson/document.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
-#include <signal.h>
-#include <list>
 #include <map>
+#include <string>
+#include <vector>
 
-#define MAX_MESSAGE_LENGTH 2048
+typedef void(*RemoteCallHandler)(const std::string&, const std::string&, const std::string&, const std::vector<std::string>&);
 
-struct per_session_data_eqemu {
-	std::string auth;
-	std::string uuid;
-	std::list<std::string> *send_queue;
-};
+void RemoteCallResponse(const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &res, const std::string &error);
 
-typedef void(*MethodHandler)(per_session_data_eqemu*, rapidjson::Document&, std::string&);
+void register_remote_call_handlers();
+void handle_rc_list_zones(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params);
+void handle_rc_get_zone_info(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params);
 
 #endif
+

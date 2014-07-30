@@ -1,5 +1,6 @@
 #include "web_interface.h"
-#include "call_handler.h"
+#include "method_handler.h"
+#include "remote_call.h"
 
 volatile bool run = true;
 TimeoutManager timeout_manager;
@@ -7,8 +8,8 @@ const EQEmuConfig *config = nullptr;
 WorldServer *worldserver = nullptr;
 libwebsocket_context *context = nullptr;
 std::map<std::string, per_session_data_eqemu*> sessions;
-std::map<std::string, CallHandler> authorized_calls;
-std::map<std::string, CallHandler> unauthorized_calls;
+std::map<std::string, std::pair<int, MethodHandler>> authorized_methods;
+std::map<std::string, MethodHandler> unauthorized_methods;
 
 void CatchSignal(int sig_num) {
 	run = false;
@@ -49,39 +50,47 @@ int callback_eqemu(libwebsocket_context *context, libwebsocket *wsi, libwebsocke
 			
 		rapidjson::Document document;
 		if(document.Parse((const char*)in).HasParseError()) {
+			WriteWebCallResponseString(session, document, "Malformed JSON data", true, true);
 			break;
 		}
 
-		std::string call;
-		if(document.HasMember("call")) {
-			call = document["call"].GetString();
+		std::string method;
+		if(document.HasMember("method")) {
+			method = document["method"].GetString();
 		}
 
-		if(call.length() == 0) {
+		if(method.length() == 0) {
 			//No function called, toss this message
-			WriteWebCallResponse(session, document, "call_empty");
+			WriteWebCallResponseString(session, document, "No method specified", true);
 			break;
 		}
 		
-		if (!CheckTokenAuthorization(session)) {
+		int status = CheckTokenAuthorization(session);
+		if (status == 0) {
 			//check func call against functions that dont req auth
-			if (unauthorized_calls.count(call) == 0) {
-				WriteWebCallResponse(session, document, "unauthorized_call_not_found: " + call);
+			if (unauthorized_methods.count(method) == 0) {
+				WriteWebCallResponseString(session, document, "No suitable method found: " + method, true);
 				break;
 			}
-
-			auto call_func = unauthorized_calls[call];
-			call_func(session, document);
+			auto call_func = unauthorized_methods[method];
+			call_func(session, document, method);
 		}
-		else {
+		else if(status > 0) {
 			//check func call against functions that req auth
-			if (authorized_calls.count(call) == 0) {
-				WriteWebCallResponse(session, document, "authorized_call_not_found: " + call);
+			if (authorized_methods.count(method) == 0) {
+				WriteWebCallResponseString(session, document, "No suitable method found: " + method, true);
+				break;
+			}
+		
+			//check status level
+			auto iter = authorized_methods.find(method);
+			if(iter->second.first > status) {
+				WriteWebCallResponseString(session, document, "Method " + method + " requires status " + std::to_string((long)iter->second.first), true);
 				break;
 			}
 
-			auto call_func = authorized_calls[call];
-			call_func(session, document);
+			auto call_func = iter->second.second;
+			call_func(session, document, method);
 		}
 
 		break;
@@ -130,7 +139,7 @@ static struct libwebsocket_protocols protocols[] = {
 int main() {
 	RegisterExecutablePlatform(ExePlatformWebInterface);
 	set_exception_handler();
-	register_calls();
+	register_methods();
 	Timer InterserverTimer(INTERSERVER_TIMER); // does auto-reconnect
 	_log(WEB_INTERFACE__INIT, "Starting EQEmu Web Server.");
 	
@@ -189,27 +198,4 @@ int main() {
 	return 0;
 }
 
-void WriteWebCallResponse(per_session_data_eqemu *session, rapidjson::Document &doc, std::string status) {
-	if (doc.HasMember("id")) {
-		rapidjson::StringBuffer s;
-		rapidjson::Writer<rapidjson::StringBuffer> writer(s);
-		writer.StartObject();
-		writer.String("id");
-		writer.String(doc["id"].GetString());
-		writer.String("status");
-		writer.String(status.c_str());
-		writer.EndObject();
-		session->send_queue->push_back(s.GetString());
-	}
-}
-
-bool CheckTokenAuthorization(per_session_data_eqemu *session) {
-	//todo: actually check this against a table of tokens that is updated periodically
-	//right now i have just one entry harded coded for testing purposes
-	if(session->auth.compare("c5b80ec8-4174-4c4c-d332-dbf3c3a551fc") == 0) {
-		return true;
-	}
-
-	return false;
-}
 

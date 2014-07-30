@@ -1303,10 +1303,6 @@ bool ZoneServer::Process() {
 			case ServerOP_CZSignalClientByName:
 			case ServerOP_CZMessagePlayer:
 			case ServerOP_CZSignalClient:
-			{
-				zoneserver_list.SendPacket(pack);
-				break;
-			}
 			case ServerOP_DepopAllPlayersCorpses:
 			case ServerOP_DepopPlayerCorpse:
 			case ServerOP_ReloadTitles:
@@ -1316,12 +1312,6 @@ bool ZoneServer::Process() {
 			case ServerOP_UpdateSpawn:
 			{
 				zoneserver_list.SendPacket(pack);
-				break;
-			}
-			case ServerOP_WIWorldResponse:
-			{
-				_log(WEB_INTERFACE__ERROR, "ServerOP_WIWorldResponse for WebInterface 0x%04x, size %d", pack->opcode, pack->size);
-				WILink.SendPacket(pack);
 				break;
 			}
 			default:

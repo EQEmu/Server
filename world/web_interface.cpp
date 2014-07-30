@@ -3,6 +3,7 @@
 #include "WorldConfig.h"
 #include "clientlist.h"
 #include "zonelist.h"
+#include "remote_call.h"
 #include "../common/logsys.h"
 #include "../common/logtypes.h"
 #include "../common/md5.h"
@@ -11,6 +12,7 @@
 
 extern ClientList client_list;
 extern ZSList zoneserver_list;
+extern std::map<std::string, RemoteCallHandler> remote_call_methods;
 
 WebInterfaceConnection::WebInterfaceConnection()
 {
@@ -99,18 +101,38 @@ bool WebInterfaceConnection::Process()
 				_log(WEB_INTERFACE__ERROR, "Got authentication from WebInterface when they are already authenticated.");
 				break;
 			}
-			case ServerOP_WIServGeneric:
+			case ServerOP_WIRemoteCall:
 			{
-				zoneserver_list.SendPacket(pack); // Send to all zones to test
-				break;
-			}
-			case ServerOP_WIClientRequest:
-			{
-				std::string Data; 					
-				WI_Client_Request_Struct* WICR = (WI_Client_Request_Struct*)pack->pBuffer;
-				Data.assign(WICR->JSON_Data, pack->size - 64);
-				_log(WEB_INTERFACE__ERROR, "Recieved ServerOPcode from WebInterface 0x%04x \nSize %d\nData '%s' from client:\n%s\n", pack->opcode, pack->size, Data.c_str(), WICR->Client_UUID);
-				zoneserver_list.SendPacket(pack); // Send to all zones to test
+				char *id = nullptr;
+				char *session_id = nullptr;
+				char *method = nullptr;
+
+				id = new char[pack->ReadUInt32() + 1];
+				pack->ReadString(id);
+
+				session_id = new char[pack->ReadUInt32() + 1];
+				pack->ReadString(session_id);
+
+				method = new char[pack->ReadUInt32() + 1];
+				pack->ReadString(method);
+
+				uint32 param_count = pack->ReadUInt32();
+				std::vector<std::string> params;
+				for(uint32 i = 0; i < param_count; ++i) {
+					char *p = new char[pack->ReadUInt32() + 1];
+					pack->ReadString(p);
+					params.push_back(p);
+					safe_delete_array(p);
+				}
+
+				if (remote_call_methods.count(method) != 0) {
+					auto f = remote_call_methods[method];
+					f(method, session_id, id, params);
+				}
+
+				safe_delete_array(id);
+				safe_delete_array(session_id);
+				safe_delete_array(method);
 				break;
 			}
 			default:

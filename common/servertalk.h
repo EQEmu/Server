@@ -186,9 +186,8 @@
 #define ServerOP_QSPlayerLogMoves			0x4014
 #define ServerOP_QSMerchantLogTransactions	0x4015
 
-#define ServerOP_WIServGeneric	0x5001
-#define ServerOP_WIWorldResponse	0x5002
-#define ServerOP_WIClientRequest	0x5003 
+#define ServerOP_WIRemoteCall 0x5001
+#define ServerOP_WIRemoteCallResponse 0x5002
 
 enum { QSG_LFGuild = 0 };
 enum {	QSG_LFGuild_PlayerMatches = 0, QSG_LFGuild_UpdatePlayerInfo, QSG_LFGuild_RequestPlayerInfo, QSG_LFGuild_UpdateGuildInfo, QSG_LFGuild_GuildMatches,
@@ -1232,17 +1231,6 @@ struct CZMessagePlayer_Struct {
 struct ReloadWorld_Struct{
 	uint32 Option;
 };
-
-struct WI_Client_Request_Struct{
-	char Client_UUID[64];
-	char JSON_Data[0];
-};
-
-struct WI_Client_Response_Struct{
-	char Client_UUID[64];
-	char JSON_Data[0];
-};
-
 
 #pragma pack()
 

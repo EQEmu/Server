@@ -41,7 +41,9 @@ extern "C" {
 #include <stddef.h>
 #include <basetsd.h>
 
+#ifndef strcasecmp
 #define strcasecmp stricmp
+#endif
 #define getdtablesize() 30000
 
 #define LWS_VISIBLE

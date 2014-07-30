@@ -91,7 +91,6 @@ SET(common_sources
 	tinyxml/tinyxml.cpp
 	tinyxml/tinyxmlerror.cpp
 	tinyxml/tinyxmlparser.cpp
-	web_interface_utils.cpp
 )
 
 SET(common_headers
@@ -237,7 +236,6 @@ SET(common_headers
 	StackWalker/StackWalker.h
 	tinyxml/tinystr.h
 	tinyxml/tinyxml.h
-	web_interface_utils.h
 )
 
 SOURCE_GROUP(Patches FILES

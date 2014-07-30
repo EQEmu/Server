@@ -87,6 +87,7 @@
 #include "ucs.h"
 #include "queryserv.h"
 #include "web_interface.h"
+#include "remote_call.h"
 
 TimeoutManager timeout_manager;
 EQStreamFactory eqsf(WorldStream,9000);
@@ -107,7 +108,6 @@ uint32 numclients = 0;
 uint32 numzones = 0;
 bool holdzones = false;
 
-
 extern ConsoleList console_list;
 
 void CatchSignal(int sig_num);
@@ -115,6 +115,7 @@ void CatchSignal(int sig_num);
 int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformWorld);
 	set_exception_handler();
+	register_remote_call_handlers();
 
 	// Load server configuration
 	_log(WORLD__INIT, "Loading server configuration..");

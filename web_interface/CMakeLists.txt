@@ -1,13 +1,15 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SET(web_interface_sources
-	call_handler.cpp
+	method_handler.cpp
+	remote_call.cpp
 	web_interface.cpp
 	worldserver.cpp
 )
 
 SET(web_interface_headers
-	call_handler.h
+	method_handler.h
+	remote_call.h
 	worldserver.h
 )
 
