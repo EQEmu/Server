@@ -3087,9 +3087,19 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y) {
 	for (i = slot_x; i <= slot_y; i++) {
 		if (i == MainAmmo) // moved here from calling procedure to facilitate future range changes where MainAmmo may not be the last slot
 			continue;
+
 		ItemInst* inst = m_inv.GetItem(i);
+
 		if(inst == nullptr)
 			continue;
+
+		// TEST CODE: test for bazaar trader crashing with charm items
+		if (Trader)
+			if (i >= EmuConstants::GENERAL_BAGS_BEGIN && i <= EmuConstants::GENERAL_BAGS_END) {
+				ItemInst* parent_item = m_inv.GetItem(Inventory::CalcSlotId(i));
+				if (parent_item && parent_item->GetItem()->ID == 17899) // trader satchel
+					continue;
+			}
 
 		bool update_slot = false;
 		if(inst->IsScaling())
@@ -3170,9 +3180,19 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 	for(int i = slot_x; i <= slot_y; i++) {
 		if (i == MainAmmo) // moved here from calling procedure to facilitate future range changes where MainAmmo may not be the last slot
 			continue;
+
 		ItemInst* inst = m_inv.GetItem(i);
+
 		if(!inst)
 			continue;
+
+		// TEST CODE: test for bazaar trader crashing with charm items
+		if (Trader)
+			if (i >= EmuConstants::GENERAL_BAGS_BEGIN && i <= EmuConstants::GENERAL_BAGS_END) {
+				ItemInst* parent_item = m_inv.GetItem(Inventory::CalcSlotId(i));
+				if (parent_item && parent_item->GetItem()->ID == 17899) // trader satchel
+					continue;
+			}
 
 		bool update_slot = false;
 		if(inst->IsScaling())
