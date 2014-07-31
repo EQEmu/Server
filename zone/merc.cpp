@@ -5136,13 +5136,13 @@ bool Merc::Spawn(Client *owner) {
 	//printf("Spawned Merc with ID %i\n", npc->GetID()); fflush(stdout);
 
 	/*
-	uint32 itemID = 0;
-	uint8 materialFromSlot = 0xFF;
-	for(int i=0; i<22; ++i) {
+	uint32 itemID = NO_ITEM;
+	uint8 materialFromSlot = _MaterialInvalid;
+	for(int i=EmuConstants::EQUIPMENT_BEGIN; i<=EmuConstants::EQUIPMENT_END; ++i) {
 		itemID = GetMercItemBySlot(i);
-		if(itemID != 0) {
+		if(itemID != NO_ITEM) {
 			materialFromSlot = Inventory::CalcMaterialFromSlot(i);
-			if(materialFromSlot != 0xFF) {
+			if(materialFromSlot != _MaterialInvalid) {
 				this->SendWearChange(materialFromSlot);
 			}
 		}

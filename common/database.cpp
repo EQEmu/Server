@@ -707,7 +707,7 @@ bool Database::DeleteCharacter(char *name)
 
 	return true;
 }
-// Store new character information into the character_ and inventory tables
+// Store new character information into the character_ and inventory tables (this won't store starting augments)
 bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
@@ -793,7 +793,7 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 	// Doodman: Is this even used?
 	// now the inventory
 
-	for (i = EmuConstants::POSSESSIONS_BEGIN; i <= EmuConstants::BANK_BAGS_END;)
+	for (i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::BANK_BAGS_END;)
 	{
 		const ItemInst* newinv = inv->GetItem((int16)i);
 		if (newinv)
@@ -821,7 +821,7 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 			safe_delete_array(invquery);
 		}
 
-		if (i == EmuConstants::CURSOR) {
+		if (i == MainCursor) {
 			i = EmuConstants::GENERAL_BAGS_BEGIN;
 			continue;
 		}

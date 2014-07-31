@@ -364,9 +364,9 @@ Corpse::Corpse(Client* client, int32 in_rezexp)
 		// worn + inventory + cursor
 		std::list<uint32> removed_list;
 		bool cursor = false;
-		for(i = 0; i <= 30; i++)
+		for(i = MAP_BEGIN; i < EmuConstants::MAP_POSSESSIONS_SIZE; i++)
 		{
-			if(i == 21 && client->GetClientVersion() >= EQClientSoF) {
+			if(i == MainAmmo && client->GetClientVersion() >= EQClientSoF) {
 				item = client->GetInv().GetItem(MainPowerSource);
 				if((item && (!client->IsBecomeNPC())) || (item && client->IsBecomeNPC() && !item->GetItem()->NoRent)) {
 					std::list<uint32> slot_list = MoveItemToCorpse(client, item, MainPowerSource);
@@ -449,9 +449,9 @@ std::list<uint32> Corpse::MoveItemToCorpse(Client *client, ItemInst *item, int16
 	returnlist.push_back(equipslot);
 
 	// Qualified bag slot iterations. processing bag slots that don't exist is probably not a good idea.
-	if(item->IsType(ItemClassContainer) && ((equipslot >= 22 && equipslot <=30))) // Limit the bag check to inventory and cursor slots.
+	if(item->IsType(ItemClassContainer) && ((equipslot >= EmuConstants::GENERAL_BEGIN && equipslot <= MainCursor))) // Limit the bag check to inventory and cursor slots.
 	{
-		for(bagindex = 0; bagindex <= 9; bagindex++)
+		for(bagindex = SUB_BEGIN; bagindex <= EmuConstants::ITEM_CONTAINER_SIZE; bagindex++)
 		{
 			// For empty bags in cursor queue, slot was previously being resolved as SLOT_INVALID (-1)
 			interior_slot = Inventory::CalcSlotId(equipslot, bagindex);
@@ -685,7 +685,7 @@ ServerLootItem_Struct* Corpse::GetItem(uint16 lootslot, ServerLootItem_Struct** 
 
 	if (sitem && bag_item_data && Inventory::SupportsContainers(sitem->equipSlot))
 	{
-		int16 bagstart = Inventory::CalcSlotId(sitem->equipSlot, 0);
+		int16 bagstart = Inventory::CalcSlotId(sitem->equipSlot, SUB_BEGIN);
 
 		cur = itemlist.begin();
 		end = itemlist.end();
@@ -750,7 +750,7 @@ void Corpse::RemoveItem(ServerLootItem_Struct* item_data)
 			itemlist.erase(cur);
 
 			material = Inventory::CalcMaterialFromSlot(sitem->equipSlot);
-			if(material != 0xFF)
+			if(material != _MaterialInvalid)
 				SendWearChange(material);
 
 			safe_delete(sitem);
@@ -983,7 +983,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 			const Item_Struct* item = database.GetItem(pkitem);
 			ItemInst* inst = database.CreateItem(item, item->MaxCharges);
 			if(inst) {
-				client->SendItemPacket(22, inst, ItemPacketLoot);
+				client->SendItemPacket(EmuConstants::CORPSE_BEGIN, inst, ItemPacketLoot);
 				safe_delete(inst);
 			}
 			else { client->Message(13, "Could not find item number %i to send!!", GetPKItem()); }
@@ -1016,7 +1016,8 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 					if(client && item) {
 						ItemInst* inst = database.CreateItem(item, item_data->charges, item_data->aug1, item_data->aug2, item_data->aug3, item_data->aug4, item_data->aug5);
 						if(inst) {
-							client->SendItemPacket(i + 22, inst, ItemPacketLoot); // 22 is the corpse inventory start offset for Ti(EMu)
+							// MainGeneral1 is the corpse inventory start offset for Ti(EMu) - CORPSE_END = MainGeneral1 + MainCursor
+							client->SendItemPacket(i + EmuConstants::CORPSE_BEGIN, inst, ItemPacketLoot);
 							safe_delete(inst);
 						}
 
@@ -1110,9 +1111,9 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 	if(GetPKItem()>1)
 		item = database.GetItem(GetPKItem());
 	else if(GetPKItem()==-1 || GetPKItem()==1)
-		item_data = GetItem(lootitem->slot_id - 22); //dont allow them to loot entire bags of items as pvp reward
+		item_data = GetItem(lootitem->slot_id - EmuConstants::CORPSE_BEGIN); //dont allow them to loot entire bags of items as pvp reward
 	else
-		item_data = GetItem(lootitem->slot_id - 22, bag_item_data);
+		item_data = GetItem(lootitem->slot_id - EmuConstants::CORPSE_BEGIN, bag_item_data);
 
 	if (GetPKItem()<=1 && item_data != 0)
 	{
@@ -1141,7 +1142,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 
 		if(inst->IsAugmented())
 		{
-			for (int i = 0; i<EmuConstants::ITEM_COMMON_SIZE; i++)
+			for (int i = AUG_BEGIN; i<EmuConstants::ITEM_COMMON_SIZE; i++)
 			{
 				ItemInst *itm = inst->GetAugment(i);
 				if(itm)
@@ -1238,7 +1239,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 		// remove bag contents too
 		if (item->ItemClass == ItemClassContainer && (GetPKItem()!=-1 || GetPKItem()!=1))
 		{
-			for (int i=0; i < 10; i++)
+			for (int i = SUB_BEGIN; i < EmuConstants::ITEM_CONTAINER_SIZE; i++)
 			{
 				if (bag_item_data[i])
 				{
@@ -1971,14 +1972,14 @@ bool ZoneDatabase::DeletePlayerCorpse(uint32 dbid) {
 uint32 Corpse::GetEquipment(uint8 material_slot) const {
 	int invslot;
 
-	if(material_slot > 8)
+	if(material_slot > EmuConstants::MATERIAL_END)
 	{
-		return 0;
+		return NO_ITEM;
 	}
 
 	invslot = Inventory::CalcSlotFromMaterial(material_slot);
-	if(invslot == -1)
-		return 0;
+	if(invslot == INVALID_INDEX) // GetWornItem() should be returning a NO_ITEM for any invalid index...
+		return NO_ITEM;
 
 	return GetWornItem(invslot);
 }
@@ -1986,13 +1987,13 @@ uint32 Corpse::GetEquipment(uint8 material_slot) const {
 uint32 Corpse::GetEquipmentColor(uint8 material_slot) const {
 	const Item_Struct *item;
 
-	if(material_slot > 8)
+	if(material_slot > EmuConstants::MATERIAL_END)
 	{
 		return 0;
 	}
 
 	item = database.GetItem(GetEquipment(material_slot));
-	if(item != 0)
+	if(item != NO_ITEM)
 	{
 		return item_tint[material_slot].rgb.use_tint ?
 			item_tint[material_slot].color :
@@ -2053,6 +2054,17 @@ void Corpse::LoadPlayerCorpseDecayTime(uint32 dbid){
 	else
 		safe_delete_array(query);
 }
+
+/*
+uint32 Corpse::ServerToCorpseSlot(int16 server_slot) {
+	// reserved
+}
+*/
+/*
+int16 Corpse::CorpseToServerSlot(uint32 corpse_slot) {
+	// reserved
+}
+*/
 
 /*
 void Corpse::CastRezz(uint16 spellid, Mob* Caster){

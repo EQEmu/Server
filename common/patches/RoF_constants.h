@@ -130,9 +130,6 @@ namespace RoF {
 
 		// most of these definitions will go away with the structure-based system..this maintains compatibility for now
 		// (bag slots and main slots beyond Possessions are assigned for compatibility with current server coding)
-		static const int16 POSSESSIONS_BEGIN = slots::MainCharm;
-		static const int16 POSSESSIONS_END = slots::MainCursor;
-
 		static const int16 EQUIPMENT_BEGIN = slots::MainCharm;
 		static const int16 EQUIPMENT_END = slots::MainAmmo;
 		static const uint16 EQUIPMENT_SIZE = slots::_MainEquipmentCount;
@@ -163,7 +160,7 @@ namespace RoF {
 
 		static const int16 TRADE_BEGIN = 3000;
 		static const int16 TRADE_END = 3007;
-		static const int16 TRADE_END_NPC = 3003;
+		static const int16 TRADE_NPC_END = 3003;
 		static const int16 TRADE_BAGS_BEGIN = 3031;
 		static const int16 TRADE_BAGS_END_OFFSET = 79;
 		static const int16 TRADE_BAGS_END = TRADE_BAGS_BEGIN + TRADE_BAGS_END_OFFSET;
