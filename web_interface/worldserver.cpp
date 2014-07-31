@@ -98,13 +98,7 @@ void WorldServer::Process(){
 					writer.Bool(true);
 
 					writer.String("result");
-					writer.StartArray();
-					if(params.size() > 0) {
-						writer.String(params[0].c_str());
-					} else {
-						writer.String("");
-					}
-					writer.EndArray();
+					writer.String(error);
 				} else {
 					writer.String("error");
 					writer.Null();

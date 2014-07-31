@@ -40,6 +40,21 @@
 		id = document["id"].GetString(); \
 	} \
 
+#define CalculateSize() uint32 sz = (uint32)(id.size() + session->uuid.size() + method.size() + 3 + 16); \
+	if(document.HasMember("params")) { \
+		auto &params = document["params"]; \
+		uint32 p_sz = (uint32)params.Size(); \
+		for(uint32 i = 0; i < p_sz; ++i) { \
+			auto &param = params[i]; \
+			if(param.IsNull()) { \
+				sz += 5; \
+			} \
+			else { \
+				sz += (uint32)strlen(param.GetString()); \
+				sz += 5; \
+			} \
+		} \
+	} \
 
 void register_methods();
 void handle_method_token_auth(per_session_data_eqemu *session, rapidjson::Document &document, std::string &method);

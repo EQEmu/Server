@@ -27,12 +27,9 @@ void register_methods()
 
 void handle_method_token_auth(per_session_data_eqemu *session, rapidjson::Document &document, std::string &method)
 {
-	if (!document.HasMember("token")) {
-		WriteWebCallResponseString(session, document, "Auth token missing", true);
-		return;
-	}
-
-	session->auth = document["token"].GetString();
+	CheckParams(1, "[token]");
+	
+	session->auth = document["params"][(rapidjson::SizeType)0].GetString();
 	if (!CheckTokenAuthorization(session)) {
 		WriteWebCallResponseBoolean(session, document, "false", false);
 	} else {
@@ -44,7 +41,8 @@ void handle_method_no_args(per_session_data_eqemu *session, rapidjson::Document 
 {
 	CheckParams(0, "[]");
 	VerifyID();
-	uint32 sz = (uint32)(id.size() + session->uuid.size() + method.size() + 3 + 16);
+	CalculateSize();
+
 	ServerPacket *pack = new ServerPacket(ServerOP_WIRemoteCall, sz);
 	pack->WriteUInt32((uint32)id.size());
 	pack->WriteString(id.c_str());
@@ -61,16 +59,7 @@ void handle_method_get_zone_info(per_session_data_eqemu *session, rapidjson::Doc
 {
 	CheckParams(1, "[zoneserver_id]");
 	VerifyID();
-	uint32 sz = (uint32)(id.size() + session->uuid.size() + method.size() + 3 + 16);
-	auto &params = document["params"];
-	auto &param = params[(rapidjson::SizeType)0];
-	if(param.IsNull()) {
-		sz += 5;
-	}
-	else {
-		sz += (uint32)strlen(param.GetString());
-		sz += 5;
-	}
+	CalculateSize();
 
 	ServerPacket *pack = new ServerPacket(ServerOP_WIRemoteCall, sz);
 	pack->WriteUInt32((uint32)id.size());
@@ -80,6 +69,9 @@ void handle_method_get_zone_info(per_session_data_eqemu *session, rapidjson::Doc
 	pack->WriteUInt32((uint32)method.size());
 	pack->WriteString(method.c_str());
 	pack->WriteUInt32(1);
+
+	auto &params = document["params"];
+	auto &param = params[(rapidjson::SizeType)0];
 	pack->WriteUInt32((uint32)strlen(param.GetString()));
 	pack->WriteString(param.GetString());
 	worldserver->SendPacket(pack);
@@ -87,17 +79,31 @@ void handle_method_get_zone_info(per_session_data_eqemu *session, rapidjson::Doc
 }
 
 void handle_method_subscribe(per_session_data_eqemu *session, rapidjson::Document &document, std::string &method) {
-	CheckParams(3, "[event, zone_id, instance_id]");
+	CheckParams(3, "[zone_id, instance_id, event_name]");
 	VerifyID();
-	uint32 sz = (uint32)(id.size() + session->uuid.size() + method.size() + 3 + 16);
+	CalculateSize();
+
+	ServerPacket *pack = new ServerPacket(ServerOP_WIRemoteCall, sz);
+	pack->WriteUInt32((uint32)id.size());
+	pack->WriteString(id.c_str());
+	pack->WriteUInt32((uint32)session->uuid.size());
+	pack->WriteString(session->uuid.c_str());
+	pack->WriteUInt32((uint32)method.size());
+	pack->WriteString(method.c_str());
+	pack->WriteUInt32(3);
+
 	auto &params = document["params"];
-	for(int i = 0; i < 3; ++i) {
-		auto &param = params[i];
-		if(param.IsNull()) {
-			sz += 5;
-		} else {
-			sz += (uint32)strlen(param.GetString());
-			sz += 5;
-		}
-	}
+	auto &param = params[(rapidjson::SizeType)0];
+	pack->WriteUInt32((uint32)strlen(param.GetString()));
+	pack->WriteString(param.GetString());
+
+	param = params[1];
+	pack->WriteUInt32((uint32)strlen(param.GetString()));
+	pack->WriteString(param.GetString());
+
+	param = params[2];
+	pack->WriteUInt32((uint32)strlen(param.GetString()));
+	pack->WriteString(param.GetString());
+	worldserver->SendPacket(pack);
+	safe_delete(pack);
 }

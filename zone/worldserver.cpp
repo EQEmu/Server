@@ -1812,6 +1812,10 @@ void WorldServer::Process() {
 			}
 			break;
 		}
+		case ServerOP_WIRemoteCall:
+			printf("Recv remote call from WI but atm doing anything with it is not yet implemented (BUT SOON)\n");
+			DumpPacket(pack);
+			break;
 		default: {
 			std::cout << " Unknown ZSopcode:" << (int)pack->opcode;
 			std::cout << " size:" << pack->size << std::endl;
