@@ -1461,8 +1461,8 @@ luabind::scope lua_register_slot() {
 			luabind::value("PersonalEnd", static_cast<int>(EmuConstants::GENERAL_END)), // deprecated
 			luabind::value("GeneralEnd", static_cast<int>(EmuConstants::GENERAL_END)),
 			luabind::value("CursorEnd", 0xFFFE), // deprecated
-			luabind::value("Tradeskill", static_cast<int>(SLOT_TRADESKILL)), // deprecated
-			luabind::value("Augment", static_cast<int>(SLOT_AUGMENT)), // deprecated
+			luabind::value("Tradeskill", static_cast<int>(legacy::SLOT_TRADESKILL)), // deprecated
+			luabind::value("Augment", static_cast<int>(legacy::SLOT_AUGMENT)), // deprecated
 			luabind::value("Invalid", INVALID_INDEX)
 		];
 }

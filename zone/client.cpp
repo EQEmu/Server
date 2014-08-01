@@ -5333,7 +5333,7 @@ bool Client::TryReward(uint32 claim_id)
 	//save
 	uint32 free_slot = 0xFFFFFFFF;
 
-	for(int i = 22; i < 30; ++i)
+	for(int i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_END; ++i)
 	{
 		ItemInst *item = GetInv().GetItem(i);
 		if(!item)
@@ -7836,7 +7836,7 @@ void Client::TickItemCheck()
 		TryItemTick(i);
 	}
 	//Scan main inventory + cursor
-	for(i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::CURSOR; i++)
+	for(i = EmuConstants::GENERAL_BEGIN; i <= MainCursor; i++)
 	{
 		TryItemTick(i);
 	}
@@ -7857,7 +7857,7 @@ void Client::TryItemTick(int slot)
 
 	if(zone->tick_items.count(iid) > 0)
 	{
-		if( GetLevel() >= zone->tick_items[iid].level && MakeRandomInt(0, 100) >= (100 - zone->tick_items[iid].chance) && (zone->tick_items[iid].bagslot || slot < 22) )
+		if( GetLevel() >= zone->tick_items[iid].level && MakeRandomInt(0, 100) >= (100 - zone->tick_items[iid].chance) && (zone->tick_items[iid].bagslot || slot <= EmuConstants::EQUIPMENT_END) )
 		{
 			ItemInst* e_inst = (ItemInst*)inst;
 			parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
@@ -7893,7 +7893,7 @@ void Client::ItemTimerCheck()
 		TryItemTimer(i);
 	}
 
-	for(i = EmuConstants::GENERAL_BAGS_BEGIN; i <= EmuConstants::CURSOR; i++)
+	for(i = EmuConstants::GENERAL_BAGS_BEGIN; i <= MainCursor; i++)
 	{
 		TryItemTimer(i);
 	}

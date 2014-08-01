@@ -4520,7 +4520,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			}
 			return;
 		}
-		else if ((castspell->inventoryslot < 30) || (castspell->slot == POTION_BELT_SPELL_SLOT))	// sanity check
+		else if ((castspell->inventoryslot <= EmuConstants::GENERAL_END) || (castspell->slot == POTION_BELT_SPELL_SLOT))	// sanity check
 		{
 			const ItemInst* inst = m_inv[castspell->inventoryslot]; //slot values are int16, need to check packet on this field
 			//bool cancast = true;
@@ -4585,7 +4585,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 		}
 		else
 		{
-			Message(0, "Error: castspell->inventoryslot >= 30 (0x%04x)", castspell->inventoryslot);
+			Message(0, "Error: castspell->inventoryslot >= %i (0x%04x)", MainCursor, castspell->inventoryslot);
 			InterruptSpell(castspell->spell_id);
 		}
 	}
@@ -4886,7 +4886,7 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 					uint16 trade_count = 0;
 
 					// Item trade count for packet sizing
-					for(int16 slot_id=3000; slot_id<=3007; slot_id++) {
+					for(int16 slot_id = EmuConstants::TRADE_BEGIN; slot_id <= EmuConstants::TRADE_END; slot_id++) {
 						if(other->GetInv().GetItem(slot_id)) { trade_count += other->GetInv().GetItem(slot_id)->GetTotalItemCount(); }
 						if(m_inv[slot_id]) { trade_count += m_inv[slot_id]->GetTotalItemCount(); }
 					}
@@ -4926,7 +4926,7 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 			if(RuleB(QueryServ, PlayerLogHandins)) {
 				uint16 handin_count = 0;
 
-				for(int16 slot_id=3000; slot_id<=3003; slot_id++) {
+				for(int16 slot_id = EmuConstants::TRADE_BEGIN; slot_id <= EmuConstants::TRADE_NPC_END; slot_id++) {
 					if(m_inv[slot_id]) { handin_count += m_inv[slot_id]->GetTotalItemCount(); }
 				}
 
@@ -6781,7 +6781,7 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app) {
 	Mob* tmp						= entity_list.GetMob(insr->TargetID);
 	const Item_Struct* item			= nullptr;
 
-	for (int16 L = 0; L <= 20; L++) {
+	for (int16 L = EmuConstants::EQUIPMENT_BEGIN; L <= MainWaist; L++) {
 		const ItemInst* inst = GetInv().GetItem(L);
 		item = inst ? inst->GetItem() : nullptr;
 

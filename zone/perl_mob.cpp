@@ -872,7 +872,7 @@ XS(XS_Mob_Attack)
 			Perl_croak(aTHX_ "other is nullptr, avoiding crash.");
 
 		if (items < 3)
-			Hand = MainPrimary;
+			Hand = 13;
 		else {
 			Hand = (int)SvIV(ST(2));
 		}

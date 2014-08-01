@@ -912,7 +912,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 
 	//gear stuff, need to make sure there's
 	//no situation where this stuff can be duped
-	for(int x = 0; x < 21; x++)
+	for(int x = EmuConstants::EQUIPMENT_BEGIN; x <= EmuConstants::EQUIPMENT_END; x++) // (< 21) added MainAmmo
 	{
 		uint32 sitem = 0;
 		sitem = CorpseToUse->GetWornItem(x);
@@ -1318,6 +1318,8 @@ void Client::SendAA(uint32 id, int seq) {
 			//Prevent removal of previous AA from window if next AA belongs to a higher client version.
 			SendAA_Struct* saa_next = nullptr;
 			saa_next = zone->FindAA(saa->sof_next_id);
+
+			// hard-coding values like this is dangerous and makes adding/updating clients a nightmare...
 			if (saa_next &&
 				(((GetClientVersionBit() == 4) && (saa_next->clientver > 4))
 				|| ((GetClientVersionBit() == 8) && (saa_next->clientver > 5))
@@ -1895,7 +1897,7 @@ SendAA_Struct* ZoneDatabase::GetAASkillVars(uint32 skill_id)
 
 				row = mysql_fetch_row(result);
 
-				//ATOI IS NOT UNISGNED LONG-SAFE!!!
+				//ATOI IS NOT UNSIGNED LONG-SAFE!!!
 
 				sendaa->cost = atoul(row[0]);
 				sendaa->cost2 = sendaa->cost;

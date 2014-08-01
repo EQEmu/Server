@@ -108,69 +108,70 @@ const EQClientVersion Strategy::ClientVersion() const
 #include "SSDefine.h"
 
 
-// Converts Titanium Slot IDs to SoD Slot IDs for use in Encodes
-static inline uint32 TitaniumToSoDSlot(uint32 TitaniumSlot) {
+// Converts Server Slot IDs to SoD Slot IDs for use in Encodes
+static inline uint32 ServerToSoDSlot(uint32 ServerSlot) {
 	uint32 SoDSlot = 0;
 
-	if(TitaniumSlot >= 21 && TitaniumSlot <= 53)	// Cursor/Ammo/Power Source and Normal Inventory Slots
-	{
-		SoDSlot = TitaniumSlot + 1;
-	}
-	else if(TitaniumSlot >= 251 && TitaniumSlot <= 340)		// Bag Slots for Normal Inventory and Cursor
-	{
-		SoDSlot = TitaniumSlot + 11;
-	}
-	else if(TitaniumSlot >= 2031 && TitaniumSlot <= 2270)	// Bank Bag Slots
-	{
-		SoDSlot = TitaniumSlot + 1;
-	}
-	else if(TitaniumSlot >= 2531 && TitaniumSlot <= 2550)	// Shared Bank Bag Slots
-	{
-		SoDSlot = TitaniumSlot + 1;
-	}
-	else if(TitaniumSlot == 9999)	//Unused slot ID to give a place to save Power Slot
-	{
-		SoDSlot = 21;
-	}
+	if (ServerSlot >= MainAmmo && ServerSlot <= 53) // Cursor/Ammo/Power Source and Normal Inventory Slots
+		SoDSlot = ServerSlot + 1;
+	
+	else if (ServerSlot >= EmuConstants::GENERAL_BAGS_BEGIN && ServerSlot <= EmuConstants::CURSOR_BAG_END)
+		SoDSlot = ServerSlot + 11;
+	
+	else if (ServerSlot >= EmuConstants::BANK_BAGS_BEGIN && ServerSlot <= EmuConstants::BANK_BAGS_END)
+		SoDSlot = ServerSlot + 1;
+	
+	else if (ServerSlot >= EmuConstants::SHARED_BANK_BAGS_BEGIN && ServerSlot <= EmuConstants::SHARED_BANK_BAGS_END)
+		SoDSlot = ServerSlot + 1;
+	
+	else if (ServerSlot == MainPowerSource)
+		SoDSlot = slots::MainPowerSource;
+	
 	else
-	{
-		SoDSlot = TitaniumSlot;
-	}
+		SoDSlot = ServerSlot;
 
 	return SoDSlot;
 }
 
-// Converts SoD Slot IDs to Titanium Slot IDs for use in Decodes
-static inline uint32 SoDToTitaniumSlot(uint32 SoDSlot) {
-	uint32 TitaniumSlot = 0;
+// Converts SoD Slot IDs to Server Slot IDs for use in Decodes
+static inline uint32 SoDToServerSlot(uint32 SoDSlot) {
+	uint32 ServerSlot = 0;
 
-	if(SoDSlot >= 22 && SoDSlot <= 54)	// Cursor/Ammo/Power Source and Normal Inventory Slots
-	{
-		TitaniumSlot = SoDSlot - 1;
-	}
-	else if(SoDSlot >= 262 && SoDSlot <= 351)	// Bag Slots for Normal Inventory and Cursor
-	{
-		TitaniumSlot = SoDSlot - 11;
-	}
-	else if(SoDSlot >= 2032 && SoDSlot <= 2271)	// Bank Bag Slots
-	{
-		TitaniumSlot = SoDSlot - 1;
-	}
-	else if(SoDSlot >= 2532 && SoDSlot <= 2551)	// Shared Bank Bag Slots
-	{
-		TitaniumSlot = SoDSlot - 1;
-	}
-	else if(SoDSlot == 21)
-	{
-		TitaniumSlot = 9999;	//Unused slot ID to give a place to save Power Slot
-	}
+	if(SoDSlot >= slots::MainAmmo && SoDSlot <= consts::CORPSE_END) // Cursor/Ammo/Power Source and Normal Inventory Slots
+		ServerSlot = SoDSlot - 1;
+	
+	else if(SoDSlot >= consts::GENERAL_BAGS_BEGIN && SoDSlot <= consts::CURSOR_BAG_END)
+		ServerSlot = SoDSlot - 11;
+	
+	else if(SoDSlot >= consts::BANK_BAGS_BEGIN && SoDSlot <= consts::BANK_BAGS_END)
+		ServerSlot = SoDSlot - 1;
+	
+	else if(SoDSlot >= consts::SHARED_BANK_BAGS_BEGIN && SoDSlot <= consts::SHARED_BANK_BAGS_END)
+		ServerSlot = SoDSlot - 1;
+	
+	else if(SoDSlot == slots::MainPowerSource)
+		ServerSlot = MainPowerSource;
+	
 	else
-	{
-		TitaniumSlot = SoDSlot;
-	}
+		ServerSlot = SoDSlot;
 
-	return TitaniumSlot;
+	return ServerSlot;
 }
+
+/*
+// Converts Server Corpse Slot IDs to SoD Corpse Slot IDs for use in Encodes
+static inline uint32 ServerToSoDCorpseSlot(uint32 ServerCorpse) {
+	uint32 SoDCorpse;
+	// reserved
+}
+*/
+/*
+// Converts SoD Corpse Slot IDs to Server Corpse Slot IDs for use in Decodes
+static inline uint32 SoDToServerCorpseSlot(uint32 SoDCorpse) {
+	uint32 ServerCorpse;
+	// reserved
+}
+*/
 
 
 ENCODE(OP_OpenNewTasksWindow) {
@@ -1838,7 +1839,7 @@ ENCODE(OP_ShopPlayerSell) {
 	ENCODE_LENGTH_EXACT(Merchant_Purchase_Struct);
 	SETUP_DIRECT_ENCODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Struct);
 	OUT(npcid);
-	eq->itemslot = TitaniumToSoDSlot(emu->itemslot);
+	eq->itemslot = ServerToSoDSlot(emu->itemslot);
 	OUT(quantity);
 	OUT(price);
 	FINISH_ENCODE();
@@ -1847,7 +1848,7 @@ ENCODE(OP_ShopPlayerSell) {
 ENCODE(OP_ApplyPoison) {
 	ENCODE_LENGTH_EXACT(ApplyPoison_Struct);
 	SETUP_DIRECT_ENCODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
-	eq->inventorySlot = TitaniumToSoDSlot(emu->inventorySlot);
+	eq->inventorySlot = ServerToSoDSlot(emu->inventorySlot);
 	OUT(success);
 	FINISH_ENCODE();
 }
@@ -1856,8 +1857,8 @@ ENCODE(OP_DeleteItem) {
 	ENCODE_LENGTH_EXACT(DeleteItem_Struct);
 	SETUP_DIRECT_ENCODE(DeleteItem_Struct, structs::DeleteItem_Struct);
 
-	eq->from_slot = TitaniumToSoDSlot(emu->from_slot);
-	eq->to_slot = TitaniumToSoDSlot(emu->to_slot);
+	eq->from_slot = ServerToSoDSlot(emu->from_slot);
+	eq->to_slot = ServerToSoDSlot(emu->to_slot);
 	OUT(number_in_stack);
 
 	FINISH_ENCODE();
@@ -1868,8 +1869,8 @@ ENCODE(OP_MoveItem) {
 	ENCODE_LENGTH_EXACT(MoveItem_Struct);
 	SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-	eq->from_slot = TitaniumToSoDSlot(emu->from_slot);
-	eq->to_slot = TitaniumToSoDSlot(emu->to_slot);
+	eq->from_slot = ServerToSoDSlot(emu->from_slot);
+	eq->to_slot = ServerToSoDSlot(emu->to_slot);
 	OUT(number_in_stack);
 
 	FINISH_ENCODE();
@@ -1879,7 +1880,7 @@ ENCODE(OP_ItemVerifyReply) {
 	ENCODE_LENGTH_EXACT(ItemVerifyReply_Struct);
 	SETUP_DIRECT_ENCODE(ItemVerifyReply_Struct, structs::ItemVerifyReply_Struct);
 
-	eq->slot = TitaniumToSoDSlot(emu->slot);
+	eq->slot = ServerToSoDSlot(emu->slot);
 	OUT(spell);
 	OUT(target);
 
@@ -1929,7 +1930,7 @@ ENCODE(OP_TributeItem) {
 	ENCODE_LENGTH_EXACT(TributeItem_Struct);
 	SETUP_DIRECT_ENCODE(TributeItem_Struct, structs::TributeItem_Struct);
 
-	eq->slot = TitaniumToSoDSlot(emu->slot);
+	eq->slot = ServerToSoDSlot(emu->slot);
 	OUT(quantity);
 	OUT(tribute_master_id);
 	OUT(tribute_points);
@@ -1976,7 +1977,7 @@ ENCODE(OP_ReadBook) {
 	else
 		eq->window = emu->window;
 	OUT(type);
-	eq->invslot = TitaniumToSoDSlot(emu->invslot);
+	eq->invslot = ServerToSoDSlot(emu->invslot);
 	strn0cpy(eq->txtfile, emu->booktext, sizeof(eq->txtfile));
 	FINISH_ENCODE();
 }
@@ -2037,7 +2038,7 @@ ENCODE(OP_AdventureMerchantSell) {
 
 	eq->unknown000 = 1;
 	OUT(npcid);
-	eq->slot = TitaniumToSoDSlot(emu->slot);
+	eq->slot = ServerToSoDSlot(emu->slot);
 	OUT(charges);
 	OUT(sell_price);
 
@@ -2568,7 +2569,7 @@ ENCODE(OP_AltCurrencySell)
 	SETUP_DIRECT_ENCODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
 
     OUT(merchant_entity_id);
-    eq->slot_id = TitaniumToSoDSlot(emu->slot_id);
+	eq->slot_id = ServerToSoDSlot(emu->slot_id);
     OUT(charges);
     OUT(cost);
     FINISH_ENCODE();
@@ -2622,7 +2623,7 @@ DECODE(OP_AdventureMerchantSell) {
 	SETUP_DIRECT_DECODE(Adventure_Sell_Struct, structs::Adventure_Sell_Struct);
 
 	IN(npcid);
-	emu->slot = SoDToTitaniumSlot(eq->slot);
+	emu->slot = SoDToServerSlot(eq->slot);
 	IN(charges);
 	IN(sell_price);
 
@@ -2634,7 +2635,7 @@ DECODE(OP_ApplyPoison) {
 	DECODE_LENGTH_EXACT(structs::ApplyPoison_Struct);
 	SETUP_DIRECT_DECODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
 
-	emu->inventorySlot = SoDToTitaniumSlot(eq->inventorySlot);
+	emu->inventorySlot = SoDToServerSlot(eq->inventorySlot);
 	IN(success);
 
 	FINISH_DIRECT_DECODE();
@@ -2644,7 +2645,7 @@ DECODE(OP_ItemVerifyRequest) {
 	DECODE_LENGTH_EXACT(structs::ItemVerifyRequest_Struct);
 	SETUP_DIRECT_DECODE(ItemVerifyRequest_Struct, structs::ItemVerifyRequest_Struct);
 
-	emu->slot = SoDToTitaniumSlot(eq->slot);
+	emu->slot = SoDToServerSlot(eq->slot);
 	IN(target);
 
 	FINISH_DIRECT_DECODE();
@@ -2654,7 +2655,7 @@ DECODE(OP_Consume) {
 	DECODE_LENGTH_EXACT(structs::Consume_Struct);
 	SETUP_DIRECT_DECODE(Consume_Struct, structs::Consume_Struct);
 
-	emu->slot = SoDToTitaniumSlot(eq->slot);
+	emu->slot = SoDToServerSlot(eq->slot);
 	IN(auto_consumed);
 	IN(type);
 
@@ -2667,7 +2668,7 @@ DECODE(OP_CastSpell) {
 
 	IN(slot);
 	IN(spell_id);
-	emu->inventoryslot = SoDToTitaniumSlot(eq->inventoryslot);
+	emu->inventoryslot = SoDToServerSlot(eq->inventoryslot);
 	IN(target_id);
 
 	FINISH_DIRECT_DECODE();
@@ -2678,8 +2679,8 @@ DECODE(OP_DeleteItem)
 	DECODE_LENGTH_EXACT(structs::DeleteItem_Struct);
 	SETUP_DIRECT_DECODE(DeleteItem_Struct, structs::DeleteItem_Struct);
 
-	emu->from_slot = SoDToTitaniumSlot(eq->from_slot);
-	emu->to_slot = SoDToTitaniumSlot(eq->to_slot);
+	emu->from_slot = SoDToServerSlot(eq->from_slot);
+	emu->to_slot = SoDToServerSlot(eq->to_slot);
 	IN(number_in_stack);
 
 	FINISH_DIRECT_DECODE();
@@ -2692,8 +2693,8 @@ DECODE(OP_MoveItem)
 
 	_log(NET__ERROR, "Moved item from %u to %u", eq->from_slot, eq->to_slot);
 
-	emu->from_slot = SoDToTitaniumSlot(eq->from_slot);
-	emu->to_slot = SoDToTitaniumSlot(eq->to_slot);
+	emu->from_slot = SoDToServerSlot(eq->from_slot);
+	emu->to_slot = SoDToServerSlot(eq->to_slot);
 	IN(number_in_stack);
 
 	FINISH_DIRECT_DECODE();
@@ -2900,7 +2901,7 @@ DECODE(OP_ShopPlayerSell) {
 	SETUP_DIRECT_DECODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Struct);
 
 	IN(npcid);
-	emu->itemslot = SoDToTitaniumSlot(eq->itemslot);
+	emu->itemslot = SoDToServerSlot(eq->itemslot);
 	IN(quantity);
 	IN(price);
 
@@ -2969,7 +2970,7 @@ DECODE(OP_TributeItem) {
 	DECODE_LENGTH_EXACT(structs::TributeItem_Struct);
 	SETUP_DIRECT_DECODE(TributeItem_Struct, structs::TributeItem_Struct);
 
-	emu->slot = SoDToTitaniumSlot(eq->slot);
+	emu->slot = SoDToServerSlot(eq->slot);
 	IN(quantity);
 	IN(tribute_master_id);
 	IN(tribute_points);
@@ -2982,7 +2983,7 @@ DECODE(OP_ReadBook) {
 	SETUP_DIRECT_DECODE(BookRequest_Struct, structs::BookRequest_Struct);
 
 	IN(type);
-	emu->invslot = SoDToTitaniumSlot(eq->invslot);
+	emu->invslot = SoDToServerSlot(eq->invslot);
 	emu->window = (uint8) eq->window;
 	strn0cpy(emu->txtfile, eq->txtfile, sizeof(emu->txtfile));
 
@@ -2993,7 +2994,7 @@ DECODE(OP_TradeSkillCombine) {
 	DECODE_LENGTH_EXACT(structs::NewCombine_Struct);
 	SETUP_DIRECT_DECODE(NewCombine_Struct, structs::NewCombine_Struct);
 
-	emu->container_slot = SoDToTitaniumSlot(eq->container_slot);
+	emu->container_slot = SoDToServerSlot(eq->container_slot);
 
 	FINISH_DIRECT_DECODE();
 }
@@ -3002,7 +3003,7 @@ DECODE(OP_AugmentItem) {
 	DECODE_LENGTH_EXACT(structs::AugmentItem_Struct);
 	SETUP_DIRECT_DECODE(AugmentItem_Struct, structs::AugmentItem_Struct);
 
-	emu->container_slot = SoDToTitaniumSlot(eq->container_slot);
+	emu->container_slot = SoDToServerSlot(eq->container_slot);
 	emu->augment_slot = eq->augment_slot;
 
 	FINISH_DIRECT_DECODE();
@@ -3077,7 +3078,7 @@ char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint
 	hdr.stacksize = stackable ? charges : 1;
 	hdr.unknown004 = 0;
 
-	int32 slot_id = TitaniumToSoDSlot(slot_id_in);
+	int32 slot_id = ServerToSoDSlot(slot_id_in);
 
 	hdr.slot = (merchant_slot == 0) ? slot_id : merchant_slot;
 	hdr.price = inst->GetPrice();
@@ -3460,11 +3461,11 @@ char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint
 
 	iqbs.subitem_count = 0;
 
-	char *SubSerializations[10];
+	char *SubSerializations[10]; // <watch>
 
 	uint32 SubLengths[10];
 
-	for(int x = 0; x < 10; ++x) {
+	for(int x = SUB_BEGIN; x < EmuConstants::ITEM_CONTAINER_SIZE; ++x) {
 
 		SubSerializations[x] = nullptr;
 
@@ -3476,14 +3477,22 @@ char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint
 
 			iqbs.subitem_count++;
 
-			if(slot_id_in >= 22 && slot_id_in < 30)
-				SubSlotNumber = (((slot_id_in + 3) * 10) + x + 1);
-			else if(slot_id_in >= 2000 && slot_id_in <= 2023)
-				SubSlotNumber = (((slot_id_in - 2000) * 10) + 2030 + x + 1);
-			else if(slot_id_in >= 2500 && slot_id_in <= 2501)
-				SubSlotNumber = (((slot_id_in - 2500) * 10) + 2530 + x + 1);
+			if (slot_id_in >= EmuConstants::GENERAL_BEGIN && slot_id_in <= EmuConstants::GENERAL_END) // (< 30) - no cursor?
+				//SubSlotNumber = (((slot_id_in + 3) * 10) + x + 1);
+				SubSlotNumber = (((slot_id_in + 3) * EmuConstants::ITEM_CONTAINER_SIZE) + x + 1);
+			else if (slot_id_in >= EmuConstants::BANK_BEGIN && slot_id_in <= EmuConstants::BANK_END)
+				//SubSlotNumber = (((slot_id_in - 2000) * 10) + 2030 + x + 1);
+				SubSlotNumber = (((slot_id_in - EmuConstants::BANK_BEGIN) * EmuConstants::ITEM_CONTAINER_SIZE) + EmuConstants::BANK_BAGS_BEGIN + x);
+			else if (slot_id_in >= EmuConstants::SHARED_BANK_BEGIN && slot_id_in <= EmuConstants::SHARED_BANK_END)
+				//SubSlotNumber = (((slot_id_in - 2500) * 10) + 2530 + x + 1);
+				SubSlotNumber = (((slot_id_in - EmuConstants::SHARED_BANK_BEGIN) * EmuConstants::ITEM_CONTAINER_SIZE) + EmuConstants::SHARED_BANK_BAGS_BEGIN + x);
 			else
 				SubSlotNumber = slot_id_in; // ???????
+
+			/*
+			// TEST CODE: <watch>
+			SubSlotNumber = Inventory::CalcSlotID(slot_id_in, x);
+			*/
 
 			SubSerializations[x] = SerializeItem(subitem, SubSlotNumber, &SubLengths[x], depth + 1);
 		}
@@ -3534,7 +3543,7 @@ DECODE(OP_AltCurrencySellSelection)
     DECODE_LENGTH_EXACT(structs::AltCurrencySelectItem_Struct);
 	SETUP_DIRECT_DECODE(AltCurrencySelectItem_Struct, structs::AltCurrencySelectItem_Struct);
     IN(merchant_entity_id);
-    emu->slot_id = SoDToTitaniumSlot(eq->slot_id);
+	emu->slot_id = SoDToServerSlot(eq->slot_id);
     FINISH_DIRECT_DECODE();
 }
 
@@ -3543,7 +3552,7 @@ DECODE(OP_AltCurrencySell)
     DECODE_LENGTH_EXACT(structs::AltCurrencySellItem_Struct);
 	SETUP_DIRECT_DECODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
     IN(merchant_entity_id);
-    emu->slot_id = SoDToTitaniumSlot(eq->slot_id);
+	emu->slot_id = SoDToServerSlot(eq->slot_id);
     IN(charges);
     IN(cost);
     FINISH_DIRECT_DECODE();

@@ -127,9 +127,6 @@ namespace SoF {
 		static const uint16 MAP_KRONO_SIZE = NOT_USED;
 		static const uint16 MAP_OTHER_SIZE = 0;
 
-		static const int16 POSSESSIONS_BEGIN = slots::MainCharm;
-		static const int16 POSSESSIONS_END = slots::MainCursor;
-
 		static const int16 EQUIPMENT_BEGIN = slots::MainCharm;
 		static const int16 EQUIPMENT_END = slots::MainAmmo;
 		static const uint16 EQUIPMENT_SIZE = slots::_MainEquipmentCount;
@@ -160,8 +157,8 @@ namespace SoF {
 
 		static const int16 TRADE_BEGIN = 3000;
 		static const int16 TRADE_END = 3007;
-		static const int16 TRADE_END_NPC = 3003;
-		static const int16 TRADE_BAGS_BEGIN = 3031; // no change from Ti?
+		static const int16 TRADE_NPC_END = 3003;
+		static const int16 TRADE_BAGS_BEGIN = 3031;
 		static const int16 TRADE_BAGS_END_OFFSET = 79;
 		static const int16 TRADE_BAGS_END = TRADE_BAGS_BEGIN + TRADE_BAGS_END_OFFSET;
 

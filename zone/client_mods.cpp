@@ -449,7 +449,8 @@ uint32 Client::GetClassHPFactor() {
 int16 Client::GetRawItemAC() {
 	int16 Total = 0;
 
-	for (int16 slot_id=0; slot_id<21; slot_id++) {
+	// this skips MainAmmo..add an '=' conditional if that slot is required (original behavior)
+	for (int16 slot_id = EmuConstants::EQUIPMENT_BEGIN; slot_id < EmuConstants::EQUIPMENT_END; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if (inst && inst->IsType(ItemClassCommon)) {
 			Total += inst->GetItem()->AC;
@@ -1127,7 +1128,7 @@ uint32 Client::CalcCurrentWeight() {
 	ItemInst* ins;
 	uint32 Total = 0;
 	int x;
-	for(x = EmuConstants::EQUIPMENT_BEGIN; x <= EmuConstants::CURSOR; x++) // include cursor or not?
+	for(x = EmuConstants::EQUIPMENT_BEGIN; x <= MainCursor; x++) // include cursor or not?
 	{
 		TempItem = 0;
 		ins = GetInv().GetItem(x);
@@ -1147,11 +1148,11 @@ uint32 Client::CalcCurrentWeight() {
 			TmpWeight = TempItem->Weight;
 		if (TmpWeight > 0)
 		{
-			// this code indicates that weight redux bags canonly be in the first general inventory slot to be effective...
+			// this code indicates that weight redux bags can only be in the first general inventory slot to be effective...
 			// is this correct? or can we scan for the highest weight redux and use that? (need client verifications)
 			int bagslot = MainGeneral1;
 			int reduction = 0;
-			for (int m = MainGeneral2; m <= EmuConstants::GENERAL_BAGS_END; m += 10) // include cursor bags or not?
+			for (int m = EmuConstants::GENERAL_BAGS_BEGIN + 10; m <= EmuConstants::GENERAL_BAGS_END; m += 10) // include cursor bags or not?
 			{
 				if (x >= m)
 					bagslot += 1;
@@ -1977,7 +1978,7 @@ int Client::GetRawACNoShield(int &shield_ac) const
 		{
 			ac -= inst->GetItem()->AC;
 			shield_ac = inst->GetItem()->AC;
-			for (uint8 i = 0; i < EmuConstants::ITEM_COMMON_SIZE; i++)
+			for (uint8 i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++)
 			{
 				if(inst->GetAugment(i))
 				{

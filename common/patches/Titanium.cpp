@@ -104,6 +104,53 @@ const EQClientVersion Strategy::ClientVersion() const
 
 #include "SSDefine.h"
 
+
+/*
+// Converts Server Slot IDs to Titanium Slot IDs for use in Encodes
+static inline uint32 ServerToTitaniumSlot(uint32 ServerSlot) {
+	uint32 TitaniumSlot;
+	// reserved
+}
+*/
+/*
+// Converts Titanium Slot IDs to Server Slot IDs for use in Decodes
+static inline uint32 TitaniumToServerSlot(uint32 TitaniumSlot) {
+	uint32 ServerSlot;
+	// reserved
+}
+*/
+/*
+// Converts Server Corpse Slot IDs to Titanium Corpse Slot IDs for use in Encodes
+static inline uint32 ServerToTitaniumCorpseSlot(uint32 ServerCorpse) {
+	uint32 TitaniumCorpse;
+	// reserved
+}
+*/
+/*
+// Converts Titanium Corpse Slot IDs to Server Corpse Slot IDs for use in Decodes
+static inline uint32 TitaniumToServerCorpseSlot(uint32 TitaniumCorpse) {
+	uint32 ServerCorpse;
+	// reserved
+}
+*/
+/*
+static inline uint32 RemovePowerSourceBit(uint32 slots) { // shouldn't need to add one..just grab the actual server reference, if so...
+	static const uint32 BIT21 = 1 << 21;
+	static const uint32 BIT22 = 1 << 22;
+	static const uint32 KEEPBITS = ~(BIT21 | BIT22);
+
+	bool wearammo = slots & BIT22;
+
+	slots &= KEEPBITS;
+
+	if (wearammo)
+		slots |= BIT21;
+
+	return slots;
+}
+*/
+
+
 EAT_ENCODE(OP_ZoneServerReady)
 EAT_ENCODE(OP_GuildMemberLevelUpdate)
 

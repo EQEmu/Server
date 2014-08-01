@@ -518,7 +518,7 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
 			uint8 index = (uint8)atoi(row[0]);
 			uint32 item_id = (uint32)atoi(row[1]);
 			int8 charges = (int8)atoi(row[2]);
-			uint32 aug[5];
+			uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
 			aug[0]	= (uint32)atoi(row[3]);
 			aug[1]	= (uint32)atoi(row[4]);
 			aug[2]	= (uint32)atoi(row[5]);
@@ -528,7 +528,7 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
 			ItemInst* inst = database.CreateItem(item_id, charges);
 			if (inst) {
 				if (inst->GetItem()->ItemClass == ItemClassCommon) {
-					for(int i=0;i<5;i++) {
+					for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
 						if (aug[i]) {
 								inst->PutAugment(&database, i, aug[i]);
 						}
@@ -564,13 +564,13 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const It
 	//Delete all items from container
 	DeleteWorldContainer(parent_id,zone_id);
 	// Save all 10 items, if they exist
-	for (uint8 index=0; index<10; index++) {
+	for (uint8 index = SUB_BEGIN; index < EmuConstants::ITEM_CONTAINER_SIZE; index++) {
 		ItemInst* inst = container->GetItem(index);
 		if (inst) {
 			uint32 item_id = inst->GetItem()->ID;
-			uint32 augslot[5] = { 0, 0, 0, 0, 0 };
+			uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
 			if (inst->IsType(ItemClassCommon)) {
-				for(int i=0;i<5;i++) {
+				for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
 					ItemInst *auginst=inst->GetAugment(i);
 					augslot[i]=(auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
 				}
@@ -978,7 +978,7 @@ bool ZoneDatabase::GetCharacterInfoForLogin_result(MYSQL_RES* result,
 		}
 
 		// Fix use_tint, previously it was set to 1 for a dyed slot, client wants it set to 0xFF
-		for(int i = 0; i<9; i++)
+		for(int i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_END; i++)
 			if(pp->item_tint[i].rgb.use_tint == 1)
 				pp->item_tint[i].rgb.use_tint = 0xFF;
 
@@ -1238,7 +1238,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 						{
 							if ((at_row = mysql_fetch_row(at_result)))
 							{
-								for (i = 0; i < _MaterialCount; i++)
+								for (i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_END; i++)
 								{
 									tmpNPCType->armor_tint[i] = atoi(at_row[i * 3]) << 16;
 									tmpNPCType->armor_tint[i] |= atoi(at_row[i * 3 + 1]) << 8;
@@ -1271,7 +1271,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 
 				if (armor_tint_id == 0)
 				{
-					for (i = 1; i < _MaterialCount; i++)
+					for (i = MaterialChest; i <= EmuConstants::MATERIAL_END; i++)
 					{
 						tmpNPCType->armor_tint[i] = tmpNPCType->armor_tint[0];
 					}
@@ -1551,7 +1551,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 						{
 							if ((at_row = mysql_fetch_row(at_result)))
 							{
-								for (i = 0; i < _MaterialCount; i++)
+								for (i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_END; i++)
 								{
 									tmpNPCType->armor_tint[i] = atoi(at_row[i * 3]) << 16;
 									tmpNPCType->armor_tint[i] |= atoi(at_row[i * 3 + 1]) << 8;
@@ -1584,7 +1584,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 
 				if (armor_tint_id == 0)
 				{
-					for (i = 1; i < _MaterialCount; i++)
+					for (i = MaterialChest; i <= EmuConstants::MATERIAL_END; i++)
 					{
 						tmpNPCType->armor_tint[i] = tmpNPCType->armor_tint[0];
 					}
@@ -2774,7 +2774,7 @@ void ZoneDatabase::SavePetInfo(Client *c) {
 		}
 	}
 
-	for (i = 0; i<EmuConstants::EQUIPMENT_SIZE; i++) {
+	for (i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; i++) {
 		if(petinfo->Items[i]) {
 			database.RunQuery(query, MakeAnyLenString(&query,
 				"INSERT INTO `character_pet_inventory` (`char_id`, `pet`, `slot`, `item_id`) values (%u, 0, %u, %u)",
@@ -2798,7 +2798,7 @@ void ZoneDatabase::SavePetInfo(Client *c) {
 	}
 	safe_delete_array(query);
 
-	for (i = 0; i<EmuConstants::EQUIPMENT_SIZE; i++) {
+	for (i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; i++) {
 		if(suspended->Items[i]) {
 			database.RunQuery(query, MakeAnyLenString(&query,
 				"INSERT INTO `character_pet_inventory` (`char_id`, `pet`, `slot`, `item_id`) values (%u, 1, %u, %u)",
@@ -2931,7 +2931,7 @@ void ZoneDatabase::LoadPetInfo(Client *c) {
 				continue;
 			
 			int slot = atoi(row[1]);
-			if (slot < 0 || slot > EmuConstants::EQUIPMENT_SIZE) // if (slot == 22) { zone.TriggerRandomCrash(); }
+			if (slot < EmuConstants::EQUIPMENT_BEGIN || slot > EmuConstants::EQUIPMENT_END)
 				continue;
 
 			pi->Items[slot] = atoul(row[2]);

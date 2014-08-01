@@ -475,7 +475,7 @@ void Bot::GenerateBaseStats() {
 	int16 CorruptionResist = _baseCorrup;
 
 	switch(this->GetClass()) {
-			case 1: // Warrior
+			case 1: // Warrior (why not just use 'case WARRIOR:'?)
 				Strength += 10;
 				Stamina += 20;
 				Agility += 10;
@@ -3427,7 +3427,7 @@ void Bot::ApplySpecialAttackMod(SkillUseTypes skill, int32 &dmg, int32 &mindmg) 
 		break;
 	}
 
-	if (item_slot >= 0){
+	if (item_slot >= EmuConstants::EQUIPMENT_BEGIN){
 		const ItemInst* inst = GetBotItem(item_slot);
 		const Item_Struct* botweapon = 0;
 		if(inst)
@@ -4332,7 +4332,7 @@ void Bot::Spawn(Client* botCharacterOwner, std::string* errorMessage) {
 		/* // fillspawnstruct now properly handles this -U
 		uint32 itemID = 0;
 		uint8 materialFromSlot = 0xFF;
-		for(int i=0; i<22; ++i) {
+		for(int i=EmuConstants::EQUIPMENT_BEGIN; i<=EmuConstants::EQUIPMENT_END; ++i) {
 			itemID = GetBotItemBySlot(i);
 			if(itemID != 0) {
 				materialFromSlot = Inventory::CalcMaterialFromSlot(i);
@@ -4348,11 +4348,11 @@ void Bot::Spawn(Client* botCharacterOwner, std::string* errorMessage) {
 void Bot::SetBotItemInSlot(uint32 slotID, uint32 itemID, const ItemInst* inst, std::string *errorMessage) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
-	uint32 augslot[5] = { 0, 0, 0, 0, 0 };
+	uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
 
-	if(this->GetBotID() > 0 && slotID >= 0 && itemID > 0) {
+	if (this->GetBotID() > 0 && slotID >= EmuConstants::EQUIPMENT_BEGIN && itemID > NO_ITEM) {
 		if (inst && inst->IsType(ItemClassCommon)) {
-			for(int i=0; i<5; ++i) {
+			for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i) {
 				ItemInst* auginst = inst->GetItem(i);
 				augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
 			}
@@ -4401,7 +4401,7 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
 				uint32 item_id	= atoi(DataRow[1]);
 				uint16 charges	= atoi(DataRow[2]);
 				uint32 color	= atoul(DataRow[3]);
-				uint32 aug[5];
+				uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
 				aug[0] = (uint32)atoul(DataRow[4]);
 				aug[1] = (uint32)atoul(DataRow[5]);
 				aug[2] = (uint32)atoul(DataRow[6]);
@@ -4412,7 +4412,7 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
 				ItemInst* inst = database.CreateItem(item_id, charges, aug[0], aug[1], aug[2], aug[3], aug[4]);
 				if(inst) {
 					int16 put_slot_id = INVALID_INDEX;
-					if(instnodrop || ((slot_id >= 0) && (slot_id <= 21) && inst->GetItem()->Attuneable))
+					if(instnodrop || ((slot_id >= EmuConstants::EQUIPMENT_BEGIN) && (slot_id <= EmuConstants::EQUIPMENT_END) && inst->GetItem()->Attuneable))
 						inst->SetInstNoDrop(true);
 					if(color > 0)
 						inst->SetColor(color);
@@ -4454,7 +4454,7 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
 uint32 Bot::GetBotItemBySlot(uint32 slotID) {
 	uint32 Result = 0;
 
-	if(this->GetBotID() > 0 && slotID >= 0) {
+	if(this->GetBotID() > 0 && slotID >= EmuConstants::EQUIPMENT_BEGIN) {
 		char* query = 0;
 		MYSQL_RES* DatasetResult;
 		MYSQL_ROW DataRow;
@@ -5298,7 +5298,7 @@ void Bot::LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp) {
 			Bot* bot = *biter;
 			if(bot && (bot->GetLevel() != client->GetLevel())) {
 				bot->SetPetChooser(false); // not sure what this does, but was in bot 'update' code
-				bot->CalcBotStats(false);
+				bot->CalcBotStats(false); // TODO: look at this and see if 'true' should be passed...
 				if(sendlvlapp)
 					bot->SendLevelAppearance();
 				// modified from Client::SetLevel()
@@ -5456,7 +5456,7 @@ void Bot::BotAddEquipItem(int slot, uint32 id) {
 	if(slot > 0 && id > 0) {
 		uint8 materialFromSlot = Inventory::CalcMaterialFromSlot(slot);
 
-		if(materialFromSlot != 0xFF) {
+		if(materialFromSlot != _MaterialInvalid) {
 			equipment[slot] = id; // npc has more than just material slots. Valid material should mean valid inventory index
 			SendWearChange(materialFromSlot);
 		}
@@ -5468,7 +5468,7 @@ void Bot::BotRemoveEquipItem(int slot) {
 	if(slot > 0) {
 		uint8 materialFromSlot = Inventory::CalcMaterialFromSlot(slot);
 
-		if(materialFromSlot != 0xFF) {
+		if(materialFromSlot != _MaterialInvalid) {
 			equipment[slot] = 0; // npc has more than just material slots. Valid material should mean valid inventory index
 			SendWearChange(materialFromSlot);
 			if(materialFromSlot == MaterialChest)
@@ -6006,8 +6006,8 @@ void Bot::FinishTrade(Client* client, BotTradeType tradeType) {
 	if(client && !client->GetTradeskillObject() && (client->trade->state != Trading)) {
 		if(tradeType == BotTradeClientNormal) {
 			// Items being traded are found in the normal trade window used to trade between a Client and a Client or NPC
-			// Items in this mode are found in slot ids 3000 thru 3003
-			PerformTradeWithClient(3000, 3007, client);
+			// Items in this mode are found in slot ids 3000 thru 3003 - thought bots used the full 8-slot window..?
+			PerformTradeWithClient(EmuConstants::TRADE_BEGIN, EmuConstants::TRADE_END, client); // {3000..3007}
 		}
 		else if(tradeType == BotTradeClientNoDropNoTrade) {
 			// Items being traded are found on the Client's cursor slot, slot id 30. This item can be either a single item or it can be a bag.
@@ -6024,7 +6024,7 @@ void Bot::FinishTrade(Client* client, BotTradeType tradeType) {
 void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* client) {
 	if(client) {
 		// TODO: Figure out what the actual max slot id is
-		const int MAX_SLOT_ID = 3179;
+		const int MAX_SLOT_ID = EmuConstants::TRADE_BAGS_END; // was the old incorrect 3179..
 		uint32 items[MAX_SLOT_ID] = {0};
 		uint8 charges[MAX_SLOT_ID] = {0};
 		bool botCanWear[MAX_SLOT_ID] = {0};
@@ -6049,7 +6049,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 				std::string TempErrorMessage;
 				const Item_Struct* mWeaponItem = inst->GetItem();
 				bool failedLoreCheck = false;
-				for (int m = 0; m<EmuConstants::ITEM_COMMON_SIZE; ++m) {
+				for (int m = AUG_BEGIN; m  <EmuConstants::ITEM_COMMON_SIZE; ++m) {
 					ItemInst *itm = inst->GetAugment(m);
 					if(itm)
 					{
@@ -6069,12 +6069,12 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 					botCanWear[i] = BotCanWear;
 					ItemInst* swap_item = nullptr;
 
-					const char* equipped[22] = {"Charm", "Left Ear", "Head", "Face", "Right Ear", "Neck", "Shoulders", "Arms", "Back",
+					const char* equipped[EmuConstants::EQUIPMENT_SIZE] = {"Charm", "Left Ear", "Head", "Face", "Right Ear", "Neck", "Shoulders", "Arms", "Back",
 												"Left Wrist", "Right Wrist", "Range", "Hands", "Primary Hand", "Secondary Hand",
 												"Left Finger", "Right Finger", "Chest", "Legs", "Feet", "Waist", "Ammo" };
 					bool success = false;
 					int how_many_slots = 0;
-					for(int j=0; j<22; ++j) {
+					for(int j = EmuConstants::EQUIPMENT_BEGIN; j <= EmuConstants::EQUIPMENT_END; ++j) {
 						if((mWeaponItem->Slots & (1 << j))) {
 							how_many_slots++;
 							if(!GetBotItem(j)) {
@@ -6132,11 +6132,11 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 						}
 					}
 					if(!success) {
-						for(int j=0; j<22; ++j) {
+						for(int j = EmuConstants::EQUIPMENT_BEGIN; j <= EmuConstants::EQUIPMENT_END; ++j) {
 							if((mWeaponItem->Slots & (1 << j))) {
 								swap_item = GetBotItem(j);
 								failedLoreCheck = false;
-								for (int k = 0; k<EmuConstants::ITEM_COMMON_SIZE; ++k) {
+								for (int k = AUG_BEGIN; k < EmuConstants::ITEM_COMMON_SIZE; ++k) {
 									ItemInst *itm = swap_item->GetAugment(k);
 									if(itm)
 									{
@@ -6518,7 +6518,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 
 		if( Hand == MainPrimary && GetLevel() >= 28 && IsWarriorClass() )
 		{
-			// Damage bonuses apply only to hits from the main hand (Hand == 13) by characters level 28 and above
+			// Damage bonuses apply only to hits from the main hand (Hand == MainPrimary) by characters level 28 and above
 			// who belong to a melee class. If we're here, then all of these conditions apply.
 
 			ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const Item_Struct*) nullptr );
@@ -7129,7 +7129,7 @@ int16 Bot::GetBotFocusEffect(BotfocusType bottype, uint16 spell_id) {
 		int16 focus_max_real = 0;
 
 		//item focus
-		for(int x=0; x<=21; x++)
+		for(int x = EmuConstants::EQUIPMENT_BEGIN; x <= EmuConstants::EQUIPMENT_END; x++)
 		{
 			TempItem = nullptr;
 			ItemInst* ins = GetBotItem(x);
@@ -7163,7 +7163,7 @@ int16 Bot::GetBotFocusEffect(BotfocusType bottype, uint16 spell_id) {
 				}
 			}
 
-			for (int y = 0; y < EmuConstants::ITEM_COMMON_SIZE; ++y)
+			for (int y = AUG_BEGIN; y < EmuConstants::ITEM_COMMON_SIZE; ++y)
 			{
 				ItemInst *aug = nullptr;
 				aug = ins->GetAugment(y);
@@ -8213,7 +8213,7 @@ void Bot::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 	if(botweaponInst) {
 		primaryweapondamage = GetWeaponDamage(other, botweaponInst);
 		backstab_dmg = botweaponInst->GetItem()->BackstabDmg;
-		for (int i = 0; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+		for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
 		{
 			ItemInst *aug = botweaponInst->GetAugment(i);
 			if(aug)
@@ -8770,7 +8770,7 @@ void Bot::EquipBot(std::string* errorMessage) {
 
 	const ItemInst* inst = 0;
 	const Item_Struct* item = 0;
-	for(int i=0; i<=21; ++i) {
+	for(int i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; ++i) {
 		inst = GetBotItem(i);
 		if(inst) {
 			item = inst->GetItem();
@@ -11260,7 +11260,7 @@ void Bot::ProcessBotInspectionRequest(Bot* inspectedBot, Client* client) {
 		// Modded to display power source items (will only show up on SoF+ client inspect windows though.)
 		// I don't think bots are currently coded to use them..but, you'll have to use '#bot inventory list'
 		// to see them on a Titanium client when/if they are activated. -U
-		for(int16 L = 0; L <= 20; L++) {
+		for(int16 L = EmuConstants::EQUIPMENT_BEGIN; L <= MainWaist; L++) {
 			inst = inspectedBot->GetBotItem(L);
 
 			if(inst) {
@@ -11274,28 +11274,28 @@ void Bot::ProcessBotInspectionRequest(Bot* inspectedBot, Client* client) {
 			}
 		}
 
-		inst = inspectedBot->GetBotItem(9999);
+		inst = inspectedBot->GetBotItem(MainPowerSource);
 
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
-				strcpy(insr->itemnames[21], item->Name);
-				insr->itemicons[21] = item->Icon;
+				strcpy(insr->itemnames[SoF::slots::MainPowerSource], item->Name);
+				insr->itemicons[SoF::slots::MainPowerSource] = item->Icon;
 			}
 			else
-				insr->itemicons[21] = 0xFFFFFFFF;
+				insr->itemicons[SoF::slots::MainPowerSource] = 0xFFFFFFFF;
 		}
 
-		inst = inspectedBot->GetBotItem(21);
+		inst = inspectedBot->GetBotItem(MainAmmo);
 
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
-				strcpy(insr->itemnames[22], item->Name);
-				insr->itemicons[22] = item->Icon;
+				strcpy(insr->itemnames[SoF::slots::MainAmmo], item->Name);
+				insr->itemicons[SoF::slots::MainAmmo] = item->Icon;
 			}
 			else
-				insr->itemicons[22] = 0xFFFFFFFF;
+				insr->itemicons[SoF::slots::MainAmmo] = 0xFFFFFFFF;
 		}
 
 		strcpy(insr->text, inspectedBot->GetInspectMessage().text);
@@ -11309,10 +11309,10 @@ void Bot::CalcItemBonuses()
 	memset(&itembonuses, 0, sizeof(StatBonuses));
 	const Item_Struct* itemtmp = 0;
 
-	for(int i=0; i<=21; ++i) {
+	for (int i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; ++i) {
 		const ItemInst* item = GetBotItem(i);
 		if(item) {
-			for(int j=0; j<=4; ++j) {
+			for(int j = AUG_BEGIN; j < EmuConstants::ITEM_COMMON_SIZE; ++j) {
 				const ItemInst* aug = item->GetAugment(j);
 				if(aug) {
 					itemtmp = aug->GetItem();
@@ -11739,7 +11739,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 	if(!strcasecmp(sep->arg[1], "augmentitem")) {
 		AugmentItem_Struct* in_augment = new AugmentItem_Struct[sizeof(AugmentItem_Struct)];
-		in_augment->container_slot = 1000;
+		in_augment->container_slot = 1000; // <watch>
 		in_augment->unknown02[0] = 0;
 		in_augment->unknown02[1] = 0;
 		in_augment->augment_slot = -1;
@@ -12155,13 +12155,13 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					return;
 				}
 
-				const char* equipped[22] = {"Charm", "Left Ear", "Head", "Face", "Right Ear", "Neck", "Shoulders", "Arms", "Back",
+				const char* equipped[EmuConstants::EQUIPMENT_SIZE] = {"Charm", "Left Ear", "Head", "Face", "Right Ear", "Neck", "Shoulders", "Arms", "Back",
 					"Left Wrist", "Right Wrist", "Range", "Hands", "Primary Hand", "Secondary Hand",
 					"Left Finger", "Right Finger", "Chest", "Legs", "Feet", "Waist", "Ammo" };
 				const ItemInst* item1 = nullptr;
 				const Item_Struct* item2 = nullptr;
 				bool is2Hweapon = false;
-				for(int i=0; i<22; ++i)
+				for(int i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; ++i)
 				{
 					if((i == MainSecondary) && is2Hweapon) {
 						continue;
@@ -12282,11 +12282,11 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				return;
 
 			int slotId = atoi(sep->arg[3]);
-			if(slotId > 21 || slotId < 0) {
+			if(slotId > EmuConstants::EQUIPMENT_END || slotId < EmuConstants::EQUIPMENT_BEGIN) {
 				c->Message(15, "A bot has 21 slots in its inventory, please choose a slot between 0 and 21.");
 				return;
 			}
-			const char* equipped[22] = {"Charm", "Left Ear", "Head", "Face", "Right Ear", "Neck", "Shoulders", "Arms", "Back",
+			const char* equipped[EmuConstants::EQUIPMENT_SIZE] = {"Charm", "Left Ear", "Head", "Face", "Right Ear", "Neck", "Shoulders", "Arms", "Back",
 										"Left Wrist", "Right Wrist", "Range", "Hands", "Primary Hand", "Secondary Hand",
 										"Left Finger", "Right Finger", "Chest", "Legs", "Feet", "Waist", "Ammo" };
 
@@ -12303,7 +12303,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			// Don't allow the player to remove a lore item they already possess and cause a crash
 			bool failedLoreCheck = false;
 			if(itminst) {
-				for (int m = 0; m<EmuConstants::ITEM_COMMON_SIZE; ++m) {
+				for (int m = AUG_BEGIN; m < EmuConstants::ITEM_COMMON_SIZE; ++m) {
 					ItemInst *itma = itminst->GetAugment(m);
 					if(itma)
 					{
@@ -14259,10 +14259,10 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		Mob *target = c->GetTarget();
 
 		if(target && target->IsBot()) {
-			for(int i=0; i<9; i++) {
+			for(int i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_END; i++) {
 				c->Message(15,"Equiped slot: %i , item: %i \n", i, target->CastToBot()->GetEquipment(i));
 			}
-			if(target->CastToBot()->GetEquipment(8) > 0)
+			if(target->CastToBot()->GetEquipment(MaterialSecondary) > 0)
 				c->Message(15,"This bot has an item in off-hand.");
 		}
 		return;
@@ -16512,7 +16512,7 @@ int Bot::GetRawACNoShield(int &shield_ac)
 		{
 			ac -= inst->GetItem()->AC;
 			shield_ac = inst->GetItem()->AC;
-			for (uint8 i = 0; i < EmuConstants::ITEM_COMMON_SIZE; i++)
+			for (uint8 i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++)
 			{
 				if(inst->GetAugment(i))
 				{
@@ -16531,7 +16531,7 @@ uint32 Bot::CalcCurrentWeight() {
 	ItemInst* inst;
 	uint32 Total = 0;
 
-	for(int i=0; i<=21; ++i) {
+	for(int i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; ++i) {
 		inst = GetBotItem(i);
 		if(inst) {
 			TempItem = inst->GetItem();

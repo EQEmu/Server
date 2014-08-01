@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "StringUtil.h"
 
 //
-// class ServerConstants
+// class EmuConstants
 //
 uint16 EmuConstants::InventoryMapSize(int16 map) {
 	switch (map) {
@@ -255,8 +255,193 @@ std::string EmuConstants::InventoryAugName(int16 aug) {
 	return ret_str;
 }
 
+// legacy-related functions
 //
-// class ClientLimits
+// these should work for the first-stage coversions..but, once the new system is up and going..conversions will be incompatible
+// without limiting server functions and other aspects, such as augment control, bag size, etc. A complete remapping will be
+// required when bag sizes over 10 and direct manipulation of augments are implemented, due to the massive increase in range usage.
+//
+// (current personal/cursor bag range {251..340}, or 90 slots ... conversion translated range would be {10000..12804}, or 2805 slots...
+// these would have to be hard-coded into all perl code to allow access to full range of the new system - actual limits would be
+// less, based on bag size..but, the range must be full and consistent to avoid translation issues -- similar changes to other ranges
+// (240 versus 6120 slots for bank bags, for example...))
+/*
+int EmuConstants::ServerToPerlSlot(int server_slot) { // set r/s
+	switch (server_slot) {
+	case legacy::SLOT_CURSOR_END:
+		return legacy::SLOT_CURSOR_END;
+	case INVALID_INDEX:
+		return legacy::SLOT_INVALID;
+	case MainPowerSource:
+		return legacy::SLOT_POWER_SOURCE;
+	case MainAmmo:
+		return legacy::SLOT_AMMO;
+	case MainCursor:
+		return legacy::SLOT_CURSOR;
+	case legacy::SLOT_TRADESKILL:
+		return legacy::SLOT_TRADESKILL;
+	case legacy::SLOT_AUGMENT:
+		return legacy::SLOT_AUGMENT;
+	default:
+		int perl_slot = legacy::SLOT_INVALID;
+
+		// activate the internal checks as needed
+		if (server_slot >= EmuConstants::EQUIPMENT_BEGIN && server_slot <= MainWaist) {
+			perl_slot = server_slot;
+		}
+		else if (server_slot >= EmuConstants::GENERAL_BEGIN && server_slot <= EmuConstants::GENERAL_END) {
+			perl_slot = server_slot;// + legacy::SLOT_PERSONAL_BEGIN - EmuConstants::GENERAL_BEGIN;
+			//if (perl_slot < legacy::SLOT_PERSONAL_BEGIN || perl_slot > legacy::SLOT_PERSONAL_END)
+			//	perl_slot = legacy::SLOT_INVALID;
+		}
+		else if (server_slot >= EmuConstants::GENERAL_BAGS_BEGIN && server_slot <= EmuConstants::GENERAL_BAGS_END) {
+			perl_slot = server_slot;// + legacy::SLOT_PERSONAL_BAGS_BEGIN - EmuConstants::GENERAL_BAGS_BEGIN;
+			//if (perl_slot < legacy::SLOT_PERSONAL_BAGS_BEGIN || perl_slot > legacy::SLOT_PERSONAL_BAGS_END)
+			//	perl_slot = legacy::SLOT_INVALID;
+		}
+		else if (server_slot >= EmuConstants::CURSOR_BAG_BEGIN && server_slot <= EmuConstants::CURSOR_BAG_END) {
+			perl_slot = server_slot;// + legacy::SLOT_CURSOR_BAG_BEGIN - EmuConstants::CURSOR_BAG_BEGIN;
+			//if (perl_slot < legacy::SLOT_CURSOR_BAG_BEGIN || perl_slot > legacy::SLOT_CURSOR_BAG_END)
+			//	perl_slot = legacy::SLOT_INVALID;
+		}
+		else if (server_slot >= EmuConstants::TRIBUTE_BEGIN && server_slot <= EmuConstants::TRIBUTE_END) {
+			perl_slot = server_slot;// + legacy::SLOT_TRIBUTE_BEGIN - EmuConstants::TRADE_BEGIN;
+			//if (perl_slot < legacy::SLOT_TRIBUTE_BEGIN || perl_slot > legacy::SLOT_TRIBUTE_END)
+			//	perl_slot = legacy::SLOT_INVALID;
+		}
+		else if (server_slot >= EmuConstants::BANK_BEGIN && server_slot <= EmuConstants::BANK_END) {
+			perl_slot = server_slot;// + legacy::SLOT_BANK_BEGIN - EmuConstants::BANK_BEGIN;
+			//if (perl_slot < legacy::SLOT_BANK_BEGIN || perl_slot > legacy::SLOT_BANK_END)
+			//	perl_slot = legacy::SLOT_INVALID;
+		}
+		else if (server_slot >= EmuConstants::BANK_BAGS_BEGIN && server_slot <= EmuConstants::BANK_BAGS_END) {
+			perl_slot = server_slot;// + legacy::SLOT_BANK_BAGS_BEGIN - EmuConstants::BANK_BAGS_BEGIN;
+			//if (perl_slot < legacy::SLOT_BANK_BAGS_BEGIN || perl_slot > legacy::SLOT_BANK_BAGS_END)
+			//	perl_slot = legacy::SLOT_INVALID;
+		}
+		else if (server_slot >= EmuConstants::SHARED_BANK_BEGIN && server_slot <= EmuConstants::SHARED_BANK_END) {
+			perl_slot = server_slot;// + legacy::SLOT_SHARED_BANK_BEGIN - EmuConstants::SHARED_BANK_BEGIN;
+			//if (perl_slot < legacy::SLOT_SHARED_BANK_BEGIN || perl_slot > legacy::SLOT_SHARED_BANK_END)
+			//	perl_slot = legacy::SLOT_INVALID;
+		}
+		else if (server_slot >= EmuConstants::SHARED_BANK_BAGS_BEGIN && server_slot <= EmuConstants::SHARED_BANK_BAGS_END) {
+			perl_slot = server_slot;// + legacy::SLOT_SHARED_BANK_BAGS_BEGIN - EmuConstants::SHARED_BANK_BAGS_BEGIN;
+			//if (perl_slot < legacy::SLOT_SHARED_BANK_BAGS_BEGIN || perl_slot > legacy::SLOT_SHARED_BANK_BAGS_END)
+			//	perl_slot = legacy::SLOT_INVALID;
+		}
+		else if (server_slot >= EmuConstants::TRADE_BEGIN && server_slot <= EmuConstants::TRADE_END) {
+			perl_slot = server_slot;// + legacy::SLOT_TRADE_BEGIN - EmuConstants::TRADE_BEGIN;
+			//if (perl_slot < legacy::SLOT_TRADE_BEGIN || perl_slot > legacy::SLOT_TRADE_END)
+			//	perl_slot = legacy::SLOT_INVALID;
+		}
+		else if (server_slot >= EmuConstants::TRADE_BAGS_BEGIN && server_slot <= EmuConstants::TRADE_BAGS_END) {
+			perl_slot = server_slot;// + legacy::SLOT_TRADE_BAGS_BEGIN - EmuConstants::TRADE_BAGS_BEGIN;
+			//if (perl_slot < legacy::SLOT_TRADE_BAGS_BEGIN || perl_slot > legacy::SLOT_TRADE_BAGS_END)
+			//	perl_slot = legacy::SLOT_INVALID;
+		}
+		else if (server_slot >= EmuConstants::WORLD_BEGIN && server_slot <= EmuConstants::WORLD_END) {
+			perl_slot = server_slot;// + legacy::SLOT_WORLD_BEGIN - EmuConstants::WORLD_BEGIN;
+			//if (perl_slot < legacy::SLOT_WORLD_BEGIN || perl_slot > legacy::SLOT_WORLD_END)
+			//	perl_slot = legacy::SLOT_INVALID;
+		}
+		else if (server_slot >= 8000 && server_slot <= 8999) { // this range may be limited to 36 in the future (client size)
+			perl_slot = server_slot;
+		}
+
+		return perl_slot;
+	}
+}
+*/
+/*
+int EmuConstants::PerlToServerSlot(int perl_slot) { // set r/s
+	switch (perl_slot) {
+	case legacy::SLOT_CURSOR_END:
+		return legacy::SLOT_CURSOR_END;
+	case legacy::SLOT_INVALID:
+		return INVALID_INDEX;
+	case legacy::SLOT_POWER_SOURCE:
+		return MainPowerSource;
+	case legacy::SLOT_AMMO:
+		return MainAmmo;
+	case legacy::SLOT_CURSOR:
+		return MainCursor;
+	case legacy::SLOT_TRADESKILL:
+		return legacy::SLOT_TRADESKILL;
+	case legacy::SLOT_AUGMENT:
+		return legacy::SLOT_AUGMENT;
+	default:
+		int server_slot = INVALID_INDEX;
+
+		// activate the internal checks as needed
+		if (perl_slot >= legacy::SLOT_EQUIPMENT_BEGIN && perl_slot <= legacy::SLOT_WAIST) {
+			server_slot = perl_slot;
+		}
+		else if (perl_slot >= legacy::SLOT_PERSONAL_BEGIN && perl_slot <= legacy::SLOT_PERSONAL_END) {
+			server_slot = perl_slot;// + EmuConstants::GENERAL_BEGIN - legacy::SLOT_PERSONAL_BEGIN;
+			//if (server_slot < EmuConstants::GENERAL_BEGIN || server_slot > EmuConstants::GENERAL_END)
+			//	server_slot = INVALID_INDEX;
+		}
+		else if (perl_slot >= legacy::SLOT_PERSONAL_BAGS_BEGIN && perl_slot <= legacy::SLOT_PERSONAL_BAGS_END) {
+			server_slot = perl_slot;// + EmuConstants::GENERAL_BAGS_BEGIN - legacy::SLOT_PERSONAL_BAGS_BEGIN;
+			//if (server_slot < EmuConstants::GENERAL_BAGS_BEGIN || server_slot > EmuConstants::GENERAL_BAGS_END)
+			//	server_slot = INVALID_INDEX;
+		}
+		else if (perl_slot >= legacy::SLOT_CURSOR_BAG_BEGIN && perl_slot <= legacy::SLOT_CURSOR_BAG_END) {
+			server_slot = perl_slot;// + EmuConstants::CURSOR_BAG_BEGIN - legacy::SLOT_CURSOR_BAG_BEGIN;
+			//if (server_slot < EmuConstants::CURSOR_BAG_BEGIN || server_slot > EmuConstants::CURSOR_BAG_END)
+			//	server_slot = INVALID_INDEX;
+		}
+		else if (perl_slot >= legacy::SLOT_TRIBUTE_BEGIN && perl_slot <= legacy::SLOT_TRIBUTE_END) {
+			server_slot = perl_slot;// + EmuConstants::TRIBUTE_BEGIN - legacy::SLOT_TRIBUTE_BEGIN;
+			//if (server_slot < EmuConstants::TRIBUTE_BEGIN || server_slot > EmuConstants::TRIBUTE_END)
+			//	server_slot = INVALID_INDEX;
+		}
+		else if (perl_slot >= legacy::SLOT_BANK_BEGIN && perl_slot <= legacy::SLOT_BANK_END) {
+			server_slot = perl_slot;// + EmuConstants::BANK_BEGIN - legacy::SLOT_BANK_BEGIN;
+			//if (server_slot < EmuConstants::BANK_BEGIN || server_slot > EmuConstants::BANK_END)
+			//	server_slot = INVALID_INDEX;
+		}
+		else if (perl_slot >= legacy::SLOT_BANK_BAGS_BEGIN && perl_slot <= legacy::SLOT_BANK_BAGS_END) {
+			server_slot = perl_slot;// + EmuConstants::BANK_BAGS_BEGIN - legacy::SLOT_BANK_BAGS_BEGIN;
+			//if (server_slot < EmuConstants::BANK_BAGS_BEGIN || server_slot > EmuConstants::BANK_BAGS_END)
+			//	server_slot = INVALID_INDEX;
+		}
+		else if (perl_slot >= legacy::SLOT_SHARED_BANK_BEGIN && perl_slot <= legacy::SLOT_SHARED_BANK_END) {
+			server_slot = perl_slot;// + EmuConstants::SHARED_BANK_BEGIN - legacy::SLOT_SHARED_BANK_BEGIN;
+			//if (server_slot < EmuConstants::SHARED_BANK_BEGIN || server_slot > EmuConstants::SHARED_BANK_END)
+			//	server_slot = INVALID_INDEX;
+		}
+		else if (perl_slot >= legacy::SLOT_SHARED_BANK_BAGS_BEGIN && perl_slot <= legacy::SLOT_SHARED_BANK_BAGS_END) {
+			server_slot = perl_slot;// + EmuConstants::SHARED_BANK_BAGS_BEGIN - legacy::SLOT_SHARED_BANK_BAGS_END;
+			//if (server_slot < EmuConstants::SHARED_BANK_BAGS_BEGIN || server_slot > EmuConstants::SHARED_BANK_BAGS_END)
+			//	server_slot = INVALID_INDEX;
+		}
+		else if (perl_slot >= legacy::SLOT_TRADE_BEGIN && perl_slot <= legacy::SLOT_TRADE_END) {
+			server_slot = perl_slot;// + EmuConstants::TRADE_BEGIN - legacy::SLOT_TRADE_BEGIN;
+			//if (server_slot < EmuConstants::TRADE_BEGIN || server_slot > EmuConstants::TRADE_END)
+			//	server_slot = INVALID_INDEX;
+		}
+		else if (perl_slot >= legacy::SLOT_TRADE_BAGS_BEGIN && perl_slot <= legacy::SLOT_TRADE_BAGS_END) {
+			server_slot = perl_slot;// + EmuConstants::TRADE_BAGS_BEGIN - legacy::SLOT_TRADE_BAGS_BEGIN;
+			//if (server_slot < EmuConstants::TRADE_BAGS_BEGIN || server_slot > EmuConstants::TRADE_BAGS_END)
+			//	server_slot = INVALID_INDEX;
+		}
+		else if (perl_slot >= legacy::SLOT_WORLD_BEGIN && perl_slot <= legacy::SLOT_WORLD_END) {
+			server_slot = perl_slot;// + EmuConstants::WORLD_BEGIN - legacy::SLOT_WORLD_BEGIN;
+			//if (server_slot < EmuConstants::WORLD_BEGIN || server_slot > EmuConstants::WORLD_END)
+			//	server_slot = INVALID_INDEX;
+		}
+		else if (perl_slot >= 8000 && perl_slot <= 8999) { // this range may be limited to 36 in the future (client size)
+			server_slot = perl_slot;
+		}
+
+		return server_slot;
+	}
+}
+*/
+
+// 
+// class EQLimits
 //
 // client validation
 bool EQLimits::IsValidClientVersion(uint32 version) {

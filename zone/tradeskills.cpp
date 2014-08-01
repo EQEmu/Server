@@ -68,7 +68,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 
 				// Verify that no more than two items are in container to guarantee no inadvertant wipes.
 				uint8 itemsFound = 0;
-				for (uint8 i=0; i<10; i++)
+				for (uint8 i = MAIN_BEGIN; i < EmuConstants::MAP_WORLD_SIZE; i++)
 				{
 					const ItemInst* inst = container->GetItem(i);
 					if (inst)
@@ -212,7 +212,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		else
 		{
 			// Delete items in our inventory container...
-			for (uint8 i=0; i<10; i++)
+			for (uint8 i = MAIN_BEGIN; i < EmuConstants::MAP_WORLD_SIZE; i++)
 			{
 				const ItemInst* inst = container->GetItem(i);
 				if (inst)
@@ -254,7 +254,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	uint32 some_id = 0;
 	bool worldcontainer=false;
 
-	if (in_combine->container_slot == SLOT_TRADESKILL) {
+	if (in_combine->container_slot == legacy::SLOT_TRADESKILL) {
 		if(!worldo) {
 			user->Message(13, "Error: Server is not aware of the tradeskill container you are attempting to use");
 			return;
@@ -353,7 +353,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		safe_delete(outapp);
 		database.DeleteWorldContainer(worldo->m_id, zone->GetZoneID());
 	} else{
-		for (uint8 i=0; i<10; i++){
+		for (uint8 i = MAIN_BEGIN; i < EmuConstants::MAP_WORLD_SIZE; i++) {
 			const ItemInst* inst = container->GetItem(i);
 			if (inst) {
 				user->DeleteItemInInventory(Inventory::CalcSlotId(in_combine->container_slot,i),0,true);
@@ -758,7 +758,7 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
 
 	uint32 *ffff_start = (uint32 *) startblock;
 	//fill in the FFFF's as if there were 0 items
-	for(r = 0; r < 10; r++) {
+	for(r = 0; r < 10; r++) { // world:item container size related?
 		*ffff_start = 0xFFFFFFFF;
 		ffff_start++;
 	}
@@ -794,7 +794,7 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
 		icon = htonl(icon);
 
 		//if we get more than 10 items, just start skipping them...
-		for(k = 0; k < num && count < 10; k++) {
+		for(k = 0; k < num && count < 10; k++) { // world:item container size related?
 			itemptr = (uint32 *) cblock;
 			cblock += sizeof(uint32);
 			datalen += sizeof(uint32);
@@ -1199,7 +1199,7 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 	bool first = true;
 	uint8 i;
 	char *pos = buf2;
-	for (i=0; i<10; i++) {
+	for (i = 0; i < 10; i++) { // <watch> TODO: need to determine if this is bound to world/item container size
 		const ItemInst* inst = container->GetItem(i);
 		if (inst) {
 			const Item_Struct* item = GetItem(inst->GetItem()->ID);
@@ -1334,7 +1334,7 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 	if (RunQuery(TSquery, MakeAnyLenString(&TSquery, "SELECT item_id, componentcount from tradeskill_recipe_entries where recipe_id=%i AND componentcount > 0", recipe_id), TSerrbuf, &TSresult)) {
 		while((TSrow = mysql_fetch_row(TSresult))!=nullptr) {
 			int ccnt = 0;
-			for(int x = 0; x < 10; x++){
+			for(int x = MAIN_BEGIN; x < EmuConstants::MAP_WORLD_SIZE; x++) {
 				const ItemInst* inst = container->GetItem(x);
 				if(inst){
 					const Item_Struct* item = GetItem(inst->GetItem()->ID);
