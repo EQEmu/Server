@@ -103,6 +103,52 @@ const EQClientVersion Strategy::ClientVersion() const
 #include "SSDefine.h"
 
 
+/*
+// Converts Server Slot IDs to Client62 Slot IDs for use in Encodes
+static inline uint32 ServerToClient62Slot(uint32 ServerSlot) {
+	uint32 Client62Slot;
+	// reserved
+}
+*/
+/*
+// Converts Client62 Slot IDs to Server Slot IDs for use in Decodes
+static inline uint32 Client62ToServerSlot(uint32 Client62Slot) {
+	uint32 ServerSlot;
+	// reserved
+}
+*/
+/*
+// Converts Server Corpse Slot IDs to Client62 Corpse Slot IDs for use in Encodes
+static inline uint32 ServerToClient62CorpseSlot(uint32 ServerCorpse) {
+	uint32 Client62Corpse;
+	// reserved
+}
+*/
+/*
+// Converts Client62 Corpse Slot IDs to Server Corpse Slot IDs for use in Decodes
+static inline uint32 Client62ToServerCorpseSlot(uint32 Client62Corpse) {
+	uint32 ServerCorpse;
+	// reserved
+}
+*/
+/*
+static inline uint32 RemovePowerSourceBit(uint32 slots) { // shouldn't need to add one..just grab the actual server reference, if so...
+	static const uint32 BIT21 = 1 << 21;
+	static const uint32 BIT22 = 1 << 22;
+	static const uint32 KEEPBITS = ~(BIT21 | BIT22);
+
+	bool wearammo = slots & BIT22;
+
+	slots &= KEEPBITS;
+
+	if (wearammo)
+		slots |= BIT21;
+
+	return slots;
+}
+*/
+
+
 EAT_ENCODE(OP_ZoneServerReady)
 EAT_ENCODE(OP_GuildMemberLevelUpdate)
 

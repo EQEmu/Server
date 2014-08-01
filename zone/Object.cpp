@@ -544,7 +544,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			EQApplicationPacket* outapp=new EQApplicationPacket(OP_ClientReady,0);
 			sender->QueuePacket(outapp);
 			safe_delete(outapp);
-			for (uint8 i=0; i<10; i++) {
+			for (uint8 i = SUB_BEGIN; i < EmuConstants::ITEM_CONTAINER_SIZE; i++) {
 				const ItemInst* inst = m_inst->GetItem(i);
 				if (inst) {
 					//sender->GetInv().PutItem(i+4000,inst);

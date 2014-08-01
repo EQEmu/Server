@@ -365,7 +365,7 @@ public:
 	bool IsActivated()					{ return m_activated; }
 	void SetActivated(bool activated)	{ m_activated = activated; }
 	int8 GetEvolveLvl() const			{ return m_evolveLvl; }
-	void SetScaling(bool v) { m_scaling = v; }
+	void SetScaling(bool v)				{ m_scaling = v; }
 
 	void Initialize(SharedDatabase *db = nullptr);
 	void ScaleItem();
@@ -413,9 +413,9 @@ protected:
 
 	//
 	// Items inside of this item (augs or contents);
-	std::map<uint8, ItemInst*> m_contents; // Zero-based index: min=0, max=9
-	std::map<std::string, std::string> m_custom_data;
-	std::map<std::string, Timer> m_timers;
+	std::map<uint8, ItemInst*>			m_contents; // Zero-based index: min=0, max=9
+	std::map<std::string, std::string>	m_custom_data;
+	std::map<std::string, Timer>		m_timers;
 };
 
 class EvolveInfo {

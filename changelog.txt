@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/31/2014 ==
+Uleat: More inventory slot constant conversions. This should be the bulk of everything..but, due to the size of the server code, there
+may be some hidden ones. (client_packet.cpp and the client translators still need a thorough review.)
+Note: Please report any abnormal behaviour with inventory-related content..each diff file was reviewed 3 times..but, things CAN be missed.
+Uleat: Test fix for client crashes in Bazaar, while actively selling, with a charm in the Trader's Satchel.
+
 == 07/27/2014 ==
 Uleat: More updates to the dictionary. Added a 'constants' file for each client translator..these will tie-in to the dictionary. Started
 replacement of hard-coded numeric values with a pre-defined constant. This will help in the transition.
