@@ -1226,7 +1226,7 @@ void Client::SendLootItemInPacket(const ItemInst* inst, int16 slot_id)
 
 bool Client::IsValidSlot(uint32 slot) {
 	if ((slot == (uint32)INVALID_INDEX) ||
-		(slot >= MAP_BEGIN && slot < EmuConstants::MAP_POSSESSIONS_SIZE) ||
+		(slot >= MAIN_BEGIN && slot < EmuConstants::MAP_POSSESSIONS_SIZE) ||
 		(slot >= EmuConstants::GENERAL_BAGS_BEGIN && slot <= EmuConstants::CURSOR_BAG_END) ||
 		(slot >= EmuConstants::TRIBUTE_BEGIN && slot <= EmuConstants::TRIBUTE_END) ||
 		(slot >= EmuConstants::BANK_BEGIN && slot <= EmuConstants::BANK_END) ||
@@ -1998,7 +1998,7 @@ void Client::RemoveNoRent(bool client_update) {
 	int16 slot_id;
 
 	// personal
-	for(slot_id = MAP_BEGIN; slot_id < EmuConstants::MAP_POSSESSIONS_SIZE; slot_id++) {
+	for(slot_id = MAIN_BEGIN; slot_id < EmuConstants::MAP_POSSESSIONS_SIZE; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if(inst && !inst->GetItem()->NoRent) {
 			mlog(INVENTORY__SLOTS, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
@@ -2065,7 +2065,7 @@ void Client::RemoveDuplicateLore(bool client_update) {
 	int16 slot_id;
 
 	// personal
-	for(slot_id = MAP_BEGIN; slot_id < EmuConstants::MAP_POSSESSIONS_SIZE; slot_id++) {
+	for(slot_id = MAIN_BEGIN; slot_id < EmuConstants::MAP_POSSESSIONS_SIZE; slot_id++) {
 		ItemInst* inst = m_inv.PopItem(slot_id);
 		if(inst) {
 			if(CheckLoreConflict(inst->GetItem())) {

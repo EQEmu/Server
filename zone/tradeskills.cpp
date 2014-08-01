@@ -68,7 +68,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 
 				// Verify that no more than two items are in container to guarantee no inadvertant wipes.
 				uint8 itemsFound = 0;
-				for (uint8 i = MAP_BEGIN; i < EmuConstants::MAP_WORLD_SIZE; i++)
+				for (uint8 i = MAIN_BEGIN; i < EmuConstants::MAP_WORLD_SIZE; i++)
 				{
 					const ItemInst* inst = container->GetItem(i);
 					if (inst)
@@ -212,7 +212,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		else
 		{
 			// Delete items in our inventory container...
-			for (uint8 i = MAP_BEGIN; i < EmuConstants::MAP_WORLD_SIZE; i++)
+			for (uint8 i = MAIN_BEGIN; i < EmuConstants::MAP_WORLD_SIZE; i++)
 			{
 				const ItemInst* inst = container->GetItem(i);
 				if (inst)
@@ -353,7 +353,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		safe_delete(outapp);
 		database.DeleteWorldContainer(worldo->m_id, zone->GetZoneID());
 	} else{
-		for (uint8 i = MAP_BEGIN; i < EmuConstants::MAP_WORLD_SIZE; i++) {
+		for (uint8 i = MAIN_BEGIN; i < EmuConstants::MAP_WORLD_SIZE; i++) {
 			const ItemInst* inst = container->GetItem(i);
 			if (inst) {
 				user->DeleteItemInInventory(Inventory::CalcSlotId(in_combine->container_slot,i),0,true);
@@ -1334,7 +1334,7 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 	if (RunQuery(TSquery, MakeAnyLenString(&TSquery, "SELECT item_id, componentcount from tradeskill_recipe_entries where recipe_id=%i AND componentcount > 0", recipe_id), TSerrbuf, &TSresult)) {
 		while((TSrow = mysql_fetch_row(TSresult))!=nullptr) {
 			int ccnt = 0;
-			for(int x = MAP_BEGIN; x < EmuConstants::MAP_WORLD_SIZE; x++) {
+			for(int x = MAIN_BEGIN; x < EmuConstants::MAP_WORLD_SIZE; x++) {
 				const ItemInst* inst = container->GetItem(x);
 				if(inst){
 					const Item_Struct* item = GetItem(inst->GetItem()->ID);

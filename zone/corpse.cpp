@@ -364,7 +364,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp)
 		// worn + inventory + cursor
 		std::list<uint32> removed_list;
 		bool cursor = false;
-		for(i = MAP_BEGIN; i < EmuConstants::MAP_POSSESSIONS_SIZE; i++)
+		for(i = MAIN_BEGIN; i < EmuConstants::MAP_POSSESSIONS_SIZE; i++)
 		{
 			if(i == MainAmmo && client->GetClientVersion() >= EQClientSoF) {
 				item = client->GetInv().GetItem(MainPowerSource);

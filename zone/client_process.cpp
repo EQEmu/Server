@@ -866,7 +866,7 @@ void Client::BulkSendInventoryItems() {
 	std::map<uint16, std::string>::iterator itr;
 
 	//Inventory items
-	for(slot_id = MAP_BEGIN; slot_id < EmuConstants::MAP_POSSESSIONS_SIZE; slot_id++) {
+	for(slot_id = MAIN_BEGIN; slot_id < EmuConstants::MAP_POSSESSIONS_SIZE; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if(inst) {
 			std::string packet = inst->Serialize(slot_id);
