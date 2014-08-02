@@ -690,7 +690,7 @@ struct SPDat_Spell_Struct
 /* 156 */	//int typedescnum; // eqstr of type description
 /* 157 */	int effectdescnum; // eqstr of effect description
 /* 158 */   //Category Desc ID 3
-/* 159 */	//bool npc_no_los;
+/* 159 */	bool npc_no_los;
 /* 161 */	bool reflectable;
 /* 162 */	int bonushate;
 /* 163 */
@@ -732,8 +732,9 @@ struct SPDat_Spell_Struct
 /* 212 */	bool AllowRest;
 /* 213 */	bool NotOutofCombat; //Fail if cast out of combat
 /* 214 */   bool NotInCombat; //Fail if cast in combat
-/* 215 - 218 */
-/* 219 */	//int maxtargets; // is used for beam and ring spells for target # limits (not implemented)
+/* 215 - 217 */
+/* 219 */	int aemaxtargets; // 
+/* 219 */	int maxtargets; // is used for beam and ring spells for target # limits (not implemented)
 /* 220 - 223 */
 /* 224 */	bool persistdeath; // buff doesn't get stripped on death
 /* 225 - 236 */ // Not in DB
