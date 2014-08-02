@@ -117,6 +117,9 @@ void RemoteCallSubscriptionHandler::Process() {
 		++iter;
 	}
 
+	if (!zone)
+		return;
+
 	ServerPacket *pack = new ServerPacket(ServerOP_WIClientSession, sz);
 	pack->WriteUInt32((uint32)zone->GetZoneID());
 	pack->WriteUInt32((uint32)zone->GetInstanceID());
