@@ -13,8 +13,13 @@ void WriteWebCallResponseString(per_session_data_eqemu *session, rapidjson::Docu
 		else {
 			writer.String(doc["id"].GetString());
 		}
+
 		writer.String("result");
+		writer.StartObject();
+		writer.String("value");
 		writer.String(result.c_str());
+		writer.EndObject();
+
 		writer.String("error");
 		if (error) {
 			writer.Bool(true);
@@ -39,8 +44,13 @@ void WriteWebCallResponseInt(per_session_data_eqemu *session, rapidjson::Documen
 		else {
 			writer.String(doc["id"].GetString());
 		}
+
 		writer.String("result");
+		writer.StartObject();
+		writer.String("value");
 		writer.Int(result);
+		writer.EndObject();
+
 		writer.String("error");
 		if (error) {
 			writer.Bool(true);
@@ -65,8 +75,13 @@ void WriteWebCallResponseBoolean(per_session_data_eqemu *session, rapidjson::Doc
 		else {
 			writer.String(doc["id"].GetString());
 		}
+
 		writer.String("result");
+		writer.StartObject();
+		writer.String("value");
 		writer.Bool(result);
+		writer.EndObject();
+
 		writer.String("error");
 		if (error) {
 			writer.Bool(true);

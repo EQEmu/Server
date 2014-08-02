@@ -40,12 +40,10 @@ void ClientLogs::subscribe(EQEMuLog::LogIDs id, Client *c) {
 	end = entries[id].end();
 	for(; cur != end; ++cur) {
 		if(*cur == c) {
-	printf("%s was allready subscribed to %d\n", c->GetName(), id);
 			return;
 		}
 	}
 
-	printf("%s has been subscribed to %d\n", c->GetName(), id);
 	entries[id].push_back(c);
 }
 

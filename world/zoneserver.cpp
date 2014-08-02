@@ -1300,6 +1300,13 @@ bool ZoneServer::Process() {
 				QSLink.SendPacket(pack);
 				break;
 			}
+			case ServerOP_WIRemoteCallResponse:
+			case ServerOP_WIClientSession:
+			case ServerOP_WIRemoteCallToClient:
+			{
+				WILink.SendPacket(pack);
+				break;
+			}
 			case ServerOP_CZSignalClientByName:
 			case ServerOP_CZMessagePlayer:
 			case ServerOP_CZSignalClient:

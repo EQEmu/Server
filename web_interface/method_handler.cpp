@@ -8,15 +8,16 @@ extern std::map<std::string, MethodHandler> unauthorized_methods;
 
 void register_authorized_methods()
 {
-	authorized_methods["token_auth"] = std::make_pair(0, handle_method_token_auth);
-	authorized_methods["list_zones"] = std::make_pair(10, handle_method_no_args);
-	authorized_methods["get_zone_info"] = std::make_pair(10, handle_method_get_zone_info);
-	authorized_methods["subscribe"] = std::make_pair(10, handle_method_subscribe);
+	authorized_methods["WebInterface::Authorize"] = std::make_pair(0, handle_method_token_auth);
+	authorized_methods["World::ListZones"] = std::make_pair(10, handle_method_no_args);
+	authorized_methods["World::GetZoneDetails"] = std::make_pair(10, handle_method_get_zone_info);
+	authorized_methods["Zone::Subscribe"] = std::make_pair(10, handle_method_subscribe);
+	authorized_methods["Zone::Unsubscribe"] = std::make_pair(10, handle_method_subscribe);
 }
 
 void register_unauthorized_methods()
 {
-	unauthorized_methods["token_auth"] = handle_method_token_auth;
+	unauthorized_methods["WebInterface::Authorize"] = handle_method_token_auth;
 }
 
 void register_methods()

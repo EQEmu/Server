@@ -3,6 +3,7 @@
 #include "WorldConfig.h"
 #include "clientlist.h"
 #include "zonelist.h"
+#include "zoneserver.h"
 #include "remote_call.h"
 #include "../common/logsys.h"
 #include "../common/logtypes.h"
@@ -133,6 +134,27 @@ bool WebInterfaceConnection::Process()
 				safe_delete_array(id);
 				safe_delete_array(session_id);
 				safe_delete_array(method);
+				break;
+			}
+			case ServerOP_WIClientSessionResponse: {
+				uint32 zone_id = pack->ReadUInt32();
+				uint32 instance_id = pack->ReadUInt32();
+				
+				ZoneServer *zs = nullptr;
+				if(instance_id != 0) {
+					zs = zoneserver_list.FindByInstanceID(instance_id);
+				} else {
+					zs = zoneserver_list.FindByZoneID(zone_id);
+				}
+
+				if(zs) {
+					ServerPacket *npack = new ServerPacket(ServerOP_WIClientSessionResponse, pack->size - 8);
+					memcpy(npack->pBuffer, pack->pBuffer + 8, pack->size - 8);
+
+					zs->SendPacket(npack);
+					safe_delete(npack);
+				}
+
 				break;
 			}
 			default:

@@ -16,11 +16,12 @@ extern ZSList zoneserver_list;
 extern WebInterfaceConnection WILink;
 std::map<std::string, RemoteCallHandler> remote_call_methods;
 
-void RemoteCallResponse(const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &res, const std::string &error) {
+void RemoteCallResponse(const std::string &connection_id, const std::string &request_id, const std::map<std::string, std::string> &res, const std::string &error) {
 	uint32 sz = (uint32)(connection_id.size() + request_id.size() + error.size() + 3 + 16);
-	uint32 res_sz = (uint32)res.size();
-	for(uint32 i = 0; i < res_sz; ++i) {
-		sz += (uint32)res[i].size() + 5;
+	auto iter = res.begin();
+	while(iter != res.end()) {
+		sz += (uint32)iter->first.size() + (uint32)iter->second.size() + 10;
+		++iter;
 	}
 
 	ServerPacket *pack = new ServerPacket(ServerOP_WIRemoteCallResponse, sz);
@@ -30,30 +31,35 @@ void RemoteCallResponse(const std::string &connection_id, const std::string &req
 	pack->WriteString(connection_id.c_str());
 	pack->WriteUInt32((uint32)error.size());
 	pack->WriteString(error.c_str());
-	pack->WriteUInt32((uint32)res_sz);
-	for (uint32 i = 0; i < res_sz; ++i) {
-		auto &r = res[i];
-		pack->WriteUInt32((uint32)r.size());
-		pack->WriteString(r.c_str());
+	pack->WriteUInt32((uint32)res.size());
+	iter = res.begin();
+	while(iter != res.end()) {
+		pack->WriteUInt32((uint32)iter->first.size());
+		pack->WriteString(iter->first.c_str());
+		pack->WriteUInt32((uint32)iter->second.size());
+		pack->WriteString(iter->second.c_str());
+		++iter;
 	}
 
 	WILink.SendPacket(pack);
+	safe_delete(pack);
 }
 
 void register_remote_call_handlers() {
-	remote_call_methods["list_zones"] = handle_rc_list_zones;
-	remote_call_methods["get_zone_info"] = handle_rc_get_zone_info;
-	remote_call_methods["subscribe"] = handle_rc_relay;
+	remote_call_methods["World::ListZones"] = handle_rc_list_zones;
+	remote_call_methods["World::GetZoneDetails"] = handle_rc_get_zone_info;
+	remote_call_methods["Zone::Subscribe"] = handle_rc_relay;
+	remote_call_methods["Zone::Unsubscribe"] = handle_rc_relay;
 }
 
 void handle_rc_list_zones(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
 	std::vector<uint32> zones;
 	zoneserver_list.GetZoneIDList(zones);
 
-	std::vector<std::string> res;
+	std::map<std::string, std::string> res;
 	uint32 sz = (uint32)zones.size();
 	for(uint32 i = 0; i < sz; ++i) {
-		res.push_back(itoa(zones[i]));
+		res[itoa(i)] = (itoa(zones[i]));
 	}
 	
 	std::string error;
@@ -62,7 +68,7 @@ void handle_rc_list_zones(const std::string &method, const std::string &connecti
 
 void handle_rc_get_zone_info(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
 	std::string error;
-	std::vector<std::string> res;
+	std::map<std::string, std::string> res;
 	if(params.size() != 1) {
 		error = "Expected only one zone_id.";
 		RemoteCallResponse(connection_id, request_id, res, error);
@@ -76,25 +82,25 @@ void handle_rc_get_zone_info(const std::string &method, const std::string &conne
 		return;
 	}
 
-	res.push_back(zs->IsStaticZone() ? "static" : "dynamic");
-	res.push_back(itoa(zs->GetZoneID()));
-	res.push_back(itoa(zs->GetInstanceID()));
-	res.push_back(zs->GetLaunchName());
-	res.push_back(zs->GetLaunchedName());
-	res.push_back(zs->GetZoneName());
-	res.push_back(zs->GetZoneLongName());
-	res.push_back(itoa(zs->GetCPort()));
-	res.push_back(itoa(zs->NumPlayers()));
+	res["type"] = zs->IsStaticZone() ? "static" : "dynamic";
+	res["zone_id"] = itoa(zs->GetZoneID());
+	res["instance_id"] = itoa(zs->GetInstanceID());
+	res["launch_name"] = zs->GetLaunchName();
+	res["launched_name"] = zs->GetLaunchedName();
+	res["short_name"] = zs->GetZoneName();
+	res["long_name"] = zs->GetZoneLongName();
+	res["port"] = itoa(zs->GetCPort());
+	res["num_players"] = itoa(zs->NumPlayers());
 	RemoteCallResponse(connection_id, request_id, res, error);
 }
 
 void handle_rc_relay(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
 	std::string error;
-	std::vector<std::string> res;
+	std::map<std::string, std::string> res;
 	uint32 zone_id = 0;
 	uint32 instance_id = 0;
 	ZoneServer *zs = nullptr;
-
+	
 	if(params.size() < 2) {
 		error = "Missing zone relay params";
 		RemoteCallResponse(connection_id, request_id, res, error);
@@ -108,8 +114,8 @@ void handle_rc_relay(const std::string &method, const std::string &connection_id
 		RemoteCallResponse(connection_id, request_id, res, error);
 		return;
 	}
-
-
+	
+	
 	if(instance_id) {
 		zs = zoneserver_list.FindByInstanceID(instance_id);
 	} else {
@@ -121,7 +127,7 @@ void handle_rc_relay(const std::string &method, const std::string &connection_id
 		RemoteCallResponse(connection_id, request_id, res, error);
 		return;
 	}
-
+	
 	uint32 sz = (uint32)(request_id.size() + connection_id.size() + method.size() + 3 + 16);
 	uint32 p_sz = (uint32)params.size() - 2;
 	for(uint32 i = 0; i < p_sz; ++i) {
@@ -129,7 +135,7 @@ void handle_rc_relay(const std::string &method, const std::string &connection_id
 		sz += (uint32)param.size();
 		sz += 5;
 	}
-
+	
 	ServerPacket *pack = new ServerPacket(ServerOP_WIRemoteCall, sz);
 	pack->WriteUInt32((uint32)request_id.size());
 	pack->WriteString(request_id.c_str());
@@ -138,13 +144,13 @@ void handle_rc_relay(const std::string &method, const std::string &connection_id
 	pack->WriteUInt32((uint32)method.size());
 	pack->WriteString(method.c_str());
 	pack->WriteUInt32(p_sz);
-
+	
 	for(uint32 i = 0; i < p_sz; ++i) {
 		auto &param = params[i + 2];
 		pack->WriteUInt32((uint32)param.size());
 		pack->WriteString(param.c_str());
 	}
-
+	
 	zs->SendPacket(pack);
 	safe_delete(pack);
 }

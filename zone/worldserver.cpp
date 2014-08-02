@@ -51,7 +51,8 @@
 #include "../common/rulesys.h"
 #include "titles.h"
 #include "QGlobals.h"
-
+#include "remote_call.h"
+#include "remote_call_subscribe.h"
 
 extern EntityList entity_list;
 extern Zone* zone;
@@ -62,6 +63,7 @@ extern NetConnection net;
 extern PetitionList petition_list;
 extern uint32 numclients;
 extern volatile bool RunLoops;
+extern std::map<std::string, RemoteCallHandler> remote_call_methods;
 
 WorldServer::WorldServer()
 : WorldConnection(EmuTCPConnection::packetModeZone)
@@ -1812,10 +1814,50 @@ void WorldServer::Process() {
 			}
 			break;
 		}
-		case ServerOP_WIRemoteCall:
-			printf("Recv remote call from WI but atm doing anything with it is not yet implemented (BUT SOON)\n");
-			DumpPacket(pack);
+		case ServerOP_WIRemoteCall: {
+			char *id = nullptr;
+			char *session_id = nullptr;
+			char *method = nullptr;
+
+			id = new char[pack->ReadUInt32() + 1];
+			pack->ReadString(id);
+
+			session_id = new char[pack->ReadUInt32() + 1];
+			pack->ReadString(session_id);
+
+			method = new char[pack->ReadUInt32() + 1];
+			pack->ReadString(method);
+
+			uint32 param_count = pack->ReadUInt32();
+			std::vector<std::string> params;
+			for(uint32 i = 0; i < param_count; ++i) {
+				char *p = new char[pack->ReadUInt32() + 1];
+				pack->ReadString(p);
+				params.push_back(p);
+				safe_delete_array(p);
+			}
+
+			if(remote_call_methods.count(method) != 0) {
+				auto f = remote_call_methods[method];
+				f(method, session_id, id, params);
+			}
+
+			safe_delete_array(id);
+			safe_delete_array(session_id);
+			safe_delete_array(method);
 			break;
+		}
+		case ServerOP_WIClientSessionResponse: {
+			uint32 count = pack->ReadUInt32();
+			for(uint32 i = 0; i < count; ++i) {
+				char *p = new char[pack->ReadUInt32() + 1];
+				pack->ReadString(p);
+				RemoteCallSubscriptionHandler::Instance()->ClearConnection(p);
+				safe_delete_array(p);
+			}
+			
+			break;
+		}	
 		default: {
 			std::cout << " Unknown ZSopcode:" << (int)pack->opcode;
 			std::cout << " size:" << pack->size << std::endl;

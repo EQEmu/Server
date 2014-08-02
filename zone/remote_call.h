@@ -15,8 +15,8 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#ifndef WORLD_REMOTE_CALL_H
-#define WORLD_REMOTE_CALL_H
+#ifndef ZONE_REMOTE_CALL_H
+#define ZONE_REMOTE_CALL_H
 
 #include <map>
 #include <string>
@@ -25,11 +25,12 @@
 typedef void(*RemoteCallHandler)(const std::string&, const std::string&, const std::string&, const std::vector<std::string>&);
 
 void RemoteCallResponse(const std::string &connection_id, const std::string &request_id, const std::map<std::string, std::string> &res, const std::string &error);
+void RemoteCall(const std::string &connection_id, const std::string &method, const std::vector<std::string> &params);
 
 void register_remote_call_handlers();
-void handle_rc_list_zones(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params);
-void handle_rc_get_zone_info(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params);
-void handle_rc_relay(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params);
+
+void handle_rc_subscribe(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params);
+void handle_rc_unsubscribe(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params);
 
 #endif
 
