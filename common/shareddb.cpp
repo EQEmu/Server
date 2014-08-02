@@ -1720,6 +1720,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 			sp[tempid].descnum = atoi(row[155]);
 			sp[tempid].effectdescnum = atoi(row[157]);
 
+			sp[tempid].npc_no_los = atoi(row[159]) != 0;
 			sp[tempid].reflectable = atoi(row[161]) != 0;
 			sp[tempid].bonushate=atoi(row[162]);
 
@@ -1750,6 +1751,8 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 			sp[tempid].AllowRest = atoi(row[212]) != 0;
 			sp[tempid].NotOutofCombat = atoi(row[213]) != 0;
 			sp[tempid].NotInCombat = atoi(row[214]) != 0;
+			sp[tempid].aemaxtargets = atoi(row[218]);
+			sp[tempid].maxtargets = atoi(row[219]);
 			sp[tempid].persistdeath = atoi(row[224]) != 0;
 			sp[tempid].DamageShieldType = 0;
 		}
