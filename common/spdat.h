@@ -697,8 +697,8 @@ struct SPDat_Spell_Struct
 /* 164 */	// for most spells this appears to mimic ResistDiff
 /* 166 */	int EndurCost;
 /* 167 */	int8 EndurTimerIndex;
-/* 168 */	//int IsDisciplineBuff; //Will goto the combat window when cast
-/* 169 */
+/* 168 */	bool IsDisciplineBuff; //Will goto the combat window when cast
+/* 169 - 172*/ //These are zero for ALL spells
 /* 173 */	int HateAdded;
 /* 174 */	int EndurUpkeep;
 /* 175 */	int numhitstype; // defines which type of behavior will tick down the numhit counter.
@@ -721,23 +721,30 @@ struct SPDat_Spell_Struct
 /* 197 */	bool not_extendable;
 /* 198- 199 */
 /* 200 */	bool suspendable; // buff is suspended in suspended buff zones
-/* 201 - 202 */
+/* 201 */	int viral_range; 
+/* 202 */
 /* 203 */	//int songcap; // individual song cap (how live currently does it, not implemented)
 /* 204 - 206 */
 /* 207 */	int spellgroup;
-/* 208 */	// int rank - increments AA effects with same name
+/* 208 */	int rank; //increments AA effects with same name
 /* 209 */	int powerful_flag; //  Need more investigation to figure out what to call this, for now we know -1 makes charm spells not break before their duration is complete, it does alot more though
 /* 210 */	// bool DurationFrozen; ??? 
 /* 211 */	int CastRestriction; //Various restriction categories for spells most seem targetable race related but have also seen others for instance only castable if target hp 20% or lower or only if target out of combat
 /* 212 */	bool AllowRest;
-/* 213 */	bool NotOutofCombat; //Fail if cast out of combat
-/* 214 */   bool NotInCombat; //Fail if cast in combat
+/* 213 */	bool InCombat; //Allow spell if target is in combat
+/* 214 */   bool OutofCombat; //Allow spell if target is out of combat
 /* 215 - 217 */
-/* 219 */	int aemaxtargets; // 
-/* 219 */	int maxtargets; // is used for beam and ring spells for target # limits (not implemented)
-/* 220 - 223 */
+/* 218 */	int aemaxtargets;  //Is used for various AE effects 
+/* 219 */	int maxtargets; //Is used for beam and ring spells for target # limits (not implemented)
+/* 220 - 223 */ 
 /* 224 */	bool persistdeath; // buff doesn't get stripped on death
-/* 225 - 236 */ // Not in DB
+/* 225 - 226 */
+/* 227 */	float min_dist; //spell power modified by distance from caster (Min Distance)
+/* 228 */	float min_dist_mod;  //spell power modified by distance from caster (Modifier at Min Distance)
+/* 229 */	float max_dist; //spell power modified by distance from caster (Max Distance)
+/* 230 */   float max_dist_mod; //spell power modified by distance from caster (Modifier at Max Distance)
+/* 231 */   int min_range; //Min casting range 
+/* 232 - 236 */
 			uint8 DamageShieldType; // This field does not exist in spells_us.txt
 };
 

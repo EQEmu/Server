@@ -1384,6 +1384,52 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		return false;
 	}
 
+	//Must be out of combat. (If Beneficial checks casters combat state, Deterimental checks targets)
+	if (!spells[spell_id].InCombat && spells[spell_id].OutofCombat){
+		if (IsDetrimentalSpell(spell_id)) { 
+			if ( (spell_target->IsNPC() && spell_target->IsEngaged()) || 
+				(spell_target->IsClient() && spell_target->CastToClient()->GetAggroCount())){
+					Message_StringID(13,SPELL_NO_EFFECT); //Unsure correct string
+					return false;
+			}
+		}
+
+		else if (IsBeneficialSpell(spell_id)) { 
+			if ( (IsNPC() && IsEngaged()) || 
+				(IsClient() && CastToClient()->GetAggroCount())){
+					if (IsDiscipline(spell_id))
+						Message_StringID(13,NO_ABILITY_IN_COMBAT);
+					else
+						Message_StringID(13,NO_CAST_IN_COMBAT);
+
+					return false;
+			}
+		}
+	}
+
+	//Must be in combat. (If Beneficial checks casters combat state, Deterimental checks targets)
+	else if (spells[spell_id].InCombat && !spells[spell_id].OutofCombat){
+		if (IsDetrimentalSpell(spell_id)) { 
+			if ( (spell_target->IsNPC() && !spell_target->IsEngaged()) || 
+				(spell_target->IsClient() && !spell_target->CastToClient()->GetAggroCount())){
+					Message_StringID(13,SPELL_NO_EFFECT); //Unsure correct string
+					return false;
+			}
+		}
+
+		else if (IsBeneficialSpell(spell_id)) { 
+			if ( (IsNPC() && !IsEngaged()) || 
+				(IsClient() && !CastToClient()->GetAggroCount())){
+					if (IsDiscipline(spell_id))
+						Message_StringID(13,NO_ABILITY_OUT_OF_COMBAT);
+					else
+						Message_StringID(13,NO_CAST_OUT_OF_COMBAT);
+
+					return false;
+			}
+		}
+	}
+
 	switch (targetType)
 	{
 // single target spells

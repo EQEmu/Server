@@ -316,6 +316,10 @@
 #define PET_NOT_FOCUSING			9263	//No longer focusing on one target, Master.
 #define PET_NOT_CASTING				9264	//Not casting spells, Master.
 #define PET_CASTING					9291	//Casting spells normally, Master.
+#define NO_CAST_IN_COMBAT			9190	//You can not cast this spell while in combat.
+#define NO_CAST_OUT_OF_COMBAT		9191	//You can not cast this spell while out of combat.
+#define NO_ABILITY_IN_COMBAT		9192	//You can not use this ability while in combat.
+#define NO_ABILITY_OUT_OF_COMBAT	9194	//You can not use this ability while out of combat.
 #define AE_RAMPAGE					11015	//%1 goes on a WILD RAMPAGE!
 #define FACE_ACCEPTED				12028	//Facial features accepted.
 #define SPELL_LEVEL_TO_LOW			12048	//You will have to achieve level %1 before you can scribe the %2.

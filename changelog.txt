@@ -1,5 +1,14 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/02/2014 ==
+Kayen: Implemented spell_news fields
+- npc_no_los (check if LOS is required for spells) 
+- InCombat, OutofCombat - Used together to restrict spells to only be cast while 
+in/out of combat (beneficial) or if target is in/out of combat (detrimental).
+Many new fields added and defined for future development.
+
+Required SQL: utils/sql/git/required/2014_08_02_spells_new.sql
+
 == 07/31/2014 ==
 Uleat: More inventory slot constant conversions. This should be the bulk of everything..but, due to the size of the server code, there
 may be some hidden ones. (client_packet.cpp and the client translators still need a thorough review.)
