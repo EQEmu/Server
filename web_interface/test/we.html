@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>WS</title>
+</head>
+	<body>
+	<span id="content"></span>
+	</body>
+	<script>
+		function generateUUID() {
+			var d = new Date().getTime();
+			var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+				var r = (d + Math.random()*16)%16 | 0;
+				d = Math.floor(d/16);
+				return (c=='x' ? r : (r&0x7|0x8)).toString(16);
+			});
+			return uuid;
+		};
+	
+		var socket = new WebSocket("ws://localhost:9888", "eqemu");
+		socket.onopen = function(e) {
+			var obj = {};
+			obj.id = 'token_auth_id';
+			obj.method = 'WebInterface::Authorize';
+			obj.params = ['c5b80ec8-4174-4c4c-d332-dbf3c3a551fc'];
+			socket.send(JSON.stringify(obj));
+		};
+		
+		socket.onmessage = function (event) {
+			var obj = JSON.parse(event.data);
+			console.log(obj);
+			
+			if(obj.id == 'token_auth_id') {
+				socket.send(JSON.stringify({id: 'list_zones_id', method: 'World::ListZones', params: []}));
+			} else if(obj.id == 'list_zones_id') {
+				for (var key in obj.result) {
+					if(obj.result.hasOwnProperty(key)) {
+						var str = JSON.stringify({id: 'get_zone_info_id', method: 'World::GetZoneDetails', params: [obj.result[key]]});
+						console.log(str);
+						socket.send(str);
+					}
+				}
+			} 
+			else if(obj.id == 'get_zone_info_id') {
+				socket.send(JSON.stringify({id: 'subscribe_id', method: 'Zone::Subscribe', params: [obj.result["zone_id"], obj.result["instance_id"], 'NPC::MakeSpawnUpdateNoDelta']}));
+			}
+		};
+	</script>
+</html>

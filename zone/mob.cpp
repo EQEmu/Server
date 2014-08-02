@@ -1216,32 +1216,16 @@ void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu){
 	spu->padding0018	=0x5df27;
 
 	if(IsNPC()) {
-		//zone_id
-		//instance_id
-		//entity_id
-		//x
-		//y
-		//z
-		//h
-		const auto &conns = RemoteCallSubscriptionHandler::Instance()->GetSubscribers("NPC::MakeSpawnUpdateNoDelta");
-		if(conns.size() > 0) {
-			std::string method = "NPC::MakeSpawnUpdateNoDelta";
-			std::vector<std::string> params;
-			params.push_back(std::to_string((long)zone->GetZoneID()));
-			params.push_back(std::to_string((long)zone->GetInstanceID()));
-			params.push_back(std::to_string((long)GetID()));
-			params.push_back(GetName());
-			params.push_back(std::to_string((double)x_pos));
-			params.push_back(std::to_string((double)y_pos));
-			params.push_back(std::to_string((double)z_pos));
-			params.push_back(std::to_string((double)heading));
-
-			auto &iter = conns.begin();
-			while(iter != conns.end()) {
-				RemoteCall((*iter), method, params);
-				++iter;
-			}
-		}
+		std::vector<std::string> params;
+		params.push_back(std::to_string((long)zone->GetZoneID()));
+		params.push_back(std::to_string((long)zone->GetInstanceID()));
+		params.push_back(std::to_string((long)GetID()));
+		params.push_back(GetName());
+		params.push_back(std::to_string((double)x_pos));
+		params.push_back(std::to_string((double)y_pos));
+		params.push_back(std::to_string((double)z_pos));
+		params.push_back(std::to_string((double)heading));
+		RemoteCallSubscriptionHandler::Instance()->OnEvent("NPC::MakeSpawnUpdateNoDelta", params);
 	}
 }
 

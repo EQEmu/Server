@@ -30,7 +30,7 @@ public:
 	static RemoteCallSubscriptionHandler *Instance();
 	bool Subscribe(std::string connection_id, std::string event_name);
 	bool Unsubscribe(std::string connection_id, std::string event_name);
-	const std::vector<std::string> &GetSubscribers(std::string event_name);
+	void OnEvent(std::string method, std::vector<std::string> &params);
 
 	void Process();
 	void ClearConnection(std::string connection_id);

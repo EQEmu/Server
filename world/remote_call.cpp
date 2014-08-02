@@ -90,7 +90,7 @@ void handle_rc_get_zone_info(const std::string &method, const std::string &conne
 	res["short_name"] = zs->GetZoneName();
 	res["long_name"] = zs->GetZoneLongName();
 	res["port"] = itoa(zs->GetCPort());
-	res["num_players"] = itoa(zs->NumPlayers());
+	res["player_count"] = itoa(zs->NumPlayers());
 	RemoteCallResponse(connection_id, request_id, res, error);
 }
 

@@ -7,6 +7,7 @@
 #include "../common/packet_dump.h"
 #include "../common/servertalk.h"
 #include "remote_call_subscribe.h"
+#include "remote_call.h"
 #include "worldserver.h"
 #include "zone.h"
 
@@ -90,12 +91,28 @@ bool RemoteCallSubscriptionHandler::Unsubscribe(std::string connection_id, std::
 	return false;
 }
 
+void RemoteCallSubscriptionHandler::OnEvent(std::string method, std::vector<std::string> &params) {
+	if(registered_events.count(method) == 0) {
+		return;
+	}
+
+	std::string func = "WebInterface::DispatchEvent::" + method;
+	std::vector<std::string> &conns = registered_events[method];
+	if(conns.size() > 0) {
+		auto &iter = conns.begin();
+		while(iter != conns.end()) {
+			RemoteCall((*iter), func, params);
+			++iter;
+		}
+	}
+}
+
 void RemoteCallSubscriptionHandler::Process() {
 	//create a check for all these connection ids packet
 	uint32 sz = 12;
 	auto iter = connection_ids.begin();
 	while(iter != connection_ids.end()) {
-		sz += iter->first.size();
+		sz += (uint32)iter->first.size();
 		sz += 5;
 		++iter;
 	}
@@ -116,15 +133,6 @@ void RemoteCallSubscriptionHandler::Process() {
 	safe_delete(pack);
 }
 
-const std::vector<std::string> &RemoteCallSubscriptionHandler::GetSubscribers(std::string event_name) {
-	if(registered_events.count(event_name) == 0) {
-		return std::vector<std::string>();
-	}
-
-	std::vector<std::string> &r = registered_events[event_name];
-	return r;
-}
-
 void RemoteCallSubscriptionHandler::ClearConnection(std::string connection_id) {
 	if(connection_ids.count(connection_id) != 0) {
 		connection_ids.erase(connection_id);
@@ -138,7 +146,6 @@ void RemoteCallSubscriptionHandler::ClearConnection(std::string connection_id) {
 			if(conn_iter->compare(connection_id) == 0) {
 				conns.erase(conn_iter);
 				registered_events[iter->first] = conns;
-				printf("Removing connection: %s from event %s\n", connection_id.c_str(), iter->first.c_str());
 				break;
 			}
 			++conn_iter;
@@ -149,10 +156,6 @@ void RemoteCallSubscriptionHandler::ClearConnection(std::string connection_id) {
 }
 
 void RemoteCallSubscriptionHandler::ClearAllConnections() {
-	//
-	//std::map<std::string, std::vector<std::string>> registered_events;
-	//std::map<std::string, int> connection_ids;
-
 	registered_events.clear();
 	connection_ids.clear();
 
