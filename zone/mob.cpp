@@ -1225,7 +1225,7 @@ void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu){
 		params.push_back(std::to_string((double)y_pos));
 		params.push_back(std::to_string((double)z_pos));
 		params.push_back(std::to_string((double)heading));
-		RemoteCallSubscriptionHandler::Instance()->OnEvent("NPC::MakeSpawnUpdateNoDelta", params);
+		RemoteCallSubscriptionHandler::Instance()->OnEvent("NPCPosition", params);
 	}
 }
 

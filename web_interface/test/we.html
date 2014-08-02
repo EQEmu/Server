@@ -22,7 +22,7 @@
 		socket.onopen = function(e) {
 			var obj = {};
 			obj.id = 'token_auth_id';
-			obj.method = 'WebInterface::Authorize';
+			obj.method = 'WebInterface.Authorize';
 			obj.params = ['c5b80ec8-4174-4c4c-d332-dbf3c3a551fc'];
 			socket.send(JSON.stringify(obj));
 		};
@@ -32,18 +32,18 @@
 			console.log(obj);
 			
 			if(obj.id == 'token_auth_id') {
-				socket.send(JSON.stringify({id: 'list_zones_id', method: 'World::ListZones', params: []}));
+				socket.send(JSON.stringify({id: 'list_zones_id', method: 'World.ListZones', params: []}));
 			} else if(obj.id == 'list_zones_id') {
 				for (var key in obj.result) {
 					if(obj.result.hasOwnProperty(key)) {
-						var str = JSON.stringify({id: 'get_zone_info_id', method: 'World::GetZoneDetails', params: [obj.result[key]]});
-						console.log(str);
+						var str = JSON.stringify({id: 'get_zone_info_id', method: 'World.GetZoneDetails', params: [obj.result[key]]});
 						socket.send(str);
 					}
 				}
 			} 
 			else if(obj.id == 'get_zone_info_id') {
-				socket.send(JSON.stringify({id: 'subscribe_id', method: 'Zone::Subscribe', params: [obj.result["zone_id"], obj.result["instance_id"], 'NPC::MakeSpawnUpdateNoDelta']}));
+				socket.send(JSON.stringify({id: 'subscribe_id', method: 'Zone.Subscribe', params: [obj.result["zone_id"], obj.result["instance_id"], 'NPCPosition']}));
+			} else if(obj.method = "On.NPCPosition") {
 			}
 		};
 	</script>

@@ -96,7 +96,7 @@ void RemoteCallSubscriptionHandler::OnEvent(std::string method, std::vector<std:
 		return;
 	}
 
-	std::string func = "WebInterface::DispatchEvent::" + method;
+	std::string func = "On." + method;
 	std::vector<std::string> &conns = registered_events[method];
 	if(conns.size() > 0) {
 		auto &iter = conns.begin();
@@ -158,5 +158,4 @@ void RemoteCallSubscriptionHandler::ClearConnection(std::string connection_id) {
 void RemoteCallSubscriptionHandler::ClearAllConnections() {
 	registered_events.clear();
 	connection_ids.clear();
-
 }

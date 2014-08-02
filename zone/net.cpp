@@ -406,10 +406,6 @@ int main(int argc, char** argv) {
 			worldwasconnected = false;
 		}
 
-		if(RemoteCallProcessTimer.Check()) {
-			RemoteCallSubscriptionHandler::Instance()->Process();
-		}
-
 		if (ZoneLoaded && zoneupdate_timer.Check()) {
 			{
 				if(net.group_timer.Enabled() && net.group_timer.Check())
@@ -445,6 +441,9 @@ int main(int argc, char** argv) {
 				if(quest_timers.Check())
 					quest_manager.Process();
 
+				if(RemoteCallProcessTimer.Check()) {
+					RemoteCallSubscriptionHandler::Instance()->Process();
+				}
 			}
 		}
 		DBAsyncWork* dbaw = 0;

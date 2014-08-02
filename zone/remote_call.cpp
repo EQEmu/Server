@@ -68,8 +68,8 @@ void RemoteCall(const std::string &connection_id, const std::string &method, con
 }
 
 void register_remote_call_handlers() {
-	remote_call_methods["Zone::Subscribe"] = handle_rc_subscribe;
-	remote_call_methods["Zone::Unsubscribe"] = handle_rc_unsubscribe;
+	remote_call_methods["Zone.Subscribe"] = handle_rc_subscribe;
+	remote_call_methods["Zone.Unsubscribe"] = handle_rc_unsubscribe;
 }
 
 void handle_rc_subscribe(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
