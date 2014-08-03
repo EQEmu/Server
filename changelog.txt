@@ -5,7 +5,9 @@ Kayen: Implemented spell_news fields
 - npc_no_los (check if LOS is required for spells) 
 - InCombat, OutofCombat - Used together to restrict spells to only be cast while 
 in/out of combat (beneficial) or if target is in/out of combat (detrimental).
-Many new fields added and defined for future development.
+-min_dist, min_dist_mod, max_dist, max_dist_mod - Scales spell power based on targets distance from caster.
+*This will require further work to fully implement but will work with 90% of live spells as is.
+*If making custom spells do not include effects that can't be scaled (like a spell trigger)
 
 Required SQL: utils/sql/git/required/2014_08_02_spells_new.sql
 

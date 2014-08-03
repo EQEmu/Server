@@ -567,20 +567,24 @@ void HateList::SpellCast(Mob *caster, uint32 spell_id, float range)
 	//So keep a list of entity ids and look up after
 	std::list<uint32> id_list;
 	range = range * range;
+	float dist_targ = 0;
 	auto iterator = list.begin();
 	while (iterator != list.end())
 	{
 		tHateEntry *h = (*iterator);
 		if(range > 0)
 		{
-			if(caster->DistNoRoot(*h->ent) <= range)
+			dist_targ = caster->DistNoRoot(*h->ent);
+			if(dist_targ <= range)
 			{
 				id_list.push_back(h->ent->GetID());
+				h->ent->CalcSpellPowerDistanceMod(spell_id, dist_targ);
 			}
 		}
 		else
 		{
 			id_list.push_back(h->ent->GetID());
+			h->ent->CalcSpellPowerDistanceMod(spell_id, 0, caster);
 		}
 		++iterator;
 	}

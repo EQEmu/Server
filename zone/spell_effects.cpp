@@ -186,6 +186,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 		buffs[buffslot].numhits = numhit;
 	}
 
+	bool _IsPowerDistModSpell = false;
+	if (IsPowerDistModSpell(spell_id))
+		_IsPowerDistModSpell = true;
+	else
+		SetSpellPowerDistanceMod(0);
+
 	// iterate through the effects in the spell
 	for (i = 0; i < EFFECT_COUNT; i++)
 	{
@@ -197,6 +203,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 		if(spell_id == SPELL_LAY_ON_HANDS && caster && caster->GetAA(aaImprovedLayOnHands))
 			effect_value = GetMaxHP();
+
+		if (_IsPowerDistModSpell)
+			effect_value += (effect_value*(GetSpellPowerDistanceMod()/100)/100);
 
 #ifdef SPELL_EFFECT_SPAM
 		effect_desc[0] = 0;
@@ -6444,4 +6453,24 @@ bool Mob::CheckSpellCategory(uint16 spell_id, int category_id, int effect_id){
 
 	return false;
 }
-			
+
+void Mob::CalcSpellPowerDistanceMod(uint16 spell_id, float range, Mob* caster)
+{
+	if (IsPowerDistModSpell(spell_id)){
+
+		float distance = 0;
+
+		if (caster && !range)
+			distance = caster->CalculateDistance(GetX(), GetY(), GetZ());
+		else
+			distance = sqrt(range);
+
+		float dm_range = spells[spell_id].max_dist - spells[spell_id].min_dist;
+		float dm_mod_interval = spells[spell_id].max_dist_mod - spells[spell_id].min_dist_mod;
+		float dist_from_min = distance -  spells[spell_id].min_dist;
+		float mod = spells[spell_id].min_dist_mod + (dist_from_min * (dm_mod_interval/dm_range));
+		mod *= 100.0f;
+		
+		SetSpellPowerDistanceMod(static_cast<int>(mod));
+	}
+}

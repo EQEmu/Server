@@ -674,6 +674,7 @@ void Group::CastGroupSpell(Mob* caster, uint16 spell_id) {
 		{
 			distance = caster->DistNoRoot(*members[z]);
 			if(distance <= range2) {
+				members[z]->CalcSpellPowerDistanceMod(spell_id, distance);
 				caster->SpellOnTarget(spell_id, members[z]);
 #ifdef GROUP_BUFF_PETS
 				if(members[z]->GetPet() && members[z]->HasPetAffinity() && !members[z]->GetPet()->IsCharmed())

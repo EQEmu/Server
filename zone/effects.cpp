@@ -740,6 +740,7 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 
 	float dist = caster->GetAOERange(spell_id);
 	float dist2 = dist * dist;
+	float dist_targ = 0;
 
 	bool bad = IsDetrimentalSpell(spell_id);
 	bool isnpc = caster->IsNPC();
@@ -755,7 +756,9 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 			continue;
 		if (curmob == caster && !affect_caster)	//watch for caster too
 			continue;
-		if (center->DistNoRoot(*curmob) > dist2)	//make sure they are in range
+		
+		dist_targ = center->DistNoRoot(*curmob);
+		if (dist_targ > dist2)	//make sure they are in range
 			continue;
 		if (isnpc && curmob->IsNPC()) {	//check npc->npc casting
 			FACTION_VALUE f = curmob->GetReverseFactionCon(caster);
@@ -785,6 +788,8 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 			if (caster->CheckAggro(curmob))
 				continue;
 		}
+
+		curmob->CalcSpellPowerDistanceMod(spell_id, dist_targ);
 
 		//if we get here... cast the spell.
 		if (IsTargetableAESpell(spell_id) && bad) {

@@ -845,6 +845,7 @@ bool IsPersistDeathSpell(uint16 spell_id);
 bool IsSuspendableSpell(uint16 spell_id);
 uint32 GetMorphTrigger(uint32 spell_id);
 bool IsCastonFadeDurationSpell(uint16 spell_id);
+bool IsPowerDistModSpell(uint16 spell_id);
 uint32 GetPartialMeleeRuneReduction(uint32 spell_id);
 uint32 GetPartialMagicRuneReduction(uint32 spell_id);
 uint32 GetPartialMeleeRuneAmount(uint32 spell_id);

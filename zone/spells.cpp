@@ -1915,6 +1915,8 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			Message_StringID(13, TARGET_OUT_OF_RANGE);
 			return(false);
 		}
+
+		spell_target->CalcSpellPowerDistanceMod(spell_id, dist2);
 	}
 
 	//
@@ -2114,16 +2116,20 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 					if((heading_to_target >= angle_start && heading_to_target <= 360.0f) ||
 						(heading_to_target >= 0.0f && heading_to_target <= angle_end))
 					{
-						if(CheckLosFN(spell_target))
+						if(CheckLosFN((*iter)) || spells[spell_id].npc_no_los){
+							(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
 							SpellOnTarget(spell_id, spell_target, false, true, resist_adjust);
+						}
 					}
 				}
 				else
 				{
 					if(heading_to_target >= angle_start && heading_to_target <= angle_end)
 					{
-						if(CheckLosFN((*iter)))
+						if(CheckLosFN((*iter)) || spells[spell_id].npc_no_los){
+							(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
 							SpellOnTarget(spell_id, (*iter), false, true, resist_adjust);
+						}
 					}
 				}
 				++iter;
