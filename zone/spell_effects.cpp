@@ -205,7 +205,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			effect_value = GetMaxHP();
 
 		if (_IsPowerDistModSpell)
-			effect_value += (effect_value*(GetSpellPowerDistanceMod()/100)/100);
+			effect_value = effect_value*(GetSpellPowerDistanceMod()/100);
 
 #ifdef SPELL_EFFECT_SPAM
 		effect_desc[0] = 0;
@@ -6471,6 +6471,6 @@ void Mob::CalcSpellPowerDistanceMod(uint16 spell_id, float range, Mob* caster)
 		float mod = spells[spell_id].min_dist_mod + (dist_from_min * (dm_mod_interval/dm_range));
 		mod *= 100.0f;
 		
-		SetSpellPowerDistanceMod(static_cast<int>(mod));
+		SetSpellPSetSpellPowerDistanceMod(static_cast<int>(mod));
 	}
 }
