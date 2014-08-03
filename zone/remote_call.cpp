@@ -6,12 +6,18 @@
 #include "../common/packet_functions.h"
 #include "../common/packet_dump.h"
 #include "../common/servertalk.h"
+#include "../common/web_interface_utils.h"
 #include "remote_call.h"
 #include "remote_call_subscribe.h"
 #include "worldserver.h"
+#include "zone.h"
+#include "entity.h"
+#include "npc.h"
+#include <string>
 
 std::map<std::string, RemoteCallHandler> remote_call_methods;
 extern WorldServer worldserver;
+extern Zone* zone;
 
 void RemoteCallResponse(const std::string &connection_id, const std::string &request_id, const std::map<std::string, std::string> &res, const std::string &error) {
 	uint32 sz = (uint32)(connection_id.size() + request_id.size() + error.size() + 3 + 16);
@@ -67,9 +73,44 @@ void RemoteCall(const std::string &connection_id, const std::string &method, con
 	safe_delete(pack);
 }
 
+/* Zone */
 void register_remote_call_handlers() {
 	remote_call_methods["Zone.Subscribe"] = handle_rc_subscribe;
 	remote_call_methods["Zone.Unsubscribe"] = handle_rc_unsubscribe;
+	remote_call_methods["Zone.GetInitialEntityPositions"] = handle_rc_get_initial_entity_positions;
+}
+
+void handle_rc_get_initial_entity_positions(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
+	std::string error;
+	std::map<std::string, std::string> res;
+
+	int16 i = 0;
+	std::list<NPC*> npc_list;
+	entity_list.GetNPCList(npc_list);
+	for (std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
+		NPC* npc = *itr;
+		// res[std::to_string(npc->GetID())] = MakeJSON(
+		// 	"zone_id:" + std::to_string(zone->GetZoneID()) +
+		// 	",inst_id:" + std::to_string(zone->GetInstanceID()) +
+		// 	",ent_id:" + std::to_string(npc->GetID()) +
+		// 	",name:" + npc->GetName() +
+		// 	",x:" + std::to_string(npc->GetX()) +
+		// 	",y:" + std::to_string(npc->GetX()) +
+		// 	",z:" + std::to_string(npc->GetX()) +
+		// 	",h:" + std::to_string(npc->GetHeading())
+		// ); 
+		res["zone_id"] = itoa(zone->GetZoneID());
+		res["instance_id"] = itoa(zone->GetInstanceID());
+		res["ent_id"] = itoa(npc->GetID());
+		res["name"] = npc->GetName();
+		res["x"] = itoa(npc->GetX());
+		res["y"] = itoa(npc->GetY());
+		res["z"] = itoa(npc->GetZ());
+		res["h"] = itoa(npc->GetHeading());
+		RemoteCallResponse(connection_id, request_id, res, error);
+		i++;
+		printf("Response ent pos %i \n", i);
+	}
 }
 
 void handle_rc_subscribe(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {

@@ -66,6 +66,7 @@ SET(common_sources
 	unix.cpp
 	uuid.cpp
 	worldconn.cpp
+	web_interface_utils.cpp
 	XMLParser.cpp
 	platform.cpp
 	patches/Client62.cpp
@@ -189,6 +190,7 @@ SET(common_headers
 	useperl.h
 	version.h
 	worldconn.h
+	web_interface_utils.h
 	XMLParser.h
 	ZoneNumbers.h
 	platform.h

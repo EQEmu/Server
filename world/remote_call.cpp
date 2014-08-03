@@ -45,11 +45,13 @@ void RemoteCallResponse(const std::string &connection_id, const std::string &req
 	safe_delete(pack);
 }
 
+/* World */
 void register_remote_call_handlers() {
 	remote_call_methods["World.ListZones"] = handle_rc_list_zones;
 	remote_call_methods["World.GetZoneDetails"] = handle_rc_get_zone_info;
 	remote_call_methods["Zone.Subscribe"] = handle_rc_relay;
 	remote_call_methods["Zone.Unsubscribe"] = handle_rc_relay;
+	remote_call_methods["Zone.GetInitialEntityPositions"] = handle_rc_relay;
 }
 
 void handle_rc_list_zones(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
