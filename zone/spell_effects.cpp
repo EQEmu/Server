@@ -204,7 +204,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 		if(spell_id == SPELL_LAY_ON_HANDS && caster && caster->GetAA(aaImprovedLayOnHands))
 			effect_value = GetMaxHP();
 
-		if (_IsPowerDistModSpell)
+		if (_IsPowerDistModSpell && GetSpellPowerDistanceMod())
 			effect_value = effect_value*(GetSpellPowerDistanceMod()/100);
 
 #ifdef SPELL_EFFECT_SPAM
