@@ -2348,36 +2348,29 @@ bool Bot::IsValidName() {
 	return Result;
 }
 
-bool Bot::IsBotNameAvailable(std::string* errorMessage) {
-	bool Result = false;
-
-	if(this->GetCleanName()) {
-		char* Query = 0;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
-
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT COUNT(id) FROM vwBotCharacterMobs WHERE name LIKE '%s'", this->GetCleanName()), TempErrorMessageBuffer, &DatasetResult)) {
-			*errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else {
-			uint32 ExistingNameCount = 0;
-
-			while(DataRow = mysql_fetch_row(DatasetResult)) {
-				ExistingNameCount = atoi(DataRow[0]);
-				break;
-			}
-
-			if(ExistingNameCount == 0)
-				Result = true;
-
-			mysql_free_result(DatasetResult);
-		}
-
-		safe_delete(Query);
+bool Bot::IsBotNameAvailable(char *botName, std::string* errorMessage) {
+	if (botName == "" || strlen(botName) > 15 || !database.CheckNameFilter(botName) || !database.CheckUsedName(botName)) {
+		return false; //Check if Botname is Empty / Check if Botname larger than 15 char / Valid to Player standards / Not used by a player!
 	}
+	
+	char* query = 0;
+	char errbuff[MYSQL_ERRMSG_SIZE];
+	MYSQL_RES *result;
 
-	return Result;
+	if(!database.RunQuery(query, MakeAnyLenString(&query, "SELECT id FROM vwBotCharacterMobs WHERE name LIKE '%s'", botName), errbuff, &result)) {
+		safe_delete_array(query);
+		return false;
+	}
+	else { // It was a valid query, so lets do our counts!
+		safe_delete_array(query);
+		uint32 tmp = mysql_num_rows(result);
+		mysql_free_result(result);
+		if (tmp > 0) { // There is a Name! No change (Return False)
+			return false;
+		}
+	}
+	
+	return true; //We made it with a valid name!
 }
 
 bool Bot::Save() {
@@ -11812,6 +11805,11 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		int gender = 0;
 		if(!strcasecmp(sep->arg[5], "female"))
 			gender = 1;
+
+		if(!IsBotNameAvailable(sep->arg[2],&TempErrorMessage)) {
+			c->Message(0, "The name %s is already being used or is invalid. Please choose a different name.", sep->arg[2]);
+			return;
+		}
 
 		NPCType DefaultNPCTypeStruct = CreateDefaultNPCTypeStructForBot(std::string(sep->arg[2]), std::string(), c->GetLevel(), atoi(sep->arg[4]), atoi(sep->arg[3]), gender);
 		Bot* NewBot = new Bot(DefaultNPCTypeStruct, c);
