@@ -743,7 +743,7 @@ struct SPDat_Spell_Struct
 /* 228 */	float min_dist_mod;  //spell power modified by distance from caster (Modifier at Min Distance)
 /* 229 */	float max_dist; //spell power modified by distance from caster (Max Distance)
 /* 230 */   float max_dist_mod; //spell power modified by distance from caster (Modifier at Max Distance)
-/* 231 */   int min_range; //Min casting range 
+/* 231 */   float min_range; //Min casting range 
 /* 232 - 236 */
 			uint8 DamageShieldType; // This field does not exist in spells_us.txt
 };

@@ -1742,8 +1742,8 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 			sp[tempid].viral_targets = atoi(row[191]);
 			sp[tempid].viral_timer = atoi(row[192]);
 			sp[tempid].NimbusEffect = atoi(row[193]);
-			sp[tempid].directional_start = (float)atoi(row[194]);
-			sp[tempid].directional_end = (float)atoi(row[195]);
+			sp[tempid].directional_start = static_cast<float>(atoi(row[194]));
+			sp[tempid].directional_end = static_cast<float>(atoi(row[195]));
 			sp[tempid].not_extendable = atoi(row[197]) != 0;
 			sp[tempid].suspendable = atoi(row[200]) != 0;
 			sp[tempid].viral_range = atoi(row[201]);
@@ -1761,7 +1761,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 			sp[tempid].min_dist_mod = atof(row[228]);
 			sp[tempid].max_dist = atof(row[229]);
 			sp[tempid].max_dist_mod = atof(row[230]);
-			sp[tempid].min_range = atoi(row[231]);
+			sp[tempid].min_range = static_cast<float>(atoi(row[231]));
 			sp[tempid].DamageShieldType = 0;
 		}
 		mysql_free_result(result);

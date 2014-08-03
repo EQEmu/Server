@@ -249,6 +249,7 @@
 #define CORPSEDRAG_BEGIN			4064	//You begin to drag %1.
 #define CORPSEDRAG_STOPALL			4065	//You stop dragging the corpses.
 #define CORPSEDRAG_STOP				4066	//You stop dragging the corpse.
+#define	TARGET_TOO_CLOSE			4602	//You are too close to your target. Get farther away.
 #define WHOALL_NO_RESULTS			5029	//There are no players in EverQuest that match those who filters.
 #define PETITION_NO_DELETE			5053	//You do not have a petition in the queue.
 #define PETITION_DELETED			5054	//Your petition was successfully deleted.
