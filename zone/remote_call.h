@@ -29,9 +29,9 @@ void RemoteCall(const std::string &connection_id, const std::string &method, con
 
 void register_remote_call_handlers();
 
-void handle_rc_get_initial_entity_positions(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params);
 void handle_rc_subscribe(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params);
 void handle_rc_unsubscribe(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params);
+void handle_rc_get_initial_entity_positions(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params);
 
 #endif
 

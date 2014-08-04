@@ -29,7 +29,7 @@
 		WriteWebCallResponseString(session, document, "Missing parameters, expected: " + std::string(msg), true); \
 		return; \
 	} \
-	if(params.Size() != sz) { \
+	if(params.Size() < sz) { \
 		WriteWebCallResponseString(session, document, "Missing parameters, expected: " + std::string(msg), true); \
 		return; \
 	} \
@@ -56,12 +56,30 @@
 		} \
 	} \
 
+#define WriteWebProtocolPacket() ServerPacket *pack = new ServerPacket(ServerOP_WIRemoteCall, sz); \
+	pack->WriteUInt32((uint32)id.size()); \
+	pack->WriteString(id.c_str()); \
+	pack->WriteUInt32((uint32)session->uuid.size()); \
+	pack->WriteString(session->uuid.c_str()); \
+	pack->WriteUInt32((uint32)method.size()); \
+	pack->WriteString(method.c_str()); \
+	auto &params = document["params"]; \
+	auto params_sz = params.Size(); \
+	pack->WriteUInt32(params_sz); \
+	for(rapidjson::SizeType i = 0; i < params_sz; ++i) { \
+		auto &param = params[(rapidjson::SizeType)i]; \
+		pack->WriteUInt32((uint32)strlen(param.GetString())); \
+		pack->WriteString(param.GetString()); \
+	} \
+	worldserver->SendPacket(pack); \
+	safe_delete(pack); \
+
 void register_methods();
 void handle_method_token_auth(per_session_data_eqemu *session, rapidjson::Document &document, std::string &method);
 void handle_method_no_args(per_session_data_eqemu *session, rapidjson::Document &document, std::string &method);
 void handle_method_get_zone_info(per_session_data_eqemu *session, rapidjson::Document &document, std::string &method);
 void handle_method_subscribe(per_session_data_eqemu *session, rapidjson::Document &document, std::string &method);
-void handle_method_void_event(per_session_data_eqemu *session, rapidjson::Document &document, std::string &method);
+void handle_method_zone_no_args(per_session_data_eqemu *session, rapidjson::Document &document, std::string &method);
 
 #endif
 

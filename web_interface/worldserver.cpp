@@ -137,8 +137,6 @@ void WorldServer::Process(){
 				char *session_id = nullptr;
 				char *method = nullptr;
 
-				DumpPacket(pack);
-
 				session_id = new char[pack->ReadUInt32() + 1];
 				pack->ReadString(session_id);
 
@@ -207,7 +205,7 @@ void WorldServer::Process(){
 					uint32 sz = 12;
 					size_t isz = invalidate.size();
 					for(size_t i = 0; i < isz; ++i) {
-						sz += invalidate[i].size();
+						sz += (uint32)invalidate[i].size();
 						sz += 5;
 					}
 

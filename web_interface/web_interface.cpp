@@ -132,7 +132,7 @@ int callback_eqemu(libwebsocket_context *context, libwebsocket *wsi, libwebsocke
 
 static struct libwebsocket_protocols protocols[] = {
 	{ "http-only", callback_http, 0, 0, },
-	{ "eqemu", callback_eqemu, sizeof(per_session_data_eqemu), 0, },
+	{ "eqemu", callback_eqemu, sizeof(per_session_data_eqemu), 65536, },
 	{ nullptr, nullptr, 0, 0 }
 };
 
@@ -159,7 +159,7 @@ int main() {
 	memset(&info, 0, sizeof info);
 	info.port = config->WebInterfacePort;
 	info.protocols = protocols;
-	info.extensions = libwebsocket_get_internal_extensions();
+	info.extensions = nullptr;
 	info.gid = -1;
 	info.uid = -1;
 

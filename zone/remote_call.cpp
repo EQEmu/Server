@@ -80,39 +80,6 @@ void register_remote_call_handlers() {
 	remote_call_methods["Zone.GetInitialEntityPositions"] = handle_rc_get_initial_entity_positions;
 }
 
-void handle_rc_get_initial_entity_positions(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
-	std::string error;
-	std::map<std::string, std::string> res;
-
-	int16 i = 0;
-	std::list<NPC*> npc_list;
-	entity_list.GetNPCList(npc_list);
-	for (std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
-		NPC* npc = *itr;
-		// res[std::to_string(npc->GetID())] = MakeJSON(
-		// 	"zone_id:" + std::to_string(zone->GetZoneID()) +
-		// 	",inst_id:" + std::to_string(zone->GetInstanceID()) +
-		// 	",ent_id:" + std::to_string(npc->GetID()) +
-		// 	",name:" + npc->GetName() +
-		// 	",x:" + std::to_string(npc->GetX()) +
-		// 	",y:" + std::to_string(npc->GetX()) +
-		// 	",z:" + std::to_string(npc->GetX()) +
-		// 	",h:" + std::to_string(npc->GetHeading())
-		// ); 
-		res["zone_id"] = itoa(zone->GetZoneID());
-		res["instance_id"] = itoa(zone->GetInstanceID());
-		res["ent_id"] = itoa(npc->GetID());
-		res["name"] = npc->GetName();
-		res["x"] = itoa(npc->GetX());
-		res["y"] = itoa(npc->GetY());
-		res["z"] = itoa(npc->GetZ());
-		res["h"] = itoa(npc->GetHeading());
-		RemoteCallResponse(connection_id, request_id, res, error);
-		i++;
-		printf("Response ent pos %i \n", i);
-	}
-}
-
 void handle_rc_subscribe(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
 	std::string error;
 	std::map<std::string, std::string> res;
@@ -150,4 +117,24 @@ void handle_rc_unsubscribe(const std::string &method, const std::string &connect
 	}
 
 	RemoteCallResponse(connection_id, request_id, res, error);
+}
+
+void handle_rc_get_initial_entity_positions(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
+	std::string error;
+	std::map<std::string, std::string> res;
+
+	std::list<NPC*> npc_list;
+	entity_list.GetNPCList(npc_list);
+	for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
+		NPC* npc = *itr;
+		res["zone_id"] = std::to_string((long)zone->GetZoneID());
+		res["instance_id"] = std::to_string((long)zone->GetInstanceID());
+		res["ent_id"] = std::to_string((long)npc->GetID());
+		res["name"] = npc->GetName();
+		res["x"] = std::to_string((double)npc->GetX());
+		res["y"] = std::to_string((double)npc->GetY());
+		res["z"] = std::to_string((double)npc->GetZ());
+		res["h"] = std::to_string((double)npc->GetHeading());
+		RemoteCallResponse(connection_id, request_id, res, error);
+	}
 }
