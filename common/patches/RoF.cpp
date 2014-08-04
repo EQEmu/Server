@@ -107,125 +107,123 @@ const EQClientVersion Strategy::ClientVersion() const
 
 #include "SSDefine.h"
 
-// Converts Titanium Slot IDs to RoF Slot IDs for use in Encodes
-static inline structs::ItemSlotStruct TitaniumToRoFSlot(uint32 TitaniumSlot)
-{
+
+// Converts Server Slot IDs to RoF Slot IDs for use in Encodes
+static inline structs::ItemSlotStruct ServerToRoFSlot(uint32 ServerSlot) {
 	structs::ItemSlotStruct RoFSlot;
-	RoFSlot.SlotType = 0xffff;
-	RoFSlot.Unknown02 = 0;
-	RoFSlot.MainSlot = 0xffff;
-	RoFSlot.SubSlot = 0xffff;
-	RoFSlot.AugSlot = 0xffff;
-	RoFSlot.Unknown01 = 0;
+	RoFSlot.SlotType	= INVALID_INDEX;
+	RoFSlot.Unknown02	= NOT_USED;
+	RoFSlot.MainSlot	= INVALID_INDEX;
+	RoFSlot.SubSlot		= INVALID_INDEX;
+	RoFSlot.AugSlot		= INVALID_INDEX;
+	RoFSlot.Unknown01	= NOT_USED;
+
 	uint32 TempSlot = 0;
 
-	if (TitaniumSlot < 56 || TitaniumSlot == 9999)	// Main Inventory and Cursor
-	{
-		RoFSlot.SlotType = 0;
-		RoFSlot.MainSlot = TitaniumSlot;
-		if (TitaniumSlot == 9999)
-		{
-			RoFSlot.MainSlot = 21;
-		}
-		else if (TitaniumSlot >= 30)	// Cursor and Extended Corpse Inventory
-		{
+	if (ServerSlot < 56 || ServerSlot == MainPowerSource) { // Main Inventory and Cursor
+		RoFSlot.SlotType = maps::MapPossessions;
+		RoFSlot.MainSlot = ServerSlot;
+
+		if (ServerSlot == MainPowerSource)
+			RoFSlot.MainSlot = slots::MainPowerSource;
+		
+		else if (ServerSlot >= MainCursor) // Cursor and Extended Corpse Inventory
 			RoFSlot.MainSlot += 3;
-		}
-		else if (TitaniumSlot > 20)
-		{
+		
+		else if (ServerSlot >= MainAmmo) // (> 20)
 			RoFSlot.MainSlot += 1;
+	}
+
+	/*else if (ServerSlot < 51) { // Cursor Buffer
+		RoFSlot.SlotType = maps::MapLimbo;
+		RoFSlot.MainSlot = ServerSlot - 31;
+	}*/
+
+	else if (ServerSlot >= EmuConstants::GENERAL_BAGS_BEGIN && ServerSlot <= EmuConstants::CURSOR_BAG_END) { // (> 250 && < 341)
+		RoFSlot.SlotType = maps::MapPossessions;
+		TempSlot = ServerSlot - 1;
+		RoFSlot.MainSlot = int(TempSlot / EmuConstants::ITEM_CONTAINER_SIZE) - 2;
+		RoFSlot.SubSlot = TempSlot - ((RoFSlot.MainSlot + 2) * EmuConstants::ITEM_CONTAINER_SIZE);
+
+		if (RoFSlot.MainSlot >= slots::MainGeneral9) // (> 30)
+			RoFSlot.MainSlot = slots::MainCursor;
+	}
+
+	else if (ServerSlot >= EmuConstants::TRIBUTE_BEGIN && ServerSlot <= EmuConstants::TRIBUTE_END) { // Tribute
+		RoFSlot.SlotType = maps::MapTribute;
+		RoFSlot.MainSlot = ServerSlot - EmuConstants::TRIBUTE_BEGIN;
+	}
+
+	else if (ServerSlot >= EmuConstants::BANK_BEGIN && ServerSlot <= EmuConstants::BANK_BAGS_END) {
+		RoFSlot.SlotType = maps::MapBank;
+		TempSlot = ServerSlot - EmuConstants::BANK_BEGIN;
+		RoFSlot.MainSlot = TempSlot;
+
+		if (TempSlot > 30) { // (> 30)
+			RoFSlot.MainSlot = int(TempSlot / EmuConstants::ITEM_CONTAINER_SIZE) - 3;
+			RoFSlot.SubSlot = TempSlot - ((RoFSlot.MainSlot + 3) * EmuConstants::ITEM_CONTAINER_SIZE);
+		}
+	}
+
+	else if (ServerSlot >= EmuConstants::SHARED_BANK_BEGIN && ServerSlot <= EmuConstants::SHARED_BANK_BAGS_END) {
+		RoFSlot.SlotType = maps::MapSharedBank;
+		TempSlot = ServerSlot - EmuConstants::SHARED_BANK_BEGIN;
+		RoFSlot.MainSlot = TempSlot;
+
+		if (TempSlot > 30) { // (> 30)
+			RoFSlot.MainSlot = int(TempSlot / EmuConstants::ITEM_CONTAINER_SIZE) - 3;
+			RoFSlot.SubSlot = TempSlot - ((RoFSlot.MainSlot + 3) * EmuConstants::ITEM_CONTAINER_SIZE);
+		}
+	}
+
+	else if (ServerSlot >= EmuConstants::TRADE_BEGIN && ServerSlot <= EmuConstants::TRADE_BAGS_END) {
+		RoFSlot.SlotType = maps::MapTrade;
+		TempSlot = ServerSlot - EmuConstants::TRADE_BEGIN;
+		RoFSlot.MainSlot = TempSlot;
+
+		if (TempSlot > 30) {
+			RoFSlot.MainSlot = int(TempSlot / EmuConstants::ITEM_CONTAINER_SIZE) - 3;
+			RoFSlot.SubSlot = TempSlot - ((RoFSlot.MainSlot + 3) * EmuConstants::ITEM_CONTAINER_SIZE);
 		}
 
-	}
-	/*else if (TitaniumSlot < 51)		// Cursor Buffer
-	{
-		RoFSlot.SlotType = 5;
-		RoFSlot.MainSlot = TitaniumSlot - 31;
-	}*/
-	else if (TitaniumSlot > 250 && TitaniumSlot < 341)
-	{
-		RoFSlot.SlotType = 0;
-		TempSlot = TitaniumSlot - 1;
-		RoFSlot.MainSlot = int(TempSlot / 10) - 2;
-		RoFSlot.SubSlot = TempSlot - ((RoFSlot.MainSlot + 2) * 10);
-		if (RoFSlot.MainSlot > 30)
-		{
-			RoFSlot.MainSlot = 33;
-		}
-	}
-	else if (TitaniumSlot > 399 && TitaniumSlot < 405)	// Tribute
-	{
-		RoFSlot.SlotType = 6;
-		RoFSlot.MainSlot = TitaniumSlot - 400;
-	}
-	else if (TitaniumSlot > 1999 && TitaniumSlot < 2271)
-	{
-		RoFSlot.SlotType = 1;
-		TempSlot = TitaniumSlot - 2000;
-		RoFSlot.MainSlot = TempSlot;
-		if (TempSlot > 30)
-		{
-			RoFSlot.MainSlot = int(TempSlot / 10) - 3;
-			RoFSlot.SubSlot = TempSlot - ((RoFSlot.MainSlot + 3) * 10);
-		}
-	}
-	else if (TitaniumSlot > 2499 && TitaniumSlot < 2551)
-	{
-		RoFSlot.SlotType = 2;
-		TempSlot = TitaniumSlot - 2500;
-		RoFSlot.MainSlot = TempSlot;
-		if (TempSlot > 30)
-		{
-			RoFSlot.MainSlot = int(TempSlot / 10) - 3;
-			RoFSlot.SubSlot = TempSlot - ((RoFSlot.MainSlot + 3) * 10);
-		}
-	}
-	else if (TitaniumSlot > 2999 && TitaniumSlot < 3180)
-	{
-		RoFSlot.SlotType = 3;
-		TempSlot = TitaniumSlot - 3000;
-		RoFSlot.MainSlot = TempSlot;
-		if (TempSlot > 99)
-		{
+		/*
+		// OLD CODE:
+		if (TempSlot > 99) {
 			if (TempSlot > 100)
-			{
 				RoFSlot.MainSlot = int((TempSlot - 100) / 10);
-			}
+			
 			else
-			{
 				RoFSlot.MainSlot = 0;
-			}
+			
 			RoFSlot.SubSlot = TempSlot - (100 + RoFSlot.MainSlot);
 		}
+		*/
 	}
-	else if (TitaniumSlot > 3999 && TitaniumSlot < 4009)
-	{
-		RoFSlot.SlotType = 4;
-		TempSlot = TitaniumSlot - 4000;
+
+	else if (ServerSlot >= EmuConstants::WORLD_BEGIN && ServerSlot <= EmuConstants::WORLD_END) {
+		RoFSlot.SlotType = maps::MapWorld;
+		TempSlot = ServerSlot - EmuConstants::WORLD_BEGIN;
 		RoFSlot.MainSlot = TempSlot;
 	}
 
-	_log(NET__ERROR, "Convert Titanium Slot %i to RoF Slots: Type %i, Unk2 %i, Main %i, Sub %i, Aug %i, Unk1 %i", TitaniumSlot, RoFSlot.SlotType, RoFSlot.Unknown02, RoFSlot.MainSlot, RoFSlot.SubSlot, RoFSlot.AugSlot, RoFSlot.Unknown01);
+	_log(NET__ERROR, "Convert Server Slot %i to RoF Slots: Type %i, Unk2 %i, Main %i, Sub %i, Aug %i, Unk1 %i", ServerSlot, RoFSlot.SlotType, RoFSlot.Unknown02, RoFSlot.MainSlot, RoFSlot.SubSlot, RoFSlot.AugSlot, RoFSlot.Unknown01);
 
 	return RoFSlot;
 }
 
-static inline uint32 RoFToTitaniumSlot(structs::ItemSlotStruct RoFSlot)
-{
-	uint32 TitaniumSlot = 0xffffffff;
+// Converts RoF Slot IDs to Server Slot IDs for use in Decodes
+static inline uint32 RoFToServerSlot(structs::ItemSlotStruct RoFSlot) {
+	uint32 ServerSlot = INVALID_INDEX;
 	uint32 TempSlot = 0;
 
-	if (RoFSlot.SlotType == 0 && RoFSlot.MainSlot < 57)	// Worn/Personal Inventory and Cursor (Originally 51)
-	{
-		if (RoFSlot.MainSlot == 21)			// Power Source
-		{
-			TempSlot = 9999;
-		}
-		else if (RoFSlot.MainSlot >= 33)	// Cursor and Extended Corpse Inventory
-		{
+	if (RoFSlot.SlotType == maps::MapPossessions && RoFSlot.MainSlot < 57) { // Worn/Personal Inventory and Cursor (< 51)
+		if (RoFSlot.MainSlot == slots::MainPowerSource)
+			TempSlot = MainPowerSource;
+		
+		else if (RoFSlot.MainSlot >= slots::MainCursor) // Cursor and Extended Corpse Inventory
 			TempSlot = RoFSlot.MainSlot - 3;
-		}
-		/*else if (RoFSlot.MainSlot == 31 || RoFSlot.MainSlot == 32) { // 9th and 10th RoF inventory/corpse slots
+
+		/*else if (RoFSlot.MainSlot == slots::MainGeneral9 || RoFSlot.MainSlot == slots::MainGeneral10) { // 9th and 10th RoF inventory/corpse slots
 			// Need to figure out what to do when we get these
 
 			// The slot range of 0 - client_max is cross-utilized between player inventory and corpse inventory.
@@ -235,171 +233,171 @@ static inline uint32 RoFToTitaniumSlot(structs::ItemSlotStruct RoFSlot)
 
 			// For now, it's probably best to leave as-is and let this work itself out in the inventory rework.
 		}*/
-		else if (RoFSlot.MainSlot >= 22)	// Ammo and Main Inventory
-		{
+
+		else if (RoFSlot.MainSlot >= slots::MainAmmo) // Ammo and Main Inventory
 			TempSlot = RoFSlot.MainSlot - 1;
-		}
-		else								// Worn Slots
-		{
+		
+		else // Worn Slots
 			TempSlot = RoFSlot.MainSlot;
-		}
 
-		if (RoFSlot.SubSlot >= 0)			// Bag Slots
-		{
-			TempSlot = ((TempSlot + 3) * 10) + RoFSlot.SubSlot + 1;
-		}
+		if (RoFSlot.SubSlot >= SUB_BEGIN) // Bag Slots
+			TempSlot = ((TempSlot + 3) * EmuConstants::ITEM_CONTAINER_SIZE) + RoFSlot.SubSlot + 1;
 
-		TitaniumSlot = TempSlot;
+		ServerSlot = TempSlot;
 	}
-	else if (RoFSlot.SlotType == 1)		// Bank Slots
-	{
-		TempSlot = 2000;
-		if (RoFSlot.SubSlot >= 0)
-		{
-			TempSlot += ((RoFSlot.MainSlot + 3) * 10) + RoFSlot.SubSlot + 1;
-		}
+
+	else if (RoFSlot.SlotType == maps::MapBank) {
+		TempSlot = EmuConstants::BANK_BEGIN;
+
+		if (RoFSlot.SubSlot >= SUB_BEGIN)
+			TempSlot += ((RoFSlot.MainSlot + 3) * EmuConstants::ITEM_CONTAINER_SIZE) + RoFSlot.SubSlot + 1;
+		
 		else
-		{
 			TempSlot += RoFSlot.MainSlot;
-		}
-		TitaniumSlot = TempSlot;
+		
+		ServerSlot = TempSlot;
 	}
-	else if (RoFSlot.SlotType == 2)		// Shared Bank Slots
-	{
-		TempSlot = 2500;
-		if (RoFSlot.SubSlot >= 0)
-		{
-			TempSlot += ((RoFSlot.MainSlot + 3) * 10) + RoFSlot.SubSlot + 1;
-		}
+
+	else if (RoFSlot.SlotType == maps::MapSharedBank) {
+		TempSlot = EmuConstants::SHARED_BANK_BEGIN;
+
+		if (RoFSlot.SubSlot >= SUB_BEGIN)
+			TempSlot += ((RoFSlot.MainSlot + 3) * EmuConstants::ITEM_CONTAINER_SIZE) + RoFSlot.SubSlot + 1;
+		
 		else
-		{
 			TempSlot += RoFSlot.MainSlot;
-		}
-		TitaniumSlot = TempSlot;
+		
+		ServerSlot = TempSlot;
 	}
-	else if (RoFSlot.SlotType == 3)		// Trade Slots
-	{
-		TempSlot = 3000;
-		if (RoFSlot.SubSlot >= 0)
-		{
-			TempSlot += 100 + (RoFSlot.MainSlot * 10) + RoFSlot.SubSlot;
-		}
+
+	else if (RoFSlot.SlotType == maps::MapTrade) {
+		TempSlot = EmuConstants::TRADE_BEGIN;
+
+		if (RoFSlot.SubSlot >= SUB_BEGIN)
+			TempSlot += ((RoFSlot.MainSlot + 3) * EmuConstants::ITEM_CONTAINER_SIZE) + RoFSlot.SubSlot + 1;
+			// OLD CODE:
+			//TempSlot += 100 + (RoFSlot.MainSlot * EmuConstants::ITEM_CONTAINER_SIZE) + RoFSlot.SubSlot;
+		
 		else
-		{
 			TempSlot += RoFSlot.MainSlot;
-		}
-		TitaniumSlot = TempSlot;
+		
+		ServerSlot = TempSlot;
 	}
-	else if (RoFSlot.SlotType == 4)		// Tradeskill Container Slots
-	{
-		TempSlot = 4000;
-		if (RoFSlot.MainSlot >= 0)
-		{
+
+	else if (RoFSlot.SlotType == maps::MapWorld) {
+		TempSlot = EmuConstants::WORLD_BEGIN;
+
+		if (RoFSlot.MainSlot >= SUB_BEGIN)
 			TempSlot += RoFSlot.MainSlot;
-		}
-		TitaniumSlot = TempSlot;
+		
+		ServerSlot = TempSlot;
 	}
-	/*else if (RoFSlot.SlotType == 5)		// Cursor Buffer
-	{
+
+	/*else if (RoFSlot.SlotType == maps::MapLimbo) { // Cursor Buffer
 		TempSlot = 31;
-		if (RoFSlot.MainSlot >= 0)
-		{
-			TempSlot += RoFSlot.MainSlot;
-		}
-		TitaniumSlot = TempSlot;
-	}*/
-	_log(NET__ERROR, "Convert RoF Slots: Type %i, Unk2 %i, Main %i, Sub %i, Aug %i, Unk1 %i to Titanium Slot %i", RoFSlot.SlotType, RoFSlot.Unknown02, RoFSlot.MainSlot, RoFSlot.SubSlot, RoFSlot.AugSlot, RoFSlot.Unknown01, TitaniumSlot);
 
-	return TitaniumSlot;
+		if (RoFSlot.MainSlot >= 0)
+			TempSlot += RoFSlot.MainSlot;
+		
+		ServerSlot = TempSlot;
+	}*/
+
+	_log(NET__ERROR, "Convert RoF Slots: Type %i, Unk2 %i, Main %i, Sub %i, Aug %i, Unk1 %i to Server Slot %i", RoFSlot.SlotType, RoFSlot.Unknown02, RoFSlot.MainSlot, RoFSlot.SubSlot, RoFSlot.AugSlot, RoFSlot.Unknown01, ServerSlot);
+
+	return ServerSlot;
 }
 
-static inline uint32 MainInvRoFToTitaniumSlot(structs::MainInvItemSlotStruct RoFSlot)
-{
-	uint32 TitaniumSlot = 0xffffffff;
+// Converts Server MainInv Slot IDs to RoF MainInv Slot IDs for use in Encodes
+static inline structs::MainInvItemSlotStruct ServerToRoFMainInvSlot(uint32 ServerSlot) {
+	structs::MainInvItemSlotStruct RoFSlot;
+	RoFSlot.MainSlot	= INVALID_INDEX;
+	RoFSlot.SubSlot		= INVALID_INDEX;
+	RoFSlot.AugSlot		= INVALID_INDEX;
+	RoFSlot.Unknown01	= NOT_USED;
+
 	uint32 TempSlot = 0;
 
-	if (RoFSlot.MainSlot < 57)				// Worn/Personal Inventory and Cursor (Originally 33)
-	{
-		if (RoFSlot.MainSlot == 21)
-		{
-			TempSlot = 9999;
-		}
-		else if (RoFSlot.MainSlot >= 33)	// Cursor and Extended Corpse Inventory
-		{
+	if (ServerSlot < 56 || ServerSlot == MainPowerSource) { // (< 52)
+		RoFSlot.MainSlot = ServerSlot;
+
+		if (ServerSlot == MainPowerSource)
+			RoFSlot.MainSlot = slots::MainPowerSource;
+		
+		else if (ServerSlot >= MainCursor) // Cursor and Extended Corpse Inventory
+			RoFSlot.MainSlot += 3;
+		
+		else if (ServerSlot >= MainAmmo) // Ammo and Personl Inventory
+			RoFSlot.MainSlot += 1;
+		
+		/*else if (ServerSlot >= MainCursor) { // Cursor
+			RoFSlot.MainSlot = slots::MainCursor;
+
+			if (ServerSlot > 30)
+				RoFSlot.SubSlot = (ServerSlot + 3) - 33;
+		}*/
+	}
+
+	else if (ServerSlot >= EmuConstants::GENERAL_BAGS_BEGIN && ServerSlot <= EmuConstants::CURSOR_BAG_END) {
+		TempSlot = ServerSlot - 1;
+		RoFSlot.MainSlot = int(TempSlot / EmuConstants::ITEM_CONTAINER_SIZE) - 2;
+		RoFSlot.SubSlot = TempSlot - ((RoFSlot.MainSlot + 2) * EmuConstants::ITEM_CONTAINER_SIZE);
+	}
+
+	_log(NET__ERROR, "Convert Server Slot %i to RoF Slots: Main %i, Sub %i, Aug %i, Unk1 %i", ServerSlot, RoFSlot.MainSlot, RoFSlot.SubSlot, RoFSlot.AugSlot, RoFSlot.Unknown01);
+
+	return RoFSlot;
+}
+
+// Converts RoF MainInv Slot IDs to Server MainInv Slot IDs for use in Decodes
+static inline uint32 RoFToServerMainInvSlot(structs::MainInvItemSlotStruct RoFSlot) {
+	uint32 ServerSlot = INVALID_INDEX;
+	uint32 TempSlot = 0;
+
+	if (RoFSlot.MainSlot < 57) { // Worn/Personal Inventory and Cursor (< 33)
+		if (RoFSlot.MainSlot == slots::MainPowerSource)
+			TempSlot = MainPowerSource;
+		
+		else if (RoFSlot.MainSlot >= slots::MainCursor) // Cursor and Extended Corpse Inventory
 			TempSlot = RoFSlot.MainSlot - 3;
-		}
-		/*else if (RoFSlot.MainSlot == 31 || RoFSlot.MainSlot == 32) { // 9th and 10th RoF inventory slots
+		
+		/*else if (RoFSlot.MainSlot == slots::MainGeneral9 || RoFSlot.MainSlot == slots::MainGeneral10) { // 9th and 10th RoF inventory slots
 			// Need to figure out what to do when we get these
 
 			// Same as above
 		}*/
-		else if (RoFSlot.MainSlot >= 22)	// Main Inventory and Ammo Slots
-		{
+
+		else if (RoFSlot.MainSlot >= slots::MainAmmo) // Main Inventory and Ammo Slots
 			TempSlot = RoFSlot.MainSlot - 1;
-		}
+		
 		else
-		{
 			TempSlot = RoFSlot.MainSlot;
-		}
 
-		if (RoFSlot.SubSlot >= 0)			// Bag Slots
-		{
-			TempSlot = ((TempSlot + 3) * 10) + RoFSlot.SubSlot + 1;
-		}
+		if (RoFSlot.SubSlot >= SUB_BEGIN) // Bag Slots
+			TempSlot = ((TempSlot + 3) * EmuConstants::ITEM_CONTAINER_SIZE) + RoFSlot.SubSlot + 1;
 
-		TitaniumSlot = TempSlot;
+		ServerSlot = TempSlot;
 	}
 
-	_log(NET__ERROR, "Convert RoF Slots: Main %i, Sub %i, Aug %i, Unk1 %i to Titanium Slot %i", RoFSlot.MainSlot, RoFSlot.SubSlot, RoFSlot.AugSlot, RoFSlot.Unknown01, TitaniumSlot);
+	_log(NET__ERROR, "Convert RoF Slots: Main %i, Sub %i, Aug %i, Unk1 %i to Server Slot %i", RoFSlot.MainSlot, RoFSlot.SubSlot, RoFSlot.AugSlot, RoFSlot.Unknown01, ServerSlot);
 
-	return TitaniumSlot;
+	return ServerSlot;
 }
 
-// Converts Titanium Slot IDs to RoF Slot IDs for use in Encodes
-static inline structs::MainInvItemSlotStruct MainInvTitaniumToRoFSlot(uint32 TitaniumSlot)
-{
-	structs::MainInvItemSlotStruct RoFSlot;
-	RoFSlot.MainSlot = 0xffff;
-	RoFSlot.SubSlot = 0xffff;
-	RoFSlot.AugSlot = 0xffff;
-	RoFSlot.Unknown01 = 0;
-	uint32 TempSlot = 0;
-
-	if (TitaniumSlot < 56 || TitaniumSlot == 9999) // (Originally 52)
-	{
-		RoFSlot.MainSlot = TitaniumSlot;
-		if (TitaniumSlot == 9999)
-		{
-			RoFSlot.MainSlot = 21;
-		}
-		else if (TitaniumSlot > 29) // Cursor and Extended Corpse Inventory
-		{
-			RoFSlot.MainSlot += 3;
-		}
-		else if(TitaniumSlot > 20) // Ammo and Personl Inventory
-		{
-			RoFSlot.MainSlot += 1;
-		}
-		/*else if (TitaniumSlot > 29)		// Cursor
-		{
-			RoFSlot.MainSlot = 33;
-			if (TitaniumSlot > 30)
-			{
-				RoFSlot.SubSlot = (TitaniumSlot + 3) - 33;
-			}
-		}*/
-	}
-	else if (TitaniumSlot > 250 && TitaniumSlot < 341)
-	{
-		TempSlot = TitaniumSlot - 1;
-		RoFSlot.MainSlot = int(TempSlot / 10) - 2;
-		RoFSlot.SubSlot = TempSlot - ((RoFSlot.MainSlot + 2) * 10);
-	}
-
-	_log(NET__ERROR, "Convert Titanium Slot %i to RoF Slots: Main %i, Sub %i, Aug %i, Unk1 %i", TitaniumSlot, RoFSlot.MainSlot, RoFSlot.SubSlot, RoFSlot.AugSlot, RoFSlot.Unknown01);
-
-	return RoFSlot;
+/*
+// Converts Server Corpse Slot IDs to RoF Corpse Slot IDs for use in Encodes
+static inline uint32 ServerToRoFCorpseSlot(uint32 ServerCorpse) {
+	uint32 RoFCorpse;
+	// reserved
 }
+*/
+/*
+// Converts RoF Corpse Slot IDs to Server Corpse Slot IDs for use in Decodes
+static inline uint32 RoFToServerCorpseSlot(uint32 RoFCorpse) {
+	uint32 ServerCorpse;
+	// reserved
+}
+*/
+
 
 ENCODE(OP_TaskHistoryReply)
 {
@@ -1200,11 +1198,11 @@ ENCODE(OP_PlayerProfile)
 
 	outapp->WriteUInt32(structs::MAX_PLAYER_BANDOLIER);
 
-	for(uint32 r = 0; r < MAX_PLAYER_BANDOLIER; r++)
+	for(uint32 r = 0; r < EmuConstants::BANDOLIERS_COUNT; r++)
 	{
 		outapp->WriteString(emu->bandoliers[r].name);
 
-		for(uint32 j = 0; j < MAX_PLAYER_BANDOLIER_ITEMS; ++j)
+		for(uint32 j = 0; j < EmuConstants::BANDOLIER_SIZE; ++j)
 		{
 			outapp->WriteString(emu->bandoliers[r].items[j].item_name);
 			outapp->WriteUInt32(emu->bandoliers[r].items[j].item_id);
@@ -1212,11 +1210,11 @@ ENCODE(OP_PlayerProfile)
 		}
 	}
 
-	for(uint32 r = 0; r < structs::MAX_PLAYER_BANDOLIER - MAX_PLAYER_BANDOLIER; r++)
+	for(uint32 r = 0; r < structs::MAX_PLAYER_BANDOLIER - EmuConstants::BANDOLIERS_COUNT; r++)
 	{
 		outapp->WriteString("");
 
-		for(uint32 j = 0; j < MAX_PLAYER_BANDOLIER_ITEMS; ++j)
+		for(uint32 j = 0; j < EmuConstants::BANDOLIER_SIZE; ++j)
 		{
 			outapp->WriteString("");
 			outapp->WriteUInt32(0);
@@ -1227,7 +1225,7 @@ ENCODE(OP_PlayerProfile)
 
 	outapp->WriteUInt32(structs::MAX_POTIONS_IN_BELT);
 
-	for(uint32 r = 0; r < MAX_POTIONS_IN_BELT; r++)
+	for(uint32 r = 0; r < EmuConstants::POTION_BELT_SIZE; r++)
 	{
 		outapp->WriteString(emu->potionbelt.items[r].item_name);
 		outapp->WriteUInt32(emu->potionbelt.items[r].item_id);
@@ -1235,7 +1233,7 @@ ENCODE(OP_PlayerProfile)
 	}
 
 
-	for(uint32 r = 0; r < structs::MAX_POTIONS_IN_BELT - MAX_POTIONS_IN_BELT; r++)
+	for(uint32 r = 0; r < structs::MAX_POTIONS_IN_BELT - EmuConstants::POTION_BELT_SIZE; r++)
 	{
 		outapp->WriteString("");
 		outapp->WriteUInt32(0);
@@ -1357,9 +1355,9 @@ ENCODE(OP_PlayerProfile)
 	outapp->WriteUInt8(0);				// Unknown
 	outapp->WriteUInt8(0);				// Unknown
 
-	outapp->WriteUInt32(MAX_PLAYER_TRIBUTES);
+	outapp->WriteUInt32(EmuConstants::TRIBUTE_SIZE);
 
-	for(uint32 r = 0; r < MAX_PLAYER_TRIBUTES; r++)
+	for(uint32 r = 0; r < EmuConstants::TRIBUTE_SIZE; r++)
 	{
 		outapp->WriteUInt32(emu->tributes[r].tribute);
 		outapp->WriteUInt32(emu->tributes[r].tier);
@@ -2839,7 +2837,7 @@ ENCODE(OP_ShopPlayerSell) {
 	ENCODE_LENGTH_EXACT(Merchant_Purchase_Struct);
 	SETUP_DIRECT_ENCODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Struct);
 	OUT(npcid);
-	eq->itemslot = MainInvTitaniumToRoFSlot(emu->itemslot);
+	eq->itemslot = ServerToRoFMainInvSlot(emu->itemslot);
 	//OUT(itemslot);
 	OUT(quantity);
 	OUT(price);
@@ -2849,7 +2847,7 @@ ENCODE(OP_ShopPlayerSell) {
 ENCODE(OP_ApplyPoison) {
 	ENCODE_LENGTH_EXACT(ApplyPoison_Struct);
 	SETUP_DIRECT_ENCODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
-	eq->inventorySlot = MainInvTitaniumToRoFSlot(emu->inventorySlot);
+	eq->inventorySlot = ServerToRoFMainInvSlot(emu->inventorySlot);
 	OUT(success);
 	FINISH_ENCODE();
 }
@@ -2859,7 +2857,7 @@ ENCODE(OP_RecipeAutoCombine) {
 	SETUP_DIRECT_ENCODE(RecipeAutoCombine_Struct, structs::RecipeAutoCombine_Struct);
 	OUT(object_type);
 	OUT(some_id);
-	eq->container_slot = TitaniumToRoFSlot(emu->unknown1);
+	eq->container_slot = ServerToRoFSlot(emu->unknown1);
 	structs::ItemSlotStruct RoFSlot;
 	RoFSlot.SlotType = 8;	// Observed
 	RoFSlot.Unknown02 = 0;
@@ -2877,8 +2875,8 @@ ENCODE(OP_DeleteItem) {
 	ENCODE_LENGTH_EXACT(DeleteItem_Struct);
 	SETUP_DIRECT_ENCODE(DeleteItem_Struct, structs::DeleteItem_Struct);
 
-	eq->from_slot = TitaniumToRoFSlot(emu->from_slot);
-	eq->to_slot = TitaniumToRoFSlot(emu->to_slot);
+	eq->from_slot = ServerToRoFSlot(emu->from_slot);
+	eq->to_slot = ServerToRoFSlot(emu->to_slot);
 	OUT(number_in_stack);
 
 	FINISH_ENCODE();
@@ -2889,8 +2887,8 @@ ENCODE(OP_MoveItem) {
 	ENCODE_LENGTH_EXACT(MoveItem_Struct);
 	SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-	eq->from_slot = TitaniumToRoFSlot(emu->from_slot);
-	eq->to_slot = TitaniumToRoFSlot(emu->to_slot);
+	eq->from_slot = ServerToRoFSlot(emu->from_slot);
+	eq->to_slot = ServerToRoFSlot(emu->to_slot);
 	OUT(number_in_stack);
 	FINISH_ENCODE();
 }
@@ -2899,7 +2897,7 @@ ENCODE(OP_ItemVerifyReply) {
 	ENCODE_LENGTH_EXACT(ItemVerifyReply_Struct);
 	SETUP_DIRECT_ENCODE(ItemVerifyReply_Struct, structs::ItemVerifyReply_Struct);
 
-	eq->slot = TitaniumToRoFSlot(emu->slot);
+	eq->slot = ServerToRoFSlot(emu->slot);
 	OUT(spell);
 	OUT(target);
 
@@ -2983,7 +2981,7 @@ ENCODE(OP_TributeItem) {
 	ENCODE_LENGTH_EXACT(TributeItem_Struct);
 	SETUP_DIRECT_ENCODE(TributeItem_Struct, structs::TributeItem_Struct);
 
-	eq->slot = TitaniumToRoFSlot(emu->slot);
+	eq->slot = ServerToRoFSlot(emu->slot);
 	OUT(quantity);
 	OUT(tribute_master_id);
 	OUT(tribute_points);
@@ -3091,7 +3089,7 @@ ENCODE(OP_AdventureMerchantSell) {
 
 	eq->unknown000 = 1;
 	OUT(npcid);
-	eq->slot = MainInvTitaniumToRoFSlot(emu->slot);
+	eq->slot = ServerToRoFMainInvSlot(emu->slot);
 	OUT(charges);
 	OUT(sell_price);
 
@@ -3822,7 +3820,7 @@ ENCODE(OP_CastSpell)
 		OUT(slot);
 	}
 	OUT(spell_id);
-	eq->inventoryslot = TitaniumToRoFSlot(emu->inventoryslot);
+	eq->inventoryslot = ServerToRoFSlot(emu->inventoryslot);
 	//OUT(inventoryslot);
 	OUT(target_id);
 	FINISH_ENCODE();
@@ -3878,7 +3876,7 @@ ENCODE(OP_AltCurrencySell)
 	SETUP_DIRECT_ENCODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
 
     OUT(merchant_entity_id);
-    eq->slot_id = TitaniumToRoFSlot(emu->slot_id);
+    eq->slot_id = ServerToRoFSlot(emu->slot_id);
     OUT(charges);
     OUT(cost);
     FINISH_ENCODE();
@@ -4090,7 +4088,7 @@ DECODE(OP_AltCurrencySellSelection)
     DECODE_LENGTH_EXACT(structs::AltCurrencySelectItem_Struct);
 	SETUP_DIRECT_DECODE(AltCurrencySelectItem_Struct, structs::AltCurrencySelectItem_Struct);
     IN(merchant_entity_id);
-    emu->slot_id = RoFToTitaniumSlot(eq->slot_id);
+    emu->slot_id = RoFToServerSlot(eq->slot_id);
     FINISH_DIRECT_DECODE();
 }
 
@@ -4099,7 +4097,7 @@ DECODE(OP_AltCurrencySell)
     DECODE_LENGTH_EXACT(structs::AltCurrencySellItem_Struct);
 	SETUP_DIRECT_DECODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
     IN(merchant_entity_id);
-    emu->slot_id = RoFToTitaniumSlot(eq->slot_id);
+    emu->slot_id = RoFToServerSlot(eq->slot_id);
     IN(charges);
     IN(cost);
     FINISH_DIRECT_DECODE();
@@ -4209,7 +4207,7 @@ DECODE(OP_AdventureMerchantSell) {
 	SETUP_DIRECT_DECODE(Adventure_Sell_Struct, structs::Adventure_Sell_Struct);
 
 	IN(npcid);
-	emu->slot = MainInvRoFToTitaniumSlot(eq->slot);
+	emu->slot = RoFToServerMainInvSlot(eq->slot);
 	IN(charges);
 	IN(sell_price);
 
@@ -4221,7 +4219,7 @@ DECODE(OP_ApplyPoison) {
 	DECODE_LENGTH_EXACT(structs::ApplyPoison_Struct);
 	SETUP_DIRECT_DECODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
 
-	emu->inventorySlot = MainInvRoFToTitaniumSlot(eq->inventorySlot);
+	emu->inventorySlot = RoFToServerMainInvSlot(eq->inventorySlot);
 	IN(success);
 
 	FINISH_DIRECT_DECODE();
@@ -4231,7 +4229,7 @@ DECODE(OP_ItemVerifyRequest) {
 	DECODE_LENGTH_EXACT(structs::ItemVerifyRequest_Struct);
 	SETUP_DIRECT_DECODE(ItemVerifyRequest_Struct, structs::ItemVerifyRequest_Struct);
 
-	emu->slot = RoFToTitaniumSlot(eq->slot);
+	emu->slot = RoFToServerSlot(eq->slot);
 	IN(target);
 
 	FINISH_DIRECT_DECODE();
@@ -4241,7 +4239,7 @@ DECODE(OP_Consume) {
 	DECODE_LENGTH_EXACT(structs::Consume_Struct);
 	SETUP_DIRECT_DECODE(Consume_Struct, structs::Consume_Struct);
 
-	emu->slot = RoFToTitaniumSlot(eq->slot);
+	emu->slot = RoFToServerSlot(eq->slot);
 	IN(auto_consumed);
 	IN(type);
 
@@ -4261,7 +4259,7 @@ DECODE(OP_CastSpell) {
 		IN(slot);
 	}
 	IN(spell_id);
-	emu->inventoryslot = RoFToTitaniumSlot(eq->inventoryslot);
+	emu->inventoryslot = RoFToServerSlot(eq->inventoryslot);
 	//IN(inventoryslot);
 	IN(target_id);
 
@@ -4273,8 +4271,8 @@ DECODE(OP_DeleteItem)
 	DECODE_LENGTH_EXACT(structs::DeleteItem_Struct);
 	SETUP_DIRECT_DECODE(DeleteItem_Struct, structs::DeleteItem_Struct);
 
-	emu->from_slot = RoFToTitaniumSlot(eq->from_slot);
-	emu->to_slot = RoFToTitaniumSlot(eq->to_slot);
+	emu->from_slot = RoFToServerSlot(eq->from_slot);
+	emu->to_slot = RoFToServerSlot(eq->to_slot);
 	IN(number_in_stack);
 
 	FINISH_DIRECT_DECODE();
@@ -4287,8 +4285,8 @@ DECODE(OP_MoveItem)
 
 	//_log(NET__ERROR, "Moved item from %u to %u", eq->from_slot.MainSlot, eq->to_slot.MainSlot);
 	_log(NET__ERROR, "MoveItem SlotType from %i to %i, MainSlot from %i to %i, SubSlot from %i to %i, AugSlot from %i to %i, Unknown01 from %i to %i, Number %u", eq->from_slot.SlotType, eq->to_slot.SlotType, eq->from_slot.MainSlot, eq->to_slot.MainSlot, eq->from_slot.SubSlot, eq->to_slot.SubSlot, eq->from_slot.AugSlot, eq->to_slot.AugSlot, eq->from_slot.Unknown01, eq->to_slot.Unknown01, eq->number_in_stack);
-	emu->from_slot = RoFToTitaniumSlot(eq->from_slot);
-	emu->to_slot = RoFToTitaniumSlot(eq->to_slot);
+	emu->from_slot = RoFToServerSlot(eq->from_slot);
+	emu->to_slot = RoFToServerSlot(eq->to_slot);
 	IN(number_in_stack);
 
 	_hex(NET__ERROR, eq, sizeof(structs::MoveItem_Struct));
@@ -4514,7 +4512,7 @@ DECODE(OP_ShopPlayerSell) {
 	SETUP_DIRECT_DECODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Struct);
 
 	IN(npcid);
-	emu->itemslot = MainInvRoFToTitaniumSlot(eq->itemslot);
+	emu->itemslot = RoFToServerMainInvSlot(eq->itemslot);
 	//IN(itemslot);
 	IN(quantity);
 	IN(price);
@@ -4611,7 +4609,7 @@ DECODE(OP_TributeItem) {
 	DECODE_LENGTH_EXACT(structs::TributeItem_Struct);
 	SETUP_DIRECT_DECODE(TributeItem_Struct, structs::TributeItem_Struct);
 
-	emu->slot = RoFToTitaniumSlot(eq->slot);
+	emu->slot = RoFToServerSlot(eq->slot);
 	IN(quantity);
 	IN(tribute_master_id);
 	IN(tribute_points);
@@ -4635,9 +4633,9 @@ DECODE(OP_TradeSkillCombine) {
 	DECODE_LENGTH_EXACT(structs::NewCombine_Struct);
 	SETUP_DIRECT_DECODE(NewCombine_Struct, structs::NewCombine_Struct);
 
-	int16 slot_id = RoFToTitaniumSlot(eq->container_slot);
+	int16 slot_id = RoFToServerSlot(eq->container_slot);
 	if (slot_id == 4000) {
-		slot_id = SLOT_TRADESKILL;	// 1000
+		slot_id = legacy::SLOT_TRADESKILL;	// 1000
 	}
 	emu->container_slot = slot_id;
 
@@ -4650,7 +4648,7 @@ DECODE(OP_RecipeAutoCombine) {
 
 	IN(object_type);
 	IN(some_id);
-	emu->unknown1 = RoFToTitaniumSlot(eq->container_slot);
+	emu->unknown1 = RoFToServerSlot(eq->container_slot);
 	IN(recipe_id);
 	IN(reply_code);
 
@@ -4661,7 +4659,7 @@ DECODE(OP_AugmentItem) {
 	DECODE_LENGTH_EXACT(structs::AugmentItem_Struct);
 	SETUP_DIRECT_DECODE(AugmentItem_Struct, structs::AugmentItem_Struct);
 
-	emu->container_slot = RoFToTitaniumSlot(eq->container_slot);
+	emu->container_slot = RoFToServerSlot(eq->container_slot);
 	//emu->augment_slot = eq->augment_slot;
 
 	FINISH_DIRECT_DECODE();
@@ -4872,7 +4870,7 @@ char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint
 	hdr.stacksize = stackable ? charges : 1;
 	hdr.unknown004 = 0;
 
-	structs::ItemSlotStruct slot_id = TitaniumToRoFSlot(slot_id_in);
+	structs::ItemSlotStruct slot_id = ServerToRoFSlot(slot_id_in);
 
 	hdr.slot_type = (merchant_slot == 0) ? slot_id.SlotType : 9; // 9 is merchant 20 is reclaim items?
 	hdr.main_slot = (merchant_slot == 0) ? slot_id.MainSlot : merchant_slot;
@@ -5074,7 +5072,7 @@ char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint
 	isbs.augrestrict = item->AugRestrict;
 	
 
-	for(int x = 0; x < 5; ++x)
+	for(int x = AUG_BEGIN; x < EmuConstants::ITEM_COMMON_SIZE; ++x)
 	{
 		isbs.augslots[x].type = item->AugSlotType[x];
 		isbs.augslots[x].visible = item->AugSlotVisible[x];
@@ -5326,11 +5324,11 @@ char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint
 
 	iqbs.subitem_count = 0;
 
-	char *SubSerializations[10];
+	char *SubSerializations[10]; // <watch>
 
 	uint32 SubLengths[10];
 
-	for(int x = 0; x < 10; ++x) {
+	for(int x = SUB_BEGIN; x < EmuConstants::ITEM_CONTAINER_SIZE; ++x) {
 
 		SubSerializations[x] = nullptr;
 
@@ -5342,14 +5340,22 @@ char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint
 
 			iqbs.subitem_count++;
 
-			if(slot_id_in >= 22 && slot_id_in < 30)
-				SubSlotNumber = (((slot_id_in + 3) * 10) + x + 1);
-			else if(slot_id_in >= 2000 && slot_id_in <= 2023)
-				SubSlotNumber = (((slot_id_in - 2000) * 10) + 2030 + x + 1);
-			else if(slot_id_in >= 2500 && slot_id_in <= 2501)
-				SubSlotNumber = (((slot_id_in - 2500) * 10) + 2530 + x + 1);
+			if(slot_id_in >= EmuConstants::GENERAL_BEGIN && slot_id_in <= EmuConstants::GENERAL_END) // (< 30) - no cursor?
+				//SubSlotNumber = (((slot_id_in + 3) * 10) + x + 1);
+				SubSlotNumber = (((slot_id_in + 3) * EmuConstants::ITEM_CONTAINER_SIZE) + x + 1);
+			else if(slot_id_in >= EmuConstants::BANK_BEGIN && slot_id_in <= EmuConstants::BANK_END)
+				//SubSlotNumber = (((slot_id_in - 2000) * 10) + 2030 + x + 1);
+				SubSlotNumber = (((slot_id_in - EmuConstants::BANK_BEGIN) * EmuConstants::ITEM_CONTAINER_SIZE) + EmuConstants::BANK_BAGS_BEGIN + x);
+			else if(slot_id_in >= EmuConstants::SHARED_BANK_BEGIN && slot_id_in <= EmuConstants::SHARED_BANK_END)
+				//SubSlotNumber = (((slot_id_in - 2500) * 10) + 2530 + x + 1);
+				SubSlotNumber = (((slot_id_in - EmuConstants::SHARED_BANK_BEGIN) * EmuConstants::ITEM_CONTAINER_SIZE) + EmuConstants::SHARED_BANK_BAGS_BEGIN + x);
 			else
 				SubSlotNumber = slot_id_in; // ???????
+
+			/*
+			// TEST CODE: <watch>
+			SubSlotNumber = Inventory::CalcSlotID(slot_id_in, x);
+			*/
 
 			SubSerializations[x] = SerializeItem(subitem, SubSlotNumber, &SubLengths[x], depth + 1);
 		}
@@ -5357,7 +5363,7 @@ char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint
 
 	ss.write((const char*)&iqbs, sizeof(RoF::structs::ItemQuaternaryBodyStruct));
 
-	for(int x = 0; x < 10; ++x) {
+	for(int x = SUB_BEGIN; x < EmuConstants::ITEM_CONTAINER_SIZE; ++x) {
 
 		if(SubSerializations[x]) {
 

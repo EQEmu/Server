@@ -824,17 +824,17 @@ void Client::AI_Process()
 
 			if(GetTarget() && !IsStunned() && !IsMezzed() && !GetFeigned()) {
 				if(attack_timer.Check()) {
-					Attack(GetTarget(), 13);
+					Attack(GetTarget(), MainPrimary);
 					if(GetTarget()) {
 						if(CheckDoubleAttack()) {
-							Attack(GetTarget(), 13);
+							Attack(GetTarget(), MainPrimary);
 							if(GetTarget()) {
 								bool triple_attack_success = false;
 								if((((GetClass() == MONK || GetClass() == WARRIOR || GetClass() == RANGER || GetClass() == BERSERKER)
 									&& GetLevel() >= 60) || GetSpecialAbility(SPECATK_TRIPLE))
 									&& CheckDoubleAttack(true))
 								{
-									Attack(GetTarget(), 13, true);
+									Attack(GetTarget(), MainPrimary, true);
 									triple_attack_success = true;
 								}
 
@@ -848,8 +848,8 @@ void Client::AI_Process()
 										if(MakeRandomInt(0, 100) < flurrychance)
 										{
 											Message_StringID(MT_NPCFlurry, YOU_FLURRY);
-											Attack(GetTarget(), 13, false);
-											Attack(GetTarget(), 13, false);
+											Attack(GetTarget(), MainPrimary, false);
+											Attack(GetTarget(), MainPrimary, false);
 										}
 									}
 
@@ -864,7 +864,7 @@ void Client::AI_Process()
 											{
 												if(MakeRandomInt(0, 100) < ExtraAttackChanceBonus)
 												{
-													Attack(GetTarget(), 13, false);
+													Attack(GetTarget(), MainPrimary, false);
 												}
 											}
 										}
@@ -903,10 +903,10 @@ void Client::AI_Process()
 
 					if(MakeRandomFloat(0.0, 1.0) < DualWieldProbability)
 					{
-						Attack(GetTarget(), 14);
+						Attack(GetTarget(), MainSecondary);
 						if(CheckDoubleAttack())
 						{
-							Attack(GetTarget(), 14);
+							Attack(GetTarget(), MainSecondary);
 						}
 
 					}
@@ -1145,14 +1145,14 @@ void Mob::AI_Process() {
 					if(IsNPC()) {
 						int16 n_atk = CastToNPC()->GetNumberOfAttacks();
 						if(n_atk <= 1) {
-							Attack(target, 13);
+							Attack(target, MainPrimary);
 						} else {
 							for(int i = 0; i < n_atk; ++i) {
-								Attack(target, 13);
+								Attack(target, MainPrimary);
 							}
 						}
 					} else {
-						Attack(target, 13);
+						Attack(target, MainPrimary);
 					}
 
 					if (target) {
@@ -1164,16 +1164,16 @@ void Mob::AI_Process() {
 								|| GetSpecialAbility(SPECATK_QUAD))
 								//check double attack, this is NOT the same rules that clients use...
 								&& RandRoll < (GetLevel() + NPCDualAttackModifier)) {
-							Attack(target, 13);
+							Attack(target, MainPrimary);
 							// lets see if we can do a triple attack with the main hand
 							//pets are excluded from triple and quads...
 							if ((GetSpecialAbility(SPECATK_TRIPLE) || GetSpecialAbility(SPECATK_QUAD))
 									&& !IsPet() && RandRoll < (GetLevel() + NPCTripleAttackModifier)) {
-								Attack(target, 13);
+								Attack(target, MainPrimary);
 								// now lets check the quad attack
 								if (GetSpecialAbility(SPECATK_QUAD)
 										&& RandRoll < (GetLevel() + NPCQuadAttackModifier)) {
-									Attack(target, 13);
+									Attack(target, MainPrimary);
 								}
 							}
 						}
@@ -1319,13 +1319,13 @@ void Mob::AI_Process() {
 						float DualWieldProbability = (GetSkill(SkillDualWield) + GetLevel()) / 400.0f;
 						if(MakeRandomFloat(0.0, 1.0) < DualWieldProbability)
 						{
-							Attack(target, 14);
+							Attack(target, MainSecondary);
 							if (CanThisClassDoubleAttack())
 							{
 								int32 RandRoll = MakeRandomInt(0, 99);
 								if (RandRoll < (GetLevel() + 20))
 								{
-									Attack(target, 14);
+									Attack(target, MainSecondary);
 								}
 							}
 						}
@@ -2024,7 +2024,7 @@ bool Mob::Flurry(ExtraAttackOptions *opts)
 		int num_attacks = GetSpecialAbilityParam(SPECATK_FLURRY, 1);
 		num_attacks = num_attacks > 0 ? num_attacks : RuleI(Combat, MaxFlurryHits);
 		for (int i = 0; i < num_attacks; i++)
-			Attack(target, 13, false, false, false, opts);
+			Attack(target, MainPrimary, false, false, false, opts);
 	}
 	return true;
 }
@@ -2073,14 +2073,14 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 			if (m_target == GetTarget())
 				continue;
 			if (CombatRange(m_target)) {
-				Attack(m_target, 13, false, false, false, opts);
+				Attack(m_target, MainPrimary, false, false, false, opts);
 				index_hit++;
 			}
 		}
 	}
 
 	if (RuleB(Combat, RampageHitsTarget) && index_hit < rampage_targets)
-		Attack(GetTarget(), 13, false, false, false, opts);
+		Attack(GetTarget(), MainPrimary, false, false, false, opts);
 
 	return true;
 }
@@ -2099,7 +2099,7 @@ void Mob::AreaRampage(ExtraAttackOptions *opts)
 	index_hit = hate_list.AreaRampage(this, GetTarget(), rampage_targets, opts);
 
 	if(index_hit == 0) {
-		Attack(GetTarget(), 13, false, false, false, opts);
+		Attack(GetTarget(), MainPrimary, false, false, false, opts);
 	}
 }
 

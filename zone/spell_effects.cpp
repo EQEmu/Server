@@ -1427,9 +1427,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						SendAppearancePacket(AT_Size, 6);
 					}
 				}
-				for(int x = 0; x < 7; x++){
+
+				for(int x = EmuConstants::MATERIAL_BEGIN; x <= EmuConstants::MATERIAL_TINT_END; x++)
 					SendWearChange(x);
-				}
+				
 				if(caster && (caster->spellbonuses.IllusionPersistence ||  caster->aabonuses.IllusionPersistence
 					|| caster->itembonuses.IllusionPersistence))
 					buffs[buffslot].persistant_buff = 1;
@@ -1451,9 +1452,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 							caster->GetTarget()->GetTexture()
 						);
 						caster->SendAppearancePacket(AT_Size, caster->GetTarget()->GetSize());
-						for(int x = 0; x < 7; x++){
+
+						for(int x = EmuConstants::MATERIAL_BEGIN; x <= EmuConstants::MATERIAL_TINT_END; x++)
 							caster->SendWearChange(x);
-						}
 				}
 			}
 
@@ -2200,7 +2201,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Rampage");
 #endif
 				if(caster)
-					entity_list.AEAttack(caster, 30, 13, 0, true); // on live wars dont get a duration ramp, its a one shot deal
+					entity_list.AEAttack(caster, 30, MainPrimary, 0, true); // on live wars dont get a duration ramp, its a one shot deal
 
 				break;
 			}
@@ -3724,7 +3725,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				else{
 					SendAppearancePacket(AT_Size, 6);
 				}
-				for(int x = 0; x < 7; x++){
+				for(int x = EmuConstants::MATERIAL_BEGIN; x <= EmuConstants::MATERIAL_TINT_END; x++){
 					SendWearChange(x);
 				}
 				break;
@@ -5047,7 +5048,7 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 		const Item_Struct* TempItem = 0;
 
-		for(int x=0; x<=21; x++)
+		for(int x = EmuConstants::EQUIPMENT_BEGIN; x <= EmuConstants::EQUIPMENT_END; x++)
 		{
 			if (SympatheticProcList.size() > MAX_SYMPATHETIC)
 				continue;
@@ -5070,7 +5071,7 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 				}
 			}
 
-			for (int y = 0; y < EmuConstants::ITEM_COMMON_SIZE; ++y)
+			for (int y = AUG_BEGIN; y < EmuConstants::ITEM_COMMON_SIZE; ++y)
 			{
 				if (SympatheticProcList.size() > MAX_SYMPATHETIC)
 					continue;
@@ -5192,7 +5193,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 		int16 focus_max_real = 0;
 
 		//item focus
-		for(int x=0; x<=21; x++)
+		for(int x = EmuConstants::EQUIPMENT_BEGIN; x <= EmuConstants::EQUIPMENT_END; x++)
 		{
 			TempItem = nullptr;
 			ItemInst* ins = GetInv().GetItem(x);
@@ -5226,7 +5227,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 				}
 			}
 
-			for (int y = 0; y < EmuConstants::ITEM_COMMON_SIZE; ++y)
+			for (int y = AUG_BEGIN; y < EmuConstants::ITEM_COMMON_SIZE; ++y)
 			{
 				ItemInst *aug = nullptr;
 				aug = ins->GetAugment(y);
@@ -5264,7 +5265,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 		}
 
 		//Tribute Focus
-		for(int x = TRIBUTE_SLOT_START; x < (TRIBUTE_SLOT_START + MAX_PLAYER_TRIBUTES); ++x)
+		for(int x = EmuConstants::TRIBUTE_BEGIN; x <= EmuConstants::TRIBUTE_END; ++x)
 		{
 			TempItem = nullptr;
 			ItemInst* ins = GetInv().GetItem(x);

@@ -31,11 +31,6 @@ typedef enum {
 	
 	// Values below are not implemented, as yet...
 	
-	// - RoF2 is added for convenience of implementor..creation client will need to be changed once that client is actually added
-	// - Code will be added to 'relieve' characters of any illegal inventory items based on their client version. This will
-	//   oversee cheats and mis-placement of starting items whenever a client is loaded.
-	_EQCreationClient = EQClientRoF,	// bump to latest client as new ones are added (make sure that db is updated accordingly)
-	
 	EmuNPC = _EQClientCount,
 	EmuMerc,
 	EmuBot,

@@ -131,7 +131,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 
 	min_damage += min_damage * GetMeleeMinDamageMod_SE(skill) / 100;
 
-	if(HitChance && !who->CheckHitChance(this, skill, 13))
+	if(HitChance && !who->CheckHitChance(this, skill, MainPrimary))
 		max_damage = 0;
 
 	else{
@@ -570,7 +570,7 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 			CastToClient()->CheckIncreaseSkill(SkillBackstab, other, 10);
 	}
 	else { //We do a single regular attack if we attack from the front without chaotic stab
-		Attack(other, 13);
+		Attack(other, MainPrimary);
 	}
 }
 
@@ -817,7 +817,7 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 	if (!CanDoSpecialAttack(other))
 		return;
 
-	if (!other->CheckHitChance(this, SkillArchery, 13,chance_mod)) {
+	if (!other->CheckHitChance(this, SkillArchery, MainPrimary, chance_mod)) {
 		mlog(COMBAT__RANGED, "Ranged attack missed %s.", other->GetName());
 		other->Damage(this, 0, SPELL_UNKNOWN, SkillArchery);
 	} else {
@@ -939,27 +939,27 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 				if (ReuseTime)
 					TrySkillProc(other, SkillArchery, ReuseTime);
 				else
-					TrySkillProc(other, SkillArchery, 0, true, 11);
+					TrySkillProc(other, SkillArchery, 0, true, MainRange);
 			}
 	}
 
 	//try proc on hits and misses
 	if((RangeWeapon != nullptr) && GetTarget() && other && !other->HasDied())
 	{
-		TryWeaponProc(RangeWeapon, other, 11);
+		TryWeaponProc(RangeWeapon, other, MainRange);
 	}
 
 	//Arrow procs because why not?
     if((Ammo != NULL) && GetTarget() && other && !other->HasDied())
     {
-        TryWeaponProc(Ammo, other, 11);
+        TryWeaponProc(Ammo, other, MainRange);
     }
 
 	if (HasSkillProcs() && GetTarget() && other && !other->HasDied()){
 		if (ReuseTime)
 			TrySkillProc(other, SkillArchery, ReuseTime);
 		else
-			TrySkillProc(other, SkillArchery, 0, false, 11);
+			TrySkillProc(other, SkillArchery, 0, false, MainRange);
 	}
 }
 
@@ -1028,7 +1028,7 @@ void NPC::RangedAttack(Mob* other)
 	
 	FaceTarget(other);
 
-	if (!other->CheckHitChance(this, skillinuse, 11, GetSpecialAbilityParam(SPECATK_RANGED_ATK, 2)))
+	if (!other->CheckHitChance(this, skillinuse, MainRange, GetSpecialAbilityParam(SPECATK_RANGED_ATK, 2)))
 	{
 		mlog(COMBAT__RANGED, "Ranged attack missed %s.", other->GetName());
 		other->Damage(this, 0, SPELL_UNKNOWN, skillinuse);
@@ -1069,15 +1069,15 @@ void NPC::RangedAttack(Mob* other)
 		other->Damage(this, TotalDmg, SPELL_UNKNOWN, skillinuse);
 
 		if (TotalDmg > 0 && HasSkillProcSuccess() && GetTarget() && !other->HasDied())
-			TrySkillProc(other, skillinuse, 0, true, 11);
+			TrySkillProc(other, skillinuse, 0, true, MainRange);
 	}
 
 	//try proc on hits and misses
 	if(other && !other->HasDied())
-		TrySpellProc(nullptr, (const Item_Struct*)nullptr, other, 11);
+		TrySpellProc(nullptr, (const Item_Struct*)nullptr, other, MainRange);
 
 	if (HasSkillProcs() && other && !other->HasDied())
-			TrySkillProc(other, skillinuse, 0, false, 11);
+			TrySkillProc(other, skillinuse, 0, false, MainRange);
 
 	CommonBreakInvisible();
 }
@@ -1200,7 +1200,7 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 	if (!CanDoSpecialAttack(other))
 		return;
 
-	if (!other->CheckHitChance(this, SkillThrowing, 13, chance_mod)){
+	if (!other->CheckHitChance(this, SkillThrowing, MainPrimary, chance_mod)){
 		mlog(COMBAT__RANGED, "Ranged attack missed %s.", other->GetName());
 		other->Damage(this, 0, SPELL_UNKNOWN, SkillThrowing);
 	} else {
@@ -1251,18 +1251,18 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 			if (ReuseTime)
 				TrySkillProc(other, SkillThrowing, ReuseTime);
 			else
-				TrySkillProc(other, SkillThrowing, 0, true, 11);
+				TrySkillProc(other, SkillThrowing, 0, true, MainRange);
 		}
 	}
 
 	if((RangeWeapon != nullptr) && GetTarget() && other && (other->GetHP() > -10))
-		TryWeaponProc(RangeWeapon, other, 11);
+		TryWeaponProc(RangeWeapon, other, MainRange);
 
 	if (HasSkillProcs() && GetTarget() && other && !other->HasDied()){
 		if (ReuseTime)
 			TrySkillProc(other, SkillThrowing, ReuseTime);
 		else
-			TrySkillProc(other, SkillThrowing, 0, false, 11);
+			TrySkillProc(other, SkillThrowing, 0, false, MainRange);
 	}
 
 }
@@ -1987,7 +1987,7 @@ uint32 Mob::TryHeadShot(Mob* defender, SkillUseTypes skillInUse) {
 
 		if(HeadShot_Dmg && HeadShot_Level && (defender->GetLevel() <= HeadShot_Level)){
 
-			float ProcChance = GetSpecialProcChances(11);
+			float ProcChance = GetSpecialProcChances(MainRange);
 			if(ProcChance > MakeRandomFloat(0,1)) 
 				return HeadShot_Dmg;
 		}
@@ -2050,7 +2050,7 @@ uint32 Mob::TryAssassinate(Mob* defender, SkillUseTypes skillInUse, uint16 Reuse
 			float ProcChance = 0.0f;
 			
 			if (skillInUse == SkillThrowing)
-				ProcChance = GetSpecialProcChances(11);
+				ProcChance = GetSpecialProcChances(MainRange);
 			else
 				ProcChance = GetAssassinateProcChances(ReuseTime);
 
@@ -2099,7 +2099,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 
 	int damage = 0;
 	int32 hate = 0;
-	int Hand = 13;
+	int Hand = MainPrimary;
 	if (hate == 0 && weapon_damage > 1) hate = weapon_damage;
 
 	if(weapon_damage > 0){

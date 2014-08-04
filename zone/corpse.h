@@ -41,7 +41,7 @@ public:
 	//abstract virtual function implementations requird by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill) { return true; }
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false) { return; }
-	virtual bool Attack(Mob* other, int Hand = 13, bool FromRiposte = false, bool IsStrikethrough = true, bool IsFromSpell = false,
+	virtual bool Attack(Mob* other, int Hand = MainPrimary, bool FromRiposte = false, bool IsStrikethrough = true, bool IsFromSpell = false,
 		ExtraAttackOptions *opts = nullptr) { return false; }
 	virtual bool HasRaid() { return false; }
 	virtual bool HasGroup() { return false; }
@@ -110,6 +110,10 @@ public:
 	uint32 GetEquipment(uint8 material_slot) const;	// returns item id
 	uint32 GetEquipmentColor(uint8 material_slot) const;
 	inline int GetRezzExp() { return rezzexp; }
+
+	// these are a temporary work-around until corpse inventory is removed from the database blob
+	//static uint32	ServerToCorpseSlot(int16 server_slot);	// encode
+	//static int16	CorpseToServerSlot(uint32 corpse_slot);	// decode
 
 protected:
 	std::list<uint32> MoveItemToCorpse(Client *client, ItemInst *item, int16 equipslot);

@@ -2704,14 +2704,14 @@ void command_texture(Client *c, const Seperator *sep)
 		// Player Races Wear Armor, so Wearchange is sent instead
 		int i;
 		if (!c->GetTarget())
-			for (i = 0; i < 7; i++)
+			for (i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_TINT_END; i++)
 			{
 				c->SendTextureWC(i, texture);
 			}
 		else if ((c->GetTarget()->GetRace() > 0 && c->GetTarget()->GetRace() <= 12) ||
 			c->GetTarget()->GetRace() == 128 || c->GetTarget()->GetRace() == 130 ||
 			c->GetTarget()->GetRace() == 330 || c->GetTarget()->GetRace() == 522) {
-			for (i = 0; i < 7; i++)
+			for (i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_TINT_END; i++)
 			{
 				c->GetTarget()->SendTextureWC(i, texture);
 			}
@@ -2892,11 +2892,12 @@ void command_peekinv(Client *c, const Seperator *sep)
 	if (bAll || (strcasecmp(sep->arg[1], "worn")==0)) {
 		// Worn items
 		bFound = true;
-		for (int16 i=0; i<=21; i++) {
+		for (int16 i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; i++) {
 			const ItemInst* inst = client->GetInv().GetItem(i);
 			item = (inst) ? inst->GetItem() : nullptr;
 			if (c->GetClientVersion() >= EQClientSoF)
 			{
+				// this kind of stuff needs to be pushed to the client translators
 				c->Message((item==0), "WornSlot: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", i,
 					((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
 					((item==0)?"null":item->Name), 0x12,
@@ -2914,7 +2915,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 	if (bAll || (strcasecmp(sep->arg[1], "inv")==0)) {
 		// Personal inventory items
 		bFound = true;
-		for (int16 i=22; i<=29; i++) {
+		for (int16 i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_END; i++) {
 			const ItemInst* inst = client->GetInv().GetItem(i);
 			item = (inst) ? inst->GetItem() : nullptr;
 			if (c->GetClientVersion() >= EQClientSoF)
@@ -2933,7 +2934,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 			}
 
 			if (inst && inst->IsType(ItemClassContainer)) {
-				for (uint8 j=0; j<10; j++) {
+				for (uint8 j = SUB_BEGIN; j < EmuConstants::ITEM_CONTAINER_SIZE; j++) {
 					const ItemInst* instbag = client->GetInv().GetItem(i, j);
 					item = (instbag) ? instbag->GetItem() : nullptr;
 					if (c->GetClientVersion() >= EQClientSoF)
@@ -2957,9 +2958,9 @@ void command_peekinv(Client *c, const Seperator *sep)
 		}
 		if(c->GetClientVersion() >= EQClientSoF)
 		{
-			const ItemInst* inst = client->GetInv().GetItem(9999);
+			const ItemInst* inst = client->GetInv().GetItem(MainPowerSource);
 			item = (inst) ? inst->GetItem() : nullptr;
-			c->Message((item==0), "InvSlot: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", 9999,
+			c->Message((item==0), "InvSlot: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", MainPowerSource,
 			((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
 			((item==0)?"null":item->Name), 0x12,
 			((item==0)?0:inst->GetCharges()));
@@ -3006,7 +3007,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 				}
 
 				if (inst && inst->IsType(ItemClassContainer) && i==0) { // 'CSD 1' - only display contents of slot 30[0] container..higher ones don't exist
-					for (uint8 j=0; j<10; j++) {
+					for (uint8 j = SUB_BEGIN; j < EmuConstants::ITEM_CONTAINER_SIZE; j++) {
 						const ItemInst* instbag = client->GetInv().GetItem(MainCursor, j);
 						item = (instbag) ? instbag->GetItem() : nullptr;
 						if (c->GetClientVersion() >= EQClientSoF)
@@ -3034,7 +3035,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 	if (bAll || (strcasecmp(sep->arg[1], "trib")==0)) {
 		// Active tribute effect items
 		bFound = true;
-		for (int16 i=TRIBUTE_SLOT_START; i<(TRIBUTE_SLOT_START + MAX_PLAYER_TRIBUTES); i++) {
+		for (int16 i = EmuConstants::TRIBUTE_BEGIN; i <= EmuConstants::TRIBUTE_END; i++) {
 			const ItemInst* inst = client->GetInv().GetItem(i);
 			item = (inst) ? inst->GetItem() : nullptr;
 			if (c->GetClientVersion() >= EQClientSoF)
@@ -3058,7 +3059,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		// Bank and shared bank items
 		bFound = true;
 		int16 i = 0;
-		for (i=2000; i<=2023; i++) {
+		for (i = EmuConstants::BANK_BEGIN; i <= EmuConstants::BANK_END; i++) {
 			const ItemInst* inst = client->GetInv().GetItem(i);
 			item = (inst) ? inst->GetItem() : nullptr;
 			if (c->GetClientVersion() >= EQClientSoF)
@@ -3077,7 +3078,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 			}
 
 			if (inst && inst->IsType(ItemClassContainer)) {
-				for (uint8 j=0; j<10; j++) {
+				for (uint8 j = SUB_BEGIN; j < EmuConstants::ITEM_CONTAINER_SIZE; j++) {
 					const ItemInst* instbag = client->GetInv().GetItem(i, j);
 					item = (instbag) ? instbag->GetItem() : nullptr;
 					if (c->GetClientVersion() >= EQClientSoF)
@@ -3099,7 +3100,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 				}
 			}
 		}
-		for (i=2500; i<=2501; i++) {
+		for (i = EmuConstants::SHARED_BANK_BEGIN; i <= EmuConstants::SHARED_BANK_END; i++) {
 			const ItemInst* inst = client->GetInv().GetItem(i);
 			item = (inst) ? inst->GetItem() : nullptr;
 			if (c->GetClientVersion() >= EQClientSoF)
@@ -3118,7 +3119,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 			}
 
 			if (inst && inst->IsType(ItemClassContainer)) {
-				for (uint8 j=0; j<10; j++) {
+				for (uint8 j = SUB_BEGIN; j < EmuConstants::ITEM_CONTAINER_SIZE; j++) {
 					const ItemInst* instbag = client->GetInv().GetItem(i, j);
 					item = (instbag) ? instbag->GetItem() : nullptr;
 					if (c->GetClientVersion() >= EQClientSoF)
@@ -3144,7 +3145,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 	if (bAll || (strcasecmp(sep->arg[1], "trade")==0)) {
 		// Items in trade window (current trader only, not the other trader)
 		bFound = true;
-		for (int16 i=3000; i<=3007; i++) {
+		for (int16 i = EmuConstants::TRADE_BEGIN; i <= EmuConstants::TRADE_END; i++) {
 			const ItemInst* inst = client->GetInv().GetItem(i);
 			item = (inst) ? inst->GetItem() : nullptr;
 			if (c->GetClientVersion() >= EQClientSoF)
@@ -3163,7 +3164,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 			}
 
 			if (inst && inst->IsType(ItemClassContainer)) {
-				for (uint8 j=0; j<10; j++) {
+				for (uint8 j = SUB_BEGIN; j < EmuConstants::ITEM_CONTAINER_SIZE; j++) {
 					const ItemInst* instbag = client->GetInv().GetItem(i, j);
 					item = (instbag) ? instbag->GetItem() : nullptr;
 					if (c->GetClientVersion() >= EQClientSoF)
@@ -3532,7 +3533,7 @@ void command_listpetition(Client *c, const Seperator *sep)
 void command_equipitem(Client *c, const Seperator *sep)
 {
 	uint32 slot_id = atoi(sep->arg[1]);
-	if (sep->IsNumber(1) && (slot_id>=0) && (slot_id<=21)) {
+	if (sep->IsNumber(1) && ((slot_id >= EmuConstants::EQUIPMENT_BEGIN) && (slot_id <= EmuConstants::EQUIPMENT_END) || (slot_id == MainPowerSource))) {
 		const ItemInst* from_inst = c->GetInv().GetItem(MainCursor);
 		const ItemInst* to_inst = c->GetInv().GetItem(slot_id); // added (desync issue when forcing stack to stack)
 		bool partialmove = false;
@@ -3567,6 +3568,8 @@ void command_equipitem(Client *c, const Seperator *sep)
 			}
 			else if(c->SwapItem(mi)) {
 				c->FastQueuePacket(&outapp);
+
+				// if the below code is still needed..just send an an item trade packet to each slot..it should overwrite the client instance
 
 				// below code has proper logic, but client does not like to have cursor charges changed
 				// (we could delete the cursor item and resend, but issues would arise if there are queued items)
@@ -7776,16 +7779,19 @@ void command_path(Client *c, const Seperator *sep)
 }
 
 void Client::Undye() {
-	for (int cur_slot = 0; cur_slot < 9 ; cur_slot++ ){
+	for (int cur_slot = EmuConstants::MATERIAL_BEGIN; cur_slot <= EmuConstants::MATERIAL_END; cur_slot++ ) {
 		uint8 slot2=SlotConvert(cur_slot);
 		ItemInst* inst = m_inv.GetItem(slot2);
+
 		if(inst != nullptr) {
 			inst->SetColor(inst->GetItem()->Color);
 			database.SaveInventory(CharacterID(), inst, slot2);
 		}
+
 		m_pp.item_tint[cur_slot].color = 0;
 		SendWearChange(cur_slot);
 	}
+
 	Save(0);
 }
 
@@ -11415,7 +11421,7 @@ void command_augmentitem(Client *c, const Seperator *sep)
 		return;
 
 		AugmentItem_Struct* in_augment = new AugmentItem_Struct[sizeof(AugmentItem_Struct)];
-		in_augment->container_slot = 1000;
+		in_augment->container_slot = 1000; // <watch>
 		in_augment->unknown02[0] = 0;
 		in_augment->unknown02[1] = 0;
 		in_augment->augment_slot = -1;

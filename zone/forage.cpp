@@ -301,7 +301,7 @@ void Client::GoFish()
 		Bait = m_inv.GetItem(bslot);
 
 	//if the bait isnt equipped, need to add its skill bonus
-	if(bslot >= IDX_INV && Bait->GetItem()->SkillModType == SkillFishing) {
+	if(bslot >= EmuConstants::GENERAL_BEGIN && Bait->GetItem()->SkillModType == SkillFishing) {
 		fishing_skill += Bait->GetItem()->SkillModValue;
 	}
 
@@ -393,7 +393,7 @@ void Client::GoFish()
 	//and then swap out items in primary slot... too lazy to fix right now
 	if (MakeRandomInt(0, 49) == 1) {
 		Message_StringID(MT_Skills, FISHING_POLE_BROKE);	//Your fishing pole broke!
-		DeleteItemInInventory(13,0,true);
+		DeleteItemInInventory(MainPrimary, 0, true);
 	}
 
 	if(CheckIncreaseSkill(SkillFishing, nullptr, 5))

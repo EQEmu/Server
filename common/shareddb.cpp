@@ -149,10 +149,10 @@ bool ret=true;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	// Delete cursor items
-	if ((ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM inventory WHERE charid=%i AND ( (slotid >=8000 and slotid<=8999) or slotid=30 or (slotid>=331 and slotid<=340))", char_id), errbuf))) {
+	if ((ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM inventory WHERE charid=%i AND ( (slotid >=8000 and slotid<=8999) or slotid=%i or (slotid>=%i and slotid<=%i))", char_id, MainCursor,EmuConstants::CURSOR_BAG_BEGIN,EmuConstants::CURSOR_BAG_END), errbuf))) {
 		for(it=start,i=8000;it!=end;++it,i++) {
 			ItemInst *inst=*it;
-			if (!(ret=SaveInventory(char_id,inst,(i==8000) ? 30 : i)))
+			if (!(ret=SaveInventory(char_id,inst,(i==8000) ? MainCursor : i)))
 				break;
 		}
 	} else {
@@ -204,20 +204,20 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	bool ret = false;
-	uint32 augslot[5] = { 0, 0, 0, 0, 0 };
+	uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
 
 	//never save tribute slots:
-	if(slot_id >= 400 && slot_id <= 404)
+	if(slot_id >= EmuConstants::TRIBUTE_BEGIN && slot_id <= EmuConstants::TRIBUTE_END)
 		return(true);
 
 	if (inst && inst->IsType(ItemClassCommon)) {
-		for(int i=0;i<5;i++) {
+		for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
 			ItemInst *auginst=inst->GetItem(i);
-			augslot[i]=(auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
+			augslot[i]=(auginst && auginst->GetItem()) ? auginst->GetItem()->ID : NO_ITEM;
 		}
 	}
 
-	if (slot_id>=2500 && slot_id<=2600) { // Shared bank inventory
+	if (slot_id >= EmuConstants::SHARED_BANK_BEGIN && slot_id <= EmuConstants::SHARED_BANK_BAGS_END) { // Shared bank inventory
 		if (!inst) {
 			// Delete item
 			uint32 account_id = GetAccountIDByChar(char_id);
@@ -229,7 +229,7 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 			// Delete bag slots, if need be
 			if (ret && Inventory::SupportsContainers(slot_id)) {
 				safe_delete_array(query);
-				int16 base_slot_id = Inventory::CalcSlotId(slot_id, 0);
+				int16 base_slot_id = Inventory::CalcSlotId(slot_id, SUB_BEGIN);
 				ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM sharedbank WHERE acctid=%i AND slotid>=%i AND slotid<%i",
 					account_id, base_slot_id, (base_slot_id+10)), errbuf);
 			}
@@ -268,7 +268,7 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 			// Delete bag slots, if need be
 			if (ret && Inventory::SupportsContainers(slot_id)) {
 				safe_delete_array(query);
-				int16 base_slot_id = Inventory::CalcSlotId(slot_id, 0);
+				int16 base_slot_id = Inventory::CalcSlotId(slot_id, SUB_BEGIN);
 				ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM inventory WHERE charid=%i AND slotid>=%i AND slotid<%i",
 					char_id, base_slot_id, (base_slot_id+10)), errbuf);
 			}
@@ -302,7 +302,7 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 
 	// Save bag contents, if slot supports bag contents
 	if (inst && inst->IsType(ItemClassContainer) && Inventory::SupportsContainers(slot_id)) {
-		for (uint8 idx=0; idx<10; idx++) {
+		for (uint8 idx = SUB_BEGIN; idx < EmuConstants::ITEM_CONTAINER_SIZE; idx++) {
 			const ItemInst* baginst = inst->GetItem(idx);
 			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
 		}
@@ -430,7 +430,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
 			int16 slot_id	= (int16)atoi(row[0]);
 			uint32 item_id	= (uint32)atoi(row[1]);
 			int8 charges	= (int8)atoi(row[2]);
-			uint32 aug[5];
+			uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
 			aug[0]	= (uint32)atoi(row[3]);
 			aug[1]	= (uint32)atoi(row[4]);
 			aug[2]	= (uint32)atoi(row[5]);
@@ -443,7 +443,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
 
 				ItemInst* inst = CreateBaseItem(item, charges);
 				if (item->ItemClass == ItemClassCommon) {
-					for(int i=0;i<5;i++) {
+					for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
 						if (aug[i]) {
 							inst->PutAugment(this, i, aug[i]);
 						}
@@ -484,8 +484,8 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
 						"Warning: Invalid slot_id for item in shared bank inventory: %s=%i, item_id=%i, slot_id=%i",
 						((is_charid==true) ? "charid" : "acctid"), id, item_id, slot_id);
 
-					if(is_charid)
-						SaveInventory(id,nullptr,slot_id);
+					if (is_charid)
+						SaveInventory(id, nullptr, slot_id);
 				}
 			}
 			else {
@@ -524,7 +524,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
 			uint32 item_id	= atoi(row[1]);
 			uint16 charges	= atoi(row[2]);
 			uint32 color		= atoul(row[3]);
-			uint32 aug[5];
+			uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
 			aug[0]	= (uint32)atoul(row[4]);
 			aug[1]	= (uint32)atoul(row[5]);
 			aug[2]	= (uint32)atoul(row[6]);
@@ -565,7 +565,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
 					}
 				}
 
-				if (instnodrop || (slot_id >= 0 && slot_id <= 21 && inst->GetItem()->Attuneable))
+				if (instnodrop || (((slot_id >= EmuConstants::EQUIPMENT_BEGIN && slot_id <= EmuConstants::EQUIPMENT_END) || slot_id == MainPowerSource) && inst->GetItem()->Attuneable))
 						inst->SetInstNoDrop(true);
 				if (color > 0)
 					inst->SetColor(color);
@@ -575,17 +575,27 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
 					inst->SetCharges(charges);
 
 				if (item->ItemClass == ItemClassCommon) {
-					for(int i=0;i<5;i++) {
+					for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
 						if (aug[i]) {
 							inst->PutAugment(this, i, aug[i]);
 						}
 					}
 				}
 
-				if (slot_id>=8000 && slot_id <= 8999)
+				if (slot_id >= 8000 && slot_id <= 8999) {
 					put_slot_id = inv->PushCursor(*inst);
-				else
+				}
+				// Admins: please report any occurrences of this error
+				else if (slot_id >= 3111 && slot_id <= 3179) {
+					LogFile->write(EQEMuLog::Error,
+						"Warning: Defunct location for item in inventory: charid=%i, item_id=%i, slot_id=%i .. pushing to cursor...",
+						char_id, item_id, slot_id);
+					put_slot_id = inv->PushCursor(*inst);
+				}
+				else {
 					put_slot_id = inv->PutItem(slot_id, *inst);
+				}
+
 				safe_delete(inst);
 
 				// Save ptr to item in inventory
@@ -633,7 +643,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
 			uint32 item_id	= atoi(row[1]);
 			int8 charges	= atoi(row[2]);
 			uint32 color		= atoul(row[3]);
-			uint32 aug[5];
+			uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
 			aug[0]	= (uint32)atoi(row[4]);
 			aug[1]	= (uint32)atoi(row[5]);
 			aug[2]	= (uint32)atoi(row[6]);
@@ -679,7 +689,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
 			inst->SetCharges(charges);
 
 			if (item->ItemClass == ItemClassCommon) {
-				for(int i=0;i<5;i++) {
+				for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
 					if (aug[i]) {
 						inst->PutAugment(this, i, aug[i]);
 					}
@@ -1710,6 +1720,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 			sp[tempid].descnum = atoi(row[155]);
 			sp[tempid].effectdescnum = atoi(row[157]);
 
+			sp[tempid].npc_no_los = atoi(row[159]) != 0;
 			sp[tempid].reflectable = atoi(row[161]) != 0;
 			sp[tempid].bonushate=atoi(row[162]);
 
@@ -1740,6 +1751,8 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 			sp[tempid].AllowRest = atoi(row[212]) != 0;
 			sp[tempid].NotOutofCombat = atoi(row[213]) != 0;
 			sp[tempid].NotInCombat = atoi(row[214]) != 0;
+			sp[tempid].aemaxtargets = atoi(row[218]);
+			sp[tempid].maxtargets = atoi(row[219]);
 			sp[tempid].persistdeath = atoi(row[224]) != 0;
 			sp[tempid].DamageShieldType = 0;
 		}

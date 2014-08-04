@@ -146,13 +146,13 @@ void Trade::SendItemData(const ItemInst* inst, int16 dest_slot_id)
 	Client* with = mob->CastToClient();
 	Client* trader = owner->CastToClient();
 	if (with && with->IsClient()) {
-		with->SendItemPacket(dest_slot_id -IDX_TRADE,inst,ItemPacketTradeView);
+		with->SendItemPacket(dest_slot_id - EmuConstants::TRADE_BEGIN, inst, ItemPacketTradeView);
 		if (inst->GetItem()->ItemClass == 1) {
-			for (uint16 i=0; i<10; i++) {
+			for (uint16 i = SUB_BEGIN; i < EmuConstants::ITEM_CONTAINER_SIZE; i++) {
 				uint16 bagslot_id = Inventory::CalcSlotId(dest_slot_id, i);
 				const ItemInst* bagitem = trader->GetInv().GetItem(bagslot_id);
 				if (bagitem) {
-					with->SendItemPacket(bagslot_id-IDX_TRADE,bagitem,ItemPacketTradeView);
+					with->SendItemPacket(bagslot_id - EmuConstants::TRADE_BEGIN, bagitem, ItemPacketTradeView);
 				}
 			}
 		}
@@ -174,7 +174,7 @@ void Trade::LogTrade()
 	uint8 item_count = 0;
 
 	if (zone->tradevar != 0) {
-		for (uint16 i=3000; i<=3007; i++) {
+		for (uint16 i = EmuConstants::TRADE_BEGIN; i <= EmuConstants::TRADE_END; i++) {
 			if (trader->GetInv().GetItem(i))
 				item_count++;
 		}
@@ -226,7 +226,7 @@ void Trade::LogTrade()
 			if (item_count > 0) {
 				strcat(logtext, "items {");
 
-				for (uint16 i=3000; i<=3007; i++) {
+				for (uint16 i = EmuConstants::TRADE_BEGIN; i <= EmuConstants::TRADE_END; i++) {
 					const ItemInst* inst = trader->GetInv().GetItem(i);
 
 					if (!comma)
@@ -242,7 +242,7 @@ void Trade::LogTrade()
 						strcat(logtext, item_num);
 
 						if (inst->IsType(ItemClassContainer)) {
-							for (uint8 j=0; j<10; j++) {
+							for (uint8 j = SUB_BEGIN; j < EmuConstants::ITEM_CONTAINER_SIZE; j++) {
 								inst = trader->GetInv().GetItem(i, j);
 								if (inst) {
 									strcat(logtext, ",");
@@ -278,7 +278,7 @@ void Trade::DumpTrade()
 		return;
 
 	Client* trader = owner->CastToClient();
-	for (uint16 i=3000; i<=3007; i++) {
+	for (uint16 i = EmuConstants::TRADE_BEGIN; i <= EmuConstants::TRADE_END; i++) {
 		const ItemInst* inst = trader->GetInv().GetItem(i);
 
 		if (inst) {
@@ -287,7 +287,7 @@ void Trade::DumpTrade()
 				i, ((inst->IsType(ItemClassContainer)) ? "True" : "False"));
 
 			if (inst->IsType(ItemClassContainer)) {
-				for (uint8 j=0; j<10; j++) {
+				for (uint8 j = SUB_BEGIN; j < EmuConstants::ITEM_CONTAINER_SIZE; j++) {
 					inst = trader->GetInv().GetItem(i, j);
 					if (inst) {
 						LogFile->write(EQEMuLog::Debug, "\tBagItem %i (Charges=%i, Slot=%i)",
@@ -308,7 +308,7 @@ void Client::ResetTrade() {
 	ItemInst* ins;
 	int x;
 	AddMoneyToPP(trade->cp, trade->sp, trade->gp, trade->pp, true);
-	for(x=3000; x <= 3007; x++)
+	for(x = EmuConstants::TRADE_BEGIN; x <= EmuConstants::TRADE_END; x++)
 	{
 		TempItem = 0;
 		ins = GetInv().GetItem(x);
@@ -355,7 +355,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 			}
 
 			// Move each trade slot into free inventory slot
-			for(int16 i = 3000; i <= 3007; i++){
+			for(int16 i = EmuConstants::TRADE_BEGIN; i <= EmuConstants::TRADE_END; i++){
 				const ItemInst* inst = m_inv[i];
 				uint16 parent_offset = 0;
 
@@ -385,7 +385,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 
 					if(inst->IsType(ItemClassContainer)) {
 						// Pseudo-Slot ID's are generated based on how the db saves bag items...
-						for(uint8 j = 0; j < inst->GetItem()->BagSlots; j++) {
+						for(uint8 j = SUB_BEGIN; j < inst->GetItem()->BagSlots; j++) {
 							const ItemInst* baginst = inst->GetItem(j);
 
 							if(baginst == nullptr) { continue; }
@@ -424,7 +424,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 							qsaudit->items[parent_offset].to_slot = slot_id;
 
 							if(inst->IsType(ItemClassContainer)) {
-								for(uint8 bagslot_idx = 0; bagslot_idx < inst->GetItem()->BagSlots; bagslot_idx++) {
+								for(uint8 bagslot_idx = SUB_BEGIN; bagslot_idx < inst->GetItem()->BagSlots; bagslot_idx++) {
 									const ItemInst* bag_inst = inst->GetItem(bagslot_idx);
 
 									if(bag_inst == nullptr) { continue; }
@@ -444,7 +444,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 							qsaudit->items[parent_offset].to_slot = MainCursor;
 
 							if(inst->IsType(ItemClassContainer)) {
-								for(uint8 bagslot_idx = 0; bagslot_idx < inst->GetItem()->BagSlots; bagslot_idx++) {
+								for(uint8 bagslot_idx = SUB_BEGIN; bagslot_idx < inst->GetItem()->BagSlots; bagslot_idx++) {
 									const ItemInst* bag_inst = inst->GetItem(bagslot_idx);
 
 									if(bag_inst == nullptr) { continue; }
@@ -468,7 +468,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 						qsaudit->items[parent_offset].to_slot = MainCursor;
 
 						if(inst->IsType(ItemClassContainer)) {
-							for(uint8 bagslot_idx = 0; bagslot_idx < inst->GetItem()->BagSlots; bagslot_idx++) {
+							for(uint8 bagslot_idx = SUB_BEGIN; bagslot_idx < inst->GetItem()->BagSlots; bagslot_idx++) {
 								const ItemInst* bag_inst = inst->GetItem(bagslot_idx);
 
 								if(bag_inst == nullptr) { continue; }
@@ -531,7 +531,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 		}
 
 		if(QSPLH) { // This can be incoporated below when revisions are made -U
-			for(int16 slot_id = 3000; slot_id <= 3003; slot_id++) {
+			for(int16 slot_id = EmuConstants::TRADE_BEGIN; slot_id <= EmuConstants::TRADE_NPC_END; slot_id++) {
 				const ItemInst* trade_inst = m_inv[slot_id];
 
 				if(trade_inst) {
@@ -547,7 +547,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 					qsaudit->items[qsaudit->char_count++].aug_5		= trade_inst->GetAugmentItemID(5);
 
 					if(trade_inst->IsType(ItemClassContainer)) {
-						for(uint8 bag_idx = 0; bag_idx < trade_inst->GetItem()->BagSlots; bag_idx++) {
+						for(uint8 bag_idx = SUB_BEGIN; bag_idx < trade_inst->GetItem()->BagSlots; bag_idx++) {
 							const ItemInst* trade_baginst = trade_inst->GetItem(bag_idx);
 
 							if(trade_baginst) {
@@ -576,10 +576,10 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 
 		std::vector<void*> item_list;
 		uint32 items[4] = { 0 };
-		for(int i = 3000; i < 3004; ++i) {
+		for(int i = EmuConstants::TRADE_BEGIN; i <= EmuConstants::TRADE_NPC_END; ++i) {
 			ItemInst *inst = m_inv.GetItem(i);
 			if(inst) {
-				items[i - 3000] = inst->GetItem()->ID;
+				items[i - EmuConstants::TRADE_BEGIN] = inst->GetItem()->ID;
 				item_list.push_back(inst);
 			} else {
 				item_list.push_back(nullptr);
@@ -592,7 +592,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 				if(GetGM() || (item->NoDrop != 0 && inst->IsInstNoDrop() == false)) {
 					// pets need to look inside bags and try to equip items found there
 					if(item->ItemClass == ItemClassContainer && item->BagSlots > 0) {
-						for(int16 bslot=0; bslot < item->BagSlots; bslot++) {
+						for(int16 bslot = SUB_BEGIN; bslot < item->BagSlots; bslot++) {
 							const ItemInst* baginst = inst->GetItem(bslot);
 							if (baginst) {
 								const Item_Struct* bagitem = baginst->GetItem();
@@ -646,8 +646,8 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 		}
 		
 		ItemInst *insts[4] = { 0 };
-		for(int i = 3000; i < 3004; ++i) {
-			insts[i - 3000] = m_inv.PopItem(i);
+		for(int i = EmuConstants::TRADE_BEGIN; i <= EmuConstants::TRADE_NPC_END; ++i) {
+			insts[i - EmuConstants::TRADE_BEGIN] = m_inv.PopItem(i);
 			database.SaveInventory(CharacterID(), nullptr, i);
 		}
 
@@ -666,8 +666,7 @@ bool Client::CheckTradeLoreConflict(Client* other)
 	if (!other)
 		return true;
 	// Move each trade slot into free inventory slot
-	for (int16 i=3000; i<=3179; i++){
-		if(i == 3008) { i = 3100; }
+	for (int16 i = EmuConstants::TRADE_BEGIN; i <= EmuConstants::TRADE_END; i++){
 		const ItemInst* inst = m_inv[i];
 
 		if (inst && inst->GetItem()) {
@@ -675,6 +674,16 @@ bool Client::CheckTradeLoreConflict(Client* other)
 				return true;
 		}
 	}
+
+	for (int16 i = EmuConstants::TRADE_BAGS_BEGIN; i <= EmuConstants::TRADE_BAGS_END; i++){
+		const ItemInst* inst = m_inv[i];
+
+		if (inst && inst->GetItem()) {
+			if (other->CheckLoreConflict(inst->GetItem()))
+				return true;
+		}
+	}
+
 	return false;
 }
 
@@ -873,7 +882,7 @@ void Client::SendSingleTraderItem(uint32 CharID, int SerialNumber) {
 
 	ItemInst* inst= database.LoadSingleTraderItem(CharID, SerialNumber);
 	if(inst) {
-		SendItemPacket(30, inst, ItemPacketMerchant);
+		SendItemPacket(30, inst, ItemPacketMerchant); // MainCursor?
 		safe_delete(inst);
 	}
 
@@ -904,7 +913,7 @@ void Client::BulkSendTraderInventory(uint32 char_id) {
 				}
 
 				inst->SetPrice(TraderItems->ItemCost[i]);
-				SendItemPacket(30, inst, ItemPacketMerchant);
+				SendItemPacket(30, inst, ItemPacketMerchant); // MainCursor?
 				safe_delete(inst);
 			}
 			else
@@ -920,11 +929,12 @@ ItemInst* Client::FindTraderItemBySerialNumber(int32 SerialNumber){
 
 	ItemInst* item = nullptr;
 	uint16 SlotID = 0;
-	for(int i = 0; i < 8;i++){
-		item = this->GetInv().GetItem(22 + i);
+	for(int i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_END; i++){
+		item = this->GetInv().GetItem(i);
 		if(item && item->GetItem()->ID == 17899){ //Traders Satchel
-			for(int x = 0; x < 10; x++){
-				SlotID = (((22 + i + 3) * 10) + x + 1);
+			for(int x = SUB_BEGIN; x < EmuConstants::ITEM_CONTAINER_SIZE; x++) {
+				// we already have the parent bag and a contents iterator..why not just iterate the bag!??
+				SlotID = Inventory::CalcSlotId(i, x);
 				item = this->GetInv().GetItem(SlotID);
 				if(item) {
 					if(item->GetSerialNumber() == SerialNumber)
@@ -950,11 +960,11 @@ GetItems_Struct* Client::GetTraderItems(){
 
 	uint8 ndx = 0;
 
-	for(int i = 0; i < 8; i++){
-		item = this->GetInv().GetItem(22 + i);
+	for(int i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_END; i++) {
+		item = this->GetInv().GetItem(i);
 		if(item && item->GetItem()->ID == 17899){ //Traders Satchel
-			for(int x = 0; x < 10; x++){
-				SlotID = (((22 + i +3 ) *10) + x + 1);
+			for(int x = SUB_BEGIN; x < EmuConstants::ITEM_CONTAINER_SIZE; x++) {
+				SlotID = Inventory::CalcSlotId(i, x);
 
 				item = this->GetInv().GetItem(SlotID);
 
@@ -974,11 +984,11 @@ uint16 Client::FindTraderItem(int32 SerialNumber, uint16 Quantity){
 
 	const ItemInst* item= nullptr;
 	uint16 SlotID = 0;
-	for(int i = 0; i < 8;i++){
-		item = this->GetInv().GetItem(22+i);
+	for(int i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_END; i++) {
+		item = this->GetInv().GetItem(i);
 		if(item && item->GetItem()->ID == 17899){ //Traders Satchel
-			for(int x = 0; x < 10; x++){
-				SlotID= (((22 + i + 3) * 10) + x + 1);
+			for(int x = SUB_BEGIN; x < EmuConstants::ITEM_CONTAINER_SIZE; x++){
+				SlotID = Inventory::CalcSlotId(i, x);
 
 				item = this->GetInv().GetItem(SlotID);
 
@@ -1713,7 +1723,7 @@ static void UpdateTraderCustomerItemsAdded(uint32 CustomerID, TraderCharges_Stru
 			_log(TRADING__CLIENT, "Sending price update for %s, Serial No. %i with %i charges",
 							item->Name, gis->SerialNumber[i], gis->Charges[i]);
 
-			Customer->SendItemPacket(30, inst, ItemPacketMerchant);
+			Customer->SendItemPacket(30, inst, ItemPacketMerchant); // MainCursor?
 		}
 	}
 
@@ -1789,7 +1799,7 @@ static void UpdateTraderCustomerPriceChanged(uint32 CustomerID, TraderCharges_St
 		_log(TRADING__CLIENT, "Sending price update for %s, Serial No. %i with %i charges",
 						item->Name, gis->SerialNumber[i], gis->Charges[i]);
 
-		Customer->SendItemPacket(30, inst, ItemPacketMerchant);
+		Customer->SendItemPacket(30, inst, ItemPacketMerchant); // MainCursor??
 	}
 	safe_delete(inst);
 }

@@ -214,7 +214,7 @@ public:
 	//abstract virtual function implementations requird by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill);
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false);
-	virtual bool Attack(Mob* other, int Hand = 13, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false,
+	virtual bool Attack(Mob* other, int Hand = MainPrimary, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false,
 		ExtraAttackOptions *opts = nullptr);
 	virtual bool HasRaid() { return (GetRaid() ? true : false); }
 	virtual bool HasGroup() { return (GetGroup() ? true : false); }
@@ -1043,9 +1043,9 @@ public:
 	void MarkSingleCompassLoc(float in_x, float in_y, float in_z, uint8 count=1);
 
 	void CalcItemScale();
-	bool CalcItemScale(uint32 slot_x, uint32 slot_y);
+	bool CalcItemScale(uint32 slot_x, uint32 slot_y); // behavior change: 'slot_y' is now [RANGE]_END and not [RANGE]_END + 1
 	void DoItemEnterZone();
-	bool DoItemEnterZone(uint32 slot_x, uint32 slot_y);
+	bool DoItemEnterZone(uint32 slot_x, uint32 slot_y); // behavior change: 'slot_y' is now [RANGE]_END and not [RANGE]_END + 1
 	void SummonAndRezzAllCorpses();
 	void SummonAllCorpses(float dest_x, float dest_y, float dest_z, float dest_heading);
 	void DepopAllCorpses();

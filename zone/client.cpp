@@ -4141,14 +4141,14 @@ void Client::UpdateLFP() {
 uint16 Client::GetPrimarySkillValue()
 {
 	SkillUseTypes skill = HIGHEST_SKILL; //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
-	bool equiped = m_inv.GetItem(13);
+	bool equiped = m_inv.GetItem(MainPrimary);
 
 	if (!equiped)
 		skill = SkillHandtoHand;
 
 	else {
 
-		uint8 type = m_inv.GetItem(13)->GetItem()->ItemType; //is this the best way to do this?
+		uint8 type = m_inv.GetItem(MainPrimary)->GetItem()->ItemType; //is this the best way to do this?
 
 		switch (type)
 		{
@@ -5333,7 +5333,7 @@ bool Client::TryReward(uint32 claim_id)
 	//save
 	uint32 free_slot = 0xFFFFFFFF;
 
-	for(int i = 22; i < 30; ++i)
+	for(int i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_END; ++i)
 	{
 		ItemInst *item = GetInv().GetItem(i);
 		if(!item)
@@ -5702,7 +5702,7 @@ void Client::AddCrystals(uint32 Radiant, uint32 Ebon)
 	SendCrystalCounts();
 }
 
-// Processes a client request to inspect a SoF client's equipment.
+// Processes a client request to inspect a SoF+ client's equipment.
 void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 	if(requestee && requester) {
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_InspectAnswer, sizeof(InspectResponse_Struct));
@@ -5727,28 +5727,30 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 			}
 		}
 
-		inst = requestee->GetInv().GetItem(9999);
+		inst = requestee->GetInv().GetItem(MainPowerSource);
 
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
-				strcpy(insr->itemnames[21], item->Name);
-				insr->itemicons[21] = item->Icon;
+				// we shouldn't do this..but, that's the way it's coded atm...
+				// (this type of action should be handled exclusively in the client translator)
+				strcpy(insr->itemnames[SoF::slots::MainPowerSource], item->Name);
+				insr->itemicons[SoF::slots::MainPowerSource] = item->Icon;
 			}
 			else
-				insr->itemicons[21] = 0xFFFFFFFF;
+				insr->itemicons[SoF::slots::MainPowerSource] = 0xFFFFFFFF;
 		}
 
-		inst = requestee->GetInv().GetItem(21);
+		inst = requestee->GetInv().GetItem(MainAmmo);
 
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
-				strcpy(insr->itemnames[22], item->Name);
-				insr->itemicons[22] = item->Icon;
+				strcpy(insr->itemnames[SoF::slots::MainAmmo], item->Name);
+				insr->itemicons[SoF::slots::MainAmmo] = item->Icon;
 			}
 			else
-				insr->itemicons[22] = 0xFFFFFFFF;
+				insr->itemicons[SoF::slots::MainAmmo] = 0xFFFFFFFF;
 		}
 
 		strcpy(insr->text, requestee->GetInspectMessage().text);
@@ -6277,8 +6279,8 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	made_npc->PR = GetPR();
 	made_npc->Corrup = GetCorrup();
 	// looks
-	made_npc->texture = GetEquipmentMaterial(1);
-	made_npc->helmtexture = GetEquipmentMaterial(0);
+	made_npc->texture = GetEquipmentMaterial(MaterialChest);
+	made_npc->helmtexture = GetEquipmentMaterial(MaterialHead);
 	made_npc->haircolor = GetHairColor();
 	made_npc->beardcolor = GetBeardColor();
 	made_npc->eyecolor1 = GetEyeColor1();
@@ -6289,9 +6291,9 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	made_npc->drakkin_heritage = GetDrakkinHeritage();
 	made_npc->drakkin_tattoo = GetDrakkinTattoo();
 	made_npc->drakkin_details = GetDrakkinDetails();
-	made_npc->d_meele_texture1 = GetEquipmentMaterial(7);
-	made_npc->d_meele_texture2 = GetEquipmentMaterial(8);
-	for (int i = 0; i < _MaterialCount; i++)	{
+	made_npc->d_meele_texture1 = GetEquipmentMaterial(MaterialPrimary);
+	made_npc->d_meele_texture2 = GetEquipmentMaterial(MaterialSecondary);
+	for (int i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_END; i++)	{
 		made_npc->armor_tint[i] = GetEquipmentColor(i);
 	}
 	made_npc->loottable_id = 0;
@@ -7829,17 +7831,17 @@ void Client::TickItemCheck()
 	if(zone->tick_items.empty()) { return; }
 
 	//Scan equip slots for items
-	for(i = 0; i <= 21; i++)
+	for(i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; i++)
 	{
 		TryItemTick(i);
 	}
 	//Scan main inventory + cursor
-	for(i = 22; i < 31; i++)
+	for(i = EmuConstants::GENERAL_BEGIN; i <= MainCursor; i++)
 	{
 		TryItemTick(i);
 	}
 	//Scan bags
-	for(i = 251; i < 340; i++)
+	for(i = EmuConstants::GENERAL_BAGS_BEGIN; i <= EmuConstants::CURSOR_BAG_END; i++)
 	{
 		TryItemTick(i);
 	}
@@ -7855,7 +7857,7 @@ void Client::TryItemTick(int slot)
 
 	if(zone->tick_items.count(iid) > 0)
 	{
-		if( GetLevel() >= zone->tick_items[iid].level && MakeRandomInt(0, 100) >= (100 - zone->tick_items[iid].chance) && (zone->tick_items[iid].bagslot || slot < 22) )
+		if( GetLevel() >= zone->tick_items[iid].level && MakeRandomInt(0, 100) >= (100 - zone->tick_items[iid].chance) && (zone->tick_items[iid].bagslot || slot <= EmuConstants::EQUIPMENT_END) )
 		{
 			ItemInst* e_inst = (ItemInst*)inst;
 			parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
@@ -7863,9 +7865,9 @@ void Client::TryItemTick(int slot)
 	}
 
 	//Only look at augs in main inventory
-	if(slot > 21) { return; }
+	if(slot > EmuConstants::EQUIPMENT_END) { return; }
 
-	for (int x = 0; x < EmuConstants::ITEM_COMMON_SIZE; ++x)
+	for (int x = AUG_BEGIN; x < EmuConstants::ITEM_COMMON_SIZE; ++x)
 	{
 		ItemInst * a_inst = inst->GetAugment(x);
 		if(!a_inst) { continue; }
@@ -7886,17 +7888,17 @@ void Client::TryItemTick(int slot)
 void Client::ItemTimerCheck()
 {
 	int i;
-	for(i = 0; i <= 21; i++)
+	for(i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; i++)
 	{
 		TryItemTimer(i);
 	}
 
-	for(i = 22; i < 31; i++)
+	for(i = EmuConstants::GENERAL_BAGS_BEGIN; i <= MainCursor; i++)
 	{
 		TryItemTimer(i);
 	}
 
-	for(i = 251; i < 340; i++)
+	for(i = EmuConstants::GENERAL_BAGS_BEGIN; i <= EmuConstants::CURSOR_BAG_END; i++)
 	{
 		TryItemTimer(i);
 	}
@@ -7918,11 +7920,11 @@ void Client::TryItemTimer(int slot)
 		++it_iter;
 	}
 	
-	if(slot > 21) {
+	if(slot > EmuConstants::EQUIPMENT_END) {
 		return;
 	}
 
-	for (int x = 0; x < EmuConstants::ITEM_COMMON_SIZE; ++x)
+	for (int x = AUG_BEGIN; x < EmuConstants::ITEM_COMMON_SIZE; ++x)
 	{
 		ItemInst * a_inst = inst->GetAugment(x);
 		if(!a_inst) {

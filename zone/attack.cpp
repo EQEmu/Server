@@ -454,9 +454,9 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 
 	if(damage > 0 && (aabonuses.TwoHandBluntBlock || spellbonuses.TwoHandBluntBlock || itembonuses.TwoHandBluntBlock)
 		&& (other->InFrontMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
-		bool equiped2 = CastToClient()->m_inv.GetItem(13);
+		bool equiped2 = CastToClient()->m_inv.GetItem(MainPrimary);
 		if(equiped2) {
-			uint8 TwoHandBlunt = CastToClient()->m_inv.GetItem(13)->GetItem()->ItemType;
+			uint8 TwoHandBlunt = CastToClient()->m_inv.GetItem(MainPrimary)->GetItem()->ItemType;
 			float bonusStaffBlock = 0.0f;
 			if(TwoHandBlunt == ItemType2HBlunt) {
 
@@ -1248,7 +1248,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 
 		if( Hand == MainPrimary && GetLevel() >= 28 && IsWarriorClass() )
 		{
-			// Damage bonuses apply only to hits from the main hand (Hand == 13) by characters level 28 and above
+			// Damage bonuses apply only to hits from the main hand (Hand == MainPrimary) by characters level 28 and above
 			// who belong to a melee class. If we're here, then all of these conditions apply.
 
 			ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const Item_Struct*) nullptr );
@@ -2629,7 +2629,7 @@ uint8 Mob::GetWeaponDamageBonus( const Item_Struct *Weapon )
 
 
 	// Assert: This function should only be called for hits by the mainhand, as damage bonuses apply only to the
-	// weapon in the primary slot. Be sure to check that Hand == 13 before calling.
+	// weapon in the primary slot. Be sure to check that Hand == MainPrimary before calling.
 
 	// Assert: The caller should ensure that Weapon is actually a weapon before calling this function.
 	// The ItemInst::IsWeapon() method can be used to quickly determine this.
@@ -3906,7 +3906,7 @@ void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand) {
 	float ProcChance, ProcBonus;
 	on->GetDefensiveProcChances(ProcBonus, ProcChance, hand , this);
 
-	if(hand != 13)
+	if(hand != MainPrimary)
 		ProcChance /= 2;
 
 		if (bDefensiveProc){
@@ -3965,7 +3965,7 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 	ProcBonus += static_cast<float>(itembonuses.ProcChance) / 10.0f; // Combat Effects
 	float ProcChance = GetProcChances(ProcBonus, hand);
 
-	if (hand != 13) //Is Archery intened to proc at 50% rate?
+	if (hand != MainPrimary) //Is Archery intened to proc at 50% rate?
 		ProcChance /= 2;
 
 	// Try innate proc on weapon
@@ -4055,7 +4055,7 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 			rangedattk = true;
 	}
 
-	if (!weapon && hand == 11 && GetSpecialAbility(SPECATK_RANGED_ATK))
+	if (!weapon && hand == MainRange && GetSpecialAbility(SPECATK_RANGED_ATK))
 		rangedattk = true;
 
 	for (uint32 i = 0; i < MAX_PROCS; i++) {
@@ -4632,7 +4632,7 @@ float Mob::GetSkillProcChances(uint16 ReuseTime, uint16 hand) {
 
 		ProcChance = static_cast<float>(weapon_speed) * (RuleR(Combat, AvgProcsPerMinute) / 60000.0f);
 		
-		if (hand != 13)
+		if (hand != MainPrimary)
 			ProcChance /= 2;
 	}
 

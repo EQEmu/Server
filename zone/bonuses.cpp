@@ -159,8 +159,8 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 	}
 
 	//tribute items
-	for (i = 0; i < MAX_PLAYER_TRIBUTES; i++) {
-		const ItemInst* inst = m_inv[TRIBUTE_SLOT_START + i];
+	for (i = 0; i < EmuConstants::TRIBUTE_SIZE; i++) {
+		const ItemInst* inst = m_inv[EmuConstants::TRIBUTE_BEGIN + i];
 		if(inst == 0)
 			continue;
 		AddItemBonuses(inst, newbon, false, true);
@@ -544,7 +544,7 @@ void Client::CalcEdibleBonuses(StatBonuses* newbon) {
 
 	bool food = false;
 	bool drink = false;
-	for (i = 22; i <= 29; i++)
+	for (i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_BAGS_BEGIN; i++)
 	{
 		if (food && drink)
 			break;
@@ -560,7 +560,7 @@ void Client::CalcEdibleBonuses(StatBonuses* newbon) {
 			AddItemBonuses(inst, newbon);
 		}
 	}
-	for (i = 251; i <= 330; i++)
+	for (i = EmuConstants::GENERAL_BAGS_BEGIN; i <= EmuConstants::GENERAL_BAGS_END; i++)
 	{
 		if (food && drink)
 			break;
@@ -3049,26 +3049,28 @@ void NPC::CalcItemBonuses(StatBonuses *newbon)
 	}
 }
 
-void Client::CalcItemScale()
-{
+void Client::CalcItemScale() {
 	bool changed = false;
 
-	if(CalcItemScale(0, 21))
+	// MainAmmo excluded in helper function below
+	if(CalcItemScale(EmuConstants::EQUIPMENT_BEGIN, EmuConstants::EQUIPMENT_END)) // original coding excluded MainAmmo (< 21)
 		changed = true;
 
-	if(CalcItemScale(22, 30))
+	if(CalcItemScale(EmuConstants::GENERAL_BEGIN, EmuConstants::GENERAL_END)) // original coding excluded MainCursor (< 30)
 		changed = true;
 
-	if(CalcItemScale(251, 341))
+	// I excluded cursor bag slots here because cursor was excluded above..if this is incorrect, change 'slot_y' here to CURSOR_BAG_END
+	// and 'slot_y' above to CURSOR from GENERAL_END above - or however it is supposed to be...
+	if(CalcItemScale(EmuConstants::GENERAL_BAGS_BEGIN, EmuConstants::GENERAL_BAGS_END)) // (< 341)
 		changed = true;
 
-	if(CalcItemScale(400, 405))
+	if(CalcItemScale(EmuConstants::TRIBUTE_BEGIN, EmuConstants::TRIBUTE_END)) // (< 405)
 		changed = true;
 
 	//Power Source Slot
 	if (GetClientVersion() >= EQClientSoF)
 	{
-		if(CalcItemScale(9999, 10000))
+		if(CalcItemScale(MainPowerSource, MainPowerSource))
 			changed = true;
 	}
 
@@ -3078,14 +3080,26 @@ void Client::CalcItemScale()
 	}
 }
 
-bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y)
-{
+bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y) {
+	// behavior change: 'slot_y' is now [RANGE]_END and not [RANGE]_END + 1
 	bool changed = false;
 	int i;
-	for (i = slot_x; i < slot_y; i++) {
-		ItemInst* inst = m_inv.GetItem(i);
-		if(inst == 0)
+	for (i = slot_x; i <= slot_y; i++) {
+		if (i == MainAmmo) // moved here from calling procedure to facilitate future range changes where MainAmmo may not be the last slot
 			continue;
+
+		ItemInst* inst = m_inv.GetItem(i);
+
+		if(inst == nullptr)
+			continue;
+
+		// TEST CODE: test for bazaar trader crashing with charm items
+		if (Trader)
+			if (i >= EmuConstants::GENERAL_BAGS_BEGIN && i <= EmuConstants::GENERAL_BAGS_END) {
+				ItemInst* parent_item = m_inv.GetItem(Inventory::CalcSlotId(i));
+				if (parent_item && parent_item->GetItem()->ID == 17899) // trader satchel
+					continue;
+			}
 
 		bool update_slot = false;
 		if(inst->IsScaling())
@@ -3101,7 +3115,7 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y)
 		}
 
 		//iterate all augments
-		for (int x = 0; x < EmuConstants::ITEM_COMMON_SIZE; ++x)
+		for (int x = AUG_BEGIN; x < EmuConstants::ITEM_COMMON_SIZE; ++x)
 		{
 			ItemInst * a_inst = inst->GetAugment(x);
 			if(!a_inst)
@@ -3132,22 +3146,25 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y)
 void Client::DoItemEnterZone() {
 	bool changed = false;
 
-	if(DoItemEnterZone(0, 21))
+	// MainAmmo excluded in helper function below
+	if(DoItemEnterZone(EmuConstants::EQUIPMENT_BEGIN, EmuConstants::EQUIPMENT_END)) // original coding excluded MainAmmo (< 21)
 		changed = true;
 
-	if(DoItemEnterZone(22, 30))
+	if(DoItemEnterZone(EmuConstants::GENERAL_BEGIN, EmuConstants::GENERAL_END)) // original coding excluded MainCursor (< 30)
 		changed = true;
 
-	if(DoItemEnterZone(251, 341))
+	// I excluded cursor bag slots here because cursor was excluded above..if this is incorrect, change 'slot_y' here to CURSOR_BAG_END
+	// and 'slot_y' above to CURSOR from GENERAL_END above - or however it is supposed to be...
+	if(DoItemEnterZone(EmuConstants::GENERAL_BAGS_BEGIN, EmuConstants::GENERAL_BAGS_END)) // (< 341)
 		changed = true;
 
-	if(DoItemEnterZone(400, 405))
+	if(DoItemEnterZone(EmuConstants::TRIBUTE_BEGIN, EmuConstants::TRIBUTE_END)) // (< 405)
 		changed = true;
 
 	//Power Source Slot
 	if (GetClientVersion() >= EQClientSoF)
 	{
-		if(DoItemEnterZone(9999, 10000))
+		if(DoItemEnterZone(MainPowerSource, MainPowerSource))
 			changed = true;
 	}
 
@@ -3158,11 +3175,24 @@ void Client::DoItemEnterZone() {
 }
 
 bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
+	// behavior change: 'slot_y' is now [RANGE]_END and not [RANGE]_END + 1
 	bool changed = false;
-	for(int i = slot_x; i < slot_y; i++) {
+	for(int i = slot_x; i <= slot_y; i++) {
+		if (i == MainAmmo) // moved here from calling procedure to facilitate future range changes where MainAmmo may not be the last slot
+			continue;
+
 		ItemInst* inst = m_inv.GetItem(i);
+
 		if(!inst)
 			continue;
+
+		// TEST CODE: test for bazaar trader crashing with charm items
+		if (Trader)
+			if (i >= EmuConstants::GENERAL_BAGS_BEGIN && i <= EmuConstants::GENERAL_BAGS_END) {
+				ItemInst* parent_item = m_inv.GetItem(Inventory::CalcSlotId(i));
+				if (parent_item && parent_item->GetItem()->ID == 17899) // trader satchel
+					continue;
+			}
 
 		bool update_slot = false;
 		if(inst->IsScaling())
@@ -3188,7 +3218,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 		}
 
 		//iterate all augments
-		for (int x = 0; x < EmuConstants::ITEM_COMMON_SIZE; ++x)
+		for (int x = AUG_BEGIN; x < EmuConstants::ITEM_COMMON_SIZE; ++x)
 		{
 			ItemInst *a_inst = inst->GetAugment(x);
 			if(!a_inst)
