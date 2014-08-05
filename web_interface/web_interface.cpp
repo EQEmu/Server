@@ -132,7 +132,7 @@ int callback_eqemu(libwebsocket_context *context, libwebsocket *wsi, libwebsocke
 
 static struct libwebsocket_protocols protocols[] = {
 	{ "http-only", callback_http, 0, 0, },
-	{ "eqemu", callback_eqemu, sizeof(per_session_data_eqemu), 65536, },
+	{ "eqemu", callback_eqemu, sizeof(per_session_data_eqemu), 1048576, },
 	{ nullptr, nullptr, 0, 0 }
 };
 

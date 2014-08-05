@@ -76,10 +76,8 @@
 
 void register_methods();
 void handle_method_token_auth(per_session_data_eqemu *session, rapidjson::Document &document, std::string &method);
-void handle_method_no_args(per_session_data_eqemu *session, rapidjson::Document &document, std::string &method);
-void handle_method_get_zone_info(per_session_data_eqemu *session, rapidjson::Document &document, std::string &method);
-void handle_method_subscribe(per_session_data_eqemu *session, rapidjson::Document &document, std::string &method);
-void handle_method_zone_no_args(per_session_data_eqemu *session, rapidjson::Document &document, std::string &method);
+void handle_method_zone(per_session_data_eqemu *session, rapidjson::Document &document, std::string &method);
+void handle_method_world(per_session_data_eqemu *session, rapidjson::Document &document, std::string &method);
 
 #endif
 
