@@ -79,7 +79,7 @@ def main() :
 def LoadServerOpcodes() :
     # Server opcodes are auto-enumerated with a starting reference of '1'
     try :
-        filename = '{0}{1}{2}'.format(repopath, '\common', '\emu_oplist.h')
+        filename = '{0}{1}{2}'.format(repopath, '/common', '/emu_oplist.h')
         
         if VERBOSE or DEBUG : print(filename)
         
@@ -130,7 +130,7 @@ def LoadClientOpcodes() :
     
     for client in clients :
         try :
-            filename = '{0}{1}{2}{3}{4}'.format(repopath, '\utils\patches', '\patch_', client, '.conf')
+            filename = '{0}{1}{2}{3}{4}'.format(repopath, '/utils/patches', '/patch_', client, '.conf')
             
             if VERBOSE or DEBUG : print(filename)
 
@@ -192,10 +192,10 @@ def LoadClientOpcodes() :
 def LoadClientTranslators() :
     for client in clients :
         try :
-            if client == '6.2' : shortname = '{0}'.format('\Client62_ops.h')
-            else : shortname = '{0}{1}{2}'.format(chr(92), client, '_ops.h')
+            if client == '6.2' : shortname = '{0}'.format('/Client62_ops.h')
+            else : shortname = '{0}{1}{2}'.format('/', client, '_ops.h')
                 
-            filename = '{0}{1}{2}'.format(repopath, '\common\patches', shortname)
+            filename = '{0}{1}{2}'.format(repopath, '/common/patches', shortname)
             
             if VERBOSE or DEBUG : print(filename)
 
@@ -247,7 +247,7 @@ def LoadClientTranslators() :
 def LoadServerHandlers() :
     # TODO: handle remarked out definitions; add other servers, if possible
     try :
-        filename = '{0}{1}{2}'.format(repopath, '\zone', '\client_packet.cpp')
+        filename = '{0}{1}{2}'.format(repopath, '/zone', '/client_packet.cpp')
         
         if VERBOSE or DEBUG : print(filename)
         
@@ -304,7 +304,7 @@ def LoadServerHandlers() :
 
 def CreateOutputDirectory() :
     try :
-        outputpath = '{0}{1}'.format(repopath, '\utils\scripts\opcode_handlers_output')
+        outputpath = '{0}{1}'.format(repopath, '/utils/scripts/opcode_handlers_output')
         
         if VERBOSE or DEBUG : print(outputpath)
         
@@ -318,7 +318,7 @@ def CreateOutputDirectory() :
 def CreateOutputStreams() :
     try :
         for client in clients :
-            filename = '{0}{1}{2}{3}{4}'.format(repopath, '\utils\scripts\opcode_handlers_output', chr(92), client, '_opcode_handlers.txt')
+            filename = '{0}{1}{2}{3}'.format(repopath, '/utils/scripts/opcode_handlers_output/', client, '_opcode_handlers.txt')
             
             if VERBOSE or DEBUG : print(filename)
             
