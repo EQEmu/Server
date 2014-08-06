@@ -6468,6 +6468,6 @@ void Mob::CalcSpellPowerDistanceMod(uint16 spell_id, float range, Mob* caster)
 		float mod = spells[spell_id].min_dist_mod + (dist_from_min * (dm_mod_interval/dm_range));
 		mod *= 100.0f;
 		
-		SetSpellPSetSpellPowerDistanceMod(static_cast<int>(mod));
+		SetSpellPowerDistanceMod(static_cast<int>(mod));
 	}
 }
