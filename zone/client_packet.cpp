@@ -27,6 +27,7 @@
 #include <sstream>
 #include <set>
 
+
 #ifdef _WINDOWS
 	#define snprintf	_snprintf
 	#define strncasecmp	_strnicmp
@@ -69,6 +70,8 @@
 #include "merc.h"
 #include "../common/ZoneNumbers.h"
 #include "QuestParserCollection.h"
+#include "remote_call.h"
+#include "remote_call_subscribe.h"
 
 extern Zone* zone;
 extern volatile bool ZoneLoaded;
@@ -1022,6 +1025,20 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 		return;
 	}
 	PlayerPositionUpdateClient_Struct* ppu = (PlayerPositionUpdateClient_Struct*)app->pBuffer;
+
+	/* Web Interface */
+	if (IsClient()) {
+		std::vector<std::string> params;
+		params.push_back(std::to_string((long)zone->GetZoneID()));
+		params.push_back(std::to_string((long)zone->GetInstanceID()));
+		params.push_back(std::to_string((long)GetID()));
+		params.push_back(GetCleanName());
+		params.push_back(std::to_string((double)ppu->x_pos));
+		params.push_back(std::to_string((double)ppu->y_pos));
+		params.push_back(std::to_string((double)ppu->z_pos));
+		params.push_back(std::to_string((double)heading));
+		RemoteCallSubscriptionHandler::Instance()->OnEvent("Client.Position", params);
+	}
 
 	if(ppu->spawn_id != GetID()) {
 		// check if the id is for a boat the player is controlling

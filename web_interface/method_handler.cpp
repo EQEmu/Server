@@ -14,7 +14,8 @@ void register_authorized_methods()
 	authorized_methods["World.GetZoneDetails"] = std::make_pair(10, handle_method_world);
 	authorized_methods["Zone.Subscribe"] = std::make_pair(10, handle_method_zone);
 	authorized_methods["Zone.Unsubscribe"] = std::make_pair(10, handle_method_zone);
-	authorized_methods["Zone.GetInitialEntityPositions"] = std::make_pair(10, handle_method_zone);
+	authorized_methods["Zone.Get.Initial.Entity.Positions"] = std::make_pair(10, handle_method_zone);
+	authorized_methods["Zone.Move.Entity"] = std::make_pair(10, handle_method_zone); 
 }
 
 void register_unauthorized_methods()

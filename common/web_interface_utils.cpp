@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 using namespace rapidjson;
 using namespace std;
 
-std::vector<std::string> explode(std::string const & s, char delim)
+std::vector<std::string> explode_string(std::string const & s, char delim)
 {
 	std::vector<std::string> result;
 	std::istringstream iss(s);
@@ -48,10 +48,10 @@ std::string MakeJSON(std::string json)
 	Writer<StringBuffer> writer(s);
 	writer.StartObject();
 
-	auto arg_c = explode(json, ',');
+	auto arg_c = explode_string(json, ',');
 	if (arg_c.size() == 0)
 	{
-		auto arg_v = explode(json, ':');
+		auto arg_v = explode_string(json, ':');
 		if (arg_v.size() > 0)
 		{
 			for (int j = 0; j < arg_v.size(); j++)
@@ -64,7 +64,7 @@ std::string MakeJSON(std::string json)
 	{
 		for (int i = 0; i < arg_c.size(); i++)
 		{
-			auto arg_v = explode(arg_c[i], ':');
+			auto arg_v = explode_string(arg_c[i], ':');
 			for (int j = 0; j < arg_v.size(); j++)
 			{
 				writer.String(arg_v[j].c_str());

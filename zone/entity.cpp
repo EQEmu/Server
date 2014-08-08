@@ -23,6 +23,7 @@
 #include <string.h>
 #include <iostream>
 
+
 #ifdef _WINDOWS
 #include <process.h>
 #else
@@ -44,6 +45,8 @@
 #include "guild_mgr.h"
 #include "raids.h"
 #include "QuestParserCollection.h"
+#include "remote_call.h"
+#include "remote_call_subscribe.h"
 
 #ifdef _WINDOWS
 	#define snprintf	_snprintf
@@ -2367,6 +2370,11 @@ void EntityList::Depop(bool StartSpawnTimer)
 			if (pnpc->IsFindable())
 				UpdateFindableNPCState(pnpc, true);
 
+			/* Web Interface Depop Entities */
+			std::vector<std::string> params;
+			params.push_back(std::to_string((long)pnpc->GetID()));
+			RemoteCallSubscriptionHandler::Instance()->OnEvent("NPC.Depop", params);
+
 			pnpc->Depop(StartSpawnTimer);
 		}
 	}
@@ -2376,8 +2384,14 @@ void EntityList::DepopAll(int NPCTypeID, bool StartSpawnTimer)
 {
 	for (auto it = npc_list.begin(); it != npc_list.end(); ++it) {
 		NPC *pnpc = it->second;
-		if (pnpc && (pnpc->GetNPCTypeID() == (uint32)NPCTypeID))
-			pnpc->Depop(StartSpawnTimer);
+		if (pnpc && (pnpc->GetNPCTypeID() == (uint32)NPCTypeID)){
+			pnpc->Depop(StartSpawnTimer); 
+
+			/* Web Interface Depop Entities */
+			std::vector<std::string> params;
+			params.push_back(std::to_string((long)pnpc->GetID()));
+			RemoteCallSubscriptionHandler::Instance()->OnEvent("NPC.Depop", params);
+		}
 	}
 }
 
