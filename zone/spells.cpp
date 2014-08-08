@@ -1034,7 +1034,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 
 			mlog(SPELLS__CASTING, "Checking Interruption: spell x: %f  spell y: %f  cur x: %f  cur y: %f channelchance %f channeling skill %d\n", GetSpellX(), GetSpellY(), GetX(), GetY(), channelchance, GetSkill(SkillChanneling));
 
-			if(MakeRandomFloat(0, 100) > channelchance) {
+			if(!spells[spell_id].uninterruptable && MakeRandomFloat(0, 100) > channelchance) {
 				mlog(SPELLS__CASTING_ERR, "Casting of %d canceled: interrupted.", spell_id);
 				InterruptSpell();
 				return;
@@ -4684,7 +4684,7 @@ void Mob::Stun(int duration)
 	if(stunned && stunned_timer.GetRemainingTime() > uint32(duration))
 		return;
 
-	if(casting_spell_id) {
+	if(IsValidSpell(casting_spell_id) && !spells[casting_spell_id].uninterruptable) {
 		int persistent_casting = spellbonuses.PersistantCasting + itembonuses.PersistantCasting;
 		if(IsClient())
 			persistent_casting += aabonuses.PersistantCasting;

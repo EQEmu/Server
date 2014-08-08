@@ -2711,7 +2711,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if (buffslot >= 0)
 					break;
 
-				if(IsCasting() && MakeRandomInt(0, 100) <= spells[spell_id].base[i])
+				if(!spells[spell_id].uninterruptable && IsCasting() && MakeRandomInt(0, 100) <= spells[spell_id].base[i])
 					InterruptSpell();
 				
 				break;
