@@ -4685,11 +4685,9 @@ void Mob::Stun(int duration)
 		return;
 
 	if(IsValidSpell(casting_spell_id) && !spells[casting_spell_id].uninterruptable) {
-		int persistent_casting = spellbonuses.PersistantCasting + itembonuses.PersistantCasting;
-		if(IsClient())
-			persistent_casting += aabonuses.PersistantCasting;
+		int persistent_casting = spellbonuses.PersistantCasting + itembonuses.PersistantCasting + aabonuses.PersistantCasting;
 
-		if(MakeRandomInt(1,99) > persistent_casting)
+		if(MakeRandomInt(0,99) > persistent_casting)
 			InterruptSpell();
 	}
 
