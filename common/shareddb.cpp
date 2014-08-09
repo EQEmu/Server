@@ -1710,7 +1710,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 			for (y = 0; y < 16; y++)
 				sp[tempid].deities[y]=atoi(row[126+y]);
 
-			sp[tempid].uninterruptable=atoi(row[146]);
+			sp[tempid].uninterruptable=atoi(row[146]) != 0;
 			sp[tempid].ResistDiff=atoi(row[147]);
 			sp[tempid].dot_stacking_exempt=atoi(row[148]);
 			sp[tempid].RecourseLink = atoi(row[150]);
@@ -1726,6 +1726,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 
 			sp[tempid].EndurCost=atoi(row[166]);
 			sp[tempid].EndurTimerIndex=atoi(row[167]);
+			sp[tempid].IsDisciplineBuff = atoi(row[168]) != 0;
 			sp[tempid].HateAdded=atoi(row[173]);
 			sp[tempid].EndurUpkeep=atoi(row[174]);
 			sp[tempid].numhitstype = atoi(row[175]);
@@ -1741,19 +1742,26 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 			sp[tempid].viral_targets = atoi(row[191]);
 			sp[tempid].viral_timer = atoi(row[192]);
 			sp[tempid].NimbusEffect = atoi(row[193]);
-			sp[tempid].directional_start = (float)atoi(row[194]);
-			sp[tempid].directional_end = (float)atoi(row[195]);
+			sp[tempid].directional_start = static_cast<float>(atoi(row[194]));
+			sp[tempid].directional_end = static_cast<float>(atoi(row[195]));
 			sp[tempid].not_extendable = atoi(row[197]) != 0;
 			sp[tempid].suspendable = atoi(row[200]) != 0;
+			sp[tempid].viral_range = atoi(row[201]);
 			sp[tempid].spellgroup=atoi(row[207]);
+			sp[tempid].rank = atoi(row[208]);
 			sp[tempid].powerful_flag=atoi(row[209]);
 			sp[tempid].CastRestriction = atoi(row[211]);
 			sp[tempid].AllowRest = atoi(row[212]) != 0;
-			sp[tempid].NotOutofCombat = atoi(row[213]) != 0;
-			sp[tempid].NotInCombat = atoi(row[214]) != 0;
+			sp[tempid].InCombat = atoi(row[213]) != 0;
+			sp[tempid].OutofCombat = atoi(row[214]) != 0;
 			sp[tempid].aemaxtargets = atoi(row[218]);
 			sp[tempid].maxtargets = atoi(row[219]);
 			sp[tempid].persistdeath = atoi(row[224]) != 0;
+			sp[tempid].min_dist = atof(row[227]);
+			sp[tempid].min_dist_mod = atof(row[228]);
+			sp[tempid].max_dist = atof(row[229]);
+			sp[tempid].max_dist_mod = atof(row[230]);
+			sp[tempid].min_range = static_cast<float>(atoi(row[231]));
 			sp[tempid].DamageShieldType = 0;
 		}
 		mysql_free_result(result);
