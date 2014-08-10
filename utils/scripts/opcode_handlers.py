@@ -9,8 +9,8 @@
 # include other servers and clients, and other criteria and features.
 
 
+import sys
 import os
-# import pickle
 
 from time import time, ctime
 
@@ -19,8 +19,8 @@ DEBUG = 1  # {0 - normal, 1 - verbose, 2 - in-depth}
 
 base_path = os.getcwd()[:-14]  # '/utils/scripts'
 
-client_list = ['6.2', 'Titanium', 'SoF', 'SoD', 'Underfoot', 'RoF']
-server_list = ['Login', 'World', 'Zone', 'UCS']
+client_list = ['6.2', 'Titanium', 'SoF', 'SoD', 'Underfoot', 'RoF', 'RoF2', 'ClientTest']
+server_list = ['Login', 'World', 'Zone', 'UCS', 'ServerTest']
 
 client_opcodes = {}
 server_opcodes = {}
@@ -34,49 +34,138 @@ out_files = {}
 
 
 def main():
-    print('Loading source data...')
+    """ Call each method independently and track success """
 
-    if not loadclientopcodes():
-        print('Could not load client opcodes...')
-        return
+    fault = False
+    faults = []
 
-    if not loadserveropcodes():
-        print('Could not load server opcodes...')
-        return
+    print('')
 
-    if not loadclienttranslators():
-        print('Could not load client translators...')
-        return
-    
-    if not loadserverhandlers():
-        print('Could not load server handlers...')
-        return
+    if fault is False:
+        fault = not createoutputdirectory()
 
-    print('Creating output streams...')
+        if fault is True:
+            faults.append('createoutputdirectory()')
 
-    if not createoutputdirectory():
-        print('Could not create output directory...')
-        return
-        
-    if not openoutputfiles():
-        print('Could not open output files...')
-        return
+    if fault is False:
+        fault = not opendebugfile()
 
-    print('Parsing opcode data...')
+        if fault is True:
+            faults.append('opendebugfile()')
 
-    if not parseclientopcodedata():
-        print('Could not parse client opcode data...')
-        return
+    if fault is False:
+        print('Loading source data...')
 
-    if not parseserveropcodedata():
-        print('Could not parse server opcode data...')
-        return
+        if fault is False:
+            fault = not loadclientopcodes()
 
-    print('Destroying output streams...')
+            if fault is True:
+                faults.append('loadclientopcodes()')
 
+        if fault is False:
+            fault = not loadserveropcodes()
+
+            if fault is True:
+                faults.append('loadserveropcodes()')
+
+        if fault is False:
+            fault = not loadclienttranslators()
+
+            if fault is True:
+                faults.append('loadclienttranslators()')
+
+        if fault is False:
+            fault = not loadserverhandlers()
+
+            if fault is True:
+                faults.append('loadserverhandlers()')
+
+        if fault is False:
+            fault = not discoverserverhandlers()
+
+            if fault is True:
+                faults.append('discoverserverhandlers()')
+
+        if fault is False:
+            fault = not clearemptyserverentries()
+
+            if fault is True:
+                faults.append('clearemptyserverentries()')
+
+    if fault is False:
+        print('Creating output streams...')
+
+        if fault is False:
+            fault = not openoutputfiles()
+
+            if fault is True:
+                faults.append('openoutputfiles()')
+
+    if fault is False:
+        print('Parsing opcode data...')
+
+        if fault is False:
+            fault = not parseclientopcodedata()
+
+            if fault is True:
+                faults.append('parseclientopcodedata()')
+
+        if fault is False:
+            fault = not parseserveropcodedata()
+
+            if fault is True:
+                faults.append('parseserveropcodedata()')
+
+    if fault is False:
+        print('Destroying output streams...')
+
+    # these should always be processed..verbose or silent
     if not closeoutputfiles():
-        print('Could not close output files...')
-        return
+        faults.append('closeoutputfiles()')
+
+    if not closedebugfile():
+        faults.append('closedebugfile()')
+
+    if len(faults) > 0:
+        message = 'Script failed due to errors in:\n'
+
+        for entry in faults:
+            message += '  {0}'.format(entry)
+
+        print(message)
+
+    return
+
+
+def createoutputdirectory():
+    """ Check for output directory - create if does not exist """
+
+    try:
+        output_path = '{0}/utils/scripts/opcode_handlers_output'.format(base_path)
+
+        if DEBUG >= 1:
+            print(output_path)
+
+        if not os.path.exists(output_path):
+            os.mkdir(output_path)
+
+        return True
+    except:
+        if DEBUG >= 2:
+            print('EXCEPTION ERROR->createoutputdirectory({0})'.format(sys.exc_info()[0]))
+
+        return False
+
+
+def opendebugfile():
+    file_name = '{0}/utils/scripts/opcode_handlers_output/DEBUG.txt'.format(base_path)
+
+    if DEBUG >= 1:
+        print(file_name)
+
+    out_files['DEBUG'] = open(file_name, 'w')
+
+    return True
 
 
 def loadclientopcodes():
@@ -100,12 +189,7 @@ def loadclientopcodes():
             with open(file_name, 'r') as data_file:
                 client_opcodes[client] = {}  # force empty dictionary to avoid collisions
 
-                while True:
-                    data_line = data_file.readline()
-
-                    if not data_line:
-                        break
-
+                for data_line in data_file:
                     key_begin = data_line.find('OP_')
                     key_end = data_line.find('=', key_begin)
 
@@ -133,26 +217,23 @@ def loadclientopcodes():
                             value))
 
             data_file.close()
-        except:  # StandardError as se:
-            #print(se.message)
-
-            #if DEBUG >= 2:
-            #    print(pickle.dumps(se.args))
+        except:
+            if DEBUG >= 2:
+                print('EXCEPTION ERROR->loadclientopcodes({0})'.format(sys.exc_info()[0]))
 
             bad_clients.append(client)
 
-    if len(bad_clients) > 0:
-        for bad_client in bad_clients:
-            if DEBUG >= 1:
-                print('Deleting \'{0}\' client from search criteria...'.format(bad_client))
+    for bad_client in bad_clients:
+        if DEBUG >= 1:
+            print('Deleting \'{0}\' client from search criteria...'.format(bad_client))
             
-            client_list.remove(bad_client)
+        client_list.remove(bad_client)
 
-            if DEBUG >= 1:
-                print('Deleting stale entries for \'{0}\' client...'.format(bad_client))
+        if DEBUG >= 1:
+            print('Deleting stale entries for \'{0}\' client...'.format(bad_client))
 
-            if bad_client in client_opcodes:
-                del client_opcodes[bad_client]
+        if bad_client in client_opcodes:
+            del client_opcodes[bad_client]
                 
     if not len(client_list) > 0:
         return False
@@ -162,23 +243,23 @@ def loadclientopcodes():
 
 def loadserveropcodes():
     try:
-        value = 1  # Server opcodes are auto-enumerated with a starting reference of '1'
+        value = 0
 
-        file_name = '{0}{1}{2}'.format(
+        server_opcodes['OP_Unknown'] = value
+        value += 1
+
+        if DEBUG >= 2:
+            print('N[Server](OP_Unknown) = {0}'.format(server_opcodes['OP_Unknown']))
+
+        file_name = '{0}{1}'.format(
             base_path,
-            '/common',
-            '/emu_oplist.h')
+            '/common/emu_oplist.h')
 
         if DEBUG >= 1:
             print(file_name)
 
         with open(file_name, 'r') as data_file:
-            while True:
-                data_line = data_file.readline()
-
-                if not data_line:
-                    break
-
+            for data_line in data_file:
                 val_begin = data_line.find('OP_', 2)
                 val_end = data_line.find(')', val_begin)
 
@@ -197,21 +278,15 @@ def loadserveropcodes():
 
         data_file.close()
 
-        file_name = '{0}{1}{2}'.format(
+        file_name = '{0}{1}'.format(
             base_path,
-            '/common',
-            '/mail_oplist.h')
+            '/common/mail_oplist.h')
 
         if DEBUG >= 1:
             print(file_name)
 
         with open(file_name, 'r') as data_file:
-            while True:
-                data_line = data_file.readline()
-
-                if not data_line:
-                    break
-
+            for data_line in data_file:
                 val_begin = data_line.find('OP_', 2)
                 val_end = data_line.find(')', val_begin)
 
@@ -229,11 +304,9 @@ def loadserveropcodes():
                             server_opcodes[data_line[val_begin:val_end]]))
 
         data_file.close()
-    except:  # StandardError as se:
-        #print(se.message)
-
-        #if DEBUG >= 2:
-        #    print(pickle.dumps(se.args))
+    except:
+        if DEBUG >= 2:
+            print('EXCEPTION ERROR->loadserveropcodes({0})'.format(sys.exc_info()[0]))
 
         return False
 
@@ -263,12 +336,7 @@ def loadclienttranslators():
                 client_encodes[client] = []
                 client_decodes[client] = []
 
-                while True:
-                    data_line = data_file.readline()
-                    
-                    if not data_line:
-                        break
-
+                for data_line in data_file:
                     val_begin = data_line.find('OP_', 2)
                     val_end = data_line.find(')', val_begin)
 
@@ -293,11 +361,9 @@ def loadclienttranslators():
                                 data_line[val_begin:val_end] in client_decodes[client]))
 
             data_file.close()
-        except:  # StandardError as se:
-            #print(se.message)
-
-            #if DEBUG >= 2:
-            #    print(pickle.dumps(se.args))
+        except:
+            if DEBUG >= 2:
+                print('EXCEPTION ERROR->loadclienttranslators({0})'.format(sys.exc_info()[0]))
 
             return False
 
@@ -309,40 +375,46 @@ def loadclienttranslators():
 
 
 def loadserverhandlers():
+    """ Load pre-designated SERVER opcode handlers """
+
     # TODO: handle remarked out definitions in file (i.e., // and /**/);
-    # TODO: out-going-only handlers need to be added..more research...
     bad_servers = []
 
     for server in server_list:
         try:
             if server == 'Login':
-                raise
+                if DEBUG >= 1:
+                    print('No pre-designated server opcode handlers for \'{0}\''.format(server))
+
+                continue
             elif server == 'World':
-                raise
+                if DEBUG >= 1:
+                    print('No pre-designated server opcode handlers for \'{0}\''.format(server))
+
+                continue
             elif server == 'Zone':
-                file_name = '{0}{1}{2}'.format(
+                file_name = '{0}{1}'.format(
                     base_path,
-                    '/zone',
-                    '/client_packet.cpp')
+                    '/zone/client_packet.cpp')
         
                 if DEBUG >= 1:
                     print(file_name)
         
                 with open(file_name, 'r') as data_file:
                     server_handlers[server] = {}
+                    can_run = False
+                    line_no = 0
 
-                    data_line = data_file.readline()
-            
-                    while not data_line[:19] == 'void MapOpcodes() {':
-                        data_line = data_file.readline()
-                
-                        if not data_line:
-                            break
-            
-                    while True:
-                        data_line = data_file.readline()
-                
-                        if not data_line or data_line[0:1] == '}':
+                    for data_line in data_file:
+                        line_no += 1
+
+                        if can_run is False:
+                            if data_line[:19] == 'void MapOpcodes() {':
+                                can_run = True
+
+                            continue
+
+                        if data_line[0:1] == '}':
                             break
                 
                         key_begin = data_line.find('OP_')
@@ -357,42 +429,55 @@ def loadserverhandlers():
                         if val_begin < 0 or val_end < 0:
                             continue
 
-                        server_handlers[server][data_line[key_begin:key_end]] = data_line[val_begin:val_end]
+                        # TODO: add continue on 'in server_opcodes' failure
+
+                        if not data_line[key_begin:key_end] in server_handlers[server]:
+                            server_handlers[server][data_line[key_begin:key_end]] = []
+
+                        server_handlers[server][data_line[key_begin:key_end]].append(
+                            '../zone/client_packet.cpp({0}:{1}) \'{2}\''.format(
+                                line_no,
+                                key_begin,
+                                data_line[val_begin:val_end]))
                 
                         if DEBUG >= 2:
-                            print('[{0}][{1}] = {2}'.format(
+                            print('[{0}][{1}]({2}) [{3}]'.format(
                                 server,
                                 data_line[key_begin:key_end],
-                                server_handlers[server][data_line[key_begin:key_end]]))
+                                data_line[val_begin:val_end],
+                                data_line[val_begin:val_end] in server_handlers[server][data_line[key_begin:key_end]]))
 
                 data_file.close()
             elif server == 'UCS':
-                raise
+                if DEBUG >= 1:
+                    print('No pre-designated server opcode handlers for \'{0}\''.format(server))
+
+                continue
             else:
+                if DEBUG >= 1:
+                    print('No pre-designated server opcode handlers for \'{0}\''.format(server))
+
                 if DEBUG >= 2:
                     print('->LoadServerHandlers(Someone added a new server and forgot to code for the data load...)')
 
-                return False
-        except:  # StandardError as se:
-            #print(se.message)
-
-            #if DEBUG >= 2:
-            #    print(pickle.dumps(se.args))
+                continue
+        except:
+            if DEBUG >= 2:
+                print('EXCEPTION ERROR->loadserverhandlers({0})'.format(sys.exc_info()[0]))
 
             bad_servers.append(server)
 
-    if len(bad_servers) > 0:
-        for bad_server in bad_servers:
-            if DEBUG >= 1:
-                print('Deleting \'{0}\' server from search criteria...'.format(bad_server))
+    for bad_server in bad_servers:
+        if DEBUG >= 1:
+            print('Deleting \'{0}\' server from search criteria...'.format(bad_server))
 
-            server_list.remove(bad_server)
+        server_list.remove(bad_server)
 
-            if DEBUG >= 1:
-                print('Deleting stale entries for \'{0}\' server...'.format(bad_server))
+        if DEBUG >= 1:
+            print('Deleting stale entries for \'{0}\' server...'.format(bad_server))
 
-            if bad_server in server_handlers:
-                del server_handlers[bad_server]
+        if bad_server in server_handlers:
+            del server_handlers[bad_server]
 
     if not len(server_list) > 0:
         return False
@@ -400,39 +485,199 @@ def loadserverhandlers():
     return True
 
 
-def createoutputdirectory():
-    try:
-        output_path = '{0}{1}'.format(
-            base_path,
-            '/utils/scripts/opcode_handlers_output')
-        
+def discoverserverhandlers():
+    """ Load undefined SERVER opcode handlers using 'discovery' method """
+
+    locations = {}
+
+    for server in server_list:  # initialize lists for any remaining servers
+        locations[server] = []
+
+    # manually enter search locations
+    #if 'Server' in locations:
+    #    locations['Server'].append('/<local_path>/<file_name>.<ext>')
+
+    # TODO: if/how to include perl/lua handlers...
+
+    if 'Login' in locations:
+        locations['Login'].append('/loginserver/Client.cpp')
+        locations['Login'].append('/loginserver/ServerManager.cpp')
+        locations['Login'].append('/loginserver/WorldServer.cpp')
+
+    if 'World' in locations:
+        locations['World'].append('/world/client.cpp')
+
+    # the bulk of opcodes are handled in 'Zone' - if processing occurs on a different
+    # server, you will need to manually trace 'ServerPacket' to the deferred location
+    if 'Zone' in locations:
+        locations['Zone'].append('/zone/AA.cpp')
+        locations['Zone'].append('/zone/attack.cpp')
+        locations['Zone'].append('/zone/bot.cpp')
+        locations['Zone'].append('/zone/client.cpp')
+        locations['Zone'].append('/zone/client_packet.cpp')
+        locations['Zone'].append('/zone/client_process.cpp')
+        locations['Zone'].append('/zone/command.cpp')
+        locations['Zone'].append('/zone/corpse.cpp')
+        locations['Zone'].append('/zone/doors.cpp')
+        locations['Zone'].append('/zone/effects.cpp')
+        locations['Zone'].append('/zone/entity.cpp')
+        locations['Zone'].append('/zone/exp.cpp')
+        locations['Zone'].append('/zone/groups.cpp')
+        locations['Zone'].append('/zone/guild.cpp')
+        locations['Zone'].append('/zone/guild_mgr.cpp')
+        locations['Zone'].append('/zone/horse.cpp')
+        locations['Zone'].append('/zone/inventory.cpp')
+        locations['Zone'].append('/zone/loottables.cpp')
+        locations['Zone'].append('/zone/merc.cpp')
+        locations['Zone'].append('/zone/mob.cpp')
+        locations['Zone'].append('/zone/MobAI.cpp')
+        locations['Zone'].append('/zone/Object.cpp')
+        locations['Zone'].append('/zone/pathing.cpp')
+        locations['Zone'].append('/zone/petitions.cpp')
+        locations['Zone'].append('/zone/questmgr.cpp')
+        locations['Zone'].append('/zone/raids.cpp')
+        locations['Zone'].append('/zone/special_attacks.cpp')
+        locations['Zone'].append('/zone/spells.cpp')
+        locations['Zone'].append('/zone/spell_effects.cpp')
+        locations['Zone'].append('/zone/tasks.cpp')
+        locations['Zone'].append('/zone/titles.cpp')
+        locations['Zone'].append('/zone/tradeskills.cpp')
+        locations['Zone'].append('/zone/trading.cpp')
+        locations['Zone'].append('/zone/trap.cpp')
+        locations['Zone'].append('/zone/tribute.cpp')
+        locations['Zone'].append('/zone/worldserver.cpp')
+        locations['Zone'].append('/zone/zone.cpp')
+        locations['Zone'].append('/zone/zonedb.cpp')
+        locations['Zone'].append('/zone/zoning.cpp')
+
+    if 'UCS' in locations:
+        locations['UCS'].append('/ucs/clientlist.cpp')
+        locations['UCS'].append('/ucs/database.cpp')
+
+    for server in server_list:
+        if not server in server_handlers:
+            server_handlers[server] = {}
+
+        for location in locations[server]:
+            try:
+                file_name = '{0}{1}'.format(
+                    base_path,
+                    location)
+
+                if DEBUG >= 1:
+                    print(file_name)
+
+                with open(file_name, 'r') as data_file:
+                    line_no = 0
+                    hint = 'Near beginning of file'
+
+                    for data_line in data_file:
+                        line_no += 1
+
+                        if data_line[:1].isalpha():
+                            hint_end = data_line.find('(')
+
+                            if not hint_end < 0:
+                                hint_begin = hint_end - 1
+
+                                while not hint_begin < 0:
+                                    if data_line[(hint_begin - 1):hint_begin].isspace():
+                                        if not data_line[hint_begin:(hint_begin + 1)].isalpha():
+                                            hint_begin += 1
+
+                                        hint = 'Near {0}'.format(data_line[hint_begin:hint_end])
+
+                                        break
+
+                                    hint_begin -= 1
+
+                        op_begin = data_line.find('OP_')
+
+                        if op_begin < 0:
+                            continue
+
+                        if data_line[(op_begin - 20):op_begin] == 'EQApplicationPacket(':
+                            key_begin = op_begin
+                            key_end = data_line.find(',', key_begin)
+                        elif data_line[(op_begin - 12):op_begin] == '->SetOpcode(':
+                            key_begin = op_begin
+                            key_end = data_line.find(')', key_begin)
+                        elif data_line[(op_begin - 5):op_begin] == 'case ':
+                            key_begin = op_begin
+                            key_end = data_line.find(':', key_begin)
+                        else:
+                            continue
+
+                        if key_end < 0:
+                            continue
+
+                        if not data_line[key_begin:key_end] in server_opcodes:
+                            out_files['DEBUG'].write('Illegal Opcode Found: ..{0} ({1}:{2}) \'{3}\'\n'.format(
+                                location,
+                                line_no,
+                                key_begin,
+                                data_line[key_begin:key_end]
+                            ))
+
+                            continue
+
+                        if not data_line[key_begin:key_end] in server_handlers[server]:
+                            server_handlers[server][data_line[key_begin:key_end]] = []
+
+                        if not data_line in server_handlers[server][data_line[key_begin:key_end]]:
+                            server_handlers[server][data_line[key_begin:key_end]].append(
+                                '..{0}({1}:{2}) \'{3}\''.format(
+                                    location,
+                                    line_no,
+                                    key_begin,
+                                    hint))
+            except:
+                if DEBUG >= 2:
+                    print('EXCEPTION ERROR->discoverserverhandlers({0})'.format(sys.exc_info()[0]))
+
+    return True
+
+
+def clearemptyserverentries():
+    bad_servers = []
+
+    for server in server_list:
+        if len(server_handlers[server]) == 0:
+            bad_servers.append(server)
+        else:
+            bad_opcodes = []
+
+            for opcode in server_handlers[server]:
+                if len(server_handlers[server][opcode]) == 0:
+                    bad_opcodes.append(opcodes)
+
+            for bad_opcode in bad_opcodes:
+                del server_handlers[server][bad_opcode]
+
+            if len(server_handlers[server]) == 0:
+                bad_servers.append(server)
+
+    for bad_server in bad_servers:
         if DEBUG >= 1:
-            print(output_path)
-            
-        if not os.path.exists(output_path):
-            os.mkdir(output_path)
-        
-        return True
-    except:  # StandardError as se:
-        #print(se.message)
+            print('Deleting \'{0}\' server from search criteria...'.format(bad_server))
+            print('Deleting stale entries for \'{0}\' server...'.format(bad_server))
 
-        #if DEBUG >= 2:
-        #    print(pickle.dumps(se.args))
+        del server_handlers[bad_server]
+        server_list.remove(bad_server)
 
-        return False
+    return True
 
 
 def openoutputfiles():
+    """ Open output files in 'w' mode - create/overwrite mode """
+
     try:
-        #file_name = '{0}{1}{2}'.format(
-        #    base_path,
-        #    '/utils/scripts/opcode_handlers_output/',
-        #    'Report.txt')
+        file_name = '{0}/utils/scripts/opcode_handlers_output/Report.txt'.format(base_path)
 
-        #if DEBUG >= 1:
-        #    print(file_name)
+        if DEBUG >= 1:
+            print(file_name)
 
-        #out_files['Report'] = open(file_name, 'w')
+        out_files['Report'] = open(file_name, 'w')
 
         for client in client_list:
             file_name = '{0}{1}{2}{3}'.format(
@@ -481,11 +726,9 @@ def openoutputfiles():
 
             if DEBUG >= 2:
                 print(message[:-2])
-    except:  # StandardError as se:
-        #print(se.message)
-
-        #if DEBUG >= 2:
-        #    print(pickle.dumps(se.args))
+    except:
+        if DEBUG >= 2:
+            print('EXCEPTION ERROR->openoutputfiles({0})'.format(sys.exc_info()[0]))
 
         for client in client_list:
             if client in out_files:
@@ -503,12 +746,12 @@ def openoutputfiles():
                 if DEBUG >= 2:
                     print('->OpeningServerStream(exception): {0}'.format(server))
 
-        #if 'Report' in out_files:
-        #    out_files['Report'].close()
-        #    del out_files['Report']
+        if 'Report' in out_files:
+            out_files['Report'].close()
+            del out_files['Report']
 
-        #    if DEBUG >= 2:
-        #        print('->OpeningReportStream(exception)')
+            if DEBUG >= 2:
+                print('->OpeningReportStream(exception)')
 
         return False
 
@@ -534,8 +777,8 @@ def parseclientopcodedata():
                 encoded = client_opcode in client_encodes[client]
                 decoded = client_opcode in client_decodes[client]
             else:
-                encoded = 'n/a'
-                decoded = 'n/a'
+                encoded = 'N/A'
+                decoded = 'N/A'
 
             message = 'Opcode: {0} ({1}) | Handled: {2} | Encoded: {3} | Decoded: {4}\n'.format(
                 client_opcode,
@@ -545,17 +788,18 @@ def parseclientopcodedata():
                 decoded)
 
             for server in server_list:
-                if client_opcode in server_handlers[server]:
-                    val1 = '{0}'.format(server_opcodes[client_opcode]).zfill(4)
-                    val2 = server_handlers[server][client_opcode]
-                else:
-                    val1 = '0000'
-                    val2 = 'n/a'
+                if client_opcode in server_handlers[server] and len(server_handlers[server][client_opcode]) > 0:
+                    handler_list = server_handlers[server][client_opcode]
+                    handler_list.sort()
 
-                message += '  Server: {0} ({1}) | Handler: \'{2}\'\n'.format(
-                    server.ljust(len(server) + (server_max_len - len(server)), ' '),
-                    val1,
-                    val2)
+                    for handler_entry in handler_list:
+                        message += '  Server: {0} ({1}) | Handler: {2}\n'.format(
+                            server.ljust(len(server) + (server_max_len - len(server)), ' '),
+                            '{0}'.format(server_opcodes[client_opcode]).zfill(4),
+                            handler_entry)
+                else:
+                    message += '  Server: {0} (0000) | Handler: N/A\n'.format(
+                        server.ljust(len(server) + (server_max_len - len(server)), ' '))
 
                 if DEBUG >= 2:
                     print('->EndOfServerLoop: {0}'.format(server))
@@ -587,10 +831,16 @@ def parseserveropcodedata():
         handler_keys.sort()
 
         for handler_opcode in handler_keys:
-            message = 'Opcode: {0} ({1}) | Handler: \'{2}\'\n'.format(
-                handler_opcode,
-                server_opcodes[handler_opcode],
-                server_handlers[server][handler_opcode])
+            handler_list = server_handlers[server][handler_opcode]
+            handler_list.sort()
+
+            message = ''
+
+            for handler_entry in handler_list:
+                message += 'Opcode: {0} ({1}) | Handler: {2}\n'.format(
+                    handler_opcode,
+                    server_opcodes[handler_opcode],
+                    handler_entry)
 
             for client in client_list:
                 if handler_opcode in client_opcodes[client]:
@@ -601,8 +851,8 @@ def parseserveropcodedata():
                 else:
                     val1 = '0x0000'
                     val2 = 'False'
-                    val3 = 'n/a'
-                    val4 = 'n/a'
+                    val3 = 'N/A'
+                    val4 = 'N/A'
 
                 message += '  Client: {0} ({1}) | Handled: {2} | Encoded: {3} | Decoded: {4}\n'.format(
                     client.ljust(len(client) + (client_max_len - len(client)), ' '),
@@ -645,12 +895,23 @@ def closeoutputfiles():
             if DEBUG >= 2:
                 print('->ClosingServerStream: {0}'.format(server))
 
-    #if 'Report' in out_files:
-    #    out_files['Report'].close()
-    #    del out_files['Report']
+    if 'Report' in out_files:
+        out_files['Report'].close()
+        del out_files['Report']
 
-    #    if DEBUG >= 2:
-    #        print('->ClosingReportStream')
+        if DEBUG >= 2:
+            print('->ClosingReportStream')
+
+    return True
+
+
+def closedebugfile():
+    if 'DEBUG' in out_files:
+        out_files['DEBUG'].close()
+        del out_files['DEBUG']
+
+        if DEBUG >= 2:
+            print('->ClosingDEBUGStream')
 
     return True
 
