@@ -1,6 +1,6 @@
 EQEmu - Custom Game Implementation for EverQuest
 
-[![Build Status](https://api.travis-ci.org/EQEmu/Server.svg)](https://travis-ci.org/EQEmu/Server)
+[![Build Status](https://travis-ci.org/EQEmu/Server.svg?branch=master)](https://travis-ci.org/EQEmu/Server)
 
 Dependencies can be obtained at http://eqemu.github.io
 
