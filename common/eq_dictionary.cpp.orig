@@ -255,6 +255,10 @@ std::string EmuConstants::InventoryAugName(int16 aug) {
 	return ret_str;
 }
 
+<<<<<<< HEAD
+//
+// class ClientLimits
+=======
 // legacy-related functions
 //
 // these should work for the first-stage coversions..but, once the new system is up and going..conversions will be incompatible
@@ -442,6 +446,7 @@ int EmuConstants::PerlToServerSlot(int perl_slot) { // set r/s
 
 // 
 // class EQLimits
+>>>>>>> upstream/master
 //
 // client validation
 bool EQLimits::IsValidClientVersion(uint32 version) {
