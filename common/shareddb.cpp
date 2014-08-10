@@ -1775,7 +1775,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 
 int SharedDatabase::GetMaxBaseDataLevel() {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = "SELECT MAX(level) FROM base_data";
+	const char *query = "SELECT MAX(level) FROM base_data";
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	int32 ret = 0;
@@ -1826,7 +1826,7 @@ bool SharedDatabase::LoadBaseData() {
 void SharedDatabase::LoadBaseData(void *data, int max_level) {
 	char *base_ptr = reinterpret_cast<char*>(data);
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = "SELECT * FROM base_data ORDER BY level, class ASC";
+	const char *query = "SELECT * FROM base_data ORDER BY level, class ASC";
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	

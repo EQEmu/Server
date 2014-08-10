@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
 
 int GetSpellColumns(SharedDatabase *db) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = "DESCRIBE spells_new";
+	const char *query = "DESCRIBE spells_new";
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	int res = 0;
