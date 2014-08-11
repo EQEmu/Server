@@ -311,7 +311,7 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 		hitBonus += (attacker->CastToNPC()->GetAccuracyRating() / 10.0f); //Modifier from database
 	
 	if(skillinuse == SkillArchery)
-		hitBonus -= hitBonus*(RuleR(Combat, ArcheryHitPenalty)*100.0f);
+		hitBonus -= hitBonus*RuleR(Combat, ArcheryHitPenalty);
 
 	//Calculate final chance to hit
 	chancetohit += ((chancetohit * (hitBonus - avoidanceBonus)) / 100.0f);

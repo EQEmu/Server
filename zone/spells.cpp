@@ -1034,7 +1034,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 
 			mlog(SPELLS__CASTING, "Checking Interruption: spell x: %f  spell y: %f  cur x: %f  cur y: %f channelchance %f channeling skill %d\n", GetSpellX(), GetSpellY(), GetX(), GetY(), channelchance, GetSkill(SkillChanneling));
 
-			if(MakeRandomFloat(0, 100) > channelchance) {
+			if(!spells[spell_id].uninterruptable && MakeRandomFloat(0, 100) > channelchance) {
 				mlog(SPELLS__CASTING_ERR, "Casting of %d canceled: interrupted.", spell_id);
 				InterruptSpell();
 				return;
@@ -1382,6 +1382,52 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 	if (spell_target && !spell_target->PassCastRestriction(true, spells[spell_id].CastRestriction)){
 		Message_StringID(13,SPELL_NEED_TAR);
 		return false;
+	}
+
+	//Must be out of combat. (If Beneficial checks casters combat state, Deterimental checks targets)
+	if (!spells[spell_id].InCombat && spells[spell_id].OutofCombat){
+		if (IsDetrimentalSpell(spell_id)) { 
+			if ( (spell_target->IsNPC() && spell_target->IsEngaged()) || 
+				(spell_target->IsClient() && spell_target->CastToClient()->GetAggroCount())){
+					Message_StringID(13,SPELL_NO_EFFECT); //Unsure correct string
+					return false;
+			}
+		}
+
+		else if (IsBeneficialSpell(spell_id)) { 
+			if ( (IsNPC() && IsEngaged()) || 
+				(IsClient() && CastToClient()->GetAggroCount())){
+					if (IsDiscipline(spell_id))
+						Message_StringID(13,NO_ABILITY_IN_COMBAT);
+					else
+						Message_StringID(13,NO_CAST_IN_COMBAT);
+
+					return false;
+			}
+		}
+	}
+
+	//Must be in combat. (If Beneficial checks casters combat state, Deterimental checks targets)
+	else if (spells[spell_id].InCombat && !spells[spell_id].OutofCombat){
+		if (IsDetrimentalSpell(spell_id)) { 
+			if ( (spell_target->IsNPC() && !spell_target->IsEngaged()) || 
+				(spell_target->IsClient() && !spell_target->CastToClient()->GetAggroCount())){
+					Message_StringID(13,SPELL_NO_EFFECT); //Unsure correct string
+					return false;
+			}
+		}
+
+		else if (IsBeneficialSpell(spell_id)) { 
+			if ( (IsNPC() && !IsEngaged()) || 
+				(IsClient() && !CastToClient()->GetAggroCount())){
+					if (IsDiscipline(spell_id))
+						Message_StringID(13,NO_ABILITY_OUT_OF_COMBAT);
+					else
+						Message_StringID(13,NO_CAST_OUT_OF_COMBAT);
+
+					return false;
+			}
+		}
 	}
 
 	switch (targetType)
@@ -1734,6 +1780,24 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			break;
 		}
 
+		case ST_PetMaster:
+		{
+			
+			Mob *owner = nullptr;
+	
+			if (IsPet()) 
+				owner = GetOwner();
+			else if ((IsNPC() && CastToNPC()->GetSwarmOwner()))
+				owner = entity_list.GetMobID(CastToNPC()->GetSwarmOwner());
+
+			if (!owner)
+				return false;
+
+			spell_target = owner;
+			CastAction = SingleTarget;
+			break;
+		}
+
 		default:
 		{
 			mlog(SPELLS__CASTING_ERR, "I dont know Target Type: %d   Spell: (%d) %s", spells[spell_id].targettype, spell_id, spells[spell_id].name);
@@ -1863,12 +1927,21 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		//casting a spell on somebody but ourself, make sure they are in range
 		float dist2 = DistNoRoot(*spell_target);
 		float range2 = range * range;
+		float min_range2 = spells[spell_id].min_range * spells[spell_id].min_range;
 		if(dist2 > range2) {
 			//target is out of range.
 			mlog(SPELLS__CASTING, "Spell %d: Spell target is out of range (squared: %f > %f)", spell_id, dist2, range2);
 			Message_StringID(13, TARGET_OUT_OF_RANGE);
 			return(false);
 		}
+		else if (dist2 < min_range2){
+			//target is too close range.
+			mlog(SPELLS__CASTING, "Spell %d: Spell target is too close (squared: %f < %f)", spell_id, dist2, min_range2);
+			Message_StringID(13, TARGET_TOO_CLOSE);
+			return(false);
+		}
+
+		spell_target->CalcSpellPowerDistanceMod(spell_id, dist2);
 	}
 
 	//
@@ -2052,7 +2125,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			std::list<Mob*> targets_in_range;
 			std::list<Mob*>::iterator iter;
 
-			entity_list.GetTargetsForConeArea(this, spells[spell_id].aoerange, spells[spell_id].aoerange / 2, targets_in_range);
+			entity_list.GetTargetsForConeArea(this, spells[spell_id].min_range, spells[spell_id].aoerange, spells[spell_id].aoerange / 2, targets_in_range);
 			iter = targets_in_range.begin();
 			while(iter != targets_in_range.end())
 			{
@@ -2068,16 +2141,20 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 					if((heading_to_target >= angle_start && heading_to_target <= 360.0f) ||
 						(heading_to_target >= 0.0f && heading_to_target <= angle_end))
 					{
-						if(CheckLosFN(spell_target))
+						if(CheckLosFN((*iter)) || spells[spell_id].npc_no_los){
+							(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
 							SpellOnTarget(spell_id, spell_target, false, true, resist_adjust);
+						}
 					}
 				}
 				else
 				{
 					if(heading_to_target >= angle_start && heading_to_target <= angle_end)
 					{
-						if(CheckLosFN((*iter)))
+						if(CheckLosFN((*iter)) || spells[spell_id].npc_no_los){
+							(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
 							SpellOnTarget(spell_id, (*iter), false, true, resist_adjust);
+						}
 					}
 				}
 				++iter;
@@ -4625,12 +4702,10 @@ void Mob::Stun(int duration)
 	if(stunned && stunned_timer.GetRemainingTime() > uint32(duration))
 		return;
 
-	if(casting_spell_id) {
-		int persistent_casting = spellbonuses.PersistantCasting + itembonuses.PersistantCasting;
-		if(IsClient())
-			persistent_casting += aabonuses.PersistantCasting;
+	if(IsValidSpell(casting_spell_id) && !spells[casting_spell_id].uninterruptable) {
+		int persistent_casting = spellbonuses.PersistantCasting + itembonuses.PersistantCasting + aabonuses.PersistantCasting;
 
-		if(MakeRandomInt(1,99) > persistent_casting)
+		if(MakeRandomInt(0,99) > persistent_casting)
 			InterruptSpell();
 	}
 

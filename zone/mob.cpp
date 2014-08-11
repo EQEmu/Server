@@ -184,6 +184,7 @@ Mob::Mob(const char* in_name,
 	has_numhits = false;
 	has_MGB = false;
 	has_ProjectIllusion = false;
+	SpellPowerDistanceMod = 0;
 
 	if(in_aa_title>0)
 		aa_title	= in_aa_title;

@@ -615,6 +615,9 @@ public:
 	bool ImprovedTaunt();
 	bool TryRootFadeByDamage(int buffslot, Mob* attacker);
 	int16 GetSlowMitigation() const {return slow_mitigation;}
+	void CalcSpellPowerDistanceMod(uint16 spell_id, float range, Mob* caster = nullptr);
+	inline int16 GetSpellPowerDistanceMod() const { return SpellPowerDistanceMod; };
+	inline void SetSpellPowerDistanceMod(int16 value) { SpellPowerDistanceMod = value; };
 
 	void ModSkillDmgTaken(SkillUseTypes skill_num, int value);
 	int16 GetModSkillDmgTaken(const SkillUseTypes skill_num);
@@ -1114,6 +1117,7 @@ protected:
 	bool has_numhits;
 	bool has_MGB;
 	bool has_ProjectIllusion;
+	int16 SpellPowerDistanceMod;
 
 	// Bind wound
 	Timer bindwound_timer;

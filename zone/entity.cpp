@@ -4552,7 +4552,7 @@ Mob *EntityList::GetClosestMobByBodyType(Mob *sender, bodyType BodyType)
 	return ClosestMob;
 }
 
-void EntityList::GetTargetsForConeArea(Mob *start, uint32 radius, uint32 height, std::list<Mob*> &m_list)
+void EntityList::GetTargetsForConeArea(Mob *start, float min_radius, float radius, float height, std::list<Mob*> &m_list)
 {
 	auto it = mob_list.begin();
 	while (it !=  mob_list.end()) {
@@ -4561,15 +4561,15 @@ void EntityList::GetTargetsForConeArea(Mob *start, uint32 radius, uint32 height,
 			++it;
 			continue;
 		}
-		int32 x_diff = ptr->GetX() - start->GetX();
-		int32 y_diff = ptr->GetY() - start->GetY();
-		int32 z_diff = ptr->GetZ() - start->GetZ();
+		float x_diff = ptr->GetX() - start->GetX();
+		float y_diff = ptr->GetY() - start->GetY();
+		float z_diff = ptr->GetZ() - start->GetZ();
 
 		x_diff *= x_diff;
 		y_diff *= y_diff;
 		z_diff *= z_diff;
 
-		if ((x_diff + y_diff) <= (radius * radius))
+		if ((x_diff + y_diff) <= (radius * radius) && (x_diff + y_diff) >= (min_radius * min_radius))
 			if(z_diff <= (height * height))
 				m_list.push_back(ptr);
 
