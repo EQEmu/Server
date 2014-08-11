@@ -1780,6 +1780,24 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			break;
 		}
 
+		case ST_PetMaster:
+		{
+			
+			Mob *owner = nullptr;
+	
+			if (IsPet()) 
+				owner = GetOwner();
+			else if ((IsNPC() && CastToNPC()->GetSwarmOwner()))
+				owner = entity_list.GetMobID(CastToNPC()->GetSwarmOwner());
+
+			if (!owner)
+				return false;
+
+			spell_target = owner;
+			CastAction = SingleTarget;
+			break;
+		}
+
 		default:
 		{
 			mlog(SPELLS__CASTING_ERR, "I dont know Target Type: %d   Spell: (%d) %s", spells[spell_id].targettype, spell_id, spells[spell_id].name);
