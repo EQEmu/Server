@@ -120,8 +120,10 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
 	// successful query. get results.
 	MYSQL_RES* res = mysql_store_result(&mysql);
 	uint32 rowCount = 0;
+
 	if (res != nullptr)
         rowCount = (uint32)mysql_num_rows(res);
+
 	MySQLRequestResult requestResult(res, (uint32)mysql_affected_rows(&mysql), rowCount, (uint32)mysql_field_count(&mysql), (uint32)mysql_insert_id(&mysql));
 
 
