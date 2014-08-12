@@ -324,6 +324,9 @@ Client::Client(EQStreamInterface* ieqs)
 
 	initial_respawn_selection = 0;
 	alternate_currency_loaded = false;
+	
+	EngagedRaidTarget = false;
+	SavedRaidRestTimer = 0;
 }
 
 Client::~Client() {
@@ -4330,12 +4333,16 @@ void Client::IncrementAggroCount() {
 
 	if(!RuleI(Character, RestRegenPercent))
 		return;
-
+	
 	// If we already had aggro before this method was called, the combat indicator should already be up for SoF clients,
 	// so we don't need to send it again.
 	//
 	if(AggroCount > 1)
 		return;
+		
+	// Pause the rest timer
+	if (AggroCount == 1) 
+		SavedRaidRestTimer = rest_timer.GetRemainingTime();
 
 	if(GetClientVersion() >= EQClientSoF) {
 
@@ -4367,14 +4374,27 @@ void Client::DecrementAggroCount() {
 	// Something else is still aggro on us, can't rest yet.
 	if(AggroCount) return;
 
-	rest_timer.Start(RuleI(Character, RestRegenTimeToActivate) * 1000);
-
+	uint32 time_until_rest;
+	if (GetEngagedRaidTarget()) {
+		time_until_rest = RuleI(Character, RestRegenRaidTimeToActivate) * 1000;
+		SetEngagedRaidTarget(false);
+	} else {
+		if (SavedRaidRestTimer > (RuleI(Character, RestRegenTimeToActivate) * 1000)) {
+			time_until_rest = SavedRaidRestTimer;
+			SavedRaidRestTimer = 0;
+		} else {
+			time_until_rest = RuleI(Character, RestRegenTimeToActivate) * 1000;
+		}
+	}
+	
+	rest_timer.Start(time_until_rest);
+	
 	if(GetClientVersion() >= EQClientSoF) {
 
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_RestState, 5);
 		char *Buffer = (char *)outapp->pBuffer;
 		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0x00);
-		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, RuleI(Character, RestRegenTimeToActivate));
+		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, (uint32)(time_until_rest / 1000));
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}

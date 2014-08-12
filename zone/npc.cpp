@@ -358,6 +358,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	SetEmoteID(d->emoteid);
 	InitializeBuffSlots();
 	CalcBonuses();
+	raid_target = d->raid_target;
 }
 
 NPC::~NPC()

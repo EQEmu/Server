@@ -9140,7 +9140,8 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 	m_pp.timeentitledonaccount = database.GetTotalTimeEntitledOnAccount(AccountID()) / 1440;
 
-	if(m_pp.RestTimer > RuleI(Character, RestRegenTimeToActivate))
+	// Reset rest timer if the durations have been lowered in the database
+	if ((m_pp.RestTimer > RuleI(Character, RestRegenTimeToActivate)) && (m_pp.RestTimer > RuleI(Character, RestRegenRaidTimeToActivate)))
 		m_pp.RestTimer = 0;
 
 	//This checksum should disappear once dynamic structs are in... each struct strategy will do it
