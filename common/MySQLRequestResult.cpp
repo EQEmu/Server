@@ -10,35 +10,24 @@ MySQLRequestResult::MySQLRequestResult()
 MySQLRequestResult::MySQLRequestResult(MYSQL_RES* result, uint32 rowsAffected, uint32 rowCount, uint32 columnCount, uint32 lastInsertedID, uint32 errorNumber, char *errorBuffer)
 	: m_CurrentRow(result), m_OneBeyondRow()
 {
-	if (errorBuffer != nullptr)
-		m_Success = false;
-	else if (errorBuffer == nullptr && result == nullptr)
-	{
-		m_Success = false;
-		
-#ifdef _EQDEBUG
-		std::cout << "DB Query Error: No Result" << std::endl;
-#endif
-		m_ErrorNumber = UINT_MAX;
-		m_ErrorBuffer = new char[MYSQL_ERRMSG_SIZE];
-
-		strcpy(m_ErrorBuffer, "DBcore::RunQuery: No Result");
-	} 
-	else
-		m_Success = true;
-
-	m_Result = result;
-	m_ErrorBuffer = errorBuffer;
+    m_Result = result;
 	m_RowsAffected = rowsAffected;
 	m_RowCount = rowCount;
 	m_ColumnCount = columnCount;
-	// If we actually need the column length / fields it will be 
-	// requested at that time, no need to pull it in just to cache it. 
-	// Normal usage would have it as nullptr most likely anyways.
-	m_ColumnLengths = nullptr; 
-	m_Fields = nullptr;
 	m_LastInsertedID = lastInsertedID;
-	m_ErrorNumber = errorNumber;
+
+	// If we actually need the column length / fields it will be
+	// requested at that time, no need to pull it in just to cache it.
+	// Normal usage would have it as nullptr most likely anyways.
+	m_ColumnLengths = nullptr;
+	m_Fields = nullptr;
+
+    if (errorBuffer != nullptr)
+		m_Success = false;
+
+    m_Success = true;
+    m_ErrorNumber = errorNumber;
+    m_ErrorBuffer = errorBuffer;
 }
 
 void MySQLRequestResult::FreeInternals()
@@ -113,7 +102,7 @@ MySQLRequestResult::MySQLRequestResult(MySQLRequestResult&& moveItem)
 	m_ColumnLengths = moveItem.m_ColumnLengths;
 	m_Fields = moveItem.m_Fields;
 
-	// Keeps deconstructor from double freeing 
+	// Keeps deconstructor from double freeing
 	// pre move instance.
 	moveItem.ZeroOut();
 }
@@ -140,7 +129,7 @@ MySQLRequestResult& MySQLRequestResult::operator=(MySQLRequestResult&& other)
 	m_ColumnLengths = other.m_ColumnLengths;
 	m_Fields = other.m_Fields;
 
-	// Keeps deconstructor from double freeing 
+	// Keeps deconstructor from double freeing
 	// pre move instance.
 	other.ZeroOut();
 	return *this;
