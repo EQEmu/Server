@@ -1198,6 +1198,9 @@ public:
     int mod_food_value(const Item_Struct *item, int change);
     int mod_drink_value(const Item_Struct *item, int change);
 
+	void SetEngagedRaidTarget(bool value) { EngagedRaidTarget = value; }
+	bool GetEngagedRaidTarget() const { return EngagedRaidTarget; }
+	
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);
@@ -1442,6 +1445,9 @@ private:
 	unsigned int	RestRegenHP;
 	unsigned int	RestRegenMana;
 	unsigned int	RestRegenEndurance;
+	
+	bool EngagedRaidTarget;
+	uint32 SavedRaidRestTimer;
 
 	std::set<uint32> zone_flags;
 

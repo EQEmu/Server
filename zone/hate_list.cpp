@@ -198,8 +198,11 @@ void HateList::Add(Mob *ent, int32 in_hate, int32 in_dam, bool bFrenzy, bool iAd
 		list.push_back(p);
 		parse->EventNPC(EVENT_HATE_LIST, owner->CastToNPC(), ent, "1", 0);
 
-		if(ent->IsClient())
+		if (ent->IsClient()) {
+			if (owner->CastToNPC()->IsRaidTarget()) 
+				ent->CastToClient()->SetEngagedRaidTarget(true);
 			ent->CastToClient()->IncrementAggroCount();
+		}
 	}
 }
 
