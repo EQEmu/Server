@@ -4303,8 +4303,9 @@ void Bot::Spawn(Client* botCharacterOwner, std::string* errorMessage) {
 		// Get the zone id this bot spawned in
 		_lastZoneId = GetZoneID();
 
-		this->helmtexture = 0xFF;
-		this->texture = 0xFF;
+		// this change propagates to Bot::FillSpawnStruct()
+		this->helmtexture = 0; //0xFF;
+		this->texture = 0; //0xFF;
 
 		if(this->Save())
 			this->GetBotOwner()->CastToClient()->Message(0, "%s saved.", this->GetCleanName());
@@ -4586,8 +4587,8 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.size = 0;
 		ns->spawn.NPC = 0;					// 0=player,1=npc,2=pc corpse,3=npc corpse
 
-		ns->spawn.helm = 0xFF;
-		ns->spawn.equip_chest2 = 0xFF;
+		ns->spawn.helm = helmtexture; //0xFF;
+		ns->spawn.equip_chest2 = texture; //0xFF;
 
 		const Item_Struct* item = 0;
 		const ItemInst* inst = 0;
