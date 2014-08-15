@@ -4330,18 +4330,18 @@ void Bot::Spawn(Client* botCharacterOwner, std::string* errorMessage) {
 
 		this->SendPosition();
 
-		/* // fillspawnstruct now properly handles this -U
+		// there is something askew with spawn struct appearance fields...
+		// I re-enabled this until I can sort it out -U
 		uint32 itemID = 0;
 		uint8 materialFromSlot = 0xFF;
-		for(int i=EmuConstants::EQUIPMENT_BEGIN; i<=EmuConstants::EQUIPMENT_END; ++i) {
+		for(int i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; ++i) {
 			itemID = GetBotItemBySlot(i);
 			if(itemID != 0) {
 				materialFromSlot = Inventory::CalcMaterialFromSlot(i);
-				if(materialFromSlot != 0xFF) {
+				if(materialFromSlot != 0xFF)
 					this->SendWearChange(materialFromSlot);
-				}
 			}
-		}*/
+		}
 	}
 }
 

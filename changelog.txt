@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/15/2014 ==
+Uleat: Reactivated the Bot::Spawn() code for sending post-spawn wear change updates..temporary until I can sort out the proper usage.
+
 == 08/13/2014 ==
 Uleat (Kingly_Krab): Fix for bot chest armor graphic glitch. (fix also caused RoF #wc to work properly)
 
