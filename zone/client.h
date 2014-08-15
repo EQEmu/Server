@@ -789,8 +789,8 @@ public:
 	void	SetTint(int16 slot_id, Color_Struct& color);
 	void	SetMaterial(int16 slot_id, uint32 item_id);
 	void	Undye();
-	uint32	GetItemIDAt(int16 slot_id);
-	uint32	GetAugmentIDAt(int16 slot_id, uint8 augslot);
+	int32	GetItemIDAt(int16 slot_id);
+	int32	GetAugmentIDAt(int16 slot_id, uint8 augslot);
 	bool	PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client_update = false);
 	bool	PushItemOnCursor(const ItemInst& inst, bool client_update = false);
 	void	DeleteItemInInventory(int16 slot_id, int8 quantity = 0, bool client_update = false, bool update_db = true);

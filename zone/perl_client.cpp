@@ -2955,7 +2955,7 @@ XS(XS_Client_GetItemIDAt)
 		Perl_croak(aTHX_ "Usage: Client::GetItemIDAt(THIS, slot_id)");
 	{
 		Client *		THIS;
-		uint32		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 		int16		slot_id = (int16)SvIV(ST(1));
 
@@ -2969,7 +2969,7 @@ XS(XS_Client_GetItemIDAt)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetItemIDAt(slot_id);
-		XSprePUSH; PUSHu((UV)RETVAL);
+		XSprePUSH; PUSHi((IV)RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -2982,7 +2982,7 @@ XS(XS_Client_GetAugmentIDAt)
 		Perl_croak(aTHX_ "Usage: Client::GetAugmentIDAt(THIS, slot_id, augslot)");
 	{
 		Client *		THIS;
-		uint32		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 		int16		slot_id = (int16)SvIV(ST(1));
 		int16		augslot = (uint8)SvIV(ST(2));
@@ -2997,7 +2997,7 @@ XS(XS_Client_GetAugmentIDAt)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetAugmentIDAt(slot_id, augslot);
-		XSprePUSH; PUSHu((UV)RETVAL);
+		XSprePUSH; PUSHi((IV)RETVAL);
 	}
 	XSRETURN(1);
 }

@@ -3537,7 +3537,7 @@ void Mob::TrySympatheticProc(Mob *target, uint32 spell_id)
 		}
 }
 
-uint32 Mob::GetItemStat(uint32 itemid, const char *identifier)
+int32 Mob::GetItemStat(uint32 itemid, const char *identifier)
 {
 	const ItemInst* inst = database.CreateItem(itemid);
 	if (!inst)
