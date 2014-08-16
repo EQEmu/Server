@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/16/2014 ==
+KLS: (addmoreice) Trying out some unstable DB changes.  Do backup your database before trying them as master will be considered unstable for a few days at least.
+
 == 08/15/2014 ==
 Uleat: Reactivated the Bot::Spawn() code for sending post-spawn wear change updates..temporary until I can sort out the proper usage.
 
