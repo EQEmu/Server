@@ -789,8 +789,8 @@ public:
 	void	SetTint(int16 slot_id, Color_Struct& color);
 	void	SetMaterial(int16 slot_id, uint32 item_id);
 	void	Undye();
-	uint32	GetItemIDAt(int16 slot_id);
-	uint32	GetAugmentIDAt(int16 slot_id, uint8 augslot);
+	int32	GetItemIDAt(int16 slot_id);
+	int32	GetAugmentIDAt(int16 slot_id, uint8 augslot);
 	bool	PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client_update = false);
 	bool	PushItemOnCursor(const ItemInst& inst, bool client_update = false);
 	void	DeleteItemInInventory(int16 slot_id, int8 quantity = 0, bool client_update = false, bool update_db = true);
@@ -1198,6 +1198,9 @@ public:
     int mod_food_value(const Item_Struct *item, int change);
     int mod_drink_value(const Item_Struct *item, int change);
 
+	void SetEngagedRaidTarget(bool value) { EngagedRaidTarget = value; }
+	bool GetEngagedRaidTarget() const { return EngagedRaidTarget; }
+	
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);
@@ -1442,6 +1445,9 @@ private:
 	unsigned int	RestRegenHP;
 	unsigned int	RestRegenMana;
 	unsigned int	RestRegenEndurance;
+	
+	bool EngagedRaidTarget;
+	uint32 SavedRaidRestTimer;
 
 	std::set<uint32> zone_flags;
 

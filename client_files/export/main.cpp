@@ -70,7 +70,7 @@ void ExportSpells(SharedDatabase *db) {
 	}
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = "SELECT * FROM spells_new ORDER BY id";
+	const char *query = "SELECT * FROM spells_new ORDER BY id";
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	if(db->RunQuery(query, strlen(query), errbuf, &result)) {
@@ -176,7 +176,7 @@ void ExportBaseData(SharedDatabase *db) {
 	}
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = "SELECT * FROM base_data ORDER BY level, class";
+	const char *query = "SELECT * FROM base_data ORDER BY level, class";
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	if(db->RunQuery(query, strlen(query), errbuf, &result)) {

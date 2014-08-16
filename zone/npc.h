@@ -395,6 +395,8 @@ public:
 	void	mod_npc_killed_merit(Mob* c);
 	void	mod_npc_killed(Mob* oos);
 	void AISpellsList(Client *c);
+	
+	bool IsRaidTarget() const { return raid_target; };
 
 protected:
 
@@ -500,6 +502,8 @@ protected:
 	//mercenary stuff
 	std::list<MercType> mercTypeList;
 	std::list<MercData> mercDataList;
+	
+	bool raid_target;
 
 private:
 	uint32	loottable_id;

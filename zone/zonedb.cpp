@@ -1115,7 +1115,8 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 			"npc_types.emoteid,"
 			"npc_types.spellscale,"
 			"npc_types.healscale,"
-			"npc_types.no_target_hotkey";
+			"npc_types.no_target_hotkey,"
+			"npc_types.raid_target";
 
 		MakeAnyLenString(&query, "%s FROM npc_types WHERE id=%d", basic_query, id);
 
@@ -1302,6 +1303,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->spellscale = atoi(row[r++]);
 				tmpNPCType->healscale = atoi(row[r++]);
 				tmpNPCType->no_target_hotkey = atoi(row[r++]) == 1 ? true : false;
+				tmpNPCType->raid_target = atoi(row[r++]) == 0 ? false : true;
 				
 				// If NPC with duplicate NPC id already in table,
 				// free item we attempted to add.
