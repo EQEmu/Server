@@ -130,7 +130,7 @@ public:
 	uint32	GetAccountIDByChar(const char* charname, uint32* oCharID = 0);
 	uint32	GetAccountIDByChar(uint32 char_id);
 	uint32	GetAccountIDByName(const char* accname, int16* status = 0, uint32* lsid = 0);
-	uint32	GetGuildDBIDByCharID(uint32 char_id);
+	uint32	GetGuildIDByCharID(uint32 char_id);
 	void	GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID = 0);
 	void	GetCharName(uint32 char_id, char* name);
 	uint32	GetCharacterInfo(const char* iName, uint32* oAccID = 0, uint32* oZoneID = 0, uint32* oInstanceID = 0,float* oX = 0, float* oY = 0, float* oZ = 0);
@@ -207,6 +207,7 @@ public:
 	char*	GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank = nullptr, char* assist = nullptr, char* puller = nullptr, char *marknpc = nullptr,
 						GroupLeadershipAA_Struct* GLAA = nullptr);
 	void	ClearGroupLeader(uint32 gid = 0);
+	
 
 	/*
 	* Raids
@@ -223,7 +224,7 @@ public:
 	bool	SetVariable(const char* varname, const char* varvalue);
 	bool	LoadVariables();
 	uint32	LoadVariables_MQ(char** query);
-	bool	LoadVariables_result(MYSQL_RES* result);
+	bool	LoadVariables_result(MySQLRequestResult results);
 
 	/*
 	* General Queries
@@ -262,7 +263,20 @@ private:
 	uint32				varcache_max;
 	VarCache_Struct**	varcache_array;
 	uint32				varcache_lastupdate;
+
+
+	/*
+	* Groups, utility methods.
+	*/
+	void    ClearAllGroupLeaders();
+	void    ClearAllGroups();
+
+
+	/*
+	* Raid, utility methods.
+	*/
+	void ClearAllRaids();
+	void ClearAllRaidDetails();
 };
 
-bool	FetchRowMap(MYSQL_RES *result, std::map<std::string,std::string> &rowmap);
 #endif
