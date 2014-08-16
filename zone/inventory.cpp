@@ -659,7 +659,7 @@ void Client::DropInst(const ItemInst* inst)
 }
 
 // Returns a slot's item ID (returns INVALID_ID if not found)
-uint32 Client::GetItemIDAt(int16 slot_id) {
+int32 Client::GetItemIDAt(int16 slot_id) {
 	const ItemInst* inst = m_inv[slot_id];
 	if (inst)
 		return inst->GetItem()->ID;
@@ -670,7 +670,7 @@ uint32 Client::GetItemIDAt(int16 slot_id) {
 
 // Returns an augment's ID that's in an item (returns INVALID_ID if not found)
 // Pass in the slot ID of the item and which augslot you want to check (0-4)
-uint32 Client::GetAugmentIDAt(int16 slot_id, uint8 augslot) {
+int32 Client::GetAugmentIDAt(int16 slot_id, uint8 augslot) {
 	const ItemInst* inst = m_inv[slot_id];
 	if (inst)
 		if (inst->GetAugmentItemID(augslot))
