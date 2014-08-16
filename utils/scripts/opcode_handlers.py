@@ -136,10 +136,6 @@ def main():
         fault = True
         faults.append('closeoutputfiles()')
 
-    if not closeundefinedfile():
-        fault = True
-        faults.append('closeundefinedfile()')
-
     if not closedebugfile():
         fault = True
         faults.append('closedebugfile()')
@@ -197,6 +193,13 @@ def opendebugfile():
     except:
         print('(Exception Error: {0}) opendebugfile()'.format(sys.exc_info()[0]))
 
+        if 'DEBUG' in out_files:
+            vprint('Closing DEBUG output file...')
+
+            out_files['DEBUG'].close()
+
+            del out_files['DEBUG']
+
         return False
 
 
@@ -206,14 +209,14 @@ def openundefinedfile():
     dprint('entering \'openundefinedfile()\'\n')
 
     try:
-        file_name = '{0}/utils/scripts/opcode_handlers_output/Undefined.txt'.format(base_path)
+        file_name = '{0}/utils/scripts/opcode_handlers_output/UNDEFINED.txt'.format(base_path)
 
         vprint(file_name)
 
-        out_files['Undefined'] = open(file_name, 'w')
+        out_files['UNDEFINED'] = open(file_name, 'w')
 
         uprint(
-            '>> \'Opcode-Handler\' Undefined dump file\n'
+            '>> \'Opcode-Handler\' UNDEFINED dump file\n'
             '>> file generated @ {0}\n\n'.format(ctime(time()))
         )
 
@@ -225,6 +228,13 @@ def openundefinedfile():
         return True
     except:
         print('(Exception Error: {0}) openundefinedfile()'.format(sys.exc_info()[0]))
+
+        if 'UNDEFINED' in out_files:
+            vprint('Closing UNDEFINED output file...')
+
+            out_files['UNDEFINED'].close()
+
+            del out_files['UNDEFINED']
 
         return False
 
@@ -570,6 +580,7 @@ def loadserverhandlers():
 
                     for data_line in data_file:
                         line_no += 1
+                        read_begin = 0
 
                         if step_1 is False:
                             if data_line[:19] == 'void MapOpcodes() {':
@@ -583,7 +594,7 @@ def loadserverhandlers():
 
                                 continue
 
-                            val_begin = data_line.find('OP_')
+                            val_begin = data_line.find('OP_', read_begin)
                             val_end = data_line.find(']', val_begin)
                 
                             if val_begin < 0 or val_end < 0:
@@ -706,12 +717,12 @@ def discoverserverhandlers():
             locations['Server'].append('/<local_path>/<file_name>.<ext>')
 
     Lists are instantiated for all SERVERS in SERVER LIST. The lists are then appended
-    with location data based on the presence of the list in the parent dictionary.
+    with location data based on the presence of the SERVER in the parent dictionary.
 
     """
 
     # TODO: handle remarked out definitions in file (i.e., // and /**/)
-    # TODO: if/how to include perl/lua handlers...
+    # TODO: if/how to include perl, lua and non-'../<server>/<file>' location handlers...
 
     dprint('entering \'discoverserverhandlers()\'\n')
 
@@ -795,6 +806,7 @@ def discoverserverhandlers():
 
                     for data_line in data_file:
                         line_no += 1
+                        read_begin = 0
 
                         if data_line[:1].isalpha():
                             hint_end = data_line.find('(')
@@ -813,7 +825,7 @@ def discoverserverhandlers():
 
                                     hint_begin -= 1
 
-                        op_begin = data_line.find('OP_')
+                        op_begin = data_line.find('OP_', read_begin)
 
                         if op_begin < 0:
                             continue
@@ -1141,16 +1153,16 @@ def openoutputfiles():
     dprint('entering \'openoutputfiles()\'\n')
 
     try:
-        file_name = '{0}/utils/scripts/opcode_handlers_output/Report.txt'.format(base_path)
+        file_name = '{0}/utils/scripts/opcode_handlers_output/REPORT.txt'.format(base_path)
 
         vprint(file_name)
 
-        out_files['Report'] = open(file_name, 'w')
+        out_files['REPORT'] = open(file_name, 'w')
 
         dprint('->open: \'{0}\' in \'w\' mode\n'.format(file_name))
 
         rprint(
-            '>> \'Opcode-Handler\' Report file\n'
+            '>> \'Opcode-Handler\' REPORT file\n'
             '>> file generated @ {0}\n\n'.format(ctime(time()))
         )
 
@@ -1202,12 +1214,12 @@ def openoutputfiles():
     except:
         print('(Exception Error: {0}) openoutputfiles()'.format(sys.exc_info()[0]))
 
-        if 'Report' in out_files:
-            vprint('Closing Report output file...')
+        if 'REPORT' in out_files:
+            vprint('Closing REPORT output file...')
 
-            out_files['Report'].close()
+            out_files['REPORT'].close()
 
-            del out_files['Report']
+            del out_files['REPORT']
 
         for client in client_list:
             if client in out_files:
@@ -1314,7 +1326,7 @@ def parseserveropcodedata():
             for handler_entry in handler_list:
                 message += 'Opcode: {0} ({1}) | Handler: {2}\n'.format(
                     handler_opcode,
-                    server_opcodes[handler_opcode],
+                    '{0}'.format(server_opcodes[handler_opcode]).zfill(4),
                     handler_entry)
 
             for client in client_list:
@@ -1353,21 +1365,21 @@ def closeoutputfiles():
 
     dprint('entering \'closeoutputfiles()\'\n')
 
-    if 'Report' in out_files:
-        file_name = out_files['Report'].name
+    if 'REPORT' in out_files:
+        file_name = out_files['REPORT'].name
 
-        out_files['Report'].close()
+        out_files['REPORT'].close()
 
-        del out_files['Report']
+        del out_files['REPORT']
 
         dprint('->close: \'{0}\'\n'.format(file_name))
 
-    if 'Undefined' in out_files:
-        file_name = out_files['Undefined'].name
+    if 'UNDEFINED' in out_files:
+        file_name = out_files['UNDEFINED'].name
 
-        out_files['Undefined'].close()
+        out_files['UNDEFINED'].close()
 
-        del out_files['Undefined']
+        del out_files['UNDEFINED']
 
         dprint('->close: \'{0}\'\n'.format(file_name))
 
@@ -1392,25 +1404,6 @@ def closeoutputfiles():
             dprint('->close: \'{0}\'\n'.format(file_name))
 
     dprint('leaving \'closeoutputfiles()\'\n\n')
-
-    return True
-
-
-def closeundefinedfile():
-    """ Close UNDEFINED FILE """
-
-    dprint('entering \'closeundefinedfile()\'\n')
-
-    if 'Undefined' in out_files:
-        file_name = out_files['Undefined'].name
-
-        dprint('closing \'{0}\'\n'.format(file_name))
-
-        out_files['Undefined'].close()
-
-        del out_files['Undefined']
-
-    dprint('leaving \'closeundefinedfile()\'\n\n')
 
     return True
 
@@ -1449,8 +1442,8 @@ def dprint(message):
 def rprint(message):
     """ REPORT PRINT helper function """
 
-    if 'Report' in out_files:
-        out_files['Report'].write(message)
+    if 'REPORT' in out_files:
+        out_files['REPORT'].write(message)
 
 
 def sprint(server, message):
@@ -1463,8 +1456,8 @@ def sprint(server, message):
 def uprint(message):
     """ UNDEFINED PRINT helper function """
 
-    if 'Undefined' in out_files:
-        out_files['Undefined'].write(message)
+    if 'UNDEFINED' in out_files:
+        out_files['UNDEFINED'].write(message)
 
 
 def vprint(message):
