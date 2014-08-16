@@ -1,5 +1,14 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/16/2014 ==
+Uleat (Noudness): Fixed a floating-point comparison error that led to the notorious 'client bounce' (this is not related to the
+'mob falling' due to not having maps installed.) This fix also eliminates a sizeable amount of unnecessary out-going packets due
+to invalid orientation corrections.
+
+Note: This patch is probably of significant enough importance that admins may wish to manually apply this to older server builds.
+The number of packets reduced per second should be approximately (num_stationary_close_clients * (num_close_clients - 1)). This will
+likely have the most effect in zones like: Nexus, Bazaar, Guilds (Halls) and RAID INSTANCES - where players don't move around a lot.
+
 == 08/15/2014 ==
 Uleat: Reactivated the Bot::Spawn() code for sending post-spawn wear change updates..temporary until I can sort out the proper usage.
 

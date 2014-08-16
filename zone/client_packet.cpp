@@ -1231,7 +1231,6 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	delta_y			= ppu->delta_y;
 	delta_z			= ppu->delta_z;
 	delta_heading	= ppu->delta_heading;
-	heading			= EQ19toFloat(ppu->heading);
 
 	if(IsTracking() && ((x_pos!=ppu->x_pos) || (y_pos!=ppu->y_pos))){
 		if(MakeRandomFloat(0, 100) < 70)//should be good
@@ -1257,12 +1256,15 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	}
 
 	// Outgoing client packet
-	if (ppu->y_pos != y_pos || ppu->x_pos != x_pos || ppu->heading != heading || ppu->animation != animation)
+	float tmpheading = EQ19toFloat(ppu->heading);
+
+	if (!FCMP(ppu->y_pos, y_pos) || !FCMP(ppu->x_pos, x_pos) || !FCMP(tmpheading, heading) || ppu->animation != animation)
 	{
 		x_pos			= ppu->x_pos;
 		y_pos			= ppu->y_pos;
 		z_pos			= ppu->z_pos;
 		animation		= ppu->animation;
+		heading			= tmpheading;
 
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 		PlayerPositionUpdateServer_Struct* ppu = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
