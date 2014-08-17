@@ -1261,25 +1261,17 @@ BaseGuildManager::GuildInfo::GuildInfo() {
 
 uint32 BaseGuildManager::DoesAccountContainAGuildLeader(uint32 AccountID)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-
-	if (!m_db->RunQuery(query,
-				MakeAnyLenString(&query,
-							"select guild_id from guild_members where char_id in (select id from character_ where account_id = %i) and rank = 2",
-							AccountID), errbuf, &result))
+	std::string query = StringFormat("SELECT guild_id FROM guild_members WHERE char_id IN "
+                                    "(SELECT id FROM character_ WHERE account_id = %i) AND rank = 2",
+                                    AccountID);
+    auto results = m_db->QueryDatabase(query);
+	if (!results.Success())
 	{
-		_log(GUILDS__ERROR, "Error executing query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+		_log(GUILDS__ERROR, "Error executing query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
-	safe_delete_array(query);
 
-	uint32 Rows = mysql_num_rows(result);
-	mysql_free_result(result);
-
-	return Rows;
+	return results.RowCount();
 }
 
 
