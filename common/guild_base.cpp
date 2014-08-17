@@ -313,27 +313,39 @@ uint32 BaseGuildManager::_GetFreeGuildID() {
 		return(GUILD_NONE);
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char query[100];
-	MYSQL_RES *result;
-
+	std::string query;
 	//this has got to be one of the more retarded things I have seen.
 	//none the less, im too lazy to rewrite it right now.
+	//possibly:
+	//
+	// SELECT t1.id + 1
+	// FROM guilds t1
+	// WHERE NOT EXISTS (
+    //	SELECT *
+    //	FROM guilds t2
+    //	WHERE t2.id = t1.id + 1
+	// )
+	// LIMIT 1
+	//
+	// Seems likely what we should be doing is auto incrementing the guild table
+	// inserting, then getting the id. NOT getting a free id then inserting.
+	// could be a race condition.
 
-	uint16 x;
-	for (x = 1; x < MAX_NUMBER_GUILDS; x++) {
-		snprintf(query, 100, "SELECT id FROM guilds where id=%i;", x);
+	for (auto index = 1; index < MAX_NUMBER_GUILDS; ++index)
+	{
+        query = StringFormat("SELECT id FROM guilds where id=%i;", index);
+		auto results = m_db->QueryDatabase(query);
 
-		if (m_db->RunQuery(query, strlen(query), errbuf, &result)) {
-			if (mysql_num_rows(result) == 0) {
-				mysql_free_result(result);
-				_log(GUILDS__DB, "Located free guild ID %d in the database", x);
-				return x;
-			}
-			mysql_free_result(result);
+		if (!results.Success())
+		{
+			LogFile->write(EQEMuLog::Error, "Error in _GetFreeGuildID query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+			continue;
 		}
-		else {
-			LogFile->write(EQEMuLog::Error, "Error in _GetFreeGuildID query '%s': %s", query, errbuf);
+
+		if (results.RowCount() == 0)
+		{
+			_log(GUILDS__DB, "Located free guild ID %d in the database", index);
+			return index;
 		}
 	}
 
