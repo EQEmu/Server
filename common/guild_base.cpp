@@ -930,19 +930,17 @@ bool BaseGuildManager::DBSetPublicNote(uint32 charid, const char* note) {
 	return(true);
 }
 
-bool BaseGuildManager::QueryWithLogging(char *&query, int len, const char *errmsg) {
+bool BaseGuildManager::QueryWithLogging(std::string query, int len, const char *errmsg) {
 	if(m_db == nullptr)
 		return(false);
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+    auto results = m_db->QueryDatabase(query);
 
-	if (!m_db->RunQuery(query, len, errbuf))
+	if (!results.Success())
 	{
-		_log(GUILDS__ERROR, "Error %s: '%s': %s", errmsg, query, errbuf);
-		safe_delete_array(query);
+		_log(GUILDS__ERROR, "Error %s: '%s': %s", errmsg, query.c_str(), results.ErrorMessage().c_str());
 		return(false);
 	}
-	safe_delete_array(query);
 
 	return(true);
 }
