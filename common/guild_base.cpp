@@ -541,19 +541,19 @@ bool BaseGuildManager::DBDeleteGuild(uint32 guild_id) {
 	char *query = 0;
 
 	//clear out old `guilds` entry
-	_RunQuery(query, MakeAnyLenString(&query,
+	QueryWithLogging(query, MakeAnyLenString(&query,
 		"DELETE FROM guilds WHERE id=%lu", (unsigned long)guild_id), "clearing old guild record");
 
 	//clear out old `guild_ranks` entries
-	_RunQuery(query, MakeAnyLenString(&query,
+	QueryWithLogging(query, MakeAnyLenString(&query,
 		"DELETE FROM guild_ranks WHERE guild_id=%lu", (unsigned long)guild_id), "clearing old guild_ranks records");
 
 	//clear out people belonging to this guild.
-	_RunQuery(query, MakeAnyLenString(&query,
+	QueryWithLogging(query, MakeAnyLenString(&query,
 		"DELETE FROM guild_members WHERE guild_id=%lu", (unsigned long)guild_id), "clearing chars in guild");
 
 	// Delete the guild bank
-	_RunQuery(query, MakeAnyLenString(&query,
+	QueryWithLogging(query, MakeAnyLenString(&query,
 		"DELETE FROM guild_bank WHERE guildid=%lu", (unsigned long)guild_id), "deleting guild bank");
 
 	_log(GUILDS__DB, "Deleted guild %d from the database.", guild_id);
@@ -806,14 +806,14 @@ bool BaseGuildManager::DBSetGuild(uint32 charid, uint32 guild_id, uint8 rank) {
 
 bool BaseGuildManager::DBSetGuildRank(uint32 charid, uint8 rank) {
 	char *query = 0;
-	return(_RunQuery(query, MakeAnyLenString(&query,
+	return(QueryWithLogging(query, MakeAnyLenString(&query,
 		"UPDATE guild_members SET rank=%d WHERE char_id=%d",
 		rank, charid), "setting a guild member's rank"));
 }
 
 bool BaseGuildManager::DBSetBankerFlag(uint32 charid, bool is_banker) {
 	char *query = 0;
-	return(_RunQuery(query, MakeAnyLenString(&query,
+	return(QueryWithLogging(query, MakeAnyLenString(&query,
 		"UPDATE guild_members SET banker=%d WHERE char_id=%d",
 		is_banker?1:0, charid), "setting a guild member's banker flag"));
 }
@@ -855,7 +855,7 @@ bool BaseGuildManager::DBSetAltFlag(uint32 charid, bool is_alt)
 {
 	char *query = 0;
 
-	return(_RunQuery(query, MakeAnyLenString(&query,
+	return(QueryWithLogging(query, MakeAnyLenString(&query,
 		"UPDATE guild_members SET alt=%d WHERE char_id=%d",
 		is_alt?1:0, charid), "setting a guild member's alt flag"));
 }
@@ -895,7 +895,7 @@ bool BaseGuildManager::GetAltFlag(uint32 CharID)
 
 bool BaseGuildManager::DBSetTributeFlag(uint32 charid, bool enabled) {
 	char *query = 0;
-	return(_RunQuery(query, MakeAnyLenString(&query,
+	return(QueryWithLogging(query, MakeAnyLenString(&query,
 		"UPDATE guild_members SET tribute_enable=%d WHERE char_id=%d",
 		enabled?1:0, charid), "setting a guild member's tribute flag"));
 }
@@ -930,7 +930,7 @@ bool BaseGuildManager::DBSetPublicNote(uint32 charid, const char* note) {
 	return(true);
 }
 
-bool BaseGuildManager::_RunQuery(char *&query, int len, const char *errmsg) {
+bool BaseGuildManager::QueryWithLogging(char *&query, int len, const char *errmsg) {
 	if(m_db == nullptr)
 		return(false);
 
