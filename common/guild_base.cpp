@@ -676,42 +676,35 @@ bool BaseGuildManager::DBSetGuildMOTD(uint32 guild_id, const char* motd, const c
 bool BaseGuildManager::DBSetGuildURL(uint32 GuildID, const char* URL)
 {
 	if(m_db == nullptr)
-		return(false);
+		return false;
 
-	std::map<uint32, GuildInfo *>::const_iterator res;
-
-	res = m_guilds.find(GuildID);
-
+	auto res = m_guilds.find(GuildID);
 	if(res == m_guilds.end())
-		return(false);
+		return false;
 
 	GuildInfo *info = res->second;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
 	//escape our strings.
 	uint32 len = strlen(URL);
-
 	char *esc = new char[len*2+1];
-
 	m_db->DoEscapeString(esc, URL, len);
 
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query, "UPDATE guilds SET url='%s' WHERE id=%d", esc, GuildID), errbuf))
+    std::string query = StringFormat("UPDATE guilds SET url='%s' WHERE id=%d", esc, GuildID);
+	auto results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
 	{
-		_log(GUILDS__ERROR, "Error setting URL for guild %d '%s': %s", GuildID, query, errbuf);
-		safe_delete_array(query);
+		_log(GUILDS__ERROR, "Error setting URL for guild %d '%s': %s", GuildID, query.c_str(), results.ErrorMessage().c_str());
 		safe_delete_array(esc);
 		return(false);
 	}
-	safe_delete_array(query);
 	safe_delete_array(esc);
 
 	_log(GUILDS__DB, "Set URL for guild %d in the database", GuildID);
 
 	info->url = URL;	//update our local record.
 
-	return(true);
+	return true;
 }
 
 bool BaseGuildManager::DBSetGuildChannel(uint32 GuildID, const char* Channel)
