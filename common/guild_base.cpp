@@ -785,33 +785,23 @@ bool BaseGuildManager::DBSetBankerFlag(uint32 charid, bool is_banker) {
 
 bool BaseGuildManager::GetBankerFlag(uint32 CharID)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
 	if(!m_db)
 		return false;
 
-	if(!m_db->RunQuery(query, MakeAnyLenString(&query, "select `banker` from `guild_members` where char_id=%i LIMIT 1", CharID), errbuf, &result))
+    std::string query = StringFormat("select `banker` from `guild_members` where char_id=%i LIMIT 1", CharID);
+    auto results = m_db->QueryDatabase(query);
+	if(!results.Success())
 	{
-		_log(GUILDS__ERROR, "Error retrieving banker flag '%s': %s", query, errbuf);
-
-		safe_delete_array(query);
-
+		_log(GUILDS__ERROR, "Error retrieving banker flag '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
-	safe_delete_array(query);
-
-	if(mysql_num_rows(result) != 1)
+	if(results.RowCount() != 1)
 		return false;
 
-	row = mysql_fetch_row(result);
+	auto row = results.begin();
 
 	bool IsBanker = atoi(row[0]);
-
-	mysql_free_result(result);
 
 	return IsBanker;
 }
