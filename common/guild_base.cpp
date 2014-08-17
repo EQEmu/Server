@@ -562,17 +562,14 @@ bool BaseGuildManager::DBDeleteGuild(uint32 guild_id) {
 bool BaseGuildManager::DBRenameGuild(uint32 guild_id, const char* name) {
 	if(m_db == nullptr) {
 		_log(GUILDS__DB, "Requested to rename guild %d when we have no database object.", guild_id);
-		return(false);
+		return false;
 	}
 
 	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(guild_id);
 	if(res == m_guilds.end())
-		return(false);
+		return false;
 	GuildInfo *info = res->second;
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 
 	//escape our strings.
 	uint32 len = strlen(name);
@@ -580,23 +577,22 @@ bool BaseGuildManager::DBRenameGuild(uint32 guild_id, const char* name) {
 	m_db->DoEscapeString(esc, name, len);
 
 	//insert the new `guilds` entry
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"UPDATE guilds SET name='%s' WHERE id=%d",
-		esc, guild_id), errbuf))
+	std::string query = StringFormat("UPDATE guilds SET name='%s' WHERE id=%d", esc, guild_id);
+	auto results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
 	{
-		_log(GUILDS__ERROR, "Error renaming guild %d '%s': %s", guild_id, query, errbuf);
-		safe_delete_array(query);
+		_log(GUILDS__ERROR, "Error renaming guild %d '%s': %s", guild_id, query.c_str(), results.Success());
 		safe_delete_array(esc);
-		return(false);
+		return false;
 	}
-	safe_delete_array(query);
 	safe_delete_array(esc);
 
 	_log(GUILDS__DB, "Renamed guild %s (%d) to %s in database.", info->name.c_str(), guild_id, name);
 
 	info->name = name;	//update our local record.
 
-	return(true);
+	return true;
 }
 
 bool BaseGuildManager::DBSetGuildLeader(uint32 guild_id, uint32 leader) {
