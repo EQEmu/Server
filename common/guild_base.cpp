@@ -231,24 +231,20 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id) {
 	}
 	GuildInfo *info = res->second;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query = StringFormat("DELETE FROM guilds WHERE id=%lu", (unsigned long)guild_id);
 
 	//clear out old `guilds` entry
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"DELETE FROM guilds WHERE id=%lu", (unsigned long)guild_id), errbuf))
-	{
-		_log(GUILDS__ERROR, "Error clearing old guild record when storing %d '%s': %s", guild_id, query, errbuf);
-	}
-	safe_delete_array(query);
+	auto results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
+		_log(GUILDS__ERROR, "Error clearing old guild record when storing %d '%s': %s", guild_id, query.c_str(), results.ErrorMessage().c_str());
 
 	//clear out old `guild_ranks` entries
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"DELETE FROM guild_ranks WHERE guild_id=%lu", (unsigned long)guild_id), errbuf))
-	{
-		_log(GUILDS__ERROR, "Error clearing old guild_ranks records when storing %d '%s': %s", guild_id, query, errbuf);
-	}
-	safe_delete_array(query);
+	query = StringFormat("DELETE FROM guild_ranks WHERE guild_id=%lu", (unsigned long)guild_id);
+	results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
+		_log(GUILDS__ERROR, "Error clearing old guild_ranks records when storing %d '%s': %s", guild_id, query.c_str(), results.ErrorMessage().c_str());
 
 	//escape our strings.
 	char *name_esc = new char[info->name.length()*2+1];
@@ -259,18 +255,18 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id) {
 	m_db->DoEscapeString(motd_set_esc, info->motd_setter.c_str(), info->motd_setter.length());
 
 	//insert the new `guilds` entry
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"INSERT INTO guilds (id,name,leader,minstatus,motd,motd_setter) VALUES(%lu,'%s',%lu,%d,'%s', '%s')",
-		(unsigned long)guild_id, name_esc, (unsigned long)info->leader_char_id, info->minstatus, motd_esc, motd_set_esc), errbuf))
+	query = StringFormat("INSERT INTO guilds (id,name,leader,minstatus,motd,motd_setter) VALUES(%lu,'%s',%lu,%d,'%s', '%s')",
+		(unsigned long)guild_id, name_esc, (unsigned long)info->leader_char_id, info->minstatus, motd_esc, motd_set_esc);
+	results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
 	{
-		_log(GUILDS__ERROR, "Error inserting new guild record when storing %d. Giving up. '%s': %s", guild_id, query, errbuf);
-		safe_delete_array(query);
+		_log(GUILDS__ERROR, "Error inserting new guild record when storing %d. Giving up. '%s': %s", guild_id, query.c_str(), results.ErrorMessage().c_str());
 		safe_delete_array(name_esc);
 		safe_delete_array(motd_esc);
 		safe_delete_array(motd_set_esc);
-		return(false);
+		return false;
 	}
-	safe_delete_array(query);
 	safe_delete_array(name_esc);
 	safe_delete_array(motd_esc);
 	safe_delete_array(motd_set_esc);
@@ -278,36 +274,37 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id) {
 	//now insert the new ranks
 	uint8 rank;
 	for(rank = 0; rank <= GUILD_MAX_RANK; rank++) {
-		const RankInfo &r = info->ranks[rank];
+		const RankInfo &rankInfo = info->ranks[rank];
 
-		char *title_esc = new char[r.name.length()*2+1];
-		m_db->DoEscapeString(title_esc, r.name.c_str(), r.name.length());
+		char *title_esc = new char[rankInfo.name.length()*2+1];
+		m_db->DoEscapeString(title_esc, rankInfo.name.c_str(), rankInfo.name.length());
 
-		if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"INSERT INTO guild_ranks (guild_id,rank,title,can_hear,can_speak,can_invite,can_remove,can_promote,can_demote,can_motd,can_warpeace)"
+        query = StringFormat("INSERT INTO guild_ranks "
+        "(guild_id,rank,title,can_hear,can_speak,can_invite,can_remove,can_promote,can_demote,can_motd,can_warpeace)"
 		" VALUES(%d,%d,'%s',%d,%d,%d,%d,%d,%d,%d,%d)",
 			guild_id, rank, title_esc,
-			r.permissions[GUILD_HEAR],
-			r.permissions[GUILD_SPEAK],
-			r.permissions[GUILD_INVITE],
-			r.permissions[GUILD_REMOVE],
-			r.permissions[GUILD_PROMOTE],
-			r.permissions[GUILD_DEMOTE],
-			r.permissions[GUILD_MOTD],
-			r.permissions[GUILD_WARPEACE]), errbuf))
+			rankInfo.permissions[GUILD_HEAR],
+			rankInfo.permissions[GUILD_SPEAK],
+			rankInfo.permissions[GUILD_INVITE],
+			rankInfo.permissions[GUILD_REMOVE],
+			rankInfo.permissions[GUILD_PROMOTE],
+			rankInfo.permissions[GUILD_DEMOTE],
+			rankInfo.permissions[GUILD_MOTD],
+			rankInfo.permissions[GUILD_WARPEACE]);
+		results = m_db->QueryDatabase(query);
+
+		if (!results.Success())
 		{
-			_log(GUILDS__ERROR, "Error inserting new guild rank record when storing %d for %d. Giving up. '%s': %s", rank, guild_id, query, errbuf);
-			safe_delete_array(query);
+			_log(GUILDS__ERROR, "Error inserting new guild rank record when storing %d for %d. Giving up. '%s': %s", rank, guild_id, query.c_str(), results.ErrorMessage().c_str());
 			safe_delete_array(title_esc);
-			return(false);
+			return false;
 		}
-		safe_delete_array(query);
 		safe_delete_array(title_esc);
 	}
 
 	_log(GUILDS__DB, "Stored guild %d in the database", guild_id);
 
-	return(true);
+	return true;
 }
 
 uint32 BaseGuildManager::_GetFreeGuildID() {
