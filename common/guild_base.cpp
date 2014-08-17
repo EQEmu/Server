@@ -955,38 +955,28 @@ bool BaseGuildManager::GetCharInfo(const char *char_name, CharGuildInfo &into) {
 		return(false);
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
 	//escape our strings.
 	uint32 nl = strlen(char_name);
 	char *esc = new char[nl*2+1];
 	m_db->DoEscapeString(esc, char_name, nl);
 
 	//load up the rank info for each guild.
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		GuildMemberBaseQuery " WHERE c.name='%s'", esc
-		), errbuf, &result)) {
-		_log(GUILDS__ERROR, "Error loading guild member '%s': %s", query, errbuf);
-		safe_delete_array(query);
-		safe_delete_array(esc);
-		return(false);
+    std::string query = StringFormat(GuildMemberBaseQuery " WHERE c.name='%s'", esc);
+    safe_delete_array(esc);
+    auto results = m_db->QueryDatabase(query);
+	if (!results.Success()) {
+		_log(GUILDS__ERROR, "Error loading guild member '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
-	safe_delete_array(query);
-	safe_delete_array(esc);
 
-	bool ret = true;
-	if ((row = mysql_fetch_row(result))) {
-		ProcessGuildMember(row, into);
-		_log(GUILDS__DB, "Retreived guild member info for char %s from the database", char_name);
-	} else {
-		ret = true;
-	}
-	mysql_free_result(result);
+	if (results.RowCount() == 0)
+        return false;
 
-	return(ret);
+    auto row = results.begin();
+    ProcessGuildMember(row, into);
+    _log(GUILDS__DB, "Retreived guild member info for char %s from the database", char_name);
+
+	return true;
 
 
 }
