@@ -984,38 +984,30 @@ bool BaseGuildManager::GetCharInfo(const char *char_name, CharGuildInfo &into) {
 bool BaseGuildManager::GetCharInfo(uint32 char_id, CharGuildInfo &into) {
 	if(m_db == nullptr) {
 		_log(GUILDS__DB, "Requested char info on %d when we have no database object.", char_id);
-		return(false);
+		return false;
 	}
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
 	//load up the rank info for each guild.
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
+	std::string query;
 #ifdef BOTS
-		GuildMemberBaseQuery " WHERE c.id=%d AND c.mobtype = 'C'", char_id
+    query = StringFormat(GuildMemberBaseQuery " WHERE c.id=%d AND c.mobtype = 'C'", char_id);
 #else
-		GuildMemberBaseQuery " WHERE c.id=%d", char_id
+    query = StringFormat(GuildMemberBaseQuery " WHERE c.id=%d", char_id);
 #endif
-		), errbuf, &result)) {
-		_log(GUILDS__ERROR, "Error loading guild member '%s': %s", query, errbuf);
-		safe_delete_array(query);
-		return(false);
+    auto results = m_db->QueryDatabase(query);
+	if (!results.Success()) {
+		_log(GUILDS__ERROR, "Error loading guild member '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
-	safe_delete_array(query);
 
-	bool ret = true;
-	if ((row = mysql_fetch_row(result))) {
-		ProcessGuildMember(row, into);
-		_log(GUILDS__DB, "Retreived guild member info for char %d", char_id);
-	} else {
-		ret = true;
-	}
-	mysql_free_result(result);
+    if (results.RowCount() == 0)
+        return false;
 
-	return(ret);
+    auto row = results.begin();
+    ProcessGuildMember(row, into);
+    _log(GUILDS__DB, "Retreived guild member info for char %d", char_id);
+
+	return true;
 
 }
 
