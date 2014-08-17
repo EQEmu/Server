@@ -643,9 +643,6 @@ bool BaseGuildManager::DBSetGuildMOTD(uint32 guild_id, const char* motd, const c
 		return(false);
 	GuildInfo *info = res->second;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
 	//escape our strings.
 	uint32 len = strlen(motd);
 	uint32 len2 = strlen(setter);
@@ -655,17 +652,16 @@ bool BaseGuildManager::DBSetGuildMOTD(uint32 guild_id, const char* motd, const c
 	m_db->DoEscapeString(esc_set, setter, len2);
 
 	//insert the new `guilds` entry
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"UPDATE guilds SET motd='%s',motd_setter='%s' WHERE id=%d",
-		esc, esc_set, guild_id), errbuf))
+	std::string query = StringFormat("UPDATE guilds SET motd='%s',motd_setter='%s' WHERE id=%d", esc, esc_set, guild_id);
+	auto results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
 	{
-		_log(GUILDS__ERROR, "Error setting MOTD for guild %d '%s': %s", guild_id, query, errbuf);
-		safe_delete_array(query);
+		_log(GUILDS__ERROR, "Error setting MOTD for guild %d '%s': %s", guild_id, query.c_str(), results.ErrorMessage().c_str());
 		safe_delete_array(esc);
 		safe_delete_array(esc_set);
-		return(false);
+		return false;
 	}
-	safe_delete_array(query);
 	safe_delete_array(esc);
 	safe_delete_array(esc_set);
 
@@ -674,7 +670,7 @@ bool BaseGuildManager::DBSetGuildMOTD(uint32 guild_id, const char* motd, const c
 	info->motd = motd;	//update our local record.
 	info->motd_setter = setter;	//update our local record.
 
-	return(true);
+	return true;
 }
 
 bool BaseGuildManager::DBSetGuildURL(uint32 GuildID, const char* URL)
