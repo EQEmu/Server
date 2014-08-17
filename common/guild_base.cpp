@@ -598,41 +598,37 @@ bool BaseGuildManager::DBRenameGuild(uint32 guild_id, const char* name) {
 bool BaseGuildManager::DBSetGuildLeader(uint32 guild_id, uint32 leader) {
 	if(m_db == nullptr) {
 		_log(GUILDS__DB, "Requested to set the leader for guild %d when we have no database object.", guild_id);
-		return(false);
+		return false;
 	}
 
 	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(guild_id);
 	if(res == m_guilds.end())
-		return(false);
+		return false;
 	GuildInfo *info = res->second;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
 	//insert the new `guilds` entry
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"UPDATE guilds SET leader='%d' WHERE id=%d",
-		leader, guild_id), errbuf))
+    std::string query = StringFormat("UPDATE guilds SET leader='%d' WHERE id=%d",leader, guild_id);
+	auto results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
 	{
-		_log(GUILDS__ERROR, "Error changing leader on guild %d '%s': %s", guild_id, query, errbuf);
-		safe_delete_array(query);
-		return(false);
+		_log(GUILDS__ERROR, "Error changing leader on guild %d '%s': %s", guild_id, query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
-	safe_delete_array(query);
 
 	//set the old leader to officer
 	if(!DBSetGuildRank(info->leader_char_id, GUILD_OFFICER))
-		return(false);
+		return false;
 	//set the new leader to leader
 	if(!DBSetGuildRank(leader, GUILD_LEADER))
-		return(false);
+		return false;
 
 	_log(GUILDS__DB, "Set guild leader for guild %d to %d in the database", guild_id, leader);
 
 	info->leader_char_id = leader;	//update our local record.
 
-	return(true);
+	return true;
 }
 
 bool BaseGuildManager::DBSetGuildMOTD(uint32 guild_id, const char* motd, const char *setter) {
