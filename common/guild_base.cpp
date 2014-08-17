@@ -930,7 +930,7 @@ bool BaseGuildManager::DBSetPublicNote(uint32 charid, const char* note) {
 	return(true);
 }
 
-bool BaseGuildManager::QueryWithLogging(std::string query, int len, const char *errmsg) {
+bool BaseGuildManager::QueryWithLogging(std::string query,  const char *errmsg) {
 	if(m_db == nullptr)
 		return(false);
 

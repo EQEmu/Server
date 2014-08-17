@@ -108,7 +108,7 @@ protected:
 	bool	DBSetAltFlag(uint32 charid, bool is_alt);
 	bool	DBSetTributeFlag(uint32 charid, bool enabled);
 	bool	DBSetPublicNote(uint32 charid, const char *note);
-	bool	QueryWithLogging(std::string query, int len, const char *errmsg);
+	bool	QueryWithLogging(std::string query, const char *errmsg);
 //	void	DBSetPublicNote(uint32 guild_id,char* charname, char* note);
 
 	bool	LocalDeleteGuild(uint32 guild_id);
