@@ -930,31 +930,23 @@ bool BaseGuildManager::GetEntireGuild(uint32 guild_id, std::vector<CharGuildInfo
 	if(m_db == nullptr)
 		return(false);
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
 	//load up the rank info for each guild.
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		GuildMemberBaseQuery " WHERE g.guild_id=%d", guild_id
-		), errbuf, &result)) {
-		_log(GUILDS__ERROR, "Error loading guild member list '%s': %s", query, errbuf);
-		safe_delete_array(query);
-		return(false);
+	std::string query = StringFormat(GuildMemberBaseQuery " WHERE g.guild_id=%d", guild_id);
+	auto results = m_db->QueryDatabase(query);
+	if (!results.Success()) {
+		_log(GUILDS__ERROR, "Error loading guild member list '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
-	safe_delete_array(query);
 
-	while ((row = mysql_fetch_row(result))) {
+    for (auto row = results.begin(); row != results.end(); ++row) {
 		CharGuildInfo *ci = new CharGuildInfo;
 		ProcessGuildMember(row, *ci);
 		members.push_back(ci);
 	}
-	mysql_free_result(result);
 
 	_log(GUILDS__DB, "Retreived entire guild member list for guild %d from the database", guild_id);
 
-	return(true);
+	return true;
 }
 
 bool BaseGuildManager::GetCharInfo(const char *char_name, CharGuildInfo &into) {
