@@ -847,30 +847,25 @@ bool BaseGuildManager::DBSetPublicNote(uint32 charid, const char* note) {
 	if(m_db == nullptr)
 		return(false);
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
 	//escape our strings.
 	uint32 len = strlen(note);
 	char *esc = new char[len*2+1];
 	m_db->DoEscapeString(esc, note, len);
 
 	//insert the new `guilds` entry
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"UPDATE guild_members SET public_note='%s' WHERE char_id=%d",
-		esc, charid), errbuf))
-	{
-		_log(GUILDS__ERROR, "Error setting public note for char %d '%s': %s", charid, query, errbuf);
-		safe_delete_array(query);
-		safe_delete_array(esc);
-		return(false);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("UPDATE guild_members SET public_note='%s' WHERE char_id=%d", esc, charid);
 	safe_delete_array(esc);
+	auto results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
+	{
+		_log(GUILDS__ERROR, "Error setting public note for char %d '%s': %s", charid, query.c_str(), results.ErrorMessage().c_str());
+		return false;
+	}
 
 	_log(GUILDS__DB, "Set public not for char %d", charid);
 
-	return(true);
+	return true;
 }
 
 bool BaseGuildManager::QueryWithLogging(std::string query, const char *errmsg) {
