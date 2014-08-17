@@ -112,63 +112,64 @@ bool BaseGuildManager::RefreshGuild(uint32 guild_id) {
 		return(false);
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	std::string query = StringFormat("SELECT name, leader, minstatus, motd, motd_setter, channel,url FROM guilds WHERE id=%lu", (unsigned long)guild_id);
 	std::map<uint32, GuildInfo *>::iterator res;
 	GuildInfo *info;
 
 	// load up all the guilds
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"SELECT name, leader, minstatus, motd, motd_setter, channel,url FROM guilds WHERE id=%lu", (unsigned long)guild_id), errbuf, &result)) {
-		_log(GUILDS__ERROR, "Error reloading guilds '%s': %s", query, errbuf);
-		safe_delete_array(query);
-		return(false);
+	auto results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
+	{
+		_log(GUILDS__ERROR, "Error reloading guilds '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
-	safe_delete_array(query);
-	if ((row = mysql_fetch_row(result))) {
-		//delete the old entry and create the new one.
-		info = _CreateGuild(guild_id, row[0], atoi(row[1]), atoi(row[2]), row[3], row[4], row[5], row[6]);
-	} else {
+
+	if (results.RowCount() == 0)
+	{
 		_log(GUILDS__ERROR, "Unable to find guild %d in the database.", guild_id);
-		return(false);
+		return false;
 	}
-	mysql_free_result(result);
 
-	//load up the rank info for each guild.
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"SELECT guild_id,rank,title,can_hear,can_speak,can_invite,can_remove,can_promote,can_demote,can_motd,can_warpeace "
-		"FROM guild_ranks WHERE guild_id=%lu", (unsigned long)guild_id), errbuf, &result)) {
-		_log(GUILDS__ERROR, "Error reloading guild ranks '%s': %s", query, errbuf);
-		safe_delete_array(query);
-		return(false);
+	auto row = results.begin();
+
+	info = _CreateGuild(guild_id, row[0], atoi(row[1]), atoi(row[2]), row[3], row[4], row[5], row[6]);
+
+    query = StringFormat("SELECT guild_id, rank, title, can_hear, can_speak, can_invite, can_remove, can_promote, can_demote, can_motd, can_warpeace "
+                        "FROM guild_ranks WHERE guild_id=%lu", (unsigned long)guild_id);
+	results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
+	{
+		_log(GUILDS__ERROR, "Error reloading guild ranks '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
-	safe_delete_array(query);
 
-	while((row = mysql_fetch_row(result))) {
+	for (auto row=results.begin();row!=results.end();++row)
+	{
 		uint8 rankn = atoi(row[1]);
+
 		if(rankn > GUILD_MAX_RANK) {
 			_log(GUILDS__ERROR, "Found invalid (too high) rank %d for guild %d, skipping.", rankn, guild_id);
 			continue;
 		}
+
 		RankInfo &rank = info->ranks[rankn];
 
 		rank.name = row[2];
-		rank.permissions[GUILD_HEAR] = (row[3][0] == '1')?true:false;
-		rank.permissions[GUILD_SPEAK] = (row[4][0] == '1')?true:false;
-		rank.permissions[GUILD_INVITE] = (row[5][0] == '1')?true:false;
-		rank.permissions[GUILD_REMOVE] = (row[6][0] == '1')?true:false;
-		rank.permissions[GUILD_PROMOTE] = (row[7][0] == '1')?true:false;
-		rank.permissions[GUILD_DEMOTE] = (row[8][0] == '1')?true:false;
-		rank.permissions[GUILD_MOTD] = (row[9][0] == '1')?true:false;
-		rank.permissions[GUILD_WARPEACE] = (row[10][0] == '1')?true:false;
+		rank.permissions[GUILD_HEAR] = (row[3][0] == '1') ? true: false;
+		rank.permissions[GUILD_SPEAK] = (row[4][0] == '1') ? true: false;
+		rank.permissions[GUILD_INVITE] = (row[5][0] == '1') ? true: false;
+		rank.permissions[GUILD_REMOVE] = (row[6][0] == '1') ? true: false;
+		rank.permissions[GUILD_PROMOTE] = (row[7][0] == '1') ? true: false;
+		rank.permissions[GUILD_DEMOTE] = (row[8][0] == '1') ? true: false;
+		rank.permissions[GUILD_MOTD] = (row[9][0] == '1') ? true: false;
+		rank.permissions[GUILD_WARPEACE] = (row[10][0] == '1') ? true: false;
 	}
-	mysql_free_result(result);
 
 	_log(GUILDS__DB, "Successfully refreshed guild %d from the database.", guild_id);
 
-	return(true);
+	return true;
 }
 
 BaseGuildManager::GuildInfo *BaseGuildManager::_CreateGuild(uint32 guild_id, const char *guild_name, uint32 leader_char_id, uint8 minstatus, const char *guild_motd, const char *motd_setter, const char *Channel, const char *URL)
