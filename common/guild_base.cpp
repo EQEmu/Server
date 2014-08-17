@@ -844,11 +844,10 @@ bool BaseGuildManager::GetBankerFlag(uint32 CharID)
 
 bool BaseGuildManager::DBSetAltFlag(uint32 charid, bool is_alt)
 {
-	char *query = 0;
+	std::string query = StringFormat("UPDATE guild_members SET alt=%d WHERE char_id=%d",
+		is_alt ? 1: 0, charid);
 
-	return(QueryWithLogging(query, MakeAnyLenString(&query,
-		"UPDATE guild_members SET alt=%d WHERE char_id=%d",
-		is_alt?1:0, charid), "setting a guild member's alt flag"));
+	return(QueryWithLogging(query, "setting a guild member's alt flag"));
 }
 
 bool BaseGuildManager::GetAltFlag(uint32 CharID)
