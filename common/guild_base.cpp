@@ -884,10 +884,9 @@ bool BaseGuildManager::GetAltFlag(uint32 CharID)
 }
 
 bool BaseGuildManager::DBSetTributeFlag(uint32 charid, bool enabled) {
-	char *query = 0;
-	return(QueryWithLogging(query, MakeAnyLenString(&query,
-		"UPDATE guild_members SET tribute_enable=%d WHERE char_id=%d",
-		enabled?1:0, charid), "setting a guild member's tribute flag"));
+	std::string query = StringFormat("UPDATE guild_members SET tribute_enable=%d WHERE char_id=%d",
+		enabled ? 1: 0, charid);
+	return(QueryWithLogging(query, "setting a guild member's tribute flag"));
 }
 
 bool BaseGuildManager::DBSetPublicNote(uint32 charid, const char* note) {
