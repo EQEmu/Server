@@ -538,23 +538,21 @@ bool BaseGuildManager::DBDeleteGuild(uint32 guild_id) {
 		return(false);
 	}
 
-	char *query = 0;
-
 	//clear out old `guilds` entry
-	QueryWithLogging(query, MakeAnyLenString(&query,
-		"DELETE FROM guilds WHERE id=%lu", (unsigned long)guild_id), "clearing old guild record");
+	std::string query = StringFormat("DELETE FROM guilds WHERE id=%lu", (unsigned long)guild_id);
+	QueryWithLogging(query, "clearing old guild record");
 
 	//clear out old `guild_ranks` entries
-	QueryWithLogging(query, MakeAnyLenString(&query,
-		"DELETE FROM guild_ranks WHERE guild_id=%lu", (unsigned long)guild_id), "clearing old guild_ranks records");
+	query = StringFormat("DELETE FROM guild_ranks WHERE guild_id=%lu", (unsigned long)guild_id);
+	QueryWithLogging(query, "clearing old guild_ranks records");
 
 	//clear out people belonging to this guild.
-	QueryWithLogging(query, MakeAnyLenString(&query,
-		"DELETE FROM guild_members WHERE guild_id=%lu", (unsigned long)guild_id), "clearing chars in guild");
+	query = StringFormat("DELETE FROM guild_members WHERE guild_id=%lu", (unsigned long)guild_id);
+	QueryWithLogging(query, "clearing chars in guild");
 
 	// Delete the guild bank
-	QueryWithLogging(query, MakeAnyLenString(&query,
-		"DELETE FROM guild_bank WHERE guildid=%lu", (unsigned long)guild_id), "deleting guild bank");
+	query = StringFormat("DELETE FROM guild_bank WHERE guildid=%lu", (unsigned long)guild_id);
+	QueryWithLogging(query, "deleting guild bank");
 
 	_log(GUILDS__DB, "Deleted guild %d from the database.", guild_id);
 
@@ -930,7 +928,7 @@ bool BaseGuildManager::DBSetPublicNote(uint32 charid, const char* note) {
 	return(true);
 }
 
-bool BaseGuildManager::QueryWithLogging(std::string query,  const char *errmsg) {
+bool BaseGuildManager::QueryWithLogging(std::string query, const char *errmsg) {
 	if(m_db == nullptr)
 		return(false);
 
