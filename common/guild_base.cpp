@@ -799,10 +799,8 @@ bool BaseGuildManager::DBSetGuild(uint32 charid, uint32 guild_id, uint8 rank) {
 }
 
 bool BaseGuildManager::DBSetGuildRank(uint32 charid, uint8 rank) {
-	char *query = 0;
-	return(QueryWithLogging(query, MakeAnyLenString(&query,
-		"UPDATE guild_members SET rank=%d WHERE char_id=%d",
-		rank, charid), "setting a guild member's rank"));
+	std::string query = StringFormat("UPDATE guild_members SET rank=%d WHERE char_id=%d", rank, charid);
+	return(QueryWithLogging(query, "setting a guild member's rank"));
 }
 
 bool BaseGuildManager::DBSetBankerFlag(uint32 charid, bool is_banker) {
