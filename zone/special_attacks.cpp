@@ -2015,7 +2015,7 @@ float Mob::GetSpecialProcChances(uint16 hand)
 		ProcBonus +=  static_cast<float>(mydex/35) + static_cast<float>(itembonuses.HeroicDEX / 25);
 		ProcChance += ProcChance * ProcBonus / 100.0f;
 	} else {
-		/*PRE 2014 CHANGE Dev Quote - "Elidroth SOE:Proc chance is a function of your base hardcapped Dexterity / 35 + Heroic Dexterity / 25.”
+		/*PRE 2014 CHANGE Dev Quote - "Elidroth SOE:Proc chance is a function of your base hardcapped Dexterity / 35 + Heroic Dexterity / 25.Â”
 		Kayen: Most reports suggest a ~ 6% chance to Headshot which consistent with above.*/
 		
 		ProcChance = (static_cast<float>(mydex/35) + static_cast<float>(itembonuses.HeroicDEX / 25))/100.0f;

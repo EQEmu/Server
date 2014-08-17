@@ -1040,6 +1040,15 @@ bool IsCastonFadeDurationSpell(uint16 spell_id)
 	return false;
 }
 
+bool IsPowerDistModSpell(uint16 spell_id)
+{
+	if (IsValidSpell(spell_id) && 
+		(spells[spell_id].max_dist_mod || spells[spell_id].min_dist_mod) && spells[spell_id].max_dist > spells[spell_id].min_dist)
+		return true;
+
+	return false;
+}
+
 uint32 GetPartialMeleeRuneReduction(uint32 spell_id)
 {
 	for (int i = 0; i < EFFECT_COUNT; ++i)

@@ -125,6 +125,7 @@ struct NPCType
 	float	spellscale;
 	float	healscale;
 	bool	no_target_hotkey;
+	bool	raid_target;
 };
 
 /*

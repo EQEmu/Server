@@ -1,6 +1,6 @@
 #include "MySQLRequestRow.h"
 
-MySQLRequestRow::MySQLRequestRow(const MySQLRequestRow& row) 
+MySQLRequestRow::MySQLRequestRow(const MySQLRequestRow& row)
 	: m_Result(row.m_Result), m_MySQLRow(row.m_MySQLRow)
 {
 }
@@ -26,13 +26,17 @@ MySQLRequestRow& MySQLRequestRow::operator=(MySQLRequestRow& moveItem)
 
 	moveItem.m_Result = nullptr;
 	moveItem.m_MySQLRow = nullptr;
-	
+
 	return *this;
 }
 
 MySQLRequestRow::MySQLRequestRow(MYSQL_RES *result)
-	: m_Result(result),  m_MySQLRow(mysql_fetch_row(m_Result))
+	: m_Result(result)
 {
+    if (result != nullptr)
+        m_MySQLRow = mysql_fetch_row(result);
+    else
+        m_MySQLRow = nullptr;
 }
 
 MySQLRequestRow& MySQLRequestRow::operator++()
@@ -41,19 +45,19 @@ MySQLRequestRow& MySQLRequestRow::operator++()
 	return *this;
 }
 
-MySQLRequestRow MySQLRequestRow::operator++(int) 
+MySQLRequestRow MySQLRequestRow::operator++(int)
 {
-	MySQLRequestRow tmp(*this); 
-	operator++(); 
+	MySQLRequestRow tmp(*this);
+	operator++();
 	return tmp;
 }
 
-bool MySQLRequestRow::operator==(const MySQLRequestRow& rhs) 
+bool MySQLRequestRow::operator==(const MySQLRequestRow& rhs)
 {
 	return m_MySQLRow == rhs.m_MySQLRow;
 }
 
-bool MySQLRequestRow::operator!=(const MySQLRequestRow& rhs) 
+bool MySQLRequestRow::operator!=(const MySQLRequestRow& rhs)
 {
 	return m_MySQLRow != rhs.m_MySQLRow;
 }

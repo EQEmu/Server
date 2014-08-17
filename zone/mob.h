@@ -524,6 +524,7 @@ public:
 
 
 	//More stuff to sort:
+	virtual bool IsRaidTarget() { return false; };
 	virtual bool IsAttackAllowed(Mob *target, bool isSpellAttack = false);
 	bool IsTargeted() const { return (targeted > 0); }
 	inline void IsTargeted(int in_tar) { targeted += in_tar; if(targeted < 0) targeted = 0;}
@@ -552,7 +553,7 @@ public:
 	void Shout(const char *format, ...);
 	void Emote(const char *format, ...);
 	void QuestJournalledSay(Client *QuestInitiator, const char *str);
-	uint32 GetItemStat(uint32 itemid, const char *identifier);
+	int32 GetItemStat(uint32 itemid, const char *identifier);
 
 	int16 CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, bool best_focus=false);
 	uint8 IsFocusEffect(uint16 spellid, int effect_index, bool AA=false,uint32 aa_effect=0);
@@ -615,6 +616,9 @@ public:
 	bool ImprovedTaunt();
 	bool TryRootFadeByDamage(int buffslot, Mob* attacker);
 	int16 GetSlowMitigation() const {return slow_mitigation;}
+	void CalcSpellPowerDistanceMod(uint16 spell_id, float range, Mob* caster = nullptr);
+	inline int16 GetSpellPowerDistanceMod() const { return SpellPowerDistanceMod; };
+	inline void SetSpellPowerDistanceMod(int16 value) { SpellPowerDistanceMod = value; };
 
 	void ModSkillDmgTaken(SkillUseTypes skill_num, int value);
 	int16 GetModSkillDmgTaken(const SkillUseTypes skill_num);
@@ -1114,6 +1118,7 @@ protected:
 	bool has_numhits;
 	bool has_MGB;
 	bool has_ProjectIllusion;
+	int16 SpellPowerDistanceMod;
 
 	// Bind wound
 	Timer bindwound_timer;

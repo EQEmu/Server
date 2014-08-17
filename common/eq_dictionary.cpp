@@ -237,7 +237,7 @@ std::string EmuConstants::InventorySubName(int16 sub) {
 		return "Unknown Sub";
 
 	std::string ret_str;
-	StringFormat(ret_str, "Container %i", (sub + 1)); // zero-based index..but, count starts at one
+	ret_str = StringFormat("Container %i", (sub + 1)); // zero-based index..but, count starts at one
 
 	return ret_str;
 }
@@ -250,7 +250,7 @@ std::string EmuConstants::InventoryAugName(int16 aug) {
 		return "Unknown Aug";
 
 	std::string ret_str;
-	StringFormat(ret_str, "Augment %i", (aug + 1)); // zero-based index..but, count starts at one
+	ret_str = StringFormat("Augment %i", (aug + 1)); // zero-based index..but, count starts at one
 
 	return ret_str;
 }
@@ -929,7 +929,7 @@ uint64 EQLimits::PossessionsBitmask(uint32 version) {
 /*Underfoot*/	0x000000027FFFFFFF,
 /*RoF*/			0x00000003FFFFFFFF,
 /*RoF2*/		0,
-		
+
 /*NPC*/			0,
 /*Merc*/		0,
 /*Bot*/			0,
@@ -950,7 +950,7 @@ uint64 EQLimits::EquipmentBitmask(uint32 version) {
 /*Underfoot*/	0x00000000007FFFFF,
 /*RoF*/			0x00000000007FFFFF,
 /*RoF2*/		0,
-		
+
 /*NPC*/			0,
 /*Merc*/		0,
 /*Bot*/			0,
@@ -971,7 +971,7 @@ uint64 EQLimits::GeneralBitmask(uint32 version) {
 /*Underfoot*/	0x000000007F800000,
 /*RoF*/			0x00000001FF800000,
 /*RoF2*/		0,
-		
+
 /*NPC*/			0,
 /*Merc*/		0,
 /*Bot*/			0,
@@ -992,7 +992,7 @@ uint64 EQLimits::CursorBitmask(uint32 version) {
 /*Underfoot*/	0x0000000200000000,
 /*RoF*/			0x0000000200000000,
 /*RoF2*/		0,
-		
+
 /*NPC*/			0,
 /*Merc*/		0,
 /*Bot*/			0,
@@ -1013,13 +1013,13 @@ bool EQLimits::AllowsEmptyBagInBag(uint32 version) {
 /*Underfoot*/	Underfoot::limits::ALLOWS_EMPTY_BAG_IN_BAG,
 /*RoF*/			RoF::limits::ALLOWS_EMPTY_BAG_IN_BAG,
 /*RoF2*/		false,
-		
+
 /*NPC*/			false,
 /*Merc*/		false,
 /*Bot*/			false,
 /*Pet*/			false
 	};
-	
+
 	return false; // not implemented
 	//return local[ValidateMobVersion(version)];
 }
@@ -1035,7 +1035,7 @@ uint16 EQLimits::ItemCommonSize(uint32 version) {
 /*Underfoot*/	EmuConstants::ITEM_COMMON_SIZE,
 /*RoF*/			EmuConstants::ITEM_COMMON_SIZE,
 /*RoF2*/		0,
-		
+
 /*NPC*/			EmuConstants::ITEM_COMMON_SIZE,
 /*Merc*/		EmuConstants::ITEM_COMMON_SIZE,
 /*Bot*/			EmuConstants::ITEM_COMMON_SIZE,
@@ -1055,7 +1055,7 @@ uint16 EQLimits::ItemContainerSize(uint32 version) {
 /*Underfoot*/	EmuConstants::ITEM_CONTAINER_SIZE,
 /*RoF*/			EmuConstants::ITEM_CONTAINER_SIZE,
 /*RoF2*/		0,
-		
+
 /*NPC*/			EmuConstants::ITEM_CONTAINER_SIZE,
 /*Merc*/		EmuConstants::ITEM_CONTAINER_SIZE,
 /*Bot*/			EmuConstants::ITEM_CONTAINER_SIZE,
@@ -1075,7 +1075,7 @@ bool EQLimits::CoinHasWeight(uint32 version) {
 /*Underfoot*/	Underfoot::limits::COIN_HAS_WEIGHT,
 /*RoF*/			RoF::limits::COIN_HAS_WEIGHT,
 /*RoF2*/		true,
-		
+
 /*NPC*/			true,
 /*Merc*/		true,
 /*Bot*/			true,
@@ -1095,7 +1095,7 @@ uint32 EQLimits::BandoliersCount(uint32 version) {
 /*Underfoot*/	EmuConstants::BANDOLIERS_COUNT,
 /*RoF*/			EmuConstants::BANDOLIERS_COUNT,
 /*RoF2*/		0,
-		
+
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
 /*Bot*/			NOT_USED,
@@ -1115,7 +1115,7 @@ uint32 EQLimits::BandolierSize(uint32 version) {
 /*Underfoot*/	EmuConstants::BANDOLIER_SIZE,
 /*RoF*/			EmuConstants::BANDOLIER_SIZE,
 /*RoF2*/		0,
-		
+
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
 /*Bot*/			NOT_USED,
@@ -1135,7 +1135,7 @@ uint32 EQLimits::PotionBeltSize(uint32 version) {
 /*Underfoot*/	EmuConstants::POTION_BELT_SIZE,
 /*RoF*/			EmuConstants::POTION_BELT_SIZE,
 /*RoF2*/		0,
-		
+
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
 /*Bot*/			NOT_USED,

@@ -103,7 +103,8 @@ int NewFloatToEQ13(float d);
 int FloatToEQ19(float d);
 int FloatToEQH(float d);
 
-
+// macro to catch fp errors (provided by noudness)
+#define FCMP(a,b) (fabs(a-b) < FLT_EPSILON)
 
 #define _ITOA_BUFLEN	25
 const char *itoa(int num);	//not thread safe

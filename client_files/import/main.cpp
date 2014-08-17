@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
 
 int GetSpellColumns(SharedDatabase *db) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = "DESCRIBE spells_new";
+	const char *query = "DESCRIBE spells_new";
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	int res = 0;
@@ -175,14 +175,14 @@ void ImportSkillCaps(SharedDatabase *db) {
 			continue;
 		}
 
-		std::string sql;
+		
 		int class_id, skill_id, level, cap;
 		class_id = atoi(split[0].c_str());
 		skill_id = atoi(split[1].c_str());
 		level = atoi(split[2].c_str());
 		cap = atoi(split[3].c_str());
 
-		StringFormat(sql, "INSERT INTO skill_caps(class, skillID, level, cap) VALUES(%d, %d, %d, %d)",
+		std::string sql = StringFormat("INSERT INTO skill_caps(class, skillID, level, cap) VALUES(%d, %d, %d, %d)",
 			class_id, skill_id, level, cap);
 
 		db->RunQuery(sql.c_str(), (uint32)sql.length());
@@ -226,7 +226,7 @@ void ImportBaseData(SharedDatabase *db) {
 		mana_fac = atof(split[8].c_str());
 		end_fac = atof(split[9].c_str());
 
-		StringFormat(sql, "INSERT INTO base_data(level, class, hp, mana, end, unk1, unk2, hp_fac, "
+		sql = StringFormat("INSERT INTO base_data(level, class, hp, mana, end, unk1, unk2, hp_fac, "
 			"mana_fac, end_fac) VALUES(%d, %d, %f, %f, %f, %f, %f, %f, %f, %f)",
 			level, class_id, hp, mana, end, unk1, unk2, hp_fac, mana_fac, end_fac);
 

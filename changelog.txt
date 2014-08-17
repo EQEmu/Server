@@ -1,5 +1,32 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/16/2014 ==
+KLS: (addmoreice) Trying out some unstable DB changes.  Do backup your database before trying them as master will be considered unstable for a few days at least.
+Uleat (Noudness): Fixed a floating-point comparison error that led to the notorious 'client bounce' (this is not related to the
+'mob falling' due to not having maps installed.) This fix also eliminates a sizeable amount of unnecessary out-going packets due
+to invalid orientation corrections.
+Note: This patch is probably of significant enough importance that admins may wish to manually apply this to older server builds.
+The number of packets reduced per second should be approximately (num_stationary_close_clients * (num_close_clients - 1)). This will
+likely have the most effect in zones like: Nexus, Bazaar, Guilds (Halls) and RAID INSTANCES - where players don't move around a lot.
+
+== 08/15/2014 ==
+Uleat: Reactivated the Bot::Spawn() code for sending post-spawn wear change updates..temporary until I can sort out the proper usage.
+
+== 08/13/2014 ==
+Uleat (Kingly_Krab): Fix for bot chest armor graphic glitch. (fix also caused RoF #wc to work properly)
+
+== 08/02/2014 ==
+Kayen: Implemented spell_news fields
+- npc_no_los (check if LOS is required for spells) 
+- InCombat, OutofCombat - Used together to restrict spells to only be cast while 
+in/out of combat (beneficial) or if target is in/out of combat (detrimental).
+-min_dist, min_dist_mod, max_dist, max_dist_mod - Scales spell power based on targets distance from caster.
+*This will require further work to fully implement but will work with 90% of live spells as is.
+*If making custom spells do not include effects that can't be scaled (like a spell trigger)
+- min_rage sets minimum distance range that must be away from target.
+
+Required SQL: utils/sql/git/required/2014_08_02_spells_new.sql
+
 == 07/31/2014 ==
 Uleat: More inventory slot constant conversions. This should be the bulk of everything..but, due to the size of the server code, there
 may be some hidden ones. (client_packet.cpp and the client translators still need a thorough review.)
