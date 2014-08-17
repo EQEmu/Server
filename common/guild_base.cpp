@@ -816,33 +816,23 @@ bool BaseGuildManager::DBSetAltFlag(uint32 charid, bool is_alt)
 
 bool BaseGuildManager::GetAltFlag(uint32 CharID)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if(!m_db)
+    if(!m_db)
 		return false;
 
-	if(!m_db->RunQuery(query, MakeAnyLenString(&query, "select `alt` from `guild_members` where char_id=%i LIMIT 1", CharID), errbuf, &result))
+    std::string query = StringFormat("SELECT `alt` FROM `guild_members` WHERE char_id=%i LIMIT 1", CharID);
+    auto results = m_db->QueryDatabase(query);
+	if(!results.Success())
 	{
-		_log(GUILDS__ERROR, "Error retrieving alt flag '%s': %s", query, errbuf);
-
-		safe_delete_array(query);
-
+		_log(GUILDS__ERROR, "Error retrieving alt flag '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
-	safe_delete_array(query);
-
-	if(mysql_num_rows(result) != 1)
+	if(results.RowCount() != 1)
 		return false;
 
-	row = mysql_fetch_row(result);
+	auto row = results.begin();
 
 	bool IsAlt = atoi(row[0]);
-
-	mysql_free_result(result);
 
 	return IsAlt;
 }
