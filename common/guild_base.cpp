@@ -40,6 +40,8 @@ BaseGuildManager::~BaseGuildManager() {
 	ClearGuilds();
 }
 
+
+
 bool BaseGuildManager::LoadGuilds() {
 
 	ClearGuilds();
@@ -49,36 +51,34 @@ bool BaseGuildManager::LoadGuilds() {
 		return(false);
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	std::string query("SELECT id, name, leader, minstatus, motd, motd_setter,channel,url FROM guilds");
 	std::map<uint32, GuildInfo *>::iterator res;
 
-	// load up all the guilds
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"SELECT id, name, leader, minstatus, motd, motd_setter,channel,url FROM guilds"), errbuf, &result)) {
-		_log(GUILDS__ERROR, "Error loading guilds '%s': %s", query, errbuf);
-		safe_delete_array(query);
-		return(false);
-	}
-	safe_delete_array(query);
-	while ((row = mysql_fetch_row(result))) {
-		_CreateGuild(atoi(row[0]), row[1], atoi(row[2]), atoi(row[3]), row[4], row[5], row[6], row[7]);
-	}
-	mysql_free_result(result);
+	auto results = m_db->QueryDatabase(query);
 
-	//load up the rank info for each guild.
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"SELECT guild_id,rank,title,can_hear,can_speak,can_invite,can_remove,can_promote,can_demote,can_motd,can_warpeace FROM guild_ranks"), errbuf, &result)) {
-		_log(GUILDS__ERROR, "Error loading guild ranks '%s': %s", query, errbuf);
-		safe_delete_array(query);
-		return(false);
+	if (!results.Success())
+	{
+		_log(GUILDS__ERROR, "Error loading guilds '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
-	safe_delete_array(query);
-	while ((row = mysql_fetch_row(result))) {
+
+	for (auto row=results.begin();row!=results.end();++row)
+		_CreateGuild(atoi(row[0]), row[1], atoi(row[2]), atoi(row[3]), row[4], row[5], row[6], row[7]);
+
+    query = "SELECT guild_id,rank,title,can_hear,can_speak,can_invite,can_remove,can_promote,can_demote,can_motd,can_warpeace FROM guild_ranks";
+	results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
+	{
+		_log(GUILDS__ERROR, "Error loading guild ranks '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
+	}
+
+	for (auto row=results.begin();row!=results.end();++row)
+	{
 		uint32 guild_id = atoi(row[0]);
 		uint8 rankn = atoi(row[1]);
+
 		if(rankn > GUILD_MAX_RANK) {
 			_log(GUILDS__ERROR, "Found invalid (too high) rank %d for guild %d, skipping.", rankn, guild_id);
 			continue;
@@ -102,9 +102,8 @@ bool BaseGuildManager::LoadGuilds() {
 		rank.permissions[GUILD_MOTD] = (row[9][0] == '1')?true:false;
 		rank.permissions[GUILD_WARPEACE] = (row[10][0] == '1')?true:false;
 	}
-	mysql_free_result(result);
 
-	return(true);
+	return true;
 }
 
 bool BaseGuildManager::RefreshGuild(uint32 guild_id) {
