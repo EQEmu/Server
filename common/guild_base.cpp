@@ -897,7 +897,7 @@ bool BaseGuildManager::QueryWithLogging(std::string query, const char *errmsg) {
 " g.banker,g.public_note,g.alt " \
 " FROM character_ AS c LEFT JOIN guild_members AS g ON c.id=g.char_id "
 #endif
-static void ProcessGuildMember(MYSQL_ROW &row, CharGuildInfo &into) {
+static void ProcessGuildMember(MySQLRequestRow row, CharGuildInfo &into) {
 	//fields from `characer_`
 	into.char_id		= atoi(row[0]);
 	into.char_name		= row[1];
