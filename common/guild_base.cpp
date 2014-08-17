@@ -748,33 +748,28 @@ bool BaseGuildManager::DBSetGuild(uint32 charid, uint32 guild_id, uint8 rank) {
 		return(false);
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query;
 
 	if(guild_id != GUILD_NONE) {
-		if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-			"REPLACE INTO guild_members (char_id,guild_id,rank) VALUES(%d,%d,%d)",
-			charid, guild_id, rank), errbuf))
-		{
-			_log(GUILDS__ERROR, "Error Changing char %d to guild %d '%s': %s", charid, guild_id, query, errbuf);
-			safe_delete_array(query);
-			return(false);
+        query = StringFormat("REPLACE INTO guild_members (char_id,guild_id,rank) VALUES(%d,%d,%d)", charid, guild_id, rank);
+        auto results = m_db->QueryDatabase(query);
+
+		if (!results.Success()) {
+			_log(GUILDS__ERROR, "Error Changing char %d to guild %d '%s': %s", charid, guild_id, query.c_str(), results.ErrorMessage().c_str());
+			return false;
 		}
+
 	} else {
-		if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-			"DELETE FROM guild_members WHERE char_id=%d",
-			charid), errbuf))
+        query = StringFormat("DELETE FROM guild_members WHERE char_id=%d", charid);
+        auto results = m_db->QueryDatabase(query);
+        if (!results.Success())
 		{
-			_log(GUILDS__ERROR, "Error removing char %d from guild '%s': %s", charid, guild_id, query, errbuf);
-			safe_delete_array(query);
-			return(false);
+			_log(GUILDS__ERROR, "Error removing char %d from guild '%s': %s", charid, guild_id, query.c_str(), results.ErrorMessage().c_str());
+			return false;
 		}
-	}
-	safe_delete_array(query);
-
+    }
 	_log(GUILDS__DB, "Set char %d to guild %d and rank %d in the database.", charid, guild_id, rank);
-
-	return(true);
+	return true;
 }
 
 bool BaseGuildManager::DBSetGuildRank(uint32 charid, uint8 rank) {
