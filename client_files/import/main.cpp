@@ -195,7 +195,7 @@ void ImportBaseData(SharedDatabase *db) {
 	}
 
 	std::string delete_sql = "DELETE FROM base_data";
-	db->RunQuery(delete_sql.c_str(), (uint32)delete_sql.length());
+	db->QueryDatabase(delete_sql);
 
 	char buffer[2048];
 	while(fgets(buffer, 2048, f)) {
@@ -224,7 +224,7 @@ void ImportBaseData(SharedDatabase *db) {
 			"mana_fac, end_fac) VALUES(%d, %d, %f, %f, %f, %f, %f, %f, %f, %f)",
 			level, class_id, hp, mana, end, unk1, unk2, hp_fac, mana_fac, end_fac);
 
-		db->RunQuery(sql.c_str(), (uint32)sql.length());
+		db->QueryDatabase(sql);
 	}
 
 	fclose(f);
