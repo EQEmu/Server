@@ -31,7 +31,7 @@ void ImportBaseData(SharedDatabase *db);
 int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformClientImport);
 	set_exception_handler();
-	
+
 	LogFile->write(EQEMuLog::Status, "Client Files Import Utility");
 	if(!EQEmuConfig::LoadConfig()) {
 		LogFile->write(EQEMuLog::Error, "Unable to load configuration file.");
@@ -55,26 +55,20 @@ int main(int argc, char **argv) {
 	ImportSpells(&database);
 	ImportSkillCaps(&database);
 	ImportBaseData(&database);
-	
+
 	return 0;
 }
 
 int GetSpellColumns(SharedDatabase *db) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	const char *query = "DESCRIBE spells_new";
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	int res = 0;
-	if(db->RunQuery(query, (uint32)strlen(query), errbuf, &result)) {
-		while(row = mysql_fetch_row(result)) {
-			++res;
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in GetSpellColumns query '%s' %s", query, errbuf);
-	}
 
-	return res;
+	const std::string query = "DESCRIBE spells_new";
+	auto results = db->QueryDatabase(query);
+	if(!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in GetSpellColumns query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
+        return 0;
+    }
+
+	return results.RowCount();
 }
 
 void ImportSpells(SharedDatabase *db) {
@@ -104,7 +98,7 @@ void ImportSpells(SharedDatabase *db) {
 		auto split = SplitString(escaped, '^');
 		int line_columns = (int)split.size();
 		std::string sql;
-		
+
 		if(line_columns >= columns) {
 			sql = "INSERT INTO spells_new VALUES(";
 			for(int i = 0; i < columns; ++i) {
@@ -170,12 +164,12 @@ void ImportSkillCaps(SharedDatabase *db) {
 	char buffer[2048];
 	while(fgets(buffer, 2048, f)) {
 		auto split = SplitString(buffer, '^');
-		
+
 		if(split.size() < 4) {
 			continue;
 		}
 
-		
+
 		int class_id, skill_id, level, cap;
 		class_id = atoi(split[0].c_str());
 		skill_id = atoi(split[1].c_str());
