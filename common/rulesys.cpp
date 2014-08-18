@@ -308,16 +308,14 @@ void RuleManager::_SaveRule(Database *db, RuleType type, uint16 index) {
 		break;
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	if (!db->RunQuery(query, MakeAnyLenString(&query,
-		"REPLACE INTO rule_values (ruleset_id, rule_name, rule_value) "
-		" VALUES(%d, '%s', '%s')",
-		m_activeRuleset, _GetRuleName(type, index), vstr),errbuf))
-	{
-		_log(RULES__ERROR, "Fauled to set rule in the database: %s: %s", query,errbuf);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("REPLACE INTO rule_values "
+                                    "(ruleset_id, rule_name, rule_value) "
+                                    " VALUES(%d, '%s', '%s')",
+                                    m_activeRuleset, _GetRuleName(type, index), vstr);
+    auto results = db->QueryDatabase(query);
+	if (!results.Success())
+		_log(RULES__ERROR, "Fauled to set rule in the database: %s: %s", query.c_str(), results.ErrorMessage().c_str());
+
 }
 
 
