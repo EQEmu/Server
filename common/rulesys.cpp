@@ -342,32 +342,25 @@ int RuleManager::GetRulesetID(Database *db, const char *rulesetname) {
 }
 
 int RuleManager::_FindOrCreateRuleset(Database *db, const char *ruleset) {
-	int res;
 
-	res = GetRulesetID(db, ruleset);
+	int res = GetRulesetID(db, ruleset);
 	if(res >= 0)
-		return(res);	//found and existing one...
+		return res;	//found and existing one...
 
 	uint32 len = strlen(ruleset);
 	char* rst = new char[2*len+1];
 	db->DoEscapeString(rst, ruleset, len);
 
-	uint32 new_id;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	if (!db->RunQuery(query, MakeAnyLenString(&query,
-		"INSERT INTO rule_sets (ruleset_id, name) "
-		" VALUES(0, '%s')",
-		rst),errbuf,nullptr,nullptr,&new_id))
+	std::string query = StringFormat("INSERT INTO rule_sets (ruleset_id, name) VALUES(0, '%s')", rst);
+	safe_delete_array(rst);
+	auto results = db->QueryDatabase(query);
+	if (!results.Success())
 	{
-		_log(RULES__ERROR, "Fauled to create rule set in the database: %s: %s", query,errbuf);
-		res = -1;
-	} else {
-		res = new_id;
+		_log(RULES__ERROR, "Fauled to create rule set in the database: %s: %s", query.c_str(), results.ErrorMessage().c_str());
+		return -1;
 	}
-	safe_delete_array(query);
 
-	return(res);
+    return results.LastInsertedID();
 }
 
 std::string RuleManager::GetRulesetName(Database *db, int id) {
