@@ -398,18 +398,15 @@ int EQW::CountBugs() {
 
 std::vector<std::string> EQW::ListBugs(uint32 offset) {
 	std::vector<std::string> res;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if(database.RunQuery(query, MakeAnyLenString(&query, "SELECT id FROM bugs WHERE status = 0 limit %d, 30", offset), errbuf, &result)) {
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result))) {
-			res.push_back(row[0]);
-		}
-		mysql_free_result(result);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT id FROM bugs WHERE status = 0 limit %d, 30", offset);
+	auto results = database.QueryDatabase(query);
+
+    if (!results.Success())
+        return res;
+
+    for (auto row = results.begin();row != results.end(); ++row)
+        res.push_back(row[0]);
+
 	return res;
 }
 
