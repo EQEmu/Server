@@ -693,54 +693,36 @@ bool AdventureManager::LoadAdventureTemplates()
 
 bool AdventureManager::LoadAdventureEntries()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, template_id FROM adventure_template_entry"), errbuf, &result))
+	std::string query = "SELECT id, template_id FROM adventure_template_entry";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success())
 	{
-		while((row = mysql_fetch_row(result)))
-		{
-			int id = atoi(row[0]);
-			int template_id = atoi(row[1]);
-			AdventureTemplate* tid = nullptr;
-
-			std::map<uint32, AdventureTemplate*>::iterator t_iter = adventure_templates.find(template_id);
-			if(t_iter == adventure_templates.end())
-			{
-				continue;
-			}
-			else
-			{
-				tid = adventure_templates[template_id];
-			}
-
-			std::list<AdventureTemplate*> temp;
-			std::map<uint32, std::list<AdventureTemplate*> >::iterator iter = adventure_entries.find(id);
-			if(iter == adventure_entries.end())
-			{
-				temp.push_back(tid);
-				adventure_entries[id] = temp;
-			}
-			else
-			{
-				temp = adventure_entries[id];
-				temp.push_back(tid);
-				adventure_entries[id] = temp;
-			}
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-		return true;
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::LoadAdventureEntries: %s (%s)", query, errbuf);
-		safe_delete_array(query);
+		LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::LoadAdventureEntries: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
-	return false;
+
+    for (auto row = results.begin(); row != results.end(); ++row)
+    {
+        int id = atoi(row[0]);
+        int template_id = atoi(row[1]);
+        AdventureTemplate* tid = nullptr;
+
+        auto t_iter = adventure_templates.find(template_id);
+        if(t_iter == adventure_templates.end())
+            continue;
+
+        tid = adventure_templates[template_id];
+
+        std::list<AdventureTemplate*> temp;
+        auto iter = adventure_entries.find(id);
+        if(iter == adventure_entries.end())
+            temp = adventure_entries[id];
+
+        temp.push_back(tid);
+        adventure_entries[id] = temp;
+    }
+
+    return true;
 }
 
 void AdventureManager::PlayerClickedDoor(const char *player, int zone_id, int door_id)
