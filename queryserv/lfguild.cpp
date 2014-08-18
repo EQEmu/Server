@@ -277,24 +277,17 @@ void LFGuildManager::TogglePlayer(uint32 FromZoneID, uint32 FromInstanceID, char
 
 void LFGuildManager::ToggleGuild(uint32 FromZoneID, uint32 FromInstanceID, char *From, char* GuildName, char *Comments, uint32 FromLevel, uint32 ToLevel, uint32 Classes, uint32 AACount, uint32 Toggle, uint32 TimeZone)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-
-	std::list<GuildLookingForPlayers>::iterator it;
-
-	for(it = Guilds.begin(); it != Guilds.end(); ++it)
-	{
+	for(auto it = Guilds.begin(); it != Guilds.end(); ++it)
 		if(!strcasecmp((*it).Name.c_str(), GuildName))
 		{
 			Guilds.erase(it);
 			break;
 		}
-	}
 
-	if(!database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM `lfguild` WHERE `type` = 1 AND `name` = '%s'", GuildName), errbuf, 0, 0))
-		_log(QUERYSERV__ERROR, "Error removing guild from LFGuild table, query was %s, %s", query, errbuf);
-
-	safe_delete_array(query);
+    std::string query = StringFormat("DELETE FROM `lfguild` WHERE `type` = 1 AND `name` = '%s'", GuildName);
+    auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		_log(QUERYSERV__ERROR, "Error removing guild from LFGuild table, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
 	uint32 Now = time(nullptr);
 
@@ -302,12 +295,19 @@ void LFGuildManager::ToggleGuild(uint32 FromZoneID, uint32 FromInstanceID, char 
 	{
 		GuildLookingForPlayers g(GuildName, Comments, FromLevel, ToLevel, Classes, AACount, TimeZone, Now);
 		Guilds.push_back(g);
-		if(!database.RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `lfguild` (`type`, `name`, `comment`, `fromlevel`, `tolevel`, `classes`, `aacount`, `timezone`, `timeposted`) VALUES(1, '%s', '%s', %u, %u, %u, %u, %u, %u)", GuildName, Comments, FromLevel, ToLevel, Classes, AACount, TimeZone, Now), errbuf, 0, 0))
-			_log(QUERYSERV__ERROR, "Error inserting guild into LFGuild table, query was %s, %s", query, errbuf);
 
-		safe_delete_array(query);
+		query = StringFormat("INSERT INTO `lfguild` "
+                            "(`type`, `name`, `comment`, `fromlevel`, `tolevel`, "
+                            "`classes`, `aacount`, `timezone`, `timeposted`) "
+                            "VALUES (1, '%s', '%s', %u, %u, %u, %u, %u, %u)",
+                            GuildName, Comments, FromLevel, ToLevel,
+                            Classes, AACount, TimeZone, Now);
+		auto results = database.QueryDatabase(query);
+		if(!results.Success())
+			_log(QUERYSERV__ERROR, "Error inserting guild into LFGuild table, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
 	}
+
 	ServerPacket *pack = new ServerPacket(ServerOP_LFGuildUpdate, strlen(GuildName) + strlen(Comments) + 30);
 
 	pack->WriteString(GuildName);
