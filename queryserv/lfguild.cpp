@@ -34,37 +34,27 @@ GuildLookingForPlayers::GuildLookingForPlayers(char *Name, char *Comments, uint3
 
 bool LFGuildManager::LoadDatabase()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (!database.RunQuery(query,MakeAnyLenString(&query, "SELECT `type`,`name`,`comment`, `fromlevel`, `tolevel`, `classes`, `aacount`, `timezone`, `timeposted` FROM `lfguild`"),errbuf,&result)){
-
-		_log(QUERYSERV__ERROR, "Failed to load LFGuild info from database. %s %s", query, errbuf);
-		safe_delete_array(query);
-
+	std::string query = "SELECT `type`,`name`,`comment`, "
+                        "`fromlevel`, `tolevel`, `classes`, "
+                        "`aacount`, `timezone`, `timeposted` FROM `lfguild`";
+    auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		_log(QUERYSERV__ERROR, "Failed to load LFGuild info from database. %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
-	safe_delete_array(query);
-
-	while((row = mysql_fetch_row(result))) {
-
+    for (auto row = results.begin(); row != results.end(); ++row) {
 		uint32 type = atoul(row[0]);
 		if(type == 0)
 		{
 			PlayerLookingForGuild p(row[1], row[2], atoul(row[3]), atoul(row[5]), atoul(row[6]), atoul(row[7]), atoul(row[8]));
 			Players.push_back(p);
+			continue;
 		}
-		else
-		{
-			GuildLookingForPlayers g(row[1], row[2], atoul(row[3]), atoul(row[4]), atoul(row[5]), atoul(row[6]), atoul(row[7]), atoul(row[8]));
-			Guilds.push_back(g);
-		}
-	}
 
-	mysql_free_result(result);
+        GuildLookingForPlayers g(row[1], row[2], atoul(row[3]), atoul(row[4]), atoul(row[5]), atoul(row[6]), atoul(row[7]), atoul(row[8]));
+        Guilds.push_back(g);
+	}
 
 	return true;
 }
