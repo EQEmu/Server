@@ -382,29 +382,22 @@ std::string RuleManager::GetRulesetName(Database *db, int id) {
 }
 
 bool RuleManager::ListRulesets(Database *db, std::map<int, std::string> &into) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
 	//start out with the default set which is always present.
 	into[0] = "default";
 
-	if (db->RunQuery(query, MakeAnyLenString(&query,
-		"SELECT ruleset_id,name"
-		" FROM rule_sets"), errbuf, &result))
+    std::string query = "SELECT ruleset_id, name FROM rule_sets";
+    auto results = db->QueryDatabase(query);
+	if (results.Success())
 	{
-		while((row = mysql_fetch_row(result))) {
-			into[ atoi(row[0]) ] = row[1];
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in ListRulesets query %s: %s", query, errbuf);
-		safe_delete_array(query);
-		return(false);
+		LogFile->write(EQEMuLog::Error, "Error in ListRulesets query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
-	return(true);
+
+	for (auto row = results.begin(); row != results.end(); ++row)
+        into[ atoi(row[0]) ] = row[1];
+
+	return true;
 }
 
 int32 RuleManager::GetIntRule(RuleManager::IntType t) const
