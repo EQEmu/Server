@@ -79,8 +79,8 @@ void ImportSpells(SharedDatabase *db) {
 		return;
 	}
 
-	std::string delete_sql = "DELETE FROM spells_new";
-	db->RunQuery(delete_sql.c_str(), (uint32)delete_sql.length());
+	std::string query = "DELETE FROM spells_new";
+	db->QueryDatabase(query);
 
 	int columns = GetSpellColumns(db);
 	int spells_imported = 0;
@@ -97,8 +97,8 @@ void ImportSpells(SharedDatabase *db) {
 		std::string escaped = ::EscapeString(buffer);
 		auto split = SplitString(escaped, '^');
 		int line_columns = (int)split.size();
-		std::string sql;
 
+		std::string sql;
 		if(line_columns >= columns) {
 			sql = "INSERT INTO spells_new VALUES(";
 			for(int i = 0; i < columns; ++i) {
@@ -134,7 +134,7 @@ void ImportSpells(SharedDatabase *db) {
 			sql += ");";
 		}
 
-		db->RunQuery(sql.c_str(), (uint32)sql.length());
+		db->QueryDatabase(sql);
 
 		spells_imported++;
 		if(spells_imported % 1000 == 0) {
