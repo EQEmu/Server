@@ -170,27 +170,23 @@ void ExportBaseData(SharedDatabase *db) {
 		return;
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	const char *query = "SELECT * FROM base_data ORDER BY level, class";
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if(db->RunQuery(query, strlen(query), errbuf, &result)) {
-		while(row = mysql_fetch_row(result)) {
+	const std::string query = "SELECT * FROM base_data ORDER BY level, class";
+	auto results = db->QueryDatabase(query);
+	if(results.Success()) {
+        for (auto row = results.begin();row != results.end();++row) {
 			std::string line;
-			unsigned int fields = mysql_num_fields(result);
-			for(unsigned int i = 0; i < fields; ++i) {
-				if(i != 0) {
+			unsigned int fields = results.ColumnCount();
+			for(unsigned int rowIndex = 0; rowIndex < fields; ++rowIndex) {
+				if(rowIndex != 0)
 					line.push_back('^');
-				}
 
-				line += row[i];
+				line += row[rowIndex];
 			}
 
 			fprintf(f, "%s\n", line.c_str());
 		}
-		mysql_free_result(result);
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in ExportBaseData query '%s' %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in ExportBaseData query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
 	}
 
 	fclose(f);
