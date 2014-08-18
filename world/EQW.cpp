@@ -433,12 +433,8 @@ std::map<std::string,std::string> EQW::GetBugDetails(Const_char *id) {
 
 void EQW::ResolveBug(const char *id) {
 	std::vector<std::string> res;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	if(database.RunQuery(query, MakeAnyLenString(&query, "UPDATE bugs SET status=1 WHERE id=%s", id), errbuf)) {
-		safe_delete_array(query);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("UPDATE bugs SET status=1 WHERE id=%s", id);
+	database.QueryDatabase(query);
 }
 
 void EQW::SendMessage(uint32 type, const char *msg) {
