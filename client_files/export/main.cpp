@@ -94,25 +94,25 @@ void ExportSpells(SharedDatabase *db) {
 }
 
 bool SkillUsable(SharedDatabase *db, int skill_id, int class_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = nullptr;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	bool res = false;
-	if(db->RunQuery(query, MakeAnyLenString(&query, "SELECT max(cap) FROM skill_caps WHERE class=%d AND skillID=%d",
-		class_id, skill_id), errbuf, &result)) {
-		if(row = mysql_fetch_row(result)) {
-			if(row[0] && atoi(row[0]) > 0) {
-				res = true;
-			}
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in skill_usable query '%s' %s", query, errbuf);
-	}
 
-	safe_delete_array(query);
-	return res;
+	bool res = false;
+
+	std::string query = StringFormat("SELECT max(cap) FROM skill_caps WHERE class=%d AND skillID=%d",
+                                    class_id, skill_id);
+	auto results = db->QueryDatabase(query);
+	if(!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in skill_usable query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
+        return false;
+    }
+
+    if (results.RowCount() == 0)
+        return false;
+
+    auto row = results.begin();
+    if(row[0] && atoi(row[0]) > 0)
+        return true;
+
+    return false;
 }
 
 int GetSkill(SharedDatabase *db, int skill_id, int class_id, int level) {
