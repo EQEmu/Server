@@ -266,10 +266,6 @@ void RuleManager::SaveRules(Database *db, const char *ruleset) {
 
 
 bool RuleManager::LoadRules(Database *db, const char *ruleset) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
 	int rsid = GetRulesetID(db, ruleset);
 	if(rsid < 0) {
@@ -282,24 +278,19 @@ bool RuleManager::LoadRules(Database *db, const char *ruleset) {
 	m_activeRuleset = rsid;
 	m_activeName = ruleset;
 
-	if (db->RunQuery(query, MakeAnyLenString(&query,
-		"SELECT rule_name, rule_value"
-		" FROM rule_values"
-		" WHERE ruleset_id=%d", rsid), errbuf, &result))
+    std::string query = StringFormat("SELECT rule_name, rule_value FROM rule_values WHERE ruleset_id=%d", rsid);
+    auto results = db->QueryDatabase(query);
+	if (!results.Success())
 	{
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result))) {
-			if(!SetRule(row[0], row[1], nullptr, false))
-				_log(RULES__ERROR, "Unable to interpret rule record for %s", row[0]);
-		}
-		mysql_free_result(result);
-	} else {
-		safe_delete_array(query);
-		LogFile->write(EQEMuLog::Error, "Error in LoadRules query %s: %s", query, errbuf);
-		return(false);
+        LogFile->write(EQEMuLog::Error, "Error in LoadRules query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
 
-	return(true);
+    for(auto row = results.begin(); row != results.end(); ++row)
+        if(!SetRule(row[0], row[1], nullptr, false))
+            _log(RULES__ERROR, "Unable to interpret rule record for %s", row[0]);
+
+	return true;
 }
 
 void RuleManager::_SaveRule(Database *db, RuleType type, uint16 index) {
