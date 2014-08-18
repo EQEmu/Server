@@ -32,7 +32,7 @@ void ExportBaseData(SharedDatabase *db);
 int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformClientExport);
 	set_exception_handler();
-	
+
 	LogFile->write(EQEMuLog::Status, "Client Files Export Utility");
 	if(!EQEmuConfig::LoadConfig()) {
 		LogFile->write(EQEMuLog::Error, "Unable to load configuration file.");
@@ -52,11 +52,11 @@ int main(int argc, char **argv) {
 			"database connection");
 		return 1;
 	}
-	
+
 	ExportSpells(&database);
 	ExportSkillCaps(&database);
 	ExportBaseData(&database);
-	
+
 	return 0;
 }
 
@@ -69,29 +69,27 @@ void ExportSpells(SharedDatabase *db) {
 		return;
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	const char *query = "SELECT * FROM spells_new ORDER BY id";
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if(db->RunQuery(query, strlen(query), errbuf, &result)) {
-		while(row = mysql_fetch_row(result)) {
+	const std::string query = "SELECT * FROM spells_new ORDER BY id";
+	auto results = db->QueryDatabase(query);
+
+	if(results.Success()) {
+        for (auto row = results.begin(); row != results.end(); ++row) {
 			std::string line;
-			unsigned int fields = mysql_num_fields(result);
+			unsigned int fields = results.ColumnCount();
 			for(unsigned int i = 0; i < fields; ++i) {
 				if(i != 0) {
 					line.push_back('^');
 				}
-				
+
 				line += row[i];
 			}
-			
+
 			fprintf(f, "%s\n", line.c_str());
 		}
-		mysql_free_result(result);
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in ExportSpells query '%s' %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in ExportSpells query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
 	}
-	
+
 	fclose(f);
 }
 
