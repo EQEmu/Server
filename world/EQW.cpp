@@ -412,25 +412,22 @@ std::vector<std::string> EQW::ListBugs(uint32 offset) {
 
 std::map<std::string,std::string> EQW::GetBugDetails(Const_char *id) {
 	std::map<std::string,std::string> res;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if(database.RunQuery(query, MakeAnyLenString(&query, "select name, zone, x, y, z, target, bug from bugs where id = %s", id), errbuf, &result)) {
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result))) {
-			res["name"] = row[0];
-			res["zone"] = row[1];
-			res["x"] = row[2];
-			res["y"] = row[3];
-			res["z"] = row[4];
-			res["target"] = row[5];
-			res["bug"] = row[6];
-			res["id"] = id;
-		}
-		mysql_free_result(result);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT name, zone, x, y, z, target, bug FROM bugs WHERE id = %s", id);
+	auto results = database.QueryDatabase(query);
+
+	if (!results.Success())
+        return res;
+
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        res["name"] = row[0];
+        res["zone"] = row[1];
+        res["x"] = row[2];
+        res["y"] = row[3];
+        res["z"] = row[4];
+        res["target"] = row[5];
+        res["bug"] = row[6];
+        res["id"] = id;
+    }
 	return res;
 }
 
