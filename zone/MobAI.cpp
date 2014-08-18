@@ -2767,7 +2767,7 @@ uint32 ZoneDatabase::GetMaxNPCSpellsID() {
 
 DBnpcspellseffects_Struct* ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEffectsID) {
 	if (iDBSpellsEffectsID == 0)
-		return 0;
+		return nullptr;
 
 	if (!npc_spellseffects_cache) {
 		npc_spellseffects_maxid = GetMaxNPCSpellsEffectsID();
@@ -2780,63 +2780,56 @@ DBnpcspellseffects_Struct* ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEff
 	}
 
 	if (iDBSpellsEffectsID > npc_spellseffects_maxid)
-		return 0;
-	if (npc_spellseffects_cache[iDBSpellsEffectsID]) { // it's in the cache, easy =)
+		return nullptr;
+
+	if (npc_spellseffects_cache[iDBSpellsEffectsID])  // it's in the cache, easy =)
 		return npc_spellseffects_cache[iDBSpellsEffectsID];
-	}
 
-	else if (!npc_spellseffects_loadtried[iDBSpellsEffectsID]) { // no reason to ask the DB again if we have failed once already
-		npc_spellseffects_loadtried[iDBSpellsEffectsID] = true;
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		MYSQL_RES *result;
-		MYSQL_ROW row;
+	if (npc_spellseffects_loadtried[iDBSpellsEffectsID])
+        return nullptr;
 
-		if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, parent_list from npc_spells_effects where id=%d", iDBSpellsEffectsID), errbuf, &result)) {
-			safe_delete_array(query);
-			if (mysql_num_rows(result) == 1) {
-				row = mysql_fetch_row(result);
-				uint32 tmpparent_list = atoi(row[1]);
-				mysql_free_result(result);
-				if (RunQuery(query, MakeAnyLenString(&query, "SELECT spell_effect_id, minlevel, maxlevel,se_base, se_limit, se_max from npc_spells_effects_entries where npc_spells_effects_id=%d ORDER BY minlevel", iDBSpellsEffectsID), errbuf, &result)) {
-					safe_delete_array(query);
-					uint32 tmpSize = sizeof(DBnpcspellseffects_Struct) + (sizeof(DBnpcspellseffects_entries_Struct) * mysql_num_rows(result));
-					npc_spellseffects_cache[iDBSpellsEffectsID] = (DBnpcspellseffects_Struct*) new uchar[tmpSize];
-					memset(npc_spellseffects_cache[iDBSpellsEffectsID], 0, tmpSize);
-					npc_spellseffects_cache[iDBSpellsEffectsID]->parent_list = tmpparent_list;
-					npc_spellseffects_cache[iDBSpellsEffectsID]->numentries = mysql_num_rows(result);
-					int j = 0;
-					while ((row = mysql_fetch_row(result))) {
-						int spell_effect_id = atoi(row[0]);
-						npc_spellseffects_cache[iDBSpellsEffectsID]->entries[j].spelleffectid =  spell_effect_id;
-						npc_spellseffects_cache[iDBSpellsEffectsID]->entries[j].minlevel = atoi(row[1]);
-						npc_spellseffects_cache[iDBSpellsEffectsID]->entries[j].maxlevel = atoi(row[2]);
-						npc_spellseffects_cache[iDBSpellsEffectsID]->entries[j].base = atoi(row[3]);
-						npc_spellseffects_cache[iDBSpellsEffectsID]->entries[j].limit = atoi(row[4]);
-						npc_spellseffects_cache[iDBSpellsEffectsID]->entries[j].max = atoi(row[5]);
-						j++;
-					}
-					mysql_free_result(result);
-					return npc_spellseffects_cache[iDBSpellsEffectsID];
-				}
-				else {
-					std::cerr << "Error in AddNPCSpells query1 '" << query << "' " << errbuf << std::endl;
-					safe_delete_array(query);
-					return 0;
-				}
-			}
-			else {
-				mysql_free_result(result);
-			}
-		}
-		else {
-			std::cerr << "Error in AddNPCSpells query1 '" << query << "' " << errbuf << std::endl;
-			safe_delete_array(query);
-			return 0;
-		}
-		return 0;
-	}
-	return 0;
+    npc_spellseffects_loadtried[iDBSpellsEffectsID] = true;
+
+    std::string query = StringFormat("SELECT id, parent_list FROM npc_spells_effects WHERE id=%d", iDBSpellsEffectsID);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        std::cerr << "Error in AddNPCSpells query1 '" << query << "' " << results.ErrorMessage() << std::endl;
+        return nullptr;
+    }
+
+    if (results.RowCount() != 1)
+        return nullptr;
+
+    auto row = results.begin();
+    uint32 tmpparent_list = atoi(row[1]);
+
+    query = StringFormat("SELECT spell_effect_id, minlevel, "
+                        "maxlevel,se_base, se_limit, se_max "
+                        "FROM npc_spells_effects_entries "
+                        "WHERE npc_spells_effects_id = %d ORDER BY minlevel", iDBSpellsEffectsID);
+    results = QueryDatabase(query);
+    if (!results.Success())
+        return nullptr;
+
+    uint32 tmpSize = sizeof(DBnpcspellseffects_Struct) + (sizeof(DBnpcspellseffects_entries_Struct) * results.RowCount());
+    npc_spellseffects_cache[iDBSpellsEffectsID] = (DBnpcspellseffects_Struct*) new uchar[tmpSize];
+    memset(npc_spellseffects_cache[iDBSpellsEffectsID], 0, tmpSize);
+    npc_spellseffects_cache[iDBSpellsEffectsID]->parent_list = tmpparent_list;
+    npc_spellseffects_cache[iDBSpellsEffectsID]->numentries = results.RowCount();
+
+    int entryIndex = 0;
+    for (row = results.begin(); row != results.end(); ++row, ++entryIndex)
+    {
+        int spell_effect_id = atoi(row[0]);
+        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].spelleffectid =  spell_effect_id;
+        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].minlevel = atoi(row[1]);
+        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].maxlevel = atoi(row[2]);
+        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].base = atoi(row[3]);
+        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].limit = atoi(row[4]);
+        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].max = atoi(row[5]);
+    }
+
+    return npc_spellseffects_cache[iDBSpellsEffectsID];
 }
 
 uint32 ZoneDatabase::GetMaxNPCSpellsEffectsID() {
