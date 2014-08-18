@@ -326,36 +326,30 @@ void LFGuildManager::ToggleGuild(uint32 FromZoneID, uint32 FromInstanceID, char 
 
 void LFGuildManager::ExpireEntries()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-
-	std::list<PlayerLookingForGuild>::iterator it;
-	std::list<GuildLookingForPlayers>::iterator it2;
-
-	for(it = Players.begin(); it != Players.end(); ++it)
+	for(auto it = Players.begin(); it != Players.end(); ++it)
 	{
-		if((*it).TimePosted + 604800 <= (uint32)time(nullptr))
-		{
-			if(!database.RunQuery(query, MakeAnyLenString(&query, "DELETE from `lfguild` WHERE `type` = 0 AND `name` = '%s'", (*it).Name.c_str()), errbuf, 0, 0))
-				_log(QUERYSERV__ERROR, "Error expiring player LFGuild entry, query was %s, %s", query, errbuf);
+		if((*it).TimePosted + 604800 > (uint32)time(nullptr))
+            continue;
 
-			safe_delete_array(query);
+        std::string query = StringFormat("DELETE from `lfguild` WHERE `type` = 0 AND `name` = '%s'", (*it).Name.c_str());
+        auto results = database.QueryDatabase(query);
+        if(!results.Success())
+            _log(QUERYSERV__ERROR, "Error expiring player LFGuild entry, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
-			it = Players.erase(it);
-		}
-	}
+        it = Players.erase(it);
+    }
 
-	for(it2 = Guilds.begin(); it2 != Guilds.end(); ++it2)
+	for(auto it2 = Guilds.begin(); it2 != Guilds.end(); ++it2)
 	{
-		if((*it2).TimePosted + 2592000 <= time(nullptr))
-		{
-			if(!database.RunQuery(query, MakeAnyLenString(&query, "DELETE from `lfguild` WHERE `type` = 1 AND `name` = '%s'", (*it2).Name.c_str()), errbuf, 0, 0))
-				_log(QUERYSERV__ERROR, "Error removing guild LFGuild entry, query was %s, %s", query, errbuf);
+		if((*it2).TimePosted + 2592000 > time(nullptr))
+            continue;
 
-			safe_delete_array(query);
+        std::string query = StringFormat("DELETE from `lfguild` WHERE `type` = 1 AND `name` = '%s'", (*it2).Name.c_str());
+        auto results = database.QueryDatabase(query);
+        if(!results.Success())
+            _log(QUERYSERV__ERROR, "Error removing guild LFGuild entry, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
-			it2 = Guilds.erase(it2);
-		}
+        it2 = Guilds.erase(it2);
 	}
 }
 
