@@ -346,27 +346,19 @@ bool PTimerList::Store(Database *db) {
 bool PTimerList::Clear(Database *db) {
 	_list.clear();
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 qlen = 0;
-
-	qlen = MakeAnyLenString(&query, "DELETE FROM timers "
-		" WHERE char_id=%lu ", (unsigned long)_char_id);
-
+	std::string query = StringFormat("DELETE FROM timers WHERE char_id=%lu ", (unsigned long)_char_id);
 #ifdef DEBUG_PTIMERS
-	printf("Storing all timers for char %lu: '%s'\n", (unsigned long)_char_id, query);
+	printf("Storing all timers for char %lu: '%s'\n", (unsigned long)_char_id, query.c_str());
 #endif
-
-	if (!db->RunQuery(query, qlen, errbuf)) {
-		safe_delete_array(query);
+    auto results = db->QueryDatabase(query);
+	if (!results.Success()) {
 #if EQDEBUG > 5
-		LogFile->write(EQEMuLog::Error, "Error in PersistentTimer::Clear, error: %s", errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in PersistentTimer::Clear, error: %s", results.ErrorMessage().c_str());
 #endif
-		return(false);
+		return false;
 	}
-	safe_delete_array(query);
 
-	return(true);
+	return true;
 }
 
 void PTimerList::Start(pTimerType type, uint32 duration) {
