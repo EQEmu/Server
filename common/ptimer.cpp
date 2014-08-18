@@ -127,41 +127,31 @@ PersistentTimer::PersistentTimer(uint32 char_id, pTimerType type, uint32 in_star
 }
 
 bool PersistentTimer::Load(Database *db) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	char *query = 0;
-	uint32 qlen = 0;
-	uint32 qcount = 0;
-
-	qlen = MakeAnyLenString(&query, "SELECT start,duration,enable "
-	" FROM timers WHERE char_id=%lu AND type=%u", (unsigned long)_char_id, _type);
 
 #ifdef DEBUG_PTIMERS
 	printf("Loading timer: char %lu of type %u\n", (unsigned long)_char_id, _type);
 #endif
-
-	if (!db->RunQuery(query, qlen, errbuf, &result)) {
-		safe_delete_array(query);
+    std::string query = StringFormat("SELECT start, duration, enable "
+                                    "FROM timers WHERE char_id=%lu AND type=%u",
+                                    (unsigned long)_char_id, _type);
+    auto results = db->QueryDatabase(query);
+	if (!results.Success()) {
 #if EQDEBUG > 5
-		LogFile->write(EQEMuLog::Error, "Error in PersistentTimer::Load, error: %s", errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in PersistentTimer::Load, error: %s", results.ErrorMessage().c_str());
 #endif
-		return(false);
+		return false;
 	}
-	safe_delete_array(query);
 
-	bool res = false;
-	qcount = mysql_num_rows(result);
-	if(qcount == 1 && (row = mysql_fetch_row(result)) ) {
-		start_time = strtoul(row[0], nullptr, 10);
-		timer_time = strtoul(row[1], nullptr, 10);
-		enabled = (row[2][0] == '1');
+	if (results.RowCount() != 1)
+        return false;
 
-		res = true;
-	}
-	mysql_free_result(result);
+	auto row = results.begin();
 
-	return(res);
+    start_time = strtoul(row[0], nullptr, 10);
+    timer_time = strtoul(row[1], nullptr, 10);
+    enabled = (row[2][0] == '1');
+
+    return true;
 }
 
 bool PersistentTimer::Store(Database *db) {
