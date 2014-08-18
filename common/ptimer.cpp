@@ -436,26 +436,19 @@ void PTimerList::ToVector(std::vector< std::pair<pTimerType, PersistentTimer *> 
 }
 
 bool PTimerList::ClearOffline(Database *db, uint32 char_id, pTimerType type) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 qlen = 0;
 
-	qlen = MakeAnyLenString(&query, "DELETE FROM timers WHERE char_id=%lu AND type=%u ",(unsigned long)char_id, type);
+	std::string query = StringFormat("DELETE FROM timers WHERE char_id=%lu AND type=%u ",(unsigned long)char_id, type);
 
 #ifdef DEBUG_PTIMERS
-	printf("Clearing timer (offline): char %lu of type %u: '%s'\n", (unsigned long)char_id, type, query);
+	printf("Clearing timer (offline): char %lu of type %u: '%s'\n", (unsigned long)char_id, type, query.c_str());
 #endif
-
-	if (!db->RunQuery(query, qlen, errbuf)) {
-		safe_delete_array(query);
+    auto results = db->QueryDatabase(query);
+	if (!results.Success()) {
 #if EQDEBUG > 5
-		LogFile->write(EQEMuLog::Error, "Error in PTimerList::ClearOffline, error: %s", errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in PTimerList::ClearOffline, error: %s", results.ErrorMessage().c_str());
 #endif
-		return(false);
+		return false;
 	}
-	safe_delete_array(query);
 
-	return(true);
-
-
+	return true;
 }
