@@ -364,28 +364,21 @@ int RuleManager::_FindOrCreateRuleset(Database *db, const char *ruleset) {
 }
 
 std::string RuleManager::GetRulesetName(Database *db, int id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	std::string res;
-
-	if (db->RunQuery(query, MakeAnyLenString(&query,
-		"SELECT name"
-		" FROM rule_sets"
-		" WHERE ruleset_id=%d", id), errbuf, &result))
+    std::string query = StringFormat("SELECT name FROM rule_sets WHERE ruleset_id=%d", id);
+    auto results = db->QueryDatabase(query);
+	if (!results.Success())
 	{
-		if((row = mysql_fetch_row(result))) {
-			res = row[0];
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadRules query %s: %s", query, errbuf);
+        LogFile->write(EQEMuLog::Error, "Error in LoadRules query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+        return "";
 	}
-	safe_delete_array(query);
 
-	return(res);
+	if (results.RowCount() == 0)
+        return "";
+
+    auto row = results.begin();
+
+	return row[0];
 }
 
 bool RuleManager::ListRulesets(Database *db, std::map<int, std::string> &into) {
