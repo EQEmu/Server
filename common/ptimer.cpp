@@ -279,61 +279,47 @@ PTimerList::~PTimerList() {
 
 
 bool PTimerList::Load(Database *db) {
-	std::map<pTimerType, PersistentTimer *>::iterator s;
-	s = _list.begin();
-	while(s != _list.end()) {
-		if(s->second != nullptr)
-			delete s->second;
-		++s;
-	}
+
+	for (auto timerIterator = _list.begin(); timerIterator != _list.end(); ++timerIterator)
+		if(timerIterator->second != nullptr)
+			delete timerIterator->second;
 	_list.clear();
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	char *query = 0;
-	uint32 qlen = 0;
-	uint32 qcount = 0;
-
-	qlen = MakeAnyLenString(&query, "SELECT type,start,duration,enable "
-	" FROM timers WHERE char_id=%lu", (unsigned long)_char_id);
 
 #ifdef DEBUG_PTIMERS
 	printf("Loading all timers for char %lu\n", (unsigned long)_char_id);
 #endif
-
-	if (!db->RunQuery(query, qlen, errbuf, &result)) {
-		safe_delete_array(query);
+	std::string query = StringFormat("SELECT type, start, duration, enable "
+                                    "FROM timers WHERE char_id = %lu",
+                                    (unsigned long)_char_id);
+    auto results = db->QueryDatabase(query);
+	if (!results.Success()) {
 #if EQDEBUG > 5
-		LogFile->write(EQEMuLog::Error, "Error in PersistentTimer::Load, error: %s", errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in PersistentTimer::Load, error: %s", results.ErrorMessage().c_str());
 #endif
-		return(false);
+		return false;
 	}
-	safe_delete_array(query);
 
 	pTimerType type;
 	uint32 start_time, timer_time;
 	bool enabled;
 
 	PersistentTimer *cur;
-	qcount = mysql_num_rows(result);
-	while((row = mysql_fetch_row(result)) ) {
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
 		type = atoi(row[0]);
 		start_time = strtoul(row[1], nullptr, 10);
 		timer_time = strtoul(row[2], nullptr, 10);
 		enabled = (row[3][0] == '1');
 
 		//if it expired allready, dont bother.
-
 		cur = new PersistentTimer(_char_id, type, start_time, timer_time, enabled);
 		if(!cur->Expired(nullptr))
 			_list[type] = cur;
 		else
 			delete cur;
 	}
-	mysql_free_result(result);
 
-	return(true);
+	return true;
 }
 
 bool PTimerList::Store(Database *db) {
