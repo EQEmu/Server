@@ -1067,79 +1067,69 @@ void AdventureManager::LoadLeaderboardInfo()
 	leaderboard_info_percentage_ruj.clear();
 	leaderboard_info_wins_tak.clear();
 	leaderboard_info_percentage_tak.clear();
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	if(database.RunQuery(query,MakeAnyLenString(&query,"select ch.name, ch.id, adv_stats.* from adventure_stats "
-		"AS adv_stats ""left join character_ AS ch on adv_stats.player_id = ch.id;"), errbuf, &result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			if(row[0])
-			{
-				LeaderboardInfo lbi;
-				lbi.name = row[0];
-				lbi.wins = atoi(row[3]);
-				lbi.guk_wins = atoi(row[3]);
-				lbi.wins += atoi(row[4]);
-				lbi.mir_wins = atoi(row[4]);
-				lbi.wins += atoi(row[5]);
-				lbi.mmc_wins = atoi(row[5]);
-				lbi.wins += atoi(row[6]);
-				lbi.ruj_wins = atoi(row[6]);
-				lbi.wins += atoi(row[7]);
-				lbi.tak_wins = atoi(row[7]);
-				lbi.losses = atoi(row[8]);
-				lbi.guk_losses = atoi(row[8]);
-				lbi.losses += atoi(row[9]);
-				lbi.mir_losses = atoi(row[9]);
-				lbi.losses += atoi(row[10]);
-				lbi.mmc_losses = atoi(row[10]);
-				lbi.losses += atoi(row[11]);
-				lbi.ruj_losses = atoi(row[11]);
-				lbi.losses += atoi(row[12]);
-				lbi.tak_losses = atoi(row[12]);
-
-				leaderboard_info_wins.push_back(lbi);
-				leaderboard_info_percentage.push_back(lbi);
-				leaderboard_info_wins_guk.push_back(lbi);
-				leaderboard_info_percentage_guk.push_back(lbi);
-				leaderboard_info_wins_mir.push_back(lbi);
-				leaderboard_info_percentage_mir.push_back(lbi);
-				leaderboard_info_wins_mmc.push_back(lbi);
-				leaderboard_info_percentage_mmc.push_back(lbi);
-				leaderboard_info_wins_ruj.push_back(lbi);
-				leaderboard_info_percentage_ruj.push_back(lbi);
-				leaderboard_info_wins_tak.push_back(lbi);
-				leaderboard_info_percentage_tak.push_back(lbi);
-
-				leaderboard_sorted_wins = false;
-				leaderboard_sorted_percentage = false;
-				leaderboard_sorted_wins_guk = false;
-				leaderboard_sorted_percentage_guk = false;
-				leaderboard_sorted_wins_mir = false;
-				leaderboard_sorted_percentage_mir = false;
-				leaderboard_sorted_wins_mmc = false;
-				leaderboard_sorted_percentage_mmc = false;
-				leaderboard_sorted_wins_ruj = false;
-				leaderboard_sorted_percentage_ruj = false;
-				leaderboard_sorted_wins_tak = false;
-				leaderboard_sorted_percentage_tak = false;
-			}
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
+	std::string query = "SELECT ch.name, ch.id, adv_stats.* FROM adventure_stats "
+		"AS adv_stats LEFT JOIN character_ AS ch ON adv_stats.player_id = ch.id;";
+    auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::GetLeaderboardInfo: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::GetLeaderboardInfo: %s (%s)", query, errbuf);
-		safe_delete_array(query);
-		return;
+
+    for (auto row = results.begin(); row != results.end(); ++row)
+    {
+        if(!row[0])
+            continue;
+
+        LeaderboardInfo lbi;
+        lbi.name = row[0];
+        lbi.wins = atoi(row[3]);
+        lbi.guk_wins = atoi(row[3]);
+        lbi.wins += atoi(row[4]);
+        lbi.mir_wins = atoi(row[4]);
+        lbi.wins += atoi(row[5]);
+        lbi.mmc_wins = atoi(row[5]);
+        lbi.wins += atoi(row[6]);
+        lbi.ruj_wins = atoi(row[6]);
+        lbi.wins += atoi(row[7]);
+        lbi.tak_wins = atoi(row[7]);
+        lbi.losses = atoi(row[8]);
+        lbi.guk_losses = atoi(row[8]);
+        lbi.losses += atoi(row[9]);
+        lbi.mir_losses = atoi(row[9]);
+        lbi.losses += atoi(row[10]);
+        lbi.mmc_losses = atoi(row[10]);
+        lbi.losses += atoi(row[11]);
+        lbi.ruj_losses = atoi(row[11]);
+        lbi.losses += atoi(row[12]);
+        lbi.tak_losses = atoi(row[12]);
+
+        leaderboard_info_wins.push_back(lbi);
+        leaderboard_info_percentage.push_back(lbi);
+        leaderboard_info_wins_guk.push_back(lbi);
+        leaderboard_info_percentage_guk.push_back(lbi);
+        leaderboard_info_wins_mir.push_back(lbi);
+        leaderboard_info_percentage_mir.push_back(lbi);
+        leaderboard_info_wins_mmc.push_back(lbi);
+        leaderboard_info_percentage_mmc.push_back(lbi);
+        leaderboard_info_wins_ruj.push_back(lbi);
+        leaderboard_info_percentage_ruj.push_back(lbi);
+        leaderboard_info_wins_tak.push_back(lbi);
+        leaderboard_info_percentage_tak.push_back(lbi);
+
+        leaderboard_sorted_wins = false;
+        leaderboard_sorted_percentage = false;
+        leaderboard_sorted_wins_guk = false;
+        leaderboard_sorted_percentage_guk = false;
+        leaderboard_sorted_wins_mir = false;
+        leaderboard_sorted_percentage_mir = false;
+        leaderboard_sorted_wins_mmc = false;
+        leaderboard_sorted_percentage_mmc = false;
+        leaderboard_sorted_wins_ruj = false;
+        leaderboard_sorted_percentage_ruj = false;
+        leaderboard_sorted_wins_tak = false;
+        leaderboard_sorted_percentage_tak = false;
 	}
-	return;
 };
 
 void AdventureManager::DoLeaderboardRequest(const char* player, uint8 type)
