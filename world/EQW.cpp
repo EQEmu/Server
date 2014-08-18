@@ -384,21 +384,16 @@ bool EQW::SetPublicNote(uint32 charid, const char *note) {
 }
 
 int EQW::CountBugs() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if(database.RunQuery(query, MakeAnyLenString(&query, "SELECT count(*) FROM bugs where status = 0"), errbuf, &result)) {
-		safe_delete_array(query);
-		if((row = mysql_fetch_row(result))) {
-			int count = atoi(row[0]);
-			mysql_free_result(result);
-			return count;
-		}
-		mysql_free_result(result);
-	}
-	safe_delete_array(query);
-	return 0;
+	std::string query = "SELECT count(*) FROM bugs where status = 0";
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+        return 0;
+
+    if (results.RowCount() == 0)
+        return 0;
+
+    auto row = results.begin();
+    return atoi(row[0]);
 }
 
 std::vector<std::string> EQW::ListBugs(uint32 offset) {
