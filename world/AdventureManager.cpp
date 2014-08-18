@@ -639,67 +639,56 @@ AdventureTemplate *AdventureManager::GetAdventureTemplate(int id)
 
 bool AdventureManager::LoadAdventureTemplates()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, zone, zone_version, "
+	std::string query = "SELECT id, zone, zone_version, "
 		"is_hard, min_level, max_level, type, type_data, type_count, assa_x, "
 		"assa_y, assa_z, assa_h, text, duration, zone_in_time, win_points, lose_points, "
-		"theme, zone_in_zone_id, zone_in_x, zone_in_y, zone_in_object_id, dest_x, dest_y,"
-		" dest_z, dest_h, graveyard_zone_id, graveyard_x, graveyard_y, graveyard_z, "
-		"graveyard_radius FROM adventure_template"), errbuf, &result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			uint8 x = 0;
-			AdventureTemplate *t = new AdventureTemplate;
-			t->id = atoi(row[x++]);
-			strcpy(t->zone, row[x++]);
-			t->zone_version = atoi(row[x++]);
-			t->is_hard = atoi(row[x++]);
-			t->min_level = atoi(row[x++]);
-			t->max_level = atoi(row[x++]);
-			t->type = atoi(row[x++]);
-			t->type_data = atoi(row[x++]);
-			t->type_count = atoi(row[x++]);
-			t->assa_x = atof(row[x++]);
-			t->assa_y = atof(row[x++]);
-			t->assa_z = atof(row[x++]);
-			t->assa_h = atof(row[x++]);
-			strn0cpy(t->text, row[x++], sizeof(t->text));
-			t->duration = atoi(row[x++]);
-			t->zone_in_time = atoi(row[x++]);
-			t->win_points = atoi(row[x++]);
-			t->lose_points = atoi(row[x++]);
-			t->theme = atoi(row[x++]);
-			t->zone_in_zone_id = atoi(row[x++]);
-			t->zone_in_x = atof(row[x++]);
-			t->zone_in_y = atof(row[x++]);
-			t->zone_in_object_id = atoi(row[x++]);
-			t->dest_x = atof(row[x++]);
-			t->dest_y = atof(row[x++]);
-			t->dest_z = atof(row[x++]);
-			t->dest_h = atof(row[x++]);
-			t->graveyard_zone_id = atoi(row[x++]);
-			t->graveyard_x = atof(row[x++]);
-			t->graveyard_y = atof(row[x++]);
-			t->graveyard_z = atof(row[x++]);
-			t->graveyard_radius = atof(row[x++]);
-			adventure_templates[t->id] = t;
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-		return true;
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::LoadAdventures: %s (%s)", query, errbuf);
-		safe_delete_array(query);
+		"theme, zone_in_zone_id, zone_in_x, zone_in_y, zone_in_object_id, dest_x, dest_y, "
+		"dest_z, dest_h, graveyard_zone_id, graveyard_x, graveyard_y, graveyard_z, "
+		"graveyard_radius FROM adventure_template";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::LoadAdventures: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return false;
-	}
-	return false;
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+		AdventureTemplate *aTemplate = new AdventureTemplate;
+		aTemplate->id = atoi(row[0]);
+		strcpy(aTemplate->zone, row[1]);
+		aTemplate->zone_version = atoi(row[2]);
+		aTemplate->is_hard = atoi(row[3]);
+		aTemplate->min_level = atoi(row[4]);
+		aTemplate->max_level = atoi(row[5]);
+		aTemplate->type = atoi(row[6]);
+		aTemplate->type_data = atoi(row[7]);
+		aTemplate->type_count = atoi(row[8]);
+		aTemplate->assa_x = atof(row[9]);
+		aTemplate->assa_y = atof(row[10]);
+		aTemplate->assa_z = atof(row[11]);
+		aTemplate->assa_h = atof(row[12]);
+		strn0cpy(aTemplate->text, row[13], sizeof(aTemplate->text));
+		aTemplate->duration = atoi(row[14]);
+		aTemplate->zone_in_time = atoi(row[15]);
+		aTemplate->win_points = atoi(row[16]);
+		aTemplate->lose_points = atoi(row[17]);
+		aTemplate->theme = atoi(row[18]);
+		aTemplate->zone_in_zone_id = atoi(row[19]);
+		aTemplate->zone_in_x = atof(row[20]);
+		aTemplate->zone_in_y = atof(row[21]);
+		aTemplate->zone_in_object_id = atoi(row[22]);
+		aTemplate->dest_x = atof(row[23]);
+		aTemplate->dest_y = atof(row[24]);
+		aTemplate->dest_z = atof(row[25]);
+		aTemplate->dest_h = atof(row[26]);
+		aTemplate->graveyard_zone_id = atoi(row[27]);
+		aTemplate->graveyard_x = atof(row[28]);
+		aTemplate->graveyard_y = atof(row[29]);
+		aTemplate->graveyard_z = atof(row[30]);
+		aTemplate->graveyard_radius = atof(row[31]);
+		adventure_templates[aTemplate->id] = aTemplate;
+    }
+
+    return true;
 }
 
 bool AdventureManager::LoadAdventureEntries()
