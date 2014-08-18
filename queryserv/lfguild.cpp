@@ -232,37 +232,31 @@ void LFGuildManager::SendGuildMatches(uint32 FromZoneID, uint32 FromInstanceID, 
 
 void LFGuildManager::TogglePlayer(uint32 FromZoneID, uint32 FromInstanceID, char *From, uint32 Class, uint32 Level, uint32 AAPoints, char *Comments, uint32 Toggle, uint32 TimeZone)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-
-	std::list<PlayerLookingForGuild>::iterator it;
-
-	for(it = Players.begin(); it != Players.end(); ++it)
-	{
-		if(!strcasecmp((*it).Name.c_str(), From))
-		{
+	for(auto it = Players.begin(); it != Players.end(); ++it)
+		if(!strcasecmp((*it).Name.c_str(), From)) {
 			Players.erase(it);
-
 			break;
 		}
-	}
 
-	if(!database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM `lfguild` WHERE `type` = 0 AND `name` = '%s'", From), errbuf, 0, 0))
-		_log(QUERYSERV__ERROR, "Error removing player from LFGuild table, query was %s, %s", query, errbuf);
-
-	safe_delete_array(query);
+    std::string query = StringFormat("DELETE FROM `lfguild` WHERE `type` = 0 AND `name` = '%s'", From);
+    auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		_log(QUERYSERV__ERROR, "Error removing player from LFGuild table, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
 	uint32 Now = time(nullptr);
 
-	if(Toggle == 1)
-	{
+	if(Toggle == 1) {
 		PlayerLookingForGuild p(From, Comments, Level, Class, AAPoints, TimeZone, Now);
 		Players.push_back(p);
-		if(!database.RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `lfguild` (`type`, `name`, `comment`, `fromlevel`, `tolevel`, `classes`, `aacount`, `timezone`, `timeposted`) VALUES(0, '%s', '%s', %u, 0, %u, %u, %u, %u)", From, Comments, Level, Class, AAPoints, TimeZone, Now), errbuf, 0, 0))
-			_log(QUERYSERV__ERROR, "Error inserting player into LFGuild table, query was %s, %s", query, errbuf);
 
-		safe_delete_array(query);
-
+		query = StringFormat("INSERT INTO `lfguild` "
+                            "(`type`, `name`, `comment`, `fromlevel`, `tolevel`, "
+                            "`classes`, `aacount`, `timezone`, `timeposted`) "
+                            "VALUES (0, '%s', '%s', %u, 0, %u, %u, %u, %u)",
+                            From, Comments, Level, Class, AAPoints, TimeZone, Now);
+        auto results = database.QueryDatabase(query);
+		if(!results.Success())
+			_log(QUERYSERV__ERROR, "Error inserting player into LFGuild table, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
 	}
 
 	ServerPacket *pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(From) + strlen(Comments) + 30);
@@ -279,7 +273,6 @@ void LFGuildManager::TogglePlayer(uint32 FromZoneID, uint32 FromInstanceID, char
 
 	worldserver->SendPacket(pack);
 	safe_delete(pack);
-
 }
 
 void LFGuildManager::ToggleGuild(uint32 FromZoneID, uint32 FromInstanceID, char *From, char* GuildName, char *Comments, uint32 FromLevel, uint32 ToLevel, uint32 Classes, uint32 AACount, uint32 Toggle, uint32 TimeZone)
