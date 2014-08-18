@@ -159,7 +159,7 @@ void ImportSkillCaps(SharedDatabase *db) {
 	}
 
 	std::string delete_sql = "DELETE FROM skill_caps";
-	db->RunQuery(delete_sql.c_str(), (uint32)delete_sql.length());
+	db->QueryDatabase(delete_sql);
 
 	char buffer[2048];
 	while(fgets(buffer, 2048, f)) {
@@ -179,7 +179,7 @@ void ImportSkillCaps(SharedDatabase *db) {
 		std::string sql = StringFormat("INSERT INTO skill_caps(class, skillID, level, cap) VALUES(%d, %d, %d, %d)",
 			class_id, skill_id, level, cap);
 
-		db->RunQuery(sql.c_str(), (uint32)sql.length());
+		db->QueryDatabase(sql);
 	}
 
 	fclose(f);
