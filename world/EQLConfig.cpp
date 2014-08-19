@@ -159,12 +159,9 @@ void EQLConfig::StartZone(Const_char *zone_ref) {
 bool EQLConfig::BootStaticZone(Const_char *short_name, uint16 port) {
 	//make sure the short name is valid.
 	if(database.GetZoneID(short_name) == 0)
-		return(false);
+		return false;
 
 	//database update
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
 	char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
@@ -172,14 +169,13 @@ bool EQLConfig::BootStaticZone(Const_char *short_name, uint16 port) {
 	database.DoEscapeString(zonebuf, short_name, strlen(short_name)&0xF);	//limit len to 16
 	zonebuf[31] = '\0';
 
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"INSERT INTO launcher_zones (launcher,zone,port) VALUES('%s', '%s', %d)",
-		namebuf, zonebuf, port), errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error in BootStaticZone query: %s", errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("INSERT INTO launcher_zones (launcher, zone, port) "
+                                    "VALUES('%s', '%s', %d)", namebuf, zonebuf, port);
+    auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in BootStaticZone query: %s", results.ErrorMessage().c_str());
 		return false;
 	}
-	safe_delete_array(query);
 
 	//update our internal state.
 	LauncherZone lz;
@@ -193,7 +189,7 @@ bool EQLConfig::BootStaticZone(Const_char *short_name, uint16 port) {
 		ll->BootZone(short_name, port);
 	}
 
-	return(true);
+	return true;
 }
 
 bool EQLConfig::ChangeStaticZone(Const_char *short_name, uint16 port) {
