@@ -598,9 +598,6 @@ uint32 ZoneDatabase::AddObject(uint32 type, uint32 icon, const Object_Struct& ob
 // Update information about existing object in database
 void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Object_Struct& object, const ItemInst* inst)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-
 	uint32 item_id = 0;
 	int16 charges = 0;
 
@@ -614,27 +611,25 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
 	char* object_name = new char[len];
 	DoEscapeString(object_name, object.object_name, strlen(object.object_name));
 
-	// Construct query
-	uint32 len_query = MakeAnyLenString(&query,
-		"update object set zoneid=%i, xpos=%f, ypos=%f, zpos=%f, heading=%f, "
-		"itemid=%i, charges=%i, objectname='%s', type=%i, icon=%i where id=%i",
-		object.zone_id, object.x, object.y, object.z, object.heading,
-		item_id, charges, object_name, type, icon, id);
-
 	// Save new record for object
-	if (!RunQuery(query, len_query, errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Unable to update object: %s", errbuf);
-	}
-	else {
-		// Save container contents, if container
-		if (inst && inst->IsType(ItemClassContainer)) {
-			SaveWorldContainer(object.zone_id, id, inst);
-		}
+	std::string query = StringFormat("UPDATE object SET "
+                                    "zoneid = %i, xpos = %f, ypos = %f, zpos = %f, heading = %f, "
+                                    "itemid = %i, charges = %i, objectname = '%s', type = %i, icon = %i "
+                                    "WHERE id = %i",
+                                    object.zone_id, object.x, object.y, object.z, object.heading,
+                                    item_id, charges, object_name, type, icon, id);
+    safe_delete_array(object_name);
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Unable to update object: %s", results.ErrorMessage().c_str());
+		return;
 	}
 
-	safe_delete_array(object_name);
-	safe_delete_array(query);
+    // Save container contents, if container
+    if (inst && inst->IsType(ItemClassContainer))
+        SaveWorldContainer(object.zone_id, id, inst);
 }
+
 Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Ground_Spawns* gs){
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
