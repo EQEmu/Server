@@ -271,21 +271,17 @@ bool EQLConfig::DeleteStaticZone(Const_char *short_name) {
 }
 
 bool EQLConfig::SetDynamicCount(int count) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 
 	char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
 
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"UPDATE launcher SET dynamics=%d WHERE name='%s'",
-		count, namebuf), errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error in SetDynamicCount query: %s", errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("UPDATE launcher SET dynamics=%d WHERE name='%s'", count, namebuf);
+    auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in SetDynamicCount query: %s", results.ErrorMessage().c_str());
 		return false;
 	}
-	safe_delete_array(query);
 
 	//update in-memory version.
 	m_dynamics = count;
@@ -296,7 +292,7 @@ bool EQLConfig::SetDynamicCount(int count) {
 		ll->BootDynamics(count);
 	}
 
-	return(false);
+	return false;
 }
 
 int EQLConfig::GetDynamicCount() const {
