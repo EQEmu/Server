@@ -560,9 +560,6 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 // Add new Zone Object (theoretically only called for items dropped to ground)
 uint32 ZoneDatabase::AddObject(uint32 type, uint32 icon, const Object_Struct& object, const ItemInst* inst)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-
 	uint32 database_id = 0;
 	uint32 item_id = 0;
 	int16 charges = 0;
@@ -577,26 +574,24 @@ uint32 ZoneDatabase::AddObject(uint32 type, uint32 icon, const Object_Struct& ob
 	char* object_name = new char[len];
 	DoEscapeString(object_name, object.object_name, strlen(object.object_name));
 
-	// Construct query
-	uint32 len_query = MakeAnyLenString(&query,
-		"insert into object (zoneid, xpos, ypos, zpos, heading, itemid, charges, objectname, "
-		"type, icon) values (%i, %f, %f, %f, %f, %i, %i, '%s', %i, %i)",
-		object.zone_id, object.x, object.y, object.z, object.heading,
-		item_id, charges, object_name, type, icon);
-
-	// Save new record for object
-	if (!RunQuery(query, len_query, errbuf, nullptr, nullptr, &database_id)) {
-		LogFile->write(EQEMuLog::Error, "Unable to insert object: %s", errbuf);
-	}
-	else {
-		// Save container contents, if container
-		if (inst && inst->IsType(ItemClassContainer)) {
-			SaveWorldContainer(object.zone_id, database_id, inst);
-		}
+    // Save new record for object
+	std::string query = StringFormat("INSERT INTO object "
+                                    "(zoneid, xpos, ypos, zpos, heading, "
+                                    "itemid, charges, objectname, type, icon) "
+                                    "values (%i, %f, %f, %f, %f, %i, %i, '%s', %i, %i)",
+                                    object.zone_id, object.x, object.y, object.z, object.heading,
+                                    item_id, charges, object_name, type, icon);
+    safe_delete_array(object_name);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Unable to insert object: %s", results.ErrorMessage().c_str());
+		return 0;
 	}
 
-	safe_delete_array(object_name);
-	safe_delete_array(query);
+    // Save container contents, if container
+    if (inst && inst->IsType(ItemClassContainer))
+        SaveWorldContainer(object.zone_id, database_id, inst);
+
 	return database_id;
 }
 
