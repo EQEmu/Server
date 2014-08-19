@@ -3970,33 +3970,22 @@ void Mob::DelGlobal(const char *varname) {
 // Inserts global variable into quest_globals table
 void Mob::InsertQuestGlobal(int charid, int npcid, int zoneid, const char *varname, const char *varvalue, int duration) {
 
-	char *query = 0;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-
 	// Make duration string either "unix_timestamp(now()) + xxx" or "NULL"
 	std::stringstream duration_ss;
 
 	if (duration == INT_MAX)
-	{
 		duration_ss << "NULL";
-	}
 	else
-	{
 		duration_ss << "unix_timestamp(now()) + " << duration;
-	}
 
 	//NOTE: this should be escaping the contents of arglist
 	//npcwise a malicious script can arbitrarily alter the DB
 	uint32 last_id = 0;
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"REPLACE INTO quest_globals (charid, npcid, zoneid, name, value, expdate)"
-		"VALUES (%i, %i, %i, '%s', '%s', %s)",
-		charid, npcid, zoneid, varname, varvalue, duration_ss.str().c_str()
-		), errbuf))
-	{
-		//_log(QUESTS, "SelGlobal error inserting %s : %s", varname, errbuf);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("REPLACE INTO quest_globals "
+                                    "(charid, npcid, zoneid, name, value, expdate)"
+                                    "VALUES (%i, %i, %i, '%s', '%s', %s)",
+                                    charid, npcid, zoneid, varname, varvalue, duration_ss.str().c_str());
+	database.QueryDatabase(query);
 
 	if(zone)
 	{
@@ -4022,14 +4011,12 @@ void Mob::InsertQuestGlobal(int charid, int npcid, int zoneid, const char *varna
 		qgu->npc_id = npcid;
 		qgu->char_id = charid;
 		qgu->zone_id = zoneid;
+
 		if(duration == INT_MAX)
-		{
 			qgu->expdate = 0xFFFFFFFF;
-		}
 		else
-		{
 			qgu->expdate = Timer::GetTimeSeconds() + duration;
-		}
+
 		strcpy((char*)qgu->name, varname);
 		strcpy((char*)qgu->value, varvalue);
 		qgu->id = last_id;
