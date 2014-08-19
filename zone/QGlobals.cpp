@@ -51,7 +51,7 @@ void QGlobalCache::Combine(std::list<QGlobal> &cacheA, std::list<QGlobal> cacheB
 
 void QGlobalCache::GetQGlobals(std::list<QGlobal> &globals, NPC *n, Client *c, Zone *z) {
 	globals.clear();
-	
+
 	QGlobalCache *npc_c = nullptr;
 	QGlobalCache *char_c = nullptr;
 	QGlobalCache *zone_c = nullptr;
@@ -139,21 +139,15 @@ void QGlobalCache::PurgeExpiredGlobals()
 
 void QGlobalCache::LoadByNPCID(uint32 npcID)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	std::string query = StringFormat("SELECT name, charid, npcid, zoneid, value, expdate "
+                                    "FROM quest_globals WHERE npcid = %d", npcID);
+    auto results = database.QueryDatabase(query);
+	if (!results.Success())
+        return;
 
-	if (database.RunQuery(query, MakeAnyLenString(&query, "select name, charid, npcid, zoneid, value, expdate"
-		" from quest_globals where npcid = %d", npcID), errbuf, &result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			AddGlobal(0, QGlobal(std::string(row[0]), atoi(row[1]), atoi(row[2]), atoi(row[3]), row[4], row[5]?atoi(row[5]):0xFFFFFFFF));
-		}
-		mysql_free_result(result);
-	}
-	safe_delete_array(query);
+    for (auto row = results.begin(); row != results.end(); ++row)
+        AddGlobal(0, QGlobal(std::string(row[0]), atoi(row[1]), atoi(row[2]), atoi(row[3]), row[4], row[5]? atoi(row[5]): 0xFFFFFFFF));
+
 }
 
 void QGlobalCache::LoadByCharID(uint32 charID)
