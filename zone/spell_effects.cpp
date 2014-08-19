@@ -5093,7 +5093,7 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 						if (IsValidSpell(proc_spellid)){
 	
-							ProcChance = GetSympatheticProcChances(spell_id, spells[TempItem->Focus.Effect].base[0], TempItemAug->ProcRate);
+							ProcChance = GetSympatheticProcChances(spell_id, spells[TempItemAug->Focus.Effect].base[0], TempItemAug->ProcRate);
 					
 							if(MakeRandomFloat(0, 1) <= ProcChance) 
 								SympatheticProcList.push_back(proc_spellid);

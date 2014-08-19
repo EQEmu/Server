@@ -1,6 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
-== 08/18/2014 ==
+== 08/19/2014 ==
+Akkadius: Implemented a Stop_Return feature (Accidental item handin prevention) that will be symmetrically used with plugin::return_items that I am currently running live testing on EZ before releasing to EQEmu. This does not hurt to have this in the source.
+Akkadius: Fixed crash where 'attacker' validation is not being checked
+Akkadius: Removed petition console spam that does not follow traditional logging and is useless
+Akkadius: Made fix with SympatheticProcChances where it was checking for TempItem->Focus.Effect instead of TempItemAug->Focus.Effect== 08/18/2014 ==
 Uleat: Fix for https://github.com/EQEmu/Server/issues/127 -- also activated a remarked action in doors.cpp to eliminate a memory leak.
 
 == 08/16/2014 ==

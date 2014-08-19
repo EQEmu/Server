@@ -2237,6 +2237,15 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 
 void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, bool updateclient){
 
+	/* Set a timestamp in an entity variable for plugin check_handin.pl in return_items
+		This will stopgap players from items being returned if global_npc.pl has a catch all return_items
+	*/
+	struct timeval read_time;
+	char buffer[50];
+	gettimeofday(&read_time, 0);
+	sprintf(buffer, "%i.%i \n", read_time.tv_sec, read_time.tv_usec);
+	this->SetEntityVariable("Stop_Return", buffer);
+
 	int32 new_value = m_pp.platinum + platinum;
 	if(new_value >= 0 && new_value > m_pp.platinum)
 		m_pp.platinum += platinum;

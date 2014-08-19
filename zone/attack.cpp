@@ -3569,12 +3569,12 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		TryTriggerOnValueAmount(true);
 
 		//fade mez if we are mezzed
-		if (IsMezzed()) {
+		if (IsMezzed() && attacker) {
 			mlog(COMBAT__HITS, "Breaking mez due to attack.");
 			entity_list.MessageClose_StringID(this, true, 100, MT_WornOff,
 					HAS_BEEN_AWAKENED, GetCleanName(), attacker->GetCleanName());
 			BuffFadeByEffect(SE_Mez);
-		}
+		} 
 
 		//check stun chances if bashing
 		if (damage > 0 && ((skill_used == SkillBash || skill_used == SkillKick) && attacker)) {
