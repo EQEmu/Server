@@ -240,12 +240,8 @@ bool EQLConfig::DeleteStaticZone(Const_char *short_name) {
 	if(res == m_zones.end()) {
 		//not found.
 		LogFile->write(EQEMuLog::Error, "Update for unknown zone %s", short_name);
-		return(false);
+		return false;
 	}
-
-	//database update
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 
 	char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
@@ -254,14 +250,13 @@ bool EQLConfig::DeleteStaticZone(Const_char *short_name) {
 	database.DoEscapeString(zonebuf, short_name, strlen(short_name)&0xF);	//limit len to 16
 	zonebuf[31] = '\0';
 
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"DELETE FROM launcher_zones WHERE launcher='%s' AND zone='%s'",
-		namebuf, zonebuf), errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error in DeleteStaticZone query: %s", errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("DELETE FROM launcher_zones WHERE "
+                                    "launcher = '%s' AND zone = '%s'", namebuf, zonebuf);
+    auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in DeleteStaticZone query: %s", results.ErrorMessage().c_str());
 		return false;
 	}
-	safe_delete_array(query);
 
 	//internal update.
 	m_zones.erase(res);
