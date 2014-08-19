@@ -646,11 +646,6 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 	// A slot will only get an item put in it if it is empty. That way
 	// an equipmentset can overload a slot for the set(s) it includes.
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 querylen = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 	int depth = 0;
 	int32 curset = equipmentset;
 	int32 nextset = -1;
@@ -662,56 +657,43 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 	// query pets_equipmentset_entries with the set_id and loop over
 	// all of the result rows. Check if we have something in the slot
 	// already. If no, add the item id to the equipment array.
-
 	while (curset >= 0 && depth < 5) {
-		if (RunQuery(query,
-			MakeAnyLenString(&query, "SELECT nested_set FROM pets_equipmentset WHERE set_id='%s'", curset),
-			errbuf, &result))
-		{
-			safe_delete_array(query);
-			if (mysql_num_rows(result) == 1) {
-				row = mysql_fetch_row(result);
-				nextset = atoi(row[0]);
-				mysql_free_result(result);
-
-				if (RunQuery(query,
-					MakeAnyLenString(&query, "SELECT slot, item_id FROM pets_equipmentset_entries WHERE set_id='%s'", curset),
-					errbuf, &result))
-				{
-					safe_delete_array(query);
-					while ((row = mysql_fetch_row(result)))
-					{
-						slot = atoi(row[0]);
-						if (slot >= EmuConstants::EQUIPMENT_SIZE)
-							continue;
-						if (items[slot] == 0)
-							items[slot] = atoi(row[1]);
-					}
-
-					mysql_free_result(result);
-				}
-				else {
-					LogFile->write(EQEMuLog::Error, "Error in GetBasePetItems query '%s': %s", query, errbuf);
-					safe_delete_array(query);
-				}
-				curset = nextset;
-				depth++;
-			}
-			else
-			{
-				// invalid set reference, it doesn't exist
-				LogFile->write(EQEMuLog::Error, "Error in GetBasePetItems equipment set '%d' does not exist", curset);
-				mysql_free_result(result);
-				return false;
-			}
-		}
-		else
-		{
-			LogFile->write(EQEMuLog::Error, "Error in GetBasePetItems query '%s': %s", query, errbuf);
-			safe_delete_array(query);
+        std::string  query = StringFormat("SELECT nested_set FROM pets_equipmentset WHERE set_id = '%s'", curset);
+		auto results = QueryDatabase(query);
+		if (!results.Success()) {
+            LogFile->write(EQEMuLog::Error, "Error in GetBasePetItems query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 			return false;
-		}
-	} // end while
+        }
+
+        if (results.RowCount() != 1) {
+            // invalid set reference, it doesn't exist
+            LogFile->write(EQEMuLog::Error, "Error in GetBasePetItems equipment set '%d' does not exist", curset);
+            return false;
+        }
+
+        auto row = results.begin();
+        nextset = atoi(row[0]);
+
+        query = StringFormat("SELECT slot, item_id FROM pets_equipmentset_entries WHERE set_id='%s'", curset);
+        results = QueryDatabase(query);
+        if (!results.Success())
+            LogFile->write(EQEMuLog::Error, "Error in GetBasePetItems query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        else {
+            for (row = results.begin(); row != results.end(); ++row)
+            {
+                slot = atoi(row[0]);
+
+                if (slot >= EmuConstants::EQUIPMENT_SIZE)
+                    continue;
+
+                if (items[slot] == 0)
+                    items[slot] = atoi(row[1]);
+            }
+        }
+
+        curset = nextset;
+        depth++;
+	}
 
 	return true;
 }
