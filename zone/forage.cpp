@@ -85,12 +85,7 @@ CREATE TABLE fishing (
 
 // This allows EqEmu to have zone specific foraging - BoB
 uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	uint8 index = 0;
 	uint32 item[FORAGE_ITEM_LIMIT];
 	uint32 chance[FORAGE_ITEM_LIMIT];
 	uint32 ret;
@@ -100,31 +95,32 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 	}
 
 	uint32 chancepool = 0;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT itemid,chance FROM forage WHERE zoneid= '%i' and level <= '%i' LIMIT %i", ZoneID, skill, FORAGE_ITEM_LIMIT), errbuf, &result))
-	{
-		safe_delete_array(query);
-		while ((row = mysql_fetch_row(result)) && (index < FORAGE_ITEM_LIMIT)) {
-			item[index] = atoi(row[0]);
-			chance[index] = atoi(row[1])+chancepool;
-LogFile->write(EQEMuLog::Error, "Possible Forage: %d with a %d chance", item[index], chance[index]);
-			chancepool = chance[index];
-			index++;
-		}
-
-		mysql_free_result(result);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in Forage query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("SELECT itemid, chance FROM "
+                                    "forage WHERE zoneid = '%i' and level <= '%i' "
+                                    "LIMIT %i", ZoneID, skill, FORAGE_ITEM_LIMIT);
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Forage query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
 
+	uint8 index = 0;
+    for (auto row = results.begin(); row != results.end(); ++row, ++index) {
+        if (index >= FORAGE_ITEM_LIMIT)
+            break;
+
+        item[index] = atoi(row[0]);
+        chance[index] = atoi(row[1]) + chancepool;
+        LogFile->write(EQEMuLog::Error, "Possible Forage: %d with a %d chance", item[index], chance[index]);
+        chancepool = chance[index];
+    }
+
+
 	if(chancepool == 0 || index < 1)
-		return(0);
+		return 0;
 
 	if(index == 1) {
-		return(item[0]);
+		return item[0];
 	}
 
 	ret = 0;
