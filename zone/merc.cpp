@@ -5879,38 +5879,36 @@ void NPC::LoadMercTypes() {
 
 void NPC::LoadMercs(){
 
-	std::string errorMessage;
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES* DatasetResult;
-	MYSQL_ROW DataRow;
+	std::string query = StringFormat("SELECT DISTINCT MTem.merc_template_id, MTyp.dbstring AS merc_type_id, "
+                                    "MTem.dbstring AS merc_subtype_id, 0 AS CostFormula, "
+                                    "CASE WHEN MTem.clientversion > MTyp.clientversion "
+                                    "THEN MTem.clientversion "
+                                    "ELSE MTyp.clientversion END AS clientversion, MTem.merc_npc_type_id "
+                                    "FROM merc_merchant_entries MME, merc_merchant_template_entries MMTE, "
+                                    "merc_types MTyp, merc_templates MTem "
+                                    "WHERE MME.merchant_id = %i AND "
+                                    "MME.merc_merchant_template_id = MMTE.merc_merchant_template_id "
+                                    "AND MMTE.merc_template_id = MTem.merc_template_id "
+                                    "AND MTem.merc_type_id = MTyp.merc_type_id;", GetNPCTypeID());
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+	    LogFile->write(EQEMuLog::Error, "Error in NPC::LoadMercTypes()");
+	    return;
+    }
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT DISTINCT MTem.merc_template_id, MTyp.dbstring AS merc_type_id, MTem.dbstring AS merc_subtype_id, 0 AS CostFormula, CASE WHEN MTem.clientversion > MTyp.clientversion then MTem.clientversion ELSE MTyp.clientversion END AS clientversion, MTem.merc_npc_type_id FROM merc_merchant_entries MME, merc_merchant_template_entries MMTE, merc_types MTyp, merc_templates MTem WHERE MME.merchant_id = %i AND MME.merc_merchant_template_id = MMTE.merc_merchant_template_id AND MMTE.merc_template_id = MTem.merc_template_id AND MTem.merc_type_id = MTyp.merc_type_id;", GetNPCTypeID()), TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
+    for (auto row = results.begin(); row != results.end(); ++row) {
+		MercData tempMerc;
+
+		tempMerc.MercTemplateID = atoi(row[0]);
+		tempMerc.MercType = atoi(row[1]);
+		tempMerc.MercSubType = atoi(row[2]);
+		tempMerc.CostFormula = atoi(row[3]);
+		tempMerc.ClientVersion = atoi(row[4]);
+		tempMerc.NPCID = atoi(row[5]);
+
+		mercDataList.push_back(tempMerc);
 	}
-	else {
-		while(DataRow = mysql_fetch_row(DatasetResult)) {
-			MercData tempMerc;
 
-			tempMerc.MercTemplateID = atoi(DataRow[0]);
-			tempMerc.MercType = atoi(DataRow[1]);
-			tempMerc.MercSubType = atoi(DataRow[2]);
-			tempMerc.CostFormula = atoi(DataRow[3]);
-			tempMerc.ClientVersion = atoi(DataRow[4]);
-			tempMerc.NPCID = atoi(DataRow[5]);
-
-			mercDataList.push_back(tempMerc);
-		}
-
-		mysql_free_result(DatasetResult);
-	}
-
-	safe_delete_array(Query);
-	Query = 0;
-
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error in NPC::LoadMercTypes()");
-	}
 }
 
 int NPC::GetNumMercTypes(uint32 clientVersion)
