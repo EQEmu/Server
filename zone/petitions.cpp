@@ -216,18 +216,12 @@ void PetitionList::UpdatePetition(Petition* pet) {
 }
 
 void ZoneDatabase::DeletePetitionFromDB(Petition* wpet) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 affected_rows = 0;
-	uint8 checkedout = 0;
-	if (wpet->CheckedOut()) checkedout = 0;
-	else checkedout = 1;
-	if (!RunQuery(query, MakeAnyLenString(&query, "DELETE from petitions where petid = %i", wpet->GetID()), errbuf, 0, &affected_rows)) {
-		LogFile->write(EQEMuLog::Error, "Error in DeletePetitionFromDB query '%s': %s", query, errbuf);
-	}
-	safe_delete_array(query);
 
-	return;
+    std::string query = StringFormat("DELETE FROM petitions WHERE petid = %i", wpet->GetID());
+    auto results = QueryDatabase(query);
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Error in DeletePetitionFromDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+
 }
 
 void ZoneDatabase::UpdatePetitionToDB(Petition* wpet) {
