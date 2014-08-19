@@ -65,23 +65,19 @@ void EQLConfig::LoadSettings() {
 }
 
 EQLConfig *EQLConfig::CreateLauncher(const char *name, uint8 dynamic_count) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 
 	char namebuf[128];
 	database.DoEscapeString(namebuf, name, strlen(name)&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
 
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"INSERT INTO launcher (name,dynamics) VALUES('%s', %d)",
-		namebuf, dynamic_count), errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error in CreateLauncher query: %s", errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("INSERT INTO launcher (name, dynamics) VALUES('%s', %d)", namebuf, dynamic_count);
+    auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in CreateLauncher query: %s", results.ErrorMessage().c_str());
 		return nullptr;
 	}
-	safe_delete_array(query);
 
-	return(new EQLConfig(name));
+	return new EQLConfig(name);
 }
 
 void EQLConfig::GetZones(std::vector<LauncherZone> &result) {
