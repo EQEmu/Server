@@ -311,7 +311,7 @@ Mob::Mob(const char* in_name,
 		shielder[m].shielder_id = 0;
 		shielder[m].shielder_bonus = 0;
 	}
-	
+
 	destructibleobject = false;
 	wandertype=0;
 	pausetype=0;
@@ -893,7 +893,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.invis		= (invisible || hidden) ? 1 : 0;	// TODO: load this before spawning players
 	ns->spawn.NPC		= IsClient() ? 0 : 1;
 	ns->spawn.IsMercenary = (IsMerc() || no_target_hotkey) ? 1 : 0;
-		
+
 	ns->spawn.petOwnerId	= ownerid;
 
 	ns->spawn.haircolor = haircolor;
@@ -2392,7 +2392,7 @@ bool Mob::HateSummon() {
 	{
 		if(summon_level == 1) {
 			entity_list.MessageClose(this, true, 500, MT_Say, "%s says,'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName() );
-	
+
 			if (target->IsClient()) {
 				target->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x_pos, y_pos, z_pos, target->GetHeading(), 0, SummonPC);
 			}
@@ -2404,12 +2404,12 @@ bool Mob::HateSummon() {
 					target->CastToBot()->SetPreSummonX(target->GetX());
 					target->CastToBot()->SetPreSummonY(target->GetY());
 					target->CastToBot()->SetPreSummonZ(target->GetZ());
-	
+
 				}
 #endif //BOTS
 				target->GMMove(x_pos, y_pos, z_pos, target->GetHeading());
 			}
-	
+
 			return true;
 		} else if(summon_level == 2) {
 			entity_list.MessageClose(this, true, 500, MT_Say, "%s says,'You will not evade me, %s!'", GetCleanName(), target->GetCleanName());
@@ -3040,7 +3040,7 @@ void Mob::TriggerDefensiveProcs(const ItemInst* weapon, Mob *on, uint16 hand, in
 			case (-1):
 				skillinuse = SkillBlock;
 			break;
-		
+
 			case (-2):
 				skillinuse = SkillParry;
 			break;
@@ -3273,7 +3273,7 @@ void Mob::TryTriggerOnValueAmount(bool IsHP, bool IsMana, bool IsEndur, bool IsP
 
 	if (!spellbonuses.TriggerOnValueAmount)
 		return;
-	
+
 	if (spellbonuses.TriggerOnValueAmount){
 
 		int buff_count = GetMaxTotalSlots();
@@ -3294,15 +3294,15 @@ void Mob::TryTriggerOnValueAmount(bool IsHP, bool IsMana, bool IsEndur, bool IsP
 						if (IsHP){
 							if ((base2 >= 500 && base2 <= 520) && GetHPRatio() < (base2 - 500)*5)
 								use_spell = true;
-		
+
 							else if (base2 = 1004 && GetHPRatio() < 80)
 								use_spell = true;
 						}
 
 						else if (IsMana){
-							if ( (base2 = 521 && GetManaRatio() < 20) || (base2 = 523 && GetManaRatio() < 40)) 
+							if ( (base2 = 521 && GetManaRatio() < 20) || (base2 = 523 && GetManaRatio() < 40))
 								use_spell = true;
-							
+
 							else if (base2 = 38311 && GetManaRatio() < 10)
 								use_spell = true;
 						}
@@ -3322,7 +3322,7 @@ void Mob::TryTriggerOnValueAmount(bool IsHP, bool IsMana, bool IsEndur, bool IsP
 
 						if (use_spell){
 							SpellFinished(spells[spell_id].base[i], this, 10, 0, -1, spells[spell_id].ResistDiff);
-							
+
 							if(!TryFadeEffect(e))
 								BuffFadeBySlot(e);
 						}
@@ -3382,7 +3382,7 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 
 	if (!caster)
 		return 0;
-	
+
 	int32 value = 0;
 
 	//Apply innate vulnerabilities
@@ -3395,7 +3395,7 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 
 	//Apply spell derived vulnerabilities
 	if (spellbonuses.FocusEffects[focusSpellVulnerability]){
-	
+
 		int32 tmp_focus = 0;
 		int tmp_buffslot = -1;
 
@@ -3456,15 +3456,15 @@ int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used)
 }
 
 int16 Mob::GetHealRate(uint16 spell_id, Mob* caster) {
-	
+
 	int16 heal_rate = 0;
 
-	heal_rate += itembonuses.HealRate + spellbonuses.HealRate + aabonuses.HealRate; 
-	heal_rate += GetFocusIncoming(focusFcHealPctIncoming, SE_FcHealPctIncoming, caster, spell_id); 
+	heal_rate += itembonuses.HealRate + spellbonuses.HealRate + aabonuses.HealRate;
+	heal_rate += GetFocusIncoming(focusFcHealPctIncoming, SE_FcHealPctIncoming, caster, spell_id);
 
 	if(heal_rate < -99)
 		heal_rate = -99;
-	
+
 	return heal_rate;
 }
 
@@ -3474,7 +3474,7 @@ bool Mob::TryFadeEffect(int slot)
 	{
 		for(int i = 0; i < EFFECT_COUNT; i++)
 		{
-			if (spells[buffs[slot].spellid].effectid[i] == SE_CastOnFadeEffectAlways || 
+			if (spells[buffs[slot].spellid].effectid[i] == SE_CastOnFadeEffectAlways ||
 				spells[buffs[slot].spellid].effectid[i] == SE_CastOnRuneFadeEffect)
 			{
 				uint16 spell_id = spells[buffs[slot].spellid].base[i];
@@ -3532,7 +3532,7 @@ void Mob::TrySympatheticProc(Mob *target, uint32 spell_id)
 				else
 					SpellFinished(focus_trigger, target, 10, 0, -1, spells[focus_trigger].ResistDiff);
 			}
-			
+
 			CheckNumHitsRemaining(NUMHIT_MatchingSpells, 0, focus_spell);
 		}
 }
@@ -3928,36 +3928,26 @@ void Mob::TarGlobal(const char *varname, const char *value, const char *duration
 }
 
 void Mob::DelGlobal(const char *varname) {
-	// delglobal(varname)
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+
 	int qgZoneid=zone->GetZoneID();
 	int qgCharid=0;
 	int qgNpcid=0;
 
 	if (this->IsNPC())
-	{
 		qgNpcid = this->GetNPCTypeID();
-	}
 
 	if (this->IsClient())
-	{
 		qgCharid = this->CastToClient()->CharacterID();
-	}
 	else
-	{
 		qgCharid = -qgNpcid;		// make char id negative npc id as a fudge
-	}
 
-	if (!database.RunQuery(query,
-		MakeAnyLenString(&query,
-		"DELETE FROM quest_globals WHERE name='%s'"
-		" && (npcid=0 || npcid=%i) && (charid=0 || charid=%i) && (zoneid=%i || zoneid=0)",
-		varname,qgNpcid,qgCharid,qgZoneid),errbuf))
-	{
-		//_log(QUESTS, "DelGlobal error deleting %s : %s", varname, errbuf);
-	}
-	safe_delete_array(query);
+    std::string query = StringFormat("DELETE FROM quest_globals "
+                                    "WHERE name='%s' && (npcid=0 || npcid=%i) "
+                                    "&& (charid=0 || charid=%i) "
+                                    "&& (zoneid=%i || zoneid=0)",
+                                    varname, qgNpcid, qgCharid, qgZoneid);
+
+	database.QueryDatabase(query);
 
 	if(zone)
 	{
@@ -4362,7 +4352,7 @@ int16 Mob::GetSkillDmgAmt(uint16 skill)
 }
 
 void Mob::MeleeLifeTap(int32 damage) {
-	
+
 	int16 lifetap_amt = 0;
 	lifetap_amt = spellbonuses.MeleeLifetap + itembonuses.MeleeLifetap + aabonuses.MeleeLifetap
 				+ spellbonuses.Vampirism + itembonuses.Vampirism + aabonuses.Vampirism;
@@ -4371,7 +4361,7 @@ void Mob::MeleeLifeTap(int32 damage) {
 
 		lifetap_amt = damage * lifetap_amt / 100;
 		mlog(COMBAT__DAMAGE, "Melee lifetap healing for %d damage.", damage);
-		
+
 		if (lifetap_amt > 0)
 			HealDamage(lifetap_amt); //Heal self for modified damage amount.
 		else
@@ -4383,9 +4373,9 @@ bool Mob::TryReflectSpell(uint32 spell_id)
 {
 	if (!spells[spell_id].reflectable)
  		return false;
-	
+
 	int chance = itembonuses.reflect_chance + spellbonuses.reflect_chance + aabonuses.reflect_chance;
- 	
+
 	if(chance && MakeRandomInt(0, 99) < chance)
 		return true;
 
@@ -4403,12 +4393,12 @@ void Mob::SpellProjectileEffect()
 		}
 
 		Mob* target = entity_list.GetMobID(projectile_target_id[i]);
-		
+
 		float dist = 0;
-		
-		if (target) 
+
+		if (target)
 				dist = target->CalculateDistance(projectile_x[i], projectile_y[i],  projectile_z[i]);
-	
+
 		int increment_end = 0;
 		increment_end = (dist / 10) - 1; //This pretty accurately determines end time for speed for 1.5 and timer of 250 ms
 
@@ -4681,7 +4671,7 @@ void Mob::SlowMitigation(Mob* caster)
 		else if ((GetSlowMitigation() >= 74) && (GetSlowMitigation() < 101))
 			caster->Message_StringID(MT_SpellFailure, SLOW_SLIGHTLY_SUCCESSFUL);
 
-		else if (GetSlowMitigation() > 100) 
+		else if (GetSlowMitigation() > 100)
 			caster->Message_StringID(MT_SpellFailure, SPELL_OPPOSITE_EFFECT);
 	}
 }
@@ -4758,10 +4748,10 @@ bool Mob::PassLimitToSkill(uint16 spell_id, uint16 skill) {
 }
 
 uint16 Mob::GetWeaponSpeedbyHand(uint16 hand) {
-	
+
 	uint16 weapon_speed = 0;
 	switch (hand) {
-		
+
 		case 13:
 			weapon_speed = attack_timer.GetDuration();
 			break;
@@ -4784,7 +4774,7 @@ int8 Mob::GetDecayEffectValue(uint16 spell_id, uint16 spelleffect) {
 	if (!IsValidSpell(spell_id))
 		return false;
 
-	int spell_level = spells[spell_id].classes[(GetClass()%16) - 1]; 
+	int spell_level = spells[spell_id].classes[(GetClass()%16) - 1];
 	int effect_value = 0;
 	int lvlModifier = 100;
 
@@ -4793,16 +4783,16 @@ int8 Mob::GetDecayEffectValue(uint16 spell_id, uint16 spelleffect) {
 		if (IsValidSpell(buffs[slot].spellid)){
 			for (int i = 0; i < EFFECT_COUNT; i++){
 				if(spells[buffs[slot].spellid].effectid[i] == spelleffect) {
-					
-					int critchance = spells[buffs[slot].spellid].base[i]; 
+
+					int critchance = spells[buffs[slot].spellid].base[i];
 					int decay = spells[buffs[slot].spellid].base2[i];
-					int lvldiff = spell_level - spells[buffs[slot].spellid].max[i]; 
-					
+					int lvldiff = spell_level - spells[buffs[slot].spellid].max[i];
+
 					if(lvldiff > 0 && decay > 0)
 					{
-						lvlModifier -= decay*lvldiff; 
+						lvlModifier -= decay*lvldiff;
 						if (lvlModifier > 0){
-							critchance = (critchance*lvlModifier)/100; 
+							critchance = (critchance*lvlModifier)/100;
 							effect_value += critchance;
 						}
 					}
@@ -4813,7 +4803,7 @@ int8 Mob::GetDecayEffectValue(uint16 spell_id, uint16 spelleffect) {
 			}
 		}
 	}
-	
+
 	return effect_value;
 }
 
