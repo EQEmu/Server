@@ -195,7 +195,7 @@ bool EQLConfig::BootStaticZone(Const_char *short_name, uint16 port) {
 bool EQLConfig::ChangeStaticZone(Const_char *short_name, uint16 port) {
 	//make sure the short name is valid.
 	if(database.GetZoneID(short_name) == 0)
-		return(false);
+		return false;
 
 	//check internal state
 	std::map<std::string, LauncherZone>::iterator res;
@@ -203,13 +203,8 @@ bool EQLConfig::ChangeStaticZone(Const_char *short_name, uint16 port) {
 	if(res == m_zones.end()) {
 		//not found.
 		LogFile->write(EQEMuLog::Error, "Update for unknown zone %s", short_name);
-		return(false);
+		return false;
 	}
-
-
-	//database update
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 
 	char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
@@ -218,15 +213,13 @@ bool EQLConfig::ChangeStaticZone(Const_char *short_name, uint16 port) {
 	database.DoEscapeString(zonebuf, short_name, strlen(short_name)&0xF);	//limit len to 16
 	zonebuf[31] = '\0';
 
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"UPDATE launcher_zones SET port=%d WHERE launcher='%s' AND zone='%s'",
-		port, namebuf, zonebuf), errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error in ChangeStaticZone query: %s", errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("UPDATE launcher_zones SET port=%d WHERE "
+                                    "launcher = '%s' AND zone = '%s'",port, namebuf, zonebuf);
+    auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in ChangeStaticZone query: %s", results.ErrorMessage().c_str());
 		return false;
 	}
-	safe_delete_array(query);
-
 
 	//update internal state
 	res->second.port = port;
@@ -237,7 +230,7 @@ bool EQLConfig::ChangeStaticZone(Const_char *short_name, uint16 port) {
 		ll->RestartZone(short_name);
 	}
 
-	return(true);
+	return true;
 }
 
 bool EQLConfig::DeleteStaticZone(Const_char *short_name) {
