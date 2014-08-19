@@ -253,8 +253,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 				strcpy(tmpmsg, "Door is locked by an unknown guild");
 			}
 			sender->Message(4, tmpmsg);
-			// safe_delete(outapp);
-			// /\ possible missing line..all other 'fail' returns seem to have it
+			safe_delete(outapp);
 			return;
 		}
 		// a key is required or the door is locked but can be picked or both
