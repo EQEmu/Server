@@ -165,22 +165,16 @@ void QGlobalCache::LoadByCharID(uint32 charID)
 
 void QGlobalCache::LoadByZoneID(uint32 zoneID)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	std::string query = StringFormat("SELECT name, charid, npcid, zoneid, value, expdate "
+                                    "FROM quest_globals WHERE zoneid = %d && npcid = 0 && charid = 0", zoneID);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success())
+        return;
 
-	if (database.RunQuery(query, MakeAnyLenString(&query, "select name, charid, npcid, zoneid, value, expdate from quest_globals"
-		" where zoneid = %d && npcid = 0 && charid = 0", zoneID), errbuf, &result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			AddGlobal(0, QGlobal(std::string(row[0]), atoi(row[1]), atoi(row[2]), atoi(row[3]), row[4], row[5]?atoi(row[5]):0xFFFFFFFF));
-		}
-		mysql_free_result(result);
-	}
-	safe_delete_array(query);
+    for (auto row = results.begin(); row != results.end(); ++row)
+        AddGlobal(0, QGlobal(std::string(row[0]), atoi(row[1]), atoi(row[2]), atoi(row[3]), row[4], row[5]? atoi(row[5]): 0xFFFFFFFF));
 }
+
 void QGlobalCache::LoadByGlobalContext()
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
