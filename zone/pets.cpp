@@ -450,46 +450,35 @@ bool ZoneDatabase::GetPetEntry(const char *pet_type, PetRecord *into) {
 }
 
 bool ZoneDatabase::GetPoweredPetEntry(const char *pet_type, int16 petpower, PetRecord *into) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 querylen = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	std::string query;
 
-	if (petpower <= 0) {
-		querylen = MakeAnyLenString(&query,
-			"SELECT npcID, temp, petpower, petcontrol, petnaming, monsterflag, equipmentset FROM pets "
-			"WHERE type='%s' AND petpower<=0", pet_type);
-	}
-	else {
-		querylen = MakeAnyLenString(&query,
-			"SELECT npcID, temp, petpower, petcontrol, petnaming, monsterflag, equipmentset FROM pets "
-			"WHERE type='%s' AND petpower<=%d ORDER BY petpower DESC LIMIT 1", pet_type, petpower);
-	}
+	if (petpower <= 0)
+		query = StringFormat("SELECT npcID, temp, petpower, petcontrol, petnaming, monsterflag, equipmentset "
+                            "FROM pets WHERE type='%s' AND petpower<=0", pet_type);
+	else
+		query = StringFormat("SELECT npcID, temp, petpower, petcontrol, petnaming, monsterflag, equipmentset "
+                            "FROM pets WHERE type='%s' AND petpower<=%d ORDER BY petpower DESC LIMIT 1",
+                            pet_type, petpower);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in GetPoweredPetEntry query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return false;
+    }
 
-	if (RunQuery(query, querylen, errbuf, &result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
+    if (results.RowCount() != 1)
+        return false;
 
-			into->npc_type = atoi(row[0]);
-			into->temporary = atoi(row[1]);
-			into->petpower = atoi(row[2]);
-			into->petcontrol = atoi(row[3]);
-			into->petnaming = atoi(row[4]);
-			into->monsterflag = atoi(row[5]);
-			into->equipmentset = atoi(row[6]);
+    auto row = results.begin();
 
-			mysql_free_result(result);
-			return(true);
-		}
-		mysql_free_result(result);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in GetPoweredPetEntry query '%s': %s", query, errbuf);
-		safe_delete_array(query);
-	}
-	return(false);
+    into->npc_type = atoi(row[0]);
+    into->temporary = atoi(row[1]);
+    into->petpower = atoi(row[2]);
+    into->petcontrol = atoi(row[3]);
+    into->petnaming = atoi(row[4]);
+    into->monsterflag = atoi(row[5]);
+    into->equipmentset = atoi(row[6]);
+
+    return true;
 }
 
 Mob* Mob::GetPet() {
