@@ -225,46 +225,50 @@ void ZoneDatabase::DeletePetitionFromDB(Petition* wpet) {
 }
 
 void ZoneDatabase::UpdatePetitionToDB(Petition* wpet) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 affected_rows = 0;
-	uint8 checkedout = 0;
-	if (wpet->CheckedOut()) checkedout = 1;
-	else checkedout = 0;
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE petitions set gmtext = '%s', lastgm = '%s', urgency = %i, checkouts = %i, unavailables = %i, ischeckedout = %i where petid = %i", wpet->GetGMText(), wpet->GetLastGM(), wpet->GetUrgency(), wpet->GetCheckouts(), wpet->GetUnavails(), checkedout, wpet->GetID()), errbuf, 0, &affected_rows)) {
-		LogFile->write(EQEMuLog::Error, "Error in UpdatePetitionToDB query '%s': %s", query, errbuf);
-	}
-	safe_delete_array(query);
-	return;
+
+	std::string query = StringFormat("UPDATE petitions SET gmtext = '%s', lastgm = '%s', urgency = %i, "
+                                    "checkouts = %i, unavailables = %i, ischeckedout = %i "
+                                    "WHERE petid = %i",
+                                    wpet->GetGMText(), wpet->GetLastGM(), wpet->GetUrgency(),
+                                    wpet->GetCheckouts(), wpet->GetUnavails(),
+                                    wpet->CheckedOut() ? 1: 0, wpet->GetID());
+    auto results = QueryDatabase(query);
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Error in UpdatePetitionToDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+
 }
-
-
 
 void ZoneDatabase::InsertPetitionToDB(Petition* wpet)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 affected_rows = 0;
-	uint8 checkedout = 0;
-	if (wpet->CheckedOut())
-		checkedout = 1;
-	else
-		checkedout = 0;
 
 	uint32 len = strlen(wpet->GetPetitionText());
 	char* petitiontext = new char[2*len+1];
 	memset(petitiontext, 0, 2*len+1);
 	DoEscapeString(petitiontext, wpet->GetPetitionText(), len);
-	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO petitions (petid, charname, accountname, lastgm, petitiontext, zone, urgency, charclass, charrace, charlevel, checkouts, unavailables, ischeckedout, senttime, gmtext) values (%i,'%s','%s','%s','%s',%i,%i,%i,%i,%i,%i,%i,%i,%i, '%s')", wpet->GetID(), wpet->GetCharName(), wpet->GetAccountName(), wpet->GetLastGM(), petitiontext, wpet->GetZone(), wpet->GetUrgency(), wpet->GetCharClass(), wpet->GetCharRace(), wpet->GetCharLevel(), wpet->GetCheckouts(), wpet->GetUnavails(), checkedout, wpet->GetSentTime(), wpet->GetGMText()), errbuf, 0, &affected_rows)) {
-		LogFile->write(EQEMuLog::Error, "Error in InsertPetitionToDB query '%s': %s", query, errbuf);
+
+	std::string query = StringFormat("INSERT INTO petitions "
+                                    "(petid, charname, accountname, lastgm, "
+                                    "petitiontext, zone, urgency, charclass, "
+                                    "charrace, charlevel, checkouts, unavailables, "
+                                    "ischeckedout, senttime, gmtext) "
+                                    "VALUES (%i, '%s', '%s', '%s', '%s', "
+                                    "%i, %i, %i, %i, %i, "
+                                    "%i, %i, %i, %i, '%s')",
+                                    wpet->GetID(), wpet->GetCharName(), wpet->GetAccountName(), wpet->GetLastGM(),
+                                    petitiontext, wpet->GetZone(), wpet->GetUrgency(), wpet->GetCharClass(),
+                                    wpet->GetCharRace(), wpet->GetCharLevel(), wpet->GetCheckouts(), wpet->GetUnavails(),
+                                    wpet->CheckedOut()? 1: 0, wpet->GetSentTime(), wpet->GetGMText());
+    safe_delete_array(petitiontext);
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in InsertPetitionToDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return;
 	}
 
-	safe_delete_array(petitiontext);
-	safe_delete_array(query);
 #if EQDEBUG >= 5
 		LogFile->write(EQEMuLog::Debug, "New petition created");
 #endif
-	return;
+
 }
 
 void ZoneDatabase::RefreshPetitionsFromDB()
