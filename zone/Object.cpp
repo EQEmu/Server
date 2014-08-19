@@ -630,37 +630,36 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
         SaveWorldContainer(object.zone_id, id, inst);
 }
 
-Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Ground_Spawns* gs){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Ground_Spawns* gs) {
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT max_x,max_y,max_z,min_x,min_y,heading,name,item,max_allowed,respawn_timer from ground_spawns where zoneid=%i and (version=%u OR version=-1) limit 50", zone_id, version), errbuf, &result))
-	{
-		safe_delete_array(query);
-		int i=0;
-		while( (row=mysql_fetch_row(result) ) ) {
-			gs->spawn[i].max_x=atof(row[0]);
-			gs->spawn[i].max_y=atof(row[1]);
-			gs->spawn[i].max_z=atof(row[2]);
-			gs->spawn[i].min_x=atof(row[3]);
-			gs->spawn[i].min_y=atof(row[4]);
-			gs->spawn[i].heading=atof(row[5]);
-			strcpy(gs->spawn[i].name,row[6]);
-			gs->spawn[i].item=atoi(row[7]);
-			gs->spawn[i].max_allowed=atoi(row[8]);
-			gs->spawn[i].respawntimer=atoi(row[9]);
-			i++;
-		}
-		mysql_free_result(result);
+	std::string query = StringFormat("SELECT max_x, max_y, max_z, "
+                                    "min_x, min_y, heading, name, "
+                                    "item, max_allowed, respawn_timer "
+                                    "FROM ground_spawns "
+                                    "WHERE zoneid = %i AND (version = %u OR version = -1) "
+                                    "LIMIT 50", zone_id, version);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        std::cerr << "Error in LoadGroundSpawns query '" << query << "' " << results.ErrorMessage() << std::endl;
+		return gs;
 	}
-	else {
-		std::cerr << "Error in LoadGroundSpawns query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-	}
+
+	int spawnIndex=0;
+    for (auto row = results.begin(); row != results.end(); ++row, ++spawnIndex) {
+        gs->spawn[spawnIndex].max_x=atof(row[0]);
+        gs->spawn[spawnIndex].max_y=atof(row[1]);
+        gs->spawn[spawnIndex].max_z=atof(row[2]);
+        gs->spawn[spawnIndex].min_x=atof(row[3]);
+        gs->spawn[spawnIndex].min_y=atof(row[4]);
+        gs->spawn[spawnIndex].heading=atof(row[5]);
+        strcpy(gs->spawn[spawnIndex].name,row[6]);
+        gs->spawn[spawnIndex].item=atoi(row[7]);
+        gs->spawn[spawnIndex].max_allowed=atoi(row[8]);
+        gs->spawn[spawnIndex].respawntimer=atoi(row[9]);
+    }
 	return gs;
 }
+
 void ZoneDatabase::DeleteObject(uint32 id)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
