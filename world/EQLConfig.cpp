@@ -33,46 +33,35 @@ EQLConfig::EQLConfig(const char *launcher_name)
 }
 
 void EQLConfig::LoadSettings() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	LauncherZone tmp;
 
+	LauncherZone tmp;
 	char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
 
-	if (database.RunQuery(query, MakeAnyLenString(&query,
-			"SELECT dynamics FROM launcher WHERE name='%s'",
-			namebuf)
-		, errbuf, &result))
-	{
-		while ((row = mysql_fetch_row(result))) {
-			m_dynamics = atoi(row[0]);
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "EQLConfig::LoadSettings: %s", errbuf);
-	}
-	safe_delete_array(query);
+    std::string query = StringFormat("SELECT dynamics FROM launcher WHERE name = '%s'", namebuf);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success())
+        LogFile->write(EQEMuLog::Error, "EQLConfig::LoadSettings: %s", results.ErrorMessage().c_str());
+    else {
+        auto row = results.begin();
+        m_dynamics = atoi(row[0]);
+    }
 
-	if (database.RunQuery(query, MakeAnyLenString(&query,
-			"SELECT zone,port FROM launcher_zones WHERE launcher='%s'",
-			namebuf)
-		, errbuf, &result))
-	{
-		LauncherZone zs;
-		while ((row = mysql_fetch_row(result))) {
-			zs.name = row[0];
-			zs.port = atoi(row[1]);
-			m_zones[zs.name] = zs;
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "EQLConfig::LoadSettings: %s", errbuf);
-	}
-	safe_delete_array(query);
+	query = StringFormat("SELECT zone, port FROM launcher_zones WHERE launcher = '%s'", namebuf);
+	results = database.QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "EQLConfig::LoadSettings: %s", results.ErrorMessage().c_str());
+        return;
+    }
+
+    LauncherZone zs;
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        zs.name = row[0];
+		zs.port = atoi(row[1]);
+		m_zones[zs.name] = zs;
+    }
+
 }
 
 EQLConfig *EQLConfig::CreateLauncher(const char *name, uint8 dynamic_count) {
