@@ -273,41 +273,40 @@ void ZoneDatabase::InsertPetitionToDB(Petition* wpet)
 
 void ZoneDatabase::RefreshPetitionsFromDB()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 	Petition* newpet;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT petid, charname, accountname, lastgm, petitiontext, zone, urgency, charclass, charrace, charlevel, checkouts, unavailables, ischeckedout, senttime, gmtext from petitions order by petid"), errbuf, &result))
-	{
-		safe_delete_array(query);
-		while ((row = mysql_fetch_row(result))) {
-			newpet = new Petition(atoi(row[0]));
-			newpet->SetCName(row[1]);
-			newpet->SetAName(row[2]);
-			newpet->SetLastGM(row[3]);
-			newpet->SetPetitionText(row[4]);
-			newpet->SetZone(atoi(row[5]));
-			newpet->SetUrgency(atoi(row[6]));
-			newpet->SetClass(atoi(row[7]));
-			newpet->SetRace(atoi(row[8]));
-			newpet->SetLevel(atoi(row[9]));
-			newpet->SetCheckouts(atoi(row[10]));
-			newpet->SetUnavails(atoi(row[11]));
-			newpet->SetSentTime2(atol(row[13]));
-			newpet->SetGMText(row[14]);
-			std::cout << "Petition " << row[0] << " pettime = " << newpet->GetSentTime() << std::endl;
-			if (atoi(row[12]) == 1) newpet->SetCheckedOut(true);
-			else newpet->SetCheckedOut(false);
-			petition_list.AddPetition(newpet);
-		}
-		mysql_free_result(result);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in RefreshPetitionsFromDB query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+	std::string query = "SELECT petid, charname, accountname, lastgm, petitiontext, "
+                        "zone, urgency, charclass, charrace, charlevel, checkouts, "
+                        "unavailables, ischeckedout, senttime, gmtext "
+                        "FROM petitions ORDER BY petid";
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in RefreshPetitionsFromDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
-	return;
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        newpet = new Petition(atoi(row[0]));
+        newpet->SetCName(row[1]);
+        newpet->SetAName(row[2]);
+        newpet->SetLastGM(row[3]);
+        newpet->SetPetitionText(row[4]);
+        newpet->SetZone(atoi(row[5]));
+        newpet->SetUrgency(atoi(row[6]));
+        newpet->SetClass(atoi(row[7]));
+        newpet->SetRace(atoi(row[8]));
+        newpet->SetLevel(atoi(row[9]));
+        newpet->SetCheckouts(atoi(row[10]));
+        newpet->SetUnavails(atoi(row[11]));
+        newpet->SetSentTime2(atol(row[13]));
+        newpet->SetGMText(row[14]);
+
+        std::cout << "Petition " << row[0] << " pettime = " << newpet->GetSentTime() << std::endl;
+
+        if (atoi(row[12]) == 1)
+            newpet->SetCheckedOut(true);
+        else
+            newpet->SetCheckedOut(false);
+        petition_list.AddPetition(newpet);
+    }
+
 }
