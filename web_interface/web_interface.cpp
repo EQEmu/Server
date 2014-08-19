@@ -7,6 +7,7 @@ TimeoutManager timeout_manager;
 const EQEmuConfig *config = nullptr;
 WorldServer *worldserver = nullptr;
 libwebsocket_context *context = nullptr;
+SharedDatabase *db = nullptr;
 std::map<std::string, per_session_data_eqemu*> sessions;
 std::map<std::string, std::pair<int, MethodHandler>> authorized_methods;
 std::map<std::string, MethodHandler> unauthorized_methods;
@@ -15,7 +16,7 @@ void CatchSignal(int sig_num) {
 	run = false;
 	if(worldserver)
 		worldserver->Disconnect();
-		
+	
 	if(context)
 		libwebsocket_cancel_service(context);
 }
@@ -169,7 +170,15 @@ int main() {
 		return 1;
 	}
 
-	worldserver = new WorldServer(config->SharedKey); 
+	db = new SharedDatabase();
+	_log(WEB_INTERFACE__TRACE, "Connecting to database...");
+	if(!db->Connect(config->DatabaseHost.c_str(), config->DatabaseUsername.c_str(),
+		config->DatabasePassword.c_str(), config->DatabaseDB.c_str(), config->DatabasePort)) {
+		_log(WEB_INTERFACE__TRACE, "Unable to connect to the database, cannot continue without a database connection");
+		return 1;
+	}
+
+	worldserver = new WorldServer(config->SharedKey);
 	worldserver->Connect();
 	writable_socket_timer.Start(10);
 
@@ -193,6 +202,7 @@ int main() {
 	}
 
 	safe_delete(worldserver);
+	safe_delete(db);
 	libwebsocket_context_destroy(context);
 
 	return 0;

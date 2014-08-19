@@ -35,9 +35,9 @@ void handle_method_token_auth(per_session_data_eqemu *session, rapidjson::Docume
 	
 	session->auth = document["params"][(rapidjson::SizeType)0].GetString();
 	if (!CheckTokenAuthorization(session)) {
-		WriteWebCallResponseBoolean(session, document, "false", false);
+		WriteWebCallResponseBoolean(session, document, false, false);
 	} else {
-		WriteWebCallResponseBoolean(session, document, "true", false);
+		WriteWebCallResponseBoolean(session, document, true, false);
 	}
 }
 

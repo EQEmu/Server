@@ -75,6 +75,9 @@ public:
 	ItemInst* CreateItem(const Item_Struct* item, int16 charges=0, uint32 aug1=0, uint32 aug2=0, uint32 aug3=0, uint32 aug4=0, uint32 aug5=0);
 	ItemInst* CreateBaseItem(const Item_Struct* item, int16 charges=0);
 
+	// Web Token Verification
+	bool VerifyToken(std::string token, int& status);
+	
 	/*
 	* Shared Memory crap
 	*/

@@ -2179,3 +2179,35 @@ void SharedDatabase::SetBotInspectMessage(uint32 botid, const InspectMessage_Str
 
 	safe_delete_array(query);
 }
+
+bool SharedDatabase::VerifyToken(std::string token, int& status) {
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	bool res = false;
+	status = 0;
+	if(token.length() > 64) {
+		token = token.substr(0, 64);
+	}
+
+	token = EscapeString(token);
+	
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT status FROM tokens WHERE token='%s'", token.c_str()), errbuf, &result)) {
+		safe_delete_array(query);
+
+		row = mysql_fetch_row(result);
+		if(row) {
+			status = atoi(row[0]);
+			res = true;
+		}
+
+		mysql_free_result(result);
+	}
+	else {
+		std::cerr << "Error in SharedDatabase::VerifyToken query '" << query << "' " << errbuf << std::endl;
+		safe_delete_array(query);
+	}
+	
+	return res;
+}

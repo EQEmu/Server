@@ -29,6 +29,7 @@
 #include "../common/web_interface_utils.h"
 #include "../common/StringUtil.h"
 #include "../common/uuid.h"
+#include "../common/shareddb.h"
 #include "worldserver.h"
 #include "lib/libwebsockets.h"
 #include "rapidjson/document.h"

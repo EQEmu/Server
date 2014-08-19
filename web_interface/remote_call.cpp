@@ -1,6 +1,8 @@
 #include "web_interface.h"
 #include "remote_call.h"
 
+extern SharedDatabase *db;
+
 void WriteWebCallResponseString(per_session_data_eqemu *session, rapidjson::Document &doc, std::string result, bool error, bool send_no_id) {
 	if (doc.HasMember("id") || send_no_id) {
 		rapidjson::StringBuffer s;
@@ -95,10 +97,13 @@ void WriteWebCallResponseBoolean(per_session_data_eqemu *session, rapidjson::Doc
 }
 
 int CheckTokenAuthorization(per_session_data_eqemu *session) {
-	//todo: actually check this against a table of tokens that is updated periodically
-	//right now i have just one entry harded coded for testing purposes
-	if (session->auth.compare("c5b80ec8-4174-4c4c-d332-dbf3c3a551fc") == 0) {
-		return 255;
+	if(db) {
+		int status;
+		if(db->VerifyToken(session->auth, status)) {
+			return status;
+		} else {
+			return 0;
+		}
 	}
 
 	return 0;
