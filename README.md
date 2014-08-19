@@ -28,7 +28,7 @@ Further instructions on building the source can be found on the
 Bug reports
 ---
 
-Please use the [issue tracker](issue-tracker) provided by GitHub to send us bug
+Please use the [issue tracker](https://github.com/EQEmu/Server/issues) provided by GitHub to send us bug
 reports or feature requests.
 
 The [EQEmu Forums](http://www.eqemulator.org/forums/) also have forums to submit
