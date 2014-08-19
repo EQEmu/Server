@@ -141,48 +141,37 @@ void QGlobalCache::LoadByNPCID(uint32 npcID)
 {
 	std::string query = StringFormat("SELECT name, charid, npcid, zoneid, value, expdate "
                                     "FROM quest_globals WHERE npcid = %d", npcID);
-    auto results = database.QueryDatabase(query);
-	if (!results.Success())
-        return;
-
-    for (auto row = results.begin(); row != results.end(); ++row)
-        AddGlobal(0, QGlobal(std::string(row[0]), atoi(row[1]), atoi(row[2]), atoi(row[3]), row[4], row[5]? atoi(row[5]): 0xFFFFFFFF));
-
+    LoadBy(query);
 }
 
 void QGlobalCache::LoadByCharID(uint32 charID)
 {
 	std::string query = StringFormat("SELECT name, charid, npcid, zoneid, value, expdate "
                                     "FROM quest_globals WHERE charid = %d && npcid = 0", charID);
-    auto results = database.QueryDatabase(query);
-    if (!results.Success())
-        return;
-
-    for (auto row = results.begin(); row != results.end(); ++row)
-        AddGlobal(0, QGlobal(std::string(row[0]), atoi(row[1]), atoi(row[2]), atoi(row[3]), row[4], row[5]? atoi(row[5]): 0xFFFFFFFF));
-
+    LoadBy(query);
 }
 
 void QGlobalCache::LoadByZoneID(uint32 zoneID)
 {
 	std::string query = StringFormat("SELECT name, charid, npcid, zoneid, value, expdate "
                                     "FROM quest_globals WHERE zoneid = %d && npcid = 0 && charid = 0", zoneID);
-    auto results = database.QueryDatabase(query);
-    if (!results.Success())
-        return;
-
-    for (auto row = results.begin(); row != results.end(); ++row)
-        AddGlobal(0, QGlobal(std::string(row[0]), atoi(row[1]), atoi(row[2]), atoi(row[3]), row[4], row[5]? atoi(row[5]): 0xFFFFFFFF));
+    LoadBy(query);
 }
 
 void QGlobalCache::LoadByGlobalContext()
 {
 	std::string query = "SELECT name, charid, npcid, zoneid, value, expdate "
                         "FROM quest_globals WHERE zoneid = 0 && npcid = 0 && charid = 0";
+    LoadBy(query);
+ }
+
+void QGlobalCache::LoadBy(const std::string query)
+{
     auto results = database.QueryDatabase(query);
     if (!results.Success())
         return;
 
     for (auto row = results.begin(); row != results.end(); ++row)
         AddGlobal(0, QGlobal(std::string(row[0]), atoi(row[1]), atoi(row[2]), atoi(row[3]), row[4], row[5]? atoi(row[5]): 0xFFFFFFFF));
+
 }
