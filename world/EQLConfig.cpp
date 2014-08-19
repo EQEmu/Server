@@ -111,30 +111,23 @@ void EQLConfig::DeleteLauncher() {
 
 	launcher_list.Remove(m_name.c_str());
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
 	char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
 
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"DELETE FROM launcher WHERE name='%s'",
-		namebuf), errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error in DeleteLauncher 1 query: %s", errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("DELETE FROM launcher WHERE name = '%s'", namebuf);
+    auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in DeleteLauncher 1st query: %s", results.ErrorMessage().c_str());
 		return;
 	}
-	safe_delete_array(query);
 
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"DELETE FROM launcher_zones WHERE launcher='%s'",
-		namebuf), errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error in DeleteLauncher 2 query: %s", errbuf);
-		safe_delete_array(query);
+    query = StringFormat("DELETE FROM launcher_zones WHERE launcher = '%s'", namebuf);
+    results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in DeleteLauncher 2nd query: %s", results.ErrorMessage().c_str());
 		return;
 	}
-	safe_delete_array(query);
 }
 
 bool EQLConfig::IsConnected() const {
