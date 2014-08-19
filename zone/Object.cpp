@@ -662,23 +662,12 @@ Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Gro
 
 void ZoneDatabase::DeleteObject(uint32 id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-
-	// Construct query
-	uint32 len_query = MakeAnyLenString(&query,
-		"delete from object where id=%i", id);
-
-	// Save new record for object
-	if (!RunQuery(query, len_query, errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Unable to delete object: %s", errbuf);
+	// delete record of object
+	std::string query = StringFormat("DELETE FROM object WHERE id = %i", id);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Unable to delete object: %s", results.ErrorMessage().c_str());
 	}
-	//else {
-		// Delete contained items, if any
-	//	DeleteWorldContainer(id);
-	//}
-
-	safe_delete_array(query);
 }
 
 uint32 Object::GetDBID()
