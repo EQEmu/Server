@@ -2035,34 +2035,23 @@ void Zone::SetInstanceTimer(uint32 new_duration)
 
 void Zone::LoadLDoNTraps()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, type, spell_id, "
-		"skill, locked FROM ldon_trap_templates"), errbuf, &result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			uint8 x = 0;
-			LDoNTrapTemplate *lt = new LDoNTrapTemplate;
-			lt->id = atoi(row[x++]);
-			lt->type = (LDoNChestTypes)atoi(row[x++]);
-			lt->spell_id = atoi(row[x++]);
-			lt->skill = atoi(row[x++]);
-			lt->locked = atoi(row[x++]);
-			ldon_trap_list[lt->id] = lt;
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadLDoNTraps: %s (%s)", query, errbuf);
-		safe_delete_array(query);
+	const std::string query = "SELECT id, type, spell_id, skill, locked FROM ldon_trap_templates";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Zone::LoadLDoNTraps: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return;
-	}
+    }
+
+    for (auto row = results.begin();row != results.end(); ++row) {
+        LDoNTrapTemplate *lt = new LDoNTrapTemplate;
+        lt->id = atoi(row[0]);
+        lt->type = (LDoNChestTypes)atoi(row[1]);
+        lt->spell_id = atoi(row[2]);
+        lt->skill = atoi(row[3]);
+        lt->locked = atoi(row[4]);
+        ldon_trap_list[lt->id] = lt;
+    }
+
 }
 
 void Zone::LoadLDoNTrapEntries()
