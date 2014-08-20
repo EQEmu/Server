@@ -69,23 +69,26 @@ ZoneDatabase::~ZoneDatabase() {
 	}
 }
 
-bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct* zd){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	if (!RunQuery(query, MakeAnyLenString(&query, "update zone set underworld=%f,minclip=%f,"
-		"maxclip=%f,fog_minclip=%f,fog_maxclip=%f,fog_blue=%i,fog_red=%i,fog_green=%i,sky=%i,"
-		"ztype=%i,zone_exp_multiplier=%f,safe_x=%f,safe_y=%f,safe_z=%f "
-		"where zoneidnumber=%i and version=%i",
-		zd->underworld,zd->minclip,
-		zd->maxclip,zd->fog_minclip[0],zd->fog_maxclip[0],zd->fog_blue[0],zd->fog_red[0],zd->fog_green[0],zd->sky,
-		zd->ztype,zd->zone_exp_multiplier,
-		zd->safe_x,zd->safe_y,zd->safe_z,
-		zoneid, instance_id),errbuf))	{
-			LogFile->write(EQEMuLog::Error, "Error in SaveZoneCFG query %s: %s", query, errbuf);
-			safe_delete_array(query);
-			return false;
+bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct* zd) {
+
+	std::string query = StringFormat("UPDATE zone SET underworld = %f, minclip = %f, "
+                                    "maxclip = %f, fog_minclip = %f, fog_maxclip = %f, "
+                                    "fog_blue = %i, fog_red = %i, fog_green = %i, "
+                                    "sky = %i, ztype = %i, zone_exp_multiplier = %f, "
+                                    "safe_x = %f, safe_y = %f, safe_z = %f "
+                                    "WHERE zoneidnumber = %i AND version = %i",
+                                    zd->underworld, zd->minclip,
+                                    zd->maxclip, zd->fog_minclip[0], zd->fog_maxclip[0],
+                                    zd->fog_blue[0], zd->fog_red[0], zd->fog_green[0],
+                                    zd->sky, zd->ztype, zd->zone_exp_multiplier,
+                                    zd->safe_x, zd->safe_y, zd->safe_z,
+                                    zoneid, instance_id);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in SaveZoneCFG query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+        return false;
 	}
-	safe_delete_array(query);
+
 	return true;
 }
 
@@ -1211,7 +1214,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->armor_tint[0] |= (atoi(row[r++]) & 0xFF) << 8;
 				tmpNPCType->armor_tint[0] |= (atoi(row[r++]) & 0xFF);
 				tmpNPCType->armor_tint[0] |= (tmpNPCType->armor_tint[0]) ? (0xFF << 24) : 0;
-				
+
 				int i;
 				if (armor_tint_id > 0)
 				{
@@ -1304,7 +1307,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->healscale = atoi(row[r++]);
 				tmpNPCType->no_target_hotkey = atoi(row[r++]) == 1 ? true : false;
 				tmpNPCType->raid_target = atoi(row[r++]) == 0 ? false : true;
-				
+
 				// If NPC with duplicate NPC id already in table,
 				// free item we attempted to add.
 				if (zone->npctable.find(tmpNPCType->npc_id) != zone->npctable.end())
@@ -1849,9 +1852,9 @@ void ZoneDatabase::SaveMercBuffs(Merc *merc) {
 				CalculateCorruptionCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
 				buffs[BuffCount].numhits, buffs[BuffCount].melee_rune, buffs[BuffCount].magic_rune,
 				buffs[BuffCount].dot_rune,
-				buffs[BuffCount].caston_x, 
-				IsPersistent, 
-				buffs[BuffCount].caston_y, 
+				buffs[BuffCount].caston_x,
+				IsPersistent,
+				buffs[BuffCount].caston_y,
 				buffs[BuffCount].caston_z,
 				buffs[BuffCount].ExtraDIChance), TempErrorMessageBuffer)) {
 				errorMessage = std::string(TempErrorMessageBuffer);
@@ -2931,7 +2934,7 @@ void ZoneDatabase::LoadPetInfo(Client *c) {
 				pi = suspended;
 			else
 				continue;
-			
+
 			int slot = atoi(row[1]);
 			if (slot < EmuConstants::EQUIPMENT_BEGIN || slot > EmuConstants::EQUIPMENT_END)
 				continue;
