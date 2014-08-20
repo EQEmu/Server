@@ -2056,54 +2056,36 @@ void Zone::LoadLDoNTraps()
 
 void Zone::LoadLDoNTrapEntries()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, trap_id FROM ldon_trap_entries"),errbuf,&result)) {
-		while((row = mysql_fetch_row(result)))
-		{
-			uint32 id = atoi(row[0]);
-			uint32 trap_id = atoi(row[1]);
-
-			LDoNTrapTemplate *tt = nullptr;
-			std::map<uint32,LDoNTrapTemplate*>::iterator it;
-			it = ldon_trap_list.find(trap_id);
-			if(it == ldon_trap_list.end())
-			{
-				continue;
-			}
-			else
-			{
-				tt = ldon_trap_list[trap_id];
-			}
-
-			std::list<LDoNTrapTemplate*> temp;
-			std::map<uint32,std::list<LDoNTrapTemplate*> >::iterator iter;
-
-			iter = ldon_trap_entry_list.find(id);
-			if(iter == ldon_trap_entry_list.end())
-			{
-				temp.push_back(tt);
-				ldon_trap_entry_list[id] = temp;
-			}
-			else
-			{
-				temp = ldon_trap_entry_list[id];
-				temp.push_back(tt);
-				ldon_trap_entry_list[id] = temp;
-			}
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadLDoNTrapEntries: %s (%s)", query, errbuf);
-		safe_delete_array(query);
+	const std::string query = "SELECT id, trap_id FROM ldon_trap_entries";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Zone::LoadLDoNTrapEntries: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return;
-	}
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row)
+    {
+        uint32 id = atoi(row[0]);
+        uint32 trap_id = atoi(row[1]);
+
+        LDoNTrapTemplate *trapTemplate = nullptr;
+        auto it = ldon_trap_list.find(trap_id);
+
+        if(it == ldon_trap_list.end())
+            continue;
+
+        trapTemplate = ldon_trap_list[trap_id];
+
+        std::list<LDoNTrapTemplate*> temp;
+        auto iter = ldon_trap_entry_list.find(id);
+
+        if(iter != ldon_trap_entry_list.end())
+            temp = ldon_trap_entry_list[id];
+
+        temp.push_back(trapTemplate);
+        ldon_trap_entry_list[id] = temp;
+    }
+
 }
 
 void Zone::LoadVeteranRewards()
