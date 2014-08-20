@@ -606,36 +606,26 @@ void Zone::LoadMercTemplates(){
 
 }
 
-
 void Zone::LoadLevelEXPMods(){
-	std::string errorMessage;
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES* DatasetResult;
-	MYSQL_ROW DataRow;
+
 	level_exp_mod.clear();
+    const std::string query = "SELECT level, exp_mod, aa_exp_mod FROM level_exp_mods";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadEXPLevelMods()");
+        return;
+    }
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT level, exp_mod, aa_exp_mod FROM level_exp_mods"), TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
-	}
-	else {
-		while(DataRow = mysql_fetch_row(DatasetResult)) {
-			uint32 index = atoi(DataRow[0]);
-			float exp_mod = atof(DataRow[1]);
-			float aa_exp_mod = atof(DataRow[2]);
-			level_exp_mod[index].ExpMod = exp_mod;
-			level_exp_mod[index].AAExpMod = aa_exp_mod;
-		}
-		mysql_free_result(DatasetResult);
-	}
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        uint32 index = atoi(row[0]);
+		float exp_mod = atof(row[1]);
+		float aa_exp_mod = atof(row[2]);
+		level_exp_mod[index].ExpMod = exp_mod;
+		level_exp_mod[index].AAExpMod = aa_exp_mod;
+    }
 
-	safe_delete_array(Query);
-	Query = 0;
-
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadEXPLevelMods()");
-	}
 }
+
 void Zone::LoadMercSpells(){
 
 	std::string errorMessage;
