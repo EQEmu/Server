@@ -2141,30 +2141,23 @@ void Zone::LoadVeteranRewards()
 void Zone::LoadAlternateCurrencies()
 {
 	AlternateCurrencies.clear();
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+
 	AltCurrencyDefinition_Struct current_currency;
 
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, item_id from alternate_currency"),
-		errbuf,&result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			current_currency.id = atoi(row[0]);
-			current_currency.item_id = atoi(row[1]);
-			AlternateCurrencies.push_back(current_currency);
-		}
+    const std::string query = "SELECT id, item_id FROM alternate_currency";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Zone::LoadAlternateCurrencies: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+		return;
+    }
 
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadAlternateCurrencies: %s (%s)", query, errbuf);
-		safe_delete_array(query);
-	}
+    for (auto row = results.begin(); row != results.end(); ++row)
+    {
+        current_currency.id = atoi(row[0]);
+        current_currency.item_id = atoi(row[1]);
+        AlternateCurrencies.push_back(current_currency);
+    }
+
 }
 
 void Zone::UpdateQGlobal(uint32 qid, QGlobal newGlobal)
