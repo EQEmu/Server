@@ -1631,45 +1631,37 @@ void Client::InspectBuffs(Client* Inspector, int Rank)
 
 //this really need to be renamed to LoadAAActions()
 bool ZoneDatabase::LoadAAEffects() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
 	memset(AA_Actions, 0, sizeof(AA_Actions));	//I hope the compiler is smart about this size...
 
-	const char *query = "SELECT aaid,rank,reuse_time,spell_id,target,nonspell_action,nonspell_mana,nonspell_duration,"
-					"redux_aa,redux_rate,redux_aa2,redux_rate2 FROM aa_actions";
-
-	if(RunQuery(query, static_cast<uint32>(strlen(query)), errbuf, &result)) {
-		//safe_delete_array(query);
-		int r;
-		while ((row = mysql_fetch_row(result))) {
-			r = 0;
-			int aaid = atoi(row[r++]);
-			int rank = atoi(row[r++]);
-			if(aaid < 0 || aaid >= aaHighestID || rank < 0 || rank >= MAX_AA_ACTION_RANKS)
-				continue;
-			AA_DBAction *caction = &AA_Actions[aaid][rank];
-
-			caction->reuse_time = atoi(row[r++]);
-			caction->spell_id = atoi(row[r++]);
-			caction->target = (aaTargetType) atoi(row[r++]);
-			caction->action = (aaNonspellAction) atoi(row[r++]);
-			caction->mana_cost = atoi(row[r++]);
-			caction->duration = atoi(row[r++]);
-			caction->redux_aa = (aaID) atoi(row[r++]);
-			caction->redux_rate = atoi(row[r++]);
-			caction->redux_aa2 = (aaID) atoi(row[r++]);
-			caction->redux_rate2 = atoi(row[r++]);
-
-		}
-		mysql_free_result(result);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadAAEffects query '%s': %s", query, errbuf);;
-		//safe_delete_array(query);
+	const std::string query = "SELECT aaid, rank, reuse_time, spell_id, target, "
+                            "nonspell_action, nonspell_mana, nonspell_duration, "
+                            "redux_aa, redux_rate, redux_aa2, redux_rate2 FROM aa_actions";
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadAAEffects query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
-	}
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+
+        int aaid = atoi(row[0]);
+        int rank = atoi(row[1]);
+        if(aaid < 0 || aaid >= aaHighestID || rank < 0 || rank >= MAX_AA_ACTION_RANKS)
+            continue;
+        AA_DBAction *caction = &AA_Actions[aaid][rank];
+
+        caction->reuse_time = atoi(row[2]);
+        caction->spell_id = atoi(row[3]);
+        caction->target = (aaTargetType) atoi(row[4]);
+        caction->action = (aaNonspellAction) atoi(row[5]);
+        caction->mana_cost = atoi(row[6]);
+        caction->duration = atoi(row[7]);
+        caction->redux_aa = (aaID) atoi(row[8]);
+        caction->redux_rate = atoi(row[9]);
+        caction->redux_aa2 = (aaID) atoi(row[10]);
+        caction->redux_rate2 = atoi(row[11]);
+
+    }
 
 	return true;
 }
