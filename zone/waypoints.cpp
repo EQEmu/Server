@@ -1030,24 +1030,21 @@ int	ZoneDatabase::GetHighestGrid(uint32 zoneid) {
 }
 
 uint8 ZoneDatabase::GetGridType2(uint32 grid, uint16 zoneid) {
-	char *query = 0;
-	char errbuff[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	int type2 = 0;
-	if (RunQuery(query, MakeAnyLenString(&query,"SELECT type2 from grid where id = %i and zoneid = %i",grid,zoneid),errbuff,&result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			type2 = atoi( row[0] );
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in GetGridType2 query '%s': %s", query, errbuff);
-		safe_delete_array(query);
-	}
 
-	return(type2);
+	int type2 = 0;
+	std::string query = StringFormat("SELECT type2 FROM grid WHERE id = %i AND zoneid = %i", grid, zoneid);
+	auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in GetGridType2 query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return 0;
+    }
+
+    if (results.RowCount() != 1)
+        return 0;
+
+    auto row = results.begin();
+
+	return atoi(row[0]);
 }
 
 bool ZoneDatabase::GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* wp) {
