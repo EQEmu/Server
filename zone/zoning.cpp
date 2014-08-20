@@ -745,26 +745,17 @@ void Client::ClearZoneFlag(uint32 zone_id) {
 }
 
 void Client::LoadZoneFlags() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
 	// Retrieve all waypoints for this grid
-	if(database.RunQuery(query,MakeAnyLenString(&query,
-		"SELECT zoneID from zone_flags WHERE charID=%d",
-		CharacterID()),errbuf,&result))
-	{
-		while((row = mysql_fetch_row(result))) {
-			zone_flags.insert(atoi(row[0]));
-		}
-		mysql_free_result(result);
-	}
-	else	// DB query error!
-	{
-		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to load zone flags for %s: %s", GetName(), errbuf);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT zoneID from zone_flags WHERE charID=%d", CharacterID());
+	auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "MySQL Error while trying to load zone flags for %s: %s", GetName(), results.ErrorMessage().c_str());
+        return;
+    }
+
+    for(auto row = results.begin(); row != results.end(); ++row)
+		zone_flags.insert(atoi(row[0]));
 }
 
 bool Client::HasZoneFlag(uint32 zone_id) const {
