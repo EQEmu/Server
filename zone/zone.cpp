@@ -2339,24 +2339,15 @@ uint32 Zone::GetSpawnKillCount(uint32 in_spawnid) {
 
 void Zone::UpdateHotzone()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	bool updh;
+    std::string query = StringFormat("SELECT hotzone FROM zone WHERE short_name = '%s'", GetShortName());
+    auto results = database.QueryDatabase(query);
+    if (!results.Success())
+        return;
 
-	if(database.RunQuery(query, MakeAnyLenString(&query,"SELECT  hotzone FROM zone WHERE short_name = '%s'", GetShortName()), errbuf, &result) )
-	{
-		if( (row = mysql_fetch_row(result)) )
-		{
-			updh = atoi(row[0]) == 0 ? false:true;
-			//Hotzone status has changed
-			if(is_hotzone != updh)
-			{
-				is_hotzone = updh;
-			}
-		}
-		mysql_free_result(result);
-	}
-	safe_delete_array(query);
+    if (results.RowCount() == 0)
+        return;
+
+    auto row = results.begin();
+
+    is_hotzone = atoi(row[0]) == 0 ? false: true;
 }
