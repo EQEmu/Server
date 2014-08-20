@@ -1779,41 +1779,36 @@ uint32 ZoneDatabase::GetSizeAA(){
 void ZoneDatabase::LoadAAs(SendAA_Struct **load){
 	if(!load)
 		return;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT skill_id from altadv_vars order by skill_id"), errbuf, &result)) {
-		int skill=0,ndx=0;
-		while((row = mysql_fetch_row(result))!=nullptr) {
-			skill=atoi(row[0]);
-			load[ndx] = GetAASkillVars(skill);
-			load[ndx]->seq = ndx+1;
-			ndx++;
+
+	std::string query = "SELECT skill_id FROM altadv_vars ORDER BY skill_id";
+	auto results = QueryDatabase(query);
+	if (results.Success()) {
+		int skill = 0, index = 0;
+		for (auto row = results.begin(); row != results.end(); ++row, ++index) {
+			skill = atoi(row[0]);
+			load[index] = GetAASkillVars(skill);
+			load[index]->seq = index+1;
 		}
-		mysql_free_result(result);
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadAAs query '%s': %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadAAs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 	}
-	safe_delete_array(query);
 
 	AARequiredLevelAndCost.clear();
+    query = "SELECT skill_id, level, cost from aa_required_level_cost order by skill_id";
+    results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadAAs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return;
+    }
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT skill_id, level, cost from aa_required_level_cost order by skill_id"), errbuf, &result))
-	{
-		AALevelCost_Struct aalcs;
-		while((row = mysql_fetch_row(result))!=nullptr)
-		{
-			aalcs.Level = atoi(row[1]);
-			aalcs.Cost = atoi(row[2]);
-			AARequiredLevelAndCost[atoi(row[0])] = aalcs;
-		}
-		mysql_free_result(result);
-	}
-	else
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadAAs query '%s': %s", query, errbuf);
+    AALevelCost_Struct aalcs;
+    for (auto row = results.begin(); row != results.end(); ++row)
+    {
+        aalcs.Level = atoi(row[1]);
+        aalcs.Cost = atoi(row[2]);
+        AARequiredLevelAndCost[atoi(row[0])] = aalcs;
+    }
 
-	safe_delete_array(query);
 }
 
 SendAA_Struct* ZoneDatabase::GetAASkillVars(uint32 skill_id)
