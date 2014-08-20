@@ -2091,56 +2091,51 @@ void Zone::LoadLDoNTrapEntries()
 void Zone::LoadVeteranRewards()
 {
 	VeteranRewards.clear();
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	InternalVeteranReward current_reward;
-	uint8 idx = 0;
 
+	InternalVeteranReward current_reward;
 	current_reward.claim_id = 0;
 
+    const std::string query = "SELECT claim_id, name, item_id, charges "
+                            "FROM veteran_reward_templates "
+                            "WHERE reward_slot < 8 and claim_id > 0 "
+                            "ORDER by claim_id, reward_slot";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Zone::LoadVeteranRewards: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+        return;
+    }
 
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT claim_id, name, item_id, charges FROM"
-		" veteran_reward_templates WHERE reward_slot < 8 and claim_id > 0 ORDER by claim_id, reward_slot"),
-		errbuf,&result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			uint32 claim = atoi(row[0]);
-			if(claim != current_reward.claim_id)
-			{
-				if(current_reward.claim_id != 0)
-				{
-					current_reward.claim_count = idx;
-					current_reward.number_available = 1;
-					VeteranRewards.push_back(current_reward);
-				}
-				idx = 0;
-				memset(&current_reward, 0, sizeof(InternalVeteranReward));
-				current_reward.claim_id = claim;
-			}
+	int index = 0;
+    for (auto row = results.begin(); row != results.end(); ++row, ++index)
+    {
+        uint32 claim = atoi(row[0]);
 
-			strcpy(current_reward.items[idx].item_name, row[1]);
-			current_reward.items[idx].item_id = atoi(row[2]);
-			current_reward.items[idx].charges = atoi(row[3]);
-			idx++;
-		}
+        if(claim != current_reward.claim_id)
+        {
+            if(current_reward.claim_id != 0)
+            {
+                current_reward.claim_count = index;
+                current_reward.number_available = 1;
+                VeteranRewards.push_back(current_reward);
+            }
 
-		if(current_reward.claim_id != 0)
-		{
-			current_reward.claim_count = idx;
-			current_reward.number_available = 1;
-			VeteranRewards.push_back(current_reward);
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadVeteranRewards: %s (%s)", query, errbuf);
-		safe_delete_array(query);
-	}
+            index = 0;
+            memset(&current_reward, 0, sizeof(InternalVeteranReward));
+            current_reward.claim_id = claim;
+        }
+
+        strcpy(current_reward.items[index].item_name, row[1]);
+        current_reward.items[index].item_id = atoi(row[2]);
+        current_reward.items[index].charges = atoi(row[3]);
+    }
+
+    if(current_reward.claim_id != 0)
+    {
+        current_reward.claim_count = index;
+        current_reward.number_available = 1;
+        VeteranRewards.push_back(current_reward);
+    }
+
 }
 
 void Zone::LoadAlternateCurrencies()
