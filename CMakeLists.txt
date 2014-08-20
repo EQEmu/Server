@@ -259,7 +259,7 @@ OPTION(EQEMU_BUILD_CLIENT_FILES "Build Client Import/Export Data Programs." ON)
 
 #C++11 stuff
 IF(NOT MSVC)
-	ADD_DEFINITIONS(-std=c++0x)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 ENDIF(NOT MSVC)
 
 #Various definitions
