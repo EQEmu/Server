@@ -451,29 +451,29 @@ void Zone::LoadTempMerchantData_result(MYSQL_RES* result) {
 
 //there should prolly be a temp counterpart of this...
 void Zone::LoadNewMerchantData(uint32 merchantid){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+
 	std::list<MerchantList> merlist;
-	if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT item, slot, faction_required, level_required, alt_currency_cost, classes_required FROM merchantlist WHERE merchantid=%d", merchantid), errbuf, &result)) {
-		while((row = mysql_fetch_row(result))) {
-			MerchantList ml;
-			ml.id = merchantid;
-			ml.item = atoul(row[0]);
-			ml.slot = atoul(row[1]);
-			ml.faction_required = atoul(row[2]);
-			ml.level_required = atoul(row[3]);
-			ml.alt_currency_cost = atoul(row[3]);
-			ml.classes_required = atoul(row[4]);
-			merlist.push_back(ml);
-		}
-		merchanttable[merchantid] = merlist;
-		mysql_free_result(result);
-	}
-	else
-		LogFile->write(EQEMuLog::Error, "Error in LoadNewMerchantData query '%s' %s", query, errbuf);
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT item, slot, faction_required, level_required, alt_currency_cost, "
+                                    "classes_required FROM merchantlist WHERE merchantid=%d", merchantid);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadNewMerchantData query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
+        return;
+    }
+
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        MerchantList ml;
+        ml.id = merchantid;
+        ml.item = atoul(row[0]);
+        ml.slot = atoul(row[1]);
+        ml.faction_required = atoul(row[2]);
+        ml.level_required = atoul(row[3]);
+        ml.alt_currency_cost = atoul(row[3]);
+        ml.classes_required = atoul(row[4]);
+        merlist.push_back(ml);
+    }
+
+    merchanttable[merchantid] = merlist;
 }
 
 void Zone::LoadMerchantData_result(MYSQL_RES* result) {
