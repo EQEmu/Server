@@ -1714,24 +1714,20 @@ void ZoneDatabase::FillAAEffects(SendAA_Struct* aa_struct){
 	if(!aa_struct)
 		return;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT effectid, base1, base2, slot from aa_effects where aaid=%i order by slot asc", aa_struct->id), errbuf, &result)) {
-		int ndx=0;
-		while((row = mysql_fetch_row(result))!=nullptr) {
-			aa_struct->abilities[ndx].skill_id=atoi(row[0]);
-			aa_struct->abilities[ndx].base1=atoi(row[1]);
-			aa_struct->abilities[ndx].base2=atoi(row[2]);
-			aa_struct->abilities[ndx].slot=atoi(row[3]);
-			ndx++;
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in Client::FillAAEffects query: '%s': %s", query, errbuf);
+	std::string query = StringFormat("SELECT effectid, base1, base2, slot from aa_effects where aaid=%i order by slot asc", aa_struct->id);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Client::FillAAEffects query: '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return;
 	}
-	safe_delete_array(query);
+
+	int index = 0;
+    for (auto row = results.begin(); row != results.end(); ++row, ++index) {
+		aa_struct->abilities[index].skill_id=atoi(row[0]);
+		aa_struct->abilities[index].base1=atoi(row[1]);
+		aa_struct->abilities[index].base2=atoi(row[2]);
+		aa_struct->abilities[index].slot=atoi(row[3]);
+	}
 }
 
 uint32 ZoneDatabase::CountAAs(){
