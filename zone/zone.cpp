@@ -2192,28 +2192,18 @@ void Zone::DeleteQGlobal(std::string name, uint32 npcID, uint32 charID, uint32 z
 
 void Zone::LoadAdventureFlavor()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, text FROM adventure_template_entry_flavor"), errbuf, &result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			uint32 id = atoi(row[0]);
-			std::string in_str = row[1];
-			adventure_entry_list_flavor[id] = in_str;
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadAdventureFlavor: %s (%s)", query, errbuf);
-		safe_delete_array(query);
+	const std::string query = "SELECT id, text FROM adventure_template_entry_flavor";
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Zone::LoadAdventureFlavor: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        uint32 id = atoi(row[0]);
+        adventure_entry_list_flavor[id] = row[1];
+    }
+
 }
 
 void Zone::DoAdventureCountIncrease()
