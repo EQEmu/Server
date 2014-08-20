@@ -1747,22 +1747,21 @@ uint32 ZoneDatabase::CountAAs(){
 	return atoi(row[0]);;
 }
 
-uint32 ZoneDatabase::CountAAEffects(){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	int count=0;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT count(id) from aa_effects"), errbuf, &result)) {
-		if((row = mysql_fetch_row(result))!=nullptr){
-			count = atoi(row[0]);
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::CountAALevels query '%s': %s", query, errbuf);
+uint32 ZoneDatabase::CountAAEffects() {
+
+	const std::string query = "SELECT count(id) FROM aa_effects";
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::CountAALevels query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return 0;
 	}
-	safe_delete_array(query);
-	return count;
+
+	if (results.RowCount() != 1)
+        return 0;
+
+    auto row = results.begin();
+
+	return atoi(row[0]);
 }
 
 uint32 ZoneDatabase::GetSizeAA(){
