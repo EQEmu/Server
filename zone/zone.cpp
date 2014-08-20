@@ -2265,31 +2265,25 @@ void Zone::DoAdventureActions()
 
 void Zone::LoadNPCEmotes(LinkedList<NPC_Emote_Struct*>* NPCEmoteList)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	NPCEmoteList->Clear();
 
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT emoteid, event_, type, text FROM npc_emotes"), errbuf, &result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			NPC_Emote_Struct* nes = new NPC_Emote_Struct;
-			nes->emoteid = atoi(row[0]);
-			nes->event_ = atoi(row[1]);
-			nes->type = atoi(row[2]);
-			strn0cpy(nes->text, row[3], sizeof(nes->text));
-			NPCEmoteList->Insert(nes);
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadNPCEmotes: %s (%s)", query, errbuf);
-		safe_delete_array(query);
-	}
+	NPCEmoteList->Clear();
+    const std::string query = "SELECT emoteid, event_, type, text FROM npc_emotes";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Zone::LoadNPCEmotes: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+        return;
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row)
+    {
+        NPC_Emote_Struct* nes = new NPC_Emote_Struct;
+        nes->emoteid = atoi(row[0]);
+        nes->event_ = atoi(row[1]);
+        nes->type = atoi(row[2]);
+        strn0cpy(nes->text, row[3], sizeof(nes->text));
+        NPCEmoteList->Insert(nes);
+    }
+
 }
 
 void Zone::ReloadWorld(uint32 Option){
