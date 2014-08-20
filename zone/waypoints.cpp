@@ -1219,19 +1219,20 @@ void ZoneDatabase::AddWP(Client *client, uint32 gridid, uint32 wpnum, float xpos
 *	wp_num:		The number of the waypoint being deleted
 *	zoneid:		The ID number of the zone that contains the waypoint being deleted
 */
-
-void ZoneDatabase::DeleteWaypoint(Client *c, uint32 grid_num, uint32 wp_num, uint16 zoneid)
+void ZoneDatabase::DeleteWaypoint(Client *client, uint32 grid_num, uint32 wp_num, uint16 zoneid)
 {
-	char *query=0;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-
-	if(!RunQuery(query, MakeAnyLenString(&query,"DELETE FROM grid_entries where gridid=%i and zoneid=%i and `number`=%i",grid_num,zoneid,wp_num), errbuf)) {
-			LogFile->write(EQEMuLog::Error, "Error deleting waypoint '%s': '%s'", query, errbuf);
-	} else {
-		if(c) c->LogSQL(query);
+	std::string query = StringFormat("DELETE FROM grid_entries WHERE "
+                                    "gridid = %i AND zoneid = %i AND `number` = %i",
+                                    grid_num, zoneid, wp_num);
+    auto results = QueryDatabase(query);
+	if(!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error deleting waypoint '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+		return;
 	}
-	safe_delete_array(query);
-} /*** END ZoneDatabase::DeleteWaypoint() ***/
+
+	if(client)
+        client->LogSQL(query.c_str());
+}
 
 
 /******************
