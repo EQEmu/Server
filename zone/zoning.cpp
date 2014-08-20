@@ -723,16 +723,11 @@ void Client::SetZoneFlag(uint32 zone_id) {
 
 	zone_flags.insert(zone_id);
 
-	//update the DB
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
 	// Retrieve all waypoints for this grid
-	if(!database.RunQuery(query,MakeAnyLenString(&query,
-		"INSERT INTO zone_flags (charID,zoneID) VALUES(%d,%d)",
-		CharacterID(),zone_id),errbuf)) {
-		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to set zone flag for %s: %s", GetName(), errbuf);
-	}
+	std::string query = StringFormat("INSERT INTO zone_flags (charID,zoneID) VALUES(%d,%d)", CharacterID(), zone_id);
+	auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to set zone flag for %s: %s", GetName(), results.ErrorMessage().c_str());
 }
 
 void Client::ClearZoneFlag(uint32 zone_id) {
