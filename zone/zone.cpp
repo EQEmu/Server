@@ -541,75 +541,69 @@ void Zone::GetMerchantDataForZoneLoad(){
 
 void Zone::LoadMercTemplates(){
 
-	std::string errorMessage;
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES* DatasetResult;
-	MYSQL_ROW DataRow;
 	std::list<MercStanceInfo> merc_stances;
 	merc_templates.clear();
-
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT `class_id`, `proficiency_id`, `stance_id`, `isdefault` FROM `merc_stance_entries` order by `class_id`, `proficiency_id`, `stance_id`"), TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
-	}
+    std::string query = "SELECT `class_id`, `proficiency_id`, `stance_id`, `isdefault` FROM "
+                        "`merc_stance_entries` ORDER BY `class_id`, `proficiency_id`, `stance_id`";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadMercTemplates()");
 	else {
-		while(DataRow = mysql_fetch_row(DatasetResult)) {
+		for (auto row = results.begin(); row != results.end(); ++row) {
 			MercStanceInfo tempMercStanceInfo;
 
-			tempMercStanceInfo.ClassID = atoi(DataRow[0]);
-			tempMercStanceInfo.ProficiencyID = atoi(DataRow[1]);
-			tempMercStanceInfo.StanceID = atoi(DataRow[2]);
-			tempMercStanceInfo.IsDefault = atoi(DataRow[3]);
+			tempMercStanceInfo.ClassID = atoi(row[0]);
+			tempMercStanceInfo.ProficiencyID = atoi(row[1]);
+			tempMercStanceInfo.StanceID = atoi(row[2]);
+			tempMercStanceInfo.IsDefault = atoi(row[3]);
 
 			merc_stances.push_back(tempMercStanceInfo);
 		}
-
-		mysql_free_result(DatasetResult);
 	}
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT DISTINCT MTem.merc_template_id, MTyp.dbstring AS merc_type_id, MTem.dbstring AS merc_subtype_id, MTyp.race_id, MS.class_id, MTyp.proficiency_id, MS.tier_id, 0 AS CostFormula, MTem.clientversion, MTem.merc_npc_type_id FROM merc_types MTyp, merc_templates MTem, merc_subtypes MS WHERE MTem.merc_type_id = MTyp.merc_type_id AND MTem.merc_subtype_id = MS.merc_subtype_id ORDER BY MTyp.race_id, MS.class_id, MTyp.proficiency_id;"), TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
-	}
-	else {
-		while(DataRow = mysql_fetch_row(DatasetResult)) {
-			int stanceIndex = 0;
-			MercTemplate tempMercTemplate;
-
-			tempMercTemplate.MercTemplateID = atoi(DataRow[0]);
-			tempMercTemplate.MercType = atoi(DataRow[1]);
-			tempMercTemplate.MercSubType = atoi(DataRow[2]);
-			tempMercTemplate.RaceID = atoi(DataRow[3]);
-			tempMercTemplate.ClassID = atoi(DataRow[4]);
-			tempMercTemplate.ProficiencyID = atoi(DataRow[5]);
-			tempMercTemplate.TierID = atoi(DataRow[6]);
-			tempMercTemplate.CostFormula = atoi(DataRow[7]);
-			tempMercTemplate.ClientVersion = atoi(DataRow[8]);
-			tempMercTemplate.MercNPCID = atoi(DataRow[9]);
-
-			for(int i = 0; i < MaxMercStanceID; i++) {
-				tempMercTemplate.Stances[i] = 0;
-			}
-
-			for (std::list<MercStanceInfo>::iterator mercStanceListItr = merc_stances.begin(); mercStanceListItr != merc_stances.end(); ++mercStanceListItr) {
-				if(mercStanceListItr->ClassID == tempMercTemplate.ClassID && mercStanceListItr->ProficiencyID == tempMercTemplate.ProficiencyID) {
-					zone->merc_stance_list[tempMercTemplate.MercTemplateID].push_back((*mercStanceListItr));
-					tempMercTemplate.Stances[stanceIndex] = mercStanceListItr->StanceID;
-					stanceIndex++;
-				}
-			}
-
-			merc_templates[tempMercTemplate.MercTemplateID] = tempMercTemplate;
-		}
-
-		mysql_free_result(DatasetResult);
+    query = "SELECT DISTINCT MTem.merc_template_id, MTyp.dbstring "
+            "AS merc_type_id, MTem.dbstring "
+            "AS merc_subtype_id, MTyp.race_id, MS.class_id, MTyp.proficiency_id, MS.tier_id, 0 "
+            "AS CostFormula, MTem.clientversion, MTem.merc_npc_type_id "
+            "FROM merc_types MTyp, merc_templates MTem, merc_subtypes MS "
+            "WHERE MTem.merc_type_id = MTyp.merc_type_id AND MTem.merc_subtype_id = MS.merc_subtype_id "
+            "ORDER BY MTyp.race_id, MS.class_id, MTyp.proficiency_id;";
+    results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadMercTemplates()");
+        return;
 	}
 
-	safe_delete_array(Query);
-	Query = 0;
+    for (auto row = results.begin(); row != results.end(); ++row) {
 
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadMercTemplates()");
-	}
+        MercTemplate tempMercTemplate;
+
+        tempMercTemplate.MercTemplateID = atoi(row[0]);
+        tempMercTemplate.MercType = atoi(row[1]);
+        tempMercTemplate.MercSubType = atoi(row[2]);
+        tempMercTemplate.RaceID = atoi(row[3]);
+        tempMercTemplate.ClassID = atoi(row[4]);
+        tempMercTemplate.ProficiencyID = atoi(row[5]);
+        tempMercTemplate.TierID = atoi(row[6]);
+        tempMercTemplate.CostFormula = atoi(row[7]);
+        tempMercTemplate.ClientVersion = atoi(row[8]);
+        tempMercTemplate.MercNPCID = atoi(row[9]);
+
+        for(int i = 0; i < MaxMercStanceID; i++)
+            tempMercTemplate.Stances[i] = 0;
+
+        int stanceIndex = 0;
+        for (std::list<MercStanceInfo>::iterator mercStanceListItr = merc_stances.begin(); mercStanceListItr != merc_stances.end(); ++mercStanceListItr, ++stanceIndex) {
+            if(mercStanceListItr->ClassID != tempMercTemplate.ClassID || mercStanceListItr->ProficiencyID != tempMercTemplate.ProficiencyID)
+                continue;
+
+            zone->merc_stance_list[tempMercTemplate.MercTemplateID].push_back((*mercStanceListItr));
+            tempMercTemplate.Stances[stanceIndex] = mercStanceListItr->StanceID;
+        }
+
+        merc_templates[tempMercTemplate.MercTemplateID] = tempMercTemplate;
+    }
+
 }
 
 
