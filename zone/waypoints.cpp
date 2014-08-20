@@ -1156,41 +1156,43 @@ void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
 *	type,type2:	The type and type2 values for the grid being created (ignored if grid is being deleted)
 *	zoneid:		The ID number of the zone the grid is being created/deleted in
 */
+void ZoneDatabase::ModifyGrid(Client *client, bool remove, uint32 id, uint8 type, uint8 type2, uint16 zoneid) {
 
-void ZoneDatabase::ModifyGrid(Client *c, bool remove, uint32 id, uint8 type, uint8 type2, uint16 zoneid) {
-	char *query = 0;
-	char errbuf[MYSQL_ERRMSG_SIZE];
 	if (!remove)
 	{
-		if(!RunQuery(query, MakeAnyLenString(&query,"INSERT INTO grid(id,zoneid,type,type2) VALUES(%i,%i,%i,%i)",id,zoneid,type,type2), errbuf)) {
-			LogFile->write(EQEMuLog::Error, "Error creating grid entry '%s': '%s'", query, errbuf);
-		} else {
-			if(c) c->LogSQL(query);
-		}
-		safe_delete_array(query);
+        std::string query = StringFormat("INSERT INTO grid(id, zoneid, type, type2) "
+                                            "VALUES (%i, %i, %i, %i)", id, zoneid, type, type2);
+        auto results = QueryDatabase(query);
+        if (!results.Success()) {
+            LogFile->write(EQEMuLog::Error, "Error creating grid entry '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+            return;
+        }
+
+        if(client)
+			client->LogSQL(query.c_str());
+
+		return;
 	}
-	else
-	{
-		if(!RunQuery(query, MakeAnyLenString(&query,"DELETE FROM grid where id=%i",id), errbuf)) {
-			LogFile->write(EQEMuLog::Error, "Error deleting grid '%s': '%s'", query, errbuf);
-		} else {
-			if(c) c->LogSQL(query);
-		}
-		safe_delete_array(query);
-		query = 0;
-		if(!RunQuery(query, MakeAnyLenString(&query,"DELETE FROM grid_entries WHERE zoneid=%i AND gridid=%i",zoneid,id), errbuf)) {
-			LogFile->write(EQEMuLog::Error, "Error deleting grid entries '%s': '%s'", query, errbuf);
-		} else {
-			if(c) c->LogSQL(query);
-		}
-		safe_delete_array(query);
-	}
-} /*** END ZoneDatabase::ModifyGrid() ***/
+
+    std::string query = StringFormat("DELETE FROM grid where id=%i", id);
+    auto results = QueryDatabase(query);
+    if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Error deleting grid '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+	else if(client)
+        client->LogSQL(query.c_str());
+
+    query = StringFormat("DELETE FROM grid_entries WHERE zoneid = %i AND gridid = %i", zoneid, id);
+    results = QueryDatabase(query);
+    if(!results.Success())
+        LogFile->write(EQEMuLog::Error, "Error deleting grid entries '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+    else if(client)
+        client->LogSQL(query.c_str());
+
+}
 
 /**************************************
 * AddWP - Adds a new waypoint to a specific grid for a specific zone.
 */
-
 void ZoneDatabase::AddWP(Client *c, uint32 gridid, uint32 wpnum, float xpos, float ypos, float zpos, uint32 pause, uint16 zoneid, float heading)
 {
 	char *query = 0;
