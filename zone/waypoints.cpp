@@ -1049,6 +1049,9 @@ uint8 ZoneDatabase::GetGridType2(uint32 grid, uint16 zoneid) {
 
 bool ZoneDatabase::GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* wp) {
 
+    if (wp == nullptr)
+        return false;
+
 	std::string query = StringFormat("SELECT x, y, z, pause, heading FROM grid_entries "
                                     "WHERE gridid = %i AND number = %i AND zoneid = %i", grid, num, zoneid);
     auto results = QueryDatabase(query);
@@ -1062,122 +1065,88 @@ bool ZoneDatabase::GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* 
 
     auto row = results.begin();
 
-    if (wp) {
-        wp->x = atof( row[0] );
-		wp->y = atof( row[1] );
-		wp->z = atof( row[2] );
-		wp->pause = atoi( row[3] );
-		wp->heading = atof( row[4] );
-    }
+    wp->x = atof(row[0]);
+    wp->y = atof(row[1]);
+    wp->z = atof(row[2]);
+    wp->pause = atoi(row[3]);
+    wp->heading = atof(row[4]);
 
     return true;
 }
 
 void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
 {
-	char *query = 0;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 	int matches = 0, fuzzy = 0, spawn2id = 0;
-	uint32 affected_rows;
 	float dbx = 0, dby = 0;
 
 	// looks like most of the stuff in spawn2 is straight integers
 	// so let's try that first
-	if(!RunQuery(
-		query,
-		MakeAnyLenString(
-			&query,
-			"SELECT id,x,y FROM spawn2 WHERE zone='%s' AND x=%i AND y=%i",
-			zone->GetShortName(), (int)x, (int)y
-		),
-		errbuf,
-		&result
-	)) {
-			LogFile->write(EQEMuLog::Error, "Error querying spawn2 '%s': '%s'", query, errbuf);
-			return;
+	std::string query = StringFormat("SELECT id, x, y FROM spawn2 WHERE zone = '%s' AND x = %i AND y = %i",
+                                    zone->GetShortName(), (int)x, (int)y);
+    auto results = QueryDatabase(query);
+	if(!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error querying spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+		return;
 	}
-	safe_delete_array(query);
 
 // how much it's allowed to be off by
 #define _GASSIGN_TOLERANCE	1.0
-	if(!(matches = mysql_num_rows(result)))	// try a fuzzy match if that didn't find it
+	if(results.RowCount() == 0)	// try a fuzzy match if that didn't find it
 	{
-		mysql_free_result(result);
-		if(!RunQuery(
-			query,
-			MakeAnyLenString(
-				&query,
-				"SELECT id,x,y FROM spawn2 WHERE zone='%s' AND "
-				"ABS( ABS(x) - ABS(%f) ) < %f AND "
-				"ABS( ABS(y) - ABS(%f) ) < %f",
-				zone->GetShortName(), x, _GASSIGN_TOLERANCE, y, _GASSIGN_TOLERANCE
-			),
-			errbuf,
-			&result
-		)) {
-			LogFile->write(EQEMuLog::Error, "Error querying fuzzy spawn2 '%s': '%s'", query, errbuf);
+        query = StringFormat("SELECT id,x,y FROM spawn2 WHERE zone='%s' AND "
+                            "ABS( ABS(x) - ABS(%f) ) < %f AND "
+                            "ABS( ABS(y) - ABS(%f) ) < %f",
+                            zone->GetShortName(), x, _GASSIGN_TOLERANCE, y, _GASSIGN_TOLERANCE);
+        results = QueryDatabase(query);
+		if(!results.Success()) {
+			LogFile->write(EQEMuLog::Error, "Error querying fuzzy spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 			return;
 		}
-		safe_delete_array(query);
+
 		fuzzy = 1;
-		if(!(matches = mysql_num_rows(result)))
-			mysql_free_result(result);
+		matches = results.RowCount();
 	}
-	if(matches)
+
+    if (matches == 0) {
+        client->Message(0, "ERROR: Unable to assign grid - can't find it in spawn2");
+        return;
+    }
+
+    if(matches == 1)
 	{
-		if(matches > 1)
-		{
-			client->Message(0, "ERROR: Unable to assign grid - multiple spawn2 rows match");
-			mysql_free_result(result);
-		}
-		else
-		{
-			row = mysql_fetch_row(result);
-			spawn2id = atoi(row[0]);
-			dbx = atof(row[1]);
-			dby = atof(row[2]);
-			if(!RunQuery(
-				query,
-				MakeAnyLenString(
-					&query,
-					"UPDATE spawn2 SET pathgrid = %d WHERE id = %d", grid, spawn2id
-				),
-				errbuf,
-				&result,
-				&affected_rows
-			)) {
-				LogFile->write(EQEMuLog::Error, "Error updating spawn2 '%s': '%s'", query, errbuf);
-				return;
-			}
-			if(affected_rows == 1)
-			{
-				if(client) client->LogSQL(query);
-				if(fuzzy)
-				{
-					float difference;
-					difference = sqrtf(pow(fabs(x-dbx),2) + pow(fabs(y-dby),2));
-					client->Message(0,
-						"Grid assign: spawn2 id = %d updated - fuzzy match: deviation %f",
-						spawn2id, difference
-					);
-				}
-				else
-				{
-					client->Message(0, "Grid assign: spawn2 id = %d updated - exact match", spawn2id);
-				}
-			}
-			else
-			{
-				client->Message(0, "ERROR: found spawn2 id %d but the update query failed", spawn2id);
-			}
-		}
+		client->Message(0, "ERROR: Unable to assign grid - multiple spawn2 rows match");
+		return;
 	}
-	else
+
+    auto row = results.begin();
+
+    spawn2id = atoi(row[0]);
+	dbx = atof(row[1]);
+	dby = atof(row[2]);
+
+	query = StringFormat("UPDATE spawn2 SET pathgrid = %d WHERE id = %d", grid, spawn2id);
+	results = QueryDatabase(query);
+	if (!results.Success())
 	{
-		client->Message(0, "ERROR: Unable to assign grid - can't find it in spawn2");
-	}
+		LogFile->write(EQEMuLog::Error, "Error updating spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+		return;
+    }
+
+    if (results.RowsAffected() != 1) {
+        client->Message(0, "ERROR: found spawn2 id %d but the update query failed", spawn2id);
+        return;
+    }
+
+    if(client)
+        client->LogSQL(query.c_str());
+
+    if(!fuzzy) {
+        client->Message(0, "Grid assign: spawn2 id = %d updated - exact match", spawn2id);
+        return;
+    }
+
+    float difference = sqrtf(pow(fabs(x - dbx) , 2) + pow(fabs(y - dby), 2));
+    client->Message(0, "Grid assign: spawn2 id = %d updated - fuzzy match: deviation %f", spawn2id, difference);
 }
 
 /******************
