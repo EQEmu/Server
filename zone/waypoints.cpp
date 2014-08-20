@@ -869,97 +869,78 @@ void NPC::AssignWaypoints(int32 grid) {
 		return;
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	bool GridErr = false, WPErr = false;
 	Waypoints.clear();
+    roamer = false;
 
 	// Retrieve the wander and pause types for this grid
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `type`,`type2` FROM `grid` WHERE `id`=%i AND `zoneid`=%i",grid,zone->GetZoneID()),errbuf, &result))
-	{
-		if((row = mysql_fetch_row(result)))
-		{
-			if(row[0] != 0)
-				wandertype = atoi(row[0]);
-			else
-				wandertype = 0;
-			if(row[1] != 0)
-				pausetype = atoi(row[1]);
-			else
-				pausetype = 0;
-		}
-		else	// No grid record found in this zone for the given ID
-		GridErr = true;
-		mysql_free_result(result);
+	std::string query = StringFormat("SELECT `type`, `type2` FROM `grid` WHERE `id` = %i AND `zoneid` = %i", grid, zone->GetZoneID());
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "MySQL Error while trying to assign grid %u to mob %s: %s", grid, name, results.ErrorMessage().c_str());
+        return;
 	}
-	else	// DB query error!
-	{
-		GridErr = true;
-		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to assign grid %u to mob %s: %s", grid, name, errbuf);
-	}
-	safe_delete_array(query);
 
-	if(!GridErr)
-	{
-		this->CastToNPC()->SetGrid(grid);	// Assign grid number
+	if (results.RowCount() == 0)
+        return;
 
-		// Retrieve all waypoints for this grid
-		if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `x`,`y`,`z`,`pause`,`heading` FROM grid_entries WHERE `gridid`=%i AND `zoneid`=%i ORDER BY `number`",grid,zone->GetZoneID()),errbuf,&result))
-		{
-			roamer = true;
-			max_wp = -1;	// Initialize it; will increment it for each waypoint successfully added to the list
+	auto row = results.begin();
 
-			while((row = mysql_fetch_row(result)))
-			{
-				if(row[0] != 0 && row[1] != 0 && row[2] != 0 && row[3] != 0)
-				{
-					wplist newwp;
-					newwp.index = ++max_wp;
-					newwp.x = atof(row[0]);
-					newwp.y = atof(row[1]);
-					newwp.z = atof(row[2]);
+    wandertype = atoi(row[0]);
+    pausetype = atoi(row[1]);
 
-					if(zone->HasMap() && RuleB(Map, FixPathingZWhenLoading) )
-					{
-						if(!RuleB(Watermap, CheckWaypointsInWaterWhenLoading) || !zone->HasWaterMap() ||
-						(zone->HasWaterMap() && !zone->watermap->InWater(newwp.x, newwp.y, newwp.z)))
-						{
-							Map::Vertex dest(newwp.x, newwp.y, newwp.z);
 
-							float newz = zone->zonemap->FindBestZ(dest, nullptr);
+    this->CastToNPC()->SetGrid(grid);	// Assign grid number
 
-							if( (newz > -2000) && ABS(newz-dest.z) < RuleR(Map, FixPathingZMaxDeltaLoading))
-								newwp.z = newz + 1;
-						}
-					}
+    // Retrieve all waypoints for this grid
+    query = StringFormat("SELECT `x`,`y`,`z`,`pause`,`heading` "
+                        "FROM grid_entries WHERE `gridid` = %i AND `zoneid` = %i "
+                        "ORDER BY `number`", grid, zone->GetZoneID());
+    results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "MySQL Error while trying to assign waypoints from grid %u to mob %s: %s", grid, name, results.ErrorMessage().c_str());
+        return;
+    }
 
-					newwp.pause = atoi(row[3]);
-					newwp.heading = atof(row[4]);
-					Waypoints.push_back(newwp);
-				}
-			}
-			mysql_free_result(result);
-		}
-		else	// DB query error!
-		{
-			WPErr = true;
-			LogFile->write(EQEMuLog::Error, "MySQL Error while trying to assign waypoints from grid %u to mob %s: %s", grid, name, errbuf);
-		}
-		safe_delete_array(query);
-	} // end if (!GridErr)
+    roamer = true;
+    max_wp = 0;	// Initialize it; will increment it for each waypoint successfully added to the list
+
+    for (auto row = results.begin(); row != results.end(); ++row, ++max_wp)
+    {
+        wplist newwp;
+        newwp.index = max_wp;
+        newwp.x = atof(row[0]);
+        newwp.y = atof(row[1]);
+        newwp.z = atof(row[2]);
+
+        if(zone->HasMap() && RuleB(Map, FixPathingZWhenLoading) )
+        {
+            if(!RuleB(Watermap, CheckWaypointsInWaterWhenLoading) || !zone->HasWaterMap() ||
+                (zone->HasWaterMap() && !zone->watermap->InWater(newwp.x, newwp.y, newwp.z)))
+            {
+                Map::Vertex dest(newwp.x, newwp.y, newwp.z);
+
+                float newz = zone->zonemap->FindBestZ(dest, nullptr);
+
+                if( (newz > -2000) && ABS(newz-dest.z) < RuleR(Map, FixPathingZMaxDeltaLoading))
+                    newwp.z = newz + 1;
+            }
+        }
+
+        newwp.pause = atoi(row[3]);
+        newwp.heading = atof(row[4]);
+        Waypoints.push_back(newwp);
+    }
+
 	if(Waypoints.size() < 2) {
 		roamer = false;
-	} else if(!GridErr && !WPErr) {
-		UpdateWaypoint(0);
-		SetWaypointPause();
-		if (wandertype == 1 || wandertype == 2 || wandertype == 5)
-			CalculateNewWaypoint();
-	} else {
-		roamer = false;
 	}
+
+    UpdateWaypoint(0);
+    SetWaypointPause();
+
+    if (wandertype == 1 || wandertype == 2 || wandertype == 5)
+        CalculateNewWaypoint();
+
 }
 
 void Mob::SendTo(float new_x, float new_y, float new_z) {
