@@ -736,16 +736,12 @@ void Client::ClearZoneFlag(uint32 zone_id) {
 
 	zone_flags.erase(zone_id);
 
-	//update the DB
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
 	// Retrieve all waypoints for this grid
-	if(!database.RunQuery(query,MakeAnyLenString(&query,
-		"DELETE FROM zone_flags WHERE charID=%d AND zoneID=%d",
-		CharacterID(),zone_id),errbuf)) {
-		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to clear zone flag for %s: %s", GetName(), errbuf);
-	}
+	std::string query = StringFormat("DELETE FROM zone_flags WHERE charID=%d AND zoneID=%d", CharacterID(), zone_id);
+	auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to clear zone flag for %s: %s", GetName(), results.ErrorMessage().c_str());
+
 }
 
 void Client::LoadZoneFlags() {
