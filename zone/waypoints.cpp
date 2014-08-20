@@ -1315,28 +1315,22 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *client, uint32 spawn2id, float xpos, 
 }
 
 uint32 ZoneDatabase::GetFreeGrid(uint16 zoneid) {
-	char *query = 0;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (RunQuery(query, MakeAnyLenString(&query,"SELECT max(id) from grid where zoneid = %i",zoneid),errbuf,&result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			uint32 tmp=0;
-			if (row[0])
-				tmp = atoi(row[0]);
-			mysql_free_result(result);
-			tmp++;
-			return tmp;
-		}
-		mysql_free_result(result);
+
+	std::string query = StringFormat("SELECT max(id) FROM grid WHERE zoneid = %i", zoneid);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in GetFreeGrid query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return 0;
 	}
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in GetFreeGrid query '%s': %s", query, errbuf);
-		safe_delete_array(query);
-	}
-	return 0;
+
+	if (results.RowCount() != 1)
+        return 0;
+
+    auto row = results.begin();
+    uint32 freeGridID = 1;
+	freeGridID = atoi(row[0]) + 1;
+
+    return freeGridID;
 }
 
 int ZoneDatabase::GetHighestWaypoint(uint32 zoneid, uint32 gridid) {
