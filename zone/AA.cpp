@@ -1466,32 +1466,30 @@ void Zone::LoadAAs() {
 bool ZoneDatabase::LoadAAEffects2() {
 	aa_effects.clear();	//start fresh
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT aaid, slot, effectid, base1, base2 FROM aa_effects ORDER BY aaid ASC, slot ASC"), errbuf, &result)) {
-		int count = 0;
-		while((row = mysql_fetch_row(result))!= nullptr) {
-			int aaid = atoi(row[0]);
-			int slot = atoi(row[1]);
-			int effectid = atoi(row[2]);
-			int base1 = atoi(row[3]);
-			int base2 = atoi(row[4]);
-			aa_effects[aaid][slot].skill_id = effectid;
-			aa_effects[aaid][slot].base1 = base1;
-			aa_effects[aaid][slot].base2 = base2;
-			aa_effects[aaid][slot].slot = slot;	//not really needed, but we'll populate it just in case
-			count++;
-		}
-		mysql_free_result(result);
-		if (count < 1)	//no results
-			LogFile->write(EQEMuLog::Error, "Error loading AA Effects, none found in the database.");
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadAAEffects2 query: '%s': %s", query, errbuf);
+	const std::string query = "SELECT aaid, slot, effectid, base1, base2 FROM aa_effects ORDER BY aaid ASC, slot ASC";
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadAAEffects2 query: '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
-	safe_delete_array(query);
+
+	if (results.RowCount()) { //no results
+        LogFile->write(EQEMuLog::Error, "Error loading AA Effects, none found in the database.");
+        return false;
+	}
+
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        int aaid = atoi(row[0]);
+        int slot = atoi(row[1]);
+        int effectid = atoi(row[2]);
+        int base1 = atoi(row[3]);
+        int base2 = atoi(row[4]);
+        aa_effects[aaid][slot].skill_id = effectid;
+        aa_effects[aaid][slot].base1 = base1;
+        aa_effects[aaid][slot].base2 = base2;
+        aa_effects[aaid][slot].slot = slot;	//not really needed, but we'll populate it just in case
+    }
+
 	return true;
 }
 void Client::ResetAA(){
