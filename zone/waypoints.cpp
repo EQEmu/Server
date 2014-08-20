@@ -1193,18 +1193,20 @@ void ZoneDatabase::ModifyGrid(Client *client, bool remove, uint32 id, uint8 type
 /**************************************
 * AddWP - Adds a new waypoint to a specific grid for a specific zone.
 */
-void ZoneDatabase::AddWP(Client *c, uint32 gridid, uint32 wpnum, float xpos, float ypos, float zpos, uint32 pause, uint16 zoneid, float heading)
+void ZoneDatabase::AddWP(Client *client, uint32 gridid, uint32 wpnum, float xpos, float ypos, float zpos, uint32 pause, uint16 zoneid, float heading)
 {
-	char *query = 0;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-
-	if(!RunQuery(query,MakeAnyLenString(&query,"INSERT INTO grid_entries (gridid,zoneid,`number`,x,y,z,pause,heading) values (%i,%i,%i,%f,%f,%f,%i,%f)",gridid,zoneid,wpnum,xpos,ypos,zpos,pause,heading), errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error adding waypoint '%s': '%s'", query, errbuf);
-	} else {
-		if(c) c->LogSQL(query);
+	std::string query = StringFormat("INSERT INTO grid_entries (gridid, zoneid, `number`, x, y, z, pause, heading) "
+                                    "VALUES (%i, %i, %i, %f, %f, %f, %i, %f)",
+                                    gridid, zoneid, wpnum, xpos, ypos, zpos, pause, heading);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error adding waypoint '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+		return;
 	}
-	safe_delete_array(query);
-} /*** END ZoneDatabase::AddWP() ***/
+
+    if(client)
+        client->LogSQL(query.c_str());
+}
 
 
 /**********
