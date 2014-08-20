@@ -1845,32 +1845,26 @@ bool Zone::RemoveSpawnGroup(uint32 in_id) {
 
 // Added By Hogie
 bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct* npcCorpseDecayTimes) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	int i = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT varname, value FROM variables WHERE varname like 'decaytime%%' ORDER BY varname"), errbuf, &result)) {
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result))) {
-			Seperator sep(row[0]);
-			npcCorpseDecayTimes[i].minlvl = atoi(sep.arg[1]);
-			npcCorpseDecayTimes[i].maxlvl = atoi(sep.arg[2]);
-			if (atoi(row[1]) > 7200)
-				npcCorpseDecayTimes[i].seconds = 720;
-			else
-				npcCorpseDecayTimes[i].seconds = atoi(row[1]);
-			i++;
-		}
-		mysql_free_result(result);
-	}
-	else {
-		safe_delete_array(query);
-		return false;
-	}
+	const std::string query = "SELECT varname, value FROM variables WHERE varname LIKE 'decaytime%%' ORDER BY varname";
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+        return false;
+
+	int index = 0;
+    for (auto row = results.begin(); row != results.end(); ++row, ++index) {
+        Seperator sep(row[0]);
+        npcCorpseDecayTimes[index].minlvl = atoi(sep.arg[1]);
+        npcCorpseDecayTimes[index].maxlvl = atoi(sep.arg[2]);
+
+        if (atoi(row[1]) > 7200)
+            npcCorpseDecayTimes[index].seconds = 720;
+        else
+            npcCorpseDecayTimes[index].seconds = atoi(row[1]);
+    }
+
 	return true;
-}// Added By Hogie -- End
+}
 
 void Zone::weatherSend()
 {
