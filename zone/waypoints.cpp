@@ -1048,31 +1048,29 @@ uint8 ZoneDatabase::GetGridType2(uint32 grid, uint16 zoneid) {
 }
 
 bool ZoneDatabase::GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* wp) {
-	char *query = 0;
-	char errbuff[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (RunQuery(query, MakeAnyLenString(&query,"SELECT x, y, z, pause, heading from grid_entries where gridid = %i and number = %i and zoneid = %i",grid,num,zoneid),errbuff,&result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			if ( wp ) {
-				wp->x = atof( row[0] );
-				wp->y = atof( row[1] );
-				wp->z = atof( row[2] );
-				wp->pause = atoi( row[3] );
-				wp->heading = atof( row[4] );
-			}
-			mysql_free_result(result);
-			return true;
-		}
-		mysql_free_result(result);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in GetWaypoints query '%s': %s", query, errbuff);
-		safe_delete_array(query);
-	}
-	return false;
+
+	std::string query = StringFormat("SELECT x, y, z, pause, heading FROM grid_entries "
+                                    "WHERE gridid = %i AND number = %i AND zoneid = %i", grid, num, zoneid);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in GetWaypoints query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return false;
+    }
+
+	if (results.RowCount() != 1)
+        return false;
+
+    auto row = results.begin();
+
+    if (wp) {
+        wp->x = atof( row[0] );
+		wp->y = atof( row[1] );
+		wp->z = atof( row[2] );
+		wp->pause = atoi( row[3] );
+		wp->heading = atof( row[4] );
+    }
+
+    return true;
 }
 
 void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
