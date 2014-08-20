@@ -1731,20 +1731,20 @@ void ZoneDatabase::FillAAEffects(SendAA_Struct* aa_struct){
 }
 
 uint32 ZoneDatabase::CountAAs(){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	int count=0;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT count(title_sid) from altadv_vars"), errbuf, &result)) {
-		if((row = mysql_fetch_row(result))!=nullptr)
-			count = atoi(row[0]);
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::CountAAs query '%s': %s", query, errbuf);
+
+	const std::string query = "SELECT count(title_sid) FROM altadv_vars";
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::CountAAs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return 0;
 	}
-	safe_delete_array(query);
-	return count;
+
+	if (results.RowCount() != 1)
+        return 0;
+
+    auto row = results.begin();
+
+	return atoi(row[0]);;
 }
 
 uint32 ZoneDatabase::CountAAEffects(){
