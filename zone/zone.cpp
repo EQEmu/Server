@@ -156,140 +156,127 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 
 //this really loads the objects into entity_list
 bool Zone::LoadZoneObjects() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = nullptr;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	uint32 len_query = MakeAnyLenString(&query, "SELECT "
-		"id,zoneid,xpos,ypos,zpos,heading,itemid,charges,objectname,type,icon,"
-		"unknown08,unknown10,unknown20,unknown24,unknown76"
-		" from object where zoneid=%i and (version=%u or version=-1)", zoneid, instanceversion);
+	std::string query = StringFormat("SELECT id, zoneid, xpos, ypos, zpos, heading, "
+                                    "itemid, charges, objectname, type, icon, unknown08, "
+                                    "unknown10, unknown20, unknown24, unknown76 fROM object "
+                                    "WHERE zoneid = %i AND (version = %u OR version = -1)",
+                                    zoneid, instanceversion);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error Loading Objects from DB: %s",results.ErrorMessage().c_str());
+		return false;
+    }
 
-	if (database.RunQuery(query, len_query, errbuf, &result)) {
-		safe_delete_array(query);
-		LogFile->write(EQEMuLog::Status, "Loading Objects from DB...");
-		while ((row = mysql_fetch_row(result))) {
-			if (atoi(row[9]) == 0)
-			{
-				// Type == 0 - Static Object
-				const char* shortname = database.GetZoneName(atoi(row[1]), false); // zoneid -> zone_shortname
+    LogFile->write(EQEMuLog::Status, "Loading Objects from DB...");
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        if (atoi(row[9]) == 0)
+        {
+            // Type == 0 - Static Object
+            const char* shortname = database.GetZoneName(atoi(row[1]), false); // zoneid -> zone_shortname
 
-				if (shortname)
-				{
-					Door d;
-					memset(&d, 0, sizeof(d));
+            if (!shortname)
+                continue;
 
-					strn0cpy(d.zone_name, shortname, sizeof(d.zone_name));
-					d.db_id = 1000000000 + atoi(row[0]); // Out of range of normal use for doors.id
-					d.door_id = -1; // Client doesn't care if these are all the same door_id
-					d.pos_x = atof(row[2]); // xpos
-					d.pos_y = atof(row[3]); // ypos
-					d.pos_z = atof(row[4]); // zpos
-					d.heading = atof(row[5]); // heading
+            Door d;
+            memset(&d, 0, sizeof(d));
 
-					strn0cpy(d.door_name, row[8], sizeof(d.door_name)); // objectname
-					// Strip trailing "_ACTORDEF" if present. Client won't accept it for doors.
-					int len = strlen(d.door_name);
-					if ((len > 9) && (memcmp(&d.door_name[len - 9], "_ACTORDEF", 10) == 0))
-					{
-						d.door_name[len - 9] = '\0';
-					}
+            strn0cpy(d.zone_name, shortname, sizeof(d.zone_name));
+            d.db_id = 1000000000 + atoi(row[0]); // Out of range of normal use for doors.id
+            d.door_id = -1; // Client doesn't care if these are all the same door_id
+            d.pos_x = atof(row[2]); // xpos
+            d.pos_y = atof(row[3]); // ypos
+            d.pos_z = atof(row[4]); // zpos
+            d.heading = atof(row[5]); // heading
 
-					memcpy(d.dest_zone, "NONE", 5);
+            strn0cpy(d.door_name, row[8], sizeof(d.door_name)); // objectname
+            // Strip trailing "_ACTORDEF" if present. Client won't accept it for doors.
+            int len = strlen(d.door_name);
+            if ((len > 9) && (memcmp(&d.door_name[len - 9], "_ACTORDEF", 10) == 0))
+                d.door_name[len - 9] = '\0';
 
-					if ((d.size = atoi(row[11])) == 0) // unknown08 = optional size percentage
-					{
-						d.size = 100;
-					}
+            memcpy(d.dest_zone, "NONE", 5);
 
-					switch (d.opentype = atoi(row[12])) // unknown10 = optional request_nonsolid (0 or 1 or experimental number)
-					{
-						case 0:
-							d.opentype = 31;
-							break;
-						case 1:
-							d.opentype = 9;
-							break;
-					}
+            if ((d.size = atoi(row[11])) == 0) // unknown08 = optional size percentage
+                d.size = 100;
 
-					d.incline = atoi(row[13]); // unknown20 = optional model incline value
-					d.client_version_mask = 0xFFFFFFFF; //We should load the mask from the zone.
+            switch (d.opentype = atoi(row[12])) // unknown10 = optional request_nonsolid (0 or 1 or experimental number)
+            {
+                case 0:
+                    d.opentype = 31;
+                    break;
+                case 1:
+                    d.opentype = 9;
+                    break;
+            }
 
-					Doors* door = new Doors(&d);
-					entity_list.AddDoor(door);
-				}
+            d.incline = atoi(row[13]); // unknown20 = optional model incline value
+            d.client_version_mask = 0xFFFFFFFF; //We should load the mask from the zone.
 
-				continue;
-			}
-			Object_Struct data = {0};
-			uint32 id = 0;
-			uint32 icon = 0;
-			uint32 type = 0;
-			uint32 itemid = 0;
-			uint32 idx = 0;
-			int16 charges = 0;
+            Doors* door = new Doors(&d);
+            entity_list.AddDoor(door);
+        }
 
-			id							= (uint32)atoi(row[0]);
-			data.zone_id				= atoi(row[1]);
-			data.x						= atof(row[2]);
-			data.y						= atof(row[3]);
-			data.z						= atof(row[4]);
-			data.heading				= atof(row[5]);
-			itemid						= (uint32)atoi(row[6]);
-			charges						= (int16)atoi(row[7]);
-			strcpy(data.object_name, row[8]);
-			type						= (uint8)atoi(row[9]);
-			icon						= (uint32)atoi(row[10]);
-			data.object_type			= type;
-			data.linked_list_addr[0]	= 0;
-			data.linked_list_addr[1]	= 0;
-			data.unknown008				= (uint32)atoi(row[11]);
-			data.unknown010				= (uint32)atoi(row[12]);
-			data.unknown020				= (uint32)atoi(row[13]);
-			data.unknown024				= (uint32)atoi(row[14]);
-			data.unknown076				= (uint32)atoi(row[15]);
-			data.unknown084				= 0;
+        Object_Struct data = {0};
+        uint32 id = 0;
+        uint32 icon = 0;
+        uint32 type = 0;
+        uint32 itemid = 0;
+        uint32 idx = 0;
+        int16 charges = 0;
 
-			ItemInst* inst = nullptr;
-			//FatherNitwit: this dosent seem to work...
-			//tradeskill containers do not have an itemid of 0... at least what I am seeing
-			if (itemid == 0) {
-				// Generic tradeskill container
-				inst = new ItemInst(ItemInstWorldContainer);
-			}
-			else {
-				// Groundspawn object
-				inst = database.CreateItem(itemid);
-			}
+        id	= (uint32)atoi(row[0]);
+        data.zone_id = atoi(row[1]);
+        data.x = atof(row[2]);
+        data.y = atof(row[3]);
+        data.z = atof(row[4]);
+        data.heading = atof(row[5]);
+		itemid = (uint32)atoi(row[6]);
+		charges	= (int16)atoi(row[7]);
+        strcpy(data.object_name, row[8]);
+        type = (uint8)atoi(row[9]);
+        icon = (uint32)atoi(row[10]);
+		data.object_type = type;
+		data.linked_list_addr[0] = 0;
+        data.linked_list_addr[1] = 0;
+        data.unknown008	= (uint32)atoi(row[11]);
+        data.unknown010	= (uint32)atoi(row[12]);
+        data.unknown020	= (uint32)atoi(row[13]);
+        data.unknown024	= (uint32)atoi(row[14]);
+        data.unknown076	= (uint32)atoi(row[15]);
+        data.unknown084	= 0;
 
-			//Father Nitwit's fix... not perfect...
-			if(inst == nullptr && type != OT_DROPPEDITEM) {
-				inst = new ItemInst(ItemInstWorldContainer);
-			}
+        ItemInst* inst = nullptr;
+        //FatherNitwit: this dosent seem to work...
+        //tradeskill containers do not have an itemid of 0... at least what I am seeing
+        if (itemid == 0) {
+            // Generic tradeskill container
+            inst = new ItemInst(ItemInstWorldContainer);
+        }
+        else {
+            // Groundspawn object
+            inst = database.CreateItem(itemid);
+        }
 
-			// Load child objects if container
-			if (inst && inst->IsType(ItemClassContainer)) {
-				database.LoadWorldContainer(id, inst);
-			}
+        //Father Nitwit's fix... not perfect...
+        if(inst == nullptr && type != OT_DROPPEDITEM) {
+            inst = new ItemInst(ItemInstWorldContainer);
+        }
 
-			Object* object = new Object(id, type, icon, data, inst);
-			entity_list.AddObject(object, false);
-			if(type == OT_DROPPEDITEM && itemid != 0)
-			{
-				entity_list.RemoveObject(object->GetID());
-			}
+        // Load child objects if container
+        if (inst && inst->IsType(ItemClassContainer)) {
+            database.LoadWorldContainer(id, inst);
+        }
 
-			safe_delete(inst);
-		}
-		mysql_free_result(result);
-	}
-	else {
-		safe_delete_array(query);
-		LogFile->write(EQEMuLog::Error, "Error Loading Objects from DB: %s",errbuf);
-		return(false);
-	}
-	return(true);
+        Object* object = new Object(id, type, icon, data, inst);
+        entity_list.AddObject(object, false);
+        if(type == OT_DROPPEDITEM && itemid != 0)
+            entity_list.RemoveObject(object->GetID());
+
+        safe_delete(inst);
+    }
+
+	return true;
 }
 
 //this also just loads into entity_list, not really into zone
@@ -789,7 +776,7 @@ void Zone::Shutdown(bool quite)
 	if (!quite)
 		LogFile->write(EQEMuLog::Normal, "Zone shutdown: going to sleep");
 	ZoneLoaded = false;
-	
+
 	zone->ResetAuth();
 	safe_delete(zone);
 	dbasync->CommitWrites();
@@ -1381,7 +1368,7 @@ bool Zone::Process() {
 	return true;
 }
 
-void Zone::ChangeWeather() 
+void Zone::ChangeWeather()
 {
 	if(!HasWeather())
 	{
