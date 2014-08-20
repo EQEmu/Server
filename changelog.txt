@@ -1,13 +1,18 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/20/2014 ==
+Uleat: Rework of Trade::AddEntity() - function used to move items into the trade window. Now accepts argument for 'stack_size' and updates client properly.
+Note: I tested trade with Titanium:{SoF,SoD,UF,RoF} in both directions and no client generated an OP_MoveItem event for attempting to place a stackable
+onto a partial stack already in the trade window. The only way to achieve stacking is to click on the receiving client. If there is a partial stack remaining
+on the cursor after the OP_MoveItem event, and there is room available, the client will generate subsequent events to move the remaining count.
+
 == 08/19/2014 ==
 Akkadius: Implemented a Stop_Return feature (Accidental item handin prevention) that will be symmetrically used with plugin::return_items that I am currently running live testing on EZ before releasing to EQEmu. This does not hurt to have this in the source.
 Akkadius: Fixed crash where 'attacker' validation is not being checked
 Akkadius: Removed petition console spam that does not follow traditional logging and is useless
-Akkadius: Made fix with SympatheticProcChances where it was checking for TempItem->Focus.Effect instead of TempItemAug->Focus.Effect== 08/18/2014 ==
+Akkadius: Made fix with SympatheticProcChances where it was checking for TempItem->Focus.Effect instead of TempItemAug->Focus.Effect
 
 == 08/18/2014 ==
-
 Uleat: Fix for https://github.com/EQEmu/Server/issues/127 -- also activated a remarked action in doors.cpp to eliminate a memory leak.
 
 == 08/16/2014 ==

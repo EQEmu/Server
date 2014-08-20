@@ -1540,7 +1540,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			// Also sends trade information to other client of trade session
 			if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
 
-			trade->AddEntity(src_slot_id, dst_slot_id);
+			trade->AddEntity(src_slot_id, dst_slot_id, move_in->number_in_stack);
 
 			return true;
 		} else {

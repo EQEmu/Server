@@ -71,8 +71,9 @@ void Trade::Start(uint32 mob_id, bool initiate_with)
 }
 
 // Add item from a given slot to trade bucket (automatically does bag data too)
-void Trade::AddEntity(uint16 from_slot_id, uint16 trade_slot_id)
-{
+void Trade::AddEntity(uint16 from_slot_id, uint16 trade_slot_id, uint32 stack_size) {
+	// TODO: review for inventory saves
+
 	if (!owner || !owner->IsClient()) {
 		// This should never happen
 		LogFile->write(EQEMuLog::Debug, "Programming error: NPC's should not call Trade::AddEntity()");
@@ -87,45 +88,56 @@ void Trade::AddEntity(uint16 from_slot_id, uint16 trade_slot_id)
 
 	// Item always goes into trade bucket from cursor
 	Client* client = owner->CastToClient();
-	const ItemInst* inst = client->GetInv().GetItem(MainCursor);
+	ItemInst* inst = client->GetInv().GetItem(MainCursor);
+
 	if (!inst) {
 		client->Message(13, "Error: Could not find item on your cursor!");
 		return;
 	}
 
-	_log(TRADING__HOLDER, "%s added item '%s' to trade slot %i", owner->GetName(), inst->GetItem()->Name, trade_slot_id);
-
 	ItemInst* inst2 = client->GetInv().GetItem(trade_slot_id);
-	int new_charges = 0;
-	if (!inst2 || !inst2->GetItem()) {
-		// Send all item data to other client
-		SendItemData(inst, trade_slot_id);
-		// Move item on cursor to the trade slots
-		client->PutItemInInventory(trade_slot_id, *inst);
-	}
-	else
-	{
-		if (client->GetInv().GetItem(MainCursor)->GetID() != client->GetInv().GetItem(trade_slot_id)->GetID()) {
+
+	// it looks like the original code attempted to allow stacking...
+	// (it just didn't handle partial stack move actions -U)
+	if (stack_size > 0) {
+		if (!inst->IsStackable() || !inst2 || !inst2->GetItem() || (inst->GetID() != inst2->GetID()) || (stack_size > inst->GetCharges())) {
 			client->Kick();
 			return;
 		}
-		new_charges = (inst2->GetCharges()+inst->GetCharges());
-		if (new_charges < inst2->GetItem()->StackSize)
-		{
-			inst2->SetCharges(new_charges);
-			new_charges = 0;
-		}
-		else
-		{
-			new_charges = inst->GetCharges()-(inst2->GetItem()->StackSize-inst2->GetCharges()); //Leftover charges = charges - difference
+
+		uint32 _stack_size = 0;
+
+		if ((stack_size + inst2->GetCharges()) > inst2->GetItem()->StackSize) {
+			_stack_size = (stack_size + inst2->GetCharges()) - inst->GetItem()->StackSize;
 			inst2->SetCharges(inst2->GetItem()->StackSize);
 		}
+		else {
+			_stack_size = inst->GetCharges() - stack_size;
+			inst2->SetCharges(stack_size + inst2->GetCharges());
+		}
+
+		_log(TRADING__HOLDER, "%s added partial item '%s' stack (qty: %i) to trade slot %i", owner->GetName(), inst->GetItem()->Name, stack_size, trade_slot_id);
+
+		if (_stack_size > 0)
+			inst->SetCharges(_stack_size);
+		else
+			client->DeleteItemInInventory(from_slot_id);
+
 		SendItemData(inst2, trade_slot_id);
 	}
-	if (new_charges > 0)
-		client->GetInv().GetItem(from_slot_id)->SetCharges(new_charges);
-	else
-		client->DeleteItemInInventory(from_slot_id);//, (ItemInst&)trade_inst);
+	else {
+		if (inst2 && inst2->GetID()) {
+			client->Kick();
+			return;
+		}
+		
+		SendItemData(inst, trade_slot_id);
+
+		_log(TRADING__HOLDER, "%s added item '%s' to trade slot %i", owner->GetName(), inst->GetItem()->Name, trade_slot_id);
+
+		client->PutItemInInventory(trade_slot_id, *inst);
+		client->DeleteItemInInventory(from_slot_id);
+	}
 }
 
 // Retrieve mob the owner is trading with
