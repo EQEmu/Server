@@ -1242,92 +1242,77 @@ void ZoneDatabase::DeleteWaypoint(Client *client, uint32 grid_num, uint32 wp_num
 * Returns 0 if the function didn't have to create a new grid. If the function had to create a new grid for the spawn, then the ID of
 * the created grid is returned.
 */
+uint32 ZoneDatabase::AddWPForSpawn(Client *client, uint32 spawn2id, float xpos, float ypos, float zpos, uint32 pause, int type1, int type2, uint16 zoneid, float heading) {
 
-uint32 ZoneDatabase::AddWPForSpawn(Client *c, uint32 spawn2id, float xpos, float ypos, float zpos, uint32 pause, int type1, int type2, uint16 zoneid, float heading) {
-	char	*query = 0;
-	uint32	grid_num,	// The grid number the spawn is assigned to (if spawn has no grid, will be the grid number we end up creating)
-		next_wp_num;	// The waypoint number we should be assigning to the new waypoint
-	bool	CreatedNewGrid;	// Did we create a new grid in this function?
-	MYSQL_RES	*result;
-	MYSQL_ROW	row;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	uint32 grid_num;	 // The grid number the spawn is assigned to (if spawn has no grid, will be the grid number we end up creating)
+    uint32 next_wp_num;	 // The waypoint number we should be assigning to the new waypoint
+	bool createdNewGrid; // Did we create a new grid in this function?
 
 	// See what grid number our spawn is assigned
-	if(RunQuery(query, MakeAnyLenString(&query,"SELECT pathgrid FROM spawn2 WHERE id=%i",spawn2id),errbuf,&result))
-	{
-		safe_delete_array(query);
-		if(mysql_num_rows(result) > 0)
-		{
-			row = mysql_fetch_row(result);
-			grid_num = atoi(row[0]);
-		}
-		else	// This spawn ID was not found in the `spawn2` table
-		return 0;
-
-		mysql_free_result(result);
-	}
-	else {	// Query error
-		LogFile->write(EQEMuLog::Error, "Error setting pathgrid '%s': '%s'", query, errbuf);
+	std::string query = StringFormat("SELECT pathgrid FROM spawn2 WHERE id = %i", spawn2id);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        // Query error
+		LogFile->write(EQEMuLog::Error, "Error setting pathgrid '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
 
-	if (grid_num == 0)	// Our spawn doesn't have a grid assigned to it -- we need to create a new grid and assign it to the spawn
-	{
-		CreatedNewGrid = true;
-		if((grid_num = GetFreeGrid(zoneid)) == 0)	// There are no grids for the current zone -- create Grid #1
-		grid_num = 1;
+	if (results.RowCount() == 0)
+        return 0;
 
-		if(!RunQuery(query, MakeAnyLenString(&query,"insert into grid set id='%i',zoneid= %i, type='%i', type2='%i'",grid_num,zoneid,type1,type2), errbuf)) {
-			LogFile->write(EQEMuLog::Error, "Error adding grid '%s': '%s'", query, errbuf);
-		} else {
-			if(c) c->LogSQL(query);
-		}
-		safe_delete_array(query);
+    auto row = results.begin();
+    grid_num = atoi(row[0]);
 
-		query = 0;
-		if(!RunQuery(query, MakeAnyLenString(&query,"update spawn2 set pathgrid='%i' where id='%i'",grid_num,spawn2id), errbuf)) {
-			LogFile->write(EQEMuLog::Error, "Error updating spawn2 pathing '%s': '%s'", query, errbuf);
-		} else {
-			if(c) c->LogSQL(query);
-		}
-		safe_delete_array(query);
+	if (grid_num == 0)
+	{ // Our spawn doesn't have a grid assigned to it -- we need to create a new grid and assign it to the spawn
+		createdNewGrid = true;
+		grid_num = GetFreeGrid(zoneid);
+		if(grid_num == 0)	// There are no grids for the current zone -- create Grid #1
+            grid_num = 1;
+
+        query = StringFormat("INSERT INTO grid SET id = '%i', zoneid = %i, type ='%i', type2 = '%i'",
+                            grid_num, zoneid, type1, type2);
+        results = QueryDatabase(query);
+		if(!results.Success())
+			LogFile->write(EQEMuLog::Error, "Error adding grid '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+		else if(client)
+            client->LogSQL(query.c_str());
+
+		query = StringFormat("UPDATE spawn2 SET pathgrid = '%i' WHERE id = '%i'", grid_num, spawn2id);
+		results = QueryDatabase(query);
+		if(!results.Success())
+			LogFile->write(EQEMuLog::Error, "Error updating spawn2 pathing '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+		else if(client)
+            client->LogSQL(query.c_str());
 	}
 	else	// NPC had a grid assigned to it
-		CreatedNewGrid = false;
-
+		createdNewGrid = false;
 
 	// Find out what the next waypoint is for this grid
-	query = 0;
-	if(RunQuery(query, MakeAnyLenString(&query,"SELECT max(`number`) FROM grid_entries WHERE zoneid='%i' AND gridid='%i'",zoneid,grid_num),errbuf,&result))
-	{
-		safe_delete_array(query);
-		row = mysql_fetch_row(result);
-		if(row[0] != 0)
-		next_wp_num = atoi(row[0]) + 1;
-		else	// No waypoints in this grid yet
-		next_wp_num = 1;
+	query = StringFormat("SELECT max(`number`) FROM grid_entries WHERE zoneid = '%i' AND gridid = '%i'", zoneid, grid_num);
 
-		mysql_free_result(result);
-	}
-	else {	// Query error
-		LogFile->write(EQEMuLog::Error, "Error getting next waypoint id '%s': '%s'", query, errbuf);
+	if(!results.Success()) { // Query error
+		LogFile->write(EQEMuLog::Error, "Error getting next waypoint id '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
 
-	query = 0;
-	if(!RunQuery(query, MakeAnyLenString(&query,"INSERT INTO grid_entries(gridid,zoneid,`number`,x,y,z,pause,heading) VALUES (%i,%i,%i,%f,%f,%f,%i,%f)",grid_num,zoneid,next_wp_num,xpos,ypos,zpos,pause,heading), errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error adding grid entry '%s': '%s'", query, errbuf);
-	} else {
-		if(c) c->LogSQL(query);
-	}
-	safe_delete_array(query);
+    row = results.begin();
+    if(row[0] != 0)
+        next_wp_num = atoi(row[0]) + 1;
+    else	// No waypoints in this grid yet
+		next_wp_num = 1;
 
-	if(CreatedNewGrid)
-		return grid_num;
+	query = StringFormat("INSERT INTO grid_entries(gridid, zoneid, `number`, x, y, z, pause, heading) "
+                        "VALUES (%i, %i, %i, %f, %f, %f, %i, %f)",
+                        grid_num, zoneid, next_wp_num, xpos, ypos, zpos, pause, heading);
+    results = QueryDatabase(query);
+	if(!results.Success())
+		LogFile->write(EQEMuLog::Error, "Error adding grid entry '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+	else if(client)
+        client->LogSQL(query.c_str());
 
-	return 0;
-} /*** END ZoneDatabase::AddWPForSpawn() ***/
-
+	return createdNewGrid? grid_num: 0;
+}
 
 uint32 ZoneDatabase::GetFreeGrid(uint16 zoneid) {
 	char *query = 0;
