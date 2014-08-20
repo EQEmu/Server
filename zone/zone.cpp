@@ -2296,35 +2296,30 @@ void Zone::ReloadWorld(uint32 Option){
 
 void Zone::LoadTickItems()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 	tick_items.clear();
 
-	if(database.RunQuery(query, MakeAnyLenString(&query, "SELECT it_itemid, it_chance, it_level, it_qglobal, it_bagslot FROM item_tick"), errbuf, &result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			if(atoi(row[0]) >= 1)
-			{
-				item_tick_struct ti_tmp;
-				ti_tmp.itemid = atoi(row[0]);
-				ti_tmp.chance = atoi(row[1]);
-				ti_tmp.level = atoi(row[2]);
-				ti_tmp.bagslot = (int16)atoi(row[4]);
-				ti_tmp.qglobal = std::string(row[3]);
-				tick_items[atoi(row[0])] = ti_tmp;
-			}
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadTickItems: %s (%s)", query, errbuf);
-		safe_delete_array(query);
-	}
+    const std::string query = "SELECT it_itemid, it_chance, it_level, it_qglobal, it_bagslot FROM item_tick";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Zone::LoadTickItems: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+        return;
+    }
+
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        if(atoi(row[0]) == 0)
+            continue;
+
+        item_tick_struct ti_tmp;
+		ti_tmp.itemid = atoi(row[0]);
+		ti_tmp.chance = atoi(row[1]);
+		ti_tmp.level = atoi(row[2]);
+		ti_tmp.bagslot = (int16)atoi(row[4]);
+		ti_tmp.qglobal = std::string(row[3]);
+		tick_items[atoi(row[0])] = ti_tmp;
+
+    }
+
 }
 
 uint32 Zone::GetSpawnKillCount(uint32 in_spawnid) {
