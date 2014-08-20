@@ -1673,23 +1673,20 @@ bool ZoneDatabase::LoadAAEffects() {
 
 //AndMetal: this may now be obsolete since we have Zone::GetTotalAALevels()
 uint8 ZoneDatabase::GetTotalAALevels(uint32 skill_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	int total=0;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT count(slot) from aa_effects where aaid=%i", skill_id), errbuf, &result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			total=atoi(row[0]);
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in GetTotalAALevels '%s: %s", query, errbuf);
-		safe_delete_array(query);
-	}
-	return total;
+
+	std::string query = StringFormat("SELECT count(slot) FROM aa_effects WHERE aaid = %i", skill_id);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in GetTotalAALevels '%s: %s", query.c_str(), results.ErrorMessage().c_str());
+        return 0;
+    }
+
+    if (results.RowCount() != 1)
+        return 0;
+
+    auto row = results.begin();
+
+	return atoi(row[0]);
 }
 
 //this will allow us to count the number of effects for an AA by pulling the info from memory instead of the database. hopefully this will same some CPU cycles
