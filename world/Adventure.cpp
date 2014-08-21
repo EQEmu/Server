@@ -374,49 +374,35 @@ void Adventure::MoveCorpsesToGraveyard()
 
 	std::list<uint32> dbid_list;
 	std::list<uint32> charid_list;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, charid FROM player_corpses WHERE instanceid=%d", GetInstanceID()), errbuf, &result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			dbid_list.push_back(atoi(row[0]));
-			charid_list.push_back(atoi(row[1]));
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::MoveCorpsesToGraveyard: %s (%s)", query, errbuf);
-		safe_delete_array(query);
-	}
+	std::string query = StringFormat("SELECT id, charid FROM player_corpses WHERE instanceid=%d", GetInstanceID());
+	auto results = database.QueryDatabase(query);
+	if(!results.Success())
+        LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::MoveCorpsesToGraveyard: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 
-	std::list<uint32>::iterator iter = dbid_list.begin();
-	while(iter != dbid_list.end())
+	for(auto row = results.begin(); row != results.end(); ++row) {
+        dbid_list.push_back(atoi(row[0]));
+        charid_list.push_back(atoi(row[1]));
+    }
+
+	for (auto iter = dbid_list.begin(); iter != dbid_list.end(); ++iter)
 	{
 		float x = GetTemplate()->graveyard_x + MakeRandomFloat(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
 		float y = GetTemplate()->graveyard_y + MakeRandomFloat(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
 		float z = GetTemplate()->graveyard_z;
-		if(database.RunQuery(query,MakeAnyLenString(&query, "UPDATE player_corpses SET zoneid=%d, instanceid=0, x=%f, y=%f, z=%f WHERE instanceid=%d",
-			GetTemplate()->graveyard_zone_id, x, y, z, GetInstanceID()), errbuf))
-		{
-			safe_delete_array(query);
-		}
-		else
-		{
-			LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::MoveCorpsesToGraveyard: %s (%s)", query, errbuf);
-			safe_delete_array(query);
-		}
-		++iter;
+
+		query = StringFormat("UPDATE player_corpses "
+                            "SET zoneid = %d, instanceid = 0, "
+                            "x = %f, y = %f, z = %f WHERE instanceid = %d",
+                            GetTemplate()->graveyard_zone_id,
+                            x, y, z, GetInstanceID());
+		auto results = database.QueryDatabase(query);
+		if(!results.Success())
+			LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::MoveCorpsesToGraveyard: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 	}
 
-	iter = dbid_list.begin();
-	std::list<uint32>::iterator c_iter = charid_list.begin();
-	while(iter != dbid_list.end())
+    auto c_iter = charid_list.begin();
+	for (auto iter = dbid_list.begin(); iter != dbid_list.end(); ++iter, ++c_iter)
 	{
 		ServerPacket* pack = new ServerPacket(ServerOP_DepopAllPlayersCorpses, sizeof(ServerDepopAllPlayersCorpses_Struct));
 		ServerDepopAllPlayersCorpses_Struct *dpc = (ServerDepopAllPlayersCorpses_Struct*)pack->pBuffer;
@@ -433,8 +419,6 @@ void Adventure::MoveCorpsesToGraveyard()
 
 		zoneserver_list.SendPacket(spc->zone_id, 0, pack);
 		delete pack;
-		++iter;
-		++c_iter;
 	}
 }
 
