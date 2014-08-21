@@ -710,17 +710,21 @@ void ZoneDatabase::UpdateTraderItemPrice(int CharID, uint32 ItemID, uint32 Charg
 }
 
 void ZoneDatabase::DeleteTraderItem(uint32 char_id){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	if(char_id==0){
-		if (!(RunQuery(query,MakeAnyLenString(&query, "delete from trader"),errbuf)))
-			_log(TRADING__CLIENT, "Failed to delete all trader items data, the error was: %s\n",errbuf);
+
+	if(char_id==0) {
+        const std::string query = "DELETE FROM trader";
+        auto results = QueryDatabase(query);
+		if (!results.Success())
+			_log(TRADING__CLIENT, "Failed to delete all trader items data, the error was: %s\n", results.ErrorMessage().c_str());
+
+        return;
 	}
-	else{
-		if (!(RunQuery(query,MakeAnyLenString(&query, "delete from trader where char_id=%i",char_id),errbuf)))
-			_log(TRADING__CLIENT, "Failed to delete trader item data for char_id: %i, the error was: %s\n",char_id,errbuf);
-	}
-	safe_delete_array(query);
+
+	std::string query = StringFormat("DELETE FROM trader WHERE char_id = %i", char_id);
+	auto results = QueryDatabase(query);
+    if (!results.Success())
+        _log(TRADING__CLIENT, "Failed to delete trader item data for char_id: %i, the error was: %s\n", char_id, results.ErrorMessage().c_str());
+
 }
 void ZoneDatabase::DeleteTraderItem(uint32 CharID,uint16 SlotID){
 	char errbuf[MYSQL_ERRMSG_SIZE];
