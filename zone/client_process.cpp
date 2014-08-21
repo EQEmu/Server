@@ -983,9 +983,11 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	uint8 handychance = 0;
 	for (itr = merlist.begin(); itr != merlist.end() && i < numItemSlots; ++itr) {
 		MerchantList ml = *itr;
-		if(GetLevel() < ml.level_required) {
+		if(MakeRandomInt(0, 99) > ml.probability)
 			continue;
-		}
+			
+		if(GetLevel() < ml.level_required)
+			continue;
 
 		if (!(ml.classes_required & (1 << (GetClass() - 1))))
 			continue;
