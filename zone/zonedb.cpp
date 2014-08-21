@@ -1716,27 +1716,18 @@ uint32 ZoneDatabase::GetZoneTZ(uint32 zoneid, uint32 version) {
 }
 
 bool ZoneDatabase::SetZoneTZ(uint32 zoneid, uint32 version, uint32 tz) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 affected_rows = 0;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "UPDATE zone SET timezone=%i WHERE zoneidnumber=%i AND version=%i", tz, zoneid, version), errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
-
-		if (affected_rows == 1)
-			return true;
-		else
-			return false;
-	}
-	else {
-		std::cerr << "Error in SetZoneTZ query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+	std::string query = StringFormat("UPDATE zone SET timezone = %i "
+                                    "WHERE zoneidnumber = %i AND version = %i",
+                                    tz, zoneid, version);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        std::cerr << "Error in SetZoneTZ query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
-	}
+    }
 
-	return false;
+    return results.RowsAffected() == 1;
 }
-//End new timezone functions.
 
 /*
  solar: this is never actually called, client_process starts an async query
