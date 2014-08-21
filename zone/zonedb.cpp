@@ -93,103 +93,97 @@ bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct
 }
 
 bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct *zone_data, bool &can_bind, bool &can_combat, bool &can_levitate, bool &can_castoutdoor, bool &is_city, bool &is_hotzone, bool &allow_mercs, uint8 &zone_type, int &ruleset, char **map_filename) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	int i=0;
-	int b=0;
-	bool good = false;
+
 	*map_filename = new char[100];
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT ztype,"
-		"fog_red,fog_green,fog_blue,fog_minclip,fog_maxclip,"
-		"fog_red2,fog_green2,fog_blue2,fog_minclip2,fog_maxclip2,"
-		"fog_red3,fog_green3,fog_blue3,fog_minclip3,fog_maxclip3,"
-		"fog_red4,fog_green4,fog_blue4,fog_minclip4,fog_maxclip4,fog_density,"
-		"sky,zone_exp_multiplier,safe_x,safe_y,safe_z,underworld,"
-		"minclip,maxclip,time_type,canbind,cancombat,canlevitate,"
-		"castoutdoor,hotzone,ruleset,suspendbuffs,map_file_name,short_name,"
-		"rain_chance1,rain_chance2,rain_chance3,rain_chance4,"
-		"rain_duration1,rain_duration2,rain_duration3,rain_duration4,"
-		"snow_chance1,snow_chance2,snow_chance3,snow_chance4,"
-		"snow_duration1,snow_duration2,snow_duration3,snow_duration4"
-		" from zone where zoneidnumber=%i and version=%i",zoneid, instance_id), errbuf, &result)) {
-		safe_delete_array(query);
-		row = mysql_fetch_row(result);
-		if(row)
-		{
-			int r = 0;
-			memset(zone_data,0,sizeof(NewZone_Struct));
-			zone_data->ztype=atoi(row[r++]);
-
-			for(i=0;i<4;i++){
-				zone_data->fog_red[i]=atoi(row[r++]);
-				zone_data->fog_green[i]=atoi(row[r++]);
-				zone_data->fog_blue[i]=atoi(row[r++]);
-				zone_data->fog_minclip[i]=atof(row[r++]);
-				zone_data->fog_maxclip[i]=atof(row[r++]);
-			}
-
-			zone_data->fog_density = atof(row[r++]);;
-			zone_data->sky=atoi(row[r++]);
-			zone_data->zone_exp_multiplier=atof(row[r++]);
-			zone_data->safe_x=atof(row[r++]);
-			zone_data->safe_y=atof(row[r++]);
-			zone_data->safe_z=atof(row[r++]);
-			zone_data->underworld=atof(row[r++]);
-			zone_data->minclip=atof(row[r++]);
-			zone_data->maxclip=atof(row[r++]);
-
-			zone_data->time_type=atoi(row[r++]);
-//not in the DB yet:
-			zone_data->gravity = 0.4;
-
-			b = atoi(row[r++]);
-			can_bind = b==0?false:true;
-			is_city = b==2?true:false;
-			can_combat = atoi(row[r++])==0?false:true;
-			can_levitate = atoi(row[r++])==0?false:true;
-			can_castoutdoor = atoi(row[r++])==0?false:true;
-			is_hotzone = atoi(row[r++])==0?false:true;
-			allow_mercs = true;
-			zone_type = zone_data->ztype;
-			ruleset = atoi(row[r++]);
-			zone_data->SuspendBuffs = atoi(row[r++]);
-			char *file = row[r++];
-			if(file)
-			{
-				strcpy(*map_filename, file);
-			}
-			else
-			{
-				strcpy(*map_filename, row[r++]);
-			}
-			for(i=0;i<4;i++){
-				zone_data->rain_chance[i]=atoi(row[r++]);
-			}
-			for(i=0;i<4;i++){
-				zone_data->rain_duration[i]=atoi(row[r++]);
-			}
-			for(i=0;i<4;i++){
-				zone_data->snow_chance[i]=atoi(row[r++]);
-			}
-			for(i=0;i<4;i++){
-				zone_data->snow_duration[i]=atof(row[r++]);
-			}
-			good = true;
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in GetZoneCFG query %s: %s", query, errbuf);
-		strcpy(*map_filename, "default");
-	}
-	safe_delete_array(query);
-
 	zone_data->zone_id = zoneid;
 
-	return(good);
+	std::string query = StringFormat("SELECT ztype, fog_red, fog_green, fog_blue, fog_minclip, fog_maxclip, " // 5
+                                    "fog_red2, fog_green2, fog_blue2, fog_minclip2, fog_maxclip2, " // 5
+                                    "fog_red3, fog_green3, fog_blue3, fog_minclip3, fog_maxclip3, " // 5
+                                    "fog_red4, fog_green4, fog_blue4, fog_minclip4, fog_maxclip4, " // 5
+                                    "fog_density, sky, zone_exp_multiplier, safe_x, safe_y, safe_z, underworld, " // 7
+                                    "minclip, maxclip, time_type, canbind, cancombat, canlevitate, " // 6
+                                    "castoutdoor, hotzone, ruleset, suspendbuffs, map_file_name, short_name, " // 6
+                                    "rain_chance1, rain_chance2, rain_chance3, rain_chance4, " // 4
+                                    "rain_duration1, rain_duration2, rain_duration3, rain_duration4, " // 4
+                                    "snow_chance1, snow_chance2, snow_chance3, snow_chance4, " // 4
+                                    "snow_duration1, snow_duration2, snow_duration3, snow_duration4 " // 4
+                                    "FROM zone WHERE zoneidnumber = %i AND version = %i", zoneid, instance_id);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in GetZoneCFG query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+        strcpy(*map_filename, "default");
+		return false;
+    }
+
+	if (results.RowCount() == 0) {
+        strcpy(*map_filename, "default");
+        return false;
+    }
+
+    auto row = results.begin();
+
+    memset(zone_data, 0, sizeof(NewZone_Struct));
+    zone_data->ztype = atoi(row[0]);
+    zone_type = zone_data->ztype;
+
+    int index;
+    for(index = 0; index < 4; index++) {
+        zone_data->fog_red[index]=atoi(row[1 + index * 5]);
+        zone_data->fog_green[index]=atoi(row[2 + index * 5]);
+        zone_data->fog_blue[index]=atoi(row[3 + index * 5]);
+        zone_data->fog_minclip[index]=atof(row[4 + index * 5]);
+        zone_data->fog_maxclip[index]=atof(row[5 + index * 5]);
+    }
+
+    zone_data->fog_density = atof(row[22]);
+    zone_data->sky=atoi(row[23]);
+    zone_data->zone_exp_multiplier=atof(row[24]);
+    zone_data->safe_x=atof(row[25]);
+    zone_data->safe_y=atof(row[26]);
+    zone_data->safe_z=atof(row[27]);
+    zone_data->underworld=atof(row[28]);
+    zone_data->minclip=atof(row[29]);
+    zone_data->maxclip=atof(row[30]);
+    zone_data->time_type=atoi(row[31]);
+
+    //not in the DB yet:
+    zone_data->gravity = 0.4;
+    allow_mercs = true;
+
+    int bindable = 0;
+    bindable = atoi(row[32]);
+
+    can_bind = bindable == 0? false: true;
+    is_city = bindable == 2? true: false;
+    can_combat = atoi(row[33]) == 0? false: true;
+    can_levitate = atoi(row[34]) == 0? false: true;
+    can_castoutdoor = atoi(row[35]) == 0? false: true;
+    is_hotzone = atoi(row[36]) == 0? false: true;
+
+
+    ruleset = atoi(row[36]);
+    zone_data->SuspendBuffs = atoi(row[37]);
+
+    char *file = row[38];
+    if(file)
+        strcpy(*map_filename, file);
+    else
+        strcpy(*map_filename, row[39]);
+
+    for(index = 0; index < 4; index++)
+        zone_data->rain_chance[index]=atoi(row[40 + index]);
+
+	for(index = 0; index < 4; index++)
+        zone_data->rain_duration[index]=atoi(row[44 + index]);
+
+	for(index = 0; index < 4; index++)
+        zone_data->snow_chance[index]=atoi(row[49 + index]);
+
+	for(index = 0; index < 4; index++)
+        zone_data->snow_duration[index]=atof(row[53 + index]);
+
+	return true;
 }
 
 //updates or clears the respawn time in the database for the current spawn id
