@@ -1978,108 +1978,93 @@ void ZoneDatabase::SaveBuffs(Client *client) {
 	}
 }
 
-void ZoneDatabase::LoadBuffs(Client *c) {
-	Buffs_Struct *buffs = c->GetBuffs();
-	uint32 max_slots = c->GetMaxBuffSlots();
-	for(int i = 0; i < max_slots; ++i) {
-		buffs[i].spellid = SPELL_UNKNOWN;
-	}
+void ZoneDatabase::LoadBuffs(Client *client) {
 
+	Buffs_Struct *buffs = client->GetBuffs();
+	uint32 max_slots = client->GetMaxBuffSlots();
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT spell_id, slot_id, caster_level, caster_name, ticsremaining, counters, "
-		"numhits, melee_rune, magic_rune, persistent, dot_rune, caston_x, caston_y, caston_z, ExtraDIChance FROM `character_buffs` WHERE "
-		"`character_id`='%u'",
-		c->CharacterID()), errbuf, &result))
-	{
-		safe_delete_array(query);
-		while ((row = mysql_fetch_row(result)))
-		{
-			uint32 slot_id = atoul(row[1]);
-			if(slot_id >= c->GetMaxBuffSlots()) {
-				continue;
-			}
+	for(int index = 0; index < max_slots; ++index)
+		buffs[index].spellid = SPELL_UNKNOWN;
 
-			uint32 spell_id = atoul(row[0]);
-			if(!IsValidSpell(spell_id)) {
-				continue;
-			}
-
-			Client *caster = entity_list.GetClientByName(row[3]);
-			uint32 caster_level = atoi(row[2]);
-			uint32 ticsremaining = atoul(row[4]);
-			uint32 counters = atoul(row[5]);
-			uint32 numhits = atoul(row[6]);
-			uint32 melee_rune = atoul(row[7]);
-			uint32 magic_rune = atoul(row[8]);
-			uint8 persistent = atoul(row[9]);
-			uint32 dot_rune = atoul(row[10]);
-			int32 caston_x = atoul(row[11]);
-			int32 caston_y = atoul(row[12]);
-			int32 caston_z = atoul(row[13]);
-			int32 ExtraDIChance = atoul(row[14]);
-
-			buffs[slot_id].spellid = spell_id;
-			buffs[slot_id].casterlevel = caster_level;
-			if(caster) {
-				buffs[slot_id].casterid = caster->GetID();
-				strcpy(buffs[slot_id].caster_name, caster->GetName());
-				buffs[slot_id].client = true;
-			} else {
-				buffs[slot_id].casterid = 0;
-				strcpy(buffs[slot_id].caster_name, "");
-				buffs[slot_id].client = false;
-			}
-
-			buffs[slot_id].ticsremaining = ticsremaining;
-			buffs[slot_id].counters = counters;
-			buffs[slot_id].numhits = numhits;
-			buffs[slot_id].melee_rune = melee_rune;
-			buffs[slot_id].magic_rune = magic_rune;
-			buffs[slot_id].persistant_buff = persistent ? true : false;
-			buffs[slot_id].dot_rune = dot_rune;
-			buffs[slot_id].caston_x = caston_x;
-			buffs[slot_id].caston_y = caston_y;
-			buffs[slot_id].caston_z = caston_z;
-			buffs[slot_id].ExtraDIChance = ExtraDIChance;
-			buffs[slot_id].RootBreakChance = 0;
-			buffs[slot_id].UpdateClient = false;
-
-		}
-		mysql_free_result(result);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadBuffs query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+	std::string query = StringFormat("SELECT spell_id, slot_id, caster_level, caster_name, ticsremaining, "
+                                    "counters, numhits, melee_rune, magic_rune, persistent, dot_rune, "
+                                    "caston_x, caston_y, caston_z, ExtraDIChance "
+                                    "FROM `character_buffs` WHERE `character_id` = '%u'", client->CharacterID());
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadBuffs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
-	}
+    }
 
-	max_slots = c->GetMaxBuffSlots();
-	for(int i = 0; i < max_slots; ++i) {
-		if(!IsValidSpell(buffs[i].spellid)) {
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        uint32 slot_id = atoul(row[1]);
+		if(slot_id >= client->GetMaxBuffSlots())
 			continue;
-		}
 
-		for(int j = 0; j < 12; ++j) {
-			bool cont = false;
-			switch(spells[buffs[i].spellid].effectid[j]) {
-			case SE_Charm:
-				buffs[i].spellid = SPELL_UNKNOWN;
-				cont = true;
-				break;
-			case SE_Illusion:
-				if(!buffs[i].persistant_buff) {
-					buffs[i].spellid = SPELL_UNKNOWN;
-					cont = true;
-				}
-				break;
-			}
+        uint32 spell_id = atoul(row[0]);
+		if(!IsValidSpell(spell_id))
+            continue;
 
-			if(cont) {
-				break;
+        Client *caster = entity_list.GetClientByName(row[3]);
+		uint32 caster_level = atoi(row[2]);
+		uint32 ticsremaining = atoul(row[4]);
+		uint32 counters = atoul(row[5]);
+		uint32 numhits = atoul(row[6]);
+		uint32 melee_rune = atoul(row[7]);
+		uint32 magic_rune = atoul(row[8]);
+		uint8 persistent = atoul(row[9]);
+		uint32 dot_rune = atoul(row[10]);
+		int32 caston_x = atoul(row[11]);
+		int32 caston_y = atoul(row[12]);
+		int32 caston_z = atoul(row[13]);
+		int32 ExtraDIChance = atoul(row[14]);
+
+		buffs[slot_id].spellid = spell_id;
+        buffs[slot_id].casterlevel = caster_level;
+
+        if(caster) {
+            buffs[slot_id].casterid = caster->GetID();
+            strcpy(buffs[slot_id].caster_name, caster->GetName());
+            buffs[slot_id].client = true;
+        } else {
+            buffs[slot_id].casterid = 0;
+			strcpy(buffs[slot_id].caster_name, "");
+			buffs[slot_id].client = false;
+        }
+
+        buffs[slot_id].ticsremaining = ticsremaining;
+		buffs[slot_id].counters = counters;
+		buffs[slot_id].numhits = numhits;
+		buffs[slot_id].melee_rune = melee_rune;
+		buffs[slot_id].magic_rune = magic_rune;
+		buffs[slot_id].persistant_buff = persistent? true: false;
+		buffs[slot_id].dot_rune = dot_rune;
+		buffs[slot_id].caston_x = caston_x;
+        buffs[slot_id].caston_y = caston_y;
+        buffs[slot_id].caston_z = caston_z;
+        buffs[slot_id].ExtraDIChance = ExtraDIChance;
+        buffs[slot_id].RootBreakChance = 0;
+        buffs[slot_id].UpdateClient = false;
+
+    }
+
+	max_slots = client->GetMaxBuffSlots();
+	for(int index = 0; index < max_slots; ++index) {
+		if(!IsValidSpell(buffs[index].spellid))
+			continue;
+
+		for(int effectIndex = 0; effectIndex < 12; ++effectIndex) {
+
+			if (spells[buffs[index].spellid].effectid[effectIndex] == SE_Charm) {
+                buffs[index].spellid = SPELL_UNKNOWN;
+                break;
+            }
+
+            if (spells[buffs[index].spellid].effectid[effectIndex] == SE_Illusion) {
+                if(buffs[index].persistant_buff)
+                    break;
+
+                buffs[index].spellid = SPELL_UNKNOWN;
 			}
 		}
 	}
