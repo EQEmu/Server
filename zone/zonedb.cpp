@@ -1840,33 +1840,23 @@ bool ZoneDatabase::LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked
 
 int ZoneDatabase::getZoneShutDownDelay(uint32 zoneID, uint32 version)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	std::string query = StringFormat("SELECT shutdowndelay FROM zone "
+                                    "WHERE zoneidnumber = %i AND (version=%i OR version=0) "
+                                    "ORDER BY version DESC", zoneID, version);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        std::cerr << "Error in getZoneShutDownDelay query '" << query << "' " << results.ErrorMessage().c_str() << std::endl;
+        return (RuleI(Zone, AutoShutdownDelay));
+    }
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT shutdowndelay FROM zone WHERE zoneidnumber=%i AND (version=%i OR version=0) ORDER BY version DESC", zoneID, version), errbuf, &result))
-	{
-		if (mysql_num_rows(result) > 0) {
-			row = mysql_fetch_row(result);
-			int retVal = atoi(row[0]);
+    if (results.RowCount() == 0) {
+        std::cerr << "Error in getZoneShutDownDelay no result '" << query << "' " << std::endl;
+        return (RuleI(Zone, AutoShutdownDelay));
+    }
 
-			mysql_free_result(result);
-			safe_delete_array(query);
-			return (retVal);
-		}
-		else {
-			std::cerr << "Error in getZoneShutDownDelay no result '" << query << "' " << errbuf << std::endl;
-			mysql_free_result(result);
-			safe_delete_array(query);
-			return (RuleI(Zone, AutoShutdownDelay));
-		}
-	}
-	else {
-		std::cerr << "Error in getZoneShutDownDelay query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-	}
-	return (RuleI(Zone, AutoShutdownDelay));
+    auto row = results.begin();
+
+    return atoi(row[0]);
 }
 
 uint32 ZoneDatabase::GetKarma(uint32 acct_id)
