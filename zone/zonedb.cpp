@@ -778,14 +778,10 @@ void ZoneDatabase::UpdateBuyLine(uint32 CharID, uint32 BuySlot, uint32 Quantity)
 		return;
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-
-	if (!(RunQuery(query,MakeAnyLenString(&query, "update buyer set quantity=%i where charid=%i and buyslot=%i",
-							Quantity, CharID, BuySlot), errbuf)))
-		_log(TRADING__CLIENT, "Failed to update quantity in buyslot %i for charid: %i, the error was: %s\n", BuySlot, CharID, errbuf);
-
-	safe_delete_array(query);
+	std::string query = StringFormat("UPDATE buyer SET quantity = %i WHERE charid = %i AND buyslot = %i", Quantity, CharID, BuySlot);
+    auto results = QueryDatabase(query);
+	if (!results.Success())
+		_log(TRADING__CLIENT, "Failed to update quantity in buyslot %i for charid: %i, the error was: %s\n", BuySlot, CharID, results.ErrorMessage().c_str());
 
 }
 
