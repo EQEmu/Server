@@ -1522,75 +1522,63 @@ void ZoneDatabase::SaveMercBuffs(Merc *merc) {
 void ZoneDatabase::LoadMercBuffs(Merc *merc) {
 	Buffs_Struct *buffs = merc->GetBuffs();
 	uint32 max_slots = merc->GetMaxBuffSlots();
-	std::string errorMessage;
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES* DatasetResult;
-	MYSQL_ROW DataRow;
+
 
 	bool BuffsLoaded = false;
-
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT SpellId, CasterLevel, DurationFormula, TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, dot_rune, caston_x, Persistent, caston_y, caston_z, ExtraDIChance FROM merc_buffs WHERE MercId = %u", merc->GetMercID()), TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
-	}
-	else {
-		int BuffCount = 0;
-
-		while(DataRow = mysql_fetch_row(DatasetResult)) {
-			if(BuffCount == BUFF_COUNT)
-				break;
-
-			buffs[BuffCount].spellid = atoi(DataRow[0]);
-			buffs[BuffCount].casterlevel = atoi(DataRow[1]);
-			buffs[BuffCount].ticsremaining = atoi(DataRow[3]);
-
-			if(CalculatePoisonCounters(buffs[BuffCount].spellid) > 0) {
-				buffs[BuffCount].counters = atoi(DataRow[4]);
-			} else if(CalculateDiseaseCounters(buffs[BuffCount].spellid) > 0) {
-				buffs[BuffCount].counters = atoi(DataRow[5]);
-			} else if(CalculateCurseCounters(buffs[BuffCount].spellid) > 0) {
-				buffs[BuffCount].counters = atoi(DataRow[6]);
-			} else if(CalculateCorruptionCounters(buffs[BuffCount].spellid) > 0) {
-				buffs[BuffCount].counters = atoi(DataRow[7]);
-			}
-			buffs[BuffCount].numhits = atoi(DataRow[8]);
-			buffs[BuffCount].melee_rune = atoi(DataRow[9]);
-			buffs[BuffCount].magic_rune = atoi(DataRow[10]);
-			buffs[BuffCount].dot_rune = atoi(DataRow[11]);
-			buffs[BuffCount].caston_x = atoi(DataRow[12]);
-			buffs[BuffCount].casterid = 0;
-
-			bool IsPersistent = false;
-
-			if(atoi(DataRow[13]))
-				IsPersistent = true;
-
-			buffs[BuffCount].caston_y = atoi(DataRow[13]);
-			buffs[BuffCount].caston_z = atoi(DataRow[14]);
-			buffs[BuffCount].ExtraDIChance = atoi(DataRow[15]);
-
-			buffs[BuffCount].persistant_buff = IsPersistent;
-
-			BuffCount++;
-		}
-
-		mysql_free_result(DatasetResult);
-
-		BuffsLoaded = true;
+    std::string query = StringFormat("SELECT SpellId, CasterLevel, DurationFormula, TicsRemaining, "
+                                    "PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, "
+                                    "HitCount, MeleeRune, MagicRune, dot_rune, caston_x, Persistent, "
+                                    "caston_y, caston_z, ExtraDIChance FROM merc_buffs WHERE MercId = %u",
+                                    merc->GetMercID());
+    auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error Loading Merc Buffs: %s", results.ErrorMessage().c_str());
+		return;
 	}
 
-	safe_delete_array(Query);
+    int buffCount = 0;
+    for (auto row = results.begin(); row != results.end(); ++row, ++buffCount) {
+        if(buffCount == BUFF_COUNT)
+            break;
 
-	if(errorMessage.empty() && BuffsLoaded) {
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM merc_buffs WHERE MercId = %u", merc->GetMercID()), TempErrorMessageBuffer)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		safe_delete_array(Query);
-	}
+        buffs[buffCount].spellid = atoi(row[0]);
+        buffs[buffCount].casterlevel = atoi(row[1]);
+        buffs[buffCount].ticsremaining = atoi(row[3]);
 
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error Loading Merc Buffs: %s", errorMessage.c_str());
-	}
+        if(CalculatePoisonCounters(buffs[buffCount].spellid) > 0)
+            buffs[buffCount].counters = atoi(row[4]);
+
+        if(CalculateDiseaseCounters(buffs[buffCount].spellid) > 0)
+            buffs[buffCount].counters = atoi(row[5]);
+
+        if(CalculateCurseCounters(buffs[buffCount].spellid) > 0)
+            buffs[buffCount].counters = atoi(row[6]);
+
+		if(CalculateCorruptionCounters(buffs[buffCount].spellid) > 0)
+            buffs[buffCount].counters = atoi(row[7]);
+
+        buffs[buffCount].numhits = atoi(row[8]);
+		buffs[buffCount].melee_rune = atoi(row[9]);
+		buffs[buffCount].magic_rune = atoi(row[10]);
+		buffs[buffCount].dot_rune = atoi(row[11]);
+		buffs[buffCount].caston_x = atoi(row[12]);
+		buffs[buffCount].casterid = 0;
+
+        bool IsPersistent = atoi(row[13])? true: false;
+
+        buffs[buffCount].caston_y = atoi(row[13]);
+        buffs[buffCount].caston_z = atoi(row[14]);
+        buffs[buffCount].ExtraDIChance = atoi(row[15]);
+
+        buffs[buffCount].persistant_buff = IsPersistent;
+
+    }
+
+	query = StringFormat("DELETE FROM merc_buffs WHERE MercId = %u", merc->GetMercID());
+    results = database.QueryDatabase(query);
+    if(!results.Success())
+        LogFile->write(EQEMuLog::Error, "Error Loading Merc Buffs: %s", results.ErrorMessage().c_str());
+
 }
 
 bool ZoneDatabase::DeleteMerc(uint32 merc_id) {
