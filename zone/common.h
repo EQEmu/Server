@@ -368,10 +368,10 @@ struct StatBonuses {
 	bool	NegateIfCombat;						// Bool Drop buff if cast or melee
 	int8	Screech;							// -1 = Will be blocked if another Screech is +(1)
 	int16	AlterNPCLevel;						// amount of lvls +/-
-	int16	AStacker[1];						// For buff stack blocking 0=Exists 1=Effect_value 
-	int16	BStacker[1];						// For buff stack blocking 0=Exists 1=Effect_value
-	int16	CStacker[1];						// For buff stack blocking 0=Exists 1=Effect_value
-	int16	DStacker[1];						// For buff stack blocking 0=Exists 1=Effect_value
+	int16	AStacker[2];						// For buff stack blocking 0=Exists 1=Effect_value
+	int16	BStacker[2];						// For buff stack blocking 0=Exists 1=Effect_value
+	int16	CStacker[2];						// For buff stack blocking 0=Exists 1=Effect_value
+	int16	DStacker[2];						// For buff stack blocking 0=Exists 1=Effect_value
 	bool	BerserkSPA;							// berserk effect
 	int16	Metabolism;							// Food/drink consumption rates.
 	bool	Sanctuary;							// Sanctuary effect, lowers place on hate list until cast on others.
