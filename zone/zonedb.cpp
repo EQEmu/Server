@@ -411,12 +411,6 @@ void ZoneDatabase::SetDoorPlace(uint8 value,uint8 door_id,const char* zone_name)
 
 void ZoneDatabase::GetEventLogs(const char* name,char* target,uint32 account_id,uint8 eventid,char* detail,char* timestamp, CharacterEventLog_Struct* cel)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	query = new char[256];
-	uint32 count = 0;
 	char modifications[200];
 	if(strlen(name) != 0)
 		sprintf(modifications,"charname=\'%s\'",name);
@@ -424,46 +418,42 @@ void ZoneDatabase::GetEventLogs(const char* name,char* target,uint32 account_id,
 		sprintf(modifications,"accountid=%i",account_id);
 
 	if(strlen(target) != 0)
-		sprintf(modifications,"%s AND target like \'%%%s%%\'",modifications,target);
+		sprintf(modifications,"%s AND target LIKE \'%%%s%%\'",modifications,target);
 
 	if(strlen(detail) != 0)
-		sprintf(modifications,"%s AND description like \'%%%s%%\'",modifications,detail);
+		sprintf(modifications,"%s AND description LIKE \'%%%s%%\'",modifications,detail);
 
 	if(strlen(timestamp) != 0)
-		sprintf(modifications,"%s AND time like \'%%%s%%\'",modifications,timestamp);
+		sprintf(modifications,"%s AND time LIKE \'%%%s%%\'",modifications,timestamp);
 
 	if(eventid == 0)
 		eventid =1;
 	sprintf(modifications,"%s AND event_nid=%i",modifications,eventid);
 
-	MakeAnyLenString(&query, "SELECT id,accountname,accountid,status,charname,target,time,descriptiontype,description FROM eventlog where %s",modifications);
-	if (RunQuery(query, strlen(query), errbuf, &result))
-	{
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result)))
-		{
-			if(count > 255)
-				break;
-			cel->eld[count].id = atoi(row[0]);
-			strn0cpy(cel->eld[count].accountname,row[1],64);
-			cel->eld[count].account_id = atoi(row[2]);
-			cel->eld[count].status = atoi(row[3]);
-			strn0cpy(cel->eld[count].charactername,row[4],64);
-			strn0cpy(cel->eld[count].targetname,row[5],64);
-			sprintf(cel->eld[count].timestamp,"%s",row[6]);
-			strn0cpy(cel->eld[count].descriptiontype,row[7],64);
-			strn0cpy(cel->eld[count].details,row[8],128);
-			cel->eventid = eventid;
-			count++;
-			cel->count = count;
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		// TODO: Invalid item length in database
-		safe_delete_array(query);
-	}
+    std::string query = StringFormat("SELECT id, accountname, accountid, status, charname, target, "
+                                    "time, descriptiontype, description FROM eventlog WHERE %s", modifications);
+    auto results = QueryDatabase(query);
+    if (!results.Success())
+        return;
+
+	int index = 0;
+    for (auto row = results.begin(); row != results.end(); ++row, ++index) {
+        if(index == 255)
+            break;
+
+        cel->eld[index].id = atoi(row[0]);
+        strn0cpy(cel->eld[index].accountname,row[1],64);
+        cel->eld[index].account_id = atoi(row[2]);
+        cel->eld[index].status = atoi(row[3]);
+        strn0cpy(cel->eld[index].charactername,row[4],64);
+        strn0cpy(cel->eld[index].targetname,row[5],64);
+        sprintf(cel->eld[index].timestamp,"%s",row[6]);
+        strn0cpy(cel->eld[index].descriptiontype,row[7],64);
+        strn0cpy(cel->eld[index].details,row[8],128);
+        cel->eventid = eventid;
+        cel->count = index + 1;
+    }
+
 }
 
 // Load child objects for a world container (i.e., forge, bag dropped to ground, etc)
