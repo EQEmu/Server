@@ -1660,31 +1660,21 @@ void ZoneDatabase::SaveMerchantTemp(uint32 npcid, uint32 slot, uint32 item, uint
 }
 
 void ZoneDatabase::DeleteMerchantTemp(uint32 npcid, uint32 slot){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "delete from merchantlist_temp where npcid=%d and slot=%d", npcid, slot), errbuf)) {
-		std::cerr << "Error in DeleteMerchantTemp query '" << query << "' " << errbuf << std::endl;
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("DELETE FROM merchantlist_temp WHERE npcid=%d AND slot=%d", npcid, slot);
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+		std::cerr << "Error in DeleteMerchantTemp query '" << query << "' " << results.ErrorMessage() << std::endl;
+
 }
 
-
 bool ZoneDatabase::UpdateZoneSafeCoords(const char* zonename, float x=0, float y=0, float z=0) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32	affected_rows = 0;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE zone SET safe_x='%f', safe_y='%f', safe_z='%f' WHERE short_name='%s';", x, y, z, zonename), errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
+	std::string query = StringFormat("UPDATE zone SET safe_x='%f', safe_y='%f', safe_z='%f' "
+                                    "WHERE short_name='%s';", x, y, z, zonename);
+	auto results = QueryDatabase(query);
+	if (!results.Success() || results.RowsAffected() == 0)
 		return false;
-	}
-	safe_delete_array(query);
-
-	if (affected_rows == 0)
-	{
-		return false;
-	}
 
 	return true;
 }
