@@ -246,8 +246,6 @@ public:
 	/*
 	* General Character Related Stuff
 	*/
-	bool	SetServerFilters(char* name, ServerSideFilters_Struct *ssfs);
-	uint32	GetServerFilters(char* name, ServerSideFilters_Struct *ssfs);
 	bool	GetAccountInfoForLogin(uint32 account_id, int16* admin = 0, char* account_name = 0,
 				uint32* lsaccountid = 0, uint8* gmspeed = 0, bool* revoked = 0, bool* gmhideme = 0);
 	bool	GetAccountInfoForLogin_result(MYSQL_RES* result, int16* admin = 0, char* account_name = 0,
