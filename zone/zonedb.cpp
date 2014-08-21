@@ -764,13 +764,11 @@ void ZoneDatabase::AddBuyLine(uint32 CharID, uint32 BuySlot, uint32 ItemID, cons
 
 void ZoneDatabase::RemoveBuyLine(uint32 CharID, uint32 BuySlot) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+	std::string query = StringFormat("DELETE FROM buyer WHERE charid = %i AND buyslot = %i", CharID, BuySlot);
+    auto results = QueryDatabase(query);
+	if (!results.Success())
+		_log(TRADING__CLIENT, "Failed to delete buyslot %i for charid: %i, the error was: %s\n", BuySlot, CharID, results.ErrorMessage().c_str());
 
-	if (!(RunQuery(query,MakeAnyLenString(&query, "delete from buyer where charid=%i and buyslot=%i", CharID, BuySlot), errbuf)))
-		_log(TRADING__CLIENT, "Failed to delete buyslot %i for charid: %i, the error was: %s\n", BuySlot, CharID, errbuf);
-
-	safe_delete_array(query);
 }
 
 void ZoneDatabase::UpdateBuyLine(uint32 CharID, uint32 BuySlot, uint32 Quantity) {
