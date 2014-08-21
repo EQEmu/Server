@@ -1303,63 +1303,53 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 	return npc;
 }
 
-bool ZoneDatabase::LoadMercInfo(Client *c) {
-	bool loaded = false;
+bool ZoneDatabase::LoadMercInfo(Client *client) {
 
-	if(c->GetEPP().merc_name[0] != 0) {
-		std::string errorMessage;
-		char* Query = 0;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
-		//char name[64];
+	if(client->GetEPP().merc_name[0] == 0)
+        return false;
 
-		//CleanMobName(c->GetEPP().merc_name, name);
+	std::string query = StringFormat("SELECT MercID, Slot, Name, TemplateID, SuspendedTime, "
+                                    "IsSuspended, TimerRemaining, Gender, StanceID, HP, Mana, "
+                                    "Endurance, Face, LuclinHairStyle, LuclinHairColor, "
+                                    "LuclinEyeColor, LuclinEyeColor2, LuclinBeardColor, LuclinBeard, "
+                                    "DrakkinHeritage, DrakkinTattoo, DrakkinDetails "
+                                    "FROM mercs WHERE OwnerCharacterID = '%i' ORDER BY Slot", client->CharacterID());
+    auto results = QueryDatabase(query);
+    if (!results.Success())
+        return false;
 
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT MercID, Slot, Name, TemplateID, SuspendedTime, IsSuspended, TimerRemaining, Gender, StanceID, HP, Mana, Endurance, Face, LuclinHairStyle, LuclinHairColor, LuclinEyeColor, LuclinEyeColor2, LuclinBeardColor, LuclinBeard, DrakkinHeritage, DrakkinTattoo, DrakkinDetails FROM mercs WHERE OwnerCharacterID = '%i' ORDER BY Slot", c->CharacterID()), TempErrorMessageBuffer, &DatasetResult)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else {
-			while(DataRow = mysql_fetch_row(DatasetResult)) {
-				uint8 slot = atoi(DataRow[1]);
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        uint8 slot = atoi(row[1]);
 
-				if(slot >= MAXMERCS) {
-					continue;
-				}
+        if(slot >= MAXMERCS)
+            continue;
 
-				c->GetMercInfo(slot).mercid = atoi(DataRow[0]);
-				c->GetMercInfo(slot).slot = slot;
-				snprintf(c->GetMercInfo(slot).merc_name, 64, "%s", std::string(DataRow[2]).c_str());
-				c->GetMercInfo(slot).MercTemplateID = atoi(DataRow[3]);
-				c->GetMercInfo(slot).SuspendedTime = atoi(DataRow[4]);
-				c->GetMercInfo(slot).IsSuspended = atoi(DataRow[5]) == 1 ? true : false;
-				c->GetMercInfo(slot).MercTimerRemaining = atoi(DataRow[6]);
-				c->GetMercInfo(slot).Gender = atoi(DataRow[7]);
-				c->GetMercInfo(slot).State = 5;
-				c->GetMercInfo(slot).Stance = atoi(DataRow[8]);
-				c->GetMercInfo(slot).hp = atoi(DataRow[9]);
-				c->GetMercInfo(slot).mana = atoi(DataRow[10]);
-				c->GetMercInfo(slot).endurance = atoi(DataRow[11]);
-				c->GetMercInfo(slot).face = atoi(DataRow[12]);
-				c->GetMercInfo(slot).luclinHairStyle = atoi(DataRow[13]);
-				c->GetMercInfo(slot).luclinHairColor = atoi(DataRow[14]);
-				c->GetMercInfo(slot).luclinEyeColor = atoi(DataRow[15]);
-				c->GetMercInfo(slot).luclinEyeColor2 = atoi(DataRow[16]);
-				c->GetMercInfo(slot).luclinBeardColor = atoi(DataRow[17]);
-				c->GetMercInfo(slot).luclinBeard = atoi(DataRow[18]);
-				c->GetMercInfo(slot).drakkinHeritage = atoi(DataRow[19]);
-				c->GetMercInfo(slot).drakkinTattoo = atoi(DataRow[20]);
-				c->GetMercInfo(slot).drakkinDetails = atoi(DataRow[21]);
-				loaded = true;
-			}
+        client->GetMercInfo(slot).mercid = atoi(row[0]);
+        client->GetMercInfo(slot).slot = slot;
+        snprintf(client->GetMercInfo(slot).merc_name, 64, "%s", row[2]);
+        client->GetMercInfo(slot).MercTemplateID = atoi(row[3]);
+        client->GetMercInfo(slot).SuspendedTime = atoi(row[4]);
+        client->GetMercInfo(slot).IsSuspended = atoi(row[5]) == 1 ? true : false;
+		client->GetMercInfo(slot).MercTimerRemaining = atoi(row[6]);
+		client->GetMercInfo(slot).Gender = atoi(row[7]);
+		client->GetMercInfo(slot).State = 5;
+		client->GetMercInfo(slot).Stance = atoi(row[8]);
+		client->GetMercInfo(slot).hp = atoi(row[9]);
+		client->GetMercInfo(slot).mana = atoi(row[10]);
+		client->GetMercInfo(slot).endurance = atoi(row[11]);
+		client->GetMercInfo(slot).face = atoi(row[12]);
+		client->GetMercInfo(slot).luclinHairStyle = atoi(row[13]);
+		client->GetMercInfo(slot).luclinHairColor = atoi(row[14]);
+		client->GetMercInfo(slot).luclinEyeColor = atoi(row[15]);
+		client->GetMercInfo(slot).luclinEyeColor2 = atoi(row[16]);
+		client->GetMercInfo(slot).luclinBeardColor = atoi(row[17]);
+		client->GetMercInfo(slot).luclinBeard = atoi(row[18]);
+		client->GetMercInfo(slot).drakkinHeritage = atoi(row[19]);
+		client->GetMercInfo(slot).drakkinTattoo = atoi(row[20]);
+		client->GetMercInfo(slot).drakkinDetails = atoi(row[21]);
+    }
 
-			mysql_free_result(DatasetResult);
-		}
-
-		safe_delete_array(Query);
-	}
-
-	return loaded;
+	return true;
 }
 
 bool ZoneDatabase::LoadCurrentMerc(Client *c) {
