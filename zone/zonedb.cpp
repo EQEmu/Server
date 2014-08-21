@@ -785,39 +785,6 @@ void ZoneDatabase::UpdateBuyLine(uint32 CharID, uint32 BuySlot, uint32 Quantity)
 
 }
 
-bool ZoneDatabase::GetCharacterInfoForLogin(const char* name, uint32* character_id,
-char* current_zone, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext,
-uint32* pplen, uint32* guilddbid, uint8* guildrank,
-uint8 *class_, uint8 *level, bool *LFP, bool *LFG, uint8 *NumXTargets, uint8 *firstlogon) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 querylen;
-	MYSQL_RES *result;
-
-	bool ret = false;
-
-	//DO NOT FORGET TO EDIT Client::Handle_Connect_OP_ZoneEntry if you change this.
-
-	if (character_id && *character_id) {
-		// searching by ID should be a lil bit faster
-		querylen = MakeAnyLenString(&query, "SELECT id,profile,zonename,x,y,z,guild_id,rank,extprofile,class,level,lfp,lfg,instanceid,xtargets,firstlogon FROM character_ LEFT JOIN guild_members ON id=char_id WHERE id=%i", *character_id);
-	}
-	else {
-		querylen = MakeAnyLenString(&query, "SELECT id,profile,zonename,x,y,z,guild_id,rank,extprofile,class,level,lfp,lfg,instanceid,xtargets,firstlogon FROM character_ LEFT JOIN guild_members ON id=char_id WHERE name='%s'", name);
-	}
-
-	if (RunQuery(query, querylen, errbuf, &result)) {
-		ret = GetCharacterInfoForLogin_result(result, character_id, current_zone, pp, inv, ext, pplen, guilddbid, guildrank, class_, level, LFP, LFG, NumXTargets, firstlogon);
-		mysql_free_result(result);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "GetCharacterInfoForLogin query '%s' %s", query, errbuf);
-	}
-
-	safe_delete_array(query);
-	return ret;
-}
-
 #define StructDist(in, f1, f2) (uint32(&in->f2)-uint32(&in->f1))
 
 // Process results of GetCharacterInfoForLogin()

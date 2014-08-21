@@ -253,10 +253,6 @@ public:
 				PlayerProfile_Struct* pp = 0, Inventory* inv = 0, ExtendedProfile_Struct *ext = 0, uint32* pplen = 0,
 				uint32* guilddbid = 0, uint8* guildrank = 0, uint8 *class_= 0, uint8 *level = 0, bool *LFP = 0,
 				bool *LFG = 0, uint8 *NumXTargets = 0, uint8* firstlogon = 0);
-	bool	GetCharacterInfoForLogin(const char* name, uint32* character_id = 0, char* current_zone = 0,
-				PlayerProfile_Struct* pp = 0, Inventory* inv = 0, ExtendedProfile_Struct *ext = 0, uint32* pplen = 0,
-				uint32* guilddbid = 0, uint8* guildrank = 0, uint8 *class_ = 0, uint8 *level = 0, bool *LFP = 0,
-				bool *LFG = 0, uint8 *NumXTargets = 0, uint8* firstlogon = 0);
 	void SaveBuffs(Client *c);
 	void LoadBuffs(Client *c);
 	void LoadPetInfo(Client *c);
