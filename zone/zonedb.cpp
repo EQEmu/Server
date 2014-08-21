@@ -2173,129 +2173,109 @@ void ZoneDatabase::RemoveTempFactions(Client *client) {
 
 }
 
-void ZoneDatabase::LoadPetInfo(Client *c) {
-	// Load current pet and suspended pet
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+void ZoneDatabase::LoadPetInfo(Client *client) {
 
-	PetInfo *petinfo = c->GetPetInfo(0);
-	PetInfo *suspended = c->GetPetInfo(1);
-	PetInfo *pi;
-	uint16 pet;
+	// Load current pet and suspended pet
+	PetInfo *petinfo = client->GetPetInfo(0);
+	PetInfo *suspended = client->GetPetInfo(1);
 
 	memset(petinfo, 0, sizeof(PetInfo));
 	memset(suspended, 0, sizeof(PetInfo));
 
-	if(database.RunQuery(query, MakeAnyLenString(&query,
-		"SELECT `pet`, `petname`, `petpower`, `spell_id`, `hp`, `mana`, `size` from `character_pet_info` where `char_id`=%u",
-		c->CharacterID()), errbuf, &result))
-	{
-		safe_delete_array(query);
-		while ((row = mysql_fetch_row(result))) {
-			pet = atoi(row[0]);
-			if (pet == 0)
-				pi = petinfo;
-			else if (pet == 1)
-				pi = suspended;
-			else
-				continue;
-
-			strncpy(pi->Name,row[1],64);
-			pi->petpower = atoi(row[2]);
-			pi->SpellID = atoi(row[3]);
-			pi->HP = atoul(row[4]);
-			pi->Mana = atoul(row[5]);
-			pi->size = atof(row[6]);
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in LoadPetInfo query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("SELECT `pet`, `petname`, `petpower`, `spell_id`, "
+                                    "`hp`, `mana`, `size` FROM `character_pet_info` "
+                                    "WHERE `char_id` = %u", client->CharacterID());
+    auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
+    PetInfo *pi;
+	for (auto row = results.begin(); row != results.end(); ++row) {
+        uint16 pet = atoi(row[0]);
 
-	if (RunQuery(query, MakeAnyLenString(&query,
-		"SELECT `pet`, `slot`, `spell_id`, `caster_level`, `castername`, "
-		"`ticsremaining`, `counters` FROM `character_pet_buffs` "
-		"WHERE `char_id`=%u",
-		c->CharacterID()), errbuf, &result))
-	{
-		safe_delete_array(query);
-		while ((row = mysql_fetch_row(result)))
-		{
-			pet = atoi(row[0]);
-			if (pet == 0)
-				pi = petinfo;
-			else if (pet == 1)
-				pi = suspended;
-			else
-				continue;
+		if (pet == 0)
+			pi = petinfo;
+		else if (pet == 1)
+			pi = suspended;
+		else
+			continue;
 
-			uint32 slot_id = atoul(row[1]);
-			if(slot_id >= RuleI(Spells, MaxTotalSlotsPET)) {
-				continue;
-			}
-
-			uint32 spell_id = atoul(row[2]);
-			if(!IsValidSpell(spell_id)) {
-				continue;
-			}
-			uint32 caster_level = atoi(row[3]);
-			int caster_id = 0;
-			// The castername field is currently unused
-			//Client *caster = entity_list.GetClientByName(row[4]);
-			//if (caster) { caster_id = caster->GetID(); }
-			uint32 ticsremaining = atoul(row[5]);
-			uint32 counters = atoul(row[6]);
-
-			pi->Buffs[slot_id].spellid = spell_id;
-			pi->Buffs[slot_id].level = caster_level;
-			pi->Buffs[slot_id].player_id = caster_id;
-			pi->Buffs[slot_id].slotid = 2;	// Always 2 in buffs struct for real buffs
-
-			pi->Buffs[slot_id].duration = ticsremaining;
-			pi->Buffs[slot_id].counters = counters;
-		}
-		mysql_free_result(result);
+		strncpy(pi->Name,row[1],64);
+		pi->petpower = atoi(row[2]);
+		pi->SpellID = atoi(row[3]);
+		pi->HP = atoul(row[4]);
+		pi->Mana = atoul(row[5]);
+		pi->size = atof(row[6]);
 	}
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadPetInfo query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+
+    query = StringFormat("SELECT `pet`, `slot`, `spell_id`, `caster_level`, `castername`, "
+                        "`ticsremaining`, `counters` FROM `character_pet_buffs` "
+                        "WHERE `char_id` = %u", client->CharacterID());
+    results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return;
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        uint16 pet = atoi(row[0]);
+        if (pet == 0)
+            pi = petinfo;
+        else if (pet == 1)
+            pi = suspended;
+        else
+            continue;
+
+        uint32 slot_id = atoul(row[1]);
+        if(slot_id >= RuleI(Spells, MaxTotalSlotsPET))
+				continue;
+
+        uint32 spell_id = atoul(row[2]);
+        if(!IsValidSpell(spell_id))
+            continue;
+
+        uint32 caster_level = atoi(row[3]);
+        int caster_id = 0;
+        // The castername field is currently unused
+        uint32 ticsremaining = atoul(row[5]);
+        uint32 counters = atoul(row[6]);
+
+        pi->Buffs[slot_id].spellid = spell_id;
+        pi->Buffs[slot_id].level = caster_level;
+        pi->Buffs[slot_id].player_id = caster_id;
+        pi->Buffs[slot_id].slotid = 2;	// Always 2 in buffs struct for real buffs
+
+        pi->Buffs[slot_id].duration = ticsremaining;
+        pi->Buffs[slot_id].counters = counters;
+    }
+
+    query = StringFormat("SELECT `pet`, `slot`, `item_id` "
+                        "FROM `character_pet_inventory` "
+                        "WHERE `char_id`=%u",client->CharacterID());
+    results = database.QueryDatabase(query);
+    if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
-	if (database.RunQuery(query, MakeAnyLenString(&query,
-		"SELECT `pet`, `slot`, `item_id` FROM `character_pet_inventory` WHERE `char_id`=%u",
-		c->CharacterID()), errbuf, &result))
-	{
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result))) {
-			pet = atoi(row[0]);
-			if (pet == 0)
-				pi = petinfo;
-			else if (pet == 1)
-				pi = suspended;
-			else
-				continue;
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        uint16 pet = atoi(row[0]);
+		if (pet == 0)
+			pi = petinfo;
+		else if (pet == 1)
+			pi = suspended;
+		else
+			continue;
 
-			int slot = atoi(row[1]);
-			if (slot < EmuConstants::EQUIPMENT_BEGIN || slot > EmuConstants::EQUIPMENT_END)
-				continue;
+		int slot = atoi(row[1]);
+		if (slot < EmuConstants::EQUIPMENT_BEGIN || slot > EmuConstants::EQUIPMENT_END)
+            continue;
 
-			pi->Items[slot] = atoul(row[2]);
-		}
-		mysql_free_result(result);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadPetInfo query '%s': %s", query, errbuf);
-		safe_delete_array(query);
-			return;
-	}
+        pi->Items[slot] = atoul(row[2]);
+    }
+
 }
 
 bool ZoneDatabase::GetFactionData(FactionMods* fm, uint32 class_mod, uint32 race_mod, uint32 deity_mod, int32 faction_id) {
