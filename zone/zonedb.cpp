@@ -1480,66 +1480,42 @@ bool ZoneDatabase::SaveMerc(Merc *merc) {
 }
 
 void ZoneDatabase::SaveMercBuffs(Merc *merc) {
+
 	Buffs_Struct *buffs = merc->GetBuffs();
-	std::string errorMessage;
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-	int BuffCount = 0;
-	int InsertCount = 0;
 
-	uint32 buff_count = merc->GetMaxBuffSlots();
-	while(BuffCount < BUFF_COUNT) {
-		if(buffs[BuffCount].spellid > 0 && buffs[BuffCount].spellid != SPELL_UNKNOWN) {
-			if(InsertCount == 0) {
-				// Remove any existing buff saves
-				if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM merc_buffs WHERE MercId = %u", merc->GetMercID()), TempErrorMessageBuffer)) {
-					errorMessage = std::string(TempErrorMessageBuffer);
-					safe_delete(Query);
-					Query = 0;
-					break;
-				}
-			}
+	// Remove any existing buff saves
+    std::string query = StringFormat("DELETE FROM merc_buffs WHERE MercId = %u", merc->GetMercID());
+    auto results = database.QueryDatabase(query);
+    if(!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error While Deleting Merc Buffs before save: %s", results.ErrorMessage().c_str());
+        return;
+    }
 
-			int IsPersistent = 0;
+	for (int buffCount = 0; buffCount <= BUFF_COUNT; buffCount++) {
+		if(buffs[buffCount].spellid == 0 || buffs[buffCount].spellid == SPELL_UNKNOWN)
+            continue;
 
-			if(buffs[BuffCount].persistant_buff)
-				IsPersistent = 1;
-			else
-				IsPersistent = 0;
+        int IsPersistent = buffs[buffCount].persistant_buff? 1: 0;
 
-			if(!database.RunQuery(Query, MakeAnyLenString(&Query, "INSERT INTO merc_buffs (MercId, SpellId, CasterLevel, DurationFormula, "
-				"TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, "
-				"dot_rune, caston_x, Persistent, caston_y, caston_z, ExtraDIChance) VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %i, %u, %i, %i, %i);",
-				merc->GetMercID(), buffs[BuffCount].spellid, buffs[BuffCount].casterlevel, spells[buffs[BuffCount].spellid].buffdurationformula,
-				buffs[BuffCount].ticsremaining,
-				CalculatePoisonCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
-				CalculateDiseaseCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
-				CalculateCurseCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
-				CalculateCorruptionCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
-				buffs[BuffCount].numhits, buffs[BuffCount].melee_rune, buffs[BuffCount].magic_rune,
-				buffs[BuffCount].dot_rune,
-				buffs[BuffCount].caston_x,
-				IsPersistent,
-				buffs[BuffCount].caston_y,
-				buffs[BuffCount].caston_z,
-				buffs[BuffCount].ExtraDIChance), TempErrorMessageBuffer)) {
-				errorMessage = std::string(TempErrorMessageBuffer);
-				safe_delete(Query);
-				Query = 0;
-				break;
-			}
-			else {
-				safe_delete(Query);
-				Query = 0;
-				InsertCount++;
-			}
-		}
-
-		BuffCount++;
-	}
-
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error Saving Merc Buffs: %s", errorMessage.c_str());
+        query = StringFormat("INSERT INTO merc_buffs (MercId, SpellId, CasterLevel, DurationFormula, "
+                            "TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, "
+                            "CorruptionCounters, HitCount, MeleeRune, MagicRune, dot_rune, "
+                            "caston_x, Persistent, caston_y, caston_z, ExtraDIChance) "
+                            "VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %i, %u, %i, %i, %i);",
+                            merc->GetMercID(), buffs[buffCount].spellid, buffs[buffCount].casterlevel,
+                            spells[buffs[buffCount].spellid].buffdurationformula, buffs[buffCount].ticsremaining,
+                            CalculatePoisonCounters(buffs[buffCount].spellid) > 0 ? buffs[buffCount].counters : 0,
+                            CalculateDiseaseCounters(buffs[buffCount].spellid) > 0 ? buffs[buffCount].counters : 0,
+                            CalculateCurseCounters(buffs[buffCount].spellid) > 0 ? buffs[buffCount].counters : 0,
+                            CalculateCorruptionCounters(buffs[buffCount].spellid) > 0 ? buffs[buffCount].counters : 0,
+                            buffs[buffCount].numhits, buffs[buffCount].melee_rune, buffs[buffCount].magic_rune,
+                            buffs[buffCount].dot_rune, buffs[buffCount].caston_x, IsPersistent, buffs[buffCount].caston_y,
+                            buffs[buffCount].caston_z, buffs[buffCount].ExtraDIChance);
+        results = database.QueryDatabase(query);
+        if(!results.Success()) {
+            LogFile->write(EQEMuLog::Error, "Error Saving Merc Buffs: %s", results.ErrorMessage().c_str());
+            break;
+        }
 	}
 }
 
