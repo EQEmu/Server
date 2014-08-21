@@ -1181,7 +1181,7 @@ void Mob::AI_Process() {
 
 					if (GetSpecialAbility(SPECATK_FLURRY)) {
 						int flurry_chance = GetSpecialAbilityParam(SPECATK_FLURRY, 0);
-						flurry_chance = flurry_chance > 0 ? flurry_chance : RuleI(Combat, NPCFlurryChance); 
+						flurry_chance = flurry_chance > 0 ? flurry_chance : RuleI(Combat, NPCFlurryChance);
 
 						if (MakeRandomInt(0, 99) < flurry_chance) {
 							ExtraAttackOptions opts;
@@ -1215,16 +1215,16 @@ void Mob::AI_Process() {
 
 					if (IsPet() || (IsNPC() && CastToNPC()->GetSwarmOwner())) {
 						Mob *owner = nullptr;
-		
+
 						if (IsPet())
 							owner = GetOwner();
-						else 
+						else
 							owner = entity_list.GetMobID(CastToNPC()->GetSwarmOwner());
-							
+
 						if (owner) {
 						int16 flurry_chance = owner->aabonuses.PetFlurry +
 							owner->spellbonuses.PetFlurry + owner->itembonuses.PetFlurry;
-						
+
 							if (flurry_chance && (MakeRandomInt(0, 99) < flurry_chance))
 								Flurry(nullptr);
 						}
@@ -1604,7 +1604,7 @@ void NPC::AI_DoMovement() {
 				roambox_movingto_x -= movex * 2;
 			if (roambox_movingto_y > roambox_max_y || roambox_movingto_y < roambox_min_y)
 				roambox_movingto_y -= movey * 2;
-			//New coord is still invalid, ignore distance and just pick a new random coord. 
+			//New coord is still invalid, ignore distance and just pick a new random coord.
 			//If we're here we may have a roambox where one side is shorter than the specified distance. Commons, Wkarana, etc.
 			if (roambox_movingto_x > roambox_max_x || roambox_movingto_x < roambox_min_x)
 				roambox_movingto_x = MakeRandomFloat(roambox_min_x+1,roambox_max_x-1);
@@ -2406,7 +2406,7 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 	}
 
 	//If any casting variables are defined in the current list, ignore those in the parent list.
-	if (spell_list->fail_recast || spell_list->engaged_no_sp_recast_min || spell_list->engaged_no_sp_recast_max 
+	if (spell_list->fail_recast || spell_list->engaged_no_sp_recast_min || spell_list->engaged_no_sp_recast_max
 		|| spell_list->engaged_beneficial_self_chance || spell_list->engaged_beneficial_other_chance || spell_list->engaged_detrimental_chance
 		|| spell_list->pursue_no_sp_recast_min || spell_list->pursue_no_sp_recast_max || spell_list->pursue_detrimental_chance
 		|| spell_list->idle_no_sp_recast_min || spell_list->idle_no_sp_recast_max || spell_list->idle_beneficial_chance) {
@@ -2457,7 +2457,7 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 	AISpellVar.idle_no_sp_recast_min = (_idle_no_sp_recast_min) ? _idle_no_sp_recast_min : RuleI(Spells, AI_IdleNoSpellMinRecast);
 	AISpellVar.idle_no_sp_recast_max = (_idle_no_sp_recast_max) ? _idle_no_sp_recast_max : RuleI(Spells, AI_IdleNoSpellMaxRecast);
 	AISpellVar.idle_beneficial_chance = (_idle_beneficial_chance) ? _idle_beneficial_chance : RuleI(Spells, AI_IdleBeneficialChance);
-	
+
 	if (AIspells.size() == 0)
 		AIautocastspell_timer->Disable();
 	else
@@ -2469,12 +2469,12 @@ bool NPC::AI_AddNPCSpellsEffects(uint32 iDBSpellsEffectsID) {
 
 	npc_spells_effects_id = iDBSpellsEffectsID;
 	AIspellsEffects.clear();
-	
-	if (iDBSpellsEffectsID == 0) 
+
+	if (iDBSpellsEffectsID == 0)
 		return false;
-	
+
 	DBnpcspellseffects_Struct* spell_effects_list = database.GetNPCSpellsEffects(iDBSpellsEffectsID);
-	
+
 	if (!spell_effects_list) {
 		return false;
 	}
@@ -2502,9 +2502,9 @@ bool NPC::AI_AddNPCSpellsEffects(uint32 iDBSpellsEffectsID) {
 	if (parentlist) {
 		for (i=0; i<parentlist->numentries; i++) {
 			if (GetLevel() >= parentlist->entries[i].minlevel && GetLevel() <= parentlist->entries[i].maxlevel && parentlist->entries[i].spelleffectid > 0) {
-				if (!IsSpellEffectInList(spell_effects_list, parentlist->entries[i].spelleffectid, parentlist->entries[i].base, 
+				if (!IsSpellEffectInList(spell_effects_list, parentlist->entries[i].spelleffectid, parentlist->entries[i].base,
 					parentlist->entries[i].limit, parentlist->entries[i].max))
-				{	
+				{
 				AddSpellEffectToNPCList(parentlist->entries[i].spelleffectid,
 						parentlist->entries[i].base, parentlist->entries[i].limit,
 						parentlist->entries[i].max);
@@ -2528,10 +2528,10 @@ void NPC::ApplyAISpellEffects(StatBonuses* newbon)
 {
 	if (!AI_HasSpellsEffects())
 		return;
-	
+
 	for(int i=0; i < AIspellsEffects.size(); i++)
 	{
-		ApplySpellsBonuses(0, 0, newbon, 0, false, 0,-1, 
+		ApplySpellsBonuses(0, 0, newbon, 0, false, 0,-1,
 			true, AIspellsEffects[i].spelleffectid,  AIspellsEffects[i].base, AIspellsEffects[i].limit,AIspellsEffects[i].max);
 	}
 
@@ -2541,10 +2541,10 @@ void NPC::ApplyAISpellEffects(StatBonuses* newbon)
 // adds a spell to the list, taking into account priority and resorting list as needed.
 void NPC::AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base, int32 limit, int32 max)
 {
-	
+
 	if(!iSpellEffectID)
 		return;
-	
+
 	HasAISpellEffects = true;
 	AISpellsEffects_Struct t;
 
@@ -2627,7 +2627,7 @@ void NPC::AISpellsList(Client *c)
 
 DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
 	if (iDBSpellsID == 0)
-		return 0;
+		return nullptr;
 
 	if (!npc_spells_cache) {
 		npc_spells_maxid = GetMaxNPCSpellsID();
@@ -2640,144 +2640,134 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
 	}
 
 	if (iDBSpellsID > npc_spells_maxid)
-		return 0;
+		return nullptr;
 	if (npc_spells_cache[iDBSpellsID]) { // it's in the cache, easy =)
 		return npc_spells_cache[iDBSpellsID];
 	}
 
 	else if (!npc_spells_loadtried[iDBSpellsID]) { // no reason to ask the DB again if we have failed once already
 		npc_spells_loadtried[iDBSpellsID] = true;
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		MYSQL_RES *result;
-		MYSQL_ROW row;
 
-		if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, parent_list, attack_proc, proc_chance, range_proc, rproc_chance, defensive_proc, dproc_chance, fail_recast, engaged_no_sp_recast_min, engaged_no_sp_recast_max, engaged_b_self_chance, engaged_b_other_chance, engaged_d_chance, pursue_no_sp_recast_min, pursue_no_sp_recast_max, pursue_d_chance, idle_no_sp_recast_min, idle_no_sp_recast_max, idle_b_chance from npc_spells where id=%d", iDBSpellsID), errbuf, &result)) {
-			safe_delete_array(query);
-			if (mysql_num_rows(result) == 1) {
-				row = mysql_fetch_row(result); 
-				uint32 tmpparent_list = atoi(row[1]);
-				uint16 tmpattack_proc = atoi(row[2]);
-				uint8 tmpproc_chance = atoi(row[3]);
-				uint16 tmprange_proc = atoi(row[4]);
-				int16 tmprproc_chance = atoi(row[5]);
-				uint16 tmpdefensive_proc = atoi(row[6]);
-				int16 tmpdproc_chance = atoi(row[7]);
-				uint32 tmppfail_recast = atoi(row[8]);
-				uint32 tmpengaged_no_sp_recast_min = atoi(row[9]);
-				uint32 tmpengaged_no_sp_recast_max = atoi(row[10]);
-				uint8 tmpengaged_b_self_chance = atoi(row[11]);
-				uint8 tmpengaged_b_other_chance = atoi(row[12]);
-				uint8 tmpengaged_d_chance = atoi(row[13]);
-				uint32 tmppursue_no_sp_recast_min = atoi(row[14]);
-				uint32 tmppursue_no_sp_recast_max = atoi(row[15]);
-				uint8 tmppursue_d_chance = atoi(row[16]);
-				uint32 tmpidle_no_sp_recast_min = atoi(row[17]);
-				uint32 tmpidle_no_sp_recast_max = atoi(row[18]);
-				uint8 tmpidle_b_chance = atoi(row[19]);
-				mysql_free_result(result);
-				if (RunQuery(query, MakeAnyLenString(&query, "SELECT spellid, type, minlevel, maxlevel, manacost, recast_delay, priority, resist_adjust from npc_spells_entries where npc_spells_id=%d ORDER BY minlevel", iDBSpellsID), errbuf, &result)) {
-					safe_delete_array(query);
-					uint32 tmpSize = sizeof(DBnpcspells_Struct) + (sizeof(DBnpcspells_entries_Struct) * mysql_num_rows(result));
-					npc_spells_cache[iDBSpellsID] = (DBnpcspells_Struct*) new uchar[tmpSize];
-					memset(npc_spells_cache[iDBSpellsID], 0, tmpSize);
-					npc_spells_cache[iDBSpellsID]->parent_list = tmpparent_list;
-					npc_spells_cache[iDBSpellsID]->attack_proc = tmpattack_proc;
-					npc_spells_cache[iDBSpellsID]->proc_chance = tmpproc_chance;
-					npc_spells_cache[iDBSpellsID]->range_proc = tmprange_proc;
-					npc_spells_cache[iDBSpellsID]->rproc_chance = tmpdproc_chance;
-					npc_spells_cache[iDBSpellsID]->defensive_proc = tmpdefensive_proc;
-					npc_spells_cache[iDBSpellsID]->dproc_chance = tmpdproc_chance;
-					npc_spells_cache[iDBSpellsID]->fail_recast = tmppfail_recast;
-					npc_spells_cache[iDBSpellsID]->engaged_no_sp_recast_min = tmpengaged_no_sp_recast_min;
-					npc_spells_cache[iDBSpellsID]->engaged_no_sp_recast_max = tmpengaged_no_sp_recast_max;
-					npc_spells_cache[iDBSpellsID]->engaged_beneficial_self_chance = tmpengaged_b_self_chance;
-					npc_spells_cache[iDBSpellsID]->engaged_beneficial_other_chance = tmpengaged_b_other_chance;
-					npc_spells_cache[iDBSpellsID]->engaged_detrimental_chance = tmpengaged_d_chance;
-					npc_spells_cache[iDBSpellsID]->pursue_no_sp_recast_min = tmppursue_no_sp_recast_min;
-					npc_spells_cache[iDBSpellsID]->pursue_no_sp_recast_max = tmppursue_no_sp_recast_max;
-					npc_spells_cache[iDBSpellsID]->pursue_detrimental_chance = tmppursue_d_chance;
-					npc_spells_cache[iDBSpellsID]->idle_no_sp_recast_min = tmpidle_no_sp_recast_min;
-					npc_spells_cache[iDBSpellsID]->idle_no_sp_recast_max = tmpidle_no_sp_recast_max;
-					npc_spells_cache[iDBSpellsID]->idle_beneficial_chance = tmpidle_b_chance;
-					npc_spells_cache[iDBSpellsID]->numentries = mysql_num_rows(result);
-					int j = 0;
-					while ((row = mysql_fetch_row(result))) {
-						int spell_id = atoi(row[0]);
-						npc_spells_cache[iDBSpellsID]->entries[j].spellid = spell_id;
-						npc_spells_cache[iDBSpellsID]->entries[j].type = atoi(row[1]);
-						npc_spells_cache[iDBSpellsID]->entries[j].minlevel = atoi(row[2]);
-						npc_spells_cache[iDBSpellsID]->entries[j].maxlevel = atoi(row[3]);
-						npc_spells_cache[iDBSpellsID]->entries[j].manacost = atoi(row[4]);
-						npc_spells_cache[iDBSpellsID]->entries[j].recast_delay = atoi(row[5]);
-						npc_spells_cache[iDBSpellsID]->entries[j].priority = atoi(row[6]);
-						if(row[7])
-						{
-							npc_spells_cache[iDBSpellsID]->entries[j].resist_adjust = atoi(row[7]);
-						}
-						else
-						{
-							if(IsValidSpell(spell_id))
-							{
-								npc_spells_cache[iDBSpellsID]->entries[j].resist_adjust = spells[spell_id].ResistDiff;
-							}
-						}
-						j++;
-					}
-					mysql_free_result(result);
-					return npc_spells_cache[iDBSpellsID];
-				}
-				else {
-					std::cerr << "Error in AddNPCSpells query1 '" << query << "' " << errbuf << std::endl;
-					safe_delete_array(query);
-					return 0;
-				}
-			}
-			else {
-				mysql_free_result(result);
-			}
-		}
-		else {
-			std::cerr << "Error in AddNPCSpells query1 '" << query << "' " << errbuf << std::endl;
-			safe_delete_array(query);
-			return 0;
-		}
+		std::string query = StringFormat("SELECT id, parent_list, attack_proc, proc_chance, "
+                                        "range_proc, rproc_chance, defensive_proc, dproc_chance, "
+                                        "fail_recast, engaged_no_sp_recast_min, engaged_no_sp_recast_max, "
+                                        "engaged_b_self_chance, engaged_b_other_chance, engaged_d_chance, "
+                                        "pursue_no_sp_recast_min, pursue_no_sp_recast_max, "
+                                        "pursue_d_chance, idle_no_sp_recast_min, idle_no_sp_recast_max, "
+                                        "idle_b_chance FROM npc_spells WHERE id=%d", iDBSpellsID);
+        auto results = QueryDatabase(query);
+        if (!results.Success()) {
+            std::cerr << "Error in AddNPCSpells query1 '" << query << "' " << results.ErrorMessage() << std::endl;
+			return nullptr;
+        }
 
-		return 0;
-	}
-	return 0;
+        if (results.RowCount() != 1)
+            return nullptr;
+
+        auto row = results.begin();
+        uint32 tmpparent_list = atoi(row[1]);
+        uint16 tmpattack_proc = atoi(row[2]);
+        uint8 tmpproc_chance = atoi(row[3]);
+        uint16 tmprange_proc = atoi(row[4]);
+        int16 tmprproc_chance = atoi(row[5]);
+        uint16 tmpdefensive_proc = atoi(row[6]);
+        int16 tmpdproc_chance = atoi(row[7]);
+        uint32 tmppfail_recast = atoi(row[8]);
+        uint32 tmpengaged_no_sp_recast_min = atoi(row[9]);
+        uint32 tmpengaged_no_sp_recast_max = atoi(row[10]);
+        uint8 tmpengaged_b_self_chance = atoi(row[11]);
+        uint8 tmpengaged_b_other_chance = atoi(row[12]);
+        uint8 tmpengaged_d_chance = atoi(row[13]);
+        uint32 tmppursue_no_sp_recast_min = atoi(row[14]);
+        uint32 tmppursue_no_sp_recast_max = atoi(row[15]);
+        uint8 tmppursue_d_chance = atoi(row[16]);
+        uint32 tmpidle_no_sp_recast_min = atoi(row[17]);
+        uint32 tmpidle_no_sp_recast_max = atoi(row[18]);
+        uint8 tmpidle_b_chance = atoi(row[19]);
+
+        query = StringFormat("SELECT spellid, type, minlevel, maxlevel, "
+                            "manacost, recast_delay, priority, resist_adjust "
+                            "FROM npc_spells_entries "
+                            "WHERE npc_spells_id=%d ORDER BY minlevel", iDBSpellsID);
+        results = QueryDatabase(query);
+
+        if (!results.Success())
+        {
+            std::cerr << "Error in AddNPCSpells query1 '" << query << "' " << results.ErrorMessage() << std::endl;
+			return nullptr;
+        }
+
+        uint32 tmpSize = sizeof(DBnpcspells_Struct) + (sizeof(DBnpcspells_entries_Struct) * results.RowCount());
+        npc_spells_cache[iDBSpellsID] = (DBnpcspells_Struct*) new uchar[tmpSize];
+        memset(npc_spells_cache[iDBSpellsID], 0, tmpSize);
+        npc_spells_cache[iDBSpellsID]->parent_list = tmpparent_list;
+        npc_spells_cache[iDBSpellsID]->attack_proc = tmpattack_proc;
+        npc_spells_cache[iDBSpellsID]->proc_chance = tmpproc_chance;
+        npc_spells_cache[iDBSpellsID]->range_proc = tmprange_proc;
+        npc_spells_cache[iDBSpellsID]->rproc_chance = tmpdproc_chance;
+        npc_spells_cache[iDBSpellsID]->defensive_proc = tmpdefensive_proc;
+        npc_spells_cache[iDBSpellsID]->dproc_chance = tmpdproc_chance;
+        npc_spells_cache[iDBSpellsID]->fail_recast = tmppfail_recast;
+        npc_spells_cache[iDBSpellsID]->engaged_no_sp_recast_min = tmpengaged_no_sp_recast_min;
+        npc_spells_cache[iDBSpellsID]->engaged_no_sp_recast_max = tmpengaged_no_sp_recast_max;
+        npc_spells_cache[iDBSpellsID]->engaged_beneficial_self_chance = tmpengaged_b_self_chance;
+        npc_spells_cache[iDBSpellsID]->engaged_beneficial_other_chance = tmpengaged_b_other_chance;
+        npc_spells_cache[iDBSpellsID]->engaged_detrimental_chance = tmpengaged_d_chance;
+        npc_spells_cache[iDBSpellsID]->pursue_no_sp_recast_min = tmppursue_no_sp_recast_min;
+        npc_spells_cache[iDBSpellsID]->pursue_no_sp_recast_max = tmppursue_no_sp_recast_max;
+        npc_spells_cache[iDBSpellsID]->pursue_detrimental_chance = tmppursue_d_chance;
+        npc_spells_cache[iDBSpellsID]->idle_no_sp_recast_min = tmpidle_no_sp_recast_min;
+        npc_spells_cache[iDBSpellsID]->idle_no_sp_recast_max = tmpidle_no_sp_recast_max;
+        npc_spells_cache[iDBSpellsID]->idle_beneficial_chance = tmpidle_b_chance;
+        npc_spells_cache[iDBSpellsID]->numentries = results.RowCount();
+
+        int entryIndex = 0;
+        for (row = results.begin(); row != results.end(); ++row, ++entryIndex)
+        {
+            int spell_id = atoi(row[0]);
+            npc_spells_cache[iDBSpellsID]->entries[entryIndex].spellid = spell_id;
+            npc_spells_cache[iDBSpellsID]->entries[entryIndex].type = atoi(row[1]);
+            npc_spells_cache[iDBSpellsID]->entries[entryIndex].minlevel = atoi(row[2]);
+            npc_spells_cache[iDBSpellsID]->entries[entryIndex].maxlevel = atoi(row[3]);
+            npc_spells_cache[iDBSpellsID]->entries[entryIndex].manacost = atoi(row[4]);
+            npc_spells_cache[iDBSpellsID]->entries[entryIndex].recast_delay = atoi(row[5]);
+            npc_spells_cache[iDBSpellsID]->entries[entryIndex].priority = atoi(row[6]);
+
+            if(row[7])
+                npc_spells_cache[iDBSpellsID]->entries[entryIndex].resist_adjust = atoi(row[7]);
+            else if(IsValidSpell(spell_id))
+                npc_spells_cache[iDBSpellsID]->entries[entryIndex].resist_adjust = spells[spell_id].ResistDiff;
+        }
+
+        return npc_spells_cache[iDBSpellsID];
+    }
+
+	return nullptr;
 }
 
 uint32 ZoneDatabase::GetMaxNPCSpellsID() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT max(id) from npc_spells"), errbuf, &result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			uint32 ret = 0;
-			if (row[0])
-				ret = atoi(row[0]);
-			mysql_free_result(result);
-			return ret;
-		}
-		mysql_free_result(result);
-	}
-	else {
-		std::cerr << "Error in GetMaxNPCSpellsID query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+	std::string query = "SELECT max(id) from npc_spells";
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        std::cerr << "Error in GetMaxNPCSpellsID query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
 
-	return 0;
+    if (results.RowCount() != 1)
+        return 0;
+
+    auto row = results.begin();
+
+    if (!row[0])
+        return 0;
+
+    return atoi(row[0]);
 }
 
 DBnpcspellseffects_Struct* ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEffectsID) {
 	if (iDBSpellsEffectsID == 0)
-		return 0;
+		return nullptr;
 
 	if (!npc_spellseffects_cache) {
 		npc_spellseffects_maxid = GetMaxNPCSpellsEffectsID();
@@ -2790,89 +2780,74 @@ DBnpcspellseffects_Struct* ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEff
 	}
 
 	if (iDBSpellsEffectsID > npc_spellseffects_maxid)
-		return 0;
-	if (npc_spellseffects_cache[iDBSpellsEffectsID]) { // it's in the cache, easy =)
+		return nullptr;
+
+	if (npc_spellseffects_cache[iDBSpellsEffectsID])  // it's in the cache, easy =)
 		return npc_spellseffects_cache[iDBSpellsEffectsID];
-	}
 
-	else if (!npc_spellseffects_loadtried[iDBSpellsEffectsID]) { // no reason to ask the DB again if we have failed once already
-		npc_spellseffects_loadtried[iDBSpellsEffectsID] = true;
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		MYSQL_RES *result;
-		MYSQL_ROW row;
+	if (npc_spellseffects_loadtried[iDBSpellsEffectsID])
+        return nullptr;
 
-		if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, parent_list from npc_spells_effects where id=%d", iDBSpellsEffectsID), errbuf, &result)) {
-			safe_delete_array(query);
-			if (mysql_num_rows(result) == 1) {
-				row = mysql_fetch_row(result); 
-				uint32 tmpparent_list = atoi(row[1]);
-				mysql_free_result(result);
-				if (RunQuery(query, MakeAnyLenString(&query, "SELECT spell_effect_id, minlevel, maxlevel,se_base, se_limit, se_max from npc_spells_effects_entries where npc_spells_effects_id=%d ORDER BY minlevel", iDBSpellsEffectsID), errbuf, &result)) {
-					safe_delete_array(query);
-					uint32 tmpSize = sizeof(DBnpcspellseffects_Struct) + (sizeof(DBnpcspellseffects_entries_Struct) * mysql_num_rows(result));
-					npc_spellseffects_cache[iDBSpellsEffectsID] = (DBnpcspellseffects_Struct*) new uchar[tmpSize];
-					memset(npc_spellseffects_cache[iDBSpellsEffectsID], 0, tmpSize);
-					npc_spellseffects_cache[iDBSpellsEffectsID]->parent_list = tmpparent_list;
-					npc_spellseffects_cache[iDBSpellsEffectsID]->numentries = mysql_num_rows(result);
-					int j = 0;
-					while ((row = mysql_fetch_row(result))) {
-						int spell_effect_id = atoi(row[0]);
-						npc_spellseffects_cache[iDBSpellsEffectsID]->entries[j].spelleffectid =  spell_effect_id;
-						npc_spellseffects_cache[iDBSpellsEffectsID]->entries[j].minlevel = atoi(row[1]);
-						npc_spellseffects_cache[iDBSpellsEffectsID]->entries[j].maxlevel = atoi(row[2]);
-						npc_spellseffects_cache[iDBSpellsEffectsID]->entries[j].base = atoi(row[3]);
-						npc_spellseffects_cache[iDBSpellsEffectsID]->entries[j].limit = atoi(row[4]);
-						npc_spellseffects_cache[iDBSpellsEffectsID]->entries[j].max = atoi(row[5]);
-						j++;
-					}
-					mysql_free_result(result);
-					return npc_spellseffects_cache[iDBSpellsEffectsID];
-				}
-				else {
-					std::cerr << "Error in AddNPCSpells query1 '" << query << "' " << errbuf << std::endl;
-					safe_delete_array(query);
-					return 0;
-				}
-			}
-			else {
-				mysql_free_result(result);
-			}
-		}
-		else {
-			std::cerr << "Error in AddNPCSpells query1 '" << query << "' " << errbuf << std::endl;
-			safe_delete_array(query);
-			return 0;
-		}
-		return 0;
-	}
-	return 0;
+    npc_spellseffects_loadtried[iDBSpellsEffectsID] = true;
+
+    std::string query = StringFormat("SELECT id, parent_list FROM npc_spells_effects WHERE id=%d", iDBSpellsEffectsID);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        std::cerr << "Error in AddNPCSpells query1 '" << query << "' " << results.ErrorMessage() << std::endl;
+        return nullptr;
+    }
+
+    if (results.RowCount() != 1)
+        return nullptr;
+
+    auto row = results.begin();
+    uint32 tmpparent_list = atoi(row[1]);
+
+    query = StringFormat("SELECT spell_effect_id, minlevel, "
+                        "maxlevel,se_base, se_limit, se_max "
+                        "FROM npc_spells_effects_entries "
+                        "WHERE npc_spells_effects_id = %d ORDER BY minlevel", iDBSpellsEffectsID);
+    results = QueryDatabase(query);
+    if (!results.Success())
+        return nullptr;
+
+    uint32 tmpSize = sizeof(DBnpcspellseffects_Struct) + (sizeof(DBnpcspellseffects_entries_Struct) * results.RowCount());
+    npc_spellseffects_cache[iDBSpellsEffectsID] = (DBnpcspellseffects_Struct*) new uchar[tmpSize];
+    memset(npc_spellseffects_cache[iDBSpellsEffectsID], 0, tmpSize);
+    npc_spellseffects_cache[iDBSpellsEffectsID]->parent_list = tmpparent_list;
+    npc_spellseffects_cache[iDBSpellsEffectsID]->numentries = results.RowCount();
+
+    int entryIndex = 0;
+    for (row = results.begin(); row != results.end(); ++row, ++entryIndex)
+    {
+        int spell_effect_id = atoi(row[0]);
+        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].spelleffectid =  spell_effect_id;
+        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].minlevel = atoi(row[1]);
+        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].maxlevel = atoi(row[2]);
+        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].base = atoi(row[3]);
+        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].limit = atoi(row[4]);
+        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].max = atoi(row[5]);
+    }
+
+    return npc_spellseffects_cache[iDBSpellsEffectsID];
 }
 
 uint32 ZoneDatabase::GetMaxNPCSpellsEffectsID() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT max(id) from npc_spells_effects"), errbuf, &result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			uint32 ret = 0;
-			if (row[0])
-				ret = atoi(row[0]);
-			mysql_free_result(result);
-			return ret;
-		}
-		mysql_free_result(result);
-	}
-	else {
-		std::cerr << "Error in GetMaxNPCSpellsEffectsID query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+	std::string query = "SELECT max(id) FROM npc_spells_effects";
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        std::cerr << "Error in GetMaxNPCSpellsEffectsID query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
 
-	return 0;
+    if (results.RowCount() != 1)
+        return 0;
+
+    auto row = results.begin();
+    if (!row[0])
+        return 0;
+
+    return atoi(row[0]);
 }
 
