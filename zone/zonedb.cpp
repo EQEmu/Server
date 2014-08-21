@@ -1606,38 +1606,31 @@ bool ZoneDatabase::DeleteMerc(uint32 merc_id) {
 }
 
 void ZoneDatabase::LoadMercEquipment(Merc *merc) {
-	std::string errorMessage;
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES* DatasetResult;
-	MYSQL_ROW DataRow;
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT item_id FROM merc_inventory WHERE merc_subtype_id = (SELECT merc_subtype_id FROM merc_subtypes WHERE class_id = '%u' AND tier_id = '%u') AND min_level <= %u AND max_level >= %u", merc->GetClass(), merc->GetTierID(), merc->GetLevel(), merc->GetLevel()), TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
-	}
-	else {
-		int itemCount = 0;
-
-		while(DataRow = mysql_fetch_row(DatasetResult)) {
-			if (itemCount == EmuConstants::EQUIPMENT_SIZE)
-				break;
-
-			if(atoi(DataRow[0]) > 0) {
-				merc->AddItem(itemCount, atoi(DataRow[0]));
-
-				itemCount++;
-			}
-		}
-
-		mysql_free_result(DatasetResult);
+	std::string query = StringFormat("SELECT item_id FROM merc_inventory "
+                                    "WHERE merc_subtype_id = ("
+                                    "SELECT merc_subtype_id FROM merc_subtypes "
+                                    "WHERE class_id = '%u' AND tier_id = '%u') "
+                                    "AND min_level <= %u AND max_level >= %u",
+                                    merc->GetClass(), merc->GetTierID(),
+                                    merc->GetLevel(), merc->GetLevel());
+    auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error Loading Merc Inventory: %s", results.ErrorMessage().c_str());
+		return;
 	}
 
-	safe_delete_array(Query);
-	Query = 0;
+    int itemCount = 0;
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        if (itemCount == EmuConstants::EQUIPMENT_SIZE)
+            break;
 
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error Loading Merc Inventory: %s", errorMessage.c_str());
-	}
+        if(atoi(row[0]) == 0)
+            continue;
+
+        merc->AddItem(itemCount, atoi(row[0]));
+        itemCount++;
+    }
 }
 
 uint8 ZoneDatabase::GetGridType(uint32 grid, uint32 zoneid ) {
