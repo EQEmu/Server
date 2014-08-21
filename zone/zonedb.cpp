@@ -2162,14 +2162,15 @@ void ZoneDatabase::SavePetInfo(Client *client) {
 
 }
 
-void ZoneDatabase::RemoveTempFactions(Client *c){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+void ZoneDatabase::RemoveTempFactions(Client *client) {
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM faction_values WHERE temp = 1 AND char_id=%u", c->CharacterID()), errbuf)) {
-		std::cerr << "Error in RemoveTempFactions query '" << query << "' " << errbuf << std::endl;
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("DELETE FROM faction_values "
+                                    "WHERE temp = 1 AND char_id = %u",
+                                    client->CharacterID());
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+		std::cerr << "Error in RemoveTempFactions query '" << query << "' " << results.ErrorMessage() << std::endl;
+
 }
 
 void ZoneDatabase::LoadPetInfo(Client *c) {
