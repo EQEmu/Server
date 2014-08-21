@@ -383,21 +383,13 @@ bool ZoneDatabase::GetAccountInfoForLogin_result(MYSQL_RES* result, int16* admin
 
 
 bool ZoneDatabase::SetSpecialAttkFlag(uint8 id, const char* flag) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32	affected_rows = 0;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE npc_types SET npcspecialattks='%s' WHERE id=%i;",flag,id), errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
+	std::string query = StringFormat("UPDATE npc_types SET npcspecialattks='%s' WHERE id = %i;", flag, id);
+    auto results = QueryDatabase(query);
+	if (!results.Success())
 		return false;
-	}
-	safe_delete_array(query);
 
-	if (affected_rows == 0) {
-		return false;
-	}
-
-	return true;
+	return results.RowsAffected() != 0;
 }
 
 bool ZoneDatabase::DoorIsOpen(uint8 door_id,const char* zone_name)
