@@ -754,13 +754,12 @@ void ZoneDatabase::DeleteBuyLines(uint32 CharID) {
 
 void ZoneDatabase::AddBuyLine(uint32 CharID, uint32 BuySlot, uint32 ItemID, const char* ItemName, uint32 Quantity, uint32 Price) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	if (!(RunQuery(query,MakeAnyLenString(&query, "replace INTO buyer VALUES(%i,%i, %i,\"%s\",%i,%i)",
-							CharID, BuySlot, ItemID, ItemName, Quantity, Price),errbuf)))
-		_log(TRADING__CLIENT, "Failed to save buline item: %i for char_id: %i, the error was: %s\n", ItemID, CharID, errbuf);
+	std::string query = StringFormat("REPLACE INTO buyer VALUES(%i, %i, %i, \"%s\", %i, %i)",
+                                    CharID, BuySlot, ItemID, ItemName, Quantity, Price);
+    auto results = QueryDatabase(query);
+	if (!results.Success())
+		_log(TRADING__CLIENT, "Failed to save buline item: %i for char_id: %i, the error was: %s\n", ItemID, CharID, results.ErrorMessage().c_str());
 
-	safe_delete_array(query);
 }
 
 void ZoneDatabase::RemoveBuyLine(uint32 CharID, uint32 BuySlot) {
