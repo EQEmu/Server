@@ -2070,95 +2070,94 @@ void ZoneDatabase::LoadBuffs(Client *client) {
 	}
 }
 
-void ZoneDatabase::SavePetInfo(Client *c) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	int i = 0;
-	PetInfo *petinfo = c->GetPetInfo(0);
-	PetInfo *suspended = c->GetPetInfo(1);
+void ZoneDatabase::SavePetInfo(Client *client) {
 
-	if(!database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM `character_pet_buffs` WHERE `char_id`=%u", c->CharacterID()),
-		errbuf)) {
-		safe_delete_array(query);
+	PetInfo *petinfo = client->GetPetInfo(0);
+	PetInfo *suspended = client->GetPetInfo(1);
+
+    std::string query = StringFormat("DELETE FROM `character_pet_buffs` WHERE `char_id` = %u", client->CharacterID());
+    auto results = database.QueryDatabase(query);
+	if(!results.Success())
 		return;
-	}
-	safe_delete_array(query);
-	if (!database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM `character_pet_inventory` WHERE `char_id`=%u", c->CharacterID()),
-		errbuf)) {
-		safe_delete_array(query);
-		// error report
+
+	query = StringFormat("DELETE FROM `character_pet_buffs` WHERE `char_id` = %u", client->CharacterID());
+	results = database.QueryDatabase(query);
+	if(!results.Success())
 		return;
-	}
-	safe_delete_array(query);
 
-	if(!database.RunQuery(query, MakeAnyLenString(&query,
-		"INSERT INTO `character_pet_info` (`char_id`, `pet`, `petname`, `petpower`, `spell_id`, `hp`, `mana`, `size`) "
-		"values (%u, 0, '%s', %i, %u, %u, %u, %f) "
-		"ON DUPLICATE KEY UPDATE `petname`='%s', `petpower`=%i, `spell_id`=%u, `hp`=%u, `mana`=%u, `size`=%f",
-		c->CharacterID(), petinfo->Name, petinfo->petpower, petinfo->SpellID, petinfo->HP, petinfo->Mana, petinfo->size,
-		petinfo->Name, petinfo->petpower, petinfo->SpellID, petinfo->HP, petinfo->Mana, petinfo->size),
-		errbuf))
-	{
-		safe_delete_array(query);
+    query = StringFormat("INSERT INTO `character_pet_info` "
+                        "(`char_id`, `pet`, `petname`, `petpower`, `spell_id`, `hp`, `mana`, `size`) "
+                        "VALUES (%u, 0, '%s', %i, %u, %u, %u, %f) "
+                        "ON DUPLICATE KEY UPDATE `petname` = '%s', `petpower` = %i, `spell_id` = %u, "
+                        "`hp` = %u, `mana` = %u, `size` = %f",
+                        client->CharacterID(), petinfo->Name, petinfo->petpower, petinfo->SpellID,
+                        petinfo->HP, petinfo->Mana, petinfo->size, petinfo->Name, petinfo->petpower,
+                        petinfo->SpellID, petinfo->HP, petinfo->Mana, petinfo->size);
+	results = database.QueryDatabase(query);
+	if(!results.Success())
 		return;
-	}
-	safe_delete_array(query);
 
-	for(i=0; i < RuleI(Spells, MaxTotalSlotsPET); i++) {
-		if (petinfo->Buffs[i].spellid != SPELL_UNKNOWN && petinfo->Buffs[i].spellid != 0) {
-			database.RunQuery(query, MakeAnyLenString(&query,
-				"INSERT INTO `character_pet_buffs` (`char_id`, `pet`, `slot`, `spell_id`, `caster_level`, "
-				"`ticsremaining`, `counters`) values "
-				"(%u, 0, %u, %u, %u, %u, %d)",
-				c->CharacterID(), i, petinfo->Buffs[i].spellid, petinfo->Buffs[i].level, petinfo->Buffs[i].duration,
-				petinfo->Buffs[i].counters),
-				errbuf);
-			safe_delete_array(query);
-		}
-		if (suspended->Buffs[i].spellid != SPELL_UNKNOWN && suspended->Buffs[i].spellid != 0) {
-			database.RunQuery(query, MakeAnyLenString(&query,
-				"INSERT INTO `character_pet_buffs` (`char_id`, `pet`, `slot`, `spell_id`, `caster_level`, "
-				"`ticsremaining`, `counters`) values "
-				"(%u, 1, %u, %u, %u, %u, %d)",
-				c->CharacterID(), i, suspended->Buffs[i].spellid, suspended->Buffs[i].level, suspended->Buffs[i].duration,
-				suspended->Buffs[i].counters),
-				errbuf);
-			safe_delete_array(query);
-		}
-	}
+	for(int index = 0; index < RuleI(Spells, MaxTotalSlotsPET); index++) {
+		if (petinfo->Buffs[index].spellid == SPELL_UNKNOWN || petinfo->Buffs[index].spellid == 0)
+            continue;
 
-	for (i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; i++) {
-		if(petinfo->Items[i]) {
-			database.RunQuery(query, MakeAnyLenString(&query,
-				"INSERT INTO `character_pet_inventory` (`char_id`, `pet`, `slot`, `item_id`) values (%u, 0, %u, %u)",
-				c->CharacterID(), i, petinfo->Items[i]), errbuf);
-			// should check for errors
-			safe_delete_array(query);
-		}
+        query = StringFormat("INSERT INTO `character_pet_buffs` "
+                            "(`char_id`, `pet`, `slot`, `spell_id`, `caster_level`, "
+                            "`ticsremaining`, `counters`) "
+                            "VALUES (%u, 0, %u, %u, %u, %u, %d)",
+                            client->CharacterID(), index, petinfo->Buffs[index].spellid,
+                            petinfo->Buffs[index].level, petinfo->Buffs[index].duration,
+                            petinfo->Buffs[index].counters);
+        database.QueryDatabase(query);
+    }
+
+    for(int index = 0; index < RuleI(Spells, MaxTotalSlotsPET); index++) {
+		if (petinfo->Buffs[index].spellid == SPELL_UNKNOWN || petinfo->Buffs[index].spellid == 0)
+            continue;
+
+        query = StringFormat("INSERT INTO `character_pet_buffs` "
+                            "(`char_id`, `pet`, `slot`, `spell_id`, `caster_level`, "
+                            "`ticsremaining`, `counters`) "
+                            "VALUES (%u, 1, %u, %u, %u, %u, %d)",
+                            client->CharacterID(), index, suspended->Buffs[index].spellid,
+                            suspended->Buffs[index].level, suspended->Buffs[index].duration,
+                            suspended->Buffs[index].counters);
+        database.QueryDatabase(query);
 	}
 
+	for (int index = EmuConstants::EQUIPMENT_BEGIN; index <= EmuConstants::EQUIPMENT_END; index++) {
+		if(!petinfo->Items[index])
+            continue;
 
-	if(!database.RunQuery(query, MakeAnyLenString(&query,
-		"INSERT INTO `character_pet_info` (`char_id`, `pet`, `petname`, `petpower`, `spell_id`, `hp`, `mana`, `size`) "
-		"values (%u, 1, '%s', %u, %u, %u, %u, %f) "
-		"ON DUPLICATE KEY UPDATE `petname`='%s', `petpower`=%i, `spell_id`=%u, `hp`=%u, `mana`=%u, `size`=%f",
-		c->CharacterID(), suspended->Name, suspended->petpower, suspended->SpellID, suspended->HP, suspended->Mana, suspended->size,
-		suspended->Name, suspended->petpower, suspended->SpellID, suspended->HP, suspended->Mana, suspended->size),
-		errbuf))
-	{
-		safe_delete_array(query);
+        query = StringFormat("INSERT INTO `character_pet_inventory` "
+                            "(`char_id`, `pet`, `slot`, `item_id`) "
+                            "VALUES (%u, 0, %u, %u)",
+                            client->CharacterID(), index, petinfo->Items[index]);
+        database.QueryDatabase(query);
+	}
+
+    query = StringFormat("INSERT INTO `character_pet_info` "
+                        "(`char_id`, `pet`, `petname`, `petpower`, `spell_id`, `hp`, `mana`, `size`) "
+                        "VALUES (%u, 1, '%s', %u, %u, %u, %u, %f) "
+                        "ON DUPLICATE KEY UPDATE "
+                        "`petname`='%s', `petpower`=%i, `spell_id`=%u, `hp`=%u, `mana`=%u, `size`=%f",
+                        client->CharacterID(), suspended->Name, suspended->petpower, suspended->SpellID,
+                        suspended->HP, suspended->Mana, suspended->size, suspended->Name, suspended->petpower,
+                        suspended->SpellID, suspended->HP, suspended->Mana, suspended->size);
+    results = database.QueryDatabase(query);
+	if(!results.Success())
 		return;
-	}
-	safe_delete_array(query);
 
-	for (i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; i++) {
-		if(suspended->Items[i]) {
-			database.RunQuery(query, MakeAnyLenString(&query,
-				"INSERT INTO `character_pet_inventory` (`char_id`, `pet`, `slot`, `item_id`) values (%u, 1, %u, %u)",
-				c->CharacterID(), i, suspended->Items[i]), errbuf);
-			// should check for errors
-			safe_delete_array(query);
-		}
+
+	for (int index = EmuConstants::EQUIPMENT_BEGIN; index <= EmuConstants::EQUIPMENT_END; index++) {
+		if(!suspended->Items[index])
+            continue;
+
+		query = StringFormat("INSERT INTO `character_pet_inventory` "
+                            "(`char_id`, `pet`, `slot`, `item_id`) "
+                            "VALUES (%u, 1, %u, %u)",
+                            client->CharacterID(), index, suspended->Items[index]);
+        database.QueryDatabase(query);
 	}
 
 }
