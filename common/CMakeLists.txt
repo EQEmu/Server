@@ -1,22 +1,22 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SET(common_sources
-	BasePacket.cpp
+	base_packet.cpp
 	classes.cpp
-	Condition.cpp
+	condition.cpp
 	crash.cpp
-	CRC16.cpp
+	crc16.cpp
 	crc32.cpp
 	database.cpp
 	dbasync.cpp
 	dbcore.cpp
 	debug.cpp
 	emu_opcodes.cpp
-	EmuTCPConnection.cpp
-	EmuTCPServer.cpp
+	emu_tcp_connection.cpp
+	emu_tcp_server.cpp
 	eq_dictionary.cpp
-	EQDB.cpp
-	EQDBRes.cpp
+	eqdb.cpp
+	eqdb_res.cpp
 	eqemu_exception.cpp
 	EQEmuConfig.cpp
 	EQEMuError.cpp
@@ -47,8 +47,8 @@ SET(common_sources
 	packet_dump.cpp
 	packet_dump_file.cpp
 	packet_functions.cpp
-	perl_EQDB.cpp
-	perl_EQDBRes.cpp
+	perl_eqdb.cpp
+	perl_eqdb_res.cpp
 	ProcLauncher.cpp
 	ptimer.cpp
 	races.cpp
