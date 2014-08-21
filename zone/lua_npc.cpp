@@ -442,6 +442,15 @@ void Lua_NPC::MerchantCloseShop() {
 	self->MerchantCloseShop();
 }
 
+void Lua_NPC::SetMerchantProbability(uint8 amt) {
+	Lua_Safe_Call_Void();
+	self->SetMerchantProbability(amt);
+}
+
+uint8 Lua_NPC::GetMerchantProbability() {
+	Lua_Safe_Call_Int();
+	return self->GetMerchantProbability();
+}
 
 luabind::scope lua_register_npc() {
 	return luabind::class_<Lua_NPC, Lua_Mob>("NPC")
@@ -532,7 +541,9 @@ luabind::scope lua_register_npc() {
 		.def("GetSpawnKillCount", (int(Lua_NPC::*)(void))&Lua_NPC::GetSpawnKillCount)
 		.def("GetScore", (int(Lua_NPC::*)(void))&Lua_NPC::GetScore)
 		.def("MerchantOpenShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantOpenShop)
-		.def("MerchantCloseShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantCloseShop);
+		.def("MerchantCloseShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantCloseShop)
+		.def("SetMerchantProbability", (void(Lua_NPC::*)(void))&Lua_NPC::SetMerchantProbability)
+		.def("GetMerchantProbability", (uint8(Lua_NPC::*)(void))&Lua_NPC::GetMerchantProbability);
 }
 
 #endif

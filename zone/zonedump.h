@@ -126,6 +126,7 @@ struct NPCType
 	float	healscale;
 	bool	no_target_hotkey;
 	bool	raid_target;
+	uint8 	probability;
 };
 
 /*

@@ -3468,6 +3468,7 @@ struct MerchantList {
 	int8	level_required;
 	uint16	alt_currency_cost;
 	uint32	classes_required;
+	uint8	probability;
 };
 
 struct TempMerchantList {
