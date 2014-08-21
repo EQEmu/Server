@@ -918,20 +918,19 @@ bool ZoneDatabase::GetCharacterInfoForLogin_result(MYSQL_RES* result,
 }
 
 bool ZoneDatabase::NoRentExpired(const char* name){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (RunQuery(query, MakeAnyLenString(&query, "Select (UNIX_TIMESTAMP(NOW())-timelaston) from character_ where name='%s'", name), errbuf, &result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			uint32 seconds = atoi(row[0]);
-			mysql_free_result(result);
-			return (seconds>1800);
-		}
-	}
-	return false;
+	std::string query = StringFormat("SELECT (UNIX_TIMESTAMP(NOW())-timelaston) "
+                                    "FROM character_ WHERE name = '%s'", name);
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+        return false;
+
+    if (results.RowCount() != 1)
+        return false;
+
+	auto row = results.begin();
+	uint32 seconds = atoi(row[0]);
+
+	return (seconds>1800);
 }
 
 /* Searches npctable for matching id, and returns the item if found,
