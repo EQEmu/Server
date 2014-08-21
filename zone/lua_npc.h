@@ -114,6 +114,8 @@ public:
 	int GetScore();
 	void MerchantOpenShop();
 	void MerchantCloseShop();
+	void SetMerchantProbability(uint8 amt);
+	uint8 GetMerchantProbability();
 };
 
 #endif
