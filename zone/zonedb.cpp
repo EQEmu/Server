@@ -1650,17 +1650,15 @@ uint8 ZoneDatabase::GetGridType(uint32 grid, uint32 zoneid ) {
 	return atoi(row[0]);
 }
 
-
-
 void ZoneDatabase::SaveMerchantTemp(uint32 npcid, uint32 slot, uint32 item, uint32 charges){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "replace into merchantlist_temp (npcid,slot,itemid,charges) values(%d,%d,%d,%d)", npcid, slot, item, charges), errbuf)) {
-		std::cerr << "Error in SaveMerchantTemp query '" << query << "' " << errbuf << std::endl;
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("REPLACE INTO merchantlist_temp (npcid, slot, itemid, charges) "
+                                    "VALUES(%d, %d, %d, %d)", npcid, slot, item, charges);
+    auto results = QueryDatabase(query);
+	if (!results.Success())
+		std::cerr << "Error in SaveMerchantTemp query '" << query << "' " << results.ErrorMessage() << std::endl;
 }
+
 void ZoneDatabase::DeleteMerchantTemp(uint32 npcid, uint32 slot){
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
