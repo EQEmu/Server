@@ -1405,57 +1405,78 @@ bool ZoneDatabase::LoadCurrentMerc(Client *client) {
 
 bool ZoneDatabase::SaveMerc(Merc *merc) {
 	Client *owner = merc->GetMercOwner();
-	bool Result = false;
-	std::string errorMessage;
 
-	if(!owner) {
+	if(!owner)
 		return false;
-	}
-
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-	uint32 affectedRows = 0;
 
 	if(merc->GetMercID() == 0) {
 		// New merc record
 		uint32 TempNewMercID = 0;
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "INSERT INTO mercs (OwnerCharacterID, Slot, Name, TemplateID, SuspendedTime, IsSuspended, TimerRemaining, Gender, StanceID, HP, Mana, Endurance, Face, LuclinHairStyle, LuclinHairColor, LuclinEyeColor, LuclinEyeColor2, LuclinBeardColor, LuclinBeard, DrakkinHeritage, DrakkinTattoo, DrakkinDetails) VALUES('%u', '%u', '%s', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i')", merc->GetMercCharacterID(), owner->GetNumMercs(), merc->GetCleanName(), merc->GetMercTemplateID(), owner->GetMercInfo().SuspendedTime, merc->IsSuspended(), owner->GetMercInfo().MercTimerRemaining, merc->GetGender(), merc->GetStance(), merc->GetHP(), merc->GetMana(), merc->GetEndurance(), merc->GetLuclinFace(), merc->GetHairStyle(), merc->GetHairColor(), merc->GetEyeColor1(), merc->GetEyeColor2(), merc->GetBeardColor(), merc->GetBeard(), merc->GetDrakkinHeritage(), merc->GetDrakkinTattoo(), merc->GetDrakkinDetails() ), TempErrorMessageBuffer, 0, &affectedRows, &TempNewMercID)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
+		std::string query = StringFormat("INSERT INTO mercs "
+                                        "(OwnerCharacterID, Slot, Name, TemplateID, "
+                                        "SuspendedTime, IsSuspended, TimerRemaining, "
+                                        "Gender, StanceID, HP, Mana, Endurance, Face, "
+                                        "LuclinHairStyle, LuclinHairColor, LuclinEyeColor, "
+                                        "LuclinEyeColor2, LuclinBeardColor, LuclinBeard, "
+                                        "DrakkinHeritage, DrakkinTattoo, DrakkinDetails) "
+                                        "VALUES('%u', '%u', '%s', '%u', '%u', '%u', '%u', "
+                                        "'%u', '%u', '%u', '%u', '%u', '%i', '%i', '%i', "
+                                        "'%i', '%i', '%i', '%i', '%i', '%i', '%i')",
+                                        merc->GetMercCharacterID(), owner->GetNumMercs(),
+                                        merc->GetCleanName(), merc->GetMercTemplateID(),
+                                        owner->GetMercInfo().SuspendedTime, merc->IsSuspended(),
+                                        owner->GetMercInfo().MercTimerRemaining, merc->GetGender(),
+                                        merc->GetStance(), merc->GetHP(), merc->GetMana(),
+                                        merc->GetEndurance(), merc->GetLuclinFace(),
+                                        merc->GetHairStyle(), merc->GetHairColor(), merc->GetEyeColor1(),
+                                        merc->GetEyeColor2(), merc->GetBeardColor(),
+                                        merc->GetBeard(), merc->GetDrakkinHeritage(),
+                                        merc->GetDrakkinTattoo(), merc->GetDrakkinDetails());
+        auto results = database.QueryDatabase(query);
+		if(!results.Success()) {
+			owner->Message(13, results.ErrorMessage().c_str());
+			return false;
+		} else if (results.RowsAffected() != 1) {
+            owner->Message(13, "Unable to save merc to the database.");
+            return false;
 		}
-		else {
-			merc->SetMercID(TempNewMercID);
-			Result = true;
-		}
-	}
-	else {
-		// Update existing merc record
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "UPDATE mercs SET OwnerCharacterID = '%u', Slot = '%u', Name = '%s', TemplateID = '%u', SuspendedTime = '%u', IsSuspended = '%u', TimerRemaining = '%u', Gender = '%u', StanceID = '%u', HP = '%u', Mana = '%u', Endurance = '%u', Face = '%i', LuclinHairStyle = '%i', LuclinHairColor = '%i', LuclinEyeColor = '%i', LuclinEyeColor2 = '%i', LuclinBeardColor = '%i', LuclinBeard = '%i', DrakkinHeritage = '%i', DrakkinTattoo = '%i', DrakkinDetails = '%i' WHERE MercID = '%u'", merc->GetMercCharacterID(), owner->GetMercSlot(), merc->GetCleanName(), merc->GetMercTemplateID(), owner->GetMercInfo().SuspendedTime, merc->IsSuspended(), owner->GetMercInfo().MercTimerRemaining, merc->GetGender(), merc->GetStance(), merc->GetHP(), merc->GetMana(), merc->GetEndurance(), merc->GetLuclinFace(), merc->GetHairStyle(), merc->GetHairColor(), merc->GetEyeColor1(), merc->GetEyeColor2(), merc->GetBeardColor(), merc->GetBeard(), merc->GetDrakkinHeritage(), merc->GetDrakkinTattoo(), merc->GetDrakkinDetails(), merc->GetMercID()), TempErrorMessageBuffer, 0, &affectedRows)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else {
-			Result = true;
-			//time(&_startTotalPlayTime);
-		}
-	}
 
-	safe_delete_array(Query);
-
-	if(!errorMessage.empty() || (Result && affectedRows != 1)) {
-		if(owner && !errorMessage.empty())
-			owner->Message(13, errorMessage.c_str());
-		else if(owner)
-			owner->Message(13, std::string("Unable to save merc to the database.").c_str());
-
-		Result = false;
-	}
-	else {
-		merc->UpdateMercInfo(owner);
+        merc->SetMercID(TempNewMercID);
+        merc->UpdateMercInfo(owner);
 		database.SaveMercBuffs(merc);
-		//database.SaveMercStance(this);
-		//database.SaveMercTimers(this);
+        return true;
 	}
 
-	return Result;
+    // Update existing merc record
+    std::string query = StringFormat("UPDATE mercs SET OwnerCharacterID = '%u', Slot = '%u', "
+                                    "Name = '%s', TemplateID = '%u', SuspendedTime = '%u', "
+                                    "IsSuspended = '%u', TimerRemaining = '%u', Gender = '%u', "
+                                    "StanceID = '%u', HP = '%u', Mana = '%u', Endurance = '%u', "
+                                    "Face = '%i', LuclinHairStyle = '%i', LuclinHairColor = '%i', "
+                                    "LuclinEyeColor = '%i', LuclinEyeColor2 = '%i', LuclinBeardColor = '%i', "
+                                    "LuclinBeard = '%i', DrakkinHeritage = '%i', DrakkinTattoo = '%i', "
+                                    "DrakkinDetails = '%i' WHERE MercID = '%u'",
+                                    merc->GetMercCharacterID(), owner->GetMercSlot(), merc->GetCleanName(),
+                                    merc->GetMercTemplateID(), owner->GetMercInfo().SuspendedTime,
+                                    merc->IsSuspended(), owner->GetMercInfo().MercTimerRemaining,
+                                    merc->GetGender(), merc->GetStance(), merc->GetHP(), merc->GetMana(),
+                                    merc->GetEndurance(), merc->GetLuclinFace(), merc->GetHairStyle(),
+                                    merc->GetHairColor(), merc->GetEyeColor1(), merc->GetEyeColor2(),
+                                    merc->GetBeardColor(), merc->GetBeard(), merc->GetDrakkinHeritage(),
+                                    merc->GetDrakkinTattoo(), merc->GetDrakkinDetails(), merc->GetMercID());
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        owner->Message(13, results.ErrorMessage().c_str());
+        return false;
+    } else if (results.RowsAffected() != 1) {
+        owner->Message(13, "Unable to save merc to the database.");
+        return false;
+    }
+
+    merc->UpdateMercInfo(owner);
+	database.SaveMercBuffs(merc);
+
+	return true;
 }
 
 void ZoneDatabase::SaveMercBuffs(Merc *merc) {
