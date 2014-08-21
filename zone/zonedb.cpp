@@ -1729,31 +1729,6 @@ bool ZoneDatabase::SetZoneTZ(uint32 zoneid, uint32 version, uint32 tz) {
     return results.RowsAffected() == 1;
 }
 
-/*
- solar: this is never actually called, client_process starts an async query
- instead and uses GetAccountInfoForLogin_result to process it..
- */
-bool ZoneDatabase::GetAccountInfoForLogin(uint32 account_id, int16* admin, char* account_name, uint32* lsaccountid, uint8* gmspeed, bool* revoked,bool* gmhideme) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT status, name, lsaccount_id, gmspeed, revoked, hideme FROM account WHERE id=%i", account_id), errbuf, &result)) {
-		safe_delete_array(query);
-		bool ret = GetAccountInfoForLogin_result(result, admin, account_name, lsaccountid, gmspeed, revoked,gmhideme);
-		mysql_free_result(result);
-		return ret;
-	}
-	else
-	{
-		std::cerr << "Error in GetAccountInfoForLogin query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-		return false;
-	}
-
-	return false;
-}
-
 void ZoneDatabase::RefreshGroupFromDB(Client *c){
 	if(!c){
 		return;
