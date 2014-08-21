@@ -539,18 +539,13 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const It
 }
 
 // Remove all child objects inside a world container (i.e., forge, bag dropped to ground, etc)
-void ZoneDatabase::DeleteWorldContainer(uint32 parent_id,uint32 zone_id)
+void ZoneDatabase::DeleteWorldContainer(uint32 parent_id, uint32 zone_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+	std::string query = StringFormat("DELETE FROM object_contents WHERE parentid = %i AND zoneid = %i", parent_id, zone_id);
+    auto results = QueryDatabase(query);
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::DeleteWorldContainer: %s", results.ErrorMessage().c_str());
 
-	uint32 len_query = MakeAnyLenString(&query,
-		"delete from object_contents where parentid=%i and zoneid=%i", parent_id,zone_id);
-	if (!RunQuery(query, len_query, errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::DeleteWorldContainer: %s", errbuf);
-	}
-
-	safe_delete_array(query);
 }
 
 Trader_Struct* ZoneDatabase::LoadTraderItem(uint32 char_id){
