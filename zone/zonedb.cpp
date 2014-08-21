@@ -1911,12 +1911,18 @@ void ZoneDatabase::QGlobalPurge()
 }
 
 void ZoneDatabase::InsertDoor(uint32 ddoordbid, uint16 ddoorid, const char* ddoor_name, float dxpos, float dypos, float dzpos, float dheading, uint8 dopentype, uint16 dguildid, uint32 dlockpick, uint32 dkeyitem, uint8 ddoor_param, uint8 dinvert, int dincline, uint16 dsize){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	if (!RunQuery(query, MakeAnyLenString(&query, "replace into doors (id, doorid,zone,version,name,pos_x,pos_y,pos_z,heading,opentype,guild,lockpick,keyitem,door_param,invert_state,incline,size) values('%i','%i','%s','%i', '%s','%f','%f','%f','%f','%i','%i','%i', '%i','%i','%i','%i','%i')", ddoordbid ,ddoorid ,zone->GetShortName(), zone->GetInstanceVersion(), ddoor_name, dxpos, dypos, dzpos, dheading, dopentype, dguildid, dlockpick, dkeyitem, ddoor_param, dinvert, dincline, dsize), errbuf))	{
-		std::cerr << "Error in InsertDoor" << query << "' " << errbuf << std::endl;
-	}
-	safe_delete_array(query);
+
+	std::string query = StringFormat("REPLACE INTO doors (id, doorid, zone, version, name, "
+                                    "pos_x, pos_y, pos_z, heading, opentype, guild, lockpick, "
+                                    "keyitem, door_param, invert_state, incline, size) "
+                                    "VALUES('%i', '%i', '%s', '%i', '%s', '%f', '%f', "
+                                    "'%f', '%f', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i')",
+                                    ddoordbid, ddoorid, zone->GetShortName(), zone->GetInstanceVersion(),
+                                    ddoor_name, dxpos, dypos, dzpos, dheading, dopentype, dguildid,
+                                    dlockpick, dkeyitem, ddoor_param, dinvert, dincline, dsize);
+    auto results = QueryDatabase(query);
+    if (!results.Success())
+		std::cerr << "Error in InsertDoor" << query << "' " << results.ErrorMessage() << std::endl;
 }
 
 void ZoneDatabase::LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32> &currency) {
