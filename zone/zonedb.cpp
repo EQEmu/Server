@@ -649,13 +649,12 @@ ItemInst* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNumber) {
 
 void ZoneDatabase::SaveTraderItem(uint32 CharID, uint32 ItemID, uint32 SerialNumber, int32 Charges, uint32 ItemCost, uint8 Slot){
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	if (!(RunQuery(query,MakeAnyLenString(&query, "replace INTO trader VALUES(%i,%i,%i,%i,%i,%i)",
-							CharID, ItemID, SerialNumber, Charges, ItemCost, Slot),errbuf)))
-		_log(TRADING__CLIENT, "Failed to save trader item: %i for char_id: %i, the error was: %s\n", ItemID, CharID, errbuf);
+	std::string query = StringFormat("REPLACE INTO trader VALUES(%i, %i, %i, %i, %i, %i)",
+                                    CharID, ItemID, SerialNumber, Charges, ItemCost, Slot);
+    auto results = QueryDatabase(query);
+    if (!results.Success())
+        _log(TRADING__CLIENT, "Failed to save trader item: %i for char_id: %i, the error was: %s\n", ItemID, CharID, results.ErrorMessage().c_str());
 
-	safe_delete_array(query);
 }
 
 void ZoneDatabase::UpdateTraderItemCharges(int CharID, uint32 SerialNumber, int32 Charges) {
