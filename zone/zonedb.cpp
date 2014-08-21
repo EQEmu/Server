@@ -1765,22 +1765,23 @@ uint8 ZoneDatabase::GroupCount(uint32 groupid) {
 	return atoi(row[0]);
 }
 
- uint8 ZoneDatabase::RaidGroupCount(uint32 raidid, uint32 groupid)
- {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	uint8 count=0;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT count(charid) FROM raid_members WHERE raidid=%d AND groupid=%d;", raidid, groupid), errbuf, &result)) {
-		if((row = mysql_fetch_row(result))!=nullptr)
-			count = atoi(row[0]);
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::RaidGroupCount query '%s': %s", query, errbuf);
-	}
-	safe_delete_array(query);
-	return count;
+uint8 ZoneDatabase::RaidGroupCount(uint32 raidid, uint32 groupid) {
+
+	std::string query = StringFormat("SELECT count(charid) FROM raid_members "
+                                    "WHERE raidid = %d AND groupid = %d;", raidid, groupid);
+    auto results = QueryDatabase(query);
+
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::RaidGroupCount query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return 0;
+    }
+
+    if (results.RowCount() == 0)
+        return 0;
+
+    auto row = results.begin();
+
+	return atoi(row[0]);
  }
 
 int32 ZoneDatabase::GetBlockedSpellsCount(uint32 zoneid)
