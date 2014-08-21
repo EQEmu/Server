@@ -193,29 +193,26 @@ void ZoneDatabase::UpdateSpawn2Timeleft(uint32 id, uint16 instance_id, uint32 ti
 	gettimeofday(&tv, nullptr);
 	uint32 cur = tv.tv_sec;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
 	//if we pass timeleft as 0 that means we clear from respawn time
 	//otherwise we update with a REPLACE INTO
-	if(timeleft == 0)
-	{
-		if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM respawn_times WHERE id=%lu "
-			"AND instance_id=%lu",(unsigned long)id, (unsigned long)instance_id),errbuf))
-		{
-			LogFile->write(EQEMuLog::Error, "Error in UpdateTimeLeft query %s: %s", query, errbuf);
-		}
-		safe_delete_array(query);
+	if(timeleft == 0) {
+        std::string query = StringFormat("DELETE FROM respawn_times WHERE id=%lu "
+                                        "AND instance_id = %lu",(unsigned long)id, (unsigned long)instance_id);
+        auto results = QueryDatabase(query);
+        if (!results.Success())
+			LogFile->write(EQEMuLog::Error, "Error in UpdateTimeLeft query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+
+		return;
 	}
-	else
-	{
-		if (!RunQuery(query, MakeAnyLenString(&query, "REPLACE INTO respawn_times (id,start,duration,instance_id) "
-			"VALUES(%lu,%lu,%lu,%lu)",(unsigned long)id, (unsigned long)cur, (unsigned long)timeleft, (unsigned long)instance_id),errbuf))
-		{
-			LogFile->write(EQEMuLog::Error, "Error in UpdateTimeLeft query %s: %s", query, errbuf);
-		}
-		safe_delete_array(query);
-	}
+
+    std::string query = StringFormat("REPLACE INTO respawn_times (id, start, duration, instance_id) "
+                                    "VALUES (%lu, %lu, %lu, %lu)",
+                                    (unsigned long)id, (unsigned long)cur,
+                                    (unsigned long)timeleft, (unsigned long)instance_id);
+    auto results = QueryDatabase(query);
+    if (!results.Success())
+        LogFile->write(EQEMuLog::Error, "Error in UpdateTimeLeft query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+
 	return;
 }
 
