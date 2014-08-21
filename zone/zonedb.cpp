@@ -1786,30 +1786,19 @@ uint8 ZoneDatabase::RaidGroupCount(uint32 raidid, uint32 groupid) {
 
 int32 ZoneDatabase::GetBlockedSpellsCount(uint32 zoneid)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	query = new char[256];
-	sprintf(query, "SELECT count(*) FROM blocked_spells WHERE zoneid=%d", zoneid);
-	if (RunQuery(query, strlen(query), errbuf, &result)) {
-		safe_delete_array(query);
-		row = mysql_fetch_row(result);
-		if (row != nullptr && row[0] != 0) {
-			int32 ret = atoi(row[0]);
-			mysql_free_result(result);
-			return ret;
-		}
-		mysql_free_result(result);
-	}
-	else {
-		std::cerr << "Error in GetBlockedSpellsCount query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+	std::string query = StringFormat("SELECT count(*) FROM blocked_spells WHERE zoneid = %d", zoneid);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        std::cerr << "Error in GetBlockedSpellsCount query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return -1;
 	}
 
-	return -1;
+	if (results.RowCount() == 0)
+        return -1;
+
+    auto row = results.begin();
+
+	return atoi(row[0]);
 }
 
 bool ZoneDatabase::LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked* into, uint32 zoneid)
