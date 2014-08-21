@@ -1949,29 +1949,33 @@ void ZoneDatabase::UpdateAltCurrencyValue(uint32 char_id, uint32 currency_id, ui
 
 }
 
-void ZoneDatabase::SaveBuffs(Client *c) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+void ZoneDatabase::SaveBuffs(Client *client) {
 
-	database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM `character_buffs` WHERE `character_id`='%u'", c->CharacterID()),
-		errbuf);
+	std::string query = StringFormat("DELETE FROM `character_buffs` WHERE `character_id` = '%u'", client->CharacterID());
+	database.QueryDatabase(query);
 
-	uint32 buff_count = c->GetMaxBuffSlots();
-	Buffs_Struct *buffs = c->GetBuffs();
-	for (int i = 0; i < buff_count; i++) {
-		if(buffs[i].spellid != SPELL_UNKNOWN) {
-			if(!database.RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `character_buffs` (character_id, slot_id, spell_id, "
-				"caster_level, caster_name, ticsremaining, counters, numhits, melee_rune, magic_rune, persistent, dot_rune, "
-				"caston_x, caston_y, caston_z, ExtraDIChance) VALUES('%u', '%u', '%u', '%u', '%s', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%i', '%i', '%i', '%i')",
-				c->CharacterID(), i, buffs[i].spellid, buffs[i].casterlevel, buffs[i].caster_name, buffs[i].ticsremaining,
-				buffs[i].counters, buffs[i].numhits, buffs[i].melee_rune, buffs[i].magic_rune, buffs[i].persistant_buff,
-				buffs[i].dot_rune, buffs[i].caston_x, buffs[i].caston_y, buffs[i].caston_z, buffs[i].ExtraDIChance),
-				errbuf)) {
-				LogFile->write(EQEMuLog::Error, "Error in SaveBuffs query '%s': %s", query, errbuf);
-			}
-		}
+	uint32 buff_count = client->GetMaxBuffSlots();
+	Buffs_Struct *buffs = client->GetBuffs();
+
+	for (int index = 0; index < buff_count; index++) {
+		if(buffs[index].spellid == SPELL_UNKNOWN)
+            continue;
+
+		query = StringFormat("INSERT INTO `character_buffs` (character_id, slot_id, spell_id, "
+                            "caster_level, caster_name, ticsremaining, counters, numhits, melee_rune, "
+                            "magic_rune, persistent, dot_rune, caston_x, caston_y, caston_z, ExtraDIChance) "
+                            "VALUES('%u', '%u', '%u', '%u', '%s', '%u', '%u', '%u', '%u', '%u', '%u', '%u', "
+                            "'%i', '%i', '%i', '%i')", client->CharacterID(), index, buffs[index].spellid,
+                            buffs[index].casterlevel, buffs[index].caster_name, buffs[index].ticsremaining,
+                            buffs[index].counters, buffs[index].numhits, buffs[index].melee_rune,
+                            buffs[index].magic_rune, buffs[index].persistant_buff, buffs[index].dot_rune,
+                            buffs[index].caston_x, buffs[index].caston_y, buffs[index].caston_z,
+                            buffs[index].ExtraDIChance);
+        auto results = QueryDatabase(query);
+        if (!results.Success())
+            LogFile->write(EQEMuLog::Error, "Error in SaveBuffs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+
 	}
-	safe_delete_array(query);
 }
 
 void ZoneDatabase::LoadBuffs(Client *c) {
