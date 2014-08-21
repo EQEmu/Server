@@ -1805,42 +1805,36 @@ bool ZoneDatabase::LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked
 {
 	LogFile->write(EQEMuLog::Status, "Loading Blocked Spells from database...");
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	MakeAnyLenString(&query, "SELECT id, spellid, type, x, y, z, x_diff, y_diff, z_diff, message "
-		"FROM blocked_spells WHERE zoneid=%d ORDER BY id asc", zoneid);
-	if (RunQuery(query, strlen(query), errbuf, &result)) {
-		safe_delete_array(query);
-		int32 r;
-		for(r = 0; (row = mysql_fetch_row(result)); r++) {
-			if(r >= blockedSpellsCount) {
-				std::cerr << "Error, Blocked Spells Count of " << blockedSpellsCount << " exceeded." << std::endl;
-				break;
-			}
-			memset(&into[r], 0, sizeof(ZoneSpellsBlocked));
-			if(row){
-				into[r].spellid = atoi(row[1]);
-				into[r].type = atoi(row[2]);
-				into[r].x = atof(row[3]);
-				into[r].y = atof(row[4]);
-				into[r].z = atof(row[5]);
-				into[r].xdiff = atof(row[6]);
-				into[r].ydiff = atof(row[7]);
-				into[r].zdiff = atof(row[8]);
-				strn0cpy(into[r].message, row[9], 255);
-			}
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		std::cerr << "Error in LoadBlockedSpells query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+	std::string query = StringFormat("SELECT id, spellid, type, x, y, z, x_diff, y_diff, z_diff, message "
+                                    "FROM blocked_spells WHERE zoneid = %d ORDER BY id ASC", zoneid);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        std::cerr << "Error in LoadBlockedSpells query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
-	}
+    }
+
+    if (results.RowCount() == 0)
+		return true;
+
+    int32 index = 0;
+    for(auto row = results.begin(); row != results.end(); ++row, ++index) {
+        if(index >= blockedSpellsCount) {
+            std::cerr << "Error, Blocked Spells Count of " << blockedSpellsCount << " exceeded." << std::endl;
+            break;
+        }
+
+        memset(&into[index], 0, sizeof(ZoneSpellsBlocked));
+        into[index].spellid = atoi(row[1]);
+        into[index].type = atoi(row[2]);
+        into[index].x = atof(row[3]);
+        into[index].y = atof(row[4]);
+        into[index].z = atof(row[5]);
+        into[index].xdiff = atof(row[6]);
+        into[index].ydiff = atof(row[7]);
+        into[index].zdiff = atof(row[8]);
+        strn0cpy(into[index].message, row[9], 255);
+    }
+
 	return true;
 }
 
