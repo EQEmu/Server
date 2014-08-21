@@ -679,42 +679,34 @@ void ZoneDatabase::UpdateTraderItemPrice(int CharID, uint32 ItemID, uint32 Charg
 	if(!item)
 		return;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-
-	char* Query = 0;
-
 	if(NewPrice == 0) {
 		_log(TRADING__CLIENT, "Removing Trader items from the DB for CharID %i, ItemID %i", CharID, ItemID);
 
-		if (!(RunQuery(Query,MakeAnyLenString(&Query, "delete from trader where char_id=%i and item_id=%i",
-								CharID, ItemID),errbuf)))
-
-			_log(TRADING__CLIENT, "Failed to remove trader item(s): %i for char_id: %i, the error was: %s\n",
-							ItemID, CharID, errbuf);
-
-		safe_delete_array(Query);
+        std::string query = StringFormat("DELETE FROM trader WHERE char_id = %i AND item_id = %i",CharID, ItemID);
+        auto results = QueryDatabase(query);
+        if (!results.Success())
+			_log(TRADING__CLIENT, "Failed to remove trader item(s): %i for char_id: %i, the error was: %s\n", ItemID, CharID, results.ErrorMessage().c_str());
 
 		return;
 	}
-	else {
-		if(!item->Stackable) {
-			if (!(RunQuery(Query,MakeAnyLenString(&Query, "update trader set item_cost=%i where char_id=%i and item_id=%i"
-								" and charges=%i", NewPrice, CharID, ItemID, Charges),errbuf)))
 
-				_log(TRADING__CLIENT, "Failed to update price for trader item: %i for char_id: %i, the error was: %s\n",
-								ItemID, CharID, errbuf);
-		}
-		else {
-			if (!(RunQuery(Query,MakeAnyLenString(&Query, "update trader set item_cost=%i where char_id=%i and item_id=%i",
-								NewPrice, CharID, ItemID),errbuf)))
+    if(!item->Stackable) {
+        std::string query = StringFormat("UPDATE trader SET item_cost = %i "
+                                        "WHERE char_id = %i AND item_id = %i AND charges=%i",
+                                        NewPrice, CharID, ItemID, Charges);
+        auto results = QueryDatabase(query);
+        if (!results.Success())
+            _log(TRADING__CLIENT, "Failed to update price for trader item: %i for char_id: %i, the error was: %s\n", ItemID, CharID, results.ErrorMessage().c_str());
 
-				_log(TRADING__CLIENT, "Failed to update price for trader item: %i for char_id: %i, the error was: %s\n",
-								ItemID, CharID, errbuf);
-		}
+        return;
+    }
 
-		safe_delete_array(Query);
-	}
-
+    std::string query = StringFormat("UPDATE trader SET item_cost = %i "
+                                    "WHERE char_id = %i AND item_id = %i",
+                                    NewPrice, CharID, ItemID);
+    auto results = QueryDatabase(query);
+    if (!results.Success())
+            _log(TRADING__CLIENT, "Failed to update price for trader item: %i for char_id: %i, the error was: %s\n", ItemID, CharID, results.ErrorMessage().c_str());
 }
 
 void ZoneDatabase::DeleteTraderItem(uint32 char_id){
