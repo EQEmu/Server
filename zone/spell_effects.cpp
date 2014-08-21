@@ -4761,24 +4761,24 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		case SE_LimitSpellClass:
 			if(focus_spell.base[i] < 0) {	//Exclude
-				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellClass));
+				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellClass))
 					return(0);
-			} 
+			}
 			else {
 				LimitInclude[12] = true;
-				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellClass)); //Include
+				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellClass)) //Include
 					LimitInclude[13] = true;
 			}
 			break;
 
 		case SE_LimitSpellSubclass:
 			if(focus_spell.base[i] < 0) {	//Exclude
-				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellSubclass));
+				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellSubclass))
 					return(0);
-			} 
+			}
 			else {
 				LimitInclude[14] = true;
-				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellSubclass)); //Include
+				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellSubclass)) //Include
 					LimitInclude[15] = true;
 			}
 			break;
