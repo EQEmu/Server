@@ -33,66 +33,51 @@ EQLConfig::EQLConfig(const char *launcher_name)
 }
 
 void EQLConfig::LoadSettings() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	LauncherZone tmp;
 
+	LauncherZone tmp;
 	char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
 
-	if (database.RunQuery(query, MakeAnyLenString(&query,
-			"SELECT dynamics FROM launcher WHERE name='%s'",
-			namebuf)
-		, errbuf, &result))
-	{
-		while ((row = mysql_fetch_row(result))) {
-			m_dynamics = atoi(row[0]);
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "EQLConfig::LoadSettings: %s", errbuf);
-	}
-	safe_delete_array(query);
+    std::string query = StringFormat("SELECT dynamics FROM launcher WHERE name = '%s'", namebuf);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success())
+        LogFile->write(EQEMuLog::Error, "EQLConfig::LoadSettings: %s", results.ErrorMessage().c_str());
+    else {
+        auto row = results.begin();
+        m_dynamics = atoi(row[0]);
+    }
 
-	if (database.RunQuery(query, MakeAnyLenString(&query,
-			"SELECT zone,port FROM launcher_zones WHERE launcher='%s'",
-			namebuf)
-		, errbuf, &result))
-	{
-		LauncherZone zs;
-		while ((row = mysql_fetch_row(result))) {
-			zs.name = row[0];
-			zs.port = atoi(row[1]);
-			m_zones[zs.name] = zs;
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "EQLConfig::LoadSettings: %s", errbuf);
-	}
-	safe_delete_array(query);
+	query = StringFormat("SELECT zone, port FROM launcher_zones WHERE launcher = '%s'", namebuf);
+	results = database.QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "EQLConfig::LoadSettings: %s", results.ErrorMessage().c_str());
+        return;
+    }
+
+    LauncherZone zs;
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        zs.name = row[0];
+		zs.port = atoi(row[1]);
+		m_zones[zs.name] = zs;
+    }
+
 }
 
 EQLConfig *EQLConfig::CreateLauncher(const char *name, uint8 dynamic_count) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 
 	char namebuf[128];
 	database.DoEscapeString(namebuf, name, strlen(name)&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
 
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"INSERT INTO launcher (name,dynamics) VALUES('%s', %d)",
-		namebuf, dynamic_count), errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error in CreateLauncher query: %s", errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("INSERT INTO launcher (name, dynamics) VALUES('%s', %d)", namebuf, dynamic_count);
+    auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in CreateLauncher query: %s", results.ErrorMessage().c_str());
 		return nullptr;
 	}
-	safe_delete_array(query);
 
-	return(new EQLConfig(name));
+	return new EQLConfig(name);
 }
 
 void EQLConfig::GetZones(std::vector<LauncherZone> &result) {
@@ -126,30 +111,23 @@ void EQLConfig::DeleteLauncher() {
 
 	launcher_list.Remove(m_name.c_str());
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
 	char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
 
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"DELETE FROM launcher WHERE name='%s'",
-		namebuf), errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error in DeleteLauncher 1 query: %s", errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("DELETE FROM launcher WHERE name = '%s'", namebuf);
+    auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in DeleteLauncher 1st query: %s", results.ErrorMessage().c_str());
 		return;
 	}
-	safe_delete_array(query);
 
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"DELETE FROM launcher_zones WHERE launcher='%s'",
-		namebuf), errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error in DeleteLauncher 2 query: %s", errbuf);
-		safe_delete_array(query);
+    query = StringFormat("DELETE FROM launcher_zones WHERE launcher = '%s'", namebuf);
+    results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in DeleteLauncher 2nd query: %s", results.ErrorMessage().c_str());
 		return;
 	}
-	safe_delete_array(query);
 }
 
 bool EQLConfig::IsConnected() const {
@@ -181,12 +159,9 @@ void EQLConfig::StartZone(Const_char *zone_ref) {
 bool EQLConfig::BootStaticZone(Const_char *short_name, uint16 port) {
 	//make sure the short name is valid.
 	if(database.GetZoneID(short_name) == 0)
-		return(false);
+		return false;
 
 	//database update
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
 	char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
@@ -194,14 +169,13 @@ bool EQLConfig::BootStaticZone(Const_char *short_name, uint16 port) {
 	database.DoEscapeString(zonebuf, short_name, strlen(short_name)&0xF);	//limit len to 16
 	zonebuf[31] = '\0';
 
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"INSERT INTO launcher_zones (launcher,zone,port) VALUES('%s', '%s', %d)",
-		namebuf, zonebuf, port), errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error in BootStaticZone query: %s", errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("INSERT INTO launcher_zones (launcher, zone, port) "
+                                    "VALUES('%s', '%s', %d)", namebuf, zonebuf, port);
+    auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in BootStaticZone query: %s", results.ErrorMessage().c_str());
 		return false;
 	}
-	safe_delete_array(query);
 
 	//update our internal state.
 	LauncherZone lz;
@@ -215,13 +189,13 @@ bool EQLConfig::BootStaticZone(Const_char *short_name, uint16 port) {
 		ll->BootZone(short_name, port);
 	}
 
-	return(true);
+	return true;
 }
 
 bool EQLConfig::ChangeStaticZone(Const_char *short_name, uint16 port) {
 	//make sure the short name is valid.
 	if(database.GetZoneID(short_name) == 0)
-		return(false);
+		return false;
 
 	//check internal state
 	std::map<std::string, LauncherZone>::iterator res;
@@ -229,13 +203,8 @@ bool EQLConfig::ChangeStaticZone(Const_char *short_name, uint16 port) {
 	if(res == m_zones.end()) {
 		//not found.
 		LogFile->write(EQEMuLog::Error, "Update for unknown zone %s", short_name);
-		return(false);
+		return false;
 	}
-
-
-	//database update
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 
 	char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
@@ -244,15 +213,13 @@ bool EQLConfig::ChangeStaticZone(Const_char *short_name, uint16 port) {
 	database.DoEscapeString(zonebuf, short_name, strlen(short_name)&0xF);	//limit len to 16
 	zonebuf[31] = '\0';
 
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"UPDATE launcher_zones SET port=%d WHERE launcher='%s' AND zone='%s'",
-		port, namebuf, zonebuf), errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error in ChangeStaticZone query: %s", errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("UPDATE launcher_zones SET port=%d WHERE "
+                                    "launcher = '%s' AND zone = '%s'",port, namebuf, zonebuf);
+    auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in ChangeStaticZone query: %s", results.ErrorMessage().c_str());
 		return false;
 	}
-	safe_delete_array(query);
-
 
 	//update internal state
 	res->second.port = port;
@@ -263,7 +230,7 @@ bool EQLConfig::ChangeStaticZone(Const_char *short_name, uint16 port) {
 		ll->RestartZone(short_name);
 	}
 
-	return(true);
+	return true;
 }
 
 bool EQLConfig::DeleteStaticZone(Const_char *short_name) {
@@ -273,12 +240,8 @@ bool EQLConfig::DeleteStaticZone(Const_char *short_name) {
 	if(res == m_zones.end()) {
 		//not found.
 		LogFile->write(EQEMuLog::Error, "Update for unknown zone %s", short_name);
-		return(false);
+		return false;
 	}
-
-	//database update
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 
 	char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
@@ -287,14 +250,13 @@ bool EQLConfig::DeleteStaticZone(Const_char *short_name) {
 	database.DoEscapeString(zonebuf, short_name, strlen(short_name)&0xF);	//limit len to 16
 	zonebuf[31] = '\0';
 
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"DELETE FROM launcher_zones WHERE launcher='%s' AND zone='%s'",
-		namebuf, zonebuf), errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error in DeleteStaticZone query: %s", errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("DELETE FROM launcher_zones WHERE "
+                                    "launcher = '%s' AND zone = '%s'", namebuf, zonebuf);
+    auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in DeleteStaticZone query: %s", results.ErrorMessage().c_str());
 		return false;
 	}
-	safe_delete_array(query);
 
 	//internal update.
 	m_zones.erase(res);
@@ -309,21 +271,17 @@ bool EQLConfig::DeleteStaticZone(Const_char *short_name) {
 }
 
 bool EQLConfig::SetDynamicCount(int count) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 
 	char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
 
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"UPDATE launcher SET dynamics=%d WHERE name='%s'",
-		count, namebuf), errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error in SetDynamicCount query: %s", errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("UPDATE launcher SET dynamics=%d WHERE name='%s'", count, namebuf);
+    auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in SetDynamicCount query: %s", results.ErrorMessage().c_str());
 		return false;
 	}
-	safe_delete_array(query);
 
 	//update in-memory version.
 	m_dynamics = count;
@@ -334,7 +292,7 @@ bool EQLConfig::SetDynamicCount(int count) {
 		ll->BootDynamics(count);
 	}
 
-	return(false);
+	return false;
 }
 
 int EQLConfig::GetDynamicCount() const {
