@@ -1634,23 +1634,20 @@ void ZoneDatabase::LoadMercEquipment(Merc *merc) {
 }
 
 uint8 ZoneDatabase::GetGridType(uint32 grid, uint32 zoneid ) {
-	char *query = 0;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	int type = 0;
-	if (RunQuery(query, MakeAnyLenString(&query,"SELECT type from grid where id = %i and zoneid = %i",grid,zoneid),errbuf,&result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			type = atoi( row[0] );
-		}
-			mysql_free_result(result);
-	} else {
-		std::cerr << "Error in GetGridType query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+
+	std::string query = StringFormat("SELECT type FROM grid WHERE id = %i AND zoneid = %i", grid, zoneid);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        std::cerr << "Error in GetGridType query '" << query << "' " << results.ErrorMessage() << std::endl;
+        return 0;
 	}
-	return type;
+
+    if (results.RowCount() != 1)
+        return 0;
+
+    auto row = results.begin();
+
+	return atoi(row[0]);
 }
 
 
