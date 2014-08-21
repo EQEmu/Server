@@ -499,42 +499,43 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
 // Save child objects for a world container (i.e., forge, bag dropped to ground, etc)
 void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const ItemInst* container)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-
 	// Since state is not saved for each world container action, we'll just delete
 	// all and save from scratch .. we may come back later to optimize
-	//DeleteWorldContainer(parent_id);
-
-	if (!container) {
+	if (!container)
 		return;
-	}
+
 	//Delete all items from container
 	DeleteWorldContainer(parent_id,zone_id);
+
 	// Save all 10 items, if they exist
 	for (uint8 index = SUB_BEGIN; index < EmuConstants::ITEM_CONTAINER_SIZE; index++) {
+
 		ItemInst* inst = container->GetItem(index);
-		if (inst) {
-			uint32 item_id = inst->GetItem()->ID;
-			uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
-			if (inst->IsType(ItemClassCommon)) {
-				for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
-					ItemInst *auginst=inst->GetAugment(i);
-					augslot[i]=(auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
-				}
-			}
-			uint32 len_query = MakeAnyLenString(&query,
+		if (!inst)
+            continue;
 
-				"replace into object_contents (zoneid,parentid,bagidx,itemid,charges,augslot1,augslot2,augslot3,augslot4,augslot5,droptime) values (%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,now())",
-				zone_id, parent_id, index, item_id, inst->GetCharges(),augslot[0],augslot[1],augslot[2],augslot[3],augslot[4]);
+        uint32 item_id = inst->GetItem()->ID;
+        uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
 
-			if (!RunQuery(query, len_query, errbuf)) {
-				LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::SaveWorldContainer: %s", errbuf);
-			}
-			safe_delete_array(query);
-		}
+        if (inst->IsType(ItemClassCommon)) {
+            for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+                ItemInst *auginst=inst->GetAugment(i);
+                augslot[i]=(auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
+            }
+        }
 
-	}
+        std::string query = StringFormat("REPLACE INTO object_contents "
+                                        "(zoneid, parentid, bagidx, itemid, charges, "
+                                        "augslot1, augslot2, augslot3, augslot4, augslot5, droptime) "
+                                        "VALUES (%i, %i, %i, %i, %i, %i, %i, %i, %i, %i, now())",
+                                        zone_id, parent_id, index, item_id, inst->GetCharges(),
+                                        augslot[0], augslot[1], augslot[2], augslot[3], augslot[4]);
+        auto results = QueryDatabase(query);
+        if (!results.Success())
+            LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::SaveWorldContainer: %s", results.ErrorMessage().c_str());
+
+    }
+
 }
 
 // Remove all child objects inside a world container (i.e., forge, bag dropped to ground, etc)
