@@ -1942,12 +1942,11 @@ void ZoneDatabase::LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32
 }
 
 void ZoneDatabase::UpdateAltCurrencyValue(uint32 char_id, uint32 currency_id, uint32 value) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	database.RunQuery(query, MakeAnyLenString(&query, "REPLACE INTO character_alt_currency (char_id, currency_id, amount)"
-		" VALUES('%u', '%u', '%u')", char_id, currency_id, value),
-		errbuf);
-	safe_delete_array(query);
+
+	std::string query = StringFormat("REPLACE INTO character_alt_currency (char_id, currency_id, amount) "
+                                    "VALUES('%u', '%u', '%u')", char_id, currency_id, value);
+	database.QueryDatabase(query);
+
 }
 
 void ZoneDatabase::SaveBuffs(Client *c) {
