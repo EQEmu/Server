@@ -601,52 +601,50 @@ TraderCharges_Struct* ZoneDatabase::LoadTraderItemWithCharges(uint32 char_id){
 
 ItemInst* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNumber) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	std::string query = StringFormat("SELECT * FROM trader WHERE char_id = %i AND serialnumber = %i "
+                                    "ORDER BY slot_id LIMIT 80", CharID, SerialNumber);
+    auto results = QueryDatabase(query);
+    if (!results.Success())
+        return nullptr;
 
-	if (RunQuery(query,MakeAnyLenString(&query, "select * from trader where char_id=%i and serialnumber=%i order by slot_id limit 80",
-						CharID, SerialNumber),errbuf,&result)){
-		safe_delete_array(query);
+	if (results.RowCount() == 0) {
+        _log(TRADING__CLIENT, "Bad result from query\n"); fflush(stdout);
+        return nullptr;
+    }
 
-		if (mysql_num_rows(result) != 1) {
-			_log(TRADING__CLIENT, "Bad result from query\n"); fflush(stdout);
-			return nullptr;
-		}
-		row = mysql_fetch_row(result);
-		int ItemID = atoi(row[1]);
-		int Charges = atoi(row[3]);
-		int Cost = atoi(row[4]);
+    auto row = results.begin();
 
-		const Item_Struct *item=database.GetItem(ItemID);
+    int ItemID = atoi(row[1]);
+	int Charges = atoi(row[3]);
+	int Cost = atoi(row[4]);
 
-		if(!item) {
-			_log(TRADING__CLIENT, "Unable to create item\n"); fflush(stdout);
-			return nullptr;
-		}
+    const Item_Struct *item = database.GetItem(ItemID);
 
-		if (item && (item->NoDrop!=0)) {
-			ItemInst* inst = database.CreateItem(item);
-			if(!inst) {
-				_log(TRADING__CLIENT, "Unable to create item instance\n"); fflush(stdout);
-				return nullptr;
-			}
-
-			inst->SetCharges(Charges);
-			inst->SetSerialNumber(SerialNumber);
-			inst->SetMerchantSlot(SerialNumber);
-			inst->SetPrice(Cost);
-			if(inst->IsStackable())
-				inst->SetMerchantCount(Charges);
-
-			return inst;
-		}
+	if(!item) {
+		_log(TRADING__CLIENT, "Unable to create item\n");
+		fflush(stdout);
+		return nullptr;
 	}
 
-	return nullptr;
+    if (item->NoDrop == 0)
+        return nullptr;
 
+    ItemInst* inst = database.CreateItem(item);
+	if(!inst) {
+		_log(TRADING__CLIENT, "Unable to create item instance\n");
+		fflush(stdout);
+		return nullptr;
+	}
 
+    inst->SetCharges(Charges);
+	inst->SetSerialNumber(SerialNumber);
+	inst->SetMerchantSlot(SerialNumber);
+	inst->SetPrice(Cost);
+
+	if(inst->IsStackable())
+		inst->SetMerchantCount(Charges);
+
+	return inst;
 }
 
 void ZoneDatabase::SaveTraderItem(uint32 CharID, uint32 ItemID, uint32 SerialNumber, int32 Charges, uint32 ItemCost, uint8 Slot){
