@@ -1926,23 +1926,19 @@ void ZoneDatabase::InsertDoor(uint32 ddoordbid, uint16 ddoorid, const char* ddoo
 }
 
 void ZoneDatabase::LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32> &currency) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT currency_id, amount FROM character_alt_currency where char_id='%u'", char_id), errbuf, &result)) {
-		safe_delete_array(query);
-		while ((row = mysql_fetch_row(result)))
-		{
-			currency[atoi(row[0])] = atoi(row[1]);
-		}
-		mysql_free_result(result);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadAltCurrencyValues query '%s': %s", query, errbuf);
-		safe_delete_array(query);
-	}
+	std::string query = StringFormat("SELECT currency_id, amount "
+                                    "FROM character_alt_currency "
+                                    "WHERE char_id = '%u'", char_id);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadAltCurrencyValues query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return;
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row)
+        currency[atoi(row[0])] = atoi(row[1]);
+
 }
 
 void ZoneDatabase::UpdateAltCurrencyValue(uint32 char_id, uint32 currency_id, uint32 value) {
