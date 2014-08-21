@@ -734,19 +734,22 @@ void ZoneDatabase::DeleteTraderItem(uint32 CharID,uint16 SlotID) {
 		_log(TRADING__CLIENT, "Failed to delete trader item data for char_id: %i, the error was: %s\n",CharID, results.ErrorMessage().c_str());
 }
 
-void ZoneDatabase::DeleteBuyLines(uint32 CharID){
+void ZoneDatabase::DeleteBuyLines(uint32 CharID) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	if(CharID==0){
-		if (!(RunQuery(query,MakeAnyLenString(&query, "delete from buyer"),errbuf)))
-			_log(TRADING__CLIENT, "Failed to delete all buyer items data, the error was: %s\n",errbuf);
+	if(CharID==0) {
+        const std::string query = "DELETE FROM buyer";
+		auto results = QueryDatabase(query);
+        if (!results.Success())
+			_log(TRADING__CLIENT, "Failed to delete all buyer items data, the error was: %s\n",results.ErrorMessage().c_str());
+
+        return;
 	}
-	else{
-		if (!(RunQuery(query,MakeAnyLenString(&query, "delete from buyer where charid=%i",CharID),errbuf)))
-			_log(TRADING__CLIENT, "Failed to delete buyer item data for charid: %i, the error was: %s\n",CharID,errbuf);
-	}
-	safe_delete_array(query);
+
+    std::string query = StringFormat("DELETE FROM buyer WHERE charid = %i", CharID);
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+			_log(TRADING__CLIENT, "Failed to delete buyer item data for charid: %i, the error was: %s\n",CharID,results.ErrorMessage().c_str());
+
 }
 
 void ZoneDatabase::AddBuyLine(uint32 CharID, uint32 BuySlot, uint32 ItemID, const char* ItemName, uint32 Quantity, uint32 Price) {
