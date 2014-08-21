@@ -384,72 +384,57 @@ bool EQW::SetPublicNote(uint32 charid, const char *note) {
 }
 
 int EQW::CountBugs() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if(database.RunQuery(query, MakeAnyLenString(&query, "SELECT count(*) FROM bugs where status = 0"), errbuf, &result)) {
-		safe_delete_array(query);
-		if((row = mysql_fetch_row(result))) {
-			int count = atoi(row[0]);
-			mysql_free_result(result);
-			return count;
-		}
-		mysql_free_result(result);
-	}
-	safe_delete_array(query);
-	return 0;
+	std::string query = "SELECT count(*) FROM bugs where status = 0";
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+        return 0;
+
+    if (results.RowCount() == 0)
+        return 0;
+
+    auto row = results.begin();
+    return atoi(row[0]);
 }
 
 std::vector<std::string> EQW::ListBugs(uint32 offset) {
 	std::vector<std::string> res;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if(database.RunQuery(query, MakeAnyLenString(&query, "SELECT id FROM bugs WHERE status = 0 limit %d, 30", offset), errbuf, &result)) {
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result))) {
-			res.push_back(row[0]);
-		}
-		mysql_free_result(result);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT id FROM bugs WHERE status = 0 limit %d, 30", offset);
+	auto results = database.QueryDatabase(query);
+
+    if (!results.Success())
+        return res;
+
+    for (auto row = results.begin();row != results.end(); ++row)
+        res.push_back(row[0]);
+
 	return res;
 }
 
 std::map<std::string,std::string> EQW::GetBugDetails(Const_char *id) {
 	std::map<std::string,std::string> res;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if(database.RunQuery(query, MakeAnyLenString(&query, "select name, zone, x, y, z, target, bug from bugs where id = %s", id), errbuf, &result)) {
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result))) {
-			res["name"] = row[0];
-			res["zone"] = row[1];
-			res["x"] = row[2];
-			res["y"] = row[3];
-			res["z"] = row[4];
-			res["target"] = row[5];
-			res["bug"] = row[6];
-			res["id"] = id;
-		}
-		mysql_free_result(result);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT name, zone, x, y, z, target, bug FROM bugs WHERE id = %s", id);
+	auto results = database.QueryDatabase(query);
+
+	if (!results.Success())
+        return res;
+
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        res["name"] = row[0];
+        res["zone"] = row[1];
+        res["x"] = row[2];
+        res["y"] = row[3];
+        res["z"] = row[4];
+        res["target"] = row[5];
+        res["bug"] = row[6];
+        res["id"] = id;
+    }
 	return res;
 }
 
 void EQW::ResolveBug(const char *id) {
 	std::vector<std::string> res;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	if(database.RunQuery(query, MakeAnyLenString(&query, "UPDATE bugs SET status=1 WHERE id=%s", id), errbuf)) {
-		safe_delete_array(query);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("UPDATE bugs SET status=1 WHERE id=%s", id);
+	database.QueryDatabase(query);
 }
 
 void EQW::SendMessage(uint32 type, const char *msg) {
