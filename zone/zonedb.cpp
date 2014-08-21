@@ -1698,27 +1698,21 @@ uint8 ZoneDatabase::GetUseCFGSafeCoords()
 
 //New functions for timezone
 uint32 ZoneDatabase::GetZoneTZ(uint32 zoneid, uint32 version) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT timezone FROM zone WHERE zoneidnumber=%i AND (version=%i OR version=0) ORDER BY version DESC", zoneid, version), errbuf, &result))
-	{
-		safe_delete_array(query);
-		if (mysql_num_rows(result) > 0) {
-			row = mysql_fetch_row(result);
-			uint32 tmp = atoi(row[0]);
-			mysql_free_result(result);
-			return tmp;
-		}
-		mysql_free_result(result);
-	}
-	else {
-		std::cerr << "Error in GetZoneTZ query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-	}
-	return 0;
+	std::string query = StringFormat("SELECT timezone FROM zone WHERE zoneidnumber = %i "
+                                    "AND (version = %i OR version = 0) ORDER BY version DESC",
+                                    zoneid, version);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        std::cerr << "Error in GetZoneTZ query '" << query << "' " << results.ErrorMessage() << std::endl;
+        return 0;
+    }
+
+    if (results.RowCount() == 0)
+        return 0;
+
+    auto row = results.begin();
+    return atoi(row[0]);
 }
 
 bool ZoneDatabase::SetZoneTZ(uint32 zoneid, uint32 version, uint32 tz) {
