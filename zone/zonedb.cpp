@@ -1582,41 +1582,27 @@ void ZoneDatabase::LoadMercBuffs(Merc *merc) {
 }
 
 bool ZoneDatabase::DeleteMerc(uint32 merc_id) {
-	std::string errorMessage;
-	bool Result = false;
-	int TempCounter = 0;
 
-	if(merc_id > 0) {
-		char* Query = 0;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
+	if(merc_id == 0)
+        return false;
 
-		// TODO: These queries need to be ran together as a transaction.. ie, if one or more fail then they all will fail to commit to the database.
+    bool firstQueryWorked = false;
+    // TODO: These queries need to be ran together as a transaction.. ie,
+    // if one or more fail then they all will fail to commit to the database.
+    std::string query = StringFormat("DELETE FROM merc_buffs WHERE MercID = '%u'", merc_id);
+    auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		LogFile->write(EQEMuLog::Error, "Error Deleting Merc: %s", results.ErrorMessage().c_str());
+	else
+        firstQueryWorked = true;
 
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM merc_buffs WHERE MercID = '%u'", merc_id), TempErrorMessageBuffer)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else
-			TempCounter++;
+	query = StringFormat("DELETE FROM mercs WHERE MercID = '%u'", merc_id);
+	if(!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error Deleting Merc: %s", results.ErrorMessage().c_str());
+		return false;
+    }
 
-		safe_delete_array(Query);
-
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM mercs WHERE MercID = '%u'", merc_id), TempErrorMessageBuffer)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else
-			TempCounter++;
-
-		safe_delete_array(Query);
-
-		if(TempCounter == 2)
-			Result = true;
-	}
-
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error Deleting Merc: %s", errorMessage.c_str());
-	}
-
-	return Result;
+	return firstQueryWorked;
 }
 
 void ZoneDatabase::LoadMercEquipment(Merc *merc) {
