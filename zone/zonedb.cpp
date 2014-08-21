@@ -726,12 +726,12 @@ void ZoneDatabase::DeleteTraderItem(uint32 char_id){
         _log(TRADING__CLIENT, "Failed to delete trader item data for char_id: %i, the error was: %s\n", char_id, results.ErrorMessage().c_str());
 
 }
-void ZoneDatabase::DeleteTraderItem(uint32 CharID,uint16 SlotID){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	if (!(RunQuery(query,MakeAnyLenString(&query, "delete from trader where char_id=%i and slot_id=%i",CharID, SlotID),errbuf)))
-		_log(TRADING__CLIENT, "Failed to delete trader item data for char_id: %i, the error was: %s\n",CharID, errbuf);
-	safe_delete_array(query);
+void ZoneDatabase::DeleteTraderItem(uint32 CharID,uint16 SlotID) {
+
+	std::string query = StringFormat("DELETE FROM trader WHERE char_id = %i And slot_id = %i", CharID, SlotID);
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+		_log(TRADING__CLIENT, "Failed to delete trader item data for char_id: %i, the error was: %s\n",CharID, results.ErrorMessage().c_str());
 }
 
 void ZoneDatabase::DeleteBuyLines(uint32 CharID){
