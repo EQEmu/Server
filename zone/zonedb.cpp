@@ -1696,62 +1696,55 @@ bool ZoneDatabase::SetZoneTZ(uint32 zoneid, uint32 version, uint32 tz) {
     return results.RowsAffected() == 1;
 }
 
-void ZoneDatabase::RefreshGroupFromDB(Client *c){
-	if(!c){
+void ZoneDatabase::RefreshGroupFromDB(Client *client){
+	if(!client)
 		return;
-	}
 
-	Group *g = c->GetGroup();
+	Group *group = client->GetGroup();
 
-	if(!g){
+	if(!group)
 		return;
-	}
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupUpdate2_Struct));
 	GroupUpdate2_Struct* gu = (GroupUpdate2_Struct*)outapp->pBuffer;
 	gu->action = groupActUpdate;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	strcpy(gu->yourname, c->GetName());
-	GetGroupLeadershipInfo(g->GetID(), gu->leadersname, nullptr, nullptr, nullptr, nullptr, &gu->leader_aas);
-	gu->NPCMarkerID = g->GetNPCMarkerID();
+	strcpy(gu->yourname, client->GetName());
+	GetGroupLeadershipInfo(group->GetID(), gu->leadersname, nullptr, nullptr, nullptr, nullptr, &gu->leader_aas);
+	gu->NPCMarkerID = group->GetNPCMarkerID();
 
 	int index = 0;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT name from group_id where groupid=%d", g->GetID()), errbuf, &result)) {
-		while((row = mysql_fetch_row(result))){
-			if(index < 6){
-				if(strcmp(c->GetName(), row[0]) != 0){
-					strcpy(gu->membername[index], row[0]);
-					index++;
-				}
-			}
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		printf("Error in group update query: %s\n", errbuf);
-	}
-	safe_delete_array(query);
 
-	c->QueuePacket(outapp);
+	std::string query = StringFormat("SELECT name FROM group_id WHERE groupid = %d", group->GetID());
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+        printf("Error in group update query: %s\n", results.ErrorMessage().c_str());
+    else
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			if(index >= 6)
+                continue;
+
+            if(strcmp(client->GetName(), row[0]) == 0)
+                continue;
+
+			strcpy(gu->membername[index], row[0]);
+			index++;
+		}
+
+	client->QueuePacket(outapp);
 	safe_delete(outapp);
 
-	if(c->GetClientVersion() >= EQClientSoD) {
-		g->NotifyMainTank(c, 1);
-		g->NotifyPuller(c, 1);
+	if(client->GetClientVersion() >= EQClientSoD) {
+		group->NotifyMainTank(client, 1);
+		group->NotifyPuller(client, 1);
 	}
 
-	g->NotifyMainAssist(c, 1);
-
-	g->NotifyMarkNPC(c);
-	g->NotifyAssistTarget(c);
-	g->NotifyTankTarget(c);
-	g->NotifyPullerTarget(c);
-	g->SendMarkedNPCsToMember(c);
+	group->NotifyMainAssist(client, 1);
+	group->NotifyMarkNPC(client);
+	group->NotifyAssistTarget(client);
+	group->NotifyTankTarget(client);
+	group->NotifyPullerTarget(client);
+	group->SendMarkedNPCsToMember(client);
 
 }
 
