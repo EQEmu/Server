@@ -1861,27 +1861,14 @@ int ZoneDatabase::getZoneShutDownDelay(uint32 zoneID, uint32 version)
 
 uint32 ZoneDatabase::GetKarma(uint32 acct_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	uint32 ret_val = 0;
-
-	if (!RunQuery(query,MakeAnyLenString(&query, "select `karma` from `account` where `id`='%i' limit 1",
-		acct_id),errbuf,&result))
-	{
-		safe_delete_array(query);
+    std::string query = StringFormat("SELECT `karma` FROM `account` WHERE `id` = '%i' LIMIT 1", acct_id);
+    auto results = QueryDatabase(query);
+	if (!results.Success())
 		return 0;
-	}
 
-	safe_delete_array(query);
-	row = mysql_fetch_row(result);
+	auto row = results.begin();
 
-	ret_val = atoi(row[0]);
-
-	mysql_free_result(result);
-
-	return ret_val;
+	return atoi(row[0]);
 }
 
 void ZoneDatabase::UpdateKarma(uint32 acct_id, uint32 amount)
