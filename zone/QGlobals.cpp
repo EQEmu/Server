@@ -51,7 +51,7 @@ void QGlobalCache::Combine(std::list<QGlobal> &cacheA, std::list<QGlobal> cacheB
 
 void QGlobalCache::GetQGlobals(std::list<QGlobal> &globals, NPC *n, Client *c, Zone *z) {
 	globals.clear();
-	
+
 	QGlobalCache *npc_c = nullptr;
 	QGlobalCache *char_c = nullptr;
 	QGlobalCache *zone_c = nullptr;
@@ -139,75 +139,39 @@ void QGlobalCache::PurgeExpiredGlobals()
 
 void QGlobalCache::LoadByNPCID(uint32 npcID)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (database.RunQuery(query, MakeAnyLenString(&query, "select name, charid, npcid, zoneid, value, expdate"
-		" from quest_globals where npcid = %d", npcID), errbuf, &result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			AddGlobal(0, QGlobal(std::string(row[0]), atoi(row[1]), atoi(row[2]), atoi(row[3]), row[4], row[5]?atoi(row[5]):0xFFFFFFFF));
-		}
-		mysql_free_result(result);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT name, charid, npcid, zoneid, value, expdate "
+                                    "FROM quest_globals WHERE npcid = %d", npcID);
+    LoadBy(query);
 }
 
 void QGlobalCache::LoadByCharID(uint32 charID)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (database.RunQuery(query, MakeAnyLenString(&query, "select name, charid, npcid, zoneid, value, expdate from"
-		" quest_globals where charid = %d && npcid = 0", charID), errbuf, &result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			AddGlobal(0, QGlobal(std::string(row[0]), atoi(row[1]), atoi(row[2]), atoi(row[3]), row[4], row[5]?atoi(row[5]):0xFFFFFFFF));
-		}
-		mysql_free_result(result);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT name, charid, npcid, zoneid, value, expdate "
+                                    "FROM quest_globals WHERE charid = %d && npcid = 0", charID);
+    LoadBy(query);
 }
 
 void QGlobalCache::LoadByZoneID(uint32 zoneID)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (database.RunQuery(query, MakeAnyLenString(&query, "select name, charid, npcid, zoneid, value, expdate from quest_globals"
-		" where zoneid = %d && npcid = 0 && charid = 0", zoneID), errbuf, &result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			AddGlobal(0, QGlobal(std::string(row[0]), atoi(row[1]), atoi(row[2]), atoi(row[3]), row[4], row[5]?atoi(row[5]):0xFFFFFFFF));
-		}
-		mysql_free_result(result);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT name, charid, npcid, zoneid, value, expdate "
+                                    "FROM quest_globals WHERE zoneid = %d && npcid = 0 && charid = 0", zoneID);
+    LoadBy(query);
 }
+
 void QGlobalCache::LoadByGlobalContext()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	std::string query = "SELECT name, charid, npcid, zoneid, value, expdate "
+                        "FROM quest_globals WHERE zoneid = 0 && npcid = 0 && charid = 0";
+    LoadBy(query);
+ }
 
-	if (database.RunQuery(query, MakeAnyLenString(&query, "select name, charid, npcid, zoneid, value, expdate from quest_globals"
-		" where zoneid = 0 && npcid = 0 && charid = 0"), errbuf, &result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			AddGlobal(0, QGlobal(std::string(row[0]), atoi(row[1]), atoi(row[2]), atoi(row[3]), row[4], row[5]?atoi(row[5]):0xFFFFFFFF));
-		}
-		mysql_free_result(result);
-	}
-	safe_delete_array(query);
+void QGlobalCache::LoadBy(const std::string query)
+{
+    auto results = database.QueryDatabase(query);
+    if (!results.Success())
+        return;
+
+    for (auto row = results.begin(); row != results.end(); ++row)
+        AddGlobal(0, QGlobal(std::string(row[0]), atoi(row[1]), atoi(row[2]), atoi(row[3]), row[4], row[5]? atoi(row[5]): 0xFFFFFFFF));
+
 }
