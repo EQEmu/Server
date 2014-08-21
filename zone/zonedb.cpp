@@ -464,49 +464,36 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
 		return;
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	//const Item_Struct* item = nullptr;
-	//ItemInst* inst = nullptr;
+	std::string query = StringFormat("SELECT bagidx, itemid, charges, augslot1, augslot2, augslot3, augslot4, augslot5 "
+                                    "FROM object_contents WHERE parentid = %i", parentid);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in DB::LoadWorldContainer: %s", results.ErrorMessage().c_str());
+        return;
+    }
 
-	uint32 len_query = MakeAnyLenString(&query, "select "
-		"bagidx,itemid,charges,augslot1,augslot2,augslot3,augslot4,augslot5 from object_contents where parentid=%i", parentid);
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        uint8 index = (uint8)atoi(row[0]);
+        uint32 item_id = (uint32)atoi(row[1]);
+        int8 charges = (int8)atoi(row[2]);
+        uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
+        aug[0]	= (uint32)atoi(row[3]);
+        aug[1]	= (uint32)atoi(row[4]);
+        aug[2]	= (uint32)atoi(row[5]);
+        aug[3]	= (uint32)atoi(row[6]);
+        aug[4]	= (uint32)atoi(row[7]);
 
-	if (RunQuery(query, len_query, errbuf, &result)) {
-		while ((row = mysql_fetch_row(result))) {
-			uint8 index = (uint8)atoi(row[0]);
-			uint32 item_id = (uint32)atoi(row[1]);
-			int8 charges = (int8)atoi(row[2]);
-			uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
-			aug[0]	= (uint32)atoi(row[3]);
-			aug[1]	= (uint32)atoi(row[4]);
-			aug[2]	= (uint32)atoi(row[5]);
-			aug[3]	= (uint32)atoi(row[6]);
-			aug[4]	= (uint32)atoi(row[7]);
+        ItemInst* inst = database.CreateItem(item_id, charges);
+        if (inst && inst->GetItem()->ItemClass == ItemClassCommon) {
+            for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++)
+                if (aug[i])
+                    inst->PutAugment(&database, i, aug[i]);
+            // Put item inside world container
+            container->PutItem(index, *inst);
+            safe_delete(inst);
+        }
+    }
 
-			ItemInst* inst = database.CreateItem(item_id, charges);
-			if (inst) {
-				if (inst->GetItem()->ItemClass == ItemClassCommon) {
-					for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
-						if (aug[i]) {
-								inst->PutAugment(&database, i, aug[i]);
-						}
-					}
-				}
-				// Put item inside world container
-				container->PutItem(index, *inst);
-				safe_delete(inst);
-			}
-		}
-		mysql_free_result(result);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in DB::LoadWorldContainer: %s", errbuf);
-	}
-
-	safe_delete_array(query);
 }
 
 // Save child objects for a world container (i.e., forge, bag dropped to ground, etc)
