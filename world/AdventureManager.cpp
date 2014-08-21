@@ -639,119 +639,90 @@ AdventureTemplate *AdventureManager::GetAdventureTemplate(int id)
 
 bool AdventureManager::LoadAdventureTemplates()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, zone, zone_version, "
+	std::string query = "SELECT id, zone, zone_version, "
 		"is_hard, min_level, max_level, type, type_data, type_count, assa_x, "
 		"assa_y, assa_z, assa_h, text, duration, zone_in_time, win_points, lose_points, "
-		"theme, zone_in_zone_id, zone_in_x, zone_in_y, zone_in_object_id, dest_x, dest_y,"
-		" dest_z, dest_h, graveyard_zone_id, graveyard_x, graveyard_y, graveyard_z, "
-		"graveyard_radius FROM adventure_template"), errbuf, &result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			uint8 x = 0;
-			AdventureTemplate *t = new AdventureTemplate;
-			t->id = atoi(row[x++]);
-			strcpy(t->zone, row[x++]);
-			t->zone_version = atoi(row[x++]);
-			t->is_hard = atoi(row[x++]);
-			t->min_level = atoi(row[x++]);
-			t->max_level = atoi(row[x++]);
-			t->type = atoi(row[x++]);
-			t->type_data = atoi(row[x++]);
-			t->type_count = atoi(row[x++]);
-			t->assa_x = atof(row[x++]);
-			t->assa_y = atof(row[x++]);
-			t->assa_z = atof(row[x++]);
-			t->assa_h = atof(row[x++]);
-			strn0cpy(t->text, row[x++], sizeof(t->text));
-			t->duration = atoi(row[x++]);
-			t->zone_in_time = atoi(row[x++]);
-			t->win_points = atoi(row[x++]);
-			t->lose_points = atoi(row[x++]);
-			t->theme = atoi(row[x++]);
-			t->zone_in_zone_id = atoi(row[x++]);
-			t->zone_in_x = atof(row[x++]);
-			t->zone_in_y = atof(row[x++]);
-			t->zone_in_object_id = atoi(row[x++]);
-			t->dest_x = atof(row[x++]);
-			t->dest_y = atof(row[x++]);
-			t->dest_z = atof(row[x++]);
-			t->dest_h = atof(row[x++]);
-			t->graveyard_zone_id = atoi(row[x++]);
-			t->graveyard_x = atof(row[x++]);
-			t->graveyard_y = atof(row[x++]);
-			t->graveyard_z = atof(row[x++]);
-			t->graveyard_radius = atof(row[x++]);
-			adventure_templates[t->id] = t;
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-		return true;
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::LoadAdventures: %s (%s)", query, errbuf);
-		safe_delete_array(query);
+		"theme, zone_in_zone_id, zone_in_x, zone_in_y, zone_in_object_id, dest_x, dest_y, "
+		"dest_z, dest_h, graveyard_zone_id, graveyard_x, graveyard_y, graveyard_z, "
+		"graveyard_radius FROM adventure_template";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::LoadAdventures: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return false;
-	}
-	return false;
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+		AdventureTemplate *aTemplate = new AdventureTemplate;
+		aTemplate->id = atoi(row[0]);
+		strcpy(aTemplate->zone, row[1]);
+		aTemplate->zone_version = atoi(row[2]);
+		aTemplate->is_hard = atoi(row[3]);
+		aTemplate->min_level = atoi(row[4]);
+		aTemplate->max_level = atoi(row[5]);
+		aTemplate->type = atoi(row[6]);
+		aTemplate->type_data = atoi(row[7]);
+		aTemplate->type_count = atoi(row[8]);
+		aTemplate->assa_x = atof(row[9]);
+		aTemplate->assa_y = atof(row[10]);
+		aTemplate->assa_z = atof(row[11]);
+		aTemplate->assa_h = atof(row[12]);
+		strn0cpy(aTemplate->text, row[13], sizeof(aTemplate->text));
+		aTemplate->duration = atoi(row[14]);
+		aTemplate->zone_in_time = atoi(row[15]);
+		aTemplate->win_points = atoi(row[16]);
+		aTemplate->lose_points = atoi(row[17]);
+		aTemplate->theme = atoi(row[18]);
+		aTemplate->zone_in_zone_id = atoi(row[19]);
+		aTemplate->zone_in_x = atof(row[20]);
+		aTemplate->zone_in_y = atof(row[21]);
+		aTemplate->zone_in_object_id = atoi(row[22]);
+		aTemplate->dest_x = atof(row[23]);
+		aTemplate->dest_y = atof(row[24]);
+		aTemplate->dest_z = atof(row[25]);
+		aTemplate->dest_h = atof(row[26]);
+		aTemplate->graveyard_zone_id = atoi(row[27]);
+		aTemplate->graveyard_x = atof(row[28]);
+		aTemplate->graveyard_y = atof(row[29]);
+		aTemplate->graveyard_z = atof(row[30]);
+		aTemplate->graveyard_radius = atof(row[31]);
+		adventure_templates[aTemplate->id] = aTemplate;
+    }
+
+    return true;
 }
 
 bool AdventureManager::LoadAdventureEntries()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, template_id FROM adventure_template_entry"), errbuf, &result))
+	std::string query = "SELECT id, template_id FROM adventure_template_entry";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success())
 	{
-		while((row = mysql_fetch_row(result)))
-		{
-			int id = atoi(row[0]);
-			int template_id = atoi(row[1]);
-			AdventureTemplate* tid = nullptr;
-
-			std::map<uint32, AdventureTemplate*>::iterator t_iter = adventure_templates.find(template_id);
-			if(t_iter == adventure_templates.end())
-			{
-				continue;
-			}
-			else
-			{
-				tid = adventure_templates[template_id];
-			}
-
-			std::list<AdventureTemplate*> temp;
-			std::map<uint32, std::list<AdventureTemplate*> >::iterator iter = adventure_entries.find(id);
-			if(iter == adventure_entries.end())
-			{
-				temp.push_back(tid);
-				adventure_entries[id] = temp;
-			}
-			else
-			{
-				temp = adventure_entries[id];
-				temp.push_back(tid);
-				adventure_entries[id] = temp;
-			}
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-		return true;
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::LoadAdventureEntries: %s (%s)", query, errbuf);
-		safe_delete_array(query);
+		LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::LoadAdventureEntries: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
-	return false;
+
+    for (auto row = results.begin(); row != results.end(); ++row)
+    {
+        int id = atoi(row[0]);
+        int template_id = atoi(row[1]);
+        AdventureTemplate* tid = nullptr;
+
+        auto t_iter = adventure_templates.find(template_id);
+        if(t_iter == adventure_templates.end())
+            continue;
+
+        tid = adventure_templates[template_id];
+
+        std::list<AdventureTemplate*> temp;
+        auto iter = adventure_entries.find(id);
+        if(iter == adventure_entries.end())
+            temp = adventure_entries[id];
+
+        temp.push_back(tid);
+        adventure_entries[id] = temp;
+    }
+
+    return true;
 }
 
 void AdventureManager::PlayerClickedDoor(const char *player, int zone_id, int door_id)
@@ -1096,79 +1067,69 @@ void AdventureManager::LoadLeaderboardInfo()
 	leaderboard_info_percentage_ruj.clear();
 	leaderboard_info_wins_tak.clear();
 	leaderboard_info_percentage_tak.clear();
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	if(database.RunQuery(query,MakeAnyLenString(&query,"select ch.name, ch.id, adv_stats.* from adventure_stats "
-		"AS adv_stats ""left join character_ AS ch on adv_stats.player_id = ch.id;"), errbuf, &result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			if(row[0])
-			{
-				LeaderboardInfo lbi;
-				lbi.name = row[0];
-				lbi.wins = atoi(row[3]);
-				lbi.guk_wins = atoi(row[3]);
-				lbi.wins += atoi(row[4]);
-				lbi.mir_wins = atoi(row[4]);
-				lbi.wins += atoi(row[5]);
-				lbi.mmc_wins = atoi(row[5]);
-				lbi.wins += atoi(row[6]);
-				lbi.ruj_wins = atoi(row[6]);
-				lbi.wins += atoi(row[7]);
-				lbi.tak_wins = atoi(row[7]);
-				lbi.losses = atoi(row[8]);
-				lbi.guk_losses = atoi(row[8]);
-				lbi.losses += atoi(row[9]);
-				lbi.mir_losses = atoi(row[9]);
-				lbi.losses += atoi(row[10]);
-				lbi.mmc_losses = atoi(row[10]);
-				lbi.losses += atoi(row[11]);
-				lbi.ruj_losses = atoi(row[11]);
-				lbi.losses += atoi(row[12]);
-				lbi.tak_losses = atoi(row[12]);
-
-				leaderboard_info_wins.push_back(lbi);
-				leaderboard_info_percentage.push_back(lbi);
-				leaderboard_info_wins_guk.push_back(lbi);
-				leaderboard_info_percentage_guk.push_back(lbi);
-				leaderboard_info_wins_mir.push_back(lbi);
-				leaderboard_info_percentage_mir.push_back(lbi);
-				leaderboard_info_wins_mmc.push_back(lbi);
-				leaderboard_info_percentage_mmc.push_back(lbi);
-				leaderboard_info_wins_ruj.push_back(lbi);
-				leaderboard_info_percentage_ruj.push_back(lbi);
-				leaderboard_info_wins_tak.push_back(lbi);
-				leaderboard_info_percentage_tak.push_back(lbi);
-
-				leaderboard_sorted_wins = false;
-				leaderboard_sorted_percentage = false;
-				leaderboard_sorted_wins_guk = false;
-				leaderboard_sorted_percentage_guk = false;
-				leaderboard_sorted_wins_mir = false;
-				leaderboard_sorted_percentage_mir = false;
-				leaderboard_sorted_wins_mmc = false;
-				leaderboard_sorted_percentage_mmc = false;
-				leaderboard_sorted_wins_ruj = false;
-				leaderboard_sorted_percentage_ruj = false;
-				leaderboard_sorted_wins_tak = false;
-				leaderboard_sorted_percentage_tak = false;
-			}
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
+	std::string query = "SELECT ch.name, ch.id, adv_stats.* FROM adventure_stats "
+		"AS adv_stats LEFT JOIN character_ AS ch ON adv_stats.player_id = ch.id;";
+    auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::GetLeaderboardInfo: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::GetLeaderboardInfo: %s (%s)", query, errbuf);
-		safe_delete_array(query);
-		return;
+
+    for (auto row = results.begin(); row != results.end(); ++row)
+    {
+        if(!row[0])
+            continue;
+
+        LeaderboardInfo lbi;
+        lbi.name = row[0];
+        lbi.wins = atoi(row[3]);
+        lbi.guk_wins = atoi(row[3]);
+        lbi.wins += atoi(row[4]);
+        lbi.mir_wins = atoi(row[4]);
+        lbi.wins += atoi(row[5]);
+        lbi.mmc_wins = atoi(row[5]);
+        lbi.wins += atoi(row[6]);
+        lbi.ruj_wins = atoi(row[6]);
+        lbi.wins += atoi(row[7]);
+        lbi.tak_wins = atoi(row[7]);
+        lbi.losses = atoi(row[8]);
+        lbi.guk_losses = atoi(row[8]);
+        lbi.losses += atoi(row[9]);
+        lbi.mir_losses = atoi(row[9]);
+        lbi.losses += atoi(row[10]);
+        lbi.mmc_losses = atoi(row[10]);
+        lbi.losses += atoi(row[11]);
+        lbi.ruj_losses = atoi(row[11]);
+        lbi.losses += atoi(row[12]);
+        lbi.tak_losses = atoi(row[12]);
+
+        leaderboard_info_wins.push_back(lbi);
+        leaderboard_info_percentage.push_back(lbi);
+        leaderboard_info_wins_guk.push_back(lbi);
+        leaderboard_info_percentage_guk.push_back(lbi);
+        leaderboard_info_wins_mir.push_back(lbi);
+        leaderboard_info_percentage_mir.push_back(lbi);
+        leaderboard_info_wins_mmc.push_back(lbi);
+        leaderboard_info_percentage_mmc.push_back(lbi);
+        leaderboard_info_wins_ruj.push_back(lbi);
+        leaderboard_info_percentage_ruj.push_back(lbi);
+        leaderboard_info_wins_tak.push_back(lbi);
+        leaderboard_info_percentage_tak.push_back(lbi);
+
+        leaderboard_sorted_wins = false;
+        leaderboard_sorted_percentage = false;
+        leaderboard_sorted_wins_guk = false;
+        leaderboard_sorted_percentage_guk = false;
+        leaderboard_sorted_wins_mir = false;
+        leaderboard_sorted_percentage_mir = false;
+        leaderboard_sorted_wins_mmc = false;
+        leaderboard_sorted_percentage_mmc = false;
+        leaderboard_sorted_wins_ruj = false;
+        leaderboard_sorted_percentage_ruj = false;
+        leaderboard_sorted_wins_tak = false;
+        leaderboard_sorted_percentage_tak = false;
 	}
-	return;
 };
 
 void AdventureManager::DoLeaderboardRequest(const char* player, uint8 type)
