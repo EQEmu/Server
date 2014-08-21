@@ -1679,40 +1679,21 @@ bool ZoneDatabase::UpdateZoneSafeCoords(const char* zonename, float x=0, float y
 	return true;
 }
 
-
 uint8 ZoneDatabase::GetUseCFGSafeCoords()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT value FROM variables WHERE varname='UseCFGSafeCoords'"), errbuf, &result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1)
-		{
-			row = mysql_fetch_row(result);
-
-			uint8 usecoords = atoi(row[0]);
-			mysql_free_result(result);
-			return usecoords;
-		}
-		else
-		{
-			mysql_free_result(result);
-			return 0;
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-
-		std::cerr << "Error in GetUseCFGSafeCoords query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-		return false;
+	const std::string query = "SELECT value FROM variables WHERE varname='UseCFGSafeCoords'";
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        std::cerr << "Error in GetUseCFGSafeCoords query '" << query << "' " << results.ErrorMessage() << std::endl;
+		return 0;
 	}
 
-	return 0;
+	if (results.RowCount() != 1)
+        return 0;
 
+	auto row = results.begin();
+
+    return atoi(row[0]);
 }
 
 
