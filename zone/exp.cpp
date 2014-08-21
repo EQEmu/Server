@@ -54,7 +54,7 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 	struct timeval read_time;
 	char buffer[50];
 	gettimeofday(&read_time, 0);
-	sprintf(buffer, "%i.%i \n", read_time.tv_sec, read_time.tv_usec);
+	sprintf(buffer, "%li.%li \n", read_time.tv_sec, read_time.tv_usec);
 	this->SetEntityVariable("Stop_Return", buffer);
 
 	uint32 add_exp = in_add_exp;

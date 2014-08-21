@@ -642,7 +642,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 				struct timeval read_time;
 				char buffer[50];
 				gettimeofday(&read_time, 0);
-				sprintf(buffer, "%i.%i \n", read_time.tv_sec, read_time.tv_usec);
+				sprintf(buffer, "%li.%li \n", read_time.tv_sec, read_time.tv_usec);
 				this->SetEntityVariable("Stop_Return", buffer);
 
 			}
