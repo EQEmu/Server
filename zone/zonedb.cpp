@@ -1880,38 +1880,28 @@ void ZoneDatabase::UpdateKarma(uint32 acct_id, uint32 amount)
 
 }
 
-void ZoneDatabase::ListAllInstances(Client* c, uint32 charid)
+void ZoneDatabase::ListAllInstances(Client* client, uint32 charid)
 {
-	if(!c)
+	if(!client)
 		return;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	std::string query = StringFormat("SELECT instance_list.id, zone, version "
+                                    "FROM instance_list JOIN instance_list_player "
+                                    "ON instance_list.id = instance_list_player.id "
+                                    "WHERE instance_list_player.charid = %lu",
+                                    (unsigned long)charid);
+    auto results = QueryDatabase(query);
+    if (!results.Success())
+        return;
 
+    char name[64];
+    database.GetCharName(charid, name);
+    client->Message(0, "%s is part of the following instances:", name);
 
-	if (RunQuery(query,MakeAnyLenString(&query, "SELECT instance_list.id, zone, version FROM instance_list JOIN"
-		" instance_list_player ON instance_list.id = instance_list_player.id"
-		" WHERE instance_list_player.charid=%lu", (unsigned long)charid),errbuf,&result))
-	{
-		safe_delete_array(query);
-
-		char name[64];
-		database.GetCharName(charid, name);
-		c->Message(0, "%s is part of the following instances:", name);
-		while(row = mysql_fetch_row(result))
-		{
-			c->Message(0, "%s - id: %lu, version: %lu", database.GetZoneName(atoi(row[1])),
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        client->Message(0, "%s - id: %lu, version: %lu", database.GetZoneName(atoi(row[1])),
 				(unsigned long)atoi(row[0]), (unsigned long)atoi(row[2]));
-		}
-
-		mysql_free_result(result);
-	}
-	else
-	{
-		safe_delete_array(query);
-	}
+    }
 }
 
 void ZoneDatabase::QGlobalPurge()
