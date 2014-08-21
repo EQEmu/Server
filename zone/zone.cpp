@@ -469,7 +469,7 @@ void Zone::LoadNewMerchantData(uint32 merchantid){
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	std::list<MerchantList> merlist;
-	if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT item, slot, faction_required, level_required, alt_currency_cost, classes_required FROM merchantlist WHERE merchantid=%d", merchantid), errbuf, &result)) {
+	if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT item, slot, faction_required, level_required, alt_currency_cost, classes_required, probability FROM merchantlist WHERE merchantid=%d", merchantid), errbuf, &result)) {
 		while((row = mysql_fetch_row(result))) {
 			MerchantList ml;
 			ml.id = merchantid;
@@ -479,6 +479,7 @@ void Zone::LoadNewMerchantData(uint32 merchantid){
 			ml.level_required = atoul(row[3]);
 			ml.alt_currency_cost = atoul(row[3]);
 			ml.classes_required = atoul(row[4]);
+			ml.probability = atoul(row[5]);
 			merlist.push_back(ml);
 		}
 		merchanttable[merchantid] = merlist;
@@ -526,6 +527,7 @@ void Zone::LoadMerchantData_result(MYSQL_RES* result) {
 		ml.level_required = atoul(row[4]);
 		ml.alt_currency_cost = atoul(row[5]);
 		ml.classes_required = atoul(row[6]);
+		ml.probability = atoul(row[7]);
 		cur->second.push_back(ml);
 	}
 }
@@ -539,7 +541,7 @@ void Zone::GetMerchantDataForZoneLoad(){
 	workpt.b1() = DBA_b1_Zone_MerchantLists;
 	DBAsyncWork* dbaw = new DBAsyncWork(&database, &MTdbafq, workpt, DBAsync::Read);
 	dbaw->AddQuery(1, &query, MakeAnyLenString(&query,
-		"select ml.merchantid,ml.slot,ml.item,ml.faction_required,ml.level_required,ml.alt_currency_cost,ml.classes_required "
+		"select ml.merchantid,ml.slot,ml.item,ml.faction_required,ml.level_required,ml.alt_currency_cost,ml.classes_required,ml.probability "
 		"from merchantlist ml, npc_types nt, spawnentry se, spawn2 s2 "
 		"where nt.merchant_id=ml.merchantid and nt.id=se.npcid "
 		"and se.spawngroupid=s2.spawngroupid and s2.zone='%s' and s2.version=%u "
