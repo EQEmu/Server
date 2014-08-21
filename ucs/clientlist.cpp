@@ -1329,7 +1329,7 @@ void Client::SendChannelMessage(std::string Message)
 		}
 	}
 
-	if(RequiredChannel)
+	if(RequiredChannel) {
 		if(RuleB(Chat, EnableAntiSpam))
 		{
 			if(!RequiredChannel->IsModerated() || RequiredChannel->HasVoice(GetName()) || RequiredChannel->IsOwner(GetName()) ||
@@ -1384,7 +1384,7 @@ void Client::SendChannelMessage(std::string Message)
 			else
 				GeneralChannelMessage("Channel " + ChannelName + " is moderated and you have not been granted a voice.");
 		}
-
+	}
 }
 
 void Client::SendChannelMessageByNumber(std::string Message) {
@@ -1883,11 +1883,12 @@ void Client::ChannelModerate(std::string CommandString) {
 
 	RequiredChannel->SetModerated(!RequiredChannel->IsModerated());
 
-	if(!RequiredChannel->IsClientInChannel(this))
-		if(RequiredChannel->IsModerated())
+	if (!RequiredChannel->IsClientInChannel(this)) {
+		if (RequiredChannel->IsModerated())
 			GeneralChannelMessage("Channel " + ChannelName + " is now moderated.");
 		else
 			GeneralChannelMessage("Channel " + ChannelName + " is no longer moderated.");
+	}
 
 }
 
