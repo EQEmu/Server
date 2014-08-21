@@ -286,10 +286,7 @@ bool ZoneDatabase::logevents(const char* accountname,uint32 accountid,uint8 stat
 }
 
 
-void ZoneDatabase::UpdateBug(BugStruct* bug){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
+void ZoneDatabase::UpdateBug(BugStruct* bug) {
 
 	uint32 len = strlen(bug->bug);
 	char* bugtext = nullptr;
@@ -319,16 +316,18 @@ void ZoneDatabase::UpdateBug(BugStruct* bug){
 	}
 
 	//x and y are intentionally swapped because eq is inversexy coords
-	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO bugs (zone, name, ui, x, y, z, type, flag, target, bug, date) "
-		"values('%s', '%s', '%s', '%.2f', '%.2f', '%.2f', '%s', %d, '%s', '%s', CURDATE())", zone->GetShortName(), bug->name,
-		uitext==nullptr?"":uitext, bug->y, bug->x, bug->z, bug->chartype, bug->type, targettext==nullptr?"Unknown Target":targettext,
-		bugtext==nullptr?"":bugtext), errbuf)) {
-		std::cerr << "Error in UpdateBug" << query << "' " << errbuf << std::endl;
-	}
-	safe_delete_array(query);
-	safe_delete_array(bugtext);
+	std::string query = StringFormat("INSERT INTO bugs (zone, name, ui, x, y, z, type, flag, target, bug, date) "
+		"VALUES('%s', '%s', '%s', '%.2f', '%.2f', '%.2f', '%s', %d, '%s', '%s', CURDATE())",
+		zone->GetShortName(), bug->name, uitext == nullptr ? "": uitext,
+		bug->x, bug->y, bug->z, bug->chartype, bug->type, targettext == nullptr? "Unknown Target": targettext,
+		bugtext==nullptr?"":bugtext);
+    safe_delete_array(bugtext);
 	safe_delete_array(uitext);
 	safe_delete_array(targettext);
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+		std::cerr << "Error in UpdateBug '" << query << "' " << results.ErrorMessage() << std::endl;
+
 }
 
 void ZoneDatabase::UpdateBug(PetitionBug_Struct* bug){
