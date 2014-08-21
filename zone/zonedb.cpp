@@ -660,14 +660,13 @@ void ZoneDatabase::SaveTraderItem(uint32 CharID, uint32 ItemID, uint32 SerialNum
 void ZoneDatabase::UpdateTraderItemCharges(int CharID, uint32 SerialNumber, int32 Charges) {
 
 	_log(TRADING__CLIENT, "ZoneDatabase::UpdateTraderItemCharges(%i, %i, %i)", CharID, SerialNumber, Charges);
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	if (!(RunQuery(query,MakeAnyLenString(&query, "update trader set charges=%i where char_id=%i and serialnumber=%i",
-						Charges, CharID, SerialNumber),errbuf)))
-		_log(TRADING__CLIENT, "Failed to update charges for trader item: %i for char_id: %i, the error was: %s\n",
-						SerialNumber, CharID, errbuf);
 
-	safe_delete_array(query);
+	std::string query = StringFormat("UPDATE trader SET charges = %i WHERE char_id = %i AND serialnumber = %i",
+                                    Charges, CharID, SerialNumber);
+    auto results = QueryDatabase(query);
+    if (!results.Success())
+		_log(TRADING__CLIENT, "Failed to update charges for trader item: %i for char_id: %i, the error was: %s\n",
+                                SerialNumber, CharID, results.ErrorMessage().c_str());
 
 }
 
