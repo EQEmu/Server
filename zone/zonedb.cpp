@@ -573,30 +573,29 @@ Trader_Struct* ZoneDatabase::LoadTraderItem(uint32 char_id){
 }
 
 TraderCharges_Struct* ZoneDatabase::LoadTraderItemWithCharges(uint32 char_id){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+
 	TraderCharges_Struct* loadti = new TraderCharges_Struct;
 	memset(loadti,0,sizeof(TraderCharges_Struct));
-	if (RunQuery(query,MakeAnyLenString(&query, "select * from trader where char_id=%i order by slot_id limit 80",char_id),errbuf,&result)){
-		safe_delete_array(query);
-		while ((row = mysql_fetch_row(result))) {
-			if(atoi(row[5])>=80 || atoi(row[5])<0)
-				_log(TRADING__CLIENT, "Bad Slot number when trying to load trader information!\n");
-			else{
-				loadti->ItemID[atoi(row[5])] = atoi(row[1]);
-				loadti->SerialNumber[atoi(row[5])] = atoi(row[2]);
-				loadti->Charges[atoi(row[5])] = atoi(row[3]);
-				loadti->ItemCost[atoi(row[5])] = atoi(row[4]);
-			}
-		}
-		mysql_free_result(result);
-	}
-	else{
-		safe_delete_array(query);
-		_log(TRADING__CLIENT, "Failed to load trader information!\n");
-	}
+
+	std::string query = StringFormat("SELECT * FROM trader WHERE char_id=%i ORDER BY slot_id LIMIT 80", char_id);
+	auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        _log(TRADING__CLIENT, "Failed to load trader information!\n");
+        return loadti;
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        if(atoi(row[5])>=80 || atoi(row[5])<0) {
+            _log(TRADING__CLIENT, "Bad Slot number when trying to load trader information!\n");
+            continue;
+        }
+
+        loadti->ItemID[atoi(row[5])] = atoi(row[1]);
+        loadti->SerialNumber[atoi(row[5])] = atoi(row[2]);
+        loadti->Charges[atoi(row[5])] = atoi(row[3]);
+        loadti->ItemCost[atoi(row[5])] = atoi(row[4]);
+    }
+
 	return loadti;
 }
 
