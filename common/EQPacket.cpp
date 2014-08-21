@@ -476,7 +476,7 @@ EQRawApplicationPacket::EQRawApplicationPacket(const unsigned char *buf, const u
 				const unsigned char *packet_start = (buf + 3);
 				const int32 packet_length = len - 3;
 				safe_delete_array(pBuffer);
-				if(len >= 0)
+				if(packet_length >= 0)
 				{
 					size = packet_length;
 					pBuffer = new unsigned char[size];
