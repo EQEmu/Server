@@ -259,8 +259,7 @@ void ZoneDatabase::UpdateSpawn2Status(uint32 id, uint8 new_status)
 }
 
 bool ZoneDatabase::logevents(const char* accountname,uint32 accountid,uint8 status,const char* charname, const char* target,const char* descriptiontype, const char* description,int event_nid){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+
 	uint32 len = strlen(description);
 	uint32 len2 = strlen(target);
 	char* descriptiontext = new char[2*len+1];
@@ -269,14 +268,20 @@ bool ZoneDatabase::logevents(const char* accountname,uint32 accountid,uint8 stat
 	memset(targetarr, 0, 2*len2+1);
 	DoEscapeString(descriptiontext, description, len);
 	DoEscapeString(targetarr, target, len2);
-	if (!RunQuery(query, MakeAnyLenString(&query, "Insert into eventlog (accountname,accountid,status,charname,target,descriptiontype,description,event_nid) values('%s',%i,%i,'%s','%s','%s','%s','%i')", accountname,accountid,status,charname,targetarr,descriptiontype,descriptiontext,event_nid), errbuf))	{
-		std::cerr << "Error in logevents" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+
+	std::string query = StringFormat("INSERT INTO eventlog (accountname, accountid, status, "
+                                    "charname, target, descriptiontype, description, event_nid) "
+                                    "VALUES('%s', %i, %i, '%s', '%s', '%s', '%s', '%i')",
+                                    accountname, accountid, status, charname, targetarr,
+                                    descriptiontype, descriptiontext, event_nid);
+    safe_delete_array(descriptiontext);
+	safe_delete_array(targetarr);
+	auto results = QueryDatabase(query);
+	if (!results.Success())	{
+		std::cerr << "Error in logevents" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
-	safe_delete_array(query);
-	safe_delete_array(descriptiontext);
-	safe_delete_array(targetarr);
+
 	return true;
 }
 
