@@ -1873,16 +1873,11 @@ uint32 ZoneDatabase::GetKarma(uint32 acct_id)
 
 void ZoneDatabase::UpdateKarma(uint32 acct_id, uint32 amount)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 affected_rows = 0;
+	std::string query = StringFormat("UPDATE account SET karma = %i WHERE id = %i", amount, acct_id);
+    auto results = QueryDatabase(query);
+    if (!results.Success())
+        std::cerr << "Error in UpdateKarma query '" << query << "' " << results.ErrorMessage().c_str() << std::endl;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "UPDATE account set karma=%i where id=%i", amount, acct_id), errbuf, 0, &affected_rows)){
-		safe_delete_array(query);}
-	else {
-		std::cerr << "Error in UpdateKarma query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-	}
 }
 
 void ZoneDatabase::ListAllInstances(Client* c, uint32 charid)
