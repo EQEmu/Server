@@ -331,17 +331,20 @@ void ZoneDatabase::UpdateBug(BugStruct* bug) {
 }
 
 void ZoneDatabase::UpdateBug(PetitionBug_Struct* bug){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+
 	uint32 len = strlen(bug->text);
 	char* bugtext = new char[2*len+1];
 	memset(bugtext, 0, 2*len+1);
 	DoEscapeString(bugtext, bug->text, len);
-	if (!RunQuery(query, MakeAnyLenString(&query, "Insert into bugs (type,name,bugtext,flag) values('%s','%s','%s',%i)","Petition",bug->name,bugtext,25), errbuf))	{
-		std::cerr << "Error in UpdateBug" << query << "' " << errbuf << std::endl;
-	}
-	safe_delete_array(query);
-	safe_delete_array(bugtext);
+
+	std::string query = StringFormat("INSERT INTO bugs (type, name, bugtext, flag) "
+                                    "VALUES('%s', '%s', '%s', %i)",
+                                    "Petition", bug->name, bugtext, 25);
+    safe_delete_array(bugtext);
+    auto results = QueryDatabase(query);
+	if (!results.Success())
+		std::cerr << "Error in UpdateBug '" << query << "' " << results.ErrorMessage() << std::endl;
+
 }
 
 
