@@ -18,30 +18,30 @@ SET(common_sources
 	eqdb.cpp
 	eqdb_res.cpp
 	eqemu_exception.cpp
-	EQEmuConfig.cpp
-	EQEMuError.cpp
-	EQPacket.cpp
-	EQStream.cpp
-	EQStreamFactory.cpp
-	EQStreamIdent.cpp
-	EQStreamProxy.cpp
+	eqemu_config.cpp
+	eqemu_error.cpp
+	eq_packet.cpp
+	eq_stream.cpp
+	eq_stream_factory.cpp
+	eq_stream_ident.cpp
+	eq_stream_proxy.cpp
 	eqtime.cpp
 	extprofile.cpp
 	faction.cpp
 	guild_base.cpp
 	guilds.cpp
 	ipc_mutex.cpp
-	Item.cpp
+	item.cpp
 	logsys.cpp
 	logsys_eqemu.cpp
 	md5.cpp
 	memory_mapped_file.cpp
 	misc.cpp
-	MiscFunctions.cpp
+	misc_functions.cpp
 	moremath.cpp
-	Mutex.cpp
-	MySQLRequestResult.cpp
-	MySQLRequestRow.cpp
+	mutex.cpp
+	mysql_request_result.cpp
+	mysql_request_row.cpp
 	opcode_map.cpp
 	opcodemgr.cpp
 	packet_dump.cpp
@@ -49,7 +49,7 @@ SET(common_sources
 	packet_functions.cpp
 	perl_eqdb.cpp
 	perl_eqdb_res.cpp
-	ProcLauncher.cpp
+	proc_launcher.cpp
 	ptimer.cpp
 	races.cpp
 	rdtsc.cpp
@@ -57,24 +57,23 @@ SET(common_sources
 	serverinfo.cpp
 	shareddb.cpp
 	spdat.cpp
-    StringUtil.cpp
-	StructStrategy.cpp
-	TCPConnection.cpp
-	TCPServer.cpp
+    string_util.cpp
+	struct_strategy.cpp
+	tcp_connection.cpp
+	tcp_server.cpp
 	timeoutmgr.cpp
 	timer.cpp
 	unix.cpp
 	worldconn.cpp
-	XMLParser.cpp
+	xml_parser.cpp
 	platform.cpp
-	patches/Client62.cpp
+	patches/client62.cpp
 	patches/patches.cpp
-	patches/SoD.cpp
-	patches/SoF.cpp
-	patches/RoF.cpp
-	#patches/RoF2.cpp
-	patches/Titanium.cpp
-	patches/Underfoot.cpp
+	patches/sod.cpp
+	patches/sof.cpp
+	patches/rof.cpp
+	patches/titanium.cpp
+	patches/underfoot.cpp
 	SocketLib/Base64.cpp
 	SocketLib/File.cpp
 	SocketLib/HttpdCookies.cpp
