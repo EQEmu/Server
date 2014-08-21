@@ -1906,11 +1906,8 @@ void ZoneDatabase::ListAllInstances(Client* client, uint32 charid)
 
 void ZoneDatabase::QGlobalPurge()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM quest_globals WHERE expdate < UNIX_TIMESTAMP()"),
-		errbuf);
-	safe_delete_array(query);
+	const std::string query = "DELETE FROM quest_globals WHERE expdate < UNIX_TIMESTAMP()";
+	database.QueryDatabase(query);
 }
 
 void ZoneDatabase::InsertDoor(uint32 ddoordbid, uint16 ddoorid, const char* ddoor_name, float dxpos, float dypos, float dzpos, float dheading, uint8 dopentype, uint16 dguildid, uint32 dlockpick, uint32 dkeyitem, uint8 ddoor_param, uint8 dinvert, int dincline, uint16 dsize){
