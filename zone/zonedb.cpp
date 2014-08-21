@@ -219,52 +219,34 @@ void ZoneDatabase::UpdateSpawn2Timeleft(uint32 id, uint16 instance_id, uint32 ti
 //Gets the respawn time left in the database for the current spawn id
 uint32 ZoneDatabase::GetSpawnTimeLeft(uint32 id, uint16 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	MakeAnyLenString(&query, "SELECT start, duration FROM respawn_times WHERE id=%lu AND instance_id=%lu",
-		(unsigned long)id, (unsigned long)zone->GetInstanceID());
-
-	if (RunQuery(query, strlen(query), errbuf, &result))
-	{
-		safe_delete_array(query);
-		row = mysql_fetch_row(result);
-		if(row)
-		{
-			timeval tv;
-			gettimeofday(&tv, nullptr);
-			uint32 resStart = atoi(row[0]);
-			uint32 resDuration = atoi(row[1]);
-
-			//compare our values to current time
-			if((resStart + resDuration) <= tv.tv_sec)
-			{
-				//our current time was expired
-				mysql_free_result(result);
-				return 0;
-			}
-			else
-			{
-				//we still have time left on this timer
-				mysql_free_result(result);
-				return ((resStart + resDuration) - tv.tv_sec);
-			}
-		}
-		else
-		{
-			mysql_free_result(result);
-			return 0;
-		}
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in GetSpawnTimeLeft query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+	std::string query = StringFormat("SELECT start, duration FROM respawn_times "
+                                    "WHERE id = %lu AND instance_id = %lu",
+                                    (unsigned long)id, (unsigned long)zone->GetInstanceID());
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in GetSpawnTimeLeft query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
-	}
-	return 0;
+    }
+
+    if (results.RowCount() != 1)
+        return 0;
+
+    auto row = results.begin();
+
+    timeval tv;
+    gettimeofday(&tv, nullptr);
+    uint32 resStart = atoi(row[0]);
+    uint32 resDuration = atoi(row[1]);
+
+    //compare our values to current time
+    if((resStart + resDuration) <= tv.tv_sec) {
+        //our current time was expired
+        return 0;
+    }
+
+    //we still have time left on this timer
+    return ((resStart + resDuration) - tv.tv_sec);
+
 }
 
 void ZoneDatabase::UpdateSpawn2Status(uint32 id, uint8 new_status)
