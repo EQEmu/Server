@@ -1,12 +1,11 @@
-#ifndef CLIENT62_H_
-#define CLIENT62_H_
+#ifndef Titanium_H_
+#define Titanium_H_
 
-#include "../StructStrategy.h"
-#include "../Item.h"
+#include "../struct_strategy.h"
 
 class EQStreamIdentifier;
 
-namespace Client62 {
+namespace Titanium {
 
 	//these are the only public member of this namespace.
 	extern void Register(EQStreamIdentifier &into);
@@ -27,11 +26,12 @@ namespace Client62 {
 		virtual const EQClientVersion ClientVersion() const;
 
 		//magic macro to declare our opcode processors
-		#include "SSDeclare.h"
-		#include "Client62_ops.h"
-
+		#include "ss_declare.h"
+		#include "titanium_ops.h"
 	};
 
 };
 
-#endif /*CLIENT62_H_*/
+
+
+#endif /*Titanium_H_*/

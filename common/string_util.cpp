@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "StringUtil.h"
+#include "string_util.h"
 
 #include <cstring> // for strncpy
 #include <stdexcept>

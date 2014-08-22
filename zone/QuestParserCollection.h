@@ -20,7 +20,7 @@
 #define _EQE_QUESTPARSERCOLLECTION_H
 
 #include "../common/types.h"
-#include "../common/Item.h"
+#include "../common/item.h"
 
 #include "masterentity.h"
 #include "QuestInterface.h"

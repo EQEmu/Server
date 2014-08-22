@@ -18,7 +18,7 @@
 #include "../common/debug.h"
 #include "masterentity.h"
 #include "StringIDs.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "../common/rulesys.h"
 #include "QuestParserCollection.h"
 #include "worldserver.h"

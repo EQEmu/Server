@@ -47,10 +47,10 @@
 #include "../common/packet_dump.h"
 #include "../common/serverinfo.h"
 #include "../common/opcodemgr.h"
-#include "../common/EQPacket.h"
+#include "../common/eq_packet.h"
 #include "../common/guilds.h"
 #include "../common/rulesys.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 //#include "../common/servertalk.h" // for oocmute and revoke
 #include "worldserver.h"
 #include "masterentity.h"

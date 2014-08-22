@@ -1,5 +1,5 @@
 #include "debug.h"
-#include "EQStreamFactory.h"
+#include "eq_stream_factory.h"
 #ifdef _WINDOWS
 	#include <winsock.h>
 	#include <process.h>
@@ -16,7 +16,7 @@
 #include <fcntl.h>
 #include <iostream>
 #include "op_codes.h"
-#include "EQStream.h"
+#include "eq_stream.h"
 #include "logsys.h"
 
 ThreadReturnType EQStreamFactoryReaderLoop(void *eqfs)

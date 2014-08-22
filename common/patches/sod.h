@@ -1,11 +1,11 @@
-#ifndef Titanium_H_
-#define Titanium_H_
+#ifndef SoD_H_
+#define SoD_H_
 
-#include "../StructStrategy.h"
+#include "../struct_strategy.h"
 
 class EQStreamIdentifier;
 
-namespace Titanium {
+namespace SoD {
 
 	//these are the only public member of this namespace.
 	extern void Register(EQStreamIdentifier &into);
@@ -26,12 +26,12 @@ namespace Titanium {
 		virtual const EQClientVersion ClientVersion() const;
 
 		//magic macro to declare our opcode processors
-		#include "SSDeclare.h"
-		#include "Titanium_ops.h"
+		#include "ss_declare.h"
+		#include "sod_ops.h"
 	};
 
 };
 
 
 
-#endif /*Titanium_H_*/
+#endif /*SoD_H_*/

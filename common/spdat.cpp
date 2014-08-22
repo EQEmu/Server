@@ -74,7 +74,7 @@
 #include "spdat.h"
 #include "packet_dump.h"
 #include "moremath.h"
-#include "Item.h"
+#include "item.h"
 #include "skills.h"
 #include "bodytypes.h"
 #include "classes.h"

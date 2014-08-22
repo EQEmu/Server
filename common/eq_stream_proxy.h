@@ -3,7 +3,7 @@
 
 
 #include "types.h"
-#include "EQStreamIntf.h"
+#include "eq_stream_intf.h"
 
 class EQStream;
 class StructStrategy;

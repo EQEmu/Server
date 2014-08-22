@@ -20,13 +20,13 @@
 #include "masterentity.h"
 #include "../common/packet_dump.h"
 #include "../common/moremath.h"
-#include "../common/Item.h"
+#include "../common/item.h"
 #include "zonedb.h"
 #include "worldserver.h"
 #include "../common/skills.h"
 #include "../common/bodytypes.h"
 #include "../common/classes.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "pets.h"
 #include <math.h>
 #include <assert.h>

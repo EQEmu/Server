@@ -26,7 +26,7 @@
 #undef seed
 #endif
 
-#include "../common/Item.h"
+#include "../common/item.h"
 
 #ifdef THIS		/* this macro seems to leak out on some systems */
 #undef THIS

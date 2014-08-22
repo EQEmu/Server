@@ -1,11 +1,12 @@
-#ifndef SoF_H_
-#define SoF_H_
+#ifndef CLIENT62_H_
+#define CLIENT62_H_
 
-#include "../StructStrategy.h"
+#include "../struct_strategy.h"
+#include "../item.h"
 
 class EQStreamIdentifier;
 
-namespace SoF {
+namespace Client62 {
 
 	//these are the only public member of this namespace.
 	extern void Register(EQStreamIdentifier &into);
@@ -26,12 +27,11 @@ namespace SoF {
 		virtual const EQClientVersion ClientVersion() const;
 
 		//magic macro to declare our opcode processors
-		#include "SSDeclare.h"
-		#include "SoF_ops.h"
+		#include "ss_declare.h"
+		#include "client62_ops.h"
+
 	};
 
 };
 
-
-
-#endif /*SoF_H_*/
+#endif /*CLIENT62_H_*/

@@ -20,7 +20,7 @@
 #include "../common/features.h"
 #include "masterentity.h"
 #include "../common/packet_dump.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 #include <string>
 #include <map>
 

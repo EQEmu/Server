@@ -23,7 +23,7 @@
 #include "map.h"
 #include "../common/spdat.h"
 #include "../common/skills.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 #include "../common/rulesys.h"
 #include "StringIDs.h"
 #include <iostream>

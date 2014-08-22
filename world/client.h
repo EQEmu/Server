@@ -20,7 +20,7 @@
 
 #include <string>
 
-//#include "../common/EQStream.h"
+//#include "../common/eq_stream.h"
 #include "../common/linked_list.h"
 #include "../common/timer.h"
 //#include "zoneserver.h"

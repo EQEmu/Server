@@ -19,7 +19,7 @@
 #define _EQPACKET_H
 
 #include "base_packet.h"
-#include "EQStreamType.h"
+#include "eq_stream_type.h"
 #include "op_codes.h"
 #include "platform.h"
 

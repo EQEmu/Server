@@ -8,7 +8,7 @@
 
 #include <mysql.h>
 #include "types.h"
-#include "MySQLRequestRow.h"
+#include "mysql_request_row.h"
 #include <string>
 #include <string.h>
 #include <limits.h>

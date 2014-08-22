@@ -1,7 +1,7 @@
 #ifndef Underfoot_H_
 #define Underfoot_H_
 
-#include "../StructStrategy.h"
+#include "../struct_strategy.h"
 
 class EQStreamIdentifier;
 
@@ -26,8 +26,8 @@ namespace Underfoot {
 		virtual const EQClientVersion ClientVersion() const;
 
 		//magic macro to declare our opcode processors
-		#include "SSDeclare.h"
-		#include "Underfoot_ops.h"
+		#include "ss_declare.h"
+		#include "underfoot_ops.h"
 	};
 
 };

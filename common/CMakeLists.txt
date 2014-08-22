@@ -119,15 +119,15 @@ SET(common_headers
 	eqemu_exception.h
 	eqemu_config.h
 	eqemu_config_elements.h
-	EQEMuError.h
-	EQPacket.h
-	EQStream.h
-	EQStreamFactory.h
-	EQStreamIdent.h
-	EQStreamIntf.h
-	EQStreamLocator.h
-	EQStreamProxy.h
-	EQStreamType.h
+	eqemu_error.h
+	eq_packet.h
+	eq_stream.h
+	eq_stream_factory.h
+	eq_stream_ident.h
+	eq_stream_intf.h
+	eq_stream_locator.h
+	eq_stream_proxy.h
+	eq_stream_type.h
 	eqtime.h
 	errmsg.h
 	extprofile.h
@@ -138,7 +138,7 @@ SET(common_headers
 	guild_base.h
 	guilds.h
 	ipc_mutex.h
-	Item.h
+	item.h
 	item_fieldlist.h
 	item_struct.h
 	languages.h
@@ -150,18 +150,19 @@ SET(common_headers
 	md5.h
 	memory_mapped_file.h
 	misc.h
-	MiscFunctions.h
+	misc_functions.h
 	moremath.h
 	Mutex.h
-	MySQLRequestResult.h
-	MySQLRequestRow.h
+	mysql_request_result.h
+	mysql_request_row.h
 	op_codes.h
 	opcode_dispatch.h
 	opcodemgr.h
 	packet_dump.h
 	packet_dump_file.h
 	packet_functions.h
-	ProcLauncher.h
+	platform.h
+	proc_launcher.h
 	profiler.h
 	ptimer.h
 	queue.h
@@ -175,11 +176,11 @@ SET(common_headers
 	shareddb.h
 	skills.h
 	spdat.h
-    StringUtil.h
-	StructStrategy.h
-	TCPBasicServer.h
-	TCPConnection.h
-	TCPServer.h
+    string_util.h
+	struct_strategy.h
+	tcp_basic_server.h
+	tcp_connection.h
+	tcp_server.h
 	timeoutmgr.h
 	timer.h
 	types.h
@@ -187,44 +188,43 @@ SET(common_headers
 	useperl.h
 	version.h
 	worldconn.h
-	XMLParser.h
-	ZoneNumbers.h
-	platform.h
-	patches/Client62.h
-	patches/Client62_constants.h
-	patches/Client62_itemfields.h
-	patches/Client62_ops.h
-	patches/Client62_structs.h
+	xml_parser.h
+	zone_numbers.h
+	patches/client62.h
+	patches/client62_constants.h
+	patches/client62_itemfields.h
+	patches/client62_ops.h
+	patches/client62_structs.h
 	patches/patches.h
-	patches/SoD.h
-	patches/SoD_constants.h
-	patches/SoD_itemfields.h
-	patches/SoD_ops.h
-	patches/SoD_structs.h
-	patches/SoF.h
-	patches/SoF_constants.h
-	patches/SoF_itemfields.h
-	patches/SoF_opcode_list.h
-	patches/SoF_ops.h
-	patches/SoF_structs.h
-	patches/SSDeclare.h
-	patches/SSDefine.h
-	patches/SSRegister.h
-	patches/RoF.h
-	patches/RoF_constants.h
-	patches/RoF_itemfields.h
-	patches/RoF_ops.h
-	patches/RoF_structs.h
-	patches/Titanium.h
-	patches/Titanium_constants.h
-	patches/Titanium_itemfields.h
-	patches/Titanium_ops.h
-	patches/Titanium_structs.h
-	patches/Underfoot.h
-	patches/Underfoot_constants.h
-	patches/Underfoot_itemfields.h
-	patches/Underfoot_ops.h
-	patches/Underfoot_structs.h
+	patches/sod.h
+	patches/sod_constants.h
+	patches/sod_itemfields.h
+	patches/sod_ops.h
+	patches/sod_structs.h
+	patches/sof.h
+	patches/sof_constants.h
+	patches/sof_itemfields.h
+	patches/sof_opcode_list.h
+	patches/sof_ops.h
+	patches/sof_structs.h
+	patches/ss_declare.h
+	patches/ss_define.h
+	patches/ss_register.h
+	patches/rof.h
+	patches/rof_constants.h
+	patches/rof_itemfields.h
+	patches/rof_ops.h
+	patches/rof_structs.h
+	patches/titanium.h
+	patches/titanium_constants.h
+	patches/titanium_itemfields.h
+	patches/titanium_ops.h
+	patches/titanium_structs.h
+	patches/underfoot.h
+	patches/underfoot_constants.h
+	patches/underfoot_itemfields.h
+	patches/underfoot_ops.h
+	patches/underfoot_structs.h
 	SocketLib/Base64.h
 	SocketLib/File.h
 	SocketLib/HttpdCookies.h
@@ -243,54 +243,48 @@ SET(common_headers
 )
 
 SOURCE_GROUP(Patches FILES
-	patches/Client62.h
-	patches/Client62_itemfields.h
-	patches/Client62_ops.h
-	patches/Client62_constants.h
-	patches/Client62_structs.h
+	patches/client62.h
+	patches/client62_itemfields.h
+	patches/client62_ops.h
+	patches/client62_constants.h
+	patches/client62_structs.h
 	patches/patches.h
-	patches/SoD.h
-	patches/SoD_itemfields.h
-	patches/SoD_ops.h
-	patches/SoD_constants.h
-	patches/SoD_structs.h
-	patches/SoF.h
-	patches/SoF_itemfields.h
-	patches/SoF_opcode_list.h
-	patches/SoF_ops.h
-	patches/SoF_constants.h
-	patches/SoF_structs.h
-	patches/SSDeclare.h
-	patches/SSDefine.h
-	patches/SSRegister.h
-	patches/RoF.h
-	patches/RoF_itemfields.h
-	patches/RoF_ops.h
-	patches/RoF_constants.h
-	patches/RoF_structs.h
-	#patches/RoF2.h
-	#patches/RoF2_itemfields.h
-	#patches/RoF2_ops.h
-	#patches/RoF2_constants.h
-	#patches/RoF2_structs.h
-	patches/Titanium.h
-	patches/Titanium_itemfields.h
-	patches/Titanium_ops.h
-	patches/Titanium_constants.h
-	patches/Titanium_structs.h
-	patches/Underfoot.h
-	patches/Underfoot_itemfields.h
-	patches/Underfoot_ops.h
-	patches/Underfoot_constants.h
-	patches/Underfoot_structs.h
-	patches/Client62.cpp
+	patches/sod.h
+	patches/sod_itemfields.h
+	patches/sod_ops.h
+	patches/sod_constants.h
+	patches/sod_structs.h
+	patches/sof.h
+	patches/sof_itemfields.h
+	patches/sof_opcode_list.h
+	patches/sof_ops.h
+	patches/sof_constants.h
+	patches/sof_structs.h
+	patches/ss_declare.h
+	patches/ss_define.h
+	patches/ss_register.h
+	patches/rof.h
+	patches/rof_itemfields.h
+	patches/rof_ops.h
+	patches/rof_constants.h
+	patches/rof_structs.h
+	patches/titanium.h
+	patches/titanium_itemfields.h
+	patches/titanium_ops.h
+	patches/titanium_constants.h
+	patches/titanium_structs.h
+	patches/underfoot.h
+	patches/underfoot_itemfields.h
+	patches/underfoot_ops.h
+	patches/underfoot_constants.h
+	patches/underfoot_structs.h
+	patches/client62.cpp
 	patches/patches.cpp
-	patches/SoD.cpp
-	patches/SoF.cpp
-	patches/RoF.cpp
-	#patches/RoF2.cpp
-	patches/Titanium.cpp
-	patches/Underfoot.cpp
+	patches/sod.cpp
+	patches/sof.cpp
+	patches/rof.cpp
+	patches/titanium.cpp
+	patches/underfoot.cpp
 )
 
 SOURCE_GROUP(SocketLib FILES
@@ -339,8 +333,7 @@ ADD_LIBRARY(common ${common_sources} ${common_headers})
 
 IF(UNIX)
 	ADD_DEFINITIONS(-fPIC)
-	#TODO: Add "patches/RoF2.cpp" when it becomes active
-	SET_SOURCE_FILES_PROPERTIES("patches/SoD.cpp" "patches/SoF.cpp" "patches/RoF.cpp" "patches/Underfoot.cpp" PROPERTIES COMPILE_FLAGS -O0)
+	SET_SOURCE_FILES_PROPERTIES("patches/sod.cpp" "patches/sof.cpp" "patches/rof.cpp" "patches/underfoot.cpp" PROPERTIES COMPILE_FLAGS -O0)
 ENDIF(UNIX)
 
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)

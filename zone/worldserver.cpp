@@ -36,7 +36,7 @@
 #include "worldserver.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/packet_dump.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 #include "zonedb.h"
 #include "zone.h"
 #include "entity.h"

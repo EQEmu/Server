@@ -1,16 +1,16 @@
 
 #include "../debug.h"
-#include "Titanium.h"
+#include "titanium.h"
 #include "../opcodemgr.h"
 #include "../logsys.h"
-#include "../EQStreamIdent.h"
+#include "../eq_stream_ident.h"
 #include "../crc32.h"
 #include "../races.h"
 
 #include "../eq_packet_structs.h"
-#include "../StringUtil.h"
-#include "../Item.h"
-#include "Titanium_structs.h"
+#include "../string_util.h"
+#include "../item.h"
+#include "titanium_structs.h"
 #include <sstream>
 
 namespace Titanium {
@@ -86,8 +86,8 @@ Strategy::Strategy()
 : StructStrategy()
 {
 	//all opcodes default to passthrough.
-	#include "SSRegister.h"
-	#include "Titanium_ops.h"
+	#include "ss_register.h"
+	#include "titanium_ops.h"
 }
 
 std::string Strategy::Describe() const {
@@ -102,7 +102,7 @@ const EQClientVersion Strategy::ClientVersion() const
 	return EQClientTitanium;
 }
 
-#include "SSDefine.h"
+#include "ss_define.h"
 
 
 /*
@@ -1460,7 +1460,7 @@ char *SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 d
 #define C(field) "|%s"
 #define S(field) "|%s"
 #define F(field) "|%f"
-#include "Titanium_itemfields.h"
+#include "titanium_itemfields.h"
 		"%.*s\""	// Quotes (and protection, if needed) around static data
 		"|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s"	// Sub items
 		"%.*s%s"	// For trailing quotes (and protection) if a subitem;
@@ -1472,7 +1472,7 @@ char *SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 d
 #define C(field) ,field
 #define S(field) ,item->field
 #define F(field) ,item->field
-#include "Titanium_itemfields.h"
+#include "titanium_itemfields.h"
 		,depth,protection
 		,sub_items[0] ? sub_items[0] : ""
 		,sub_items[1] ? sub_items[1] : ""

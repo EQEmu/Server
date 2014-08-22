@@ -20,8 +20,8 @@
 #include "entity.h"
 #include "masterentity.h"
 #include "../common/spdat.h"
-#include "../common/MiscFunctions.h"
-#include "../common/StringUtil.h"
+#include "../common/misc_functions.h"
+#include "../common/string_util.h"
 
 /*
 

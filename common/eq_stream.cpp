@@ -17,8 +17,8 @@
 */
 
 #include "debug.h"
-#include "EQPacket.h"
-#include "EQStream.h"
+#include "eq_packet.h"
+#include "eq_stream.h"
 #include "misc.h"
 #include "Mutex.h"
 #include "op_codes.h"

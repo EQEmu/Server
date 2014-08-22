@@ -1,6 +1,6 @@
 #include "debug.h"
-#include "EQStreamIdent.h"
-#include "EQStreamProxy.h"
+#include "eq_stream_ident.h"
+#include "eq_stream_proxy.h"
 #include "logsys.h"
 
 EQStreamIdentifier::~EQStreamIdentifier() {

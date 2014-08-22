@@ -19,7 +19,7 @@
 #include "ErrorLog.h"
 #include "LoginServer.h"
 #include "LoginStructures.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 
 extern ErrorLog *server_log;
 extern LoginServer server;

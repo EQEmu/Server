@@ -1,19 +1,19 @@
 #include "../common/debug.h"
-#include "../common/EQPacket.h"
-#include "../common/EQStreamIntf.h"
+#include "../common/eq_packet.h"
+#include "../common/eq_stream_intf.h"
 #include "../common/misc.h"
 #include "../common/rulesys.h"
 #include "../common/emu_opcodes.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/packet_dump.h"
-#include "../common/EQStreamIntf.h"
-#include "../common/Item.h"
+#include "../common/eq_stream_intf.h"
+#include "../common/item.h"
 #include "../common/races.h"
 #include "../common/classes.h"
 #include "../common/languages.h"
 #include "../common/skills.h"
 #include "../common/extprofile.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "../common/clientversions.h"
 
 #include "client.h"
@@ -25,7 +25,7 @@
 #include "zonelist.h"
 #include "clientlist.h"
 #include "wguild_mgr.h"
-#include "SoFCharCreateData.h"
+#include "sofCharCreateData.h"
 
 #include <iostream>
 #include <iomanip>

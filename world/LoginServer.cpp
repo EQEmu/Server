@@ -56,7 +56,7 @@
 #include "LoginServerList.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/packet_dump.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "zoneserver.h"
 #include "worlddb.h"
 #include "zonelist.h"

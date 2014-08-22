@@ -18,7 +18,7 @@
 #ifndef __EQEmuConfig_H
 #define __EQEmuConfig_H
 
-#include "XMLParser.h"
+#include "xml_parser.h"
 #include "linked_list.h"
 
 struct LoginConfig {

@@ -23,7 +23,7 @@
 #include "zonedb.h"
 #include "client.h"
 #include "../common/Mutex.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 
 class Petition
 {

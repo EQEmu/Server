@@ -1,7 +1,7 @@
 #if !defined(_L__EQDATAB__H)
 #define _L__EQDATAB__H
 
-#include "MiscFunctions.h"
+#include "misc_functions.h"
 
 #ifdef WIN32
 #include <windows.h>

@@ -10,7 +10,7 @@
 #include <limits.h>
 #include "dbcore.h"
 #include <string.h>
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 #include <cstdlib>
 
 #ifdef _WINDOWS

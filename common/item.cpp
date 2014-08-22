@@ -17,8 +17,8 @@
 */
 
 #include "debug.h"
-#include "StringUtil.h"
-#include "Item.h"
+#include "string_util.h"
+#include "item.h"
 #include "database.h"
 #include "misc.h"
 #include "races.h"

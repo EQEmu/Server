@@ -1,16 +1,16 @@
 
 #include "../debug.h"
-#include "SoD.h"
+#include "sod.h"
 #include "../opcodemgr.h"
 #include "../logsys.h"
-#include "../EQStreamIdent.h"
+#include "../eq_stream_ident.h"
 #include "../crc32.h"
 
 #include "../eq_packet_structs.h"
-#include "../MiscFunctions.h"
-#include "../StringUtil.h"
-#include "../Item.h"
-#include "SoD_structs.h"
+#include "../misc_functions.h"
+#include "../string_util.h"
+#include "../item.h"
+#include "sod_structs.h"
 #include "../rulesys.h"
 
 #include <iostream>
@@ -89,8 +89,8 @@ Strategy::Strategy()
 : StructStrategy()
 {
 	//all opcodes default to passthrough.
-	#include "SSRegister.h"
-	#include "SoD_ops.h"
+	#include "ss_register.h"
+	#include "sod_ops.h"
 }
 
 std::string Strategy::Describe() const {
@@ -105,7 +105,7 @@ const EQClientVersion Strategy::ClientVersion() const
 	return EQClientSoD;
 }
 
-#include "SSDefine.h"
+#include "ss_define.h"
 
 
 // Converts Server Slot IDs to SoD Slot IDs for use in Encodes

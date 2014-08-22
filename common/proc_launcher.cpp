@@ -20,7 +20,7 @@
 #include <vector>
 
 #include "debug.h"
-#include "ProcLauncher.h"
+#include "proc_launcher.h"
 #ifdef _WINDOWS
 	#include <windows.h>
 #else

@@ -1,16 +1,16 @@
 
 #include "../debug.h"
-#include "Underfoot.h"
+#include "underfoot.h"
 #include "../opcodemgr.h"
 #include "../logsys.h"
-#include "../EQStreamIdent.h"
+#include "../eq_stream_ident.h"
 #include "../crc32.h"
 
 #include "../eq_packet_structs.h"
-#include "../MiscFunctions.h"
-#include "../StringUtil.h"
-#include "../Item.h"
-#include "Underfoot_structs.h"
+#include "../misc_functions.h"
+#include "../string_util.h"
+#include "../item.h"
+#include "underfoot_structs.h"
 #include "../rulesys.h"
 
 #include <iostream>
@@ -90,8 +90,8 @@ Strategy::Strategy()
 : StructStrategy()
 {
 	//all opcodes default to passthrough.
-	#include "SSRegister.h"
-	#include "Underfoot_ops.h"
+	#include "ss_register.h"
+	#include "underfoot_ops.h"
 }
 
 std::string Strategy::Describe() const {
@@ -106,7 +106,7 @@ const EQClientVersion Strategy::ClientVersion() const
 	return EQClientUnderfoot;
 }
 
-#include "SSDefine.h"
+#include "ss_define.h"
 
 
 // Converts Server Slot IDs to Underfoot Slot IDs for use in Encodes

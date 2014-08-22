@@ -1,8 +1,8 @@
 
 #include "debug.h"
-#include "StructStrategy.h"
+#include "struct_strategy.h"
 #include "logsys.h"
-#include "EQStream.h"
+#include "eq_stream.h"
 #include <map>
 
 

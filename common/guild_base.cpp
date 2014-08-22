@@ -20,8 +20,8 @@
 #include "guild_base.h"
 #include "database.h"
 #include "logsys.h"
-//#include "MiscFunctions.h"
-#include "StringUtil.h"
+//#include "misc_functions.h"
+#include "string_util.h"
 #include <cstdlib>
 #include <cstring>
 

@@ -1,8 +1,8 @@
 #ifndef TCPBASICSERVER_H_
 #define TCPBASICSERVER_H_
 
-#include "TCPServer.h"
-#include "TCPConnection.h"
+#include "tcp_server.h"
+#include "tcp_connection.h"
 
 class TCPBasicServer : public TCPServer<TCPConnection> {
 public:

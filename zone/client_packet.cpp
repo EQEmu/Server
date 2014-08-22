@@ -45,7 +45,7 @@
 #include "worldserver.h"
 #include "../common/rdtsc.h"
 #include "../common/packet_dump_file.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "../common/breakdowns.h"
 #include "../common/guilds.h"
 #include "../common/rulesys.h"
@@ -67,7 +67,7 @@
 #include "pathing.h"
 #include "water_map.h"
 #include "merc.h"
-#include "../common/ZoneNumbers.h"
+#include "../common/zone_numbers.h"
 #include "QuestParserCollection.h"
 
 extern Zone* zone;

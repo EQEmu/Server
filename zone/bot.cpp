@@ -4,7 +4,7 @@
 #include "object.h"
 #include "doors.h"
 #include "QuestParserCollection.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 
 extern volatile bool ZoneLoaded;
 

@@ -1,5 +1,5 @@
 #include "../common/debug.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 #include "map.h"
 #include "RaycastMesh.h"
 #include "zone.h"

@@ -22,7 +22,7 @@
 #include "npc.h"
 #include "masterentity.h"
 #include "zonedb.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 #ifdef _WINDOWS
 #define snprintf	_snprintf
 #endif

@@ -18,13 +18,13 @@
 */
 
 #include "../common/debug.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 
 #include "clientlist.h"
 #include "database.h"
 #include "chatchannel.h"
 
-#include "../common/EQStreamFactory.h"
+#include "../common/eq_stream_factory.h"
 #include "../common/emu_tcp_connection.h"
 #include "../common/emu_tcp_server.h"
 #include <list>

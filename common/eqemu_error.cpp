@@ -18,10 +18,10 @@
 #ifdef _WINDOWS
 #include <windows.h>
 #endif
-#include "EQEMuError.h"
+#include "eqemu_error.h"
 #include "linked_list.h"
 #include "Mutex.h"
-#include "MiscFunctions.h"
+#include "misc_functions.h"
 #include <stdio.h>
 #include <string.h>
 #ifdef _WINDOWS

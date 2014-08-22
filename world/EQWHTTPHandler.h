@@ -18,8 +18,8 @@
 #ifndef EQWHTTPHandler_H
 #define EQWHTTPHandler_H
 
-#include "../common/TCPServer.h"
-#include "../common/TCPConnection.h"
+#include "../common/tcp_server.h"
+#include "../common/tcp_connection.h"
 #include "../common/SocketLib/HttpdSocket.h"
 #include "../common/SocketLib/Mime.h"
 #include "../common/types.h"

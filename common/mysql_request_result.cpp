@@ -1,4 +1,4 @@
-#include "MySQLRequestResult.h"
+#include "mysql_request_result.h"
 
 
 MySQLRequestResult::MySQLRequestResult()

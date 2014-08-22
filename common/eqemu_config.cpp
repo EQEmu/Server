@@ -17,7 +17,7 @@
 */
 #include "../common/debug.h"
 #include "eqemu_config.h"
-#include "MiscFunctions.h"
+#include "misc_functions.h"
 #include <iostream>
 #include <sstream>
 

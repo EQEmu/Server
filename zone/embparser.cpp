@@ -20,8 +20,8 @@
 
 #include "../common/debug.h"
 #include "../common/seperator.h"
-#include "../common/MiscFunctions.h"
-#include "../common/StringUtil.h"
+#include "../common/misc_functions.h"
+#include "../common/string_util.h"
 #include "../common/features.h"
 #include "masterentity.h"
 #include "embparser.h"

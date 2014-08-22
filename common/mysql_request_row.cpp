@@ -1,4 +1,4 @@
-#include "MySQLRequestRow.h"
+#include "mysql_request_row.h"
 
 MySQLRequestRow::MySQLRequestRow(const MySQLRequestRow& row)
 	: m_Result(row.m_Result), m_MySQLRow(row.m_MySQLRow)

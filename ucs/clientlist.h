@@ -21,8 +21,8 @@
 #define CHATSERVER_CLIENTLIST_H
 
 #include "../common/opcodemgr.h"
-#include "../common/EQStreamType.h"
-#include "../common/EQStreamFactory.h"
+#include "../common/eq_stream_type.h"
+#include "../common/eq_stream_factory.h"
 #include "../common/rulesys.h"
 #include "chatchannel.h"
 #include <list>

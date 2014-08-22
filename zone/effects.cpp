@@ -24,7 +24,7 @@
 #include "../common/packet_functions.h"
 #include "petitions.h"
 #include "../common/serverinfo.h"
-#include "../common/ZoneNumbers.h"
+#include "../common/zone_numbers.h"
 #include "../common/moremath.h"
 #include "../common/guilds.h"
 #include "StringIDs.h"

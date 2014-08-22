@@ -10,7 +10,7 @@
 
 #include "masterentity.h"
 #include "../common/seperator.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
 #include "lua_entity.h"

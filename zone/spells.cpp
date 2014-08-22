@@ -71,13 +71,13 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "masterentity.h"
 #include "../common/packet_dump.h"
 #include "../common/moremath.h"
-#include "../common/Item.h"
+#include "../common/item.h"
 #include "worldserver.h"
 #include "../common/skills.h"
 #include "../common/bodytypes.h"
 #include "../common/classes.h"
 #include "../common/rulesys.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include <math.h>
 #include <assert.h>
 

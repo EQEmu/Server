@@ -53,7 +53,7 @@ SET(world_headers
 	LoginServerList.h
 	net.h
 	queryserv.h
-	SoFCharCreateData.h
+	sofCharCreateData.h
 	ucs.h
 	wguild_mgr.h
 	WorldConfig.h

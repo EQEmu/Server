@@ -14,7 +14,7 @@
 #include "../common/queue.h"
 #include "../common/timer.h"
 #include "../common/condition.h"
-#include "../common/MySQLRequestResult.h"
+#include "../common/mysql_request_result.h"
 
 class DBcore {
 public:

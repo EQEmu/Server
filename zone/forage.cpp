@@ -31,8 +31,8 @@
 #include "water_map.h"
 #include "titles.h"
 #include "StringIDs.h"
-#include "../common/MiscFunctions.h"
-#include "../common/StringUtil.h"
+#include "../common/misc_functions.h"
+#include "../common/string_util.h"
 #include "../common/rulesys.h"
 
 #include "zonedb.h"

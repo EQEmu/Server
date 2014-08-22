@@ -1,7 +1,7 @@
 #ifndef EmuTCPSERVER_H_
 #define EmuTCPSERVER_H_
 
-#include "TCPServer.h"
+#include "tcp_server.h"
 
 class EmuTCPConnection;
 struct EmuTCPNetPacket_Struct;

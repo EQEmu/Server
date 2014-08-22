@@ -21,7 +21,7 @@
 #include "StringIDs.h"
 #include "worldserver.h"
 #include "QuestParserCollection.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 
 #include <sstream>
 #include <math.h>

@@ -21,7 +21,7 @@
 
 #include "cppunit/cpptest.h"
 #include "../common/fixed_memory_hash_set.h"
-#include "../common/Item.h"
+#include "../common/item.h"
 
 class FixedMemoryHashTest : public Test::Suite {
 	typedef void(FixedMemoryHashTest::*TestFunction)(void);

@@ -18,9 +18,9 @@
 
 #include "../common/debug.h"
 #include "masterentity.h"
-#include "../common/Item.h"
+#include "../common/item.h"
 #include "../common/linked_list.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include <math.h>
 #include <assert.h>
 #include "worldserver.h"

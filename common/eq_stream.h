@@ -9,9 +9,9 @@
 #ifndef WIN32
 #include <netinet/in.h>
 #endif
-#include "EQStreamType.h"
-#include "EQPacket.h"
-#include "EQStreamIntf.h"
+#include "eq_stream_type.h"
+#include "eq_packet.h"
+#include "eq_stream_intf.h"
 #include "Mutex.h"
 #include "../common/opcodemgr.h"
 #include "../common/misc.h"

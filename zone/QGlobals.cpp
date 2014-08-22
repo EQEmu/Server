@@ -1,5 +1,5 @@
 #include "../common/debug.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "QGlobals.h"
 #include "masterentity.h"
 #include "zone.h"

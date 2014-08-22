@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <iomanip>
 
-#include "TCPConnection.h"
+#include "tcp_connection.h"
 #include "../common/servertalk.h"
 #include "../common/timer.h"
 #include "../common/packet_dump.h"

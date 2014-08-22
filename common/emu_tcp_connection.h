@@ -1,7 +1,7 @@
 #ifndef EmuTCPCONNECTION_H_
 #define EmuTCPCONNECTION_H_
 
-#include "TCPConnection.h"
+#include "tcp_connection.h"
 #include "timer.h"
 
 //moved out of TCPConnection:: to be more exportable

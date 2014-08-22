@@ -24,7 +24,7 @@
 
 #include "masterentity.h"
 #include "StringIDs.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 #include "../common/rulesys.h"
 
 

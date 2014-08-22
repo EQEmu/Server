@@ -1,8 +1,8 @@
 
 #include "debug.h"
-#include "EQStreamProxy.h"
-#include "EQStream.h"
-#include "StructStrategy.h"
+#include "eq_stream_proxy.h"
+#include "eq_stream.h"
+#include "struct_strategy.h"
 
 
 EQStreamProxy::EQStreamProxy(EQStream *&stream, const StructStrategy *structs, OpcodeManager **opcodes)

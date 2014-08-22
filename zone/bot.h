@@ -11,7 +11,7 @@
 #include "corpse.h"
 #include "zonedb.h"
 #include "StringIDs.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 #include "../common/debug.h"
 #include "guild_mgr.h"
 #include "worldserver.h"

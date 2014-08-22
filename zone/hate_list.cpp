@@ -23,7 +23,7 @@
 #include <list>
 #include "masterentity.h"
 #include "../common/rulesys.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 #include "hate_list.h"
 #include "QuestParserCollection.h"
 #include "zone.h"

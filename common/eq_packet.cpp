@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <iomanip>
-#include "EQPacket.h"
+#include "eq_packet.h"
 #include "misc.h"
 #include "op_codes.h"
 #include "crc16.h"

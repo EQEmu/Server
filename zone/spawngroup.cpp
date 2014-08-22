@@ -23,8 +23,8 @@
 #include <iostream>
 #include "../common/types.h"
 #include "zonedb.h"
-#include "../common/MiscFunctions.h"
-#include "../common/StringUtil.h"
+#include "../common/misc_functions.h"
+#include "../common/string_util.h"
 
 extern EntityList entity_list;
 

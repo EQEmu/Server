@@ -20,7 +20,7 @@
 #include "NpcAI.h"
 #include "../common/packet_functions.h"
 #include "../common/packet_dump.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "worldserver.h"
 extern EntityList entity_list;
 extern WorldServer worldserver;
