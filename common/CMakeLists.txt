@@ -93,14 +93,14 @@ SET(common_sources
 )
 
 SET(common_headers
-	BasePacket.h
+	base_packet.h
 	base_data.h
 	bodytypes.h
 	breakdowns.h
 	classes.h
-	Condition.h
+	condition.h
 	crash.h
-	CRC16.h
+	crc16.h
 	crc32.h
 	database.h
 	dbasync.h
@@ -109,16 +109,16 @@ SET(common_headers
 	deity.h
 	emu_opcodes.h
 	emu_oplist.h
-	EmuTCPConnection.h
-	EmuTCPServer.h
+	emu_tcp_connection.h
+	emu_tcp_server.h
 	eq_constants.h
 	eq_dictionary.h
 	eq_packet_structs.h
-	EQDB.h
-	EQDBRes.h
+	eqdb.h
+	eqdb_res.h
 	eqemu_exception.h
-	EQEmuConfig.h
-	EQEmuConfig_elements.h
+	eqemu_config.h
+	eqemu_config_elements.h
 	EQEMuError.h
 	EQPacket.h
 	EQStream.h
@@ -215,11 +215,6 @@ SET(common_headers
 	patches/RoF_itemfields.h
 	patches/RoF_ops.h
 	patches/RoF_structs.h
-	#patches/RoF2.h
-	#patches/RoF2_constants.h
-	#patches/RoF2_itemfields.h
-	#patches/RoF2_ops.h
-	#patches/RoF2_structs.h
 	patches/Titanium.h
 	patches/Titanium_constants.h
 	patches/Titanium_itemfields.h

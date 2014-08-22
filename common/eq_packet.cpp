@@ -22,7 +22,7 @@
 #include "EQPacket.h"
 #include "misc.h"
 #include "op_codes.h"
-#include "CRC16.h"
+#include "crc16.h"
 #include "platform.h"
 #ifndef STATIC_OPCODE
 #include "opcodemgr.h"

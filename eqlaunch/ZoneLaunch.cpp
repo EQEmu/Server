@@ -20,7 +20,7 @@
 
 #include "ZoneLaunch.h"
 #include "worldserver.h"
-#include "../common/EQEmuConfig.h"
+#include "../common/eqemu_config.h"
 
 //static const uint32 ZONE_RESTART_DELAY = 10000;
 //static const uint32 ZONE_TERMINATE_WAIT = 10000;

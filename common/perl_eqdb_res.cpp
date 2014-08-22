@@ -30,7 +30,7 @@ typedef const char Const_char;
 #ifdef EMBPERL
 #include "../common/debug.h"
 #include "../common/useperl.h"
-#include "EQDBRes.h"
+#include "eqdb_res.h"
 
 
 XS(XS_EQDBRes_num_rows); /* prototype to pass -Wmissing-prototypes */

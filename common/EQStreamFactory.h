@@ -5,7 +5,7 @@
 #include <queue>
 #include <map>
 #include "../common/EQStream.h"
-#include "../common/Condition.h"
+#include "../common/condition.h"
 #include "../common/timeoutmgr.h"
 #include "../common/opcodemgr.h"
 #include "../common/timer.h"

@@ -13,7 +13,7 @@
 #include "../common/linked_list.h"
 #include "../common/queue.h"
 #include "../common/timer.h"
-#include "../common/Condition.h"
+#include "../common/condition.h"
 #include "../common/MySQLRequestResult.h"
 
 class DBcore {

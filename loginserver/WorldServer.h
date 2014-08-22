@@ -20,8 +20,8 @@
 
 #include "../common/debug.h"
 #include "../common/EQStreamFactory.h"
-#include "../common/EmuTCPConnection.h"
-#include "../common/EmuTCPServer.h"
+#include "../common/emu_tcp_connection.h"
+#include "../common/emu_tcp_server.h"
 #include "../common/servertalk.h"
 #include "../common/packet_dump.h"
 #include <string>

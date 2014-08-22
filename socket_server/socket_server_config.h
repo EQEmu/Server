@@ -20,7 +20,7 @@
 #ifndef __socket_server_config_H
 #define __socket_server_config_H
 
-#include "../common/EQEmuConfig.h"
+#include "../common/eqemu_config.h"
 
 class socket_server_config : public EQEmuConfig {
 public:

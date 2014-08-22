@@ -23,7 +23,7 @@
 #include "../common/debug.h"
 #include "EQWParser.h"
 #include "EQW.h"
-#include "../common/EQDB.h"
+#include "../common/eqdb.h"
 #include "../common/logsys.h"
 #include "worlddb.h"
 

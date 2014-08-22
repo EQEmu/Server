@@ -30,8 +30,8 @@ tremendously.
 #include <stdio.h>
 #include <iomanip>
 
-#include "EmuTCPConnection.h"
-#include "EmuTCPServer.h"
+#include "emu_tcp_connection.h"
+#include "emu_tcp_server.h"
 #include "../common/servertalk.h"
 #include "../common/packet_dump.h"
 

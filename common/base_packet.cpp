@@ -16,7 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "debug.h"
-#include "BasePacket.h"
+#include "base_packet.h"
 #include "misc.h"
 #include "packet_dump.h"
 

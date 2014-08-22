@@ -16,7 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "debug.h"
-#include "EQDBRes.h"
+#include "eqdb_res.h"
 #include <mysql.h>
 
 std::vector<std::string> EQDBRes::fetch_row_array() {

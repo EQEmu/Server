@@ -38,7 +38,7 @@ enum {
 #include "../common/linked_list.h"
 #include "../common/timer.h"
 #include "../common/queue.h"
-#include "../common/EmuTCPConnection.h"
+#include "../common/emu_tcp_connection.h"
 #include "WorldTCPConnection.h"
 #include "../common/Mutex.h"
 

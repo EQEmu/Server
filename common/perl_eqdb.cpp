@@ -30,7 +30,7 @@ typedef const char Const_char;
 #ifdef EMBPERL
 #include "../common/debug.h"
 #include "../common/useperl.h"
-#include "EQDB.h"
+#include "eqdb.h"
 
 #ifdef THIS /* this macro seems to leak out on some systems */
 #undef THIS

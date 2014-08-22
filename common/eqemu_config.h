@@ -112,14 +112,14 @@ protected:
 
 #define ELEMENT(name) \
 	void do_##name(TiXmlElement *ele);
-	#include "EQEmuConfig_elements.h"
+	#include "eqemu_config_elements.h"
 
 
 	EQEmuConfig() {
 		// import the needed handler prototypes
 #define ELEMENT(name) \
 		Handlers[#name]=(ElementHandler)&EQEmuConfig::do_##name;
-	#include "EQEmuConfig_elements.h"
+	#include "eqemu_config_elements.h"
 
 		// Set sane defaults
 

@@ -19,7 +19,7 @@
 #include "worldserver.h"
 #include "../common/servertalk.h"
 #include "ZoneLaunch.h"
-#include "../common/EQEmuConfig.h"
+#include "../common/eqemu_config.h"
 #include "../common/StringUtil.h"
 
 

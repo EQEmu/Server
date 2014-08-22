@@ -18,7 +18,7 @@
 #include "../common/debug.h"
 #include "HTTPRequest.h"
 #include "EQWHTTPHandler.h"
-#include "../common/EQDB.h"
+#include "../common/eqdb.h"
 #include "../common/SocketLib/HttpdForm.h"
 #include <cstdlib>
 

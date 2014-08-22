@@ -7,7 +7,7 @@
 #include "../common/queue.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/Mutex.h"
-#include "../common/EmuTCPConnection.h"
+#include "../common/emu_tcp_connection.h"
 
 #ifdef _WINDOWS
 	void AutoInitLoginServer(void *tmp);

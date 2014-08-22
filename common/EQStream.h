@@ -15,7 +15,7 @@
 #include "Mutex.h"
 #include "../common/opcodemgr.h"
 #include "../common/misc.h"
-#include "../common/Condition.h"
+#include "../common/condition.h"
 #include "../common/timer.h"
 
 #define FLAG_COMPRESSED	0x01

@@ -18,7 +18,7 @@
 
 #include "../../common/debug.h"
 #include "../../common/shareddb.h"
-#include "../../common/EQEmuConfig.h"
+#include "../../common/eqemu_config.h"
 #include "../../common/platform.h"
 #include "../../common/crash.h"
 #include "../../common/rulesys.h"

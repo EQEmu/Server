@@ -25,8 +25,8 @@
 #include "chatchannel.h"
 
 #include "../common/EQStreamFactory.h"
-#include "../common/EmuTCPConnection.h"
-#include "../common/EmuTCPServer.h"
+#include "../common/emu_tcp_connection.h"
+#include "../common/emu_tcp_server.h"
 #include <list>
 #include <vector>
 #include <string>

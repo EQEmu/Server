@@ -1,6 +1,6 @@
 #include "debug.h"
-#include "EmuTCPServer.h"
-#include "EmuTCPConnection.h"
+#include "emu_tcp_server.h"
+#include "emu_tcp_connection.h"
 
 EmuTCPServer::EmuTCPServer(uint16 iPort, bool iOldFormat)
 :	TCPServer<EmuTCPConnection>(iPort),

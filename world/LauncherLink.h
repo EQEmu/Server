@@ -18,7 +18,7 @@
 #ifndef LAUNCHERLINK_H_
 #define LAUNCHERLINK_H_
 
-#include "../common/EmuTCPConnection.h"
+#include "../common/emu_tcp_connection.h"
 #include "../common/timer.h"
 #include <string>
 #include <vector>

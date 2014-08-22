@@ -22,7 +22,7 @@
 #include <vector>
 #include <map>
 #include "types.h"
-#include "EQDBRes.h"
+#include "eqdb_res.h"
 #include <mysql.h>
 
 //this is the main object exported to perl.

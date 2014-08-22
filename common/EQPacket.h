@@ -18,7 +18,7 @@
 #ifndef _EQPACKET_H
 #define _EQPACKET_H
 
-#include "BasePacket.h"
+#include "base_packet.h"
 #include "EQStreamType.h"
 #include "op_codes.h"
 #include "platform.h"

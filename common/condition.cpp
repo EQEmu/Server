@@ -17,7 +17,7 @@
 */
 
 #include "debug.h"
-#include "Condition.h"
+#include "condition.h"
 
 #ifdef _WINDOWS
 

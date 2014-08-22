@@ -18,7 +18,7 @@
 #ifndef __WorldConfig_H
 #define __WorldConfig_H
 
-#include "../common/EQEmuConfig.h"
+#include "../common/eqemu_config.h"
 
 class WorldConfig : public EQEmuConfig {
 public:
