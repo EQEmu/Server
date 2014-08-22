@@ -1473,7 +1473,7 @@ bool ZoneDatabase::LoadAAEffects2() {
 		return false;
 	}
 
-	if (results.RowCount()) { //no results
+	if (!results.RowCount()) { //no results
         LogFile->write(EQEMuLog::Error, "Error loading AA Effects, none found in the database.");
         return false;
 	}
