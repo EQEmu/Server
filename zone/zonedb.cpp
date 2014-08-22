@@ -348,37 +348,40 @@ void ZoneDatabase::UpdateBug(PetitionBug_Struct* bug){
 }
 
 
-bool ZoneDatabase::GetAccountInfoForLogin_result(MYSQL_RES* result, int16* admin, char* account_name, uint32* lsaccountid, uint8* gmspeed, bool* revoked,bool* gmhideme, uint32* account_creation) {
-	MYSQL_ROW row;
-	if (mysql_num_rows(result) == 1) {
-		row = mysql_fetch_row(result);
-		if (admin)
-			*admin = atoi(row[0]);
-		if (account_name)
-			strcpy(account_name, row[1]);
-		if (lsaccountid) {
+bool ZoneDatabase::GetAccountInfoForLogin_result(MySQLRequestResult results, int16* admin, char* account_name, uint32* lsaccountid, uint8* gmspeed, bool* revoked,bool* gmhideme, uint32* account_creation) {
 
-			if (row[2])
-				*lsaccountid = atoi(row[2]);
-			else
-				*lsaccountid = 0;
+	if (results.RowCount() != 1)
+        return false;
 
+    auto row = results.begin();
 
-		}
-		if (gmspeed)
-			*gmspeed = atoi(row[3]);
-		if (revoked)
-			*revoked = atoi(row[4]);
-		if(gmhideme)
-			*gmhideme = atoi(row[5]);
-		if(account_creation)
-			*account_creation = atoul(row[6]);
+    if (admin)
+        *admin = atoi(row[0]);
 
-		return true;
-	}
-	else {
-		return false;
-	}
+    if (account_name)
+        strcpy(account_name, row[1]);
+
+    if (lsaccountid) {
+        if (row[2])
+            *lsaccountid = atoi(row[2]);
+        else
+            *lsaccountid = 0;
+    }
+
+    if (gmspeed)
+        *gmspeed = atoi(row[3]);
+
+    if (revoked)
+        *revoked = atoi(row[4]);
+
+    if(gmhideme)
+        *gmhideme = atoi(row[5]);
+
+    if(account_creation)
+        *account_creation = atoul(row[6]);
+
+    return true;
+
 }
 
 
