@@ -69,7 +69,7 @@
 
 #include "logsys.h"
 
-#include "../common/Mutex.h"
+#include "../common/mutex.h"
 #include <stdio.h>
 #include <stdarg.h>
 

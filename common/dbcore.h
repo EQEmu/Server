@@ -9,7 +9,7 @@
 #include <mysql.h>
 #include <string.h>
 #include "../common/types.h"
-#include "../common/Mutex.h"
+#include "../common/mutex.h"
 #include "../common/linked_list.h"
 #include "../common/queue.h"
 #include "../common/timer.h"

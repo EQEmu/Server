@@ -23,7 +23,7 @@
 #include "../common/timer.h"
 #include "../common/queue.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/Mutex.h"
+#include "../common/mutex.h"
 #include "../common/emu_tcp_connection.h"
 
 class LoginServer{

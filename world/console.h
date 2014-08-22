@@ -40,7 +40,7 @@ enum {
 #include "../common/queue.h"
 #include "../common/emu_tcp_connection.h"
 #include "WorldTCPConnection.h"
-#include "../common/Mutex.h"
+#include "../common/mutex.h"
 
 struct ServerChannelMessage_Struct;
 

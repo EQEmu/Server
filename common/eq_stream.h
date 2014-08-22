@@ -12,7 +12,7 @@
 #include "eq_stream_type.h"
 #include "eq_packet.h"
 #include "eq_stream_intf.h"
-#include "Mutex.h"
+#include "mutex.h"
 #include "../common/opcodemgr.h"
 #include "../common/misc.h"
 #include "../common/condition.h"

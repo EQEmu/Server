@@ -152,7 +152,7 @@ SET(common_headers
 	misc.h
 	misc_functions.h
 	moremath.h
-	Mutex.h
+	mutex.h
 	mysql_request_result.h
 	mysql_request_row.h
 	op_codes.h

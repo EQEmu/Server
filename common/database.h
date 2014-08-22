@@ -29,7 +29,7 @@
 /*#include "eq_stream.h"
 #include "guilds.h"
 #include "misc_functions.h"
-#include "Mutex.h"
+#include "mutex.h"
 #include "item.h"
 #include "extprofile.h"*/
 #include <string>

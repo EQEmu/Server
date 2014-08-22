@@ -23,7 +23,7 @@
 #include <time.h>
 #include <string>
 
-#include "../common/Mutex.h"
+#include "../common/mutex.h"
 
 /**
  * Dictates the log type specified in ErrorLog for Log(...)

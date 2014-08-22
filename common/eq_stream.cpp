@@ -20,7 +20,7 @@
 #include "eq_packet.h"
 #include "eq_stream.h"
 #include "misc.h"
-#include "Mutex.h"
+#include "mutex.h"
 #include "op_codes.h"
 #include "crc16.h"
 #include "platform.h"

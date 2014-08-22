@@ -44,7 +44,7 @@
 #endif
 
 #include "types.h"
-#include "Mutex.h"
+#include "mutex.h"
 #include "queue.h"
 #include "misc_functions.h"
 

@@ -25,7 +25,7 @@
 #include "../common/eq_stream.h"
 #include "../common/eq_stream_factory.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/Mutex.h"
+#include "../common/mutex.h"
 #include "../common/version.h"
 #include "../common/eqemu_error.h"
 #include "../common/packet_dump_file.h"

@@ -20,7 +20,7 @@
 #endif
 #include "eqemu_error.h"
 #include "linked_list.h"
-#include "Mutex.h"
+#include "mutex.h"
 #include "misc_functions.h"
 #include <stdio.h>
 #include <string.h>
