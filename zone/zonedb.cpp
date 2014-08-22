@@ -2333,21 +2333,18 @@ bool ZoneDatabase::GetFactionData(FactionMods* fm, uint32 class_mod, uint32 race
 	return true;
 }
 
-bool ZoneDatabase::LoadFactionValues(uint32 char_id, faction_map & val_list) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT faction_id,current_value FROM faction_values WHERE char_id = %i",char_id), errbuf, &result)) {
-		safe_delete_array(query);
-		bool ret = LoadFactionValues_result(result, val_list);
-		mysql_free_result(result);
-		return ret;
-	}
-	else {
-		std::cerr << "Error in LoadFactionValues query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-	}
-	return false;
+bool ZoneDatabase::LoadFactionValues(uint32 char_id, faction_map& val_list) {
+
+	std::string query = StringFormat("SELECT faction_id,current_value "
+                                    "FROM faction_values "
+                                    "WHERE char_id = %i", char_id);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        std::cerr << "Error in LoadFactionValues query '" << query << "' " << results.ErrorMessage() << std::endl;
+        return false;
+    }
+
+    return LoadFactionValues_result(std::move(results), val_list);
 }
 
 bool ZoneDatabase::LoadFactionValues_result(MySQLRequestResult results, faction_map & val_list) {
