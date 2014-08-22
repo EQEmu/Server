@@ -16,8 +16,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
-#include "HTTPRequest.h"
-#include "EQWHTTPHandler.h"
+#include "http_request.h"
+#include "eqw_http_handler.h"
 #include "../common/eqdb.h"
 #include "../common/SocketLib/HttpdForm.h"
 #include <cstdlib>

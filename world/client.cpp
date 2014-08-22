@@ -18,14 +18,14 @@
 
 #include "client.h"
 #include "worlddb.h"
-#include "WorldConfig.h"
-#include "LoginServer.h"
-#include "LoginServerList.h"
+#include "world_config.h"
+#include "login_server.h"
+#include "login_server_list.h"
 #include "zoneserver.h"
 #include "zonelist.h"
 #include "clientlist.h"
 #include "wguild_mgr.h"
-#include "sofCharCreateData.h"
+#include "sof_char_create_data.h"
 
 #include <iostream>
 #include <iomanip>

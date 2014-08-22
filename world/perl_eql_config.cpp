@@ -29,8 +29,8 @@ typedef const char Const_char;
 
 #ifdef EMBPERL
 #include "../common/debug.h"
-#include "EQWParser.h"
-#include "EQLConfig.h"
+#include "eqw_parser.h"
+#include "eql_config.h"
 
 #ifdef seed
 #undef seed

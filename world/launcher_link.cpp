@@ -17,9 +17,9 @@
 */
 
 #include "../common/debug.h"
-#include "LauncherLink.h"
-#include "LauncherList.h"
-#include "WorldConfig.h"
+#include "launcher_link.h"
+#include "launcher_list.h"
+#include "world_config.h"
 #include "../common/logsys.h"
 #include "../common/md5.h"
 #include "../common/packet_dump.h"
@@ -27,7 +27,7 @@
 #include "../common/emu_tcp_connection.h"
 #include "../common/string_util.h"
 #include "worlddb.h"
-#include "EQLConfig.h"
+#include "eql_config.h"
 
 #include <vector>
 #include <string>

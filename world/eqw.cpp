@@ -19,9 +19,9 @@
 #ifdef EMBPERL
 
 #include "../common/debug.h"
-#include "EQW.h"
-#include "EQWParser.h"
-#include "WorldConfig.h"
+#include "eqw.h"
+#include "eqw_parser.h"
+#include "world_config.h"
 #include "../common/races.h"
 #include "../common/classes.h"
 #include "../common/misc.h"
@@ -30,12 +30,12 @@
 #include "zonelist.h"
 #include "clientlist.h"
 #include "cliententry.h"
-#include "LoginServer.h"
-#include "LoginServerList.h"
+#include "login_server.h"
+#include "login_server_list.h"
 #include "worlddb.h"
 #include "client.h"
-#include "LauncherList.h"
-#include "LauncherLink.h"
+#include "launcher_list.h"
+#include "launcher_link.h"
 #include "wguild_mgr.h"
 
 #ifdef seed

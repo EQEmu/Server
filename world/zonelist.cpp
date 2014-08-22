@@ -18,10 +18,10 @@
 #include "../common/debug.h"
 #include "zonelist.h"
 #include "zoneserver.h"
-#include "WorldTCPConnection.h"
+#include "world_tcp_connection.h"
 #include "worlddb.h"
 #include "console.h"
-#include "WorldConfig.h"
+#include "world_config.h"
 #include "../common/servertalk.h"
 #include "../common/string_util.h"
 

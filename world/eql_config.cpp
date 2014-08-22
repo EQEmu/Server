@@ -16,10 +16,10 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
-#include "EQLConfig.h"
+#include "eql_config.h"
 #include "worlddb.h"
-#include "LauncherLink.h"
-#include "LauncherList.h"
+#include "launcher_link.h"
+#include "launcher_list.h"
 #include "../common/string_util.h"
 #include <cstdlib>
 #include <cstring>

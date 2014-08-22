@@ -26,7 +26,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <vector>
-#include "sofCharCreateData.h"
+#include "sof_char_create_data.h"
 
 WorldDatabase database;
 extern std::vector<RaceClassAllocation> character_create_allocations;

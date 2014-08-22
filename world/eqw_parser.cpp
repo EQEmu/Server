@@ -21,8 +21,8 @@
 #ifdef EMBPERL
 
 #include "../common/debug.h"
-#include "EQWParser.h"
-#include "EQW.h"
+#include "eqw_parser.h"
+#include "eqw.h"
 #include "../common/eqdb.h"
 #include "../common/logsys.h"
 #include "worlddb.h"

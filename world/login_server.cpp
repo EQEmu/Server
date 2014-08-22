@@ -52,8 +52,8 @@
 #define IGNORE_LS_FATAL_ERROR
 
 #include "../common/servertalk.h"
-#include "LoginServer.h"
-#include "LoginServerList.h"
+#include "login_server.h"
+#include "login_server_list.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/packet_dump.h"
 #include "../common/string_util.h"
@@ -61,7 +61,7 @@
 #include "worlddb.h"
 #include "zonelist.h"
 #include "clientlist.h"
-#include "WorldConfig.h"
+#include "world_config.h"
 
 extern ZSList zoneserver_list;
 extern ClientList client_list;

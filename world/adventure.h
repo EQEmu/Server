@@ -4,7 +4,7 @@
 #include "../common/debug.h"
 #include "../common/types.h"
 #include "../common/timer.h"
-#include "AdventureTemplate.h"
+#include "adventure_template.h"
 #include <list>
 #include <string>
 #include <stdlib.h>

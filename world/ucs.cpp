@@ -1,6 +1,6 @@
 #include "../common/debug.h"
 #include "ucs.h"
-#include "WorldConfig.h"
+#include "world_config.h"
 #include "../common/logsys.h"
 #include "../common/logtypes.h"
 #include "../common/md5.h"

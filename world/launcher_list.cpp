@@ -18,10 +18,10 @@
 
 
 #include "../common/debug.h"
-#include "LauncherList.h"
-#include "LauncherLink.h"
+#include "launcher_list.h"
+#include "launcher_link.h"
 #include "../common/logsys.h"
-#include "EQLConfig.h"
+#include "eql_config.h"
 
 LauncherList::LauncherList()
 : nextID(1)

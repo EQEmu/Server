@@ -16,11 +16,11 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
-#include "EQWHTTPHandler.h"
+#include "eqw_http_handler.h"
 #include "../common/SocketLib/Base64.h"
-#include "EQWParser.h"
-#include "EQW.h"
-#include "HTTPRequest.h"
+#include "eqw_parser.h"
+#include "eqw.h"
+#include "http_request.h"
 #include "../common/logsys.h"
 #include "worlddb.h"
 #include "console.h"

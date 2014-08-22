@@ -39,7 +39,7 @@ enum {
 #include "../common/timer.h"
 #include "../common/queue.h"
 #include "../common/emu_tcp_connection.h"
-#include "WorldTCPConnection.h"
+#include "world_tcp_connection.h"
 #include "../common/mutex.h"
 
 struct ServerChannelMessage_Struct;
