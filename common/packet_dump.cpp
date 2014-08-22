@@ -21,7 +21,7 @@
 #include <stdio.h>
 
 #include "packet_dump.h"
-#include "EQPacket.h"
+#include "eq_packet.h"
 #include "../common/servertalk.h"
 
 void DumpPacketAscii(const uchar* buf, uint32 size, uint32 cols, uint32 skip) {

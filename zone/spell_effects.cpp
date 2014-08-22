@@ -20,7 +20,7 @@
 #include "masterentity.h"
 #include "../common/packet_dump.h"
 #include "../common/moremath.h"
-#include "../common/Item.h"
+#include "../common/item.h"
 #include "worldserver.h"
 #include "../common/skills.h"
 #include "../common/bodytypes.h"
@@ -33,8 +33,8 @@
 #include "../common/unix.h"
 #endif
 
-#include "StringIDs.h"
-#include "QuestParserCollection.h"
+#include "string_ids.h"
+#include "quest_parser_collection.h"
 
 extern Zone* zone;
 extern volatile bool ZoneLoaded;

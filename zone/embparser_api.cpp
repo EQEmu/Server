@@ -22,7 +22,7 @@
 #ifdef EMBPERL_XS
 
 #include "../common/debug.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 #include "embparser.h"
 #include "questmgr.h"
 #include "embxs.h"

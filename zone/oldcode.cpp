@@ -67,12 +67,12 @@ extern volatile bool ZoneLoaded;
 
 #include "../common/queue.h"
 #include "../common/timer.h"
-#include "../common/EQStream.h"
+#include "../common/eq_stream.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/Mutex.h"
+#include "../common/mutex.h"
 #include "../common/version.h"
 #include "../common/files.h"
-#include "../common/EQEMuError.h"
+#include "../common/eqemu_error.h"
 #include "../common/packet_dump_file.h"
 
 #include "masterentity.h"

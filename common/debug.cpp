@@ -19,8 +19,8 @@
 #endif
 
 #include "debug.h"
-#include "StringUtil.h"
-#include "MiscFunctions.h"
+#include "string_util.h"
+#include "misc_functions.h"
 #include "platform.h"
 
 #ifndef va_copy

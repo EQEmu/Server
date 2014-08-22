@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "misc.h"
-#include "EQPacket.h"
+#include "eq_packet.h"
 
 
 #define LOG_CATEGORY(category) #category ,

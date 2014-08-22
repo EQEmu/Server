@@ -17,13 +17,13 @@
 */
 
 #include "../common/debug.h"
-#include "../common/ProcLauncher.h"
-#include "../common/EQEmuConfig.h"
+#include "../common/proc_launcher.h"
+#include "../common/eqemu_config.h"
 #include "../common/servertalk.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
 #include "worldserver.h"
-#include "ZoneLaunch.h"
+#include "zone_launch.h"
 #include <vector>
 #include <map>
 #include <set>

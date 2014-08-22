@@ -20,7 +20,7 @@
 #ifndef __queryservconfig_H
 #define __queryservconfig_H
 
-#include "../common/EQEmuConfig.h"
+#include "../common/eqemu_config.h"
 
 class queryservconfig : public EQEmuConfig {
 public:

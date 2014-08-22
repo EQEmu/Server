@@ -1,37 +1,37 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SET(eqlogin_sources
-	Client.cpp
-	ClientManager.cpp
-	Config.cpp
-	DatabaseMySQL.cpp
-	DatabasePostgreSQL.cpp
-	ErrorLog.cpp
-	Main.cpp
-	ServerManager.cpp
-	WorldServer.cpp
+	client.cpp
+	client_manager.cpp
+	config.cpp
+	database_mysql.cpp
+	database_postgresql.cpp
+	error_log.cpp
+	main.cpp
+	server_manager.cpp
+	world_server.cpp
 )
 
 IF(MSVC OR MINGW)
 	ADD_DEFINITIONS(-DNOMINMAX)
-	SET(eqlogin_sources ${eqlogin_sources} Encryption.cpp)
+	SET(eqlogin_sources ${eqlogin_sources} encryption.cpp)
 ENDIF(MSVC OR MINGW)
 
 SET(eqlogin_headers
-	Client.h
-	ClientManager.h
-	Config.h
-	Database.h
-	DatabaseMySQL.h
-	DatabasePostgreSQL.h
-	Encryption.h
-	EQCryptoAPI.h
-	ErrorLog.h
-	LoginServer.h
-	LoginStructures.h
-	Options.h
-	ServerManager.h
-	WorldServer.h
+	client.h
+	client_manager.h
+	config.h
+	database.h
+	database_mysql.h
+	database_postgresql.h
+	encryption.h
+	eq_crypto_api.h
+	error_log.h
+	login_server.h
+	login_structures.h
+	options.h
+	server_manager.h
+	world_server.h
 )
 
 IF(UNIX)

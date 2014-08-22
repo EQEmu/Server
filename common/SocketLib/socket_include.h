@@ -211,7 +211,7 @@ typedef unsigned short port_t;
 #endif
 
 #ifdef _THREADSAFE_SOCKETS
-#include "Mutex.h"
+#include "mutex.h"
 #include "Lock.h"
 #endif
 

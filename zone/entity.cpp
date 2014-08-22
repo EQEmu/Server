@@ -39,11 +39,11 @@
 #include "petitions.h"
 #include "../common/spdat.h"
 #include "../common/features.h"
-#include "StringIDs.h"
+#include "string_ids.h"
 #include "../common/dbasync.h"
 #include "guild_mgr.h"
 #include "raids.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 
 #ifdef _WINDOWS
 	#define snprintf	_snprintf

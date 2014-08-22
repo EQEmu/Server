@@ -21,11 +21,11 @@
 #include <string.h>
 #include "masterentity.h"
 #include "worldserver.h"
-#include "StringIDs.h"
+#include "string_ids.h"
 #include "zonedb.h"
 #include "../common/packet_functions.h"
 #include "../common/packet_dump.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "guild_mgr.h"
 
 #define OPEN_DOOR 0x02

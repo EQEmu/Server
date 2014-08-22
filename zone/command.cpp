@@ -47,10 +47,10 @@
 #include "../common/packet_dump.h"
 #include "../common/serverinfo.h"
 #include "../common/opcodemgr.h"
-#include "../common/EQPacket.h"
+#include "../common/eq_packet.h"
 #include "../common/guilds.h"
 #include "../common/rulesys.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 //#include "../common/servertalk.h" // for oocmute and revoke
 #include "worldserver.h"
 #include "masterentity.h"
@@ -68,11 +68,11 @@ extern WorldServer worldserver;
 extern TaskManager *taskmanager;
 void CatchSignal(int sig_num);
 
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 
-#include "StringIDs.h"
+#include "string_ids.h"
 #include "command.h"
-#include "QGlobals.h"
+#include "qglobals.h"
 
 //struct cl_struct *commandlist;	// the actual linked list of commands
 int commandcount;								// how many commands we have

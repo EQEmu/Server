@@ -43,10 +43,10 @@
 #include "net.h"
 #include "../common/seperator.h"
 #include "../common/packet_dump_file.h"
-#include "../common/EQStreamFactory.h"
-#include "../common/EQStream.h"
-#include "../common/StringUtil.h"
-#include "ZoneConfig.h"
+#include "../common/eq_stream_factory.h"
+#include "../common/eq_stream.h"
+#include "../common/string_util.h"
+#include "zone_config.h"
 #include "../common/breakdowns.h"
 #include "map.h"
 #include "water_map.h"
@@ -57,7 +57,7 @@
 #include "client_logs.h"
 #include "../common/rulesys.h"
 #include "guild_mgr.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 
 #ifdef _WINDOWS
 #define snprintf	_snprintf

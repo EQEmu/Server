@@ -32,7 +32,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
 #endif
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "../common/packet_functions.h"
 #include "../common/packet_dump.h"
 #include "../common/packet_dump_file.h"

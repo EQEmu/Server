@@ -19,11 +19,11 @@
 #include <stdio.h>
 #include "../../common/debug.h"
 #include "../../common/shareddb.h"
-#include "../../common/EQEmuConfig.h"
+#include "../../common/eqemu_config.h"
 #include "../../common/platform.h"
 #include "../../common/crash.h"
 #include "../../common/rulesys.h"
-#include "../../common/StringUtil.h"
+#include "../../common/string_util.h"
 
 void ExportSpells(SharedDatabase *db);
 void ExportSkillCaps(SharedDatabase *db);

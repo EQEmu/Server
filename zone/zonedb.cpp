@@ -1,7 +1,7 @@
 
 #include "zonedb.h"
-#include "../common/Item.h"
-#include "../common/StringUtil.h"
+#include "../common/item.h"
+#include "../common/string_util.h"
 #include "../common/extprofile.h"
 #include "../common/guilds.h"
 #include "../common/rulesys.h"

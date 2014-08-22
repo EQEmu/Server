@@ -19,7 +19,7 @@
 #include "rulesys.h"
 #include "logsys.h"
 #include "database.h"
-#include "StringUtil.h"
+#include "string_util.h"
 #include <cstdlib>
 #include <cstring>
 

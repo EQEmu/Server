@@ -12,8 +12,8 @@
 #include <limits.h>
 #include "dbcore.h"
 #include <string.h>
-//#include "../common/MiscFunctions.h"
-#include "StringUtil.h"
+//#include "../common/misc_functions.h"
+#include "string_util.h"
 #define ASYNC_LOOP_GRANULARITY 4 //# of ms between checking our work
 
 bool DBAsyncCB_LoadVariables(DBAsyncWork* iWork) {

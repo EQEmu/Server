@@ -2,7 +2,7 @@
 #include "lfguild.h"
 #include "database.h"
 #include "worldserver.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "../common/packet_dump.h"
 #include "../common/rulesys.h"
 

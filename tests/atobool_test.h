@@ -20,7 +20,7 @@
 #define __EQEMU_TESTS_ATOBOOL_H
 
 #include "cppunit/cpptest.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 
 class atoboolTest : public Test::Suite {
 	typedef void(atoboolTest::*TestFunction)(void);

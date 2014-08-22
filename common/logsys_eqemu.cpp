@@ -18,7 +18,7 @@
 
 #include "debug.h"
 #include "logsys.h"
-#include "StringUtil.h"
+#include "string_util.h"
 
 #include <stdarg.h>
 #include <stdio.h>

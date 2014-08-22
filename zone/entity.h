@@ -29,7 +29,7 @@
 #include "zonedb.h"
 #include "zonedump.h"
 #include "zonedbasync.h"
-#include "QGlobals.h"
+#include "qglobals.h"
 
 class EQApplicationPacket;
 

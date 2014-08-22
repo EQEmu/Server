@@ -22,7 +22,7 @@
 #include "zoneserver.h"
 #include "zonelist.h"
 #include "../common/logsys.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 
 extern ClientList client_list;
 extern ZSList zoneserver_list;

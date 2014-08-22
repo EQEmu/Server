@@ -22,7 +22,7 @@
 #include "client.h"
 #include "console.h"
 #include "worlddb.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "../common/guilds.h"
 #include "../common/races.h"
 #include "../common/classes.h"

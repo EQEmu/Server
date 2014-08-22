@@ -18,7 +18,7 @@
 
 #include "../common/debug.h"
 #include "../common/logsys.h"
-#include "../common/BasePacket.h"
+#include "../common/base_packet.h"
 #include "mob.h"
 #include <stdarg.h>
 #include <stdio.h>

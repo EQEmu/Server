@@ -13,9 +13,9 @@
 #include "lua_client.h"
 #include "lua_npc.h"
 #include "lua_entity_list.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 #include "questmgr.h"
-#include "QGlobals.h"
+#include "qglobals.h"
 #include "../common/timer.h"
 
 struct Events { };

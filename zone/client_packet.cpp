@@ -45,30 +45,30 @@
 #include "worldserver.h"
 #include "../common/rdtsc.h"
 #include "../common/packet_dump_file.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "../common/breakdowns.h"
 #include "../common/guilds.h"
 #include "../common/rulesys.h"
 #include "../common/spdat.h"
 #include "petitions.h"
-#include "NpcAI.h"
+#include "npc_ai.h"
 #include "../common/skills.h"
 #include "forage.h"
 #include "zone.h"
 #include "event_codes.h"
 #include "../common/faction.h"
 #include "../common/crc32.h"
-#include "StringIDs.h"
+#include "string_ids.h"
 #include "map.h"
 #include "titles.h"
 #include "pets.h"
-#include "ZoneConfig.h"
+#include "zone_config.h"
 #include "guild_mgr.h"
 #include "pathing.h"
 #include "water_map.h"
 #include "merc.h"
-#include "../common/ZoneNumbers.h"
-#include "QuestParserCollection.h"
+#include "../common/zone_numbers.h"
+#include "quest_parser_collection.h"
 
 extern Zone* zone;
 extern volatile bool ZoneLoaded;
@@ -8970,7 +8970,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 			continue;
 		}
 
-		if(aa[a]->value > 1)	//hack in some stuff for sony's new AA method (where each level of each AA has a seperate ID)
+		if(aa[a]->value > 1)	//hack in some stuff for sony's new AA method (where each level of each aa.has a seperate ID)
 			aa_points[(id - aa[a]->value +1)] = aa[a]->value;
 		else
 			aa_points[id] = aa[a]->value;

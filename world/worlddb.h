@@ -19,7 +19,7 @@
 #define WORLDDB_H_
 
 #include "../common/shareddb.h"
-#include "../common/ZoneNumbers.h"
+#include "../common/zone_numbers.h"
 
 struct PlayerProfile_Struct;
 struct CharCreate_Struct;

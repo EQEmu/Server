@@ -12,7 +12,7 @@
 #include "mob.h"
 #include "client.h"
 #include "worldserver.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 #include "event_codes.h"
 #include "embparser.h"
 #include <string>

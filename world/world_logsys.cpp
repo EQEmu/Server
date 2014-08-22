@@ -1,7 +1,7 @@
 
 #include "../common/debug.h"
 #include "../common/logsys.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 
 #include "zoneserver.h"
 #include "client.h"

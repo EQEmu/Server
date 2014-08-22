@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 #include "eq_dictionary.h"
-#include "StringUtil.h"
+#include "string_util.h"
 
 //
 // class EmuConstants

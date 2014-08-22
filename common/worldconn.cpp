@@ -26,7 +26,7 @@
 #include <stdarg.h>
 
 #include "worldconn.h"
-#include "EQEmuConfig.h"
+#include "eqemu_config.h"
 #include "md5.h"
 #include "database.h"
 #include "servertalk.h"

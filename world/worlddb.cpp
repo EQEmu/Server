@@ -17,16 +17,16 @@
 */
 
 #include "worlddb.h"
-//#include "../common/Item.h"
-#include "../common/StringUtil.h"
+//#include "../common/item.h"
+#include "../common/string_util.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/Item.h"
+#include "../common/item.h"
 #include "../common/dbasync.h"
 #include "../common/rulesys.h"
 #include <iostream>
 #include <cstdlib>
 #include <vector>
-#include "SoFCharCreateData.h"
+#include "sof_char_create_data.h"
 
 WorldDatabase database;
 extern std::vector<RaceClassAllocation> character_create_allocations;

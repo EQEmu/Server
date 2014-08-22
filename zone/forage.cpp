@@ -30,9 +30,9 @@
 #include "npc.h"
 #include "water_map.h"
 #include "titles.h"
-#include "StringIDs.h"
-#include "../common/MiscFunctions.h"
-#include "../common/StringUtil.h"
+#include "string_ids.h"
+#include "../common/misc_functions.h"
+#include "../common/string_util.h"
 #include "../common/rulesys.h"
 
 #include "zonedb.h"
@@ -40,7 +40,7 @@
 #define snprintf	_snprintf
 #endif
 
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 
 //max number of items which can be in the foraging table
 //for a given zone.
