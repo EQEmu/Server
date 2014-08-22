@@ -15,10 +15,10 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "ServerManager.h"
-#include "LoginServer.h"
-#include "ErrorLog.h"
-#include "LoginStructures.h"
+#include "server_manager.h"
+#include "login_server.h"
+#include "error_log.h"
+#include "login_structures.h"
 #include <stdlib.h>
 
 extern ErrorLog *server_log;

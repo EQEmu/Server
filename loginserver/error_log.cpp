@@ -16,7 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include <string.h>
-#include "ErrorLog.h"
+#include "error_log.h"
 
 const char *eqLogTypes[_log_largest_type] =
 {

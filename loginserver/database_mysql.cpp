@@ -16,12 +16,12 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
-#include "Database.h"
+#include "database.h"
 
 #ifdef EQEMU_MYSQL_ENABLED
-#include "DatabaseMySQL.h"
-#include "ErrorLog.h"
-#include "LoginServer.h"
+#include "database_mysql.h"
+#include "error_log.h"
+#include "login_server.h"
 
 extern ErrorLog *server_log;
 extern LoginServer server;

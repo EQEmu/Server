@@ -18,15 +18,15 @@
 #ifndef EQEMU_LOGINSERVER_H
 #define EQEMU_LOGINSERVER_H
 
-#include "ErrorLog.h"
-#include "Config.h"
-#include "Database.h"
-#include "DatabaseMySQL.h"
-#include "DatabasePostgreSQL.h"
-#include "Encryption.h"
-#include "Options.h"
-#include "ServerManager.h"
-#include "ClientManager.h"
+#include "error_log.h"
+#include "config.h"
+#include "database.h"
+#include "database_mysql.h"
+#include "database_postgresql.h"
+#include "encryption.h"
+#include "options.h"
+#include "server_manager.h"
+#include "client_manager.h"
 
 /**
 * Login server struct, contains every variable for the server that needs to exist

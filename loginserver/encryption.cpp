@@ -16,8 +16,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
-#include "Encryption.h"
-#include "ErrorLog.h"
+#include "encryption.h"
+#include "error_log.h"
 #include <string>
 
 extern ErrorLog *server_log;

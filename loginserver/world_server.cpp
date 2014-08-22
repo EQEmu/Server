@@ -15,10 +15,10 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "WorldServer.h"
-#include "ErrorLog.h"
-#include "LoginServer.h"
-#include "LoginStructures.h"
+#include "world_server.h"
+#include "error_log.h"
+#include "login_server.h"
+#include "login_structures.h"
 
 extern ErrorLog *server_log;
 extern LoginServer server;

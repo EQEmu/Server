@@ -22,7 +22,7 @@
 #include "../common/opcodemgr.h"
 #include "../common/eq_stream_type.h"
 #include "../common/eq_stream_factory.h"
-#include "Client.h"
+#include "client.h"
 #include <list>
 
 using namespace std;

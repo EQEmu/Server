@@ -24,8 +24,8 @@
 #include "../common/emu_tcp_server.h"
 #include "../common/servertalk.h"
 #include "../common/packet_dump.h"
-#include "WorldServer.h"
-#include "Client.h"
+#include "world_server.h"
+#include "client.h"
 #include <list>
 
 /**

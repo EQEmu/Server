@@ -22,7 +22,7 @@
 #include "../common/timer.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
-#include "LoginServer.h"
+#include "login_server.h"
 #include <time.h>
 #include <stdlib.h>
 #include <string>
