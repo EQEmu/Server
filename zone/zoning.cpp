@@ -723,16 +723,11 @@ void Client::SetZoneFlag(uint32 zone_id) {
 
 	zone_flags.insert(zone_id);
 
-	//update the DB
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
 	// Retrieve all waypoints for this grid
-	if(!database.RunQuery(query,MakeAnyLenString(&query,
-		"INSERT INTO zone_flags (charID,zoneID) VALUES(%d,%d)",
-		CharacterID(),zone_id),errbuf)) {
-		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to set zone flag for %s: %s", GetName(), errbuf);
-	}
+	std::string query = StringFormat("INSERT INTO zone_flags (charID,zoneID) VALUES(%d,%d)", CharacterID(), zone_id);
+	auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to set zone flag for %s: %s", GetName(), results.ErrorMessage().c_str());
 }
 
 void Client::ClearZoneFlag(uint32 zone_id) {
@@ -741,39 +736,26 @@ void Client::ClearZoneFlag(uint32 zone_id) {
 
 	zone_flags.erase(zone_id);
 
-	//update the DB
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
 	// Retrieve all waypoints for this grid
-	if(!database.RunQuery(query,MakeAnyLenString(&query,
-		"DELETE FROM zone_flags WHERE charID=%d AND zoneID=%d",
-		CharacterID(),zone_id),errbuf)) {
-		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to clear zone flag for %s: %s", GetName(), errbuf);
-	}
+	std::string query = StringFormat("DELETE FROM zone_flags WHERE charID=%d AND zoneID=%d", CharacterID(), zone_id);
+	auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to clear zone flag for %s: %s", GetName(), results.ErrorMessage().c_str());
+
 }
 
 void Client::LoadZoneFlags() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
 	// Retrieve all waypoints for this grid
-	if(database.RunQuery(query,MakeAnyLenString(&query,
-		"SELECT zoneID from zone_flags WHERE charID=%d",
-		CharacterID()),errbuf,&result))
-	{
-		while((row = mysql_fetch_row(result))) {
-			zone_flags.insert(atoi(row[0]));
-		}
-		mysql_free_result(result);
-	}
-	else	// DB query error!
-	{
-		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to load zone flags for %s: %s", GetName(), errbuf);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT zoneID from zone_flags WHERE charID=%d", CharacterID());
+	auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "MySQL Error while trying to load zone flags for %s: %s", GetName(), results.ErrorMessage().c_str());
+        return;
+    }
+
+    for(auto row = results.begin(); row != results.end(); ++row)
+		zone_flags.insert(atoi(row[0]));
 }
 
 bool Client::HasZoneFlag(uint32 zone_id) const {
