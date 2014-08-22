@@ -973,113 +973,118 @@ void NPC::RangedAttack(Mob* other)
 		return;
 	}
 
-	//if we have SPECATK_RANGED_ATK set then we range attack without weapon or ammo
-	const Item_Struct* weapon = nullptr;
-	const Item_Struct* ammo = nullptr;
-	if(!GetSpecialAbility(SPECATK_RANGED_ATK))
-	{
-		//find our bow and ammo return if we can't find them...
-		return;
-	}
+	int attacks = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 0);
+	attacks = attacks > 0 ? attacks : 1;
+	for(int i = 0; i < attacks; ++i) {
 
-	int sa_min_range = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 0); //Min Range of NPC attack
-	int sa_max_range = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 1); //Max Range of NPC attack
-
-	float min_range = static_cast<float>(RuleI(Combat, MinRangedAttackDist));
-	float max_range = 250; // needs to be longer than 200(most spells)
-	
-	if (sa_max_range)
-		max_range = static_cast<float>(sa_max_range);
-
-	if (sa_min_range)
-		min_range = static_cast<float>(sa_min_range);
-
-	mlog(COMBAT__RANGED, "Calculated bow range to be %.1f", max_range);
-	max_range *= max_range;
-	if(DistNoRootNoZ(*other) > max_range) {
-		mlog(COMBAT__RANGED, "Ranged attack out of range...%.2f vs %.2f", DistNoRootNoZ(*other), max_range);
-		//target is out of range, client does a message
-		return;
-	}
-	else if(DistNoRootNoZ(*other) < (min_range * min_range))
-		return;
-	
-
-	if(!other || !IsAttackAllowed(other) ||
-		IsCasting() ||
-		DivineAura() ||
-		IsStunned() ||
-		IsFeared() ||
-		IsMezzed() ||
-		(GetAppearance() == eaDead)){
-		return;
-	}
-
-	SkillUseTypes skillinuse = SkillArchery;
-	skillinuse = static_cast<SkillUseTypes>(GetRangedSkill());
-
-	if(!ammo && !GetAmmoIDfile())
-		ammo = database.GetItem(8005);
-
-	if(ammo)
-		SendItemAnimation(other, ammo, SkillArchery);
-	else 
-		ProjectileAnimation(other, 0,false,0,0,0,0,GetAmmoIDfile(),skillinuse);
-	
-	FaceTarget(other);
-
-	if (!other->CheckHitChance(this, skillinuse, MainRange, GetSpecialAbilityParam(SPECATK_RANGED_ATK, 2)))
-	{
-		mlog(COMBAT__RANGED, "Ranged attack missed %s.", other->GetName());
-		other->Damage(this, 0, SPELL_UNKNOWN, skillinuse);
-	}
-	else
-	{
-		int16 WDmg = GetWeaponDamage(other, weapon);
-		int16 ADmg = GetWeaponDamage(other, ammo);
-		int32 TotalDmg = 0;
-		if(WDmg > 0 || ADmg > 0)
+		//if we have SPECATK_RANGED_ATK set then we range attack without weapon or ammo
+		const Item_Struct* weapon = nullptr;
+		const Item_Struct* ammo = nullptr;
+		if(!GetSpecialAbility(SPECATK_RANGED_ATK))
 		{
-			mlog(COMBAT__RANGED, "Ranged attack hit %s.", other->GetName());
-			
-			int32 MaxDmg = max_dmg * RuleR(Combat, ArcheryNPCMultiplier); // should add a field to npc_types
-			int32 MinDmg = min_dmg * RuleR(Combat, ArcheryNPCMultiplier);
-
-			if(RuleB(Combat, UseIntervalAC))
-				TotalDmg = MaxDmg;
-			else
-				TotalDmg = MakeRandomInt(MinDmg, MaxDmg);
-
-			TotalDmg += TotalDmg *  GetSpecialAbilityParam(SPECATK_RANGED_ATK, 3) / 100; //Damage modifier
-			
-			other->AvoidDamage(this, TotalDmg, false);
-			other->MeleeMitigation(this, TotalDmg, MinDmg);
-			if (TotalDmg > 0)
-				CommonOutgoingHitSuccess(other, TotalDmg, skillinuse);
+			//find our bow and ammo return if we can't find them...
+			return;
 		}
 
+		int sa_min_range = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 4); //Min Range of NPC attack
+		int sa_max_range = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 1); //Max Range of NPC attack
+
+		float min_range = static_cast<float>(RuleI(Combat, MinRangedAttackDist));
+		float max_range = 250; // needs to be longer than 200(most spells)
+	
+		if (sa_max_range)
+			max_range = static_cast<float>(sa_max_range);
+
+		if (sa_min_range)
+			min_range = static_cast<float>(sa_min_range);
+
+		mlog(COMBAT__RANGED, "Calculated bow range to be %.1f", max_range);
+		max_range *= max_range;
+		if(DistNoRootNoZ(*other) > max_range) {
+			mlog(COMBAT__RANGED, "Ranged attack out of range...%.2f vs %.2f", DistNoRootNoZ(*other), max_range);
+			//target is out of range, client does a message
+			return;
+		}
+		else if(DistNoRootNoZ(*other) < (min_range * min_range))
+			return;
+	
+
+		if(!other || !IsAttackAllowed(other) ||
+			IsCasting() ||
+			DivineAura() ||
+			IsStunned() ||
+			IsFeared() ||
+			IsMezzed() ||
+			(GetAppearance() == eaDead)){
+			return;
+		}
+
+		SkillUseTypes skillinuse = SkillArchery;
+		skillinuse = static_cast<SkillUseTypes>(GetRangedSkill());
+
+		if(!ammo && !GetAmmoIDfile())
+			ammo = database.GetItem(8005);
+
+		if(ammo)
+			SendItemAnimation(other, ammo, SkillArchery);
+		else 
+			ProjectileAnimation(other, 0,false,0,0,0,0,GetAmmoIDfile(),skillinuse);
+	
+		FaceTarget(other);
+
+		if (!other->CheckHitChance(this, skillinuse, MainRange, GetSpecialAbilityParam(SPECATK_RANGED_ATK, 2)))
+		{
+			mlog(COMBAT__RANGED, "Ranged attack missed %s.", other->GetName());
+			other->Damage(this, 0, SPELL_UNKNOWN, skillinuse);
+		}
 		else
-			TotalDmg = -5;
+		{
+			int16 WDmg = GetWeaponDamage(other, weapon);
+			int16 ADmg = GetWeaponDamage(other, ammo);
+			int32 TotalDmg = 0;
+			if(WDmg > 0 || ADmg > 0)
+			{
+				mlog(COMBAT__RANGED, "Ranged attack hit %s.", other->GetName());
+			
+				int32 MaxDmg = max_dmg * RuleR(Combat, ArcheryNPCMultiplier); // should add a field to npc_types
+				int32 MinDmg = min_dmg * RuleR(Combat, ArcheryNPCMultiplier);
 
-		if (TotalDmg > 0)
-			other->AddToHateList(this, TotalDmg, 0, false);
-		else
-			other->AddToHateList(this, 0, 0, false);
+				if(RuleB(Combat, UseIntervalAC))
+					TotalDmg = MaxDmg;
+				else
+					TotalDmg = MakeRandomInt(MinDmg, MaxDmg);
 
-		other->Damage(this, TotalDmg, SPELL_UNKNOWN, skillinuse);
+				TotalDmg += TotalDmg *  GetSpecialAbilityParam(SPECATK_RANGED_ATK, 3) / 100; //Damage modifier
+			
+				other->AvoidDamage(this, TotalDmg, false);
+				other->MeleeMitigation(this, TotalDmg, MinDmg);
+				if (TotalDmg > 0)
+					CommonOutgoingHitSuccess(other, TotalDmg, skillinuse);
+			}
 
-		if (TotalDmg > 0 && HasSkillProcSuccess() && GetTarget() && !other->HasDied())
-			TrySkillProc(other, skillinuse, 0, true, MainRange);
+			else
+				TotalDmg = -5;
+
+			if (TotalDmg > 0)
+				other->AddToHateList(this, TotalDmg, 0, false);
+			else
+				other->AddToHateList(this, 0, 0, false);
+
+			other->Damage(this, TotalDmg, SPELL_UNKNOWN, skillinuse);
+
+			if (TotalDmg > 0 && HasSkillProcSuccess() && GetTarget() && !other->HasDied())
+				TrySkillProc(other, skillinuse, 0, true, MainRange);
+		}
+
+		//try proc on hits and misses
+		if(other && !other->HasDied())
+			TrySpellProc(nullptr, (const Item_Struct*)nullptr, other, MainRange);
+
+		if (HasSkillProcs() && other && !other->HasDied())
+				TrySkillProc(other, skillinuse, 0, false, MainRange);
+
+		CommonBreakInvisible();
 	}
-
-	//try proc on hits and misses
-	if(other && !other->HasDied())
-		TrySpellProc(nullptr, (const Item_Struct*)nullptr, other, MainRange);
-
-	if (HasSkillProcs() && other && !other->HasDied())
-			TrySkillProc(other, skillinuse, 0, false, MainRange);
-
-	CommonBreakInvisible();
 }
 
 uint16 Mob::GetThrownDamage(int16 wDmg, int32& TotalDmg, int& minDmg)

@@ -1569,11 +1569,7 @@ void Mob::AI_Process() {
 	//Do Ranged attack here
 	if(doranged)
 	{
-		int attacks = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 0);
-		attacks = attacks > 0 ? attacks : 1;
-		for(int i = 0; i < attacks; ++i) {
-			RangedAttack(target);
-		}
+		RangedAttack(target);
 	}
 }
 
