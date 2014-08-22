@@ -16,11 +16,10 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-
-
-#include "ZoneLaunch.h"
-#include "worldserver.h"
+#include "../common/debug.h"
 #include "../common/eqemu_config.h"
+#include "zone_launch.h"
+#include "worldserver.h"
 
 //static const uint32 ZONE_RESTART_DELAY = 10000;
 //static const uint32 ZONE_TERMINATE_WAIT = 10000;

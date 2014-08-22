@@ -23,7 +23,7 @@
 #include "../common/platform.h"
 #include "../common/crash.h"
 #include "worldserver.h"
-#include "ZoneLaunch.h"
+#include "zone_launch.h"
 #include <vector>
 #include <map>
 #include <set>
