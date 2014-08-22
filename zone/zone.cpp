@@ -156,140 +156,127 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 
 //this really loads the objects into entity_list
 bool Zone::LoadZoneObjects() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = nullptr;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	uint32 len_query = MakeAnyLenString(&query, "SELECT "
-		"id,zoneid,xpos,ypos,zpos,heading,itemid,charges,objectname,type,icon,"
-		"unknown08,unknown10,unknown20,unknown24,unknown76"
-		" from object where zoneid=%i and (version=%u or version=-1)", zoneid, instanceversion);
+	std::string query = StringFormat("SELECT id, zoneid, xpos, ypos, zpos, heading, "
+                                    "itemid, charges, objectname, type, icon, unknown08, "
+                                    "unknown10, unknown20, unknown24, unknown76 fROM object "
+                                    "WHERE zoneid = %i AND (version = %u OR version = -1)",
+                                    zoneid, instanceversion);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error Loading Objects from DB: %s",results.ErrorMessage().c_str());
+		return false;
+    }
 
-	if (database.RunQuery(query, len_query, errbuf, &result)) {
-		safe_delete_array(query);
-		LogFile->write(EQEMuLog::Status, "Loading Objects from DB...");
-		while ((row = mysql_fetch_row(result))) {
-			if (atoi(row[9]) == 0)
-			{
-				// Type == 0 - Static Object
-				const char* shortname = database.GetZoneName(atoi(row[1]), false); // zoneid -> zone_shortname
+    LogFile->write(EQEMuLog::Status, "Loading Objects from DB...");
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        if (atoi(row[9]) == 0)
+        {
+            // Type == 0 - Static Object
+            const char* shortname = database.GetZoneName(atoi(row[1]), false); // zoneid -> zone_shortname
 
-				if (shortname)
-				{
-					Door d;
-					memset(&d, 0, sizeof(d));
+            if (!shortname)
+                continue;
 
-					strn0cpy(d.zone_name, shortname, sizeof(d.zone_name));
-					d.db_id = 1000000000 + atoi(row[0]); // Out of range of normal use for doors.id
-					d.door_id = -1; // Client doesn't care if these are all the same door_id
-					d.pos_x = atof(row[2]); // xpos
-					d.pos_y = atof(row[3]); // ypos
-					d.pos_z = atof(row[4]); // zpos
-					d.heading = atof(row[5]); // heading
+            Door d;
+            memset(&d, 0, sizeof(d));
 
-					strn0cpy(d.door_name, row[8], sizeof(d.door_name)); // objectname
-					// Strip trailing "_ACTORDEF" if present. Client won't accept it for doors.
-					int len = strlen(d.door_name);
-					if ((len > 9) && (memcmp(&d.door_name[len - 9], "_ACTORDEF", 10) == 0))
-					{
-						d.door_name[len - 9] = '\0';
-					}
+            strn0cpy(d.zone_name, shortname, sizeof(d.zone_name));
+            d.db_id = 1000000000 + atoi(row[0]); // Out of range of normal use for doors.id
+            d.door_id = -1; // Client doesn't care if these are all the same door_id
+            d.pos_x = atof(row[2]); // xpos
+            d.pos_y = atof(row[3]); // ypos
+            d.pos_z = atof(row[4]); // zpos
+            d.heading = atof(row[5]); // heading
 
-					memcpy(d.dest_zone, "NONE", 5);
+            strn0cpy(d.door_name, row[8], sizeof(d.door_name)); // objectname
+            // Strip trailing "_ACTORDEF" if present. Client won't accept it for doors.
+            int len = strlen(d.door_name);
+            if ((len > 9) && (memcmp(&d.door_name[len - 9], "_ACTORDEF", 10) == 0))
+                d.door_name[len - 9] = '\0';
 
-					if ((d.size = atoi(row[11])) == 0) // unknown08 = optional size percentage
-					{
-						d.size = 100;
-					}
+            memcpy(d.dest_zone, "NONE", 5);
 
-					switch (d.opentype = atoi(row[12])) // unknown10 = optional request_nonsolid (0 or 1 or experimental number)
-					{
-						case 0:
-							d.opentype = 31;
-							break;
-						case 1:
-							d.opentype = 9;
-							break;
-					}
+            if ((d.size = atoi(row[11])) == 0) // unknown08 = optional size percentage
+                d.size = 100;
 
-					d.incline = atoi(row[13]); // unknown20 = optional model incline value
-					d.client_version_mask = 0xFFFFFFFF; //We should load the mask from the zone.
+            switch (d.opentype = atoi(row[12])) // unknown10 = optional request_nonsolid (0 or 1 or experimental number)
+            {
+                case 0:
+                    d.opentype = 31;
+                    break;
+                case 1:
+                    d.opentype = 9;
+                    break;
+            }
 
-					Doors* door = new Doors(&d);
-					entity_list.AddDoor(door);
-				}
+            d.incline = atoi(row[13]); // unknown20 = optional model incline value
+            d.client_version_mask = 0xFFFFFFFF; //We should load the mask from the zone.
 
-				continue;
-			}
-			Object_Struct data = {0};
-			uint32 id = 0;
-			uint32 icon = 0;
-			uint32 type = 0;
-			uint32 itemid = 0;
-			uint32 idx = 0;
-			int16 charges = 0;
+            Doors* door = new Doors(&d);
+            entity_list.AddDoor(door);
+        }
 
-			id							= (uint32)atoi(row[0]);
-			data.zone_id				= atoi(row[1]);
-			data.x						= atof(row[2]);
-			data.y						= atof(row[3]);
-			data.z						= atof(row[4]);
-			data.heading				= atof(row[5]);
-			itemid						= (uint32)atoi(row[6]);
-			charges						= (int16)atoi(row[7]);
-			strcpy(data.object_name, row[8]);
-			type						= (uint8)atoi(row[9]);
-			icon						= (uint32)atoi(row[10]);
-			data.object_type			= type;
-			data.linked_list_addr[0]	= 0;
-			data.linked_list_addr[1]	= 0;
-			data.unknown008				= (uint32)atoi(row[11]);
-			data.unknown010				= (uint32)atoi(row[12]);
-			data.unknown020				= (uint32)atoi(row[13]);
-			data.unknown024				= (uint32)atoi(row[14]);
-			data.unknown076				= (uint32)atoi(row[15]);
-			data.unknown084				= 0;
+        Object_Struct data = {0};
+        uint32 id = 0;
+        uint32 icon = 0;
+        uint32 type = 0;
+        uint32 itemid = 0;
+        uint32 idx = 0;
+        int16 charges = 0;
 
-			ItemInst* inst = nullptr;
-			//FatherNitwit: this dosent seem to work...
-			//tradeskill containers do not have an itemid of 0... at least what I am seeing
-			if (itemid == 0) {
-				// Generic tradeskill container
-				inst = new ItemInst(ItemInstWorldContainer);
-			}
-			else {
-				// Groundspawn object
-				inst = database.CreateItem(itemid);
-			}
+        id	= (uint32)atoi(row[0]);
+        data.zone_id = atoi(row[1]);
+        data.x = atof(row[2]);
+        data.y = atof(row[3]);
+        data.z = atof(row[4]);
+        data.heading = atof(row[5]);
+		itemid = (uint32)atoi(row[6]);
+		charges	= (int16)atoi(row[7]);
+        strcpy(data.object_name, row[8]);
+        type = (uint8)atoi(row[9]);
+        icon = (uint32)atoi(row[10]);
+		data.object_type = type;
+		data.linked_list_addr[0] = 0;
+        data.linked_list_addr[1] = 0;
+        data.unknown008	= (uint32)atoi(row[11]);
+        data.unknown010	= (uint32)atoi(row[12]);
+        data.unknown020	= (uint32)atoi(row[13]);
+        data.unknown024	= (uint32)atoi(row[14]);
+        data.unknown076	= (uint32)atoi(row[15]);
+        data.unknown084	= 0;
 
-			//Father Nitwit's fix... not perfect...
-			if(inst == nullptr && type != OT_DROPPEDITEM) {
-				inst = new ItemInst(ItemInstWorldContainer);
-			}
+        ItemInst* inst = nullptr;
+        //FatherNitwit: this dosent seem to work...
+        //tradeskill containers do not have an itemid of 0... at least what I am seeing
+        if (itemid == 0) {
+            // Generic tradeskill container
+            inst = new ItemInst(ItemInstWorldContainer);
+        }
+        else {
+            // Groundspawn object
+            inst = database.CreateItem(itemid);
+        }
 
-			// Load child objects if container
-			if (inst && inst->IsType(ItemClassContainer)) {
-				database.LoadWorldContainer(id, inst);
-			}
+        //Father Nitwit's fix... not perfect...
+        if(inst == nullptr && type != OT_DROPPEDITEM) {
+            inst = new ItemInst(ItemInstWorldContainer);
+        }
 
-			Object* object = new Object(id, type, icon, data, inst);
-			entity_list.AddObject(object, false);
-			if(type == OT_DROPPEDITEM && itemid != 0)
-			{
-				entity_list.RemoveObject(object->GetID());
-			}
+        // Load child objects if container
+        if (inst && inst->IsType(ItemClassContainer)) {
+            database.LoadWorldContainer(id, inst);
+        }
 
-			safe_delete(inst);
-		}
-		mysql_free_result(result);
-	}
-	else {
-		safe_delete_array(query);
-		LogFile->write(EQEMuLog::Error, "Error Loading Objects from DB: %s",errbuf);
-		return(false);
-	}
-	return(true);
+        Object* object = new Object(id, type, icon, data, inst);
+        entity_list.AddObject(object, false);
+        if(type == OT_DROPPEDITEM && itemid != 0)
+            entity_list.RemoveObject(object->GetID());
+
+        safe_delete(inst);
+    }
+
+	return true;
 }
 
 //this also just loads into entity_list, not really into zone
@@ -464,30 +451,29 @@ void Zone::LoadTempMerchantData_result(MYSQL_RES* result) {
 
 //there should prolly be a temp counterpart of this...
 void Zone::LoadNewMerchantData(uint32 merchantid){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+
 	std::list<MerchantList> merlist;
-	if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT item, slot, faction_required, level_required, alt_currency_cost, classes_required, probability FROM merchantlist WHERE merchantid=%d", merchantid), errbuf, &result)) {
-		while((row = mysql_fetch_row(result))) {
-			MerchantList ml;
-			ml.id = merchantid;
-			ml.item = atoul(row[0]);
-			ml.slot = atoul(row[1]);
-			ml.faction_required = atoul(row[2]);
-			ml.level_required = atoul(row[3]);
-			ml.alt_currency_cost = atoul(row[3]);
-			ml.classes_required = atoul(row[4]);
-			ml.probability = atoul(row[5]);
-			merlist.push_back(ml);
-		}
-		merchanttable[merchantid] = merlist;
-		mysql_free_result(result);
-	}
-	else
-		LogFile->write(EQEMuLog::Error, "Error in LoadNewMerchantData query '%s' %s", query, errbuf);
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT item, slot, faction_required, level_required, alt_currency_cost, "
+                                    "classes_required FROM merchantlist WHERE merchantid=%d", merchantid);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadNewMerchantData query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
+        return;
+    }
+
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        MerchantList ml;
+        ml.id = merchantid;
+        ml.item = atoul(row[0]);
+        ml.slot = atoul(row[1]);
+        ml.faction_required = atoul(row[2]);
+        ml.level_required = atoul(row[3]);
+        ml.alt_currency_cost = atoul(row[3]);
+        ml.classes_required = atoul(row[4]);
+        merlist.push_back(ml);
+    }
+
+    merchanttable[merchantid] = merlist;
 }
 
 void Zone::LoadMerchantData_result(MYSQL_RES* result) {
@@ -556,149 +542,125 @@ void Zone::GetMerchantDataForZoneLoad(){
 
 void Zone::LoadMercTemplates(){
 
-	std::string errorMessage;
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES* DatasetResult;
-	MYSQL_ROW DataRow;
 	std::list<MercStanceInfo> merc_stances;
 	merc_templates.clear();
-
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT `class_id`, `proficiency_id`, `stance_id`, `isdefault` FROM `merc_stance_entries` order by `class_id`, `proficiency_id`, `stance_id`"), TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
-	}
+    std::string query = "SELECT `class_id`, `proficiency_id`, `stance_id`, `isdefault` FROM "
+                        "`merc_stance_entries` ORDER BY `class_id`, `proficiency_id`, `stance_id`";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadMercTemplates()");
 	else {
-		while(DataRow = mysql_fetch_row(DatasetResult)) {
+		for (auto row = results.begin(); row != results.end(); ++row) {
 			MercStanceInfo tempMercStanceInfo;
 
-			tempMercStanceInfo.ClassID = atoi(DataRow[0]);
-			tempMercStanceInfo.ProficiencyID = atoi(DataRow[1]);
-			tempMercStanceInfo.StanceID = atoi(DataRow[2]);
-			tempMercStanceInfo.IsDefault = atoi(DataRow[3]);
+			tempMercStanceInfo.ClassID = atoi(row[0]);
+			tempMercStanceInfo.ProficiencyID = atoi(row[1]);
+			tempMercStanceInfo.StanceID = atoi(row[2]);
+			tempMercStanceInfo.IsDefault = atoi(row[3]);
 
 			merc_stances.push_back(tempMercStanceInfo);
 		}
-
-		mysql_free_result(DatasetResult);
 	}
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT DISTINCT MTem.merc_template_id, MTyp.dbstring AS merc_type_id, MTem.dbstring AS merc_subtype_id, MTyp.race_id, MS.class_id, MTyp.proficiency_id, MS.tier_id, 0 AS CostFormula, MTem.clientversion, MTem.merc_npc_type_id FROM merc_types MTyp, merc_templates MTem, merc_subtypes MS WHERE MTem.merc_type_id = MTyp.merc_type_id AND MTem.merc_subtype_id = MS.merc_subtype_id ORDER BY MTyp.race_id, MS.class_id, MTyp.proficiency_id;"), TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
-	}
-	else {
-		while(DataRow = mysql_fetch_row(DatasetResult)) {
-			int stanceIndex = 0;
-			MercTemplate tempMercTemplate;
-
-			tempMercTemplate.MercTemplateID = atoi(DataRow[0]);
-			tempMercTemplate.MercType = atoi(DataRow[1]);
-			tempMercTemplate.MercSubType = atoi(DataRow[2]);
-			tempMercTemplate.RaceID = atoi(DataRow[3]);
-			tempMercTemplate.ClassID = atoi(DataRow[4]);
-			tempMercTemplate.ProficiencyID = atoi(DataRow[5]);
-			tempMercTemplate.TierID = atoi(DataRow[6]);
-			tempMercTemplate.CostFormula = atoi(DataRow[7]);
-			tempMercTemplate.ClientVersion = atoi(DataRow[8]);
-			tempMercTemplate.MercNPCID = atoi(DataRow[9]);
-
-			for(int i = 0; i < MaxMercStanceID; i++) {
-				tempMercTemplate.Stances[i] = 0;
-			}
-
-			for (std::list<MercStanceInfo>::iterator mercStanceListItr = merc_stances.begin(); mercStanceListItr != merc_stances.end(); ++mercStanceListItr) {
-				if(mercStanceListItr->ClassID == tempMercTemplate.ClassID && mercStanceListItr->ProficiencyID == tempMercTemplate.ProficiencyID) {
-					zone->merc_stance_list[tempMercTemplate.MercTemplateID].push_back((*mercStanceListItr));
-					tempMercTemplate.Stances[stanceIndex] = mercStanceListItr->StanceID;
-					stanceIndex++;
-				}
-			}
-
-			merc_templates[tempMercTemplate.MercTemplateID] = tempMercTemplate;
-		}
-
-		mysql_free_result(DatasetResult);
+    query = "SELECT DISTINCT MTem.merc_template_id, MTyp.dbstring "
+            "AS merc_type_id, MTem.dbstring "
+            "AS merc_subtype_id, MTyp.race_id, MS.class_id, MTyp.proficiency_id, MS.tier_id, 0 "
+            "AS CostFormula, MTem.clientversion, MTem.merc_npc_type_id "
+            "FROM merc_types MTyp, merc_templates MTem, merc_subtypes MS "
+            "WHERE MTem.merc_type_id = MTyp.merc_type_id AND MTem.merc_subtype_id = MS.merc_subtype_id "
+            "ORDER BY MTyp.race_id, MS.class_id, MTyp.proficiency_id;";
+    results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadMercTemplates()");
+        return;
 	}
 
-	safe_delete_array(Query);
-	Query = 0;
+    for (auto row = results.begin(); row != results.end(); ++row) {
 
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadMercTemplates()");
-	}
+        MercTemplate tempMercTemplate;
+
+        tempMercTemplate.MercTemplateID = atoi(row[0]);
+        tempMercTemplate.MercType = atoi(row[1]);
+        tempMercTemplate.MercSubType = atoi(row[2]);
+        tempMercTemplate.RaceID = atoi(row[3]);
+        tempMercTemplate.ClassID = atoi(row[4]);
+        tempMercTemplate.ProficiencyID = atoi(row[5]);
+        tempMercTemplate.TierID = atoi(row[6]);
+        tempMercTemplate.CostFormula = atoi(row[7]);
+        tempMercTemplate.ClientVersion = atoi(row[8]);
+        tempMercTemplate.MercNPCID = atoi(row[9]);
+
+        for(int i = 0; i < MaxMercStanceID; i++)
+            tempMercTemplate.Stances[i] = 0;
+
+        int stanceIndex = 0;
+        for (std::list<MercStanceInfo>::iterator mercStanceListItr = merc_stances.begin(); mercStanceListItr != merc_stances.end(); ++mercStanceListItr, ++stanceIndex) {
+            if(mercStanceListItr->ClassID != tempMercTemplate.ClassID || mercStanceListItr->ProficiencyID != tempMercTemplate.ProficiencyID)
+                continue;
+
+            zone->merc_stance_list[tempMercTemplate.MercTemplateID].push_back((*mercStanceListItr));
+            tempMercTemplate.Stances[stanceIndex] = mercStanceListItr->StanceID;
+        }
+
+        merc_templates[tempMercTemplate.MercTemplateID] = tempMercTemplate;
+    }
+
 }
-
 
 void Zone::LoadLevelEXPMods(){
-	std::string errorMessage;
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES* DatasetResult;
-	MYSQL_ROW DataRow;
+
 	level_exp_mod.clear();
+    const std::string query = "SELECT level, exp_mod, aa_exp_mod FROM level_exp_mods";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadEXPLevelMods()");
+        return;
+    }
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT level, exp_mod, aa_exp_mod FROM level_exp_mods"), TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
-	}
-	else {
-		while(DataRow = mysql_fetch_row(DatasetResult)) {
-			uint32 index = atoi(DataRow[0]);
-			float exp_mod = atof(DataRow[1]);
-			float aa_exp_mod = atof(DataRow[2]);
-			level_exp_mod[index].ExpMod = exp_mod;
-			level_exp_mod[index].AAExpMod = aa_exp_mod;
-		}
-		mysql_free_result(DatasetResult);
-	}
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        uint32 index = atoi(row[0]);
+		float exp_mod = atof(row[1]);
+		float aa_exp_mod = atof(row[2]);
+		level_exp_mod[index].ExpMod = exp_mod;
+		level_exp_mod[index].AAExpMod = aa_exp_mod;
+    }
 
-	safe_delete_array(Query);
-	Query = 0;
-
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadEXPLevelMods()");
-	}
 }
+
 void Zone::LoadMercSpells(){
 
-	std::string errorMessage;
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES* DatasetResult;
-	MYSQL_ROW DataRow;
 	merc_spells_list.clear();
+    const std::string query = "SELECT msl.class_id, msl.proficiency_id, msle.spell_id, msle.spell_type, "
+                            "msle.stance_id, msle.minlevel, msle.maxlevel, msle.slot, msle.procChance "
+                            "FROM merc_spell_lists msl, merc_spell_list_entries msle "
+                            "WHERE msle.merc_spell_list_id = msl.merc_spell_list_id "
+                            "ORDER BY msl.class_id, msl.proficiency_id, msle.spell_type, msle.minlevel, msle.slot;";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Zone::LoadMercSpells()");
+        return;
+    }
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT msl.class_id, msl.proficiency_id, msle.spell_id, msle.spell_type, msle.stance_id, msle.minlevel, msle.maxlevel, msle.slot, msle.procChance FROM merc_spell_lists msl, merc_spell_list_entries msle WHERE msle.merc_spell_list_id = msl.merc_spell_list_id ORDER BY msl.class_id, msl.proficiency_id, msle.spell_type, msle.minlevel, msle.slot;"), TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
-	}
-	else {
-		while(DataRow = mysql_fetch_row(DatasetResult)) {
-			uint32 classid;
-			MercSpellEntry tempMercSpellEntry;
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        uint32 classid;
+        MercSpellEntry tempMercSpellEntry;
 
-			classid = atoi(DataRow[0]);
-			tempMercSpellEntry.proficiencyid = atoi(DataRow[1]);
-			tempMercSpellEntry.spellid = atoi(DataRow[2]);
-			tempMercSpellEntry.type = atoi(DataRow[3]);
-			tempMercSpellEntry.stance = atoi(DataRow[4]);
-			tempMercSpellEntry.minlevel = atoi(DataRow[5]);
-			tempMercSpellEntry.maxlevel = atoi(DataRow[6]);
-			tempMercSpellEntry.slot = atoi(DataRow[7]);
-			tempMercSpellEntry.proc_chance = atoi(DataRow[8]);
+        classid = atoi(row[0]);
+        tempMercSpellEntry.proficiencyid = atoi(row[1]);
+        tempMercSpellEntry.spellid = atoi(row[2]);
+        tempMercSpellEntry.type = atoi(row[3]);
+        tempMercSpellEntry.stance = atoi(row[4]);
+        tempMercSpellEntry.minlevel = atoi(row[5]);
+        tempMercSpellEntry.maxlevel = atoi(row[6]);
+        tempMercSpellEntry.slot = atoi(row[7]);
+        tempMercSpellEntry.proc_chance = atoi(row[8]);
 
-			merc_spells_list[classid].push_back(tempMercSpellEntry);
-		}
+        merc_spells_list[classid].push_back(tempMercSpellEntry);
+    }
 
-		mysql_free_result(DatasetResult);
+    if(MERC_DEBUG > 0)
+        LogFile->write(EQEMuLog::Debug, "Mercenary Debug: Loaded %i merc spells.", merc_spells_list[1].size() + merc_spells_list[2].size() + merc_spells_list[9].size() + merc_spells_list[12].size());
 
-		if(MERC_DEBUG > 0)
-			LogFile->write(EQEMuLog::Debug, "Mercenary Debug: Loaded %i merc spells.", merc_spells_list[1].size() + merc_spells_list[2].size() + merc_spells_list[9].size() + merc_spells_list[12].size());
-	}
-
-	safe_delete_array(Query);
-	Query = 0;
-
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadMercSpells()");
-	}
 }
 
 void Zone::DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) {
@@ -791,7 +753,7 @@ void Zone::Shutdown(bool quite)
 	if (!quite)
 		LogFile->write(EQEMuLog::Normal, "Zone shutdown: going to sleep");
 	ZoneLoaded = false;
-	
+
 	zone->ResetAuth();
 	safe_delete(zone);
 	dbasync->CommitWrites();
@@ -1383,7 +1345,7 @@ bool Zone::Process() {
 	return true;
 }
 
-void Zone::ChangeWeather() 
+void Zone::ChangeWeather()
 {
 	if(!HasWeather())
 	{
@@ -1884,32 +1846,26 @@ bool Zone::RemoveSpawnGroup(uint32 in_id) {
 
 // Added By Hogie
 bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct* npcCorpseDecayTimes) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	int i = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT varname, value FROM variables WHERE varname like 'decaytime%%' ORDER BY varname"), errbuf, &result)) {
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result))) {
-			Seperator sep(row[0]);
-			npcCorpseDecayTimes[i].minlvl = atoi(sep.arg[1]);
-			npcCorpseDecayTimes[i].maxlvl = atoi(sep.arg[2]);
-			if (atoi(row[1]) > 7200)
-				npcCorpseDecayTimes[i].seconds = 720;
-			else
-				npcCorpseDecayTimes[i].seconds = atoi(row[1]);
-			i++;
-		}
-		mysql_free_result(result);
-	}
-	else {
-		safe_delete_array(query);
-		return false;
-	}
+	const std::string query = "SELECT varname, value FROM variables WHERE varname LIKE 'decaytime%%' ORDER BY varname";
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+        return false;
+
+	int index = 0;
+    for (auto row = results.begin(); row != results.end(); ++row, ++index) {
+        Seperator sep(row[0]);
+        npcCorpseDecayTimes[index].minlvl = atoi(sep.arg[1]);
+        npcCorpseDecayTimes[index].maxlvl = atoi(sep.arg[2]);
+
+        if (atoi(row[1]) > 7200)
+            npcCorpseDecayTimes[index].seconds = 720;
+        else
+            npcCorpseDecayTimes[index].seconds = atoi(row[1]);
+    }
+
 	return true;
-}// Added By Hogie -- End
+}
 
 void Zone::weatherSend()
 {
@@ -2080,170 +2036,129 @@ void Zone::SetInstanceTimer(uint32 new_duration)
 
 void Zone::LoadLDoNTraps()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, type, spell_id, "
-		"skill, locked FROM ldon_trap_templates"), errbuf, &result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			uint8 x = 0;
-			LDoNTrapTemplate *lt = new LDoNTrapTemplate;
-			lt->id = atoi(row[x++]);
-			lt->type = (LDoNChestTypes)atoi(row[x++]);
-			lt->spell_id = atoi(row[x++]);
-			lt->skill = atoi(row[x++]);
-			lt->locked = atoi(row[x++]);
-			ldon_trap_list[lt->id] = lt;
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadLDoNTraps: %s (%s)", query, errbuf);
-		safe_delete_array(query);
+	const std::string query = "SELECT id, type, spell_id, skill, locked FROM ldon_trap_templates";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Zone::LoadLDoNTraps: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return;
-	}
+    }
+
+    for (auto row = results.begin();row != results.end(); ++row) {
+        LDoNTrapTemplate *lt = new LDoNTrapTemplate;
+        lt->id = atoi(row[0]);
+        lt->type = (LDoNChestTypes)atoi(row[1]);
+        lt->spell_id = atoi(row[2]);
+        lt->skill = atoi(row[3]);
+        lt->locked = atoi(row[4]);
+        ldon_trap_list[lt->id] = lt;
+    }
+
 }
 
 void Zone::LoadLDoNTrapEntries()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, trap_id FROM ldon_trap_entries"),errbuf,&result)) {
-		while((row = mysql_fetch_row(result)))
-		{
-			uint32 id = atoi(row[0]);
-			uint32 trap_id = atoi(row[1]);
-
-			LDoNTrapTemplate *tt = nullptr;
-			std::map<uint32,LDoNTrapTemplate*>::iterator it;
-			it = ldon_trap_list.find(trap_id);
-			if(it == ldon_trap_list.end())
-			{
-				continue;
-			}
-			else
-			{
-				tt = ldon_trap_list[trap_id];
-			}
-
-			std::list<LDoNTrapTemplate*> temp;
-			std::map<uint32,std::list<LDoNTrapTemplate*> >::iterator iter;
-
-			iter = ldon_trap_entry_list.find(id);
-			if(iter == ldon_trap_entry_list.end())
-			{
-				temp.push_back(tt);
-				ldon_trap_entry_list[id] = temp;
-			}
-			else
-			{
-				temp = ldon_trap_entry_list[id];
-				temp.push_back(tt);
-				ldon_trap_entry_list[id] = temp;
-			}
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadLDoNTrapEntries: %s (%s)", query, errbuf);
-		safe_delete_array(query);
+	const std::string query = "SELECT id, trap_id FROM ldon_trap_entries";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Zone::LoadLDoNTrapEntries: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return;
-	}
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row)
+    {
+        uint32 id = atoi(row[0]);
+        uint32 trap_id = atoi(row[1]);
+
+        LDoNTrapTemplate *trapTemplate = nullptr;
+        auto it = ldon_trap_list.find(trap_id);
+
+        if(it == ldon_trap_list.end())
+            continue;
+
+        trapTemplate = ldon_trap_list[trap_id];
+
+        std::list<LDoNTrapTemplate*> temp;
+        auto iter = ldon_trap_entry_list.find(id);
+
+        if(iter != ldon_trap_entry_list.end())
+            temp = ldon_trap_entry_list[id];
+
+        temp.push_back(trapTemplate);
+        ldon_trap_entry_list[id] = temp;
+    }
+
 }
 
 void Zone::LoadVeteranRewards()
 {
 	VeteranRewards.clear();
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	InternalVeteranReward current_reward;
-	uint8 idx = 0;
 
+	InternalVeteranReward current_reward;
 	current_reward.claim_id = 0;
 
+    const std::string query = "SELECT claim_id, name, item_id, charges "
+                            "FROM veteran_reward_templates "
+                            "WHERE reward_slot < 8 and claim_id > 0 "
+                            "ORDER by claim_id, reward_slot";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Zone::LoadVeteranRewards: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+        return;
+    }
 
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT claim_id, name, item_id, charges FROM"
-		" veteran_reward_templates WHERE reward_slot < 8 and claim_id > 0 ORDER by claim_id, reward_slot"),
-		errbuf,&result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			uint32 claim = atoi(row[0]);
-			if(claim != current_reward.claim_id)
-			{
-				if(current_reward.claim_id != 0)
-				{
-					current_reward.claim_count = idx;
-					current_reward.number_available = 1;
-					VeteranRewards.push_back(current_reward);
-				}
-				idx = 0;
-				memset(&current_reward, 0, sizeof(InternalVeteranReward));
-				current_reward.claim_id = claim;
-			}
+	int index = 0;
+    for (auto row = results.begin(); row != results.end(); ++row, ++index)
+    {
+        uint32 claim = atoi(row[0]);
 
-			strcpy(current_reward.items[idx].item_name, row[1]);
-			current_reward.items[idx].item_id = atoi(row[2]);
-			current_reward.items[idx].charges = atoi(row[3]);
-			idx++;
-		}
+        if(claim != current_reward.claim_id)
+        {
+            if(current_reward.claim_id != 0)
+            {
+                current_reward.claim_count = index;
+                current_reward.number_available = 1;
+                VeteranRewards.push_back(current_reward);
+            }
 
-		if(current_reward.claim_id != 0)
-		{
-			current_reward.claim_count = idx;
-			current_reward.number_available = 1;
-			VeteranRewards.push_back(current_reward);
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadVeteranRewards: %s (%s)", query, errbuf);
-		safe_delete_array(query);
-	}
+            index = 0;
+            memset(&current_reward, 0, sizeof(InternalVeteranReward));
+            current_reward.claim_id = claim;
+        }
+
+        strcpy(current_reward.items[index].item_name, row[1]);
+        current_reward.items[index].item_id = atoi(row[2]);
+        current_reward.items[index].charges = atoi(row[3]);
+    }
+
+    if(current_reward.claim_id != 0)
+    {
+        current_reward.claim_count = index;
+        current_reward.number_available = 1;
+        VeteranRewards.push_back(current_reward);
+    }
+
 }
 
 void Zone::LoadAlternateCurrencies()
 {
 	AlternateCurrencies.clear();
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+
 	AltCurrencyDefinition_Struct current_currency;
 
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, item_id from alternate_currency"),
-		errbuf,&result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			current_currency.id = atoi(row[0]);
-			current_currency.item_id = atoi(row[1]);
-			AlternateCurrencies.push_back(current_currency);
-		}
+    const std::string query = "SELECT id, item_id FROM alternate_currency";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Zone::LoadAlternateCurrencies: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+		return;
+    }
 
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadAlternateCurrencies: %s (%s)", query, errbuf);
-		safe_delete_array(query);
-	}
+    for (auto row = results.begin(); row != results.end(); ++row)
+    {
+        current_currency.id = atoi(row[0]);
+        current_currency.item_id = atoi(row[1]);
+        AlternateCurrencies.push_back(current_currency);
+    }
+
 }
 
 void Zone::UpdateQGlobal(uint32 qid, QGlobal newGlobal)
@@ -2278,28 +2193,18 @@ void Zone::DeleteQGlobal(std::string name, uint32 npcID, uint32 charID, uint32 z
 
 void Zone::LoadAdventureFlavor()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, text FROM adventure_template_entry_flavor"), errbuf, &result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			uint32 id = atoi(row[0]);
-			std::string in_str = row[1];
-			adventure_entry_list_flavor[id] = in_str;
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadAdventureFlavor: %s (%s)", query, errbuf);
-		safe_delete_array(query);
+	const std::string query = "SELECT id, text FROM adventure_template_entry_flavor";
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Zone::LoadAdventureFlavor: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        uint32 id = atoi(row[0]);
+        adventure_entry_list_flavor[id] = row[1];
+    }
+
 }
 
 void Zone::DoAdventureCountIncrease()
@@ -2361,31 +2266,25 @@ void Zone::DoAdventureActions()
 
 void Zone::LoadNPCEmotes(LinkedList<NPC_Emote_Struct*>* NPCEmoteList)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	NPCEmoteList->Clear();
 
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT emoteid, event_, type, text FROM npc_emotes"), errbuf, &result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			NPC_Emote_Struct* nes = new NPC_Emote_Struct;
-			nes->emoteid = atoi(row[0]);
-			nes->event_ = atoi(row[1]);
-			nes->type = atoi(row[2]);
-			strn0cpy(nes->text, row[3], sizeof(nes->text));
-			NPCEmoteList->Insert(nes);
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadNPCEmotes: %s (%s)", query, errbuf);
-		safe_delete_array(query);
-	}
+	NPCEmoteList->Clear();
+    const std::string query = "SELECT emoteid, event_, type, text FROM npc_emotes";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Zone::LoadNPCEmotes: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+        return;
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row)
+    {
+        NPC_Emote_Struct* nes = new NPC_Emote_Struct;
+        nes->emoteid = atoi(row[0]);
+        nes->event_ = atoi(row[1]);
+        nes->type = atoi(row[2]);
+        strn0cpy(nes->text, row[3], sizeof(nes->text));
+        NPCEmoteList->Insert(nes);
+    }
+
 }
 
 void Zone::ReloadWorld(uint32 Option){
@@ -2398,35 +2297,30 @@ void Zone::ReloadWorld(uint32 Option){
 
 void Zone::LoadTickItems()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 	tick_items.clear();
 
-	if(database.RunQuery(query, MakeAnyLenString(&query, "SELECT it_itemid, it_chance, it_level, it_qglobal, it_bagslot FROM item_tick"), errbuf, &result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			if(atoi(row[0]) >= 1)
-			{
-				item_tick_struct ti_tmp;
-				ti_tmp.itemid = atoi(row[0]);
-				ti_tmp.chance = atoi(row[1]);
-				ti_tmp.level = atoi(row[2]);
-				ti_tmp.bagslot = (int16)atoi(row[4]);
-				ti_tmp.qglobal = std::string(row[3]);
-				tick_items[atoi(row[0])] = ti_tmp;
-			}
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadTickItems: %s (%s)", query, errbuf);
-		safe_delete_array(query);
-	}
+    const std::string query = "SELECT it_itemid, it_chance, it_level, it_qglobal, it_bagslot FROM item_tick";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Zone::LoadTickItems: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+        return;
+    }
+
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        if(atoi(row[0]) == 0)
+            continue;
+
+        item_tick_struct ti_tmp;
+		ti_tmp.itemid = atoi(row[0]);
+		ti_tmp.chance = atoi(row[1]);
+		ti_tmp.level = atoi(row[2]);
+		ti_tmp.bagslot = (int16)atoi(row[4]);
+		ti_tmp.qglobal = std::string(row[3]);
+		tick_items[atoi(row[0])] = ti_tmp;
+
+    }
+
 }
 
 uint32 Zone::GetSpawnKillCount(uint32 in_spawnid) {
@@ -2446,24 +2340,15 @@ uint32 Zone::GetSpawnKillCount(uint32 in_spawnid) {
 
 void Zone::UpdateHotzone()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	bool updh;
+    std::string query = StringFormat("SELECT hotzone FROM zone WHERE short_name = '%s'", GetShortName());
+    auto results = database.QueryDatabase(query);
+    if (!results.Success())
+        return;
 
-	if(database.RunQuery(query, MakeAnyLenString(&query,"SELECT  hotzone FROM zone WHERE short_name = '%s'", GetShortName()), errbuf, &result) )
-	{
-		if( (row = mysql_fetch_row(result)) )
-		{
-			updh = atoi(row[0]) == 0 ? false:true;
-			//Hotzone status has changed
-			if(is_hotzone != updh)
-			{
-				is_hotzone = updh;
-			}
-		}
-		mysql_free_result(result);
-	}
-	safe_delete_array(query);
+    if (results.RowCount() == 0)
+        return;
+
+    auto row = results.begin();
+
+    is_hotzone = atoi(row[0]) == 0 ? false: true;
 }
