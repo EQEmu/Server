@@ -2143,7 +2143,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 					{
 						if(CheckLosFN((*iter)) || spells[spell_id].npc_no_los){
 							(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
-							SpellOnTarget(spell_id, spell_target, false, true, resist_adjust);
+							SpellOnTarget(spell_id, (*iter), false, true, resist_adjust);
 						}
 					}
 				}
