@@ -2402,23 +2402,18 @@ bool ZoneDatabase::GetNPCFactionList(uint32 npcfaction_id, int32* faction_id, in
 //o--------------------------------------------------------------
 bool ZoneDatabase::SetCharacterFactionLevel(uint32 char_id, int32 faction_id, int32 value, uint8 temp, faction_map &val_list)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 affected_rows = 0;
 
-	if (!RunQuery(query, MakeAnyLenString(&query,
-		"DELETE FROM faction_values WHERE char_id=%i AND faction_id = %i",
-		char_id, faction_id), errbuf)) {
-		std::cerr << "Error in SetCharacterFactionLevel query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+	std::string query = StringFormat("DELETE FROM faction_values "
+                                    "WHERE char_id=%i AND faction_id = %i",
+                                    char_id, faction_id);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        std::cerr << "Error in SetCharacterFactionLevel query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
-	}
+    }
 
 	if(value == 0)
-	{
-		safe_delete_array(query);
 		return true;
-	}
 
 	if(temp == 2)
 		temp = 0;
@@ -2426,23 +2421,19 @@ bool ZoneDatabase::SetCharacterFactionLevel(uint32 char_id, int32 faction_id, in
 	if(temp == 3)
 		temp = 1;
 
-	if (!RunQuery(query, MakeAnyLenString(&query,
-		"INSERT INTO faction_values (char_id,faction_id,current_value,temp) VALUES (%i,%i,%i,%i)",
-		char_id, faction_id,value,temp), errbuf, 0, &affected_rows)) {
-		std::cerr << "Error in SetCharacterFactionLevel query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+    query = StringFormat("INSERT INTO faction_values (char_id, faction_id, current_value, temp) "
+                        "VALUES (%i, %i, %i, %i)", char_id, faction_id, value, temp);
+    results = QueryDatabase(query);
+	if (!results.Success()) {
+		std::cerr << "Error in SetCharacterFactionLevel query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
-	safe_delete_array(query);
-
-	if (affected_rows == 0)
-	{
+	if (results.RowsAffected() == 0)
 		return false;
-	}
 
 	val_list[faction_id] = value;
-	return(true);
+	return true;
 }
 
 bool ZoneDatabase::LoadFactionData()
