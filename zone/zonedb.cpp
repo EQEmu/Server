@@ -2438,69 +2438,47 @@ bool ZoneDatabase::SetCharacterFactionLevel(uint32 char_id, int32 faction_id, in
 
 bool ZoneDatabase::LoadFactionData()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	query = new char[256];
-	strcpy(query, "SELECT MAX(id) FROM faction_list");
 
-
-	if (RunQuery(query, strlen(query), errbuf, &result)) {
-		safe_delete_array(query);
-		row = mysql_fetch_row(result);
-		if (row && row[0])
-		{
-			max_faction = atoi(row[0]);
-			faction_array = new Faction*[max_faction+1];
-			for(unsigned int i=0; i<max_faction; i++)
-			{
-				faction_array[i] = nullptr;
-			}
-			mysql_free_result(result);
-
-			MakeAnyLenString(&query, "SELECT id,name,base FROM faction_list");
-			if (RunQuery(query, strlen(query), errbuf, &result))
-			{
-				safe_delete_array(query);
-				while((row = mysql_fetch_row(result)))
-				{
-					uint32 index = atoi(row[0]);
-					faction_array[index] = new Faction;
-					strn0cpy(faction_array[index]->name, row[1], 50);
-					faction_array[index]->base = atoi(row[2]);
-
-					char sec_errbuf[MYSQL_ERRMSG_SIZE];
-					MYSQL_RES *sec_result;
-					MYSQL_ROW sec_row;
-					MakeAnyLenString(&query, "SELECT `mod`, `mod_name` FROM `faction_list_mod` WHERE faction_id=%u", index);
-					if (RunQuery(query, strlen(query), sec_errbuf, &sec_result)) {
-						while((sec_row = mysql_fetch_row(sec_result)))
-						{
-							faction_array[index]->mods[sec_row[1]] = atoi(sec_row[0]);
-						}
-						mysql_free_result(sec_result);
-					}
-					safe_delete_array(query);
-				}
-				mysql_free_result(result);
-			}
-			else {
-				std::cerr << "Error in LoadFactionData '" << query << "' " << errbuf << std::endl;
-				safe_delete_array(query);
-				return false;
-			}
-		}
-		else {
-			mysql_free_result(result);
-		}
-	}
-	else {
-		std::cerr << "Error in LoadFactionData '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+	std::string query = "SELECT MAX(id) FROM faction_list";
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		std::cerr << "Error in LoadFactionData '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
-	return true;
+
+    if (results.RowCount() == 0)
+        return false;
+
+    auto row = results.begin();
+
+	max_faction = atoi(row[0]);
+    faction_array = new Faction*[max_faction+1];
+    for(unsigned int index=0; index<max_faction; index++)
+        faction_array[index] = nullptr;
+
+    query = "SELECT id, name, base FROM faction_list";
+    results = QueryDatabase(query);
+    if (!results.Success()) {
+        std::cerr << "Error in LoadFactionData '" << query << "' " << results.ErrorMessage() << std::endl;
+        return false;
+    }
+
+    for (row = results.begin(); row != results.end(); ++row) {
+        uint32 index = atoi(row[0]);
+		faction_array[index] = new Faction;
+		strn0cpy(faction_array[index]->name, row[1], 50);
+		faction_array[index]->base = atoi(row[2]);
+
+
+        query = StringFormat("SELECT `mod`, `mod_name` FROM `faction_list_mod` WHERE faction_id = %u", index);
+        auto modResults = QueryDatabase(query);
+        if (!modResults.Success())
+            continue;
+
+		for (auto modRow = modResults.begin(); modRow != modResults.end(); ++modRow)
+            faction_array[index]->mods[modRow[1]] = atoi(modRow[0]);
+
+    }
 }
 
 bool ZoneDatabase::GetFactionIdsForNPC(uint32 nfl_id, std::list<struct NPCFaction*> *faction_list, int32* primary_faction) {
