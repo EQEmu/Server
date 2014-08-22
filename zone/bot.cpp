@@ -3,7 +3,7 @@
 #include "bot.h"
 #include "object.h"
 #include "doors.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 #include "../common/string_util.h"
 
 extern volatile bool ZoneLoaded;

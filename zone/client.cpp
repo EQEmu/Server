@@ -57,11 +57,11 @@ extern volatile bool RunLoops;
 #include "../common/string_util.h"
 #include "forage.h"
 #include "command.h"
-#include "StringIDs.h"
-#include "NpcAI.h"
+#include "string_ids.h"
+#include "npc_ai.h"
 #include "client_logs.h"
 #include "guild_mgr.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 
 
 extern EntityList entity_list;

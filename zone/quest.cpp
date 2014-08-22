@@ -29,7 +29,7 @@
 	#include "../common/unix.h"
 #endif
 
-#include "Quest.h"
+#include "quest.h"
 
 pquest_entry	Quest::m_pQuests;
 int				Quest::m_nQuests;

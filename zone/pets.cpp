@@ -35,7 +35,7 @@
 #include "../common/unix.h"
 #endif
 
-#include "StringIDs.h"
+#include "string_ids.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // pet related functions

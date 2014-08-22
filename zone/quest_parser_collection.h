@@ -23,7 +23,7 @@
 #include "../common/item.h"
 
 #include "masterentity.h"
-#include "QuestInterface.h"
+#include "quest_interface.h"
 
 #include <string.h>
 #include <string>

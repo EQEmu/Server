@@ -43,9 +43,9 @@ class Client;
 #include "npc.h"
 #include "merc.h"
 #include "zone.h"
-#include "AA.h"
+#include "aa.h"
 #include "questmgr.h"
-#include "QGlobals.h"
+#include "qglobals.h"
 
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)

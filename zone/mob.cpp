@@ -18,9 +18,9 @@
 #include "../common/debug.h"
 #include "masterentity.h"
 #include "../common/spdat.h"
-#include "StringIDs.h"
+#include "string_ids.h"
 #include "worldserver.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 #include "../common/string_util.h"
 
 #include <sstream>

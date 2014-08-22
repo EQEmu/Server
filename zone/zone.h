@@ -32,7 +32,7 @@
 #include "spawn2.h"
 #include "tasks.h"
 #include "pathing.h"
-#include "QGlobals.h"
+#include "qglobals.h"
 #include <unordered_map>
 
 class Map;

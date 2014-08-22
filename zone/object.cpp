@@ -27,9 +27,9 @@
 #include "../common/misc_functions.h"
 #include "../common/string_util.h"
 #include "../common/features.h"
-#include "StringIDs.h"
+#include "string_ids.h"
 
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 
 const char DEFAULT_OBJECT_NAME[] = "IT63_ACTORDEF";
 const char DEFAULT_OBJECT_NAME_SUFFIX[] = "_ACTORDEF";

@@ -37,10 +37,10 @@ Child of the Mob class.
 #include "../common/packet_functions.h"
 #include "../common/string_util.h"
 #include "../common/crc32.h"
-#include "StringIDs.h"
+#include "string_ids.h"
 #include "worldserver.h"
 #include "../common/rulesys.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 
 extern EntityList entity_list;
 extern Zone* zone;

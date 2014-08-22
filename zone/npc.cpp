@@ -43,7 +43,7 @@
 #include "../common/misc_functions.h"
 #include "../common/string_util.h"
 #include "../common/rulesys.h"
-#include "StringIDs.h"
+#include "string_ids.h"
 
 //#define SPELLQUEUE //Use only if you want to be spammed by spell testing
 
@@ -52,7 +52,7 @@ extern Zone* zone;
 extern volatile bool ZoneLoaded;
 extern EntityList entity_list;
 
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 
 NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float heading, int iflymode, bool IsCorpse)
 : Mob(d->name,

@@ -26,7 +26,7 @@
 #include "masterentity.h"
 #include "embparser.h"
 #include "questmgr.h"
-#include "QGlobals.h"
+#include "qglobals.h"
 #include "zone.h"
 #include <algorithm>
 #include <sstream>

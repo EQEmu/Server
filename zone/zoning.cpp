@@ -23,8 +23,8 @@
 #include "../common/packet_dump.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
-#include "StringIDs.h"
-#include "QuestParserCollection.h"
+#include "string_ids.h"
+#include "quest_parser_collection.h"
 
 extern WorldServer worldserver;
 extern Zone* zone;

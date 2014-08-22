@@ -23,15 +23,15 @@
 #include <algorithm>
 #include "npc.h"
 #include "masterentity.h"
-#include "NpcAI.h"
+#include "npc_ai.h"
 #include "map.h"
 #include "../common/moremath.h"
-#include "StringIDs.h"
+#include "string_ids.h"
 #include "../common/misc_functions.h"
 #include "../common/string_util.h"
 #include "../common/rulesys.h"
 #include "../common/features.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 #include "water_map.h"
 
 extern EntityList entity_list;

@@ -20,8 +20,8 @@
 #define EQMEU_EMBPARSER_H
 #ifdef EMBPERL
 
-#include "QuestParserCollection.h"
-#include "QuestInterface.h"
+#include "quest_parser_collection.h"
+#include "quest_interface.h"
 #include <string>
 #include <queue>
 #include <map>

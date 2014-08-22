@@ -50,7 +50,7 @@
 #include "../common/string_util.h"
 #include "../common/spdat.h"
 #include "petitions.h"
-#include "NpcAI.h"
+#include "npc_ai.h"
 #include "../common/skills.h"
 #include "forage.h"
 #include "zone.h"
@@ -58,11 +58,11 @@
 #include "../common/faction.h"
 #include "../common/crc32.h"
 #include "../common/rulesys.h"
-#include "StringIDs.h"
+#include "string_ids.h"
 #include "map.h"
 #include "guild_mgr.h"
 #include <string>
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 
 extern Zone* zone;
 extern volatile bool ZoneLoaded;

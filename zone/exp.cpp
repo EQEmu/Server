@@ -18,10 +18,10 @@
 #include "../common/debug.h"
 #include "../common/features.h"
 #include "masterentity.h"
-#include "StringIDs.h"
+#include "string_ids.h"
 #include "../common/string_util.h"
 #include "../common/rulesys.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 
 
 static uint32 MaxBankedGroupLeadershipPoints(int Level)

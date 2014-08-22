@@ -30,8 +30,8 @@
 #include "worldserver.h"
 #include "zonedb.h"
 #include "petitions.h"
-#include "StringIDs.h"
-#include "NpcAI.h"
+#include "string_ids.h"
+#include "npc_ai.h"
 
 
 // Return max stat value for level

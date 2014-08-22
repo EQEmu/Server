@@ -5,8 +5,8 @@
 #include <luabind/luabind.hpp>
 #include <luabind/object.hpp>
 
-#include "QuestParserCollection.h"
-#include "QuestInterface.h"
+#include "quest_parser_collection.h"
+#include "quest_interface.h"
 
 #include "masterentity.h"
 #include "../common/seperator.h"

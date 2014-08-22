@@ -46,7 +46,7 @@
 #include "../common/eq_stream_factory.h"
 #include "../common/eq_stream.h"
 #include "../common/string_util.h"
-#include "ZoneConfig.h"
+#include "zone_config.h"
 #include "../common/breakdowns.h"
 #include "map.h"
 #include "water_map.h"
@@ -57,7 +57,7 @@
 #include "client_logs.h"
 #include "../common/rulesys.h"
 #include "guild_mgr.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 
 #ifdef _WINDOWS
 #define snprintf	_snprintf

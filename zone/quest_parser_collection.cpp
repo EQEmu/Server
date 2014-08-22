@@ -19,8 +19,8 @@
 #include "../common/debug.h"
 #include "../common/misc_functions.h"
 #include "../common/features.h"
-#include "QuestParserCollection.h"
-#include "QuestInterface.h"
+#include "quest_parser_collection.h"
+#include "quest_interface.h"
 #include "zone.h"
 #include "questmgr.h"
 

@@ -29,17 +29,17 @@
 #include <assert.h>
 
 #include "masterentity.h"
-#include "NpcAI.h"
+#include "npc_ai.h"
 #include "../common/packet_dump.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/eq_constants.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
 #include "zone.h"
-#include "StringIDs.h"
+#include "string_ids.h"
 #include "../common/string_util.h"
 #include "../common/rulesys.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 #include "water_map.h"
 #include "worldserver.h"
 extern WorldServer worldserver;

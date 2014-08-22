@@ -17,10 +17,10 @@
 */
 #include "../common/debug.h"
 #include "masterentity.h"
-#include "StringIDs.h"
+#include "string_ids.h"
 #include "../common/string_util.h"
 #include "../common/rulesys.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 #include "worldserver.h"
 extern WorldServer worldserver;
 

@@ -21,7 +21,7 @@
 #include <string.h>
 #include "masterentity.h"
 #include "worldserver.h"
-#include "StringIDs.h"
+#include "string_ids.h"
 #include "zonedb.h"
 #include "../common/packet_functions.h"
 #include "../common/packet_dump.h"

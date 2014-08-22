@@ -68,11 +68,11 @@ extern WorldServer worldserver;
 extern TaskManager *taskmanager;
 void CatchSignal(int sig_num);
 
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 
-#include "StringIDs.h"
+#include "string_ids.h"
 #include "command.h"
-#include "QGlobals.h"
+#include "qglobals.h"
 
 //struct cl_struct *commandlist;	// the actual linked list of commands
 int commandcount;								// how many commands we have

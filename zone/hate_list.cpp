@@ -25,7 +25,7 @@
 #include "../common/rulesys.h"
 #include "../common/misc_functions.h"
 #include "hate_list.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 #include "zone.h"
 #include "water_map.h"
 

@@ -2134,7 +2134,7 @@ struct AALevelCost_Struct
 	uint32 Cost;
 };
 
-//assumes that no activatable AA has more than 5 ranks
+//assumes that no activatable aa.has more than 5 ranks
 #define MAX_AA_ACTION_RANKS 20
 extern AA_DBAction AA_Actions[aaHighestID][MAX_AA_ACTION_RANKS];	//[aaid][rank]
 extern std::map<uint16, AA_SwarmPet> AA_SwarmPets;	//key=spell_id

@@ -25,7 +25,7 @@
 #include "../common/skills.h"
 #include "../common/misc_functions.h"
 #include "../common/rulesys.h"
-#include "StringIDs.h"
+#include "string_ids.h"
 #include <iostream>
 
 extern Zone* zone;

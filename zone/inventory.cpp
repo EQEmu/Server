@@ -30,9 +30,9 @@
 #include "../common/guilds.h"
 #include "../common/logsys.h"
 #include "../common/string_util.h"
-#include "StringIDs.h"
-#include "NpcAI.h"
-#include "QuestParserCollection.h"
+#include "string_ids.h"
+#include "npc_ai.h"
+#include "quest_parser_collection.h"
 extern WorldServer worldserver;
 
 // @merth: this needs to be touched up

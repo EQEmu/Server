@@ -45,12 +45,12 @@
 #include "petitions.h"
 #include "../common/packet_functions.h"
 #include "../common/md5.h"
-#include "ZoneConfig.h"
-#include "StringIDs.h"
+#include "zone_config.h"
+#include "string_ids.h"
 #include "guild_mgr.h"
 #include "../common/rulesys.h"
 #include "titles.h"
-#include "QGlobals.h"
+#include "qglobals.h"
 
 
 extern EntityList entity_list;

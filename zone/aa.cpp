@@ -19,7 +19,7 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 // Test 1
 
 #include "../common/debug.h"
-#include "AA.h"
+#include "aa.h"
 #include "mob.h"
 #include "client.h"
 #include "groups.h"
@@ -37,7 +37,7 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 #include "../common/string_util.h"
 #include "../common/logsys.h"
 #include "zonedb.h"
-#include "StringIDs.h"
+#include "string_ids.h"
 
 //static data arrays, really not big enough to warrant shared mem.
 AA_DBAction AA_Actions[aaHighestID][MAX_AA_ACTION_RANKS];	//[aaid][rank]
@@ -458,7 +458,7 @@ void Client::HandleAAAction(aaID activate) {
 			Escape();
 			break;
 
-		// Don't think this code is used any longer for Bestial Alignment as the AA has a spell_id and no nonspell_action.
+		// Don't think this code is used any longer for Bestial Alignment as the aa.has a spell_id and no nonspell_action.
 		case aaActionBeastialAlignment:
 			switch(GetBaseRace()) {
 				case BARBARIAN:
@@ -1237,7 +1237,7 @@ void Client::SendAA(uint32 id, int seq) {
 	Note: There were many ways to achieve this effect - The method used proved to be the most straight forward and consistent.
 	Stacking does not currently work ideally for AA's that use hotkeys, therefore they will be excluded at this time.
 
-	TODO: Problem with AA hotkeys - When you reach max rank of an AA tier (ie 5/5), it automatically displays the next AA in
+	TODO: Problem with aa.hotkeys - When you reach max rank of an AA tier (ie 5/5), it automatically displays the next AA in
 	the series and you can not transfer the hotkey to the next AA series. To the best of the my ability and through many
 	different variations of coding I could not find an ideal solution to this issue.
 
@@ -1676,7 +1676,7 @@ bool ZoneDatabase::LoadAAEffects() {
 	return true;
 }
 
-//Returns the number effects an AA has when we send them to the client
+//Returns the number effects an aa.has when we send them to the client
 //For the purposes of sizing a packet because every skill does not
 //have the same number effects, they can range from none to a few depending on AA.
 //counts the # of effects by counting the different slots of an AAID in the DB.

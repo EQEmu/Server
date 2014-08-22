@@ -23,7 +23,7 @@
 #include <math.h>
 
 #include "masterentity.h"
-#include "StringIDs.h"
+#include "string_ids.h"
 #include "../common/misc_functions.h"
 #include "../common/rulesys.h"
 

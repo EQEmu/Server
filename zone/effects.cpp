@@ -27,8 +27,8 @@
 #include "../common/zone_numbers.h"
 #include "../common/moremath.h"
 #include "../common/guilds.h"
-#include "StringIDs.h"
-#include "NpcAI.h"
+#include "string_ids.h"
+#include "npc_ai.h"
 
 float Client::GetActSpellRange(uint16 spell_id, float range, bool IsBard)
 {

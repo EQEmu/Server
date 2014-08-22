@@ -17,7 +17,7 @@
 */
 #include "../common/debug.h"
 #include "masterentity.h"
-#include "NpcAI.h"
+#include "npc_ai.h"
 #include "../common/packet_functions.h"
 #include "../common/packet_dump.h"
 #include "../common/string_util.h"

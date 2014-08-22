@@ -33,8 +33,8 @@
 #include "../common/unix.h"
 #endif
 
-#include "StringIDs.h"
-#include "QuestParserCollection.h"
+#include "string_ids.h"
+#include "quest_parser_collection.h"
 
 extern Zone* zone;
 extern volatile bool ZoneLoaded;

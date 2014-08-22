@@ -73,8 +73,8 @@ And then at then end of embparser.cpp, add:
 #include "event_codes.h"
 #include "guild_mgr.h"
 #include "../common/rulesys.h"
-#include "QGlobals.h"
-#include "QuestParserCollection.h"
+#include "qglobals.h"
+#include "quest_parser_collection.h"
 
 #ifdef BOTS
 #include "bot.h"

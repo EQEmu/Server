@@ -16,7 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
-#include "ZoneConfig.h"
+#include "zone_config.h"
 
 ZoneConfig *ZoneConfig::_zone_config = nullptr;
 

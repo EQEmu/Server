@@ -29,11 +29,11 @@
 #include "../common/packet_functions.h"
 #include "../common/packet_dump.h"
 #include "titles.h"
-#include "StringIDs.h"
+#include "string_ids.h"
 #include "../common/misc_functions.h"
 #include "../common/string_util.h"
 #include "../common/rulesys.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 
 static const SkillUseTypes TradeskillUnknown = Skill1HBlunt; /* an arbitrary non-tradeskill */
 
@@ -928,20 +928,20 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	_log(TRADESKILLS__TRACE, "...Bonusstat: %d , INT: %d , WIS: %d , DEX: %d , STR: %d", bonusstat , GetINT() , GetWIS() , GetDEX() , GetSTR());
 
 	float res = MakeRandomFloat(0, 99);
-	int AAChance = 0;
+	int aa_chance = 0;
 
 	//AA modifiers
 	//can we do this with nested switches?
 	if(spec->tradeskill == SkillAlchemy){
 		switch(GetAA(aaAlchemyMastery)){
 		case 1:
-			AAChance = 10;
+			aa_chance = 10;
 			break;
 		case 2:
-			AAChance = 25;
+			aa_chance = 25;
 			break;
 		case 3:
-			AAChance = 50;
+			aa_chance = 50;
 			break;
 		}
 	}
@@ -949,13 +949,13 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	if(spec->tradeskill == SkillJewelryMaking){
 		switch(GetAA(aaJewelCraftMastery)){
 		case 1:
-			AAChance = 10;
+			aa_chance = 10;
 			break;
 		case 2:
-			AAChance = 25;
+			aa_chance = 25;
 			break;
 		case 3:
-			AAChance = 50;
+			aa_chance = 50;
 			break;
 		}
 	}
@@ -964,13 +964,13 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	if (spec->tradeskill == SkillBlacksmithing) {
 		switch(GetAA(aaBlacksmithingMastery)) {
 		case 1:
-			AAChance = 10;
+			aa_chance = 10;
 			break;
 		case 2:
-			AAChance = 25;
+			aa_chance = 25;
 			break;
 		case 3:
-			AAChance = 50;
+			aa_chance = 50;
 			break;
 		}
 	}
@@ -978,13 +978,13 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	if (spec->tradeskill == SkillBaking) {
 		switch(GetAA(aaBakingMastery)) {
 		case 1:
-			AAChance = 10;
+			aa_chance = 10;
 			break;
 		case 2:
-			AAChance = 25;
+			aa_chance = 25;
 			break;
 		case 3:
-			AAChance = 50;
+			aa_chance = 50;
 			break;
 		}
 	}
@@ -992,13 +992,13 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	if (spec->tradeskill == SkillBrewing) {
 		switch(GetAA(aaBrewingMastery)) {
 		case 1:
-			AAChance = 10;
+			aa_chance = 10;
 			break;
 		case 2:
-			AAChance = 25;
+			aa_chance = 25;
 			break;
 		case 3:
-			AAChance = 50;
+			aa_chance = 50;
 			break;
 		}
 	}
@@ -1006,13 +1006,13 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	if (spec->tradeskill == SkillFletching) {
 		switch(GetAA(aaFletchingMastery2)) {
 		case 1:
-			AAChance = 10;
+			aa_chance = 10;
 			break;
 		case 2:
-			AAChance = 25;
+			aa_chance = 25;
 			break;
 		case 3:
-			AAChance = 50;
+			aa_chance = 50;
 			break;
 		}
 	}
@@ -1020,13 +1020,13 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	if (spec->tradeskill == SkillPottery) {
 		switch(GetAA(aaPotteryMastery)) {
 		case 1:
-			AAChance = 10;
+			aa_chance = 10;
 			break;
 		case 2:
-			AAChance = 25;
+			aa_chance = 25;
 			break;
 		case 3:
-			AAChance = 50;
+			aa_chance = 50;
 			break;
 		}
 	}
@@ -1034,13 +1034,13 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	if (spec->tradeskill == SkillTailoring) {
 		switch(GetAA(aaTailoringMastery)) {
 		case 1:
-			AAChance = 10;
+			aa_chance = 10;
 			break;
 		case 2:
-			AAChance = 25;
+			aa_chance = 25;
 			break;
 		case 3:
-			AAChance = 50;
+			aa_chance = 50;
 			break;
 		}
 	}
@@ -1048,20 +1048,20 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	if (spec->tradeskill == SkillResearch) {
 		switch(GetAA(aaArcaneTongues)) {
 		case 1:
-			AAChance = 10;
+			aa_chance = 10;
 			break;
 		case 2:
-			AAChance = 25;
+			aa_chance = 25;
 			break;
 		case 3:
-			AAChance = 50;
+			aa_chance = 50;
 			break;
 		}
 	}
 
 	chance = mod_tradeskill_chance(chance, spec);
 
-	if (((spec->tradeskill==75) || GetGM() || (chance > res)) || MakeRandomInt(0, 99) < AAChance){
+	if (((spec->tradeskill==75) || GetGM() || (chance > res)) || MakeRandomInt(0, 99) < aa_chance){
 		success_modifier = 1;
 
 		if(over_trivial < 0)
