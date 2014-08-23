@@ -229,9 +229,6 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, i
 }
 
 bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, int16 slot_id) {
-    char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	bool ret = false;
 
 	uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
     if (inst->IsType(ItemClassCommon))
@@ -248,18 +245,15 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, 
     else
         charges = 0x7FFF;
 
-    uint32 len_query = MakeAnyLenString(&query,
-        "REPLACE INTO sharedbank "
-        "	(acctid,slotid,itemid,charges,custom_data,"
-        "	augslot1,augslot2,augslot3,augslot4,augslot5)"
-        " VALUES(%lu,%lu,%lu,%lu,'%s',"
-        "	%lu,%lu,%lu,%lu,%lu)",
-        (unsigned long)account_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID, (unsigned long)charges,
-        inst->GetCustomDataString().c_str(),
-        (unsigned long)augslot[0],(unsigned long)augslot[1],(unsigned long)augslot[2],(unsigned long)augslot[3],(unsigned long)augslot[4]);
-
-
-    ret = RunQuery(query, len_query, errbuf);
+    std::string query = StringFormat("REPLACE INTO sharedbank "
+                                    "(acctid, slotid, itemid, charges, custom_data, "
+                                    "augslot1, augslot2, augslot3, augslot4, augslot5) "
+                                    "VALUES( %lu, %lu, %lu, %lu, '%s', "
+                                    "%lu, %lu, %lu, %lu, %lu)",
+                                    (unsigned long)account_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID,
+                                    (unsigned long)charges, inst->GetCustomDataString().c_str(), (unsigned long)augslot[0],
+                                    (unsigned long)augslot[1],(unsigned long)augslot[2],(unsigned long)augslot[3],(unsigned long)augslot[4]);
+    auto results = QueryDatabase(query);
 
     // Save bag contents, if slot supports bag contents
 	if (inst->IsType(ItemClassContainer) && Inventory::SupportsContainers(slot_id))
@@ -268,7 +262,12 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, 
 			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
 		}
 
-    return ret;
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "UpdateSharedBankSlot query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return false;
+    }
+
+	return true;
 }
 
 bool SharedDatabase::DeleteInventorySlot(uint32 char_id, int16 slot_id) {
