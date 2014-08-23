@@ -270,23 +270,30 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, 
 }
 
 bool SharedDatabase::DeleteInventorySlot(uint32 char_id, int16 slot_id) {
-    char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	bool ret = false;
+
 	// Delete item
-    ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM inventory WHERE charid=%i AND slotid=%i",
-                                                    char_id, slot_id), errbuf);
+	std::string query = StringFormat("DELETE FROM inventory WHERE charid = %i AND slotid = %i", char_id, slot_id);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "DeleteInventorySlot query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return false;
+    }
 
     // Delete bag slots, if need be
-    if (ret && Inventory::SupportsContainers(slot_id)) {
-        safe_delete_array(query);
-        int16 base_slot_id = Inventory::CalcSlotId(slot_id, SUB_BEGIN);
-        ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM inventory WHERE charid=%i AND slotid>=%i AND slotid<%i",
-                                                        char_id, base_slot_id, (base_slot_id+10)), errbuf);
+    if (!Inventory::SupportsContainers(slot_id))
+        return true;
+
+    int16 base_slot_id = Inventory::CalcSlotId(slot_id, SUB_BEGIN);
+    query = StringFormat("DELETE FROM inventory WHERE charid = %i AND slotid >= %i AND slotid < %i",
+                        char_id, base_slot_id, (base_slot_id+10));
+    results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "DeleteInventorySlot, bags query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return false;
     }
 
     // @merth: need to delete augments here
-    return ret;
+    return true;
 }
 
 bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id) {
