@@ -873,7 +873,30 @@ bool Mob::CombatRange(Mob* other)
 	if (size_mod > 10000)
 		size_mod = size_mod / 7;
 
-	if (DistNoRoot(*other) <= size_mod)
+	float _DistNoRoot = DistNoRoot(*other);
+
+	if (GetSpecialAbility(NPC_CHASE_DISTANCE)){
+		
+		float max_dist = static_cast<float>(GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 0));
+		float min_dist = static_cast<float>(GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 1));
+
+		if (max_dist == 1)
+			max_dist = 250.0f; //Default it to 250 if you forget to put a value
+
+		max_dist = max_dist * max_dist;
+
+		if (!min_dist)
+			min_dist = size_mod; //Default to melee range
+		else
+			min_dist = min_dist * min_dist;
+		
+		if (CheckLastLosState() && (_DistNoRoot >= min_dist && _DistNoRoot <= max_dist))
+			SetPseudoRoot(true); 
+		else 
+			SetPseudoRoot(false);
+	}
+
+	if (_DistNoRoot <= size_mod)
 	{
 		return true;
 	}
@@ -887,6 +910,8 @@ bool Mob::CheckLosFN(Mob* other) {
 	if(other)
 		Result = CheckLosFN(other->GetX(), other->GetY(), other->GetZ(), other->GetSize());
 
+	SetLastLosState(Result);
+	
 	return Result;
 }
 

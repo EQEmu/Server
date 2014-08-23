@@ -183,6 +183,7 @@ Mob::Mob(const char* in_name,
 	has_MGB = false;
 	has_ProjectIllusion = false;
 	SpellPowerDistanceMod = 0;
+	last_los_check = false;
 
 	if(in_aa_title>0)
 		aa_title	= in_aa_title;
@@ -341,6 +342,7 @@ Mob::Mob(const char* in_name,
 		viral_spells[i] = 0;
 	}
 	pStandingPetOrder = SPO_Follow;
+	pseudo_rooted = false;
 
 	see_invis = in_see_invis;
 	see_invis_undead = in_see_invis_undead != 0;
