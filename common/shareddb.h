@@ -68,6 +68,7 @@ protected:
     bool    DeleteSharedBankSlot(uint32 char_id, int16 slot_id);
     bool    UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, int16 slot_id);
     bool    DeleteInventorySlot(uint32 char_id, int16 slot_id);
+    bool    UpdateInventorySlot(uint32 char_id, const ItemInst* inst, int16 slot_id);
 
 public:
 	std::string	GetBook(const char *txtfile);

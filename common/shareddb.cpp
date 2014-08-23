@@ -170,18 +170,10 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	bool ret = false;
-	uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
 
 	//never save tribute slots:
 	if(slot_id >= EmuConstants::TRIBUTE_BEGIN && slot_id <= EmuConstants::TRIBUTE_END)
 		return(true);
-
-	if (inst && inst->IsType(ItemClassCommon)) {
-		for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
-			ItemInst *auginst=inst->GetItem(i);
-			augslot[i]=(auginst && auginst->GetItem()) ? auginst->GetItem()->ID : NO_ITEM;
-		}
-	}
 
 	if (slot_id >= EmuConstants::SHARED_BANK_BEGIN && slot_id <= EmuConstants::SHARED_BANK_BAGS_END) { // Shared bank inventory
 		if (!inst) {
@@ -196,23 +188,7 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
             ret = DeleteInventorySlot(char_id, slot_id);
 		}
 		else {
-			uint16 charges = 0;
-			if(inst->GetCharges() >= 0)
-				charges = inst->GetCharges();
-			else
-				charges = 0x7FFF;
-			// Update/Insert item
-			uint32 len_query = MakeAnyLenString(&query,
-				"REPLACE INTO inventory "
-				"	(charid,slotid,itemid,charges,instnodrop,custom_data,color,"
-				"	augslot1,augslot2,augslot3,augslot4,augslot5)"
-				" VALUES(%lu,%lu,%lu,%lu,%lu,'%s',%lu,"
-				"	%lu,%lu,%lu,%lu,%lu)",
-				(unsigned long)char_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID, (unsigned long)charges,
-				(unsigned long)(inst->IsInstNoDrop() ? 1:0),inst->GetCustomDataString().c_str(),(unsigned long)inst->GetColor(),
-				(unsigned long)augslot[0],(unsigned long)augslot[1],(unsigned long)augslot[2],(unsigned long)augslot[3],(unsigned long)augslot[4] );
-
-			ret = RunQuery(query, len_query, errbuf);
+            ret = UpdateInventorySlot(char_id, inst, slot_id);
 		}
 	}
 
@@ -229,6 +205,47 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 	}
 
 	// @merth: need to save augments here
+
+	return ret;
+}
+
+bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, int16 slot_id) {
+    char errbuf[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
+	bool ret = false;
+
+	uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
+    if (inst->IsType(ItemClassCommon))
+		for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+			ItemInst *auginst=inst->GetItem(i);
+			augslot[i]=(auginst && auginst->GetItem()) ? auginst->GetItem()->ID : NO_ITEM;
+		}
+
+    uint16 charges = 0;
+	if(inst->GetCharges() >= 0)
+		charges = inst->GetCharges();
+	else
+		charges = 0x7FFF;
+
+	// Update/Insert item
+	uint32 len_query = MakeAnyLenString(&query,
+		"REPLACE INTO inventory "
+		"	(charid,slotid,itemid,charges,instnodrop,custom_data,color,"
+		"	augslot1,augslot2,augslot3,augslot4,augslot5)"
+		" VALUES(%lu,%lu,%lu,%lu,%lu,'%s',%lu,"
+		"	%lu,%lu,%lu,%lu,%lu)",
+		(unsigned long)char_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID, (unsigned long)charges,
+		(unsigned long)(inst->IsInstNoDrop() ? 1:0),inst->GetCustomDataString().c_str(),(unsigned long)inst->GetColor(),
+		(unsigned long)augslot[0],(unsigned long)augslot[1],(unsigned long)augslot[2],(unsigned long)augslot[3],(unsigned long)augslot[4] );
+
+	ret = RunQuery(query, len_query, errbuf);
+
+    // Save bag contents, if slot supports bag contents
+	if (inst->IsType(ItemClassContainer) && Inventory::SupportsContainers(slot_id))
+		for (uint8 idx = SUB_BEGIN; idx < EmuConstants::ITEM_CONTAINER_SIZE; idx++) {
+			const ItemInst* baginst = inst->GetItem(idx);
+			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
+		}
 
 	return ret;
 }
