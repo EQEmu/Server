@@ -47,18 +47,15 @@ SharedDatabase::~SharedDatabase() {
 
 bool SharedDatabase::SetHideMe(uint32 account_id, uint8 hideme)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE account SET hideme = %i where id = %i", hideme, account_id), errbuf)) {
-		std::cerr << "Error in SetGMSpeed query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+	std::string query = StringFormat("UPDATE account SET hideme = %i WHERE id = %i", hideme, account_id);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		std::cerr << "Error in SetGMSpeed query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
-	safe_delete_array(query);
 	return true;
-
 }
 
 uint8 SharedDatabase::GetGMSpeed(uint32 account_id)
@@ -1804,7 +1801,7 @@ bool SharedDatabase::LoadBaseData() {
 		EQEmu::IPCMutex mutex("base_data");
 		mutex.Lock();
 		base_data_mmf = new EQEmu::MemoryMappedFile("shared/base_data");
-	
+
 		int size = 16 * (GetMaxBaseDataLevel() + 1) * sizeof(BaseDataStruct);
 		if(size == 0) {
 			EQ_EXCEPT("SharedDatabase", "Base Data size is zero");
@@ -1829,9 +1826,9 @@ void SharedDatabase::LoadBaseData(void *data, int max_level) {
 	const char *query = "SELECT * FROM base_data ORDER BY level, class ASC";
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	
+
 	if(RunQuery(query, strlen(query), errbuf, &result)) {
-	
+
 		int lvl = 0;
 		int cl = 0;
 		while (row = mysql_fetch_row(result)) {
