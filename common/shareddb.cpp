@@ -196,14 +196,6 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 		LogFile->write(EQEMuLog::Error, "SaveInventory query '%s': %s", query, errbuf);
 	safe_delete_array(query);
 
-	// Save bag contents, if slot supports bag contents
-	if (inst && inst->IsType(ItemClassContainer) && Inventory::SupportsContainers(slot_id)) {
-		for (uint8 idx = SUB_BEGIN; idx < EmuConstants::ITEM_CONTAINER_SIZE; idx++) {
-			const ItemInst* baginst = inst->GetItem(idx);
-			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
-		}
-	}
-
 	// @merth: need to save augments here
 
 	return ret;
