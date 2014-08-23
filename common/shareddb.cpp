@@ -185,22 +185,7 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 
 	if (slot_id >= EmuConstants::SHARED_BANK_BEGIN && slot_id <= EmuConstants::SHARED_BANK_BAGS_END) { // Shared bank inventory
 		if (!inst) {
-			// Delete item
-			uint32 account_id = GetAccountIDByChar(char_id);
-			uint32 len_query = MakeAnyLenString(&query, "DELETE FROM sharedbank WHERE acctid=%i AND slotid=%i",
-				account_id, slot_id);
-
-			ret = RunQuery(query, len_query, errbuf);
-
-			// Delete bag slots, if need be
-			if (ret && Inventory::SupportsContainers(slot_id)) {
-				safe_delete_array(query);
-				int16 base_slot_id = Inventory::CalcSlotId(slot_id, SUB_BEGIN);
-				ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM sharedbank WHERE acctid=%i AND slotid>=%i AND slotid<%i",
-					account_id, base_slot_id, (base_slot_id+10)), errbuf);
-			}
-
-			// @merth: need to delete augments here
+            ret = DeleteSharedBankSlot(char_id, slot_id);
 		}
 		else {
 			// Update/Insert item
@@ -277,6 +262,28 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 	// @merth: need to save augments here
 
 	return ret;
+}
+
+bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id) {
+    char errbuf[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
+	bool ret = false;
+    // Delete item
+	uint32 account_id = GetAccountIDByChar(char_id);
+	uint32 len_query = MakeAnyLenString(&query, "DELETE FROM sharedbank WHERE acctid=%i AND slotid=%i", account_id, slot_id);
+
+	ret = RunQuery(query, len_query, errbuf);
+
+	// Delete bag slots, if need be
+	if (ret && Inventory::SupportsContainers(slot_id)) {
+		safe_delete_array(query);
+		int16 base_slot_id = Inventory::CalcSlotId(slot_id, SUB_BEGIN);
+		ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM sharedbank WHERE acctid=%i AND slotid>=%i AND slotid<%i",
+                                                        account_id, base_slot_id, (base_slot_id+10)), errbuf);
+    }
+
+    // @merth: need to delete augments here
+    return ret;
 }
 
 int32 SharedDatabase::GetSharedPlatinum(uint32 account_id)
