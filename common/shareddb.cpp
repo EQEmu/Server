@@ -167,38 +167,22 @@ bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const Ite
 }
 
 bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 slot_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	bool ret = false;
 
 	//never save tribute slots:
 	if(slot_id >= EmuConstants::TRIBUTE_BEGIN && slot_id <= EmuConstants::TRIBUTE_END)
-		return(true);
+		return true;
 
-	if (slot_id >= EmuConstants::SHARED_BANK_BEGIN && slot_id <= EmuConstants::SHARED_BANK_BAGS_END) { // Shared bank inventory
-		if (!inst) {
-            ret = DeleteSharedBankSlot(char_id, slot_id);
-		}
-		else {
-            ret = UpdateSharedBankSlot(char_id, inst, slot_id);
-		}
+	if (slot_id >= EmuConstants::SHARED_BANK_BEGIN && slot_id <= EmuConstants::SHARED_BANK_BAGS_END) {
+        // Shared bank inventory
+		if (!inst)
+            return DeleteSharedBankSlot(char_id, slot_id);
+		else
+            return UpdateSharedBankSlot(char_id, inst, slot_id);
 	}
-	else { // All other inventory
-		if (!inst) {
-            ret = DeleteInventorySlot(char_id, slot_id);
-		}
-		else {
-            ret = UpdateInventorySlot(char_id, inst, slot_id);
-		}
-	}
+	else if (!inst) // All other inventory
+        return DeleteInventorySlot(char_id, slot_id);
 
-	if (!ret)
-		LogFile->write(EQEMuLog::Error, "SaveInventory query '%s': %s", query, errbuf);
-	safe_delete_array(query);
-
-	// @merth: need to save augments here
-
-	return ret;
+    return UpdateInventorySlot(char_id, inst, slot_id);
 }
 
 bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, int16 slot_id) {
