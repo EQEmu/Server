@@ -88,33 +88,23 @@ bool SharedDatabase::SetGMSpeed(uint32 account_id, uint8 gmspeed)
 
 }
 
-uint32 SharedDatabase::GetTotalTimeEntitledOnAccount(uint32 AccountID) {
+uint32 SharedDatabase::GetTotalTimeEntitledOnAccount(uint32 accountID) {
 
-	uint32 EntitledTime = 0;
+	std::string query = StringFormat("SELECT SUM(ASCII(SUBSTRING(profile, 237, 1)) "
+                                    "+ (ASCII(SUBSTRING(profile, 238, 1)) * 256) "
+                                    "+ (ASCII(SUBSTRING(profile, 239, 1)) * 65536) "
+                                    "+ (ASCII(SUBSTRING(profile, 240, 1)) * 16777216))"
+                                    "FROM character_ WHERE account_id = %i",accountID);
+    auto results = QueryDatabase(query);
+    if (!results.Success())
+        return 0;
 
-	const char *EntitledQuery = "select sum(ascii(substring(profile, 237, 1)) + (ascii(substring(profile, 238, 1)) * 256) +"
-				"(ascii(substring(profile, 239, 1)) * 65536) + (ascii(substring(profile, 240, 1)) * 16777216))"
-				"from character_ where account_id = %i";
+    if (results.RowCount() != 1)
+        return 0;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (RunQuery(query, MakeAnyLenString(&query, EntitledQuery, AccountID), errbuf, &result)) {
+    auto row = results.begin();
 
-		if (mysql_num_rows(result) == 1) {
-
-			row = mysql_fetch_row(result);
-
-			EntitledTime = atoi(row[0]);
-		}
-
-		mysql_free_result(result);
-	}
-
-	safe_delete_array(query);
-
-	return EntitledTime;
+	return atoi(row[0]);
 }
 
 bool SharedDatabase::SaveCursor(uint32 char_id, std::list<ItemInst*>::const_iterator &start, std::list<ItemInst*>::const_iterator &end)
