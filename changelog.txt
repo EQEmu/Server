@@ -1,5 +1,15 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/22/2014 ==
+Uleat: Rework of Trade::FinishedTrade() and Trade::ResetTrade() to parse items a little more intelligently.
+
+Trade window items are now sent to client inventory in this order:
+	- Bags
+	- Partial stack movements
+	- All remaining items
+
+If any of these procedures cause any problems, please post them immediately.
+
 == 08/20/2014 ==
 Uleat: Rework of Trade::AddEntity() - function used to move items into the trade window. Now accepts argument for 'stack_size' and updates client properly.
 Note: I tested trade with Titanium:{SoF,SoD,UF,RoF} in both directions and no client generated an OP_MoveItem event for attempting to place a stackable
