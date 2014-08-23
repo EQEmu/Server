@@ -134,39 +134,36 @@ bool SharedDatabase::SaveCursor(uint32 char_id, std::list<ItemInst*>::const_iter
 
 bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const ItemInst* inst)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 	// Delete cursor items
-	if (!RunQuery(query, MakeAnyLenString(&query,
-		"SELECT itemid,charges FROM sharedbank "
-		"WHERE acctid=%d AND slotid=%d",
-		account_id, slot_id), errbuf, &result)) {
-		LogFile->write(EQEMuLog::Error, "Error runing inventory verification query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+	std::string query = StringFormat("SELECT itemid, charges FROM sharedbank "
+                                    "WHERE acctid = %d AND slotid = %d",
+                                    account_id, slot_id);
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error runing inventory verification query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		//returning true is less harmful in the face of a query error
-		return(true);
+		return true;
 	}
-	safe_delete_array(query);
 
-	row = mysql_fetch_row(result);
-	bool found = false;
-	if(row) {
-		uint32 id = atoi(row[0]);
-		uint16 charges = atoi(row[1]);
+	if (results.RowCount() == 0)
+        return false;
 
-		uint16 expect_charges = 0;
-		if(inst->GetCharges() >= 0)
-			expect_charges = inst->GetCharges();
-		else
-			expect_charges = 0x7FFF;
+	auto row = results.begin();
 
-		if(id == inst->GetItem()->ID && charges == expect_charges)
-			found = true;
-	}
-	mysql_free_result(result);
-	return(found);
+    uint32 id = atoi(row[0]);
+    uint16 charges = atoi(row[1]);
+
+    uint16 expect_charges = 0;
+
+    if(inst->GetCharges() >= 0)
+        expect_charges = inst->GetCharges();
+    else
+        expect_charges = 0x7FFF;
+
+    if(id != inst->GetItem()->ID || charges != expect_charges)
+        return false;
+
+	return true;
 }
 
 bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 slot_id) {
