@@ -264,21 +264,16 @@ bool Database::LoadChatChannels() {
 	return true;
 }
 
-void Database::SetChannelPassword(std::string ChannelName, std::string Password) {
+void Database::SetChannelPassword(std::string channelName, std::string password) {
 
-	_log(UCS__TRACE, "Database::SetChannelPassword(%s, %s)", ChannelName.c_str(), Password.c_str());
+	_log(UCS__TRACE, "Database::SetChannelPassword(%s, %s)", channelName.c_str(), password.c_str());
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query = StringFormat("UPDATE `chatchannels` SET `password` = '%s' WHERE `name` = '%s'",
+                                    password.c_str(), channelName.c_str());
+    auto results = QueryDatabase(query);
+	if(!results.Success())
+		_log(UCS__ERROR, "Error updating password in database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
-	if(!RunQuery(query, MakeAnyLenString(&query, "UPDATE `chatchannels` set `password`='%s' where `name`='%s'", Password.c_str(),
-						ChannelName.c_str()), errbuf)) {
-
-		_log(UCS__ERROR, "Error updating password in database: %s, %s", query, errbuf);
-
-	}
-
-	safe_delete_array(query);
 }
 
 void Database::SetChannelOwner(std::string ChannelName, std::string Owner) {
