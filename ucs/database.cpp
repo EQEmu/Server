@@ -172,45 +172,31 @@ int Database::FindAccount(const char *characterName, Client *client) {
 	return accountID;
 }
 
-bool Database::VerifyMailKey(std::string CharacterName, int IPAddress, std::string MailKey) {
+bool Database::VerifyMailKey(std::string characterName, int IPAddress, std::string MailKey) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (!RunQuery(query,MakeAnyLenString(&query, "select `mailkey` from `character_` where `name`='%s' limit 1",
-						CharacterName.c_str()),errbuf,&result)){
-
-		safe_delete_array(query);
-
-		_log(UCS__ERROR, "Error retrieving mailkey from database: %s", errbuf);
-
+	std::string query = StringFormat("SELECT `mailkey` FROM `character_` WHERE `name`='%s' LIMIT 1",
+                                    characterName.c_str());
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		_log(UCS__ERROR, "Error retrieving mailkey from database: %s", results.ErrorMessage().c_str());
 		return false;
 	}
 
-	safe_delete_array(query);
-
-	row = mysql_fetch_row(result);
+	auto row = results.begin();
 
 	// The key is the client's IP address (expressed as 8 hex digits) and an 8 hex digit random string generated
 	// by world.
 	//
-	char CombinedKey[17];
+	char combinedKey[17];
 
 	if(RuleB(Chat, EnableMailKeyIPVerification) == true)
-		sprintf(CombinedKey, "%08X%s", IPAddress, MailKey.c_str());
+		sprintf(combinedKey, "%08X%s", IPAddress, MailKey.c_str());
 	else
-		sprintf(CombinedKey, "%s", MailKey.c_str());
+		sprintf(combinedKey, "%s", MailKey.c_str());
 
-	_log(UCS__TRACE, "DB key is [%s], Client key is [%s]", row[0], CombinedKey);
+	_log(UCS__TRACE, "DB key is [%s], Client key is [%s]", row[0], combinedKey);
 
-	bool Valid = !strcmp(row[0], CombinedKey);
-
-	mysql_free_result(result);
-
-	return Valid;
-
+	return !strcmp(row[0], combinedKey);
 }
 
 int Database::FindCharacter(const char *CharacterName) {
