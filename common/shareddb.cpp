@@ -357,44 +357,36 @@ bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add)
 
 bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin_level)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+
 	const Item_Struct* myitem;
 
-	RunQuery
-	(
-		query,
-		MakeAnyLenString
-		(
-			&query,
-			"SELECT itemid, item_charges, slot FROM starting_items "
-			"WHERE (race = %i or race = 0) AND (class = %i or class = 0) AND "
-			"(deityid = %i or deityid=0) AND (zoneid = %i or zoneid = 0) AND "
-			"gm <= %i ORDER BY id",
-			si_race, si_class, si_deity, si_current_zone, admin_level
-		),
-		errbuf,
-		&result
-	);
-	safe_delete_array(query);
+    std::string query = StringFormat("SELECT itemid, item_charges, slot FROM starting_items "
+                                    "WHERE (race = %i or race = 0) AND (class = %i or class = 0) AND "
+                                    "(deityid = %i or deityid = 0) AND (zoneid = %i or zoneid = 0) AND "
+                                    "gm <= %i ORDER BY id",
+                                    si_race, si_class, si_deity, si_current_zone, admin_level);
+    auto results = QueryDatabase(query);
+    if (!results.Success())
+        return false;
 
-	while((row = mysql_fetch_row(result))) {
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
 		int itemid = atoi(row[0]);
 		int charges = atoi(row[1]);
 		int slot = atoi(row[2]);
 		myitem = GetItem(itemid);
+
 		if(!myitem)
 			continue;
+
 		ItemInst* myinst = CreateBaseItem(myitem, charges);
+
 		if(slot < 0)
-			slot = inv->FindFreeSlot(0,0);
+			slot = inv->FindFreeSlot(0, 0);
+
 		inv->PutItem(slot, *myinst);
 		safe_delete(myinst);
 	}
-
-	if(result) mysql_free_result(result);
 
 	return true;
 }
