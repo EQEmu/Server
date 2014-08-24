@@ -644,104 +644,66 @@ GuildBankManager::~GuildBankManager()
 	}
 }
 
-bool GuildBankManager::Load(uint32 GuildID)
+bool GuildBankManager::Load(uint32 guildID)
 {
-	const char *LoadQuery = "SELECT `area`, `slot`, `itemid`, `qty`, `donator`, `permissions`, `whofor` from `guild_bank` "
-				"WHERE `guildid` = %i";
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-
-	char* query = 0;
-
-	MYSQL_RES *result;
-
-	MYSQL_ROW row;
-
-	if(database.RunQuery(query, MakeAnyLenString(&query, LoadQuery, GuildID), errbuf, &result))
-	{
-		GuildBank *Bank = new GuildBank;
-
-		Bank->GuildID = GuildID;
-
-		for(int i = 0; i < GUILD_BANK_MAIN_AREA_SIZE; ++i)
-			Bank->Items.MainArea[i].ItemID = 0;
-
-		for(int i = 0; i < GUILD_BANK_DEPOSIT_AREA_SIZE; ++i)
-			Bank->Items.DepositArea[i].ItemID = 0;
-
-		char Donator[64], WhoFor[64];
-
-		while((row = mysql_fetch_row(result)))
-		{
-			int Area = atoi(row[0]);
-
-			int Slot = atoi(row[1]);
-
-			int ItemID = atoi(row[2]);
-
-			int Qty = atoi(row[3]);
-
-			if(row[4])
-				strn0cpy(Donator, row[4], sizeof(Donator));
-			else
-				Donator[0] = '\0';
-
-			int Permissions = atoi(row[5]);
-
-			if(row[6])
-				strn0cpy(WhoFor, row[6], sizeof(WhoFor));
-			else
-				WhoFor[0] = '\0';
-
-			if(Area == GuildBankMainArea)
-			{
-				if((Slot >= 0) && (Slot < GUILD_BANK_MAIN_AREA_SIZE))
-				{
-					Bank->Items.MainArea[Slot].ItemID = ItemID;
-
-					Bank->Items.MainArea[Slot].Quantity = Qty;
-
-					strn0cpy(Bank->Items.MainArea[Slot].Donator, Donator, sizeof(Donator));
-
-					Bank->Items.MainArea[Slot].Permissions = Permissions;
-
-					strn0cpy(Bank->Items.MainArea[Slot].WhoFor, WhoFor, sizeof(WhoFor));
-				}
-			}
-			else
-			{
-				if((Slot >= 0 ) && (Slot < GUILD_BANK_DEPOSIT_AREA_SIZE))
-				{
-					Bank->Items.DepositArea[Slot].ItemID = ItemID;
-
-					Bank->Items.DepositArea[Slot].Quantity = Qty;
-
-					strn0cpy(Bank->Items.DepositArea[Slot].Donator, Donator, sizeof(Donator));
-
-					Bank->Items.DepositArea[Slot].Permissions = Permissions;
-
-					strn0cpy(Bank->Items.DepositArea[Slot].WhoFor, WhoFor, sizeof(WhoFor));
-				}
-			}
-
-		}
-		mysql_free_result(result);
-
-		safe_delete_array(query);
-
-		Banks.push_back(Bank);
-	}
-	else
-	{
-		_log(GUILDS__BANK_ERROR, "Error Loading guild bank: %s, %s", query, errbuf);
-
-		safe_delete_array(query);
-
+	std::string query = StringFormat("SELECT `area`, `slot`, `itemid`, `qty`, `donator`, `permissions`, `whofor` "
+                                    "FROM `guild_bank` WHERE `guildid` = %i", guildID);
+    auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
+        _log(GUILDS__BANK_ERROR, "Error Loading guild bank: %s, %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
-	return true;
+    GuildBank *bank = new GuildBank;
 
+    bank->GuildID = guildID;
+
+    for(int i = 0; i < GUILD_BANK_MAIN_AREA_SIZE; ++i)
+        bank->Items.MainArea[i].ItemID = 0;
+
+    for(int i = 0; i < GUILD_BANK_DEPOSIT_AREA_SIZE; ++i)
+        bank->Items.DepositArea[i].ItemID = 0;
+
+    char donator[64], whoFor[64];
+
+    for (auto row = results.begin(); row != results.end(); ++row)
+    {
+        int area = atoi(row[0]);
+        int slot = atoi(row[1]);
+        int itemID = atoi(row[2]);
+        int qty = atoi(row[3]);
+
+        if(row[4])
+            strn0cpy(donator, row[4], sizeof(donator));
+        else
+            donator[0] = '\0';
+
+        int permissions = atoi(row[5]);
+
+        if(row[6])
+            strn0cpy(whoFor, row[6], sizeof(whoFor));
+        else
+            whoFor[0] = '\0';
+
+        if(slot < 0 ||
+            ((area != GuildBankMainArea || slot >= GUILD_BANK_MAIN_AREA_SIZE) ||
+            (area == GuildBankMainArea || slot >= GUILD_BANK_DEPOSIT_AREA_SIZE)))
+            continue;
+
+        bank->Items.MainArea[slot].ItemID = itemID;
+        bank->Items.MainArea[slot].Quantity = qty;
+
+        strn0cpy(bank->Items.MainArea[slot].Donator, donator, sizeof(donator));
+
+        bank->Items.MainArea[slot].Permissions = permissions;
+
+        strn0cpy(bank->Items.MainArea[slot].WhoFor, whoFor, sizeof(whoFor));
+    }
+
+    Banks.push_back(bank);
+
+	return true;
 }
 
 bool GuildBankManager::IsLoaded(uint32 GuildID)
