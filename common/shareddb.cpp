@@ -1693,25 +1693,19 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 }
 
 int SharedDatabase::GetMaxBaseDataLevel() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
 	const char *query = "SELECT MAX(level) FROM base_data";
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	int32 ret = 0;
-	if(RunQuery(query, strlen(query), errbuf, &result)) {
-		row = mysql_fetch_row(result);
-		if(row) {
-			ret = atoi(row[0]);
-			mysql_free_result(result);
-		} else {
-			ret = -1;
-			mysql_free_result(result);
-		}
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in GetMaxBaseDataLevel query '%s' %s", query, errbuf);
-		ret = -1;
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in GetMaxBaseDataLevel query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
+		return -1;
 	}
-	return ret;
+
+	if (results.RowCount() == 0)
+        return -1;
+
+    auto row = results.begin();
+
+	return atoi(row[0]);
 }
 
 bool SharedDatabase::LoadBaseData() {
