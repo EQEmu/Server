@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/24/2014 ==
+Akkadius: Character creation process crash fix and query cleanup
+
 == 08/23/2014 ==
 Akkadius: Changed zone process window title format, example: 'crushbone :: clients: 6 inst_id: 1 inst_ver: 0 :: port: 7015'
 Akkadius: Most of the following changes are QueryServ related, fully implemented its original functionality to be able to offload
