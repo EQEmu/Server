@@ -413,38 +413,27 @@ Spawn2* ZoneDatabase::LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2
 	return newSpawn;
 }
 
-bool ZoneDatabase::CreateSpawn2(Client *c, uint32 spawngroup, const char* zone, float heading, float x, float y, float z, uint32 respawn, uint32 variance, uint16 condition, int16 cond_value)
+bool ZoneDatabase::CreateSpawn2(Client *client, uint32 spawngroup, const char* zone, float heading, float x, float y, float z, uint32 respawn, uint32 variance, uint16 condition, int16 cond_value)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
 
-	char *query = 0;
-	uint32 affected_rows = 0;
-
-	//	if(GetInverseXY()==1) {
-	//		float temp=x;
-	//		x=y;
-	//		y=temp;
-	//	}
-	if (RunQuery(query, MakeAnyLenString(&query,
-		"INSERT INTO spawn2 (spawngroupID,zone,x,y,z,heading,respawntime,variance,_condition,cond_value) Values (%i, '%s', %f, %f, %f, %f, %i, %i, %u, %i)",
-		spawngroup, zone, x, y, z, heading, respawn, variance, condition, cond_value
-		), errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
-		if (affected_rows == 1) {
-			if(c) c->LogSQL(query);
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in CreateSpawn2 query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+	std::string query = StringFormat("INSERT INTO spawn2 (spawngroupID, zone, x, y, z, heading, "
+                                    "respawntime, variance, _condition, cond_value) "
+                                    "VALUES (%i, '%s', %f, %f, %f, %f, %i, %i, %u, %i)",
+                                    spawngroup, zone, x, y, z, heading,
+                                    respawn, variance, condition, cond_value);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in CreateSpawn2 query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
-	}
+    }
 
-	return false;
+    if (results.RowsAffected() != 1)
+        return false;
+
+    if(client)
+        client->LogSQL(query.c_str());
+
+    return true;
 }
 
 uint32 Zone::CountSpawn2() {
