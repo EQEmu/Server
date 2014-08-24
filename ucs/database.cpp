@@ -564,21 +564,17 @@ void Database::AddFriendOrIgnore(int charID, int type, std::string name) {
 
 }
 
-void Database::RemoveFriendOrIgnore(int CharID, int Type, std::string Name) {
+void Database::RemoveFriendOrIgnore(int charID, int type, std::string name) {
 
-	const char *FriendsQuery="DELETE FROM `friends` WHERE `charid`=%i AND `type`=%i and `name`='%s'";
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-
-	if(!RunQuery(query, MakeAnyLenString(&query, FriendsQuery, CharID, Type, CapitaliseName(Name).c_str()), errbuf, 0, 0))
-		_log(UCS__ERROR, "Error removing friend/ignore, query was %s", query);
+	std::string query = StringFormat("DELETE FROM `friends` WHERE `charid` = %i "
+                                    "AND `type` = %i AND `name` = '%s'",
+                                    charID, type, CapitaliseName(name).c_str());
+    auto results = QueryDatabase(query);
+	if(!results.Success())
+		_log(UCS__ERROR, "Error removing friend/ignore, query was %s", query.c_str());
 	else
-		_log(UCS__TRACE, "Removed Friend/Ignore entry for charid %i, type %i, name %s from database.",
-			CharID, Type, Name.c_str());
+		_log(UCS__TRACE, "Removed Friend/Ignore entry for charid %i, type %i, name %s from database.", charID, type, name.c_str());
 
-
-	safe_delete_array(query);
 }
 
 void Database::GetFriendsAndIgnore(int CharID, std::vector<std::string> &Friends, std::vector<std::string> &Ignorees) {
