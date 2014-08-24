@@ -53,10 +53,11 @@ const std::string vStringFormat(const char* format, va_list args)
 		return "";
 	}
 	else if ((unsigned int)characters_used > output.capacity()) {
-		output.resize(characters_used+1);
+		output.resize(characters_used + 1);
 		va_copy(tmpargs,args);
 		characters_used = vsnprintf(&output[0], output.capacity(), format, tmpargs);
 		va_end(tmpargs);
+		output.resize(characters_used);
 
 		if (characters_used < 0) {
 			// We shouldn't have a format error by this point, but I can't imagine what error we
@@ -71,6 +72,8 @@ const std::string vStringFormat(const char* format, va_list args)
 		va_copy(tmpargs,args);
 		characters_used = vsnprintf(&output[0], output.capacity(), format, tmpargs);
 		va_end(tmpargs);
+
+		output.resize(characters_used);
 
 		if (characters_used < 0) {
 			// We shouldn't have a format error by this point, but I can't imagine what error we
@@ -349,6 +352,42 @@ std::string EscapeString(const std::string &s) {
 	size_t sz = s.length();
 	for(size_t i = 0; i < sz; ++i) {
 		char c = s[i];
+		switch(c) {
+		case '\x00':
+			ret += "\\x00";
+			break;
+		case '\n':
+			ret += "\\n";
+			break;
+		case '\r':
+			ret += "\\r";
+			break;
+		case '\\':
+			ret += "\\\\";
+			break;
+		case '\'':
+			ret += "\\'";
+			break;
+		case '\"':
+			ret += "\\\"";
+			break;
+		case '\x1a':
+			ret += "\\x1a";
+			break;
+		default:
+			ret.push_back(c);
+			break;
+		}
+	}
+
+	return ret;
+}
+
+std::string EscapeString(const char *src, size_t sz) {
+	std::string ret;
+
+	for(size_t i = 0; i < sz; ++i) {
+		char c = src[i];
 		switch(c) {
 		case '\x00':
 			ret += "\\x00";
