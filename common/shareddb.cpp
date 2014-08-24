@@ -492,123 +492,108 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
 	return true;
 }
 
-
 // Overloaded: Retrieve character inventory based on character id
 bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES* result;
-	MYSQL_ROW row;
-	bool ret = false;
 
 	// Retrieve character inventory
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT slotid,itemid,charges,color,augslot1,augslot2,augslot3,augslot4,augslot5,"
-		"instnodrop,custom_data FROM inventory WHERE charid=%i ORDER BY slotid", char_id), errbuf, &result)) {
+	std::string query = StringFormat("SELECT slotid, itemid, charges, color, augslot1, "
+                                    "augslot2, augslot3, augslot4, augslot5, instnodrop, custom_data "
+                                    "FROM inventory WHERE charid = %i ORDER BY slotid", char_id);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+    		LogFile->write(EQEMuLog::Error, "GetInventory query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
+            LogFile->write(EQEMuLog::Error, "If you got an error related to the 'instnodrop' field, run the following SQL Queries:\nalter table inventory add instnodrop tinyint(1) unsigned default 0 not null;\n");
+        return false;
+    }
 
-		while ((row = mysql_fetch_row(result))) {
-			int16 slot_id	= atoi(row[0]);
-			uint32 item_id	= atoi(row[1]);
-			uint16 charges	= atoi(row[2]);
-			uint32 color		= atoul(row[3]);
-			uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
-			aug[0]	= (uint32)atoul(row[4]);
-			aug[1]	= (uint32)atoul(row[5]);
-			aug[2]	= (uint32)atoul(row[6]);
-			aug[3]	= (uint32)atoul(row[7]);
-			aug[4]	= (uint32)atoul(row[8]);
-			bool instnodrop	= (row[9] && (uint16)atoi(row[9])) ? true : false;
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        int16 slot_id	= atoi(row[0]);
+        uint32 item_id	= atoi(row[1]);
+        uint16 charges	= atoi(row[2]);
+        uint32 color	= atoul(row[3]);
 
-			const Item_Struct* item = GetItem(item_id);
+        uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
 
-			if (item) {
-				int16 put_slot_id = INVALID_INDEX;
+        aug[0]	= (uint32)atoul(row[4]);
+        aug[1]	= (uint32)atoul(row[5]);
+        aug[2]	= (uint32)atoul(row[6]);
+        aug[3]	= (uint32)atoul(row[7]);
+        aug[4]	= (uint32)atoul(row[8]);
 
-				ItemInst* inst = CreateBaseItem(item, charges);
+        bool instnodrop	= (row[9] && (uint16)atoi(row[9]))? true: false;
 
-				if(row[10]) {
-					std::string data_str(row[10]);
-					std::string id;
-					std::string value;
-					bool use_id = true;
+        const Item_Struct* item = GetItem(item_id);
 
-					for(int i = 0; i < data_str.length(); ++i) {
-						if(data_str[i] == '^') {
-							if(!use_id) {
-								inst->SetCustomData(id, value);
-								id.clear();
-								value.clear();
-							}
-							use_id = !use_id;
-						}
-						else {
-							char v = data_str[i];
-							if(use_id) {
-								id.push_back(v);
-							} else {
-								value.push_back(v);
-							}
-						}
-					}
-				}
+        if (!item) {
+            LogFile->write(EQEMuLog::Error,"Warning: charid %i has an invalid item_id %i in inventory slot %i", char_id, item_id, slot_id);
+            continue;
+        }
 
-				if (instnodrop || (((slot_id >= EmuConstants::EQUIPMENT_BEGIN && slot_id <= EmuConstants::EQUIPMENT_END) || slot_id == MainPowerSource) && inst->GetItem()->Attuneable))
-						inst->SetInstNoDrop(true);
-				if (color > 0)
-					inst->SetColor(color);
-				if(charges==0x7FFF)
-					inst->SetCharges(-1);
-				else
-					inst->SetCharges(charges);
+        int16 put_slot_id = INVALID_INDEX;
 
-				if (item->ItemClass == ItemClassCommon) {
-					for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
-						if (aug[i]) {
-							inst->PutAugment(this, i, aug[i]);
-						}
-					}
-				}
+        ItemInst* inst = CreateBaseItem(item, charges);
 
-				if (slot_id >= 8000 && slot_id <= 8999) {
-					put_slot_id = inv->PushCursor(*inst);
-				}
-				// Admins: please report any occurrences of this error
-				else if (slot_id >= 3111 && slot_id <= 3179) {
-					LogFile->write(EQEMuLog::Error,
-						"Warning: Defunct location for item in inventory: charid=%i, item_id=%i, slot_id=%i .. pushing to cursor...",
-						char_id, item_id, slot_id);
-					put_slot_id = inv->PushCursor(*inst);
-				}
-				else {
-					put_slot_id = inv->PutItem(slot_id, *inst);
-				}
+        if(row[10]) {
+            std::string data_str(row[10]);
+            std::string idAsString;
+            std::string value;
+            bool use_id = true;
 
-				safe_delete(inst);
+            for(int i = 0; i < data_str.length(); ++i) {
+                if(data_str[i] == '^') {
+                    if(!use_id) {
+                        inst->SetCustomData(idAsString, value);
+                        idAsString.clear();
+                        value.clear();
+                    }
 
-				// Save ptr to item in inventory
-				if (put_slot_id == INVALID_INDEX) {
-					LogFile->write(EQEMuLog::Error,
-						"Warning: Invalid slot_id for item in inventory: charid=%i, item_id=%i, slot_id=%i",
-						char_id, item_id, slot_id);
-				}
-			}
-			else {
-				LogFile->write(EQEMuLog::Error,
-					"Warning: charid %i has an invalid item_id %i in inventory slot %i",
-					char_id, item_id, slot_id);
-			}
-		}
-		mysql_free_result(result);
+                    use_id = !use_id;
+                    continue;
+                }
 
-		// Retrieve shared inventory
-		ret = GetSharedBank(char_id, inv, true);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "GetInventory query '%s' %s", query, errbuf);
-		LogFile->write(EQEMuLog::Error, "If you got an error related to the 'instnodrop' field, run the following SQL Queries:\nalter table inventory add instnodrop tinyint(1) unsigned default 0 not null;\n");
-	}
+                char v = data_str[i];
+                if(use_id)
+                    idAsString.push_back(v);
+                else
+                    value.push_back(v);
+            }
+        }
 
-	safe_delete_array(query);
-	return ret;
+        if (instnodrop || (((slot_id >= EmuConstants::EQUIPMENT_BEGIN && slot_id <= EmuConstants::EQUIPMENT_END) || slot_id == MainPowerSource) && inst->GetItem()->Attuneable))
+            inst->SetInstNoDrop(true);
+
+        if (color > 0)
+            inst->SetColor(color);
+
+        if(charges==0x7FFF)
+            inst->SetCharges(-1);
+        else
+            inst->SetCharges(charges);
+
+        if (item->ItemClass == ItemClassCommon)
+            for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++)
+                if (aug[i])
+                    inst->PutAugment(this, i, aug[i]);
+
+        if (slot_id >= 8000 && slot_id <= 8999)
+            put_slot_id = inv->PushCursor(*inst);
+        else if (slot_id >= 3111 && slot_id <= 3179) {
+            // Admins: please report any occurrences of this error
+            LogFile->write(EQEMuLog::Error, "Warning: Defunct location for item in inventory: charid=%i, item_id=%i, slot_id=%i .. pushing to cursor...", char_id, item_id, slot_id);
+            put_slot_id = inv->PushCursor(*inst);
+        } else
+            put_slot_id = inv->PutItem(slot_id, *inst);
+
+        safe_delete(inst);
+
+        // Save ptr to item in inventory
+        if (put_slot_id == INVALID_INDEX) {
+            LogFile->write(EQEMuLog::Error, "Warning: Invalid slot_id for item in inventory: charid=%i, item_id=%i, slot_id=%i",char_id, item_id, slot_id);
+        }
+    }
+
+    // Retrieve shared inventory
+	return GetSharedBank(char_id, inv, true);
 }
 
 // Overloaded: Retrieve character inventory based on account_id and character name
