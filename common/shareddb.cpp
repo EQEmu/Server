@@ -1840,21 +1840,22 @@ void SharedDatabase::GetLootDropInfo(uint32 &loot_drop_count, uint32 &max_loot_d
 	loot_drop_count = 0;
 	max_loot_drop = 0;
 	loot_drop_entries = 0;
-	const char *query = "SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM lootdrop_entries) FROM lootdrop";
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	if(RunQuery(query, strlen(query), errbuf, &result)) {
-		if(row = mysql_fetch_row(result)) {
-			loot_drop_count = static_cast<uint32>(atoul(row[0]));
-			max_loot_drop = static_cast<uint32>(atoul(row[1]));
-			loot_drop_entries = static_cast<uint32>(atoul(row[2]));
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error getting loot table info from database: %s, %s", query, errbuf);
-	}
+	const std::string query = "SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM lootdrop_entries) FROM lootdrop";
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error getting loot table info from database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
+        return;
+    }
+
+	if (results.RowCount() == 0)
+        return;
+
+    auto row =results.begin();
+
+    loot_drop_count = static_cast<uint32>(atoul(row[0]));
+	max_loot_drop = static_cast<uint32>(atoul(row[1]));
+	loot_drop_entries = static_cast<uint32>(atoul(row[2]));
 }
 
 void SharedDatabase::LoadLootTables(void *data, uint32 size) {
