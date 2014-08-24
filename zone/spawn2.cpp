@@ -690,49 +690,45 @@ void SpawnConditionManager::UpdateDBCondition(const char* zone_name, uint32 inst
 }
 
 bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, std::string &zone_name) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	int len;
 
-	bool ret = false;
-
-	len = MakeAnyLenString(&query,
-		"SELECT id,cond_id,period,next_minute,next_hour,next_day,next_month,next_year,enabled,action,argument,strict,zone "
-		"FROM spawn_events WHERE id=%d", event_id);
-	if (database.RunQuery(query, len, errbuf, &result)) {
-		safe_delete_array(query);
-		if((row = mysql_fetch_row(result))) {
-			event.id = atoi(row[0]);
-			event.condition_id = atoi(row[1]);
-			event.period = atoi(row[2]);
-
-			event.next.minute = atoi(row[3]);
-			event.next.hour = atoi(row[4]);
-			event.next.day = atoi(row[5]);
-			event.next.month = atoi(row[6]);
-			event.next.year = atoi(row[7]);
-
-			event.enabled = atoi(row[8])==0?false:true;
-			event.action = (SpawnEvent::Action) atoi(row[9]);
-			event.argument = atoi(row[10]);
-			event.strict = atoi(row[11])==0?false:true;
-			zone_name = row[12];
-
-			std::string t;
-			EQTime::ToString(&event.next, t);
-			_log(SPAWNS__CONDITIONS, "(LoadDBEvent) Loaded %s spawn event %d on condition %d with period %d, action %d, argument %d, strict %d. Will trigger at %s",
-				event.enabled?"enabled":"disabled", event.id, event.condition_id, event.period, event.action, event.argument, event.strict, t.c_str());
-
-			ret = true;
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadDBEvent query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("SELECT id, cond_id, period, "
+                                    "next_minute, next_hour, next_day, "
+                                    "next_month, next_year, enabled, "
+                                    "action, argument, strict, zone "
+                                    "FROM spawn_events WHERE id = %d", event_id);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in LoadDBEvent query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
-	return(ret);
+
+    if (results.RowCount() == 0)
+        return false;
+
+	auto row = results.begin();
+
+    event.id = atoi(row[0]);
+    event.condition_id = atoi(row[1]);
+    event.period = atoi(row[2]);
+
+    event.next.minute = atoi(row[3]);
+    event.next.hour = atoi(row[4]);
+    event.next.day = atoi(row[5]);
+    event.next.month = atoi(row[6]);
+    event.next.year = atoi(row[7]);
+
+    event.enabled = atoi(row[8]) != 0;
+    event.action = (SpawnEvent::Action) atoi(row[9]);
+    event.argument = atoi(row[10]);
+    event.strict = atoi(row[11]) != 0;
+    zone_name = row[12];
+
+    std::string timeAsString;
+    EQTime::ToString(&event.next, timeAsString);
+
+    _log(SPAWNS__CONDITIONS, "(LoadDBEvent) Loaded %s spawn event %d on condition %d with period %d, action %d, argument %d, strict %d. Will trigger at %s", event.enabled? "enabled": "disabled", event.id, event.condition_id, event.period, event.action, event.argument, event.strict, timeAsString.c_str());
+
+	return true;
 }
 
 bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 instance_id)
