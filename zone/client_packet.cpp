@@ -11405,92 +11405,68 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 		Message(15,"Your home city has already been set.", m_pp.binds[4].zoneId, database.GetZoneName(m_pp.binds[4].zoneId));
 		return;
 	}
+
 	if (app->size < 1) {
 		LogFile->write(EQEMuLog::Error, "Wrong size: OP_SetStartCity, size=%i, expected %i", app->size, 1);
 		DumpPacket(app);
 		return;
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result = nullptr;
-	MYSQL_ROW row = 0;
 	float x(0),y(0),z(0);
 	uint32 zoneid = 0;
+	uint32 startCity = (uint32)strtol((const char*)app->pBuffer, nullptr, 10);
 
-	uint32 StartCity = (uint32)strtol((const char*)app->pBuffer, nullptr, 10);
-	bool ValidCity = false;
-	database.RunQuery
-	(
-		query,
-		MakeAnyLenString
-		(
-			&query,
-			"SELECT zone_id, bind_id, x, y, z FROM start_zones "
-			"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
-			m_pp.class_,
-			m_pp.deity,
-			m_pp.race
-		),
-		errbuf,
-		&result
-	);
-	safe_delete_array(query);
-
-	if(!result) {
+	std::string query = StringFormat("SELECT zone_id, bind_id, x, y, z FROM start_zones "
+                                    "WHERE player_class=%i AND player_deity=%i AND player_race=%i",
+                                    m_pp.class_, m_pp.deity, m_pp.race);
+    auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
 		LogFile->write(EQEMuLog::Error, "No valid start zones found for /setstartcity");
 		return;
 	}
 
-	while(row = mysql_fetch_row(result)) {
+    bool validCity = false;
+	for (auto row = results.begin(); row != results.end(); ++row) {
 		if(atoi(row[1]) != 0)
 			zoneid = atoi(row[1]);
 		else
 			zoneid = atoi(row[0]);
 
-		if(zoneid == StartCity) {
-			ValidCity = true;
-			x = atof(row[2]);
-			y = atof(row[3]);
-			z = atof(row[4]);
-		}
+		if(zoneid != startCity)
+            continue;
+
+        validCity = true;
+        x = atof(row[2]);
+        y = atof(row[3]);
+        z = atof(row[4]);
 	}
 
-	if(ValidCity) {
+	if(validCity) {
 		Message(15,"Your home city has been set");
-		SetStartZone(StartCity, x, y, z);
-	}
-	else {
-		database.RunQuery
-		(
-			query,
-			MakeAnyLenString
-			(
-				&query,
-				"SELECT zone_id, bind_id FROM start_zones "
-				"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
-				m_pp.class_,
-				m_pp.deity,
-				m_pp.race
-			),
-			errbuf,
-			&result
-	);
-		safe_delete_array(query);
-		Message(15,"Use \"/startcity #\" to choose a home city from the following list:");
-		char* name;
-		while(row = mysql_fetch_row(result)) {
-			if(atoi(row[1]) != 0)
-				zoneid = atoi(row[1]);
-			else
-				zoneid = atoi(row[0]);
-			database.GetZoneLongName(database.GetZoneName(zoneid),&name);
-			Message(15,"%d - %s", zoneid, name);
-			safe_delete_array(name);
-		}
+		SetStartZone(startCity, x, y, z);
+		return;
 	}
 
-	mysql_free_result(result);
+	query = StringFormat("SELECT zone_id, bind_id FROM start_zones "
+                        "WHERE player_class=%i AND player_deity=%i AND player_race=%i",
+                        m_pp.class_, m_pp.deity, m_pp.race);
+    results = database.QueryDatabase(query);
+    if (!results.Success())
+        return;
+
+    Message(15,"Use \"/startcity #\" to choose a home city from the following list:");
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        if(atoi(row[1]) != 0)
+            zoneid = atoi(row[1]);
+        else
+            zoneid = atoi(row[0]);
+
+        char* name;
+        database.GetZoneLongName(database.GetZoneName(zoneid), &name);
+        Message(15,"%d - %s", zoneid, name);
+    }
+
 }
 
 void Client::Handle_OP_Report(const EQApplicationPacket *app)
