@@ -3137,6 +3137,7 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 		DumpPacket(app);
 		return;
 	}
+
 	DumpPacket(app);
 	ItemViewRequest_Struct* ivrs = (ItemViewRequest_Struct*)app->pBuffer;
 
@@ -3156,30 +3157,24 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 				silentsaylink = true;
 			}
 
-			if (sayid && sayid > 0)
+			if (sayid > 0)
 			{
-				char errbuf[MYSQL_ERRMSG_SIZE];
-				char *query = 0;
-				MYSQL_RES *result;
-				MYSQL_ROW row;
 
+                std::string query = StringFormat("SELECT `phrase` FROM saylink WHERE `id` = '%i'", sayid);
+                auto results = database.QueryDatabase(query);
+                if (!results.Success()) {
+                    Message(13, "Error: The saylink (%s) was not found in the database.", response.c_str());
+					return;
+                }
 
-				if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `phrase` FROM saylink WHERE `id` = '%i'", sayid),errbuf,&result))
-				{
-					if (mysql_num_rows(result) == 1)
-					{
-						row = mysql_fetch_row(result);
-						response = row[0];
-					}
-					mysql_free_result(result);
-				}
-				else
-				{
-					Message(13, "Error: The saylink (%s) was not found in the database.",response.c_str());
-					safe_delete_array(query);
+				if (results.RowCount() != 1) {
+                    Message(13, "Error: The saylink (%s) was not found in the database.", response.c_str());
 					return;
 				}
-				safe_delete_array(query);
+
+				auto row = results.begin();
+                response = row[0];
+
 			}
 
 			if((response).size() > 0)
@@ -4628,7 +4623,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 
 			p_timers.Start(pTimerHarmTouch, HarmTouchReuseTime);
 		}
-		
+
 		if (spell_to_cast > 0)	// if we've matched LoH or HT, cast now
 			CastSpell(spell_to_cast, castspell->target_id, castspell->slot);
 	}
@@ -5864,9 +5859,9 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	else
 		this->DeleteItemInInventory(mp->itemslot,mp->quantity,false);
 
-	//This forces the price to show up correctly for charged items. 
+	//This forces the price to show up correctly for charged items.
 	if(inst->IsCharged())
-		mp->quantity = 1; 
+		mp->quantity = 1;
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopPlayerSell, sizeof(Merchant_Purchase_Struct));
 	Merchant_Purchase_Struct* mco=(Merchant_Purchase_Struct*)outapp->pBuffer;
@@ -7635,7 +7630,7 @@ void Client::Handle_OP_Mend(const EQApplicationPacket *app)
 	int mendhp = GetMaxHP() / 4;
 	int currenthp = GetHP();
 	if (MakeRandomInt(0, 199) < (int)GetSkill(SkillMend)) {
-		
+
 		int criticalchance = spellbonuses.CriticalMend + itembonuses.CriticalMend + aabonuses.CriticalMend;
 
 		if(MakeRandomInt(0,99) < criticalchance){
@@ -9532,7 +9527,7 @@ void Client::CompleteConnect() {
 
 	/* This sub event is for if a player logs in for the first time since entering world. */
 	if (firstlogon == 1){
-		parse->EventPlayer(EVENT_CONNECT, this, "", 0); 
+		parse->EventPlayer(EVENT_CONNECT, this, "", 0);
 		/* QS: PlayerLogConnectDisconnect */
 		if (RuleB(QueryServ, PlayerLogConnectDisconnect)){
 			std::string event_desc = StringFormat("Connect :: Logged into zoneid:%i instid:%i", this->GetZoneID(), this->GetInstanceID());
@@ -12775,7 +12770,7 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app) {
 				QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, this->CharacterID(), event_desc);
 			}
 		}
-	} 
+	}
 	/* Cursor to Item storage */
 	else {
 		uint32 max_currency = GetAlternateCurrencyValue(reclaim->currency_id);
@@ -12784,7 +12779,7 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app) {
 		if(reclaim->count > max_currency) {
 			SummonItem(item_id, max_currency);
 			SetAlternateCurrencyValue(reclaim->currency_id, 0);
-		} 
+		}
 		else {
 			SummonItem(item_id, reclaim->count, 0, 0, 0, 0, 0, false, MainCursor);
 			AddAlternateCurrencyValue(reclaim->currency_id, -((int32)reclaim->count));
@@ -12793,7 +12788,7 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app) {
 		if (RuleB(QueryServ, PlayerLogAlternateCurrencyTransactions)){
 			std::string event_desc = StringFormat("Reclaim :: Cursor to Item :: alt_currency_id:%i amount:-%i in zoneid:%i instid:%i", reclaim->currency_id, reclaim->count, this->GetZoneID(), this->GetInstanceID());
 			QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, this->CharacterID(), event_desc);
-		} 
+		}
 	}
 }
 
@@ -12885,8 +12880,8 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app) {
 		/* QS: PlayerLogAlternateCurrencyTransactions :: Sold to Merchant*/
 		if (RuleB(QueryServ, PlayerLogAlternateCurrencyTransactions)){
 			std::string event_desc = StringFormat("Sold to Merchant :: itemid:%u npcid:%u alt_currency_id:%u cost:%u in zoneid:%u instid:%i", item->ID, npc_id, alt_cur_id, cost, this->GetZoneID(), this->GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, this->CharacterID(), event_desc); 
-		} 
+			QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, this->CharacterID(), event_desc);
+		}
 
 		FastQueuePacket(&outapp);
 		AddAlternateCurrencyValue(alt_cur_id, cost);
@@ -12947,7 +12942,7 @@ void Client::Handle_OP_LFGuild(const EQApplicationPacket *app)
 	switch(Command)
 	{
 		case 0:
-		{	
+		{
 				VERIFY_PACKET_LENGTH(OP_LFGuild, app, LFGuild_PlayerToggle_Struct);
 			LFGuild_PlayerToggle_Struct *pts = (LFGuild_PlayerToggle_Struct *)app->pBuffer;
 
