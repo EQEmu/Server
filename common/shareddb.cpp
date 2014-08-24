@@ -1860,61 +1860,56 @@ void SharedDatabase::GetLootDropInfo(uint32 &loot_drop_count, uint32 &max_loot_d
 
 void SharedDatabase::LoadLootTables(void *data, uint32 size) {
 	EQEmu::FixedMemoryVariableHashSet<LootTable_Struct> hash(reinterpret_cast<uint8*>(data), size);
-	const char *query = "SELECT loottable.id, loottable.mincash, loottable.maxcash, loottable.avgcoin,"
-		" loottable_entries.lootdrop_id, loottable_entries.multiplier, loottable_entries.droplimit, "
-		"loottable_entries.mindrop, loottable_entries.probability FROM loottable LEFT JOIN loottable_entries"
-		" ON loottable.id = loottable_entries.loottable_id ORDER BY id";
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+
 	uint8 loot_table[sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * 128)];
 	LootTable_Struct *lt = reinterpret_cast<LootTable_Struct*>(loot_table);
 
-	if(RunQuery(query, strlen(query), errbuf, &result)) {
-		uint32 current_id = 0;
-		uint32 current_entry = 0;
-		while(row = mysql_fetch_row(result)) {
-			uint32 id = static_cast<uint32>(atoul(row[0]));
-			if(id != current_id) {
-				if(current_id != 0) {
-					hash.insert(current_id, loot_table, (sizeof(LootTable_Struct) +
-						(sizeof(LootTableEntries_Struct) * lt->NumEntries)));
-				}
+	const std::string query = "SELECT loottable.id, loottable.mincash, loottable.maxcash, loottable.avgcoin, "
+                            "loottable_entries.lootdrop_id, loottable_entries.multiplier, loottable_entries.droplimit, "
+                            "loottable_entries.mindrop, loottable_entries.probability FROM loottable LEFT JOIN loottable_entries "
+                            "ON loottable.id = loottable_entries.loottable_id ORDER BY id";
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error getting loot table info from database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
+        return;
+    }
 
-				memset(loot_table, 0, sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * 128));
-				current_entry = 0;
-				current_id = id;
-				lt->mincash = static_cast<uint32>(atoul(row[1]));
-				lt->maxcash = static_cast<uint32>(atoul(row[2]));
-				lt->avgcoin = static_cast<uint32>(atoul(row[3]));
-			}
+    uint32 current_id = 0;
+    uint32 current_entry = 0;
 
-			if(current_entry > 128) {
-				continue;
-			}
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        uint32 id = static_cast<uint32>(atoul(row[0]));
+        if(id != current_id) {
+            if(current_id != 0)
+                hash.insert(current_id, loot_table, (sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * lt->NumEntries)));
 
-			if(!row[4]) {
-				continue;
-			}
+            memset(loot_table, 0, sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * 128));
+            current_entry = 0;
+            current_id = id;
+            lt->mincash = static_cast<uint32>(atoul(row[1]));
+            lt->maxcash = static_cast<uint32>(atoul(row[2]));
+            lt->avgcoin = static_cast<uint32>(atoul(row[3]));
+        }
 
-			lt->Entries[current_entry].lootdrop_id = static_cast<uint32>(atoul(row[4]));
-			lt->Entries[current_entry].multiplier = static_cast<uint8>(atoi(row[5]));
-			lt->Entries[current_entry].droplimit = static_cast<uint8>(atoi(row[6]));
-			lt->Entries[current_entry].mindrop = static_cast<uint8>(atoi(row[7]));
-			lt->Entries[current_entry].probability = static_cast<float>(atof(row[8]));
+        if(current_entry > 128)
+            continue;
 
-			++(lt->NumEntries);
-			++current_entry;
-		}
-		if(current_id != 0) {
-			hash.insert(current_id, loot_table, (sizeof(LootTable_Struct) +
-				(sizeof(LootTableEntries_Struct) * lt->NumEntries)));
-		}
+        if(!row[4])
+            continue;
 
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error getting loot table info from database: %s, %s", query, errbuf);
-	}
+        lt->Entries[current_entry].lootdrop_id = static_cast<uint32>(atoul(row[4]));
+        lt->Entries[current_entry].multiplier = static_cast<uint8>(atoi(row[5]));
+        lt->Entries[current_entry].droplimit = static_cast<uint8>(atoi(row[6]));
+        lt->Entries[current_entry].mindrop = static_cast<uint8>(atoi(row[7]));
+        lt->Entries[current_entry].probability = static_cast<float>(atof(row[8]));
+
+        ++(lt->NumEntries);
+        ++current_entry;
+    }
+
+    if(current_id != 0)
+        hash.insert(current_id, loot_table, (sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * lt->NumEntries)));
+
 }
 
 void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
