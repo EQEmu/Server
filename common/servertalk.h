@@ -184,9 +184,11 @@
 #define ServerOP_QSPlayerLogNPCKills		0x4012
 #define ServerOP_QSPlayerLogDeletes			0x4013
 #define ServerOP_QSPlayerLogMoves			0x4014
-#define ServerOP_QSMerchantLogTransactions	0x4015
+#define ServerOP_QSPlayerLogMerchantTransactions	0x4015
+#define ServerOP_QSSendQuery				0x4016
 
-enum { QSG_LFGuild = 0 };
+/* Query Serv Generic Packet Flag/Type Enumeration */
+enum { QSG_LFGuild = 0 }; 
 enum {	QSG_LFGuild_PlayerMatches = 0, QSG_LFGuild_UpdatePlayerInfo, QSG_LFGuild_RequestPlayerInfo, QSG_LFGuild_UpdateGuildInfo, QSG_LFGuild_GuildMatches,
 	QSG_LFGuild_RequestGuildInfo };
 
@@ -1217,6 +1219,10 @@ struct QSMerchantLogTransaction_Struct {
 	MoneyUpdate_Struct		char_money;
 	uint16					char_count;
 	QSTransactionItems_Struct items[0];
+};
+
+struct QSGeneralQuery_Struct {
+	char QueryString[0];
 };
 
 struct CZMessagePlayer_Struct {

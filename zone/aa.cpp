@@ -38,6 +38,9 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 #include "../common/logsys.h"
 #include "zonedb.h"
 #include "string_ids.h"
+#include "queryserv.h"
+
+extern QueryServ* QServ;
 
 //static data arrays, really not big enough to warrant shared mem.
 AA_DBAction AA_Actions[aaHighestID][MAX_AA_ACTION_RANKS];	//[aaid][rank]
@@ -1039,16 +1042,16 @@ void Client::BuyAA(AA_Action* action)
 	else
 		real_cost = aa2->cost + (aa2->cost_inc * cur_level);
 
-	if(m_pp.aapoints >= real_cost && cur_level < aa2->max_level) {
-		SetAA(aa2->id, cur_level+1);
+	if (m_pp.aapoints >= real_cost && cur_level < aa2->max_level) {
+		SetAA(aa2->id, cur_level + 1);
 
-		mlog(AA__MESSAGE, "Set AA %d to level %d", aa2->id, cur_level+1);
+		mlog(AA__MESSAGE, "Set AA %d to level %d", aa2->id, cur_level + 1);
 
 		m_pp.aapoints -= real_cost;
 
 		Save();
 		if ((RuleB(AA, Stacking) && (GetClientVersionBit() >= 4) && (aa2->hotkey_sid == 4294967295u))
-			&& ((aa2->max_level == (cur_level+1)) && aa2->sof_next_id)){
+			&& ((aa2->max_level == (cur_level + 1)) && aa2->sof_next_id)){
 			SendAA(aa2->id);
 			SendAA(aa2->sof_next_id);
 		}
@@ -1059,10 +1062,28 @@ void Client::BuyAA(AA_Action* action)
 
 		//we are building these messages ourself instead of using the stringID to work around patch discrepencies
 		//these are AA_GAIN_ABILITY	(410) & AA_IMPROVE (411), respectively, in both Titanium & SoF. not sure about 6.2
-		if(cur_level<1)
-			Message(15,"You have gained the ability \"%s\" at a cost of %d ability %s.", aa2->name, real_cost, (real_cost>1)?"points":"point");
-		else
-			Message(15,"You have improved %s %d at a cost of %d ability %s.", aa2->name, cur_level+1, real_cost, (real_cost>1)?"points":"point");
+
+		/* Initial purchase of an AA ability */
+		if (cur_level < 1){
+			Message(15, "You have gained the ability \"%s\" at a cost of %d ability %s.", aa2->name, real_cost, (real_cost>1) ? "points" : "point");
+
+			/* QS: Player_Log_AA_Purchases */ 
+			if (RuleB(QueryServ, PlayerLogAAPurchases)){
+				std::string event_desc = StringFormat("Initial AA Purchase :: aa_name:%s aa_id:%i at cost:%i in zoneid:%i instid:%i", aa2->name, aa2->id, real_cost, this->GetZoneID(), this->GetInstanceID());
+				QServ->PlayerLogEvent(Player_Log_AA_Purchases, this->CharacterID(), event_desc);
+			}
+		}
+		/* Ranked purchase of an AA ability */
+		else{
+			Message(15, "You have improved %s %d at a cost of %d ability %s.", aa2->name, cur_level + 1, real_cost, (real_cost > 1) ? "points" : "point");
+
+			/* QS: Player_Log_AA_Purchases */
+			if (RuleB(QueryServ, PlayerLogAAPurchases)){
+				std::string event_desc = StringFormat("Ranked AA Purchase :: aa_name:%s aa_id:%i at cost:%i in zoneid:%i instid:%i", aa2->name, aa2->id, real_cost, this->GetZoneID(), this->GetInstanceID());
+				QServ->PlayerLogEvent(Player_Log_AA_Purchases, this->CharacterID(), event_desc);
+			}
+		}
+
 
 
 		SendAAStats();
@@ -1816,7 +1837,7 @@ SendAA_Struct* ZoneDatabase::GetAASkillVars(uint32 skill_id)
     }
 
     query = StringFormat("SELECT a.cost, a.max_level, a.hotkey_sid, a.hotkey_sid2, a.title_sid, a.desc_sid, a.type, "
-                        "COALESCE ("	//So we can return 0 if it's null.
+                        "COALESCE("	//So we can return 0 if it's null.
                         "("	// this is our derived table that has the row #
                             // that we can SELECT from, because the client is stupid.
                         "SELECT p.prereq_index_num "

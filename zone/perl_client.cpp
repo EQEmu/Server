@@ -1312,13 +1312,15 @@ XS(XS_Client_MovePCInstance)
 			if (THIS->IsMerc())
 				_log(CLIENT__ERROR, "Perl(XS_Client_MovePCInstance) attempted to process a type Merc reference");
 			else if (THIS->IsNPC())
-				_log(CLIENT__ERROR, "Perl(XS_Client_MovePCInstance) attempted to process a type NPC reference");
+				_log(CLIENT__ERROR, "Perl(XS_MovePCInstance) attempted to process a type NPC reference");
 		#ifdef BOTS
 			else if (THIS->IsBot())
 				_log(CLIENT__ERROR, "Perl(XS_Client_MovePCInstance) attempted to process a type Bot reference");
 		#endif
 			else
-				_log(CLIENT__ERROR, "Perl(XS_Client_MovePCInstance) attempted to process an Unknown type reference");
+				_log(CLIENT__ERROR, "Perl(XS_MovePCInstance) attempted to process an Unknown type reference");
+
+			Perl_croak(aTHX_ "THIS is not of type Client");
 
 			Perl_croak(aTHX_ "THIS is not of type Client");
 		}

@@ -1134,7 +1134,7 @@ void Lua_Client::Signal(uint32 id) {
 
 void Lua_Client::AddAlternateCurrencyValue(uint32 currency, int amount) {
 	Lua_Safe_Call_Void();
-	self->AddAlternateCurrencyValue(currency, amount);
+	self->AddAlternateCurrencyValue(currency, amount, 1);
 }
 
 void Lua_Client::SendWebLink(const char *site) {
