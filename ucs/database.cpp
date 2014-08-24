@@ -288,109 +288,92 @@ void Database::SetChannelOwner(std::string channelName, std::string owner) {
 
 }
 
-void Database::SendHeaders(Client *c) {
+void Database::SendHeaders(Client *client) {
 
-	int UnknownField2 = 25015275;
-	int UnknownField3 = 1;
+	int unknownField2 = 25015275;
+	int unknownField3 = 1;
+	int characterID = FindCharacter(client->MailBoxName().c_str());
 
-	int CharacterID = FindCharacter(c->MailBoxName().c_str());
-	_log(UCS__TRACE, "Sendheaders for %s, CharID is %i", c->MailBoxName().c_str(), CharacterID);
-	if(CharacterID <= 0)
+	_log(UCS__TRACE, "Sendheaders for %s, CharID is %i", client->MailBoxName().c_str(), characterID);
+
+	if(characterID <= 0)
 		return;
 
+	std::string query = StringFormat("SELECT `msgid`,`timestamp`, `from`, `subject`, `status` "
+                                    "FROM `mail` WHERE `charid`=%i", characterID);
+    auto results = QueryDatabase(query);
+	if (!results.Success())
+		return;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char buffer[100];
 
-	if (!RunQuery(query,MakeAnyLenString(&query, "select `msgid`,`timestamp`,`from`,`subject`, `status` from `mail` "
-							"where `charid`=%i", CharacterID),errbuf,&result)){
+	int headerCountPacketLength = 0;
 
-		safe_delete_array(query);
+	sprintf(buffer, "%i", client->GetMailBoxNumber());
+	headerCountPacketLength += (strlen(buffer) + 1);
 
-		return ;
-	}
+	sprintf(buffer, "%i", unknownField2);
+	headerCountPacketLength += (strlen(buffer) + 1);
 
-	safe_delete_array(query);
+	sprintf(buffer, "%i", unknownField3);
+	headerCountPacketLength += (strlen(buffer) + 1);
 
-	char Buf[100];
+	sprintf(buffer, "%i", results.RowCount());
+	headerCountPacketLength += (strlen(buffer) + 1);
 
-	uint32 NumRows = mysql_num_rows(result);
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MailHeaderCount, headerCountPacketLength);
 
-	int HeaderCountPacketLength = 0;
+	char *packetBuffer = (char *)outapp->pBuffer;
 
-	sprintf(Buf, "%i", c->GetMailBoxNumber());
-	HeaderCountPacketLength += (strlen(Buf) + 1);
-
-	sprintf(Buf, "%i", UnknownField2);
-	HeaderCountPacketLength += (strlen(Buf) + 1);
-
-	sprintf(Buf, "%i", UnknownField3);
-	HeaderCountPacketLength += (strlen(Buf) + 1);
-
-	sprintf(Buf, "%i", NumRows);
-	HeaderCountPacketLength += (strlen(Buf) + 1);
-
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MailHeaderCount, HeaderCountPacketLength);
-
-	char *PacketBuffer = (char *)outapp->pBuffer;
-
-	VARSTRUCT_ENCODE_INTSTRING(PacketBuffer, c->GetMailBoxNumber());
-	VARSTRUCT_ENCODE_INTSTRING(PacketBuffer, UnknownField2);
-	VARSTRUCT_ENCODE_INTSTRING(PacketBuffer, UnknownField3);
-	VARSTRUCT_ENCODE_INTSTRING(PacketBuffer, NumRows);
+	VARSTRUCT_ENCODE_INTSTRING(packetBuffer, client->GetMailBoxNumber());
+	VARSTRUCT_ENCODE_INTSTRING(packetBuffer, unknownField2);
+	VARSTRUCT_ENCODE_INTSTRING(packetBuffer, unknownField3);
+	VARSTRUCT_ENCODE_INTSTRING(packetBuffer, results.RowCount());
 
 	_pkt(UCS__PACKETS, outapp);
 
-	c->QueuePacket(outapp);
+	client->QueuePacket(outapp);
 
 	safe_delete(outapp);
 
-	int RowNum = 0;
+	int rowIndex = 0;
+	for(auto row = results.begin(); row != results.end(); ++row, ++rowIndex) {
+		int headerPacketLength = 0;
 
-	while((row = mysql_fetch_row(result))) {
+		sprintf(buffer, "%i", client->GetMailBoxNumber());
+		headerPacketLength += strlen(buffer) + 1;
+		sprintf(buffer, "%i", unknownField2);
+		headerPacketLength += strlen(buffer) + 1;
+		sprintf(buffer, "%i", rowIndex);
+		headerPacketLength += strlen(buffer) + 1;
 
+		headerPacketLength += strlen(row[0]) + 1;
+		headerPacketLength += strlen(row[1]) + 1;
+		headerPacketLength += strlen(row[4]) + 1;
+		headerPacketLength += GetMailPrefix().length() + strlen(row[2]) + 1;
+		headerPacketLength += strlen(row[3]) + 1;
 
-		int HeaderPacketLength = 0;
+		outapp = new EQApplicationPacket(OP_MailHeader, headerPacketLength);
 
-		sprintf(Buf, "%i", c->GetMailBoxNumber());
-		HeaderPacketLength = HeaderPacketLength + strlen(Buf) + 1;
-		sprintf(Buf, "%i", UnknownField2);
-		HeaderPacketLength = HeaderPacketLength + strlen(Buf) + 1;
-		sprintf(Buf, "%i", RowNum);
-		HeaderPacketLength = HeaderPacketLength + strlen(Buf) + 1;
+		packetBuffer = (char *)outapp->pBuffer;
 
-		HeaderPacketLength = HeaderPacketLength + strlen(row[0]) + 1;
-		HeaderPacketLength = HeaderPacketLength + strlen(row[1]) + 1;
-		HeaderPacketLength = HeaderPacketLength + strlen(row[4]) + 1;
-		HeaderPacketLength = HeaderPacketLength + GetMailPrefix().length() + strlen(row[2]) + 1;
-		HeaderPacketLength = HeaderPacketLength + strlen(row[3]) + 1;
-
-		outapp = new EQApplicationPacket(OP_MailHeader, HeaderPacketLength);
-
-		PacketBuffer = (char *)outapp->pBuffer;
-
-		VARSTRUCT_ENCODE_INTSTRING(PacketBuffer, c->GetMailBoxNumber());
-		VARSTRUCT_ENCODE_INTSTRING(PacketBuffer, UnknownField2);
-		VARSTRUCT_ENCODE_INTSTRING(PacketBuffer, RowNum);
-		VARSTRUCT_ENCODE_STRING(PacketBuffer, row[0]);
-		VARSTRUCT_ENCODE_STRING(PacketBuffer, row[1]);
-		VARSTRUCT_ENCODE_STRING(PacketBuffer, row[4]);
-		VARSTRUCT_ENCODE_STRING(PacketBuffer, GetMailPrefix().c_str()); PacketBuffer--;
-		VARSTRUCT_ENCODE_STRING(PacketBuffer, row[2]);
-		VARSTRUCT_ENCODE_STRING(PacketBuffer, row[3]);
+		VARSTRUCT_ENCODE_INTSTRING(packetBuffer, client->GetMailBoxNumber());
+		VARSTRUCT_ENCODE_INTSTRING(packetBuffer, unknownField2);
+		VARSTRUCT_ENCODE_INTSTRING(packetBuffer, rowIndex);
+		VARSTRUCT_ENCODE_STRING(packetBuffer, row[0]);
+		VARSTRUCT_ENCODE_STRING(packetBuffer, row[1]);
+		VARSTRUCT_ENCODE_STRING(packetBuffer, row[4]);
+		VARSTRUCT_ENCODE_STRING(packetBuffer, GetMailPrefix().c_str());
+		packetBuffer--;
+		VARSTRUCT_ENCODE_STRING(packetBuffer, row[2]);
+		VARSTRUCT_ENCODE_STRING(packetBuffer, row[3]);
 
 		_pkt(UCS__PACKETS, outapp);
 
-		c->QueuePacket(outapp);
+		client->QueuePacket(outapp);
 
 		safe_delete(outapp);
-
-		RowNum++;
 	}
-
-	mysql_free_result(result);
 
 }
 
