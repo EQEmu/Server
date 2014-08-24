@@ -36,14 +36,15 @@ QueryServ::~QueryServ(){
 
 void QueryServ::SendQuery(std::string Query)
 {
-	ServerPacket* pack = new ServerPacket(ServerOP_QSSendQuery, strlen(Query.c_str()) + 5);
-	pack->WriteUInt32(strlen(Query.c_str())); /* Pack Query String Size so it can be dynamically broken out at queryserv */
+	ServerPacket* pack = new ServerPacket(ServerOP_QSSendQuery, Query.length() + 5);
+	pack->WriteUInt32(Query.length()); /* Pack Query String Size so it can be dynamically broken out at queryserv */
 	pack->WriteString(Query.c_str()); /* Query */
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }
 
-void QueryServ::PlayerLogEvent(int Event_Type, int Character_ID, std::string Event_Desc){
+void QueryServ::PlayerLogEvent(int Event_Type, int Character_ID, std::string Event_Desc)
+{
 	std::string query = StringFormat(
 			"INSERT INTO `qs_player_events` (event, char_id, event_desc, time) VALUES (%i, %i, '%s', UNIX_TIMESTAMP(now()))",
 			Event_Type, Character_ID, EscapeString(Event_Desc).c_str());
