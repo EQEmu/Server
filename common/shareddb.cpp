@@ -1059,20 +1059,21 @@ std::string SharedDatabase::GetBook(const char *txtfile)
 void SharedDatabase::GetFactionListInfo(uint32 &list_count, uint32 &max_lists) {
 	list_count = 0;
 	max_lists = 0;
-	const char *query = "SELECT COUNT(*), MAX(id) FROM npc_faction";
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	if(RunQuery(query, strlen(query), errbuf, &result)) {
-		if(row = mysql_fetch_row(result)) {
-			list_count = static_cast<uint32>(atoul(row[0]));
-			max_lists = static_cast<uint32>(atoul(row[1]));
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error getting npc faction info from database: %s, %s", query, errbuf);
+	const std::string query = "SELECT COUNT(*), MAX(id) FROM npc_faction";
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error getting npc faction info from database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
+        return;
 	}
+
+	if (results.RowCount() == 0)
+        return;
+
+    auto row = results.begin();
+
+    list_count = static_cast<uint32>(atoul(row[0]));
+    max_lists = static_cast<uint32>(atoul(row[1]));
 }
 
 const NPCFactionList* SharedDatabase::GetNPCFactionEntry(uint32 id) {
