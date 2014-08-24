@@ -132,55 +132,44 @@ void Database::GetAccountStatus(Client *client) {
 
 }
 
-int Database::FindAccount(const char *CharacterName, Client *c) {
+int Database::FindAccount(const char *characterName, Client *client) {
 
-	_log(UCS__TRACE, "FindAccount for character %s", CharacterName);
+	_log(UCS__TRACE, "FindAccount for character %s", characterName);
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	c->ClearCharacters();
-
-	if (!RunQuery(query,MakeAnyLenString(&query, "select `id`, `account_id`, `level` from `character_` where `name`='%s' limit 1",
-						CharacterName),errbuf,&result))
-	{
-		_log(UCS__ERROR, "FindAccount query failed: %s", query);
-		safe_delete_array(query);
+	client->ClearCharacters();
+    std::string query = StringFormat("SELECT `id`, `account_id`, `level` "
+                                    "FROM `character_` WHERE `name` = '%s' LIMIT 1",
+                                    characterName);
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		_log(UCS__ERROR, "FindAccount query failed: %s", query.c_str());
 		return -1;
 	}
-	safe_delete_array(query);
 
-	if (mysql_num_rows(result) != 1)
-	{
+	if (results.RowCount() != 1) {
 		_log(UCS__ERROR, "Bad result from query");
-		mysql_free_result(result);
 		return -1;
 	}
 
-	row = mysql_fetch_row(result);
-	c->AddCharacter(atoi(row[0]), CharacterName, atoi(row[2]));
-	int AccountID = atoi(row[1]);
+	auto row = results.begin();
+	client->AddCharacter(atoi(row[0]), characterName, atoi(row[2]));
 
-	mysql_free_result(result);
-	_log(UCS__TRACE, "Account ID for %s is %i", CharacterName, AccountID);
+	int accountID = atoi(row[1]);
 
-	if (!RunQuery(query,MakeAnyLenString(&query, "select `id`, `name`, `level` from `character_` where `account_id`=%i and `name` !='%s'",
-						AccountID, CharacterName),errbuf,&result))
-	{
-		safe_delete_array(query);
-		return AccountID;
-	}
-	safe_delete_array(query);
+	_log(UCS__TRACE, "Account ID for %s is %i", characterName, accountID);
 
-	for(unsigned int i = 0; i < mysql_num_rows(result); i++)
-	{
-		row = mysql_fetch_row(result);
-		c->AddCharacter(atoi(row[0]), row[1], atoi(row[2]));
-	}
-	mysql_free_result(result);
-	return AccountID;
+    query = StringFormat("SELECT `id`, `name`, `level` FROM `character_` "
+                        "WHERE `account_id` = %i AND `name` != '%s'",
+						accountID, characterName);
+    results = QueryDatabase(query);
+	if (!results.Success())
+		return accountID;
+
+	for (auto row = results.begin(); row != results.end(); ++row)
+		client->AddCharacter(atoi(row[0]), row[1], atoi(row[2]));
+
+	return accountID;
 }
 
 bool Database::VerifyMailKey(std::string CharacterName, int IPAddress, std::string MailKey) {
