@@ -630,6 +630,9 @@ bool Client::Save(uint8 iCommitNow) {
 		return false;
 	}
 
+	/* Mirror Character Data */
+	database.StoreCharacterLookup(this->CharacterID());
+
 	return true;
 }
 

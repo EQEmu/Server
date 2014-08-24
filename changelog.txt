@@ -2,6 +2,12 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 08/24/2014 ==
 Akkadius: Character creation process crash fix and query cleanup
+Akkadius: Created `character_lookup` table for applications that mirrors all `character_` table fields minus blob fields for application lookups
+	- A 2.4GB character_ table will take 7 seconds to query on a SSD versus .1s on the character_lookup table
+	- This also causes applications like Magelo to burst reads of the entire character table because of the blob fields that come with the reads, as much as 500-600MB/s even if a indexed id filter is provided
+	- This field is synchronized on player save and has 0.001s DB hit
+	- When we split out from the blob, ideally this table can be removed
+	- Required SQL: utils\sql\git\required\2014_08_24_character_lookup.sql
 
 == 08/23/2014 ==
 Akkadius: Changed zone process window title format, example: 'crushbone :: clients: 6 inst_id: 1 inst_ver: 0 :: port: 7015'
