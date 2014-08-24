@@ -311,7 +311,7 @@ Mob *HateList::GetTop(Mob *center)
 				}
 			}
 
-			if (cur->ent->Sanctuary()) {
+			if (cur->ent->Sanctuary()) { 
 				if(hate == -1)
 				{
 					top = cur->ent;

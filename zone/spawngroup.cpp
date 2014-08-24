@@ -28,8 +28,7 @@
 
 extern EntityList entity_list;
 
-SpawnEntry::SpawnEntry( uint32 in_NPCType, int in_chance, uint8 in_npc_spawn_limit )
-{
+SpawnEntry::SpawnEntry( uint32 in_NPCType, int in_chance, uint8 in_npc_spawn_limit ) {
 	NPCType = in_NPCType;
 	chance = in_chance;
 	npc_spawn_limit = in_npc_spawn_limit;
@@ -57,7 +56,6 @@ uint32 SpawnGroup::GetNPCType() {
 	int npcType = 0;
 	int totalchance = 0;
 
-	//check limits on this spawn group and npc type
 	if(!entity_list.LimitCheckGroup(id, group_spawn_limit))
 		return(0);
 
@@ -68,7 +66,6 @@ uint32 SpawnGroup::GetNPCType() {
 	for(; cur != end; ++cur) {
 		SpawnEntry *se = *cur;
 
-		//check limits on this spawn group and npc type
 		if(!entity_list.LimitCheckType(se->NPCType, se->npc_spawn_limit))
 			continue;
 
@@ -93,7 +90,6 @@ uint32 SpawnGroup::GetNPCType() {
 			roll -= se->chance;
 		}
 	}
-	//CODER implement random table
 	return npcType;
 }
 
@@ -149,7 +145,6 @@ bool ZoneDatabase::LoadSpawnGroups(const char* zone_name, uint16 version, SpawnG
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	// CODER new spawn code
 	query = 0;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT DISTINCT(spawngroupID), spawngroup.name, spawngroup.spawn_limit, spawngroup.dist, spawngroup.max_x, spawngroup.min_x, spawngroup.max_y, spawngroup.min_y, spawngroup.delay, spawngroup.despawn, spawngroup.despawn_timer, spawngroup.mindelay FROM spawn2,spawngroup WHERE spawn2.spawngroupID=spawngroup.ID and spawn2.version=%u and zone='%s'", version, zone_name), errbuf, &result))
 	{
@@ -162,7 +157,7 @@ bool ZoneDatabase::LoadSpawnGroups(const char* zone_name, uint16 version, SpawnG
 	}
 	else
 	{
-		std::cerr << "Error2 in PopulateZoneLists query '" << query << "' " << errbuf << std::endl;
+		_log(ZONE__SPAWNS, "Error2 in PopulateZoneLists query '%s' ", query);
 		safe_delete_array(query);
 		return false;
 	}
@@ -182,18 +177,17 @@ bool ZoneDatabase::LoadSpawnGroups(const char* zone_name, uint16 version, SpawnG
 			if (sg)
 				sg->AddSpawnEntry(newSpawnEntry);
 			else
-				std::cout << "Error in SpawngroupID: " << row[0] << std::endl;
+				_log(ZONE__SPAWNS, "Error in LoadSpawnGroups %s ", query); 
 		}
 		mysql_free_result(result);
 	}
 	else
 	{
-		std::cerr << "Error3 in PopulateZoneLists query '" << query << "' " << errbuf << std::endl;
+		_log(ZONE__SPAWNS, "Error2 in PopulateZoneLists query '%'", query);
 		safe_delete_array(query);
 		return false;
 	}
 
-	// CODER end new spawn code
 	return true;
 }
 
@@ -203,8 +197,6 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList* spawn_g
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-
-	// CODER new spawn code
 	query = 0;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT DISTINCT spawngroup.id, spawngroup.name, spawngroup.spawn_limit, spawngroup.dist, spawngroup.max_x, spawngroup.min_x, spawngroup.max_y, spawngroup.min_y, spawngroup.delay, spawngroup.despawn, spawngroup.despawn_timer, spawngroup.mindelay FROM spawngroup WHERE spawngroup.ID='%i'", spawngroupid), errbuf, &result))
 	{
@@ -217,7 +209,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList* spawn_g
 	}
 	else
 	{
-		std::cerr << "Error2 in PopulateZoneLists query '" << query << "' " << errbuf << std::endl;
+		_log(ZONE__SPAWNS, "Error2 in PopulateZoneLists query %s", query);
 		safe_delete_array(query);
 		return false;
 	}
@@ -233,17 +225,16 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList* spawn_g
 			if (sg)
 				sg->AddSpawnEntry(newSpawnEntry);
 			else
-				std::cout << "Error in SpawngroupID: " << row[0] << std::endl;
+				_log(ZONE__SPAWNS, "Error in SpawngroupID: %s ", row[0]);
 		}
 		mysql_free_result(result);
 	}
 	else
 	{
-		std::cerr << "Error3 in PopulateZoneLists query '" << query << "' " << errbuf << std::endl;
+		_log(ZONE__SPAWNS, "Error3 in PopulateZoneLists query '%s'", row[0]);
 		safe_delete_array(query);
 		return false;
 	}
 
-	// CODER end new spawn code
 	return true;
 }

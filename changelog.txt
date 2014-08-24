@@ -1,5 +1,43 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/23/2014 ==
+Akkadius: Changed zone process window title format, example: 'crushbone :: clients: 6 inst_id: 1 inst_ver: 0 :: port: 7015'
+Akkadius: Most of the following changes are QueryServ related, fully implemented its original functionality to be able to offload
+	intensive or metric based logging to a remote server process that could exist on another server entirely
+Akkadius: Implemented Player Event Logging Types (Go to table `qs_player_events`):
+			1 = Player_Log_Quest,
+			2 = Player_Log_Zoning,
+			3 = Player_Log_Deaths,
+			4 = Player_Log_Connect_State,
+			5 = Player_Log_Levels,
+			6 = Player_Log_Keyring_Addition,
+			7 = Player_Log_QGlobal_Update,
+			8 = Player_Log_Task_Updates,
+			9 = Player_Log_AA_Purchases,
+			10 = Player_Log_Trade_Skill_Events,
+			11 = Player_Log_Issued_Commands,
+			12 = Player_Log_Money_Transactions,
+			13 = Player_Log_Alternate_Currency_Transactions,
+		- All QueryServ logging will be implemented with a front end in EoC 2.0 very soon
+		- Architecture page: http://wiki.eqemulator.org/p?QueryServ_Architecture
+Akkadius: Changed all QS Error related logging to 'QUERYSERV__ERROR'
+Akkadius: (Natedog) (Crash Fix) Legacy MySQL bug revert for loading AA's COALESCE( from COALESCE (
+Akkadius: Implemented Perl Quest objects (LUA still needed to be exported):
+	- quest::qs_send_query("MySQL query") - Will send a raw query to the QueryServ process, useful for custom logging
+	- quest::qs_player_event(char_id, event_desc); - Will process a quest type event to table `qs_player_events` 
+Akkadius: Added MySQL Tables
+	- `qs_player_aa_rate_hourly`
+	- `qs_player_events` 
+	- Source table structures from:
+		- utils\sql\git\queryserv\required\08_23_2014_player_events_and_player_aa_rate_hourly
+		To get the complete QueryServ schema, source from here:
+		- utils\sql\git\queryserv\required\Complete_QueryServ_Table_Structures.sql
+Akkadius: Added rules for each logging type, source rules here with them enabled by default:
+	- utils\sql\git\queryserv\required\Complete_QueryServ_Rules_Enabled.sql
+Akkadius: Spawn related logging cleanup
+Akkadius: General code cleanup
+Akkadius: More to come for QueryServ 
+
 == 08/20/2014 ==
 Uleat: Rework of Trade::AddEntity() - function used to move items into the trade window. Now accepts argument for 'stack_size' and updates client properly.
 Note: I tested trade with Titanium:{SoF,SoD,UF,RoF} in both directions and no client generated an OP_MoveItem event for attempting to place a stackable
