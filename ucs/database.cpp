@@ -225,34 +225,19 @@ int Database::FindCharacter(const char *characterName) {
 
 bool Database::GetVariable(const char* varname, char* varvalue, uint16 varvalue_len) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (!RunQuery(query,MakeAnyLenString(&query, "select `value` from `variables` where `varname`='%s'", varname), errbuf, &result)) {
-
-		_log(UCS__ERROR, "Unable to get message count from database. %s %s", query, errbuf);
-
-		safe_delete_array(query);
-
+	std::string query = StringFormat("SELECT `value` FROM `variables` WHERE `varname` = '%s'", varname);
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		_log(UCS__ERROR, "Unable to get message count from database. %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
-	safe_delete_array(query);
-
-	if (mysql_num_rows(result) != 1) {
-
-		mysql_free_result(result);
-
+	if (results.RowCount() != 1)
 		return false;
-	}
 
-	row = mysql_fetch_row(result);
+	auto row = results.begin();
 
 	snprintf(varvalue, varvalue_len, "%s", row[0]);
-
-	mysql_free_result(result);
 
 	return true;
 }
