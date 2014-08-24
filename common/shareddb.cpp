@@ -1032,35 +1032,28 @@ const Item_Struct* SharedDatabase::IterateItems(uint32* id) {
 
 std::string SharedDatabase::GetBook(const char *txtfile)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 	char txtfile2[20];
 	std::string txtout;
-	strcpy(txtfile2,txtfile);
-	if (!RunQuery(query, MakeAnyLenString(&query, "SELECT txtfile FROM books where name='%s'", txtfile2), errbuf, &result)) {
-		std::cerr << "Error in GetBook query '" << query << "' " << errbuf << std::endl;
-		if (query != 0)
-			safe_delete_array(query);
+	strcpy(txtfile2, txtfile);
+
+	std::string query = StringFormat("SELECT txtfile FROM books WHERE name = '%s'", txtfile2);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		std::cerr << "Error in GetBook query '" << query << "' " << results.ErrorMessage() << std::endl;
 		txtout.assign(" ",1);
 		return txtout;
 	}
-	else {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 0) {
-			mysql_free_result(result);
-			LogFile->write(EQEMuLog::Error, "No book to send, (%s)", txtfile);
-			txtout.assign(" ",1);
-			return txtout;
-		}
-		else {
-			row = mysql_fetch_row(result);
-			txtout.assign(row[0],strlen(row[0]));
-			mysql_free_result(result);
-			return txtout;
-		}
-	}
+
+    if (results.RowCount() == 0) {
+        LogFile->write(EQEMuLog::Error, "No book to send, (%s)", txtfile);
+        txtout.assign(" ",1);
+        return txtout;
+    }
+
+    auto row = results.begin();
+    txtout.assign(row[0],strlen(row[0]));
+
+    return txtout;
 }
 
 void SharedDatabase::GetFactionListInfo(uint32 &list_count, uint32 &max_lists) {
