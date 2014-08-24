@@ -1129,37 +1129,28 @@ int16 SpawnConditionManager::GetCondition(const char *zone_short, uint32 instanc
 		}
 
 		SpawnCondition &cond = condi->second;
-		return(cond.value);
-	} else {
-		//this is a remote spawn condition, grab it from the DB
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char* query = 0;
-		MYSQL_RES *result;
-		MYSQL_ROW row;
-		int len;
-
-		int16 value;
-
-		//load spawn conditions
-		SpawnCondition cond;
-		len = MakeAnyLenString(&query, "SELECT value FROM spawn_condition_values WHERE zone='%s' AND instance_id=%u AND id=%d",
-			zone_short, instance_id, condition_id);
-		if (database.RunQuery(query, len, errbuf, &result)) {
-			safe_delete_array(query);
-			if((row = mysql_fetch_row(result))) {
-				value = atoi(row[0]);
-			} else {
-				_log(SPAWNS__CONDITIONS, "Unable to load remote condition %d from zone %s in Get request.", condition_id, zone_short);
-				value = 0;	//dunno a better thing to do...
-			}
-			mysql_free_result(result);
-		} else {
-			_log(SPAWNS__CONDITIONS, "Unable to query remote condition %d from zone %s in Get request.", condition_id, zone_short);
-			safe_delete_array(query);
-			value = 0;	//dunno a better thing to do...
-		}
-		return(value);
+		return cond.value;
 	}
+
+	//this is a remote spawn condition, grab it from the DB
+    //load spawn conditions
+    std::string query = StringFormat("SELECT value FROM spawn_condition_values "
+                                    "WHERE zone = '%s' AND instance_id = %u AND id = %d",
+                                    zone_short, instance_id, condition_id);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        _log(SPAWNS__CONDITIONS, "Unable to query remote condition %d from zone %s in Get request.", condition_id, zone_short);
+		return 0;	//dunno a better thing to do...
+    }
+
+    if (results.RowCount() == 0) {
+        _log(SPAWNS__CONDITIONS, "Unable to load remote condition %d from zone %s in Get request.", condition_id, zone_short);
+		return 0;	//dunno a better thing to do...
+    }
+
+    auto row = results.begin();
+
+    return atoi(row[0]);
 }
 
 bool SpawnConditionManager::Check(uint16 condition, int16 min_value) {
