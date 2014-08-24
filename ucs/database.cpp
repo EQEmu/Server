@@ -577,44 +577,29 @@ void Database::RemoveFriendOrIgnore(int charID, int type, std::string name) {
 
 }
 
-void Database::GetFriendsAndIgnore(int CharID, std::vector<std::string> &Friends, std::vector<std::string> &Ignorees) {
+void Database::GetFriendsAndIgnore(int charID, std::vector<std::string> &friends, std::vector<std::string> &ignorees) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	const char *FriendsQuery="select `type`, `name` from `friends` WHERE `charid`=%i";
-
-	if (!RunQuery(query,MakeAnyLenString(&query, FriendsQuery, CharID),errbuf,&result)){
-
-		_log(UCS__ERROR, "GetFriendsAndIgnore query error %s, %s", query, errbuf);
-
-		safe_delete_array(query);
-
-		return ;
+	std::string query = StringFormat("select `type`, `name` FROM `friends` WHERE `charid`=%i", charID);
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		_log(UCS__ERROR, "GetFriendsAndIgnore query error %s, %s", query.c_str(), results.ErrorMessage().c_str());
+		return;
 	}
 
-	safe_delete_array(query);
 
-	while((row = mysql_fetch_row(result))) {
-
-		std::string Name = row[1];
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		std::string name = row[1];
 
 		if(atoi(row[0]) == 0)
 		{
-			Ignorees.push_back(Name);
-			_log(UCS__TRACE, "Added Ignoree from DB %s", Name.c_str());
+			ignorees.push_back(name);
+			_log(UCS__TRACE, "Added Ignoree from DB %s", name.c_str());
+			continue;
 		}
-		else
-		{
-			Friends.push_back(Name);
-			_log(UCS__TRACE, "Added Friend from DB %s", Name.c_str());
-		}
+
+        friends.push_back(name);
+        _log(UCS__TRACE, "Added Friend from DB %s", name.c_str());
 	}
 
-	mysql_free_result(result);
-
-	return;
 }
 
