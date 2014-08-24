@@ -642,61 +642,63 @@ int32 ZoneDatabase::GetDoorsDBCountPlusOne(const char *zone_name, int16 version)
 
 bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name, int16 version) {
 	LogFile->write(EQEMuLog::Status, "Loading Doors from database...");
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+
 
 //	Door tmpDoor;
-	MakeAnyLenString(&query, "SELECT id,doorid,zone,name,pos_x,pos_y,pos_z,heading,"
-		"opentype,guild,lockpick,keyitem,nokeyring,triggerdoor,triggertype,dest_zone,dest_instance,dest_x,"
-		"dest_y,dest_z,dest_heading,door_param,invert_state,incline,size,is_ldon_door,client_version_mask "
-		"FROM doors WHERE zone='%s' AND (version=%u OR version=-1) ORDER BY doorid asc", zone_name, version);
-	if (RunQuery(query, strlen(query), errbuf, &result)) {
-		safe_delete_array(query);
-		int32 r;
-		for(r = 0; (row = mysql_fetch_row(result)); r++) {
-			if(r >= iDoorCount) {
-				std::cerr << "Error, Door Count of " << iDoorCount << " exceeded." << std::endl;
-				break;
-			}
-			memset(&into[r], 0, sizeof(Door));
-			into[r].db_id = atoi(row[0]);
-			into[r].door_id = atoi(row[1]);
-			strn0cpy(into[r].zone_name,row[2],32);
-			strn0cpy(into[r].door_name,row[3],32);
-			into[r].pos_x = (float)atof(row[4]);
-			into[r].pos_y = (float)atof(row[5]);
-			into[r].pos_z = (float)atof(row[6]);
-			into[r].heading = (float)atof(row[7]);
-			into[r].opentype = atoi(row[8]);
-			into[r].guild_id = atoi(row[9]);
-			into[r].lockpick = atoi(row[10]);
-			into[r].keyitem = atoi(row[11]);
-			into[r].nokeyring = atoi(row[12]);
-			into[r].trigger_door = atoi(row[13]);
-			into[r].trigger_type = atoi(row[14]);
-			strn0cpy(into[r].dest_zone, row[15], 32);
-			into[r].dest_instance_id = atoi(row[16]);
-			into[r].dest_x = (float) atof(row[17]);
-			into[r].dest_y = (float) atof(row[18]);
-			into[r].dest_z = (float) atof(row[19]);
-			into[r].dest_heading = (float) atof(row[20]);
-			into[r].door_param=atoi(row[21]);
-			into[r].invert_state=atoi(row[22]);
-			into[r].incline=atoi(row[23]);
-			into[r].size=atoi(row[24]);
-			into[r].is_ldon_door=atoi(row[25]);
-			into[r].client_version_mask = (uint32)strtoul(row[26], nullptr, 10);
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		std::cerr << "Error in DBLoadDoors query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+    std::string query = StringFormat("SELECT id, doorid, zone, name, pos_x, pos_y, pos_z, heading, "
+                                    "opentype, guild, lockpick, keyitem, nokeyring, triggerdoor, triggertype, "
+                                    "dest_zone, dest_instance, dest_x, dest_y, dest_z, dest_heading, "
+                                    "door_param, invert_state, incline, size, is_ldon_door, client_version_mask "
+                                    "FROM doors WHERE zone = '%s' AND (version = %u OR version = -1) "
+                                    "ORDER BY doorid asc", zone_name, version);
+	auto results = QueryDatabase(query);
+	if (!results.Success()){
+		std::cerr << "Error in DBLoadDoors query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
+
+    int32 rowIndex = 0;
+    for(auto row = results.begin(); row != results.end(); ++row, ++rowIndex) {
+        if(rowIndex >= iDoorCount) {
+            std::cerr << "Error, Door Count of " << iDoorCount << " exceeded." << std::endl;
+            break;
+        }
+
+        memset(&into[rowIndex], 0, sizeof(Door));
+
+		into[rowIndex].db_id = atoi(row[0]);
+		into[rowIndex].door_id = atoi(row[1]);
+
+        strn0cpy(into[rowIndex].zone_name,row[2],32);
+		strn0cpy(into[rowIndex].door_name,row[3],32);
+
+		into[rowIndex].pos_x = (float)atof(row[4]);
+		into[rowIndex].pos_y = (float)atof(row[5]);
+		into[rowIndex].pos_z = (float)atof(row[6]);
+		into[rowIndex].heading = (float)atof(row[7]);
+		into[rowIndex].opentype = atoi(row[8]);
+		into[rowIndex].guild_id = atoi(row[9]);
+		into[rowIndex].lockpick = atoi(row[10]);
+		into[rowIndex].keyitem = atoi(row[11]);
+		into[rowIndex].nokeyring = atoi(row[12]);
+		into[rowIndex].trigger_door = atoi(row[13]);
+		into[rowIndex].trigger_type = atoi(row[14]);
+
+		strn0cpy(into[rowIndex].dest_zone, row[15], 32);
+
+		into[rowIndex].dest_instance_id = atoi(row[16]);
+		into[rowIndex].dest_x = (float) atof(row[17]);
+		into[rowIndex].dest_y = (float) atof(row[18]);
+		into[rowIndex].dest_z = (float) atof(row[19]);
+		into[rowIndex].dest_heading = (float) atof(row[20]);
+		into[rowIndex].door_param=atoi(row[21]);
+		into[rowIndex].invert_state=atoi(row[22]);
+		into[rowIndex].incline=atoi(row[23]);
+		into[rowIndex].size=atoi(row[24]);
+		into[rowIndex].is_ldon_door=atoi(row[25]);
+		into[rowIndex].client_version_mask = (uint32)strtoul(row[26], nullptr, 10);
+    }
+
 	return true;
 }
 
