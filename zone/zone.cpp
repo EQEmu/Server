@@ -718,10 +718,23 @@ void Zone::DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) {
 	}
 }
 
+bool Zone::IsLoaded() {
+	return ZoneLoaded;
+}
+
 void Zone::Shutdown(bool quite)
 {
 	if (!ZoneLoaded)
 		return;
+
+	std::list<Mob*> mob_list;
+	entity_list.GetMobList(mob_list);
+	std::list<Mob*>::iterator mob_itr = mob_list.begin();
+	while (mob_itr != mob_list.end()) {
+		Mob* mob_inst = *mob_itr;
+		mob_inst->AI_Stop();
+		++mob_itr;
+	}
 
 	std::map<uint32,NPCType *>::iterator itr;
 	while(zone->npctable.size()) {
