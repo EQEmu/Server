@@ -1357,7 +1357,6 @@ int32 SharedDatabase::DeleteStalePlayerBackups() {
 
 bool SharedDatabase::GetCommandSettings(std::map<std::string,uint8> &commands) {
 
-	commands.clear();
 	const std::string query = "SELECT command, access FROM commands";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
@@ -1365,11 +1364,12 @@ bool SharedDatabase::GetCommandSettings(std::map<std::string,uint8> &commands) {
 		return false;
 	}
 
+    commands.clear();
+
     for (auto row = results.begin(); row != results.end(); ++row)
         commands[row[0]]=atoi(row[1]);
 
     return true;
-
 }
 
 bool SharedDatabase::LoadSkillCaps() {
@@ -1404,31 +1404,25 @@ void SharedDatabase::LoadSkillCaps(void *data) {
 	uint32 level_count = HARD_LEVEL_CAP + 1;
 	uint16 *skill_caps_table = reinterpret_cast<uint16*>(data);
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if(RunQuery(query, MakeAnyLenString(&query,
-		"SELECT skillID, class, level, cap FROM skill_caps ORDER BY skillID, class, level"),
-		errbuf, &result)) {
-		safe_delete_array(query);
-
-		while((row = mysql_fetch_row(result))) {
-			uint8 skillID = atoi(row[0]);
-			uint8 class_ = atoi(row[1]) - 1;
-			uint8 level = atoi(row[2]);
-			uint16 cap = atoi(row[3]);
-			if(skillID >= skill_count || class_ >= class_count || level >= level_count)
-				continue;
-
-			uint32 index = (((class_ * skill_count) + skillID) * level_count) + level;
-			skill_caps_table[index] = cap;
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error loading skill caps from database: %s", errbuf);
-		safe_delete_array(query);
+	const std::string query = "SELECT skillID, class, level, cap FROM skill_caps ORDER BY skillID, class, level";
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error loading skill caps from database: %s", results.ErrorMessage().c_str());
+        return;
 	}
+
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        uint8 skillID = atoi(row[0]);
+        uint8 class_ = atoi(row[1]) - 1;
+        uint8 level = atoi(row[2]);
+        uint16 cap = atoi(row[3]);
+
+        if(skillID >= skill_count || class_ >= class_count || level >= level_count)
+            continue;
+
+        uint32 index = (((class_ * skill_count) + skillID) * level_count) + level;
+        skill_caps_table[index] = cap;
+    }
 }
 
 uint16 SharedDatabase::GetSkillCap(uint8 Class_, SkillUseTypes Skill, uint8 Level) {
@@ -1511,32 +1505,20 @@ uint8 SharedDatabase::GetTrainLevel(uint8 Class_, SkillUseTypes Skill, uint8 Lev
 
 void SharedDatabase::LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpellID) {
 
-	const char *DSQuery = "SELECT `spellid`, `type` from `damageshieldtypes` WHERE `spellid` > 0 "
-							"AND `spellid` <= %i";
+	std::string query = StringFormat("SELECT `spellid`, `type` FROM `damageshieldtypes` WHERE `spellid` > 0 "
+                                    "AND `spellid` <= %i", iMaxSpellID);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadDamageShieldTypes: %s %s", query.c_str(), results.ErrorMessage().c_str());
+        return;
+    }
 
-	const char *ERR_MYSQLERROR = "Error in LoadDamageShieldTypes: %s %s";
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        int spellID = atoi(row[0]);
+        if((spellID > 0) && (spellID <= iMaxSpellID))
+            sp[spellID].DamageShieldType = atoi(row[1]);
+    }
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if(RunQuery(query,MakeAnyLenString(&query,DSQuery,iMaxSpellID),errbuf,&result)) {
-
-		while((row = mysql_fetch_row(result))) {
-
-			int SpellID = atoi(row[0]);
-			if((SpellID > 0) && (SpellID <= iMaxSpellID)) {
-				sp[SpellID].DamageShieldType = atoi(row[1]);
-			}
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, query, errbuf);
-		safe_delete_array(query);
-	}
 }
 
 const EvolveInfo* SharedDatabase::GetEvolveInfo(uint32 loregroup) {
