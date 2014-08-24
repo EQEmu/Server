@@ -678,19 +678,15 @@ void SpawnConditionManager::UpdateDBEvent(SpawnEvent &event) {
 }
 
 void SpawnConditionManager::UpdateDBCondition(const char* zone_name, uint32 instance_id, uint16 cond_id, int16 value) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	int len;
 
-	SpawnCondition cond;
-	len = MakeAnyLenString(&query,
-		"REPLACE INTO spawn_condition_values (id, value, zone, instance_id) VALUES(%u, %u, '%s', %u)",
-		cond_id, value, zone_name, instance_id
-	);
-	if(!database.RunQuery(query, len, errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Unable to update spawn condition '%s': %s\n", query, errbuf);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("REPLACE INTO spawn_condition_values "
+                                    "(id, value, zone, instance_id) "
+                                    "VALUES( %u, %u, '%s', %u)",
+                                    cond_id, value, zone_name, instance_id);
+    auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		LogFile->write(EQEMuLog::Error, "Unable to update spawn condition '%s': %s\n", query.c_str(), results.ErrorMessage().c_str());
+
 }
 
 bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, std::string &zone_name) {
