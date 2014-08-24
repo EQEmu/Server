@@ -1356,27 +1356,20 @@ int32 SharedDatabase::DeleteStalePlayerBackups() {
 }
 
 bool SharedDatabase::GetCommandSettings(std::map<std::string,uint8> &commands) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	query = new char[256];
-	strcpy(query, "SELECT command,access from commands");
+
 	commands.clear();
-	if (RunQuery(query, strlen(query), errbuf, &result)) {
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result))) {
-			commands[row[0]]=atoi(row[1]);
-		}
-		mysql_free_result(result);
-		return true;
-	} else {
-		std::cerr << "Error in GetCommands query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+	const std::string query = "SELECT command, access FROM commands";
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        std::cerr << "Error in GetCommands query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
-	return false;
+    for (auto row = results.begin(); row != results.end(); ++row)
+        commands[row[0]]=atoi(row[1]);
+
+    return true;
+
 }
 
 bool SharedDatabase::LoadSkillCaps() {
