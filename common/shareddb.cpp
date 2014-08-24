@@ -2015,25 +2015,19 @@ const LootDrop_Struct* SharedDatabase::GetLootDrop(uint32 lootdrop_id) {
 
 void SharedDatabase::GetPlayerInspectMessage(char* playername, InspectMessage_Struct* message) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	std::string query = StringFormat("SELECT inspectmessage FROM character_ WHERE name = '%s'", playername);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        std::cerr << "Error in GetPlayerInspectMessage query '" << query << "' " << results.ErrorMessage() << std::endl;
+        return;
+    }
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT inspectmessage FROM character_ WHERE name='%s'", playername), errbuf, &result)) {
-		safe_delete_array(query);
+    if (results.RowCount() != 1)
+        return;
 
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			memcpy(message, row[0], sizeof(InspectMessage_Struct));
-		}
+    auto row = results.begin();
 
-		mysql_free_result(result);
-	}
-	else {
-		std::cerr << "Error in GetPlayerInspectMessage query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-	}
+    memcpy(message, row[0], sizeof(InspectMessage_Struct));
 }
 
 void SharedDatabase::SetPlayerInspectMessage(char* playername, const InspectMessage_Struct* message) {
