@@ -617,34 +617,27 @@ int32 ZoneDatabase::GetDoorsCountPlusOne(const char *zone_name, int16 version) {
 }
 
 int32 ZoneDatabase::GetDoorsDBCountPlusOne(const char *zone_name, int16 version) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+
 	uint32 oMaxID = 0;
 
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	query = new char[256];
-	sprintf(query, "SELECT MAX(doorid) FROM doors WHERE zone='%s' AND (version=%u OR version=-1)", zone_name, version);
-	if (RunQuery(query, strlen(query), errbuf, &result)) {
-		safe_delete_array(query);
-		row = mysql_fetch_row(result);
-		if (row != nullptr && row[1] != 0) {
-				if (row[0])
-					oMaxID = atoi(row[0]) + 1;
-				else
-					oMaxID = 0;
-			mysql_free_result(result);
-			return oMaxID;
-		}
-		mysql_free_result(result);
-	}
-	else {
-		std::cerr << "Error in GetDoorsCountPlusOne query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+    std::string query = StringFormat("SELECT MAX(doorid) FROM doors "
+                                    "WHERE zone = '%s' AND (version = %u OR version = -1)",
+                                    zone_name, version);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        std::cerr << "Error in GetDoorsCountPlusOne query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return -1;
 	}
 
-	return -1;
+    if (results.RowCount() != 1)
+        return -1;
+
+    auto row = results.begin();
+
+    if (!row[0])
+        return 0;
+
+    return atoi(row[0]) + 1;
 }
 
 bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name, int16 version) {
