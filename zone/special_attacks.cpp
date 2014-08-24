@@ -947,12 +947,18 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 
 void NPC::RangedAttack(Mob* other)
 {
+
+	if (!other)
+		return;
 	//make sure the attack and ranged timers are up
 	//if the ranged timer is disabled, then they have no ranged weapon and shouldent be attacking anyhow
 	if((attack_timer.Enabled() && !attack_timer.Check(false)) || (ranged_timer.Enabled() && !ranged_timer.Check())){
 		mlog(COMBAT__RANGED, "Archery canceled. Timer not up. Attack %d, ranged %d", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
 		return;
 	}
+
+	if(!CheckLosFN(other))
+		return;
 
 	int attacks = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 0);
 	attacks = attacks > 0 ? attacks : 1;
