@@ -384,28 +384,33 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 
 
 Spawn2* ZoneDatabase::LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2id, uint32 timeleft) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, spawngroupID, x, y, z, heading, respawntime, variance, pathgrid, _condition, cond_value, enabled, animation FROM spawn2 WHERE id=%i", spawn2id), errbuf, &result))	{
-		if (mysql_num_rows(result) == 1)
-		{
-			row = mysql_fetch_row(result);
-			bool perl_enabled = atoi(row[11]) == 1 ? true : false;
-			Spawn2* newSpawn = new Spawn2(atoi(row[0]), atoi(row[1]), atof(row[2]), atof(row[3]), atof(row[4]), atof(row[5]), atoi(row[6]), atoi(row[7]), timeleft, atoi(row[8]), atoi(row[9]), atoi(row[10]), perl_enabled, (EmuAppearance)atoi(row[12]));
-			spawn2_list.Insert( newSpawn );
-			mysql_free_result(result);
-			safe_delete_array(query);
-			return newSpawn;
-		}
-		mysql_free_result(result);
-	}
+	std::string query = StringFormat("SELECT id, spawngroupID, x, y, z, heading, "
+                                    "respawntime, variance, pathgrid, _condition, "
+                                    "cond_value, enabled, animation FROM spawn2 "
+                                    "WHERE id = %i", spawn2id);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadSpawn2 query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return nullptr;
+    }
 
-	LogFile->write(EQEMuLog::Error, "Error in LoadSpawn2 query '%s': %s", query, errbuf);
-	safe_delete_array(query);
-	return 0;
+    if (results.RowCount() != 1) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadSpawn2 query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return nullptr;
+    }
+
+	auto row = results.begin();
+
+    bool perl_enabled = atoi(row[11]) == 1 ? true : false;
+
+	Spawn2* newSpawn = new Spawn2(atoi(row[0]), atoi(row[1]), atof(row[2]), atof(row[3]), atof(row[4]),
+                                    atof(row[5]), atoi(row[6]), atoi(row[7]), timeleft, atoi(row[8]),
+                                    atoi(row[9]), atoi(row[10]), perl_enabled, (EmuAppearance)atoi(row[12]));
+
+    spawn2_list.Insert(newSpawn);
+
+	return newSpawn;
 }
 
 bool ZoneDatabase::CreateSpawn2(Client *c, uint32 spawngroup, const char* zone, float heading, float x, float y, float z, uint32 respawn, uint32 variance, uint16 condition, int16 cond_value)
