@@ -11573,7 +11573,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 	// Could make this into a rule, although there is a hard limit since we are using a popup, of 4096 bytes that can
 	// be displayed in the window, including all the HTML formatting tags.
 	//
-	const int MaxResults = 10;
+	const int maxResults = 10;
 
 	if(app->size < sizeof(GMSearchCorpse_Struct))
 	{
@@ -11586,85 +11586,62 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 	GMSearchCorpse_Struct *gmscs = (GMSearchCorpse_Struct *)app->pBuffer;
 	gmscs->Name[63] = '\0';
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* Query = 0;
-	MYSQL_RES *Result;
-	MYSQL_ROW Row;
+	char *escSearchString = new char[129];
+	database.DoEscapeString(escSearchString, gmscs->Name, strlen(gmscs->Name));
 
-	char *EscSearchString = new char[129];
+    std::string query = StringFormat("SELECT charname, zoneid, x, y, z, timeofdeath, rezzed, IsBurried "
+                                    "FROM player_corpses WheRE charname LIKE '%%%s%%' ORDER BY charname LIMIT %i",
+                                    escSearchString, maxResults);
+    safe_delete_array(escSearchString);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        Message(0, "Query failed: %s.", results.ErrorMessage().c_str());
+        return;
+    }
 
-	database.DoEscapeString(EscSearchString, gmscs->Name, strlen(gmscs->Name));
+    if (results.RowCount() == 0)
+        return;
 
-	if (database.RunQuery(Query, MakeAnyLenString(&Query, "select charname, zoneid, x, y, z, timeofdeath, rezzed, IsBurried from "
-								"player_corpses where charname like '%%%s%%' order by charname limit %i",
-								EscSearchString, MaxResults), errbuf, &Result))
-	{
+    if(results.RowCount() == maxResults)
+        Message(clientMessageError, "Your search found too many results; some are not displayed.");
+    else
+        Message(clientMessageYellow, "There are %i corpse(s) that match the search string '%s'.", results.RowCount(), gmscs->Name);
 
-		int NumberOfRows = mysql_num_rows(Result);
+    char charName[64], timeOfDeath[20];
 
-		if(NumberOfRows == MaxResults)
-			Message(clientMessageError, "Your search found too many results; some are not displayed.");
-		else {
-			Message(clientMessageYellow, "There are %i corpse(s) that match the search string '%s'.",
-				NumberOfRows, gmscs->Name);
-		}
-
-		if(NumberOfRows == 0)
-		{
-			mysql_free_result(Result);
-			safe_delete_array(Query);
-			return;
-		}
-
-		char CharName[64], TimeOfDeath[20], Buffer[512];
-
-		std::string PopupText = "<table><tr><td>Name</td><td>Zone</td><td>X</td><td>Y</td><td>Z</td><td>Date</td><td>"
+	std::string popupText = "<table><tr><td>Name</td><td>Zone</td><td>X</td><td>Y</td><td>Z</td><td>Date</td><td>"
 					"Rezzed</td><td>Buried</td></tr><tr><td>&nbsp</td><td></td><td></td><td></td><td></td><td>"
 					"</td><td></td><td></td></tr>";
 
+    for (auto row = results.begin(); row != results.end(); ++row) {
 
-		while ((Row = mysql_fetch_row(Result)))
-		{
+        strn0cpy(charName, row[0], sizeof(charName));
 
-			strn0cpy(CharName, Row[0], sizeof(CharName));
+        uint32 ZoneID = atoi(row[1]);
+        float CorpseX = atof(row[2]);
+        float CorpseY = atof(row[3]);
+        float CorpseZ = atof(row[4]);
 
-			uint32 ZoneID = atoi(Row[1]);
+        strn0cpy(timeOfDeath, row[5], sizeof(timeOfDeath));
 
-			float CorpseX = atof(Row[2]);
-			float CorpseY = atof(Row[3]);
-			float CorpseZ = atof(Row[4]);
+        bool corpseRezzed = atoi(row[6]);
+        bool corpseBuried = atoi(row[7]);
 
-			strn0cpy(TimeOfDeath, Row[5], sizeof(TimeOfDeath));
+        popupText += StringFormat("<tr><td>%s</td><td>%s</td><td>%8.0f</td><td>%8.0f</td><td>%8.0f</td><td>%s</td><td>%s</td><td>%s</td></tr>",
+                                charName, StaticGetZoneName(ZoneID), CorpseX, CorpseY, CorpseZ, timeOfDeath,
+                                corpseRezzed ? "Yes" : "No", corpseBuried ? "Yes" : "No");
 
-			bool CorpseRezzed = atoi(Row[6]);
-			bool CorpseBuried = atoi(Row[7]);
+        if(popupText.size() > 4000) {
+            Message(clientMessageError, "Unable to display all the results.");
+            break;
+        }
 
-			sprintf(Buffer, "<tr><td>%s</td><td>%s</td><td>%8.0f</td><td>%8.0f</td><td>%8.0f</td><td>%s</td><td>%s</td><td>%s</td></tr>",
-				CharName, StaticGetZoneName(ZoneID), CorpseX, CorpseY, CorpseZ, TimeOfDeath,
-				CorpseRezzed ? "Yes" : "No", CorpseBuried ? "Yes" : "No");
+    }
 
-			PopupText += Buffer;
+    popupText += "</table>";
 
-			if(PopupText.size() > 4000)
-			{
-				Message(clientMessageError, "Unable to display all the results.");
-				break;
-			}
+    SendPopupToClient("Corpses", popupText.c_str());
 
-		}
-
-		PopupText += "</table>";
-
-		mysql_free_result(Result);
-
-		SendPopupToClient("Corpses", PopupText.c_str());
-	}
-	else{
-		Message(0, "Query failed: %s.", errbuf);
-
-	}
-	safe_delete_array(Query);
-	safe_delete_array(EscSearchString);
 }
 
 void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
