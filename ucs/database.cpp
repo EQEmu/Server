@@ -377,65 +377,52 @@ void Database::SendHeaders(Client *client) {
 
 }
 
-void Database::SendBody(Client *c, int MessageNumber) {
+void Database::SendBody(Client *client, int messageNumber) {
 
-	int CharacterID = FindCharacter(c->MailBoxName().c_str());
+	int characterID = FindCharacter(client->MailBoxName().c_str());
 
-	_log(UCS__TRACE, "SendBody: MsgID %i, to %s, CharID is %i", MessageNumber, c->MailBoxName().c_str(), CharacterID);
+	_log(UCS__TRACE, "SendBody: MsgID %i, to %s, CharID is %i", messageNumber, client->MailBoxName().c_str(), characterID);
 
-	if(CharacterID <= 0)
+	if(characterID <= 0)
 		return;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (!RunQuery(query,MakeAnyLenString(&query, "select `msgid`, `body`, `to` from `mail` "
-							"where `charid`=%i and `msgid`=%i", CharacterID, MessageNumber), errbuf, &result)){
-		safe_delete_array(query);
-
-		return ;
-	}
-
-	safe_delete_array(query);
-
-	if (mysql_num_rows(result) != 1) {
-
-		mysql_free_result(result);
-
+	std::string query = StringFormat("SELECT `msgid`, `body`, `to` FROM `mail` "
+                                    "WHERE `charid`=%i AND `msgid`=%i", characterID, messageNumber);
+    auto results = QueryDatabase(query);
+	if (!results.Success())
 		return;
-	}
 
-	row = mysql_fetch_row(result);
 
-	_log(UCS__TRACE, "Message: %i  body (%i bytes)", MessageNumber, strlen(row[1]));
+	if (results.RowCount() != 1)
+		return;
 
-	int PacketLength = 12 + strlen(row[0]) + strlen(row[1]) + strlen(row[2]);
+	auto row = results.begin();
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MailSendBody,PacketLength);
+	_log(UCS__TRACE, "Message: %i  body (%i bytes)", messageNumber, strlen(row[1]));
 
-	char *PacketBuffer = (char *)outapp->pBuffer;
+	int packetLength = 12 + strlen(row[0]) + strlen(row[1]) + strlen(row[2]);
 
-	VARSTRUCT_ENCODE_INTSTRING(PacketBuffer, c->GetMailBoxNumber());
-	VARSTRUCT_ENCODE_STRING(PacketBuffer,row[0]);
-	VARSTRUCT_ENCODE_STRING(PacketBuffer,row[1]);
-	VARSTRUCT_ENCODE_STRING(PacketBuffer,"1");
-	VARSTRUCT_ENCODE_TYPE(uint8, PacketBuffer, 0);
-	VARSTRUCT_ENCODE_TYPE(uint8, PacketBuffer, 0x0a);
-	VARSTRUCT_ENCODE_STRING(PacketBuffer, "TO:"); PacketBuffer--;
-	VARSTRUCT_ENCODE_STRING(PacketBuffer, row[2]); PacketBuffer--; // Overwrite the null terminator
-	VARSTRUCT_ENCODE_TYPE(uint8, PacketBuffer, 0x0a);
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MailSendBody,packetLength);
 
-	mysql_free_result(result);
+	char *packetBuffer = (char *)outapp->pBuffer;
+
+	VARSTRUCT_ENCODE_INTSTRING(packetBuffer, client->GetMailBoxNumber());
+	VARSTRUCT_ENCODE_STRING(packetBuffer,row[0]);
+	VARSTRUCT_ENCODE_STRING(packetBuffer,row[1]);
+	VARSTRUCT_ENCODE_STRING(packetBuffer,"1");
+	VARSTRUCT_ENCODE_TYPE(uint8, packetBuffer, 0);
+	VARSTRUCT_ENCODE_TYPE(uint8, packetBuffer, 0x0a);
+	VARSTRUCT_ENCODE_STRING(packetBuffer, "TO:");
+	packetBuffer--;
+	VARSTRUCT_ENCODE_STRING(packetBuffer, row[2]);
+	packetBuffer--; // Overwrite the null terminator
+	VARSTRUCT_ENCODE_TYPE(uint8, packetBuffer, 0x0a);
 
 	_pkt(UCS__PACKETS, outapp);
 
-	c->QueuePacket(outapp);
+	client->QueuePacket(outapp);
 
 	safe_delete(outapp);
-
-
 }
 
 bool Database::SendMail(std::string Recipient, std::string From, std::string Subject, std::string Body, std::string RecipientsString) {
