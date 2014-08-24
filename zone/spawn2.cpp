@@ -354,34 +354,30 @@ void Spawn2::DeathReset(bool realdeath)
 }
 
 bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version, uint32 repopdelay) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
 	const char *zone_name = database.GetZoneName(zoneid);
-
-	MakeAnyLenString(&query, "SELECT id, spawngroupID, x, y, z, heading, respawntime, variance, pathgrid, _condition, cond_value, enabled, animation FROM spawn2 WHERE zone='%s' AND version=%u", zone_name, version);
-	if (RunQuery(query, strlen(query), errbuf, &result))
-	{
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result)))
-		{
-			Spawn2* newSpawn = 0;
-
-			bool perl_enabled = atoi(row[11]) == 1 ? true : false;
-			uint32 spawnLeft = (GetSpawnTimeLeft(atoi(row[0]), zone->GetInstanceID()) * 1000);
-			newSpawn = new Spawn2(atoi(row[0]), atoi(row[1]), atof(row[2]), atof(row[3]), atof(row[4]), atof(row[5]), atoi(row[6]), atoi(row[7]), spawnLeft, atoi(row[8]), atoi(row[9]), atoi(row[10]), perl_enabled, (EmuAppearance)atoi(row[12]));
-			spawn2_list.Insert( newSpawn );
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in PopulateZoneLists query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("SELECT id, spawngroupID, x, y, z, heading, "
+                                    "respawntime, variance, pathgrid, _condition, "
+                                    "cond_value, enabled, animation FROM spawn2 "
+                                    "WHERE zone = '%s' AND version = %u",
+                                    zone_name, version);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in PopulateZoneLists query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
-	}
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        Spawn2* newSpawn = 0;
+
+        bool perl_enabled = atoi(row[11]) == 1? true: false;
+        uint32 spawnLeft = (GetSpawnTimeLeft(atoi(row[0]), zone->GetInstanceID()) * 1000);
+        newSpawn = new Spawn2(atoi(row[0]), atoi(row[1]), atof(row[2]), atof(row[3]), atof(row[4]),
+                                atof(row[5]), atoi(row[6]), atoi(row[7]), spawnLeft, atoi(row[8]),
+                                atoi(row[9]), atoi(row[10]), perl_enabled, (EmuAppearance)atoi(row[12]));
+
+        spawn2_list.Insert(newSpawn);
+    }
 
 	return true;
 }
@@ -863,10 +859,10 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 		SpawnEvent &cevent = *cur;
 
 		bool StrictCheck = false;
-		if(cevent.strict && 
-			cevent.next.hour == tod.hour && 
-			cevent.next.day == tod.day && 
-			cevent.next.month == tod.month && 
+		if(cevent.strict &&
+			cevent.next.hour == tod.hour &&
+			cevent.next.day == tod.day &&
+			cevent.next.month == tod.month &&
 			cevent.next.year == tod.year)
 			StrictCheck = true;
 
@@ -894,7 +890,7 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 				//execute the event
 				if(!cevent.strict || StrictCheck)
 					ExecEvent(cevent, false);
-		
+
 				//add the period of the event to the trigger time
 				EQTime::AddMinutes(cevent.period, &cevent.next);
 				ran = true;
@@ -926,7 +922,7 @@ void SpawnConditionManager::FindNearestEvent() {
 		if(cevent.enabled)
 		{
 			//see if this event is before our last nearest
-			if(EQTime::IsTimeBefore(&next_event, &cevent.next)) 
+			if(EQTime::IsTimeBefore(&next_event, &cevent.next))
 			{
 				memcpy(&next_event, &cevent.next, sizeof(next_event));
 				next_id = cevent.id;
