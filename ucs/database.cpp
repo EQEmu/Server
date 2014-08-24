@@ -425,72 +425,62 @@ void Database::SendBody(Client *client, int messageNumber) {
 	safe_delete(outapp);
 }
 
-bool Database::SendMail(std::string Recipient, std::string From, std::string Subject, std::string Body, std::string RecipientsString) {
+bool Database::SendMail(std::string recipient, std::string from, std::string subject, std::string body, std::string recipientsString) {
 
-	int CharacterID;
+	int characterID;
 
-	std::string CharacterName;
+	std::string characterName;
 
 	//printf("Database::SendMail(%s, %s, %s)\n", Recipient.c_str(), From.c_str(), Subject.c_str());
 
-	std::string::size_type LastPeriod = Recipient.find_last_of(".");
+	auto lastPeriod = recipient.find_last_of(".");
 
-	if(LastPeriod == std::string::npos)
-		CharacterName = Recipient;
+	if(lastPeriod == std::string::npos)
+		characterName = recipient;
 	else
-		CharacterName = Recipient.substr(LastPeriod+1);
+		characterName = recipient.substr(lastPeriod+1);
 
-	CharacterName[0] = toupper(CharacterName[0]);
+	characterName[0] = toupper(characterName[0]);
 
-	for(unsigned int i = 1; i < CharacterName.length(); i++)
-		CharacterName[i] = tolower(CharacterName[i]);
+	for(unsigned int i = 1; i < characterName.length(); i++)
+		characterName[i] = tolower(characterName[i]);
 
-	CharacterID = FindCharacter(CharacterName.c_str());
+	characterID = FindCharacter(characterName.c_str());
 
-	_log(UCS__TRACE, "SendMail: CharacterID for recipient %s is %i", CharacterName.c_str(), CharacterID);
+	_log(UCS__TRACE, "SendMail: CharacterID for recipient %s is %i", characterName.c_str(), characterID);
 
-	if(CharacterID <= 0) return false;
+	if(characterID <= 0)
+        return false;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+	char *escSubject = new char[subject.length() * 2 + 1];
+	char *escBody = new char[body.length() * 2 + 1];
 
-	char *EscSubject = new char[Subject.length() * 2 + 1];
-	char *EscBody = new char[Body.length() * 2 + 1];
+	DoEscapeString(escSubject, subject.c_str(), subject.length());
+	DoEscapeString(escBody, body.c_str(), body.length());
 
-	DoEscapeString(EscSubject, Subject.c_str(), Subject.length());
-	DoEscapeString(EscBody, Body.c_str(), Body.length());
+	int now = time(nullptr); // time returns a 64 bit int on Windows at least, which vsnprintf doesn't like.
 
-	const char *MailQuery="INSERT INTO `mail` (`charid`, `timestamp`, `from`, `subject`, `body`, `to`, `status`) "
-				"VALUES ('%i', %i, '%s', '%s', '%s', '%s', %i)";
-
-	uint32 LastMsgID;
-
-	int Now = time(nullptr); // time returns a 64 bit int on Windows at least, which vsnprintf doesn't like.
-
-	if(!RunQuery(query, MakeAnyLenString(&query, MailQuery, CharacterID, Now, From.c_str(), EscSubject, EscBody,
-						RecipientsString.c_str(), 1), errbuf, 0, 0, &LastMsgID)) {
-
-		_log(UCS__ERROR, "SendMail: Query %s failed with error %s", query, errbuf);
-
-		safe_delete_array(EscSubject);
-		safe_delete_array(EscBody);
-		safe_delete_array(query);
-
+    std::string query = StringFormat("INSERT INTO `mail` "
+                                    "(`charid`, `timestamp`, `from`, `subject`, `body`, `to`, `status`) "
+                                    "VALUES ('%i', %i, '%s', '%s', '%s', '%s', %i)",
+                                    characterID, now, from.c_str(), escSubject, escBody,
+                                    recipientsString.c_str(), 1);
+    safe_delete_array(escSubject);
+    safe_delete_array(escBody);
+    auto results = QueryDatabase(query);
+	if(!results.Success()) {
+		_log(UCS__ERROR, "SendMail: Query %s failed with error %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
-	_log(UCS__TRACE, "MessageID %i generated, from %s, to %s", LastMsgID, From.c_str(), Recipient.c_str());
+	_log(UCS__TRACE, "MessageID %i generated, from %s, to %s", results.LastInsertedID(), from.c_str(), recipient.c_str());
 
-	safe_delete_array(EscSubject);
-	safe_delete_array(EscBody);
-	safe_delete_array(query);
 
-	Client *c = CL->IsCharacterOnline(CharacterName);
+	Client *client = CL->IsCharacterOnline(characterName);
 
-	if(c) {
-		std::string FQN = GetMailPrefix() + From;
-
-		c->SendNotification(c->GetMailBoxNumber(CharacterName), Subject, FQN, LastMsgID);
+	if(client) {
+		std::string FQN = GetMailPrefix() + from;
+		client->SendNotification(client->GetMailBoxNumber(characterName), subject, FQN, results.LastInsertedID());
 	}
 
 	MailMessagesSent++;
