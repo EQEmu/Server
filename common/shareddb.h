@@ -63,7 +63,7 @@ public:
 	bool	SetSharedPlatinum(uint32 account_id, int32 amount_to_add);
 	bool	GetInventory(uint32 char_id, Inventory* inv);
 	bool	GetInventory(uint32 account_id, char* name, Inventory* inv);
-	bool	SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin);
+	bool	SetStartingItems(Inventory* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin);
 protected:
     bool    DeleteSharedBankSlot(uint32 char_id, int16 slot_id);
     bool    UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, int16 slot_id);

@@ -355,7 +355,7 @@ bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add)
 	return true;
 }
 
-bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin_level)
+bool SharedDatabase::SetStartingItems(Inventory* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin_level)
 {
 
 	const Item_Struct* myitem;

@@ -44,7 +44,7 @@
 	#include <windows.h>
 	#include <winsock.h>
 #else
-	
+
 	#ifdef FREEBSD //Timothy Whitman - January 7, 2003
 		#include <sys/types.h>
 	#endif
@@ -1530,7 +1530,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 
 
 	// Starting Items inventory
-	database.SetStartingItems(&pp, &inv, pp.race, pp.class_, pp.deity, pp.zone_id, pp.name, GetAdmin());
+	database.SetStartingItems(&inv, pp.race, pp.class_, pp.deity, pp.zone_id, pp.name, GetAdmin());
 
 
 	// now we give the pp and the inv we made to StoreCharacter
