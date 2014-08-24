@@ -199,46 +199,28 @@ bool Database::VerifyMailKey(std::string characterName, int IPAddress, std::stri
 	return !strcmp(row[0], combinedKey);
 }
 
-int Database::FindCharacter(const char *CharacterName) {
+int Database::FindCharacter(const char *characterName) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *safeCharName = RemoveApostrophes(characterName);
+    std::string query = StringFormat("SELECT `id` FROM `character_` WHERE `name`='%s' LIMIT 1", safeCharName);
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		_log(UCS__ERROR, "FindCharacter failed. %s %s", query.c_str(), results.ErrorMessage().c_str());
+		safe_delete(safeCharName);
+		return -1;
+	}
+    safe_delete(safeCharName);
 
-	char *SafeCharName = RemoveApostrophes(CharacterName);
-
-	if (!RunQuery(query,MakeAnyLenString(&query, "select `id` from `character_` where `name`='%s' limit 1",
-						SafeCharName),errbuf,&result)){
-
-		_log(UCS__ERROR, "FindCharacter failed. %s %s", query, errbuf);
-
-		safe_delete_array(query);
-		safe_delete_array(SafeCharName);
-
+	if (results.RowCount() != 1) {
+		_log(UCS__ERROR, "Bad result from FindCharacter query for character %s", characterName);
 		return -1;
 	}
 
-	safe_delete_array(query);
-	safe_delete_array(SafeCharName);
+	auto row = results.begin();
 
-	if (mysql_num_rows(result) != 1) {
+	int characterID = atoi(row[0]);
 
-		_log(UCS__ERROR, "Bad result from FindCharacter query for character %s", CharacterName);
-
-		mysql_free_result(result);
-
-		return -1;
-	}
-
-	row = mysql_fetch_row(result);
-
-	int CharacterID = atoi(row[0]);
-
-	mysql_free_result(result);
-
-	return CharacterID;
-
+	return characterID;
 }
 
 bool Database::GetVariable(const char* varname, char* varvalue, uint16 varvalue_len) {
