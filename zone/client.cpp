@@ -5261,31 +5261,21 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 void Client::SendRewards()
 {
 	std::vector<ClientReward> rewards;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT reward_id, amount FROM"
-		" account_rewards WHERE account_id=%i ORDER by reward_id", AccountID()),
-		errbuf,&result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			ClientReward cr;
-			cr.id = atoi(row[0]);
-			cr.amount = atoi(row[1]);
-			rewards.push_back(cr);
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Client::SendRewards(): %s (%s)", query, errbuf);
-		safe_delete_array(query);
+	std::string query = StringFormat("SELECT reward_id, amount FROM "
+                        "account_rewards WHERE account_id = %i "
+                        "ORDER BY reward_id", AccountID());
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in Client::SendRewards(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        ClientReward cr;
+        cr.id = atoi(row[0]);
+        cr.amount = atoi(row[1]);
+        rewards.push_back(cr);
+    }
 
 	if(rewards.size() > 0)
 	{
