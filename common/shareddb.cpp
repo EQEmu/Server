@@ -2041,25 +2041,19 @@ void SharedDatabase::SetPlayerInspectMessage(char* playername, const InspectMess
 
 void SharedDatabase::GetBotInspectMessage(uint32 botid, InspectMessage_Struct* message) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT BotInspectMessage FROM bots WHERE BotID=%i", botid), errbuf, &result)) {
-		safe_delete_array(query);
-
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			memcpy(message, row[0], sizeof(InspectMessage_Struct));
-		}
-
-		mysql_free_result(result);
+	std::string query = StringFormat("SELECT BotInspectMessage FROM bots WHERE BotID = %i", botid);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        std::cerr << "Error in GetBotInspectMessage query '" << query << "' " << results.ErrorMessage() << std::endl;
+        return;
 	}
-	else {
-		std::cerr << "Error in GetBotInspectMessage query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-	}
+
+    if (results.RowCount() != 1)
+        return;
+
+    auto row = results.begin();
+    memcpy(message, row[0], sizeof(InspectMessage_Struct));
+
 }
 
 void SharedDatabase::SetBotInspectMessage(uint32 botid, const InspectMessage_Struct* message) {
