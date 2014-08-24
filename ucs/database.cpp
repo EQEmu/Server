@@ -246,31 +246,20 @@ bool Database::LoadChatChannels() {
 
 	_log(UCS__INIT, "Loading chat channels from the database.");
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (!RunQuery(query,MakeAnyLenString(&query, "select `name`,`owner`,`password`, `minstatus` from `chatchannels`"),errbuf,&result)){
-
-		_log(UCS__ERROR, "Failed to load channels. %s %s", query, errbuf);
-		safe_delete_array(query);
-
+	const std::string query = "SELECT `name`, `owner`, `password`, `minstatus` FROM `chatchannels`";
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		_log(UCS__ERROR, "Failed to load channels. %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
-	safe_delete_array(query);
+	for (auto row = results.begin();row != results.end(); ++row) {
+		std::string channelName = row[0];
+		std::string channelOwner = row[1];
+		std::string channelPassword = row[2];
 
-	while((row = mysql_fetch_row(result))) {
-
-		std::string ChannelName = row[0];
-		std::string ChannelOwner = row[1];
-		std::string ChannelPassword = row[2];
-
-		ChannelList->CreateChannel(ChannelName, ChannelOwner, ChannelPassword, true, atoi(row[3]));
+		ChannelList->CreateChannel(channelName, channelOwner, channelPassword, true, atoi(row[3]));
 	}
-
-	mysql_free_result(result);
 
 	return true;
 }
