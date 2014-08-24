@@ -733,94 +733,87 @@ bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, std:
 
 bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	int len;
-
 	//clear out old stuff..
 	spawn_conditions.clear();
 
-	//load spawn conditions
-	SpawnCondition cond;
-	len = MakeAnyLenString(&query, "SELECT id, onchange, value FROM spawn_conditions WHERE zone='%s'", zone_name);
-	if (database.RunQuery(query, len, errbuf, &result)) {
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result))) {
-			cond.condition_id = atoi(row[0]);
-			cond.value = atoi(row[2]);
-			cond.on_change = (SpawnCondition::OnChange) atoi(row[1]);
-			spawn_conditions[cond.condition_id] = cond;
 
-			_log(SPAWNS__CONDITIONS, "Loaded spawn condition %d with value %d and on_change %d", cond.condition_id, cond.value, cond.on_change);
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadSpawnConditions query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+
+	std::string query = StringFormat("SELECT id, onchange, value "
+                                    "FROM spawn_conditions "
+                                    "WHERE zone = '%s'", zone_name);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadSpawnConditions query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
-	}
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        //load spawn conditions
+        SpawnCondition cond;
+
+        cond.condition_id = atoi(row[0]);
+        cond.value = atoi(row[2]);
+        cond.on_change = (SpawnCondition::OnChange) atoi(row[1]);
+        spawn_conditions[cond.condition_id] = cond;
+
+        _log(SPAWNS__CONDITIONS, "Loaded spawn condition %d with value %d and on_change %d", cond.condition_id, cond.value, cond.on_change);
+    }
 
 	//load values
-	len = MakeAnyLenString(&query, "SELECT id, value FROM spawn_condition_values WHERE zone='%s' and instance_id=%u", zone_name, instance_id);
-	if (database.RunQuery(query, len, errbuf, &result)) {
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result)))
-		{
-			std::map<uint16, SpawnCondition>::iterator iter = spawn_conditions.find(atoi(row[0]));
-			if(iter != spawn_conditions.end())
-			{
-				iter->second.value = atoi(row[1]);
-			}
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in LoadSpawnConditions query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+	query = StringFormat("SELECT id, value FROM spawn_condition_values "
+                        "WHERE zone = '%s' AND instance_id = %u",
+                        zone_name, instance_id);
+    results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadSpawnConditions query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		spawn_conditions.clear();
 		return false;
-	}
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        auto iter = spawn_conditions.find(atoi(row[0]));
+
+        if(iter != spawn_conditions.end())
+            iter->second.value = atoi(row[1]);
+    }
 
 	//load spawn events
-	SpawnEvent event;
-	len = MakeAnyLenString(&query,
-		"SELECT id,cond_id,period,next_minute,next_hour,next_day,next_month,next_year,enabled,action,argument,strict "
-		"FROM spawn_events WHERE zone='%s'", zone_name);
-	if (database.RunQuery(query, len, errbuf, &result)) {
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result))) {
-			event.id = atoi(row[0]);
-			event.condition_id = atoi(row[1]);
-			event.period = atoi(row[2]);
-			if(event.period == 0) {
-				LogFile->write(EQEMuLog::Error, "Refusing to load spawn event #%d because it has a period of 0\n", event.id);
-				continue;
-			}
-
-			event.next.minute = atoi(row[3]);
-			event.next.hour = atoi(row[4]);
-			event.next.day = atoi(row[5]);
-			event.next.month = atoi(row[6]);
-			event.next.year = atoi(row[7]);
-
-			event.enabled = atoi(row[8])==0?false:true;
-			event.action = (SpawnEvent::Action) atoi(row[9]);
-			event.argument = atoi(row[10]);
-			event.strict = atoi(row[11])==0?false:true;
-			spawn_events.push_back(event);
-
-			_log(SPAWNS__CONDITIONS, "(LoadSpawnConditions) Loaded %s spawn event %d on condition %d with period %d, action %d, argument %d, strict %d",
-				event.enabled?"enabled":"disabled", event.id, event.condition_id, event.period, event.action, event.argument, event.strict);
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadSpawnConditions events query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+    query = StringFormat("SELECT id, cond_id, period, next_minute, next_hour, "
+                        "next_day, next_month, next_year, enabled, action, argument, strict "
+                        "FROM spawn_events WHERE zone = '%s'", zone_name);
+    results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadSpawnConditions events query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
-	}
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        SpawnEvent event;
+
+        event.id = atoi(row[0]);
+        event.condition_id = atoi(row[1]);
+        event.period = atoi(row[2]);
+
+        if(event.period == 0) {
+            LogFile->write(EQEMuLog::Error, "Refusing to load spawn event #%d because it has a period of 0\n", event.id);
+            continue;
+        }
+
+        event.next.minute = atoi(row[3]);
+        event.next.hour = atoi(row[4]);
+        event.next.day = atoi(row[5]);
+        event.next.month = atoi(row[6]);
+        event.next.year = atoi(row[7]);
+
+        event.enabled = atoi(row[8])==0?false:true;
+        event.action = (SpawnEvent::Action) atoi(row[9]);
+        event.argument = atoi(row[10]);
+        event.strict = atoi(row[11])==0?false:true;
+
+        spawn_events.push_back(event);
+
+        _log(SPAWNS__CONDITIONS, "(LoadSpawnConditions) Loaded %s spawn event %d on condition %d with period %d, action %d, argument %d, strict %d", event.enabled? "enabled": "disabled", event.id, event.condition_id, event.period, event.action, event.argument, event.strict);
+    }
 
 	//now we need to catch up on events that happened while we were away
 	//and use them to alter just the condition variables.
@@ -834,11 +827,7 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 	TimeOfDay_Struct tod;
 	zone->zone_time.getEQTimeOfDay(&tod);
 
-	std::vector<SpawnEvent>::iterator cur,end;
-	cur = spawn_events.begin();
-	end = spawn_events.end();
-	bool ran;
-	for(; cur != end; ++cur) {
+	for(auto cur = spawn_events.begin(); cur != spawn_events.end(); ++cur) {
 		SpawnEvent &cevent = *cur;
 
 		bool StrictCheck = false;
@@ -853,43 +842,42 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 		if(!cevent.enabled || !StrictCheck)
 			SetCondition(zone->GetShortName(), zone->GetInstanceID(),cevent.condition_id,0);
 
-		if(cevent.enabled)
-		{
-			//watch for special case of all 0s, which means to reset next to now
-			if(cevent.next.year == 0 && cevent.next.month == 0 && cevent.next.day == 0 && cevent.next.hour == 0 && cevent.next.minute == 0) {
-				_log(SPAWNS__CONDITIONS, "Initial next trigger time set for spawn event %d", cevent.id);
-				memcpy(&cevent.next, &tod, sizeof(cevent.next));
-				//add one period
-				EQTime::AddMinutes(cevent.period, &cevent.next);
-				//save it in the db.
-				UpdateDBEvent(cevent);
-				continue;	//were done with this event.
-			}
+		if(!cevent.enabled)
+            continue;
 
-			ran = false;
-			while(EQTime::IsTimeBefore(&tod, &cevent.next)) {
-				_log(SPAWNS__CONDITIONS, "Catch up triggering on event %d", cevent.id);
-				//this event has been triggered.
-				//execute the event
-				if(!cevent.strict || StrictCheck)
-					ExecEvent(cevent, false);
+        //watch for special case of all 0s, which means to reset next to now
+        if(cevent.next.year == 0 && cevent.next.month == 0 && cevent.next.day == 0 && cevent.next.hour == 0 && cevent.next.minute == 0) {
+            _log(SPAWNS__CONDITIONS, "Initial next trigger time set for spawn event %d", cevent.id);
+            memcpy(&cevent.next, &tod, sizeof(cevent.next));
+            //add one period
+            EQTime::AddMinutes(cevent.period, &cevent.next);
+            //save it in the db.
+            UpdateDBEvent(cevent);
+            continue;	//were done with this event.
+        }
 
-				//add the period of the event to the trigger time
-				EQTime::AddMinutes(cevent.period, &cevent.next);
-				ran = true;
-			}
-			//only write it out if the event actually ran
-			if(ran) {
-				//save the event in the DB
-				UpdateDBEvent(cevent);
-			}
-		}
+        bool ran = false;
+        while(EQTime::IsTimeBefore(&tod, &cevent.next)) {
+            _log(SPAWNS__CONDITIONS, "Catch up triggering on event %d", cevent.id);
+            //this event has been triggered.
+            //execute the event
+            if(!cevent.strict || StrictCheck)
+                ExecEvent(cevent, false);
+
+            //add the period of the event to the trigger time
+            EQTime::AddMinutes(cevent.period, &cevent.next);
+            ran = true;
+        }
+
+        //only write it out if the event actually ran
+        if(ran)
+            UpdateDBEvent(cevent); //save the event in the DB
 	}
 
 	//now our event timers are all up to date, find our closest event.
 	FindNearestEvent();
 
-	return(true);
+	return true;
 }
 
 void SpawnConditionManager::FindNearestEvent() {
