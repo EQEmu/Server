@@ -12884,8 +12884,8 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app) {
 
 		/* QS: PlayerLogAlternateCurrencyTransactions :: Sold to Merchant*/
 		if (RuleB(QueryServ, PlayerLogAlternateCurrencyTransactions)){
-			std::string event_desc = StringFormat("Sold to Merchant :: itemid:%i npcid:%i alt_currency_id:%i cost:%i in zoneid:%i instid:%i", item->ID, npc_id, alt_cur_id, cost, this->GetZoneID(), this->GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, this->CharacterID(), event_desc);
+			std::string event_desc = StringFormat("Sold to Merchant :: itemid:%u npcid:%u alt_currency_id:%u cost:%u in zoneid:%u instid:%i", item->ID, npc_id, alt_cur_id, cost, this->GetZoneID(), this->GetInstanceID());
+			QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, this->CharacterID(), event_desc); 
 		} 
 
 		FastQueuePacket(&outapp);
