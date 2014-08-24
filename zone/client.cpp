@@ -324,7 +324,7 @@ Client::Client(EQStreamInterface* ieqs)
 
 	initial_respawn_selection = 0;
 	alternate_currency_loaded = false;
-	
+
 	EngagedRaidTarget = false;
 	SavedRaidRestTimer = 0;
 }
@@ -1029,7 +1029,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 						Message(13, "Command '%s' not recognized.", message);
 					}
 				} else {
-					if(!RuleB(Chat, SuppressCommandErrors)) 
+					if(!RuleB(Chat, SuppressCommandErrors))
 						Message(13, "Command '%s' not recognized.", message);
 				}
 			}
@@ -3998,25 +3998,17 @@ void Client::SendWindow(uint32 PopupID, uint32 NegativeID, uint32 Buttons, const
 
 void Client::KeyRingLoad()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	query = new char[256];
-
-	sprintf(query, "SELECT item_id FROM keyring WHERE char_id='%i' ORDER BY item_id",character_id);
-	if (database.RunQuery(query, strlen(query), errbuf, &result))
-	{
-		safe_delete_array(query);
-		while(0 != (row = mysql_fetch_row(result))){
-			keyring.push_back(atoi(row[0]));
-		}
-		mysql_free_result(result);
-	}else {
-		std::cerr << "Error in Client::KeyRingLoad query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+	std::string query = StringFormat("SELECT item_id FROM keyring "
+                                    "WHERE char_id = '%i' ORDER BY item_id", character_id);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        std::cerr << "Error in Client::KeyRingLoad query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return;
-	}
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row)
+        keyring.push_back(atoi(row[0]));
+
 }
 
 void Client::KeyRingAdd(uint32 item_id)
@@ -4342,15 +4334,15 @@ void Client::IncrementAggroCount() {
 
 	if(!RuleI(Character, RestRegenPercent))
 		return;
-	
+
 	// If we already had aggro before this method was called, the combat indicator should already be up for SoF clients,
 	// so we don't need to send it again.
 	//
 	if(AggroCount > 1)
 		return;
-		
+
 	// Pause the rest timer
-	if (AggroCount == 1) 
+	if (AggroCount == 1)
 		SavedRaidRestTimer = rest_timer.GetRemainingTime();
 
 	if(GetClientVersion() >= EQClientSoF) {
@@ -4395,9 +4387,9 @@ void Client::DecrementAggroCount() {
 			time_until_rest = RuleI(Character, RestRegenTimeToActivate) * 1000;
 		}
 	}
-	
+
 	rest_timer.Start(time_until_rest);
-	
+
 	if(GetClientVersion() >= EQClientSoF) {
 
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_RestState, 5);
@@ -4502,7 +4494,7 @@ void Client::SendRespawnBinds()
 
 	int num_options = respawn_options.size();
 	uint32 PacketLength = 17 + (26 * num_options); //Header size + per-option invariant size
-	
+
 	std::list<RespawnOption>::iterator itr;
 	RespawnOption* opt;
 
@@ -7672,7 +7664,7 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 				tmpValue = current_value + mod + npc_value[i];
 
 				int16 FactionModPct = spellbonuses.FactionModPct + itembonuses.FactionModPct + aabonuses.FactionModPct;
-				tmpValue += (tmpValue * FactionModPct) / 100; 
+				tmpValue += (tmpValue * FactionModPct) / 100;
 
 				// Make sure faction hits don't go to GMs...
 				if (m_pp.gm==1 && (tmpValue < current_value)) {
@@ -7948,7 +7940,7 @@ void Client::TryItemTimer(int slot)
 		}
 		++it_iter;
 	}
-	
+
 	if(slot > EmuConstants::EQUIPMENT_END) {
 		return;
 	}
@@ -8271,10 +8263,10 @@ void Client::ExpeditionSay(const char *str, int ExpID) {
 	while((row = mysql_fetch_row(result))) {
 		const char* CharName = row[0];
 		if(strcmp(CharName, this->GetCleanName()) != 0)
-			worldserver.SendEmoteMessage(CharName, 0, 0, 14, "%s says to the expedition, '%s'", this->GetCleanName(), str); 
+			worldserver.SendEmoteMessage(CharName, 0, 0, 14, "%s says to the expedition, '%s'", this->GetCleanName(), str);
 		// ChannelList->CreateChannel(ChannelName, ChannelOwner, ChannelPassword, true, atoi(row[3]));
-	} 
+	}
 
 	mysql_free_result(result);
-	
+
 }
