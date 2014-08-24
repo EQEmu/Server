@@ -28,8 +28,8 @@ class QueryServ{
 	public:
 		QueryServ();
 		~QueryServ();
-		void QueryServ::SendQuery(std::string Query);
-		void QueryServ::PlayerLogEvent(int Event_Type, int Character_ID, std::string Event_Desc);
+		void SendQuery(std::string Query);
+		void PlayerLogEvent(int Event_Type, int Character_ID, std::string Event_Desc);
 };
 
 #endif /* QUERYSERV_ZONE_H */ 
