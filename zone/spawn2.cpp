@@ -661,23 +661,20 @@ void SpawnConditionManager::ExecEvent(SpawnEvent &event, bool send_update) {
 }
 
 void SpawnConditionManager::UpdateDBEvent(SpawnEvent &event) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	int len;
 
-	SpawnCondition cond;
-	len = MakeAnyLenString(&query,
-		"UPDATE spawn_events SET "
-		"next_minute=%d, next_hour=%d, next_day=%d, next_month=%d, "
-		"next_year=%d, enabled=%d, strict=%d "
-		"WHERE id=%d",
-		event.next.minute, event.next.hour, event.next.day, event.next.month,
-		event.next.year, event.enabled?1:0, event.strict?1:0,event.id
-	);
-	if(!database.RunQuery(query, len, errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Unable to update spawn event '%s': %s\n", query, errbuf);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("UPDATE spawn_events SET "
+                                    "next_minute = %d, next_hour = %d, "
+                                    "next_day = %d, next_month = %d, "
+                                    "next_year = %d, enabled = %d, "
+                                    "strict = %d WHERE id = %d",
+                                    event.next.minute, event.next.hour,
+                                    event.next.day, event.next.month,
+                                    event.next.year, event.enabled? 1: 0,
+                                    event.strict? 1: 0, event.id);
+	auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		LogFile->write(EQEMuLog::Error, "Unable to update spawn event '%s': %s\n", query.c_str(), results.ErrorMessage().c_str());
+
 }
 
 void SpawnConditionManager::UpdateDBCondition(const char* zone_name, uint32 instance_id, uint16 cond_id, int16 value) {
