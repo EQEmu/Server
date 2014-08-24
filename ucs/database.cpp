@@ -506,58 +506,48 @@ void Database::ExpireMail() {
 
 	_log(UCS__INIT, "Expiring mail...");
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	uint32 AffectedRows;
-
-	if (!RunQuery(query,MakeAnyLenString(&query, "select COUNT(*) from `mail` "),errbuf,&result)){
-		_log(UCS__ERROR, "Unable to get message count from database. %s %s", query, errbuf);
-		safe_delete_array(query);
-		return ;
+	std::string query = "SELECT COUNT(*) FROM `mail`";
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+		_log(UCS__ERROR, "Unable to get message count from database. %s %s", query.c_str(), results.ErrorMessage().c_str());
+		return;
 	}
-	safe_delete_array(query);
 
-	row = mysql_fetch_row(result);
+	auto row = results.begin();
 
 	_log(UCS__INIT, "There are %s messages in the database.", row[0]);
 
-	mysql_free_result(result);
-
 	// Expire Trash
 	if(RuleI(Mail, ExpireTrash) >= 0) {
-		if(RunQuery(query, MakeAnyLenString(&query, "delete from `mail` where `status`=4 and `timestamp` < %i",
-				time(nullptr) - RuleI(Mail, ExpireTrash)), errbuf, 0, &AffectedRows)) {
-				_log(UCS__INIT, "Expired %i trash messages.", AffectedRows);
-		}
-		else {
-			_log(UCS__ERROR, "Error expiring trash messages, %s %s", query, errbuf);
-		}
-		safe_delete_array(query);
+        query = StringFormat("DELETE FROM `mail` WHERE `status`=4 AND `timestamp` < %i",
+                            time(nullptr) - RuleI(Mail, ExpireTrash));
+        results = QueryDatabase(query);
+		if(!results.Success())
+            _log(UCS__INIT, "Expired %i trash messages.", results.RowsAffected());
+		else
+			_log(UCS__ERROR, "Error expiring trash messages, %s %s", query.c_str(), results.ErrorMessage().c_str());
 	}
+
 	// Expire Read
 	if(RuleI(Mail, ExpireRead) >= 0) {
-		if(RunQuery(query, MakeAnyLenString(&query, "delete from `mail` where `status`=3 and `timestamp` < %i",
-				time(nullptr) - RuleI(Mail, ExpireRead)), errbuf, 0, &AffectedRows)) {
-				_log(UCS__INIT, "Expired %i read messages.", AffectedRows);
-		}
-		else {
-			_log(UCS__ERROR, "Error expiring read messages, %s %s", query, errbuf);
-		}
-		safe_delete_array(query);
+        query = StringFormat("DELETE FROM `mail` WHERE `status` = 3 AND `timestamp` < %i",
+                            time(nullptr) - RuleI(Mail, ExpireRead));
+        results = QueryDatabase(query);
+		if(!results.Success())
+            _log(UCS__INIT, "Expired %i read messages.", results.RowsAffected());
+		else
+			_log(UCS__ERROR, "Error expiring read messages, %s %s", query.c_str(), results.ErrorMessage().c_str());
 	}
+
 	// Expire Unread
 	if(RuleI(Mail, ExpireUnread) >= 0) {
-		if(RunQuery(query, MakeAnyLenString(&query, "delete from `mail` where `status`=1 and `timestamp` < %i",
-				time(nullptr) - RuleI(Mail, ExpireUnread)), errbuf, 0, &AffectedRows)) {
-				_log(UCS__INIT, "Expired %i unread messages.", AffectedRows);
-		}
-		else {
-			_log(UCS__ERROR, "Error expiring unread messages, %s %s", query, errbuf);
-		}
-		safe_delete_array(query);
+        query = StringFormat("DELETE FROM `mail` WHERE `status`=1 AND `timestamp` < %i",
+                            time(nullptr) - RuleI(Mail, ExpireUnread));
+        results = QueryDatabase(query);
+		if(!results.Success())
+            _log(UCS__INIT, "Expired %i unread messages.", results.RowsAffected());
+		else
+			_log(UCS__ERROR, "Error expiring unread messages, %s %s", query.c_str(), results.ErrorMessage().c_str());
 	}
 }
 
