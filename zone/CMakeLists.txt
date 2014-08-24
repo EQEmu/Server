@@ -16,7 +16,7 @@ SET(zone_sources
 	command.cpp
 	corpse.cpp
 	doors.cpp
-	effects.cpp
+	effects.cpp 
 	embparser.cpp
 	embparser_api.cpp
 	embperl.cpp
@@ -93,6 +93,7 @@ SET(zone_sources
 	petitions.cpp
 	pets.cpp
 	qglobals.cpp
+	queryserv.cpp
 	questmgr.cpp
 	quest_parser_collection.cpp
 	raids.cpp
@@ -183,6 +184,8 @@ SET(zone_headers
 	petitions.h
 	pets.h
 	qglobals.h
+	quest_interface.h
+	queryserv.h
 	quest_interface.h
 	questmgr.h
 	quest_parser_collection.h
