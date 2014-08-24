@@ -551,22 +551,17 @@ void Database::ExpireMail() {
 	}
 }
 
-void Database::AddFriendOrIgnore(int CharID, int Type, std::string Name) {
+void Database::AddFriendOrIgnore(int charID, int type, std::string name) {
 
-	const char *FriendsQuery="INSERT INTO `friends` (`charid`, `type`, `name`) VALUES ('%i', %i, '%s')";
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-
-
-	if(!RunQuery(query, MakeAnyLenString(&query, FriendsQuery, CharID, Type, CapitaliseName(Name).c_str()), errbuf, 0, 0))
-		_log(UCS__ERROR, "Error adding friend/ignore, query was %s : %s", query, errbuf);
+    std::string query = StringFormat("INSERT INTO `friends` (`charid`, `type`, `name`) "
+                                    "VALUES('%i', %i, '%s')",
+                                    charID, type, CapitaliseName(name).c_str());
+    auto results = QueryDatabase(query);
+	if(!results.Success())
+		_log(UCS__ERROR, "Error adding friend/ignore, query was %s : %s", query.c_str(), results.ErrorMessage().c_str());
 	else
-		_log(UCS__TRACE, "Wrote Friend/Ignore entry for charid %i, type %i, name %s to database.",
-			CharID, Type, Name.c_str());
+		_log(UCS__TRACE, "Wrote Friend/Ignore entry for charid %i, type %i, name %s to database.", charID, type, name.c_str());
 
-
-	safe_delete_array(query);
 }
 
 void Database::RemoveFriendOrIgnore(int CharID, int Type, std::string Name) {
