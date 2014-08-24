@@ -428,10 +428,7 @@ void Database::SendBody(Client *client, int messageNumber) {
 bool Database::SendMail(std::string recipient, std::string from, std::string subject, std::string body, std::string recipientsString) {
 
 	int characterID;
-
 	std::string characterName;
-
-	//printf("Database::SendMail(%s, %s, %s)\n", Recipient.c_str(), From.c_str(), Subject.c_str());
 
 	auto lastPeriod = recipient.find_last_of(".");
 
@@ -488,22 +485,21 @@ bool Database::SendMail(std::string recipient, std::string from, std::string sub
 	return true;
 }
 
-void Database::SetMessageStatus(int MessageNumber, int Status) {
+void Database::SetMessageStatus(int messageNumber, int status) {
 
-	_log(UCS__TRACE, "SetMessageStatus %i %i", MessageNumber, Status);
+	_log(UCS__TRACE, "SetMessageStatus %i %i", messageNumber, status);
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	if(status == 0) {
+        std::string query = StringFormat("DELETE FROM `mail` WHERE `msgid` = %i", messageNumber);
+		auto results = QueryDatabase(query);
+        return;
+    }
 
-	if(Status == 0)
-		RunQuery(query, MakeAnyLenString(&query, "delete from `mail` where `msgid`=%i", MessageNumber), errbuf);
-	else if (!RunQuery(query, MakeAnyLenString(&query, "update `mail` set `status`=%i where `msgid`=%i", Status, MessageNumber), errbuf)) {
+    std::string query = StringFormat("UPDATE `mail` SET `status` = %i WHERE `msgid`=%i", status, messageNumber);
+    auto results = QueryDatabase(query);
+	if (!results.Success())
+		_log(UCS__ERROR, "Error updating status %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
-		_log(UCS__ERROR, "Error updating status %s, %s", query, errbuf);
-
-	}
-
-	safe_delete_array(query);
 }
 
 void Database::ExpireMail() {
