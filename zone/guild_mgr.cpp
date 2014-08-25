@@ -1004,70 +1004,58 @@ int GuildBankManager::Promote(uint32 guildID, int slotID)
 	return mainSlot;
 }
 
-void GuildBankManager::SetPermissions(uint32 GuildID, uint16 SlotID, uint32 Permissions, const char *MemberName)
+void GuildBankManager::SetPermissions(uint32 guildID, uint16 slotID, uint32 permissions, const char *memberName)
 {
-	if((SlotID > (GUILD_BANK_MAIN_AREA_SIZE - 1)))
+	if((slotID > (GUILD_BANK_MAIN_AREA_SIZE - 1)))
 		return;
 
-	std::list<GuildBank*>::iterator Iterator = GetGuildBank(GuildID);
+	auto iter = GetGuildBank(guildID);
 
-	if(Iterator == Banks.end())
+	if(iter == Banks.end())
+		return;
+
+	if((*iter)->Items.MainArea[slotID].ItemID == 0)
+		return;
+
+	std::string query = StringFormat("UPDATE `guild_bank` SET `permissions` = %i, `whofor` = '%s' "
+                                "WHERE `guildid` = %i AND `area` = 1 AND `slot` = %i LIMIT 1",
+                                permissions, memberName, guildID, slotID);
+    auto results = database.QueryDatabase(query);
+	if(!results.Success())
 	{
+		_log(GUILDS__BANK_ERROR, "error changing permissions: %s : %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
-	if((*Iterator)->Items.MainArea[SlotID].ItemID == 0)
-	{
-		return;
-	}
+	(*iter)->Items.MainArea[slotID].Permissions = permissions;
 
-	const char *Query="UPDATE `guild_bank` SET `permissions` = %i, `whofor` = '%s' WHERE `guildid` = %i AND `area` = 1 AND `slot` = %i LIMIT 1";
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-
-	char* query = 0;
-
-	if(!database.RunQuery(query, MakeAnyLenString(&query, Query, Permissions, MemberName, GuildID, SlotID), errbuf))
-	{
-		_log(GUILDS__BANK_ERROR, "error changing permissions: %s : %s", query, errbuf);
-
-		safe_delete_array(query);
-
-		return;
-	}
-
-	safe_delete_array(query);
-
-	(*Iterator)->Items.MainArea[SlotID].Permissions = Permissions;
-
-	if(Permissions == GuildBankSingleMember)
-		strn0cpy((*Iterator)->Items.MainArea[SlotID].WhoFor, MemberName, sizeof((*Iterator)->Items.MainArea[SlotID].WhoFor));
+	if(permissions == GuildBankSingleMember)
+		strn0cpy((*iter)->Items.MainArea[slotID].WhoFor, memberName, sizeof((*iter)->Items.MainArea[slotID].WhoFor));
 	else
-		(*Iterator)->Items.MainArea[SlotID].WhoFor[0] = '\0';
+		(*iter)->Items.MainArea[slotID].WhoFor[0] = '\0';
 
-
-	const Item_Struct *Item = database.GetItem((*Iterator)->Items.MainArea[SlotID].ItemID);
+	const Item_Struct *Item = database.GetItem((*iter)->Items.MainArea[slotID].ItemID);
 
 	GuildBankItemUpdate_Struct gbius;
 
 	if(!Item->Stackable)
-		gbius.Init(GuildBankItemUpdate, 1, SlotID, GuildBankMainArea, 1, Item->ID, Item->Icon, 1, (*Iterator)->Items.MainArea[SlotID].Permissions, 0, 0);
+		gbius.Init(GuildBankItemUpdate, 1, slotID, GuildBankMainArea, 1, Item->ID, Item->Icon, 1, (*iter)->Items.MainArea[slotID].Permissions, 0, 0);
 	else
 	{
-		if((*Iterator)->Items.MainArea[SlotID].Quantity == Item->StackSize)
-			gbius.Init(GuildBankItemUpdate, 1, SlotID, GuildBankMainArea, 1, Item->ID, Item->Icon,
-					(*Iterator)->Items.MainArea[SlotID].Quantity, (*Iterator)->Items.MainArea[SlotID].Permissions, 0, 0);
+		if((*iter)->Items.MainArea[slotID].Quantity == Item->StackSize)
+			gbius.Init(GuildBankItemUpdate, 1, slotID, GuildBankMainArea, 1, Item->ID, Item->Icon,
+					(*iter)->Items.MainArea[slotID].Quantity, (*iter)->Items.MainArea[slotID].Permissions, 0, 0);
 		else
-			gbius.Init(GuildBankItemUpdate, 1, SlotID, GuildBankMainArea, 1, Item->ID, Item->Icon,
-					(*Iterator)->Items.MainArea[SlotID].Quantity, (*Iterator)->Items.MainArea[SlotID].Permissions, 1, 0);
+			gbius.Init(GuildBankItemUpdate, 1, slotID, GuildBankMainArea, 1, Item->ID, Item->Icon,
+					(*iter)->Items.MainArea[slotID].Quantity, (*iter)->Items.MainArea[slotID].Permissions, 1, 0);
 	}
 
 
 	strn0cpy(gbius.ItemName, Item->Name, sizeof(gbius.ItemName));
 
-	strn0cpy(gbius.WhoFor, (*Iterator)->Items.MainArea[SlotID].WhoFor, sizeof(gbius.WhoFor));
+	strn0cpy(gbius.WhoFor, (*iter)->Items.MainArea[slotID].WhoFor, sizeof(gbius.WhoFor));
 
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, GuildID);
+	entity_list.QueueClientsGuildBankItemUpdate(&gbius, guildID);
 }
 
 ItemInst* GuildBankManager::GetItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity)
