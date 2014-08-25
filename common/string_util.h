@@ -26,6 +26,7 @@
 const std::string vStringFormat(const char* format, va_list args);
 const std::string StringFormat(const char* format, ...);
 std::string EscapeString(const std::string &s);
+std::string EscapeString(const char *src, size_t sz);
 
 const char *MakeLowerString(const char *source);
 

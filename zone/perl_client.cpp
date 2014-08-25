@@ -1320,6 +1320,8 @@ XS(XS_Client_MovePCInstance)
 			else
 				_log(CLIENT__ERROR, "Perl(XS_Client_MovePCInstance) attempted to process an Unknown type reference");
 
+			Perl_croak(aTHX_ "THIS is not of type Client"); 
+
 			Perl_croak(aTHX_ "THIS is not of type Client");
 		}
 	}

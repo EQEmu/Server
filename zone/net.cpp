@@ -48,6 +48,7 @@
 #include "worldserver.h"
 #include "net.h"
 #include "zone.h"
+#include "queryserv.h"
 #include "command.h"
 #include "zone_config.h"
 #include "titles.h"
@@ -98,6 +99,7 @@ npcDecayTimes_Struct npcCorpseDecayTimes[100];
 TitleManager title_manager;
 DBAsyncFinishedQueue MTdbafq;
 DBAsync *dbasync = nullptr;
+QueryServ *QServ = 0; 
 TaskManager *taskmanager = 0;
 QuestParserCollection *parse = 0;
 
@@ -113,6 +115,8 @@ int main(int argc, char** argv) {
 	set_exception_handler();
 
 	const char *zone_name;
+
+	QServ = new QueryServ;
 
 	if(argc == 3) {
 		worldserver.SetLauncherName(argv[2]);
@@ -622,7 +626,7 @@ void LoadSpells(EQEmu::MemoryMappedFile **mmf) {
 	SPDAT_RECORDS = records;
 }
 
-
+/* Update Window Title with relevant information */
 void UpdateWindowTitle(char* iNewTitle) {
 #ifdef _WINDOWS
 	char tmp[500];
@@ -634,7 +638,7 @@ void UpdateWindowTitle(char* iNewTitle) {
 			#if defined(GOTFRAGS) || defined(_EQDEBUG)
 				snprintf(tmp, sizeof(tmp), "%i: %s, %i clients, %i", ZoneConfig::get()->ZonePort, zone->GetShortName(), numclients, getpid());
 			#else
-				snprintf(tmp, sizeof(tmp), "%i: %s, %i clients", ZoneConfig::get()->ZonePort, zone->GetShortName(), numclients);
+			snprintf(tmp, sizeof(tmp), "%s :: clients: %i inst_id: %i inst_ver: %i :: port: %i", zone->GetShortName(), numclients, zone->GetInstanceID(), zone->GetInstanceVersion(), ZoneConfig::get()->ZonePort);
 			#endif
 		}
 		else {

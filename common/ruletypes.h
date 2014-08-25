@@ -558,14 +558,28 @@ RULE_INT ( Console, SessionTimeOut, 600000 )	// Amount of time in ms for the con
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( QueryServ )
-RULE_BOOL( QueryServ, PlayerChatLogging, false) // Logs Player Chat
+RULE_BOOL( QueryServ, PlayerLogChat, false) // Logs Player Chat 
 RULE_BOOL( QueryServ, PlayerLogTrades, false) // Logs Player Trades
 RULE_BOOL( QueryServ, PlayerLogHandins, false) // Logs Player Handins
 RULE_BOOL( QueryServ, PlayerLogNPCKills, false) // Logs Player NPC Kills
 RULE_BOOL( QueryServ, PlayerLogDeletes, false) // Logs Player Deletes
 RULE_BOOL( QueryServ, PlayerLogMoves, false) // Logs Player Moves
-RULE_BOOL( QueryServ, MerchantLogTransactions, false) // Logs Merchant Transactions
+RULE_BOOL( QueryServ, PlayerLogMerchantTransactions, false) // Logs Merchant Transactions
 RULE_BOOL( QueryServ, PlayerLogPCCoordinates, false) // Logs Player Coordinates with certain events
+RULE_BOOL( QueryServ, PlayerLogDropItem, false) // Logs Player Drop Item
+RULE_BOOL( QueryServ, PlayerLogZone, false) // Logs Player Zone Events
+RULE_BOOL( QueryServ, PlayerLogDeaths, false) // Logs Player Deaths
+RULE_BOOL( QueryServ, PlayerLogConnectDisconnect, false) // Logs Player Connect Disconnect State
+RULE_BOOL( QueryServ, PlayerLogLevels, false) // Logs Player Leveling/Deleveling
+RULE_BOOL( QueryServ, PlayerLogAARate, false) // Logs Player AA Experience Rates 
+RULE_BOOL( QueryServ, PlayerLogQGlobalUpdate, false) // Logs Player QGlobal Updates
+RULE_BOOL( QueryServ, PlayerLogTaskUpdates, false) // Logs Player Task Updates
+RULE_BOOL( QueryServ, PlayerLogKeyringAddition, false) // Log PLayer Keyring additions
+RULE_BOOL( QueryServ, PlayerLogAAPurchases, false) // Log Player AA Purchases
+RULE_BOOL( QueryServ, PlayerLogTradeSkillEvents, false) // Log Player Tradeskill Transactions
+RULE_BOOL( QueryServ, PlayerLogIssuedCommandes, false ) // Log Player Issued Commands
+RULE_BOOL( QueryServ, PlayerLogMoneyTransactions, false) // Log Player Money Transaction/Splits
+RULE_BOOL( QueryServ, PlayerLogAlternateCurrencyTransactions, false) // Log Ploayer Alternate Currency Transactions
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Inventory )

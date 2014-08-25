@@ -62,8 +62,9 @@
 #include "guild_mgr.h"
 #include "titles.h"
 #include "../common/patches/patches.h"
+#include "queryserv.h"
 
-// these should be in the headers...
+extern QueryServ* QServ;
 extern WorldServer worldserver;
 extern TaskManager *taskmanager;
 void CatchSignal(int sig_num);
@@ -586,6 +587,12 @@ int command_realdispatch(Client *c, const char *message)
 	if(c->Admin() < cur->access){
 		c->Message(13,"Your access level is not high enough to use this command.");
 		return(-1);
+	}
+
+	/* QS: Player_Log_Issued_Commands */
+	if (RuleB(QueryServ, PlayerLogIssuedCommandes)){
+		std::string event_desc = StringFormat("Issued command :: '%s' in zoneid:%i instid:%i", message, c->GetZoneID(), c->GetInstanceID());
+		QServ->PlayerLogEvent(Player_Log_Issued_Commands, c->CharacterID(), event_desc); 
 	}
 
 #ifdef COMMANDS_LOGGING

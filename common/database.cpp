@@ -608,10 +608,11 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 	for (int16 i=EmuConstants::EQUIPMENT_BEGIN; i<=EmuConstants::BANK_BAGS_END;)
 	{
 		const ItemInst* newinv = inv->GetItem(i);
-		if (!newinv)
+		if (newinv)
 		{
-			invquery = StringFormat("INSERT INTO inventory SET charid=%0u, slotid=%0d, itemid=%0u, charges=%0d, color=%0u",
-				charid, i, newinv->GetItem()->ID,newinv->GetCharges(), newinv->GetColor());
+			invquery = StringFormat("INSERT INTO `inventory` (charid, slotid, itemid, charges, color) VALUES (%u, %i, %u, %i, %u)",
+				charid, i, newinv->GetItem()->ID, newinv->GetCharges(), newinv->GetColor()); 
+			
 			auto results = QueryDatabase(invquery);
 
 			if (!results.RowsAffected())

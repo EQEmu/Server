@@ -34,6 +34,9 @@
 #include "../common/string_util.h"
 #include "../common/rulesys.h"
 #include "quest_parser_collection.h"
+#include "queryserv.h"
+
+extern QueryServ* QServ;
 
 static const SkillUseTypes TradeskillUnknown = Skill1HBlunt; /* an arbitrary non-tradeskill */
 
@@ -1067,7 +1070,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		if(over_trivial < 0)
 			CheckIncreaseTradeskill(bonusstat, stat_modifier, skillup_modifier, success_modifier, spec->tradeskill);
 
-		Message_StringID(4,TRADESKILL_SUCCEED,spec->name.c_str());
+		Message_StringID(4, TRADESKILL_SUCCEED, spec->name.c_str());
 
 		_log(TRADESKILLS__TRACE, "Tradeskill success");
 
@@ -1076,16 +1079,24 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 			//should we check this crap?
 			SummonItem(itr->first, itr->second);
 			item = database.GetItem(itr->first);
-			if (this->GetGroup())
-			{
-				entity_list.MessageGroup(this,true,MT_Skills,"%s has successfully fashioned %s!",GetName(),item->Name);
+			if (this->GetGroup()) {
+				entity_list.MessageGroup(this, true, MT_Skills, "%s has successfully fashioned %s!", GetName(), item->Name);
 			}
+
+			/* QS: Player_Log_Trade_Skill_Events */
+			if (RuleB(QueryServ, PlayerLogTradeSkillEvents)){
+				std::string event_desc = StringFormat("Success :: fashioned recipe_id:%i tskillid:%i trivial:%i chance:%4.2f  in zoneid:%i instid:%i", spec->recipe_id, spec->tradeskill, spec->trivial, chance, this->GetZoneID(), this->GetInstanceID());
+				QServ->PlayerLogEvent(Player_Log_Trade_Skill_Events, this->CharacterID(), event_desc);
+			}
+
 			if(RuleB(TaskSystem, EnableTaskSystem))
 				UpdateTasksForItem(ActivityTradeSkill, itr->first, itr->second);
 			++itr;
 		}
 		return(true);
-	} else {
+	} 
+	/* Tradeskill Fail */
+	else {
 		success_modifier = 2; // Halves the chance
 
 		if(over_trivial < 0)
@@ -1097,6 +1108,13 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 			if (this->GetGroup())
 		{
 			entity_list.MessageGroup(this,true,MT_Skills,"%s was unsuccessful in %s tradeskill attempt.",GetName(),this->GetGender() == 0 ? "his" : this->GetGender() == 1 ? "her" : "its");
+
+		}
+
+		/* QS: Player_Log_Trade_Skill_Events */
+		if (RuleB(QueryServ, PlayerLogTradeSkillEvents)){
+			std::string event_desc = StringFormat("Failed :: recipe_id:%i tskillid:%i trivial:%i chance:%4.2f  in zoneid:%i instid:%i", spec->recipe_id, spec->tradeskill, spec->trivial, chance, this->GetZoneID(), this->GetInstanceID());
+			QServ->PlayerLogEvent(Player_Log_Trade_Skill_Events, this->CharacterID(), event_desc);
 		}
 
 		itr = spec->onfail.begin();
@@ -1105,6 +1123,8 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 			SummonItem(itr->first, itr->second);
 			++itr;
 		}
+
+		/* Salvage Item rolls */
 
 		// Rolls on each item, is possible to return everything
 		int SalvageChance = aabonuses.SalvageChance + itembonuses.SalvageChance + spellbonuses.SalvageChance;
