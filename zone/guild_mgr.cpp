@@ -1141,90 +1141,73 @@ std::list<GuildBank*>::iterator GuildBankManager::GetGuildBank(uint32 GuildID)
 	return Iterator;
 }
 
-bool GuildBankManager::DeleteItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity)
+bool GuildBankManager::DeleteItem(uint32 guildID, uint16 area, uint16 slotID, uint32 quantity)
 {
-	std::list<GuildBank*>::iterator Iterator = GetGuildBank(GuildID);
+	auto iter = GetGuildBank(guildID);
 
-	if(Iterator == Banks.end())
+	if(iter == Banks.end())
 		return false;
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-
-	char* query = 0;
 
 	GuildBankItem* BankArea = nullptr;
 
-	if(Area == GuildBankMainArea)
+	if(area == GuildBankMainArea)
 	{
-		if(SlotID > (GUILD_BANK_MAIN_AREA_SIZE - 1))
+		if(slotID > (GUILD_BANK_MAIN_AREA_SIZE - 1))
 			return false;
 
-		BankArea = &(*Iterator)->Items.MainArea[0];
-	}
-	else
-	{
-		if(SlotID > (GUILD_BANK_DEPOSIT_AREA_SIZE - 1))
+		BankArea = &(*iter)->Items.MainArea[0];
+	} else {
+		if(slotID > (GUILD_BANK_DEPOSIT_AREA_SIZE - 1))
 			return false;
 
-		BankArea = &(*Iterator)->Items.DepositArea[0];
+		BankArea = &(*iter)->Items.DepositArea[0];
 	}
 
+	bool deleted = true;
 
-	bool Deleted = true;
+	const Item_Struct *Item = database.GetItem(BankArea[slotID].ItemID);
 
-	const Item_Struct *Item = database.GetItem(BankArea[SlotID].ItemID);
-
-	if(!Item->Stackable || (Quantity >= BankArea[SlotID].Quantity))
-	{
-		const char *Query = "DELETE from `guild_bank` where `guildid` = %i AND `area` = %i AND `slot` = %i LIMIT 1";
-
-		if(!database.RunQuery(query, MakeAnyLenString(&query, Query, GuildID, Area, SlotID), errbuf))
-		{
-			_log(GUILDS__BANK_ERROR, "Delete item failed. %s : %s", query, errbuf);
-
-			safe_delete_array(query);
-
+	if(!Item->Stackable || (quantity >= BankArea[slotID].Quantity)) {
+        std::string query = StringFormat("DELETE FROM `guild_bank` WHERE `guildid` = %i "
+                                        "AND `area` = %i AND `slot` = %i LIMIT 1",
+                                        guildID, area, slotID);
+        auto results = database.QueryDatabase(query);
+		if(!results.Success()) {
+			_log(GUILDS__BANK_ERROR, "Delete item failed. %s : %s", query.c_str(), results.ErrorMessage().c_str());
 			return false;
 		}
 
-		safe_delete_array(query);
+		BankArea[slotID].ItemID = 0;
 
-		BankArea[SlotID].ItemID = 0;
-	}
-	else
-	{
-		const char *Query = "UPDATE `guild_bank` SET `qty` = %i where `guildid` = %i AND `area` = %i AND `slot` = %i LIMIT 1";
-
-		if(!database.RunQuery(query, MakeAnyLenString(&query, Query, BankArea[SlotID].Quantity - Quantity,
-				GuildID, Area, SlotID), errbuf))
-		{
-			_log(GUILDS__BANK_ERROR, "Update item failed. %s : %s", query, errbuf);
-
-			safe_delete_array(query);
-
+	} else {
+		std::string query = StringFormat("UPDATE `guild_bank` SET `qty` = %i WHERE `guildid` = %i "
+                                        "AND `area` = %i AND `slot` = %i LIMIT 1",
+                                        BankArea[slotID].Quantity - quantity, guildID, area, slotID);
+        auto results = database.QueryDatabase(query);
+		if(!results.Success()) {
+			_log(GUILDS__BANK_ERROR, "Update item failed. %s : %s", query.c_str(), results.ErrorMessage().c_str());
 			return false;
 		}
 
-		safe_delete_array(query);
+		BankArea[slotID].Quantity -= quantity;
 
-		BankArea[SlotID].Quantity -= Quantity;
-
-		Deleted = false;
+		deleted = false;
 	}
+
 	GuildBankItemUpdate_Struct gbius;
 
-	if(!Deleted)
+	if(!deleted)
 	{
-		gbius.Init(GuildBankItemUpdate, 1, SlotID, Area, 1, Item->ID, Item->Icon, BankArea[SlotID].Quantity, BankArea[SlotID].Permissions, 1, 0);
+		gbius.Init(GuildBankItemUpdate, 1, slotID, area, 1, Item->ID, Item->Icon, BankArea[slotID].Quantity, BankArea[slotID].Permissions, 1, 0);
 
 		strn0cpy(gbius.ItemName, Item->Name, sizeof(gbius.ItemName));
 
-		strn0cpy(gbius.WhoFor, BankArea[SlotID].WhoFor, sizeof(gbius.WhoFor));
+		strn0cpy(gbius.WhoFor, BankArea[slotID].WhoFor, sizeof(gbius.WhoFor));
 	}
 	else
-		gbius.Init(GuildBankItemUpdate, 1, SlotID, Area, 0, 0, 0, 0, 0, 0, 0);
+		gbius.Init(GuildBankItemUpdate, 1, slotID, area, 0, 0, 0, 0, 0, 0, 0);
 
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, GuildID);
+	entity_list.QueueClientsGuildBankItemUpdate(&gbius, guildID);
 
 	return true;
 
