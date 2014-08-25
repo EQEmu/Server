@@ -541,13 +541,40 @@ void NPC::AI_Start(uint32 iMoveDelay) {
 void Mob::AI_Stop() {
 	if (!IsAIControlled())
 		return;
+
 	pAIControlled = false;
+
 	safe_delete(AIthink_timer);
 	safe_delete(AIwalking_timer);
 	safe_delete(AImovement_timer);
-	safe_delete(AItarget_check_timer)
+	safe_delete(AItarget_check_timer);
 	safe_delete(AIscanarea_timer);
 	safe_delete(AIfeignremember_timer);
+	safe_delete(PathingLOSCheckTimer);
+	safe_delete(PathingRouteUpdateTimerShort);
+	safe_delete(PathingRouteUpdateTimerLong);
+
+	attack_timer.Disable();
+	attack_dw_timer.Disable();
+	ranged_timer.Disable();
+	tic_timer.Disable();
+	mana_timer.Disable();
+	spellend_timer.Disable();
+	projectile_timer.Disable();
+	rewind_timer.Disable();
+	bindwound_timer.Disable();
+	stunned_timer.Disable();
+	spun_timer.Disable();
+	bardsong_timer.Disable();
+	gravity_timer.Disable();
+	viral_timer.Disable();
+	flee_timer.Disable();
+
+	for (int sat = 0; sat < MAX_SPECIAL_ATTACK; ++sat) {
+		if (SpecialAbilities[sat].timer)
+			SpecialAbilities[sat].timer->Disable();
+	}
+
 	hate_list.Wipe();
 }
 

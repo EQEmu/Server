@@ -1598,7 +1598,7 @@ Corpse *EntityList::GetCorpseByName(const char *name)
 
 Spawn2 *EntityList::GetSpawnByID(uint32 id)
 {
-	if (!zone)
+	if (!zone || !zone->IsLoaded())
 		return nullptr;
 
 	LinkedListIterator<Spawn2 *> iterator(zone->spawn2_list);
