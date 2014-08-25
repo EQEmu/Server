@@ -935,90 +935,73 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
 	return true;
 }
 
-int GuildBankManager::Promote(uint32 GuildID, int SlotID)
+int GuildBankManager::Promote(uint32 guildID, int slotID)
 {
-	if((SlotID < 0) || (SlotID > (GUILD_BANK_DEPOSIT_AREA_SIZE - 1)))
+	if((slotID < 0) || (slotID > (GUILD_BANK_DEPOSIT_AREA_SIZE - 1)))
 		return -1;
 
-	std::list<GuildBank*>::iterator Iterator = GetGuildBank(GuildID);
+	auto iter = GetGuildBank(guildID);
 
-	if(Iterator == Banks.end())
-	{
+	if(iter == Banks.end())
 		return -1;
-	}
 
-	if((*Iterator)->Items.DepositArea[SlotID].ItemID == 0)
-	{
+	if((*iter)->Items.DepositArea[slotID].ItemID == 0)
 		return -1;
-	}
 
-	int MainSlot = -1;
+	int mainSlot = -1;
 
 	for(int i = 0; i < GUILD_BANK_MAIN_AREA_SIZE; ++i)
-		if((*Iterator)->Items.MainArea[i].ItemID == 0)
-		{
-			MainSlot = i;
-
+		if((*iter)->Items.MainArea[i].ItemID == 0) {
+			mainSlot = i;
 			break;
 		}
 
-	if(MainSlot == -1)
+	if(mainSlot == -1)
 		return -1;
 
+	(*iter)->Items.MainArea[mainSlot].ItemID = (*iter)->Items.DepositArea[slotID].ItemID;
+	(*iter)->Items.MainArea[mainSlot].Quantity = (*iter)->Items.DepositArea[slotID].Quantity;
+    (*iter)->Items.MainArea[mainSlot].Permissions = (*iter)->Items.DepositArea[slotID].Permissions;
 
-	(*Iterator)->Items.MainArea[MainSlot].ItemID = (*Iterator)->Items.DepositArea[SlotID].ItemID;
+	strn0cpy((*iter)->Items.MainArea[mainSlot].Donator, (*iter)->Items.DepositArea[slotID].Donator, sizeof((*iter)->Items.MainArea[mainSlot].Donator));
+	strn0cpy((*iter)->Items.MainArea[mainSlot].WhoFor, (*iter)->Items.DepositArea[slotID].WhoFor, sizeof((*iter)->Items.MainArea[mainSlot].WhoFor));
 
-	(*Iterator)->Items.MainArea[MainSlot].Quantity = (*Iterator)->Items.DepositArea[SlotID].Quantity;
-
-	strn0cpy((*Iterator)->Items.MainArea[MainSlot].Donator, (*Iterator)->Items.DepositArea[SlotID].Donator, sizeof((*Iterator)->Items.MainArea[MainSlot].Donator));
-	(*Iterator)->Items.MainArea[MainSlot].Permissions = (*Iterator)->Items.DepositArea[SlotID].Permissions;
-
-	strn0cpy((*Iterator)->Items.MainArea[MainSlot].WhoFor, (*Iterator)->Items.DepositArea[SlotID].WhoFor, sizeof((*Iterator)->Items.MainArea[MainSlot].WhoFor));
-
-	const char *Query="UPDATE `guild_bank` SET `area` = 1, `slot` = %i WHERE `guildid` = %i AND `area` = 0 AND `slot` = %i LIMIT 1";
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-
-	char* query = 0;
-
-	if(!database.RunQuery(query, MakeAnyLenString(&query, Query, MainSlot, GuildID, SlotID), errbuf))
-	{
-		_log(GUILDS__BANK_ERROR, "error promoting item: %s : %s", query, errbuf);
-
-		safe_delete_array(query);
-
+	std::string query = StringFormat("UPDATE `guild_bank` SET `area` = 1, `slot` = %i "
+                                    "WHERE `guildid` = %i AND `area` = 0 AND `slot` = %i "
+                                    "LIMIT 1", mainSlot, guildID, slotID);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+		_log(GUILDS__BANK_ERROR, "error promoting item: %s : %s", query.c_str(), results.ErrorMessage().c_str());
 		return -1;
 	}
 
-	safe_delete_array(query);
+	(*iter)->Items.DepositArea[slotID].ItemID = 0;
 
-	(*Iterator)->Items.DepositArea[SlotID].ItemID = 0;
-
-	const Item_Struct *Item = database.GetItem((*Iterator)->Items.MainArea[MainSlot].ItemID);
+	const Item_Struct *Item = database.GetItem((*iter)->Items.MainArea[mainSlot].ItemID);
 
 	GuildBankItemUpdate_Struct gbius;
 
 	if(!Item->Stackable)
-		gbius.Init(GuildBankItemUpdate, 1, MainSlot, GuildBankMainArea, 1, Item->ID, Item->Icon, 1, 0, 0, 0);
+		gbius.Init(GuildBankItemUpdate, 1, mainSlot, GuildBankMainArea, 1, Item->ID, Item->Icon, 1, 0, 0, 0);
 	else
 	{
-		if((*Iterator)->Items.MainArea[MainSlot].Quantity == Item->StackSize)
-			gbius.Init(GuildBankItemUpdate, 1, MainSlot, GuildBankMainArea, 1, Item->ID, Item->Icon,
-					(*Iterator)->Items.MainArea[MainSlot].Quantity, 0, 0, 0);
+		if((*iter)->Items.MainArea[mainSlot].Quantity == Item->StackSize)
+			gbius.Init(GuildBankItemUpdate, 1, mainSlot, GuildBankMainArea, 1, Item->ID, Item->Icon,
+					(*iter)->Items.MainArea[mainSlot].Quantity, 0, 0, 0);
 		else
-			gbius.Init(GuildBankItemUpdate, 1, MainSlot, GuildBankMainArea, 1, Item->ID, Item->Icon,
-					(*Iterator)->Items.MainArea[MainSlot].Quantity, 0, 1, 0);
+			gbius.Init(GuildBankItemUpdate, 1, mainSlot, GuildBankMainArea, 1, Item->ID, Item->Icon,
+					(*iter)->Items.MainArea[mainSlot].Quantity, 0, 1, 0);
 	}
 
 	strn0cpy(gbius.ItemName, Item->Name, sizeof(gbius.ItemName));
 
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, GuildID);
+	entity_list.QueueClientsGuildBankItemUpdate(&gbius, guildID);
 
-	gbius.Init(GuildBankItemUpdate, 1, SlotID, GuildBankDepositArea, 0, 0, 0, 0, 0, 0, 0);
+	gbius.Init(GuildBankItemUpdate, 1, slotID, GuildBankDepositArea, 0, 0, 0, 0, 0, 0, 0);
 
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, GuildID);
+	entity_list.QueueClientsGuildBankItemUpdate(&gbius, guildID);
 
-	return MainSlot;
+	return mainSlot;
 }
 
 void GuildBankManager::SetPermissions(uint32 GuildID, uint16 SlotID, uint32 Permissions, const char *MemberName)
