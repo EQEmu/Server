@@ -1338,26 +1338,20 @@ bool GuildBankManager::SplitStack(uint32 GuildID, uint16 SlotID, uint32 Quantity
 	return true;
 }
 
-void GuildBankManager::UpdateItemQuantity(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity)
+void GuildBankManager::UpdateItemQuantity(uint32 guildID, uint16 area, uint16 slotID, uint32 quantity)
 {
 	// Helper method for MergeStacks. Assuming all passed parameters are valid.
 	//
-	char errbuf[MYSQL_ERRMSG_SIZE];
-
-	char* query = 0;
-
-	const char *Query = "UPDATE `guild_bank` SET `qty` = %i where `guildid` = %i AND `area` = %i AND `slot` = %i LIMIT 1";
-
-	if(!database.RunQuery(query, MakeAnyLenString(&query, Query, Quantity, GuildID, Area, SlotID), errbuf))
-	{
-		_log(GUILDS__BANK_ERROR, "Update item quantity failed. %s : %s", query, errbuf);
-
-		safe_delete_array(query);
-
+	std::string query = StringFormat("UPDATE `guild_bank` SET `qty` = %i "
+                                    "WHERE `guildid` = %i AND `area` = %i "
+                                    "AND `slot` = %i LIMIT 1",
+                                    quantity, guildID, area, slotID);
+    auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
+		_log(GUILDS__BANK_ERROR, "Update item quantity failed. %s : %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
-	safe_delete_array(query);
 }
 
 bool GuildBankManager::AllowedToWithdraw(uint32 GuildID, uint16 Area, uint16 SlotID, const char *Name)
