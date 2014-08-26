@@ -1,6 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 08/24/2014 ==
+Uleat: Fix (attempted) for zone crashes related to zone shut-down. This change disables all Mob AI and disables/deletes all Mob timers once Zone::ShutDown() is called. More areas will be addressed as reports come in.
+Note: Perl and Lua quests tested to work..please post any aberrant behavior. (I finally set my spell-check to US English...)
 Akkadius: Character creation process crash fix and query cleanup
 Akkadius: Created `character_lookup` table for applications that mirrors all `character_` table fields minus blob fields for application lookups
 	- A 2.4GB character_ table will take 7 seconds to query on a SSD versus .1s on the character_lookup table
