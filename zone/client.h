@@ -268,7 +268,7 @@ public:
 	void	TradeRequestFailed(const EQApplicationPacket* app);
 	void	BuyTraderItem(TraderBuy_Struct* tbs,Client* trader,const EQApplicationPacket* app);
 	void	TraderUpdate(uint16 slot_id,uint32 trader_id);
-	void	FinishTrade(Mob* with, ServerPacket* qspack = nullptr, bool finalizer = false);
+	void	FinishTrade(Mob* with, bool finalizer = false, void* event_entry = nullptr, std::list<void*>* event_details = nullptr);
 	void	SendZonePoints();
 
 	void	SendBuyerResults(char *SearchQuery, uint32 SearchID);

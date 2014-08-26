@@ -4862,6 +4862,7 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 {
 	Mob* with = trade->With();
 	trade->state = TradeAccepted;
+
 	if (with && with->IsClient()) {
 		//finish trade...
 		// Have both accepted?
@@ -4872,6 +4873,7 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 			other->trade->state = TradeCompleting;
 			trade->state = TradeCompleting;
 
+			// should we do this for NoDrop items as well?
 			if (CheckTradeLoreConflict(other) || other->CheckTradeLoreConflict(this)) {
 				Message_StringID(13, TRADE_CANCEL_LORE);
 				other->Message_StringID(13, TRADE_CANCEL_LORE);
@@ -4887,23 +4889,37 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 
 				// start QS code
 				if(RuleB(QueryServ, PlayerLogTrades)) {
-					uint16 trade_count = 0;
+					QSPlayerLogTrade_Struct event_entry;
+					std::list<void*> event_details;
 
-					// Item trade count for packet sizing
-					for(int16 slot_id = EmuConstants::TRADE_BEGIN; slot_id <= EmuConstants::TRADE_END; slot_id++) {
-						if(other->GetInv().GetItem(slot_id)) { trade_count += other->GetInv().GetItem(slot_id)->GetTotalItemCount(); }
-						if(m_inv[slot_id]) { trade_count += m_inv[slot_id]->GetTotalItemCount(); }
-					}
-
-					ServerPacket* qspack = new ServerPacket(ServerOP_QSPlayerLogTrades, sizeof(QSPlayerLogTrade_Struct) + (sizeof(QSTradeItems_Struct) * trade_count));
+					memset(&event_entry, 0, sizeof(QSPlayerLogTrade_Struct));
 
 					// Perform actual trade
-					this->FinishTrade(other, qspack, true);
-					other->FinishTrade(this, qspack, false);
+					this->FinishTrade(other, true, &event_entry, &event_details);
+					other->FinishTrade(this, false, &event_entry, &event_details);
 
-					qspack->Deflate();
-					if(worldserver.Connected()) { worldserver.SendPacket(qspack); }
-					safe_delete(qspack);
+					ServerPacket* qs_pack = new ServerPacket(ServerOP_QSPlayerLogTrades, sizeof(QSPlayerLogTrade_Struct)+(sizeof(QSTradeItems_Struct)* event_details.size()));
+
+					QSPlayerLogTrade_Struct* qs_buf = (QSPlayerLogTrade_Struct*)qs_pack->pBuffer;
+
+					memcpy(qs_buf, &event_entry, sizeof(QSPlayerLogTrade_Struct));
+
+					int offset = 0;
+
+					for (std::list<void*>::iterator iter = event_details.begin(); iter != event_details.end(); ++iter, ++offset) {
+						QSTradeItems_Struct* detail = reinterpret_cast<QSTradeItems_Struct*>(*iter);
+						qs_buf->items[offset] = *detail;
+						safe_delete(detail);
+					}
+
+					event_details.clear();
+
+					qs_pack->Deflate();
+
+					if(worldserver.Connected())
+						worldserver.SendPacket(qs_pack);
+
+					safe_delete(qs_pack);
 					// end QS code
 				}
 				else {
@@ -4928,25 +4944,42 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 		if(with->IsNPC()) {
 			// Audit trade to database for player trade stream
 			if(RuleB(QueryServ, PlayerLogHandins)) {
-				uint16 handin_count = 0;
+				QSPlayerLogHandin_Struct event_entry;
+				std::list<void*> event_details;
 
-				for(int16 slot_id = EmuConstants::TRADE_BEGIN; slot_id <= EmuConstants::TRADE_NPC_END; slot_id++) {
-					if(m_inv[slot_id]) { handin_count += m_inv[slot_id]->GetTotalItemCount(); }
+				memset(&event_entry, 0, sizeof(QSPlayerLogHandin_Struct));
+
+				FinishTrade(with->CastToNPC(), false, &event_entry, &event_details);
+
+				ServerPacket* qs_pack = new ServerPacket(ServerOP_QSPlayerLogHandins, sizeof(QSPlayerLogHandin_Struct)+(sizeof(QSHandinItems_Struct)* event_details.size()));
+
+				QSPlayerLogHandin_Struct* qs_buf = (QSPlayerLogHandin_Struct*)qs_pack->pBuffer;
+
+				memcpy(qs_buf, &event_entry, sizeof(QSPlayerLogHandin_Struct));
+
+				int offset = 0;
+
+				for (std::list<void*>::iterator iter = event_details.begin(); iter != event_details.end(); ++iter, ++offset) {
+					QSHandinItems_Struct* detail = reinterpret_cast<QSHandinItems_Struct*>(*iter);
+					qs_buf->items[offset] = *detail;
+					safe_delete(detail);
 				}
 
-				ServerPacket* qspack = new ServerPacket(ServerOP_QSPlayerLogHandins, sizeof(QSPlayerLogHandin_Struct) + (sizeof(QSHandinItems_Struct) * handin_count));
+				event_details.clear();
 
-				FinishTrade(with->CastToNPC(), qspack);
+				qs_pack->Deflate();
 
-				qspack->Deflate();
-				if(worldserver.Connected()) { worldserver.SendPacket(qspack); }
-				safe_delete(qspack);
+				if(worldserver.Connected())
+					worldserver.SendPacket(qs_pack);
+
+				safe_delete(qs_pack);
 			}
 			else {
 				FinishTrade(with->CastToNPC());
 			}
 		}
 #ifdef BOTS
+		// TODO: Log Bot trades
 		else if(with->IsBot())
 			with->CastToBot()->FinishTrade(this, Bot::BotTradeClientNormal);
 #endif
