@@ -656,6 +656,8 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 						if (!bias_inst || (bias_inst->GetID() != inst->GetID()) || (bias_inst->GetCharges() >= bias_inst->GetItem()->StackSize))
 							continue;
 
+						int16 old_charges = inst->GetCharges();
+
 						if ((bias_inst->GetCharges() + inst->GetCharges()) > bias_inst->GetItem()->StackSize) {
 							int16 new_charges = (bias_inst->GetCharges() + inst->GetCharges()) - bias_inst->GetItem()->StackSize;
 
@@ -665,6 +667,24 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 						else {
 							bias_inst->SetCharges(bias_inst->GetCharges() + inst->GetCharges());
 							inst->SetCharges(0);
+						}
+
+						if (qs_log) {
+							QSTradeItems_Struct* detail = new QSTradeItems_Struct;
+
+							detail->from_id = this->character_id;
+							detail->from_slot = trade_slot;
+							detail->to_id = this->character_id;
+							detail->to_slot = bias_slot;
+							detail->item_id = inst->GetID();
+							detail->charges = (old_charges - inst->GetCharges());
+							detail->aug_1 = 0;
+							detail->aug_2 = 0;
+							detail->aug_3 = 0;
+							detail->aug_4 = 0;
+							detail->aug_5 = 0;
+
+							event_details->push_back(detail);
 						}
 
 						if (inst->GetCharges() == 0) {

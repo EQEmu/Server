@@ -1118,6 +1118,7 @@ struct QSPlayerLogTrade_Struct {
 	uint32				char2_id;
 	MoneyUpdate_Struct	char2_money;
 	uint16				char2_count;
+	uint16				_detail_count;
 	QSTradeItems_Struct items[0];
 };
 
@@ -1141,6 +1142,7 @@ struct QSPlayerLogHandin_Struct {
 	uint32				npc_id;
 	MoneyUpdate_Struct	npc_money;
 	uint16				npc_count;
+	uint16				_detail_count;
 	QSHandinItems_Struct items[0];
 };
 

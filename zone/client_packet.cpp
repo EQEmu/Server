@@ -4898,8 +4898,9 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 					this->FinishTrade(other, true, &event_entry, &event_details);
 					other->FinishTrade(this, false, &event_entry, &event_details);
 
-					ServerPacket* qs_pack = new ServerPacket(ServerOP_QSPlayerLogTrades, sizeof(QSPlayerLogTrade_Struct)+(sizeof(QSTradeItems_Struct)* event_details.size()));
+					event_entry._detail_count = event_details.size();
 
+					ServerPacket* qs_pack = new ServerPacket(ServerOP_QSPlayerLogTrades, sizeof(QSPlayerLogTrade_Struct)+(sizeof(QSTradeItems_Struct)* event_entry._detail_count));
 					QSPlayerLogTrade_Struct* qs_buf = (QSPlayerLogTrade_Struct*)qs_pack->pBuffer;
 
 					memcpy(qs_buf, &event_entry, sizeof(QSPlayerLogTrade_Struct));
@@ -4951,8 +4952,9 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 
 				FinishTrade(with->CastToNPC(), false, &event_entry, &event_details);
 
-				ServerPacket* qs_pack = new ServerPacket(ServerOP_QSPlayerLogHandins, sizeof(QSPlayerLogHandin_Struct)+(sizeof(QSHandinItems_Struct)* event_details.size()));
+				event_entry._detail_count = event_details.size();
 
+				ServerPacket* qs_pack = new ServerPacket(ServerOP_QSPlayerLogHandins, sizeof(QSPlayerLogHandin_Struct)+(sizeof(QSHandinItems_Struct)* event_entry._detail_count));
 				QSPlayerLogHandin_Struct* qs_buf = (QSPlayerLogHandin_Struct*)qs_pack->pBuffer;
 
 				memcpy(qs_buf, &event_entry, sizeof(QSPlayerLogHandin_Struct));

@@ -119,7 +119,7 @@ void Database::AddSpeech(const char* from, const char* to, const char* message, 
 	safe_delete_array(S3);
 }
 
-void Database::LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 Items) {
+void Database::LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 DetailCount) {
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
@@ -134,8 +134,8 @@ void Database::LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 Items) {
 		_log(QUERYSERV__ERROR, "%s", query);
 	}
 
-	if(Items > 0) {
-		for(int i = 0; i < Items; i++) {
+	if(DetailCount > 0) {
+		for(int i = 0; i < DetailCount; i++) {
 			if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_trade_record_entries` SET `event_id`='%i', "
 				"`from_id`='%i', `from_slot`='%i', `to_id`='%i', `to_slot`='%i', `item_id`='%i', "
 				"`charges`='%i', `aug_1`='%i', `aug_2`='%i', `aug_3`='%i', `aug_4`='%i', `aug_5`='%i'",
@@ -149,7 +149,7 @@ void Database::LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 Items) {
 	}
 }
 
-void Database::LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 Items) { 
+void Database::LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 DetailCount) { 
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	uint32 lastid = 0;
@@ -163,8 +163,8 @@ void Database::LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 Items) {
 		_log(QUERYSERV__ERROR, "%s", query);
 	}
 
-	if(Items > 0) {
-		for(int i = 0; i < Items; i++) {
+	if(DetailCount > 0) {
+		for(int i = 0; i < DetailCount; i++) {
 			if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_handin_record_entries` SET `event_id`='%i', "
 				"`action_type`='%s', `char_slot`='%i', `item_id`='%i', `charges`='%i', "
 				"`aug_1`='%i', `aug_2`='%i', `aug_3`='%i', `aug_4`='%i', `aug_5`='%i'",
