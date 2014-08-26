@@ -654,6 +654,99 @@ int16 Inventory::FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size, boo
 	return INVALID_INDEX;
 }
 
+// This is a mix of HasSpaceForItem and FindFreeSlot..due to existing coding behavior, it was better to add a new helper function...
+int16 Inventory::FindFreeSlotForTradeItem(const ItemInst* inst) {
+	// Do not arbitrarily use this function..it is designed for use with Client::ResetTrade() and Client::FinishTrade().
+	// If you have a need, use it..but, understand it is not a compatible replacement for Inventory::FindFreeSlot().
+	//
+	// I'll probably implement a bitmask in the new inventory system to avoid having to adjust stack bias -U
+
+	if (!inst || !inst->GetID())
+		return INVALID_INDEX;
+
+	// step 1: find room for bags (caller should really ask for slots for bags first to avoid sending them to cursor..and bag item loss)
+	if (inst->IsType(ItemClassContainer)) {
+		for (int16 free_slot = EmuConstants::GENERAL_BEGIN; free_slot <= EmuConstants::GENERAL_END; ++free_slot)
+			if (!m_inv[free_slot])
+				return free_slot;
+
+		return MainCursor; // return cursor since bags do not stack and will not fit inside other bags..yet...)
+	}
+
+	// step 2: find partial room for stackables
+	if (inst->IsStackable()) {
+		for (int16 free_slot = EmuConstants::GENERAL_BEGIN; free_slot <= EmuConstants::GENERAL_END; ++free_slot) {
+			const ItemInst* main_inst = m_inv[free_slot];
+
+			if (!main_inst)
+				continue;
+
+			if ((main_inst->GetID() == inst->GetID()) && (main_inst->GetCharges() < main_inst->GetItem()->StackSize))
+				return free_slot;
+
+			if (main_inst->IsType(ItemClassContainer)) { // if item-specific containers already have bad items, we won't fix it here...
+				for (uint8 free_bag_slot = SUB_BEGIN; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < EmuConstants::ITEM_CONTAINER_SIZE); ++free_bag_slot) {
+					const ItemInst* sub_inst = main_inst->GetItem(free_bag_slot);
+
+					if (!sub_inst)
+						continue;
+
+					if ((sub_inst->GetID() == inst->GetID()) && (sub_inst->GetCharges() < sub_inst->GetItem()->StackSize))
+						return Inventory::CalcSlotId(free_slot, free_bag_slot);
+				}
+			}
+		}
+	}
+
+	// step 3a: find room for container-specific items (ItemClassArrow)
+	if (inst->GetItem()->ItemType == ItemTypeArrow) {
+		for (int16 free_slot = EmuConstants::GENERAL_BEGIN; free_slot <= EmuConstants::GENERAL_END; ++free_slot) {
+			const ItemInst* main_inst = m_inv[free_slot];
+
+			if (!main_inst || (main_inst->GetItem()->BagType != BagTypeQuiver) || !main_inst->IsType(ItemClassContainer))
+				continue;
+
+			for (uint8 free_bag_slot = SUB_BEGIN; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < EmuConstants::ITEM_CONTAINER_SIZE); ++free_bag_slot)
+				if (!main_inst->GetItem(free_bag_slot))
+					return Inventory::CalcSlotId(free_slot, free_bag_slot);
+		}
+	}
+
+	// step 3b: find room for container-specific items (ItemClassSmallThrowing)
+	if (inst->GetItem()->ItemType == ItemTypeSmallThrowing) {
+		for (int16 free_slot = EmuConstants::GENERAL_BEGIN; free_slot <= EmuConstants::GENERAL_END; ++free_slot) {
+			const ItemInst* main_inst = m_inv[free_slot];
+
+			if (!main_inst || (main_inst->GetItem()->BagType != BagTypeBandolier) || !main_inst->IsType(ItemClassContainer))
+				continue;
+
+			for (uint8 free_bag_slot = SUB_BEGIN; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < EmuConstants::ITEM_CONTAINER_SIZE); ++free_bag_slot)
+				if (!main_inst->GetItem(free_bag_slot))
+					return Inventory::CalcSlotId(free_slot, free_bag_slot);
+		}
+	}
+
+	// step 4: just find an empty slot
+	for (int16 free_slot = EmuConstants::GENERAL_BEGIN; free_slot <= EmuConstants::GENERAL_END; ++free_slot) {
+		const ItemInst* main_inst = m_inv[free_slot];
+
+		if (!main_inst)
+			return free_slot;
+
+		if (main_inst->IsType(ItemClassContainer)) {
+			if ((main_inst->GetItem()->BagSize < inst->GetItem()->Size) || (main_inst->GetItem()->BagType == BagTypeBandolier) || (main_inst->GetItem()->BagType == BagTypeQuiver))
+				continue;
+
+			for (uint8 free_bag_slot = SUB_BEGIN; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < EmuConstants::ITEM_CONTAINER_SIZE); ++free_bag_slot)
+				if (!main_inst->GetItem(free_bag_slot))
+					return Inventory::CalcSlotId(free_slot, free_bag_slot);
+		}
+	}
+
+	//return INVALID_INDEX; // everything else pushes to the cursor
+	return MainCursor;
+}
+
 // Opposite of below: Get parent bag slot_id from a slot inside of bag
 int16 Inventory::CalcSlotId(int16 slot_id) {
 	int16 parent_slot_id = INVALID_INDEX;
