@@ -858,9 +858,10 @@ void ZoneDatabase::UpdateBuyLine(uint32 CharID, uint32 BuySlot, uint32 Quantity)
 }
 
 bool ZoneDatabase::GetCharacterInfoForLogin(const char* name, uint32* character_id,
-char* current_zone, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext,
-uint32* pplen, uint32* guilddbid, uint8* guildrank,
-uint8 *class_, uint8 *level, bool *LFP, bool *LFG, uint8 *NumXTargets, uint8 *firstlogon) {
+	char* current_zone, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext,
+	uint32* pplen, uint32* guilddbid, uint8* guildrank,
+	uint8 *class_, uint8 *level, bool *LFP, bool *LFG, uint8 *NumXTargets, uint8 *firstlogon) {
+
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 	uint32 querylen;

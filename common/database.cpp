@@ -18,6 +18,7 @@
 #include "../common/debug.h"
 #include "../common/rulesys.h"
 #include <iostream>
+#include <iomanip>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -769,6 +770,395 @@ void Database::GetCharName(uint32 char_id, char* name) {
 
 	auto row = results.begin();
 	strcpy(name, row[0]);
+}
+
+static inline void loadbar(unsigned int x, unsigned int n, unsigned int w = 50)
+{
+	if ((x != n) && (x % (n / 100 + 1) != 0)) return;
+
+	float ratio = x / (float)n;
+	int   c = ratio * w;
+
+	std::cout << std::setw(3) << (int)(ratio * 100) << "% [";
+	for (int x = 0; x<c; x++) std::cout << "=";
+	for (int x = c; x<w; x++) std::cout << " ";
+	std::cout << "]\r" << std::flush;
+}
+
+bool Database::CheckDatabaseConversions() {
+	/* Set all of this ugliness */
+	char errbuf[MYSQL_ERRMSG_SIZE]; char errbuf2[MYSQL_ERRMSG_SIZE];
+	char *query = 0; char *query2 = 0;
+	uint32 querylen;  uint32 querylen2;
+	MYSQL_RES *result; MYSQL_RES *result2;
+	MYSQL_ROW row2; MYSQL_ROW row;
+	unsigned long* lengths;
+	PlayerProfile_Struct* pp;
+	uint32 pplen = 0;
+	uint32 i;
+
+	int number_of_characters = 0;
+	int printppdebug = 1;
+	int runconvert = 0;
+
+	printf("CheckDatabase Running.... \n");
+
+	printf("Running character binary blob to database conversion... \n", number_of_characters);
+	/* Get the number of characters */
+	querylen = MakeAnyLenString(&query, "SELECT COUNT(`id`) FROM `character_`");
+	if (RunQuery(query, querylen, errbuf, &result)) {
+		row = mysql_fetch_row(result);
+		number_of_characters = atoi(row[0]); 
+		printf("Number of Characters in Database: %i \n", number_of_characters);
+		safe_delete_array(query);
+		mysql_free_result(result);
+	}
+
+	// querylen = MakeAnyLenString(&query, "SELECT `id` FROM `character_` WHERE `id` = 61238");
+	int char_iter_count = 0;
+	querylen = MakeAnyLenString(&query, "SELECT `id` FROM `character_` WHERE `id` = 61238"); 
+	if (RunQuery(query, querylen, errbuf, &result)) {
+		safe_delete_array(query);
+		while (row = mysql_fetch_row(result)) {
+			char_iter_count++;
+			querylen2 = MakeAnyLenString(&query2, "SELECT `id`, `profile`, `name`, `level` FROM `character_` WHERE `id` = %i", atoi(row[0]));
+			if (RunQuery(query2, querylen2, errbuf2, &result2)){
+				safe_delete_array(query2);
+				row2 = mysql_fetch_row(result2);
+				pp = (PlayerProfile_Struct*)row2[1]; 
+
+				/* Verify PP Integrity */
+				lengths = mysql_fetch_lengths(result2);
+				if (lengths[1] == sizeof(PlayerProfile_Struct)) {
+					memcpy(pp, row2[1], sizeof(PlayerProfile_Struct));
+					// printf("FINE: Player profile '%s' %i length mismatch Expected: %i, Got: %i \n", row2[2], atoi(row2[3]), sizeof(PlayerProfile_Struct), lengths[1]);
+				}
+				/* Continue of PP Size does not match (Usually a created character never logged in) */
+				else {
+					// printf("NO PP: Player profile '%s' %i length mismatch Expected: %i, Got: %i \n", row2[2], atoi(row2[3]), sizeof(PlayerProfile_Struct), lengths[1]);
+					continue;
+				}
+
+				/* Loading Status on conversion */
+				if (runconvert == 1){
+					std::cout << "\r" << char_iter_count << "/" << number_of_characters << " " << std::flush;
+					loadbar(char_iter_count, number_of_characters, 50);
+				}
+
+				/* Print out the entire Player Profile for testing */
+				if (printppdebug == 1){
+					printf("ID: %i \n", atoi(row[0]));
+					printf("checksum: %i \n", pp->checksum);
+					printf("name: %s \n", pp->name);
+					printf("last_name: %s \n", pp->last_name);
+					printf("gender: %i \n", pp->gender);
+					printf("race: %i \n", pp->race);
+					printf("class_: %i \n", pp->class_);
+					printf("unknown0112: %i \n", pp->unknown0112);
+					printf("level: %i \n", pp->level);
+
+					printf("\n=== BIND DATA (Array Size 5) ===\n");
+					for (i = 0; i < 5; i++){
+						printf("Bind Num: %i ZoneID: %u x: %f y: %f z: %f heading: %f \n", i, pp->binds[i].zoneId, pp->binds[i].x, pp->binds[i].y, pp->binds[i].z, pp->binds[i].heading);
+					}
+					printf("\n");
+
+					printf("deity: %u \n", pp->deity);
+					printf("guild_id: %u \n", pp->guild_id);
+					printf("birthday: %u \n", pp->birthday);
+					printf("lastlogin: %u \n", pp->lastlogin);
+					printf("timePlayedMin: %u \n", pp->timePlayedMin);
+					printf("pvp: %u \n", pp->pvp);
+					printf("level2: %u \n", pp->level2);
+					printf("anon: %u \n", pp->anon);
+					printf("gm: %u \n", pp->gm);
+					printf("guildrank: %u \n", pp->guildrank);
+					printf("guildbanker: %u \n", pp->guildbanker);
+					printf("unknown0246[6]: %u \n", pp->unknown0246[6]);
+					printf("intoxication: %u \n", pp->intoxication);
+
+					printf("\n=== Spell Slot Refresh spellSlotRefresh[MAX_PP_MEMSPELL] ===\n");
+					for (i = 0; i < MAX_PP_MEMSPELL; i++){
+						printf("Slot: %i Value: %u \n", i, pp->spellSlotRefresh[i]);
+					}
+					printf("\n\n");
+
+					printf("abilitySlotRefresh: %u \n", pp->abilitySlotRefresh);
+					printf("haircolor: %u \n", pp->haircolor);
+					printf("beardcolor: %u \n", pp->beardcolor);
+					printf("eyecolor1: %u \n", pp->eyecolor1);
+					printf("eyecolor2: %u \n", pp->eyecolor2);
+					printf("hairstyle: %u \n", pp->hairstyle);
+					printf("beard: %u \n", pp->beard);
+					printf("ability_time_seconds: %u \n", pp->ability_time_seconds);
+					printf("ability_number: %u \n", pp->ability_number);
+					printf("ability_time_minutes: %u \n", pp->ability_time_minutes);
+					printf("ability_time_hours: %u \n", pp->ability_time_hours);
+
+					printf("\n=== Color Material Data ===\n");
+					for (i = 0; i < 10; i++){
+						printf("Slot: %i Blue: %u Green: %u Red: %i Use_Tint: %u Color: %u \n", i, pp->item_tint[i].rgb.blue, pp->item_tint[i].rgb.green, pp->item_tint[i].rgb.red, pp->item_tint[i].rgb.use_tint, pp->item_tint[i].color);
+					}
+					printf("\n\n");
+
+					printf("\n=== AA Data ===\n");
+					for (i = 0; i < MAX_PP_AA_ARRAY; i++){
+						printf("ID: %u Value %u\n", pp->aa_array[i].AA, pp->aa_array[i].value);
+					}
+					printf("\n\n");
+
+					printf("%i unknown2384\n", pp->unknown2384);
+					printf("servername: %s \n", pp->servername);
+					printf("title: %s \n", pp->title);
+					printf("suffix: %s \n", pp->suffix);
+					printf("guildid2: %u \n", pp->guildid2);
+					printf("exp: %u \n", pp->exp);
+					printf("unknown2492: %u \n", pp->unknown2492);
+					printf("points: %u \n", pp->points);
+					printf("mana: %u \n", pp->mana);
+					printf("cur_hp: %u \n", pp->cur_hp);
+					printf("unknown2508: %u \n", pp->unknown2508);
+					printf("STR: %u \n", pp->STR);
+					printf("STA: %u \n", pp->STA);
+					printf("CHA: %u \n", pp->CHA);
+					printf("DEX: %u \n", pp->DEX);
+					printf("INT: %u \n", pp->INT);
+					printf("AGI: %u \n", pp->AGI);
+					printf("WIS: %u \n", pp->WIS);
+					printf("face: %u \n", pp->face);
+					printf("unknown2541[47]: %u \n", pp->unknown2541[47]);
+					printf("languages[MAX_PP_LANGUAGE]: %u \n", pp->languages[MAX_PP_LANGUAGE]);
+
+					printf("\n=== languages[MAX_PP_LANGUAGE] ===\n");
+					for (i = 0; i < MAX_PP_LANGUAGE; i++){
+						printf("ID: %u Value: %u \n", i, pp->languages[i]);
+					}
+					printf("\n\n");
+
+					printf("unknown2616[4]: %u \n", pp->unknown2616[4]);
+
+					printf("\n=== Spell Book ===\n");
+					for (i = 0; i < MAX_PP_SPELLBOOK; i++){
+						printf("Spell Book Slot: %i Spell: %u \n", i, pp->spell_book[i]);
+					}
+					printf("\n\n");
+
+					printf("unknown4540[128]: %u \n", pp->unknown4540[128]);
+
+					printf("\n=== mem_spells[MAX_PP_MEMSPELL] ===\n");
+					for (i = 0; i < MAX_PP_MEMSPELL; i++){
+						printf("ID: %u Value: %u \n", i, pp->mem_spells[i]); 
+					}
+					printf("\n\n");
+
+					printf("unknown4704[32]: %u \n", pp->unknown4704[32]);
+					printf("y: %4.2f \n", pp->y);
+					printf("x: %4.2f \n", pp->x);
+					printf("z: %4.2f \n", pp->z);
+					printf("heading: %4.2f \n", pp->heading);
+					printf("unknown4752[4]: %u \n", pp->unknown4752[4]);
+					printf("platinum: %u \n", pp->platinum);
+					printf("gold: %u \n", pp->gold);
+					printf("silver: %u \n", pp->silver);
+					printf("copper: %u \n", pp->copper);
+					printf("platinum_bank: %u \n", pp->platinum_bank);
+					printf("gold_bank: %u \n", pp->gold_bank);
+					printf("silver_bank: %u \n", pp->silver_bank);
+					printf("copper_bank: %u \n", pp->copper_bank);
+					printf("platinum_cursor: %u \n", pp->platinum_cursor);
+					printf("gold_cursor: %u \n", pp->gold_cursor);
+					printf("silver_cursor: %u \n", pp->silver_cursor);
+					printf("copper_cursor: %u \n", pp->copper_cursor);
+					printf("platinum_shared: %u \n", pp->platinum_shared);
+					printf("unknown4808[24]: %u \n", pp->unknown4808[24]);
+
+					printf("\n=== skills[MAX_PP_SKILL] ===\n");
+					for (i = 0; i < MAX_PP_SKILL; i++){
+						printf("ID: %u Value: %u \n", i, pp->skills[i]);
+					}
+					printf("\n\n");
+
+					printf("unknown5132[184]: %u \n", pp->unknown5132[184]);
+					printf("pvp2: %u \n", pp->pvp2);
+					printf("unknown5420: %u \n", pp->unknown5420);
+					printf("pvptype: %u \n", pp->pvptype);
+					printf("unknown5428: %u \n", pp->unknown5428);
+					printf("ability_down: %u \n", pp->ability_down);
+					printf("unknown5436[8]: %u \n", pp->unknown5436[8]);
+					printf("autosplit: %u \n", pp->autosplit);
+					printf("unknown5448[8]: %u \n", pp->unknown5448[8]);
+					printf("zone_change_count: %u \n", pp->zone_change_count);
+					printf("unknown5460[16]: %u \n", pp->unknown5460[16]);
+					printf("drakkin_heritage: %u \n", pp->drakkin_heritage);
+					printf("drakkin_tattoo: %u \n", pp->drakkin_tattoo);
+					printf("drakkin_details: %u \n", pp->drakkin_details);
+					printf("expansions: %u \n", pp->expansions);
+					printf("toxicity: %u \n", pp->toxicity);
+					printf("unknown5496: %s \n", pp->unknown5496);
+					printf("hunger_level: %i \n", pp->hunger_level);
+					printf("thirst_level: %i \n", pp->thirst_level);
+					printf("ability_up: %u \n", pp->ability_up);
+					printf("unknown5524: %s \n", pp->unknown5524);
+					printf("zone_id: %u \n", pp->zone_id);
+					printf("zoneInstance: %u \n", pp->zoneInstance);
+
+					// SpellBuff_Struct	buffs[BUFF_COUNT];
+
+					printf("groupMembers: %s \n", pp->groupMembers);
+					printf("unknown6428: %s \n", pp->unknown6428);
+					printf("entityid: %u \n", pp->entityid);
+					printf("leadAAActive: %u \n", pp->leadAAActive);
+					printf("unknown7092: %u \n", pp->unknown7092);
+					printf("ldon_points_guk: %i \n", pp->ldon_points_guk);
+					printf("ldon_points_mir: %i \n", pp->ldon_points_mir);
+					printf("ldon_points_mmc: %i \n", pp->ldon_points_mmc);
+					printf("ldon_points_ruj: %i \n", pp->ldon_points_ruj);
+					printf("ldon_points_tak: %i \n", pp->ldon_points_tak);
+					printf("ldon_points_available: %i \n", pp->ldon_points_available);
+					printf("ldon_wins_guk: %i \n", pp->ldon_wins_guk);
+					printf("ldon_wins_mir: %i \n", pp->ldon_wins_mir);
+					printf("ldon_wins_mmc: %i \n", pp->ldon_wins_mmc);
+					printf("ldon_wins_ruj: %i \n", pp->ldon_wins_ruj);
+					printf("ldon_wins_tak: %i \n", pp->ldon_wins_tak);
+					printf("ldon_losses_guk: %i \n", pp->ldon_losses_guk);
+					printf("ldon_losses_mir: %i \n", pp->ldon_losses_mir);
+					printf("ldon_losses_mmc: %i \n", pp->ldon_losses_mmc);
+					printf("ldon_losses_ruj: %i \n", pp->ldon_losses_ruj);
+					printf("ldon_losses_tak: %i \n", pp->ldon_losses_tak);
+					printf("unknown7160[72]: %u \n", pp->unknown7160[72]);
+					printf("tribute_time_remaining: %u \n", pp->tribute_time_remaining);
+					printf("showhelm: %u \n", pp->showhelm);
+					printf("career_tribute_points: %u \n", pp->career_tribute_points);
+					printf("unknown7244: %u \n", pp->unknown7244);
+					printf("tribute_points: %u \n", pp->tribute_points);
+					printf("unknown7252: %u \n", pp->unknown7252);
+					printf("tribute_active: %u \n", pp->tribute_active);
+
+					printf("\n=== Tribute_Struct tributes[EmuConstants::TRIBUTE_SIZE] ===\n");
+					for (i = 0; i < EmuConstants::TRIBUTE_SIZE; i++){
+						printf("ID: %u Tribute: %u Tier: %u \n", i, pp->tributes[i].tribute, pp->tributes[i].tier);
+					}
+					printf("\n\n");
+
+					// Tribute_Struct		tributes[EmuConstants::TRIBUTE_SIZE];
+					// /*7264*/	Disciplines_Struct	disciplines;
+
+					printf("\n=== Disciplines_Struct	disciplines ===\n");
+					for (i = 0; i < MAX_PP_DISCIPLINES; i++){
+						printf("ID: %u Disc Value: %u \n", i, pp->disciplines.values[i]);
+					}
+					printf("\n\n");
+
+					printf("\n=== recastTimers[MAX_RECAST_TYPES] ===\n");
+					for (i = 0; i < MAX_RECAST_TYPES; i++){
+						printf("ID: %u Value: %u \n", i, pp->recastTimers[i]);
+					}
+					printf("\n\n");
+
+					printf("unknown7780: %s \n", pp->unknown7780);
+					printf("endurance: %u \n", pp->endurance);
+					printf("group_leadership_exp: %u \n", pp->group_leadership_exp);
+					printf("raid_leadership_exp: %u \n", pp->raid_leadership_exp);
+					printf("group_leadership_points: %u \n", pp->group_leadership_points);
+					printf("raid_leadership_points: %u \n", pp->raid_leadership_points);
+
+					// LeadershipAA_Struct	leader_abilities;
+
+					printf("\n=== LeadershipAA_Struct leader_abilities ===\n");
+					for (i = 0; i <= MAX_LEADERSHIP_AA_ARRAY; i++){
+						printf("ID: %u Rank: %u \n", i, pp->leader_abilities.ranks[i]);
+					}
+					printf("\n\n");
+
+					printf("unknown8088[132]: %u \n", pp->unknown8088[132]);
+					printf("air_remaining: %u \n", pp->air_remaining);
+					printf("PVPKills: %u \n", pp->PVPKills);
+					printf("PVPDeaths: %u \n", pp->PVPDeaths);
+					printf("PVPCurrentPoints: %u \n", pp->PVPCurrentPoints);
+					printf("PVPCareerPoints: %u \n", pp->PVPCareerPoints);
+					printf("PVPBestKillStreak: %u \n", pp->PVPBestKillStreak);
+					printf("PVPWorstDeathStreak: %u \n", pp->PVPWorstDeathStreak);
+					printf("PVPCurrentKillStreak: %u \n", pp->PVPCurrentKillStreak);
+
+					// PVPStatsEntry_Struct	PVPLastKill;
+
+					printf("\n=== PVPStatsEntry_Struct	PVPLastKill ===\n");
+					printf("Char Name: %s Level: %u Race: %u Class: %u Zone: %u Time: %u Points: %u \n", pp->PVPLastKill.Name, pp->PVPLastKill.Level, pp->PVPLastKill.Race, pp->PVPLastKill.Class, pp->PVPLastKill.Zone, pp->PVPLastKill.Time, pp->PVPLastKill.Points);
+					printf("\n\n");
+
+					// /*8304*/	PVPStatsEntry_Struct	PVPLastDeath;
+
+					printf("\n=== PVPStatsEntry_Struct	PVPLastDeath ===\n");
+					printf("Char Name: %s Level: %u Race: %u Class: %u Zone: %u Time: %u Points: %u \n", pp->PVPLastDeath.Name, pp->PVPLastDeath.Level, pp->PVPLastDeath.Race, pp->PVPLastDeath.Class, pp->PVPLastDeath.Zone, pp->PVPLastDeath.Time, pp->PVPLastDeath.Points);
+					printf("\n\n");
+
+					printf("PVPNumberOfKillsInLast24Hours: %u \n", pp->PVPNumberOfKillsInLast24Hours);
+
+					// PVPStatsEntry_Struct	PVPRecentKills[50];
+
+					printf("\n===PVPStatsEntry_Struct	PVPRecentKills[50] ===\n");
+					for (i = 0; i < 50; i++){
+						printf("ID: %u Char Name: %s Level: %u Race: %u Class: %u Zone: %u Time: %u Points: %u \n", i, pp->PVPRecentKills[i].Name, pp->PVPRecentKills[i].Level, pp->PVPRecentKills[i].Race, pp->PVPRecentKills[i].Class, pp->PVPRecentKills[i].Zone, pp->PVPRecentKills[i].Time, pp->PVPRecentKills[i].Points);
+					}
+					printf("\n\n");
+
+					printf("aapoints_spent: %u \n", pp->aapoints_spent);
+					printf("expAA: %u \n", pp->expAA);
+					printf("aapoints: %u \n", pp->aapoints);
+					printf("unknown12844[36]: %u \n", pp->unknown12844[36]);
+
+					// Bandolier_Struct	bandoliers[EmuConstants::BANDOLIERS_COUNT];
+
+					printf("\n=== Bandolier_Struct	bandoliers[EmuConstants::BANDOLIERS_COUNT] ===\n");
+					uint16 si = 0;
+					for (i = 0; i <= EmuConstants::BANDOLIERS_COUNT; i++){
+						// BandolierItem_Struct items[EmuConstants::BANDOLIER_SIZE];
+						for (si = 0; si < EmuConstants::BANDOLIER_SIZE; si++){
+							printf("ID: %u item_id: %u icon: %u items name: %s name: %s\n", i, pp->bandoliers[i].items[si].item_id, pp->bandoliers[i].items[si].icon, pp->bandoliers[i].items[si].item_name, pp->bandoliers[i].name);
+						}
+					}
+					printf("\n\n");
+
+					printf("unknown14160[4506]: %u \n", pp->unknown14160[4506]);
+
+					// SuspendedMinion_Struct	SuspendedMinion; // No longer in use (In DB)
+
+					// printf("\n=== SuspendedMinion_Struct	SuspendedMinion ===\n");
+					// printf("SpellID: %u HP: %u Mana: %u  \n", i, pp->leader_abilities.ranks[i]);
+
+					// printf("\n\n");
+
+					printf("timeentitledonaccount: %u \n", pp->timeentitledonaccount);
+
+					// PotionBelt_Struct	potionbelt;			//there should be 3 more of these
+
+					printf("\n=== PotionBelt_Struct	potionbelt ===\n");
+					for (i = 0; i < EmuConstants::POTION_BELT_SIZE; i++){
+						printf("ID: %u Icon: %u Item ID: %u  Item Name: %s\n", i, pp->potionbelt.items[i].icon, pp->potionbelt.items[i].item_id, pp->potionbelt.items[i].item_name);
+					}
+					printf("\n\n");
+
+					printf("unknown19568[8]: %u \n", pp->unknown19568[8]);
+					printf("currentRadCrystals: %u \n", pp->currentRadCrystals);
+					printf("careerRadCrystals: %u \n", pp->careerRadCrystals); 
+					printf("currentEbonCrystals: %u \n", pp->currentEbonCrystals);
+					printf("careerEbonCrystals: %u \n", pp->careerEbonCrystals);
+					printf("groupAutoconsent: %u \n", pp->groupAutoconsent);
+					printf("raidAutoconsent: %u \n", pp->raidAutoconsent);
+					printf("guildAutoconsent: %u \n", pp->guildAutoconsent);
+					printf("unknown19595[5]: %u \n", pp->unknown19595[5]);
+					printf("RestTimer: %u \n", pp->RestTimer);
+
+
+					printf("\n");
+				}
+
+				mysql_free_result(result2);
+			}
+		}
+		mysql_free_result(result);
+	}
+	return true;
 }
 
 bool Database::LoadVariables() {

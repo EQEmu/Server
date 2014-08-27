@@ -276,6 +276,9 @@ int main(int argc, char** argv) {
 		_log(WORLD__INIT, "HTTP world service disabled.");
 	}
 
+	_log(WORLD__INIT, "Checking Database Conversions..");
+	database.CheckDatabaseConversions();
+
 	_log(WORLD__INIT, "Loading variables..");
 	database.LoadVariables();
 	_log(WORLD__INIT, "Loading zones..");
