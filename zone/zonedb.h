@@ -246,6 +246,7 @@ public:
 	/*
 	* General Character Related Stuff
 	*/
+    void	StoreCharacterLookup(uint32 char_id);
 	bool	GetAccountInfoForLogin_result(MySQLRequestResult results, int16* admin = 0, char* account_name = 0,
 				uint32* lsaccountid = 0, uint8* gmspeed = 0, bool* revoked = 0, bool* gmhideme = nullptr,
 				uint32* account_creation = 0);

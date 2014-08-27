@@ -25,14 +25,14 @@
 #include "../common/packet_functions.h"
 #include "petitions.h"
 #include "../common/serverinfo.h"
-#include "../common/ZoneNumbers.h"
+#include "../common/zone_numbers.h"
 #include "../common/moremath.h"
 #include "../common/guilds.h"
 #include "../common/logsys.h"
-#include "../common/StringUtil.h"
-#include "StringIDs.h"
-#include "NpcAI.h"
-#include "QuestParserCollection.h"
+#include "../common/string_util.h"
+#include "string_ids.h"
+#include "npc_ai.h"
+#include "quest_parser_collection.h"
 extern WorldServer worldserver;
 
 // @merth: this needs to be touched up
@@ -200,6 +200,15 @@ bool Client::CheckLoreConflict(const Item_Struct* item) {
 }
 
 bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, bool attuned, uint16 to_slot) {
+	/* Set a timestamp in an entity variable for plugin check_handin.pl in return_items
+		This will stopgap players from items being returned if global_npc.pl has a catch all return_items
+	*/
+	struct timeval read_time;
+	char buffer[50];
+	gettimeofday(&read_time, 0);
+	sprintf(buffer, "%li.%li \n", read_time.tv_sec, read_time.tv_usec);
+	this->SetEntityVariable("Recieved_Item", buffer);
+
 	// TODO: update calling methods and script apis to handle a failure return
 
 	const Item_Struct* item = database.GetItem(item_id);
@@ -813,25 +822,24 @@ bool Client::PushItemOnCursor(const ItemInst& inst, bool client_update)
 	return database.SaveCursor(CharacterID(), s, e);
 }
 
-bool Client::PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client_update)
-{
+bool Client::PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client_update) {
 	mlog(INVENTORY__SLOTS, "Putting item %s (%d) into slot %d", inst.GetItem()->Name, inst.GetItem()->ID, slot_id);
+
 	if (slot_id == MainCursor)
-	{
-		return PushItemOnCursor(inst,client_update);
-	}
+		return PushItemOnCursor(inst, client_update);
 	else
 		m_inv.PutItem(slot_id, inst);
 
-	if (client_update) {
-		SendItemPacket(slot_id, &inst, (slot_id == MainCursor) ? ItemPacketSummonItem : ItemPacketTrade);
-	}
+	if (client_update)
+		SendItemPacket(slot_id, &inst, ((slot_id == MainCursor) ? ItemPacketSummonItem : ItemPacketTrade));
 
 	if (slot_id == MainCursor) {
-		std::list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
+		std::list<ItemInst*>::const_iterator s = m_inv.cursor_begin(), e = m_inv.cursor_end();
 		return database.SaveCursor(this->CharacterID(), s, e);
-	} else
+	}
+	else {
 		return database.SaveInventory(this->CharacterID(), &inst, slot_id);
+	}
 
 	CalcBonuses();
 }
@@ -1530,7 +1538,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			// Also sends trade information to other client of trade session
 			if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
 
-			trade->AddEntity(src_slot_id, dst_slot_id);
+			trade->AddEntity(dst_slot_id, move_in->number_in_stack);
 
 			return true;
 		} else {

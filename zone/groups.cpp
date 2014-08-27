@@ -17,10 +17,10 @@
 */
 #include "../common/debug.h"
 #include "masterentity.h"
-#include "NpcAI.h"
+#include "npc_ai.h"
 #include "../common/packet_functions.h"
 #include "../common/packet_dump.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "worldserver.h"
 extern EntityList entity_list;
 extern WorldServer worldserver;
@@ -193,11 +193,10 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
 
 	for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
 		if (members[i] != nullptr && members[i]->IsClient()) { // If Group Member is Client
-			Client *c = members[i]->CastToClient();
-		//I could not get MoneyOnCorpse to work, so we use this
-		c->AddMoneyToPP(cpsplit, spsplit, gpsplit, ppsplit, true);
-
-		c->Message(2, msg.c_str());
+				Client *c = members[i]->CastToClient();
+			//I could not get MoneyOnCorpse to work, so we use this
+			c->AddMoneyToPP(cpsplit, spsplit, gpsplit, ppsplit, true); 
+			c->Message(2, msg.c_str());
 		}
 	}
 }

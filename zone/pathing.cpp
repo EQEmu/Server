@@ -7,7 +7,7 @@
 #include <fstream>
 #include "pathing.h"
 #include "water_map.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 #include "doors.h"
 #include "client.h"
 #include "zone.h"

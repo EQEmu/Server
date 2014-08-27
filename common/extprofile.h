@@ -19,7 +19,7 @@
 #define EXTENDED_PROFILE_H
 
 #include "eq_packet_structs.h"
-#include "Item.h"
+#include "item.h"
 
 
 #pragma pack(1)

@@ -18,9 +18,9 @@
 
 #include "../common/debug.h"
 #include "masterentity.h"
-#include "../common/Item.h"
+#include "../common/item.h"
 #include "../common/linked_list.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include <math.h>
 #include <assert.h>
 #include "worldserver.h"
@@ -67,70 +67,51 @@ const NPCType *Horse::GetHorseType(uint16 spell_id) {
 
 const NPCType *Horse::BuildHorseType(uint16 spell_id) {
 
-	const char* FileName = spells[spell_id].teleport_zone;
+	const char* fileName = spells[spell_id].teleport_zone;
 
-	char mount_color = 0;
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (database.RunQuery(query,MakeAnyLenString(&query, "SELECT race,gender,texture,mountspeed FROM horses WHERE filename='%s'", FileName), errbuf, &result)) {
-
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) {
-
-			row = mysql_fetch_row(result);
-
-			NPCType* npc_type = new NPCType;
-			memset(npc_type, 0, sizeof(NPCType));
-			strcpy(npc_type->name,"Unclaimed_Mount");	//this should never get used
-
-			strcpy(npc_type->special_abilities, "19,1^20,1^24,1");
-			npc_type->cur_hp = 1;
-			npc_type->max_hp = 1;
-			npc_type->race = atoi(row[0]);
-			npc_type->gender = atoi(row[1]); // Drogmor's are female horses. Yuck.
-			npc_type->class_ = 1;
-			npc_type->deity= 1;
-			npc_type->level = 1;
-			npc_type->npc_id = 0;
-			npc_type->loottable_id = 0;
-			npc_type->texture = atoi(row[2]);
-			npc_type->helmtexture = atoi(row[2]);
-			npc_type->runspeed = atof(row[3]);
-
-			mount_color = atoi(row[2]);
-
-			npc_type->light = 0;
-			npc_type->STR = 75;
-			npc_type->STA = 75;
-			npc_type->DEX = 75;
-			npc_type->AGI = 75;
-			npc_type->INT = 75;
-			npc_type->WIS = 75;
-			npc_type->CHA = 75;
-
-			horses_auto_delete.Insert(npc_type);
-
-			mysql_free_result(result);
-			return(npc_type);
-		}
-		else {
-			LogFile->write(EQEMuLog::Error, "No Database entry for mount: %s, check the horses table", FileName);
-			//Message(13, "Unable to find data for mount %s", FileName);
-			safe_delete_array(query);
-		}
-		mysql_free_result(result);
-		return nullptr;
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in Mount query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+	std::string query = StringFormat("SELECT race, gender, texture, mountspeed FROM horses WHERE filename = '%s'", fileName);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Mount query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return nullptr;
 	}
 
+	if (results.RowCount() != 1) {
+        LogFile->write(EQEMuLog::Error, "No Database entry for mount: %s, check the horses table", fileName);
+        return nullptr;
+	}
+
+    auto row = results.begin();
+
+	NPCType* npc_type = new NPCType;
+	memset(npc_type, 0, sizeof(NPCType));
+	strcpy(npc_type->name,"Unclaimed_Mount");	//this should never get used
+
+	strcpy(npc_type->special_abilities, "19,1^20,1^24,1");
+	npc_type->cur_hp = 1;
+	npc_type->max_hp = 1;
+	npc_type->race = atoi(row[0]);
+	npc_type->gender = atoi(row[1]); // Drogmor's are female horses. Yuck.
+	npc_type->class_ = 1;
+	npc_type->deity= 1;
+	npc_type->level = 1;
+	npc_type->npc_id = 0;
+	npc_type->loottable_id = 0;
+	npc_type->texture = atoi(row[2]); // mount color
+	npc_type->helmtexture = atoi(row[2]); // mount color
+	npc_type->runspeed = atof(row[3]);
+
+	npc_type->light = 0;
+	npc_type->STR = 75;
+	npc_type->STA = 75;
+	npc_type->DEX = 75;
+	npc_type->AGI = 75;
+	npc_type->INT = 75;
+	npc_type->WIS = 75;
+	npc_type->CHA = 75;
+	horses_auto_delete.Insert(npc_type);
+
+	return npc_type;
 }
 
 void Client::SummonHorse(uint16 spell_id) {

@@ -25,13 +25,13 @@
 #include "../common/packet_functions.h"
 #include "petitions.h"
 #include "../common/serverinfo.h"
-#include "../common/ZoneNumbers.h"
+#include "../common/zone_numbers.h"
 #include "../common/moremath.h"
 #include "../common/guilds.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "guild_mgr.h"
-#include "StringIDs.h"
-#include "NpcAI.h"
+#include "string_ids.h"
+#include "npc_ai.h"
 
 extern WorldServer worldserver;
 

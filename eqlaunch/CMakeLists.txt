@@ -3,12 +3,12 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 SET(eqlaunch_sources
 	eqlaunch.cpp
 	worldserver.cpp
-	ZoneLaunch.cpp
+	zone_launch.cpp
 )
 
 SET(eqlaunch_headers
 	worldserver.h
-	ZoneLaunch.h
+	zone_launch.h
 )
 
 ADD_EXECUTABLE(eqlaunch ${eqlaunch_sources} ${eqlaunch_headers})

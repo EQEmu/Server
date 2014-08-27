@@ -19,7 +19,7 @@
 #ifndef WORLDCONNECTION_H
 #define WORLDCONNECTION_H
 
-#include "../common/EmuTCPConnection.h"
+#include "../common/emu_tcp_connection.h"
 #include <string>
 
 class ServerPacket;

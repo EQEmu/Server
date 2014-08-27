@@ -20,13 +20,13 @@
 #include "masterentity.h"
 #include "../common/packet_dump.h"
 #include "../common/moremath.h"
-#include "../common/Item.h"
+#include "../common/item.h"
 #include "zonedb.h"
 #include "worldserver.h"
 #include "../common/skills.h"
 #include "../common/bodytypes.h"
 #include "../common/classes.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "pets.h"
 #include <math.h>
 #include <assert.h>
@@ -35,7 +35,7 @@
 #include "../common/unix.h"
 #endif
 
-#include "StringIDs.h"
+#include "string_ids.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // pet related functions
@@ -362,30 +362,33 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 
 	// handle monster summoning pet appearance
 	if(record.monsterflag) {
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char* query = 0;
-		MYSQL_RES *result = nullptr;
-		MYSQL_ROW row = nullptr;
-		uint32 monsterid;
+
+		uint32 monsterid = 0;
 
 		// get a random npc id from the spawngroups assigned to this zone
-		if (database.RunQuery(query,	MakeAnyLenString(&query,
-			"SELECT npcID FROM (spawnentry INNER JOIN spawn2 ON spawn2.spawngroupID = spawnentry.spawngroupID) "
-			"INNER JOIN npc_types ON npc_types.id = spawnentry.npcID "
-			"WHERE spawn2.zone = '%s' AND npc_types.bodytype NOT IN (11, 33, 66, 67) "
-			"AND npc_types.race NOT IN (0,1,2,3,4,5,6,7,8,9,10,11,12,44,55,67,71,72,73,77,78,81,90,92,93,94,106,112,114,127,128,130,139,141,183,236,237,238,239,254,266,329,330,378,379,380,381,382,383,404,522) "
-			"ORDER BY RAND() LIMIT 1",	zone->GetShortName()), errbuf, &result))
-		{
-			row = mysql_fetch_row(result);
-			if (row)
-				monsterid = atoi(row[0]);
-			else
-				monsterid = 567;	// since we don't have any monsters, just make it look like an earth pet for now
+		auto query = StringFormat("SELECT npcID "
+                                    "FROM (spawnentry INNER JOIN spawn2 ON spawn2.spawngroupID = spawnentry.spawngroupID) "
+                                    "INNER JOIN npc_types ON npc_types.id = spawnentry.npcID "
+                                    "WHERE spawn2.zone = '%s' AND npc_types.bodytype NOT IN (11, 33, 66, 67) "
+                                    "AND npc_types.race NOT IN (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 44, "
+                                    "55, 67, 71, 72, 73, 77, 78, 81, 90, 92, 93, 94, 106, 112, 114, 127, 128, "
+                                    "130, 139, 141, 183, 236, 237, 238, 239, 254, 266, 329, 330, 378, 379, "
+                                    "380, 381, 382, 383, 404, 522) "
+                                    "ORDER BY RAND() LIMIT 1", zone->GetShortName());
+        auto results = database.QueryDatabase(query);
+		if (!results.Success()) {
+            // if the database query failed
+			LogFile->write(EQEMuLog::Error, "Error querying database for monster summoning pet in zone %s (%s)", zone->GetShortName(), results.ErrorMessage().c_str());
 		}
-		else {	// if the database query failed
-			LogFile->write(EQEMuLog::Error, "Error querying database for monster summoning pet in zone %s (%s)", zone->GetShortName(), errbuf);
-			monsterid = 567;
-		}
+
+        if (results.RowCount() != 0) {
+            auto row = results.begin();
+            monsterid = atoi(row[0]);
+        }
+
+        // since we don't have any monsters, just make it look like an earth pet for now
+        if (monsterid == 0)
+            monsterid = 567;
 
 		// give the summoned pet the attributes of the monster we found
 		const NPCType* monster = database.GetNPCType(monsterid);
@@ -396,12 +399,9 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 			npc_type->gender = monster->gender;
 			npc_type->luclinface = monster->luclinface;
 			npc_type->helmtexture = monster->helmtexture;
-		}
-		else {
+		} else
 			LogFile->write(EQEMuLog::Error, "Error loading NPC data for monster summoning pet (NPC ID %d)", monsterid);
-		}
 
-		safe_delete_array(query);
 	}
 
 	//this takes ownership of the npc_type data
@@ -450,46 +450,35 @@ bool ZoneDatabase::GetPetEntry(const char *pet_type, PetRecord *into) {
 }
 
 bool ZoneDatabase::GetPoweredPetEntry(const char *pet_type, int16 petpower, PetRecord *into) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 querylen = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	std::string query;
 
-	if (petpower <= 0) {
-		querylen = MakeAnyLenString(&query,
-			"SELECT npcID, temp, petpower, petcontrol, petnaming, monsterflag, equipmentset FROM pets "
-			"WHERE type='%s' AND petpower<=0", pet_type);
-	}
-	else {
-		querylen = MakeAnyLenString(&query,
-			"SELECT npcID, temp, petpower, petcontrol, petnaming, monsterflag, equipmentset FROM pets "
-			"WHERE type='%s' AND petpower<=%d ORDER BY petpower DESC LIMIT 1", pet_type, petpower);
-	}
+	if (petpower <= 0)
+		query = StringFormat("SELECT npcID, temp, petpower, petcontrol, petnaming, monsterflag, equipmentset "
+                            "FROM pets WHERE type='%s' AND petpower<=0", pet_type);
+	else
+		query = StringFormat("SELECT npcID, temp, petpower, petcontrol, petnaming, monsterflag, equipmentset "
+                            "FROM pets WHERE type='%s' AND petpower<=%d ORDER BY petpower DESC LIMIT 1",
+                            pet_type, petpower);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in GetPoweredPetEntry query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return false;
+    }
 
-	if (RunQuery(query, querylen, errbuf, &result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
+    if (results.RowCount() != 1)
+        return false;
 
-			into->npc_type = atoi(row[0]);
-			into->temporary = atoi(row[1]);
-			into->petpower = atoi(row[2]);
-			into->petcontrol = atoi(row[3]);
-			into->petnaming = atoi(row[4]);
-			into->monsterflag = atoi(row[5]);
-			into->equipmentset = atoi(row[6]);
+    auto row = results.begin();
 
-			mysql_free_result(result);
-			return(true);
-		}
-		mysql_free_result(result);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in GetPoweredPetEntry query '%s': %s", query, errbuf);
-		safe_delete_array(query);
-	}
-	return(false);
+    into->npc_type = atoi(row[0]);
+    into->temporary = atoi(row[1]);
+    into->petpower = atoi(row[2]);
+    into->petcontrol = atoi(row[3]);
+    into->petnaming = atoi(row[4]);
+    into->monsterflag = atoi(row[5]);
+    into->equipmentset = atoi(row[6]);
+
+    return true;
 }
 
 Mob* Mob::GetPet() {
@@ -657,11 +646,6 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 	// A slot will only get an item put in it if it is empty. That way
 	// an equipmentset can overload a slot for the set(s) it includes.
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 querylen = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 	int depth = 0;
 	int32 curset = equipmentset;
 	int32 nextset = -1;
@@ -673,56 +657,43 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 	// query pets_equipmentset_entries with the set_id and loop over
 	// all of the result rows. Check if we have something in the slot
 	// already. If no, add the item id to the equipment array.
-
 	while (curset >= 0 && depth < 5) {
-		if (RunQuery(query,
-			MakeAnyLenString(&query, "SELECT nested_set FROM pets_equipmentset WHERE set_id='%s'", curset),
-			errbuf, &result))
-		{
-			safe_delete_array(query);
-			if (mysql_num_rows(result) == 1) {
-				row = mysql_fetch_row(result);
-				nextset = atoi(row[0]);
-				mysql_free_result(result);
-
-				if (RunQuery(query,
-					MakeAnyLenString(&query, "SELECT slot, item_id FROM pets_equipmentset_entries WHERE set_id='%s'", curset),
-					errbuf, &result))
-				{
-					safe_delete_array(query);
-					while ((row = mysql_fetch_row(result)))
-					{
-						slot = atoi(row[0]);
-						if (slot >= EmuConstants::EQUIPMENT_SIZE)
-							continue;
-						if (items[slot] == 0)
-							items[slot] = atoi(row[1]);
-					}
-
-					mysql_free_result(result);
-				}
-				else {
-					LogFile->write(EQEMuLog::Error, "Error in GetBasePetItems query '%s': %s", query, errbuf);
-					safe_delete_array(query);
-				}
-				curset = nextset;
-				depth++;
-			}
-			else
-			{
-				// invalid set reference, it doesn't exist
-				LogFile->write(EQEMuLog::Error, "Error in GetBasePetItems equipment set '%d' does not exist", curset);
-				mysql_free_result(result);
-				return false;
-			}
-		}
-		else
-		{
-			LogFile->write(EQEMuLog::Error, "Error in GetBasePetItems query '%s': %s", query, errbuf);
-			safe_delete_array(query);
+        std::string  query = StringFormat("SELECT nested_set FROM pets_equipmentset WHERE set_id = '%s'", curset);
+		auto results = QueryDatabase(query);
+		if (!results.Success()) {
+            LogFile->write(EQEMuLog::Error, "Error in GetBasePetItems query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 			return false;
-		}
-	} // end while
+        }
+
+        if (results.RowCount() != 1) {
+            // invalid set reference, it doesn't exist
+            LogFile->write(EQEMuLog::Error, "Error in GetBasePetItems equipment set '%d' does not exist", curset);
+            return false;
+        }
+
+        auto row = results.begin();
+        nextset = atoi(row[0]);
+
+        query = StringFormat("SELECT slot, item_id FROM pets_equipmentset_entries WHERE set_id='%s'", curset);
+        results = QueryDatabase(query);
+        if (!results.Success())
+            LogFile->write(EQEMuLog::Error, "Error in GetBasePetItems query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        else {
+            for (row = results.begin(); row != results.end(); ++row)
+            {
+                slot = atoi(row[0]);
+
+                if (slot >= EmuConstants::EQUIPMENT_SIZE)
+                    continue;
+
+                if (items[slot] == 0)
+                    items[slot] = atoi(row[1]);
+            }
+        }
+
+        curset = nextset;
+        depth++;
+	}
 
 	return true;
 }

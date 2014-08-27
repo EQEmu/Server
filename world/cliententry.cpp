@@ -18,13 +18,13 @@
 #include "../common/debug.h"
 #include "cliententry.h"
 #include "clientlist.h"
-#include "LoginServer.h"
-#include "LoginServerList.h"
+#include "login_server.h"
+#include "login_server_list.h"
 #include "worlddb.h"
 #include "zoneserver.h"
-#include "WorldConfig.h"
+#include "world_config.h"
 #include "../common/guilds.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 
 extern uint32 numplayers;
 extern LoginServerList loginserverlist;

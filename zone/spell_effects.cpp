@@ -20,7 +20,7 @@
 #include "masterentity.h"
 #include "../common/packet_dump.h"
 #include "../common/moremath.h"
-#include "../common/Item.h"
+#include "../common/item.h"
 #include "worldserver.h"
 #include "../common/skills.h"
 #include "../common/bodytypes.h"
@@ -33,8 +33,8 @@
 #include "../common/unix.h"
 #endif
 
-#include "StringIDs.h"
-#include "QuestParserCollection.h"
+#include "string_ids.h"
+#include "quest_parser_collection.h"
 
 extern Zone* zone;
 extern volatile bool ZoneLoaded;
@@ -4761,24 +4761,24 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		case SE_LimitSpellClass:
 			if(focus_spell.base[i] < 0) {	//Exclude
-				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellClass));
+				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellClass))
 					return(0);
-			} 
+			}
 			else {
 				LimitInclude[12] = true;
-				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellClass)); //Include
+				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellClass)) //Include
 					LimitInclude[13] = true;
 			}
 			break;
 
 		case SE_LimitSpellSubclass:
 			if(focus_spell.base[i] < 0) {	//Exclude
-				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellSubclass));
+				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellSubclass))
 					return(0);
-			} 
+			}
 			else {
 				LimitInclude[14] = true;
-				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellSubclass)); //Include
+				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellSubclass)) //Include
 					LimitInclude[15] = true;
 			}
 			break;
@@ -5093,7 +5093,7 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 						if (IsValidSpell(proc_spellid)){
 	
-							ProcChance = GetSympatheticProcChances(spell_id, spells[TempItem->Focus.Effect].base[0], TempItemAug->ProcRate);
+							ProcChance = GetSympatheticProcChances(spell_id, spells[TempItemAug->Focus.Effect].base[0], TempItemAug->ProcRate);
 					
 							if(MakeRandomFloat(0, 1) <= ProcChance) 
 								SympatheticProcList.push_back(proc_spellid);

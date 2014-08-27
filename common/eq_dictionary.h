@@ -26,13 +26,13 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "eq_constants.h"
 #include "clientversions.h"
 #include <string>
-#include "../common/patches/Client62_constants.h"
-#include "../common/patches/Titanium_constants.h"
-#include "../common/patches/SoF_constants.h"
-#include "../common/patches/SoD_constants.h"
-#include "../common/patches/Underfoot_constants.h"
-#include "../common/patches/RoF_constants.h"
-//#include "../common/patches/RoF2_constants.h"
+#include "../common/patches/client62_constants.h"
+#include "../common/patches/titanium_constants.h"
+#include "../common/patches/sof_constants.h"
+#include "../common/patches/sod_constants.h"
+#include "../common/patches/underfoot_constants.h"
+#include "../common/patches/rof_constants.h"
+//#include "../common/patches/rof2_constants.h"
 
 // *** DO NOT CHANGE without a full understanding of the consequences..the server is set up to use these settings explicitly!! ***
 // *** You will cause compilation failures and corrupt your database if partial or incorrect attempts to change them are made!! ***

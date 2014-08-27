@@ -20,7 +20,7 @@
 #define OPCODE_MANAGER_H
 
 #include "types.h"
-#include "Mutex.h"
+#include "mutex.h"
 #include "emu_opcodes.h"
 
 #include <map>

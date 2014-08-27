@@ -2,7 +2,7 @@
 #include <iostream>
 #include "entity.h"
 #include "masterentity.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "../common/breakdowns.h"
 #include <stdlib.h>
 

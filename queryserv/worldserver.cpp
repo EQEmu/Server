@@ -56,122 +56,107 @@ void WorldServer::OnConnected()
 
 void WorldServer::Process()
 {
-	WorldConnection::Process();
-
+	WorldConnection::Process(); 
 	if (!Connected())
 		return;
 
-	ServerPacket *pack = 0;
-
+	ServerPacket *pack = 0; 
 	while((pack = tcpc.PopPacket()))
 	{
-		_log(QUERYSERV__TRACE, "Received Opcode: %4X", pack->opcode);
-
-		switch(pack->opcode)
-		{
+		_log(QUERYSERV__TRACE, "Received Opcode: %4X", pack->opcode); 
+		switch(pack->opcode) {
 			case 0: {
 				break;
 			}
-			case ServerOP_KeepAlive:
-			{
+			case ServerOP_KeepAlive: {
 				break;
 			}
-			case ServerOP_Speech:
-			{
-				Server_Speech_Struct *SSS = (Server_Speech_Struct*)pack->pBuffer;
-
+			case ServerOP_Speech: {
+				Server_Speech_Struct *SSS = (Server_Speech_Struct*)pack->pBuffer; 
 				std::string tmp1 = SSS->from;
-				std::string tmp2 = SSS->to;
-
+				std::string tmp2 = SSS->to; 
 				database.AddSpeech(tmp1.c_str(), tmp2.c_str(), SSS->message, SSS->minstatus, SSS->guilddbid, SSS->type);
 				break;
 			}
-			case ServerOP_QSPlayerLogTrades:
-			{
+			case ServerOP_QSPlayerLogTrades: {
 				QSPlayerLogTrade_Struct *QS = (QSPlayerLogTrade_Struct*)pack->pBuffer;
-				uint32 Items = QS->char1_count + QS->char2_count;
-				database.LogPlayerTrade(QS, Items);
+				database.LogPlayerTrade(QS, QS->_detail_count);
 				break;
 			}
-			case ServerOP_QSPlayerLogHandins:
-			{
+			case ServerOP_QSPlayerLogHandins: {
 				QSPlayerLogHandin_Struct *QS = (QSPlayerLogHandin_Struct*)pack->pBuffer;
-				uint32 Items = QS->char_count + QS->npc_count;
-				database.LogPlayerHandin(QS, Items);
+				database.LogPlayerHandin(QS, QS->_detail_count);
 				break;
 			}
-			case ServerOP_QSPlayerLogNPCKills:
-			{
+			case ServerOP_QSPlayerLogNPCKills: {
 				QSPlayerLogNPCKill_Struct *QS = (QSPlayerLogNPCKill_Struct*)pack->pBuffer;
 				uint32 Members = pack->size - sizeof(QSPlayerLogNPCKill_Struct);
 				if (Members > 0) Members = Members / sizeof(QSPlayerLogNPCKillsPlayers_Struct);
 				database.LogPlayerNPCKill(QS, Members);
 				break;
 			}
-			case ServerOP_QSPlayerLogDeletes:
-			{
+			case ServerOP_QSPlayerLogDeletes: {
 				QSPlayerLogDelete_Struct *QS = (QSPlayerLogDelete_Struct*)pack->pBuffer;
 				uint32 Items = QS->char_count;
 				database.LogPlayerDelete(QS, Items);
 				break;
 			}
-			case ServerOP_QSPlayerLogMoves:
-			{
+			case ServerOP_QSPlayerLogMoves: {
 				QSPlayerLogMove_Struct *QS = (QSPlayerLogMove_Struct*)pack->pBuffer;
 				uint32 Items = QS->char_count;
 				database.LogPlayerMove(QS, Items);
 				break;
 			}
-			case ServerOP_QSMerchantLogTransactions:
-			{
+			case ServerOP_QSPlayerLogMerchantTransactions: {
 				QSMerchantLogTransaction_Struct *QS = (QSMerchantLogTransaction_Struct*)pack->pBuffer;
 				uint32 Items = QS->char_count + QS->merchant_count;
 				database.LogMerchantTransaction(QS, Items);
-				break;
+				break; 
 			}
-			case ServerOP_QueryServGeneric:
-			{
-				// The purpose of ServerOP_QueryServerGeneric is so that we don't have to add code to world just to relay packets
-				// each time we add functionality to queryserv.
-				//
-				// A ServerOP_QueryServGeneric packet has the following format:
-				//
-				// uint32 SourceZoneID
-				// uint32 SourceInstanceID
-				// char OriginatingCharacterName[0] // Null terminated name of the character this packet came from. This could be just
-				//					// an empty string if it has no meaning in the context of a particular packet.
-				// uint32 Type
-				//
-				// The 'Type' field is a 'sub-opcode'. A value of 0 is used for the LFGuild packets. The next feature to be added
-				// to queryserv would use 1, etc.
-				//
-				// Obviously, any fields in the packet following the 'Type' will be unique to the particular type of packet. The
-				// 'Generic' in the name of this ServerOP code relates to the four header fields.
+			case ServerOP_QueryServGeneric: {
+				/* 
+					The purpose of ServerOP_QueryServerGeneric is so that we don't have to add code to world just to relay packets
+					each time we add functionality to queryserv.
+				
+					A ServerOP_QueryServGeneric packet has the following format:
+				
+					uint32 SourceZoneID
+					uint32 SourceInstanceID
+					char OriginatingCharacterName[0] 
+						- Null terminated name of the character this packet came from. This could be just
+						- an empty string if it has no meaning in the context of a particular packet.
+					uint32 Type
+				
+					The 'Type' field is a 'sub-opcode'. A value of 0 is used for the LFGuild packets. The next feature to be added
+					to queryserv would use 1, etc.
+				
+					Obviously, any fields in the packet following the 'Type' will be unique to the particular type of packet. The
+					'Generic' in the name of this ServerOP code relates to the four header fields.
+				*/
+
 				char From[64];
 				pack->SetReadPosition(8);
 				pack->ReadString(From);
 				uint32 Type = pack->ReadUInt32();
 
-				switch(Type)
-				{
-					case QSG_LFGuild:
-					{
-						lfguildmanager.HandlePacket(pack);
+				switch(Type) {
+					case QSG_LFGuild:{
+						lfguildmanager.HandlePacket(pack); 
 						break;
 					}
-
 					default:
 						_log(QUERYSERV__ERROR, "Received unhandled ServerOP_QueryServGeneric", Type);
 						break;
 				}
-
 				break;
 			}
-
-
+			case ServerOP_QSSendQuery: {
+				/* Process all packets here */
+				database.GeneralQueryReceive(pack);  
+				break;
+			}
 		}
-	}
-
+	} 
 	safe_delete(pack);
 	return;
 }

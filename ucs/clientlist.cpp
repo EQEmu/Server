@@ -18,15 +18,15 @@
 */
 
 #include "../common/debug.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 
 #include "clientlist.h"
 #include "database.h"
 #include "chatchannel.h"
 
-#include "../common/EQStreamFactory.h"
-#include "../common/EmuTCPConnection.h"
-#include "../common/EmuTCPServer.h"
+#include "../common/eq_stream_factory.h"
+#include "../common/emu_tcp_connection.h"
+#include "../common/emu_tcp_server.h"
 #include <list>
 #include <vector>
 #include <string>
@@ -1329,7 +1329,7 @@ void Client::SendChannelMessage(std::string Message)
 		}
 	}
 
-	if(RequiredChannel)
+	if(RequiredChannel) {
 		if(RuleB(Chat, EnableAntiSpam))
 		{
 			if(!RequiredChannel->IsModerated() || RequiredChannel->HasVoice(GetName()) || RequiredChannel->IsOwner(GetName()) ||
@@ -1384,7 +1384,7 @@ void Client::SendChannelMessage(std::string Message)
 			else
 				GeneralChannelMessage("Channel " + ChannelName + " is moderated and you have not been granted a voice.");
 		}
-
+	}
 }
 
 void Client::SendChannelMessageByNumber(std::string Message) {
@@ -1883,11 +1883,12 @@ void Client::ChannelModerate(std::string CommandString) {
 
 	RequiredChannel->SetModerated(!RequiredChannel->IsModerated());
 
-	if(!RequiredChannel->IsClientInChannel(this))
-		if(RequiredChannel->IsModerated())
+	if (!RequiredChannel->IsClientInChannel(this)) {
+		if (RequiredChannel->IsModerated())
 			GeneralChannelMessage("Channel " + ChannelName + " is now moderated.");
 		else
 			GeneralChannelMessage("Channel " + ChannelName + " is no longer moderated.");
+	}
 
 }
 

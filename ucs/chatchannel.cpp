@@ -20,7 +20,7 @@
 #include "chatchannel.h"
 #include "clientlist.h"
 #include "database.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include <cstdlib>
 
 extern Database database;

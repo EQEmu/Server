@@ -22,20 +22,20 @@
 #include "../common/features.h"
 #include "../common/queue.h"
 #include "../common/timer.h"
-#include "../common/EQStream.h"
-#include "../common/EQStreamFactory.h"
+#include "../common/eq_stream.h"
+#include "../common/eq_stream_factory.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/Mutex.h"
+#include "../common/mutex.h"
 #include "../common/version.h"
-#include "../common/EQEMuError.h"
+#include "../common/eqemu_error.h"
 #include "../common/packet_dump_file.h"
 #include "../common/opcodemgr.h"
 #include "../common/guilds.h"
-#include "../common/EQStreamIdent.h"
+#include "../common/eq_stream_ident.h"
 #include "../common/patches/patches.h"
 #include "../common/rulesys.h"
-#include "../common/MiscFunctions.h"
-#include "../common/StringUtil.h"
+#include "../common/misc_functions.h"
+#include "../common/string_util.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
 #include "../common/ipc_mutex.h"
@@ -43,18 +43,19 @@
 #include "../common/eqemu_exception.h"
 #include "../common/spdat.h"
 
-#include "ZoneConfig.h"
+#include "zone_config.h"
 #include "masterentity.h"
 #include "worldserver.h"
 #include "net.h"
 #include "zone.h"
+#include "queryserv.h"
 #include "command.h"
-#include "ZoneConfig.h"
+#include "zone_config.h"
 #include "titles.h"
 #include "guild_mgr.h"
 #include "tasks.h"
 
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 #include "embparser.h"
 #include "lua_parser.h"
 #include "client_logs.h"
@@ -98,6 +99,7 @@ npcDecayTimes_Struct npcCorpseDecayTimes[100];
 TitleManager title_manager;
 DBAsyncFinishedQueue MTdbafq;
 DBAsync *dbasync = nullptr;
+QueryServ *QServ = 0; 
 TaskManager *taskmanager = 0;
 QuestParserCollection *parse = 0;
 
@@ -113,6 +115,8 @@ int main(int argc, char** argv) {
 	set_exception_handler();
 
 	const char *zone_name;
+
+	QServ = new QueryServ;
 
 	if(argc == 3) {
 		worldserver.SetLauncherName(argv[2]);
@@ -622,7 +626,7 @@ void LoadSpells(EQEmu::MemoryMappedFile **mmf) {
 	SPDAT_RECORDS = records;
 }
 
-
+/* Update Window Title with relevant information */
 void UpdateWindowTitle(char* iNewTitle) {
 #ifdef _WINDOWS
 	char tmp[500];
@@ -634,7 +638,7 @@ void UpdateWindowTitle(char* iNewTitle) {
 			#if defined(GOTFRAGS) || defined(_EQDEBUG)
 				snprintf(tmp, sizeof(tmp), "%i: %s, %i clients, %i", ZoneConfig::get()->ZonePort, zone->GetShortName(), numclients, getpid());
 			#else
-				snprintf(tmp, sizeof(tmp), "%i: %s, %i clients", ZoneConfig::get()->ZonePort, zone->GetShortName(), numclients);
+			snprintf(tmp, sizeof(tmp), "%s :: clients: %i inst_id: %i inst_ver: %i :: port: %i", zone->GetShortName(), numclients, zone->GetInstanceID(), zone->GetInstanceVersion(), ZoneConfig::get()->ZonePort);
 			#endif
 		}
 		else {

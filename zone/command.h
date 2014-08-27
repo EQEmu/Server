@@ -21,7 +21,7 @@
 #define COMMAND_H
 
 #include "../common/seperator.h"
-#include "../common/EQStream.h"
+#include "../common/eq_stream.h"
 #include "client.h"
 
 #define	COMMAND_CHAR	'#'

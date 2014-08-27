@@ -28,7 +28,7 @@ spawn2 mediumblob, npcs mediumblob, npc_loot mediumblob, gmspawntype mediumblob,
 #define ZONEDUMP_H
 #include "../common/faction.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/Item.h"
+#include "../common/item.h"
 
 #pragma pack(1)
 
@@ -126,6 +126,7 @@ struct NPCType
 	float	healscale;
 	bool	no_target_hotkey;
 	bool	raid_target;
+	uint8 	probability;
 };
 
 /*

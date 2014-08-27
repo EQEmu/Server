@@ -20,13 +20,13 @@
 #include "masterentity.h"
 #include "../common/packet_dump.h"
 #include "../common/moremath.h"
-#include "../common/Item.h"
+#include "../common/item.h"
 #include "worldserver.h"
 #include "../common/skills.h"
 #include "../common/bodytypes.h"
 #include "../common/classes.h"
 #include "../common/rulesys.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 #include <math.h>
 #include <assert.h>
 #include <iostream>
@@ -35,7 +35,7 @@
 #include "../common/unix.h"
 #endif
 
-#include "StringIDs.h"
+#include "string_ids.h"
 
 void Mob::CalcBonuses()
 {

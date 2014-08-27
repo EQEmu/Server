@@ -18,11 +18,11 @@
 
 #include "../../common/debug.h"
 #include "../../common/shareddb.h"
-#include "../../common/EQEmuConfig.h"
+#include "../../common/eqemu_config.h"
 #include "../../common/platform.h"
 #include "../../common/crash.h"
 #include "../../common/rulesys.h"
-#include "../../common/StringUtil.h"
+#include "../../common/string_util.h"
 
 void ImportSpells(SharedDatabase *db);
 void ImportSkillCaps(SharedDatabase *db);
@@ -31,7 +31,7 @@ void ImportBaseData(SharedDatabase *db);
 int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformClientImport);
 	set_exception_handler();
-	
+
 	LogFile->write(EQEMuLog::Status, "Client Files Import Utility");
 	if(!EQEmuConfig::LoadConfig()) {
 		LogFile->write(EQEMuLog::Error, "Unable to load configuration file.");
@@ -55,26 +55,20 @@ int main(int argc, char **argv) {
 	ImportSpells(&database);
 	ImportSkillCaps(&database);
 	ImportBaseData(&database);
-	
+
 	return 0;
 }
 
 int GetSpellColumns(SharedDatabase *db) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	const char *query = "DESCRIBE spells_new";
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	int res = 0;
-	if(db->RunQuery(query, (uint32)strlen(query), errbuf, &result)) {
-		while(row = mysql_fetch_row(result)) {
-			++res;
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in GetSpellColumns query '%s' %s", query, errbuf);
-	}
 
-	return res;
+	const std::string query = "DESCRIBE spells_new";
+	auto results = db->QueryDatabase(query);
+	if(!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in GetSpellColumns query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
+        return 0;
+    }
+
+	return results.RowCount();
 }
 
 void ImportSpells(SharedDatabase *db) {
@@ -85,8 +79,8 @@ void ImportSpells(SharedDatabase *db) {
 		return;
 	}
 
-	std::string delete_sql = "DELETE FROM spells_new";
-	db->RunQuery(delete_sql.c_str(), (uint32)delete_sql.length());
+	std::string query = "DELETE FROM spells_new";
+	db->QueryDatabase(query);
 
 	int columns = GetSpellColumns(db);
 	int spells_imported = 0;
@@ -103,8 +97,8 @@ void ImportSpells(SharedDatabase *db) {
 		std::string escaped = ::EscapeString(buffer);
 		auto split = SplitString(escaped, '^');
 		int line_columns = (int)split.size();
+
 		std::string sql;
-		
 		if(line_columns >= columns) {
 			sql = "INSERT INTO spells_new VALUES(";
 			for(int i = 0; i < columns; ++i) {
@@ -140,7 +134,7 @@ void ImportSpells(SharedDatabase *db) {
 			sql += ");";
 		}
 
-		db->RunQuery(sql.c_str(), (uint32)sql.length());
+		db->QueryDatabase(sql);
 
 		spells_imported++;
 		if(spells_imported % 1000 == 0) {
@@ -165,17 +159,17 @@ void ImportSkillCaps(SharedDatabase *db) {
 	}
 
 	std::string delete_sql = "DELETE FROM skill_caps";
-	db->RunQuery(delete_sql.c_str(), (uint32)delete_sql.length());
+	db->QueryDatabase(delete_sql);
 
 	char buffer[2048];
 	while(fgets(buffer, 2048, f)) {
 		auto split = SplitString(buffer, '^');
-		
+
 		if(split.size() < 4) {
 			continue;
 		}
 
-		
+
 		int class_id, skill_id, level, cap;
 		class_id = atoi(split[0].c_str());
 		skill_id = atoi(split[1].c_str());
@@ -185,7 +179,7 @@ void ImportSkillCaps(SharedDatabase *db) {
 		std::string sql = StringFormat("INSERT INTO skill_caps(class, skillID, level, cap) VALUES(%d, %d, %d, %d)",
 			class_id, skill_id, level, cap);
 
-		db->RunQuery(sql.c_str(), (uint32)sql.length());
+		db->QueryDatabase(sql);
 	}
 
 	fclose(f);
@@ -201,7 +195,7 @@ void ImportBaseData(SharedDatabase *db) {
 	}
 
 	std::string delete_sql = "DELETE FROM base_data";
-	db->RunQuery(delete_sql.c_str(), (uint32)delete_sql.length());
+	db->QueryDatabase(delete_sql);
 
 	char buffer[2048];
 	while(fgets(buffer, 2048, f)) {
@@ -230,7 +224,7 @@ void ImportBaseData(SharedDatabase *db) {
 			"mana_fac, end_fac) VALUES(%d, %d, %f, %f, %f, %f, %f, %f, %f, %f)",
 			level, class_id, hp, mana, end, unk1, unk2, hp_fac, mana_fac, end_fac);
 
-		db->RunQuery(sql.c_str(), (uint32)sql.length());
+		db->QueryDatabase(sql);
 	}
 
 	fclose(f);

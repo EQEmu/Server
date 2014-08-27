@@ -25,7 +25,7 @@
 #include "../common/linked_list.h"
 #include "../common/emu_opcodes.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/Item.h"
+#include "../common/item.h"
 #include "client.h"
 #include "mob.h"
 #include "npc.h"

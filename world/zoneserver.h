@@ -18,8 +18,8 @@
 #ifndef ZONESERVER_H
 #define ZONESERVER_H
 
-#include "WorldTCPConnection.h"
-#include "../common/EmuTCPConnection.h"
+#include "world_tcp_connection.h"
+#include "../common/emu_tcp_connection.h"
 #include <string.h>
 #include <string>
 

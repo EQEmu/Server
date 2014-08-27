@@ -2,7 +2,7 @@
 #define UCS_H
 
 #include "../common/types.h"
-#include "../common/EmuTCPConnection.h"
+#include "../common/emu_tcp_connection.h"
 #include "../common/servertalk.h"
 
 class UCSConnection

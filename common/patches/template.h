@@ -1,7 +1,7 @@
 #ifndef TEMPLATE_H_
 #define TEMPLATE_H_
 
-#include "../StructStrategy.h"
+#include "../struct_strategy.h"
 
 class EQStreamIdentifier;
 
@@ -25,7 +25,7 @@ namespace TEMPLATE {
 		virtual std::string Describe() const;
 		virtual const EQClientVersion ClientVersion() const;
 		//magic macro to declare our opcodes
-		#include "SSDeclare.h"
+		#include "ss_declare.h"
 		#include "TEMPLATE_ops.h"
 
 	};

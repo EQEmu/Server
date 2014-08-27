@@ -39,11 +39,11 @@
 #include "petitions.h"
 #include "../common/spdat.h"
 #include "../common/features.h"
-#include "StringIDs.h"
+#include "string_ids.h"
 #include "../common/dbasync.h"
 #include "guild_mgr.h"
 #include "raids.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 
 #ifdef _WINDOWS
 	#define snprintf	_snprintf
@@ -622,6 +622,7 @@ void EntityList::AddCorpse(Corpse *corpse, uint32 in_id)
 void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 {
 	npc->SetID(GetFreeID());
+	npc->SetMerchantProbability((uint8) MakeRandomInt(0, 99));
 	parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
 
 	uint16 emoteid = npc->GetEmoteID();
@@ -1597,7 +1598,7 @@ Corpse *EntityList::GetCorpseByName(const char *name)
 
 Spawn2 *EntityList::GetSpawnByID(uint32 id)
 {
-	if (!zone)
+	if (!zone || !zone->IsLoaded())
 		return nullptr;
 
 	LinkedListIterator<Spawn2 *> iterator(zone->spawn2_list);
@@ -4167,6 +4168,20 @@ void EntityList::SignalAllClients(uint32 data)
 			ent->Signal(data);
 		++it;
 	}
+}
+
+uint16 EntityList::GetClientCount(){
+	uint16 ClientCount = 0;
+	std::list<Client*> client_list;
+	entity_list.GetClientList(client_list);
+	std::list<Client*>::iterator iter = client_list.begin();
+	while (iter != client_list.end()) {
+		Client *entry = (*iter);
+		entry->GetCleanName();
+		ClientCount++;
+		iter++;
+	}
+	return ClientCount;
 }
 
 void EntityList::GetMobList(std::list<Mob *> &m_list)

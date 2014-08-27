@@ -30,9 +30,9 @@
 #include "npc.h"
 #include "water_map.h"
 #include "titles.h"
-#include "StringIDs.h"
-#include "../common/MiscFunctions.h"
-#include "../common/StringUtil.h"
+#include "string_ids.h"
+#include "../common/misc_functions.h"
+#include "../common/string_util.h"
 #include "../common/rulesys.h"
 
 #include "zonedb.h"
@@ -40,7 +40,7 @@
 #define snprintf	_snprintf
 #endif
 
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 
 //max number of items which can be in the foraging table
 //for a given zone.
@@ -85,12 +85,7 @@ CREATE TABLE fishing (
 
 // This allows EqEmu to have zone specific foraging - BoB
 uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	uint8 index = 0;
 	uint32 item[FORAGE_ITEM_LIMIT];
 	uint32 chance[FORAGE_ITEM_LIMIT];
 	uint32 ret;
@@ -100,31 +95,32 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 	}
 
 	uint32 chancepool = 0;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT itemid,chance FROM forage WHERE zoneid= '%i' and level <= '%i' LIMIT %i", ZoneID, skill, FORAGE_ITEM_LIMIT), errbuf, &result))
-	{
-		safe_delete_array(query);
-		while ((row = mysql_fetch_row(result)) && (index < FORAGE_ITEM_LIMIT)) {
-			item[index] = atoi(row[0]);
-			chance[index] = atoi(row[1])+chancepool;
-LogFile->write(EQEMuLog::Error, "Possible Forage: %d with a %d chance", item[index], chance[index]);
-			chancepool = chance[index];
-			index++;
-		}
-
-		mysql_free_result(result);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in Forage query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("SELECT itemid, chance FROM "
+                                    "forage WHERE zoneid = '%i' and level <= '%i' "
+                                    "LIMIT %i", ZoneID, skill, FORAGE_ITEM_LIMIT);
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Forage query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
 
+	uint8 index = 0;
+    for (auto row = results.begin(); row != results.end(); ++row, ++index) {
+        if (index >= FORAGE_ITEM_LIMIT)
+            break;
+
+        item[index] = atoi(row[0]);
+        chance[index] = atoi(row[1]) + chancepool;
+        LogFile->write(EQEMuLog::Error, "Possible Forage: %d with a %d chance", item[index], chance[index]);
+        chancepool = chance[index];
+    }
+
+
 	if(chancepool == 0 || index < 1)
-		return(0);
+		return 0;
 
 	if(index == 1) {
-		return(item[0]);
+		return item[0];
 	}
 
 	ret = 0;
@@ -143,12 +139,6 @@ LogFile->write(EQEMuLog::Error, "Possible Forage: %d with a %d chance", item[ind
 
 uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, uint8 &npc_chance)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	uint8 index = 0;
 	uint32 item[50];
 	uint32 chance[50];
 	uint32 npc_ids[50];
@@ -161,44 +151,44 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
 		chance[c]=0;
 	}
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT itemid,chance,npc_id,npc_chance FROM fishing WHERE (zoneid= '%i' || zoneid = 0) and skill_level <= '%i'",ZoneID, skill ), errbuf, &result))
-	{
-		safe_delete_array(query);
-		while ((row = mysql_fetch_row(result))&&(index<50)) {
-			item[index] = atoi(row[0]);
-			chance[index] = atoi(row[1])+chancepool;
-			chancepool = chance[index];
-
-			npc_ids[index] = atoi(row[2]);
-			npc_chances[index] = atoi(row[3]);
-			index++;
-		}
-
-		mysql_free_result(result);
-	}
-	else {
-		std::cerr << "Error in Fishing query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+    std::string query = StringFormat("SELECT itemid, chance, npc_id, npc_chance "
+                                    "FROM fishing WHERE (zoneid = '%i' || zoneid = 0) AND skill_level <= '%i'",
+                                    ZoneID, skill);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        std::cerr << "Error in Fishing query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
-	}
+    }
+
+    uint8 index = 0;
+    for (auto row = results.begin(); row != results.end(); ++row, ++index) {
+        if (index >= 50)
+            break;
+
+        item[index] = atoi(row[0]);
+        chance[index] = atoi(row[1])+chancepool;
+        chancepool = chance[index];
+
+        npc_ids[index] = atoi(row[2]);
+        npc_chances[index] = atoi(row[3]);
+    }
 
 	npc_id = 0;
 	npc_chance = 0;
-	if (index>0) {
-		uint32 random = MakeRandomInt(1, chancepool);
-		for (int i = 0; i < index; i++)
-		{
-			if (random <= chance[i])
-			{
-				ret = item[i];
-				npc_id = npc_ids[i];
-				npc_chance = npc_chances[i];
-				break;
-			}
-		}
-	} else {
-		ret = 0;
-	}
+	if (index <= 0)
+        return 0;
+
+    uint32 random = MakeRandomInt(1, chancepool);
+    for (int i = 0; i < index; i++)
+    {
+        if (random > chance[i])
+            continue;
+
+        ret = item[i];
+        npc_id = npc_ids[i];
+        npc_chance = npc_chances[i];
+        break;
+    }
 
 	return ret;
 }

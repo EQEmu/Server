@@ -2,7 +2,7 @@
 #include "TEMPLATE.h"
 #include "../opcodemgr.h"
 #include "../logsys.h"
-#include "../EQStreamIdent.h"
+#include "../eq_stream_ident.h"
 
 #include "../eq_packet_structs.h"
 #include "TEMPLATE_structs.h"
@@ -68,7 +68,7 @@ Strategy::Strategy()
 : StructStrategy()
 {
 	//all opcodes default to passthrough.
-	#include "SSRegister.h"
+	#include "ss_register.h"
 	#include "TEMPLATE_ops.h"
 }
 
@@ -80,7 +80,7 @@ std::string Strategy::Describe() const {
 }
 
 
-#include "SSDefine.h"
+#include "ss_define.h"
 
 
 /*ENCODE(OP_PlayerProfile) {

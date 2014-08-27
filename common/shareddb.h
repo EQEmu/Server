@@ -6,7 +6,7 @@
 #include "database.h"
 #include "skills.h"
 #include "spdat.h"
-#include "Item.h"
+#include "item.h"
 #include "base_data.h"
 #include "fixed_memory_hash_set.h"
 #include "fixed_memory_variable_hash_set.h"
