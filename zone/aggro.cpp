@@ -877,8 +877,12 @@ bool Mob::CombatRange(Mob* other)
 
 	if (GetSpecialAbility(NPC_CHASE_DISTANCE)){
 		
+		bool DoLoSCheck = true;
 		float max_dist = static_cast<float>(GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 0));
 		float min_dist = static_cast<float>(GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 1));
+		
+		if (GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 2));
+			DoLoSCheck = false; //Ignore line of sight check
 
 		if (max_dist == 1)
 			max_dist = 250.0f; //Default it to 250 if you forget to put a value
@@ -890,7 +894,7 @@ bool Mob::CombatRange(Mob* other)
 		else
 			min_dist = min_dist * min_dist;
 		
-		if (CheckLastLosState() && (_DistNoRoot >= min_dist && _DistNoRoot <= max_dist))
+		if ((DoLoSCheck && CheckLastLosState()) && (_DistNoRoot >= min_dist && _DistNoRoot <= max_dist))
 			SetPseudoRoot(true); 
 		else 
 			SetPseudoRoot(false);
