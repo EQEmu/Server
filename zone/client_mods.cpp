@@ -24,7 +24,7 @@
 #include "../common/serverinfo.h"
 #include "../common/zone_numbers.h"
 #include "../common/moremath.h"
-#include "../common/guilds.h"
+#include "../common/guild_base.h"
 #include "../common/logsys.h"
 #include "masterentity.h"
 #include "worldserver.h"
@@ -377,7 +377,7 @@ int32 Client::CalcBaseHP()
 			stats = (stats - 255) / 2;
 			stats += 255;
 		}
-		
+
 		base_hp = 5;
 		auto base_data = database.GetBaseData(GetLevel(), GetClass());
 		if(base_data) {

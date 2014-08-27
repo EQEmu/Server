@@ -10,7 +10,7 @@
 #include "seperator.h"
 #include "string_util.h"
 #include "eq_packet_structs.h"
-#include "guilds.h"
+#include "guild_base.h"
 #include "extprofile.h"
 #include "memory_mapped_file.h"
 #include "ipc_mutex.h"
@@ -1804,7 +1804,7 @@ bool SharedDatabase::LoadBaseData() {
 		EQEmu::IPCMutex mutex("base_data");
 		mutex.Lock();
 		base_data_mmf = new EQEmu::MemoryMappedFile("shared/base_data");
-	
+
 		int size = 16 * (GetMaxBaseDataLevel() + 1) * sizeof(BaseDataStruct);
 		if(size == 0) {
 			EQ_EXCEPT("SharedDatabase", "Base Data size is zero");
@@ -1829,9 +1829,9 @@ void SharedDatabase::LoadBaseData(void *data, int max_level) {
 	const char *query = "SELECT * FROM base_data ORDER BY level, class ASC";
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	
+
 	if(RunQuery(query, strlen(query), errbuf, &result)) {
-	
+
 		int lvl = 0;
 		int cl = 0;
 		while (row = mysql_fetch_row(result)) {

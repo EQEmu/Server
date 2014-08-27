@@ -33,7 +33,7 @@ class Client;
 #include "../common/deity.h"
 #include "../common/seperator.h"
 #include "../common/item.h"
-#include "../common/guilds.h"
+#include "../common/guild_base.h"
 #include "../common/item_struct.h"
 #include "../common/clientversions.h"
 
@@ -1200,7 +1200,7 @@ public:
 
 	void SetEngagedRaidTarget(bool value) { EngagedRaidTarget = value; }
 	bool GetEngagedRaidTarget() const { return EngagedRaidTarget; }
-	
+
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);
@@ -1445,7 +1445,7 @@ private:
 	unsigned int	RestRegenHP;
 	unsigned int	RestRegenMana;
 	unsigned int	RestRegenEndurance;
-	
+
 	bool EngagedRaidTarget;
 	uint32 SavedRaidRestTimer;
 

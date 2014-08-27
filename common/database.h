@@ -27,7 +27,7 @@
 #include "linked_list.h"
 #include "eq_packet_structs.h"
 /*#include "eq_stream.h"
-#include "guilds.h"
+#include "guild_base.h"
 #include "misc_functions.h"
 #include "mutex.h"
 #include "item.h"
@@ -207,7 +207,7 @@ public:
 	char*	GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank = nullptr, char* assist = nullptr, char* puller = nullptr, char *marknpc = nullptr,
 						GroupLeadershipAA_Struct* GLAA = nullptr);
 	void	ClearGroupLeader(uint32 gid = 0);
-	
+
 
 	/*
 	* Raids
