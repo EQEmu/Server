@@ -204,23 +204,35 @@ void Database::LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 detailCount)
 
 }
 
-void Database::LogPlayerNPCKill(QSPlayerLogNPCKill_Struct* QS, uint32 Members){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	uint32 lastid = 0;
-	if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_npc_kill_record` SET `npc_id`='%i', `type`='%i', `zone_id`='%i', `time`=NOW()", QS->s1.NPCID, QS->s1.Type, QS->s1.ZoneID), errbuf, 0, 0, &lastid)) {
-		_log(QUERYSERV__ERROR, "Failed NPC Kill Log Record Insert: %s", errbuf);
-		_log(QUERYSERV__ERROR, "%s", query);
+void Database::LogPlayerNPCKill(QSPlayerLogNPCKill_Struct* QS, uint32 members){
+
+	std::string query = StringFormat("INSERT INTO `qs_player_npc_kill_record` "
+                                    "SET `npc_id` = '%i', `type` = '%i', "
+                                    "`zone_id` = '%i', `time` = NOW()",
+                                    QS->s1.NPCID, QS->s1.Type, QS->s1.ZoneID);
+	auto results = QueryDatabase(query);
+	if(!results.Success()) {
+		_log(QUERYSERV__ERROR, "Failed NPC Kill Log Record Insert: %s", results.ErrorMessage().c_str());
+		_log(QUERYSERV__ERROR, "%s", query.c_str());
 	}
 
-	if(Members > 0){
-		for (int i = 0; i < Members; i++) {
-			if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_npc_kill_record_entries` SET `event_id`='%i', `char_id`='%i'", lastid, QS->Chars[i].char_id, errbuf, 0, 0))) {
-				_log(QUERYSERV__ERROR, "Failed NPC Kill Log Entry Insert: %s", errbuf);
-				_log(QUERYSERV__ERROR, "%s", query);
-			}
+	if(members == 0)
+        return;
+
+	int lastIndex = results.LastInsertedID();
+
+	for (int i = 0; i < members; i++) {
+        query = StringFormat("INSERT INTO `qs_player_npc_kill_record_entries` "
+                            "SET `event_id` = '%i', `char_id` = '%i'",
+                            lastIndex, QS->Chars[i].char_id);
+		auto results = QueryDatabase(query);
+		if(!results.Success()) {
+			_log(QUERYSERV__ERROR, "Failed NPC Kill Log Entry Insert: %s", results.ErrorMessage().c_str());
+			_log(QUERYSERV__ERROR, "%s", query.c_str());
 		}
+
 	}
+
 }
 
 void Database::LogPlayerDelete(QSPlayerLogDelete_Struct* QS, uint32 Items) {
