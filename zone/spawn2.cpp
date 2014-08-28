@@ -16,7 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include <stdlib.h>
 #include "spawn2.h"
 #include "entity.h"
@@ -354,96 +354,86 @@ void Spawn2::DeathReset(bool realdeath)
 }
 
 bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version, uint32 repopdelay) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
 	const char *zone_name = database.GetZoneName(zoneid);
-
-	MakeAnyLenString(&query, "SELECT id, spawngroupID, x, y, z, heading, respawntime, variance, pathgrid, _condition, cond_value, enabled, animation FROM spawn2 WHERE zone='%s' AND version=%u", zone_name, version);
-	if (RunQuery(query, strlen(query), errbuf, &result))
-	{
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result)))
-		{
-			Spawn2* newSpawn = 0;
-
-			bool perl_enabled = atoi(row[11]) == 1 ? true : false;
-			uint32 spawnLeft = (GetSpawnTimeLeft(atoi(row[0]), zone->GetInstanceID()) * 1000);
-			newSpawn = new Spawn2(atoi(row[0]), atoi(row[1]), atof(row[2]), atof(row[3]), atof(row[4]), atof(row[5]), atoi(row[6]), atoi(row[7]), spawnLeft, atoi(row[8]), atoi(row[9]), atoi(row[10]), perl_enabled, (EmuAppearance)atoi(row[12]));
-			spawn2_list.Insert( newSpawn );
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in PopulateZoneLists query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("SELECT id, spawngroupID, x, y, z, heading, "
+                                    "respawntime, variance, pathgrid, _condition, "
+                                    "cond_value, enabled, animation FROM spawn2 "
+                                    "WHERE zone = '%s' AND version = %u",
+                                    zone_name, version);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in PopulateZoneLists query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
-	}
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        Spawn2* newSpawn = 0;
+
+        bool perl_enabled = atoi(row[11]) == 1? true: false;
+        uint32 spawnLeft = (GetSpawnTimeLeft(atoi(row[0]), zone->GetInstanceID()) * 1000);
+        newSpawn = new Spawn2(atoi(row[0]), atoi(row[1]), atof(row[2]), atof(row[3]), atof(row[4]),
+                                atof(row[5]), atoi(row[6]), atoi(row[7]), spawnLeft, atoi(row[8]),
+                                atoi(row[9]), atoi(row[10]), perl_enabled, (EmuAppearance)atoi(row[12]));
+
+        spawn2_list.Insert(newSpawn);
+    }
 
 	return true;
 }
 
 
 Spawn2* ZoneDatabase::LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2id, uint32 timeleft) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, spawngroupID, x, y, z, heading, respawntime, variance, pathgrid, _condition, cond_value, enabled, animation FROM spawn2 WHERE id=%i", spawn2id), errbuf, &result))	{
-		if (mysql_num_rows(result) == 1)
-		{
-			row = mysql_fetch_row(result);
-			bool perl_enabled = atoi(row[11]) == 1 ? true : false;
-			Spawn2* newSpawn = new Spawn2(atoi(row[0]), atoi(row[1]), atof(row[2]), atof(row[3]), atof(row[4]), atof(row[5]), atoi(row[6]), atoi(row[7]), timeleft, atoi(row[8]), atoi(row[9]), atoi(row[10]), perl_enabled, (EmuAppearance)atoi(row[12]));
-			spawn2_list.Insert( newSpawn );
-			mysql_free_result(result);
-			safe_delete_array(query);
-			return newSpawn;
-		}
-		mysql_free_result(result);
-	}
+	std::string query = StringFormat("SELECT id, spawngroupID, x, y, z, heading, "
+                                    "respawntime, variance, pathgrid, _condition, "
+                                    "cond_value, enabled, animation FROM spawn2 "
+                                    "WHERE id = %i", spawn2id);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadSpawn2 query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return nullptr;
+    }
 
-	LogFile->write(EQEMuLog::Error, "Error in LoadSpawn2 query '%s': %s", query, errbuf);
-	safe_delete_array(query);
-	return 0;
+    if (results.RowCount() != 1) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadSpawn2 query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return nullptr;
+    }
+
+	auto row = results.begin();
+
+    bool perl_enabled = atoi(row[11]) == 1 ? true : false;
+
+	Spawn2* newSpawn = new Spawn2(atoi(row[0]), atoi(row[1]), atof(row[2]), atof(row[3]), atof(row[4]),
+                                    atof(row[5]), atoi(row[6]), atoi(row[7]), timeleft, atoi(row[8]),
+                                    atoi(row[9]), atoi(row[10]), perl_enabled, (EmuAppearance)atoi(row[12]));
+
+    spawn2_list.Insert(newSpawn);
+
+	return newSpawn;
 }
 
-bool ZoneDatabase::CreateSpawn2(Client *c, uint32 spawngroup, const char* zone, float heading, float x, float y, float z, uint32 respawn, uint32 variance, uint16 condition, int16 cond_value)
+bool ZoneDatabase::CreateSpawn2(Client *client, uint32 spawngroup, const char* zone, float heading, float x, float y, float z, uint32 respawn, uint32 variance, uint16 condition, int16 cond_value)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
 
-	char *query = 0;
-	uint32 affected_rows = 0;
-
-	//	if(GetInverseXY()==1) {
-	//		float temp=x;
-	//		x=y;
-	//		y=temp;
-	//	}
-	if (RunQuery(query, MakeAnyLenString(&query,
-		"INSERT INTO spawn2 (spawngroupID,zone,x,y,z,heading,respawntime,variance,_condition,cond_value) Values (%i, '%s', %f, %f, %f, %f, %i, %i, %u, %i)",
-		spawngroup, zone, x, y, z, heading, respawn, variance, condition, cond_value
-		), errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
-		if (affected_rows == 1) {
-			if(c) c->LogSQL(query);
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in CreateSpawn2 query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+	std::string query = StringFormat("INSERT INTO spawn2 (spawngroupID, zone, x, y, z, heading, "
+                                    "respawntime, variance, _condition, cond_value) "
+                                    "VALUES (%i, '%s', %f, %f, %f, %f, %i, %i, %u, %i)",
+                                    spawngroup, zone, x, y, z, heading,
+                                    respawn, variance, condition, cond_value);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in CreateSpawn2 query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
-	}
+    }
 
-	return false;
+    if (results.RowsAffected() != 1)
+        return false;
+
+    if(client)
+        client->LogSQL(query.c_str());
+
+    return true;
 }
 
 uint32 Zone::CountSpawn2() {
@@ -671,177 +661,159 @@ void SpawnConditionManager::ExecEvent(SpawnEvent &event, bool send_update) {
 }
 
 void SpawnConditionManager::UpdateDBEvent(SpawnEvent &event) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	int len;
 
-	SpawnCondition cond;
-	len = MakeAnyLenString(&query,
-		"UPDATE spawn_events SET "
-		"next_minute=%d, next_hour=%d, next_day=%d, next_month=%d, "
-		"next_year=%d, enabled=%d, strict=%d "
-		"WHERE id=%d",
-		event.next.minute, event.next.hour, event.next.day, event.next.month,
-		event.next.year, event.enabled?1:0, event.strict?1:0,event.id
-	);
-	if(!database.RunQuery(query, len, errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Unable to update spawn event '%s': %s\n", query, errbuf);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("UPDATE spawn_events SET "
+                                    "next_minute = %d, next_hour = %d, "
+                                    "next_day = %d, next_month = %d, "
+                                    "next_year = %d, enabled = %d, "
+                                    "strict = %d WHERE id = %d",
+                                    event.next.minute, event.next.hour,
+                                    event.next.day, event.next.month,
+                                    event.next.year, event.enabled? 1: 0,
+                                    event.strict? 1: 0, event.id);
+	auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		LogFile->write(EQEMuLog::Error, "Unable to update spawn event '%s': %s\n", query.c_str(), results.ErrorMessage().c_str());
+
 }
 
 void SpawnConditionManager::UpdateDBCondition(const char* zone_name, uint32 instance_id, uint16 cond_id, int16 value) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	int len;
 
-	SpawnCondition cond;
-	len = MakeAnyLenString(&query,
-		"REPLACE INTO spawn_condition_values (id, value, zone, instance_id) VALUES(%u, %u, '%s', %u)",
-		cond_id, value, zone_name, instance_id
-	);
-	if(!database.RunQuery(query, len, errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Unable to update spawn condition '%s': %s\n", query, errbuf);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("REPLACE INTO spawn_condition_values "
+                                    "(id, value, zone, instance_id) "
+                                    "VALUES( %u, %u, '%s', %u)",
+                                    cond_id, value, zone_name, instance_id);
+    auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		LogFile->write(EQEMuLog::Error, "Unable to update spawn condition '%s': %s\n", query.c_str(), results.ErrorMessage().c_str());
+
 }
 
 bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, std::string &zone_name) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	int len;
 
-	bool ret = false;
-
-	len = MakeAnyLenString(&query,
-		"SELECT id,cond_id,period,next_minute,next_hour,next_day,next_month,next_year,enabled,action,argument,strict,zone "
-		"FROM spawn_events WHERE id=%d", event_id);
-	if (database.RunQuery(query, len, errbuf, &result)) {
-		safe_delete_array(query);
-		if((row = mysql_fetch_row(result))) {
-			event.id = atoi(row[0]);
-			event.condition_id = atoi(row[1]);
-			event.period = atoi(row[2]);
-
-			event.next.minute = atoi(row[3]);
-			event.next.hour = atoi(row[4]);
-			event.next.day = atoi(row[5]);
-			event.next.month = atoi(row[6]);
-			event.next.year = atoi(row[7]);
-
-			event.enabled = atoi(row[8])==0?false:true;
-			event.action = (SpawnEvent::Action) atoi(row[9]);
-			event.argument = atoi(row[10]);
-			event.strict = atoi(row[11])==0?false:true;
-			zone_name = row[12];
-
-			std::string t;
-			EQTime::ToString(&event.next, t);
-			_log(SPAWNS__CONDITIONS, "(LoadDBEvent) Loaded %s spawn event %d on condition %d with period %d, action %d, argument %d, strict %d. Will trigger at %s",
-				event.enabled?"enabled":"disabled", event.id, event.condition_id, event.period, event.action, event.argument, event.strict, t.c_str());
-
-			ret = true;
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadDBEvent query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("SELECT id, cond_id, period, "
+                                    "next_minute, next_hour, next_day, "
+                                    "next_month, next_year, enabled, "
+                                    "action, argument, strict, zone "
+                                    "FROM spawn_events WHERE id = %d", event_id);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in LoadDBEvent query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
-	return(ret);
+
+    if (results.RowCount() == 0)
+        return false;
+
+	auto row = results.begin();
+
+    event.id = atoi(row[0]);
+    event.condition_id = atoi(row[1]);
+    event.period = atoi(row[2]);
+
+    event.next.minute = atoi(row[3]);
+    event.next.hour = atoi(row[4]);
+    event.next.day = atoi(row[5]);
+    event.next.month = atoi(row[6]);
+    event.next.year = atoi(row[7]);
+
+    event.enabled = atoi(row[8]) != 0;
+    event.action = (SpawnEvent::Action) atoi(row[9]);
+    event.argument = atoi(row[10]);
+    event.strict = atoi(row[11]) != 0;
+    zone_name = row[12];
+
+    std::string timeAsString;
+    EQTime::ToString(&event.next, timeAsString);
+
+    _log(SPAWNS__CONDITIONS, "(LoadDBEvent) Loaded %s spawn event %d on condition %d with period %d, action %d, argument %d, strict %d. Will trigger at %s", event.enabled? "enabled": "disabled", event.id, event.condition_id, event.period, event.action, event.argument, event.strict, timeAsString.c_str());
+
+	return true;
 }
 
 bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	int len;
-
 	//clear out old stuff..
 	spawn_conditions.clear();
 
-	//load spawn conditions
-	SpawnCondition cond;
-	len = MakeAnyLenString(&query, "SELECT id, onchange, value FROM spawn_conditions WHERE zone='%s'", zone_name);
-	if (database.RunQuery(query, len, errbuf, &result)) {
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result))) {
-			cond.condition_id = atoi(row[0]);
-			cond.value = atoi(row[2]);
-			cond.on_change = (SpawnCondition::OnChange) atoi(row[1]);
-			spawn_conditions[cond.condition_id] = cond;
 
-			_log(SPAWNS__CONDITIONS, "Loaded spawn condition %d with value %d and on_change %d", cond.condition_id, cond.value, cond.on_change);
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadSpawnConditions query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+
+	std::string query = StringFormat("SELECT id, onchange, value "
+                                    "FROM spawn_conditions "
+                                    "WHERE zone = '%s'", zone_name);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadSpawnConditions query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
-	}
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        //load spawn conditions
+        SpawnCondition cond;
+
+        cond.condition_id = atoi(row[0]);
+        cond.value = atoi(row[2]);
+        cond.on_change = (SpawnCondition::OnChange) atoi(row[1]);
+        spawn_conditions[cond.condition_id] = cond;
+
+        _log(SPAWNS__CONDITIONS, "Loaded spawn condition %d with value %d and on_change %d", cond.condition_id, cond.value, cond.on_change);
+    }
 
 	//load values
-	len = MakeAnyLenString(&query, "SELECT id, value FROM spawn_condition_values WHERE zone='%s' and instance_id=%u", zone_name, instance_id);
-	if (database.RunQuery(query, len, errbuf, &result)) {
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result)))
-		{
-			std::map<uint16, SpawnCondition>::iterator iter = spawn_conditions.find(atoi(row[0]));
-			if(iter != spawn_conditions.end())
-			{
-				iter->second.value = atoi(row[1]);
-			}
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in LoadSpawnConditions query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+	query = StringFormat("SELECT id, value FROM spawn_condition_values "
+                        "WHERE zone = '%s' AND instance_id = %u",
+                        zone_name, instance_id);
+    results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadSpawnConditions query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		spawn_conditions.clear();
 		return false;
-	}
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        auto iter = spawn_conditions.find(atoi(row[0]));
+
+        if(iter != spawn_conditions.end())
+            iter->second.value = atoi(row[1]);
+    }
 
 	//load spawn events
-	SpawnEvent event;
-	len = MakeAnyLenString(&query,
-		"SELECT id,cond_id,period,next_minute,next_hour,next_day,next_month,next_year,enabled,action,argument,strict "
-		"FROM spawn_events WHERE zone='%s'", zone_name);
-	if (database.RunQuery(query, len, errbuf, &result)) {
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result))) {
-			event.id = atoi(row[0]);
-			event.condition_id = atoi(row[1]);
-			event.period = atoi(row[2]);
-			if(event.period == 0) {
-				LogFile->write(EQEMuLog::Error, "Refusing to load spawn event #%d because it has a period of 0\n", event.id);
-				continue;
-			}
-
-			event.next.minute = atoi(row[3]);
-			event.next.hour = atoi(row[4]);
-			event.next.day = atoi(row[5]);
-			event.next.month = atoi(row[6]);
-			event.next.year = atoi(row[7]);
-
-			event.enabled = atoi(row[8])==0?false:true;
-			event.action = (SpawnEvent::Action) atoi(row[9]);
-			event.argument = atoi(row[10]);
-			event.strict = atoi(row[11])==0?false:true;
-			spawn_events.push_back(event);
-
-			_log(SPAWNS__CONDITIONS, "(LoadSpawnConditions) Loaded %s spawn event %d on condition %d with period %d, action %d, argument %d, strict %d",
-				event.enabled?"enabled":"disabled", event.id, event.condition_id, event.period, event.action, event.argument, event.strict);
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadSpawnConditions events query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+    query = StringFormat("SELECT id, cond_id, period, next_minute, next_hour, "
+                        "next_day, next_month, next_year, enabled, action, argument, strict "
+                        "FROM spawn_events WHERE zone = '%s'", zone_name);
+    results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadSpawnConditions events query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
-	}
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        SpawnEvent event;
+
+        event.id = atoi(row[0]);
+        event.condition_id = atoi(row[1]);
+        event.period = atoi(row[2]);
+
+        if(event.period == 0) {
+            LogFile->write(EQEMuLog::Error, "Refusing to load spawn event #%d because it has a period of 0\n", event.id);
+            continue;
+        }
+
+        event.next.minute = atoi(row[3]);
+        event.next.hour = atoi(row[4]);
+        event.next.day = atoi(row[5]);
+        event.next.month = atoi(row[6]);
+        event.next.year = atoi(row[7]);
+
+        event.enabled = atoi(row[8])==0?false:true;
+        event.action = (SpawnEvent::Action) atoi(row[9]);
+        event.argument = atoi(row[10]);
+        event.strict = atoi(row[11])==0?false:true;
+
+        spawn_events.push_back(event);
+
+        _log(SPAWNS__CONDITIONS, "(LoadSpawnConditions) Loaded %s spawn event %d on condition %d with period %d, action %d, argument %d, strict %d", event.enabled? "enabled": "disabled", event.id, event.condition_id, event.period, event.action, event.argument, event.strict);
+    }
 
 	//now we need to catch up on events that happened while we were away
 	//and use them to alter just the condition variables.
@@ -855,18 +827,14 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 	TimeOfDay_Struct tod;
 	zone->zone_time.getEQTimeOfDay(&tod);
 
-	std::vector<SpawnEvent>::iterator cur,end;
-	cur = spawn_events.begin();
-	end = spawn_events.end();
-	bool ran;
-	for(; cur != end; ++cur) {
+	for(auto cur = spawn_events.begin(); cur != spawn_events.end(); ++cur) {
 		SpawnEvent &cevent = *cur;
 
 		bool StrictCheck = false;
-		if(cevent.strict && 
-			cevent.next.hour == tod.hour && 
-			cevent.next.day == tod.day && 
-			cevent.next.month == tod.month && 
+		if(cevent.strict &&
+			cevent.next.hour == tod.hour &&
+			cevent.next.day == tod.day &&
+			cevent.next.month == tod.month &&
 			cevent.next.year == tod.year)
 			StrictCheck = true;
 
@@ -874,43 +842,42 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 		if(!cevent.enabled || !StrictCheck)
 			SetCondition(zone->GetShortName(), zone->GetInstanceID(),cevent.condition_id,0);
 
-		if(cevent.enabled)
-		{
-			//watch for special case of all 0s, which means to reset next to now
-			if(cevent.next.year == 0 && cevent.next.month == 0 && cevent.next.day == 0 && cevent.next.hour == 0 && cevent.next.minute == 0) {
-				_log(SPAWNS__CONDITIONS, "Initial next trigger time set for spawn event %d", cevent.id);
-				memcpy(&cevent.next, &tod, sizeof(cevent.next));
-				//add one period
-				EQTime::AddMinutes(cevent.period, &cevent.next);
-				//save it in the db.
-				UpdateDBEvent(cevent);
-				continue;	//were done with this event.
-			}
+		if(!cevent.enabled)
+            continue;
 
-			ran = false;
-			while(EQTime::IsTimeBefore(&tod, &cevent.next)) {
-				_log(SPAWNS__CONDITIONS, "Catch up triggering on event %d", cevent.id);
-				//this event has been triggered.
-				//execute the event
-				if(!cevent.strict || StrictCheck)
-					ExecEvent(cevent, false);
-		
-				//add the period of the event to the trigger time
-				EQTime::AddMinutes(cevent.period, &cevent.next);
-				ran = true;
-			}
-			//only write it out if the event actually ran
-			if(ran) {
-				//save the event in the DB
-				UpdateDBEvent(cevent);
-			}
-		}
+        //watch for special case of all 0s, which means to reset next to now
+        if(cevent.next.year == 0 && cevent.next.month == 0 && cevent.next.day == 0 && cevent.next.hour == 0 && cevent.next.minute == 0) {
+            _log(SPAWNS__CONDITIONS, "Initial next trigger time set for spawn event %d", cevent.id);
+            memcpy(&cevent.next, &tod, sizeof(cevent.next));
+            //add one period
+            EQTime::AddMinutes(cevent.period, &cevent.next);
+            //save it in the db.
+            UpdateDBEvent(cevent);
+            continue;	//were done with this event.
+        }
+
+        bool ran = false;
+        while(EQTime::IsTimeBefore(&tod, &cevent.next)) {
+            _log(SPAWNS__CONDITIONS, "Catch up triggering on event %d", cevent.id);
+            //this event has been triggered.
+            //execute the event
+            if(!cevent.strict || StrictCheck)
+                ExecEvent(cevent, false);
+
+            //add the period of the event to the trigger time
+            EQTime::AddMinutes(cevent.period, &cevent.next);
+            ran = true;
+        }
+
+        //only write it out if the event actually ran
+        if(ran)
+            UpdateDBEvent(cevent); //save the event in the DB
 	}
 
 	//now our event timers are all up to date, find our closest event.
 	FindNearestEvent();
 
-	return(true);
+	return true;
 }
 
 void SpawnConditionManager::FindNearestEvent() {
@@ -926,7 +893,7 @@ void SpawnConditionManager::FindNearestEvent() {
 		if(cevent.enabled)
 		{
 			//see if this event is before our last nearest
-			if(EQTime::IsTimeBefore(&next_event, &cevent.next)) 
+			if(EQTime::IsTimeBefore(&next_event, &cevent.next))
 			{
 				memcpy(&next_event, &cevent.next, sizeof(next_event));
 				next_id = cevent.id;
@@ -1162,37 +1129,28 @@ int16 SpawnConditionManager::GetCondition(const char *zone_short, uint32 instanc
 		}
 
 		SpawnCondition &cond = condi->second;
-		return(cond.value);
-	} else {
-		//this is a remote spawn condition, grab it from the DB
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char* query = 0;
-		MYSQL_RES *result;
-		MYSQL_ROW row;
-		int len;
-
-		int16 value;
-
-		//load spawn conditions
-		SpawnCondition cond;
-		len = MakeAnyLenString(&query, "SELECT value FROM spawn_condition_values WHERE zone='%s' AND instance_id=%u AND id=%d",
-			zone_short, instance_id, condition_id);
-		if (database.RunQuery(query, len, errbuf, &result)) {
-			safe_delete_array(query);
-			if((row = mysql_fetch_row(result))) {
-				value = atoi(row[0]);
-			} else {
-				_log(SPAWNS__CONDITIONS, "Unable to load remote condition %d from zone %s in Get request.", condition_id, zone_short);
-				value = 0;	//dunno a better thing to do...
-			}
-			mysql_free_result(result);
-		} else {
-			_log(SPAWNS__CONDITIONS, "Unable to query remote condition %d from zone %s in Get request.", condition_id, zone_short);
-			safe_delete_array(query);
-			value = 0;	//dunno a better thing to do...
-		}
-		return(value);
+		return cond.value;
 	}
+
+	//this is a remote spawn condition, grab it from the DB
+    //load spawn conditions
+    std::string query = StringFormat("SELECT value FROM spawn_condition_values "
+                                    "WHERE zone = '%s' AND instance_id = %u AND id = %d",
+                                    zone_short, instance_id, condition_id);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        _log(SPAWNS__CONDITIONS, "Unable to query remote condition %d from zone %s in Get request.", condition_id, zone_short);
+		return 0;	//dunno a better thing to do...
+    }
+
+    if (results.RowCount() == 0) {
+        _log(SPAWNS__CONDITIONS, "Unable to load remote condition %d from zone %s in Get request.", condition_id, zone_short);
+		return 0;	//dunno a better thing to do...
+    }
+
+    auto row = results.begin();
+
+    return atoi(row[0]);
 }
 
 bool SpawnConditionManager::Check(uint16 condition, int16 min_value) {

@@ -29,19 +29,22 @@
 #include <assert.h>
 
 #include "masterentity.h"
-#include "NpcAI.h"
+#include "npc_ai.h"
 #include "../common/packet_dump.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/eq_constants.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
 #include "zone.h"
-#include "StringIDs.h"
-#include "../common/StringUtil.h"
+#include "string_ids.h"
+#include "../common/string_util.h"
 #include "../common/rulesys.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 #include "water_map.h"
 #include "worldserver.h"
+#include "queryserv.h"
+
+extern QueryServ* QServ;
 extern WorldServer worldserver;
 
 #ifdef _WINDOWS
@@ -1455,14 +1458,14 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 	int exploss = 0;
 	mlog(COMBAT__HITS, "Fatal blow dealt by %s with %d damage, spell %d, skill %d", killerMob ? killerMob->GetName() : "Unknown", damage, spell, attack_skill);
 
-	//
-	// #1: Send death packet to everyone
-	//
+	/*
+		#1: Send death packet to everyone
+	*/
 	uint8 killed_level = GetLevel();
 	
 	SendLogoutPackets();
 
-	//make our become corpse packet, and queue to ourself before OP_Death.
+	/* Make self become corpse packet */
 	EQApplicationPacket app2(OP_BecomeCorpse, sizeof(BecomeCorpse_Struct));
 	BecomeCorpse_Struct* bc = (BecomeCorpse_Struct*)app2.pBuffer;
 	bc->spawn_id = GetID();
@@ -1471,7 +1474,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 	bc->z = GetZ();
 	QueuePacket(&app2);
 
-	// make death packet
+	/* Make Death Packet */
 	EQApplicationPacket app(OP_Death, sizeof(Death_Struct));
 	Death_Struct* d = (Death_Struct*)app.pBuffer;
 	d->spawn_id = GetID();
@@ -1484,9 +1487,9 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 	app.priority = 6;
 	entity_list.QueueClients(this, &app);
 
-	//
-	// #2: figure out things that affect the player dying and mark them dead
-	//
+	/*
+		#2: figure out things that affect the player dying and mark them dead
+	*/
 
 	InterruptSpell();
 	SetPet(0);
@@ -1541,9 +1544,9 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 	//remove ourself from all proximities
 	ClearAllProximities();
 
-	//
-	// #3: exp loss and corpse generation
-	//
+	/*
+		#3: exp loss and corpse generation
+	*/
 
 	// figure out if they should lose exp
 	if(RuleB(Character, UseDeathExpLossMult)){
@@ -1659,27 +1662,21 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 
 			LeftCorpse = true;
 		}
-
-//		if(!IsLD())//Todo: make it so an LDed client leaves corpse if its enabled
-//			MakeCorpse(exploss);
 	} else {
 		BuffFadeDetrimental();
 	}
 
-	//
-	// Finally, send em home
-	//
+	/*
+		Finally, send em home
 
-	// we change the mob variables, not pp directly, because Save() will copy
-	// from these and overwrite what we set in pp anyway
-	//
+		We change the mob variables, not pp directly, because Save() will copy
+		from these and overwrite what we set in pp anyway
+	*/
 
 	if(LeftCorpse && (GetClientVersionBit() & BIT_SoFAndLater) && RuleB(Character, RespawnFromHover))
 	{
-		ClearDraggedCorpses();
-
-		RespawnFromHoverTimer.Start(RuleI(Character, RespawnFromHoverTimer) * 1000);
-
+		ClearDraggedCorpses(); 
+		RespawnFromHoverTimer.Start(RuleI(Character, RespawnFromHoverTimer) * 1000); 
 		SendRespawnBinds();
 	}
 	else
@@ -1696,15 +1693,20 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 		if(r)
 			r->MemberZoned(this);
 
-		dead_timer.Start(5000, true);
-
+		dead_timer.Start(5000, true); 
 		m_pp.zone_id = m_pp.binds[0].zoneId;
 		m_pp.zoneInstance = 0;
-		database.MoveCharacterToZone(this->CharacterID(), database.GetZoneName(m_pp.zone_id));
-
-		Save();
-
+		database.MoveCharacterToZone(this->CharacterID(), database.GetZoneName(m_pp.zone_id)); 
+		Save(); 
 		GoToDeath();
+	}
+
+	/* QS: PlayerLogDeaths */
+	if (RuleB(QueryServ, PlayerLogDeaths)){
+		const char * killer_name = "";
+		if (killerMob && killerMob->GetCleanName()){ killer_name = killerMob->GetCleanName(); } 
+		std::string event_desc = StringFormat("Died in zoneid:%i instid:%i by '%s', spellid:%i, damage:%i", this->GetZoneID(), this->GetInstanceID(), killer_name, spell, damage); 
+		QServ->PlayerLogEvent(Player_Log_Deaths, this->CharacterID(), event_desc);
 	}
 
 	parse->EventPlayer(EVENT_DEATH_COMPLETE, this, buffer, 0);

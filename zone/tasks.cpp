@@ -27,25 +27,23 @@ Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
 #define strcasecmp _stricmp
 #endif
 
-#include "../common/MiscFunctions.h"
-#include "../common/StringUtil.h"
+#include "../common/misc_functions.h"
+#include "../common/string_util.h"
 #include "../common/rulesys.h"
 #include "masterentity.h"
 #include "../common/features.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 #include "mob.h"
+#include "queryserv.h"
 
+extern QueryServ* QServ;
 
 TaskManager::TaskManager() {
-
 	for(int i=0; i<MAXTASKS; i++)
 		Tasks[i] = nullptr;
-
-
 }
 
 TaskManager::~TaskManager() {
-
 	for(int i=0; i<MAXTASKS; i++) {
 		if(Tasks[i] != nullptr) {
 			for(int j=0; j<Tasks[i]->ActivityCount; j++) {
@@ -62,11 +60,8 @@ TaskManager::~TaskManager() {
 }
 
 bool TaskManager::LoadTaskSets() {
-
-
 	const char *TaskSetQuery = "SELECT `id`, `taskid` from `tasksets` WHERE `id` > 0 AND `id` < %i "
 					"AND `taskid` >= 0 AND `taskid` < %i ORDER BY `id`, `taskid` ASC";
-
 	const char *ERR_MYSQLERROR = "[TASKS]Error in TaskManager::LoadTaskSets: %s";
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
@@ -1985,12 +1980,17 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int T
 		// Inform the client the task has been updated, both by a chat message
 		c->Message(0, "Your task '%s' has been updated.", Task->Title);
 		
-		if(Task->Activity[ActivityID].GoalMethod != METHODQUEST)
-		{
+		if(Task->Activity[ActivityID].GoalMethod != METHODQUEST) {
 			char buf[24];
 			snprintf(buf, 23, "%d %d", ActiveTasks[TaskIndex].TaskID, ActiveTasks[TaskIndex].Activity[ActivityID].ActivityID);
 			buf[23] = '\0';
 			parse->EventPlayer(EVENT_TASK_STAGE_COMPLETE, c, buf, 0);
+
+			/* QS: PlayerLogTaskUpdates :: Update */
+			if (RuleB(QueryServ, PlayerLogTaskUpdates)){
+				std::string event_desc = StringFormat("Task Stage Complete :: taskid:%i activityid:%i donecount:%i in zoneid:%i instid:%i", ActiveTasks[TaskIndex].TaskID, ActiveTasks[TaskIndex].Activity[ActivityID].ActivityID, ActiveTasks[TaskIndex].Activity[ActivityID].DoneCount, c->GetZoneID(), c->GetInstanceID());
+				QServ->PlayerLogEvent(Player_Log_Task_Updates, c->CharacterID(), event_desc);
+			}
 		}
 		
 		// If this task is now complete, the Completed tasks will have been
@@ -2002,6 +2002,12 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int T
 			buf[23] = '\0';
 			parse->EventPlayer(EVENT_TASK_COMPLETE, c, buf, 0);
 
+			/* QS: PlayerLogTaskUpdates :: Complete */
+			if (RuleB(QueryServ, PlayerLogTaskUpdates)){
+				std::string event_desc = StringFormat("Task Complete :: taskid:%i activityid:%i donecount:%i in zoneid:%i instid:%i", ActiveTasks[TaskIndex].TaskID, ActiveTasks[TaskIndex].Activity[ActivityID].ActivityID, ActiveTasks[TaskIndex].Activity[ActivityID].DoneCount, c->GetZoneID(), c->GetInstanceID());
+				QServ->PlayerLogEvent(Player_Log_Task_Updates, c->CharacterID(), event_desc);
+			}
+
 			taskmanager->SendCompletedTasksToClient(c, this);
 			c->SendTaskActivityComplete(ActiveTasks[TaskIndex].TaskID, 0, TaskIndex, false);
 			taskmanager->SaveClientState(c, this);
@@ -2011,6 +2017,7 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int T
 			// If Experience and/or cash rewards are set, reward them from the task even if RewardMethod is METHODQUEST
 			RewardTask(c, Task);
 			//RemoveTask(c, TaskIndex);
+
 		}
 
 	}

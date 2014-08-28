@@ -24,15 +24,15 @@ class Client;
 #include "../common/emu_opcodes.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/eq_constants.h"
-#include "../common/EQStreamIntf.h"
-#include "../common/EQPacket.h"
+#include "../common/eq_stream_intf.h"
+#include "../common/eq_packet.h"
 #include "../common/linked_list.h"
 #include "../common/extprofile.h"
 #include "../common/classes.h"
 #include "../common/races.h"
 #include "../common/deity.h"
 #include "../common/seperator.h"
-#include "../common/Item.h"
+#include "../common/item.h"
 #include "../common/guilds.h"
 #include "../common/item_struct.h"
 #include "../common/clientversions.h"
@@ -43,9 +43,9 @@ class Client;
 #include "npc.h"
 #include "merc.h"
 #include "zone.h"
-#include "AA.h"
+#include "aa.h"
 #include "questmgr.h"
-#include "QGlobals.h"
+#include "qglobals.h"
 
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)
@@ -268,7 +268,7 @@ public:
 	void	TradeRequestFailed(const EQApplicationPacket* app);
 	void	BuyTraderItem(TraderBuy_Struct* tbs,Client* trader,const EQApplicationPacket* app);
 	void	TraderUpdate(uint16 slot_id,uint32 trader_id);
-	void	FinishTrade(Mob* with, ServerPacket* qspack = nullptr, bool finalizer = false);
+	void	FinishTrade(Mob* with, bool finalizer = false, void* event_entry = nullptr, std::list<void*>* event_details = nullptr);
 	void	SendZonePoints();
 
 	void	SendBuyerResults(char *SearchQuery, uint32 SearchID);
@@ -1097,7 +1097,7 @@ public:
 	inline void ClearDraggedCorpses() { DraggedCorpses.clear(); }
 	void SendAltCurrencies();
 	void SetAlternateCurrencyValue(uint32 currency_id, uint32 new_amount);
-	void AddAlternateCurrencyValue(uint32 currency_id, int32 amount);
+	void AddAlternateCurrencyValue(uint32 currency_id, int32 amount, int8 method = 0);
 	void SendAlternateCurrencyValues();
 	void SendAlternateCurrencyValue(uint32 currency_id, bool send_if_null = true);
 	uint32 GetAlternateCurrencyValue(uint32 currency_id) const;

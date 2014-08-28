@@ -22,14 +22,16 @@
 #ifdef EMBPERL_XS
 
 #include "../common/debug.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 #include "embparser.h"
 #include "questmgr.h"
 #include "embxs.h"
 #include "entity.h"
 #include "zone.h"
+#include "queryserv.h"
 
 extern Zone* zone;
+extern QueryServ* QServ; 
 
 /*
 
@@ -3370,6 +3372,36 @@ XS(XS__clear_npctype_cache)
 	XSRETURN_EMPTY;
 }
 
+XS(XS__qs_send_query);
+XS(XS__qs_send_query)
+{
+	dXSARGS;
+	if (items != 1){
+		Perl_croak(aTHX_ "Usage: qs_send_query(query)");
+	}
+	else{
+		// char *Query = (char *)SvPV_nolen(ST(0));
+		std::string Query = (std::string)SvPV_nolen(ST(0));
+		QServ->SendQuery(Query);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS__qs_player_event);
+XS(XS__qs_player_event)
+{
+	dXSARGS;
+	if (items != 2){ 
+		Perl_croak(aTHX_ "Usage: qs_player_event(char_id, event_desc)");
+	}
+	else{
+		int	char_id = (int)SvIV(ST(0)); 
+		std::string event_desc = (std::string)SvPV_nolen(ST(1));
+		QServ->PlayerLogEvent(Player_Log_Quest, char_id, event_desc);
+	}
+	XSRETURN_EMPTY;
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -3591,6 +3623,8 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "enablerecipe"), XS__enablerecipe, file);
 		newXS(strcpy(buf, "disablerecipe"), XS__disablerecipe, file);
 		newXS(strcpy(buf, "clear_npctype_cache"), XS__clear_npctype_cache, file);
+		newXS(strcpy(buf, "qs_send_query"), XS__qs_send_query, file); 
+		newXS(strcpy(buf, "qs_player_event"), XS__qs_player_event, file);
 		XSRETURN_YES;
 }
 

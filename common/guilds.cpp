@@ -16,7 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
-#include "MiscFunctions.h"
+#include "misc_functions.h"
 #include "guilds.h"
 #include "database.h"
 #include "eq_packet_structs.h"

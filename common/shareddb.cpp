@@ -4,11 +4,11 @@
 
 #include "shareddb.h"
 #include "mysql.h"
-#include "Item.h"
+#include "item.h"
 #include "classes.h"
 #include "rulesys.h"
 #include "seperator.h"
-#include "StringUtil.h"
+#include "string_util.h"
 #include "eq_packet_structs.h"
 #include "guilds.h"
 #include "extprofile.h"

@@ -2,7 +2,7 @@
 #include "lfguild.h"
 #include "database.h"
 #include "worldserver.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "../common/packet_dump.h"
 #include "../common/rulesys.h"
 
@@ -22,7 +22,7 @@ PlayerLookingForGuild::PlayerLookingForGuild(char *Name, char *Comments, uint32 
 
 GuildLookingForPlayers::GuildLookingForPlayers(char *Name, char *Comments, uint32 FromLevel, uint32 ToLevel, uint32 Classes, uint32 AACount, uint32 Timezone, uint32 TimePosted)
 {
-	this->Name = Name;
+	this->Name = Name; 
 	this->Comments = Comments;
 	this->FromLevel = FromLevel;
 	this->ToLevel = ToLevel;

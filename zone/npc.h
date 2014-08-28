@@ -29,7 +29,7 @@ class NPC;
 #include "spawn2.h"
 #include "../common/loottable.h"
 #include "zonedump.h"
-#include "QGlobals.h"
+#include "qglobals.h"
 #include "../common/rulesys.h"
 
 #ifdef _WINDOWS

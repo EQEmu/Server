@@ -246,6 +246,7 @@ public:
 	/*
 	* General Character Related Stuff
 	*/
+	void	StoreCharacterLookup(uint32 char_id);
 	bool	SetServerFilters(char* name, ServerSideFilters_Struct *ssfs);
 	uint32	GetServerFilters(char* name, ServerSideFilters_Struct *ssfs);
 	bool	GetAccountInfoForLogin(uint32 account_id, int16* admin = 0, char* account_name = 0,

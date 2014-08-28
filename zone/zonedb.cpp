@@ -1,7 +1,7 @@
 
 #include "zonedb.h"
-#include "../common/Item.h"
-#include "../common/StringUtil.h"
+#include "../common/item.h"
+#include "../common/string_util.h"
 #include "../common/extprofile.h"
 #include "../common/guilds.h"
 #include "../common/rulesys.h"
@@ -3225,4 +3225,12 @@ bool ZoneDatabase::GetFactionIdsForNPC(uint32 nfl_id, std::list<struct NPCFactio
 		}
 	}
 	return true;
+}
+
+void ZoneDatabase::StoreCharacterLookup(uint32 char_id) {
+	std::string c_lookup = StringFormat("REPLACE INTO `character_lookup` (id, account_id, `name`, timelaston, x, y, z, zonename, zoneid, instanceid, pktime, groupid, class, `level`, lfp, lfg, mailkey, xtargets, firstlogon, inspectmessage)"
+		" SELECT id, account_id, `name`, timelaston, x, y, z, zonename, zoneid, instanceid, pktime, groupid, class, `level`, lfp, lfg, mailkey, xtargets, firstlogon, inspectmessage"
+		" FROM `character_` "
+		" WHERE `id` = %i ", char_id);  
+	QueryDatabase(c_lookup); 
 }

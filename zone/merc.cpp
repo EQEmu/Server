@@ -1,17 +1,17 @@
 #include "merc.h"
 #include "masterentity.h"
-#include "NpcAI.h"
+#include "npc_ai.h"
 #include "../common/packet_dump.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/eq_constants.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
 #include "zone.h"
-#include "StringIDs.h"
-#include "../common/MiscFunctions.h"
-#include "../common/StringUtil.h"
+#include "string_ids.h"
+#include "../common/misc_functions.h"
+#include "../common/string_util.h"
 #include "../common/rulesys.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 #include "water_map.h"
 
 extern volatile bool ZoneLoaded;
@@ -2773,7 +2773,7 @@ int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 
 
 int32 Merc::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
-	
+
 	if (spells[spell_id].targettype == ST_Self)
 		return value;
 
@@ -2784,9 +2784,9 @@ int32 Merc::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
 	int chance = RuleI(Spells, BaseCritChance);
 		chance += itembonuses.CriticalSpellChance + spellbonuses.CriticalSpellChance + aabonuses.CriticalSpellChance;
-		
+
 	if (chance > 0){
- 
+
 		 int32 ratio = RuleI(Spells, BaseCritRatio); //Critical modifier is applied from spell effects only. Keep at 100 for live like criticals.
 
 			 if (MakeRandomInt(1,100) <= chance){
@@ -2801,29 +2801,29 @@ int32 Merc::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 		}
 
 		ratio += RuleI(Spells, WizCritRatio); //Default is zero
-			
+
 		if (Critical){
 
-			value = value_BaseEffect*ratio/100;  
+			value = value_BaseEffect*ratio/100;
 
-			value += value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100; 
+			value += value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100;
 
 			value += int(value_BaseEffect*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100)*ratio/100;
 
 			if (target) {
-				value += int(value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100)*ratio/100;  
-				value -= target->GetFcDamageAmtIncoming(this, spell_id); 
+				value += int(value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100)*ratio/100;
+				value -= target->GetFcDamageAmtIncoming(this, spell_id);
 			}
 
-			value -= GetFocusEffect(focusFcDamageAmtCrit, spell_id)*ratio/100; 
+			value -= GetFocusEffect(focusFcDamageAmtCrit, spell_id)*ratio/100;
 
-			value -= GetFocusEffect(focusFcDamageAmt, spell_id); 
+			value -= GetFocusEffect(focusFcDamageAmt, spell_id);
 
 			if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
 				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value)*ratio/100;
 
-			value = (value * GetSpellScale() / 100);	
-				
+			value = (value * GetSpellScale() / 100);
+
 			entity_list.MessageClose_StringID(this, false, 100, MT_SpellCrits,
 					OTHER_CRIT_BLAST, GetName(), itoa(-value));
 
@@ -2832,30 +2832,30 @@ int32 Merc::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	}
 
 	 value = value_BaseEffect;
- 
-	 value += value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100; 
-	 
+
+	 value += value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100;
+
 	 value += value_BaseEffect*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100;
 
 	 if (target) {
 		value += value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100;
-		value -= target->GetFcDamageAmtIncoming(this, spell_id); 
+		value -= target->GetFcDamageAmtIncoming(this, spell_id);
 	 }
 
-	 value -= GetFocusEffect(focusFcDamageAmtCrit, spell_id); 
+	 value -= GetFocusEffect(focusFcDamageAmtCrit, spell_id);
 
-	 value -= GetFocusEffect(focusFcDamageAmt, spell_id); 
-	 
+	 value -= GetFocusEffect(focusFcDamageAmt, spell_id);
+
 	if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
-         value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value); 
+         value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
 
-	value = (value * GetSpellScale() / 100);		 
-		 
+	value = (value * GetSpellScale() / 100);
+
 	return value;
  }
 
 int32 Merc::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
-	
+
 	if (target == nullptr)
 		target = this;
 
@@ -2863,37 +2863,37 @@ int32 Merc::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 	int16 chance = 0;
 	int8 modifier = 1;
 	bool Critical = false;
-		
-	value_BaseEffect = value + (value*GetFocusEffect(focusFcBaseEffects, spell_id)/100); 
-		
+
+	value_BaseEffect = value + (value*GetFocusEffect(focusFcBaseEffects, spell_id)/100);
+
 	value = value_BaseEffect;
 
-	value += int(value_BaseEffect*GetFocusEffect(focusImprovedHeal, spell_id)/100); 
- 
+	value += int(value_BaseEffect*GetFocusEffect(focusImprovedHeal, spell_id)/100);
+
 	// Instant Heals
 	if(spells[spell_id].buffduration < 1) {
 
-		chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance; 
+		chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance;
 
-		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id); 
-						
+		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id);
+
 		if (spellbonuses.CriticalHealDecay)
-			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay); 
-	
+			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay);
+
 		if(chance && (MakeRandomInt(0,99) < chance)) {
 			Critical = true;
 			modifier = 2; //At present time no critical heal amount modifier SPA exists.
 		}
-		
+
 		value *= modifier;
-		value += GetFocusEffect(focusFcHealAmtCrit, spell_id) * modifier; 
-		value += GetFocusEffect(focusFcHealAmt, spell_id); 
-		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id); 
-	
+		value += GetFocusEffect(focusFcHealAmtCrit, spell_id) * modifier;
+		value += GetFocusEffect(focusFcHealAmt, spell_id);
+		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id);
+
 		if(itembonuses.HealAmt && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
 			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value) * modifier;
 
-		value += value*target->GetHealRate(spell_id, this)/100; 
+		value += value*target->GetHealRate(spell_id, this)/100;
 
 		if (Critical)
 			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s performs an exceptional heal! (%d)", GetName(), value);
@@ -2903,14 +2903,14 @@ int32 Merc::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 	//Heal over time spells. [Heal Rate and Additional Healing effects do not increase this value]
 	else {
-		
-		chance = itembonuses.CriticalHealOverTime + spellbonuses.CriticalHealOverTime + aabonuses.CriticalHealOverTime; 
 
-		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id); 
-		
+		chance = itembonuses.CriticalHealOverTime + spellbonuses.CriticalHealOverTime + aabonuses.CriticalHealOverTime;
+
+		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id);
+
 		if (spellbonuses.CriticalRegenDecay)
 			chance += GetDecayEffectValue(spell_id, SE_CriticalRegenDecay);
-		
+
 		if(chance && (MakeRandomInt(0,99) < chance))
 			return (value * 2);
 	}
@@ -5851,71 +5851,64 @@ void Client::SendMercAssignPacket(uint32 entityID, uint32 unk01, uint32 unk02) {
 	FastQueuePacket(&outapp);
 }
 
-void NPC::LoadMercTypes(){
-	std::string errorMessage;
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES* DatasetResult;
-	MYSQL_ROW DataRow;
+void NPC::LoadMercTypes() {
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT DISTINCT MTyp.dbstring, MTyp.clientversion FROM merc_merchant_entries MME, merc_merchant_template_entries MMTE, merc_types MTyp, merc_templates MTem WHERE MME.merchant_id = %i AND MME.merc_merchant_template_id = MMTE.merc_merchant_template_id AND MMTE.merc_template_id = MTem.merc_template_id AND MTem.merc_type_id = MTyp.merc_type_id;", GetNPCTypeID()), TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
+	std::string query = StringFormat("SELECT DISTINCT MTyp.dbstring, MTyp.clientversion "
+                                    "FROM merc_merchant_entries MME, merc_merchant_template_entries MMTE, "
+                                    "merc_types MTyp, merc_templates MTem "
+                                    "WHERE MME.merchant_id = %i "
+                                    "AND MME.merc_merchant_template_id = MMTE.merc_merchant_template_id "
+                                    "AND MMTE.merc_template_id = MTem.merc_template_id "
+                                    "AND MTem.merc_type_id = MTyp.merc_type_id;", GetNPCTypeID());
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in NPC::LoadMercTypes()");
+        return;
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+		MercType tempMercType;
+
+		tempMercType.Type = atoi(row[0]);
+		tempMercType.ClientVersion = atoi(row[1]);
+
+		mercTypeList.push_back(tempMercType);
 	}
-	else {
-		while(DataRow = mysql_fetch_row(DatasetResult)) {
-			MercType tempMercType;
 
-			tempMercType.Type = atoi(DataRow[0]);
-			tempMercType.ClientVersion = atoi(DataRow[1]);
-
-			mercTypeList.push_back(tempMercType);
-		}
-
-		mysql_free_result(DatasetResult);
-	}
-
-	safe_delete_array(Query);
-	Query = 0;
-
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error in NPC::LoadMercTypes()");
-	}
 }
 
 void NPC::LoadMercs(){
 
-	std::string errorMessage;
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES* DatasetResult;
-	MYSQL_ROW DataRow;
+	std::string query = StringFormat("SELECT DISTINCT MTem.merc_template_id, MTyp.dbstring AS merc_type_id, "
+                                    "MTem.dbstring AS merc_subtype_id, 0 AS CostFormula, "
+                                    "CASE WHEN MTem.clientversion > MTyp.clientversion "
+                                    "THEN MTem.clientversion "
+                                    "ELSE MTyp.clientversion END AS clientversion, MTem.merc_npc_type_id "
+                                    "FROM merc_merchant_entries MME, merc_merchant_template_entries MMTE, "
+                                    "merc_types MTyp, merc_templates MTem "
+                                    "WHERE MME.merchant_id = %i AND "
+                                    "MME.merc_merchant_template_id = MMTE.merc_merchant_template_id "
+                                    "AND MMTE.merc_template_id = MTem.merc_template_id "
+                                    "AND MTem.merc_type_id = MTyp.merc_type_id;", GetNPCTypeID());
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+	    LogFile->write(EQEMuLog::Error, "Error in NPC::LoadMercTypes()");
+	    return;
+    }
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT DISTINCT MTem.merc_template_id, MTyp.dbstring AS merc_type_id, MTem.dbstring AS merc_subtype_id, 0 AS CostFormula, CASE WHEN MTem.clientversion > MTyp.clientversion then MTem.clientversion ELSE MTyp.clientversion END AS clientversion, MTem.merc_npc_type_id FROM merc_merchant_entries MME, merc_merchant_template_entries MMTE, merc_types MTyp, merc_templates MTem WHERE MME.merchant_id = %i AND MME.merc_merchant_template_id = MMTE.merc_merchant_template_id AND MMTE.merc_template_id = MTem.merc_template_id AND MTem.merc_type_id = MTyp.merc_type_id;", GetNPCTypeID()), TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
+    for (auto row = results.begin(); row != results.end(); ++row) {
+		MercData tempMerc;
+
+		tempMerc.MercTemplateID = atoi(row[0]);
+		tempMerc.MercType = atoi(row[1]);
+		tempMerc.MercSubType = atoi(row[2]);
+		tempMerc.CostFormula = atoi(row[3]);
+		tempMerc.ClientVersion = atoi(row[4]);
+		tempMerc.NPCID = atoi(row[5]);
+
+		mercDataList.push_back(tempMerc);
 	}
-	else {
-		while(DataRow = mysql_fetch_row(DatasetResult)) {
-			MercData tempMerc;
 
-			tempMerc.MercTemplateID = atoi(DataRow[0]);
-			tempMerc.MercType = atoi(DataRow[1]);
-			tempMerc.MercSubType = atoi(DataRow[2]);
-			tempMerc.CostFormula = atoi(DataRow[3]);
-			tempMerc.ClientVersion = atoi(DataRow[4]);
-			tempMerc.NPCID = atoi(DataRow[5]);
-
-			mercDataList.push_back(tempMerc);
-		}
-
-		mysql_free_result(DatasetResult);
-	}
-
-	safe_delete_array(Query);
-	Query = 0;
-
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error in NPC::LoadMercTypes()");
-	}
 }
 
 int NPC::GetNumMercTypes(uint32 clientVersion)

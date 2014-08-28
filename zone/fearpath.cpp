@@ -23,7 +23,7 @@
 #include <cstdlib>
 
 #include "../common/rulesys.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 #include "map.h"
 #include "zone.h"
 #include "pathing.h"

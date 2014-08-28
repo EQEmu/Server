@@ -67,20 +67,20 @@ And then at then end of embparser.cpp, add:
 #include "zonedb.h"
 #include "../common/spdat.h"
 #include "../common/packet_functions.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "spawn2.h"
 #include "zone.h"
 #include "event_codes.h"
 #include "guild_mgr.h"
 #include "../common/rulesys.h"
-#include "QGlobals.h"
-#include "QuestParserCollection.h"
-
+#include "qglobals.h"
+#include "quest_parser_collection.h"
+#include "queryserv.h"
 #ifdef BOTS
 #include "bot.h"
 #endif
 
-
+extern QueryServ* QServ;
 extern Zone* zone;
 extern WorldServer worldserver;
 extern EntityList entity_list;
@@ -172,8 +172,7 @@ void QuestManager::EndQuest() {
 				cur = QTimerList.erase(cur);
 			else
 				++cur;
-		}
-
+		} 
 		run.owner->Depop();
 	}
 	quests_running_.pop();
@@ -1294,33 +1293,29 @@ void QuestManager::setglobal(const char *varname, const char *newvalue, int opti
 	int qgNpcid = owner->GetNPCTypeID();
 
 	/*	options value determines the availability of global variables to NPCs when a quest begins
-	------------------------------------------------------------------
-		value		npcid		player		zone
-	------------------------------------------------------------------
-		0			this		this		this
-		1			all			this		this
-		2			this		all			this
-		3			all			all			this
-		4			this		this		all
-		5			all			this		all
-		6			this		all			all
-		7			all			all			all
+		------------------------------------------------------------------
+			value		npcid		player		zone
+		------------------------------------------------------------------
+			0			this		this		this
+			1			all			this		this
+			2			this		all			this
+			3			all			all			this
+			4			this		this		all
+			5			all			this		all
+			6			this		all			all
+			7			all			all			all
 	*/
-	if (initiator && initiator->IsClient()) // some events like waypoint and spawn don't have a player involved
-	{
-		qgCharid=initiator->CharacterID();
-	}
 
-	else
-	{
+	if (initiator && initiator->IsClient()){ // some events like waypoint and spawn don't have a player involved
+		qgCharid=initiator->CharacterID();
+	} 
+	else {
 		qgCharid=-qgNpcid;		// make char id negative npc id as a fudge
 	}
-	if (options < 0 || options > 7)
-	{
+	if (options < 0 || options > 7) {
 		std::cerr << "Invalid options for global var " << varname << " using defaults" << std::endl;
 	}	// default = 0 (only this npcid,player and zone)
-	else
-	{
+	else {
 		if (options & 1)
 			qgNpcid=0;
 		if (options & 2)
@@ -1330,30 +1325,32 @@ void QuestManager::setglobal(const char *varname, const char *newvalue, int opti
 	}
 
 	InsertQuestGlobal(qgCharid, qgNpcid, qgZoneid, varname, newvalue, QGVarDuration(duration));
+
+	/* QS: PlayerLogQGlobalUpdate */
+	if (RuleB(QueryServ, PlayerLogQGlobalUpdate) && qgCharid && qgCharid > 0 && initiator && initiator->IsClient()){
+		std::string event_desc = StringFormat("Update :: qglobal:%s to qvalue:%s zoneid:%i instid:%i", varname, newvalue, initiator->GetZoneID(), initiator->GetInstanceID());
+		QServ->PlayerLogEvent(Player_Log_QGlobal_Update, qgCharid, event_desc);
+	}
 }
 
 /* Inserts global variable into quest_globals table */
-int QuestManager::InsertQuestGlobal(
-									int charid, int npcid, int zoneid,
-									const char *varname, const char *varvalue,
-									int duration)
-{
+int QuestManager::InsertQuestGlobal(int charid, int npcid, int zoneid, const char *varname, const char *varvalue, int duration) {
 	char *query = 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 
 	// Make duration string either "unix_timestamp(now()) + xxx" or "NULL"
-	std::stringstream duration_ss;
-	if (duration == INT_MAX)
-	{
+	std::stringstream duration_ss; 
+	if (duration == INT_MAX) {
 		duration_ss << "NULL";
 	}
-	else
-	{
+	else {
 		duration_ss << "unix_timestamp(now()) + " << duration;
 	}
 
-	//NOTE: this should be escaping the contents of arglist
-	//npcwise a malicious script can arbitrarily alter the DB
+	/*
+		NOTE: this should be escaping the contents of arglist
+		npcwise a malicious script can arbitrarily alter the DB
+	*/
 	uint32 last_id = 0;
 	if (!database.RunQuery(query, MakeAnyLenString(&query,
 		"REPLACE INTO quest_globals (charid, npcid, zoneid, name, value, expdate)"
@@ -1365,9 +1362,8 @@ int QuestManager::InsertQuestGlobal(
 	}
 	safe_delete_array(query);
 
-	if(zone)
-	{
-		//first delete our global
+	if(zone) { 
+		/* Delete existing qglobal data and update zone processes */
 		ServerPacket* pack = new ServerPacket(ServerOP_QGlobalDelete, sizeof(ServerQGlobalDelete_Struct));
 		ServerQGlobalDelete_Struct *qgd = (ServerQGlobalDelete_Struct*)pack->pBuffer;
 		qgd->npc_id = npcid;
@@ -1383,18 +1379,16 @@ int QuestManager::InsertQuestGlobal(
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
 
-		//then create a new one with the new id
+		/* Create new qglobal data and update zone processes */
 		pack = new ServerPacket(ServerOP_QGlobalUpdate, sizeof(ServerQGlobalUpdate_Struct));
 		ServerQGlobalUpdate_Struct *qgu = (ServerQGlobalUpdate_Struct*)pack->pBuffer;
 		qgu->npc_id = npcid;
 		qgu->char_id = charid;
 		qgu->zone_id = zoneid;
-		if(duration == INT_MAX)
-		{
+		if(duration == INT_MAX) {
 			qgu->expdate = 0xFFFFFFFF;
 		}
-		else
-		{
+		else {
 			qgu->expdate = Timer::GetTimeSeconds() + duration;
 		}
 		strcpy((char*)qgu->name, varname);
@@ -1420,8 +1414,7 @@ int QuestManager::InsertQuestGlobal(
 	return 0;
 }
 
-void QuestManager::targlobal(const char *varname, const char *value, const char *duration, int qgNpcid, int qgCharid, int qgZoneid)
-{
+void QuestManager::targlobal(const char *varname, const char *value, const char *duration, int qgNpcid, int qgCharid, int qgZoneid) {
 	InsertQuestGlobal(qgCharid, qgNpcid, qgZoneid, varname, value, QGVarDuration(duration));
 }
 
@@ -1432,15 +1425,24 @@ void QuestManager::delglobal(const char *varname) {
 	int qgZoneid=zone->GetZoneID();
 	int qgCharid=0;
 	int qgNpcid=owner->GetNPCTypeID();
+	
+	
+	
 	if (initiator && initiator->IsClient()) // some events like waypoint and spawn don't have a player involved
 	{
 		qgCharid=initiator->CharacterID();
 	}
 
-	else
-	{
+	else {
 		qgCharid=-qgNpcid;		// make char id negative npc id as a fudge
 	}
+
+	/* QS: PlayerLogQGlobalUpdate */
+	if (RuleB(QueryServ, PlayerLogQGlobalUpdate) && qgCharid && qgCharid > 0 && initiator && initiator->IsClient()){
+		std::string event_desc = StringFormat("Deleted :: qglobal:%s zoneid:%i instid:%i", varname, initiator->GetZoneID(), initiator->GetInstanceID());
+		QServ->PlayerLogEvent(Player_Log_QGlobal_Update, qgCharid, event_desc);
+	}
+
 	if (!database.RunQuery(query,
 		MakeAnyLenString(&query,
 		"DELETE FROM quest_globals WHERE name='%s'"
@@ -1451,8 +1453,7 @@ void QuestManager::delglobal(const char *varname) {
 	}
 	safe_delete_array(query);
 
-	if(zone)
-	{
+	if(zone) {
 		ServerPacket* pack = new ServerPacket(ServerOP_QGlobalDelete, sizeof(ServerQGlobalDelete_Struct));
 		ServerQGlobalDelete_Struct *qgu = (ServerQGlobalDelete_Struct*)pack->pBuffer;
 
@@ -1701,17 +1702,14 @@ void QuestManager::showgrid(int grid) {
 	pts.push_back(pt);
 
 	// Retrieve all waypoints for this grid
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `x`,`y`,`z` FROM grid_entries WHERE `gridid`=%i AND `zoneid`=%i ORDER BY `number`",grid,zone->GetZoneID()),errbuf,&result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
+	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `x`,`y`,`z` FROM grid_entries WHERE `gridid`=%i AND `zoneid`=%i ORDER BY `number`",grid,zone->GetZoneID()),errbuf,&result)) {
+		while((row = mysql_fetch_row(result))) {
 			pt.x = atof(row[0]);
 			pt.y = atof(row[1]);
 			pt.z = atof(row[2]);
 			pts.push_back(pt);
 		}
-		mysql_free_result(result);
-
+		mysql_free_result(result); 
 		initiator->SendPathPacket(pts);
 	}
 	else	// DB query error!

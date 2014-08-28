@@ -20,7 +20,7 @@
 #include "timer.h"
 #include "ptimer.h"
 #include "database.h"
-#include "StringUtil.h"
+#include "string_util.h"
 #include <stdio.h>
 #include <cstdlib>
 #include <cstring>

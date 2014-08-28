@@ -23,9 +23,9 @@
 #include <list>
 #include "masterentity.h"
 #include "../common/rulesys.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 #include "hate_list.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 #include "zone.h"
 #include "water_map.h"
 
@@ -311,7 +311,7 @@ Mob *HateList::GetTop(Mob *center)
 				}
 			}
 
-			if (cur->ent->Sanctuary()) {
+			if (cur->ent->Sanctuary()) { 
 				if(hate == -1)
 				{
 					top = cur->ent;

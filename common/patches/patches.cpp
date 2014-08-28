@@ -2,13 +2,13 @@
 #include "../debug.h"
 #include "patches.h"
 
-#include "Client62.h"
-#include "Titanium.h"
-#include "Underfoot.h"
-#include "SoF.h"
-#include "SoD.h"
-#include "RoF.h"
-//#include "RoF2.h"
+#include "client62.h"
+#include "titanium.h"
+#include "underfoot.h"
+#include "sof.h"
+#include "sod.h"
+#include "rof.h"
+//#include "rof2.h"
 
 void RegisterAllPatches(EQStreamIdentifier &into) {
 	Client62::Register(into);

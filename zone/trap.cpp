@@ -20,8 +20,8 @@
 #include "entity.h"
 #include "masterentity.h"
 #include "../common/spdat.h"
-#include "../common/MiscFunctions.h"
-#include "../common/StringUtil.h"
+#include "../common/misc_functions.h"
+#include "../common/string_util.h"
 
 /*
 
@@ -262,45 +262,36 @@ Mob* EntityList::GetTrapTrigger(Trap* trap) {
 
 //todo: rewrite this to not need direct access to trap members.
 bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	//	int char_num = 0;
-	unsigned long* lengths;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id,x,y,z,effect,effectvalue,effectvalue2,skill,maxzdiff,radius,chance,message,respawn_time,respawn_var,level FROM traps WHERE zone='%s' AND version=%u", zonename, version), errbuf, &result)) {
-		safe_delete_array(query);
-		while ((row = mysql_fetch_row(result)))
-		{
-			lengths = mysql_fetch_lengths(result);
-			Trap* trap = new Trap();
-			trap->trap_id = atoi(row[0]);
-			trap->x = atof(row[1]);
-			trap->y = atof(row[2]);
-			trap->z = atof(row[3]);
-			trap->effect = atoi(row[4]);
-			trap->effectvalue = atoi(row[5]);
-			trap->effectvalue2 = atoi(row[6]);
-			trap->skill = atoi(row[7]);
-			trap->maxzdiff = atof(row[8]);
-			trap->radius = atof(row[9]);
-			trap->chance = atoi(row[10]);
-			trap->message = row[11];
-			trap->respawn_time = atoi(row[12]);
-			trap->respawn_var = atoi(row[13]);
-			trap->level = atoi(row[14]);
-			entity_list.AddTrap(trap);
-			trap->CreateHiddenTrigger();
-		}
-		mysql_free_result(result);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadTraps query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("SELECT id, x, y, z, effect, effectvalue, effectvalue2, skill, "
+                                    "maxzdiff, radius, chance, message, respawn_time, respawn_var, level "
+                                    "FROM traps WHERE zone='%s' AND version=%u", zonename, version);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadTraps query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
-	}
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        Trap* trap = new Trap();
+        trap->trap_id = atoi(row[0]);
+        trap->x = atof(row[1]);
+        trap->y = atof(row[2]);
+        trap->z = atof(row[3]);
+        trap->effect = atoi(row[4]);
+        trap->effectvalue = atoi(row[5]);
+        trap->effectvalue2 = atoi(row[6]);
+        trap->skill = atoi(row[7]);
+        trap->maxzdiff = atof(row[8]);
+        trap->radius = atof(row[9]);
+        trap->chance = atoi(row[10]);
+        trap->message = row[11];
+        trap->respawn_time = atoi(row[12]);
+        trap->respawn_var = atoi(row[13]);
+        trap->level = atoi(row[14]);
+        entity_list.AddTrap(trap);
+        trap->CreateHiddenTrigger();
+    }
 
 	return true;
 }

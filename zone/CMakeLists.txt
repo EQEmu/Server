@@ -1,7 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SET(zone_sources
-	AA.cpp
+	aa.cpp
 	aggro.cpp
 	attack.cpp
 	beacon.cpp
@@ -16,7 +16,7 @@ SET(zone_sources
 	command.cpp
 	corpse.cpp
 	doors.cpp
-	effects.cpp
+	effects.cpp 
 	embparser.cpp
 	embparser_api.cpp
 	embperl.cpp
@@ -69,12 +69,12 @@ SET(zone_sources
 	map.cpp
 	merc.cpp
 	mob.cpp
-	MobAI.cpp
+	mob_ai.cpp
 	mod_functions.cpp
 	net.cpp
 	npc.cpp
-	NpcAI.cpp
-	Object.cpp
+	npc_ai.cpp
+	object.cpp
 	oriented_bounding_box.cpp
 	pathing.cpp
 	perl_client.cpp
@@ -86,17 +86,18 @@ SET(zone_sources
 	perl_npc.cpp
 	perl_object.cpp
 	perl_perlpacket.cpp
-	perl_PlayerCorpse.cpp
+	perl_player_corpse.cpp
 	perl_questitem.cpp
 	perl_raids.cpp
 	perlpacket.cpp
 	petitions.cpp
 	pets.cpp
-	QGlobals.cpp
+	qglobals.cpp
+	queryserv.cpp
 	questmgr.cpp
-	QuestParserCollection.cpp
+	quest_parser_collection.cpp
 	raids.cpp
-	RaycastMesh.cpp
+	raycast_mesh.cpp
 	spawn2.cpp
 	spawn2.h
 	spawngroup.cpp
@@ -116,18 +117,18 @@ SET(zone_sources
 	worldserver.cpp
 	zone.cpp
 	zone_logsys.cpp
-	ZoneConfig.cpp
+	zone_config.cpp
 	zonedb.cpp
 	zonedbasync.cpp
 	zoning.cpp
 )
 
 SET(zone_headers
-	AA.h
+	aa.h
 	basic_functions.h
 	beacon.h
 	bot.h
-	botStructs.h
+	bot_structs.h
 	client.h
 	client_logs.h
 	client_packet.h
@@ -175,25 +176,27 @@ SET(zone_headers
 	mob.h
 	net.h
 	npc.h
-	NpcAI.h
+	npc_ai.h
 	object.h
 	oriented_bounding_box.h
 	pathing.h
 	perlpacket.h
 	petitions.h
 	pets.h
-	QGlobals.h
-	QuestInterface.h
+	qglobals.h
+	quest_interface.h
+	queryserv.h
+	quest_interface.h
 	questmgr.h
-	QuestParserCollection.h
+	quest_parser_collection.h
 	raid.h
 	raids.h
-	RaycastMesh.h
+	raycast_mesh.h
 	skills.h
 	spawn2.cpp
 	spawn2.h
 	spawngroup.h
-	StringIDs.h
+	string_ids.h
 	tasks.h
 	titles.h
 	trap.h
@@ -202,7 +205,7 @@ SET(zone_headers
 	water_map_v2.h
 	worldserver.h
 	zone.h
-	ZoneConfig.h
+	zone_config.h
 	zonedb.h
 	zonedbasync.h
 	zonedump.h

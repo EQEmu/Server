@@ -49,21 +49,22 @@ extern volatile bool RunLoops;
 #include "../common/packet_functions.h"
 #include "petitions.h"
 #include "../common/serverinfo.h"
-#include "../common/ZoneNumbers.h"
+#include "../common/zone_numbers.h"
 #include "../common/moremath.h"
 #include "../common/guilds.h"
 #include "../common/breakdowns.h"
 #include "../common/rulesys.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "forage.h"
 #include "command.h"
-#include "StringIDs.h"
-#include "NpcAI.h"
+#include "string_ids.h"
+#include "npc_ai.h"
 #include "client_logs.h"
 #include "guild_mgr.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
+#include "queryserv.h"
 
-
+extern QueryServ* QServ;
 extern EntityList entity_list;
 extern Zone* zone;
 extern volatile bool ZoneLoaded;
@@ -629,6 +630,9 @@ bool Client::Save(uint8 iCommitNow) {
 		return false;
 	}
 
+	/* Mirror Character Data */
+	database.StoreCharacterLookup(this->CharacterID());
+
 	return true;
 }
 
@@ -805,8 +809,8 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		}
 	}
 
-
-	if(RuleB(QueryServ, PlayerChatLogging)) {
+	/* Logs Player Chat */
+	if (RuleB(QueryServ, PlayerLogChat)) {
 		ServerPacket* pack = new ServerPacket(ServerOP_Speech, sizeof(Server_Speech_Struct) + strlen(message) + 1);
 		Server_Speech_Struct* sem = (Server_Speech_Struct*) pack->pBuffer;
 
@@ -841,7 +845,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 
 	switch(chan_num)
 	{
-	case 0: { // GuildChat
+	case 0: { /* Guild Chat */
 		if (!IsInAGuild())
 			Message_StringID(MT_DefaultText, GUILD_NOT_MEMBER2);	//You are not a member of any guild.
 		else if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_SPEAK))
@@ -850,7 +854,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			Message(0, "Error: World server disconnected");
 		break;
 	}
-	case 2: { // GroupChat
+	case 2: { /* Group Chat */
 		Raid* raid = entity_list.GetRaidByClient(this);
 		if(raid) {
 			raid->RaidGroupSay((const char*) message, this);
@@ -863,14 +867,14 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		}
 		break;
 	}
-	case 15: { //raid say
+	case 15: { /* Raid Say */
 		Raid* raid = entity_list.GetRaidByClient(this);
 		if(raid){
 			raid->RaidSay((const char*) message, this);
 		}
 		break;
 	}
-	case 3: { // Shout
+	case 3: { /* Shout */
 		Mob *sender = this;
 		if (GetPet() && GetPet()->FindType(SE_VoiceGraft))
 			sender = GetPet();
@@ -878,7 +882,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		entity_list.ChannelMessage(sender, chan_num, language, lang_skill, message);
 		break;
 	}
-	case 4: { // Auction
+	case 4: { /* Auction */
 		if(RuleB(Chat, ServerWideAuction))
 		{
 			if(!global_channel_timer.Check())
@@ -917,7 +921,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		}
 		break;
 	}
-	case 5: { // OOC
+	case 5: { /* OOC */
 		if(RuleB(Chat, ServerWideOOC))
 		{
 			if(!global_channel_timer.Check())
@@ -964,15 +968,15 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		}
 		break;
 	}
-	case 6: // Broadcast
-	case 11: { // GMSay
+	case 6: /* Broadcast */
+	case 11: { /* GM Say */
 		if (!(admin >= 80))
 			Message(0, "Error: Only GMs can use this channel");
 		else if (!worldserver.SendChannelMessage(this, targetname, chan_num, 0, language, message))
 			Message(0, "Error: World server disconnected");
 		break;
 	}
-	case 7: { // Tell
+	case 7: { /* Tell */
 			if(!global_channel_timer.Check())
 			{
 				if(strlen(targetname) == 0)
@@ -1020,7 +1024,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				Message(0, "Error: World server disconnected");
 		break;
 	}
-	case 8: { // /say
+	case 8: { /* Say */
 		if(message[0] == COMMAND_CHAR) {
 			if(command_dispatch(this, message) == -2) {
 				if(parse->PlayerHasQuestSub(EVENT_COMMAND)) {
@@ -4029,13 +4033,17 @@ void Client::KeyRingAdd(uint32 item_id)
 	bool bFound = KeyRingCheck(item_id);
 	if(!bFound){
 		sprintf(query, "INSERT INTO keyring(char_id,item_id) VALUES(%i,%i)",character_id,item_id);
-		if(database.RunQuery(query, strlen(query), errbuf, 0, &affected_rows))
-		{
+		if(database.RunQuery(query, strlen(query), errbuf, 0, &affected_rows)) {
 			Message(4,"Added to keyring.");
+
+			/* QS: PlayerLogKeyringAddition */
+			if (RuleB(QueryServ, PlayerLogKeyringAddition)){
+				std::string event_desc = StringFormat("itemid:%i in zoneid:%i instid:%i", item_id, this->GetZoneID(), this->GetInstanceID());
+				QServ->PlayerLogEvent(Player_Log_Keyring_Addition, this->CharacterID(), event_desc);
+			}
 			safe_delete_array(query);
 		}
-		else
-		{
+		else {
 			std::cerr << "Error in Doors::HandleClick query '" << query << "' " << errbuf << std::endl;
 			safe_delete_array(query);
 			return;
@@ -6933,8 +6941,18 @@ void Client::SetAlternateCurrencyValue(uint32 currency_id, uint32 new_amount)
 	SendAlternateCurrencyValue(currency_id);
 }
 
-void Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount)
+void Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount, int8 method)
 {
+
+	/* Added via Quest, rest of the logging methods may be done inline due to information available in that area of the code */
+	if (method == 1){
+		/* QS: PlayerLogAlternateCurrencyTransactions :: Cursor to Item Storage */
+		if (RuleB(QueryServ, PlayerLogAlternateCurrencyTransactions)){
+			std::string event_desc = StringFormat("Added via Quest :: Cursor to Item :: alt_currency_id:%i amount:%i in zoneid:%i instid:%i", currency_id, this->GetZoneID(), this->GetInstanceID());
+			QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, this->CharacterID(), event_desc);
+		}
+	}
+
 	if(amount == 0) {
 		return;
 	}
