@@ -122,34 +122,45 @@ void Database::AddSpeech(const char* from, const char* to, const char* message, 
 
 }
 
-void Database::LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 DetailCount) {
+void Database::LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 detailCount) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	uint32 lastid = 0;
-	if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_trade_record` SET `time`=NOW(), "
-		"`char1_id`='%i', `char1_pp`='%i', `char1_gp`='%i', `char1_sp`='%i', `char1_cp`='%i', `char1_items`='%i', "
-		"`char2_id`='%i', `char2_pp`='%i', `char2_gp`='%i', `char2_sp`='%i', `char2_cp`='%i', `char2_items`='%i'",
-		QS->char1_id, QS->char1_money.platinum, QS->char1_money.gold, QS->char1_money.silver, QS->char1_money.copper, QS->char1_count,
-		QS->char2_id, QS->char2_money.platinum, QS->char2_money.gold, QS->char2_money.silver, QS->char2_money.copper, QS->char2_count),
-		errbuf, 0, 0, &lastid)) {
-		_log(QUERYSERV__ERROR, "Failed Trade Log Record Insert: %s", errbuf);
-		_log(QUERYSERV__ERROR, "%s", query);
+	std::string query = StringFormat("INSERT INTO `qs_player_trade_record` SET `time` = NOW(), "
+                                    "`char1_id` = '%i', `char1_pp` = '%i', `char1_gp` = '%i', "
+                                    "`char1_sp` = '%i', `char1_cp` = '%i', `char1_items` = '%i', "
+                                    "`char2_id` = '%i', `char2_pp` = '%i', `char2_gp` = '%i', "
+                                    "`char2_sp` = '%i', `char2_cp` = '%i', `char2_items` = '%i'",
+                                    QS->char1_id, QS->char1_money.platinum, QS->char1_money.gold,
+                                    QS->char1_money.silver, QS->char1_money.copper, QS->char1_count,
+                                    QS->char2_id, QS->char2_money.platinum, QS->char2_money.gold,
+                                    QS->char2_money.silver, QS->char2_money.copper, QS->char2_count);
+    auto results = QueryDatabase(query);
+	if(!results.Success()) {
+		_log(QUERYSERV__ERROR, "Failed Trade Log Record Insert: %s", results.ErrorMessage().c_str());
+		_log(QUERYSERV__ERROR, "%s", query.c_str());
 	}
 
-	if(DetailCount > 0) {
-		for(int i = 0; i < DetailCount; i++) {
-			if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_trade_record_entries` SET `event_id`='%i', "
-				"`from_id`='%i', `from_slot`='%i', `to_id`='%i', `to_slot`='%i', `item_id`='%i', "
-				"`charges`='%i', `aug_1`='%i', `aug_2`='%i', `aug_3`='%i', `aug_4`='%i', `aug_5`='%i'",
-				lastid, QS->items[i].from_id, QS->items[i].from_slot, QS->items[i].to_id, QS->items[i].to_slot, QS->items[i].item_id,
-				QS->items[i].charges, QS->items[i].aug_1, QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5,
-				errbuf, 0, 0))) {
-				_log(QUERYSERV__ERROR, "Failed Trade Log Record Entry Insert: %s", errbuf);
-				_log(QUERYSERV__ERROR, "%s", query);
-			}
-		}
-	}
+	if(detailCount == 0)
+        return;
+
+	int lastIndex = results.LastInsertedID();
+
+    for(int i = 0; i < detailCount; i++) {
+        query = StringFormat("INSERT INTO `qs_player_trade_record_entries` SET `event_id` = '%i', "
+                            "`from_id` = '%i', `from_slot` = '%i', `to_id` = '%i', `to_slot` = '%i', "
+                            "`item_id` = '%i', `charges` = '%i', `aug_1` = '%i', `aug_2` = '%i', "
+                            "`aug_3` = '%i', `aug_4` = '%i', `aug_5` = '%i'",
+                            lastIndex, QS->items[i].from_id, QS->items[i].from_slot,
+                            QS->items[i].to_id, QS->items[i].to_slot, QS->items[i].item_id,
+                            QS->items[i].charges, QS->items[i].aug_1, QS->items[i].aug_2,
+                            QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5);
+        results = QueryDatabase(query);
+        if(!results.Success()) {
+            _log(QUERYSERV__ERROR, "Failed Trade Log Record Entry Insert: %s", results.ErrorMessage().c_str());
+            _log(QUERYSERV__ERROR, "%s", query.c_str());
+        }
+
+    }
+
 }
 
 void Database::LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 DetailCount) {
