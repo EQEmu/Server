@@ -822,25 +822,24 @@ bool Client::PushItemOnCursor(const ItemInst& inst, bool client_update)
 	return database.SaveCursor(CharacterID(), s, e);
 }
 
-bool Client::PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client_update)
-{
+bool Client::PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client_update) {
 	mlog(INVENTORY__SLOTS, "Putting item %s (%d) into slot %d", inst.GetItem()->Name, inst.GetItem()->ID, slot_id);
+
 	if (slot_id == MainCursor)
-	{
-		return PushItemOnCursor(inst,client_update);
-	}
+		return PushItemOnCursor(inst, client_update);
 	else
 		m_inv.PutItem(slot_id, inst);
 
-	if (client_update) {
-		SendItemPacket(slot_id, &inst, (slot_id == MainCursor) ? ItemPacketSummonItem : ItemPacketTrade);
-	}
+	if (client_update)
+		SendItemPacket(slot_id, &inst, ((slot_id == MainCursor) ? ItemPacketSummonItem : ItemPacketTrade));
 
 	if (slot_id == MainCursor) {
-		std::list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
+		std::list<ItemInst*>::const_iterator s = m_inv.cursor_begin(), e = m_inv.cursor_end();
 		return database.SaveCursor(this->CharacterID(), s, e);
-	} else
+	}
+	else {
 		return database.SaveInventory(this->CharacterID(), &inst, slot_id);
+	}
 
 	CalcBonuses();
 }
@@ -1539,7 +1538,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			// Also sends trade information to other client of trade session
 			if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
 
-			trade->AddEntity(src_slot_id, dst_slot_id, move_in->number_in_stack);
+			trade->AddEntity(dst_slot_id, move_in->number_in_stack);
 
 			return true;
 		} else {

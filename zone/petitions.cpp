@@ -300,8 +300,6 @@ void ZoneDatabase::RefreshPetitionsFromDB()
         newpet->SetSentTime2(atol(row[13]));
         newpet->SetGMText(row[14]);
 
-        std::cout << "Petition " << row[0] << " pettime = " << newpet->GetSentTime() << std::endl;
-
         if (atoi(row[12]) == 1)
             newpet->SetCheckedOut(true);
         else

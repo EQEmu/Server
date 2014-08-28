@@ -398,6 +398,7 @@ public:
 	void	UpdateFindableNPCState(NPC *n, bool Remove);
 	void	HideCorpses(Client *c, uint8 CurrentMode, uint8 NewMode);
 
+	uint16 GetClientCount();
 	void GetMobList(std::list<Mob*> &m_list);
 	void GetNPCList(std::list<NPC*> &n_list);
 	void GetMercList(std::list<Merc*> &n_list);

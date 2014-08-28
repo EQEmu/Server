@@ -325,7 +325,7 @@ Client::Client(EQStreamInterface* ieqs)
 
 	initial_respawn_selection = 0;
 	alternate_currency_loaded = false;
-	
+
 	EngagedRaidTarget = false;
 	SavedRaidRestTimer = 0;
 }
@@ -1033,7 +1033,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 						Message(13, "Command '%s' not recognized.", message);
 					}
 				} else {
-					if(!RuleB(Chat, SuppressCommandErrors)) 
+					if(!RuleB(Chat, SuppressCommandErrors))
 						Message(13, "Command '%s' not recognized.", message);
 				}
 			}
@@ -4017,6 +4017,7 @@ void Client::KeyRingLoad()
 
 void Client::KeyRingAdd(uint32 item_id)
 {
+<<<<<<< HEAD
 	if(0==item_id)
         return;
 
@@ -4034,6 +4035,33 @@ void Client::KeyRingAdd(uint32 item_id)
     Message(4,"Added to keyring.");
 
     keyring.push_back(item_id);
+=======
+	if(0==item_id)return;
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char *query = 0;
+	uint32 affected_rows = 0;
+	query = new char[256];
+	bool bFound = KeyRingCheck(item_id);
+	if(!bFound){
+		sprintf(query, "INSERT INTO keyring(char_id,item_id) VALUES(%i,%i)",character_id,item_id);
+		if(database.RunQuery(query, strlen(query), errbuf, 0, &affected_rows)) {
+			Message(4,"Added to keyring.");
+
+			/* QS: PlayerLogKeyringAddition */
+			if (RuleB(QueryServ, PlayerLogKeyringAddition)){
+				std::string event_desc = StringFormat("itemid:%i in zoneid:%i instid:%i", item_id, this->GetZoneID(), this->GetInstanceID());
+				QServ->PlayerLogEvent(Player_Log_Keyring_Addition, this->CharacterID(), event_desc);
+			}
+			safe_delete_array(query);
+		}
+		else {
+			std::cerr << "Error in Doors::HandleClick query '" << query << "' " << errbuf << std::endl;
+			safe_delete_array(query);
+			return;
+		}
+		keyring.push_back(item_id);
+	}
+>>>>>>> ca84040a3939b71e835701e2cc52fe199e386382
 }
 
 bool Client::KeyRingCheck(uint32 item_id)
@@ -4064,40 +4092,25 @@ void Client::KeyRingList()
 
 bool Client::IsDiscovered(uint32 itemid) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	std::string query = StringFormat("SELECT count(*) FROM discovered_items WHERE item_id = '%lu'", itemid);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        std::cerr << "Error in IsDiscovered query '" << query << "' " << results.ErrorMessage() << std::endl;
+        return false;
+    }
 
-	if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT count(*) FROM discovered_items WHERE item_id = '%lu'", itemid), errbuf, &result))
-	{
-		row = mysql_fetch_row(result);
-		if (atoi(row[0]))
-		{
-			mysql_free_result(result);
-			safe_delete_array(query);
-			return true;
-		}
-	}
-	else
-	{
-		std::cerr << "Error in IsDiscovered query '" << query << "' " << errbuf << std::endl;
-	}
-	mysql_free_result(result);
-	safe_delete_array(query);
-	return false;
+    auto row = results.begin();
+
+    return atoi(row[0]) != 0;
 }
 
 void Client::DiscoverItem(uint32 itemid) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "INSERT INTO discovered_items SET item_id=%lu, char_name='%s', discovered_date=UNIX_TIMESTAMP(), account_status=%i", itemid, GetName(), Admin()), errbuf, &result))
-	{
-		mysql_free_result(result);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("INSERT INTO discovered_items SET "
+                                    "item_id = %lu, char_name = '%s', "
+                                    "discovered_date = UNIX_TIMESTAMP(), account_status=%i",
+                                    itemid, GetName(), Admin());
+    auto results = database.QueryDatabase(query);
 
 	parse->EventPlayer(EVENT_DISCOVER_ITEM, this, "", itemid);
 }
@@ -4334,15 +4347,15 @@ void Client::IncrementAggroCount() {
 
 	if(!RuleI(Character, RestRegenPercent))
 		return;
-	
+
 	// If we already had aggro before this method was called, the combat indicator should already be up for SoF clients,
 	// so we don't need to send it again.
 	//
 	if(AggroCount > 1)
 		return;
-		
+
 	// Pause the rest timer
-	if (AggroCount == 1) 
+	if (AggroCount == 1)
 		SavedRaidRestTimer = rest_timer.GetRemainingTime();
 
 	if(GetClientVersion() >= EQClientSoF) {
@@ -4387,9 +4400,9 @@ void Client::DecrementAggroCount() {
 			time_until_rest = RuleI(Character, RestRegenTimeToActivate) * 1000;
 		}
 	}
-	
+
 	rest_timer.Start(time_until_rest);
-	
+
 	if(GetClientVersion() >= EQClientSoF) {
 
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_RestState, 5);
@@ -4494,7 +4507,7 @@ void Client::SendRespawnBinds()
 
 	int num_options = respawn_options.size();
 	uint32 PacketLength = 17 + (26 * num_options); //Header size + per-option invariant size
-	
+
 	std::list<RespawnOption>::iterator itr;
 	RespawnOption* opt;
 
@@ -5280,31 +5293,21 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 void Client::SendRewards()
 {
 	std::vector<ClientReward> rewards;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT reward_id, amount FROM"
-		" account_rewards WHERE account_id=%i ORDER by reward_id", AccountID()),
-		errbuf,&result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			ClientReward cr;
-			cr.id = atoi(row[0]);
-			cr.amount = atoi(row[1]);
-			rewards.push_back(cr);
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Client::SendRewards(): %s (%s)", query, errbuf);
-		safe_delete_array(query);
+	std::string query = StringFormat("SELECT reward_id, amount FROM "
+                        "account_rewards WHERE account_id = %i "
+                        "ORDER BY reward_id", AccountID());
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in Client::SendRewards(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        ClientReward cr;
+        cr.id = atoi(row[0]);
+        cr.amount = atoi(row[1]);
+        rewards.push_back(cr);
+    }
 
 	if(rewards.size() > 0)
 	{
@@ -5365,88 +5368,54 @@ bool Client::TryReward(uint32 claim_id)
 	}
 
 	if(free_slot == 0xFFFFFFFF)
-	{
 		return false;
-	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	uint32 amt = 0;
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT amount FROM"
-		" account_rewards WHERE account_id=%i AND reward_id=%i", AccountID(), claim_id),
-		errbuf,&result))
-	{
-		row = mysql_fetch_row(result);
-		if(row)
-		{
-			amt = atoi(row[0]);
-		}
-		else
-		{
-			mysql_free_result(result);
-			safe_delete_array(query);
-			return false;
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query, errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("SELECT amount FROM account_rewards "
+                                    "WHERE account_id=%i AND reward_id=%i",
+                                    AccountID(), claim_id);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return false;
-	}
+    }
+
+	if (results.RowCount() == 0)
+        return false;
+
+    uint32 amt = 0;
+	auto row = results.begin();
+
+    amt = atoi(row[0]);
 
 	if(amt == 0)
-	{
 		return false;
-	}
 
-	std::list<InternalVeteranReward>::iterator iter = zone->VeteranRewards.begin();
-	while(iter != zone->VeteranRewards.end())
-	{
+    auto iter = zone->VeteranRewards.begin();
+	for (; iter != zone->VeteranRewards.end(); ++iter)
 		if((*iter).claim_id == claim_id)
-		{
 			break;
-		}
-		++iter;
-	}
 
 	if(iter == zone->VeteranRewards.end())
-	{
 		return false;
-	}
 
 	if(amt == 1)
 	{
-		if(!database.RunQuery(query,MakeAnyLenString(&query,"DELETE FROM"
-			" account_rewards WHERE account_id=%i AND reward_id=%i", AccountID(), claim_id),
-			errbuf))
-		{
-			LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query, errbuf);
-			safe_delete_array(query);
-		}
-		else
-		{
-			safe_delete_array(query);
-		}
+        query = StringFormat("DELETE FROM account_rewards "
+                            "WHERE account_id=%i AND reward_id=%i",
+                            AccountID(), claim_id);
+        results = database.QueryDatabase(query);
+		if(!results.ErrorMessage().c_str())
+			LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+
 	}
 	else
 	{
-		if(!database.RunQuery(query,MakeAnyLenString(&query,"UPDATE account_rewards SET amount=(amount-1)"
-			" WHERE account_id=%i AND reward_id=%i", AccountID(), claim_id),
-			errbuf))
-		{
-			LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query, errbuf);
-			safe_delete_array(query);
-		}
-		else
-		{
-			safe_delete_array(query);
-		}
+        query = StringFormat("UPDATE account_rewards SET amount=(amount-1) "
+                            "WHERE account_id=%i AND reward_id=%i", AccountID(), claim_id);
+        results = database.QueryDatabase(query);
+		if(!results.Success())
+			LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+
 	}
 
 	InternalVeteranReward ivr = (*iter);
@@ -7674,7 +7643,7 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 				tmpValue = current_value + mod + npc_value[i];
 
 				int16 FactionModPct = spellbonuses.FactionModPct + itembonuses.FactionModPct + aabonuses.FactionModPct;
-				tmpValue += (tmpValue * FactionModPct) / 100; 
+				tmpValue += (tmpValue * FactionModPct) / 100;
 
 				// Make sure faction hits don't go to GMs...
 				if (m_pp.gm==1 && (tmpValue < current_value)) {
@@ -7811,41 +7780,30 @@ void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 totalval
 
 void Client::LoadAccountFlags()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
 	accountflags.clear();
-	MakeAnyLenString(&query, "SELECT p_flag, p_value FROM account_flags WHERE p_accid = '%d'", account_id);
-	if(database.RunQuery(query, strlen(query), errbuf, &result))
-	{
-		while(row = mysql_fetch_row(result))
-		{
-			std::string fname(row[0]);
-			std::string fval(row[1]);
-			accountflags[fname] = fval;
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		std::cerr << "Error in LoadAccountFlags query '" << query << "' " << errbuf << std::endl;
-	}
-	safe_delete_array(query);
+
+	std::string query = StringFormat("SELECT p_flag, p_value FROM account_flags WHERE p_accid = '%d'", account_id);
+	auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        std::cerr << "Error in LoadAccountFlags query '" << query << "' " << results.ErrorMessage() << std::endl;
+        return;
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        std::string fname(row[0]);
+        std::string fval(row[1]);
+        accountflags[fname] = fval;
+    }
+
 }
 
 void Client::SetAccountFlag(std::string flag, std::string val)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
-	MakeAnyLenString(&query, "REPLACE INTO account_flags (p_accid, p_flag, p_value) VALUES( '%d', '%s', '%s')", account_id, flag.c_str(), val.c_str());
-	if(!database.RunQuery(query, strlen(query), errbuf))
-	{
-		std::cerr << "Error in SetAccountFlags query '" << query << "' " << errbuf << std::endl;
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("REPLACE INTO account_flags (p_accid, p_flag, p_value) "
+                                    "VALUES( '%d', '%s', '%s')", account_id, flag.c_str(), val.c_str());
+    auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		std::cerr << "Error in SetAccountFlags query '" << query << "' " << results.ErrorMessage() << std::endl;
 
 	accountflags[flag] = val;
 }
@@ -7950,7 +7908,7 @@ void Client::TryItemTimer(int slot)
 		}
 		++it_iter;
 	}
-	
+
 	if(slot > EmuConstants::EQUIPMENT_END) {
 		return;
 	}
@@ -8254,29 +8212,21 @@ void Client::PlayMP3(const char* fname)
 	safe_delete(outapp);
 }
 
-void Client::ExpeditionSay(const char *str, int ExpID) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+void Client::ExpeditionSay(const char *str, int expID) {
 
-	if (!database.RunQuery(query,MakeAnyLenString(&query, "SELECT `player_name` FROM `cust_inst_players` WHERE `inst_id` = %i", ExpID),errbuf,&result)){
-		safe_delete_array(query);
+	std::string query = StringFormat("SELECT `player_name` FROM "
+                                    "`cust_inst_players` WHERE "
+                                    "`inst_id` = %i", expID);
+    auto results = database.QueryDatabase(query);
+	if (!results.Success())
 		return;
+
+    this->Message(14, "You say to the expedition, '%s'", str);
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		const char* charName = row[0];
+		if(strcmp(charName, this->GetCleanName()) != 0)
+			worldserver.SendEmoteMessage(charName, 0, 0, 14, "%s says to the expedition, '%s'", this->GetCleanName(), str);
 	}
 
-	safe_delete_array(query);
-
-	if(result)
-		this->Message(14, "You say to the expedition, '%s'", str);
-
-	while((row = mysql_fetch_row(result))) {
-		const char* CharName = row[0];
-		if(strcmp(CharName, this->GetCleanName()) != 0)
-			worldserver.SendEmoteMessage(CharName, 0, 0, 14, "%s says to the expedition, '%s'", this->GetCleanName(), str); 
-		// ChannelList->CreateChannel(ChannelName, ChannelOwner, ChannelPassword, true, atoi(row[3]));
-	} 
-
-	mysql_free_result(result);
-	
 }

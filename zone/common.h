@@ -127,7 +127,8 @@ enum {
 	FLEE_PERCENT = 37,
 	ALLOW_BENEFICIAL = 38,
 	DISABLE_MELEE = 39,
-	MAX_SPECIAL_ATTACK = 40
+	NPC_CHASE_DISTANCE = 40,
+	MAX_SPECIAL_ATTACK = 41
 	
 };
 
@@ -526,7 +527,7 @@ public:
 	Mob* With();
 
 	// Add item from cursor slot to trade bucket (automatically does bag data too)
-	void AddEntity(uint16 from_slot_id, uint16 trade_slot_id, uint32 stack_size);
+	void AddEntity(uint16 trade_slot_id, uint32 stack_size);
 
 	// Audit trade
 	void LogTrade();

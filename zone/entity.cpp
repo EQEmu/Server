@@ -1476,7 +1476,7 @@ void EntityList::QueueClientsStatus(Mob *sender, const EQApplicationPacket *app,
 void EntityList::DuelMessage(Mob *winner, Mob *loser, bool flee)
 {
 	if (winner->GetLevelCon(winner->GetLevel(), loser->GetLevel()) > 2) {
-		std::vector<void*> args;
+		std::vector<EQEmu::Any> args;
 		args.push_back(winner);
 		args.push_back(loser);
 
@@ -1598,7 +1598,7 @@ Corpse *EntityList::GetCorpseByName(const char *name)
 
 Spawn2 *EntityList::GetSpawnByID(uint32 id)
 {
-	if (!zone)
+	if (!zone || !zone->IsLoaded())
 		return nullptr;
 
 	LinkedListIterator<Spawn2 *> iterator(zone->spawn2_list);
@@ -2847,7 +2847,7 @@ void EntityList::ClearFeignAggro(Mob *targ)
 			}
 
 			if (targ->IsClient()) {
-				std::vector<void*> args;
+				std::vector<EQEmu::Any> args;
 				args.push_back(it->second);
 				int i = parse->EventPlayer(EVENT_FEIGN_DEATH, targ->CastToClient(), "", 0, &args);
 				if (i != 0) {
@@ -3244,7 +3244,7 @@ void EntityList::ProcessMove(Client *c, float x, float y, float z)
 		if (evt.npc) {
 			parse->EventNPC(evt.event_id, evt.npc, evt.client, "", 0);
 		} else {
-			std::vector<void*> args;
+			std::vector<EQEmu::Any> args;
 			args.push_back(&evt.area_id);
 			args.push_back(&evt.area_type);
 			parse->EventPlayer(evt.event_id, evt.client, "", 0, &args);
@@ -3298,7 +3298,7 @@ void EntityList::ProcessMove(NPC *n, float x, float y, float z)
 
 	for (auto iter = events.begin(); iter != events.end(); ++iter) {
 		quest_proximity_event& evt = (*iter);
-		std::vector<void*> args;
+		std::vector<EQEmu::Any> args;
 		args.push_back(&evt.area_id);
 		args.push_back(&evt.area_type);
 		parse->EventNPC(evt.event_id, evt.npc, evt.client, "", 0, &args);
@@ -4168,6 +4168,20 @@ void EntityList::SignalAllClients(uint32 data)
 			ent->Signal(data);
 		++it;
 	}
+}
+
+uint16 EntityList::GetClientCount(){
+	uint16 ClientCount = 0;
+	std::list<Client*> client_list;
+	entity_list.GetClientList(client_list);
+	std::list<Client*>::iterator iter = client_list.begin();
+	while (iter != client_list.end()) {
+		Client *entry = (*iter);
+		entry->GetCleanName();
+		ClientCount++;
+		iter++;
+	}
+	return ClientCount;
 }
 
 void EntityList::GetMobList(std::list<Mob *> &m_list)

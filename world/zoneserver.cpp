@@ -1268,7 +1268,7 @@ bool ZoneServer::Process() {
 				UCSLink.SendPacket(pack);
 				break;
 			}
-
+			case ServerOP_QSSendQuery:
 			case ServerOP_QueryServGeneric:
 			case ServerOP_Speech:
 			case ServerOP_QSPlayerLogTrades:
@@ -1296,7 +1296,7 @@ bool ZoneServer::Process() {
 				QSLink.SendPacket(pack);
 				break;
 			}
-			case ServerOP_QSMerchantLogTransactions:
+			case ServerOP_QSPlayerLogMerchantTransactions:
 			{
 				QSLink.SendPacket(pack);
 				break;

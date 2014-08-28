@@ -25,7 +25,9 @@
 #include "../common/string_util.h"
 #include "string_ids.h"
 #include "quest_parser_collection.h"
+#include "queryserv.h"
 
+extern QueryServ* QServ;
 extern WorldServer worldserver;
 extern Zone* zone;
 
@@ -147,7 +149,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		}
 	}
 
-		//make sure its a valid zone.
+	/* Check for Valid Zone */
 	const char *target_zone_name = database.GetZoneName(target_zone_id);
 	if(target_zone_name == nullptr) {
 		//invalid zone...
@@ -157,7 +159,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		return;
 	}
 
-	//load up the safe coords, restrictions, and verify the zone name
+	/* Load up the Safe Coordinates, restrictions and verify the zone name*/
 	float safe_x, safe_y, safe_z;
 	int16 minstatus = 0;
 	uint8 minlevel = 0;
@@ -327,15 +329,19 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 
 	SendLogoutPackets();
 
-	//dont clear aggro until the zone is successful
+	/* QS: PlayerLogZone */
+	if (RuleB(QueryServ, PlayerLogZone)){
+		std::string event_desc = StringFormat("Zoning :: zoneid:%u instid:%u x:%4.2f y:%4.2f z:%4.2f h:%4.2f zonemode:%d from zoneid:%u instid:%i", zone_id, instance_id, dest_x, dest_y, dest_z, dest_h, zone_mode, this->GetZoneID(), this->GetInstanceID());
+		QServ->PlayerLogEvent(Player_Log_Zoning, this->CharacterID(), event_desc);
+	}
+
+	/* Dont clear aggro until the zone is successful */
 	entity_list.RemoveFromHateLists(this);
 
 	if(this->GetPet())
 		entity_list.RemoveFromHateLists(this->GetPet());
 
-	LogFile->write(EQEMuLog::Status, "Zoning '%s' to: %s (%i) - (%i) x=%f, y=%f, z=%f",
-		m_pp.name, database.GetZoneName(zone_id), zone_id, instance_id,
-		dest_x, dest_y, dest_z);
+	LogFile->write(EQEMuLog::Status, "Zoning '%s' to: %s (%i) - (%i) x=%f, y=%f, z=%f", m_pp.name, database.GetZoneName(zone_id), zone_id, instance_id, dest_x, dest_y, dest_z);
 
 	//set the player's coordinates in the new zone so they have them
 	//when they zone into it
