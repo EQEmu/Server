@@ -161,6 +161,9 @@ uint32 Database::CheckLogin(const char* name, const char* password, int16* oStat
 		return 0;
 	}
 
+	if(results.RowCount() < 1)
+		return 0;
+
 	auto row = results.begin();
 
 	uint32 id = atoi(row[0]);
