@@ -1548,6 +1548,11 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
         return;
     }
 
+    if(results.ColumnCount() <= SPELL_LOAD_FIELD_COUNT) {
+		_log(SPELLS__LOAD_ERR, "Fatal error loading spells: Spell field count < SPELL_LOAD_FIELD_COUNT(%u)", SPELL_LOAD_FIELD_COUNT);
+		return;
+    }
+
     int tempid = 0;
     int counter = 0;
 
