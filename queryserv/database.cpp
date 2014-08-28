@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errmsg.h> 
+#include <errmsg.h>
 #include <mysqld_error.h>
 #include <limits.h>
 #include <ctype.h>
@@ -96,27 +96,30 @@ Close the connection to the database
 Database::~Database()
 {
 }
- 
+
 void Database::AddSpeech(const char* from, const char* to, const char* message, uint16 minstatus, uint32 guilddbid, uint8 type) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
 
-	char *S1 = new char[strlen(from) * 2 + 1];
-	char *S2 = new char[strlen(to) * 2 + 1];
-	char *S3 = new char[strlen(message) * 2 + 1];
-	DoEscapeString(S1, from, strlen(from));
-	DoEscapeString(S2, to, strlen(to));
-	DoEscapeString(S3, message, strlen(message));
+	char *escapedFrom = new char[strlen(from) * 2 + 1];
+	char *escapedTo = new char[strlen(to) * 2 + 1];
+	char *escapedMessage = new char[strlen(message) * 2 + 1];
+	DoEscapeString(escapedFrom, from, strlen(from));
+	DoEscapeString(escapedTo, to, strlen(to));
+	DoEscapeString(escapedMessage, message, strlen(message));
 
-	if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_speech` SET `from`='%s', `to`='%s', `message`='%s', `minstatus`='%i', `guilddbid`='%i', `type`='%i'", S1, S2, S3, minstatus, guilddbid, type), errbuf, 0, 0)) {
-		_log(QUERYSERV__ERROR, "Failed Speech Entry Insert: %s", errbuf);
-		_log(QUERYSERV__ERROR, "%s", query);
+    std::string query = StringFormat("INSERT INTO `qs_player_speech` "
+                                    "SET `from` = '%s', `to` = '%s', `message`='%s', "
+                                    "`minstatus`='%i', `guilddbid`='%i', `type`='%i'",
+                                    escapedFrom, escapedTo, escapedMessage, minstatus, guilddbid, type);
+    safe_delete_array(escapedFrom);
+	safe_delete_array(escapedTo);
+	safe_delete_array(escapedMessage);
+	auto results = QueryDatabase(query);
+	if(!results.Success()) {
+		_log(QUERYSERV__ERROR, "Failed Speech Entry Insert: %s", results.ErrorMessage().c_str());
+		_log(QUERYSERV__ERROR, "%s", query.c_str());
 	}
 
-	safe_delete_array(query);
-	safe_delete_array(S1);
-	safe_delete_array(S2);
-	safe_delete_array(S3);
+
 }
 
 void Database::LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 DetailCount) {
@@ -149,7 +152,7 @@ void Database::LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 DetailCount) {
 	}
 }
 
-void Database::LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 DetailCount) { 
+void Database::LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 DetailCount) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	uint32 lastid = 0;
@@ -225,7 +228,7 @@ void Database::LogPlayerDelete(QSPlayerLogDelete_Struct* QS, uint32 Items) {
 	}
 }
 
-void Database::LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 Items) { 
+void Database::LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 Items) {
 	/* These are item moves */
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
@@ -236,7 +239,7 @@ void Database::LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 Items) {
 		errbuf, 0, 0, &lastid)) {
 		_log(QUERYSERV__ERROR, "Failed Move Log Record Insert: %s", errbuf);
 		_log(QUERYSERV__ERROR, "%s", query);
-	} 
+	}
 	if(Items > 0) {
 		for(int i = 0; i < Items; i++) {
 			if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_move_record_entries` SET `event_id`='%i', "
@@ -276,7 +279,7 @@ void Database::LogMerchantTransaction(QSMerchantLogTransaction_Struct* QS, uint3
 				QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5,
 				errbuf, 0, 0))) {
 				_log(QUERYSERV__ERROR, "Failed Transaction Log Record Entry Insert: %s", errbuf);
-				_log(QUERYSERV__ERROR, "%s", query); 
+				_log(QUERYSERV__ERROR, "%s", query);
 			}
 		}
 	}
@@ -293,11 +296,11 @@ void Database::GeneralQueryReceive(ServerPacket *pack) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	uint32 lastid = 0;
-	if (!RunQuery(query, MakeAnyLenString(&query, Query), errbuf, 0, 0, &lastid)) { 
+	if (!RunQuery(query, MakeAnyLenString(&query, Query), errbuf, 0, 0, &lastid)) {
 		_log(QUERYSERV__ERROR, "Failed Delete Log Record Insert: %s", errbuf);
-		_log(QUERYSERV__ERROR, "%s", query); 
+		_log(QUERYSERV__ERROR, "%s", query);
 	}
 	safe_delete_array(query);
-	safe_delete(pack); 
-	safe_delete(Query); 
+	safe_delete(pack);
+	safe_delete(Query);
 }
