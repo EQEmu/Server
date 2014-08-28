@@ -306,33 +306,43 @@ void Database::LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 items) {
 
 void Database::LogMerchantTransaction(QSMerchantLogTransaction_Struct* QS, uint32 items) {
 	/* Merchant transactions are from the perspective of the merchant, not the player -U */
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	uint32 lastid = 0;
-	if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_merchant_transaction_record` SET `time`=NOW(), "
-		"`zone_id`='%i', `merchant_id`='%i', `merchant_pp`='%i', `merchant_gp`='%i', `merchant_sp`='%i', `merchant_cp`='%i', `merchant_items`='%i', "
-		"`char_id`='%i', `char_pp`='%i', `char_gp`='%i', `char_sp`='%i', `char_cp`='%i', `char_items`='%i'",
-		QS->zone_id, QS->merchant_id, QS->merchant_money.platinum, QS->merchant_money.gold, QS->merchant_money.silver, QS->merchant_money.copper, QS->merchant_count,
-		QS->char_id, QS->char_money.platinum, QS->char_money.gold, QS->char_money.silver, QS->char_money.copper, QS->char_count),
-		errbuf, 0, 0, &lastid)) {
-		_log(QUERYSERV__ERROR, "Failed Transaction Log Record Insert: %s", errbuf);
-		_log(QUERYSERV__ERROR, "%s", query);
+	std::string query = StringFormat("INSERT INTO `qs_merchant_transaction_record` SET `time` = NOW(), "
+                                    "`zone_id` = '%i', `merchant_id` = '%i', `merchant_pp` = '%i', "
+                                    "`merchant_gp` = '%i', `merchant_sp` = '%i', `merchant_cp` = '%i', "
+                                    "`merchant_items` = '%i', `char_id` = '%i', `char_pp` = '%i', "
+                                    "`char_gp` = '%i', `char_sp` = '%i', `char_cp` = '%i', "
+                                    "`char_items` = '%i'",
+                                    QS->zone_id, QS->merchant_id, QS->merchant_money.platinum,
+                                    QS->merchant_money.gold, QS->merchant_money.silver,
+                                    QS->merchant_money.copper, QS->merchant_count, QS->char_id,
+                                    QS->char_money.platinum, QS->char_money.gold, QS->char_money.silver,
+                                    QS->char_money.copper, QS->char_count);
+    auto results = QueryDatabase(query);
+	if(!results.Success()) {
+		_log(QUERYSERV__ERROR, "Failed Transaction Log Record Insert: %s", results.ErrorMessage().c_str());
+		_log(QUERYSERV__ERROR, "%s", query.c_str());
 	}
 
-	if(items > 0) {
-		for(int i = 0; i < items; i++) {
-			if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_merchant_transaction_record_entries` SET `event_id`='%i', "
-				"`char_slot`='%i', `item_id`='%i', `charges`='%i', `aug_1`='%i', "
-				"`aug_2`='%i', `aug_3`='%i', `aug_4`='%i', `aug_5`='%i'",
-				lastid, QS->items[i].char_slot, QS->items[i].item_id, QS->items[i].charges, QS->items[i].aug_1,
-				QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5,
-				errbuf, 0, 0))) {
-				_log(QUERYSERV__ERROR, "Failed Transaction Log Record Entry Insert: %s", errbuf);
-				_log(QUERYSERV__ERROR, "%s", query);
-			}
-		}
-	}
-	safe_delete_array(query);
+	if(items == 0)
+        return;
+
+    int lastIndex = results.LastInsertedID();
+
+    for(int i = 0; i < items; i++) {
+        query = StringFormat("INSERT INTO `qs_merchant_transaction_record_entries` SET `event_id` = '%i', "
+                            "`char_slot` = '%i', `item_id` = '%i', `charges` = '%i', `aug_1` = '%i', "
+                            "`aug_2` = '%i', `aug_3` = '%i', `aug_4` = '%i', `aug_5` = '%i'",
+                            lastIndex, QS->items[i].char_slot, QS->items[i].item_id, QS->items[i].charges,
+                            QS->items[i].aug_1, QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4,
+                            QS->items[i].aug_5);
+        results = QueryDatabase(query);
+        if(!results.Success()) {
+            _log(QUERYSERV__ERROR, "Failed Transaction Log Record Entry Insert: %s", results.ErrorMessage().c_str());
+            _log(QUERYSERV__ERROR, "%s", query.c_str());
+        }
+
+    }
+
 }
 
 void Database::GeneralQueryReceive(ServerPacket *pack) {
