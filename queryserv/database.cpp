@@ -235,32 +235,37 @@ void Database::LogPlayerNPCKill(QSPlayerLogNPCKill_Struct* QS, uint32 members){
 
 }
 
-void Database::LogPlayerDelete(QSPlayerLogDelete_Struct* QS, uint32 Items) {
+void Database::LogPlayerDelete(QSPlayerLogDelete_Struct* QS, uint32 items) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	uint32 lastid = 0;
-	if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_delete_record` SET `time`=NOW(), "
-		"`char_id`='%i', `stack_size`='%i', `char_items`='%i'",
-		QS->char_id, QS->stack_size, QS->char_count, QS->char_count),
-		errbuf, 0, 0, &lastid)) {
-		_log(QUERYSERV__ERROR, "Failed Delete Log Record Insert: %s", errbuf);
-		_log(QUERYSERV__ERROR, "%s", query);
+	std::string query = StringFormat("INSERT INTO `qs_player_delete_record` SET `time` = NOW(), "
+                                    "`char_id` = '%i', `stack_size` = '%i', `char_items` = '%i'",
+                                    QS->char_id, QS->stack_size, QS->char_count, QS->char_count);
+    auto results = QueryDatabase(query);
+	if(!results.Success()) {
+		_log(QUERYSERV__ERROR, "Failed Delete Log Record Insert: %s", results.ErrorMessage().c_str());
+		_log(QUERYSERV__ERROR, "%s", query.c_str());
 	}
 
-	if(Items > 0) {
-		for(int i = 0; i < Items; i++) {
-			if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_delete_record_entries` SET `event_id`='%i', "
-				"`char_slot`='%i', `item_id`='%i', `charges`='%i', `aug_1`='%i', "
-				"`aug_2`='%i', `aug_3`='%i', `aug_4`='%i', `aug_5`='%i'",
-				lastid, QS->items[i].char_slot, QS->items[i].item_id, QS->items[i].charges, QS->items[i].aug_1,
-				QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5,
-				errbuf, 0, 0))) {
-				_log(QUERYSERV__ERROR, "Failed Delete Log Record Entry Insert: %s", errbuf);
-				_log(QUERYSERV__ERROR, "%s", query);
-			}
-		}
-	}
+	if(items == 0)
+        return;
+
+    int lastIndex = results.LastInsertedID();
+
+    for(int i = 0; i < items; i++) {
+        query = StringFormat("INSERT INTO `qs_player_delete_record_entries` SET `event_id` = '%i', "
+                            "`char_slot` = '%i', `item_id` = '%i', `charges` = '%i', `aug_1` = '%i', "
+                            "`aug_2` = '%i', `aug_3` = '%i', `aug_4` = '%i', `aug_5` = '%i'",
+                            lastIndex, QS->items[i].char_slot, QS->items[i].item_id, QS->items[i].charges,
+                            QS->items[i].aug_1, QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4,
+                            QS->items[i].aug_5);
+        results = QueryDatabase(query);
+        if(!results.Success()) {
+            _log(QUERYSERV__ERROR, "Failed Delete Log Record Entry Insert: %s", results.ErrorMessage().c_str());
+            _log(QUERYSERV__ERROR, "%s", query.c_str());
+        }
+
+    }
+
 }
 
 void Database::LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 Items) {
