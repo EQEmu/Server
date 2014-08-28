@@ -268,34 +268,43 @@ void Database::LogPlayerDelete(QSPlayerLogDelete_Struct* QS, uint32 items) {
 
 }
 
-void Database::LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 Items) {
+void Database::LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 items) {
 	/* These are item moves */
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	uint32 lastid = 0;
-	if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_move_record` SET `time`=NOW(), "
-		"`char_id`='%i', `from_slot`='%i', `to_slot`='%i', `stack_size`='%i', `char_items`='%i', `postaction`='%i'",
-		QS->char_id, QS->from_slot, QS->to_slot, QS->stack_size, QS->char_count, QS->postaction),
-		errbuf, 0, 0, &lastid)) {
-		_log(QUERYSERV__ERROR, "Failed Move Log Record Insert: %s", errbuf);
-		_log(QUERYSERV__ERROR, "%s", query);
+
+	std::string query = StringFormat("INSERT INTO `qs_player_move_record` SET `time` = NOW(), "
+                                    "`char_id` = '%i', `from_slot` = '%i', `to_slot` = '%i', "
+                                    "`stack_size` = '%i', `char_items` = '%i', `postaction` = '%i'",
+                                    QS->char_id, QS->from_slot, QS->to_slot, QS->stack_size,
+                                    QS->char_count, QS->postaction);
+    auto results = QueryDatabase(query);
+	if(!results.Success()) {
+		_log(QUERYSERV__ERROR, "Failed Move Log Record Insert: %s", results.ErrorMessage().c_str());
+		_log(QUERYSERV__ERROR, "%s", query.c_str());
 	}
-	if(Items > 0) {
-		for(int i = 0; i < Items; i++) {
-			if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_move_record_entries` SET `event_id`='%i', "
-				"`from_slot`='%i', `to_slot`='%i', `item_id`='%i', `charges`='%i', "
-				"`aug_1`='%i', `aug_2`='%i', `aug_3`='%i', `aug_4`='%i', `aug_5`='%i'", lastid,
-				QS->items[i].from_slot, QS->items[i].to_slot, QS->items[i].item_id, QS->items[i].charges,
-				QS->items[i].aug_1, QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5,
-				errbuf, 0, 0))) {
-				_log(QUERYSERV__ERROR, "Failed Move Log Record Entry Insert: %s", errbuf);
-				_log(QUERYSERV__ERROR, "%s", query);
-			}
-		}
-	}
+
+	if(items == 0)
+        return;
+
+    int lastIndex = results.LastInsertedID();
+
+    for(int i = 0; i < items; i++) {
+        query = StringFormat("INSERT INTO `qs_player_move_record_entries` SET `event_id` = '%i', "
+                            "`from_slot` = '%i', `to_slot` = '%i', `item_id` = '%i', `charges` = '%i', "
+                            "`aug_1` = '%i', `aug_2` = '%i', `aug_3` = '%i', `aug_4` = '%i', `aug_5` = '%i'",
+                            lastIndex, QS->items[i].from_slot, QS->items[i].to_slot, QS->items[i].item_id,
+                            QS->items[i].charges, QS->items[i].aug_1, QS->items[i].aug_2,
+                            QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5);
+        results = QueryDatabase(query);
+        if(!results.Success()) {
+            _log(QUERYSERV__ERROR, "Failed Move Log Record Entry Insert: %s", results.ErrorMessage().c_str());
+            _log(QUERYSERV__ERROR, "%s", query.c_str());
+        }
+
+    }
+
 }
 
-void Database::LogMerchantTransaction(QSMerchantLogTransaction_Struct* QS, uint32 Items) {
+void Database::LogMerchantTransaction(QSMerchantLogTransaction_Struct* QS, uint32 items) {
 	/* Merchant transactions are from the perspective of the merchant, not the player -U */
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
@@ -310,8 +319,8 @@ void Database::LogMerchantTransaction(QSMerchantLogTransaction_Struct* QS, uint3
 		_log(QUERYSERV__ERROR, "%s", query);
 	}
 
-	if(Items > 0) {
-		for(int i = 0; i < Items; i++) {
+	if(items > 0) {
+		for(int i = 0; i < items; i++) {
 			if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_merchant_transaction_record_entries` SET `event_id`='%i', "
 				"`char_slot`='%i', `item_id`='%i', `charges`='%i', `aug_1`='%i', "
 				"`aug_2`='%i', `aug_3`='%i', `aug_4`='%i', `aug_5`='%i'",
