@@ -163,33 +163,45 @@ void Database::LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 detailCount) {
 
 }
 
-void Database::LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 DetailCount) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	uint32 lastid = 0;
-	if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_handin_record` SET `time`=NOW(), `quest_id`='%i', "
-		"`char_id`='%i', `char_pp`='%i', `char_gp`='%i', `char_sp`='%i', `char_cp`='%i', `char_items`='%i', "
-		"`npc_id`='%i', `npc_pp`='%i', `npc_gp`='%i', `npc_sp`='%i', `npc_cp`='%i', `npc_items`='%i'",
-		QS->quest_id, QS->char_id, QS->char_money.platinum, QS->char_money.gold, QS->char_money.silver, QS->char_money.copper, QS->char_count,
-		QS->npc_id, QS->npc_money.platinum, QS->npc_money.gold, QS->npc_money.silver, QS->npc_money.copper, QS->npc_count),
-		errbuf, 0, 0, &lastid)) {
-		_log(QUERYSERV__ERROR, "Failed Handin Log Record Insert: %s", errbuf);
-		_log(QUERYSERV__ERROR, "%s", query);
+void Database::LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 detailCount) {
+
+    std::string query = StringFormat("INSERT INTO `qs_player_handin_record` SET `time` = NOW(), "
+                                    "`quest_id` = '%i', `char_id` = '%i', `char_pp` = '%i', "
+                                    "`char_gp` = '%i', `char_sp` = '%i', `char_cp` = '%i', "
+                                    "`char_items` = '%i', `npc_id` = '%i', `npc_pp` = '%i', "
+                                    "`npc_gp` = '%i', `npc_sp` = '%i', `npc_cp` = '%i', "
+                                    "`npc_items`='%i'",
+                                    QS->quest_id, QS->char_id, QS->char_money.platinum,
+                                    QS->char_money.gold, QS->char_money.silver, QS->char_money.copper,
+                                    QS->char_count, QS->npc_id, QS->npc_money.platinum,
+                                    QS->npc_money.gold, QS->npc_money.silver, QS->npc_money.copper,
+                                    QS->npc_count);
+    auto results = QueryDatabase(query);
+	if(!results.Success()) {
+		_log(QUERYSERV__ERROR, "Failed Handin Log Record Insert: %s", results.ErrorMessage().c_str());
+		_log(QUERYSERV__ERROR, "%s", query.c_str());
 	}
 
-	if(DetailCount > 0) {
-		for(int i = 0; i < DetailCount; i++) {
-			if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_handin_record_entries` SET `event_id`='%i', "
-				"`action_type`='%s', `char_slot`='%i', `item_id`='%i', `charges`='%i', "
-				"`aug_1`='%i', `aug_2`='%i', `aug_3`='%i', `aug_4`='%i', `aug_5`='%i'",
-				lastid, QS->items[i].action_type, QS->items[i].char_slot, QS->items[i].item_id, QS->items[i].charges,
-				QS->items[i].aug_1, QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5,
-				errbuf, 0, 0))) {
-				_log(QUERYSERV__ERROR, "Failed Handin Log Record Entry Insert: %s", errbuf);
-				_log(QUERYSERV__ERROR, "%s", query);
-			}
-		}
-	}
+	if(detailCount == 0)
+        return;
+
+	int lastIndex = results.LastInsertedID();
+
+    for(int i = 0; i < detailCount; i++) {
+        query = StringFormat("INSERT INTO `qs_player_handin_record_entries` SET `event_id` = '%i', "
+                            "`action_type` = '%s', `char_slot` = '%i', `item_id` = '%i', "
+                            "`charges` = '%i', `aug_1` = '%i', `aug_2` = '%i', `aug_3` = '%i', "
+                            "`aug_4` = '%i', `aug_5` = '%i'",
+                            lastIndex, QS->items[i].action_type, QS->items[i].char_slot,
+                            QS->items[i].item_id, QS->items[i].charges, QS->items[i].aug_1,
+                            QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4,
+                            QS->items[i].aug_5);
+        if(!results.Success()) {
+            _log(QUERYSERV__ERROR, "Failed Handin Log Record Entry Insert: %s", results.ErrorMessage().c_str());
+            _log(QUERYSERV__ERROR, "%s", query.c_str());
+        }
+    }
+
 }
 
 void Database::LogPlayerNPCKill(QSPlayerLogNPCKill_Struct* QS, uint32 Members){
