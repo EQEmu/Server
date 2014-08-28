@@ -3137,6 +3137,7 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 		DumpPacket(app);
 		return;
 	}
+
 	DumpPacket(app);
 	ItemViewRequest_Struct* ivrs = (ItemViewRequest_Struct*)app->pBuffer;
 
@@ -3156,30 +3157,24 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 				silentsaylink = true;
 			}
 
-			if (sayid && sayid > 0)
+			if (sayid > 0)
 			{
-				char errbuf[MYSQL_ERRMSG_SIZE];
-				char *query = 0;
-				MYSQL_RES *result;
-				MYSQL_ROW row;
 
+                std::string query = StringFormat("SELECT `phrase` FROM saylink WHERE `id` = '%i'", sayid);
+                auto results = database.QueryDatabase(query);
+                if (!results.Success()) {
+                    Message(13, "Error: The saylink (%s) was not found in the database.", response.c_str());
+					return;
+                }
 
-				if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `phrase` FROM saylink WHERE `id` = '%i'", sayid),errbuf,&result))
-				{
-					if (mysql_num_rows(result) == 1)
-					{
-						row = mysql_fetch_row(result);
-						response = row[0];
-					}
-					mysql_free_result(result);
-				}
-				else
-				{
-					Message(13, "Error: The saylink (%s) was not found in the database.",response.c_str());
-					safe_delete_array(query);
+				if (results.RowCount() != 1) {
+                    Message(13, "Error: The saylink (%s) was not found in the database.", response.c_str());
 					return;
 				}
-				safe_delete_array(query);
+
+				auto row = results.begin();
+                response = row[0];
+
 			}
 
 			if((response).size() > 0)
@@ -4628,7 +4623,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 
 			p_timers.Start(pTimerHarmTouch, HarmTouchReuseTime);
 		}
-		
+
 		if (spell_to_cast > 0)	// if we've matched LoH or HT, cast now
 			CastSpell(spell_to_cast, castspell->target_id, castspell->slot);
 	}
@@ -4862,6 +4857,7 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 {
 	Mob* with = trade->With();
 	trade->state = TradeAccepted;
+
 	if (with && with->IsClient()) {
 		//finish trade...
 		// Have both accepted?
@@ -4872,6 +4868,7 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 			other->trade->state = TradeCompleting;
 			trade->state = TradeCompleting;
 
+			// should we do this for NoDrop items as well?
 			if (CheckTradeLoreConflict(other) || other->CheckTradeLoreConflict(this)) {
 				Message_StringID(13, TRADE_CANCEL_LORE);
 				other->Message_StringID(13, TRADE_CANCEL_LORE);
@@ -4887,23 +4884,38 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 
 				// start QS code
 				if(RuleB(QueryServ, PlayerLogTrades)) {
-					uint16 trade_count = 0;
+					QSPlayerLogTrade_Struct event_entry;
+					std::list<void*> event_details;
 
-					// Item trade count for packet sizing
-					for(int16 slot_id = EmuConstants::TRADE_BEGIN; slot_id <= EmuConstants::TRADE_END; slot_id++) {
-						if(other->GetInv().GetItem(slot_id)) { trade_count += other->GetInv().GetItem(slot_id)->GetTotalItemCount(); }
-						if(m_inv[slot_id]) { trade_count += m_inv[slot_id]->GetTotalItemCount(); }
-					}
-
-					ServerPacket* qspack = new ServerPacket(ServerOP_QSPlayerLogTrades, sizeof(QSPlayerLogTrade_Struct) + (sizeof(QSTradeItems_Struct) * trade_count));
+					memset(&event_entry, 0, sizeof(QSPlayerLogTrade_Struct));
 
 					// Perform actual trade
-					this->FinishTrade(other, qspack, true);
-					other->FinishTrade(this, qspack, false);
+					this->FinishTrade(other, true, &event_entry, &event_details);
+					other->FinishTrade(this, false, &event_entry, &event_details);
 
-					qspack->Deflate();
-					if(worldserver.Connected()) { worldserver.SendPacket(qspack); }
-					safe_delete(qspack);
+					event_entry._detail_count = event_details.size();
+
+					ServerPacket* qs_pack = new ServerPacket(ServerOP_QSPlayerLogTrades, sizeof(QSPlayerLogTrade_Struct)+(sizeof(QSTradeItems_Struct)* event_entry._detail_count));
+					QSPlayerLogTrade_Struct* qs_buf = (QSPlayerLogTrade_Struct*)qs_pack->pBuffer;
+
+					memcpy(qs_buf, &event_entry, sizeof(QSPlayerLogTrade_Struct));
+
+					int offset = 0;
+
+					for (std::list<void*>::iterator iter = event_details.begin(); iter != event_details.end(); ++iter, ++offset) {
+						QSTradeItems_Struct* detail = reinterpret_cast<QSTradeItems_Struct*>(*iter);
+						qs_buf->items[offset] = *detail;
+						safe_delete(detail);
+					}
+
+					event_details.clear();
+
+					qs_pack->Deflate();
+
+					if(worldserver.Connected())
+						worldserver.SendPacket(qs_pack);
+
+					safe_delete(qs_pack);
 					// end QS code
 				}
 				else {
@@ -4928,25 +4940,43 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 		if(with->IsNPC()) {
 			// Audit trade to database for player trade stream
 			if(RuleB(QueryServ, PlayerLogHandins)) {
-				uint16 handin_count = 0;
+				QSPlayerLogHandin_Struct event_entry;
+				std::list<void*> event_details;
 
-				for(int16 slot_id = EmuConstants::TRADE_BEGIN; slot_id <= EmuConstants::TRADE_NPC_END; slot_id++) {
-					if(m_inv[slot_id]) { handin_count += m_inv[slot_id]->GetTotalItemCount(); }
+				memset(&event_entry, 0, sizeof(QSPlayerLogHandin_Struct));
+
+				FinishTrade(with->CastToNPC(), false, &event_entry, &event_details);
+
+				event_entry._detail_count = event_details.size();
+
+				ServerPacket* qs_pack = new ServerPacket(ServerOP_QSPlayerLogHandins, sizeof(QSPlayerLogHandin_Struct)+(sizeof(QSHandinItems_Struct)* event_entry._detail_count));
+				QSPlayerLogHandin_Struct* qs_buf = (QSPlayerLogHandin_Struct*)qs_pack->pBuffer;
+
+				memcpy(qs_buf, &event_entry, sizeof(QSPlayerLogHandin_Struct));
+
+				int offset = 0;
+
+				for (std::list<void*>::iterator iter = event_details.begin(); iter != event_details.end(); ++iter, ++offset) {
+					QSHandinItems_Struct* detail = reinterpret_cast<QSHandinItems_Struct*>(*iter);
+					qs_buf->items[offset] = *detail;
+					safe_delete(detail);
 				}
 
-				ServerPacket* qspack = new ServerPacket(ServerOP_QSPlayerLogHandins, sizeof(QSPlayerLogHandin_Struct) + (sizeof(QSHandinItems_Struct) * handin_count));
+				event_details.clear();
 
-				FinishTrade(with->CastToNPC(), qspack);
+				qs_pack->Deflate();
 
-				qspack->Deflate();
-				if(worldserver.Connected()) { worldserver.SendPacket(qspack); }
-				safe_delete(qspack);
+				if(worldserver.Connected())
+					worldserver.SendPacket(qs_pack);
+
+				safe_delete(qs_pack);
 			}
 			else {
 				FinishTrade(with->CastToNPC());
 			}
 		}
 #ifdef BOTS
+		// TODO: Log Bot trades
 		else if(with->IsBot())
 			with->CastToBot()->FinishTrade(this, Bot::BotTradeClientNormal);
 #endif
@@ -5864,9 +5894,9 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	else
 		this->DeleteItemInInventory(mp->itemslot,mp->quantity,false);
 
-	//This forces the price to show up correctly for charged items. 
+	//This forces the price to show up correctly for charged items.
 	if(inst->IsCharged())
-		mp->quantity = 1; 
+		mp->quantity = 1;
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopPlayerSell, sizeof(Merchant_Purchase_Struct));
 	Merchant_Purchase_Struct* mco=(Merchant_Purchase_Struct*)outapp->pBuffer;
@@ -7635,7 +7665,7 @@ void Client::Handle_OP_Mend(const EQApplicationPacket *app)
 	int mendhp = GetMaxHP() / 4;
 	int currenthp = GetHP();
 	if (MakeRandomInt(0, 199) < (int)GetSkill(SkillMend)) {
-		
+
 		int criticalchance = spellbonuses.CriticalMend + itembonuses.CriticalMend + aabonuses.CriticalMend;
 
 		if(MakeRandomInt(0,99) < criticalchance){
@@ -9532,7 +9562,7 @@ void Client::CompleteConnect() {
 
 	/* This sub event is for if a player logs in for the first time since entering world. */
 	if (firstlogon == 1){
-		parse->EventPlayer(EVENT_CONNECT, this, "", 0); 
+		parse->EventPlayer(EVENT_CONNECT, this, "", 0);
 		/* QS: PlayerLogConnectDisconnect */
 		if (RuleB(QueryServ, PlayerLogConnectDisconnect)){
 			std::string event_desc = StringFormat("Connect :: Logged into zoneid:%i instid:%i", this->GetZoneID(), this->GetInstanceID());
@@ -11410,92 +11440,68 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 		Message(15,"Your home city has already been set.", m_pp.binds[4].zoneId, database.GetZoneName(m_pp.binds[4].zoneId));
 		return;
 	}
+
 	if (app->size < 1) {
 		LogFile->write(EQEMuLog::Error, "Wrong size: OP_SetStartCity, size=%i, expected %i", app->size, 1);
 		DumpPacket(app);
 		return;
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result = nullptr;
-	MYSQL_ROW row = 0;
 	float x(0),y(0),z(0);
 	uint32 zoneid = 0;
+	uint32 startCity = (uint32)strtol((const char*)app->pBuffer, nullptr, 10);
 
-	uint32 StartCity = (uint32)strtol((const char*)app->pBuffer, nullptr, 10);
-	bool ValidCity = false;
-	database.RunQuery
-	(
-		query,
-		MakeAnyLenString
-		(
-			&query,
-			"SELECT zone_id, bind_id, x, y, z FROM start_zones "
-			"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
-			m_pp.class_,
-			m_pp.deity,
-			m_pp.race
-		),
-		errbuf,
-		&result
-	);
-	safe_delete_array(query);
-
-	if(!result) {
+	std::string query = StringFormat("SELECT zone_id, bind_id, x, y, z FROM start_zones "
+                                    "WHERE player_class=%i AND player_deity=%i AND player_race=%i",
+                                    m_pp.class_, m_pp.deity, m_pp.race);
+    auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
 		LogFile->write(EQEMuLog::Error, "No valid start zones found for /setstartcity");
 		return;
 	}
 
-	while(row = mysql_fetch_row(result)) {
+    bool validCity = false;
+	for (auto row = results.begin(); row != results.end(); ++row) {
 		if(atoi(row[1]) != 0)
 			zoneid = atoi(row[1]);
 		else
 			zoneid = atoi(row[0]);
 
-		if(zoneid == StartCity) {
-			ValidCity = true;
-			x = atof(row[2]);
-			y = atof(row[3]);
-			z = atof(row[4]);
-		}
+		if(zoneid != startCity)
+            continue;
+
+        validCity = true;
+        x = atof(row[2]);
+        y = atof(row[3]);
+        z = atof(row[4]);
 	}
 
-	if(ValidCity) {
+	if(validCity) {
 		Message(15,"Your home city has been set");
-		SetStartZone(StartCity, x, y, z);
-	}
-	else {
-		database.RunQuery
-		(
-			query,
-			MakeAnyLenString
-			(
-				&query,
-				"SELECT zone_id, bind_id FROM start_zones "
-				"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
-				m_pp.class_,
-				m_pp.deity,
-				m_pp.race
-			),
-			errbuf,
-			&result
-	);
-		safe_delete_array(query);
-		Message(15,"Use \"/startcity #\" to choose a home city from the following list:");
-		char* name;
-		while(row = mysql_fetch_row(result)) {
-			if(atoi(row[1]) != 0)
-				zoneid = atoi(row[1]);
-			else
-				zoneid = atoi(row[0]);
-			database.GetZoneLongName(database.GetZoneName(zoneid),&name);
-			Message(15,"%d - %s", zoneid, name);
-			safe_delete_array(name);
-		}
+		SetStartZone(startCity, x, y, z);
+		return;
 	}
 
-	mysql_free_result(result);
+	query = StringFormat("SELECT zone_id, bind_id FROM start_zones "
+                        "WHERE player_class=%i AND player_deity=%i AND player_race=%i",
+                        m_pp.class_, m_pp.deity, m_pp.race);
+    results = database.QueryDatabase(query);
+    if (!results.Success())
+        return;
+
+    Message(15,"Use \"/startcity #\" to choose a home city from the following list:");
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        if(atoi(row[1]) != 0)
+            zoneid = atoi(row[1]);
+        else
+            zoneid = atoi(row[0]);
+
+        char* name;
+        database.GetZoneLongName(database.GetZoneName(zoneid), &name);
+        Message(15,"%d - %s", zoneid, name);
+    }
+
 }
 
 void Client::Handle_OP_Report(const EQApplicationPacket *app)
@@ -11602,7 +11608,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 	// Could make this into a rule, although there is a hard limit since we are using a popup, of 4096 bytes that can
 	// be displayed in the window, including all the HTML formatting tags.
 	//
-	const int MaxResults = 10;
+	const int maxResults = 10;
 
 	if(app->size < sizeof(GMSearchCorpse_Struct))
 	{
@@ -11615,85 +11621,62 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 	GMSearchCorpse_Struct *gmscs = (GMSearchCorpse_Struct *)app->pBuffer;
 	gmscs->Name[63] = '\0';
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* Query = 0;
-	MYSQL_RES *Result;
-	MYSQL_ROW Row;
+	char *escSearchString = new char[129];
+	database.DoEscapeString(escSearchString, gmscs->Name, strlen(gmscs->Name));
 
-	char *EscSearchString = new char[129];
+    std::string query = StringFormat("SELECT charname, zoneid, x, y, z, timeofdeath, rezzed, IsBurried "
+                                    "FROM player_corpses WheRE charname LIKE '%%%s%%' ORDER BY charname LIMIT %i",
+                                    escSearchString, maxResults);
+    safe_delete_array(escSearchString);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        Message(0, "Query failed: %s.", results.ErrorMessage().c_str());
+        return;
+    }
 
-	database.DoEscapeString(EscSearchString, gmscs->Name, strlen(gmscs->Name));
+    if (results.RowCount() == 0)
+        return;
 
-	if (database.RunQuery(Query, MakeAnyLenString(&Query, "select charname, zoneid, x, y, z, timeofdeath, rezzed, IsBurried from "
-								"player_corpses where charname like '%%%s%%' order by charname limit %i",
-								EscSearchString, MaxResults), errbuf, &Result))
-	{
+    if(results.RowCount() == maxResults)
+        Message(clientMessageError, "Your search found too many results; some are not displayed.");
+    else
+        Message(clientMessageYellow, "There are %i corpse(s) that match the search string '%s'.", results.RowCount(), gmscs->Name);
 
-		int NumberOfRows = mysql_num_rows(Result);
+    char charName[64], timeOfDeath[20];
 
-		if(NumberOfRows == MaxResults)
-			Message(clientMessageError, "Your search found too many results; some are not displayed.");
-		else {
-			Message(clientMessageYellow, "There are %i corpse(s) that match the search string '%s'.",
-				NumberOfRows, gmscs->Name);
-		}
-
-		if(NumberOfRows == 0)
-		{
-			mysql_free_result(Result);
-			safe_delete_array(Query);
-			return;
-		}
-
-		char CharName[64], TimeOfDeath[20], Buffer[512];
-
-		std::string PopupText = "<table><tr><td>Name</td><td>Zone</td><td>X</td><td>Y</td><td>Z</td><td>Date</td><td>"
+	std::string popupText = "<table><tr><td>Name</td><td>Zone</td><td>X</td><td>Y</td><td>Z</td><td>Date</td><td>"
 					"Rezzed</td><td>Buried</td></tr><tr><td>&nbsp</td><td></td><td></td><td></td><td></td><td>"
 					"</td><td></td><td></td></tr>";
 
+    for (auto row = results.begin(); row != results.end(); ++row) {
 
-		while ((Row = mysql_fetch_row(Result)))
-		{
+        strn0cpy(charName, row[0], sizeof(charName));
 
-			strn0cpy(CharName, Row[0], sizeof(CharName));
+        uint32 ZoneID = atoi(row[1]);
+        float CorpseX = atof(row[2]);
+        float CorpseY = atof(row[3]);
+        float CorpseZ = atof(row[4]);
 
-			uint32 ZoneID = atoi(Row[1]);
+        strn0cpy(timeOfDeath, row[5], sizeof(timeOfDeath));
 
-			float CorpseX = atof(Row[2]);
-			float CorpseY = atof(Row[3]);
-			float CorpseZ = atof(Row[4]);
+        bool corpseRezzed = atoi(row[6]);
+        bool corpseBuried = atoi(row[7]);
 
-			strn0cpy(TimeOfDeath, Row[5], sizeof(TimeOfDeath));
+        popupText += StringFormat("<tr><td>%s</td><td>%s</td><td>%8.0f</td><td>%8.0f</td><td>%8.0f</td><td>%s</td><td>%s</td><td>%s</td></tr>",
+                                charName, StaticGetZoneName(ZoneID), CorpseX, CorpseY, CorpseZ, timeOfDeath,
+                                corpseRezzed ? "Yes" : "No", corpseBuried ? "Yes" : "No");
 
-			bool CorpseRezzed = atoi(Row[6]);
-			bool CorpseBuried = atoi(Row[7]);
+        if(popupText.size() > 4000) {
+            Message(clientMessageError, "Unable to display all the results.");
+            break;
+        }
 
-			sprintf(Buffer, "<tr><td>%s</td><td>%s</td><td>%8.0f</td><td>%8.0f</td><td>%8.0f</td><td>%s</td><td>%s</td><td>%s</td></tr>",
-				CharName, StaticGetZoneName(ZoneID), CorpseX, CorpseY, CorpseZ, TimeOfDeath,
-				CorpseRezzed ? "Yes" : "No", CorpseBuried ? "Yes" : "No");
+    }
 
-			PopupText += Buffer;
+    popupText += "</table>";
 
-			if(PopupText.size() > 4000)
-			{
-				Message(clientMessageError, "Unable to display all the results.");
-				break;
-			}
+    SendPopupToClient("Corpses", popupText.c_str());
 
-		}
-
-		PopupText += "</table>";
-
-		mysql_free_result(Result);
-
-		SendPopupToClient("Corpses", PopupText.c_str());
-	}
-	else{
-		Message(0, "Query failed: %s.", errbuf);
-
-	}
-	safe_delete_array(Query);
-	safe_delete_array(EscSearchString);
 }
 
 void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
@@ -12775,7 +12758,7 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app) {
 				QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, this->CharacterID(), event_desc);
 			}
 		}
-	} 
+	}
 	/* Cursor to Item storage */
 	else {
 		uint32 max_currency = GetAlternateCurrencyValue(reclaim->currency_id);
@@ -12784,7 +12767,7 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app) {
 		if(reclaim->count > max_currency) {
 			SummonItem(item_id, max_currency);
 			SetAlternateCurrencyValue(reclaim->currency_id, 0);
-		} 
+		}
 		else {
 			SummonItem(item_id, reclaim->count, 0, 0, 0, 0, 0, false, MainCursor);
 			AddAlternateCurrencyValue(reclaim->currency_id, -((int32)reclaim->count));
@@ -12793,7 +12776,7 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app) {
 		if (RuleB(QueryServ, PlayerLogAlternateCurrencyTransactions)){
 			std::string event_desc = StringFormat("Reclaim :: Cursor to Item :: alt_currency_id:%i amount:-%i in zoneid:%i instid:%i", reclaim->currency_id, reclaim->count, this->GetZoneID(), this->GetInstanceID());
 			QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, this->CharacterID(), event_desc);
-		} 
+		}
 	}
 }
 
@@ -12885,8 +12868,8 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app) {
 		/* QS: PlayerLogAlternateCurrencyTransactions :: Sold to Merchant*/
 		if (RuleB(QueryServ, PlayerLogAlternateCurrencyTransactions)){
 			std::string event_desc = StringFormat("Sold to Merchant :: itemid:%u npcid:%u alt_currency_id:%u cost:%u in zoneid:%u instid:%i", item->ID, npc_id, alt_cur_id, cost, this->GetZoneID(), this->GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, this->CharacterID(), event_desc); 
-		} 
+			QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, this->CharacterID(), event_desc);
+		}
 
 		FastQueuePacket(&outapp);
 		AddAlternateCurrencyValue(alt_cur_id, cost);
@@ -12947,7 +12930,7 @@ void Client::Handle_OP_LFGuild(const EQApplicationPacket *app)
 	switch(Command)
 	{
 		case 0:
-		{	
+		{
 				VERIFY_PACKET_LENGTH(OP_LFGuild, app, LFGuild_PlayerToggle_Struct);
 			LFGuild_PlayerToggle_Struct *pts = (LFGuild_PlayerToggle_Struct *)app->pBuffer;
 

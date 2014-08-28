@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/26/2014 ==
+Uleat: Implemented 'Smart' Player Trade transfers. Trades are processed by containers, stackables and then all remaining. QueryServ logs have been updated to match these transactions.
+Note: QueryServ logs previously listed 'Items' on the main entry table. This indicated the number of slots affected and not the actual number of items.
+This field now indicates the actual number of items transferred. For non-stackable, the value is '1' and stackable is the number of charges. A _detail_count
+property has been added to both 'Trade' and 'Handin' structs to indicate the number of details recorded..though, not tracked..it could be added.
+
 == 08/24/2014 ==
 Uleat: Fix (attempted) for zone crashes related to zone shut-down. This change disables all Mob AI and disables/deletes all Mob timers once Zone::ShutDown() is called. More areas will be addressed as reports come in.
 Note: Perl and Lua quests tested to work..please post any aberrant behavior. (I finally set my spell-check to US English...)
@@ -48,6 +54,16 @@ Akkadius: Added rules for each logging type, source rules here with them enabled
 Akkadius: Spawn related logging cleanup
 Akkadius: General code cleanup
 Akkadius: More to come for QueryServ 
+
+== 08/22/2014 ==
+Uleat: Rework of Trade::FinishedTrade() and Trade::ResetTrade() to parse items a little more intelligently.
+
+Trade window items are now sent to client inventory in this order:
+	- Bags
+	- Partial stack movements
+	- All remaining items
+
+If any of these procedures cause any problems, please post them immediately.
 
 == 08/20/2014 ==
 Uleat: Rework of Trade::AddEntity() - function used to move items into the trade window. Now accepts argument for 'stack_size' and updates client properly.
