@@ -357,7 +357,7 @@ void Client::GoFish()
 			}
 		}
 
-		std::vector<void*> args;
+		std::vector<EQEmu::Any> args;
 		args.push_back(inst);
 		parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst != nullptr ? inst->GetItem()->ID : 0, &args);
 	}
@@ -471,7 +471,7 @@ void Client::ForageItem(bool guarantee) {
 			}
 		}
 
-		std::vector<void*> args;
+		std::vector<EQEmu::Any> args;
 		args.push_back(inst);
 		parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "", inst ? inst->GetItem()->ID : 0, &args);
 
