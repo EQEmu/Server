@@ -205,6 +205,24 @@
 #define MERCHANT_HANDY_ITEM2		1146	//Greetings, %3. You look like you could use a %4.
 #define MERCHANT_HANDY_ITEM3		1147	//Hi there %3, just browsing? Have you seen the %4 I just got in?
 #define MERCHANT_HANDY_ITEM4		1148	//Welcome to my shop, %3. You would probably find a %4 handy.
+#define WONT_SELL_RACE1				1154 	//I don't like to speak to %B3(12) much less sell to them!
+#define WONT_SELL_CLASS1			1155 	//It's %B3(13) like you that are ruining the continent...get OUT!
+#define WONT_SELL_CLASS2			1156 	//Isn't there some kind of ordinance against %B3(13) crawling out from under their rocks?
+#define WONT_SELL_CLASS3			1157 	//%B3(13) like you don't have any place in my shop..now make way for welcome customers.
+#define WONT_SELL_CLASS4			1158 	//I thought scumbag %B3(13) like you just stole whatever they need.  Now GET OUT!
+#define WONT_SELL_CLASS5			1159 	//I don't have anything to do with %B3(13)..move along.
+#define WONT_SELL_NONSTDRACE1		1160 	//I don't have anything to do with your little gang..move along.
+#define WONT_SELL_RACE2				1161 	//It's not enough that you %B3(12) have ruined your own land. Now get lost!
+#define WONT_SELL_RACE3				1162 	//I have something here that %B3(12) use..let me see...it's the EXIT, now get LOST!
+#define WONT_SELL_RACE4				1163 	//Don't you %B3(12) have your own merchants?  Whatever, I'm not selling anything to you!
+#define WONT_SELL_NONSTDRACE2		1164 	//Members of your little "club" have ruined things around here..get lost!
+#define WONT_SELL_NONSTDRACE3		1165 	//I don't have anything to do with your damned club..move along.
+#define WONT_SELL_DEEDS1			1166 	//Creatures like you make me sick..the things you do..get out of here Pagan!
+#define WONT_SELL_DEEDS2			1167 	//After all the things you've done..the things you believe in..leave my shop!
+#define WONT_SELL_DEEDS3			1168 	//Actions speak louder than beliefs, and I despise both your actions and all you believe in.
+#define WONT_SELL_DEEDS4			1169 	//Get out of here now!
+#define WONT_SELL_DEEDS5			1170 	//I am tolerant by nature..but infidels like you push me past my limit..get out!
+#define WONT_SELL_DEEDS6			1171 	//I cannot abide you or your actions against all that is right..BE GONE!
 #define AA_POINT					1197	//point
 #define AA_POINTS					1215	//points
 #define SPELL_FIZZLE_OTHER			1218	//%1's spell fizzles!

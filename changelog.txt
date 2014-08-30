@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/30/2014 ==
+demonstar55: (noudess) Merchants should be more descriptive of why they don't sell to you
+
 == 08/26/2014 ==
 Uleat: Implemented 'Smart' Player Trade transfers. Trades are processed by containers, stackables and then all remaining. QueryServ logs have been updated to match these transactions.
 Note: QueryServ logs previously listed 'Items' on the main entry table. This indicated the number of slots affected and not the actual number of items.
