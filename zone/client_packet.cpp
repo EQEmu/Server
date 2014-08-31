@@ -8786,31 +8786,15 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	if(!RuleB(Character, MaintainIntoxicationAcrossZones))
 		m_pp.intoxication = 0;
 
-	//uint32 aalen = database.GetPlayerAlternateAdv(account_id, name, &aa);
-	//if (aalen == 0) {
-	//	std::cout << "Client dropped: !GetPlayerAlternateAdv, name=" << name << std::endl;
-	//	return false;
-	//}
-
-
-
-	////////////////////////////////////////////////////////////	// Player Profile Packet
-	// Try to find the EQ ID for the guild, if doesnt exist, guild has been deleted.
-
-	// Clear memory, but leave it in the DB (no reason not to, guild might be restored?)
-	strcpy(name, m_pp.name);
-	strcpy(lastname, m_pp.last_name);
 	if((m_pp.x == -1 && m_pp.y == -1 && m_pp.z == -1)||(m_pp.x == -2 && m_pp.y == -2 && m_pp.z == -2)) {
 		m_pp.x = zone->safe_x();
 		m_pp.y = zone->safe_y();
 		m_pp.z = zone->safe_z();
 	}
 
-	//these now come from the database, and it is the authority.
-	if(class_ > 0)
-		m_pp.class_ = class_;
-	else
-		class_ = m_pp.class_;
+
+	class_ = m_pp.class_;
+
 	if(level > 0) {
 		if(m_pp.level != level) {
 			//they changed their level in the database... not ideal, but oh well..
@@ -8882,9 +8866,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	
 
 	/* Load Guild */
-	if (!IsInAGuild()) {
-		m_pp.guild_id = GUILD_NONE;
-	}
+	if (!IsInAGuild()) { m_pp.guild_id = GUILD_NONE; }
 	else {
 		m_pp.guild_id = GuildID();
 
@@ -9483,8 +9465,7 @@ void Client::CompleteConnect() {
 	}
 
 	/* Sends appearances for all mobs not doing anim_stand aka sitting, looting, playing dead */
-	entity_list.SendZoneAppearance(this);
-
+	entity_list.SendZoneAppearance(this); 
 	/* Sends the Nimbus particle effects (up to 3) for any mob using them */
 	entity_list.SendNimbusEffects(this);
 
