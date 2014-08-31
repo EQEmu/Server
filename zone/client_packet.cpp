@@ -8698,6 +8698,8 @@ void Client::DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) {
 			break;
 		}
 		case DBA_b1_Entity_Client_Save: {
+			clock_t t = std::clock(); /* Function timer start */
+
 			char errbuf[MYSQL_ERRMSG_SIZE];
 			uint32 affected_rows = 0;
 			DBAsyncQuery* dbaq = dbaw->PopAnswer();
@@ -8713,6 +8715,8 @@ void Client::DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) {
 					Message(13, "errbuf: %s", errbuf);
 			}
 			pQueuedSaveWorkID = 0;
+
+			LogFile->write(EQEMuLog::Status, "Client::DBAWComplete Save Character Async done... Took %f seconds", ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 			break;
 		}
 		default: {
@@ -8761,12 +8765,17 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		}
 	}
 
-	// This should be a part of the PlayerProfile BLOB, but we don't want to modify that
-	// The player inspect message is retrieved from the db on load, then saved as new updates come in..no mods to Client::Save()
-	database.GetPlayerInspectMessage(m_pp.name, &m_inspect_message);
+	/* Load Character Currency into PP */
+	database.LoadCharacterCurrency(CharacterID(), &m_pp);
+	/* Load Character Data from DB into PP */
+	database.LoadCharacterData(CharacterID(), &m_pp);
+	/* Move to another method when can, this is pointless... */
+	database.GetPlayerInspectMessage(m_pp.name, &m_inspect_message); 
+	/* Load Character Currency*/
+	database.LoadCharacterCurrency(CharacterID(), &m_pp);
 
 	conn_state = PlayerProfileLoaded;
-
+	/* Set Current zone */
 	m_pp.zone_id = zone->GetZoneID();
 	m_pp.zoneInstance = zone->GetInstanceID();
 
@@ -8820,7 +8829,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	base_race	= m_pp.race;
 	gender		= m_pp.gender;
 	base_gender	= m_pp.gender;
-	deity		= m_pp.deity;//FYI: DEITY_AGNOSTIC = 396; still valid?
+	deity		= m_pp.deity; //FYI: DEITY_AGNOSTIC = 396; still valid?
 	haircolor	= m_pp.haircolor;
 	beardcolor	= m_pp.beardcolor;
 	eyecolor1	= m_pp.eyecolor1;
@@ -8833,8 +8842,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	drakkin_details		= m_pp.drakkin_details;
 
 	//if we zone in with invalid Z, fix it.
-	if (zone->zonemap != nullptr) {
-
+	if (zone->zonemap != nullptr) { 
 		Map::Vertex me;
 		me.x = GetX();
 		me.y = GetY();
@@ -8871,19 +8879,13 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	if (m_pp.gm && admin < minStatusToBeGM)
 		m_pp.gm = 0;
 
-	if (m_pp.platinum < 0 || m_pp.gold < 0 || m_pp.silver < 0 || m_pp.copper < 0 )
-	{
-		m_pp.platinum = 0;
-		m_pp.gold = 0;
-		m_pp.silver = 0;
-		m_pp.copper = 0;
-	}
+	
 
+	/* Load Guild */
 	if (!IsInAGuild()) {
 		m_pp.guild_id = GUILD_NONE;
 	}
-	else
-	{
+	else {
 		m_pp.guild_id = GuildID();
 
 		if(zone->GetZoneID() == RuleI(World, GuildBankZoneID))
@@ -8895,119 +8897,88 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	switch (race)
 	{
 		case OGRE:
-			size = 9;
-			break;
+			size = 9; break;
 		case TROLL:
-			size = 8;
-			break;
-		case VAHSHIR:
-		case BARBARIAN:
-			size = 7;
-			break;
-		case HUMAN:
-		case HIGH_ELF:
-		case ERUDITE:
-		case IKSAR:
-		case DRAKKIN:
-			size = 6;
-			break;
+			size = 8; break;
+		case VAHSHIR: case BARBARIAN:
+			size = 7; break;
+		case HUMAN: case HIGH_ELF: case ERUDITE: case IKSAR: case DRAKKIN:
+			size = 6; break;
 		case HALF_ELF:
-			size = 5.5;
-			break;
-		case WOOD_ELF:
-		case DARK_ELF:
-		case FROGLOK:
-			size = 5;
-			break;
+			size = 5.5; break;
+		case WOOD_ELF: case DARK_ELF: case FROGLOK:
+			size = 5; break;
 		case DWARF:
-			size = 4;
-			break;
+			size = 4; break;
 		case HALFLING:
-			size = 3.5;
-			break;
+			size = 3.5; break;
 		case GNOME:
-			size = 3;
-			break;
+			size = 3; break;
 		default:
 			size = 0;
 	}
 
-	//validate skills
-	//im not sure I follow this logic... commenting for now...
-	/*
-	if(Admin() < minStatusToHaveInvalidSkills) {
-		SkillType sk;
-		for (sk = _1H_BLUNT; sk <= HIGHEST_SKILL; sk = (SkillType)(sk+1)) {
-			//int cap = GetSkillCap(sk-1);
-			int cap = MaxSkill(sk-1, GetClass(), GetLevel());
-			if (cap >= 254)
-				m_pp.skills[sk] = cap;
-		}
-	}
-	*/
-
-	//validate adventure points, this cap is arbitrary at 2,000,000,000
-	if(m_pp.ldon_points_guk < 0)
-		m_pp.ldon_points_guk = 0;
-	if(m_pp.ldon_points_guk > 0x77359400)
-		m_pp.ldon_points_guk = 0x77359400;
-	if(m_pp.ldon_points_mir < 0)
-		m_pp.ldon_points_mir = 0;
-	if(m_pp.ldon_points_mir > 0x77359400)
-		m_pp.ldon_points_mir = 0x77359400;
-	if(m_pp.ldon_points_mmc < 0)
-		m_pp.ldon_points_mmc = 0;
-	if(m_pp.ldon_points_mmc > 0x77359400)
-		m_pp.ldon_points_mmc = 0x77359400;
-	if(m_pp.ldon_points_ruj < 0)
-		m_pp.ldon_points_ruj = 0;
-	if(m_pp.ldon_points_ruj > 0x77359400)
-		m_pp.ldon_points_ruj = 0x77359400;
-	if(m_pp.ldon_points_tak < 0)
-		m_pp.ldon_points_tak = 0;
-	if(m_pp.ldon_points_tak > 0x77359400)
-		m_pp.ldon_points_tak = 0x77359400;
-	if(m_pp.ldon_points_available < 0)
-		m_pp.ldon_points_available = 0;
-	if(m_pp.ldon_points_available > 0x77359400)
-		m_pp.ldon_points_available = 0x77359400;
-
+	/* Check for Invalid points */
+	if (m_pp.ldon_points_guk < 0 || m_pp.ldon_points_guk > 2000000000){ m_pp.ldon_points_guk = 0; }
+	if (m_pp.ldon_points_mir < 0 || m_pp.ldon_points_mir > 2000000000){ m_pp.ldon_points_mir = 0; }
+	if (m_pp.ldon_points_mmc < 0 || m_pp.ldon_points_mmc > 2000000000){ m_pp.ldon_points_mmc = 0; }
+	if (m_pp.ldon_points_ruj < 0 || m_pp.ldon_points_ruj > 2000000000){ m_pp.ldon_points_ruj = 0; }
+	if (m_pp.ldon_points_tak < 0 || m_pp.ldon_points_tak > 2000000000){ m_pp.ldon_points_tak = 0; }
+	if (m_pp.ldon_points_available < 0 || m_pp.ldon_points_available > 2000000000){ m_pp.ldon_points_available = 0; }
+	
 	if(GetSkill(SkillSwimming) < 100)
-		SetSkill(SkillSwimming,100);
+		SetSkill(SkillSwimming, 100);
 
-	//pull AAs from the PP
-	for(uint32 a=0; a < MAX_PP_AA_ARRAY; a++){
-		//set up our AA pointer
+	
+
+	/* Load Character AA's */
+	//database.LoadCharacterAA(this->CharacterID(), &m_pp, &aa, &aa_points);
+
+	/* Initialize AA's */
+	for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++){
 		aa[a] = &m_pp.aa_array[a];
-
-
+	}
+	std::string query = StringFormat(
+		"SELECT								"
+		"slot,							    "
+		"aa_id,								"
+		"aa_value							"
+		"FROM								"
+		"`character_alternate_abilities`    "
+		"WHERE `id` = %i ORDER BY `slot`", this->CharacterID());
+	auto results = database.QueryDatabase(query); int si = 0;
+	for (auto row = results.begin(); row != results.end(); ++row) { 
+		si = atoi(row[0]);
+		m_pp.aa_array[si].AA = atoi(row[1]);
+		m_pp.aa_array[si].value = atoi(row[1]); 
+		aa[si]->AA = atoi(row[1]);
+		aa[si]->value = atoi(row[2]);
+	}
+	for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++){
 		uint32 id = aa[a]->AA;
 		//watch for invalid AA IDs
-		if(id == aaNone)
+		if (id == aaNone)
 			continue;
-		if(id >= aaHighestID) {
+		if (id >= aaHighestID) {
+			aa[a]->AA = aaNone;
+			aa[a]->value = 0;
+			continue;
+		}
+		if (aa[a]->value == 0) {
+			aa[a]->AA = aaNone;
+			continue;
+		}
+		if (aa[a]->value > HIGHEST_AA_VALUE) {
 			aa[a]->AA = aaNone;
 			aa[a]->value = 0;
 			continue;
 		}
 
-		//watch for invalid AA values
-		if(aa[a]->value == 0) {
-			aa[a]->AA = aaNone;
-			continue;
-		}
-		if(aa[a]->value > HIGHEST_AA_VALUE) {
-			aa[a]->AA = aaNone;
-			aa[a]->value = 0;
-			continue;
-		}
-
-		if(aa[a]->value > 1)	//hack in some stuff for sony's new AA method (where each level of each aa.has a seperate ID)
-			aa_points[(id - aa[a]->value +1)] = aa[a]->value;
+		if (aa[a]->value > 1)	/* hack in some stuff for sony's new AA method (where each level of each aa.has a seperate ID) */
+			aa_points[(id - aa[a]->value + 1)] = aa[a]->value;
 		else
 			aa_points[id] = aa[a]->value;
 	}
-
 
 	if(SPDAT_RECORDS > 0)
 	{
@@ -9042,8 +9013,10 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		}
 	}
 
+	/* Load Character Key Ring */
 	KeyRingLoad();
 
+	/* Send Group Members via PP */
 	uint32 groupid = database.GetGroupID(GetName());
 	Group* group = nullptr;
 	if(groupid > 0){
@@ -9128,6 +9101,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		m_pp.z = zone->newzone_data.safe_z;
 	}
 
+	/* Get Expansions from variables table and ship via PP */
 	char val[20] = {0};
 	if (database.GetVariable("Expansions", val, 20))
 		m_pp.expansions = atoi(val);
@@ -9143,14 +9117,11 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		if(IsValidSpell(m_pp.mem_spells[i]))
 			m_pp.spellSlotRefresh[i] = p_timers.GetRemainingTime(pTimerSpellStart + m_pp.mem_spells[i]) * 1000;
 
-	if(m_pp.class_==SHADOWKNIGHT || m_pp.class_==PALADIN)
-	{
+	/* Ability slot refresh send SK/PAL */
+	if(m_pp.class_==SHADOWKNIGHT || m_pp.class_==PALADIN) {
 		uint32 abilitynum=0;
-		if(m_pp.class_==SHADOWKNIGHT)
-			abilitynum = pTimerHarmTouch;
-		else
-			abilitynum = pTimerLayHands;
-
+		if (m_pp.class_ == SHADOWKNIGHT){ abilitynum = pTimerHarmTouch; }
+		else{ abilitynum = pTimerLayHands; }
 
 		uint32 remaining = p_timers.GetRemainingTime(abilitynum);
 		if(remaining > 0 && remaining < 15300)
@@ -9174,16 +9145,16 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 	m_pp.timeentitledonaccount = database.GetTotalTimeEntitledOnAccount(AccountID()) / 1440;
 
-	// Reset rest timer if the durations have been lowered in the database
+	/* Reset rest timer if the durations have been lowered in the database */
 	if ((m_pp.RestTimer > RuleI(Character, RestRegenTimeToActivate)) && (m_pp.RestTimer > RuleI(Character, RestRegenRaidTimeToActivate)))
 		m_pp.RestTimer = 0;
 
-	//This checksum should disappear once dynamic structs are in... each struct strategy will do it
+	/* This checksum should disappear once dynamic structs are in... each struct strategy will do it */
 	CRC32::SetEQChecksum((unsigned char*)&m_pp, sizeof(PlayerProfile_Struct)-4);
 
 	outapp = new EQApplicationPacket(OP_PlayerProfile,sizeof(PlayerProfile_Struct));
 
-	// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA
+	/* The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA */
 	m_pp.entityid = GetID();
 	memcpy(outapp->pBuffer,&m_pp,outapp->size);
 	outapp->priority = 6;
@@ -9193,9 +9164,11 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		rest_timer.Start(m_pp.RestTimer * 1000);
 
 	database.LoadPetInfo(this);
-	//this was moved before the spawn packets are sent
-	//in hopes that it adds more consistency...
-	//Remake pet
+	/*
+		This was moved before the spawn packets are sent
+		in hopes that it adds more consistency...
+		Remake pet
+	*/
 	if (m_petinfo.SpellID > 1 && !GetPet() && m_petinfo.SpellID <= SPDAT_RECORDS)
 	{
 		MakePoweredPet(m_petinfo.SpellID, spells[m_petinfo.SpellID].teleport_zone, m_petinfo.petpower, m_petinfo.Name, m_petinfo.size);
@@ -9208,7 +9181,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		}
 		m_petinfo.SpellID = 0;
 	}
-	// Moved here so it's after where we load the pet data.
+	/* Moved here so it's after where we load the pet data. */
 	if(!GetAA(aaPersistentMinion))
 		memset(&m_suspendedminion, 0, sizeof(PetInfo));
 
@@ -12894,13 +12867,13 @@ void Client::Handle_OP_CrystalCreate(const EQApplicationPacket *app) {
 			SummonItem(RuleI(Zone, EbonCrystalItemID), GetEbonCrystals());
 			m_pp.currentEbonCrystals = 0;
 			m_pp.careerEbonCrystals = 0;
-			Save();
+			SaveCurrency();
 			SendCrystalCounts();
 		} else {
 			SummonItem(RuleI(Zone, EbonCrystalItemID), cr->amount);
 			m_pp.currentEbonCrystals -= cr->amount;
 			m_pp.careerEbonCrystals -= cr->amount;
-			Save();
+			SaveCurrency();
 			SendCrystalCounts();
 		}
 	} else if(cr->type == 4) {
@@ -12908,13 +12881,13 @@ void Client::Handle_OP_CrystalCreate(const EQApplicationPacket *app) {
 			SummonItem(RuleI(Zone, RadiantCrystalItemID), GetRadiantCrystals());
 			m_pp.currentRadCrystals = 0;
 			m_pp.careerRadCrystals = 0;
-			Save();
+			SaveCurrency();
 			SendCrystalCounts();
 		} else {
 			SummonItem(RuleI(Zone, RadiantCrystalItemID), cr->amount);
 			m_pp.currentRadCrystals -= cr->amount;
 			m_pp.careerRadCrystals -= cr->amount;
-			Save();
+			SaveCurrency();
 			SendCrystalCounts();
 		}
 	}

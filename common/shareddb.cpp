@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
+#include <ctime>
 
 #include "shareddb.h"
 #include "mysql.h"
@@ -1270,9 +1271,11 @@ bool SharedDatabase::SetPlayerProfile(uint32 account_id, uint32 charid, PlayerPr
 	uint32 affected_rows = 0;
 	bool ret = false;
 
+	clock_t t = std::clock(); /* Function timer start */
 	if (RunQuery(query, SetPlayerProfile_MQ(&query, account_id, charid, pp, inv, ext, current_zone, current_instance, MaxXTargets), errbuf, 0, &affected_rows)) {
 		ret = (affected_rows != 0);
 	}
+	LogFile->write(EQEMuLog::Status, "SharedDatabase::SetPlayerProfile SetPlayerProfile_MQ done... Took %f seconds", ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 
 	if (!ret) {
 		LogFile->write(EQEMuLog::Error, "SetPlayerProfile query '%s' %s", query, errbuf);
@@ -1292,7 +1295,7 @@ uint32 SharedDatabase::SetPlayerProfile_MQ(char** query, uint32 account_id, uint
 	if (!current_instance)
 		current_instance = pp->zoneInstance;
 
-	if(strlen(pp->name) == 0) // Sanity check in case pp never loaded
+	if(strlen(pp->name) == 0) /* Sanity check in case pp never loaded */
 		return false;
 
 	end += sprintf(end, "UPDATE character_ SET timelaston=unix_timestamp(now()),name=\'%s\', zonename=\'%s\', zoneid=%u, instanceid=%u, x = %f, y = %f, z = %f, profile=\'", pp->name, GetZoneName(current_zone), current_zone, current_instance, pp->x, pp->y, pp->z);

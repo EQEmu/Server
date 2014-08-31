@@ -479,60 +479,27 @@ void Client::ReportConnectingState() {
 	};
 }
 
-bool Client::Save(uint8 iCommitNow) {
-#if 0
-// Orig. Offset: 344 / 0x00000000
-//		Length: 36 / 0x00000024
-	unsigned char rawData[36] =
+inline double clock_diff_to_sec(long clock_diff)
 {
-	0x0D, 0x30, 0xE1, 0x30, 0x1E, 0x10, 0x22, 0x10, 0x20, 0x10, 0x21, 0x10, 0x1C, 0x20, 0x1F, 0x10,
-	0x7C, 0x10, 0x68, 0x10, 0x51, 0x10, 0x78, 0x10, 0xBD, 0x10, 0xD2, 0x10, 0xCD, 0x10, 0xD1, 0x10,
-	0x01, 0x10, 0x6D, 0x10
-} ;
-	for (int tmp = 0;tmp <=35;tmp++){
-		m_pp.unknown0256[89+tmp] = rawData[tmp];
-	}
-#endif
+	return double(clock_diff) / CLOCKS_PER_SEC;
+}
 
-	if(!ClientDataLoaded())
-		return false;
-
-	m_pp.x = x_pos;
-	m_pp.y = y_pos;
-	m_pp.z = z_pos;
-	m_pp.guildrank=guildrank;
-	m_pp.heading = heading;
-
-	// Temp Hack for signed values until we get the root of the problem changed over to signed...
-	if (m_pp.copper < 0) { m_pp.copper = 0; }
-	if (m_pp.silver < 0) { m_pp.silver = 0; }
-	if (m_pp.gold < 0) { m_pp.gold = 0; }
-	if (m_pp.platinum < 0) { m_pp.platinum = 0; }
-	if (m_pp.copper_bank < 0) { m_pp.copper_bank = 0; }
-	if (m_pp.silver_bank < 0) { m_pp.silver_bank = 0; }
-	if (m_pp.gold_bank < 0) { m_pp.gold_bank = 0; }
-	if (m_pp.platinum_bank < 0) { m_pp.platinum_bank = 0; }
-
-
-	int spentpoints=0;
-	for(int a=0;a < MAX_PP_AA_ARRAY;a++) {
+bool Client::SaveAA(){
+	clock_t t = std::clock(); /* Function timer start */
+	/* Save Player AA */
+	int spentpoints = 0;
+	for (int a = 0; a < MAX_PP_AA_ARRAY; a++) {
 		uint32 points = aa[a]->value;
-		if(points > HIGHEST_AA_VALUE) // Unifying this
-		{
+		if (points > HIGHEST_AA_VALUE) {
 			aa[a]->value = HIGHEST_AA_VALUE;
 			points = HIGHEST_AA_VALUE;
 		}
-		if (points > 0)
-		{
-			SendAA_Struct* curAA = zone->FindAA(aa[a]->AA-aa[a]->value+1);
-			if(curAA)
-			{
-				for (int rank=0; rank<points; rank++)
-				{
-					std::map<uint32, AALevelCost_Struct>::iterator RequiredLevel = AARequiredLevelAndCost.find(aa[a]->AA-aa[a]->value + 1 + rank);
-
-					if(RequiredLevel != AARequiredLevelAndCost.end())
-					{
+		if (points > 0) {
+			SendAA_Struct* curAA = zone->FindAA(aa[a]->AA - aa[a]->value + 1);
+			if (curAA) { 
+				for (int rank = 0; rank<points; rank++) {
+					std::map<uint32, AALevelCost_Struct>::iterator RequiredLevel = AARequiredLevelAndCost.find(aa[a]->AA - aa[a]->value + 1 + rank);
+					if (RequiredLevel != AARequiredLevelAndCost.end()) {
 						spentpoints += RequiredLevel->second.Cost;
 					}
 					else
@@ -541,36 +508,58 @@ bool Client::Save(uint8 iCommitNow) {
 			}
 		}
 	}
-
-	m_pp.aapoints_spent = spentpoints + m_epp.expended_aa;
-
-	if (GetHP() <= 0) {
-		m_pp.cur_hp = GetMaxHP();
+	m_pp.aapoints_spent = spentpoints + m_epp.expended_aa; 
+	for (int a = 0; a < MAX_PP_AA_ARRAY; a++) {
+		if (aa[a]->AA > 0 && aa[a]->value){
+			std::string rquery = StringFormat("REPLACE INTO `character_alternate_abilities` (id, slot, aa_id, aa_value)"
+				" VALUES (%u, %u, %u, %u)",
+				character_id, a, aa[a]->AA, aa[a]->value);
+			auto results = database.QueryDatabase(rquery);
+		}
 	}
-	else
-		m_pp.cur_hp = GetHP();
+	LogFile->write(EQEMuLog::Status, "Issuing Client AA Save... CID: %i Took %f seconds", character_id, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
+	return true;
+}
+
+bool Client::Save(uint8 iCommitNow) {
+	if(!ClientDataLoaded()) 
+		return false;
+
+	clock_t t = std::clock(); /* Function timer start */
+
+	/* Wrote current basics to PP for saves */
+	m_pp.x = x_pos;
+	m_pp.y = y_pos;
+	m_pp.z = z_pos;
+	m_pp.guildrank = guildrank;
+	m_pp.heading = heading;
+
+	/* Mana and HP */
+	if (GetHP() <= 0) { m_pp.cur_hp = GetMaxHP(); }
+	else { m_pp.cur_hp = GetHP(); }
 
 	m_pp.mana = cur_mana;
 	m_pp.endurance = cur_end;
 
+	/* Save Character Currency */
+	database.SaveCharacterCurrency(this->CharacterID(), &m_pp);
+
+	/* Save Character AA */
+	SaveAA();
+
+	/* Save Character Buffs */
 	database.SaveBuffs(this);
 
+	/* Total Time Played */
 	TotalSecondsPlayed += (time(nullptr) - m_pp.lastlogin);
 	m_pp.timePlayedMin = (TotalSecondsPlayed / 60);
 	m_pp.RestTimer = rest_timer.GetRemainingTime() / 1000;
 
-	if(GetMercInfo().MercTimerRemaining > RuleI(Mercs, UpkeepIntervalMS))
-		GetMercInfo().MercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS);
-
-	if(GetMercTimer()->Enabled()) {
-		GetMercInfo().MercTimerRemaining = GetMercTimer()->GetRemainingTime();
-	}
-
-	if (GetMerc() && !dead) {
-
-	} else {
-		memset(&m_mercinfo, 0, sizeof(struct MercInfo));
-	}
+	/* Save Mercs */
+	if (GetMercInfo().MercTimerRemaining > RuleI(Mercs, UpkeepIntervalMS)){ GetMercInfo().MercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS); }
+	if(GetMercTimer()->Enabled()) { GetMercInfo().MercTimerRemaining = GetMercTimer()->GetRemainingTime(); } 
+	if (GetMerc() && !dead) { } 
+	else { memset(&m_mercinfo, 0, sizeof(struct MercInfo)); }
 
 	m_pp.lastlogin = time(nullptr);
 	if (pQueuedSaveWorkID) {
@@ -591,19 +580,17 @@ bool Client::Save(uint8 iCommitNow) {
 	}
 	database.SavePetInfo(this);
 
-	if(tribute_timer.Enabled()) {
-		m_pp.tribute_time_remaining = tribute_timer.GetRemainingTime();
-	} else {
-		m_pp.tribute_time_remaining = 0xFFFFFFFF;
-		m_pp.tribute_active = 0;
-	}
+	if(tribute_timer.Enabled()) { m_pp.tribute_time_remaining = tribute_timer.GetRemainingTime(); } 
+	else { m_pp.tribute_time_remaining = 0xFFFFFFFF; m_pp.tribute_active = 0; }
 
 	p_timers.Store(&database);
 
-//	printf("Dumping inventory on save:\n");
-//	m_inv.dumpEntireInventory();
-
+	/* Save Character Task */
 	SaveTaskState();
+
+	/* Save Character Data */
+	database.SaveCharacterData(this->CharacterID(), this->AccountID(), &m_pp);
+
 	if (iCommitNow <= 1) {
 		char* query = 0;
 		uint32_breakdown workpt;
@@ -632,7 +619,7 @@ bool Client::Save(uint8 iCommitNow) {
 
 	/* Mirror Character Data */
 	database.StoreCharacterLookup(this->CharacterID());
-
+	LogFile->write(EQEMuLog::Status, "Client::Save %i, done... Took %f seconds", character_id, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 	return true;
 }
 
@@ -2115,7 +2102,7 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 			m_pp.copper = copperpp;
 			if(updateclient)
 				SendMoneyUpdate();
-			Save();
+			SaveCurrency();
 			return true;
 		}
 		silver -= copper;
@@ -2130,7 +2117,7 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 			m_pp.copper += (silver-(m_pp.silver*10));
 			if(updateclient)
 				SendMoneyUpdate();
-			Save();
+			SaveCurrency();
 			return true;
 		}
 
@@ -2150,7 +2137,7 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 			m_pp.copper += coppertest;
 			if(updateclient)
 				SendMoneyUpdate();
-			Save();
+			SaveCurrency();
 			return true;
 		}
 
@@ -2168,7 +2155,7 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 		if(updateclient)
 			SendMoneyUpdate();
 		RecalcWeight();
-		Save();
+		SaveCurrency();
 		return true;
 	}
 }
@@ -2234,7 +2221,7 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 
 	RecalcWeight();
 
-	Save();
+	SaveCurrency();
 
 	LogFile->write(EQEMuLog::Debug, "Client::AddMoneyToPP() %s should have: plat:%i gold:%i silver:%i copper:%i", GetName(), m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
 }
@@ -2270,7 +2257,7 @@ void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 plat
 		SendMoneyUpdate();
 
 	RecalcWeight();
-	Save();
+	SaveCurrency();
 
 #if (EQDEBUG>=5)
 		LogFile->write(EQEMuLog::Debug, "Client::AddMoneyToPP() %s should have: plat:%i gold:%i silver:%i copper:%i",
@@ -2807,11 +2794,6 @@ void Client::SetMaterial(int16 in_slot, uint32 item_id) {
 			m_pp.item_material[MaterialArms]		= item->Material;
 		else if (in_slot==MainWrist1)
 			m_pp.item_material[MaterialWrist]		= item->Material;
-		/*
-		// non-live behavior
-		else if (in_slot==SLOT_BRACER02)
-			m_pp.item_material[MaterialWrist]		= item->Material;
-		*/
 		else if (in_slot==MainHands)
 			m_pp.item_material[MaterialHands]		= item->Material;
 		else if (in_slot==MainLegs)
@@ -5734,7 +5716,7 @@ void Client::AddCrystals(uint32 Radiant, uint32 Ebon)
 	m_pp.currentEbonCrystals += Ebon;
 	m_pp.careerEbonCrystals += Ebon;
 
-	Save();
+	SaveCurrency();
 
 	SendCrystalCounts();
 }

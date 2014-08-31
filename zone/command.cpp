@@ -6273,13 +6273,13 @@ void command_setcrystals(Client *c, const Seperator *sep)
 	{
 		t->SetRadiantCrystals(atoi(sep->arg[2]));
 		t->SendCrystalCounts();
-		t->Save();
+		t->SaveCurrency();
 	}
 	else if(!strcasecmp(sep->arg[1], "ebon"))
 	{
 		t->SetEbonCrystals(atoi(sep->arg[2]));
 		t->SendCrystalCounts();
-		t->Save();
+		t->SaveCurrency();
 	}
 	else
 	{

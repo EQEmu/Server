@@ -971,8 +971,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 			}
 
 			RemoveCash();
-			Save();
-			client->Save();
+			Save(); 
 		}
 
 		outapp->priority = 6;

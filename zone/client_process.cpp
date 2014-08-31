@@ -1582,7 +1582,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 		safe_delete(outapp);
 	}
 
-	Save();
+	SaveCurrency();
 }
 
 void Client::OPGMTraining(const EQApplicationPacket *app)

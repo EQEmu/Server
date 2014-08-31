@@ -1048,8 +1048,12 @@ void Client::BuyAA(AA_Action* action)
 		mlog(AA__MESSAGE, "Set AA %d to level %d", aa2->id, cur_level + 1);
 
 		m_pp.aapoints -= real_cost;
+		
+		/* Do Player Profile rank calculations and set player profile */
+		SaveAA();
+		/* Save to Database to avoid having to write the whole AA array to the profile, only write changes*/
+		// database.SaveCharacterAA(this->CharacterID(), aa2->id, (cur_level + 1)); 
 
-		Save();
 		if ((RuleB(AA, Stacking) && (GetClientVersionBit() >= 4) && (aa2->hotkey_sid == 4294967295u))
 			&& ((aa2->max_level == (cur_level + 1)) && aa2->sof_next_id)){
 			SendAA(aa2->id);

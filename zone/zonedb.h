@@ -252,8 +252,9 @@ public:
 	bool	GetAccountInfoForLogin(uint32 account_id, int16* admin = 0, char* account_name = 0,
 				uint32* lsaccountid = 0, uint8* gmspeed = 0, bool* revoked = 0, bool* gmhideme = 0);
 	bool	GetAccountInfoForLogin_result(MYSQL_RES* result, int16* admin = 0, char* account_name = 0,
-				uint32* lsaccountid = 0, uint8* gmspeed = 0, bool* revoked = 0, bool* gmhideme = nullptr,
-				uint32* account_creation = 0);
+			uint32* lsaccountid = 0, uint8* gmspeed = 0, bool* revoked = 0, bool* gmhideme = nullptr,
+			uint32* account_creation = 0);
+
 	bool	GetCharacterInfoForLogin_result(MYSQL_RES* result, uint32* character_id = 0, char* current_zone = 0,
 				PlayerProfile_Struct* pp = 0, Inventory* inv = 0, ExtendedProfile_Struct *ext = 0, uint32* pplen = 0,
 				uint32* guilddbid = 0, uint8* guildrank = 0, uint8 *class_= 0, uint8 *level = 0, bool *LFP = 0,
@@ -267,6 +268,16 @@ public:
 	void LoadPetInfo(Client *c);
 	void SavePetInfo(Client *c);
 	void RemoveTempFactions(Client *c);
+
+	/* Player Profile Loaders */
+	bool	LoadCharacterData(uint32 character_id, PlayerProfile_Struct* pp);
+	bool	LoadCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
+
+	/* Player Profile Saves */
+
+	bool SaveCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
+	bool SaveCharacterData(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp);
+	bool SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 current_level);
 
 	/*
 	* Character Inventory

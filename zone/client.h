@@ -313,6 +313,10 @@ public:
 			bool	Save(uint8 iCommitNow); // 0 = delayed, 1=async now, 2=sync now
 			void	SaveBackup();
 
+	/* New PP Save Functions */
+	bool SaveCurrency(){ return database.SaveCharacterCurrency(this->CharacterID(), &m_pp); }
+	bool SaveAA();
+	
 	inline bool ClientDataLoaded() const { return client_data_loaded; }
 	inline bool	Connected()		const { return (client_state == CLIENT_CONNECTED); }
 	inline bool	InZone()		const { return (client_state == CLIENT_CONNECTED || client_state == CLIENT_LINKDEAD); }
