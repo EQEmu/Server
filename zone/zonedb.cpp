@@ -370,41 +370,6 @@ void ZoneDatabase::UpdateBug(PetitionBug_Struct* bug){
 	safe_delete_array(bugtext);
 }
 
-
-bool ZoneDatabase::GetAccountInfoForLogin_result(MYSQL_RES* result, int16* admin, char* account_name, uint32* lsaccountid, uint8* gmspeed, bool* revoked,bool* gmhideme, uint32* account_creation) {
-	MYSQL_ROW row;
-	if (mysql_num_rows(result) == 1) {
-		row = mysql_fetch_row(result);
-		if (admin)
-			*admin = atoi(row[0]);
-		if (account_name)
-			strcpy(account_name, row[1]);
-		if (lsaccountid) {
-
-			if (row[2])
-				*lsaccountid = atoi(row[2]);
-			else
-				*lsaccountid = 0;
-
-
-		}
-		if (gmspeed)
-			*gmspeed = atoi(row[3]);
-		if (revoked)
-			*revoked = atoi(row[4]);
-		if(gmhideme)
-			*gmhideme = atoi(row[5]);
-		if(account_creation)
-			*account_creation = atoul(row[6]);
-
-		return true;
-	}
-	else {
-		return false;
-	}
-}
-
-
 bool ZoneDatabase::SetSpecialAttkFlag(uint8 id, const char* flag) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
@@ -859,42 +824,7 @@ void ZoneDatabase::UpdateBuyLine(uint32 CharID, uint32 BuySlot, uint32 Quantity)
 
 }
 
-bool ZoneDatabase::GetCharacterInfoForLogin(const char* name, uint32* character_id,
-	char* current_zone, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext,
-	uint32* pplen, uint32* guilddbid, uint8* guildrank,
-	uint8 *class_, uint8 *level, bool *LFP, bool *LFG, uint8 *NumXTargets, uint8 *firstlogon) {
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 querylen;
-	MYSQL_RES *result;
-
-	bool ret = false;
-
-	//DO NOT FORGET TO EDIT Client::Handle_Connect_OP_ZoneEntry if you change this.
-
-	if (character_id && *character_id) {
-		// searching by ID should be a lil bit faster
-		querylen = MakeAnyLenString(&query, "SELECT id,profile,zonename,x,y,z,guild_id,rank,extprofile,class,level,lfp,lfg,instanceid,xtargets,firstlogon FROM character_ LEFT JOIN guild_members ON id=char_id WHERE id=%i", *character_id);
-	}
-	else {
-		querylen = MakeAnyLenString(&query, "SELECT id,profile,zonename,x,y,z,guild_id,rank,extprofile,class,level,lfp,lfg,instanceid,xtargets,firstlogon FROM character_ LEFT JOIN guild_members ON id=char_id WHERE name='%s'", name);
-	}
-
-	if (RunQuery(query, querylen, errbuf, &result)) {
-		ret = GetCharacterInfoForLogin_result(result, character_id, current_zone, pp, inv, ext, pplen, guilddbid, guildrank, class_, level, LFP, LFG, NumXTargets, firstlogon);
-		mysql_free_result(result);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "GetCharacterInfoForLogin query '%s' %s", query, errbuf);
-	}
-
-	safe_delete_array(query);
-	return ret;
-}
-
 #define StructDist(in, f1, f2) (uint32(&in->f2)-uint32(&in->f1))
-
 
 bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* pp){
 	std::string query = StringFormat(
@@ -1082,6 +1012,38 @@ bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* 
 		pp->RestTimer = atoi(row[r]); r++;							
 		LogFile->write(EQEMuLog::Status, "Loading Character Data for character ID: %i, done", character_id);
 	}
+	return true;
+}
+
+bool ZoneDatabase::LoadCharacterFactionValues(uint32 character_id, faction_map & val_list) {
+	std::string query = StringFormat("SELECT faction_id,current_value FROM faction_values WHERE char_id = %i", character_id);
+	auto results = database.QueryDatabase(query);
+	for (auto row = results.begin(); row != results.end(); ++row) { val_list[atoi(row[0])] = atoi(row[1]); }
+	return true;
+}
+
+bool ZoneDatabase::LoadCharacterDisciplines(uint32 character_id, PlayerProfile_Struct* pp){
+	std::string query = StringFormat(
+		"SELECT				  "
+		"disc_id			  "
+		"FROM				  "
+		"`character_disciplines`"
+		"WHERE `id` = %u ORDER BY `disc_id`", character_id);
+	auto results = database.QueryDatabase(query); int i = 0;
+	for (auto row = results.begin(); row != results.end(); ++row) { pp->disciplines.values[i] = atoi(row[0]); i++; } 
+	return true;
+}
+
+bool ZoneDatabase::LoadCharacterSkills(uint32 character_id, PlayerProfile_Struct* pp){
+	std::string query = StringFormat(
+		"SELECT				"
+		"skill_id,			"
+		"`value`			"
+		"FROM				"
+		"`character_skills` "
+		"WHERE `id` = %u ORDER BY `skill_id`", character_id);
+	auto results = database.QueryDatabase(query); int i = 0;
+	for (auto row = results.begin(); row != results.end(); ++row) { i = atoi(row[0]); pp->skills[i] = atoi(row[1]); }
 	return true;
 }
 
@@ -1456,103 +1418,6 @@ bool ZoneDatabase::SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 cur
 	auto results = QueryDatabase(rquery);
 	LogFile->write(EQEMuLog::Status, "Saving AA for character ID: %i, aa_id: %u current_level: %i", character_id, aa_id, current_level);
 	return true;
-}
-
-// Process results of GetCharacterInfoForLogin()
-// Query this processes: SELECT id,profile,zonename,x,y,z,guild,guildrank,extprofile,class,level FROM character_ WHERE id=%i
-bool ZoneDatabase::GetCharacterInfoForLogin_result(MYSQL_RES* result,
-	uint32* character_id, char* current_zone, PlayerProfile_Struct* pp, Inventory* inv,
-	ExtendedProfile_Struct *ext, uint32* pplen, uint32* guilddbid, uint8* guildrank,
-	uint8 *class_, uint8 *level, bool *LFP, bool *LFG, uint8 *NumXTargets, uint8* firstlogon) { 
-
-	MYSQL_ROW row;
-	unsigned long* lengths;
-
-	if (mysql_num_rows(result) == 1) {
-		row = mysql_fetch_row(result);
-		lengths = mysql_fetch_lengths(result);
-		if (pp && pplen) {
-			if (lengths[1] == sizeof(PlayerProfile_Struct)) {
-				// memcpy(pp, row[1], sizeof(PlayerProfile_Struct));
-			} else {
-				LogFile->write(EQEMuLog::Error, "Player profile length mismatch in GetCharacterInfo Expected: %i, Got: %i",
-					sizeof(PlayerProfile_Struct), lengths[1]);
-				return false;
-			}
-
-			*pplen = lengths[1];
-			pp->zone_id = GetZoneID(row[2]);
-			pp->zoneInstance = atoi(row[13]);
-
-			pp->x = atof(row[3]);
-			pp->y = atof(row[4]);
-			pp->z = atof(row[5]);
-
-			pp->lastlogin = time(nullptr);
-
-			if (pp->x == -1 && pp->y == -1 && pp->z == -1)
-				GetSafePoints(pp->zone_id, database.GetInstanceVersion(pp->zoneInstance), &pp->x, &pp->y, &pp->z);
-		}
-
-		uint32 char_id = atoi(row[0]);
-		if (RuleB(Character, SharedBankPlat))
-			pp->platinum_shared = database.GetSharedPlatinum(GetAccountIDByChar(char_id));
-		if (character_id)
-			*character_id = char_id;
-		if (current_zone)
-			strcpy(current_zone, row[2]);
-
-		if (guilddbid) {
-			if(row[6] != nullptr)
-				*guilddbid = atoi(row[6]);
-			else
-				*guilddbid = GUILD_NONE;
-		}
-		if (guildrank) {
-			if(row[7] != nullptr)
-				*guildrank = atoi(row[7]);
-			else
-				*guildrank = GUILD_RANK_NONE;
-		}
-
-		if(ext) {
-			//SetExtendedProfile handles any conversion
-			SetExtendedProfile(ext, row[8], lengths[8]);
-		}
-
-		if(class_)
-			*class_ = atoi(row[9]);
-
-		if(level)
-			*level = atoi(row[10]);
-
-		if(LFP)
-			*LFP = atoi(row[11]);
-
-		if(LFG)
-			*LFG = atoi(row[12]);
-
-		if(NumXTargets)
-		{
-			*NumXTargets = atoi(row[14]);
-		}
-
-
-		if(firstlogon)
-		{
-			*firstlogon = atoi(row[15]);
-		}
-
-		// Fix use_tint, previously it was set to 1 for a dyed slot, client wants it set to 0xFF
-		for(int i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_END; i++)
-			if(pp->item_tint[i].rgb.use_tint == 1)
-				pp->item_tint[i].rgb.use_tint = 0xFF;
-
-		// Retrieve character inventory
-		return GetInventory(char_id, inv);
-	}
-
-	return false;
 }
 
 bool ZoneDatabase::NoRentExpired(const char* name){
@@ -2812,31 +2677,6 @@ bool ZoneDatabase::SetZoneTZ(uint32 zoneid, uint32 version, uint32 tz) {
 }
 //End new timezone functions.
 
-/*
- solar: this is never actually called, client_process starts an async query
- instead and uses GetAccountInfoForLogin_result to process it..
- */
-bool ZoneDatabase::GetAccountInfoForLogin(uint32 account_id, int16* admin, char* account_name, uint32* lsaccountid, uint8* gmspeed, bool* revoked,bool* gmhideme) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT status, name, lsaccount_id, gmspeed, revoked, hideme FROM account WHERE id=%i", account_id), errbuf, &result)) {
-		safe_delete_array(query);
-		bool ret = GetAccountInfoForLogin_result(result, admin, account_name, lsaccountid, gmspeed, revoked,gmhideme);
-		mysql_free_result(result);
-		return ret;
-	}
-	else
-	{
-		std::cerr << "Error in GetAccountInfoForLogin query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-		return false;
-	}
-
-	return false;
-}
-
 void ZoneDatabase::RefreshGroupFromDB(Client *c){
 	if(!c){
 		return;
@@ -3565,31 +3405,6 @@ bool ZoneDatabase::GetFactionData(FactionMods* fm, uint32 class_mod, uint32 race
 		fm->deity_mod = 0;
 	}
 
-	return true;
-}
-
-bool ZoneDatabase::LoadFactionValues(uint32 char_id, faction_map & val_list) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT faction_id,current_value FROM faction_values WHERE char_id = %i",char_id), errbuf, &result)) {
-		safe_delete_array(query);
-		bool ret = LoadFactionValues_result(result, val_list);
-		mysql_free_result(result);
-		return ret;
-	}
-	else {
-		std::cerr << "Error in LoadFactionValues query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-	}
-	return false;
-}
-
-bool ZoneDatabase::LoadFactionValues_result(MYSQL_RES* result, faction_map & val_list) {
-	MYSQL_ROW row;
-	while((row = mysql_fetch_row(result))) {
-		val_list[atoi(row[0])] = atoi(row[1]);
-	}
 	return true;
 }
 

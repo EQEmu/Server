@@ -1092,7 +1092,7 @@ bool Database::CheckDatabaseConversions() {
 
 	// querylen = MakeAnyLenString(&query, "SELECT `id` FROM `character_` WHERE `id` = 61238");
 	int char_iter_count = 0;
-	querylen = MakeAnyLenString(&query, "SELECT `id` FROM `character_` WHERE `id` >= 61238 LIMIT 100"); 
+	querylen = MakeAnyLenString(&query, "SELECT `id` FROM `character_` WHERE `id` >= 61238 LIMIT 1"); 
 	if (RunQuery(query, querylen, errbuf, &result)) {
 		safe_delete_array(query);
 		while (row = mysql_fetch_row(result)) {
