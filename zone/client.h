@@ -37,6 +37,7 @@ class Client;
 #include "../common/item_struct.h"
 #include "../common/clientversions.h"
 
+#include "common.h"
 #include "zonedb.h"
 #include "errno.h"
 #include "mob.h"
@@ -101,11 +102,6 @@ enum {	//scribing argument to MemorizeSpell
 	memSpellForget = 2,
 	memSpellSpellbar = 3
 };
-
-#define USE_ITEM_SPELL_SLOT 10
-#define POTION_BELT_SPELL_SLOT 11
-#define DISCIPLINE_SPELL_SLOT 10
-#define ABILITY_SPELL_SLOT 9
 
 //Modes for the zoning state of the client.
 typedef enum {
@@ -239,7 +235,6 @@ public:
 	void	KeyRingList();
 	virtual bool IsClient() const { return true; }
 	virtual void DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw);
-	bool	FinishConnState2(DBAsyncWork* dbaw);
 	void	CompleteConnect();
 	bool	TryStacking(ItemInst* item, uint8 type = ItemPacketTrade, bool try_worn = true, bool try_cursor = true);
 	void	SendTraderPacket(Client* trader, uint32 Unknown72 = 51);

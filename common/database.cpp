@@ -758,17 +758,18 @@ void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID
 
 void Database::GetCharName(uint32 char_id, char* name) {
 	
-	std::string query = StringFormat("SELECT name FROM character_ WHERE id='%i'", char_id);
+	std::string query = StringFormat("SELECT `name` FROM `character_data` WHERE id='%i'", char_id);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
-	{
+	if (!results.Success()) {
 		std::cerr << "Error in GetCharName query '" << query << "' " << results.ErrorMessage() << std::endl;
-		return;
+		return; 
 	}
 
 	auto row = results.begin();
-	strcpy(name, row[0]);
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		strcpy(name, row[0]);
+	}
 }
 
 static inline void loadbar(unsigned int x, unsigned int n, unsigned int w = 50) {
@@ -849,7 +850,7 @@ bool Database::CheckDatabaseConversions() {
 				" 	`level2` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	               "
 				" 	`anon` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	                   "
 				" 	`gm` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	                   "
-				" 	`intoxication` int(11) UNSIGNED NOT NULL,	                       "
+				" 	`intoxication` int(11) UNSIGNED NOT NULL DEFAULT 0,	                       "
 				" 	`hair_color` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	           "
 				" 	`beard_color` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	           "
 				" 	`eye_color_1` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	           "
@@ -885,9 +886,9 @@ bool Database::CheckDatabaseConversions() {
 				" 	`drakkin_heritage` int(11) UNSIGNED NOT NULL DEFAULT 0,	           "
 				" 	`drakkin_tattoo` int(11) UNSIGNED NOT NULL DEFAULT 0,	           "
 				" 	`drakkin_details` int(11) UNSIGNED NOT NULL DEFAULT 0,	           "
-				" 	`toxicity` int(11) UNSIGNED NOT NULL DEFAULT 0,	                   "
-				" 	`hunger_level` int(11) UNSIGNED NOT NULL DEFAULT 0,	               "
-				" 	`thirst_level` int(11) UNSIGNED NOT NULL DEFAULT 0,	               "
+				" 	`toxicity` int(11) NOT NULL DEFAULT 0,							   "
+				" 	`hunger_level` int(11) NOT NULL DEFAULT 0,						   "
+				" 	`thirst_level` int(11) NOT NULL DEFAULT 0,						   "
 				" 	`ability_up` int(11) UNSIGNED NOT NULL DEFAULT 0,	               "
 				" 	`zone_id` int(11) UNSIGNED NOT NULL DEFAULT 0,	                   "
 				" 	`zone_instance` int(11) UNSIGNED NOT NULL DEFAULT 0,	           "
@@ -1092,7 +1093,7 @@ bool Database::CheckDatabaseConversions() {
 
 	// querylen = MakeAnyLenString(&query, "SELECT `id` FROM `character_` WHERE `id` = 61238");
 	int char_iter_count = 0;
-	querylen = MakeAnyLenString(&query, "SELECT `id` FROM `character_` WHERE `id` >= 61238 LIMIT 1"); 
+	querylen = MakeAnyLenString(&query, "SELECT `id` FROM `character_` WHERE `id` >= 61238 LIMIT 100"); 
 	if (RunQuery(query, querylen, errbuf, &result)) {
 		safe_delete_array(query);
 		while (row = mysql_fetch_row(result)) {
@@ -1146,6 +1147,8 @@ bool Database::CheckDatabaseConversions() {
 						pp->careerEbonCrystals
 						);
 					auto results = QueryDatabase(rquery);
+
+					if (pp->tribute_time_remaining < 0 || pp->tribute_time_remaining == 4294967295){ pp->tribute_time_remaining = 0; }
 
 					/* Run Character Data Convert */
 					rquery = StringFormat(

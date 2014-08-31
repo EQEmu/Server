@@ -256,18 +256,28 @@ public:
 	void SavePetInfo(Client *c);
 	void RemoveTempFactions(Client *c);
 
-	/* Player Profile Loaders */
+	/* Character Data Loaders */
 	bool	LoadCharacterFactionValues(uint32 character_id, faction_map & val_list);
+	bool	LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Struct* pp);
+	bool	LoadCharacterMemmedSpells(uint32 character_id, PlayerProfile_Struct* pp);
+	bool	LoadCharacterLanguages(uint32 character_id, PlayerProfile_Struct* pp);
 	bool	LoadCharacterDisciplines(uint32 character_id, PlayerProfile_Struct* pp);
 	bool	LoadCharacterSkills(uint32 character_id, PlayerProfile_Struct* pp);
 	bool	LoadCharacterData(uint32 character_id, PlayerProfile_Struct* pp);
 	bool	LoadCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
+	bool	LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Struct* pp);
 
-	/* Player Profile Saves */
-
+	/* Character Data Saves */ 
 	bool SaveCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
 	bool SaveCharacterData(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp);
 	bool SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 current_level);
+	bool SaveCharacterSpellSwap(uint32 character_id, uint32 spell_id, uint32 from_slot, uint32 to_slot);
+	bool SaveCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
+	bool SaveCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
+
+	/* Character Data Deletes */
+	bool DeleteCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
+	bool DeleteCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
 
 	/*
 	* Character Inventory

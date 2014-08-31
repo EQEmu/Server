@@ -751,7 +751,7 @@ bool BaseGuildManager::DBSetGuild(uint32 charid, uint32 guild_id, uint8 rank) {
 	std::string query;
 
 	if(guild_id != GUILD_NONE) {
-        query = StringFormat("REPLACE INTO guild_members (char_id,guild_id,rank) VALUES(%d,%d,%d)", charid, guild_id, rank);
+        query = StringFormat("REPLACE INTO guild_members (char_id,guild_id,rank,public_note) VALUES(%d,%d,%d,'')", charid, guild_id, rank);
         auto results = m_db->QueryDatabase(query);
 
 		if (!results.Success()) {

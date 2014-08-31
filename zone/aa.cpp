@@ -300,7 +300,7 @@ void Client::ActivateAA(aaID activate){
 					return;
 				}
 			} else {
-				if(!CastSpell(caa->spell_id, target_id, 10, -1, -1, 0, -1, AATimerID + pTimerAAStart, timer_base, 1)) {
+				if (!CastSpell(caa->spell_id, target_id, USE_ITEM_SPELL_SLOT, -1, -1, 0, -1, AATimerID + pTimerAAStart, timer_base, 1)) {
 					//Reset on failed cast
 					SendAATimer(AATimerID, 0, 0xFFFFFF);
 					Message_StringID(15,ABILITY_FAILED);
@@ -525,7 +525,7 @@ void Client::HandleAAAction(aaID activate) {
 	//cast the spell, if we have one
 	if(IsValidSpell(spell_id)) {
 		int aatid = GetAATimerID(activate);
-		if(!CastSpell(spell_id, target_id , 10, -1, -1, 0, -1, pTimerAAStart + aatid , CalcAAReuseTimer(caa), 1)) {
+		if (!CastSpell(spell_id, target_id, USE_ITEM_SPELL_SLOT, -1, -1, 0, -1, pTimerAAStart + aatid, CalcAAReuseTimer(caa), 1)) {
 			SendAATimer(aatid, 0, 0xFFFFFF);
 			Message_StringID(15,ABILITY_FAILED);
 			p_timers.Clear(&database, pTimerAAStart + aatid);
@@ -1822,8 +1822,7 @@ void ZoneDatabase::LoadAAs(SendAA_Struct **load){
     }
 
     AALevelCost_Struct aalcs;
-    for (auto row = results.begin(); row != results.end(); ++row)
-    {
+    for (auto row = results.begin(); row != results.end(); ++row) {
         aalcs.Level = atoi(row[1]);
         aalcs.Cost = atoi(row[2]);
         AARequiredLevelAndCost[atoi(row[0])] = aalcs;

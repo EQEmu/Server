@@ -41,11 +41,12 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 	MYSQL_ROW row;
 	Inventory *inv;
 
+	/* Initialize Variables */
 	for (int i=0; i<10; i++) {
 		strcpy(cs->name[i], "<none>");
 		cs->zone[i] = 0;
 		cs->level[i] = 0;
-			cs->tutorial[i] = 0;
+		cs->tutorial[i] = 0;
 		cs->gohome[i] = 0;
 	}
 
@@ -165,7 +166,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 						if(result2) {
 							row2 = mysql_fetch_row(result2);
 							ExtendedProfile_Struct* ext = (ExtendedProfile_Struct*)row2[0];
-							SetPlayerProfile(account_id,char_id,pp,inv,ext, 0, 0, 5);
+							// SetPlayerProfile(account_id,char_id,pp,inv,ext, 0, 0, 5);
 						}
 						mysql_free_result(result2);
 					}

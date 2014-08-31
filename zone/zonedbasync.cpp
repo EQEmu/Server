@@ -12,30 +12,6 @@ void DispatchFinishedDBAsync(DBAsyncWork* dbaw) {
 	uint32_breakdown workpt;
 	workpt = dbaw->WPT();
 	switch (workpt.b4()) {
-/*		case DBA_b4_Main: {
-			switch (workpt.i24_1()) {
-				case DBA_i24_1_Main_LoadVariables: {
-					char errbuf[MYSQL_ERRMSG_SIZE];
-					MYSQL_RES* result;
-					DBAsyncQuery* dbaq = dbaw->PopAnswer();
-					if (dbaq->GetAnswer(errbuf, result))
-						database.LoadVariables_result(result);
-					else
-						std::cout << "Async DB.LoadVariables() failed: '" << errbuf << "'" << std::endl;
-					break;
-				}
-				default: {
-					std::cout << "Error: DispatchFinishedDBAsync(): Unknown workpt.b4" << std::endl;
-					break;
-				}
-			}
-		}*/
-		case DBA_b4_Zone: {
-			if(zone == nullptr)
-				break;
-			zone->DBAWComplete(workpt.b1(), dbaw);
-			break;
-		}
 		case DBA_b4_Entity: {
 			Entity* entity = entity_list.GetID(workpt.w2_3());
 			if (!entity)
