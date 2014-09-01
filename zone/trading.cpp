@@ -871,7 +871,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				items[i - EmuConstants::TRADE_BEGIN] = inst->GetItem()->ID;
 				item_list.push_back(inst);
 			} else {
-				item_list.push_back(nullptr);
+				item_list.push_back((ItemInst*)nullptr);
 				continue;
 			}
 

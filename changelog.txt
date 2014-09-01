@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/31/2014 ==
+KLS: Fixed a bug in fishing in S3D zones
+KLS: Fixed a bug in turnins with new any abstraction
+KLS: Fixed a few quest related inconsistencies.
+KLS: Added Lua EntityList::ChannelMessage(from, type, msg, language)
+
 == 08/30/2014 ==
 demonstar55: (noudess) Merchants should be more descriptive of why they don't sell to you
 
