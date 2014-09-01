@@ -124,61 +124,6 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 			uint8 bind_heading_id = atoi(row_b[r]); r++;
 		}
 
-		// if (pp->binds[4].zoneId == 0) {
-		// 	bool altered = false;
-		// 	MYSQL_RES *result2;
-		// 	MYSQL_ROW row2;
-		// 	char startzone[50] = { 0 };
-		// 
-		// 	// check for start zone variable (I didn't even know any variables were still being used...)
-		// 	if (database.GetVariable("startzone", startzone, 50)) {
-		// 		uint32 zoneid = database.GetZoneID(startzone);
-		// 		if (zoneid) {
-		// 			pp->binds[4].zoneId = zoneid;
-		// 			GetSafePoints(zoneid, 0, &pp->binds[4].x, &pp->binds[4].y, &pp->binds[4].z);
-		// 			altered = true;
-		// 		}
-		// 	}
-		// 	else {
-		// 		RunQuery(query,
-		// 			MakeAnyLenString(&query,
-		// 			"SELECT zone_id,bind_id,x,y,z FROM start_zones "
-		// 			"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
-		// 			pp->class_,
-		// 			pp->deity,
-		// 			pp->race
-		// 			),
-		// 			errbuf,
-		// 			&result2
-		// 			);
-		// 		safe_delete_array(query);
-		// 
-		// 		// if there is only one possible start city, set it
-		// 		if (mysql_num_rows(result2) == 1) {
-		// 			row2 = mysql_fetch_row(result2);
-		// 			if (atoi(row2[1]) != 0) {		// if a bind_id is specified, make them start there
-		// 				pp->binds[4].zoneId = (uint32)atoi(row2[1]);
-		// 				GetSafePoints(pp->binds[4].zoneId, 0, &pp->binds[4].x, &pp->binds[4].y, &pp->binds[4].z);
-		// 			}
-		// 			else {	// otherwise, use the zone and coordinates given
-		// 				pp->binds[4].zoneId = (uint32)atoi(row2[0]);
-		// 				float x = atof(row2[2]);
-		// 				float y = atof(row2[3]);
-		// 				float z = atof(row2[4]);
-		// 				if (x == 0 && y == 0 && z == 0)
-		// 					GetSafePoints(pp->binds[4].zoneId, 0, &x, &y, &z);
-		// 
-		// 				pp->binds[4].x = x;
-		// 				pp->binds[4].y = y;
-		// 				pp->binds[4].z = z;
-		// 			}
-		// 			altered = true;
-		// 		}
-		// 
-		// 		mysql_free_result(result2);
-		// 	}
-		// }	
-
 		/*
 			Character's equipped items
 			@merth: Haven't done bracer01/bracer02 yet.
@@ -194,10 +139,6 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 			slot = atoi(row_b[0]); 
 			if (atoi(row_b[1]) == 1){ pp.item_tint[slot].rgb.use_tint = 0xFF; }
 			pp.item_tint[slot].color = atoul(row_b[2]);
-			printf("charid: %u  \n", character_id);
-			printf("slot: %u  \n", slot);
-			printf("use_tint: %u item_tint: %u \n", pp.item_tint[slot].rgb.use_tint, atoul(row_b[2]));
-			cs->cs_colors[char_num][slot].color = atoul(row_b[2]);
 		}
 
 		/* Load Inventory */
@@ -212,9 +153,8 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 
 				cs->equip[char_num][material] = item->GetItem()->Material;
 
-				color = pp.item_tint[material].color;
-				// if (pp.item_tint[material].rgb.use_tint){ color = pp.item_tint[material].color; }
-				// else{ color = item->GetItem()->Color; }
+				if (pp.item_tint[material].rgb.use_tint){ color = pp.item_tint[material].color; }
+				else{ color = item->GetItem()->Color; }
 
 				cs->cs_colors[char_num][material].color = color;
 

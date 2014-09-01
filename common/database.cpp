@@ -1130,7 +1130,7 @@ bool Database::CheckDatabaseConversions() {
 				
 				/* Verify PP Integrity */
 				lengths = mysql_fetch_lengths(result2);
-				if (lengths[1] > 0) {
+				if (lengths[1] == sizeof(PlayerProfile_Struct)) {
 					memcpy(pp, row2[1], sizeof(PlayerProfile_Struct));
 					// printf("FINE: Player profile '%s' %i length Expected: %i, Got: %i \n", row2[2], atoi(row2[3]), sizeof(PlayerProfile_Struct), lengths[1]);
 				}

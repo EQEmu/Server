@@ -801,8 +801,8 @@ struct SuspendedMinion_Struct
 ** OpCode: 0x006a
  */
 static const uint32 MAX_PP_LANGUAGE		= 28;
-static const uint32 MAX_PP_SPELLBOOK	= 720;	// Increased to 480 to support SoF 
-static const uint32 MAX_PP_MEMSPELL		= 12; 
+static const uint32 MAX_PP_SPELLBOOK =	 480;	// Increased to 480 to support SoF 
+static const uint32 MAX_PP_MEMSPELL		= 9; 
 static const uint32 MAX_PP_SKILL		= _SkillPacketArraySize;	// 100 - actual skills buffer size
 static const uint32 MAX_PP_AA_ARRAY		= 240;
 static const uint32 MAX_GROUP_MEMBERS	= 6;

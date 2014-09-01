@@ -1878,8 +1878,8 @@ void Client::DyeArmor(DyeStruct* dye){
 				ItemInst* inst = this->m_inv.GetItem(slot2);
 				if(inst){
 					uint32 armor_color = (dye->dye[i].rgb.red * 65536) + (dye->dye[i].rgb.green * 256) + (dye->dye[i].rgb.blue);
-					inst->SetColor(armor_color);
-					database.SaveCharacterMaterialColor(this->CharacterID(), slot2, armor_color);
+					inst->SetColor(armor_color); 
+					database.SaveCharacterMaterialColor(this->CharacterID(), i, armor_color);
 					database.SaveInventory(CharacterID(),inst,slot2);
 					if(dye->dye[i].rgb.use_tint)
 						m_pp.item_tint[i].rgb.use_tint = 0xFF;

@@ -1151,9 +1151,9 @@ bool ZoneDatabase::SaveCharacterMaterialColor(uint32 character_id, uint32 slot_i
 	return true;
 }
 
-bool ZoneDatabase::LoadCharacterMaterial(uint32 character_id, PlayerProfile_Struct* pp){
+bool ZoneDatabase::LoadCharacterMaterialColor(uint32 character_id, PlayerProfile_Struct* pp){
 	std::string query = StringFormat("SELECT slot, blue, green, red, use_tint, color FROM `character_material` WHERE `id` = %u LIMIT 9", character_id);
-	auto results = database.QueryDatabase(query); int i = 0; int r = 0;
+	auto results = database.QueryDatabase(query); int i = 0; int r = 0; 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		r = 0;
 		i = atoi(row[r]); /* Slot */ r++;

@@ -266,7 +266,7 @@ public:
 	bool	LoadCharacterData(uint32 character_id, PlayerProfile_Struct* pp);
 	bool	LoadCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
 	bool	LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Struct* pp);
-	bool	LoadCharacterMaterial(uint32 character_id, PlayerProfile_Struct* pp);
+	bool	LoadCharacterMaterialColor(uint32 character_id, PlayerProfile_Struct* pp);
 
 	/* Character Data Saves */ 
 	bool SaveCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
