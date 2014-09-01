@@ -1086,6 +1086,28 @@ bool Database::CheckDatabaseConversions() {
 			QueryDatabase(rquery);
 			printf(" done...\n");
 		}
+		/* Check for table `character_material` */
+		rquery = StringFormat("SHOW TABLES LIKE 'character_material'");
+		results = QueryDatabase(rquery);
+		// blue, green, red, use_tint,
+		if (results.RowCount() == 0){
+			printf("Table: `character_material` doesn't exist... creating...");
+			rquery = StringFormat(
+				"CREATE TABLE `character_material` ( "
+				"`id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,"
+				"`slot` tinyint(11) UNSIGNED NOT NULL DEFAULT '0',"
+				"`blue` tinyint(11) UNSIGNED NOT NULL DEFAULT '0',"
+				"`green` tinyint(11) UNSIGNED NOT NULL DEFAULT '0',"
+				"`red` tinyint(11) UNSIGNED NOT NULL DEFAULT '0',"
+				"`use_tint` tinyint(11) UNSIGNED NOT NULL DEFAULT '0',"
+				"`color` int(11) UNSIGNED NOT NULL DEFAULT '0',"
+				"PRIMARY KEY(`id`, `slot`),"
+				"KEY `id` (`id`)"
+				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;"
+				);
+			QueryDatabase(rquery);
+			printf(" done...\n");
+		} 
 
 		/* Done */
 		printf("Starting conversion...\n\n");
@@ -1093,7 +1115,7 @@ bool Database::CheckDatabaseConversions() {
 
 	// querylen = MakeAnyLenString(&query, "SELECT `id` FROM `character_` WHERE `id` = 61238");
 	int char_iter_count = 0;
-	querylen = MakeAnyLenString(&query, "SELECT `id` FROM `character_` WHERE `id` >= 61238 LIMIT 100"); 
+	querylen = MakeAnyLenString(&query, "SELECT `id` FROM `character_` WHERE `id` >= 61238 LIMIT 10"); 
 	if (RunQuery(query, querylen, errbuf, &result)) {
 		safe_delete_array(query);
 		while (row = mysql_fetch_row(result)) {
@@ -1105,14 +1127,15 @@ bool Database::CheckDatabaseConversions() {
 				pp = (PlayerProfile_Struct*)row2[1];
 				character_id = atoi(row[0]);
 				account_id = atoi(row2[4]);
+				
 				/* Verify PP Integrity */
 				lengths = mysql_fetch_lengths(result2);
-				if (lengths[1] == sizeof(PlayerProfile_Struct)) {
+				if (lengths[1] > 0) {
 					memcpy(pp, row2[1], sizeof(PlayerProfile_Struct));
-					// printf("FINE: Player profile '%s' %i length mismatch Expected: %i, Got: %i \n", row2[2], atoi(row2[3]), sizeof(PlayerProfile_Struct), lengths[1]);
+					// printf("FINE: Player profile '%s' %i length Expected: %i, Got: %i \n", row2[2], atoi(row2[3]), sizeof(PlayerProfile_Struct), lengths[1]);
 				}
 				/* Continue of PP Size does not match (Usually a created character never logged in) */
-				else {
+				else { 
 					// printf("NO PP: Player profile '%s' %i length mismatch Expected: %i, Got: %i \n", row2[2], atoi(row2[3]), sizeof(PlayerProfile_Struct), lengths[1]);
 					continue;
 				}
@@ -1480,6 +1503,14 @@ bool Database::CheckDatabaseConversions() {
 					for (i = 0; i < MAX_PP_DISCIPLINES; i++){
 						if (pp->disciplines.values[i] > 0){
 							rquery = StringFormat("REPLACE INTO `character_disciplines` (id, disc_id) VALUES (%u, %u)", character_id, pp->disciplines.values[i]);
+							QueryDatabase(rquery);
+						}
+					}
+					/* Run Material Color Convert */
+					for (i = 0; i < _MaterialCount; i++){
+						if (pp->item_tint[i].color > 0){
+							if (pp->item_tint[i].rgb.use_tint > 0){ pp->item_tint[i].rgb.use_tint = 1; }
+							rquery = StringFormat("REPLACE INTO `character_material` (id, slot, blue, green, red, use_tint, color) VALUES (%u, %u, %u, %u, %u, %u, %u)", character_id, i, pp->item_tint[i].rgb.blue, pp->item_tint[i].rgb.green, pp->item_tint[i].rgb.red, pp->item_tint[i].rgb.use_tint, pp->item_tint[i].color);
 							QueryDatabase(rquery);
 						}
 					}

@@ -3120,6 +3120,7 @@ void Client::SetTint(int16 in_slot, uint32 color) {
 	Color_Struct new_color;
 	new_color.color = color;
 	SetTint(in_slot, new_color);
+	database.SaveCharacterMaterialColor(this->CharacterID(), in_slot, color);
 }
 
 // Still need to reconcile bracer01 versus bracer02
@@ -3147,6 +3148,8 @@ void Client::SetTint(int16 in_slot, Color_Struct& color) {
 		m_pp.item_tint[MaterialLegs].color=color.color;
 	else if (in_slot==MainFeet)
 		m_pp.item_tint[MaterialFeet].color=color.color;
+
+	database.SaveCharacterMaterialColor(this->CharacterID(), in_slot, color.color);
 }
 
 void Client::SetHideMe(bool flag)

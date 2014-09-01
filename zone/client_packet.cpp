@@ -597,6 +597,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	
 	loaditems = database.GetInventory(cid, &m_inv); /* Load Character Inventory */
 	database.LoadCharacterBindPoint(cid, &m_pp); /* Load Character Bind */
+	database.LoadCharacterMaterial(cid, &m_pp); /* Load Character Material */
 	database.LoadCharacterCurrency(cid, &m_pp); /* Load Character Currency into PP */
 	database.LoadCharacterData(cid, &m_pp); /* Load Character Data from DB into PP */
 	database.GetPlayerInspectMessage(m_pp.name, &m_inspect_message); /* Move to another method when can, this is pointless... */

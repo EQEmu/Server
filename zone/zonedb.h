@@ -266,6 +266,7 @@ public:
 	bool	LoadCharacterData(uint32 character_id, PlayerProfile_Struct* pp);
 	bool	LoadCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
 	bool	LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Struct* pp);
+	bool	LoadCharacterMaterial(uint32 character_id, PlayerProfile_Struct* pp);
 
 	/* Character Data Saves */ 
 	bool SaveCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
@@ -274,6 +275,7 @@ public:
 	bool SaveCharacterSpellSwap(uint32 character_id, uint32 spell_id, uint32 from_slot, uint32 to_slot);
 	bool SaveCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
 	bool SaveCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
+	bool SaveCharacterMaterialColor(uint32 character_id, uint32 slot_id, uint32 color);
 
 	/* Character Data Deletes */
 	bool DeleteCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);

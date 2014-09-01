@@ -1145,6 +1145,28 @@ bool ZoneDatabase::LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Str
 	return true;
 }
 
+bool ZoneDatabase::SaveCharacterMaterialColor(uint32 character_id, uint32 slot_id, uint32 color){
+	std::string query = StringFormat("REPLACE INTO `character_material` (id, slot, color) VALUES (%u, %u, %u)", character_id, slot_id, color); QueryDatabase(query);
+	LogFile->write(EQEMuLog::Status, "ZoneDatabase::SaveCharacterMaterialColor for character ID: %i, slot_id: %u color: %u done", character_id, slot_id, color);
+	return true;
+}
+
+bool ZoneDatabase::LoadCharacterMaterial(uint32 character_id, PlayerProfile_Struct* pp){
+	std::string query = StringFormat("SELECT slot, blue, green, red, use_tint, color FROM `character_material` WHERE `id` = %u LIMIT 9", character_id);
+	auto results = database.QueryDatabase(query); int i = 0; int r = 0;
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		r = 0;
+		i = atoi(row[r]); /* Slot */ r++;
+		pp->item_tint[i].rgb.blue = atoi(row[r]); r++;
+		pp->item_tint[i].rgb.green = atoi(row[r]); r++;
+		pp->item_tint[i].rgb.red = atoi(row[r]); r++;
+		if (row[r] && atoi(row[r]) > 0){ pp->item_tint[i].rgb.use_tint = 0xFF; } r++;
+		pp->item_tint[i].color = atoi(row[r]); r++;  
+		printf("Loading color: %u tint: %u \n", pp->item_tint[i].color, pp->item_tint[i].rgb.use_tint);
+	}
+	return true;
+}
+
 bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp){
 	clock_t t = std::clock(); /* Function timer start */
 	if (pp->tribute_time_remaining < 0 || pp->tribute_time_remaining == 4294967295){ pp->tribute_time_remaining = 0; }
