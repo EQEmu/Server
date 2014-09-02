@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 09/02/2014 ==
+demonstar55: crash fix checking DivineAura in hate_list.cpp
+
 == 08/31/2014 ==
 KLS: Fixed a bug in fishing in S3D zones
 KLS: Fixed a bug in turnins with new any abstraction
