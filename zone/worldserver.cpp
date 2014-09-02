@@ -322,7 +322,7 @@ void WorldServer::Process() {
 
 					entity->CastToMob()->SetZone(ztz->requested_zone_id, ztz->requested_instance_id);
 
-					if(ztz->ignorerestrictions == 3)
+					if(ztz->ignorerestrictions == 3) 
 						entity->CastToClient()->GoToSafeCoords(ztz->requested_zone_id, ztz->requested_instance_id);
 				}
 

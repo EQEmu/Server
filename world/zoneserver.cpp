@@ -675,6 +675,9 @@ bool ZoneServer::Process() {
 				zlog(WORLD__ZONE,"ZoneToZone request for %s current zone %d req zone %d\n",
 					ztz->name, ztz->current_zone_id, ztz->requested_zone_id);
 
+				printf("\n\n ZoneToZone request for %s current zone %d req zone %d\n\n",
+					ztz->name, ztz->current_zone_id, ztz->requested_zone_id);
+
 				if(GetZoneID() == ztz->current_zone_id && GetInstanceID() == ztz->current_instance_id)	// this is a request from the egress zone
 				{
 					zlog(WORLD__ZONE,"Processing ZTZ for egress from zone for client %s\n", ztz->name);

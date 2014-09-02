@@ -92,7 +92,7 @@ uint32 SharedDatabase::SetPlayerProfile_MQ(char** query, uint32 account_id, uint
 	if (strlen(pp->name) == 0) // Sanity check in case pp never loaded
 		return false;
 
-	end += sprintf(end, "UPDATE character_ SET timelaston=unix_timestamp(now()),name=\'%s\', zonename=\'%s\', zoneid=%u, instanceid=%u, x = %f, y = %f, z = %f, ", pp->name, "halas", 29, current_instance, pp->x, pp->y, pp->z);
+	end += sprintf(end, "UPDATE character_ SET timelaston=unix_timestamp(now()),name=\'%s\', zonename=\'%s\', zoneid=%u, instanceid=%u, x = %f, y = %f, z = %f, ", pp->name, GetZoneName(current_zone), current_zone, current_instance, pp->x, pp->y, pp->z);
 	// end += DoEscapeString(end, (char*)pp, sizeof(PlayerProfile_Struct));
 	end += sprintf(end, " extprofile=\'");
 	end += DoEscapeString(end, (char*)ext, sizeof(ExtendedProfile_Struct));

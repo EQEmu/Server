@@ -1931,6 +1931,7 @@ void Mob::SetZone(uint32 zone_id, uint32 instance_id)
 	{
 		CastToClient()->GetPP().zone_id = zone_id;
 		CastToClient()->GetPP().zoneInstance = instance_id;
+		CastToClient()->Save();
 	}
 	Save();
 }

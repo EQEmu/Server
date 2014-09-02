@@ -50,6 +50,10 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 #endif
 	ZoneChange_Struct* zc=(ZoneChange_Struct*)app->pBuffer;
 
+	printf("INCOMING CLIENT\n\n");
+	printf("%s\n", zc->char_name);
+	printf("%u\n", zc->zoneID);
+
 	uint16 target_zone_id = 0;
 	uint16 target_instance_id = zc->instanceID;
 	ZonePoint* zone_point = nullptr;
@@ -368,6 +372,8 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 		outapp->priority = 6;
 		FastQueuePacket(&outapp);
 
+		printf("INTERZONE PROCESS\n");
+
 		zone->StartShutdownTimer(AUTHENTICATION_TIMEOUT * 1000);
 	} else {
 	// vesuvias - zoneing to another zone so we need to the let the world server
@@ -384,6 +390,17 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 		strcpy(ztz->name, GetName());
 		ztz->guild_id = GuildID();
 		worldserver.SendPacket(pack);
+
+		printf("ZONING REQUEST TO WORLD\n");
+		printf("ztz->response %u              \n", ztz->response);
+		printf("ztz->current_zone_id %u       \n", ztz->current_zone_id);
+		printf("ztz->current_instance_id %u   \n", ztz->current_instance_id);
+		printf("ztz->requested_zone_id %u     \n", ztz->requested_zone_id);
+		printf("ztz->requested_instance_id %u \n", ztz->requested_instance_id);
+		printf("ztz->admin %u                 \n", ztz->admin);
+		printf("ztz->ignorerestrictions %u    \n", ztz->ignorerestrictions);
+		printf("ztz->guild_id %u              \n", ztz->guild_id);
+
 		safe_delete(pack);
 	}
 
@@ -551,6 +568,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 
 	if(ReadyToZone) {
 		zone_mode = zm;
+		printf("\n\n ZONE MODE %u \n\n", zm);
 		if(zm == ZoneToBindPoint) {
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + iZoneNameLength);
 			ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
@@ -583,6 +601,10 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			gmg->heading = heading;
 			gmg->instance_id = instance_id;
 			gmg->type = 0x01;				//an observed value, not sure of meaning
+
+			printf("gmg->zone_id %u \n", gmg->zone_id);
+			printf("gmg->x %u \n", gmg->x);
+			printf("gmg->y %u \n", gmg->y);
 
 			outapp->priority = 6;
 			FastQueuePacket(&outapp);
