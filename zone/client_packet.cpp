@@ -553,7 +553,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		m_pp.item_tint[i].rgb.use_tint = 0xFF;
 
 	uint32 cid = CharacterID();
-	character_id = cid;
+	character_id = cid; /* Global character_id reference */
 
 	/* Flush and reload factions */
 	database.RemoveTempFactions(this);
@@ -588,8 +588,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		if (RuleB(Character, SharedBankPlat))
 			m_pp.platinum_shared = database.GetSharedPlatinum(database.GetAccountIDByChar(cid));
 
-		// if (ext) { SetExtendedProfile(ext, row[8], lengths[8]); }
-		if (level){ level = atoi(row[10]); }
 		if (LFP){ LFP = atoi(row[11]); }
 		if (LFG){ LFG = atoi(row[12]); }
 		if (firstlogon){ firstlogon = atoi(row[15]); }
@@ -607,6 +605,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	database.LoadCharacterSpellBook(cid, &m_pp); /* Load Character Spell Book */
 	database.LoadCharacterMemmedSpells(cid, &m_pp);  /* Load Character Memorized Spells */
 	database.LoadCharacterDisciplines(cid, &m_pp); /* Load Character Disciplines */
+
+	if (level){ level = m_pp.level; }
 
 	/* If GM, not trackable */
 	if (gmhideme) { trackable = false; }
@@ -632,9 +632,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		m_pp.z = zone->safe_z();
 	} 
 	/* If too far below ground, then fix */
-	float ground_z = GetGroundZ(m_pp.x, m_pp.y, m_pp.z);
-	if (m_pp.z < (ground_z - 500))
-		m_pp.z = ground_z;
+	// float ground_z = GetGroundZ(m_pp.x, m_pp.y, m_pp.z);
+	// if (m_pp.z < (ground_z - 500))
+	// 	m_pp.z = ground_z;
 
 	/* Set Mob variables for spawn */
 	class_ = m_pp.class_; 
@@ -1019,8 +1019,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	outapp = new EQApplicationPacket(OP_Weather, 12);
 	Weather_Struct *ws = (Weather_Struct *)outapp->pBuffer;
 	ws->val1 = 0x000000FF;
-	if (zone->zone_weather == 1)
-		ws->type = 0x31; // Rain
+	if (zone->zone_weather == 1){ ws->type = 0x31; } // Rain
 	if (zone->zone_weather == 2) {
 		outapp->pBuffer[8] = 0x01;
 		ws->type = 0x02;

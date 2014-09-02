@@ -35,9 +35,7 @@ extern std::vector<RaceClassCombos> character_create_race_class_combos;
 
 // solar: the current stuff is at the bottom of this function
 void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct* cs) {
-	/* Initialize Player Profile for the small time it is being used for item material */
-	PlayerProfile_Struct pp;
-	memset(&pp, 0, sizeof(PlayerProfile_Struct));
+	Inventory *inv;
 	
 	/* Initialize Variables */
 	for (int i=0; i<10; i++) {
@@ -73,10 +71,12 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 		"zone_id		            "  // 19
 		"FROM                       "  
 		"character_data             "  
-		"WHERE `account_id` = %i LIMIT 10   ", account_id);
-	auto results = database.QueryDatabase(cquery); uint16 char_num = 0;
+		"WHERE `account_id` = %i ORDER BY `name` LIMIT 10   ", account_id);
+	auto results = database.QueryDatabase(cquery); int char_num = 0;
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		printf("id is %i \n", atoi(row[0]));
+		PlayerProfile_Struct pp;
+		memset(&pp, 0, sizeof(PlayerProfile_Struct));
+
 		uint32 character_id = atoi(row[0]);
 		strcpy(cs->name[char_num], row[1]);
 		uint8 lvl = atoi(row[5]);
@@ -133,16 +133,17 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 		*/
 
 		/* Load Character Material Data for Char Select */
-		cquery = StringFormat("SELECT slot, use_tint, color FROM `character_material` WHERE `id` = %u", character_id);
+		cquery = StringFormat("SELECT slot, red, green, blue, use_tint, color FROM `character_material` WHERE `id` = %u", character_id);
 		auto results_b = database.QueryDatabase(cquery); uint8 slot = 0;
 		for (auto row_b = results_b.begin(); row_b != results_b.end(); ++row_b) {
 			slot = atoi(row_b[0]); 
-			if (atoi(row_b[1]) == 1){ pp.item_tint[slot].rgb.use_tint = 0xFF; }
-			pp.item_tint[slot].color = atoul(row_b[2]);
+			pp.item_tint[slot].rgb.red = atoi(row_b[1]);
+			pp.item_tint[slot].rgb.green = atoi(row_b[2]);
+			pp.item_tint[slot].rgb.blue = atoi(row_b[3]);
+			pp.item_tint[slot].rgb.use_tint = atoi(row_b[4]);
 		}
 
 		/* Load Inventory */
-		Inventory *inv;
 		inv = new Inventory;
 		if (GetInventory(account_id, cs->name[char_num], inv)) {
 			for (uint8 material = 0; material <= 8; material++) {
@@ -156,9 +157,9 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 				if (pp.item_tint[material].rgb.use_tint){ color = pp.item_tint[material].color; }
 				else{ color = item->GetItem()->Color; }
 
-				cs->cs_colors[char_num][material].color = color;
+				cs->cs_colors[char_num][material].color = color; 
 
-				// the weapons are kept elsewhere
+				/* Weapons are handled a bit differently */
 				if ((material == MaterialPrimary) || (material == MaterialSecondary)) {
 					if (strlen(item->GetItem()->IDFile) > 2) {
 						uint32 idfile = atoi(&item->GetItem()->IDFile[2]);

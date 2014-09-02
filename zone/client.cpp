@@ -588,34 +588,34 @@ bool Client::Save(uint8 iCommitNow) {
 	/* Save Character Task */
 	SaveTaskState();
 
+	if (iCommitNow <= 1) {
+		// char* query = 0;
+		// uint32_breakdown workpt;
+		// workpt.b4() = DBA_b4_Entity;
+		// workpt.w2_3() = GetID();
+		// workpt.b1() = DBA_b1_Entity_Client_Save;
+		// DBAsyncWork* dbaw = new DBAsyncWork(&database, &MTdbafq, workpt, DBAsync::Write, 0xFFFFFFFF);
+		// dbaw->AddQuery(iCommitNow == 0 ? true : false, &query, database.SetPlayerProfile_MQ(&query, account_id, character_id, &m_pp, &m_inv, &m_epp, 0, 0, MaxXTargets), false);
+		// if (iCommitNow == 0){
+		// 	pQueuedSaveWorkID = dbasync->AddWork(&dbaw, 2500);
+		// }
+		// else {
+		// 	dbasync->AddWork(&dbaw, 0);
+		// 	SaveBackup();
+		// }
+		// safe_delete_array(query);
+		// return true;
+	}
+	else if (database.SetPlayerProfile(account_id, character_id, &m_pp, &m_inv, &m_epp, 0, 0, MaxXTargets)) {
+		SaveBackup();
+	}
+	else {
+		std::cerr << "Failed to update player profile" << std::endl;
+		return false;
+	}
+
 	/* Save Character Data */
 	database.SaveCharacterData(this->CharacterID(), this->AccountID(), &m_pp);
-
-	// if (iCommitNow <= 1) {
-	// 	char* query = 0;
-	// 	uint32_breakdown workpt;
-	// 	workpt.b4() = DBA_b4_Entity;
-	// 	workpt.w2_3() = GetID();
-	// 	workpt.b1() = DBA_b1_Entity_Client_Save;
-	// 	DBAsyncWork* dbaw = new DBAsyncWork(&database, &MTdbafq, workpt, DBAsync::Write, 0xFFFFFFFF);
-	// 	dbaw->AddQuery(iCommitNow == 0 ? true : false, &query, database.SetPlayerProfile_MQ(&query, account_id, character_id, &m_pp, &m_inv, &m_epp, 0, 0, MaxXTargets), false);
-	// 	if (iCommitNow == 0){
-	// 		pQueuedSaveWorkID = dbasync->AddWork(&dbaw, 2500);
-	// 	}
-	// 	else {
-	// 		dbasync->AddWork(&dbaw, 0);
-	// 		SaveBackup();
-	// 	}
-	// 	safe_delete_array(query);
-	// 	return true;
-	// }
-	// else if (database.SetPlayerProfile(account_id, character_id, &m_pp, &m_inv, &m_epp, 0, 0, MaxXTargets)) {
-	// 	SaveBackup();
-	// }
-	// else {
-	// 	std::cerr << "Failed to update player profile" << std::endl;
-	// 	return false;
-	// }
 
 	/* Mirror Character Data */
 	database.StoreCharacterLookup(this->CharacterID());

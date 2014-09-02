@@ -61,6 +61,46 @@ bool SharedDatabase::SetHideMe(uint32 account_id, uint8 hideme)
 	return true;
 
 }
+bool SharedDatabase::SetPlayerProfile(uint32 account_id, uint32 charid, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, uint32 current_zone, uint32 current_instance, uint8 MaxXTargets) {
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
+	uint32 affected_rows = 0;
+	bool ret = false;
+
+	if (RunQuery(query, SetPlayerProfile_MQ(&query, account_id, charid, pp, inv, ext, current_zone, current_instance, MaxXTargets), errbuf, 0, &affected_rows)) {
+		ret = (affected_rows != 0);
+	}
+
+	if (!ret) {
+		LogFile->write(EQEMuLog::Error, "SetPlayerProfile query '%s' %s", query, errbuf);
+	}
+
+	safe_delete_array(query);
+	return ret;
+}
+
+// Generate SQL for updating player profile
+uint32 SharedDatabase::SetPlayerProfile_MQ(char** query, uint32 account_id, uint32 charid, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, uint32 current_zone, uint32 current_instance, uint8 MaxXTargets) {
+	*query = new char[396 + sizeof(PlayerProfile_Struct)* 2 + sizeof(ExtendedProfile_Struct)* 2 + 4];
+	char* end = *query;
+	if (!current_zone)
+		current_zone = pp->zone_id;
+
+	if (!current_instance)
+		current_instance = pp->zoneInstance;
+
+	if (strlen(pp->name) == 0) // Sanity check in case pp never loaded
+		return false;
+
+	end += sprintf(end, "UPDATE character_ SET timelaston=unix_timestamp(now()),name=\'%s\', zonename=\'%s\', zoneid=%u, instanceid=%u, x = %f, y = %f, z = %f, ", pp->name, "halas", 29, current_instance, pp->x, pp->y, pp->z);
+	// end += DoEscapeString(end, (char*)pp, sizeof(PlayerProfile_Struct));
+	end += sprintf(end, " extprofile=\'");
+	end += DoEscapeString(end, (char*)ext, sizeof(ExtendedProfile_Struct));
+	end += sprintf(end, "\',class=%d,level=%d,xtargets=%u WHERE id=%u", pp->class_, pp->level, MaxXTargets, charid);
+
+	return (uint32)(end - (*query));
+}
+
 
 uint8 SharedDatabase::GetGMSpeed(uint32 account_id)
 {

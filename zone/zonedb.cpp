@@ -1146,7 +1146,7 @@ bool ZoneDatabase::LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Str
 }
 
 bool ZoneDatabase::SaveCharacterMaterialColor(uint32 character_id, uint32 slot_id, uint32 color){
-	std::string query = StringFormat("REPLACE INTO `character_material` (id, slot, color) VALUES (%u, %u, %u)", character_id, slot_id, color); QueryDatabase(query);
+	std::string query = StringFormat("REPLACE INTO `character_material` (id, slot, color, use_tint) VALUES (%u, %u, %u, 255)", character_id, slot_id, color); QueryDatabase(query);
 	LogFile->write(EQEMuLog::Status, "ZoneDatabase::SaveCharacterMaterialColor for character ID: %i, slot_id: %u color: %u done", character_id, slot_id, color);
 	return true;
 }
@@ -1160,9 +1160,8 @@ bool ZoneDatabase::LoadCharacterMaterialColor(uint32 character_id, PlayerProfile
 		pp->item_tint[i].rgb.blue = atoi(row[r]); r++;
 		pp->item_tint[i].rgb.green = atoi(row[r]); r++;
 		pp->item_tint[i].rgb.red = atoi(row[r]); r++;
-		if (row[r] && atoi(row[r]) > 0){ pp->item_tint[i].rgb.use_tint = 0xFF; } r++;
-		pp->item_tint[i].color = atoi(row[r]); r++;  
-		printf("Loading color: %u tint: %u \n", pp->item_tint[i].color, pp->item_tint[i].rgb.use_tint);
+		pp->item_tint[i].rgb.use_tint = atoi(row[r]);
+		printf("Material Load: %u %u %u %u\n", pp->item_tint[i].rgb.blue, pp->item_tint[i].rgb.green, pp->item_tint[i].rgb.red, pp->item_tint[i].rgb.use_tint);
 	}
 	return true;
 }
@@ -1445,13 +1444,9 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 		pp->guildAutoconsent,
 		pp->RestTimer
 	);
-	auto results = database.QueryDatabase(query); 
-	//if (results.RowsAffected() != 2) {		
-	//	LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::SaveCharacterData Error! Query: %s \n", query); return false;
-	//}
-	//else{ 
-		LogFile->write(EQEMuLog::Status, "ZoneDatabase::SaveCharacterData %i, done... Took %f seconds", character_id, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
-	//} 
+	auto results = database.QueryDatabase(query);
+	if (!results.RowsAffected()){ std::cout << "ERROR ZoneDatabase:SaveCharacterData: " << results.ErrorMessage() << "\n\n" << query << "\n" << std::endl; }
+	LogFile->write(EQEMuLog::Status, "ZoneDatabase::SaveCharacterData %i, done... Took %f seconds", character_id, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 	return true;
 }
 
