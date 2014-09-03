@@ -4067,44 +4067,41 @@ void Bot::Depop() {
 }
 
 bool Bot::DeleteBot(std::string* errorMessage) {
-	bool Result = false;
-	int TempCounter = 0;
+	bool hadError = false;
 
-	if(this->GetBotID() > 0) {
-		char* Query = 0;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
+	if(this->GetBotID() == 0)
+        return false;
 
-		// TODO: These queries need to be ran together as a transaction.. ie, if one or more fail then they all will fail to commit to the database.
+    // TODO: These queries need to be ran together as a transaction.. ie, if one or more fail then they all will fail to commit to the database.
+    std::string query = StringFormat("DELETE FROM botinventory WHERE botid = '%u'", this->GetBotID());
+    auto results = database.QueryDatabase(query);
+    if(!results.Success()) {
+        *errorMessage = std::string(results.ErrorMessage());
+        hadError = true;
+    }
 
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM botinventory WHERE botid = '%u'", this->GetBotID()), TempErrorMessageBuffer)) {
-			*errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else
-			TempCounter++;
+    query = StringFormat("DELETE FROM botbuffs WHERE botid = '%u'", this->GetBotID());
+    results = database.QueryDatabase(query);
+    if(!results.Success()) {
+        *errorMessage = std::string(results.ErrorMessage());
+        hadError = true;
+    }
 
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM botbuffs WHERE botid = '%u'", this->GetBotID()), TempErrorMessageBuffer)) {
-			*errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else
-			TempCounter++;
+    query = StringFormat("DELETE FROM botstances WHERE BotID = '%u'", this->GetBotID());
+    results = database.QueryDatabase(query);
+    if(!results.Success()) {
+        *errorMessage = std::string(results.ErrorMessage());
+        hadError = true;
+    }
 
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM botstances WHERE BotID = '%u'", this->GetBotID()), TempErrorMessageBuffer)) {
-			*errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else
-			TempCounter++;
+    query = StringFormat("DELETE FROM bots WHERE BotID = '%u'", this->GetBotID());
+    results = database.QueryDatabase(query);
+    if(!results.Success()) {
+        *errorMessage = std::string(results.ErrorMessage());
+        hadError = true;
+    }
 
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM bots WHERE BotID = '%u'", this->GetBotID()), TempErrorMessageBuffer)) {
-			*errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else
-			TempCounter++;
-
-		if(TempCounter == 4)
-			Result = true;
-	}
-
-	return Result;
+	return !hadError;
 }
 
 void Bot::Spawn(Client* botCharacterOwner, std::string* errorMessage) {
