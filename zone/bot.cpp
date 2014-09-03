@@ -2742,34 +2742,21 @@ void Bot::SavePetBuffs(SpellBuff_Struct* petBuffs, uint32 botPetSaveId) {
 }
 
 void Bot::SavePetItems(uint32* petItems, uint32 botPetSaveId) {
-	if(petItems && botPetSaveId > 0) {
-		std::string errorMessage;
-		char* Query = 0;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-		int ItemCount = 0;
+	if(!petItems || botPetSaveId == 0)
+        return;
 
-		while (ItemCount < EmuConstants::EQUIPMENT_SIZE) {
-			if(petItems[ItemCount] > 0) {
-				if(!database.RunQuery(Query, MakeAnyLenString(&Query, "INSERT INTO botpetinventory (BotPetsId, ItemId) VALUES(%u, %u);", botPetSaveId, petItems[ItemCount]), TempErrorMessageBuffer)) {
-					errorMessage = std::string(TempErrorMessageBuffer);
-					safe_delete(Query);
-					Query = 0;
-					break;
-				}
-				else {
-					safe_delete(Query);
-					Query = 0;
-					ItemCount++;
-				}
-			}
+    for (int itemIndex = 0;itemIndex < EmuConstants::EQUIPMENT_SIZE; itemIndex++) {
+		if(petItems[itemIndex] == 0)
+            continue;
 
-			ItemCount++;
-		}
-
-		if(!errorMessage.empty()) {
-			// TODO: Record this error message to zone error log
-		}
+        std::string query = StringFormat("INSERT INTO botpetinventory "
+                                        "(BotPetsId, ItemId) VALUES(%u, %u);",
+                                        botPetSaveId, petItems[itemIndex]);
+        auto results = database.QueryDatabase(query);
+        if(!results.Success())
+            break;
 	}
+
 }
 
 void Bot::DeletePetBuffs(uint32 botPetSaveId) {
