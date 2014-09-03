@@ -2814,39 +2814,33 @@ void Bot::SaveStance() {
 }
 
 void Bot::LoadTimers() {
-	std::string errorMessage;
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES* DatasetResult;
-	MYSQL_ROW DataRow;
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT IfNull(bt.TimerID, 0) As TimerID, IfNull(bt.Value, 0) As Value, IfNull(MAX(sn.recast_time), 0) AS MaxTimer FROM bottimers bt, spells_new sn WHERE bt.BotID = %u AND sn.EndurTimerIndex = (SELECT case WHEN TimerID > %i THEN TimerID - %i ELSE TimerID END AS TimerID FROM bottimers WHERE TimerID = bt.TimerID AND BotID = bt.BotID ) AND sn.classes%i <= %i;", GetBotID(), DisciplineReuseStart-1, DisciplineReuseStart-1, GetClass(), GetLevel()), TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
-	}
-	else {
-		int TimerID = 0;
-		uint32 Value = 0;
-		uint32 MaxValue = 0;
-
-		while(DataRow = mysql_fetch_row(DatasetResult)) {
-			TimerID = atoi(DataRow[0]) - 1;
-			Value = atoi(DataRow[1]);
-			MaxValue = atoi(DataRow[2]);
-
-			if(TimerID >= 0 && TimerID < MaxTimer && Value < (Timer::GetCurrentTime() + MaxValue)) {
-				timers[TimerID] = Value;
-			}
-		}
-
-		mysql_free_result(DatasetResult);
-	}
-
-	safe_delete(Query);
-	Query = 0;
-
-	if(!errorMessage.empty()) {
+	std::string query = StringFormat("SELECT IfNull(bt.TimerID, 0) As TimerID, IfNull(bt.Value, 0) As Value, "
+                                    "IfNull(MAX(sn.recast_time), 0) AS MaxTimer FROM bottimers bt, spells_new sn "
+                                    "WHERE bt.BotID = %u AND sn.EndurTimerIndex = "
+                                    "(SELECT case WHEN TimerID > %i THEN TimerID - %i ELSE TimerID END AS TimerID "
+                                    "FROM bottimers WHERE TimerID = bt.TimerID AND BotID = bt.BotID ) "
+                                    "AND sn.classes%i <= %i;",
+                                    GetBotID(), DisciplineReuseStart-1, DisciplineReuseStart-1, GetClass(), GetLevel());
+    auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
 		LogFile->write(EQEMuLog::Error, "Error in Bot::LoadTimers()");
+		return;
 	}
+
+    int timerID = 0;
+    uint32 value = 0;
+    uint32 maxValue = 0;
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        timerID = atoi(row[0]) - 1;
+        value = atoi(row[1]);
+        maxValue = atoi(row[2]);
+
+        if(timerID >= 0 && timerID < MaxTimer && value < (Timer::GetCurrentTime() + maxValue))
+            timers[timerID] = value;
+    }
+
 }
 
 void Bot::SaveTimers() {
