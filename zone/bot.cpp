@@ -2402,7 +2402,6 @@ bool Bot::Save() {
         return true;
 	}
 
-
     // Update existing bot record
     std::string query = StringFormat("UPDATE bots SET BotOwnerCharacterID = '%u', BotSpellsID = '%u', "
                                     "Name = '%s', LastName = '%s', BotLevel = '%u', Race = '%i', "
@@ -2459,66 +2458,41 @@ uint32 Bot::GetTotalPlayTime() {
 }
 
 void Bot::SaveBuffs() {
-	std::string errorMessage;
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-	int BuffCount = 0;
-	int InsertCount = 0;
 
-	uint32 buff_count = GetMaxTotalSlots();
-	while(BuffCount < BUFF_COUNT) {
-		if(buffs[BuffCount].spellid > 0 && buffs[BuffCount].spellid != SPELL_UNKNOWN) {
-			if(InsertCount == 0) {
-				// Remove any existing buff saves
-				if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM botbuffs WHERE BotId = %u", GetBotID()), TempErrorMessageBuffer)) {
-					errorMessage = std::string(TempErrorMessageBuffer);
-					safe_delete(Query);
-					Query = 0;
-					break;
-				}
-			}
+    // Remove any existing buff saves
+    std::string query = StringFormat("DELETE FROM botbuffs WHERE BotId = %u", GetBotID());
+    auto results = database.QueryDatabase(query);
+    if(!results.Success())
+        return;
 
-			int IsPersistent = 0;
+	for (int buffIndex = 0; buffIndex < BUFF_COUNT; buffIndex++) {
+        if (buffs[buffIndex].spellid <= 0 || buffs[buffIndex].spellid == SPELL_UNKNOWN)
+            continue;
 
-			if(buffs[BuffCount].persistant_buff)
-				IsPersistent = 1;
-			else
-				IsPersistent = 0;
+        int isPersistent = buffs[buffIndex].persistant_buff? 1: 0;
+        query = StringFormat("INSERT INTO botbuffs (BotId, SpellId, CasterLevel, DurationFormula, "
+                            "TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, "
+                            "CorruptionCounters, HitCount, MeleeRune, MagicRune, dot_rune, "
+                            "caston_x, Persistent, caston_y, caston_z, ExtraDIChance) "
+                            "VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %i, %u, "
+                            "%i, %i, %i);",
+                            GetBotID(), buffs[buffIndex].spellid, buffs[buffIndex].casterlevel,
+                            spells[buffs[buffIndex].spellid].buffdurationformula,
+                            buffs[buffIndex].ticsremaining,
+                            CalculatePoisonCounters(buffs[buffIndex].spellid) > 0 ? buffs[buffIndex].counters : 0,
+                            CalculateDiseaseCounters(buffs[buffIndex].spellid) > 0 ? buffs[buffIndex].counters : 0,
+                            CalculateCurseCounters(buffs[buffIndex].spellid) > 0 ? buffs[buffIndex].counters : 0,
+                            CalculateCorruptionCounters(buffs[buffIndex].spellid) > 0 ? buffs[buffIndex].counters : 0,
+                            buffs[buffIndex].numhits, buffs[buffIndex].melee_rune,
+                            buffs[buffIndex].magic_rune, buffs[buffIndex].dot_rune,
+                            buffs[buffIndex].caston_x, isPersistent, buffs[buffIndex].caston_y,
+                            buffs[buffIndex].caston_z, buffs[buffIndex].ExtraDIChance);
+        auto results = database.QueryDatabase(query);
+        if(!results.Success())
+            return;
 
-			if(!database.RunQuery(Query, MakeAnyLenString(&Query, "INSERT INTO botbuffs (BotId, SpellId, CasterLevel, DurationFormula, "
-				"TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, "
-				"dot_rune, caston_x, Persistent, caston_y, caston_z, ExtraDIChance) VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %i, %u, %i, %i, %i);",
-				GetBotID(), buffs[BuffCount].spellid, buffs[BuffCount].casterlevel, spells[buffs[BuffCount].spellid].buffdurationformula,
-				buffs[BuffCount].ticsremaining,
-				CalculatePoisonCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
-				CalculateDiseaseCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
-				CalculateCurseCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
-				CalculateCorruptionCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
-				buffs[BuffCount].numhits, buffs[BuffCount].melee_rune, buffs[BuffCount].magic_rune,
-				buffs[BuffCount].dot_rune,
-				buffs[BuffCount].caston_x,
-				IsPersistent,
-				buffs[BuffCount].caston_y,
-				buffs[BuffCount].caston_z,
-				buffs[BuffCount].ExtraDIChance), TempErrorMessageBuffer)) {
-				errorMessage = std::string(TempErrorMessageBuffer);
-				safe_delete(Query);
-				Query = 0;
-				break;
-			}
-			else {
-				safe_delete(Query);
-				Query = 0;
-				InsertCount++;
-			}
-		}
+    }
 
-		BuffCount++;
-	}
-
-	if(!errorMessage.empty()) {
-		// TODO: Record this error message to zone error log
-	}
 }
 
 void Bot::LoadBuffs() {
