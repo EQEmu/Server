@@ -2787,38 +2787,18 @@ void Bot::DeletePetStats(uint32 botPetSaveId) {
 }
 
 void Bot::LoadStance() {
-	int Result = 0;
-	bool loaded = false;
-	std::string errorMessage;
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES* DatasetResult;
-	MYSQL_ROW DataRow;
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "select StanceID from botstances where BotID = %u;", GetBotID()), TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
-	}
-	else {
-		while(DataRow = mysql_fetch_row(DatasetResult)) {
-			Result = atoi(DataRow[0]);
-			loaded = true;
-			break;
-		}
-
-		mysql_free_result(DatasetResult);
-	}
-
-	safe_delete(Query);
-	Query = 0;
-
-	if(!errorMessage.empty()) {
+	std::string query = StringFormat("SELECT StanceID FROM botstances WHERE BotID = %u;", GetBotID());
+	auto results = database.QueryDatabase(query);
+	if(!results.Success() || results.RowCount() == 0) {
 		LogFile->write(EQEMuLog::Error, "Error in Bot::LoadStance()");
+		SetDefaultBotStance();
+		return;
 	}
 
-	if(loaded)
-		SetBotStance((BotStanceType)Result);
-	else
-		SetDefaultBotStance();
+	auto row = results.begin();
+
+    SetBotStance((BotStanceType)atoi(row[0]));
 }
 
 void Bot::SaveStance() {
