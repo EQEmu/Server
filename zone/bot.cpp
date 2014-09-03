@@ -2844,30 +2844,28 @@ void Bot::LoadTimers() {
 }
 
 void Bot::SaveTimers() {
-	std::string errorMessage;
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
+    bool hadError = false;
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM bottimers WHERE BotID = %u;", GetBotID()), TempErrorMessageBuffer)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
-		safe_delete(Query);
-		Query = 0;
+	std::string query = StringFormat("DELETE FROM bottimers WHERE BotID = %u;", GetBotID());
+    auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		hadError = true;
+
+	for(int timerIndex = 0; timerIndex < MaxTimer; timerIndex++) {
+		if(timers[timerIndex] <= Timer::GetCurrentTime())
+            continue;
+
+        query = StringFormat("REPLACE INTO bottimers (BotID, TimerID, Value) VALUES(%u, %u, %u);",
+                            GetBotID(), timerIndex+1, timers[timerIndex]);
+        results = database.QueryDatabase(query);
+
+        if(!results.Success())
+            hadError = true;
 	}
 
-	for(int i = 0; i < MaxTimer; i++) {
-		if(timers[i] > Timer::GetCurrentTime()) {
-			if(!database.RunQuery(Query, MakeAnyLenString(&Query, "REPLACE INTO bottimers (BotID, TimerID, Value) VALUES(%u, %u, %u);", GetBotID(), i+1, timers[i]), TempErrorMessageBuffer)) {
-				errorMessage = std::string(TempErrorMessageBuffer);
-			}
-
-			safe_delete(Query);
-			Query = 0;
-		}
-	}
-
-	if(!errorMessage.empty()) {
+	if(hadError)
 		LogFile->write(EQEMuLog::Error, "Error in Bot::SaveTimers()");
-	}
+
 }
 
 bool Bot::Process()
