@@ -4,6 +4,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 Secrets: Identified OP_GuildPromote for RoF clients.
 Secrets: Fixed promotion, demotion, transferring a leader and displaying of client ranks in the Rain of Fear client. The rain of fear client, as such, will only have 3 ranks like the other clients, but supports a theoretical 8 ranks later.
 Secrets/Akkadius: Fixed an issue involving character name lookup in the new DB code.
+demonstar55: crash fix checking DivineAura in hate_list.cpp
 
 == 08/31/2014 ==
 KLS: Fixed a bug in fishing in S3D zones
