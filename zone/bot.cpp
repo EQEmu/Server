@@ -2645,50 +2645,29 @@ void Bot::LoadPetBuffs(SpellBuff_Struct* petBuffs, uint32 botPetSaveId) {
 }
 
 void Bot::LoadPetItems(uint32* petItems, uint32 botPetSaveId) {
-	if(petItems && botPetSaveId > 0) {
-		std::string errorMessage;
-		char* Query = 0;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
+    if(!petItems || botPetSaveId == 0)
+        return;
 
-		bool itemsLoaded = false;
+	std::string query = StringFormat("SELECT ItemId FROM botpetinventory "
+                                    "WHERE BotPetsId = %u;", botPetSaveId);
+    auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		return;
 
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT ItemId FROM botpetinventory WHERE BotPetsId = %u;", botPetSaveId), TempErrorMessageBuffer, &DatasetResult)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else {
-			int ItemCount = 0;
+    int itemIndex = 0;
 
-			while(DataRow = mysql_fetch_row(DatasetResult)) {
-				if(ItemCount == EmuConstants::EQUIPMENT_SIZE)
-					break;
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        if(itemIndex == EmuConstants::EQUIPMENT_SIZE)
+            break;
 
-				petItems[ItemCount] = atoi(DataRow[0]);
+        petItems[itemIndex] = atoi(row[0]);
 
-				ItemCount++;
-			}
+        itemIndex++;
+    }
 
-			mysql_free_result(DatasetResult);
+    query = StringFormat("DELETE FROM botpetinventory WHERE BotPetsId = %u;", botPetSaveId);
+    results = database.QueryDatabase(query);
 
-			itemsLoaded = true;
-		}
-
-		safe_delete(Query);
-		Query = 0;
-
-		if(errorMessage.empty() && itemsLoaded) {
-			if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM botpetinventory WHERE BotPetsId = %u;", botPetSaveId), TempErrorMessageBuffer)) {
-				errorMessage = std::string(TempErrorMessageBuffer);
-				safe_delete(Query);
-				Query = 0;
-			}
-		}
-
-		if(!errorMessage.empty()) {
-			// TODO: Record this error message to zone error log
-		}
-	}
 }
 
 void Bot::SavePet() {
