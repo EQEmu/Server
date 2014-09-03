@@ -2547,32 +2547,18 @@ void Bot::LoadBuffs() {
 }
 
 uint32 Bot::GetPetSaveId() {
-	uint32 Result = 0;
-	std::string errorMessage;
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES* DatasetResult;
-	MYSQL_ROW DataRow;
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "select BotPetsId from botpets where BotId = %u;", GetBotID()), TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
-	}
-	else {
-		while(DataRow = mysql_fetch_row(DatasetResult)) {
-			Result = atoi(DataRow[0]);
-			break;
-		}
+	std::string query = StringFormat("SELECT BotPetsId FROM botpets WHERE BotId = %u;", GetBotID());
+    auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		return 0;
 
-		mysql_free_result(DatasetResult);
-	}
+    if (results.RowCount() == 0)
+        return 0;
 
-	safe_delete(Query);
+    auto row = results.begin();
 
-	if(!errorMessage.empty()) {
-		// TODO: Record this error message to zone error log
-	}
-
-	return Result;
+	return atoi(row[0]);
 }
 
 void Bot::LoadPet() {
