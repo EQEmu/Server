@@ -4156,30 +4156,29 @@ void Bot::Spawn(Client* botCharacterOwner, std::string* errorMessage) {
 
 // Saves the specified item as an inventory record in the database for this bot.
 void Bot::SetBotItemInSlot(uint32 slotID, uint32 itemID, const ItemInst* inst, std::string *errorMessage) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+
 	uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
 
-	if (this->GetBotID() > 0 && slotID >= EmuConstants::EQUIPMENT_BEGIN && itemID > NO_ITEM) {
-		if (inst && inst->IsType(ItemClassCommon)) {
-			for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i) {
-				ItemInst* auginst = inst->GetItem(i);
-				augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
-			}
-		}
-		if(!database.RunQuery(query, MakeAnyLenString(&query,
-			"REPLACE INTO botinventory "
-			"	(botid,slotid,itemid,charges,instnodrop,color,"
-			"	augslot1,augslot2,augslot3,augslot4,augslot5)"
-			" VALUES(%lu,%lu,%lu,%lu,%lu,%lu,"
-			"	%lu,%lu,%lu,%lu,%lu)",
-			(unsigned long)this->GetBotID(), (unsigned long)slotID, (unsigned long)itemID, (unsigned long)inst->GetCharges(), (unsigned long)(inst->IsInstNoDrop() ? 1:0),(unsigned long)inst->GetColor(),
-			(unsigned long)augslot[0],(unsigned long)augslot[1],(unsigned long)augslot[2],(unsigned long)augslot[3],(unsigned long)augslot[4]), errbuf)) {
-				*errorMessage = std::string(errbuf);
-		}
+	if (this->GetBotID() == 0 || slotID < EmuConstants::EQUIPMENT_BEGIN || itemID <= NO_ITEM)
+        return;
 
-		safe_delete_array(query);
-	}
+    if (inst && inst->IsType(ItemClassCommon)) {
+        for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i) {
+            ItemInst* auginst = inst->GetItem(i);
+            augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
+        }
+    }
+
+    std::string query = StringFormat("REPLACE INTO botinventory (botid, slotid, itemid, charges, instnodrop, color, "
+                                    "augslot1, augslot2, augslot3, augslot4, augslot5) "
+                                    "VALUES(%lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu)",
+                                    (unsigned long)this->GetBotID(), (unsigned long)slotID, (unsigned long)itemID,
+                                    (unsigned long)inst->GetCharges(), (unsigned long)(inst->IsInstNoDrop()? 1: 0),
+                                    (unsigned long)inst->GetColor(), (unsigned long)augslot[0], (unsigned long)augslot[1],
+                                    (unsigned long)augslot[2], (unsigned long)augslot[3], (unsigned long)augslot[4]);
+    auto results = database.QueryDatabase(query);
+    if(!results.Success())
+        *errorMessage = std::string(results.ErrorMessage());
 }
 
 // Deletes the inventory record for the specified item from the database for this bot.
