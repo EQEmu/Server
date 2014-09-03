@@ -4183,16 +4183,18 @@ void Bot::SetBotItemInSlot(uint32 slotID, uint32 itemID, const ItemInst* inst, s
 
 // Deletes the inventory record for the specified item from the database for this bot.
 void Bot::RemoveBotItemBySlot(uint32 slotID, std::string *errorMessage) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 
-	if(this->GetBotID() > 0 && slotID >= 0) {
-		if(!database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM botinventory WHERE botid=%i AND slotid=%i", this->GetBotID(), slotID), errbuf)){
-			*errorMessage = std::string(errbuf);
-		}
-		safe_delete_array(query);
-		m_inv.DeleteItem(slotID);
-	}
+	if(this->GetBotID() == 0)
+        return;
+
+	std::string query = StringFormat("DELETE FROM botinventory "
+                                    "WHERE botid = %i AND slotid = %i",
+                                    this->GetBotID(), slotID);
+    auto results = database.QueryDatabase(query);
+    if(!results.Success())
+        *errorMessage = std::string(results.ErrorMessage());
+
+    m_inv.DeleteItem(slotID);
 }
 
 // Retrieves all the inventory records from the database for this bot.
