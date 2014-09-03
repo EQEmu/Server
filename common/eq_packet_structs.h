@@ -2287,10 +2287,13 @@ struct Stun_Struct { // 4 bytes total
 };
 
 struct AugmentItem_Struct {
-/*00*/	int16	container_slot;
-/*02*/	char	unknown02[2];
-/*04*/	int32	augment_slot;
-/*08*/
+/*00*/	uint32	container_index;
+/*04*/	int32	container_slot;
+/*08*/	uint32  augment_index;
+/*12*/	int32	augment_slot;
+/*16*/	uint32	dest_inst_id;			// The unique serial number for the item instance that is being augmented
+/*20*/	int32	augment_action;			// Guessed - 0 = augment, 1 = remove with distiller, 3 = delete aug
+/*24*/
 };
 
 // OP_Emote

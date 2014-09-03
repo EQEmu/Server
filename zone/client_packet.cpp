@@ -6281,7 +6281,145 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 
 	// Delegate to tradeskill object to perform combine
 	AugmentItem_Struct* in_augment = (AugmentItem_Struct*)app->pBuffer;
-	Object::HandleAugmentation(this, in_augment, m_tradeskill_object);
+	bool deleteItems = false;
+	if(GetClientVersion() >= EQClientRoF)
+	{
+		ItemInst *itemOneToPush = nullptr, *itemTwoToPush = nullptr;
+		
+		//Message(15, "%i %i %i %i %i %i", in_augment->container_slot, in_augment->augment_slot, in_augment->container_index, in_augment->augment_index, in_augment->augment_action, in_augment->dest_inst_id);
+		
+		// Adding augment
+		if (in_augment->augment_action == 0)
+		{
+			ItemInst *tobe_auged, *auged_with = nullptr;
+			int8 slot=-1;
+			Inventory& user_inv = GetInv();
+
+			uint16 slot_id = in_augment->container_slot;
+			uint16 aug_slot_id = in_augment->augment_slot;
+			//Message(13, "%i AugSlot", aug_slot_id);
+			if(slot_id == INVALID_INDEX || aug_slot_id == INVALID_INDEX)
+			{
+				Message(13, "Error: Invalid Aug Index.");
+				return;
+			}
+
+			tobe_auged = user_inv.GetItem(slot_id);
+			auged_with = user_inv.GetItem(MainCursor);
+
+			if(tobe_auged && auged_with)
+			{
+				if (((slot=tobe_auged->AvailableAugmentSlot(auged_with->GetAugmentType()))!=-1) && 
+					(tobe_auged->AvailableWearSlot(auged_with->GetItem()->Slots)))
+				{
+					tobe_auged->PutAugment(slot, *auged_with);
+
+					ItemInst *aug = tobe_auged->GetAugment(in_augment->augment_index);
+					if(aug) {
+						std::vector<EQEmu::Any> args;
+						args.push_back(aug);
+						parse->EventItem(EVENT_AUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
+
+						args.assign(1, tobe_auged);
+						parse->EventItem(EVENT_AUGMENT_INSERT, this, aug, nullptr, "", in_augment->augment_index, &args);
+					}
+					else
+					{
+						Message(13, "Error: Could not find augmentation at index %i. Aborting.");
+						return;
+					}
+
+					itemOneToPush = tobe_auged->Clone();
+					// Must push items after the items in inventory are deleted - necessary due to lore items...
+					if (itemOneToPush)
+					{
+						DeleteItemInInventory(slot_id, 0, true);
+						DeleteItemInInventory(MainCursor, 0, true);
+						if(PutItemInInventory(slot_id, *itemOneToPush, true))
+						{
+							//Message(13, "Sucessfully added an augment to your item!");
+							return;
+						}
+						else
+						{
+							Message(13, "Error: No available slot for end result. Please free up some bag space.");
+						}
+					}
+					else
+					{
+						Message(13, "Error in cloning item for augment. Aborted.");
+					}
+
+				}
+				else
+				{
+					Message(13, "Error: No available slot for augment in that item.");
+				}
+			}
+		}
+		else if(in_augment->augment_action == 1)
+		{
+			ItemInst *tobe_auged, *auged_with = nullptr;
+			int8 slot=-1;
+			Inventory& user_inv = GetInv();
+
+			uint16 slot_id = in_augment->container_slot;
+			uint16 aug_slot_id = in_augment->augment_slot; //it's actually solvent slot
+			if(slot_id == INVALID_INDEX || aug_slot_id == INVALID_INDEX)
+			{
+				Message(13, "Error: Invalid Aug Index.");
+				return;
+			}
+
+			tobe_auged = user_inv.GetItem(slot_id);
+			auged_with = user_inv.GetItem(aug_slot_id);
+
+			ItemInst *old_aug = nullptr;
+			if(!auged_with)
+				return;
+			const uint32 id = auged_with->GetID();
+			ItemInst *aug = tobe_auged->GetAugment(in_augment->augment_index);
+			if(aug) {
+				std::vector<EQEmu::Any> args;
+				args.push_back(aug);
+				parse->EventItem(EVENT_UNAUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
+
+				args.assign(1, tobe_auged);
+
+				args.push_back(false);
+
+				parse->EventItem(EVENT_AUGMENT_REMOVE, this, aug, nullptr, "", in_augment->augment_index, &args);
+			}
+			else
+			{
+				Message(13, "Error: Could not find augmentation at index %i. Aborting.");
+				return;
+			}
+				old_aug = tobe_auged->RemoveAugment(in_augment->augment_index);
+
+			itemOneToPush = tobe_auged->Clone();
+			if (old_aug)
+				itemTwoToPush = old_aug->Clone();
+			if(itemOneToPush && itemTwoToPush && auged_with)
+			{
+				DeleteItemInInventory(slot_id, 0, true);
+				DeleteItemInInventory(aug_slot_id, auged_with->IsStackable() ? 1 : 0, true);
+				if(!PutItemInInventory(slot_id, *itemOneToPush, true))
+				{
+					Message(15, "Shouldn't happen, contact an admin!");				
+				}
+
+				if(PutItemInInventory(MainCursor, *itemTwoToPush, true))
+				{
+					//Message(15, "Successfully removed an augmentation!");
+				}
+			}
+		}
+	}
+	else
+	{
+		Object::HandleAugmentation(this, in_augment, m_tradeskill_object);
+	}
 	return;
 }
 

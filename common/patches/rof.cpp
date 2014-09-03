@@ -4682,8 +4682,11 @@ DECODE(OP_AugmentItem) {
 	SETUP_DIRECT_DECODE(AugmentItem_Struct, structs::AugmentItem_Struct);
 
 	emu->container_slot = RoFToServerSlot(eq->container_slot);
-	//emu->augment_slot = eq->augment_slot;
-
+	emu->augment_slot = RoFToServerSlot(eq->augment_slot);
+	emu->container_index = eq->container_index;
+	emu->augment_index = eq->augment_index;
+	emu->dest_inst_id = eq->dest_inst_id;
+	emu->augment_action = eq->augment_action;
 	FINISH_DIRECT_DECODE();
 }
 
@@ -5090,7 +5093,7 @@ char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint
 	memset(&isbs, 0, sizeof(RoF::structs::ItemSecondaryBodyStruct));
 
 	isbs.augtype = item->AugType;
-	isbs.augdistiller = 0;
+	isbs.augdistiller = 65535;
 	isbs.augrestrict = item->AugRestrict;
 	
 
