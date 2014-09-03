@@ -2339,35 +2339,29 @@ bool Bot::IsValidName() {
 }
 
 bool Bot::IsBotNameAvailable(std::string* errorMessage) {
-	bool Result = false;
 
-	if(this->GetCleanName()) {
-		char* Query = 0;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
+	if(!this->GetCleanName())
+        return false;
 
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT COUNT(id) FROM vwBotCharacterMobs WHERE name LIKE '%s'", this->GetCleanName()), TempErrorMessageBuffer, &DatasetResult)) {
-			*errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else {
-			uint32 ExistingNameCount = 0;
+    std::string query = StringFormat("SELECT COUNT(id) FROM vwBotCharacterMobs "
+                                    "WHERE name LIKE '%s'", this->GetCleanName());
+    auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
+        *errorMessage = std::string(results.ErrorMessage());
+		return false;
+    }
 
-			while(DataRow = mysql_fetch_row(DatasetResult)) {
-				ExistingNameCount = atoi(DataRow[0]);
-				break;
-			}
+	uint32 existingNameCount = 0;
 
-			if(ExistingNameCount == 0)
-				Result = true;
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        existingNameCount = atoi(row[0]);
+        break;
+    }
 
-			mysql_free_result(DatasetResult);
-		}
+    if(existingNameCount != 0)
+        return false;
 
-		safe_delete(Query);
-	}
-
-	return Result;
+	return true;
 }
 
 bool Bot::Save() {
