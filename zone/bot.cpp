@@ -2802,25 +2802,15 @@ void Bot::LoadStance() {
 }
 
 void Bot::SaveStance() {
-	if(_baseBotStance != _botStance) {
-		std::string errorMessage;
-		char* Query = 0;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
+	if(_baseBotStance == _botStance)
+        return;
 
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "REPLACE INTO botstances (BotID, StanceId) VALUES(%u, %u);", GetBotID(), GetBotStance()), TempErrorMessageBuffer)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
-			safe_delete(Query);
-			Query = 0;
-		}
-		else {
-			safe_delete(Query);
-			Query = 0;
-		}
+    std::string query = StringFormat("REPLACE INTO botstances (BotID, StanceId) "
+                                    "VALUES(%u, %u);", GetBotID(), GetBotStance());
+    auto results = database.QueryDatabase(query);
+    if(!results.Success())
+        LogFile->write(EQEMuLog::Error, "Error in Bot::SaveStance()");
 
-		if(!errorMessage.empty()) {
-			LogFile->write(EQEMuLog::Error, "Error in Bot::SaveStance()");
-		}
-	}
 }
 
 void Bot::LoadTimers() {
