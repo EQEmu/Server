@@ -2778,18 +2778,12 @@ void Bot::DeletePetItems(uint32 botPetSaveId) {
 }
 
 void Bot::DeletePetStats(uint32 botPetSaveId) {
-	if(botPetSaveId > 0) {
-		std::string errorMessage;
-		char* Query = 0;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
+	if(botPetSaveId == 0)
+        return;
 
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE from botpets where BotPetsId = %u;", botPetSaveId), TempErrorMessageBuffer)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
-		}
+	std::string query = StringFormat("DELETE from botpets where BotPetsId = %u;", botPetSaveId);
+    auto results = database.QueryDatabase(query);
 
-		safe_delete(Query);
-		Query = 0;
-	}
 }
 
 void Bot::LoadStance() {
