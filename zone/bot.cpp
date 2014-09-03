@@ -2496,77 +2496,54 @@ void Bot::SaveBuffs() {
 }
 
 void Bot::LoadBuffs() {
-	std::string errorMessage;
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES* DatasetResult;
-	MYSQL_ROW DataRow;
 
-	bool BuffsLoaded = false;
+	std::string query = StringFormat("SELECT SpellId, CasterLevel, DurationFormula, TicsRemaining, "
+                                    "PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, "
+                                    "HitCount, MeleeRune, MagicRune, dot_rune, caston_x, Persistent, "
+                                    "caston_y, caston_z, ExtraDIChance FROM botbuffs WHERE BotId = %u",
+                                    GetBotID());
+    auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		return;
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT SpellId, CasterLevel, DurationFormula, TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, dot_rune, caston_x, Persistent, caston_y, caston_z, ExtraDIChance FROM botbuffs WHERE BotId = %u", GetBotID()), TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
-	}
-	else {
-		int BuffCount = 0;
+    int buffCount = 0;
 
-		while(DataRow = mysql_fetch_row(DatasetResult)) {
-			if(BuffCount == BUFF_COUNT)
-				break;
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        if(buffCount == BUFF_COUNT)
+            break;
 
-			buffs[BuffCount].spellid = atoi(DataRow[0]);
-			buffs[BuffCount].casterlevel = atoi(DataRow[1]);
-			buffs[BuffCount].ticsremaining = atoi(DataRow[3]);
+        buffs[buffCount].spellid = atoi(row[0]);
+        buffs[buffCount].casterlevel = atoi(row[1]);
+        buffs[buffCount].ticsremaining = atoi(row[3]);
 
-			if(CalculatePoisonCounters(buffs[BuffCount].spellid) > 0) {
-				buffs[BuffCount].counters = atoi(DataRow[4]);
-			} else if(CalculateDiseaseCounters(buffs[BuffCount].spellid) > 0) {
-				buffs[BuffCount].counters = atoi(DataRow[5]);
-			} else if(CalculateCurseCounters(buffs[BuffCount].spellid) > 0) {
-				buffs[BuffCount].counters = atoi(DataRow[6]);
-			} else if(CalculateCorruptionCounters(buffs[BuffCount].spellid) > 0) {
-				buffs[BuffCount].counters = atoi(DataRow[7]);
-			}
-			buffs[BuffCount].numhits = atoi(DataRow[8]);
-			buffs[BuffCount].melee_rune = atoi(DataRow[9]);
-			buffs[BuffCount].magic_rune = atoi(DataRow[10]);
-			buffs[BuffCount].dot_rune = atoi(DataRow[11]);
-			buffs[BuffCount].caston_x = atoi(DataRow[12]);
-			buffs[BuffCount].casterid = 0;
+        if(CalculatePoisonCounters(buffs[buffCount].spellid) > 0)
+            buffs[buffCount].counters = atoi(row[4]);
+        else if(CalculateDiseaseCounters(buffs[buffCount].spellid) > 0)
+            buffs[buffCount].counters = atoi(row[5]);
+        else if(CalculateCurseCounters(buffs[buffCount].spellid) > 0)
+            buffs[buffCount].counters = atoi(row[6]);
+        else if(CalculateCorruptionCounters(buffs[buffCount].spellid) > 0)
+            buffs[buffCount].counters = atoi(row[7]);
 
-			bool IsPersistent = false;
+        buffs[buffCount].numhits = atoi(row[8]);
+        buffs[buffCount].melee_rune = atoi(row[9]);
+        buffs[buffCount].magic_rune = atoi(row[10]);
+        buffs[buffCount].dot_rune = atoi(row[11]);
+        buffs[buffCount].caston_x = atoi(row[12]);
+        buffs[buffCount].casterid = 0;
 
-			if(atoi(DataRow[13]))
-				IsPersistent = true;
+        buffs[buffCount].persistant_buff = atoi(row[13])? true: false;
 
-			buffs[BuffCount].caston_y = atoi(DataRow[14]);
-			buffs[BuffCount].caston_z = atoi(DataRow[15]);
-			buffs[BuffCount].ExtraDIChance = atoi(DataRow[16]);
+        buffs[buffCount].caston_y = atoi(row[14]);
+        buffs[buffCount].caston_z = atoi(row[15]);
+        buffs[buffCount].ExtraDIChance = atoi(row[16]);
 
-			buffs[BuffCount].persistant_buff = IsPersistent;
+        buffCount++;
+    }
 
-			BuffCount++;
-		}
+    query = StringFormat("DELETE FROM botbuffs WHERE BotId = %u", GetBotID());
+    results = database.QueryDatabase(query);
 
-		mysql_free_result(DatasetResult);
-
-		BuffsLoaded = true;
-	}
-
-	safe_delete(Query);
-	Query = 0;
-
-	if(errorMessage.empty() && BuffsLoaded) {
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM botbuffs WHERE BotId = %u", GetBotID()), TempErrorMessageBuffer)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
-			safe_delete(Query);
-			Query = 0;
-		}
-	}
-
-	if(!errorMessage.empty()) {
-		// TODO: Record this error message to zone error log
-	}
 }
 
 uint32 Bot::GetPetSaveId() {
