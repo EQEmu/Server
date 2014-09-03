@@ -2594,39 +2594,25 @@ void Bot::LoadPet() {
 }
 
 void Bot::LoadPetStats(std::string* petName, uint16* petMana, uint16* petHitPoints, uint32* botPetId, uint32 botPetSaveId) {
-	if(botPetSaveId > 0) {
-		std::string errorMessage;
-		char* Query = 0;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
+	if(botPetSaveId == 0)
+        return;
 
-		bool statsLoaded = false;
+    std::string query = StringFormat("SELECT PetId, Name, Mana, HitPoints "
+                                    "FROM botpets WHERE BotPetsId = %u;",
+                                    botPetSaveId);
+    auto results = database.QueryDatabase(query);
+    if(!results.Success())
+        return;
 
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "select PetId, Name, Mana, HitPoints from botpets where BotPetsId = %u;", botPetSaveId), TempErrorMessageBuffer, &DatasetResult)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else {
-			while(DataRow = mysql_fetch_row(DatasetResult)) {
-				*botPetId = atoi(DataRow[0]);
-				*petName = std::string(DataRow[1]);
-				*petMana = atoi(DataRow[2]);
-				*petHitPoints = atoi(DataRow[3]);
-				break;
-			}
+    if (results.RowCount() == 0)
+        return;
 
-			mysql_free_result(DatasetResult);
+    auto row = results.begin();
 
-			statsLoaded = true;
-		}
-
-		safe_delete(Query);
-		Query = 0;
-
-		if(!errorMessage.empty()) {
-			// TODO: Record this error message to zone error log
-		}
-	}
+    *botPetId = atoi(row[0]);
+    *petName = std::string(row[1]);
+    *petMana = atoi(row[2]);
+    *petHitPoints = atoi(row[3]);
 }
 
 void Bot::LoadPetBuffs(SpellBuff_Struct* petBuffs, uint32 botPetSaveId) {
