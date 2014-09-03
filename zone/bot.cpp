@@ -2365,53 +2365,80 @@ bool Bot::IsBotNameAvailable(std::string* errorMessage) {
 }
 
 bool Bot::Save() {
-	bool Result = false;
-	std::string errorMessage;
-
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-	uint32 affectedRows = 0;
 
 	if(this->GetBotID() == 0) {
 		// New bot record
-		uint32 TempNewBotID = 0;
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "INSERT INTO bots (BotOwnerCharacterID, BotSpellsID, Name, LastName, BotLevel, Race, Class, Gender, Size, Face, LuclinHairStyle, LuclinHairColor, LuclinEyeColor, LuclinEyeColor2, LuclinBeardColor, LuclinBeard, DrakkinHeritage, DrakkinTattoo, DrakkinDetails, HP, Mana, MR, CR, DR, FR, PR, Corrup, AC, STR, STA, DEX, AGI, _INT, WIS, CHA, ATK, LastSpawnDate, TotalPlayTime, LastZoneId) VALUES('%u', '%u', '%s', '%s', '%u', '%i', '%i', '%i', '%f', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', NOW(), 0, %i)", this->_botOwnerCharacterID, this->GetBotSpellID(), this->GetCleanName(), this->lastname, this->GetLevel(), GetRace(), GetClass(), GetGender(), GetSize(), this->GetLuclinFace(), this->GetHairStyle(), GetHairColor(), this->GetEyeColor1(), this->GetEyeColor2(), this->GetBeardColor(), this->GetBeard(), this->GetDrakkinHeritage(), this->GetDrakkinTattoo(), this->GetDrakkinDetails(), GetHP(), GetMana(), GetMR(), GetCR(), GetDR(), GetFR(), GetPR(), GetCorrup(), GetAC(), GetSTR(), GetSTA(), GetDEX(), GetAGI(), GetINT(), GetWIS(), GetCHA(), GetATK(), _lastZoneId), TempErrorMessageBuffer, 0, &affectedRows, &TempNewBotID)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
+		std::string query = StringFormat("INSERT INTO bots (BotOwnerCharacterID, BotSpellsID, Name, LastName, "
+                            "BotLevel, Race, Class, Gender, Size, Face, LuclinHairStyle, "
+                            "LuclinHairColor, LuclinEyeColor, LuclinEyeColor2, LuclinBeardColor, "
+                            "LuclinBeard, DrakkinHeritage, DrakkinTattoo, DrakkinDetails, HP, Mana, "
+                            "MR, CR, DR, FR, PR, Corrup, AC, STR, STA, DEX, AGI, _INT, WIS, CHA, ATK, "
+                            "LastSpawnDate, TotalPlayTime, LastZoneId) "
+                            "VALUES('%u', '%u', '%s', '%s', '%u', '%i', '%i', '%i', '%f', '%i', '%i', "
+                            "'%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', "
+                            "'%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', "
+                            "'%i', NOW(), 0, %i)",
+                            this->_botOwnerCharacterID, this->GetBotSpellID(), this->GetCleanName(),
+                            this->lastname, this->GetLevel(), GetRace(), GetClass(), GetGender(),
+                            GetSize(), this->GetLuclinFace(), this->GetHairStyle(), GetHairColor(),
+                            this->GetEyeColor1(), this->GetEyeColor2(), this->GetBeardColor(),
+                            this->GetBeard(), this->GetDrakkinHeritage(), this->GetDrakkinTattoo(),
+                            this->GetDrakkinDetails(), GetHP(), GetMana(), GetMR(), GetCR(), GetDR(),
+                            GetFR(), GetPR(), GetCorrup(), GetAC(), GetSTR(), GetSTA(), GetDEX(),
+                            GetAGI(), GetINT(), GetWIS(), GetCHA(), GetATK(), _lastZoneId);
+        auto results = database.QueryDatabase(query);
+		if(!results.Success()) {
+            auto botOwner = GetBotOwner();
+			if (botOwner)
+                botOwner->Message(13, results.ErrorMessage().c_str());
+            return false;
 		}
-		else {
-			SetBotID(TempNewBotID);
-			Result = true;
-		}
-	}
-	else {
-		// Update existing bot record
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "UPDATE bots SET BotOwnerCharacterID = '%u', BotSpellsID = '%u', Name = '%s', LastName = '%s', BotLevel = '%u', Race = '%i', Class = '%i', Gender = '%i', Size = '%f', Face = '%i', LuclinHairStyle = '%i', LuclinHairColor = '%i', LuclinEyeColor = '%i', LuclinEyeColor2 = '%i', LuclinBeardColor = '%i', LuclinBeard = '%i', DrakkinHeritage = '%i', DrakkinTattoo = '%i', DrakkinDetails = '%i', HP = '%i', Mana = '%i', MR = '%i', CR = '%i', DR = '%i', FR = '%i', PR = '%i', Corrup = '%i', AC = '%i', STR = '%i', STA = '%i', DEX = '%i', AGI = '%i', _INT = '%i', WIS = '%i', CHA = '%i', ATK = '%i', LastSpawnDate = NOW(), TotalPlayTime = '%u', LastZoneId = %i WHERE BotID = '%u'", _botOwnerCharacterID, this->GetBotSpellID(), this->GetCleanName(), this->lastname, this->GetLevel(), _baseRace, this->GetClass(), _baseGender, GetSize(), this->GetLuclinFace(), this->GetHairStyle(), GetHairColor(), this->GetEyeColor1(), this->GetEyeColor2(), this->GetBeardColor(), this->GetBeard(), this->GetDrakkinHeritage(), GetDrakkinTattoo(), GetDrakkinDetails(), GetHP(), GetMana(), _baseMR, _baseCR, _baseDR, _baseFR, _basePR, _baseCorrup, _baseAC, _baseSTR, _baseSTA, _baseDEX, _baseAGI, _baseINT, _baseWIS, _baseCHA, _baseATK, GetTotalPlayTime(), _lastZoneId, GetBotID()), TempErrorMessageBuffer, 0, &affectedRows)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else {
-			Result = true;
-			time(&_startTotalPlayTime);
-		}
-	}
 
-	safe_delete(Query);
-
-	if(!errorMessage.empty() || (Result && affectedRows != 1)) {
-		if(GetBotOwner() && !errorMessage.empty())
-			GetBotOwner()->Message(13, errorMessage.c_str());
-		else if(GetBotOwner())
-			GetBotOwner()->Message(13, std::string("Unable to save bot to the database.").c_str());
-
-		Result = false;
-	}
-	else {
-		SaveBuffs();
+        SetBotID(results.LastInsertedID());
+        SaveBuffs();
 		SavePet();
 		SaveStance();
 		SaveTimers();
+        return true;
 	}
 
-	return Result;
+
+    // Update existing bot record
+    std::string query = StringFormat("UPDATE bots SET BotOwnerCharacterID = '%u', BotSpellsID = '%u', "
+                                    "Name = '%s', LastName = '%s', BotLevel = '%u', Race = '%i', "
+                                    "Class = '%i', Gender = '%i', Size = '%f', Face = '%i', "
+                                    "LuclinHairStyle = '%i', LuclinHairColor = '%i', "
+                                    "LuclinEyeColor = '%i', LuclinEyeColor2 = '%i', "
+                                    "LuclinBeardColor = '%i', LuclinBeard = '%i', DrakkinHeritage = '%i', "
+                                    "DrakkinTattoo = '%i', DrakkinDetails = '%i', HP = '%i', Mana = '%i', "
+                                    "MR = '%i', CR = '%i', DR = '%i', FR = '%i', PR = '%i', "
+                                    "Corrup = '%i', AC = '%i', STR = '%i', STA = '%i', DEX = '%i', "
+                                    "AGI = '%i', _INT = '%i', WIS = '%i', CHA = '%i', ATK = '%i', "
+                                    "LastSpawnDate = NOW(), TotalPlayTime = '%u', LastZoneId = %i "
+                                    "WHERE BotID = '%u'",
+                                    _botOwnerCharacterID, this->GetBotSpellID(), this->GetCleanName(),
+                                    this->lastname, this->GetLevel(), _baseRace, this->GetClass(),
+                                    _baseGender, GetSize(), this->GetLuclinFace(), this->GetHairStyle(),
+                                    GetHairColor(), this->GetEyeColor1(), this->GetEyeColor2(),
+                                    this->GetBeardColor(), this->GetBeard(), this->GetDrakkinHeritage(),
+                                    GetDrakkinTattoo(), GetDrakkinDetails(), GetHP(), GetMana(),
+                                    _baseMR, _baseCR, _baseDR, _baseFR, _basePR, _baseCorrup, _baseAC,
+                                    _baseSTR, _baseSTA, _baseDEX, _baseAGI, _baseINT, _baseWIS, _baseCHA,
+                                    _baseATK, GetTotalPlayTime(), _lastZoneId, GetBotID());
+    auto results = database.QueryDatabase(query);
+    if(!results.Success()) {
+        auto botOwner = GetBotOwner();
+        if (botOwner)
+            botOwner->Message(13, results.ErrorMessage().c_str());
+        return false;
+    }
+
+    SaveBuffs();
+    SavePet();
+    SaveStance();
+    SaveTimers();
+
+	return true;
 }
 
 // Returns the current total play time for the bot
