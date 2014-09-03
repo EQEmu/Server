@@ -2717,33 +2717,28 @@ uint32 Bot::SavePetStats(std::string petName, uint16 petMana, uint16 petHitPoint
 }
 
 void Bot::SavePetBuffs(SpellBuff_Struct* petBuffs, uint32 botPetSaveId) {
-	if(petBuffs && botPetSaveId > 0) {
-		std::string errorMessage;
-		char* Query = 0;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-		int BuffCount = 0;
+	if(!petBuffs || botPetSaveId == 0)
+        return;
 
-		while(BuffCount < BUFF_COUNT) {
-			if(petBuffs[BuffCount].spellid > 0 && petBuffs[BuffCount].spellid != SPELL_UNKNOWN) {
-				if(!database.RunQuery(Query, MakeAnyLenString(&Query, "INSERT INTO botpetbuffs (BotPetsId, SpellId, CasterLevel, Duration) VALUES(%u, %u, %u, %u);", botPetSaveId, petBuffs[BuffCount].spellid, petBuffs[BuffCount].level, petBuffs[BuffCount].duration), TempErrorMessageBuffer)) {
-					errorMessage = std::string(TempErrorMessageBuffer);
-					safe_delete(Query);
-					Query = 0;
-					break;
-				}
-				else {
-					safe_delete(Query);
-					Query = 0;
-				}
-			}
+	int buffIndex = 0;
 
-			BuffCount++;
-		}
+	while(buffIndex < BUFF_COUNT) {
+        if(petBuffs[buffIndex].spellid > 0 && petBuffs[buffIndex].spellid != SPELL_UNKNOWN) {
 
-		if(!errorMessage.empty()) {
-			// TODO: Record this error message to zone error log
-		}
-	}
+            std::string query = StringFormat("INSERT INTO botpetbuffs "
+                                            "(BotPetsId, SpellId, CasterLevel, Duration) "
+                                            "VALUES(%u, %u, %u, %u);",
+                                            botPetSaveId, petBuffs[buffIndex].spellid,
+                                            petBuffs[buffIndex].level, petBuffs[buffIndex].duration);
+            auto results = database.QueryDatabase(query);
+            if(!results.Success())
+                break;
+
+        }
+
+        buffIndex++;
+    }
+
 }
 
 void Bot::SavePetItems(uint32* petItems, uint32 botPetSaveId) {
