@@ -90,6 +90,7 @@
 	void Handle_OP_GuildWar(const EQApplicationPacket *app);
 	void Handle_OP_GuildLeader(const EQApplicationPacket *app);
 	void Handle_OP_GuildDemote(const EQApplicationPacket *app);
+	void Handle_OP_GuildPromote(const EQApplicationPacket *app);
 	void Handle_OP_GuildInvite(const EQApplicationPacket *app);
 	void Handle_OP_GuildRemove(const EQApplicationPacket *app);
 	void Handle_OP_GetGuildMOTD(const EQApplicationPacket *app);

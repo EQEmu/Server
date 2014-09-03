@@ -374,6 +374,10 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 		else if(c != nullptr && s->guild_id != GUILD_NONE) {
 			//char is in zone, and has changed into a new guild, send MOTD.
 			c->SendGuildMOTD();
+			if(c->GetClientVersion() >= EQClientRoF)
+			{
+				c->SendGuildRanks();
+			}
 		}
 
 
