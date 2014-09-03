@@ -4461,6 +4461,14 @@ struct GuildBankPromote_Struct
 /*12*/	uint32	Slot2;	// Always appears to be the same as Slot for Action code 3
 };
 
+struct GuildPromoteStruct {
+/*000*/	char	target[64];
+/*064*/	char	name[64];
+/*128*/	uint32	rank;
+/*132*/	uint32	myrank;
+/*136*/
+};
+
 struct GuildBankPermissions_Struct
 {
 /*00*/	uint32	Action;	// 6

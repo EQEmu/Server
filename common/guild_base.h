@@ -54,6 +54,7 @@ public:
 	bool	SetGuild(uint32 charid, uint32 guild_id, uint8 rank);
 	bool	SetGuildRank(uint32 charid, uint8 rank);
 	bool	SetBankerFlag(uint32 charid, bool is_banker);
+	bool	ForceRankUpdate(uint32 charid);
 	bool	GetAltFlag(uint32 CharID);
 	bool	SetAltFlag(uint32 charid, bool is_alt);
 	bool	GetBankerFlag(uint32 CharID);

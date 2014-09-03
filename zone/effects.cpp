@@ -175,8 +175,8 @@ int32 Client::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
 	value -= GetFocusEffect(focusFcDamageAmt, spell_id);
 
-	if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
-		 value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
+	if(itembonuses.SpellDmg)
+		value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
 
 	return value;
 }
@@ -245,29 +245,15 @@ int32 Client::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 	
 	value -= extra_dmg;
 
+	if(itembonuses.SpellDmg)
+		value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value) / 6;
+
 	return value;
 }
 
 int32 Mob::GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_spell_dmg)
 {
-	int total_cast_time = 0;
-
-	if (spells[spell_id].recast_time >= spells[spell_id].recovery_time)
-			total_cast_time = spells[spell_id].recast_time + spells[spell_id].cast_time;
-	else
-		total_cast_time = spells[spell_id].recovery_time + spells[spell_id].cast_time;
-
-	if (total_cast_time > 0 && total_cast_time <= 2500)
-		extra_spell_amt = extra_spell_amt*25/100; 
-	 else if (total_cast_time > 2500 && total_cast_time < 7000) 
-		 extra_spell_amt = extra_spell_amt*(0.167*((total_cast_time - 1000)/1000)); 
-	 else 
-		 extra_spell_amt = extra_spell_amt * total_cast_time / 7000; 
-
-		if(extra_spell_amt*2 < base_spell_dmg)
-			return 0;
-
-		return extra_spell_amt;
+	return extra_spell_amt;
 }
 
 
