@@ -2707,20 +2707,13 @@ void Bot::SavePet() {
 }
 
 uint32 Bot::SavePetStats(std::string petName, uint16 petMana, uint16 petHitPoints, uint32 botPetId) {
-	uint32 Result = 0;
 
-	std::string errorMessage;
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
+	std::string query = StringFormat("REPLACE INTO botpets SET PetId = %u, BotId = %u, Name = '%s', "
+                                    "Mana = %u, HitPoints = %u;", botPetId, GetBotID(), petName.c_str(),
+                                    petMana, petHitPoints);
+    auto results = database.QueryDatabase(query);
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "REPLACE INTO botpets SET PetId = %u, BotId = %u, Name = '%s', Mana = %u, HitPoints = %u;", botPetId, GetBotID(), petName.c_str(), petMana, petHitPoints), TempErrorMessageBuffer, 0, 0, &Result)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
-	}
-
-	safe_delete(Query);
-	Query = 0;
-
-	return Result;
+	return 0;
 }
 
 void Bot::SavePetBuffs(SpellBuff_Struct* petBuffs, uint32 botPetSaveId) {
