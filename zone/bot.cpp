@@ -2616,52 +2616,32 @@ void Bot::LoadPetStats(std::string* petName, uint16* petMana, uint16* petHitPoin
 }
 
 void Bot::LoadPetBuffs(SpellBuff_Struct* petBuffs, uint32 botPetSaveId) {
-	if(petBuffs && botPetSaveId > 0) {
-		std::string errorMessage;
-		char* Query = 0;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
+	if(!petBuffs || botPetSaveId == 0)
+        return;
 
-		bool BuffsLoaded = false;
+    std::string query = StringFormat("SELECT SpellId, CasterLevel, Duration "
+                                    "FROM botpetbuffs WHERE BotPetsId = %u;", botPetSaveId);
+    auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		return;
 
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT SpellId, CasterLevel, Duration FROM botpetbuffs WHERE BotPetsId = %u;", botPetSaveId), TempErrorMessageBuffer, &DatasetResult)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else {
-			int BuffCount = 0;
 
-			while(DataRow = mysql_fetch_row(DatasetResult)) {
-				if(BuffCount == BUFF_COUNT)
-					break;
+	int buffIndex = 0;
 
-				petBuffs[BuffCount].spellid = atoi(DataRow[0]);
-				petBuffs[BuffCount].level = atoi(DataRow[1]);
-				petBuffs[BuffCount].duration = atoi(DataRow[2]);
+	for (auto row = results.begin();row != results.end(); ++row) {
+		if(buffIndex == BUFF_COUNT)
+			break;
 
-				BuffCount++;
-			}
+		petBuffs[buffIndex].spellid = atoi(row[0]);
+		petBuffs[buffIndex].level = atoi(row[1]);
+		petBuffs[buffIndex].duration = atoi(row[2]);
 
-			mysql_free_result(DatasetResult);
-
-			BuffsLoaded = true;
-		}
-
-		safe_delete(Query);
-		Query = 0;
-
-		if(errorMessage.empty() && BuffsLoaded) {
-			if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM botpetbuffs WHERE BotPetsId = %u;", botPetSaveId), TempErrorMessageBuffer)) {
-				errorMessage = std::string(TempErrorMessageBuffer);
-				safe_delete(Query);
-				Query = 0;
-			}
-		}
-
-		if(!errorMessage.empty()) {
-			// TODO: Record this error message to zone error log
-		}
+		buffIndex++;
 	}
+
+	query = StringFormat("DELETE FROM botpetbuffs WHERE BotPetsId = %u;", botPetSaveId);
+	results = database.QueryDatabase(query);
+
 }
 
 void Bot::LoadPetItems(uint32* petItems, uint32 botPetSaveId) {
