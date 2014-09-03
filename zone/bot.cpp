@@ -1466,85 +1466,75 @@ void Bot::GenerateAABonuses(StatBonuses* newbon) {
 }
 
 void Bot::LoadAAs() {
-	std::string errorMessage;
-	char* Query = 0;
-	int length = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES* DatasetResult;
-	MYSQL_ROW DataRow;
-
 	int maxAAExpansion = RuleI(Bots, BotAAExpansion); //get expansion to get AAs up to
 	botAAs.clear();	//start fresh
 
+    std::string query;
+
 	if(GetClass() == BERSERKER)
-		length = MakeAnyLenString(&Query, "SELECT skill_id FROM altadv_vars WHERE berserker = 1 AND class_type > 1 AND class_type <= %i AND aa_expansion <= %i ORDER BY skill_id;", GetLevel(), maxAAExpansion);
+		query = StringFormat("SELECT skill_id FROM altadv_vars WHERE berserker = 1 AND class_type > 1 AND class_type <= %i AND aa_expansion <= %i ORDER BY skill_id;", GetLevel(), maxAAExpansion);
 	else
-		length = MakeAnyLenString(&Query, "SELECT skill_id FROM altadv_vars WHERE ((classes & ( 1 << %i )) >> %i) = 1 AND class_type > 1 AND class_type <= %i AND aa_expansion <= %i ORDER BY skill_id;", GetClass(), GetClass(), GetLevel(), maxAAExpansion);
+		query = StringFormat("SELECT skill_id FROM altadv_vars WHERE ((classes & ( 1 << %i )) >> %i) = 1 AND class_type > 1 AND class_type <= %i AND aa_expansion <= %i ORDER BY skill_id;", GetClass(), GetClass(), GetLevel(), maxAAExpansion);
 
-	if(!database.RunQuery(Query, length, TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
-	}
-	else {
-		int totalAAs = database.CountAAs();
+    auto results = database.QueryDatabase(query);
 
-		while(DataRow = mysql_fetch_row(DatasetResult)) {
-			uint32 skill_id = 0;
-			skill_id = atoi(DataRow[0]);
-
-			if(skill_id > 0 && skill_id < totalAAs) {
-				SendAA_Struct *sendAA = zone->FindAA(skill_id);
-
-				if(sendAA) {
-					for(int i=0; i<sendAA->max_level; i++) {
-						//Get AA info & add to list
-						uint32 aaid = sendAA->id + i;
-						uint8 total_levels = 0;
-						uint8 req_level;
-						std::map<uint32, AALevelCost_Struct>::iterator RequiredLevel = AARequiredLevelAndCost.find(aaid);
-
-						//Get level required for AA
-						if(RequiredLevel != AARequiredLevelAndCost.end())
-							req_level = RequiredLevel->second.Level;
-						else
-							req_level = (sendAA->class_type + i * sendAA->level_inc);
-
-						if(req_level > GetLevel())
-							break;
-
-						//Bot is high enough level for AA
-						std::map<uint32, BotAA>::iterator foundAA = botAAs.find(aaid);
-
-						// AA is not already in list
-						if(foundAA == botAAs.end()) {
-							if(sendAA->id == aaid) {
-								BotAA newAA;
-
-								newAA.total_levels = 0;
-								newAA.aa_id = aaid;
-								newAA.req_level = req_level;
-								newAA.total_levels += 1;
-
-								botAAs[aaid] = newAA;	//add to list
-							}
-							else {
-								//update master AA record with number of levels a bot has in AA, based on level.
-								botAAs[sendAA->id].total_levels+=1;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		mysql_free_result(DatasetResult);
-	}
-
-	safe_delete(Query);
-	Query = 0;
-
-	if(!errorMessage.empty()) {
+	if(!results.Success()) {
 		LogFile->write(EQEMuLog::Error, "Error in Bot::LoadAAs()");
+		return;
 	}
+
+    int totalAAs = database.CountAAs();
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        uint32 skill_id = 0;
+		skill_id = atoi(row[0]);
+
+        if(skill_id <= 0 || skill_id >= totalAAs)
+            continue;
+
+        SendAA_Struct *sendAA = zone->FindAA(skill_id);
+
+        if(!sendAA)
+            continue;
+
+        for(int i=0; i<sendAA->max_level; i++) {
+            //Get AA info & add to list
+            uint32 aaid = sendAA->id + i;
+            uint8 total_levels = 0;
+            uint8 req_level;
+            std::map<uint32, AALevelCost_Struct>::iterator RequiredLevel = AARequiredLevelAndCost.find(aaid);
+
+            //Get level required for AA
+            if(RequiredLevel != AARequiredLevelAndCost.end())
+                req_level = RequiredLevel->second.Level;
+            else
+                req_level = (sendAA->class_type + i * sendAA->level_inc);
+
+            if(req_level > GetLevel())
+                break;
+
+            //Bot is high enough level for AA
+            std::map<uint32, BotAA>::iterator foundAA = botAAs.find(aaid);
+
+            // AA is already in list
+            if(foundAA != botAAs.end())
+                continue;
+
+            if(sendAA->id == aaid) {
+                BotAA newAA;
+
+                newAA.total_levels = 0;
+                newAA.aa_id = aaid;
+                newAA.req_level = req_level;
+                newAA.total_levels += 1;
+
+                botAAs[aaid] = newAA;	//add to list
+            }
+            else //update master AA record with number of levels a bot has in AA, based on level.
+                botAAs[sendAA->id].total_levels+=1;
+        }
+    }
+
 }
 
 uint32 Bot::GetAA(uint32 aa_id) {
@@ -2485,10 +2475,10 @@ void Bot::SaveBuffs() {
 				CalculateCorruptionCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
 				buffs[BuffCount].numhits, buffs[BuffCount].melee_rune, buffs[BuffCount].magic_rune,
 				buffs[BuffCount].dot_rune,
-				buffs[BuffCount].caston_x, 
-				IsPersistent, 
+				buffs[BuffCount].caston_x,
+				IsPersistent,
 				buffs[BuffCount].caston_y,
-				buffs[BuffCount].caston_z, 
+				buffs[BuffCount].caston_z,
 				buffs[BuffCount].ExtraDIChance), TempErrorMessageBuffer)) {
 				errorMessage = std::string(TempErrorMessageBuffer);
 				safe_delete(Query);
@@ -3398,7 +3388,7 @@ void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 
 	if (CanSkillProc && HasSkillProcs())
 		TrySkillProc(other, skillinuse, ReuseTime);
-	
+
 	if (CanSkillProc && (damage > 0) && HasSkillProcSuccess())
 		TrySkillProc(other, skillinuse, ReuseTime, true);
 }
@@ -8109,7 +8099,7 @@ void Bot::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 
 	if (HasSkillProcs())
 		TrySkillProc(who, skill, ReuseTime*1000);
-	
+
 	if (max_damage > 0 && HasSkillProcSuccess())
 		TrySkillProc(who, skill, ReuseTime*1000, true);
 
@@ -9113,7 +9103,7 @@ void Bot::SetAttackTimer() {
 }
 
 int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
-	
+
 	if (spells[spell_id].targettype == ST_Self)
 		return value;
 
@@ -9125,22 +9115,22 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	// Need to scale HT damage differently after level 40! It no longer scales by the constant value in the spell file. It scales differently, instead of 10 more damage per level, it does 30 more damage per level. So we multiply the level minus 40 times 20 if they are over level 40.
 	if ( (spell_id == SPELL_HARM_TOUCH || spell_id == SPELL_HARM_TOUCH2 || spell_id == SPELL_IMP_HARM_TOUCH ) && GetLevel() > 40)
 		value -= (GetLevel() - 40) * 20;
-       
+
 	//This adds the extra damage from the AA Unholy Touch, 450 per level to the AA Improved Harm TOuch.
 	if (spell_id == SPELL_IMP_HARM_TOUCH) //Improved Harm Touch
 		value -= GetAA(aaUnholyTouch) * 450; //Unholy Touch
-        
+
 	int chance = RuleI(Spells, BaseCritChance);
 		chance += itembonuses.CriticalSpellChance + spellbonuses.CriticalSpellChance + aabonuses.CriticalSpellChance;
-		
+
 	if (chance > 0){
- 
+
 		 int32 ratio = RuleI(Spells, BaseCritRatio); //Critical modifier is applied from spell effects only. Keep at 100 for live like criticals.
 
 		//Improved Harm Touch is a guaranteed crit if you have at least one level of SCF.
 		 if (spell_id == SPELL_IMP_HARM_TOUCH && (GetAA(aaSpellCastingFury) > 0) && (GetAA(aaUnholyTouch) > 0))
 			 chance = 100;
- 
+
 		 if (MakeRandomInt(1,100) <= chance){
 			Critical = true;
 			ratio += itembonuses.SpellCritDmgIncrease + spellbonuses.SpellCritDmgIncrease + aabonuses.SpellCritDmgIncrease;
@@ -9153,23 +9143,23 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 		}
 
 		ratio += RuleI(Spells, WizCritRatio); //Default is zero
-			
+
 		if (Critical){
 
-			value = value_BaseEffect*ratio/100;  
+			value = value_BaseEffect*ratio/100;
 
-			value += value_BaseEffect*GetBotFocusEffect(BotfocusImprovedDamage, spell_id)/100; 
+			value += value_BaseEffect*GetBotFocusEffect(BotfocusImprovedDamage, spell_id)/100;
 
 			value += int(value_BaseEffect*GetBotFocusEffect(BotfocusFcDamagePctCrit, spell_id)/100)*ratio/100;
 
 			if (target) {
-				value += int(value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100)*ratio/100;  
-				value -= target->GetFcDamageAmtIncoming(this, spell_id); 
+				value += int(value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100)*ratio/100;
+				value -= target->GetFcDamageAmtIncoming(this, spell_id);
 			}
 
-			value -= GetBotFocusEffect(BotfocusFcDamageAmtCrit, spell_id)*ratio/100; 
+			value -= GetBotFocusEffect(BotfocusFcDamageAmtCrit, spell_id)*ratio/100;
 
-			value -= GetBotFocusEffect(BotfocusFcDamageAmt, spell_id); 
+			value -= GetBotFocusEffect(BotfocusFcDamageAmt, spell_id);
 
 			if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
 				value += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value)*ratio/100;
@@ -9181,28 +9171,28 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	}
 
 	 value = value_BaseEffect;
- 
-	 value += value_BaseEffect*GetBotFocusEffect(BotfocusImprovedDamage, spell_id)/100; 
-	 
+
+	 value += value_BaseEffect*GetBotFocusEffect(BotfocusImprovedDamage, spell_id)/100;
+
 	 value += value_BaseEffect*GetBotFocusEffect(BotfocusFcDamagePctCrit, spell_id)/100;
 
 	 if (target) {
 		value += value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100;
-		value -= target->GetFcDamageAmtIncoming(this, spell_id); 
+		value -= target->GetFcDamageAmtIncoming(this, spell_id);
 	 }
 
-	 value -= GetBotFocusEffect(BotfocusFcDamageAmtCrit, spell_id); 
+	 value -= GetBotFocusEffect(BotfocusFcDamageAmtCrit, spell_id);
 
-	 value -= GetBotFocusEffect(BotfocusFcDamageAmt, spell_id); 
-	 
+	 value -= GetBotFocusEffect(BotfocusFcDamageAmt, spell_id);
+
 	if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
-         value += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value); 
+         value += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
 
 	return value;
  }
 
 int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
-	
+
 	if (target == nullptr)
 		target = this;
 
@@ -9210,37 +9200,37 @@ int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 	int16 chance = 0;
 	int8 modifier = 1;
 	bool Critical = false;
-		
-	value_BaseEffect = value + (value*GetBotFocusEffect(BotfocusFcBaseEffects, spell_id)/100); 
-		
+
+	value_BaseEffect = value + (value*GetBotFocusEffect(BotfocusFcBaseEffects, spell_id)/100);
+
 	value = value_BaseEffect;
 
-	value += int(value_BaseEffect*GetBotFocusEffect(BotfocusImprovedHeal, spell_id)/100); 
- 
+	value += int(value_BaseEffect*GetBotFocusEffect(BotfocusImprovedHeal, spell_id)/100);
+
 	// Instant Heals
 	if(spells[spell_id].buffduration < 1) {
 
-		chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance; 
+		chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance;
 
-		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id); 
-						
+		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id);
+
 		if (spellbonuses.CriticalHealDecay)
-			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay); 
-	
+			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay);
+
 		if(chance && (MakeRandomInt(0,99) < chance)) {
 			Critical = true;
 			modifier = 2; //At present time no critical heal amount modifier SPA exists.
 		}
-		
+
 		value *= modifier;
-		value += GetBotFocusEffect(BotfocusFcHealAmtCrit, spell_id) * modifier; 
-		value += GetBotFocusEffect(BotfocusFcHealAmt, spell_id); 
-		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id); 
+		value += GetBotFocusEffect(BotfocusFcHealAmtCrit, spell_id) * modifier;
+		value += GetBotFocusEffect(BotfocusFcHealAmt, spell_id);
+		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id);
 
 		if(itembonuses.HealAmt && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
 			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value) * modifier;
 
-		value += value*target->GetHealRate(spell_id, this)/100; 
+		value += value*target->GetHealRate(spell_id, this)/100;
 
 		if (Critical)
 			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s performs an exceptional heal! (%d)", GetName(), value);
@@ -9250,14 +9240,14 @@ int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 	//Heal over time spells. [Heal Rate and Additional Healing effects do not increase this value]
 	else {
-		
-		chance = itembonuses.CriticalHealOverTime + spellbonuses.CriticalHealOverTime + aabonuses.CriticalHealOverTime; 
 
-		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id); 
-		
+		chance = itembonuses.CriticalHealOverTime + spellbonuses.CriticalHealOverTime + aabonuses.CriticalHealOverTime;
+
+		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id);
+
 		if (spellbonuses.CriticalRegenDecay)
 			chance += GetDecayEffectValue(spell_id, SE_CriticalRegenDecay);
-		
+
 		if(chance && (MakeRandomInt(0,99) < chance))
 			return (value * 2);
 	}
