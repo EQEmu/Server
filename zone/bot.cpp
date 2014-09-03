@@ -4200,65 +4200,62 @@ void Bot::RemoveBotItemBySlot(uint32 slotID, std::string *errorMessage) {
 // Retrieves all the inventory records from the database for this bot.
 void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
 
-	if(this->GetBotID() > 0) {
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char* query = 0;
-		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
+	if(this->GetBotID() == 0)
+        return;
 
-		if(database.RunQuery(query, MakeAnyLenString(&query, "SELECT slotid,itemid,charges,color,augslot1,augslot2,augslot3,augslot4,augslot5,instnodrop FROM botinventory WHERE botid=%i order by slotid", this->GetBotID()), errbuf, &DatasetResult)) {
-			while(DataRow = mysql_fetch_row(DatasetResult)) {
-				int16 slot_id	= atoi(DataRow[0]);
-				uint32 item_id	= atoi(DataRow[1]);
-				uint16 charges	= atoi(DataRow[2]);
-				uint32 color	= atoul(DataRow[3]);
-				uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
-				aug[0] = (uint32)atoul(DataRow[4]);
-				aug[1] = (uint32)atoul(DataRow[5]);
-				aug[2] = (uint32)atoul(DataRow[6]);
-				aug[3] = (uint32)atoul(DataRow[7]);
-				aug[4] = (uint32)atoul(DataRow[8]);
-				bool instnodrop	= (DataRow[9] && (uint16)atoi(DataRow[9])) ? true : false;
+    std::string query = StringFormat("SELECT slotid, itemid, charges, color, "
+                                    "augslot1, augslot2, augslot3, augslot4, "
+                                    "augslot5, instnodrop FROM botinventory "
+                                    "WHERE botid = %i ORDER BY slotid", this->GetBotID());
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        *errorMessage = std::string(results.ErrorMessage());
+        return;
+    }
 
-				ItemInst* inst = database.CreateItem(item_id, charges, aug[0], aug[1], aug[2], aug[3], aug[4]);
-				if(inst) {
-					int16 put_slot_id = INVALID_INDEX;
-					if(instnodrop || ((slot_id >= EmuConstants::EQUIPMENT_BEGIN) && (slot_id <= EmuConstants::EQUIPMENT_END) && inst->GetItem()->Attuneable))
-						inst->SetInstNoDrop(true);
-					if(color > 0)
-						inst->SetColor(color);
-					if(charges==255)
-						inst->SetCharges(-1);
-					else
-						inst->SetCharges(charges);
-					if((slot_id >= 8000) && (slot_id <= 8999)) {
-						// do nothing
-					}
-					else {
-						put_slot_id = inv.PutItem(slot_id, *inst);
-					}
-					safe_delete(inst);
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        int16 slot_id	= atoi(row[0]);
+        uint32 item_id	= atoi(row[1]);
+        uint16 charges	= atoi(row[2]);
+        uint32 color	= atoul(row[3]);
+        uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
+        aug[0] = (uint32)atoul(row[4]);
+        aug[1] = (uint32)atoul(row[5]);
+        aug[2] = (uint32)atoul(row[6]);
+        aug[3] = (uint32)atoul(row[7]);
+        aug[4] = (uint32)atoul(row[8]);
+        bool instnodrop	= (row[9] && (uint16)atoi(row[9])) ? true : false;
 
-					// Save ptr to item in inventory
-					if (put_slot_id == INVALID_INDEX) {
-						LogFile->write(EQEMuLog::Error,
-							"Warning: Invalid slot_id for item in inventory: botid=%i, item_id=%i, slot_id=%i",
-							this->GetBotID(), item_id, slot_id);
-					}
-				}
-				else {
-					LogFile->write(EQEMuLog::Error,
-						"Warning: botid %i has an invalid item_id %i in inventory slot %i",
-						this->GetBotID(), item_id, slot_id);
-				}
-			}
-			mysql_free_result(DatasetResult);
-		}
-		else
-			*errorMessage = std::string(errbuf);
+        ItemInst* inst = database.CreateItem(item_id, charges, aug[0], aug[1], aug[2], aug[3], aug[4]);
+        if (!inst) {
+            LogFile->write(EQEMuLog::Error, "Warning: botid %i has an invalid item_id %i in inventory slot %i", this->GetBotID(), item_id, slot_id);
+            continue;
+        }
 
-		safe_delete_array(query);
-	}
+        int16 put_slot_id = INVALID_INDEX;
+
+        if (instnodrop || ((slot_id >= EmuConstants::EQUIPMENT_BEGIN) && (slot_id <= EmuConstants::EQUIPMENT_END) && inst->GetItem()->Attuneable))
+            inst->SetInstNoDrop(true);
+
+        if (color > 0)
+            inst->SetColor(color);
+
+        if (charges==255)
+            inst->SetCharges(-1);
+        else
+            inst->SetCharges(charges);
+
+        if (slot_id < 8000 || slot_id > 8999)
+            put_slot_id = inv.PutItem(slot_id, *inst);
+
+        safe_delete(inst);
+
+        // Save ptr to item in inventory
+        if (put_slot_id == INVALID_INDEX)
+            LogFile->write(EQEMuLog::Error, "Warning: Invalid slot_id for item in inventory: botid=%i, item_id=%i, slot_id=%i",this->GetBotID(), item_id, slot_id);
+
+    }
+
 }
 
 // Returns the inventory record for this bot from the database for the specified equipment slot.
