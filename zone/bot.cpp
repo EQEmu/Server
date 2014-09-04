@@ -4868,34 +4868,17 @@ uint32 Bot::GetBotGroupIdByBotGroupName(std::string botGroupName, std::string* e
 }
 
 uint32 Bot::GetBotGroupLeaderIdByBotGroupName(std::string botGroupName) {
-	uint32 result = 0;
 
-	if(!botGroupName.empty()) {
-		char* Query = 0;
-		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
+	if(botGroupName.empty())
+        return 0;
 
-		if(database.RunQuery(Query, MakeAnyLenString(&Query, "select BotGroupLeaderBotId from vwBotGroups where BotGroupName = '%s'", botGroupName.c_str()), 0, &DatasetResult)) {
-			uint32 RowCount = mysql_num_rows(DatasetResult);
+	std::string query = StringFormat("SELECT BotGroupLeaderBotId FROM vwBotGroups WHERE BotGroupName = '%s'", botGroupName.c_str());
+    auto results = database.QueryDatabase(query);
+    if (!results.Success() || results.RowCount() == 0)
+        return 0;
 
-			if(RowCount > 0) {
-				for(int iCounter = 0; iCounter < RowCount; iCounter++) {
-					DataRow = mysql_fetch_row(DatasetResult);
-
-					if(DataRow) {
-						result = atoi(DataRow[0]);
-						break;
-					}
-				}
-			}
-
-			mysql_free_result(DatasetResult);
-		}
-
-		safe_delete_array(Query);
-	}
-
-	return result;
+    auto row = results.begin();
+    return atoi(row[0]);
 }
 
 uint32 Bot::AllowedBotSpawns(uint32 botOwnerCharacterID, std::string* errorMessage) {
