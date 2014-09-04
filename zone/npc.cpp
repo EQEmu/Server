@@ -1127,9 +1127,10 @@ uint32 ZoneDatabase::UpdateNPCTypeAppearance(uint8 command, const char* zone, ui
 	uint32 tmp = 0;
 	uint32 tmp2 = 0;
 	uint32 last_insert_id = 0;
+
     if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE npc_types SET name=\"%s\", level=%i, race=%i, class=%i, hp=%i, gender=%i, texture=%i, helmtexture=%i, size=%i, loottable_id=%i, merchant_id=%i, face=%i, WHERE id=%i", spawn->GetName(), spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(), spawn->MerchantType, spawn->GetNPCTypeID()), errbuf, 0)) {
-		if(c)
-            c->LogSQL(query);
+		if(client)
+            client->LogSQL(query);
         safe_delete_array(query);
         return true;
     }
