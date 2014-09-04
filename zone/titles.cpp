@@ -31,25 +31,17 @@ bool TitleManager::LoadTitles()
 {
 	Titles.clear();
 
-	TitleEntry Title;
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = nullptr;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"SELECT `id`, `skill_id`, `min_skill_value`, `max_skill_value`, `min_aa_points`, `max_aa_points`, `class`, `gender`, "
-		"`char_id`, `status`, `item_id`, `prefix`, `suffix`, `title_set` from titles"), errbuf, &result))
-	{
-		LogFile->write(EQEMuLog::Error, "Unable to load titles: %s : %s", query, errbuf);
-		safe_delete_array(query);
-		return(false);
+	std::string query = "SELECT `id`, `skill_id`, `min_skill_value`, `max_skill_value`, "
+                        "`min_aa_points`, `max_aa_points`, `class`, `gender`, `char_id`, "
+                        "`status`, `item_id`, `prefix`, `suffix`, `title_set` FROM titles";
+    auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Unable to load titles: %s : %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
 
-	safe_delete_array(query);
-
-	while ((row = mysql_fetch_row(result))) {
+	for (auto row = results.begin(); row != results.end(); ++row) {
+        TitleEntry Title;
 		Title.TitleID = atoi(row[0]);
 		Title.SkillID = (SkillUseTypes) atoi(row[1]);
 		Title.MinSkillValue = atoi(row[2]);
@@ -66,9 +58,8 @@ bool TitleManager::LoadTitles()
 		Title.TitleSet = atoi(row[13]);
 		Titles.push_back(Title);
 	}
-	mysql_free_result(result);
 
-	return(true);
+	return true;
 }
 
 EQApplicationPacket *TitleManager::MakeTitlesPacket(Client *c)
