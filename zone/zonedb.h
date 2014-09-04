@@ -372,7 +372,7 @@ public:
 	*/
 	const NPCType*			GetNPCType(uint32 id);
 	uint32	NPCSpawnDB(uint8 command, const char* zone, uint32 zone_version, Client *c, NPC* spawn = 0, uint32 extra = 0); // 0 = Create 1 = Add; 2 = Update; 3 = Remove; 4 = Delete
-    uint32  CreateNewNPCCommand(uint8 command, const char* zone, uint32 zone_version, Client *c, NPC* spawn, uint32 extra);
+    uint32  CreateNewNPCCommand(uint8 command, const char* zone, uint32 zone_version, Client *client, NPC* spawn, uint32 extra);
 	bool	SetSpecialAttkFlag(uint8 id, const char* flag);
 	bool	GetPetEntry(const char *pet_type, PetRecord *into);
 	bool	GetPoweredPetEntry(const char *pet_type, int16 petpower, PetRecord *into);
