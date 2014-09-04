@@ -4882,30 +4882,24 @@ uint32 Bot::GetBotGroupLeaderIdByBotGroupName(std::string botGroupName) {
 }
 
 uint32 Bot::AllowedBotSpawns(uint32 botOwnerCharacterID, std::string* errorMessage) {
-	uint32 Result = 0;
 
-	if(botOwnerCharacterID > 0) {
-		char ErrBuf[MYSQL_ERRMSG_SIZE];
-		char* Query = 0;
-		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
+	if(botOwnerCharacterID == 0)
+        return 0;
 
-		if(database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT value FROM quest_globals WHERE name='bot_spawn_limit' and charid=%i", botOwnerCharacterID), ErrBuf, &DatasetResult)) {
-			if(mysql_num_rows(DatasetResult) == 1) {
-				DataRow = mysql_fetch_row(DatasetResult);
-				if(DataRow)
-					Result = atoi(DataRow[0]);
-			}
+    std::string query = StringFormat("SELECT value FROM quest_globals "
+                                    "WHERE name = 'bot_spawn_limit' AND charid = %i",
+                                    botOwnerCharacterID);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        *errorMessage = std::string(results.ErrorMessage());
+        return 0;
+    }
 
-			mysql_free_result(DatasetResult);
-		}
-		else
-			*errorMessage = std::string(ErrBuf);
+    if (results.RowCount() != 1)
+        return 0;
 
-		safe_delete_array(Query);
-	}
-
-	return Result;
+	auto row = results.begin();
+	return atoi(row[0]);
 }
 
 uint32 Bot::SpawnedBotCount(uint32 botOwnerCharacterID, std::string* errorMessage) {
