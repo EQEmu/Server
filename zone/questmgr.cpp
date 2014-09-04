@@ -2272,19 +2272,19 @@ bool QuestManager::istaskappropriate(int task) {
 }
 
 void QuestManager::clearspawntimers() {
-	if(zone) {
-		//TODO: Dec 19, 2008, replace with code updated for current spawn timers.
-		LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
-		iterator.Reset();
-		while (iterator.MoreElements())
-		{
-			char errbuf[MYSQL_ERRMSG_SIZE];
-			char *query = 0;
-			database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM respawn_times WHERE id=%lu AND "
-				"instance_id=%lu",(unsigned long)iterator.GetData()->GetID(), (unsigned long)zone->GetInstanceID()), errbuf);
-			safe_delete_array(query);
-			iterator.Advance();
-		}
+	if(!zone)
+        return;
+
+	//TODO: Dec 19, 2008, replace with code updated for current spawn timers.
+    LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
+	iterator.Reset();
+	while (iterator.MoreElements()) {
+		std::string query = StringFormat("DELETE FROM respawn_times "
+                                        "WHERE id = %lu AND instance_id = %lu",
+                                        (unsigned long)iterator.GetData()->GetID(),
+                                        (unsigned long)zone->GetInstanceID());
+        auto results = database.QueryDatabase(query);
+		iterator.Advance();
 	}
 }
 
