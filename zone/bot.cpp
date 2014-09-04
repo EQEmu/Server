@@ -4744,44 +4744,32 @@ void Bot::DeleteBotGroup(std::string botGroupName, std::string* errorMessage) {
 }
 
 std::list<BotGroup> Bot::LoadBotGroup(std::string botGroupName, std::string* errorMessage) {
-	std::list<BotGroup> Result;
-	char ErrBuf[MYSQL_ERRMSG_SIZE];
-	char* Query = 0;
-	MYSQL_RES* DatasetResult;
-	MYSQL_ROW DataRow;
+	std::list<BotGroup> botGroup;
 
-	if(!botGroupName.empty()) {
-		uint32 botGroupId = GetBotGroupIdByBotGroupName(botGroupName, errorMessage);
+	if(botGroupName.empty())
+        return botGroup;
 
-		if(botGroupId > 0) {
-			if(!database.RunQuery(Query, MakeAnyLenString(&Query, "select BotId from botgroupmembers where BotGroupId = %u", botGroupId), ErrBuf, &DatasetResult)) {
-				*errorMessage = std::string(ErrBuf);
-			}
-			else {
-				uint32 RowCount = mysql_num_rows(DatasetResult);
+	uint32 botGroupId = GetBotGroupIdByBotGroupName(botGroupName, errorMessage);
 
-				if(RowCount > 0) {
-					for(int iCounter = 0; iCounter < RowCount; iCounter++) {
-						DataRow = mysql_fetch_row(DatasetResult);
+	if(botGroupId == 0)
+        return botGroup;
 
-						if(DataRow) {
-							BotGroup tempBotGroup;
-							tempBotGroup.BotGroupID = botGroupId;
-							tempBotGroup.BotID = atoi(DataRow[0]);
+	std::string query = StringFormat("SELECT BotId FROM botgroupmembers WHERE BotGroupId = %u", botGroupId);
+	auto results = database.QueryDatabase(query);
+    if(!results.Success()) {
+        *errorMessage = std::string(results.ErrorMessage());
+        return botGroup;
+    }
 
-							Result.push_back(tempBotGroup);
-						}
-					}
-				}
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        BotGroup tempBotGroup;
+        tempBotGroup.BotGroupID = botGroupId;
+        tempBotGroup.BotID = atoi(row[0]);
 
-				mysql_free_result(DatasetResult);
-			}
+        botGroup.push_back(tempBotGroup);
+    }
 
-			safe_delete_array(Query);
-		}
-	}
-
-	return Result;
+	return botGroup;
 }
 
 std::list<BotGroupList> Bot::GetBotGroupListByBotOwnerCharacterId(uint32 botOwnerCharacterId, std::string* errorMessage) {
