@@ -4545,31 +4545,24 @@ Bot* Bot::LoadBot(uint32 botID, std::string* errorMessage) {
 }
 
 std::list<uint32> Bot::GetGroupedBotsByGroupId(uint32 groupId, std::string* errorMessage) {
-	std::list<uint32> Result;
+	std::list<uint32> groupedBots;
 
-	if(groupId > 0) {
-		char* Query = 0;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
+	if(groupId == 0)
+        return groupedBots;
 
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "select g.mobid as BotID from vwGroups as g join bots as b on g.mobid = b.BotId and g.mobtype = 'B' where g.groupid = %u", groupId), TempErrorMessageBuffer, &DatasetResult)) {
-			*errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else {
-			while(DataRow = mysql_fetch_row(DatasetResult)) {
-				if(DataRow) {
-					Result.push_back(atoi(DataRow[0]));
-				}
-			}
-
-			mysql_free_result(DatasetResult);
-		}
-
-		safe_delete_array(Query);
+    std::string query = StringFormat("SELECT g.mobid AS BotID FROM vwGroups AS g "
+                                    "JOIN bots AS b ON g.mobid = b.BotId AND g.mobtype = 'B' "
+                                    "WHERE g.groupid = %u", groupId);
+    auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
+		*errorMessage = std::string(results.ErrorMessage());
+		return groupedBots;
 	}
 
-	return Result;
+    for (auto row = results.begin(); row != results.end(); ++row)
+        groupedBots.push_back(atoi(row[0]));
+
+	return groupedBots;
 }
 
 // Load and spawn all zoned bots by bot owner character
