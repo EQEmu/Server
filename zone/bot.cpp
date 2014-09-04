@@ -8557,28 +8557,19 @@ bool Bot::ProcessGuildRemoval(Client* guildOfficer, std::string botName) {
 }
 
 void Bot::SetBotGuildMembership(uint32 botId, uint32 guildid, uint8 rank) {
-	if(botId > 0) {
-		std::string errorMessage;
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
+	if(botId == 0)
+        return;
 
-		if(guildid > 0) {
-			if(!database.RunQuery(query, MakeAnyLenString(&query, "REPLACE INTO botguildmembers SET char_id = %u, guild_id = %u, rank = %u;", botId, guildid, rank), errbuf)) {
-				errorMessage = std::string(errbuf);
-			}
-		}
-		else {
-			if(!database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM botguildmembers WHERE char_id = %u;", botId), errbuf)) {
-				errorMessage = std::string(errbuf);
-			}
-		}
+    if(guildid > 0) {
+        std::string query = StringFormat("REPLACE INTO botguildmembers "
+                                        "SET char_id = %u, guild_id = %u, rank = %u;",
+                                        botId, guildid, rank);
+        auto results = database.QueryDatabase(query);
+        return;
+    }
 
-		safe_delete_array(query);
-
-		if(!errorMessage.empty()) {
-			// TODO: Log this error message to the zone error log
-		}
-	}
+    std::string query = StringFormat("DELETE FROM botguildmembers WHERE char_id = %u;", botId);
+    auto results = database.QueryDatabase(query);
 }
 
 void Bot::LoadGuildMembership(uint32* guildId, uint8* guildRank, std::string* guildName) {
