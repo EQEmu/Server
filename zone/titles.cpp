@@ -337,24 +337,18 @@ void Client::SetTitleSuffix(const char *Suffix)
 	safe_delete(outapp);
 }
 
-void Client::EnableTitle(int titleset) {
+void Client::EnableTitle(int titleSet) {
 
-	if (CheckTitle(titleset)) {
+	if (CheckTitle(titleSet))
 		return;
-	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query = StringFormat("INSERT INTO player_titlesets "
+                                    "(char_id, title_set) VALUES (%i, %i)",
+                                    CharacterID(), titleSet);
+    auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		LogFile->write(EQEMuLog::Error, "Error in EnableTitle query for titleset %i and charid %i", titleSet, CharacterID());
 
-	if(!database.RunQuery(query,MakeAnyLenString(&query, "INSERT INTO player_titlesets (char_id, title_set) VALUES (%i, %i)", CharacterID(), titleset), errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error in EnableTitle query for titleset %i and charid %i", titleset, CharacterID());
-		safe_delete_array(query);
-		return;
-	}
-	else {
-		safe_delete_array(query);
-		return;
-	}
 }
 
 bool Client::CheckTitle(int titleset) {
