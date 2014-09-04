@@ -962,7 +962,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z,
 	}
 }
 
-uint32 ZoneDatabase::CreateNewNPCCommand(uint8 command, const char* zone, uint32 zone_version, Client *client, NPC* spawn, uint32 extra) {
+uint32 ZoneDatabase::CreateNewNPCCommand(const char* zone, uint32 zone_version,Client *client, NPC* spawn, uint32 extra) {
 
     uint32 npc_type_id = 0;
 
@@ -1067,7 +1067,7 @@ uint32 ZoneDatabase::CreateNewNPCCommand(uint8 command, const char* zone, uint32
 	return true;
 }
 
-uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(uint8 command, const char* zone, uint32 zone_version, Client *client, NPC* spawn, uint32 respawnTime) {
+uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(const char* zone, uint32 zone_version, Client *client, NPC* spawn, uint32 respawnTime) {
     uint32 last_insert_id = 0;
 
 	std::string query = StringFormat("INSERT INTO spawngroup (name) VALUES('%s%s%i')",
@@ -1119,25 +1119,20 @@ uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(uint8 command, const char* zone,
     return spawnid;
 }
 
-uint32 ZoneDatabase::UpdateNPCTypeAppearance(uint8 command, const char* zone, uint32 zone_version, Client *client, NPC* spawn) {
-    char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	uint32 tmp = 0;
-	uint32 tmp2 = 0;
-	uint32 last_insert_id = 0;
+uint32 ZoneDatabase::UpdateNPCTypeAppearance(Client *client, NPC* spawn) {
 
-    if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE npc_types SET name=\"%s\", level=%i, race=%i, class=%i, hp=%i, gender=%i, texture=%i, helmtexture=%i, size=%i, loottable_id=%i, merchant_id=%i, face=%i, WHERE id=%i", spawn->GetName(), spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(), spawn->MerchantType, spawn->GetNPCTypeID()), errbuf, 0)) {
-		if(client)
-            client->LogSQL(query);
-        safe_delete_array(query);
-        return true;
-    }
-    else {
-        safe_delete_array(query);
-        return false;
-    }
+	std::string query = StringFormat("UPDATE npc_types SET name = \"%s\", level = %i, race = %i, class = %i, "
+                                    "hp = %i, gender = %i, texture = %i, helmtexture = %i, size = %i, "
+                                    "loottable_id = %i, merchant_id = %i, face = %i, WHERE id = %i",
+                                    spawn->GetName(), spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(),
+                                    spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(),
+                                    spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(),
+                                    spawn->MerchantType, spawn->GetNPCTypeID());
+    auto results = QueryDatabase(query);
+    if (!results.Success() && client)
+            client->LogSQL(query.c_str());
+
+    return results.Success() == true? 1: 0;
 }
 
 uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_version, Client *c, NPC* spawn, uint32 extra) {
@@ -1150,13 +1145,13 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 	uint32 last_insert_id = 0;
 	switch (command) {
 		case 0: { // Create a new NPC and add all spawn related data
-			return CreateNewNPCCommand(command, zone, zone_version, c, spawn, extra);
+			return CreateNewNPCCommand(zone, zone_version, c, spawn, extra);
 		}
 		case 1:{ // Add new spawn group and spawn point for an existing NPC Type ID
-			return AddNewNPCSpawnGroupCommand(command, zone, zone_version, c, spawn, extra);
+			return AddNewNPCSpawnGroupCommand(zone, zone_version, c, spawn, extra);
 		}
 		case 2: { // Update npc_type appearance and other data on targeted spawn
-			return UpdateNPCTypeAppearance(command, zone, zone_version, c, spawn);
+			return UpdateNPCTypeAppearance(c, spawn);
 		}
 		case 3: { // delete spawn from spawning, but leave in npc_types table
 			if (!RunQuery(query, MakeAnyLenString(&query, "SELECT id,spawngroupID from spawn2 where zone='%s' AND spawngroupID=%i", zone, spawn->GetSp2()), errbuf, &result)) {
