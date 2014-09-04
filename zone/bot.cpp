@@ -4681,41 +4681,43 @@ std::list<SpawnedBotsList> Bot::ListSpawnedBots(uint32 characterID, std::string*
 }
 
 void Bot::SaveBotGroup(Group* botGroup, std::string botGroupName, std::string* errorMessage) {
-	if(botGroup && !botGroupName.empty()) {
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
+	if(!botGroup || botGroupName.empty())
+        return;
 
-		Mob* tempGroupLeader = botGroup->GetLeader();
+    Mob* tempGroupLeader = botGroup->GetLeader();
 
-		if(tempGroupLeader->IsBot()) {
-			uint32 botGroupId = 0;
+    if(!tempGroupLeader->IsBot())
+        return;
 
-			uint32 botGroupLeaderBotId = tempGroupLeader->CastToBot()->GetBotID();
+    uint32 botGroupId = 0;
+    uint32 botGroupLeaderBotId = tempGroupLeader->CastToBot()->GetBotID();
 
-			if(!database.RunQuery(query, MakeAnyLenString(&query, "INSERT into botgroup (BotGroupLeaderBotId, BotGroupName) values (%u, '%s')", botGroupLeaderBotId, botGroupName.c_str()), errbuf, 0, 0, &botGroupId)) {
-				*errorMessage = std::string(errbuf);
-			}
-			else {
-				if(botGroupId > 0) {
-					for(int counter = 0; counter < botGroup->GroupCount(); counter++) {
-						Mob* tempBot = botGroup->members[counter];
+    std::string query = StringFormat("INSERT INTO botgroup (BotGroupLeaderBotId, BotGroupName) "
+                                    "VALUES (%u, '%s')", botGroupLeaderBotId, botGroupName.c_str());
+    auto results = database.QueryDatabase(query);
+    if(!results.Success()) {
+        *errorMessage = std::string(results.ErrorMessage());
+        return;
+    }
 
-						if(tempBot && tempBot->IsBot()) {
-							uint32 botGroupMemberBotId = tempBot->CastToBot()->GetBotID();
+    if(botGroupId == 0)
+        return;
 
-							safe_delete_array(query);
+    for(int groupMemberIndex = 0; groupMemberIndex < botGroup->GroupCount(); groupMemberIndex++) {
+        Mob* tempBot = botGroup->members[groupMemberIndex];
 
-							if(!database.RunQuery(query, MakeAnyLenString(&query, "INSERT into botgroupmembers (BotGroupId, BotId) values (%u, %u)", botGroupId, botGroupMemberBotId), errbuf)) {
-								*errorMessage = std::string(errbuf);
-							}
-						}
-					}
-				}
-			}
+        if(!tempBot || !tempBot->IsBot())
+            continue;
 
-			safe_delete_array(query);
-		}
-	}
+        uint32 botGroupMemberBotId = tempBot->CastToBot()->GetBotID();
+
+        query = StringFormat("INSERT INTO botgroupmembers (BotGroupId, BotId) "
+                            "VALUES (%u, %u)", botGroupId, botGroupMemberBotId);
+        results = database.QueryDatabase(query);
+        if(!results.Success())
+            *errorMessage = std::string(results.ErrorMessage());
+    }
+
 }
 
 void Bot::DeleteBotGroup(std::string botGroupName, std::string* errorMessage) {
