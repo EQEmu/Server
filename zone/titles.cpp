@@ -235,48 +235,37 @@ bool TitleManager::IsNewTradeSkillTitleAvailable(int SkillID, int SkillValue)
 	return false;
 }
 
-void TitleManager::CreateNewPlayerTitle(Client *c, const char *Title)
+void TitleManager::CreateNewPlayerTitle(Client *client, const char *title)
 {
-	if(!c || !Title)
+	if(!client || !title)
 		return;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = nullptr;
-	MYSQL_RES *result;
+	char *escTitle = new char[strlen(title) * 2 + 1];
 
-	char *EscTitle = new char[strlen(Title) * 2 + 1];
+	client->SetAATitle(title);
 
-	c->SetAATitle(Title);
-
-	database.DoEscapeString(EscTitle, Title, strlen(Title));
-
-	if (database.RunQuery(query, MakeAnyLenString(&query,
-		"SELECT `id` from titles where `prefix` = '%s' and char_id = %i", EscTitle, c->CharacterID()), errbuf, &result))
-	{
-		if(mysql_num_rows(result) > 0)
-		{
-			mysql_free_result(result);
-			safe_delete_array(query);
-			safe_delete_array(EscTitle);
-			return;
-		}
-		mysql_free_result(result);
+	database.DoEscapeString(escTitle, title, strlen(title));
+    auto query = StringFormat("SELECT `id` FROM titles "
+                            "WHERE `prefix` = '%s' AND char_id = %i",
+                            escTitle, client->CharacterID());
+    auto results = database.QueryDatabase(query);
+	if (results.Success() && results.RowCount() > 0){
+        safe_delete_array(escTitle);
+        return;
 	}
 
-	safe_delete_array(query);
+	query = StringFormat("INSERT INTO titles (`char_id`, `prefix`) VALUES(%i, '%s')",
+							client->CharacterID(), escTitle);
+    safe_delete_array(escTitle);
+    results = database.QueryDatabase(query);
+	if(!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error adding title: %s %s", query.c_str(), results.ErrorMessage().c_str());
+        return;
+    }
 
-	if(!database.RunQuery(query,MakeAnyLenString(&query, "INSERT into titles (`char_id`, `prefix`) VALUES(%i, '%s')",
-							c->CharacterID(), EscTitle), errbuf))
-		LogFile->write(EQEMuLog::Error, "Error adding title: %s %s", query, errbuf);
-	else
-	{
-		ServerPacket* pack = new ServerPacket(ServerOP_ReloadTitles, 0);
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-	safe_delete_array(query);
-	safe_delete_array(EscTitle);
-
+    ServerPacket* pack = new ServerPacket(ServerOP_ReloadTitles, 0);
+    worldserver.SendPacket(pack);
+    safe_delete(pack);
 }
 
 void TitleManager::CreateNewPlayerSuffix(Client *c, const char *Suffix)
