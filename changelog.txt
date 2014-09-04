@@ -3,6 +3,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 == 09/03/2014 ==
 Secrets: Identified the routines needed to augment items in RoF. Currently, only Insert and Remove are supported. Swap and Destroy do not work due to missing functions related to the cursor.
 demonstar55: Added work around command to show numhits on your buffs (#shownumhits)
+Uleat: Fix for timer issue introduced by Zone::ShutDown() fix.
 
 == 09/02/2014 ==
 Secrets: Identified OP_GuildPromote for RoF clients.
