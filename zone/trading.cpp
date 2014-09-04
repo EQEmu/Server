@@ -1624,50 +1624,35 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs,Client* Trader,const EQApplicat
 
 void Client::SendBazaarWelcome(){
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	const std::string query = "SELECT COUNT(DISTINCT char_id), count(char_id) FROM trader";
+    auto results = database.QueryDatabase(query);
+	if (results.Success() && results.RowCount() == 1){
+        auto row = results.begin();
 
-	char* query = 0;
+        EQApplicationPacket* outapp = new EQApplicationPacket(OP_BazaarSearch, sizeof(BazaarWelcome_Struct));
 
-	MYSQL_RES *result;
+        memset(outapp->pBuffer,0,outapp->size);
 
-	MYSQL_ROW row;
+        BazaarWelcome_Struct* bws = (BazaarWelcome_Struct*)outapp->pBuffer;
 
-	if (database.RunQuery(query,MakeAnyLenString(&query, "select count(distinct char_id),count(char_id) from trader"),errbuf,&result)){
-		if(mysql_num_rows(result)==1){
+        bws->Beginning.Action = BazaarWelcome;
 
-			row = mysql_fetch_row(result);
+        bws->Traders = atoi(row[0]);
+        bws->Items = atoi(row[1]);
 
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_BazaarSearch, sizeof(BazaarWelcome_Struct));
+        QueuePacket(outapp);
 
-			memset(outapp->pBuffer,0,outapp->size);
+        safe_delete(outapp);
+    }
 
-			BazaarWelcome_Struct* bws = (BazaarWelcome_Struct*)outapp->pBuffer;
+    const std::string buyerCountQuery = "SELECT COUNT(DISTINCT charid) FROM buyer";
+    results = database.QueryDatabase(query);
+	if (!results.Success() || results.RowCount() != 1)
+        return;
 
-			bws->Beginning.Action = BazaarWelcome;
-
-			bws->Items = atoi(row[1]);
-
-			bws->Traders = atoi(row[0]);
-
-			QueuePacket(outapp);
-
-			safe_delete(outapp);
-		}
-		mysql_free_result(result);
-	}
-	safe_delete_array(query);
-
-	if (database.RunQuery(query,MakeAnyLenString(&query, "select count(distinct charid) from buyer"),errbuf,&result)){
-		if(mysql_num_rows(result)==1) {
-
-			row = mysql_fetch_row(result);
-
-			Message(10, "There are %i Buyers waiting to purchase your loot. Type /barter to search for them,"
-					" or use /buyer to set up your own Buy Lines.", atoi(row[0]));
-		}
-		mysql_free_result(result);
-	}
-	safe_delete_array(query);
+    auto row = results.begin();
+    Message(10, "There are %i Buyers waiting to purchase your loot. Type /barter to search for them, "
+				"or use /buyer to set up your own Buy Lines.", atoi(row[0]));
 }
 
 void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint32 ItemStat, uint32 Slot, uint32 Type,
