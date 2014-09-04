@@ -4260,27 +4260,21 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
 
 // Returns the inventory record for this bot from the database for the specified equipment slot.
 uint32 Bot::GetBotItemBySlot(uint32 slotID) {
-	uint32 Result = 0;
 
-	if(this->GetBotID() > 0 && slotID >= EmuConstants::EQUIPMENT_BEGIN) {
-		char* query = 0;
-		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
+	if(this->GetBotID() == 0 || slotID < EmuConstants::EQUIPMENT_BEGIN)
+        return 0;
 
-		if(database.RunQuery(query, MakeAnyLenString(&query, "SELECT itemid FROM botinventory WHERE botid=%i AND slotid=%i", GetBotID(), slotID), 0, &DatasetResult)) {
-			if(mysql_num_rows(DatasetResult) == 1) {
-				DataRow = mysql_fetch_row(DatasetResult);
-				if(DataRow)
-					Result = atoi(DataRow[0]);
-			}
+    std::string query = StringFormat("SELECT itemid FROM botinventory WHERE botid=%i AND slotid = %i", GetBotID(), slotID);
+    auto results = database.QueryDatabase(query);
+    if(results.Success())
+        return 0;
 
-			mysql_free_result(DatasetResult);
-		}
+    if(results.RowCount() != 1)
+        return 0;
 
-		safe_delete_array(query);
-	}
+	auto row = results.begin();
 
-	return Result;
+	return atoi(row[0]);
 }
 
 // Returns the number of inventory records the bot has in the database.
