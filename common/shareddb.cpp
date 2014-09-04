@@ -61,46 +61,6 @@ bool SharedDatabase::SetHideMe(uint32 account_id, uint8 hideme)
 	return true;
 
 }
-bool SharedDatabase::SetPlayerProfile(uint32 account_id, uint32 charid, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, uint32 current_zone, uint32 current_instance, uint8 MaxXTargets) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	uint32 affected_rows = 0;
-	bool ret = false;
-
-	if (RunQuery(query, SetPlayerProfile_MQ(&query, account_id, charid, pp, inv, ext, current_zone, current_instance, MaxXTargets), errbuf, 0, &affected_rows)) {
-		ret = (affected_rows != 0);
-	}
-
-	if (!ret) {
-		LogFile->write(EQEMuLog::Error, "SetPlayerProfile query '%s' %s", query, errbuf);
-	}
-
-	safe_delete_array(query);
-	return ret;
-}
-
-// Generate SQL for updating player profile
-uint32 SharedDatabase::SetPlayerProfile_MQ(char** query, uint32 account_id, uint32 charid, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, uint32 current_zone, uint32 current_instance, uint8 MaxXTargets) {
-	*query = new char[396 + sizeof(PlayerProfile_Struct)* 2 + sizeof(ExtendedProfile_Struct)* 2 + 4];
-	char* end = *query;
-	if (!current_zone)
-		current_zone = pp->zone_id;
-
-	if (!current_instance)
-		current_instance = pp->zoneInstance;
-
-	if (strlen(pp->name) == 0) // Sanity check in case pp never loaded
-		return false;
-
-	end += sprintf(end, "UPDATE character_ SET timelaston=unix_timestamp(now()),name=\'%s\', zonename=\'%s\', zoneid=%u, instanceid=%u, x = %f, y = %f, z = %f, ", pp->name, GetZoneName(current_zone), current_zone, current_instance, pp->x, pp->y, pp->z);
-	// end += DoEscapeString(end, (char*)pp, sizeof(PlayerProfile_Struct));
-	end += sprintf(end, " extprofile=\'");
-	end += DoEscapeString(end, (char*)ext, sizeof(ExtendedProfile_Struct));
-	end += sprintf(end, "\',class=%d,level=%d,xtargets=%u WHERE id=%u", pp->class_, pp->level, MaxXTargets, charid);
-
-	return (uint32)(end - (*query));
-}
-
 
 uint8 SharedDatabase::GetGMSpeed(uint32 account_id)
 {
@@ -386,12 +346,11 @@ int32 SharedDatabase::GetSharedPlatinum(uint32 account_id)
 	return 0;
 }
 
-bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add)
-{
+bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE account SET sharedplat = sharedplat + %i WHERE id = %i", amount_to_add, account_id), errbuf)) {
+	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE `account` SET `sharedplat` = `sharedplat` + %i WHERE id = %i", amount_to_add, account_id), errbuf)) {
 		std::cerr << "Error in SetSharedPlatinum query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
@@ -401,35 +360,24 @@ bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add)
 	return true;
 }
 
-bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin_level)
-{
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin_level) {
 	const Item_Struct* myitem;
-
-	RunQuery
-	(
-		query,
-		MakeAnyLenString
-		(
-			&query,
-			"SELECT itemid, item_charges, slot FROM starting_items "
-			"WHERE (race = %i or race = 0) AND (class = %i or class = 0) AND "
-			"(deityid = %i or deityid=0) AND (zoneid = %i or zoneid = 0) AND "
-			"gm <= %i ORDER BY id",
-			si_race, si_class, si_deity, si_current_zone, admin_level
-		),
-		errbuf,
-		&result
-	);
-	safe_delete_array(query);
-
-	while((row = mysql_fetch_row(result))) {
-		int itemid = atoi(row[0]);
-		int charges = atoi(row[1]);
-		int slot = atoi(row[2]);
+	uint32 itemid = 0;
+	uint32 charges = 0;
+	uint32 slot = 0;
+	auto query = StringFormat(
+		"SELECT `itemid`, `item_charges`, `slot` FROM `starting_items`"
+		" WHERE (`race` = %i OR `race` = 0)"
+		" AND (`class` = %i OR `class` = 0)"
+		" AND  (`deityid` = %i OR `deityid` = 0)"
+		" AND (`zoneid` = %i OR `zoneid` = 0)"
+		" AND gm <= %i ORDER BY id",
+		si_race, si_class, si_deity, si_current_zone, admin_level);
+	auto results = QueryDatabase(query); 
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		itemid = atoi(row[0]); 
+		charges = atoi(row[1]);
+		slot = atoi(row[2]);
 		myitem = GetItem(itemid);
 		if(!myitem)
 			continue;
@@ -439,9 +387,6 @@ bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, 
 		inv->PutItem(slot, *myinst);
 		safe_delete(myinst);
 	}
-
-	if(result) mysql_free_result(result);
-
 	return true;
 }
 
@@ -675,8 +620,13 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
 	bool ret = false;
 
 	// Retrieve character inventory
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT slotid,itemid,charges,color,augslot1,augslot2,augslot3,augslot4,augslot5,"
-		"instnodrop,custom_data FROM inventory INNER JOIN character_ ch ON ch.id=charid WHERE ch.name='%s' AND ch.account_id=%i ORDER BY slotid",
+	if (RunQuery(query, MakeAnyLenString(&query, 
+		" SELECT `slotid`, `itemid`, `charges`, `color`, `augslot1`, `augslot2`, `augslot3`, `augslot4`, `augslot5`, `instnodrop`, `custom_data`"
+		" FROM `inventory`"
+		" INNER JOIN character_ ch ON ch.id = charid"
+		" WHERE ch.NAME = '%s'"
+		" AND ch.account_id = % i"
+		" ORDER BY `slotid`",
 		name, account_id), errbuf, &result))
 	{
 		while ((row = mysql_fetch_row(result))) {
@@ -736,7 +686,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
 					}
 				}
 			}
-			if (slot_id>=8000 && slot_id <= 8999)
+			if (slot_id >= 8000 && slot_id <= 8999)
 				put_slot_id = inv->PushCursor(*inst);
 			else
 				put_slot_id = inv->PutItem(slot_id, *inst);
@@ -2053,8 +2003,7 @@ const LootDrop_Struct* SharedDatabase::GetLootDrop(uint32 lootdrop_id) {
 	return nullptr;
 }
 
-void SharedDatabase::GetPlayerInspectMessage(char* playername, InspectMessage_Struct* message) {
-
+void SharedDatabase::GetPlayerInspectMessage(char* playername, InspectMessage_Struct* message) { 
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 	MYSQL_RES *result;

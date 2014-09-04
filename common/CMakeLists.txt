@@ -8,7 +8,6 @@ SET(common_sources
 	crc16.cpp
 	crc32.cpp
 	database.cpp
-	dbasync.cpp
 	dbcore.cpp
 	debug.cpp
 	emu_opcodes.cpp
@@ -103,7 +102,6 @@ SET(common_headers
 	crc16.h
 	crc32.h
 	database.h
-	dbasync.h
 	dbcore.h
 	debug.h
 	deity.h

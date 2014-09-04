@@ -77,9 +77,6 @@ extern volatile bool ZoneLoaded;
 extern WorldServer worldserver;
 extern PetitionList petition_list;
 extern EntityList entity_list;
-extern DBAsyncFinishedQueue MTdbafq;
-extern DBAsync *dbasync;
-
 typedef void (Client::*ClientPacketProc)(const EQApplicationPacket *app);
 
 //Use a map for connecting opcodes since it dosent get used a lot and is sparse
@@ -525,7 +522,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		client_state = CLIENT_KICKED;
 		return;
 	}
-
 	
 	strcpy(name, cze->char_name);
 	/* Check for Client Spoofing */
@@ -592,19 +588,20 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		if (LFG){ LFG = atoi(row[12]); }
 		if (firstlogon){ firstlogon = atoi(row[15]); }
 	}
-	
+
 	loaditems = database.GetInventory(cid, &m_inv); /* Load Character Inventory */
+	database.LoadCharacterBandolier(cid, &m_pp); /* Load Character Bandolier */
 	database.LoadCharacterBindPoint(cid, &m_pp); /* Load Character Bind */
 	database.LoadCharacterMaterialColor(cid, &m_pp); /* Load Character Material */
+	database.LoadCharacterPotions(cid, &m_pp); /* Load Character Potion Belt */
 	database.LoadCharacterCurrency(cid, &m_pp); /* Load Character Currency into PP */
 	database.LoadCharacterData(cid, &m_pp); /* Load Character Data from DB into PP */
-	database.GetPlayerInspectMessage(m_pp.name, &m_inspect_message); /* Move to another method when can, this is pointless... */
-	database.LoadCharacterCurrency(cid, &m_pp); /* Load Character Currency */
 	database.LoadCharacterSkills(cid, &m_pp); /* Load Character Skills */
-	database.LoadCharacterLanguages(cid, &m_pp); /* Load Character Languages */
+	database.GetPlayerInspectMessage(m_pp.name, &m_inspect_message); /* Move to another method when can, this is pointless... */
 	database.LoadCharacterSpellBook(cid, &m_pp); /* Load Character Spell Book */
 	database.LoadCharacterMemmedSpells(cid, &m_pp);  /* Load Character Memorized Spells */
 	database.LoadCharacterDisciplines(cid, &m_pp); /* Load Character Disciplines */
+	database.LoadCharacterLanguages(cid, &m_pp); /* Load Character Languages */
 
 	if (level){ level = m_pp.level; }
 
@@ -612,9 +609,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (gmhideme) { trackable = false; }
 	/* Set Con State for Reporting */
 	conn_state = PlayerProfileLoaded;
-	
-	// m_pp.zone_id = zone->GetZoneID();
-	// m_pp.zoneInstance = zone->GetInstanceID();
 
 	/* Set Total Seconds Played */
 	TotalSecondsPlayed = m_pp.timePlayedMin * 60;
@@ -9168,38 +9162,6 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) {
-	Entity::DBAWComplete(workpt_b1, dbaw);
-	switch (workpt_b1) {
-		case DBA_b1_Entity_Client_Save: {
-			clock_t t = std::clock(); /* Function timer start */
-
-			char errbuf[MYSQL_ERRMSG_SIZE];
-			uint32 affected_rows = 0;
-			DBAsyncQuery* dbaq = dbaw->PopAnswer();
-			if (dbaq->GetAnswer(errbuf, 0, &affected_rows) && affected_rows == 1) {
-				if (dbaq->QPT()) {
-					SaveBackup();
-				}
-			}
-			else {
-				std::cout << "Async client save failed. '" << errbuf << "'" << std::endl;
-				Message(13, "Error: Asyncronous save of your character failed.");
-				if (Admin() >= 200)
-					Message(13, "errbuf: %s", errbuf);
-			}
-			pQueuedSaveWorkID = 0;
-
-			LogFile->write(EQEMuLog::Status, "Client::DBAWComplete Save Character Async done... Took %f seconds", ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
-			break;
-		}
-		default: {
-			std::cout << "Error: Client::DBAWComplete(): Unknown workpt_b1" << std::endl;
-			break;
-		}
-	}
-}
-
 /* Finish client connecting state */
 void Client::CompleteConnect() {
 	UpdateWho();
@@ -9221,7 +9183,7 @@ void Client::CompleteConnect() {
 		SendAppearancePacket(AT_GuildID, GuildID(), false);
 		SendAppearancePacket(AT_GuildRank, GuildRank(), false);
 	}
-	for (uint32 spellInt = 0; spellInt < MAX_PP_SPELLBOOK; spellInt++) {
+	for (uint32 spellInt = 0; spellInt < MAX_PP_REF_SPELLBOOK; spellInt++) {
 		if (m_pp.spell_book[spellInt] < 3 || m_pp.spell_book[spellInt] > 50000)
 			m_pp.spell_book[spellInt] = 0xFFFFFFFF;
 	}
@@ -9417,7 +9379,7 @@ void Client::CompleteConnect() {
 		SendWearChange(x);
 	Mob *pet = GetPet();
 	if (pet != nullptr) {
-		for (x = 0; x < 8; x++)
+		for (x = 0; x < 8; x++) 
 			pet->SendWearChange(x);
 	}
 
@@ -9496,6 +9458,8 @@ void Client::CompleteConnect() {
 	SendAlternateCurrencyValues();
 	alternate_currency_loaded = true;
 	ProcessAlternateCurrencyQueue();
+
+
 
 	CalcItemScale();
 	DoItemEnterZone();
@@ -10504,8 +10468,7 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app) {
 	}
 }
 
-void Client::Handle_OP_PotionBelt(const EQApplicationPacket *app) {
-
+void Client::Handle_OP_PotionBelt(const EQApplicationPacket *app) { 
 	if(app->size != sizeof(MovePotionToBelt_Struct)) {
 		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_PotionBelt expected %i got %i",
 					sizeof(MovePotionToBelt_Struct), app->size);
@@ -10519,6 +10482,7 @@ void Client::Handle_OP_PotionBelt(const EQApplicationPacket *app) {
 			m_pp.potionbelt.items[mptbs->SlotNumber].item_id = BaseItem->ID;
 			m_pp.potionbelt.items[mptbs->SlotNumber].icon = BaseItem->Icon;
 			strn0cpy(m_pp.potionbelt.items[mptbs->SlotNumber].item_name, BaseItem->Name, sizeof(BaseItem->Name));
+			database.SaveCharacterPotionBelt(this->CharacterID(), mptbs->SlotNumber, m_pp.potionbelt.items[mptbs->SlotNumber].item_id, m_pp.potionbelt.items[mptbs->SlotNumber].icon);
 		}
 	}
 	else {
@@ -10526,9 +10490,6 @@ void Client::Handle_OP_PotionBelt(const EQApplicationPacket *app) {
 		m_pp.potionbelt.items[mptbs->SlotNumber].icon = 0;
 		strncpy(m_pp.potionbelt.items[mptbs->SlotNumber].item_name, "\0", 1);
 	}
-
-	Save();
-
 }
 
 void Client::Handle_OP_LFGGetMatchesRequest(const EQApplicationPacket *app) {

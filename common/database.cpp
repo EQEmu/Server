@@ -71,55 +71,25 @@ Database::Database(const char* host, const char* user, const char* passwd, const
 	Connect(host, user, passwd, database, port);
 }
 
-bool Database::Connect(const char* host, const char* user, const char* passwd, const char* database, uint32 port)
-{
+bool Database::Connect(const char* host, const char* user, const char* passwd, const char* database, uint32 port) {
 	uint32 errnum= 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	if (!Open(host, user, passwd, database, port, &errnum, errbuf))
-	{
+	if (!Open(host, user, passwd, database, port, &errnum, errbuf)) {
 		LogFile->write(EQEMuLog::Error, "Failed to connect to database: Error: %s", errbuf);
-		HandleMysqlError(errnum);
 
 		return false; 
 	}
-	else
-	{
+	else {
 		LogFile->write(EQEMuLog::Status, "Using database '%s' at %s:%d",database,host,port);
 		return true;
 	}
 }
 
-void Database::DBInitVars() {
-
+void Database::DBInitVars() { 
 	varcache_array = 0;
 	varcache_max = 0;
 	varcache_lastupdate = 0;
 }
-
-void Database::HandleMysqlError(uint32 errnum) {
-/*	switch(errnum) {
-		case 0:
-			break;
-		case 1045: // Access Denied
-		case 2001: {
-			AddEQEMuError(EQEMuError_Mysql_1405, true);
-			break;
-		}
-		case 2003: { // Unable to connect
-			AddEQEMuError(EQEMuError_Mysql_2003, true);
-			break;
-		}
-		case 2005: { // Unable to connect
-			AddEQEMuError(EQEMuError_Mysql_2005, true);
-			break;
-		}
-		case 2007: { // Unable to connect
-			AddEQEMuError(EQEMuError_Mysql_2007, true);
-			break;
-		}
-	}*/
-}
-
 /*
 
 Close the connection to the database
@@ -191,24 +161,18 @@ bool Database::CheckBannedIPs(const char* loginIP)
 	return false;
 }
 
-bool Database::AddBannedIP(char* bannedIP, const char* notes)
-{
-	std::string query = StringFormat("INSERT into Banned_IPs SET ip_address='%s', notes='%s'", bannedIP, notes);
-
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-	{
-		std::cerr << "Error in ReserveName query '" << query << "' " << results.ErrorMessage() << std::endl;
+bool Database::AddBannedIP(char* bannedIP, const char* notes) {
+	std::string query = StringFormat("INSERT into Banned_IPs SET ip_address='%s', notes='%s'", bannedIP, notes); 
+	auto results = QueryDatabase(query); 
+	if (!results.Success()) {
+		std::cerr << "Error in Database::AddBannedIP query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
-	}
-
+	} 
 	return true;
 }
 
  bool Database::CheckGMIPs(const char* ip_address, uint32 account_id) {
-	std::string query = StringFormat("SELECT * FROM `gm_ips` WHERE `ip_address` = '%s' AND `account_id` = %i", ip_address, account_id);
-
+	std::string query = StringFormat("SELECT * FROM `gm_ips` WHERE `ip_address` = '%s' AND `account_id` = %i", ip_address, account_id); 
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
@@ -221,32 +185,24 @@ bool Database::AddBannedIP(char* bannedIP, const char* notes)
 }
 
 bool Database::AddGMIP(char* ip_address, char* name) {
-	std::string query = StringFormat("INSERT into `gm_ips` SET `ip_address` = '%s', `name` = '%s'", ip_address, name);
-
-	auto results = QueryDatabase(query);
-
+	std::string query = StringFormat("INSERT into `gm_ips` SET `ip_address` = '%s', `name` = '%s'", ip_address, name); 
+	auto results = QueryDatabase(query); 
 	return results.Success();
 }
 
-void Database::LoginIP(uint32 AccountID, const char* LoginIP)
-{
-	std::string query = StringFormat("INSERT INTO account_ip SET accid=%i, ip='%s' ON DUPLICATE KEY UPDATE count=count+1, lastused=now()", AccountID, LoginIP);
-
-	auto results = QueryDatabase(query);
-
+void Database::LoginIP(uint32 AccountID, const char* LoginIP) {
+	std::string query = StringFormat("INSERT INTO account_ip SET accid=%i, ip='%s' ON DUPLICATE KEY UPDATE count=count+1, lastused=now()", AccountID, LoginIP); 
+	auto results = QueryDatabase(query); 
 	if (!results.Success())
 		std::cerr << "Error in Log IP query '" << query << "' " << results.ErrorMessage() << std::endl;
 }
 
-int16 Database::CheckStatus(uint32 account_id)
-{
+int16 Database::CheckStatus(uint32 account_id) {
 	std::string query = StringFormat("SELECT `status`, UNIX_TIMESTAMP(`suspendeduntil`) as `suspendeduntil`, UNIX_TIMESTAMP() as `current`"
 							" FROM `account` WHERE `id` = %i", account_id);
 
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-	{
+	auto results = QueryDatabase(query); 
+	if (!results.Success()) {
 		std::cerr << "Error in CheckStatus query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
@@ -254,10 +210,8 @@ int16 Database::CheckStatus(uint32 account_id)
 	if (results.RowCount() != 1)
 		return 0;
 	
-	auto row = results.begin();
-
-	int16 status = atoi(row[0]);
-
+	auto row = results.begin(); 
+	int16 status = atoi(row[0]); 
 	int32 suspendeduntil = 0;
 
 	// MariaDB initalizes with NULL if unix_timestamp() is out of range
@@ -281,12 +235,10 @@ uint32 Database::CreateAccount(const char* name, const char* password, int16 sta
 	else
 		query = StringFormat("INSERT INTO account SET name='%s', status=%i, lsaccount_id=%i, time_creation=UNIX_TIMESTAMP();",name, status, lsaccount_id);
 
-	std::cerr << "Account Attempting to be created:" << name << " " << (int16) status << std::endl;
-
+	std::cerr << "Account Attempting to be created:" << name << " " << (int16) status << std::endl; 
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
-	{
+	if (!results.Success()) {
 		std::cerr << "Error in CreateAccount query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
@@ -301,8 +253,7 @@ uint32 Database::CreateAccount(const char* name, const char* password, int16 sta
 }
 
 bool Database::DeleteAccount(const char* name) {
-	std::string query = StringFormat("DELETE FROM account WHERE name='%s';",name);
-
+	std::string query = StringFormat("DELETE FROM account WHERE name='%s';",name); 
 	std::cout << "Account Attempting to be deleted:" << name << std::endl;
 
 	auto results = QueryDatabase(query);
@@ -317,7 +268,7 @@ bool Database::DeleteAccount(const char* name) {
 }
 
 bool Database::SetLocalPassword(uint32 accid, const char* password) {
-	std::string query = StringFormat("UPDATE account SET password=MD5('%s') where id=%i;", password, accid);
+	std::string query = StringFormat("UPDATE `account` SET `password` = MD5('%s') where id=%i;", password, accid);
 
 	auto results = QueryDatabase(query);
 
@@ -342,275 +293,394 @@ bool Database::SetAccountStatus(const char* name, int16 status) {
 	if (results.RowsAffected() == 0)
 	{
 		std::cout << "Account: " << name << " does not exist, therefore it cannot be flagged\n";
-		return false;
+		return false; 
 	}
 
 	return true;
 }
 
-bool Database::ReserveName(uint32 account_id, char* name)
-{
-	std::string query = StringFormat("INSERT into character_ SET account_id=%i, name='%s', profile=NULL", account_id, name);
-
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-	{
-		std::cerr << "Error in ReserveName query '" << query << "' " << results.ErrorMessage() << std::endl;
-		return false;
-	}
-
+/* This initially creates the character during character create */
+bool Database::ReserveName(uint32 account_id, char* name) {
+	std::string query = StringFormat("INSERT INTO `character_data` SET `account_id` = %i, `name` = '%s'", account_id, name); 
+	auto results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "Database::ReserveName", query); 
 	return true;
+}
+
+bool Database::ThrowDBError(std::string ErrorMessage, std::string query_title, std::string query){  
+	if (ErrorMessage != ""){ std::cout << "\nERROR " << query_title << ": " << ErrorMessage << "\n\n" << query << "\n" << std::endl; return true; }
+	return false;
 }
 
 /*
-Delete the character with the name "name"
-returns false on failure, true otherwise
+	Delete the character with the name "name"
+	returns false on failure, true otherwise
 */
-bool Database::DeleteCharacter(char *name)
-{
-	std::string query=StringFormat("SELECT id from character_ WHERE name='%s'", name);
-	int charid;
-
-	if(!name ||	!strlen(name))
-	{
+bool Database::DeleteCharacter(char *name) {
+	uint32 charid = 0;
+	printf("Database::DeleteCharacter name : %s \n", name);
+	if(!name ||	!strlen(name)) {
 		std::cerr << "DeleteCharacter: request to delete without a name (empty char slot)" << std::endl;
 		return false;
 	}
 
-// get id from character_ before deleting record so we can clean up inventory and qglobal
-
-#if DEBUG >= 5
-	std::cout << "DeleteCharacter: Attempting to delete '" << name << "'" << std::endl;
-#endif
-
+	/* Get id from character_data before deleting record so we can clean up the rest of the tables */
+	std::string query = StringFormat("SELECT `id` from `character_data` WHERE `name` = '%s'", name);
 	auto results = QueryDatabase(query);
+	for (auto row = results.begin(); row != results.end(); ++row) { charid = atoi(row[0]); }
+	if (charid <= 0){ std::cerr << "Database::DeleteCharacter :: Character not found, stopping delete...\n"; return false; }
 
-	if(results.RowCount() != 1)
-	{
-		std::cerr << "DeleteCharacter error: got " << results.RowCount() << " rows matching '" << name << "'" << std::endl;
-		return false;
-	}
-
-	auto row = results.begin();
-	charid = atoi(row[0]);
-
-#if DEBUG >= 5
-	std::cout << "DeleteCharacter: found '" <<  name << "' with char id: " << charid << std::endl;
-	std::cout << "DeleteCharacter: deleting << '" << name << "' (id " << charid << "): " << std::endl;
-	std::cout << " quest_globals";
-#endif
-
-	query = StringFormat("DELETE from quest_globals WHERE charid='%d'", charid);
+	query = StringFormat("DELETE FROM `quest_globals` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);			 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_activities` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);	 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_enabledtasks` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);	 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `completed_tasks` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);		 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `friends` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `mail` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);					 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `timers` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `inventory` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `char_recipe_list` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);		 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `adventure_stats` WHERE `player_id` ='%d'", charid); results = QueryDatabase(query);		 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `zone_flags` WHERE `charID` = '%d'", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `titles` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `player_titlesets` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);		 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `keyring` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `faction_values` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);		 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `instance_list_player` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);	 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_data` WHERE `id` = '%d'", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_skills` WHERE `id` = %u", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_languages` WHERE `id` = %u", charid); results = QueryDatabase(query);			 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_bind` WHERE `id` = %u", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_alternate_abilities` WHERE `id` = %u", charid); results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_currency` WHERE `id` = %u", charid); results = QueryDatabase(query);			 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_data` WHERE `id` = %u", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_spells` WHERE `id` = %u", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_memmed_spells` WHERE `id` = %u", charid); results = QueryDatabase(query);		 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_disciplines` WHERE `id` = %u", charid); results = QueryDatabase(query);		 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_material` WHERE `id` = %u", charid); results = QueryDatabase(query);			 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_tribute` WHERE `id` = %u", charid); results = QueryDatabase(query);			 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_bandolier` WHERE `id` = %u", charid); results = QueryDatabase(query);			 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_potionbelt` WHERE `id` = %u", charid); results = QueryDatabase(query);			 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_alt_currency` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+#ifdef BOTS																														 
+	query = StringFormat("DELETE FROM `guild_members` WHERE `char_id` = '%d' AND GetMobTypeById(%i) = 'C'", charid);
+#else																															 
+	query = StringFormat("DELETE FROM `guild_members` WHERE `char_id` = '%d'", charid);
+#endif																															 
 	QueryDatabase(query);
-
-#if DEBUG >= 5
-	std::cout << " character_tasks";
-#endif
-
-	query = StringFormat("DELETE from character_tasks WHERE charid='%d'", charid);
-	QueryDatabase(query);
-
-#if DEBUG >= 5
-	std::cout << " character_activities";
-#endif
-
-	query = StringFormat("DELETE from character_activities WHERE charid='%d'", charid);
-	QueryDatabase(query);
-
-#if DEBUG >= 5
-	std::cout << " character_enabledtasks";
-#endif
-
-	query = StringFormat("DELETE from character_enabledtasks WHERE charid='%d'", charid);
-	QueryDatabase(query);
-
-#if DEBUG >= 5
-	std::cout << " completed_tasks";
-#endif
-
-	query = StringFormat("DELETE from completed_tasks WHERE charid='%d'", charid);
-	QueryDatabase(query);
-
-#if DEBUG >= 5
-	std::cout << " friends";
-#endif
-
-	query = StringFormat("DELETE from friends WHERE charid='%d'", charid);
-	QueryDatabase(query);
-
-#if DEBUG >= 5
-	std::cout << " mail";
-#endif
-
-	query = StringFormat( "DELETE from mail WHERE charid='%d'", charid);
-	QueryDatabase(query);
-
-#if DEBUG >= 5
-	std::cout << " ptimers";
-#endif
-
-	query = StringFormat("DELETE from timers WHERE char_id='%d'", charid);
-	QueryDatabase(query);
-
-#if DEBUG >= 5
-	std::cout << " inventory";
-#endif
-
-	query = StringFormat("DELETE from inventory WHERE charid='%d'", charid);
-	QueryDatabase(query);
-
-#if DEBUG >= 5
-	std::cout << " guild_members";
-#endif
-
-#ifdef BOTS
-	query = StringFormat("DELETE FROM guild_members WHERE char_id='%d' AND GetMobTypeById(%i) = 'C'", charid);
-#else
-	query = StringFormat("DELETE FROM guild_members WHERE char_id='%d'", charid);
-#endif
-	QueryDatabase(query);
-
-#if DEBUG >= 5
-	std::cout << " recipes";
-#endif
-
-	query = StringFormat("DELETE FROM char_recipe_list WHERE char_id='%d'", charid);
-	QueryDatabase(query);
-
-#if DEBUG >= 5
-	std::cout << " adventure_stats";
-#endif
-
-	query = StringFormat("DELETE FROM adventure_stats WHERE player_id='%d'", charid);
-	QueryDatabase(query);
-
-#if DEBUG >= 5
-	std::cout << " zone_flags";
-#endif
-
-	query = StringFormat("DELETE FROM zone_flags WHERE charID='%d'", charid);
-	QueryDatabase(query);
-
-#if DEBUG >= 5
-	std::cout << " titles";
-#endif
-
-	query = StringFormat("DELETE FROM titles WHERE char_id='%d'", charid);
-	QueryDatabase(query);
-
-#if DEBUG >= 5
-	std::cout << " titlesets";
-#endif
-
-	query = StringFormat("DELETE FROM player_titlesets WHERE char_id='%d'", charid);
-	QueryDatabase(query);
-
-#if DEBUG >= 5
-	std::cout << " keyring";
-#endif
-
-	query = StringFormat("DELETE FROM keyring WHERE char_id='%d'", charid);
-	QueryDatabase(query);
-
-#if DEBUG >= 5
-	std::cout << " factions";
-#endif
-
-	query = StringFormat("DELETE FROM faction_values WHERE char_id='%d'", charid);
-	QueryDatabase(query);
-
-#if DEBUG >= 5
-	std::cout << " instances";
-#endif
-
-	query = StringFormat("DELETE FROM instance_list_player WHERE charid='%d'", charid);
-	QueryDatabase(query);
-
-#if DEBUG >= 5
-	std::cout << " _character";
-#endif
-
-	query = StringFormat("DELETE from character_ WHERE id='%d'", charid);
-	results = QueryDatabase(query);
-
-	if(results.RowsAffected() != 1)	// here we have to have a match or it's an error
-	{
-		LogFile->write(EQEMuLog::Error, "DeleteCharacter: error: delete operation affected %d rows\n", results.RowsAffected());
-		return false;
-	}
-
-#if DEBUG >= 5
-	std::cout << " alternate currency";
-#endif
-
-	query = StringFormat("DELETE FROM character_alt_currency WHERE char_id='%d'", charid);
-	QueryDatabase(query);
-
-#if DEBUG >= 5
-	std::cout << std::endl;
-#endif
-	std::cout << "DeleteCharacter: successfully deleted '" << name << "' (id " << charid << ")" << std::endl;
-
+	
 	return true;
 }
 
-/* This only for new Character creation storing */
-bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext)
-{
-	char query[256+sizeof(PlayerProfile_Struct)*2+sizeof(ExtendedProfile_Struct)*2+5];
-	char* end = query;
-	uint32 charid = 0;
-	char zone[50];
-	float x, y, z;
+bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp){
+	std::string query = StringFormat(
+		"REPLACE INTO `character_data` ("
+		"id,"
+		"account_id,"
+		"`name`,"
+		"last_name,"
+		"gender,"
+		"race,"
+		"class,"
+		"`level`,"
+		"deity,"
+		"birthday,"
+		"last_login,"
+		"time_played,"
+		"pvp_status,"
+		"level2,"
+		"anon,"
+		"gm,"
+		"intoxication,"
+		"hair_color,"
+		"beard_color,"
+		"eye_color_1,"
+		"eye_color_2,"
+		"hair_style,"
+		"beard,"
+		"ability_time_seconds,"
+		"ability_number,"
+		"ability_time_minutes,"
+		"ability_time_hours,"
+		"title,"
+		"suffix,"
+		"exp,"
+		"points,"
+		"mana,"
+		"cur_hp,"
+		"str,"
+		"sta,"
+		"cha,"
+		"dex,"
+		"`int`,"
+		"agi,"
+		"wis,"
+		"face,"
+		"y,"
+		"x,"
+		"z,"
+		"heading,"
+		"pvp2,"
+		"pvp_type,"
+		"autosplit_enabled,"
+		"zone_change_count,"
+		"drakkin_heritage,"
+		"drakkin_tattoo,"
+		"drakkin_details,"
+		"toxicity,"
+		"hunger_level,"
+		"thirst_level,"
+		"ability_up,"
+		"zone_id,"
+		"zone_instance,"
+		"leadership_exp_on,"
+		"ldon_points_guk,"
+		"ldon_points_mir,"
+		"ldon_points_mmc,"
+		"ldon_points_ruj,"
+		"ldon_points_tak,"
+		"ldon_points_available,"
+		"tribute_time_remaining,"
+		"show_helm,"
+		"career_tribute_points,"
+		"tribute_points,"
+		"tribute_active,"
+		"endurance,"
+		"group_leadership_exp,"
+		"raid_leadership_exp,"
+		"group_leadership_points,"
+		"raid_leadership_points,"
+		"air_remaining,"
+		"pvp_kills,"
+		"pvp_deaths,"
+		"pvp_current_points,"
+		"pvp_career_points,"
+		"pvp_best_kill_streak,"
+		"pvp_worst_death_streak,"
+		"pvp_current_kill_streak,"
+		"aa_points_spent,"
+		"aa_exp,"
+		"aa_points,"
+		"group_auto_consent,"
+		"raid_auto_consent,"
+		"guild_auto_consent,"
+		"RestTimer) "
+		"VALUES ("
+		"%u,"  // id					
+		"%u,"  // account_id			
+		"'%s',"  // `name`				
+		"'%s',"  // last_name			
+		"%u,"  // gender				
+		"%u,"  // race					
+		"%u,"  // class					
+		"%u,"  // `level`				
+		"%u,"  // deity					
+		"%u,"  // birthday				
+		"%u,"  // last_login			
+		"%u,"  // time_played			
+		"%u,"  // pvp_status			
+		"%u,"  // level2				
+		"%u,"  // anon					
+		"%u,"  // gm					
+		"%u,"  // intoxication			
+		"%u,"  // hair_color			
+		"%u,"  // beard_color			
+		"%u,"  // eye_color_1			
+		"%u,"  // eye_color_2			
+		"%u,"  // hair_style			
+		"%u,"  // beard					
+		"%u,"  // ability_time_seconds	
+		"%u,"  // ability_number		
+		"%u,"  // ability_time_minutes	
+		"%u,"  // ability_time_hours	
+		"'%s',"  // title				
+		"'%s',"  // suffix				
+		"%u,"  // exp					
+		"%u,"  // points				
+		"%u,"  // mana					
+		"%u,"  // cur_hp				
+		"%u,"  // str					
+		"%u,"  // sta					
+		"%u,"  // cha					
+		"%u,"  // dex					
+		"%u,"  // `int`					
+		"%u,"  // agi					
+		"%u,"  // wis					
+		"%u,"  // face					
+		"%f,"  // y						
+		"%f,"  // x						
+		"%f,"  // z						
+		"%f,"  // heading				
+		"%u,"  // pvp2					
+		"%u,"  // pvp_type				
+		"%u,"  // autosplit_enabled		
+		"%u,"  // zone_change_count		
+		"%u,"  // drakkin_heritage		
+		"%u,"  // drakkin_tattoo		
+		"%u,"  // drakkin_details		
+		"%i,"  // toxicity				
+		"%i,"  // hunger_level			
+		"%i,"  // thirst_level			
+		"%u,"  // ability_up			
+		"%u,"  // zone_id				
+		"%u,"  // zone_instance			
+		"%u,"  // leadership_exp_on		
+		"%u,"  // ldon_points_guk		
+		"%u,"  // ldon_points_mir		
+		"%u,"  // ldon_points_mmc		
+		"%u,"  // ldon_points_ruj		
+		"%u,"  // ldon_points_tak		
+		"%u,"  // ldon_points_available	
+		"%u,"  // tribute_time_remaining
+		"%u,"  // show_helm				
+		"%u,"  // career_tribute_points	
+		"%u,"  // tribute_points		
+		"%u,"  // tribute_active		
+		"%u,"  // endurance				
+		"%u,"  // group_leadership_exp	
+		"%u,"  // raid_leadership_exp	
+		"%u,"  // group_leadership_point
+		"%u,"  // raid_leadership_points
+		"%u,"  // air_remaining			
+		"%u,"  // pvp_kills				
+		"%u,"  // pvp_deaths			
+		"%u,"  // pvp_current_points	
+		"%u,"  // pvp_career_points		
+		"%u,"  // pvp_best_kill_streak	
+		"%u,"  // pvp_worst_death_streak
+		"%u,"  // pvp_current_kill_strea
+		"%u,"  // aa_points_spent		
+		"%u,"  // aa_exp				
+		"%u,"  // aa_points				
+		"%u,"  // group_auto_consent	
+		"%u,"  // raid_auto_consent		
+		"%u,"  // guild_auto_consent	
+		"%u"  // RestTimer				
+		")",
+		character_id,					  // " id,                        "
+		account_id,						  // " account_id,                "
+		pp->name,						  // " `name`,                    "
+		pp->last_name,					  // " last_name,                 "
+		pp->gender,						  // " gender,                    "
+		pp->race,						  // " race,                      "
+		pp->class_,						  // " class,                     "
+		pp->level,						  // " `level`,                   "
+		pp->deity,						  // " deity,                     "
+		pp->birthday,					  // " birthday,                  "
+		pp->lastlogin,					  // " last_login,                "
+		pp->timePlayedMin,				  // " time_played,               "
+		pp->pvp,						  // " pvp_status,                "
+		pp->level2,						  // " level2,                    "
+		pp->anon,						  // " anon,                      "
+		pp->gm,							  // " gm,                        "
+		pp->intoxication,				  // " intoxication,              "
+		pp->haircolor,					  // " hair_color,                "
+		pp->beardcolor,					  // " beard_color,               "
+		pp->eyecolor1,					  // " eye_color_1,               "
+		pp->eyecolor2,					  // " eye_color_2,               "
+		pp->hairstyle,					  // " hair_style,                "
+		pp->beard,						  // " beard,                     "
+		pp->ability_time_seconds,		  // " ability_time_seconds,      "
+		pp->ability_number,				  // " ability_number,            "
+		pp->ability_time_minutes,		  // " ability_time_minutes,      "
+		pp->ability_time_hours,			  // " ability_time_hours,        "
+		pp->title,						  // " title,                     "
+		pp->suffix,						  // " suffix,                    "
+		pp->exp,						  // " exp,                       "
+		pp->points,						  // " points,                    "
+		pp->mana,						  // " mana,                      "
+		pp->cur_hp,						  // " cur_hp,                    "
+		pp->STR,						  // " str,                       "
+		pp->STA,						  // " sta,                       "
+		pp->CHA,						  // " cha,                       "
+		pp->DEX,						  // " dex,                       "
+		pp->INT,						  // " `int`,                     "
+		pp->AGI,						  // " agi,                       "
+		pp->WIS,						  // " wis,                       "
+		pp->face,						  // " face,                      "
+		pp->y,							  // " y,                         "
+		pp->x,							  // " x,                         "
+		pp->z,							  // " z,                         "
+		pp->heading,					  // " heading,                   "
+		pp->pvp2,						  // " pvp2,                      "
+		pp->pvptype,					  // " pvp_type,                  "
+		pp->autosplit,					  // " autosplit_enabled,         "
+		pp->zone_change_count,			  // " zone_change_count,         "
+		pp->drakkin_heritage,			  // " drakkin_heritage,          "
+		pp->drakkin_tattoo,				  // " drakkin_tattoo,            "
+		pp->drakkin_details,			  // " drakkin_details,           "
+		pp->toxicity,					  // " toxicity,                  "
+		pp->hunger_level,				  // " hunger_level,              "
+		pp->thirst_level,				  // " thirst_level,              "
+		pp->ability_up,					  // " ability_up,                "
+		pp->zone_id,					  // " zone_id,                   "
+		pp->zoneInstance,				  // " zone_instance,             "
+		pp->leadAAActive,				  // " leadership_exp_on,         "
+		pp->ldon_points_guk,			  // " ldon_points_guk,           "
+		pp->ldon_points_mir,			  // " ldon_points_mir,           "
+		pp->ldon_points_mmc,			  // " ldon_points_mmc,           "
+		pp->ldon_points_ruj,			  // " ldon_points_ruj,           "
+		pp->ldon_points_tak,			  // " ldon_points_tak,           "
+		pp->ldon_points_available,		  // " ldon_points_available,     "
+		pp->tribute_time_remaining,		  // " tribute_time_remaining,    "
+		pp->showhelm,					  // " show_helm,                 "
+		pp->career_tribute_points,		  // " career_tribute_points,     "
+		pp->tribute_points,				  // " tribute_points,            "
+		pp->tribute_active,				  // " tribute_active,            "
+		pp->endurance,					  // " endurance,                 "
+		pp->group_leadership_exp,		  // " group_leadership_exp,      "
+		pp->raid_leadership_exp,		  // " raid_leadership_exp,       "
+		pp->group_leadership_points,	  // " group_leadership_points,   "
+		pp->raid_leadership_points,		  // " raid_leadership_points,    "
+		pp->air_remaining,				  // " air_remaining,             "
+		pp->PVPKills,					  // " pvp_kills,                 "
+		pp->PVPDeaths,					  // " pvp_deaths,                "
+		pp->PVPCurrentPoints,			  // " pvp_current_points,        "
+		pp->PVPCareerPoints,			  // " pvp_career_points,         "
+		pp->PVPBestKillStreak,			  // " pvp_best_kill_streak,      "
+		pp->PVPWorstDeathStreak,		  // " pvp_worst_death_streak,    "
+		pp->PVPCurrentKillStreak,		  // " pvp_current_kill_streak,   "
+		pp->aapoints_spent,				  // " aa_points_spent,           "
+		pp->expAA,						  // " aa_exp,                    "
+		pp->aapoints,					  // " aa_points,                 "
+		pp->groupAutoconsent,			  // " group_auto_consent,        "
+		pp->raidAutoconsent,			  // " raid_auto_consent,         "
+		pp->guildAutoconsent,			  // " guild_auto_consent,        "
+		pp->RestTimer					  // " RestTimer)                 "
+		);
+	auto results = QueryDatabase(query);
+	return true;
+}
 
+
+/* This only for new Character creation storing */
+bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inventory* inv) {
+	uint32 charid = 0; char zone[50]; float x, y, z; 
 	charid = GetCharacterID(pp->name);
 
-	if(!charid)
-	{
+	if(!charid) {
 		LogFile->write(EQEMuLog::Error, "StoreCharacter: no character id");
 		return false;
 	}
 
 	const char *zname = GetZoneName(pp->zone_id);
 	if(zname == nullptr) {
-		//zone not in the DB, something to prevent crash...
+		/* Zone not in the DB, something to prevent crash... */
 		strn0cpy(zone, "qeynos", 49);
 		pp->zone_id = 1;
-	} else
-		strn0cpy(zone, zname, 49);
-
-	x=pp->x;
-	y=pp->y;
-	z=pp->z;
-
-	// construct the character_ query
-	end += sprintf(end,
-		"UPDATE character_ SET timelaston=0, "
-		"zonename=\'%s\', x=%f, y=%f, z=%f, profile=\'",
-		zone, x, y, z
-	);
-	end += DoEscapeString(end, (char*)pp, sizeof(PlayerProfile_Struct));
-	end += sprintf(end, "\', extprofile=\'");
-	end += DoEscapeString(end, (char*)ext, sizeof(ExtendedProfile_Struct));
-	end += sprintf(end, "\' WHERE account_id=%d AND name='%s'",account_id, pp->name);
-
-	auto results = QueryDatabase(query, (uint32) (end - query));
-	// stack assigned query, no need to delete it.
-
-	if(!results.RowsAffected())
-	{
-		LogFile->write(EQEMuLog::Error, "StoreCharacter query '%s' %s", query, results.ErrorMessage().c_str());
-		return false;
 	}
+	else{ strn0cpy(zone, zname, 49); }
 
-	// now the inventory
+	x = pp->x;
+	y = pp->y;
+	z = pp->z;
+
+	/* Saves Player Profile Data to `character_data` */
+	SaveCharacterCreate(charid, account_id, pp); 
+
+	/* Insert starting inventory... */
 	std::string invquery;
-	for (int16 i=EmuConstants::EQUIPMENT_BEGIN; i<=EmuConstants::BANK_BAGS_END;)
-	{
+	for (int16 i=EmuConstants::EQUIPMENT_BEGIN; i<=EmuConstants::BANK_BAGS_END;) {
 		const ItemInst* newinv = inv->GetItem(i);
-		if (newinv)
-		{
+		if (newinv) {
 			invquery = StringFormat("INSERT INTO `inventory` (charid, slotid, itemid, charges, color) VALUES (%u, %i, %u, %i, %u)",
 				charid, i, newinv->GetItem()->ID, newinv->GetCharges(), newinv->GetColor()); 
 			
@@ -624,69 +694,41 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 #endif
 		}
 
-		if (i == MainCursor) {
-			i = EmuConstants::GENERAL_BAGS_BEGIN;
-			continue;
-		}
-		else if (i == EmuConstants::CURSOR_BAG_END) {
-			i = EmuConstants::BANK_BEGIN;
-			continue;
-		}
-		else if (i == EmuConstants::BANK_END) {
-			i = EmuConstants::BANK_BAGS_BEGIN;
-			continue;
-		}
-
+		if (i == MainCursor) { i = EmuConstants::GENERAL_BAGS_BEGIN; continue; }
+		else if (i == EmuConstants::CURSOR_BAG_END) { i = EmuConstants::BANK_BEGIN; continue; }
+		else if (i == EmuConstants::BANK_END) { i = EmuConstants::BANK_BAGS_BEGIN; continue; } 
 		i++;
 	}
 	return true;
 }
 
-//0=failure, otherwise returns the char ID for the given char name.
 uint32 Database::GetCharacterID(const char *name) {
-	uint32 cid = 0;
-	if(GetAccountIDByChar(name, &cid) == 0)
-		return(0);
-	return(cid);
+	std::string query = StringFormat("SELECT `id` FROM `character_data` WHERE `name` = '%s'", name);
+	auto results = QueryDatabase(query);
+	auto row = results.begin();
+	if (row[0]){ return atoi(row[0]); }
+	return 0; 
 }
 
 /*
-This function returns the account_id that owns the character with
-the name "name" or zero if no character with that name was found
-Zero will also be returned if there is a database error.
+	This function returns the account_id that owns the character with
+	the name "name" or zero if no character with that name was found
+	Zero will also be returned if there is a database error.
 */
-uint32 Database::GetAccountIDByChar(const char* charname, uint32* oCharID) {
-	std::string query = StringFormat("SELECT account_id, id FROM character_ WHERE name='%s'", charname);
-
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-	{
-		std::cerr << "Error in GetAccountIDByChar query '" << query << "' " << results.ErrorMessage() << std::endl;
-		return 0;
-	}
-
-	if (results.RowCount() != 1)
-		return 0;
-
+uint32 Database::GetAccountIDByChar(const char* charname) {
+	uint32 accountId = 0;
+	std::string query = StringFormat("SELECT `account_id`, `id` FROM `character_data` WHERE `name` = '%s' LIMIT 1", charname);
+	auto results = QueryDatabase(query); 
 	auto row = results.begin();
-
-	uint32 accountId = atoi(row[0]);
-
-	if (oCharID)
-		*oCharID = atoi(row[1]);
-
+	if (row[0]){ accountId = atoi(row[0]); }
 	return accountId;
 }
 
 // Retrieve account_id for a given char_id
 uint32 Database::GetAccountIDByChar(uint32 char_id) {
-	std::string query = StringFormat("SELECT account_id FROM character_ WHERE id=%i", char_id);
-
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-	{
+	std::string query = StringFormat("SELECT `account_id` FROM `character_` WHERE `id` = %i LIMIT 1", char_id); 
+	auto results = QueryDatabase(query); 
+	if (!results.Success()) {
 		LogFile->write(EQEMuLog::Error, "Error in GetAccountIDByChar query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
@@ -694,8 +736,7 @@ uint32 Database::GetAccountIDByChar(uint32 char_id) {
 	if (results.RowCount() != 1)
 		return 0;
 
-	auto row = results.begin();
-
+	auto row = results.begin(); 
 	return atoi(row[0]);
 }
 
@@ -703,11 +744,10 @@ uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* 
 	if (!isAlphaNumeric(accname))
 		return 0;
 
-	std::string query = StringFormat("SELECT id, status, lsaccount_id FROM account WHERE name='%s'", accname);
+	std::string query = StringFormat("SELECT `id`, `status`, `lsaccount_id` FROM `account` WHERE `name` = '%s' LIMIT 1", accname);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
-	{
+	if (!results.Success()) {
 		std::cerr << "Error in GetAccountIDByAcc query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
@@ -722,8 +762,7 @@ uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* 
 	if (status)
 		*status = atoi(row[1]);
 
-	if (lsid)
-	{
+	if (lsid) {
 		if (row[2])
 			*lsid = atoi(row[2]);
 		else
@@ -734,12 +773,10 @@ uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* 
 }
 
 void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID) {
-	std::string query = StringFormat("SELECT name, lsaccount_id FROM account WHERE id='%i'", accountid);
-
+	std::string query = StringFormat("SELECT `name`, `lsaccount_id` FROM `account` WHERE `id` = '%i'", accountid); 
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
-	{
+	if (!results.Success()) {
 		std::cerr << "Error in GetAccountName query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return;
 	}
@@ -773,11 +810,9 @@ void Database::GetCharName(uint32 char_id, char* name) {
 }
 
 static inline void loadbar(unsigned int x, unsigned int n, unsigned int w = 50) {
-	if ((x != n) && (x % (n / 100 + 1) != 0)) return;
-
+	if ((x != n) && (x % (n / 100 + 1) != 0)) return; 
 	float ratio = x / (float)n;
-	int   c = ratio * w;
-
+	int   c = ratio * w; 
 	std::cout << std::setw(3) << (int)(ratio * 100) << "% [";
 	for (int x = 0; x<c; x++) std::cout << "=";
 	for (int x = c; x<w; x++) std::cout << " ";
@@ -817,6 +852,9 @@ bool Database::CheckDatabaseConversions() {
 		std::cin.ignore(1);  
 	}
 
+	// runconvert = 0;
+	// printppdebug = 1;
+
 	if (runconvert == 1){
 		printf("Running character binary blob to database conversion... \n", number_of_characters); 
 		/* Get the number of characters */
@@ -833,101 +871,101 @@ bool Database::CheckDatabaseConversions() {
 		if (results.RowCount() == 0){
 			printf("Table: `character_data` doesn't exist... creating...");
 			rquery = StringFormat(
-				" CREATE TABLE `character_data` (                                      "
-				" 	`id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,                     "
-				" 	`account_id` int(11) NOT NULL DEFAULT '0',                         "
-				" 	`name` varchar(64) NOT NULL,	                                   "
-				" 	`last_name` varchar(64) NOT NULL,	                               "
-				" 	`gender` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	               "
-				" 	`race` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	                   "
-				" 	`class` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,		           "
-				" 	`level` int(11) UNSIGNED NOT NULL DEFAULT 0,		               "
-				" 	`deity` int(11) UNSIGNED NOT NULL,								   "
-				" 	`birthday` int(11) UNSIGNED NOT NULL DEFAULT 0,	                   "
-				" 	`last_login` int(11) UNSIGNED NOT NULL DEFAULT 0,	               "
-				" 	`time_played` int(11) UNSIGNED NOT NULL DEFAULT 0,	               "
-				" 	`pvp_status` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	           "
-				" 	`level2` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	               "
-				" 	`anon` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	                   "
-				" 	`gm` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	                   "
-				" 	`intoxication` int(11) UNSIGNED NOT NULL DEFAULT 0,	                       "
-				" 	`hair_color` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	           "
-				" 	`beard_color` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	           "
-				" 	`eye_color_1` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	           "
-				" 	`eye_color_2` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	           "
-				" 	`hair_style` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	           "
-				" 	`beard` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	               "
-				" 	`ability_time_seconds` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	   "
-				" 	`ability_number` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	       "
-				" 	`ability_time_minutes` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	   "
-				" 	`ability_time_hours` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	   "
-				" 	`title` varchar(32) NOT NULL,	                                   "
-				" 	`suffix` varchar(32) NOT NULL,		                               "
-				" 	`exp` int(11) UNSIGNED NOT NULL DEFAULT 0,		                   "
-				" 	`points` int(11) UNSIGNED NOT NULL DEFAULT 0,	                   "
-				" 	`mana` int(11) UNSIGNED NOT NULL DEFAULT 0,	                       "
-				" 	`cur_hp` int(11) UNSIGNED NOT NULL DEFAULT 0,	                   "
-				" 	`str` int(11) UNSIGNED NOT NULL DEFAULT 0,	                       "
-				" 	`sta` int(11) UNSIGNED NOT NULL DEFAULT 0,	                       "
-				" 	`cha` int(11) UNSIGNED NOT NULL DEFAULT 0,	                       "
-				" 	`dex` int(11) UNSIGNED NOT NULL DEFAULT 0,	                       "
-				" 	`int` int(11) UNSIGNED NOT NULL DEFAULT 0,	                       "
-				" 	`agi` int(11) UNSIGNED NOT NULL DEFAULT 0,	                       "
-				" 	`wis` int(11) UNSIGNED NOT NULL DEFAULT 0,	                       "
-				" 	`face` int(11) UNSIGNED NOT NULL DEFAULT 0,		                   "
-				" 	`y` float NOT NULL DEFAULT '0',	                                   "
-				" 	`x` float NOT NULL DEFAULT '0',	                                   "
-				" 	`z` float NOT NULL DEFAULT '0',	                                   "
-				" 	`heading` float NOT NULL DEFAULT '0',                              "
-				" 	`pvp2` int(11) UNSIGNED NOT NULL DEFAULT 0,	                       "
-				" 	`pvp_type` int(11) UNSIGNED NOT NULL DEFAULT 0,	                   "
-				" 	`autosplit_enabled` int(11) UNSIGNED NOT NULL DEFAULT 0,           "
-				" 	`zone_change_count` int(11) UNSIGNED NOT NULL DEFAULT 0,	       "
-				" 	`drakkin_heritage` int(11) UNSIGNED NOT NULL DEFAULT 0,	           "
-				" 	`drakkin_tattoo` int(11) UNSIGNED NOT NULL DEFAULT 0,	           "
-				" 	`drakkin_details` int(11) UNSIGNED NOT NULL DEFAULT 0,	           "
-				" 	`toxicity` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				" 	`hunger_level` int(11) UNSIGNED NOT NULL DEFAULT 0,				   "
-				" 	`thirst_level` int(11) UNSIGNED NOT NULL DEFAULT 0,				   "
-				" 	`ability_up` int(11) UNSIGNED NOT NULL DEFAULT 0,	               "
-				" 	`zone_id` int(11) UNSIGNED NOT NULL DEFAULT 0,	                   "
-				" 	`zone_instance` int(11) UNSIGNED NOT NULL DEFAULT 0,	           "
-				" 	`leadership_exp_on` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,       "
-				" 	`ldon_points_guk` int(11) UNSIGNED NOT NULL DEFAULT 0,	           "
-				" 	`ldon_points_mir` int(11) UNSIGNED NOT NULL DEFAULT 0,	           "
-				" 	`ldon_points_mmc` int(11) UNSIGNED NOT NULL DEFAULT 0,	           "
-				" 	`ldon_points_ruj` int(11) UNSIGNED NOT NULL DEFAULT 0,	           "
-				" 	`ldon_points_tak` int(11) UNSIGNED NOT NULL DEFAULT 0,	           "
-				" 	`ldon_points_available` int(11) UNSIGNED NOT NULL DEFAULT 0,	   "
-				" 	`tribute_time_remaining` int(11) UNSIGNED NOT NULL DEFAULT 0,	   "
-				" 	`show_helm` int(11) UNSIGNED NOT NULL DEFAULT 0,	               "
-				" 	`career_tribute_points` int(11) UNSIGNED NOT NULL DEFAULT 0,       "
-				" 	`tribute_points` int(11) UNSIGNED NOT NULL DEFAULT 0,	           "
-				" 	`tribute_active` int(11) UNSIGNED NOT NULL DEFAULT 0,	           "
-				" 	`endurance` int(11) UNSIGNED NOT NULL DEFAULT 0,	               "
-				" 	`group_leadership_exp` int(11) UNSIGNED NOT NULL DEFAULT 0,	       "
-				" 	`raid_leadership_exp` int(11) UNSIGNED NOT NULL DEFAULT 0,	       "
-				" 	`group_leadership_points` int(11) UNSIGNED NOT NULL DEFAULT 0,	   "
-				" 	`raid_leadership_points` int(11) UNSIGNED NOT NULL DEFAULT 0,      "
-				" 	`air_remaining` int(11) UNSIGNED NOT NULL DEFAULT 0,	           "
-				" 	`pvp_kills` int(11) UNSIGNED NOT NULL DEFAULT 0,	               "
-				" 	`pvp_deaths` int(11) UNSIGNED NOT NULL DEFAULT 0,	               "
-				" 	`pvp_current_points` int(11) UNSIGNED NOT NULL DEFAULT 0,	       "
-				" 	`pvp_career_points` int(11) UNSIGNED NOT NULL DEFAULT 0,	       "
-				" 	`pvp_best_kill_streak` int(11) UNSIGNED NOT NULL DEFAULT 0,	       "
-				" 	`pvp_worst_death_streak` int(11) UNSIGNED NOT NULL DEFAULT 0,	   "
-				" 	`pvp_current_kill_streak` int(11) UNSIGNED NOT NULL DEFAULT 0,     "
-				" 	`aa_points_spent` int(11) UNSIGNED NOT NULL DEFAULT 0,	           "
-				" 	`aa_exp` int(11) UNSIGNED NOT NULL DEFAULT 0,	                   "
-				" 	`aa_points` int(11) UNSIGNED NOT NULL DEFAULT 0,	               "
-				" 	`group_auto_consent` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	   "
-				" 	`raid_auto_consent` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	   "
-				" 	`guild_auto_consent` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	   "
-				" 	`RestTimer` int(11) UNSIGNED NOT NULL DEFAULT 0,	               "
-				" 	PRIMARY KEY (`id`),                                                "
-				" 	UNIQUE KEY `name` (`name`),                                        "
-				"   KEY `account_id` (`account_id`)                                    "
-				" ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;             "
+				"CREATE TABLE `character_data` (										   "
+				"`id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,							   "
+				"`account_id` int(11) NOT NULL DEFAULT '0',								   "
+				"`name` varchar(64) NOT NULL DEFAULT '',								   "
+				"`last_name` varchar(64) NOT NULL DEFAULT '',							   "
+				"`gender` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,						   "
+				"`race` smallint(11) UNSIGNED NOT NULL DEFAULT 0,						   "
+				"`class` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,						   "
+				"`level` int(11) UNSIGNED NOT NULL DEFAULT 0,							   "
+				"`deity` int(11) UNSIGNED NOT NULL DEFAULT 0,							   "
+				"`birthday` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
+				"`last_login` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
+				"`time_played` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
+				"`pvp_status` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,					   "
+				"`level2` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,						   "
+				"`anon` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,						   "
+				"`gm` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,							   "
+				"`intoxication` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
+				"`hair_color` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,					   "
+				"`beard_color` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,					   "
+				"`eye_color_1` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,					   "
+				"`eye_color_2` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,					   "
+				"`hair_style` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,					   "
+				"`beard` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,						   "
+				"`ability_time_seconds` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,		   "
+				"`ability_number` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,				   "
+				"`ability_time_minutes` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,		   "
+				"`ability_time_hours` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,			   "
+				"`title` varchar(32) NOT NULL DEFAULT '',								   "
+				"`suffix` varchar(32) NOT NULL DEFAULT '',								   "
+				"`exp` int(11) UNSIGNED NOT NULL DEFAULT 0,								   "
+				"`points` int(11) UNSIGNED NOT NULL DEFAULT 0,							   "
+				"`mana` int(11) UNSIGNED NOT NULL DEFAULT 0,							   "
+				"`cur_hp` int(11) UNSIGNED NOT NULL DEFAULT 0,							   "
+				"`str` int(11) UNSIGNED NOT NULL DEFAULT 0,								   "
+				"`sta` int(11) UNSIGNED NOT NULL DEFAULT 0,								   "
+				"`cha` int(11) UNSIGNED NOT NULL DEFAULT 0,								   "
+				"`dex` int(11) UNSIGNED NOT NULL DEFAULT 0,								   "
+				"`int` int(11) UNSIGNED NOT NULL DEFAULT 0,								   "
+				"`agi` int(11) UNSIGNED NOT NULL DEFAULT 0,								   "
+				"`wis` int(11) UNSIGNED NOT NULL DEFAULT 0,								   "
+				"`face` int(11) UNSIGNED NOT NULL DEFAULT 0,							   "
+				"`y` float NOT NULL DEFAULT '0',										   "
+				"`x` float NOT NULL DEFAULT '0',										   "
+				"`z` float NOT NULL DEFAULT '0',										   "
+				"`heading` float NOT NULL DEFAULT '0',									   "
+				"`pvp2` int(11) UNSIGNED NOT NULL DEFAULT 0,							   "
+				"`pvp_type` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
+				"`autosplit_enabled` int(11) UNSIGNED NOT NULL DEFAULT 0,				   "
+				"`zone_change_count` int(11) UNSIGNED NOT NULL DEFAULT 0,				   "
+				"`drakkin_heritage` int(11) UNSIGNED NOT NULL DEFAULT 0,				   "
+				"`drakkin_tattoo` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
+				"`drakkin_details` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
+				"`toxicity` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
+				"`hunger_level` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
+				"`thirst_level` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
+				"`ability_up` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
+				"`zone_id` int(11) UNSIGNED NOT NULL DEFAULT 0,							   "
+				"`zone_instance` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
+				"`leadership_exp_on` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,			   "
+				"`ldon_points_guk` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
+				"`ldon_points_mir` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
+				"`ldon_points_mmc` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
+				"`ldon_points_ruj` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
+				"`ldon_points_tak` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
+				"`ldon_points_available` int(11) UNSIGNED NOT NULL DEFAULT 0,			   "
+				"`tribute_time_remaining` int(11) UNSIGNED NOT NULL DEFAULT 0,			   "
+				"`show_helm` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
+				"`career_tribute_points` int(11) UNSIGNED NOT NULL DEFAULT 0,			   "
+				"`tribute_points` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
+				"`tribute_active` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
+				"`endurance` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
+				"`group_leadership_exp` int(11) UNSIGNED NOT NULL DEFAULT 0,			   "
+				"`raid_leadership_exp` int(11) UNSIGNED NOT NULL DEFAULT 0,				   "
+				"`group_leadership_points` int(11) UNSIGNED NOT NULL DEFAULT 0,			   "
+				"`raid_leadership_points` int(11) UNSIGNED NOT NULL DEFAULT 0,			   "
+				"`air_remaining` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
+				"`pvp_kills` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
+				"`pvp_deaths` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
+				"`pvp_current_points` int(11) UNSIGNED NOT NULL DEFAULT 0,				   "
+				"`pvp_career_points` int(11) UNSIGNED NOT NULL DEFAULT 0,				   "
+				"`pvp_best_kill_streak` int(11) UNSIGNED NOT NULL DEFAULT 0,			   "
+				"`pvp_worst_death_streak` int(11) UNSIGNED NOT NULL DEFAULT 0,			   "
+				"`pvp_current_kill_streak` int(11) UNSIGNED NOT NULL DEFAULT 0,			   "
+				"`aa_points_spent` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
+				"`aa_exp` int(11) UNSIGNED NOT NULL DEFAULT 0,							   "
+				"`aa_points` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
+				"`group_auto_consent` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,			   "
+				"`raid_auto_consent` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,			   "
+				"`guild_auto_consent` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,			   "
+				"`RestTimer` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
+				"PRIMARY KEY(`id`),														   "
+				"UNIQUE KEY `name` (`name`),											   "
+				"KEY `account_id` (`account_id`)										   "
+				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;			   "
 			);
 			QueryDatabase(rquery);
 			printf(" done...\n");
@@ -981,23 +1019,24 @@ bool Database::CheckDatabaseConversions() {
 			QueryDatabase(rquery);
 			printf(" done...\n");
 		}
-		/* Check for table `character_bind_home` */
-		rquery = StringFormat("SHOW TABLES LIKE 'character_bind_home'");
+		/* Check for table `character_bind` */
+		rquery = StringFormat("SHOW TABLES LIKE 'character_bind'");
 		results = QueryDatabase(rquery);
 		if (results.RowCount() == 0){
-			printf("Table: `character_bind_home` doesn't exist... creating...");
+			printf("Table: `character_bind` doesn't exist... creating...");
 			rquery = StringFormat(
-				" CREATE TABLE `character_bind_home` (							"
-				" `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,							"
-				" `zone_id` smallint(11) UNSIGNED NOT NULL DEFAULT '0',					"
-				" `instance_id` mediumint(11) UNSIGNED NOT NULL DEFAULT '0',				"
-				" `x` float NOT NULL DEFAULT '0',								"
-				" `y` float NOT NULL DEFAULT '0',								"
-				" `z` float NOT NULL DEFAULT '0',								"
-				" `heading` float NOT NULL DEFAULT '0',							"
-				" PRIMARY KEY(`id`),											"
-				" KEY `id` (`id`)												"
-				" ) ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;"
+				"CREATE TABLE `character_bind` (							   "
+				"`id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,				   "
+				"`is_home` tinyint(11) UNSIGNED NOT NULL DEFAULT '0',		   "
+				"`zone_id` smallint(11) UNSIGNED NOT NULL DEFAULT '0',		   "
+				"`instance_id` mediumint(11) UNSIGNED NOT NULL DEFAULT '0',	   "
+				"`x` float NOT NULL DEFAULT '0',							   "
+				"`y` float NOT NULL DEFAULT '0',							   "
+				"`z` float NOT NULL DEFAULT '0',							   "
+				"`heading` float NOT NULL DEFAULT '0',						   "
+				"PRIMARY KEY(`id`, `is_home`),								   "
+				"KEY `id` (`id`)											   "
+				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;" 
 			);
 			QueryDatabase(rquery);
 			printf(" done...\n");
@@ -1068,7 +1107,7 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;"
 			);
 			QueryDatabase(rquery);
-			printf(" done...\n");
+			printf(" done...\n"); 
 		}
 		/* Check for table `character_disciplines` */
 		rquery = StringFormat("SHOW TABLES LIKE 'character_disciplines'");
@@ -1076,12 +1115,13 @@ bool Database::CheckDatabaseConversions() {
 		if (results.RowCount() == 0){
 			printf("Table: `character_disciplines` doesn't exist... creating...");
 			rquery = StringFormat(
-				"CREATE TABLE `character_disciplines` (						   "
-				"`id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,				   "
-				"`disc_id` smallint(11) UNSIGNED NOT NULL DEFAULT '0',		   "
-				"PRIMARY KEY(`id`, `disc_id`),								   "
-				"KEY `id` (`id`)											   "
-				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;"
+				" CREATE TABLE `character_disciplines` (						  "
+				" `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,				  "
+				" `slot_id` smallint(11) UNSIGNED NOT NULL DEFAULT '0',			  "
+				" `disc_id` smallint(11) UNSIGNED NOT NULL DEFAULT '0',			  "
+				" PRIMARY KEY(`id`, `slot_id`),									  "
+				" KEY `id` (`id`)												  "
+				" ) ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;  " 
 			);
 			QueryDatabase(rquery);
 			printf(" done...\n");
@@ -1089,7 +1129,6 @@ bool Database::CheckDatabaseConversions() {
 		/* Check for table `character_material` */
 		rquery = StringFormat("SHOW TABLES LIKE 'character_material'");
 		results = QueryDatabase(rquery);
-		// blue, green, red, use_tint,
 		if (results.RowCount() == 0){
 			printf("Table: `character_material` doesn't exist... creating...");
 			rquery = StringFormat(
@@ -1104,10 +1143,65 @@ bool Database::CheckDatabaseConversions() {
 				"PRIMARY KEY(`id`, `slot`),"
 				"KEY `id` (`id`)"
 				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;"
-				);
+			);
 			QueryDatabase(rquery);
 			printf(" done...\n");
 		} 
+		/* Check for table `character_tribute` */
+		rquery = StringFormat("SHOW TABLES LIKE 'character_tribute'");
+		results = QueryDatabase(rquery);
+		if (results.RowCount() == 0){
+			printf("Table: `character_tribute` doesn't exist... creating...");
+			rquery = StringFormat(
+				"CREATE TABLE `character_tribute` (							   "
+				"`id` int(11) unsigned NOT NULL AUTO_INCREMENT,				   "
+				"`tier` tinyint(11) unsigned NOT NULL DEFAULT '0',			   "
+				"`tribute` int(11) UNSIGNED NOT NULL DEFAULT '0',			   "
+				"KEY `id` (`id`)											   "
+				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;"
+			);
+			QueryDatabase(rquery);
+			printf(" done...\n");
+		}
+		/* Check for table `character_bandolier` */
+		rquery = StringFormat("SHOW TABLES LIKE 'character_bandolier'");
+		results = QueryDatabase(rquery);
+		if (results.RowCount() == 0){
+			printf("Table: `character_bandolier` doesn't exist... creating...");
+			rquery = StringFormat(
+				"CREATE TABLE `character_bandolier` (							"
+				"`id` int(11) unsigned NOT NULL AUTO_INCREMENT,					"
+				"`bandolier_id` tinyint(11) unsigned NOT NULL DEFAULT '0',		"
+				"`bandolier_slot` tinyint(11) unsigned NOT NULL DEFAULT '0',	"
+				"`item_id` int(11) UNSIGNED NOT NULL DEFAULT '0',				"
+				"`icon` int(11) UNSIGNED NOT NULL DEFAULT '0',				"
+				"`bandolier_name` varchar(32) NOT NULL DEFAULT '0',				"
+				"PRIMARY KEY(`id`,`bandolier_id`, `bandolier_slot`),			"
+				"KEY `id` (`id`)												"
+				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;	"
+			);
+			QueryDatabase(rquery);
+			printf(" done...\n");
+		}
+		/* Check for table `character_potionbelt` */
+		rquery = StringFormat("SHOW TABLES LIKE 'character_potionbelt'");
+		results = QueryDatabase(rquery);
+		if (results.RowCount() == 0){
+			printf("Table: `character_potionbelt` doesn't exist... creating...");
+			rquery = StringFormat(
+				"CREATE TABLE `character_potionbelt` (						  "
+				"`id` int(11) unsigned NOT NULL AUTO_INCREMENT,				  "
+				"`potion_id` tinyint(11) unsigned NOT NULL DEFAULT '0',		  "
+				"`item_id` int(11) UNSIGNED NOT NULL DEFAULT '0',			  "
+				"`icon` int(11) UNSIGNED NOT NULL DEFAULT '0',				  "
+				"PRIMARY KEY(`id`,`potion_id`),								  "
+				"KEY `id` (`id`)												  "
+				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;"
+			);
+			QueryDatabase(rquery);
+			printf(" done...\n");
+		}
+
 
 		/* Done */
 		printf("Starting conversion...\n\n");
@@ -1115,7 +1209,7 @@ bool Database::CheckDatabaseConversions() {
 
 	// querylen = MakeAnyLenString(&query, "SELECT `id` FROM `character_` WHERE `id` = 61238"); // WHERE `account_id` = 11001
 	int char_iter_count = 0;
-	querylen = MakeAnyLenString(&query, "SELECT `id` FROM `character_` WHERE `account_id` = 11001");  
+	querylen = MakeAnyLenString(&query, "SELECT `id` FROM `character_` WHERE `id` = 61238");  
 	if (RunQuery(query, querylen, errbuf, &result)) {
 		safe_delete_array(query);
 		while (row = mysql_fetch_row(result)) {
@@ -1168,7 +1262,7 @@ bool Database::CheckDatabaseConversions() {
 						pp->careerRadCrystals,
 						pp->currentEbonCrystals,
 						pp->careerEbonCrystals
-						);
+					);
 					auto results = QueryDatabase(rquery);
 
 					if (pp->tribute_time_remaining < 0 || pp->tribute_time_remaining == 4294967295){ pp->tribute_time_remaining = 0; }
@@ -1228,7 +1322,7 @@ bool Database::CheckDatabaseConversions() {
 						"drakkin_heritage,"
 						"drakkin_tattoo,"
 						"drakkin_details,"
-						"toxicity,"
+						"toxicity," 
 						"hunger_level,"
 						"thirst_level,"
 						"ability_up,"
@@ -1319,7 +1413,7 @@ bool Database::CheckDatabaseConversions() {
 						"%u,"		// drakkin_heritage			  
 						"%u,"		// drakkin_tattoo			  
 						"%u,"		// drakkin_details			  
-						"%u,"		// toxicity					  
+						"%i,"		// toxicity	 				  
 						"%u,"		// hunger_level				  
 						"%u,"		// thirst_level				  
 						"%u,"		// ability_up				  
@@ -1463,35 +1557,38 @@ bool Database::CheckDatabaseConversions() {
 					} 
 
 					/* Run Bind Home Convert */
-					rquery = StringFormat("REPLACE INTO `character_bind_home` (id, zone_id, instance_id, x, y, z, heading)"
-						" VALUES (%u, %u, %u, %f, %f, %f, %f)",
+					rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
+						" VALUES (%u, %u, %u, %f, %f, %f, %f, 1)",
 						character_id, pp->binds[4].zoneId, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading); 
-					results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Bind Home Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+						results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Bind Home Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+
+					/* Run Bind Convert */
+					rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
+						" VALUES (%u, %u, %u, %f, %f, %f, %f, 0)", 
+						character_id, pp->binds[0].zoneId, 0, pp->binds[0].x, pp->binds[0].y, pp->binds[0].z, pp->binds[0].heading);
+						results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Bind Home Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
 
 					/* Run Language Convert */
 					for (i = 0; i < MAX_PP_LANGUAGE; i++){
 						if (pp->languages[i] > 0){
 							rquery = StringFormat("REPLACE INTO `character_languages` (id, lang_id, value) VALUES (%u, %u, %u)", character_id, i, pp->languages[i]);
-							QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Language Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+							results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Language Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
 						}
 					}
-
 					/* Run Skill Convert */
 					for (i = 0; i < MAX_PP_SKILL; i++){
-						if (pp->skills[i] > 0){
+						if (pp->skills[i] > 0){ 
 							rquery = StringFormat("REPLACE INTO `character_skills` (id, skill_id, value) VALUES (%u, %u, %u)", character_id, i, pp->skills[i]);
-							QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Skill Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+							results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Skill Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
 						}
 					}
-
 					/* Run Spell Convert */
 					for (i = 0; i < MAX_PP_SPELLBOOK; i++){
-						if (pp->spell_book[i] > 0 && pp->spell_book[i] != 4294967295){
+						if (pp->spell_book[i] > 0 && pp->spell_book[i] != 4294967295 && pp->spell_book[i] < 40000 && pp->spell_book[i] != 1){
 							rquery = StringFormat("REPLACE INTO `character_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, i, pp->spell_book[i]); 
-							QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Spell Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+							results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Spell Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
 						}
 					}
-
 					/* Run Max Memmed Spell Convert */
 					for (i = 0; i < MAX_PP_MEMSPELL; i++){
 						if (pp->mem_spells[i] > 0){
@@ -1499,12 +1596,11 @@ bool Database::CheckDatabaseConversions() {
 							QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Memmed Spell Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
 						}
 					}
-
 					/* Run Discipline Convert */
 					for (i = 0; i < MAX_PP_DISCIPLINES; i++){
 						if (pp->disciplines.values[i] > 0){
-							rquery = StringFormat("REPLACE INTO `character_disciplines` (id, disc_id) VALUES (%u, %u)", character_id, pp->disciplines.values[i]);
-							QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Discipline Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+							rquery = StringFormat("REPLACE INTO `character_disciplines` (id, slot_id, disc_id) VALUES (%u, %u, %u)", character_id, i, pp->disciplines.values[i]);
+							results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Discipline Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
 						}
 					}
 					/* Run Material Color Convert */
@@ -1512,8 +1608,31 @@ bool Database::CheckDatabaseConversions() {
 						if (pp->item_tint[i].color > 0){
 							rquery = StringFormat("REPLACE INTO `character_material` (id, slot, blue, green, red, use_tint, color) VALUES (%u, %u, %u, %u, %u, %u, %u)", character_id, i, pp->item_tint[i].rgb.blue, pp->item_tint[i].rgb.green, pp->item_tint[i].rgb.red, pp->item_tint[i].rgb.use_tint, pp->item_tint[i].color);
 							// printf("REPLACE INTO `character_material` (id, slot, blue, green, red, use_tint, color) VALUES (%u, %u, %u, %u, %u, %u, %u);\n", character_id, i, pp->item_tint[i].rgb.blue, pp->item_tint[i].rgb.green, pp->item_tint[i].rgb.red, pp->item_tint[i].rgb.use_tint, pp->item_tint[i].color);
-							QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Color Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+							results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Color Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
 						} 
+					}
+					/* Run Tribute Convert */
+					for (i = 0; i < EmuConstants::TRIBUTE_SIZE; i++){
+						if (pp->tributes[i].tribute > 0){
+							rquery = StringFormat("REPLACE INTO `character_tribute` (id, tier, tribute) VALUES (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
+							results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Tribute Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+						}
+					}
+					/* Run Bandolier Convert */
+					for (i = 0; i <= EmuConstants::BANDOLIERS_COUNT; i++){
+						for (int si = 0; si < EmuConstants::BANDOLIER_SIZE; si++){
+							if (pp->bandoliers[i].items[si].item_id > 0){
+								rquery = StringFormat("REPLACE INTO `character_bandolier` (id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name) VALUES (%i, %u, %i, %u, %u, '%s')", character_id, i, si, pp->bandoliers[i].items[si].item_id, pp->bandoliers[i].items[si].icon, pp->bandoliers[i].name);
+								results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Bandolier Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; } 
+							}
+						} 
+					}
+					/* Run Potion Belt Convert */
+					for (i = 0; i <= EmuConstants::POTION_BELT_SIZE; i++){
+						if (pp->potionbelt.items[i].item_id > 0){
+							rquery = StringFormat("REPLACE INTO `character_potionbelt` (id, potion_id, item_id, icon) VALUES (%i, %u, %u, %u)", character_id, i, pp->potionbelt.items[i].item_id, pp->potionbelt.items[i].icon);
+							results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Potion Belt Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+						}
 					}
 				}
 
@@ -2283,7 +2402,7 @@ bool Database::AddToNameFilter(const char* name) {
 }
 
 uint32 Database::GetAccountIDFromLSID(uint32 iLSID, char* oAccountName, int16* oStatus) {
-
+	uint32 account_id = 0;
 	std::string query = StringFormat("SELECT id, name, status FROM account WHERE lsaccount_id=%i", iLSID);
 	auto results = QueryDatabase(query);
 
@@ -2296,14 +2415,14 @@ uint32 Database::GetAccountIDFromLSID(uint32 iLSID, char* oAccountName, int16* o
 	if (results.RowCount() != 1)
 		return 0;
 
-	auto row = results.begin();
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		account_id = atoi(row[0]);
 
-	uint32 account_id = atoi(row[0]);
-
-	if (oAccountName)
-		strcpy(oAccountName, row[1]);
-	if (oStatus)
-		*oStatus = atoi(row[2]);
+		if (oAccountName)
+			strcpy(oAccountName, row[1]);
+		if (oStatus)
+			*oStatus = atoi(row[2]);
+	}
 
 	return account_id;
 }
@@ -2339,11 +2458,9 @@ void Database::ClearMerchantTemp(){
 		std::cerr << "Error in ClearMerchantTemp query '" << query << "' " << results.ErrorMessage() << std::endl;
 }
 
-bool Database::UpdateName(const char* oldname, const char* newname) {
-	
-	std::cout << "Renaming " << oldname << " to " << newname << "..." << std::endl;
-
-	std::string query = StringFormat("UPDATE character_ SET name='%s' WHERE name='%s';", newname, oldname);
+bool Database::UpdateName(const char* oldname, const char* newname) { 
+	std::cout << "Renaming " << oldname << " to " << newname << "..." << std::endl; 
+	std::string query = StringFormat("UPDATE `character_data` SET `name` = '%s' WHERE `name` = '%s';", newname, oldname);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
@@ -2356,13 +2473,10 @@ bool Database::UpdateName(const char* oldname, const char* newname) {
 }
 
 // If the name is used or an error occurs, it returns false, otherwise it returns true
-bool Database::CheckUsedName(const char* name)
-{
-	std::string query = StringFormat("SELECT id FROM character_ where name='%s'", name);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-	{
+bool Database::CheckUsedName(const char* name) {
+	std::string query = StringFormat("SELECT `id` FROM `character_data` WHERE `name` = '%s'", name);
+	auto results = QueryDatabase(query); 
+	if (!results.Success()) {
 		std::cerr << "Error in CheckUsedName query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
@@ -2373,13 +2487,10 @@ bool Database::CheckUsedName(const char* name)
 	return true;
 }
 
-uint8 Database::GetServerType()
-{
-	std::string query("SELECT value FROM variables WHERE varname='ServerType'");
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-	{
+uint8 Database::GetServerType() {
+	std::string query("SELECT `value` FROM `variables` WHERE `varname` = 'ServerType' LIMIT 1");
+	auto results = QueryDatabase(query); 
+	if (!results.Success()) {
 		std::cerr << "Error in GetServerType query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
@@ -2391,15 +2502,14 @@ uint8 Database::GetServerType()
 	return atoi(row[0]);
 }
 
-bool Database::MoveCharacterToZone(const char* charname, const char* zonename,uint32 zoneid) {
+bool Database::MoveCharacterToZone(const char* charname, const char* zonename, uint32 zoneid) {
 	if(zonename == nullptr || strlen(zonename) == 0)
 		return false;
 
-	std::string query = StringFormat("UPDATE character_ SET zonename = '%s',zoneid=%i,x=-1, y=-1, z=-1 WHERE name='%s'", zonename,zoneid, charname);
+	std::string query = StringFormat("UPDATE `character_data` SET `zoneid` = %i, `x` = -1, `y` = -1, `z` = -1 WHERE `name` = '%s'", zoneid, charname);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
-	{
+	if (!results.Success()) {
 		std::cerr << "Error in MoveCharacterToZone(name) query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
@@ -2414,13 +2524,11 @@ bool Database::MoveCharacterToZone(const char* charname, const char* zonename) {
 	return MoveCharacterToZone(charname, zonename, GetZoneID(zonename));
 }
 
-bool Database::MoveCharacterToZone(uint32 iCharID, const char* iZonename) {
-
-	std::string query = StringFormat("UPDATE character_ SET zonename = '%s', zoneid=%i, x=-1, y=-1, z=-1 WHERE id=%i", iZonename, GetZoneID(iZonename), iCharID);
+bool Database::MoveCharacterToZone(uint32 iCharID, const char* iZonename) { 
+	std::string query = StringFormat("UPDATE `character_data` SET `zoneid` = %i, `x` = -1, `y` = -1, `z` = -1 WHERE `id` = %i", iZonename, GetZoneID(iZonename), iCharID);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
-	{
+	if (!results.Success()) {
 		std::cerr << "Error in MoveCharacterToZone(id) query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
@@ -2428,57 +2536,11 @@ bool Database::MoveCharacterToZone(uint32 iCharID, const char* iZonename) {
 	return results.RowsAffected() != 0;
 }
 
-uint8 Database::CopyCharacter(const char* oldname, const char* newname, uint32 acctid) {
-	
-	PlayerProfile_Struct* pp;
-	ExtendedProfile_Struct* ext;
-
-	std::string query = StringFormat("SELECT profile, extprofile FROM character_ WHERE name='%s'", oldname);
+bool Database::SetHackerFlag(const char* accountname, const char* charactername, const char* hacked) { 
+	std::string query = StringFormat("INSERT INTO `hackers` (account, name, hacked) values('%s','%s','%s')", accountname, charactername, hacked);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
-	{
-		std::cerr << "Error in CopyCharacter read query '" << query << "' " << results.ErrorMessage() << std::endl;
-		return 0;
-	}
-
-	auto row = results.begin();
-
-	pp = (PlayerProfile_Struct*)row[0];
-	strcpy(pp->name, newname);
-
-	ext = (ExtendedProfile_Struct*)row[1];
-
-	char query2[276 + sizeof(PlayerProfile_Struct)*2 + sizeof(ExtendedProfile_Struct)*2 + 1];
-	char* end=query2;
-
-	end += sprintf(end, "INSERT INTO character_ SET zonename=\'%s\', x = %f, y = %f, z = %f, profile=\'", GetZoneName(pp->zone_id), pp->x, pp->y, pp->z);
-	end += DoEscapeString(end, (char*) pp, sizeof(PlayerProfile_Struct));
-	end += sprintf(end,"\', extprofile=\'");
-	end += DoEscapeString(end, (char*) ext, sizeof(ExtendedProfile_Struct));
-	end += sprintf(end, "\', account_id=%d, name='%s'", acctid, newname);
-
-	results = QueryDatabase(query2, (uint32) (end - query2));
-
-	if (!results.Success())
-	{
-		std::cerr << "Error in CopyCharacter query '" << query2 << "' " << results.ErrorMessage() << std::endl;
-		return 0;
-	}
-
-	if (results.RowsAffected() == 0)
-		return 0;
-
-	return 1;
-}
-
-bool Database::SetHackerFlag(const char* accountname, const char* charactername, const char* hacked) {
-	
-	std::string query = StringFormat("INSERT INTO hackers(account,name,hacked) values('%s','%s','%s')", accountname, charactername, hacked);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-	{
+	if (!results.Success()) {
 		std::cerr << "Error in SetHackerFlag query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
@@ -2486,8 +2548,7 @@ bool Database::SetHackerFlag(const char* accountname, const char* charactername,
 	return results.RowsAffected() != 0;
 }
 
-bool Database::SetMQDetectionFlag(const char* accountname, const char* charactername, const char* hacked, const char* zone) {
-	
+bool Database::SetMQDetectionFlag(const char* accountname, const char* charactername, const char* hacked, const char* zone) { 
 	//Utilize the "hacker" table, but also give zone information.
 	std::string query = StringFormat("INSERT INTO hackers(account,name,hacked,zone) values('%s','%s','%s','%s')", accountname, charactername, hacked, zone);
 	auto results = QueryDatabase(query);
@@ -2573,8 +2634,6 @@ uint32 Database::GetCharacterInfo(const char* iName, uint32* oAccID, uint32* oZo
 	std::string query = StringFormat("SELECT `id`, `account_id`, `zone_id`, `zone_instance`, `x`, `y`, `z` FROM `character_data` WHERE `name` = '%s'", iName);
 	auto results = QueryDatabase(query);
 
-	printf("Calling Database::GetCharacterInfo: ACCID: %u ZONEID: %u INSTANCEID: %u \n", oAccID, oZoneID, oInstanceID);
-
 	if (!results.Success()) {
 		std::cerr << "Error in GetCharacterInfo query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
@@ -2583,7 +2642,7 @@ uint32 Database::GetCharacterInfo(const char* iName, uint32* oAccID, uint32* oZo
 	if (results.RowCount() != 1)
 		return 0;
 
-	auto row = results.begin(); 
+	auto row = results.begin();
 	uint32 charid = atoi(row[0]);
 	if (oAccID){ *oAccID = atoi(row[1]); }
 	if (oZoneID){ *oZoneID = atoi(row[2]); }
@@ -2591,8 +2650,6 @@ uint32 Database::GetCharacterInfo(const char* iName, uint32* oAccID, uint32* oZo
 	if (oX){ *oX = atof(row[4]); }
 	if (oY){ *oY = atof(row[5]); }
 	if (oZ){ *oZ = atof(row[6]); }
-
-	printf("Calling Database::GetCharacterInfo: ACCID: %u ZONEID: %u INSTANCEID: %u \n", oAccID, oZoneID, oInstanceID);
 
 	return charid;
 }
@@ -2631,45 +2688,35 @@ bool Database::GetLiveChar(uint32 account_id, char* cname) {
 	return true;
 }
 
-void Database::SetLFP(uint32 CharID, bool LFP) {
-
-	std::string query = StringFormat("update character_ set lfp=%i where id=%i",LFP, CharID);
-	auto results = QueryDatabase(query);
-
+void Database::SetLFP(uint32 CharID, bool LFP) { 
+	std::string query = StringFormat("UPDATE `character_data` SET `lfp` = %i WHERE `id` = %i",LFP, CharID);
+	auto results = QueryDatabase(query); 
 	if (!results.Success())
 		LogFile->write(EQEMuLog::Error, "Error updating LFP for character %i : %s", CharID, results.ErrorMessage().c_str());
 }
 
-void Database::SetLoginFlags(uint32 CharID, bool LFP, bool LFG, uint8 firstlogon) {
-	
-	std::string query = StringFormat("update character_ set lfp=%i, lfg=%i, firstlogon=%i where id=%i",LFP, LFG, firstlogon, CharID);
-	auto results = QueryDatabase(query);
-
+void Database::SetLoginFlags(uint32 CharID, bool LFP, bool LFG, uint8 firstlogon) { 
+	std::string query = StringFormat("update `character_data` SET `lfp` = %i, `lfg` = %i, `firstlogon` = %i WHERE `id` = %i",LFP, LFG, firstlogon, CharID);
+	auto results = QueryDatabase(query); 
 	if (!results.Success())
 		LogFile->write(EQEMuLog::Error, "Error updating LFP for character %i : %s", CharID, results.ErrorMessage().c_str());
 }
 
-void Database::SetLFG(uint32 CharID, bool LFG) {
-
-	std::string query = StringFormat("update character_ set lfg=%i where id=%i",LFG, CharID);
-	auto results = QueryDatabase(query);
-
+void Database::SetLFG(uint32 CharID, bool LFG) { 
+	std::string query = StringFormat("update `character_data` SET `lfg` = %i WHERE `id` = %i",LFG, CharID);
+	auto results = QueryDatabase(query); 
 	if (!results.Success())
 		LogFile->write(EQEMuLog::Error, "Error updating LFP for character %i : %s", CharID, results.ErrorMessage().c_str());
 }
 
-void Database::SetFirstLogon(uint32 CharID, uint8 firstlogon) {
-	
-	std::string query = StringFormat( "update character_ set firstlogon=%i where id=%i",firstlogon, CharID);
-	auto results = QueryDatabase(query);
-
+void Database::SetFirstLogon(uint32 CharID, uint8 firstlogon) { 
+	std::string query = StringFormat( "UPDATE `character_data` SET `firstlogon` = %i WHERE `id` = %i",firstlogon, CharID);
+	auto results = QueryDatabase(query); 
 	if (!results.Success())
 		LogFile->write(EQEMuLog::Error, "Error updating firstlogon for character %i : %s", CharID, results.ErrorMessage().c_str());
 }
 
-void Database::AddReport(std::string who, std::string against, std::string lines)
-{
-	
+void Database::AddReport(std::string who, std::string against, std::string lines) { 
 	char *escape_str = new char[lines.size()*2+1];
 	DoEscapeString(escape_str, lines.c_str(), lines.size());
 
@@ -2681,11 +2728,9 @@ void Database::AddReport(std::string who, std::string against, std::string lines
 		LogFile->write(EQEMuLog::Error, "Error adding a report for %s: %s", who.c_str(), results.ErrorMessage().c_str());
 }
 
-void Database::SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ismerc){
-	
+void Database::SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ismerc) {
 	std::string query;
-	if (id == 0)
-	{
+	if (id == 0) {
 		// removing from group
 		query = StringFormat("delete from group_id where charid=%i and name='%s' and ismerc=%i",charid, name, ismerc);
 		auto results = QueryDatabase(query);
@@ -2696,8 +2741,8 @@ void Database::SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ism
 		return;
 	}
 
-	// adding to group
-	query = StringFormat("replace into group_id set charid=%i, groupid=%i, name='%s', ismerc='%i'",charid, id, name, ismerc);
+	/* Add to the Group */
+	query = StringFormat("REPLACE INTO  `group_id` SET `charid` = %i, `groupid` = %i, `name` = '%s', `ismerc` = '%i'", charid, id, name, ismerc);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
@@ -2755,46 +2800,34 @@ uint32 Database::GetGroupID(const char* name){
 	return atoi(row[0]);
 }
 
-char* Database::GetGroupLeaderForLogin(const char* name,char* leaderbuf){
-	
-	PlayerProfile_Struct pp;
-
-	std::string query = StringFormat("SELECT profile from character_ where name='%s'", name);
+/* Is this really getting used properly... A half implementation ? Akkadius */
+char* Database::GetGroupLeaderForLogin(const char* name, char* leaderbuf){ 
+	std::string query = StringFormat("SELECT `groupid` FROM `group_id` WHERE `name = '%s'", name);
 	auto results = QueryDatabase(query);
+	auto row = results.begin(); uint32 group_id = 0;
+	if (row[0]){ group_id = atoi(row[0]); }
 
-	if (!results.Success())
-	{
-		std::cout << "Unable to get leader name: " << results.ErrorMessage() << std::endl;
-		return leaderbuf;
-	}
-
-	if (results.LengthOfColumn(0) != sizeof(PlayerProfile_Struct))
-		return leaderbuf;
-
-	auto row = results.begin();
-
-	memcpy(&pp, row[0], sizeof(PlayerProfile_Struct));
-	strcpy(leaderbuf,pp.groupMembers[0]);
+	query = StringFormat("SELECT `name` FROM `group_id` WHERE `name` != '%s' AND `groupid` = %u", name, group_id);
+	results = QueryDatabase(query);
+	row = results.begin();
+	if (row[0]){ strcpy(leaderbuf, row[0]); }
 
 	return leaderbuf;
 }
 
-void Database::SetGroupLeaderName(uint32 gid, const char* name) {
-
-	std::string query = StringFormat("Replace into group_leaders set gid=%lu, leadername='%s'",(unsigned long)gid,name);
+void Database::SetGroupLeaderName(uint32 gid, const char* name) { 
+	std::string query = StringFormat("REPLACE INTO `group_leaders` SET `gid` = %lu, `leadername` = '%s'",(unsigned long)gid,name);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		std::cout << "Unable to set group leader: " << results.ErrorMessage() << std::endl;
 }
 
-char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank, char* assist, char* puller, char *marknpc, GroupLeadershipAA_Struct* GLAA){
-	
-	std::string query = StringFormat("SELECT leadername, maintank, assist, puller, marknpc, leadershipaa FROM group_leaders WHERE gid=%lu",(unsigned long)gid);
+char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank, char* assist, char* puller, char *marknpc, GroupLeadershipAA_Struct* GLAA){ 
+	std::string query = StringFormat("SELECT `leadername`, `maintank`, `assist`, `puller`, `marknpc`, `leadershipaa` FROM `group_leaders` WHERE `gid` = %lu",(unsigned long)gid);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success() || results.RowCount() == 0)
-	{
+	if (!results.Success() || results.RowCount() == 0) {
 		if(leaderbuf)
 			strcpy(leaderbuf, "UNKNOWN");
 
@@ -2837,8 +2870,7 @@ char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* mainta
 }
 
 // Clearing all group leaders
-void Database::ClearAllGroupLeaders(void)
-{
+void Database::ClearAllGroupLeaders(void) {
 	std::string query("DELETE from group_leaders");
 	auto results = QueryDatabase(query);
 
@@ -2863,8 +2895,7 @@ void Database::ClearGroupLeader(uint32 gid) {
 		std::cout << "Unable to clear group leader: " << results.ErrorMessage() << std::endl;
 }
 
-uint8 Database::GetAgreementFlag(uint32 acctid)
-{
+uint8 Database::GetAgreementFlag(uint32 acctid) {
 
 	std::string query = StringFormat("SELECT rulesflag FROM account WHERE id=%i",acctid);
 	auto results = QueryDatabase(query);
@@ -2880,14 +2911,12 @@ uint8 Database::GetAgreementFlag(uint32 acctid)
 	return atoi(row[0]);
 }
 
-void Database::SetAgreementFlag(uint32 acctid)
-{
+void Database::SetAgreementFlag(uint32 acctid) {
 	std::string query = StringFormat("UPDATE account SET rulesflag=1 where id=%i", acctid);
 	QueryDatabase(query);
 }
 
 void Database::ClearRaid(uint32 rid) {
-	
 	if(rid == 0)
 	{
 		//clear all raids
@@ -2903,8 +2932,7 @@ void Database::ClearRaid(uint32 rid) {
 		std::cout << "Unable to clear raids: " << results.ErrorMessage() << std::endl;
 }
 
-void Database::ClearAllRaids(void)
-{
+void Database::ClearAllRaids(void) {
 
 	std::string query("delete from raid_members");
 	auto results = QueryDatabase(query);

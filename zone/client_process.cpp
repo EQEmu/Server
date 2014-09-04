@@ -1717,6 +1717,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		}
 
 		uint16 skilllevel = GetRawSkill(skill);
+
 		if(skilllevel == 0) {
 			//this is a new skill..
 			uint16 t_level = SkillTrainLevel(skill, GetClass());
@@ -1726,7 +1727,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			}
 
 			SetSkill(skill, t_level);
-		} else {
+		} else { 
 			switch(skill) {
 			case SkillBrewing:
 			case SkillMakePoison:

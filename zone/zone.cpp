@@ -77,8 +77,6 @@ extern bool staticzone;
 Zone* zone = 0;
 volatile bool ZoneLoaded = false;
 extern QuestParserCollection* parse;
-extern DBAsyncFinishedQueue MTdbafq;
-extern DBAsync *dbasync;
 
 bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	const char* zonename = database.GetZoneName(iZoneID);
@@ -705,7 +703,6 @@ void Zone::Shutdown(bool quite)
 
 	zone->ResetAuth();
 	safe_delete(zone);
-	dbasync->CommitWrites();
 	entity_list.ClearAreas();
 	parse->ReloadQuests(true);
 	UpdateWindowTitle();
@@ -844,8 +841,6 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 }
 
 Zone::~Zone() {
-	if(pQueuedMerchantsWorkID != 0)
-		dbasync->CancelWork(pQueuedMerchantsWorkID);
 	spawn2_list.Clear();
 	safe_delete(zonemap);
 	safe_delete(watermap);

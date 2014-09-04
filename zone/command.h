@@ -125,7 +125,6 @@ void command_worldshutdown(Client *c, const Seperator *sep);
 void command_sendzonespawns(Client *c, const Seperator *sep);
 void command_zsave(Client *c, const Seperator *sep);
 void command_dbspawn2(Client *c, const Seperator *sep);
-void command_copychar(Client *c, const Seperator *sep);
 void command_shutdown(Client *c, const Seperator *sep);
 void command_delacct(Client *c, const Seperator *sep);
 void command_setpass(Client *c, const Seperator *sep);

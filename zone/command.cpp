@@ -225,7 +225,6 @@ int command_init(void) {
 		command_add("worldshutdown","- Shut down world and all zones",200,command_worldshutdown) ||
 		command_add("sendzonespawns","- Refresh spawn list for all clients in zone",150,command_sendzonespawns) ||
 		command_add("dbspawn2","[spawngroup] [respawn] [variance] - Spawn an NPC from a predefined row in the spawn2 table",100,command_dbspawn2) ||
-		command_add("copychar","[character name] [new character] [new account id] - Create a copy of a character",100,command_copychar) ||
 		command_add("shutdown","- Shut this zone process down",150,command_shutdown) ||
 		command_add("delacct","[accountname] - Delete an account",150,command_delacct) ||
 		command_add("setpass","[accountname] [password] - Set local password for accountname",150,command_setpass) ||
@@ -2227,28 +2226,6 @@ void command_dbspawn2(Client *c, const Seperator *sep)
 	}
 }
 
-void command_copychar(Client *c, const Seperator *sep)
-{
-	if(sep->arg[1][0]==0 || sep->arg[2][0] == 0 || sep->arg[3][0] == 0)
-		c->Message(0, "Usage: #copychar [character name] [new character] [new account id]");
-	//CheckUsedName.... TRUE=No Char, FALSE=Char/Error
-	//If there is no source...
-	else if (database.CheckUsedName((char*)sep->arg[1])) {
-		c->Message(0, "Source character not found!");
-	}
-	else {
-		//If there is a name is not used....
-		if (database.CheckUsedName((char*) sep->arg[2])) {
-			if (!database.CopyCharacter((char*) sep->arg[1], (char*) sep->arg[2], atoi(sep->arg[3])))
-				c->Message(0, "Character copy operation failed!");
-			else
-				c->Message(0, "Character copy complete.");
-		}
-		else
-			c->Message(0, "Target character already exists!");
-	}
-}
-
 void command_shutdown(Client *c, const Seperator *sep)
 {
 	CatchSignal(2);
@@ -2423,8 +2400,8 @@ void command_showskills(Client *c, const Seperator *sep)
 
 	c->Message(0, "Skills for %s", t->GetName());
 	for (SkillUseTypes i=Skill1HBlunt; i <= HIGHEST_SKILL; i=(SkillUseTypes)(i+1))
-		c->Message(0, "Skill [%d] is at [%d]", i, t->GetSkill(i));
-}
+		c->Message(0, "Skill [%d] is at [%d] - %u", i, t->GetSkill(i), t->GetRawSkill(i)); 
+} 
 
 void command_findspell(Client *c, const Seperator *sep)
 {
@@ -2801,7 +2778,7 @@ void command_charbackup(Client *c, const Seperator *sep)
 		if (sep->IsNumber(2))
 			charid = atoi(sep->arg[2]);
 		else
-			database.GetAccountIDByChar(sep->arg[2], &charid);
+			database.GetAccountIDByChar(sep->arg[2]);
 		if (charid) {
 			if (database.RunQuery(query, MakeAnyLenString(&query,
 				"Select id, backupreason, charid, account_id, zoneid, DATE_FORMAT(ts, '%%m/%%d/%%Y %%H:%%i:%%s') "
@@ -2828,7 +2805,7 @@ void command_charbackup(Client *c, const Seperator *sep)
 		if (sep->IsNumber(2))
 			charid = atoi(sep->arg[2]);
 		else
-			database.GetAccountIDByChar(sep->arg[2], &charid);
+			database.GetAccountIDByChar(sep->arg[2]);
 
 		if (charid && sep->IsNumber(3)) {
 			uint32 cbid = atoi(sep->arg[3]);
@@ -8725,6 +8702,7 @@ void command_traindisc(Client *c, const Seperator *sep)
 						break;	//continue the 1st loop
 					} else if(t->GetPP().disciplines.values[r] == 0) {
 						t->GetPP().disciplines.values[r] = curspell;
+						database.SaveCharacterDisc(c->CharacterID(), r, curspell);
 						t->SendDisciplineUpdate();
 						t->Message(0, "You have learned a new discipline!");
 						count++;	//success counter

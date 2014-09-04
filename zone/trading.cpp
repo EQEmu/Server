@@ -913,14 +913,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				if(!tradingWith->IsMoving())
 					tradingWith->FaceTarget(this);
 
-				/* Set a timestamp in an entity variable for plugin check_handin.pl in return_items
-				This will stopgap players from items being returned if global_npc.pl has a catch all return_items
-				*/
-				struct timeval read_time;
-				char buffer[50];
-				gettimeofday(&read_time, 0);
-				sprintf(buffer, "%li.%li \n", read_time.tv_sec, read_time.tv_usec);
-				this->SetEntityVariable("Stop_Return", buffer);
+				this->EVENT_ITEM_ScriptStopReturn();
 
 			}
 		}
@@ -938,7 +931,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		parse->AddVar(temp1, temp2);
 		snprintf(temp1, 100, "platinum.%d", tradingWith->GetNPCTypeID());
 		snprintf(temp2, 100, "%u", trade->pp);
-		parse->AddVar(temp1, temp2);
+		parse->AddVar(temp1, temp2); 
 
 		if(tradingWith->GetAppearance() != eaDead) {
 			tradingWith->FaceTarget(this);

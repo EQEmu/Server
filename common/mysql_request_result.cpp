@@ -32,6 +32,7 @@ MySQLRequestResult::MySQLRequestResult(MYSQL_RES* result, uint32 rowsAffected, u
 
 void MySQLRequestResult::FreeInternals()
 {
+
 	safe_delete_array(m_ErrorBuffer);
 
 	if (m_Result != nullptr)

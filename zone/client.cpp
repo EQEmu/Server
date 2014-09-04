@@ -73,8 +73,6 @@ extern uint32 numclients;
 extern PetitionList petition_list;
 bool commandlogged;
 char entirecommand[255];
-extern DBAsyncFinishedQueue MTdbafq;
-extern DBAsync *dbasync;
 
 Client::Client(EQStreamInterface* ieqs)
 : Mob("No name",	// name
@@ -544,8 +542,9 @@ bool Client::Save(uint8 iCommitNow) {
 	/* Save Character Currency */
 	database.SaveCharacterCurrency(this->CharacterID(), &m_pp);
 
-	/* Save Character AA */
-	// SaveAA();
+	/* Save Current Bind Points : Sets Instance to 0 because it is currently not implemented */
+	database.SaveCharacterBindPoint(this->CharacterID(), m_pp.binds[0].zoneId, 0, m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, 0, 0); /* Regular bind */
+	database.SaveCharacterBindPoint(this->CharacterID(), m_pp.binds[4].zoneId, 0, m_pp.binds[4].x, m_pp.binds[4].y, m_pp.binds[4].z, 0, 1); /* Home Bind */
 
 	/* Save Character Buffs */
 	database.SaveBuffs(this);
@@ -557,15 +556,11 @@ bool Client::Save(uint8 iCommitNow) {
 
 	/* Save Mercs */
 	if (GetMercInfo().MercTimerRemaining > RuleI(Mercs, UpkeepIntervalMS)){ GetMercInfo().MercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS); }
-	if(GetMercTimer()->Enabled()) { GetMercInfo().MercTimerRemaining = GetMercTimer()->GetRemainingTime(); } 
+	if (GetMercTimer()->Enabled()) { GetMercInfo().MercTimerRemaining = GetMercTimer()->GetRemainingTime(); } 
 	if (GetMerc() && !dead) { } 
 	else { memset(&m_mercinfo, 0, sizeof(struct MercInfo)); }
 
 	m_pp.lastlogin = time(nullptr);
-	if (pQueuedSaveWorkID) {
-		dbasync->CancelWork(pQueuedSaveWorkID);
-		pQueuedSaveWorkID = 0;
-	}
 
 	if (GetPet() && !GetPet()->IsFamiliar() && GetPet()->CastToNPC()->GetPetSpellID() && !dead) {
 		NPC *pet = GetPet()->CastToNPC();
@@ -585,34 +580,10 @@ bool Client::Save(uint8 iCommitNow) {
 
 	p_timers.Store(&database);
 
-	/* Save Character Task */
-	SaveTaskState();
+	database.SaveCharacterTribute(this->CharacterID(), &m_pp);
 
-	// if (iCommitNow <= 1) {
-	// 	// char* query = 0;
-	// 	// uint32_breakdown workpt;
-	// 	// workpt.b4() = DBA_b4_Entity;
-	// 	// workpt.w2_3() = GetID();
-	// 	// workpt.b1() = DBA_b1_Entity_Client_Save;
-	// 	// DBAsyncWork* dbaw = new DBAsyncWork(&database, &MTdbafq, workpt, DBAsync::Write, 0xFFFFFFFF);
-	// 	// dbaw->AddQuery(iCommitNow == 0 ? true : false, &query, database.SetPlayerProfile_MQ(&query, account_id, character_id, &m_pp, &m_inv, &m_epp, 0, 0, MaxXTargets), false);
-	// 	// if (iCommitNow == 0){
-	// 	// 	pQueuedSaveWorkID = dbasync->AddWork(&dbaw, 2500);
-	// 	// }
-	// 	// else {
-	// 	// 	dbasync->AddWork(&dbaw, 0);
-	// 	// 	SaveBackup();
-	// 	// }
-	// 	// safe_delete_array(query);
-	// 	// return true;
-	// }
-	// else if (database.SetPlayerProfile(account_id, character_id, &m_pp, &m_inv, &m_epp, 0, 0, MaxXTargets)) {
-	// 	SaveBackup();
-	// }
-	// else {
-	// 	std::cerr << "Failed to update player profile" << std::endl;
-	// 	return false;
-	// }
+	/* Save Character Task */
+	SaveTaskState(); 
 
 	/* Save Character Data */
 	database.SaveCharacterData(this->CharacterID(), this->AccountID(), &m_pp);
@@ -624,12 +595,6 @@ bool Client::Save(uint8 iCommitNow) {
 }
 
 void Client::SaveBackup() {
-	if (!RunLoops)
-		return;
-	char* query = 0;
-	DBAsyncWork* dbaw = new DBAsyncWork(&database, &DBAsyncCB_CharacterBackup, this->CharacterID(), DBAsync::Read);
-	dbaw->AddQuery(0, &query, MakeAnyLenString(&query, "Select id, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(ts) as age from character_backup where charid=%u and backupreason=0 order by ts asc", this->CharacterID()), true);
-	dbasync->AddWork(&dbaw, 0);
 }
 
 CLIENTPACKET::CLIENTPACKET()
@@ -1393,12 +1358,14 @@ bool Client::UpdateLDoNPoints(int32 points, uint32 theme)
 
 void Client::SetSkill(SkillUseTypes skillid, uint16 value) {
 	if (skillid > HIGHEST_SKILL)
-		return;
-	m_pp.skills[skillid] = value; // We need to be able to #setskill 254 and 255 to reset skills
+		return;  
+	m_pp.skills[skillid] = value; // We need to be able to #setskill 254 and 255 to reset skills 
+
+	database.SaveCharacterSkill(this->CharacterID(), skillid, value);
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SkillUpdate, sizeof(SkillUpdate_Struct));
 	SkillUpdate_Struct* skill = (SkillUpdate_Struct*)outapp->pBuffer;
-	skill->skillId=skillid;
+	skill->skillId=skillid; 
 	skill->value=value;
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -1414,10 +1381,12 @@ void Client::IncreaseLanguageSkill(int skill_id, int value) {
 	if (m_pp.languages[skill_id] > 100) //Lang skill above max
 		m_pp.languages[skill_id] = 100;
 
+	database.SaveCharacterLanguage(this->CharacterID(), skill_id, m_pp.languages[skill_id]);
+
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SkillUpdate, sizeof(SkillUpdate_Struct));
 	SkillUpdate_Struct* skill = (SkillUpdate_Struct*)outapp->pBuffer;
 	skill->skillId = 100 + skill_id;
-	skill->value = m_pp.languages[skill_id];
+	skill->value = m_pp.languages[skill_id]; 
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
@@ -2165,32 +2134,27 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 	uint64 tmp2;
 	tmp = copper;
 
-	// Add Amount of Platinum
+	/* Add Amount of Platinum */
 	tmp2 = tmp/1000;
 	int32 new_val = m_pp.platinum + tmp2;
-	if(new_val < 0) {
-		m_pp.platinum = 0;
-	} else {
-		m_pp.platinum = m_pp.platinum + tmp2;
-	}
+	if(new_val < 0) { m_pp.platinum = 0; } 
+	else { m_pp.platinum = m_pp.platinum + tmp2; }
 	tmp-=tmp2*1000;
 
 	//if (updateclient)
 	//	SendClientMoneyUpdate(3,tmp2);
 
-	// Add Amount of Gold
+	/* Add Amount of Gold */
 	tmp2 = tmp/100;
 	new_val = m_pp.gold + tmp2;
-	if(new_val < 0) {
-		m_pp.gold = 0;
-	} else {
-		m_pp.gold = m_pp.gold + tmp2;
-	}
+	if(new_val < 0) { m_pp.gold = 0; } 
+	else { m_pp.gold = m_pp.gold + tmp2; }
+
 	tmp-=tmp2*100;
 	//if (updateclient)
 	//	SendClientMoneyUpdate(2,tmp2);
 
-	// Add Amount of Silver
+	/* Add Amount of Silver */
 	tmp2 = tmp/10;
 	new_val = m_pp.silver + tmp2;
 	if(new_val < 0) {
@@ -2226,8 +2190,7 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 	LogFile->write(EQEMuLog::Debug, "Client::AddMoneyToPP() %s should have: plat:%i gold:%i silver:%i copper:%i", GetName(), m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
 }
 
-void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, bool updateclient){
-
+void Client::EVENT_ITEM_ScriptStopReturn(){
 	/* Set a timestamp in an entity variable for plugin check_handin.pl in return_items
 		This will stopgap players from items being returned if global_npc.pl has a catch all return_items
 	*/
@@ -2236,6 +2199,10 @@ void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 plat
 	gettimeofday(&read_time, 0);
 	sprintf(buffer, "%li.%li \n", read_time.tv_sec, read_time.tv_usec);
 	this->SetEntityVariable("Stop_Return", buffer);
+}
+
+void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, bool updateclient){
+	this->EVENT_ITEM_ScriptStopReturn();
 
 	int32 new_value = m_pp.platinum + platinum;
 	if(new_value >= 0 && new_value > m_pp.platinum)
@@ -3184,6 +3151,7 @@ void Client::SetLanguageSkill(int langid, int value)
 		value = 100; //Max lang value
 
 	m_pp.languages[langid] = value;
+	database.SaveCharacterLanguage(this->CharacterID(), langid, value);
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SkillUpdate, sizeof(SkillUpdate_Struct));
 	SkillUpdate_Struct* skill = (SkillUpdate_Struct*)outapp->pBuffer;

@@ -34,9 +34,6 @@ public:
 	SharedDatabase(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
 	virtual ~SharedDatabase();
 
-	/* Temp */
-	uint32 SetPlayerProfile_MQ(char** query, uint32 account_id, uint32 charid, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, uint32 current_zone, uint32 current_instance, uint8 MaxXTargets);
-	bool SetPlayerProfile(uint32 account_id, uint32 charid, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, uint32 current_zone, uint32 current_instance, uint8 MaxXTargets);
 	/*
 	* General Character Related Stuff
 	*/

@@ -4933,8 +4933,9 @@ void Client::UntrainDisc(int slot, bool update_client)
 	if(slot >= MAX_PP_DISCIPLINES || slot < 0)
 		return;
 
-	mlog(CLIENT__SPELLS, "Discipline %d untrained from slot %d", m_pp.disciplines.values[slot], slot);
+	mlog(CLIENT__SPELLS, "Discipline %d untrained from slot %d", m_pp.disciplines.values[slot], slot); 
 	m_pp.disciplines.values[slot] = 0;
+	database.DeleteCharacterDisc(this->CharacterID(), slot);
 
 	if(update_client)
 	{

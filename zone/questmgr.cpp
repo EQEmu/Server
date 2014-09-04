@@ -974,6 +974,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 							SpellGlobalCheckResult = initiator->SpellGlobalCheck(curspell, Char_ID);
 							if (SpellGlobalCheckResult) {
 								initiator->GetPP().disciplines.values[r] = curspell;
+								database.SaveCharacterDisc(Char_ID, r, curspell);
 								initiator->SendDisciplineUpdate();
 								initiator->Message(0, "You have learned a new discipline!");
 								count++;	//success counter
@@ -981,11 +982,12 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 							break;	//continue the 1st loop
 						}
 						else {
-						initiator->GetPP().disciplines.values[r] = curspell;
-						initiator->SendDisciplineUpdate();
-						initiator->Message(0, "You have learned a new discipline!");
-						count++;	//success counter
-						break;	//continue the 1st loop
+							initiator->GetPP().disciplines.values[r] = curspell;
+							database.SaveCharacterDisc(Char_ID, r, curspell);
+							initiator->SendDisciplineUpdate();
+							initiator->Message(0, "You have learned a new discipline!");
+							count++;	//success counter
+							break;	//continue the 1st loop
 						}
 					}	//if we get to this point, there's already a discipline in this slot, so we skip it
 				}

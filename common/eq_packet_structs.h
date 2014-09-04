@@ -800,9 +800,12 @@ struct SuspendedMinion_Struct
 ** Length: 4308 bytes
 ** OpCode: 0x006a
  */
-static const uint32 MAX_PP_LANGUAGE		= 28;
-static const uint32 MAX_PP_SPELLBOOK =	 480;	// Increased to 480 to support SoF 
-static const uint32 MAX_PP_MEMSPELL		= 9; 
+static const uint32 MAX_PP_LANGUAGE = 28;
+static const uint32 MAX_PP_SPELLBOOK = 720;	// Set for all functions
+static const uint32 MAX_PP_MEMSPELL = 12; // Set to latest client so functions can work right
+static const uint32 MAX_PP_REF_SPELLBOOK = 480;	// Set for Player Profile size retain
+static const uint32 MAX_PP_REF_MEMSPELL = 9; // Set for Player Profile size retain
+
 static const uint32 MAX_PP_SKILL		= _SkillPacketArraySize;	// 100 - actual skills buffer size
 static const uint32 MAX_PP_AA_ARRAY		= 240;
 static const uint32 MAX_GROUP_MEMBERS	= 6;
@@ -880,7 +883,7 @@ struct PlayerProfile_Struct
 /*0245*/	uint8				guildbanker;
 /*0246*/	uint8				unknown0246[6];		//
 /*0252*/	uint32				intoxication;
-/*0256*/	uint32				spellSlotRefresh[MAX_PP_MEMSPELL];	//in ms
+/*0256*/	uint32				spellSlotRefresh[MAX_PP_REF_MEMSPELL];	//in ms
 /*0292*/	uint32				abilitySlotRefresh;
 /*0296*/	uint8				haircolor;			// Player hair color
 /*0297*/	uint8				beardcolor;			// Player beard color
@@ -919,9 +922,9 @@ struct PlayerProfile_Struct
 /*2505*/	uint8				unknown2541[47];	// ?
 /*2552*/	uint8				languages[MAX_PP_LANGUAGE];
 /*2580*/	uint8				unknown2616[4];
-/*2584*/	uint32				spell_book[MAX_PP_SPELLBOOK];
+/*2584*/	uint32				spell_book[MAX_PP_REF_SPELLBOOK];
 /*4504*/	uint8				unknown4540[128];	// Was [428] all 0xff
-/*4632*/	uint32				mem_spells[MAX_PP_MEMSPELL];
+/*4632*/	uint32				mem_spells[MAX_PP_REF_MEMSPELL];
 /*4668*/	uint8				unknown4704[32];	//
 /*4700*/	float				y;					// Player y position
 /*4704*/	float				x;					// Player x position

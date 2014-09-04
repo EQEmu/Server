@@ -254,8 +254,10 @@ int32 Client::TributeItem(uint32 slot, uint32 quantity) {
 		return(0);
 	}
 
-	//make sure they have enough of them
-	//and remove it from inventory
+	/*
+		Make sure they have enough of them
+		and remove it from inventory
+	*/
 	if(inst->IsStackable()) {
 		if(inst->GetCharges() < (int32)quantity)	//dont have enough....
 			return(0);
@@ -267,7 +269,7 @@ int32 Client::TributeItem(uint32 slot, uint32 quantity) {
 
 	pts *= quantity;
 
-	//add the tribute value in points
+	/* Add the tribute value in points */
 	AddTributePoints(pts);
 	return(pts);
 }
@@ -279,7 +281,7 @@ int32 Client::TributeMoney(uint32 platinum) {
 		return(0);
 	}
 
-	//add the tribute value in points
+	/* Add the tribute value in points */
 	AddTributePoints(platinum);
 	return(platinum);
 }

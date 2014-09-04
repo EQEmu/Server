@@ -606,6 +606,7 @@ bool Client::TrainDiscipline(uint32 itemid) {
 			return(false);
 		} else if(m_pp.disciplines.values[r] == 0) {
 			m_pp.disciplines.values[r] = spell_id;
+			database.SaveCharacterDisc(this->CharacterID(), r, spell_id);
 			SendDisciplineUpdate();
 			Message(0, "You have learned a new discipline!");
 			return(true);

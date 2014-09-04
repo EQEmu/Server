@@ -50,10 +50,6 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 #endif
 	ZoneChange_Struct* zc=(ZoneChange_Struct*)app->pBuffer;
 
-	printf("INCOMING CLIENT\n\n");
-	printf("%s\n", zc->char_name);
-	printf("%u\n", zc->zoneID);
-
 	uint16 target_zone_id = 0;
 	uint16 target_instance_id = zc->instanceID;
 	ZonePoint* zone_point = nullptr;
@@ -568,7 +564,6 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 
 	if(ReadyToZone) {
 		zone_mode = zm;
-		printf("\n\n ZONE MODE %u \n\n", zm);
 		if(zm == ZoneToBindPoint) {
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + iZoneNameLength);
 			ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
@@ -601,10 +596,6 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			gmg->heading = heading;
 			gmg->instance_id = instance_id;
 			gmg->type = 0x01;				//an observed value, not sure of meaning
-
-			printf("gmg->zone_id %u \n", gmg->zone_id);
-			printf("gmg->x %u \n", gmg->x);
-			printf("gmg->y %u \n", gmg->y);
 
 			outapp->priority = 6;
 			FastQueuePacket(&outapp);
@@ -726,6 +717,7 @@ void Client::SetBindPoint(int to_zone, float new_x, float new_y, float new_z) {
 		m_pp.binds[0].y = new_y;
 		m_pp.binds[0].z = new_z;
 	}
+	database.SaveCharacterBindPoint(this->CharacterID(), m_pp.binds[0].zoneId, 0, m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, 0, 0);
 }
 
 void Client::GoToBind(uint8 bindnum) {

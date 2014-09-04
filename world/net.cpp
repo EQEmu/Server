@@ -67,7 +67,6 @@
 
 #endif
 
-#include "../common/dbasync.h"
 #include "../common/emu_tcp_server.h"
 #include "../common/patches/patches.h"
 #include "zoneserver.h"
@@ -98,7 +97,6 @@ UCSConnection UCSLink;
 QueryServConnection QSLink;
 LauncherList launcher_list;
 AdventureManager adventure_manager;
-DBAsync *dbasync = nullptr;
 volatile bool RunLoops = true;
 uint32 numclients = 0;
 uint32 numzones = 0;
@@ -175,7 +173,6 @@ int main(int argc, char** argv) {
 		_log(WORLD__INIT_ERR, "Cannot continue without a database connection.");
 		return 1;
 	}
-	dbasync = new DBAsync(&database);
 	guild_mgr.SetDatabase(&database);
 
 	if (argc >= 2) {
