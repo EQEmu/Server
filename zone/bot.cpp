@@ -4773,41 +4773,28 @@ std::list<BotGroup> Bot::LoadBotGroup(std::string botGroupName, std::string* err
 }
 
 std::list<BotGroupList> Bot::GetBotGroupListByBotOwnerCharacterId(uint32 botOwnerCharacterId, std::string* errorMessage) {
-	std::list<BotGroupList> result;
+	std::list<BotGroupList> botGroups;
 
-	if(botOwnerCharacterId > 0) {
-		char ErrBuf[MYSQL_ERRMSG_SIZE];
-		char* Query = 0;
-		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
+	if(botOwnerCharacterId == 0)
+        return botGroups;
 
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "select BotGroupName, BotGroupLeaderName from vwBotGroups where BotOwnerCharacterId = %u", botOwnerCharacterId), ErrBuf, &DatasetResult)) {
-			*errorMessage = std::string(ErrBuf);
-		}
-		else {
-			uint32 RowCount = mysql_num_rows(DatasetResult);
+    std::string query = StringFormat("SELECT BotGroupName, BotGroupLeaderName FROM vwBotGroups "
+                                    "WHERE BotOwnerCharacterId = %u", botOwnerCharacterId);
+    auto results = database.QueryDatabase(query);
+    if(!results.Success()) {
+        *errorMessage = std::string(results.ErrorMessage());
+        return botGroups;
+    }
 
-			if(RowCount > 0) {
-				for(int iCounter = 0; iCounter < RowCount; iCounter++) {
-					DataRow = mysql_fetch_row(DatasetResult);
+    for(auto row = results.begin(); row != results.end(); ++row) {
+		BotGroupList botGroupList;
+        botGroupList.BotGroupName = std::string(row[0]);
+        botGroupList.BotGroupLeaderName = std::string(row[1]);
 
-					if(DataRow) {
-						BotGroupList botGroupList;
-						botGroupList.BotGroupName = std::string(DataRow[0]);
-						botGroupList.BotGroupLeaderName = std::string(DataRow[1]);
+        botGroups.push_back(botGroupList);
+    }
 
-						result.push_back(botGroupList);
-					}
-				}
-			}
-
-			mysql_free_result(DatasetResult);
-		}
-
-		safe_delete_array(Query);
-	}
-
-	return result;
+	return botGroups;
 }
 
 bool Bot::DoesBotGroupNameExist(std::string botGroupName) {
