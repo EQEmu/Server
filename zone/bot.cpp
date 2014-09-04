@@ -4656,38 +4656,28 @@ std::list<BotsAvailableList> Bot::GetBotList(uint32 botOwnerCharacterID, std::st
 }
 
 std::list<SpawnedBotsList> Bot::ListSpawnedBots(uint32 characterID, std::string* errorMessage) {
-	std::list<SpawnedBotsList> Result;
-	char ErrBuf[MYSQL_ERRMSG_SIZE];
-	char* Query = 0;
-	MYSQL_RES* DatasetResult;
-	MYSQL_ROW DataRow;
+	std::list<SpawnedBotsList> spawnedBots;
 
-	if(characterID > 0) {
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT bot_name, zone_name FROM botleader WHERE leaderid=%i", characterID), ErrBuf, &DatasetResult)) {
-			*errorMessage = std::string(ErrBuf);
-		}
-		else {
-			uint32 RowCount = mysql_num_rows(DatasetResult);
+	if(characterID == 0)
+        return spawnedBots;
 
-			if(RowCount > 0) {
-				for(int iCounter = 0; iCounter < RowCount; iCounter++) {
-					DataRow = mysql_fetch_row(DatasetResult);
-					SpawnedBotsList TempSpawnedBotsList;
-					TempSpawnedBotsList.BotLeaderCharID = characterID;
-					strcpy(TempSpawnedBotsList.BotName, DataRow[0]);
-					strcpy(TempSpawnedBotsList.ZoneName, DataRow[1]);
+	std::string query = StringFormat("SELECT bot_name, zone_name FROM botleader WHERE leaderid=%i", characterID);
+	auto results = database.QueryDatabase(query);
+    if(!results.Success()) {
+        *errorMessage = std::string(results.ErrorMessage());
+        return spawnedBots;
+    }
 
-					Result.push_back(TempSpawnedBotsList);
-				}
-			}
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        SpawnedBotsList spawnedBotsList;
+        spawnedBotsList.BotLeaderCharID = characterID;
+        strcpy(spawnedBotsList.BotName, row[0]);
+        strcpy(spawnedBotsList.ZoneName, row[1]);
 
-			mysql_free_result(DatasetResult);
-		}
+        spawnedBots.push_back(spawnedBotsList);
+    }
 
-		safe_delete_array(Query);
-	}
-
-	return Result;
+	return spawnedBots;
 }
 
 void Bot::SaveBotGroup(Group* botGroup, std::string botGroupName, std::string* errorMessage) {
