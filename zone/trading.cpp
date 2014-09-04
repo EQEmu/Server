@@ -2402,60 +2402,44 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 
 	safe_delete(outapp);
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* Query = 0;
-	char ItemName[64];
-	std::string Search, Values;
-	MYSQL_RES *Result;
-	MYSQL_ROW Row;
+    std::string query = StringFormat("SELECT * FROM buyer WHERE charid = %i", Buyer->CharacterID());
+    auto results = database.QueryDatabase(query);
+    if (!results.Success() || results.RowCount() == 0)
+        return;
 
-	if (database.RunQuery(Query,MakeAnyLenString(&Query, "select * from buyer where charid = %i",
-							Buyer->CharacterID()),errbuf,&Result)){
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        char ItemName[64];
+        uint32 BuySlot = atoi(row[1]);
+        uint32 ItemID = atoi(row[2]);
+		strcpy(ItemName, row[3]);
+		uint32 Quantity = atoi(row[4]);
+		uint32 Price = atoi(row[5]);
 
-		if(mysql_num_rows(Result) == 0) {
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Barter, 936);
 
-			safe_delete_array(Query);
+		char *Buf = (char *)outapp->pBuffer;
 
-			mysql_free_result(Result);
+		const Item_Struct* item = database.GetItem(ItemID);
 
-			return;
-		}
+		if(!item)
+            continue;
 
-		while ((Row = mysql_fetch_row(Result))) {
+        VARSTRUCT_ENCODE_TYPE(uint32, Buf, Barter_BuyerInspectWindow);
+		VARSTRUCT_ENCODE_TYPE(uint32, Buf, BuySlot);
+		VARSTRUCT_ENCODE_TYPE(uint8, Buf, 1);				// Flag
+		VARSTRUCT_ENCODE_TYPE(uint32, Buf, ItemID);
+		VARSTRUCT_ENCODE_STRING(Buf, ItemName);
+		VARSTRUCT_ENCODE_TYPE(uint32, Buf, item->Icon);
+		VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity);
+		VARSTRUCT_ENCODE_TYPE(uint8, Buf, 1);				// Flag
+		VARSTRUCT_ENCODE_TYPE(uint32, Buf, Price);
+		VARSTRUCT_ENCODE_TYPE(uint32, Buf, Buyer->GetID());
+		VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);
+		VARSTRUCT_ENCODE_STRING(Buf, Buyer->GetName());
 
-			uint32 BuySlot = atoi(Row[1]);
-			uint32 ItemID = atoi(Row[2]);
-			strcpy(ItemName, Row[3]);
-			uint32 Quantity = atoi(Row[4]);
-			uint32 Price = atoi(Row[5]);
-
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Barter, 936);
-
-			char *Buf = (char *)outapp->pBuffer;
-
-			const Item_Struct* item = database.GetItem(ItemID);
-
-			if(!item) continue;
-
-			VARSTRUCT_ENCODE_TYPE(uint32, Buf, Barter_BuyerInspectWindow);
-			VARSTRUCT_ENCODE_TYPE(uint32, Buf, BuySlot);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buf, 1);				// Flag
-			VARSTRUCT_ENCODE_TYPE(uint32, Buf, ItemID);
-			VARSTRUCT_ENCODE_STRING(Buf, ItemName);
-			VARSTRUCT_ENCODE_TYPE(uint32, Buf, item->Icon);
-			VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buf, 1);				// Flag
-			VARSTRUCT_ENCODE_TYPE(uint32, Buf, Price);
-			VARSTRUCT_ENCODE_TYPE(uint32, Buf, Buyer->GetID());
-			VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);
-			VARSTRUCT_ENCODE_STRING(Buf, Buyer->GetName());
-
-			_pkt(TRADING__BARTER, outapp);
-			QueuePacket(outapp);
-		}
-		mysql_free_result(Result);
-	}
-	safe_delete_array(Query);
+		_pkt(TRADING__BARTER, outapp);
+		QueuePacket(outapp);
+    }
 }
 
 void Client::SellToBuyer(const EQApplicationPacket *app) {
