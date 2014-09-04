@@ -351,27 +351,21 @@ void Client::EnableTitle(int titleSet) {
 
 }
 
-bool Client::CheckTitle(int titleset) {
+bool Client::CheckTitle(int titleSet) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-
-	if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT `id` FROM player_titlesets WHERE `title_set`=%i AND `char_id`=%i LIMIT 1", titleset, CharacterID()), errbuf, &result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) >= 1) {
-			mysql_free_result(result);
-			return(true);
-		}
-		mysql_free_result(result);
+	std::string query = StringFormat("SELECT `id` FROM player_titlesets "
+                                    "WHERE `title_set`=%i AND `char_id`=%i LIMIT 1",
+                                    titleSet, CharacterID());
+    auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in CheckTitle query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return false;
 	}
 
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in CheckTitle query '%s': %s", query, errbuf);
-		safe_delete_array(query);
-	}
+	if (results.RowCount() == 0)
+        return false;
 
-	return(false);
+	return true;
 }
 
 void Client::RemoveTitle(int titleset) {
