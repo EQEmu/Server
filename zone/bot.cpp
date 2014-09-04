@@ -4935,29 +4935,22 @@ uint32 Bot::CreatedBotCount(uint32 botOwnerCharacterID, std::string* errorMessag
 }
 
 uint32 Bot::GetBotOwnerCharacterID(uint32 botID, std::string* errorMessage) {
-	uint32 Result = 0;
 
-	if(botID > 0) {
-		char ErrBuf[MYSQL_ERRMSG_SIZE];
-		char* Query = 0;
-		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
+	if(botID == 0)
+        return 0;
 
-		if(database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT BotOwnerCharacterID FROM bots WHERE BotID = %u", botID), ErrBuf, &DatasetResult)) {
-			if(mysql_num_rows(DatasetResult) == 1) {
-				if(DataRow = mysql_fetch_row(DatasetResult))
-					Result = atoi(DataRow[0]);
-			}
+    std::string query = StringFormat("SELECT BotOwnerCharacterID FROM bots WHERE BotID = %u", botID);
+    auto results = database.QueryDatabase(query);
+    if (results.Success()) {
+        *errorMessage = std::string(results.ErrorMessage());
+        return 0;
+    }
 
-			mysql_free_result(DatasetResult);
-		}
-		else
-			*errorMessage = std::string(ErrBuf);
+    if (results.RowCount() != 1)
+        return 0;
 
-		safe_delete_array(Query);
-	}
-
-	return Result;
+	auto row = results.begin();
+	return atoi(row[0]);
 }
 
 void Bot::LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp) {
