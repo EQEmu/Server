@@ -8573,33 +8573,23 @@ void Bot::SetBotGuildMembership(uint32 botId, uint32 guildid, uint8 rank) {
 }
 
 void Bot::LoadGuildMembership(uint32* guildId, uint8* guildRank, std::string* guildName) {
-	if(guildId && guildRank && guildName) {
-		std::string errorMessage;
-		char* Query = 0;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
 
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT gm.guild_id, gm.rank, g.name FROM vwGuildMembers AS gm JOIN guilds AS g ON gm.guild_id = g.id WHERE gm.char_id = %u AND gm.mobtype = 'B';", GetBotID()), TempErrorMessageBuffer, &DatasetResult)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else {
-			while(DataRow = mysql_fetch_row(DatasetResult)) {
-				*guildId = atoi(DataRow[0]);
-				*guildRank = atoi(DataRow[1]);
-				*guildName = std::string(DataRow[2]);
-				break;
-			}
+	if(guildId == nullptr || guildRank == nullptr || guildName == nullptr)
+        return;
 
-			mysql_free_result(DatasetResult);
-		}
+    std::string query = StringFormat("SELECT gm.guild_id, gm.rank, g.name "
+                                    "FROM vwGuildMembers AS gm JOIN guilds AS g "
+                                    "ON gm.guild_id = g.id "
+                                    "WHERE gm.char_id = %u AND gm.mobtype = 'B';",
+                                    GetBotID());
+    auto results = database.QueryDatabase(query);
+    if(!results.Success() || results.RowCount() == 0)
+        return;
 
-		safe_delete(Query);
-
-		if(!errorMessage.empty()) {
-			// TODO: Record this error message to zone error log
-		}
-	}
+    auto row = results.begin();
+    *guildId = atoi(row[0]);
+    *guildRank = atoi(row[1]);
+    *guildName = std::string(row[2]);
 }
 
 int32 Bot::CalcMaxMana() {
