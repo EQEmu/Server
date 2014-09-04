@@ -1669,11 +1669,6 @@ void QuestManager::showgrid(int grid) {
 	if(initiator == nullptr)
 		return;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
 	FindPerson_Point pt;
 	std::vector<FindPerson_Point> pts;
 
@@ -1683,22 +1678,25 @@ void QuestManager::showgrid(int grid) {
 	pts.push_back(pt);
 
 	// Retrieve all waypoints for this grid
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `x`,`y`,`z` FROM grid_entries WHERE `gridid`=%i AND `zoneid`=%i ORDER BY `number`",grid,zone->GetZoneID()),errbuf,&result)) {
-		while((row = mysql_fetch_row(result))) {
-			pt.x = atof(row[0]);
-			pt.y = atof(row[1]);
-			pt.z = atof(row[2]);
-			pts.push_back(pt);
-		}
-		mysql_free_result(result);
-		initiator->SendPathPacket(pts);
-	}
-	else	// DB query error!
-	{
-		LogFile->write(EQEMuLog::Quest, "Error loading grid %d for showgrid(): %s", grid, errbuf);
+	std::string query = StringFormat("SELECT `x`,`y`,`z` FROM grid_entries "
+                                    "WHERE `gridid` = %i AND `zoneid` = %i "
+                                    "ORDER BY `number`", grid, zone->GetZoneID());
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Quest, "Error loading grid %d for showgrid(): %s", grid, results.ErrorMessage().c_str());
 		return;
-	}
-	safe_delete_array(query);
+    }
+
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        pt.x = atof(row[0]);
+        pt.y = atof(row[1]);
+        pt.z = atof(row[2]);
+
+        pts.push_back(pt);
+    }
+
+    initiator->SendPathPacket(pts);
+
 }
 
 //change the value of a spawn condition
