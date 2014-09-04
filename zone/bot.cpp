@@ -4721,27 +4721,26 @@ void Bot::SaveBotGroup(Group* botGroup, std::string botGroupName, std::string* e
 }
 
 void Bot::DeleteBotGroup(std::string botGroupName, std::string* errorMessage) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 
-	if(!botGroupName.empty()) {
-		uint32 botGroupId = GetBotGroupIdByBotGroupName(botGroupName, errorMessage);
+	if(botGroupName.empty())
+        return;
 
-		if(errorMessage->empty() && botGroupId > 0) {
-			if(!database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM botgroupmembers WHERE BotGroupId = %u", botGroupId), errbuf)) {
-				*errorMessage = std::string(errbuf);
-			}
-			else {
-				safe_delete_array(query);
+    uint32 botGroupId = GetBotGroupIdByBotGroupName(botGroupName, errorMessage);
 
-				if(!database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM botgroup WHERE BotGroupId = %u", botGroupId), errbuf)) {
-					*errorMessage = std::string(errbuf);
-				}
-			}
+    if(!errorMessage->empty() || botGroupId== 0)
+        return;
 
-			safe_delete_array(query);
-		}
-	}
+    std::string query = StringFormat("DELETE FROM botgroupmembers WHERE BotGroupId = %u", botGroupId);
+    auto results = database.QueryDatabase(query);
+    if(!results.Success()) {
+        *errorMessage = std::string(results.ErrorMessage());
+        return;
+    }
+
+    query = StringFormat("DELETE FROM botgroup WHERE BotGroupId = %u", botGroupId);
+    results = database.QueryDatabase(query);
+    if(!results.Success())
+        *errorMessage = std::string(results.ErrorMessage());
 }
 
 std::list<BotGroup> Bot::LoadBotGroup(std::string botGroupName, std::string* errorMessage) {
