@@ -268,48 +268,37 @@ void TitleManager::CreateNewPlayerTitle(Client *client, const char *title)
     safe_delete(pack);
 }
 
-void TitleManager::CreateNewPlayerSuffix(Client *c, const char *Suffix)
+void TitleManager::CreateNewPlayerSuffix(Client *client, const char *suffix)
 {
-	if(!c || !Suffix)
+	if(!client || !suffix)
 		return;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = nullptr;
-	MYSQL_RES *result;
+    client->SetTitleSuffix(suffix);
 
-	char *EscSuffix = new char[strlen(Suffix) * 2 + 1];
+	char *escSuffix = new char[strlen(suffix) * 2 + 1];
+	database.DoEscapeString(escSuffix, suffix, strlen(suffix));
 
-	c->SetTitleSuffix(Suffix);
-
-	database.DoEscapeString(EscSuffix, Suffix, strlen(Suffix));
-
-	if (database.RunQuery(query, MakeAnyLenString(&query,
-		"SELECT `id` from titles where `suffix` = '%s' and char_id = %i", EscSuffix, c->CharacterID()), errbuf, &result))
-	{
-		if(mysql_num_rows(result) > 0)
-		{
-			mysql_free_result(result);
-			safe_delete_array(query);
-			safe_delete_array(EscSuffix);
+    std::string query = StringFormat("SELECT `id` FROM titles "
+                                    "WHERE `suffix` = '%s' AND char_id = %i",
+                                    escSuffix, client->CharacterID());
+    auto results = database.QueryDatabase(query);
+	if (results.Success() && results.RowCount() > 0) {
+			safe_delete_array(escSuffix);
 			return;
-		}
-		mysql_free_result(result);
-	}
+    }
 
-	safe_delete_array(query);
+    query = StringFormat("INSERT INTO titles (`char_id`, `suffix`) VALUES(%i, '%s')",
+                        client->CharacterID(), escSuffix);
+    safe_delete_array(escSuffix);
+    results = database.QueryDatabase(query);
+	if(!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error adding title suffix: %s %s", query.c_str(), results.ErrorMessage().c_str());
+        return;
+    }
 
-	if(!database.RunQuery(query,MakeAnyLenString(&query, "INSERT into titles (`char_id`, `suffix`) VALUES(%i, '%s')",
-							c->CharacterID(), EscSuffix), errbuf))
-		LogFile->write(EQEMuLog::Error, "Error adding title suffix: %s %s", query, errbuf);
-	else
-	{
-		ServerPacket* pack = new ServerPacket(ServerOP_ReloadTitles, 0);
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-	safe_delete_array(query);
-	safe_delete_array(EscSuffix);
-
+    ServerPacket* pack = new ServerPacket(ServerOP_ReloadTitles, 0);
+    worldserver.SendPacket(pack);
+    safe_delete(pack);
 }
 
 void Client::SetAATitle(const char *Title)
