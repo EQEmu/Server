@@ -4820,43 +4820,31 @@ bool Bot::DoesBotGroupNameExist(std::string botGroupName) {
 }
 
 uint32 Bot::CanLoadBotGroup(uint32 botOwnerCharacterId, std::string botGroupName, std::string* errorMessage) {
-	uint32 result = 0;
 
-	if(botOwnerCharacterId > 0 && !botGroupName.empty()) {
-		char ErrBuf[MYSQL_ERRMSG_SIZE];
-		char* Query = 0;
-		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
+	if(botOwnerCharacterId == 0 || botGroupName.empty())
+        return 0;
 
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "select BotGroupId, BotGroupName from vwBotGroups where BotOwnerCharacterId = %u", botOwnerCharacterId), ErrBuf, &DatasetResult)) {
-			*errorMessage = std::string(ErrBuf);
-		}
-		else {
-			uint32 RowCount = mysql_num_rows(DatasetResult);
+    std::string query = StringFormat("SELECT BotGroupId, BotGroupName FROM vwBotGroups "
+                                    "WHERE BotOwnerCharacterId = %u", botOwnerCharacterId);
+    auto results = database.QueryDatabase(query);
+    if(!results.Success()) {
+        *errorMessage = std::string(results.ErrorMessage());
+        return 0;
+    }
 
-			if(RowCount > 0) {
-				for(int iCounter = 0; iCounter < RowCount; iCounter++) {
-					DataRow = mysql_fetch_row(DatasetResult);
+    if(results.RowCount() == 0)
+        return 0;
 
-					if(DataRow) {
-						uint32 tempBotGroupId = atoi(DataRow[0]);
-						std::string tempBotGroupName = std::string(DataRow[1]);
+    for(auto row = results.begin(); row != results.end(); ++row) {
 
-						if(botGroupName == tempBotGroupName) {
-							result = tempBotGroupId;
-							break;
-						}
-					}
-				}
-			}
+        uint32 tempBotGroupId = atoi(row[0]);
+        std::string tempBotGroupName = std::string(row[1]);
 
-			mysql_free_result(DatasetResult);
-		}
+        if(botGroupName == tempBotGroupName)
+            return tempBotGroupId;
+    }
 
-		safe_delete_array(Query);
-	}
-
-	return result;
+	return 0;
 }
 
 uint32 Bot::GetBotGroupIdByBotGroupName(std::string botGroupName, std::string* errorMessage) {
