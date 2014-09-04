@@ -16125,27 +16125,20 @@ uint32 Bot::GetEquipmentColor(uint8 material_slot) const
 {
 	//Bot tints
 	uint32 slotid = 0;
-	uint32 returncolor = 0;
 	uint32 botid = this->GetBotID();
 
 	//Translate code slot # to DB slot #
 	slotid = Inventory::CalcSlotFromMaterial(material_slot);
 
 	//read from db
-	char* Query = 0;
-	MYSQL_RES* DatasetResult;
-	MYSQL_ROW DataRow;
+	std::string query = StringFormat("SELECT color FROM botinventory "
+                                    "WHERE BotID = %u AND SlotID = %u", botid, slotid);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success() || results.RowCount() != 1)
+        return 0;
 
-	if(database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT color FROM botinventory WHERE BotID = %u AND SlotID = %u", botid, slotid), 0, &DatasetResult)) {
-		if(mysql_num_rows(DatasetResult) == 1) {
-			DataRow = mysql_fetch_row(DatasetResult);
-			if(DataRow)
-				returncolor = atoul(DataRow[0]);
-		}
-		mysql_free_result(DatasetResult);
-		safe_delete_array(Query);
-	}
-	return returncolor;
+    auto row = results.begin();
+	return atoul(row[0]);
 }
 
 int Bot::GetRawACNoShield(int &shield_ac)
