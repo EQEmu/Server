@@ -4503,32 +4503,45 @@ uint32 Bot::GetBotIDByBotName(std::string botName) {
 }
 
 Bot* Bot::LoadBot(uint32 botID, std::string* errorMessage) {
-	Bot* Result = 0;
+	Bot* loadedBot = nullptr;
 
-	if(botID > 0) {
-		char* Query = 0;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
+	if(botID == 0)
+        return nullptr;
 
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT BotOwnerCharacterID, BotSpellsID, Name, LastName, BotLevel, Race, Class, Gender, Size, Face, LuclinHairStyle, LuclinHairColor, LuclinEyeColor, LuclinEyeColor2, LuclinBeardColor, LuclinBeard, DrakkinHeritage, DrakkinTattoo, DrakkinDetails, HP, Mana, MR, CR, DR, FR, PR, Corrup, AC, STR, STA, DEX, AGI, _INT, WIS, CHA, ATK, BotCreateDate, LastSpawnDate, TotalPlayTime, LastZoneId FROM bots WHERE BotID = '%u'", botID), TempErrorMessageBuffer, &DatasetResult)) {
-			*errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else {
-			while(DataRow = mysql_fetch_row(DatasetResult)) {
-				NPCType DefaultNPCTypeStruct = CreateDefaultNPCTypeStructForBot(std::string(DataRow[2]), std::string(DataRow[3]), atoi(DataRow[4]), atoi(DataRow[5]), atoi(DataRow[6]), atoi(DataRow[7]));
-				NPCType TempNPCStruct = FillNPCTypeStruct(atoi(DataRow[1]), std::string(DataRow[2]), std::string(DataRow[3]), atoi(DataRow[4]), atoi(DataRow[5]), atoi(DataRow[6]), atoi(DataRow[7]), atof(DataRow[8]), atoi(DataRow[9]), atoi(DataRow[10]), atoi(DataRow[11]), atoi(DataRow[12]), atoi(DataRow[13]), atoi(DataRow[14]), atoi(DataRow[15]), atoi(DataRow[16]), atoi(DataRow[17]), atoi(DataRow[18]), atoi(DataRow[19]), atoi(DataRow[20]), DefaultNPCTypeStruct.MR, DefaultNPCTypeStruct.CR, DefaultNPCTypeStruct.DR, DefaultNPCTypeStruct.FR, DefaultNPCTypeStruct.PR, DefaultNPCTypeStruct.Corrup, DefaultNPCTypeStruct.AC, DefaultNPCTypeStruct.STR, DefaultNPCTypeStruct.STA, DefaultNPCTypeStruct.DEX, DefaultNPCTypeStruct.AGI, DefaultNPCTypeStruct.INT, DefaultNPCTypeStruct.WIS, DefaultNPCTypeStruct.CHA, DefaultNPCTypeStruct.ATK);
-				Result = new Bot(botID, atoi(DataRow[0]), atoi(DataRow[1]), atof(DataRow[38]), atoi(DataRow[39]), TempNPCStruct);
-				break;
-			}
+    std::string query = StringFormat("SELECT BotOwnerCharacterID, BotSpellsID, Name, LastName, BotLevel, "
+                                    "Race, Class, Gender, Size, Face, LuclinHairStyle, LuclinHairColor, "
+                                    "LuclinEyeColor, LuclinEyeColor2, LuclinBeardColor, LuclinBeard, "
+                                    "DrakkinHeritage, DrakkinTattoo, DrakkinDetails, HP, Mana, MR, CR, "
+                                    "DR, FR, PR, Corrup, AC, STR, STA, DEX, AGI, _INT, WIS, CHA, ATK, "
+                                    "BotCreateDate, LastSpawnDate, TotalPlayTime, LastZoneId "
+                                    "FROM bots WHERE BotID = '%u'", botID);
+    auto results = database.QueryDatabase(query);
+    if(!results.Success()) {
+        *errorMessage = std::string(results.ErrorMessage());
+        return nullptr;
+    }
 
-			mysql_free_result(DatasetResult);
-		}
+    if (results.RowCount() == 0)
+        return nullptr;
 
-		safe_delete_array(Query);
-	}
+    auto row = results.begin();
+    NPCType defaultNPCTypeStruct = CreateDefaultNPCTypeStructForBot(std::string(row[2]), std::string(row[3]),
+                                                                    atoi(row[4]), atoi(row[5]), atoi(row[6]), atoi(row[7]));
 
-	return Result;
+    NPCType tempNPCStruct = FillNPCTypeStruct(atoi(row[1]), std::string(row[2]), std::string(row[3]), atoi(row[4]),
+                                            atoi(row[5]), atoi(row[6]), atoi(row[7]), atof(row[8]), atoi(row[9]),
+                                            atoi(row[10]), atoi(row[11]), atoi(row[12]), atoi(row[13]), atoi(row[14]),
+                                            atoi(row[15]), atoi(row[16]), atoi(row[17]), atoi(row[18]), atoi(row[19]),
+                                            atoi(row[20]), defaultNPCTypeStruct.MR, defaultNPCTypeStruct.CR,
+                                            defaultNPCTypeStruct.DR, defaultNPCTypeStruct.FR, defaultNPCTypeStruct.PR,
+                                            defaultNPCTypeStruct.Corrup, defaultNPCTypeStruct.AC, defaultNPCTypeStruct.STR,
+                                            defaultNPCTypeStruct.STA, defaultNPCTypeStruct.DEX, defaultNPCTypeStruct.AGI,
+                                            defaultNPCTypeStruct.INT, defaultNPCTypeStruct.WIS, defaultNPCTypeStruct.CHA,
+                                            defaultNPCTypeStruct.ATK);
+
+    loadedBot = new Bot(botID, atoi(row[0]), atoi(row[1]), atof(row[38]), atoi(row[39]), tempNPCStruct);
+
+	return loadedBot;
 }
 
 std::list<uint32> Bot::GetGroupedBotsByGroupId(uint32 groupId, std::string* errorMessage) {
