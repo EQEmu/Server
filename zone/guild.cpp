@@ -165,7 +165,7 @@ void Client::SendGuildSpawnAppearance() {
 			switch (rank) {
 				case 0: { rank = 5; break; }	// GUILD_MEMBER	0
 				case 1: { rank = 3; break; }	// GUILD_OFFICER 1
-				case 2: { rank = 1; break; }	// GUILD_LEADER	2  
+				case 2: { rank = 1; break; }	// GUILD_LEADER	2
 				default: { break; }				// GUILD_NONE
 			}
 		}
@@ -417,38 +417,21 @@ void Client::GuildChangeRank(const char* name, uint32 guild_id, uint32 oldrank, 
 }*/
 
 
-bool ZoneDatabase::CheckGuildDoor(uint8 doorid,uint16 guild_id,const char* zone) {
-	MYSQL_ROW row;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	if (!RunQuery(query, MakeAnyLenString(&query,
-		"SELECT guild FROM doors where doorid=%i AND zone='%s'",
-		doorid-128, zone), errbuf, &result))
-	{
-		LogFile->write(EQEMuLog::Error, "Error in CheckGuildDoor query '%s': %s", query, errbuf);
-		safe_delete_array(query);
-		return false;
-	} else {
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			if (atoi(row[0]) == guild_id)
-			{
-				mysql_free_result(result);
-				return true;
-			}
-			else
-			{
-				mysql_free_result(result);
-				return false;
-			}
+bool ZoneDatabase::CheckGuildDoor(uint8 doorid, uint16 guild_id, const char* zone) {
 
-			// code below will never be reached
-			mysql_free_result(result);
-			return false;
-		}
+	std::string query = StringFormat("SELECT guild FROM doors WHERE doorid = %i AND zone = '%s'",
+                                    doorid-128, zone);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in CheckGuildDoor query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
-	return false;
+
+	if (results.RowCount() != 1)
+        return false;
+
+    auto row = results.begin();
+    return atoi(row[0]) == guild_id;
 }
 
 bool ZoneDatabase::SetGuildDoor(uint8 doorid,uint16 guild_id, const char* zone) {
