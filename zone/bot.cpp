@@ -4628,38 +4628,31 @@ bool Bot::GroupHasBot(Group* group) {
 }
 
 std::list<BotsAvailableList> Bot::GetBotList(uint32 botOwnerCharacterID, std::string* errorMessage) {
-	std::list<BotsAvailableList> Result;
+	std::list<BotsAvailableList> ownersBots;
 
-	if(botOwnerCharacterID > 0) {
-		char* Query = 0;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
+	if(botOwnerCharacterID == 0)
+        return ownersBots;
 
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT BotID, Name, Class, BotLevel, Race FROM bots WHERE BotOwnerCharacterID = '%u'", botOwnerCharacterID), TempErrorMessageBuffer, &DatasetResult)) {
-			*errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else {
-			while(DataRow = mysql_fetch_row(DatasetResult)) {
-				if(DataRow) {
-					BotsAvailableList TempAvailableBot;
-					TempAvailableBot.BotID = atoi(DataRow[0]);
-					strcpy(TempAvailableBot.BotName, DataRow[1]);
-					TempAvailableBot.BotClass = atoi(DataRow[2]);
-					TempAvailableBot.BotLevel = atoi(DataRow[3]);
-					TempAvailableBot.BotRace = atoi(DataRow[4]);
-
-					Result.push_back(TempAvailableBot);
-				}
-			}
-
-			mysql_free_result(DatasetResult);
-		}
-
-		safe_delete_array(Query);
+    std::string query = StringFormat("SELECT BotID, Name, Class, BotLevel, Race "
+                                    "FROM bots WHERE BotOwnerCharacterID = '%u'", botOwnerCharacterID);
+    auto results = database.QueryDatabase(query);
+    if(!results.Success()) {
+		*errorMessage = std::string(results.ErrorMessage());
+		return ownersBots;
 	}
 
-	return Result;
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        BotsAvailableList availableBot;
+        availableBot.BotID = atoi(row[0]);
+        strcpy(availableBot.BotName, row[1]);
+        availableBot.BotClass = atoi(row[2]);
+        availableBot.BotLevel = atoi(row[3]);
+        availableBot.BotRace = atoi(row[4]);
+
+        ownersBots.push_back(availableBot);
+	}
+
+	return ownersBots;
 }
 
 std::list<SpawnedBotsList> Bot::ListSpawnedBots(uint32 characterID, std::string* errorMessage) {
