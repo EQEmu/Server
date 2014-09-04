@@ -1135,6 +1135,58 @@ uint32 ZoneDatabase::UpdateNPCTypeAppearance(Client *client, NPC* spawn) {
     return results.Success() == true? 1: 0;
 }
 
+uint32 ZoneDatabase::DeleteSpawnLeaveInNPCTypeTable(const char* zone, Client *client, NPC* spawn) {
+    char errbuf[MYSQL_ERRMSG_SIZE];
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	uint32 tmp = 0;
+	uint32 tmp2 = 0;
+    if (!RunQuery(query, MakeAnyLenString(&query, "SELECT id,spawngroupID from spawn2 where zone='%s' AND spawngroupID=%i", zone, spawn->GetSp2()), errbuf, &result)) {
+		safe_delete_array(query);
+		return 0;
+	}
+	safe_delete_array(query);
+
+	row = mysql_fetch_row(result);
+	if (row == nullptr)
+        return 0;
+	if (row[0])
+        tmp = atoi(row[0]);
+	if (row[1])
+        tmp2 = atoi(row[1]);
+
+	if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawn2 WHERE id='%i'", tmp), errbuf,0)) {
+		safe_delete(query);
+		return 0;
+	}
+
+	if(client)
+        client->LogSQL(query);
+
+	safe_delete_array(query);
+
+	if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawngroup WHERE id='%i'", tmp2), errbuf,0)) {
+		safe_delete(query);
+		return 0;
+	}
+
+	if(client)
+        client->LogSQL(query);
+
+	safe_delete_array(query);
+	if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawnentry WHERE spawngroupID='%i'", tmp2), errbuf,0)) {
+		safe_delete(query);
+		return 0;
+	}
+
+	if(client)
+        client->LogSQL(query);
+
+	safe_delete_array(query);
+	return 1;
+}
+
 uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_version, Client *c, NPC* spawn, uint32 extra) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
@@ -1154,39 +1206,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			return UpdateNPCTypeAppearance(c, spawn);
 		}
 		case 3: { // delete spawn from spawning, but leave in npc_types table
-			if (!RunQuery(query, MakeAnyLenString(&query, "SELECT id,spawngroupID from spawn2 where zone='%s' AND spawngroupID=%i", zone, spawn->GetSp2()), errbuf, &result)) {
-				safe_delete_array(query);
-				return 0;
-			}
-			safe_delete_array(query);
-
-			row = mysql_fetch_row(result);
-			if (row == nullptr) return false;
-			if (row[0]) tmp = atoi(row[0]);
-			if (row[1]) tmp2 = atoi(row[1]);
-
-			if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawn2 WHERE id='%i'", tmp), errbuf,0)) {
-				safe_delete(query);
-				return false;
-			}
-			if(c) c->LogSQL(query);
-			safe_delete_array(query);
-			if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawngroup WHERE id='%i'", tmp2), errbuf,0)) {
-				safe_delete(query);
-				return false;
-			}
-			if(c) c->LogSQL(query);
-			safe_delete_array(query);
-			if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawnentry WHERE spawngroupID='%i'", tmp2), errbuf,0)) {
-				safe_delete(query);
-				return false;
-			}
-			if(c) c->LogSQL(query);
-			safe_delete_array(query);
-			return true;
-
-
-			break;
+			return DeleteSpawnLeaveInNPCTypeTable(zone, c, spawn);
 		}
 		case 4: { //delete spawn from DB (including npc_type)
 			if (!RunQuery(query, MakeAnyLenString(&query, "SELECT id,spawngroupID from spawn2 where zone='%s' AND version=%u AND spawngroupID=%i", zone, zone_version, spawn->GetSp2()), errbuf, &result)) {
