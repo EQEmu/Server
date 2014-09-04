@@ -4279,30 +4279,22 @@ uint32 Bot::GetBotItemBySlot(uint32 slotID) {
 
 // Returns the number of inventory records the bot has in the database.
 uint32 Bot::GetBotItemsCount(std::string *errorMessage) {
-	uint32 Result = 0;
 
-	if(this->GetBotID() > 0) {
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char* query = 0;
-		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
+	if(this->GetBotID() == 0)
+        return 0;
 
-		if(database.RunQuery(query, MakeAnyLenString(&query, "SELECT COUNT(*) FROM botinventory WHERE botid=%i", this->GetBotID()), errbuf, &DatasetResult)) {
-			if(mysql_num_rows(DatasetResult) == 1) {
-				DataRow = mysql_fetch_row(DatasetResult);
-				if(DataRow)
-					Result = atoi(DataRow[0]);
-			}
+    std::string query = StringFormat("SELECT COUNT(*) FROM botinventory WHERE botid = %i", this->GetBotID());
+    auto results = database.QueryDatabase(query);
+    if(!results.Success()) {
+        *errorMessage = std::string(results.ErrorMessage());
+        return 0;
+    }
 
-			mysql_free_result(DatasetResult);
-		}
-		else
-			*errorMessage = std::string(errbuf);
+    if(results.RowCount() != 1)
+        return 0;
 
-		safe_delete_array(query);
-	}
-
-	return Result;
+    auto row = results.begin();
+    return atoi(row[0]);
 }
 
 bool Bot::MesmerizeTarget(Mob* target) {
