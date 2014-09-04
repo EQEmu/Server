@@ -4487,35 +4487,19 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 }
 
 uint32 Bot::GetBotIDByBotName(std::string botName) {
-	uint32 Result = 0;
+	if(botName.empty())
+        return 0;
 
-	if(!botName.empty()) {
-		char* Query = 0;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
-		std::string errorMessage;
+    std::string query = StringFormat("SELECT BotID FROM bots WHERE Name = '%s'", botName.c_str());
+    auto results = database.QueryDatabase(query);
+    if(!results.Success())
+        return 0;
 
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT BotID FROM bots WHERE Name = '%s'", botName.c_str()), TempErrorMessageBuffer, &DatasetResult)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else {
-			while(DataRow = mysql_fetch_row(DatasetResult)) {
-				Result = atoi(DataRow[0]);
-				break;
-			}
+    if (results.RowCount() == 0)
+        return 0;
 
-			mysql_free_result(DatasetResult);
-		}
-
-		safe_delete_array(Query);
-
-		if(!errorMessage.empty()) {
-			// TODO: Log this error to zone error log
-		}
-	}
-
-	return Result;
+    auto row = results.begin();
+	return atoi(row[0]);
 }
 
 Bot* Bot::LoadBot(uint32 botID, std::string* errorMessage) {
