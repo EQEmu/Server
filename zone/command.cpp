@@ -453,7 +453,8 @@ int command_init(void) {
 		command_add("merchant_open_shop", "Opens a merchants shop", 100, command_merchantopenshop) ||
 		command_add("open_shop", nullptr, 100, command_merchantopenshop) ||
 		command_add("merchant_close_shop", "Closes a merchant shop", 100, command_merchantcloseshop) ||
-		command_add("close_shop", nullptr, 100, command_merchantcloseshop)
+		command_add("close_shop", nullptr, 100, command_merchantcloseshop) ||
+		command_add("shownumhits", "Shows buffs numhits for yourself.", 0, command_shownumhits)
 		)
 	{
 		command_deinit();
@@ -11554,4 +11555,10 @@ void command_merchantcloseshop(Client *c, const Seperator *sep)
 	}
 
 	merchant->CastToNPC()->MerchantCloseShop();
+}
+
+void command_shownumhits(Client *c, const Seperator *sep)
+{
+	c->ShowNumHits();
+	return;
 }
