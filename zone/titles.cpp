@@ -368,24 +368,17 @@ bool Client::CheckTitle(int titleSet) {
 	return true;
 }
 
-void Client::RemoveTitle(int titleset) {
+void Client::RemoveTitle(int titleSet) {
 
-	if (!CheckTitle(titleset)) {
+	if (!CheckTitle(titleSet))
 		return;
-	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query = StringFormat("DELETE FROM player_titlesets "
+                                    "WHERE `title_set` = %i AND `char_id` = %i",
+                                    titleSet, CharacterID());
+    auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Error in RemoveTitle query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 
-	if (database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM player_titlesets WHERE `title_set`=%i AND `char_id`=%i", titleset, CharacterID()), errbuf)) {
-		safe_delete_array(query);
-	}
-
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in RemoveTitle query '%s': %s", query, errbuf);
-		safe_delete_array(query);
-	}
-
-	return;
 }
 
