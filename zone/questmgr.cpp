@@ -1408,22 +1408,14 @@ void QuestManager::targlobal(const char *varname, const char *value, const char 
 
 void QuestManager::delglobal(const char *varname) {
 	QuestManagerCurrentQuestVars();
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 	int qgZoneid=zone->GetZoneID();
 	int qgCharid=0;
 	int qgNpcid=owner->GetNPCTypeID();
 
-
-
 	if (initiator && initiator->IsClient()) // some events like waypoint and spawn don't have a player involved
-	{
 		qgCharid=initiator->CharacterID();
-	}
-
-	else {
+	else
 		qgCharid=-qgNpcid;		// make char id negative npc id as a fudge
-	}
 
 	/* QS: PlayerLogQGlobalUpdate */
 	if (RuleB(QueryServ, PlayerLogQGlobalUpdate) && qgCharid && qgCharid > 0 && initiator && initiator->IsClient()){
@@ -1431,31 +1423,32 @@ void QuestManager::delglobal(const char *varname) {
 		QServ->PlayerLogEvent(Player_Log_QGlobal_Update, qgCharid, event_desc);
 	}
 
-	if (!database.RunQuery(query,
-		MakeAnyLenString(&query,
-		"DELETE FROM quest_globals WHERE name='%s'"
-		" && (npcid=0 || npcid=%i) && (charid=0 || charid=%i) && (zoneid=%i || zoneid=0)",
-		varname,qgNpcid,qgCharid,qgZoneid),errbuf))
-	{
-		std::cerr << "delglobal error deleting " << varname << " : " << errbuf << std::endl;
-	}
-	safe_delete_array(query);
+    std::string query = StringFormat("DELETE FROM quest_globals "
+                                    "WHERE name = '%s' "
+                                    "&& (npcid=0 || npcid=%i) "
+                                    "&& (charid=0 || charid=%i) "
+                                    "&& (zoneid=%i || zoneid=0)",
+                                    varname, qgNpcid, qgCharid, qgZoneid);
+    auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		std::cerr << "delglobal error deleting " << varname << " : " << results.ErrorMessage() << std::endl;
 
-	if(zone) {
-		ServerPacket* pack = new ServerPacket(ServerOP_QGlobalDelete, sizeof(ServerQGlobalDelete_Struct));
-		ServerQGlobalDelete_Struct *qgu = (ServerQGlobalDelete_Struct*)pack->pBuffer;
+	if(!zone)
+        return;
 
-		qgu->npc_id = qgNpcid;
-		qgu->char_id = qgCharid;
-		qgu->zone_id = qgZoneid;
-		strcpy(qgu->name, varname);
+    ServerPacket* pack = new ServerPacket(ServerOP_QGlobalDelete, sizeof(ServerQGlobalDelete_Struct));
+    ServerQGlobalDelete_Struct *qgu = (ServerQGlobalDelete_Struct*)pack->pBuffer;
 
-		entity_list.DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
-		zone->DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
+    qgu->npc_id = qgNpcid;
+    qgu->char_id = qgCharid;
+    qgu->zone_id = qgZoneid;
+    strcpy(qgu->name, varname);
 
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
+    entity_list.DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
+    zone->DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
+
+    worldserver.SendPacket(pack);
+    safe_delete(pack);
 }
 
 // Converts duration string to duration value (in seconds)
