@@ -435,22 +435,18 @@ bool ZoneDatabase::CheckGuildDoor(uint8 doorid, uint16 guild_id, const char* zon
 }
 
 bool ZoneDatabase::SetGuildDoor(uint8 doorid,uint16 guild_id, const char* zone) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32	affected_rows = 0;
+
 	if (doorid > 127)
 		doorid = doorid - 128;
-	if (!RunQuery(query, MakeAnyLenString(&query,
-		"UPDATE doors SET guild = %i WHERE (doorid=%i) AND (zone='%s')",
-		guild_id, doorid, zone), errbuf, 0,&affected_rows))
-	{
-		LogFile->write(EQEMuLog::Error, "Error in SetGuildDoor query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+
+    std::string query = StringFormat("UPDATE doors SET guild = %i WHERE (doorid=%i) AND (zone='%s')",
+                                        guild_id, doorid, zone);
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in SetGuildDoor query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
-	safe_delete_array(query);
-
-	return(affected_rows > 0);
+	return (results.RowsAffected() > 0);
 }
 
