@@ -375,6 +375,7 @@ public:
     uint32  CreateNewNPCCommand(const char* zone, uint32 zone_version, Client *client, NPC* spawn, uint32 extra);
     uint32  AddNewNPCSpawnGroupCommand(const char* zone, uint32 zone_version, Client *client, NPC* spawn, uint32 respawnTime);
     uint32  DeleteSpawnLeaveInNPCTypeTable(const char* zone, Client *client, NPC* spawn);
+    uint32  DeleteSpawnRemoveFromNPCTypeTable(const char* zone, uint32 zone_version, Client *client, NPC* spawn);
     uint32  UpdateNPCTypeAppearance(Client *client, NPC* spawn);
 	bool	SetSpecialAttkFlag(uint8 id, const char* flag);
 	bool	GetPetEntry(const char *pet_type, PetRecord *into);
