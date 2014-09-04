@@ -2263,103 +2263,92 @@ void Client::HandleTraderPriceUpdate(const EQApplicationPacket *app) {
 
 }
 
-void Client::SendBuyerResults(char* SearchString, uint32 SearchID) {
+void Client::SendBuyerResults(char* searchString, uint32 searchID) {
 
 	// This method is called when a potential seller in the /barter window searches for matching buyers
 	//
-	_log(TRADING__BARTER, "Client::SendBuyerResults %s\n", SearchString);
+	_log(TRADING__BARTER, "Client::SendBuyerResults %s\n", searchString);
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* Query = 0;
-	char ItemName[64];
-	std::string Search, Values;
-	MYSQL_RES *Result;
-	MYSQL_ROW Row;
+	char* escSearchString = new char[strlen(searchString) * 2 + 1];
+	database.DoEscapeString(escSearchString, searchString, strlen(searchString));
 
-	char*EscSearchString = new char[strlen(SearchString) * 2 + 1];
-	database.DoEscapeString(EscSearchString, SearchString, strlen(SearchString));
+	std::string query = StringFormat("SELECT * FROM buyer WHERE itemname LIKE '%%%s%%' ORDER BY charid LIMIT %i",
+							escSearchString, RuleI(Bazaar, MaxBarterSearchResults));
+	safe_delete_array(escSearchString);
+	auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        _log(TRADING__CLIENT, "Failed to retrieve Barter Search!! %s %s\n", query.c_str(), results.ErrorMessage().c_str());
+        return;
+    }
 
-	if (database.RunQuery(Query,MakeAnyLenString(&Query, "select * from buyer where itemname like '%%%s%%' order by charid limit %i",
-							EscSearchString, RuleI(Bazaar, MaxBarterSearchResults)), errbuf, &Result)) {
+    int numberOfRows = results.RowCount();
 
-		int NumberOfRows = mysql_num_rows(Result);
+    if(numberOfRows == RuleI(Bazaar, MaxBarterSearchResults))
+        Message(15, "Your search found too many results; some are not displayed.");
+    else if(strlen(searchString) == 0)
+        Message(10, "There are %i Buy Lines.", numberOfRows);
+    else
+        Message(10, "There are %i Buy Lines that match the search string '%s'.", numberOfRows, searchString);
 
-		if(NumberOfRows == RuleI(Bazaar, MaxBarterSearchResults))
-			Message(15, "Your search found too many results; some are not displayed.");
-		else {
-			if(strlen(SearchString) == 0)
-				Message(10, "There are %i Buy Lines.", NumberOfRows);
-			else
-				Message(10, "There are %i Buy Lines that match the search string '%s'.",
-						NumberOfRows, SearchString);
+    if(numberOfRows == 0)
+        return;
+
+    uint32 lastCharID = 0;
+	Client *buyer = nullptr;
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+        char itemName[64];
+
+        uint32 charID = atoi(row[0]);
+		uint32 buySlot = atoi(row[1]);
+		uint32 itemID = atoi(row[2]);
+		strcpy(itemName, row[3]);
+		uint32 quantity = atoi(row[4]);
+		uint32 price = atoi(row[5]);
+
+        // Each item in the search results is sent as a single fixed length packet, although the position of
+		// the fields varies due to the use of variable length strings. The reason the packet is so big, is
+		// to allow item compensation, e.g. a buyer could offer to buy a Blade Of Carnage for 10000pp plus
+		// other items in exchange. Item compensation is not currently supported in EQEmu.
+		//
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Barter, 940);
+
+		char *buf = (char *)outapp->pBuffer;
+
+		const Item_Struct* item = database.GetItem(itemID);
+
+		if(!item)
+            continue;
+
+        // Save having to scan the client list when dealing with multiple buylines for the same Character.
+		if(charID != lastCharID) {
+			buyer = entity_list.GetClientByCharID(charID);
+			lastCharID = charID;
 		}
 
-		if(NumberOfRows == 0) {
-			mysql_free_result(Result);
-			safe_delete_array(Query);
-			return;
-		}
+		if(!buyer)
+            continue;
 
-		uint32 LastCharID = 0;
-		Client *Buyer = nullptr;
+        VARSTRUCT_ENCODE_TYPE(uint32, buf, Barter_BuyerSearchResults);	// Command
+		VARSTRUCT_ENCODE_TYPE(uint32, buf, searchID);			// Match up results with the request
+		VARSTRUCT_ENCODE_TYPE(uint32, buf, buySlot);			// Slot in this Buyer's list
+		VARSTRUCT_ENCODE_TYPE(uint8, buf, 0x01);				// Unknown - probably a flag field
+		VARSTRUCT_ENCODE_TYPE(uint32, buf, itemID);			// ItemID
+		VARSTRUCT_ENCODE_STRING(buf, itemName);			// Itemname
+		VARSTRUCT_ENCODE_TYPE(uint32, buf, item->Icon);			// Icon
+		VARSTRUCT_ENCODE_TYPE(uint32, buf, quantity);			// Quantity
+		VARSTRUCT_ENCODE_TYPE(uint8, buf, 0x01);				// Unknown - probably a flag field
+		VARSTRUCT_ENCODE_TYPE(uint32, buf, price);				// Price
+		VARSTRUCT_ENCODE_TYPE(uint32, buf, buyer->GetID());		// Entity ID
+		VARSTRUCT_ENCODE_TYPE(uint32, buf, 0);				// Flag for + Items , probably ItemCount
+		VARSTRUCT_ENCODE_STRING(buf, buyer->GetName());		// Seller Name
 
-		while ((Row = mysql_fetch_row(Result))) {
+		_pkt(TRADING__BARTER, outapp);
 
-			uint32 CharID = atoi(Row[0]);
-			uint32 BuySlot = atoi(Row[1]);
-			uint32 ItemID = atoi(Row[2]);
-			strcpy(ItemName, Row[3]);
-			uint32 Quantity = atoi(Row[4]);
-			uint32 Price = atoi(Row[5]);
+		QueuePacket(outapp);
+		safe_delete(outapp);
+    }
 
-			// Each item in the search results is sent as a single fixed length packet, although the position of
-			// the fields varies due to the use of variable length strings. The reason the packet is so big, is
-			// to allow item compensation, e.g. a buyer could offer to buy a Blade Of Carnage for 10000pp plus
-			// other items in exchange. Item compensation is not currently supported in EQEmu.
-			//
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Barter, 940);
-
-			char *Buf = (char *)outapp->pBuffer;
-
-			const Item_Struct* item = database.GetItem(ItemID);
-
-			if(!item) continue;
-
-			// Save having to scan the client list when dealing with multiple buylines for the same Character.
-			if(CharID != LastCharID) {
-				Buyer = entity_list.GetClientByCharID(CharID);
-				LastCharID = CharID;
-			}
-
-			if(!Buyer) continue;
-
-			VARSTRUCT_ENCODE_TYPE(uint32, Buf, Barter_BuyerSearchResults);	// Command
-			VARSTRUCT_ENCODE_TYPE(uint32, Buf, SearchID);			// Match up results with the request
-			VARSTRUCT_ENCODE_TYPE(uint32, Buf, BuySlot);			// Slot in this Buyer's list
-			VARSTRUCT_ENCODE_TYPE(uint8, Buf, 0x01);				// Unknown - probably a flag field
-			VARSTRUCT_ENCODE_TYPE(uint32, Buf, ItemID);			// ItemID
-			VARSTRUCT_ENCODE_STRING(Buf, ItemName);			// Itemname
-			VARSTRUCT_ENCODE_TYPE(uint32, Buf, item->Icon);			// Icon
-			VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity);			// Quantity
-			VARSTRUCT_ENCODE_TYPE(uint8, Buf, 0x01);				// Unknown - probably a flag field
-			VARSTRUCT_ENCODE_TYPE(uint32, Buf, Price);				// Price
-			VARSTRUCT_ENCODE_TYPE(uint32, Buf, Buyer->GetID());		// Entity ID
-			VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);				// Flag for + Items , probably ItemCount
-			VARSTRUCT_ENCODE_STRING(Buf, Buyer->GetName());		// Seller Name
-
-			_pkt(TRADING__BARTER, outapp);
-
-			QueuePacket(outapp);
-			safe_delete(outapp);
-		}
-
-		mysql_free_result(Result);
-	}
-	else{
-		_log(TRADING__CLIENT, "Failed to retrieve Barter Search!! %s %s\n", Query, errbuf);
-	}
-	safe_delete_array(Query);
-	safe_delete_array(EscSearchString);
 }
 
 void Client::ShowBuyLines(const EQApplicationPacket *app) {
