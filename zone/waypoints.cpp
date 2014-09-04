@@ -1007,26 +1007,19 @@ void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 }
 
 int	ZoneDatabase::GetHighestGrid(uint32 zoneid) {
-	char *query = 0;
-	char errbuff[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	int res = 0;
-	if (RunQuery(query, MakeAnyLenString(&query,
-		"SELECT COALESCE(MAX(id), 0) FROM grid WHERE zoneid = %i",
-		zoneid),errbuff,&result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			res = atoi( row[0] );
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in GetHighestGrid query '%s': %s", query, errbuff);
-		safe_delete_array(query);
-	}
 
-	return(res);
+	std::string query = StringFormat("SELECT COALESCE(MAX(id), 0) FROM grid WHERE zoneid = %i", zoneid);
+	auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in GetHighestGrid query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return 0;
+    }
+
+	if (results.RowCount() != 1)
+        return 0;
+
+	auto row = results.begin();
+	return atoi(row[0]);
 }
 
 uint8 ZoneDatabase::GetGridType2(uint32 grid, uint16 zoneid) {
