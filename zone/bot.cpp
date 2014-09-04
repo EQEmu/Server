@@ -11349,18 +11349,22 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 			uint32 botid = c->GetTarget()->CastToBot()->GetBotID();
 			std::string errorMessage;
-			char* Query = 0;
+
 
 			int setslot = atoi(sep->arg[2]);
 			uint8 red = atoi(sep->arg[3]);
 			uint8 green = atoi(sep->arg[4]);
 			uint8 blue = atoi(sep->arg[5]);
 			uint32 setcolor = (red << 16) | (green << 8) | blue;
+            std::string query = StringFormat("UPDATE botinventory SET color = %u "
+                                            "WHERE slotID = %i AND botID = %u",
+                                            setcolor, setslot, botid);
+            auto results = database.QueryDatabase(query);
+			if(!results.Success())
+                return;
 
-			if(database.RunQuery(Query, MakeAnyLenString(&Query, "UPDATE botinventory SET color = %u WHERE slotID = %i AND botID = %u",setcolor, setslot, botid))){
-				int slotmaterial = Inventory::CalcMaterialFromSlot(setslot);
-				c->GetTarget()->CastToBot()->SendWearChange(slotmaterial);
-			}
+			int slotmaterial = Inventory::CalcMaterialFromSlot(setslot);
+            c->GetTarget()->CastToBot()->SendWearChange(slotmaterial);
 		}
 		else {
 			c->Message(15, "You must target a bot you own to do this.");
@@ -11368,11 +11372,8 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		return;
 	}
 	// Help for coloring bot armor
-		if(!strcasecmp(sep->arg[1], "help") && !strcasecmp(sep->arg[2], "armorcolor") ){
+    if(!strcasecmp(sep->arg[1], "help") && !strcasecmp(sep->arg[2], "armorcolor") ){
 		//read from db
-		char* Query = 0;
-		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
 
 		c->Message(0, "-----------------#bot armorcolor help-----------------------------");
 		c->Message(0, "Armor: 17(Chest/Robe), 7(Arms), 9(Bracer), 12(Hands), 18(Legs), 19(Boots), 2(Helm)");
