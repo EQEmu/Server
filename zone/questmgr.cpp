@@ -2661,11 +2661,6 @@ void QuestManager::FlagInstanceByRaidLeader(uint32 zone, int16 version)
 const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkName) {
 	QuestManagerCurrentQuestVars();
 
-	const char *ERR_MYSQLERROR = "Error in saylink phrase queries";
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 	int sayid = 0;
 
 	int sz = strlen(Phrase);
@@ -2673,42 +2668,26 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 	database.DoEscapeString(escaped_string, Phrase, sz);
 
 	// Query for an existing phrase and id in the saylink table
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `id` FROM `saylink` WHERE `phrase` = '%s'", escaped_string),errbuf,&result))
+	std::string query = StringFormat("SELECT `id` FROM `saylink` WHERE `phrase` = '%s'", escaped_string);
+	auto results = database.QueryDatabase(query);
+	if(results.Success())
 	{
-		if (mysql_num_rows(result) >= 1)
-		{
-			while((row = mysql_fetch_row(result)))
-			{
+		if (results.RowCount() >= 1)
+			for (auto row = results.begin();row != results.end(); ++row)
 				sayid = atoi(row[0]);
-			}
-			mysql_free_result(result);
-		}
 		else // Add a new saylink entry to the database and query it again for the new sayid number
 		{
-			safe_delete_array(query);
+            query = StringFormat("INSERT INTO `saylink` (`phrase`) VALUES ('%s')", escaped_string);
+			results = database.QueryDatabase(query);
 
-			database.RunQuery(query,MakeAnyLenString(&query,"INSERT INTO `saylink` (`phrase`) VALUES ('%s')", escaped_string),errbuf);
-			safe_delete_array(query);
-
-			if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `id` FROM saylink WHERE `phrase` = '%s'", escaped_string),errbuf,&result))
-			{
-				if (mysql_num_rows(result) >= 1)
-				{
-					while((row = mysql_fetch_row(result)))
-					{
+			if(!results.Success())
+                LogFile->write(EQEMuLog::Error, "Error in saylink phrase queries", results.ErrorMessage().c_str());
+            else if (results.RowCount() >= 1)
+					for(auto row = results.begin(); row != results.end(); ++row)
 						sayid = atoi(row[0]);
-					}
-					mysql_free_result(result);
-				}
-			}
-			else
-			{
-				LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, errbuf);
-			}
-			safe_delete_array(query);
+
 		}
 	}
-	safe_delete_array(query);
 	safe_delete_array(escaped_string);
 
 	if(silent)
@@ -2716,27 +2695,21 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 	else
 		sayid = sayid + 500000;
 
-		//Create the say link as an item link hash
-		char linktext[250];
+    //Create the say link as an item link hash
+    char linktext[250];
 
 	if(initiator)
 	{
 		if (initiator->GetClientVersion() >= EQClientRoF)
-		{
 			sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"0000000000000000000000000000000000000000000000000",LinkName,0x12);
-		}
 		else if (initiator->GetClientVersion() >= EQClientSoF)
-		{
 			sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"00000000000000000000000000000000000000000000",LinkName,0x12);
-		}
 		else
-		{
 			sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"000000000000000000000000000000000000000",LinkName,0x12);
-		}
 	}
-	else {	// If no initiator, create an RoF saylink, since older clients handle RoF ones better than RoF handles older ones.
+	else // If no initiator, create an RoF saylink, since older clients handle RoF ones better than RoF handles older ones.
 		sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"0000000000000000000000000000000000000000000000000",LinkName,0x12);
-	}
+
 	strcpy(Phrase,linktext);
 	return Phrase;
 
