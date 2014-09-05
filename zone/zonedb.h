@@ -377,6 +377,7 @@ public:
     uint32  DeleteSpawnLeaveInNPCTypeTable(const char* zone, Client *client, NPC* spawn);
     uint32  DeleteSpawnRemoveFromNPCTypeTable(const char* zone, uint32 zone_version, Client *client, NPC* spawn);
     uint32  AddSpawnFromSpawnGroup(const char* zone, uint32 zone_version, Client *client, NPC* spawn, uint32 spawnGroupID);
+    uint32  AddNPCTypes(const char* zone, uint32 zone_version, Client *client, NPC* spawn, uint32 spawnGroupID);
     uint32  UpdateNPCTypeAppearance(Client *client, NPC* spawn);
 	bool	SetSpecialAttkFlag(uint8 id, const char* flag);
 	bool	GetPetEntry(const char *pet_type, PetRecord *into);

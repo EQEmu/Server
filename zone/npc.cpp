@@ -1241,31 +1241,52 @@ uint32 ZoneDatabase::DeleteSpawnRemoveFromNPCTypeTable(const char* zone, uint32 
 }
 
 uint32  ZoneDatabase::AddSpawnFromSpawnGroup(const char* zone, uint32 zone_version, Client *client, NPC* spawn, uint32 spawnGroupID) {
-    char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	uint32 tmp = 0;
-    if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) values('%s', %u, %f, %f, %f, %i, %f, %i)", zone, zone_version, client->GetX(), client->GetY(), client->GetZ(), 120, client->GetHeading(), spawnGroupID), errbuf, 0, 0, &tmp)) {
-		safe_delete(query);
-		return false;
-	}
+
+	uint32 last_insert_id = 0;
+	std::string query = StringFormat("INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) "
+                                    "VALUES('%s', %u, %f, %f, %f, %i, %f, %i)",
+                                    zone, zone_version, client->GetX(), client->GetY(), client->GetZ(),
+                                    120, client->GetHeading(), spawnGroupID);
+    auto results = QueryDatabase(query);
+    if (!results.Success())
+		return 0;
 
 	if(client)
-        client->LogSQL(query);
-    safe_delete_array(query);
+        client->LogSQL(query.c_str());
 
-    return true;
+    return 1;
+}
+
+uint32 ZoneDatabase::AddNPCTypes(const char* zone, uint32 zone_version, Client *client, NPC* spawn, uint32 spawnGroupID) {
+
+    uint32 npc_type_id;
+	char numberlessName[64];
+
+	EntityList::RemoveNumbers(strn0cpy(numberlessName, spawn->GetName(), sizeof(numberlessName)));
+	std::string query = StringFormat("INSERT INTO npc_types (name, level, race, class, hp, gender, "
+                                    "texture, helmtexture, size, loottable_id, merchant_id, face, "
+                                    "runspeed, prim_melee_type, sec_melee_type) "
+                                    "VALUES(\"%s\", %i, %i, %i, %i, %i, %i, %i, %f, %i, %i, %i, %f, %i, %i)",
+                                    numberlessName, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(),
+                                    spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(),
+                                    spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(),
+                                    spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28);
+    auto results = QueryDatabase(query);
+	if (!results.Success())
+		return 0;
+    npc_type_id = results.LastInsertedID();
+
+	if(client)
+        client->LogSQL(query.c_str());
+
+	if(client)
+        client->Message(0, "%s npc_type ID %i created successfully!", numberlessName, npc_type_id);
+
+	return 1;
 }
 
 uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_version, Client *c, NPC* spawn, uint32 extra) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	uint32 tmp = 0;
-	uint32 tmp2 = 0;
-	uint32 last_insert_id = 0;
+
 	switch (command) {
 		case 0: { // Create a new NPC and add all spawn related data
 			return CreateNewNPCCommand(zone, zone_version, c, spawn, extra);
@@ -1286,18 +1307,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			return AddSpawnFromSpawnGroup(zone, zone_version, c, spawn, extra);
         }
 		case 6: { // add npc_type
-			uint32 npc_type_id;
-			char tmpstr[64];
-			EntityList::RemoveNumbers(strn0cpy(tmpstr, spawn->GetName(), sizeof(tmpstr)));
-			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO npc_types (name, level, race, class, hp, gender, texture, helmtexture, size, loottable_id, merchant_id, face, runspeed, prim_melee_type, sec_melee_type) values(\"%s\",%i,%i,%i,%i,%i,%i,%i,%f,%i,%i,%i,%f,%i,%i)", tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(), spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28), errbuf, 0, 0, &npc_type_id)) {
-				safe_delete(query);
-				return false;
-			}
-			if(c) c->LogSQL(query);
-			safe_delete_array(query);
-			if(c) c->Message(0, "%s npc_type ID %i created successfully!", tmpstr, npc_type_id);
-			return true;
-			break;
+			return AddNPCTypes(zone, zone_version, c, spawn, extra);
 		}
 	}
 	return false;
