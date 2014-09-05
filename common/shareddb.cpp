@@ -1632,6 +1632,13 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 
 		int tempid = 0;
 		int counter = 0;
+
+		if(result && mysql_field_count(getMySQL()) <= SPELL_LOAD_FIELD_COUNT) {
+			_log(SPELLS__LOAD_ERR, "Fatal error loading spells: Spell field count < SPELL_LOAD_FIELD_COUNT(%u)", SPELL_LOAD_FIELD_COUNT);
+			mysql_free_result(result);
+			return;
+		}
+
 		while (row = mysql_fetch_row(result)) {
 			tempid = atoi(row[0]);
 			if(tempid >= max_spells) {

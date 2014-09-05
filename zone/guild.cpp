@@ -160,9 +160,17 @@ void Client::SendGuildSpawnAppearance() {
 		uint8 rank = guild_mgr.GetDisplayedRank(GuildID(), GuildRank(), CharacterID());
 		mlog(GUILDS__OUT_PACKETS, "Sending spawn appearance for guild %d at rank %d", GuildID(), rank);
 		SendAppearancePacket(AT_GuildID, GuildID());
+		if(GetClientVersion() >= EQClientRoF)
+		{
+			switch (rank) {
+				case 0: { rank = 5; break; }	// GUILD_MEMBER	0
+				case 1: { rank = 3; break; }	// GUILD_OFFICER 1
+				case 2: { rank = 1; break; }	// GUILD_LEADER	2  
+				default: { break; }				// GUILD_NONE
+			}
+		}
 		SendAppearancePacket(AT_GuildRank, rank);
 	}
-
 	UpdateWho();
 }
 

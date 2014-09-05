@@ -190,6 +190,7 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_GuildWar] = &Client::Handle_OP_GuildWar;
 	ConnectedOpcodes[OP_GuildLeader] = &Client::Handle_OP_GuildLeader;
 	ConnectedOpcodes[OP_GuildDemote] = &Client::Handle_OP_GuildDemote;
+	ConnectedOpcodes[OP_GuildPromote] = &Client::Handle_OP_GuildPromote;
 	ConnectedOpcodes[OP_GuildInvite] = &Client::Handle_OP_GuildInvite;
 	ConnectedOpcodes[OP_GuildRemove] = &Client::Handle_OP_GuildRemove;
 	ConnectedOpcodes[OP_GetGuildMOTD] = &Client::Handle_OP_GetGuildMOTD;
@@ -433,7 +434,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	case CLIENT_CONNECTING: {
 		if(ConnectingOpcodes.count(opcode) != 1) {
 			//Hate const cast but everything in lua needs to be non-const even if i make it non-mutable
-			std::vector<void*> args;
+			std::vector<EQEmu::Any> args;
 			args.push_back(const_cast<EQApplicationPacket*>(app));
 			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 1, &args);
 
@@ -462,7 +463,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 		ClientPacketProc p;
 		p = ConnectedOpcodes[opcode];
 		if(p == nullptr) {
-			std::vector<void*> args;
+			std::vector<EQEmu::Any> args;
 			args.push_back(const_cast<EQApplicationPacket*>(app));
 			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 0, &args);
 
@@ -4088,7 +4089,7 @@ void Client::Handle_OP_GuildLeader(const EQApplicationPacket *app)
 	GuildMakeLeader* gml=(GuildMakeLeader*)app->pBuffer;
 	if (!IsInAGuild())
 		Message(0, "Error: You arent in a guild!");
-	else if (!guild_mgr.IsGuildLeader(GuildID(), CharacterID()))
+	else if (GuildRank() != GUILD_LEADER)
 		Message(0, "Error: You arent the guild leader!");
 	else if (!worldserver.Connected())
 		Message(0, "Error: World server disconnected");
@@ -4166,6 +4167,57 @@ void Client::Handle_OP_GuildDemote(const EQApplicationPacket *app)
 		Message(0, "Successfully demoted %s to rank %d", demote->target, rank);
 	}
 //	SendGuildMembers(GuildID(), true);
+	return;
+}
+
+
+void Client::Handle_OP_GuildPromote(const EQApplicationPacket *app)
+{
+	mlog(GUILDS__IN_PACKETS, "Received OP_GuildPromote");
+	mpkt(GUILDS__IN_PACKET_TRACE, app);
+
+	if(app->size != sizeof(GuildPromoteStruct)) {
+		mlog(GUILDS__ERROR, "Error: app size of %i != size of GuildDemoteStruct of %i\n",app->size,sizeof(GuildPromoteStruct));
+		return;
+	}
+
+	if (!IsInAGuild())
+		Message(0, "Error: You arent in a guild!");
+	else if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_PROMOTE))
+		Message(0, "You dont have permission to invite.");
+	else if (!worldserver.Connected())
+		Message(0, "Error: World server disconnected");
+	else {
+		GuildPromoteStruct* promote = (GuildPromoteStruct*)app->pBuffer;
+
+		CharGuildInfo gci;
+		if(!guild_mgr.GetCharInfo(promote->target, gci)) {
+			Message(0, "Unable to find '%s'", promote->target);
+			return;
+		}
+		if(gci.guild_id != GuildID()) {
+			Message(0, "You aren't in the same guild, what do you think you are doing?");
+			return;
+		}
+
+		uint8 rank = gci.rank + 1;
+
+		if(rank > GUILD_OFFICER)
+			return;
+
+
+		mlog(GUILDS__ACTIONS, "Promoting %s (%d) from rank %s (%d) to %s (%d) in %s (%d)",
+			promote->target, gci.char_id,
+			guild_mgr.GetRankName(GuildID(), gci.rank), gci.rank,
+			guild_mgr.GetRankName(GuildID(), rank), rank,
+			guild_mgr.GetGuildName(GuildID()), GuildID());
+
+		if(!guild_mgr.SetGuildRank(gci.char_id, rank)) {
+			Message(13, "Error while setting rank %d on '%s'.", rank, promote->target);
+			return;
+		}
+		Message(0, "Successfully promoted %s to rank %d", promote->target, rank);
+	}
 	return;
 }
 
@@ -4379,6 +4431,16 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 
 	GuildInviteAccept_Struct* gj = (GuildInviteAccept_Struct*) app->pBuffer;
 
+	if(GetClientVersion() >= EQClientRoF)
+	{
+		if(gj->response > 9)
+		{
+		//dont care if the check fails (since we dont know the rank), just want to clear the entry.
+		guild_mgr.VerifyAndClearInvite(CharacterID(), gj->guildeqid, gj->response);
+		worldserver.SendEmoteMessage(gj->inviter, 0, 0, "%s has declined to join the guild.", this->GetName());
+		return;
+		}
+	}
 	if (gj->response == 5 || gj->response == 4) {
 		//dont care if the check fails (since we dont know the rank), just want to clear the entry.
 		guild_mgr.VerifyAndClearInvite(CharacterID(), gj->guildeqid, gj->response);
@@ -4424,15 +4486,24 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 				guild_mgr.GetGuildName(gj->guildeqid), gj->guildeqid,
 				gj->response);
 
-			//change guild and rank.
-			if(!guild_mgr.SetGuild(CharacterID(), gj->guildeqid, gj->response)) {
+			//change guild and rank
+
+			uint32 guildrank = gj->response;
+
+			if(GetClientVersion() == EQClientRoF)
+			{
+				if(gj->response == 8)
+				{
+					guildrank = 0;
+				}
+			}
+
+			if(!guild_mgr.SetGuild(CharacterID(), gj->guildeqid, guildrank)) {
 				Message(13, "There was an error during the invite, DB may now be inconsistent.");
 				return;
 			}
 			if(zone->GetZoneID() == RuleI(World, GuildBankZoneID) && GuildBanks)
 				GuildBanks->SendGuildBank(this);
-			SendGuildRanks();
-
 		}
 	}
 }
@@ -5426,36 +5497,15 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 		Message(0,"You cannot use a merchant right now.");
 		action = 0;
 	}
-	int factionlvl = GetFactionLevel(CharacterID(), tmp->CastToNPC()->GetNPCTypeID(), GetRace(), GetClass(), GetDeity(), tmp->CastToNPC()->GetPrimaryFaction(), tmp);
-	if(factionlvl >= 7)
-	{
-		char playerp[16] = "players";
-		if(HatedByClass(GetRace(), GetClass(), GetDeity(), tmp->CastToNPC()->GetPrimaryFaction()))
-			strcpy(playerp,GetClassPlural(this));
-		else
-			strcpy(playerp,GetRacePlural(this));
+	int primaryfaction = tmp->CastToNPC()->GetPrimaryFaction();
+	int factionlvl = GetFactionLevel(CharacterID(), tmp->CastToNPC()->GetNPCTypeID(), GetRace(), GetClass(), GetDeity(), primaryfaction, tmp);
+	if (factionlvl >= 7) {
+		MerchantRejectMessage(tmp, primaryfaction);
+		action = 0;
+	}
 
-		uint8 rand_ = rand() % 4;
-		switch(rand_){
-			case 1:
-				Message(0,"%s says 'It's not enough that you %s have ruined your own lands. Now get lost!'", tmp->GetCleanName(), playerp);
-				break;
-			case 2:
-				Message(0,"%s says 'I have something here that %s use... let me see... it's the EXIT, now get LOST!'", tmp->GetCleanName(), playerp);
-				break;
-			case 3:
-				Message(0,"%s says 'Don't you %s have your own merchants? Whatever, I'm not selling anything to you!'", tmp->GetCleanName(), playerp);
-				break;
-			default:
-				Message(0,"%s says 'I don't like to speak to %s much less sell to them!'", tmp->GetCleanName(), playerp);
-				break;
-		}
-		action = 0;
-	}
 	if (tmp->Charmed())
-	{
 		action = 0;
-	}
 
 	// 1199 I don't have time for that now. etc
 	if (!tmp->CastToNPC()->IsMerchantOpen()) {
@@ -6016,7 +6066,7 @@ void Client::Handle_OP_ClickObject(const EQApplicationPacket *app)
 
 		object->HandleClick(this, click_object);
 
-		std::vector<void*> args;
+		std::vector<EQEmu::Any> args;
 		args.push_back(object);
 
 		char buf[10];
@@ -6231,7 +6281,145 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 
 	// Delegate to tradeskill object to perform combine
 	AugmentItem_Struct* in_augment = (AugmentItem_Struct*)app->pBuffer;
-	Object::HandleAugmentation(this, in_augment, m_tradeskill_object);
+	bool deleteItems = false;
+	if(GetClientVersion() >= EQClientRoF)
+	{
+		ItemInst *itemOneToPush = nullptr, *itemTwoToPush = nullptr;
+		
+		//Message(15, "%i %i %i %i %i %i", in_augment->container_slot, in_augment->augment_slot, in_augment->container_index, in_augment->augment_index, in_augment->augment_action, in_augment->dest_inst_id);
+		
+		// Adding augment
+		if (in_augment->augment_action == 0)
+		{
+			ItemInst *tobe_auged, *auged_with = nullptr;
+			int8 slot=-1;
+			Inventory& user_inv = GetInv();
+
+			uint16 slot_id = in_augment->container_slot;
+			uint16 aug_slot_id = in_augment->augment_slot;
+			//Message(13, "%i AugSlot", aug_slot_id);
+			if(slot_id == INVALID_INDEX || aug_slot_id == INVALID_INDEX)
+			{
+				Message(13, "Error: Invalid Aug Index.");
+				return;
+			}
+
+			tobe_auged = user_inv.GetItem(slot_id);
+			auged_with = user_inv.GetItem(MainCursor);
+
+			if(tobe_auged && auged_with)
+			{
+				if (((slot=tobe_auged->AvailableAugmentSlot(auged_with->GetAugmentType()))!=-1) && 
+					(tobe_auged->AvailableWearSlot(auged_with->GetItem()->Slots)))
+				{
+					tobe_auged->PutAugment(slot, *auged_with);
+
+					ItemInst *aug = tobe_auged->GetAugment(in_augment->augment_index);
+					if(aug) {
+						std::vector<EQEmu::Any> args;
+						args.push_back(aug);
+						parse->EventItem(EVENT_AUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
+
+						args.assign(1, tobe_auged);
+						parse->EventItem(EVENT_AUGMENT_INSERT, this, aug, nullptr, "", in_augment->augment_index, &args);
+					}
+					else
+					{
+						Message(13, "Error: Could not find augmentation at index %i. Aborting.");
+						return;
+					}
+
+					itemOneToPush = tobe_auged->Clone();
+					// Must push items after the items in inventory are deleted - necessary due to lore items...
+					if (itemOneToPush)
+					{
+						DeleteItemInInventory(slot_id, 0, true);
+						DeleteItemInInventory(MainCursor, 0, true);
+						if(PutItemInInventory(slot_id, *itemOneToPush, true))
+						{
+							//Message(13, "Sucessfully added an augment to your item!");
+							return;
+						}
+						else
+						{
+							Message(13, "Error: No available slot for end result. Please free up some bag space.");
+						}
+					}
+					else
+					{
+						Message(13, "Error in cloning item for augment. Aborted.");
+					}
+
+				}
+				else
+				{
+					Message(13, "Error: No available slot for augment in that item.");
+				}
+			}
+		}
+		else if(in_augment->augment_action == 1)
+		{
+			ItemInst *tobe_auged, *auged_with = nullptr;
+			int8 slot=-1;
+			Inventory& user_inv = GetInv();
+
+			uint16 slot_id = in_augment->container_slot;
+			uint16 aug_slot_id = in_augment->augment_slot; //it's actually solvent slot
+			if(slot_id == INVALID_INDEX || aug_slot_id == INVALID_INDEX)
+			{
+				Message(13, "Error: Invalid Aug Index.");
+				return;
+			}
+
+			tobe_auged = user_inv.GetItem(slot_id);
+			auged_with = user_inv.GetItem(aug_slot_id);
+
+			ItemInst *old_aug = nullptr;
+			if(!auged_with)
+				return;
+			const uint32 id = auged_with->GetID();
+			ItemInst *aug = tobe_auged->GetAugment(in_augment->augment_index);
+			if(aug) {
+				std::vector<EQEmu::Any> args;
+				args.push_back(aug);
+				parse->EventItem(EVENT_UNAUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
+
+				args.assign(1, tobe_auged);
+
+				args.push_back(false);
+
+				parse->EventItem(EVENT_AUGMENT_REMOVE, this, aug, nullptr, "", in_augment->augment_index, &args);
+			}
+			else
+			{
+				Message(13, "Error: Could not find augmentation at index %i. Aborting.");
+				return;
+			}
+				old_aug = tobe_auged->RemoveAugment(in_augment->augment_index);
+
+			itemOneToPush = tobe_auged->Clone();
+			if (old_aug)
+				itemTwoToPush = old_aug->Clone();
+			if(itemOneToPush && itemTwoToPush && auged_with)
+			{
+				DeleteItemInInventory(slot_id, 0, true);
+				DeleteItemInInventory(aug_slot_id, auged_with->IsStackable() ? 1 : 0, true);
+				if(!PutItemInInventory(slot_id, *itemOneToPush, true))
+				{
+					Message(15, "Shouldn't happen, contact an admin!");				
+				}
+
+				if(PutItemInInventory(MainCursor, *itemTwoToPush, true))
+				{
+					//Message(15, "Successfully removed an augmentation!");
+				}
+			}
+		}
+	}
+	else
+	{
+		Object::HandleAugmentation(this, in_augment, m_tradeskill_object);
+	}
 	return;
 }
 
@@ -6246,13 +6434,13 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 	if(!currentdoor)
 	{
 		Message(0,"Unable to find door, please notify a GM (DoorID: %i).",cd->doorid);
-			return;
+		return;
 	}
 
 	char buf[20];
 	snprintf(buf, 19, "%u", cd->doorid);
 	buf[19] = '\0';
-	std::vector<void*> args;
+	std::vector<EQEmu::Any> args;
 	args.push_back(currentdoor);
 	parse->EventPlayer(EVENT_CLICK_DOOR, this, buf, 0, &args);
 
@@ -9322,8 +9510,18 @@ void Client::CompleteConnect() {
 	UpdateAdmin(false);
 
 	if (IsInAGuild()){
+		uint8 rank = GuildRank();
+		if(GetClientVersion() >= EQClientRoF)
+		{
+			switch (rank) {
+				case 0: { rank = 5; break; }	// GUILD_MEMBER	0
+				case 1: { rank = 3; break; }	// GUILD_OFFICER 1
+				case 2: { rank = 1; break; }	// GUILD_LEADER	2  
+				default: { break; }				// GUILD_NONE
+			}
+		}
 		SendAppearancePacket(AT_GuildID, GuildID(), false);
-		SendAppearancePacket(AT_GuildRank, GuildRank(), false);
+		SendAppearancePacket(AT_GuildRank, rank, false);
 	}
 	for (uint32 spellInt = 0; spellInt < MAX_PP_SPELLBOOK; spellInt++)
 	{

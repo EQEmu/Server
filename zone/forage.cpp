@@ -235,7 +235,7 @@ bool Client::CanFish() {
 		dest.y = RodY;
 		dest.z = z_pos+10;
 
-		RodZ = zone->zonemap->FindBestZ(dest, nullptr) - 1;
+		RodZ = zone->zonemap->FindBestZ(dest, nullptr) + 4;
 		bool in_lava = zone->watermap->InLava(RodX, RodY, RodZ);
 		bool in_water = zone->watermap->InWater(RodX, RodY, RodZ) || zone->watermap->InVWater(RodX, RodY, RodZ);
 		//Message(0, "Rod is at %4.3f, %4.3f, %4.3f, InWater says %d, InLava says %d", RodX, RodY, RodZ, in_water, in_lava);
@@ -355,11 +355,11 @@ void Client::GoFish()
 				safe_delete(inst);
 				inst = m_inv.GetItem(MainCursor);
 			}
-		}
 
-		std::vector<void*> args;
-		args.push_back(inst);
-		parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst != nullptr ? inst->GetItem()->ID : 0, &args);
+			std::vector<EQEmu::Any> args;
+			args.push_back(inst);
+			parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst->GetID(), &args);
+		}
 	}
 	else
 	{
@@ -469,11 +469,11 @@ void Client::ForageItem(bool guarantee) {
 				safe_delete(inst);
 				inst = m_inv.GetItem(MainCursor);
 			}
-		}
 
-		std::vector<void*> args;
-		args.push_back(inst);
-		parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "", inst ? inst->GetItem()->ID : 0, &args);
+			std::vector<EQEmu::Any> args;
+			args.push_back(inst);
+			parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "", inst->GetID(), &args);
+		}
 
 		int ChanceSecondForage = aabonuses.ForageAdditionalItems + itembonuses.ForageAdditionalItems + spellbonuses.ForageAdditionalItems;
 		if(!guarantee && MakeRandomInt(0,99) < ChanceSecondForage) {

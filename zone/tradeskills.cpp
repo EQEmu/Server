@@ -149,7 +149,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 
 			ItemInst *aug = tobe_auged->GetAugment(slot);
 			if(aug) {
-				std::vector<void*> args;
+				std::vector<EQEmu::Any> args;
 				args.push_back(aug);
 				parse->EventItem(EVENT_AUGMENT_ITEM, user, tobe_auged, nullptr, "", slot, &args);
 
@@ -171,7 +171,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		const uint32 id = auged_with->GetID();
 		ItemInst *aug = tobe_auged->GetAugment(in_augment->augment_slot);
 		if(aug) {
-			std::vector<void*> args;
+			std::vector<EQEmu::Any> args;
 			args.push_back(aug);
 			parse->EventItem(EVENT_UNAUGMENT_ITEM, user, tobe_auged, nullptr, "", slot, &args);
 

@@ -42,7 +42,7 @@ public:
 		float f = 3.1416;
 		
 		auto s = StringFormat(fmt, c, i, f);
-		TEST_ASSERT(s.length() == 17);
+		TEST_ASSERT_EQUALS(s.length(), 17);
 		TEST_ASSERT(s.compare("Test: a 2014 3.14") == 0);
 	}
 

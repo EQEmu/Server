@@ -1,4 +1,3 @@
-
 #include "../debug.h"
 #include "rof.h"
 #include "../opcodemgr.h"
@@ -1974,7 +1973,14 @@ ENCODE(OP_ZoneSpawns)
 			else
 			{
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildID);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildrank);
+
+				/* Translate older ranks to new values */
+				switch (emu->guildrank) {
+					case 0: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 5);  break; }  // GUILD_MEMBER	0
+					case 1: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 3);  break; }  // GUILD_OFFICER	1
+					case 2: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 1);  break; }  // GUILD_LEADER	2 
+					default: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildrank); break; }  //			
+				}
 			}
 
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->class_);
@@ -2406,7 +2412,15 @@ ENCODE(OP_GuildMemberList) {
 			PutFieldN(level);
 			PutFieldN(banker);
 			PutFieldN(class_);
-			PutFieldN(rank);
+
+			/* Translate older ranks to new values */
+			switch (emu_e->rank) {
+				case 0: { e->rank = htonl(5); break; }  // GUILD_MEMBER	0
+				case 1: { e->rank = htonl(3); break; }  // GUILD_OFFICER 1
+				case 2: { e->rank = htonl(1); break; }  // GUILD_LEADER	2  
+				default: { e->rank = htonl(emu_e->rank); break; } // GUILD_NONE
+			}
+
 			PutFieldN(time_last_on);
 			PutFieldN(tribute_enable);
 			e->unknown01 = 0;
@@ -3330,7 +3344,15 @@ ENCODE(OP_SetGuildRank)
 	ENCODE_LENGTH_EXACT(GuildSetRank_Struct);
 	SETUP_DIRECT_ENCODE(GuildSetRank_Struct, structs::GuildSetRank_Struct);
 	eq->GuildID = emu->Unknown00;
-	OUT(Rank);
+
+	/* Translate older ranks to new values */
+	switch (emu->Rank) {
+		case 0: { eq->Rank = 5; break; }  // GUILD_MEMBER	0
+		case 1: { eq->Rank = 3; break; }  // GUILD_OFFICER	1
+		case 2: { eq->Rank = 1; break; }  // GUILD_LEADER	2 
+		default: { eq->Rank = emu->Rank; break; }
+	}
+
 	memcpy(eq->MemberName, emu->MemberName, sizeof(eq->MemberName));
 	OUT(Banker);
 	eq->Unknown76 = 1;
@@ -4660,8 +4682,11 @@ DECODE(OP_AugmentItem) {
 	SETUP_DIRECT_DECODE(AugmentItem_Struct, structs::AugmentItem_Struct);
 
 	emu->container_slot = RoFToServerSlot(eq->container_slot);
-	//emu->augment_slot = eq->augment_slot;
-
+	emu->augment_slot = RoFToServerSlot(eq->augment_slot);
+	emu->container_index = eq->container_index;
+	emu->augment_index = eq->augment_index;
+	emu->dest_inst_id = eq->dest_inst_id;
+	emu->augment_action = eq->augment_action;
 	FINISH_DIRECT_DECODE();
 }
 
@@ -5068,7 +5093,7 @@ char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint
 	memset(&isbs, 0, sizeof(RoF::structs::ItemSecondaryBodyStruct));
 
 	isbs.augtype = item->AugType;
-	isbs.augdistiller = 0;
+	isbs.augdistiller = 65535;
 	isbs.augrestrict = item->AugRestrict;
 	
 

@@ -1,5 +1,27 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 09/03/2014 ==
+Secrets: Identified the routines needed to augment items in RoF. Currently, only Insert and Remove are supported. Swap and Destroy do not work due to missing functions related to the cursor.
+demonstar55: Added work around command to show numhits on your buffs (#shownumhits)
+Uleat: Fix for timer issue introduced by Zone::ShutDown() fix.
+
+== 09/02/2014 ==
+Secrets: Identified OP_GuildPromote for RoF clients.
+Secrets: Fixed promotion, demotion, transferring a leader and displaying of client ranks in the Rain of Fear client. The rain of fear client, as such, will only have 3 ranks like the other clients, but supports a theoretical 8 ranks later.
+Secrets/Akkadius: Fixed an issue involving character name lookup in the new DB code.
+demonstar55: crash fix checking DivineAura in hate_list.cpp
+Secrets: Reverted some code that got in the main branch that shouldn't have gotten there.
+Uleat: Changed #loc to report the same precision as /loc for Cartesians
+
+== 08/31/2014 ==
+KLS: Fixed a bug in fishing in S3D zones
+KLS: Fixed a bug in turnins with new any abstraction
+KLS: Fixed a few quest related inconsistencies.
+KLS: Added Lua EntityList::ChannelMessage(from, type, msg, language)
+
+== 08/30/2014 ==
+demonstar55: (noudess) Merchants should be more descriptive of why they don't sell to you
+
 == 08/26/2014 ==
 Uleat: Implemented 'Smart' Player Trade transfers. Trades are processed by containers, stackables and then all remaining. QueryServ logs have been updated to match these transactions.
 Note: QueryServ logs previously listed 'Items' on the main entry table. This indicated the number of slots affected and not the actual number of items.

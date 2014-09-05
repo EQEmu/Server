@@ -733,6 +733,7 @@ void Zone::Shutdown(bool quite)
 	while (mob_itr != mob_list.end()) {
 		Mob* mob_inst = *mob_itr;
 		mob_inst->AI_Stop();
+		mob_inst->AI_ShutDown();
 		++mob_itr;
 	}
 

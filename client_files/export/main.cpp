@@ -81,7 +81,9 @@ void ExportSpells(SharedDatabase *db) {
 					line.push_back('^');
 				}
 
-				line += row[i];
+				if(row[i] != nullptr) {
+					line += row[i];
+				}
 			}
 
 			fprintf(f, "%s\n", line.c_str());
@@ -180,7 +182,9 @@ void ExportBaseData(SharedDatabase *db) {
 				if(rowIndex != 0)
 					line.push_back('^');
 
-				line += row[rowIndex];
+				if(row[rowIndex] != nullptr) {
+					line += row[rowIndex];
+				}
 			}
 
 			fprintf(f, "%s\n", line.c_str());

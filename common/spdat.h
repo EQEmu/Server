@@ -621,6 +621,8 @@ typedef enum {
 // number. note that the id field is counted as 0, this way the numbers
 // here match the numbers given to sep in the loading function net.cpp
 //
+#define SPELL_LOAD_FIELD_COUNT 231
+
 struct SPDat_Spell_Struct
 {
 /* 000 */	int id;	// not used

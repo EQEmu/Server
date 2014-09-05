@@ -40,7 +40,7 @@ public:
 	MySQLRequestResult& operator=(MySQLRequestResult&& other);
 
 	bool Success() const { return m_Success;}
-	std::string ErrorMessage() const {return std::string(m_ErrorBuffer);}
+	std::string ErrorMessage() const {return m_ErrorBuffer ? std::string(m_ErrorBuffer) : std::string("");}
 	uint32 ErrorNumber() const {return m_ErrorNumber;}
 	uint32 RowsAffected() const {return m_RowsAffected;}
 	uint32 RowCount() const {return m_RowCount;}
