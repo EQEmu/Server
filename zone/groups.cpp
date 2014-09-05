@@ -1326,15 +1326,12 @@ void Group::DelegateMainTank(const char *NewMainTankName, uint8 toggle)
 	}
 
 	if(updateDB) {
-		char errbuff[MYSQL_ERRMSG_SIZE];
 
-		char *Query = nullptr;
-
-		if (!database.RunQuery(Query, MakeAnyLenString(&Query, "UPDATE group_leaders SET maintank='%s' WHERE gid=%i LIMIT 1",
-									MainTankName.c_str(), GetID()), errbuff))
-			LogFile->write(EQEMuLog::Error, "Unable to set group main tank: %s\n", errbuff);
-
-		safe_delete_array(Query);
+		std::string query = StringFormat("UPDATE group_leaders SET maintank = '%s' WHERE gid = %i LIMIT 1",
+                                        MainTankName.c_str(), GetID());
+        auto results = database.QueryDatabase(query);
+		if (!results.Success())
+			LogFile->write(EQEMuLog::Error, "Unable to set group main tank: %s\n", results.ErrorMessage().c_str());
 	}
 }
 
