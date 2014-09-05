@@ -1372,15 +1372,13 @@ void Group::DelegateMainAssist(const char *NewMainAssistName, uint8 toggle)
 	}
 
 	if(updateDB) {
-		char errbuff[MYSQL_ERRMSG_SIZE];
 
-		char *Query = nullptr;
+		std::string query = StringFormat("UPDATE group_leaders SET assist = '%s' WHERE gid = %i LIMIT 1",
+                                        MainAssistName.c_str(), GetID());
+        auto results = database.QueryDatabase(query);
+		if (!results.Success())
+			LogFile->write(EQEMuLog::Error, "Unable to set group main assist: %s\n", results.ErrorMessage().c_str());
 
-		if (!database.RunQuery(Query, MakeAnyLenString(&Query, "UPDATE group_leaders SET assist='%s' WHERE gid=%i LIMIT 1",
-									MainAssistName.c_str(), GetID()), errbuff))
-			LogFile->write(EQEMuLog::Error, "Unable to set group main assist: %s\n", errbuff);
-
-		safe_delete_array(Query);
 	}
 }
 
@@ -1421,15 +1419,13 @@ void Group::DelegatePuller(const char *NewPullerName, uint8 toggle)
 	}
 
 	if(updateDB) {
-		char errbuff[MYSQL_ERRMSG_SIZE];
 
-		char *Query = nullptr;
+		std::string query = StringFormat("UPDATE group_leaders SET puller = '%s' WHERE gid = %i LIMIT 1",
+                                        PullerName.c_str(), GetID());
+        auto results = database.QueryDatabase(query);
+		if (!results.Success())
+			LogFile->write(EQEMuLog::Error, "Unable to set group main puller: %s\n", results.ErrorMessage().c_str());
 
-		if (!database.RunQuery(Query, MakeAnyLenString(&Query, "UPDATE group_leaders SET puller='%s' WHERE gid=%i LIMIT 1",
-									PullerName.c_str(), GetID()), errbuff))
-			LogFile->write(EQEMuLog::Error, "Unable to set group main puller: %s\n", errbuff);
-
-		safe_delete_array(Query);
 	}
 
 }
