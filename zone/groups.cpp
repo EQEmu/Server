@@ -195,7 +195,7 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
 		if (members[i] != nullptr && members[i]->IsClient()) { // If Group Member is Client
 				Client *c = members[i]->CastToClient();
 			//I could not get MoneyOnCorpse to work, so we use this
-			c->AddMoneyToPP(cpsplit, spsplit, gpsplit, ppsplit, true); 
+			c->AddMoneyToPP(cpsplit, spsplit, gpsplit, ppsplit, true);
 			c->Message(2, msg.c_str());
 		}
 	}
@@ -957,31 +957,28 @@ void Group::TeleportGroup(Mob* sender, uint32 zoneID, uint16 instance_id, float 
 }
 
 bool Group::LearnMembers() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "SELECT name FROM group_id WHERE groupid=%lu", (unsigned long)GetID()),
-					errbuf,&result)){
-		safe_delete_array(query);
-		if(mysql_num_rows(result) < 1) {	//could prolly be 2
-			mysql_free_result(result);
-			LogFile->write(EQEMuLog::Error, "Error getting group members for group %lu: %s", (unsigned long)GetID(), errbuf);
-			return(false);
-		}
-		int i = 0;
-		while((row = mysql_fetch_row(result))) {
-			if(!row[0])
-				continue;
-			members[i] = nullptr;
-			strn0cpy(membername[i], row[0], 64);
+	std::string query = StringFormat("SELECT name FROM group_id WHERE groupid = %lu", (unsigned long)GetID());
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+        return false;
 
-			i++;
-		}
-		mysql_free_result(result);
+    if (results.RowCount() == 0) {
+        LogFile->write(EQEMuLog::Error, "Error getting group members for group %lu: %s", (unsigned long)GetID(), results.ErrorMessage().c_str());
+			return false;
+    }
+
+	int memberIndex = 0;
+    for(auto row = results.begin(); row != results.end(); ++row) {
+		if(!row[0])
+			continue;
+
+		members[memberIndex] = nullptr;
+		strn0cpy(membername[memberIndex], row[0], 64);
+
+		memberIndex++;
 	}
 
-	return(true);
+	return true;
 }
 
 void Group::VerifyGroup() {
@@ -1065,7 +1062,7 @@ void Group::HealGroup(uint32 heal_amt, Mob* caster, int32 range)
 
 	if (!range)
 		range = 200;
-	
+
 	float distance;
 	float range2 = range*range;
 
@@ -1102,10 +1099,10 @@ void Group::BalanceHP(int32 penalty, int32 range, Mob* caster, int32 limit)
 		return;
 
 	if (!range)
-		range = 200;	
-		
+		range = 200;
+
 	int dmgtaken = 0, numMem = 0, dmgtaken_tmp = 0;
-	
+
 	float distance;
 	float range2 = range*range;
 
@@ -1152,16 +1149,16 @@ void Group::BalanceMana(int32 penalty, int32 range, Mob* caster, int32 limit)
 		return;
 
 	if (!range)
-		range = 200;	
+		range = 200;
 
 	float distance;
 	float range2 = range*range;
-	
+
 	int manataken = 0, numMem = 0, manataken_tmp = 0;
 	unsigned int gi = 0;
 	for(; gi < MAX_GROUP_MEMBERS; gi++)
 	{
-		if(members[gi] && (members[gi]->GetMaxMana() > 0)){			
+		if(members[gi] && (members[gi]->GetMaxMana() > 0)){
 			distance = caster->DistNoRoot(*members[gi]);
 			if(distance <= range2){
 
