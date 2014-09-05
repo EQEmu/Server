@@ -1240,6 +1240,24 @@ uint32 ZoneDatabase::DeleteSpawnRemoveFromNPCTypeTable(const char* zone, uint32 
 	return 1;
 }
 
+uint32  ZoneDatabase::AddSpawnFromSpawnGroup(const char* zone, uint32 zone_version, Client *client, NPC* spawn, uint32 spawnGroupID) {
+    char errbuf[MYSQL_ERRMSG_SIZE];
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	uint32 tmp = 0;
+    if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) values('%s', %u, %f, %f, %f, %i, %f, %i)", zone, zone_version, client->GetX(), client->GetY(), client->GetZ(), 120, client->GetHeading(), spawnGroupID), errbuf, 0, 0, &tmp)) {
+		safe_delete(query);
+		return false;
+	}
+
+	if(client)
+        client->LogSQL(query);
+    safe_delete_array(query);
+
+    return true;
+}
+
 uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_version, Client *c, NPC* spawn, uint32 extra) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
@@ -1265,16 +1283,8 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			return DeleteSpawnRemoveFromNPCTypeTable(zone, zone_version, c, spawn);
 		}
 		case 5: { // add a spawn from spawngroup
-			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) values('%s', %u, %f, %f, %f, %i, %f, %i)", zone, zone_version, c->GetX(), c->GetY(), c->GetZ(), 120, c->GetHeading(), extra), errbuf, 0, 0, &tmp)) {
-				safe_delete(query);
-				return false;
-			}
-			if(c) c->LogSQL(query);
-			safe_delete_array(query);
-
-			return true;
-			break;
-			}
+			return AddSpawnFromSpawnGroup(zone, zone_version, c, spawn, extra);
+        }
 		case 6: { // add npc_type
 			uint32 npc_type_id;
 			char tmpstr[64];
