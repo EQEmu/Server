@@ -2099,7 +2099,8 @@ void Client::RemoveNoRent(bool client_update) {
 			iter = local.erase(iter);
 		}
 
-		database.SaveCursor(this->character_id, m_inv.cursor_begin(), m_inv.cursor_end());
+		std::list<ItemInst*>::const_iterator s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+		database.SaveCursor(this->CharacterID(), s, e);
 		local.clear();
 	}
 }
@@ -2241,7 +2242,8 @@ void Client::RemoveDuplicateLore(bool client_update) {
 			iter = local.erase(iter);
 		}
 
-		database.SaveCursor(this->character_id, m_inv.cursor_begin(), m_inv.cursor_end());
+		std::list<ItemInst*>::const_iterator s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+		database.SaveCursor(this->CharacterID(), s, e);
 		local.clear();
 	}
 }
