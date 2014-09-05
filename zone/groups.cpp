@@ -1868,15 +1868,12 @@ void Group::UnDelegateMarkNPC(const char *OldNPCMarkerName)
 
 	NPCMarkerName.clear();
 
-	char errbuff[MYSQL_ERRMSG_SIZE];
 
-	char *Query = 0;
+	std::string query = StringFormat("UPDATE group_leaders SET marknpc = '' WHERE gid = %i LIMIT 1", GetID());
+    auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Unable to clear group marknpc: %s\n", results.ErrorMessage().c_str());
 
-	if (!database.RunQuery(Query, MakeAnyLenString(&Query, "UPDATE group_leaders SET marknpc='' WHERE gid=%i LIMIT 1",
-								GetID()), errbuff))
-		LogFile->write(EQEMuLog::Error, "Unable to clear group marknpc: %s\n", errbuff);
-
-	safe_delete_array(Query);
 }
 
 void Group::SaveGroupLeaderAA()
