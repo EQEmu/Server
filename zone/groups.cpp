@@ -1621,15 +1621,10 @@ void Group::UnDelegateMainAssist(const char *OldMainAssistName, uint8 toggle)
 
 		safe_delete(outapp);
 
-		char errbuff[MYSQL_ERRMSG_SIZE];
-
-		char *Query = 0;
-
-		if (!database.RunQuery(Query, MakeAnyLenString(&Query, "UPDATE group_leaders SET assist='' WHERE gid=%i LIMIT 1",
-									GetID()), errbuff))
-			LogFile->write(EQEMuLog::Error, "Unable to clear group main assist: %s\n", errbuff);
-
-		safe_delete_array(Query);
+		std::string query = StringFormat("UPDATE group_leaders SET assist = '' WHERE gid = %i LIMIT 1", GetID());
+        auto results = database.QueryDatabase(query);
+		if (!results.Success())
+			LogFile->write(EQEMuLog::Error, "Unable to clear group main assist: %s\n", results.ErrorMessage().c_str());
 
 		if(!toggle)
 		{
