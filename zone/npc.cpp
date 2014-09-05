@@ -1183,65 +1183,61 @@ uint32 ZoneDatabase::DeleteSpawnLeaveInNPCTypeTable(const char* zone, Client *cl
 }
 
 uint32 ZoneDatabase::DeleteSpawnRemoveFromNPCTypeTable(const char* zone, uint32 zone_version, Client *client, NPC* spawn) {
-    char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	uint32 tmp = 0;
-	uint32 tmp2 = 0;
-    if (!RunQuery(query, MakeAnyLenString(&query, "SELECT id,spawngroupID from spawn2 where zone='%s' AND version=%u AND spawngroupID=%i", zone, zone_version, spawn->GetSp2()), errbuf, &result)) {
-		safe_delete_array(query);
-		return(0);
-	}
-	safe_delete_array(query);
 
-	row = mysql_fetch_row(result);
+	uint32 id = 0;
+	uint32 spawngroupID = 0;
 
-	if (row == nullptr)
-        return false;
+	std::string query = StringFormat("SELECT id, spawngroupID FROM spawn2 WHERE zone = '%s' "
+                                    "AND version = %u AND spawngroupID = %i",
+                                    zone, zone_version, spawn->GetSp2());
+    auto results = QueryDatabase(query);
+    if (!results.Success())
+		return 0;
+
+    if (results.RowCount() == 0)
+        return 0;
+
+	auto row = results.begin();
+
 	if (row[0])
-        tmp = atoi(row[0]);
+        id = atoi(row[0]);
+
 	if (row[1])
-        tmp2 = atoi(row[1]);
-	mysql_free_result(result);
+        spawngroupID = atoi(row[1]);
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawn2 WHERE id='%i'", tmp), errbuf,0)) {
-		safe_delete(query);
-		return false;
-	}
-
-	if(client)
-        client->LogSQL(query);
-
-    safe_delete_array(query);
-	if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawngroup WHERE id='%i'", tmp2), errbuf,0)) {
-		safe_delete(query);
-		return false;
-	}
+    query = StringFormat("DELETE FROM spawn2 WHERE id = '%i'", id);
+    results = QueryDatabase(query);
+	if (!results.Success())
+		return 0;
 
 	if(client)
-        client->LogSQL(query);
+        client->LogSQL(query.c_str());
 
-	safe_delete_array(query);
-	if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawnentry WHERE spawngroupID='%i'", tmp2), errbuf,0)) {
-		safe_delete(query);
-		return false;
-	}
-
-	if(client)
-        client->LogSQL(query);
-
-    safe_delete_array(query);
-	if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM npc_types WHERE id='%i'", spawn->GetNPCTypeID()), errbuf,0)) {
-		safe_delete(query);
-		return false;
-	}
+    query = StringFormat("DELETE FROM spawngroup WHERE id = '%i'", spawngroupID);
+	results = QueryDatabase(query);
+	if (!results.Success())
+		return 0;
 
 	if(client)
-        client->LogSQL(query);
+        client->LogSQL(query.c_str());
 
-    safe_delete_array(query);
-	return true;
+    query = StringFormat("DELETE FROM spawnentry WHERE spawngroupID = '%i'", spawngroupID);
+	results = QueryDatabase(query);
+	if (!results.Success())
+		return 0;
+
+	if(client)
+        client->LogSQL(query.c_str());
+
+    query = StringFormat("DELETE FROM npc_types WHERE id = '%i'", spawn->GetNPCTypeID());
+	results = QueryDatabase(query);
+	if (!results.Success())
+		return 0;
+
+	if(client)
+        client->LogSQL(query.c_str());
+
+	return 1;
 }
 
 uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_version, Client *c, NPC* spawn, uint32 extra) {
