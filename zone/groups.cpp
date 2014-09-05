@@ -1787,16 +1787,11 @@ void Group::DelegateMarkNPC(const char *NewNPCMarkerName)
 		if(members[i] && members[i]->IsClient())
 			NotifyMarkNPC(members[i]->CastToClient());
 
-	char errbuff[MYSQL_ERRMSG_SIZE];
-
-	char *Query = 0;
-
-	if (!database.RunQuery(Query, MakeAnyLenString(&Query, "UPDATE group_leaders SET marknpc='%s' WHERE gid=%i LIMIT 1",
-								NewNPCMarkerName, GetID()), errbuff))
-		LogFile->write(EQEMuLog::Error, "Unable to set group mark npc: %s\n", errbuff);
-
-	safe_delete_array(Query);
-
+	std::string query = StringFormat("UPDATE group_leaders SET marknpc = '%s' WHERE gid = %i LIMIT 1",
+                                    NewNPCMarkerName, GetID());
+    auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Unable to set group mark npc: %s\n", results.ErrorMessage().c_str());
 }
 
 void Group::NotifyMarkNPC(Client *c)
