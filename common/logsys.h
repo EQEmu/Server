@@ -92,8 +92,8 @@ extern void log_raw_packet(LogType type, uint16 seq, const BasePacket *p);
 			class Mob;
 			extern void log_message_mob(LogType type, Mob *who, const char *fmt, ...);
 			#define mlog( type, format, ...) \
-				if(IsLoggingEnabled()) \
 				do { \
+				if(IsLoggingEnabled()) \
 					if(log_type_info[ type ].enabled) { \
 						log_message_mob(type, this, format, ##__VA_ARGS__); \
 					} \
@@ -150,16 +150,16 @@ extern void log_raw_packet(LogType type, uint16 seq, const BasePacket *p);
 	class Mob;
 	extern void log_hex_mob(LogType type, Mob *who, const char *data, uint32 length);
 	#define mhex( type, data, len) \
-		if(IsLoggingEnabled()) \
 		do { \
+		if(IsLoggingEnabled()) \
 			if(log_type_info[ type ].enabled) { \
 				log_hex_mob(type, this, data, len); \
 			} \
 		} while(false)
 	extern void log_packet_mob(LogType type, Mob *who, const BasePacket *p);
 	#define mpkt( type, packet) \
-		if(IsLoggingEnabled()) \
 		do { \
+		if(IsLoggingEnabled()) \
 			if(log_type_info[ type ].enabled) { \
 				log_packet_mob(type, this, packet); \
 			} \

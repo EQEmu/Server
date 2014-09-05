@@ -23,8 +23,8 @@ VERBOSE = False  # messaging: {False - minimal, True - robust}
 base_path = os.getcwd()[:-14]  # '/utils/scripts'
 base_path = base_path.replace('\\', '/')
 
-client_list = ['6.2', 'Titanium', 'SoF', 'SoD', 'Underfoot', 'RoF', 'RoF2', 'ClientTest']
-server_list = ['Login', 'World', 'Zone', 'UCS', 'ServerTest']
+client_list = ['6.2', 'Titanium', 'SoF', 'SoD', 'Underfoot', 'RoF', 'RoF2']
+server_list = ['Login', 'World', 'Zone', 'UCS']
 
 client_opcodes = {}  # x[key='Client'][key='OP_CodeName'](value='0x####')
 server_opcodes = {}  # x[key='OP_CodeName'](value=<integer>) - opcodes apply to all servers
@@ -248,7 +248,7 @@ def loadclientopcodes():
     
     for client in client_list:
         try:
-            short_name = '/patch_{0}.conf'.format(client)
+            short_name = '/patch_{0}.conf'.format(client).lower()
 
             file_name = '{0}/utils/patches{1}'.format(
                 base_path,
@@ -455,9 +455,9 @@ def loadclienttranslators():
     for client in client_list:
         try:
             if client == '6.2':
-                short_name = '/Client62_ops.h'
+                short_name = '/client62_ops.h'
             else:
-                short_name = '/{0}_ops.h'.format(client)
+                short_name = '/{0}_ops.h'.format(client).lower()
 
             file_name = '{0}/common/patches{1}'.format(
                 base_path,
@@ -734,15 +734,15 @@ def discoverserverhandlers():
             locations[server] = []
 
     if 'Login' in locations:
-        locations['Login'].append('/loginserver/Client.cpp')
-        locations['Login'].append('/loginserver/ServerManager.cpp')
-        locations['Login'].append('/loginserver/WorldServer.cpp')
+        locations['Login'].append('/loginserver/client.cpp')
+        locations['Login'].append('/loginserver/server_manager.cpp')
+        locations['Login'].append('/loginserver/world_server.cpp')
 
     if 'World' in locations:
         locations['World'].append('/world/client.cpp')
 
     if 'Zone' in locations:
-        locations['Zone'].append('/zone/AA.cpp')
+        locations['Zone'].append('/zone/aa.cpp')
         locations['Zone'].append('/zone/attack.cpp')
         locations['Zone'].append('/zone/bot.cpp')
         locations['Zone'].append('/zone/client.cpp')
@@ -762,8 +762,8 @@ def discoverserverhandlers():
         locations['Zone'].append('/zone/loottables.cpp')
         locations['Zone'].append('/zone/merc.cpp')
         locations['Zone'].append('/zone/mob.cpp')
-        locations['Zone'].append('/zone/MobAI.cpp')
-        locations['Zone'].append('/zone/Object.cpp')
+        locations['Zone'].append('/zone/mob_ai.cpp')
+        locations['Zone'].append('/zone/object.cpp')
         locations['Zone'].append('/zone/pathing.cpp')
         locations['Zone'].append('/zone/petitions.cpp')
         locations['Zone'].append('/zone/questmgr.cpp')

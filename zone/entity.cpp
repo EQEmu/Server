@@ -3242,7 +3242,8 @@ void EntityList::ProcessMove(Client *c, float x, float y, float z)
 	for (auto iter = events.begin(); iter != events.end(); ++iter) {
 		quest_proximity_event& evt = (*iter);
 		if (evt.npc) {
-			parse->EventNPC(evt.event_id, evt.npc, evt.client, "", 0);
+			std::vector<EQEmu::Any> args;
+			parse->EventNPC(evt.event_id, evt.npc, evt.client, "", 0, &args);
 		} else {
 			std::vector<EQEmu::Any> args;
 			args.push_back(&evt.area_id);

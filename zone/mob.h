@@ -727,6 +727,7 @@ public:
 	virtual void AI_Init();
 	virtual void AI_Start(uint32 iMoveDelay = 0);
 	virtual void AI_Stop();
+	virtual void AI_ShutDown();
 	virtual void AI_Process();
 
 	const char* GetEntityVariable(const char *id);

@@ -594,15 +594,17 @@ void Zone::LoadMercTemplates(){
             tempMercTemplate.Stances[i] = 0;
 
         int stanceIndex = 0;
-        for (std::list<MercStanceInfo>::iterator mercStanceListItr = merc_stances.begin(); mercStanceListItr != merc_stances.end(); ++mercStanceListItr, ++stanceIndex) {
+        for (auto mercStanceListItr = merc_stances.begin(); mercStanceListItr != merc_stances.end(); ++mercStanceListItr) {
             if(mercStanceListItr->ClassID != tempMercTemplate.ClassID || mercStanceListItr->ProficiencyID != tempMercTemplate.ProficiencyID)
                 continue;
 
             zone->merc_stance_list[tempMercTemplate.MercTemplateID].push_back((*mercStanceListItr));
             tempMercTemplate.Stances[stanceIndex] = mercStanceListItr->StanceID;
+            ++stanceIndex;
         }
 
         merc_templates[tempMercTemplate.MercTemplateID] = tempMercTemplate;
+
     }
 
 }
@@ -733,6 +735,7 @@ void Zone::Shutdown(bool quite)
 	while (mob_itr != mob_list.end()) {
 		Mob* mob_inst = *mob_itr;
 		mob_inst->AI_Stop();
+		mob_inst->AI_ShutDown();
 		++mob_itr;
 	}
 

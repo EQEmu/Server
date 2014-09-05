@@ -121,9 +121,8 @@ bool SharedDatabase::SaveCursor(uint32 char_id, std::list<ItemInst*>::const_iter
         return false;
     }
 
-	int i;
-	iter_queue it;
-    for(it = start, i = 8000; it != end; ++it, i++) {
+    int i = 8000;
+    for(auto it = start; it != end; ++it, i++) {
         ItemInst *inst = *it;
         if (!SaveInventory(char_id,inst,(i == 8000) ? MainCursor : i))
             return false;
