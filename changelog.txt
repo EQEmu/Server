@@ -1,6 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 09/05/2014 ==
+demonstar55: Fix size getting nuked with lua's SendIllusionPacket
+
+== 09/05/2014 ==
 Uleat: Fix for cursor item loss when zoning. (Thanks to the other devs who traced and fixed the 'macro' issue!)
 
 == 09/03/2014 ==
