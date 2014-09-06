@@ -1541,31 +1541,27 @@ void command_viewpetition(Client *c, const Seperator *sep)
 
 void command_petitioninfo(Client *c, const Seperator *sep)
 {
-	if (sep->arg[1][0] == 0)
+	if (sep->arg[1][0] == 0) {
 		c->Message(0, "Usage: #petitioninfo (petition number) Type #listpetition for a list");
-	else
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		int queryfound = 0;
-		MYSQL_RES *result;
-		MYSQL_ROW row;
+		return;
+    }
 
-		if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT petid, charname, accountname, zone, charclass, charrace, charlevel from petitions order by petid"), errbuf, &result))
-		{
-			while ((row = mysql_fetch_row(result)))
-				if (strcasecmp(row[0],sep->argplus[1])== 0)
-				{
-					queryfound=1;
-					c->Message(13,"	ID : %s Character Name: %s Account Name: %s Zone: %s Character Class: %s Character Race: %s Character Level: %s",row[0],row[1],row[2],row[3],row[4],row[5],row[6]);
-				}
-			LogFile->write(EQEMuLog::Normal,"Petition information request from %s, petition number:", c->GetName(), atoi(sep->argplus[1]) );
-			if (queryfound==0)
-				c->Message(13,"There was an error in your request: ID not found! Please check the Id and try again.");
-			mysql_free_result(result);
-		}
-		safe_delete_array(query);
-	}
+    std::string query = "SELECT petid, charname, accountname, zone, charclass, charrace, charlevel FROM petitions ORDER BY petid";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success())
+        return;
+
+    LogFile->write(EQEMuLog::Normal,"Petition information request from %s, petition number:", c->GetName(), atoi(sep->argplus[1]) );
+
+    if (results.RowCount() == 0) {
+		c->Message(13,"There was an error in your request: ID not found! Please check the Id and try again.");
+        return;
+    }
+
+	for (auto row = results.begin(); row != results.end(); ++row)
+		if (strcasecmp(row[0],sep->argplus[1])== 0)
+			c->Message(13,"	ID : %s Character Name: %s Account Name: %s Zone: %s Character Class: %s Character Race: %s Character Level: %s",row[0],row[1],row[2],row[3],row[4],row[5],row[6]);
+
 }
 
 void command_delpetition(Client *c, const Seperator *sep)
