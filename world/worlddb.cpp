@@ -151,39 +151,31 @@ int WorldDatabase::MoveCharacterToBind(int CharID, uint8 bindnum) {
 	if (bindnum > 4)
 		bindnum = 0;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	uint32	affected_rows = 0;
 	PlayerProfile_Struct pp;
 
-	bool PPValid = false;
+    std::string query = StringFormat("SELECT profile FROM character_ WHERE id = '%i'", CharID);
+    auto results = QueryDatabase(query);
+    if (!results.Success())
+        return 0;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT profile from character_ where id='%i'", CharID), errbuf, &result)) {
-		row = mysql_fetch_row(result);
-		unsigned long* lengths = mysql_fetch_lengths(result);
-		if (lengths[0] == sizeof(PlayerProfile_Struct)) {
-			memcpy(&pp, row[0], sizeof(PlayerProfile_Struct));
-			PPValid = true;
-		}
-		mysql_free_result(result);
-	}
-	safe_delete_array(query);
+    auto row = results.begin();
+    if (results.LengthOfColumn(0) != sizeof(PlayerProfile_Struct))
+        return 0;
 
-	if(!PPValid) return 0;
+    memcpy(&pp, row[0], sizeof(PlayerProfile_Struct));
 
 	const char *BindZoneName = StaticGetZoneName(pp.binds[bindnum].zoneId);
 
-	if(!strcmp(BindZoneName, "UNKNWN")) return pp.zone_id;
+	if(!strcmp(BindZoneName, "UNKNWN"))
+        return pp.zone_id;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET zonename = '%s',zoneid=%i,x=%f, y=%f, z=%f, instanceid=0 WHERE id='%i'",
-							BindZoneName, pp.binds[bindnum].zoneId, pp.binds[bindnum].x, pp.binds[bindnum].y, pp.binds[bindnum].z,
-							CharID), errbuf, 0,&affected_rows)) {
-
+    query = StringFormat("UPDATE character_ SET zonename = '%s', zoneid = %i, x = %f, y = %f, z = %f, instanceid = 0 "
+                        "WHERE id = '%i'",
+                        BindZoneName, pp.binds[bindnum].zoneId, pp.binds[bindnum].x, pp.binds[bindnum].y,
+                        pp.binds[bindnum].z, CharID);
+    results = QueryDatabase(query);
+	if (!results.Success())
 		return pp.zone_id;
-	}
-	safe_delete_array(query);
 
 	return pp.binds[bindnum].zoneId;
 }
