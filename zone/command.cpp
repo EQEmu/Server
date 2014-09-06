@@ -4253,8 +4253,7 @@ void command_repop(Client *c, const Seperator *sep)
 
 		LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
 		iterator.Reset();
-		while (iterator.MoreElements())
-		{
+		while (iterator.MoreElements()) {
 			std::string query = StringFormat("DELETE FROM respawn_times WHERE id = %lu AND instance_id = %lu",
                                             (unsigned long)iterator.GetData()->GetID(),
                                             (unsigned long)zone->GetInstanceID());
@@ -4268,7 +4267,6 @@ void command_repop(Client *c, const Seperator *sep)
         c->Message(0, "Zone depoped. Repoping now.");
 		zone->Repop();
 		return;
-
 	}
 
     c->Message(0, "Zone depoped. Repop in %i seconds", atoi(sep->arg[timearg]));
@@ -4618,32 +4616,30 @@ void command_npcspawn(Client *c, const Seperator *sep)
 
 void command_spawnfix(Client *c, const Seperator *sep) {
 	Mob *t = c->GetTarget();
-	if (!t || !t->IsNPC())
+	if (!t || !t->IsNPC()) {
 		c->Message(0, "Error: #spawnfix: Need an NPC target.");
-	else {
-		Spawn2* s2 = t->CastToNPC()->respawn2;
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
+		return;
+    }
 
-		if(!s2) {
-			c->Message(0, "#spawnfix FAILED -- cannot determine which spawn entry in the database this mob came from.");
-		}
-		else
-		{
-			if(database.RunQuery(query, MakeAnyLenString(&query, "UPDATE spawn2 SET x='%f', y='%f', z='%f', heading='%f' WHERE id='%i'",c->GetX(), c->GetY(), c->GetZ(), c->GetHeading(),s2->GetID()), errbuf))
-			{
-				c->LogSQL(query);
-				c->Message(0, "Updating coordinates successful.");
-				t->Depop(false);
-			}
-			else
-			{
-				c->Message(13, "Update failed! MySQL gave the following error:");
-				c->Message(13, errbuf);
-			}
-			safe_delete_array(query);
-		}
-	}
+    Spawn2* s2 = t->CastToNPC()->respawn2;
+
+    if(!s2) {
+        c->Message(0, "#spawnfix FAILED -- cannot determine which spawn entry in the database this mob came from.");
+        return;
+    }
+
+    std::string query = StringFormat("UPDATE spawn2 SET x = '%f', y = '%f', z = '%f', heading = '%f' WHERE id = '%i'",
+                                    c->GetX(), c->GetY(), c->GetZ(), c->GetHeading(),s2->GetID());
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        c->Message(13, "Update failed! MySQL gave the following error:");
+        c->Message(13, results.ErrorMessage().c_str());
+        return;
+    }
+
+    c->LogSQL(query.c_str());
+    c->Message(0, "Updating coordinates successful.");
+    t->Depop(false);
 }
 
 void command_loc(Client *c, const Seperator *sep)
