@@ -412,9 +412,6 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
         return false;
     }
 
-    if (results.RowCount() == 0)
-        return false;
-
     for (auto row = results.begin(); row != results.end(); ++row) {
         int16 slot_id	= (int16)atoi(row[0]);
 		uint32 item_id	= (uint32)atoi(row[1]);
@@ -435,7 +432,6 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
 					((is_charid==true) ? "charid" : "acctid"), id, item_id, slot_id);
             continue;
         }
-
 
         int16 put_slot_id = INVALID_INDEX;
 
