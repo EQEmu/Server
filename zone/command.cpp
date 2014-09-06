@@ -3476,23 +3476,22 @@ void command_motd(Client *c, const Seperator *sep)
 
 void command_listpetition(Client *c, const Seperator *sep)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 	bool header = false;
-	if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT petid, charname, accountname from petitions order by petid"), errbuf, &result)) {
-		LogFile->write(EQEMuLog::Normal,"Petition list requested by %s", c->GetName());
-		while ((row = mysql_fetch_row(result))) {
-			if(!header) {
-				header = true;
-				c->Message(13,"	ID : Character Name , Account Name");
-			}
-			c->Message(15, " %s:	%s , %s ",row[0],row[1],row[2]);
-		}
-		mysql_free_result(result);
-	}
-	safe_delete_array(query);
+
+	std::string query = "SELECT petid, charname, accountname FROM petitions ORDER BY petid";
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+        return;
+
+    LogFile->write(EQEMuLog::Normal,"Petition list requested by %s", c->GetName());
+
+    if (results.RowCount() == 0)
+        return;
+
+    c->Message(13,"	ID : Character Name , Account Name");
+
+    for (auto row = results.begin(); row != results.end(); ++row)
+        c->Message(15, " %s:	%s , %s ",row[0],row[1],row[2]);
 }
 
 void command_equipitem(Client *c, const Seperator *sep)
