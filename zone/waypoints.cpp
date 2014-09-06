@@ -1291,6 +1291,7 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *client, uint32 spawn2id, float xpos, 
 	// Find out what the next waypoint is for this grid
 	query = StringFormat("SELECT max(`number`) FROM grid_entries WHERE zoneid = '%i' AND gridid = '%i'", zoneid, grid_num);
 
+	results = QueryDatabase(query);
 	if(!results.Success()) { // Query error
 		LogFile->write(EQEMuLog::Error, "Error getting next waypoint id '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
