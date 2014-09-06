@@ -182,49 +182,28 @@ int WorldDatabase::MoveCharacterToBind(int CharID, uint8 bindnum) {
 
 bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row = 0;
-	int rows;
-
 	if(!in_pp || !in_cc)
 		return false;
 
 	in_pp->x = in_pp->y = in_pp->z = in_pp->heading = in_pp->zone_id = 0;
 	in_pp->binds[0].x = in_pp->binds[0].y = in_pp->binds[0].z = in_pp->binds[0].zoneId = 0;
 
-	if(!RunQuery(query, MakeAnyLenString(&query, "SELECT x,y,z,heading,zone_id,bind_id FROM start_zones WHERE player_choice=%i AND player_class=%i "
-			"AND player_deity=%i AND player_race=%i",
-			in_cc->start_zone,
-			in_cc->class_,
-			in_cc->deity,
-			in_cc->race), errbuf, &result))
-	{
-		LogFile->write(EQEMuLog::Error, "Start zone query failed: %s : %s\n", query, errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("SELECT x, y, z, heading, zone_id, bind_id "
+                                    "FROM start_zones WHERE player_choice = % i "
+                                    "AND player_class = %i AND player_deity = %i "
+                                    "AND player_race = %i",
+                                    in_cc->start_zone, in_cc->class_, in_cc->deity,
+                                    in_cc->race);
+    auto results = QueryDatabase(query);
+	if(!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Start zone query failed: %s : %s\n", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
-	LogFile->write(EQEMuLog::Status, "Start zone query: %s\n", query);
-	safe_delete_array(query);
+	LogFile->write(EQEMuLog::Status, "Start zone query: %s\n", query.c_str());
 
-	if((rows = mysql_num_rows(result)) > 0)
-		row = mysql_fetch_row(result);
-
-	if(row)
-	{
-		LogFile->write(EQEMuLog::Status, "Found starting location in start_zones");
-		in_pp->x = atof(row[0]);
-		in_pp->y = atof(row[1]);
-		in_pp->z = atof(row[2]);
-		in_pp->heading = atof(row[3]);
-		in_pp->zone_id = atoi(row[4]);
-		in_pp->binds[0].zoneId = atoi(row[5]);
-	}
-	else
-	{
-		printf("No start_zones entry in database, using defaults\n");
+    if (results.RowCount() == 0) {
+        printf("No start_zones entry in database, using defaults\n");
 		switch(in_cc->start_zone)
 		{
 			case 0:
@@ -312,6 +291,16 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 				break;
 			}
 		}
+    }
+    else {
+		LogFile->write(EQEMuLog::Status, "Found starting location in start_zones");
+		auto row = results.begin();
+		in_pp->x = atof(row[0]);
+		in_pp->y = atof(row[1]);
+		in_pp->z = atof(row[2]);
+		in_pp->heading = atof(row[3]);
+		in_pp->zone_id = atoi(row[4]);
+		in_pp->binds[0].zoneId = atoi(row[5]);
 	}
 
 	if(in_pp->x == 0 && in_pp->y == 0 && in_pp->z == 0)
@@ -319,8 +308,7 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 
 	if(in_pp->binds[0].x == 0 && in_pp->binds[0].y == 0 && in_pp->binds[0].z == 0)
 		database.GetSafePoints(in_pp->binds[0].zoneId, 0, &in_pp->binds[0].x, &in_pp->binds[0].y, &in_pp->binds[0].z);
-	if(result)
-		mysql_free_result(result);
+
 	return true;
 }
 
