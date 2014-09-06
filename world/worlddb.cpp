@@ -314,7 +314,6 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 
 bool WorldDatabase::GetStartZoneSoF(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc)
 {
-
 	// SoF doesn't send the player_choice field in character creation, it now sends the real zoneID instead.
 	//
 	// For SoF, search for an entry in start_zones with a matching zone_id, class, race and deity.
@@ -322,49 +321,25 @@ bool WorldDatabase::GetStartZoneSoF(PlayerProfile_Struct* in_pp, CharCreate_Stru
 	// For now, if no row matching row is found, send them to Crescent Reach, as that is probably the most likely
 	// reason for no match being found.
 	//
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row = 0;
-	int rows;
-
 	if(!in_pp || !in_cc)
 		return false;
 
 	in_pp->x = in_pp->y = in_pp->z = in_pp->heading = in_pp->zone_id = 0;
 	in_pp->binds[0].x = in_pp->binds[0].y = in_pp->binds[0].z = in_pp->binds[0].zoneId = 0;
 
-	if(!RunQuery(query, MakeAnyLenString(&query, "SELECT x,y,z,heading,bind_id FROM start_zones WHERE zone_id=%i AND player_class=%i "
-			"AND player_deity=%i AND player_race=%i",
-			in_cc->start_zone,
-			in_cc->class_,
-			in_cc->deity,
-			in_cc->race), errbuf, &result))
-	{
-		LogFile->write(EQEMuLog::Status, "SoF Start zone query failed: %s : %s\n", query, errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("SELECT x, y, z, heading, bind_id FROM start_zones WHERE zone_id = %i "
+                                    "AND player_class = %i AND player_deity = %i AND player_race = %i",
+                                    in_cc->start_zone, in_cc->class_, in_cc->deity, in_cc->race);
+    auto results = QueryDatabase(query);
+	if(!results.Success()) {
+		LogFile->write(EQEMuLog::Status, "SoF Start zone query failed: %s : %s\n", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
-	LogFile->write(EQEMuLog::Status, "SoF Start zone query: %s\n", query);
-	safe_delete_array(query);
+	LogFile->write(EQEMuLog::Status, "SoF Start zone query: %s\n", query.c_str());
 
-	if((rows = mysql_num_rows(result)) > 0)
-		row = mysql_fetch_row(result);
-
-	if(row)
-	{
-		LogFile->write(EQEMuLog::Status, "Found starting location in start_zones");
-		in_pp->x = atof(row[0]);
-		in_pp->y = atof(row[1]);
-		in_pp->z = atof(row[2]);
-		in_pp->heading = atof(row[3]);
-		in_pp->zone_id = in_cc->start_zone;
-		in_pp->binds[0].zoneId = atoi(row[4]);
-	}
-	else
-	{
-		printf("No start_zones entry in database, using defaults\n");
+    if (results.RowCount() == 0) {
+        printf("No start_zones entry in database, using defaults\n");
 
 		if(in_cc->start_zone == RuleI(World, TutorialZoneID))
 			in_pp->zone_id = in_cc->start_zone;
@@ -374,7 +349,16 @@ bool WorldDatabase::GetStartZoneSoF(PlayerProfile_Struct* in_pp, CharCreate_Stru
 			in_pp->z = in_pp->binds[0].z = 0.79;
 			in_pp->zone_id = in_pp->binds[0].zoneId = 394; // Crescent Reach.
 		}
-
+    }
+    else {
+		LogFile->write(EQEMuLog::Status, "Found starting location in start_zones");
+		auto row = results.begin();
+		in_pp->x = atof(row[0]);
+		in_pp->y = atof(row[1]);
+		in_pp->z = atof(row[2]);
+		in_pp->heading = atof(row[3]);
+		in_pp->zone_id = in_cc->start_zone;
+		in_pp->binds[0].zoneId = atoi(row[4]);
 	}
 
 	if(in_pp->x == 0 && in_pp->y == 0 && in_pp->z == 0)
@@ -382,8 +366,7 @@ bool WorldDatabase::GetStartZoneSoF(PlayerProfile_Struct* in_pp, CharCreate_Stru
 
 	if(in_pp->binds[0].x == 0 && in_pp->binds[0].y == 0 && in_pp->binds[0].z == 0)
 		database.GetSafePoints(in_pp->binds[0].zoneId, 0, &in_pp->binds[0].x, &in_pp->binds[0].y, &in_pp->binds[0].z);
-	if(result)
-		mysql_free_result(result);
+
 	return true;
 }
 
