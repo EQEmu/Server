@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 09/06/2014 ==
+Uleat: Tweaked 'Smart' trading code to return main slots before sub slots in stackable and free space search processes. (If enough people ask for it, I'll add an optional rule to allow 'bag packing' - the original implementation behavior)
+
 == 09/05/2014 ==
 Uleat: Fix for cursor item loss when zoning. (Thanks to the other devs who traced and fixed the 'macro' issue!)
 demonstar55: Fix size getting nuked with lua's SendIllusionPacket
