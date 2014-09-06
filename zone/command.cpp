@@ -4255,23 +4255,24 @@ void command_repop(Client *c, const Seperator *sep)
 		iterator.Reset();
 		while (iterator.MoreElements())
 		{
-			char errbuf[MYSQL_ERRMSG_SIZE];
-			char *query = 0;
-			database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM respawn_times WHERE id=%lu"
-				" AND instance_id=%lu",(unsigned long)iterator.GetData()->GetID(), (unsigned long)zone->GetInstanceID()), errbuf);
-			safe_delete_array(query);
+			std::string query = StringFormat("DELETE FROM respawn_times WHERE id = %lu AND instance_id = %lu",
+                                            (unsigned long)iterator.GetData()->GetID(),
+                                            (unsigned long)zone->GetInstanceID());
+			auto results = database.QueryDatabase(query);
 			iterator.Advance();
 		}
 		c->Message(0, "Zone depop: Force resetting spawn timers.");
 	}
-	if (sep->IsNumber(timearg)) {
-		c->Message(0, "Zone depoped. Repop in %i seconds", atoi(sep->arg[timearg]));
-		zone->Repop(atoi(sep->arg[timearg])*1000);
-	}
-	else {
-		c->Message(0, "Zone depoped. Repoping now.");
+
+	if (!sep->IsNumber(timearg)) {
+        c->Message(0, "Zone depoped. Repoping now.");
 		zone->Repop();
+		return;
+
 	}
+
+    c->Message(0, "Zone depoped. Repop in %i seconds", atoi(sep->arg[timearg]));
+	zone->Repop(atoi(sep->arg[timearg])*1000);
 }
 
 void command_spawnstatus(Client *c, const Seperator *sep)
