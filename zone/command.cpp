@@ -1566,17 +1566,18 @@ void command_petitioninfo(Client *c, const Seperator *sep)
 
 void command_delpetition(Client *c, const Seperator *sep)
 {
-	if (sep->arg[1][0] == 0 || strcasecmp(sep->arg[1],"*")==0)
+	if (sep->arg[1][0] == 0 || strcasecmp(sep->arg[1],"*") == 0) {
 		c->Message(0, "Usage: #delpetition (petition number) Type #listpetition for a list");
-	else {
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(13,"Attempting to delete petition number: %i",atoi(sep->argplus[1]));
-		if (database.RunQuery(query, MakeAnyLenString(&query, "DELETE from petitions where petid=%i",atoi(sep->argplus[1])), errbuf)) {
-			LogFile->write(EQEMuLog::Normal,"Delete petition request from %s, petition number:", c->GetName(), atoi(sep->argplus[1]) );
-		}
-		safe_delete_array(query);
-	}
+		return;
+    }
+
+	c->Message(13,"Attempting to delete petition number: %i",atoi(sep->argplus[1]));
+	std::string query = StringFormat("DELETE FROM petitions WHERE petid = %i", atoi(sep->argplus[1]));
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+        return;
+
+    LogFile->write(EQEMuLog::Normal,"Delete petition request from %s, petition number:", c->GetName(), atoi(sep->argplus[1]) );
 }
 
 void command_listnpcs(Client *c, const Seperator *sep)
