@@ -2786,81 +2786,79 @@ void command_appearance(Client *c, const Seperator *sep)
 
 void command_charbackup(Client *c, const Seperator *sep)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES* result;
-	MYSQL_ROW row;
+
 	if (strcasecmp(sep->arg[1], "list") == 0) {
 		uint32 charid = 0;
 		if (sep->IsNumber(2))
 			charid = atoi(sep->arg[2]);
 		else
 			database.GetAccountIDByChar(sep->arg[2], &charid);
-		if (charid) {
-			if (database.RunQuery(query, MakeAnyLenString(&query,
-				"Select id, backupreason, charid, account_id, zoneid, DATE_FORMAT(ts, '%%m/%%d/%%Y %%H:%%i:%%s') "
-				" from character_backup where charid=%u", charid), errbuf, &result)) {
-				safe_delete(query);
-				uint32 x = 0;
-				while ((row = mysql_fetch_row(result))) {
-					c->Message(0, " %u: %s, %s (%u), reason=%u", atoi(row[0]), row[5], database.GetZoneName(atoi(row[4])), atoi(row[4]), atoi(row[1]));
-					x++;
-				}
-				c->Message(0, " %u backups found.", x);
-				mysql_free_result(result);
-			}
-			else {
-				c->Message(13, "Query error: '%s' %s", query, errbuf);
-				safe_delete(query);
-			}
-		}
-		else
-			c->Message(0, "Usage: #charbackup list [char name/id]");
+
+        if (charid == 0) {
+            c->Message(0, "Usage: #charbackup list [char name/id]");
+            return;
+        }
+
+        std::string query = StringFormat("SELECT id, backupreason, charid, account_id, "
+                                        "zoneid, DATE_FORMAT(ts, '%%m/%%d/%%Y %%H:%%i:%%s') "
+                                        "FROM character_backup WHERE charid = %u", charid);
+        auto results = database.QueryDatabase(query);
+        if (!results.Success()) {
+            c->Message(13, "Query error: '%s' %s", query.c_str(), results.ErrorMessage().c_str());
+            return;
+        }
+
+        uint32 backupsFound = 0;
+        for (auto row = results.begin(); row != results.end(); ++row, ++backupsFound)
+            c->Message(0, " %u: %s, %s (%u), reason=%u", atoi(row[0]), row[5], database.GetZoneName(atoi(row[4])), atoi(row[4]), atoi(row[1]));
+
+        c->Message(0, " %u backups found.", backupsFound);
+
+        return;
 	}
-	else if (strcasecmp(sep->arg[1], "restore") == 0) {
+
+	if (strcasecmp(sep->arg[1], "restore") == 0) {
 		uint32 charid = 0;
 		if (sep->IsNumber(2))
 			charid = atoi(sep->arg[2]);
 		else
 			database.GetAccountIDByChar(sep->arg[2], &charid);
 
-		if (charid && sep->IsNumber(3)) {
-			uint32 cbid = atoi(sep->arg[3]);
-			if (database.RunQuery(query, MakeAnyLenString(&query,
-				"Insert into character_backup (backupreason, charid, account_id, name, profile, level, class, x, y, z, zoneid, alt_adv) "
-				" select 1, id, account_id, name, profile, level, class, x, y, z, zoneid, alt_adv from character_ where id=%u", charid), errbuf)) {
-				if (database.RunQuery(query, MakeAnyLenString(&query,
-					"update character_ inner join character_backup on character_.id = character_backup.charid "
-					" set character_.name = character_backup.name, "
-					" character_.profile = character_backup.profile, "
-					" character_.level = character_backup.level, "
-					" character_.class = character_backup.class, "
-					" character_.x = character_backup.x, "
-					" character_.y = character_backup.y, "
-					" character_.z = character_backup.z, "
-					" character_.zoneid = character_backup.zoneid "
-					" where character_backup.charid=%u and character_backup.id=%u", charid, cbid), errbuf)) {
-					safe_delete(query);
-					c->Message(0, "Character restored.");
-				}
-				else {
-					c->Message(13, "Query error: '%s' %s", query, errbuf);
-					safe_delete(query);
-				}
-			}
-			else {
-				c->Message(13, "Query error: '%s' %s", query, errbuf);
-				safe_delete(query);
-			}
-		}
-		else
-			c->Message(0, "Usage: #charbackup list [char name/id]");
+        if (!charid || !sep->IsNumber(3)) {
+            c->Message(0, "Usage: #charbackup list [char name/id]");
+            return;
+        }
+
+        std::string query = StringFormat("INSERT INTO character_backup (backupreason, charid, account_id, "
+                                        "name, profile, level, class, x, y, z, zoneid, alt_adv) "
+                                        "SELECT 1, id, account_id, name, profile, level, class, "
+                                        "x, y, z, zoneid, alt_adv FROM character_ WHERE id = %u", charid);
+        auto results = database.QueryDatabase(query);
+        if (!results.Success()) {
+            c->Message(13, "Query error: '%s' %s", query.c_str(), results.ErrorMessage().c_str());
+            return;
+        }
+
+        uint32 cbid = atoi(sep->arg[3]);
+        query = StringFormat("UPDATE character_ INNER JOIN character_backup ON character_.id = character_backup.charid "
+                            "SET character_.name = character_backup.name, character_.profile = character_backup.profile, "
+                            "character_.level = character_backup.level, character_.class = character_backup.class, "
+                            "character_.x = character_backup.x, character_.y = character_backup.y, "
+                            " character_.z = character_backup.z, character_.zoneid = character_backup.zoneid "
+                            "WHERE character_backup.charid = %u AND character_backup.id = %u", charid, cbid);
+        results = database.QueryDatabase(query);
+        if (!results.Success()) {
+            c->Message(13, "Query error: '%s' %s", query.c_str(), results.ErrorMessage().c_str());
+            return;
+        }
+
+        c->Message(0, "Character restored.");
+        return;
 	}
-	else {
-		c->Message(0, "#charbackup sub-commands:");
-		c->Message(0, "  list [char name/id]");
-		c->Message(0, "  restore [char name/id] [backup#]");
-	}
+
+    c->Message(0, "#charbackup sub-commands:");
+    c->Message(0, "  list [char name/id]");
+    c->Message(0, "  restore [char name/id] [backup#]");
 }
 
 void command_nukeitem(Client *c, const Seperator *sep)
