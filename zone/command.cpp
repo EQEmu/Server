@@ -6309,60 +6309,54 @@ void command_ban(Client *c, const Seperator *sep)
 
 void command_suspend(Client *c, const Seperator *sep)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = nullptr;
 
-	if((sep->arg[1][0] == 0) || (sep->arg[2][0] == 0))
+	if((sep->arg[1][0] == 0) || (sep->arg[2][0] == 0)) {
 		c->Message(0, "Usage: #suspend <charname> <days> (Specify 0 days to lift the suspension immediately)");
-	else
-	{
-		int Duration = atoi(sep->arg[2]);
+		return;
+    }
 
-		if(Duration < 0)
-			Duration = 0;
+    int duration = atoi(sep->arg[2]);
 
-		char *EscName = new char[strlen(sep->arg[1]) * 2 + 1];
+	if(duration < 0)
+		duration = 0;
 
-		database.DoEscapeString(EscName, sep->arg[1], strlen(sep->arg[1]));
+	char *escName = new char[strlen(sep->arg[1]) * 2 + 1];
+	database.DoEscapeString(escName, sep->arg[1], strlen(sep->arg[1]));
+	int accountID = database.GetAccountIDByChar(escName);
+    safe_delete_array(escName);
 
-		int AccountID;
+    if (accountID <= 0) {
+        c->Message(13,"Character does not exist.");
+        return;
+    }
 
-		if((AccountID = database.GetAccountIDByChar(EscName)) > 0)
-		{
-			database.RunQuery(query, MakeAnyLenString(&query, "UPDATE `account` SET `suspendeduntil` = DATE_ADD(NOW(), INTERVAL %i DAY)"
-									" WHERE `id` = %i", Duration, AccountID), errbuf, 0);
+	std::string query = StringFormat("UPDATE `account` SET `suspendeduntil` = DATE_ADD(NOW(), INTERVAL %i DAY) "
+									"WHERE `id` = %i", duration, accountID);
+    auto results = database.QueryDatabase(query);
 
-			if(Duration)
-				c->Message(13,"Account number %i with the character %s has been temporarily suspended for %i day(s).", AccountID, sep->arg[1],
-					Duration);
-			else
-				c->Message(13,"Account number %i with the character %s is no longer suspended.", AccountID, sep->arg[1]);
+    if(duration)
+        c->Message(13,"Account number %i with the character %s has been temporarily suspended for %i day(s).", accountID, sep->arg[1], duration);
+    else
+        c->Message(13,"Account number %i with the character %s is no longer suspended.", accountID, sep->arg[1]);
 
-			safe_delete_array(query);
+    Client *bannedClient = entity_list.GetClientByName(sep->arg[1]);
 
-			Client *BannedClient = entity_list.GetClientByName(sep->arg[1]);
+    if(bannedClient) {
+        bannedClient->WorldKick();
+        return;
+    }
 
-			if(BannedClient)
-				BannedClient->WorldKick();
-			else
-			{
-				ServerPacket* pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
-				ServerKickPlayer_Struct* sks = (ServerKickPlayer_Struct*) pack->pBuffer;
+    ServerPacket* pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
+	ServerKickPlayer_Struct* sks = (ServerKickPlayer_Struct*) pack->pBuffer;
 
-				strn0cpy(sks->adminname, c->GetName(), sizeof(sks->adminname));
-				strn0cpy(sks->name, sep->arg[1], sizeof(sks->name));
-				sks->adminrank = c->Admin();
+	strn0cpy(sks->adminname, c->GetName(), sizeof(sks->adminname));
+	strn0cpy(sks->name, sep->arg[1], sizeof(sks->name));
+	sks->adminrank = c->Admin();
 
-				worldserver.SendPacket(pack);
+	worldserver.SendPacket(pack);
 
-				safe_delete(pack);
-			}
+	safe_delete(pack);
 
-		} else
-			c->Message(13,"Character does not exist.");
-
-		safe_delete_array(EscName);
-	}
 }
 
 void command_ipban(Client *c, const Seperator *sep)
