@@ -423,37 +423,31 @@ bool WorldDatabase::GetCharacterLevel(const char *name, int &level)
 bool WorldDatabase::LoadCharacterCreateAllocations() {
 	character_create_allocations.clear();
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if(RunQuery(query, MakeAnyLenString(&query, "SELECT * FROM char_create_point_allocations order by id"), errbuf, &result)) {
-		safe_delete_array(query);
-		while(row = mysql_fetch_row(result)) {
-			RaceClassAllocation allocate;
-			int r = 0;
-			allocate.Index = atoi(row[r++]);
-			allocate.BaseStats[0] = atoi(row[r++]);
-			allocate.BaseStats[3] = atoi(row[r++]);
-			allocate.BaseStats[1] = atoi(row[r++]);
-			allocate.BaseStats[2] = atoi(row[r++]);
-			allocate.BaseStats[4] = atoi(row[r++]);
-			allocate.BaseStats[5] = atoi(row[r++]);
-			allocate.BaseStats[6] = atoi(row[r++]);
-			allocate.DefaultPointAllocation[0] = atoi(row[r++]);
-			allocate.DefaultPointAllocation[3] = atoi(row[r++]);
-			allocate.DefaultPointAllocation[1] = atoi(row[r++]);
-			allocate.DefaultPointAllocation[2] = atoi(row[r++]);
-			allocate.DefaultPointAllocation[4] = atoi(row[r++]);
-			allocate.DefaultPointAllocation[5] = atoi(row[r++]);
-			allocate.DefaultPointAllocation[6] = atoi(row[r++]);
-			character_create_allocations.push_back(allocate);
-		}
-		mysql_free_result(result);
-	} else {
-		safe_delete_array(query);
-		return false;
-	}
+	std::string query = "SELECT * FROM char_create_point_allocations ORDER BY id";
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+        return false;
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        RaceClassAllocation allocate;
+		allocate.Index = atoi(row[0]);
+		allocate.BaseStats[0] = atoi(row[1]);
+		allocate.BaseStats[3] = atoi(row[2]);
+		allocate.BaseStats[1] = atoi(row[3]);
+		allocate.BaseStats[2] = atoi(row[4]);
+		allocate.BaseStats[4] = atoi(row[5]);
+		allocate.BaseStats[5] = atoi(row[6]);
+		allocate.BaseStats[6] = atoi(row[7]);
+		allocate.DefaultPointAllocation[0] = atoi(row[8]);
+		allocate.DefaultPointAllocation[3] = atoi(row[9]);
+		allocate.DefaultPointAllocation[1] = atoi(row[10]);
+		allocate.DefaultPointAllocation[2] = atoi(row[11]);
+		allocate.DefaultPointAllocation[4] = atoi(row[12]);
+		allocate.DefaultPointAllocation[5] = atoi(row[13]);
+		allocate.DefaultPointAllocation[6] = atoi(row[14]);
+
+		character_create_allocations.push_back(allocate);
+    }
 
 	return true;
 }
