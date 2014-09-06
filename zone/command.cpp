@@ -5249,49 +5249,51 @@ void command_manaburn(Client *c, const Seperator *sep)
 
 void command_viewmessage(Client *c, const Seperator *sep)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if(sep->arg[1][0]==0)
-	{
-		if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT id,date,receiver,sender,message from tellque where receiver='%s'",c->GetName()), errbuf, &result))
-		{
-			if (mysql_num_rows(result)>0)
-			{
-				c->Message(0,"You have messages waiting for you to view.");
-				c->Message(0,"Type #Viewmessage <Message ID> to view the message.");
-				c->Message(0," ID , Message Sent Date, Message Sender");
-				while ((row = mysql_fetch_row(result)))
-					c->Message(0,"ID: %s Sent Date: %s Sender: %s ",row[0],row[1],row[3]);
-			}
-			else
-				c->Message(0,"You have no new messages");
-				mysql_free_result(result);
-		}
-		safe_delete_array(query);
+
+	if(sep->arg[1][0]==0) {
+        std::string query = StringFormat("SELECT id, date, receiver, sender, message "
+                                        "FROM tellque WHERE receiver = '%s'", c->GetName());
+        auto results = database.QueryDatabase(query);
+        if (!results.Success())
+            return;
+
+        if (results.RowCount() == 0) {
+            c->Message(0,"You have no new messages");
+            return;
+        }
+
+        c->Message(0,"You have messages waiting for you to view.");
+		c->Message(0,"Type #Viewmessage <Message ID> to view the message.");
+		c->Message(0," ID , Message Sent Date, Message Sender");
+		for (auto row = results.begin(); row != results.end(); ++row)
+            c->Message(0,"ID: %s Sent Date: %s Sender: %s ",row[0], row[1], row[3]);
+
+		return;
 	}
-	else
-	{
-		if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT id,date,receiver,sender,message from tellque where id=%s",sep->argplus[1]), errbuf, &result))
-		{
-			if (mysql_num_rows(result)==1)
-			{
-				row = mysql_fetch_row(result);
-				mysql_free_result(result);
-				if (strcasecmp((const char *) c->GetName(), (const char *) row[2]) == 0)
-				{
-					c->Message(15,"ID: %s,Sent Date: %s,Sender: %s,Message: %s",row[0],row[1],row[3],row[4]);
-					database.RunQuery(query, MakeAnyLenString(&query, "Delete from tellque where id=%s",row[0]), errbuf);
-				}
-				else
-					c->Message(13,"Invalid Message Number, check the number and try again.");
-			}
-			else
-				c->Message(13,"Invalid Message Number, check the number and try again.");
-		}
-		safe_delete_array(query);
-	}
+
+    std::string query = StringFormat("SELECT id, date, receiver, sender, message "
+                                    "FROM tellque WHERE id = %s", sep->argplus[1]);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success())
+        return;
+
+    if (results.RowCount() != 1) {
+        c->Message(13,"Invalid Message Number, check the number and try again.");
+        return;
+    }
+
+    auto row = results.begin();
+
+    if (strcasecmp((const char *) c->GetName(), (const char *) row[2]) != 0) {
+        c->Message(13,"Invalid Message Number, check the number and try again.");
+        return;
+    }
+
+    c->Message(15,"ID: %s,Sent Date: %s,Sender: %s,Message: %s",row[0],row[1],row[3],row[4]);
+
+    query = StringFormat("Delete FROM tellque WHERE id = %s", row[0]);
+    results = database.QueryDatabase(query);
+
 }
 
 void command_doanim(Client *c, const Seperator *sep)
