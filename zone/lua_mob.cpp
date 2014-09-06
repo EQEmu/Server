@@ -1451,7 +1451,7 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 	uint32 drakkin_heritage = 4294967295;
 	uint32 drakkin_tattoo = 4294967295;
 	uint32 drakkin_details = 4294967295;
-	float size = 0xFFFFFFFF;
+	float size = -1.0f;
 
 	auto cur = illusion["race"];
 	if(luabind::type(cur) != LUA_TNIL) {
