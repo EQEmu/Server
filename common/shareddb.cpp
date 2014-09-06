@@ -2148,7 +2148,8 @@ void SharedDatabase::SetPlayerInspectMessage(char* playername, const InspectMess
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET inspectmessage='%s' WHERE name='%s'", message->text, playername), errbuf)) {
+	std::string msg = EscapeString(message->text);
+	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET inspectmessage='%s' WHERE name='%s'", msg.c_str(), playername), errbuf)) {
 		std::cerr << "Error in SetPlayerInspectMessage query '" << query << "' " << errbuf << std::endl;
 	}
 
@@ -2183,7 +2184,8 @@ void SharedDatabase::SetBotInspectMessage(uint32 botid, const InspectMessage_Str
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE bots SET BotInspectMessage='%s' WHERE BotID=%i", message->text, botid), errbuf)) {
+	std::string msg = EscapeString(message->text);
+	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE bots SET BotInspectMessage='%s' WHERE BotID=%i", msg.c_str(), botid), errbuf)) {
 		std::cerr << "Error in SetBotInspectMessage query '" << query << "' " << errbuf << std::endl;
 	}
 
