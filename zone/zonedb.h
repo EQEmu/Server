@@ -239,7 +239,6 @@ public:
 	void UpdateBuyLine(uint32 CharID, uint32 BuySlot, uint32 Quantity);
 
 	/* General Character Related Stuff */
-	void	StoreCharacterLookup(uint32 char_id);
 	bool	SetServerFilters(char* name, ServerSideFilters_Struct *ssfs);
 	uint32	GetServerFilters(char* name, ServerSideFilters_Struct *ssfs);
 

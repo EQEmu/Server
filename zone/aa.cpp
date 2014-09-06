@@ -1035,8 +1035,7 @@ void Client::BuyAA(AA_Action* action)
 	uint32 real_cost;
 	std::map<uint32, AALevelCost_Struct>::iterator RequiredLevel = AARequiredLevelAndCost.find(action->ability);
 
-	if(RequiredLevel != AARequiredLevelAndCost.end())
-	{
+	if(RequiredLevel != AARequiredLevelAndCost.end()) {
 		real_cost = RequiredLevel->second.Cost;
 	}
 	else
@@ -1064,8 +1063,10 @@ void Client::BuyAA(AA_Action* action)
 
 		SendAATable();
 
-		//we are building these messages ourself instead of using the stringID to work around patch discrepencies
-		//these are AA_GAIN_ABILITY	(410) & AA_IMPROVE (411), respectively, in both Titanium & SoF. not sure about 6.2
+		/*
+			We are building these messages ourself instead of using the stringID to work around patch discrepencies
+				these are AA_GAIN_ABILITY	(410) & AA_IMPROVE (411), respectively, in both Titanium & SoF. not sure about 6.2
+		*/
 
 		/* Initial purchase of an AA ability */
 		if (cur_level < 1){
@@ -1087,8 +1088,6 @@ void Client::BuyAA(AA_Action* action)
 				QServ->PlayerLogEvent(Player_Log_AA_Purchases, this->CharacterID(), event_desc);
 			}
 		}
-
-
 
 		SendAAStats();
 

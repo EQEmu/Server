@@ -477,13 +477,10 @@ void Client::ReportConnectingState() {
 	};
 }
 
-inline double clock_diff_to_sec(long clock_diff)
-{
-	return double(clock_diff) / CLOCKS_PER_SEC;
-}
-
 bool Client::SaveAA(){
 	clock_t t = std::clock(); /* Function timer start */
+	int first_entry = 0;
+	std::string rquery;
 	/* Save Player AA */
 	int spentpoints = 0;
 	for (int a = 0; a < MAX_PP_AA_ARRAY; a++) {
@@ -509,12 +506,15 @@ bool Client::SaveAA(){
 	m_pp.aapoints_spent = spentpoints + m_epp.expended_aa; 
 	for (int a = 0; a < MAX_PP_AA_ARRAY; a++) {
 		if (aa[a]->AA > 0 && aa[a]->value){
-			std::string rquery = StringFormat("REPLACE INTO `character_alternate_abilities` (id, slot, aa_id, aa_value)"
-				" VALUES (%u, %u, %u, %u)",
-				character_id, a, aa[a]->AA, aa[a]->value);
-			auto results = database.QueryDatabase(rquery);
+			if (first_entry != 1){
+				rquery = StringFormat("REPLACE INTO `character_alternate_abilities` (id, slot, aa_id, aa_value)"
+					" VALUES (%u, %u, %u, %u)", character_id, a, aa[a]->AA, aa[a]->value);
+				first_entry = 1;
+			}
+			rquery = rquery + StringFormat(", (%u, %u, %u, %u)", character_id, a, aa[a]->AA, aa[a]->value);
 		}
 	}
+	auto results = database.QueryDatabase(rquery);
 	LogFile->write(EQEMuLog::Status, "Issuing Client AA Save... CID: %i Took %f seconds", character_id, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 	return true;
 }
@@ -581,15 +581,9 @@ bool Client::Save(uint8 iCommitNow) {
 	p_timers.Store(&database);
 
 	database.SaveCharacterTribute(this->CharacterID(), &m_pp);
+	SaveTaskState(); /* Save Character Task */
+	database.SaveCharacterData(this->CharacterID(), this->AccountID(), &m_pp); /* Save Character Data */
 
-	/* Save Character Task */
-	SaveTaskState(); 
-
-	/* Save Character Data */
-	database.SaveCharacterData(this->CharacterID(), this->AccountID(), &m_pp);
-
-	/* Mirror Character Data */
-	database.StoreCharacterLookup(this->CharacterID());
 	LogFile->write(EQEMuLog::Status, "Client::Save %i, done... Took %f seconds", character_id, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 	return true;
 }

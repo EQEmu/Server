@@ -793,8 +793,7 @@ void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID
 
 }
 
-void Database::GetCharName(uint32 char_id, char* name) {
-	
+void Database::GetCharName(uint32 char_id, char* name) { 
 	std::string query = StringFormat("SELECT `name` FROM `character_data` WHERE id='%i'", char_id);
 	auto results = QueryDatabase(query);
 
@@ -1209,7 +1208,7 @@ bool Database::CheckDatabaseConversions() {
 
 	// querylen = MakeAnyLenString(&query, "SELECT `id` FROM `character_` WHERE `id` = 61238"); // WHERE `account_id` = 11001
 	int char_iter_count = 0;
-	querylen = MakeAnyLenString(&query, "SELECT `id` FROM `character_` WHERE `id` = 61238");  
+	querylen = MakeAnyLenString(&query, "SELECT `id` FROM `character_` WHERE `account_id` = 11001");  
 	if (RunQuery(query, querylen, errbuf, &result)) {
 		safe_delete_array(query);
 		while (row = mysql_fetch_row(result)) {
@@ -1454,8 +1453,8 @@ bool Database::CheckDatabaseConversions() {
 						")",
 						character_id,
 						account_id,
-						pp->name,
-						pp->last_name,
+						EscapeString(pp->name).c_str(),
+						EscapeString(pp->last_name).c_str(),
 						pp->gender,
 						pp->race,
 						pp->class_,
@@ -1479,8 +1478,8 @@ bool Database::CheckDatabaseConversions() {
 						pp->ability_number,
 						pp->ability_time_minutes,
 						pp->ability_time_hours,
-						pp->title,
-						pp->suffix,
+						EscapeString(pp->title).c_str(),
+						EscapeString(pp->suffix).c_str(),
 						pp->exp,
 						pp->points,
 						pp->mana,
@@ -1546,15 +1545,26 @@ bool Database::CheckDatabaseConversions() {
 					results = QueryDatabase(rquery);
 					if (!results.RowsAffected()){ std::cout << "ERROR PP Data Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
 
+					// str.append(str2);       
+
 					/* Run AA Convert */
-					for (i = 0; i < MAX_PP_AA_ARRAY; i++){
+					/* 
+						We set a first entry variable because we need the first initial piece of the query to be declared 
+						This is to speed up the INSERTS and trim down the amount of individual sends during the process.
+						The speed difference is dramatic
+					*/
+					int first_entry = 0; 
+					for (i = 1; i < MAX_PP_AA_ARRAY; i++){
 						if (pp->aa_array[i].AA > 0 && pp->aa_array[i].value > 0){
-							rquery = StringFormat("REPLACE INTO `character_alternate_abilities` (id, slot, aa_id, aa_value)"
-								" VALUES (%u, %u, %u, %u)",
-								character_id, i, pp->aa_array[i].AA, pp->aa_array[i].value);
-							results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR AA Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
-						}
-					} 
+							if (first_entry != 1){
+								rquery = StringFormat("REPLACE INTO `character_alternate_abilities` (id, slot, aa_id, aa_value)"
+									" VALUES (%u, %u, %u, %u)", character_id, i, pp->aa_array[i].AA, pp->aa_array[i].value);
+								first_entry = 1; 
+							}
+							rquery = rquery + StringFormat(", (%u, %u, %u, %u)", character_id, i, pp->aa_array[i].AA, pp->aa_array[i].value); 
+						} 
+					}
+					results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR AA Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
 
 					/* Run Bind Home Convert */
 					rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
@@ -1569,71 +1579,117 @@ bool Database::CheckDatabaseConversions() {
 						results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Bind Home Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
 
 					/* Run Language Convert */
+					first_entry = 0;
 					for (i = 0; i < MAX_PP_LANGUAGE; i++){
 						if (pp->languages[i] > 0){
-							rquery = StringFormat("REPLACE INTO `character_languages` (id, lang_id, value) VALUES (%u, %u, %u)", character_id, i, pp->languages[i]);
-							results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Language Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+							if (first_entry != 1){
+								rquery = StringFormat("REPLACE INTO `character_languages` (id, lang_id, value) VALUES (%u, %u, %u)", character_id, i, pp->languages[i]);
+								first_entry = 1;
+							}
+							rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->languages[i]);
 						}
 					}
+					results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Language Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
 					/* Run Skill Convert */
+					first_entry = 0;
 					for (i = 0; i < MAX_PP_SKILL; i++){
-						if (pp->skills[i] > 0){ 
-							rquery = StringFormat("REPLACE INTO `character_skills` (id, skill_id, value) VALUES (%u, %u, %u)", character_id, i, pp->skills[i]);
-							results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Skill Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+						if (pp->skills[i] > 0){
+							if (first_entry != 1){
+								rquery = StringFormat("REPLACE INTO `character_skills` (id, skill_id, value) VALUES (%u, %u, %u)", character_id, i, pp->skills[i]);
+								first_entry = 1;
+							}
+							rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->skills[i]);
 						}
 					}
+					results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Skill Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
 					/* Run Spell Convert */
+					first_entry = 0;
 					for (i = 0; i < MAX_PP_SPELLBOOK; i++){
 						if (pp->spell_book[i] > 0 && pp->spell_book[i] != 4294967295 && pp->spell_book[i] < 40000 && pp->spell_book[i] != 1){
-							rquery = StringFormat("REPLACE INTO `character_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, i, pp->spell_book[i]); 
-							results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Spell Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+							if (first_entry != 1){
+								rquery = StringFormat("REPLACE INTO `character_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, i, pp->spell_book[i]);
+								first_entry = 1;
+							}
+							rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->spell_book[i]);
 						}
 					}
-					/* Run Max Memmed Spell Convert */
+					// std::cout << rquery << "\n";
+					results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Spell Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+					/* Run Max Memmed Spell Convert */ 
+					first_entry = 0;
 					for (i = 0; i < MAX_PP_MEMSPELL; i++){
-						if (pp->mem_spells[i] > 0){
-							rquery = StringFormat("REPLACE INTO `character_memmed_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, i, pp->mem_spells[i]);
-							QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Memmed Spell Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+						if (pp->mem_spells[i] > 0 && pp->mem_spells[i] != 65535){
+							if (first_entry != 1){
+								rquery = StringFormat("REPLACE INTO `character_memmed_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, i, pp->mem_spells[i]);
+								first_entry = 1;
+							}
+							rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->mem_spells[i]);
 						}
 					}
+					results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Memmed Spell Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
 					/* Run Discipline Convert */
+					first_entry = 0;
 					for (i = 0; i < MAX_PP_DISCIPLINES; i++){
 						if (pp->disciplines.values[i] > 0){
-							rquery = StringFormat("REPLACE INTO `character_disciplines` (id, slot_id, disc_id) VALUES (%u, %u, %u)", character_id, i, pp->disciplines.values[i]);
-							results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Discipline Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+							if (first_entry != 1){
+								rquery = StringFormat("REPLACE INTO `character_disciplines` (id, slot_id, disc_id) VALUES (%u, %u, %u)", character_id, i, pp->disciplines.values[i]);
+								first_entry = 1;
+							}
+							rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->disciplines.values[i]);
 						}
 					}
+					results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Discipline Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
 					/* Run Material Color Convert */
+					first_entry = 0;
 					for (i = 0; i < _MaterialCount; i++){
 						if (pp->item_tint[i].color > 0){
-							rquery = StringFormat("REPLACE INTO `character_material` (id, slot, blue, green, red, use_tint, color) VALUES (%u, %u, %u, %u, %u, %u, %u)", character_id, i, pp->item_tint[i].rgb.blue, pp->item_tint[i].rgb.green, pp->item_tint[i].rgb.red, pp->item_tint[i].rgb.use_tint, pp->item_tint[i].color);
-							// printf("REPLACE INTO `character_material` (id, slot, blue, green, red, use_tint, color) VALUES (%u, %u, %u, %u, %u, %u, %u);\n", character_id, i, pp->item_tint[i].rgb.blue, pp->item_tint[i].rgb.green, pp->item_tint[i].rgb.red, pp->item_tint[i].rgb.use_tint, pp->item_tint[i].color);
-							results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Color Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+							if (first_entry != 1){
+								rquery = StringFormat("REPLACE INTO `character_material` (id, slot, blue, green, red, use_tint, color) VALUES (%u, %u, %u, %u, %u, %u, %u)", character_id, i, pp->item_tint[i].rgb.blue, pp->item_tint[i].rgb.green, pp->item_tint[i].rgb.red, pp->item_tint[i].rgb.use_tint, pp->item_tint[i].color);
+								first_entry = 1;
+							}
+							rquery = rquery + StringFormat(", (%u, %u, %u, %u, %u, %u, %u)", character_id, i, pp->item_tint[i].rgb.blue, pp->item_tint[i].rgb.green, pp->item_tint[i].rgb.red, pp->item_tint[i].rgb.use_tint, pp->item_tint[i].color);
 						} 
 					}
+					results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Color Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
 					/* Run Tribute Convert */
+					first_entry = 0;
 					for (i = 0; i < EmuConstants::TRIBUTE_SIZE; i++){
 						if (pp->tributes[i].tribute > 0){
-							rquery = StringFormat("REPLACE INTO `character_tribute` (id, tier, tribute) VALUES (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
-							results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Tribute Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+							if (first_entry != 1){
+								rquery = StringFormat("REPLACE INTO `character_tribute` (id, tier, tribute) VALUES (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
+								first_entry = 1;
+							}
+							rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
 						}
 					}
+					results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Tribute Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
 					/* Run Bandolier Convert */
+					first_entry = 0;
 					for (i = 0; i <= EmuConstants::BANDOLIERS_COUNT; i++){
 						for (int si = 0; si < EmuConstants::BANDOLIER_SIZE; si++){
 							if (pp->bandoliers[i].items[si].item_id > 0){
-								rquery = StringFormat("REPLACE INTO `character_bandolier` (id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name) VALUES (%i, %u, %i, %u, %u, '%s')", character_id, i, si, pp->bandoliers[i].items[si].item_id, pp->bandoliers[i].items[si].icon, pp->bandoliers[i].name);
-								results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Bandolier Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; } 
+								if (first_entry != 1){
+									rquery = StringFormat("REPLACE INTO `character_bandolier` (id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name) VALUES (%i, %u, %i, %u, %u, '%s')", character_id, i, si, pp->bandoliers[i].items[si].item_id, pp->bandoliers[i].items[si].icon, pp->bandoliers[i].name);
+									first_entry = 1;
+								}
+								rquery = rquery + StringFormat(", (%i, %u, %i, %u, %u, '%s')", character_id, i, si, pp->bandoliers[i].items[si].item_id, pp->bandoliers[i].items[si].icon, pp->bandoliers[i].name);
 							}
 						} 
 					}
+					results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Bandolier Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
 					/* Run Potion Belt Convert */
+					first_entry = 0;
 					for (i = 0; i <= EmuConstants::POTION_BELT_SIZE; i++){
 						if (pp->potionbelt.items[i].item_id > 0){
-							rquery = StringFormat("REPLACE INTO `character_potionbelt` (id, potion_id, item_id, icon) VALUES (%i, %u, %u, %u)", character_id, i, pp->potionbelt.items[i].item_id, pp->potionbelt.items[i].icon);
-							results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Potion Belt Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+							if (first_entry != 1){
+								rquery = StringFormat("REPLACE INTO `character_potionbelt` (id, potion_id, item_id, icon) VALUES (%i, %u, %u, %u)", character_id, i, pp->potionbelt.items[i].item_id, pp->potionbelt.items[i].icon);
+								first_entry = 1;
+							}
+							rquery = rquery + StringFormat(", (%i, %u, %u, %u)", character_id, i, pp->potionbelt.items[i].item_id, pp->potionbelt.items[i].icon);
+							
 						}
 					}
+					results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Potion Belt Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
 				}
 
 				/* Print out the entire Player Profile for testing */
