@@ -6784,10 +6784,10 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 
 			if(tobe_auged && auged_with)
 			{
-				if (((slot=tobe_auged->AvailableAugmentSlot(auged_with->GetAugmentType()))!=-1) && 
+				if (((tobe_auged->IsAugmentSlotAvailable(auged_with->GetAugmentType(), in_augment->augment_index)) != -1) &&
 					(tobe_auged->AvailableWearSlot(auged_with->GetItem()->Slots)))
 				{
-					tobe_auged->PutAugment(slot, *auged_with);
+					tobe_auged->PutAugment(in_augment->augment_index, *auged_with);
 
 					ItemInst *aug = tobe_auged->GetAugment(in_augment->augment_index);
 					if(aug) {
@@ -6800,7 +6800,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 					}
 					else
 					{
-						Message(13, "Error: Could not find augmentation at index %i. Aborting.");
+						Message(13, "Error: Could not find augmentation at index %i. Aborting.", in_augment->augment_index);
 						return;
 					}
 
