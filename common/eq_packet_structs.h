@@ -2290,10 +2290,13 @@ struct Stun_Struct { // 4 bytes total
 };
 
 struct AugmentItem_Struct {
-/*00*/	int16	container_slot;
-/*02*/	char	unknown02[2];
-/*04*/	int32	augment_slot;
-/*08*/
+/*00*/	uint32	container_index;
+/*04*/	int32	container_slot;
+/*08*/	uint32  augment_index;
+/*12*/	int32	augment_slot;
+/*16*/	uint32	dest_inst_id;			// The unique serial number for the item instance that is being augmented
+/*20*/	int32	augment_action;			// Guessed - 0 = augment, 1 = remove with distiller, 3 = delete aug
+/*24*/
 };
 
 // OP_Emote
@@ -4462,6 +4465,14 @@ struct GuildBankPromote_Struct
 /*04*/	uint32	Unknown04;
 /*08*/	uint32	Slot;
 /*12*/	uint32	Slot2;	// Always appears to be the same as Slot for Action code 3
+};
+
+struct GuildPromoteStruct {
+/*000*/	char	target[64];
+/*064*/	char	name[64];
+/*128*/	uint32	rank;
+/*132*/	uint32	myrank;
+/*136*/
 };
 
 struct GuildBankPermissions_Struct

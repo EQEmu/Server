@@ -451,7 +451,8 @@ int command_init(void) {
 		command_add("merchant_open_shop", "Opens a merchants shop", 100, command_merchantopenshop) ||
 		command_add("open_shop", nullptr, 100, command_merchantopenshop) ||
 		command_add("merchant_close_shop", "Closes a merchant shop", 100, command_merchantcloseshop) ||
-		command_add("close_shop", nullptr, 100, command_merchantcloseshop)
+		command_add("close_shop", nullptr, 100, command_merchantcloseshop) ||
+		command_add("shownumhits", "Shows buffs numhits for yourself.", 0, command_shownumhits)
 		)
 	{
 		command_deinit();
@@ -4589,7 +4590,7 @@ void command_loc(Client *c, const Seperator *sep)
 {
 	Mob *t=c->GetTarget()?c->GetTarget():c->CastToMob();
 
-	c->Message(0, "%s's Location (XYZ): %1.1f, %1.1f, %1.1f; heading=%1.1f", t->GetName(), t->GetX(), t->GetY(), t->GetZ(), t->GetHeading());
+	c->Message(0, "%s's Location (XYZ): %1.2f, %1.2f, %1.2f; heading=%1.1f", t->GetName(), t->GetX(), t->GetY(), t->GetZ(), t->GetHeading());
 }
 
 void command_goto(Client *c, const Seperator *sep)
@@ -6664,7 +6665,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
 		c->Message(15,"NPCID %u now regens %i hitpoints per tick.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set hp_regen_rate=%i where hp_regen_rate=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set hp_regen_rate=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
 	}
@@ -11327,8 +11328,6 @@ void command_augmentitem(Client *c, const Seperator *sep)
 
 		AugmentItem_Struct* in_augment = new AugmentItem_Struct[sizeof(AugmentItem_Struct)];
 		in_augment->container_slot = 1000; // <watch>
-		in_augment->unknown02[0] = 0;
-		in_augment->unknown02[1] = 0;
 		in_augment->augment_slot = -1;
 		if(c->GetTradeskillObject() != nullptr)
 		Object::HandleAugmentation(c, in_augment, c->GetTradeskillObject());
@@ -11454,4 +11453,10 @@ void command_merchantcloseshop(Client *c, const Seperator *sep)
 	}
 
 	merchant->CastToNPC()->MerchantCloseShop();
+}
+
+void command_shownumhits(Client *c, const Seperator *sep)
+{
+	c->ShowNumHits();
+	return;
 }

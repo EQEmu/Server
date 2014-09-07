@@ -863,7 +863,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			quest_npc = true;
 		}
 
-		std::vector<void*> item_list;
+		std::vector<EQEmu::Any> item_list;
 		uint32 items[4] = { 0 };
 		for(int i = EmuConstants::TRADE_BEGIN; i <= EmuConstants::TRADE_NPC_END; ++i) {
 			ItemInst *inst = m_inv.GetItem(i);
@@ -871,7 +871,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				items[i - EmuConstants::TRADE_BEGIN] = inst->GetItem()->ID;
 				item_list.push_back(inst);
 			} else {
-				item_list.push_back(nullptr);
+				item_list.push_back((ItemInst*)nullptr);
 				continue;
 			}
 

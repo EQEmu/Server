@@ -11741,8 +11741,6 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	if(!strcasecmp(sep->arg[1], "augmentitem")) {
 		AugmentItem_Struct* in_augment = new AugmentItem_Struct[sizeof(AugmentItem_Struct)];
 		in_augment->container_slot = 1000; // <watch>
-		in_augment->unknown02[0] = 0;
-		in_augment->unknown02[1] = 0;
 		in_augment->augment_slot = -1;
 		Object::HandleAugmentation(c, in_augment, c->GetTradeskillObject());
 		return;

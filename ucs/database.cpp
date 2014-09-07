@@ -522,10 +522,11 @@ void Database::ExpireMail() {
         query = StringFormat("DELETE FROM `mail` WHERE `status`=4 AND `timestamp` < %i",
                             time(nullptr) - RuleI(Mail, ExpireTrash));
         results = QueryDatabase(query);
-		if(!results.Success())
-            _log(UCS__INIT, "Expired %i trash messages.", results.RowsAffected());
+		if(results.Success())
+            _log(UCS__ERROR, "Error expiring trash messages, %s %s", query.c_str(), results.ErrorMessage().c_str());
 		else
-			_log(UCS__ERROR, "Error expiring trash messages, %s %s", query.c_str(), results.ErrorMessage().c_str());
+            _log(UCS__INIT, "Expired %i trash messages.", results.RowsAffected());
+
 	}
 
 	// Expire Read
@@ -533,7 +534,7 @@ void Database::ExpireMail() {
         query = StringFormat("DELETE FROM `mail` WHERE `status` = 3 AND `timestamp` < %i",
                             time(nullptr) - RuleI(Mail, ExpireRead));
         results = QueryDatabase(query);
-		if(!results.Success())
+		if(results.Success())
             _log(UCS__INIT, "Expired %i read messages.", results.RowsAffected());
 		else
 			_log(UCS__ERROR, "Error expiring read messages, %s %s", query.c_str(), results.ErrorMessage().c_str());
@@ -544,7 +545,7 @@ void Database::ExpireMail() {
         query = StringFormat("DELETE FROM `mail` WHERE `status`=1 AND `timestamp` < %i",
                             time(nullptr) - RuleI(Mail, ExpireUnread));
         results = QueryDatabase(query);
-		if(!results.Success())
+		if(results.Success())
             _log(UCS__INIT, "Expired %i unread messages.", results.RowsAffected());
 		else
 			_log(UCS__ERROR, "Error expiring unread messages, %s %s", query.c_str(), results.ErrorMessage().c_str());

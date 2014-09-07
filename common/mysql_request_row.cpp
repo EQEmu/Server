@@ -64,6 +64,5 @@ bool MySQLRequestRow::operator!=(const MySQLRequestRow& rhs)
 
 char* MySQLRequestRow::operator[](int index)
 {
-
 	return m_MySQLRow[index];
 }

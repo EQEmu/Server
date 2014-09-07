@@ -683,6 +683,13 @@ int16 Inventory::FindFreeSlotForTradeItem(const ItemInst* inst) {
 
 			if ((main_inst->GetID() == inst->GetID()) && (main_inst->GetCharges() < main_inst->GetItem()->StackSize))
 				return free_slot;
+		}
+
+		for (int16 free_slot = EmuConstants::GENERAL_BEGIN; free_slot <= EmuConstants::GENERAL_END; ++free_slot) {
+			const ItemInst* main_inst = m_inv[free_slot];
+
+			if (!main_inst)
+				continue;
 
 			if (main_inst->IsType(ItemClassContainer)) { // if item-specific containers already have bad items, we won't fix it here...
 				for (uint8 free_bag_slot = SUB_BEGIN; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < EmuConstants::ITEM_CONTAINER_SIZE); ++free_bag_slot) {
@@ -732,8 +739,12 @@ int16 Inventory::FindFreeSlotForTradeItem(const ItemInst* inst) {
 
 		if (!main_inst)
 			return free_slot;
+	}
 
-		if (main_inst->IsType(ItemClassContainer)) {
+	for (int16 free_slot = EmuConstants::GENERAL_BEGIN; free_slot <= EmuConstants::GENERAL_END; ++free_slot) {
+		const ItemInst* main_inst = m_inv[free_slot];
+
+		if (main_inst && main_inst->IsType(ItemClassContainer)) {
 			if ((main_inst->GetItem()->BagSize < inst->GetItem()->Size) || (main_inst->GetItem()->BagType == BagTypeBandolier) || (main_inst->GetItem()->BagType == BagTypeQuiver))
 				continue;
 

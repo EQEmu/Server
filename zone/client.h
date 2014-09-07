@@ -592,7 +592,7 @@ public:
 	FACTION_VALUE	GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_race, uint32 p_class, uint32 p_deity, int32 pFaction, Mob* tnpc);
 	int32	GetCharacterFactionLevel(int32 faction_id);
 	int32	GetModCharacterFactionLevel(int32 faction_id);
-	bool	HatedByClass(uint32 p_race, uint32 p_class, uint32 p_deity, int32 pFaction);
+	void	MerchantRejectMessage(Mob *merchant, int primaryfaction);
 	void	SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 totalvalue, uint8 temp);
 
 	void	SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, uint8 char_race, uint8 char_deity);
@@ -1199,7 +1199,9 @@ public:
 
 	void SetEngagedRaidTarget(bool value) { EngagedRaidTarget = value; }
 	bool GetEngagedRaidTarget() const { return EngagedRaidTarget; }
-	
+
+	void ShowNumHits(); // work around function for numhits not showing on buffs
+
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);

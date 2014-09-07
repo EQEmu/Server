@@ -1460,7 +1460,7 @@ void Mob::SendIllusionPacket(uint16 in_race, uint8 in_gender, uint8 in_texture, 
 	else
 		this->drakkin_details = in_drakkin_details;
 
-	if (in_size == 0xFFFFFFFF)
+	if (in_size <= 0.0f)
 		this->size = GetSize();
 	else
 		this->size = in_size;

@@ -715,7 +715,7 @@ bool AdventureManager::LoadAdventureEntries()
 
         std::list<AdventureTemplate*> temp;
         auto iter = adventure_entries.find(id);
-        if(iter == adventure_entries.end())
+        if(iter != adventure_entries.end())
             temp = adventure_entries[id];
 
         temp.push_back(tid);
