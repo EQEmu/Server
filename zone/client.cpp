@@ -503,7 +503,7 @@ bool Client::SaveAA(){
 			}
 		}
 	}
-	m_pp.aapoints_spent = spentpoints + m_epp.expended_aa; 
+	m_pp.aapoints_spent = spentpoints + m_epp.expended_aa;
 	for (int a = 0; a < MAX_PP_AA_ARRAY; a++) {
 		if (aa[a]->AA > 0 && aa[a]->value){
 			if (first_entry != 1){
@@ -582,7 +582,7 @@ bool Client::Save(uint8 iCommitNow) {
 
 	database.SaveCharacterTribute(this->CharacterID(), &m_pp);
 	SaveTaskState(); /* Save Character Task */
-	database.SaveCharacterData(this->CharacterID(), this->AccountID(), &m_pp); /* Save Character Data */
+	database.SaveCharacterData(this->CharacterID(), this->AccountID(), &m_pp, &m_epp); /* Save Character Data */
 
 	LogFile->write(EQEMuLog::Status, "Client::Save %i, done... Took %f seconds", character_id, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 	return true;
@@ -4233,7 +4233,6 @@ void Client::VoiceMacroReceived(uint32 Type, char *Target, uint32 MacroNumber) {
 }
 
 void Client::ClearGroupAAs() {
-
 	for(unsigned int i = 0; i < MAX_GROUP_LEADERSHIP_AA_ARRAY; i++)
 		m_pp.leader_abilities.ranks[i] = 0;
 
@@ -4243,28 +4242,18 @@ void Client::ClearGroupAAs() {
 	m_pp.raid_leadership_exp = 0;
 
 	Save();
+	database.SaveCharacterLeadershipAA(this->CharacterID(), &m_pp);
 }
 
 void Client::UpdateGroupAAs(int32 points, uint32 type) {
-
-	switch(type)
-	{
-	case 0:
-		{
-		m_pp.group_leadership_points += points;
-		break;
-		}
-	case 1:
-		{
-		m_pp.raid_leadership_points += points;
-		break;
-		}
+	switch(type) {
+		case 0: { m_pp.group_leadership_points += points; break; }
+		case 1: { m_pp.raid_leadership_points += points; break; }
 	}
 	SendLeadershipEXPUpdate();
 }
 
-bool Client::IsLeadershipEXPOn()
-{
+bool Client::IsLeadershipEXPOn() {
 
 	if(!m_pp.leadAAActive)
 		return false;

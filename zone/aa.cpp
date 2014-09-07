@@ -18,6 +18,8 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 
 // Test 1
 
+#include <iostream>
+
 #include "../common/debug.h"
 #include "aa.h"
 #include "mob.h"
@@ -316,13 +318,14 @@ void Client::ActivateAA(aaID activate){
 		}
 	}
 	// Check if AA is expendable
-	if (aas_send[activate - activate_val]->special_category == 7)
-	{
+	if (aas_send[activate - activate_val]->special_category == 7) {
+		
 		// Add the AA cost to the extended profile to track overall total
 		m_epp.expended_aa += aas_send[activate]->cost;
+		
 		SetAA(activate, 0);
 
-		Save();
+		SaveAA(); /* Save Character AA */
 		SendAA(activate);
 		SendAATable();
 	}
@@ -1047,7 +1050,7 @@ void Client::BuyAA(AA_Action* action)
 		mlog(AA__MESSAGE, "Set AA %d to level %d", aa2->id, cur_level + 1);
 
 		m_pp.aapoints -= real_cost;
-		
+
 		/* Do Player Profile rank calculations and set player profile */
 		SaveAA();
 		/* Save to Database to avoid having to write the whole AA array to the profile, only write changes*/
@@ -1533,6 +1536,8 @@ void Client::ResetAA(){
 	m_pp.raid_leadership_points = 0;
 	m_pp.group_leadership_exp = 0;
 	m_pp.raid_leadership_exp = 0;
+
+	database.DeleteCharacterLeadershipAAs(this->CharacterID());
 }
 
 int Client::GroupLeadershipAAHealthEnhancement()

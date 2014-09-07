@@ -114,31 +114,12 @@ bool SharedDatabase::SetGMSpeed(uint32 account_id, uint8 gmspeed)
 }
 
 uint32 SharedDatabase::GetTotalTimeEntitledOnAccount(uint32 AccountID) {
-
 	uint32 EntitledTime = 0;
-
-	const char *EntitledQuery = "select sum(ascii(substring(profile, 237, 1)) + (ascii(substring(profile, 238, 1)) * 256) +"
-				"(ascii(substring(profile, 239, 1)) * 65536) + (ascii(substring(profile, 240, 1)) * 16777216))"
-				"from character_ where account_id = %i";
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (RunQuery(query, MakeAnyLenString(&query, EntitledQuery, AccountID), errbuf, &result)) {
-
-		if (mysql_num_rows(result) == 1) {
-
-			row = mysql_fetch_row(result);
-
-			EntitledTime = atoi(row[0]);
-		}
-
-		mysql_free_result(result);
+	std::string query = StringFormat("SELECT `time_played` FROM `character_data` WHERE `account_id` = %u", AccountID);
+	auto results = QueryDatabase(query);
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		EntitledTime += atoi(row[0]);
 	}
-
-	safe_delete_array(query);
-
 	return EntitledTime;
 }
 
@@ -2003,38 +1984,19 @@ const LootDrop_Struct* SharedDatabase::GetLootDrop(uint32 lootdrop_id) {
 	return nullptr;
 }
 
-void SharedDatabase::GetPlayerInspectMessage(char* playername, InspectMessage_Struct* message) { 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT inspectmessage FROM character_ WHERE name='%s'", playername), errbuf, &result)) {
-		safe_delete_array(query);
-
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			memcpy(message, row[0], sizeof(InspectMessage_Struct));
-		}
-
-		mysql_free_result(result);
-	}
-	else {
-		std::cerr << "Error in GetPlayerInspectMessage query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* message) { 
+	std::string query = StringFormat("SELECT `inspect_message` FROM `character_inspect_messages` WHERE `id` = %u LIMIT 1", character_id);
+	auto results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "SharedDatabase::LoadCharacterInspectMessage", query);
+	auto row = results.begin();  
+	memcpy(message, "", sizeof(InspectMessage_Struct));
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		memcpy(message, row[0], sizeof(InspectMessage_Struct));
 	}
 }
 
-void SharedDatabase::SetPlayerInspectMessage(char* playername, const InspectMessage_Struct* message) {
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET inspectmessage='%s' WHERE name='%s'", message->text, playername), errbuf)) {
-		std::cerr << "Error in SetPlayerInspectMessage query '" << query << "' " << errbuf << std::endl;
-	}
-
-	safe_delete_array(query);
+void SharedDatabase::SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* message) {
+	std::string query = StringFormat("REPLACE INTO `character_inspect_messages` (id, inspect_message) VALUES (%u, '%s')", character_id, EscapeString(message->text).c_str());
+	auto results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "SharedDatabase::SaveCharacterInspectMessage", query);  
 }
 
 void SharedDatabase::GetBotInspectMessage(uint32 botid, InspectMessage_Struct* message) {

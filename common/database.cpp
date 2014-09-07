@@ -329,37 +329,39 @@ bool Database::DeleteCharacter(char *name) {
 	for (auto row = results.begin(); row != results.end(); ++row) { charid = atoi(row[0]); }
 	if (charid <= 0){ std::cerr << "Database::DeleteCharacter :: Character not found, stopping delete...\n"; return false; }
 
-	query = StringFormat("DELETE FROM `quest_globals` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);			 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_activities` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);	 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_enabledtasks` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);	 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `completed_tasks` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);		 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `friends` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `mail` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);					 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `timers` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `inventory` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `char_recipe_list` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);		 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `adventure_stats` WHERE `player_id` ='%d'", charid); results = QueryDatabase(query);		 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `zone_flags` WHERE `charID` = '%d'", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `titles` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `player_titlesets` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);		 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `keyring` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `faction_values` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);		 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `instance_list_player` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);	 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_data` WHERE `id` = '%d'", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_skills` WHERE `id` = %u", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_languages` WHERE `id` = %u", charid); results = QueryDatabase(query);			 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_bind` WHERE `id` = %u", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_alternate_abilities` WHERE `id` = %u", charid); results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_currency` WHERE `id` = %u", charid); results = QueryDatabase(query);			 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_data` WHERE `id` = %u", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_spells` WHERE `id` = %u", charid); results = QueryDatabase(query);				 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_memmed_spells` WHERE `id` = %u", charid); results = QueryDatabase(query);		 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_disciplines` WHERE `id` = %u", charid); results = QueryDatabase(query);		 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_material` WHERE `id` = %u", charid); results = QueryDatabase(query);			 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_tribute` WHERE `id` = %u", charid); results = QueryDatabase(query);			 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_bandolier` WHERE `id` = %u", charid); results = QueryDatabase(query);			 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_potionbelt` WHERE `id` = %u", charid); results = QueryDatabase(query);			 ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_alt_currency` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `quest_globals` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);			  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_activities` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);	  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_enabledtasks` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);	  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `completed_tasks` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);		  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `friends` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `mail` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);					  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `timers` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `inventory` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `char_recipe_list` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);		  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `adventure_stats` WHERE `player_id` ='%d'", charid); results = QueryDatabase(query);		  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `zone_flags` WHERE `charID` = '%d'", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `titles` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `player_titlesets` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);		  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `keyring` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `faction_values` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);		  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `instance_list_player` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);	  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_data` WHERE `id` = '%d'", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_skills` WHERE `id` = %u", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_languages` WHERE `id` = %u", charid); results = QueryDatabase(query);			  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_bind` WHERE `id` = %u", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_alternate_abilities` WHERE `id` = %u", charid); results = QueryDatabase(query);  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_currency` WHERE `id` = %u", charid); results = QueryDatabase(query);			  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_data` WHERE `id` = %u", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_spells` WHERE `id` = %u", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_memmed_spells` WHERE `id` = %u", charid); results = QueryDatabase(query);		  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_disciplines` WHERE `id` = %u", charid); results = QueryDatabase(query);		  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_material` WHERE `id` = %u", charid); results = QueryDatabase(query);			  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_tribute` WHERE `id` = %u", charid); results = QueryDatabase(query);			  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_bandolier` WHERE `id` = %u", charid); results = QueryDatabase(query);			  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_potionbelt` WHERE `id` = %u", charid); results = QueryDatabase(query);			  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_inspect_messages` WHERE `id` = %u", charid); results = QueryDatabase(query);	  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_leadership_abilities` WHERE `id` = %u", charid); results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `character_alt_currency` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
 #ifdef BOTS																														 
 	query = StringFormat("DELETE FROM `guild_members` WHERE `char_id` = '%d' AND GetMobTypeById(%i) = 'C'", charid);
 #else																															 
@@ -819,14 +821,11 @@ static inline void loadbar(unsigned int x, unsigned int n, unsigned int w = 50) 
 }
 
 bool Database::CheckDatabaseConversions() {
-	/* Set all of this ugliness */
-	char errbuf[MYSQL_ERRMSG_SIZE]; char errbuf2[MYSQL_ERRMSG_SIZE]; char errbuf3[MYSQL_ERRMSG_SIZE];
-	char *query = 0; char *query2 = 0; char *query3 = 0;
-	uint32 querylen;  uint32 querylen2; uint32 querylen3;
-	MYSQL_RES *result; MYSQL_RES *result2; MYSQL_RES *result3;
-	MYSQL_ROW row; MYSQL_ROW row2; MYSQL_ROW row3;
-	unsigned long* lengths;
+	unsigned int lengths;
+	unsigned int lengths_e;
+	std::string squery;
 	PlayerProfile_Struct* pp;
+	ExtendedProfile_Struct* e_pp;
 	uint32 pplen = 0;
 	uint32 i;
 	int character_id = 0;
@@ -870,101 +869,109 @@ bool Database::CheckDatabaseConversions() {
 		if (results.RowCount() == 0){
 			printf("Table: `character_data` doesn't exist... creating...");
 			rquery = StringFormat(
-				"CREATE TABLE `character_data` (										   "
-				"`id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,							   "
-				"`account_id` int(11) NOT NULL DEFAULT '0',								   "
-				"`name` varchar(64) NOT NULL DEFAULT '',								   "
-				"`last_name` varchar(64) NOT NULL DEFAULT '',							   "
-				"`gender` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,						   "
-				"`race` smallint(11) UNSIGNED NOT NULL DEFAULT 0,						   "
-				"`class` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,						   "
-				"`level` int(11) UNSIGNED NOT NULL DEFAULT 0,							   "
-				"`deity` int(11) UNSIGNED NOT NULL DEFAULT 0,							   "
-				"`birthday` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
-				"`last_login` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
-				"`time_played` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
-				"`pvp_status` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				"`level2` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,						   "
-				"`anon` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,						   "
-				"`gm` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,							   "
-				"`intoxication` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				"`hair_color` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				"`beard_color` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				"`eye_color_1` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				"`eye_color_2` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				"`hair_style` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				"`beard` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,						   "
-				"`ability_time_seconds` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,		   "
-				"`ability_number` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,				   "
-				"`ability_time_minutes` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,		   "
-				"`ability_time_hours` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,			   "
-				"`title` varchar(32) NOT NULL DEFAULT '',								   "
-				"`suffix` varchar(32) NOT NULL DEFAULT '',								   "
-				"`exp` int(11) UNSIGNED NOT NULL DEFAULT 0,								   "
-				"`points` int(11) UNSIGNED NOT NULL DEFAULT 0,							   "
-				"`mana` int(11) UNSIGNED NOT NULL DEFAULT 0,							   "
-				"`cur_hp` int(11) UNSIGNED NOT NULL DEFAULT 0,							   "
-				"`str` int(11) UNSIGNED NOT NULL DEFAULT 0,								   "
-				"`sta` int(11) UNSIGNED NOT NULL DEFAULT 0,								   "
-				"`cha` int(11) UNSIGNED NOT NULL DEFAULT 0,								   "
-				"`dex` int(11) UNSIGNED NOT NULL DEFAULT 0,								   "
-				"`int` int(11) UNSIGNED NOT NULL DEFAULT 0,								   "
-				"`agi` int(11) UNSIGNED NOT NULL DEFAULT 0,								   "
-				"`wis` int(11) UNSIGNED NOT NULL DEFAULT 0,								   "
-				"`face` int(11) UNSIGNED NOT NULL DEFAULT 0,							   "
-				"`y` float NOT NULL DEFAULT '0',										   "
-				"`x` float NOT NULL DEFAULT '0',										   "
-				"`z` float NOT NULL DEFAULT '0',										   "
-				"`heading` float NOT NULL DEFAULT '0',									   "
-				"`pvp2` int(11) UNSIGNED NOT NULL DEFAULT 0,							   "
-				"`pvp_type` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
-				"`autosplit_enabled` int(11) UNSIGNED NOT NULL DEFAULT 0,				   "
-				"`zone_change_count` int(11) UNSIGNED NOT NULL DEFAULT 0,				   "
-				"`drakkin_heritage` int(11) UNSIGNED NOT NULL DEFAULT 0,				   "
-				"`drakkin_tattoo` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				"`drakkin_details` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				"`toxicity` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
-				"`hunger_level` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				"`thirst_level` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				"`ability_up` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
-				"`zone_id` int(11) UNSIGNED NOT NULL DEFAULT 0,							   "
-				"`zone_instance` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				"`leadership_exp_on` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,			   "
-				"`ldon_points_guk` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				"`ldon_points_mir` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				"`ldon_points_mmc` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				"`ldon_points_ruj` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				"`ldon_points_tak` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				"`ldon_points_available` int(11) UNSIGNED NOT NULL DEFAULT 0,			   "
-				"`tribute_time_remaining` int(11) UNSIGNED NOT NULL DEFAULT 0,			   "
-				"`show_helm` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
-				"`career_tribute_points` int(11) UNSIGNED NOT NULL DEFAULT 0,			   "
-				"`tribute_points` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				"`tribute_active` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				"`endurance` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
-				"`group_leadership_exp` int(11) UNSIGNED NOT NULL DEFAULT 0,			   "
-				"`raid_leadership_exp` int(11) UNSIGNED NOT NULL DEFAULT 0,				   "
-				"`group_leadership_points` int(11) UNSIGNED NOT NULL DEFAULT 0,			   "
-				"`raid_leadership_points` int(11) UNSIGNED NOT NULL DEFAULT 0,			   "
-				"`air_remaining` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				"`pvp_kills` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
-				"`pvp_deaths` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
-				"`pvp_current_points` int(11) UNSIGNED NOT NULL DEFAULT 0,				   "
-				"`pvp_career_points` int(11) UNSIGNED NOT NULL DEFAULT 0,				   "
-				"`pvp_best_kill_streak` int(11) UNSIGNED NOT NULL DEFAULT 0,			   "
-				"`pvp_worst_death_streak` int(11) UNSIGNED NOT NULL DEFAULT 0,			   "
-				"`pvp_current_kill_streak` int(11) UNSIGNED NOT NULL DEFAULT 0,			   "
-				"`aa_points_spent` int(11) UNSIGNED NOT NULL DEFAULT 0,					   "
-				"`aa_exp` int(11) UNSIGNED NOT NULL DEFAULT 0,							   "
-				"`aa_points` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
-				"`group_auto_consent` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,			   "
-				"`raid_auto_consent` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,			   "
-				"`guild_auto_consent` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,			   "
-				"`RestTimer` int(11) UNSIGNED NOT NULL DEFAULT 0,						   "
-				"PRIMARY KEY(`id`),														   "
-				"UNIQUE KEY `name` (`name`),											   "
-				"KEY `account_id` (`account_id`)										   "
-				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;			   "
+				"CREATE TABLE `character_data` (									"
+				"`id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,						"
+				"`account_id` int(11) NOT NULL DEFAULT '0',							"
+				"`name` varchar(64) NOT NULL DEFAULT '',							"
+				"`last_name` varchar(64) NOT NULL DEFAULT '',						"
+				"`title` varchar(32) NOT NULL DEFAULT '',							"
+				"`suffix` varchar(32) NOT NULL DEFAULT '',							"
+				"`zone_id` int(11) UNSIGNED NOT NULL DEFAULT 0,						"
+				"`zone_instance` int(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`y` float NOT NULL DEFAULT '0',									"
+				"`x` float NOT NULL DEFAULT '0',									"
+				"`z` float NOT NULL DEFAULT '0',									"
+				"`heading` float NOT NULL DEFAULT '0',								"
+				"`gender` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,					"
+				"`race` smallint(11) UNSIGNED NOT NULL DEFAULT 0,					"
+				"`class` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,					"
+				"`level` int(11) UNSIGNED NOT NULL DEFAULT 0,						"
+				"`deity` int(11) UNSIGNED NOT NULL DEFAULT 0,						"
+				"`birthday` int(11) UNSIGNED NOT NULL DEFAULT 0,					"
+				"`last_login` int(11) UNSIGNED NOT NULL DEFAULT 0,					"
+				"`time_played` int(11) UNSIGNED NOT NULL DEFAULT 0,					"
+				"`level2` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,					"
+				"`anon` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,					"
+				"`gm` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,						"
+				"`face` int(11) UNSIGNED NOT NULL DEFAULT 0,						"
+				"`hair_color` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`hair_style` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`beard` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,					"
+				"`beard_color` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`eye_color_1` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`eye_color_2` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`drakkin_heritage` int(11) UNSIGNED NOT NULL DEFAULT 0,			"
+				"`drakkin_tattoo` int(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`drakkin_details` int(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`ability_time_seconds` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	"
+				"`ability_number` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,			"
+				"`ability_time_minutes` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,	"
+				"`ability_time_hours` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,		"
+				"`exp` int(11) UNSIGNED NOT NULL DEFAULT 0,							"
+				"`aa_points_spent` int(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`aa_exp` int(11) UNSIGNED NOT NULL DEFAULT 0,						"
+				"`aa_points` int(11) UNSIGNED NOT NULL DEFAULT 0,					"
+				"`group_leadership_exp` int(11) UNSIGNED NOT NULL DEFAULT 0,		"
+				"`raid_leadership_exp` int(11) UNSIGNED NOT NULL DEFAULT 0,			"
+				"`group_leadership_points` int(11) UNSIGNED NOT NULL DEFAULT 0,		"
+				"`raid_leadership_points` int(11) UNSIGNED NOT NULL DEFAULT 0,		"
+				"`points` int(11) UNSIGNED NOT NULL DEFAULT 0,						"
+				"`cur_hp` int(11) UNSIGNED NOT NULL DEFAULT 0,						"
+				"`mana` int(11) UNSIGNED NOT NULL DEFAULT 0,						"
+				"`endurance` int(11) UNSIGNED NOT NULL DEFAULT 0,					"
+				"`intoxication` int(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`str` int(11) UNSIGNED NOT NULL DEFAULT 0,							"
+				"`sta` int(11) UNSIGNED NOT NULL DEFAULT 0,							"
+				"`cha` int(11) UNSIGNED NOT NULL DEFAULT 0,							"
+				"`dex` int(11) UNSIGNED NOT NULL DEFAULT 0,							"
+				"`int` int(11) UNSIGNED NOT NULL DEFAULT 0,							"
+				"`agi` int(11) UNSIGNED NOT NULL DEFAULT 0,							"
+				"`wis` int(11) UNSIGNED NOT NULL DEFAULT 0,							"
+				"`zone_change_count` int(11) UNSIGNED NOT NULL DEFAULT 0,			"
+				"`toxicity` int(11) UNSIGNED NOT NULL DEFAULT 0,					"
+				"`hunger_level` int(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`thirst_level` int(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`ability_up` int(11) UNSIGNED NOT NULL DEFAULT 0,					"
+				"`ldon_points_guk` int(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`ldon_points_mir` int(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`ldon_points_mmc` int(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`ldon_points_ruj` int(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`ldon_points_tak` int(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`ldon_points_available` int(11) UNSIGNED NOT NULL DEFAULT 0,		"
+				"`tribute_time_remaining` int(11) UNSIGNED NOT NULL DEFAULT 0,		"
+				"`career_tribute_points` int(11) UNSIGNED NOT NULL DEFAULT 0,		"
+				"`tribute_points` int(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`tribute_active` int(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`pvp_status` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`pvp_kills` int(11) UNSIGNED NOT NULL DEFAULT 0,					"
+				"`pvp_deaths` int(11) UNSIGNED NOT NULL DEFAULT 0,					"
+				"`pvp_current_points` int(11) UNSIGNED NOT NULL DEFAULT 0,			"
+				"`pvp_career_points` int(11) UNSIGNED NOT NULL DEFAULT 0,			"
+				"`pvp_best_kill_streak` int(11) UNSIGNED NOT NULL DEFAULT 0,		"
+				"`pvp_worst_death_streak` int(11) UNSIGNED NOT NULL DEFAULT 0,		"
+				"`pvp_current_kill_streak` int(11) UNSIGNED NOT NULL DEFAULT 0,		"
+				"`pvp2` int(11) UNSIGNED NOT NULL DEFAULT 0,						"
+				"`pvp_type` int(11) UNSIGNED NOT NULL DEFAULT 0,					"
+				"`show_helm` int(11) UNSIGNED NOT NULL DEFAULT 0,					"
+				"`group_auto_consent` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,		"
+				"`raid_auto_consent` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,		"
+				"`guild_auto_consent` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,		"
+				"`leadership_exp_on` tinyint(11) UNSIGNED NOT NULL DEFAULT 0,		"
+				"`RestTimer` int(11) UNSIGNED NOT NULL DEFAULT 0,					"
+				"`air_remaining` int(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`autosplit_enabled` int(11) UNSIGNED NOT NULL DEFAULT 0,			"
+				"`lfp` tinyint(1) unsigned NOT NULL DEFAULT '0',					"
+				"`lfg` tinyint(1) unsigned NOT NULL DEFAULT '0',					"
+				"`mailkey` char(16) NOT NULL DEFAULT '',							"
+				"`xtargets` tinyint(3) unsigned NOT NULL DEFAULT '5',				"
+				"`firstlogon` tinyint(3) NOT NULL DEFAULT '0',						"
+				"`e_aa_effects` int(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`e_percent_to_aa` int(11) UNSIGNED NOT NULL DEFAULT 0,				"
+				"`e_expended_aa_spent` int(11) UNSIGNED NOT NULL DEFAULT 0,			"
+				"PRIMARY KEY(`id`),													"
+				"UNIQUE KEY `name` (`name`),										"
+				"KEY `account_id` (`account_id`)									"
+				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;		"
 			);
 			QueryDatabase(rquery);
 			printf(" done...\n");
@@ -1200,813 +1207,594 @@ bool Database::CheckDatabaseConversions() {
 			QueryDatabase(rquery);
 			printf(" done...\n");
 		}
-
+		/* Check for table `character_potionbelt` */
+		rquery = StringFormat("SHOW TABLES LIKE 'character_inspect_messages'");
+		results = QueryDatabase(rquery);
+		if (results.RowCount() == 0){
+			printf("Table: `character_inspect_messages` doesn't exist... creating...");
+			rquery = StringFormat(
+				"CREATE TABLE `character_inspect_messages` (					  "
+				"`id` int(11) unsigned NOT NULL AUTO_INCREMENT,				  "
+				"`inspect_message` varchar(255) NOT NULL DEFAULT '',			  "
+				"PRIMARY KEY(`id`),											  "
+				"KEY `id` (`id`)												  "
+				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;"
+				);
+			QueryDatabase(rquery);
+			printf(" done...\n");
+		}
+		/* Check for table `character_leadership_abilities` */
+		rquery = StringFormat("SHOW TABLES LIKE 'character_leadership_abilities'");
+		results = QueryDatabase(rquery);
+		if (results.RowCount() == 0){
+			printf("Table: `character_leadership_abilities` doesn't exist... creating...");
+			rquery = StringFormat(
+				"CREATE TABLE `character_leadership_abilities` ("
+				"`id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, "
+				"`slot` smallint(11) UNSIGNED NOT NULL DEFAULT 0, "
+				"`rank` smallint(11) UNSIGNED NOT NULL DEFAULT 0, "
+				"PRIMARY KEY(`id`,`slot`), "
+				"KEY `id` (`id`)												  "
+				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1; "
+			);
+			QueryDatabase(rquery);
+			printf(" done...\n");
+		}
 
 		/* Done */
 		printf("Starting conversion...\n\n");
 	}
 
-	// querylen = MakeAnyLenString(&query, "SELECT `id` FROM `character_` WHERE `id` = 61238"); // WHERE `account_id` = 11001
+	// Testing account = 11001
 	int char_iter_count = 0;
-	querylen = MakeAnyLenString(&query, "SELECT `id` FROM `character_` WHERE `account_id` = 11001");  
-	if (RunQuery(query, querylen, errbuf, &result)) {
-		safe_delete_array(query);
-		while (row = mysql_fetch_row(result)) {
-			char_iter_count++;
-			querylen2 = MakeAnyLenString(&query2, "SELECT `id`, `profile`, `name`, `level`, `account_id` FROM `character_` WHERE `id` = %i", atoi(row[0]));
-			if (RunQuery(query2, querylen2, errbuf2, &result2)){
-				safe_delete_array(query2);
-				row2 = mysql_fetch_row(result2);
-				pp = (PlayerProfile_Struct*)row2[1];
-				character_id = atoi(row[0]);
-				account_id = atoi(row2[4]);
-				
-				/* Verify PP Integrity */
-				lengths = mysql_fetch_lengths(result2);
-				if (lengths[1] == sizeof(PlayerProfile_Struct)) {
-					memcpy(pp, row2[1], sizeof(PlayerProfile_Struct));
-					// printf("FINE: Player profile '%s' %i length Expected: %i, Got: %i \n", row2[2], atoi(row2[3]), sizeof(PlayerProfile_Struct), lengths[1]);
-				}
-				/* Continue of PP Size does not match (Usually a created character never logged in) */
-				else { 
-					// printf("NO PP: Player profile '%s' %i length mismatch Expected: %i, Got: %i \n", row2[2], atoi(row2[3]), sizeof(PlayerProfile_Struct), lengths[1]);
-					continue;
-				}
+	rquery = StringFormat("SELECT `id` FROM `character_` WHERE `account_id` = 11001");
+	results = QueryDatabase(rquery);
 
-				/* Loading Status on conversion */
-				if (runconvert == 1){
-					std::cout << "\r" << char_iter_count << "/" << number_of_characters << " " << std::flush;
-					loadbar(char_iter_count, number_of_characters, 50);
+	uint8 firstlogon = 0;
+	uint8 lfg = 0;
+	uint8 lfp = 0;
+	std::string mailkey;
+	uint8 xtargets = 0;
+	std::string inspectmessage;
 
-					/* Run Currency Convert */
-					std::string rquery = StringFormat("REPLACE INTO `character_currency` (id, platinum, gold, silver, copper,"
-						"platinum_bank, gold_bank, silver_bank, copper_bank,"
-						"platinum_cursor, gold_cursor, silver_cursor, copper_cursor, "
-						"radiant_crystals, career_radiant_crystals, ebon_crystals, career_ebon_crystals)"
-						"VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u)",
-						character_id,
-						pp->platinum,
-						pp->gold,
-						pp->silver,
-						pp->copper,
-						pp->platinum_bank,
-						pp->gold_bank,
-						pp->silver_bank,
-						pp->copper_bank,
-						pp->platinum_cursor,
-						pp->gold_cursor,
-						pp->silver_cursor,
-						pp->copper_cursor,
-						pp->currentRadCrystals,
-						pp->careerRadCrystals,
-						pp->currentEbonCrystals,
-						pp->careerEbonCrystals
-					);
-					auto results = QueryDatabase(rquery);
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		char_iter_count++;
+		squery = StringFormat("SELECT `id`, `profile`, `name`, `level`, `account_id`, `firstlogon`, `lfg`, `lfp`, `mailkey`, `xtargets`, `inspectmessage`, `extprofile` FROM `character_` WHERE `id` = %i", atoi(row[0]));
+		auto results2 = QueryDatabase(squery);
+		auto row2 = results2.begin();
+		pp = (PlayerProfile_Struct*)row2[1];
+		e_pp = (ExtendedProfile_Struct*)row2[11];
+		character_id = atoi(row[0]);
+		account_id = atoi(row2[4]);
+		/* Convert some data from the character_ table that is still relevant */
+		firstlogon = atoi(row2[5]);
+		lfg = atoi(row2[6]);
+		lfp = atoi(row2[7]);
+		mailkey = row2[8];
+		xtargets = atoi(row2[9]);
+		inspectmessage = row2[10];
 
-					if (pp->tribute_time_remaining < 0 || pp->tribute_time_remaining == 4294967295){ pp->tribute_time_remaining = 0; }
-
-					/* Run Character Data Convert */
-					rquery = StringFormat(
-						"REPLACE INTO `character_data` ("
-						"id," 
-						"account_id,"
-						"`name`,"
-						"last_name,"
-						"gender,"
-						"race,"
-						"class,"
-						"`level`,"
-						"deity,"
-						"birthday,"
-						"last_login,"
-						"time_played,"
-						"pvp_status,"
-						"level2,"
-						"anon,"
-						"gm,"
-						"intoxication,"
-						"hair_color,"
-						"beard_color,"
-						"eye_color_1,"
-						"eye_color_2,"
-						"hair_style,"
-						"beard,"
-						"ability_time_seconds,"
-						"ability_number,"
-						"ability_time_minutes,"
-						"ability_time_hours,"
-						"title,"
-						"suffix,"
-						"exp,"
-						"points,"
-						"mana,"
-						"cur_hp,"
-						"str,"
-						"sta,"
-						"cha,"
-						"dex,"
-						"`int`,"
-						"agi,"
-						"wis,"
-						"face,"
-						"y,"
-						"x,"
-						"z,"
-						"heading,"
-						"pvp2,"
-						"pvp_type,"
-						"autosplit_enabled,"
-						"zone_change_count,"
-						"drakkin_heritage,"
-						"drakkin_tattoo,"
-						"drakkin_details,"
-						"toxicity," 
-						"hunger_level,"
-						"thirst_level,"
-						"ability_up,"
-						"zone_id,"
-						"zone_instance,"
-						"leadership_exp_on,"
-						"ldon_points_guk,"
-						"ldon_points_mir,"
-						"ldon_points_mmc,"
-						"ldon_points_ruj,"
-						"ldon_points_tak,"
-						"ldon_points_available,"
-						"tribute_time_remaining,"
-						"show_helm,"
-						"career_tribute_points,"
-						"tribute_points,"
-						"tribute_active,"
-						"endurance,"
-						"group_leadership_exp,"
-						"raid_leadership_exp,"
-						"group_leadership_points,"
-						"raid_leadership_points,"
-						"air_remaining,"
-						"pvp_kills,"
-						"pvp_deaths,"
-						"pvp_current_points,"
-						"pvp_career_points,"
-						"pvp_best_kill_streak,"
-						"pvp_worst_death_streak,"
-						"pvp_current_kill_streak,"
-						"aa_points_spent,"
-						"aa_exp,"
-						"aa_points,"
-						"group_auto_consent,"
-						"raid_auto_consent,"
-						"guild_auto_consent,"
-						"RestTimer)"
-						"VALUES ("
-						"%u,"		// id														
-						"%u,"		// account_id												
-						"'%s',"		// `name`					  
-						"'%s',"		// last_name					
-						"%u,"		// gender					  
-						"%u,"		// race						  
-						"%u,"		// class							
-						"%u,"		// `level`					  
-						"%u,"		// deity							
-						"%u,"		// birthday					  
-						"%u,"		// last_login				  
-						"%u,"		// time_played				  
-						"%u,"		// pvp_status				  
-						"%u,"		// level2					  
-						"%u,"		// anon						  
-						"%u,"		// gm						  
-						"%u,"		// intoxication				  
-						"%u,"		// hair_color				  
-						"%u,"		// beard_color				  
-						"%u,"		// eye_color_1				  
-						"%u,"		// eye_color_2				  
-						"%u,"		// hair_style				  
-						"%u,"		// beard							
-						"%u,"		// ability_time_seconds		  
-						"%u,"		// ability_number			  
-						"%u,"		// ability_time_minutes		  
-						"%u,"		// ability_time_hours		  
-						"'%s',"		// title						
-						"'%s',"		// suffix					  
-						"%u,"		// exp						  
-						"%u,"		// points					  
-						"%u,"		// mana						  
-						"%u,"		// cur_hp					  
-						"%u,"		// str						  
-						"%u,"		// sta						  
-						"%u,"		// cha						  
-						"%u,"		// dex						  
-						"%u,"		// `int`							
-						"%u,"		// agi						  
-						"%u,"		// wis						  
-						"%u,"		// face						  
-						"%f,"		// y								
-						"%f,"		// x								
-						"%f,"		// z								
-						"%f,"		// heading					  
-						"%u,"		// pvp2						  
-						"%u,"		// pvp_type					  
-						"%u,"		// autosplit_enabled				
-						"%u,"		// zone_change_count				
-						"%u,"		// drakkin_heritage			  
-						"%u,"		// drakkin_tattoo			  
-						"%u,"		// drakkin_details			  
-						"%i,"		// toxicity	 				  
-						"%u,"		// hunger_level				  
-						"%u,"		// thirst_level				  
-						"%u,"		// ability_up				  
-						"%u,"		// zone_id					  
-						"%u,"		// zone_instance					
-						"%u,"		// leadership_exp_on				
-						"%u,"		// ldon_points_guk			  
-						"%u,"		// ldon_points_mir			  
-						"%u,"		// ldon_points_mmc			  
-						"%u,"		// ldon_points_ruj			  
-						"%u,"		// ldon_points_tak			  
-						"%u,"		// ldon_points_available			
-						"%u,"		// tribute_time_remaining	  
-						"%u,"		// show_helm						
-						"%u,"		// career_tribute_points			
-						"%u,"		// tribute_points			  
-						"%u,"		// tribute_active			  
-						"%u,"		// endurance						
-						"%u,"		// group_leadership_exp		  
-						"%u,"		// raid_leadership_exp		  
-						"%u,"		// group_leadership_points	  
-						"%u,"		// raid_leadership_points	  
-						"%u,"		// air_remaining					
-						"%u,"		// pvp_kills						
-						"%u,"		// pvp_deaths				  
-						"%u,"		// pvp_current_points		  
-						"%u,"		// pvp_career_points				
-						"%u,"		// pvp_best_kill_streak		  
-						"%u,"		// pvp_worst_death_streak	  
-						"%u,"		// pvp_current_kill_streak	  
-						"%u,"		// aa_points_spent			  
-						"%u,"		// aa_exp					  
-						"%u,"		// aa_points						
-						"%u,"		// group_auto_consent		  
-						"%u,"		// raid_auto_consent				
-						"%u,"		// guild_auto_consent		  
-						"%u" 		// RestTimer						
-						")",
-						character_id,
-						account_id,
-						EscapeString(pp->name).c_str(),
-						EscapeString(pp->last_name).c_str(),
-						pp->gender,
-						pp->race,
-						pp->class_,
-						pp->level,
-						pp->deity,
-						pp->birthday,
-						pp->lastlogin,
-						pp->timePlayedMin,
-						pp->pvp,
-						pp->level2,
-						pp->anon,
-						pp->gm,
-						pp->intoxication,
-						pp->haircolor,
-						pp->beardcolor,
-						pp->eyecolor1,
-						pp->eyecolor2,
-						pp->hairstyle,
-						pp->beard,
-						pp->ability_time_seconds,
-						pp->ability_number,
-						pp->ability_time_minutes,
-						pp->ability_time_hours,
-						EscapeString(pp->title).c_str(),
-						EscapeString(pp->suffix).c_str(),
-						pp->exp,
-						pp->points,
-						pp->mana,
-						pp->cur_hp,
-						pp->STR,
-						pp->STA,
-						pp->CHA,
-						pp->DEX,
-						pp->INT,
-						pp->AGI,
-						pp->WIS,
-						pp->face,
-						pp->y,
-						pp->x,
-						pp->z,
-						pp->heading,
-						pp->pvp2,
-						pp->pvptype,
-						pp->autosplit,
-						pp->zone_change_count,
-						pp->drakkin_heritage,
-						pp->drakkin_tattoo,
-						pp->drakkin_details,
-						pp->toxicity,
-						pp->hunger_level,
-						pp->thirst_level,
-						pp->ability_up,
-						pp->zone_id,
-						pp->zoneInstance,
-						pp->leadAAActive,
-						pp->ldon_points_guk,
-						pp->ldon_points_mir,
-						pp->ldon_points_mmc,
-						pp->ldon_points_ruj,
-						pp->ldon_points_tak,
-						pp->ldon_points_available,
-						pp->tribute_time_remaining,
-						pp->showhelm,
-						pp->career_tribute_points,
-						pp->tribute_points,
-						pp->tribute_active,
-						pp->endurance,
-						pp->group_leadership_exp,
-						pp->raid_leadership_exp,
-						pp->group_leadership_points,
-						pp->raid_leadership_points,
-						pp->air_remaining,
-						pp->PVPKills,
-						pp->PVPDeaths,
-						pp->PVPCurrentPoints,
-						pp->PVPCareerPoints,
-						pp->PVPBestKillStreak,
-						pp->PVPWorstDeathStreak,
-						pp->PVPCurrentKillStreak,
-						pp->aapoints_spent,
-						pp->expAA,
-						pp->aapoints,
-						pp->groupAutoconsent,
-						pp->raidAutoconsent,
-						pp->guildAutoconsent,
-						pp->RestTimer
-					);
-					results = QueryDatabase(rquery);
-					if (!results.RowsAffected()){ std::cout << "ERROR PP Data Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
-
-					// str.append(str2);       
-
-					/* Run AA Convert */
-					/* 
-						We set a first entry variable because we need the first initial piece of the query to be declared 
-						This is to speed up the INSERTS and trim down the amount of individual sends during the process.
-						The speed difference is dramatic
-					*/
-					int first_entry = 0; 
-					for (i = 1; i < MAX_PP_AA_ARRAY; i++){
-						if (pp->aa_array[i].AA > 0 && pp->aa_array[i].value > 0){
-							if (first_entry != 1){
-								rquery = StringFormat("REPLACE INTO `character_alternate_abilities` (id, slot, aa_id, aa_value)"
-									" VALUES (%u, %u, %u, %u)", character_id, i, pp->aa_array[i].AA, pp->aa_array[i].value);
-								first_entry = 1; 
-							}
-							rquery = rquery + StringFormat(", (%u, %u, %u, %u)", character_id, i, pp->aa_array[i].AA, pp->aa_array[i].value); 
-						} 
-					}
-					results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR AA Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
-
-					/* Run Bind Home Convert */
-					rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
-						" VALUES (%u, %u, %u, %f, %f, %f, %f, 1)",
-						character_id, pp->binds[4].zoneId, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading); 
-						results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Bind Home Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
-
-					/* Run Bind Convert */
-					rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
-						" VALUES (%u, %u, %u, %f, %f, %f, %f, 0)", 
-						character_id, pp->binds[0].zoneId, 0, pp->binds[0].x, pp->binds[0].y, pp->binds[0].z, pp->binds[0].heading);
-						results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Bind Home Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
-
-					/* Run Language Convert */
-					first_entry = 0;
-					for (i = 0; i < MAX_PP_LANGUAGE; i++){
-						if (pp->languages[i] > 0){
-							if (first_entry != 1){
-								rquery = StringFormat("REPLACE INTO `character_languages` (id, lang_id, value) VALUES (%u, %u, %u)", character_id, i, pp->languages[i]);
-								first_entry = 1;
-							}
-							rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->languages[i]);
-						}
-					}
-					results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Language Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
-					/* Run Skill Convert */
-					first_entry = 0;
-					for (i = 0; i < MAX_PP_SKILL; i++){
-						if (pp->skills[i] > 0){
-							if (first_entry != 1){
-								rquery = StringFormat("REPLACE INTO `character_skills` (id, skill_id, value) VALUES (%u, %u, %u)", character_id, i, pp->skills[i]);
-								first_entry = 1;
-							}
-							rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->skills[i]);
-						}
-					}
-					results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Skill Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
-					/* Run Spell Convert */
-					first_entry = 0;
-					for (i = 0; i < MAX_PP_SPELLBOOK; i++){
-						if (pp->spell_book[i] > 0 && pp->spell_book[i] != 4294967295 && pp->spell_book[i] < 40000 && pp->spell_book[i] != 1){
-							if (first_entry != 1){
-								rquery = StringFormat("REPLACE INTO `character_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, i, pp->spell_book[i]);
-								first_entry = 1;
-							}
-							rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->spell_book[i]);
-						}
-					}
-					// std::cout << rquery << "\n";
-					results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Spell Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
-					/* Run Max Memmed Spell Convert */ 
-					first_entry = 0;
-					for (i = 0; i < MAX_PP_MEMSPELL; i++){
-						if (pp->mem_spells[i] > 0 && pp->mem_spells[i] != 65535){
-							if (first_entry != 1){
-								rquery = StringFormat("REPLACE INTO `character_memmed_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, i, pp->mem_spells[i]);
-								first_entry = 1;
-							}
-							rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->mem_spells[i]);
-						}
-					}
-					results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Memmed Spell Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
-					/* Run Discipline Convert */
-					first_entry = 0;
-					for (i = 0; i < MAX_PP_DISCIPLINES; i++){
-						if (pp->disciplines.values[i] > 0){
-							if (first_entry != 1){
-								rquery = StringFormat("REPLACE INTO `character_disciplines` (id, slot_id, disc_id) VALUES (%u, %u, %u)", character_id, i, pp->disciplines.values[i]);
-								first_entry = 1;
-							}
-							rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->disciplines.values[i]);
-						}
-					}
-					results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Discipline Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
-					/* Run Material Color Convert */
-					first_entry = 0;
-					for (i = 0; i < _MaterialCount; i++){
-						if (pp->item_tint[i].color > 0){
-							if (first_entry != 1){
-								rquery = StringFormat("REPLACE INTO `character_material` (id, slot, blue, green, red, use_tint, color) VALUES (%u, %u, %u, %u, %u, %u, %u)", character_id, i, pp->item_tint[i].rgb.blue, pp->item_tint[i].rgb.green, pp->item_tint[i].rgb.red, pp->item_tint[i].rgb.use_tint, pp->item_tint[i].color);
-								first_entry = 1;
-							}
-							rquery = rquery + StringFormat(", (%u, %u, %u, %u, %u, %u, %u)", character_id, i, pp->item_tint[i].rgb.blue, pp->item_tint[i].rgb.green, pp->item_tint[i].rgb.red, pp->item_tint[i].rgb.use_tint, pp->item_tint[i].color);
-						} 
-					}
-					results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Color Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
-					/* Run Tribute Convert */
-					first_entry = 0;
-					for (i = 0; i < EmuConstants::TRIBUTE_SIZE; i++){
-						if (pp->tributes[i].tribute > 0){
-							if (first_entry != 1){
-								rquery = StringFormat("REPLACE INTO `character_tribute` (id, tier, tribute) VALUES (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
-								first_entry = 1;
-							}
-							rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
-						}
-					}
-					results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Tribute Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
-					/* Run Bandolier Convert */
-					first_entry = 0;
-					for (i = 0; i <= EmuConstants::BANDOLIERS_COUNT; i++){
-						for (int si = 0; si < EmuConstants::BANDOLIER_SIZE; si++){
-							if (pp->bandoliers[i].items[si].item_id > 0){
-								if (first_entry != 1){
-									rquery = StringFormat("REPLACE INTO `character_bandolier` (id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name) VALUES (%i, %u, %i, %u, %u, '%s')", character_id, i, si, pp->bandoliers[i].items[si].item_id, pp->bandoliers[i].items[si].icon, pp->bandoliers[i].name);
-									first_entry = 1;
-								}
-								rquery = rquery + StringFormat(", (%i, %u, %i, %u, %u, '%s')", character_id, i, si, pp->bandoliers[i].items[si].item_id, pp->bandoliers[i].items[si].icon, pp->bandoliers[i].name);
-							}
-						} 
-					}
-					results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Bandolier Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
-					/* Run Potion Belt Convert */
-					first_entry = 0;
-					for (i = 0; i <= EmuConstants::POTION_BELT_SIZE; i++){
-						if (pp->potionbelt.items[i].item_id > 0){
-							if (first_entry != 1){
-								rquery = StringFormat("REPLACE INTO `character_potionbelt` (id, potion_id, item_id, icon) VALUES (%i, %u, %u, %u)", character_id, i, pp->potionbelt.items[i].item_id, pp->potionbelt.items[i].icon);
-								first_entry = 1;
-							}
-							rquery = rquery + StringFormat(", (%i, %u, %u, %u)", character_id, i, pp->potionbelt.items[i].item_id, pp->potionbelt.items[i].icon);
-							
-						}
-					}
-					results = QueryDatabase(rquery); if (!results.RowsAffected()){ std::cout << "ERROR Potion Belt Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
-				}
-
-				/* Print out the entire Player Profile for testing */
-				if (printppdebug == 1) {
-					printf("ID: %i \n", atoi(row[0]));
-					printf("checksum: %i \n", pp->checksum);
-					printf("name: %s \n", pp->name);
-					printf("last_name: %s \n", pp->last_name);
-					printf("gender: %i \n", pp->gender);
-					printf("race: %i \n", pp->race);
-					printf("class_: %i \n", pp->class_);
-					printf("unknown0112: %i \n", pp->unknown0112);
-					printf("level: %i \n", pp->level);
-
-					printf("\n=== BIND DATA (Array Size 5) ===\n");
-					for (i = 0; i < 5; i++){
-						printf("Bind Num: %i ZoneID: %u x: %f y: %f z: %f heading: %f \n", i, pp->binds[i].zoneId, pp->binds[i].x, pp->binds[i].y, pp->binds[i].z, pp->binds[i].heading);
-					}
-					printf("\n");
-
-					printf("deity: %u \n", pp->deity);
-					printf("guild_id: %u \n", pp->guild_id);
-					printf("birthday: %u \n", pp->birthday);
-					printf("lastlogin: %u \n", pp->lastlogin);
-					printf("timePlayedMin: %u \n", pp->timePlayedMin);
-					printf("pvp: %u \n", pp->pvp);
-					printf("level2: %u \n", pp->level2);
-					printf("anon: %u \n", pp->anon);
-					printf("gm: %u \n", pp->gm);
-					printf("guildrank: %u \n", pp->guildrank);
-					printf("guildbanker: %u \n", pp->guildbanker);
-					printf("unknown0246[6]: %u \n", pp->unknown0246[6]);
-					printf("intoxication: %u \n", pp->intoxication);
-
-					printf("\n=== Spell Slot Refresh spellSlotRefresh[MAX_PP_MEMSPELL] ===\n");
-					for (i = 0; i < MAX_PP_MEMSPELL; i++){
-						printf("Slot: %i Value: %u \n", i, pp->spellSlotRefresh[i]);
-					}
-					printf("\n\n");
-
-					printf("abilitySlotRefresh: %u \n", pp->abilitySlotRefresh);
-					printf("haircolor: %u \n", pp->haircolor);
-					printf("beardcolor: %u \n", pp->beardcolor);
-					printf("eyecolor1: %u \n", pp->eyecolor1);
-					printf("eyecolor2: %u \n", pp->eyecolor2);
-					printf("hairstyle: %u \n", pp->hairstyle);
-					printf("beard: %u \n", pp->beard);
-					printf("ability_time_seconds: %u \n", pp->ability_time_seconds);
-					printf("ability_number: %u \n", pp->ability_number);
-					printf("ability_time_minutes: %u \n", pp->ability_time_minutes);
-					printf("ability_time_hours: %u \n", pp->ability_time_hours);
-
-					printf("\n=== Color Material Data ===\n");
-					for (i = 0; i < 10; i++){
-						printf("Slot: %i Blue: %u Green: %u Red: %i Use_Tint: %u Color: %u \n", i, pp->item_tint[i].rgb.blue, pp->item_tint[i].rgb.green, pp->item_tint[i].rgb.red, pp->item_tint[i].rgb.use_tint, pp->item_tint[i].color);
-					}
-					printf("\n\n");
-
-					printf("\n=== AA Data ===\n");
-					for (i = 0; i < MAX_PP_AA_ARRAY; i++){
-						printf("ID: %u Value %u\n", pp->aa_array[i].AA, pp->aa_array[i].value);
-					}
-					printf("\n\n");
-
-					printf("%i unknown2384\n", pp->unknown2384);
-					printf("servername: %s \n", pp->servername);
-					printf("title: %s \n", pp->title);
-					printf("suffix: %s \n", pp->suffix);
-					printf("guildid2: %u \n", pp->guildid2);
-					printf("exp: %u \n", pp->exp);
-					printf("unknown2492: %u \n", pp->unknown2492);
-					printf("points: %u \n", pp->points);
-					printf("mana: %u \n", pp->mana);
-					printf("cur_hp: %u \n", pp->cur_hp);
-					printf("unknown2508: %u \n", pp->unknown2508);
-					printf("STR: %u \n", pp->STR);
-					printf("STA: %u \n", pp->STA);
-					printf("CHA: %u \n", pp->CHA);
-					printf("DEX: %u \n", pp->DEX);
-					printf("INT: %u \n", pp->INT);
-					printf("AGI: %u \n", pp->AGI);
-					printf("WIS: %u \n", pp->WIS);
-					printf("face: %u \n", pp->face);
-					printf("unknown2541[47]: %u \n", pp->unknown2541[47]);
-					printf("languages[MAX_PP_LANGUAGE]: %u \n", pp->languages[MAX_PP_LANGUAGE]);
-
-					printf("\n=== languages[MAX_PP_LANGUAGE] ===\n");
-					for (i = 0; i < MAX_PP_LANGUAGE; i++){
-						printf("ID: %u Value: %u \n", i, pp->languages[i]);
-					}
-					printf("\n\n");
-
-					printf("unknown2616[4]: %u \n", pp->unknown2616[4]);
-
-					printf("\n=== Spell Book ===\n");
-					for (i = 0; i < MAX_PP_SPELLBOOK; i++){
-						printf("Spell Book Slot: %i Spell: %u \n", i, pp->spell_book[i]);
-					}
-					printf("\n\n");
-
-					printf("unknown4540[128]: %u \n", pp->unknown4540[128]);
-
-					printf("\n=== mem_spells[MAX_PP_MEMSPELL] ===\n");
-					for (i = 0; i < MAX_PP_MEMSPELL; i++){
-						printf("ID: %u Value: %u \n", i, pp->mem_spells[i]);
-					}
-					printf("\n\n");
-
-					printf("unknown4704[32]: %u \n", pp->unknown4704[32]);
-					printf("y: %4.2f \n", pp->y);
-					printf("x: %4.2f \n", pp->x);
-					printf("z: %4.2f \n", pp->z);
-					printf("heading: %4.2f \n", pp->heading);
-					printf("unknown4752[4]: %u \n", pp->unknown4752[4]);
-
-					printf("platinum: %u \n", pp->platinum);
-					printf("gold: %u \n", pp->gold);
-					printf("silver: %u \n", pp->silver);
-					printf("copper: %u \n", pp->copper);
-					printf("platinum_bank: %u \n", pp->platinum_bank);
-					printf("gold_bank: %u \n", pp->gold_bank);
-					printf("silver_bank: %u \n", pp->silver_bank);
-					printf("copper_bank: %u \n", pp->copper_bank);
-					printf("platinum_cursor: %u \n", pp->platinum_cursor);
-					printf("gold_cursor: %u \n", pp->gold_cursor);
-					printf("silver_cursor: %u \n", pp->silver_cursor);
-					printf("copper_cursor: %u \n", pp->copper_cursor);
-					printf("platinum_shared: %u \n", pp->platinum_shared);
-					printf("unknown4808[24]: %u \n", pp->unknown4808[24]);
-
-
-
-					printf("\n=== skills[MAX_PP_SKILL] ===\n");
-					for (i = 0; i < MAX_PP_SKILL; i++){
-						printf("ID: %u Value: %u \n", i, pp->skills[i]);
-					}
-					printf("\n\n");
-
-					printf("unknown5132[184]: %u \n", pp->unknown5132[184]);
-					printf("pvp2: %u \n", pp->pvp2);
-					printf("unknown5420: %u \n", pp->unknown5420);
-					printf("pvptype: %u \n", pp->pvptype);
-					printf("unknown5428: %u \n", pp->unknown5428);
-					printf("ability_down: %u \n", pp->ability_down);
-					printf("unknown5436[8]: %u \n", pp->unknown5436[8]);
-					printf("autosplit: %u \n", pp->autosplit);
-					printf("unknown5448[8]: %u \n", pp->unknown5448[8]);
-					printf("zone_change_count: %u \n", pp->zone_change_count);
-					printf("unknown5460[16]: %u \n", pp->unknown5460[16]);
-					printf("drakkin_heritage: %u \n", pp->drakkin_heritage);
-					printf("drakkin_tattoo: %u \n", pp->drakkin_tattoo);
-					printf("drakkin_details: %u \n", pp->drakkin_details);
-					printf("expansions: %u \n", pp->expansions);
-					printf("toxicity: %u \n", pp->toxicity);
-					printf("unknown5496: %s \n", pp->unknown5496);
-					printf("hunger_level: %i \n", pp->hunger_level);
-					printf("thirst_level: %i \n", pp->thirst_level);
-					printf("ability_up: %u \n", pp->ability_up);
-					printf("unknown5524: %s \n", pp->unknown5524);
-					printf("zone_id: %u \n", pp->zone_id);
-					printf("zoneInstance: %u \n", pp->zoneInstance);
-
-					// SpellBuff_Struct	buffs[BUFF_COUNT];
-
-					printf("groupMembers: %s \n", pp->groupMembers);
-					printf("unknown6428: %s \n", pp->unknown6428);
-					printf("entityid: %u \n", pp->entityid);
-					printf("leadAAActive: %u \n", pp->leadAAActive);
-					printf("unknown7092: %u \n", pp->unknown7092);
-					printf("ldon_points_guk: %i \n", pp->ldon_points_guk);
-					printf("ldon_points_mir: %i \n", pp->ldon_points_mir);
-					printf("ldon_points_mmc: %i \n", pp->ldon_points_mmc);
-					printf("ldon_points_ruj: %i \n", pp->ldon_points_ruj);
-					printf("ldon_points_tak: %i \n", pp->ldon_points_tak);
-					printf("ldon_points_available: %i \n", pp->ldon_points_available);
-					printf("ldon_wins_guk: %i \n", pp->ldon_wins_guk);
-					printf("ldon_wins_mir: %i \n", pp->ldon_wins_mir);
-					printf("ldon_wins_mmc: %i \n", pp->ldon_wins_mmc);
-					printf("ldon_wins_ruj: %i \n", pp->ldon_wins_ruj);
-					printf("ldon_wins_tak: %i \n", pp->ldon_wins_tak);
-					printf("ldon_losses_guk: %i \n", pp->ldon_losses_guk);
-					printf("ldon_losses_mir: %i \n", pp->ldon_losses_mir);
-					printf("ldon_losses_mmc: %i \n", pp->ldon_losses_mmc);
-					printf("ldon_losses_ruj: %i \n", pp->ldon_losses_ruj);
-					printf("ldon_losses_tak: %i \n", pp->ldon_losses_tak);
-					printf("unknown7160[72]: %u \n", pp->unknown7160[72]);
-					printf("tribute_time_remaining: %u \n", pp->tribute_time_remaining);
-					printf("showhelm: %u \n", pp->showhelm);
-					printf("career_tribute_points: %u \n", pp->career_tribute_points);
-					printf("unknown7244: %u \n", pp->unknown7244);
-					printf("tribute_points: %u \n", pp->tribute_points);
-					printf("unknown7252: %u \n", pp->unknown7252);
-					printf("tribute_active: %u \n", pp->tribute_active);
-
-					printf("\n=== Tribute_Struct tributes[EmuConstants::TRIBUTE_SIZE] ===\n");
-					for (i = 0; i < EmuConstants::TRIBUTE_SIZE; i++){
-						printf("ID: %u Tribute: %u Tier: %u \n", i, pp->tributes[i].tribute, pp->tributes[i].tier);
-					}
-					printf("\n\n");
-
-					// Tribute_Struct		tributes[EmuConstants::TRIBUTE_SIZE];
-					// /*7264*/	Disciplines_Struct	disciplines;
-
-					printf("\n=== Disciplines_Struct	disciplines ===\n");
-					for (i = 0; i < MAX_PP_DISCIPLINES; i++){
-						printf("ID: %u Disc Value: %u \n", i, pp->disciplines.values[i]);
-					}
-					printf("\n\n");
-
-					printf("\n=== recastTimers[MAX_RECAST_TYPES] ===\n");
-					for (i = 0; i < MAX_RECAST_TYPES; i++){
-						printf("ID: %u Value: %u \n", i, pp->recastTimers[i]);
-					}
-					printf("\n\n");
-
-					printf("unknown7780: %s \n", pp->unknown7780);
-					printf("endurance: %u \n", pp->endurance);
-					printf("group_leadership_exp: %u \n", pp->group_leadership_exp);
-					printf("raid_leadership_exp: %u \n", pp->raid_leadership_exp);
-					printf("group_leadership_points: %u \n", pp->group_leadership_points);
-					printf("raid_leadership_points: %u \n", pp->raid_leadership_points);
-
-					// LeadershipAA_Struct	leader_abilities;
-
-					printf("\n=== LeadershipAA_Struct leader_abilities ===\n");
-					for (i = 0; i <= MAX_LEADERSHIP_AA_ARRAY; i++){
-						printf("ID: %u Rank: %u \n", i, pp->leader_abilities.ranks[i]);
-					}
-					printf("\n\n");
-
-					printf("unknown8088[132]: %u \n", pp->unknown8088[132]);
-					printf("air_remaining: %u \n", pp->air_remaining);
-					printf("PVPKills: %u \n", pp->PVPKills);
-					printf("PVPDeaths: %u \n", pp->PVPDeaths);
-					printf("PVPCurrentPoints: %u \n", pp->PVPCurrentPoints);
-					printf("PVPCareerPoints: %u \n", pp->PVPCareerPoints);
-					printf("PVPBestKillStreak: %u \n", pp->PVPBestKillStreak);
-					printf("PVPWorstDeathStreak: %u \n", pp->PVPWorstDeathStreak);
-					printf("PVPCurrentKillStreak: %u \n", pp->PVPCurrentKillStreak);
-
-					// PVPStatsEntry_Struct	PVPLastKill;
-
-					printf("\n=== PVPStatsEntry_Struct	PVPLastKill ===\n");
-					printf("Char Name: %s Level: %u Race: %u Class: %u Zone: %u Time: %u Points: %u \n", pp->PVPLastKill.Name, pp->PVPLastKill.Level, pp->PVPLastKill.Race, pp->PVPLastKill.Class, pp->PVPLastKill.Zone, pp->PVPLastKill.Time, pp->PVPLastKill.Points);
-					printf("\n\n");
-
-					// /*8304*/	PVPStatsEntry_Struct	PVPLastDeath;
-
-					printf("\n=== PVPStatsEntry_Struct	PVPLastDeath ===\n");
-					printf("Char Name: %s Level: %u Race: %u Class: %u Zone: %u Time: %u Points: %u \n", pp->PVPLastDeath.Name, pp->PVPLastDeath.Level, pp->PVPLastDeath.Race, pp->PVPLastDeath.Class, pp->PVPLastDeath.Zone, pp->PVPLastDeath.Time, pp->PVPLastDeath.Points);
-					printf("\n\n");
-
-					printf("PVPNumberOfKillsInLast24Hours: %u \n", pp->PVPNumberOfKillsInLast24Hours);
-
-					// PVPStatsEntry_Struct	PVPRecentKills[50];
-
-					printf("\n===PVPStatsEntry_Struct	PVPRecentKills[50] ===\n");
-					for (i = 0; i < 50; i++){
-						printf("ID: %u Char Name: %s Level: %u Race: %u Class: %u Zone: %u Time: %u Points: %u \n", i, pp->PVPRecentKills[i].Name, pp->PVPRecentKills[i].Level, pp->PVPRecentKills[i].Race, pp->PVPRecentKills[i].Class, pp->PVPRecentKills[i].Zone, pp->PVPRecentKills[i].Time, pp->PVPRecentKills[i].Points);
-					}
-					printf("\n\n");
-
-					printf("aapoints_spent: %u \n", pp->aapoints_spent);
-					printf("expAA: %u \n", pp->expAA);
-					printf("aapoints: %u \n", pp->aapoints);
-					printf("unknown12844[36]: %u \n", pp->unknown12844[36]);
-
-					// Bandolier_Struct	bandoliers[EmuConstants::BANDOLIERS_COUNT];
-
-					printf("\n=== Bandolier_Struct	bandoliers[EmuConstants::BANDOLIERS_COUNT] ===\n");
-					uint16 si = 0;
-					for (i = 0; i <= EmuConstants::BANDOLIERS_COUNT; i++){
-						// BandolierItem_Struct items[EmuConstants::BANDOLIER_SIZE];
-						for (si = 0; si < EmuConstants::BANDOLIER_SIZE; si++){
-							printf("ID: %u item_id: %u icon: %u items name: %s name: %s\n", i, pp->bandoliers[i].items[si].item_id, pp->bandoliers[i].items[si].icon, pp->bandoliers[i].items[si].item_name, pp->bandoliers[i].name);
-						}
-					}
-					printf("\n\n");
-
-					printf("unknown14160[4506]: %u \n", pp->unknown14160[4506]);
-
-					// SuspendedMinion_Struct	SuspendedMinion; // No longer in use (In DB)
-
-					// printf("\n=== SuspendedMinion_Struct	SuspendedMinion ===\n");
-					// printf("SpellID: %u HP: %u Mana: %u  \n", i, pp->leader_abilities.ranks[i]);
-
-					// printf("\n\n");
-
-					printf("timeentitledonaccount: %u \n", pp->timeentitledonaccount);
-
-					// PotionBelt_Struct	potionbelt;			//there should be 3 more of these
-
-					printf("\n=== PotionBelt_Struct	potionbelt ===\n");
-					for (i = 0; i < EmuConstants::POTION_BELT_SIZE; i++){
-						printf("ID: %u Icon: %u Item ID: %u  Item Name: %s\n", i, pp->potionbelt.items[i].icon, pp->potionbelt.items[i].item_id, pp->potionbelt.items[i].item_name);
-					}
-					printf("\n\n");
-
-					printf("unknown19568[8]: %u \n", pp->unknown19568[8]);
-					printf("currentRadCrystals: %u \n", pp->currentRadCrystals);
-					printf("careerRadCrystals: %u \n", pp->careerRadCrystals);
-					printf("currentEbonCrystals: %u \n", pp->currentEbonCrystals);
-					printf("careerEbonCrystals: %u \n", pp->careerEbonCrystals);
-					printf("groupAutoconsent: %u \n", pp->groupAutoconsent);
-					printf("raidAutoconsent: %u \n", pp->raidAutoconsent);
-					printf("guildAutoconsent: %u \n", pp->guildAutoconsent);
-					printf("unknown19595[5]: %u \n", pp->unknown19595[5]);
-					printf("RestTimer: %u \n", pp->RestTimer);
-
-
-					printf("\n");
-				}
-
-				mysql_free_result(result2);
-			}
+		/* Verify PP Integrity */
+		lengths = results2.LengthOfColumn(1);
+		if (lengths == sizeof(PlayerProfile_Struct)) { /* If PP is the size it is expected to be */
+			memcpy(pp, row2[1], sizeof(PlayerProfile_Struct));
+			// std::cout << "SIZE OK\n" << std::endl;
 		}
-		mysql_free_result(result);
+		/* Continue of PP Size does not match (Usually a created character never logged in) */
+		else { continue; }
+
+		lengths_e = results2.LengthOfColumn(11);
+		if (lengths_e == sizeof(ExtendedProfile_Struct)) {
+			memcpy(e_pp, row2[11], sizeof(ExtendedProfile_Struct));
+		}
+		if (e_pp->expended_aa > 4000000){ e_pp->expended_aa = 0; }
+
+		// std::cout << "Expended AA: " << e_pp->expended_aa << "\n" << std::endl;
+
+		/* Loading Status on conversion */
+		if (runconvert == 1){
+			std::cout << "\r" << char_iter_count << "/" << number_of_characters << " " << std::flush;
+			loadbar(char_iter_count, number_of_characters, 50);
+
+			/* Run inspect message convert  */
+			if (inspectmessage != ""){
+				std::string rquery = StringFormat("REPLACE INTO `character_inspect_messages` (id, inspect_message)"
+					"VALUES (%u, '%s')",
+					character_id,
+					EscapeString(inspectmessage).c_str()
+					);
+				auto results = QueryDatabase(rquery);
+				if (!results.RowsAffected()){ std::cout << "ERROR Inspect Messages Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+			}
+
+			/* Run Currency Convert */
+			std::string rquery = StringFormat("REPLACE INTO `character_currency` (id, platinum, gold, silver, copper,"
+				"platinum_bank, gold_bank, silver_bank, copper_bank,"
+				"platinum_cursor, gold_cursor, silver_cursor, copper_cursor, "
+				"radiant_crystals, career_radiant_crystals, ebon_crystals, career_ebon_crystals)"
+				"VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u)",
+				character_id,
+				pp->platinum,
+				pp->gold,
+				pp->silver,
+				pp->copper,
+				pp->platinum_bank,
+				pp->gold_bank,
+				pp->silver_bank,
+				pp->copper_bank,
+				pp->platinum_cursor,
+				pp->gold_cursor,
+				pp->silver_cursor,
+				pp->copper_cursor,
+				pp->currentRadCrystals,
+				pp->careerRadCrystals,
+				pp->currentEbonCrystals,
+				pp->careerEbonCrystals
+			);
+			auto results = QueryDatabase(rquery);
+
+			if (pp->tribute_time_remaining < 0 || pp->tribute_time_remaining == 4294967295){ pp->tribute_time_remaining = 0; }
+
+			/* Run Character Data Convert */
+			rquery = StringFormat(
+				"REPLACE INTO `character_data` ("
+				"id,"
+				"account_id,"
+				"`name`,"
+				"last_name,"
+				"gender,"
+				"race,"
+				"class,"
+				"`level`,"
+				"deity,"
+				"birthday,"
+				"last_login,"
+				"time_played,"
+				"pvp_status,"
+				"level2,"
+				"anon,"
+				"gm,"
+				"intoxication,"
+				"hair_color,"
+				"beard_color,"
+				"eye_color_1,"
+				"eye_color_2,"
+				"hair_style,"
+				"beard,"
+				"ability_time_seconds,"
+				"ability_number,"
+				"ability_time_minutes,"
+				"ability_time_hours,"
+				"title,"
+				"suffix,"
+				"exp,"
+				"points,"
+				"mana,"
+				"cur_hp,"
+				"str,"
+				"sta,"
+				"cha,"
+				"dex,"
+				"`int`,"
+				"agi,"
+				"wis,"
+				"face,"
+				"y,"
+				"x,"
+				"z,"
+				"heading,"
+				"pvp2,"
+				"pvp_type,"
+				"autosplit_enabled,"
+				"zone_change_count,"
+				"drakkin_heritage,"
+				"drakkin_tattoo,"
+				"drakkin_details,"
+				"toxicity,"
+				"hunger_level,"
+				"thirst_level,"
+				"ability_up,"
+				"zone_id,"
+				"zone_instance,"
+				"leadership_exp_on,"
+				"ldon_points_guk,"
+				"ldon_points_mir,"
+				"ldon_points_mmc,"
+				"ldon_points_ruj,"
+				"ldon_points_tak,"
+				"ldon_points_available,"
+				"tribute_time_remaining,"
+				"show_helm,"
+				"career_tribute_points,"
+				"tribute_points,"
+				"tribute_active,"
+				"endurance,"
+				"group_leadership_exp,"
+				"raid_leadership_exp,"
+				"group_leadership_points,"
+				"raid_leadership_points,"
+				"air_remaining,"
+				"pvp_kills,"
+				"pvp_deaths,"
+				"pvp_current_points,"
+				"pvp_career_points,"
+				"pvp_best_kill_streak,"
+				"pvp_worst_death_streak,"
+				"pvp_current_kill_streak,"
+				"aa_points_spent,"
+				"aa_exp,"
+				"aa_points,"
+				"group_auto_consent,"
+				"raid_auto_consent,"
+				"guild_auto_consent,"
+				"RestTimer,"
+				"firstlogon,"
+				"lfg,"
+				"lfp,"
+				"mailkey,"
+				"xtargets," 
+				"e_aa_effects,"
+				"e_percent_to_aa,"
+				"e_expended_aa_spent"
+				")"
+				"VALUES ("
+				"%u,"		// id														
+				"%u,"		// account_id												
+				"'%s',"		// `name`					  
+				"'%s',"		// last_name					
+				"%u,"		// gender					  
+				"%u,"		// race						  
+				"%u,"		// class							
+				"%u,"		// `level`					  
+				"%u,"		// deity							
+				"%u,"		// birthday					  
+				"%u,"		// last_login				  
+				"%u,"		// time_played				  
+				"%u,"		// pvp_status				  
+				"%u,"		// level2					  
+				"%u,"		// anon						  
+				"%u,"		// gm						  
+				"%u,"		// intoxication				  
+				"%u,"		// hair_color				  
+				"%u,"		// beard_color				  
+				"%u,"		// eye_color_1				  
+				"%u,"		// eye_color_2				  
+				"%u,"		// hair_style				  
+				"%u,"		// beard							
+				"%u,"		// ability_time_seconds		  
+				"%u,"		// ability_number			  
+				"%u,"		// ability_time_minutes		  
+				"%u,"		// ability_time_hours		  
+				"'%s',"		// title						
+				"'%s',"		// suffix					  
+				"%u,"		// exp						  
+				"%u,"		// points					  
+				"%u,"		// mana						  
+				"%u,"		// cur_hp					  
+				"%u,"		// str						  
+				"%u,"		// sta						  
+				"%u,"		// cha						  
+				"%u,"		// dex						  
+				"%u,"		// `int`							
+				"%u,"		// agi						  
+				"%u,"		// wis						  
+				"%u,"		// face						  
+				"%f,"		// y								
+				"%f,"		// x								
+				"%f,"		// z								
+				"%f,"		// heading					  
+				"%u,"		// pvp2						  
+				"%u,"		// pvp_type					  
+				"%u,"		// autosplit_enabled				
+				"%u,"		// zone_change_count				
+				"%u,"		// drakkin_heritage			  
+				"%u,"		// drakkin_tattoo			  
+				"%u,"		// drakkin_details			  
+				"%i,"		// toxicity	 				  
+				"%u,"		// hunger_level				  
+				"%u,"		// thirst_level				  
+				"%u,"		// ability_up				  
+				"%u,"		// zone_id					  
+				"%u,"		// zone_instance					
+				"%u,"		// leadership_exp_on				
+				"%u,"		// ldon_points_guk			  
+				"%u,"		// ldon_points_mir			  
+				"%u,"		// ldon_points_mmc			  
+				"%u,"		// ldon_points_ruj			  
+				"%u,"		// ldon_points_tak			  
+				"%u,"		// ldon_points_available			
+				"%u,"		// tribute_time_remaining	  
+				"%u,"		// show_helm						
+				"%u,"		// career_tribute_points			
+				"%u,"		// tribute_points			  
+				"%u,"		// tribute_active			  
+				"%u,"		// endurance						
+				"%u,"		// group_leadership_exp		  
+				"%u,"		// raid_leadership_exp		  
+				"%u,"		// group_leadership_points	  
+				"%u,"		// raid_leadership_points	  
+				"%u,"		// air_remaining					
+				"%u,"		// pvp_kills						
+				"%u,"		// pvp_deaths				  
+				"%u,"		// pvp_current_points		  
+				"%u,"		// pvp_career_points				
+				"%u,"		// pvp_best_kill_streak		  
+				"%u,"		// pvp_worst_death_streak	  
+				"%u,"		// pvp_current_kill_streak	  
+				"%u,"		// aa_points_spent			  
+				"%u,"		// aa_exp					  
+				"%u,"		// aa_points						
+				"%u,"		// group_auto_consent		  
+				"%u,"		// raid_auto_consent				
+				"%u,"		// guild_auto_consent		  
+				"%u," 		// RestTimer
+				"%u,"		// First Logon - References online status for EVENT_CONNECT/EVENT_DISCONNECt
+				"%u,"		// Looking for Group
+				"%u,"		// Looking for P?
+				"'%s',"		// Mailkey
+				"%u,"		// X Targets
+				"%u,"		// AA Effects
+				"%u,"		// Percent to AA
+				"%u"		// e_expended_aa_spent
+				")",
+				character_id,
+				account_id,
+				EscapeString(pp->name).c_str(),
+				EscapeString(pp->last_name).c_str(),
+				pp->gender,
+				pp->race,
+				pp->class_,
+				pp->level,
+				pp->deity,
+				pp->birthday,
+				pp->lastlogin,
+				pp->timePlayedMin,
+				pp->pvp,
+				pp->level2,
+				pp->anon,
+				pp->gm,
+				pp->intoxication,
+				pp->haircolor,
+				pp->beardcolor,
+				pp->eyecolor1,
+				pp->eyecolor2,
+				pp->hairstyle,
+				pp->beard,
+				pp->ability_time_seconds,
+				pp->ability_number,
+				pp->ability_time_minutes,
+				pp->ability_time_hours,
+				EscapeString(pp->title).c_str(),
+				EscapeString(pp->suffix).c_str(),
+				pp->exp,
+				pp->points,
+				pp->mana,
+				pp->cur_hp,
+				pp->STR,
+				pp->STA,
+				pp->CHA,
+				pp->DEX,
+				pp->INT,
+				pp->AGI,
+				pp->WIS,
+				pp->face,
+				pp->y,
+				pp->x,
+				pp->z,
+				pp->heading,
+				pp->pvp2,
+				pp->pvptype,
+				pp->autosplit,
+				pp->zone_change_count,
+				pp->drakkin_heritage,
+				pp->drakkin_tattoo,
+				pp->drakkin_details,
+				pp->toxicity,
+				pp->hunger_level,
+				pp->thirst_level,
+				pp->ability_up,
+				pp->zone_id,
+				pp->zoneInstance,
+				pp->leadAAActive,
+				pp->ldon_points_guk,
+				pp->ldon_points_mir,
+				pp->ldon_points_mmc,
+				pp->ldon_points_ruj,
+				pp->ldon_points_tak,
+				pp->ldon_points_available,
+				pp->tribute_time_remaining,
+				pp->showhelm,
+				pp->career_tribute_points,
+				pp->tribute_points,
+				pp->tribute_active,
+				pp->endurance,
+				pp->group_leadership_exp,
+				pp->raid_leadership_exp,
+				pp->group_leadership_points,
+				pp->raid_leadership_points,
+				pp->air_remaining,
+				pp->PVPKills,
+				pp->PVPDeaths,
+				pp->PVPCurrentPoints,
+				pp->PVPCareerPoints,
+				pp->PVPBestKillStreak,
+				pp->PVPWorstDeathStreak,
+				pp->PVPCurrentKillStreak,
+				pp->aapoints_spent,
+				pp->expAA,
+				pp->aapoints,
+				pp->groupAutoconsent,
+				pp->raidAutoconsent,
+				pp->guildAutoconsent,
+				pp->RestTimer,
+				firstlogon,
+				lfg,
+				lfp,
+				mailkey.c_str(),
+				xtargets,
+				e_pp->aa_effects,
+				e_pp->perAA,
+				e_pp->expended_aa
+			);
+			results = QueryDatabase(rquery); 
+			if (!results.RowsAffected()){ std::cout << "ERROR PP Data Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+
+			/*
+				We set a first entry variable because we need the first initial piece of the query to be declared
+				This is to speed up the INSERTS and trim down the amount of individual sends during the process.
+				The speed difference is dramatic
+			*/
+			/* Run AA Convert */
+			int first_entry = 0; rquery = "";
+			for (i = 1; i < MAX_PP_AA_ARRAY; i++){
+				if (pp->aa_array[i].AA > 0 && pp->aa_array[i].value > 0){
+					if (first_entry != 1){
+						rquery = StringFormat("REPLACE INTO `character_alternate_abilities` (id, slot, aa_id, aa_value)"
+							" VALUES (%u, %u, %u, %u)", character_id, i, pp->aa_array[i].AA, pp->aa_array[i].value);
+						first_entry = 1;
+					}
+					rquery = rquery + StringFormat(", (%u, %u, %u, %u)", character_id, i, pp->aa_array[i].AA, pp->aa_array[i].value);
+				}
+			}
+			if (rquery != ""){ results = QueryDatabase(rquery); } if (!results.RowsAffected()){ std::cout << "ERROR AA Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+
+			/* Run Bind Home Convert */
+			rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
+				" VALUES (%u, %u, %u, %f, %f, %f, %f, 1)",
+				character_id, pp->binds[4].zoneId, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading);
+			if (rquery != ""){ results = QueryDatabase(rquery); }  if (!results.RowsAffected()){ std::cout << "ERROR Bind Home Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+
+			/* Run Bind Convert */
+			rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
+				" VALUES (%u, %u, %u, %f, %f, %f, %f, 0)",
+				character_id, pp->binds[0].zoneId, 0, pp->binds[0].x, pp->binds[0].y, pp->binds[0].z, pp->binds[0].heading);
+			if (rquery != ""){ results = QueryDatabase(rquery); }  if (!results.RowsAffected()){ std::cout << "ERROR Bind Home Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+
+			/* Run Language Convert */
+			first_entry = 0; rquery = "";
+			for (i = 0; i < MAX_PP_LANGUAGE; i++){
+				if (pp->languages[i] > 0){
+					if (first_entry != 1){
+						rquery = StringFormat("REPLACE INTO `character_languages` (id, lang_id, value) VALUES (%u, %u, %u)", character_id, i, pp->languages[i]);
+						first_entry = 1;
+					}
+					rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->languages[i]);
+				}
+			}
+			if (rquery != ""){ results = QueryDatabase(rquery); }  if (!results.RowsAffected()){ std::cout << "ERROR Language Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+			/* Run Skill Convert */
+			first_entry = 0; rquery = "";
+			for (i = 0; i < MAX_PP_SKILL; i++){
+				if (pp->skills[i] > 0){
+					if (first_entry != 1){
+						rquery = StringFormat("REPLACE INTO `character_skills` (id, skill_id, value) VALUES (%u, %u, %u)", character_id, i, pp->skills[i]);
+						first_entry = 1;
+					}
+					rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->skills[i]);
+				}
+			}
+			if (rquery != ""){ results = QueryDatabase(rquery); }  if (!results.RowsAffected()){ std::cout << "ERROR Skill Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+			/* Run Spell Convert */
+			first_entry = 0; rquery = "";
+			for (i = 0; i < MAX_PP_REF_SPELLBOOK; i++){
+				if (pp->spell_book[i] > 0 && pp->spell_book[i] != 4294967295 && pp->spell_book[i] < 40000 && pp->spell_book[i] != 1){
+					if (first_entry != 1){
+						rquery = StringFormat("REPLACE INTO `character_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, i, pp->spell_book[i]);
+						first_entry = 1;
+					}
+					rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->spell_book[i]);
+				}
+			}
+			// std::cout << rquery << "\n";
+			if (rquery != ""){ results = QueryDatabase(rquery); }  if (!results.RowsAffected()){ std::cout << "ERROR Spell Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+			/* Run Max Memmed Spell Convert */
+			first_entry = 0; rquery = "";
+			for (i = 0; i < MAX_PP_REF_MEMSPELL; i++){
+				if (pp->mem_spells[i] > 0 && pp->mem_spells[i] != 65535 && pp->mem_spells[i] != 4294967295){
+					if (first_entry != 1){
+						rquery = StringFormat("REPLACE INTO `character_memmed_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, i, pp->mem_spells[i]);
+						first_entry = 1;
+					}
+					rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->mem_spells[i]);
+				}
+			}
+			if (rquery != ""){ results = QueryDatabase(rquery); }  if (!results.RowsAffected()){ std::cout << "ERROR Memmed Spell Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+			/* Run Discipline Convert */
+			first_entry = 0; rquery = "";
+			for (i = 0; i < MAX_PP_DISCIPLINES; i++){
+				if (pp->disciplines.values[i] > 0){
+					if (first_entry != 1){
+						rquery = StringFormat("REPLACE INTO `character_disciplines` (id, slot_id, disc_id) VALUES (%u, %u, %u)", character_id, i, pp->disciplines.values[i]);
+						first_entry = 1;
+					}
+					rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->disciplines.values[i]);
+				}
+			}
+			if (rquery != ""){ results = QueryDatabase(rquery); }  if (!results.RowsAffected()){ std::cout << "ERROR Discipline Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+			/* Run Material Color Convert */
+			first_entry = 0; rquery = "";
+			for (i = 0; i < _MaterialCount; i++){
+				if (pp->item_tint[i].color > 0){
+					if (first_entry != 1){
+						rquery = StringFormat("REPLACE INTO `character_material` (id, slot, blue, green, red, use_tint, color) VALUES (%u, %u, %u, %u, %u, %u, %u)", character_id, i, pp->item_tint[i].rgb.blue, pp->item_tint[i].rgb.green, pp->item_tint[i].rgb.red, pp->item_tint[i].rgb.use_tint, pp->item_tint[i].color);
+						first_entry = 1;
+					}
+					rquery = rquery + StringFormat(", (%u, %u, %u, %u, %u, %u, %u)", character_id, i, pp->item_tint[i].rgb.blue, pp->item_tint[i].rgb.green, pp->item_tint[i].rgb.red, pp->item_tint[i].rgb.use_tint, pp->item_tint[i].color);
+				}
+			}
+			if (rquery != ""){ results = QueryDatabase(rquery); } if (!results.RowsAffected()){ std::cout << "ERROR Color Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+			/* Run Tribute Convert */
+			first_entry = 0; rquery = "";
+			for (i = 0; i < EmuConstants::TRIBUTE_SIZE; i++){
+				if (pp->tributes[i].tribute > 0){
+					if (first_entry != 1){
+						rquery = StringFormat("REPLACE INTO `character_tribute` (id, tier, tribute) VALUES (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
+						first_entry = 1;
+					}
+					rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
+				}
+			}
+			if (rquery != ""){ results = QueryDatabase(rquery); }  if (!results.RowsAffected()){ std::cout << "ERROR Tribute Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+			/* Run Bandolier Convert */
+			first_entry = 0; rquery = "";
+			for (i = 0; i <= EmuConstants::BANDOLIERS_COUNT; i++){
+				for (int si = 0; si < EmuConstants::BANDOLIER_SIZE; si++){
+					if (pp->bandoliers[i].items[si].item_id > 0){
+						if (first_entry != 1){
+							rquery = StringFormat("REPLACE INTO `character_bandolier` (id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name) VALUES (%i, %u, %i, %u, %u, '%s')", character_id, i, si, pp->bandoliers[i].items[si].item_id, pp->bandoliers[i].items[si].icon, pp->bandoliers[i].name);
+							first_entry = 1;
+						}
+						rquery = rquery + StringFormat(", (%i, %u, %i, %u, %u, '%s')", character_id, i, si, pp->bandoliers[i].items[si].item_id, pp->bandoliers[i].items[si].icon, pp->bandoliers[i].name);
+					}
+				}
+			}
+			if (rquery != ""){ results = QueryDatabase(rquery); }  if (!results.RowsAffected()){ std::cout << "ERROR Bandolier Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+			/* Run Potion Belt Convert */
+			first_entry = 0; rquery = "";
+			for (i = 0; i <= EmuConstants::POTION_BELT_SIZE; i++){
+				if (pp->potionbelt.items[i].item_id > 0){
+					if (first_entry != 1){
+						rquery = StringFormat("REPLACE INTO `character_potionbelt` (id, potion_id, item_id, icon) VALUES (%i, %u, %u, %u)", character_id, i, pp->potionbelt.items[i].item_id, pp->potionbelt.items[i].icon);
+						first_entry = 1;
+					}
+					rquery = rquery + StringFormat(", (%i, %u, %u, %u)", character_id, i, pp->potionbelt.items[i].item_id, pp->potionbelt.items[i].icon);
+
+				}
+			}
+			if (rquery != ""){ results = QueryDatabase(rquery); } if (!results.RowsAffected()){ std::cout << "ERROR Potion Belt Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+			/* Run Leadership AA Convert */
+			first_entry = 0; rquery = "";
+			for (i = 0; i <= MAX_LEADERSHIP_AA_ARRAY; i++){
+				if (pp->leader_abilities.ranks[i] > 0){
+					if (first_entry != 1){
+						rquery = StringFormat("REPLACE INTO `character_leadership_abilities` (id, slot, rank) VALUES (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);
+						first_entry = 1;
+					}
+					rquery = rquery + StringFormat(", (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);
+				}
+			} 
+			if (rquery != ""){ results = QueryDatabase(rquery); } if (!results.RowsAffected()){ std::cout << "ERROR Leadership AA Convert: " << results.ErrorMessage() << "\n\n" << rquery << "\n" << std::endl; }
+		}
 	}
 	if (runconvert == 1){ printf("\n\nCharacter blob conversion complete, continuing world bootup...\n"); }
 

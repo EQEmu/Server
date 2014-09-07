@@ -494,8 +494,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	return(true);
 }
 
-void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
-{
+void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app) {
 	if(app->size != sizeof(ClientZoneEntry_Struct))
 		return;
 	ClientZoneEntry_Struct *cze = (ClientZoneEntry_Struct *) app->pBuffer;
@@ -543,7 +542,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	std::string query;
 	unsigned long* lengths;
 
-	/* Set item materials */
+	/* Set item material tint */
 	for (int i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_END; i++)
 	if (m_pp.item_tint[i].rgb.use_tint == 1)
 		m_pp.item_tint[i].rgb.use_tint = 0xFF;
@@ -569,24 +568,24 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		if (account_creation){ account_creation = atoul(row[6]); }
 	}
 
-	/* Load Character Legacy Data: Temp until I move */
-	query = StringFormat("SELECT id,profile,zonename,x,y,z,guild_id,rank,extprofile,class,level,lfp,lfg,instanceid,xtargets,firstlogon FROM character_ LEFT JOIN guild_members ON id=char_id WHERE id=%i", cid);
+	/* Load Character Data */
+	query = StringFormat("SELECT `lfp`, `lfg`, `xtargets`, `firstlogon`, `guild_id`, `rank` FROM `character_data` LEFT JOIN `guild_members` ON `id` = `char_id` WHERE `id` = %i", cid);
 	results = database.QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		m_pp.lastlogin = time(nullptr);
-		if (row[6]){ 
-			guild_id = atoi(row[6]); 
+		if (row[4]){ 
+			guild_id = atoi(row[4]); 
 			if (guildrank) {
-				if (row[7] != nullptr){ guildrank = atoi(row[7]); }
+				if (row[5] != nullptr){ guildrank = atoi(row[5]); }
 				else{ guildrank = GUILD_RANK_NONE; }
 			}
 		}
 		if (RuleB(Character, SharedBankPlat))
 			m_pp.platinum_shared = database.GetSharedPlatinum(database.GetAccountIDByChar(cid));
 
-		if (LFP){ LFP = atoi(row[11]); }
-		if (LFG){ LFG = atoi(row[12]); }
-		if (firstlogon){ firstlogon = atoi(row[15]); }
+		if (LFP){ LFP = atoi(row[0]); }
+		if (LFG){ LFG = atoi(row[1]); }
+		if (firstlogon){ firstlogon = atoi(row[3]); }
 	}
 
 	loaditems = database.GetInventory(cid, &m_inv); /* Load Character Inventory */
@@ -595,13 +594,14 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	database.LoadCharacterMaterialColor(cid, &m_pp); /* Load Character Material */
 	database.LoadCharacterPotions(cid, &m_pp); /* Load Character Potion Belt */
 	database.LoadCharacterCurrency(cid, &m_pp); /* Load Character Currency into PP */
-	database.LoadCharacterData(cid, &m_pp); /* Load Character Data from DB into PP */
+	database.LoadCharacterData(cid, &m_pp, &m_epp); /* Load Character Data from DB into PP as well as E_PP */
 	database.LoadCharacterSkills(cid, &m_pp); /* Load Character Skills */
-	database.GetPlayerInspectMessage(m_pp.name, &m_inspect_message); /* Move to another method when can, this is pointless... */
+	database.LoadCharacterInspectMessage(cid, &m_inspect_message); /* Load Character Inspect Message */
 	database.LoadCharacterSpellBook(cid, &m_pp); /* Load Character Spell Book */
 	database.LoadCharacterMemmedSpells(cid, &m_pp);  /* Load Character Memorized Spells */
 	database.LoadCharacterDisciplines(cid, &m_pp); /* Load Character Disciplines */
 	database.LoadCharacterLanguages(cid, &m_pp); /* Load Character Languages */
+	database.LoadCharacterLeadershipAA(cid, &m_pp); /* Load Character Leadership AA's */
 
 	if (level){ level = m_pp.level; }
 
@@ -619,7 +619,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		m_pp.intoxication = 0; 
 	strcpy(name, m_pp.name);
 	strcpy(lastname, m_pp.last_name);
-	/* If PP is set to wierd coordinates */
+	/* If PP is set to weird coordinates */
 	if ((m_pp.x == -1 && m_pp.y == -1 && m_pp.z == -1) || (m_pp.x == -2 && m_pp.y == -2 && m_pp.z == -2)) {
 		m_pp.x = zone->safe_x();
 		m_pp.y = zone->safe_y();
@@ -900,8 +900,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (zone->IsPVPZone())
 		m_pp.pvp = 1;
 	/* Time entitled on Account: Move to account */
-	m_pp.timeentitledonaccount = database.GetTotalTimeEntitledOnAccount(AccountID()) / 1440;
-
+	m_pp.timeentitledonaccount = database.GetTotalTimeEntitledOnAccount(AccountID()) / 1440; 
 	/* Reset rest timer if the durations have been lowered in the database */
 	if ((m_pp.RestTimer > RuleI(Character, RestRegenTimeToActivate)) && (m_pp.RestTimer > RuleI(Character, RestRegenRaidTimeToActivate)))
 		m_pp.RestTimer = 0;
@@ -926,8 +925,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		in hopes that it adds more consistency...
 		Remake pet
 	*/
-	if (m_petinfo.SpellID > 1 && !GetPet() && m_petinfo.SpellID <= SPDAT_RECORDS)
-	{
+	if (m_petinfo.SpellID > 1 && !GetPet() && m_petinfo.SpellID <= SPDAT_RECORDS) {
 		MakePoweredPet(m_petinfo.SpellID, spells[m_petinfo.SpellID].teleport_zone, m_petinfo.petpower, m_petinfo.Name, m_petinfo.size);
 		if (GetPet() && GetPet()->IsNPC()) {
 			NPC *pet = GetPet()->CastToNPC();
@@ -1022,8 +1020,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	SetAttackTimer();
-
+	SetAttackTimer(); 
 	conn_state = ZoneInfoSent;
 
 	return;
@@ -7312,7 +7309,7 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app) {
 	InspectMessage_Struct* newmessage = (InspectMessage_Struct*) insr->text;
 	InspectMessage_Struct& playermessage = this->GetInspectMessage();
 	memcpy(&playermessage, newmessage, sizeof(InspectMessage_Struct));
-	database.SetPlayerInspectMessage(name, &playermessage);
+	database.SaveCharacterInspectMessage(this->CharacterID(), &playermessage);
 
 	if(tmp != 0 && tmp->IsClient()) { tmp->CastToClient()->QueuePacket(outapp); } // Send answer to requester
 
@@ -7329,7 +7326,7 @@ void Client::Handle_OP_InspectMessageUpdate(const EQApplicationPacket *app) {
 	InspectMessage_Struct* newmessage = (InspectMessage_Struct*) app->pBuffer;
 	InspectMessage_Struct& playermessage = this->GetInspectMessage();
 	memcpy(&playermessage, newmessage, sizeof(InspectMessage_Struct));
-	database.SetPlayerInspectMessage(name, &playermessage);
+	database.SaveCharacterInspectMessage(this->CharacterID(), &playermessage);
 }
 
 #if 0	// I dont think there's an op for this now, and we check this
@@ -9559,6 +9556,8 @@ void Client::Handle_OP_PurchaseLeadershipAA(const EQApplicationPacket *app) {
 		//sell them the ability.
 		m_pp.group_leadership_points -= cost;
 		m_pp.leader_abilities.ranks[aaid]++;
+
+		database.SaveCharacterLeadershipAA(this->CharacterID(), &m_pp); 
 	}
 
 	//success, send them an update

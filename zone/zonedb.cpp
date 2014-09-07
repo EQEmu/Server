@@ -821,7 +821,7 @@ void ZoneDatabase::UpdateBuyLine(uint32 CharID, uint32 BuySlot, uint32 Quantity)
 
 #define StructDist(in, f1, f2) (uint32(&in->f2)-uint32(&in->f1))
 
-bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* pp){
+bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp){
 	std::string query = StringFormat(
 		"SELECT                     "
 		"`name`,                    "
@@ -911,100 +911,106 @@ bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* 
 		"group_auto_consent,        "
 		"raid_auto_consent,         "
 		"guild_auto_consent,        "
-		"RestTimer                  "
+		"RestTimer,                 "
+		"`e_aa_effects`,			"
+		"`e_percent_to_aa`,			"
+		"`e_expended_aa_spent`		"
 		"FROM                       "
 		"character_data             "
 		"WHERE `id` = %i         ", character_id);
 	auto results = database.QueryDatabase(query); int r = 0;
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		strcpy(pp->name, row[r]); r++;
-		strcpy(pp->last_name, row[r]); r++;
-		pp->gender = atoi(row[r]); r++;								
-		pp->race = atoi(row[r]); r++;								
-		pp->class_ = atoi(row[r]); r++;								
-		pp->level = atoi(row[r]); r++;								
-		pp->deity = atoi(row[r]); r++;								
-		pp->birthday = atoi(row[r]); r++;							
-		pp->lastlogin = atoi(row[r]); r++;							
-		pp->timePlayedMin = atoi(row[r]); r++;						
-		pp->pvp = atoi(row[r]); r++;								
-		pp->level2 = atoi(row[r]); r++;								
-		pp->anon = atoi(row[r]); r++;								
-		pp->gm = atoi(row[r]); r++;									
-		pp->intoxication = atoi(row[r]); r++;						
-		pp->haircolor = atoi(row[r]); r++;							
-		pp->beardcolor = atoi(row[r]); r++;							
-		pp->eyecolor1 = atoi(row[r]); r++;							
-		pp->eyecolor2 = atoi(row[r]); r++;							
-		pp->hairstyle = atoi(row[r]); r++;							
-		pp->beard = atoi(row[r]); r++;								
-		pp->ability_time_seconds = atoi(row[r]); r++;				
-		pp->ability_number = atoi(row[r]); r++;						
-		pp->ability_time_minutes = atoi(row[r]); r++;				
-		pp->ability_time_hours = atoi(row[r]); r++;	
-		strcpy(pp->title, row[r]); r++;
-		strcpy(pp->suffix, row[r]); r++;						
-		pp->exp = atoi(row[r]); r++;								
-		pp->points = atoi(row[r]); r++;								
-		pp->mana = atoi(row[r]); r++;								
-		pp->cur_hp = atoi(row[r]); r++;								
-		pp->STR = atoi(row[r]); r++;								
-		pp->STA = atoi(row[r]); r++;								
-		pp->CHA = atoi(row[r]); r++;								
-		pp->DEX = atoi(row[r]); r++;								
-		pp->INT = atoi(row[r]); r++;								
-		pp->AGI = atoi(row[r]); r++;								
-		pp->WIS = atoi(row[r]); r++;								
-		pp->face = atoi(row[r]); r++;								
-		pp->y = atof(row[r]); r++;									
-		pp->x = atof(row[r]); r++;									
-		pp->z = atof(row[r]); r++;									
-		pp->heading = atof(row[r]); r++;							
-		pp->pvp2 = atoi(row[r]); r++;								
-		pp->pvptype = atoi(row[r]); r++;							
-		pp->autosplit = atoi(row[r]); r++;							
-		pp->zone_change_count = atoi(row[r]); r++;					
-		pp->drakkin_heritage = atoi(row[r]); r++;					
-		pp->drakkin_tattoo = atoi(row[r]); r++;						
-		pp->drakkin_details = atoi(row[r]); r++;					
-		pp->toxicity = atoi(row[r]); r++;							
-		pp->hunger_level = atoi(row[r]); r++;						
-		pp->thirst_level = atoi(row[r]); r++;						
-		pp->ability_up = atoi(row[r]); r++;							
-		pp->zone_id = atoi(row[r]); r++;							
-		pp->zoneInstance = atoi(row[r]); r++;						
-		pp->leadAAActive = atoi(row[r]); r++;						
-		pp->ldon_points_guk = atoi(row[r]); r++;					
-		pp->ldon_points_mir = atoi(row[r]); r++;					
-		pp->ldon_points_mmc = atoi(row[r]); r++;					
-		pp->ldon_points_ruj = atoi(row[r]); r++;					
-		pp->ldon_points_tak = atoi(row[r]); r++;					
-		pp->ldon_points_available = atoi(row[r]); r++;				
-		pp->tribute_time_remaining = atoi(row[r]); r++;				
-		pp->showhelm = atoi(row[r]); r++;							
-		pp->career_tribute_points = atoi(row[r]); r++;				
-		pp->tribute_points = atoi(row[r]); r++;						
-		pp->tribute_active = atoi(row[r]); r++;						
-		pp->endurance = atoi(row[r]); r++;							
-		pp->group_leadership_exp = atoi(row[r]); r++;				
-		pp->raid_leadership_exp = atoi(row[r]); r++;				
-		pp->group_leadership_points = atoi(row[r]); r++;			
-		pp->raid_leadership_points = atoi(row[r]); r++;				
-		pp->air_remaining = atoi(row[r]); r++;						
-		pp->PVPKills = atoi(row[r]); r++;							
-		pp->PVPDeaths = atoi(row[r]); r++;							
-		pp->PVPCurrentPoints = atoi(row[r]); r++;					
-		pp->PVPCareerPoints = atoi(row[r]); r++;					
-		pp->PVPBestKillStreak = atoi(row[r]); r++;					
-		pp->PVPWorstDeathStreak = atoi(row[r]); r++;				
-		pp->PVPCurrentKillStreak = atoi(row[r]); r++;				
-		pp->aapoints_spent = atoi(row[r]); r++;						
-		pp->expAA = atoi(row[r]); r++;								
-		pp->aapoints = atoi(row[r]); r++;							
-		pp->groupAutoconsent = atoi(row[r]); r++;					
-		pp->raidAutoconsent = atoi(row[r]); r++;					
-		pp->guildAutoconsent = atoi(row[r]); r++;					
-		pp->RestTimer = atoi(row[r]); r++;							
+		strcpy(pp->name, row[r]); r++;											 // "`name`,                    "
+		strcpy(pp->last_name, row[r]); r++;										 // "last_name,                 "
+		pp->gender = atoi(row[r]); r++;											 // "gender,                    "
+		pp->race = atoi(row[r]); r++;											 // "race,                      "
+		pp->class_ = atoi(row[r]); r++;											 // "class,                     "
+		pp->level = atoi(row[r]); r++;											 // "`level`,                   "
+		pp->deity = atoi(row[r]); r++;											 // "deity,                     "
+		pp->birthday = atoi(row[r]); r++;										 // "birthday,                  "
+		pp->lastlogin = atoi(row[r]); r++;										 // "last_login,                "
+		pp->timePlayedMin = atoi(row[r]); r++;									 // "time_played,               "
+		pp->pvp = atoi(row[r]); r++;											 // "pvp_status,                "
+		pp->level2 = atoi(row[r]); r++;											 // "level2,                    "
+		pp->anon = atoi(row[r]); r++;											 // "anon,                      "
+		pp->gm = atoi(row[r]); r++;												 // "gm,                        "
+		pp->intoxication = atoi(row[r]); r++;									 // "intoxication,              "
+		pp->haircolor = atoi(row[r]); r++;										 // "hair_color,                "
+		pp->beardcolor = atoi(row[r]); r++;										 // "beard_color,               "
+		pp->eyecolor1 = atoi(row[r]); r++;										 // "eye_color_1,               "
+		pp->eyecolor2 = atoi(row[r]); r++;										 // "eye_color_2,               "
+		pp->hairstyle = atoi(row[r]); r++;										 // "hair_style,                "
+		pp->beard = atoi(row[r]); r++;											 // "beard,                     "
+		pp->ability_time_seconds = atoi(row[r]); r++;							 // "ability_time_seconds,      "
+		pp->ability_number = atoi(row[r]); r++;									 // "ability_number,            "
+		pp->ability_time_minutes = atoi(row[r]); r++;							 // "ability_time_minutes,      "
+		pp->ability_time_hours = atoi(row[r]); r++;								 // "ability_time_hours,        "
+		strcpy(pp->title, row[r]); r++;											 // "title,                     "
+		strcpy(pp->suffix, row[r]); r++;										 // "suffix,                    "
+		pp->exp = atoi(row[r]); r++;											 // "exp,                       "
+		pp->points = atoi(row[r]); r++;											 // "points,                    "
+		pp->mana = atoi(row[r]); r++;											 // "mana,                      "
+		pp->cur_hp = atoi(row[r]); r++;											 // "cur_hp,                    "
+		pp->STR = atoi(row[r]); r++;											 // "str,                       "
+		pp->STA = atoi(row[r]); r++;											 // "sta,                       "
+		pp->CHA = atoi(row[r]); r++;											 // "cha,                       "
+		pp->DEX = atoi(row[r]); r++;											 // "dex,                       "
+		pp->INT = atoi(row[r]); r++;											 // "`int`,                     "
+		pp->AGI = atoi(row[r]); r++;											 // "agi,                       "
+		pp->WIS = atoi(row[r]); r++;											 // "wis,                       "
+		pp->face = atoi(row[r]); r++;											 // "face,                      "
+		pp->y = atof(row[r]); r++;												 // "y,                         "
+		pp->x = atof(row[r]); r++;												 // "x,                         "
+		pp->z = atof(row[r]); r++;												 // "z,                         "
+		pp->heading = atof(row[r]); r++;										 // "heading,                   "
+		pp->pvp2 = atoi(row[r]); r++;											 // "pvp2,                      "
+		pp->pvptype = atoi(row[r]); r++;										 // "pvp_type,                  "
+		pp->autosplit = atoi(row[r]); r++;										 // "autosplit_enabled,         "
+		pp->zone_change_count = atoi(row[r]); r++;								 // "zone_change_count,         "
+		pp->drakkin_heritage = atoi(row[r]); r++;								 // "drakkin_heritage,          "
+		pp->drakkin_tattoo = atoi(row[r]); r++;									 // "drakkin_tattoo,            "
+		pp->drakkin_details = atoi(row[r]); r++;								 // "drakkin_details,           "
+		pp->toxicity = atoi(row[r]); r++;										 // "toxicity,                  "
+		pp->hunger_level = atoi(row[r]); r++;									 // "hunger_level,              "
+		pp->thirst_level = atoi(row[r]); r++;									 // "thirst_level,              "
+		pp->ability_up = atoi(row[r]); r++;										 // "ability_up,                "
+		pp->zone_id = atoi(row[r]); r++;										 // "zone_id,                   "
+		pp->zoneInstance = atoi(row[r]); r++;									 // "zone_instance,             "
+		pp->leadAAActive = atoi(row[r]); r++;									 // "leadership_exp_on,         "
+		pp->ldon_points_guk = atoi(row[r]); r++;								 // "ldon_points_guk,           "
+		pp->ldon_points_mir = atoi(row[r]); r++;								 // "ldon_points_mir,           "
+		pp->ldon_points_mmc = atoi(row[r]); r++;								 // "ldon_points_mmc,           "
+		pp->ldon_points_ruj = atoi(row[r]); r++;								 // "ldon_points_ruj,           "
+		pp->ldon_points_tak = atoi(row[r]); r++;								 // "ldon_points_tak,           "
+		pp->ldon_points_available = atoi(row[r]); r++;							 // "ldon_points_available,     "
+		pp->tribute_time_remaining = atoi(row[r]); r++;							 // "tribute_time_remaining,    "
+		pp->showhelm = atoi(row[r]); r++;										 // "show_helm,                 "
+		pp->career_tribute_points = atoi(row[r]); r++;							 // "career_tribute_points,     "
+		pp->tribute_points = atoi(row[r]); r++;									 // "tribute_points,            "
+		pp->tribute_active = atoi(row[r]); r++;									 // "tribute_active,            "
+		pp->endurance = atoi(row[r]); r++;										 // "endurance,                 "
+		pp->group_leadership_exp = atoi(row[r]); r++;							 // "group_leadership_exp,      "
+		pp->raid_leadership_exp = atoi(row[r]); r++;							 // "raid_leadership_exp,       "
+		pp->group_leadership_points = atoi(row[r]); r++;						 // "group_leadership_points,   "
+		pp->raid_leadership_points = atoi(row[r]); r++;							 // "raid_leadership_points,    "
+		pp->air_remaining = atoi(row[r]); r++;									 // "air_remaining,             "
+		pp->PVPKills = atoi(row[r]); r++;										 // "pvp_kills,                 "
+		pp->PVPDeaths = atoi(row[r]); r++;										 // "pvp_deaths,                "
+		pp->PVPCurrentPoints = atoi(row[r]); r++;								 // "pvp_current_points,        "
+		pp->PVPCareerPoints = atoi(row[r]); r++;								 // "pvp_career_points,         "
+		pp->PVPBestKillStreak = atoi(row[r]); r++;								 // "pvp_best_kill_streak,      "
+		pp->PVPWorstDeathStreak = atoi(row[r]); r++;							 // "pvp_worst_death_streak,    "
+		pp->PVPCurrentKillStreak = atoi(row[r]); r++;							 // "pvp_current_kill_streak,   "
+		pp->aapoints_spent = atoi(row[r]); r++;									 // "aa_points_spent,           "
+		pp->expAA = atoi(row[r]); r++;											 // "aa_exp,                    "
+		pp->aapoints = atoi(row[r]); r++;										 // "aa_points,                 "
+		pp->groupAutoconsent = atoi(row[r]); r++;								 // "group_auto_consent,        "
+		pp->raidAutoconsent = atoi(row[r]); r++;								 // "raid_auto_consent,         "
+		pp->guildAutoconsent = atoi(row[r]); r++;								 // "guild_auto_consent,        "
+		pp->RestTimer = atoi(row[r]); r++;										 // "RestTimer,                 "
+		m_epp->aa_effects = atoi(row[r]); r++;									 // "`e_aa_effects`,			"
+		m_epp->perAA = atoi(row[r]); r++;										 // "`e_percent_to_aa`,			"
+		m_epp->expended_aa = atoi(row[r]); r++;									 // "`e_expended_aa_spent`		"
 		LogFile->write(EQEMuLog::Status, "Loading Character Data for character ID: %i, done", character_id);
 	}
 	return true;
@@ -1057,6 +1063,16 @@ bool ZoneDatabase::LoadCharacterLanguages(uint32 character_id, PlayerProfile_Str
 		pp->languages[i] = 0;
 	}
 	for (auto row = results.begin(); row != results.end(); ++row) { i = atoi(row[0]); pp->languages[i] = atoi(row[1]); }
+	return true;
+}
+
+bool ZoneDatabase::LoadCharacterLeadershipAA(uint32 character_id, PlayerProfile_Struct* pp){
+	std::string query = StringFormat("SELECT slot, rank FROM character_leadership_abilities WHERE `id` = %u", character_id);
+	auto results = database.QueryDatabase(query); uint32 slot = 0;
+	for (auto row = results.begin(); row != results.end(); ++row) { 
+		slot = atoi(row[0]);
+		pp->leader_abilities.ranks[slot] = atoi(row[1]);  
+	}
 	return true;
 }
 
@@ -1288,7 +1304,23 @@ bool ZoneDatabase::SaveCharacterPotionBelt(uint32 character_id, uint8 potion_id,
 	return true;
 }
 
-bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp){
+bool ZoneDatabase::SaveCharacterLeadershipAA(uint32 character_id, PlayerProfile_Struct* pp){
+	uint8 first_entry = 0; std::string query = "";
+	for (int i = 0; i <= MAX_LEADERSHIP_AA_ARRAY; i++){
+		if (pp->leader_abilities.ranks[i] > 0){
+			if (first_entry != 1){
+				query = StringFormat("REPLACE INTO `character_leadership_abilities` (id, slot, rank) VALUES (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);
+				first_entry = 1;
+			}
+			query = query + StringFormat(", (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);
+		}
+	}
+	auto results = QueryDatabase(query);
+	ThrowDBError(results.ErrorMessage(), "ZoneDatabase::SaveCharacterLeadershipAA", query);
+	return true;
+}
+
+bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp){
 	clock_t t = std::clock(); /* Function timer start */
 	std::string query = StringFormat(
 		"REPLACE INTO `character_data` ("
@@ -1381,7 +1413,11 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 		" group_auto_consent,        "
 		" raid_auto_consent,         "
 		" guild_auto_consent,        "
-		" RestTimer)                 "
+		" RestTimer,				 "
+		" e_aa_effects,				 "
+		" e_percent_to_aa,			 "
+		" e_expended_aa_spent		 "
+		")							 "
 		"VALUES ("
 		"%u,"  // id																" id,                        "
 		"%u,"  // account_id														" account_id,                "
@@ -1472,7 +1508,10 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 		"%u,"  // group_auto_consent		  pp->groupAutoconsent,					" group_auto_consent,        "
 		"%u,"  // raid_auto_consent			  pp->raidAutoconsent,					" raid_auto_consent,         "
 		"%u,"  // guild_auto_consent		  pp->guildAutoconsent,					" guild_auto_consent,        "
-		"%u"  // RestTimer					  pp->RestTimer,						" RestTimer)                 "
+		"%u,"  // RestTimer					  pp->RestTimer,						" RestTimer)                 "
+		"%u,"  // e_aa_effects
+		"%u,"  // e_percent_to_aa
+		"%u"   // e_expended_aa_spent
 		")", 
 		character_id,					  // " id,                        "
 		account_id,						  // " account_id,                "
@@ -1563,7 +1602,10 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 		pp->groupAutoconsent,			  // " group_auto_consent,        "
 		pp->raidAutoconsent,			  // " raid_auto_consent,         "
 		pp->guildAutoconsent,			  // " guild_auto_consent,        "
-		pp->RestTimer					  // " RestTimer)                 "
+		pp->RestTimer,					  // " RestTimer)                 "
+		m_epp->aa_effects,
+		m_epp->perAA,
+		m_epp->expended_aa
 	);
 	auto results = database.QueryDatabase(query);
 	if (!results.RowsAffected()){ std::cout << "ERROR ZoneDatabase:SaveCharacterData: " << results.ErrorMessage() << "\n\n" << query << "\n" << std::endl; }
@@ -1650,7 +1692,11 @@ bool ZoneDatabase::DeleteCharacterBandolier(uint32 character_id, uint32 band_id)
 	std::string query = StringFormat("DELETE FROM `character_bandolier` WHERE `bandolier_id` = %u AND `id` = %u", band_id, character_id); QueryDatabase(query); return true; 
 }
 
-bool ZoneDatabase::DeleteCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id){
+bool ZoneDatabase::DeleteCharacterLeadershipAAs(uint32 character_id){
+	std::string query = StringFormat("DELETE FROM `character_leadership_abilities` WHERE `id` = %u", character_id); QueryDatabase(query); return true; 
+}
+
+bool ZoneDatabase::DeleteCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id){ 
 	std::string query = StringFormat("DELETE FROM `character_memmed_spells` WHERE `slot_id` = %u AND `id` = %u", slot_id, character_id); QueryDatabase(query); return true;
 }
 
