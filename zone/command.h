@@ -150,7 +150,6 @@ void command_texture(Client *c, const Seperator *sep);
 void command_npctypespawn(Client *c, const Seperator *sep);
 void command_heal(Client *c, const Seperator *sep);
 void command_appearance(Client *c, const Seperator *sep);
-void command_charbackup(Client *c, const Seperator *sep);
 void command_nukeitem(Client *c, const Seperator *sep);
 void command_peekinv(Client *c, const Seperator *sep);
 void command_findnpctype(Client *c, const Seperator *sep);

@@ -1705,7 +1705,7 @@ bool ZoneDatabase::NoRentExpired(const char* name){
 	char *query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	if (RunQuery(query, MakeAnyLenString(&query, "Select (UNIX_TIMESTAMP(NOW())-timelaston) from character_ where name='%s'", name), errbuf, &result)) {
+	if (RunQuery(query, MakeAnyLenString(&query, "Select (UNIX_TIMESTAMP(NOW()) - last_login) from `character_data` where name='%s'", name), errbuf, &result)) {
 		safe_delete_array(query);
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);

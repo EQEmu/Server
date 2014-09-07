@@ -4750,7 +4750,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 		}
 #ifdef BOTS
 		else if (invitee->IsBot()) {
-			// The guild system is too tightly coupled with the character_ table so we have to avoid using much of the system
+			// The guild system is too tightly coupled with the character_data table so we have to avoid using much of the system
 			Bot::ProcessGuildInvite(this, invitee->CastToBot());
 			return;
 		}

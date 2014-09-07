@@ -182,45 +182,16 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 }
 
 int WorldDatabase::MoveCharacterToBind(int CharID, uint8 bindnum) {
-	// if an invalid bind point is specified, use the primary bind
-	if (bindnum > 4)
-		bindnum = 0;
+	/*  if an invalid bind point is specified, use the primary bind */
+	if (bindnum > 4){ bindnum = 0; }
+	int is_home = 0;
+	if (bindnum == 4){ is_home = 1; }
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	uint32	affected_rows = 0;
-	PlayerProfile_Struct pp;
-
-	bool PPValid = false;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT profile from character_ where id='%i'", CharID), errbuf, &result)) {
-		row = mysql_fetch_row(result);
-		unsigned long* lengths = mysql_fetch_lengths(result);
-		if (lengths[0] == sizeof(PlayerProfile_Struct)) {
-			memcpy(&pp, row[0], sizeof(PlayerProfile_Struct));
-			PPValid = true;
-		}
-		mysql_free_result(result);
+	std::string query = StringFormat("SELECT `zone_id` FROM `character_bind` WHERE `id` = %u AND `is_home` = %u LIMIT 1", CharID, is_home);
+	auto results = database.QueryDatabase(query); int i = 0;
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		return atoi(row[0]);
 	}
-	safe_delete_array(query);
-
-	if(!PPValid) return 0;
-
-	const char *BindZoneName = StaticGetZoneName(pp.binds[bindnum].zoneId);
-
-	if(!strcmp(BindZoneName, "UNKNWN")) return pp.zone_id;
-
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET zonename = '%s',zoneid=%i,x=%f, y=%f, z=%f, instanceid=0 WHERE id='%i'",
-							BindZoneName, pp.binds[bindnum].zoneId, pp.binds[bindnum].x, pp.binds[bindnum].y, pp.binds[bindnum].z,
-							CharID), errbuf, 0,&affected_rows)) {
-
-		return pp.zone_id;
-	}
-	safe_delete_array(query);
-
-	return pp.binds[bindnum].zoneId;
 }
 
 bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc)
@@ -481,7 +452,7 @@ void WorldDatabase::SetMailKey(int CharID, int IPAddress, int MailKey) {
 	else
 		sprintf(MailKeyString, "%08X", MailKey);
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET mailkey = '%s' WHERE id='%i'",
+	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE `character_data` SET mailkey = '%s' WHERE id='%i'",
 							MailKeyString, CharID), errbuf))
 
 		LogFile->write(EQEMuLog::Error, "WorldDatabase::SetMailKey(%i, %s) : %s", CharID, MailKeyString, errbuf);
@@ -497,7 +468,7 @@ bool WorldDatabase::GetCharacterLevel(const char *name, int &level)
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	if(RunQuery(query, MakeAnyLenString(&query, "SELECT level FROM character_ WHERE name='%s'", name), errbuf, &result))
+	if(RunQuery(query, MakeAnyLenString(&query, "SELECT `level` FROM `character_data` WHERE `name` = '%s'", name), errbuf, &result))
 	{
 		if(row = mysql_fetch_row(result))
 		{

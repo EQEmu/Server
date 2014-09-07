@@ -257,12 +257,11 @@ int command_init(void) {
 		command_add("dbspawn",nullptr,0,command_npctypespawn) ||
 		command_add("heal","- Completely heal your target",10,command_heal) ||
 		command_add("appearance","[type] [value] - Send an appearance packet for you or your target",150,command_appearance) ||
-		command_add("charbackup","[list/restore] - Query or restore character backups",150,command_charbackup) ||
 		command_add("nukeitem","[itemid] - Remove itemid from your player target's inventory",150,command_nukeitem) ||
 		command_add("peekinv","[worn/cursor/inv/bank/trade/trib/all] - Print out contents of your player target's inventory",100,command_peekinv) ||
 		command_add("findnpctype","[search criteria] - Search database NPC types",100,command_findnpctype) ||
 		command_add("findzone","[search criteria] - Search database zones",100,command_findzone) ||
-		command_add("fz",nullptr,100,command_findzone) ||
+		command_add("fz",nullptr,100, command_findzone) ||
 		command_add("viewnpctype","[npctype id] - Show info about an npctype",100,command_viewnpctype) ||
 		command_add("reloadstatic","- Reload Static Zone Data",150,command_reloadstatic) ||
 		command_add("reloadquest"," - Clear quest cache (any argument causes it to also stop all timers)",150,command_reloadqst) ||
@@ -2764,85 +2763,6 @@ void command_appearance(Client *c, const Seperator *sep)
 			t=c->GetTarget();
 		t->SendAppearancePacket(atoi(sep->arg[1]), atoi(sep->arg[2]));
 		c->Message(0, "Sending appearance packet: target=%s, type=%s, value=%s", t->GetName(), sep->arg[1], sep->arg[2]);
-	}
-}
-
-void command_charbackup(Client *c, const Seperator *sep)
-{
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES* result;
-	MYSQL_ROW row;
-	if (strcasecmp(sep->arg[1], "list") == 0) {
-		uint32 charid = 0;
-		if (sep->IsNumber(2))
-			charid = atoi(sep->arg[2]);
-		else
-			database.GetAccountIDByChar(sep->arg[2]);
-		if (charid) {
-			if (database.RunQuery(query, MakeAnyLenString(&query,
-				"Select id, backupreason, charid, account_id, zoneid, DATE_FORMAT(ts, '%%m/%%d/%%Y %%H:%%i:%%s') "
-				" from character_backup where charid=%u", charid), errbuf, &result)) {
-				safe_delete(query);
-				uint32 x = 0;
-				while ((row = mysql_fetch_row(result))) {
-					c->Message(0, " %u: %s, %s (%u), reason=%u", atoi(row[0]), row[5], database.GetZoneName(atoi(row[4])), atoi(row[4]), atoi(row[1]));
-					x++;
-				}
-				c->Message(0, " %u backups found.", x);
-				mysql_free_result(result);
-			}
-			else {
-				c->Message(13, "Query error: '%s' %s", query, errbuf);
-				safe_delete(query);
-			}
-		}
-		else
-			c->Message(0, "Usage: #charbackup list [char name/id]");
-	}
-	else if (strcasecmp(sep->arg[1], "restore") == 0) {
-		uint32 charid = 0;
-		if (sep->IsNumber(2))
-			charid = atoi(sep->arg[2]);
-		else
-			database.GetAccountIDByChar(sep->arg[2]);
-
-		if (charid && sep->IsNumber(3)) {
-			uint32 cbid = atoi(sep->arg[3]);
-			if (database.RunQuery(query, MakeAnyLenString(&query,
-				"Insert into character_backup (backupreason, charid, account_id, name, profile, level, class, x, y, z, zoneid, alt_adv) "
-				" select 1, id, account_id, name, profile, level, class, x, y, z, zoneid, alt_adv from character_ where id=%u", charid), errbuf)) {
-				if (database.RunQuery(query, MakeAnyLenString(&query,
-					"update character_ inner join character_backup on character_.id = character_backup.charid "
-					" set character_.name = character_backup.name, "
-					" character_.profile = character_backup.profile, "
-					" character_.level = character_backup.level, "
-					" character_.class = character_backup.class, "
-					" character_.x = character_backup.x, "
-					" character_.y = character_backup.y, "
-					" character_.z = character_backup.z, "
-					" character_.zoneid = character_backup.zoneid "
-					" where character_backup.charid=%u and character_backup.id=%u", charid, cbid), errbuf)) {
-					safe_delete(query);
-					c->Message(0, "Character restored.");
-				}
-				else {
-					c->Message(13, "Query error: '%s' %s", query, errbuf);
-					safe_delete(query);
-				}
-			}
-			else {
-				c->Message(13, "Query error: '%s' %s", query, errbuf);
-				safe_delete(query);
-			}
-		}
-		else
-			c->Message(0, "Usage: #charbackup list [char name/id]");
-	}
-	else {
-		c->Message(0, "#charbackup sub-commands:");
-		c->Message(0, "  list [char name/id]");
-		c->Message(0, "  restore [char name/id] [backup#]");
 	}
 }
 
@@ -6296,7 +6216,7 @@ void command_ban(Client *c, const Seperator *sep)
 	}
 	else
 	{
-		database.RunQuery(query, MakeAnyLenString(&query, "SELECT account_id from character_ where name = '%s'", sep->arg[1]), errbuf, &result);
+		database.RunQuery(query, MakeAnyLenString(&query, "SELECT account_id from `character_data` where name = '%s'", sep->arg[1]), errbuf, &result);
 		if(query)
 		{
 			safe_delete_array(query);

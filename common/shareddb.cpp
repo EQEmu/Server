@@ -384,7 +384,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
 	if (is_charid) {
 		len_query = MakeAnyLenString(&query,
 			"SELECT sb.slotid,sb.itemid,sb.charges,sb.augslot1,sb.augslot2,sb.augslot3,sb.augslot4,sb.augslot5,sb.custom_data from sharedbank sb "
-			"INNER JOIN character_ ch ON ch.account_id=sb.acctid "
+			"INNER JOIN character_data ch ON ch.account_id=sb.acctid "
 			"WHERE ch.id=%i", id);
 	}
 	else {
@@ -604,7 +604,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
 	if (RunQuery(query, MakeAnyLenString(&query, 
 		" SELECT `slotid`, `itemid`, `charges`, `color`, `augslot1`, `augslot2`, `augslot3`, `augslot4`, `augslot5`, `instnodrop`, `custom_data`"
 		" FROM `inventory`"
-		" INNER JOIN character_ ch ON ch.id = charid"
+		" INNER JOIN `character_data` ch ON ch.id = charid"
 		" WHERE ch.NAME = '%s'"
 		" AND ch.account_id = % i"
 		" ORDER BY `slotid`",

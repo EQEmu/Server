@@ -454,7 +454,7 @@ bool ZoneServer::Process() {
 							timeinfo = localtime ( &rawtime );
 							char *telldate=asctime(timeinfo);
 
-							std::string query = StringFormat("SELECT name FROM character_ WHERE name = '%s'",scm->deliverto);
+							std::string query = StringFormat("SELECT name FROM `character_data` WHERE name = '%s'",scm->deliverto);
 							auto results = database.QueryDatabase(query);
 							if (!results.Success())
                                 break;

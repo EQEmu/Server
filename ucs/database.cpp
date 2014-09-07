@@ -139,7 +139,7 @@ int Database::FindAccount(const char *characterName, Client *client) {
 
 	client->ClearCharacters();
     std::string query = StringFormat("SELECT `id`, `account_id`, `level` "
-                                    "FROM `character_` WHERE `name` = '%s' LIMIT 1",
+                                    "FROM `character_data` WHERE `name` = '%s' LIMIT 1",
                                     characterName);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
@@ -159,7 +159,7 @@ int Database::FindAccount(const char *characterName, Client *client) {
 
 	_log(UCS__TRACE, "Account ID for %s is %i", characterName, accountID);
 
-    query = StringFormat("SELECT `id`, `name`, `level` FROM `character_` "
+    query = StringFormat("SELECT `id`, `name`, `level` FROM `character_data` "
                         "WHERE `account_id` = %i AND `name` != '%s'",
 						accountID, characterName);
     results = QueryDatabase(query);
@@ -174,7 +174,7 @@ int Database::FindAccount(const char *characterName, Client *client) {
 
 bool Database::VerifyMailKey(std::string characterName, int IPAddress, std::string MailKey) {
 
-	std::string query = StringFormat("SELECT `mailkey` FROM `character_` WHERE `name`='%s' LIMIT 1",
+	std::string query = StringFormat("SELECT `mailkey` FROM `character_data` WHERE `name`='%s' LIMIT 1",
                                     characterName.c_str());
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
@@ -202,7 +202,7 @@ bool Database::VerifyMailKey(std::string characterName, int IPAddress, std::stri
 int Database::FindCharacter(const char *characterName) {
 
 	char *safeCharName = RemoveApostrophes(characterName);
-    std::string query = StringFormat("SELECT `id` FROM `character_` WHERE `name`='%s' LIMIT 1", safeCharName);
+    std::string query = StringFormat("SELECT `id` FROM `character_data` WHERE `name`='%s' LIMIT 1", safeCharName);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		_log(UCS__ERROR, "FindCharacter failed. %s %s", query.c_str(), results.ErrorMessage().c_str());

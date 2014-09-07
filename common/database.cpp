@@ -728,7 +728,7 @@ uint32 Database::GetAccountIDByChar(const char* charname) {
 
 // Retrieve account_id for a given char_id
 uint32 Database::GetAccountIDByChar(uint32 char_id) {
-	std::string query = StringFormat("SELECT `account_id` FROM `character_` WHERE `id` = %i LIMIT 1", char_id); 
+	std::string query = StringFormat("SELECT `account_id` FROM `character_data` WHERE `id` = %i LIMIT 1", char_id); 
 	auto results = QueryDatabase(query); 
 	if (!results.Success()) {
 		LogFile->write(EQEMuLog::Error, "Error in GetAccountIDByChar query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
