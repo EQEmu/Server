@@ -386,17 +386,6 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 		strcpy(ztz->name, GetName());
 		ztz->guild_id = GuildID();
 		worldserver.SendPacket(pack);
-
-		printf("ZONING REQUEST TO WORLD\n");
-		printf("ztz->response %u              \n", ztz->response);
-		printf("ztz->current_zone_id %u       \n", ztz->current_zone_id);
-		printf("ztz->current_instance_id %u   \n", ztz->current_instance_id);
-		printf("ztz->requested_zone_id %u     \n", ztz->requested_zone_id);
-		printf("ztz->requested_instance_id %u \n", ztz->requested_instance_id);
-		printf("ztz->admin %u                 \n", ztz->admin);
-		printf("ztz->ignorerestrictions %u    \n", ztz->ignorerestrictions);
-		printf("ztz->guild_id %u              \n", ztz->guild_id);
-
 		safe_delete(pack);
 	}
 

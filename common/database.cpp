@@ -649,6 +649,7 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 		pp->RestTimer					  // " RestTimer)                 "
 		);
 	auto results = QueryDatabase(query);
+	ThrowDBError(results.ErrorMessage(), "Database::SaveCharacterCreate", query);
 	return true;
 }
 
@@ -1247,7 +1248,7 @@ bool Database::CheckDatabaseConversions() {
 
 	// Testing account = 11001
 	int char_iter_count = 0;
-	rquery = StringFormat("SELECT `id` FROM `character_` WHERE `account_id` = 11001");
+	rquery = StringFormat("SELECT `id` FROM `character_`");
 	results = QueryDatabase(rquery);
 
 	uint8 firstlogon = 0;

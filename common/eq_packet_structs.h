@@ -801,8 +801,8 @@ struct SuspendedMinion_Struct
 ** OpCode: 0x006a
  */
 static const uint32 MAX_PP_LANGUAGE = 28;
-static const uint32 MAX_PP_SPELLBOOK = 720;	// Set for all functions
-static const uint32 MAX_PP_MEMSPELL = 12; // Set to latest client so functions can work right
+static const uint32 MAX_PP_SPELLBOOK = 480;	// Set for all functions
+static const uint32 MAX_PP_MEMSPELL = 9; // Set to latest client so functions can work right
 static const uint32 MAX_PP_REF_SPELLBOOK = 480;	// Set for Player Profile size retain
 static const uint32 MAX_PP_REF_MEMSPELL = 9; // Set for Player Profile size retain
 

@@ -542,29 +542,26 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app) {
 	std::string query;
 	unsigned long* lengths;
 
-	/* Set item material tint */
-	for (int i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_END; i++)
-	if (m_pp.item_tint[i].rgb.use_tint == 1)
-		m_pp.item_tint[i].rgb.use_tint = 0xFF;
-
 	uint32 cid = CharacterID();
 	character_id = cid; /* Global character_id reference */
+
+	clock_t t = std::clock(); /* Function timer start */
 
 	/* Flush and reload factions */
 	database.RemoveTempFactions(this);
 	database.LoadCharacterFactionValues(cid, factionvalues);
 
 	/* Load Character Account Data: Temp until I move */
-	query = StringFormat("SELECT `status`, `name`, `lsaccount_id`, `gmspeed`, `revoked`, `hideme` FROM `account` WHERE `id` = %i", this->AccountID());
+	query = StringFormat("SELECT `status`, `name`, `lsaccount_id`, `gmspeed`, `revoked`, `hideme` FROM `account` WHERE `id` = %u", this->AccountID());
 	auto results = database.QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		if (admin){ admin = atoi(row[0]); }
 		if (account_name){ strcpy(account_name, row[1]); }
 		if (lsaccountid && atoi(row[2]) > 0){ lsaccountid = atoi(row[2]); }
 		else{ lsaccountid = 0; }
-		if (gmspeed){ gmspeed = atoi(row[3]); }
-		if (revoked){ revoked = atoi(row[4]); } 
-		if (gmhideme){ gmhideme = atoi(row[5]); }
+		gmspeed = atoi(row[3]);
+		revoked = atoi(row[4]); 
+		gmhideme = atoi(row[5]); 
 		if (account_creation){ account_creation = atoul(row[6]); }
 	}
 
@@ -587,7 +584,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app) {
 		if (LFG){ LFG = atoi(row[1]); }
 		if (firstlogon){ firstlogon = atoi(row[3]); }
 	}
-
+	
 	loaditems = database.GetInventory(cid, &m_inv); /* Load Character Inventory */
 	database.LoadCharacterBandolier(cid, &m_pp); /* Load Character Bandolier */
 	database.LoadCharacterBindPoint(cid, &m_pp); /* Load Character Bind */
@@ -602,6 +599,13 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app) {
 	database.LoadCharacterDisciplines(cid, &m_pp); /* Load Character Disciplines */
 	database.LoadCharacterLanguages(cid, &m_pp); /* Load Character Languages */
 	database.LoadCharacterLeadershipAA(cid, &m_pp); /* Load Character Leadership AA's */
+
+	/* Set item material tint */
+	for (int i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_END; i++)
+	if (m_pp.item_tint[i].rgb.use_tint == 1 || m_pp.item_tint[i].rgb.use_tint == 255)
+		m_pp.item_tint[i].rgb.use_tint = 0xFF;
+
+	std::cout << "Character Data Load Took " << (((float)(std::clock() - t)) / CLOCKS_PER_SEC) << " seconds\n" << std::endl; 
 
 	if (level){ level = m_pp.level; }
 
@@ -4981,6 +4985,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 
 	/* Memorized Spell */
 	if (m_pp.mem_spells[castspell->slot] && m_pp.mem_spells[castspell->slot] == castspell->spell_id){
+
 		uint16 spell_to_cast = 0; 
 		if (castspell->slot < MAX_PP_MEMSPELL) {
 			spell_to_cast = m_pp.mem_spells[castspell->slot];

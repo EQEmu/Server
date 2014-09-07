@@ -1032,7 +1032,12 @@ bool ZoneDatabase::LoadCharacterMemmedSpells(uint32 character_id, PlayerProfile_
 		"`character_memmed_spells`		"
 		"WHERE `id` = %u ORDER BY `slot_id`", character_id);
 	auto results = database.QueryDatabase(query); int i = 0;
-	for (auto row = results.begin(); row != results.end(); ++row) { i = atoi(row[0]); pp->mem_spells[i] = atoi(row[1]); } 
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		i = atoi(row[0]); 
+		if (i < MAX_PP_MEMSPELL){ 
+			pp->mem_spells[i] = atoi(row[1]); 
+		}
+	}
 	return true;
 }
 
@@ -1045,7 +1050,12 @@ bool ZoneDatabase::LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Str
 		"`character_spells`		"
 		"WHERE `id` = %u ORDER BY `slot_id`", character_id);
 	auto results = database.QueryDatabase(query); int i = 0;
-	for (auto row = results.begin(); row != results.end(); ++row) { i = atoi(row[0]); pp->spell_book[i] = atoi(row[1]); }
+	for (auto row = results.begin(); row != results.end(); ++row) { 
+		i = atoi(row[0]); 
+		if (i < MAX_PP_SPELLBOOK){ 
+			pp->spell_book[i] = atoi(row[1]); 
+		} 
+	} 
 	return true;
 }
 
@@ -1062,7 +1072,12 @@ bool ZoneDatabase::LoadCharacterLanguages(uint32 character_id, PlayerProfile_Str
 	for (i = 0; i < MAX_PP_LANGUAGE; i++){ 
 		pp->languages[i] = 0;
 	}
-	for (auto row = results.begin(); row != results.end(); ++row) { i = atoi(row[0]); pp->languages[i] = atoi(row[1]); }
+	for (auto row = results.begin(); row != results.end(); ++row) { 
+		i = atoi(row[0]); 
+		if (i < MAX_PP_LANGUAGE){
+			pp->languages[i] = atoi(row[1]);
+		}
+	}
 	return true;
 }
 
@@ -1084,7 +1099,12 @@ bool ZoneDatabase::LoadCharacterDisciplines(uint32 character_id, PlayerProfile_S
 		"`character_disciplines`"
 		"WHERE `id` = %u ORDER BY `disc_id`", character_id);
 	auto results = database.QueryDatabase(query); int i = 0;
-	for (auto row = results.begin(); row != results.end(); ++row) { pp->disciplines.values[i] = atoi(row[0]); i++; }   
+	for (auto row = results.begin(); row != results.end(); ++row) { 
+		if (i < MAX_PP_DISCIPLINES){
+			pp->disciplines.values[i] = atoi(row[0]);
+		}
+		i++; 
+	}   
 	return true; 
 }
 
@@ -1101,7 +1121,12 @@ bool ZoneDatabase::LoadCharacterSkills(uint32 character_id, PlayerProfile_Struct
 	for (i = 0; i < MAX_PP_SKILL; i++){ 
 		pp->skills[i] = 0;
 	}
-	for (auto row = results.begin(); row != results.end(); ++row) { i = atoi(row[0]); pp->skills[i] = atoi(row[1]); }
+	for (auto row = results.begin(); row != results.end(); ++row) { 
+		i = atoi(row[0]); 
+		if (i < MAX_PP_SKILL){
+			pp->skills[i] = atoi(row[1]);
+		}
+	}
 	return true;
 }
 
