@@ -822,25 +822,24 @@ bool Client::PushItemOnCursor(const ItemInst& inst, bool client_update)
 	return database.SaveCursor(CharacterID(), s, e);
 }
 
-bool Client::PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client_update)
-{
+bool Client::PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client_update) {
 	mlog(INVENTORY__SLOTS, "Putting item %s (%d) into slot %d", inst.GetItem()->Name, inst.GetItem()->ID, slot_id);
+
 	if (slot_id == MainCursor)
-	{
-		return PushItemOnCursor(inst,client_update);
-	}
+		return PushItemOnCursor(inst, client_update);
 	else
 		m_inv.PutItem(slot_id, inst);
 
-	if (client_update) {
-		SendItemPacket(slot_id, &inst, (slot_id == MainCursor) ? ItemPacketSummonItem : ItemPacketTrade);
-	}
+	if (client_update)
+		SendItemPacket(slot_id, &inst, ((slot_id == MainCursor) ? ItemPacketSummonItem : ItemPacketTrade));
 
 	if (slot_id == MainCursor) {
-		std::list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
+		std::list<ItemInst*>::const_iterator s = m_inv.cursor_begin(), e = m_inv.cursor_end();
 		return database.SaveCursor(this->CharacterID(), s, e);
-	} else
+	}
+	else {
 		return database.SaveInventory(this->CharacterID(), &inst, slot_id);
+	}
 
 	CalcBonuses();
 }
@@ -1539,7 +1538,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			// Also sends trade information to other client of trade session
 			if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
 
-			trade->AddEntity(src_slot_id, dst_slot_id, move_in->number_in_stack);
+			trade->AddEntity(dst_slot_id, move_in->number_in_stack);
 
 			return true;
 		} else {
@@ -2003,11 +2002,10 @@ bool Client::DecreaseByID(uint32 type, uint8 amt) {
 }
 
 void Client::RemoveNoRent(bool client_update) {
+	int16 slot_id = 0;
 
-	int16 slot_id;
-
-	// personal
-	for(slot_id = MAIN_BEGIN; slot_id < EmuConstants::MAP_POSSESSIONS_SIZE; slot_id++) {
+	// equipment
+	for(slot_id = EmuConstants::EQUIPMENT_BEGIN; slot_id <= EmuConstants::EQUIPMENT_END; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if(inst && !inst->GetItem()->NoRent) {
 			mlog(INVENTORY__SLOTS, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
@@ -2015,11 +2013,22 @@ void Client::RemoveNoRent(bool client_update) {
 		}
 	}
 
+	// general
+	for (slot_id = EmuConstants::GENERAL_BEGIN; slot_id <= EmuConstants::GENERAL_END; slot_id++) {
+		const ItemInst* inst = m_inv[slot_id];
+		if (inst && !inst->GetItem()->NoRent) {
+			mlog(INVENTORY__SLOTS, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
+			DeleteItemInInventory(slot_id, 0, client_update);
+		}
+	}
+
 	// power source
-	const ItemInst* inst = m_inv[MainPowerSource];
-	if(inst && !inst->GetItem()->NoRent) {
-		mlog(INVENTORY__SLOTS, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, MainPowerSource);
-		DeleteItemInInventory(MainPowerSource, 0, (GetClientVersion() >= EQClientSoF) ? client_update : false); // Ti slot non-existent
+	if (m_inv[MainPowerSource]) {
+		const ItemInst* inst = m_inv[MainPowerSource];
+		if (inst && !inst->GetItem()->NoRent) {
+			mlog(INVENTORY__SLOTS, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, MainPowerSource);
+			DeleteItemInInventory(MainPowerSource, 0, (GetClientVersion() >= EQClientSoF) ? client_update : false); // Ti slot non-existent
+		}
 	}
 
 	// containers
@@ -2066,15 +2075,42 @@ void Client::RemoveNoRent(bool client_update) {
 			DeleteItemInInventory(slot_id, 0, false); // Can't delete from client Shared Bank Container slots
 		}
 	}
+
+	// cursor & limbo
+	if (!m_inv.CursorEmpty()) {
+		std::list<ItemInst*> local;
+		ItemInst* inst = nullptr;
+
+		while (!m_inv.CursorEmpty()) {
+			inst = m_inv.PopItem(MainCursor);
+			if (inst)
+				local.push_back(inst);
+		}
+
+		std::list<ItemInst*>::iterator iter = local.begin();
+		while (iter != local.end()) {
+			inst = *iter;
+			if (!inst->GetItem()->NoRent)
+				mlog(INVENTORY__SLOTS, "NoRent Timer Lapse: Deleting %s from `Limbo`", inst->GetItem()->Name);
+			else
+				m_inv.PushCursor(**iter);
+
+			safe_delete(*iter);
+			iter = local.erase(iter);
+		}
+
+		std::list<ItemInst*>::const_iterator s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+		database.SaveCursor(this->CharacterID(), s, e);
+		local.clear();
+	}
 }
 
 // Two new methods to alleviate perpetual login desyncs
 void Client::RemoveDuplicateLore(bool client_update) {
-	// Split-charge stacking may be added at some point -U
-	int16 slot_id;
+	int16 slot_id = 0;
 
-	// personal
-	for(slot_id = MAIN_BEGIN; slot_id < EmuConstants::MAP_POSSESSIONS_SIZE; slot_id++) {
+	// equipment
+	for(slot_id = EmuConstants::EQUIPMENT_BEGIN; slot_id <= EmuConstants::EQUIPMENT_END; slot_id++) {
 		ItemInst* inst = m_inv.PopItem(slot_id);
 		if(inst) {
 			if(CheckLoreConflict(inst->GetItem())) {
@@ -2088,17 +2124,34 @@ void Client::RemoveDuplicateLore(bool client_update) {
 		}
 	}
 
+	// general
+	for (slot_id = EmuConstants::GENERAL_BEGIN; slot_id <= EmuConstants::GENERAL_END; slot_id++) {
+		ItemInst* inst = m_inv.PopItem(slot_id);
+		if (inst) {
+			if (CheckLoreConflict(inst->GetItem())) {
+				mlog(INVENTORY__ERROR, "Lore Duplication Error: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
+				database.SaveInventory(character_id, nullptr, slot_id);
+			}
+			else {
+				m_inv.PutItem(slot_id, *inst);
+			}
+			safe_delete(inst);
+		}
+	}
+
 	// power source
-	ItemInst* inst = m_inv.PopItem(MainPowerSource);
-	if(inst) {
-		if(CheckLoreConflict(inst->GetItem())) {
-			mlog(INVENTORY__ERROR, "Lore Duplication Error: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
-			database.SaveInventory(character_id, nullptr, MainPowerSource);
+	if (m_inv[MainPowerSource]) {
+		ItemInst* inst = m_inv.PopItem(MainPowerSource);
+		if (inst) {
+			if (CheckLoreConflict(inst->GetItem())) {
+				mlog(INVENTORY__ERROR, "Lore Duplication Error: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
+				database.SaveInventory(character_id, nullptr, MainPowerSource);
+			}
+			else {
+				m_inv.PutItem(MainPowerSource, *inst);
+			}
+			safe_delete(inst);
 		}
-		else {
-			m_inv.PutItem(MainPowerSource, *inst);
-		}
-		safe_delete(inst);
 	}
 
 	// containers
@@ -2147,11 +2200,56 @@ void Client::RemoveDuplicateLore(bool client_update) {
 	}
 
 	// Shared Bank and Shared Bank Containers are not checked due to their allowing duplicate lore items -U
+
+	// cursor & limbo
+	if (!m_inv.CursorEmpty()) {
+		std::list<ItemInst*> local;
+		ItemInst* inst = nullptr;
+
+		while (!m_inv.CursorEmpty()) {
+			inst = m_inv.PopItem(MainCursor);
+			if (inst)
+				local.push_back(inst);
+		}
+
+		std::list<ItemInst*>::iterator iter = local.begin();
+		while (iter != local.end()) {
+			inst = *iter;
+			if (CheckLoreConflict(inst->GetItem())) {
+				mlog(INVENTORY__ERROR, "Lore Duplication Error: Deleting %s from `Limbo`", inst->GetItem()->Name);
+				safe_delete(*iter);
+				iter = local.erase(iter);
+			}
+			else {
+				++iter;
+			}
+		}
+
+		iter = local.begin();
+		while (iter != local.end()) {
+			inst = *iter;
+			if (!inst->GetItem()->LoreFlag ||
+				((inst->GetItem()->LoreGroup == -1) && (m_inv.HasItem(inst->GetID(), 0, invWhereCursor) == INVALID_INDEX)) ||
+				(inst->GetItem()->LoreGroup && ~inst->GetItem()->LoreGroup && (m_inv.HasItemByLoreGroup(inst->GetItem()->LoreGroup, invWhereCursor) == INVALID_INDEX))) {
+				
+				m_inv.PushCursor(**iter);
+			}
+			else {
+				mlog(INVENTORY__ERROR, "Lore Duplication Error: Deleting %s from `Limbo`", inst->GetItem()->Name);
+			}
+
+			safe_delete(*iter);
+			iter = local.erase(iter);
+		}
+
+		std::list<ItemInst*>::const_iterator s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+		database.SaveCursor(this->CharacterID(), s, e);
+		local.clear();
+	}
 }
 
 void Client::MoveSlotNotAllowed(bool client_update) {
-
-	int16 slot_id;
+	int16 slot_id = 0;
 
 	// equipment
 	for(slot_id = EmuConstants::EQUIPMENT_BEGIN; slot_id <= EmuConstants::EQUIPMENT_END; slot_id++) {

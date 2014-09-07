@@ -140,101 +140,92 @@ bool SpawnGroupList::RemoveSpawnGroup(uint32 in_id) {
 }
 
 bool ZoneDatabase::LoadSpawnGroups(const char* zone_name, uint16 version, SpawnGroupList* spawn_group_list) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	query = 0;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT DISTINCT(spawngroupID), spawngroup.name, spawngroup.spawn_limit, spawngroup.dist, spawngroup.max_x, spawngroup.min_x, spawngroup.max_y, spawngroup.min_y, spawngroup.delay, spawngroup.despawn, spawngroup.despawn_timer, spawngroup.mindelay FROM spawn2,spawngroup WHERE spawn2.spawngroupID=spawngroup.ID and spawn2.version=%u and zone='%s'", version, zone_name), errbuf, &result))
-	{
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result))) {
-			SpawnGroup* newSpawnGroup = new SpawnGroup( atoi(row[0]), row[1], atoi(row[2]), atof(row[3]), atof(row[4]), atof(row[5]), atof(row[6]), atof(row[7]), atoi(row[8]), atoi(row[9]), atoi(row[10]), atoi(row[11]));
-			spawn_group_list->AddSpawnGroup(newSpawnGroup);
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		_log(ZONE__SPAWNS, "Error2 in PopulateZoneLists query '%s' ", query);
-		safe_delete_array(query);
+	std::string query = StringFormat("SELECT DISTINCT(spawngroupID), spawngroup.name, spawngroup.spawn_limit, "
+                                    "spawngroup.dist, spawngroup.max_x, spawngroup.min_x, "
+                                    "spawngroup.max_y, spawngroup.min_y, spawngroup.delay, "
+                                    "spawngroup.despawn, spawngroup.despawn_timer, spawngroup.mindelay "
+                                    "FROM spawn2, spawngroup WHERE spawn2.spawngroupID = spawngroup.ID "
+                                    "AND spawn2.version = %u and zone = '%s'", version, zone_name);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        _log(ZONE__SPAWNS, "Error2 in PopulateZoneLists query '%s' ", query.c_str());
 		return false;
-	}
+    }
 
-	query = 0;
-	if (RunQuery(query, MakeAnyLenString(&query,
-		"SELECT DISTINCT spawnentry.spawngroupID, npcid, chance, "
-		"npc_types.spawn_limit AS sl "
-		"FROM spawnentry, spawn2, npc_types "
-		"WHERE spawnentry.npcID=npc_types.id AND spawnentry.spawngroupID=spawn2.spawngroupID "
-		"AND zone='%s'", zone_name), errbuf, &result)) {
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result)))
-		{
-			SpawnEntry* newSpawnEntry = new SpawnEntry( atoi(row[1]), atoi(row[2]), row[3]?atoi(row[3]):0);
-			SpawnGroup *sg = spawn_group_list->GetSpawnGroup(atoi(row[0]));
-			if (sg)
-				sg->AddSpawnEntry(newSpawnEntry);
-			else
-				_log(ZONE__SPAWNS, "Error in LoadSpawnGroups %s ", query); 
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		_log(ZONE__SPAWNS, "Error2 in PopulateZoneLists query '%'", query);
-		safe_delete_array(query);
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        SpawnGroup* newSpawnGroup = new SpawnGroup(atoi(row[0]), row[1], atoi(row[2]), atof(row[3]),
+                                                    atof(row[4]), atof(row[5]), atof(row[6]), atof(row[7]),
+                                                    atoi(row[8]), atoi(row[9]), atoi(row[10]), atoi(row[11]));
+        spawn_group_list->AddSpawnGroup(newSpawnGroup);
+    }
+
+	query = StringFormat("SELECT DISTINCT spawnentry.spawngroupID, npcid, chance, "
+                        "npc_types.spawn_limit AS sl "
+                        "FROM spawnentry, spawn2, npc_types "
+                        "WHERE spawnentry.npcID=npc_types.id "
+                        "AND spawnentry.spawngroupID = spawn2.spawngroupID "
+                        "AND zone = '%s'", zone_name);
+    results = QueryDatabase(query);
+    if (!results.Success()) {
+        _log(ZONE__SPAWNS, "Error2 in PopulateZoneLists query '%'", query.c_str());
 		return false;
-	}
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        SpawnEntry* newSpawnEntry = new SpawnEntry( atoi(row[1]), atoi(row[2]), row[3]?atoi(row[3]):0);
+		SpawnGroup *sg = spawn_group_list->GetSpawnGroup(atoi(row[0]));
+
+		if (!sg) {
+            _log(ZONE__SPAWNS, "Error in LoadSpawnGroups %s ", query.c_str());
+            continue;
+		}
+
+		sg->AddSpawnEntry(newSpawnEntry);
+    }
 
 	return true;
 }
 
 bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList* spawn_group_list) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	query = 0;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT DISTINCT spawngroup.id, spawngroup.name, spawngroup.spawn_limit, spawngroup.dist, spawngroup.max_x, spawngroup.min_x, spawngroup.max_y, spawngroup.min_y, spawngroup.delay, spawngroup.despawn, spawngroup.despawn_timer, spawngroup.mindelay FROM spawngroup WHERE spawngroup.ID='%i'", spawngroupid), errbuf, &result))
-	{
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result))) {
-			SpawnGroup* newSpawnGroup = new SpawnGroup( atoi(row[0]), row[1], atoi(row[2]), atof(row[3]), atof(row[4]), atof(row[5]), atof(row[6]), atof(row[7]), atoi(row[8]), atoi(row[9]), atoi(row[10]), atoi(row[11]));
-			spawn_group_list->AddSpawnGroup(newSpawnGroup);
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		_log(ZONE__SPAWNS, "Error2 in PopulateZoneLists query %s", query);
-		safe_delete_array(query);
+
+	std::string query = StringFormat("SELECT DISTINCT(spawngroup.id), spawngroup.name, spawngroup.spawn_limit, "
+                                    "spawngroup.dist, spawngroup.max_x, spawngroup.min_x, "
+                                    "spawngroup.max_y, spawngroup.min_y, spawngroup.delay, "
+                                    "spawngroup.despawn, spawngroup.despawn_timer, spawngroup.mindelay "
+                                    "FROM spawngroup WHERE spawngroup.ID = '%i'", spawngroupid);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        _log(ZONE__SPAWNS, "Error2 in PopulateZoneLists query %s", query.c_str());
+		return false;
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        SpawnGroup* newSpawnGroup = new SpawnGroup(atoi(row[0]), row[1], atoi(row[2]), atof(row[3]), atof(row[4]), atof(row[5]), atof(row[6]), atof(row[7]), atoi(row[8]), atoi(row[9]), atoi(row[10]), atoi(row[11]));
+        spawn_group_list->AddSpawnGroup(newSpawnGroup);
+    }
+
+	query = StringFormat("SELECT DISTINCT(spawnentry.spawngroupID), spawnentry.npcid, "
+                        "spawnentry.chance, spawngroup.spawn_limit FROM spawnentry, spawngroup "
+                        "WHERE spawnentry.spawngroupID = '%i' AND spawngroup.spawn_limit = '0' "
+                        "ORDER BY chance", spawngroupid);
+    results = QueryDatabase(query);
+	if (!results.Success()) {
+        _log(ZONE__SPAWNS, "Error3 in PopulateZoneLists query '%s'", query.c_str());
 		return false;
 	}
 
-	query = 0;
-	if (RunQuery(query, MakeAnyLenString(&query,
-		"SELECT DISTINCT spawnentry.spawngroupID, spawnentry.npcid, spawnentry.chance, spawngroup.spawn_limit FROM spawnentry,spawngroup WHERE spawnentry.spawngroupID='%i' AND spawngroup.spawn_limit='0' ORDER by chance", spawngroupid), errbuf, &result)) {
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result)))
-		{
-			SpawnEntry* newSpawnEntry = new SpawnEntry( atoi(row[1]), atoi(row[2]), row[3]?atoi(row[3]):0);
-			SpawnGroup *sg = spawn_group_list->GetSpawnGroup(atoi(row[0]));
-			if (sg)
-				sg->AddSpawnEntry(newSpawnEntry);
-			else
-				_log(ZONE__SPAWNS, "Error in SpawngroupID: %s ", row[0]);
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		_log(ZONE__SPAWNS, "Error3 in PopulateZoneLists query '%s'", row[0]);
-		safe_delete_array(query);
-		return false;
-	}
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        SpawnEntry* newSpawnEntry = new SpawnEntry( atoi(row[1]), atoi(row[2]), row[3]?atoi(row[3]):0);
+        SpawnGroup *sg = spawn_group_list->GetSpawnGroup(atoi(row[0]));
+        if (!sg) {
+            _log(ZONE__SPAWNS, "Error in SpawngroupID: %s ", row[0]);
+            continue;
+        }
+
+        sg->AddSpawnEntry(newSpawnEntry);
+    }
 
 	return true;
 }

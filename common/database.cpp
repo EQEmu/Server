@@ -161,6 +161,9 @@ uint32 Database::CheckLogin(const char* name, const char* password, int16* oStat
 		return 0;
 	}
 
+	if(results.RowCount() == 0)
+		return 0;
+
 	auto row = results.begin();
 
 	uint32 id = atoi(row[0]);
@@ -768,7 +771,9 @@ void Database::GetCharName(uint32 char_id, char* name) {
 	}
 
 	auto row = results.begin();
-	strcpy(name, row[0]);
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		strcpy(name, row[0]);
+	}
 }
 
 bool Database::LoadVariables() {

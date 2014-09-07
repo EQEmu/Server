@@ -416,6 +416,11 @@ void Lua_EntityList::SignalAllClients(int signal) {
 	self->SignalAllClients(signal);
 }
 
+void Lua_EntityList::ChannelMessage(Lua_Mob from, int channel_num, int language, const char *message) {
+	Lua_Safe_Call_Void();
+	self->ChannelMessage(from, channel_num, language, message);
+}
+
 luabind::scope lua_register_entity_list() {
 	return luabind::class_<Lua_EntityList>("EntityList")
 		.def(luabind::constructor<>())
@@ -479,7 +484,8 @@ luabind::scope lua_register_entity_list() {
 		.def("GetObjectList", (Lua_Object_List(Lua_EntityList::*)(void))&Lua_EntityList::GetObjectList)
 		.def("GetDoorsList", (Lua_Doors_List(Lua_EntityList::*)(void))&Lua_EntityList::GetDoorsList)
 		.def("GetSpawnList", (Lua_Spawn_List(Lua_EntityList::*)(void))&Lua_EntityList::GetSpawnList)
-		.def("SignalAllClients", (void(Lua_EntityList::*)(int))&Lua_EntityList::SignalAllClients);
+		.def("SignalAllClients", (void(Lua_EntityList::*)(int))&Lua_EntityList::SignalAllClients)
+		.def("ChannelMessage", (void(Lua_EntityList::*)(Lua_Mob,int,int,const char*))&Lua_EntityList::ChannelMessage);
 }
 
 luabind::scope lua_register_mob_list() {

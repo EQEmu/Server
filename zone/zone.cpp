@@ -594,15 +594,17 @@ void Zone::LoadMercTemplates(){
             tempMercTemplate.Stances[i] = 0;
 
         int stanceIndex = 0;
-        for (std::list<MercStanceInfo>::iterator mercStanceListItr = merc_stances.begin(); mercStanceListItr != merc_stances.end(); ++mercStanceListItr, ++stanceIndex) {
+        for (auto mercStanceListItr = merc_stances.begin(); mercStanceListItr != merc_stances.end(); ++mercStanceListItr) {
             if(mercStanceListItr->ClassID != tempMercTemplate.ClassID || mercStanceListItr->ProficiencyID != tempMercTemplate.ProficiencyID)
                 continue;
 
             zone->merc_stance_list[tempMercTemplate.MercTemplateID].push_back((*mercStanceListItr));
             tempMercTemplate.Stances[stanceIndex] = mercStanceListItr->StanceID;
+            ++stanceIndex;
         }
 
         merc_templates[tempMercTemplate.MercTemplateID] = tempMercTemplate;
+
     }
 
 }
@@ -733,6 +735,7 @@ void Zone::Shutdown(bool quite)
 	while (mob_itr != mob_list.end()) {
 		Mob* mob_inst = *mob_itr;
 		mob_inst->AI_Stop();
+		mob_inst->AI_ShutDown();
 		++mob_itr;
 	}
 
@@ -1691,45 +1694,41 @@ ZonePoint* Zone::GetClosestZonePointWithoutZone(float x, float y, float z, Clien
 
 bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list, const char* zonename, uint32 version)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+
 	zone_point_list->Clear();
 	zone->numzonepoints = 0;
-	MakeAnyLenString(&query, "SELECT x, y, z, target_x, target_y, "
-		"target_z, target_zone_id, heading, target_heading, number, "
-		"target_instance, client_version_mask FROM zone_points "
-		"WHERE zone='%s' AND (version=%i OR version=-1) order by number", zonename, version);
-	if (RunQuery(query, strlen(query), errbuf, &result))
-	{
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result)))
-		{
-			ZonePoint* zp = new ZonePoint;
-			zp->x = atof(row[0]);
-			zp->y = atof(row[1]);
-			zp->z = atof(row[2]);
-			zp->target_x = atof(row[3]);
-			zp->target_y = atof(row[4]);
-			zp->target_z = atof(row[5]);
-			zp->target_zone_id = atoi(row[6]);
-			zp->heading = atof(row[7]);
-			zp->target_heading = atof(row[8]);
-			zp->number = atoi(row[9]);
-			zp->target_zone_instance = atoi(row[10]);
-			zp->client_version_mask = (uint32)strtoul(row[11], nullptr, 0);
-			zone_point_list->Insert(zp);
-			zone->numzonepoints++;
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		std::cerr << "Error1 in LoadStaticZonePoints query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+	std::string query = StringFormat("SELECT x, y, z, target_x, target_y, "
+                                    "target_z, target_zone_id, heading, target_heading, "
+                                    "number, target_instance, client_version_mask "
+                                    "FROM zone_points WHERE zone='%s' AND (version=%i OR version=-1) "
+                                    "ORDER BY number", zonename, version);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        std::cerr << "Error1 in LoadStaticZonePoints query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        ZonePoint* zp = new ZonePoint;
+
+        zp->x = atof(row[0]);
+        zp->y = atof(row[1]);
+        zp->z = atof(row[2]);
+        zp->target_x = atof(row[3]);
+        zp->target_y = atof(row[4]);
+        zp->target_z = atof(row[5]);
+        zp->target_zone_id = atoi(row[6]);
+        zp->heading = atof(row[7]);
+        zp->target_heading = atof(row[8]);
+        zp->number = atoi(row[9]);
+        zp->target_zone_instance = atoi(row[10]);
+        zp->client_version_mask = (uint32)strtoul(row[11], nullptr, 0);
+
+        zone_point_list->Insert(zp);
+
+        zone->numzonepoints++;
+    }
+
 	return true;
 }
 

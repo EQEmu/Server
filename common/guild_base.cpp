@@ -474,6 +474,11 @@ bool BaseGuildManager::SetBankerFlag(uint32 charid, bool is_banker) {
 	return(true);
 }
 
+bool BaseGuildManager::ForceRankUpdate(uint32 charid) {
+	SendRankUpdate(charid);
+	return(true);
+}
+
 bool BaseGuildManager::SetAltFlag(uint32 charid, bool is_alt)
 {
 	if(!DBSetAltFlag(charid, is_alt))

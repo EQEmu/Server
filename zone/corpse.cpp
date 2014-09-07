@@ -1164,7 +1164,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 		strcpy(corpse_name, orgname);
 		snprintf(buf, 87, "%d %d %s", inst->GetItem()->ID, inst->GetCharges(), EntityList::RemoveNumbers(corpse_name));
 		buf[87] = '\0';
-		std::vector<void*> args;
+		std::vector<EQEmu::Any> args;
 		args.push_back(inst);
 		args.push_back(this);
 		parse->EventPlayer(EVENT_LOOT, client, buf, 0, &args);

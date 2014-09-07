@@ -836,8 +836,6 @@ void Client::BulkSendInventoryItems() {
 		}
 	}
 
-	// Where are cursor buffer items processed? They need to be validated as well... -U
-
 	bool deletenorent = database.NoRentExpired(GetName());
 	if(deletenorent){ RemoveNoRent(false); } //client was offline for more than 30 minutes, delete no rent items
 

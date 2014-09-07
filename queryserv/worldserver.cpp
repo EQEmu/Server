@@ -80,14 +80,12 @@ void WorldServer::Process()
 			}
 			case ServerOP_QSPlayerLogTrades: {
 				QSPlayerLogTrade_Struct *QS = (QSPlayerLogTrade_Struct*)pack->pBuffer;
-				uint32 Items = QS->char1_count + QS->char2_count;
-				database.LogPlayerTrade(QS, Items);
+				database.LogPlayerTrade(QS, QS->_detail_count);
 				break;
 			}
 			case ServerOP_QSPlayerLogHandins: {
 				QSPlayerLogHandin_Struct *QS = (QSPlayerLogHandin_Struct*)pack->pBuffer;
-				uint32 Items = QS->char_count + QS->npc_count;
-				database.LogPlayerHandin(QS, Items);
+				database.LogPlayerHandin(QS, QS->_detail_count);
 				break;
 			}
 			case ServerOP_QSPlayerLogNPCKills: {

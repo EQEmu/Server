@@ -7773,29 +7773,67 @@ int32 Client::GetModCharacterFactionLevel(int32 faction_id) {
 	return Modded;
 }
 
-bool Client::HatedByClass(uint32 p_race, uint32 p_class, uint32 p_deity, int32 pFaction)
+void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 {
+	int messageid = 0;
+	int32 tmpFactionValue = 0;
+	int32 lowestvalue = 0;
+	FactionMods fmod;
 
-	bool Result = false;
-
-	int32 tmpFactionValue;
-	FactionMods fmods;
-
-	//First get the NPC's Primary faction
-	if(pFaction > 0)
-	{
-		//Get the faction data from the database
-		if(database.GetFactionData(&fmods, p_class, p_race, p_deity, pFaction))
-		{
-			tmpFactionValue = GetCharacterFactionLevel(pFaction);
-			tmpFactionValue += GetFactionBonus(pFaction);
-			tmpFactionValue += GetItemFactionBonus(pFaction);
-			CalculateFaction(&fmods, tmpFactionValue);
-			if(fmods.class_mod < fmods.race_mod)
-				Result = true;
+	// If a faction is involved, get the data.
+	if (primaryfaction > 0) {
+		if (database.GetFactionData(&fmod, GetClass(), GetRace(), GetDeity(), primaryfaction)) {
+			tmpFactionValue = GetCharacterFactionLevel(primaryfaction);
+			lowestvalue = std::min(tmpFactionValue, std::min(fmod.class_mod, fmod.race_mod));
 		}
 	}
-	return Result;
+	// If no primary faction or biggest influence is your faction hit
+	if (primaryfaction <= 0 || lowestvalue == tmpFactionValue) {
+		merchant->Say_StringID(MakeRandomInt(WONT_SELL_DEEDS1, WONT_SELL_DEEDS6));
+	} else if (lowestvalue == fmod.race_mod) { // race biggest
+		// Non-standard race (ex. illusioned to wolf)
+		if (GetRace() > PLAYER_RACE_COUNT) {
+			messageid = MakeRandomInt(1, 3); // these aren't sequential StringIDs :(
+			switch (messageid) {
+			case 1:
+				messageid = WONT_SELL_NONSTDRACE1;
+				break;
+			case 2:
+				messageid = WONT_SELL_NONSTDRACE2;
+				break;
+			case 3:
+				messageid = WONT_SELL_NONSTDRACE3;
+				break;
+			default: // w/e should never happen
+				messageid = WONT_SELL_NONSTDRACE1;
+				break;
+			}
+			merchant->Say_StringID(messageid);
+		} else { // normal player races
+			messageid = MakeRandomInt(1, 4);
+			switch (messageid) {
+			case 1:
+				messageid = WONT_SELL_RACE1;
+				break;
+			case 2:
+				messageid = WONT_SELL_RACE2;
+				break;
+			case 3:
+				messageid = WONT_SELL_RACE3;
+				break;
+			case 4:
+				messageid = WONT_SELL_RACE4;
+				break;
+			default: // w/e should never happen
+				messageid = WONT_SELL_RACE1;
+				break;
+			}
+			merchant->Say_StringID(messageid, itoa(GetRace()));
+		}
+	} else if (lowestvalue == fmod.class_mod) {
+		merchant->Say_StringID(MakeRandomInt(WONT_SELL_CLASS1, WONT_SELL_CLASS5), itoa(GetClass()));
+	}
+	return;
 }
 
 //o--------------------------------------------------------------
@@ -7940,7 +7978,7 @@ void Client::ItemTimerCheck()
 		TryItemTimer(i);
 	}
 
-	for(i = EmuConstants::GENERAL_BAGS_BEGIN; i <= MainCursor; i++)
+	for(i = EmuConstants::GENERAL_BEGIN; i <= MainCursor; i++)
 	{
 		TryItemTimer(i);
 	}
@@ -8296,3 +8334,15 @@ void Client::ExpeditionSay(const char *str, int ExpID) {
 	mysql_free_result(result);
 	
 }
+
+void Client::ShowNumHits()
+{
+	uint32 buffcount = GetMaxTotalSlots();
+	for (uint32 buffslot = 0; buffslot < buffcount; buffslot++) {
+		const Buffs_Struct &curbuff = buffs[buffslot];
+		if (curbuff.spellid != SPELL_UNKNOWN && curbuff.numhits)
+			Message(0, "You have %d hits left on %s", curbuff.numhits, GetSpellName(curbuff.spellid));
+	}
+	return;
+}
+
