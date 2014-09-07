@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 09/07/2014 ==
+Akkadius: Fixed ROF Augment item dupe with not checking for available slots properly and adding items to the virtual instance
+
 == 09/06/2014 ==
 Uleat: Tweaked 'Smart' trading code to return main slots before sub slots in stackable and free space search processes. (If enough people ask for it, I'll add an optional rule to allow 'bag packing' - the original implementation behavior)
 

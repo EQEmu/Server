@@ -1580,6 +1580,16 @@ int8 ItemInst::AvailableAugmentSlot(int32 augtype) const
 	return (i < EmuConstants::ITEM_COMMON_SIZE) ? i : INVALID_INDEX;
 }
 
+bool ItemInst::IsAugmentSlotAvailable(int32 augtype, uint8 slot) const {
+	if (m_item->ItemClass != ItemClassCommon || !m_item)
+		 return false;
+
+	if ((!GetItem(slot) && m_item->AugSlotVisible[slot]) && augtype == -1 || (m_item->AugSlotType[slot] && ((1 << (m_item->AugSlotType[slot] - 1)) & augtype))) {
+		return true;
+	}
+		return false;
+}
+
 // Retrieve item inside container
 ItemInst* ItemInst::GetItem(uint8 index) const
 {
