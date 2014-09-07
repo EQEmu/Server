@@ -202,7 +202,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			effect_value = GetMaxHP();
 
 		if (GetSpellPowerDistanceMod())
-			effect_value = effect_value*(GetSpellPowerDistanceMod()/100);
+			effect_value = effect_value*GetSpellPowerDistanceMod()/100;
 
 #ifdef SPELL_EFFECT_SPAM
 		effect_desc[0] = 0;
