@@ -6521,12 +6521,11 @@ void command_npcemote(Client *c, const Seperator *sep)
 
 void command_npcedit(Client *c, const Seperator *sep)
 {
-	if (!c->GetTarget() || !c->GetTarget()->IsNPC())
-	{
+	if (!c->GetTarget() || !c->GetTarget()->IsNPC()) {
 		c->Message(0, "Error: Must have NPC targeted");
 		return;
 	}
-	if ( strcasecmp( sep->arg[1], "help" ) == 0 ) {
+	else if ( strcasecmp( sep->arg[1], "help" ) == 0 ) {
 
 		c->Message(0, "Help File for #npcedit. Syntax for commands are:");
 		c->Message(0, "#npcedit Name - Sets an NPC's name");
@@ -6597,654 +6596,722 @@ void command_npcedit(Client *c, const Seperator *sep)
 		c->Message(0, "#npcedit version - Set an NPC's version");
 
 	}
-	else if ( strcasecmp( sep->arg[1], "name" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has the name %s.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),(sep->argplus[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set name='%s' where id=%i",(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
+
+	uint32 npcTypeID = c->GetTarget()->CastToNPC()->GetNPCTypeID();
+
+	if ( strcasecmp( sep->arg[1], "name" ) == 0 ) {
+        c->Message(15,"NPCID %u now has the name %s.",npcTypeID, sep->argplus[2]);
+
+		std::string query = StringFormat("UPDATE npc_types SET name = '%s' WHERE id = %i",
+                                        sep->argplus[2],npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
 	}
 
-	else if ( strcasecmp( sep->arg[1], "lastname" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has the lastname %s.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),(sep->argplus[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set lastname='%s' where id=%i",(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "race" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has the race %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set race=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "class" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u is now class %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set class=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "bodytype" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has type %i bodytype.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set bodytype=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "hp" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has %i Hitpoints.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set hp=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "gender" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u is now gender %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set gender=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "texture" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now uses texture %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set texture=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "helmtexture" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now uses helmtexture %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set helmtexture=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "size" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u is now size %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set size=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "hpregen" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now regens %i hitpoints per tick.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set hp_regen_rate=%i where hp_regen_rate=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "manaregen" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now regens %i mana per tick.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set mana_regen_rate=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "loottable" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u is now on loottable_id %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set loottable_id=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "merchantid" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u is now merchant_id %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set merchant_id=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "alt_currency_id" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has field 'alt_currency_id' set to %s.",c->GetTarget()->CastToNPC()->GetNPCTypeID(), (sep->argplus[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set alt_currency_id='%s' where id=%i",(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "npc_spells_effects_id" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has field 'npc_spells_effects_id' set to %s.",c->GetTarget()->CastToNPC()->GetNPCTypeID(), (sep->argplus[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set npc_spells_effects_id='%s' where id=%i",(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "adventure_template_id" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has field 'adventure_template_id' set to %s.",c->GetTarget()->CastToNPC()->GetNPCTypeID(), (sep->argplus[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set adventure_template_id='%s' where id=%i",(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "trap_template" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has field 'trap_template' set to %s.",c->GetTarget()->CastToNPC()->GetNPCTypeID(), (sep->argplus[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set trap_template='%s' where id=%i",(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "special_abilities" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has field 'special_abilities' set to %s.",c->GetTarget()->CastToNPC()->GetNPCTypeID(), (sep->argplus[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set special_abilities='%s' where id=%i",(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "spell" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now uses spell list %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set npc_spells_id=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "faction" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u is now faction %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set npc_faction_id=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "mindmg" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now hits for a min of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set mindmg=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "maxdmg" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now hits for a max of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set maxdmg=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "aggroradius" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has an aggro radius of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set aggroradius=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "assistradius" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has an assist radius of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set assistradius=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "social" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u social status is now %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set social=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "runspeed" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u is now runs at %f",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atof(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set runspeed=%f where id=%i",atof(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "AGI" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has %i Agility.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set AGI=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "CHA" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has %i Charisma.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set CHA=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "DEX" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has %i Dexterity.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set DEX=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "INT" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has %i Intelligence.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set _INT=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "STA" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has %i Stamina.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set STA=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "STR" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has %i Strength.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set STR=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "WIS" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has a Magic Resistance of %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set WIS=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "MR" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has a Magic Resistance of %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set MR=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "DR" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has a Disease Resistance of %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set DR=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "CR" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has a Cold Resistance of %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set CR=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "FR" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has a Fire Resistance of %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set FR=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "PR" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has a Poison Resistance of %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set PR=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "Corrup" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has a Corruption Resistance of %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set corrup=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "PhR" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15, "NPCID %u now has a Physical Resistance of %i.", c->GetTarget()->CastToNPC()->GetNPCTypeID(), atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set PhR=%i where id=%i", atoi(sep->argplus[2]), c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "seeinvis" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has seeinvis set to %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set see_invis=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "seeinvisundead" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has seeinvisundead set to %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set see_invis_undead=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "seehide" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has seehide set to %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set see_hide=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "seeimprovedhide" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has seeimprovedhide set to %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set see_improved_hide=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "AC" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has %i Armor Class.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->argplus[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set ac=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "ATK" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has %i Attack.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->argplus[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set atk=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "Accuracy" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has %i Accuracy.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->argplus[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set accuracy=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "level" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u is now level %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set level=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "maxlevel" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has a maximum level of %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set maxlevel=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "qglobal" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15, "Quest globals have been %s for NPCID %u", atoi(sep->arg[2]) == 0 ? "disabled" : "enabled", c->GetTarget()->CastToNPC()->GetNPCTypeID());
-		database.RunQuery(query, MakeAnyLenString(&query, "UPDATE npc_types SET qglobal=%i WHERE id=%i", atoi(sep->argplus[2]) == 0 ? 0 : 1, c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "npcaggro" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u will now %s other NPCs with negative faction npc_value",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2])==0?"not aggro":"aggro");
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set npc_aggro=%i where id=%i",atoi(sep->argplus[2])==0?0:1,c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "limit" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has a spawn limit of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->argplus[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set limit=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "Attackspeed" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has attack_speed set to %f",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atof(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set attack_speed=%f where id=%i",atof(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "findable" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u is now %s",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2])==0?"not findable":"findable");
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set findable=%i where id=%i",atoi(sep->argplus[2])==0?0:1,c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "wep1" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u will have item graphic %i set to his primary on repop.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set d_meele_texture1=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "wep2" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u will have item graphic %i set to his secondary on repop.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set d_meele_texture2=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "featuresave" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u saved with all current facial feature settings",c->GetTarget()->CastToNPC()->GetNPCTypeID());
+	if ( strcasecmp( sep->arg[1], "lastname" ) == 0 ) {
+        c->Message(15,"NPCID %u now has the lastname %s.",npcTypeID, sep->argplus[2]);
 
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set luclin_haircolor=%i where id=%i",c->GetTarget()->GetHairColor(),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set luclin_beardcolor=%i where id=%i",c->GetTarget()->GetBeardColor(),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set luclin_hairstyle=%i where id=%i",c->GetTarget()->GetHairStyle(),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set luclin_beard=%i where id=%i",c->GetTarget()->GetBeard(),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set face=%i where id=%i",c->GetTarget()->GetLuclinFace(),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set drakkin_heritage=%i where id=%i",c->GetTarget()->GetDrakkinHeritage(),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set drakkin_tattoo=%i where id=%i",c->GetTarget()->GetDrakkinTattoo(),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set drakkin_details=%i where id=%i",c->GetTarget()->GetDrakkinDetails(),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
+		std::string query = StringFormat("UPDATE npc_types SET lastname = '%s' WHERE id = %i",
+                                        sep->argplus[2],npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
 
+	if ( strcasecmp( sep->arg[1], "race" ) == 0 ) {
+        c->Message(15,"NPCID %u now has the race %i.",npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET race = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
 	}
-	else if ( strcasecmp( sep->arg[1], "color" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has %i red, %i green, and %i blue tinting on their armor.", c->GetTarget()->CastToNPC()->GetNPCTypeID(), atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set armortint_red=%i, armortint_green=%i, armortint_blue=%i where id=%i", atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
+
+	if ( strcasecmp( sep->arg[1], "class" ) == 0 ) {
+        c->Message(15,"NPCID %u is now class %i.",npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET class = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
 	}
-	else if ( strcasecmp( sep->arg[1], "armortint_id" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has field 'armortint_id' set to %s",c->GetTarget()->CastToNPC()->GetNPCTypeID(), (sep->argplus[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set armortint_id='%s' where id=%i",(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
+
+	if ( strcasecmp( sep->arg[1], "bodytype" ) == 0 ) {
+        c->Message(15,"NPCID %u now has type %i bodytype.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET bodytype = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
 	}
-	else if ( strcasecmp( sep->arg[1], "setanimation" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		int Animation = 0;
-		if(sep->arg[2] && atoi(sep->arg[2]) <= 4){
-			if((strcasecmp( sep->arg[2], "stand" ) == 0) || atoi(sep->arg[2]) == 0){
-				Animation = 0; //Stand
-			}
-			if((strcasecmp( sep->arg[2], "sit" ) == 0) || atoi(sep->arg[2]) == 1){
-				Animation = 1; //Sit
-			}
-			if((strcasecmp( sep->arg[2], "crouch" ) == 0) || atoi(sep->arg[2]) == 2){
-				Animation = 2; //Crouch
-			}
-			if((strcasecmp( sep->arg[2], "dead" ) == 0) || atoi(sep->arg[2]) == 3){
-				Animation = 3; //Dead
-			}
-			if((strcasecmp( sep->arg[2], "loot" ) == 0) || atoi(sep->arg[2]) == 4){
-				Animation = 4; //Looting Animation
-			}
+
+	if ( strcasecmp( sep->arg[1], "hp" ) == 0 ) {
+        c->Message(15,"NPCID %u now has %i Hitpoints.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET hp = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "gender" ) == 0 ) {
+        c->Message(15,"NPCID %u is now gender %i.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET gender = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "texture" ) == 0 ) {
+        c->Message(15,"NPCID %u now uses texture %i.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET texture = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "helmtexture" ) == 0 ) {
+        c->Message(15,"NPCID %u now uses helmtexture %i.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET helmtexture = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "size" ) == 0 ) {
+        c->Message(15,"NPCID %u is now size %i.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET size = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "hpregen" ) == 0 ) {
+        c->Message(15,"NPCID %u now regens %i hitpoints per tick.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET hp_regen_rate = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "manaregen" ) == 0 ) {
+        c->Message(15,"NPCID %u now regens %i mana per tick.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET mana_regen_rate = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+    if ( strcasecmp( sep->arg[1], "loottable" ) == 0 ) {
+        c->Message(15,"NPCID %u is now on loottable_id %i.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET loottable_id = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "merchantid" ) == 0 ) {
+        c->Message(15,"NPCID %u is now merchant_id %i.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET merchant_id = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "alt_currency_id" ) == 0 ) {
+        c->Message(15,"NPCID %u now has field 'alt_currency_id' set to %s.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET alt_currency_id = '%s' WHERE id = %i",
+                                        sep->argplus[2],npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "npc_spells_effects_id" ) == 0 ) {
+        c->Message(15,"NPCID %u now has field 'npc_spells_effects_id' set to %s.", npcTypeID, sep->argplus[2]);
+
+		std::string query = StringFormat("UPDATE npc_types SET npc_spells_effects_id = '%s' WHERE id = %i",
+                                        sep->argplus[2],npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "adventure_template_id" ) == 0 ) {
+        c->Message(15,"NPCID %u now has field 'adventure_template_id' set to %s.", npcTypeID, sep->argplus[2]);
+
+		std::string query = StringFormat("UPDATE npc_types SET adventure_template_id = '%s' WHERE id = %i",
+                                        sep->argplus[2],npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "trap_template" ) == 0 ) {
+        c->Message(15,"NPCID %u now has field 'trap_template' set to %s.", npcTypeID, sep->argplus[2]);
+
+		std::string query = StringFormat("UPDATE npc_types SET trap_template = '%s' WHERE id = %i",
+                                        sep->argplus[2],npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "special_abilities" ) == 0 ) {
+        c->Message(15,"NPCID %u now has field 'special_abilities' set to %s.", npcTypeID, sep->argplus[2]);
+
+		std::string query = StringFormat("UPDATE npc_types SET special_abilities = '%s' WHERE id = %i",
+                                        sep->argplus[2],npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "spell" ) == 0 ) {
+        c->Message(15,"NPCID %u now uses spell list %i", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET npc_spells_id = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "faction" ) == 0 ) {
+        c->Message(15,"NPCID %u is now faction %i", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET npc_faction_id = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "mindmg" ) == 0 ) {
+        c->Message(15,"NPCID %u now hits for a min of %i", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET mindmg = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "maxdmg" ) == 0 ) {
+        c->Message(15,"NPCID %u now hits for a max of %i", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET maxdmg = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "aggroradius" ) == 0 ) {
+        c->Message(15,"NPCID %u now has an aggro radius of %i", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET aggroradius = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "assistradius" ) == 0 ) {
+        c->Message(15,"NPCID %u now has an assist radius of %i", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET assistradius = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "social" ) == 0 ) {
+        c->Message(15,"NPCID %u social status is now %i", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET social = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "runspeed" ) == 0 ) {
+        c->Message(15,"NPCID %u now runs at %f", npcTypeID, atof(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET runspeed = %f WHERE id = %i",
+                                        atof(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "AGI" ) == 0 ) {
+        c->Message(15,"NPCID %u now has %i Agility.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET AGI = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "CHA" ) == 0 ) {
+        c->Message(15,"NPCID %u now has %i Charisma.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET CHA = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "DEX" ) == 0 ) {
+        c->Message(15,"NPCID %u now has %i Dexterity.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET DEX = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "INT" ) == 0 ) {
+        c->Message(15,"NPCID %u now has %i Intelligence.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET _INT = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "STA" ) == 0 ) {
+        c->Message(15,"NPCID %u now has %i Stamina.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET STA = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "STR" ) == 0 ) {
+        c->Message(15,"NPCID %u now has %i Strength.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET STR = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "WIS" ) == 0 ) {
+        c->Message(15,"NPCID %u now has a Magic Resistance of %i.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET WIS = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "MR" ) == 0 ) {
+        c->Message(15,"NPCID %u now has a Magic Resistance of %i.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET MR = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "DR" ) == 0 ) {
+        c->Message(15,"NPCID %u now has a Disease Resistance of %i.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET DR = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "CR" ) == 0 ) {
+        c->Message(15,"NPCID %u now has a Cold Resistance of %i.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET CR = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+    if ( strcasecmp( sep->arg[1], "FR" ) == 0 ) {
+        c->Message(15,"NPCID %u now has a Fire Resistance of %i.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET FR = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+    if ( strcasecmp( sep->arg[1], "PR" ) == 0 ) {
+        c->Message(15,"NPCID %u now has a Poison Resistance of %i.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET PR = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "Corrup" ) == 0 ) {
+        c->Message(15,"NPCID %u now has a Corruption Resistance of %i.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET corrup = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "PhR" ) == 0 ) {
+        c->Message(15,"NPCID %u now has a Physical Resistance of %i.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET PhR = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "seeinvis" ) == 0 ) {
+        c->Message(15,"NPCID %u now has seeinvis set to %i.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET see_invis = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "seeinvisundead" ) == 0 ) {
+        c->Message(15,"NPCID %u now has seeinvisundead set to %i.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET see_invis_undead = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "seehide" ) == 0 ) {
+        c->Message(15,"NPCID %u now has seehide set to %i.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET see_hide = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "seeimprovedhide" ) == 0 ) {
+        c->Message(15,"NPCID %u now has seeimprovedhide set to %i.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET see_improved_hide = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "AC" ) == 0 ) {
+        c->Message(15,"NPCID %u now has %i Armor Class.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET ac = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "ATK" ) == 0 ) {
+        c->Message(15,"NPCID %u now has %i Attack.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET atk = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "Accuracy" ) == 0 ) {
+        c->Message(15,"NPCID %u now has %i Accuracy.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET accuracy = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "level" ) == 0 ) {
+        c->Message(15,"NPCID %u is now level %i.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET level = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "maxlevel" ) == 0 ) {
+        c->Message(15,"NPCID %u now has a maximum level of %i.", npcTypeID, atoi(sep->argplus[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET maxlevel = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "qglobal" ) == 0 ) {
+        c->Message(15,"Quest globals have been %s for NPCID %u",
+                    atoi(sep->arg[2]) == 0 ? "disabled" : "enabled", npcTypeID);
+
+		std::string query = StringFormat("UPDATE npc_types SET qglobal = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "npcaggro" ) == 0 ) {
+        c->Message(15,"NPCID %u will now %s other NPCs with negative faction npc_value",
+                    npcTypeID, atoi(sep->arg[2]) == 0? "not aggro": "aggro");
+
+		std::string query = StringFormat("UPDATE npc_types SET npc_aggro = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]) == 0? 0: 1, npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "limit" ) == 0 ) {
+        c->Message(15,"NPCID %u now has a spawn limit of %i",
+                    npcTypeID, atoi(sep->arg[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET limit = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "Attackspeed" ) == 0 ) {
+        c->Message(15,"NPCID %u now has attack_speed set to %f",
+                    npcTypeID, atof(sep->arg[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET attack_speed = %f WHERE id = %i",
+                                        atof(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "findable" ) == 0 ) {
+        c->Message(15,"NPCID %u is now %s", npcTypeID, atoi(sep->arg[2]) == 0? "not findable": "findable");
+
+		std::string query = StringFormat("UPDATE npc_types SET findable = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]) == 0? 0: 1, npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "wep1" ) == 0 ) {
+        c->Message(15,"NPCID %u will have item graphic %i set to his primary on repop.",
+                        npcTypeID, atoi(sep->arg[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET d_meele_texture1 = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "wep2" ) == 0 ) {
+        c->Message(15,"NPCID %u will have item graphic %i set to his secondary on repop.",
+                        npcTypeID, atoi(sep->arg[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET d_meele_texture2 = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "featuresave" ) == 0 ) {
+        c->Message(15,"NPCID %u saved with all current facial feature settings",
+                        npcTypeID);
+
+        Mob* target = c->GetTarget();
+
+		std::string query = StringFormat("UPDATE npc_types "
+                                        "SET luclin_haircolor = %i, luclin_beardcolor = %i, "
+                                        "luclin_hairstyle = %i, luclin_beard = %i, "
+                                        "face = %i, drakkin_heritage = %i, "
+                                        "drakkin_tattoo = %i, drakkin_details = %i, "
+                                        "WHERE id = %i",
+                                        target->GetHairColor(), target->GetBeardColor(),
+                                        target->GetHairStyle(), target->GetBeard(),
+                                        target->GetLuclinFace(), target->GetDrakkinHeritage(),
+                                        target->GetDrakkinTattoo(), target->GetDrakkinDetails(),
+                                        npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "color" ) == 0 ) {
+        c->Message(15,"NPCID %u now has %i red, %i green, and %i blue tinting on their armor.",
+                        npcTypeID, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]));
+
+		std::string query = StringFormat("UPDATE npc_types "
+                                        "SET armortint_red = %i, armortint_green = %i, armortint_blue = %i "
+                                        "WHERE id = %i",
+                                        atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "armortint_id" ) == 0 ) {
+        c->Message(15,"NPCID %u now has field 'armortint_id' set to %s",
+                        npcTypeID, sep->arg[2]);
+
+		std::string query = StringFormat("UPDATE npc_types SET armortint_id = '%s' WHERE id = %i",
+                                        sep->argplus[2], npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "setanimation" ) == 0 ) {
+		int animation = 0;
+		if(sep->arg[2] && atoi(sep->arg[2]) <= 4) {
+			if((strcasecmp( sep->arg[2], "stand" ) == 0) || atoi(sep->arg[2]) == 0)
+				animation = 0; //Stand
+			if((strcasecmp( sep->arg[2], "sit" ) == 0) || atoi(sep->arg[2]) == 1)
+				animation = 1; //Sit
+			if((strcasecmp( sep->arg[2], "crouch" ) == 0) || atoi(sep->arg[2]) == 2)
+				animation = 2; //Crouch
+			if((strcasecmp( sep->arg[2], "dead" ) == 0) || atoi(sep->arg[2]) == 3)
+				animation = 3; //Dead
+			if((strcasecmp( sep->arg[2], "loot" ) == 0) || atoi(sep->arg[2]) == 4)
+				animation = 4; //Looting Animation
 		}
-		else{
+		else {
 			c->Message(0, "You must specifiy an animation stand, sit, crouch, dead, loot (0-4)");
 			c->Message(0, "Example: #npcedit setanimation sit");
 			c->Message(0, "Example: #npcedit setanimation 0");
 			return;
 		}
-		c->Message(15,"NPCID %u now has the animation set to %i on spawn with spawngroup %i", c->GetTarget()->CastToNPC()->GetNPCTypeID(), Animation, c->GetTarget()->CastToNPC()->GetSp2() );
-		database.RunQuery(query, MakeAnyLenString(&query, "update spawn2 set animation = %i where spawngroupID=%i", Animation, c->GetTarget()->CastToNPC()->GetSp2()), errbuf);
-		c->GetTarget()->SetAppearance(EmuAppearance(Animation));
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "scalerate" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15, "NPCID %u now has a scaling rate of %i.", c->GetTarget()->CastToNPC()->GetNPCTypeID(), atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set scalerate=%i where id=%i", atoi(sep->arg[2]), c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "healscale" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15, "NPCID %u now has a heal scaling rate of %i.", c->GetTarget()->CastToNPC()->GetNPCTypeID(), atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set healscale=%i where id=%i", atoi(sep->arg[2]), c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "spellscale" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15, "NPCID %u now has a spell scaling rate of %i.", c->GetTarget()->CastToNPC()->GetNPCTypeID(), atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set spellscale=%i where id=%i", atoi(sep->arg[2]), c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "no_target" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15, "NPCID %u is now %s.", c->GetTarget()->CastToNPC()->GetNPCTypeID(), atoi(sep->arg[2]) == 0 ? "targetable" : "untargetable");
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set no_target_hotkey=%i where id=%i", atoi(sep->arg[2]), c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "version" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15, "NPCID %u is now version %i.", c->GetTarget()->CastToNPC()->GetNPCTypeID(), atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set version=%i where id=%i", atoi(sep->arg[2]), c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
+
+		c->Message(15,"NPCID %u now has the animation set to %i on spawn with spawngroup %i", npcTypeID, animation, c->GetTarget()->CastToNPC()->GetSp2() );
+
+		std::string query = StringFormat("UPDATE spawn2 SET animation = %i "
+                                        "WHERE spawngroupID = %i",
+                                        animation, c->GetTarget()->CastToNPC()->GetSp2());
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+
+		c->GetTarget()->SetAppearance(EmuAppearance(animation));
+		return;
 	}
 
-	else if((sep->arg[1][0] == 0 || strcasecmp(sep->arg[1],"*")==0) || ((c->GetTarget()==0) || (c->GetTarget()->IsClient())))
-	{
-		c->Message(0, "Type #npcedit help for more info");
+	if ( strcasecmp( sep->arg[1], "scalerate" ) == 0 ) {
+        c->Message(15,"NPCID %u now has a scaling rate of %i.",
+                        npcTypeID, atoi(sep->arg[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET scalerate = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
 	}
+
+	if ( strcasecmp( sep->arg[1], "healscale" ) == 0 ) {
+        c->Message(15, "NPCID %u now has a heal scaling rate of %i.",
+                        npcTypeID, atoi(sep->arg[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET healscale = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "spellscale" ) == 0 ) {
+        c->Message(15, "NPCID %u now has a spell scaling rate of %i.",
+                        npcTypeID, atoi(sep->arg[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET spellscale = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "no_target" ) == 0 ) {
+        c->Message(15, "NPCID %u is now %s.",
+                        npcTypeID, atoi(sep->arg[2]) == 0? "targetable": "untargetable");
+
+		std::string query = StringFormat("UPDATE npc_types SET no_target_hotkey = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if ( strcasecmp( sep->arg[1], "version" ) == 0 ) {
+        c->Message(15, "NPCID %u is now version %i.",
+                        npcTypeID, atoi(sep->arg[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET version = %i WHERE id = %i",
+                                        atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if((sep->arg[1][0] == 0 || strcasecmp(sep->arg[1],"*")==0) || ((c->GetTarget()==0) || (c->GetTarget()->IsClient())))
+		c->Message(0, "Type #npcedit help for more info");
+
 }
 
 #ifdef PACKET_PROFILER
