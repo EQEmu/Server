@@ -8878,233 +8878,261 @@ void command_refreshgroup(Client *c, const Seperator *sep)
 void command_advnpcspawn(Client *c, const Seperator *sep)
 {
 	Mob *target=c->GetTarget();
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 last_insert_id = 0;
 
-		if (strcasecmp(sep->arg[1], "maketype") == 0){
-			if(target && target->IsNPC())
-			{
-			database.NPCSpawnDB(6, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC());
-			}
-			else
-			c->Message(0, "Target Required!");
-		}
-		else if (strcasecmp(sep->arg[1], "makegroup") == 0) {
-			if(sep->arg[2])
-			{
-				if (!database.RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawngroup (name,spawn_limit,dist,max_x,min_x,max_y,min_y,delay) VALUES (\"%s\",%i,%f,%f,%f,%f,%f,%i)", sep->arg[2], (sep->arg[3]?atoi(sep->arg[3]):0), (sep->arg[4]?atof(sep->arg[4]):0), (sep->arg[5]?atof(sep->arg[5]):0), (sep->arg[6]?atof(sep->arg[6]):0), (sep->arg[7]?atof(sep->arg[7]):0), (sep->arg[8]?atof(sep->arg[8]):0), (sep->arg[9]?atoi(sep->arg[9]):0)), errbuf, 0, 0, &last_insert_id))
-				{
-					c->Message(0, "Invalid Arguments -- MySQL gave the following error:");
-					c->Message(13, errbuf);
-				}
-				else
-				{
-				c->LogSQL(query);
-				c->Message(0, "Group ID %i created successfully!", last_insert_id);
-				}
-				safe_delete_array(query);
-			}
-			else
-			{
-				c->Message(0, "Format: #advnpdspawn makegroup <name> [spawn limit] [dist] [max x] [min x] [max y] [min y] [delay]");
-			}
-		}
-		else if (strcasecmp(sep->arg[1], "addgroupentry") == 0) {
-			if(atoi(sep->arg[2]) && atoi(sep->arg[3]) && atoi(sep->arg[4]))
-			{
-				if (!database.RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawnentry (spawngroupID,npcID,chance) VALUES (%i,%i,%i)", atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), errbuf, 0, 0, &last_insert_id)))
-				{
-					c->Message(0, "Invalid Arguments -- MySQL gave the following error:");
-					c->Message(13, errbuf);
-				}
-				else
-				{
-				c->LogSQL(query);
-				c->Message(0, "NPC %i added to group %i with %i chance!", atoi(sep->arg[3]), atoi(sep->arg[2]), atoi(sep->arg[4]) );
-				}
-				safe_delete(query);
-			}
-			else
-			{
-				c->Message(0, "Format: #advnpdspawn addgroupentry <spawnggroupID> <npcID> <chance>");
-			}
-		}
-		else if (strcasecmp(sep->arg[1], "editgroupbox") == 0) {
-			if(atof(sep->arg[2]) && atof(sep->arg[3]) && atof(sep->arg[4]) && atof(sep->arg[5]) && atof(sep->arg[6]) && atof(sep->arg[7]) && atof(sep->arg[8]))
-			{
-				if (!database.RunQuery(query, MakeAnyLenString(&query, "UPDATE spawngroup SET dist='%f',max_x='%f',min_x='%f',max_y='%f',min_y='%f',delay='%i' WHERE id='%i'", atof(sep->arg[3]),atof(sep->arg[4]),atof(sep->arg[5]),atof(sep->arg[6]),atof(sep->arg[7]),atoi(sep->arg[8]),atoi(sep->arg[2]), errbuf, 0, 0, &last_insert_id)))
-				{
-					c->Message(0, "Invalid Arguments -- MySQL gave the following error:");
-					c->Message(13, errbuf);
-				}
-				else
-				{
-				c->LogSQL(query);
-				c->Message(0, "Group ID %i created successfully!", last_insert_id);
-				}
-				safe_delete_array(query);
-			}
-			else
-			{
-				c->Message(0, "Format: #advnpdspawn editgroupbox <spawngroupID> <dist> <max x> <min x> <max y> <min y> <delay>");
-			}
-		}
-		else if (strcasecmp(sep->arg[1], "cleargroupbox") == 0) {
-			if(atoi(sep->arg[2]))
-			{
-				if (!database.RunQuery(query, MakeAnyLenString(&query, "UPDATE spawngroup SET dist='0',max_x='0',min_x='0',max_y='0',min_y='0',delay='0' WHERE id='%i'",atoi(sep->arg[2])), errbuf, 0, 0, &last_insert_id))
-				{
-					c->Message(0, "Invalid Arguments -- MySQL gave the following error:");
-					c->Message(13, errbuf);
-				}
-				else
-				{
-				c->LogSQL(query);
-				c->Message(0, "Group ID %i created successfully!", last_insert_id);
-				}
-				safe_delete_array(query);
-			}
-			else
-			{
-				c->Message(0, "Format: #advnpdspawn cleargroupbox <spawngroupID>");
-			}
-		}
-		else if (strcasecmp(sep->arg[1], "addgroupspawn") == 0 && atoi(sep->arg[2])!=0) {
-			database.NPCSpawnDB(5, zone->GetShortName(), zone->GetInstanceVersion(), c, 0, atoi(sep->arg[2]));
-			c->Message(0, "Mob of group %i added successfully!", atoi(sep->arg[2]));
-		}
-		else if (strcasecmp(sep->arg[1], "removegroupspawn") == 0) {
-			if (!target || !target->IsNPC())
-				c->Message(0, "Error: Need an NPC target.");
-			else {
-				Spawn2* s2 = target->CastToNPC()->respawn2;
+    if (strcasecmp(sep->arg[1], "maketype") == 0) {
+        if(!target || !target->IsNPC()) {
+            c->Message(0, "Target Required!");
+            return;
+        }
 
-				if(!s2) {
-					c->Message(0, "removegroupspawn FAILED -- cannot determine which spawn entry in the database this mob came from.");
-				}
-				else
-				{
-					if(database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawn2 WHERE id='%i'",s2->GetID()), errbuf))
-					{
-						c->LogSQL(query);
-						c->Message(0, "Spawnpoint Removed successfully.");
-						target->Depop(false);
-					}
-					else
-					{
-						c->Message(13, "Update failed! MySQL gave the following error:");
-						c->Message(13, errbuf);
-					}
-					safe_delete_array(query);
-				}
-			}
-		}
-		else if (strcasecmp(sep->arg[1], "movespawn") == 0) {
-			if (!target || !target->IsNPC())
-				c->Message(0, "Error: Need an NPC target.");
-			else {
-				Spawn2* s2 = target->CastToNPC()->respawn2;
+        database.NPCSpawnDB(6, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC());
+        return;
+    }
 
-				if(!s2) {
-					c->Message(0, "movespawn FAILED -- cannot determine which spawn entry in the database this mob came from.");
-				}
-				else
-				{
-					if(database.RunQuery(query, MakeAnyLenString(&query, "UPDATE spawn2 SET x='%f', y='%f', z='%f', heading='%f' WHERE id='%i'",c->GetX(), c->GetY(), c->GetZ(), c->GetHeading(),s2->GetID()), errbuf))
-					{
-						c->LogSQL(query);
-						c->Message(0, "Updating coordinates successful.");
-						target->CastToNPC()->GMMove(c->GetX(), c->GetY(), c->GetZ(), c->GetHeading());
-						target->CastToNPC()->SaveGuardSpot(true);
-						target->SendPosition();
-					}
-					else
-					{
-						c->Message(13, "Update failed! MySQL gave the following error:");
-						c->Message(13, errbuf);
-					}
-					safe_delete_array(query);
-				}
-			}
-		}
-		else if (strcasecmp(sep->arg[1], "editrespawn") == 0) {
-			if (!target || !target->IsNPC())
-				c->Message(0, "Error: Need an NPC target.");
-			else {
-				Spawn2* s2 = target->CastToNPC()->respawn2;
+    if (strcasecmp(sep->arg[1], "makegroup") == 0) {
+        if(!sep->arg[2]) {
+            c->Message(0, "Format: #advnpdspawn makegroup <name> [spawn limit] [dist] [max x] [min x] [max y] [min y] [delay]");
+            return;
+        }
 
-				uint32 new_rs = 0;
-				uint32 new_var = s2->GetVariance();
-				if(!sep->IsNumber(2))
-				{
-					c->Message(0, "editrespawn FAILED -- cannot set respawn to be 0");
-					return;
-				}
-				else
-				{
-					new_rs = atoi(sep->arg[2]);
-				}
+        std::string query = StringFormat("INSERT INTO spawngroup "
+                                        "(name, spawn_limit, dist, max_x, min_x, max_y, min_y, delay) "
+                                        "VALUES (\"%s\", %i, %f, %f, %f, %f, %f, %i)",
+                                        sep->arg[2],
+                                        (sep->arg[3]? atoi(sep->arg[3]): 0),
+                                        (sep->arg[4]? atof(sep->arg[4]): 0),
+                                        (sep->arg[5]? atof(sep->arg[5]): 0),
+                                        (sep->arg[6]? atof(sep->arg[6]): 0),
+                                        (sep->arg[7]? atof(sep->arg[7]): 0),
+                                        (sep->arg[8]? atof(sep->arg[8]): 0),
+                                        (sep->arg[9]? atoi(sep->arg[9]): 0));
+        auto results = database.QueryDatabase(query);
+        if (!results.Success()) {
+            c->Message(0, "Invalid Arguments -- MySQL gave the following error:");
+            c->Message(13, results.ErrorMessage().c_str());
+            return;
+        }
 
-				if(sep->IsNumber(3))
-				{
-					new_var = atoi(sep->arg[3]);
-				}
+        c->LogSQL(query.c_str());
+        c->Message(0, "Group ID %i created successfully!", results.LastInsertedID());
+        return;
+    }
 
-				if(!s2) {
-					c->Message(0, "editrespawn FAILED -- cannot determine which spawn entry in the database this mob came from.");
-				}
-				else
-				{
-					if(database.RunQuery(query, MakeAnyLenString(&query, "UPDATE spawn2 SET respawntime=%u, variance=%u WHERE id='%i'", new_rs, new_var, s2->GetID()), errbuf))
-					{
-						c->LogSQL(query);
-						c->Message(0, "Updating respawn timer successful.");
-						s2->SetRespawnTimer(new_rs);
-						s2->SetVariance(new_var);
-					}
-					else
-					{
-						c->Message(13, "Update failed! MySQL gave the following error:");
-						c->Message(13, errbuf);
-					}
-					safe_delete_array(query);
-				}
-			}
-		}
-		else if (strcasecmp(sep->arg[1], "setversion") == 0) {
-			int16 Version = 0;
-			if (!target || !target->IsNPC())
-				c->Message(0, "Error: Need an NPC target.");
-			else {
-				if(sep->IsNumber(2)){
-					Version = atoi(sep->arg[2]);
-					if(database.RunQuery(query, MakeAnyLenString(&query, "UPDATE spawn2 SET version=%i WHERE spawngroupID='%i'", Version, c->GetTarget()->CastToNPC()->GetSp2()), errbuf)){
-						c->LogSQL(query);
-						c->Message(0, "Version change to %i was successful from SpawnGroupID %i", Version, c->GetTarget()->CastToNPC()->GetSp2());
-						c->GetTarget()->Depop(false);
-					}
-					else{
-						c->Message(13, "Update failed! MySQL gave the following error:");
-						c->Message(13, errbuf);
-					}
-					safe_delete_array(query);
-				}
-				else{
-					c->Message(0, "setversion FAILED -- You must set a version number");
-					return;
-				}
-			}
-		}
-		else if (strcasecmp(sep->arg[1], "testload") == 0 && atoi(sep->arg[2])!=0) {
-			database.LoadSpawnGroupsByID(atoi(sep->arg[2]),&zone->spawn_group_list);
-			c->Message(0, "Group %i loaded successfully!", atoi(sep->arg[2]));
-		}
-		else {
-			c->Message(0, "Error: #advnpcspawn: Invalid command.");
-			c->Message(0, "Usage: #advnpcspawn [maketype|makegroup|addgroupentry|addgroupspawn|setversion]");
-			c->Message(0, "Usage: #advnpcspawn [removegroupspawn|movespawn|editrespawn|editgroupbox|cleargroupbox]");
-		}
+	if (strcasecmp(sep->arg[1], "addgroupentry") == 0) {
+        if(!atoi(sep->arg[2]) || !atoi(sep->arg[3]) || !atoi(sep->arg[4])) {
+            c->Message(0, "Format: #advnpdspawn addgroupentry <spawnggroupID> <npcID> <chance>");
+            return;
+        }
+
+        std::string query = StringFormat("INSERT INTO spawnentry (spawngroupID, npcID, chance) "
+                                        "VALUES (%i, %i, %i)",
+                                        atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]));
+        auto results = database.QueryDatabase(query);
+        if (!results.Success()) {
+            c->Message(0, "Invalid Arguments -- MySQL gave the following error:");
+            c->Message(13, results.ErrorMessage().c_str());
+            return;
+        }
+
+        c->LogSQL(query.c_str());
+        c->Message(0, "NPC %i added to group %i with %i chance!", atoi(sep->arg[3]), atoi(sep->arg[2]), atoi(sep->arg[4]) );
+
+        return;
+    }
+
+    if (strcasecmp(sep->arg[1], "editgroupbox") == 0) {
+        if(!atof(sep->arg[2]) || !atof(sep->arg[3]) || !atof(sep->arg[4]) || !atof(sep->arg[5]) || !atof(sep->arg[6]) || !atof(sep->arg[7]) || !atof(sep->arg[8])) {
+            c->Message(0, "Format: #advnpdspawn editgroupbox <spawngroupID> <dist> <max x> <min x> <max y> <min y> <delay>");
+            return;
+        }
+
+        std::string query = StringFormat("UPDATE spawngroup SET dist = '%f', max_x = '%f', min_x = '%f', "
+                                        "max_y = '%f', min_y = '%f', delay = '%i' WHERE id = '%i'",
+                                        atof(sep->arg[3]), atof(sep->arg[4]), atof(sep->arg[5]),
+                                        atof(sep->arg[6]), atof(sep->arg[7]), atoi(sep->arg[8]),
+                                        atoi(sep->arg[2]));
+        auto results = database.QueryDatabase(query);
+        if (!results.Success()) {
+            c->Message(0, "Invalid Arguments -- MySQL gave the following error:");
+            c->Message(13, results.ErrorMessage().c_str());
+            return;
+        }
+
+        c->LogSQL(query.c_str());
+        c->Message(0, "Group ID %i created successfully!", results.LastInsertedID());
+
+        return;
+    }
+
+	if (strcasecmp(sep->arg[1], "cleargroupbox") == 0) {
+        if(!atoi(sep->arg[2])) {
+            c->Message(0, "Format: #advnpdspawn cleargroupbox <spawngroupID>");
+            return;
+        }
+
+        std::string query = StringFormat("UPDATE spawngroup "
+                                        "SET dist = '0', max_x = '0', min_x = '0', "
+                                        "max_y = '0', min_y = '0', delay = '0' "
+                                        "WHERE id = '%i' ", atoi(sep->arg[2]));
+        auto results = database.QueryDatabase(query);
+        if (!results.Success()) {
+            c->Message(0, "Invalid Arguments -- MySQL gave the following error:");
+            c->Message(13, results.ErrorMessage().c_str());
+            return;
+        }
+
+        c->LogSQL(query.c_str());
+        c->Message(0, "Group ID %i created successfully!", results.LastInsertedID());
+
+        return;
+    }
+
+	if (strcasecmp(sep->arg[1], "addgroupspawn") == 0 && atoi(sep->arg[2])!=0) {
+        database.NPCSpawnDB(5, zone->GetShortName(), zone->GetInstanceVersion(), c, 0, atoi(sep->arg[2]));
+        c->Message(0, "Mob of group %i added successfully!", atoi(sep->arg[2]));
+        return;
+    }
+
+	if (strcasecmp(sep->arg[1], "removegroupspawn") == 0) {
+        if (!target || !target->IsNPC()) {
+            c->Message(0, "Error: Need an NPC target.");
+            return;
+        }
+
+        Spawn2* s2 = target->CastToNPC()->respawn2;
+
+        if(!s2) {
+            c->Message(0, "removegroupspawn FAILED -- cannot determine which spawn entry in the database this mob came from.");
+            return;
+        }
+
+        std::string query = StringFormat("DELETE FROM spawn2 WHERE id = '%i'", s2->GetID());
+        auto results = database.QueryDatabase(query);
+        if(!results.Success()) {
+            c->Message(13, "Update failed! MySQL gave the following error:");
+            c->Message(13, results.ErrorMessage().c_str());
+            return;
+        }
+
+        c->LogSQL(query.c_str());
+        c->Message(0, "Spawnpoint Removed successfully.");
+        target->Depop(false);
+
+        return;
+    }
+
+	if (strcasecmp(sep->arg[1], "movespawn") == 0) {
+        if (!target || !target->IsNPC()) {
+            c->Message(0, "Error: Need an NPC target.");
+            return;
+        }
+
+        Spawn2* s2 = target->CastToNPC()->respawn2;
+
+        if(!s2) {
+            c->Message(0, "movespawn FAILED -- cannot determine which spawn entry in the database this mob came from.");
+            return;
+        }
+
+        std::string query = StringFormat("UPDATE spawn2 SET x = '%f', y = '%f', z = '%f', heading = '%f' "
+                                        "WHERE id = '%i'",
+                                        c->GetX(), c->GetY(), c->GetZ(), c->GetHeading(),s2->GetID());
+        auto results = database.QueryDatabase(query);
+        if (!results.Success()) {
+            c->Message(13, "Update failed! MySQL gave the following error:");
+            c->Message(13, results.ErrorMessage().c_str());
+            return;
+        }
+
+        c->LogSQL(query.c_str());
+        c->Message(0, "Updating coordinates successful.");
+        target->CastToNPC()->GMMove(c->GetX(), c->GetY(), c->GetZ(), c->GetHeading());
+        target->CastToNPC()->SaveGuardSpot(true);
+        target->SendPosition();
+
+        return;
+    }
+
+	if (strcasecmp(sep->arg[1], "editrespawn") == 0) {
+        if (!target || !target->IsNPC()) {
+            c->Message(0, "Error: Need an NPC target.");
+            return;
+        }
+
+        Spawn2* s2 = target->CastToNPC()->respawn2;
+
+        uint32 new_rs = 0;
+        uint32 new_var = s2->GetVariance();
+        if(!sep->IsNumber(2)) {
+            c->Message(0, "editrespawn FAILED -- cannot set respawn to be 0");
+            return;
+        }
+
+        new_rs = atoi(sep->arg[2]);
+
+        if(sep->IsNumber(3))
+            new_var = atoi(sep->arg[3]);
+
+        if(!s2) {
+            c->Message(0, "editrespawn FAILED -- cannot determine which spawn entry in the database this mob came from.");
+            return;
+        }
+
+        std::string query = StringFormat("UPDATE spawn2 SET respawntime = %u, variance = %u "
+                                        "WHERE id = '%i'", new_rs, new_var, s2->GetID());
+        auto results = database.QueryDatabase(query);
+        if (!results.Success()) {
+            c->Message(13, "Update failed! MySQL gave the following error:");
+            c->Message(13, results.ErrorMessage().c_str());
+            return;
+        }
+
+        c->LogSQL(query.c_str());
+        c->Message(0, "Updating respawn timer successful.");
+        s2->SetRespawnTimer(new_rs);
+        s2->SetVariance(new_var);
+
+        return;
+    }
+
+	if (strcasecmp(sep->arg[1], "setversion") == 0) {
+        if (!target || !target->IsNPC()) {
+            c->Message(0, "Error: Need an NPC target.");
+            return;
+        }
+
+        if(!sep->IsNumber(2)) {
+            c->Message(0, "setversion FAILED -- You must set a version number");
+            return;
+        }
+
+        int16 version = atoi(sep->arg[2]);
+        std::string query = StringFormat("UPDATE spawn2 SET version = %i "
+                                        "WHERE spawngroupID = '%i'",
+                                        version, c->GetTarget()->CastToNPC()->GetSp2());
+        auto results = database.QueryDatabase(query);
+        if (!results.Success()) {
+            c->Message(13, "Update failed! MySQL gave the following error:");
+            c->Message(13, results.ErrorMessage().c_str());
+            return;
+        }
+
+        c->LogSQL(query.c_str());
+        c->Message(0, "Version change to %i was successful from SpawnGroupID %i", version, c->GetTarget()->CastToNPC()->GetSp2());
+        c->GetTarget()->Depop(false);
+
+        return;
+    }
+
+	if (strcasecmp(sep->arg[1], "testload") == 0 && atoi(sep->arg[2])!=0) {
+        database.LoadSpawnGroupsByID(atoi(sep->arg[2]),&zone->spawn_group_list);
+        c->Message(0, "Group %i loaded successfully!", atoi(sep->arg[2]));
+        return;
+    }
+
+    c->Message(0, "Error: #advnpcspawn: Invalid command.");
+    c->Message(0, "Usage: #advnpcspawn [maketype|makegroup|addgroupentry|addgroupspawn|setversion]");
+    c->Message(0, "Usage: #advnpcspawn [removegroupspawn|movespawn|editrespawn|editgroupbox|cleargroupbox]");
 }
 
 void command_aggrozone(Client *c, const Seperator *sep) {
