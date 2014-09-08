@@ -7978,7 +7978,7 @@ void Client::ItemTimerCheck()
 		TryItemTimer(i);
 	}
 
-	for(i = EmuConstants::GENERAL_BAGS_BEGIN; i <= MainCursor; i++)
+	for(i = EmuConstants::GENERAL_BEGIN; i <= MainCursor; i++)
 	{
 		TryItemTimer(i);
 	}

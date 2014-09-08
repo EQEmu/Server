@@ -2032,7 +2032,8 @@ void SharedDatabase::GetPlayerInspectMessage(char* playername, InspectMessage_St
 
 void SharedDatabase::SetPlayerInspectMessage(char* playername, const InspectMessage_Struct* message) {
 
-	std::string query = StringFormat("UPDATE character_ SET inspectmessage = '%s' WHERE name = '%s'", message->text, playername);
+	std::string msg = EscapeString(message->text);
+	std::string query = StringFormat("UPDATE character_ SET inspectmessage = '%s' WHERE name = '%s'", msg.c_str(), playername);
     auto results = QueryDatabase(query);
 	if (!results.Success())
 		std::cerr << "Error in SetPlayerInspectMessage query '" << query << "' " << results.ErrorMessage() << std::endl;
@@ -2058,7 +2059,8 @@ void SharedDatabase::GetBotInspectMessage(uint32 botid, InspectMessage_Struct* m
 
 void SharedDatabase::SetBotInspectMessage(uint32 botid, const InspectMessage_Struct* message) {
 
-	std::string query = StringFormat("UPDATE bots SET BotInspectMessage = '%s' WHERE BotID = %i", message->text, botid);
+	std::string msg = EscapeString(message->text);
+	std::string query = StringFormat("UPDATE bots SET BotInspectMessage = '%s' WHERE BotID = %i", msg.c_str(), botid);
     auto results = QueryDatabase(query);
     if (!results.Success())
 		std::cerr << "Error in SetBotInspectMessage query '" << query << "' " << results.ErrorMessage() << std::endl;
