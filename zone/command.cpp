@@ -7975,8 +7975,6 @@ void command_flags(Client *c, const Seperator *sep) {
 
 void command_flagedit(Client *c, const Seperator *sep) {
 	//super-command for editing zone flags
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 	if(sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help")) {
 		c->Message(0, "Syntax: #flagedit [lockzone|unlockzone|listzones|give|take].");
 		c->Message(0, "...lockzone [zone id/short] [flag name] - Set the specified flag name on the zone, locking the zone");
@@ -8009,17 +8007,21 @@ void command_flagedit(Client *c, const Seperator *sep) {
 		database.DoEscapeString(flag_name, sep->argplus[3], 64);
 		flag_name[127] = '\0';
 
-		if(!database.RunQuery(query, MakeAnyLenString(&query,
-			"UPDATE zone SET flag_needed='%s' WHERE zoneidnumber=%d AND version=%d",
-			flag_name, zoneid, zone->GetInstanceVersion()), errbuf))
-		{
-			c->Message(13, "Error updating zone: %s", errbuf);
-		} else {
-			c->LogSQL(query);
-			c->Message(15, "Success! Zone %s now requires a flag, named %s", database.GetZoneName(zoneid), flag_name);
+        std::string query = StringFormat("UPDATE zone SET flag_needed = '%s' "
+                                        "WHERE zoneidnumber = %d AND version = %d",
+                                        flag_name, zoneid, zone->GetInstanceVersion());
+        auto results = database.QueryDatabase(query);
+		if(!results.Success()) {
+			c->Message(13, "Error updating zone: %s", results.ErrorMessage().c_str());
+			return;
 		}
-		safe_delete(query);
-	} else if(!strcasecmp(sep->arg[1], "unlockzone")) {
+
+        c->LogSQL(query.c_str());
+        c->Message(15, "Success! Zone %s now requires a flag, named %s", database.GetZoneName(zoneid), flag_name);
+        return;
+	}
+
+	if(!strcasecmp(sep->arg[1], "unlockzone")) {
 		uint32 zoneid = 0;
 		if(sep->arg[2][0] != '\0') {
 			zoneid = atoi(sep->arg[2]);
@@ -8027,39 +8029,43 @@ void command_flagedit(Client *c, const Seperator *sep) {
 				zoneid = database.GetZoneID(sep->arg[2]);
 			}
 		}
+
 		if(zoneid < 1) {
 			c->Message(13, "zone required. see help.");
 			return;
 		}
 
-		if(!database.RunQuery(query, MakeAnyLenString(&query,
-			"UPDATE zone SET flag_needed='' WHERE zoneidnumber=%d AND version=%d",
-			zoneid, zone->GetInstanceVersion()), errbuf))
-		{
-			c->Message(15, "Error updating zone: %s", errbuf);
-		} else {
-			c->LogSQL(query);
-			c->Message(15, "Success! Zone %s no longer requires a flag.", database.GetZoneName(zoneid));
+        std::string query = StringFormat("UPDATE zone SET flag_needed = '' "
+                                        "WHERE zoneidnumber = %d AND version = %d",
+                                        zoneid, zone->GetInstanceVersion());
+        auto results = database.QueryDatabase(query);
+		if(!results.Success()) {
+			c->Message(15, "Error updating zone: %s", results.ErrorMessage().c_str());
+			return;
 		}
-		safe_delete(query);
-	} else if(!strcasecmp(sep->arg[1], "listzones")) {
-		MYSQL_RES *result;
-		MYSQL_ROW row;
-		if (database.RunQuery(query, MakeAnyLenString(&query,
-			"SELECT zoneidnumber,short_name,long_name,version,flag_needed FROM zone WHERE flag_needed != ''"
-			), errbuf, &result))
-		{
-			c->Message(0, "Zones which require flags:");
-			while ((row = mysql_fetch_row(result)))
-			{
-				c->Message(0, "Zone %s (%s,%s) version %s requires key %s", row[2], row[0], row[1], row[3], row[4]);
-			}
-			mysql_free_result(result);
-		} else {
-			c->Message(13, "Unable to query zone flags: %s", errbuf);
-		}
-		safe_delete_array(query);
-	} else if(!strcasecmp(sep->arg[1], "give")) {
+
+        c->LogSQL(query.c_str());
+        c->Message(15, "Success! Zone %s no longer requires a flag.", database.GetZoneName(zoneid));
+        return;
+	}
+
+	if(!strcasecmp(sep->arg[1], "listzones")) {
+        std::string query = "SELECT zoneidnumber, short_name, long_name, version, flag_needed "
+                            "FROM zone WHERE flag_needed != ''";
+        auto results = database.QueryDatabase(query);
+		if (!results.Success()) {
+            c->Message(13, "Unable to query zone flags: %s", results.ErrorMessage().c_str());
+            return;
+        }
+
+        c->Message(0, "Zones which require flags:");
+        for (auto row = results.begin(); row != results.end(); ++row)
+            c->Message(0, "Zone %s (%s,%s) version %s requires key %s", row[2], row[0], row[1], row[3], row[4]);
+
+        return;
+	}
+
+	if(!strcasecmp(sep->arg[1], "give")) {
 		uint32 zoneid = 0;
 		if(sep->arg[2][0] != '\0') {
 			zoneid = atoi(sep->arg[2]);
@@ -8079,7 +8085,10 @@ void command_flagedit(Client *c, const Seperator *sep) {
 		}
 
 		t->CastToClient()->SetZoneFlag(zoneid);
-	} else if(!strcasecmp(sep->arg[1], "give")) {
+		return;
+	}
+
+	if(!strcasecmp(sep->arg[1], "give")) {
 		uint32 zoneid = 0;
 		if(sep->arg[2][0] != '\0') {
 			zoneid = atoi(sep->arg[2]);
@@ -8099,9 +8108,10 @@ void command_flagedit(Client *c, const Seperator *sep) {
 		}
 
 		t->CastToClient()->ClearZoneFlag(zoneid);
-	} else {
-		c->Message(15, "Invalid action specified. use '#flagedit help' for help");
+		return;
 	}
+
+    c->Message(15, "Invalid action specified. use '#flagedit help' for help");
 }
 
 void command_mlog(Client *c, const Seperator *sep) {
