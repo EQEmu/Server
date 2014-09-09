@@ -274,6 +274,7 @@ public:
 	inline bool IsAugmentable() const { return m_item->AugSlotType[0]!=0 || m_item->AugSlotType[1]!=0 || m_item->AugSlotType[2]!=0 || m_item->AugSlotType[3]!=0 || m_item->AugSlotType[4]!=0; }
 	bool AvailableWearSlot(uint32 aug_wear_slots) const;
 	int8 AvailableAugmentSlot(int32 augtype) const;
+	bool IsAugmentSlotAvailable(int32 augtype, uint8 slot) const;
 	inline int32 GetAugmentType() const { return m_item->AugType; }
 
 	inline bool IsExpendable() const { return ((m_item->Click.Type == ET_Expendable ) || (m_item->ItemType == ItemTypePotion)); }

@@ -1460,7 +1460,7 @@ void Mob::SendIllusionPacket(uint16 in_race, uint8 in_gender, uint8 in_texture, 
 	else
 		this->drakkin_details = in_drakkin_details;
 
-	if (in_size == 0xFFFFFFFF)
+	if (in_size <= 0.0f)
 		this->size = GetSize();
 	else
 		this->size = in_size;
@@ -1941,10 +1941,8 @@ void Mob::Kill() {
 
 void Mob::SetAttackTimer() {
 	float PermaHaste;
-	if(GetHaste() > 0)
-		PermaHaste = 1 / (1 + (float)GetHaste()/100);
-	else if(GetHaste() < 0)
-		PermaHaste = 1 * (1 - (float)GetHaste()/100);
+	if (GetHaste())
+		PermaHaste = 1 / (1 + (float)GetHaste() / 100);
 	else
 		PermaHaste = 1.0f;
 
