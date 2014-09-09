@@ -19,9 +19,6 @@
 #include "../common/rulesys.h"
 #include <iostream>
 #include <fstream>
-
-using namespace std;
-
 #include <iomanip>
 #include <stdio.h>
 #include <stdlib.h>
