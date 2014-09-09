@@ -1413,10 +1413,8 @@ void NPC::DoClassAttacks(Mob *target) {
 		return;
 
 	float HasteModifier = 0;
-	if(GetHaste() > 0)
+	if (GetHaste())
 		HasteModifier = 10000 / (100 + GetHaste());
-	else if(GetHaste() < 0)
-		HasteModifier = (100 - GetHaste());
 	else
 		HasteModifier = 100;
 
