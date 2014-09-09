@@ -23,7 +23,7 @@
 #include "console.h"
 #include "worlddb.h"
 #include "../common/string_util.h"
-#include "../common/guilds.h"
+#include "../common/guild_base.h"
 #include "../common/races.h"
 #include "../common/classes.h"
 #include "../common/packet_dump.h"

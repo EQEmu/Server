@@ -26,7 +26,7 @@
 #include "client.h"
 #include "../common/md5.h"
 #include "world_config.h"
-#include "../common/guilds.h"
+#include "../common/guild_base.h"
 #include "../common/packet_dump.h"
 #include "../common/misc.h"
 #include "../common/string_util.h"

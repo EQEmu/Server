@@ -27,7 +27,7 @@
 #include "../common/serverinfo.h"
 #include "../common/zone_numbers.h"
 #include "../common/moremath.h"
-#include "../common/guilds.h"
+#include "../common/guild_base.h"
 #include "../common/string_util.h"
 #include "guild_mgr.h"
 #include "string_ids.h"

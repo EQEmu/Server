@@ -35,7 +35,7 @@
 #include "../common/timeoutmgr.h"
 #include "../common/eqemu_error.h"
 #include "../common/opcodemgr.h"
-#include "../common/guilds.h"
+#include "../common/guild_base.h"
 #include "../common/eq_stream_ident.h"
 #include "../common/rulesys.h"
 #include "../common/platform.h"

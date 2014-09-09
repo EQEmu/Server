@@ -27,7 +27,7 @@
 #include "../common/serverinfo.h"
 #include "../common/zone_numbers.h"
 #include "../common/moremath.h"
-#include "../common/guilds.h"
+#include "../common/guild_base.h"
 #include "../common/logsys.h"
 #include "../common/string_util.h"
 #include "string_ids.h"
@@ -261,7 +261,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	bool enforcewear	= RuleB(Inventory, EnforceAugmentWear);
 	bool enforcerestr	= RuleB(Inventory, EnforceAugmentRestriction);
 	bool enforceusable	= RuleB(Inventory, EnforceAugmentUsability);
-	
+
 	for (int iter = AUG_BEGIN; iter < EmuConstants::ITEM_COMMON_SIZE; ++iter) {
 		const Item_Struct* augtest = database.GetItem(augments[iter]);
 
@@ -279,7 +279,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 			if(CheckLoreConflict(augtest)) {
 				// DuplicateLoreMessage(augtest->ID);
 				Message(13, "You already have a lore %s (%u) in your inventory.", augtest->Name, augtest->ID);
-				
+
 				return false;
 			}
 			// check that augment is an actual augment
@@ -287,7 +287,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 				Message(13, "%s (%u) (Aug%i) is not an actual augment.", augtest->Name, augtest->ID, iter + 1);
 				mlog(INVENTORY__ERROR, "Player %s on account %s attempted to use a non-augment item (Aug%i) as an augment.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
 					GetName(), account_name, item->ID, (iter + 1), aug1, aug2, aug3, aug4, aug5);
-				
+
 				return false;
 			}
 
@@ -534,7 +534,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	// validation passed..so, set the charges and create the actual item
 
 	// if the item is stackable and the charge amount is -1 or 0 then set to 1 charge.
-	// removed && item->MaxCharges == 0 if -1 or 0 was passed max charges is irrelevant 
+	// removed && item->MaxCharges == 0 if -1 or 0 was passed max charges is irrelevant
 	if(charges <= 0 && item->Stackable)
 		charges = 1;
 
@@ -962,7 +962,7 @@ bool Client::AutoPutLootInInventory(ItemInst& inst, bool try_worn, bool try_curs
 					{
 						SendWearChange(worn_slot_material);
 					}
-					
+
 					parse->EventItem(EVENT_EQUIP_ITEM, this, &inst, nullptr, "", i);
 					return true;
 				}

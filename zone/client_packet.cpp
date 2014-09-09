@@ -45,7 +45,7 @@
 #include "../common/packet_dump_file.h"
 #include "../common/string_util.h"
 #include "../common/breakdowns.h"
-#include "../common/guilds.h"
+#include "../common/guild_base.h"
 #include "../common/rulesys.h"
 #include "../common/spdat.h"
 #include "petitions.h"

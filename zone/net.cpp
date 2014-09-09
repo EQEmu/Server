@@ -30,7 +30,7 @@
 #include "../common/eqemu_error.h"
 #include "../common/packet_dump_file.h"
 #include "../common/opcodemgr.h"
-#include "../common/guilds.h"
+#include "../common/guild_base.h"
 #include "../common/eq_stream_ident.h"
 #include "../common/patches/patches.h"
 #include "../common/rulesys.h"
@@ -99,7 +99,7 @@ npcDecayTimes_Struct npcCorpseDecayTimes[100];
 TitleManager title_manager;
 DBAsyncFinishedQueue MTdbafq;
 DBAsync *dbasync = nullptr;
-QueryServ *QServ = 0; 
+QueryServ *QServ = 0;
 TaskManager *taskmanager = 0;
 QuestParserCollection *parse = 0;
 

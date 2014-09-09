@@ -29,7 +29,6 @@ SET(common_sources
 	extprofile.cpp
 	faction.cpp
 	guild_base.cpp
-	guilds.cpp
 	ipc_mutex.cpp
 	item.cpp
 	logsys.cpp
@@ -137,7 +136,6 @@ SET(common_headers
 	fixed_memory_hash_set.h
 	fixed_memory_variable_hash_set.h
 	guild_base.h
-	guilds.h
 	ipc_mutex.h
 	item.h
 	item_fieldlist.h

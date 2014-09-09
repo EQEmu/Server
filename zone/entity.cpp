@@ -33,7 +33,7 @@
 #include "net.h"
 #include "masterentity.h"
 #include "worldserver.h"
-#include "../common/guilds.h"
+#include "../common/guild_base.h"
 #include "../common/packet_dump.h"
 #include "../common/packet_functions.h"
 #include "petitions.h"

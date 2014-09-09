@@ -23,7 +23,7 @@
 #include "worlddb.h"
 #include "zoneserver.h"
 #include "world_config.h"
-#include "../common/guilds.h"
+#include "../common/guild_base.h"
 #include "../common/string_util.h"
 
 extern uint32 numplayers;

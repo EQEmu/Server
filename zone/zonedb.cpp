@@ -3,7 +3,7 @@
 #include "../common/item.h"
 #include "../common/string_util.h"
 #include "../common/extprofile.h"
-#include "../common/guilds.h"
+#include "../common/guild_base.h"
 #include "../common/rulesys.h"
 #include "zone.h"
 #include "client.h"
@@ -1211,7 +1211,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->armor_tint[0] |= (atoi(row[r++]) & 0xFF) << 8;
 				tmpNPCType->armor_tint[0] |= (atoi(row[r++]) & 0xFF);
 				tmpNPCType->armor_tint[0] |= (tmpNPCType->armor_tint[0]) ? (0xFF << 24) : 0;
-				
+
 				int i;
 				if (armor_tint_id > 0)
 				{
@@ -1304,7 +1304,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->healscale = atoi(row[r++]);
 				tmpNPCType->no_target_hotkey = atoi(row[r++]) == 1 ? true : false;
 				tmpNPCType->raid_target = atoi(row[r++]) == 0 ? false : true;
-				
+
 				// If NPC with duplicate NPC id already in table,
 				// free item we attempted to add.
 				if (zone->npctable.find(tmpNPCType->npc_id) != zone->npctable.end())
@@ -1849,9 +1849,9 @@ void ZoneDatabase::SaveMercBuffs(Merc *merc) {
 				CalculateCorruptionCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
 				buffs[BuffCount].numhits, buffs[BuffCount].melee_rune, buffs[BuffCount].magic_rune,
 				buffs[BuffCount].dot_rune,
-				buffs[BuffCount].caston_x, 
-				IsPersistent, 
-				buffs[BuffCount].caston_y, 
+				buffs[BuffCount].caston_x,
+				IsPersistent,
+				buffs[BuffCount].caston_y,
 				buffs[BuffCount].caston_z,
 				buffs[BuffCount].ExtraDIChance), TempErrorMessageBuffer)) {
 				errorMessage = std::string(TempErrorMessageBuffer);
@@ -2931,7 +2931,7 @@ void ZoneDatabase::LoadPetInfo(Client *c) {
 				pi = suspended;
 			else
 				continue;
-			
+
 			int slot = atoi(row[1]);
 			if (slot < EmuConstants::EQUIPMENT_BEGIN || slot > EmuConstants::EQUIPMENT_END)
 				continue;
@@ -3231,6 +3231,6 @@ void ZoneDatabase::StoreCharacterLookup(uint32 char_id) {
 	std::string c_lookup = StringFormat("REPLACE INTO `character_lookup` (id, account_id, `name`, timelaston, x, y, z, zonename, zoneid, instanceid, pktime, groupid, class, `level`, lfp, lfg, mailkey, xtargets, firstlogon, inspectmessage)"
 		" SELECT id, account_id, `name`, timelaston, x, y, z, zonename, zoneid, instanceid, pktime, groupid, class, `level`, lfp, lfg, mailkey, xtargets, firstlogon, inspectmessage"
 		" FROM `character_` "
-		" WHERE `id` = %i ", char_id);  
-	QueryDatabase(c_lookup); 
+		" WHERE `id` = %i ", char_id);
+	QueryDatabase(c_lookup);
 }
