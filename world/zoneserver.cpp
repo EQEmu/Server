@@ -448,31 +448,31 @@ bool ZoneServer::Process() {
 					else if (cle->Online() == CLE_Status_Zoning) {
 						if (!scm->noreply)
 						{
-							time_t rawtime;
-							struct tm * timeinfo;
-							time ( &rawtime );
-							timeinfo = localtime ( &rawtime );
-							char *telldate=asctime(timeinfo);
-
-							std::string query = StringFormat("SELECT name FROM `character_data` WHERE name = '%s'",scm->deliverto);
-							auto results = database.QueryDatabase(query);
-							if (!results.Success())
-                                break;
-
-                            if (results.RowCount() == 0) {
-                                zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);
-                                break;
-                            }
-
-                            query = StringFormat("INSERT INTO tellque "
-                                                "(Date, Receiver, Sender, Message) "
-                                                "VALUES('%s', '%s', '%s', '%s')",
-                                                telldate, scm->deliverto, scm->from, scm->message);
-                            results = database.QueryDatabase(query);
-                            if (results.Success())
-                                zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "Your message has been added to the %s's que.", scm->to);
-                            else
-                                zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);
+							// time_t rawtime;
+							// struct tm * timeinfo;
+							// time ( &rawtime );
+							// timeinfo = localtime ( &rawtime );
+							// char *telldate=asctime(timeinfo);
+							// 
+							// std::string query = StringFormat("SELECT name FROM `character_data` WHERE name = '%s'",scm->deliverto);
+							// auto results = database.QueryDatabase(query);
+							// if (!results.Success())
+                            //     break;
+							// 
+                            // if (results.RowCount() == 0) {
+                            //     zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);
+                            //     break;
+                            // }
+							// 
+                            // query = StringFormat("INSERT INTO tellque "
+                            //                     "(Date, Receiver, Sender, Message) "
+                            //                     "VALUES('%s', '%s', '%s', '%s')",
+                            //                     telldate, scm->deliverto, scm->from, scm->message);
+                            // results = database.QueryDatabase(query);
+                            // if (results.Success())
+                            //     zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "Your message has been added to the %s's que.", scm->to);
+                            // else
+                            //     zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);
 
 						}
 					//		zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);

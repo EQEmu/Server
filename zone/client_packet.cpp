@@ -571,21 +571,20 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app) {
 	results = database.QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		m_pp.lastlogin = time(nullptr);
-		if (row[4]){ 
+		if (atoi(row[4]) > 0){ 
 			guild_id = atoi(row[4]); 
-			if (guildrank) {
-				if (row[5] != nullptr){ guildrank = atoi(row[5]); }
-				else{ guildrank = GUILD_RANK_NONE; }
-			}
+			if (row[5] != nullptr){ guildrank = atoi(row[5]); }
+			else{ guildrank = GUILD_RANK_NONE; }
 		}
-		if (RuleB(Character, SharedBankPlat))
-			m_pp.platinum_shared = database.GetSharedPlatinum(database.GetAccountIDByChar(cid));
-
+		
 		if (LFP){ LFP = atoi(row[0]); }
 		if (LFG){ LFG = atoi(row[1]); }
 		if (firstlogon){ firstlogon = atoi(row[3]); }
 	}
 	
+	if (RuleB(Character, SharedBankPlat))
+		m_pp.platinum_shared = database.GetSharedPlatinum(this->AccountID());
+
 	loaditems = database.GetInventory(cid, &m_inv); /* Load Character Inventory */
 	database.LoadCharacterBandolier(cid, &m_pp); /* Load Character Bandolier */
 	database.LoadCharacterBindPoint(cid, &m_pp); /* Load Character Bind */
@@ -622,6 +621,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app) {
 	/* If we can maintain intoxication across zones, check for it */
 	if (!RuleB(Character, MaintainIntoxicationAcrossZones))
 		m_pp.intoxication = 0; 
+
 	strcpy(name, m_pp.name);
 	strcpy(lastname, m_pp.last_name);
 	/* If PP is set to weird coordinates */
@@ -751,10 +751,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app) {
 			aa_points[id] = aa[a]->value;
 	}
 
-	if (SPDAT_RECORDS > 0)
-	{
-		for (uint32 z = 0; z<MAX_PP_MEMSPELL; z++)
-		{
+	if (SPDAT_RECORDS > 0) {
+		for (uint32 z = 0; z<MAX_PP_MEMSPELL; z++) {
 			if (m_pp.mem_spells[z] >= (uint32)SPDAT_RECORDS)
 				UnmemSpell(z, false);
 		}
@@ -5020,7 +5018,8 @@ void Client::Handle_OP_SwapSpell(const EQApplicationPacket *app)
 	m_pp.spell_book[swapspell->from_slot] = m_pp.spell_book[swapspell->to_slot];
 	m_pp.spell_book[swapspell->to_slot] = swapspelltemp;
 	
-	database.SaveCharacterSpellSwap(this->CharacterID(), swapspelltemp, swapspell->from_slot, swapspell->to_slot);
+	database.SaveCharacterSpell(this->CharacterID(), m_pp.spell_book[swapspell->from_slot], swapspell->from_slot); 
+	database.SaveCharacterSpell(this->CharacterID(), swapspelltemp, swapspell->to_slot);
 
 	QueuePacket(app);
 	return;
@@ -9573,7 +9572,6 @@ void Client::CompleteConnect() {
 
 	entity_list.SendUntargetable(this);
 
-	client_data_loaded = true;
 	int x;
 	for (x = 0; x < 8; x++)
 		SendWearChange(x);
@@ -9659,7 +9657,8 @@ void Client::CompleteConnect() {
 	alternate_currency_loaded = true;
 	ProcessAlternateCurrencyQueue();
 
-
+	/* This needs to be set, this determines whether or not data was loaded properly before a save */
+	client_data_loaded = true;
 
 	CalcItemScale();
 	DoItemEnterZone();

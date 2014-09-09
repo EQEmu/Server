@@ -486,7 +486,7 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app) {
 	outapp->pBuffer = new uchar[1];
 	outapp->size = 1;
 
-	bool valid;
+	bool valid = false;
 	if(!database.CheckNameFilter(char_name)) { valid = false; }
 	else if (char_name[0] < 'A' && char_name[0] > 'Z') { valid = false; } /* Name must begin with an upper-case letter. */
 	else if (database.ReserveName(GetAccountID(), char_name)) { valid = true; 	}

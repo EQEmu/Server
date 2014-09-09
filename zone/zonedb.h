@@ -269,7 +269,6 @@ public:
 	bool	SaveCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
 	bool	SaveCharacterData(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp);
 	bool	SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 current_level);
-	bool	SaveCharacterSpellSwap(uint32 character_id, uint32 spell_id, uint32 from_slot, uint32 to_slot);
 	bool	SaveCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
 	bool	SaveCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
 	bool	SaveCharacterMaterialColor(uint32 character_id, uint32 slot_id, uint32 color); 

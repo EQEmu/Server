@@ -18,6 +18,10 @@
 #include "../common/debug.h"
 #include "../common/rulesys.h"
 #include <iostream>
+#include <fstream>
+
+using namespace std;
+
 #include <iomanip>
 #include <stdio.h>
 #include <stdlib.h>
@@ -306,11 +310,21 @@ bool Database::SetAccountStatus(const char* name, int16 status) {
 bool Database::ReserveName(uint32 account_id, char* name) {
 	std::string query = StringFormat("INSERT INTO `character_data` SET `account_id` = %i, `name` = '%s'", account_id, name); 
 	auto results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "Database::ReserveName", query); 
+	if (!results.Success() || results.ErrorMessage() != ""){ return false; } 
 	return true;
 }
 
 bool Database::ThrowDBError(std::string ErrorMessage, std::string query_title, std::string query){  
-	if (ErrorMessage != ""){ std::cout << "\nERROR " << query_title << ": " << ErrorMessage << "\n\n" << query << "\n" << std::endl; return true; }
+	if (ErrorMessage != ""){ 
+		std::cout << "\nERROR " << query_title << ": " << ErrorMessage << "\n\n" << query << "\n" << std::endl; 
+
+		/* Write to file temporarily */
+		std::ofstream log("eqemu_query_error_log.txt", std::ios_base::app | std::ios_base::out);
+		log << "\nERROR " << query_title << ": " << ErrorMessage << "\n\n" << query << "\n";
+		log.close();
+
+		return true; 
+	}
 	return false;
 }
 
@@ -987,7 +1001,7 @@ bool Database::CheckDatabaseConversions() {
 			printf("Table: `character_currency` doesn't exist... creating...");
 			rquery = StringFormat(
 				" CREATE TABLE `character_currency` (                                  "
-				" 	`id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,                              "
+				" 	`id` int(11) UNSIGNED NOT NULL DEFAULT 0,                              "
 				" 	`platinum` int(11) UNSIGNED NOT NULL DEFAULT 0,                    "
 				" 	`gold` int(11) UNSIGNED NOT NULL DEFAULT 0,                        "
 				" 	`silver` int(11) UNSIGNED NOT NULL DEFAULT 0,                      "
@@ -1006,7 +1020,7 @@ bool Database::CheckDatabaseConversions() {
 				" 	`career_ebon_crystals` int(11) UNSIGNED NOT NULL DEFAULT 0,        "
 				" 	PRIMARY KEY (`id`),                                                "
 				"   KEY `id` (`id`)                                                    "
-				" ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;             "
+				" ) ENGINE=InnoDB DEFAULT CHARSET=latin1;             "
 			);
 			QueryDatabase(rquery);
 			printf(" done...\n");
@@ -1018,13 +1032,13 @@ bool Database::CheckDatabaseConversions() {
 			printf("Table: `character_alternate_abilities` doesn't exist... creating...");
 			rquery = StringFormat(
 				" CREATE TABLE `character_alternate_abilities` (						"
-				" `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,									"
+				" `id` int(11) UNSIGNED NOT NULL DEFAULT 0,									"
 				" `slot` smallint(11) UNSIGNED NOT NULL DEFAULT 0,						"
 				" `aa_id` smallint(11) UNSIGNED NOT NULL DEFAULT 0,						"
 				" `aa_value` smallint(11) UNSIGNED NOT NULL DEFAULT 0,					"
 				" PRIMARY KEY(`id`,`slot`),												"
 				" KEY `id` (`id`)														"
-				" ) ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;		"
+				" ) ENGINE = InnoDB DEFAULT CHARSET = latin1;		"
 			);
 			QueryDatabase(rquery);
 			printf(" done...\n");
@@ -1046,7 +1060,7 @@ bool Database::CheckDatabaseConversions() {
 				"`heading` float NOT NULL DEFAULT '0',						   "
 				"PRIMARY KEY(`id`, `is_home`),								   "
 				"KEY `id` (`id`)											   "
-				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;" 
+				") ENGINE = InnoDB DEFAULT CHARSET = latin1;" 
 			);
 			QueryDatabase(rquery);
 			printf(" done...\n");
@@ -1063,7 +1077,7 @@ bool Database::CheckDatabaseConversions() {
 				"`value` smallint(11) UNSIGNED NOT NULL DEFAULT '0',		   "
 				"PRIMARY KEY(`id`, `lang_id`),								   "
 				"KEY `id` (`id`)											   "
-				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;"
+				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
 			QueryDatabase(rquery);
 			printf(" done...\n");
@@ -1080,7 +1094,7 @@ bool Database::CheckDatabaseConversions() {
 				"`value` smallint(11) UNSIGNED NOT NULL DEFAULT '0',		   "
 				"PRIMARY KEY(`id`, `skill_id`),								   "
 				"KEY `id` (`id`)											   "
-				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;"
+				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			); 
 			QueryDatabase(rquery);
 			printf(" done...\n");
@@ -1097,7 +1111,7 @@ bool Database::CheckDatabaseConversions() {
 				"`spell_id` smallint(11) UNSIGNED NOT NULL DEFAULT '0',		   "
 				"PRIMARY KEY(`id`, `slot_id`),								   "
 				"KEY `id` (`id`)											   "
-				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;"
+				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
 			QueryDatabase(rquery);
 			printf(" done...\n");
@@ -1109,12 +1123,12 @@ bool Database::CheckDatabaseConversions() {
 			printf("Table: `character_memmed_spells` doesn't exist... creating...");
 			rquery = StringFormat(
 				"CREATE TABLE `character_memmed_spells` (							   "
-				"`id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,				   "
+				"`id` int(11) UNSIGNED NOT NULL DEFAULT 0,				   "
 				"`slot_id` smallint(11) UNSIGNED NOT NULL DEFAULT '0',		   "
 				"`spell_id` smallint(11) UNSIGNED NOT NULL DEFAULT '0',		   "
 				"PRIMARY KEY(`id`, `slot_id`),								   "
 				"KEY `id` (`id`)											   "
-				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;"
+				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
 			QueryDatabase(rquery);
 			printf(" done...\n"); 
@@ -1126,12 +1140,12 @@ bool Database::CheckDatabaseConversions() {
 			printf("Table: `character_disciplines` doesn't exist... creating...");
 			rquery = StringFormat(
 				" CREATE TABLE `character_disciplines` (						  "
-				" `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,				  "
+				" `id` int(11) UNSIGNED NOT NULL DEFAULT 0,				  "
 				" `slot_id` smallint(11) UNSIGNED NOT NULL DEFAULT '0',			  "
 				" `disc_id` smallint(11) UNSIGNED NOT NULL DEFAULT '0',			  "
 				" PRIMARY KEY(`id`, `slot_id`),									  "
 				" KEY `id` (`id`)												  "
-				" ) ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;  " 
+				" ) ENGINE = InnoDB DEFAULT CHARSET = latin1;  " 
 			);
 			QueryDatabase(rquery);
 			printf(" done...\n");
@@ -1141,7 +1155,7 @@ bool Database::CheckDatabaseConversions() {
 		results = QueryDatabase(rquery);
 		if (results.RowCount() == 0){
 			printf("Table: `character_material` doesn't exist... creating...");
-			rquery = StringFormat(
+			rquery = StringFormat( 
 				"CREATE TABLE `character_material` ( "
 				"`id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,"
 				"`slot` tinyint(11) UNSIGNED NOT NULL DEFAULT '0',"
@@ -1164,11 +1178,11 @@ bool Database::CheckDatabaseConversions() {
 			printf("Table: `character_tribute` doesn't exist... creating...");
 			rquery = StringFormat(
 				"CREATE TABLE `character_tribute` (							   "
-				"`id` int(11) unsigned NOT NULL AUTO_INCREMENT,				   "
+				"`id` int(11) unsigned NOT NULL DEFAULT 0,				   "
 				"`tier` tinyint(11) unsigned NOT NULL DEFAULT '0',			   "
 				"`tribute` int(11) UNSIGNED NOT NULL DEFAULT '0',			   "
 				"KEY `id` (`id`)											   "
-				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;"
+				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
 			QueryDatabase(rquery);
 			printf(" done...\n");
@@ -1180,7 +1194,7 @@ bool Database::CheckDatabaseConversions() {
 			printf("Table: `character_bandolier` doesn't exist... creating...");
 			rquery = StringFormat(
 				"CREATE TABLE `character_bandolier` (							"
-				"`id` int(11) unsigned NOT NULL AUTO_INCREMENT,					"
+				"`id` int(11) unsigned NOT NULL DEFAULT 0,					"
 				"`bandolier_id` tinyint(11) unsigned NOT NULL DEFAULT '0',		"
 				"`bandolier_slot` tinyint(11) unsigned NOT NULL DEFAULT '0',	"
 				"`item_id` int(11) UNSIGNED NOT NULL DEFAULT '0',				"
@@ -1188,7 +1202,7 @@ bool Database::CheckDatabaseConversions() {
 				"`bandolier_name` varchar(32) NOT NULL DEFAULT '0',				"
 				"PRIMARY KEY(`id`,`bandolier_id`, `bandolier_slot`),			"
 				"KEY `id` (`id`)												"
-				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;	"
+				") ENGINE = InnoDB DEFAULT CHARSET = latin1;	"
 			);
 			QueryDatabase(rquery);
 			printf(" done...\n");
@@ -1200,13 +1214,13 @@ bool Database::CheckDatabaseConversions() {
 			printf("Table: `character_potionbelt` doesn't exist... creating...");
 			rquery = StringFormat(
 				"CREATE TABLE `character_potionbelt` (						  "
-				"`id` int(11) unsigned NOT NULL AUTO_INCREMENT,				  "
+				"`id` int(11) unsigned NOT NULL DEFAULT 0,				  "
 				"`potion_id` tinyint(11) unsigned NOT NULL DEFAULT '0',		  "
 				"`item_id` int(11) UNSIGNED NOT NULL DEFAULT '0',			  "
 				"`icon` int(11) UNSIGNED NOT NULL DEFAULT '0',				  "
 				"PRIMARY KEY(`id`,`potion_id`),								  "
 				"KEY `id` (`id`)												  "
-				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;"
+				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
 			QueryDatabase(rquery);
 			printf(" done...\n");
@@ -1218,11 +1232,11 @@ bool Database::CheckDatabaseConversions() {
 			printf("Table: `character_inspect_messages` doesn't exist... creating...");
 			rquery = StringFormat(
 				"CREATE TABLE `character_inspect_messages` (					  "
-				"`id` int(11) unsigned NOT NULL AUTO_INCREMENT,				  "
+				"`id` int(11) unsigned NOT NULL DEFAULT 0,				  "
 				"`inspect_message` varchar(255) NOT NULL DEFAULT '',			  "
 				"PRIMARY KEY(`id`),											  "
 				"KEY `id` (`id`)												  "
-				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;"
+				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 				);
 			QueryDatabase(rquery);
 			printf(" done...\n");
@@ -1234,12 +1248,12 @@ bool Database::CheckDatabaseConversions() {
 			printf("Table: `character_leadership_abilities` doesn't exist... creating...");
 			rquery = StringFormat(
 				"CREATE TABLE `character_leadership_abilities` ("
-				"`id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, "
+				"`id` int(11) UNSIGNED NOT NULL DEFAULT 0, "
 				"`slot` smallint(11) UNSIGNED NOT NULL DEFAULT 0, "
 				"`rank` smallint(11) UNSIGNED NOT NULL DEFAULT 0, "
 				"PRIMARY KEY(`id`,`slot`), "
 				"KEY `id` (`id`)												  "
-				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1; "
+				") ENGINE = InnoDB DEFAULT CHARSET = latin1; "
 			);
 			QueryDatabase(rquery);
 			printf(" done...\n");
@@ -2650,15 +2664,21 @@ uint32 Database::GetGroupID(const char* name){
 
 /* Is this really getting used properly... A half implementation ? Akkadius */
 char* Database::GetGroupLeaderForLogin(const char* name, char* leaderbuf){ 
+	leaderbuf = "";
 	std::string query = StringFormat("SELECT `groupid` FROM `group_id` WHERE `name = '%s'", name);
 	auto results = QueryDatabase(query);
 	auto row = results.begin(); uint32 group_id = 0;
-	if (row[0]){ group_id = atoi(row[0]); }
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		if (row[0]){ group_id = atoi(row[0]); }
+	}
 
-	query = StringFormat("SELECT `name` FROM `group_id` WHERE `name` != '%s' AND `groupid` = %u", name, group_id);
-	results = QueryDatabase(query);
-	row = results.begin();
-	if (row[0]){ strcpy(leaderbuf, row[0]); }
+	if (group_id > 0){
+		query = StringFormat("SELECT `leadername` FROM `group_leader` WHERE `gid` = '%u' AND `groupid` = %u LIMIT 1", group_id);
+		results = QueryDatabase(query);
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			if (row[0]){ strcpy(leaderbuf, row[0]); }
+		}
+	}
 
 	return leaderbuf;
 }

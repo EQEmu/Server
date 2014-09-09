@@ -946,7 +946,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 	uint16 count;
 	uint16 curspell;
 
-	uint16 Char_ID = initiator->CharacterID();
+	uint32 Char_ID = initiator->CharacterID();
 	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
 	bool SpellGlobalCheckResult = 0;
 
@@ -960,7 +960,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 			spells[curspell].skill != 52 &&
 			( !RuleB(Spells, UseCHAScribeHack) || spells[curspell].effectid[EFFECT_COUNT - 1] != 10 )
 		)
-		{
+		{ 
 			if(IsDiscipline(curspell)){
 				//we may want to come up with a function like Client::GetNextAvailableSpellBookSlot() to help speed this up a little
 				for(uint32 r = 0; r < MAX_PP_DISCIPLINES; r++) {
@@ -974,12 +974,12 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 							SpellGlobalCheckResult = initiator->SpellGlobalCheck(curspell, Char_ID);
 							if (SpellGlobalCheckResult) {
 								initiator->GetPP().disciplines.values[r] = curspell;
-								database.SaveCharacterDisc(Char_ID, r, curspell);
+								database.SaveCharacterDisc(Char_ID, r, curspell); 
 								initiator->SendDisciplineUpdate();
 								initiator->Message(0, "You have learned a new discipline!");
 								count++;	//success counter
 							}
-							break;	//continue the 1st loop
+							break;	//continue the 1st loop 
 						}
 						else {
 							initiator->GetPP().disciplines.values[r] = curspell;

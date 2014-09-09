@@ -2156,8 +2156,8 @@ void command_worldshutdown(Client *c, const Seperator *sep)
 	uint32 interval=0;
 	if (worldserver.Connected()) {
 		if(sep->IsNumber(1) && sep->IsNumber(2) && ((time=atoi(sep->arg[1]))>0) && ((interval=atoi(sep->arg[2]))>0)) {
-			worldserver.SendEmoteMessage(0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down in %i seconds, everyone log out before this time.",time);
-			c->Message(0, "Sending shutdown packet now, World will shutdown in: %i Seconds with an interval of: %i",time,interval);
+			worldserver.SendEmoteMessage(0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down in %i minutes, everyone log out before this time.", (time / 60 ));
+			c->Message(0, "Sending shutdown packet now, World will shutdown in: %i minutes with an interval of: %i seconds", (time / 60), interval);
 			ServerPacket* pack = new ServerPacket(ServerOP_ShutdownAll,sizeof(WorldShutDown_Struct));
 			WorldShutDown_Struct* wsd = (WorldShutDown_Struct*)pack->pBuffer;
 			wsd->time=time*1000;
