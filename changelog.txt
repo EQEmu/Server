@@ -6,6 +6,9 @@ demonstar55: Incrase Mob kick/bash timer by 3
 demonstar55: Fix slow effect on NPC special attack reuse timers
 	see: http://www.eqemulator.org/forums/showthread.php?t=38734
 demonstar55: Slow fixes to bots!
+demonstar55: Revamped how NPC attack rate is set
+	SQL: 2014_09_09_attack_delay.sql
+demonstar55: Added attackdelay to #npcedit
 
 == 09/08/2014 ==
 demonstar55: Fix slow calc

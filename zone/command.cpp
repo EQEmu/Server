@@ -7159,6 +7159,15 @@ void command_npcedit(Client *c, const Seperator *sep)
 		c->LogSQL(query);
 		safe_delete_array(query);
 	}
+	else if ( strcasecmp( sep->arg[1], "Attackdelay" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15,"NPCID %u now has attack_delay set to %f",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atof(sep->arg[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set attack_delay=%f where id=%i",atof(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
 	else if ( strcasecmp( sep->arg[1], "findable" ) == 0 )
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
