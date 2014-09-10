@@ -684,7 +684,7 @@ public:
 	inline bool GetInvul(void) { return invulnerable; }
 	inline void SetExtraHaste(int Haste) { ExtraHaste = Haste; }
 	virtual int GetHaste();
-	inline float GetPermaHaste() { return GetHaste() ? 1.0f / (1.0f + static_cast<float>(GetHaste()) / 100.0f) : 1.0f; }
+	inline float GetPermaHaste() { return GetHaste() ? 100.0f / (1.0f + static_cast<float>(GetHaste()) / 100.0f) : 100.0f; }
 
 	uint8 GetWeaponDamageBonus(const Item_Struct* Weapon);
 	uint16 GetDamageTable(SkillUseTypes skillinuse);

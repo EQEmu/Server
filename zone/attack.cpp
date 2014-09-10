@@ -4811,7 +4811,7 @@ void Mob::SetAttackTimer()
 
 void Client::SetAttackTimer()
 {
-	float PermaHaste = GetPermaHaste() * 100.0f;
+	float PermaHaste = GetPermaHaste();
 
 	//default value for attack timer in case they have
 	//an invalid weapon equipped:
@@ -4907,7 +4907,7 @@ void Client::SetAttackTimer()
 
 void NPC::SetAttackTimer()
 {
-	float PermaHaste = GetPermaHaste() * 100.0f;
+	float PermaHaste = GetPermaHaste();
 
 	//default value for attack timer in case they have
 	//an invalid weapon equipped:
