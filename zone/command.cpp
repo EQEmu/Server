@@ -7143,6 +7143,15 @@ void command_npcedit(Client *c, const Seperator *sep)
 		return;
 	}
 
+	if ( strcasecmp( sep->arg[1], "Attackdelay" ) == 0 ) {
+		c->Message(15,"NPCID %u now has attack_delay set to %i",npcTypeID,atoi(sep->arg[2]));
+
+		std::string query = StringFormat("UPDATE npc_types SET attack_delay = %i WHERE id = %i",atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
 	if ( strcasecmp( sep->arg[1], "findable" ) == 0 ) {
         c->Message(15,"NPCID %u is now %s", npcTypeID, atoi(sep->arg[2]) == 0? "not findable": "findable");
 

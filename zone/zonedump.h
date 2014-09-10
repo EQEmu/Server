@@ -111,6 +111,7 @@ struct NPCType
 	uint8	spawn_limit;	//only this many may be in zone at a time (0=no limit)
 	uint8	mount_color;	//only used by horse class
 	float	attack_speed;	//%+- on attack delay of the mob.
+	uint8	attack_delay;	//delay between attacks in 10ths of a second
 	int		accuracy_rating;	//10 = 1% accuracy
 	int		avoidance_rating;	//10 = 1% avoidance
 	bool	findable;		//can be found with find command

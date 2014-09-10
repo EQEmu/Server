@@ -8350,12 +8350,10 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		return;
 
 	float HasteModifier = 0;
-	if(GetHaste() >= 0){
+	if (GetHaste())
 		HasteModifier = 10000 / (100 + GetHaste());
-	}
-	else {
-		HasteModifier = (100 - GetHaste());
-	}
+	else
+		HasteModifier = 100;
 	int32 dmg = 0;
 
 	uint16 skill_to_use = -1;
@@ -8981,10 +8979,8 @@ int32 Bot::CalcMaxMana() {
 
 void Bot::SetAttackTimer() {
 	float PermaHaste;
-	if(GetHaste() > 0)
+	if (GetHaste())
 		PermaHaste = 1 / (1 + (float)GetHaste()/100);
-	else if(GetHaste() < 0)
-		PermaHaste = 1 * (1 - (float)GetHaste()/100);
 	else
 		PermaHaste = 1.0f;
 
