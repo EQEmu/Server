@@ -174,8 +174,9 @@ Mob::Mob(const char* in_name,
 	drakkin_heritage	= in_drakkin_heritage;
 	drakkin_tattoo		= in_drakkin_tattoo;
 	drakkin_details		= in_drakkin_details;
-	attack_speed= 0;
-	slow_mitigation= 0;
+	attack_speed = 0;
+	attack_delay = 0;
+	slow_mitigation = 0;
 	findable	= false;
 	trackable	= true;
 	has_shieldequiped = false;

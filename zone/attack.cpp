@@ -4907,7 +4907,7 @@ void Client::SetAttackTimer()
 
 void NPC::SetAttackTimer()
 {
-	float PermaHaste = GetPermaHaste();
+	float PermaHaste = GetPermaHaste() * 100.0f;
 
 	//default value for attack timer in case they have
 	//an invalid weapon equipped:
@@ -4941,7 +4941,7 @@ void NPC::SetAttackTimer()
 		// What they do is take the lower of their set delay and the weapon's
 		// ex. Mob's delay set to 20, weapon set to 19, delay 19
 		// Mob's delay set to 20, weapon set to 21, delay 20
-		int speed = static_cast<int>((36 * (100 + DelayMod) / 100) * (100.0f + attack_speed) * PermaHaste);
+		int speed = static_cast<int>((attack_delay * (100 + DelayMod) / 100) * PermaHaste);
 		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true);
 	}
 }
