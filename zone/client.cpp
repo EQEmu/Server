@@ -8346,3 +8346,19 @@ void Client::ShowNumHits()
 	return;
 }
 
+float Client::GetQuiverHaste()
+{
+	float quiver_haste = 0;
+	for (int r = EmuConstants::GENERAL_BEGIN; r <= EmuConstants::GENERAL_END; r++) {
+		const ItemInst *pi = GetInv().GetItem(r);
+		if (!pi)
+			continue;
+		if (pi->IsType(ItemClassContainer) && pi->GetItem()->BagType == BagTypeQuiver) {
+			float temp_wr = (pi->GetItem()->BagWR / RuleI(Combat, QuiverWRHasteDiv));
+			quiver_haste = std::max(temp_wr, quiver_haste);
+		}
+	}
+	if (quiver_haste > 0)
+		quiver_haste = 1.0f / (1.0f + static_cast<float>(quiver_haste) / 100.0f);
+	return quiver_haste;
+}
