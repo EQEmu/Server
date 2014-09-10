@@ -465,7 +465,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			char buf[10];
 			snprintf(buf, 9, "%u", m_inst->GetItem()->ID);
 			buf[9] = '\0';
-			std::vector<void*> args;
+			std::vector<EQEmu::Any> args;
 			args.push_back(m_inst);
 			parse->EventPlayer(EVENT_PLAYER_PICKUP, sender, buf, 0, &args);
 

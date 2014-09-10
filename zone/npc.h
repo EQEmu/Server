@@ -134,7 +134,6 @@ public:
 	void CalcNPCRegen();
 	void CalcNPCDamage();
 
-
 	int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target = nullptr);
 	int32 GetActSpellHealing(uint16 spell_id, int32 value, Mob* target = nullptr);
 	inline void SetSpellFocusDMG(int32 NewSpellFocusDMG) {SpellFocusDMG = NewSpellFocusDMG;}
@@ -158,6 +157,7 @@ public:
 	virtual void InitializeBuffSlots();
 	virtual void UninitializeBuffSlots();
 
+	virtual void	SetAttackTimer();
 	virtual void	RangedAttack(Mob* other);
 	virtual void	ThrowingAttack(Mob* other) { }
 	int32 GetNumberOfAttacks() const { return attack_count; }
@@ -388,16 +388,16 @@ public:
 	inline void SetHealScale(float amt)		{ healscale = amt; }
 	inline float GetHealScale()					{ return healscale; }
 
-    uint32 	GetSpawnKillCount();
-    int 	GetScore();
-	void 	SetMerchantProbability(uint8 amt) { probability = amt; }
+	uint32	GetSpawnKillCount();
+	int	GetScore();
+	void	SetMerchantProbability(uint8 amt) { probability = amt; }
 	uint8	GetMerchantProbability() { return probability; }
-    void 	mod_prespawn(Spawn2 *sp);
-	int 	mod_npc_damage(int damage, SkillUseTypes skillinuse, int hand, const Item_Struct* weapon, Mob* other);
+	void	mod_prespawn(Spawn2 *sp);
+	int	mod_npc_damage(int damage, SkillUseTypes skillinuse, int hand, const Item_Struct* weapon, Mob* other);
 	void	mod_npc_killed_merit(Mob* c);
 	void	mod_npc_killed(Mob* oos);
-	void AISpellsList(Client *c);
-	
+	void	AISpellsList(Client *c);
+
 	bool IsRaidTarget() const { return raid_target; };
 
 protected:

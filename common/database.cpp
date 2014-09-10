@@ -161,6 +161,9 @@ uint32 Database::CheckLogin(const char* name, const char* password, int16* oStat
 		return 0;
 	}
 
+	if(results.RowCount() == 0)
+		return 0;
+
 	auto row = results.begin();
 
 	uint32 id = atoi(row[0]);
@@ -316,7 +319,7 @@ bool Database::DeleteAccount(const char* name) {
 }
 
 bool Database::SetLocalPassword(uint32 accid, const char* password) {
-	std::string query = StringFormat("UPDATE account SET password=MD5('%s') where id=%i;", password, accid);
+	std::string query = StringFormat("UPDATE account SET password=MD5('%s') where id=%i;", EscapeString(password).c_str(), accid);
 
 	auto results = QueryDatabase(query);
 
@@ -768,7 +771,9 @@ void Database::GetCharName(uint32 char_id, char* name) {
 	}
 
 	auto row = results.begin();
-	strcpy(name, row[0]);
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		strcpy(name, row[0]);
+	}
 }
 
 bool Database::LoadVariables() {

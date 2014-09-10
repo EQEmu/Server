@@ -8350,12 +8350,10 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		return;
 
 	float HasteModifier = 0;
-	if(GetHaste() >= 0){
+	if (GetHaste())
 		HasteModifier = 10000 / (100 + GetHaste());
-	}
-	else {
-		HasteModifier = (100 - GetHaste());
-	}
+	else
+		HasteModifier = 100;
 	int32 dmg = 0;
 
 	uint16 skill_to_use = -1;
@@ -8981,10 +8979,8 @@ int32 Bot::CalcMaxMana() {
 
 void Bot::SetAttackTimer() {
 	float PermaHaste;
-	if(GetHaste() > 0)
+	if (GetHaste())
 		PermaHaste = 1 / (1 + (float)GetHaste()/100);
-	else if(GetHaste() < 0)
-		PermaHaste = 1 * (1 - (float)GetHaste()/100);
 	else
 		PermaHaste = 1.0f;
 
@@ -11741,8 +11737,6 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	if(!strcasecmp(sep->arg[1], "augmentitem")) {
 		AugmentItem_Struct* in_augment = new AugmentItem_Struct[sizeof(AugmentItem_Struct)];
 		in_augment->container_slot = 1000; // <watch>
-		in_augment->unknown02[0] = 0;
-		in_augment->unknown02[1] = 0;
 		in_augment->augment_slot = -1;
 		Object::HandleAugmentation(c, in_augment, c->GetTradeskillObject());
 		return;

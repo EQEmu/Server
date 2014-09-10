@@ -2519,10 +2519,10 @@ struct Stun_Struct { // 8 bytes total
 
 struct AugmentItem_Struct {
 /*00*/	uint32	dest_inst_id;			// The unique serial number for the item instance that is being augmented
-/*04*/	uint32	unknown04;				// Seen 0
+/*04*/	uint32	container_index;				// Seen 0
 /*08*/	ItemSlotStruct container_slot;	// Slot of the item being augmented
-/*20*/	uint32	unknown20;				// Seen 0
-/*24*/	ItemSlotStruct distiller_slot;	// Slot of the distiller to use (if one applies)
+/*20*/	uint32	augment_index;				// Seen 0
+/*24*/	ItemSlotStruct augment_slot;	// Slot of the distiller to use (if one applies)
 /*36*/	int32	augment_action;			// Guessed - 0 = augment, 1 = remove with distiller, 3 = delete aug
 /*36*/	//int32	augment_slot;
 /*40*/

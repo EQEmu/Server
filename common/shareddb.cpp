@@ -143,19 +143,22 @@ uint32 SharedDatabase::GetTotalTimeEntitledOnAccount(uint32 AccountID) {
 
 bool SharedDatabase::SaveCursor(uint32 char_id, std::list<ItemInst*>::const_iterator &start, std::list<ItemInst*>::const_iterator &end)
 {
-iter_queue it;
-int i;
-bool ret=true;
+	iter_queue it;
+	int i;
+	bool ret = true;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	// Delete cursor items
-	if ((ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM inventory WHERE charid=%i AND ( (slotid >=8000 and slotid<=8999) or slotid=%i or (slotid>=%i and slotid<=%i))", char_id, MainCursor,EmuConstants::CURSOR_BAG_BEGIN,EmuConstants::CURSOR_BAG_END), errbuf))) {
-		for(it=start,i=8000;it!=end;++it,i++) {
-			ItemInst *inst=*it;
-			if (!(ret=SaveInventory(char_id,inst,(i==8000) ? MainCursor : i)))
+	if ((ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM inventory WHERE charid = %i AND ((slotid >= 8000 AND slotid <= 8999) OR slotid = %i OR (slotid >= %i AND slotid <= %i))",
+		char_id, MainCursor, EmuConstants::CURSOR_BAG_BEGIN, EmuConstants::CURSOR_BAG_END), errbuf))) {
+
+		for (it = start, i = 8000; it != end; ++it, i++) {
+			ItemInst *inst = *it;
+			if (!(ret = SaveInventory(char_id, inst, (i == 8000) ? MainCursor : i)))
 				break;
 		}
-	} else {
+	}
+	else {
 		std::cout << "Clearing cursor failed: " << errbuf << std::endl;
 	}
 	safe_delete_array(query);
@@ -1632,6 +1635,13 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 
 		int tempid = 0;
 		int counter = 0;
+
+		if(result && mysql_field_count(getMySQL()) <= SPELL_LOAD_FIELD_COUNT) {
+			_log(SPELLS__LOAD_ERR, "Fatal error loading spells: Spell field count < SPELL_LOAD_FIELD_COUNT(%u)", SPELL_LOAD_FIELD_COUNT);
+			mysql_free_result(result);
+			return;
+		}
+
 		while (row = mysql_fetch_row(result)) {
 			tempid = atoi(row[0]);
 			if(tempid >= max_spells) {
@@ -2138,7 +2148,8 @@ void SharedDatabase::SetPlayerInspectMessage(char* playername, const InspectMess
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET inspectmessage='%s' WHERE name='%s'", message->text, playername), errbuf)) {
+	std::string msg = EscapeString(message->text);
+	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET inspectmessage='%s' WHERE name='%s'", msg.c_str(), playername), errbuf)) {
 		std::cerr << "Error in SetPlayerInspectMessage query '" << query << "' " << errbuf << std::endl;
 	}
 
@@ -2173,7 +2184,8 @@ void SharedDatabase::SetBotInspectMessage(uint32 botid, const InspectMessage_Str
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE bots SET BotInspectMessage='%s' WHERE BotID=%i", message->text, botid), errbuf)) {
+	std::string msg = EscapeString(message->text);
+	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE bots SET BotInspectMessage='%s' WHERE BotID=%i", msg.c_str(), botid), errbuf)) {
 		std::cerr << "Error in SetBotInspectMessage query '" << query << "' " << errbuf << std::endl;
 	}
 

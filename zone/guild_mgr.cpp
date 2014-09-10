@@ -374,6 +374,10 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 		else if(c != nullptr && s->guild_id != GUILD_NONE) {
 			//char is in zone, and has changed into a new guild, send MOTD.
 			c->SendGuildMOTD();
+			if(c->GetClientVersion() >= EQClientRoF)
+			{
+				c->SendGuildRanks();
+			}
 		}
 
 
@@ -686,19 +690,26 @@ bool GuildBankManager::Load(uint32 guildID)
         else
             whoFor[0] = '\0';
 
-        if(slot < 0 ||
-            ((area != GuildBankMainArea || slot >= GUILD_BANK_MAIN_AREA_SIZE) ||
-            (area == GuildBankMainArea || slot >= GUILD_BANK_DEPOSIT_AREA_SIZE)))
+        if(slot < 0)
             continue;
 
-        bank->Items.MainArea[slot].ItemID = itemID;
-        bank->Items.MainArea[slot].Quantity = qty;
+        GuildBankItem *itemSection = nullptr;
 
-        strn0cpy(bank->Items.MainArea[slot].Donator, donator, sizeof(donator));
+        if (area == GuildBankMainArea && slot < GUILD_BANK_MAIN_AREA_SIZE)
+            itemSection = bank->Items.MainArea;
+        else if (area != GuildBankMainArea && slot < GUILD_BANK_DEPOSIT_AREA_SIZE)
+            itemSection = bank->Items.DepositArea;
+        else
+            continue;
 
-        bank->Items.MainArea[slot].Permissions = permissions;
+        itemSection[slot].ItemID = itemID;
+        itemSection[slot].Quantity = qty;
 
-        strn0cpy(bank->Items.MainArea[slot].WhoFor, whoFor, sizeof(whoFor));
+        strn0cpy(itemSection[slot].Donator, donator, sizeof(donator));
+
+        itemSection[slot].Permissions = permissions;
+
+        strn0cpy(itemSection[slot].WhoFor, whoFor, sizeof(whoFor));
     }
 
     Banks.push_back(bank);

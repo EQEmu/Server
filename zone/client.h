@@ -222,6 +222,8 @@ public:
 	virtual Group* GetGroup() { return entity_list.GetGroupByClient(this); }
 	virtual inline bool IsBerserk() { return berserk; }
 	virtual int32 GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit, float mit_rating, float atk_rating);
+	virtual void SetAttackTimer();
+	float GetQuiverHaste();
 
 	void	AI_Init();
 	void	AI_Start(uint32 iMoveDelay = 0);
@@ -594,7 +596,7 @@ public:
 	FACTION_VALUE	GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_race, uint32 p_class, uint32 p_deity, int32 pFaction, Mob* tnpc);
 	int32	GetCharacterFactionLevel(int32 faction_id);
 	int32	GetModCharacterFactionLevel(int32 faction_id);
-	bool	HatedByClass(uint32 p_race, uint32 p_class, uint32 p_deity, int32 pFaction);
+	void	MerchantRejectMessage(Mob *merchant, int primaryfaction);
 	void	SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 totalvalue, uint8 temp);
 
 	void	SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, uint8 char_race, uint8 char_deity);
@@ -1194,13 +1196,15 @@ public:
 	int32 mod_client_xp(int32 in_exp, NPC *npc);
 	uint32 mod_client_xp_for_level(uint32 xp, uint16 check_level);
 	int mod_client_haste_cap(int cap);
-    int mod_consume(Item_Struct *item, ItemUseTypes type, int change);
-    int mod_food_value(const Item_Struct *item, int change);
-    int mod_drink_value(const Item_Struct *item, int change);
+	int mod_consume(Item_Struct *item, ItemUseTypes type, int change);
+	int mod_food_value(const Item_Struct *item, int change);
+	int mod_drink_value(const Item_Struct *item, int change);
 
 	void SetEngagedRaidTarget(bool value) { EngagedRaidTarget = value; }
 	bool GetEngagedRaidTarget() const { return EngagedRaidTarget; }
-	
+
+	void ShowNumHits(); // work around function for numhits not showing on buffs
+
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);
