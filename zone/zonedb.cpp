@@ -178,10 +178,10 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
         zone_data->rain_duration[index]=atoi(row[44 + index]);
 
 	for(index = 0; index < 4; index++)
-        zone_data->snow_chance[index]=atoi(row[49 + index]);
+        zone_data->snow_chance[index]=atoi(row[48 + index]);
 
 	for(index = 0; index < 4; index++)
-        zone_data->snow_duration[index]=atof(row[53 + index]);
+        zone_data->snow_duration[index]=atof(row[52 + index]);
 
 	return true;
 }
