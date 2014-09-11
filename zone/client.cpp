@@ -4002,54 +4002,38 @@ void Client::SendWindow(uint32 PopupID, uint32 NegativeID, uint32 Buttons, const
 
 void Client::KeyRingLoad()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	query = new char[256];
-
-	sprintf(query, "SELECT item_id FROM keyring WHERE char_id='%i' ORDER BY item_id",character_id);
-	if (database.RunQuery(query, strlen(query), errbuf, &result))
-	{
-		safe_delete_array(query);
-		while(0 != (row = mysql_fetch_row(result))){
-			keyring.push_back(atoi(row[0]));
-		}
-		mysql_free_result(result);
-	}else {
-		std::cerr << "Error in Client::KeyRingLoad query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+	std::string query = StringFormat("SELECT item_id FROM keyring "
+                                    "WHERE char_id = '%i' ORDER BY item_id", character_id);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        std::cerr << "Error in Client::KeyRingLoad query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return;
-	}
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row)
+        keyring.push_back(atoi(row[0]));
+
 }
 
 void Client::KeyRingAdd(uint32 item_id)
 {
-	if(0==item_id)return;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 affected_rows = 0;
-	query = new char[256];
-	bool bFound = KeyRingCheck(item_id);
-	if(!bFound){
-		sprintf(query, "INSERT INTO keyring(char_id,item_id) VALUES(%i,%i)",character_id,item_id);
-		if(database.RunQuery(query, strlen(query), errbuf, 0, &affected_rows)) {
-			Message(4,"Added to keyring.");
+	if(0==item_id)
+        return;
 
-			/* QS: PlayerLogKeyringAddition */
-			if (RuleB(QueryServ, PlayerLogKeyringAddition)){
-				std::string event_desc = StringFormat("itemid:%i in zoneid:%i instid:%i", item_id, this->GetZoneID(), this->GetInstanceID());
-				QServ->PlayerLogEvent(Player_Log_Keyring_Addition, this->CharacterID(), event_desc);
-			}
-			safe_delete_array(query);
-		}
-		else {
-			std::cerr << "Error in Doors::HandleClick query '" << query << "' " << errbuf << std::endl;
-			safe_delete_array(query);
-			return;
-		}
-		keyring.push_back(item_id);
-	}
+	bool found = KeyRingCheck(item_id);
+	if (found)
+        return;
+
+    std::string query = StringFormat("INSERT INTO keyring(char_id, item_id) VALUES(%i, %i)", character_id, item_id);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        std::cerr << "Error in Doors::HandleClick query '" << query << "' " << results.ErrorMessage() << std::endl;
+        return;
+    }
+
+    Message(4,"Added to keyring.");
+
+    keyring.push_back(item_id);
 }
 
 bool Client::KeyRingCheck(uint32 item_id)
