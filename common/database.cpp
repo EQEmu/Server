@@ -306,7 +306,7 @@ bool Database::SetAccountStatus(const char* name, int16 status) {
 /* This initially creates the character during character create */
 bool Database::ReserveName(uint32 account_id, char* name) {
 	std::string query = StringFormat("INSERT INTO `character_data` SET `account_id` = %i, `name` = '%s'", account_id, name); 
-	auto results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "Database::ReserveName", query); 
+	auto results = QueryDatabase(query);
 	if (!results.Success() || results.ErrorMessage() != ""){ return false; } 
 	return true;
 }
