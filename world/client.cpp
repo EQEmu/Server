@@ -171,7 +171,7 @@ void Client::SendCharInfo() {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendCharInfo, sizeof(CharacterSelect_Struct));
 	CharacterSelect_Struct* cs = (CharacterSelect_Struct*)outapp->pBuffer;
 
-	database.GetCharSelectInfo(GetAccountID(), cs);
+	database.GetCharSelectInfo(GetAccountID(), cs, ClientVersionBit);
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -699,7 +699,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	if(!pZoning && ew->return_home && !ew->tutorial) {
 		CharacterSelect_Struct* cs = new CharacterSelect_Struct;
 		memset(cs, 0, sizeof(CharacterSelect_Struct));
-		database.GetCharSelectInfo(GetAccountID(), cs);
+		database.GetCharSelectInfo(GetAccountID(), cs, ClientVersionBit);
 		bool home_enabled = false;
 
 		for(int x = 0; x < 10; ++x)
@@ -729,7 +729,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	if(!pZoning && (RuleB(World, EnableTutorialButton) && (ew->tutorial || StartInTutorial))) {
 		CharacterSelect_Struct* cs = new CharacterSelect_Struct;
 		memset(cs, 0, sizeof(CharacterSelect_Struct));
-		database.GetCharSelectInfo(GetAccountID(), cs);
+		database.GetCharSelectInfo(GetAccountID(), cs, ClientVersionBit);
 		bool tutorial_enabled = false;
 
 		for(int x = 0; x < 10; ++x)

@@ -33,9 +33,11 @@ extern std::vector<RaceClassCombos> character_create_race_class_combos;
 
 
 // solar: the current stuff is at the bottom of this function
-void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct* cs) {
+void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct* cs, uint32 ClientVersion) {
 	Inventory *inv;
-	
+	uint8 has_home = 0; 
+	uint8 has_bind = 0;
+
 	/* Initialize Variables */
 	for (int i=0; i<10; i++) {
 		strcpy(cs->name[i], "<none>");
@@ -105,23 +107,52 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 				cs->gohome[char_num] = 1;
 		}
 
-		/*
-			This part creates home city entries for characters created before the home bind point was tracked.
-			Do it here because the player profile is already loaded and it's as good a spot as any. This whole block should
-			probably be removed at some point, when most accounts are safely converted.
-		*/
-
-		/* Load Character Bind Data */
-		cquery = StringFormat("SELECT zone_id, instance_id, x, y, z, heading FROM character_bind_home  WHERE `id` = %i LIMIT 1", character_id);
-		auto results_bind = database.QueryDatabase(cquery); int r = 0;
+		/* Set Bind Point Data for any character that may possibly be missing it for any reason */
+		cquery = StringFormat("SELECT `zone_id`, `instance_id`, `x`, `y`, `z`, `heading`, `is_home` FROM `character_bind`  WHERE `id` = %i LIMIT 2", character_id); 
+		auto results_bind = database.QueryDatabase(cquery); has_home = 0; has_bind = 0;
 		for (auto row_b = results_bind.begin(); row_b != results_bind.end(); ++row_b) {
-			uint8 bind_zone_id = atoi(row_b[r]); r++;
-			uint8 bind_instance_id = atoi(row_b[r]); r++;
-			uint8 bind_x_id = atoi(row_b[r]); r++;
-			uint8 bind_y_id = atoi(row_b[r]); r++;
-			uint8 bind_z_id = atoi(row_b[r]); r++;
-			uint8 bind_heading_id = atoi(row_b[r]); r++;
+			if (row_b[6] && atoi(row_b[6]) == 1){ has_home = 1; }
+			if (row_b[6] && atoi(row_b[6]) == 0){ has_bind = 1; } 
 		}
+
+		if (has_home == 0 || has_bind == 0){
+			cquery = StringFormat("SELECT `zone_id`, `bind_id`, `x`, `y`, `z` FROM `start_zones` WHERE `player_class` = %i AND `player_deity` = %i AND `player_race` = %i",
+				cs->class_[char_num], cs->deity[char_num], cs->race[char_num]);
+			auto results_bind = database.QueryDatabase(cquery);
+			for (auto row_d = results_bind.begin(); row_d != results_bind.end(); ++row_d) {
+				/* If a bind_id is specified, make them start there */
+				if (atoi(row_d[1]) != 0) { 
+					pp.binds[4].zoneId = (uint32)atoi(row_d[1]);
+					GetSafePoints(pp.binds[4].zoneId, 0, &pp.binds[4].x, &pp.binds[4].y, &pp.binds[4].z);
+				}
+				/* Otherwise, use the zone and coordinates given */
+				else {	
+					pp.binds[4].zoneId = (uint32)atoi(row_d[0]);
+					float x = atof(row_d[2]); 
+					float y = atof(row_d[3]); 
+					float z = atof(row_d[4]); 
+					if (x == 0 && y == 0 && z == 0){ GetSafePoints(pp.binds[4].zoneId, 0, &x, &y, &z); } 
+					pp.binds[4].x = x; pp.binds[4].y = y; pp.binds[4].z = z;
+					
+				}
+			}
+			pp.binds[0] = pp.binds[4];
+			/* If no home bind set, set it */
+			if (has_home == 0){
+				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
+					" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)", 
+					character_id, pp.binds[4].zoneId, 0, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z, pp.binds[4].heading, 1); 
+				auto results_bset = QueryDatabase(query); ThrowDBError(results_bset.ErrorMessage(), "WorldDatabase::GetCharSelectInfo Set Home Point", query);
+			}
+			/* If no regular bind set, set it */
+			if (has_bind == 0){
+				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
+					" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)", 
+					character_id, pp.binds[0].zoneId, 0, pp.binds[0].x, pp.binds[0].y, pp.binds[0].z, pp.binds[0].heading, 0); 
+				auto results_bset = QueryDatabase(query); ThrowDBError(results_bset.ErrorMessage(), "WorldDatabase::GetCharSelectInfo Set Bind Point", query);
+			}
+		}
+		/* Bind End */
 
 		/*
 			Character's equipped items

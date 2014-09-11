@@ -571,7 +571,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app) {
 	results = database.QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		m_pp.lastlogin = time(nullptr);
-		if (atoi(row[4]) > 0){ 
+		if (row[4] && atoi(row[4]) > 0){ 
 			guild_id = atoi(row[4]); 
 			if (row[5] != nullptr){ guildrank = atoi(row[5]); }
 			else{ guildrank = GUILD_RANK_NONE; }

@@ -573,8 +573,8 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 		")",
 		character_id,					  // " id,                        "
 		account_id,						  // " account_id,                "
-		pp->name,						  // " `name`,                    "
-		pp->last_name,					  // " last_name,                 "
+		EscapeString(pp->name).c_str(),	  // " `name`,                    "
+		EscapeString(pp->last_name).c_str(), // " last_name,              "
 		pp->gender,						  // " gender,                    "
 		pp->race,						  // " race,                      "
 		pp->class_,						  // " class,                     "
@@ -598,8 +598,8 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 		pp->ability_number,				  // " ability_number,            "
 		pp->ability_time_minutes,		  // " ability_time_minutes,      "
 		pp->ability_time_hours,			  // " ability_time_hours,        "
-		pp->title,						  // " title,                     "
-		pp->suffix,						  // " suffix,                    "
+		EscapeString(pp->title).c_str(),  // " title,                     "
+		EscapeString(pp->suffix).c_str(), // " suffix,                    "
 		pp->exp,						  // " exp,                       "
 		pp->points,						  // " points,                    "
 		pp->mana,						  // " mana,                      "
@@ -661,12 +661,49 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 		pp->raidAutoconsent,			  // " raid_auto_consent,         "
 		pp->guildAutoconsent,			  // " guild_auto_consent,        "
 		pp->RestTimer					  // " RestTimer)                 "
-		);
+	);
 	auto results = QueryDatabase(query);
-	ThrowDBError(results.ErrorMessage(), "Database::SaveCharacterCreate", query);
+	ThrowDBError(results.ErrorMessage(), "Database::SaveCharacterCreate Character Data", query); 
+	/* Save Bind Points */
+	query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
+		" VALUES (%u, %u, %u, %f, %f, %f, %f, %i), "
+		"(%u, %u, %u, %f, %f, %f, %f, %i)",
+		character_id, pp->binds[0].zoneId, 0, pp->binds[0].x, pp->binds[0].y, pp->binds[0].z, pp->binds[0].heading, 0,
+		character_id, pp->binds[4].zoneId, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading, 1
+	); results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "Database::SaveCharacterCreate Bind Point", query);
+
+	/* Save Skills */
+	int firstquery = 0;
+	for (int i = 0; i < MAX_PP_SKILL; i++){
+		if (pp->skills[i] > 0){
+			if (firstquery != 1){
+				firstquery = 1;
+				query = StringFormat("REPLACE INTO `character_skills` (id, skill_id, value) VALUES (%u, %u, %u)", character_id, i, pp->skills[i]);
+			}
+			else{
+				query = query + StringFormat(", (%u, %u, %u)", character_id, i, pp->skills[i]);
+			}
+		}
+	}
+	results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "Database::SaveCharacterCreate Starting Skills", query);
+
+	/* Save Language */
+	firstquery = 0;
+	for (int i = 0; i < MAX_PP_LANGUAGE; i++){
+		if (pp->languages[i] > 0){
+			if (firstquery != 1){
+				firstquery = 1;
+				query = StringFormat("REPLACE INTO `character_languages` (id, lang_id, value) VALUES (%u, %u, %u)", character_id, i, pp->languages[i]);
+			}
+			else{
+				query = query + StringFormat(", (%u, %u, %u)", character_id, i, pp->languages[i]);
+			}
+		}
+	}
+	results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "Database::SaveCharacterCreate Starting Languages", query);
+
 	return true;
 }
-
 
 /* This only for new Character creation storing */
 bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inventory* inv) {
@@ -690,7 +727,7 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 	y = pp->y;
 	z = pp->z;
 
-	/* Saves Player Profile Data to `character_data` */
+	/* Saves Player Profile Data */
 	SaveCharacterCreate(charid, account_id, pp); 
 
 	/* Insert starting inventory... */
