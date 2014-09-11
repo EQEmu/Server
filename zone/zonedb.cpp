@@ -2350,11 +2350,11 @@ bool ZoneDatabase::LoadFactionValues(uint32 char_id, faction_map& val_list) {
     return LoadFactionValues_result(std::move(results), val_list);
 }
 
-bool ZoneDatabase::LoadFactionValues_result(MySQLRequestResult results, faction_map & val_list) {
-
-	for (auto row = results.begin(); row != results.begin(); ++row)
+bool ZoneDatabase::LoadFactionValues_result(MYSQL_RES* result, faction_map & val_list) {
+	MYSQL_ROW row;
+	while((row = mysql_fetch_row(result))) {
 		val_list[atoi(row[0])] = atoi(row[1]);
-
+	}
 	return true;
 }
 

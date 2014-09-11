@@ -303,7 +303,7 @@ public:
 	bool	SetCharacterFactionLevel(uint32 char_id, int32 faction_id, int32 value, uint8 temp, faction_map &val_list); // rembrant, needed for factions Dec, 16 2001
 	bool	LoadFactionData();
 	bool	LoadFactionValues(uint32 char_id, faction_map & val_list);
-	bool	LoadFactionValues_result(MySQLRequestResult result, faction_map & val_list);
+	bool	LoadFactionValues_result(MYSQL_RES* result, faction_map & val_list);
 
 	/*
 	* AAs
