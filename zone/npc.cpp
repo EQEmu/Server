@@ -936,6 +936,8 @@ NPC* NPC::SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z,
 		npc_type->WIS = 150;
 		npc_type->CHA = 150;
 
+		npc_type->attack_delay = 30;
+
 		npc_type->prim_melee_type = 28;
 		npc_type->sec_melee_type = 28;
 
