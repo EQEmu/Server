@@ -136,30 +136,30 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
         zone_data->fog_maxclip[index]=atof(row[5 + index * 5]);
     }
 
-    zone_data->fog_density = atof(row[22]);
-    zone_data->sky=atoi(row[23]);
-    zone_data->zone_exp_multiplier=atof(row[24]);
-    zone_data->safe_x=atof(row[25]);
-    zone_data->safe_y=atof(row[26]);
-    zone_data->safe_z=atof(row[27]);
-    zone_data->underworld=atof(row[28]);
-    zone_data->minclip=atof(row[29]);
-    zone_data->maxclip=atof(row[30]);
-    zone_data->time_type=atoi(row[31]);
+    zone_data->fog_density = atof(row[21]);
+    zone_data->sky=atoi(row[22]);
+    zone_data->zone_exp_multiplier=atof(row[23]);
+    zone_data->safe_x=atof(row[24]);
+    zone_data->safe_y=atof(row[25]);
+    zone_data->safe_z=atof(row[26]);
+    zone_data->underworld=atof(row[27]);
+    zone_data->minclip=atof(row[28]);
+    zone_data->maxclip=atof(row[29]);
+    zone_data->time_type=atoi(row[30]);
 
     //not in the DB yet:
     zone_data->gravity = 0.4;
     allow_mercs = true;
 
     int bindable = 0;
-    bindable = atoi(row[32]);
+    bindable = atoi(row[31]);
 
     can_bind = bindable == 0? false: true;
     is_city = bindable == 2? true: false;
-    can_combat = atoi(row[33]) == 0? false: true;
-    can_levitate = atoi(row[34]) == 0? false: true;
-    can_castoutdoor = atoi(row[35]) == 0? false: true;
-    is_hotzone = atoi(row[36]) == 0? false: true;
+    can_combat = atoi(row[32]) == 0? false: true;
+    can_levitate = atoi(row[33]) == 0? false: true;
+    can_castoutdoor = atoi(row[34]) == 0? false: true;
+    is_hotzone = atoi(row[35]) == 0? false: true;
 
 
     ruleset = atoi(row[36]);
