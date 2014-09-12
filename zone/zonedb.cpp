@@ -922,8 +922,8 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
                         "npc_types.texture, npc_types.helmtexture, npc_types.size, "
                         "npc_types.loottable_id, npc_types.merchant_id, npc_types.alt_currency_id, "
                         "npc_types.adventure_template_id, npc_types.trap_template, npc_types.attack_speed, "
-                        "npc_types.STR, npc_types.STA, npc_types.DEX, npc_types.AGI, npc_types._INT, "
-                        "npc_types.WIS, npc_types.CHA, npc_types.MR, npc_types.CR, npc_types.DR, "
+                        "npc_types.attack_delay, npc_types.STR, npc_types.STA, npc_types.DEX, npc_types.AGI, "
+                        "npc_types._INT, npc_types.WIS, npc_types.CHA, npc_types.MR, npc_types.CR, npc_types.DR, "
                         "npc_types.FR, npc_types.PR, npc_types.Corrup, npc_types.PhR,"
                         "npc_types.mindmg, npc_types.maxdmg, npc_types.attack_count, npc_types.special_abilities,"
                         "npc_types.npc_spells_id, npc_types.npc_spells_effects_id, npc_types.d_meele_texture1,"
@@ -976,6 +976,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 		tmpNPCType->adventure_template = atoi(row[14]);
 		tmpNPCType->trap_template = atoi(row[15]);
 		tmpNPCType->attack_speed = atof(row[16]);
+		tmpNPCType->attack_delay = atoi(row[17]);
 		tmpNPCType->STR = atoi(row[17]);
 		tmpNPCType->STA = atoi(row[18]);
 		tmpNPCType->DEX = atoi(row[19]);
