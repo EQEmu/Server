@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 09/13/2014 ==
+demonstar55: Fix rogues not having Thieves' Cant
+
 == 09/09/2014 ==
 demonstar55: Incrase Mob kick/bash timer by 3
 	see: http://www.eqemulator.org/forums/showthread.php?t=38734

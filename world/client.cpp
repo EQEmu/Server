@@ -1446,6 +1446,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	SetRacialLanguages( &pp ); // bUsh
 	SetRaceStartingSkills( &pp ); // bUsh
 	SetClassStartingSkills( &pp ); // bUsh
+	SetClassLanguages(&pp);
 	pp.skills[SkillSenseHeading] = 200;
 	// Some one fucking fix this to use a field name. -Doodman
 	//pp.unknown3596[28] = 15; // @bp: This is to enable disc usage
@@ -2031,6 +2032,18 @@ void Client::SetRacialLanguages( PlayerProfile_Struct *pp )
 			pp->languages[LANG_DRAGON] = 100;
 			break;
 		}
+	}
+}
+
+void Client::SetClassLanguages(PlayerProfile_Struct *pp)
+{
+	// we only need to handle one class, but custom server might want to do more
+	switch(pp->class_) {
+	case ROGUE:
+		pp->languages[LANG_THIEVES_CANT] = 100;
+		break;
+	default:
+		break;
 	}
 }
 
