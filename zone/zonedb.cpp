@@ -548,55 +548,54 @@ void ZoneDatabase::DeleteWorldContainer(uint32 parent_id, uint32 zone_id)
 
 }
 
-Trader_Struct* ZoneDatabase::LoadTraderItem(uint32 char_id){
-
+Trader_Struct* ZoneDatabase::LoadTraderItem(uint32 char_id)
+{
 	Trader_Struct* loadti = new Trader_Struct;
 	memset(loadti,0,sizeof(Trader_Struct));
 
 	std::string query = StringFormat("SELECT * FROM trader WHERE char_id = %i ORDER BY slot_id LIMIT 80", char_id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        _log(TRADING__CLIENT, "Failed to load trader information!\n");
-        return loadti;
+		_log(TRADING__CLIENT, "Failed to load trader information!\n");
+		return loadti;
 	}
 
-    loadti->Code = BazaarTrader_ShowItems;
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        if(atoi(row[5])>=80 || atoi(row[4])<0) {
-            _log(TRADING__CLIENT, "Bad Slot number when trying to load trader information!\n");
-            continue;
-        }
+	loadti->Code = BazaarTrader_ShowItems;
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		if (atoi(row[5]) >= 80 || atoi(row[4]) < 0) {
+			_log(TRADING__CLIENT, "Bad Slot number when trying to load trader information!\n");
+			continue;
+		}
 
 		loadti->Items[atoi(row[5])] = atoi(row[1]);
 		loadti->ItemCost[atoi(row[5])] = atoi(row[4]);
-    }
+	}
 	return loadti;
 }
 
-TraderCharges_Struct* ZoneDatabase::LoadTraderItemWithCharges(uint32 char_id){
-
+TraderCharges_Struct* ZoneDatabase::LoadTraderItemWithCharges(uint32 char_id)
+{
 	TraderCharges_Struct* loadti = new TraderCharges_Struct;
 	memset(loadti,0,sizeof(TraderCharges_Struct));
 
 	std::string query = StringFormat("SELECT * FROM trader WHERE char_id=%i ORDER BY slot_id LIMIT 80", char_id);
 	auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        _log(TRADING__CLIENT, "Failed to load trader information!\n");
-        return loadti;
-    }
+	if (!results.Success()) {
+		_log(TRADING__CLIENT, "Failed to load trader information!\n");
+		return loadti;
+	}
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        if(atoi(row[5])>=80 || atoi(row[5])<0) {
-            _log(TRADING__CLIENT, "Bad Slot number when trying to load trader information!\n");
-            continue;
-        }
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		if (atoi(row[5]) >= 80 || atoi(row[5]) < 0) {
+			_log(TRADING__CLIENT, "Bad Slot number when trying to load trader information!\n");
+			continue;
+		}
 
-        loadti->ItemID[atoi(row[5])] = atoi(row[1]);
-        loadti->SerialNumber[atoi(row[5])] = atoi(row[2]);
-        loadti->Charges[atoi(row[5])] = atoi(row[3]);
-        loadti->ItemCost[atoi(row[5])] = atoi(row[4]);
-    }
-
+		loadti->ItemID[atoi(row[5])] = atoi(row[1]);
+		loadti->SerialNumber[atoi(row[5])] = atoi(row[2]);
+		loadti->Charges[atoi(row[5])] = atoi(row[3]);
+		loadti->ItemCost[atoi(row[5])] = atoi(row[4]);
+	}
 	return loadti;
 }
 
