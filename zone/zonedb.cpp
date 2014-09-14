@@ -570,6 +570,7 @@ Trader_Struct* ZoneDatabase::LoadTraderItem(uint32 char_id){
 		loadti->Items[atoi(row[5])] = atoi(row[1]);
 		loadti->ItemCost[atoi(row[5])] = atoi(row[4]);
     }
+	return loadti;
 }
 
 TraderCharges_Struct* ZoneDatabase::LoadTraderItemWithCharges(uint32 char_id){
