@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 09/15/2014 ==
+Kayen: Nimbus effects will now be reapplied after zoning and will be removed when associated buff fades.
+
 == 09/13/2014 ==
 demonstar55: Fix rogues not having Thieves' Cant
 
