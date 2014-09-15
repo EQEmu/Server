@@ -4375,6 +4375,15 @@ void Mob::SpreadVirus(uint16 spell_id, uint16 casterID)
 
 void Mob::RemoveNimbusEffect(int effectid)
 {
+	if (effectid == nimbus_effect1)
+		nimbus_effect1 = 0;
+
+	else if (effectid == nimbus_effect2)
+		nimbus_effect2 = 0;
+
+	else if (effectid == nimbus_effect3)
+		nimbus_effect3 = 0;
+
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RemoveNimbusEffect, sizeof(RemoveNimbusEffect_Struct));
 	RemoveNimbusEffect_Struct* rne = (RemoveNimbusEffect_Struct*)outapp->pBuffer;
 	rne->spawnid = GetID();

@@ -9574,10 +9574,16 @@ void Client::CompleteConnect() {
 	//reapply some buffs
 	uint32 buff_count = GetMaxTotalSlots();
 	for (uint32 j1 = 0; j1 < buff_count; j1++) {
-		if (buffs[j1].spellid >(uint32)SPDAT_RECORDS)
+		if (!IsValidSpell(buffs[j1].spellid))
 			continue;
 
 		const SPDat_Spell_Struct &spell = spells[buffs[j1].spellid];
+
+		int NimbusEffect = GetNimbusEffect(buffs[j1].spellid);
+		if(NimbusEffect) {
+			if(!IsNimbusEffectActive(NimbusEffect))
+				SendSpellEffect(NimbusEffect, 500, 0, 1, 3000, true);
+		}
 
 		for (int x1 = 0; x1 < EFFECT_COUNT; x1++) {
 			switch (spell.effectid[x1]) {
