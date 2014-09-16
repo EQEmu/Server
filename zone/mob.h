@@ -843,7 +843,7 @@ public:
 	void StopSpecialAbilityTimer(int ability);
 	Timer *GetSpecialAbilityTimer(int ability);
 	void ClearSpecialAbilities();
-	void ProcessSpecialAbilities(const std::string str);
+	void ProcessSpecialAbilities(const std::string &str);
 
 	Shielders_Struct shielder[MAX_SHIELDERS];
 	Trade* trade;

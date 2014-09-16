@@ -4924,7 +4924,7 @@ void Mob::ClearSpecialAbilities() {
 	}
 }
 
-void Mob::ProcessSpecialAbilities(const std::string str) {
+void Mob::ProcessSpecialAbilities(const std::string &str) {
 	ClearSpecialAbilities();
 
 	std::vector<std::string> sp = SplitString(str, '^');
