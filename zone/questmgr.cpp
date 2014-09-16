@@ -2951,6 +2951,15 @@ const char* QuestManager::GetZoneLongName(const char *zone) {
 	return ln.c_str();
 }
 
+void QuestManager::CrossZoneSignalNPCByNPCTypeID(uint32 npctype_id, uint32 data){
+	ServerPacket* pack = new ServerPacket(ServerOP_CZSignalNPC, sizeof(CZNPCSignal_Struct));
+	CZNPCSignal_Struct* CZSN = (CZNPCSignal_Struct*)pack->pBuffer;
+	CZSN->npctype_id = npctype_id;
+	CZSN->data = data;
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
 void QuestManager::CrossZoneSignalPlayerByCharID(int charid, uint32 data){
 	ServerPacket* pack = new ServerPacket(ServerOP_CZSignalClient, sizeof(CZClientSignal_Struct));
 	CZClientSignal_Struct* CZSC = (CZClientSignal_Struct*) pack->pBuffer;
@@ -2968,7 +2977,7 @@ void QuestManager::CrossZoneSignalPlayerByName(const char *CharName, uint32 data
 	CZSC->data = data;
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
-}
+} 
 
 void QuestManager::CrossZoneMessagePlayerByName(uint32 Type, const char *CharName, const char *Message){
 	uint32 message_len = strlen(CharName) + 1;
@@ -2978,6 +2987,18 @@ void QuestManager::CrossZoneMessagePlayerByName(uint32 Type, const char *CharNam
 	CZSC->Type = Type;
 	strn0cpy(CZSC->CharName, CharName, 64);
 	strn0cpy(CZSC->Message, Message, 512);
+	worldserver.SendPacket(pack); 
+	safe_delete(pack);
+}
+
+void QuestManager::CrossZoneSetEntityVariableByNPCTypeID(uint32 npctype_id, const char *id, const char *m_var){
+	uint32 message_len = strlen(id) + 1;
+	uint32 message_len2 = strlen(m_var) + 1;
+	ServerPacket* pack = new ServerPacket(ServerOP_CZSetEntityVariableByNPCTypeID, sizeof(CZSetEntVarByNPCTypeID_Struct) + message_len + message_len2);
+	CZSetEntVarByNPCTypeID_Struct* CZSNBYNID = (CZSetEntVarByNPCTypeID_Struct*)pack->pBuffer;
+	CZSNBYNID->npctype_id = npctype_id;
+	strn0cpy(CZSNBYNID->id, id, 256); 
+	strn0cpy(CZSNBYNID->m_var, m_var, 256);
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }

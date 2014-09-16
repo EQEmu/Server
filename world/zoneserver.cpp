@@ -1266,7 +1266,9 @@ bool ZoneServer::Process() {
 				break;
 			}
 			case ServerOP_CZSignalClientByName:
-			case ServerOP_CZMessagePlayer:
+			case ServerOP_CZMessagePlayer: 
+			case ServerOP_CZSignalNPC:
+			case ServerOP_CZSetEntityVariableByNPCTypeID:
 			case ServerOP_CZSignalClient:
 			{
 				zoneserver_list.SendPacket(pack);

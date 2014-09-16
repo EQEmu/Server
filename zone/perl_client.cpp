@@ -5072,6 +5072,35 @@ XS(XS_Client_UpdateTaskActivity)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_GetTaskActivityDoneCount); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetTaskActivityDoneCount)
+{
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: Client::GetTaskActivityDoneCount(THIS, TaskID, ActivityID)");
+	{
+		Client *	THIS;
+		int		RETVAL; 
+		int		TaskID = (int)SvIV(ST(1));
+		int		ActivityID = (int)SvIV(ST(2));
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		
+		RETVAL = THIS->GetTaskActivityDoneCountFromTaskID(TaskID, ActivityID);
+		XSprePUSH; PUSHi((IV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
 XS(XS_Client_AssignTask); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AssignTask)
 {
@@ -6199,6 +6228,7 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "IsTaskCompleted"), XS_Client_IsTaskCompleted, file, "$$");
 		newXSproto(strcpy(buf, "IsTaskActive"), XS_Client_IsTaskActive, file, "$$");
 		newXSproto(strcpy(buf, "IsTaskActivityActive"), XS_Client_IsTaskActivityActive, file, "$$$");
+		newXSproto(strcpy(buf, "GetTaskActivityDoneCount"), XS_Client_GetTaskActivityDoneCount, file, "$$$");
 		newXSproto(strcpy(buf, "GetCorpseCount"), XS_Client_GetCorpseCount, file, "$");
 		newXSproto(strcpy(buf, "GetCorpseID"), XS_Client_GetCorpseID, file, "$$");
 		newXSproto(strcpy(buf, "GetCorpseItemAt"), XS_Client_GetCorpseItemAt, file, "$$$");

@@ -1777,6 +1777,24 @@ void WorldServer::Process() {
 
 			break;
 		}
+		case ServerOP_CZSetEntityVariableByNPCTypeID:
+		{
+			CZSetEntVarByNPCTypeID_Struct* CZM = (CZSetEntVarByNPCTypeID_Struct*)pack->pBuffer;
+			NPC* n = entity_list.GetNPCByNPCTypeID(CZM->npctype_id);
+			if (n != 0) {
+				n->SetEntityVariable(CZM->id, CZM->m_var);
+			}
+			break;
+		}
+		case ServerOP_CZSignalNPC:
+		{
+			CZNPCSignal_Struct* CZCN = (CZNPCSignal_Struct*)pack->pBuffer;
+			NPC* n = entity_list.GetNPCByNPCTypeID(CZCN->npctype_id); 
+			if (n != 0) {
+				n->SignalNPC(CZCN->data);
+			}
+			break;
+		}
 		case ServerOP_CZSignalClient:
 		{
 			CZClientSignal_Struct* CZCS = (CZClientSignal_Struct*) pack->pBuffer;

@@ -9435,7 +9435,7 @@ void Client::CompleteConnect() {
 		if (buffs[j1].spellid >(uint32)SPDAT_RECORDS)
 			continue;
 
-		const SPDat_Spell_Struct &spell = spells[buffs[j1].spellid];
+		const SPDat_Spell_Struct &spell = spells[buffs[j1].spellid]; 
 
 		for (int x1 = 0; x1 < EFFECT_COUNT; x1++) {
 			switch (spell.effectid[x1]) {

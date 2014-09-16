@@ -179,13 +179,15 @@
 #define ServerOP_CZMessagePlayer 0x4008
 #define ServerOP_ReloadWorld 0x4009
 
-#define ServerOP_QSPlayerLogTrades			0x4010
-#define ServerOP_QSPlayerLogHandins			0x4011
-#define ServerOP_QSPlayerLogNPCKills		0x4012
-#define ServerOP_QSPlayerLogDeletes			0x4013
-#define ServerOP_QSPlayerLogMoves			0x4014
+#define ServerOP_QSPlayerLogTrades					0x4010
+#define ServerOP_QSPlayerLogHandins					0x4011
+#define ServerOP_QSPlayerLogNPCKills				0x4012
+#define ServerOP_QSPlayerLogDeletes					0x4013
+#define ServerOP_QSPlayerLogMoves					0x4014
 #define ServerOP_QSPlayerLogMerchantTransactions	0x4015
-#define ServerOP_QSSendQuery				0x4016
+#define ServerOP_QSSendQuery						0x4016
+#define ServerOP_CZSignalNPC						0x4017
+#define ServerOP_CZSetEntityVariableByNPCTypeID		0x4018
 
 /* Query Serv Generic Packet Flag/Type Enumeration */
 enum { QSG_LFGuild = 0 }; 
@@ -1092,6 +1094,11 @@ struct CZClientSignal_Struct {
 	uint32 data;
 };
 
+struct CZNPCSignal_Struct {
+	uint32 npctype_id;
+	uint32 data;
+};
+
 struct CZClientSignalByName_Struct {
 	char Name[64];
 	uint32 data;
@@ -1231,6 +1238,12 @@ struct CZMessagePlayer_Struct {
 	uint32	Type;
 	char	CharName[64];
 	char	Message[512];
+};
+
+struct CZSetEntVarByNPCTypeID_Struct {
+	uint32 npctype_id;
+	char id[256];
+	char m_var[256];
 };
 
 struct ReloadWorld_Struct{
