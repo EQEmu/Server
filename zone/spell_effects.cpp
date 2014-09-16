@@ -3166,6 +3166,10 @@ snare has both of them negative, yet their range should work the same:
 			result = MakeRandomInt(ubase, abs(max));
 			break;
 
+		case 137:	// used in berserker AA desperation
+			result = ubase - (ubase * (GetHPRatio() / 100.0f));
+			break;
+
 		//these are used in stacking effects... formula unknown
 		case 201:
 		case 203:
