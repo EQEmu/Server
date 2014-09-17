@@ -6453,8 +6453,12 @@ void Mob::ResourceTap(int32 damage, uint16 spellid){
 			if (spells[spellid].max[i] && (damage > spells[spellid].max[i]))
 				damage = spells[spellid].max[i];
 
-			if (spells[spellid].base2[i] == 0)  //HP Tap
-				SetHP((GetHP()+ damage));
+			if (spells[spellid].base2[i] == 0){ //HP Tap
+				if (damage > 0)
+					HealDamage(damage);
+				else
+					Damage(this, -damage,0, SkillEvocation,false);
+			}
 
 			if (spells[spellid].base2[i] == 1)  //Mana Tap
 				SetMana(GetMana() + damage);
