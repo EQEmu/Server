@@ -1026,7 +1026,7 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;		"
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", rquery);
+			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_currency` */
@@ -1058,7 +1058,7 @@ bool Database::CheckDatabaseConversions() {
 				" ) ENGINE=InnoDB DEFAULT CHARSET=latin1;             "
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", rquery);
+			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_alternate_abilities` */
@@ -1077,7 +1077,7 @@ bool Database::CheckDatabaseConversions() {
 				" ) ENGINE = InnoDB DEFAULT CHARSET = latin1;		"
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", rquery);
+			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_bind` */
@@ -1100,7 +1100,7 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;" 
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", rquery);
+			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_languages` */
@@ -1118,7 +1118,7 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", rquery);
+			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_skills` */
@@ -1136,7 +1136,7 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			); 
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", rquery);
+			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_spells` */
@@ -1154,7 +1154,7 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", rquery);
+			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		} 
 		/* Check for table `character_memmed_spells` */
@@ -1172,7 +1172,7 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", rquery);
+			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n"); 
 		}
 		/* Check for table `character_disciplines` */
@@ -1190,7 +1190,7 @@ bool Database::CheckDatabaseConversions() {
 				" ) ENGINE = InnoDB DEFAULT CHARSET = latin1;  " 
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", rquery);
+			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_material` */
@@ -1212,7 +1212,7 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;"
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", rquery);
+			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		} 
 		/* Check for table `character_tribute` */
@@ -1229,7 +1229,7 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", rquery);
+			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_bandolier` */
@@ -1250,7 +1250,7 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;	"
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", rquery);
+			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_potionbelt` */
@@ -1269,7 +1269,7 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", rquery);
+			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_potionbelt` */
@@ -1286,7 +1286,7 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 				);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", rquery);
+			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_leadership_abilities` */
@@ -1304,7 +1304,7 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1; "
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", rquery);
+			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 
@@ -1325,7 +1325,7 @@ bool Database::CheckDatabaseConversions() {
 	std::string inspectmessage;
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		char_iter_count++;
+		char_iter_count++; 
 		squery = StringFormat("SELECT `id`, `profile`, `name`, `level`, `account_id`, `firstlogon`, `lfg`, `lfp`, `mailkey`, `xtargets`, `inspectmessage`, `extprofile` FROM `character_` WHERE `id` = %i", atoi(row[0]));
 		auto results2 = QueryDatabase(squery);
 		auto row2 = results2.begin();
@@ -1725,19 +1725,19 @@ bool Database::CheckDatabaseConversions() {
 					rquery = rquery + StringFormat(", (%u, %u, %u, %u)", character_id, i, pp->aa_array[i].AA, pp->aa_array[i].value);
 				}
 			}
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Error AA Convert", rquery); } 
+			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "AA Convert", rquery); } 
 			
 			/* Run Bind Home Convert */
 			rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
 				" VALUES (%u, %u, %u, %f, %f, %f, %f, 1)",
 				character_id, pp->binds[4].zoneId, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading);
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Error Bind Home Convert", rquery); }  
+			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Bind Home Convert", rquery); }  
 
 			/* Run Bind Convert */
 			rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
 				" VALUES (%u, %u, %u, %f, %f, %f, %f, 0)",
 				character_id, pp->binds[0].zoneId, 0, pp->binds[0].x, pp->binds[0].y, pp->binds[0].z, pp->binds[0].heading);
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Error Character Bind Convert", rquery); }  
+			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Bind Convert", rquery); }  
 
 			/* Run Language Convert */
 			first_entry = 0; rquery = "";
@@ -1750,7 +1750,7 @@ bool Database::CheckDatabaseConversions() {
 					rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->languages[i]);
 				}
 			}
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Error Character Language Convert", rquery);  } 
+			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Language Convert", rquery);  } 
 			/* Run Skill Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i < MAX_PP_SKILL; i++){
@@ -1762,7 +1762,7 @@ bool Database::CheckDatabaseConversions() {
 					rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->skills[i]);
 				}
 			}
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Error Character Skills Convert Convert", rquery);  } 
+			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Skills Convert Convert", rquery);  } 
 			/* Run Spell Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i < MAX_PP_REF_SPELLBOOK; i++){
@@ -1775,7 +1775,7 @@ bool Database::CheckDatabaseConversions() {
 				}
 			}
 			// std::cout << rquery << "\n";
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Error Character Spell Convert", rquery);  }  
+			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Spell Convert", rquery);  }  
 			/* Run Max Memmed Spell Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i < MAX_PP_REF_MEMSPELL; i++){
@@ -1787,7 +1787,7 @@ bool Database::CheckDatabaseConversions() {
 					rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->mem_spells[i]);
 				}
 			}
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Error Character Memmed Spells Convert", rquery);  }  
+			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Memmed Spells Convert", rquery);  }  
 			/* Run Discipline Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i < MAX_PP_DISCIPLINES; i++){
@@ -1799,7 +1799,7 @@ bool Database::CheckDatabaseConversions() {
 					rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->disciplines.values[i]);
 				}
 			}
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Error Character Discipline Convert", rquery);  } 
+			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Discipline Convert", rquery);  } 
 			/* Run Material Color Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i < _MaterialCount; i++){
@@ -1811,7 +1811,7 @@ bool Database::CheckDatabaseConversions() {
 					rquery = rquery + StringFormat(", (%u, %u, %u, %u, %u, %u, %u)", character_id, i, pp->item_tint[i].rgb.blue, pp->item_tint[i].rgb.green, pp->item_tint[i].rgb.red, pp->item_tint[i].rgb.use_tint, pp->item_tint[i].color);
 				}
 			}
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Error Character Material Convert", rquery);  } 
+			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Material Convert", rquery);  } 
 			/* Run Tribute Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i < EmuConstants::TRIBUTE_SIZE; i++){
@@ -1823,7 +1823,7 @@ bool Database::CheckDatabaseConversions() {
 					rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
 				}
 			}
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Error Character Tribute Convert", rquery);  }
+			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Tribute Convert", rquery);  }
 			/* Run Bandolier Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i <= EmuConstants::BANDOLIERS_COUNT; i++){
@@ -1837,7 +1837,7 @@ bool Database::CheckDatabaseConversions() {
 					}
 				}
 			}
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Error Character Bandolier Convert", rquery);  } 
+			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Bandolier Convert", rquery);  } 
 			/* Run Potion Belt Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i <= EmuConstants::POTION_BELT_SIZE; i++){
@@ -1850,7 +1850,7 @@ bool Database::CheckDatabaseConversions() {
 
 				}
 			}
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Error Character Potion Belt Convert", rquery);  } 
+			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Potion Belt Convert", rquery);  } 
 			/* Run Leadership AA Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i <= MAX_LEADERSHIP_AA_ARRAY; i++){
@@ -1862,7 +1862,7 @@ bool Database::CheckDatabaseConversions() {
 					rquery = rquery + StringFormat(", (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);
 				}
 			} 
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Error Character Leadership AA Convert", rquery);  }
+			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Leadership AA Convert", rquery);  }
 		}
 	}
 	if (runconvert == 1){
