@@ -2066,6 +2066,7 @@ void ZoneDatabase::LoadBuffs(Client *client) {
                     break;
 
                 buffs[index].spellid = SPELL_UNKNOWN;
+				break;
 			}
 		}
 	}
