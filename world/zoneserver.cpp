@@ -472,7 +472,7 @@ bool ZoneServer::Process() {
                             if (results.Success())
                                 zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "Your message has been added to %s's queue.", scm->to);
                             else
-                                zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "%s is not online at this time.", scm->to, scm->to);
+                                zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "%s is not online at this time.", scm->to);
 
 						}
 					//		zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);
