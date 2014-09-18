@@ -10,7 +10,7 @@ MySQLRequestResult::MySQLRequestResult()
 MySQLRequestResult::MySQLRequestResult(MYSQL_RES* result, uint32 rowsAffected, uint32 rowCount, uint32 columnCount, uint32 lastInsertedID, uint32 errorNumber, char *errorBuffer)
 	: m_CurrentRow(result), m_OneBeyondRow()
 {
-    m_Result = result;
+	m_Result = result;
 	m_RowsAffected = rowsAffected;
 	m_RowCount = rowCount;
 	m_ColumnCount = columnCount;
@@ -22,12 +22,12 @@ MySQLRequestResult::MySQLRequestResult(MYSQL_RES* result, uint32 rowsAffected, u
 	m_ColumnLengths = nullptr;
 	m_Fields = nullptr;
 
-    if (errorBuffer != nullptr)
+	m_Success = true;
+	if (errorBuffer != nullptr)
 		m_Success = false;
 
-    m_Success = true;
-    m_ErrorNumber = errorNumber;
-    m_ErrorBuffer = errorBuffer;
+	m_ErrorNumber = errorNumber;
+	m_ErrorBuffer = errorBuffer;
 }
 
 void MySQLRequestResult::FreeInternals()
