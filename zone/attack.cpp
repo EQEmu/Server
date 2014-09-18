@@ -3516,7 +3516,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		if(spell_id == SPELL_UNKNOWN) {
 			damage = ReduceDamage(damage);
 			mlog(COMBAT__HITS, "Melee Damage reduced to %d", damage);
-			ReduceAllDamage(damage);
+			damage = ReduceAllDamage(damage);
 			TryTriggerThreshHold(damage, SE_TriggerMeleeThreshold, attacker);
 		} else {
 			int32 origdmg = damage;
@@ -3529,7 +3529,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 				//Kayen: Probably need to add a filter for this - Not sure if this msg is correct but there should be a message for spell negate/runes.
 				Message(263, "%s tries to cast on YOU, but YOUR magical skin absorbs the spell.",attacker->GetCleanName());
 			}
-			ReduceAllDamage(damage);
+			damage = ReduceAllDamage(damage);
 			TryTriggerThreshHold(damage, SE_TriggerSpellThreshold, attacker);
 		}
 
@@ -4802,4 +4802,146 @@ void Mob::CommonBreakInvisible()
 
 	hidden = false;
 	improved_hidden = false;
+}
+
+void Mob::SetAttackTimer()
+{
+	attack_timer.SetAtTrigger(4000, true);
+}
+
+void Client::SetAttackTimer()
+{
+	float PermaHaste = GetPermaHaste();
+
+	//default value for attack timer in case they have
+	//an invalid weapon equipped:
+	attack_timer.SetAtTrigger(4000, true);
+
+	Timer *TimerToUse = nullptr;
+	const Item_Struct *PrimaryWeapon = nullptr;
+
+	for (int i = MainRange; i <= MainSecondary; i++) {
+		//pick a timer
+		if (i == MainPrimary)
+			TimerToUse = &attack_timer;
+		else if (i == MainRange)
+			TimerToUse = &ranged_timer;
+		else if (i == MainSecondary)
+			TimerToUse = &attack_dw_timer;
+		else	//invalid slot (hands will always hit this)
+			continue;
+
+		const Item_Struct *ItemToUse = nullptr;
+
+		//find our item
+		ItemInst *ci = GetInv().GetItem(i);
+		if (ci)
+			ItemToUse = ci->GetItem();
+
+		//special offhand stuff
+		if (i == MainSecondary) {
+			//if we have a 2H weapon in our main hand, no dual
+			if (PrimaryWeapon != nullptr) {
+				if (PrimaryWeapon->ItemClass == ItemClassCommon
+						&& (PrimaryWeapon->ItemType == ItemType2HSlash
+						|| PrimaryWeapon->ItemType == ItemType2HBlunt
+						|| PrimaryWeapon->ItemType == ItemType2HPiercing)) {
+					attack_dw_timer.Disable();
+					continue;
+				}
+			}
+
+			//if we cant dual wield, skip it
+			if (!CanThisClassDualWield()) {
+				attack_dw_timer.Disable();
+				continue;
+			}
+		}
+
+		//see if we have a valid weapon
+		if (ItemToUse != nullptr) {
+			//check type and damage/delay
+			if (ItemToUse->ItemClass != ItemClassCommon
+					|| ItemToUse->Damage == 0
+					|| ItemToUse->Delay == 0) {
+				//no weapon
+				ItemToUse = nullptr;
+			}
+			// Check to see if skill is valid
+			else if ((ItemToUse->ItemType > ItemTypeLargeThrowing) &&
+					(ItemToUse->ItemType != ItemTypeMartial) &&
+					(ItemToUse->ItemType != ItemType2HPiercing)) {
+				//no weapon
+				ItemToUse = nullptr;
+			}
+		}
+
+		int16 DelayMod = std::max(itembonuses.HundredHands + spellbonuses.HundredHands, -99);
+		int speed = 0;
+
+		//if we have no weapon..
+		if (ItemToUse == nullptr) {
+			//above checks ensure ranged weapons do not fall into here
+			// Work out if we're a monk
+			if ((GetClass() == MONK) || (GetClass() == BEASTLORD))
+				speed = static_cast<int>((GetMonkHandToHandDelay() * (100 + DelayMod) / 100) * PermaHaste);
+			else
+				speed = static_cast<int>((36 * (100 + DelayMod) / 100) * PermaHaste);
+		} else {
+			//we have a weapon, use its delay
+			// Convert weapon delay to timer resolution (milliseconds)
+			//delay * 100
+			speed = static_cast<int>((ItemToUse->Delay * (100 + DelayMod) / 100) * PermaHaste);
+			if (ItemToUse->ItemType == ItemTypeBow || ItemToUse->ItemType == ItemTypeLargeThrowing) {
+				float quiver_haste = GetQuiverHaste();
+				if (quiver_haste > 0)
+					speed *= quiver_haste;
+			}
+		}
+		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true);
+
+		if (i == MainPrimary)
+			PrimaryWeapon = ItemToUse;
+	}
+}
+
+void NPC::SetAttackTimer()
+{
+	float PermaHaste = GetPermaHaste();
+
+	//default value for attack timer in case they have
+	//an invalid weapon equipped:
+	attack_timer.SetAtTrigger(4000, true);
+
+	Timer *TimerToUse = nullptr;
+
+	for (int i = MainRange; i <= MainSecondary; i++) {
+		//pick a timer
+		if (i == MainPrimary)
+			TimerToUse = &attack_timer;
+		else if (i == MainRange)
+			TimerToUse = &ranged_timer;
+		else if (i == MainSecondary)
+			TimerToUse = &attack_dw_timer;
+		else	//invalid slot (hands will always hit this)
+			continue;
+
+		//special offhand stuff
+		if (i == MainSecondary) {
+			//NPCs get it for free at 13
+			if(GetLevel() < 13) {
+				attack_dw_timer.Disable();
+				continue;
+			}
+		}
+
+		int16 DelayMod = std::max(itembonuses.HundredHands + spellbonuses.HundredHands, -99);
+
+		// Technically NPCs should do some logic for weapons, but the effect is minimal
+		// What they do is take the lower of their set delay and the weapon's
+		// ex. Mob's delay set to 20, weapon set to 19, delay 19
+		// Mob's delay set to 20, weapon set to 21, delay 20
+		int speed = static_cast<int>((attack_delay * (100 + DelayMod) / 100) * PermaHaste);
+		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true);
+	}
 }

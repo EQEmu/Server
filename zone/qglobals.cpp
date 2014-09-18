@@ -165,13 +165,12 @@ void QGlobalCache::LoadByGlobalContext()
     LoadBy(query);
  }
 
-void QGlobalCache::LoadBy(const std::string query)
+void QGlobalCache::LoadBy(const std::string &query)
 {
-    auto results = database.QueryDatabase(query);
-    if (!results.Success())
-        return;
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		return;
 
-    for (auto row = results.begin(); row != results.end(); ++row)
-        AddGlobal(0, QGlobal(std::string(row[0]), atoi(row[1]), atoi(row[2]), atoi(row[3]), row[4], row[5]? atoi(row[5]): 0xFFFFFFFF));
-
+	for (auto row = results.begin(); row != results.end(); ++row)
+		AddGlobal(0, QGlobal(std::string(row[0]), atoi(row[1]), atoi(row[2]), atoi(row[3]), row[4], row[5]? atoi(row[5]): 0xFFFFFFFF));
 }

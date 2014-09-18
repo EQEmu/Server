@@ -684,6 +684,7 @@ public:
 	inline bool GetInvul(void) { return invulnerable; }
 	inline void SetExtraHaste(int Haste) { ExtraHaste = Haste; }
 	virtual int GetHaste();
+	inline float GetPermaHaste() { return GetHaste() ? 100.0f / (1.0f + static_cast<float>(GetHaste()) / 100.0f) : 100.0f; }
 
 	uint8 GetWeaponDamageBonus(const Item_Struct* Weapon);
 	uint16 GetDamageTable(SkillUseTypes skillinuse);
@@ -842,7 +843,7 @@ public:
 	void StopSpecialAbilityTimer(int ability);
 	Timer *GetSpecialAbilityTimer(int ability);
 	void ClearSpecialAbilities();
-	void ProcessSpecialAbilities(const std::string str);
+	void ProcessSpecialAbilities(const std::string &str);
 
 	Shielders_Struct shielder[MAX_SHIELDERS];
 	Trade* trade;
@@ -1052,6 +1053,7 @@ protected:
 	Timer attack_dw_timer;
 	Timer ranged_timer;
 	float attack_speed; //% increase/decrease in attack speed (not haste)
+	int8 attack_delay; //delay between attacks in 10ths of seconds
 	float slow_mitigation; // Allows for a slow mitigation (100 = 100%, 50% = 50%)
 	Timer tic_timer;
 	Timer mana_timer;

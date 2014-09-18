@@ -561,6 +561,18 @@ bool Group::DelMember(Mob* oldmember,bool ignoresender)
 		}
 	}
 
+	/* This may seem pointless but the case above does not cover the following situation:
+	 * Group has Leader a, member b, member c
+	 * b and c are out of zone
+	 * a disconnects/quits
+	 * b or c zone back in and disconnects/quits
+	 * a is still "leader" from GetLeader()'s perspective and will crash the zone when we DelMember(b)
+	 * Ultimately we should think up a better solution to this.
+	 */
+	if(oldmember == GetLeader()) {
+		SetLeader(nullptr);
+	}
+
 	ServerPacket* pack = new ServerPacket(ServerOP_GroupLeave, sizeof(ServerGroupLeave_Struct));
 	ServerGroupLeave_Struct* gl = (ServerGroupLeave_Struct*)pack->pBuffer;
 	gl->gid = GetID();

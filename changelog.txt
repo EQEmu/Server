@@ -1,5 +1,33 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 09/16/2014 ==
+demonstar55: Implement spell formula 137 (BER AA Desperation)
+Uleat (NateDog): Fix for LoadBuffs() crash when a spell with a non-persistent Illusion effect was loaded.
+demonstar55: Fix some effect calcs + implement more (derived from the client)
+
+== 09/15/2014 ==
+Kayen: Nimbus effects will now be reapplied after zoning and will be removed when associated buff fades.
+
+== 09/13/2014 ==
+demonstar55: Fix rogues not having Thieves' Cant
+
+== 09/09/2014 ==
+demonstar55: Incrase Mob kick/bash timer by 3
+	see: http://www.eqemulator.org/forums/showthread.php?t=38734
+demonstar55: Fix slow effect on NPC special attack reuse timers
+	see: http://www.eqemulator.org/forums/showthread.php?t=38734
+demonstar55: Slow fixes to bots!
+demonstar55: Revamped how NPC attack rate is set
+	SQL: 2014_09_09_attack_delay.sql
+demonstar55: Added attackdelay to #npcedit
+
+== 09/08/2014 ==
+demonstar55: Fix slow calc
+	see: http://www.eqemulator.org/forums/showthread.php?t=38734
+
+== 09/07/2014 ==
+Akkadius: Fixed ROF Augment item dupe with not checking for available slots properly and adding items to the virtual instance
+
 == 09/06/2014 ==
 Uleat: Tweaked 'Smart' trading code to return main slots before sub slots in stackable and free space search processes. (If enough people ask for it, I'll add an optional rule to allow 'bag packing' - the original implementation behavior)
 

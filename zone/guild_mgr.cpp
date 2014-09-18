@@ -850,23 +850,15 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
 		return false;
 	}
 
-	const char *Query="INSERT INTO `guild_bank` (`guildid`, `area`, `slot`, `itemid`, `qty`, `donator`, `permissions`, `WhoFor`) "
-				"VALUES (%i, %i, %i, %i, %i, '%s', %i, '%s')";
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-
-	char* query = 0;
-
-	if(!database.RunQuery(query, MakeAnyLenString(&query, Query, GuildID, Area, Slot, ItemID, QtyOrCharges, Donator, Permissions, WhoFor), errbuf))
-	{
-		_log(GUILDS__BANK_ERROR, "Insert Error: %s : %s", query, errbuf);
-
-		safe_delete_array(query);
-
+	std::string query = StringFormat("INSERT INTO `guild_bank` "
+                                    "(`guildid`, `area`, `slot`, `itemid`, `qty`, `donator`, `permissions`, `WhoFor`) "
+                                    "VALUES (%i, %i, %i, %i, %i, '%s', %i, '%s')",
+                                    GuildID, Area, Slot, ItemID, QtyOrCharges, Donator, Permissions, WhoFor);
+    auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
+		_log(GUILDS__BANK_ERROR, "Insert Error: %s : %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
-
-	safe_delete_array(query);
 
 	const Item_Struct *Item = database.GetItem(ItemID);
 

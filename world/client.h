@@ -90,6 +90,7 @@ private:
 	void SetClassStartingSkills( PlayerProfile_Struct *pp );
 	void SetRaceStartingSkills( PlayerProfile_Struct *pp );
 	void SetRacialLanguages( PlayerProfile_Struct *pp );
+	void SetClassLanguages(PlayerProfile_Struct *pp);
 
 	ClientListEntry* cle;
 	Timer	CLE_keepalive_timer;

@@ -356,9 +356,11 @@ void Client::GoFish()
 				inst = m_inv.GetItem(MainCursor);
 			}
 
-			std::vector<EQEmu::Any> args;
-			args.push_back(inst);
-			parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst->GetID(), &args);
+			if(inst) {
+				std::vector<EQEmu::Any> args;
+				args.push_back(inst);
+				parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst->GetID(), &args);
+			}
 		}
 	}
 	else
@@ -470,9 +472,11 @@ void Client::ForageItem(bool guarantee) {
 				inst = m_inv.GetItem(MainCursor);
 			}
 
-			std::vector<EQEmu::Any> args;
-			args.push_back(inst);
-			parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "", inst->GetID(), &args);
+			if(inst) {
+				std::vector<EQEmu::Any> args;
+				args.push_back(inst);
+				parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "", inst->GetID(), &args);
+			}
 		}
 
 		int ChanceSecondForage = aabonuses.ForageAdditionalItems + itembonuses.ForageAdditionalItems + spellbonuses.ForageAdditionalItems;

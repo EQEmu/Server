@@ -1413,10 +1413,8 @@ void NPC::DoClassAttacks(Mob *target) {
 		return;
 
 	float HasteModifier = 0;
-	if(GetHaste() > 0)
+	if (GetHaste())
 		HasteModifier = 10000 / (100 + GetHaste());
-	else if(GetHaste() < 0)
-		HasteModifier = (100 - GetHaste());
 	else
 		HasteModifier = 100;
 
@@ -1464,7 +1462,7 @@ void NPC::DoClassAttacks(Mob *target) {
 						}
 					}
 
-					reuse = KickReuseTime * 1000;
+					reuse = (KickReuseTime + 3) * 1000;
 					DoSpecialAttackDamage(target, SkillKick, dmg, 1, -1, reuse);
 					did_attack = true;
 				}
@@ -1484,7 +1482,7 @@ void NPC::DoClassAttacks(Mob *target) {
 						}
 					}
 
-					reuse = BashReuseTime * 1000;
+					reuse = (BashReuseTime + 3) * 1000;
 					DoSpecialAttackDamage(target, SkillBash, dmg, 1, -1, reuse);
 					did_attack = true;
 				}
@@ -1537,7 +1535,7 @@ void NPC::DoClassAttacks(Mob *target) {
 					}
 				}
 
-				reuse = KickReuseTime * 1000;
+				reuse = (KickReuseTime + 3) * 1000;
 				DoSpecialAttackDamage(target, SkillKick, dmg, 1, -1, reuse);
 				did_attack = true;
 			}
@@ -1562,7 +1560,7 @@ void NPC::DoClassAttacks(Mob *target) {
 					}
 				}
 
-				reuse = BashReuseTime * 1000;
+				reuse = (BashReuseTime + 3) * 1000;
 				DoSpecialAttackDamage(target, SkillBash, dmg, 1, -1, reuse);
 				did_attack = true;
 			}

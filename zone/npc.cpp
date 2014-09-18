@@ -248,6 +248,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	delaytimer = false;
 	combat_event = false;
 	attack_speed = d->attack_speed;
+	attack_delay = d->attack_delay;
 	slow_mitigation = d->slow_mitigation;
 
 	EntityList::RemoveNumbers(name);
@@ -934,6 +935,8 @@ NPC* NPC::SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z,
 		npc_type->INT = 150;
 		npc_type->WIS = 150;
 		npc_type->CHA = 150;
+
+		npc_type->attack_delay = 30;
 
 		npc_type->prim_melee_type = 28;
 		npc_type->sec_melee_type = 28;

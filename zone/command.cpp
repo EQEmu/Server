@@ -6555,6 +6555,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		c->Message(0, "#npcedit qglobal - Sets an NPC's quest global flag");
 		c->Message(0, "#npcedit limit - Sets an NPC's spawn limit counter");
 		c->Message(0, "#npcedit Attackspeed - Sets an NPC's attack speed modifier");
+		c->Message(0, "#npcedit Attackdelay - Sets an NPC's attack delay");
 		c->Message(0, "#npcedit findable - Sets an NPC's findable flag");
 		c->Message(0, "#npcedit wep1 - Sets an NPC's primary weapon model");
 		c->Message(0, "#npcedit wep2 - Sets an NPC's secondary weapon model");
@@ -7053,6 +7054,15 @@ void command_npcedit(Client *c, const Seperator *sep)
 		char *query = 0;
 		c->Message(15,"NPCID %u now has attack_speed set to %f",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atof(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set attack_speed=%f where id=%i",atof(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
+	else if ( strcasecmp( sep->arg[1], "Attackdelay" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15,"NPCID %u now has attack_delay set to %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set attack_delay=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
 	}

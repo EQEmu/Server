@@ -218,6 +218,8 @@ public:
 	virtual Group* GetGroup() { return entity_list.GetGroupByClient(this); }
 	virtual inline bool IsBerserk() { return berserk; }
 	virtual int32 GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit, float mit_rating, float atk_rating);
+	virtual void SetAttackTimer();
+	float GetQuiverHaste();
 
 	void	AI_Init();
 	void	AI_Start(uint32 iMoveDelay = 0);
@@ -1193,9 +1195,9 @@ public:
 	int32 mod_client_xp(int32 in_exp, NPC *npc);
 	uint32 mod_client_xp_for_level(uint32 xp, uint16 check_level);
 	int mod_client_haste_cap(int cap);
-    int mod_consume(Item_Struct *item, ItemUseTypes type, int change);
-    int mod_food_value(const Item_Struct *item, int change);
-    int mod_drink_value(const Item_Struct *item, int change);
+	int mod_consume(Item_Struct *item, ItemUseTypes type, int change);
+	int mod_food_value(const Item_Struct *item, int change);
+	int mod_drink_value(const Item_Struct *item, int change);
 
 	void SetEngagedRaidTarget(bool value) { EngagedRaidTarget = value; }
 	bool GetEngagedRaidTarget() const { return EngagedRaidTarget; }

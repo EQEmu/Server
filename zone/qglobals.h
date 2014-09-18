@@ -42,7 +42,7 @@ public:
 	void LoadByZoneID(uint32 zoneID); //zone
 	void LoadByGlobalContext(); //zone
 protected:
-    void LoadBy(const std::string query);
+	void LoadBy(const std::string &query);
 	std::list<QGlobal> qGlobalBucket;
 };
 
