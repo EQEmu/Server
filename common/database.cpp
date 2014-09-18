@@ -28,6 +28,7 @@
 #include <limits.h>
 #include <ctype.h>
 #include <assert.h>
+#include <math.h>
 #include <map>
 
 // Disgrace: for windows compile
@@ -1345,18 +1346,18 @@ bool Database::CheckDatabaseConversions() {
 		lengths = results2.LengthOfColumn(1);
 		if (lengths == sizeof(PlayerProfile_Struct)) { /* If PP is the size it is expected to be */
 			memcpy(pp, row2[1], sizeof(PlayerProfile_Struct));
-			// std::cout << "SIZE OK\n" << std::endl;
 		}
 		/* Continue of PP Size does not match (Usually a created character never logged in) */
-		else { continue; }
+		else {
+			printf("\nCharacter %s(%u) was missing profile data, character not converted.", row2[2] ? row2[2] : "Unknown", character_id);
+			continue;
+		}
 
 		lengths_e = results2.LengthOfColumn(11);
 		if (lengths_e == sizeof(ExtendedProfile_Struct)) {
 			memcpy(e_pp, row2[11], sizeof(ExtendedProfile_Struct));
 		}
 		if (e_pp->expended_aa > 4000000){ e_pp->expended_aa = 0; }
-
-		// std::cout << "Expended AA: " << e_pp->expended_aa << "\n" << std::endl;
 
 		/* Loading Status on conversion */
 		if (runconvert == 1){
@@ -1663,7 +1664,7 @@ bool Database::CheckDatabaseConversions() {
 				pp->ability_up,
 				pp->zone_id,
 				pp->zoneInstance,
-				pp->leadAAActive,
+				pp->leadAAActive == 0 ? 0 : 1,
 				pp->ldon_points_guk,
 				pp->ldon_points_mir,
 				pp->ldon_points_mmc,
@@ -1728,17 +1729,20 @@ bool Database::CheckDatabaseConversions() {
 			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "AA Convert", rquery); } 
 			
 			/* Run Bind Home Convert */
-			rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
-				" VALUES (%u, %u, %u, %f, %f, %f, %f, 1)",
-				character_id, pp->binds[4].zoneId, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading);
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Bind Home Convert", rquery); }  
+			if(pp->binds[4].zoneId < 999 && !std::isnan(pp->binds[4].x) && !std::isnan(pp->binds[4].y) && !std::isnan(pp->binds[4].z) && !std::isnan(pp->binds[4].heading)) {
+				rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
+					" VALUES (%u, %u, %u, %f, %f, %f, %f, 1)",
+					character_id, pp->binds[4].zoneId, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading);
+				if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Bind Home Convert", rquery); }  
+			}
 
 			/* Run Bind Convert */
-			rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
-				" VALUES (%u, %u, %u, %f, %f, %f, %f, 0)",
-				character_id, pp->binds[0].zoneId, 0, pp->binds[0].x, pp->binds[0].y, pp->binds[0].z, pp->binds[0].heading);
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Bind Convert", rquery); }  
-
+			if(pp->binds[0].zoneId < 999 && !std::isnan(pp->binds[0].x) && !std::isnan(pp->binds[0].y) && !std::isnan(pp->binds[0].z) && !std::isnan(pp->binds[0].heading)) {
+				rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
+					" VALUES (%u, %u, %u, %f, %f, %f, %f, 0)",
+					character_id, pp->binds[0].zoneId, 0, pp->binds[0].x, pp->binds[0].y, pp->binds[0].z, pp->binds[0].heading);
+				if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Bind Convert", rquery); }  
+			}
 			/* Run Language Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i < MAX_PP_LANGUAGE; i++){
@@ -1791,7 +1795,7 @@ bool Database::CheckDatabaseConversions() {
 			/* Run Discipline Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i < MAX_PP_DISCIPLINES; i++){
-				if (pp->disciplines.values[i] > 0){
+				if(pp->disciplines.values[i] > 0 && pp->disciplines.values[i] < 60000){
 					if (first_entry != 1){
 						rquery = StringFormat("REPLACE INTO `character_disciplines` (id, slot_id, disc_id) VALUES (%u, %u, %u)", character_id, i, pp->disciplines.values[i]);
 						first_entry = 1;
@@ -1827,13 +1831,15 @@ bool Database::CheckDatabaseConversions() {
 			/* Run Bandolier Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i <= EmuConstants::BANDOLIERS_COUNT; i++){
-				for (int si = 0; si < EmuConstants::BANDOLIER_SIZE; si++){
-					if (pp->bandoliers[i].items[si].item_id > 0){
-						if (first_entry != 1){
-							rquery = StringFormat("REPLACE INTO `character_bandolier` (id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name) VALUES (%i, %u, %i, %u, %u, '%s')", character_id, i, si, pp->bandoliers[i].items[si].item_id, pp->bandoliers[i].items[si].icon, pp->bandoliers[i].name);
-							first_entry = 1;
+				if(strlen(pp->bandoliers[i].name) < 32) {
+					for (int si = 0; si < EmuConstants::BANDOLIER_SIZE; si++){
+						if (pp->bandoliers[i].items[si].item_id > 0){
+							if (first_entry != 1) {
+								rquery = StringFormat("REPLACE INTO `character_bandolier` (id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name) VALUES (%i, %u, %i, %u, %u, '%s')", character_id, i, si, pp->bandoliers[i].items[si].item_id, pp->bandoliers[i].items[si].icon, pp->bandoliers[i].name);
+								first_entry = 1;
+							}
+							rquery = rquery + StringFormat(", (%i, %u, %i, %u, %u, '%s')", character_id, i, si, pp->bandoliers[i].items[si].item_id, pp->bandoliers[i].items[si].icon, pp->bandoliers[i].name);
 						}
-						rquery = rquery + StringFormat(", (%i, %u, %i, %u, %u, '%s')", character_id, i, si, pp->bandoliers[i].items[si].item_id, pp->bandoliers[i].items[si].icon, pp->bandoliers[i].name);
 					}
 				}
 			}
@@ -1854,7 +1860,7 @@ bool Database::CheckDatabaseConversions() {
 			/* Run Leadership AA Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i <= MAX_LEADERSHIP_AA_ARRAY; i++){
-				if (pp->leader_abilities.ranks[i] > 0){
+				if(pp->leader_abilities.ranks[i] > 0 && pp->leader_abilities.ranks[i] < 6){
 					if (first_entry != 1){
 						rquery = StringFormat("REPLACE INTO `character_leadership_abilities` (id, slot, rank) VALUES (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);
 						first_entry = 1;
