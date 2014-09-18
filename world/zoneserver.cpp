@@ -437,13 +437,13 @@ bool ZoneServer::Process() {
 						Console* con = 0;
 						con = console_list.FindByAccountName(&scm->deliverto[1]);
 						if (((!con) || (!con->SendChannelMessage(scm))) && (!scm->noreply))
-							zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);
+							zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "%s is not online at this time.", scm->to);
 						break;
 					}
 					ClientListEntry* cle = client_list.FindCharacter(scm->deliverto);
 					if (cle == 0 || cle->Online() < CLE_Status_Zoning || (cle->TellsOff() && ((cle->Anon() == 1 && scm->fromadmin < cle->Admin()) || scm->fromadmin < 80))) {
 						if (!scm->noreply)
-							zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);
+							zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "%s is not online at this time.", scm->to);
 					}
 					else if (cle->Online() == CLE_Status_Zoning) {
 						if (!scm->noreply)
@@ -460,7 +460,7 @@ bool ZoneServer::Process() {
                                 break;
 
                             if (results.RowCount() == 0) {
-                                zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);
+                                zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "%s is not online at this time.", scm->to);
                                 break;
                             }
 
@@ -470,9 +470,9 @@ bool ZoneServer::Process() {
                                                 telldate, scm->deliverto, scm->from, scm->message);
                             results = database.QueryDatabase(query);
                             if (results.Success())
-                                zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "Your message has been added to the %s's que.", scm->to);
+                                zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "Your message has been added to %s's queue.", scm->to);
                             else
-                                zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);
+                                zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "%s is not online at this time.", scm->to, scm->to);
 
 						}
 					//		zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);
