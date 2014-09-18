@@ -897,7 +897,7 @@ bool Database::CheckDatabaseConversions() {
 		printf(" Database currently has character data being stored via \n"); 
 		printf("  the legacy character storage method and will proceed with converting...\n\n");
 		printf(" It is recommended that you backup your database \n");
-		printf("  before continuing the automatic conversion proces...\n\n");
+		printf("  before continuing the automatic conversion process...\n\n");
 		printf("----------------------------------------------------------\n\n");
 		std::cout << "Press ENTER to continue....." << std::endl << std::endl;
 		std::cin.ignore(1);  
