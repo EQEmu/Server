@@ -333,8 +333,6 @@ int command_init(void) {
 		command_add("guilds",nullptr,0,command_guild) ||
 		command_add("zonestatus","- Show connected zoneservers, synonymous with /servers",150,command_zonestatus) ||
 		command_add("manaburn","- Use AA Wizard class skill manaburn on target",10,command_manaburn) ||
-		command_add("viewmessage","[id] - View messages in your tell queue",100,command_viewmessage) ||
-		command_add("viewmessages",nullptr,0,command_viewmessage) ||
 		command_add("doanim","[animnum] [type] - Send an EmoteAnim for you or your target",50,command_doanim) ||
 		command_add("randomfeatures","- Temporarily randomizes the Facial Features of your target",80,command_randomfeatures) ||
 		command_add("rf",nullptr,80,command_randomfeatures) ||
@@ -5291,53 +5289,6 @@ void command_manaburn(Client *c, const Seperator *sep)
 			else
 				c->Message(0, "You have not learned this skill.");
 		}
-	}
-}
-
-void command_viewmessage(Client *c, const Seperator *sep)
-{
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if(sep->arg[1][0]==0)
-	{
-		if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT id,date,receiver,sender,message from tellque where receiver='%s'",c->GetName()), errbuf, &result))
-		{
-			if (mysql_num_rows(result)>0)
-			{
-				c->Message(0,"You have messages waiting for you to view.");
-				c->Message(0,"Type #Viewmessage <Message ID> to view the message.");
-				c->Message(0," ID , Message Sent Date, Message Sender");
-				while ((row = mysql_fetch_row(result)))
-					c->Message(0,"ID: %s Sent Date: %s Sender: %s ",row[0],row[1],row[3]);
-			}
-			else
-				c->Message(0,"You have no new messages");
-				mysql_free_result(result);
-		}
-		safe_delete_array(query);
-	}
-	else
-	{
-		if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT id,date,receiver,sender,message from tellque where id=%s",sep->argplus[1]), errbuf, &result))
-		{
-			if (mysql_num_rows(result)==1)
-			{
-				row = mysql_fetch_row(result);
-				mysql_free_result(result);
-				if (strcasecmp((const char *) c->GetName(), (const char *) row[2]) == 0)
-				{
-					c->Message(15,"ID: %s,Sent Date: %s,Sender: %s,Message: %s",row[0],row[1],row[3],row[4]);
-					database.RunQuery(query, MakeAnyLenString(&query, "Delete from tellque where id=%s",row[0]), errbuf);
-				}
-				else
-					c->Message(13,"Invalid Message Number, check the number and try again.");
-			}
-			else
-				c->Message(13,"Invalid Message Number, check the number and try again.");
-		}
-		safe_delete_array(query);
 	}
 }
 
