@@ -9834,6 +9834,8 @@ void Client::CompleteConnect() {
 	}
 
 	entity_list.RefreshClientXTargets(this);
+
+	worldserver.RequestTellQueue(GetName());
 }
 
 void Client::Handle_OP_KeyRing(const EQApplicationPacket *app)

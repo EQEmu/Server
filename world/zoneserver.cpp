@@ -441,41 +441,27 @@ bool ZoneServer::Process() {
 						break;
 					}
 					ClientListEntry* cle = client_list.FindCharacter(scm->deliverto);
-					if (cle == 0 || cle->Online() < CLE_Status_Zoning || (cle->TellsOff() && ((cle->Anon() == 1 && scm->fromadmin < cle->Admin()) || scm->fromadmin < 80))) {
+					if (cle == 0 || cle->Online() < CLE_Status_Zoning ||
+							(cle->TellsOff() && ((cle->Anon() == 1 && scm->fromadmin < cle->Admin()) || scm->fromadmin < 80))) {
 						if (!scm->noreply)
-							zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "%s is not online at this time.", scm->to);
-					}
-					else if (cle->Online() == CLE_Status_Zoning) {
-						if (!scm->noreply)
-						{
-							time_t rawtime;
-							struct tm * timeinfo;
-							time ( &rawtime );
-							timeinfo = localtime ( &rawtime );
-							char *telldate=asctime(timeinfo);
-
-							std::string query = StringFormat("SELECT name FROM character_ WHERE name = '%s'",scm->deliverto);
-							auto results = database.QueryDatabase(query);
-							if (!results.Success())
-                                break;
-
-                            if (results.RowCount() == 0) {
-                                zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "%s is not online at this time.", scm->to);
-                                break;
-                            }
-
-                            query = StringFormat("INSERT INTO tellque "
-                                                "(Date, Receiver, Sender, Message) "
-                                                "VALUES('%s', '%s', '%s', '%s')",
-                                                telldate, scm->deliverto, scm->from, scm->message);
-                            results = database.QueryDatabase(query);
-                            if (results.Success())
-                                zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "Your message has been added to %s's queue.", scm->to);
-                            else
-                                zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "%s is not online at this time.", scm->to);
-
+							zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0,
+											"%s is not online at this time.", scm->to);
+					} else if (cle->Online() == CLE_Status_Zoning) {
+						if (!scm->noreply) {
+							if (cle->TellQueueFull()) {
+								zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0,
+												"%s's tell queue is full.", scm->to);
+							} else {
+								size_t struct_size = sizeof(ServerChannelMessage_Struct) + strlen(scm->message) + 1;
+								ServerChannelMessage_Struct *temp = (ServerChannelMessage_Struct *) new uchar[struct_size];
+								memset(temp, 0, struct_size); // just in case, was seeing some corrupt messages, but it shouldn't happen
+								memcpy(temp, scm, struct_size);
+								temp->noreply = true;
+								cle->PushToTellQueue(temp); // deallocation is handled in processing or deconstructor
+								zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0,
+												"Your message has been added to %s's queue.", scm->to);
+							}
 						}
-					//		zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);
 					}
 					else if (cle->Server() == 0) {
 						if (!scm->noreply)
@@ -1317,6 +1303,16 @@ bool ZoneServer::Process() {
 			case ServerOP_UpdateSpawn:
 			{
 				zoneserver_list.SendPacket(pack);
+				break;
+			}
+			case ServerOP_RequestTellQueue:
+			{
+				ServerRequestTellQueue_Struct* rtq = (ServerRequestTellQueue_Struct*) pack->pBuffer;
+				ClientListEntry *cle = client_list.FindCharacter(rtq->name);
+				if (!cle || cle->TellQueueEmpty())
+					break;
+
+				cle->ProcessTellQueue();
 				break;
 			}
 			default:

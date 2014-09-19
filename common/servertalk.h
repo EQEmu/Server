@@ -83,6 +83,7 @@
 #define ServerOP_QGlobalUpdate		0x0063
 #define ServerOP_QGlobalDelete		0x0064
 #define ServerOP_DepopPlayerCorpse	0x0065
+#define ServerOP_RequestTellQueue	0x0066 // client asks for it's tell queues
 
 #define ServerOP_RaidAdd			0x0100 //in use
 #define ServerOP_RaidRemove			0x0101 //in use
@@ -1235,6 +1236,10 @@ struct CZMessagePlayer_Struct {
 
 struct ReloadWorld_Struct{
 	uint32 Option;
+};
+
+struct ServerRequestTellQueue_Struct {
+	char	name[64];
 };
 
 #pragma pack()

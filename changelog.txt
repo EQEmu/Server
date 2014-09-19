@@ -1,5 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 09/18/2014==
+demonstar55: Implement tell queues
+	Currently set to a limit of 20 by default (World:TellQueueSize) I was unable to hit the limit on live though (100+)
+	The required SQL nukes the old tell queue table, which may or may not be in your DB
+	Optional SQL adds the rule to the DB to allow easy of change
+	Note: this does not play well with multiple sessions with the same name on (crash and relog and have multiple sessions) but normal tells don't play well either
+
 == 09/16/2014 ==
 demonstar55: Implement spell formula 137 (BER AA Desperation)
 Uleat (NateDog): Fix for LoadBuffs() crash when a spell with a non-persistent Illusion effect was loaded.

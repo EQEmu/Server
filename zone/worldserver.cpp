@@ -2180,3 +2180,19 @@ void WorldServer::HandleLFPMatches(ServerPacket *pack) {
 		safe_delete(outapp);
 	}
 }
+
+void WorldServer::RequestTellQueue(const char *who)
+{
+	if (!who)
+		return;
+
+	ServerPacket* pack = new ServerPacket(ServerOP_RequestTellQueue, sizeof(ServerRequestTellQueue_Struct));
+	ServerRequestTellQueue_Struct* rtq = (ServerRequestTellQueue_Struct*) pack->pBuffer;
+
+	strn0cpy(rtq->name, who, sizeof(rtq->name));
+
+	SendPacket(pack);
+	safe_delete(pack);
+	return;
+}
+

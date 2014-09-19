@@ -171,6 +171,7 @@ RULE_INT ( World, PVPSettings, 0) // Sets the PVP settings for the server, 1 = R
 RULE_BOOL (World, IsGMPetitionWindowEnabled, false)
 RULE_INT (World, FVNoDropFlag, 0) // Sets the Firiona Vie settings on the client. If set to 2, the flag will be set for GMs only, allowing trading of no-drop items.
 RULE_BOOL (World, IPLimitDisconnectAll, false)
+RULE_INT (World, TellQueueSize, 20)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Zone )
