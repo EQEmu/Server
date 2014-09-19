@@ -1217,7 +1217,11 @@ bool ZoneDatabase::SaveCharacterBindPoint(uint32 character_id, uint32 zone_id, u
 }
 
 bool ZoneDatabase::SaveCharacterMaterialColor(uint32 character_id, uint32 slot_id, uint32 color){
-	std::string query = StringFormat("REPLACE INTO `character_material` (id, slot, color, use_tint) VALUES (%u, %u, %u, 255)", character_id, slot_id, color); auto results = QueryDatabase(query);
+	uint8 red = (color & 0x00FF0000) >> 16; 
+	uint8 green = (color & 0x0000FF00) >> 8;
+	uint8 blue = (color & 0x000000FF); 
+
+	std::string query = StringFormat("REPLACE INTO `character_material` (id, slot, red, green, blue, color, use_tint) VALUES (%u, %u, %u, %u, %u, %u, 255)", character_id, slot_id, red, green, blue, color); auto results = QueryDatabase(query);
 	LogFile->write(EQEMuLog::Status, "ZoneDatabase::SaveCharacterMaterialColor for character ID: %i, slot_id: %u color: %u done", character_id, slot_id, color);
 	ThrowDBError(results.ErrorMessage(), "ZoneDatabase::SaveCharacterMaterialColor", query);
 	return true;
