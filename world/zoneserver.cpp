@@ -443,14 +443,26 @@ bool ZoneServer::Process() {
 					ClientListEntry* cle = client_list.FindCharacter(scm->deliverto);
 					if (cle == 0 || cle->Online() < CLE_Status_Zoning ||
 							(cle->TellsOff() && ((cle->Anon() == 1 && scm->fromadmin < cle->Admin()) || scm->fromadmin < 80))) {
-						if (!scm->noreply)
-							zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0,
-											"%s is not online at this time.", scm->to);
+						if (!scm->noreply) {
+							ClientListEntry* sender = client_list.FindCharacter(scm->from);
+							if (!sender)
+								break;
+							scm->noreply = true;
+							scm->queued = 3; // offline
+							strcpy(scm->deliverto, scm->from);
+							// ideally this would be trimming off the message too, oh well
+							sender->Server()->SendPacket(pack);
+						}
 					} else if (cle->Online() == CLE_Status_Zoning) {
 						if (!scm->noreply) {
+							ClientListEntry* sender = client_list.FindCharacter(scm->from);
 							if (cle->TellQueueFull()) {
-								zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0,
-												"%s's tell queue is full.", scm->to);
+								if (!sender)
+									break;
+								scm->noreply = true;
+								scm->queued = 2; // queue full
+								strcpy(scm->deliverto, scm->from);
+								sender->Server()->SendPacket(pack);
 							} else {
 								size_t struct_size = sizeof(ServerChannelMessage_Struct) + strlen(scm->message) + 1;
 								ServerChannelMessage_Struct *temp = (ServerChannelMessage_Struct *) new uchar[struct_size];
@@ -458,8 +470,13 @@ bool ZoneServer::Process() {
 								memcpy(temp, scm, struct_size);
 								temp->noreply = true;
 								cle->PushToTellQueue(temp); // deallocation is handled in processing or deconstructor
-								zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0,
-												"Your message has been added to %s's queue.", scm->to);
+
+								if (!sender)
+									break;
+								scm->noreply = true;
+								scm->queued = 1; // queued
+								strcpy(scm->deliverto, scm->from);
+								sender->Server()->SendPacket(pack);
 							}
 						}
 					}

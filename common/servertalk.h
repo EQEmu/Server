@@ -347,6 +347,7 @@ struct ServerChannelMessage_Struct {
 	uint16 chan_num;
 	uint32 guilddbid;
 	uint16 language;
+	uint8 queued; // 0 = not queued, 1 = queued, 2 = queue full, 3 = offline
 	char message[0];
 };
 

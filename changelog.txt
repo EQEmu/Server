@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 09/19/2014 ==
 demonstar55: Added Client::Tell_StringID (used in tell queue messages)
+demonstar55: Tell queues (and offline) messages now show correctly
 
 == 09/18/2014==
 demonstar55: Implement tell queues
