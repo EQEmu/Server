@@ -260,6 +260,7 @@ public:
 			const char *message5 = nullptr, const char *message6 = nullptr,
 			const char *message7 = nullptr, const char *message8 = nullptr,
 			const char *message9 = nullptr);
+	void	Tell_StringID(uint32 string_id, const char *who, const char *message);
 	void	SendBazaarResults(uint32 trader_id,uint32 class_,uint32 race,uint32 stat,uint32 slot,uint32 type,char name[64],uint32 minprice,uint32 maxprice);
 	void	SendTraderItem(uint32 item_id,uint16 quantity);
 	uint16	FindTraderItem(int32 SerialNumber,uint16 Quantity);

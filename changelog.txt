@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 09/19/2014 ==
+demonstar55: Added Client::Tell_StringID (used in tell queue messages)
+
 == 09/18/2014==
 demonstar55: Implement tell queues
 	Currently set to a limit of 20 by default (World:TellQueueSize) I was unable to hit the limit on live though (100+)
