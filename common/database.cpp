@@ -659,7 +659,7 @@ the name "name" or zero if no character with that name was found
 Zero will also be returned if there is a database error.
 */
 uint32 Database::GetAccountIDByChar(const char* charname, uint32* oCharID) {
-	std::string query = StringFormat("SELECT account_id, id FROM character_ WHERE name='%s'", charname);
+	std::string query = StringFormat("SELECT account_id, id FROM character_ WHERE name='%s'", EscapeString(charname).c_str());
 
 	auto results = QueryDatabase(query);
 
