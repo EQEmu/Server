@@ -3,6 +3,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 == 09/20/2014 ==
 demonstar55: Fix crash in SendEnterWorld on illegally long names
 demonstar55: The client only lets you enter 15 characters for your name (UF at least)
+demonstar55: Add rule Spells:SHDProcIDOffByOne for pre-UF spell file, set to true, UF+ set to false
 KLS: #suspend and #ban now have required messages to record the reason for the ban/suspension.
 
 == 09/19/2014 ==
