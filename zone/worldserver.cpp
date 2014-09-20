@@ -182,7 +182,7 @@ void WorldServer::Process() {
 						else if (scm->queued == 2) // tell queue was full
 							client->Tell_StringID(QUEUE_TELL_FULL, scm->to, scm->message);
 						else if (scm->queued == 3) // person was offline
-							client->Message_StringID(MT_TellEcho, TOLD_NOT_ONLINE);
+							client->Message_StringID(MT_TellEcho, TOLD_NOT_ONLINE, scm->to);
 						else // normal stuff
 							client->ChannelMessageSend(scm->from, scm->to, scm->chan_num, scm->language, scm->message);
 						if (!scm->noreply && scm->chan_num != 2) { //dont echo on group chat
