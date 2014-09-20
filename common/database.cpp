@@ -1140,7 +1140,7 @@ bool Database::CheckNameFilter(const char* name, bool surname)
 	else
 	{
 		// the minimum 4 is enforced by the client too
-		if(!name || strlen(name) < 4 || strlen(name) > 64)
+		if(!name || strlen(name) < 4 || strlen(name) > 15)
 		{
 			return false;
 		}
