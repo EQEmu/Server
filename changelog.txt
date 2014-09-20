@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 09/20/2014 ==
+demonstar55: Fix crash in SendEnterWorld on illegally long names
+
 == 09/19/2014 ==
 demonstar55: Added Client::Tell_StringID (used in tell queue messages)
 demonstar55: Tell queues (and offline) messages now show correctly

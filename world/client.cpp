@@ -130,7 +130,7 @@ void Client::SendLogServer()
 
 void Client::SendEnterWorld(std::string name)
 {
-char char_name[32]= { 0 };
+	char char_name[64] = { 0 };
 	if (pZoning && database.GetLiveChar(GetAccountID(), char_name)) {
 		if(database.GetAccountIDByChar(char_name) != GetAccountID()) {
 			eqs->Close();
