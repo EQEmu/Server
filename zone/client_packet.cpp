@@ -614,6 +614,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app) {
 	/* Set Con State for Reporting */
 	conn_state = PlayerProfileLoaded;
 
+	m_pp.zone_id = zone->GetZoneID(); 
+	m_pp.zoneInstance = zone->GetInstanceID();
+
 	/* Set Total Seconds Played */
 	TotalSecondsPlayed = m_pp.timePlayedMin * 60;
 	/* Set Max AA XP */
