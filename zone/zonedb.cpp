@@ -1245,7 +1245,7 @@ bool ZoneDatabase::SaveCharacterTribute(uint32 character_id, PlayerProfile_Struc
 	std::string query = StringFormat("DELETE FROM `character_tribute` WHERE `id` = %u", character_id); QueryDatabase(query);
 	/* Save Tributes only if we have values... */
 	for (int i = 0; i < EmuConstants::TRIBUTE_SIZE; i++){
-		if (pp->tributes[i].tribute > 0 && pp->tributes[i].tribute != 0xffffffffui32){ 
+		if (pp->tributes[i].tribute > 0 && pp->tributes[i].tribute != 4294967295){ 
 			std::string query = StringFormat("REPLACE INTO `character_tribute` (id, tier, tribute) VALUES (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute); QueryDatabase(query);
 			LogFile->write(EQEMuLog::Status, "ZoneDatabase::SaveCharacterTribute for character ID: %i, tier:%u tribute:%u done", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
 		}
