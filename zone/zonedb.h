@@ -6,7 +6,8 @@
 #include "../common/loottable.h"
 #include "zonedump.h"
 #include "../common/faction.h"
-#include <limits> 
+#include <limits>
+
 //#include "doors.h"
 
 struct wplist {
