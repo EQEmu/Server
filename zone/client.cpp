@@ -3077,6 +3077,14 @@ void Client::FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType fil
 	safe_delete(outapp);
 }
 
+void Client::Tell_StringID(uint32 string_id, const char *who, const char *message)
+{
+	char string_id_str[10];
+	snprintf(string_id_str, 10, "%d", string_id);
+
+	Message_StringID(MT_TellEcho, TELL_QUEUED_MESSAGE, who, string_id_str, message);
+}
+
 void Client::SetTint(int16 in_slot, uint32 color) {
 	Color_Struct new_color;
 	new_color.color = color;

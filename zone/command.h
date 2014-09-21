@@ -215,7 +215,6 @@ void command_guild(Client *c, const Seperator *sep);
 bool helper_guild_edit(Client *c, uint32 dbid, uint32 eqid, uint8 rank, const char* what, const char* value);
 void command_zonestatus(Client *c, const Seperator *sep);
 void command_manaburn(Client *c, const Seperator *sep);
-void command_viewmessage(Client *c, const Seperator *sep);
 void command_doanim(Client *c, const Seperator *sep);
 void command_randomfeatures(Client *c, const Seperator *sep);
 void command_face(Client *c, const Seperator *sep);

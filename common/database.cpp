@@ -770,10 +770,20 @@ uint32 Database::GetCharacterID(const char *name) {
 	the name "name" or zero if no character with that name was found
 	Zero will also be returned if there is a database error.
 */
-uint32 Database::GetAccountIDByChar(const char* charname) {
-	uint32 accountId = 0;
-	std::string query = StringFormat("SELECT `account_id`, `id` FROM `character_data` WHERE `name` = '%s' LIMIT 1", charname);
-	auto results = QueryDatabase(query); 
+uint32 Database::GetAccountIDByChar(const char* charname, uint32* oCharID) {
+	std::string query = StringFormat("SELECT account_id, id FROM character_ WHERE name='%s'", EscapeString(charname).c_str());
+
+	auto results = QueryDatabase(query);
+
+	if (!results.Success())
+	{
+		std::cerr << "Error in GetAccountIDByChar query '" << query << "' " << results.ErrorMessage() << std::endl;
+		return 0;
+	}
+
+	if (results.RowCount() != 1)
+		return 0;
+
 	auto row = results.begin();
 	if (row[0]){ accountId = atoi(row[0]); }
 	return accountId;
@@ -2244,7 +2254,7 @@ bool Database::CheckNameFilter(const char* name, bool surname)
 	else
 	{
 		// the minimum 4 is enforced by the client too
-		if(!name || strlen(name) < 4 || strlen(name) > 64)
+		if(!name || strlen(name) < 4 || strlen(name) > 15)
 		{
 			return false;
 		}

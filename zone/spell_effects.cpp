@@ -5598,28 +5598,29 @@ void Mob::CheckNumHitsRemaining(uint8 type, uint32 buff_slot, uint16 spell_id)
 }
 
 //for some stupid reason SK procs return theirs one base off...
-uint16 Mob::GetProcID(uint16 spell_id, uint8 effect_index) {
+uint16 Mob::GetProcID(uint16 spell_id, uint8 effect_index)
+{
+	if (!RuleB(Spells, SHDProcIDOffByOne)) // UF+ spell files
+		return spells[spell_id].base[effect_index];
+
+	// We should actually just be checking if the mob is SHD, but to not force
+	// custom servers to create new spells, we will still do this
 	bool sk = false;
 	bool other = false;
-	for(int x = 0; x < 16; x++)
-	{
-		if(x == 4){
-			if(spells[spell_id].classes[4] < 255)
+	for (int x = 0; x < 16; x++) {
+		if (x == 4) {
+			if (spells[spell_id].classes[4] < 255)
 				sk = true;
-		}
-		else{
-			if(spells[spell_id].classes[x] < 255)
+		} else {
+			if (spells[spell_id].classes[x] < 255)
 				other = true;
 		}
 	}
 
-	if(sk && !other)
-	{
-		return(spells[spell_id].base[effect_index] + 1);
-	}
-	else{
-		return(spells[spell_id].base[effect_index]);
-	}
+	if (sk && !other)
+		return spells[spell_id].base[effect_index] + 1;
+	else
+		return spells[spell_id].base[effect_index];
 }
 
 bool Mob::TryDivineSave()

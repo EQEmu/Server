@@ -171,6 +171,7 @@ RULE_INT ( World, PVPSettings, 0) // Sets the PVP settings for the server, 1 = R
 RULE_BOOL (World, IsGMPetitionWindowEnabled, false)
 RULE_INT (World, FVNoDropFlag, 0) // Sets the Firiona Vie settings on the client. If set to 2, the flag will be set for GMs only, allowing trading of no-drop items.
 RULE_BOOL (World, IPLimitDisconnectAll, false)
+RULE_INT (World, TellQueueSize, 20)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Zone )
@@ -320,6 +321,7 @@ RULE_INT ( Spells, AI_PursueDetrimentalChance, 90) // Chance while chasing targe
 RULE_INT ( Spells, AI_IdleNoSpellMinRecast, 500) // AI spell recast time(MS) check when no spell is cast while idle. (min time in random)
 RULE_INT ( Spells, AI_IdleNoSpellMaxRecast, 2000) // AI spell recast time(MS) check when no spell is cast while chasing target. (max time in random)
 RULE_INT ( Spells, AI_IdleBeneficialChance, 100) // Chance while idle to do a beneficial spell on self or others.
+RULE_BOOL ( Spells, SHDProcIDOffByOne, true) // pre June 2009 SHD spell procs were off by 1, they stopped doing this in June 2009 (so UF+ spell files need this false)
 
 RULE_CATEGORY_END()
 

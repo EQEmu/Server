@@ -126,8 +126,9 @@ void Client::SendLogServer()
 	safe_delete(outapp);
 }
 
-void Client::SendEnterWorld(std::string name) {
-	char char_name[32]= { 0 };
+void Client::SendEnterWorld(std::string name)
+{
+	char char_name[64] = { 0 };
 	if (pZoning && database.GetLiveChar(GetAccountID(), char_name)) {
 		if(database.GetAccountIDByChar(char_name) != GetAccountID()) {
 			eqs->Close();
@@ -468,7 +469,8 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 	return true;
 }
 
-bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app) {
+bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app)
+{
 	if (GetAccountID() == 0) {
 		clog(WORLD__CLIENT_ERR,"Name approval request with no logged in account");
 		return false;
@@ -478,7 +480,7 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app) {
 	uchar race = app->pBuffer[64];
 	uchar clas = app->pBuffer[68];
 
-	clog(WORLD__CLIENT,"Name approval request. Name=%s, race=%s, class=%s",char_name,GetRaceName(race),GetEQClassName(clas));
+	clog(WORLD__CLIENT, "Name approval request. Name=%s, race=%s, class=%s", char_name, GetRaceName(race), GetEQClassName(clas));
 
 	EQApplicationPacket *outapp;
 	outapp = new EQApplicationPacket;
@@ -495,9 +497,8 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app) {
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	if(!valid) {
+	if (!valid)
 		memset(char_name, 0, sizeof(char_name));
-	}
 
 	return true;
 }
