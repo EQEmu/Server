@@ -1364,7 +1364,8 @@ bool Database::CheckDatabaseConversions() {
 		}
 		/* Continue of PP Size does not match (Usually a created character never logged in) */
 		else {
-			printf("\nCharacter %s(%u) was missing profile data, character not converted.", row2[2] ? row2[2] : "Unknown", character_id);
+			// printf("%s ID: %i profile mismatch, not converting. PP %u - Profile Length %u \n", row2[2] ? row2[2] : "Unknown", character_id, sizeof(PlayerProfile_Struct), lengths);
+			std::cout << (row2[2] ? row2[2] : "Unknown") << " ID: " << character_id << " size mismatch. Expected Size: " << sizeof(PlayerProfile_Struct) << " Seen: " << lengths << std::endl;
 			continue;
 		}
 
