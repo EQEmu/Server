@@ -132,7 +132,7 @@ public:
 	*/
 	bool	CheckNameFilter(const char* name, bool surname = false);
 	bool	CheckUsedName(const char* name);
-	uint32	GetAccountIDByChar(const char* charname);
+	uint32	GetAccountIDByChar(const char* charname, uint32* oCharID = 0);
 	uint32	GetAccountIDByChar(uint32 char_id);
 	uint32	GetAccountIDByName(const char* accname, int16* status = 0, uint32* lsid = 0);
 	uint32	GetGuildIDByCharID(uint32 char_id);

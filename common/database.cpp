@@ -782,10 +782,15 @@ uint32 Database::GetAccountIDByChar(const char* charname, uint32* oCharID) {
 	}
 
 	if (results.RowCount() != 1)
-		return 0;
+		return 0; 
 
 	auto row = results.begin();
-	if (row[0]){ accountId = atoi(row[0]); }
+
+	uint32 accountId = atoi(row[0]);
+
+	if (oCharID)
+		*oCharID = atoi(row[1]);
+
 	return accountId;
 }
 
