@@ -368,8 +368,6 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 		outapp->priority = 6;
 		FastQueuePacket(&outapp);
 
-		printf("INTERZONE PROCESS\n");
-
 		zone->StartShutdownTimer(AUTHENTICATION_TIMEOUT * 1000);
 	} else {
 	// vesuvias - zoneing to another zone so we need to the let the world server
