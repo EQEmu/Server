@@ -101,6 +101,7 @@ MySQLRequestResult::MySQLRequestResult(MySQLRequestResult&& moveItem)
 	m_RowsAffected = moveItem.m_RowsAffected;
 	m_LastInsertedID = moveItem.m_LastInsertedID;
 	m_ColumnLengths = moveItem.m_ColumnLengths;
+	m_ColumnCount = moveItem.m_ColumnCount;
 	m_Fields = moveItem.m_Fields;
 
 	// Keeps deconstructor from double freeing
@@ -128,6 +129,7 @@ MySQLRequestResult& MySQLRequestResult::operator=(MySQLRequestResult&& other)
 	m_CurrentRow = other.m_CurrentRow;
 	m_OneBeyondRow = other.m_OneBeyondRow;
 	m_ColumnLengths = other.m_ColumnLengths;
+	m_ColumnCount = other.m_ColumnCount;
 	m_Fields = other.m_Fields;
 
 	// Keeps deconstructor from double freeing
