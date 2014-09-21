@@ -222,7 +222,7 @@ public:
 	uint32	GetRaidID(const char* name);
 	const char *GetRaidLeaderName(uint32 rid);
 
-	bool Database::CheckDatabaseConversions();
+	bool CheckDatabaseConversions();
 
 	/*
 	* Database Variables

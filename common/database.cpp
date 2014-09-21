@@ -28,7 +28,7 @@
 #include <limits.h>
 #include <ctype.h>
 #include <assert.h>
-#include <math.h>
+#include <cmath>
 #include <map>
 
 // Disgrace: for windows compile
