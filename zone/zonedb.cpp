@@ -1662,8 +1662,7 @@ bool ZoneDatabase::DeleteCharacterMemorizedSpell(uint32 character_id, uint32 spe
 }
 
 bool ZoneDatabase::NoRentExpired(const char* name){
-	std::string query = StringFormat("SELECT (UNIX_TIMESTAMP(NOW())-timelaston) "
-                                    "FROM character_ WHERE name = '%s'", name);
+	std::string query = StringFormat("SELECT (UNIX_TIMESTAMP(NOW()) - last_login) FROM `character_data` WHERE name = '%s'", name);  
 	auto results = QueryDatabase(query);
 	if (!results.Success())
         return false;
