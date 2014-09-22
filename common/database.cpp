@@ -708,7 +708,9 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 
 /* This only for new Character creation storing */
 bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inventory* inv) {
-	uint32 charid = 0; char zone[50]; float x, y, z; 
+	uint32 charid = 0; 
+	char zone[50]; 
+	float x, y, z; 
 	charid = GetCharacterID(pp->name);
 
 	if(!charid) {
@@ -739,7 +741,7 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 			invquery = StringFormat("INSERT INTO `inventory` (charid, slotid, itemid, charges, color) VALUES (%u, %i, %u, %i, %u)",
 				charid, i, newinv->GetItem()->ID, newinv->GetCharges(), newinv->GetColor()); 
 			
-			auto results = QueryDatabase(invquery);
+			auto results = QueryDatabase(invquery); 
 
 			if (!results.RowsAffected())
 				LogFile->write(EQEMuLog::Error, "StoreCharacter inventory failed. Query '%s' %s", invquery.c_str(), results.ErrorMessage().c_str());
@@ -749,9 +751,18 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 #endif
 		}
 
-		if (i == MainCursor) { i = EmuConstants::GENERAL_BAGS_BEGIN; continue; }
-		else if (i == EmuConstants::CURSOR_BAG_END) { i = EmuConstants::BANK_BEGIN; continue; }
-		else if (i == EmuConstants::BANK_END) { i = EmuConstants::BANK_BAGS_BEGIN; continue; } 
+		if (i == MainCursor) { 
+			i = EmuConstants::GENERAL_BAGS_BEGIN; 
+			continue;
+		}
+		else if (i == EmuConstants::CURSOR_BAG_END) { 
+			i = EmuConstants::BANK_BEGIN; 
+			continue; 
+		}
+		else if (i == EmuConstants::BANK_END) { 
+			i = EmuConstants::BANK_BAGS_BEGIN; 
+			continue; 
+		} 
 		i++;
 	}
 	return true;

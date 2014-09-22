@@ -347,8 +347,8 @@ bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add) {
 bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin_level) {
 	const Item_Struct* myitem;
 	uint32 itemid = 0;
-	uint32 charges = 0;
-	uint32 slot = 0;
+	int32 charges = 0;
+	int32 slot = 0;
 	auto query = StringFormat(
 		"SELECT `itemid`, `item_charges`, `slot` FROM `starting_items`"
 		" WHERE (`race` = %i OR `race` = 0)"
@@ -363,7 +363,7 @@ bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, 
 		charges = atoi(row[1]);
 		slot = atoi(row[2]);
 		myitem = GetItem(itemid);
-		if(!myitem)
+		if(!myitem) 
 			continue;
 		ItemInst* myinst = CreateBaseItem(myitem, charges);
 		if(slot < 0)
