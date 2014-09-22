@@ -478,7 +478,6 @@ void Client::ReportConnectingState() {
 }
 
 bool Client::SaveAA(){
-	clock_t t = std::clock(); /* Function timer start */
 	int first_entry = 0;
 	std::string rquery;
 	/* Save Player AA */
@@ -515,15 +514,12 @@ bool Client::SaveAA(){
 		}
 	}
 	auto results = database.QueryDatabase(rquery);
-	LogFile->write(EQEMuLog::Status, "Issuing Client AA Save... CID: %i Took %f seconds", character_id, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 	return true;
 }
 
 bool Client::Save(uint8 iCommitNow) {
 	if(!ClientDataLoaded()) 
 		return false;
-
-	clock_t t = std::clock(); /* Function timer start */
 
 	/* Wrote current basics to PP for saves */
 	m_pp.x = x_pos;
@@ -584,7 +580,6 @@ bool Client::Save(uint8 iCommitNow) {
 	SaveTaskState(); /* Save Character Task */
 	database.SaveCharacterData(this->CharacterID(), this->AccountID(), &m_pp, &m_epp); /* Save Character Data */
 
-	LogFile->write(EQEMuLog::Status, "Client::Save %i, done... Took %f seconds", character_id, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 	return true;
 }
 
@@ -7968,7 +7963,7 @@ void Client::RefundAA() {
 				for(int j = 0; j < cur; j++) {
 					m_pp.aapoints += curaa->cost + (curaa->cost_inc * j);
 					refunded = true;
-				}
+				} 
 			}
 			else
 			{
@@ -7980,8 +7975,9 @@ void Client::RefundAA() {
 	}
 
 	if(refunded) {
+		SaveAA();
 		Save();
-		Kick();
+		// Kick();
 	}
 }
 

@@ -1520,11 +1520,15 @@ bool ZoneDatabase::LoadAAEffects2() {
 	return true;
 }
 void Client::ResetAA(){
+	RefundAA(); 
 	uint32 i;
 	for(i=0;i<MAX_PP_AA_ARRAY;i++){
 		aa[i]->AA = 0;
 		aa[i]->value = 0;
+		m_pp.aa_array[MAX_PP_AA_ARRAY].AA = 0;
+		m_pp.aa_array[MAX_PP_AA_ARRAY].value = 0; 
 	}
+
 	std::map<uint32,uint8>::iterator itr;
 	for(itr=aa_points.begin();itr!=aa_points.end();++itr)
 		aa_points[itr->first] = 0;
@@ -1537,7 +1541,11 @@ void Client::ResetAA(){
 	m_pp.group_leadership_exp = 0;
 	m_pp.raid_leadership_exp = 0;
 
+	database.DeleteCharacterAAs(this->CharacterID());
+	SaveAA(); 
+	SendAATable();
 	database.DeleteCharacterLeadershipAAs(this->CharacterID());
+	Kick();
 }
 
 int Client::GroupLeadershipAAHealthEnhancement()

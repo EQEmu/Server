@@ -149,7 +149,7 @@ Access Levels:
 int command_init(void) {
 	if
 	(
-		command_add("resetaa","- Resets a Player's AA in their profile.",200,command_resetaa) ||
+		command_add("resetaa","- Resets a Player's AA in their profile and refunds spent AA's to unspent, disconnects player.",200,command_resetaa) ||
 		command_add("qtest","- QueryServ testing command.",255,command_qtest) ||
 		command_add("bind","- Sets your targets bind spot to their current location",200,command_bind) ||
 		command_add("sendop","[opcode] - LE's Private test command, leave it alone",200,command_sendop) ||
@@ -403,7 +403,6 @@ int command_init(void) {
 		command_add("guildapprove","[guildapproveid] - Approve a guild with specified ID (guild creator receives the id)",0,command_guildapprove) ||
 		command_add("guildlist","[guildapproveid] - Lists character names who have approved the guild specified by the approve id",0,command_guildlist) ||
 		command_add("altactivate", "[argument] - activates alternate advancement abilities, use altactivate help for more information", 0, command_altactivate) ||
-		command_add("refundaa", "- Refunds your target's AA points, will disconnect them in the process as well.", 100, command_refundaa) ||
 
 #ifdef BOTS
 		command_add("bot","- Type \"#bot help\" to the see the list of available commands for bots.", 0, command_bot) ||
@@ -8531,25 +8530,6 @@ void command_altactivate(Client *c, const Seperator *sep){
 	else
 	{
 		c->ActivateAA((aaID) atoi(sep->arg[1]));
-	}
-}
-
-void command_refundaa(Client *c, const Seperator *sep){
-	Client* refundee = nullptr;
-	if(c) {
-		if(c->GetTarget()){
-			if(c->GetTarget()->IsClient())
-				refundee = c->GetTarget()->CastToClient();
-			else
-				c->Message(0, "Your target must be a client.");
-		}
-		else{
-			c->Message(0, "You must have a target selected.");
-		}
-
-		if(refundee) {
-			refundee->RefundAA();
-		}
 	}
 }
 

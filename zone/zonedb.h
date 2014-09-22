@@ -287,6 +287,7 @@ public:
 	bool	DeleteCharacterDisc(uint32 character_id, uint32 slot_id); 
 	bool	DeleteCharacterBandolier(uint32 character_id, uint32 band_id);
 	bool	DeleteCharacterLeadershipAAs(uint32 character_id);
+	bool	DeleteCharacterAAs(uint32 character_id);
 
 	/* Character Inventory */
 	bool	NoRentExpired(const char* name);

@@ -546,8 +546,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app) {
 	uint32 cid = CharacterID();
 	character_id = cid; /* Global character_id reference */
 
-	clock_t t = std::clock(); /* Function timer start */
-
 	/* Flush and reload factions */
 	database.RemoveTempFactions(this);
 	database.LoadCharacterFactionValues(cid, factionvalues);
@@ -604,8 +602,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app) {
 	for (int i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_END; i++)
 	if (m_pp.item_tint[i].rgb.use_tint == 1 || m_pp.item_tint[i].rgb.use_tint == 255)
 		m_pp.item_tint[i].rgb.use_tint = 0xFF;
-
-	std::cout << "Character Data Load Took " << (((float)(std::clock() - t)) / CLOCKS_PER_SEC) << " seconds\n" << std::endl; 
 
 	if (level){ level = m_pp.level; }
 
