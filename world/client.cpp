@@ -489,10 +489,20 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app)
 	outapp->size = 1;
 
 	bool valid = false;
-	if(!database.CheckNameFilter(char_name)) { valid = false; }
-	else if (char_name[0] < 'A' && char_name[0] > 'Z') { valid = false; } /* Name must begin with an upper-case letter. */
-	else if (database.ReserveName(GetAccountID(), char_name)) { valid = true; 	}
-	else { valid = false; }
+	if(!database.CheckNameFilter(char_name)) { 
+		valid = false; 
+	}
+	/* Name must begin with an upper-case letter. */
+	else if (islower(char_name[0])) { 
+		valid = false; 
+	} 
+	else if (database.ReserveName(GetAccountID(), char_name)) { 
+		valid = true; 	
+	}
+	else { 
+		valid = false; 
+	}
+
 	outapp->pBuffer[0] = valid? 1 : 0;
 	QueuePacket(outapp);
 	safe_delete(outapp);
