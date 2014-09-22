@@ -1,11 +1,14 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+
+
 == 09/22/2014 ==
 Akkadius: #resetaa now covers the function of #resetaa and #refundaa
 	- #resetaa will wipe all AA data, refund the spent points into the available points and send character to character select properly
 Akkadius: Removed #refundaa
 Akkadius: Removed a lot of debug code for blob conversion
 Akkadius: Changed status logging for loads/saves to Debug category
+Kayen: Spell recourse effects / triggerable spell effects will now be applied AFTER the base spells effects have been applied (consistent with live)
 
 == 09/21/2014 == 
 Akkadius: Player Profile Blob to Database Conversion
