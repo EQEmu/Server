@@ -1846,7 +1846,7 @@ bool Database::CheckDatabaseConversions() {
 			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Tribute Convert", rquery);  }
 			/* Run Bandolier Convert */
 			first_entry = 0; rquery = "";
-			for (i = 0; i <= EmuConstants::BANDOLIERS_COUNT; i++){
+			for (i = 0; i < EmuConstants::BANDOLIERS_COUNT; i++){
 				if(strlen(pp->bandoliers[i].name) < 32) {
 					for (int si = 0; si < EmuConstants::BANDOLIER_SIZE; si++){
 						if (pp->bandoliers[i].items[si].item_id > 0){
@@ -1862,7 +1862,7 @@ bool Database::CheckDatabaseConversions() {
 			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Bandolier Convert", rquery);  } 
 			/* Run Potion Belt Convert */
 			first_entry = 0; rquery = "";
-			for (i = 0; i <= EmuConstants::POTION_BELT_SIZE; i++){
+			for (i = 0; i < EmuConstants::POTION_BELT_SIZE; i++){
 				if (pp->potionbelt.items[i].item_id > 0){
 					if (first_entry != 1){
 						rquery = StringFormat("REPLACE INTO `character_potionbelt` (id, potion_id, item_id, icon) VALUES (%i, %u, %u, %u)", character_id, i, pp->potionbelt.items[i].item_id, pp->potionbelt.items[i].icon);
@@ -1875,7 +1875,7 @@ bool Database::CheckDatabaseConversions() {
 			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Potion Belt Convert", rquery);  } 
 			/* Run Leadership AA Convert */
 			first_entry = 0; rquery = "";
-			for (i = 0; i <= MAX_LEADERSHIP_AA_ARRAY; i++){
+			for (i = 0; i < MAX_LEADERSHIP_AA_ARRAY; i++){
 				if(pp->leader_abilities.ranks[i] > 0 && pp->leader_abilities.ranks[i] < 6){
 					if (first_entry != 1){
 						rquery = StringFormat("REPLACE INTO `character_leadership_abilities` (id, slot, rank) VALUES (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);
