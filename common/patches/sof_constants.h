@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifndef SoF_CONSTANTS_H_
 #define SoF_CONSTANTS_H_
 
-#include "../common/types.h"
+#include "../types.h"
 
 namespace SoF {
 	namespace maps {
