@@ -3648,7 +3648,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	}
 
 	TrySpellTrigger(spelltar, spell_id);
-	TryApplyEffect(spelltar, spell_id);
 	if (IsValidSpell(spells[spell_id].RecourseLink))
 		SpellFinished(spells[spell_id].RecourseLink, this, 10, 0, -1, spells[spells[spell_id].RecourseLink].ResistDiff);
 		

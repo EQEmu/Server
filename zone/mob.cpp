@@ -3083,26 +3083,6 @@ void Mob::TrySpellTrigger(Mob *target, uint32 spell_id)
 	}
 }
 
-void Mob::TryApplyEffect(Mob *target, uint32 spell_id)
-{
-	if(target == nullptr || !IsValidSpell(spell_id))
-	{
-		return;
-	}
-
-	for(int i = 0; i < EFFECT_COUNT; i++)
-	{
-		if (spells[spell_id].effectid[i] == SE_ApplyEffect)
-		{
-			if(MakeRandomInt(0, 100) <= spells[spell_id].base[i])
-			{
-				if(target)
-					SpellFinished(spells[spell_id].base2[i], target, 10, 0, -1, spells[spell_id].ResistDiff);
-			}
-		}
-	}
-}
-
 void Mob::TryTriggerOnValueAmount(bool IsHP, bool IsMana, bool IsEndur, bool IsPet)
 {
 	/*

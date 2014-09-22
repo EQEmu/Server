@@ -580,7 +580,6 @@ public:
 	void TryTriggerOnCast(uint32 spell_id, bool aa_trigger);
 	void TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger);
 	void TrySpellTrigger(Mob *target, uint32 spell_id);
-	void TryApplyEffect(Mob *target, uint32 spell_id);
 	void TryTriggerOnValueAmount(bool IsHP = false, bool IsMana = false, bool IsEndur = false, bool IsPet = false);
 	void TryTwincast(Mob *caster, Mob *target, uint32 spell_id);
 	void TrySympatheticProc(Mob *target, uint32 spell_id);
