@@ -3402,6 +3402,41 @@ XS(XS__qs_player_event)
 	XSRETURN_EMPTY;
 }
 
+XS(XS__crosszonesetentityvariablebynpctypeid);
+XS(XS__crosszonesetentityvariablebynpctypeid)
+{
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: crosszonesetentityvariablebynpctypeid(npctype_id, id, m_var)");
+
+	if (items == 3) {
+		uint32 npctype_id = (uint32)SvIV(ST(0));
+		const char *id = (const char *)SvPV_nolen(ST(1));
+		const char *m_var = (const char *)SvPV_nolen(ST(2));
+		quest_manager.CrossZoneSetEntityVariableByNPCTypeID(npctype_id, id, m_var);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonesignalnpcbynpctypeid);
+XS(XS__crosszonesignalnpcbynpctypeid)
+{
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: crosszonesignalnpcbynpctypeid(npctype_id, data)");
+
+	if (items == 2) {
+		uint32 npctype_id = (uint32)SvIV(ST(0));
+		uint32 data = (uint32)SvIV(ST(1)); 
+		quest_manager.CrossZoneSignalNPCByNPCTypeID(npctype_id, data);
+	}
+
+	XSRETURN_EMPTY;
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -3624,7 +3659,9 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "disablerecipe"), XS__disablerecipe, file);
 		newXS(strcpy(buf, "clear_npctype_cache"), XS__clear_npctype_cache, file);
 		newXS(strcpy(buf, "qs_send_query"), XS__qs_send_query, file); 
-		newXS(strcpy(buf, "qs_player_event"), XS__qs_player_event, file);
+		newXS(strcpy(buf, "qs_player_event"), XS__qs_player_event, file); 
+		newXS(strcpy(buf, "crosszonesetentityvariablebynpctypeid"), XS__crosszonesetentityvariablebynpctypeid, file);
+		newXS(strcpy(buf, "crosszonesignalnpcbynpctypeid"), XS__crosszonesignalnpcbynpctypeid, file);
 		XSRETURN_YES;
 }
 

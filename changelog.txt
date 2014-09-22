@@ -1,5 +1,124 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 09/22/2014 ==
+Akkadius: #resetaa now covers the function of #resetaa and #refundaa
+	- #resetaa will wipe all AA data, refund the spent points into the available points and send character to character select properly
+Akkadius: Removed #refundaa
+Akkadius: Removed a lot of debug code for blob conversion
+Akkadius: Changed status logging for loads/saves to Debug category
+
+== 09/21/2014 == 
+Akkadius: Player Profile Blob to Database Conversion
+	- Summary: HUGE difference in database speeds reads/writes and 1:10 datasize difference
+		- The new character storage engine unlike the character_ table before, is able to properly index data and make use of 
+			proper MySQL/MariaDB caching optimizations and performance has increased phenominally
+		PERFORMANCE AND STATISTICS FIGURES (Varies on hardware):
+		- EZ Server Character data size of 2.6GB `character_` table alone now takes up approx 600MB
+		- Character Data Loads take approx .03 seconds BEFORE MySQL/MariaDB cache
+		- Character Data Loads take approx .001-.0035 seconds AFTER MySQL/MariaDB cache
+		- Character Data Saves take approx .0001 - .003 for any particular save operation
+		- Database Auto Conversion: When the 'character_' table exists, World boot-up will queue an auto-conversion prompt and convert all of your characters, BACKUP
+			YOUR DATABASE BEFORE CONVERTING, here is an EASY backup script: http://wiki.eqemulator.org/p?MySQL_DB_Backup_Script
+			- On auto conversion, the following tables are created automatically:
+				- Table: `character_skills` - Stores Character Skills
+				- Table: `character_languages` - Stores Character Language
+				- Table: `character_bind` - Stores Character Bind point and Home Bind point designated by is_home bool field
+				- Table: `character_alternate_abilities` - Stores all Character AA
+				- Table: `character_currency` - Stores all Platinum/Gold/Silver/Copper and character related currencies
+				- Table: `character_data` - Stores basic character data (Fields from `character_` table migrated to this table)
+				- Table: `character_spells` - Stores character spells
+				- Table: `character_memmed_spells` - Stores character memorized spells
+				- Table: `character_disciplines` - Stores character disciplines
+				- Table: `character_material` - Stores character armor dye textures
+				- Table: `character_tribute` - Stores character tributes
+				- Table: `character_bandolier` - Stores character bandoliers
+				- Table: `character_inspect_messages` - Stores character inspection messages (Moved from `character_` table)
+				- Table: `character_leadership_abilities` - Stores character Leadership AAs
+	- Loads: Majority of Player profile loads now occur at Client::Handle_Connect_OP_ZoneEntry
+		LoadCharacterFactionValues(uint32 character_id, faction_map & val_list);
+		LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Struct* pp);
+		LoadCharacterMemmedSpells(uint32 character_id, PlayerProfile_Struct* pp);
+		LoadCharacterLanguages(uint32 character_id, PlayerProfile_Struct* pp);
+		LoadCharacterDisciplines(uint32 character_id, PlayerProfile_Struct* pp);
+		LoadCharacterSkills(uint32 character_id, PlayerProfile_Struct* pp);
+		LoadCharacterData(uint32 character_id, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp);
+		LoadCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
+		LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Struct* pp);
+		LoadCharacterMaterialColor(uint32 character_id, PlayerProfile_Struct* pp);
+		LoadCharacterBandolier(uint32 character_id, PlayerProfile_Struct* pp);
+		LoadCharacterTribute(uint32 character_id, PlayerProfile_Struct* pp);
+		LoadCharacterPotions(uint32 character_id, PlayerProfile_Struct* pp);
+		LoadCharacterLeadershipAA(uint32 character_id, PlayerProfile_Struct* pp);
+	- Saves: Occur all over the code now instead of calling full saves
+		SaveCharacterBindPoint(uint32 character_id, uint32 zone_id, uint32 instance_id, float x, float y, float z, float heading, uint8 is_home);
+		SaveCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
+		SaveCharacterData(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp);
+		SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 current_level);
+		SaveCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
+		SaveCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
+		SaveCharacterMaterialColor(uint32 character_id, uint32 slot_id, uint32 color); 
+		SaveCharacterSkill(uint32 character_id, uint32 skill_id, uint32 value);
+		SaveCharacterLanguage(uint32 character_id, uint32 lang_id, uint32 value);
+		SaveCharacterDisc(uint32 character_id, uint32 slot_id, uint32 disc_id);
+		SaveCharacterTribute(uint32 character_id, PlayerProfile_Struct* pp);
+		SaveCharacterBandolier(uint32 character_id, uint8 bandolier_id, uint8 bandolier_slot, uint32 item_id, uint32 icon, const char* bandolier_name);
+		SaveCharacterPotionBelt(uint32 character_id, uint8 potion_id, uint32 item_id, uint32 icon);
+		SaveCharacterLeadershipAA(uint32 character_id, PlayerProfile_Struct* pp);
+	- Deletes:
+		DeleteCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
+		DeleteCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
+		DeleteCharacterDisc(uint32 character_id, uint32 slot_id); 
+		DeleteCharacterBandolier(uint32 character_id, uint32 band_id);
+		DeleteCharacterLeadershipAAs(uint32 character_id);
+	- Now occur all over the code and only trigger when necessary
+	- Two FULL saves when looting a corpse, this has been reduced to just currency saves on initial loot and trimmed to one save since AddToMoneyPP did it already
+	- Every time a player moves coin with any situation (Splits/Trades/Merchant/Skills/Bank Coin Exchange/Coin Moves), a full save is made, this is now just a currency save
+	- Every time a player skilled up at a skill vendor, a full blob save hit was made, this is not just a currency hit
+	- Every time an AA was purchased, a full save was made
+	- Every time a spell was scribed/swapped, disc was trained
+	- When a client exists a zone, when a client enters a zone
+	- NOTE: These amount of excessive saves have caused scalability issues that cause the `character_` table to hang which causes process hangs that affect the whole server
+		because of the slowness of the `character_` table and the blob not allowing any indexing to occur
+	- All functions that once depended on the `character_` table are now rewritten to appropriately read from the `character_data` table
+	- Database query errors that occur during conversion or from and load/save/delete character functions are now leveraged via ThrowDBError and logs now go to 
+		Server_Folder_Root/eqemu_query_error_log.txt (You cannot log errors natively through MySQL)
+	- DBASYNC IS NOW COMPLETELY REMOVED - This was mainly for Character data async loads/saves and merchantlist loads
+	- Side implementations: 
+		Perl Exports:
+			- quest::crosszonesetentityvariablebynpctypeid(npctype_id, id, m_var) - Sets entity variables world wide with specified npctype_id
+			- quest::crosszonesignalnpcbynpctypeid(npctype_id, data) - Signals all NPC entities world wide with specified npctype_id
+			- $client->GetTaskActivityDoneCount(TaskID, ActivityID) - Gets task activity done count by task id and activity id for client entity
+	
+	VIEW TABLE SIZE AFTER CONVERT:
+		
+	SELECT CONCAT(table_schema, '.', table_name) as table_name,
+		   CONCAT(ROUND(table_rows / 1000000, 2), 'M')                                    rows,
+		   CONCAT(ROUND(data_length / ( 1024 * 1024 * 1024 ), 2), 'G')                    DATA,
+		   CONCAT(ROUND(index_length / ( 1024 * 1024 * 1024 ), 2), 'G')                   idx,
+		   CONCAT(ROUND(( data_length + index_length ) / ( 1024 * 1024 * 1024 ), 2), 'G') total_size,
+		   ROUND(index_length / data_length, 2)                                           idxfrac
+	FROM   information_schema.TABLES
+	WHERE `table_name` LIKE 'character_%'
+	ORDER  BY DATA DESC;
+
+== 09/20/2014 ==
+demonstar55: Fix crash in SendEnterWorld on illegally long names
+demonstar55: The client only lets you enter 15 characters for your name (UF at least)
+demonstar55: Add rule Spells:SHDProcIDOffByOne for pre-UF spell file, set to true, UF+ set to false
+KLS: #suspend and #ban now have required messages to record the reason for the ban/suspension.
+
+== 09/19/2014 ==
+demonstar55: Added Client::Tell_StringID (used in tell queue messages)
+demonstar55: Tell queues (and offline) messages now show correctly
+demonstar55: Fix starting with capital check
+
+== 09/18/2014==
+demonstar55: Implement tell queues
+	Currently set to a limit of 20 by default (World:TellQueueSize) I was unable to hit the limit on live though (100+)
+	The required SQL nukes the old tell queue table, which may or may not be in your DB
+	Optional SQL adds the rule to the DB to allow easy of change
+	Note: this does not play well with multiple sessions with the same name on (crash and relog and have multiple sessions) but normal tells don't play well either
+
 == 09/16/2014 ==
 demonstar55: Implement spell formula 137 (BER AA Desperation)
 Uleat (NateDog): Fix for LoadBuffs() crash when a spell with a non-persistent Illusion effect was loaded.

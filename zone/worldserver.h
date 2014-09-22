@@ -57,6 +57,8 @@ public:
 	void HandleLFGMatches(ServerPacket *pack);
 	void HandleLFPMatches(ServerPacket *pack);
 
+	void RequestTellQueue(const char *who);
+
 private:
 	virtual void OnConnected();
 

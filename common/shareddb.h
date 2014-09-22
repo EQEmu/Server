@@ -40,13 +40,10 @@ public:
 	bool	SetGMSpeed(uint32 account_id, uint8 gmspeed);
 	uint8	GetGMSpeed(uint32 account_id);
 	bool	SetHideMe(uint32 account_id, uint8 hideme);
-	bool	GetPlayerProfile(uint32 account_id, char* name, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, char* current_zone = 0, uint32 *current_instance = 0);
-	bool	SetPlayerProfile(uint32 account_id, uint32 charid, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, uint32 current_zone, uint32 current_instance, uint8 MaxXTargets);
-	uint32	SetPlayerProfile_MQ(char** query, uint32 account_id, uint32 charid, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, uint32 current_zone, uint32 current_instance, uint8 MaxXTargets);
 	int32	DeleteStalePlayerCorpses();
 	int32	DeleteStalePlayerBackups();
-	void	GetPlayerInspectMessage(char* playername, InspectMessage_Struct* message);
-	void	SetPlayerInspectMessage(char* playername, const InspectMessage_Struct* message);
+	void	LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* message);
+	void	SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* message);
 	void	GetBotInspectMessage(uint32 botid, InspectMessage_Struct* message);
 	void	SetBotInspectMessage(uint32 botid, const InspectMessage_Struct* message);
 	bool	GetCommandSettings(std::map<std::string,uint8> &commands);

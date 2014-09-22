@@ -77,8 +77,6 @@ extern bool staticzone;
 Zone* zone = 0;
 volatile bool ZoneLoaded = false;
 extern QuestParserCollection* parse;
-extern DBAsyncFinishedQueue MTdbafq;
-extern DBAsync *dbasync;
 
 bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	const char* zonename = database.GetZoneName(iZoneID);
@@ -105,7 +103,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	}
 	zone->zonemap = Map::LoadMapFile(zone->map_name);
 	zone->watermap = WaterMap::LoadWaterMapfile(zone->map_name);
-	zone->pathing = PathManager::LoadPathFile(zone->map_name);
+	zone->pathing = PathManager::LoadPathFile(zone->map_name); 
 
 	char tmp[10];
 	if (database.GetVariable("loglevel",tmp, 9)) {
@@ -401,40 +399,33 @@ uint32 Zone::GetTempMerchantQuantity(uint32 NPCID, uint32 Slot) {
 
 void Zone::LoadTempMerchantData(){
 	LogFile->write(EQEMuLog::Status, "Loading Temporary Merchant Lists...");
-
-	char* query = 0;
-	uint32_breakdown workpt;
-	workpt.b4() = DBA_b4_Zone;
-	workpt.w2_3() = 0;
-	workpt.b1() = DBA_b1_Zone_MerchantListsTemp;
-	DBAsyncWork* dbaw = new DBAsyncWork(&database, &MTdbafq, workpt, DBAsync::Read);
-	dbaw->AddQuery(1, &query, MakeAnyLenString(&query,
-		"select ml.npcid,ml.slot,ml.itemid,ml.charges "
-		"from "
-		"	merchantlist_temp ml, "
-		"	spawnentry se, "
-		"	spawn2 s2 "
-		"where "
-		"	ml.npcid=se.npcid "
-		"	and se.spawngroupid=s2.spawngroupid "
-		"	and s2.zone='%s' and s2.version=%u", GetShortName(), GetInstanceVersion()));
-	if (!(pQueuedMerchantsWorkID = dbasync->AddWork(&dbaw))) {
-		safe_delete(dbaw);
-		LogFile->write(EQEMuLog::Error, "dbasync->AddWork() failed adding merchant list query");
+	std::string query = StringFormat(
+		"SELECT								   "
+		"ml.npcid,							   "
+		"ml.slot,							   "
+		"ml.charges,						   "
+		"ml.itemid							   "
+		"FROM								   "
+		"merchantlist_temp ml,				   "
+		"spawnentry se,						   "
+		"spawn2 s2							   "
+		"WHERE								   "
+		"ml.npcid = se.npcid				   "
+		"AND se.spawngroupid = s2.spawngroupid "
+		"AND s2.zone = '%s' AND s2.version = %i", GetShortName(), GetInstanceVersion());
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in LoadTempMerchantData query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
-}
-
-void Zone::LoadTempMerchantData_result(MYSQL_RES* result) {
-	MYSQL_ROW row;
-	std::map<uint32,std::list<TempMerchantList> >::iterator cur;
+	std::map<uint32, std::list<TempMerchantList> >::iterator cur;
 	uint32 npcid = 0;
-	while((row = mysql_fetch_row(result))) {
+	for (auto row = results.begin(); row != results.end(); ++row) {
 		TempMerchantList ml;
 		ml.npcid = atoul(row[0]);
-		if(npcid != ml.npcid){
+		if (npcid != ml.npcid){
 			cur = tmpmerchanttable.find(ml.npcid);
-			if(cur == tmpmerchanttable.end()) {
+			if (cur == tmpmerchanttable.end()) {
 				std::list<TempMerchantList> empty;
 				tmpmerchanttable[ml.npcid] = empty;
 				cur = tmpmerchanttable.find(ml.npcid);
@@ -447,9 +438,9 @@ void Zone::LoadTempMerchantData_result(MYSQL_RES* result) {
 		ml.origslot = ml.slot;
 		cur->second.push_back(ml);
 	}
+	pQueuedMerchantsWorkID = 0;
 }
 
-//there should prolly be a temp counterpart of this...
 void Zone::LoadNewMerchantData(uint32 merchantid){
 
 	std::list<MerchantList> merlist;
@@ -476,16 +467,35 @@ void Zone::LoadNewMerchantData(uint32 merchantid){
     merchanttable[merchantid] = merlist;
 }
 
-void Zone::LoadMerchantData_result(MYSQL_RES* result) {
-	MYSQL_ROW row;
-	std::map<uint32,std::list<MerchantList> >::iterator cur;
+void Zone::GetMerchantDataForZoneLoad(){
+	LogFile->write(EQEMuLog::Status, "Loading Merchant Lists...");
+	std::string query = StringFormat(												   
+		"SELECT																		   "
+		"ml.merchantid,																   "
+		"ml.slot,																	   "
+		"ml.item,																	   "
+		"ml.faction_required,														   "
+		"ml.level_required,															   "
+		"ml.alt_currency_cost,														   "
+		"ml.classes_required,														   "
+		"ml.probability																   "
+		"FROM																		   "
+		"merchantlist AS ml,														   "
+		"npc_types AS nt,															   "
+		"spawnentry AS se,															   "
+		"spawn2 AS s2																   "
+		"WHERE nt.merchant_id = ml.merchantid AND nt.id = se.npcid					   "
+		"AND se.spawngroupid = s2.spawngroupid AND s2.zone = '%s' AND s2.version = %i  ", GetShortName(), GetInstanceVersion());
+	auto results = database.QueryDatabase(query); 
+	std::map<uint32, std::list<MerchantList> >::iterator cur;
 	uint32 npcid = 0;
-	while((row = mysql_fetch_row(result))) {
+	if (results.RowCount() == 0){ LogFile->write(EQEMuLog::Error, "Error in loading Merchant Data for zone");  return; }
+	for (auto row = results.begin(); row != results.end(); ++row) { 
 		MerchantList ml;
 		ml.id = atoul(row[0]);
-		if(npcid != ml.id){
+		if (npcid != ml.id){
 			cur = merchanttable.find(ml.id);
-			if(cur == merchanttable.end()) {
+			if (cur == merchanttable.end()) {
 				std::list<MerchantList> empty;
 				merchanttable[ml.id] = empty;
 				cur = merchanttable.find(ml.id);
@@ -495,15 +505,15 @@ void Zone::LoadMerchantData_result(MYSQL_RES* result) {
 
 		std::list<MerchantList>::iterator iter = cur->second.begin();
 		bool found = false;
-		while(iter != cur->second.end()) {
-			if((*iter).item == ml.id) {
+		while (iter != cur->second.end()) {
+			if ((*iter).item == ml.id) {
 				found = true;
 				break;
 			}
 			++iter;
 		}
 
-		if(found) {
+		if (found) {
 			continue;
 		}
 
@@ -516,28 +526,7 @@ void Zone::LoadMerchantData_result(MYSQL_RES* result) {
 		ml.probability = atoul(row[7]);
 		cur->second.push_back(ml);
 	}
-}
 
-void Zone::GetMerchantDataForZoneLoad(){
-	LogFile->write(EQEMuLog::Status, "Loading Merchant Lists...");
-	char* query = 0;
-	uint32_breakdown workpt;
-	workpt.b4() = DBA_b4_Zone;
-	workpt.w2_3() = 0;
-	workpt.b1() = DBA_b1_Zone_MerchantLists;
-	DBAsyncWork* dbaw = new DBAsyncWork(&database, &MTdbafq, workpt, DBAsync::Read);
-	dbaw->AddQuery(1, &query, MakeAnyLenString(&query,
-		"select ml.merchantid,ml.slot,ml.item,ml.faction_required,ml.level_required,ml.alt_currency_cost,ml.classes_required,ml.probability "
-		"from merchantlist ml, npc_types nt, spawnentry se, spawn2 s2 "
-		"where nt.merchant_id=ml.merchantid and nt.id=se.npcid "
-		"and se.spawngroupid=s2.spawngroupid and s2.zone='%s' and s2.version=%u "
-		//"group by ml.merchantid,slot order by merchantid,slot asc"		//this made the query use a temp table/filesort (very slow)... so we handle unsorted data on our end.
-		, GetShortName(), GetInstanceVersion()));
-	if (!(pQueuedMerchantsWorkID = dbasync->AddWork(&dbaw))) {
-		safe_delete(dbaw);
-		LogFile->write(EQEMuLog::Error,"dbasync->AddWork() failed adding merchant list query");
-		return;
-	}
 }
 
 void Zone::LoadMercTemplates(){
@@ -665,61 +654,6 @@ void Zone::LoadMercSpells(){
 
 }
 
-void Zone::DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) {
-//	LogFile->write(EQEMuLog::Debug, "Zone work complete...");
-	switch (workpt_b1) {
-		case DBA_b1_Zone_MerchantLists: {
-			char errbuf[MYSQL_ERRMSG_SIZE];
-			MYSQL_RES* result = 0;
-			DBAsyncQuery* dbaq = dbaw->PopAnswer();
-			if(dbaq == nullptr) {
-				LogFile->write(EQEMuLog::Error, "nullptr answer provided for async merchant list load.");
-				break;
-			}
-			if(!dbaq->GetAnswer(errbuf, &result)) {
-				LogFile->write(EQEMuLog::Error, "Zone::DBAWComplete(): Unable to get results for merchant lists");
-				break;
-			}
-			if(dbaq->QPT() != 1) {
-				LogFile->write(EQEMuLog::Error, "Zone::DBAWComplete(): Invalid query part for merchant lists");
-				break;
-			}
-
-			LoadMerchantData_result(result);
-
-			pQueuedMerchantsWorkID = 0;
-			break;
-		}
-		case DBA_b1_Zone_MerchantListsTemp: {
-			char errbuf[MYSQL_ERRMSG_SIZE];
-			MYSQL_RES* result = 0;
-			DBAsyncQuery* dbaq = dbaw->PopAnswer();
-			if(dbaq == nullptr) {
-				LogFile->write(EQEMuLog::Error, "nullptr answer provided for async temp merchant list load.");
-				break;
-			}
-			if(!dbaq->GetAnswer(errbuf, &result)) {
-				LogFile->write(EQEMuLog::Error, "Zone::DBAWComplete(): Unable to get results for temp merchant lists");
-				break;
-			}
-			if(dbaq->QPT() != 1) {
-				LogFile->write(EQEMuLog::Error, "Zone::DBAWComplete(): Invalid query part for temp merchant lists");
-				break;
-			}
-
-			LoadTempMerchantData_result(result);
-
-			pQueuedMerchantsWorkID = 0;
-			break;
-		}
-
-		default: {
-			LogFile->write(EQEMuLog::Error, "Zone::DBAWComplete(): Unknown workpt_b1");
-			break;
-		}
-	}
-}
-
 bool Zone::IsLoaded() {
 	return ZoneLoaded;
 }
@@ -772,7 +706,6 @@ void Zone::Shutdown(bool quite)
 
 	zone->ResetAuth();
 	safe_delete(zone);
-	dbasync->CommitWrites();
 	entity_list.ClearAreas();
 	parse->ReloadQuests(true);
 	UpdateWindowTitle();
@@ -911,8 +844,6 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 }
 
 Zone::~Zone() {
-	if(pQueuedMerchantsWorkID != 0)
-		dbasync->CancelWork(pQueuedMerchantsWorkID);
 	spawn2_list.Clear();
 	safe_delete(zonemap);
 	safe_delete(watermap);

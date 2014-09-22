@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
+#include <ctime>
 
 #include "shareddb.h"
 #include "mysql.h"
@@ -113,31 +114,12 @@ bool SharedDatabase::SetGMSpeed(uint32 account_id, uint8 gmspeed)
 }
 
 uint32 SharedDatabase::GetTotalTimeEntitledOnAccount(uint32 AccountID) {
-
 	uint32 EntitledTime = 0;
-
-	const char *EntitledQuery = "select sum(ascii(substring(profile, 237, 1)) + (ascii(substring(profile, 238, 1)) * 256) +"
-				"(ascii(substring(profile, 239, 1)) * 65536) + (ascii(substring(profile, 240, 1)) * 16777216))"
-				"from character_ where account_id = %i";
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (RunQuery(query, MakeAnyLenString(&query, EntitledQuery, AccountID), errbuf, &result)) {
-
-		if (mysql_num_rows(result) == 1) {
-
-			row = mysql_fetch_row(result);
-
-			EntitledTime = atoi(row[0]);
-		}
-
-		mysql_free_result(result);
+	std::string query = StringFormat("SELECT `time_played` FROM `character_data` WHERE `account_id` = %u", AccountID);
+	auto results = QueryDatabase(query);
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		EntitledTime += atoi(row[0]);
 	}
-
-	safe_delete_array(query);
-
 	return EntitledTime;
 }
 
@@ -348,12 +330,11 @@ int32 SharedDatabase::GetSharedPlatinum(uint32 account_id)
 	return 0;
 }
 
-bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add)
-{
+bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE account SET sharedplat = sharedplat + %i WHERE id = %i", amount_to_add, account_id), errbuf)) {
+	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE `account` SET `sharedplat` = `sharedplat` + %i WHERE id = %i", amount_to_add, account_id), errbuf)) {
 		std::cerr << "Error in SetSharedPlatinum query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
@@ -363,37 +344,26 @@ bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add)
 	return true;
 }
 
-bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin_level)
-{
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin_level) {
 	const Item_Struct* myitem;
-
-	RunQuery
-	(
-		query,
-		MakeAnyLenString
-		(
-			&query,
-			"SELECT itemid, item_charges, slot FROM starting_items "
-			"WHERE (race = %i or race = 0) AND (class = %i or class = 0) AND "
-			"(deityid = %i or deityid=0) AND (zoneid = %i or zoneid = 0) AND "
-			"gm <= %i ORDER BY id",
-			si_race, si_class, si_deity, si_current_zone, admin_level
-		),
-		errbuf,
-		&result
-	);
-	safe_delete_array(query);
-
-	while((row = mysql_fetch_row(result))) {
-		int itemid = atoi(row[0]);
-		int charges = atoi(row[1]);
-		int slot = atoi(row[2]);
+	uint32 itemid = 0;
+	int32 charges = 0;
+	int32 slot = 0;
+	auto query = StringFormat(
+		"SELECT `itemid`, `item_charges`, `slot` FROM `starting_items`"
+		" WHERE (`race` = %i OR `race` = 0)"
+		" AND (`class` = %i OR `class` = 0)"
+		" AND  (`deityid` = %i OR `deityid` = 0)"
+		" AND (`zoneid` = %i OR `zoneid` = 0)"
+		" AND gm <= %i ORDER BY id",
+		si_race, si_class, si_deity, si_current_zone, admin_level);
+	auto results = QueryDatabase(query); 
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		itemid = atoi(row[0]); 
+		charges = atoi(row[1]);
+		slot = atoi(row[2]);
 		myitem = GetItem(itemid);
-		if(!myitem)
+		if(!myitem) 
 			continue;
 		ItemInst* myinst = CreateBaseItem(myitem, charges);
 		if(slot < 0)
@@ -401,9 +371,6 @@ bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, 
 		inv->PutItem(slot, *myinst);
 		safe_delete(myinst);
 	}
-
-	if(result) mysql_free_result(result);
-
 	return true;
 }
 
@@ -420,7 +387,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
 	if (is_charid) {
 		len_query = MakeAnyLenString(&query,
 			"SELECT sb.slotid,sb.itemid,sb.charges,sb.augslot1,sb.augslot2,sb.augslot3,sb.augslot4,sb.augslot5,sb.custom_data from sharedbank sb "
-			"INNER JOIN character_ ch ON ch.account_id=sb.acctid "
+			"INNER JOIN character_data ch ON ch.account_id=sb.acctid "
 			"WHERE ch.id=%i", id);
 	}
 	else {
@@ -637,8 +604,13 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
 	bool ret = false;
 
 	// Retrieve character inventory
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT slotid,itemid,charges,color,augslot1,augslot2,augslot3,augslot4,augslot5,"
-		"instnodrop,custom_data FROM inventory INNER JOIN character_ ch ON ch.id=charid WHERE ch.name='%s' AND ch.account_id=%i ORDER BY slotid",
+	if (RunQuery(query, MakeAnyLenString(&query, 
+		" SELECT `slotid`, `itemid`, `charges`, `color`, `augslot1`, `augslot2`, `augslot3`, `augslot4`, `augslot5`, `instnodrop`, `custom_data`"
+		" FROM `inventory`"
+		" INNER JOIN `character_data` ch ON ch.id = charid"
+		" WHERE ch.NAME = '%s'"
+		" AND ch.account_id = % i"
+		" ORDER BY `slotid`",
 		name, account_id), errbuf, &result))
 	{
 		while ((row = mysql_fetch_row(result))) {
@@ -698,7 +670,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
 					}
 				}
 			}
-			if (slot_id>=8000 && slot_id <= 8999)
+			if (slot_id >= 8000 && slot_id <= 8999)
 				put_slot_id = inv->PushCursor(*inst);
 			else
 				put_slot_id = inv->PutItem(slot_id, *inst);
@@ -1210,104 +1182,6 @@ bool SharedDatabase::LoadNPCFactionLists() {
 
 	return true;
 }
-
-// Get the player profile and inventory for the given account "account_id" and
-// character name "name". Return true if the character was found, otherwise false.
-// False will also be returned if there is a database error.
-bool SharedDatabase::GetPlayerProfile(uint32 account_id, char* name, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, char* current_zone, uint32 *current_instance) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES* result;
-	MYSQL_ROW row;
-	bool ret = false;
-
-	unsigned long* lengths;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT profile,zonename,x,y,z,extprofile,instanceid FROM character_ WHERE account_id=%i AND name='%s'", account_id, name), errbuf, &result)) {
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			lengths = mysql_fetch_lengths(result);
-			if (lengths[0] == sizeof(PlayerProfile_Struct)) {
-				memcpy(pp, row[0], sizeof(PlayerProfile_Struct));
-
-				if (current_zone)
-					strcpy(current_zone, row[1]);
-				pp->zone_id = GetZoneID(row[1]);
-				pp->x = atof(row[2]);
-				pp->y = atof(row[3]);
-				pp->z = atof(row[4]);
-				pp->zoneInstance = atoi(row[6]);
-				if (pp->x == -1 && pp->y == -1 && pp->z == -1)
-					GetSafePoints(pp->zone_id, GetInstanceVersion(pp->zoneInstance), &pp->x, &pp->y, &pp->z);
-
-				if(current_instance)
-					*current_instance = pp->zoneInstance;
-
-				if(ext) {
-					//SetExtendedProfile handles any conversion
-					SetExtendedProfile(ext, row[5], lengths[5]);
-				}
-
-				// Retrieve character inventory
-				ret = GetInventory(account_id, name, inv);
-			}
-			else {
-				LogFile->write(EQEMuLog::Error, "Player profile length mismatch in GetPlayerProfile. Found: %i, Expected: %i",
-					lengths[0], sizeof(PlayerProfile_Struct));
-			}
-		}
-
-		mysql_free_result(result);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "GetPlayerProfile query '%s' %s", query, errbuf);
-	}
-
-	safe_delete_array(query);
-	return ret;
-}
-
-bool SharedDatabase::SetPlayerProfile(uint32 account_id, uint32 charid, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, uint32 current_zone, uint32 current_instance, uint8 MaxXTargets) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	uint32 affected_rows = 0;
-	bool ret = false;
-
-	if (RunQuery(query, SetPlayerProfile_MQ(&query, account_id, charid, pp, inv, ext, current_zone, current_instance, MaxXTargets), errbuf, 0, &affected_rows)) {
-		ret = (affected_rows != 0);
-	}
-
-	if (!ret) {
-		LogFile->write(EQEMuLog::Error, "SetPlayerProfile query '%s' %s", query, errbuf);
-	}
-
-	safe_delete_array(query);
-	return ret;
-}
-
-// Generate SQL for updating player profile
-uint32 SharedDatabase::SetPlayerProfile_MQ(char** query, uint32 account_id, uint32 charid, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, uint32 current_zone, uint32 current_instance, uint8 MaxXTargets) {
-	*query = new char[396 + sizeof(PlayerProfile_Struct)*2 + sizeof(ExtendedProfile_Struct)*2 + 4];
-	char* end = *query;
-	if (!current_zone)
-		current_zone = pp->zone_id;
-
-	if (!current_instance)
-		current_instance = pp->zoneInstance;
-
-	if(strlen(pp->name) == 0) // Sanity check in case pp never loaded
-		return false;
-
-	end += sprintf(end, "UPDATE character_ SET timelaston=unix_timestamp(now()),name=\'%s\', zonename=\'%s\', zoneid=%u, instanceid=%u, x = %f, y = %f, z = %f, profile=\'", pp->name, GetZoneName(current_zone), current_zone, current_instance, pp->x, pp->y, pp->z);
-	end += DoEscapeString(end, (char*)pp, sizeof(PlayerProfile_Struct));
-	end += sprintf(end,"\', extprofile=\'");
-	end += DoEscapeString(end, (char*)ext, sizeof(ExtendedProfile_Struct));
-	end += sprintf(end,"\',class=%d,level=%d,xtargets=%u WHERE id=%u", pp->class_, pp->level, MaxXTargets, charid);
-
-	return (uint32) (end - (*query));
-}
-
-
 
 // Create appropriate ItemInst class
 ItemInst* SharedDatabase::CreateItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5)
@@ -2120,40 +1994,19 @@ const LootDrop_Struct* SharedDatabase::GetLootDrop(uint32 lootdrop_id) {
 	return nullptr;
 }
 
-void SharedDatabase::GetPlayerInspectMessage(char* playername, InspectMessage_Struct* message) {
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT inspectmessage FROM character_ WHERE name='%s'", playername), errbuf, &result)) {
-		safe_delete_array(query);
-
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			memcpy(message, row[0], sizeof(InspectMessage_Struct));
-		}
-
-		mysql_free_result(result);
-	}
-	else {
-		std::cerr << "Error in GetPlayerInspectMessage query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* message) { 
+	std::string query = StringFormat("SELECT `inspect_message` FROM `character_inspect_messages` WHERE `id` = %u LIMIT 1", character_id);
+	auto results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "SharedDatabase::LoadCharacterInspectMessage", query);
+	auto row = results.begin();  
+	memcpy(message, "", sizeof(InspectMessage_Struct));
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		memcpy(message, row[0], sizeof(InspectMessage_Struct));
 	}
 }
 
-void SharedDatabase::SetPlayerInspectMessage(char* playername, const InspectMessage_Struct* message) {
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
-	std::string msg = EscapeString(message->text);
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET inspectmessage='%s' WHERE name='%s'", msg.c_str(), playername), errbuf)) {
-		std::cerr << "Error in SetPlayerInspectMessage query '" << query << "' " << errbuf << std::endl;
-	}
-
-	safe_delete_array(query);
+void SharedDatabase::SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* message) {
+	std::string query = StringFormat("REPLACE INTO `character_inspect_messages` (id, inspect_message) VALUES (%u, '%s')", character_id, EscapeString(message->text).c_str());
+	auto results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "SharedDatabase::SaveCharacterInspectMessage", query);  
 }
 
 void SharedDatabase::GetBotInspectMessage(uint32 botid, InspectMessage_Struct* message) {

@@ -67,7 +67,6 @@
 
 #endif
 
-#include "../common/dbasync.h"
 #include "../common/emu_tcp_server.h"
 #include "../common/patches/patches.h"
 #include "zoneserver.h"
@@ -98,7 +97,6 @@ UCSConnection UCSLink;
 QueryServConnection QSLink;
 LauncherList launcher_list;
 AdventureManager adventure_manager;
-DBAsync *dbasync = nullptr;
 volatile bool RunLoops = true;
 uint32 numclients = 0;
 uint32 numzones = 0;
@@ -175,7 +173,6 @@ int main(int argc, char** argv) {
 		_log(WORLD__INIT_ERR, "Cannot continue without a database connection.");
 		return 1;
 	}
-	dbasync = new DBAsync(&database);
 	guild_mgr.SetDatabase(&database);
 
 	if (argc >= 2) {
@@ -222,9 +219,8 @@ int main(int argc, char** argv) {
 		else if (strcasecmp(argv[1], "flag") == 0) {
 			if (argc == 4) {
 				if (Seperator::IsNumber(argv[3])) {
-
 					if (atoi(argv[3]) >= 0 && atoi(argv[3]) <= 255) {
-						if (database.SetAccountStatus(argv[2], atoi(argv[3]))) {
+						if (database.SetAccountStatus(argv[2], atoi(argv[3]))){
 							std::cout << "Account flagged: Username='" << argv[2] << "', status=" << argv[3] << std::endl;
 							return 0;
 						}
@@ -276,6 +272,8 @@ int main(int argc, char** argv) {
 		_log(WORLD__INIT, "HTTP world service disabled.");
 	}
 
+	_log(WORLD__INIT, "Checking Database Conversions..");
+	database.CheckDatabaseConversions(); 
 	_log(WORLD__INIT, "Loading variables..");
 	database.LoadVariables();
 	_log(WORLD__INIT, "Loading zones..");

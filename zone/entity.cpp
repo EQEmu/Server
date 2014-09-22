@@ -40,7 +40,6 @@
 #include "../common/spdat.h"
 #include "../common/features.h"
 #include "string_ids.h"
-#include "../common/dbasync.h"
 #include "guild_mgr.h"
 #include "raids.h"
 #include "quest_parser_collection.h"
@@ -57,7 +56,6 @@ extern WorldServer worldserver;
 extern NetConnection net;
 extern uint32 numclients;
 extern PetitionList petition_list;
-extern DBAsync *dbasync;
 
 extern char errorname[32];
 extern uint16 adverrornum;
@@ -65,12 +63,11 @@ extern uint16 adverrornum;
 Entity::Entity()
 {
 	id = 0;
-	pDBAsyncWorkID = 0;
 }
 
 Entity::~Entity()
 {
-	dbasync->CancelWork(pDBAsyncWorkID);
+	
 }
 
 Client *Entity::CastToClient()

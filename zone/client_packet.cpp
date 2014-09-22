@@ -77,9 +77,6 @@ extern volatile bool ZoneLoaded;
 extern WorldServer worldserver;
 extern PetitionList petition_list;
 extern EntityList entity_list;
-extern DBAsyncFinishedQueue MTdbafq;
-extern DBAsync *dbasync;
-
 typedef void (Client::*ClientPacketProc)(const EQApplicationPacket *app);
 
 //Use a map for connecting opcodes since it dosent get used a lot and is sparse
@@ -498,8 +495,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	return(true);
 }
 
-void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
-{
+void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app) {
 	if(app->size != sizeof(ClientZoneEntry_Struct))
 		return;
 	ClientZoneEntry_Struct *cze = (ClientZoneEntry_Struct *) app->pBuffer;
@@ -507,19 +503,18 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if(strlen(cze->char_name) > 63)
 		return;
 
-	conn_state = ReceivedZoneEntry;
-
+	conn_state = ReceivedZoneEntry; 
 
 	ClientVersion = Connection()->ClientVersion();
 	ClientVersionBit = 1 << (ClientVersion - 1);
 
-	// Antighost code
-	// tmp var is so the search doesnt find this object
+	/* Antighost code
+		tmp var is so the search doesnt find this object
+	*/
 	Client* client = entity_list.GetClientByName(cze->char_name);
 	if (!zone->GetAuth(ip, cze->char_name, &WID, &account_id, &character_id, &admin, lskey, &tellsoff)) {
 		LogFile->write(EQEMuLog::Error, "GetAuth() returned false kicking client");
-		if (client != 0)
-		{
+		if (client != 0) {
 			client->Save();
 			client->Kick();
 		}
@@ -527,8 +522,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		client_state = CLIENT_KICKED;
 		return;
 	}
-
+	
 	strcpy(name, cze->char_name);
+	/* Check for Client Spoofing */
 	if (client != 0) {
 		struct in_addr ghost_addr;
 		ghost_addr.s_addr = eqs->GetRemoteIP();
@@ -539,29 +535,496 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		client->Disconnect();
 	}
 
-	char* query = 0;
-	uint32_breakdown workpt;
-	workpt.b4() = DBA_b4_Entity;
-	workpt.w2_3() = GetID();
-	workpt.b1() = DBA_b1_Entity_Client_InfoForLogin;
-	DBAsyncWork* dbaw = new DBAsyncWork(&database, &MTdbafq, workpt, DBAsync::Read);
-	dbaw->AddQuery(1, &query, MakeAnyLenString(&query,
-		"SELECT status,name,lsaccount_id,gmspeed,revoked,hideme,time_creation FROM account WHERE id=%i",
-		account_id));
-	//DO NOT FORGET TO EDIT ZoneDatabase::GetCharacterInfoForLogin if you change this
-	dbaw->AddQuery(2, &query, MakeAnyLenString(&query,
-		"SELECT id,profile,zonename,x,y,z,guild_id,rank,extprofile,class,level,lfp,lfg,instanceid,xtargets,firstlogon"
-		" FROM character_ LEFT JOIN guild_members ON id=char_id WHERE id=%i",
-		character_id));
-	dbaw->AddQuery(3, &query, MakeAnyLenString(&query,
-		"SELECT faction_id,current_value FROM faction_values WHERE temp = 0 AND char_id = %i",
-		character_id));
-	if (!(pDBAsyncWorkID = dbasync->AddWork(&dbaw))) {
-		safe_delete(dbaw);
-		LogFile->write(EQEMuLog::Error,"dbasync->AddWork() returned false, client crash");
-		client_state = CLIENT_KICKED;
-		return;
+	uint32 pplen = 0; 
+	EQApplicationPacket* outapp = 0;
+	MYSQL_RES* result = 0;
+	bool loaditems = 0;
+	uint32 i;
+	std::string query;
+	unsigned long* lengths;
+
+	uint32 cid = CharacterID();
+	character_id = cid; /* Global character_id reference */
+
+	/* Flush and reload factions */
+	database.RemoveTempFactions(this);
+	database.LoadCharacterFactionValues(cid, factionvalues);
+
+	/* Load Character Account Data: Temp until I move */
+	query = StringFormat("SELECT `status`, `name`, `lsaccount_id`, `gmspeed`, `revoked`, `hideme` FROM `account` WHERE `id` = %u", this->AccountID());
+	auto results = database.QueryDatabase(query);
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		if (admin){ admin = atoi(row[0]); }
+		if (account_name){ strcpy(account_name, row[1]); }
+		if (lsaccountid && atoi(row[2]) > 0){ lsaccountid = atoi(row[2]); }
+		else{ lsaccountid = 0; }
+		gmspeed = atoi(row[3]);
+		revoked = atoi(row[4]); 
+		gmhideme = atoi(row[5]); 
+		if (account_creation){ account_creation = atoul(row[6]); }
 	}
+
+	/* Load Character Data */
+	query = StringFormat("SELECT `lfp`, `lfg`, `xtargets`, `firstlogon`, `guild_id`, `rank` FROM `character_data` LEFT JOIN `guild_members` ON `id` = `char_id` WHERE `id` = %i", cid);
+	results = database.QueryDatabase(query);
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		m_pp.lastlogin = time(nullptr);
+		if (row[4] && atoi(row[4]) > 0){ 
+			guild_id = atoi(row[4]); 
+			if (row[5] != nullptr){ guildrank = atoi(row[5]); }
+			else{ guildrank = GUILD_RANK_NONE; }
+		}
+		
+		if (LFP){ LFP = atoi(row[0]); }
+		if (LFG){ LFG = atoi(row[1]); }
+		if (firstlogon){ firstlogon = atoi(row[3]); }
+	}
+	
+	if (RuleB(Character, SharedBankPlat))
+		m_pp.platinum_shared = database.GetSharedPlatinum(this->AccountID());
+
+	loaditems = database.GetInventory(cid, &m_inv); /* Load Character Inventory */
+	database.LoadCharacterBandolier(cid, &m_pp); /* Load Character Bandolier */
+	database.LoadCharacterBindPoint(cid, &m_pp); /* Load Character Bind */
+	database.LoadCharacterMaterialColor(cid, &m_pp); /* Load Character Material */
+	database.LoadCharacterPotions(cid, &m_pp); /* Load Character Potion Belt */
+	database.LoadCharacterCurrency(cid, &m_pp); /* Load Character Currency into PP */
+	database.LoadCharacterData(cid, &m_pp, &m_epp); /* Load Character Data from DB into PP as well as E_PP */
+	database.LoadCharacterSkills(cid, &m_pp); /* Load Character Skills */
+	database.LoadCharacterInspectMessage(cid, &m_inspect_message); /* Load Character Inspect Message */
+	database.LoadCharacterSpellBook(cid, &m_pp); /* Load Character Spell Book */
+	database.LoadCharacterMemmedSpells(cid, &m_pp);  /* Load Character Memorized Spells */
+	database.LoadCharacterDisciplines(cid, &m_pp); /* Load Character Disciplines */
+	database.LoadCharacterLanguages(cid, &m_pp); /* Load Character Languages */
+	database.LoadCharacterLeadershipAA(cid, &m_pp); /* Load Character Leadership AA's */
+
+	/* Set item material tint */
+	for (int i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_END; i++)
+	if (m_pp.item_tint[i].rgb.use_tint == 1 || m_pp.item_tint[i].rgb.use_tint == 255)
+		m_pp.item_tint[i].rgb.use_tint = 0xFF;
+
+	if (level){ level = m_pp.level; }
+
+	/* If GM, not trackable */
+	if (gmhideme) { trackable = false; }
+	/* Set Con State for Reporting */
+	conn_state = PlayerProfileLoaded;
+
+	m_pp.zone_id = zone->GetZoneID(); 
+	m_pp.zoneInstance = zone->GetInstanceID();
+
+	/* Set Total Seconds Played */
+	TotalSecondsPlayed = m_pp.timePlayedMin * 60;
+	/* Set Max AA XP */
+	max_AAXP = RuleI(AA, ExpPerPoint);
+	/* If we can maintain intoxication across zones, check for it */
+	if (!RuleB(Character, MaintainIntoxicationAcrossZones))
+		m_pp.intoxication = 0; 
+
+	strcpy(name, m_pp.name);
+	strcpy(lastname, m_pp.last_name);
+	/* If PP is set to weird coordinates */
+	if ((m_pp.x == -1 && m_pp.y == -1 && m_pp.z == -1) || (m_pp.x == -2 && m_pp.y == -2 && m_pp.z == -2)) {
+		m_pp.x = zone->safe_x();
+		m_pp.y = zone->safe_y();
+		m_pp.z = zone->safe_z();
+	} 
+	/* If too far below ground, then fix */
+	// float ground_z = GetGroundZ(m_pp.x, m_pp.y, m_pp.z);
+	// if (m_pp.z < (ground_z - 500))
+	// 	m_pp.z = ground_z;
+
+	/* Set Mob variables for spawn */
+	class_ = m_pp.class_; 
+	level = m_pp.level;
+	x_pos = m_pp.x;
+	y_pos = m_pp.y;
+	z_pos = m_pp.z;
+	heading = m_pp.heading;
+	race = m_pp.race;
+	base_race = m_pp.race;
+	gender = m_pp.gender;
+	base_gender = m_pp.gender;
+	deity = m_pp.deity;
+	haircolor = m_pp.haircolor;
+	beardcolor = m_pp.beardcolor;
+	eyecolor1 = m_pp.eyecolor1;
+	eyecolor2 = m_pp.eyecolor2;
+	hairstyle = m_pp.hairstyle;
+	luclinface = m_pp.face;
+	beard = m_pp.beard;
+	drakkin_heritage = m_pp.drakkin_heritage;
+	drakkin_tattoo = m_pp.drakkin_tattoo;
+	drakkin_details = m_pp.drakkin_details;
+
+	/* If GM not set in DB, and does not meet min status to be GM, reset */
+	if (m_pp.gm && admin < minStatusToBeGM)
+		m_pp.gm = 0;
+
+	/* Load Guild */
+	if (!IsInAGuild()) { m_pp.guild_id = GUILD_NONE; }
+	else {
+		m_pp.guild_id = GuildID(); 
+		if (zone->GetZoneID() == RuleI(World, GuildBankZoneID))
+			GuildBanker = (guild_mgr.IsGuildLeader(GuildID(), CharacterID()) || guild_mgr.GetBankerFlag(CharacterID()));
+	}
+	m_pp.guildbanker = GuildBanker;
+
+	switch (race)
+	{
+		case OGRE:
+			size = 9; break;
+		case TROLL:
+			size = 8; break;
+		case VAHSHIR: case BARBARIAN:
+			size = 7; break;
+		case HUMAN: case HIGH_ELF: case ERUDITE: case IKSAR: case DRAKKIN:
+			size = 6; break;
+		case HALF_ELF:
+			size = 5.5; break;
+		case WOOD_ELF: case DARK_ELF: case FROGLOK:
+			size = 5; break;
+		case DWARF:
+			size = 4; break;
+		case HALFLING:
+			size = 3.5; break;
+		case GNOME:
+			size = 3; break;
+		default:
+			size = 0;
+	}
+
+	/* Check for Invalid points */
+	if (m_pp.ldon_points_guk < 0 || m_pp.ldon_points_guk > 2000000000){ m_pp.ldon_points_guk = 0; }
+	if (m_pp.ldon_points_mir < 0 || m_pp.ldon_points_mir > 2000000000){ m_pp.ldon_points_mir = 0; }
+	if (m_pp.ldon_points_mmc < 0 || m_pp.ldon_points_mmc > 2000000000){ m_pp.ldon_points_mmc = 0; }
+	if (m_pp.ldon_points_ruj < 0 || m_pp.ldon_points_ruj > 2000000000){ m_pp.ldon_points_ruj = 0; }
+	if (m_pp.ldon_points_tak < 0 || m_pp.ldon_points_tak > 2000000000){ m_pp.ldon_points_tak = 0; }
+	if (m_pp.ldon_points_available < 0 || m_pp.ldon_points_available > 2000000000){ m_pp.ldon_points_available = 0; }
+
+	/* Set Swimming Skill 100 by default if under 100 */
+	if (GetSkill(SkillSwimming) < 100)
+		SetSkill(SkillSwimming, 100);
+
+	/* Initialize AA's : Move to function eventually */
+	for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++){ aa[a] = &m_pp.aa_array[a]; }
+	query = StringFormat(
+		"SELECT								"
+		"slot,							    "
+		"aa_id,								"
+		"aa_value							"
+		"FROM								"
+		"`character_alternate_abilities`    "
+		"WHERE `id` = %u ORDER BY `slot`", this->CharacterID());
+	results = database.QueryDatabase(query); i = 0;
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		i = atoi(row[0]);
+		m_pp.aa_array[i].AA = atoi(row[1]);
+		m_pp.aa_array[i].value = atoi(row[1]);
+		aa[i]->AA = atoi(row[1]);
+		aa[i]->value = atoi(row[2]);
+	}
+	for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++){
+		uint32 id = aa[a]->AA;
+		//watch for invalid AA IDs
+		if (id == aaNone)
+			continue;
+		if (id >= aaHighestID) {
+			aa[a]->AA = aaNone;
+			aa[a]->value = 0;
+			continue;
+		}
+		if (aa[a]->value == 0) {
+			aa[a]->AA = aaNone;
+			continue;
+		}
+		if (aa[a]->value > HIGHEST_AA_VALUE) {
+			aa[a]->AA = aaNone;
+			aa[a]->value = 0;
+			continue;
+		}
+
+		if (aa[a]->value > 1)	/* hack in some stuff for sony's new AA method (where each level of each aa.has a seperate ID) */
+			aa_points[(id - aa[a]->value + 1)] = aa[a]->value;
+		else
+			aa_points[id] = aa[a]->value;
+	}
+
+	if (SPDAT_RECORDS > 0) {
+		for (uint32 z = 0; z<MAX_PP_MEMSPELL; z++) {
+			if (m_pp.mem_spells[z] >= (uint32)SPDAT_RECORDS)
+				UnmemSpell(z, false);
+		}
+
+		database.LoadBuffs(this);
+		uint32 max_slots = GetMaxBuffSlots();
+		for (int i = 0; i < max_slots; i++) {
+			if (buffs[i].spellid != SPELL_UNKNOWN) {
+				m_pp.buffs[i].spellid = buffs[i].spellid;
+				m_pp.buffs[i].bard_modifier = 10;
+				m_pp.buffs[i].slotid = 2;
+				m_pp.buffs[i].player_id = 0x2211;
+				m_pp.buffs[i].level = buffs[i].casterlevel;
+				m_pp.buffs[i].effect = 0;
+				m_pp.buffs[i].duration = buffs[i].ticsremaining;
+				m_pp.buffs[i].counters = buffs[i].counters;
+			}
+			else {
+				m_pp.buffs[i].spellid = SPELLBOOK_UNKNOWN;
+				m_pp.buffs[i].bard_modifier = 10;
+				m_pp.buffs[i].slotid = 0;
+				m_pp.buffs[i].player_id = 0;
+				m_pp.buffs[i].level = 0;
+				m_pp.buffs[i].effect = 0;
+				m_pp.buffs[i].duration = 0;
+				m_pp.buffs[i].counters = 0;
+			}
+		}
+	}
+
+	/* Load Character Key Ring */
+	KeyRingLoad();
+
+	/* Send Group Members via PP */
+	uint32 groupid = database.GetGroupID(GetName());
+	Group* group = nullptr;
+	if (groupid > 0){
+		group = entity_list.GetGroupByID(groupid);
+		if (!group) {	//nobody from our is here... start a new group
+			group = new Group(groupid);
+			if (group->GetID() != 0)
+				entity_list.AddGroup(group, groupid);
+			else	//error loading group members...
+			{
+				delete group;
+				group = nullptr;
+			}
+		}	//else, somebody from our group is already here...
+
+		if (group)
+			group->UpdatePlayer(this);
+		else
+			database.SetGroupID(GetName(), 0, CharacterID());	//cannot re-establish group, kill it
+
+	}
+	else {	//no group id
+		//clear out the group junk in our PP
+		uint32 xy = 0;
+		for (xy = 0; xy < MAX_GROUP_MEMBERS; xy++)
+			memset(m_pp.groupMembers[xy], 0, 64);
+	}
+
+	if (group){
+		// If the group leader is not set, pull the group leader infomrmation from the database.
+		if (!group->GetLeader()){
+			char ln[64];
+			char MainTankName[64];
+			char AssistName[64];
+			char PullerName[64];
+			char NPCMarkerName[64];
+			GroupLeadershipAA_Struct GLAA;
+			memset(ln, 0, 64);
+			strcpy(ln, database.GetGroupLeadershipInfo(group->GetID(), ln, MainTankName, AssistName, PullerName, NPCMarkerName, &GLAA));
+			Client *c = entity_list.GetClientByName(ln);
+			if (c)
+				group->SetLeader(c);
+
+			group->SetMainTank(MainTankName);
+			group->SetMainAssist(AssistName);
+			group->SetPuller(PullerName);
+			group->SetNPCMarker(NPCMarkerName);
+			group->SetGroupAAs(&GLAA);
+
+			//group->NotifyMainTank(this, 1);
+			//group->NotifyMainAssist(this, 1);
+			//group->NotifyPuller(this, 1);
+
+			// If we are the leader, force an update of our group AAs to other members in the zone, in case
+			// we purchased a new one while out-of-zone.
+			if (group->IsLeader(this))
+				group->SendLeadershipAAUpdate();
+
+		}
+		LFG = false;
+	}
+
+#ifdef BOTS
+	Bot::LoadAndSpawnAllZonedBots(this);
+#endif
+
+	CalcBonuses();
+	if (m_pp.cur_hp <= 0)
+		m_pp.cur_hp = GetMaxHP();
+
+	SetHP(m_pp.cur_hp);
+	Mob::SetMana(m_pp.mana);
+	SetEndurance(m_pp.endurance);
+
+	/* Update LFP in case any (or all) of our group disbanded while we were zoning. */
+	if (IsLFP()) { UpdateLFP(); }
+
+	/* Get Expansions from variables table and ship via PP */
+	char val[20] = { 0 };
+	if (database.GetVariable("Expansions", val, 20)){ m_pp.expansions = atoi(val); }
+	else{ m_pp.expansions = 0x3FF; }
+
+	p_timers.SetCharID(CharacterID());
+	if (!p_timers.Load(&database)) {
+		LogFile->write(EQEMuLog::Error, "Unable to load ability timers from the database for %s (%i)!", GetCleanName(), CharacterID());
+	}
+
+	/* Load Spell Slot Refresh from Currently Memoried Spells */
+	for (unsigned int i = 0; i < MAX_PP_MEMSPELL; ++i)
+	if (IsValidSpell(m_pp.mem_spells[i]))
+		m_pp.spellSlotRefresh[i] = p_timers.GetRemainingTime(pTimerSpellStart + m_pp.mem_spells[i]) * 1000;
+
+	/* Ability slot refresh send SK/PAL */
+	if (m_pp.class_ == SHADOWKNIGHT || m_pp.class_ == PALADIN) {
+		uint32 abilitynum = 0;
+		if (m_pp.class_ == SHADOWKNIGHT){ abilitynum = pTimerHarmTouch; }
+		else{ abilitynum = pTimerLayHands; }
+
+		uint32 remaining = p_timers.GetRemainingTime(abilitynum);
+		if (remaining > 0 && remaining < 15300)
+			m_pp.abilitySlotRefresh = remaining * 1000;
+		else
+			m_pp.abilitySlotRefresh = 0;
+	}
+
+#ifdef _EQDEBUG
+	printf("Dumping inventory on load:\n");
+	m_inv.dumpEntireInventory();
+#endif
+
+	/* Reset to max so they dont drown on zone in if its underwater */
+	m_pp.air_remaining = 60; 
+	/* Check for PVP Zone status*/
+	if (zone->IsPVPZone())
+		m_pp.pvp = 1;
+	/* Time entitled on Account: Move to account */
+	m_pp.timeentitledonaccount = database.GetTotalTimeEntitledOnAccount(AccountID()) / 1440; 
+	/* Reset rest timer if the durations have been lowered in the database */
+	if ((m_pp.RestTimer > RuleI(Character, RestRegenTimeToActivate)) && (m_pp.RestTimer > RuleI(Character, RestRegenRaidTimeToActivate)))
+		m_pp.RestTimer = 0;
+
+	/* This checksum should disappear once dynamic structs are in... each struct strategy will do it */
+	CRC32::SetEQChecksum((unsigned char*)&m_pp, sizeof(PlayerProfile_Struct)-4);
+
+	outapp = new EQApplicationPacket(OP_PlayerProfile, sizeof(PlayerProfile_Struct));
+
+	/* The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA */
+	m_pp.entityid = GetID();
+	memcpy(outapp->pBuffer, &m_pp, outapp->size);
+	outapp->priority = 6;
+	FastQueuePacket(&outapp);
+
+	if (m_pp.RestTimer)
+		rest_timer.Start(m_pp.RestTimer * 1000);
+
+	database.LoadPetInfo(this);
+	/*
+		This was moved before the spawn packets are sent
+		in hopes that it adds more consistency...
+		Remake pet
+	*/
+	if (m_petinfo.SpellID > 1 && !GetPet() && m_petinfo.SpellID <= SPDAT_RECORDS) {
+		MakePoweredPet(m_petinfo.SpellID, spells[m_petinfo.SpellID].teleport_zone, m_petinfo.petpower, m_petinfo.Name, m_petinfo.size);
+		if (GetPet() && GetPet()->IsNPC()) {
+			NPC *pet = GetPet()->CastToNPC();
+			pet->SetPetState(m_petinfo.Buffs, m_petinfo.Items);
+			pet->CalcBonuses();
+			pet->SetHP(m_petinfo.HP);
+			pet->SetMana(m_petinfo.Mana);
+		}
+		m_petinfo.SpellID = 0;
+	}
+	/* Moved here so it's after where we load the pet data. */
+	if (!GetAA(aaPersistentMinion))
+		memset(&m_suspendedminion, 0, sizeof(PetInfo));
+
+	/* Server Zone Entry Packet */
+	outapp = new EQApplicationPacket(OP_ZoneEntry, sizeof(ServerZoneEntry_Struct));
+	ServerZoneEntry_Struct* sze = (ServerZoneEntry_Struct*)outapp->pBuffer;
+
+	FillSpawnStruct(&sze->player, CastToMob());
+	sze->player.spawn.curHp = 1;
+	sze->player.spawn.NPC = 0;
+	sze->player.spawn.z += 6;	//arbitrary lift, seems to help spawning under zone.
+	outapp->priority = 6;
+	FastQueuePacket(&outapp);
+
+	/* Zone Spawns Packet */
+	entity_list.SendZoneSpawnsBulk(this);
+	entity_list.SendZoneCorpsesBulk(this);
+	entity_list.SendZonePVPUpdates(this);	//hack until spawn struct is fixed.
+
+	/* Time of Day packet */
+	outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
+	TimeOfDay_Struct* tod = (TimeOfDay_Struct*)outapp->pBuffer;
+	zone->zone_time.getEQTimeOfDay(time(0), tod);
+	outapp->priority = 6;
+	FastQueuePacket(&outapp);
+
+	/* Tribute Packets */
+	DoTributeUpdate();
+	if (m_pp.tribute_active) {
+		//restart the tribute timer where we left off
+		tribute_timer.Start(m_pp.tribute_time_remaining);
+	}
+
+	/*
+		Character Inventory Packet
+		this is not quite where live sends inventory, they do it after tribute
+	*/
+	if (loaditems) { /* Dont load if a length error occurs */
+		BulkSendInventoryItems();
+		/* Send stuff on the cursor which isnt sent in bulk */
+		iter_queue it;
+		for (it = m_inv.cursor_begin(); it != m_inv.cursor_end(); ++it) {
+			/* First item cursor is sent in bulk inventory packet */
+			if (it == m_inv.cursor_begin())
+				continue;
+			const ItemInst *inst = *it;
+			SendItemPacket(MainCursor, inst, ItemPacketSummonItem);
+		}
+	}
+
+	/* Task Packets */
+	LoadClientTaskState();
+
+	if (GetClientVersion() >= EQClientRoF) {
+		outapp = new EQApplicationPacket(OP_ReqNewZone, 0);
+		Handle_Connect_OP_ReqNewZone(outapp);
+		safe_delete(outapp);
+	}
+
+	if (ClientVersionBit & BIT_UnderfootAndLater) {
+		outapp = new EQApplicationPacket(OP_XTargetResponse, 8);
+		outapp->WriteUInt32(GetMaxXTargets());
+		outapp->WriteUInt32(0);
+		FastQueuePacket(&outapp);
+	}
+
+	/*
+		Weather Packet
+		This shouldent be moved, this seems to be what the client
+		uses to advance to the next state (sending ReqNewZone)
+	*/
+	outapp = new EQApplicationPacket(OP_Weather, 12);
+	Weather_Struct *ws = (Weather_Struct *)outapp->pBuffer;
+	ws->val1 = 0x000000FF;
+	if (zone->zone_weather == 1){ ws->type = 0x31; } // Rain
+	if (zone->zone_weather == 2) {
+		outapp->pBuffer[8] = 0x01;
+		ws->type = 0x02;
+	}
+	outapp->priority = 6;
+	QueuePacket(outapp);
+	safe_delete(outapp);
+
+	SetAttackTimer(); 
+	conn_state = ZoneInfoSent;
+
 	return;
 }
 
@@ -2104,7 +2567,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					}
 
 					if(i == 0) {
-						CastSpell(item->Click.Effect, target_id, 10, item->CastTime, 0, 0, slot_id);
+						CastSpell(item->Click.Effect, target_id, USE_ITEM_SPELL_SLOT, item->CastTime, 0, 0, slot_id);
 					}
 				}
 				else
@@ -2131,7 +2594,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					}
 
 					if(i == 0) {
-						CastSpell(augitem->Click.Effect, target_id, 10, augitem->CastTime, 0, 0, slot_id);
+						CastSpell(augitem->Click.Effect, target_id, USE_ITEM_SPELL_SLOT, augitem->CastTime, 0, 0, slot_id);
 					}
                 }
                 else
@@ -4340,7 +4803,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 		}
 #ifdef BOTS
 		else if (invitee->IsBot()) {
-			// The guild system is too tightly coupled with the character_ table so we have to avoid using much of the system
+			// The guild system is too tightly coupled with the character_data table so we have to avoid using much of the system
 			Bot::ProcessGuildInvite(this, invitee->CastToBot());
 			return;
 		}
@@ -4536,6 +4999,7 @@ void Client::Handle_OP_MemorizeSpell(const EQApplicationPacket *app)
 
 void Client::Handle_OP_SwapSpell(const EQApplicationPacket *app)
 {
+
 	if (app->size != sizeof(SwapSpell_Struct)) {
 		std::cout << "Wrong size on OP_SwapSpell. Got: " << app->size << ", Expected: " << sizeof(SwapSpell_Struct) << std::endl;
 		return;
@@ -4547,8 +5011,14 @@ void Client::Handle_OP_SwapSpell(const EQApplicationPacket *app)
 		return;
 
 	swapspelltemp = m_pp.spell_book[swapspell->from_slot];
+	if (swapspelltemp < 0){
+		return; 
+	}
 	m_pp.spell_book[swapspell->from_slot] = m_pp.spell_book[swapspell->to_slot];
 	m_pp.spell_book[swapspell->to_slot] = swapspelltemp;
+	
+	database.SaveCharacterSpell(this->CharacterID(), m_pp.spell_book[swapspell->from_slot], swapspell->from_slot); 
+	database.SaveCharacterSpell(this->CharacterID(), swapspelltemp, swapspell->to_slot);
 
 	QueuePacket(app);
 	return;
@@ -4580,7 +5050,28 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 #endif
 	LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv=%lx", castspell->slot, castspell->spell_id, castspell->target_id, (unsigned long)castspell->inventoryslot);
 
-	if ((castspell->slot == USE_ITEM_SPELL_SLOT) || (castspell->slot == POTION_BELT_SPELL_SLOT))	// ITEM or POTION cast
+	std::cout << "OP_CastSpell " << castspell->slot << " spell " << castspell->spell_id << " inventory slot " << castspell->inventoryslot << "\n" << std::endl;
+
+	/* Memorized Spell */
+	if (m_pp.mem_spells[castspell->slot] && m_pp.mem_spells[castspell->slot] == castspell->spell_id){
+
+		uint16 spell_to_cast = 0; 
+		if (castspell->slot < MAX_PP_MEMSPELL) {
+			spell_to_cast = m_pp.mem_spells[castspell->slot];
+			if (spell_to_cast != castspell->spell_id) {
+				InterruptSpell(castspell->spell_id); //CHEATER!!!
+				return;
+			}
+		}
+		else if (castspell->slot >= MAX_PP_MEMSPELL) {
+			InterruptSpell();
+			return;
+		}
+
+		CastSpell(spell_to_cast, castspell->target_id, castspell->slot);
+	}
+	/* Spell Slot or Potion Belt Slot */
+	else if ((castspell->slot == USE_ITEM_SPELL_SLOT) || (castspell->slot == POTION_BELT_SPELL_SLOT))	// ITEM or POTION cast
 	{
 		//discipline, using the item spell slot
 		if (castspell->inventoryslot == 0xFFFFFFFF) {
@@ -4659,14 +5150,16 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			InterruptSpell(castspell->spell_id);
 		}
 	}
-	else if (castspell->slot == DISCIPLINE_SPELL_SLOT) {	// DISCIPLINE cast
+	/* Discipline */
+	else if (castspell->slot == DISCIPLINE_SPELL_SLOT) {
 		if (!UseDiscipline(castspell->spell_id, castspell->target_id)) {
 			printf("Unknown ability being used by %s, spell being cast is: %i\n", GetName(), castspell->spell_id);
 			InterruptSpell(castspell->spell_id);
 			return;
 		}
 	}
-	else if (castspell->slot == ABILITY_SPELL_SLOT) {	// ABILITY cast (LoH and Harm Touch)
+	/* ABILITY cast (LoH and Harm Touch) */
+	else if (castspell->slot == ABILITY_SPELL_SLOT) {
 		uint16 spell_to_cast = 0;
 
 		if (castspell->spell_id == SPELL_LAY_ON_HANDS && GetClass() == PALADIN) {
@@ -4697,26 +5190,6 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 
 		if (spell_to_cast > 0)	// if we've matched LoH or HT, cast now
 			CastSpell(spell_to_cast, castspell->target_id, castspell->slot);
-	}
-	else	// MEMORIZED SPELL (first confirm that it's a valid memmed spell slot, then validate that the spell is currently memorized)
-	{
-		uint16 spell_to_cast = 0;
-
-		if(castspell->slot < MAX_PP_MEMSPELL)
-		{
-			spell_to_cast = m_pp.mem_spells[castspell->slot];
-			if(spell_to_cast != castspell->spell_id)
-			{
-				InterruptSpell(castspell->spell_id); //CHEATER!!!
-				return;
-			}
-		}
-		else if (castspell->slot >= MAX_PP_MEMSPELL) {
-			InterruptSpell();
-			return;
-		}
-
-		CastSpell(spell_to_cast, castspell->target_id, castspell->slot);
 	}
 	return;
 }
@@ -7027,7 +7500,7 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app) {
 	InspectMessage_Struct* newmessage = (InspectMessage_Struct*) insr->text;
 	InspectMessage_Struct& playermessage = this->GetInspectMessage();
 	memcpy(&playermessage, newmessage, sizeof(InspectMessage_Struct));
-	database.SetPlayerInspectMessage(name, &playermessage);
+	database.SaveCharacterInspectMessage(this->CharacterID(), &playermessage);
 
 	if(tmp != 0 && tmp->IsClient()) { tmp->CastToClient()->QueuePacket(outapp); } // Send answer to requester
 
@@ -7044,7 +7517,7 @@ void Client::Handle_OP_InspectMessageUpdate(const EQApplicationPacket *app) {
 	InspectMessage_Struct* newmessage = (InspectMessage_Struct*) app->pBuffer;
 	InspectMessage_Struct& playermessage = this->GetInspectMessage();
 	memcpy(&playermessage, newmessage, sizeof(InspectMessage_Struct));
-	database.SetPlayerInspectMessage(name, &playermessage);
+	database.SaveCharacterInspectMessage(this->CharacterID(), &playermessage);
 }
 
 #if 0	// I dont think there's an op for this now, and we check this
@@ -8877,621 +9350,6 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) {
-	Entity::DBAWComplete(workpt_b1, dbaw);
-	switch (workpt_b1) {
-		case DBA_b1_Entity_Client_InfoForLogin: {
-			if (!FinishConnState2(dbaw))
-				client_state = CLIENT_ERROR;
-			break;
-		}
-		case DBA_b1_Entity_Client_Save: {
-			char errbuf[MYSQL_ERRMSG_SIZE];
-			uint32 affected_rows = 0;
-			DBAsyncQuery* dbaq = dbaw->PopAnswer();
-			if (dbaq->GetAnswer(errbuf, 0, &affected_rows) && affected_rows == 1) {
-				if (dbaq->QPT()) {
-					SaveBackup();
-				}
-			}
-			else {
-				std::cout << "Async client save failed. '" << errbuf << "'" << std::endl;
-				Message(13, "Error: Asyncronous save of your character failed.");
-				if (Admin() >= 200)
-					Message(13, "errbuf: %s", errbuf);
-			}
-			pQueuedSaveWorkID = 0;
-			break;
-		}
-		default: {
-			std::cout << "Error: Client::DBAWComplete(): Unknown workpt_b1" << std::endl;
-			break;
-		}
-	}
-}
-
-bool Client::FinishConnState2(DBAsyncWork* dbaw) {
-	uint32 pplen = 0;
-	DBAsyncQuery* dbaq = 0;
-	EQApplicationPacket* outapp = 0;
-	MYSQL_RES* result = 0;
-	bool loaditems = 0;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	uint32 i;
-
-	for (i=1; i<=3; i++) {
-		dbaq = dbaw->PopAnswer();
-		if (!dbaq) {
-			std::cout << "Error in FinishConnState2(): dbaq==0" << std::endl;
-			return false;
-		}
-		if (!dbaq->GetAnswer(errbuf, &result)) {
-			std::cout << "Error in FinishConnState2(): !dbaq[" << dbaq->QPT() << "]->GetAnswer(): " << errbuf << std::endl;
-			return false;
-		}
-		if (dbaq->QPT() == 1) {
-			database.GetAccountInfoForLogin_result(result, 0, account_name, &lsaccountid, &gmspeed, &revoked, &gmhideme, &account_creation);
-			if(gmhideme)
-			{
-				trackable = false;
-			}
-		}
-		else if (dbaq->QPT() == 2) {
-			loaditems = database.GetCharacterInfoForLogin_result(result, 0, 0, &m_pp, &m_inv, &m_epp, &pplen, &guild_id, &guildrank, &class_, &level, &LFP, &LFG, &MaxXTargets, &firstlogon);
-		}
-		else if (dbaq->QPT() == 3) {
-			database.RemoveTempFactions(this);
-			database.LoadFactionValues_result(result, factionvalues);
-		}
-		else {
-			std::cout << "Error in FinishConnState2(): dbaq->PQT() unknown" << std::endl;
-			return false;
-		}
-	}
-
-	// This should be a part of the PlayerProfile BLOB, but we don't want to modify that
-	// The player inspect message is retrieved from the db on load, then saved as new updates come in..no mods to Client::Save()
-	database.GetPlayerInspectMessage(m_pp.name, &m_inspect_message);
-
-	conn_state = PlayerProfileLoaded;
-
-	m_pp.zone_id = zone->GetZoneID();
-	m_pp.zoneInstance = zone->GetInstanceID();
-
-	TotalSecondsPlayed = m_pp.timePlayedMin * 60;
-
-	max_AAXP = RuleI(AA, ExpPerPoint);
-
-	if(!RuleB(Character, MaintainIntoxicationAcrossZones))
-		m_pp.intoxication = 0;
-
-	//uint32 aalen = database.GetPlayerAlternateAdv(account_id, name, &aa);
-	//if (aalen == 0) {
-	//	std::cout << "Client dropped: !GetPlayerAlternateAdv, name=" << name << std::endl;
-	//	return false;
-	//}
-
-
-
-	////////////////////////////////////////////////////////////	// Player Profile Packet
-	// Try to find the EQ ID for the guild, if doesnt exist, guild has been deleted.
-
-	// Clear memory, but leave it in the DB (no reason not to, guild might be restored?)
-	strcpy(name, m_pp.name);
-	strcpy(lastname, m_pp.last_name);
-	if((m_pp.x == -1 && m_pp.y == -1 && m_pp.z == -1)||(m_pp.x == -2 && m_pp.y == -2 && m_pp.z == -2)) {
-		m_pp.x = zone->safe_x();
-		m_pp.y = zone->safe_y();
-		m_pp.z = zone->safe_z();
-	}
-
-	//these now come from the database, and it is the authority.
-	if(class_ > 0)
-		m_pp.class_ = class_;
-	else
-		class_ = m_pp.class_;
-	if(level > 0) {
-		if(m_pp.level != level) {
-			//they changed their level in the database... not ideal, but oh well..
-			m_pp.exp = GetEXPForLevel(level);
-			m_pp.level = level;
-		}
-	} else {
-		level = m_pp.level;
-	}
-
-	x_pos		= m_pp.x;
-	y_pos		= m_pp.y;
-	z_pos		= m_pp.z;
-	heading		= m_pp.heading;
-	race		= m_pp.race;
-	base_race	= m_pp.race;
-	gender		= m_pp.gender;
-	base_gender	= m_pp.gender;
-	deity		= m_pp.deity;//FYI: DEITY_AGNOSTIC = 396; still valid?
-	haircolor	= m_pp.haircolor;
-	beardcolor	= m_pp.beardcolor;
-	eyecolor1	= m_pp.eyecolor1;
-	eyecolor2	= m_pp.eyecolor2;
-	hairstyle	= m_pp.hairstyle;
-	luclinface	= m_pp.face;
-	beard		= m_pp.beard;
-	drakkin_heritage	= m_pp.drakkin_heritage;
-	drakkin_tattoo		= m_pp.drakkin_tattoo;
-	drakkin_details		= m_pp.drakkin_details;
-
-	//if we zone in with invalid Z, fix it.
-	if (zone->zonemap != nullptr) {
-
-		Map::Vertex me;
-		me.x = GetX();
-		me.y = GetY();
-		me.z = GetZ() + (GetSize() == 0.0 ? 6 : GetSize());
-
-		Map::Vertex hit;
-
-		if (zone->zonemap->FindBestZ(me, &hit) == BEST_Z_INVALID)
-		{
-#if EQDEBUG >= 5
-			LogFile->write(EQEMuLog::Debug, "Player %s started below the zone trying to fix! (%.3f, %.3f, %.3f)", GetName(), me.x, me.y, me.z);
-#endif
-			me.z += 200;	//arbitrary #
-			if (zone->zonemap->FindBestZ(me, &hit) != BEST_Z_INVALID)
-			{
-				//+10 so they dont stick in the ground
-				SendTo(me.x, me.y, hit.z + 10);
-				m_pp.z = hit.z + 10;
-			}
-			else
-			{
-				//one more, desperate try
-				me.z += 2000;
-				if (zone->zonemap->FindBestZ(me, &hit) != BEST_Z_INVALID)
-				{
-					//+10 so they dont stick in the ground
-					SendTo(me.x, me.y, hit.z + 10);
-					m_pp.z = hit.z + 10;
-				}
-			}
-		}
-	}
-
-	if (m_pp.gm && admin < minStatusToBeGM)
-		m_pp.gm = 0;
-
-	if (m_pp.platinum < 0 || m_pp.gold < 0 || m_pp.silver < 0 || m_pp.copper < 0 )
-	{
-		m_pp.platinum = 0;
-		m_pp.gold = 0;
-		m_pp.silver = 0;
-		m_pp.copper = 0;
-	}
-
-	if (!IsInAGuild()) {
-		m_pp.guild_id = GUILD_NONE;
-	}
-	else
-	{
-		m_pp.guild_id = GuildID();
-
-		if(zone->GetZoneID() == RuleI(World, GuildBankZoneID))
-			GuildBanker = (guild_mgr.IsGuildLeader(GuildID(), CharacterID()) || guild_mgr.GetBankerFlag(CharacterID()));
-	}
-
-	m_pp.guildbanker = GuildBanker;
-
-	switch (race)
-	{
-		case OGRE:
-			size = 9;
-			break;
-		case TROLL:
-			size = 8;
-			break;
-		case VAHSHIR:
-		case BARBARIAN:
-			size = 7;
-			break;
-		case HUMAN:
-		case HIGH_ELF:
-		case ERUDITE:
-		case IKSAR:
-		case DRAKKIN:
-			size = 6;
-			break;
-		case HALF_ELF:
-			size = 5.5;
-			break;
-		case WOOD_ELF:
-		case DARK_ELF:
-		case FROGLOK:
-			size = 5;
-			break;
-		case DWARF:
-			size = 4;
-			break;
-		case HALFLING:
-			size = 3.5;
-			break;
-		case GNOME:
-			size = 3;
-			break;
-		default:
-			size = 0;
-	}
-
-	//validate skills
-	//im not sure I follow this logic... commenting for now...
-	/*
-	if(Admin() < minStatusToHaveInvalidSkills) {
-		SkillType sk;
-		for (sk = _1H_BLUNT; sk <= HIGHEST_SKILL; sk = (SkillType)(sk+1)) {
-			//int cap = GetSkillCap(sk-1);
-			int cap = MaxSkill(sk-1, GetClass(), GetLevel());
-			if (cap >= 254)
-				m_pp.skills[sk] = cap;
-		}
-	}
-	*/
-
-	//validate adventure points, this cap is arbitrary at 2,000,000,000
-	if(m_pp.ldon_points_guk < 0)
-		m_pp.ldon_points_guk = 0;
-	if(m_pp.ldon_points_guk > 0x77359400)
-		m_pp.ldon_points_guk = 0x77359400;
-	if(m_pp.ldon_points_mir < 0)
-		m_pp.ldon_points_mir = 0;
-	if(m_pp.ldon_points_mir > 0x77359400)
-		m_pp.ldon_points_mir = 0x77359400;
-	if(m_pp.ldon_points_mmc < 0)
-		m_pp.ldon_points_mmc = 0;
-	if(m_pp.ldon_points_mmc > 0x77359400)
-		m_pp.ldon_points_mmc = 0x77359400;
-	if(m_pp.ldon_points_ruj < 0)
-		m_pp.ldon_points_ruj = 0;
-	if(m_pp.ldon_points_ruj > 0x77359400)
-		m_pp.ldon_points_ruj = 0x77359400;
-	if(m_pp.ldon_points_tak < 0)
-		m_pp.ldon_points_tak = 0;
-	if(m_pp.ldon_points_tak > 0x77359400)
-		m_pp.ldon_points_tak = 0x77359400;
-	if(m_pp.ldon_points_available < 0)
-		m_pp.ldon_points_available = 0;
-	if(m_pp.ldon_points_available > 0x77359400)
-		m_pp.ldon_points_available = 0x77359400;
-
-	if(GetSkill(SkillSwimming) < 100)
-		SetSkill(SkillSwimming,100);
-
-	//pull AAs from the PP
-	for(uint32 a=0; a < MAX_PP_AA_ARRAY; a++){
-		//set up our AA pointer
-		aa[a] = &m_pp.aa_array[a];
-
-
-		uint32 id = aa[a]->AA;
-		//watch for invalid AA IDs
-		if(id == aaNone)
-			continue;
-		if(id >= aaHighestID) {
-			aa[a]->AA = aaNone;
-			aa[a]->value = 0;
-			continue;
-		}
-
-		//watch for invalid AA values
-		if(aa[a]->value == 0) {
-			aa[a]->AA = aaNone;
-			continue;
-		}
-		if(aa[a]->value > HIGHEST_AA_VALUE) {
-			aa[a]->AA = aaNone;
-			aa[a]->value = 0;
-			continue;
-		}
-
-		if(aa[a]->value > 1)	//hack in some stuff for sony's new AA method (where each level of each aa.has a seperate ID)
-			aa_points[(id - aa[a]->value +1)] = aa[a]->value;
-		else
-			aa_points[id] = aa[a]->value;
-	}
-
-
-	if(SPDAT_RECORDS > 0)
-	{
-		for(uint32 z=0;z<MAX_PP_MEMSPELL;z++)
-		{
-			if(m_pp.mem_spells[z] >= (uint32)SPDAT_RECORDS)
-				UnmemSpell(z, false);
-		}
-
-		database.LoadBuffs(this);
-		uint32 max_slots = GetMaxBuffSlots();
-		for(int i = 0; i < max_slots; i++) {
-			if(buffs[i].spellid != SPELL_UNKNOWN) {
-				m_pp.buffs[i].spellid = buffs[i].spellid;
-				m_pp.buffs[i].bard_modifier = 10;
-				m_pp.buffs[i].slotid = 2;
-				m_pp.buffs[i].player_id = 0x2211;
-				m_pp.buffs[i].level = buffs[i].casterlevel;
-				m_pp.buffs[i].effect = 0;
-				m_pp.buffs[i].duration = buffs[i].ticsremaining;
-				m_pp.buffs[i].counters = buffs[i].counters;
-			} else {
-				m_pp.buffs[i].spellid = SPELLBOOK_UNKNOWN;
-				m_pp.buffs[i].bard_modifier = 10;
-				m_pp.buffs[i].slotid = 0;
-				m_pp.buffs[i].player_id = 0;
-				m_pp.buffs[i].level = 0;
-				m_pp.buffs[i].effect = 0;
-				m_pp.buffs[i].duration = 0;
-				m_pp.buffs[i].counters = 0;
-			}
-		}
-	}
-
-	KeyRingLoad();
-
-	uint32 groupid = database.GetGroupID(GetName());
-	Group* group = nullptr;
-	if(groupid > 0){
-		group = entity_list.GetGroupByID(groupid);
-		if(!group) {	//nobody from our is here... start a new group
-			group = new Group(groupid);
-			if(group->GetID() != 0)
-				entity_list.AddGroup(group, groupid);
-			else	//error loading group members...
-			{
-				delete group;
-				group = nullptr;
-			}
-		}	//else, somebody from our group is already here...
-
-		if(group)
-			group->UpdatePlayer(this);
-		else
-			database.SetGroupID(GetName(), 0, CharacterID());	//cannot re-establish group, kill it
-
-	} else {	//no group id
-		//clear out the group junk in our PP
-		uint32 xy=0;
-		for(xy=0;xy < MAX_GROUP_MEMBERS;xy++)
-			memset(m_pp.groupMembers[xy], 0, 64);
-	}
-
-	if(group){
-		// If the group leader is not set, pull the group leader infomrmation from the database.
-		if(!group->GetLeader()){
-			char ln[64];
-			char MainTankName[64];
-			char AssistName[64];
-			char PullerName[64];
-			char NPCMarkerName[64];
-			GroupLeadershipAA_Struct GLAA;
-			memset(ln, 0, 64);
-			strcpy(ln, database.GetGroupLeadershipInfo(group->GetID(), ln, MainTankName, AssistName, PullerName, NPCMarkerName, &GLAA));
-			Client *c = entity_list.GetClientByName(ln);
-			if(c)
-				group->SetLeader(c);
-
-			group->SetMainTank(MainTankName);
-			group->SetMainAssist(AssistName);
-			group->SetPuller(PullerName);
-			group->SetNPCMarker(NPCMarkerName);
-			group->SetGroupAAs(&GLAA);
-
-			//group->NotifyMainTank(this, 1);
-			//group->NotifyMainAssist(this, 1);
-			//group->NotifyPuller(this, 1);
-
-			// If we are the leader, force an update of our group AAs to other members in the zone, in case
-			// we purchased a new one while out-of-zone.
-			if(group->IsLeader(this))
-				group->SendLeadershipAAUpdate();
-
-		}
-		LFG = false;
-	}
-
-#ifdef BOTS
-	Bot::LoadAndSpawnAllZonedBots(this);
-#endif
-
-	CalcBonuses();
-	if (m_pp.cur_hp <= 0)
-		m_pp.cur_hp = GetMaxHP();
-
-	SetHP(m_pp.cur_hp);
-	Mob::SetMana(m_pp.mana);
-	SetEndurance(m_pp.endurance);
-
-	if(IsLFP()) {
-		// Update LFP in case any (or all) of our group disbanded while we were zoning.
-		UpdateLFP();
-	}
-
-	if(m_pp.z <= zone->newzone_data.underworld) {
-		m_pp.x = zone->newzone_data.safe_x;
-		m_pp.y = zone->newzone_data.safe_y;
-		m_pp.z = zone->newzone_data.safe_z;
-	}
-
-	char val[20] = {0};
-	if (database.GetVariable("Expansions", val, 20))
-		m_pp.expansions = atoi(val);
-	else
-		m_pp.expansions = 0x3FF;
-
-	p_timers.SetCharID(CharacterID());
-	if(!p_timers.Load(&database)) {
-		LogFile->write(EQEMuLog::Error, "Unable to load ability timers from the database for %s (%i)!", GetCleanName(), CharacterID());
-	}
-
-	for(unsigned int i =0 ; i < MAX_PP_MEMSPELL; ++i)
-		if(IsValidSpell(m_pp.mem_spells[i]))
-			m_pp.spellSlotRefresh[i] = p_timers.GetRemainingTime(pTimerSpellStart + m_pp.mem_spells[i]) * 1000;
-
-	if(m_pp.class_==SHADOWKNIGHT || m_pp.class_==PALADIN)
-	{
-		uint32 abilitynum=0;
-		if(m_pp.class_==SHADOWKNIGHT)
-			abilitynum = pTimerHarmTouch;
-		else
-			abilitynum = pTimerLayHands;
-
-
-		uint32 remaining = p_timers.GetRemainingTime(abilitynum);
-		if(remaining > 0 && remaining < 15300)
-			m_pp.abilitySlotRefresh = remaining * 1000;
-		else
-			m_pp.abilitySlotRefresh = 0;
-	}
-
-#ifdef _EQDEBUG
-	printf("Dumping inventory on load:\n");
-	m_inv.dumpEntireInventory();
-#endif
-
-//lost in current PP
-//	strcpy(m_pp.servername,"eqemulator");
-
-	m_pp.air_remaining = 60; //Reset to max so they dont drown on zone in if its underwater
-
-	if(zone->IsPVPZone())
-		m_pp.pvp=1;
-
-	m_pp.timeentitledonaccount = database.GetTotalTimeEntitledOnAccount(AccountID()) / 1440;
-
-	// Reset rest timer if the durations have been lowered in the database
-	if ((m_pp.RestTimer > RuleI(Character, RestRegenTimeToActivate)) && (m_pp.RestTimer > RuleI(Character, RestRegenRaidTimeToActivate)))
-		m_pp.RestTimer = 0;
-
-	//This checksum should disappear once dynamic structs are in... each struct strategy will do it
-	CRC32::SetEQChecksum((unsigned char*)&m_pp, sizeof(PlayerProfile_Struct)-4);
-
-	outapp = new EQApplicationPacket(OP_PlayerProfile,sizeof(PlayerProfile_Struct));
-
-	// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA
-	m_pp.entityid = GetID();
-	memcpy(outapp->pBuffer,&m_pp,outapp->size);
-	outapp->priority = 6;
-	FastQueuePacket(&outapp);
-
-	if(m_pp.RestTimer)
-		rest_timer.Start(m_pp.RestTimer * 1000);
-
-	database.LoadPetInfo(this);
-	//this was moved before the spawn packets are sent
-	//in hopes that it adds more consistency...
-	//Remake pet
-	if (m_petinfo.SpellID > 1 && !GetPet() && m_petinfo.SpellID <= SPDAT_RECORDS)
-	{
-		MakePoweredPet(m_petinfo.SpellID, spells[m_petinfo.SpellID].teleport_zone, m_petinfo.petpower, m_petinfo.Name, m_petinfo.size);
-		if (GetPet() && GetPet()->IsNPC()) {
-			NPC *pet = GetPet()->CastToNPC();
-			pet->SetPetState(m_petinfo.Buffs, m_petinfo.Items);
-			pet->CalcBonuses();
-			pet->SetHP(m_petinfo.HP);
-			pet->SetMana(m_petinfo.Mana);
-		}
-		m_petinfo.SpellID = 0;
-	}
-	// Moved here so it's after where we load the pet data.
-	if(!GetAA(aaPersistentMinion))
-		memset(&m_suspendedminion, 0, sizeof(PetInfo));
-
-	/* Server Zone Entry Packet */
-	outapp = new EQApplicationPacket(OP_ZoneEntry, sizeof(ServerZoneEntry_Struct));
-	ServerZoneEntry_Struct* sze = (ServerZoneEntry_Struct*)outapp->pBuffer;
-
-	FillSpawnStruct(&sze->player,CastToMob());
-	sze->player.spawn.curHp=1;
-	sze->player.spawn.NPC=0;
-	sze->player.spawn.z += 6;	//arbitrary lift, seems to help spawning under zone.
-	outapp->priority = 6;
-	FastQueuePacket(&outapp);
-
-	/* Zone Spawns Packet */
-	entity_list.SendZoneSpawnsBulk(this);
-	entity_list.SendZoneCorpsesBulk(this);
-	entity_list.SendZonePVPUpdates(this);	//hack until spawn struct is fixed.
-
-	/* Time of Day packet */
-	outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
-	TimeOfDay_Struct* tod = (TimeOfDay_Struct*)outapp->pBuffer;
-	zone->zone_time.getEQTimeOfDay(time(0), tod);
-	outapp->priority = 6;
-	FastQueuePacket(&outapp);
-
-	/* Tribute Packets */
-	DoTributeUpdate();
-	if(m_pp.tribute_active) {
-		//restart the tribute timer where we left off
-		tribute_timer.Start(m_pp.tribute_time_remaining);
-	}
-
-	/*
-		Character Inventory Packet
-		this is not quite where live sends inventory, they do it after tribute
-	*/
-	if (loaditems) { //dont load if a length error occurs
-		BulkSendInventoryItems();
-
-		// Send stuff on the cursor which isnt sent in bulk
-		iter_queue it;
-		for (it=m_inv.cursor_begin();it!=m_inv.cursor_end();++it) {
-			// First item cursor is sent in bulk inventory packet
-			if (it==m_inv.cursor_begin())
-				continue;
-			const ItemInst *inst=*it;
-			SendItemPacket(MainCursor, inst, ItemPacketSummonItem);
-		}
-	}
-
-	/* Task Packets */
-	LoadClientTaskState();
-
-	if (GetClientVersion() >= EQClientRoF)
-	{
-		outapp = new EQApplicationPacket(OP_ReqNewZone, 0);
-		Handle_Connect_OP_ReqNewZone(outapp);
-		safe_delete(outapp);
-	}
-
-	if(ClientVersionBit & BIT_UnderfootAndLater)
-	{
-		outapp = new EQApplicationPacket(OP_XTargetResponse, 8);
-		outapp->WriteUInt32(GetMaxXTargets());
-		outapp->WriteUInt32(0);
-		FastQueuePacket(&outapp);
-	}
-
-	/*
-		Weather Packet
-		This shouldent be moved, this seems to be what the client
-		uses to advance to the next state (sending ReqNewZone)
-	*/
-	outapp = new EQApplicationPacket(OP_Weather, 12);
-	Weather_Struct *ws = (Weather_Struct *) outapp->pBuffer;
-	ws->val1 = 0x000000FF;
-	if (zone->zone_weather == 1)
-		ws->type = 0x31; // Rain
-	if (zone->zone_weather == 2)
-	{
-		outapp->pBuffer[8] = 0x01;
-		ws->type = 0x02;
-	}
-	outapp->priority = 6;
-	QueuePacket(outapp);
-	safe_delete(outapp);
-
-	SetAttackTimer();
-
-	conn_state = ZoneInfoSent;
-
-	return true;
-}
-
 /* Finish client connecting state */
 void Client::CompleteConnect() {
 	UpdateWho();
@@ -9523,8 +9381,7 @@ void Client::CompleteConnect() {
 		SendAppearancePacket(AT_GuildID, GuildID(), false);
 		SendAppearancePacket(AT_GuildRank, rank, false);
 	}
-	for (uint32 spellInt = 0; spellInt < MAX_PP_SPELLBOOK; spellInt++)
-	{
+	for (uint32 spellInt = 0; spellInt < MAX_PP_REF_SPELLBOOK; spellInt++) {
 		if (m_pp.spell_book[spellInt] < 3 || m_pp.spell_book[spellInt] > 50000)
 			m_pp.spell_book[spellInt] = 0xFFFFFFFF;
 	}
@@ -9577,7 +9434,7 @@ void Client::CompleteConnect() {
 		if (!IsValidSpell(buffs[j1].spellid))
 			continue;
 
-		const SPDat_Spell_Struct &spell = spells[buffs[j1].spellid];
+		const SPDat_Spell_Struct &spell = spells[buffs[j1].spellid]; 
 
 		int NimbusEffect = GetNimbusEffect(buffs[j1].spellid);
 		if(NimbusEffect) {
@@ -9714,20 +9571,18 @@ void Client::CompleteConnect() {
 	}
 
 	/* Sends appearances for all mobs not doing anim_stand aka sitting, looting, playing dead */
-	entity_list.SendZoneAppearance(this);
-
+	entity_list.SendZoneAppearance(this); 
 	/* Sends the Nimbus particle effects (up to 3) for any mob using them */
 	entity_list.SendNimbusEffects(this);
 
 	entity_list.SendUntargetable(this);
 
-	client_data_loaded = true;
 	int x;
 	for (x = 0; x < 8; x++)
 		SendWearChange(x);
 	Mob *pet = GetPet();
 	if (pet != nullptr) {
-		for (x = 0; x < 8; x++)
+		for (x = 0; x < 8; x++) 
 			pet->SendWearChange(x);
 	}
 
@@ -9807,6 +9662,9 @@ void Client::CompleteConnect() {
 	alternate_currency_loaded = true;
 	ProcessAlternateCurrencyQueue();
 
+	/* This needs to be set, this determines whether or not data was loaded properly before a save */
+	client_data_loaded = true;
+
 	CalcItemScale();
 	DoItemEnterZone();
 
@@ -9834,6 +9692,8 @@ void Client::CompleteConnect() {
 	}
 
 	entity_list.RefreshClientXTargets(this);
+
+	worldserver.RequestTellQueue(GetName());
 }
 
 void Client::Handle_OP_KeyRing(const EQApplicationPacket *app)
@@ -9905,6 +9765,8 @@ void Client::Handle_OP_PurchaseLeadershipAA(const EQApplicationPacket *app) {
 		//sell them the ability.
 		m_pp.group_leadership_points -= cost;
 		m_pp.leader_abilities.ranks[aaid]++;
+
+		database.SaveCharacterLeadershipAA(this->CharacterID(), &m_pp); 
 	}
 
 	//success, send them an update
@@ -10814,8 +10676,7 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app) {
 	}
 }
 
-void Client::Handle_OP_PotionBelt(const EQApplicationPacket *app) {
-
+void Client::Handle_OP_PotionBelt(const EQApplicationPacket *app) { 
 	if(app->size != sizeof(MovePotionToBelt_Struct)) {
 		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_PotionBelt expected %i got %i",
 					sizeof(MovePotionToBelt_Struct), app->size);
@@ -10829,6 +10690,7 @@ void Client::Handle_OP_PotionBelt(const EQApplicationPacket *app) {
 			m_pp.potionbelt.items[mptbs->SlotNumber].item_id = BaseItem->ID;
 			m_pp.potionbelt.items[mptbs->SlotNumber].icon = BaseItem->Icon;
 			strn0cpy(m_pp.potionbelt.items[mptbs->SlotNumber].item_name, BaseItem->Name, sizeof(BaseItem->Name));
+			database.SaveCharacterPotionBelt(this->CharacterID(), mptbs->SlotNumber, m_pp.potionbelt.items[mptbs->SlotNumber].item_id, m_pp.potionbelt.items[mptbs->SlotNumber].icon);
 		}
 	}
 	else {
@@ -10836,9 +10698,6 @@ void Client::Handle_OP_PotionBelt(const EQApplicationPacket *app) {
 		m_pp.potionbelt.items[mptbs->SlotNumber].icon = 0;
 		strncpy(m_pp.potionbelt.items[mptbs->SlotNumber].item_name, "\0", 1);
 	}
-
-	Save();
-
 }
 
 void Client::Handle_OP_LFGGetMatchesRequest(const EQApplicationPacket *app) {
@@ -13098,13 +12957,13 @@ void Client::Handle_OP_CrystalCreate(const EQApplicationPacket *app) {
 			SummonItem(RuleI(Zone, EbonCrystalItemID), GetEbonCrystals());
 			m_pp.currentEbonCrystals = 0;
 			m_pp.careerEbonCrystals = 0;
-			Save();
+			SaveCurrency();
 			SendCrystalCounts();
 		} else {
 			SummonItem(RuleI(Zone, EbonCrystalItemID), cr->amount);
 			m_pp.currentEbonCrystals -= cr->amount;
 			m_pp.careerEbonCrystals -= cr->amount;
-			Save();
+			SaveCurrency();
 			SendCrystalCounts();
 		}
 	} else if(cr->type == 4) {
@@ -13112,13 +12971,13 @@ void Client::Handle_OP_CrystalCreate(const EQApplicationPacket *app) {
 			SummonItem(RuleI(Zone, RadiantCrystalItemID), GetRadiantCrystals());
 			m_pp.currentRadCrystals = 0;
 			m_pp.careerRadCrystals = 0;
-			Save();
+			SaveCurrency();
 			SendCrystalCounts();
 		} else {
 			SummonItem(RuleI(Zone, RadiantCrystalItemID), cr->amount);
 			m_pp.currentRadCrystals -= cr->amount;
 			m_pp.careerRadCrystals -= cr->amount;
-			Save();
+			SaveCurrency();
 			SendCrystalCounts();
 		}
 	}

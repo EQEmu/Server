@@ -479,7 +479,6 @@ ENCODE(OP_PlayerProfile) {
 	uint32 r;
 
 	eq->available_slots=0xffffffff;
-	memset(eq->unknown06284, 0xff, sizeof(eq->unknown06284));
 	memset(eq->unknown07284, 0xff, sizeof(eq->unknown07284));
 
 //	OUT(checksum);
@@ -546,7 +545,7 @@ ENCODE(OP_PlayerProfile) {
 	OUT(gold);
 	OUT(silver);
 	OUT(copper);
-	OUT(platinum_cursor);
+	OUT(platinum_cursor); 
 	OUT(gold_cursor);
 	OUT(silver_cursor);
 	OUT(copper_cursor);

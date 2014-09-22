@@ -766,7 +766,7 @@ struct BindStruct {
 ** OpCode: 0x006a
  */
 static const uint32 MAX_PP_LANGUAGE		= 25; //
-static const uint32 MAX_PP_SPELLBOOK	= 480; // Confirmed 60 pages on Underfoot now
+static const uint32 MAX_PP_SPELLBOOK	= 720; // Confirmed 60 pages on Underfoot now
 static const uint32 MAX_PP_MEMSPELL		= 10; //was 9 now 10 on Underfoot
 static const uint32 MAX_PP_SKILL		= _SkillPacketArraySize;	// 100 - actual skills buffer size
 static const uint32 MAX_PP_AA_ARRAY		= 300; //was 299
@@ -879,7 +879,6 @@ struct PlayerProfile_Struct
 /*04216*/ uint8   face;					// Player face - Actually uint32?
 /*04217*/ uint8   unknown04217[147];		// was [175]
 /*04364*/ uint32   spell_book[MAX_PP_SPELLBOOK];	// List of the Spells in spellbook 720 = 90 pages [2880] was [1920]
-/*06284*/ uint8   unknown06284[960];			// Spacer for the end of the book for now (pages 60 to 90)
 /*07244*/ uint32   mem_spells[MAX_PP_MEMSPELL]; // List of spells memorized
 /*07284*/ uint8   unknown07284[28];		//#### uint8 unknown04396[32]; in Titanium ####[28]
 /*07312*/ uint32  platinum;				// Platinum Pieces on player

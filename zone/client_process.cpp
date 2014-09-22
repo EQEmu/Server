@@ -1547,7 +1547,12 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 				if (from_bucket == &m_pp.platinum_shared)
 					amount_to_add = 0 - amount_to_take;
 
-				database.SetSharedPlatinum(AccountID(),amount_to_add);
+				database.SetSharedPlatinum(AccountID(),amount_to_add); 
+			}
+		}
+		else{
+			if (to_bucket == &m_pp.platinum_shared || from_bucket == &m_pp.platinum_shared){
+				this->Message(13, "::: WARNING! ::: SHARED BANK IS DISABLED AND YOUR PLATINUM WILL BE DESTROYED IF YOU PUT IT HERE");
 			}
 		}
 	}
@@ -1580,7 +1585,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 		safe_delete(outapp);
 	}
 
-	Save();
+	SaveCurrency();
 }
 
 void Client::OPGMTraining(const EQApplicationPacket *app)
@@ -1715,6 +1720,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		}
 
 		uint16 skilllevel = GetRawSkill(skill);
+
 		if(skilllevel == 0) {
 			//this is a new skill..
 			uint16 t_level = SkillTrainLevel(skill, GetClass());
@@ -1724,7 +1730,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			}
 
 			SetSkill(skill, t_level);
-		} else {
+		} else { 
 			switch(skill) {
 			case SkillBrewing:
 			case SkillMakePoison:

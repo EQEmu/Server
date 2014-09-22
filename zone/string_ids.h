@@ -249,6 +249,8 @@
 #define PLAYER_CHARMED				1461	//You lose control of yourself!
 #define TRADER_BUSY					1468	//That Trader is currently with a customer. Please wait until their transaction is finished.
 #define SENSE_CORPSE_DIRECTION		1563	//You sense a corpse in this direction.
+#define QUEUED_TELL					2458	//[queued]
+#define QUEUE_TELL_FULL				2459	//[zoing and queue is full]
 #define SUSPEND_MINION_UNSUSPEND	3267	//%1 tells you, 'I live again...'
 #define SUSPEND_MINION_SUSPEND		3268	//%1 tells you, 'By your command, master.'
 #define ONLY_SUMMONED_PETS			3269	//3269 This effect only works with summoned pets.
@@ -269,6 +271,8 @@
 #define CORPSEDRAG_STOP				4066	//You stop dragging the corpse.
 #define	TARGET_TOO_CLOSE			4602	//You are too close to your target. Get farther away.
 #define WHOALL_NO_RESULTS			5029	//There are no players in EverQuest that match those who filters.
+#define TELL_QUEUED_MESSAGE			5045	//You told %1 '%T2. %3'
+#define TOLD_NOT_ONLINE				5046	//%1 is not online at this time.
 #define PETITION_NO_DELETE			5053	//You do not have a petition in the queue.
 #define PETITION_DELETED			5054	//Your petition was successfully deleted.
 #define GAIN_RAIDEXP				5085	//You gained raid experience!

@@ -354,7 +354,7 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 	m_pp.zoneInstance = instance_id;
 
 	//Force a save so its waiting for them when they zone
-	Save(2);
+	Save(2); 
 
 	if (zone_id == zone->GetZoneID() && instance_id == zone->GetInstanceID()) {
 		// No need to ask worldserver if we're zoning to ourselves (most
@@ -704,6 +704,7 @@ void Client::SetBindPoint(int to_zone, float new_x, float new_y, float new_z) {
 		m_pp.binds[0].y = new_y;
 		m_pp.binds[0].z = new_z;
 	}
+	database.SaveCharacterBindPoint(this->CharacterID(), m_pp.binds[0].zoneId, 0, m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, 0, 0);
 }
 
 void Client::GoToBind(uint8 bindnum) {

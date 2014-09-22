@@ -756,7 +756,7 @@ bool BaseGuildManager::DBSetGuild(uint32 charid, uint32 guild_id, uint8 rank) {
 	std::string query;
 
 	if(guild_id != GUILD_NONE) {
-        query = StringFormat("REPLACE INTO guild_members (char_id,guild_id,rank) VALUES(%d,%d,%d)", charid, guild_id, rank);
+        query = StringFormat("REPLACE INTO guild_members (char_id,guild_id,rank,public_note) VALUES(%d,%d,%d,'')", charid, guild_id, rank);
         auto results = m_db->QueryDatabase(query);
 
 		if (!results.Success()) {
@@ -897,10 +897,10 @@ bool BaseGuildManager::QueryWithLogging(std::string query, const char *errmsg) {
 " FROM vwBotCharacterMobs AS c LEFT JOIN vwGuildMembers AS g ON c.id=g.char_id AND c.mobtype = g.mobtype "
 #else
 #define GuildMemberBaseQuery \
-"SELECT c.id,c.name,c.class,c.level,c.timelaston,c.zoneid," \
+"SELECT c.id,c.name,c.class,c.level,c.last_login,c.zone_id," \
 " g.guild_id,g.rank,g.tribute_enable,g.total_tribute,g.last_tribute," \
 " g.banker,g.public_note,g.alt " \
-" FROM character_ AS c LEFT JOIN guild_members AS g ON c.id=g.char_id "
+" FROM `character_data` AS c LEFT JOIN guild_members AS g ON c.id=g.char_id "
 #endif
 static void ProcessGuildMember(MySQLRequestRow row, CharGuildInfo &into) {
 	//fields from `characer_`
@@ -1241,7 +1241,7 @@ BaseGuildManager::GuildInfo::GuildInfo() {
 uint32 BaseGuildManager::DoesAccountContainAGuildLeader(uint32 AccountID)
 {
 	std::string query = StringFormat("SELECT guild_id FROM guild_members WHERE char_id IN "
-                                    "(SELECT id FROM character_ WHERE account_id = %i) AND rank = 2",
+		"(SELECT id FROM `character_data` WHERE account_id = %i) AND rank = 2",
                                     AccountID);
     auto results = m_db->QueryDatabase(query);
 	if (!results.Success())

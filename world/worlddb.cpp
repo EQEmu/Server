@@ -21,7 +21,6 @@
 #include "../common/string_util.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/item.h"
-#include "../common/dbasync.h"
 #include "../common/rulesys.h"
 #include <iostream>
 #include <cstdlib>
@@ -34,248 +33,196 @@ extern std::vector<RaceClassCombos> character_create_race_class_combos;
 
 
 // solar: the current stuff is at the bottom of this function
-void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct* cs) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct* cs, uint32 ClientVersion) {
 	Inventory *inv;
+	uint8 has_home = 0; 
+	uint8 has_bind = 0;
 
+	/* Initialize Variables */
 	for (int i=0; i<10; i++) {
 		strcpy(cs->name[i], "<none>");
 		cs->zone[i] = 0;
 		cs->level[i] = 0;
-			cs->tutorial[i] = 0;
+		cs->tutorial[i] = 0;
 		cs->gohome[i] = 0;
 	}
 
-	int char_num = 0;
-	unsigned long* lengths;
+	/* Get Character Info */
+	std::string cquery = StringFormat(
+		"SELECT                     "  
+		"`id`,                      "  // 0
+		"name,                      "  // 1
+		"gender,                    "  // 2
+		"race,                      "  // 3
+		"class,                     "  // 4
+		"`level`,                   "  // 5
+		"deity,                     "  // 6
+		"last_login,                "  // 7
+		"time_played,               "  // 8
+		"hair_color,                "  // 9
+		"beard_color,               "  // 10
+		"eye_color_1,               "  // 11
+		"eye_color_2,               "  // 12
+		"hair_style,                "  // 13
+		"beard,                     "  // 14
+		"face,                      "  // 15
+		"drakkin_heritage,          "  // 16
+		"drakkin_tattoo,            "  // 17
+		"drakkin_details,           "  // 18
+		"zone_id		            "  // 19
+		"FROM                       "  
+		"character_data             "  
+		"WHERE `account_id` = %i ORDER BY `name` LIMIT 10   ", account_id);
+	auto results = database.QueryDatabase(cquery); int char_num = 0;
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		PlayerProfile_Struct pp;
+		memset(&pp, 0, sizeof(PlayerProfile_Struct));
 
-	// Populate character info
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT name,profile,zonename,class,level FROM character_ WHERE account_id=%i order by name limit 10", account_id), errbuf, &result)) {
-		safe_delete_array(query);
-		while ((row = mysql_fetch_row(result))) {
-			lengths = mysql_fetch_lengths(result);
-			////////////
-			////////////	This is the current one, the other are for converting
-			////////////
-			if ((lengths[1] == sizeof(PlayerProfile_Struct))) {
-				strcpy(cs->name[char_num], row[0]);
-				PlayerProfile_Struct* pp = (PlayerProfile_Struct*)row[1];
-				uint8 clas = atoi(row[3]);
-				uint8 lvl = atoi(row[4]);
+		uint32 character_id = atoi(row[0]);
+		strcpy(cs->name[char_num], row[1]);
+		uint8 lvl = atoi(row[5]);
+		cs->level[char_num] = lvl;
+		cs->class_[char_num] = atoi(row[4]);
+		cs->race[char_num] = atoi(row[3]);
+		cs->gender[char_num] = atoi(row[2]);
+		cs->deity[char_num] = atoi(row[6]);
+		cs->zone[char_num] = atoi(row[19]);
+		cs->face[char_num] = atoi(row[15]);
+		cs->haircolor[char_num] = atoi(row[9]);
+		cs->beardcolor[char_num] = atoi(row[10]);
+		cs->eyecolor2[char_num] = atoi(row[12]);
+		cs->eyecolor1[char_num] = atoi(row[11]);
+		cs->hairstyle[char_num] = atoi(row[13]);
+		cs->beard[char_num] = atoi(row[14]);
+		cs->drakkin_heritage[char_num] = atoi(row[16]);
+		cs->drakkin_tattoo[char_num] = atoi(row[17]);
+		cs->drakkin_details[char_num] = atoi(row[18]);
 
-				// Character information
-				if(lvl == 0)
-					cs->level[char_num]		= pp->level;	//no level in DB, trust PP
-				else
-					cs->level[char_num]		= lvl;
-				if(clas == 0)
-					cs->class_[char_num]	= pp->class_;	//no class in DB, trust PP
-				else
-					cs->class_[char_num]	= clas;
-				cs->race[char_num]			= pp->race;
-				cs->gender[char_num]		= pp->gender;
-				cs->deity[char_num]			= pp->deity;
-				cs->zone[char_num]			= GetZoneID(row[2]);
-				cs->face[char_num]			= pp->face;
-				cs->haircolor[char_num]		= pp->haircolor;
-				cs->beardcolor[char_num]	= pp->beardcolor;
-				cs->eyecolor2[char_num]		= pp->eyecolor2;
-				cs->eyecolor1[char_num]		= pp->eyecolor1;
-				cs->hairstyle[char_num]		= pp->hairstyle;
-				cs->beard[char_num]			= pp->beard;
-				cs->drakkin_heritage[char_num]	= pp->drakkin_heritage;
-				cs->drakkin_tattoo[char_num]	= pp->drakkin_tattoo;
-				cs->drakkin_details[char_num]	= pp->drakkin_details;
+		if (RuleB(World, EnableTutorialButton) && (lvl <= RuleI(World, MaxLevelForTutorial)))
+			cs->tutorial[char_num] = 1;
 
-				if(RuleB(World, EnableTutorialButton) && (lvl <= RuleI(World, MaxLevelForTutorial)))
-					cs->tutorial[char_num] = 1;
+		if (RuleB(World, EnableReturnHomeButton)) {
+			int now = time(nullptr);
+			if ((now - atoi(row[8])) >= RuleI(World, MinOfflineTimeToReturnHome))
+				cs->gohome[char_num] = 1;
+		}
 
-				if(RuleB(World, EnableReturnHomeButton)) {
-					int now = time(nullptr);
-					if((now - pp->lastlogin) >= RuleI(World, MinOfflineTimeToReturnHome))
-						cs->gohome[char_num] = 1;
+		/* Set Bind Point Data for any character that may possibly be missing it for any reason */
+		cquery = StringFormat("SELECT `zone_id`, `instance_id`, `x`, `y`, `z`, `heading`, `is_home` FROM `character_bind`  WHERE `id` = %i LIMIT 2", character_id); 
+		auto results_bind = database.QueryDatabase(cquery); has_home = 0; has_bind = 0;
+		for (auto row_b = results_bind.begin(); row_b != results_bind.end(); ++row_b) {
+			if (row_b[6] && atoi(row_b[6]) == 1){ has_home = 1; }
+			if (row_b[6] && atoi(row_b[6]) == 0){ has_bind = 1; } 
+		}
+
+		if (has_home == 0 || has_bind == 0){
+			cquery = StringFormat("SELECT `zone_id`, `bind_id`, `x`, `y`, `z` FROM `start_zones` WHERE `player_class` = %i AND `player_deity` = %i AND `player_race` = %i",
+				cs->class_[char_num], cs->deity[char_num], cs->race[char_num]);
+			auto results_bind = database.QueryDatabase(cquery);
+			for (auto row_d = results_bind.begin(); row_d != results_bind.end(); ++row_d) {
+				/* If a bind_id is specified, make them start there */
+				if (atoi(row_d[1]) != 0) { 
+					pp.binds[4].zoneId = (uint32)atoi(row_d[1]);
+					GetSafePoints(pp.binds[4].zoneId, 0, &pp.binds[4].x, &pp.binds[4].y, &pp.binds[4].z);
 				}
-
-
-				// This part creates home city entries for characters created before the home bind point was tracked.
-				// Do it here because the player profile is already loaded and it's as good a spot as any. This whole block should
-				// probably be removed at some point, when most accounts are safely converted.
-				if(pp->binds[4].zoneId == 0) {
-					bool altered = false;
-					MYSQL_RES *result2;
-					MYSQL_ROW row2;
-					char startzone[50] = {0};
-
-					// check for start zone variable (I didn't even know any variables were still being used...)
-					if(database.GetVariable("startzone", startzone, 50)) {
-						uint32 zoneid = database.GetZoneID(startzone);
-						if(zoneid) {
-							pp->binds[4].zoneId = zoneid;
-							GetSafePoints(zoneid, 0, &pp->binds[4].x, &pp->binds[4].y, &pp->binds[4].z);
-							altered = true;
-						}
-					}
-					else {
-						RunQuery(query,
-							MakeAnyLenString(&query,
-							"SELECT zone_id,bind_id,x,y,z FROM start_zones "
-							"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
-							pp->class_,
-							pp->deity,
-							pp->race
-							),
-							errbuf,
-							&result2
-						);
-						safe_delete_array(query);
-
-						// if there is only one possible start city, set it
-						if(mysql_num_rows(result2) == 1) {
-							row2 = mysql_fetch_row(result2);
-							if(atoi(row2[1]) != 0) {		// if a bind_id is specified, make them start there
-								pp->binds[4].zoneId = (uint32)atoi(row2[1]);
-								GetSafePoints(pp->binds[4].zoneId, 0, &pp->binds[4].x, &pp->binds[4].y, &pp->binds[4].z);
-							}
-							else {	// otherwise, use the zone and coordinates given
-								pp->binds[4].zoneId = (uint32)atoi(row2[0]);
-								float x = atof(row2[2]);
-								float y = atof(row2[3]);
-								float z = atof(row2[4]);
-								if(x == 0 && y == 0 && z == 0)
-									GetSafePoints(pp->binds[4].zoneId, 0, &x, &y, &z);
-
-								pp->binds[4].x = x;
-								pp->binds[4].y = y;
-								pp->binds[4].z = z;
-							}
-							altered = true;
-						}
-
-						mysql_free_result(result2);
-					}
-
-					// update the player profile
-					if(altered) {
-						uint32 char_id = GetCharacterID(cs->name[char_num]);
-						RunQuery(query,MakeAnyLenString(&query,"SELECT extprofile FROM character_ WHERE id=%i",char_id), errbuf, &result2);
-						safe_delete_array(query);
-						if(result2) {
-							row2 = mysql_fetch_row(result2);
-							ExtendedProfile_Struct* ext = (ExtendedProfile_Struct*)row2[0];
-							SetPlayerProfile(account_id,char_id,pp,inv,ext, 0, 0, 5);
-						}
-						mysql_free_result(result2);
-					}
-				}	// end of "set start zone" block
-
-
-				// Character's equipped items
-				// @merth: Haven't done bracer01/bracer02 yet.
-				// Also: this needs a second look after items are a little more solid
-				// NOTE: items don't have a color, players MAY have a tint, if the
-				// use_tint part is set. otherwise use the regular color
-				inv = new Inventory;
-				if(GetInventory(account_id, cs->name[char_num], inv))
-				{
-					for (uint8 material = 0; material <= 8; material++)
-					{
-						uint32 color;
-						ItemInst *item = inv->GetItem(Inventory::CalcSlotFromMaterial(material));
-						if(item == 0)
-							continue;
-
-						cs->equip[char_num][material] = item->GetItem()->Material;
-
-						if(pp->item_tint[material].rgb.use_tint)	// they have a tint (LoY dye)
-							color = pp->item_tint[material].color;
-						else	// no tint, use regular item color
-							color = item->GetItem()->Color;
-
-						cs->cs_colors[char_num][material].color = color;
-
-						// the weapons are kept elsewhere
-						if ((material==MaterialPrimary) || (material==MaterialSecondary))
-						{
-							if(strlen(item->GetItem()->IDFile) > 2) {
-								uint32 idfile=atoi(&item->GetItem()->IDFile[2]);
-								if (material==MaterialPrimary)
-									cs->primary[char_num]=idfile;
-								else
-									cs->secondary[char_num]=idfile;
-							}
-						}
-					}
+				/* Otherwise, use the zone and coordinates given */
+				else {	
+					pp.binds[4].zoneId = (uint32)atoi(row_d[0]);
+					float x = atof(row_d[2]); 
+					float y = atof(row_d[3]); 
+					float z = atof(row_d[4]); 
+					if (x == 0 && y == 0 && z == 0){ GetSafePoints(pp.binds[4].zoneId, 0, &x, &y, &z); } 
+					pp.binds[4].x = x; pp.binds[4].y = y; pp.binds[4].z = z;
+					
 				}
-				else
-				{
-					printf("Error loading inventory for %s\n", cs->name[char_num]);
-				}
-				safe_delete(inv);
-				if (++char_num > 10)
-					break;
 			}
-			else
-			{
-				std::cout << "Got a bogus character (" << row[0] << ") Ignoring!!!" << std::endl;
-				std::cout << "PP length ="<<lengths[1]<<" but PP should be "<<sizeof(PlayerProfile_Struct) << std::endl;
-				//DeleteCharacter(row[0]);
+			pp.binds[0] = pp.binds[4];
+			/* If no home bind set, set it */
+			if (has_home == 0){
+				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
+					" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)", 
+					character_id, pp.binds[4].zoneId, 0, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z, pp.binds[4].heading, 1); 
+				auto results_bset = QueryDatabase(query); ThrowDBError(results_bset.ErrorMessage(), "WorldDatabase::GetCharSelectInfo Set Home Point", query);
+			}
+			/* If no regular bind set, set it */
+			if (has_bind == 0){
+				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
+					" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)", 
+					character_id, pp.binds[0].zoneId, 0, pp.binds[0].x, pp.binds[0].y, pp.binds[0].z, pp.binds[0].heading, 0); 
+				auto results_bset = QueryDatabase(query); ThrowDBError(results_bset.ErrorMessage(), "WorldDatabase::GetCharSelectInfo Set Bind Point", query);
 			}
 		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		std::cerr << "Error in GetCharSelectInfo query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-		return;
+		/* Bind End */
+
+		/*
+			Character's equipped items
+			@merth: Haven't done bracer01/bracer02 yet.
+			Also: this needs a second look after items are a little more solid
+			NOTE: items don't have a color, players MAY have a tint, if the
+			use_tint part is set. otherwise use the regular color
+		*/
+
+		/* Load Character Material Data for Char Select */
+		cquery = StringFormat("SELECT slot, red, green, blue, use_tint, color FROM `character_material` WHERE `id` = %u", character_id);
+		auto results_b = database.QueryDatabase(cquery); uint8 slot = 0;
+		for (auto row_b = results_b.begin(); row_b != results_b.end(); ++row_b) {
+			slot = atoi(row_b[0]); 
+			pp.item_tint[slot].rgb.red = atoi(row_b[1]);
+			pp.item_tint[slot].rgb.green = atoi(row_b[2]);
+			pp.item_tint[slot].rgb.blue = atoi(row_b[3]);
+			pp.item_tint[slot].rgb.use_tint = atoi(row_b[4]);
+		}
+
+		/* Load Inventory */
+		inv = new Inventory;
+		if (GetInventory(account_id, cs->name[char_num], inv)) {
+			for (uint8 material = 0; material <= 8; material++) {
+				uint32 color = 0;
+				ItemInst *item = inv->GetItem(Inventory::CalcSlotFromMaterial(material));
+				if (item == 0)
+					continue;
+
+				cs->equip[char_num][material] = item->GetItem()->Material;
+
+				if (pp.item_tint[material].rgb.use_tint){ color = pp.item_tint[material].color; }
+				else{ color = item->GetItem()->Color; }
+
+				cs->cs_colors[char_num][material].color = color; 
+
+				/* Weapons are handled a bit differently */
+				if ((material == MaterialPrimary) || (material == MaterialSecondary)) {
+					if (strlen(item->GetItem()->IDFile) > 2) {
+						uint32 idfile = atoi(&item->GetItem()->IDFile[2]);
+						if (material == MaterialPrimary)
+							cs->primary[char_num] = idfile;
+						else
+							cs->secondary[char_num] = idfile;
+					}
+				}
+			}
+		}
+		else {
+			printf("Error loading inventory for %s\n", cs->name[char_num]);
+		}
+		safe_delete(inv);
+		if (++char_num > 10)
+			break;
 	}
 
 	return;
 }
 
 int WorldDatabase::MoveCharacterToBind(int CharID, uint8 bindnum) {
-	// if an invalid bind point is specified, use the primary bind
-	if (bindnum > 4)
-		bindnum = 0;
+	/*  if an invalid bind point is specified, use the primary bind */
+	if (bindnum > 4){ bindnum = 0; }
+	int is_home = 0;
+	if (bindnum == 4){ is_home = 1; }
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	uint32	affected_rows = 0;
-	PlayerProfile_Struct pp;
-
-	bool PPValid = false;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT profile from character_ where id='%i'", CharID), errbuf, &result)) {
-		row = mysql_fetch_row(result);
-		unsigned long* lengths = mysql_fetch_lengths(result);
-		if (lengths[0] == sizeof(PlayerProfile_Struct)) {
-			memcpy(&pp, row[0], sizeof(PlayerProfile_Struct));
-			PPValid = true;
-		}
-		mysql_free_result(result);
+	std::string query = StringFormat("SELECT `zone_id` FROM `character_bind` WHERE `id` = %u AND `is_home` = %u LIMIT 1", CharID, is_home);
+	auto results = database.QueryDatabase(query); int i = 0;
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		return atoi(row[0]);
 	}
-	safe_delete_array(query);
-
-	if(!PPValid) return 0;
-
-	const char *BindZoneName = StaticGetZoneName(pp.binds[bindnum].zoneId);
-
-	if(!strcmp(BindZoneName, "UNKNWN")) return pp.zone_id;
-
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET zonename = '%s',zoneid=%i,x=%f, y=%f, z=%f, instanceid=0 WHERE id='%i'",
-							BindZoneName, pp.binds[bindnum].zoneId, pp.binds[bindnum].x, pp.binds[bindnum].y, pp.binds[bindnum].z,
-							CharID), errbuf, 0,&affected_rows)) {
-
-		return pp.zone_id;
-	}
-	safe_delete_array(query);
-
-	return pp.binds[bindnum].zoneId;
 }
 
 bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc)
@@ -444,12 +391,16 @@ bool WorldDatabase::GetStartZoneSoF(PlayerProfile_Struct* in_pp, CharCreate_Stru
 	in_pp->x = in_pp->y = in_pp->z = in_pp->heading = in_pp->zone_id = 0;
 	in_pp->binds[0].x = in_pp->binds[0].y = in_pp->binds[0].z = in_pp->binds[0].zoneId = 0;
 
-	if(!RunQuery(query, MakeAnyLenString(&query, "SELECT x,y,z,heading,bind_id FROM start_zones WHERE zone_id=%i AND player_class=%i "
-			"AND player_deity=%i AND player_race=%i",
-			in_cc->start_zone,
-			in_cc->class_,
-			in_cc->deity,
-			in_cc->race), errbuf, &result))
+	if(!RunQuery(query, MakeAnyLenString(&query, "SELECT `x`, `y`, ``z, `heading`, `bind_id` "
+		" FROM `start_zones` "
+		" WHERE `zone_id` = %i "
+		" AND `player_class` = %i "
+		" AND player_deity=%i" 
+		" AND player_race=%i",
+		in_cc->start_zone,
+		in_cc->class_,
+		in_cc->deity,
+		in_cc->race), errbuf, &result))
 	{
 		LogFile->write(EQEMuLog::Status, "SoF Start zone query failed: %s : %s\n", query, errbuf);
 		safe_delete_array(query);
@@ -532,7 +483,7 @@ void WorldDatabase::SetMailKey(int CharID, int IPAddress, int MailKey) {
 	else
 		sprintf(MailKeyString, "%08X", MailKey);
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET mailkey = '%s' WHERE id='%i'",
+	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE `character_data` SET mailkey = '%s' WHERE id='%i'",
 							MailKeyString, CharID), errbuf))
 
 		LogFile->write(EQEMuLog::Error, "WorldDatabase::SetMailKey(%i, %s) : %s", CharID, MailKeyString, errbuf);
@@ -548,7 +499,7 @@ bool WorldDatabase::GetCharacterLevel(const char *name, int &level)
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	if(RunQuery(query, MakeAnyLenString(&query, "SELECT level FROM character_ WHERE name='%s'", name), errbuf, &result))
+	if(RunQuery(query, MakeAnyLenString(&query, "SELECT `level` FROM `character_data` WHERE `name` = '%s'", name), errbuf, &result))
 	{
 		if(row = mysql_fetch_row(result))
 		{

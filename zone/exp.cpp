@@ -51,14 +51,7 @@ static uint32 MaxBankedRaidLeadershipPoints(int Level)
 
 void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 
-	/* Set a timestamp in an entity variable for plugin check_handin.pl in return_items
-		This will stopgap players from items being returned if global_npc.pl has a catch all return_items
-	*/
-	struct timeval read_time;
-	char buffer[50];
-	gettimeofday(&read_time, 0);
-	sprintf(buffer, "%li.%li \n", read_time.tv_sec, read_time.tv_usec);
-	this->SetEntityVariable("Stop_Return", buffer);
+	this->EVENT_ITEM_ScriptStopReturn();
 
 	uint32 add_exp = in_add_exp;
 

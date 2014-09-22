@@ -946,7 +946,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 	uint16 count;
 	uint16 curspell;
 
-	uint16 Char_ID = initiator->CharacterID();
+	uint32 Char_ID = initiator->CharacterID();
 	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
 	bool SpellGlobalCheckResult = 0;
 
@@ -960,7 +960,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 			spells[curspell].skill != 52 &&
 			( !RuleB(Spells, UseCHAScribeHack) || spells[curspell].effectid[EFFECT_COUNT - 1] != 10 )
 		)
-		{
+		{ 
 			if(IsDiscipline(curspell)){
 				//we may want to come up with a function like Client::GetNextAvailableSpellBookSlot() to help speed this up a little
 				for(uint32 r = 0; r < MAX_PP_DISCIPLINES; r++) {
@@ -974,18 +974,20 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 							SpellGlobalCheckResult = initiator->SpellGlobalCheck(curspell, Char_ID);
 							if (SpellGlobalCheckResult) {
 								initiator->GetPP().disciplines.values[r] = curspell;
+								database.SaveCharacterDisc(Char_ID, r, curspell); 
 								initiator->SendDisciplineUpdate();
 								initiator->Message(0, "You have learned a new discipline!");
 								count++;	//success counter
 							}
-							break;	//continue the 1st loop
+							break;	//continue the 1st loop 
 						}
 						else {
-						initiator->GetPP().disciplines.values[r] = curspell;
-						initiator->SendDisciplineUpdate();
-						initiator->Message(0, "You have learned a new discipline!");
-						count++;	//success counter
-						break;	//continue the 1st loop
+							initiator->GetPP().disciplines.values[r] = curspell;
+							database.SaveCharacterDisc(Char_ID, r, curspell);
+							initiator->SendDisciplineUpdate();
+							initiator->Message(0, "You have learned a new discipline!");
+							count++;	//success counter
+							break;	//continue the 1st loop
 						}
 					}	//if we get to this point, there's already a discipline in this slot, so we skip it
 				}
@@ -2949,6 +2951,15 @@ const char* QuestManager::GetZoneLongName(const char *zone) {
 	return ln.c_str();
 }
 
+void QuestManager::CrossZoneSignalNPCByNPCTypeID(uint32 npctype_id, uint32 data){
+	ServerPacket* pack = new ServerPacket(ServerOP_CZSignalNPC, sizeof(CZNPCSignal_Struct));
+	CZNPCSignal_Struct* CZSN = (CZNPCSignal_Struct*)pack->pBuffer;
+	CZSN->npctype_id = npctype_id;
+	CZSN->data = data;
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
 void QuestManager::CrossZoneSignalPlayerByCharID(int charid, uint32 data){
 	ServerPacket* pack = new ServerPacket(ServerOP_CZSignalClient, sizeof(CZClientSignal_Struct));
 	CZClientSignal_Struct* CZSC = (CZClientSignal_Struct*) pack->pBuffer;
@@ -2966,7 +2977,7 @@ void QuestManager::CrossZoneSignalPlayerByName(const char *CharName, uint32 data
 	CZSC->data = data;
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
-}
+} 
 
 void QuestManager::CrossZoneMessagePlayerByName(uint32 Type, const char *CharName, const char *Message){
 	uint32 message_len = strlen(CharName) + 1;
@@ -2976,6 +2987,18 @@ void QuestManager::CrossZoneMessagePlayerByName(uint32 Type, const char *CharNam
 	CZSC->Type = Type;
 	strn0cpy(CZSC->CharName, CharName, 64);
 	strn0cpy(CZSC->Message, Message, 512);
+	worldserver.SendPacket(pack); 
+	safe_delete(pack);
+}
+
+void QuestManager::CrossZoneSetEntityVariableByNPCTypeID(uint32 npctype_id, const char *id, const char *m_var){
+	uint32 message_len = strlen(id) + 1;
+	uint32 message_len2 = strlen(m_var) + 1;
+	ServerPacket* pack = new ServerPacket(ServerOP_CZSetEntityVariableByNPCTypeID, sizeof(CZSetEntVarByNPCTypeID_Struct) + message_len + message_len2);
+	CZSetEntVarByNPCTypeID_Struct* CZSNBYNID = (CZSetEntVarByNPCTypeID_Struct*)pack->pBuffer;
+	CZSNBYNID->npctype_id = npctype_id;
+	strn0cpy(CZSNBYNID->id, id, 256); 
+	strn0cpy(CZSNBYNID->m_var, m_var, 256);
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }

@@ -4841,6 +4841,8 @@ void Client::MemSpell(uint16 spell_id, int slot, bool update_client)
 	m_pp.mem_spells[slot] = spell_id;
 	mlog(CLIENT__SPELLS, "Spell %d memorized into slot %d", spell_id, slot);
 
+	database.SaveCharacterMemorizedSpell(this->CharacterID(), m_pp.mem_spells[slot], slot);
+
 	if(update_client)
 	{
 		MemorizeSpell(slot, spell_id, memSpellMemorize);
@@ -4855,6 +4857,8 @@ void Client::UnmemSpell(int slot, bool update_client)
 	mlog(CLIENT__SPELLS, "Spell %d forgotten from slot %d", m_pp.mem_spells[slot], slot);
 	m_pp.mem_spells[slot] = 0xFFFFFFFF;
 
+	database.DeleteCharacterMemorizedSpell(this->CharacterID(), m_pp.mem_spells[slot], slot);
+	
 	if(update_client)
 	{
 		MemorizeSpell(slot, m_pp.mem_spells[slot], memSpellForget);
@@ -4882,6 +4886,7 @@ void Client::ScribeSpell(uint16 spell_id, int slot, bool update_client)
 	}
 
 	m_pp.spell_book[slot] = spell_id;
+	database.SaveCharacterSpell(this->CharacterID(), spell_id, slot);
 	mlog(CLIENT__SPELLS, "Spell %d scribed into spell book slot %d", spell_id, slot);
 
 	if(update_client)
@@ -4897,7 +4902,8 @@ void Client::UnscribeSpell(int slot, bool update_client)
 
 	mlog(CLIENT__SPELLS, "Spell %d erased from spell book slot %d", m_pp.spell_book[slot], slot);
 	m_pp.spell_book[slot] = 0xFFFFFFFF;
-
+	
+	database.DeleteCharacterSpell(this->CharacterID(), m_pp.spell_book[slot], slot); 
 	if(update_client)
 	{
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_DeleteSpell, sizeof(DeleteSpell_Struct));
@@ -4925,8 +4931,9 @@ void Client::UntrainDisc(int slot, bool update_client)
 	if(slot >= MAX_PP_DISCIPLINES || slot < 0)
 		return;
 
-	mlog(CLIENT__SPELLS, "Discipline %d untrained from slot %d", m_pp.disciplines.values[slot], slot);
+	mlog(CLIENT__SPELLS, "Discipline %d untrained from slot %d", m_pp.disciplines.values[slot], slot); 
 	m_pp.disciplines.values[slot] = 0;
+	database.DeleteCharacterDisc(this->CharacterID(), slot);
 
 	if(update_client)
 	{

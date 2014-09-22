@@ -64,8 +64,6 @@ extern ClientList client_list;
 extern uint32 numclients;
 extern volatile bool RunLoops;
 
-
-
 Client::Client(EQStreamInterface* ieqs)
 :	autobootup_timeout(RuleI(World, ZoneAutobootTimeoutMS)),
 	CLE_keepalive_timer(RuleI(World, ClientKeepaliveTimeoutMS)),
@@ -130,7 +128,7 @@ void Client::SendLogServer()
 
 void Client::SendEnterWorld(std::string name)
 {
-char char_name[32]= { 0 };
+	char char_name[64] = { 0 };
 	if (pZoning && database.GetLiveChar(GetAccountID(), char_name)) {
 		if(database.GetAccountIDByChar(char_name) != GetAccountID()) {
 			eqs->Close();
@@ -174,7 +172,7 @@ void Client::SendCharInfo() {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendCharInfo, sizeof(CharacterSelect_Struct));
 	CharacterSelect_Struct* cs = (CharacterSelect_Struct*)outapp->pBuffer;
 
-	database.GetCharSelectInfo(GetAccountID(), cs);
+	database.GetCharSelectInfo(GetAccountID(), cs, ClientVersionBit);
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -471,8 +469,8 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 	return true;
 }
 
-bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app) {
-
+bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app)
+{
 	if (GetAccountID() == 0) {
 		clog(WORLD__CLIENT_ERR,"Name approval request with no logged in account");
 		return false;
@@ -482,7 +480,7 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app) {
 	uchar race = app->pBuffer[64];
 	uchar clas = app->pBuffer[68];
 
-	clog(WORLD__CLIENT,"Name approval request. Name=%s, race=%s, class=%s",char_name,GetRaceName(race),GetEQClassName(clas));
+	clog(WORLD__CLIENT, "Name approval request. Name=%s, race=%s, class=%s", char_name, GetRaceName(race), GetEQClassName(clas));
 
 	EQApplicationPacket *outapp;
 	outapp = new EQApplicationPacket;
@@ -490,27 +488,27 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app) {
 	outapp->pBuffer = new uchar[1];
 	outapp->size = 1;
 
-	bool valid;
-	if(!database.CheckNameFilter(char_name)) {
-		valid = false;
+	bool valid = false;
+	if(!database.CheckNameFilter(char_name)) { 
+		valid = false; 
 	}
-	else if(char_name[0] < 'A' && char_name[0] > 'Z') {
-		//name must begin with an upper-case letter.
-		valid = false;
+	/* Name must begin with an upper-case letter. */
+	else if (islower(char_name[0])) { 
+		valid = false; 
+	} 
+	else if (database.ReserveName(GetAccountID(), char_name)) { 
+		valid = true; 	
 	}
-	else if (database.ReserveName(GetAccountID(), char_name)) {
-		valid = true;
+	else { 
+		valid = false; 
 	}
-	else {
-		valid = false;
-	}
+
 	outapp->pBuffer[0] = valid? 1 : 0;
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	if(!valid) {
+	if (!valid)
 		memset(char_name, 0, sizeof(char_name));
-	}
 
 	return true;
 }
@@ -642,13 +640,11 @@ bool Client::HandleCharacterCreateRequestPacket(const EQApplicationPacket *app) 
 }
 
 bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
-	if (GetAccountID() == 0)
-	{
+	if (GetAccountID() == 0) {
 		clog(WORLD__CLIENT_ERR,"Account ID not set; unable to create character.");
 		return false;
 	}
-	else if (app->size != sizeof(CharCreate_Struct))
-	{
+	else if (app->size != sizeof(CharCreate_Struct)) {
 		clog(WORLD__CLIENT_ERR,"Wrong size on OP_CharacterCreate. Got: %d, Expected: %d",app->size,sizeof(CharCreate_Struct));
 		DumpPacket(app);
 		// the previous behavior was essentially returning true here
@@ -657,8 +653,7 @@ bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
 	}
 
 	CharCreate_Struct *cc = (CharCreate_Struct*)app->pBuffer;
-	if(OPCharCreate(char_name, cc) == false)
-	{
+	if(OPCharCreate(char_name, cc) == false) {
 		database.DeleteCharacter(char_name);
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_ApproveName, 1);
 		outapp->pBuffer[0] = 0;
@@ -675,8 +670,7 @@ bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
 	return true;
 }
 
-bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
-
+bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) { 
 	if (GetAccountID() == 0) {
 		clog(WORLD__CLIENT_ERR,"Enter world with no logged in account");
 		eqs->Close();
@@ -713,11 +707,10 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		return true;
 	}
 
-	if(!pZoning && ew->return_home && !ew->tutorial)
-	{
+	if(!pZoning && ew->return_home && !ew->tutorial) {
 		CharacterSelect_Struct* cs = new CharacterSelect_Struct;
 		memset(cs, 0, sizeof(CharacterSelect_Struct));
-		database.GetCharSelectInfo(GetAccountID(), cs);
+		database.GetCharSelectInfo(GetAccountID(), cs, ClientVersionBit);
 		bool home_enabled = false;
 
 		for(int x = 0; x < 10; ++x)
@@ -733,12 +726,10 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		}
 		safe_delete(cs);
 
-		if(home_enabled)
-		{
+		if(home_enabled) {
 			zoneID = database.MoveCharacterToBind(charid,4);
 		}
-		else
-		{
+		else {
 			clog(WORLD__CLIENT_ERR,"'%s' is trying to go home before they're able...",char_name);
 			database.SetHackerFlag(GetAccountName(), char_name, "MQGoHome: player tried to go home before they were able.");
 			eqs->Close();
@@ -749,7 +740,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	if(!pZoning && (RuleB(World, EnableTutorialButton) && (ew->tutorial || StartInTutorial))) {
 		CharacterSelect_Struct* cs = new CharacterSelect_Struct;
 		memset(cs, 0, sizeof(CharacterSelect_Struct));
-		database.GetCharSelectInfo(GetAccountID(), cs);
+		database.GetCharSelectInfo(GetAccountID(), cs, ClientVersionBit);
 		bool tutorial_enabled = false;
 
 		for(int x = 0; x < 10; ++x)
@@ -807,16 +798,16 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		database.SetLoginFlags(charid, false, false, 1);
 	}
 	else{
-		uint32 groupid=database.GetGroupID(char_name);
-		if(groupid>0){
-			char* leader=0;
-			char leaderbuf[64]={0};
-			if((leader=database.GetGroupLeaderForLogin(char_name,leaderbuf)) && strlen(leader)>1){
+		uint32 groupid = database.GetGroupID(char_name);
+		if(groupid > 0){
+			char* leader = 0;
+			char leaderbuf[64] = {0};
+			if((leader = database.GetGroupLeaderForLogin(char_name, leaderbuf)) && strlen(leader)>1){
 				EQApplicationPacket* outapp3 = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
 				GroupJoin_Struct* gj=(GroupJoin_Struct*)outapp3->pBuffer;
 				gj->action=8;
-				strcpy(gj->yourname,char_name);
-				strcpy(gj->membername,leader);
+				strcpy(gj->yourname, char_name);
+				strcpy(gj->membername, leader);
 				QueuePacket(outapp3);
 				safe_delete(outapp3);
 			}
@@ -895,8 +886,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 bool Client::HandleDeleteCharacterPacket(const EQApplicationPacket *app) {
 
 	uint32 char_acct_id = database.GetAccountIDByChar((char*)app->pBuffer);
-	if(char_acct_id == GetAccountID())
-	{
+	if(char_acct_id == GetAccountID()) {
 		clog(WORLD__CLIENT,"Delete character: %s",app->pBuffer);
 		database.DeleteCharacter((char *)app->pBuffer);
 		SendCharInfo();
@@ -1347,8 +1337,7 @@ void Client::SendApproveWorld()
 	safe_delete(outapp);
 }
 
-bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
-{
+bool Client::OPCharCreate(char *name, CharCreate_Struct *cc) {
 	PlayerProfile_Struct pp;
 	ExtendedProfile_Struct ext;
 	Inventory inv;
@@ -1356,12 +1345,11 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	char startzone[50]={0};
 	uint32 i;
 	struct in_addr	in;
-
-
-	int stats_sum = cc->STR + cc->STA + cc->AGI + cc->DEX +
-		cc->WIS + cc->INT + cc->CHA;
+	
+	int stats_sum = cc->STR + cc->STA + cc->AGI + cc->DEX + cc->WIS + cc->INT + cc->CHA;
 
 	in.s_addr = GetIP();
+
 	clog(WORLD__CLIENT,"Character creation request from %s LS#%d (%s:%d) : ", GetCLE()->LSName(), GetCLE()->LSID(), inet_ntoa(in), GetPort());
 	clog(WORLD__CLIENT,"Name: %s", name);
 	clog(WORLD__CLIENT,"Race: %d  Class: %d  Gender: %d  Deity: %d  Start zone: %d",
@@ -1374,38 +1362,23 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	clog(WORLD__CLIENT,"Hairstyle: %d  Haircolor: %d", cc->hairstyle, cc->haircolor);
 	clog(WORLD__CLIENT,"Beard: %d  Beardcolor: %d", cc->beard, cc->beardcolor);
 
-	// validate the char creation struct
+	/* Validate the char creation struct */
 	if(ClientVersionBit & BIT_SoFAndLater) {
-		if(!CheckCharCreateInfoSoF(cc))
-		{
+		if(!CheckCharCreateInfoSoF(cc)) {
 			clog(WORLD__CLIENT_ERR,"CheckCharCreateInfo did not validate the request (bad race/class/stats)");
 			return false;
 		}
 	} else {
-		if(!CheckCharCreateInfoTitanium(cc))
-		{
+		if(!CheckCharCreateInfoTitanium(cc)) {
 			clog(WORLD__CLIENT_ERR,"CheckCharCreateInfo did not validate the request (bad race/class/stats)");
 			return false;
 		}
 	}
 
-	// Convert incoming cc_s to the new PlayerProfile_Struct
+	/* Convert incoming cc_s to the new PlayerProfile_Struct */
 	memset(&pp, 0, sizeof(PlayerProfile_Struct));	// start building the profile
 
-	InitExtendedProfile(&ext);
-
 	strn0cpy(pp.name, name, 63);
-	// clean the capitalization of the name
-#if 0	// on second thought, don't - this will just make the creation fail
-// because the name won't match what was already reserved earlier
-	for (i = 0; pp.name[i] && i < 63; i++)
-	{
-		if(!isalpha(pp.name[i]))
-			return false;
-		pp.name[i] = tolower(pp.name[i]);
-	}
-	pp.name[0] = toupper(pp.name[0]);
-#endif
 
 	pp.race				= cc->race;
 	pp.class_			= cc->class_;
@@ -1432,20 +1405,14 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	pp.lastlogin	= bday;
 	pp.level			= 1;
 	pp.points			= 5;
-	pp.cur_hp			= 1000; // 1k hp during dev only
-	//what was the point of this? zone dosent handle this:
-	//pp.expAA			= 0xFFFFFFFF;
-
+	pp.cur_hp			= 1000; // 1k hp during dev only 
 	pp.hunger_level = 6000;
 	pp.thirst_level = 6000;
 
-
-	// FIXME: FV roleplay, database goodness...
-
-	// Racial Languages
-	SetRacialLanguages( &pp ); // bUsh
-	SetRaceStartingSkills( &pp ); // bUsh
-	SetClassStartingSkills( &pp ); // bUsh
+	/* Racial Languages */
+	SetRacialLanguages( &pp );
+	SetRaceStartingSkills( &pp );
+	SetClassStartingSkills( &pp ); 
 	SetClassLanguages(&pp);
 	pp.skills[SkillSenseHeading] = 200;
 	// Some one fucking fix this to use a field name. -Doodman
@@ -1453,24 +1420,25 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 //	strcpy(pp.servername, WorldConfig::get()->ShortName.c_str());
 
 
-	for(i = 0; i < MAX_PP_SPELLBOOK; i++)
+	for (i = 0; i < MAX_PP_REF_SPELLBOOK; i++)
 		pp.spell_book[i] = 0xFFFFFFFF;
 
-	for(i = 0; i < MAX_PP_MEMSPELL; i++)
+	for(i = 0; i < MAX_PP_REF_MEMSPELL; i++)
 		pp.mem_spells[i] = 0xFFFFFFFF;
 
 	for(i = 0; i < BUFF_COUNT; i++)
 		pp.buffs[i].spellid = 0xFFFF;
 
+	/*
+		Was memset(pp.unknown3704, 0xffffffff, 8);
+		but I dont think thats what you really wanted to do...
+		memset is byte based
+	*/
 
-	//was memset(pp.unknown3704, 0xffffffff, 8);
-	//but I dont think thats what you really wanted to do...
-	//memset is byte based
-
-	//If server is PVP by default, make all character set to it.
+	/* If server is PVP by default, make all character set to it. */
 	pp.pvp = database.GetServerType() == 1 ? 1 : 0;
 
-	//If it is an SoF Client and the SoF Start Zone rule is set, send new chars there
+	/* If it is an SoF Client and the SoF Start Zone rule is set, send new chars there */
 	if((ClientVersionBit & BIT_SoFAndLater) && (RuleI(World, SoFStartZoneID) > 0)) {
 		clog(WORLD__CLIENT,"Found 'SoFStartZoneID' rule setting: %i", (RuleI(World, SoFStartZoneID)));
 		pp.zone_id = (RuleI(World, SoFStartZoneID));
@@ -1479,11 +1447,9 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 		else
 			clog(WORLD__CLIENT_ERR,"Error getting zone id for Zone ID %i", (RuleI(World, SoFStartZoneID)));
 	}
-	else
-	{
-		// if there's a startzone variable put them in there
-		if(database.GetVariable("startzone", startzone, 50))
-		{
+	else {
+		/* if there's a startzone variable put them in there */
+		if(database.GetVariable("startzone", startzone, 50)) {
 			clog(WORLD__CLIENT,"Found 'startzone' variable setting: %s", startzone);
 			pp.zone_id = database.GetZoneID(startzone);
 			if(pp.zone_id)
@@ -1491,8 +1457,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 			else
 				clog(WORLD__CLIENT_ERR,"Error getting zone id for '%s'", startzone);
 		}
-		else	// otherwise use normal starting zone logic
-		{
+		else{	/* otherwise use normal starting zone logic */
 			bool ValidStartZone = false;
 
 			if(ClientVersionBit & BIT_TitaniumAndEarlier)
@@ -1505,14 +1470,12 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 		}
 	}
 
-	if(!pp.zone_id)
-	{
+	if(!pp.zone_id) {
 		pp.zone_id = 1;		// qeynos
 		pp.x = pp.y = pp.z = -1;
 	}
 
-	if(!pp.binds[0].zoneId)
-	{
+	if(!pp.binds[0].zoneId) {
 		pp.binds[0].zoneId = pp.zone_id;
 		pp.binds[0].x = pp.x;
 		pp.binds[0].y = pp.y;
@@ -1520,7 +1483,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 		pp.binds[0].heading = pp.heading;
 	}
 
-	// set starting city location to the initial bind point
+	/* Set Starting city */
 	pp.binds[4] = pp.binds[0];
 
 
@@ -1529,28 +1492,23 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	clog(WORLD__CLIENT,"Bind location: %s  %0.2f, %0.2f, %0.2f",
 		database.GetZoneName(pp.binds[0].zoneId), pp.binds[0].x, pp.binds[0].y, pp.binds[0].z);
 
-
-	// Starting Items inventory
+	/* Starting Items inventory */
 	database.SetStartingItems(&pp, &inv, pp.race, pp.class_, pp.deity, pp.zone_id, pp.name, GetAdmin());
-
 
 	// now we give the pp and the inv we made to StoreCharacter
 	// to see if we can store it
-	if (!database.StoreCharacter(GetAccountID(), &pp, &inv, &ext))
-	{
+	if (!database.StoreCharacter(GetAccountID(), &pp, &inv)) {
 		clog(WORLD__CLIENT_ERR,"Character creation failed: %s", pp.name);
 		return false;
 	}
-	else
-	{
+	else {
 		clog(WORLD__CLIENT,"Character creation successful: %s", pp.name);
 		return true;
 	}
 }
 
 // returns true if the request is ok, false if there's an error
-bool CheckCharCreateInfoSoF(CharCreate_Struct *cc)
-{
+bool CheckCharCreateInfoSoF(CharCreate_Struct *cc) {
 	if(!cc) return false;
 
 	_log(WORLD__CLIENT, "Validating char creation info...");

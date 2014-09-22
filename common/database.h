@@ -105,10 +105,16 @@ public:
 	Database(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
 	bool Connect(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
 	~Database();
+	bool	ThrowDBError(std::string ErrorMessage, std::string query_title, std::string query);
+
 
 	/*
 	* General Character Related Stuff
 	*/
+
+	/* Character Creation */
+	bool	SaveCharacterCreate(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp);
+
 	bool	MoveCharacterToZone(const char* charname, const char* zonename);
 	bool	MoveCharacterToZone(const char* charname, const char* zonename,uint32 zoneid);
 	bool	MoveCharacterToZone(uint32 iCharID, const char* iZonename);
@@ -118,9 +124,8 @@ public:
 	bool	AddToNameFilter(const char* name);
 	bool	ReserveName(uint32 account_id, char* name);
 	bool	CreateCharacter(uint32 account_id, char* name, uint16 gender, uint16 race, uint16 class_, uint8 str, uint8 sta, uint8 cha, uint8 dex, uint8 int_, uint8 agi, uint8 wis, uint8 face);
-	bool	StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext);
+	bool	StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inventory* inv);
 	bool	DeleteCharacter(char* name);
-	uint8	CopyCharacter(const char* oldname, const char* newname, uint32 acctid);
 
 	/*
 	* General Information Getting Queries
@@ -217,6 +222,8 @@ public:
 	uint32	GetRaidID(const char* name);
 	const char *GetRaidLeaderName(uint32 rid);
 
+	bool CheckDatabaseConversions();
+
 	/*
 	* Database Variables
 	*/
@@ -249,10 +256,6 @@ public:
 	void	SetFirstLogon(uint32 CharID, uint8 firstlogon);
 	void	SetLoginFlags(uint32 CharID, bool LFP, bool LFG, uint8 firstlogon);
 	void	AddReport(std::string who, std::string against, std::string lines);
-
-
-protected:
-	void	HandleMysqlError(uint32 errnum);
 
 private:
 	void DBInitVars();

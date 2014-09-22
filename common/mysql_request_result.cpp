@@ -10,7 +10,7 @@ MySQLRequestResult::MySQLRequestResult()
 MySQLRequestResult::MySQLRequestResult(MYSQL_RES* result, uint32 rowsAffected, uint32 rowCount, uint32 columnCount, uint32 lastInsertedID, uint32 errorNumber, char *errorBuffer)
 	: m_CurrentRow(result), m_OneBeyondRow()
 {
-    m_Result = result;
+	m_Result = result;
 	m_RowsAffected = rowsAffected;
 	m_RowCount = rowCount;
 	m_ColumnCount = columnCount;
@@ -22,16 +22,17 @@ MySQLRequestResult::MySQLRequestResult(MYSQL_RES* result, uint32 rowsAffected, u
 	m_ColumnLengths = nullptr;
 	m_Fields = nullptr;
 
-    if (errorBuffer != nullptr)
+	m_Success = true;
+	if (errorBuffer != nullptr)
 		m_Success = false;
 
-    m_Success = true;
-    m_ErrorNumber = errorNumber;
-    m_ErrorBuffer = errorBuffer;
+	m_ErrorNumber = errorNumber;
+	m_ErrorBuffer = errorBuffer;
 }
 
 void MySQLRequestResult::FreeInternals()
 {
+
 	safe_delete_array(m_ErrorBuffer);
 
 	if (m_Result != nullptr)
@@ -100,6 +101,7 @@ MySQLRequestResult::MySQLRequestResult(MySQLRequestResult&& moveItem)
 	m_RowsAffected = moveItem.m_RowsAffected;
 	m_LastInsertedID = moveItem.m_LastInsertedID;
 	m_ColumnLengths = moveItem.m_ColumnLengths;
+	m_ColumnCount = moveItem.m_ColumnCount;
 	m_Fields = moveItem.m_Fields;
 
 	// Keeps deconstructor from double freeing
@@ -127,6 +129,7 @@ MySQLRequestResult& MySQLRequestResult::operator=(MySQLRequestResult&& other)
 	m_CurrentRow = other.m_CurrentRow;
 	m_OneBeyondRow = other.m_OneBeyondRow;
 	m_ColumnLengths = other.m_ColumnLengths;
+	m_ColumnCount = other.m_ColumnCount;
 	m_Fields = other.m_Fields;
 
 	// Keeps deconstructor from double freeing
