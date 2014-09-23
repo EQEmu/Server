@@ -1638,35 +1638,57 @@ bool ZoneDatabase::SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 cur
 }
 
 bool ZoneDatabase::SaveCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id){
-	std::string query = StringFormat("REPLACE INTO `character_memmed_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, slot_id, spell_id); QueryDatabase(query); return true;
+	std::string query = StringFormat("REPLACE INTO `character_memmed_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, slot_id, spell_id); 
+	QueryDatabase(query); 
+	return true;
 }
 
 bool ZoneDatabase::SaveCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id){
-	std::string query = StringFormat("REPLACE INTO `character_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, slot_id, spell_id); QueryDatabase(query); return true;
+	std::string query = StringFormat("REPLACE INTO `character_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, slot_id, spell_id); 
+	QueryDatabase(query); 
+	return true;
 }
 
 bool ZoneDatabase::DeleteCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id){
-	std::string query = StringFormat("DELETE FROM `character_spells` WHERE `slot_id` = %u AND `id` = %u", slot_id, character_id); QueryDatabase(query); return true;
+	std::string query = StringFormat("DELETE FROM `character_spells` WHERE `slot_id` = %u AND `id` = %u", slot_id, character_id); 
+	QueryDatabase(query); 
+	return true;
 }
 
 bool ZoneDatabase::DeleteCharacterDisc(uint32 character_id, uint32 slot_id){
-	std::string query = StringFormat("DELETE FROM `character_disciplines` WHERE `slot_id` = %u AND `id` = %u", slot_id, character_id); QueryDatabase(query); return true;
+	std::string query = StringFormat("DELETE FROM `character_disciplines` WHERE `slot_id` = %u AND `id` = %u", slot_id, character_id); 
+	QueryDatabase(query); 
+	return true;
 }
 
 bool ZoneDatabase::DeleteCharacterBandolier(uint32 character_id, uint32 band_id){
-	std::string query = StringFormat("DELETE FROM `character_bandolier` WHERE `bandolier_id` = %u AND `id` = %u", band_id, character_id); QueryDatabase(query); return true; 
+	std::string query = StringFormat("DELETE FROM `character_bandolier` WHERE `bandolier_id` = %u AND `id` = %u", band_id, character_id); 
+	QueryDatabase(query); 
+	return true; 
 }
 
 bool ZoneDatabase::DeleteCharacterLeadershipAAs(uint32 character_id){
-	std::string query = StringFormat("DELETE FROM `character_leadership_abilities` WHERE `id` = %u", character_id); QueryDatabase(query); return true; 
+	std::string query = StringFormat("DELETE FROM `character_leadership_abilities` WHERE `id` = %u", character_id); 
+	QueryDatabase(query); 
+	return true; 
 }
 
 bool ZoneDatabase::DeleteCharacterAAs(uint32 character_id){
-	std::string query = StringFormat("DELETE FROM `character_alternate_abilities` WHERE `id` = %u", character_id); QueryDatabase(query); return true;
+	std::string query = StringFormat("DELETE FROM `character_alternate_abilities` WHERE `id` = %u", character_id); 
+	QueryDatabase(query); 
+	return true;
+}
+
+bool ZoneDatabase::DeleteCharacterDye(uint32 character_id){
+	std::string query = StringFormat("DELETE FROM `character_material` WHERE `id` = %u", character_id);
+	QueryDatabase(query);  
+	return true;
 }
 
 bool ZoneDatabase::DeleteCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id){ 
-	std::string query = StringFormat("DELETE FROM `character_memmed_spells` WHERE `slot_id` = %u AND `id` = %u", slot_id, character_id); QueryDatabase(query); return true;
+	std::string query = StringFormat("DELETE FROM `character_memmed_spells` WHERE `slot_id` = %u AND `id` = %u", slot_id, character_id); 
+	QueryDatabase(query); 
+	return true;
 }
 
 bool ZoneDatabase::NoRentExpired(const char* name){
