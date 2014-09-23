@@ -1081,7 +1081,7 @@ ENCODE(OP_PlayerProfile)
 	// zeroes for the rest of the spellbook slots
 	for(uint32 r = 0; r < structs::MAX_PP_SPELLBOOK - MAX_PP_SPELLBOOK; r++)
 	{
-		outapp->WriteUInt32(0);
+		outapp->WriteUInt32(0xFFFFFFFFU);
 	}
 
 	outapp->WriteUInt32(structs::MAX_PP_MEMSPELL);		// Memorised spell slots
@@ -1093,7 +1093,7 @@ ENCODE(OP_PlayerProfile)
 	// zeroes for the rest of the slots
 	for(uint32 r = 0; r < structs::MAX_PP_MEMSPELL - MAX_PP_MEMSPELL; r++)
 	{
-		outapp->WriteUInt32(0);
+		outapp->WriteUInt32(0xFFFFFFFFU);
 	}
 
 	outapp->WriteUInt32(13);			// Unknown count

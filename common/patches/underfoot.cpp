@@ -537,7 +537,8 @@ ENCODE(OP_PlayerProfile) {
 	OUT(WIS);
 	OUT(face);
 //	OUT(unknown02264[47]);
-	OUT_array(spell_book, structs::MAX_PP_SPELLBOOK);
+	memset(eq->spell_book, 0xFF, sizeof(uint32)* structs::MAX_PP_SPELLBOOK);
+	OUT_array(spell_book, 480U);
 //	OUT(unknown4184[128]);
 	OUT_array(mem_spells, structs::MAX_PP_MEMSPELL);
 //	OUT(unknown04396[32]);
