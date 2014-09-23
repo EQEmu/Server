@@ -720,7 +720,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app) {
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		i = atoi(row[0]);
 		m_pp.aa_array[i].AA = atoi(row[1]);
-		m_pp.aa_array[i].value = atoi(row[1]);
+		m_pp.aa_array[i].value = atoi(row[2]);
 		aa[i]->AA = atoi(row[1]);
 		aa[i]->value = atoi(row[2]);
 	}

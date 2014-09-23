@@ -50,6 +50,16 @@
 #include "extprofile.h"
 extern Client client;
 
+#ifdef _WINDOWS
+#if _MSC_VER > 1700 // greater than 2012 (2013+)
+#	define _ISNAN_(a) std::isnan(a)
+#else
+#	include <float.h>
+#	define _ISNAN_(a) _isnan(a)
+#endif
+#else
+#	define _ISNAN_(a) std::isnan(a)
+#endif
 
 /*
 Establish a connection to a mysql database with the supplied parameters
@@ -1743,20 +1753,21 @@ bool Database::CheckDatabaseConversions() {
 			*/
 			/* Run AA Convert */
 			int first_entry = 0; rquery = "";
-			for (i = 1; i < MAX_PP_AA_ARRAY; i++){
+			for (i = 0; i < MAX_PP_AA_ARRAY; i++){
 				if (pp->aa_array[i].AA > 0 && pp->aa_array[i].value > 0){
 					if (first_entry != 1){
 						rquery = StringFormat("REPLACE INTO `character_alternate_abilities` (id, slot, aa_id, aa_value)"
 							" VALUES (%u, %u, %u, %u)", character_id, i, pp->aa_array[i].AA, pp->aa_array[i].value);
 						first_entry = 1;
+					} else {
+						rquery = rquery + StringFormat(", (%u, %u, %u, %u)", character_id, i, pp->aa_array[i].AA, pp->aa_array[i].value);
 					}
-					rquery = rquery + StringFormat(", (%u, %u, %u, %u)", character_id, i, pp->aa_array[i].AA, pp->aa_array[i].value);
 				}
 			}
 			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "AA Convert", rquery); } 
 			
 			/* Run Bind Home Convert */
-			if(pp->binds[4].zoneId < 999 && !std::isnan(pp->binds[4].x) && !std::isnan(pp->binds[4].y) && !std::isnan(pp->binds[4].z) && !std::isnan(pp->binds[4].heading)) {
+			if(pp->binds[4].zoneId < 999 && !_ISNAN_(pp->binds[4].x) && !_ISNAN_(pp->binds[4].y) && !_ISNAN_(pp->binds[4].z) && !_ISNAN_(pp->binds[4].heading)) {
 				rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
 					" VALUES (%u, %u, %u, %f, %f, %f, %f, 1)",
 					character_id, pp->binds[4].zoneId, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading);
@@ -1764,7 +1775,7 @@ bool Database::CheckDatabaseConversions() {
 			}
 
 			/* Run Bind Convert */
-			if(pp->binds[0].zoneId < 999 && !std::isnan(pp->binds[0].x) && !std::isnan(pp->binds[0].y) && !std::isnan(pp->binds[0].z) && !std::isnan(pp->binds[0].heading)) {
+			if(pp->binds[0].zoneId < 999 && !_ISNAN_(pp->binds[0].x) && !_ISNAN_(pp->binds[0].y) && !_ISNAN_(pp->binds[0].z) && !_ISNAN_(pp->binds[0].heading)) {
 				rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
 					" VALUES (%u, %u, %u, %f, %f, %f, %f, 0)",
 					character_id, pp->binds[0].zoneId, 0, pp->binds[0].x, pp->binds[0].y, pp->binds[0].z, pp->binds[0].heading);

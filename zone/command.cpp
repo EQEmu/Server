@@ -7681,7 +7681,7 @@ void Client::Undye() {
 		SendWearChange(cur_slot);
 	}
 
-	Save(0);
+	database.DeleteCharacterDye(this->CharacterID());
 }
 
 void command_undye(Client *c, const Seperator *sep)
