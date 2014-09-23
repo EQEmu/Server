@@ -1753,14 +1753,15 @@ bool Database::CheckDatabaseConversions() {
 			*/
 			/* Run AA Convert */
 			int first_entry = 0; rquery = "";
-			for (i = 1; i < MAX_PP_AA_ARRAY; i++){
+			for (i = 0; i < MAX_PP_AA_ARRAY; i++){
 				if (pp->aa_array[i].AA > 0 && pp->aa_array[i].value > 0){
 					if (first_entry != 1){
 						rquery = StringFormat("REPLACE INTO `character_alternate_abilities` (id, slot, aa_id, aa_value)"
 							" VALUES (%u, %u, %u, %u)", character_id, i, pp->aa_array[i].AA, pp->aa_array[i].value);
 						first_entry = 1;
+					} else {
+						rquery = rquery + StringFormat(", (%u, %u, %u, %u)", character_id, i, pp->aa_array[i].AA, pp->aa_array[i].value);
 					}
-					rquery = rquery + StringFormat(", (%u, %u, %u, %u)", character_id, i, pp->aa_array[i].AA, pp->aa_array[i].value);
 				}
 			}
 			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "AA Convert", rquery); } 
