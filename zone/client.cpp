@@ -8021,7 +8021,7 @@ void Client::IncrementAA(int aa_id) {
 
 	SetAA(aa_id, GetAA(aa_id) + 1);
 
-	Save();
+	SaveAA();
 
 	SendAA(aa_id);
 	SendAATable();
