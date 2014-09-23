@@ -958,7 +958,12 @@ bool ZoneDatabase::LoadCharacterMemmedSpells(uint32 character_id, PlayerProfile_
 		"FROM							"
 		"`character_memmed_spells`		"
 		"WHERE `id` = %u ORDER BY `slot_id`", character_id);
-	auto results = database.QueryDatabase(query); int i = 0;
+	auto results = database.QueryDatabase(query); 
+	int i = 0;
+	/* Initialize Spells */
+	for (i = 0; i < MAX_PP_MEMSPELL; i++){
+		pp->mem_spells[i] = 0xFFFFFFFF;
+	}
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		i = atoi(row[0]); 
 		if (i < MAX_PP_MEMSPELL){ 
@@ -976,14 +981,15 @@ bool ZoneDatabase::LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Str
 		"FROM					"
 		"`character_spells`		"
 		"WHERE `id` = %u ORDER BY `slot_id`", character_id);
-	auto results = database.QueryDatabase(query); int i = 0;
+	auto results = database.QueryDatabase(query); 
+	int i = 0;
 	/* Initialize Spells */
 	for (i = 0; i < MAX_PP_SPELLBOOK; i++){
-		pp->spell_book[i] = 0;
+		pp->spell_book[i] = 0xFFFFFFFF; 
 	}
 	for (auto row = results.begin(); row != results.end(); ++row) { 
-		i = atoi(row[0]); 
-		if (i < MAX_PP_SPELLBOOK){ 
+		i = atoi(row[0]);
+		if (i < MAX_PP_SPELLBOOK){
 			pp->spell_book[i] = atoi(row[1]); 
 		} 
 	} 
