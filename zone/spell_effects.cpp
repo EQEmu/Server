@@ -188,6 +188,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 	if (!IsPowerDistModSpell(spell_id))
 		SetSpellPowerDistanceMod(0);
+		
+	bool SE_SpellTrigger_HasCast = false;	
 
 	// iterate through the effects in the spell
 	for (i = 0; i < EFFECT_COUNT; i++)
@@ -2736,6 +2738,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					
 					if(MakeRandomInt(0, 100) <= spells[spell_id].base[i])
 						caster->SpellFinished(spells[spell_id].base2[i], this, 10, 0, -1, spells[spell_id].ResistDiff);
+				}
+				break;
+			}
+			
+			case SE_SpellTrigger: {
+
+				if (!SE_SpellTrigger_HasCast) {
+					if (caster && caster->TrySpellTrigger(this, spell_id, i))
+						SE_SpellTrigger_HasCast = true;
 				}
 				break;
 			}
