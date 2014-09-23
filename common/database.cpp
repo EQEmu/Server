@@ -924,9 +924,9 @@ bool Database::CheckDatabaseConversions() {
 	int runconvert = 0;
 
 	/* Check For Legacy Storage Method */
-	std::string rquery = StringFormat("SELECT `profile` FROM `character_` LIMIT 1");
+	std::string rquery = StringFormat("SHOW TABLES LIKE 'character_'");
 	auto results = QueryDatabase(rquery);
-	for (auto row = results.begin(); row != results.end(); ++row) { 
+	if (results.RowCount() == 1){
 		runconvert = 1; 
 		printf("\n\n::: Legacy Character Data Binary Blob Storage Detected... \n");
 		printf("----------------------------------------------------------\n\n");
