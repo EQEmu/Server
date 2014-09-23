@@ -391,12 +391,12 @@ bool WorldDatabase::GetStartZoneSoF(PlayerProfile_Struct* in_pp, CharCreate_Stru
 	in_pp->x = in_pp->y = in_pp->z = in_pp->heading = in_pp->zone_id = 0;
 	in_pp->binds[0].x = in_pp->binds[0].y = in_pp->binds[0].z = in_pp->binds[0].zoneId = 0;
 
-	if(!RunQuery(query, MakeAnyLenString(&query, "SELECT `x`, `y`, ``z, `heading`, `bind_id` "
-		" FROM `start_zones` "
-		" WHERE `zone_id` = %i "
-		" AND `player_class` = %i "
-		" AND player_deity=%i" 
-		" AND player_race=%i",
+	if(!RunQuery(query, MakeAnyLenString(&query, "SELECT x, y, z, heading, bind_id "
+		" FROM start_zones "
+		" WHERE zone_id = %i "
+		" AND player_class = %i "
+		" AND player_deity = %i" 
+		" AND player_race = %i",
 		in_cc->start_zone,
 		in_cc->class_,
 		in_cc->deity,

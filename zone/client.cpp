@@ -529,8 +529,12 @@ bool Client::Save(uint8 iCommitNow) {
 	m_pp.heading = heading;
 
 	/* Mana and HP */
-	if (GetHP() <= 0) { m_pp.cur_hp = GetMaxHP(); }
-	else { m_pp.cur_hp = GetHP(); }
+	if (GetHP() <= 0) {
+		m_pp.cur_hp = GetMaxHP();
+	}
+	else { 
+		m_pp.cur_hp = GetHP();
+	}
 
 	m_pp.mana = cur_mana;
 	m_pp.endurance = cur_end;
@@ -551,10 +555,17 @@ bool Client::Save(uint8 iCommitNow) {
 	m_pp.RestTimer = rest_timer.GetRemainingTime() / 1000;
 
 	/* Save Mercs */
-	if (GetMercInfo().MercTimerRemaining > RuleI(Mercs, UpkeepIntervalMS)){ GetMercInfo().MercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS); }
-	if (GetMercTimer()->Enabled()) { GetMercInfo().MercTimerRemaining = GetMercTimer()->GetRemainingTime(); } 
-	if (GetMerc() && !dead) { } 
-	else { memset(&m_mercinfo, 0, sizeof(struct MercInfo)); }
+	if (GetMercInfo().MercTimerRemaining > RuleI(Mercs, UpkeepIntervalMS)) {
+		GetMercInfo().MercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS);
+	}
+
+	if (GetMercTimer()->Enabled()) {
+		GetMercInfo().MercTimerRemaining = GetMercTimer()->GetRemainingTime();
+	}
+
+	if (!(GetMerc() && !dead)) { 
+		memset(&m_mercinfo, 0, sizeof(struct MercInfo));
+	}
 
 	m_pp.lastlogin = time(nullptr);
 
@@ -571,13 +582,31 @@ bool Client::Save(uint8 iCommitNow) {
 	}
 	database.SavePetInfo(this);
 
-	if(tribute_timer.Enabled()) { m_pp.tribute_time_remaining = tribute_timer.GetRemainingTime(); } 
-	else { m_pp.tribute_time_remaining = 0xFFFFFFFF; m_pp.tribute_active = 0; }
+	if(tribute_timer.Enabled()) { 
+		m_pp.tribute_time_remaining = tribute_timer.GetRemainingTime();
+	} 
+	else {
+		m_pp.tribute_time_remaining = 0xFFFFFFFF; m_pp.tribute_active = 0;
+	}
 
 	p_timers.Store(&database);
 
 	database.SaveCharacterTribute(this->CharacterID(), &m_pp);
 	SaveTaskState(); /* Save Character Task */
+
+	if(m_pp.hunger_level < 0) {
+		m_pp.hunger_level = 0;
+	}
+	else if(m_pp.hunger_level > 6000) {
+		m_pp.hunger_level = 6000;
+	}
+
+	if(m_pp.thirst_level < 0) {
+		m_pp.thirst_level = 0;
+	}
+	else if(m_pp.thirst_level > 6000) {
+		m_pp.thirst_level = 6000;
+	}
 	database.SaveCharacterData(this->CharacterID(), this->AccountID(), &m_pp, &m_epp); /* Save Character Data */
 
 	return true;
