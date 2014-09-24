@@ -1034,10 +1034,13 @@ bool ZoneDatabase::LoadCharacterDisciplines(uint32 character_id, PlayerProfile_S
 		"disc_id			  "
 		"FROM				  "
 		"`character_disciplines`"
-		"WHERE `id` = %u ORDER BY `disc_id`", character_id);
-	auto results = database.QueryDatabase(query); int i = 0;
+		"WHERE `id` = %u ORDER BY `slot_id`", character_id);
+	auto results = database.QueryDatabase(query); 
+	int i = 0;
+	/* Initialize Disciplines */
+	memset(pp->disciplines.values, 0, MAX_PP_DISCIPLINES);
 	for (auto row = results.begin(); row != results.end(); ++row) { 
-		if (i < MAX_PP_DISCIPLINES){
+		if (i < MAX_PP_DISCIPLINES){ 
 			pp->disciplines.values[i] = atoi(row[0]);
 		}
 		i++; 
@@ -1150,12 +1153,14 @@ bool ZoneDatabase::LoadCharacterTribute(uint32 character_id, PlayerProfile_Struc
 	std::string query = StringFormat("SELECT `tier`, `tribute` FROM `character_tribute` WHERE `id` = %u", character_id);
 	auto results = database.QueryDatabase(query); int i = 0;
 	for (i = 0; i < EmuConstants::TRIBUTE_SIZE; i++){
-		pp->tributes[i].tribute = 0;
+		pp->tributes[i].tribute = 0xFFFFFFFF;
 		pp->tributes[i].tier = 0;
 	}
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		pp->tributes[i].tier = atoi(row[0]); 
-		pp->tributes[i].tribute = atoi(row[1]);
+		if(pp->tributes[i].tribute != TRIBUTE_NONE){
+			pp->tributes[i].tier = atoi(row[0]);
+			pp->tributes[i].tribute = atoi(row[1]);
+		}
 	}
 	return true;
 }

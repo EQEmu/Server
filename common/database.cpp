@@ -1857,7 +1857,7 @@ bool Database::CheckDatabaseConversions() {
 			/* Run Tribute Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i < EmuConstants::TRIBUTE_SIZE; i++){
-				if (pp->tributes[i].tribute > 0){
+				if (pp->tributes[i].tribute > 0 && pp->tributes[i].tribute != 4294967295){
 					if (first_entry != 1){
 						rquery = StringFormat("REPLACE INTO `character_tribute` (id, tier, tribute) VALUES (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
 						first_entry = 1;
