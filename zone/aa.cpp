@@ -988,13 +988,20 @@ void Client::BuyAA(AA_Action* action)
 	}
 
 	uint32 real_cost;
+	uint8 req_level;
 	std::map<uint32, AALevelCost_Struct>::iterator RequiredLevel = AARequiredLevelAndCost.find(action->ability);
 
 	if(RequiredLevel != AARequiredLevelAndCost.end()) {
 		real_cost = RequiredLevel->second.Cost;
+		req_level = RequiredLevel->second.Level;
 	}
-	else
+	else {
 		real_cost = aa2->cost + (aa2->cost_inc * cur_level);
+		req_level = aa2->class_type + (aa2->level_inc * cur_level);
+	}
+
+	if (req_level > GetLevel())
+		return; //Cheater trying to Buy AA...
 
 	if (m_pp.aapoints >= real_cost && cur_level < aa2->max_level) {
 		SetAA(aa2->id, cur_level + 1);
