@@ -1151,15 +1151,18 @@ bool ZoneDatabase::LoadCharacterBandolier(uint32 character_id, PlayerProfile_Str
 
 bool ZoneDatabase::LoadCharacterTribute(uint32 character_id, PlayerProfile_Struct* pp){
 	std::string query = StringFormat("SELECT `tier`, `tribute` FROM `character_tribute` WHERE `id` = %u", character_id);
-	auto results = database.QueryDatabase(query); int i = 0;
+	auto results = database.QueryDatabase(query); 
+	int i = 0;
 	for (i = 0; i < EmuConstants::TRIBUTE_SIZE; i++){
 		pp->tributes[i].tribute = 0xFFFFFFFF;
 		pp->tributes[i].tier = 0;
 	}
+	i = 0;
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		if(pp->tributes[i].tribute != TRIBUTE_NONE){
+		if(atoi(row[1]) != TRIBUTE_NONE){
 			pp->tributes[i].tier = atoi(row[0]);
 			pp->tributes[i].tribute = atoi(row[1]);
+			i++;
 		}
 	}
 	return true;
@@ -1244,21 +1247,24 @@ bool ZoneDatabase::SaveCharacterSkill(uint32 character_id, uint32 skill_id, uint
 }
 
 bool ZoneDatabase::SaveCharacterDisc(uint32 character_id, uint32 slot_id, uint32 disc_id){
-	std::string query = StringFormat("REPLACE INTO `character_disciplines` (id, slot_id, disc_id) VALUES (%u, %u, %u)", character_id, slot_id, disc_id); auto results = QueryDatabase(query);
+	std::string query = StringFormat("REPLACE INTO `character_disciplines` (id, slot_id, disc_id) VALUES (%u, %u, %u)", character_id, slot_id, disc_id); 
+	auto results = QueryDatabase(query);
 	LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterDisc for character ID: %i, slot:%u disc_id:%u done", character_id, slot_id, disc_id);
 	ThrowDBError(results.ErrorMessage(), "ZoneDatabase::SaveCharacterDisc", query);
 	return true; 
 }
 
 bool ZoneDatabase::SaveCharacterTribute(uint32 character_id, PlayerProfile_Struct* pp){
-	std::string query = StringFormat("DELETE FROM `character_tribute` WHERE `id` = %u", character_id); QueryDatabase(query);
+	std::string query = StringFormat("DELETE FROM `character_tribute` WHERE `id` = %u", character_id); 
+	QueryDatabase(query);
 	/* Save Tributes only if we have values... */
 	for (int i = 0; i < EmuConstants::TRIBUTE_SIZE; i++){
-		if (pp->tributes[i].tribute > 0 && pp->tributes[i].tribute != 0xffffffffu){ 
-			std::string query = StringFormat("REPLACE INTO `character_tribute` (id, tier, tribute) VALUES (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute); QueryDatabase(query);
+		if (pp->tributes[i].tribute > 0 && pp->tributes[i].tribute != TRIBUTE_NONE){
+			std::string query = StringFormat("REPLACE INTO `character_tribute` (id, tier, tribute) VALUES (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute); 
+			QueryDatabase(query);
 			LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterTribute for character ID: %i, tier:%u tribute:%u done", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
 		}
-	}
+	} 
 	return true;
 }
 
