@@ -3061,6 +3061,32 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	mod_consider(tmob, con);
 
 	QueuePacket(outapp);
+	// only wanted to check raid target once
+	// and need con to still be around so, do it here!
+	if (tmob->IsRaidTarget()) {
+		uint32 color = 0;
+		switch (con->level) {
+		case CON_GREEN:
+			color = 2;
+			break;
+		case CON_LIGHTBLUE:
+			color = 10;
+			break;
+		case CON_BLUE:
+			color = 4;
+			break;
+		case CON_WHITE:
+			color = 10;
+			break;
+		case CON_YELLOW:
+			color = 15;
+			break;
+		case CON_RED:
+			color = 13;
+			break;
+		}
+		SendColoredText(color, std::string("This creature would take an army to defeat!"));
+	}
 	safe_delete(outapp);
 	return;
 }
