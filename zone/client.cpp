@@ -8313,3 +8313,18 @@ float Client::GetQuiverHaste()
 		quiver_haste = 1.0f / (1.0f + static_cast<float>(quiver_haste) / 100.0f);
 	return quiver_haste;
 }
+
+void Client::SendColoredText(uint32 color, std::string message)
+{
+	// arbitrary size limit
+	if (message.size() > 512) // live does send this with empty strings sometimes ...
+		return;
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ColoredText,
+									sizeof(ColoredText_Struct) + message.size());
+	ColoredText_Struct *cts = (ColoredText_Struct *)outapp->pBuffer;
+	cts->color = color;
+	strcpy(cts->msg, message.c_str());
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
