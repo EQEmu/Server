@@ -8,6 +8,7 @@ SET(tests_sources
 
 SET(tests_headers
 	atobool_test.h
+	data_verification_test.h
 	fixed_memory_test.h
 	fixed_memory_variable_test.h
 	hextoi_32_64_test.h
@@ -19,6 +20,8 @@ SET(tests_headers
 ADD_EXECUTABLE(tests ${tests_sources} ${tests_headers})
 
 TARGET_LINK_LIBRARIES(tests common cppunit)
+
+INSTALL(TARGETS tests RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 IF(MSVC)
 	SET_TARGET_PROPERTIES(tests PROPERTIES LINK_FLAGS_RELEASE "/OPT:REF /OPT:ICF")
