@@ -1038,7 +1038,7 @@ bool ZoneDatabase::LoadCharacterDisciplines(uint32 character_id, PlayerProfile_S
 	auto results = database.QueryDatabase(query); 
 	int i = 0;
 	/* Initialize Disciplines */
-	memset(pp->disciplines.values, 0, MAX_PP_DISCIPLINES);
+	memset(pp->disciplines.values, 0, (sizeof(pp->disciplines.values[0]) * MAX_PP_DISCIPLINES));
 	for (auto row = results.begin(); row != results.end(); ++row) { 
 		if (i < MAX_PP_DISCIPLINES){ 
 			pp->disciplines.values[i] = atoi(row[0]);
