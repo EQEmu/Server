@@ -2969,7 +2969,7 @@ struct GroupInvite_Struct {
 //	uint8	unknown128[65];
 };
 
-struct BuffFadeMsg_Struct {
+struct ColoredText_Struct {
 	uint32 color;
 	char msg[1];
 };

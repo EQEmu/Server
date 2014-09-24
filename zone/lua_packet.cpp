@@ -446,7 +446,7 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("YellForHelp", static_cast<int>(OP_YellForHelp)),
 			luabind::value("SafePoint", static_cast<int>(OP_SafePoint)),
 			luabind::value("Buff", static_cast<int>(OP_Buff)),
-			luabind::value("BuffFadeMsg", static_cast<int>(OP_BuffFadeMsg)),
+			luabind::value("ColoredText", static_cast<int>(OP_ColoredText)),
 			luabind::value("SpecialMesg", static_cast<int>(OP_SpecialMesg)),
 			luabind::value("Consent", static_cast<int>(OP_Consent)),
 			luabind::value("ConsentResponse", static_cast<int>(OP_ConsentResponse)),

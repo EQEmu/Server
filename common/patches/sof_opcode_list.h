@@ -187,7 +187,7 @@
 0x1ee9,
 0x7f5d, OP_CastSpell
 0x0659, OP_ManaChange
-0x3bc7, OP_BuffFadeMsg
+0x3bc7, OP_ColoredText
 0x3209,
 0x6a93, OP_MemorizeSpell
 0x1237,
