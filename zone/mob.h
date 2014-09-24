@@ -526,7 +526,7 @@ public:
 
 
 	//More stuff to sort:
-	virtual bool IsRaidTarget() { return false; };
+	virtual bool IsRaidTarget() const { return false; };
 	virtual bool IsAttackAllowed(Mob *target, bool isSpellAttack = false);
 	bool IsTargeted() const { return (targeted > 0); }
 	inline void IsTargeted(int in_tar) { targeted += in_tar; if(targeted < 0) targeted = 0;}
