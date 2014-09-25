@@ -1790,28 +1790,15 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 	return Charerrors == 0;
 }
 
-void Client::SetClassStartingSkills( PlayerProfile_Struct *pp )
+void Client::SetClassStartingSkills(PlayerProfile_Struct *pp)
 {
-	for(uint32 i = 0; i <= HIGHEST_SKILL; ++i) {
-		if(pp->skills[i] == 0) {
-			if(i >= SkillSpecializeAbjure && i <= SkillSpecializeEvocation) {
+	for (uint32 i = 0; i <= HIGHEST_SKILL; ++i) {
+		if (pp->skills[i] == 0) {
+			if (i >= SkillSpecializeAbjure && i <= SkillSpecializeEvocation)
 				continue;
-			}
 
-			if(i == SkillMakePoison ||
-				i == SkillTinkering ||
-				i == SkillResearch ||
-				i == SkillAlchemy ||
-				i == SkillBaking ||
-				i == SkillTailoring ||
-				i == SkillBlacksmithing ||
-				i == SkillFletching ||
-				i == SkillBrewing ||
-				i == SkillPottery ||
-				i == SkillJewelryMaking ||
-				i == SkillBegging) {
+			if (EQEmu::IsTradeskill(i) || i == SkillBegging)
 				continue;
-			}
 
 			pp->skills[i] = database.GetSkillCap(pp->class_, (SkillUseTypes)i, 1);
 		}

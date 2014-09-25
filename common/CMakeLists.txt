@@ -55,8 +55,9 @@ SET(common_sources
 	rulesys.cpp
 	serverinfo.cpp
 	shareddb.cpp
+	skills.cpp
 	spdat.cpp
-    string_util.cpp
+	string_util.cpp
 	struct_strategy.cpp
 	tcp_connection.cpp
 	tcp_server.cpp

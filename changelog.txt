@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 09/24/2014 ==
 Uleat: Re-ordered server opcodes and handlers to give them some predictability of location (I need this for the inventory re-enumeration.)
+demonstar55: Added helper function bool EQEmu::IsTradeskill(uint32 skill)
 
 == 09/22/2014 ==
 Akkadius: #resetaa now covers the function of #resetaa and #refundaa
