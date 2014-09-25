@@ -133,22 +133,6 @@ static inline uint32 TitaniumToServerCorpseSlot(uint32 TitaniumCorpse) {
 	// reserved
 }
 */
-/*
-static inline uint32 RemovePowerSourceBit(uint32 slots) { // shouldn't need to add one..just grab the actual server reference, if so...
-	static const uint32 BIT21 = 1 << 21;
-	static const uint32 BIT22 = 1 << 22;
-	static const uint32 KEEPBITS = ~(BIT21 | BIT22);
-
-	bool wearammo = slots & BIT22;
-
-	slots &= KEEPBITS;
-
-	if (wearammo)
-		slots |= BIT21;
-
-	return slots;
-}
-*/
 
 
 EAT_ENCODE(OP_ZoneServerReady)
