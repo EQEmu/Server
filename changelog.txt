@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 09/24/2014 ==
+Uleat: Re-ordered server opcodes and handlers to give them some predictability of location (I need this for the inventory re-enumeration.)
+
 == 09/22/2014 ==
 Akkadius: #resetaa now covers the function of #resetaa and #refundaa
 	- #resetaa will wipe all AA data, refund the spent points into the available points and send character to character select properly
