@@ -497,7 +497,6 @@ void EntityList::MobProcess()
 		if (!it->second->Process()) {
 			Mob *mob = it->second;
 			uint16 tempid = it->first;
-			++it; // we don't erase here because the destructor will
 			if (mob->IsNPC()) {
 				entity_list.RemoveNPC(mob->CastToNPC()->GetID());
 			} else if (mob->IsMerc()) {
@@ -525,7 +524,12 @@ void EntityList::MobProcess()
 				}
 				entity_list.RemoveClient(mob->GetID());
 			}
-			entity_list.RemoveMob(tempid);
+
+			if(entity_list.RemoveMob(tempid)) {
+				it = mob_list.begin();
+			} else {
+				++it;
+			}
 		} else {
 			++it;
 		}
