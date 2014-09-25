@@ -38,6 +38,11 @@ T ClampUpper(const T& value, const T& upper) {
 	return std::min(value, upper);
 }
 
+template <typename T>
+bool ValueWithin(const T& value, const T& lower, const T& upper) {
+	return value >= lower && value <= upper;
+}
+
 }
 
 #endif

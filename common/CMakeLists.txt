@@ -103,6 +103,7 @@ SET(common_headers
 	crash.h
 	crc16.h
 	crc32.h
+	data_verification.h
 	database.h
 	dbcore.h
 	debug.h
