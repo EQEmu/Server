@@ -924,9 +924,9 @@ bool Database::CheckDatabaseConversions() {
 	int runconvert = 0;
 
 	/* Check For Legacy Storage Method */
-	std::string rquery = StringFormat("SELECT `profile` FROM `character_` LIMIT 1");
+	std::string rquery = StringFormat("SHOW TABLES LIKE 'character_'");
 	auto results = QueryDatabase(rquery);
-	for (auto row = results.begin(); row != results.end(); ++row) { 
+	if (results.RowCount() == 1){
 		runconvert = 1; 
 		printf("\n\n::: Legacy Character Data Binary Blob Storage Detected... \n");
 		printf("----------------------------------------------------------\n\n");
@@ -1857,7 +1857,7 @@ bool Database::CheckDatabaseConversions() {
 			/* Run Tribute Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i < EmuConstants::TRIBUTE_SIZE; i++){
-				if (pp->tributes[i].tribute > 0){
+				if (pp->tributes[i].tribute > 0 && pp->tributes[i].tribute != 4294967295){
 					if (first_entry != 1){
 						rquery = StringFormat("REPLACE INTO `character_tribute` (id, tier, tribute) VALUES (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
 						first_entry = 1;
@@ -2467,7 +2467,7 @@ bool Database::MoveCharacterToZone(const char* charname, const char* zonename, u
 	if(zonename == nullptr || strlen(zonename) == 0)
 		return false;
 
-	std::string query = StringFormat("UPDATE `character_data` SET `zoneid` = %i, `x` = -1, `y` = -1, `z` = -1 WHERE `name` = '%s'", zoneid, charname);
+	std::string query = StringFormat("UPDATE `character_data` SET `zone_id` = %i, `x` = -1, `y` = -1, `z` = -1 WHERE `name` = '%s'", zoneid, charname);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
@@ -2486,7 +2486,7 @@ bool Database::MoveCharacterToZone(const char* charname, const char* zonename) {
 }
 
 bool Database::MoveCharacterToZone(uint32 iCharID, const char* iZonename) { 
-	std::string query = StringFormat("UPDATE `character_data` SET `zoneid` = %i, `x` = -1, `y` = -1, `z` = -1 WHERE `id` = %i", iZonename, GetZoneID(iZonename), iCharID);
+	std::string query = StringFormat("UPDATE `character_data` SET `zone_id` = %i, `x` = -1, `y` = -1, `z` = -1 WHERE `id` = %i", iZonename, GetZoneID(iZonename), iCharID);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {

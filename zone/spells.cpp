@@ -4720,8 +4720,8 @@ void Client::MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message)
 	if(send_message)
 	{
 		const char *fadetext = spells[spell_id].spell_fades;
-		outapp = new EQApplicationPacket(OP_BuffFadeMsg, sizeof(BuffFadeMsg_Struct) + strlen(fadetext));
-		BuffFadeMsg_Struct *bfm = (BuffFadeMsg_Struct *) outapp->pBuffer;
+		outapp = new EQApplicationPacket(OP_ColoredText, sizeof(ColoredText_Struct) + strlen(fadetext));
+		ColoredText_Struct *bfm = (ColoredText_Struct *) outapp->pBuffer;
 		bfm->color = MT_Spells;
 		memcpy(bfm->msg, fadetext, strlen(fadetext));
 		QueuePacket(outapp);

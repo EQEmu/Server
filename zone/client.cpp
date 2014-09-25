@@ -701,14 +701,10 @@ void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req, CLIENT_CO
 }
 
 void Client::FastQueuePacket(EQApplicationPacket** app, bool ack_req, CLIENT_CONN_STATUS required_state) {
-
-	//std::cout << "Sending: 0x" << std::hex << std::setw(4) << std::setfill('0') << (*app)->GetOpcode() << std::dec << ", size=" << (*app)->size << std::endl;
-
 	// if the program doesnt care about the status or if the status isnt what we requested
 	if (required_state != CLIENT_CONNECTINGALL && client_state != required_state) {
 		// todo: save packets for later use
 		AddPacket(app, ack_req);
-//		LogFile->write(EQEMuLog::Normal, "Adding Packet to list (%d) (%d)", (*app)->GetOpcode(), (int)required_state);
 		return;
 	}
 	else {
@@ -8317,3 +8313,18 @@ float Client::GetQuiverHaste()
 		quiver_haste = 1.0f / (1.0f + static_cast<float>(quiver_haste) / 100.0f);
 	return quiver_haste;
 }
+
+void Client::SendColoredText(uint32 color, std::string message)
+{
+	// arbitrary size limit
+	if (message.size() > 512) // live does send this with empty strings sometimes ...
+		return;
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ColoredText,
+									sizeof(ColoredText_Struct) + message.size());
+	ColoredText_Struct *cts = (ColoredText_Struct *)outapp->pBuffer;
+	cts->color = color;
+	strcpy(cts->msg, message.c_str());
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+

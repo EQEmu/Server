@@ -23,7 +23,7 @@
 #include "../common/string_util.h"
 
 class StringUtilTest : public Test::Suite {
-	typedef void(IPCMutexTest::*TestFunction)(void);
+	typedef void(StringUtilTest::*TestFunction)(void);
 public:
 	StringUtilTest() {
 		TEST_ADD(StringUtilTest::StringFormatTest);
@@ -35,7 +35,7 @@ public:
 	}
 
 	private:
-		void StringFormatTest() {
+	void StringFormatTest() {
 		const char* fmt = "Test: %c %d %4.2f";
 		char c = 'a';
 		int i = 2014;

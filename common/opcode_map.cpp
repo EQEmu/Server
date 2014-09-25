@@ -160,7 +160,7 @@ void load_opcode_names()
 	opcode_map[0x0192]="LiveOP_YellForHelp";
 	opcode_map[0x00ef]="LiveOP_SafePoint";
 	opcode_map[0x0157]="LiveOP_Buff";
-	opcode_map[0x00c0]="LiveOP_BuffFadeMsg";
+	opcode_map[0x00c0]="LiveOP_ColoredText";
 	opcode_map[0x0440]="LiveOP_MultiLineMsg";
 	opcode_map[0x021c]="LiveOP_SpecialMesg";
 	opcode_map[0x0013]="LiveOP_Consent";

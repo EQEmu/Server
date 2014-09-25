@@ -532,9 +532,12 @@ void EQStream::FastQueuePacket(EQApplicationPacket **p, bool ack_req)
 		return;
 	}
 
-	uint16 opcode = (*OpMgr)->EmuToEQ(pack->emu_opcode);
-
-	//_log(NET__APP_TRACE, "Queueing %sacked packet with opcode 0x%x (%s) and length %d", ack_req?"":"non-", opcode, OpcodeManager::EmuToName(pack->emu_opcode), pack->size);
+	uint16 opcode = 0;
+	if(pack->GetOpcodeBypass() != 0) {
+		opcode = pack->GetOpcodeBypass();
+	} else {
+		opcode = (*OpMgr)->EmuToEQ(pack->emu_opcode);
+	}
 
 	if (!ack_req) {
 		NonSequencedPush(new EQProtocolPacket(opcode, pack->pBuffer, pack->size));
@@ -877,43 +880,6 @@ sockaddr_in address;
 	AddBytesSent(length);
 }
 
-/*
-commented out since im not sure theres a lot of merit in it.
-Really it was bitterness towards allocating a 2k buffer on the stack each call.
-Im sure the thought was client side, but even then, they will
-likely need a whole thread to call this method, in which case, they should
-supply the buffer so we dont re-allocate it each time.
-EQProtocolPacket *EQStream::Read(int eq_fd, sockaddr_in *from)
-{
-int socklen;
-int length=0;
-EQProtocolPacket *p=nullptr;
-char temp[15];
-
-	socklen=sizeof(sockaddr);
-#ifdef _WINDOWS
-	length=recvfrom(eq_fd, (char *)_tempBuffer, 2048, 0, (struct sockaddr*)from, (int *)&socklen);
-#else
-	length=recvfrom(eq_fd, _tempBuffer, 2048, 0, (struct sockaddr*)from, (socklen_t *)&socklen);
-#endif
-
-	if (length>=2) {
-		p=new EQProtocolPacket(_tempBuffer[1],&_tempBuffer[2],length-2);
-
-		uint32 ip=from->sin_addr.s_addr;
-		sprintf(temp,"%d.%d.%d.%d:%d",
-			*(unsigned char *)&ip,
-			*((unsigned char *)&ip+1),
-			*((unsigned char *)&ip+2),
-			*((unsigned char *)&ip+3),
-			ntohs(from->sin_port));
-		//std::cout << timestamp() << "Data from: " << temp << " OpCode 0x" << std::hex << std::setw(2) << std::setfill('0') << (int)p->opcode << std::dec << std::endl;
-		//dump_message(p->pBuffer,p->size,timestamp());
-
-	}
-	return p;
-}*/
-
 void EQStream::SendSessionResponse()
 {
 EQProtocolPacket *out=new EQProtocolPacket(OP_SessionResponse,nullptr,sizeof(SessionResponse));
@@ -1101,14 +1067,6 @@ EQProtocolPacket *p=nullptr;
 		SequencedQueue.clear();
 	}
 	MOutboundQueue.unlock();
-
-/*if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
-	_log(NET__ERROR, _L "Out-bound Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, SequencedBase, SequencedQueue.size(), NextOutSeq);
-}
-if(NextSequencedSend > SequencedQueue.size()) {
-	_log(NET__ERROR, _L "Out-bound Next Send Sequence is beyond the end of the queue NSS %d > SQ %d" __L, NextSequencedSend, SequencedQueue.size());
-}*/
-	//NOTE: we prolly want to reset counters if we are stupposed to do anything after this.
 }
 
 void EQStream::PacketQueueClear()

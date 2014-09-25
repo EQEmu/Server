@@ -3556,7 +3556,7 @@ struct GMToggle_Struct {
 	uint32 toggle;
 };
 
-struct BuffFadeMsg_Struct {
+struct ColoredText_Struct {
 	uint32 color;
 	char msg[1]; //was 1
 /*0???*/ uint8  paddingXXX[3];          // always 0's
