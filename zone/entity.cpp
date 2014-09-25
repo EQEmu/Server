@@ -490,22 +490,36 @@ void EntityList::MobProcess()
 #endif
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
-		if (!it->second) {
+		uint16 id = it->first;
+		Mob *mob = it->second;
+		
+		size_t sz = mob_list.size();
+		bool p_val = mob->Process();
+		size_t a_sz = mob_list.size();
+		
+		if(a_sz > sz) {
+			//increased size can potentially screw with iterators so reset it to current value
+			//if buckets are re-orderered we may skip a process here and there but since 
+			//process happens so often it shouldn't matter much
+			it = mob_list.find(id);
 			++it;
-			continue;
+		} else {
+			++it;
 		}
-		if (!it->second->Process()) {
-			Mob *mob = it->second;
-			uint16 tempid = it->first;
-			if (mob->IsNPC()) {
-				entity_list.RemoveNPC(mob->CastToNPC()->GetID());
-			} else if (mob->IsMerc()) {
-				entity_list.RemoveMerc(mob->CastToMerc()->GetID());
+
+		if(!p_val) {
+			if(mob->IsNPC()) {
+				entity_list.RemoveNPC(id);
+			}
+			else if(mob->IsMerc()) {
+				entity_list.RemoveMerc(id);
 #ifdef BOTS
-			} else if (mob->IsBot()) {
-				entity_list.RemoveBot(mob->CastToBot()->GetID());
+			}
+			else if(mob->IsBot()) {
+				entity_list.RemoveBot(id);
 #endif
-			} else {
+			}
+			else {
 #ifdef _WINDOWS
 				struct in_addr in;
 				in.s_addr = mob->CastToClient()->GetIP();
@@ -513,25 +527,19 @@ void EntityList::MobProcess()
 #endif
 				zone->StartShutdownTimer();
 				Group *g = GetGroupByMob(mob);
-				if (g) {
+				if(g) {
 					LogFile->write(EQEMuLog::Error, "About to delete a client still in a group.");
 					g->DelMember(mob);
 				}
 				Raid *r = entity_list.GetRaidByClient(mob->CastToClient());
-				if (r) {
+				if(r) {
 					LogFile->write(EQEMuLog::Error, "About to delete a client still in a raid.");
 					r->MemberZoned(mob->CastToClient());
 				}
-				entity_list.RemoveClient(mob->GetID());
+				entity_list.RemoveClient(id);
 			}
 
-			if(entity_list.RemoveMob(tempid)) {
-				it = mob_list.begin();
-			} else {
-				++it;
-			}
-		} else {
-			++it;
+			entity_list.RemoveMob(id);
 		}
 	}
 }
