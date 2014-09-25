@@ -1178,8 +1178,14 @@ bool ZoneDatabase::LoadCharacterPotions(uint32 character_id, PlayerProfile_Struc
 	}
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		i = atoi(row[0]); /* Potion belt slot number */
-		pp->potionbelt.items[i].item_id = atoi(row[1]);
-		pp->potionbelt.items[i].icon = atoi(row[2]); 
+		uint32 item_id = atoi(row[1]);
+		const Item_Struct *item = database.GetItem(item_id);
+
+		if(item) {
+			pp->potionbelt.items[i].item_id = item_id;
+			pp->potionbelt.items[i].icon = atoi(row[2]);
+			strncpy(pp->potionbelt.items[i].item_name, item->Name, 64);
+		}
 	}
 	return true;
 }

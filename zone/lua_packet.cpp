@@ -301,6 +301,7 @@ luabind::scope lua_register_packet() {
 		.def("ReadFixedLengthString", &Lua_Packet::ReadFixedLengthString);
 }
 
+//TODO: Reorder these to match emu_oplist.h again
 luabind::scope lua_register_packet_opcodes() {
 	return luabind::class_<Opcodes>("Opcode")
 		.enum_("constants")

@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 09/24/2014 ==
 Uleat: Re-ordered server opcodes and handlers to give them some predictability of location (I need this for the inventory re-enumeration.)
+demonstar55: Added helper function bool EQEmu::IsTradeskill(uint32 skill)
 
 == 09/23/2014 ==
 Kayen: Spell recourse effects will now be applied AFTER the base spells effects have been applied (consistent with live).

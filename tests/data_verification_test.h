@@ -29,6 +29,7 @@ public:
 		TEST_ADD(DataVerificationTest::Clamp);
 		TEST_ADD(DataVerificationTest::ClampUpper);
 		TEST_ADD(DataVerificationTest::ClampLower);
+		TEST_ADD(DataVerificationTest::ValueWithin);
 	}
 
 	~DataVerificationTest() {
@@ -88,6 +89,19 @@ public:
 
 		TEST_ASSERT_EQUALS(vi1, 500);
 		TEST_ASSERT_EQUALS(vi2, 750);
+	}
+	
+	void ValueWithin() {
+		float value_f = 500.0f;
+		int value_i = 500;
+
+		TEST_ASSERT(EQEmu::ValueWithin(value_f, 0.0f, 1000.0f));
+		TEST_ASSERT(!EQEmu::ValueWithin(value_f, 0.0f, 400.0f));
+		TEST_ASSERT(!EQEmu::ValueWithin(value_f, 600.0f, 900.0f));
+		
+		TEST_ASSERT(EQEmu::ValueWithin(value_i, 0, 1000));
+		TEST_ASSERT(!EQEmu::ValueWithin(value_i, 0, 400));
+		TEST_ASSERT(!EQEmu::ValueWithin(value_i, 600, 900));
 	}
 };
 

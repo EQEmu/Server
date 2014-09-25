@@ -48,6 +48,7 @@
 #include "../common/guilds.h"
 #include "../common/rulesys.h"
 #include "../common/spdat.h"
+#include "../common/data_verification.h"
 #include "petitions.h"
 #include "npc_ai.h"
 #include "../common/skills.h"
@@ -10490,7 +10491,13 @@ void Client::Handle_OP_PotionBelt(const EQApplicationPacket *app)
 		DumpPacket(app);
 		return;
 	}
+
 	MovePotionToBelt_Struct *mptbs = (MovePotionToBelt_Struct*)app->pBuffer;
+	if(!EQEmu::ValueWithin(mptbs->SlotNumber, 0U, 3U)) {
+		LogFile->write(EQEMuLog::Debug, "Client::Handle_OP_PotionBelt mptbs->SlotNumber out of range.");
+		return;
+	}
+
 	if (mptbs->Action == 0) {
 		const Item_Struct *BaseItem = database.GetItem(mptbs->ItemID);
 		if (BaseItem) {

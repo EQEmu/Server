@@ -284,9 +284,11 @@ int main(int argc, char** argv) {
 	database.ClearRaid();
 	database.ClearRaidDetails();
 	_log(WORLD__INIT, "Loading items..");
-	if (!database.LoadItems()) {
+	if (!database.LoadItems())
 		_log(WORLD__INIT_ERR, "Error: Could not load item data. But ignoring");
-	}
+	_log(WORLD__INIT, "Loading skill caps..");
+	if (!database.LoadSkillCaps())
+		_log(WORLD__INIT_ERR, "Error: Could not load skill cap data. But ignoring");
 	_log(WORLD__INIT, "Loading guilds..");
 	guild_mgr.LoadGuilds();
 	//rules:

@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2014 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -15,34 +15,26 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#ifndef COMMON_DATA_VERIFICATION_H
-#define COMMON_DATA_VERIFICATION_H
+#include "types.h"
+#include "skills.h"
 
-#include <algorithm>
-
-namespace EQEmu
+bool EQEmu::IsTradeskill(uint32 skill)
 {
-
-template <typename T>
-T Clamp(const T& value, const T& lower, const T& upper) {
-	return std::max(lower, std::min(value, upper));
+	switch (skill) {
+	case SkillFishing:
+	case SkillMakePoison:
+	case SkillTinkering:
+	case SkillResearch:
+	case SkillAlchemy:
+	case SkillBaking:
+	case SkillTailoring:
+	case SkillBlacksmithing:
+	case SkillFletching:
+	case SkillBrewing:
+	case SkillPottery:
+	case SkillJewelryMaking:
+		return true;
+	default:
+		return false;
+	}
 }
-
-template <typename T>
-T ClampLower(const T& value, const T& lower) {
-	return std::max(lower, value);
-}
-
-template <typename T>
-T ClampUpper(const T& value, const T& upper) {
-	return std::min(value, upper);
-}
-
-template <typename T>
-bool ValueWithin(const T& value, const T& lower, const T& upper) {
-	return value >= lower && value <= upper;
-}
-
-}
-
-#endif
