@@ -3331,10 +3331,13 @@ int32 Mob::ReduceAllDamage(int32 damage)
 	if(damage <= 0)
 		return damage;
 
-	if(spellbonuses.ManaAbsorbPercentDamage[0] && (GetMana() > damage * spellbonuses.ManaAbsorbPercentDamage[0] / 100)) {
-		damage -= (damage * spellbonuses.ManaAbsorbPercentDamage[0] / 100);
-		SetMana(GetMana() - damage);
-		TryTriggerOnValueAmount(false, true);
+	if(spellbonuses.ManaAbsorbPercentDamage[0]) {
+		int32 mana_reduced =  damage * spellbonuses.ManaAbsorbPercentDamage[0] / 100;
+		if (GetMana() >= mana_reduced){
+			damage -= mana_reduced;
+			SetMana(GetMana() - mana_reduced);
+			TryTriggerOnValueAmount(false, true);
+		}
 	}
 	
 	CheckNumHitsRemaining(NUMHIT_IncomingDamage);

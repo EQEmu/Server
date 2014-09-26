@@ -3031,12 +3031,11 @@ void Mob::TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger)
 	}
 }
 
-void Mob::TrySpellTrigger(Mob *target, uint32 spell_id)
+bool Mob::TrySpellTrigger(Mob *target, uint32 spell_id, int effect)
 {
-	if(target == nullptr || !IsValidSpell(spell_id))
-	{
-		return;
-	}
+	if(!target || !IsValidSpell(spell_id))
+		return false;
+	
 	int spell_trig = 0;
 	// Count all the percentage chances to trigger for all effects
 	for(int i = 0; i < EFFECT_COUNT; i++)
@@ -3055,8 +3054,10 @@ void Mob::TrySpellTrigger(Mob *target, uint32 spell_id)
 				if(MakeRandomInt(0, trig_chance) <= spells[spell_id].base[i])
 				{
 					// If we trigger an effect then its over.
-					SpellFinished(spells[spell_id].base2[i], target, 10, 0, -1, spells[spell_id].ResistDiff);
-					break;
+					if (IsValidSpell(spells[spell_id].base2[i])){
+						SpellFinished(spells[spell_id].base2[i], target, 10, 0, -1, spells[spell_id].ResistDiff);
+						return true;
+					}
 				}
 				else
 				{
@@ -3070,37 +3071,15 @@ void Mob::TrySpellTrigger(Mob *target, uint32 spell_id)
 	// if the chances don't add to 100, then each effect gets a chance to fire, chance for no trigger as well.
 	else
 	{
-		for(int i = 0; i < EFFECT_COUNT; i++)
+		if(MakeRandomInt(0, 100) <= spells[spell_id].base[effect])
 		{
-			if (spells[spell_id].effectid[i] == SE_SpellTrigger)
-			{
-				if(MakeRandomInt(0, 100) <= spells[spell_id].base[i])
-				{
-					SpellFinished(spells[spell_id].base2[i], target, 10, 0, -1, spells[spell_id].ResistDiff);
-				}
+			if (IsValidSpell(spells[spell_id].base2[effect])){
+				SpellFinished(spells[spell_id].base2[effect], target, 10, 0, -1, spells[spell_id].ResistDiff);
+				return true; //Only trigger once of these per spell effect.
 			}
 		}
 	}
-}
-
-void Mob::TryApplyEffect(Mob *target, uint32 spell_id)
-{
-	if(target == nullptr || !IsValidSpell(spell_id))
-	{
-		return;
-	}
-
-	for(int i = 0; i < EFFECT_COUNT; i++)
-	{
-		if (spells[spell_id].effectid[i] == SE_ApplyEffect)
-		{
-			if(MakeRandomInt(0, 100) <= spells[spell_id].base[i])
-			{
-				if(target)
-					SpellFinished(spells[spell_id].base2[i], target, 10, 0, -1, spells[spell_id].ResistDiff);
-			}
-		}
-	}
+	return false;
 }
 
 void Mob::TryTriggerOnValueAmount(bool IsHP, bool IsMana, bool IsEndur, bool IsPet)

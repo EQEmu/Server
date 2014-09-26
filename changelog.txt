@@ -4,6 +4,11 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 Uleat: Re-ordered server opcodes and handlers to give them some predictability of location (I need this for the inventory re-enumeration.)
 demonstar55: Added helper function bool EQEmu::IsTradeskill(uint32 skill)
 
+== 09/23/2014 ==
+Kayen: Spell recourse effects will now be applied AFTER the base spells effects have been applied (consistent with live).
+Kayen: SE_ApplySpell and SE_TriggerSpell will now be applied based on which effect slot they are used in (instead of always before all spell effects are checked).
+Note: If a spell has multiple SE_TriggerSpell effects within it. Only one will be able to trigger. (If you want multiple spells use SE_ApplySpell)
+
 == 09/22/2014 ==
 Akkadius: #resetaa now covers the function of #resetaa and #refundaa
 	- #resetaa will wipe all AA data, refund the spent points into the available points and send character to character select properly

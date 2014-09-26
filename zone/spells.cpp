@@ -3606,107 +3606,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		spell_effectiveness = 100;
 	}
 
-		// Recourse means there is a spell linked to that spell in that the recourse spell will
-		// be automatically casted on the casters group or the caster only depending on Targettype
-		// this is for things like dark empathy, shadow vortex
-		int recourse_spell=0;
-		recourse_spell = spells[spell_id].RecourseLink;
-		if(recourse_spell)
-		{
-			if(spells[recourse_spell].targettype == ST_Group || spells[recourse_spell].targettype == ST_GroupTeleport)
-			{
-				if(IsGrouped())
-				{
-					Group *g = entity_list.GetGroupByMob(this);
-					if(g)
-						g->CastGroupSpell(this, recourse_spell);
-					else{
-						SpellOnTarget(recourse_spell, this);
-#ifdef GROUP_BUFF_PETS
-						if (GetPet())
-							SpellOnTarget(recourse_spell, GetPet());
-#endif
-					}
-				}
-				else if(IsRaidGrouped() && IsClient())
-				{
-					Raid *r = entity_list.GetRaidByClient(CastToClient());
-					uint32 gid = 0xFFFFFFFF;
-					if(r)
-						gid = r->GetGroup(GetName());
-					else
-						gid = 13;	// Forces ungrouped spell casting
-
-					if(gid < 12)
-					{
-						r->CastGroupSpell(this, recourse_spell, gid);
-					}
-					else{
-						SpellOnTarget(recourse_spell, this);
-#ifdef GROUP_BUFF_PETS
-						if (GetPet())
-							SpellOnTarget(recourse_spell, GetPet());
-#endif
-					}
-				}
-				else if(HasOwner())
-				{
-					if(GetOwner()->IsGrouped())
-					{
-						Group *g = entity_list.GetGroupByMob(GetOwner());
-						if(g)
-							g->CastGroupSpell(this, recourse_spell);
-						else{
-							SpellOnTarget(recourse_spell, GetOwner());
-							SpellOnTarget(recourse_spell, this);
-						}
-					}
-					else if(GetOwner()->IsRaidGrouped() && GetOwner()->IsClient())
-					{
-						Raid *r = entity_list.GetRaidByClient(GetOwner()->CastToClient());
-						uint32 gid = 0xFFFFFFFF;
-						if(r)
-							gid = r->GetGroup(GetOwner()->GetName());
-						else
-							gid = 13;	// Forces ungrouped spell casting
-
-						if(gid < 12)
-						{
-							r->CastGroupSpell(this, recourse_spell, gid);
-						}
-						else
-						{
-							SpellOnTarget(recourse_spell, GetOwner());
-							SpellOnTarget(recourse_spell, this);
-						}
-					}
-					else
-					{
-						SpellOnTarget(recourse_spell, GetOwner());
-						SpellOnTarget(recourse_spell, this);
-					}
-				}
-				else
-				{
-					SpellOnTarget(recourse_spell, this);
-#ifdef GROUP_BUFF_PETS
-					if (GetPet())
-						SpellOnTarget(recourse_spell, GetPet());
-#endif
-				}
-
-			}
-			else
-			{
-				SpellOnTarget(recourse_spell, this);
-			}
-		}
-
 	if(spelltar->spellbonuses.SpellDamageShield && IsDetrimentalSpell(spell_id))
 		spelltar->DamageShield(this, true);
-
-	TrySpellTrigger(spelltar, spell_id);
-	TryApplyEffect(spelltar, spell_id);
 
 	if (spelltar->IsAIControlled() && IsDetrimentalSpell(spell_id) && !IsHarmonySpell(spell_id)) {
 		int32 aggro_amount = CheckAggroAmount(spell_id, isproc);
@@ -3746,7 +3647,9 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		return false;
 	}
 
-
+	if (IsValidSpell(spells[spell_id].RecourseLink))
+		SpellFinished(spells[spell_id].RecourseLink, this, 10, 0, -1, spells[spells[spell_id].RecourseLink].ResistDiff);
+		
 	if (IsDetrimentalSpell(spell_id)) {
 
 		CheckNumHitsRemaining(NUMHIT_OutgoingSpells);
