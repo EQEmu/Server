@@ -27,6 +27,7 @@ class SkillsUtilsTest: public Test::Suite {
 public:
 	SkillsUtilsTest() {
 		TEST_ADD(SkillsUtilsTest::IsTradeskill);
+		TEST_ADD(SkillsUtilsTest::IsSpecializedSkill);
 	}
 
 	~SkillsUtilsTest() {
@@ -36,6 +37,11 @@ public:
 	void IsTradeskill() {
 		TEST_ASSERT(EQEmu::IsTradeskill(SkillPottery));
 		TEST_ASSERT(!EQEmu::IsTradeskill(SkillParry));
+	}
+
+	void IsSpecializedSkill() {
+		TEST_ASSERT(EQEmu::IsSpecializedSkill(SkillSpecializeConjuration));
+		TEST_ASSERT(!EQEmu::IsSpecializedSkill(SkillConjuration))
 	}
 };
 
