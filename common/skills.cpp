@@ -18,7 +18,7 @@
 #include "types.h"
 #include "skills.h"
 
-bool EQEmu::IsTradeskill(uint32 skill)
+bool EQEmu::IsTradeskill(SkillUseTypes skill)
 {
 	switch (skill) {
 	case SkillFishing:

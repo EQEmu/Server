@@ -1797,7 +1797,7 @@ void Client::SetClassStartingSkills(PlayerProfile_Struct *pp)
 			if (i >= SkillSpecializeAbjure && i <= SkillSpecializeEvocation)
 				continue;
 
-			if (EQEmu::IsTradeskill(i) || i == SkillBegging)
+			if (EQEmu::IsTradeskill((SkillUseTypes)i) || i == SkillBegging)
 				continue;
 
 			pp->skills[i] = database.GetSkillCap(pp->class_, (SkillUseTypes)i, 1);
