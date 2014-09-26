@@ -18,7 +18,7 @@
 #include "types.h"
 #include "skills.h"
 
-bool EQEmu::IsTradeskill(uint32 skill)
+bool EQEmu::IsTradeskill(SkillUseTypes skill)
 {
 	switch (skill) {
 	case SkillFishing:
@@ -33,6 +33,22 @@ bool EQEmu::IsTradeskill(uint32 skill)
 	case SkillBrewing:
 	case SkillPottery:
 	case SkillJewelryMaking:
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool EQEmu::IsSpecializedSkill(SkillUseTypes skill)
+{
+	// this could be a simple if, but if this is more portable if any IDs change (probably won't)
+	// or any other specialized are added (also unlikely)
+	switch (skill) {
+	case SkillSpecializeAbjure:
+	case SkillSpecializeAlteration:
+	case SkillSpecializeConjuration:
+	case SkillSpecializeDivination:
+	case SkillSpecializeEvocation:
 		return true;
 	default:
 		return false;

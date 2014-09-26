@@ -1794,10 +1794,10 @@ void Client::SetClassStartingSkills(PlayerProfile_Struct *pp)
 {
 	for (uint32 i = 0; i <= HIGHEST_SKILL; ++i) {
 		if (pp->skills[i] == 0) {
-			if (i >= SkillSpecializeAbjure && i <= SkillSpecializeEvocation)
-				continue;
-
-			if (EQEmu::IsTradeskill(i) || i == SkillBegging)
+			// Skip specialized, tradeskills (fishing excluded), Alcohol Tolerance, and Bind Wound
+			if (EQEmu::IsSpecializedSkill((SkillUseTypes)i) ||
+					(EQEmu::IsTradeskill((SkillUseTypes)i) && i != SkillFishing) ||
+					i == SkillAlcoholTolerance || i == SkillBindWound)
 				continue;
 
 			pp->skills[i] = database.GetSkillCap(pp->class_, (SkillUseTypes)i, 1);

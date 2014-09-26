@@ -15,6 +15,7 @@ SET(tests_headers
 	ipc_mutex_test.h
 	memory_mapped_file_test.h
 	string_util_test.h
+	skills_util_test.h
 )
 
 ADD_EXECUTABLE(tests ${tests_sources} ${tests_headers})

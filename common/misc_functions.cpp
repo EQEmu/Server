@@ -387,3 +387,26 @@ float EQHtoFloat(int d)
 {
 	return(360.0f - float((d * 360) >> 11));
 }
+
+// returns a swapped-bit value for use in client translator and inventory functions
+uint32 SwapBits21and22(uint32 mask)
+{
+	static const uint32 BIT21 = 1 << 21;
+	static const uint32 BIT22 = 1 << 22;
+	static const uint32 SWAPBITS = (BIT21 | BIT22);
+
+	if ((bool)(mask & BIT21) != (bool)(mask & BIT22))
+		mask ^= SWAPBITS;
+
+	return mask;
+}
+
+// returns an unset bit 22 value for use in client translators
+uint32 Catch22(uint32 mask)
+{
+	static const uint32 KEEPBITS = ~(1 << 22);
+
+	mask &= KEEPBITS;
+
+	return mask;
+}

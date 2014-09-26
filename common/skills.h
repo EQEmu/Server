@@ -262,7 +262,8 @@ typedef enum {
 
 // for skill related helper functions
 namespace EQEmu {
-	bool IsTradeskill(uint32 skill);
+	bool IsTradeskill(SkillUseTypes skill);
+	bool IsSpecializedSkill(SkillUseTypes skill);
 }
 
 #endif
