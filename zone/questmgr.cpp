@@ -172,7 +172,7 @@ void QuestManager::EndQuest() {
 				cur = QTimerList.erase(cur);
 			else
 				++cur;
-		} 
+		}
 		run.owner->Depop();
 	}
 	quests_running_.pop();
@@ -447,7 +447,7 @@ void QuestManager::settimer(const char *timer_name, int seconds) {
 
 	end = QTimerList.end();
 	while (cur != end) {
-		if(cur->mob && cur->mob == owner && cur->name == timer_name) 
+		if(cur->mob && cur->mob == owner && cur->name == timer_name)
 		{
 			cur->Timer_.Enable();
 			cur->Timer_.Start(seconds * 1000, false);
@@ -471,7 +471,7 @@ void QuestManager::settimerMS(const char *timer_name, int milliseconds) {
 
 	end = QTimerList.end();
 	while (cur != end) {
-		if(cur->mob && cur->mob == owner && cur->name == timer_name) 
+		if(cur->mob && cur->mob == owner && cur->name == timer_name)
 		{
 			cur->Timer_.Enable();
 			cur->Timer_.Start(milliseconds, false);
@@ -1310,7 +1310,7 @@ void QuestManager::setglobal(const char *varname, const char *newvalue, int opti
 
 	if (initiator && initiator->IsClient()){ // some events like waypoint and spawn don't have a player involved
 		qgCharid=initiator->CharacterID();
-	} 
+	}
 	else {
 		qgCharid=-qgNpcid;		// make char id negative npc id as a fudge
 	}
@@ -1337,81 +1337,69 @@ void QuestManager::setglobal(const char *varname, const char *newvalue, int opti
 
 /* Inserts global variable into quest_globals table */
 int QuestManager::InsertQuestGlobal(int charid, int npcid, int zoneid, const char *varname, const char *varvalue, int duration) {
-	char *query = 0;
-	char errbuf[MYSQL_ERRMSG_SIZE];
 
 	// Make duration string either "unix_timestamp(now()) + xxx" or "NULL"
-	std::stringstream duration_ss; 
-	if (duration == INT_MAX) {
-		duration_ss << "NULL";
-	}
-	else {
-		duration_ss << "unix_timestamp(now()) + " << duration;
-	}
+	std::string durationText = (duration == INT_MAX)? "NULL": StringFormat("unix_timestamp(now()) + %i", duration);
 
 	/*
 		NOTE: this should be escaping the contents of arglist
 		npcwise a malicious script can arbitrarily alter the DB
 	*/
-	uint32 last_id = 0;
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"REPLACE INTO quest_globals (charid, npcid, zoneid, name, value, expdate)"
-		"VALUES (%i, %i, %i, '%s', '%s', %s)",
-		charid, npcid, zoneid, varname, varvalue, duration_ss.str().c_str()
-		), errbuf, nullptr, nullptr, &last_id))
-	{
-		std::cerr << "setglobal error inserting " << varname << " : " << errbuf << std::endl;
-	}
-	safe_delete_array(query);
 
-	if(zone) { 
-		/* Delete existing qglobal data and update zone processes */
-		ServerPacket* pack = new ServerPacket(ServerOP_QGlobalDelete, sizeof(ServerQGlobalDelete_Struct));
-		ServerQGlobalDelete_Struct *qgd = (ServerQGlobalDelete_Struct*)pack->pBuffer;
-		qgd->npc_id = npcid;
-		qgd->char_id = charid;
-		qgd->zone_id = zoneid;
-		qgd->from_zone_id = zone->GetZoneID();
-		qgd->from_instance_id = zone->GetInstanceID();
-		strcpy(qgd->name, varname);
+	std::string query = StringFormat("REPLACE INTO quest_globals "
+                                    "(charid, npcid, zoneid, name, value, expdate)"
+                                    "VALUES (%i, %i, %i, '%s', '%s', %s)",
+                                    charid, npcid, zoneid, varname, varvalue, durationText.c_str());
+    auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		std::cerr << "setglobal error inserting " << varname << " : " << results.ErrorMessage() << std::endl;
 
-		entity_list.DeleteQGlobal(std::string((char*)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
-		zone->DeleteQGlobal(std::string((char*)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
+	if(!zone)
+        return 0;
 
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
+    /* Delete existing qglobal data and update zone processes */
+    ServerPacket* pack = new ServerPacket(ServerOP_QGlobalDelete, sizeof(ServerQGlobalDelete_Struct));
+    ServerQGlobalDelete_Struct *qgd = (ServerQGlobalDelete_Struct*)pack->pBuffer;
+    qgd->npc_id = npcid;
+    qgd->char_id = charid;
+    qgd->zone_id = zoneid;
+    qgd->from_zone_id = zone->GetZoneID();
+    qgd->from_instance_id = zone->GetInstanceID();
+    strcpy(qgd->name, varname);
 
-		/* Create new qglobal data and update zone processes */
-		pack = new ServerPacket(ServerOP_QGlobalUpdate, sizeof(ServerQGlobalUpdate_Struct));
-		ServerQGlobalUpdate_Struct *qgu = (ServerQGlobalUpdate_Struct*)pack->pBuffer;
-		qgu->npc_id = npcid;
-		qgu->char_id = charid;
-		qgu->zone_id = zoneid;
-		if(duration == INT_MAX) {
-			qgu->expdate = 0xFFFFFFFF;
-		}
-		else {
-			qgu->expdate = Timer::GetTimeSeconds() + duration;
-		}
-		strcpy((char*)qgu->name, varname);
-		strn0cpy((char*)qgu->value, varvalue, 128);
-		qgu->id = last_id;
-		qgu->from_zone_id = zone->GetZoneID();
-		qgu->from_instance_id = zone->GetInstanceID();
+    entity_list.DeleteQGlobal(std::string((char*)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
+    zone->DeleteQGlobal(std::string((char*)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
 
-		QGlobal temp;
-		temp.npc_id = npcid;
-		temp.char_id = charid;
-		temp.zone_id = zoneid;
-		temp.expdate = qgu->expdate;
-		temp.name.assign(qgu->name);
-		temp.value.assign(qgu->value);
-		entity_list.UpdateQGlobal(qgu->id, temp);
-		zone->UpdateQGlobal(qgu->id, temp);
+    worldserver.SendPacket(pack);
+    safe_delete(pack);
 
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
+    /* Create new qglobal data and update zone processes */
+    pack = new ServerPacket(ServerOP_QGlobalUpdate, sizeof(ServerQGlobalUpdate_Struct));
+	ServerQGlobalUpdate_Struct *qgu = (ServerQGlobalUpdate_Struct*)pack->pBuffer;
+	qgu->npc_id = npcid;
+	qgu->char_id = charid;
+	qgu->zone_id = zoneid;
+
+	qgu->expdate = (duration == INT_MAX)? 0xFFFFFFFF: Timer::GetTimeSeconds() + duration;
+
+    strcpy((char*)qgu->name, varname);
+    strn0cpy((char*)qgu->value, varvalue, 128);
+	qgu->id = results.LastInsertedID();
+	qgu->from_zone_id = zone->GetZoneID();
+	qgu->from_instance_id = zone->GetInstanceID();
+
+	QGlobal temp;
+	temp.npc_id = npcid;
+	temp.char_id = charid;
+	temp.zone_id = zoneid;
+	temp.expdate = qgu->expdate;
+	temp.name.assign(qgu->name);
+	temp.value.assign(qgu->value);
+	entity_list.UpdateQGlobal(qgu->id, temp);
+	zone->UpdateQGlobal(qgu->id, temp);
+
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
 
 	return 0;
 }
@@ -1422,22 +1410,14 @@ void QuestManager::targlobal(const char *varname, const char *value, const char 
 
 void QuestManager::delglobal(const char *varname) {
 	QuestManagerCurrentQuestVars();
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 	int qgZoneid=zone->GetZoneID();
 	int qgCharid=0;
 	int qgNpcid=owner->GetNPCTypeID();
-	
-	
-	
-	if (initiator && initiator->IsClient()) // some events like waypoint and spawn don't have a player involved
-	{
-		qgCharid=initiator->CharacterID();
-	}
 
-	else {
+	if (initiator && initiator->IsClient()) // some events like waypoint and spawn don't have a player involved
+		qgCharid=initiator->CharacterID();
+	else
 		qgCharid=-qgNpcid;		// make char id negative npc id as a fudge
-	}
 
 	/* QS: PlayerLogQGlobalUpdate */
 	if (RuleB(QueryServ, PlayerLogQGlobalUpdate) && qgCharid && qgCharid > 0 && initiator && initiator->IsClient()){
@@ -1445,31 +1425,32 @@ void QuestManager::delglobal(const char *varname) {
 		QServ->PlayerLogEvent(Player_Log_QGlobal_Update, qgCharid, event_desc);
 	}
 
-	if (!database.RunQuery(query,
-		MakeAnyLenString(&query,
-		"DELETE FROM quest_globals WHERE name='%s'"
-		" && (npcid=0 || npcid=%i) && (charid=0 || charid=%i) && (zoneid=%i || zoneid=0)",
-		varname,qgNpcid,qgCharid,qgZoneid),errbuf))
-	{
-		std::cerr << "delglobal error deleting " << varname << " : " << errbuf << std::endl;
-	}
-	safe_delete_array(query);
+    std::string query = StringFormat("DELETE FROM quest_globals "
+                                    "WHERE name = '%s' "
+                                    "&& (npcid=0 || npcid=%i) "
+                                    "&& (charid=0 || charid=%i) "
+                                    "&& (zoneid=%i || zoneid=0)",
+                                    varname, qgNpcid, qgCharid, qgZoneid);
+    auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		std::cerr << "delglobal error deleting " << varname << " : " << results.ErrorMessage() << std::endl;
 
-	if(zone) {
-		ServerPacket* pack = new ServerPacket(ServerOP_QGlobalDelete, sizeof(ServerQGlobalDelete_Struct));
-		ServerQGlobalDelete_Struct *qgu = (ServerQGlobalDelete_Struct*)pack->pBuffer;
+	if(!zone)
+        return;
 
-		qgu->npc_id = qgNpcid;
-		qgu->char_id = qgCharid;
-		qgu->zone_id = qgZoneid;
-		strcpy(qgu->name, varname);
+    ServerPacket* pack = new ServerPacket(ServerOP_QGlobalDelete, sizeof(ServerQGlobalDelete_Struct));
+    ServerQGlobalDelete_Struct *qgu = (ServerQGlobalDelete_Struct*)pack->pBuffer;
 
-		entity_list.DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
-		zone->DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
+    qgu->npc_id = qgNpcid;
+    qgu->char_id = qgCharid;
+    qgu->zone_id = qgZoneid;
+    strcpy(qgu->name, varname);
 
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
+    entity_list.DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
+    zone->DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
+
+    worldserver.SendPacket(pack);
+    safe_delete(pack);
 }
 
 // Converts duration string to duration value (in seconds)
@@ -1690,11 +1671,6 @@ void QuestManager::showgrid(int grid) {
 	if(initiator == nullptr)
 		return;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
 	FindPerson_Point pt;
 	std::vector<FindPerson_Point> pts;
 
@@ -1704,22 +1680,25 @@ void QuestManager::showgrid(int grid) {
 	pts.push_back(pt);
 
 	// Retrieve all waypoints for this grid
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `x`,`y`,`z` FROM grid_entries WHERE `gridid`=%i AND `zoneid`=%i ORDER BY `number`",grid,zone->GetZoneID()),errbuf,&result)) {
-		while((row = mysql_fetch_row(result))) {
-			pt.x = atof(row[0]);
-			pt.y = atof(row[1]);
-			pt.z = atof(row[2]);
-			pts.push_back(pt);
-		}
-		mysql_free_result(result); 
-		initiator->SendPathPacket(pts);
-	}
-	else	// DB query error!
-	{
-		LogFile->write(EQEMuLog::Quest, "Error loading grid %d for showgrid(): %s", grid, errbuf);
+	std::string query = StringFormat("SELECT `x`,`y`,`z` FROM grid_entries "
+                                    "WHERE `gridid` = %i AND `zoneid` = %i "
+                                    "ORDER BY `number`", grid, zone->GetZoneID());
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Quest, "Error loading grid %d for showgrid(): %s", grid, results.ErrorMessage().c_str());
 		return;
-	}
-	safe_delete_array(query);
+    }
+
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        pt.x = atof(row[0]);
+        pt.y = atof(row[1]);
+        pt.z = atof(row[2]);
+
+        pts.push_back(pt);
+    }
+
+    initiator->SendPathPacket(pts);
+
 }
 
 //change the value of a spawn condition
@@ -2295,19 +2274,19 @@ bool QuestManager::istaskappropriate(int task) {
 }
 
 void QuestManager::clearspawntimers() {
-	if(zone) {
-		//TODO: Dec 19, 2008, replace with code updated for current spawn timers.
-		LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
-		iterator.Reset();
-		while (iterator.MoreElements())
-		{
-			char errbuf[MYSQL_ERRMSG_SIZE];
-			char *query = 0;
-			database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM respawn_times WHERE id=%lu AND "
-				"instance_id=%lu",(unsigned long)iterator.GetData()->GetID(), (unsigned long)zone->GetInstanceID()), errbuf);
-			safe_delete_array(query);
-			iterator.Advance();
-		}
+	if(!zone)
+        return;
+
+	//TODO: Dec 19, 2008, replace with code updated for current spawn timers.
+    LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
+	iterator.Reset();
+	while (iterator.MoreElements()) {
+		std::string query = StringFormat("DELETE FROM respawn_times "
+                                        "WHERE id = %lu AND instance_id = %lu",
+                                        (unsigned long)iterator.GetData()->GetID(),
+                                        (unsigned long)zone->GetInstanceID());
+        auto results = database.QueryDatabase(query);
+		iterator.Advance();
 	}
 }
 
@@ -2684,11 +2663,6 @@ void QuestManager::FlagInstanceByRaidLeader(uint32 zone, int16 version)
 const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkName) {
 	QuestManagerCurrentQuestVars();
 
-	const char *ERR_MYSQLERROR = "Error in saylink phrase queries";
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 	int sayid = 0;
 
 	int sz = strlen(Phrase);
@@ -2696,42 +2670,26 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 	database.DoEscapeString(escaped_string, Phrase, sz);
 
 	// Query for an existing phrase and id in the saylink table
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `id` FROM `saylink` WHERE `phrase` = '%s'", escaped_string),errbuf,&result))
+	std::string query = StringFormat("SELECT `id` FROM `saylink` WHERE `phrase` = '%s'", escaped_string);
+	auto results = database.QueryDatabase(query);
+	if(results.Success())
 	{
-		if (mysql_num_rows(result) >= 1)
-		{
-			while((row = mysql_fetch_row(result)))
-			{
+		if (results.RowCount() >= 1)
+			for (auto row = results.begin();row != results.end(); ++row)
 				sayid = atoi(row[0]);
-			}
-			mysql_free_result(result);
-		}
 		else // Add a new saylink entry to the database and query it again for the new sayid number
 		{
-			safe_delete_array(query);
+            query = StringFormat("INSERT INTO `saylink` (`phrase`) VALUES ('%s')", escaped_string);
+			results = database.QueryDatabase(query);
 
-			database.RunQuery(query,MakeAnyLenString(&query,"INSERT INTO `saylink` (`phrase`) VALUES ('%s')", escaped_string),errbuf);
-			safe_delete_array(query);
-
-			if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `id` FROM saylink WHERE `phrase` = '%s'", escaped_string),errbuf,&result))
-			{
-				if (mysql_num_rows(result) >= 1)
-				{
-					while((row = mysql_fetch_row(result)))
-					{
+			if(!results.Success())
+                LogFile->write(EQEMuLog::Error, "Error in saylink phrase queries", results.ErrorMessage().c_str());
+            else if (results.RowCount() >= 1)
+					for(auto row = results.begin(); row != results.end(); ++row)
 						sayid = atoi(row[0]);
-					}
-					mysql_free_result(result);
-				}
-			}
-			else
-			{
-				LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, errbuf);
-			}
-			safe_delete_array(query);
+
 		}
 	}
-	safe_delete_array(query);
 	safe_delete_array(escaped_string);
 
 	if(silent)
@@ -2739,27 +2697,21 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 	else
 		sayid = sayid + 500000;
 
-		//Create the say link as an item link hash
-		char linktext[250];
+    //Create the say link as an item link hash
+    char linktext[250];
 
 	if(initiator)
 	{
 		if (initiator->GetClientVersion() >= EQClientRoF)
-		{
 			sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"0000000000000000000000000000000000000000000000000",LinkName,0x12);
-		}
 		else if (initiator->GetClientVersion() >= EQClientSoF)
-		{
 			sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"00000000000000000000000000000000000000000000",LinkName,0x12);
-		}
 		else
-		{
 			sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"000000000000000000000000000000000000000",LinkName,0x12);
-		}
 	}
-	else {	// If no initiator, create an RoF saylink, since older clients handle RoF ones better than RoF handles older ones.
+	else // If no initiator, create an RoF saylink, since older clients handle RoF ones better than RoF handles older ones.
 		sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"0000000000000000000000000000000000000000000000000",LinkName,0x12);
-	}
+
 	strcpy(Phrase,linktext);
 	return Phrase;
 
