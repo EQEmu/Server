@@ -136,10 +136,6 @@ public:
 
 	int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target = nullptr);
 	int32 GetActSpellHealing(uint16 spell_id, int32 value, Mob* target = nullptr);
-	inline void SetSpellFocusDMG(int32 NewSpellFocusDMG) {SpellFocusDMG = NewSpellFocusDMG;}
-	inline void SetSpellFocusHeal(int32 NewSpellFocusHeal) {SpellFocusHeal = NewSpellFocusHeal;}
-	int32 SpellFocusDMG;
-	int32 SpellFocusHeal;
 
 	virtual void SetTarget(Mob* mob);
 	virtual uint16 GetSkill(SkillUseTypes skill_num) const { if (skill_num <= HIGHEST_SKILL) { return skills[skill_num]; } return 0; }
