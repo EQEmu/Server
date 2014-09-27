@@ -419,6 +419,56 @@ bool Lua_Spell::GetAllowRest() {
 	return self->AllowRest;
 }
 
+bool Lua_Spell::GetInCombat() {
+	Lua_Safe_Call_Bool();
+	return self->InCombat;
+}
+
+bool Lua_Spell::GetOutOfCombat() {
+	Lua_Safe_Call_Bool();
+	return self->OutofCombat;
+}
+
+int Lua_Spell::GetAEMaxTargets() {
+	Lua_Safe_Call_Int();
+	return self->aemaxtargets;
+}
+
+int Lua_Spell::GetMaxTargets() {
+	Lua_Safe_Call_Int();
+	return self->maxtargets;
+}
+
+bool Lua_Spell::GetPersistDeath() {
+	Lua_Safe_Call_Bool();
+	return self->persistdeath;
+}
+
+float Lua_Spell::GetMinDist() {
+	Lua_Safe_Call_Real();
+	return self->min_dist;
+}
+
+float Lua_Spell::GetMinDistMod() {
+	Lua_Safe_Call_Real();
+	return self->min_dist_mod;
+}
+
+float Lua_Spell::GetMaxDist() {
+	Lua_Safe_Call_Real();
+	return self->max_dist;
+}
+
+float Lua_Spell::GetMaxDistMod() {
+	Lua_Safe_Call_Real();
+	return self->max_dist_mod;
+}
+
+float Lua_Spell::GetMinRange() {
+	Lua_Safe_Call_Real();
+	return self->min_range;
+}
+
 int Lua_Spell::GetDamageShieldType() {
 	Lua_Safe_Call_Int();
 	return self->DamageShieldType;
@@ -501,6 +551,16 @@ luabind::scope lua_register_spell() {
 		.def("PowerfulFlag", &Lua_Spell::GetPowerfulFlag)
 		.def("CastRestriction", &Lua_Spell::GetCastRestriction)
 		.def("AllowRest", &Lua_Spell::GetAllowRest)
+		.def("InCombat", &Lua_Spell::GetInCombat)
+		.def("OutOfCombat", &Lua_Spell::GetOutOfCombat)
+		.def("AEMaxTargets", &Lua_Spell::GetAEMaxTargets)
+		.def("MaxTargets", &Lua_Spell::GetMaxTargets)
+		.def("PersistDeath", &Lua_Spell::GetPersistDeath)
+		.def("MinDist", &Lua_Spell::GetMinDist)
+		.def("MinDistMod", &Lua_Spell::GetMinDistMod)
+		.def("MaxDist", &Lua_Spell::GetMaxDist)
+		.def("MaxDistMod", &Lua_Spell::GetMaxDistMod)
+		.def("MinRange", &Lua_Spell::GetMinRange)
 		.def("DamageShieldType", &Lua_Spell::GetDamageShieldType);
 }
 

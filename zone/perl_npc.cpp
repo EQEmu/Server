@@ -2340,8 +2340,8 @@ XS(boot_NPC)
 		newXSproto(strcpy(buf, "SetSpellFocusHeal"), XS_NPC_SetSpellFocusHeal, file, "$$");
 		newXSproto(strcpy(buf, "GetSpellFocusDMG"), XS_NPC_GetSpellFocusDMG, file, "$");
 		newXSproto(strcpy(buf, "GetSpellFocusHeal"), XS_NPC_GetSpellFocusHeal, file, "$");
-		newXSproto(strcpy(buf, "GetSlowMitigation"), XS_NPC_GetAttackSpeed, file, "$");
-		newXSproto(strcpy(buf, "GetAttackSpeed"), XS_NPC_GetSlowMitigation, file, "$");
+		newXSproto(strcpy(buf, "GetSlowMitigation"), XS_NPC_GetSlowMitigation, file, "$");
+		newXSproto(strcpy(buf, "GetAttackSpeed"), XS_NPC_GetAttackSpeed, file, "$");
 		newXSproto(strcpy(buf, "GetAccuracyRating"), XS_NPC_GetAccuracyRating, file, "$");
 		newXSproto(strcpy(buf, "GetSpawnKillCount"), XS_NPC_GetSpawnKillCount, file, "$");
 		newXSproto(strcpy(buf, "GetScore"), XS_NPC_GetScore, file, "$");
