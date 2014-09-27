@@ -1267,8 +1267,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 				if (spells[spell_id].base[i] == 1)
 					BuffFadeByEffect(SE_Blind);
-				// handled by client
-				// TODO: blind flag?
+				is_blind = true;
 				break;
 			}
 
@@ -3975,6 +3974,10 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				rooted = false;
 				break;
 			}
+
+			case SE_Blind:
+				is_blind = false;
+				break;
 
 			case SE_Fear:
 			{

@@ -130,7 +130,7 @@ void Mob::ProcessFlee() {
 }
 
 float Mob::GetFearSpeed() {
-	if(flee_mode) {
+	if(flee_mode || is_blind) {
 		//we know ratio < FLEE_HP_RATIO
 		float speed = GetBaseRunspeed();
 		float ratio = GetHPRatio();
@@ -140,6 +140,12 @@ float Mob::GetFearSpeed() {
 			multiplier = multiplier / 6.0f;
 
 		speed = speed * ratio * multiplier / 100;
+
+        // A blinded mob should be pretty slow when running amuck.
+		if (is_blind)
+			{
+			speed = speed/3.0;
+			}
 
 		//NPC will eventually stop. Snares speeds this up.
 		if(speed < 0.09)
