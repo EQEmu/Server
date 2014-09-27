@@ -1,5 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 09/27/2014 ==
+Kayen: Implemented perl function $mob->GetSpellStat(spell_id, identifier, slot);
+Note: identifier is the stat field in spells_new, slot is used for certain effects like effectid, base,base2, max ect.
+Example $mob->GetSpellStat(121, "range"); //Returns spell range
+Example $mob->GetSpellStat(121, "effectid", 1); //Returns the the value of effectid1
+This will allow you to pull almost all the data for any spell in quest files.
+
 == 09/24/2014 ==
 Uleat: Re-ordered server opcodes and handlers to give them some predictability of location (I need this for the inventory re-enumeration.)
 demonstar55: Added helper function bool EQEmu::IsTradeskill(uint32 skill)
