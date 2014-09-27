@@ -1267,7 +1267,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 				if (spells[spell_id].base[i] == 1)
 					BuffFadeByEffect(SE_Blind);
-				is_blind = true;
+
+				// For spells like flash-of-light
+				if (IsDetrimentalSpell(spell_id))
+					is_blind = true;
 				break;
 			}
 
