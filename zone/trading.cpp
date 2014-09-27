@@ -1861,7 +1861,7 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 	int Action = BazaarSearchResults;
 	uint32 Cost = 0;
 	int32 SerialNumber = 0;
-	char Name[64] = {0};
+	char temp_buffer[64] = {0};
 	int Count = 0;
 	uint32 StatValue=0;
 
@@ -1887,23 +1887,23 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 		bool Stackable = atoi(row[10]);
 		if(Stackable) {
 			int Charges = atoi(row[9]);
-			sprintf(Name, "%s(%i)", row[7], Charges);
+			sprintf(temp_buffer, "%s(%i)", row[7], Charges);
 		}
 		else
-			sprintf(Name,"%s(%i)",row[7], Count);
+			sprintf(temp_buffer,"%s(%i)",row[7], Count);
 
-		memcpy(bufptr,&Name, strlen(Name));
+		memcpy(bufptr,&temp_buffer, strlen(temp_buffer));
 
 		bufptr += 64;
 
 		// Extra fields for SoD+
 		//
 		if(Trader2)
-			sprintf(Name, "%s", Trader2->GetName());
+			sprintf(temp_buffer, "%s", Trader2->GetName());
 		else
-			sprintf(Name, "Unknown");
+			sprintf(temp_buffer, "Unknown");
 
-		memcpy(bufptr,&Name, strlen(Name));
+		memcpy(bufptr,&temp_buffer, strlen(temp_buffer));
 
 		bufptr += 64;
 
