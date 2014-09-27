@@ -56,7 +56,7 @@ int32 NPC::GetActSpellDamage(uint16 spell_id, int32 value,  Mob* target) {
 			value -= target->GetFcDamageAmtIncoming(this, spell_id)/spells[spell_id].buffduration;
 	 }
 	  	 
-	 value += dmg*SpellFocusDMG/100; 
+	 value += dmg*GetSpellFocusDMG()/100; 
 
 	if (AI_HasSpellsEffects()){
 		int16 chance = 0;
@@ -275,7 +275,7 @@ int32 NPC::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 	//Scale all NPC spell healing via SetSpellFocusHeal(value)
 
-	value += value*SpellFocusHeal/100; 
+	value += value*GetSpellFocusHeal()/100; 
 
 	 if (target) {
 		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id); 
