@@ -104,6 +104,8 @@ void Client::CalcBonuses()
 	CalcMaxMana();
 	CalcMaxEndurance();
 
+	SetAttackTimer();
+
 	rooted = FindType(SE_Root);
 
 	XPRate = 100 + spellbonuses.XPRateMod;
@@ -174,8 +176,6 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 
 	if(newbon->EnduranceRegen > CalcEnduranceRegenCap())
 		newbon->EnduranceRegen = CalcEnduranceRegenCap();
-
-	SetAttackTimer();
 }
 
 void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug, bool isTribute) {
