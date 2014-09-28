@@ -8349,11 +8349,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 	if(!ca_time)
 		return;
 
-	float HasteModifier = 0;
-	if (GetHaste())
-		HasteModifier = 10000 / (100 + GetHaste());
-	else
-		HasteModifier = 100;
+	float HasteModifier = GetHaste() * 0.01f;
 	int32 dmg = 0;
 
 	uint16 skill_to_use = -1;
@@ -8585,7 +8581,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		TryBackstab(target,reuse);
 	}
 
-	classattack_timer.Start(reuse*HasteModifier/100);
+	classattack_timer.Start(reuse / HasteModifier);
 }
 
 bool Bot::TryHeadShot(Mob* defender, SkillUseTypes skillInUse) {
@@ -8978,11 +8974,7 @@ int32 Bot::CalcMaxMana() {
 }
 
 void Bot::SetAttackTimer() {
-	float PermaHaste;
-	if (GetHaste())
-		PermaHaste = 1 / (1 + (float)GetHaste()/100);
-	else
-		PermaHaste = 1.0f;
+	float haste_mod = GetHaste() * 0.01f;
 
 	//default value for attack timer in case they have
 	//an invalid weapon equipped:
@@ -8991,117 +8983,74 @@ void Bot::SetAttackTimer() {
 	Timer* TimerToUse = nullptr;
 	const Item_Struct* PrimaryWeapon = nullptr;
 
-	for (int i=MainRange; i<=MainSecondary; i++) {
-
+	for (int i = MainRange; i <= MainSecondary; i++) {
 		//pick a timer
 		if (i == MainPrimary)
 			TimerToUse = &attack_timer;
 		else if (i == MainRange)
 			TimerToUse = &ranged_timer;
-		else if(i == MainSecondary)
+		else if (i == MainSecondary)
 			TimerToUse = &attack_dw_timer;
 		else	//invalid slot (hands will always hit this)
 			continue;
 
 		const Item_Struct* ItemToUse = nullptr;
 		ItemInst* ci = GetBotItem(i);
-		if(ci)
+		if (ci)
 			ItemToUse = ci->GetItem();
 
 		//special offhand stuff
-		if(i == MainSecondary) {
+		if (i == MainSecondary) {
 			//if we have a 2H weapon in our main hand, no dual
-			if(PrimaryWeapon != nullptr) {
-				if(	PrimaryWeapon->ItemClass == ItemClassCommon
-					&& (PrimaryWeapon->ItemType == ItemType2HSlash
-					||	PrimaryWeapon->ItemType == ItemType2HBlunt
-					||	PrimaryWeapon->ItemType == ItemType2HPiercing)) {
-						attack_dw_timer.Disable();
-						continue;
+			if (PrimaryWeapon != nullptr) {
+				if (PrimaryWeapon->ItemClass == ItemClassCommon
+						&& (PrimaryWeapon->ItemType == ItemType2HSlash
+						|| PrimaryWeapon->ItemType == ItemType2HBlunt
+						|| PrimaryWeapon->ItemType == ItemType2HPiercing)) {
+					attack_dw_timer.Disable();
+					continue;
 				}
 			}
 
 			//clients must have the skill to use it...
-			if(!GetSkill(SkillDualWield)) {
+			if (!GetSkill(SkillDualWield)) {
 				attack_dw_timer.Disable();
 				continue;
 			}
 		}
 
 		//see if we have a valid weapon
-		if(ItemToUse != nullptr) {
+		if (ItemToUse != nullptr) {
 			//check type and damage/delay
-			if(ItemToUse->ItemClass != ItemClassCommon
-				|| ItemToUse->Damage == 0
-				|| ItemToUse->Delay == 0) {
+			if (ItemToUse->ItemClass != ItemClassCommon
+					|| ItemToUse->Damage == 0
+					|| ItemToUse->Delay == 0) {
 					//no weapon
-					ItemToUse = nullptr;
+				ItemToUse = nullptr;
 			}
 			// Check to see if skill is valid
-			else if((ItemToUse->ItemType > ItemTypeLargeThrowing) && (ItemToUse->ItemType != ItemTypeMartial) && (ItemToUse->ItemType != ItemType2HPiercing)) {
+			else if ((ItemToUse->ItemType > ItemTypeLargeThrowing) && (ItemToUse->ItemType != ItemTypeMartial) && (ItemToUse->ItemType != ItemType2HPiercing)) {
 				//no weapon
 				ItemToUse = nullptr;
 			}
 		}
 
-		int16 DelayMod = itembonuses.HundredHands + spellbonuses.HundredHands;
-		if (DelayMod < -99)
-			DelayMod = -99;
+		int hhe = std::max(itembonuses.HundredHands + spellbonuses.HundredHands, -99);
+		int speed = 0;
+		int delay = 36;
 
 		//if we have no weapon..
 		if (ItemToUse == nullptr) {
 			//above checks ensure ranged weapons do not fall into here
 			// Work out if we're a monk
-			if ((GetClass() == MONK) || (GetClass() == BEASTLORD)) {
-				//we are a monk, use special delay
-				int speed = (int)( (GetMonkHandToHandDelay()*(100+DelayMod)/100)*(100.0f+attack_speed)*PermaHaste);
-				// 1200 seemed too much, with delay 10 weapons available
-				if(speed < RuleI(Combat, MinHastedDelay))	//lower bound
-					speed = RuleI(Combat, MinHastedDelay);
-				TimerToUse->SetAtTrigger(speed, true);	// Hand to hand, delay based on level or epic
-			} else {
-				//not a monk... using fist, regular delay
-				int speed = (int)((36 *(100+DelayMod)/100)*(100.0f+attack_speed)*PermaHaste);
-				//if(speed < RuleI(Combat, MinHastedDelay) && IsClient())	//lower bound
-				//	speed = RuleI(Combat, MinHastedDelay);
-				TimerToUse->SetAtTrigger(speed, true); // Hand to hand, non-monk 2/36
-			}
+			if ((GetClass() == MONK) || (GetClass() == BEASTLORD))
+				delay = GetMonkHandToHandDelay();
 		} else {
 			//we have a weapon, use its delay
-			// Convert weapon delay to timer resolution (milliseconds)
-			//delay * 100
-			int speed = (int)((ItemToUse->Delay*(100+DelayMod)/100)*(100.0f+attack_speed)*PermaHaste);
-			if(speed < RuleI(Combat, MinHastedDelay))
-				speed = RuleI(Combat, MinHastedDelay);
-
-			if(ItemToUse && (ItemToUse->ItemType == ItemTypeBow || ItemToUse->ItemType == ItemTypeLargeThrowing))
-			{
-				/*if(IsClient())
-				{
-					float max_quiver = 0;
-					for(int r = SLOT_PERSONAL_BEGIN; r <= SLOT_PERSONAL_END; r++)
-					{
-						const ItemInst *pi = CastToClient()->GetInv().GetItem(r);
-						if(!pi)
-							continue;
-						if(pi->IsType(ItemClassContainer) && pi->GetItem()->BagType == bagTypeQuiver)
-						{
-							float temp_wr = (pi->GetItem()->BagWR / 3);
-							if(temp_wr > max_quiver)
-							{
-								max_quiver = temp_wr;
-							}
-						}
-					}
-					if(max_quiver > 0)
-					{
-						float quiver_haste = 1 / (1 + max_quiver / 100);
-						speed *= quiver_haste;
-					}
-				}*/
-			}
-			TimerToUse->SetAtTrigger(speed, true);
+			delay = ItemToUse->Delay;
 		}
+		speed = static_cast<int>(((delay / haste_mod) + ((hhe / 100.0f) * delay)) * 100);
+		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true);
 
 		if(i == MainPrimary)
 			PrimaryWeapon = ItemToUse;

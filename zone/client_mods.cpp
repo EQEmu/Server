@@ -1341,11 +1341,44 @@ int16 Client::CalcCHA() {
 	return(CHA);
 }
 
-int Client::CalcHaste() {
-	int h = spellbonuses.haste + spellbonuses.hastetype2;
+int Client::CalcHaste()
+{
+	/* Tests: (based on results in newer char window)
+	* 68 v1 + 46 item + 25 over + 35 inhib = 204%
+	* 46 item + 5 v2 + 25 over + 35 inhib = 65%
+	* 68 v1 + 46 item + 5 v2 + 25 over + 35 inhib = 209%
+	* 75% slow + 35 inhib = 25%
+	* 35 inhib = 65%
+	* 75% slow = 25%
+	* Conclusions:
+	* the bigger effect in slow v. inhib wins
+	* slow negates all other hastes
+	* inhib will only negate all other hastes if you don't have v1 (ex. VQ)
+	*/
+	// slow beats all! Besides a better inhibit
+	if (spellbonuses.haste < 0) {
+		if (-spellbonuses.haste <= spellbonuses.inhibitmelee)
+			Haste = 100 - spellbonuses.inhibitmelee;
+		else
+			Haste = 100 + spellbonuses.haste;
+		return Haste;
+	}
+
+	// No haste and inhibit, kills all other hastes
+	if (spellbonuses.haste == 0 && spellbonuses.inhibitmelee) {
+		Haste = 100 - spellbonuses.inhibitmelee;
+		return Haste;
+	}
+
+	int h = 0;
 	int cap = 0;
-	int overhaste = 0;
 	int level = GetLevel();
+
+	// we know we have a haste spell and not slowed, no extra inhibit melee checks needed
+	if (spellbonuses.haste)
+		h += spellbonuses.haste - spellbonuses.inhibitmelee;
+	if (spellbonuses.hastetype2 && level > 49) // type 2 is capped at 10% and only available to 50+
+		h += spellbonuses.hastetype2 > 10 ? 10 : spellbonuses.hastetype2;
 
 	// 26+ no cap, 1-25 10
 	if (level > 25) // 26+
@@ -1368,24 +1401,16 @@ int Client::CalcHaste() {
 
 	// 51+ 25 (despite there being higher spells...), 1-50 10
 	if (level > 50) // 51+
-		overhaste = spellbonuses.hastetype3 > 25 ? 25 : spellbonuses.hastetype3;
+		h += spellbonuses.hastetype3 > 25 ? 25 : spellbonuses.hastetype3;
 	else // 1-50
-		overhaste = spellbonuses.hastetype3 > 10 ? 10 : spellbonuses.hastetype3;
+		h += spellbonuses.hastetype3 > 10 ? 10 : spellbonuses.hastetype3;
 
-	h += overhaste;
 	h += ExtraHaste;	//GM granted haste.
 
 	h = mod_client_haste(h);
 
-	if (spellbonuses.inhibitmelee) {
-		if (h >= 0)
-			h -= spellbonuses.inhibitmelee;
-		else
-			h -= ((100 + h) * spellbonuses.inhibitmelee / 100);
-	}
-
-	Haste = h;
-	return(Haste);
+	Haste = 100 + h;
+	return Haste;
 }
 
 //The AA multipliers are set to be 5, but were 2 on WR

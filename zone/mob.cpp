@@ -2735,11 +2735,28 @@ uint32 Mob::GetZoneID() const {
 	return(zone->GetZoneID());
 }
 
-int Mob::GetHaste() {
-	int h = spellbonuses.haste + spellbonuses.hastetype2;
+int Mob::GetHaste()
+{
+	// See notes in Client::CalcHaste
+	// Need to check if the effect of inhibit melee differs for NPCs
+	if (spellbonuses.haste < 0) {
+		if (-spellbonuses.haste <= spellbonuses.inhibitmelee)
+			return 100 - spellbonuses.inhibitmelee;
+		else
+			return 100 + spellbonuses.haste;
+	}
+
+	if (spellbonuses.haste == 0 && spellbonuses.inhibitmelee)
+		return 100 - spellbonuses.inhibitmelee;
+
+	int h = 0;
 	int cap = 0;
-	int overhaste = 0;
 	int level = GetLevel();
+
+	if (spellbonuses.haste)
+		h += spellbonuses.haste - spellbonuses.inhibitmelee;
+	if (spellbonuses.hastetype2 && level > 49)
+		h += spellbonuses.hastetype2 > 10 ? 10 : spellbonuses.hastetype2;
 
 	// 26+ no cap, 1-25 10
 	if (level > 25) // 26+
@@ -2760,21 +2777,13 @@ int Mob::GetHaste() {
 
 	// 51+ 25 (despite there being higher spells...), 1-50 10
 	if (level > 50) // 51+
-		overhaste = spellbonuses.hastetype3 > 25 ? 25 : spellbonuses.hastetype3;
+		h += spellbonuses.hastetype3 > 25 ? 25 : spellbonuses.hastetype3;
 	else // 1-50
-		overhaste = spellbonuses.hastetype3 > 10 ? 10 : spellbonuses.hastetype3;
+		h += spellbonuses.hastetype3 > 10 ? 10 : spellbonuses.hastetype3;
 
-	h += overhaste;
 	h += ExtraHaste;	//GM granted haste.
 
-	if (spellbonuses.inhibitmelee) {
-		if (h >= 0)
-			h -= spellbonuses.inhibitmelee;
-		else
-			h -= ((100 + h) * spellbonuses.inhibitmelee / 100);
-	}
-
-	return(h);
+	return 100 + h;
 }
 
 void Mob::SetTarget(Mob* mob) {

@@ -1412,11 +1412,7 @@ void NPC::DoClassAttacks(Mob *target) {
 	if(!ca_time)
 		return;
 
-	float HasteModifier = 0;
-	if (GetHaste())
-		HasteModifier = 10000 / (100 + GetHaste());
-	else
-		HasteModifier = 100;
+	float HasteModifier = GetHaste() * 0.01f;
 
 	int level = GetLevel();
 	int reuse = TauntReuseTime * 1000;	//make this very long since if they dont use it once, they prolly never will
@@ -1568,7 +1564,7 @@ void NPC::DoClassAttacks(Mob *target) {
 		}
 	}
 
-	classattack_timer.Start(reuse*HasteModifier/100);
+	classattack_timer.Start(reuse / HasteModifier);
 }
 
 void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
@@ -1592,20 +1588,13 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 	}
 
 	int ReuseTime = 0;
-	int ClientHaste = GetHaste();
-	int HasteMod = 0;
+	float HasteMod = GetHaste() * 0.01f;
 
-	if(ClientHaste >= 0){
-		HasteMod = (10000/(100+ClientHaste)); //+100% haste = 2x as many attacks
-	}
-	else{
-		HasteMod = (100-ClientHaste); //-100% haste = 1/2 as many attacks
-	}
 	int32 dmg = 0;
 
 	uint16 skill_to_use = -1;
 
-	if (skill == -1){ 
+	if (skill == -1){
 		switch(GetClass()){
 		case WARRIOR:
 		case RANGER:
@@ -1677,8 +1666,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 				}
 			}
 
-			ReuseTime = BashReuseTime-1;
-			ReuseTime = (ReuseTime*HasteMod)/100;
+			ReuseTime = (BashReuseTime - 1) / HasteMod;
 
 			DoSpecialAttackDamage(ca_target, SkillBash, dmg, 1,-1,ReuseTime);
 
@@ -1705,8 +1693,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 		if (min_dmg > max_dmg)
 			max_dmg = min_dmg;
 
-		ReuseTime = FrenzyReuseTime-1;
-		ReuseTime = (ReuseTime*HasteMod)/100;
+		ReuseTime = (FrenzyReuseTime - 1) / HasteMod;
 
 		//Live parses show around 55% Triple 35% Double 10% Single, you will always get first hit.
 		while(AtkRounds > 0) {
@@ -1781,7 +1768,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 		TryBackstab(ca_target,ReuseTime);
 	}
 
-	ReuseTime = (ReuseTime*HasteMod)/100;
+	ReuseTime = ReuseTime / HasteMod;
 	if(ReuseTime > 0 && !IsRiposte){ 
 		p_timers.Start(pTimerCombatAbility, ReuseTime);
 	}
