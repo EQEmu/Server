@@ -616,7 +616,7 @@ public:
 	bool PassCastRestriction(bool UseCastRestriction = true, int16 value = 0, bool IsDamage = true);
 	bool ImprovedTaunt();
 	bool TryRootFadeByDamage(int buffslot, Mob* attacker);
-	int16 GetSlowMitigation() const {return slow_mitigation;}
+	float GetSlowMitigation() const { return slow_mitigation; }
 	void CalcSpellPowerDistanceMod(uint16 spell_id, float range, Mob* caster = nullptr);
 	inline int16 GetSpellPowerDistanceMod() const { return SpellPowerDistanceMod; };
 	inline void SetSpellPowerDistanceMod(int16 value) { SpellPowerDistanceMod = value; };
