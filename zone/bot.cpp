@@ -9035,7 +9035,7 @@ void Bot::SetAttackTimer() {
 			}
 		}
 
-		int hhe = std::max(itembonuses.HundredHands + spellbonuses.HundredHands, -99);
+		int hhe = itembonuses.HundredHands + spellbonuses.HundredHands;
 		int speed = 0;
 		int delay = 36;
 
@@ -9049,7 +9049,10 @@ void Bot::SetAttackTimer() {
 			//we have a weapon, use its delay
 			delay = ItemToUse->Delay;
 		}
-		speed = static_cast<int>(((delay / haste_mod) + ((hhe / 100.0f) * delay)) * 100);
+		if (RuleB(Spells, Jun182014HundredHandsRevamp))
+			speed = static_cast<int>(((delay / haste_mod) + ((hhe / 1000.0f) * (delay / haste_mod))) * 100);
+		else
+			speed = static_cast<int>(((delay / haste_mod) + ((hhe / 100.0f) * delay)) * 100);
 		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true);
 
 		if(i == MainPrimary)

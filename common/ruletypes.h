@@ -322,6 +322,7 @@ RULE_INT ( Spells, AI_IdleNoSpellMinRecast, 500) // AI spell recast time(MS) che
 RULE_INT ( Spells, AI_IdleNoSpellMaxRecast, 2000) // AI spell recast time(MS) check when no spell is cast while chasing target. (max time in random)
 RULE_INT ( Spells, AI_IdleBeneficialChance, 100) // Chance while idle to do a beneficial spell on self or others.
 RULE_BOOL ( Spells, SHDProcIDOffByOne, true) // pre June 2009 SHD spell procs were off by 1, they stopped doing this in June 2009 (so UF+ spell files need this false)
+RULE_BOOL ( Spells, Jun182014HundredHandsRevamp, false) // this should be true for if you import a spell file newer than June 18, 2014
 
 RULE_CATEGORY_END()
 

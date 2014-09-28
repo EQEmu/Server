@@ -4825,7 +4825,6 @@ void Mob::CommonBreakInvisible()
  * Difference     -0.004444444   -0.005555556   -0.006666667   -0.008222222
  *
  * These times are in 10th of a second
- * New formula currently unsupported
  */
 
 void Mob::SetAttackTimer()
@@ -4900,7 +4899,7 @@ void Client::SetAttackTimer()
 			}
 		}
 
-		int hhe = std::max(itembonuses.HundredHands + spellbonuses.HundredHands, -99);
+		int hhe = itembonuses.HundredHands + spellbonuses.HundredHands;
 		int speed = 0;
 		int delay = 36;
 		float quiver_haste = 0.0f;
@@ -4917,7 +4916,10 @@ void Client::SetAttackTimer()
 			if (ItemToUse->ItemType == ItemTypeBow || ItemToUse->ItemType == ItemTypeLargeThrowing)
 				quiver_haste = GetQuiverHaste();
 		}
-		speed = static_cast<int>(((delay / haste_mod) + ((hhe / 100.0f) * delay)) * 100);
+		if (RuleB(Spells, Jun182014HundredHandsRevamp))
+			speed = static_cast<int>(((delay / haste_mod) + ((hhe / 1000.0f) * (delay / haste_mod))) * 100);
+		else
+			speed = static_cast<int>(((delay / haste_mod) + ((hhe / 100.0f) * delay)) * 100);
 		// this is probably wrong
 		if (quiver_haste > 0)
 			speed *= quiver_haste;
@@ -4937,13 +4939,17 @@ void NPC::SetAttackTimer()
 	attack_timer.SetAtTrigger(4000, true);
 
 	Timer *TimerToUse = nullptr;
-	int hhe = std::max(itembonuses.HundredHands + spellbonuses.HundredHands, -99);
+	int hhe = itembonuses.HundredHands + spellbonuses.HundredHands;
 
 	// Technically NPCs should do some logic for weapons, but the effect is minimal
 	// What they do is take the lower of their set delay and the weapon's
 	// ex. Mob's delay set to 20, weapon set to 19, delay 19
 	// Mob's delay set to 20, weapon set to 21, delay 20
-	int speed = static_cast<int>(((attack_delay / haste_mod) + ((hhe / 100.0f) * attack_delay)) * 100);
+	int speed = 0;
+	if (RuleB(Spells, Jun182014HundredHandsRevamp))
+		speed = static_cast<int>(((attack_delay / haste_mod) + ((hhe / 1000.0f) * (attack_delay / haste_mod))) * 100);
+	else
+		speed = static_cast<int>(((attack_delay / haste_mod) + ((hhe / 100.0f) * attack_delay)) * 100);
 
 	for (int i = MainRange; i <= MainSecondary; i++) {
 		//pick a timer
