@@ -294,6 +294,7 @@ struct StatBonuses {
 	int16	ResistFearChance;					//i
 	bool	Fearless;							//i
 	bool	IsFeared;							//i
+	bool	IsBlind;							//i
 	int16	StunResist;							//i
 	int16	MeleeSkillCheck;					//i
 	uint8	MeleeSkillCheckSkill;

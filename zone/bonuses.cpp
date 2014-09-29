@@ -2472,7 +2472,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				}
 				break;
 			}
-			
+
 			case SE_ManaAbsorbPercentDamage:
 			{
 				if (newbon->ManaAbsorbPercentDamage[0] < effect_value){
@@ -2493,7 +2493,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_ShieldBlock:
 				newbon->ShieldBlock += effect_value;
 				break;
-			
+
 			case SE_ShieldEquipHateMod:
 				newbon->ShieldEquipHateMod += effect_value;
 				break;
@@ -2505,6 +2505,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_BlockBehind:
 				newbon->BlockBehind += effect_value;
+				break;
+
+			case SE_Blind:
+				newbon->IsBlind = true;
 				break;
 
 			case SE_Fear:
@@ -4084,6 +4088,10 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.BlockBehind = effect_value;
 					aabonuses.BlockBehind = effect_value;
 					itembonuses.BlockBehind = effect_value;
+					break;
+
+				case SE_Blind:
+					spellbonuses.IsBlind = false;
 					break;
 
 				case SE_Fear:

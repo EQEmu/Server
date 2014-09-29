@@ -768,6 +768,7 @@ public:
 	inline void StartFleeing() { flee_mode = true; CalculateNewFearpoint(); }
 	void ProcessFlee();
 	void CheckFlee();
+	inline bool IsBlind() { return spellbonuses.IsBlind; }
 
 	inline bool			CheckAggro(Mob* other) {return hate_list.IsOnHateList(other);}
 	float				CalculateHeadingToTarget(float in_x, float in_y);
@@ -1190,7 +1191,6 @@ protected:
 	float fear_walkto_y;
 	float fear_walkto_z;
 	bool curfp;
-	bool is_blind;
 
 	// Pathing
 	//

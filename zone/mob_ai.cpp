@@ -1039,8 +1039,8 @@ void Mob::AI_Process() {
 	// Begin: Additions for Wiz Fear Code
 	//
 	if(RuleB(Combat, EnableFearPathing)){
-		if(curfp || (is_blind && !CombatRange(hate_list.GetClosest(this)))) {
-			if(IsRooted()) {
+		if(curfp) {
+			if(IsRooted() || (IsBlind() && CombatRange(hate_list.GetClosest(this)))) {
 				//make sure everybody knows were not moving, for appearance sake
 				if(IsMoving())
 				{
@@ -1087,7 +1087,9 @@ void Mob::AI_Process() {
 
 	if (engaged)
 	{
-		if (IsRooted() || is_blind)
+		// we are prevented from getting here if we are blind and don't have a target in range
+		// from above, so no extra blind checks needed
+		if (IsRooted() || IsBlind())
 			SetTarget(hate_list.GetClosest(this));
 		else
 		{
