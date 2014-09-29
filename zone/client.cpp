@@ -7562,8 +7562,6 @@ FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_ra
 }
 
 //o--------------------------------------------------------------
-//| Name: SetFactionLevel; rembrant, Dec. 20, 2001
-//o--------------------------------------------------------------
 //| Notes: Sets the characters faction standing with the specified NPC.
 //o--------------------------------------------------------------
 void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, uint8 char_race, uint8 char_deity)
@@ -7571,90 +7569,90 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 	int32 faction_id[MAX_NPC_FACTIONS]={ 0,0,0,0,0,0,0,0,0,0 };
 	int32 npc_value[MAX_NPC_FACTIONS]={ 0,0,0,0,0,0,0,0,0,0 };
 	uint8 temp[MAX_NPC_FACTIONS]={ 0,0,0,0,0,0,0,0,0,0 };
-	int32 mod;
-	int32 t;
-	int32 tmpValue;
-	int32 current_value;
+	int16 mod;
+	int16 tmpValue;
+	int16 current_value;
 	FactionMods fm;
+	bool  change=false;
+	bool  repair=false;
+
 	// Get the npc faction list
 	if(!database.GetNPCFactionList(npc_id, faction_id, npc_value, temp))
 		return;
+
 	for(int i = 0;i<MAX_NPC_FACTIONS;i++)
-	{
+		{
 		if(faction_id[i] <= 0)
 			continue;
 
 		// Get the faction modifiers
 		if(database.GetFactionData(&fm,char_class,char_race,char_deity,faction_id[i]))
-		{
+			{
 			// Get the characters current value with that faction
 			current_value = GetCharacterFactionLevel(faction_id[i]);
 
-			if(this->itembonuses.HeroicCHA) {
+			// Modify if we have Heroic Charisma
+			if(this->itembonuses.HeroicCHA) 
+				{
 				int faction_mod = itembonuses.HeroicCHA / 5;
 				// If our result isn't truncated, then just do that
-				if(npc_value[i] * faction_mod / 100 != 0)
+				if(npc_value[i] * faction_mod / 100 != 0) 
 					npc_value[i] += npc_value[i] * faction_mod / 100;
-				// If our result is truncated, then double a mob's value every once and a while to equal what they would have got
-				else {
+				// If our result is truncated, then double a mob's value every once 
+				// in a while to equal what they would have got
+				else 
+					{
 					if(MakeRandomInt(0, 100) < faction_mod)
 						npc_value[i] *= 2;
-				}
-			}
-			//figure out their modifier
-			mod = fm.base + fm.class_mod + fm.race_mod + fm.deity_mod;
-			if(mod > MAX_FACTION)
-				mod = MAX_FACTION;
-			else if(mod < MIN_FACTION)
-				mod = MIN_FACTION;
-
-			// Calculate the faction
-			if(npc_value[i] != 0) {
-				tmpValue = current_value + mod + npc_value[i];
-
-				int16 FactionModPct = spellbonuses.FactionModPct + itembonuses.FactionModPct + aabonuses.FactionModPct;
-				tmpValue += (tmpValue * FactionModPct) / 100; 
-
-				// Make sure faction hits don't go to GMs...
-				if (m_pp.gm==1 && (tmpValue < current_value)) {
-					tmpValue = current_value;
-				}
-
-				// Make sure we dont go over the min/max faction limits
-				if(tmpValue >= MAX_FACTION)
-				{
-					t = MAX_FACTION - mod;
-					if(current_value == t) {
-						//do nothing, it is already maxed out
-					} else if(!(database.SetCharacterFactionLevel(char_id, faction_id[i], t, temp[i], factionvalues)))
-					{
-						return;
 					}
 				}
-				else if(tmpValue <= MIN_FACTION)
-				{
-					t = MIN_FACTION - mod;
-					if(current_value == t) {
-						//do nothing, it is already maxed out
-					} else if(!(database.SetCharacterFactionLevel(char_id, faction_id[i], t, temp[i], factionvalues)))
-					{
-						return;
-					}
-				}
-				else
-				{
-					if(!(database.SetCharacterFactionLevel(char_id, faction_id[i], current_value + npc_value[i], temp[i], factionvalues)))
-					{
-						return;
-					}
-				}
-				if(tmpValue <= MIN_FACTION)
-					tmpValue = MIN_FACTION;
 
-				SendFactionMessage(npc_value[i], faction_id[i], tmpValue, temp[i]);
+			// Set flag when to update db.
+			if (current_value > MAX_PERSONAL_FACTION) // db faction out of line (old code saved it wrong)
+				{
+				repair=true;
+				current_value = MAX_PERSONAL_FACTION;
+				}
+			else if (current_value < MIN_PERSONAL_FACTION) // db faction out of line (old code saved it wrong)
+				{
+				repair=true;
+				current_value = MIN_PERSONAL_FACTION;
+				}
+			// Also update if there's a hit and we're not maxxed or bottomed out or a GM
+			else if(m_pp.gm != 1 && npc_value[i] != 0 &&
+					(current_value != MAX_PERSONAL_FACTION || current_value != MIN_PERSONAL_FACTION)) 
+				{
+				change=true;
+				}
+
+			current_value += npc_value[i];
+			
+			if (current_value < MIN_PERSONAL_FACTION)
+				{
+				current_value = MIN_PERSONAL_FACTION;
+				}
+			else if (current_value > MAX_PERSONAL_FACTION)
+				{
+				current_value = MAX_PERSONAL_FACTION;
+				}
+
+			if (change || repair)
+				{
+				database.SetCharacterFactionLevel(char_id, faction_id[i],
+						current_value, temp[i], factionvalues);
+
+				if (change) // Message only if kill modified faction. Repair silently.
+					{
+					//figure out their modifierm buildmessage wants final faction
+					mod = fm.base + fm.class_mod + fm.race_mod + fm.deity_mod;
+			    	tmpValue = current_value + mod + npc_value[i];
+
+					SendFactionMessage(npc_value[i],faction_id[i],tmpValue,temp[i]);
+					}
+				}
+
 			}
 		}
-	}
 	return;
 }
 
@@ -7690,8 +7688,6 @@ int32 Client::GetModCharacterFactionLevel(int32 faction_id) {
 	FactionMods fm;
 	if(database.GetFactionData(&fm,GetClass(),GetRace(),GetDeity(),faction_id))
 		Modded += fm.base + fm.class_mod + fm.race_mod + fm.deity_mod;
-	if (Modded > MAX_FACTION)
-		Modded = MAX_FACTION;
 
 	return Modded;
 }
@@ -7774,13 +7770,13 @@ void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 totalval
 
 	if (tmpvalue == 0 || temp == 1 || temp == 2)
 		return;
-	else if (totalvalue >= MAX_FACTION)
+	else if (totalvalue >= MAX_PERSONAL_FACTION)
 		Message_StringID(0, FACTION_BEST, name);
-	else if (tmpvalue > 0 && totalvalue < MAX_FACTION)
+	else if (tmpvalue > 0 && totalvalue < MAX_PERSONAL_FACTION)
 		Message_StringID(0, FACTION_BETTER, name);
-	else if (tmpvalue < 0 && totalvalue > MIN_FACTION)
+	else if (tmpvalue < 0 && totalvalue > MIN_PERSONAL_FACTION)
 		Message_StringID(0, FACTION_WORSE, name);
-	else if (totalvalue <= MIN_FACTION)
+	else if (totalvalue <= MIN_PERSONAL_FACTION)
 		Message_StringID(0, FACTION_WORST, name);
 
 	return;
