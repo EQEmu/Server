@@ -433,8 +433,8 @@ void Zone::LoadTempMerchantData(){
 			npcid = ml.npcid;
 		}
 		ml.slot = atoul(row[1]);
-		ml.item = atoul(row[2]);
-		ml.charges = atoul(row[3]);
+		ml.charges = atoul(row[2]);
+		ml.item = atoul(row[3]);
 		ml.origslot = ml.slot;
 		cur->second.push_back(ml);
 	}
