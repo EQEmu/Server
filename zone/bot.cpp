@@ -4941,7 +4941,7 @@ uint32 Bot::GetBotOwnerCharacterID(uint32 botID, std::string* errorMessage) {
 
     std::string query = StringFormat("SELECT BotOwnerCharacterID FROM bots WHERE BotID = %u", botID);
     auto results = database.QueryDatabase(query);
-    if (results.Success()) {
+    if (!results.Success()) {
         *errorMessage = std::string(results.ErrorMessage());
         return 0;
     }
