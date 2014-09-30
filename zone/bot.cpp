@@ -4266,7 +4266,7 @@ uint32 Bot::GetBotItemBySlot(uint32 slotID) {
 
     std::string query = StringFormat("SELECT itemid FROM botinventory WHERE botid=%i AND slotid = %i", GetBotID(), slotID);
     auto results = database.QueryDatabase(query);
-    if(results.Success())
+    if(!results.Success())
         return 0;
 
     if(results.RowCount() != 1)
