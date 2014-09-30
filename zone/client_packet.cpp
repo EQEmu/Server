@@ -1307,7 +1307,13 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	conn_state = ReceivedZoneEntry; 
 
 	ClientVersion = Connection()->ClientVersion();
-	ClientVersionBit = 1 << (ClientVersion - 1);
+	if (ClientVersion != EQClientUnknown)
+		ClientVersionBit = 1 << (ClientVersion - 1);
+	else
+		ClientVersionBit = 0;
+
+	bool siv = m_inv.SetInventoryVersion(ClientVersion);
+	LogFile->write(EQEMuLog::Debug, "%s inventory version to %s(%i)", (siv ? "Succeeded in setting" : "Failed to set"), EQClientVersionName(ClientVersion), ClientVersion);
 
 	/* Antighost code
 		tmp var is so the search doesnt find this object
@@ -3999,15 +4005,16 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 	else if ((castspell->slot == USE_ITEM_SPELL_SLOT) || (castspell->slot == POTION_BELT_SPELL_SLOT))	// ITEM or POTION cast
 	{
 		//discipline, using the item spell slot
-		if (castspell->inventoryslot == 0xFFFFFFFF) {
+		if (castspell->inventoryslot == INVALID_INDEX) {
 			if (!UseDiscipline(castspell->spell_id, castspell->target_id)) {
 				LogFile->write(EQEMuLog::Debug, "Unknown ability being used by %s, spell being cast is: %i\n", GetName(), castspell->spell_id);
 				InterruptSpell(castspell->spell_id);
 			}
 			return;
 		}
-		else if ((castspell->inventoryslot <= EmuConstants::GENERAL_END) || (castspell->slot == POTION_BELT_SPELL_SLOT))	// sanity check
+		else if (m_inv.SupportsClickCasting(castspell->inventoryslot) || (castspell->slot == POTION_BELT_SPELL_SLOT))	// sanity check
 		{
+			// packet field types will be reviewed as packet transistions occur -U
 			const ItemInst* inst = m_inv[castspell->inventoryslot]; //slot values are int16, need to check packet on this field
 			//bool cancast = true;
 			if (inst && inst->IsType(ItemClassCommon))
@@ -8555,7 +8562,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 
 	LogFile->write(EQEMuLog::Debug, "OP ItemVerifyRequest: spell=%i, target=%i, inv=%i", spell_id, target_id, slot_id);
 
-	if ((slot_id < MainCursor) || (slot_id == MainPowerSource) || (slot_id > 250 && slot_id < 331 && ((item->ItemType == ItemTypePotion) || item->PotionBelt))) // sanity check
+	if (m_inv.SupportsClickCasting(slot_id) || ((item->ItemType == ItemTypePotion || item->PotionBelt) && m_inv.SupportsPotionBeltCasting(slot_id))) // sanity check
 	{
 		ItemInst* p_inst = (ItemInst*)inst;
 

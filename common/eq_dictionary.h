@@ -184,6 +184,7 @@ public:
 	static uint64	CursorBitmask(uint32 version);
 
 	static bool	AllowsEmptyBagInBag(uint32 version);
+	static bool AllowsClickCastFromBag(uint32 version);
 
 	// items
 	static uint16	ItemCommonSize(uint32 version);

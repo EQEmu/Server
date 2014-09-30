@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 09/30/2014 ==
+Uleat: Implemented click-casting from bag slots for clients that natively support it (RoF)
+
 == 09/28/2014 ==
 demonstar55: Add support for post June 18, 2014 Hundred Hands Effect spells (they changed the formula and stuff)
 set Spells:Jun182014HundredHandsRevamp to true if you're using a spell file from June 18, 2014+

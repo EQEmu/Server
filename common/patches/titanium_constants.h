@@ -180,6 +180,7 @@ namespace Titanium {
 
 	namespace limits {
 		static const bool ALLOWS_EMPTY_BAG_IN_BAG = false;
+		static const bool ALLOWS_CLICK_CAST_FROM_BAG = false;
 		static const bool COIN_HAS_WEIGHT = true;
 	}
 

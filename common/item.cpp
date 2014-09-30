@@ -911,6 +911,30 @@ bool Inventory::CanItemFitInContainer(const Item_Struct *ItemToTry, const Item_S
 	return true;
 }
 
+bool Inventory::SupportsClickCasting(int16 slot_id)
+{
+	// there are a few non-potion items that identify as ItemTypePotion..so, we still need to ubiquitously include the equipment range
+	if ((uint16)slot_id <= EmuConstants::GENERAL_END || slot_id == MainPowerSource)
+	{
+		return true;
+	}
+	else if (slot_id >= EmuConstants::GENERAL_BAGS_BEGIN && slot_id <= EmuConstants::GENERAL_BAGS_END)
+	{
+		if (EQLimits::AllowsClickCastFromBag(m_version))
+			return true;
+	}
+
+	return false;
+}
+
+bool Inventory::SupportsPotionBeltCasting(int16 slot_id)
+{
+	if ((uint16)slot_id <= EmuConstants::GENERAL_END || slot_id == MainPowerSource || (slot_id >= EmuConstants::GENERAL_BAGS_BEGIN && slot_id <= EmuConstants::GENERAL_BAGS_END))
+		return true;
+
+	return false;
+}
+
 // Test whether a given slot can support a container item
 bool Inventory::SupportsContainers(int16 slot_id)
 {

@@ -121,7 +121,21 @@ public:
 	// Public Methods
 	///////////////////////////////
 
+	Inventory() { m_version = EQClientUnknown; m_versionset = false; }
 	~Inventory();
+
+	// Inventory v2 creep
+	bool SetInventoryVersion(EQClientVersion version) {
+		if (!m_versionset) {
+			m_version = version;
+			return (m_versionset = true);
+		}
+		else {
+			return false;
+		}
+	}
+
+	EQClientVersion GetInventoryVersion() { return m_version; }
 
 	static void CleanDirty();
 	static void MarkDirty(ItemInst *inst);
@@ -132,7 +146,7 @@ public:
 
 	inline iter_queue cursor_begin()	{ return m_cursor.begin(); }
 	inline iter_queue cursor_end()		{ return m_cursor.end(); }
-	inline bool CursorEmpty()		{ return (m_cursor.size() == 0); }
+	inline bool CursorEmpty()			{ return (m_cursor.size() == 0); }
 
 	// Retrieve a read-only item from inventory
 	inline const ItemInst* operator[](int16 slot_id) const { return GetItem(slot_id); }
@@ -183,6 +197,10 @@ public:
 
 	static bool CanItemFitInContainer(const Item_Struct *ItemToTry, const Item_Struct *Container);
 
+	//  Test for valid inventory casting slot
+	bool SupportsClickCasting(int16 slot_id);
+	bool SupportsPotionBeltCasting(int16 slot_id);
+
 	// Test whether a given slot can support a container item
 	static bool SupportsContainers(int16 slot_id);
 
@@ -229,7 +247,12 @@ protected:
 	std::map<int16, ItemInst*>	m_bank;		// Items in character bank
 	std::map<int16, ItemInst*>	m_shbank;	// Items in character shared bank
 	std::map<int16, ItemInst*>	m_trade;	// Items in a trade session
-	ItemInstQueue			m_cursor;	// Items on cursor: FIFO
+	ItemInstQueue				m_cursor;	// Items on cursor: FIFO
+
+private:
+	// Active inventory version
+	EQClientVersion m_version;
+	bool m_versionset;
 };
 
 class SharedDatabase;
