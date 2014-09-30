@@ -10693,7 +10693,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 		Client *i = entity_list.GetClientByName(ri->player_name);
 		if (i){
 			if (IsRaidGrouped()){
-				i->Message_StringID(0, ALREADY_IN_RAID, ri->player_name); //group failed, must invite members not in raid...
+				i->Message_StringID(0, ALREADY_IN_RAID, GetName()); //group failed, must invite members not in raid...
 				return;
 			}
 			Raid *r = entity_list.GetRaidByClient(i);
