@@ -47,8 +47,10 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* ite
 
 	uint32 cash = 0;
 	if(max_cash > 0 && EQEmu::ValueWithin(lts->avgcoin, min_cash, max_cash)) {
-		int avg_cash_roll = MakeRandomInt(1, 100);
-		if(avg_cash_roll > 50) {
+		float upper_chance = (float)(lts->avgcoin - min_cash) / (float)(max_cash - min_cash);
+		float avg_cash_roll = (float)MakeRandomFloat(0.0, 1.0);
+
+		if(avg_cash_roll <= upper_chance) {
 			cash = MakeRandomInt(lts->avgcoin, max_cash);
 		} else {
 			cash = MakeRandomInt(min_cash, lts->avgcoin);
