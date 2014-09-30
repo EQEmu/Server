@@ -3205,55 +3205,55 @@ snare has both of them negative, yet their range should work the same:
 		case 124:	// check sign
 			result = ubase;
 			if (caster_level > 50)
-				result += caster_level - 50;
+				result += updownsign * (caster_level - 50);
 			break;
 
 		case 125:	// check sign
 			result = ubase;
 			if (caster_level > 50)
-				result += 2 * (caster_level - 50);
+				result += updownsign * 2 * (caster_level - 50);
 			break;
 
 		case 126:	// check sign
 			result = ubase;
 			if (caster_level > 50)
-				result += 3 * (caster_level - 50);
+				result += updownsign * 3 * (caster_level - 50);
 			break;
 
 		case 127:	// check sign
 			result = ubase;
 			if (caster_level > 50)
-				result += 4 * (caster_level - 50);
+				result += updownsign * 4 * (caster_level - 50);
 			break;
 
 		case 128:	// check sign
 			result = ubase;
 			if (caster_level > 50)
-				result += 5 * (caster_level - 50);
+				result += updownsign * 5 * (caster_level - 50);
 			break;
 
 		case 129:	// check sign
 			result = ubase;
 			if (caster_level > 50)
-				result += 10 * (caster_level - 50);
+				result += updownsign * 10 * (caster_level - 50);
 			break;
 
 		case 130:	// check sign
 			result = ubase;
 			if (caster_level > 50)
-				result += 15 * (caster_level - 50);
+				result += updownsign * 15 * (caster_level - 50);
 			break;
 
 		case 131:	// check sign
 			result = ubase;
 			if (caster_level > 50)
-				result += 20 * (caster_level - 50);
+				result += updownsign * 20 * (caster_level - 50);
 			break;
 
 		case 132:	// check sign
 			result = ubase;
 			if (caster_level > 50)
-				result += 25 * (caster_level - 50);
+				result += updownsign * 25 * (caster_level - 50);
 			break;
 
 		case 137:	// used in berserker AA desperation
