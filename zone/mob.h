@@ -684,7 +684,6 @@ public:
 	inline bool GetInvul(void) { return invulnerable; }
 	inline void SetExtraHaste(int Haste) { ExtraHaste = Haste; }
 	virtual int GetHaste();
-	inline float GetPermaHaste() { return GetHaste() ? 100.0f / (1.0f + static_cast<float>(GetHaste()) / 100.0f) : 100.0f; }
 
 	uint8 GetWeaponDamageBonus(const Item_Struct* Weapon);
 	uint16 GetDamageTable(SkillUseTypes skillinuse);
@@ -769,6 +768,7 @@ public:
 	inline void StartFleeing() { flee_mode = true; CalculateNewFearpoint(); }
 	void ProcessFlee();
 	void CheckFlee();
+	inline bool IsBlind() { return spellbonuses.IsBlind; }
 
 	inline bool			CheckAggro(Mob* other) {return hate_list.IsOnHateList(other);}
 	float				CalculateHeadingToTarget(float in_x, float in_y);

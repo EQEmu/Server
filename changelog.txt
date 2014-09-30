@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 09/28/2014 ==
+demonstar55: Add support for post June 18, 2014 Hundred Hands Effect spells (they changed the formula and stuff)
+set Spells:Jun182014HundredHandsRevamp to true if you're using a spell file from June 18, 2014+
+
 == 09/27/2014 ==
 Kayen: Implemented perl function $mob->GetSpellStat(spell_id, identifier, slot);
 Note: identifier is the stat field in spells_new, slot is used for certain effects like effectid, base,base2, max ect.
@@ -7,6 +11,10 @@ Example $mob->GetSpellStat(121, "range"); //Returns spell range
 Example $mob->GetSpellStat(121, "effectid", 1); //Returns the the value of effectid1
 This will allow you to pull almost all the data for any spell in quest files.
 demonstar55: Move the client's SetAttackTimer to the end of Client::CalcBonuses to keep the haste in sync
+demonstar55: Correct haste/slow "stacking" rules
+demonstar55: Correct SE_AttackSpeed4 to respect unslowable
+demonstar55: Make the haste be between 1-225 like the client (<100 = slow, >100 = haste) to ...
+demonstar55: Correct Hundred Hands effect and use formula provided by devs
 
 == 09/24/2014 ==
 Uleat: Re-ordered server opcodes and handlers to give them some predictability of location (I need this for the inventory re-enumeration.)

@@ -2672,45 +2672,47 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 	// Query for an existing phrase and id in the saylink table
 	std::string query = StringFormat("SELECT `id` FROM `saylink` WHERE `phrase` = '%s'", escaped_string);
 	auto results = database.QueryDatabase(query);
-	if(results.Success())
-	{
-		if (results.RowCount() >= 1)
+	if (results.Success()) {
+		if (results.RowCount() >= 1) {
 			for (auto row = results.begin();row != results.end(); ++row)
 				sayid = atoi(row[0]);
-		else // Add a new saylink entry to the database and query it again for the new sayid number
-		{
-            query = StringFormat("INSERT INTO `saylink` (`phrase`) VALUES ('%s')", escaped_string);
-			results = database.QueryDatabase(query);
-
-			if(!results.Success())
-                LogFile->write(EQEMuLog::Error, "Error in saylink phrase queries", results.ErrorMessage().c_str());
-            else if (results.RowCount() >= 1)
-					for(auto row = results.begin(); row != results.end(); ++row)
-						sayid = atoi(row[0]);
-
+		} else { // Add a new saylink entry to the database and query it again for the new sayid number
+			std::string insert_query = StringFormat("INSERT INTO `saylink` (`phrase`) VALUES ('%s')", escaped_string);
+			results = database.QueryDatabase(insert_query);
+			if (!results.Success()) {
+				LogFile->write(EQEMuLog::Error, "Error in saylink phrase queries", results.ErrorMessage().c_str());
+			} else {
+				results = database.QueryDatabase(query);
+				if (results.Success()) {
+					if (results.RowCount() >= 1)
+						for(auto row = results.begin(); row != results.end(); ++row)
+							sayid = atoi(row[0]);
+				} else {
+					LogFile->write(EQEMuLog::Error, "Error in saylink phrase queries", results.ErrorMessage().c_str());
+				}
+			}
 		}
 	}
 	safe_delete_array(escaped_string);
 
-	if(silent)
+	if (silent)
 		sayid = sayid + 750000;
 	else
 		sayid = sayid + 500000;
 
-    //Create the say link as an item link hash
-    char linktext[250];
+	//Create the say link as an item link hash
+	char linktext[250];
 
-	if(initiator)
-	{
+	if (initiator) {
 		if (initiator->GetClientVersion() >= EQClientRoF)
 			sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"0000000000000000000000000000000000000000000000000",LinkName,0x12);
 		else if (initiator->GetClientVersion() >= EQClientSoF)
 			sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"00000000000000000000000000000000000000000000",LinkName,0x12);
 		else
 			sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"000000000000000000000000000000000000000",LinkName,0x12);
-	}
-	else // If no initiator, create an RoF saylink, since older clients handle RoF ones better than RoF handles older ones.
+	} else { // If no initiator, create an RoF saylink, since older clients handle RoF ones better than RoF handles older ones.
 		sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"0000000000000000000000000000000000000000000000000",LinkName,0x12);
+	}
 
 	strcpy(Phrase,linktext);
 	return Phrase;
