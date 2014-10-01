@@ -484,6 +484,19 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		return false;
 	}
 
+	// This needs a bit more work for saving timer to PP for zoning etc
+	if (IsClient() && item_slot) {
+		ItemInst *itm = CastToClient()->GetInv().GetItem(item_slot);
+		if (itm->GetItem()->RecastDelay) {
+			outapp = new EQApplicationPacket(OP_ItemRecastDelay, sizeof(ItemRecastDelay_Struct));
+			ItemRecastDelay_Struct *ird = (ItemRecastDelay_Struct *)outapp->pBuffer;
+			ird->recast_delay = itm->GetItem()->RecastDelay;
+			ird->recast_type = itm->GetItem()->RecastType;
+			CastToClient()->QueuePacket(outapp);
+			safe_delete(outapp);
+		}
+	}
+
 	return(true);
 }
 
