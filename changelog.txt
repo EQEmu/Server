@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 10/01/2014 ==
 Kayen: Exported to PERL $client->SendColoredText(color, msg)
+demonstar55: Exported SendColoredText to lua
 
 == 09/30/2014 ==
 Uleat: Implemented click-casting from bag slots for clients that natively support it (RoF)
