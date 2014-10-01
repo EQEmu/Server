@@ -1615,36 +1615,36 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs,Client* Trader,const EQApplicat
 
 }
 
-void Client::SendBazaarWelcome(){
-
+void Client::SendBazaarWelcome()
+{
 	const std::string query = "SELECT COUNT(DISTINCT char_id), count(char_id) FROM trader";
-    auto results = database.QueryDatabase(query);
+	auto results = database.QueryDatabase(query);
 	if (results.Success() && results.RowCount() == 1){
-        auto row = results.begin();
+		auto row = results.begin();
 
-        EQApplicationPacket* outapp = new EQApplicationPacket(OP_BazaarSearch, sizeof(BazaarWelcome_Struct));
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_BazaarSearch, sizeof(BazaarWelcome_Struct));
 
-        memset(outapp->pBuffer,0,outapp->size);
+		memset(outapp->pBuffer,0,outapp->size);
 
-        BazaarWelcome_Struct* bws = (BazaarWelcome_Struct*)outapp->pBuffer;
+		BazaarWelcome_Struct* bws = (BazaarWelcome_Struct*)outapp->pBuffer;
 
-        bws->Beginning.Action = BazaarWelcome;
+		bws->Beginning.Action = BazaarWelcome;
 
-        bws->Traders = atoi(row[0]);
-        bws->Items = atoi(row[1]);
+		bws->Traders = atoi(row[0]);
+		bws->Items = atoi(row[1]);
 
-        QueuePacket(outapp);
+		QueuePacket(outapp);
 
-        safe_delete(outapp);
-    }
+		safe_delete(outapp);
+	}
 
-    const std::string buyerCountQuery = "SELECT COUNT(DISTINCT charid) FROM buyer";
-    results = database.QueryDatabase(query);
+	const std::string buyerCountQuery = "SELECT COUNT(DISTINCT charid) FROM buyer";
+	results = database.QueryDatabase(buyerCountQuery);
 	if (!results.Success() || results.RowCount() != 1)
-        return;
+		return;
 
-    auto row = results.begin();
-    Message(10, "There are %i Buyers waiting to purchase your loot. Type /barter to search for them, "
+	auto row = results.begin();
+	Message(10, "There are %i Buyers waiting to purchase your loot. Type /barter to search for them, "
 				"or use /buyer to set up your own Buy Lines.", atoi(row[0]));
 }
 
