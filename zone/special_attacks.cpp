@@ -26,6 +26,7 @@
 #include "string_ids.h"
 #include "../common/misc_functions.h"
 #include "../common/rulesys.h"
+#include "../common/string_util.h"
 
 
 int Mob::GetKickDamage() {
@@ -346,15 +347,23 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 			ReuseTime = MonkSpecialAttack(GetTarget(), ca_atk->m_skill) - 1 - skill_reduction;
 
 			//Live AA - Technique of Master Wu
-			uint16 bDoubleSpecialAttack = itembonuses.DoubleSpecialAttack + spellbonuses.DoubleSpecialAttack + aabonuses.DoubleSpecialAttack;
-			if (bDoubleSpecialAttack && (bDoubleSpecialAttack >= 100 || bDoubleSpecialAttack > MakeRandomInt(0, 99))) {
-
-				int MonkSPA [5] = { SkillFlyingKick, SkillDragonPunch, SkillEagleStrike, SkillTigerClaw, SkillRoundKick };
-				MonkSpecialAttack(GetTarget(), MonkSPA[MakeRandomInt(0, 4)]);
-
-				// always 1/4 of the double attack chance, 25% at rank 5 (100/4)
-				if ((bDoubleSpecialAttack / 4) > MakeRandomInt(0, 99))
-					MonkSpecialAttack(GetTarget(), MonkSPA[MakeRandomInt(0, 4)]);
+			int wuchance = itembonuses.DoubleSpecialAttack + spellbonuses.DoubleSpecialAttack + aabonuses.DoubleSpecialAttack;
+			if (wuchance) {
+				if (wuchance >= 100 || wuchance > MakeRandomInt(0, 99)) {
+					int MonkSPA [5] = { SkillFlyingKick, SkillDragonPunch, SkillEagleStrike, SkillTigerClaw, SkillRoundKick };
+					int extra = 1;
+					// always 1/4 of the double attack chance, 25% at rank 5 (100/4)
+					if (wuchance / 4 > MakeRandomInt(0, 99))
+						extra++;
+					// They didn't add a string ID for this.
+					std::string msg = StringFormat("The spirit of Master Wu fills you!  You gain %d additional attack(s).", extra);
+					// live uses 400 here -- not sure if it's the best for all clients though
+					SendColoredText(400, msg);
+					while (extra) {
+						MonkSpecialAttack(GetTarget(), MonkSPA[MakeRandomInt(0, 4)]);
+						extra--;
+					}
+				}
 			}
 
 			if(ReuseTime < 100) {
@@ -1743,18 +1752,21 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 			return;
 
 		//Live AA - Technique of Master Wu
-		uint16 bDoubleSpecialAttack = itembonuses.DoubleSpecialAttack + spellbonuses.DoubleSpecialAttack + aabonuses.DoubleSpecialAttack;
-		if( bDoubleSpecialAttack && (bDoubleSpecialAttack >= 100 || bDoubleSpecialAttack > MakeRandomInt(0,100))) {
-
-			int MonkSPA [5] = { SkillFlyingKick, SkillDragonPunch, SkillEagleStrike, SkillTigerClaw, SkillRoundKick };
-			MonkSpecialAttack(ca_target, MonkSPA[MakeRandomInt(0,4)]);
-
-			int TripleChance = 25; 
-			if (bDoubleSpecialAttack > 100)
-				TripleChance += TripleChance*(100-bDoubleSpecialAttack)/100;
-
-			if(TripleChance > MakeRandomInt(0,100)) {
-				MonkSpecialAttack(ca_target, MonkSPA[MakeRandomInt(0,4)]);
+		int wuchance = itembonuses.DoubleSpecialAttack + spellbonuses.DoubleSpecialAttack + aabonuses.DoubleSpecialAttack;
+		if (wuchance) {
+			if (wuchance >= 100 || wuchance > MakeRandomInt(0, 99)) {
+				int MonkSPA [5] = { SkillFlyingKick, SkillDragonPunch, SkillEagleStrike, SkillTigerClaw, SkillRoundKick };
+				int extra = 1;
+				if (wuchance / 4 > MakeRandomInt(0, 99))
+					extra++;
+				// They didn't add a string ID for this.
+				std::string msg = StringFormat("The spirit of Master Wu fills you!  You gain %d additional attack(s).", extra);
+				// live uses 400 here -- not sure if it's the best for all clients though
+				SendColoredText(400, msg);
+				while (extra) {
+					MonkSpecialAttack(ca_target, MonkSPA[MakeRandomInt(0, 4)]);
+					extra--;
+				}
 			}
 		}
 	}
