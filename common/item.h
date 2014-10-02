@@ -391,8 +391,6 @@ public:
 	void SetActivated(bool activated)	{ m_activated = activated; }
 	int8 GetEvolveLvl() const			{ return m_evolveLvl; }
 	void SetScaling(bool v)				{ m_scaling = v; }
-	void SetTimestamp(uint32 v)			{ m_timestamp = v; }
-	uint32 GetTimestamp()				{ return m_timestamp; }
 
 	void Initialize(SharedDatabase *db = nullptr);
 	void ScaleItem();
@@ -437,7 +435,6 @@ protected:
 	Item_Struct*		m_scaledItem;
 	EvolveInfo*			m_evolveInfo;
 	bool				m_scaling;
-	uint32				m_timestamp;		// UNIX timestamp (GMT) of expiration
 
 	//
 	// Items inside of this item (augs or contents);
