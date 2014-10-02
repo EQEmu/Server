@@ -4264,6 +4264,13 @@ struct ItemVerifyReply_Struct {
 /*012*/
 };
 
+struct ItemRecastDelay_Struct {
+/*000*/	uint32	recast_delay;	// in seconds
+/*004*/	uint32	recast_type;
+/*008*/	uint32	unknown008;
+/*012*/
+};
+
 /**
  * Shroud yourself. For yourself shrouding, this has your spawnId, spawnStruct,
  * bits of your charProfileStruct (no checksum, then charProfile up till

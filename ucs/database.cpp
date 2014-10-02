@@ -523,9 +523,9 @@ void Database::ExpireMail() {
                             time(nullptr) - RuleI(Mail, ExpireTrash));
         results = QueryDatabase(query);
 		if(results.Success())
-            _log(UCS__ERROR, "Error expiring trash messages, %s %s", query.c_str(), results.ErrorMessage().c_str());
-		else
             _log(UCS__INIT, "Expired %i trash messages.", results.RowsAffected());
+		else
+            _log(UCS__ERROR, "Error expiring trash messages, %s %s", query.c_str(), results.ErrorMessage().c_str());
 
 	}
 

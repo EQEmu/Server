@@ -184,6 +184,7 @@ namespace RoF {
 
 	namespace limits {
 		static const bool ALLOWS_EMPTY_BAG_IN_BAG = true;
+		static const bool ALLOWS_CLICK_CAST_FROM_BAG = true;
 		static const bool COIN_HAS_WEIGHT = false;
 	}
 

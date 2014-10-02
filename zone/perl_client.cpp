@@ -6020,6 +6020,32 @@ XS(XS_Client_SendMarqueeMessage)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_SendColoredText); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SendColoredText)
+{
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: Client::SendColoredText(color, message)");
+	{
+		Client *		THIS;
+		uint32 color =	(uint32)SvUV(ST(1));
+		std::string msg = (std::string)SvPV_nolen(ST(2));
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if(THIS == NULL)
+			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+
+		THIS->SendColoredText(color, msg);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6259,6 +6285,7 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "SendTargetCommand"), XS_Client_SendTargetCommand, file, "$$");
 		newXSproto(strcpy(buf, "ExpeditionMessage"), XS_Client_ExpeditionMessage, file, "$$$");
 		newXSproto(strcpy(buf, "SendMarqueeMessage"), XS_Client_SendMarqueeMessage, file, "$$$$$$$");
+		newXSproto(strcpy(buf, "SendColoredText"), XS_Client_SendColoredText, file, "$$$");
 		XSRETURN_YES;
 }
 
