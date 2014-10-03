@@ -5329,3 +5329,19 @@ void NPC::UninitializeBuffSlots()
 	safe_delete_array(buffs);
 }
 
+void Client::SendSpellAnim(uint16 targetid, uint16 spell_id)
+{
+	if (!targetid || !IsValidSpell(spell_id))
+		return;
+
+	EQApplicationPacket app(OP_Action, sizeof(Action_Struct));
+	Action_Struct* a = (Action_Struct*)app.pBuffer;
+	a->target = targetid;
+	a->source = this->GetID();
+	a->type = 231;
+	a->spell = spell_id;
+	a->sequence = 231;
+
+	app.priority = 1;
+	entity_list.QueueCloseClients(this, &app);
+}

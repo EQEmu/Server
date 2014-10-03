@@ -6046,6 +6046,32 @@ XS(XS_Client_SendColoredText)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_SendSpellAnim); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SendSpellAnim)
+{
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: SendSpellAnim(uint16 spell_id, uint32 seq)");
+	{
+		Client *		THIS;
+		uint16 targetid =	(uint16)SvUV(ST(1));
+		uint16 spell_id =	(uint16)SvUV(ST(2));
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if(THIS == NULL)
+			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+
+		THIS->SendSpellAnim(targetid,spell_id);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6286,6 +6312,8 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "ExpeditionMessage"), XS_Client_ExpeditionMessage, file, "$$$");
 		newXSproto(strcpy(buf, "SendMarqueeMessage"), XS_Client_SendMarqueeMessage, file, "$$$$$$$");
 		newXSproto(strcpy(buf, "SendColoredText"), XS_Client_SendColoredText, file, "$$$");
+		newXSproto(strcpy(buf, "SendSpellAnim"), XS_Client_SendSpellAnim, file, "$$$");
+		
 		XSRETURN_YES;
 }
 
