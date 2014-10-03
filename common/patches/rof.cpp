@@ -1423,7 +1423,7 @@ namespace RoF
 
 		OUT(lootee);
 		OUT(looter);
-		eq->slot_id = emu->slot_id + 1;
+		eq->slot_id = ServerToRoFCorpseSlot(emu->slot_id);
 		OUT(auto_loot);
 
 		FINISH_ENCODE();
@@ -4405,7 +4405,7 @@ namespace RoF
 
 		IN(lootee);
 		IN(looter);
-		emu->slot_id = eq->slot_id - 1;
+		emu->slot_id = RoFToServerCorpseSlot(eq->slot_id);
 		IN(auto_loot);
 
 		FINISH_DIRECT_DECODE();
@@ -5406,6 +5406,7 @@ namespace RoF
 	static inline uint32 ServerToRoFCorpseSlot(uint32 ServerCorpse)
 	{
 		//uint32 RoFCorpse;
+		return (ServerCorpse + 1);
 	}
 
 	static inline uint32 RoFToServerSlot(structs::ItemSlotStruct RoFSlot)
@@ -5546,6 +5547,7 @@ namespace RoF
 	static inline uint32 RoFToServerCorpseSlot(uint32 RoFCorpse)
 	{
 		//uint32 ServerCorpse;
+		return (RoFCorpse - 1);
 	}
 }
 // end namespace RoF

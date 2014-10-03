@@ -654,7 +654,7 @@ namespace Titanium
 
 		OUT(lootee);
 		OUT(looter);
-		eq->slot_id = emu->slot_id;
+		eq->slot_id = ServerToTitaniumCorpseSlot(emu->slot_id);
 		OUT(auto_loot);
 
 		FINISH_ENCODE();
@@ -1517,7 +1517,7 @@ namespace Titanium
 
 		IN(lootee);
 		IN(looter);
-		emu->slot_id = eq->slot_id;
+		emu->slot_id = TitaniumToServerCorpseSlot(eq->slot_id);
 		IN(auto_loot);
 
 		FINISH_DIRECT_DECODE();
@@ -1745,6 +1745,7 @@ namespace Titanium
 	static inline int16 ServerToTitaniumCorpseSlot(uint32 ServerCorpse)
 	{
 		//int16 TitaniumCorpse;
+		return ServerCorpse;
 	}
 
 	static inline uint32 TitaniumToServerSlot(int16 TitaniumSlot)
@@ -1759,6 +1760,7 @@ namespace Titanium
 	static inline uint32 TitaniumToServerCorpseSlot(int16 TitaniumCorpse)
 	{
 		//uint32 ServerCorpse;
+		return TitaniumCorpse;
 	}
 }
 // end namespace Titanium
