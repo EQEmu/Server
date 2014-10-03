@@ -990,11 +990,6 @@ namespace Client62
 		FINISH_DIRECT_DECODE();
 	}
 
-#if 0
-	// needs to be tested (and OpCode found)
-	DECODE(OP_AugmentInfo) { DECODE_FORWARD(OP_ReadBook); }
-#endif
-
 	DECODE(OP_AugmentItem)
 	{
 		DECODE_LENGTH_EXACT(structs::AugmentItem_Struct);

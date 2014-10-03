@@ -1347,9 +1347,6 @@ namespace Titanium
 		FINISH_DIRECT_DECODE();
 	}
 
-	// needs to be tested
-	DECODE(OP_AugmentInfo) { DECODE_FORWARD(OP_ReadBook); }
-
 	DECODE(OP_AugmentItem)
 	{
 		DECODE_LENGTH_EXACT(structs::AugmentItem_Struct);

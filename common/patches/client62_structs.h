@@ -3099,11 +3099,6 @@ struct GuildMemberUpdate_Struct {
 /*72*/	uint32	unknown072;
 };
 
-
-
-
-
-
 	};	//end namespace structs
 };	//end namespace Client62
 
