@@ -2895,96 +2895,74 @@ void ZoneDatabase::LoadBuffs(Client *client) {
 	}
 }
 
-void ZoneDatabase::SavePetInfo(Client *client) {
+void ZoneDatabase::SavePetInfo(Client *client)
+{
+	PetInfo *petinfo = nullptr;
 
-	PetInfo *petinfo = client->GetPetInfo(0);
-	PetInfo *suspended = client->GetPetInfo(1);
-
-    std::string query = StringFormat("DELETE FROM `character_pet_buffs` WHERE `char_id` = %u", client->CharacterID());
-    auto results = database.QueryDatabase(query);
-	if(!results.Success())
+	std::string query = StringFormat("DELETE FROM `character_pet_buffs` WHERE `char_id` = %u", client->CharacterID());
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
 		return;
 
-	query = StringFormat("DELETE FROM `character_pet_buffs` WHERE `char_id` = %u", client->CharacterID());
+	query = StringFormat("DELETE FROM `character_pet_inventory` WHERE `char_id` = %u", client->CharacterID());
 	results = database.QueryDatabase(query);
-	if(!results.Success())
+	if (!results.Success())
 		return;
 
-    query = StringFormat("INSERT INTO `character_pet_info` "
-                        "(`char_id`, `pet`, `petname`, `petpower`, `spell_id`, `hp`, `mana`, `size`) "
-                        "VALUES (%u, 0, '%s', %i, %u, %u, %u, %f) "
-                        "ON DUPLICATE KEY UPDATE `petname` = '%s', `petpower` = %i, `spell_id` = %u, "
-                        "`hp` = %u, `mana` = %u, `size` = %f",
-                        client->CharacterID(), petinfo->Name, petinfo->petpower, petinfo->SpellID,
-                        petinfo->HP, petinfo->Mana, petinfo->size, petinfo->Name, petinfo->petpower,
-                        petinfo->SpellID, petinfo->HP, petinfo->Mana, petinfo->size);
-	results = database.QueryDatabase(query);
-	if(!results.Success())
-		return;
+	for (int pet = 0; pet < 2; pet++) {
+		petinfo = client->GetPetInfo(pet);
+		if (!petinfo)
+			continue;
 
-	for(int index = 0; index < RuleI(Spells, MaxTotalSlotsPET); index++) {
-		if (petinfo->Buffs[index].spellid == SPELL_UNKNOWN || petinfo->Buffs[index].spellid == 0)
-            continue;
+		query = StringFormat("INSERT INTO `character_pet_info` "
+				"(`char_id`, `pet`, `petname`, `petpower`, `spell_id`, `hp`, `mana`, `size`) "
+				"VALUES (%u, %u, '%s', %i, %u, %u, %u, %f) "
+				"ON DUPLICATE KEY UPDATE `petname` = '%s', `petpower` = %i, `spell_id` = %u, "
+				"`hp` = %u, `mana` = %u, `size` = %f",
+				client->CharacterID(), pet, petinfo->Name, petinfo->petpower, petinfo->SpellID,
+				petinfo->HP, petinfo->Mana, petinfo->size, // and now the ON DUPLICATE ENTRIES
+				petinfo->Name, petinfo->petpower, petinfo->SpellID, petinfo->HP, petinfo->Mana, petinfo->size);
+		results = database.QueryDatabase(query);
+		if (!results.Success())
+			return;
+		query.clear();
 
-        query = StringFormat("INSERT INTO `character_pet_buffs` "
-                            "(`char_id`, `pet`, `slot`, `spell_id`, `caster_level`, "
-                            "`ticsremaining`, `counters`) "
-                            "VALUES (%u, 0, %u, %u, %u, %u, %d)",
-                            client->CharacterID(), index, petinfo->Buffs[index].spellid,
-                            petinfo->Buffs[index].level, petinfo->Buffs[index].duration,
-                            petinfo->Buffs[index].counters);
-        database.QueryDatabase(query);
-    }
+		// pet buffs!
+		for (int index = 0; index < RuleI(Spells, MaxTotalSlotsPET); index++) {
+			if (petinfo->Buffs[index].spellid == SPELL_UNKNOWN || petinfo->Buffs[index].spellid == 0)
+				continue;
+			if (query.length() == 0)
+				query = StringFormat("INSERT INTO `character_pet_buffs` "
+						"(`char_id`, `pet`, `slot`, `spell_id`, `caster_level`, "
+						"`ticsremaining`, `counters`) "
+						"VALUES (%u, %u, %u, %u, %u, %u, %d)",
+						client->CharacterID(), pet, index, petinfo->Buffs[index].spellid,
+						petinfo->Buffs[index].level, petinfo->Buffs[index].duration,
+						petinfo->Buffs[index].counters);
+			else
+				query += StringFormat(", (%u, %u, %u, %u, %u, %u, %d)",
+						client->CharacterID(), pet, index, petinfo->Buffs[index].spellid,
+						petinfo->Buffs[index].level, petinfo->Buffs[index].duration,
+						petinfo->Buffs[index].counters);
+		}
+		database.QueryDatabase(query);
+		query.clear();
 
-    for(int index = 0; index < RuleI(Spells, MaxTotalSlotsPET); index++) {
-		if (petinfo->Buffs[index].spellid == SPELL_UNKNOWN || petinfo->Buffs[index].spellid == 0)
-            continue;
+		// pet inventory!
+		for (int index = EmuConstants::EQUIPMENT_BEGIN; index <= EmuConstants::EQUIPMENT_END; index++) {
+			if (!petinfo->Items[index])
+				continue;
 
-        query = StringFormat("INSERT INTO `character_pet_buffs` "
-                            "(`char_id`, `pet`, `slot`, `spell_id`, `caster_level`, "
-                            "`ticsremaining`, `counters`) "
-                            "VALUES (%u, 1, %u, %u, %u, %u, %d)",
-                            client->CharacterID(), index, suspended->Buffs[index].spellid,
-                            suspended->Buffs[index].level, suspended->Buffs[index].duration,
-                            suspended->Buffs[index].counters);
-        database.QueryDatabase(query);
+			if (query.length() == 0)
+				query = StringFormat("INSERT INTO `character_pet_inventory` "
+						"(`char_id`, `pet`, `slot`, `item_id`) "
+						"VALUES (%u, %u, %u, %u)",
+						client->CharacterID(), pet, index, petinfo->Items[index]);
+			else
+				query += StringFormat(", (%u, %u, %u, %u)", client->CharacterID(), pet, index, petinfo->Items[index]);
+		}
+		database.QueryDatabase(query);
 	}
-
-	for (int index = EmuConstants::EQUIPMENT_BEGIN; index <= EmuConstants::EQUIPMENT_END; index++) {
-		if(!petinfo->Items[index])
-            continue;
-
-        query = StringFormat("INSERT INTO `character_pet_inventory` "
-                            "(`char_id`, `pet`, `slot`, `item_id`) "
-                            "VALUES (%u, 0, %u, %u)",
-                            client->CharacterID(), index, petinfo->Items[index]);
-        database.QueryDatabase(query);
-	}
-
-    query = StringFormat("INSERT INTO `character_pet_info` "
-                        "(`char_id`, `pet`, `petname`, `petpower`, `spell_id`, `hp`, `mana`, `size`) "
-                        "VALUES (%u, 1, '%s', %u, %u, %u, %u, %f) "
-                        "ON DUPLICATE KEY UPDATE "
-                        "`petname`='%s', `petpower`=%i, `spell_id`=%u, `hp`=%u, `mana`=%u, `size`=%f",
-                        client->CharacterID(), suspended->Name, suspended->petpower, suspended->SpellID,
-                        suspended->HP, suspended->Mana, suspended->size, suspended->Name, suspended->petpower,
-                        suspended->SpellID, suspended->HP, suspended->Mana, suspended->size);
-    results = database.QueryDatabase(query);
-	if(!results.Success())
-		return;
-
-
-	for (int index = EmuConstants::EQUIPMENT_BEGIN; index <= EmuConstants::EQUIPMENT_END; index++) {
-		if(!suspended->Items[index])
-            continue;
-
-		query = StringFormat("INSERT INTO `character_pet_inventory` "
-                            "(`char_id`, `pet`, `slot`, `item_id`) "
-                            "VALUES (%u, 1, %u, %u)",
-                            client->CharacterID(), index, suspended->Items[index]);
-        database.QueryDatabase(query);
-	}
-
 }
 
 void ZoneDatabase::RemoveTempFactions(Client *client) {
