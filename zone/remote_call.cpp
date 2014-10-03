@@ -1,23 +1,25 @@
 #include "../common/debug.h"
+#include "../common/EmuTCPConnection.h"
 #include "../common/logsys.h"
 #include "../common/logtypes.h"
 #include "../common/md5.h"
-#include "../common/EmuTCPConnection.h"
-#include "../common/packet_functions.h"
 #include "../common/packet_dump.h"
+#include "../common/packet_functions.h"
 #include "../common/servertalk.h"
 #include "../common/web_interface_utils.h"
+#include "client.h"
+#include "entity.h"
+#include "mob.h"
+#include "npc.h"
+#include "QuestParserCollection.h"
 #include "remote_call.h"
 #include "remote_call_subscribe.h"
 #include "worldserver.h"
 #include "zone.h"
-#include "entity.h"
-#include "npc.h"
-#include "mob.h"
-#include "client.h"
 #include <string>
 
 std::map<std::string, RemoteCallHandler> remote_call_methods;
+
 extern WorldServer worldserver;
 extern Zone* zone;
 
@@ -75,12 +77,13 @@ void RemoteCall(const std::string &connection_id, const std::string &method, con
 	safe_delete(pack);
 }
 
-/* Zone */
+/* Zone: register_remote_call_handlers */
 void register_remote_call_handlers() {
 	remote_call_methods["Zone.Subscribe"] = handle_rc_subscribe;
 	remote_call_methods["Zone.Unsubscribe"] = handle_rc_unsubscribe;
-	remote_call_methods["Zone.Get.Initial.Entity.Positions"] = handle_rc_get_initial_entity_positions;
-	remote_call_methods["Zone.Move.Entity"] = handle_rc_move_entity; 
+	remote_call_methods["Zone.GetInitialEntityPositions"] = handle_rc_get_initial_entity_positions;
+	remote_call_methods["Zone.MoveEntity"] = handle_rc_move_entity;
+	remote_call_methods["Zone.Action"] = handle_rc_zone_action;
 }
 
 void handle_rc_subscribe(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
@@ -130,11 +133,11 @@ void handle_rc_get_initial_entity_positions(const std::string &method, const std
 	entity_list.GetNPCList(npc_list);
 	for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 		NPC* npc = *itr;
-		res["zone_id"] = std::to_string((long)zone->GetZoneID());
-		res["instance_id"] = std::to_string((long)zone->GetInstanceID());
 		res["ent_id"] = std::to_string((long)npc->GetID());
+		res["race_id"] = std::to_string((long)npc->GetRace());
+		res["class_id"] = std::to_string((long)npc->GetClass()); 
 		res["type"] = "NPC";
-		res["name"] = npc->GetName();
+		res["name"] = npc->GetCleanName();
 		res["x"] = std::to_string((double)npc->GetX());
 		res["y"] = std::to_string((double)npc->GetY());
 		res["z"] = std::to_string((double)npc->GetZ());
@@ -145,51 +148,119 @@ void handle_rc_get_initial_entity_positions(const std::string &method, const std
 	entity_list.GetClientList(client_list);
 	for (std::list<Client*>::iterator itr = client_list.begin(); itr != client_list.end(); ++itr) {
 		Client* c = *itr;
-		res["zone_id"] = itoa(zone->GetZoneID());
-		res["instance_id"] = itoa(zone->GetInstanceID());
 		res["ent_id"] = itoa(c->GetID());
+		res["race_id"] = std::to_string((long)c->GetRace());
+		res["class_id"] = std::to_string((long)c->GetClass());
 		res["type"] = "Client";
-		res["name"] = c->GetCleanName();
+		res["name"] = c->GetCleanName(); 
 		res["x"] = itoa(c->GetX());
 		res["y"] = itoa(c->GetY());
 		res["z"] = itoa(c->GetZ());
 		res["h"] = itoa(c->GetHeading());
 		RemoteCallResponse(connection_id, request_id, res, error); 
 	}
+	std::list<Corpse*> corpse_list;
+	entity_list.GetCorpseList(corpse_list);
+	for (std::list<Corpse*>::iterator itr = corpse_list.begin(); itr != corpse_list.end(); ++itr) {
+		Corpse* c = *itr;
+		res["ent_id"] = itoa(c->GetID());
+		res["race_id"] = std::to_string((long)c->GetRace());
+		res["class_id"] = std::to_string((long)c->GetClass());
+		res["type"] = "Corpse";
+		res["name"] = c->GetCleanName();
+		res["x"] = itoa(c->GetX());
+		res["y"] = itoa(c->GetY());
+		res["z"] = itoa(c->GetZ());
+		res["h"] = itoa(c->GetHeading());
+		RemoteCallResponse(connection_id, request_id, res, error);
+	}
+	// std::list<Doors*> door_list;
+	// entity_list.GetDoorsList(door_list);
+	// std::list<Doors*>::iterator iter = door_list.begin(); 
+	// while (iter != door_list.end()) {
+	// 	Doors *c = (*iter);
+	// 	res["ent_id"] = itoa(c->GetID());
+	// 	res["type"] = "Door";
+	// 	res["x"] = itoa(c->GetX());
+	// 	res["y"] = itoa(c->GetY());
+	// 	res["z"] = itoa(c->GetZ());
+	// 	res["h"] = itoa(c->GetHeading());
+	// 	RemoteCallResponse(connection_id, request_id, res, error);
+	// }
 }
 
 void handle_rc_move_entity(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
 	std::string error;
-	std::map<std::string, std::string> res;
-
-	if (params.size() != 1) {
+	std::map<std::string, std::string> res; 
+	if (params.size() != 5) {
 		error = "Missing function data";
+		std::cout << error << "\n" << std::endl;
 		RemoteCallResponse(connection_id, request_id, res, error);
-		return;
-
-	}
-
-	printf("params 0 = %s\n", params[0].c_str());
-	printf("params 1 = %s\n", params[1].c_str());
-	printf("params 2 = %s\n", params[2].c_str());
-	printf("params 3 = %s\n", params[3].c_str());
-	return;
-	auto arg_v = explode_string(params[0].c_str(), ':');
-	/*
-	0 = Ent ID
-	1 = X
-	2 = Y
-	3 = Z
-	4 = H
-	*/
-	Mob *ent = entity_list.GetMob(atoi(arg_v[0].c_str()));
+		return; 
+	} 
+	/* 0 = Ent ID, 1 = X, 2 = Y, 3 = Z, 4 = H */
+	Mob *ent = entity_list.GetMob(atoi(params[0].c_str()));
 	if (ent){
 		if (ent->IsClient()){
-			ent->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), atoi(arg_v[1].c_str()), atoi(arg_v[2].c_str()), ent->GetGroundZ(atoi(arg_v[1].c_str()), atoi(arg_v[2].c_str())), ent->GetHeading());
-
+			ent->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), atoi(params[1].c_str()), atoi(params[2].c_str()), ent->GetGroundZ(atoi(params[1].c_str()), atoi(params[2].c_str())), ent->GetHeading());
 		}
 		else{
-			ent->GMMove(atoi(arg_v[1].c_str()), atoi(arg_v[2].c_str()), ent->GetGroundZ(atoi(arg_v[1].c_str()), atoi(arg_v[2].c_str())), ent->GetHeading());
+			ent->GMMove(atoi(params[1].c_str()), atoi(params[2].c_str()), ent->GetGroundZ(atoi(params[1].c_str()), atoi(params[2].c_str())), ent->GetHeading()); 
 		}
+	}
+}
+
+void handle_rc_zone_action(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
+	std::string error;
+	std::map<std::string, std::string> res;
+
+	/* Zone Reload Functions */
+	if (params[0] == "Repop"){ zone->Repop(); } 
+	if (params[0] == "ReloadQuests"){ parse->ReloadQuests(); }
+
+	/* Zone Visuals Functions */
+	if (params[0] == "ZoneSky"){ 
+		for (int z = 0; z < 4; z++) {
+			zone->newzone_data.fog_red[z] = atoi(params[1].c_str());
+			zone->newzone_data.fog_green[z] = atoi(params[2].c_str());
+			zone->newzone_data.fog_blue[z] = atoi(params[3].c_str());
+			zone->newzone_data.sky = 0; 
+		}
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
+		entity_list.QueueClients(0, outapp);  
+		safe_delete(outapp);
+	}
+	if (params[0] == "ZoneFogDensity"){
+		zone->newzone_data.fog_density = atof(params[1].c_str());
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
+		entity_list.QueueClients(0, outapp);
+		safe_delete(outapp);
+	}
+	if (params[0] == "ZoneFogClip"){
+		for (int z = 0; z < 4; z++) {
+			zone->newzone_data.fog_minclip[z] = atoi(params[1].c_str());
+			zone->newzone_data.fog_maxclip[z] = atoi(params[2].c_str());
+			zone->newzone_data.sky = 0; 
+		}
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
+		entity_list.QueueClients(0, outapp);
+		safe_delete(outapp);
+	}
+	if (params[0] == "ZoneClip"){
+		zone->newzone_data.minclip = atoi(params[1].c_str());
+		zone->newzone_data.maxclip = atoi(params[2].c_str());
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
+		entity_list.QueueClients(0, outapp);
+		safe_delete(outapp);
+	} 
+	if (params[0] == "ZoneSaveHeaders"){ zone->SaveZoneCFG(); }
+	
+	if (params[0] == "Kill"){
+		Mob *ent = entity_list.GetMob(atoi(params[1].c_str()));
+		if (ent){ ent->Kill(); }
 	}
 }

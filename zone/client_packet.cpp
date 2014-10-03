@@ -1027,16 +1027,16 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	PlayerPositionUpdateClient_Struct* ppu = (PlayerPositionUpdateClient_Struct*)app->pBuffer;
 
 	/* Web Interface */
-	if (IsClient()) {
+	if (IsClient() && RemoteCallSubscriptionHandler::Instance()->IsSubscribed("Client.Position")) {
 		std::vector<std::string> params;
-		params.push_back(std::to_string((long)zone->GetZoneID()));
-		params.push_back(std::to_string((long)zone->GetInstanceID()));
 		params.push_back(std::to_string((long)GetID()));
 		params.push_back(GetCleanName());
 		params.push_back(std::to_string((double)ppu->x_pos));
 		params.push_back(std::to_string((double)ppu->y_pos));
 		params.push_back(std::to_string((double)ppu->z_pos));
 		params.push_back(std::to_string((double)heading));
+		params.push_back(std::to_string((double)GetClass()));
+		params.push_back(std::to_string((double)GetRace())); 
 		RemoteCallSubscriptionHandler::Instance()->OnEvent("Client.Position", params);
 	}
 
@@ -1311,9 +1311,21 @@ void Client::Handle_OP_AutoAttack(const EQApplicationPacket *app)
 		return;
 	}
 
+	/* Web Interface: Combat State */
+	if (RemoteCallSubscriptionHandler::Instance()->IsSubscribed("Combat.States")) {
+		bool wi_aa = false;
+		if (app->pBuffer[0] == 0){ wi_aa = false; }
+		else if (app->pBuffer[0] == 1){ wi_aa = true; }
+		std::vector<std::string> params;
+		params.push_back(std::to_string((long)GetID()));
+		params.push_back(std::to_string((bool)wi_aa));
+		RemoteCallSubscriptionHandler::Instance()->OnEvent("Combat.States", params);
+	}
+
 	if (app->pBuffer[0] == 0)
 	{
 		auto_attack = false;
+
 		if (IsAIControlled())
 			return;
 		attack_timer.Disable();

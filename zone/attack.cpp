@@ -42,6 +42,7 @@
 #include "QuestParserCollection.h"
 #include "water_map.h"
 #include "worldserver.h"
+#include "remote_call_subscribe.h"
 extern WorldServer worldserver;
 
 #ifdef _WINDOWS
@@ -2014,7 +2015,8 @@ void NPC::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes attack
 
 bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack_skill) {
 	mlog(COMBAT__HITS, "Fatal blow dealt by %s with %d damage, spell %d, skill %d", killerMob->GetName(), damage, spell, attack_skill);
-	
+	bool MadeCorpse = false;
+	uint16 OrigEntID = this->GetID();
 	Mob *oos = nullptr;
 	if(killerMob) {
 		oos = killerMob->GetOwnerOrSelf();
@@ -2269,6 +2271,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 		entity_list.RemoveFromAutoXTargets(this);
 		uint16 emoteid = this->GetEmoteID();
 		Corpse* corpse = new Corpse(this, &itemlist, GetNPCTypeID(), &NPCTypedata,level>54?RuleI(NPC,MajorNPCCorpseDecayTimeMS):RuleI(NPC,MinorNPCCorpseDecayTimeMS));
+		MadeCorpse = true;
 		entity_list.LimitRemoveNPC(this);
 		entity_list.AddCorpse(corpse, GetID());
 
@@ -2356,6 +2359,15 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	else
 		entity_list.RemoveFromXTargets(this);
 
+	/* Web Interface: Entity Death  */
+	if (RemoteCallSubscriptionHandler::Instance()->IsSubscribed("Entity.Events")) {
+		std::vector<std::string> params;
+		params.push_back(std::to_string((long)EntityEvents::Entity_Death));
+		params.push_back(std::to_string((long)OrigEntID));
+		params.push_back(std::to_string((bool)MadeCorpse));
+		RemoteCallSubscriptionHandler::Instance()->OnEvent("Entity.Events", params);
+	}
+
 	// Parse quests even if we're killed by an NPC
 	if(oos) {
 		mod_npc_killed(oos);
@@ -2383,6 +2395,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	char buffer[48] = { 0 };
 	snprintf(buffer, 47, "%d %d %d %d", killerMob ? killerMob->GetID() : 0, damage, spell, static_cast<int>(attack_skill));
 	parse->EventNPC(EVENT_DEATH_COMPLETE, this, oos, buffer, 0);
+	
 	return true;
 }
 

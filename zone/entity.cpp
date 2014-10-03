@@ -627,6 +627,20 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 	npc->SetID(GetFreeID());
 	parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
 
+	/* Web Interface: NPC Spawn (Pop) */
+	if (RemoteCallSubscriptionHandler::Instance()->IsSubscribed("NPC.Position")) {
+		std::vector<std::string> params;
+		params.push_back(std::to_string((long)npc->GetID()));
+		params.push_back(npc->GetCleanName());
+		params.push_back(std::to_string((float)npc->GetX()));
+		params.push_back(std::to_string((float)npc->GetY()));
+		params.push_back(std::to_string((float)npc->GetZ()));
+		params.push_back(std::to_string((double)npc->GetHeading())); 
+		params.push_back(std::to_string((double)npc->GetClass()));
+		params.push_back(std::to_string((double)npc->GetRace()));
+		RemoteCallSubscriptionHandler::Instance()->OnEvent("NPC.Position", params);
+	}
+
 	uint16 emoteid = npc->GetEmoteID();
 	if (emoteid != 0)
 		npc->DoNPCEmote(ONSPAWN, emoteid);

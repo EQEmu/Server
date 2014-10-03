@@ -22,6 +22,11 @@
 #include <string>
 #include <vector>
 
+enum EntityEvents {
+	Entity_Death = 0,
+	Entity_Corpse_Bury
+};
+
 class RemoteCallSubscriptionHandler
 {
 public:
@@ -31,6 +36,7 @@ public:
 	bool Subscribe(std::string connection_id, std::string event_name);
 	bool Unsubscribe(std::string connection_id, std::string event_name);
 	void OnEvent(std::string method, std::vector<std::string> &params);
+	bool IsSubscribed(std::string method);
 
 	void Process();
 	void ClearConnection(std::string connection_id);

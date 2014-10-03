@@ -107,6 +107,13 @@ void RemoteCallSubscriptionHandler::OnEvent(std::string method, std::vector<std:
 	}
 }
 
+bool RemoteCallSubscriptionHandler::IsSubscribed(std::string method){
+	if (registered_events.count(method) == 0) {
+		return false; 
+	}
+	return true; 
+}
+
 void RemoteCallSubscriptionHandler::Process() {
 	//create a check for all these connection ids packet
 	uint32 sz = 12;

@@ -6,7 +6,7 @@ extern WorldServer *worldserver;
 extern std::map<std::string, std::pair<int, MethodHandler>> authorized_methods;
 extern std::map<std::string, MethodHandler> unauthorized_methods;
 
-/* Web Interface */
+/* Web Interface:register_authorized_methods */
 void register_authorized_methods()
 {
 	authorized_methods["WebInterface.Authorize"] = std::make_pair(0, handle_method_token_auth);
@@ -16,6 +16,8 @@ void register_authorized_methods()
 	authorized_methods["Zone.Unsubscribe"] = std::make_pair(10, handle_method_zone);
 	authorized_methods["Zone.GetInitialEntityPositions"] = std::make_pair(10, handle_method_zone);
 	authorized_methods["Zone.MoveEntity"] = std::make_pair(10, handle_method_zone); 
+	authorized_methods["Zone.Action"] = std::make_pair(10, handle_method_zone);
+	authorized_methods["Quest.GetScript"] = std::make_pair(10, handle_method_world);
 }
 
 void register_unauthorized_methods()

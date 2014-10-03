@@ -1,3 +1,7 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+
 #include "../common/debug.h"
 #include "../common/logsys.h"
 #include "../common/logtypes.h"
@@ -45,13 +49,16 @@ void RemoteCallResponse(const std::string &connection_id, const std::string &req
 	safe_delete(pack);
 }
 
-/* World */
+/* World:register_remote_call_handlers */
 void register_remote_call_handlers() {
 	remote_call_methods["World.ListZones"] = handle_rc_list_zones;
 	remote_call_methods["World.GetZoneDetails"] = handle_rc_get_zone_info;
 	remote_call_methods["Zone.Subscribe"] = handle_rc_relay;
 	remote_call_methods["Zone.Unsubscribe"] = handle_rc_relay;
 	remote_call_methods["Zone.GetInitialEntityPositions"] = handle_rc_relay;
+	remote_call_methods["Zone.MoveEntity"] = handle_rc_relay;
+	remote_call_methods["Zone.Action"] = handle_rc_relay;
+	remote_call_methods["Quest.GetScript"] = handle_rc_quest_interface;
 }
 
 void handle_rc_list_zones(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
@@ -155,4 +162,27 @@ void handle_rc_relay(const std::string &method, const std::string &connection_id
 	
 	zs->SendPacket(pack);
 	safe_delete(pack);
+}
+
+void handle_rc_quest_interface(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
+	std::string error;
+	std::map<std::string, std::string> res;
+
+	/*
+	if (params.size() != 1) {
+	error = "Expected only one zone_id.";
+	RemoteCallResponse(connection_id, request_id, res, error);
+	return;
+	}
+	*/
+
+	std::string str;
+	std::ifstream file("quests/global/Waypoint.pl", std::ios::in);
+	if (file) {
+		while (!file.eof()) str.push_back(file.get());
+	}
+	// std::cout << str << '\n';
+
+	res["quest_text"] = str.c_str(); 
+	RemoteCallResponse(connection_id, request_id, res, error); 
 }
