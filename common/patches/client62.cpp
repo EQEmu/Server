@@ -18,15 +18,15 @@ namespace Client62
 	static OpcodeManager *opcodes = nullptr;
 	static Strategy struct_strategy;
 
-	char* SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 depth);
+	char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint8 depth);
 
 	// server to client inventory location converters
-	static inline uint32 ServerToClient62Slot(uint32 ServerSlot);
-	static inline uint32 ServerToClient62CorpseSlot(uint32 ServerCorpse);
+	static inline int16 ServerToClient62Slot(uint32 ServerSlot);
+	static inline int16 ServerToClient62CorpseSlot(uint32 ServerCorpse);
 
 	// client to server inventory location converters
-	static inline uint32 Client62ToServerSlot(uint32 Client62Slot);
-	static inline uint32 Client62ToServerCorpseSlot(uint32 Client62Corpse);
+	static inline uint32 Client62ToServerSlot(int16 Client62Slot);
+	static inline uint32 Client62ToServerCorpseSlot(int16 Client62Corpse);
 
 	void Register(EQStreamIdentifier &into)
 	{
@@ -127,6 +127,31 @@ namespace Client62
 		//OUT(damage);
 		OUT(spell);
 		OUT(buff_unknown); // if this is 4, a buff icon is made
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_AdventureMerchantSell)
+	{
+		ENCODE_LENGTH_EXACT(Adventure_Sell_Struct);
+		SETUP_DIRECT_ENCODE(Adventure_Sell_Struct, structs::Adventure_Sell_Struct);
+
+		eq->unknown000 = 1;
+		OUT(npcid);
+		eq->slot = ServerToClient62Slot(emu->slot);
+		OUT(charges);
+		OUT(sell_price);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_ApplyPoison)
+	{
+		ENCODE_LENGTH_EXACT(ApplyPoison_Struct);
+		SETUP_DIRECT_ENCODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
+
+		eq->inventorySlot = ServerToClient62Slot(emu->inventorySlot);
+		OUT(success);
 
 		FINISH_ENCODE();
 	}
@@ -232,6 +257,20 @@ namespace Client62
 
 		delete[] __emu_buffer;
 		dest->FastQueuePacket(&in, ack_req);
+	}
+
+	ENCODE(OP_DeleteCharge) { ENCODE_FORWARD(OP_MoveItem); }
+
+	ENCODE(OP_DeleteItem)
+	{
+		ENCODE_LENGTH_EXACT(DeleteItem_Struct);
+		SETUP_DIRECT_ENCODE(DeleteItem_Struct, structs::DeleteItem_Struct);
+
+		eq->from_slot = ServerToClient62Slot(emu->from_slot);
+		eq->to_slot = ServerToClient62Slot(emu->to_slot);
+		OUT(number_in_stack);
+
+		FINISH_ENCODE();
 	}
 
 	ENCODE(OP_DeleteSpawn)
@@ -396,6 +435,31 @@ namespace Client62
 		OUT(group_leadership_points);
 		OUT(raid_leadership_exp);
 		OUT(raid_leadership_points);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_LootItem)
+	{
+		ENCODE_LENGTH_EXACT(LootingItem_Struct);
+		SETUP_DIRECT_ENCODE(LootingItem_Struct, structs::LootingItem_Struct);
+
+		OUT(lootee);
+		OUT(looter);
+		eq->slot_id = emu->slot_id;
+		OUT(auto_loot);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_MoveItem)
+	{
+		ENCODE_LENGTH_EXACT(MoveItem_Struct);
+		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
+
+		eq->from_slot = ServerToClient62Slot(emu->from_slot);
+		eq->to_slot = ServerToClient62Slot(emu->to_slot);
+		OUT(number_in_stack);
 
 		FINISH_ENCODE();
 	}
@@ -616,6 +680,7 @@ namespace Client62
 
 	ENCODE(OP_ReadBook)
 	{
+		// no apparent slot translation needed -U
 		EQApplicationPacket *in = *p;
 		*p = nullptr;
 
@@ -732,6 +797,19 @@ namespace Client62
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_ShopPlayerSell)
+	{
+		ENCODE_LENGTH_EXACT(Merchant_Purchase_Struct);
+		SETUP_DIRECT_ENCODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Struct);
+
+		OUT(npcid);
+		eq->itemslot = ServerToClient62Slot(emu->itemslot);
+		OUT(quantity);
+		OUT(price);
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_Track)
 	{
 		EQApplicationPacket *in = *p;
@@ -762,6 +840,19 @@ namespace Client62
 
 		delete[] __emu_buffer;
 		dest->FastQueuePacket(&in, ack_req);
+	}
+
+	ENCODE(OP_TributeItem)
+	{
+		ENCODE_LENGTH_EXACT(TributeItem_Struct);
+		SETUP_DIRECT_ENCODE(TributeItem_Struct, structs::TributeItem_Struct);
+
+		eq->slot = ServerToClient62Slot(emu->slot);
+		OUT(quantity);
+		OUT(tribute_master_id);
+		OUT(tribute_points);
+
+		FINISH_ENCODE();
 	}
 
 	ENCODE(OP_WearChange)
@@ -875,6 +966,59 @@ namespace Client62
 	}
 
 // DECODE methods
+	DECODE(OP_AdventureMerchantSell)
+	{
+		DECODE_LENGTH_EXACT(structs::Adventure_Sell_Struct);
+		SETUP_DIRECT_DECODE(Adventure_Sell_Struct, structs::Adventure_Sell_Struct);
+
+		IN(npcid);
+		emu->slot = Client62ToServerSlot(eq->slot);
+		IN(charges);
+		IN(sell_price);
+
+		FINISH_DIRECT_DECODE();
+	}
+	
+	DECODE(OP_ApplyPoison)
+	{
+		DECODE_LENGTH_EXACT(structs::ApplyPoison_Struct);
+		SETUP_DIRECT_DECODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
+
+		emu->inventorySlot = Client62ToServerSlot(eq->inventorySlot);
+		IN(success);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+#if 0
+	// needs to be tested (and OpCode found)
+	DECODE(OP_AugmentInfo) { DECODE_FORWARD(OP_ReadBook); }
+#endif
+
+	DECODE(OP_AugmentItem)
+	{
+		DECODE_LENGTH_EXACT(structs::AugmentItem_Struct);
+		SETUP_DIRECT_DECODE(AugmentItem_Struct, structs::AugmentItem_Struct);
+
+		emu->container_slot = Client62ToServerSlot(eq->container_slot);
+		emu->augment_slot = eq->augment_slot;
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_CastSpell)
+	{
+		DECODE_LENGTH_EXACT(structs::CastSpell_Struct);
+		SETUP_DIRECT_DECODE(CastSpell_Struct, structs::CastSpell_Struct);
+
+		IN(slot);
+		IN(spell_id);
+		emu->inventoryslot = Client62ToServerSlot(eq->inventoryslot);
+		IN(target_id);
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	DECODE(OP_CharacterCreate)
 	{
 		DECODE_LENGTH_EXACT(structs::CharCreate_Struct);
@@ -899,6 +1043,30 @@ namespace Client62
 		IN(face);
 		IN(eyecolor1);
 		IN(eyecolor2);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_Consume)
+	{
+		DECODE_LENGTH_EXACT(structs::Consume_Struct);
+		SETUP_DIRECT_DECODE(Consume_Struct, structs::Consume_Struct);
+
+		emu->slot = Client62ToServerSlot(eq->slot);
+		IN(auto_consumed);
+		IN(type);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_DeleteItem)
+	{
+		DECODE_LENGTH_EXACT(structs::DeleteItem_Struct);
+		SETUP_DIRECT_DECODE(DeleteItem_Struct, structs::DeleteItem_Struct);
+
+		emu->from_slot = Client62ToServerSlot(eq->from_slot);
+		emu->to_slot = Client62ToServerSlot(eq->to_slot);
+		IN(number_in_stack);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -935,8 +1103,36 @@ namespace Client62
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_LootItem)
+	{
+		DECODE_LENGTH_EXACT(structs::LootingItem_Struct);
+		SETUP_DIRECT_DECODE(LootingItem_Struct, structs::LootingItem_Struct);
+
+		IN(lootee);
+		IN(looter);
+		emu->slot_id = eq->slot_id;
+		IN(auto_loot);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_MoveItem)
+	{
+		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
+		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
+
+		_log(NET__ERROR, "Moved item from %u to %u", eq->from_slot, eq->to_slot);
+
+		emu->from_slot = Client62ToServerSlot(eq->from_slot);
+		emu->to_slot = Client62ToServerSlot(eq->to_slot);
+		IN(number_in_stack);
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	DECODE(OP_ReadBook)
 	{
+		// no apparent slot translation needed -U
 		DECODE_LENGTH_ATLEAST(structs::BookRequest_Struct);
 		SETUP_DIRECT_DECODE(BookRequest_Struct, structs::BookRequest_Struct);
 
@@ -960,6 +1156,43 @@ namespace Client62
 		emu->filters[26] = 1;
 		emu->filters[27] = 1;
 		emu->filters[28] = 1;
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_ShopPlayerSell)
+	{
+		DECODE_LENGTH_EXACT(structs::Merchant_Purchase_Struct);
+		SETUP_DIRECT_DECODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Struct);
+
+		IN(npcid);
+		emu->itemslot = Client62ToServerSlot(eq->itemslot);
+		IN(quantity);
+		IN(price);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_TradeSkillCombine)
+	{
+		DECODE_LENGTH_EXACT(structs::NewCombine_Struct);
+		SETUP_DIRECT_DECODE(NewCombine_Struct, structs::NewCombine_Struct);
+
+		emu->container_slot = Client62ToServerSlot(eq->container_slot);
+		IN(guildtribute_slot);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_TributeItem)
+	{
+		DECODE_LENGTH_EXACT(structs::TributeItem_Struct);
+		SETUP_DIRECT_DECODE(TributeItem_Struct, structs::TributeItem_Struct);
+
+		emu->slot = Client62ToServerSlot(eq->slot);
+		IN(quantity);
+		IN(tribute_master_id);
+		IN(tribute_points);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -992,13 +1225,14 @@ namespace Client62
 	}
 
 // file scope helper methods
-	char *SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 depth)
+	char *SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint8 depth)
 	{
 		char *serialization = nullptr;
 		char *instance = nullptr;
 		const char *protection = (const char *)"\\\\\\\\\\";
 		char *sub_items[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 		bool stackable = inst->IsStackable();
+		int16 slot_id = ServerToClient62Slot(slot_id_in);
 		uint32 merchant_slot = inst->GetMerchantSlot();
 		int16 charges = inst->GetCharges();
 		const Item_Struct *item = inst->GetItem();
@@ -1009,7 +1243,8 @@ namespace Client62
 			"%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|",
 			stackable ? charges : 1,
 			0,
-			(merchant_slot == 0) ? slot_id : merchant_slot,
+			//(merchant_slot == 0) ? slot_id : merchant_slot, // change when translator activated
+			(merchant_slot == 0) ? slot_id_in : merchant_slot,
 			inst->GetPrice(),
 			(merchant_slot == 0) ? 1 : inst->GetMerchantCount(),
 			0,
@@ -1075,22 +1310,30 @@ namespace Client62
 		return serialization;
 	}
 
-	static inline uint32 ServerToClient62Slot(uint32 ServerSlot)
+	static inline int16 ServerToClient62Slot(uint32 ServerSlot)
 	{
-		//uint32 Client62Slot;
+		//int16 Client62Slot;
+		if (ServerSlot == INVALID_INDEX)
+			return INVALID_INDEX;
+
+		return ServerSlot; // deprecated
 	}
 	
-	static inline uint32 ServerToClient62CorpseSlot(uint32 ServerCorpse)
+	static inline int16 ServerToClient62CorpseSlot(uint32 ServerCorpse)
 	{
-		//uint32 Client62Corpse;
+		//int16 Client62Corpse;
 	}
 
-	static inline uint32 Client62ToServerSlot(uint32 Client62Slot)
+	static inline uint32 Client62ToServerSlot(int16 Client62Slot)
 	{
 		//uint32 ServerSlot;
+		if (Client62Slot == INVALID_INDEX)
+			return INVALID_INDEX;
+
+		return Client62Slot; // deprecated
 	}
 	
-	static inline uint32 Client62ToServerCorpseSlot(uint32 Client62Corpse)
+	static inline uint32 Client62ToServerCorpseSlot(int16 Client62Corpse)
 	{
 		//uint32 ServerCorpse;
 	}

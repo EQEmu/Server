@@ -1678,7 +1678,7 @@ struct BulkItemPacket_Struct
 
 struct Consume_Struct
 {
-/*000*/ ItemSlotStruct slot;
+/*000*/ ItemSlotStruct	slot;
 /*012*/ uint32	auto_consumed;	// 0xffffffff when auto eating e7030000 when right click
 /*016*/ uint32	type;			// 0x01=Food 0x02=Water
 /*020*/ uint32	c_unknown1;		// Seen 2
@@ -1711,17 +1711,17 @@ struct ItemProperties_Struct {
 };
 
 struct DeleteItem_Struct {
-/*0000*/ ItemSlotStruct from_slot;
-/*0004*/ ItemSlotStruct to_slot;
-/*0008*/ uint32 number_in_stack;
-/*0012*/
+/*0000*/ ItemSlotStruct	from_slot;
+/*0012*/ ItemSlotStruct	to_slot;
+/*0024*/ uint32			number_in_stack;
+/*0028*/
 };
 
 struct MoveItem_Struct {
-/*0000*/ ItemSlotStruct from_slot;
-/*0004*/ ItemSlotStruct to_slot;
-/*0008*/ uint32 number_in_stack;
-/*0012*/
+/*0000*/ ItemSlotStruct	from_slot;
+/*0012*/ ItemSlotStruct	to_slot;
+/*0024*/ uint32			number_in_stack;
+/*0028*/
 };
 
 //
@@ -2045,7 +2045,7 @@ struct Merchant_Sell_Struct {
 
 struct Merchant_Purchase_Struct {
 /*000*/	uint32	npcid;			// Merchant NPC's entity id
-/*004*/	MainInvItemSlotStruct itemslot;
+/*004*/	MainInvItemSlotStruct	itemslot;
 /*012*/	uint32	quantity;
 /*016*/	uint32	price;
 /*020*/
@@ -3488,10 +3488,10 @@ struct TributeInfo_Struct {
 
 struct TributeItem_Struct
 {
-/*00*/	ItemSlotStruct slot;
-/*12*/	uint32   quantity;
-/*16*/	uint32   tribute_master_id;
-/*20*/	int32  tribute_points;
+/*00*/	ItemSlotStruct	slot;
+/*12*/	uint32	quantity;
+/*16*/	uint32	tribute_master_id;
+/*20*/	int32	tribute_points;
 /*24*/
 };
 
@@ -3527,7 +3527,7 @@ struct Split_Struct
 */
 struct NewCombine_Struct {
 /*00*/	ItemSlotStruct container_slot;
-/*12*/	ItemSlotStruct unknown_slot;	// Slot type is 8?
+/*12*/	ItemSlotStruct guildtribute_slot;	// Slot type is 8? (MapGuildTribute = 8 -U)
 /*24*/
 };
 

@@ -18,15 +18,15 @@ namespace Titanium
 	static OpcodeManager *opcodes = nullptr;
 	static Strategy struct_strategy;
 
-	char* SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 depth);
+	char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint8 depth);
 
 	// server to client inventory location converters
-	static inline uint32 ServerToTitaniumSlot(uint32 ServerSlot);
-	static inline uint32 ServerToTitaniumCorpseSlot(uint32 ServerCorpse);
+	static inline int16 ServerToTitaniumSlot(uint32 ServerSlot);
+	static inline int16 ServerToTitaniumCorpseSlot(uint32 ServerCorpse);
 
 	// client to server inventory location converters
-	static inline uint32 TitaniumToServerSlot(uint32 TitaniumSlot);
-	static inline uint32 TitaniumToServerCorpseSlot(uint32 TitaniumCorpse);
+	static inline uint32 TitaniumToServerSlot(int16 TitaniumSlot);
+	static inline uint32 TitaniumToServerCorpseSlot(int16 TitaniumCorpse);
 
 	void Register(EQStreamIdentifier &into)
 	{
@@ -133,6 +133,31 @@ namespace Titanium
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_AdventureMerchantSell)
+	{
+		ENCODE_LENGTH_EXACT(Adventure_Sell_Struct);
+		SETUP_DIRECT_ENCODE(Adventure_Sell_Struct, structs::Adventure_Sell_Struct);
+
+		eq->unknown000 = 1;
+		OUT(npcid);
+		eq->slot = ServerToTitaniumSlot(emu->slot);
+		OUT(charges);
+		OUT(sell_price);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_ApplyPoison)
+	{
+		ENCODE_LENGTH_EXACT(ApplyPoison_Struct);
+		SETUP_DIRECT_ENCODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
+
+		eq->inventorySlot = ServerToTitaniumSlot(emu->inventorySlot);
+		OUT(success);
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_BazaarSearch)
 	{
 		if (((*p)->size == sizeof(BazaarReturnDone_Struct)) || ((*p)->size == sizeof(BazaarWelcome_Struct))) {
@@ -235,6 +260,20 @@ namespace Titanium
 		delete[] __emu_buffer;
 
 		dest->FastQueuePacket(&in, ack_req);
+	}
+
+	ENCODE(OP_DeleteCharge) { ENCODE_FORWARD(OP_MoveItem); }
+
+	ENCODE(OP_DeleteItem)
+	{
+		ENCODE_LENGTH_EXACT(DeleteItem_Struct);
+		SETUP_DIRECT_ENCODE(DeleteItem_Struct, structs::DeleteItem_Struct);
+
+		eq->from_slot = ServerToTitaniumSlot(emu->from_slot);
+		eq->to_slot = ServerToTitaniumSlot(emu->to_slot);
+		OUT(number_in_stack);
+
+		FINISH_ENCODE();
 	}
 
 	ENCODE(OP_DeleteSpawn)
@@ -608,6 +647,31 @@ namespace Titanium
 		delete in;
 	}
 
+	ENCODE(OP_LootItem)
+	{
+		ENCODE_LENGTH_EXACT(LootingItem_Struct);
+		SETUP_DIRECT_ENCODE(LootingItem_Struct, structs::LootingItem_Struct);
+
+		OUT(lootee);
+		OUT(looter);
+		eq->slot_id = emu->slot_id;
+		OUT(auto_loot);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_MoveItem)
+	{
+		ENCODE_LENGTH_EXACT(MoveItem_Struct);
+		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
+
+		eq->from_slot = ServerToTitaniumSlot(emu->from_slot);
+		eq->to_slot = ServerToTitaniumSlot(emu->to_slot);
+		OUT(number_in_stack);
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_NewSpawn) { ENCODE_FORWARD(OP_ZoneSpawns); }
 
 	ENCODE(OP_OnLevelMessage)
@@ -870,6 +934,7 @@ namespace Titanium
 
 	ENCODE(OP_ReadBook)
 	{
+		// no apparent slot translation needed -U
 		EQApplicationPacket *in = *p;
 		*p = nullptr;
 
@@ -992,6 +1057,19 @@ namespace Titanium
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_ShopPlayerSell)
+	{
+		ENCODE_LENGTH_EXACT(Merchant_Purchase_Struct);
+		SETUP_DIRECT_ENCODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Struct);
+
+		OUT(npcid);
+		eq->itemslot = ServerToTitaniumSlot(emu->itemslot);
+		OUT(quantity);
+		OUT(price);
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_Track)
 	{
 		EQApplicationPacket *in = *p;
@@ -1048,6 +1126,19 @@ namespace Titanium
 		OUT(ItemID);
 		OUT(Quantity);
 		OUT(AlreadySold);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_TributeItem)
+	{
+		ENCODE_LENGTH_EXACT(TributeItem_Struct);
+		SETUP_DIRECT_ENCODE(TributeItem_Struct, structs::TributeItem_Struct);
+
+		eq->slot = ServerToTitaniumSlot(emu->slot);
+		OUT(quantity);
+		OUT(tribute_master_id);
+		OUT(tribute_points);
 
 		FINISH_ENCODE();
 	}
@@ -1232,6 +1323,57 @@ namespace Titanium
 	}
 
 // DECODE methods
+	DECODE(OP_AdventureMerchantSell)
+	{
+		DECODE_LENGTH_EXACT(structs::Adventure_Sell_Struct);
+		SETUP_DIRECT_DECODE(Adventure_Sell_Struct, structs::Adventure_Sell_Struct);
+
+		IN(npcid);
+		emu->slot = TitaniumToServerSlot(eq->slot);
+		IN(charges);
+		IN(sell_price);
+
+		FINISH_DIRECT_DECODE();
+	}
+	
+	DECODE(OP_ApplyPoison)
+	{
+		DECODE_LENGTH_EXACT(structs::ApplyPoison_Struct);
+		SETUP_DIRECT_DECODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
+
+		emu->inventorySlot = TitaniumToServerSlot(eq->inventorySlot);
+		IN(success);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	// needs to be tested
+	DECODE(OP_AugmentInfo) { DECODE_FORWARD(OP_ReadBook); }
+
+	DECODE(OP_AugmentItem)
+	{
+		DECODE_LENGTH_EXACT(structs::AugmentItem_Struct);
+		SETUP_DIRECT_DECODE(AugmentItem_Struct, structs::AugmentItem_Struct);
+
+		emu->container_slot = TitaniumToServerSlot(eq->container_slot);
+		emu->augment_slot = eq->augment_slot;
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_CastSpell)
+	{
+		DECODE_LENGTH_EXACT(structs::CastSpell_Struct);
+		SETUP_DIRECT_DECODE(CastSpell_Struct, structs::CastSpell_Struct);
+
+		IN(slot);
+		IN(spell_id);
+		emu->inventoryslot = TitaniumToServerSlot(eq->inventoryslot);
+		IN(target_id);
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	DECODE(OP_CharacterCreate)
 	{
 		DECODE_LENGTH_EXACT(structs::CharCreate_Struct);
@@ -1256,6 +1398,30 @@ namespace Titanium
 		IN(face);
 		IN(eyecolor1);
 		IN(eyecolor2);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_Consume)
+	{
+		DECODE_LENGTH_EXACT(structs::Consume_Struct);
+		SETUP_DIRECT_DECODE(Consume_Struct, structs::Consume_Struct);
+
+		emu->slot = TitaniumToServerSlot(eq->slot);
+		IN(auto_consumed);
+		IN(type);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_DeleteItem)
+	{
+		DECODE_LENGTH_EXACT(structs::DeleteItem_Struct);
+		SETUP_DIRECT_DECODE(DeleteItem_Struct, structs::DeleteItem_Struct);
+
+		emu->from_slot = TitaniumToServerSlot(eq->from_slot);
+		emu->to_slot =TitaniumToServerSlot(eq->to_slot);
+		IN(number_in_stack);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -1347,8 +1513,36 @@ namespace Titanium
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_LootItem)
+	{
+		DECODE_LENGTH_EXACT(structs::LootingItem_Struct);
+		SETUP_DIRECT_DECODE(LootingItem_Struct, structs::LootingItem_Struct);
+
+		IN(lootee);
+		IN(looter);
+		emu->slot_id = eq->slot_id;
+		IN(auto_loot);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_MoveItem)
+	{
+		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
+		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
+
+		_log(NET__ERROR, "Moved item from %u to %u", eq->from_slot, eq->to_slot);
+
+		emu->from_slot = TitaniumToServerSlot(eq->from_slot);
+		emu->to_slot = TitaniumToServerSlot(eq->to_slot);
+		IN(number_in_stack);
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	DECODE(OP_ReadBook)
 	{
+		// no apparent slot translation needed -U
 		DECODE_LENGTH_ATLEAST(structs::BookRequest_Struct);
 		SETUP_DIRECT_DECODE(BookRequest_Struct, structs::BookRequest_Struct);
 
@@ -1372,6 +1566,19 @@ namespace Titanium
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_ShopPlayerSell)
+	{
+		DECODE_LENGTH_EXACT(structs::Merchant_Purchase_Struct);
+		SETUP_DIRECT_DECODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Struct);
+
+		IN(npcid);
+		emu->itemslot = TitaniumToServerSlot(eq->itemslot);
+		IN(quantity);
+		IN(price);
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	DECODE(OP_TraderBuy)
 	{
 		DECODE_LENGTH_EXACT(structs::TraderBuy_Struct);
@@ -1384,6 +1591,30 @@ namespace Titanium
 		memcpy(emu->ItemName, eq->ItemName, sizeof(emu->ItemName));
 		IN(ItemID);
 		IN(Quantity);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_TradeSkillCombine)
+	{
+		DECODE_LENGTH_EXACT(structs::NewCombine_Struct);
+		SETUP_DIRECT_DECODE(NewCombine_Struct, structs::NewCombine_Struct);
+
+		emu->container_slot = TitaniumToServerSlot(eq->container_slot);
+		IN(guildtribute_slot);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_TributeItem)
+	{
+		DECODE_LENGTH_EXACT(structs::TributeItem_Struct);
+		SETUP_DIRECT_DECODE(TributeItem_Struct, structs::TributeItem_Struct);
+
+		emu->slot = TitaniumToServerSlot(eq->slot);
+		IN(quantity);
+		IN(tribute_master_id);
+		IN(tribute_points);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -1422,13 +1653,14 @@ namespace Titanium
 	}
 
 // file scope helper methods
-	char *SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 depth)
+	char *SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint8 depth)
 	{
 		char *serialization = nullptr;
 		char *instance = nullptr;
 		const char *protection = (const char *)"\\\\\\\\\\";
 		char *sub_items[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 		bool stackable = inst->IsStackable();
+		int16 slot_id = ServerToTitaniumSlot(slot_id_in);
 		uint32 merchant_slot = inst->GetMerchantSlot();
 		int16 charges = inst->GetCharges();
 		const Item_Struct *item = inst->GetItem();
@@ -1439,7 +1671,8 @@ namespace Titanium
 			"%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|",
 			stackable ? charges : 0,
 			0,
-			(merchant_slot == 0) ? slot_id : merchant_slot,
+			//(merchant_slot == 0) ? slot_id : merchant_slot, // change when translator activated
+			(merchant_slot == 0) ? slot_id_in : merchant_slot,
 			inst->GetPrice(),
 			(merchant_slot == 0) ? 1 : inst->GetMerchantCount(),
 			0,
@@ -1503,22 +1736,30 @@ namespace Titanium
 		return serialization;
 	}
 
-	static inline uint32 ServerToTitaniumSlot(uint32 ServerSlot)
+	static inline int16 ServerToTitaniumSlot(uint32 ServerSlot)
 	{
-		//uint32 TitaniumSlot;
+		//int16 TitaniumSlot;
+		if (ServerSlot == INVALID_INDEX)
+			return INVALID_INDEX;
+
+		return ServerSlot; // deprecated
 	}
 	
-	static inline uint32 ServerToTitaniumCorpseSlot(uint32 ServerCorpse)
+	static inline int16 ServerToTitaniumCorpseSlot(uint32 ServerCorpse)
 	{
-		//uint32 TitaniumCorpse;
+		//int16 TitaniumCorpse;
 	}
 
-	static inline uint32 TitaniumToServerSlot(uint32 TitaniumSlot)
+	static inline uint32 TitaniumToServerSlot(int16 TitaniumSlot)
 	{
 		//uint32 ServerSlot;
+		if (TitaniumSlot == INVALID_INDEX)
+			return INVALID_INDEX;
+
+		return TitaniumSlot; // deprecated
 	}
 	
-	static inline uint32 TitaniumToServerCorpseSlot(uint32 TitaniumCorpse)
+	static inline uint32 TitaniumToServerCorpseSlot(int16 TitaniumCorpse)
 	{
 		//uint32 ServerCorpse;
 	}

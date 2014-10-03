@@ -3074,6 +3074,7 @@ namespace SoD
 		SETUP_DIRECT_DECODE(NewCombine_Struct, structs::NewCombine_Struct);
 
 		emu->container_slot = SoDToServerSlot(eq->container_slot);
+		IN(guildtribute_slot);
 
 		FINISH_DIRECT_DECODE();
 	}
