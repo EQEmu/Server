@@ -1207,33 +1207,25 @@ ItemInst* SharedDatabase::CreateBaseItem(const Item_Struct* item, int16 charges)
 }
 
 int32 SharedDatabase::DeleteStalePlayerCorpses() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 affected_rows = 0;
-
 	if(RuleB(Zone, EnableShadowrest))
 	{
-		if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE player_corpses SET IsBurried = 1 WHERE IsBurried=0 and "
-			"(UNIX_TIMESTAMP() - UNIX_TIMESTAMP(timeofdeath)) > %d and not timeofdeath=0",
-			(RuleI(Character, CorpseDecayTimeMS) / 1000)), errbuf, 0, &affected_rows))
-		{
-			safe_delete_array(query);
+        std::string query = StringFormat("UPDATE player_corpses SET IsBurried = 1 WHERE IsBurried = 0 AND "
+                                        "(UNIX_TIMESTAMP() - UNIX_TIMESTAMP(timeofdeath)) > %d AND NOT timeofdeath = 0",
+                                        (RuleI(Character, CorpseDecayTimeMS) / 1000));
+        auto results = QueryDatabase(query);
+		if (!results.Success())
 			return -1;
-		}
-	}
-	else
-	{
-		if (!RunQuery(query, MakeAnyLenString(&query, "Delete from player_corpses where (UNIX_TIMESTAMP() - "
-			"UNIX_TIMESTAMP(timeofdeath)) > %d and not timeofdeath=0", (RuleI(Character, CorpseDecayTimeMS) / 1000)),
-			errbuf, 0, &affected_rows))
-		{
-			safe_delete_array(query);
-			return -1;
-		}
+
+		return results.RowsAffected();
 	}
 
-	safe_delete_array(query);
-	return affected_rows;
+    std::string query = StringFormat("DELETE FROM player_corpses WHERE (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(timeofdeath)) > %d "
+                                    "AND NOT timeofdeath = 0", (RuleI(Character, CorpseDecayTimeMS) / 1000));
+    auto results = QueryDatabase(query);
+    if (!results.Success())
+        return -1;
+
+    return results.RowsAffected();
 }
 
 int32 SharedDatabase::DeleteStalePlayerBackups() {
