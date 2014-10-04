@@ -334,16 +334,13 @@ int32 SharedDatabase::GetSharedPlatinum(uint32 account_id)
 }
 
 bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE `account` SET `sharedplat` = `sharedplat` + %i WHERE id = %i", amount_to_add, account_id), errbuf)) {
-		std::cerr << "Error in SetSharedPlatinum query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+	std::string query = StringFormat("UPDATE account SET sharedplat = sharedplat + %i WHERE id = %i", amount_to_add, account_id);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		std::cerr << "Error in SetSharedPlatinum query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
-	safe_delete_array(query);
 	return true;
 }
 
