@@ -7309,56 +7309,58 @@ void command_nologs(Client *c, const Seperator *sep)
 
 void command_qglobal(Client *c, const Seperator *sep) {
 	//In-game switch for qglobal column
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 	if(sep->arg[1][0] == 0) {
 		c->Message(0, "Syntax: #qglobal [on/off/view]. Requires NPC target.");
 		return;
 	}
-	Mob *t = c->GetTarget();
-	if(!t || !t->IsNPC()) {
+
+	Mob *target = c->GetTarget();
+
+	if(!target || !target->IsNPC()) {
 		c->Message(13, "NPC Target Required!");
 		return;
 	}
-	if(!strcasecmp(sep->arg[1], "on"))
-	{
-		if(!database.RunQuery(query, MakeAnyLenString(&query, "UPDATE npc_types SET qglobal=1 WHERE id='%i'", t->GetNPCTypeID()), errbuf, 0))
-		{
+
+	if(!strcasecmp(sep->arg[1], "on")) {
+        std::string query = StringFormat("UPDATE npc_types SET qglobal = 1 WHERE id = '%i'",
+                                        target->GetNPCTypeID());
+        auto results = database.QueryDatabase(query);
+		if(!results.Success()) {
 			c->Message(15, "Could not update database.");
+			return;
 		}
-		else
-		{
-			c->LogSQL(query);
-			c->Message(15, "Success! Changes take effect on zone reboot.");
-		}
-		safe_delete(query);
+
+        c->LogSQL(query.c_str());
+        c->Message(15, "Success! Changes take effect on zone reboot.");
+		return;
 	}
-	else if(!strcasecmp(sep->arg[1], "off"))
-	{
-		if(!database.RunQuery(query, MakeAnyLenString(&query, "UPDATE npc_types SET qglobal=0 WHERE id='%i'", t->GetNPCTypeID()), errbuf, 0))
-		{
+
+	if(!strcasecmp(sep->arg[1], "off")) {
+        std::string query = StringFormat("UPDATE npc_types SET qglobal = 0 WHERE id = '%i'",
+                                        target->GetNPCTypeID());
+        auto results = database.QueryDatabase(query);
+		if(!results.Success()) {
 			c->Message(15, "Could not update database.");
+			return;
 		}
-		else
-		{
-			c->LogSQL(query);
-			c->Message(15, "Success! Changes take effect on zone reboot.");
-		}
-		safe_delete(query);
+
+		c->LogSQL(query.c_str());
+        c->Message(15, "Success! Changes take effect on zone reboot.");
+		return;
 	}
-	else if(!strcasecmp(sep->arg[1], "view"))
-	{
-		const NPCType *type = database.GetNPCType(t->GetNPCTypeID());
-		if(!type) {
+
+	if(!strcasecmp(sep->arg[1], "view")) {
+		const NPCType *type = database.GetNPCType(target->GetNPCTypeID());
+		if(!type)
 			c->Message(15, "Invalid NPC type.");
-		} else if(type->qglobal) {
+		else if(type->qglobal)
 			c->Message(15, "This NPC has quest globals active.");
-		} else {
+		else
 			c->Message(15, "This NPC has quest globals disabled.");
-		}
-	} else {
-		c->Message(15, "Invalid action specified.");
+		return;
 	}
+
+    c->Message(15, "Invalid action specified.");
 }
 
 void command_path(Client *c, const Seperator *sep)
