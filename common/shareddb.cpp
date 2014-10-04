@@ -597,104 +597,94 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
 
 // Overloaded: Retrieve character inventory based on account_id and character name
 bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES* result;
-	MYSQL_ROW row;
-	bool ret = false;
-
 	// Retrieve character inventory
-	if (RunQuery(query, MakeAnyLenString(&query,
-		" SELECT `slotid`, `itemid`, `charges`, `color`, `augslot1`, `augslot2`, `augslot3`, `augslot4`, `augslot5`, `instnodrop`, `custom_data`"
-		" FROM `inventory`"
-		" INNER JOIN `character_data` ch ON ch.id = charid"
-		" WHERE ch.NAME = '%s'"
-		" AND ch.account_id = % i"
-		" ORDER BY `slotid`",
-		name, account_id), errbuf, &result))
-	{
-		while ((row = mysql_fetch_row(result))) {
-			int16 slot_id	= atoi(row[0]);
-			uint32 item_id	= atoi(row[1]);
-			int8 charges	= atoi(row[2]);
-			uint32 color		= atoul(row[3]);
-			uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
-			aug[0]	= (uint32)atoi(row[4]);
-			aug[1]	= (uint32)atoi(row[5]);
-			aug[2]	= (uint32)atoi(row[6]);
-			aug[3]	= (uint32)atoi(row[7]);
-			aug[4]	= (uint32)atoi(row[8]);
-			bool instnodrop	= (row[9] && (uint16)atoi(row[9])) ? true : false;
-			const Item_Struct* item = GetItem(item_id);
-			int16 put_slot_id = INVALID_INDEX;
-			if(!item)
-				continue;
-
-			ItemInst* inst = CreateBaseItem(item, charges);
-			inst->SetInstNoDrop(instnodrop);
-
-			if(row[10]) {
-				std::string data_str(row[10]);
-				std::string id;
-				std::string value;
-				bool use_id = true;
-
-				for(int i = 0; i < data_str.length(); ++i) {
-					if(data_str[i] == '^') {
-						if(!use_id) {
-							inst->SetCustomData(id, value);
-							id.clear();
-							value.clear();
-						}
-						use_id = !use_id;
-					}
-					else {
-						char v = data_str[i];
-						if(use_id) {
-							id.push_back(v);
-						} else {
-							value.push_back(v);
-						}
-					}
-				}
-			}
-
-			if (color > 0)
-				inst->SetColor(color);
-			inst->SetCharges(charges);
-
-			if (item->ItemClass == ItemClassCommon) {
-				for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
-					if (aug[i]) {
-						inst->PutAugment(this, i, aug[i]);
-					}
-				}
-			}
-			if (slot_id >= 8000 && slot_id <= 8999)
-				put_slot_id = inv->PushCursor(*inst);
-			else
-				put_slot_id = inv->PutItem(slot_id, *inst);
-			safe_delete(inst);
-
-			// Save ptr to item in inventory
-			if (put_slot_id == INVALID_INDEX) {
-				LogFile->write(EQEMuLog::Error,
-					"Warning: Invalid slot_id for item in inventory: name=%s, acctid=%i, item_id=%i, slot_id=%i",
-					name, account_id, item_id, slot_id);
-			}
-		}
-		mysql_free_result(result);
-
-		// Retrieve shared inventory
-		ret = GetSharedBank(account_id, inv, false);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "GetInventory query '%s' %s", query, errbuf);
+	std::string query = StringFormat("SELECT slotid, itemid, charges, color, augslot1, "
+                                    "augslot2, augslot3, augslot4, augslot5, instnodrop, custom_data "
+                                    "FROM inventory INNER JOIN character_data ch "
+                                    "ON ch.id = charid WHERE ch.name = '%s' AND ch.account_id = %i ORDER BY slotid",
+                                    name, account_id);
+    auto results = QueryDatabase(query);
+    if (!results.Success()){
+		LogFile->write(EQEMuLog::Error, "GetInventory query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
 		LogFile->write(EQEMuLog::Error, "If you got an error related to the 'instnodrop' field, run the following SQL Queries:\nalter table inventory add instnodrop tinyint(1) unsigned default 0 not null;\n");
+        return false;
 	}
 
-	safe_delete_array(query);
-	return ret;
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        int16 slot_id	= atoi(row[0]);
+        uint32 item_id	= atoi(row[1]);
+        int8 charges	= atoi(row[2]);
+        uint32 color	= atoul(row[3]);
+
+        uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
+        aug[0]	= (uint32)atoi(row[4]);
+        aug[1]	= (uint32)atoi(row[5]);
+        aug[2]	= (uint32)atoi(row[6]);
+        aug[3]	= (uint32)atoi(row[7]);
+        aug[4]	= (uint32)atoi(row[8]);
+
+        bool instnodrop	= (row[9] && (uint16)atoi(row[9])) ? true : false;
+        const Item_Struct* item = GetItem(item_id);
+        int16 put_slot_id = INVALID_INDEX;
+        if(!item)
+            continue;
+
+        ItemInst* inst = CreateBaseItem(item, charges);
+        inst->SetInstNoDrop(instnodrop);
+
+        if(row[10]) {
+            std::string data_str(row[10]);
+            std::string idAsString;
+            std::string value;
+            bool use_id = true;
+
+            for(int i = 0; i < data_str.length(); ++i) {
+                if(data_str[i] == '^') {
+                    if(!use_id) {
+                        inst->SetCustomData(idAsString, value);
+                        idAsString.clear();
+                        value.clear();
+                    }
+
+                    use_id = !use_id;
+                    continue;
+                }
+
+                char v = data_str[i];
+                if(use_id)
+                    idAsString.push_back(v);
+                else
+                    value.push_back(v);
+
+            }
+        }
+
+        if (color > 0)
+            inst->SetColor(color);
+
+        inst->SetCharges(charges);
+
+        if (item->ItemClass == ItemClassCommon)
+            for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++)
+                if (aug[i])
+                    inst->PutAugment(this, i, aug[i]);
+
+        if (slot_id>=8000 && slot_id <= 8999)
+            put_slot_id = inv->PushCursor(*inst);
+        else
+            put_slot_id = inv->PutItem(slot_id, *inst);
+
+        safe_delete(inst);
+
+        // Save ptr to item in inventory
+        if (put_slot_id == INVALID_INDEX)
+            LogFile->write(EQEMuLog::Error, "Warning: Invalid slot_id for item in inventory: name=%s, acctid=%i, item_id=%i, slot_id=%i", name, account_id, item_id, slot_id);
+
+    }
+
+    // Retrieve shared inventory
+	return GetSharedBank(account_id, inv, false);
 }
 
 
