@@ -7737,17 +7737,16 @@ void Client::LoadAccountFlags()
         accountflags[row[0]] = row[1];
 }
 
-void Client::SetAccountFlag(std::string flag, std::string val)
-{
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+void Client::SetAccountFlag(std::string flag, std::string val) {
 
-	MakeAnyLenString(&query, "REPLACE INTO account_flags (p_accid, p_flag, p_value) VALUES( '%d', '%s', '%s')", account_id, flag.c_str(), val.c_str());
-	if(!database.RunQuery(query, strlen(query), errbuf))
-	{
-		std::cerr << "Error in SetAccountFlags query '" << query << "' " << errbuf << std::endl;
+    std::string query = StringFormat("REPLACE INTO account_flags (p_accid, p_flag, p_value) "
+                                    "VALUES( '%d', '%s', '%s')",
+                                    account_id, flag.c_str(), val.c_str());
+    auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
+		std::cerr << "Error in SetAccountFlags query '" << query << "' " << results.ErrorMessage() << std::endl;
+		return;
 	}
-	safe_delete_array(query);
 
 	accountflags[flag] = val;
 }
