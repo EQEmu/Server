@@ -3096,67 +3096,47 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 void command_findnpctype(Client *c, const Seperator *sep)
 {
-	if(sep->arg[1][0] == 0)
+	if(sep->arg[1][0] == 0) {
 		c->Message(0, "Usage: #findnpctype [search criteria]");
-	else
-	{
-		int id;
-		int count;
-		const int maxrows = 20;
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query;
-		MYSQL_RES *result;
-		MYSQL_ROW row;
+		return;
+    }
 
-		query = new char[256];
+	std::string query;
 
-		// If id evaluates to 0, then search as if user entered a string.
-		if ((id = atoi((const char *)sep->arg[1])) == 0)
-			MakeAnyLenString(&query,
-				"SELECT id,name"
-				" FROM npc_types WHERE name LIKE '%%%s%%'",
-				sep->arg[1]);
-		// Otherwise, look for just that npc id.
-		else
-			MakeAnyLenString(&query,
-				"SELECT id,name FROM npc_types WHERE id=%i", id);
+	int id = atoi((const char *)sep->arg[1]);
+	if (id == 0) // If id evaluates to 0, then search as if user entered a string.
+		query = StringFormat("SELECT id, name FROM npc_types WHERE name LIKE '%%%s%%'", sep->arg[1]);
+	else // Otherwise, look for just that npc id.
+		query = StringFormat("SELECT id, name FROM npc_types WHERE id = %i", id);
 
-		// If query runs successfully.
-		if (database.RunQuery(query, strlen(query), errbuf, &result))
-		{
-			count = 0;
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        c->Message (0, "Error querying database.");
+		c->Message (0, query.c_str());
+    }
 
-			// Process each row returned.
-			while((row = mysql_fetch_row(result)))
-			{
-				// Limit to returning maxrows rows.
-				if (++count > maxrows)
-				{
-					c->Message (0,
-						"%i npc types shown. Too many results.", maxrows);
-					break;
-				}
-				c->Message (0, "  %s: %s", row[0], row[1]);
-			}
+    if (results.RowCount() == 0) // No matches found.
+        c->Message (0, "No matches found for %s.", sep->arg[1]);
 
-			// If we did not hit the maxrows limit.
-			if (count <= maxrows)
-				c->Message (0, "Query complete. %i rows shown.", count);
-			// No matches found.
-			else if (count == 0)
-				c->Message (0, "No matches found for %s.", sep->arg[1]);
+    // If query runs successfully.
+	int count = 0;
+    const int maxrows = 20;
 
-			mysql_free_result(result);
-		}
-		// If query failed.
-		else
-		{
-			c->Message (0, "Error querying database.");
-			c->Message (0, query);
-		}
+    // Process each row returned.
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		// Limit to returning maxrows rows.
+        if (++count > maxrows) {
+            c->Message (0, "%i npc types shown. Too many results.", maxrows);
+            break;
+        }
 
-		safe_delete_array(query);
-	}
+        c->Message (0, "  %s: %s", row[0], row[1]);
+    }
+
+    // If we did not hit the maxrows limit.
+    if (count <= maxrows)
+        c->Message (0, "Query complete. %i rows shown.", count);
+
 }
 
 void command_findzone(Client *c, const Seperator *sep)
