@@ -500,27 +500,21 @@ bool WorldDatabase::LoadCharacterCreateAllocations() {
 bool WorldDatabase::LoadCharacterCreateCombos() {
 	character_create_race_class_combos.clear();
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if(RunQuery(query, MakeAnyLenString(&query, "select * from char_create_combinations order by race, class, deity, start_zone"), errbuf, &result)) {
-		safe_delete_array(query);
-		while(row = mysql_fetch_row(result)) {
-			RaceClassCombos combo;
-			int r = 0;
-			combo.AllocationIndex = atoi(row[r++]);
-			combo.Race = atoi(row[r++]);
-			combo.Class = atoi(row[r++]);
-			combo.Deity = atoi(row[r++]);
-			combo.Zone = atoi(row[r++]);
-			combo.ExpansionRequired = atoi(row[r++]);
-			character_create_race_class_combos.push_back(combo);
-		}
-		mysql_free_result(result);
-	} else {
-		safe_delete_array(query);
-		return false;
+	std::string query = "SELECT * FROM char_create_combinations ORDER BY race, class, deity, start_zone";
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+        return false;
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		RaceClassCombos combo;
+		combo.AllocationIndex = atoi(row[0]);
+		combo.Race = atoi(row[1]);
+		combo.Class = atoi(row[2]);
+		combo.Deity = atoi(row[3]);
+		combo.Zone = atoi(row[4]);
+		combo.ExpansionRequired = atoi(row[5]);
+
+		character_create_race_class_combos.push_back(combo);
 	}
 
 	return true;
