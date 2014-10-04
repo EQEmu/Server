@@ -4047,14 +4047,11 @@ bool Client::IsDiscovered(uint32 itemid) {
 
 void Client::DiscoverItem(uint32 itemid) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "INSERT INTO discovered_items SET item_id=%lu, char_name='%s', discovered_date=UNIX_TIMESTAMP(), account_status=%i", itemid, GetName(), Admin()), errbuf, &result))
-	{
-		mysql_free_result(result);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("INSERT INTO discovered_items "
+                                    "SET item_id = %lu, char_name = '%s', "
+                                    "discovered_date = UNIX_TIMESTAMP(), account_status = %i",
+                                    itemid, GetName(), Admin());
+	auto results = database.QueryDatabase(query);
 
 	parse->EventPlayer(EVENT_DISCOVER_ITEM, this, "", itemid);
 }
