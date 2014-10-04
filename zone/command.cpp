@@ -588,7 +588,7 @@ int command_realdispatch(Client *c, const char *message)
 	/* QS: Player_Log_Issued_Commands */
 	if (RuleB(QueryServ, PlayerLogIssuedCommandes)){
 		std::string event_desc = StringFormat("Issued command :: '%s' in zoneid:%i instid:%i", message, c->GetZoneID(), c->GetInstanceID());
-		QServ->PlayerLogEvent(Player_Log_Issued_Commands, c->CharacterID(), event_desc); 
+		QServ->PlayerLogEvent(Player_Log_Issued_Commands, c->CharacterID(), event_desc);
 	}
 
 #ifdef COMMANDS_LOGGING
@@ -815,17 +815,18 @@ void command_version(Client *c, const Seperator *sep)
 
 void command_setfaction(Client *c, const Seperator *sep)
 {
-	if((sep->arg[1][0] == 0 || strcasecmp(sep->arg[1],"*")==0) || ((c->GetTarget()==0) || (c->GetTarget()->IsClient())))
+	if((sep->arg[1][0] == 0 || strcasecmp(sep->arg[1],"*")==0) || ((c->GetTarget()==0) || (c->GetTarget()->IsClient()))) {
 		c->Message(0, "Usage: #setfaction [faction number]");
-	else
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"Setting NPC %u to faction %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->argplus[1]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set npc_faction_id=%i where id=%i",atoi(sep->argplus[1]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
+		return;
+    }
+
+    auto npcTypeID = c->GetTarget()->CastToNPC()->GetNPCTypeID();
+    c->Message(15,"Setting NPC %u to faction %i", npcTypeID, atoi(sep->argplus[1]));
+
+    std::string query = StringFormat("UPDATE npc_types SET npc_faction_id = %i WHERE id = %i",
+                                    atoi(sep->argplus[1]), npcTypeID);
+    database.QueryDatabase(query);
+    c->LogSQL(query.c_str());
 }
 
 void command_serversidename(Client *c, const Seperator *sep)
@@ -2397,8 +2398,8 @@ void command_showskills(Client *c, const Seperator *sep)
 
 	c->Message(0, "Skills for %s", t->GetName());
 	for (SkillUseTypes i=Skill1HBlunt; i <= HIGHEST_SKILL; i=(SkillUseTypes)(i+1))
-		c->Message(0, "Skill [%d] is at [%d] - %u", i, t->GetSkill(i), t->GetRawSkill(i)); 
-} 
+		c->Message(0, "Skill [%d] is at [%d] - %u", i, t->GetSkill(i), t->GetRawSkill(i));
+}
 
 void command_findspell(Client *c, const Seperator *sep)
 {
