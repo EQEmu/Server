@@ -48,18 +48,14 @@ SharedDatabase::~SharedDatabase() {
 
 bool SharedDatabase::SetHideMe(uint32 account_id, uint8 hideme)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE account SET hideme = %i where id = %i", hideme, account_id), errbuf)) {
-		std::cerr << "Error in SetGMSpeed query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+	std::string query = StringFormat("UPDATE account SET hideme = %i WHERE id = %i", hideme, account_id);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		std::cerr << "Error in SetGMSpeed query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
-	safe_delete_array(query);
 	return true;
-
 }
 
 uint8 SharedDatabase::GetGMSpeed(uint32 account_id)
@@ -357,13 +353,13 @@ bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, 
 		" AND (`zoneid` = %i OR `zoneid` = 0)"
 		" AND gm <= %i ORDER BY id",
 		si_race, si_class, si_deity, si_current_zone, admin_level);
-	auto results = QueryDatabase(query); 
+	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		itemid = atoi(row[0]); 
+		itemid = atoi(row[0]);
 		charges = atoi(row[1]);
 		slot = atoi(row[2]);
 		myitem = GetItem(itemid);
-		if(!myitem) 
+		if(!myitem)
 			continue;
 		ItemInst* myinst = CreateBaseItem(myitem, charges);
 		if(slot < 0)
@@ -604,7 +600,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
 	bool ret = false;
 
 	// Retrieve character inventory
-	if (RunQuery(query, MakeAnyLenString(&query, 
+	if (RunQuery(query, MakeAnyLenString(&query,
 		" SELECT `slotid`, `itemid`, `charges`, `color`, `augslot1`, `augslot2`, `augslot3`, `augslot4`, `augslot5`, `instnodrop`, `custom_data`"
 		" FROM `inventory`"
 		" INNER JOIN `character_data` ch ON ch.id = charid"
@@ -1688,7 +1684,7 @@ bool SharedDatabase::LoadBaseData() {
 		EQEmu::IPCMutex mutex("base_data");
 		mutex.Lock();
 		base_data_mmf = new EQEmu::MemoryMappedFile("shared/base_data");
-	
+
 		int size = 16 * (GetMaxBaseDataLevel() + 1) * sizeof(BaseDataStruct);
 		if(size == 0) {
 			EQ_EXCEPT("SharedDatabase", "Base Data size is zero");
@@ -1713,9 +1709,9 @@ void SharedDatabase::LoadBaseData(void *data, int max_level) {
 	const char *query = "SELECT * FROM base_data ORDER BY level, class ASC";
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	
+
 	if(RunQuery(query, strlen(query), errbuf, &result)) {
-	
+
 		int lvl = 0;
 		int cl = 0;
 		while (row = mysql_fetch_row(result)) {
@@ -1994,10 +1990,10 @@ const LootDrop_Struct* SharedDatabase::GetLootDrop(uint32 lootdrop_id) {
 	return nullptr;
 }
 
-void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* message) { 
+void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* message) {
 	std::string query = StringFormat("SELECT `inspect_message` FROM `character_inspect_messages` WHERE `id` = %u LIMIT 1", character_id);
 	auto results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "SharedDatabase::LoadCharacterInspectMessage", query);
-	auto row = results.begin();  
+	auto row = results.begin();
 	memcpy(message, "", sizeof(InspectMessage_Struct));
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		memcpy(message, row[0], sizeof(InspectMessage_Struct));
@@ -2006,7 +2002,7 @@ void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMes
 
 void SharedDatabase::SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* message) {
 	std::string query = StringFormat("REPLACE INTO `character_inspect_messages` (id, inspect_message) VALUES (%u, '%s')", character_id, EscapeString(message->text).c_str());
-	auto results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "SharedDatabase::SaveCharacterInspectMessage", query);  
+	auto results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "SharedDatabase::SaveCharacterInspectMessage", query);
 }
 
 void SharedDatabase::GetBotInspectMessage(uint32 botid, InspectMessage_Struct* message) {
