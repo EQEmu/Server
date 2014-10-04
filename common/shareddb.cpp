@@ -1409,23 +1409,16 @@ const EvolveInfo* SharedDatabase::GetEvolveInfo(uint32 loregroup) {
 }
 
 int SharedDatabase::GetMaxSpellID() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = nullptr;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	int32 ret = 0;
-	if(RunQuery(query, MakeAnyLenString(&query, "SELECT MAX(id) FROM spells_new"),
-		errbuf, &result)) {
-		safe_delete_array(query);
-		row = mysql_fetch_row(result);
-		ret = atoi(row[0]);
-		mysql_free_result(result);
-	} else {
-		_log(SPELLS__LOAD_ERR, "Error in GetMaxSpellID query '%s' %s", query, errbuf);
-		safe_delete_array(query);
-		ret = -1;
-	}
-	return ret;
+	std::string query = "SELECT MAX(id) FROM spells_new";
+	auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        _log(SPELLS__LOAD_ERR, "Error in GetMaxSpellID query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
+        return -1;
+    }
+
+    auto row = results.begin();
+
+	return atoi(row[0]);
 }
 
 void SharedDatabase::LoadSpells(void *data, int max_spells) {
