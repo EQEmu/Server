@@ -99,27 +99,26 @@ uint32 SharedDatabase::GetTotalTimeEntitledOnAccount(uint32 AccountID) {
 
 bool SharedDatabase::SaveCursor(uint32 char_id, std::list<ItemInst*>::const_iterator &start, std::list<ItemInst*>::const_iterator &end)
 {
-	iter_queue it;
-	int i;
-	bool ret = true;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
 	// Delete cursor items
-	if ((ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM inventory WHERE charid = %i AND ((slotid >= 8000 AND slotid <= 8999) OR slotid = %i OR (slotid >= %i AND slotid <= %i))",
-		char_id, MainCursor, EmuConstants::CURSOR_BAG_BEGIN, EmuConstants::CURSOR_BAG_END), errbuf))) {
+	std::string query = StringFormat("DELETE FROM inventory WHERE charid = %i "
+                                    "AND ((slotid >= 8000 AND slotid <= 8999) "
+                                    "OR slotid = %i OR (slotid >= %i AND slotid <= %i) )",
+                                    char_id, MainCursor,
+                                    EmuConstants::CURSOR_BAG_BEGIN, EmuConstants::CURSOR_BAG_END);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        std::cout << "Clearing cursor failed: " << results.ErrorMessage() << std::endl;
+        return false;
+    }
 
-		for (it = start, i = 8000; it != end; ++it, i++) {
-			ItemInst *inst = *it;
-			if (!(ret = SaveInventory(char_id, inst, (i == 8000) ? MainCursor : i)))
-				break;
-		}
-	}
-	else {
-		std::cout << "Clearing cursor failed: " << errbuf << std::endl;
-	}
-	safe_delete_array(query);
+    int i = 8000;
+    for(auto it = start; it != end; ++it, i++) {
+        ItemInst *inst = *it;
+        if (!SaveInventory(char_id,inst,(i == 8000) ? MainCursor : i))
+            return false;
+    }
 
-	return ret;
+	return true;
 }
 
 bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const ItemInst* inst)
