@@ -1935,13 +1935,10 @@ void SharedDatabase::GetBotInspectMessage(uint32 botid, InspectMessage_Struct* m
 
 void SharedDatabase::SetBotInspectMessage(uint32 botid, const InspectMessage_Struct* message) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
 	std::string msg = EscapeString(message->text);
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE bots SET BotInspectMessage='%s' WHERE BotID=%i", msg.c_str(), botid), errbuf)) {
-		std::cerr << "Error in SetBotInspectMessage query '" << query << "' " << errbuf << std::endl;
-	}
+	std::string query = StringFormat("UPDATE bots SET BotInspectMessage = '%s' WHERE BotID = %i", msg.c_str(), botid);
+    auto results = QueryDatabase(query);
+    if (!results.Success())
+		std::cerr << "Error in SetBotInspectMessage query '" << query << "' " << results.ErrorMessage() << std::endl;
 
-	safe_delete_array(query);
 }
