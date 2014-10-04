@@ -10838,7 +10838,9 @@ void command_mysql(Client *c, const Seperator *sep)
 {
 	if(!sep->arg[1][0] || !sep->arg[2][0]) {
 		c->Message(0, "Usage: #mysql query \"Query here\"");
+		return;
 	}
+
 	if ( strcasecmp( sep->arg[1], "help" ) == 0 ) {
 		c->Message(0, "MYSQL In-Game CLI Interface:");
 		c->Message(0, "Example: #mysql query \"Query goes here quoted\" -s -h");
@@ -10846,81 +10848,70 @@ void command_mysql(Client *c, const Seperator *sep)
 		c->Message(0, "Example: #mysql query \"select * from table where name like \"#something#\"");
 		c->Message(0, "-s - Spaces select entries apart");
 		c->Message(0, "-h - Colors every other select result");
+		return;
 	}
+
 	if ( strcasecmp( sep->arg[1], "query" ) == 0 ) {
 		///Parse switches here
-		int argnum = 3; bool Options = false, Optionh = false; bool Fail = false;
+		int argnum = 3;
+		bool optionS = false;
+		bool optionH = false;
 		while(sep->arg[argnum] && strlen(sep->arg[argnum]) > 1){
 			switch(sep->arg[argnum][1]){
-				case 's': Options = true; break;
-				case 'h': Optionh = true; break;
-				default: c->Message(15, "%s, there is no option '%c'", c->GetName(), sep->arg[argnum][1]); Fail = true;
+				case 's': optionS = true; break;
+				case 'h': optionH = true; break;
+				default:
+                    c->Message(15, "%s, there is no option '%c'", c->GetName(), sep->arg[argnum][1]);
+                    return;
 			}
 			++argnum;
 		}
 
-		if(!Fail) {
-			char errbuf[MYSQL_ERRMSG_SIZE];
-			int HText = 0;
-			MYSQL_RES *result;
-			std::stringstream MsgText;
-			std::string QueryText(sep->arg[2]);
-			//swap # for % so like queries can work
-			std::replace(QueryText.begin(), QueryText.end(), '#', '%');
+        int highlightTextIndex = 0;
+        std::string query(sep->arg[2]);
+        //swap # for % so like queries can work
+        std::replace(query.begin(), query.end(), '#', '%');
+        auto results = database.QueryDatabase(query);
+        if (!results.Success()) {
+            c->Message(0, "Invalid query: '%s', '%s'", sep->arg[2], results.ErrorMessage().c_str());
+            return;
+        }
 
-			if (database.RunQuery(QueryText.c_str(), QueryText.length(), errbuf, &result)) {
-				//Using sep->arg[2] again, replace # with %% so it doesn't screw up when sent through vsnprintf in Message
-				QueryText = sep->arg[2];
-				int pos = QueryText.find('#');
-				while(pos != std::string::npos)
-				{
-					QueryText.erase(pos,1);
-					QueryText.insert(pos, "%%");
-					pos = QueryText.find('#');
-				}
+        //Using sep->arg[2] again, replace # with %% so it doesn't screw up when sent through vsnprintf in Message
+        query = sep->arg[2];
+        int pos = query.find('#');
+        while(pos != std::string::npos) {
+            query.erase(pos,1);
+            query.insert(pos, "%%");
+            pos = query.find('#');
+        }
+        c->Message(15, "---Running query: '%s'", query.c_str());
 
-				MsgText << "---Running query: '" << QueryText << "'";
-				c->Message (15, MsgText.str().c_str());
-				MsgText.str("");
+        for (auto row = results.begin(); row != results.end(); ++row) {
+            std::stringstream lineText;
+            std::vector<std::string> lineVec;
+            for(int i = 0; i < results.RowCount(); i++) {
+                //split lines that could overflow the buffer in Client::Message and get cut off
+                //This will crash MQ2 @ 4000 since their internal buffer is only 2048.
+                //Reducing it to 2000 fixes that but splits more results from tables with a lot of columns.
+                if(lineText.str().length() > 4000) {
+                    lineVec.push_back(lineText.str());
+                    lineText.str("");
+                }
+                lineText << results.FieldName(i) << ":" << "[" << (row[i] ? row[i] : "nullptr") << "] ";
+            }
 
-				MYSQL_ROW row;
-				while ((row = mysql_fetch_row(result))) {
+            lineVec.push_back(lineText.str());
 
-					MYSQL_FIELD *fields = mysql_fetch_fields(result);
-					unsigned int num_fields = mysql_num_fields(result);
-					std::stringstream LineText;
-					std::vector<std::string> LineVec;
-					for(int i = 0; i < num_fields; i++) {
-						//split lines that could overflow the buffer in Client::Message and get cut off
-						//This will crash MQ2 @ 4000 since their internal buffer is only 2048.
-						//Reducing it to 2000 fixes that but splits more results from tables with a lot of columns.
-						if(LineText.str().length() > 4000) {
-							LineVec.push_back(LineText.str());
-							LineText.str("");
-						}
-						LineText << fields[i].name << ":" << "[" << (row[i] ? row[i] : "nullptr") << "] ";
-					}
-					LineVec.push_back(LineText.str());
+            if(optionS) //This provides spacing for the space switch
+                c->Message(0, " ");
+            if(optionH) //This option will highlight every other row
+                highlightTextIndex = 1 - highlightTextIndex;
 
-					if(Options) { //This provides spacing for the space switch
-						c->Message(0, " ");
-					}
-					if(Optionh) { //This option will highlight every other row
-						HText = 1 - HText;
-					}
-					for(int lineNum = 0; lineNum < LineVec.size(); ++lineNum)
-					{
-						c->Message(HText, LineVec[lineNum].c_str());
-					}
-				}
-			}
-			else {
-				MsgText << "Invalid query: ' " << sep->arg[2] << " ', ' " << errbuf << " '";
-				c->Message(0, MsgText.str().c_str());
-				MsgText.str("");
-			}
-		}
-	}
+            for(int lineNum = 0; lineNum < lineVec.size(); ++lineNum)
+                    c->Message(highlightTextIndex, lineVec[lineNum].c_str());
+        }
+    }
 }
 
 void command_xtargets(Client *c, const Seperator *sep)
