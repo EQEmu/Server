@@ -6111,70 +6111,62 @@ void command_stun(Client *c, const Seperator *sep)
 
 void command_ban(Client *c, const Seperator *sep)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
-	if(sep->arg[1][0] == 0 || sep->arg[2][0] == 0)
-	{
+if(sep->arg[1][0] == 0 || sep->arg[2][0] == 0) {
 		c->Message(0, "Usage: #ban <charname> <message>");
+		return;
 	}
-	else
-	{
-		auto account_id = database.GetAccountIDByChar(sep->arg[1]);
 
-		std::string message;
-		int i = 2;
-		while(1) {
-			if(sep->arg[i][0] == 0) {
-				break;
-			}
+    auto account_id = database.GetAccountIDByChar(sep->arg[1]);
 
-			if(message.length() > 0) {
-				message.push_back(' ');
-			}
+    std::string message;
+    int i = 2;
+    while(1) {
+        if(sep->arg[i][0] == 0) {
+            break;
+        }
 
-			message += sep->arg[i];
-			++i;
-		}
+        if(message.length() > 0) {
+            message.push_back(' ');
+        }
 
-		if(message.length() == 0) {
-			c->Message(0, "Usage: #ban <charname> <message>");
-			return;
-		}
+        message += sep->arg[i];
+        ++i;
+    }
 
-		if(account_id > 0)
-		{
-			database.RunQuery(query, MakeAnyLenString(&query, "UPDATE account set status = -2, ban_reason = '%s' where id = %i", EscapeString(message).c_str(), account_id), errbuf, 0);
-			c->Message(13, "Account number %i with the character %s has been banned with message: \"%s\"", account_id, sep->arg[1], message.c_str());
+    if(message.length() == 0) {
+        c->Message(0, "Usage: #ban <charname> <message>");
+        return;
+    }
 
-			ServerPacket pack(ServerOP_FlagUpdate, 6);
-			*((uint32*)&pack.pBuffer[0]) = account_id;
-			*((int16*)&pack.pBuffer[4]) = -2;
-			worldserver.SendPacket(&pack);
+    if(account_id == 0) {
+        c->Message(13, "Character does not exist.");
+        return;
+    }
 
-			Client *client = nullptr;
-			client = entity_list.GetClientByName(sep->arg[1]);
-			if(client)
-			{
-				client->WorldKick();
-			}
-			else
-			{
-				ServerPacket pack(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
-				ServerKickPlayer_Struct* skp = (ServerKickPlayer_Struct*)pack.pBuffer;
-				strcpy(skp->adminname, c->GetName());
-				strcpy(skp->name, sep->arg[1]);
-				skp->adminrank = c->Admin();
-				worldserver.SendPacket(&pack);
-			}
-		}
-		else
-		{
-			c->Message(13, "Character does not exist.");
-		}
+    std::string query = StringFormat("UPDATE account SET status = -2, ban_reason = '%s' "
+                                    "WHERE id = %i", EscapeString(message).c_str(), account_id);
+    auto results = database.QueryDatabase(query);
 
-		safe_delete_array(query);
-	}
+    c->Message(13, "Account number %i with the character %s has been banned with message: \"%s\"", account_id, sep->arg[1], message.c_str());
+
+    ServerPacket flagUpdatePack(ServerOP_FlagUpdate, 6);
+    *((uint32*)&flagUpdatePack.pBuffer[0]) = account_id;
+    *((int16*)&flagUpdatePack.pBuffer[4]) = -2;
+    worldserver.SendPacket(&flagUpdatePack);
+
+    Client *client = nullptr;
+    client = entity_list.GetClientByName(sep->arg[1]);
+    if(client) {
+        client->WorldKick();
+        return;
+    }
+
+    ServerPacket kickPlayerPack(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
+    ServerKickPlayer_Struct* skp = (ServerKickPlayer_Struct*)kickPlayerPack.pBuffer;
+    strcpy(skp->adminname, c->GetName());
+    strcpy(skp->name, sep->arg[1]);
+    skp->adminrank = c->Admin();
+    worldserver.SendPacket(&kickPlayerPack);
 }
 
 void command_suspend(Client *c, const Seperator *sep)
