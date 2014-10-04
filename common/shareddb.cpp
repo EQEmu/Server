@@ -156,117 +156,165 @@ bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const Ite
 }
 
 bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 slot_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	bool ret = false;
-	uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
 
 	//never save tribute slots:
 	if(slot_id >= EmuConstants::TRIBUTE_BEGIN && slot_id <= EmuConstants::TRIBUTE_END)
-		return(true);
+		return true;
 
-	if (inst && inst->IsType(ItemClassCommon)) {
+	if (slot_id >= EmuConstants::SHARED_BANK_BEGIN && slot_id <= EmuConstants::SHARED_BANK_BAGS_END) {
+        // Shared bank inventory
+		if (!inst)
+            return DeleteSharedBankSlot(char_id, slot_id);
+		else
+            return UpdateSharedBankSlot(char_id, inst, slot_id);
+	}
+	else if (!inst) // All other inventory
+        return DeleteInventorySlot(char_id, slot_id);
+
+    return UpdateInventorySlot(char_id, inst, slot_id);
+}
+
+bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, int16 slot_id) {
+
+	uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
+    if (inst->IsType(ItemClassCommon))
 		for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
 			ItemInst *auginst=inst->GetItem(i);
 			augslot[i]=(auginst && auginst->GetItem()) ? auginst->GetItem()->ID : NO_ITEM;
 		}
-	}
 
-	if (slot_id >= EmuConstants::SHARED_BANK_BEGIN && slot_id <= EmuConstants::SHARED_BANK_BAGS_END) { // Shared bank inventory
-		if (!inst) {
-			// Delete item
-			uint32 account_id = GetAccountIDByChar(char_id);
-			uint32 len_query = MakeAnyLenString(&query, "DELETE FROM sharedbank WHERE acctid=%i AND slotid=%i",
-				account_id, slot_id);
+    uint16 charges = 0;
+	if(inst->GetCharges() >= 0)
+		charges = inst->GetCharges();
+	else
+		charges = 0x7FFF;
 
-			ret = RunQuery(query, len_query, errbuf);
+	// Update/Insert item
+    std::string query = StringFormat("REPLACE INTO inventory "
+                                    "(charid, slotid, itemid, charges, instnodrop, custom_data, color, "
+                                    "augslot1, augslot2, augslot3, augslot4, augslot5) "
+                                    "VALUES( %lu, %lu, %lu, %lu, %lu, '%s', %lu, "
+                                    "%lu, %lu, %lu, %lu, %lu)",
+                                    (unsigned long)char_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID,
+                                    (unsigned long)charges, (unsigned long)(inst->IsInstNoDrop()? 1: 0),
+                                    inst->GetCustomDataString().c_str(), (unsigned long)inst->GetColor(),
+                                    (unsigned long)augslot[0], (unsigned long)augslot[1], (unsigned long)augslot[2],
+                                    (unsigned long)augslot[3],(unsigned long)augslot[4]);
+	auto results = QueryDatabase(query);
 
-			// Delete bag slots, if need be
-			if (ret && Inventory::SupportsContainers(slot_id)) {
-				safe_delete_array(query);
-				int16 base_slot_id = Inventory::CalcSlotId(slot_id, SUB_BEGIN);
-				ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM sharedbank WHERE acctid=%i AND slotid>=%i AND slotid<%i",
-					account_id, base_slot_id, (base_slot_id+10)), errbuf);
-			}
-
-			// @merth: need to delete augments here
-		}
-		else {
-			// Update/Insert item
-			uint32 account_id = GetAccountIDByChar(char_id);
-			uint16 charges = 0;
-			if(inst->GetCharges() >= 0)
-				charges = inst->GetCharges();
-			else
-				charges = 0x7FFF;
-
-			uint32 len_query = MakeAnyLenString(&query,
-				"REPLACE INTO sharedbank "
-				"	(acctid,slotid,itemid,charges,custom_data,"
-				"	augslot1,augslot2,augslot3,augslot4,augslot5)"
-				" VALUES(%lu,%lu,%lu,%lu,'%s',"
-				"	%lu,%lu,%lu,%lu,%lu)",
-				(unsigned long)account_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID, (unsigned long)charges,
-				inst->GetCustomDataString().c_str(),
-				(unsigned long)augslot[0],(unsigned long)augslot[1],(unsigned long)augslot[2],(unsigned long)augslot[3],(unsigned long)augslot[4]);
-
-
-			ret = RunQuery(query, len_query, errbuf);
-		}
-	}
-	else { // All other inventory
-		if (!inst) {
-			// Delete item
-			ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM inventory WHERE charid=%i AND slotid=%i",
-				char_id, slot_id), errbuf);
-
-			// Delete bag slots, if need be
-			if (ret && Inventory::SupportsContainers(slot_id)) {
-				safe_delete_array(query);
-				int16 base_slot_id = Inventory::CalcSlotId(slot_id, SUB_BEGIN);
-				ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM inventory WHERE charid=%i AND slotid>=%i AND slotid<%i",
-					char_id, base_slot_id, (base_slot_id+10)), errbuf);
-			}
-
-			// @merth: need to delete augments here
-		}
-		else {
-			uint16 charges = 0;
-			if(inst->GetCharges() >= 0)
-				charges = inst->GetCharges();
-			else
-				charges = 0x7FFF;
-			// Update/Insert item
-			uint32 len_query = MakeAnyLenString(&query,
-				"REPLACE INTO inventory "
-				"	(charid,slotid,itemid,charges,instnodrop,custom_data,color,"
-				"	augslot1,augslot2,augslot3,augslot4,augslot5)"
-				" VALUES(%lu,%lu,%lu,%lu,%lu,'%s',%lu,"
-				"	%lu,%lu,%lu,%lu,%lu)",
-				(unsigned long)char_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID, (unsigned long)charges,
-				(unsigned long)(inst->IsInstNoDrop() ? 1:0),inst->GetCustomDataString().c_str(),(unsigned long)inst->GetColor(),
-				(unsigned long)augslot[0],(unsigned long)augslot[1],(unsigned long)augslot[2],(unsigned long)augslot[3],(unsigned long)augslot[4] );
-
-			ret = RunQuery(query, len_query, errbuf);
-		}
-	}
-
-	if (!ret)
-		LogFile->write(EQEMuLog::Error, "SaveInventory query '%s': %s", query, errbuf);
-	safe_delete_array(query);
-
-	// Save bag contents, if slot supports bag contents
-	if (inst && inst->IsType(ItemClassContainer) && Inventory::SupportsContainers(slot_id)) {
+    // Save bag contents, if slot supports bag contents
+	if (inst->IsType(ItemClassContainer) && Inventory::SupportsContainers(slot_id))
 		for (uint8 idx = SUB_BEGIN; idx < EmuConstants::ITEM_CONTAINER_SIZE; idx++) {
 			const ItemInst* baginst = inst->GetItem(idx);
 			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
 		}
-	}
 
-	// @merth: need to save augments here
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "UpdateInventorySlot query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return false;
+    }
 
-	return ret;
+	return true;
 }
+
+bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, int16 slot_id) {
+
+	uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
+    if (inst->IsType(ItemClassCommon))
+		for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+			ItemInst *auginst=inst->GetItem(i);
+			augslot[i]=(auginst && auginst->GetItem()) ? auginst->GetItem()->ID : NO_ITEM;
+		}
+
+// Update/Insert item
+    uint32 account_id = GetAccountIDByChar(char_id);
+    uint16 charges = 0;
+    if(inst->GetCharges() >= 0)
+        charges = inst->GetCharges();
+    else
+        charges = 0x7FFF;
+
+    std::string query = StringFormat("REPLACE INTO sharedbank "
+                                    "(acctid, slotid, itemid, charges, custom_data, "
+                                    "augslot1, augslot2, augslot3, augslot4, augslot5) "
+                                    "VALUES( %lu, %lu, %lu, %lu, '%s', "
+                                    "%lu, %lu, %lu, %lu, %lu)",
+                                    (unsigned long)account_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID,
+                                    (unsigned long)charges, inst->GetCustomDataString().c_str(), (unsigned long)augslot[0],
+                                    (unsigned long)augslot[1],(unsigned long)augslot[2],(unsigned long)augslot[3],(unsigned long)augslot[4]);
+    auto results = QueryDatabase(query);
+
+    // Save bag contents, if slot supports bag contents
+	if (inst->IsType(ItemClassContainer) && Inventory::SupportsContainers(slot_id))
+		for (uint8 idx = SUB_BEGIN; idx < EmuConstants::ITEM_CONTAINER_SIZE; idx++) {
+			const ItemInst* baginst = inst->GetItem(idx);
+			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
+		}
+
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "UpdateSharedBankSlot query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return false;
+    }
+
+	return true;
+}
+
+bool SharedDatabase::DeleteInventorySlot(uint32 char_id, int16 slot_id) {
+
+	// Delete item
+	std::string query = StringFormat("DELETE FROM inventory WHERE charid = %i AND slotid = %i", char_id, slot_id);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "DeleteInventorySlot query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return false;
+    }
+
+    // Delete bag slots, if need be
+    if (!Inventory::SupportsContainers(slot_id))
+        return true;
+
+    int16 base_slot_id = Inventory::CalcSlotId(slot_id, SUB_BEGIN);
+    query = StringFormat("DELETE FROM inventory WHERE charid = %i AND slotid >= %i AND slotid < %i",
+                        char_id, base_slot_id, (base_slot_id+10));
+    results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "DeleteInventorySlot, bags query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return false;
+    }
+
+    // @merth: need to delete augments here
+    return true;
+}
+
+bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id) {
+
+    // Delete item
+	uint32 account_id = GetAccountIDByChar(char_id);
+	std::string query = StringFormat("DELETE FROM sharedbank WHERE acctid=%i AND slotid=%i", account_id, slot_id);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "DeleteSharedBankSlot query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return false;
+    }
+
+	// Delete bag slots, if need be
+	if (!Inventory::SupportsContainers(slot_id))
+        return true;
+
+    int16 base_slot_id = Inventory::CalcSlotId(slot_id, SUB_BEGIN);
+    query = StringFormat("DELETE FROM sharedbank WHERE acctid = %i "
+                        "AND slotid >= %i AND slotid < %i",
+                        account_id, base_slot_id, (base_slot_id+10));
+    results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "DeleteSharedBankSlot, bags query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return false;
+    }
+
+    // @merth: need to delete augments here
+    return true;
+}
+
 
 int32 SharedDatabase::GetSharedPlatinum(uint32 account_id)
 {

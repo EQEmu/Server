@@ -54,6 +54,10 @@ public:
 	*/
 	bool	SaveCursor(uint32 char_id, std::list<ItemInst*>::const_iterator &start, std::list<ItemInst*>::const_iterator &end);
 	bool	SaveInventory(uint32 char_id, const ItemInst* inst, int16 slot_id);
+	bool    DeleteSharedBankSlot(uint32 char_id, int16 slot_id);
+	bool    DeleteInventorySlot(uint32 char_id, int16 slot_id);
+	bool    UpdateInventorySlot(uint32 char_id, const ItemInst* inst, int16 slot_id);
+	bool    UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, int16 slot_id);
 	bool	VerifyInventory(uint32 account_id, int16 slot_id, const ItemInst* inst);
 	bool	GetSharedBank(uint32 id, Inventory* inv, bool is_charid);
 	int32	GetSharedPlatinum(uint32 account_id);
