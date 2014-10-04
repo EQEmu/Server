@@ -1510,33 +1510,29 @@ void command_movechar(Client *c, const Seperator *sep)
 
 void command_viewpetition(Client *c, const Seperator *sep)
 {
-	if (sep->arg[1][0] == 0)
+	if (sep->arg[1][0] == 0) {
 		c->Message(0, "Usage: #viewpetition (petition number) Type #listpetition for a list");
-	else
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		int queryfound = 0;
-		MYSQL_RES *result;
-		MYSQL_ROW row;
-		c->Message(13,"	ID : Character Name , Petition Text");
-		if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT petid, charname, petitiontext from petitions order by petid"), errbuf, &result))
-		{
-			while ((row = mysql_fetch_row(result)))
-			{
-				if (strcasecmp(row[0],sep->argplus[1])== 0)
-				{
-					queryfound=1;
-					c->Message(15, " %s:	%s , %s ",row[0],row[1],row[2]);
-				}
-			}
-			LogFile->write(EQEMuLog::Normal,"View petition request from %s, petition number:", c->GetName(), atoi(sep->argplus[1]) );
-			if (queryfound==0)
-				c->Message(13,"There was an error in your request: ID not found! Please check the Id and try again.");
-			mysql_free_result(result);
-		}
-		safe_delete_array(query);
-	}
+		return;
+    }
+
+    c->Message(13,"	ID : Character Name , Petition Text");
+
+    std::string query = "SELECT petid, charname, petitiontext FROM petitions ORDER BY petid";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success())
+        return;
+
+    LogFile->write(EQEMuLog::Normal,"View petition request from %s, petition number: %i", c->GetName(), atoi(sep->argplus[1]) );
+
+    if (results.RowCount() == 0) {
+        c->Message(13,"There was an error in your request: ID not found! Please check the Id and try again.");
+        return;
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row)
+        if (strcasecmp(row[0], sep->argplus[1]) == 0)
+			c->Message(15, " %s:	%s , %s ", row[0], row[1], row[2]);
+
 }
 
 void command_petitioninfo(Client *c, const Seperator *sep)
