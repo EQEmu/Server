@@ -432,9 +432,6 @@ void WorldDatabase::GetLauncherList(std::vector<std::string> &rl) {
 
 void WorldDatabase::SetMailKey(int CharID, int IPAddress, int MailKey) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
 	char MailKeyString[17];
 
 	if(RuleB(Chat, EnableMailKeyIPVerification) == true)
@@ -442,12 +439,11 @@ void WorldDatabase::SetMailKey(int CharID, int IPAddress, int MailKey) {
 	else
 		sprintf(MailKeyString, "%08X", MailKey);
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE `character_data` SET mailkey = '%s' WHERE id='%i'",
-							MailKeyString, CharID), errbuf))
-
-		LogFile->write(EQEMuLog::Error, "WorldDatabase::SetMailKey(%i, %s) : %s", CharID, MailKeyString, errbuf);
-
-	safe_delete_array(query);
+    std::string query = StringFormat("UPDATE character_data SET mailkey = '%s' WHERE id = '%i'",
+                                    MailKeyString, CharID);
+    auto results = QueryDatabase(query);
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "WorldDatabase::SetMailKey(%i, %s) : %s", CharID, MailKeyString, results.ErrorMessage().c_str());
 
 }
 
