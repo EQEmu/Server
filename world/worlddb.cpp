@@ -449,28 +449,20 @@ void WorldDatabase::SetMailKey(int CharID, int IPAddress, int MailKey) {
 
 bool WorldDatabase::GetCharacterLevel(const char *name, int &level)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	std::string query = StringFormat("SELECT level FROM character_data WHERE name = '%s'", name);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "WorldDatabase::GetCharacterLevel: %s", results.ErrorMessage().c_str());
+        return false;
+	}
 
-	if(RunQuery(query, MakeAnyLenString(&query, "SELECT `level` FROM `character_data` WHERE `name` = '%s'", name), errbuf, &result))
-	{
-		if(row = mysql_fetch_row(result))
-		{
-			level = atoi(row[0]);
-			mysql_free_result(result);
-			safe_delete_array(query);
-			return true;
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "WorldDatabase::GetCharacterLevel: %s", errbuf);
-	}
-	safe_delete_array(query);
-	return false;
+	if (results.RowCount() == 0)
+        return false;
+
+    auto row = results.begin();
+    level = atoi(row[0]);
+
+    return true;
 }
 
 bool WorldDatabase::LoadCharacterCreateAllocations() {
