@@ -1073,57 +1073,52 @@ const NPCFactionList* SharedDatabase::GetNPCFactionEntry(uint32 id) {
 
 void SharedDatabase::LoadNPCFactionLists(void *data, uint32 size, uint32 list_count, uint32 max_lists) {
 	EQEmu::FixedMemoryHashSet<NPCFactionList> hash(reinterpret_cast<uint8*>(data), size, list_count, max_lists);
-	const char *query = "SELECT npc_faction.id, npc_faction.primaryfaction, npc_faction.ignore_primary_assist, "
-		"npc_faction_entries.faction_id, npc_faction_entries.value, npc_faction_entries.npc_value, npc_faction_entries.temp "
-		"FROM npc_faction LEFT JOIN npc_faction_entries ON npc_faction.id = npc_faction_entries.npc_faction_id ORDER BY "
-		"npc_faction.id;";
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 	NPCFactionList faction;
 
-	if(RunQuery(query, strlen(query), errbuf, &result)) {
-		uint32 current_id = 0;
-		uint32 current_entry = 0;
-		while(row = mysql_fetch_row(result)) {
-			uint32 id = static_cast<uint32>(atoul(row[0]));
-			if(id != current_id) {
-				if(current_id != 0) {
-					hash.insert(current_id, faction);
-				}
+	const std::string query = "SELECT npc_faction.id, npc_faction.primaryfaction, npc_faction.ignore_primary_assist, "
+                            "npc_faction_entries.faction_id, npc_faction_entries.value, npc_faction_entries.npc_value, "
+                            "npc_faction_entries.temp FROM npc_faction LEFT JOIN npc_faction_entries "
+                            "ON npc_faction.id = npc_faction_entries.npc_faction_id ORDER BY npc_faction.id;";
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error getting npc faction info from database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
+		return;
+    }
 
-				memset(&faction, 0, sizeof(faction));
-				current_entry = 0;
-				current_id = id;
-				faction.id = id;
-				faction.primaryfaction = static_cast<uint32>(atoul(row[1]));
-				faction.assistprimaryfaction = (atoi(row[2]) == 0);
-			}
+    uint32 current_id = 0;
+    uint32 current_entry = 0;
 
-			if(!row[3]) {
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        uint32 id = static_cast<uint32>(atoul(row[0]));
+        if(id != current_id) {
+            if(current_id != 0) {
+                hash.insert(current_id, faction);
+            }
+
+            memset(&faction, 0, sizeof(faction));
+            current_entry = 0;
+            current_id = id;
+            faction.id = id;
+            faction.primaryfaction = static_cast<uint32>(atoul(row[1]));
+            faction.assistprimaryfaction = (atoi(row[2]) == 0);
+        }
+
+        if(!row[3])
+            continue;
+
+        if(current_entry >= MAX_NPC_FACTIONS)
 				continue;
-			}
 
-			if(current_entry >= MAX_NPC_FACTIONS) {
-				continue;
-			}
+        faction.factionid[current_entry] = static_cast<uint32>(atoul(row[3]));
+        faction.factionvalue[current_entry] = static_cast<int32>(atoi(row[4]));
+        faction.factionnpcvalue[current_entry] = static_cast<int8>(atoi(row[5]));
+        faction.factiontemp[current_entry] = static_cast<uint8>(atoi(row[6]));
+        ++current_entry;
+    }
 
-			faction.factionid[current_entry] = static_cast<uint32>(atoul(row[3]));
-			faction.factionvalue[current_entry] = static_cast<int32>(atoi(row[4]));
-			faction.factionnpcvalue[current_entry] = static_cast<int8>(atoi(row[5]));
-			faction.factiontemp[current_entry] = static_cast<uint8>(atoi(row[6]));
-			++current_entry;
-		}
+    if(current_id != 0)
+        hash.insert(current_id, faction);
 
-		if(current_id != 0) {
-			hash.insert(current_id, faction);
-		}
-
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error getting npc faction info from database: %s, %s", query, errbuf);
-}
 }
 
 bool SharedDatabase::LoadNPCFactionLists() {
