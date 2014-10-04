@@ -5223,67 +5223,51 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 void Client::SendRewards()
 {
 	std::vector<ClientReward> rewards;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT reward_id, amount FROM"
-		" account_rewards WHERE account_id=%i ORDER by reward_id", AccountID()),
-		errbuf,&result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			ClientReward cr;
-			cr.id = atoi(row[0]);
-			cr.amount = atoi(row[1]);
-			rewards.push_back(cr);
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Client::SendRewards(): %s (%s)", query, errbuf);
-		safe_delete_array(query);
+	std::string query = StringFormat("SELECT reward_id, amount "
+                                    "FROM account_rewards "
+                                    "WHERE account_id = %i "
+                                    "ORDER BY reward_id", AccountID());
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Client::SendRewards(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return;
-	}
+    }
 
-	if(rewards.size() > 0)
-	{
-		EQApplicationPacket *vetapp = new EQApplicationPacket(OP_VetRewardsAvaliable, (sizeof(InternalVeteranReward) * rewards.size()));
-		uchar *data = vetapp->pBuffer;
-		for(int i = 0; i < rewards.size(); ++i)
-		{
-			InternalVeteranReward *ivr = (InternalVeteranReward*)data;
-			ivr->claim_id = rewards[i].id;
-			ivr->number_available = rewards[i].amount;
-			std::list<InternalVeteranReward>::iterator iter = zone->VeteranRewards.begin();
-			while(iter != zone->VeteranRewards.end())
-			{
-				if((*iter).claim_id == rewards[i].id)
-				{
-					break;
-				}
-				++iter;
-			}
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        ClientReward cr;
+        cr.id = atoi(row[0]);
+        cr.amount = atoi(row[1]);
+        rewards.push_back(cr);
+    }
 
-			if(iter != zone->VeteranRewards.end())
-			{
-				InternalVeteranReward ivro = (*iter);
-				ivr->claim_count = ivro.claim_count;
-				for(int x = 0; x < ivro.claim_count; ++x)
-				{
-					ivr->items[x].item_id = ivro.items[x].item_id;
-					ivr->items[x].charges = ivro.items[x].charges;
-					strcpy(ivr->items[x].item_name, ivro.items[x].item_name);
-				}
-			}
+	if(rewards.size() == 0)
+        return;
 
-			data += sizeof(InternalVeteranReward);
-		}
-		FastQueuePacket(&vetapp);
-	}
+	EQApplicationPacket *vetapp = new EQApplicationPacket(OP_VetRewardsAvaliable, (sizeof(InternalVeteranReward) * rewards.size()));
+    uchar *data = vetapp->pBuffer;
+    for(int i = 0; i < rewards.size(); ++i) {
+        InternalVeteranReward *ivr = (InternalVeteranReward*)data;
+        ivr->claim_id = rewards[i].id;
+        ivr->number_available = rewards[i].amount;
+        auto iter = zone->VeteranRewards.begin();
+        for (;iter != zone->VeteranRewards.end(); ++iter)
+            if((*iter).claim_id == rewards[i].id)
+                break;
+
+        if(iter != zone->VeteranRewards.end()) {
+            InternalVeteranReward ivro = (*iter);
+            ivr->claim_count = ivro.claim_count;
+            for(int x = 0; x < ivro.claim_count; ++x) {
+                ivr->items[x].item_id = ivro.items[x].item_id;
+                ivr->items[x].charges = ivro.items[x].charges;
+                strcpy(ivr->items[x].item_name, ivro.items[x].item_name);
+            }
+        }
+
+        data += sizeof(InternalVeteranReward);
+    }
+
+    FastQueuePacket(&vetapp);
 }
 
 bool Client::TryReward(uint32 claim_id)
