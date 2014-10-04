@@ -3141,63 +3141,48 @@ void command_findnpctype(Client *c, const Seperator *sep)
 
 void command_findzone(Client *c, const Seperator *sep)
 {
-	if(sep->arg[1][0] == 0)
+	if(sep->arg[1][0] == 0) {
 		c->Message(0, "Usage: #findzone [search criteria]");
-	else
-	{
-		int id;
-		int count;
-		const int maxrows = 20;
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query;
-		MYSQL_RES *result;
-		MYSQL_ROW row;
+        return;
+    }
 
-		query = new char[256];
+    std::string query;
+    int id = atoi((const char *)sep->arg[1]);
+    if (id == 0) { // If id evaluates to 0, then search as if user entered a string.
+        char *escName = new char[strlen(sep->arg[1]) * 2 + 1];
+		database.DoEscapeString(escName, sep->arg[1], strlen(sep->arg[1]));
 
-		// If id evaluates to 0, then search as if user entered a string.
-		if ((id = atoi((const char *)sep->arg[1])) == 0)
-		{
-			char *EscName = new char[strlen(sep->arg[1]) * 2 + 1];
-			database.DoEscapeString(EscName, sep->arg[1], strlen(sep->arg[1]));
+        query = StringFormat("SELECT zoneidnumber, short_name, long_name FROM zone "
+                            "WHERE long_name RLIKE '%s' AND version = 0", escName);
+		safe_delete_array(escName);
+    }
+    else // Otherwise, look for just that zoneidnumber.
+		query = StringFormat("SELECT zoneidnumber, short_name, long_name FROM zone "
+                            "WHERE zoneidnumber = %i AND version = 0", id);
 
-			MakeAnyLenString(&query, "SELECT zoneidnumber,short_name,long_name FROM zone WHERE long_name rLIKE '%s' AND version=0",
-						EscName);
-			safe_delete_array(EscName);
-		}
-		// Otherwise, look for just that zoneidnumber.
-		else
-			MakeAnyLenString(&query, "SELECT zoneidnumber,short_name,long_name FROM zone WHERE zoneidnumber=%i AND version=0", id);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        c->Message (0, "Error querying database.");
+        c->Message (0, query.c_str());
+        return;
+    }
 
-		if (database.RunQuery(query, strlen(query), errbuf, &result))
-		{
-			count = 0;
+    int count = 0;
+    const int maxrows = 20;
 
-			while((row = mysql_fetch_row(result)))
-			{
-				if (++count > maxrows)
-				{
-					c->Message (0, "%i zones shown. Too many results.", maxrows);
-					break;
-				}
-				c->Message (0, "  %s: %s, %s", row[0], row[1], row[2]);
-			}
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        if (++count > maxrows) {
+            c->Message (0, "%i zones shown. Too many results.", maxrows);
+            break;
+        }
 
-			if (count <= maxrows)
-				c->Message (0, "Query complete. %i rows shown.", count);
-			else if (count == 0)
-				c->Message (0, "No matches found for %s.", sep->arg[1]);
+        c->Message (0, "  %s: %s, %s", row[0], row[1], row[2]);
+    }
 
-			mysql_free_result(result);
-		}
-		else
-		{
-			c->Message (0, "Error querying database.");
-			c->Message (0, query);
-		}
-
-		safe_delete_array(query);
-	}
+    if (count <= maxrows)
+        c->Message (0, "Query complete. %i rows shown.", count);
+    else if (count == 0)
+        c->Message (0, "No matches found for %s.", sep->arg[1]);
 }
 
 void command_viewnpctype(Client *c, const Seperator *sep)
