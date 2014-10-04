@@ -5270,8 +5270,7 @@ void Client::SendRewards()
     FastQueuePacket(&vetapp);
 }
 
-bool Client::TryReward(uint32 claim_id)
-{
+bool Client::TryReward(uint32 claim_id) {
 	//Make sure we have an open spot
 	//Make sure we have it in our acct and count > 0
 	//Make sure the entry was found
@@ -5281,142 +5280,89 @@ bool Client::TryReward(uint32 claim_id)
 	//save
 	uint32 free_slot = 0xFFFFFFFF;
 
-	for(int i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_END; ++i)
-	{
+	for(int i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_END; ++i) {
 		ItemInst *item = GetInv().GetItem(i);
-		if(!item)
-		{
+		if(!item) {
 			free_slot = i;
 			break;
 		}
 	}
 
 	if(free_slot == 0xFFFFFFFF)
-	{
 		return false;
-	}
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	uint32 amt = 0;
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT amount FROM"
-		" account_rewards WHERE account_id=%i AND reward_id=%i", AccountID(), claim_id),
-		errbuf,&result))
-	{
-		row = mysql_fetch_row(result);
-		if(row)
-		{
-			amt = atoi(row[0]);
-		}
-		else
-		{
-			mysql_free_result(result);
-			safe_delete_array(query);
-			return false;
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query, errbuf);
-		safe_delete_array(query);
+	std::string query = StringFormat("SELECT amount FROM account_rewards "
+                                    "WHERE account_id = %i AND reward_id = %i",
+                                    AccountID(), claim_id);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return false;
-	}
+    }
 
+    if (results.RowCount() == 0)
+        return false;
+
+    auto row = results.begin();
+
+    uint32 amt = atoi(row[0]);
 	if(amt == 0)
-	{
 		return false;
-	}
 
 	std::list<InternalVeteranReward>::iterator iter = zone->VeteranRewards.begin();
-	while(iter != zone->VeteranRewards.end())
-	{
+	for (; iter != zone->VeteranRewards.end(); ++row)
 		if((*iter).claim_id == claim_id)
-		{
 			break;
-		}
-		++iter;
-	}
 
 	if(iter == zone->VeteranRewards.end())
-	{
 		return false;
-	}
 
-	if(amt == 1)
-	{
-		if(!database.RunQuery(query,MakeAnyLenString(&query,"DELETE FROM"
-			" account_rewards WHERE account_id=%i AND reward_id=%i", AccountID(), claim_id),
-			errbuf))
-		{
-			LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query, errbuf);
-			safe_delete_array(query);
-		}
-		else
-		{
-			safe_delete_array(query);
-		}
+	if(amt == 1) {
+        query = StringFormat("DELETE FROM account_rewards "
+                            "WHERE account_id = %i AND reward_id = %i",
+                            AccountID(), claim_id);
+        auto results = database.QueryDatabase(query);
+		if(!results.Success())
+			LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 	}
-	else
-	{
-		if(!database.RunQuery(query,MakeAnyLenString(&query,"UPDATE account_rewards SET amount=(amount-1)"
-			" WHERE account_id=%i AND reward_id=%i", AccountID(), claim_id),
-			errbuf))
-		{
-			LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query, errbuf);
-			safe_delete_array(query);
-		}
-		else
-		{
-			safe_delete_array(query);
-		}
+	else {
+        query = StringFormat("UPDATE account_rewards SET amount = (amount-1) "
+                            "WHERE account_id = %i AND reward_id = %i",
+                            AccountID(), claim_id);
+        auto results = database.QueryDatabase(query);
+		if(!results.Success())
+			LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 	}
 
 	InternalVeteranReward ivr = (*iter);
 	ItemInst *claim = database.CreateItem(ivr.items[0].item_id, ivr.items[0].charges);
-	if(claim)
-	{
-		bool lore_conflict = false;
-		if(CheckLoreConflict(claim->GetItem()))
-		{
-			lore_conflict = true;
-		}
-
-		for(int y = 1; y < 8; y++)
-		{
-			if(ivr.items[y].item_id)
-			{
-				if(claim->GetItem()->ItemClass == 1)
-				{
-					ItemInst *item_temp = database.CreateItem(ivr.items[y].item_id, ivr.items[y].charges);
-					if(item_temp)
-					{
-						if(CheckLoreConflict(item_temp->GetItem()))
-						{
-							lore_conflict = true;
-							DuplicateLoreMessage(ivr.items[y].item_id);
-						}
-						claim->PutItem(y-1, *item_temp);
-					}
-				}
-			}
-		}
-
-		if(lore_conflict)
-		{
-			safe_delete(claim);
-			return true;
-		}
-		else
-		{
-			PutItemInInventory(free_slot, *claim);
-			SendItemPacket(free_slot, claim, ItemPacketTrade);
-		}
+	if(!claim) {
+        Save();
+        return true;
 	}
+
+    bool lore_conflict = CheckLoreConflict(claim->GetItem());
+
+    for(int y = 1; y < 8; y++)
+        if(ivr.items[y].item_id && claim->GetItem()->ItemClass == 1) {
+            ItemInst *item_temp = database.CreateItem(ivr.items[y].item_id, ivr.items[y].charges);
+            if(item_temp) {
+                if(CheckLoreConflict(item_temp->GetItem())) {
+                    lore_conflict = true;
+                    DuplicateLoreMessage(ivr.items[y].item_id);
+                }
+                claim->PutItem(y-1, *item_temp);
+            }
+        }
+
+    if(lore_conflict) {
+        safe_delete(claim);
+        return true;
+    }
+
+    PutItemInInventory(free_slot, *claim);
+    SendItemPacket(free_slot, claim, ItemPacketTrade);
 
 	Save();
 	return true;
