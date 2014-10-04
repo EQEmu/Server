@@ -345,32 +345,37 @@ bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add) {
 }
 
 bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin_level) {
+
 	const Item_Struct* myitem;
-	uint32 itemid = 0;
-	int32 charges = 0;
-	int32 slot = 0;
-	auto query = StringFormat(
-		"SELECT `itemid`, `item_charges`, `slot` FROM `starting_items`"
-		" WHERE (`race` = %i OR `race` = 0)"
-		" AND (`class` = %i OR `class` = 0)"
-		" AND  (`deityid` = %i OR `deityid` = 0)"
-		" AND (`zoneid` = %i OR `zoneid` = 0)"
-		" AND gm <= %i ORDER BY id",
-		si_race, si_class, si_deity, si_current_zone, admin_level);
-	auto results = QueryDatabase(query);
+
+    std::string query = StringFormat("SELECT itemid, item_charges, slot FROM starting_items "
+                                    "WHERE (race = %i or race = 0) AND (class = %i or class = 0) AND "
+                                    "(deityid = %i or deityid = 0) AND (zoneid = %i or zoneid = 0) AND "
+                                    "gm <= %i ORDER BY id",
+                                    si_race, si_class, si_deity, si_current_zone, admin_level);
+    auto results = QueryDatabase(query);
+    if (!results.Success())
+        return false;
+
+
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		itemid = atoi(row[0]);
-		charges = atoi(row[1]);
-		slot = atoi(row[2]);
+		int32 itemid = atoi(row[0]);
+		int32 charges = atoi(row[1]);
+		int32 slot = atoi(row[2]);
 		myitem = GetItem(itemid);
+
 		if(!myitem)
 			continue;
+
 		ItemInst* myinst = CreateBaseItem(myitem, charges);
+
 		if(slot < 0)
-			slot = inv->FindFreeSlot(0,0);
+			slot = inv->FindFreeSlot(0, 0);
+
 		inv->PutItem(slot, *myinst);
 		safe_delete(myinst);
 	}
+
 	return true;
 }
 
