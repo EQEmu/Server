@@ -324,7 +324,7 @@ Client::Client(EQStreamInterface* ieqs)
 
 	initial_respawn_selection = 0;
 	alternate_currency_loaded = false;
-	
+
 	EngagedRaidTarget = false;
 	SavedRaidRestTimer = 0;
 }
@@ -491,7 +491,7 @@ bool Client::SaveAA(){
 		}
 		if (points > 0) {
 			SendAA_Struct* curAA = zone->FindAA(aa[a]->AA - aa[a]->value + 1);
-			if (curAA) { 
+			if (curAA) {
 				for (int rank = 0; rank<points; rank++) {
 					std::map<uint32, AALevelCost_Struct>::iterator RequiredLevel = AARequiredLevelAndCost.find(aa[a]->AA - aa[a]->value + 1 + rank);
 					if (RequiredLevel != AARequiredLevelAndCost.end()) {
@@ -519,7 +519,7 @@ bool Client::SaveAA(){
 }
 
 bool Client::Save(uint8 iCommitNow) {
-	if(!ClientDataLoaded()) 
+	if(!ClientDataLoaded())
 		return false;
 
 	/* Wrote current basics to PP for saves */
@@ -533,7 +533,7 @@ bool Client::Save(uint8 iCommitNow) {
 	if (GetHP() <= 0) {
 		m_pp.cur_hp = GetMaxHP();
 	}
-	else { 
+	else {
 		m_pp.cur_hp = GetHP();
 	}
 
@@ -564,7 +564,7 @@ bool Client::Save(uint8 iCommitNow) {
 		GetMercInfo().MercTimerRemaining = GetMercTimer()->GetRemainingTime();
 	}
 
-	if (!(GetMerc() && !dead)) { 
+	if (!(GetMerc() && !dead)) {
 		memset(&m_mercinfo, 0, sizeof(struct MercInfo));
 	}
 
@@ -583,9 +583,9 @@ bool Client::Save(uint8 iCommitNow) {
 	}
 	database.SavePetInfo(this);
 
-	if(tribute_timer.Enabled()) { 
+	if(tribute_timer.Enabled()) {
 		m_pp.tribute_time_remaining = tribute_timer.GetRemainingTime();
-	} 
+	}
 	else {
 		m_pp.tribute_time_remaining = 0xFFFFFFFF; m_pp.tribute_active = 0;
 	}
@@ -989,7 +989,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 						Message(13, "Command '%s' not recognized.", message);
 					}
 				} else {
-					if(!RuleB(Chat, SuppressCommandErrors)) 
+					if(!RuleB(Chat, SuppressCommandErrors))
 						Message(13, "Command '%s' not recognized.", message);
 				}
 			}
@@ -1362,14 +1362,14 @@ bool Client::UpdateLDoNPoints(int32 points, uint32 theme)
 
 void Client::SetSkill(SkillUseTypes skillid, uint16 value) {
 	if (skillid > HIGHEST_SKILL)
-		return;  
-	m_pp.skills[skillid] = value; // We need to be able to #setskill 254 and 255 to reset skills 
+		return;
+	m_pp.skills[skillid] = value; // We need to be able to #setskill 254 and 255 to reset skills
 
 	database.SaveCharacterSkill(this->CharacterID(), skillid, value);
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SkillUpdate, sizeof(SkillUpdate_Struct));
 	SkillUpdate_Struct* skill = (SkillUpdate_Struct*)outapp->pBuffer;
-	skill->skillId=skillid; 
+	skill->skillId=skillid;
 	skill->value=value;
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -1390,7 +1390,7 @@ void Client::IncreaseLanguageSkill(int skill_id, int value) {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SkillUpdate, sizeof(SkillUpdate_Struct));
 	SkillUpdate_Struct* skill = (SkillUpdate_Struct*)outapp->pBuffer;
 	skill->skillId = 100 + skill_id;
-	skill->value = m_pp.languages[skill_id]; 
+	skill->value = m_pp.languages[skill_id];
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
@@ -2141,7 +2141,7 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 	/* Add Amount of Platinum */
 	tmp2 = tmp/1000;
 	int32 new_val = m_pp.platinum + tmp2;
-	if(new_val < 0) { m_pp.platinum = 0; } 
+	if(new_val < 0) { m_pp.platinum = 0; }
 	else { m_pp.platinum = m_pp.platinum + tmp2; }
 	tmp-=tmp2*1000;
 
@@ -2151,7 +2151,7 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 	/* Add Amount of Gold */
 	tmp2 = tmp/100;
 	new_val = m_pp.gold + tmp2;
-	if(new_val < 0) { m_pp.gold = 0; } 
+	if(new_val < 0) { m_pp.gold = 0; }
 	else { m_pp.gold = m_pp.gold + tmp2; }
 
 	tmp-=tmp2*100;
@@ -4031,28 +4031,18 @@ void Client::KeyRingList()
 
 bool Client::IsDiscovered(uint32 itemid) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	std::string query = StringFormat("SELECT count(*) FROM discovered_items WHERE item_id = '%lu'", itemid);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        std::cerr << "Error in IsDiscovered query '" << query << "' " << results.ErrorMessage() << std::endl;
+        return false;
+    }
 
-	if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT count(*) FROM discovered_items WHERE item_id = '%lu'", itemid), errbuf, &result))
-	{
-		row = mysql_fetch_row(result);
-		if (atoi(row[0]))
-		{
-			mysql_free_result(result);
-			safe_delete_array(query);
-			return true;
-		}
-	}
-	else
-	{
-		std::cerr << "Error in IsDiscovered query '" << query << "' " << errbuf << std::endl;
-	}
-	mysql_free_result(result);
-	safe_delete_array(query);
-	return false;
+	auto row = results.begin();
+    if (!atoi(row[0]))
+        return false;
+
+	return true;
 }
 
 void Client::DiscoverItem(uint32 itemid) {
@@ -4290,15 +4280,15 @@ void Client::IncrementAggroCount() {
 
 	if(!RuleI(Character, RestRegenPercent))
 		return;
-	
+
 	// If we already had aggro before this method was called, the combat indicator should already be up for SoF clients,
 	// so we don't need to send it again.
 	//
 	if(AggroCount > 1)
 		return;
-		
+
 	// Pause the rest timer
-	if (AggroCount == 1) 
+	if (AggroCount == 1)
 		SavedRaidRestTimer = rest_timer.GetRemainingTime();
 
 	if(GetClientVersion() >= EQClientSoF) {
@@ -4343,9 +4333,9 @@ void Client::DecrementAggroCount() {
 			time_until_rest = RuleI(Character, RestRegenTimeToActivate) * 1000;
 		}
 	}
-	
+
 	rest_timer.Start(time_until_rest);
-	
+
 	if(GetClientVersion() >= EQClientSoF) {
 
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_RestState, 5);
@@ -4450,7 +4440,7 @@ void Client::SendRespawnBinds()
 
 	int num_options = respawn_options.size();
 	uint32 PacketLength = 17 + (26 * num_options); //Header size + per-option invariant size
-	
+
 	std::list<RespawnOption>::iterator itr;
 	RespawnOption* opt;
 
@@ -7630,7 +7620,7 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 				tmpValue = current_value + mod + npc_value[i];
 
 				int16 FactionModPct = spellbonuses.FactionModPct + itembonuses.FactionModPct + aabonuses.FactionModPct;
-				tmpValue += (tmpValue * FactionModPct) / 100; 
+				tmpValue += (tmpValue * FactionModPct) / 100;
 
 				// Make sure faction hits don't go to GMs...
 				if (m_pp.gm==1 && (tmpValue < current_value)) {
@@ -7944,7 +7934,7 @@ void Client::TryItemTimer(int slot)
 		}
 		++it_iter;
 	}
-	
+
 	if(slot > EmuConstants::EQUIPMENT_END) {
 		return;
 	}
@@ -7980,7 +7970,7 @@ void Client::RefundAA() {
 				for(int j = 0; j < cur; j++) {
 					m_pp.aapoints += curaa->cost + (curaa->cost_inc * j);
 					refunded = true;
-				} 
+				}
 			}
 			else
 			{
@@ -8268,12 +8258,12 @@ void Client::ExpeditionSay(const char *str, int ExpID) {
 	while((row = mysql_fetch_row(result))) {
 		const char* CharName = row[0];
 		if(strcmp(CharName, this->GetCleanName()) != 0)
-			worldserver.SendEmoteMessage(CharName, 0, 0, 14, "%s says to the expedition, '%s'", this->GetCleanName(), str); 
+			worldserver.SendEmoteMessage(CharName, 0, 0, 14, "%s says to the expedition, '%s'", this->GetCleanName(), str);
 		// ChannelList->CreateChannel(ChannelName, ChannelOwner, ChannelPassword, true, atoi(row[3]));
-	} 
+	}
 
 	mysql_free_result(result);
-	
+
 }
 
 void Client::ShowNumHits()
