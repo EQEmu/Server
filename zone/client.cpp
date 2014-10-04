@@ -7722,28 +7722,19 @@ void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 totalval
 
 void Client::LoadAccountFlags()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
 	accountflags.clear();
-	MakeAnyLenString(&query, "SELECT p_flag, p_value FROM account_flags WHERE p_accid = '%d'", account_id);
-	if(database.RunQuery(query, strlen(query), errbuf, &result))
-	{
-		while(row = mysql_fetch_row(result))
-		{
-			std::string fname(row[0]);
-			std::string fval(row[1]);
-			accountflags[fname] = fval;
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		std::cerr << "Error in LoadAccountFlags query '" << query << "' " << errbuf << std::endl;
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT p_flag, p_value "
+                                    "FROM account_flags WHERE p_accid = '%d'",
+                                    account_id);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        std::cerr << "Error in LoadAccountFlags query '" << query << "' " << results.ErrorMessage() << std::endl;
+        return;
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row)
+        accountflags[row[0]] = row[1];
 }
 
 void Client::SetAccountFlag(std::string flag, std::string val)
