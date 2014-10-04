@@ -6268,50 +6268,41 @@ void command_ipban(Client *c, const Seperator *sep)
 
 void command_revoke(Client *c, const Seperator *sep)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
-	if(sep->arg[1][0] == 0 || sep->arg[2][0] == 0)
-	{
+	if(sep->arg[1][0] == 0 || sep->arg[2][0] == 0) {
 		c->Message(0, "Usage: #revoke [charname] [1/0]");
+		return;
 	}
-	else
-	{
-		uint32 tmp = database.GetAccountIDByChar(sep->arg[1]);
-		if(tmp)
-		{
-			int flag = sep->arg[2][0] == '1' ? true : false;
-			database.RunQuery(query, MakeAnyLenString(&query, "UPDATE account set revoked=%d where id = %i", flag, tmp), errbuf, 0);
-			c->Message(13,"%s account number %i with the character %s.", flag?"Revoking":"Unrevoking", tmp, sep->arg[1]);
-			Client* revokee = entity_list.GetClientByAccID(tmp);
-			if(revokee)
-			{
-				c->Message(0, "Found %s in this zone.", revokee->GetName());
-				revokee->SetRevoked(flag);
-			}
-			else
-			{
+
+    uint32 characterID = database.GetAccountIDByChar(sep->arg[1]);
+    if(characterID == 0) {
+        c->Message(13,"Character does not exist.");
+        return;
+    }
+
+    int flag = sep->arg[2][0] == '1' ? true : false;
+    std::string query = StringFormat("UPDATE account SET revoked = %d WHERE id = %i", flag, characterID);
+    auto results = database.QueryDatabase(query);
+
+    c->Message(13,"%s account number %i with the character %s.", flag? "Revoking": "Unrevoking", characterID, sep->arg[1]);
+
+    Client* revokee = entity_list.GetClientByAccID(characterID);
+    if(revokee) {
+        c->Message(0, "Found %s in this zone.", revokee->GetName());
+        revokee->SetRevoked(flag);
+        return;
+    }
+
 #if EQDEBUG >= 6
-				c->Message(0, "Couldn't find %s in this zone, passing request to worldserver.", sep->arg[1]);
+    c->Message(0, "Couldn't find %s in this zone, passing request to worldserver.", sep->arg[1]);
 #endif
-				ServerPacket * outapp = new ServerPacket (ServerOP_Revoke,sizeof(RevokeStruct));
-				RevokeStruct* revoke = (RevokeStruct*)outapp->pBuffer;
-				strn0cpy(revoke->adminname, c->GetName(), 64);
-				strn0cpy(revoke->name, sep->arg[1], 64);
-				revoke->toggle = flag;
-				worldserver.SendPacket(outapp);
-				safe_delete(outapp);
-			}
-		}
-		else {
-			c->Message(13,"Character does not exist.");
-		}
-		if(query)
-		{
-			safe_delete_array(query);
-			query=nullptr;
-		}
-	}
+
+    ServerPacket * outapp = new ServerPacket (ServerOP_Revoke,sizeof(RevokeStruct));
+    RevokeStruct* revoke = (RevokeStruct*)outapp->pBuffer;
+    strn0cpy(revoke->adminname, c->GetName(), 64);
+    strn0cpy(revoke->name, sep->arg[1], 64);
+    revoke->toggle = flag;
+    worldserver.SendPacket(outapp);
+    safe_delete(outapp);
 }
 
 void command_oocmute(Client *c, const Seperator *sep)
