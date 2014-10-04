@@ -1287,31 +1287,25 @@ void SharedDatabase::LoadSkillCaps(void *data) {
 	uint32 level_count = HARD_LEVEL_CAP + 1;
 	uint16 *skill_caps_table = reinterpret_cast<uint16*>(data);
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if(RunQuery(query, MakeAnyLenString(&query,
-		"SELECT skillID, class, level, cap FROM skill_caps ORDER BY skillID, class, level"),
-		errbuf, &result)) {
-		safe_delete_array(query);
-
-		while((row = mysql_fetch_row(result))) {
-			uint8 skillID = atoi(row[0]);
-			uint8 class_ = atoi(row[1]) - 1;
-			uint8 level = atoi(row[2]);
-			uint16 cap = atoi(row[3]);
-			if(skillID >= skill_count || class_ >= class_count || level >= level_count)
-				continue;
-
-			uint32 index = (((class_ * skill_count) + skillID) * level_count) + level;
-			skill_caps_table[index] = cap;
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error loading skill caps from database: %s", errbuf);
-		safe_delete_array(query);
+	const std::string query = "SELECT skillID, class, level, cap FROM skill_caps ORDER BY skillID, class, level";
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error loading skill caps from database: %s", results.ErrorMessage().c_str());
+        return;
 	}
+
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        uint8 skillID = atoi(row[0]);
+        uint8 class_ = atoi(row[1]) - 1;
+        uint8 level = atoi(row[2]);
+        uint16 cap = atoi(row[3]);
+
+        if(skillID >= skill_count || class_ >= class_count || level >= level_count)
+            continue;
+
+        uint32 index = (((class_ * skill_count) + skillID) * level_count) + level;
+        skill_caps_table[index] = cap;
+    }
 }
 
 uint16 SharedDatabase::GetSkillCap(uint8 Class_, SkillUseTypes Skill, uint8 Level) {
