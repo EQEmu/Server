@@ -674,25 +674,26 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
 
 
 void SharedDatabase::GetItemsCount(int32 &item_count, uint32 &max_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 	item_count = -1;
 	max_id = 0;
 
-	char query[] = "SELECT MAX(id), count(*) FROM items";
-	if (RunQuery(query, static_cast<uint32>(strlen(query)), errbuf, &result)) {
-		row = mysql_fetch_row(result);
-		if (row != nullptr && row[1] != 0) {
-			item_count = atoi(row[1]);
-			if(row[0])
-				max_id = atoi(row[0]);
-		}
-		mysql_free_result(result);
+	const std::string query = "SELECT MAX(id), count(*) FROM items";
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in GetItemsCount '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+        return;
 	}
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in GetItemsCount '%s': '%s'", query, errbuf);
-	}
+
+	if (results.RowCount() == 0)
+        return;
+
+    auto row = results.begin();
+
+    if(row[0])
+        max_id = atoi(row[0]);
+
+    if (row[1])
+		item_count = atoi(row[1]);
 }
 
 bool SharedDatabase::LoadItems() {
