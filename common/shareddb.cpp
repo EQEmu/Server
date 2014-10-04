@@ -1229,18 +1229,13 @@ int32 SharedDatabase::DeleteStalePlayerCorpses() {
 }
 
 int32 SharedDatabase::DeleteStalePlayerBackups() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 affected_rows = 0;
-
 	// 1209600 seconds = 2 weeks
-	if (!RunQuery(query, MakeAnyLenString(&query, "Delete from player_corpses_backup where (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(timeofdeath)) > 1209600"), errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
-		return -1;
-	}
-	safe_delete_array(query);
+	const std::string query = "DELETE FROM player_corpses_backup WHERE (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(timeofdeath)) > 1209600";
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+        return -1;
 
-	return affected_rows;
+    return results.RowsAffected();
 }
 
 bool SharedDatabase::GetCommandSettings(std::map<std::string,uint8> &commands) {
