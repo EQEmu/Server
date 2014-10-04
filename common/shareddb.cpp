@@ -318,34 +318,19 @@ bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id) {
 
 int32 SharedDatabase::GetSharedPlatinum(uint32 account_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT sharedplat FROM account WHERE id='%i'", account_id), errbuf, &result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1)
-		{
-			row = mysql_fetch_row(result);
-			uint32 shared_platinum = atoi(row[0]);
-			mysql_free_result(result);
-			return shared_platinum;
-		}
-		else
-		{
-			mysql_free_result(result);
-			return 0;
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		std::cerr << "Error in GetSharedPlatinum query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+	std::string query = StringFormat("SELECT sharedplat FROM account WHERE id = '%i'", account_id);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        std::cerr << "Error in GetSharedPlatinum query '" << query << "' " << results.ErrorMessage().c_str() << std::endl;
 		return false;
-	}
+    }
 
-	return 0;
+    if (results.RowCount() != 1)
+        return 0;
+
+	auto row = results.begin();
+
+	return atoi(row[0]);
 }
 
 bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add) {
