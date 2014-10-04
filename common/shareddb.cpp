@@ -1626,53 +1626,52 @@ bool SharedDatabase::LoadBaseData() {
 
 void SharedDatabase::LoadBaseData(void *data, int max_level) {
 	char *base_ptr = reinterpret_cast<char*>(data);
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	const char *query = "SELECT * FROM base_data ORDER BY level, class ASC";
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	if(RunQuery(query, strlen(query), errbuf, &result)) {
-
-		int lvl = 0;
-		int cl = 0;
-		while (row = mysql_fetch_row(result)) {
-			lvl = atoi(row[0]);
-			cl = atoi(row[1]);
-			if(lvl <= 0) {
-				LogFile->write(EQEMuLog::Error, "Non fatal error: base_data.level <= 0, ignoring.");
-				continue;
-			}
-
-			if(lvl >= max_level) {
-				LogFile->write(EQEMuLog::Error, "Non fatal error: base_data.level >= max_level, ignoring.");
-				continue;
-			}
-
-			if(cl <= 0) {
-				LogFile->write(EQEMuLog::Error, "Non fatal error: base_data.cl <= 0, ignoring.");
-				continue;
-			}
-
-			if(cl > 16) {
-				LogFile->write(EQEMuLog::Error, "Non fatal error: base_data.class > 16, ignoring.");
-				continue;
-			}
-
-			BaseDataStruct *bd = reinterpret_cast<BaseDataStruct*>(base_ptr + (((16 * (lvl - 1)) + (cl - 1)) * sizeof(BaseDataStruct)));
-			bd->base_hp = atof(row[2]);
-			bd->base_mana = atof(row[3]);
-			bd->base_end = atof(row[4]);
-			bd->unk1 = atof(row[5]);
-			bd->unk2 = atof(row[6]);
-			bd->hp_factor = atof(row[7]);
-			bd->mana_factor = atof(row[8]);
-			bd->endurance_factor = atof(row[9]);
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadBaseData query '%s' %s", query, errbuf);
-		safe_delete_array(query);
+	const std::string query = "SELECT * FROM base_data ORDER BY level, class ASC";
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadBaseData query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
+        return;
 	}
+
+    int lvl = 0;
+    int cl = 0;
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        lvl = atoi(row[0]);
+        cl = atoi(row[1]);
+
+        if(lvl <= 0) {
+            LogFile->write(EQEMuLog::Error, "Non fatal error: base_data.level <= 0, ignoring.");
+            continue;
+        }
+
+        if(lvl >= max_level) {
+            LogFile->write(EQEMuLog::Error, "Non fatal error: base_data.level >= max_level, ignoring.");
+            continue;
+        }
+
+        if(cl <= 0) {
+            LogFile->write(EQEMuLog::Error, "Non fatal error: base_data.cl <= 0, ignoring.");
+            continue;
+        }
+
+        if(cl > 16) {
+            LogFile->write(EQEMuLog::Error, "Non fatal error: base_data.class > 16, ignoring.");
+            continue;
+        }
+
+        BaseDataStruct *bd = reinterpret_cast<BaseDataStruct*>(base_ptr + (((16 * (lvl - 1)) + (cl - 1)) * sizeof(BaseDataStruct)));
+		bd->base_hp = atof(row[2]);
+		bd->base_mana = atof(row[3]);
+		bd->base_end = atof(row[4]);
+		bd->unk1 = atof(row[5]);
+		bd->unk2 = atof(row[6]);
+		bd->hp_factor = atof(row[7]);
+		bd->mana_factor = atof(row[8]);
+		bd->endurance_factor = atof(row[9]);
+    }
+
 }
 
 const BaseDataStruct* SharedDatabase::GetBaseData(int lvl, int cl) {
