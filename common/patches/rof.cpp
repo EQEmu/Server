@@ -376,6 +376,7 @@ namespace RoF
 		OUT(duration);
 		eq->playerId = 0x7cde;
 		OUT(slotid);
+		OUT(num_hits);
 		if (emu->bufffade == 1)
 			eq->bufffade = 1;
 		else
@@ -414,7 +415,7 @@ namespace RoF
 
 		__packet->WriteUInt32(emu->entity_id);
 		__packet->WriteUInt32(0);		// PlayerID ?
-		__packet->WriteUInt8(1);			// 1 indicates all buffs on the player (0 to add or remove a single buff)
+		__packet->WriteUInt8(emu->all_buffs);			// 1 indicates all buffs on the player (0 to add or remove a single buff)
 		__packet->WriteUInt16(emu->count);
 
 		for (uint16 i = 0; i < emu->count; ++i)
@@ -429,10 +430,10 @@ namespace RoF
 			__packet->WriteUInt32(buffslot);
 			__packet->WriteUInt32(emu->entries[i].spell_id);
 			__packet->WriteUInt32(emu->entries[i].tics_remaining);
-			__packet->WriteUInt32(0); // Unknown
+			__packet->WriteUInt32(emu->entries[i].num_hits); // Unknown
 			__packet->WriteString("");
 		}
-		__packet->WriteUInt8(0); // Unknown
+		__packet->WriteUInt8(!emu->all_buffs); // Unknown
 
 		FINISH_ENCODE();
 	}

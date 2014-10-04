@@ -564,7 +564,7 @@ struct SpellBuffFade_Struct_Underfoot {
 /*008*/	float unknown008;
 /*012*/	uint32 spellid;
 /*016*/	uint32 duration;
-/*020*/	uint32 unknown016;
+/*020*/	uint32 num_hits;
 /*024*/ uint32 playerId;	// Global player ID?
 /*028*/	uint32 unknown020;
 /*032*/ uint8 unknown0028[48];
@@ -588,6 +588,25 @@ struct SpellBuffFade_Struct {
 /*032*/	uint32 bufffade;
 /*036*/
 };
+
+#if 0
+struct BuffIconEntry_Struct {
+/*000*/ uint32 buff_slot;
+/*004*/ uint32 spell_id;
+/*008*/ uint32 tics_remaining;
+/*012*/ uint32 num_hits;
+// char name[0]; caster name is also here sometimes
+// uint8  unknownend; 1 when single, 0 when all opposite of all_buffs?
+};
+
+struct BuffIcon_Struct {
+/*000*/ uint32 entity_id;
+/*004*/ uint32 unknown004;
+/*008*/ uint8  all_buffs; // 1 when updating all buffs, 0 when doing one
+/*009*/ uint16 count;
+/*011*/ BuffIconEntry_Struct entires[0];
+};
+#endif
 
 struct BuffRemoveRequest_Struct
 {

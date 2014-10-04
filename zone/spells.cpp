@@ -5164,20 +5164,40 @@ void Mob::_StopSong()
 //Thus I use this in the buff process to update the correct duration once after casting
 //this allows AAs and focus effects that increase buff duration to work correctly, but could probably
 //be used for other things as well
-void Client::SendBuffDurationPacket(uint16 spell_id, int duration, int inlevel)
+void Client::SendBuffDurationPacket(Buffs_Struct &buff)
 {
 	EQApplicationPacket* outapp;
 	outapp = new EQApplicationPacket(OP_Buff, sizeof(SpellBuffFade_Struct));
 	SpellBuffFade_Struct* sbf = (SpellBuffFade_Struct*) outapp->pBuffer;
 
 	sbf->entityid = GetID();
-	sbf->slot=2;
-	sbf->spellid=spell_id;
-	sbf->slotid=0;
-	sbf->effect = inlevel > 0 ? inlevel : GetLevel();
-	sbf->level = inlevel > 0 ? inlevel : GetLevel();
+	sbf->slot = 2;
+	sbf->spellid = buff.spellid;
+	sbf->slotid = 0;
+	sbf->effect = buff.casterlevel > 0 ? buff.casterlevel : GetLevel();
+	sbf->level = buff.casterlevel > 0 ? buff.casterlevel : GetLevel();
 	sbf->bufffade = 0;
-	sbf->duration = duration;
+	sbf->duration = buff.ticsremaining;
+	sbf->num_hits = buff.numhits;
+	FastQueuePacket(&outapp);
+}
+
+void Client::SendBuffNumHitPacket(Buffs_Struct &buff, int slot)
+{
+	// UF+ use this packet
+	if (GetClientVersion() < EQClientUnderfoot)
+		return;
+	EQApplicationPacket *outapp;
+	outapp = new EQApplicationPacket(OP_BuffCreate, sizeof(BuffIcon_Struct) + sizeof(BuffIconEntry_Struct));
+	BuffIcon_Struct *bi = (BuffIcon_Struct *)outapp->pBuffer;
+	bi->entity_id = GetID();
+	bi->count = 1;
+	bi->all_buffs = 0;
+
+	bi->entries[0].buff_slot = slot;
+	bi->entries[0].spell_id = buff.spellid;
+	bi->entries[0].tics_remaining = buff.ticsremaining;
+	bi->entries[0].num_hits = buff.numhits;
 	FastQueuePacket(&outapp);
 }
 
@@ -5252,6 +5272,7 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 	BuffIcon_Struct *buff = (BuffIcon_Struct*)outapp->pBuffer;
 	buff->entity_id = GetID();
 	buff->count = count;
+	buff->all_buffs = 1;
 
 	uint32 index = 0;
 	for(unsigned int i = 0; i < buff_count; ++i)
@@ -5261,6 +5282,7 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 			buff->entries[index].buff_slot = i;
 			buff->entries[index].spell_id = buffs[i].spellid;
 			buff->entries[index].tics_remaining = buffs[i].ticsremaining;
+			buff->entries[index].num_hits = buffs[i].numhits;
 			++index;
 		}
 	}
@@ -5278,7 +5300,7 @@ void Mob::BuffModifyDurationBySpellID(uint16 spell_id, int32 newDuration)
 			buffs[i].ticsremaining = newDuration;
 			if(IsClient())
 			{
-				CastToClient()->SendBuffDurationPacket(buffs[i].spellid, buffs[i].ticsremaining, buffs[i].casterlevel);
+				CastToClient()->SendBuffDurationPacket(buffs[i]);
 			}
 		}
 	}

@@ -330,6 +330,7 @@ namespace Underfoot
 		OUT(duration);
 		OUT(slotid);
 		OUT(bufffade);	// Live (October 2011) sends a 2 rather than 0 when a buff is created, but it doesn't seem to matter.
+		OUT(num_hits);
 		eq->unknown008 = 1.0f;
 
 		FINISH_ENCODE();
@@ -348,7 +349,7 @@ namespace Underfoot
 		*((uint32*)ptr) = emu->entity_id;
 		ptr += sizeof(uint32);
 		ptr += sizeof(uint32);
-		*((uint8*)ptr) = 1;
+		*((uint8*)ptr) = emu->all_buffs;
 		ptr += sizeof(uchar);
 		*((uint16*)ptr) = emu->count;
 		ptr += sizeof(uint16);
@@ -371,7 +372,9 @@ namespace Underfoot
 			ptr += sizeof(uint32);
 			*((uint32*)ptr) = emu->entries[i].tics_remaining;
 			ptr += sizeof(uint32);
+			*((uint32*)ptr) = emu->entries[i].num_hits;
 			ptr += sizeof(uint32);
+			*((uint8*)ptr) = !emu->all_buffs;
 			ptr += 1;
 		}
 
