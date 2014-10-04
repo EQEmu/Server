@@ -77,18 +77,14 @@ uint8 SharedDatabase::GetGMSpeed(uint32 account_id)
 
 bool SharedDatabase::SetGMSpeed(uint32 account_id, uint8 gmspeed)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE account SET gmspeed = %i where id = %i", gmspeed, account_id), errbuf)) {
-		std::cerr << "Error in SetGMSpeed query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+	std::string query = StringFormat("UPDATE account SET gmspeed = %i WHERE id = %i", gmspeed, account_id);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		std::cerr << "Error in SetGMSpeed query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
-	safe_delete_array(query);
 	return true;
-
 }
 
 uint32 SharedDatabase::GetTotalTimeEntitledOnAccount(uint32 AccountID) {
