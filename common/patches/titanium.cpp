@@ -654,7 +654,7 @@ namespace Titanium
 
 		OUT(lootee);
 		OUT(looter);
-		eq->slot_id = emu->slot_id;
+		eq->slot_id = ServerToTitaniumCorpseSlot(emu->slot_id);
 		OUT(auto_loot);
 
 		FINISH_ENCODE();
@@ -1347,9 +1347,6 @@ namespace Titanium
 		FINISH_DIRECT_DECODE();
 	}
 
-	// needs to be tested
-	DECODE(OP_AugmentInfo) { DECODE_FORWARD(OP_ReadBook); }
-
 	DECODE(OP_AugmentItem)
 	{
 		DECODE_LENGTH_EXACT(structs::AugmentItem_Struct);
@@ -1520,7 +1517,7 @@ namespace Titanium
 
 		IN(lootee);
 		IN(looter);
-		emu->slot_id = eq->slot_id;
+		emu->slot_id = TitaniumToServerCorpseSlot(eq->slot_id);
 		IN(auto_loot);
 
 		FINISH_DIRECT_DECODE();
@@ -1678,7 +1675,7 @@ namespace Titanium
 			0,
 			//merchant_slot,	//instance ID, bullshit for now
 			(merchant_slot == 0) ? inst->GetSerialNumber() : merchant_slot,
-			0,
+			0, // item recast timer timestamp field (aka..last_cast_time field in SoF+ clients)
 			(stackable ? ((inst->GetItem()->ItemType == ItemTypePotion) ? 1 : 0) : charges),
 			inst->IsInstNoDrop() ? 1 : 0,
 			0
@@ -1748,6 +1745,7 @@ namespace Titanium
 	static inline int16 ServerToTitaniumCorpseSlot(uint32 ServerCorpse)
 	{
 		//int16 TitaniumCorpse;
+		return ServerCorpse;
 	}
 
 	static inline uint32 TitaniumToServerSlot(int16 TitaniumSlot)
@@ -1762,6 +1760,7 @@ namespace Titanium
 	static inline uint32 TitaniumToServerCorpseSlot(int16 TitaniumCorpse)
 	{
 		//uint32 ServerCorpse;
+		return TitaniumCorpse;
 	}
 }
 // end namespace Titanium

@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/03/2014 ==
+Uleat: Fixed Ti(6.2) OP_AugmentInfo translation that I broke (does not currently need and I mis-read a process)
+Uleat: Moved client patch OP_LootItem slot translation to external handlers
+
 == 10/02/2014 ==
 Kayen: Exported to PERL $client->SendSpellAnim(targetid, spellid)
 This function sends the spell graphic of a spell without actually having to cast the spell.

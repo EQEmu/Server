@@ -984,7 +984,7 @@ namespace SoD
 
 		OUT(lootee);
 		OUT(looter);
-		eq->slot_id = emu->slot_id + 1;
+		eq->slot_id = ServerToSoDCorpseSlot(emu->slot_id);
 		OUT(auto_loot);
 
 		FINISH_ENCODE();
@@ -2956,7 +2956,7 @@ namespace SoD
 
 		IN(lootee);
 		IN(looter);
-		emu->slot_id = eq->slot_id - 1;
+		emu->slot_id = SoDToServerCorpseSlot(eq->slot_id);
 		IN(auto_loot);
 
 		FINISH_DIRECT_DECODE();
@@ -3599,6 +3599,7 @@ namespace SoD
 	static inline uint32 ServerToSoDCorpseSlot(uint32 ServerCorpse)
 	{
 		//uint32 SoDCorpse;
+		return (ServerCorpse + 1);
 	}
 
 	static inline uint32 SoDToServerSlot(uint32 SoDSlot)
@@ -3623,6 +3624,7 @@ namespace SoD
 	static inline uint32 SoDToServerCorpseSlot(uint32 SoDCorpse)
 	{
 		//uint32 ServerCorpse;
+		return (SoDCorpse - 1);
 	}
 }
 // end namespace SoD

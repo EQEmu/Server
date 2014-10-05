@@ -47,7 +47,6 @@ E(OP_ZoneSpawns)
 // incoming packets that require a DECODE translation:
 D(OP_AdventureMerchantSell)
 D(OP_ApplyPoison)
-D(OP_AugmentInfo)
 D(OP_AugmentItem)
 D(OP_CastSpell)
 D(OP_CharacterCreate)

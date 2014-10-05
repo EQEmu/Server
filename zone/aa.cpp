@@ -1751,19 +1751,15 @@ void ZoneDatabase::FillAAEffects(SendAA_Struct* aa_struct){
 	if(!aa_struct)
 		return;
 
-	std::string query = StringFormat("SELECT effectid, base1, base2, slot from aa_effects where aaid=%i order by slot asc", aa_struct->id);
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in Client::FillAAEffects query: '%s': %s", query.c_str(), results.ErrorMessage().c_str());
-        return;
-	}
-
-	int index = 0;
-    for (auto row = results.begin(); row != results.end(); ++row, ++index) {
-		aa_struct->abilities[index].skill_id=atoi(row[0]);
-		aa_struct->abilities[index].base1=atoi(row[1]);
-		aa_struct->abilities[index].base2=atoi(row[2]);
-		aa_struct->abilities[index].slot=atoi(row[3]);
+	auto it = aa_effects.find(aa_struct->id);
+	if (it != aa_effects.end()) {
+		for (int slot = 0; slot < aa_struct->total_abilities; slot++) {
+			// aa_effects is a map of a map, so the slot reference does not start at 0
+			aa_struct->abilities[slot].skill_id = it->second[slot + 1].skill_id;
+			aa_struct->abilities[slot].base1 = it->second[slot + 1].base1;
+			aa_struct->abilities[slot].base2 = it->second[slot + 1].base2;
+			aa_struct->abilities[slot].slot = it->second[slot + 1].slot;
+		}
 	}
 }
 

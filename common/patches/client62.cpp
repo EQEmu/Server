@@ -446,7 +446,7 @@ namespace Client62
 
 		OUT(lootee);
 		OUT(looter);
-		eq->slot_id = emu->slot_id;
+		eq->slot_id = ServerToClient62CorpseSlot(emu->slot_id);
 		OUT(auto_loot);
 
 		FINISH_ENCODE();
@@ -990,11 +990,6 @@ namespace Client62
 		FINISH_DIRECT_DECODE();
 	}
 
-#if 0
-	// needs to be tested (and OpCode found)
-	DECODE(OP_AugmentInfo) { DECODE_FORWARD(OP_ReadBook); }
-#endif
-
 	DECODE(OP_AugmentItem)
 	{
 		DECODE_LENGTH_EXACT(structs::AugmentItem_Struct);
@@ -1110,7 +1105,7 @@ namespace Client62
 
 		IN(lootee);
 		IN(looter);
-		emu->slot_id = eq->slot_id;
+		emu->slot_id = Client62ToServerCorpseSlot(eq->slot_id);
 		IN(auto_loot);
 
 		FINISH_DIRECT_DECODE();
@@ -1239,6 +1234,7 @@ namespace Client62
 		int i;
 		uint32 sub_length;
 
+		// not sure if 6.2 has a recast timer timestamp field..but, something seems amiss between this and Ti's ordering
 		MakeAnyLenString(&instance,
 			"%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|",
 			stackable ? charges : 1,
@@ -1322,6 +1318,7 @@ namespace Client62
 	static inline int16 ServerToClient62CorpseSlot(uint32 ServerCorpse)
 	{
 		//int16 Client62Corpse;
+		return ServerCorpse;
 	}
 
 	static inline uint32 Client62ToServerSlot(int16 Client62Slot)
@@ -1336,6 +1333,7 @@ namespace Client62
 	static inline uint32 Client62ToServerCorpseSlot(int16 Client62Corpse)
 	{
 		//uint32 ServerCorpse;
+		return Client62Corpse;
 	}
 }
 // end namespace Client62
