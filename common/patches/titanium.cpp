@@ -1675,7 +1675,7 @@ namespace Titanium
 			0,
 			//merchant_slot,	//instance ID, bullshit for now
 			(merchant_slot == 0) ? inst->GetSerialNumber() : merchant_slot,
-			0,
+			0, // item recast timer timestamp field (aka..last_cast_time field in SoF+ clients)
 			(stackable ? ((inst->GetItem()->ItemType == ItemTypePotion) ? 1 : 0) : charges),
 			inst->IsInstNoDrop() ? 1 : 0,
 			0
