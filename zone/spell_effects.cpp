@@ -3396,6 +3396,9 @@ void Mob::BuffProcess()
 				if(buffs[buffs_i].UpdateClient == true)
 				{
 					CastToClient()->SendBuffDurationPacket(buffs[buffs_i]);
+					// Hack to get UF to play nicer, RoF seems fine without it
+					if (CastToClient()->GetClientVersion() == EQClientUnderfoot && buffs[buffs_i].numhits > 0)
+						CastToClient()->SendBuffNumHitPacket(buffs[buffs_i], buffs_i);
 					buffs[buffs_i].UpdateClient = false;
 				}
 			}

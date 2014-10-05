@@ -345,14 +345,10 @@ namespace Underfoot
 		__packet->pBuffer = new unsigned char[sz];
 		memset(__packet->pBuffer, 0, sz);
 
-		uchar *ptr = __packet->pBuffer;
-		*((uint32*)ptr) = emu->entity_id;
-		ptr += sizeof(uint32);
-		ptr += sizeof(uint32);
-		*((uint8*)ptr) = emu->all_buffs;
-		ptr += sizeof(uchar);
-		*((uint16*)ptr) = emu->count;
-		ptr += sizeof(uint16);
+		__packet->WriteUInt32(emu->entity_id);
+		__packet->WriteUInt32(0);
+		__packet->WriteUInt8(emu->all_buffs); // 1 = all buffs, 0 = 1 buff
+		__packet->WriteUInt16(emu->count);
 
 		for (uint16 i = 0; i < emu->count; ++i)
 		{
@@ -366,17 +362,13 @@ namespace Underfoot
 				buffslot += 14;
 			}
 
-			*((uint32*)ptr) = buffslot;
-			ptr += sizeof(uint32);
-			*((uint32*)ptr) = emu->entries[i].spell_id;
-			ptr += sizeof(uint32);
-			*((uint32*)ptr) = emu->entries[i].tics_remaining;
-			ptr += sizeof(uint32);
-			*((uint32*)ptr) = emu->entries[i].num_hits;
-			ptr += sizeof(uint32);
-			*((uint8*)ptr) = !emu->all_buffs;
-			ptr += 1;
+			__packet->WriteUInt32(buffslot);
+			__packet->WriteUInt32(emu->entries[i].spell_id);
+			__packet->WriteUInt32(emu->entries[i].tics_remaining);
+			__packet->WriteUInt32(emu->entries[i].num_hits);
+			__packet->WriteString("");
 		}
+		__packet->WriteUInt8(!emu->all_buffs);
 
 		FINISH_ENCODE();
 		/*

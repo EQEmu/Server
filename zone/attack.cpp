@@ -3315,7 +3315,10 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 
 		if(damage < 1)
 			return 0;
-
+			
+		//Regular runes absorb spell damage (except dots) - Confirmed on live.
+		if (spellbonuses.MeleeRune[0] && spellbonuses.MeleeRune[1] >= 0)
+			damage = RuneAbsorb(damage, SE_Rune);	
 
 		if (spellbonuses.AbsorbMagicAtt[0] && spellbonuses.AbsorbMagicAtt[1] >= 0)
 			damage = RuneAbsorb(damage, SE_AbsorbMagicAtt);

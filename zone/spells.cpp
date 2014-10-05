@@ -484,19 +484,6 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		return false;
 	}
 
-	// This needs a bit more work for saving timer to PP for zoning etc
-	if (IsClient() && item_slot != INVALID_INDEX && ((slot == USE_ITEM_SPELL_SLOT) || (slot == POTION_BELT_SPELL_SLOT))) {
-		ItemInst *itm = CastToClient()->GetInv().GetItem(item_slot);
-		if (itm && itm->GetItem()->RecastDelay) {
-			outapp = new EQApplicationPacket(OP_ItemRecastDelay, sizeof(ItemRecastDelay_Struct));
-			ItemRecastDelay_Struct *ird = (ItemRecastDelay_Struct *)outapp->pBuffer;
-			ird->recast_delay = itm->GetItem()->RecastDelay;
-			ird->recast_type = itm->GetItem()->RecastType;
-			CastToClient()->QueuePacket(outapp);
-			safe_delete(outapp);
-		}
-	}
-
 	return(true);
 }
 
@@ -2228,6 +2215,12 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		ItemInst *itm = CastToClient()->GetInv().GetItem(inventory_slot);
 		if(itm && itm->GetItem()->RecastDelay > 0){
 			CastToClient()->GetPTimers().Start((pTimerItemStart + itm->GetItem()->RecastType), itm->GetItem()->RecastDelay);
+			EQApplicationPacket *outapp = new EQApplicationPacket(OP_ItemRecastDelay, sizeof(ItemRecastDelay_Struct));
+			ItemRecastDelay_Struct *ird = (ItemRecastDelay_Struct *)outapp->pBuffer;
+			ird->recast_delay = itm->GetItem()->RecastDelay;
+			ird->recast_type = itm->GetItem()->RecastType;
+			CastToClient()->QueuePacket(outapp);
+			safe_delete(outapp);
 		}
 	}
 
@@ -5351,3 +5344,19 @@ void NPC::UninitializeBuffSlots()
 	safe_delete_array(buffs);
 }
 
+void Client::SendSpellAnim(uint16 targetid, uint16 spell_id)
+{
+	if (!targetid || !IsValidSpell(spell_id))
+		return;
+
+	EQApplicationPacket app(OP_Action, sizeof(Action_Struct));
+	Action_Struct* a = (Action_Struct*)app.pBuffer;
+	a->target = targetid;
+	a->source = this->GetID();
+	a->type = 231;
+	a->spell = spell_id;
+	a->sequence = 231;
+
+	app.priority = 1;
+	entity_list.QueueCloseClients(this, &app);
+}

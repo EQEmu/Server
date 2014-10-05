@@ -3111,6 +3111,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 						DeleteItemInInventory(MainCursor, 0, true);
 						if (PutItemInInventory(slot_id, *itemOneToPush, true))
 						{
+							CalcBonuses();
 							//Message(13, "Sucessfully added an augment to your item!");
 							return;
 						}
@@ -3185,6 +3186,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 
 				if (PutItemInInventory(MainCursor, *itemTwoToPush, true))
 				{
+					CalcBonuses();
 					//Message(15, "Successfully removed an augmentation!");
 				}
 			}
