@@ -191,6 +191,13 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 	bool ret = false;
 	uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
 
+	// If we never save tribute slots..how are we to ever benefit from them!!? The client
+	// object is destroyed upon zoning - including its inventory object..and if tributes
+	// don't exist in the database, then they will never be loaded when the new client
+	// object is created in the new zone object... Something to consider... -U
+	//
+	// (we could add them to the 'NoRent' checks and dispose of after 30 minutes offline)
+
 	//never save tribute slots:
 	if(slot_id >= EmuConstants::TRIBUTE_BEGIN && slot_id <= EmuConstants::TRIBUTE_END)
 		return(true);

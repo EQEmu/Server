@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/05/2014 ==
+Uleat: Added Server<->Corpse slot translators needed for re-enumeration (inactive until phased in)
+
 == 10/03/2014 ==
 Uleat: Fixed Ti(6.2) OP_AugmentInfo translation that I broke (does not currently need and I mis-read a process)
 Uleat: Moved client patch OP_LootItem slot translation to external handlers

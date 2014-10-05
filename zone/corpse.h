@@ -112,8 +112,8 @@ public:
 	inline int GetRezzExp() { return rezzexp; }
 
 	// these are a temporary work-around until corpse inventory is removed from the database blob
-	//static uint32	ServerToCorpseSlot(int16 server_slot);	// encode
-	//static int16	CorpseToServerSlot(uint32 corpse_slot);	// decode
+	static uint16	ServerToCorpseSlot(uint16 server_slot);	// encode
+	static uint16	CorpseToServerSlot(uint16 corpse_slot);	// decode
 
 protected:
 	std::list<uint32> MoveItemToCorpse(Client *client, ItemInst *item, int16 equipslot);

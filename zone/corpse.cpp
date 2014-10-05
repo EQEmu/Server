@@ -97,6 +97,7 @@ Corpse* Corpse::LoadFromDBData(uint32 in_dbid, uint32 in_charid, char* in_charna
 		for (unsigned int i=0; i < dbpcs->itemcount; i++) {
 			tmp = new ServerLootItem_Struct;
 			memcpy(tmp, &dbpcs->items[i], sizeof(player_lootitem::ServerLootItem_Struct));
+			tmp->lootslot = CorpseToServerSlot(tmp->lootslot); // temp hack until corpse blobs are removed
 			itemlist.push_back(tmp);
 		}
 
@@ -147,6 +148,7 @@ Corpse* Corpse::LoadFromDBData(uint32 in_dbid, uint32 in_charid, char* in_charna
 		for (unsigned int i=0; i < dbpc->itemcount; i++) {
 			tmp = new ServerLootItem_Struct;
 			memcpy(tmp, &dbpc->items[i], sizeof(player_lootitem::ServerLootItem_Struct));
+			tmp->lootslot = CorpseToServerSlot(tmp->lootslot); // temp hack until corpse blobs are removed
 			itemlist.push_back(tmp);
 		}
 
@@ -600,6 +602,7 @@ bool Corpse::Save() {
 	end = itemlist.end();
 	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* item = *cur;
+		item->lootslot = ServerToCorpseSlot(item->lootslot); // temp hack until corpse blobs are removed
 		memcpy((char*) &dbpc->items[x++], (char*) item, sizeof(player_lootitem::ServerLootItem_Struct));
 	}
 
@@ -2055,15 +2058,111 @@ void Corpse::LoadPlayerCorpseDecayTime(uint32 dbid){
 }
 
 /*
-uint32 Corpse::ServerToCorpseSlot(int16 server_slot) {
-	// reserved
-}
+**	Corpse slot translations are needed until corpse database blobs are converted
+**	
+**	To account for the addition of MainPowerSource, MainGeneral9 and MainGeneral10 into
+**	the contiguous possessions slot enumeration, the following designations will be used:
+**	
+**	Designatiom			Server		Corpse		Offset
+**	--------------------------------------------------
+**	MainCharm			0			0			0
+**	...					...			...			0
+**	MainWaist			20			20			0
+**	MainPowerSource		21			9999		+9978
+**	MainAmmo			22			21			-1
+**
+**	MainGeneral1		23			22			-1
+**	...					...			...			-1
+**	MainGeneral8		30			29			-1
+**	MainGeneral9		31			9997		+9966
+**	MainGeneral10		32			9998		+9966
+**
+**	MainCursor			33			30			-3
+**
+**	MainGeneral1_1		251			251			0
+**	...					...			...			0
+**	MainGeneral8_10		330			330			0
+**	MainGeneral9_1		331			341			+10
+**	...					...			...			+10
+**	MainGeneral10_10	350			360			+10
+**
+**	MainCursor_1		351			331			-20
+**	...					...			...			-20
+**	MainCursor_10		360			340			-20
+**
+**	(Not all slot designations are valid to all clients..see <client>##_constants.h files for valid slot enumerations)
 */
-/*
-int16 Corpse::CorpseToServerSlot(uint32 corpse_slot) {
-	// reserved
+uint16 Corpse::ServerToCorpseSlot(uint16 server_slot)
+{
+	return server_slot; // temporary return
+
+	/*
+	switch (server_slot)
+	{
+	case MainPowerSource:
+		return 9999;
+	case MainGeneral9:
+		return 9997;
+	case MainGeneral10:
+		return 9998;
+	case MainCursor:
+		return 30;
+	case MainAmmo:
+	case MainGeneral1:
+	case MainGeneral2:
+	case MainGeneral3:
+	case MainGeneral4:
+	case MainGeneral5:
+	case MainGeneral6:
+	case MainGeneral7:
+	case MainGeneral8:
+		return server_slot - 1;
+	default:
+		if (server_slot >= EmuConstants::CURSOR_BAG_BEGIN && server_slot <= EmuConstants::CURSOR_BAG_END)
+			return server_slot - 20;
+		else if (server_slot >= EmuConstants::GENERAL_BAGS_END - 19 && server_slot <= EmuConstants::GENERAL_BAGS_END)
+			return server_slot + 10;
+		else
+			return server_slot;
+	}
+	*/
 }
-*/
+
+uint16 Corpse::CorpseToServerSlot(uint16 corpse_slot)
+{
+	return corpse_slot; // temporary return
+
+	/*
+	switch (corpse_slot)
+	{
+	case 9999:
+		return MainPowerSource;
+	case 9997:
+		return MainGeneral9;
+	case 9998:
+		return MainGeneral10;
+	case 30:
+		return MainCursor;
+	case 21: // old SLOT_AMMO
+	case 22: // old PERSONAL_BEGIN
+	case 23:
+	case 24:
+	case 25:
+	case 26:
+	case 27:
+	case 28:
+	case 29: // old PERSONAL_END
+		return corpse_slot + 1;
+	default:
+		if (corpse_slot >= 331 && corpse_slot <= 340)
+			return corpse_slot + 20;
+		else if (corpse_slot >= 341 && corpse_slot <= 360)
+			return corpse_slot - 10;
+		else
+			return corpse_slot;
+	}
+	*/
+}
 
 /*
 void Corpse::CastRezz(uint16 spellid, Mob* Caster){
