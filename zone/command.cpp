@@ -370,7 +370,7 @@ int command_init(void) {
 		command_add("opcode","- opcode management",250,command_opcode) ||
 		command_add("logs","[status|normal|error|debug|quest|all] - Subscribe to a log type",250,command_logs) ||
 		command_add("nologs","[status|normal|error|debug|quest|all] - Unsubscribe to a log type",250,command_nologs) ||
-		command_add("ban","[name] - Ban by character name",150,command_ban) ||
+		command_add("ban","[name] [reason]- Ban by character name",150,command_ban) ||
 		command_add("suspend","[name][days] - Suspend by character name and for specificed number of days",150,command_suspend) ||
 		command_add("ipban","[IP address] - Ban IP by character name",200,command_ipban) ||
 		command_add("oocmute","[1/0] - Mutes OOC chat",200,command_oocmute) ||
@@ -382,7 +382,7 @@ int command_init(void) {
 		command_add("npcshout","[message] - Make your NPC target shout a message.",150,command_npcshout) ||
 		command_add("timers","- Display persistent timers for target",200,command_timers) ||
 		command_add("hp","- Refresh your HP bar from the server.",0,command_hp) ||
-		command_add("pf","- ",0,command_pf) ||
+		command_add("pf","- Display additional mob coordinate and wandering data",0,command_pf) ||
 		command_add("logsql","- enable SQL logging",200,command_logsql) ||
 		command_add("bestz","- Ask map for a good Z coord for your x,y coords.",0,command_bestz) ||
 		command_add("ginfo","- get group info on target.",20,command_ginfo) ||
