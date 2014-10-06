@@ -163,6 +163,8 @@
 #define CANNOT_WAKE					555		//%1 tells you, 'I am unable to wake %2, master.'
 #define GUILD_NAME_IN_USE			711		//You cannot create a guild with that name, that guild already exists on this server.
 #define GM_GAINXP					1002	//[GM] You have gained %1 AXP and %2 EXP (%3).
+#define MALE_SLAYUNDEAD				1007	//%1's holy blade cleanses his target!(%2)
+#define FEMALE_SLAYUNDEAD			1008	//%1's holy blade cleanses her target!(%2)
 #define FINISHING_BLOW				1009	//%1 scores a Finishing Blow!!
 #define ASSASSINATES				1016	//%1 ASSASSINATES their victim!!
 #define CRIPPLING_BLOW				1021	//%1 lands a Crippling Blow!(%2)
