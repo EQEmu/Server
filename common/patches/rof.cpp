@@ -2628,7 +2628,7 @@ namespace RoF
 		else
 			eq->window = emu->window;
 		OUT(type);
-		eq->invslot = 0; // Set to hard 0 since it's not required for the structure to work
+		OUT(invslot);
 		strn0cpy(eq->txtfile, emu->booktext, sizeof(eq->txtfile));
 
 		FINISH_ENCODE();
@@ -4497,7 +4497,7 @@ namespace RoF
 		SETUP_DIRECT_DECODE(BookRequest_Struct, structs::BookRequest_Struct);
 
 		IN(type);
-		emu->invslot = 0; // Set to hard 0 since it's not required for the structure to work
+		IN(invslot);
 		emu->window = (uint8)eq->window;
 		strn0cpy(emu->txtfile, eq->txtfile, sizeof(emu->txtfile));
 
