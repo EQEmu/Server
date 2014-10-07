@@ -100,32 +100,26 @@ void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bo
 	safe_delete(pack);
 }
 
-void Raid::RemoveMember(const char *c)
+void Raid::RemoveMember(const char *characterName)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "DELETE FROM raid_members where name='%s'", c ),errbuf,&result)){
-		mysql_free_result(result);
-	}
+	std::string query = StringFormat("DELETE FROM raid_members where name='%s'", characterName);
+	auto results = database.QueryDatabase(query);
 
-	Client *m = entity_list.GetClientByName(c);
-	safe_delete_array(query);
+	Client *client = entity_list.GetClientByName(characterName);
 	disbandCheck = true;
-	SendRaidRemoveAll(c);
-	SendRaidDisband(m);
+	SendRaidRemoveAll(characterName);
+	SendRaidDisband(client);
 	LearnMembers();
 	VerifyRaid();
 
-	if(m){
-		m->SetRaidGrouped(false);
-	}
+	if(client)
+		client->SetRaidGrouped(false);
 
 	ServerPacket *pack = new ServerPacket(ServerOP_RaidRemove, sizeof(ServerRaidGeneralAction_Struct));
 	ServerRaidGeneralAction_Struct *rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 	rga->rid = GetID();
 	rga->instance_id = zone->GetInstanceID();
-	strn0cpy(rga->playername, c, 64);
+	strn0cpy(rga->playername, characterName, 64);
 	rga->zoneid = zone->GetZoneID();
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
