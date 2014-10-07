@@ -768,23 +768,15 @@ void Raid::AddRaidLooter(const char* looter)
 
 void Raid::RemoveRaidLooter(const char* looter)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_members SET islooter=0 WHERE name='%s'", looter),errbuf,&result)){
-		mysql_free_result(result);
-	}
-
-	safe_delete_array(query);
+	std::string query = StringFormat("UPDATE raid_members SET islooter = 0 WHERE name = '%s'", looter);
+	auto results = database.QueryDatabase(query);
 
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
-	{
-		if(strcmp(looter, members[x].membername) == 0)
-		{
+		if(strcmp(looter, members[x].membername) == 0) {
 			members[x].IsLooter = 0;
 			break;
 		}
-	}
+
 	ServerPacket *pack = new ServerPacket(ServerOP_DetailsChange, sizeof(ServerRaidGeneralAction_Struct));
 	ServerRaidGeneralAction_Struct *rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 	rga->rid = GetID();
@@ -792,15 +784,6 @@ void Raid::RemoveRaidLooter(const char* looter)
 	rga->instance_id = zone->GetInstanceID();
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
-
-	/* For reference only at this time. This code removes a looter from the Raid Options Window.
-
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
-	RaidGeneral_Struct *rgs = (RaidGeneral_Struct*)outapp->pBuffer;
-	rgs->action = 34;
-	strcpy(rgs->leader_name, looter);
-	QueuePacket(outapp);
-	safe_delete(outapp); */
 }
 
 bool Raid::IsRaidMember(const char *name){
