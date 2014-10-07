@@ -187,25 +187,15 @@ void Raid::SetGroupLeader(const char *who, bool glFlag)
 
 void Raid::SetRaidLeader(const char *wasLead, const char *name)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (!database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_members SET israidleader=0 WHERE name='%s'", wasLead),errbuf,&result)){
-		printf("Set Raid Leader error: %s\n", errbuf);
-	}
-	else
-		mysql_free_result(result);
+	std::string query = StringFormat("UPDATE raid_members SET israidleader = 0 WHERE name = '%s'", wasLead);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		printf("Set Raid Leader error: %s\n", results.ErrorMessage().c_str());
 
-	safe_delete_array(query);
-	query = 0;
-
-	if (!database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_members SET israidleader=1 WHERE name='%s'", name),errbuf,&result)){
-		printf("Set Raid Leader error: %s\n", errbuf);
-	}
-	else
-		mysql_free_result(result);
-
-	safe_delete_array(query);
+	query = StringFormat("UPDATE raid_members SET israidleader = 1 WHERE name = '%s'", name);
+	results = database.QueryDatabase(query);
+	if (!results.Success())
+		printf("Set Raid Leader error: %s\n", results.ErrorMessage().c_str());
 
 	strn0cpy(leadername, name, 64);
 
