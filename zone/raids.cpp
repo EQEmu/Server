@@ -168,20 +168,12 @@ void Raid::MoveMember(const char *name, uint32 newGroup)
 
 void Raid::SetGroupLeader(const char *who, bool glFlag)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_members SET isgroupleader=%lu WHERE name='%s'", (unsigned long)glFlag, who),errbuf,&result)){
-		mysql_free_result(result);
-	}
+	std::string query = StringFormat("UPDATE raid_members SET isgroupleader = %lu WHERE name = '%s'",
+                                    (unsigned long)glFlag, who);
+    auto results = database.QueryDatabase(query);
 
-	safe_delete_array(query);
 	LearnMembers();
 	VerifyRaid();
-
-	//if(glFlag == true){ //we're setting the flag
-		//this->SendMakeGroupLeaderPacket(who);
-	//}
 
 	ServerPacket *pack = new ServerPacket(ServerOP_RaidGroupLeader, sizeof(ServerRaidGeneralAction_Struct));
 	ServerRaidGeneralAction_Struct *rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
