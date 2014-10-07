@@ -127,14 +127,9 @@ void Raid::RemoveMember(const char *characterName)
 
 void Raid::DisbandRaid()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "DELETE FROM raid_members WHERE raidid=%lu", (unsigned long)GetID()),errbuf,&result)){
-		mysql_free_result(result);
-	}
+	std::string query = StringFormat("DELETE FROM raid_members WHERE raidid = %lu", (unsigned long)GetID());
+	auto results = database.QueryDatabase(query);
 
-	safe_delete_array(query);
 	LearnMembers();
 	VerifyRaid();
 	SendRaidDisbandAll();
