@@ -1229,14 +1229,9 @@ void Raid::LockRaid(bool lockFlag)
 
 void Raid::SetRaidDetails()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "INSERT INTO raid_details SET raidid=%lu, loottype=4, locked=0", (unsigned long)GetID()),errbuf,&result)){
-		mysql_free_result(result);
-	}
-
-	safe_delete_array(query);
+	std::string query = StringFormat("INSERT INTO raid_details SET raidid = %lu, loottype = 4, locked = 0",
+                                    (unsigned long)GetID());
+    auto results = database.QueryDatabase(query);
 }
 
 void Raid::GetRaidDetails()
