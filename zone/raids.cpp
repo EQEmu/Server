@@ -738,27 +738,16 @@ void Raid::TeleportRaid(Mob* sender, uint32 zoneID, uint16 instance_id, float x,
 
 void Raid::ChangeLootType(uint32 type)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_details SET loottype=%lu WHERE raidid=%lu", (unsigned long)type, (unsigned long)GetID()),errbuf,&result)){
-		mysql_free_result(result);
-	}
-
-	safe_delete_array(query);
+	std::string query = StringFormat("UPDATE raid_details SET loottype = %lu WHERE raidid = %lu",
+                                    (unsigned long)type, (unsigned long)GetID());
+    auto results = database.QueryDatabase(query);
 	LootType = type;
 }
 
 void Raid::AddRaidLooter(const char* looter)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_members SET islooter=1 WHERE name='%s'", looter),errbuf,&result)){
-		mysql_free_result(result);
-	}
-
-	safe_delete_array(query);
+	std::string query = StringFormat("UPDATE raid_members SET islooter = 1 WHERE name = '%s'", looter);
+	auto results = database.QueryDatabase(query);
 
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
 	{
@@ -775,15 +764,6 @@ void Raid::AddRaidLooter(const char* looter)
 	rga->instance_id = zone->GetInstanceID();
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
-
-	/* For reference only at this time. This code adds a looter to the Raid Options Window.
-
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
-	RaidGeneral_Struct *rgs = (RaidGeneral_Struct*)outapp->pBuffer;
-	rgs->action = 33;
-	strcpy(rgs->leader_name, looter);
-	QueuePacket(outapp);
-	safe_delete(outapp); */
 }
 
 void Raid::RemoveRaidLooter(const char* looter)
