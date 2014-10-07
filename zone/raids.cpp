@@ -1256,39 +1256,43 @@ void Raid::GetRaidDetails()
 bool Raid::LearnMembers()
 {
 	memset(members, 0, (sizeof(RaidMember)*MAX_RAID_MEMBERS));
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "SELECT name, groupid, _class, level, isgroupleader, israidleader, islooter FROM raid_members WHERE raidid=%lu", (unsigned long)GetID()),errbuf,&result)){
-		safe_delete_array(query);
-		if(mysql_num_rows(result) < 1) {
-			mysql_free_result(result);
-			LogFile->write(EQEMuLog::Error, "Error getting raid members for raid %lu: %s", (unsigned long)GetID(), errbuf);
-			disbandCheck = true;
-			return(false);
-		}
-		int i = 0;
-		while((row = mysql_fetch_row(result))) {
-			if(!row[0])
-				continue;
-			members[i].member = nullptr;
-			strn0cpy(members[i].membername, row[0], 64);
-			int GroupNum = atoi(row[1]);
-			if(GroupNum > 11)
-				members[i].GroupNumber = 0xFFFFFFFF;
-			else
-				members[i].GroupNumber = GroupNum;
-			members[i]._class = atoi(row[2]);
-			members[i].level = atoi(row[3]);
-			members[i].IsGroupLeader = atoi(row[4]);
-			members[i].IsRaidLeader = atoi(row[5]);
-			members[i].IsLooter = atoi(row[6]);
-			i++;
-		}
-		mysql_free_result(result);
-	}
-	return(true);
+
+	std::string query = StringFormat("SELECT name, groupid, _class, level, "
+                                    "isgroupleader, israidleader, islooter "
+                                    "FROM raid_members WHERE raidid = %lu",
+                                    (unsigned long)GetID());
+    auto results = database.QueryDatabase(query);
+    if (!results.Success())
+        return false;
+
+	if(results.RowCount() == 0) {
+        LogFile->write(EQEMuLog::Error, "Error getting raid members for raid %lu: %s", (unsigned long)GetID(), results.ErrorMessage().c_str());
+        disbandCheck = true;
+        return false;
+    }
+
+    int index = 0;
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        if(!row[0])
+            continue;
+
+        members[index].member = nullptr;
+        strn0cpy(members[index].membername, row[0], 64);
+        int groupNum = atoi(row[1]);
+        if(groupNum > 11)
+            members[index].GroupNumber = 0xFFFFFFFF;
+        else
+            members[index].GroupNumber = groupNum;
+
+        members[index]._class = atoi(row[2]);
+        members[index].level = atoi(row[3]);
+        members[index].IsGroupLeader = atoi(row[4]);
+        members[index].IsRaidLeader = atoi(row[5]);
+        members[index].IsLooter = atoi(row[6]);
+        ++index;
+    }
+
+	return true;
 }
 
 void Raid::VerifyRaid()
