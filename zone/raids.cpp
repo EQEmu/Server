@@ -74,14 +74,14 @@ void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bo
 	if(!c)
 		return;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "INSERT INTO raid_members SET raidid=%lu, charid=%lu, groupid=%lu, _class=%d, level=%d, name='%s', isgroupleader=%d, israidleader=%d, islooter=%d", (unsigned long)GetID(), (unsigned long)c->CharacterID(), (unsigned long)group, c->GetClass(), c->GetLevel(), c->GetName(), groupleader, rleader, looter ),errbuf,&result)){
-		mysql_free_result(result);
-	}
+	std::string query = StringFormat("INSERT INTO raid_members SET raidid = %lu, charid = %lu, "
+                                    "groupid = %lu, _class = %d, level = %d, name = '%s', "
+                                    "isgroupleader = %d, israidleader = %d, islooter = %d",
+                                    (unsigned long)GetID(), (unsigned long)c->CharacterID(),
+                                    (unsigned long)group, c->GetClass(), c->GetLevel(),
+                                    c->GetName(), groupleader, rleader, looter);
+    auto results = database.QueryDatabase(query);
 
-	safe_delete_array(query);
 	LearnMembers();
 	VerifyRaid();
 	if(group < 12)
@@ -514,7 +514,7 @@ void Raid::BalanceHP(int32 penalty, uint32 gid, int32 range, Mob* caster, int32 
 
 	int dmgtaken = 0, numMem = 0, dmgtaken_tmp = 0;
 	int gi = 0;
-	
+
 	float distance;
 	float range2 = range*range;
 
@@ -567,7 +567,7 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, int32 range, Mob* caster, int3
 
 	if (!range)
 		range = 200;
-			
+
 	float distance;
 	float range2 = range*range;
 
