@@ -60,41 +60,32 @@ TaskManager::~TaskManager() {
 }
 
 bool TaskManager::LoadTaskSets() {
-	const char *TaskSetQuery = "SELECT `id`, `taskid` from `tasksets` WHERE `id` > 0 AND `id` < %i "
-					"AND `taskid` >= 0 AND `taskid` < %i ORDER BY `id`, `taskid` ASC";
-	const char *ERR_MYSQLERROR = "[TASKS]Error in TaskManager::LoadTaskSets: %s";
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
 	// Clear all task sets in memory. Done so we can reload them on the fly if required by just calling
 	// this method again.
-	for(int i=0; i<MAXTASKSETS; i++) {
+	for(int i=0; i<MAXTASKSETS; i++)
 		TaskSets[i].clear();
-	}
 
-	if(database.RunQuery(query,MakeAnyLenString(&query,TaskSetQuery,MAXTASKSETS,MAXTASKS),errbuf,&result)) {
-
-		while((row = mysql_fetch_row(result))) {
-			int TaskSet = atoi(row[0]);
-			int TaskID = atoi(row[1]);
-
-			TaskSets[TaskSet].push_back(TaskID);
-			_log(TASKS__GLOBALLOAD, "Adding TaskID %4i to TaskSet %4i", TaskID, TaskSet);
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("SELECT `id`, `taskid` from `tasksets` "
+                                    "WHERE `id` > 0 AND `id` < %i "
+                                    "AND `taskid` >= 0 AND `taskid` < %i "
+                                    "ORDER BY `id`, `taskid` ASC",
+                                    MAXTASKSETS, MAXTASKS);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "[TASKS]Error in TaskManager::LoadTaskSets: %s", results.ErrorMessage().c_str());
 		return false;
-	}
+    }
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+        int taskSet = atoi(row[0]);
+        int taskID = atoi(row[1]);
+
+        TaskSets[taskSet].push_back(taskID);
+        _log(TASKS__GLOBALLOAD, "Adding TaskID %4i to TaskSet %4i", taskID, taskSet);
+    }
 
 	return true;
-
 }
 
 bool TaskManager::LoadSingleTask(int TaskID) {
@@ -1152,7 +1143,7 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 		if(Tasks[TaskList[i]] != nullptr) break;
 	}
 
-	// FIXME: The 10 and 5 values in this calculation are to account for the string "ABCD" we are putting in 3 times. 
+	// FIXME: The 10 and 5 values in this calculation are to account for the string "ABCD" we are putting in 3 times.
 	//
 	// Calculate how big the packet needs to be pased on the number of tasks and the
 	// size of the variable length strings.
@@ -1230,9 +1221,9 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 		// FIXME: In live packets, these two strings appear to be the same as the Text1 and Text2
 		// strings from the first activity in the task, however the task chooser/selector
 		// does not appear to make use of them.
-		sprintf(Ptr, "ABCD");				
+		sprintf(Ptr, "ABCD");
 		Ptr = Ptr + strlen(Ptr) + 1;
-		sprintf(Ptr, "ABCD");	
+		sprintf(Ptr, "ABCD");
 		Ptr = Ptr + strlen(Ptr) + 1;
 
 		AvailableTaskTrailer = (AvailableTaskTrailer_Struct*)Ptr;
@@ -1247,7 +1238,7 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 
 		// In some packets, this next string looks like a short task summary, however it doesn't
 		// appear anywhere in the client window.
-		sprintf(Ptr, "ABCD"); 
+		sprintf(Ptr, "ABCD");
 		Ptr = Ptr + strlen(Ptr) + 1;
 	}
 
@@ -1979,7 +1970,7 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int T
 		taskmanager->SendSingleActiveTaskToClient(c, TaskIndex, TaskComplete, false);
 		// Inform the client the task has been updated, both by a chat message
 		c->Message(0, "Your task '%s' has been updated.", Task->Title);
-		
+
 		if(Task->Activity[ActivityID].GoalMethod != METHODQUEST) {
 			char buf[24];
 			snprintf(buf, 23, "%d %d", ActiveTasks[TaskIndex].TaskID, ActiveTasks[TaskIndex].Activity[ActivityID].ActivityID);
@@ -1992,7 +1983,7 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int T
 				QServ->PlayerLogEvent(Player_Log_Task_Updates, c->CharacterID(), event_desc);
 			}
 		}
-		
+
 		// If this task is now complete, the Completed tasks will have been
 		// updated in UnlockActivities. Send the completed task list to the
 		// client. This is the same sequence the packets are sent on live.
