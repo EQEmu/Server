@@ -349,17 +349,16 @@ void Database::GeneralQueryReceive(ServerPacket *pack) {
 	/*
 		These are general queries passed from anywhere in zone instead of packing structures and breaking them down again and again
 	*/
-	char *Query = nullptr;
-	Query = new char[pack->ReadUInt32() + 1];
-	pack->ReadString(Query);
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	uint32 lastid = 0;
-	if (!RunQuery(query, MakeAnyLenString(&query, Query), errbuf, 0, 0, &lastid)) {
-		_log(QUERYSERV__ERROR, "Failed Delete Log Record Insert: %s", errbuf);
-		_log(QUERYSERV__ERROR, "%s", query);
+	char *queryBuffer = new char[pack->ReadUInt32() + 1];
+	pack->ReadString(queryBuffer);
+
+	std::string query(queryBuffer);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		_log(QUERYSERV__ERROR, "Failed Delete Log Record Insert: %s", results.ErrorMessage().c_str());
+		_log(QUERYSERV__ERROR, "%s", query.c_str());
 	}
-	safe_delete_array(query);
+
 	safe_delete(pack);
-	safe_delete(Query);
+	safe_delete(queryBuffer);
 }
