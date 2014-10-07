@@ -148,14 +148,10 @@ void Raid::DisbandRaid()
 
 void Raid::MoveMember(const char *name, uint32 newGroup)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_members SET groupid=%lu WHERE name='%s'", (unsigned long)newGroup, name),errbuf,&result)){
-		mysql_free_result(result);
-	}
+	std::string query = StringFormat("UPDATE raid_members SET groupid = %lu WHERE name = '%s'",
+                                    (unsigned long)newGroup, name);
+    auto results = database.QueryDatabase(query);
 
-	safe_delete_array(query);
 	LearnMembers();
 	VerifyRaid();
 	SendRaidMoveAll(name);
