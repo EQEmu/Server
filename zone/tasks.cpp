@@ -117,203 +117,177 @@ void TaskManager::ReloadGoalLists() {
 		_log(TASKS__GLOBALLOAD,"TaskManager::LoadTasks LoadLists failed");
 }
 
-bool TaskManager::LoadTasks(int SingleTask) {
+bool TaskManager::LoadTasks(int singleTask) {
 
 	// If TaskID !=0, then just load the task specified.
-
-	const char *AllTaskQuery = "SELECT `id`, `duration`, `title`, `description`, `reward`, `rewardid`,"
-					"`cashreward`, `xpreward`, `rewardmethod`, `startzone`, `minlevel`, `maxlevel`, `repeatable` "
-					"from `tasks` WHERE `id` < %i";
-
-	const char *SingleTaskQuery = "SELECT `id`, `duration`, `title`, `description`, `reward`, `rewardid`,"
-						"`cashreward`, `xpreward`, `rewardmethod`, `startzone`, `minlevel`, `maxlevel`, `repeatable` "
-						"from `tasks` WHERE `id` = %i";
-
-	const char *AllActivityQuery = "SELECT `taskid`, `step`, `activityid`, `activitytype`, `text1`, `text2`,"
-						"`text3`, `goalid`, `goalmethod`, `goalcount`, `delivertonpc`, "
-						"`zoneid`, `optional` from `activities` WHERE "
-						"`taskid` < %i AND `activityid` < %i ORDER BY taskid, activityid ASC";
-
-	const char *SingleTaskActivityQuery = "SELECT `taskid`, `step`, `activityid`, `activitytype`, `text1`, `text2`,"
-								"`text3`, `goalid`, `goalmethod`, `goalcount`, `delivertonpc`, "
-								"`zoneid`, `optional` from `activities` WHERE "
-								"`taskid` = %i AND `activityid` < %i ORDER BY taskid, activityid ASC";
-
-	const char *ERR_TASK_OOR = "[TASKS]Task ID %i out of range while loading tasks from database";
-
-	const char *ERR_TASK_OR_ACTIVITY_OOR = "[TASKS]Task or Activity ID (%i, %i) out of range while loading"
-										"activities from database";
-
-	const char *ERR_NOTASK = "[TASKS]Activity for non-existent task (%i, %i) while loading activities from database";
-
-	const char *ERR_SEQERR = "[TASKS]Activities for Task %i are not sequential starting at 0. Not loading task.";
-
-	const char *ERR_MYSQLERROR = "[TASKS]Error in TaskManager::LoadTasks: %s";
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	int QueryLength = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
 	_log(TASKS__GLOBALLOAD, "TaskManager::LoadTasks Called");
 
-	if(SingleTask == 0) {
+    std::string query;
+	if(singleTask == 0) {
 		if(!GoalListManager.LoadLists())
 			_log(TASKS__GLOBALLOAD,"TaskManager::LoadTasks LoadLists failed");
 
 		if(!LoadTaskSets())
 			_log(TASKS__GLOBALLOAD,"TaskManager::LoadTasks LoadTaskSets failed");
 
-		QueryLength = MakeAnyLenString(&query,AllTaskQuery,MAXTASKS);
+		query = StringFormat("SELECT `id`, `duration`, `title`, `description`, `reward`, "
+                            "`rewardid`, `cashreward`, `xpreward`, `rewardmethod`, "
+                            "`startzone`, `minlevel`, `maxlevel`, `repeatable` "
+                            "FROM `tasks` WHERE `id` < %i", MAXTASKS);
 	}
 	else
-		QueryLength = MakeAnyLenString(&query,SingleTaskQuery,SingleTask);
+		query = StringFormat("SELECT `id`, `duration`, `title`, `description`, `reward`, "
+                            "`rewardid`, `cashreward`, `xpreward`, `rewardmethod`, "
+                            "`startzone`, `minlevel`, `maxlevel`, `repeatable` "
+                            "FROM `tasks` WHERE `id` = %i",singleTask);
 
-	if(database.RunQuery(query,QueryLength,errbuf,&result)) {
+    const char *ERR_MYSQLERROR = "[TASKS]Error in TaskManager::LoadTasks: %s";
 
-		while((row = mysql_fetch_row(result))) {
-			int TaskID = atoi(row[0]);
-			if((TaskID <= 0) || (TaskID >= MAXTASKS)) {
-				// This shouldn't happen, as the SELECT is bounded by MAXTASKS
-				LogFile->write(EQEMuLog::Error, ERR_TASK_OOR, TaskID);
-				continue;
-			}
-			Tasks[TaskID] = new TaskInformation;
-			Tasks[TaskID]->Duration = atoi(row[1]);
-			Tasks[TaskID]->Title = new char[strlen(row[2]) + 1];
-			strcpy(Tasks[TaskID]->Title, row[2]);
-			Tasks[TaskID]->Description = new char[strlen(row[3]) + 1];
-			strcpy(Tasks[TaskID]->Description, row[3]);
-			Tasks[TaskID]->Reward = new char[strlen(row[4]) + 1];
-			strcpy(Tasks[TaskID]->Reward, row[4]);
-			Tasks[TaskID]->RewardID = atoi(row[5]);
-			Tasks[TaskID]->CashReward = atoi(row[6]);
-			Tasks[TaskID]->XPReward = atoi(row[7]);
-			Tasks[TaskID]->RewardMethod = (TaskMethodType)atoi(row[8]);
-			Tasks[TaskID]->StartZone = atoi(row[9]);
-			Tasks[TaskID]->MinLevel = atoi(row[10]);
-			Tasks[TaskID]->MaxLevel = atoi(row[11]);
-			Tasks[TaskID]->Repeatable = atoi(row[12]);
-			Tasks[TaskID]->ActivityCount = 0;
-			Tasks[TaskID]->SequenceMode = ActivitiesSequential;
-			Tasks[TaskID]->LastStep = 0;
-
-			_log(TASKS__GLOBALLOAD,"TaskID: %5i, Duration: %8i, StartZone: %3i Reward: %s MinLevel %i MaxLevel %i Repeatable: %s",
-					TaskID, Tasks[TaskID]->Duration, Tasks[TaskID]->StartZone, Tasks[TaskID]->Reward,
-					Tasks[TaskID]->MinLevel, Tasks[TaskID]->MaxLevel,
-					Tasks[TaskID]->Repeatable ? "Yes" : "No");
-			_log(TASKS__GLOBALLOAD,"Title:         %s ", Tasks[TaskID]->Title);
-			//_log(TASKS__GLOBALLOAD,"Description: %s ", Tasks[TaskID]->Description);
-
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, errbuf);
-		safe_delete_array(query);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
 		return false;
-	}
+    }
 
-	if(SingleTask==0)
-		QueryLength = MakeAnyLenString(&query,AllActivityQuery,MAXTASKS, MAXACTIVITIESPERTASK);
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        int taskID = atoi(row[0]);
+
+        if((taskID <= 0) || (taskID >= MAXTASKS)) {
+            // This shouldn't happen, as the SELECT is bounded by MAXTASKS
+			LogFile->write(EQEMuLog::Error, "[TASKS]Task ID %i out of range while loading tasks from database", taskID);
+			continue;
+        }
+
+		Tasks[taskID] = new TaskInformation;
+		Tasks[taskID]->Duration = atoi(row[1]);
+		Tasks[taskID]->Title = new char[strlen(row[2]) + 1];
+		strcpy(Tasks[taskID]->Title, row[2]);
+		Tasks[taskID]->Description = new char[strlen(row[3]) + 1];
+		strcpy(Tasks[taskID]->Description, row[3]);
+		Tasks[taskID]->Reward = new char[strlen(row[4]) + 1];
+		strcpy(Tasks[taskID]->Reward, row[4]);
+		Tasks[taskID]->RewardID = atoi(row[5]);
+		Tasks[taskID]->CashReward = atoi(row[6]);
+		Tasks[taskID]->XPReward = atoi(row[7]);
+		Tasks[taskID]->RewardMethod = (TaskMethodType)atoi(row[8]);
+		Tasks[taskID]->StartZone = atoi(row[9]);
+		Tasks[taskID]->MinLevel = atoi(row[10]);
+		Tasks[taskID]->MaxLevel = atoi(row[11]);
+		Tasks[taskID]->Repeatable = atoi(row[12]);
+		Tasks[taskID]->ActivityCount = 0;
+		Tasks[taskID]->SequenceMode = ActivitiesSequential;
+		Tasks[taskID]->LastStep = 0;
+
+		_log(TASKS__GLOBALLOAD,"TaskID: %5i, Duration: %8i, StartZone: %3i Reward: %s MinLevel %i MaxLevel %i Repeatable: %s",
+					taskID, Tasks[taskID]->Duration, Tasks[taskID]->StartZone, Tasks[taskID]->Reward,
+					Tasks[taskID]->MinLevel, Tasks[taskID]->MaxLevel,
+					Tasks[taskID]->Repeatable ? "Yes" : "No");
+		_log(TASKS__GLOBALLOAD,"Title:         %s ", Tasks[taskID]->Title);
+    }
+
+
+	if(singleTask==0)
+		query = StringFormat("SELECT `taskid`, `step`, `activityid`, `activitytype`, "
+                            "`text1`, `text2`, `text3`, `goalid`, `goalmethod`, "
+                            "`goalcount`, `delivertonpc`, `zoneid`, `optional` "
+                            "FROM `activities` "
+                            "WHERE `taskid` < %i AND `activityid` < %i "
+                            "ORDER BY taskid, activityid ASC", MAXTASKS, MAXACTIVITIESPERTASK);
 	else
-		QueryLength = MakeAnyLenString(&query,SingleTaskActivityQuery, SingleTask, MAXACTIVITIESPERTASK);
-
-	if(database.RunQuery(query,QueryLength, errbuf, &result)) {
-
-		while((row = mysql_fetch_row(result))) {
-			int TaskID = atoi(row[0]);
-			int Step = atoi(row[1]);
-
-			int ActivityID = atoi(row[2]);
-
-			if((TaskID <= 0) || (TaskID >= MAXTASKS) || (ActivityID < 0) || (ActivityID >= MAXACTIVITIESPERTASK)) {
-				// This shouldn't happen, as the SELECT is bounded by MAXTASKS
-				LogFile->write(EQEMuLog::Error, ERR_TASK_OR_ACTIVITY_OOR, TaskID, ActivityID);
-				continue;
-			}
-			if(Tasks[TaskID]==nullptr) {
-				LogFile->write(EQEMuLog::Error, ERR_NOTASK, TaskID, ActivityID);
-				continue;
-			}
-			Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].StepNumber = Step;
-
-			if(Step != 0)
-				Tasks[TaskID]->SequenceMode = ActivitiesStepped;
-
-			if(Step >Tasks[TaskID]->LastStep) Tasks[TaskID]->LastStep = Step;
-
-			// Task Activities MUST be numbered sequentially from 0. If not, log an error
-			// and set the task to nullptr. Subsequent activities for this task will raise
-			// ERR_NOTASK errors.
-			// Change to (ActivityID != (Tasks[TaskID]->ActivityCount + 1)) to index from 1
-			if(ActivityID != Tasks[TaskID]->ActivityCount) {
-				LogFile->write(EQEMuLog::Error, ERR_SEQERR, TaskID, ActivityID);
-				Tasks[TaskID] = nullptr;
-				continue;
-			}
-
-			Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].Type = atoi(row[3]);
-
-			Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].Text1 = new char[strlen(row[4]) + 1];
-
-			if(strlen(row[4])>0)
-				strcpy(Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].Text1, row[4]);
-			else
-				Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].Text1[0]=0;
-
-			Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].Text2 = new char[strlen(row[5]) + 1];
-
-			if(strlen(row[5])>0)
-				strcpy(Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].Text2, row[5]);
-			else
-				Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].Text2[0]=0;
-
-			Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].Text3 = new char[strlen(row[6]) + 1];
-
-			if(strlen(row[6])>0)
-				strcpy(Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].Text3, row[6]);
-			else
-				Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].Text3[0]=0;
-
-			Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].GoalID = atoi(row[7]);
-			Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].GoalMethod = (TaskMethodType)atoi(row[8]);
-			Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].GoalCount = atoi(row[9]);
-			Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].DeliverToNPC = atoi(row[10]);
-			Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].ZoneID = atoi(row[11]);
-			Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].Optional = atoi(row[12]);
-
-			_log(TASKS__GLOBALLOAD, "Activity Slot %2i: ID %i for Task %5i. Type: %3i, GoalID: %8i, "
-					"GoalMethod: %i, GoalCount: %3i, ZoneID:%3i",
-					Tasks[TaskID]->ActivityCount, ActivityID, TaskID,
-					Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].Type,
-					Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].GoalID,
-					Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].GoalMethod,
-					Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].GoalCount,
-					Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].ZoneID);
-
-			_log(TASKS__GLOBALLOAD, "          Text1: %s",
-				Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].Text1);
-			_log(TASKS__GLOBALLOAD, "          Text2: %s",
-				Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].Text2);
-			_log(TASKS__GLOBALLOAD, "          Text3: %s",
-				Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].Text3);
-
-			Tasks[TaskID]->ActivityCount++;
-
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, errbuf);
-		safe_delete_array(query);
+		query = StringFormat("SELECT `taskid`, `step`, `activityid`, `activitytype`, "
+                            "`text1`, `text2`, `text3`, `goalid`, `goalmethod`, "
+                            "`goalcount`, `delivertonpc`, `zoneid`, `optional` "
+                            "FROM `activities` "
+                            "WHERE `taskid` = %i AND `activityid` < %i "
+                            "ORDER BY taskid, activityid ASC", singleTask, MAXACTIVITIESPERTASK);
+    results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
 		return false;
+    }
+
+	for(auto row = results.begin(); row != results.end(); ++row) {
+        int taskID = atoi(row[0]);
+        int step = atoi(row[1]);
+
+        int activityID = atoi(row[2]);
+
+        if((taskID <= 0) || (taskID >= MAXTASKS) || (activityID < 0) || (activityID >= MAXACTIVITIESPERTASK)) {
+            // This shouldn't happen, as the SELECT is bounded by MAXTASKS
+            LogFile->write(EQEMuLog::Error, "[TASKS]Task or Activity ID (%i, %i) out of range while loading "
+                                            "activities from database", taskID, activityID);
+            continue;
+        }
+
+        if(Tasks[taskID]==nullptr) {
+            LogFile->write(EQEMuLog::Error, "[TASKS]Activity for non-existent task (%i, %i) while loading activities from database", taskID, activityID);
+            continue;
+        }
+
+        Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].StepNumber = step;
+
+        if(step != 0)
+            Tasks[taskID]->SequenceMode = ActivitiesStepped;
+
+        if(step >Tasks[taskID]->LastStep)
+            Tasks[taskID]->LastStep = step;
+
+        // Task Activities MUST be numbered sequentially from 0. If not, log an error
+        // and set the task to nullptr. Subsequent activities for this task will raise
+        // ERR_NOTASK errors.
+        // Change to (activityID != (Tasks[taskID]->ActivityCount + 1)) to index from 1
+        if(activityID != Tasks[taskID]->ActivityCount) {
+            LogFile->write(EQEMuLog::Error, "[TASKS]Activities for Task %i are not sequential starting at 0. Not loading task.", taskID, activityID);
+            Tasks[taskID] = nullptr;
+            continue;
+        }
+
+        Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Type = atoi(row[3]);
+
+        Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text1 = new char[strlen(row[4]) + 1];
+
+        if(strlen(row[4])>0)
+            strcpy(Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text1, row[4]);
+        else
+            Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text1[0]=0;
+
+        Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text2 = new char[strlen(row[5]) + 1];
+
+        if(strlen(row[5])>0)
+            strcpy(Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text2, row[5]);
+        else
+            Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text2[0]=0;
+
+        Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text3 = new char[strlen(row[6]) + 1];
+
+        if(strlen(row[6])>0)
+            strcpy(Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text3, row[6]);
+        else
+            Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text3[0]=0;
+
+        Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].GoalID = atoi(row[7]);
+        Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].GoalMethod = (TaskMethodType)atoi(row[8]);
+        Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].GoalCount = atoi(row[9]);
+        Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].DeliverToNPC = atoi(row[10]);
+        Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].ZoneID = atoi(row[11]);
+        Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Optional = atoi(row[12]);
+
+        _log(TASKS__GLOBALLOAD, "Activity Slot %2i: ID %i for Task %5i. Type: %3i, GoalID: %8i, "
+                                "GoalMethod: %i, GoalCount: %3i, ZoneID:%3i",
+                                Tasks[taskID]->ActivityCount, activityID, taskID,
+                                Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Type,
+                                Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].GoalID,
+                                Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].GoalMethod,
+                                Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].GoalCount,
+                                Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].ZoneID);
+
+        _log(TASKS__GLOBALLOAD, "          Text1: %s", Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text1);
+        _log(TASKS__GLOBALLOAD, "          Text2: %s", Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text2);
+        _log(TASKS__GLOBALLOAD, "          Text3: %s", Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text3);
+
+        Tasks[taskID]->ActivityCount++;
 	}
+
 	return true;
 }
 
