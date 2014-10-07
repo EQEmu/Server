@@ -1207,14 +1207,10 @@ void Raid::SendRaidGroupRemove(const char *who, uint32 gid)
 
 void Raid::LockRaid(bool lockFlag)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_details SET locked=%d WHERE raidid=%lu", lockFlag, (unsigned long)GetID()),errbuf,&result)){
-		mysql_free_result(result);
-	}
+	std::string query = StringFormat("UPDATE raid_details SET locked = %d WHERE raidid = %lu",
+                                    lockFlag, (unsigned long)GetID());
+    auto results = database.QueryDatabase(query);
 
-	safe_delete_array(query);
 	locked = lockFlag;
 	if(lockFlag)
 		SendRaidLock();
