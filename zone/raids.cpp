@@ -1236,24 +1236,21 @@ void Raid::SetRaidDetails()
 
 void Raid::GetRaidDetails()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "SELECT locked, loottype FROM raid_details WHERE raidid=%lu", (unsigned long)GetID()),errbuf,&result)){
-		safe_delete_array(query);
-		if(mysql_num_rows(result) < 1) {
-			mysql_free_result(result);
-			LogFile->write(EQEMuLog::Error, "Error getting raid details for raid %lu: %s", (unsigned long)GetID(), errbuf);
-			return;
-		}
-		row = mysql_fetch_row(result);
-		if(row){
-			locked = atoi(row[0]);
-			LootType = atoi(row[1]);
-		}
-		mysql_free_result(result);
-	}
+	std::string query = StringFormat("SELECT locked, loottype FROM raid_details WHERE raidid = %lu",
+                                    (unsigned long)GetID());
+    auto results = database.QueryDatabase(query);
+    if (!results.Success())
+        return;
+
+    if (results.RowCount() == 0) {
+        LogFile->write(EQEMuLog::Error, "Error getting raid details for raid %lu: %s", (unsigned long)GetID(), results.ErrorMessage().c_str());
+        return;
+    }
+
+    auto row = results.begin();
+
+    locked = atoi(row[0]);
+    LootType = atoi(row[1]);
 }
 
 bool Raid::LearnMembers()
