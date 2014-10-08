@@ -1337,14 +1337,15 @@ void Client::SendApproveWorld()
 	safe_delete(outapp);
 }
 
-bool Client::OPCharCreate(char *name, CharCreate_Struct *cc) {
+bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
+{
 	PlayerProfile_Struct pp;
 	ExtendedProfile_Struct ext;
 	Inventory inv;
 	time_t bday = time(nullptr);
 	char startzone[50]={0};
 	uint32 i;
-	struct in_addr	in;
+	struct in_addr in;
 
 	int stats_sum = cc->STR + cc->STA + cc->AGI + cc->DEX + cc->WIS + cc->INT + cc->CHA;
 
@@ -1352,8 +1353,8 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc) {
 
 	clog(WORLD__CLIENT, "Character creation request from %s LS#%d (%s:%d) : ", GetCLE()->LSName(), GetCLE()->LSID(), inet_ntoa(in), GetPort());
 	clog(WORLD__CLIENT, "Name: %s", name);
-	clog(WORLD__CLIENT, "Race: %d  Class: %d  Gender: %d  Deity: %d  Start zone: %d",
-		cc->race, cc->class_, cc->gender, cc->deity, cc->start_zone);
+	clog(WORLD__CLIENT, "Race: %d  Class: %d  Gender: %d  Deity: %d  Start zone: %d  Tutorial: %s",
+		cc->race, cc->class_, cc->gender, cc->deity, cc->start_zone, cc->tutorial ? "true" : "false");
 	clog(WORLD__CLIENT, "STR  STA  AGI  DEX  WIS  INT  CHA    Total");
 	clog(WORLD__CLIENT, "%3d  %3d  %3d  %3d  %3d  %3d  %3d     %3d",
 		cc->STR, cc->STA, cc->AGI, cc->DEX, cc->WIS, cc->INT, cc->CHA,
@@ -1361,16 +1362,15 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc) {
 	clog(WORLD__CLIENT, "Face: %d  Eye colors: %d %d", cc->face, cc->eyecolor1, cc->eyecolor2);
 	clog(WORLD__CLIENT, "Hairstyle: %d  Haircolor: %d", cc->hairstyle, cc->haircolor);
 	clog(WORLD__CLIENT, "Beard: %d  Beardcolor: %d", cc->beard, cc->beardcolor);
-	clog(WORLD__CLIENT, "Home: %d Tutorial: %d", cc->start_zone, cc->tutorial);
 
 	/* Validate the char creation struct */
-	if(ClientVersionBit & BIT_SoFAndLater) {
-		if(!CheckCharCreateInfoSoF(cc)) {
+	if (ClientVersionBit & BIT_SoFAndLater) {
+		if (!CheckCharCreateInfoSoF(cc)) {
 			clog(WORLD__CLIENT_ERR,"CheckCharCreateInfo did not validate the request (bad race/class/stats)");
 			return false;
 		}
 	} else {
-		if(!CheckCharCreateInfoTitanium(cc)) {
+		if (!CheckCharCreateInfoTitanium(cc)) {
 			clog(WORLD__CLIENT_ERR,"CheckCharCreateInfo did not validate the request (bad race/class/stats)");
 			return false;
 		}
@@ -1406,18 +1406,16 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc) {
 	pp.lastlogin	= bday;
 	pp.level			= 1;
 	pp.points			= 5;
-	pp.cur_hp			= 1000; // 1k hp during dev only 
+	pp.cur_hp			= 1000; // 1k hp during dev only
 	pp.hunger_level = 6000;
 	pp.thirst_level = 6000;
 
-	/* Racial Languages */
-	SetRacialLanguages( &pp );
-	SetRaceStartingSkills( &pp );
-	SetClassStartingSkills( &pp ); 
+	/* Set Racial and Class specific language and skills */
+	SetRacialLanguages(&pp);
+	SetRaceStartingSkills(&pp);
+	SetClassStartingSkills(&pp);
 	SetClassLanguages(&pp);
 	pp.skills[SkillSenseHeading] = 200;
-	// Some one fucking fix this to use a field name. -Doodman
-	//pp.unknown3596[28] = 15; // @bp: This is to enable disc usage
 //	strcpy(pp.servername, WorldConfig::get()->ShortName.c_str());
 
 
@@ -1430,60 +1428,50 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc) {
 	for(i = 0; i < BUFF_COUNT; i++)
 		pp.buffs[i].spellid = 0xFFFF;
 
-	/*
-		Was memset(pp.unknown3704, 0xffffffff, 8);
-		but I dont think thats what you really wanted to do...
-		memset is byte based
-	*/
-
 	/* If server is PVP by default, make all character set to it. */
 	pp.pvp = database.GetServerType() == 1 ? 1 : 0;
 
 	/* If it is an SoF Client and the SoF Start Zone rule is set, send new chars there */
-	if((ClientVersionBit & BIT_SoFAndLater) && (RuleI(World, SoFStartZoneID) > 0)) {
-		clog(WORLD__CLIENT,"Found 'SoFStartZoneID' rule setting: %i", (RuleI(World, SoFStartZoneID)));
-		pp.zone_id = (RuleI(World, SoFStartZoneID));
-		if(pp.zone_id)
+	if (ClientVersionBit & BIT_SoFAndLater && RuleI(World, SoFStartZoneID) > 0) {
+		clog(WORLD__CLIENT,"Found 'SoFStartZoneID' rule setting: %i", RuleI(World, SoFStartZoneID));
+		pp.zone_id = RuleI(World, SoFStartZoneID);
+		if (pp.zone_id)
 			database.GetSafePoints(pp.zone_id, 0, &pp.x, &pp.y, &pp.z);
 		else
-			clog(WORLD__CLIENT_ERR,"Error getting zone id for Zone ID %i", (RuleI(World, SoFStartZoneID)));
-	}
-	else {
+			clog(WORLD__CLIENT_ERR,"Error getting zone id for Zone ID %i", RuleI(World, SoFStartZoneID));
+	} else {
 		/* if there's a startzone variable put them in there */
-		if(database.GetVariable("startzone", startzone, 50)) {
+		if (database.GetVariable("startzone", startzone, 50)) {
 			clog(WORLD__CLIENT,"Found 'startzone' variable setting: %s", startzone);
 			pp.zone_id = database.GetZoneID(startzone);
-			if(pp.zone_id)
+			if (pp.zone_id)
 				database.GetSafePoints(pp.zone_id, 0, &pp.x, &pp.y, &pp.z);
 			else
 				clog(WORLD__CLIENT_ERR,"Error getting zone id for '%s'", startzone);
-		}
-		else{	/* otherwise use normal starting zone logic */
+		} else {	/* otherwise use normal starting zone logic */
 			bool ValidStartZone = false;
-
-			if(ClientVersionBit & BIT_TitaniumAndEarlier)
+			if (ClientVersionBit & BIT_TitaniumAndEarlier)
 				ValidStartZone = database.GetStartZone(&pp, cc);
 			else
 				ValidStartZone = database.GetStartZoneSoF(&pp, cc);
 
-			if(!ValidStartZone)
+			if (!ValidStartZone)
 				return false;
 		}
 	}
 
-	if(!pp.zone_id) {
+	/* just in case  */
+	if (!pp.zone_id) {
 		pp.zone_id = 1;		// qeynos
 		pp.x = pp.y = pp.z = -1;
 	}
 
 	/* Set Home Binds */
-	if(!pp.binds[4].zoneId) {
-		pp.binds[4].zoneId = pp.zone_id;
-		pp.binds[4].x = pp.x;
-		pp.binds[4].y = pp.y;
-		pp.binds[4].z = pp.z;
-		pp.binds[4].heading = pp.heading;
-	}
+	pp.binds[4].zoneId = pp.zone_id;
+	pp.binds[4].x = pp.x;
+	pp.binds[4].y = pp.y;
+	pp.binds[4].z = pp.z;
+	pp.binds[4].heading = pp.heading;
 
 	/* Overrides if we have the tutorial flag set! */
 	if (cc->tutorial && RuleB(World, EnableTutorialButton)) {
@@ -1514,10 +1502,8 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc) {
 		clog(WORLD__CLIENT_ERR,"Character creation failed: %s", pp.name);
 		return false;
 	}
-	else {
-		clog(WORLD__CLIENT,"Character creation successful: %s", pp.name);
-		return true;
-	}
+	clog(WORLD__CLIENT,"Character creation successful: %s", pp.name);
+	return true;
 }
 
 // returns true if the request is ok, false if there's an error
