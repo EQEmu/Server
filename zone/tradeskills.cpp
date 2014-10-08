@@ -425,7 +425,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 	}
 
     //pull the list of components
-	std::string query = StringFormat("SELECT tre.item_id,tre.componentcount "
+	std::string query = StringFormat("SELECT tre.item_id, tre.componentcount "
                                     "FROM tradeskill_recipe_entries AS tre "
                                     "WHERE tre.componentcount > 0 AND tre.recipe_id = %u",
                                     rac->recipe_id);
@@ -638,32 +638,25 @@ SkillUseTypes Object::TypeToSkill(uint32 type)
 
 void Client::TradeskillSearchResults(const char *query, unsigned long qlen, unsigned long objtype, unsigned long someid) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (!database.RunQuery(query, qlen, errbuf, &result)) {
-		LogFile->write(EQEMuLog::Error, "Error in TradeskillSearchResults query '%s': %s", query, errbuf);
+    std::string internalQuery(query);
+    auto results = database.QueryDatabase(internalQuery);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in TradeskillSearchResults query '%s': %s", internalQuery.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
-	uint8 qcount = 0;
+	if(results.RowCount() < 1)
+		return; //search gave no results... not an error
 
-	qcount = mysql_num_rows(result);
-	if(qcount < 1) {
-		//search gave no results... not an error
-		return;
-	}
-	if(mysql_num_fields(result) != 6) {
-		LogFile->write(EQEMuLog::Error, "Error in TradeskillSearchResults query '%s': Invalid column count in result", query);
+	if(results.ColumnCount() != 6) {
+		LogFile->write(EQEMuLog::Error, "Error in TradeskillSearchResults query '%s': Invalid column count in result", internalQuery.c_str());
 		return;
 	}
 
-	uint8 r;
-	for(r = 0; r < qcount; r++) {
-		row = mysql_fetch_row(result);
+	for(auto row = results.begin(); row != results.end(); ++row) {
 		if(row == nullptr || row[0] == nullptr || row[1] == nullptr || row[2] == nullptr || row[3] == nullptr || row[5] == nullptr)
 			continue;
+
 		uint32 recipe = (uint32)atoi(row[0]);
 		const char *name = row[1];
 		uint32 trivial = (uint32) atoi(row[2]);
@@ -673,14 +666,10 @@ void Client::TradeskillSearchResults(const char *query, unsigned long qlen, unsi
 		// Skip the recipes that exceed the threshold in skill difference
 		// Recipes that have either been made before or were
 		// explicitly learned are excempt from that limit
-		if (RuleB(Skills, UseLimitTradeskillSearchSkillDiff)) {
-			if (((int32)trivial - (int32)GetSkill((SkillUseTypes)tradeskill)) > RuleI(Skills, MaxTradeskillSearchSkillDiff)
-				&& row[4] == nullptr)
-			{
+		if (RuleB(Skills, UseLimitTradeskillSearchSkillDiff)
+            && ((int32)trivial - (int32)GetSkill((SkillUseTypes)tradeskill)) > RuleI(Skills, MaxTradeskillSearchSkillDiff)
+            && row[4] == nullptr)
 				continue;
-			}
-		}
-
 
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_RecipeReply, sizeof(RecipeReply_Struct));
 		RecipeReply_Struct *reply = (RecipeReply_Struct *) outapp->pBuffer;
@@ -693,7 +682,7 @@ void Client::TradeskillSearchResults(const char *query, unsigned long qlen, unsi
 		strn0cpy(reply->recipe_name, name, sizeof(reply->recipe_name));
 		FastQueuePacket(&outapp);
 	}
-	mysql_free_result(result);
+
 }
 
 void Client::SendTradeskillDetails(uint32 recipe_id) {
