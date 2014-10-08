@@ -3299,47 +3299,33 @@ TaskProximityManager::~TaskProximityManager() {
 
 }
 
-bool TaskProximityManager::LoadProximities(int ZoneID) {
+bool TaskProximityManager::LoadProximities(int zoneID) {
+	TaskProximity proximity;
 
-	const char *ProximityQuery = "SELECT `exploreid`, `minx`, `maxx`, `miny`, `maxy`, "
-					"`minz`, `maxz` from `proximities` WHERE `zoneid`=%i "
-					"ORDER BY `zoneid` ASC";
-
-	const char *ERR_MYSQLERROR = "Error in TaskProximityManager::LoadProximities %s %s";
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-
-	TaskProximity Proximity;
-
-	_log(TASKS__GLOBALLOAD, "TaskProximityManager::LoadProximities Called for zone %i", ZoneID);
+	_log(TASKS__GLOBALLOAD, "TaskProximityManager::LoadProximities Called for zone %i", zoneID);
 	TaskProximities.clear();
 
-	if(database.RunQuery(query,MakeAnyLenString(&query,ProximityQuery, ZoneID),errbuf,&result)) {
-
-		while((row = mysql_fetch_row(result))) {
-			Proximity.ExploreID = atoi(row[0]);
-			Proximity.MinX = atof(row[1]);
-			Proximity.MaxX = atof(row[2]);
-			Proximity.MinY = atof(row[3]);
-			Proximity.MaxY = atof(row[4]);
-			Proximity.MinZ = atof(row[5]);
-			Proximity.MaxZ = atof(row[6]);
-
-			TaskProximities.push_back(Proximity);
-
-		}
-		mysql_free_result(result);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, query, errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("SELECT `exploreid`, `minx`, `maxx`, "
+                                    "`miny`, `maxy`, `minz`, `maxz` "
+                                    "FROM `proximities` WHERE `zoneid` = %i "
+                                    "ORDER BY `zoneid` ASC", zoneID);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in TaskProximityManager::LoadProximities %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
-	}
-	safe_delete_array(query);
+    }
+
+	for( auto row = results.begin(); row != results.end(); ++row) {
+        proximity.ExploreID = atoi(row[0]);
+        proximity.MinX = atof(row[1]);
+        proximity.MaxX = atof(row[2]);
+        proximity.MinY = atof(row[3]);
+        proximity.MaxY = atof(row[4]);
+        proximity.MinZ = atof(row[5]);
+        proximity.MaxZ = atof(row[6]);
+
+        TaskProximities.push_back(proximity);
+    }
 
 	return true;
 
