@@ -1507,33 +1507,28 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 }
 
 // returns true if the request is ok, false if there's an error
-bool CheckCharCreateInfoSoF(CharCreate_Struct *cc) {
-	if(!cc) return false;
+bool CheckCharCreateInfoSoF(CharCreate_Struct *cc)
+{
+	if (!cc)
+		return false;
 
 	_log(WORLD__CLIENT, "Validating char creation info...");
 
 	RaceClassCombos class_combo;
 	bool found = false;
 	int combos = character_create_race_class_combos.size();
-	for(int i = 0; i < combos; ++i) {
-		if(character_create_race_class_combos[i].Class == cc->class_ &&
-			character_create_race_class_combos[i].Race == cc->race &&
-			character_create_race_class_combos[i].Deity == cc->deity) {
-				if(RuleB(World, EnableTutorialButton) &&
-					(RuleI(World, TutorialZoneID) == cc->start_zone ||
-					(character_create_race_class_combos[i].Zone == cc->start_zone))) {
-					class_combo = character_create_race_class_combos[i];
-					found = true;
-					break;
-				} else if(character_create_race_class_combos[i].Zone == cc->start_zone) {
-					class_combo = character_create_race_class_combos[i];
-					found = true;
-					break;
-				}
+	for (int i = 0; i < combos; ++i) {
+		if (character_create_race_class_combos[i].Class == cc->class_ &&
+				character_create_race_class_combos[i].Race == cc->race &&
+				character_create_race_class_combos[i].Deity == cc->deity &&
+				character_create_race_class_combos[i].Zone == cc->start_zone) {
+			class_combo = character_create_race_class_combos[i];
+			found = true;
+			break;
 		}
 	}
 
-	if(!found) {
+	if (!found) {
 		_log(WORLD__CLIENT_ERR, "Could not find class/race/deity/start_zone combination");
 		return false;
 	}
@@ -1542,15 +1537,15 @@ bool CheckCharCreateInfoSoF(CharCreate_Struct *cc) {
 	uint32 allocs = character_create_allocations.size();
 	RaceClassAllocation allocation = {0};
 	found = false;
-	for(int i = 0; i < combos; ++i) {
-		if(character_create_allocations[i].Index == class_combo.AllocationIndex) {
+	for (int i = 0; i < allocs; ++i) {
+		if (character_create_allocations[i].Index == class_combo.AllocationIndex) {
 			allocation = character_create_allocations[i];
 			found = true;
 			break;
 		}
 	}
 
-	if(!found) {
+	if (!found) {
 		_log(WORLD__CLIENT_ERR, "Could not find starting stats for selected character combo, cannot verify stats");
 		return false;
 	}
@@ -1563,37 +1558,37 @@ bool CheckCharCreateInfoSoF(CharCreate_Struct *cc) {
 		allocation.DefaultPointAllocation[5] +
 		allocation.DefaultPointAllocation[6];
 
-	if(cc->STR > allocation.BaseStats[0] + max_stats || cc->STR < allocation.BaseStats[0]) {
+	if (cc->STR > allocation.BaseStats[0] + max_stats || cc->STR < allocation.BaseStats[0]) {
 		_log(WORLD__CLIENT_ERR, "Strength out of range");
 		return false;
 	}
 
-	if(cc->DEX > allocation.BaseStats[1] + max_stats || cc->DEX < allocation.BaseStats[1]) {
+	if (cc->DEX > allocation.BaseStats[1] + max_stats || cc->DEX < allocation.BaseStats[1]) {
 		_log(WORLD__CLIENT_ERR, "Dexterity out of range");
 		return false;
 	}
 
-	if(cc->AGI > allocation.BaseStats[2] + max_stats || cc->AGI < allocation.BaseStats[2]) {
+	if (cc->AGI > allocation.BaseStats[2] + max_stats || cc->AGI < allocation.BaseStats[2]) {
 		_log(WORLD__CLIENT_ERR, "Agility out of range");
 		return false;
 	}
 
-	if(cc->STA > allocation.BaseStats[3] + max_stats || cc->STA < allocation.BaseStats[3]) {
+	if (cc->STA > allocation.BaseStats[3] + max_stats || cc->STA < allocation.BaseStats[3]) {
 		_log(WORLD__CLIENT_ERR, "Stamina out of range");
 		return false;
 	}
 
-	if(cc->INT > allocation.BaseStats[4] + max_stats || cc->INT < allocation.BaseStats[4]) {
+	if (cc->INT > allocation.BaseStats[4] + max_stats || cc->INT < allocation.BaseStats[4]) {
 		_log(WORLD__CLIENT_ERR, "Intelligence out of range");
 		return false;
 	}
 
-	if(cc->WIS > allocation.BaseStats[5] + max_stats || cc->WIS < allocation.BaseStats[5]) {
+	if (cc->WIS > allocation.BaseStats[5] + max_stats || cc->WIS < allocation.BaseStats[5]) {
 		_log(WORLD__CLIENT_ERR, "Wisdom out of range");
 		return false;
 	}
 
-	if(cc->CHA > allocation.BaseStats[6] + max_stats || cc->CHA < allocation.BaseStats[6]) {
+	if (cc->CHA > allocation.BaseStats[6] + max_stats || cc->CHA < allocation.BaseStats[6]) {
 		_log(WORLD__CLIENT_ERR, "Charisma out of range");
 		return false;
 	}
@@ -1606,7 +1601,7 @@ bool CheckCharCreateInfoSoF(CharCreate_Struct *cc) {
 	current_stats += cc->INT - allocation.BaseStats[4];
 	current_stats += cc->WIS - allocation.BaseStats[5];
 	current_stats += cc->CHA - allocation.BaseStats[6];
-	if(current_stats > max_stats) {
+	if (current_stats > max_stats) {
 		_log(WORLD__CLIENT_ERR, "Current Stats > Maximum Stats");
 		return false;
 	}
@@ -1685,7 +1680,8 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 	{ /*Berserker*/       false, true,     false,  false,  false,  false,  false,  true,  true,  true,  false,   false, false, true,   false,  false}
 	};//Initial table by kathgar, editted by Wiz for accuracy, solar too
 
-	if(!cc) return false;
+	if (!cc)
+		return false;
 
 	_log(WORLD__CLIENT,"Validating char creation info...");
 
@@ -1699,19 +1695,16 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 
 	// if out of range looking it up in the table would crash stuff
 	// so we return from these
-	if(classtemp >= PLAYER_CLASS_COUNT)
-	{
+	if (classtemp >= PLAYER_CLASS_COUNT) {
 		_log(WORLD__CLIENT_ERR,"  class is out of range");
 		return false;
 	}
-	if(racetemp >= _TABLE_RACES)
-	{
+	if (racetemp >= _TABLE_RACES) {
 		_log(WORLD__CLIENT_ERR,"  race is out of range");
 		return false;
 	}
 
-	if(!ClassRaceLookupTable[classtemp][racetemp]) //Lookup table better than a bunch of ifs?
-	{
+	if (!ClassRaceLookupTable[classtemp][racetemp]) { //Lookup table better than a bunch of ifs?
 		_log(WORLD__CLIENT_ERR,"  invalid race/class combination");
 		// we return from this one, since if it's an invalid combination our table
 		// doesn't have meaningful values for the stats
@@ -1739,44 +1732,36 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 	// NOTE: these could just be else if, but i want to see all the stats
 	// that are messed up not just the first hit
 
-	if(bTOTAL + stat_points != cTOTAL)
-	{
+	if (bTOTAL + stat_points != cTOTAL) {
 		_log(WORLD__CLIENT_ERR,"  stat points total doesn't match expected value: expecting %d got %d", bTOTAL + stat_points, cTOTAL);
 		Charerrors++;
 	}
 
-	if(cc->STR > bSTR + stat_points || cc->STR < bSTR)
-	{
+	if (cc->STR > bSTR + stat_points || cc->STR < bSTR) {
 		_log(WORLD__CLIENT_ERR,"  stat STR is out of range");
 		Charerrors++;
 	}
-	if(cc->STA > bSTA + stat_points || cc->STA < bSTA)
-	{
+	if (cc->STA > bSTA + stat_points || cc->STA < bSTA) {
 		_log(WORLD__CLIENT_ERR,"  stat STA is out of range");
 		Charerrors++;
 	}
-	if(cc->AGI > bAGI + stat_points || cc->AGI < bAGI)
-	{
+	if (cc->AGI > bAGI + stat_points || cc->AGI < bAGI) {
 		_log(WORLD__CLIENT_ERR,"  stat AGI is out of range");
 		Charerrors++;
 	}
-	if(cc->DEX > bDEX + stat_points || cc->DEX < bDEX)
-	{
+	if (cc->DEX > bDEX + stat_points || cc->DEX < bDEX) {
 		_log(WORLD__CLIENT_ERR,"  stat DEX is out of range");
 		Charerrors++;
 	}
-	if(cc->WIS > bWIS + stat_points || cc->WIS < bWIS)
-	{
+	if (cc->WIS > bWIS + stat_points || cc->WIS < bWIS) {
 		_log(WORLD__CLIENT_ERR,"  stat WIS is out of range");
 		Charerrors++;
 	}
-	if(cc->INT > bINT + stat_points || cc->INT < bINT)
-	{
+	if (cc->INT > bINT + stat_points || cc->INT < bINT) {
 		_log(WORLD__CLIENT_ERR,"  stat INT is out of range");
 		Charerrors++;
 	}
-	if(cc->CHA > bCHA + stat_points || cc->CHA < bCHA)
-	{
+	if (cc->CHA > bCHA + stat_points || cc->CHA < bCHA) {
 		_log(WORLD__CLIENT_ERR,"  stat CHA is out of range");
 		Charerrors++;
 	}
