@@ -11832,7 +11832,7 @@ void Client::Handle_OP_SetServerFilter(const EQApplicationPacket *app)
 void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 {
 	// if the character has a start city, don't let them use the command
-	if (m_pp.binds[4].zoneId != 0) {
+	if (m_pp.binds[4].zoneId != 0 && m_pp.binds[4].zoneId != 189) {
 		Message(15, "Your home city has already been set.", m_pp.binds[4].zoneId, database.GetZoneName(m_pp.binds[4].zoneId));
 		return;
 	}
