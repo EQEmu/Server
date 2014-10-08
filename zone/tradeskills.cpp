@@ -686,34 +686,25 @@ void Client::TradeskillSearchResults(const std::string query, unsigned long objt
 
 void Client::SendTradeskillDetails(uint32 recipe_id) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	char *query = 0;
-
-	uint32 qlen = 0;
-	uint8 qcount = 0;
-
-	//pull the list of components
-	qlen = MakeAnyLenString(&query, "SELECT tre.item_id,tre.componentcount,i.icon,i.Name "
-	 " FROM tradeskill_recipe_entries AS tre "
-	 " LEFT JOIN items AS i ON tre.item_id = i.id "
-	 " WHERE tre.componentcount > 0 AND tre.recipe_id=%u", recipe_id);
-
-	if (!database.RunQuery(query, qlen, errbuf, &result)) {
-		LogFile->write(EQEMuLog::Error, "Error in SendTradeskillDetails query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+    //pull the list of components
+	std::string query = StringFormat("SELECT tre.item_id,tre.componentcount,i.icon,i.Name "
+                                    "FROM tradeskill_recipe_entries AS tre "
+                                    "LEFT JOIN items AS i ON tre.item_id = i.id "
+                                    "WHERE tre.componentcount > 0 AND tre.recipe_id = %u",
+                                    recipe_id);
+    auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in SendTradeskillDetails query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
-	safe_delete_array(query);
 
-	qcount = mysql_num_rows(result);
-	if(qcount < 1) {
+	if(results.RowCount() < 1) {
 		LogFile->write(EQEMuLog::Error, "Error in SendTradeskillDetails: no components returned");
 		return;
 	}
-	if(qcount > 10) {
-		LogFile->write(EQEMuLog::Error, "Error in SendTradeskillDetails: too many components returned (%u)", qcount);
+
+	if(results.RowCount() > 10) {
+		LogFile->write(EQEMuLog::Error, "Error in SendTradeskillDetails: too many components returned (%u)", results.RowCount());
 		return;
 	}
 
@@ -743,20 +734,18 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
 	uint32 len;
 	uint32 datalen = 0;
 	uint8 count = 0;
-	for(r = 0; r < qcount; r++) {
-		row = mysql_fetch_row(result);
+
+	for(auto row = results.begin(); row != results.end(); ++row) {
 
 		//watch for references to items which are not in the
 		//items table, which the left join will make nullptr...
-		if(row[2] == nullptr || row[3] == nullptr) {
+		if(row[2] == nullptr || row[3] == nullptr)
 			continue;
-		}
 
 		uint32 item = (uint32)atoi(row[0]);
 		uint8 num = (uint8) atoi(row[1]);
-
-
 		uint32 icon = (uint32) atoi(row[2]);
+
 		const char *name = row[3];
 		len = strlen(name);
 		if(len > 63)
@@ -786,7 +775,6 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
 		}
 
 	}
-	mysql_free_result(result);
 
 	//now move the item data over top of the FFFFs
 	uint8 dist = sizeof(uint32) * (10 - count);
