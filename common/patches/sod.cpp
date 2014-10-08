@@ -2705,12 +2705,7 @@ namespace SoD
 		IN(hairstyle);
 		IN(gender);
 		IN(race);
-
-		if (RuleB(World, EnableTutorialButton) && eq->tutorial)
-			emu->start_zone = RuleI(World, TutorialZoneID);
-		else
-			emu->start_zone = eq->start_zone;
-
+		IN(start_zone);
 		IN(haircolor);
 		IN(deity);
 		IN(STR);
@@ -2723,6 +2718,7 @@ namespace SoD
 		IN(face);
 		IN(eyecolor1);
 		IN(eyecolor2);
+		IN(tutorial);
 		IN(drakkin_heritage);
 		IN(drakkin_tattoo);
 		IN(drakkin_details);

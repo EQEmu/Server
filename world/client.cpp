@@ -1345,22 +1345,23 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc) {
 	char startzone[50]={0};
 	uint32 i;
 	struct in_addr	in;
-	
+
 	int stats_sum = cc->STR + cc->STA + cc->AGI + cc->DEX + cc->WIS + cc->INT + cc->CHA;
 
 	in.s_addr = GetIP();
 
-	clog(WORLD__CLIENT,"Character creation request from %s LS#%d (%s:%d) : ", GetCLE()->LSName(), GetCLE()->LSID(), inet_ntoa(in), GetPort());
-	clog(WORLD__CLIENT,"Name: %s", name);
-	clog(WORLD__CLIENT,"Race: %d  Class: %d  Gender: %d  Deity: %d  Start zone: %d",
+	clog(WORLD__CLIENT, "Character creation request from %s LS#%d (%s:%d) : ", GetCLE()->LSName(), GetCLE()->LSID(), inet_ntoa(in), GetPort());
+	clog(WORLD__CLIENT, "Name: %s", name);
+	clog(WORLD__CLIENT, "Race: %d  Class: %d  Gender: %d  Deity: %d  Start zone: %d",
 		cc->race, cc->class_, cc->gender, cc->deity, cc->start_zone);
-	clog(WORLD__CLIENT,"STR  STA  AGI  DEX  WIS  INT  CHA    Total");
-	clog(WORLD__CLIENT,"%3d  %3d  %3d  %3d  %3d  %3d  %3d     %3d",
+	clog(WORLD__CLIENT, "STR  STA  AGI  DEX  WIS  INT  CHA    Total");
+	clog(WORLD__CLIENT, "%3d  %3d  %3d  %3d  %3d  %3d  %3d     %3d",
 		cc->STR, cc->STA, cc->AGI, cc->DEX, cc->WIS, cc->INT, cc->CHA,
 		stats_sum);
-	clog(WORLD__CLIENT,"Face: %d  Eye colors: %d %d", cc->face, cc->eyecolor1, cc->eyecolor2);
-	clog(WORLD__CLIENT,"Hairstyle: %d  Haircolor: %d", cc->hairstyle, cc->haircolor);
-	clog(WORLD__CLIENT,"Beard: %d  Beardcolor: %d", cc->beard, cc->beardcolor);
+	clog(WORLD__CLIENT, "Face: %d  Eye colors: %d %d", cc->face, cc->eyecolor1, cc->eyecolor2);
+	clog(WORLD__CLIENT, "Hairstyle: %d  Haircolor: %d", cc->hairstyle, cc->haircolor);
+	clog(WORLD__CLIENT, "Beard: %d  Beardcolor: %d", cc->beard, cc->beardcolor);
+	clog(WORLD__CLIENT, "Home: %d Tutorial: %d", cc->start_zone, cc->tutorial);
 
 	/* Validate the char creation struct */
 	if(ClientVersionBit & BIT_SoFAndLater) {
@@ -1475,22 +1476,34 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc) {
 		pp.x = pp.y = pp.z = -1;
 	}
 
-	if(!pp.binds[0].zoneId) {
-		pp.binds[0].zoneId = pp.zone_id;
-		pp.binds[0].x = pp.x;
-		pp.binds[0].y = pp.y;
-		pp.binds[0].z = pp.z;
-		pp.binds[0].heading = pp.heading;
+	/* Set Home Binds */
+	if(!pp.binds[4].zoneId) {
+		pp.binds[4].zoneId = pp.zone_id;
+		pp.binds[4].x = pp.x;
+		pp.binds[4].y = pp.y;
+		pp.binds[4].z = pp.z;
+		pp.binds[4].heading = pp.heading;
 	}
 
-	/* Set Starting city */
-	pp.binds[4] = pp.binds[0];
+	/* Overrides if we have the tutorial flag set! */
+	if (cc->tutorial && RuleB(World, EnableTutorialButton)) {
+		pp.zone_id = RuleI(World, TutorialZoneID);
+		database.GetSafePoints(pp.zone_id, 0, &pp.x, &pp.y, &pp.z);
+	}
 
+	/* Will either be the same as home or tutorial */
+	pp.binds[0].zoneId = pp.zone_id;
+	pp.binds[0].x = pp.x;
+	pp.binds[0].y = pp.y;
+	pp.binds[0].z = pp.z;
+	pp.binds[0].heading = pp.heading;
 
-	clog(WORLD__CLIENT,"Current location: %s  %0.2f, %0.2f, %0.2f, %0.2f",
-		database.GetZoneName(pp.zone_id), pp.x, pp.y, pp.z, pp.heading);
-	clog(WORLD__CLIENT,"Bind location: %s  %0.2f, %0.2f, %0.2f",
-		database.GetZoneName(pp.binds[0].zoneId), pp.binds[0].x, pp.binds[0].y, pp.binds[0].z);
+	clog(WORLD__CLIENT,"Current location: %s (%d)  %0.2f, %0.2f, %0.2f, %0.2f",
+		database.GetZoneName(pp.zone_id), pp.zone_id, pp.x, pp.y, pp.z, pp.heading);
+	clog(WORLD__CLIENT,"Bind location: %s (%d) %0.2f, %0.2f, %0.2f",
+		database.GetZoneName(pp.binds[0].zoneId), pp.binds[0].zoneId,  pp.binds[0].x, pp.binds[0].y, pp.binds[0].z);
+	clog(WORLD__CLIENT,"Home location: %s (%d) %0.2f, %0.2f, %0.2f",
+		database.GetZoneName(pp.binds[4].zoneId), pp.binds[4].zoneId,  pp.binds[4].x, pp.binds[4].y, pp.binds[4].z);
 
 	/* Starting Items inventory */
 	database.SetStartingItems(&pp, &inv, pp.race, pp.class_, pp.deity, pp.zone_id, pp.name, GetAdmin());

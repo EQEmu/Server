@@ -4036,12 +4036,7 @@ namespace RoF
 		IN(race);
 		IN(class_);
 		IN(deity);
-
-		if (RuleB(World, EnableTutorialButton) && eq->tutorial)
-			emu->start_zone = RuleI(World, TutorialZoneID);
-		else
-			emu->start_zone = eq->start_zone;
-
+		IN(start_zone);
 		IN(haircolor);
 		IN(beard);
 		IN(beardcolor);
@@ -4059,7 +4054,7 @@ namespace RoF
 		IN(WIS);
 		IN(INT);
 		IN(CHA);
-		//IN(tutorial);
+		IN(tutorial);
 
 		FINISH_DIRECT_DECODE();
 	}

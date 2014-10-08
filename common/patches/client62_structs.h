@@ -558,7 +558,7 @@ struct CharCreate_Struct
 /*0128*/	uint32	face;
 /*0132*/	uint32	eyecolor1;	//its possiable we could have these switched
 /*0136*/	uint32	eyecolor2;	//since setting one sets the other we really can't check
-/*0140*/	uint32	unknown140;
+/*0140*/	uint32	tutorial;	//assumptions are bad! But guessed
 };
 
 /*

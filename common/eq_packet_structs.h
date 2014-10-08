@@ -689,7 +689,7 @@ struct CharCreate_Struct
 /*0076*/	uint32	drakkin_heritage;	// added for SoF
 /*0080*/	uint32	drakkin_tattoo;		// added for SoF
 /*0084*/	uint32	drakkin_details;	// added for SoF
-/*0088*/
+/*0088*/	uint32	tutorial;
 };
 
 /*

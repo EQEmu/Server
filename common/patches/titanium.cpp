@@ -1395,6 +1395,7 @@ namespace Titanium
 		IN(face);
 		IN(eyecolor1);
 		IN(eyecolor2);
+		IN(tutorial);
 
 		FINISH_DIRECT_DECODE();
 	}
