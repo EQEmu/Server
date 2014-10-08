@@ -74,14 +74,14 @@ void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bo
 	if(!c)
 		return;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "INSERT INTO raid_members SET raidid=%lu, charid=%lu, groupid=%lu, _class=%d, level=%d, name='%s', isgroupleader=%d, israidleader=%d, islooter=%d", (unsigned long)GetID(), (unsigned long)c->CharacterID(), (unsigned long)group, c->GetClass(), c->GetLevel(), c->GetName(), groupleader, rleader, looter ),errbuf,&result)){
-		mysql_free_result(result);
-	}
+	std::string query = StringFormat("INSERT INTO raid_members SET raidid = %lu, charid = %lu, "
+                                    "groupid = %lu, _class = %d, level = %d, name = '%s', "
+                                    "isgroupleader = %d, israidleader = %d, islooter = %d",
+                                    (unsigned long)GetID(), (unsigned long)c->CharacterID(),
+                                    (unsigned long)group, c->GetClass(), c->GetLevel(),
+                                    c->GetName(), groupleader, rleader, looter);
+    auto results = database.QueryDatabase(query);
 
-	safe_delete_array(query);
 	LearnMembers();
 	VerifyRaid();
 	if(group < 12)
@@ -100,32 +100,26 @@ void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bo
 	safe_delete(pack);
 }
 
-void Raid::RemoveMember(const char *c)
+void Raid::RemoveMember(const char *characterName)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "DELETE FROM raid_members where name='%s'", c ),errbuf,&result)){
-		mysql_free_result(result);
-	}
+	std::string query = StringFormat("DELETE FROM raid_members where name='%s'", characterName);
+	auto results = database.QueryDatabase(query);
 
-	Client *m = entity_list.GetClientByName(c);
-	safe_delete_array(query);
+	Client *client = entity_list.GetClientByName(characterName);
 	disbandCheck = true;
-	SendRaidRemoveAll(c);
-	SendRaidDisband(m);
+	SendRaidRemoveAll(characterName);
+	SendRaidDisband(client);
 	LearnMembers();
 	VerifyRaid();
 
-	if(m){
-		m->SetRaidGrouped(false);
-	}
+	if(client)
+		client->SetRaidGrouped(false);
 
 	ServerPacket *pack = new ServerPacket(ServerOP_RaidRemove, sizeof(ServerRaidGeneralAction_Struct));
 	ServerRaidGeneralAction_Struct *rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 	rga->rid = GetID();
 	rga->instance_id = zone->GetInstanceID();
-	strn0cpy(rga->playername, c, 64);
+	strn0cpy(rga->playername, characterName, 64);
 	rga->zoneid = zone->GetZoneID();
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
@@ -133,14 +127,9 @@ void Raid::RemoveMember(const char *c)
 
 void Raid::DisbandRaid()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "DELETE FROM raid_members WHERE raidid=%lu", (unsigned long)GetID()),errbuf,&result)){
-		mysql_free_result(result);
-	}
+	std::string query = StringFormat("DELETE FROM raid_members WHERE raidid = %lu", (unsigned long)GetID());
+	auto results = database.QueryDatabase(query);
 
-	safe_delete_array(query);
 	LearnMembers();
 	VerifyRaid();
 	SendRaidDisbandAll();
@@ -159,14 +148,10 @@ void Raid::DisbandRaid()
 
 void Raid::MoveMember(const char *name, uint32 newGroup)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_members SET groupid=%lu WHERE name='%s'", (unsigned long)newGroup, name),errbuf,&result)){
-		mysql_free_result(result);
-	}
+	std::string query = StringFormat("UPDATE raid_members SET groupid = %lu WHERE name = '%s'",
+                                    (unsigned long)newGroup, name);
+    auto results = database.QueryDatabase(query);
 
-	safe_delete_array(query);
 	LearnMembers();
 	VerifyRaid();
 	SendRaidMoveAll(name);
@@ -183,20 +168,12 @@ void Raid::MoveMember(const char *name, uint32 newGroup)
 
 void Raid::SetGroupLeader(const char *who, bool glFlag)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_members SET isgroupleader=%lu WHERE name='%s'", (unsigned long)glFlag, who),errbuf,&result)){
-		mysql_free_result(result);
-	}
+	std::string query = StringFormat("UPDATE raid_members SET isgroupleader = %lu WHERE name = '%s'",
+                                    (unsigned long)glFlag, who);
+    auto results = database.QueryDatabase(query);
 
-	safe_delete_array(query);
 	LearnMembers();
 	VerifyRaid();
-
-	//if(glFlag == true){ //we're setting the flag
-		//this->SendMakeGroupLeaderPacket(who);
-	//}
 
 	ServerPacket *pack = new ServerPacket(ServerOP_RaidGroupLeader, sizeof(ServerRaidGeneralAction_Struct));
 	ServerRaidGeneralAction_Struct *rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
@@ -210,25 +187,15 @@ void Raid::SetGroupLeader(const char *who, bool glFlag)
 
 void Raid::SetRaidLeader(const char *wasLead, const char *name)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (!database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_members SET israidleader=0 WHERE name='%s'", wasLead),errbuf,&result)){
-		printf("Set Raid Leader error: %s\n", errbuf);
-	}
-	else
-		mysql_free_result(result);
+	std::string query = StringFormat("UPDATE raid_members SET israidleader = 0 WHERE name = '%s'", wasLead);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		printf("Set Raid Leader error: %s\n", results.ErrorMessage().c_str());
 
-	safe_delete_array(query);
-	query = 0;
-
-	if (!database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_members SET israidleader=1 WHERE name='%s'", name),errbuf,&result)){
-		printf("Set Raid Leader error: %s\n", errbuf);
-	}
-	else
-		mysql_free_result(result);
-
-	safe_delete_array(query);
+	query = StringFormat("UPDATE raid_members SET israidleader = 1 WHERE name = '%s'", name);
+	results = database.QueryDatabase(query);
+	if (!results.Success())
+		printf("Set Raid Leader error: %s\n", results.ErrorMessage().c_str());
 
 	strn0cpy(leadername, name, 64);
 
@@ -264,14 +231,10 @@ bool Raid::IsGroupLeader(const char *who)
 
 void Raid::UpdateLevel(const char *name, int newLevel)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_members SET level=%lu WHERE name='%s'", (unsigned long)newLevel, name),errbuf,&result)){
-		mysql_free_result(result);
-	}
+	std::string query = StringFormat("UPDATE raid_members SET level = %lu WHERE name = '%s'",
+                                    (unsigned long)newLevel, name);
+    auto results = database.QueryDatabase(query);
 
-	safe_delete_array(query);
 	LearnMembers();
 	VerifyRaid();
 }
@@ -514,7 +477,7 @@ void Raid::BalanceHP(int32 penalty, uint32 gid, int32 range, Mob* caster, int32 
 
 	int dmgtaken = 0, numMem = 0, dmgtaken_tmp = 0;
 	int gi = 0;
-	
+
 	float distance;
 	float range2 = range*range;
 
@@ -567,7 +530,7 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, int32 range, Mob* caster, int3
 
 	if (!range)
 		range = 200;
-			
+
 	float distance;
 	float range2 = range*range;
 
@@ -775,27 +738,16 @@ void Raid::TeleportRaid(Mob* sender, uint32 zoneID, uint16 instance_id, float x,
 
 void Raid::ChangeLootType(uint32 type)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_details SET loottype=%lu WHERE raidid=%lu", (unsigned long)type, (unsigned long)GetID()),errbuf,&result)){
-		mysql_free_result(result);
-	}
-
-	safe_delete_array(query);
+	std::string query = StringFormat("UPDATE raid_details SET loottype = %lu WHERE raidid = %lu",
+                                    (unsigned long)type, (unsigned long)GetID());
+    auto results = database.QueryDatabase(query);
 	LootType = type;
 }
 
 void Raid::AddRaidLooter(const char* looter)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_members SET islooter=1 WHERE name='%s'", looter),errbuf,&result)){
-		mysql_free_result(result);
-	}
-
-	safe_delete_array(query);
+	std::string query = StringFormat("UPDATE raid_members SET islooter = 1 WHERE name = '%s'", looter);
+	auto results = database.QueryDatabase(query);
 
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
 	{
@@ -812,36 +764,19 @@ void Raid::AddRaidLooter(const char* looter)
 	rga->instance_id = zone->GetInstanceID();
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
-
-	/* For reference only at this time. This code adds a looter to the Raid Options Window.
-
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
-	RaidGeneral_Struct *rgs = (RaidGeneral_Struct*)outapp->pBuffer;
-	rgs->action = 33;
-	strcpy(rgs->leader_name, looter);
-	QueuePacket(outapp);
-	safe_delete(outapp); */
 }
 
 void Raid::RemoveRaidLooter(const char* looter)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_members SET islooter=0 WHERE name='%s'", looter),errbuf,&result)){
-		mysql_free_result(result);
-	}
-
-	safe_delete_array(query);
+	std::string query = StringFormat("UPDATE raid_members SET islooter = 0 WHERE name = '%s'", looter);
+	auto results = database.QueryDatabase(query);
 
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
-	{
-		if(strcmp(looter, members[x].membername) == 0)
-		{
+		if(strcmp(looter, members[x].membername) == 0) {
 			members[x].IsLooter = 0;
 			break;
 		}
-	}
+
 	ServerPacket *pack = new ServerPacket(ServerOP_DetailsChange, sizeof(ServerRaidGeneralAction_Struct));
 	ServerRaidGeneralAction_Struct *rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 	rga->rid = GetID();
@@ -849,15 +784,6 @@ void Raid::RemoveRaidLooter(const char* looter)
 	rga->instance_id = zone->GetInstanceID();
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
-
-	/* For reference only at this time. This code removes a looter from the Raid Options Window.
-
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
-	RaidGeneral_Struct *rgs = (RaidGeneral_Struct*)outapp->pBuffer;
-	rgs->action = 34;
-	strcpy(rgs->leader_name, looter);
-	QueuePacket(outapp);
-	safe_delete(outapp); */
 }
 
 bool Raid::IsRaidMember(const char *name){
@@ -1281,14 +1207,10 @@ void Raid::SendRaidGroupRemove(const char *who, uint32 gid)
 
 void Raid::LockRaid(bool lockFlag)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_details SET locked=%d WHERE raidid=%lu", lockFlag, (unsigned long)GetID()),errbuf,&result)){
-		mysql_free_result(result);
-	}
+	std::string query = StringFormat("UPDATE raid_details SET locked = %d WHERE raidid = %lu",
+                                    lockFlag, (unsigned long)GetID());
+    auto results = database.QueryDatabase(query);
 
-	safe_delete_array(query);
 	locked = lockFlag;
 	if(lockFlag)
 		SendRaidLock();
@@ -1307,74 +1229,70 @@ void Raid::LockRaid(bool lockFlag)
 
 void Raid::SetRaidDetails()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "INSERT INTO raid_details SET raidid=%lu, loottype=4, locked=0", (unsigned long)GetID()),errbuf,&result)){
-		mysql_free_result(result);
-	}
-
-	safe_delete_array(query);
+	std::string query = StringFormat("INSERT INTO raid_details SET raidid = %lu, loottype = 4, locked = 0",
+                                    (unsigned long)GetID());
+    auto results = database.QueryDatabase(query);
 }
 
 void Raid::GetRaidDetails()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "SELECT locked, loottype FROM raid_details WHERE raidid=%lu", (unsigned long)GetID()),errbuf,&result)){
-		safe_delete_array(query);
-		if(mysql_num_rows(result) < 1) {
-			mysql_free_result(result);
-			LogFile->write(EQEMuLog::Error, "Error getting raid details for raid %lu: %s", (unsigned long)GetID(), errbuf);
-			return;
-		}
-		row = mysql_fetch_row(result);
-		if(row){
-			locked = atoi(row[0]);
-			LootType = atoi(row[1]);
-		}
-		mysql_free_result(result);
-	}
+	std::string query = StringFormat("SELECT locked, loottype FROM raid_details WHERE raidid = %lu",
+                                    (unsigned long)GetID());
+    auto results = database.QueryDatabase(query);
+    if (!results.Success())
+        return;
+
+    if (results.RowCount() == 0) {
+        LogFile->write(EQEMuLog::Error, "Error getting raid details for raid %lu: %s", (unsigned long)GetID(), results.ErrorMessage().c_str());
+        return;
+    }
+
+    auto row = results.begin();
+
+    locked = atoi(row[0]);
+    LootType = atoi(row[1]);
 }
 
 bool Raid::LearnMembers()
 {
 	memset(members, 0, (sizeof(RaidMember)*MAX_RAID_MEMBERS));
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "SELECT name, groupid, _class, level, isgroupleader, israidleader, islooter FROM raid_members WHERE raidid=%lu", (unsigned long)GetID()),errbuf,&result)){
-		safe_delete_array(query);
-		if(mysql_num_rows(result) < 1) {
-			mysql_free_result(result);
-			LogFile->write(EQEMuLog::Error, "Error getting raid members for raid %lu: %s", (unsigned long)GetID(), errbuf);
-			disbandCheck = true;
-			return(false);
-		}
-		int i = 0;
-		while((row = mysql_fetch_row(result))) {
-			if(!row[0])
-				continue;
-			members[i].member = nullptr;
-			strn0cpy(members[i].membername, row[0], 64);
-			int GroupNum = atoi(row[1]);
-			if(GroupNum > 11)
-				members[i].GroupNumber = 0xFFFFFFFF;
-			else
-				members[i].GroupNumber = GroupNum;
-			members[i]._class = atoi(row[2]);
-			members[i].level = atoi(row[3]);
-			members[i].IsGroupLeader = atoi(row[4]);
-			members[i].IsRaidLeader = atoi(row[5]);
-			members[i].IsLooter = atoi(row[6]);
-			i++;
-		}
-		mysql_free_result(result);
-	}
-	return(true);
+
+	std::string query = StringFormat("SELECT name, groupid, _class, level, "
+                                    "isgroupleader, israidleader, islooter "
+                                    "FROM raid_members WHERE raidid = %lu",
+                                    (unsigned long)GetID());
+    auto results = database.QueryDatabase(query);
+    if (!results.Success())
+        return false;
+
+	if(results.RowCount() == 0) {
+        LogFile->write(EQEMuLog::Error, "Error getting raid members for raid %lu: %s", (unsigned long)GetID(), results.ErrorMessage().c_str());
+        disbandCheck = true;
+        return false;
+    }
+
+    int index = 0;
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        if(!row[0])
+            continue;
+
+        members[index].member = nullptr;
+        strn0cpy(members[index].membername, row[0], 64);
+        int groupNum = atoi(row[1]);
+        if(groupNum > 11)
+            members[index].GroupNumber = 0xFFFFFFFF;
+        else
+            members[index].GroupNumber = groupNum;
+
+        members[index]._class = atoi(row[2]);
+        members[index].level = atoi(row[3]);
+        members[index].IsGroupLeader = atoi(row[4]);
+        members[index].IsRaidLeader = atoi(row[5]);
+        members[index].IsLooter = atoi(row[6]);
+        ++index;
+    }
+
+	return true;
 }
 
 void Raid::VerifyRaid()
