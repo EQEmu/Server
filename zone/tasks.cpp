@@ -728,28 +728,31 @@ void ClientTaskState::EnableTask(int characterID, int taskCount, int *tasks) {
 
 }
 
-void ClientTaskState::DisableTask(int CharID, int TaskCount, int *TaskList) {
+void ClientTaskState::DisableTask(int charID, int taskCount, int *taskList) {
 
 	// Check if the Task is enabled for this client
 	//
-	std::vector<int> TasksDisabled;
-	std::vector<int>::iterator Iterator;
+	std::vector<int> tasksDisabled;
 
-	for(int i=0; i<TaskCount; i++) {
-		Iterator = EnabledTasks.begin();
-		bool RemoveTask = false;
+	for(int i=0; i<taskCount; i++) {
+		auto iterator = EnabledTasks.begin();
+		bool removeTask = false;
 
-		while(Iterator != EnabledTasks.end()) {
-			if((*Iterator) == TaskList[i]) {
-				RemoveTask = true;
+		while(iterator != EnabledTasks.end()) {
+			if((*iterator) == taskList[i]) {
+				removeTask = true;
 				break;
 			}
-			if((*Iterator) > TaskList[i]) break;
-			++Iterator;
+
+			if((*iterator) > taskList[i])
+                break;
+
+			++iterator;
 		}
-		if(RemoveTask) {
-			EnabledTasks.erase(Iterator);
-			TasksDisabled.push_back(TaskList[i]);
+
+		if(removeTask) {
+			EnabledTasks.erase(iterator);
+			tasksDisabled.push_back(taskList[i]);
 		}
 	}
 
@@ -757,40 +760,20 @@ void ClientTaskState::DisableTask(int CharID, int TaskCount, int *TaskList) {
 	for(unsigned int i=0; i<EnabledTasks.size(); i++)
 		_log(TASKS__UPDATE, "%i ", EnabledTasks[i]);
 
-	if(TasksDisabled.size() == 0) return;
+	if(tasksDisabled.size() == 0)
+        return;
 
-	std::string TaskQuery="DELETE FROM character_enabledtasks WHERE ";
+	std::stringstream queryStream(StringFormat("DELETE FROM character_enabledtasks WHERE charid = %i AND (", charID));
 
-	const char *ERR_MYSQLERROR = "[TASKS]Error in ClientTaskState::DisableTask %s %s";
+	for(unsigned int i=0; i<tasksDisabled.size(); i++)
+        queryStream << i ? StringFormat("taskid = %i ", tasksDisabled[i]): StringFormat("OR taskid = %i ", tasksDisabled[i]);
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-
-	char *buf = 0;
-
-	MakeAnyLenString(&buf, "charid=%i AND (", CharID);
-	TaskQuery += buf;
-	safe_delete_array(buf);
-
-	for(unsigned int i=0; i<TasksDisabled.size(); i++) {
-		if(i==0)
-			MakeAnyLenString(&buf, "taskid=%i", TasksDisabled[i]);
-		else
-			MakeAnyLenString(&buf, " OR taskid=%i", TasksDisabled[i]);
-
-		TaskQuery += buf;
-		safe_delete_array(buf);
-	}
-
-	TaskQuery = TaskQuery + ")";
-	_log(TASKS__UPDATE, "Executing query %s", TaskQuery.c_str());
-
-	if(!database.RunQuery(query,MakeAnyLenString(&query, TaskQuery.c_str()), errbuf)) {
-
-		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, query, errbuf);
-	}
-
-	safe_delete_array(query);
+	queryStream << ")";
+	std::string query = queryStream.str();
+	_log(TASKS__UPDATE, "Executing query %s", query.c_str());
+    auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		LogFile->write(EQEMuLog::Error, "[TASKS]Error in ClientTaskState::DisableTask %s %s", query.c_str(), results.ErrorMessage().c_str());
 }
 
 bool ClientTaskState::IsTaskEnabled(int TaskID) {
