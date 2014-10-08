@@ -3125,98 +3125,83 @@ TaskGoalListManager::~TaskGoalListManager() {
 
 bool TaskGoalListManager::LoadLists() {
 
-
-	const char *CountQuery = "SELECT `listid`, COUNT(`entry`) FROM `goallists` GROUP by `listid` "
-							"ORDER BY `listid`";
-
-	const char *ListQuery = "SELECT `entry` from `goallists` WHERE `listid`=%i "
-							"ORDER BY `entry` ASC LIMIT %i";
-
-	const char *ERR_MYSQLERROR = "Error in TaskGoalListManager::LoadLists: %s %s";
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
 	_log(TASKS__GLOBALLOAD, "TaskGoalListManager::LoadLists Called");
 
-	for(int i=0; i< NumberOfLists; i++) {
-
+	for(int i=0; i< NumberOfLists; i++)
 		safe_delete_array(TaskGoalLists[i].GoalItemEntries);
-
-	}
 	safe_delete_array(TaskGoalLists);
+
+    const char *ERR_MYSQLERROR = "Error in TaskGoalListManager::LoadLists: %s %s";
 
 	NumberOfLists = 0;
 
-	if(database.RunQuery(query,MakeAnyLenString(&query,CountQuery),errbuf,&result)) {
-
-		NumberOfLists = mysql_num_rows(result);
-		_log(TASKS__GLOBALLOAD, "Database returned a count of %i lists", NumberOfLists);
-
-		TaskGoalLists = new TaskGoalList_Struct[NumberOfLists];
-
-		int ListIndex = 0;
-
-		while((row = mysql_fetch_row(result))) {
-			int ListID = atoi(row[0]);
-			int ListSize = atoi(row[1]);
-
-			TaskGoalLists[ListIndex].ListID = ListID;
-			TaskGoalLists[ListIndex].Size = ListSize;
-			TaskGoalLists[ListIndex].Min = 0;
-			TaskGoalLists[ListIndex].Max = 0;
-			TaskGoalLists[ListIndex].GoalItemEntries = new int[ListSize];
-
-			ListIndex++;
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, query, errbuf);
-		safe_delete_array(query);
+    std::string query = "SELECT `listid`, COUNT(`entry`) "
+                        "FROM `goallists` GROUP by `listid` "
+                        "ORDER BY `listid`";
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, query.c_str(), results.ErrorMessage().c_str());
 		return false;
+    }
+
+    NumberOfLists = results.RowCount();
+    _log(TASKS__GLOBALLOAD, "Database returned a count of %i lists", NumberOfLists);
+
+    TaskGoalLists = new TaskGoalList_Struct[NumberOfLists];
+
+    int listIndex = 0;
+
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        int listID = atoi(row[0]);
+        int listSize = atoi(row[1]);
+
+        TaskGoalLists[listIndex].ListID = listID;
+        TaskGoalLists[listIndex].Size = listSize;
+        TaskGoalLists[listIndex].Min = 0;
+        TaskGoalLists[listIndex].Max = 0;
+        TaskGoalLists[listIndex].GoalItemEntries = new int[listSize];
+
+        listIndex++;
+    }
+
+	for(int listIndex = 0; listIndex < NumberOfLists; listIndex++) {
+
+		int listID = TaskGoalLists[listIndex].ListID;
+		unsigned int size = TaskGoalLists[listIndex].Size;
+        query = StringFormat("SELECT `entry` from `goallists` "
+                            "WHERE `listid` = %i "
+							"ORDER BY `entry` ASC LIMIT %i",
+							listID, size);
+        results = database.QueryDatabase(query);
+        if (!results.Success()) {
+            LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, query.c_str(), results.ErrorMessage().c_str());
+			TaskGoalLists[listIndex].Size = 0;
+			continue;
+        }
+
+        // This should only happen if a row is deleted in between us retrieving the counts
+        // at the start of this method and getting to here. It should not be possible for
+        // an INSERT to cause a problem, as the SELECT is used with a LIMIT
+        if(results.RowCount() < size)
+            TaskGoalLists[listIndex].Size = results.RowCount();
+
+        int entryIndex = 0;
+        for (auto row = results.begin(); row != results.end(); ++row, ++entryIndex) {
+
+            int entry = atoi(row[0]);
+
+            if(entry < TaskGoalLists[listIndex].Min)
+                TaskGoalLists[listIndex].Min = entry;
+
+            if(entry > TaskGoalLists[listIndex].Max)
+                TaskGoalLists[listIndex].Max = entry;
+
+            TaskGoalLists[listIndex].GoalItemEntries[entryIndex] = entry;
+
+        }
+
 	}
 
-	for(int ListIndex = 0; ListIndex < NumberOfLists; ListIndex++) {
-
-		int ListID = TaskGoalLists[ListIndex].ListID;
-		unsigned int Size = TaskGoalLists[ListIndex].Size;
-
-		if(database.RunQuery(query,MakeAnyLenString(&query,ListQuery,ListID,Size),errbuf,&result)) {
-			// This should only happen if a row is deleted in between us retrieving the counts
-			// at the start of this method and getting to here. It should not be possible for
-			// an INSERT to cause a problem, as the SELECT is used with a LIMIT
-			if(mysql_num_rows(result) < Size)
-				TaskGoalLists[ListIndex].Size = mysql_num_rows(result);
-
-			int EntryIndex = 0;
-
-			while((row = mysql_fetch_row(result))) {
-
-				int Entry = atoi(row[0]);
-
-				if(Entry < TaskGoalLists[ListIndex].Min)
-					TaskGoalLists[ListIndex].Min = Entry;
-
-				if(Entry > TaskGoalLists[ListIndex].Max)
-					TaskGoalLists[ListIndex].Max = Entry;
-
-				TaskGoalLists[ListIndex].GoalItemEntries[EntryIndex++] = Entry;
-
-			}
-
-			mysql_free_result(result);
-			safe_delete_array(query);
-		}
-		else {
-			LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, query, errbuf);
-			TaskGoalLists[ListIndex].Size = 0;
-			safe_delete_array(query);
-		}
-	}
 	return true;
 
 }
