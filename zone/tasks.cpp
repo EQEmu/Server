@@ -679,32 +679,33 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 	return true;
 }
 
-void ClientTaskState::EnableTask(int CharID, int TaskCount, int *TaskList) {
+void ClientTaskState::EnableTask(int characterID, int taskCount, int *tasks) {
 
 	// Check if the Task is already enabled for this client
 	//
-	std::vector<int> TasksEnabled;
-	std::vector<int>::iterator Iterator;
+	std::vector<int> tasksEnabled;
 
-	for(int i=0; i<TaskCount; i++) {
-		Iterator = EnabledTasks.begin();
-		bool AddTask = true;
+	for(int i=0; i<taskCount; i++) {
+		auto iterator = EnabledTasks.begin();
+		bool addTask = true;
 
-		while(Iterator != EnabledTasks.end()) {
+		while(iterator != EnabledTasks.end()) {
 			// If this task is already enabled, stop looking
-			if((*Iterator) == TaskList[i]) {
-				AddTask = false;
+			if((*iterator) == tasks[i]) {
+				addTask = false;
 				break;
 			}
 			// Our list of enabled tasks is sorted, so we can quit if we find a taskid higher than
 			// the one we are looking for.
-			if((*Iterator) > TaskList[i]) break;
-			++Iterator;
+			if((*iterator) > tasks[i])
+                break;
+			++iterator;
 		}
-		if(AddTask) {
-			EnabledTasks.insert(Iterator, TaskList[i]);
+
+		if(addTask) {
+			EnabledTasks.insert(iterator, tasks[i]);
 			// Make a note of the task we enabled, for later SQL generation
-			TasksEnabled.push_back(TaskList[i]);
+			tasksEnabled.push_back(tasks[i]);
 		}
 	}
 
@@ -712,35 +713,19 @@ void ClientTaskState::EnableTask(int CharID, int TaskCount, int *TaskList) {
 	for(unsigned int i=0; i<EnabledTasks.size(); i++)
 		_log(TASKS__UPDATE, "%i ", EnabledTasks[i]);
 
-	if(TasksEnabled.size() == 0 ) return;
+	if(tasksEnabled.size() == 0 )
+        return;
 
-	std::string TaskQuery="REPLACE INTO character_enabledtasks (charid, taskid) VALUES ";
+	std::stringstream queryStream("REPLACE INTO character_enabledtasks (charid, taskid) VALUES ");
+	for(unsigned int i=0; i<tasksEnabled.size(); i++)
+		queryStream << ( i ? ", " : "" ) <<  StringFormat("(%i, %i)", characterID, tasksEnabled[i]);
 
-	const char *ERR_MYSQLERROR = "[TASKS]Error in ClientTaskState::EnableTask %s %s";
+    std::string query = queryStream.str();
+	_log(TASKS__UPDATE, "Executing query %s", query.c_str());
+    auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		LogFile->write(EQEMuLog::Error, "[TASKS]Error in ClientTaskState::EnableTask %s %s", query.c_str(), results.ErrorMessage().c_str());
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-
-	char *buf = 0;
-
-	for(unsigned int i=0; i<TasksEnabled.size(); i++) {
-		if(i==0)
-			MakeAnyLenString(&buf, "(%i, %i)", CharID, TasksEnabled[i]);
-		else
-			MakeAnyLenString(&buf, ",(%i, %i)", CharID, TasksEnabled[i]);
-
-		TaskQuery += buf;
-		safe_delete_array(buf);
-	}
-
-	_log(TASKS__UPDATE, "Executing query %s", TaskQuery.c_str());
-
-	if(!database.RunQuery(query,MakeAnyLenString(&query, TaskQuery.c_str()), errbuf)) {
-
-		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, query, errbuf);
-	}
-
-	safe_delete_array(query);
 }
 
 void ClientTaskState::DisableTask(int CharID, int TaskCount, int *TaskList) {
