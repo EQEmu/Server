@@ -1511,19 +1511,13 @@ bool Client::CanIncreaseTradeskill(SkillUseTypes tradeskill) {
 
 bool ZoneDatabase::EnableRecipe(uint32 recipe_id)
 {
-	char *query = 0;
-	uint32 qlen;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	uint32 affected_rows = 0;
+	std::string query = StringFormat("UPDATE tradeskill_recipe SET enabled = 1 "
+                                    "WHERE id = %u;", recipe_id);
+    auto results = QueryDatabase(query);
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Error in EnableRecipe query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 
-	qlen = MakeAnyLenString(&query, "UPDATE tradeskill_recipe SET enabled = 1 WHERE id = %u;", recipe_id);
-
-	if (!RunQuery(query, qlen, errbuf, 0, &affected_rows)) {
-		LogFile->write(EQEMuLog::Error, "Error in EnableRecipe query '%s': %s", query, errbuf);
-	}
-	safe_delete_array(query);
-
-	return (affected_rows > 0);
+	return results.RowsAffected() > 0;
 }
 
 bool ZoneDatabase::DisableRecipe(uint32 recipe_id)
