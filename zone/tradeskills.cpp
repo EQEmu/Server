@@ -1418,73 +1418,54 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 	return true;
 }
 
-void ZoneDatabase::UpdateRecipeMadecount(uint32 recipe_id, uint32 char_id, uint32 madecount)
+void ZoneDatabase::UpdateRecipeMadecount(uint32 recipe_id, uint32 char_id, uint32 madeCount)
 {
-	char *query = 0;
-	uint32 qlen;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-
-	qlen = MakeAnyLenString(&query, "INSERT INTO char_recipe_list "
-		" SET recipe_id = %u, char_id = %u, madecount = %u "
-		" ON DUPLICATE KEY UPDATE madecount = %u;"
-	, recipe_id, char_id, madecount, madecount);
-
-	if (!RunQuery(query, qlen, errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error in UpdateRecipeMadecount query '%s': %s", query, errbuf);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("INSERT INTO char_recipe_list "
+                                    "SET recipe_id = %u, char_id = %u, madecount = %u "
+                                    "ON DUPLICATE KEY UPDATE madecount = %u;",
+                                    recipe_id, char_id, madeCount, madeCount);
+    auto results = QueryDatabase(query);
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Error in UpdateRecipeMadecount query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 }
 
 void Client::LearnRecipe(uint32 recipeID)
 {
-	char *query = 0;
-	uint32 qlen;
-	uint32 qcount = 0;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	qlen = MakeAnyLenString(&query, "SELECT tr.name, crl.madecount "
-		" FROM tradeskill_recipe as tr "
-		" LEFT JOIN (SELECT recipe_id, madecount FROM char_recipe_list WHERE char_id = %u) AS crl "
-		" ON tr.id = crl.recipe_id "
-		" WHERE tr.id = %u ;", CharacterID(), recipeID);
-
-	if (!database.RunQuery(query, qlen, errbuf, &result)) {
-		LogFile->write(EQEMuLog::Error, "Error in Client::LearnRecipe query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+	std::string query = StringFormat("SELECT tr.name, crl.madecount "
+                                    "FROM tradeskill_recipe AS tr "
+                                    "LEFT JOIN (SELECT recipe_id, madecount "
+                                    "FROM char_recipe_list WHERE char_id = %u) AS crl "
+                                    "ON tr.id = crl.recipe_id "
+                                    "WHERE tr.id = %u ;", CharacterID(), recipeID);
+    auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in Client::LearnRecipe query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
-	qcount = mysql_num_rows(result);
-	if (qcount != 1) {
-		LogFile->write(EQEMuLog::Normal, "Client::LearnRecipe - RecipeID: %d had %d occurences.", recipeID, qcount);
-		mysql_free_result(result);
-		safe_delete_array(query);
+	if (results.RowCount() != 1) {
+		LogFile->write(EQEMuLog::Normal, "Client::LearnRecipe - RecipeID: %d had %d occurences.", recipeID, results.RowCount());
 		return;
 	}
-	safe_delete_array(query);
 
-	row = mysql_fetch_row(result);
+	auto row = results.begin();
 
-	if (row != nullptr && row[0] != nullptr) {
-		// Only give Learn message if character doesn't know the recipe
-		if (row[1] == nullptr) {
-			Message_StringID(4, TRADESKILL_LEARN_RECIPE, row[0]);
-			// Actually learn the recipe now
-			qlen = MakeAnyLenString(&query, "INSERT INTO char_recipe_list "
-				" SET recipe_id = %u, char_id = %u, madecount = 0 "
-				" ON DUPLICATE KEY UPDATE madecount = madecount;"
-			, recipeID, CharacterID());
+	if (row[0] == nullptr)
+        return;
 
-			if (!database.RunQuery(query, qlen, errbuf)) {
-				LogFile->write(EQEMuLog::Error, "Error in LearnRecipe query '%s': %s", query, errbuf);
-			}
-			safe_delete_array(query);
-		}
-	}
+	// Only give Learn message if character doesn't know the recipe
+    if (row[1] != nullptr)
+        return;
 
-	mysql_free_result(result);
+    Message_StringID(4, TRADESKILL_LEARN_RECIPE, row[0]);
+    // Actually learn the recipe now
+	query = StringFormat("INSERT INTO char_recipe_list "
+                        "SET recipe_id = %u, char_id = %u, madecount = 0 "
+                        "ON DUPLICATE KEY UPDATE madecount = madecount;",
+                        recipeID, CharacterID());
+    results = database.QueryDatabase(query);
+    if (!results.Success())
+        LogFile->write(EQEMuLog::Error, "Error in LearnRecipe query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
