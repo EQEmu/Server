@@ -1149,194 +1149,167 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint32 some_id,
 	uint32 char_id, DBTradeskillRecipe_Struct *spec)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	char *query = 0;
-	char buf2[4096];
 
-	uint32 sum = 0;
-	uint32 count = 0;
-	uint32 qcount = 0;
-	uint32 qlen = 0;
-
-	// make where clause segment for container(s)
-	char containers[30];
-	if (some_id == 0) {
-		// world combiner so no item number
-		snprintf(containers,29, "= %u", c_type);
-	} else {
-		// container in inventory
-		snprintf(containers,29, "in (%u,%u)", c_type, some_id);
-	}
-
-	buf2[0] = '\0';
+	std::string containers;// make where clause segment for container(s)
+	if (some_id == 0)
+		containers = StringFormat("= %u", c_type); // world combiner so no item number
+	else
+		containers = StringFormat("IN (%u,%u)", c_type, some_id); // container in inventory
 
 	//Could prolly watch for stacks in this loop and handle them properly...
 	//just increment sum and count accordingly
 	bool first = true;
-	uint8 i;
-	char *pos = buf2;
-	for (i = 0; i < 10; i++) { // <watch> TODO: need to determine if this is bound to world/item container size
+	std::string buf2;
+	uint32 count = 0;
+	uint32 sum = 0;
+	for (uint8 i = 0; i < 10; i++) { // <watch> TODO: need to determine if this is bound to world/item container size
 		const ItemInst* inst = container->GetItem(i);
-		if (inst) {
-			const Item_Struct* item = GetItem(inst->GetItem()->ID);
-			if (item) {
-				if(first) {
-					pos += snprintf(pos, 19, "%d", item->ID);
-					first = false;
-				} else {
-					pos += snprintf(pos, 19, ",%d", item->ID);
-				}
-				sum += item->ID;
-				count++;
-			}
-		}
-	}
-	*pos = '\0';
+		if (!inst)
+            continue;
 
-	if(count < 1) {
-		return(false);	//no items == no recipe
+        const Item_Struct* item = GetItem(inst->GetItem()->ID);
+        if (!item)
+            continue;
+
+        if(first) {
+            buf2 += StringFormat("%d", item->ID);
+            first = false;
+        } else
+            buf2 += StringFormat(",%d", item->ID);
+
+        sum += item->ID;
+        count++;
 	}
 
-	qlen = MakeAnyLenString(&query, "SELECT tre.recipe_id "
-	" FROM tradeskill_recipe_entries AS tre"
-	"   INNER JOIN tradeskill_recipe AS tr ON (tre.recipe_id = tr.id) "
-	" WHERE tr.enabled AND (( tre.item_id IN(%s) AND tre.componentcount>0 )"
-	" OR ( tre.item_id %s AND tre.iscontainer=1 ))"
-	" GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u"
-	" AND sum(tre.item_id * tre.componentcount) = %u", buf2, containers, count, sum);
+	if(count == 0)
+		return false;	//no items == no recipe
 
-	if (!RunQuery(query, qlen, errbuf, &result)) {
-		LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe search, query: %s", query);
-		safe_delete_array(query);
-		LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe search, error: %s", errbuf);
-		return(false);
-	}
-	safe_delete_array(query);
-
-	qcount = mysql_num_rows(result);
-	if(qcount > 1) {
-		//multiple recipes, partial match... do an extra query to get it exact.
-		//this happens when combining components for a smaller recipe
-		//which is completely contained within another recipe
-
-		first = true;
-		pos = buf2;
-		for (i = 0; i < qcount; i++) {
-			row = mysql_fetch_row(result);
-			uint32 recipeid = (uint32)atoi(row[0]);
-			if(first) {
-				pos += snprintf(pos, 19, "%u", recipeid);
-				first = false;
-			} else {
-				pos += snprintf(pos, 19, ",%u", recipeid);
-			}
-			//length limit on buf2
-			if(i == 214) { //Maximum number of recipe matches (19 * 215 = 4096)
-				LogFile->write(EQEMuLog::Error, "GetTradeRecipe warning: Too many matches. Unable to search all recipe entries. Searched %u of %u possible entries.", i + 1, qcount);
-				break;
-			}
-		}
-
-		qlen = MakeAnyLenString(&query, "SELECT tre.recipe_id"
-		" FROM tradeskill_recipe_entries AS tre"
-		" WHERE tre.recipe_id IN (%s)"
-		" GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u"
-		" AND sum(tre.item_id * tre.componentcount) = %u", buf2, count, sum);
-
-		if (!RunQuery(query, qlen, errbuf, &result)) {
-			LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, re-query: %s", query);
-			safe_delete_array(query);
-			LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, error: %s", errbuf);
-			return(false);
-		}
-		safe_delete_array(query);
-
-		qcount = mysql_num_rows(result);
+	std::string query = StringFormat("SELECT tre.recipe_id "
+                                    "FROM tradeskill_recipe_entries AS tre "
+                                    "INNER JOIN tradeskill_recipe AS tr ON (tre.recipe_id = tr.id) "
+                                    "WHERE tr.enabled AND (( tre.item_id IN(%s) AND tre.componentcount > 0) "
+                                    "OR ( tre.item_id %s AND tre.iscontainer=1 ))"
+                                    "GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u "
+                                    "AND sum(tre.item_id * tre.componentcount) = %u",
+                                    buf2.c_str(), containers.c_str(), count, sum);
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe search, query: %s", query.c_str());
+		LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe search, error: %s", results.ErrorMessage().c_str());
+		return false;
 	}
 
-	if(qcount < 1)
-		return(false);
+    if (results.RowCount() > 1) {
+        //multiple recipes, partial match... do an extra query to get it exact.
+        //this happens when combining components for a smaller recipe
+        //which is completely contained within another recipe
+        first = true;
+        uint32 index = 0;
+        buf2 = "";
+        for (auto row = results.begin(); row != results.end(); ++row, ++index) {
+            uint32 recipeid = (uint32)atoi(row[0]);
+            if(first) {
+                buf2 += StringFormat("%u", recipeid);
+                first = false;
+            } else
+                buf2 += StringFormat(",%u", recipeid);
 
-	if(qcount > 1)
-	{
+            //length limit on buf2
+            if(index == 214) { //Maximum number of recipe matches (19 * 215 = 4096)
+                LogFile->write(EQEMuLog::Error, "GetTradeRecipe warning: Too many matches. Unable to search all recipe entries. Searched %u of %u possible entries.", index + 1, results.RowCount());
+                break;
+            }
+        }
+
+        query = StringFormat("SELECT tre.recipe_id "
+                            "FROM tradeskill_recipe_entries AS tre "
+                            "WHERE tre.recipe_id IN (%s) "
+                            "GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u "
+                            "AND sum(tre.item_id * tre.componentcount) = %u", buf2.c_str(), count, sum);
+        auto results = QueryDatabase(query);
+        if (!results.Success()) {
+            LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, re-query: %s", query.c_str());
+            LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, error: %s", results.ErrorMessage().c_str());
+            return false;
+        }
+    }
+
+    if (results.RowCount() < 1)
+        return false;
+
+	if(results.RowCount() > 1) {
 		//The recipe is not unique, so we need to compare the container were using.
-
 		uint32 containerId = 0;
 
-		if(some_id) { //Standard container
+		if(some_id) //Standard container
 			containerId = some_id;
-		}
-		else if(c_type) { //World container
+		else if(c_type)//World container
 			containerId = c_type;
+		else //Invalid container
+			return false;
+
+		query = StringFormat("SELECT tre.recipe_id "
+                            "FROM tradeskill_recipe_entries AS tre "
+                            "WHERE tre.recipe_id IN (%s) "
+                            "AND tre.item_id = %u;", buf2.c_str(), containerId);
+        results = QueryDatabase(query);
+		if (!results.Success()) {
+			LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, re-query: %s", query.c_str());
+			LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, error: %s", results.ErrorMessage().c_str());
+			return false;
 		}
-		else { //Invalid container
-			return(false);
-		}
 
-		qlen = MakeAnyLenString(&query,"SELECT tre.recipe_id FROM tradeskill_recipe_entries as tre WHERE tre.recipe_id IN (%s)"
-		" AND tre.item_id = %u;",buf2,containerId);
-
-		if (!RunQuery(query, qlen, errbuf, &result)) {
-			LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, re-query: %s", query);
-			safe_delete_array(query);
-			LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, error: %s", errbuf);
-			return(false);
-		}
-		safe_delete_array(query);
-
-		uint32 resultRowTotal = mysql_num_rows(result);
-
-		if(resultRowTotal == 0) { //Recipe contents matched more than 1 recipe, but not in this container
+		if(results.RowCount() == 0) { //Recipe contents matched more than 1 recipe, but not in this container
 			LogFile->write(EQEMuLog::Error, "Combine error: Incorrect container is being used!");
-			return(false);
+			return false;
 		}
-		if(resultRowTotal > 1) { //Recipe contents matched more than 1 recipe in this container
-			LogFile->write(EQEMuLog::Error, "Combine error: Recipe is not unique! %u matches found for container %u. Continuing with first recipe match.", resultRowTotal, containerId);
-		}
+
+		if (results.RowCount() > 1) //Recipe contents matched more than 1 recipe in this container
+			LogFile->write(EQEMuLog::Error, "Combine error: Recipe is not unique! %u matches found for container %u. Continuing with first recipe match.", results.RowCount(), containerId);
+
 	}
 
-	row = mysql_fetch_row(result);
+	auto row = results.begin();
 	uint32 recipe_id = (uint32)atoi(row[0]);
-	mysql_free_result(result);
 
 	//Right here we verify that we actually have ALL of the tradeskill components..
 	//instead of part which is possible with experimentation.
 	//This is here because something's up with the query above.. it needs to be rethought out
 	bool has_components = true;
-	char TSerrbuf[MYSQL_ERRMSG_SIZE];
-	char *TSquery = 0;
-	MYSQL_RES *TSresult;
-	MYSQL_ROW TSrow;
-	if (RunQuery(TSquery, MakeAnyLenString(&TSquery, "SELECT item_id, componentcount from tradeskill_recipe_entries where recipe_id=%i AND componentcount > 0", recipe_id), TSerrbuf, &TSresult)) {
-		while((TSrow = mysql_fetch_row(TSresult))!=nullptr) {
-			int ccnt = 0;
-			for(int x = MAIN_BEGIN; x < EmuConstants::MAP_WORLD_SIZE; x++) {
-				const ItemInst* inst = container->GetItem(x);
-				if(inst){
-					const Item_Struct* item = GetItem(inst->GetItem()->ID);
-					if (item) {
-						if(item->ID == atoi(TSrow[0])){
-							ccnt++;
-						}
-					}
-				}
-			}
-			if(ccnt != atoi(TSrow[1]))
-				has_components = false;
-		}
-		mysql_free_result(TSresult);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in tradeskill verify query: '%s': %s", TSquery, TSerrbuf);
-	}
-	safe_delete_array(TSquery);
-	if(has_components == false){
+	query = StringFormat("SELECT item_id, componentcount "
+                        "FROM tradeskill_recipe_entries "
+                        "WHERE recipe_id = %i AND componentcount > 0",
+                        recipe_id);
+	results = QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in tradeskill verify query: '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        return GetTradeRecipe(recipe_id, c_type, some_id, char_id, spec);
+    }
 
-		return false;
-	}
+	if (results.RowCount() == 0)
+        return GetTradeRecipe(recipe_id, c_type, some_id, char_id, spec);
 
-	return(GetTradeRecipe(recipe_id, c_type, some_id, char_id, spec));
+	for (auto row = results.begin(); row != results.end(); ++row) {
+        int ccnt = 0;
+
+        for(int x = MAIN_BEGIN; x < EmuConstants::MAP_WORLD_SIZE; x++) {
+            const ItemInst* inst = container->GetItem(x);
+            if(!inst)
+                continue;
+
+            const Item_Struct* item = GetItem(inst->GetItem()->ID);
+            if (!item)
+                continue;
+
+            if(item->ID == atoi(row[0]))
+                ccnt++;
+        }
+
+        if(ccnt != atoi(row[1]))
+            return false;
+    }
+
+	return GetTradeRecipe(recipe_id, c_type, some_id, char_id, spec);
 }
 
 bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id,
