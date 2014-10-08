@@ -142,7 +142,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 	// Adding augment
 	if (in_augment->augment_slot == -1)
 	{
-		if (((slot=tobe_auged->AvailableAugmentSlot(auged_with->GetAugmentType()))!=-1) && 
+		if (((slot=tobe_auged->AvailableAugmentSlot(auged_with->GetAugmentType()))!=-1) &&
 			(tobe_auged->AvailableWearSlot(auged_with->GetItem()->Slots)))
 		{
 			tobe_auged->PutAugment(slot, *auged_with);
@@ -424,38 +424,28 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 		return;
 	}
 
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	char *query = 0;
-
-	uint32 qlen = 0;
-	uint8 qcount = 0;
-
-	//pull the list of components
-	qlen = MakeAnyLenString(&query, "SELECT tre.item_id,tre.componentcount "
-	 " FROM tradeskill_recipe_entries AS tre "
-	 " WHERE tre.componentcount > 0 AND tre.recipe_id=%u", rac->recipe_id);
-
-	if (!database.RunQuery(query, qlen, errbuf, &result)) {
-		LogFile->write(EQEMuLog::Error, "Error in HandleAutoCombine query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+    //pull the list of components
+	std::string query = StringFormat("SELECT tre.item_id,tre.componentcount "
+                                    "FROM tradeskill_recipe_entries AS tre "
+                                    "WHERE tre.componentcount > 0 AND tre.recipe_id = %u",
+                                    rac->recipe_id);
+    auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in HandleAutoCombine query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
 	}
-	safe_delete_array(query);
 
-	qcount = mysql_num_rows(result);
-	if(qcount < 1) {
+	if(results.RowCount() < 1) {
 		LogFile->write(EQEMuLog::Error, "Error in HandleAutoCombine: no components returned");
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
 	}
-	if(qcount > 10) {
-		LogFile->write(EQEMuLog::Error, "Error in HandleAutoCombine: too many components returned (%u)", qcount);
+
+	if(results.RowCount() > 10) {
+		LogFile->write(EQEMuLog::Error, "Error in HandleAutoCombine: too many components returned (%u)", results.RowCount());
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
@@ -466,17 +456,15 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 	uint8 counts[10];
 	memset(counts, 0, sizeof(counts));
 
-
 	//search for all the items in their inventory
 	Inventory& user_inv = user->GetInv();
 	uint8 count = 0;
 	uint8 needcount = 0;
-	uint8 r,k;
 
 	std::list<int> MissingItems;
 
-	for(r = 0; r < qcount; r++) {
-		row = mysql_fetch_row(result);
+    uint8 needItemIndex = 0;
+	for (auto row = results.begin(); row != results.end(); ++row, ++needItemIndex) {
 		uint32 item = (uint32)atoi(row[0]);
 		uint8 num = (uint8) atoi(row[1]);
 
@@ -491,10 +479,9 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 			MissingItems.push_back(item);
 
 		//dont start deleting anything until we have found it all.
-		items[r] = item;
-		counts[r] = num;
+		items[needItemIndex] = item;
+		counts[needItemIndex] = num;
 	}
-	mysql_free_result(result);
 
 	//make sure we found it all...
 	if(count != needcount)
@@ -520,12 +507,12 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 
 	//remove all the items from the players inventory, with updates...
 	int16 slot;
-	for(r = 0; r < qcount; r++) {
+	for(uint8 r = 0; r < results.RowCount(); r++) {
 		if(items[r] == 0 || counts[r] == 0)
 			continue;	//skip empties, could prolly break here
 
 		//we have to loop here to delete 1 at a time in case its in multiple stacks.
-		for(k = 0; k < counts[r]; k++) {
+		for(uint8 k = 0; k < counts[r]; k++) {
 			slot = user_inv.HasItem(items[r], 1, invWherePersonal);
 			if (slot == INVALID_INDEX) {
 				//WTF... I just checked this above, but just to be sure...
@@ -539,19 +526,14 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 			const ItemInst* inst = user_inv.GetItem(slot);
 
 			if (inst && !inst->IsStackable())
-			{
 				user->DeleteItemInInventory(slot, 0, true);
-			}
 			else
-			{
 				user->DeleteItemInInventory(slot, 1, true);
-			}
 		}
 	}
 
 	//otherwise, we found it all...
 	outp->reply_code = 0x00000000;	//success for finding it...
-
 	user->QueuePacket(outapp);
 	safe_delete(outapp);
 
@@ -1094,7 +1076,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 			++itr;
 		}
 		return(true);
-	} 
+	}
 	/* Tradeskill Fail */
 	else {
 		success_modifier = 2; // Halves the chance
@@ -1172,7 +1154,7 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 			chance_stage2 = 12.5 - (.08 * (current_raw_skill - 175));
 		}
 	}
-	   
+
 	chance_stage2 = mod_tradeskill_skillup(chance_stage2);
 
 	if (chance_stage2 > MakeRandomFloat(0, 99)) {
