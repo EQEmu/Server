@@ -636,12 +636,11 @@ SkillUseTypes Object::TypeToSkill(uint32 type)
 	return TradeskillUnknown;
 }
 
-void Client::TradeskillSearchResults(const char *query, unsigned long objtype, unsigned long someid) {
+void Client::TradeskillSearchResults(const std::string query, unsigned long objtype, unsigned long someid) {
 
-    std::string internalQuery(query);
-    auto results = database.QueryDatabase(internalQuery);
+    auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error in TradeskillSearchResults query '%s': %s", internalQuery.c_str(), results.ErrorMessage().c_str());
+		LogFile->write(EQEMuLog::Error, "Error in TradeskillSearchResults query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -649,7 +648,7 @@ void Client::TradeskillSearchResults(const char *query, unsigned long objtype, u
 		return; //search gave no results... not an error
 
 	if(results.ColumnCount() != 6) {
-		LogFile->write(EQEMuLog::Error, "Error in TradeskillSearchResults query '%s': Invalid column count in result", internalQuery.c_str());
+		LogFile->write(EQEMuLog::Error, "Error in TradeskillSearchResults query '%s': Invalid column count in result", query.c_str());
 		return;
 	}
 

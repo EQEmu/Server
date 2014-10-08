@@ -11311,56 +11311,46 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 	// some_id = 0 if world combiner, item number otherwise
 
 	// make where clause segment for container(s)
-	char containers[30];
-	if (tsf->some_id == 0) {
-		// world combiner so no item number
-		snprintf(containers, 29, "= %u", tsf->object_type);
-	}
-	else {
-		// container in inventory
-		snprintf(containers, 29, "in (%u,%u)", tsf->object_type, tsf->some_id);
-	}
+	std::string containers;
+	if (tsf->some_id == 0)
+		containers += StringFormat(" = %u ", tsf->object_type); // world combiner so no item number
+	else
+		containers += StringFormat(" in (%u, %u) ", tsf->object_type, tsf->some_id); // container in inventory
 
-	char *query = 0;
-	char buf[5500]; //gotta be big enough for 500 IDs
-
+	std::string favoriteIDs; //gotta be big enough for 500 IDs
 	bool first = true;
-	uint16 r;
-	char *pos = buf;
-
 	//Assumes item IDs are <10 characters long
-	for (r = 0; r < 500; r++) {
-		if (tsf->favorite_recipes[r] == 0)
+	for (uint16 favoriteIndex = 0; favoriteIndex < 500; ++favoriteIndex) {
+		if (tsf->favorite_recipes[favoriteIndex] == 0)
 			continue;
 
 		if (first) {
-			pos += snprintf(pos, 10, "%u", tsf->favorite_recipes[r]);
+			favoriteIDs += StringFormat("%u", tsf->favorite_recipes[favoriteIndex]);
 			first = false;
 		}
-		else {
-			pos += snprintf(pos, 10, ",%u", tsf->favorite_recipes[r]);
-		}
+		else
+			favoriteIDs += StringFormat(",%u", tsf->favorite_recipes[favoriteIndex]);
 	}
 
 	if (first)	//no favorites....
 		return;
 
-	//To be a good kid, I should move this SQL somewhere else...
-	//but im lazy right now, so it stays here
-	uint32 qlen = 0;
-	qlen = MakeAnyLenString(&query, "SELECT tr.id,tr.name,tr.trivial,SUM(tre.componentcount),crl.madecount,tr.tradeskill "
-		" FROM tradeskill_recipe AS tr "
-		" LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id=tre.recipe_id "
-		" LEFT JOIN (SELECT recipe_id, madecount FROM char_recipe_list WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
-		" WHERE tr.enabled <> 0 AND tr.id IN (%s) "
-		" AND tr.must_learn & 0x20 <> 0x20 AND ((tr.must_learn & 0x3 <> 0 AND crl.madecount IS NOT NULL) OR (tr.must_learn & 0x3 = 0)) "
-		" GROUP BY tr.id "
-		" HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 "
-		" LIMIT 100 ", CharacterID(), buf, containers);
+	const std::string query = StringFormat("SELECT tr.id, tr.name, tr.trivial, "
+                                    "SUM(tre.componentcount), crl.madecount,tr.tradeskill "
+                                    "FROM tradeskill_recipe AS tr "
+                                    "LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id=tre.recipe_id "
+                                    "LEFT JOIN (SELECT recipe_id, madecount "
+                                    "FROM char_recipe_list "
+                                    "WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
+                                    "WHERE tr.enabled <> 0 AND tr.id IN (%s) "
+                                    "AND tr.must_learn & 0x20 <> 0x20 AND "
+                                    "((tr.must_learn & 0x3 <> 0 AND crl.madecount IS NOT NULL) "
+                                    "OR (tr.must_learn & 0x3 = 0)) "
+                                    "GROUP BY tr.id "
+                                    "HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 "
+                                    "LIMIT 100 ", CharacterID(), favoriteIDs.c_str(), containers.c_str());
 
 	TradeskillSearchResults(query, tsf->object_type, tsf->some_id);
-
-	safe_delete_array(query);
 	return;
 }
 
@@ -11389,36 +11379,33 @@ void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 		snprintf(containers, 29, "in (%u,%u)", rss->object_type, rss->some_id);
 	}
 
-	char *query = 0;
-	char searchclause[140];	//2X rss->query + SQL crap
+	std::string searchClause;
 
 	//omit the rlike clause if query is empty
 	if (rss->query[0] != 0) {
 		char buf[120];	//larger than 2X rss->query
 		database.DoEscapeString(buf, rss->query, strlen(rss->query));
-
-		snprintf(searchclause, 139, "name rlike '%s' AND", buf);
+		searchClause = StringFormat("name rlike '%s' AND", buf);
 	}
-	else {
-		searchclause[0] = '\0';
-	}
-	uint32 qlen = 0;
 
 	//arbitrary limit of 200 recipes, makes sense to me.
-	qlen = MakeAnyLenString(&query, "SELECT tr.id,tr.name,tr.trivial,SUM(tre.componentcount),crl.madecount,tr.tradeskill "
-		" FROM tradeskill_recipe AS tr "
-		" LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id=tre.recipe_id "
-		" LEFT JOIN (SELECT recipe_id, madecount FROM char_recipe_list WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
-		" WHERE %s tr.trivial >= %u AND tr.trivial <= %u AND tr.enabled <> 0 "
-		" AND tr.must_learn & 0x20 <> 0x20 AND((tr.must_learn & 0x3 <> 0 AND crl.madecount IS NOT NULL) OR (tr.must_learn & 0x3 = 0)) "
-		" GROUP BY tr.id "
-		" HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 "
-		" LIMIT 200 "
-		, CharacterID(), searchclause, rss->mintrivial, rss->maxtrivial, containers);
-
+	const std::string query =  StringFormat("SELECT tr.id, tr.name, tr.trivial, "
+                                        "SUM(tre.componentcount), crl.madecount,tr.tradeskill "
+                                        "FROM tradeskill_recipe AS tr "
+                                        "LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id = tre.recipe_id "
+                                        "LEFT JOIN (SELECT recipe_id, madecount "
+                                        "FROM char_recipe_list WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
+                                        "WHERE %s tr.trivial >= %u AND tr.trivial <= %u AND tr.enabled <> 0 "
+                                        "AND tr.must_learn & 0x20 <> 0x20 "
+                                        "AND ((tr.must_learn & 0x3 <> 0 "
+                                        "AND crl.madecount IS NOT NULL) "
+                                        "OR (tr.must_learn & 0x3 = 0)) "
+                                        "GROUP BY tr.id "
+                                        "HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 "
+                                        "LIMIT 200 ",
+                                        CharacterID(), searchClause.c_str(),
+                                        rss->mintrivial, rss->maxtrivial, containers);
 	TradeskillSearchResults(query, rss->object_type, rss->some_id);
-
-	safe_delete_array(query);
 	return;
 }
 
