@@ -298,146 +298,127 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state) {
 	// in that slot had more activities than the one now occupying it. Hopefully retaining the slot number for the
 	// duration of a session will overcome this.
 	//
-	const char *TaskQuery="REPLACE INTO character_tasks (charid, taskid, slot, acceptedtime) "
-							"VALUES (%i, %i, %i, %i)";
-
-	const char *ActivityQuery="REPLACE INTO character_activities (charid, taskid, activityid, donecount, completed) "
-							"VALUES ";
-
-	const char *CompletedTaskQuery="REPLACE INTO completed_tasks (charid, completedtime, taskid, activityid) "
-							"VALUES (%i, %i, %i, %i)";
+	if(!c || !state)
+        return false;
 
 	const char *ERR_MYSQLERROR = "[TASKS]Error in TaskManager::SaveClientState %s";
 
-	if(!c || !state) return false;
+	int characterID = c->CharacterID();
 
-	int CharacterID = c->CharacterID();
-
-	_log(TASKS__CLIENTSAVE,"TaskManager::SaveClientState for character ID %d", CharacterID);
-
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+	_log(TASKS__CLIENTSAVE,"TaskManager::SaveClientState for character ID %d", characterID);
 
 	if(state->ActiveTaskCount > 0) {
-		for(int Task=0; Task<MAXACTIVETASKS; Task++) {
-			int TaskID = state->ActiveTasks[Task].TaskID;
-			if(TaskID==TASKSLOTEMPTY) continue;
-			if(state->ActiveTasks[Task].Updated) {
+		for(int task=0; task<MAXACTIVETASKS; task++) {
+			int taskID = state->ActiveTasks[task].TaskID;
+			if(taskID==TASKSLOTEMPTY)
+                continue;
 
-				_log(TASKS__CLIENTSAVE, "TaskManager::SaveClientState for character ID %d, Updating TaskIndex %i TaskID %i",
-						CharacterID, Task, TaskID);
+			if(state->ActiveTasks[task].Updated) {
 
-				if(!database.RunQuery(query,MakeAnyLenString(&query, TaskQuery,
-							CharacterID,
-							TaskID,
-							Task,
-							state->ActiveTasks[Task].AcceptedTime), errbuf)) {
+				_log(TASKS__CLIENTSAVE, "TaskManager::SaveClientState for character ID %d, Updating TaskIndex %i TaskID %i", characterID, task, taskID);
 
-					LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, errbuf);
-				}
+                std::string query = StringFormat("REPLACE INTO character_tasks (charid, taskid, slot, acceptedtime) "
+                                                "VALUES (%i, %i, %i, %i)",
+                                                characterID, taskID, task, state->ActiveTasks[task].AcceptedTime);
+                auto results = database.QueryDatabase(query);
+				if(!results.Success())
+					LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
 				else
-					state->ActiveTasks[Task].Updated = false;
+					state->ActiveTasks[task].Updated = false;
 
-				safe_delete_array(query);
 			}
 
-			int UpdatedActivityCount = 0;
-			std::string UpdateActivityQuery = ActivityQuery;
-			char *buf = 0;
+			std::string query = "REPLACE INTO character_activities (charid, taskid, activityid, donecount, completed) "
+                                "VALUES ";
 
-			for(int Activity=0; Activity<Tasks[TaskID]->ActivityCount; Activity++) {
+            int updatedActivityCount = 0;
+			for(int activityIndex = 0; activityIndex<Tasks[taskID]->ActivityCount; ++activityIndex) {
 
-				if(state->ActiveTasks[Task].Activity[Activity].Updated) {
+				if(!state->ActiveTasks[task].Activity[activityIndex].Updated)
+                    continue;
 
-					_log(TASKS__CLIENTSAVE, "TaskManager::SaveClientSate for character ID %d, "
-							"Updating Activity %i, %i",
-							CharacterID, Task, Activity);
+                _log(TASKS__CLIENTSAVE, "TaskManager::SaveClientSate for character ID %d, Updating Activity %i, %i",
+                                        characterID, task, activityIndex);
 
-					if(UpdatedActivityCount==0) {
-						MakeAnyLenString(&buf, "(%i, %i, %i, %i, %i)", CharacterID, TaskID,
-								Activity,
-								state->ActiveTasks[Task].Activity[Activity].DoneCount,
-								state->ActiveTasks[Task].Activity[Activity].State ==
-								ActivityCompleted);
-					}
-					else {
-						MakeAnyLenString(&buf, ", (%i, %i, %i, %i, %i)", CharacterID, TaskID,
-								Activity,
-								state->ActiveTasks[Task].Activity[Activity].DoneCount,
-								state->ActiveTasks[Task].Activity[Activity].State ==
-								ActivityCompleted);
-					}
-					UpdateActivityQuery = UpdateActivityQuery + buf;
-					safe_delete_array(buf);
-					UpdatedActivityCount++;
-				}
+                if(updatedActivityCount==0)
+					query += StringFormat("(%i, %i, %i, %i, %i)",
+                                        characterID, taskID, activityIndex,
+                                        state->ActiveTasks[task].Activity[activityIndex].DoneCount,
+                                        state->ActiveTasks[task].Activity[activityIndex].State == ActivityCompleted);
+                else
+					query += StringFormat(", (%i, %i, %i, %i, %i)",
+                                        characterID, taskID, activityIndex,
+                                        state->ActiveTasks[task].Activity[activityIndex].DoneCount,
+                                        state->ActiveTasks[task].Activity[activityIndex].State == ActivityCompleted);
+
+                updatedActivityCount++;
 			}
 
-			if(UpdatedActivityCount > 0) {
-				_log(TASKS__CLIENTSAVE, "Executing query %s", UpdateActivityQuery.c_str());
-				if(!database.RunQuery(query,MakeAnyLenString(&query, UpdateActivityQuery.c_str()),
-								errbuf)) {
+			if(updatedActivityCount == 0)
+                continue;
 
-					LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, errbuf);
-				}
-				else {
-					state->ActiveTasks[Task].Updated=false;
-					for(int Activity=0; Activity<Tasks[TaskID]->ActivityCount; Activity++)
-						state->ActiveTasks[Task].Activity[Activity].Updated=false;
+            _log(TASKS__CLIENTSAVE, "Executing query %s", query.c_str());
+            auto results = database.QueryDatabase(query);
 
-				}
+            if(!results.Success()) {
+                LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
+                continue;
+            }
 
-				safe_delete_array(query);
-			}
+            state->ActiveTasks[task].Updated=false;
+            for(int activityIndex=0; activityIndex<Tasks[taskID]->ActivityCount; ++activityIndex)
+                state->ActiveTasks[task].Activity[activityIndex].Updated=false;
+
 		}
-
-	}
-	if(RuleB(TaskSystem, RecordCompletedTasks) &&
-		(state->CompletedTasks.size() > (unsigned int)state->LastCompletedTaskLoaded)) {
-
-		for(unsigned int i=state->LastCompletedTaskLoaded; i<state->CompletedTasks.size(); i++) {
-
-			_log(TASKS__CLIENTSAVE, "TaskManager::SaveClientState Saving Completed Task at slot %i", i);
-			int TaskID = state->CompletedTasks[i].TaskID;
-			if((TaskID<=0) || (TaskID>=MAXTASKS) || (Tasks[TaskID]==nullptr)) continue;
-
-			// First we save a record with an ActivityID of -1.
-			// This indicates this task was completed at the given time. We infer that all
-			// none optional activities were completed.
-			//
-			if(!database.RunQuery(query,MakeAnyLenString(&query, CompletedTaskQuery,
-							CharacterID,
-							state->CompletedTasks[i].CompletedTime,
-							TaskID, -1), errbuf)) {
-
-				LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, errbuf);
-				continue;
-			}
-			safe_delete_array(query);
-
-			// If the Rule to record non-optional task completion is not enabled, don't save it
-			if(!RuleB(TaskSystem, RecordCompletedOptionalActivities)) continue;
-
-			// Insert one record for each completed optional task.
-
-			for(int j=0; j<Tasks[TaskID]->ActivityCount; j++) {
-				if(Tasks[TaskID]->Activity[j].Optional && state->CompletedTasks[i].ActivityDone[j]) {
-
-					if(!database.RunQuery(query,MakeAnyLenString(&query, CompletedTaskQuery,
-									CharacterID,
-									state->CompletedTasks[i].CompletedTime,
-									TaskID, j), errbuf)) {
-
-						LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, errbuf);
-					}
-					safe_delete_array(query);
-				}
-			}
-		}
-		state->LastCompletedTaskLoaded = state->CompletedTasks.size();
 	}
 
+	if(!RuleB(TaskSystem, RecordCompletedTasks) || (state->CompletedTasks.size() <= (unsigned int)state->LastCompletedTaskLoaded)) {
+        state->LastCompletedTaskLoaded = state->CompletedTasks.size();
+        return true;
+    }
+
+    const char* completedTaskQuery = "REPLACE INTO completed_tasks (charid, completedtime, taskid, activityid) "
+                        "VALUES (%i, %i, %i, %i)";
+
+	for(unsigned int i=state->LastCompletedTaskLoaded; i<state->CompletedTasks.size(); i++) {
+
+        _log(TASKS__CLIENTSAVE, "TaskManager::SaveClientState Saving Completed Task at slot %i", i);
+        int taskID = state->CompletedTasks[i].TaskID;
+
+        if((taskID <= 0) || (taskID >= MAXTASKS) || (Tasks[taskID] == nullptr))
+            continue;
+
+        // First we save a record with an ActivityID of -1.
+        // This indicates this task was completed at the given time. We infer that all
+        // none optional activities were completed.
+        //
+        std::string query = StringFormat(completedTaskQuery, characterID, state->CompletedTasks[i].CompletedTime, taskID, -1);
+        auto results = database.QueryDatabase(query);
+        if(!results.Success()) {
+            LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
+            continue;
+        }
+
+        // If the Rule to record non-optional task completion is not enabled, don't save it
+        if(!RuleB(TaskSystem, RecordCompletedOptionalActivities))
+            continue;
+
+        // Insert one record for each completed optional task.
+
+        for(int j=0; j<Tasks[taskID]->ActivityCount; j++) {
+            if(!Tasks[taskID]->Activity[j].Optional || !state->CompletedTasks[i].ActivityDone[j])
+                continue;
+
+            query = StringFormat(completedTaskQuery, characterID, state->CompletedTasks[i].CompletedTime, taskID, j);
+            results = database.QueryDatabase(query);
+            if(!results.Success())
+                LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
+
+        }
+
+    }
+
+    state->LastCompletedTaskLoaded = state->CompletedTasks.size();
 	return true;
 }
 
