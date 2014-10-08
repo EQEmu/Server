@@ -1892,22 +1892,17 @@ void Group::SaveGroupLeaderAA()
 {
 	// Stores the Group Leaders Leadership AA data from the Player Profile as a blob in the group_leaders table.
 	// This is done so that group members not in the same zone as the Leader still have access to this information.
+	char *queryBuffer = new char[sizeof(GroupLeadershipAA_Struct) * 2 + 1];
+    database.DoEscapeString(queryBuffer, (char*)&LeaderAbilities, sizeof(GroupLeadershipAA_Struct));
 
-	char *Query = new char[200 + sizeof(GroupLeadershipAA_Struct)*2];
+	std::string query = "UPDATE group_leaders SET leadershipaa = '";
+	query += queryBuffer;
+	query +=  StringFormat("' WHERE gid = %i LIMIT 1", GetID());
+	safe_delete_array(queryBuffer);
+    auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Unable to store LeadershipAA: %s\n", results.ErrorMessage().c_str());
 
-	char *End = Query;
-
-	End += sprintf(End, "UPDATE group_leaders SET leadershipaa='");
-
-	End += database.DoEscapeString(End, (char*)&LeaderAbilities, sizeof(GroupLeadershipAA_Struct));
-
-	End += sprintf(End,"' WHERE gid=%i LIMIT 1", GetID());
-
-	char errbuff[MYSQL_ERRMSG_SIZE];
-	if (!database.RunQuery(Query, End - Query, errbuff))
-		LogFile->write(EQEMuLog::Error, "Unable to store LeadershipAA: %s\n", errbuff);
-
-	safe_delete_array(Query);
 }
 
 void Group::UnMarkNPC(uint16 ID)
