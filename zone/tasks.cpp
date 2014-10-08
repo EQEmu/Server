@@ -1272,24 +1272,18 @@ int ClientTaskState::GetActiveTaskID(int index) {
 	return ActiveTasks[index].TaskID;
 }
 
-static void DeleteCompletedTaskFromDatabase(int CharID, int TaskID) {
+static void DeleteCompletedTaskFromDatabase(int charID, int taskID) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+    _log(TASKS__UPDATE, "DeleteCompletedTasksFromDatabase. CharID = %i, TaskID = %i", charID, taskID);
 
-	const char *TaskQuery="DELETE FROM completed_tasks WHERE charid=%i AND taskid = %i";
-
-	_log(TASKS__UPDATE, "DeleteCompletedTasksFromDatabase. CharID = %i, TaskID = %i",
-		CharID, TaskID);
-
-	if(!database.RunQuery(query,MakeAnyLenString(&query, TaskQuery, CharID, TaskID), errbuf)) {
-
-		LogFile->write(EQEMuLog::Error, "[TASKS]Error in CientTaskState::CancelTask %s, %s", query, errbuf);
-		safe_delete_array(query);
+    const std::string query = StringFormat("DELETE FROM completed_tasks WHERE charid=%i AND taskid = %i", charID, taskID);
+    auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "[TASKS]Error in CientTaskState::CancelTask %s, %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
-	_log(TASKS__UPDATE, "Delete query %s", query);
-	safe_delete_array(query);
+
+	_log(TASKS__UPDATE, "Delete query %s", query.c_str());
 }
 
 bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
