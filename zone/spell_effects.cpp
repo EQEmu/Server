@@ -2738,7 +2738,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if (caster && IsValidSpell(spells[spell_id].base2[i])){
 					
 					if(MakeRandomInt(0, 100) <= spells[spell_id].base[i])
-						caster->SpellFinished(spells[spell_id].base2[i], this, 10, 0, -1, spells[spell_id].ResistDiff);
+						caster->SpellFinished(spells[spell_id].base2[i], this, 10, 0, -1, spells[spells[spell_id].base2[i]].ResistDiff);
 				}
 				break;
 			}
