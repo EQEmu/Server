@@ -2981,40 +2981,29 @@ void ClientTaskState::CancelTask(Client *c, int SequenceNumber, bool RemoveFromD
 		RemoveTask(c, SequenceNumber);
 }
 
-void ClientTaskState::RemoveTask(Client *c, int SequenceNumber) {
+void ClientTaskState::RemoveTask(Client *c, int sequenceNumber) {
 
-	int CharacterID = c->CharacterID();
+	int characterID = c->CharacterID();
+    _log(TASKS__UPDATE, "ClientTaskState Cancel Task %i ", sequenceNumber);
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-
-	const char *TaskQuery="DELETE FROM character_tasks WHERE charid=%i AND taskid = %i";
-
-	const char *ActivityQuery="DELETE FROM character_activities WHERE charid=%i AND taskid = %i";
-
-	_log(TASKS__UPDATE, "ClientTaskState Cancel Task %i ", SequenceNumber);
-
-	if(!database.RunQuery(query,MakeAnyLenString(&query, ActivityQuery,
-							CharacterID,
-							ActiveTasks[SequenceNumber].TaskID), errbuf)) {
-
-		LogFile->write(EQEMuLog::Error, "[TASKS]Error in CientTaskState::CancelTask %s", errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("DELETE FROM character_activities WHERE charid=%i AND taskid = %i",
+                                    characterID, ActiveTasks[sequenceNumber].TaskID);
+    auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "[TASKS]Error in CientTaskState::CancelTask %s", results.ErrorMessage().c_str());
 		return;
 	}
-	_log(TASKS__UPDATE, "CancelTask: %s", query);
-	safe_delete_array(query);
-	if(!database.RunQuery(query,MakeAnyLenString(&query, TaskQuery,
-							CharacterID,
-							ActiveTasks[SequenceNumber].TaskID), errbuf)) {
+    _log(TASKS__UPDATE, "CancelTask: %s", query.c_str());
 
-		LogFile->write(EQEMuLog::Error, "[TASKS]Error in CientTaskState::CancelTask %s", errbuf);
-	}
+    query = StringFormat("DELETE FROM character_tasks WHERE charid=%i AND taskid = %i",
+                        characterID, ActiveTasks[sequenceNumber].TaskID);
+	results = database.QueryDatabase(query);
+	if(!results.Success())
+		LogFile->write(EQEMuLog::Error, "[TASKS]Error in CientTaskState::CancelTask %s", results.ErrorMessage().c_str());
 
-	_log(TASKS__UPDATE, "CancelTask: %s", query);
-	safe_delete_array(query);
+	_log(TASKS__UPDATE, "CancelTask: %s", query.c_str());
 
-	ActiveTasks[SequenceNumber].TaskID = TASKSLOTEMPTY;
+	ActiveTasks[sequenceNumber].TaskID = TASKSLOTEMPTY;
 	ActiveTaskCount--;
 }
 
