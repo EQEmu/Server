@@ -1375,7 +1375,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	query = StringFormat("SELECT `lfp`, `lfg`, `xtargets`, `firstlogon`, `guild_id`, `rank` FROM `character_data` LEFT JOIN `guild_members` ON `id` = `char_id` WHERE `id` = %i", cid);
 	results = database.QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		m_pp.lastlogin = time(nullptr);
 		if (row[4] && atoi(row[4]) > 0){ 
 			guild_id = atoi(row[4]); 
 			if (row[5] != nullptr){ guildrank = atoi(row[5]); }
@@ -1661,11 +1660,18 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 #endif
 
 	CalcBonuses();
+	if (RuleB(Zone, EnableLoggedOffReplenishments) &&
+			time(nullptr) - m_pp.lastlogin >= RuleI(Zone, MinOfflineTimeToReplenishments)) {
+		m_pp.cur_hp = GetMaxHP();
+		m_pp.mana = GetMaxMana();
+		m_pp.endurance = GetMaxEndurance();
+	}
+
 	if (m_pp.cur_hp <= 0)
 		m_pp.cur_hp = GetMaxHP();
 
 	SetHP(m_pp.cur_hp);
-	Mob::SetMana(m_pp.mana);
+	Mob::SetMana(m_pp.mana); // mob function doesn't send the packet
 	SetEndurance(m_pp.endurance);
 
 	/* Update LFP in case any (or all) of our group disbanded while we were zoning. */

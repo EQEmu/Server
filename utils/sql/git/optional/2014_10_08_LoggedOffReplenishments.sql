@@ -1,0 +1,2 @@
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Zone:EnableLoggedOffReplenishments', 'true', 'Replenish mana/hp/end if logged off for MinOfflineTimeToReplenishments');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Zone:MinOfflineTimeToReplenishments', '21600', 'Minimum logged off time to trigger replenish mana/hp/end');

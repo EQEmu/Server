@@ -201,6 +201,8 @@ RULE_INT ( Zone, EbonCrystalItemID, 40902)
 RULE_INT ( Zone, RadiantCrystalItemID, 40903)
 RULE_BOOL ( Zone, LevelBasedEXPMods, false) // Allows you to use the level_exp_mods table in consideration to your players EXP hits
 RULE_INT ( Zone, WeatherTimer, 600) // Weather timer when no duration is available
+RULE_BOOL ( Zone, EnableLoggedOffReplenishments, true)
+RULE_INT ( Zone, MinOfflineTimeToReplenishments, 21600) // 21600 seconds is 6 Hours
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Map )
