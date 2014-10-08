@@ -636,7 +636,7 @@ SkillUseTypes Object::TypeToSkill(uint32 type)
 	return TradeskillUnknown;
 }
 
-void Client::TradeskillSearchResults(const char *query, unsigned long qlen, unsigned long objtype, unsigned long someid) {
+void Client::TradeskillSearchResults(const char *query, unsigned long objtype, unsigned long someid) {
 
     std::string internalQuery(query);
     auto results = database.QueryDatabase(internalQuery);
