@@ -523,7 +523,7 @@ void Client::CompleteConnect()
 			switch (rank) {
 			case 0: { rank = 5; break; }	// GUILD_MEMBER	0
 			case 1: { rank = 3; break; }	// GUILD_OFFICER 1
-			case 2: { rank = 1; break; }	// GUILD_LEADER	2  
+			case 2: { rank = 1; break; }	// GUILD_LEADER	2
 			default: { break; }				// GUILD_NONE
 			}
 		}
@@ -848,7 +848,7 @@ void Client::CompleteConnect()
 void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 {
 	//ToDo: Break warp down for special zones. Some zones have special teleportation pads or bad .map files which can trigger the detector without a legit zone request.
-	
+
 	switch (CheatType)
 	{
 	case MQWarp: //Some zones may still have issues. Database updates will eliminate most if not all problems.
@@ -1304,7 +1304,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if(strlen(cze->char_name) > 63)
 		return;
 
-	conn_state = ReceivedZoneEntry; 
+	conn_state = ReceivedZoneEntry;
 
 	ClientVersion = Connection()->ClientVersion();
 	if (ClientVersion != EQClientUnknown)
@@ -1329,7 +1329,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		client_state = CLIENT_KICKED;
 		return;
 	}
-	
+
 	strcpy(name, cze->char_name);
 	/* Check for Client Spoofing */
 	if (client != 0) {
@@ -1342,7 +1342,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		client->Disconnect();
 	}
 
-	uint32 pplen = 0; 
+	uint32 pplen = 0;
 	EQApplicationPacket* outapp = 0;
 	MYSQL_RES* result = 0;
 	bool loaditems = 0;
@@ -1366,8 +1366,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		if (lsaccountid && atoi(row[2]) > 0){ lsaccountid = atoi(row[2]); }
 		else{ lsaccountid = 0; }
 		gmspeed = atoi(row[3]);
-		revoked = atoi(row[4]); 
-		gmhideme = atoi(row[5]); 
+		revoked = atoi(row[4]);
+		gmhideme = atoi(row[5]);
 		if (account_creation){ account_creation = atoul(row[6]); }
 	}
 
@@ -1375,17 +1375,17 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	query = StringFormat("SELECT `lfp`, `lfg`, `xtargets`, `firstlogon`, `guild_id`, `rank` FROM `character_data` LEFT JOIN `guild_members` ON `id` = `char_id` WHERE `id` = %i", cid);
 	results = database.QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		if (row[4] && atoi(row[4]) > 0){ 
-			guild_id = atoi(row[4]); 
+		if (row[4] && atoi(row[4]) > 0){
+			guild_id = atoi(row[4]);
 			if (row[5] != nullptr){ guildrank = atoi(row[5]); }
 			else{ guildrank = GUILD_RANK_NONE; }
 		}
-		
+
 		if (LFP){ LFP = atoi(row[0]); }
 		if (LFG){ LFG = atoi(row[1]); }
 		if (firstlogon){ firstlogon = atoi(row[3]); }
 	}
-	
+
 	if (RuleB(Character, SharedBankPlat))
 		m_pp.platinum_shared = database.GetSharedPlatinum(this->AccountID());
 
@@ -1417,7 +1417,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	/* Set Con State for Reporting */
 	conn_state = PlayerProfileLoaded;
 
-	m_pp.zone_id = zone->GetZoneID(); 
+	m_pp.zone_id = zone->GetZoneID();
 	m_pp.zoneInstance = zone->GetInstanceID();
 
 	/* Set Total Seconds Played */
@@ -1426,7 +1426,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	max_AAXP = RuleI(AA, ExpPerPoint);
 	/* If we can maintain intoxication across zones, check for it */
 	if (!RuleB(Character, MaintainIntoxicationAcrossZones))
-		m_pp.intoxication = 0; 
+		m_pp.intoxication = 0;
 
 	strcpy(name, m_pp.name);
 	strcpy(lastname, m_pp.last_name);
@@ -1435,14 +1435,14 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		m_pp.x = zone->safe_x();
 		m_pp.y = zone->safe_y();
 		m_pp.z = zone->safe_z();
-	} 
+	}
 	/* If too far below ground, then fix */
 	// float ground_z = GetGroundZ(m_pp.x, m_pp.y, m_pp.z);
 	// if (m_pp.z < (ground_z - 500))
 	// 	m_pp.z = ground_z;
 
 	/* Set Mob variables for spawn */
-	class_ = m_pp.class_; 
+	class_ = m_pp.class_;
 	level = m_pp.level;
 	x_pos = m_pp.x;
 	y_pos = m_pp.y;
@@ -1471,7 +1471,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	/* Load Guild */
 	if (!IsInAGuild()) { m_pp.guild_id = GUILD_NONE; }
 	else {
-		m_pp.guild_id = GuildID(); 
+		m_pp.guild_id = GuildID();
 		if (zone->GetZoneID() == RuleI(World, GuildBankZoneID))
 			GuildBanker = (guild_mgr.IsGuildLeader(GuildID(), CharacterID()) || guild_mgr.GetBankerFlag(CharacterID()));
 	}
@@ -1711,12 +1711,12 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 #endif
 
 	/* Reset to max so they dont drown on zone in if its underwater */
-	m_pp.air_remaining = 60; 
+	m_pp.air_remaining = 60;
 	/* Check for PVP Zone status*/
 	if (zone->IsPVPZone())
 		m_pp.pvp = 1;
 	/* Time entitled on Account: Move to account */
-	m_pp.timeentitledonaccount = database.GetTotalTimeEntitledOnAccount(AccountID()) / 1440; 
+	m_pp.timeentitledonaccount = database.GetTotalTimeEntitledOnAccount(AccountID()) / 1440;
 	/* Reset rest timer if the durations have been lowered in the database */
 	if ((m_pp.RestTimer > RuleI(Character, RestRegenTimeToActivate)) && (m_pp.RestTimer > RuleI(Character, RestRegenRaidTimeToActivate)))
 		m_pp.RestTimer = 0;
@@ -1836,7 +1836,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	SetAttackTimer(); 
+	SetAttackTimer();
 	conn_state = ZoneInfoSent;
 
 	return;
@@ -11311,56 +11311,46 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 	// some_id = 0 if world combiner, item number otherwise
 
 	// make where clause segment for container(s)
-	char containers[30];
-	if (tsf->some_id == 0) {
-		// world combiner so no item number
-		snprintf(containers, 29, "= %u", tsf->object_type);
-	}
-	else {
-		// container in inventory
-		snprintf(containers, 29, "in (%u,%u)", tsf->object_type, tsf->some_id);
-	}
+	std::string containers;
+	if (tsf->some_id == 0)
+		containers += StringFormat(" = %u ", tsf->object_type); // world combiner so no item number
+	else
+		containers += StringFormat(" in (%u, %u) ", tsf->object_type, tsf->some_id); // container in inventory
 
-	char *query = 0;
-	char buf[5500]; //gotta be big enough for 500 IDs
-
+	std::string favoriteIDs; //gotta be big enough for 500 IDs
 	bool first = true;
-	uint16 r;
-	char *pos = buf;
-
 	//Assumes item IDs are <10 characters long
-	for (r = 0; r < 500; r++) {
-		if (tsf->favorite_recipes[r] == 0)
+	for (uint16 favoriteIndex = 0; favoriteIndex < 500; ++favoriteIndex) {
+		if (tsf->favorite_recipes[favoriteIndex] == 0)
 			continue;
 
 		if (first) {
-			pos += snprintf(pos, 10, "%u", tsf->favorite_recipes[r]);
+			favoriteIDs += StringFormat("%u", tsf->favorite_recipes[favoriteIndex]);
 			first = false;
 		}
-		else {
-			pos += snprintf(pos, 10, ",%u", tsf->favorite_recipes[r]);
-		}
+		else
+			favoriteIDs += StringFormat(",%u", tsf->favorite_recipes[favoriteIndex]);
 	}
 
 	if (first)	//no favorites....
 		return;
 
-	//To be a good kid, I should move this SQL somewhere else...
-	//but im lazy right now, so it stays here
-	uint32 qlen = 0;
-	qlen = MakeAnyLenString(&query, "SELECT tr.id,tr.name,tr.trivial,SUM(tre.componentcount),crl.madecount,tr.tradeskill "
-		" FROM tradeskill_recipe AS tr "
-		" LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id=tre.recipe_id "
-		" LEFT JOIN (SELECT recipe_id, madecount FROM char_recipe_list WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
-		" WHERE tr.enabled <> 0 AND tr.id IN (%s) "
-		" AND tr.must_learn & 0x20 <> 0x20 AND ((tr.must_learn & 0x3 <> 0 AND crl.madecount IS NOT NULL) OR (tr.must_learn & 0x3 = 0)) "
-		" GROUP BY tr.id "
-		" HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 "
-		" LIMIT 100 ", CharacterID(), buf, containers);
+	const std::string query = StringFormat("SELECT tr.id, tr.name, tr.trivial, "
+                                    "SUM(tre.componentcount), crl.madecount,tr.tradeskill "
+                                    "FROM tradeskill_recipe AS tr "
+                                    "LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id=tre.recipe_id "
+                                    "LEFT JOIN (SELECT recipe_id, madecount "
+                                    "FROM char_recipe_list "
+                                    "WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
+                                    "WHERE tr.enabled <> 0 AND tr.id IN (%s) "
+                                    "AND tr.must_learn & 0x20 <> 0x20 AND "
+                                    "((tr.must_learn & 0x3 <> 0 AND crl.madecount IS NOT NULL) "
+                                    "OR (tr.must_learn & 0x3 = 0)) "
+                                    "GROUP BY tr.id "
+                                    "HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 "
+                                    "LIMIT 100 ", CharacterID(), favoriteIDs.c_str(), containers.c_str());
 
-	TradeskillSearchResults(query, qlen, tsf->object_type, tsf->some_id);
-
-	safe_delete_array(query);
+	TradeskillSearchResults(query, tsf->object_type, tsf->some_id);
 	return;
 }
 
@@ -11389,36 +11379,33 @@ void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 		snprintf(containers, 29, "in (%u,%u)", rss->object_type, rss->some_id);
 	}
 
-	char *query = 0;
-	char searchclause[140];	//2X rss->query + SQL crap
+	std::string searchClause;
 
 	//omit the rlike clause if query is empty
 	if (rss->query[0] != 0) {
 		char buf[120];	//larger than 2X rss->query
 		database.DoEscapeString(buf, rss->query, strlen(rss->query));
-
-		snprintf(searchclause, 139, "name rlike '%s' AND", buf);
+		searchClause = StringFormat("name rlike '%s' AND", buf);
 	}
-	else {
-		searchclause[0] = '\0';
-	}
-	uint32 qlen = 0;
 
 	//arbitrary limit of 200 recipes, makes sense to me.
-	qlen = MakeAnyLenString(&query, "SELECT tr.id,tr.name,tr.trivial,SUM(tre.componentcount),crl.madecount,tr.tradeskill "
-		" FROM tradeskill_recipe AS tr "
-		" LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id=tre.recipe_id "
-		" LEFT JOIN (SELECT recipe_id, madecount FROM char_recipe_list WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
-		" WHERE %s tr.trivial >= %u AND tr.trivial <= %u AND tr.enabled <> 0 "
-		" AND tr.must_learn & 0x20 <> 0x20 AND((tr.must_learn & 0x3 <> 0 AND crl.madecount IS NOT NULL) OR (tr.must_learn & 0x3 = 0)) "
-		" GROUP BY tr.id "
-		" HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 "
-		" LIMIT 200 "
-		, CharacterID(), searchclause, rss->mintrivial, rss->maxtrivial, containers);
-
-	TradeskillSearchResults(query, qlen, rss->object_type, rss->some_id);
-
-	safe_delete_array(query);
+	const std::string query =  StringFormat("SELECT tr.id, tr.name, tr.trivial, "
+                                        "SUM(tre.componentcount), crl.madecount,tr.tradeskill "
+                                        "FROM tradeskill_recipe AS tr "
+                                        "LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id = tre.recipe_id "
+                                        "LEFT JOIN (SELECT recipe_id, madecount "
+                                        "FROM char_recipe_list WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
+                                        "WHERE %s tr.trivial >= %u AND tr.trivial <= %u AND tr.enabled <> 0 "
+                                        "AND tr.must_learn & 0x20 <> 0x20 "
+                                        "AND ((tr.must_learn & 0x3 <> 0 "
+                                        "AND crl.madecount IS NOT NULL) "
+                                        "OR (tr.must_learn & 0x3 = 0)) "
+                                        "GROUP BY tr.id "
+                                        "HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 "
+                                        "LIMIT 200 ",
+                                        CharacterID(), searchClause.c_str(),
+                                        rss->mintrivial, rss->maxtrivial, containers);
+	TradeskillSearchResults(query, rss->object_type, rss->some_id);
 	return;
 }
 
