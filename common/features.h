@@ -211,9 +211,9 @@ enum {	//some random constants
 // max factions per npc faction list
 #define MAX_NPC_FACTIONS 20
 
-//value caps
-#define MAX_FACTION 1500
-#define MIN_FACTION -1500
+// Each char can earn or lose these amoutns, independant of mods
+#define MAX_PERSONAL_FACTION  1200
+#define MIN_PERSONAL_FACTION -3000
 
 //The Level Cap:
 //#define LEVEL_CAP RuleI(Character, MaxLevel)	//hard cap is 127
