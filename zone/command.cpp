@@ -371,7 +371,7 @@ int command_init(void) {
 		command_add("logs","[status|normal|error|debug|quest|all] - Subscribe to a log type",250,command_logs) ||
 		command_add("nologs","[status|normal|error|debug|quest|all] - Unsubscribe to a log type",250,command_nologs) ||
 		command_add("ban","[name] [reason]- Ban by character name",150,command_ban) ||
-		command_add("suspend","[name][days] - Suspend by character name and for specificed number of days",150,command_suspend) ||
+		command_add("suspend","[name] [days] [reason] - Suspend by character name and for specificed number of days",150,command_suspend) ||
 		command_add("ipban","[IP address] - Ban IP by character name",200,command_ipban) ||
 		command_add("oocmute","[1/0] - Mutes OOC chat",200,command_oocmute) ||
 		command_add("revoke","[charname] [1/0] - Makes charname unable to talk on OOC",200,command_revoke) ||
