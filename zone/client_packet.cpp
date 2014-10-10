@@ -10565,8 +10565,9 @@ void Client::Handle_OP_PurchaseLeadershipAA(const EQApplicationPacket *app)
 		//sell them the ability.
 		m_pp.raid_leadership_points -= cost;
 		m_pp.leader_abilities.ranks[aaid]++;
-	}
-	else {
+
+		database.SaveCharacterLeadershipAA(this->CharacterID(), &m_pp);
+	} else {
 		//it is a group ability.
 		if (cost > m_pp.group_leadership_points) {
 			Message(13, "You do not have enough points to purchase this ability.");
@@ -10585,7 +10586,10 @@ void Client::Handle_OP_PurchaseLeadershipAA(const EQApplicationPacket *app)
 	UpdateLeadershipAA_Struct *u = (UpdateLeadershipAA_Struct *)outapp->pBuffer;
 	u->ability_id = aaid;
 	u->new_rank = m_pp.leader_abilities.ranks[aaid];
-	u->pointsleft = m_pp.group_leadership_points; // FIXME: Take into account raid abilities
+	if (aaid >= raidAAMarkNPC) // raid AA
+		u->pointsleft = m_pp.raid_leadership_points;
+	else // group AA
+		u->pointsleft = m_pp.group_leadership_points;
 	FastQueuePacket(&outapp);
 
 	Group *g = GetGroup();
