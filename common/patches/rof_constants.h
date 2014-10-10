@@ -108,7 +108,7 @@ namespace RoF {
 		static const uint16 MAP_TRADE_SIZE = 8;
 		static const uint16 MAP_WORLD_SIZE = 10;
 		static const uint16 MAP_LIMBO_SIZE = 36;
-		static const uint16 MAP_TRIBUTE_SIZE = 0; //?
+		static const uint16 MAP_TRIBUTE_SIZE = 5; // 5 until verified otherwise
 		static const uint16 MAP_TROPHY_TRIBUTE_SIZE = 0;
 		static const uint16 MAP_GUILD_TRIBUTE_SIZE = 0;
 		static const uint16 MAP_MERCHANT_SIZE = 0;
@@ -161,6 +161,7 @@ namespace RoF {
 		static const int16 TRADE_BEGIN = 3000;
 		static const int16 TRADE_END = 3007;
 		static const int16 TRADE_NPC_END = 3003;
+		static const int16 TRADE_NPC_SIZE = 4;
 		static const int16 TRADE_BAGS_BEGIN = 3031;
 		static const int16 TRADE_BAGS_END_OFFSET = 79;
 		static const int16 TRADE_BAGS_END = TRADE_BAGS_BEGIN + TRADE_BAGS_END_OFFSET;
@@ -173,6 +174,12 @@ namespace RoF {
 
 		static const int16 CORPSE_BEGIN = slots::MainGeneral1;
 		static const int16 CORPSE_END = slots::MainGeneral1 + slots::MainCursor;
+
+		// RoF may have additional material slots based on observations in player profile - may need translators
+		static const int16 MATERIAL_BEGIN = MaterialHead;
+		static const int16 MATERIAL_END = MaterialSecondary;
+		static const int16 MATERIAL_TINT_END = MaterialFeet;
+		static const int16 MATERIAL_SIZE = _MaterialCount;
 
 		static const uint16 ITEM_COMMON_SIZE = 6;
 		static const uint16 ITEM_CONTAINER_SIZE = 255; // 255; (server max will be 255..unsure what actual client is - test)

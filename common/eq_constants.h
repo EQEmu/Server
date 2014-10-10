@@ -810,76 +810,11 @@ enum MaterialUseSlots : uint8
 **
 */
 
-enum InventoryMapTypes : int16 {
-	MapPossessions = 0,
-	MapBank,
-	MapSharedBank,
-	MapTrade,
-	MapWorld,
-	MapLimbo,
-	MapTribute,
-	MapTrophyTribute,
-	MapGuildTribute,
-	MapMerchant,
-	MapDeleted,
-	MapCorpse,
-	MapBazaar,
-	MapInspect,
-	MapRealEstate,
-	MapViewMODPC,
-	MapViewMODBank,
-	MapViewMODSharedBank,
-	MapViewMODLimbo,
-	MapAltStorage,
-	MapArchived,
-	MapMail,
-	MapGuildTrophyTribute,
-	MapKrono,
-	MapOther,
-	_MapCount
-};
-
-enum InventoryMainTypes : int16 {
-	MainCharm = 0,
-	MainEar1,
-	MainHead,
-	MainFace,
-	MainEar2,
-	MainNeck,
-	MainShoulders,
-	MainArms,
-	MainBack,
-	MainWrist1,
-	MainWrist2,
-	MainRange,
-	MainHands,
-	MainPrimary,
-	MainSecondary,
-	MainFinger1,
-	MainFinger2,
-	MainChest,
-	MainLegs,
-	MainFeet,
-	MainWaist,
-	MainPowerSource = 9999, // temp
-	MainAmmo = 21, // temp
-	MainGeneral1,
-	MainGeneral2,
-	MainGeneral3,
-	MainGeneral4,
-	MainGeneral5,
-	MainGeneral6,
-	MainGeneral7,
-	MainGeneral8,
-	//MainGeneral9,
-	//MainGeneral10,
-	MainCursor,
-	_MainCount
-};
-
 #define INVALID_INDEX	-1
 #define NOT_USED		0
 #define NO_ITEM			0
+
+#define DB_ITEM_CONTAINER_SIZE	255 // probably need to move to database.h
 
 // yes..these are redundant... but, they help to identify and define what is actually being performed
 // plus, since they're pre-op's, they don't affect the actual binary size

@@ -32,16 +32,15 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "../common/patches/sod_constants.h"
 #include "../common/patches/underfoot_constants.h"
 #include "../common/patches/rof_constants.h"
-//#include "../common/patches/rof2_constants.h"
+#include "../common/patches/rof2_constants.h"
 
 // *** DO NOT CHANGE without a full understanding of the consequences..the server is set up to use these settings explicitly!! ***
 // *** You will cause compilation failures and corrupt your database if partial or incorrect attempts to change them are made!! ***
 
 // Hard-coded values usually indicate that further research is needed and the values given are from the old (known) system
 
-// (future use)
-//using namespace RoF2::maps;	// server inventory maps enumeration (code and database sync'd to reference)
-//using namespace RoF::slots;	// server possessions slots enumeration (code and database sync'd to reference)
+using namespace RoF2::maps;		// server inventory maps enumeration (code and database sync'd to reference)
+using namespace RoF2::slots;	// server possessions slots enumeration (code and database sync'd to reference)
 
 class EmuConstants {
 	// an immutable value is required to initialize arrays, etc... use this class as a repository for those
@@ -58,20 +57,20 @@ public:
 	static std::string InventoryAugName(int16 aug);
 
 	// these are currently hard-coded for existing inventory system..do not use in place of special client version handlers until ready
-	static const uint16	MAP_POSSESSIONS_SIZE = _MainCount;
-	static const uint16 MAP_BANK_SIZE = 24;
-	static const uint16 MAP_SHARED_BANK_SIZE = 2;
-	static const uint16 MAP_TRADE_SIZE = 8;
-	static const uint16 MAP_WORLD_SIZE = 10;
-	static const uint16 MAP_LIMBO_SIZE = 36;
-	static const uint16 MAP_TRIBUTE_SIZE = 5; // (need client values)
+	static const uint16	MAP_POSSESSIONS_SIZE = RoF2::consts::MAP_POSSESSIONS_SIZE;
+	static const uint16 MAP_BANK_SIZE = RoF2::consts::MAP_BANK_SIZE;
+	static const uint16 MAP_SHARED_BANK_SIZE = RoF2::consts::MAP_SHARED_BANK_SIZE;
+	static const uint16 MAP_TRADE_SIZE = RoF2::consts::MAP_TRADE_SIZE;
+	static const uint16 MAP_WORLD_SIZE = RoF2::consts::MAP_WORLD_SIZE;
+	static const uint16 MAP_LIMBO_SIZE = RoF2::consts::MAP_LIMBO_SIZE;
+	static const uint16 MAP_TRIBUTE_SIZE = Titanium::consts::MAP_TRIBUTE_SIZE; // server is setup for 'presumed' Titanium value of 5..if Titanium::consts is changed, hard-code this to '5' until server/db is updated
 	static const uint16 MAP_TROPHY_TRIBUTE_SIZE = 0;
 	static const uint16 MAP_GUILD_TRIBUTE_SIZE = 0;
 	static const uint16 MAP_MERCHANT_SIZE = 0;
 	static const uint16 MAP_DELETED_SIZE = 0;
-	static const uint16 MAP_CORPSE_SIZE = _MainCount; // no bitmask use..limits to size of client corpse window (see EQLimits::InventoryMapSize(MapCorpse, <EQClientVersion))
-	static const uint16 MAP_BAZAAR_SIZE = 80;
-	static const uint16 MAP_INSPECT_SIZE = 22;
+	static const uint16 MAP_CORPSE_SIZE = RoF2::consts::MAP_CORPSE_SIZE; // no bitmask use..limits to size of client corpse window (see EQLimits::InventoryMapSize(MapCorpse, <EQClientVersion))
+	static const uint16 MAP_BAZAAR_SIZE = Titanium::consts::MAP_BAZAAR_SIZE;
+	static const uint16 MAP_INSPECT_SIZE = RoF2::consts::MAP_INSPECT_SIZE;
 	static const uint16 MAP_REAL_ESTATE_SIZE = 0;
 	static const uint16 MAP_VIEW_MOD_PC_SIZE = NOT_USED;
 	static const uint16 MAP_VIEW_MOD_BANK_SIZE = NOT_USED;
@@ -81,60 +80,61 @@ public:
 	static const uint16 MAP_ARCHIVED_SIZE = 0;
 	static const uint16 MAP_MAIL_SIZE = 0;
 	static const uint16 MAP_GUILD_TROPHY_TRIBUTE_SIZE = 0;
-	static const uint16 MAP_KRONO_SIZE = 0;
+	static const uint16 MAP_KRONO_SIZE = RoF::consts::MAP_KRONO_SIZE;
 	static const uint16 MAP_OTHER_SIZE = 0;
 
 	// most of these definitions will go away with the structure-based system..this maintains compatibility for now
 	// (these are mainly to assign specific values to constants used in conversions and to identify per-client ranges/offsets)
-	static const int16 EQUIPMENT_BEGIN = MainCharm;
-	static const int16 EQUIPMENT_END = MainAmmo;
-	static const uint16 EQUIPMENT_SIZE = 22; // does not account for 'Power Source' - used mainly for npc equipment arrays
+	static const int16 EQUIPMENT_BEGIN = RoF2::consts::EQUIPMENT_BEGIN;
+	static const int16 EQUIPMENT_END = RoF2::consts::EQUIPMENT_END;
+	static const uint16 EQUIPMENT_SIZE = RoF2::consts::EQUIPMENT_SIZE;
 
-	static const int16 GENERAL_BEGIN = MainGeneral1;
-	static const int16 GENERAL_END = MainGeneral8;
-	static const uint16 GENERAL_SIZE = 8;
-	static const int16 GENERAL_BAGS_BEGIN = 251;
-	static const int16 GENERAL_BAGS_END_OFFSET = 79;
-	static const int16 GENERAL_BAGS_END = GENERAL_BAGS_BEGIN + GENERAL_BAGS_END_OFFSET;
+	static const int16 GENERAL_BEGIN = RoF2::consts::GENERAL_BEGIN;
+	static const int16 GENERAL_END = RoF2::consts::GENERAL_END;
+	static const uint16 GENERAL_SIZE = RoF2::consts::GENERAL_SIZE;
+	static const int16 GENERAL_BAGS_BEGIN = RoF2::consts::GENERAL_BAGS_BEGIN;
+	static const int16 GENERAL_BAGS_END_OFFSET = RoF2::consts::GENERAL_BAGS_END_OFFSET;
+	static const int16 GENERAL_BAGS_END = RoF2::consts::GENERAL_BAGS_END;
 
-	static const int16 CURSOR_BAG_BEGIN = 331;
-	static const int16 CURSOR_BAG_END_OFFSET = 9;
-	static const int16 CURSOR_BAG_END = CURSOR_BAG_BEGIN + CURSOR_BAG_END_OFFSET;
+	static const int16 CURSOR_BAG_BEGIN = RoF2::consts::CURSOR_BAG_BEGIN;
+	static const int16 CURSOR_BAG_END_OFFSET = RoF2::consts::CURSOR_BAG_END_OFFSET;
+	static const int16 CURSOR_BAG_END = RoF2::consts::CURSOR_BAG_END;
 
-	static const int16 BANK_BEGIN = 2000;
-	static const int16 BANK_END = 2023;
-	static const int16 BANK_BAGS_BEGIN = 2031;
-	static const int16 BANK_BAGS_END_OFFSET = 239;
-	static const int16 BANK_BAGS_END = BANK_BAGS_BEGIN + BANK_BAGS_END_OFFSET;
+	static const int16 BANK_BEGIN = RoF2::consts::BANK_BEGIN;
+	static const int16 BANK_END = RoF2::consts::BANK_END;
+	static const int16 BANK_BAGS_BEGIN = RoF2::consts::BANK_BAGS_BEGIN;
+	static const int16 BANK_BAGS_END_OFFSET = RoF2::consts::BANK_BAGS_END_OFFSET;
+	static const int16 BANK_BAGS_END = RoF2::consts::BANK_BAGS_END;
 
-	static const int16 SHARED_BANK_BEGIN = 2500;
-	static const int16 SHARED_BANK_END = 2501;
-	static const int16 SHARED_BANK_BAGS_BEGIN = 2531;
-	static const int16 SHARED_BANK_BAGS_END_OFFSET = 19;
-	static const int16 SHARED_BANK_BAGS_END = SHARED_BANK_BAGS_BEGIN + SHARED_BANK_BAGS_END_OFFSET;
+	static const int16 SHARED_BANK_BEGIN = RoF2::consts::SHARED_BANK_BEGIN;
+	static const int16 SHARED_BANK_END = RoF2::consts::SHARED_BANK_END;
+	static const int16 SHARED_BANK_BAGS_BEGIN = RoF2::consts::SHARED_BANK_BAGS_BEGIN;
+	static const int16 SHARED_BANK_BAGS_END_OFFSET = RoF2::consts::SHARED_BANK_BAGS_END_OFFSET;
+	static const int16 SHARED_BANK_BAGS_END = RoF2::consts::SHARED_BANK_BAGS_END;
 
-	static const int16 TRADE_BEGIN = 3000;
-	static const int16 TRADE_END = 3007;
-	static const int16 TRADE_NPC_END = 3003;
-	static const int16 TRADE_BAGS_BEGIN = 3031;
-	static const int16 TRADE_BAGS_END_OFFSET = 79;
-	static const int16 TRADE_BAGS_END = TRADE_BAGS_BEGIN + TRADE_BAGS_END_OFFSET;
+	static const int16 TRADE_BEGIN = RoF2::consts::TRADE_BEGIN;
+	static const int16 TRADE_END = RoF2::consts::TRADE_END;
+	static const int16 TRADE_NPC_END = RoF2::consts::TRADE_NPC_END;
+	static const int16 TRADE_NPC_SIZE = RoF2::consts::TRADE_NPC_SIZE;
+	static const int16 TRADE_BAGS_BEGIN = RoF2::consts::TRADE_BAGS_BEGIN;
+	static const int16 TRADE_BAGS_END_OFFSET = RoF2::consts::TRADE_BAGS_END_OFFSET;
+	static const int16 TRADE_BAGS_END = RoF2::consts::TRADE_BAGS_END;
 
-	static const int16 WORLD_BEGIN = 4000;
-	static const int16 WORLD_END = 4009;
+	static const int16 WORLD_BEGIN = RoF2::consts::WORLD_BEGIN;
+	static const int16 WORLD_END = RoF2::consts::WORLD_END;
 	static const int16 WORLD_SIZE = MAP_WORLD_SIZE;
 
-	static const int16 TRIBUTE_BEGIN = 400;
-	static const int16 TRIBUTE_END = 404;
+	static const int16 TRIBUTE_BEGIN = RoF2::consts::TRIBUTE_BEGIN;
+	static const int16 TRIBUTE_END = RoF2::consts::TRIBUTE_END;
 	static const int16 TRIBUTE_SIZE = MAP_TRIBUTE_SIZE;
 
-	static const int16 CORPSE_BEGIN = 22;
-	//static const int16 CORPSE_END = RoF::consts::CORPSE_END; // not ready for use
+	static const int16 CORPSE_BEGIN = RoF2::consts::CORPSE_BEGIN;
+	static const int16 CORPSE_END = RoF2::consts::CORPSE_END;
 
-	static const int16 MATERIAL_BEGIN = MaterialHead;
-	static const int16 MATERIAL_END = MaterialSecondary;
-	static const int16 MATERIAL_TINT_END = MaterialFeet;
-	static const int16 MATERIAL_SIZE = _MaterialCount;
+	static const int16 MATERIAL_BEGIN = Underfoot::consts::MATERIAL_BEGIN;
+	static const int16 MATERIAL_END = Underfoot::consts::MATERIAL_END;
+	static const int16 MATERIAL_TINT_END = Underfoot::consts::MATERIAL_TINT_END;
+	static const int16 MATERIAL_SIZE = Underfoot::consts::MATERIAL_SIZE;
 
 	// items
 	// common and container sizes will not increase until the new 'location' struct is implemented

@@ -216,12 +216,10 @@ std::string EmuConstants::InventoryMainName(int16 main) {
 		return "General 7";
 	case MainGeneral8:
 		return "General 8";
-	/*
 	case MainGeneral9:
 		return "General 9";
 	case MainGeneral10:
 		return "General 10";
-	*/
 	case MainCursor:
 		return "Cursor";
 	default:
@@ -517,7 +515,7 @@ EQClientVersion EQLimits::ValidateMobVersion(EQClientVersion version) {
 // inventory
 uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 	// not all maps will have an instantiated container..some are references for queue generators (i.e., bazaar, mail, etc...)
-	// a zero '0' indicates a needed value..otherwise, change to '_NOTUSED' for a null value so indices requiring research can be identified
+	// a zero '0' indicates a needed value..otherwise, change to 'NOT_USED' for a null value so indices requiring research can be identified
 	// ALL of these values need to be verified before pushing to live
 	//
 	// make sure that you transcribe the actual value from 'defaults' to here before updating or client crashes will ensue..and/or...
@@ -586,10 +584,10 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*RoF*/			EmuConstants::MAP_TRADE_SIZE,
 /*RoF2*/		0,
 
-/*NPC*/			4,
-/*Merc*/		4,
+/*NPC*/			EmuConstants::TRADE_NPC_SIZE,
+/*Merc*/		EmuConstants::TRADE_NPC_SIZE,
 /*Bot*/			EmuConstants::MAP_TRADE_SIZE, // client thinks this is another client
-/*Pet*/			4
+/*Pet*/			EmuConstants::TRADE_NPC_SIZE
 		},
 		{ // local[MapWorld]
 /*Unknown*/		NOT_USED,
@@ -631,70 +629,70 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*RoF*/			EmuConstants::MAP_TRIBUTE_SIZE,
 /*RoF2*/		0,
 
-/*NPC*/			0,
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			NOT_USED,
+/*Merc*/		NOT_USED,
+/*Bot*/			NOT_USED,
+/*Pet*/			NOT_USED
 		},
 		{ // local[MapTrophyTribute]
 /*Unknown*/		NOT_USED,
-/*62*/			0,
-/*Titanium*/	0,
-/*SoF*/			0,
-/*SoD*/			0,
-/*Underfoot*/	0,
+/*62*/			EmuConstants::MAP_TROPHY_TRIBUTE_SIZE,
+/*Titanium*/	EmuConstants::MAP_TROPHY_TRIBUTE_SIZE,
+/*SoF*/			EmuConstants::MAP_TROPHY_TRIBUTE_SIZE,
+/*SoD*/			EmuConstants::MAP_TROPHY_TRIBUTE_SIZE,
+/*Underfoot*/	EmuConstants::MAP_TROPHY_TRIBUTE_SIZE,
 /*RoF*/			EmuConstants::MAP_TROPHY_TRIBUTE_SIZE,
 /*RoF2*/		0,
 
-/*NPC*/			0,
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			NOT_USED,
+/*Merc*/		NOT_USED,
+/*Bot*/			NOT_USED,
+/*Pet*/			NOT_USED
 		},
 		{ // local[MapGuildTribute]
 /*Unknown*/		NOT_USED,
-/*62*/			0,
-/*Titanium*/	0,
-/*SoF*/			0,
-/*SoD*/			0,
-/*Underfoot*/	0,
+/*62*/			EmuConstants::MAP_GUILD_TRIBUTE_SIZE,
+/*Titanium*/	EmuConstants::MAP_GUILD_TRIBUTE_SIZE,
+/*SoF*/			EmuConstants::MAP_GUILD_TRIBUTE_SIZE,
+/*SoD*/			EmuConstants::MAP_GUILD_TRIBUTE_SIZE,
+/*Underfoot*/	EmuConstants::MAP_GUILD_TRIBUTE_SIZE,
 /*RoF*/			EmuConstants::MAP_GUILD_TRIBUTE_SIZE,
 /*RoF2*/		0,
 
-/*NPC*/			0,
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			NOT_USED,
+/*Merc*/		NOT_USED,
+/*Bot*/			NOT_USED,
+/*Pet*/			NOT_USED
 		},
 		{ // local[MapMerchant]
 /*Unknown*/		NOT_USED,
-/*62*/			0,
-/*Titanium*/	0,
-/*SoF*/			0,
-/*SoD*/			0,
-/*Underfoot*/	0,
+/*62*/			EmuConstants::MAP_MERCHANT_SIZE,
+/*Titanium*/	EmuConstants::MAP_MERCHANT_SIZE,
+/*SoF*/			EmuConstants::MAP_MERCHANT_SIZE,
+/*SoD*/			EmuConstants::MAP_MERCHANT_SIZE,
+/*Underfoot*/	EmuConstants::MAP_MERCHANT_SIZE,
 /*RoF*/			EmuConstants::MAP_MERCHANT_SIZE,
 /*RoF2*/		0,
 
-/*NPC*/			0,
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			NOT_USED,
+/*Merc*/		NOT_USED,
+/*Bot*/			NOT_USED,
+/*Pet*/			NOT_USED
 		},
 		{ // local[MapDeleted]
 /*Unknown*/		NOT_USED,
-/*62*/			0,
-/*Titanium*/	0,
-/*SoF*/			0,
-/*SoD*/			0,
-/*Underfoot*/	0,
+/*62*/			EmuConstants::MAP_DELETED_SIZE,
+/*Titanium*/	EmuConstants::MAP_DELETED_SIZE,
+/*SoF*/			EmuConstants::MAP_DELETED_SIZE,
+/*SoD*/			EmuConstants::MAP_DELETED_SIZE,
+/*Underfoot*/	EmuConstants::MAP_DELETED_SIZE,
 /*RoF*/			EmuConstants::MAP_DELETED_SIZE,
 /*RoF2*/		0,
 
-/*NPC*/			0,
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			NOT_USED,
+/*Merc*/		NOT_USED,
+/*Bot*/			NOT_USED,
+/*Pet*/			NOT_USED
 		},
 		{ // local[MapCorpse]
 /*Unknown*/		NOT_USED,
@@ -703,13 +701,13 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoF*/			SoF::consts::MAP_CORPSE_SIZE,
 /*SoD*/			SoD::consts::MAP_CORPSE_SIZE,
 /*Underfoot*/	Underfoot::consts::MAP_CORPSE_SIZE,
-/*RoF*/			RoF::consts::MAP_CORPSE_SIZE,
+/*RoF*/			EmuConstants::MAP_CORPSE_SIZE,
 /*RoF2*/		0,
 
-/*NPC*/			0,
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			EmuConstants::MAP_CORPSE_SIZE,
+/*Merc*/		EmuConstants::MAP_CORPSE_SIZE,
+/*Bot*/			EmuConstants::MAP_CORPSE_SIZE,
+/*Pet*/			EmuConstants::MAP_CORPSE_SIZE
 		},
 		{ // local[MapBazaar]
 /*Unknown*/		NOT_USED,
@@ -721,19 +719,19 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*RoF*/			EmuConstants::MAP_BAZAAR_SIZE,
 /*RoF2*/		0,
 
-/*NPC*/			0, // this may need to be 'EmuConstants::MAP_BAZAAR_SIZE' if offline client traders respawn as an npc
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			NOT_USED, // this may need to be 'EmuConstants::MAP_BAZAAR_SIZE' if offline client traders respawn as an npc
+/*Merc*/		NOT_USED,
+/*Bot*/			NOT_USED,
+/*Pet*/			NOT_USED
 		},
 		{ // local[MapInspect]
 /*Unknown*/		NOT_USED,
 /*62*/			Client62::consts::MAP_INSPECT_SIZE,
 /*Titanium*/	Titanium::consts::MAP_INSPECT_SIZE,
-/*SoF*/			SoF::consts::MAP_INSPECT_SIZE,
-/*SoD*/			SoD::consts::MAP_INSPECT_SIZE,
-/*Underfoot*/	Underfoot::consts::MAP_INSPECT_SIZE,
-/*RoF*/			RoF::consts::MAP_INSPECT_SIZE,
+/*SoF*/			EmuConstants::MAP_INSPECT_SIZE,
+/*SoD*/			EmuConstants::MAP_INSPECT_SIZE,
+/*Underfoot*/	EmuConstants::MAP_INSPECT_SIZE,
+/*RoF*/			EmuConstants::MAP_INSPECT_SIZE,
 /*RoF2*/		0,
 
 /*NPC*/			NOT_USED,
@@ -743,168 +741,168 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapRealEstate]
 /*Unknown*/		NOT_USED,
-/*62*/			0,
-/*Titanium*/	0,
-/*SoF*/			0,
-/*SoD*/			0,
-/*Underfoot*/	0,
+/*62*/			EmuConstants::MAP_REAL_ESTATE_SIZE,
+/*Titanium*/	EmuConstants::MAP_REAL_ESTATE_SIZE,
+/*SoF*/			EmuConstants::MAP_REAL_ESTATE_SIZE,
+/*SoD*/			EmuConstants::MAP_REAL_ESTATE_SIZE,
+/*Underfoot*/	EmuConstants::MAP_REAL_ESTATE_SIZE,
 /*RoF*/			EmuConstants::MAP_REAL_ESTATE_SIZE,
 /*RoF2*/		0,
 
-/*NPC*/			0,
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			NOT_USED,
+/*Merc*/		NOT_USED,
+/*Bot*/			NOT_USED,
+/*Pet*/			NOT_USED
 		},
 		{ // local[MapViewMODPC]
 /*Unknown*/		NOT_USED,
-/*62*/			0,
-/*Titanium*/	0,
-/*SoF*/			0,
-/*SoD*/			0,
-/*Underfoot*/	0,
+/*62*/			EmuConstants::MAP_VIEW_MOD_PC_SIZE,
+/*Titanium*/	EmuConstants::MAP_VIEW_MOD_PC_SIZE,
+/*SoF*/			EmuConstants::MAP_VIEW_MOD_PC_SIZE,
+/*SoD*/			EmuConstants::MAP_VIEW_MOD_PC_SIZE,
+/*Underfoot*/	EmuConstants::MAP_VIEW_MOD_PC_SIZE,
 /*RoF*/			EmuConstants::MAP_VIEW_MOD_PC_SIZE,
 /*RoF2*/		0,
 
-/*NPC*/			0,
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			NOT_USED,
+/*Merc*/		NOT_USED,
+/*Bot*/			NOT_USED,
+/*Pet*/			NOT_USED
 		},
 		{ // local[MapViewMODBank]
 /*Unknown*/		NOT_USED,
-/*62*/			0,
-/*Titanium*/	0,
-/*SoF*/			0,
-/*SoD*/			0,
-/*Underfoot*/	0,
+/*62*/			EmuConstants::MAP_VIEW_MOD_BANK_SIZE,
+/*Titanium*/	EmuConstants::MAP_VIEW_MOD_BANK_SIZE,
+/*SoF*/			EmuConstants::MAP_VIEW_MOD_BANK_SIZE,
+/*SoD*/			EmuConstants::MAP_VIEW_MOD_BANK_SIZE,
+/*Underfoot*/	EmuConstants::MAP_VIEW_MOD_BANK_SIZE,
 /*RoF*/			EmuConstants::MAP_VIEW_MOD_BANK_SIZE,
 /*RoF2*/		0,
 
-/*NPC*/			0,
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			NOT_USED,
+/*Merc*/		NOT_USED,
+/*Bot*/			NOT_USED,
+/*Pet*/			NOT_USED
 		},
 		{ // local[MapViewMODSharedBank]
 /*Unknown*/		NOT_USED,
-/*62*/			0,
-/*Titanium*/	0,
-/*SoF*/			0,
-/*SoD*/			0,
-/*Underfoot*/	0,
+/*62*/			EmuConstants::MAP_VIEW_MOD_SHARED_BANK_SIZE,
+/*Titanium*/	EmuConstants::MAP_VIEW_MOD_SHARED_BANK_SIZE,
+/*SoF*/			EmuConstants::MAP_VIEW_MOD_SHARED_BANK_SIZE,
+/*SoD*/			EmuConstants::MAP_VIEW_MOD_SHARED_BANK_SIZE,
+/*Underfoot*/	EmuConstants::MAP_VIEW_MOD_SHARED_BANK_SIZE,
 /*RoF*/			EmuConstants::MAP_VIEW_MOD_SHARED_BANK_SIZE,
 /*RoF2*/		0,
 
-/*NPC*/			0,
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			NOT_USED,
+/*Merc*/		NOT_USED,
+/*Bot*/			NOT_USED,
+/*Pet*/			NOT_USED
 		},
 		{ // local[MapViewMODLimbo]
 /*Unknown*/		NOT_USED,
-/*62*/			0,
-/*Titanium*/	0,
-/*SoF*/			0,
-/*SoD*/			0,
-/*Underfoot*/	0,
+/*62*/			EmuConstants::MAP_VIEW_MOD_LIMBO_SIZE,
+/*Titanium*/	EmuConstants::MAP_VIEW_MOD_LIMBO_SIZE,
+/*SoF*/			EmuConstants::MAP_VIEW_MOD_LIMBO_SIZE,
+/*SoD*/			EmuConstants::MAP_VIEW_MOD_LIMBO_SIZE,
+/*Underfoot*/	EmuConstants::MAP_VIEW_MOD_LIMBO_SIZE,
 /*RoF*/			EmuConstants::MAP_VIEW_MOD_LIMBO_SIZE,
 /*RoF2*/		0,
 
-/*NPC*/			0,
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			NOT_USED,
+/*Merc*/		NOT_USED,
+/*Bot*/			NOT_USED,
+/*Pet*/			NOT_USED
 		},
 		{ // local[MapAltStorage]
 /*Unknown*/		NOT_USED,
-/*62*/			0,
-/*Titanium*/	0,
-/*SoF*/			0,
-/*SoD*/			0,
-/*Underfoot*/	0,
+/*62*/			EmuConstants::MAP_ALT_STORAGE_SIZE,
+/*Titanium*/	EmuConstants::MAP_ALT_STORAGE_SIZE,
+/*SoF*/			EmuConstants::MAP_ALT_STORAGE_SIZE,
+/*SoD*/			EmuConstants::MAP_ALT_STORAGE_SIZE,
+/*Underfoot*/	EmuConstants::MAP_ALT_STORAGE_SIZE,
 /*RoF*/			EmuConstants::MAP_ALT_STORAGE_SIZE,
 /*RoF2*/		0,
 
-/*NPC*/			0,
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			NOT_USED,
+/*Merc*/		NOT_USED,
+/*Bot*/			NOT_USED,
+/*Pet*/			NOT_USED
 		},
 		{ // local[MapArchived]
 /*Unknown*/		NOT_USED,
-/*62*/			0,
-/*Titanium*/	0,
-/*SoF*/			0,
-/*SoD*/			0,
-/*Underfoot*/	0,
+/*62*/			EmuConstants::MAP_ARCHIVED_SIZE,
+/*Titanium*/	EmuConstants::MAP_ARCHIVED_SIZE,
+/*SoF*/			EmuConstants::MAP_ARCHIVED_SIZE,
+/*SoD*/			EmuConstants::MAP_ARCHIVED_SIZE,
+/*Underfoot*/	EmuConstants::MAP_ARCHIVED_SIZE,
 /*RoF*/			EmuConstants::MAP_ARCHIVED_SIZE,
 /*RoF2*/		0,
 
-/*NPC*/			0,
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			NOT_USED,
+/*Merc*/		NOT_USED,
+/*Bot*/			NOT_USED,
+/*Pet*/			NOT_USED
 		},
 		{ // local[MapMail]
 /*Unknown*/		NOT_USED,
-/*62*/			0,
-/*Titanium*/	0,
-/*SoF*/			0,
-/*SoD*/			0,
-/*Underfoot*/	0,
+/*62*/			EmuConstants::MAP_MAIL_SIZE,
+/*Titanium*/	EmuConstants::MAP_MAIL_SIZE,
+/*SoF*/			EmuConstants::MAP_MAIL_SIZE,
+/*SoD*/			EmuConstants::MAP_MAIL_SIZE,
+/*Underfoot*/	EmuConstants::MAP_MAIL_SIZE,
 /*RoF*/			EmuConstants::MAP_MAIL_SIZE,
 /*RoF2*/		0,
 
-/*NPC*/			0,
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			NOT_USED,
+/*Merc*/		NOT_USED,
+/*Bot*/			NOT_USED,
+/*Pet*/			NOT_USED
 		},
 		{ // local[MapGuildTrophyTribute]
 /*Unknown*/		NOT_USED,
-/*62*/			0,
-/*Titanium*/	0,
-/*SoF*/			0,
-/*SoD*/			0,
-/*Underfoot*/	0,
+/*62*/			EmuConstants::MAP_GUILD_TROPHY_TRIBUTE_SIZE,
+/*Titanium*/	EmuConstants::MAP_GUILD_TROPHY_TRIBUTE_SIZE,
+/*SoF*/			EmuConstants::MAP_GUILD_TROPHY_TRIBUTE_SIZE,
+/*SoD*/			EmuConstants::MAP_GUILD_TROPHY_TRIBUTE_SIZE,
+/*Underfoot*/	EmuConstants::MAP_GUILD_TROPHY_TRIBUTE_SIZE,
 /*RoF*/			EmuConstants::MAP_GUILD_TROPHY_TRIBUTE_SIZE,
 /*RoF2*/		0,
 
-/*NPC*/			0,
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			NOT_USED,
+/*Merc*/		NOT_USED,
+/*Bot*/			NOT_USED,
+/*Pet*/			NOT_USED
 		},
 		{ // local[MapKrono]
 /*Unknown*/		NOT_USED,
-/*62*/			NOT_USED,
-/*Titanium*/	NOT_USED,
-/*SoF*/			NOT_USED,
-/*SoD*/			NOT_USED,
-/*Underfoot*/	NOT_USED,
+/*62*/			Client62::consts::MAP_KRONO_SIZE,
+/*Titanium*/	Titanium::consts::MAP_KRONO_SIZE,
+/*SoF*/			SoF::consts::MAP_KRONO_SIZE,
+/*SoD*/			SoD::consts::MAP_KRONO_SIZE,
+/*Underfoot*/	Underfoot::consts::MAP_KRONO_SIZE,
 /*RoF*/			EmuConstants::MAP_KRONO_SIZE,
 /*RoF2*/		0,
 
-/*NPC*/			0,
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			NOT_USED,
+/*Merc*/		NOT_USED,
+/*Bot*/			NOT_USED,
+/*Pet*/			NOT_USED
 		},
 		{ // local[MapOther]
 /*Unknown*/		NOT_USED,
-/*62*/			0,
-/*Titanium*/	0,
-/*SoF*/			0,
-/*SoD*/			0,
-/*Underfoot*/	0,
+/*62*/			EmuConstants::MAP_OTHER_SIZE,
+/*Titanium*/	EmuConstants::MAP_OTHER_SIZE,
+/*SoF*/			EmuConstants::MAP_OTHER_SIZE,
+/*SoD*/			EmuConstants::MAP_OTHER_SIZE,
+/*Underfoot*/	EmuConstants::MAP_OTHER_SIZE,
 /*RoF*/			EmuConstants::MAP_OTHER_SIZE,
 /*RoF2*/		0,
 
-/*NPC*/			0,
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			NOT_USED,
+/*Merc*/		NOT_USED,
+/*Bot*/			NOT_USED,
+/*Pet*/			NOT_USED
 		}
 	};
 
@@ -915,7 +913,6 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 }
 
 uint64 EQLimits::PossessionsBitmask(uint32 version) {
-	// these are for the new inventory system (RoF)..not the current (Ti) one...
 	// 0x0000000000200000 is SlotPowerSource (SoF+)
 	// 0x0000000080000000 is SlotGeneral9 (RoF+)
 	// 0x0000000100000000 is SlotGeneral10 (RoF+)
@@ -930,14 +927,13 @@ uint64 EQLimits::PossessionsBitmask(uint32 version) {
 /*RoF*/			0x00000003FFFFFFFF,
 /*RoF2*/		0,
 
-/*NPC*/			0,
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			0x00000000007FFFFF, // limited to equipment slots..for the time being
+/*Merc*/		0x00000000007FFFFF,
+/*Bot*/			0x00000000007FFFFF,
+/*Pet*/			0x00000000007FFFFF
 	};
 
-	return NOT_USED;
-	//return local[ValidateMobVersion(version)];
+	return local[ValidateMobVersion(version)];
 }
 
 uint64 EQLimits::EquipmentBitmask(uint32 version) {
@@ -951,14 +947,13 @@ uint64 EQLimits::EquipmentBitmask(uint32 version) {
 /*RoF*/			0x00000000007FFFFF,
 /*RoF2*/		0,
 
-/*NPC*/			0,
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			0x00000000007FFFFF,
+/*Merc*/		0x00000000007FFFFF,
+/*Bot*/			0x00000000007FFFFF,
+/*Pet*/			0x00000000007FFFFF
 	};
 
-	return NOT_USED;
-	//return local[ValidateMobVersion(version)];
+	return local[ValidateMobVersion(version)];
 }
 
 uint64 EQLimits::GeneralBitmask(uint32 version) {
@@ -972,14 +967,13 @@ uint64 EQLimits::GeneralBitmask(uint32 version) {
 /*RoF*/			0x00000001FF800000,
 /*RoF2*/		0,
 
-/*NPC*/			0,
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			NOT_USED,
+/*Merc*/		NOT_USED,
+/*Bot*/			NOT_USED,
+/*Pet*/			NOT_USED
 	};
 
-	return NOT_USED;
-	//return local[ValidateMobVersion(version)];
+	return local[ValidateMobVersion(version)];
 }
 
 uint64 EQLimits::CursorBitmask(uint32 version) {
@@ -993,14 +987,13 @@ uint64 EQLimits::CursorBitmask(uint32 version) {
 /*RoF*/			0x0000000200000000,
 /*RoF2*/		0,
 
-/*NPC*/			0,
-/*Merc*/		0,
-/*Bot*/			0,
-/*Pet*/			0
+/*NPC*/			NOT_USED,
+/*Merc*/		NOT_USED,
+/*Bot*/			NOT_USED,
+/*Pet*/			NOT_USED
 	};
 
-	return NOT_USED;
-	//return local[ValidateMobVersion(version)];
+	return local[ValidateMobVersion(version)];
 }
 
 bool EQLimits::AllowsEmptyBagInBag(uint32 version) {
@@ -1020,8 +1013,7 @@ bool EQLimits::AllowsEmptyBagInBag(uint32 version) {
 /*Pet*/			false
 	};
 
-	return false; // not implemented
-	//return local[ValidateMobVersion(version)];
+	return local[ValidateMobVersion(version)];
 }
 
 bool EQLimits::AllowsClickCastFromBag(uint32 version) {
