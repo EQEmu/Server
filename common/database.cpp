@@ -1915,6 +1915,172 @@ bool Database::CheckDatabaseConversions() {
 		printf("\n\nCharacter blob conversion complete, continuing world bootup...\n"); 
 	}
 
+
+#ifdef BOTS
+
+	int runbotsconvert = 0;
+
+	/* Check For Legacy Bot References */
+	rquery = StringFormat("SHOW CREATE VIEW `vwbotcharactermobs`");
+	results = QueryDatabase(rquery);
+	if (results.RowCount() == 1){
+		auto row = results.begin();
+		std::string table_check = row[1];
+
+		if (table_check.find("character_data") == -1){
+			runbotsconvert = 1;
+			printf("\n\n::: Legacy Bot Views and Function Detected... \n");
+			printf("----------------------------------------------------------\n\n");
+			printf(" Database currently has bot view/function linkage to obselete \n");
+			printf("  table references and will now be converted...\n\n");
+			printf("----------------------------------------------------------\n\n");
+			std::cout << "Press ENTER to continue....." << std::endl << std::endl;
+			std::cin.ignore(1);
+		}
+	}
+	else{
+		ThrowDBError(results.ErrorMessage(), "Bot View Discovery", rquery);
+	}
+
+	if (runbotsconvert == 1){
+
+		/* Update view `vwbotcharactermobs` */
+		rquery = StringFormat("DROP VIEW `vwbotcharactermobs`;");
+		results = QueryDatabase(rquery);
+		ThrowDBError(results.ErrorMessage(), "Drop View `vwbotcharactermobs`", rquery);
+
+		rquery = StringFormat(
+			"CREATE VIEW `vwbotcharactermobs` AS\n"
+			"SELECT _utf8'C' AS mobtype,\n" // Natedog: '_utf8'
+			"c.`id`,\n"
+			"c.`name`,\n"
+			"c.`class`,\n"
+			"c.`level`,\n"
+			"c.`last_login`,\n"
+			"c.`zone_id`\n"
+			"FROM `character_data` AS c\n"
+			"UNION ALL\n"
+			"SELECT _utf8'B' AS mobtype,\n" // Natedog: '_utf8'
+			"b.`BotID` AS id,\n"
+			"b.`Name` AS name,\n"
+			"b.`Class` AS class,\n"
+			"b.`BotLevel` AS level,\n"
+			"0 AS timelaston,\n"
+			"0 AS zoneid\n"
+			"FROM bots AS b;"
+			);
+		results = QueryDatabase(rquery);
+		ThrowDBError(results.ErrorMessage(), "Create View `vwbotcharactermobs`", rquery);
+
+
+		/* Update function `GetMobType` */
+		rquery = StringFormat("DROP FUNCTION IF EXISTS `GetMobType`;");
+		results = QueryDatabase(rquery);
+		ThrowDBError(results.ErrorMessage(), "Drop Function `GetMobType`", rquery);
+
+		rquery = StringFormat(
+			"CREATE FUNCTION `GetMobType` (mobname VARCHAR(64)) RETURNS CHAR(1)\n"
+			"BEGIN\n"
+			"	DECLARE Result CHAR(1);\n"
+			"\n"
+			"	SET Result = NULL;\n"
+			"\n"
+			"	IF (SELECT COUNT(*) FROM `character_data` WHERE `name` = mobname) > 0 THEN\n"
+			"		SET Result = 'C';\n"
+			"	ELSEIF (SELECT COUNT(*) FROM `bots` WHERE `Name` = mobname) > 0 THEN\n"
+			"		SET Result = 'B';\n"
+			"	END IF;\n "
+			"\n"
+			"	RETURN Result;\n"
+			"END"
+			);
+		results = QueryDatabase(rquery);
+		ThrowDBError(results.ErrorMessage(), "Create Function `GetMobType`", rquery);
+
+
+		/* Update view `vwgroups` */
+		rquery = StringFormat("DROP VIEW IF EXISTS `vwgroups`;");
+		results = QueryDatabase(rquery);
+		ThrowDBError(results.ErrorMessage(), "Drop View `vwgroups`", rquery);
+
+		rquery = StringFormat(
+			"CREATE VIEW `vwgroups` AS\n"
+			"SELECT g.`groupid` AS groupid,\n"
+			"GetMobType(g.`name`) AS mobtype,\n"
+			"g.`name` AS name,\n"
+			"g.`charid` AS mobid,\n"
+			"IFNULL(c.`level`, b.`BotLevel`) AS level\n"
+			"FROM `group_id` AS g\n"
+			"LEFT JOIN `character_data` AS c ON g.`name` = c.`name`\n"
+			"LEFT JOIN `bots` AS b ON g.`name` = b.`Name`;"
+			);
+		results = QueryDatabase(rquery);
+		ThrowDBError(results.ErrorMessage(), "Create View `vwgroups`", rquery);
+
+
+		/* Update view `vwbotgroups` */
+		rquery = StringFormat("DROP VIEW IF EXISTS `vwbotgroups`;");
+		results = QueryDatabase(rquery);
+		ThrowDBError(results.ErrorMessage(), "Drop View `vwbotgroups`", rquery);
+
+		rquery = StringFormat(
+			"CREATE VIEW `vwbotgroups` AS\n"
+			"SELECT g.`BotGroupId`,\n"
+			"g.`BotGroupName`,\n"
+			"g.`BotGroupLeaderBotId`,\n"
+			"b.`Name` AS BotGroupLeaderName,\n"
+			"b.`BotOwnerCharacterId`,\n"
+			"c.`name` AS BotOwnerCharacterName\n"
+			"FROM `botgroup` AS g\n"
+			"JOIN `bots` AS b ON g.`BotGroupLeaderBotId` = b.`BotID`\n"
+			"JOIN `character_data` AS c ON b.`BotOwnerCharacterID` = c.`id`\n"
+			"ORDER BY b.`BotOwnerCharacterId`, g.`BotGroupName`;"
+			);
+		results = QueryDatabase(rquery);
+		ThrowDBError(results.ErrorMessage(), "Create View `vwbotgroups`", rquery);
+
+
+		/* Update view `vwguildmembers` */
+		rquery = StringFormat("DROP VIEW IF EXISTS `vwguildmembers`;");
+		results = QueryDatabase(rquery);
+		ThrowDBError(results.ErrorMessage(), "Drop View `vwguildmembers`", rquery);
+
+		rquery = StringFormat(
+			"CREATE VIEW `vwguildmembers` AS\n"
+			"SELECT 'C' AS mobtype,\n"
+			"cm.`char_id`,\n"
+			"cm.`guild_id`,\n"
+			"cm.`rank`,\n"
+			"cm.`tribute_enable`,\n"
+			"cm.`total_tribute`,\n"
+			"cm.`last_tribute`,\n"
+			"cm.`banker`,\n"
+			"cm.`public_note`,\n"
+			"cm.`alt`\n"
+			"FROM `guild_members` AS cm\n"
+			"UNION ALL\n"
+			"SELECT 'B' AS mobtype,\n"
+			"bm.`char_id`,\n"
+			"bm.`guild_id`,\n"
+			"bm.`rank`,\n"
+			"bm.`tribute_enable`,\n"
+			"bm.`total_tribute`,\n"
+			"bm.`last_tribute`,\n"
+			"bm.`banker`,\n"
+			"bm.`public_note`,\n"
+			"bm.`alt`\n"
+			"FROM `botguildmembers` AS bm;"
+			);
+		results = QueryDatabase(rquery);
+		ThrowDBError(results.ErrorMessage(), "Create View `vwguildmembers`", rquery);
+	}
+
+	if (runbotsconvert == 1){
+		printf("\n\nBot views/function conversion complete, continuing world bootup...\n");
+	}
+
+#endif
+
 	return true;
 }
 
