@@ -307,41 +307,40 @@ bool Zone::LoadGroundSpawns() {
 	return(true);
 }
 
-int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charges, bool sold){
+int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charges, bool sold) {
 	int freeslot = 0;
 	std::list<MerchantList> merlist = merchanttable[merchantid];
 	std::list<MerchantList>::const_iterator itr;
 	uint32 i = 1;
 	for (itr = merlist.begin(); itr != merlist.end(); ++itr) {
 		MerchantList ml = *itr;
-		if(ml.item == item)
+		if (ml.item == item)
 			return 0;
 
 		// Account for merchant lists with gaps in them.
-		if(ml.slot >= i)
+		if (ml.slot >= i)
 			i = ml.slot + 1;
-
 	}
 	std::list<TempMerchantList> tmp_merlist = tmpmerchanttable[npcid];
 	std::list<TempMerchantList>::const_iterator tmp_itr;
 	bool update_charges = false;
 	TempMerchantList ml;
-	while(freeslot == 0 && !update_charges){
+	while (freeslot == 0 && !update_charges) {
 		freeslot = i;
 		for (tmp_itr = tmp_merlist.begin(); tmp_itr != tmp_merlist.end(); ++tmp_itr) {
 			ml = *tmp_itr;
-			if(ml.item == item){
+			if (ml.item == item) {
 				update_charges = true;
 				freeslot = 0;
 				break;
 			}
-			if((ml.slot == i) || (ml.origslot==i)) {
-				freeslot=0;
+			if ((ml.slot == i) || (ml.origslot == i)) {
+				freeslot = 0;
 			}
 		}
 		i++;
 	}
-	if(update_charges){
+	if (update_charges) {
 		tmp_merlist.clear();
 		std::list<TempMerchantList> oldtmp_merlist = tmpmerchanttable[npcid];
 		for (tmp_itr = oldtmp_merlist.begin(); tmp_itr != oldtmp_merlist.end(); ++tmp_itr) {
@@ -349,27 +348,27 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 			if(ml2.item != item)
 				tmp_merlist.push_back(ml2);
 		}
-		if(sold)
+		if (sold)
 			ml.charges = ml.charges + charges;
 		else
 			ml.charges = charges;
-		if(!ml.origslot)
+		if (!ml.origslot)
 			ml.origslot = ml.slot;
-		if(charges>0){
+		if (charges > 0) {
 			database.SaveMerchantTemp(npcid, ml.origslot, item, ml.charges);
 			tmp_merlist.push_back(ml);
 		}
-		else{
-			database.DeleteMerchantTemp(npcid,ml.origslot);
+		else {
+			database.DeleteMerchantTemp(npcid, ml.origslot);
 		}
 		tmpmerchanttable[npcid] = tmp_merlist;
 
-		if(sold)
+		if (sold)
 			return ml.slot;
 
 	}
-	if(freeslot){
-		if(charges<0) //sanity check only, shouldnt happen
+	if (freeslot) {
+		if (charges < 0) //sanity check only, shouldnt happen
 			charges = 0x7FFF;
 		database.SaveMerchantTemp(npcid, freeslot, item, charges);
 		tmp_merlist = tmpmerchanttable[npcid];
@@ -391,13 +390,13 @@ uint32 Zone::GetTempMerchantQuantity(uint32 NPCID, uint32 Slot) {
 	std::list<TempMerchantList>::const_iterator Iterator;
 
 	for (Iterator = TmpMerchantList.begin(); Iterator != TmpMerchantList.end(); ++Iterator)
-		if((*Iterator).slot == Slot)
+		if ((*Iterator).slot == Slot)
 			return (*Iterator).charges;
 
 	return 0;
 }
 
-void Zone::LoadTempMerchantData(){
+void Zone::LoadTempMerchantData() {
 	LogFile->write(EQEMuLog::Status, "Loading Temporary Merchant Lists...");
 	std::string query = StringFormat(
 		"SELECT								   "
@@ -412,7 +411,8 @@ void Zone::LoadTempMerchantData(){
 		"WHERE								   "
 		"ml.npcid = se.npcid				   "
 		"AND se.spawngroupid = s2.spawngroupid "
-		"AND s2.zone = '%s' AND s2.version = %i", GetShortName(), GetInstanceVersion());
+		"AND s2.zone = '%s' AND s2.version = %i"
+		"ORDER BY ml.slot					   ", GetShortName(), GetInstanceVersion());
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		LogFile->write(EQEMuLog::Error, "Error in LoadTempMerchantData query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
@@ -441,11 +441,11 @@ void Zone::LoadTempMerchantData(){
 	pQueuedMerchantsWorkID = 0;
 }
 
-void Zone::LoadNewMerchantData(uint32 merchantid){
+void Zone::LoadNewMerchantData(uint32 merchantid) {
 
 	std::list<MerchantList> merlist;
 	std::string query = StringFormat("SELECT item, slot, faction_required, level_required, alt_currency_cost, "
-                                    "classes_required FROM merchantlist WHERE merchantid=%d", merchantid);
+                                     "classes_required FROM merchantlist WHERE merchantid=%d ORDER BY slot", merchantid);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
         LogFile->write(EQEMuLog::Error, "Error in LoadNewMerchantData query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
@@ -467,7 +467,7 @@ void Zone::LoadNewMerchantData(uint32 merchantid){
     merchanttable[merchantid] = merlist;
 }
 
-void Zone::GetMerchantDataForZoneLoad(){
+void Zone::GetMerchantDataForZoneLoad() {
 	LogFile->write(EQEMuLog::Status, "Loading Merchant Lists...");
 	std::string query = StringFormat(												   
 		"SELECT																		   "
@@ -485,15 +485,19 @@ void Zone::GetMerchantDataForZoneLoad(){
 		"spawnentry AS se,															   "
 		"spawn2 AS s2																   "
 		"WHERE nt.merchant_id = ml.merchantid AND nt.id = se.npcid					   "
-		"AND se.spawngroupid = s2.spawngroupid AND s2.zone = '%s' AND s2.version = %i  ", GetShortName(), GetInstanceVersion());
+		"AND se.spawngroupid = s2.spawngroupid AND s2.zone = '%s' AND s2.version = %i  "
+		"ORDER BY ml.slot															   ", GetShortName(), GetInstanceVersion());
 	auto results = database.QueryDatabase(query); 
 	std::map<uint32, std::list<MerchantList> >::iterator cur;
 	uint32 npcid = 0;
-	if (results.RowCount() == 0){ LogFile->write(EQEMuLog::Error, "Error in loading Merchant Data for zone");  return; }
+	if (results.RowCount() == 0) {
+		LogFile->write(EQEMuLog::Error, "Error in loading Merchant Data for zone");
+		return;
+	}
 	for (auto row = results.begin(); row != results.end(); ++row) { 
 		MerchantList ml;
 		ml.id = atoul(row[0]);
-		if (npcid != ml.id){
+		if (npcid != ml.id) {
 			cur = merchanttable.find(ml.id);
 			if (cur == merchanttable.end()) {
 				std::list<MerchantList> empty;

@@ -967,93 +967,96 @@ void Client::BulkSendInventoryItems()
 
 void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	const Item_Struct* handyitem = nullptr;
-	uint32 numItemSlots=80; //The max number of items passed in the transaction.
+	uint32 numItemSlots = 80; //The max number of items passed in the transaction.
 	const Item_Struct *item;
 	std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
 	std::list<MerchantList>::const_iterator itr;
 	Mob* merch = entity_list.GetMobByNpcTypeID(npcid);
-	if(merlist.size()==0){ //Attempt to load the data, it might have been missed if someone spawned the merchant after the zone was loaded
+	if (merlist.size() == 0) { //Attempt to load the data, it might have been missed if someone spawned the merchant after the zone was loaded
 		zone->LoadNewMerchantData(merchant_id);
 		merlist = zone->merchanttable[merchant_id];
-		if(merlist.size()==0)
+		if (merlist.size() == 0)
 			return;
 	}
 	std::list<TempMerchantList> tmp_merlist = zone->tmpmerchanttable[npcid];
 	std::list<TempMerchantList>::iterator tmp_itr;
 
-	uint32 i=1;
+	uint32 i = 1;
 	uint8 handychance = 0;
-	for (itr = merlist.begin(); itr != merlist.end() && i < numItemSlots; ++itr) {
+	for (itr = merlist.begin(); itr != merlist.end() && i <= numItemSlots; ++itr) {
 		MerchantList ml = *itr;
 		if (merch->CastToNPC()->GetMerchantProbability() > ml.probability)
 			continue;
-			
-		if(GetLevel() < ml.level_required)
+
+		if (GetLevel() < ml.level_required)
 			continue;
 
 		if (!(ml.classes_required & (1 << (GetClass() - 1))))
 			continue;
 
 		int32 fac = merch ? merch->GetPrimaryFaction() : 0;
-		if(fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required)
+		if (fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required)
 			continue;
 
-		handychance = MakeRandomInt(0, merlist.size() + tmp_merlist.size() - 1 );
+		handychance = MakeRandomInt(0, merlist.size() + tmp_merlist.size() - 1);
 
 		item = database.GetItem(ml.item);
-		if(item) {
-			if(handychance==0)
-				handyitem=item;
+		if (item) {
+			if (handychance == 0)
+				handyitem = item;
 			else
 				handychance--;
-			int charges=1;
-			if(item->ItemClass==ItemClassCommon)
-				charges=item->MaxCharges;
+			int charges = 1;
+			if (item->ItemClass == ItemClassCommon)
+				charges = item->MaxCharges;
 			ItemInst* inst = database.CreateItem(item, charges);
 			if (inst) {
-				if (RuleB(Merchant, UsePriceMod)){
-				inst->SetPrice((item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(merch,false)));
+				if (RuleB(Merchant, UsePriceMod)) {
+					inst->SetPrice((item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate * Client::CalcPriceMod(merch, false)));
 				}
 				else
-					inst->SetPrice((item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate));
+					inst->SetPrice((item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate));
 				inst->SetMerchantSlot(ml.slot);
 				inst->SetMerchantCount(-1);		//unlimited
-				if(charges > 0)
+				if (charges > 0)
 					inst->SetCharges(charges);
 				else
 					inst->SetCharges(1);
 
-				SendItemPacket(ml.slot-1, inst, ItemPacketMerchant);
+				SendItemPacket(ml.slot - 1, inst, ItemPacketMerchant);
 				safe_delete(inst);
 			}
 		}
 		// Account for merchant lists with gaps.
-		if(ml.slot >= i)
+		if (ml.slot >= i) {
+			if (ml.slot > i)
+				LogFile->write(EQEMuLog::Debug, "(WARNING) Merchantlist contains gap at slot %d. Merchant: %d, NPC: %d", i, merchant_id, npcid);
 			i = ml.slot + 1;
+		}
 	}
 	std::list<TempMerchantList> origtmp_merlist = zone->tmpmerchanttable[npcid];
 	tmp_merlist.clear();
-	for(tmp_itr = origtmp_merlist.begin();tmp_itr != origtmp_merlist.end() && i<numItemSlots;++tmp_itr){
+	for (tmp_itr = origtmp_merlist.begin(); tmp_itr != origtmp_merlist.end() && i <= numItemSlots; ++tmp_itr) {
 		TempMerchantList ml = *tmp_itr;
-		item=database.GetItem(ml.item);
-		ml.slot=i;
+		item = database.GetItem(ml.item);
+		ml.slot = i;
 		if (item) {
-			if(handychance==0)
-				handyitem=item;
+			if (handychance == 0)
+				handyitem = item;
 			else
 				handychance--;
-			int charges=1;
+			int charges = 1;
 			//if(item->ItemClass==ItemClassCommon && (int16)ml.charges <= item->MaxCharges)
 			//	charges=ml.charges;
 			//else
 			charges = item->MaxCharges;
 			ItemInst* inst = database.CreateItem(item, charges);
 			if (inst) {
-				if (RuleB(Merchant, UsePriceMod)){
-				inst->SetPrice((item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(merch,false)));
+				if (RuleB(Merchant, UsePriceMod)) {
+					inst->SetPrice((item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate * Client::CalcPriceMod(merch, false)));
 				}
 				else
-					inst->SetPrice((item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate));
+					inst->SetPrice((item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate));
 				inst->SetMerchantSlot(ml.slot);
 				inst->SetMerchantCount(ml.charges);
 				if(charges > 0)
@@ -1069,32 +1072,32 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	}
 	//this resets the slot
 	zone->tmpmerchanttable[npcid] = tmp_merlist;
-	if(merch != nullptr && handyitem){
-		char handy_id[8]={0};
-		int greeting=MakeRandomInt(0, 4);
-		int greet_id=0;
-		switch(greeting){
+	if (merch != nullptr && handyitem) {
+		char handy_id[8] = { 0 };
+		int greeting = MakeRandomInt(0, 4);
+		int greet_id = 0;
+		switch (greeting) {
 			case 1:
-				greet_id=MERCHANT_GREETING;
+				greet_id = MERCHANT_GREETING;
 				break;
 			case 2:
-				greet_id=MERCHANT_HANDY_ITEM1;
+				greet_id = MERCHANT_HANDY_ITEM1;
 				break;
 			case 3:
-				greet_id=MERCHANT_HANDY_ITEM2;
+				greet_id = MERCHANT_HANDY_ITEM2;
 				break;
 			case 4:
-				greet_id=MERCHANT_HANDY_ITEM3;
+				greet_id = MERCHANT_HANDY_ITEM3;
 				break;
 			default:
-				greet_id=MERCHANT_HANDY_ITEM4;
+				greet_id = MERCHANT_HANDY_ITEM4;
 		}
-		sprintf(handy_id,"%i",greet_id);
+		sprintf(handy_id, "%i", greet_id);
 
-		if(greet_id!=MERCHANT_GREETING)
-			Message_StringID(10,GENERIC_STRINGID_SAY,merch->GetCleanName(),handy_id,this->GetName(),handyitem->Name);
+		if (greet_id != MERCHANT_GREETING)
+			Message_StringID(10, GENERIC_STRINGID_SAY, merch->GetCleanName(), handy_id, this->GetName(), handyitem->Name);
 		else
-			Message_StringID(10,GENERIC_STRINGID_SAY,merch->GetCleanName(),handy_id,this->GetName());
+			Message_StringID(10, GENERIC_STRINGID_SAY, merch->GetCleanName(), handy_id, this->GetName());
 
 		merch->CastToNPC()->FaceTarget(this->CastToMob());
 	}
