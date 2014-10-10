@@ -1295,7 +1295,7 @@ bool ZoneDatabase::SaveCharacterPotionBelt(uint32 character_id, uint8 potion_id,
 
 bool ZoneDatabase::SaveCharacterLeadershipAA(uint32 character_id, PlayerProfile_Struct* pp){
 	uint8 first_entry = 0; std::string query = "";
-	for (int i = 0; i <= MAX_LEADERSHIP_AA_ARRAY; i++){
+	for (int i = 0; i < MAX_LEADERSHIP_AA_ARRAY; i++){
 		if (pp->leader_abilities.ranks[i] > 0){
 			if (first_entry != 1){
 				query = StringFormat("REPLACE INTO `character_leadership_abilities` (id, slot, rank) VALUES (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);
