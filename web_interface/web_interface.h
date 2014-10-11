@@ -39,8 +39,6 @@
 #include <list>
 #include <map>
 
-#define MAX_MESSAGE_LENGTH 2048
-
 struct per_session_data_eqemu {
 	std::string auth;
 	std::string uuid;

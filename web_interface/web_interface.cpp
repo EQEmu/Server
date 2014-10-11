@@ -97,16 +97,13 @@ int callback_eqemu(libwebsocket_context *context, libwebsocket *wsi, libwebsocke
 		break;
 	}
 	case LWS_CALLBACK_SERVER_WRITEABLE: {
-		//send messages here
-		char out_message[MAX_MESSAGE_LENGTH + LWS_SEND_BUFFER_PRE_PADDING + LWS_SEND_BUFFER_POST_PADDING + 1];
+		std::vector<char> out_message;
 		for (auto iter = session->send_queue->begin(); iter != session->send_queue->end(); ++iter) {
-
-			//out_message
-			memset(out_message, 0, MAX_MESSAGE_LENGTH + LWS_SEND_BUFFER_PRE_PADDING + LWS_SEND_BUFFER_POST_PADDING + 1);
+			out_message.resize((*iter).size() + LWS_SEND_BUFFER_PRE_PADDING + LWS_SEND_BUFFER_POST_PADDING + 1);
+			memset(&out_message[0], 0, (*iter).size() + LWS_SEND_BUFFER_PRE_PADDING + LWS_SEND_BUFFER_POST_PADDING + 1);
 			memcpy(&out_message[LWS_SEND_BUFFER_PRE_PADDING], &(*iter)[0], (*iter).size());
-			auto n = libwebsocket_write(wsi, (unsigned char*)&out_message[LWS_SEND_BUFFER_PRE_PADDING], (*iter).size(), LWS_WRITE_TEXT);
-			if (n < (*iter).size()) {
-				//couldn't write the message
+			int n = libwebsocket_write(wsi, (unsigned char*)&out_message[LWS_SEND_BUFFER_PRE_PADDING], (*iter).size(), LWS_WRITE_TEXT);
+			if(n < (*iter).size()) {
 				return -1;
 			}
 		}
