@@ -102,8 +102,7 @@ int callback_eqemu(libwebsocket_context *context, libwebsocket *wsi, libwebsocke
 		for (auto iter = session->send_queue->begin(); iter != session->send_queue->end(); ++iter) {
 
 			//out_message
-			size_t sz = LWS_SEND_BUFFER_PRE_PADDING + LWS_SEND_BUFFER_POST_PADDING + (*iter).size();
-			memset(out_message, 0, sz);
+			memset(out_message, 0, MAX_MESSAGE_LENGTH + LWS_SEND_BUFFER_PRE_PADDING + LWS_SEND_BUFFER_POST_PADDING + 1);
 			memcpy(&out_message[LWS_SEND_BUFFER_PRE_PADDING], &(*iter)[0], (*iter).size());
 			auto n = libwebsocket_write(wsi, (unsigned char*)&out_message[LWS_SEND_BUFFER_PRE_PADDING], (*iter).size(), LWS_WRITE_TEXT);
 			if (n < (*iter).size()) {

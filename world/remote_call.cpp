@@ -1,5 +1,3 @@
-#include <iostream>
-#include <fstream>
 #include <string>
 
 #include "../common/debug.h"
@@ -168,21 +166,43 @@ void handle_rc_quest_interface(const std::string &method, const std::string &con
 	std::string error;
 	std::map<std::string, std::string> res;
 
-	/*
-	if (params.size() != 1) {
-	error = "Expected only one zone_id.";
-	RemoteCallResponse(connection_id, request_id, res, error);
-	return;
+	FILE *f = fopen("quests/global/Waypoint.pl", "r");
+	if(!f) {
+		error = "File not found";
+		RemoteCallResponse(connection_id, request_id, res, error);
+		return;
 	}
-	*/
 
-	std::string str;
-	std::ifstream file("quests/global/Waypoint.pl", std::ios::in);
-	if (file) {
-		while (!file.eof()) str.push_back(file.get());
+	fseek(f, 0, SEEK_END);
+	size_t sz = ftell(f);
+	rewind(f);
+
+	//todo: actually break the message apart or something so we don't destroy web_interface's poor buffer
+	//dunno where to do this yet, got some musing to do
+	//if(sz >= 1024) {
+	//	error = "File too large... for now...";
+	//	RemoteCallResponse(connection_id, request_id, res, error);
+	//	return;
+	//}
+	
+	char *buffer = new char[sz + 1];
+	size_t r = fread(buffer, 1, sz, f);
+	if(r != sz) {
+		error = "Unable to read file";
+		RemoteCallResponse(connection_id, request_id, res, error);
+		delete[] buffer;
+		return;
 	}
-	// std::cout << str << '\n';
 
-	res["quest_text"] = str.c_str(); 
+	buffer[sz] = '\0';
+
+	//std::string str;
+	//std::ifstream file("quests/global/Waypoint.pl", std::ios::in);
+	//if (file) {
+	//	while (!file.eof())
+	//		str.push_back(file.get());
+	//}
+
+	res["quest_text"] = buffer; 
 	RemoteCallResponse(connection_id, request_id, res, error); 
 }
