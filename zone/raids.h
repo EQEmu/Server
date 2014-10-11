@@ -38,7 +38,7 @@ enum {	//raid packet types:
 	raidMembers = 6,	//len 395+, details + members list
 	raidNoAssignLeadership	= 7,
 	raidCreate = 8,		//len 72
-	raidUnknown				= 9,
+	raidUnknown				= 9, // unused?
 	raidNoRaid = 10,		//parameter=0
 	raidChangeLootType		= 11,
 	raidStringID			= 12,
@@ -130,6 +130,8 @@ public:
 	void	AddRaidLooter(const char* looter);
 	void	RemoveRaidLooter(const char* looter);
 
+	inline void	SetRaidMOTD(std::string in_motd) { motd = in_motd; };
+
 	//util func
 	//keeps me from having to keep iterating through the list
 	//when I want lots of data from the same entry
@@ -160,6 +162,7 @@ public:
 	//also learns raid structure based on db.
 	void	SetRaidDetails();
 	void	GetRaidDetails();
+	void	SaveRaidMOTD();
 	bool	LearnMembers();
 	void	VerifyRaid();
 	void	MemberZoned(Client *c);
@@ -194,6 +197,9 @@ public:
 	void	SendMakeGroupLeaderPacketAll();
 	void	SendMakeGroupLeaderPacket(const char *who); //13
 	void	SendMakeGroupLeaderPacketTo(const char *who, Client *to);
+	void	SendRaidMOTD(Client *c);
+	void	SendRaidMOTD();
+	void	SendRaidMOTDToWorld();
 
 	void	QueuePacket(const EQApplicationPacket *app, bool ack_req = true);
 
@@ -206,6 +212,7 @@ protected:
 	uint32 LootType;
 	bool disbandCheck;
 	bool forceDisband;
+	std::string motd;
 };
 
 

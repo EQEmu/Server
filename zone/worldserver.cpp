@@ -1372,6 +1372,18 @@ void WorldServer::Process() {
 			break;
 		}
 
+		case ServerOP_RaidMOTD: {
+			ServerRaidMOTD_Struct *rmotd = (ServerRaidMOTD_Struct *)pack->pBuffer;
+			if (!zone)
+				break;
+			Raid *r = entity_list.GetRaidByID(rmotd->rid);
+			if (!r)
+				break;
+			r->SetRaidMOTD(std::string(rmotd->motd));
+			r->SendRaidMOTD();
+			break;
+		}
+
 		case ServerOP_SpawnPlayerCorpse: {
 			SpawnPlayerCorpse_Struct* s = (SpawnPlayerCorpse_Struct*)pack->pBuffer;
 			Corpse* NewCorpse = database.LoadPlayerCorpse(s->player_corpse_id);

@@ -3623,6 +3623,11 @@ struct RaidAddMember_Struct {
 /*139*/	uint8 flags[5]; //no idea if these are needed...
 };
 
+struct RaidMOTD_Struct {
+/*000*/ RaidGeneral_Struct general; // leader_name and action only used
+/*140*/ char motd[0]; // max size 1024, but reply is variable
+};
+
 struct RaidAdd_Struct {
 /*000*/	uint32		action;	//=0
 /*004*/	char		player_name[64];	//should both be the player's name

@@ -104,6 +104,7 @@
 #define ServerOP_GroupFollow		0x0110
 #define ServerOP_GroupFollowAck		0x0111
 #define ServerOP_GroupCancelInvite	0x0112
+#define ServerOP_RaidMOTD			0x0113
 
 #define ServerOP_InstanceUpdateTime			0x014F
 #define ServerOP_AdventureRequest			0x0150
@@ -852,6 +853,11 @@ struct ServerRaidMessage_Struct {
 	uint32 gid;
 	char from[64];
 	char message[0];
+};
+
+struct ServerRaidMOTD_Struct {
+	uint32 rid;
+	char motd[0];
 };
 
 struct ServerLFGMatchesRequest_Struct {

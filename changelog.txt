@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/11/2014 ==
+demonstar55: Implement Raid MOTD for UF
+	Don't forget 2014_10_11_RaidMOTD.sql!
+
 == 10/09/2014 ==
 Uleat: Added 'BOTS' conversion code to supplement the database 'PlayerProfile' blob conversion that Akkadius recently implemented.
 Note: This automatic conversion uses the view `vwbotcharactermobs` as an update vector. If you need/would like for the converter to run on

@@ -409,6 +409,14 @@ bool ZoneServer::Process() {
 				break;
 			}
 
+			case ServerOP_RaidMOTD: {
+				if (pack->size < sizeof(ServerRaidMOTD_Struct))
+					break;
+
+				zoneserver_list.SendPacket(pack);
+				break;
+			}
+
 			case ServerOP_SpawnCondition: {
 				if(pack->size != sizeof(ServerSpawnCondition_Struct))
 					break;

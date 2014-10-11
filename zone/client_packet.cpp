@@ -565,6 +565,7 @@ void Client::CompleteConnect()
 			raid->SendRaidAdd(GetName(), this);
 			raid->SendBulkRaid(this);
 			raid->SendGroupUpdate(this);
+			raid->SendRaidMOTD(this);
 			uint32 grpID = raid->GetGroup(GetName());
 			if (grpID < 12){
 				raid->SendRaidGroupRemove(GetName(), grpID);
@@ -10656,8 +10657,8 @@ void Client::Handle_OP_PVPLeaderBoardRequest(const EQApplicationPacket *app)
 
 void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(RaidGeneral_Struct)) {
-		LogFile->write(EQEMuLog::Error, "Wrong size: OP_RaidCommand, size=%i, expected %i", app->size, sizeof(RaidGeneral_Struct));
+	if (app->size < sizeof(RaidGeneral_Struct)) {
+		LogFile->write(EQEMuLog::Error, "Wrong size: OP_RaidCommand, size=%i, expected at least %i", app->size, sizeof(RaidGeneral_Struct));
 		DumpPacket(app);
 		return;
 	}
@@ -11216,6 +11217,19 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 				r->SetRaidLeader(GetName(), ri->leader_name);
 			}
 		}
+		break;
+	}
+
+	case RaidCommandSetMotd:
+	{
+		Raid *r = entity_list.GetRaidByClient(this);
+		if (!r)
+			break;
+		// we don't use the RaidGeneral here!
+		RaidMOTD_Struct *motd = (RaidMOTD_Struct *)app->pBuffer;
+		r->SetRaidMOTD(std::string(motd->motd));
+		r->SaveRaidMOTD();
+		r->SendRaidMOTDToWorld();
 		break;
 	}
 

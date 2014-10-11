@@ -89,6 +89,7 @@ void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bo
 	SendRaidAddAll(c->GetName());
 
 	c->SetRaidGrouped(true);
+	SendRaidMOTD(c);
 
 	ServerPacket *pack = new ServerPacket(ServerOP_RaidAdd, sizeof(ServerRaidGeneralAction_Struct));
 	ServerRaidGeneralAction_Struct *rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
@@ -1205,6 +1206,44 @@ void Raid::SendRaidGroupRemove(const char *who, uint32 gid)
 	safe_delete(pack);
 }
 
+void Raid::SendRaidMOTD(Client *c)
+{
+	if (!c || motd.empty())
+		return;
+
+	size_t size = motd.size() + 1;
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidMOTD_Struct) + size);
+	RaidMOTD_Struct *rmotd = (RaidMOTD_Struct *)outapp->pBuffer;
+	rmotd->general.action = raidSetMotd;
+	strn0cpy(rmotd->general.player_name, c->GetName(), 64);
+	strn0cpy(rmotd->motd, motd.c_str(), size);
+	c->FastQueuePacket(&outapp);
+}
+
+void Raid::SendRaidMOTD()
+{
+	if (motd.empty())
+		return;
+
+	for (uint32 i = 0; i < MAX_RAID_MEMBERS; i++)
+		if (members[i].member)
+			SendRaidMOTD(members[i].member);
+}
+
+void Raid::SendRaidMOTDToWorld()
+{
+	if (motd.empty())
+		return;
+
+	size_t size = motd.size() + 1;
+	ServerPacket *pack = new ServerPacket(ServerOP_RaidMOTD, sizeof(ServerRaidMOTD_Struct) + size);
+	ServerRaidMOTD_Struct *smotd = (ServerRaidMOTD_Struct *)pack->pBuffer;
+	smotd->rid = GetID();
+	strn0cpy(smotd->motd, motd.c_str(), size);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
 void Raid::LockRaid(bool lockFlag)
 {
 	std::string query = StringFormat("UPDATE raid_details SET locked = %d WHERE raidid = %lu",
@@ -1229,14 +1268,14 @@ void Raid::LockRaid(bool lockFlag)
 
 void Raid::SetRaidDetails()
 {
-	std::string query = StringFormat("INSERT INTO raid_details SET raidid = %lu, loottype = 4, locked = 0",
+	std::string query = StringFormat("INSERT INTO raid_details SET raidid = %lu, loottype = 4, locked = 0, motd = ''",
                                     (unsigned long)GetID());
     auto results = database.QueryDatabase(query);
 }
 
 void Raid::GetRaidDetails()
 {
-	std::string query = StringFormat("SELECT locked, loottype FROM raid_details WHERE raidid = %lu",
+	std::string query = StringFormat("SELECT locked, loottype, motd FROM raid_details WHERE raidid = %lu",
                                     (unsigned long)GetID());
     auto results = database.QueryDatabase(query);
     if (!results.Success())
@@ -1251,6 +1290,15 @@ void Raid::GetRaidDetails()
 
     locked = atoi(row[0]);
     LootType = atoi(row[1]);
+	motd = std::string(row[2]);
+}
+
+void Raid::SaveRaidMOTD()
+{
+	std::string query = StringFormat("UPDATE raid_details SET motd = '%s' WHERE raidid = %lu",
+			EscapeString(motd).c_str(), (unsigned long)GetID());
+
+	auto results = database.QueryDatabase(query);
 }
 
 bool Raid::LearnMembers()
