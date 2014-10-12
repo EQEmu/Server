@@ -42,9 +42,9 @@
 				}
 			} 
 			else if(obj.id == 'get_zone_info_id') {
-				socket.send(JSON.stringify({id: 'subscribe_id', method: 'Zone.Subscribe', params: [obj.result["zone_id"], obj.result["instance_id"], 'NPCPosition']}));
-				socket.send(JSON.stringify({id: 'on_entity_pos_id', method: 'Zone.GetInitialEntityPositions', params: [obj.result["zone_id"], obj.result["instance_id"]]}));
-			} else if(obj.method == "On.NPCPosition") {
+				//socket.send(JSON.stringify({id: 'subscribe_id', method: 'Zone.Subscribe', params: [obj.result["zone_id"], obj.result["instance_id"], 'NPCPosition']}));
+				//socket.send(JSON.stringify({id: 'on_entity_pos_id', method: 'Zone.GetInitialEntityPositions', params: [obj.result["zone_id"], obj.result["instance_id"]]}));
+				socket.send(JSON.stringify({id: 'quest_script_id', method: 'Quest.GetScript', params: []}));
 			}
 		};
 	</script>
