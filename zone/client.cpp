@@ -1287,7 +1287,7 @@ bool Client::UpdateLDoNPoints(int32 points, uint32 theme)
 			m_pp.ldon_points_ruj += rujpts;
 			m_pp.ldon_points_tak += takpts;
 			points-=splitpts;
-		// if anything left, recursively loop thru again
+			// if anything left, recursively loop thru again
 			if (splitpts !=0)
 				UpdateLDoNPoints(splitpts,0);
 			break;
@@ -1344,6 +1344,7 @@ bool Client::UpdateLDoNPoints(int32 points, uint32 theme)
 		}
 	}
 	m_pp.ldon_points_available += points;
+
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventurePointsUpdate, sizeof(AdventurePoints_Update_Struct));
 	AdventurePoints_Update_Struct* apus = (AdventurePoints_Update_Struct*)outapp->pBuffer;
 	apus->ldon_available_points = m_pp.ldon_points_available;

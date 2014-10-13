@@ -1405,7 +1405,22 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	database.LoadCharacterLanguages(cid, &m_pp); /* Load Character Languages */
 	database.LoadCharacterLeadershipAA(cid, &m_pp); /* Load Character Leadership AA's */
 	database.LoadCharacterTribute(cid, &m_pp); /* Load CharacterTribute */
-	database.LoadCharacterLDONStats(cid, &m_pp); /* Load Character LDON Stats */
+
+	/* Load AdventureStats */
+	AdventureStats_Struct as;
+	if(database.GetAdventureStats(cid, &as))
+	{
+		m_pp.ldon_wins_guk = as.success.guk;
+		m_pp.ldon_wins_mir = as.success.mir;
+		m_pp.ldon_wins_mmc = as.success.mmc;
+		m_pp.ldon_wins_ruj = as.success.ruj;
+		m_pp.ldon_wins_tak = as.success.tak;
+		m_pp.ldon_losses_guk = as.failure.guk;
+		m_pp.ldon_losses_mir = as.failure.mir;
+		m_pp.ldon_losses_mmc = as.failure.mmc;
+		m_pp.ldon_losses_ruj = as.failure.ruj;
+		m_pp.ldon_losses_tak = as.failure.tak;
+	}
 
 	/* Set item material tint */
 	for (int i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_END; i++)
@@ -2489,11 +2504,8 @@ void Client::Handle_OP_AdventureStatsRequest(const EQApplicationPacket *app)
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventureStatsReply, sizeof(AdventureStats_Struct));
 	AdventureStats_Struct *as = (AdventureStats_Struct*)outapp->pBuffer;
 
-	if (database.GetAdventureStats(CharacterID(), as->success.guk, as->success.mir, as->success.mmc, as->success.ruj,
-		as->success.tak, as->failure.guk, as->failure.mir, as->failure.mmc, as->failure.ruj, as->failure.tak))
+	if (database.GetAdventureStats(CharacterID(), as))
 	{
-		as->failure.total = as->failure.guk + as->failure.mir + as->failure.mmc + as->failure.ruj + as->failure.tak;
-		as->success.total = as->success.guk + as->success.mir + as->success.mmc + as->success.ruj + as->success.tak;
 		m_pp.ldon_wins_guk = as->success.guk;
 		m_pp.ldon_wins_mir = as->success.mir;
 		m_pp.ldon_wins_mmc = as->success.mmc;

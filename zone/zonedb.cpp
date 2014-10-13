@@ -1028,34 +1028,6 @@ bool ZoneDatabase::LoadCharacterLeadershipAA(uint32 character_id, PlayerProfile_
 	return true;
 }
 
-bool ZoneDatabase::LoadCharacterLDONStats(uint32 character_id, PlayerProfile_Struct* pp) { 
-	std::string query = StringFormat("SELECT `guk_wins`, `mir_wins`, `mmc_wins`, `ruj_wins`, `tak_wins`, `guk_losses`, "
-		"`mir_losses`, `mmc_losses`, `ruj_losses`, `tak_losses` FROM `adventure_stats` WHERE player_id=%u", character_id);
-
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-		return false;
-
-	if (results.RowCount() == 0)
-		return false;
-
-	auto row = results.begin();
-
-	pp->ldon_wins_guk = atoi(row[0]);
-	pp->ldon_wins_mir = atoi(row[1]);
-	pp->ldon_wins_mmc = atoi(row[2]);
-	pp->ldon_wins_ruj = atoi(row[3]);
-	pp->ldon_wins_tak = atoi(row[4]);
-	pp->ldon_losses_guk = atoi(row[5]);
-	pp->ldon_losses_mir = atoi(row[6]);
-	pp->ldon_losses_mmc = atoi(row[7]);
-	pp->ldon_losses_ruj = atoi(row[8]);
-	pp->ldon_losses_tak = atoi(row[9]);
-
-	return true;
-}
-
 bool ZoneDatabase::LoadCharacterDisciplines(uint32 character_id, PlayerProfile_Struct* pp){
 	std::string query = StringFormat(
 		"SELECT				  "
