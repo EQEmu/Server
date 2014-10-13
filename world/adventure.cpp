@@ -358,6 +358,7 @@ void Adventure::Finished(AdventureWinStatus ws)
 				afe.points = 0;
 			}
 			adventure_manager.AddFinishedEvent(afe);
+			
 			database.UpdateAdventureStatsEntry(database.GetCharacterID((*iter).c_str()), GetTemplate()->theme, (ws != AWS_Lose) ? true : false);
 		}
 		++iter;

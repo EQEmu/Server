@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/12/2014 ==
+Akkadius: Fix for LDON Character Stat load
+
 == 10/11/2014 ==
 demonstar55: Implement Raid MOTD for UF
 	Don't forget 2014_10_11_RaidMOTD.sql!
