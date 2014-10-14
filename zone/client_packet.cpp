@@ -5345,6 +5345,8 @@ void Client::Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app)
 	}
 
 	default:
+		LogFile->write(EQEMuLog::Debug, "Got unhandled OP_DoGroupLeadershipAbility Ability: %d Parameter: %d",
+				dglas->Ability, dglas->Parameter);
 		break;
 	}
 }
