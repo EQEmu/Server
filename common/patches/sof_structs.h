@@ -3478,6 +3478,16 @@ struct RaidMOTD_Struct {
 /*140*/ char motd[0]; // max size 1024, but reply is variable
 };
 
+struct RaidLeadershipUpdate_Struct {
+/*000*/	uint32 action;
+/*004*/	char player_name[64];
+/*068*/	uint32 Unknown068;
+/*072*/	char leader_name[64];
+/*136*/	GroupLeadershipAA_Struct group; //unneeded
+/*200*/	RaidLeadershipAA_Struct raid;
+/*264*/	char Unknown264[128];
+};
+
 struct RaidAdd_Struct {
 /*000*/	uint32		action;	//=0
 /*004*/	char		player_name[64];	//should both be the player's name
