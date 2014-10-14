@@ -214,6 +214,12 @@ public:
 	void	ClearRaidDetails(uint32 rid = 0);
 	uint32	GetRaidID(const char* name);
 	const char *GetRaidLeaderName(uint32 rid);
+	void	GetGroupLeadershipInfo(uint32 gid, uint32 rid, char* maintank = nullptr, char* assist = nullptr, char* puller = nullptr, char *marknpc = nullptr,
+			GroupLeadershipAA_Struct* GLAA = nullptr);
+	void	GetRaidLeadershipInfo(uint32 rid, char* maintank = nullptr, char* assist = nullptr, char* puller = nullptr, char *marknpc = nullptr,
+			RaidLeadershipAA_Struct* RLAA = nullptr);
+	void	SetRaidGroupLeaderInfo(uint32 gid, uint32 rid);
+	void	ClearRaidLeader(uint32 gid = 0xFFFFFFFF, uint32 rid = 0);
 
 	bool CheckDatabaseConversions();
 
@@ -273,6 +279,7 @@ private:
 	*/
 	void ClearAllRaids();
 	void ClearAllRaidDetails();
+	void ClearAllRaidLeaders();
 };
 
 #endif

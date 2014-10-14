@@ -3169,6 +3169,142 @@ const char* Database::GetRaidLeaderName(uint32 rid)
 	return name;
 }
 
+// maintank, assist, puller, marknpc currently unused
+void Database::GetGroupLeadershipInfo(uint32 gid, uint32 rid, char *maintank,
+		char *assist, char *puller, char *marknpc, GroupLeadershipAA_Struct *GLAA)
+{
+	std::string query = StringFormat(
+			"SELECT maintank, assist, puller, marknpc, leadershipaa FROM raid_leaders WHERE gid = %lu AND rid = %lu",
+			(unsigned long)gid, (unsigned long)rid);
+	auto results = QueryDatabase(query);
+
+	if (!results.Success() || results.RowCount() == 0) {
+		if (maintank)
+			maintank[0] = '\0';
+
+		if (assist)
+			assist[0] = '\0';
+
+		if (puller)
+			puller[0] = '\0';
+
+		if (marknpc)
+			marknpc[0] = '\0';
+
+		return;
+	}
+
+	auto row = results.begin();
+
+	if (maintank)
+		strcpy(maintank, row[0]);
+
+	if (assist)
+		strcpy(assist, row[1]);
+
+	if (puller)
+		strcpy(puller, row[2]);
+
+	if (marknpc)
+		strcpy(marknpc, row[3]);
+
+	if (GLAA && results.LengthOfColumn(4) == sizeof(GroupLeadershipAA_Struct))
+		memcpy(GLAA, row[4], sizeof(GroupLeadershipAA_Struct));
+
+	return;
+}
+
+// maintank, assist, puller, marknpc currently unused
+void Database::GetRaidLeadershipInfo(uint32 rid, char *maintank,
+		char *assist, char *puller, char *marknpc, RaidLeadershipAA_Struct *RLAA)
+{
+	std::string query = StringFormat(
+			"SELECT maintank, assist, puller, marknpc, leadershipaa FROM raid_leaders WHERE gid = %lu AND rid = %lu",
+			(unsigned long)0xFFFFFFFF, (unsigned long)rid);
+	auto results = QueryDatabase(query);
+
+	if (!results.Success() || results.RowCount() == 0) {
+		if (maintank)
+			maintank[0] = '\0';
+
+		if (assist)
+			assist[0] = '\0';
+
+		if (puller)
+			puller[0] = '\0';
+
+		if (marknpc)
+			marknpc[0] = '\0';
+
+		return;
+	}
+
+	auto row = results.begin();
+
+	if (maintank)
+		strcpy(maintank, row[0]);
+
+	if (assist)
+		strcpy(assist, row[1]);
+
+	if (puller)
+		strcpy(puller, row[2]);
+
+	if (marknpc)
+		strcpy(marknpc, row[3]);
+
+	if (RLAA && results.LengthOfColumn(4) == sizeof(RaidLeadershipAA_Struct))
+		memcpy(RLAA, row[4], sizeof(RaidLeadershipAA_Struct));
+
+	return;
+}
+
+void Database::SetRaidGroupLeaderInfo(uint32 gid, uint32 rid)
+{
+	std::string query = StringFormat("UPDATE raid_leaders SET leadershipaa = '', WHERE gid = %lu AND rid = %lu",
+			(unsigned long)gid, (unsigned long)rid);
+	auto results = QueryDatabase(query);
+
+	if (results.RowsAffected() != 0)
+		return;
+
+	query = StringFormat("INSERT INTO raid_leaders(gid, rid, marknpc, leadershipaa, maintank, assist, puller) VALUES(%lu, %lu, '', '', '', '', '')",
+			(unsigned long)gid, (unsigned long)rid);
+	results = QueryDatabase(query);
+
+	if (!results.Success())
+		std::cout << "Unable to set raid/group leader: " << results.ErrorMessage() << std::endl;
+
+	return;
+}
+
+// Clearing all raid leaders
+void Database::ClearAllRaidLeaders(void)
+{
+	std::string query("DELETE from raid_leaders");
+	auto results = QueryDatabase(query);
+
+	if (!results.Success())
+		std::cout << "Unable to clear raid leaders: " << results.ErrorMessage() << std::endl;
+
+	return;
+}
+
+void Database::ClearRaidLeader(uint32 gid, uint32 rid)
+{
+	if (rid == 0) {
+		ClearAllRaidLeaders();
+		return;
+	}
+
+	std::string query = StringFormat("DELETE from raid_leaders where gid = %lu and rid = %lu",
+			(unsigned long)gid, (unsigned long)rid);
+	auto results = QueryDatabase(query);
+
+	if (!results.Success())
+		std::cout << "Unable to clear raid leader: " << results.ErrorMessage() << std::endl;
+}
+
 bool Database::VerifyInstanceAlive(uint16 instance_id, uint32 char_id)
 {
 	//we are not saved to this instance so set our instance to 0

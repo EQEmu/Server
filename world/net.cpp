@@ -283,6 +283,7 @@ int main(int argc, char** argv) {
 	_log(WORLD__INIT, "Clearing raids..");
 	database.ClearRaid();
 	database.ClearRaidDetails();
+	database.ClearRaidLeader();
 	_log(WORLD__INIT, "Loading items..");
 	if (!database.LoadItems())
 		_log(WORLD__INIT_ERR, "Error: Could not load item data. But ignoring");

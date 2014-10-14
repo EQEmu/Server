@@ -3670,7 +3670,11 @@ void Client::LogSQL(const char *fmt, ...) {
 }
 
 void Client::GetGroupAAs(GroupLeadershipAA_Struct *into) const {
-	memcpy(into, &m_pp.leader_abilities, sizeof(GroupLeadershipAA_Struct));
+	memcpy(into, &m_pp.leader_abilities.group, sizeof(GroupLeadershipAA_Struct));
+}
+
+void Client::GetRaidAAs(RaidLeadershipAA_Struct *into) const {
+	memcpy(into, &m_pp.leader_abilities.raid, sizeof(RaidLeadershipAA_Struct));
 }
 
 void Client::EnteringMessages(Client* client)

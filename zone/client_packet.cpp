@@ -546,6 +546,7 @@ void Client::CompleteConnect()
 			raid = new Raid(raidid);
 			if (raid->GetID() != 0){
 				entity_list.AddRaid(raid, raidid);
+				raid->LoadLeadership(); // Recreating raid in new zone, get leadership from DB
 			}
 			else
 				raid = nullptr;
@@ -566,11 +567,20 @@ void Client::CompleteConnect()
 			raid->SendBulkRaid(this);
 			raid->SendGroupUpdate(this);
 			raid->SendRaidMOTD(this);
+			if (raid->IsLeader(this)) { // We're a raid leader, lets update just in case!
+				raid->UpdateRaidAAs();
+				raid->SendAllRaidLeadershipAA();
+			}
 			uint32 grpID = raid->GetGroup(GetName());
 			if (grpID < 12){
 				raid->SendRaidGroupRemove(GetName(), grpID);
 				raid->SendRaidGroupAdd(GetName(), grpID);
+				if (raid->IsGroupLeader(GetName())) { // group leader same thing!
+					raid->UpdateGroupAAs(raid->GetGroup(this));
+					raid->GroupUpdate(grpID, false);
+				}
 			}
+			raid->SendGroupLeadershipAA(this, grpID); // this may get sent an extra time ...
 			if (raid->IsLocked())
 				raid->SendRaidLockTo(this);
 		}
@@ -10606,10 +10616,23 @@ void Client::Handle_OP_PurchaseLeadershipAA(const EQApplicationPacket *app)
 		u->pointsleft = m_pp.group_leadership_points;
 	FastQueuePacket(&outapp);
 
-	Group *g = GetGroup();
-
 	// Update all group members with the new AA the leader has purchased.
-	if (g) {
+	if (IsRaidGrouped()) {
+		Raid *r = GetRaid();
+		if (!r)
+			return;
+		if (aaid >= raidAAMarkNPC) {
+			r->UpdateRaidAAs();
+			r->SendAllRaidLeadershipAA();
+		} else {
+			uint32 gid = r->GetGroup(this);
+			r->UpdateGroupAAs(gid);
+			r->GroupUpdate(gid, false);
+		}
+	} else if (IsGrouped()) {
+		Group *g = GetGroup();
+		if (!g)
+			return;
 		g->UpdateGroupAAs();
 		g->SendLeadershipAAUpdate();
 	}
@@ -11228,6 +11251,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 		{
 			if (strcmp(r->leadername, GetName()) == 0){
 				r->SetRaidLeader(GetName(), ri->leader_name);
+				r->UpdateRaidAAs();
+				r->SendAllRaidLeadershipAA();
 			}
 		}
 		break;
