@@ -411,7 +411,7 @@ void Zone::LoadTempMerchantData() {
 		"WHERE								   "
 		"ml.npcid = se.npcid				   "
 		"AND se.spawngroupid = s2.spawngroupid "
-		"AND s2.zone = '%s' AND s2.version = %i"
+		"AND s2.zone = '%s' AND s2.version = %i "
 		"ORDER BY ml.slot					   ", GetShortName(), GetInstanceVersion());
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {

@@ -4120,15 +4120,10 @@ void EntityList::UnMarkNPC(uint16 ID)
 	// each group to remove the dead mobs entity ID from the groups list of NPCs marked via the
 	// Group Leadership AA Mark NPC ability.
 	//
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		if (it->second) {
-			Group *g = nullptr;
-			g = it->second->GetGroup();
-
-			if (g)
-				g->UnMarkNPC(ID);
-		}
+	auto it = group_list.begin();
+	while (it != group_list.end()) {
+		if (*it)
+			(*it)->UnMarkNPC(ID);
 		++it;
 	}
 }

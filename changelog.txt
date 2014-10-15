@@ -6,6 +6,15 @@ Notes: I modifed the behavior of both load and drop bots to fail on the first op
        'load_bots.sql' will explicitly add bot schema, while 'drop_bots.sql' will explicitly drop it. I also added a few lines to change
 	   a few altered tables back to their original state - as of the date in the file.
 
+== 10/13/2014 ==
+demonstar55: Partially implement leadership and raids
+	Currently working: client side only effects and stat bonuses.
+	Not working: Mark NPC, and other stuff that need extra server side support
+	Currently only UF tested (Tit and 62 may just work, others need packet work)
+
+== 10/12/2014 ==
+Akkadius: Fix for LDON Character Stat load
+
 == 10/11/2014 ==
 demonstar55: Implement Raid MOTD for UF
 	Don't forget 2014_10_11_RaidMOTD.sql!

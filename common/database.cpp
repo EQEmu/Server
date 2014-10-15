@@ -2952,11 +2952,20 @@ char* Database::GetGroupLeaderForLogin(const char* name, char* leaderbuf){
 }
 
 void Database::SetGroupLeaderName(uint32 gid, const char* name) { 
-	std::string query = StringFormat("REPLACE INTO `group_leaders` SET `gid` = %lu, `leadername` = '%s'",(unsigned long)gid,name);
-	auto results = QueryDatabase(query);
+	std::string query = StringFormat("UPDATE group_leaders SET leadername = '%s' WHERE gid = %u", EscapeString(name).c_str(), gid);
+	auto result = QueryDatabase(query);
 
-	if (!results.Success())
-		std::cout << "Unable to set group leader: " << results.ErrorMessage() << std::endl;
+	if(result.RowsAffected() != 0) {
+		return;
+	}
+
+	query = StringFormat("INSERT INTO group_leaders(gid, leadername, marknpc, leadershipaa, maintank, assist, puller) VALUES(%u, '%s', '', '', '', '', '')",
+						 gid, EscapeString(name).c_str());
+	result = QueryDatabase(query);
+
+	if(!result.Success()) {
+		LogFile->write(EQEMuLog::Debug, "Error in Database::SetGroupLeaderName: %s", result.ErrorMessage().c_str());
+	}
 }
 
 char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank, char* assist, char* puller, char *marknpc, GroupLeadershipAA_Struct* GLAA){ 
@@ -3161,6 +3170,142 @@ const char* Database::GetRaidLeaderName(uint32 rid)
 	strcpy(name, row[0]);
 
 	return name;
+}
+
+// maintank, assist, puller, marknpc currently unused
+void Database::GetGroupLeadershipInfo(uint32 gid, uint32 rid, char *maintank,
+		char *assist, char *puller, char *marknpc, GroupLeadershipAA_Struct *GLAA)
+{
+	std::string query = StringFormat(
+			"SELECT maintank, assist, puller, marknpc, leadershipaa FROM raid_leaders WHERE gid = %lu AND rid = %lu",
+			(unsigned long)gid, (unsigned long)rid);
+	auto results = QueryDatabase(query);
+
+	if (!results.Success() || results.RowCount() == 0) {
+		if (maintank)
+			maintank[0] = '\0';
+
+		if (assist)
+			assist[0] = '\0';
+
+		if (puller)
+			puller[0] = '\0';
+
+		if (marknpc)
+			marknpc[0] = '\0';
+
+		return;
+	}
+
+	auto row = results.begin();
+
+	if (maintank)
+		strcpy(maintank, row[0]);
+
+	if (assist)
+		strcpy(assist, row[1]);
+
+	if (puller)
+		strcpy(puller, row[2]);
+
+	if (marknpc)
+		strcpy(marknpc, row[3]);
+
+	if (GLAA && results.LengthOfColumn(4) == sizeof(GroupLeadershipAA_Struct))
+		memcpy(GLAA, row[4], sizeof(GroupLeadershipAA_Struct));
+
+	return;
+}
+
+// maintank, assist, puller, marknpc currently unused
+void Database::GetRaidLeadershipInfo(uint32 rid, char *maintank,
+		char *assist, char *puller, char *marknpc, RaidLeadershipAA_Struct *RLAA)
+{
+	std::string query = StringFormat(
+			"SELECT maintank, assist, puller, marknpc, leadershipaa FROM raid_leaders WHERE gid = %lu AND rid = %lu",
+			(unsigned long)0xFFFFFFFF, (unsigned long)rid);
+	auto results = QueryDatabase(query);
+
+	if (!results.Success() || results.RowCount() == 0) {
+		if (maintank)
+			maintank[0] = '\0';
+
+		if (assist)
+			assist[0] = '\0';
+
+		if (puller)
+			puller[0] = '\0';
+
+		if (marknpc)
+			marknpc[0] = '\0';
+
+		return;
+	}
+
+	auto row = results.begin();
+
+	if (maintank)
+		strcpy(maintank, row[0]);
+
+	if (assist)
+		strcpy(assist, row[1]);
+
+	if (puller)
+		strcpy(puller, row[2]);
+
+	if (marknpc)
+		strcpy(marknpc, row[3]);
+
+	if (RLAA && results.LengthOfColumn(4) == sizeof(RaidLeadershipAA_Struct))
+		memcpy(RLAA, row[4], sizeof(RaidLeadershipAA_Struct));
+
+	return;
+}
+
+void Database::SetRaidGroupLeaderInfo(uint32 gid, uint32 rid)
+{
+	std::string query = StringFormat("UPDATE raid_leaders SET leadershipaa = '', WHERE gid = %lu AND rid = %lu",
+			(unsigned long)gid, (unsigned long)rid);
+	auto results = QueryDatabase(query);
+
+	if (results.RowsAffected() != 0)
+		return;
+
+	query = StringFormat("INSERT INTO raid_leaders(gid, rid, marknpc, leadershipaa, maintank, assist, puller) VALUES(%lu, %lu, '', '', '', '', '')",
+			(unsigned long)gid, (unsigned long)rid);
+	results = QueryDatabase(query);
+
+	if (!results.Success())
+		std::cout << "Unable to set raid/group leader: " << results.ErrorMessage() << std::endl;
+
+	return;
+}
+
+// Clearing all raid leaders
+void Database::ClearAllRaidLeaders(void)
+{
+	std::string query("DELETE from raid_leaders");
+	auto results = QueryDatabase(query);
+
+	if (!results.Success())
+		std::cout << "Unable to clear raid leaders: " << results.ErrorMessage() << std::endl;
+
+	return;
+}
+
+void Database::ClearRaidLeader(uint32 gid, uint32 rid)
+{
+	if (rid == 0) {
+		ClearAllRaidLeaders();
+		return;
+	}
+
+	std::string query = StringFormat("DELETE from raid_leaders where gid = %lu and rid = %lu",
+			(unsigned long)gid, (unsigned long)rid);
+	auto results = QueryDatabase(query);
+
+	if (!results.Success())
+		std::cout << "Unable to clear raid leader: " << results.ErrorMessage() << std::endl;
 }
 
 bool Database::VerifyInstanceAlive(uint16 instance_id, uint32 char_id)
@@ -3699,8 +3844,7 @@ void Database::UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win)
 	QueryDatabase(query);
 }
 
-bool Database::GetAdventureStats(uint32 char_id, uint32 &guk_w, uint32 &mir_w, uint32 &mmc_w, uint32 &ruj_w,
-								uint32 &tak_w, uint32 &guk_l, uint32 &mir_l, uint32 &mmc_l, uint32 &ruj_l, uint32 &tak_l)
+bool Database::GetAdventureStats(uint32 char_id, AdventureStats_Struct *as)
 {
 
 	std::string query = StringFormat("SELECT `guk_wins`, `mir_wins`, `mmc_wins`, `ruj_wins`, `tak_wins`, `guk_losses`, "
@@ -3715,16 +3859,18 @@ bool Database::GetAdventureStats(uint32 char_id, uint32 &guk_w, uint32 &mir_w, u
 
 	auto row = results.begin();
 
-	guk_w = atoi(row[0]);
-	mir_w = atoi(row[1]);
-	mmc_w = atoi(row[2]);
-	ruj_w = atoi(row[3]);
-	tak_w = atoi(row[4]);
-	guk_l = atoi(row[5]);
-	mir_l = atoi(row[6]);
-	mmc_l = atoi(row[7]);
-	ruj_l = atoi(row[8]);
-	tak_l = atoi(row[9]);
+	as->success.guk = atoi(row[0]);
+	as->success.mir = atoi(row[1]);
+	as->success.mmc = atoi(row[2]);
+	as->success.ruj = atoi(row[3]);
+	as->success.tak = atoi(row[4]);
+	as->failure.guk = atoi(row[5]);
+	as->failure.mir = atoi(row[6]);
+	as->failure.mmc = atoi(row[7]);
+	as->failure.ruj = atoi(row[8]);
+	as->failure.tak = atoi(row[9]);
+	as->failure.total = as->failure.guk + as->failure.mir + as->failure.mmc + as->failure.ruj + as->failure.tak;
+	as->success.total = as->success.guk + as->success.mir + as->success.mmc + as->success.ruj + as->success.tak;
 
 	return true;
 }

@@ -546,6 +546,7 @@ void Client::CompleteConnect()
 			raid = new Raid(raidid);
 			if (raid->GetID() != 0){
 				entity_list.AddRaid(raid, raidid);
+				raid->LoadLeadership(); // Recreating raid in new zone, get leadership from DB
 			}
 			else
 				raid = nullptr;
@@ -566,11 +567,20 @@ void Client::CompleteConnect()
 			raid->SendBulkRaid(this);
 			raid->SendGroupUpdate(this);
 			raid->SendRaidMOTD(this);
+			if (raid->IsLeader(this)) { // We're a raid leader, lets update just in case!
+				raid->UpdateRaidAAs();
+				raid->SendAllRaidLeadershipAA();
+			}
 			uint32 grpID = raid->GetGroup(GetName());
 			if (grpID < 12){
 				raid->SendRaidGroupRemove(GetName(), grpID);
 				raid->SendRaidGroupAdd(GetName(), grpID);
+				if (raid->IsGroupLeader(GetName())) { // group leader same thing!
+					raid->UpdateGroupAAs(raid->GetGroup(this));
+					raid->GroupUpdate(grpID, false);
+				}
 			}
+			raid->SendGroupLeadershipAA(this, grpID); // this may get sent an extra time ...
 			if (raid->IsLocked())
 				raid->SendRaidLockTo(this);
 		}
@@ -1405,6 +1415,22 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	database.LoadCharacterLanguages(cid, &m_pp); /* Load Character Languages */
 	database.LoadCharacterLeadershipAA(cid, &m_pp); /* Load Character Leadership AA's */
 	database.LoadCharacterTribute(cid, &m_pp); /* Load CharacterTribute */
+
+	/* Load AdventureStats */
+	AdventureStats_Struct as;
+	if(database.GetAdventureStats(cid, &as))
+	{
+		m_pp.ldon_wins_guk = as.success.guk;
+		m_pp.ldon_wins_mir = as.success.mir;
+		m_pp.ldon_wins_mmc = as.success.mmc;
+		m_pp.ldon_wins_ruj = as.success.ruj;
+		m_pp.ldon_wins_tak = as.success.tak;
+		m_pp.ldon_losses_guk = as.failure.guk;
+		m_pp.ldon_losses_mir = as.failure.mir;
+		m_pp.ldon_losses_mmc = as.failure.mmc;
+		m_pp.ldon_losses_ruj = as.failure.ruj;
+		m_pp.ldon_losses_tak = as.failure.tak;
+	}
 
 	/* Set item material tint */
 	for (int i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_END; i++)
@@ -2488,11 +2514,8 @@ void Client::Handle_OP_AdventureStatsRequest(const EQApplicationPacket *app)
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventureStatsReply, sizeof(AdventureStats_Struct));
 	AdventureStats_Struct *as = (AdventureStats_Struct*)outapp->pBuffer;
 
-	if (database.GetAdventureStats(CharacterID(), as->success.guk, as->success.mir, as->success.mmc, as->success.ruj,
-		as->success.tak, as->failure.guk, as->failure.mir, as->failure.mmc, as->failure.ruj, as->failure.tak))
+	if (database.GetAdventureStats(CharacterID(), as))
 	{
-		as->failure.total = as->failure.guk + as->failure.mir + as->failure.mmc + as->failure.ruj + as->failure.tak;
-		as->success.total = as->success.guk + as->success.mir + as->success.mmc + as->success.ruj + as->success.tak;
 		m_pp.ldon_wins_guk = as->success.guk;
 		m_pp.ldon_wins_mir = as->success.mir;
 		m_pp.ldon_wins_mmc = as->success.mmc;
@@ -5322,6 +5345,8 @@ void Client::Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app)
 	}
 
 	default:
+		LogFile->write(EQEMuLog::Debug, "Got unhandled OP_DoGroupLeadershipAbility Ability: %d Parameter: %d",
+				dglas->Ability, dglas->Parameter);
 		break;
 	}
 }
@@ -10593,10 +10618,23 @@ void Client::Handle_OP_PurchaseLeadershipAA(const EQApplicationPacket *app)
 		u->pointsleft = m_pp.group_leadership_points;
 	FastQueuePacket(&outapp);
 
-	Group *g = GetGroup();
-
 	// Update all group members with the new AA the leader has purchased.
-	if (g) {
+	if (IsRaidGrouped()) {
+		Raid *r = GetRaid();
+		if (!r)
+			return;
+		if (aaid >= raidAAMarkNPC) {
+			r->UpdateRaidAAs();
+			r->SendAllRaidLeadershipAA();
+		} else {
+			uint32 gid = r->GetGroup(this);
+			r->UpdateGroupAAs(gid);
+			r->GroupUpdate(gid, false);
+		}
+	} else if (IsGrouped()) {
+		Group *g = GetGroup();
+		if (!g)
+			return;
 		g->UpdateGroupAAs();
 		g->SendLeadershipAAUpdate();
 	}
@@ -11215,6 +11253,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 		{
 			if (strcmp(r->leadername, GetName()) == 0){
 				r->SetRaidLeader(GetName(), ri->leader_name);
+				r->UpdateRaidAAs();
+				r->SendAllRaidLeadershipAA();
 			}
 		}
 		break;

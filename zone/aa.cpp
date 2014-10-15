@@ -1550,6 +1550,41 @@ void Client::ResetAA(){
 
 int Client::GroupLeadershipAAHealthEnhancement()
 {
+	if (IsRaidGrouped()) {
+		int bonus = 0;
+		Raid *raid = GetRaid();
+		if (!raid)
+			return 0;
+		uint32 group_id = raid->GetGroup(this);
+		if (group_id < 12 && raid->GroupCount(group_id) >= 3) {
+			switch (raid->GetLeadershipAA(groupAAHealthEnhancement, group_id)) {
+			case 1:
+				bonus = 30;
+				break;
+			case 2:
+				bonus = 60;
+				break;
+			case 3:
+				bonus = 100;
+				break;
+			}
+		}
+		if (raid->RaidCount() >= 18) {
+			switch (raid->GetLeadershipAA(raidAAHealthEnhancement)) {
+			case 1:
+				bonus += 30;
+				break;
+			case 2:
+				bonus += 60;
+				break;
+			case 3:
+				bonus += 100;
+				break;
+			}
+		}
+		return bonus;
+	}
+
 	Group *g = GetGroup();
 
 	if(!g || (g->GroupCount() < 3))
@@ -1572,6 +1607,41 @@ int Client::GroupLeadershipAAHealthEnhancement()
 
 int Client::GroupLeadershipAAManaEnhancement()
 {
+	if (IsRaidGrouped()) {
+		int bonus = 0;
+		Raid *raid = GetRaid();
+		if (!raid)
+			return 0;
+		uint32 group_id = raid->GetGroup(this);
+		if (group_id < 12 && raid->GroupCount(group_id) >= 3) {
+			switch (raid->GetLeadershipAA(groupAAManaEnhancement, group_id)) {
+			case 1:
+				bonus = 30;
+				break;
+			case 2:
+				bonus = 60;
+				break;
+			case 3:
+				bonus = 100;
+				break;
+			}
+		}
+		if (raid->RaidCount() >= 18) {
+			switch (raid->GetLeadershipAA(raidAAManaEnhancement)) {
+			case 1:
+				bonus += 30;
+				break;
+			case 2:
+				bonus += 60;
+				break;
+			case 3:
+				bonus += 100;
+				break;
+			}
+		}
+		return bonus;
+	}
+
 	Group *g = GetGroup();
 
 	if(!g || (g->GroupCount() < 3))
@@ -1594,6 +1664,41 @@ int Client::GroupLeadershipAAManaEnhancement()
 
 int Client::GroupLeadershipAAHealthRegeneration()
 {
+	if (IsRaidGrouped()) {
+		int bonus = 0;
+		Raid *raid = GetRaid();
+		if (!raid)
+			return 0;
+		uint32 group_id = raid->GetGroup(this);
+		if (group_id < 12 && raid->GroupCount(group_id) >= 3) {
+			switch (raid->GetLeadershipAA(groupAAHealthRegeneration, group_id)) {
+			case 1:
+				bonus = 4;
+				break;
+			case 2:
+				bonus = 6;
+				break;
+			case 3:
+				bonus = 8;
+				break;
+			}
+		}
+		if (raid->RaidCount() >= 18) {
+			switch (raid->GetLeadershipAA(raidAAHealthRegeneration)) {
+			case 1:
+				bonus += 4;
+				break;
+			case 2:
+				bonus += 6;
+				break;
+			case 3:
+				bonus += 8;
+				break;
+			}
+		}
+		return bonus;
+	}
+
 	Group *g = GetGroup();
 
 	if(!g || (g->GroupCount() < 3))
@@ -1616,6 +1721,53 @@ int Client::GroupLeadershipAAHealthRegeneration()
 
 int Client::GroupLeadershipAAOffenseEnhancement()
 {
+	if (IsRaidGrouped()) {
+		int bonus = 0;
+		Raid *raid = GetRaid();
+		if (!raid)
+			return 0;
+		uint32 group_id = raid->GetGroup(this);
+		if (group_id < 12 && raid->GroupCount(group_id) >= 3) {
+			switch (raid->GetLeadershipAA(groupAAOffenseEnhancement, group_id)) {
+			case 1:
+				bonus = 10;
+				break;
+			case 2:
+				bonus = 19;
+				break;
+			case 3:
+				bonus = 28;
+				break;
+			case 4:
+				bonus = 34;
+				break;
+			case 5:
+				bonus = 40;
+				break;
+			}
+		}
+		if (raid->RaidCount() >= 18) {
+			switch (raid->GetLeadershipAA(raidAAOffenseEnhancement)) {
+			case 1:
+				bonus += 10;
+				break;
+			case 2:
+				bonus += 19;
+				break;
+			case 3:
+				bonus += 28;
+				break;
+			case 4:
+				bonus += 34;
+				break;
+			case 5:
+				bonus += 40;
+				break;
+			}
+		}
+		return bonus;
+	}
+
 	Group *g = GetGroup();
 
 	if(!g || (g->GroupCount() < 3))

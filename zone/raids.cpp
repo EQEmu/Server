@@ -29,6 +29,8 @@ Raid::Raid(uint32 raidID)
 : GroupIDConsumer(raidID)
 {
 	memset(members ,0, (sizeof(RaidMember)*MAX_RAID_MEMBERS));
+	memset(&raid_aa, 0, sizeof(RaidLeadershipAA_Struct));
+	memset(group_aa, 0, sizeof(GroupLeadershipAA_Struct) * MAX_RAID_GROUPS);
 	leader = nullptr;
 	memset(leadername, 0, 64);
 	locked = false;
@@ -39,6 +41,8 @@ Raid::Raid(Client* nLeader)
 : GroupIDConsumer()
 {
 	memset(members ,0, (sizeof(RaidMember)*MAX_RAID_MEMBERS));
+	memset(&raid_aa, 0, sizeof(RaidLeadershipAA_Struct));
+	memset(group_aa, 0, sizeof(GroupLeadershipAA_Struct) * MAX_RAID_GROUPS);
 	leader = nLeader;
 	memset(leadername, 0, 64);
 	strn0cpy(leadername, nLeader->GetName(), 64);
@@ -84,8 +88,18 @@ void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bo
 
 	LearnMembers();
 	VerifyRaid();
+	if (rleader) {
+		database.SetRaidGroupLeaderInfo(RAID_GROUPLESS, GetID());
+		UpdateRaidAAs();
+	}
+	if (group != RAID_GROUPLESS && groupleader) {
+		database.SetRaidGroupLeaderInfo(group, GetID());
+		UpdateGroupAAs(group);
+	}
 	if(group < 12)
 		GroupUpdate(group);
+	else // get raid AAs, GroupUpdate will handles it otherwise
+		SendGroupLeadershipAA(c, RAID_GROUPLESS);
 	SendRaidAddAll(c->GetName());
 
 	c->SetRaidGrouped(true);
@@ -186,6 +200,18 @@ void Raid::SetGroupLeader(const char *who, bool glFlag)
 	safe_delete(pack);
 }
 
+Client *Raid::GetGroupLeader(uint32 group_id)
+{
+	if (group_id == RAID_GROUPLESS)
+		return nullptr;
+
+	for (uint32 i = 0; i < MAX_RAID_MEMBERS; i++)
+		if (members[i].member && members[i].IsGroupLeader && members[i].GroupNumber == group_id)
+			return members[i].member;
+
+	return nullptr;
+}
+
 void Raid::SetRaidLeader(const char *wasLead, const char *name)
 {
 	std::string query = StringFormat("UPDATE raid_members SET israidleader = 0 WHERE name = '%s'", wasLead);
@@ -216,6 +242,59 @@ void Raid::SetRaidLeader(const char *wasLead, const char *name)
 	rga->instance_id = zone->GetInstanceID();
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
+}
+
+void Raid::SaveGroupLeaderAA(uint32 gid)
+{
+	char *queryBuffer = new char[sizeof(GroupLeadershipAA_Struct) * 2 + 1];
+	database.DoEscapeString(queryBuffer, (char*)&group_aa[gid], sizeof(GroupLeadershipAA_Struct));
+
+	std::string query = "UPDATE raid_leaders SET leadershipaa = '";
+	query += queryBuffer;
+	query +=  StringFormat("' WHERE gid = %lu AND rid = %lu LIMIT 1", gid, GetID());
+	safe_delete_array(queryBuffer);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Unable to store LeadershipAA: %s\n", results.ErrorMessage().c_str());
+}
+
+void Raid::SaveRaidLeaderAA()
+{
+	char *queryBuffer = new char[sizeof(RaidLeadershipAA_Struct) * 2 + 1];
+	database.DoEscapeString(queryBuffer, (char*)&raid_aa, sizeof(RaidLeadershipAA_Struct));
+	_hex(NET__ERROR, queryBuffer, sizeof(RaidLeadershipAA_Struct));
+
+	std::string query = "UPDATE raid_leaders SET leadershipaa = '";
+	query += queryBuffer;
+	query +=  StringFormat("' WHERE gid = %lu AND rid = %lu LIMIT 1", RAID_GROUPLESS, GetID());
+	safe_delete_array(queryBuffer);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Unable to store LeadershipAA: %s\n", results.ErrorMessage().c_str());
+}
+
+void Raid::UpdateGroupAAs(uint32 gid)
+{
+	Client *gl = GetGroupLeader(gid);
+
+	if (gl)
+		gl->GetGroupAAs(&group_aa[gid]);
+	else
+		memset(&group_aa[gid], 0, sizeof(GroupLeadershipAA_Struct));
+
+	SaveGroupLeaderAA(gid);
+}
+
+void Raid::UpdateRaidAAs()
+{
+	Client *rl = GetLeader();
+
+	if (rl)
+		rl->GetRaidAAs(&raid_aa);
+	else
+		memset(&raid_aa, 0, sizeof(RaidLeadershipAA_Struct));
+
+	SaveRaidLeaderAA();
 }
 
 bool Raid::IsGroupLeader(const char *who)
@@ -1094,6 +1173,7 @@ void Raid::SendGroupUpdate(Client *to)
 		strn0cpy(gu->leadersname, to->GetName(), 64);
 	}
 	strn0cpy(gu->yourname, to->GetName(), 64);
+	memcpy(&gu->leader_aas, &group_aa[grp], sizeof(GroupLeadershipAA_Struct));
 
 	to->FastQueuePacket(&outapp);
 }
@@ -1106,8 +1186,10 @@ void Raid::GroupUpdate(uint32 gid, bool initial)
 	{
 		if(strlen(members[x].membername) > 0){
 			if(members[x].GroupNumber == gid){
-				if(members[x].member)
+				if(members[x].member) {
 					SendGroupUpdate(members[x].member);
+					SendGroupLeadershipAA(members[x].member, gid);
+				}
 			}
 		}
 	}
@@ -1242,6 +1324,34 @@ void Raid::SendRaidMOTDToWorld()
 	strn0cpy(smotd->motd, motd.c_str(), size);
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
+}
+
+void Raid::SendGroupLeadershipAA(Client *c, uint32 gid)
+{
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidLeadershipUpdate_Struct));
+	RaidLeadershipUpdate_Struct *rlaa = (RaidLeadershipUpdate_Struct *)outapp->pBuffer;
+	rlaa->action = raidSetLeaderAbilities;
+	strn0cpy(rlaa->leader_name, c->GetName(), 64);
+	strn0cpy(rlaa->player_name, c->GetName(), 64);
+	if (gid != RAID_GROUPLESS)
+		memcpy(&rlaa->group, &group_aa[gid], sizeof(GroupLeadershipAA_Struct));
+	memcpy(&rlaa->raid, &raid_aa, sizeof(RaidLeadershipAA_Struct));
+	c->QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
+void Raid::SendGroupLeadershipAA(uint32 gid)
+{
+	for (uint32 i = 0; i < MAX_RAID_MEMBERS; i++)
+		if (members[i].member && members[i].GroupNumber == gid)
+			SendGroupLeadershipAA(members[i].member, gid);
+}
+
+void Raid::SendAllRaidLeadershipAA()
+{
+	for (uint32 i = 0; i < MAX_RAID_MEMBERS; i++)
+		if (members[i].member)
+			SendGroupLeadershipAA(members[i].member, members[i].GroupNumber);
 }
 
 void Raid::LockRaid(bool lockFlag)
@@ -1482,5 +1592,13 @@ void Raid::RaidMessage_StringID(Mob* sender, uint32 type, uint32 string_id, cons
 				members[i].member->Message_StringID(type, string_id, message, message2, message3, message4, message5, message6, message7, message8, message9, distance);
 		}
 	}
+}
+
+void Raid::LoadLeadership()
+{
+	database.GetRaidLeadershipInfo(GetID(), nullptr, nullptr, nullptr, nullptr, &raid_aa);
+
+	for (uint32 group_id = 0; group_id < MAX_RAID_GROUPS; group_id++)
+		database.GetGroupLeadershipInfo(group_id, GetID(), nullptr, nullptr, nullptr, nullptr, &group_aa[group_id]);
 }
 
