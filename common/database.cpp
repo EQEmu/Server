@@ -1933,6 +1933,8 @@ bool Database::CheckDatabaseConversions() {
 			printf("----------------------------------------------------------\n\n");
 			printf(" Database currently has bot view/function linkage to obselete \n");
 			printf("  table references and will now be converted...\n\n");
+			printf(" It is recommended that you backup your database \n");
+			printf("  before continuing the automatic conversion process...\n\n");
 			printf("----------------------------------------------------------\n\n");
 			std::cout << "Press ENTER to continue....." << std::endl << std::endl;
 			std::cin.ignore(1);
@@ -1943,6 +1945,7 @@ bool Database::CheckDatabaseConversions() {
 	}
 
 	if (runbotsconvert == 1){
+		printf("Running bot views/function database conversion... \n");
 
 		/* Update view `vwbotcharactermobs` */
 		rquery = StringFormat("DROP VIEW `vwbotcharactermobs`;");

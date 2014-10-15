@@ -1,7 +1,7 @@
--- 'load_bots' sql script file
+-- 'load_bots_old' sql script file
 -- current as of 10/15/2014
 --
--- Use this file on databases where the player profile blob has been converted.
+-- Use this file on databases where the player profile blob has not been converted
 --
 -- Note: This file assumes a database free of bot remnants. If you have a prior
 -- bot installation and wish to reload the default schema and entries, then
@@ -140,7 +140,7 @@ CREATE TABLE `botpets` (
 	CONSTRAINT `FK_botpets_1` FOREIGN KEY (`BotId`) REFERENCES `bots` (`BotID`),
 	CONSTRAINT `U_botpets_1` UNIQUE (`BotId`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
-
+		
 CREATE TABLE `botpetbuffs` (
 	`BotPetBuffId` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`BotPetsId` INT(10) UNSIGNED NOT NULL DEFAULT '0',
@@ -194,22 +194,22 @@ CREATE TABLE `botguildmembers` (
 	PRIMARY KEY  (`char_id`)
 ) ENGINE=InnoDB;
 
-DELIMITER \\
-
+DELIMITER //
+		
 CREATE FUNCTION `GetMobType` (mobname VARCHAR(64)) RETURNS CHAR(1)
 BEGIN
 	DECLARE Result CHAR(1);
 	
 	SET Result = NULL;
 	
-	IF (SELECT COUNT(*) FROM `character_data` WHERE `name` = mobname) > 0 THEN
+	IF (SELECT COUNT(*) FROM `character_` WHERE `name` = mobname) > 0 THEN
 		SET Result = 'C';
 	ELSEIF (SELECT COUNT(*) FROM `bots` WHERE `Name` = mobname) > 0 THEN
 		SET Result = 'B';
 	END IF;
 	
-	RETURN Result;
-END\\
+RETURN Result;
+END//
 
 DELIMITER ;
 
@@ -219,9 +219,9 @@ c.`id`,
 c.`name`,
 c.`class`,
 c.`level`,
-c.`last_login`,
-c.`zone_id`
-FROM `character_data` AS c
+c.`timelaston`,
+c.`zoneid`
+FROM `character_` AS c
 UNION ALL
 SELECT _utf8'B' AS mobtype,
 b.`BotID` AS id,
@@ -239,7 +239,7 @@ g.`name` AS name,
 g.`charid` AS mobid,
 IFNULL(c.`level`, b.`BotLevel`) AS level
 FROM `group_id` AS g
-LEFT JOIN `character_data` AS c ON g.`name` = c.`name`
+LEFT JOIN `character_` AS c ON g.`name` = c.`name`
 LEFT JOIN `bots` AS b ON g.`name` = b.`Name`;
 
 CREATE VIEW `vwbotgroups` AS
@@ -251,7 +251,7 @@ b.`BotOwnerCharacterId`,
 c.`name` AS BotOwnerCharacterName
 FROM `botgroup` AS g
 JOIN `bots` AS b ON g.`BotGroupLeaderBotId` = b.`BotID`
-JOIN `character_data` AS c ON b.`BotOwnerCharacterID` = c.`id`
+JOIN `character_` AS c ON b.`BotOwnerCharacterID` = c.`id`
 ORDER BY b.`BotOwnerCharacterId`, g.`BotGroupName`;
 
 CREATE VIEW `vwguildmembers` AS
