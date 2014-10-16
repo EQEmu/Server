@@ -15,10 +15,10 @@ UPDATE `spawn2` SET `enabled` = 0 WHERE `id` IN (59297,59298);
 DELETE FROM `commands` WHERE `command` = 'bot';
 DELETE FROM `rule_values` WHERE `rule_name` LIKE 'Bots%';
 
-DROP VIEW IF EXISTS `vwbotcharactermobs`;
-DROP VIEW IF EXISTS `vwbotgroups`;
-DROP VIEW IF EXISTS `vwgroups`;
-DROP VIEW IF EXISTS `vwguildmembers`;
+DROP VIEW IF EXISTS `vwBotCharacterMobs`;
+DROP VIEW IF EXISTS `vwBotGroups`;
+DROP VIEW IF EXISTS `vwGroups`;
+DROP VIEW IF EXISTS `vwGuildMembers`;
 
 DROP FUNCTION IF EXISTS `GetMobType`;
 

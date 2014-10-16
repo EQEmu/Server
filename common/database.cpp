@@ -1921,7 +1921,7 @@ bool Database::CheckDatabaseConversions() {
 	int runbotsconvert = 0;
 
 	/* Check For Legacy Bot References */
-	rquery = StringFormat("SHOW CREATE VIEW `vwbotcharactermobs`");
+	rquery = StringFormat("SHOW CREATE VIEW `vwBotCharacterMobs`");
 	results = QueryDatabase(rquery);
 	if (results.RowCount() == 1){
 		auto row = results.begin();
@@ -1948,12 +1948,12 @@ bool Database::CheckDatabaseConversions() {
 		printf("Running bot views/function database conversion... \n");
 
 		/* Update view `vwbotcharactermobs` */
-		rquery = StringFormat("DROP VIEW `vwbotcharactermobs`;");
+		rquery = StringFormat("DROP VIEW `vwBotCharacterMobs`;");
 		results = QueryDatabase(rquery);
-		ThrowDBError(results.ErrorMessage(), "Drop View `vwbotcharactermobs`", rquery);
+		ThrowDBError(results.ErrorMessage(), "Drop View `vwBotCharacterMobs`", rquery);
 
 		rquery = StringFormat(
-			"CREATE VIEW `vwbotcharactermobs` AS\n"
+			"CREATE VIEW `vwBotCharacterMobs` AS\n"
 			"SELECT _utf8'C' AS mobtype,\n" // Natedog: '_utf8'
 			"c.`id`,\n"
 			"c.`name`,\n"
@@ -1973,7 +1973,7 @@ bool Database::CheckDatabaseConversions() {
 			"FROM bots AS b;"
 			);
 		results = QueryDatabase(rquery);
-		ThrowDBError(results.ErrorMessage(), "Create View `vwbotcharactermobs`", rquery);
+		ThrowDBError(results.ErrorMessage(), "Create View `vwBotCharacterMobs`", rquery);
 
 
 		/* Update function `GetMobType` */
@@ -2002,12 +2002,12 @@ bool Database::CheckDatabaseConversions() {
 
 
 		/* Update view `vwgroups` */
-		rquery = StringFormat("DROP VIEW IF EXISTS `vwgroups`;");
+		rquery = StringFormat("DROP VIEW IF EXISTS `vwGroups`;");
 		results = QueryDatabase(rquery);
-		ThrowDBError(results.ErrorMessage(), "Drop View `vwgroups`", rquery);
+		ThrowDBError(results.ErrorMessage(), "Drop View `vwGroups`", rquery);
 
 		rquery = StringFormat(
-			"CREATE VIEW `vwgroups` AS\n"
+			"CREATE VIEW `vwGroups` AS\n"
 			"SELECT g.`groupid` AS groupid,\n"
 			"GetMobType(g.`name`) AS mobtype,\n"
 			"g.`name` AS name,\n"
@@ -2018,16 +2018,16 @@ bool Database::CheckDatabaseConversions() {
 			"LEFT JOIN `bots` AS b ON g.`name` = b.`Name`;"
 			);
 		results = QueryDatabase(rquery);
-		ThrowDBError(results.ErrorMessage(), "Create View `vwgroups`", rquery);
+		ThrowDBError(results.ErrorMessage(), "Create View `vwGroups`", rquery);
 
 
 		/* Update view `vwbotgroups` */
-		rquery = StringFormat("DROP VIEW IF EXISTS `vwbotgroups`;");
+		rquery = StringFormat("DROP VIEW IF EXISTS `vwBotGroups`;");
 		results = QueryDatabase(rquery);
-		ThrowDBError(results.ErrorMessage(), "Drop View `vwbotgroups`", rquery);
+		ThrowDBError(results.ErrorMessage(), "Drop View `vwBotGroups`", rquery);
 
 		rquery = StringFormat(
-			"CREATE VIEW `vwbotgroups` AS\n"
+			"CREATE VIEW `vwBotGroups` AS\n"
 			"SELECT g.`BotGroupId`,\n"
 			"g.`BotGroupName`,\n"
 			"g.`BotGroupLeaderBotId`,\n"
@@ -2040,16 +2040,16 @@ bool Database::CheckDatabaseConversions() {
 			"ORDER BY b.`BotOwnerCharacterId`, g.`BotGroupName`;"
 			);
 		results = QueryDatabase(rquery);
-		ThrowDBError(results.ErrorMessage(), "Create View `vwbotgroups`", rquery);
+		ThrowDBError(results.ErrorMessage(), "Create View `vwBotGroups`", rquery);
 
 
 		/* Update view `vwguildmembers` */
-		rquery = StringFormat("DROP VIEW IF EXISTS `vwguildmembers`;");
+		rquery = StringFormat("DROP VIEW IF EXISTS `vwGuildMembers`;");
 		results = QueryDatabase(rquery);
-		ThrowDBError(results.ErrorMessage(), "Drop View `vwguildmembers`", rquery);
+		ThrowDBError(results.ErrorMessage(), "Drop View `vwGuildMembers`", rquery);
 
 		rquery = StringFormat(
-			"CREATE VIEW `vwguildmembers` AS\n"
+			"CREATE VIEW `vwGuildMembers` AS\n"
 			"SELECT 'C' AS mobtype,\n"
 			"cm.`char_id`,\n"
 			"cm.`guild_id`,\n"
@@ -2075,7 +2075,7 @@ bool Database::CheckDatabaseConversions() {
 			"FROM `botguildmembers` AS bm;"
 			);
 		results = QueryDatabase(rquery);
-		ThrowDBError(results.ErrorMessage(), "Create View `vwguildmembers`", rquery);
+		ThrowDBError(results.ErrorMessage(), "Create View `vwGuildMembers`", rquery);
 	}
 
 	if (runbotsconvert == 1){

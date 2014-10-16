@@ -213,7 +213,7 @@ END//
 
 DELIMITER ;
 
-CREATE VIEW `vwbotcharactermobs` AS
+CREATE VIEW `vwBotCharacterMobs` AS
 SELECT _utf8'C' AS mobtype,
 c.`id`,
 c.`name`,
@@ -232,7 +232,7 @@ b.`BotLevel` AS level,
 0 AS zoneid
 FROM bots AS b;
 
-CREATE VIEW `vwgroups` AS
+CREATE VIEW `vwGroups` AS
 SELECT g.`groupid` AS groupid,
 GetMobType(g.`name`) AS mobtype,
 g.`name` AS name,
@@ -242,7 +242,7 @@ FROM `group_id` AS g
 LEFT JOIN `character_` AS c ON g.`name` = c.`name`
 LEFT JOIN `bots` AS b ON g.`name` = b.`Name`;
 
-CREATE VIEW `vwbotgroups` AS
+CREATE VIEW `vwBotGroups` AS
 SELECT g.`BotGroupId`,
 g.`BotGroupName`,
 g.`BotGroupLeaderBotId`,
@@ -254,7 +254,7 @@ JOIN `bots` AS b ON g.`BotGroupLeaderBotId` = b.`BotID`
 JOIN `character_` AS c ON b.`BotOwnerCharacterID` = c.`id`
 ORDER BY b.`BotOwnerCharacterId`, g.`BotGroupName`;
 
-CREATE VIEW `vwguildmembers` AS
+CREATE VIEW `vwGuildMembers` AS
 SELECT 'C' AS mobtype,
 cm.`char_id`,
 cm.`guild_id`,
