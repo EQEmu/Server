@@ -262,7 +262,6 @@ void Raid::SaveRaidLeaderAA()
 {
 	char *queryBuffer = new char[sizeof(RaidLeadershipAA_Struct) * 2 + 1];
 	database.DoEscapeString(queryBuffer, (char*)&raid_aa, sizeof(RaidLeadershipAA_Struct));
-	_hex(NET__ERROR, queryBuffer, sizeof(RaidLeadershipAA_Struct));
 
 	std::string query = "UPDATE raid_leaders SET leadershipaa = '";
 	query += queryBuffer;
