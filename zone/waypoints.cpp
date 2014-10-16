@@ -1084,14 +1084,14 @@ void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
 
 // how much it's allowed to be off by
 #define _GASSIGN_TOLERANCE	1.0
-	if(results.RowCount() == 0)	// try a fuzzy match if that didn't find it
+	if (results.RowCount() == 0)	// try a fuzzy match if that didn't find it
 	{
         query = StringFormat("SELECT id,x,y FROM spawn2 WHERE zone='%s' AND "
                             "ABS( ABS(x) - ABS(%f) ) < %f AND "
                             "ABS( ABS(y) - ABS(%f) ) < %f",
                             zone->GetShortName(), x, _GASSIGN_TOLERANCE, y, _GASSIGN_TOLERANCE);
         results = QueryDatabase(query);
-		if(!results.Success()) {
+		if (!results.Success()) {
 			LogFile->write(EQEMuLog::Error, "Error querying fuzzy spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 			return;
 		}
@@ -1100,12 +1100,13 @@ void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
 		matches = results.RowCount();
 	}
 
-    if (matches == 0) {
+    if (matches == 0)
+	{
         client->Message(0, "ERROR: Unable to assign grid - can't find it in spawn2");
         return;
     }
 
-    if(matches == 1)
+    if(matches > 1)
 	{
 		client->Message(0, "ERROR: Unable to assign grid - multiple spawn2 rows match");
 		return;
@@ -1125,7 +1126,8 @@ void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
 		return;
     }
 
-    if (results.RowsAffected() != 1) {
+    if (results.RowsAffected() != 1)
+	{
         client->Message(0, "ERROR: found spawn2 id %d but the update query failed", spawn2id);
         return;
     }
@@ -1133,7 +1135,8 @@ void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
     if(client)
         client->LogSQL(query.c_str());
 
-    if(!fuzzy) {
+	if (!fuzzy)
+	{
         client->Message(0, "Grid assign: spawn2 id = %d updated - exact match", spawn2id);
         return;
     }
