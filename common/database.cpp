@@ -943,7 +943,7 @@ bool Database::CheckDatabaseConversions() {
 	// printppdebug = 1;
 
 	if (runconvert == 1){
-		printf("Running character binary blob to database conversion... \n", number_of_characters); 
+		printf("Running character binary blob to database conversion... \n"); 
 		/* Get the number of characters */
 		rquery = StringFormat("SELECT COUNT(`id`) FROM `character_`");
 		results = QueryDatabase(rquery);
