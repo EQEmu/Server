@@ -11077,6 +11077,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 									if (strcmp(ri->leader_name, r->members[x].membername) != 0 && strlen(ri->leader_name) > 0)
 									{
 										r->SetGroupLeader(r->members[x].membername);
+										r->UpdateGroupAAs(oldgrp);
 										Client *cgl = entity_list.GetClientByName(r->members[x].membername);
 										if (cgl){
 											r->SendRaidRemove(r->members[x].membername, cgl);
@@ -11104,8 +11105,10 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 							}
 						}
 					}
-					if (grpcount == 0)
+					if (grpcount == 0) {
 						r->SetGroupLeader(ri->leader_name);
+						r->UpdateGroupAAs(ri->parameter);
+					}
 
 					r->MoveMember(ri->leader_name, ri->parameter);
 					if (c){
@@ -11143,6 +11146,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 						if (r->members[x].GroupNumber == oldgrp && strlen(r->members[x].membername) > 0 && strcmp(r->members[x].membername, ri->leader_name) != 0)
 						{
 							r->SetGroupLeader(r->members[x].membername);
+							r->UpdateGroupAAs(oldgrp);
 							Client *cgl = entity_list.GetClientByName(r->members[x].membername);
 							if (cgl){
 								r->SendRaidRemove(r->members[x].membername, cgl);
