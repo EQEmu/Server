@@ -11137,7 +11137,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 					r->SetGroupLeader(ri->leader_name, false);
 					for (int x = 0; x < MAX_RAID_MEMBERS; x++)
 					{
-						if (strlen(r->members[x].membername) > 0 && strcmp(r->members[x].membername, ri->leader_name) != 0)
+						if (r->members[x].GroupNumber == oldgrp && strlen(r->members[x].membername) > 0 && strcmp(r->members[x].membername, ri->leader_name) != 0)
 						{
 							r->SetGroupLeader(r->members[x].membername);
 							Client *cgl = entity_list.GetClientByName(r->members[x].membername);
