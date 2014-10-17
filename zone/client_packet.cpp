@@ -11010,6 +11010,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 							if (r->members[x].GroupNumber == grp){
 								r->SetGroupLeader(ri->leader_name, false);
 								r->SetGroupLeader(r->members[x].membername);
+								r->UpdateGroupAAs(grp);
 								break;
 							}
 						}
@@ -11021,6 +11022,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 						if (strlen(r->members[x].membername) > 0 && strcmp(r->members[x].membername, r->members[i].membername) != 0)
 						{
 							r->SetRaidLeader(r->members[i].membername, r->members[x].membername);
+							r->UpdateRaidAAs();
+							r->SendAllRaidLeadershipAA();
 							break;
 						}
 					}
