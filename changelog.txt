@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 10/18/2014==
 demonstar55: Implement group mentor, sharing leadership exp (SoF+ only)
+demonstar55: Add gaining of group leadership while in raids
 
 == 10/16/2014 ==
 Uleat: Fixed the auto-conversion view naming error and renamed the views in the script files. Added a fix sql for databases that auto-converted.

@@ -4256,12 +4256,28 @@ bool Client::IsLeadershipEXPOn() {
 
 	Group *g = GetGroup();
 
-	if(g && g->IsLeader(this) && (g->GroupCount() > 2))
+	if (g && g->IsLeader(this) && g->GroupCount() > 2)
 		return true;
 
 	Raid *r = GetRaid();
 
-	if(r && r->IsLeader(this) && (r->RaidCount() > 17))
+	if (!r)
+		return false;
+
+	// raid leaders can only gain raid AA XP
+	if (r->IsLeader(this)) {
+		if (r->RaidCount() > 17)
+			return true;
+		else
+			return false;
+	}
+
+	uint32 gid = r->GetGroup(this);
+
+	if (gid > 11) // not in a group
+		return false;
+
+	if (r->IsGroupLeader(GetName()) && r->GroupCount(gid) > 2)
 		return true;
 
 	return false;

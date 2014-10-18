@@ -133,14 +133,12 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 			}
 		}
 
-		if(IsLeadershipEXPOn() && (conlevel == CON_BLUE || conlevel == CON_WHITE || conlevel == CON_YELLOW || conlevel == CON_RED)) {
+		if (IsLeadershipEXPOn() && (conlevel == CON_BLUE || conlevel == CON_WHITE || conlevel == CON_YELLOW || conlevel == CON_RED)) {
 			add_exp = static_cast<uint32>(static_cast<float>(add_exp) * 0.8f);
 
-			if(GetGroup())
-			{
-				if((m_pp.group_leadership_points < MaxBankedGroupLeadershipPoints(GetLevel()))
-					&& (RuleI(Character, KillsPerGroupLeadershipAA) > 0))
-				{
+			if (GetGroup()) {
+				if (m_pp.group_leadership_points < MaxBankedGroupLeadershipPoints(GetLevel())
+						&& RuleI(Character, KillsPerGroupLeadershipAA) > 0) {
 					uint32 exp = GROUP_EXP_PER_POINT / RuleI(Character, KillsPerGroupLeadershipAA);
 					Client *mentoree = GetGroup()->GetMentoree();
 					if (GetGroup()->GetMentorPercent() && mentoree &&
@@ -154,20 +152,30 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 						AddLeadershipEXP(exp, 0); // ends up rounded up if mentored, no idea how live actually does it
 						Message_StringID(MT_Leadership, GAIN_GROUP_LEADERSHIP_EXP);
 					}
-				}
-				else
+				} else {
 					Message_StringID(MT_Leadership, MAX_GROUP_LEADERSHIP_POINTS);
-			}
-			else
-			{
-				if((m_pp.raid_leadership_points < MaxBankedRaidLeadershipPoints(GetLevel()))
-					&& (RuleI(Character, KillsPerRaidLeadershipAA) > 0))
-				{
-					AddLeadershipEXP(0, RAID_EXP_PER_POINT / RuleI(Character, KillsPerRaidLeadershipAA));
-					Message_StringID(MT_Leadership, GAIN_RAID_LEADERSHIP_EXP);
 				}
-				else
-					Message_StringID(MT_Leadership, MAX_RAID_LEADERSHIP_POINTS);
+			} else {
+				Raid *raid = GetRaid();
+				// Raid leaders CAN NOT gain group AA XP, other group leaders can though!
+				if (raid->IsLeader(this)) {
+					if (m_pp.raid_leadership_points < MaxBankedRaidLeadershipPoints(GetLevel())
+							&& RuleI(Character, KillsPerRaidLeadershipAA) > 0) {
+						AddLeadershipEXP(0, RAID_EXP_PER_POINT / RuleI(Character, KillsPerRaidLeadershipAA));
+						Message_StringID(MT_Leadership, GAIN_RAID_LEADERSHIP_EXP);
+					} else {
+						Message_StringID(MT_Leadership, MAX_RAID_LEADERSHIP_POINTS);
+					}
+				} else {
+					if (m_pp.group_leadership_points < MaxBankedGroupLeadershipPoints(GetLevel())
+							&& RuleI(Character, KillsPerGroupLeadershipAA) > 0) {
+						// mentoring stuff needs to be added here when raids are have support for it
+						AddLeadershipEXP(0, GROUP_EXP_PER_POINT / RuleI(Character, KillsPerGroupLeadershipAA));
+						Message_StringID(MT_Leadership, GAIN_GROUP_LEADERSHIP_EXP);
+					} else {
+						Message_StringID(MT_Leadership, MAX_GROUP_LEADERSHIP_POINTS);
+					}
+				}
 			}
 
 		}
