@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/18/2014==
+demonstar55: Implement group mentor, sharing leadership exp (SoF+ only)
+
 == 10/16/2014 ==
 Uleat: Fixed the auto-conversion view naming error and renamed the views in the script files. Added a fix sql for databases that auto-converted.
 Fix SQL: ../sql/git/bots/deprecated/2014_10_16_Lower_Case_View_Fix.sql

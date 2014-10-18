@@ -2963,7 +2963,7 @@ void Database::SetGroupLeaderName(uint32 gid, const char* name) {
 		return;
 	}
 
-	query = StringFormat("INSERT INTO group_leaders(gid, leadername, marknpc, leadershipaa, maintank, assist, puller) VALUES(%u, '%s', '', '', '', '', '')",
+	query = StringFormat("INSERT INTO group_leaders(gid, leadername, marknpc, leadershipaa, maintank, assist, puller, mentoree, mentor_percent) VALUES(%u, '%s', '', '', '', '', '', '', '0')",
 						 gid, EscapeString(name).c_str());
 	result = QueryDatabase(query);
 
@@ -2972,8 +2972,9 @@ void Database::SetGroupLeaderName(uint32 gid, const char* name) {
 	}
 }
 
-char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank, char* assist, char* puller, char *marknpc, GroupLeadershipAA_Struct* GLAA){ 
-	std::string query = StringFormat("SELECT `leadername`, `maintank`, `assist`, `puller`, `marknpc`, `leadershipaa` FROM `group_leaders` WHERE `gid` = %lu",(unsigned long)gid);
+char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank, char* assist, char* puller, char *marknpc, char *mentoree, int *mentor_percent, GroupLeadershipAA_Struct* GLAA)
+{
+	std::string query = StringFormat("SELECT `leadername`, `maintank`, `assist`, `puller`, `marknpc`, `mentoree`, `mentor_percent`, `leadershipaa` FROM `group_leaders` WHERE `gid` = %lu",(unsigned long)gid);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success() || results.RowCount() == 0) {
@@ -2991,6 +2992,12 @@ char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* mainta
 
 		if(marknpc)
 			marknpc[0] = '\0';
+
+		if (mentoree)
+			mentoree[0] = '\0';
+
+		if (mentor_percent)
+			*mentor_percent = 0;
 
 		return leaderbuf;
 	}
@@ -3012,8 +3019,14 @@ char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* mainta
 	if(marknpc)
 		strcpy(marknpc, row[4]);
 
-	if(GLAA && results.LengthOfColumn(5) == sizeof(GroupLeadershipAA_Struct))
-		memcpy(GLAA, row[5], sizeof(GroupLeadershipAA_Struct));
+	if (mentoree)
+		strcpy(mentoree, row[5]);
+
+	if (mentor_percent)
+		*mentor_percent = atoi(row[6]);
+
+	if(GLAA && results.LengthOfColumn(7) == sizeof(GroupLeadershipAA_Struct))
+		memcpy(GLAA, row[7], sizeof(GroupLeadershipAA_Struct));
 
 	return leaderbuf;
 }

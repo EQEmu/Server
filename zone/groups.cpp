@@ -46,6 +46,7 @@ Group::Group(uint32 gid)
 : GroupIDConsumer(gid)
 {
 	leader = nullptr;
+	mentoree = nullptr;
 	memset(members,0,sizeof(Mob*) * MAX_GROUP_MEMBERS);
 	AssistTargetID = 0;
 	TankTargetID = 0;
@@ -81,6 +82,7 @@ Group::Group(Mob* leader)
 	TankTargetID = 0;
 	PullerTargetID = 0;
 	memset(&LeaderAbilities, 0, sizeof(GroupLeadershipAA_Struct));
+	mentoree = nullptr;
 	uint32 i;
 	for(i=0;i<MAX_GROUP_MEMBERS;i++)
 	{
@@ -467,6 +469,11 @@ bool Group::UpdatePlayer(Mob* update){
 			return true;
 		}
 	}
+
+	// mentoree isn't set, the name has a length and the name is ours! update the pointer
+	if (update->IsClient() && !mentoree && mentoree_name.length() && !mentoree_name.compare(update->GetName()))
+		mentoree = update->CastToClient();
+
 	return false;
 }
 
@@ -500,6 +507,9 @@ void Group::MemberZoned(Mob* removemob) {
 
 	if(removemob->IsClient() && HasRole(removemob, RolePuller))
 		SetGroupPullerTarget(0);
+
+	if (removemob->IsClient() && removemob == mentoree)
+		mentoree = nullptr;
 }
 
 bool Group::DelMemberOOZ(const char *Name) {
@@ -528,6 +538,8 @@ bool Group::DelMemberOOZ(const char *Name) {
 					}
 					ClearAllNPCMarks();
 				}
+				if (Name == mentoree_name)
+					ClearGroupMentor();
 				return true;
 			}
 	}
@@ -641,6 +653,9 @@ bool Group::DelMember(Mob* oldmember,bool ignoresender)
 		SetGroupPullerTarget(0);
 		UnDelegatePuller(oldmember->GetName());
 	}
+
+	if (oldmember->GetName() == mentoree_name)
+		ClearGroupMentor();
 
 	if(oldmember->IsClient())
 		SendMarkedNPCsToMember(oldmember->CastToClient(), true);
@@ -1734,6 +1749,31 @@ void Group::SetGroupPullerTarget(Mob *m)
 			members[i]->CastToClient()->UpdateXTargetType(PullerTarget, m);
 		}
 	}
+}
+
+void Group::SetGroupMentor(int percent, char *name)
+{
+	mentoree_name = name;
+	mentor_percent = percent;
+	Client *client = entity_list.GetClientByName(name);
+
+	mentoree = client ? client : nullptr;
+	std::string query = StringFormat("UPDATE group_leaders SET mentoree = '%s', mentor_percent = %i WHERE gid = %i LIMIT 1",
+			mentoree_name.c_str(), mentor_percent, GetID());
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Unable to set group mentor: %s\n", results.ErrorMessage().c_str());
+}
+
+void Group::ClearGroupMentor()
+{
+	mentoree_name.clear();
+	mentor_percent = 0;
+	mentoree = nullptr;
+	std::string query = StringFormat("UPDATE group_leaders SET mentoree = '', mentor_percent = 0 WHERE gid = %i LIMIT 1", GetID());
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Unable to clear group mentor: %s\n", results.ErrorMessage().c_str());
 }
 
 void Group::NotifyAssistTarget(Client *c)

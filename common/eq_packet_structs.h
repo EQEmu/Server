@@ -2231,6 +2231,12 @@ struct GroupLeaderChange_Struct
 /*128*/		char	Unknown128[20];
 };
 
+struct GroupMentor_Struct {
+/*000*/	int percent;
+/*004*/	char name[64];
+/*068*/
+};
+
 struct FaceChange_Struct {
 /*000*/	uint8	haircolor;
 /*001*/	uint8	beardcolor;

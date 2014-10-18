@@ -138,6 +138,7 @@
 	void Handle_OP_GroupInvite(const EQApplicationPacket *app);
 	void Handle_OP_GroupInvite2(const EQApplicationPacket *app);
 	void Handle_OP_GroupMakeLeader(const EQApplicationPacket *app);
+	void Handle_OP_GroupMentor(const EQApplicationPacket *app);
 	void Handle_OP_GroupRoles(const EQApplicationPacket *app);
 	void Handle_OP_GroupUpdate(const EQApplicationPacket *app);
 	void Handle_OP_GuildBank(const EQApplicationPacket *app);

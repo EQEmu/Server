@@ -133,7 +133,7 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 			}
 		}
 
-		if(IsLeadershipEXPOn() && ((conlevel == CON_BLUE) || (conlevel == CON_WHITE) || (conlevel == CON_YELLOW) || (conlevel == CON_RED))) {
+		if(IsLeadershipEXPOn() && (conlevel == CON_BLUE || conlevel == CON_WHITE || conlevel == CON_YELLOW || conlevel == CON_RED)) {
 			add_exp = static_cast<uint32>(static_cast<float>(add_exp) * 0.8f);
 
 			if(GetGroup())
@@ -141,8 +141,19 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 				if((m_pp.group_leadership_points < MaxBankedGroupLeadershipPoints(GetLevel()))
 					&& (RuleI(Character, KillsPerGroupLeadershipAA) > 0))
 				{
-					AddLeadershipEXP(GROUP_EXP_PER_POINT / RuleI(Character, KillsPerGroupLeadershipAA), 0);
-					Message_StringID(MT_Leadership, GAIN_GROUP_LEADERSHIP_EXP);
+					uint32 exp = GROUP_EXP_PER_POINT / RuleI(Character, KillsPerGroupLeadershipAA);
+					Client *mentoree = GetGroup()->GetMentoree();
+					if (GetGroup()->GetMentorPercent() && mentoree &&
+							mentoree->GetGroupPoints() < MaxBankedGroupLeadershipPoints(mentoree->GetLevel())) {
+						uint32 mentor_exp = exp * (GetGroup()->GetMentorPercent() / 100.0f);
+						exp -= mentor_exp;
+						mentoree->AddLeadershipEXP(mentor_exp, 0); // ends up rounded down
+						mentoree->Message_StringID(MT_Leadership, GAIN_GROUP_LEADERSHIP_EXP);
+					}
+					if (exp > 0) { // possible if you mentor 100% to the other client
+						AddLeadershipEXP(exp, 0); // ends up rounded up if mentored, no idea how live actually does it
+						Message_StringID(MT_Leadership, GAIN_GROUP_LEADERSHIP_EXP);
+					}
 				}
 				else
 					Message_StringID(MT_Leadership, MAX_GROUP_LEADERSHIP_POINTS);

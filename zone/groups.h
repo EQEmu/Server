@@ -132,6 +132,11 @@ public:
 	const char *GetClientNameByIndex(uint8 index);
 	void UpdateXTargetMarkedNPC(uint32 Number, Mob *m);
 
+	void SetGroupMentor(int percent, char *name);
+	void ClearGroupMentor();
+	inline int GetMentorPercent() { return mentor_percent; }
+	inline Client *GetMentoree() { return mentoree; }
+
 	Mob* members[MAX_GROUP_MEMBERS];
 	char	membername[MAX_GROUP_MEMBERS][64];
 	uint8	MemberRoles[MAX_GROUP_MEMBERS];
@@ -151,6 +156,9 @@ private:
 	uint16	PullerTargetID;
 	uint16	MarkedNPCs[MAX_MARKED_NPCS];
 
+	std::string mentoree_name;
+	Client *mentoree;
+	int mentor_percent;
 };
 
 #endif

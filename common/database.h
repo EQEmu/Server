@@ -203,7 +203,7 @@ public:
 
 	void	SetGroupLeaderName(uint32 gid, const char* name);
 	char*	GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank = nullptr, char* assist = nullptr, char* puller = nullptr, char *marknpc = nullptr,
-						GroupLeadershipAA_Struct* GLAA = nullptr);
+						char *mentoree = nullptr, int *mentor_percent = nullptr, GroupLeadershipAA_Struct* GLAA = nullptr);
 	void	ClearGroupLeader(uint32 gid = 0);
 	
 
