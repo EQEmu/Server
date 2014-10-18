@@ -5,6 +5,10 @@
 -- There may still be remnants of bot activity in tables `guild_members` and
 -- `group_id`. If these entries are causing issues, you may need to manually
 -- remove them.
+--
+-- If this script fails due to a 'SQL Error (1068): Multiple primary key defined'
+-- error, run this query: ALTER TABLE `guild_members` DROP PRIMARY KEY;
+-- and it should remove the key so this script will process in its entirety.
 
 
 ALTER TABLE `guild_members` ADD PRIMARY KEY (`char_id`);
