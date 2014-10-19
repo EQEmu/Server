@@ -3191,10 +3191,10 @@ const char* Database::GetRaidLeaderName(uint32 rid)
 
 // maintank, assist, puller, marknpc currently unused
 void Database::GetGroupLeadershipInfo(uint32 gid, uint32 rid, char *maintank,
-		char *assist, char *puller, char *marknpc, GroupLeadershipAA_Struct *GLAA)
+		char *assist, char *puller, char *marknpc, char *mentoree, int *mentor_percent, GroupLeadershipAA_Struct *GLAA)
 {
 	std::string query = StringFormat(
-			"SELECT maintank, assist, puller, marknpc, leadershipaa FROM raid_leaders WHERE gid = %lu AND rid = %lu",
+			"SELECT maintank, assist, puller, marknpc, mentoree, mentor_percent, leadershipaa FROM raid_leaders WHERE gid = %lu AND rid = %lu",
 			(unsigned long)gid, (unsigned long)rid);
 	auto results = QueryDatabase(query);
 
@@ -3210,6 +3210,12 @@ void Database::GetGroupLeadershipInfo(uint32 gid, uint32 rid, char *maintank,
 
 		if (marknpc)
 			marknpc[0] = '\0';
+
+		if (mentoree)
+			mentoree[0] = '\0';
+
+		if (mentor_percent)
+			*mentor_percent = 0;
 
 		return;
 	}
@@ -3228,8 +3234,14 @@ void Database::GetGroupLeadershipInfo(uint32 gid, uint32 rid, char *maintank,
 	if (marknpc)
 		strcpy(marknpc, row[3]);
 
-	if (GLAA && results.LengthOfColumn(4) == sizeof(GroupLeadershipAA_Struct))
-		memcpy(GLAA, row[4], sizeof(GroupLeadershipAA_Struct));
+	if (mentoree)
+		strcpy(mentoree, row[4]);
+
+	if (mentor_percent)
+		*mentor_percent = atoi(row[5]);
+
+	if (GLAA && results.LengthOfColumn(6) == sizeof(GroupLeadershipAA_Struct))
+		memcpy(GLAA, row[6], sizeof(GroupLeadershipAA_Struct));
 
 	return;
 }
@@ -3288,7 +3300,7 @@ void Database::SetRaidGroupLeaderInfo(uint32 gid, uint32 rid)
 	if (results.RowsAffected() != 0)
 		return;
 
-	query = StringFormat("INSERT INTO raid_leaders(gid, rid, marknpc, leadershipaa, maintank, assist, puller) VALUES(%lu, %lu, '', '', '', '', '')",
+	query = StringFormat("INSERT INTO raid_leaders(gid, rid, marknpc, leadershipaa, maintank, assist, puller, mentoree, mentor_percent) VALUES(%lu, %lu, '', '', '', '', '', '', 0)",
 			(unsigned long)gid, (unsigned long)rid);
 	results = QueryDatabase(query);
 

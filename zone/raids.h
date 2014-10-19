@@ -92,6 +92,12 @@ struct RaidMember{
 	bool IsLooter;
 };
 
+struct GroupMentor {
+	std::string name;
+	Client *mentoree;
+	int mentor_percent;
+};
+
 class Raid : public GroupIDConsumer {
 public:
 	Raid(Client *nLeader);
@@ -221,6 +227,12 @@ public:
 	inline void SetRaidAAs(RaidLeadershipAA_Struct *rlaa)
 		{ memcpy(&raid_aa, rlaa, sizeof(RaidLeadershipAA_Struct)); }
 
+	void	SetGroupMentor(uint32 group_id, int percent, char *name);
+	void	ClearGroupMentor(uint32 group_id);
+	void	CheckGroupMentor(uint32 group_id, Client *c); // this just checks if we should be fixing the pointer in group mentor struct on zone
+	inline int GetMentorPercent(uint32 group_id) { return group_mentor[group_id].mentor_percent; }
+	inline Client *GetMentoree(uint32 group_id) { return group_mentor[group_id].mentoree; }
+
 	RaidMember members[MAX_RAID_MEMBERS];
 	char leadername[64];
 protected:
@@ -233,6 +245,8 @@ protected:
 	std::string motd;
 	RaidLeadershipAA_Struct raid_aa;
 	GroupLeadershipAA_Struct group_aa[MAX_RAID_GROUPS];
+
+	GroupMentor group_mentor[MAX_RAID_GROUPS];
 };
 
 

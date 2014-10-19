@@ -215,7 +215,7 @@ public:
 	uint32	GetRaidID(const char* name);
 	const char *GetRaidLeaderName(uint32 rid);
 	void	GetGroupLeadershipInfo(uint32 gid, uint32 rid, char* maintank = nullptr, char* assist = nullptr, char* puller = nullptr, char *marknpc = nullptr,
-			GroupLeadershipAA_Struct* GLAA = nullptr);
+			char *mentoree = nullptr, int *mentor_percent = nullptr, GroupLeadershipAA_Struct* GLAA = nullptr);
 	void	GetRaidLeadershipInfo(uint32 rid, char* maintank = nullptr, char* assist = nullptr, char* puller = nullptr, char *marknpc = nullptr,
 			RaidLeadershipAA_Struct* RLAA = nullptr);
 	void	SetRaidGroupLeaderInfo(uint32 gid, uint32 rid);

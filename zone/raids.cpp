@@ -31,6 +31,10 @@ Raid::Raid(uint32 raidID)
 	memset(members ,0, (sizeof(RaidMember)*MAX_RAID_MEMBERS));
 	memset(&raid_aa, 0, sizeof(RaidLeadershipAA_Struct));
 	memset(group_aa, 0, sizeof(GroupLeadershipAA_Struct) * MAX_RAID_GROUPS);
+	for (int i = 0; i < MAX_RAID_GROUPS; i++) {
+		group_mentor[i].mentor_percent = 0;
+		group_mentor[i].mentoree = nullptr;
+	}
 	leader = nullptr;
 	memset(leadername, 0, 64);
 	locked = false;
@@ -43,6 +47,10 @@ Raid::Raid(Client* nLeader)
 	memset(members ,0, (sizeof(RaidMember)*MAX_RAID_MEMBERS));
 	memset(&raid_aa, 0, sizeof(RaidLeadershipAA_Struct));
 	memset(group_aa, 0, sizeof(GroupLeadershipAA_Struct) * MAX_RAID_GROUPS);
+	for (int i = 0; i < MAX_RAID_GROUPS; i++) {
+		group_mentor[i].mentor_percent = 0;
+		group_mentor[i].mentoree = nullptr;
+	}
 	leader = nLeader;
 	memset(leadername, 0, 64);
 	strn0cpy(leadername, nLeader->GetName(), 64);
@@ -1482,13 +1490,19 @@ void Raid::MemberZoned(Client *c)
 	if(!c)
 		return;
 
+	// Raid::GetGroup() goes over the members as well, this way we go over once
+	uint32 gid = RAID_GROUPLESS;
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
 	{
 		if(members[x].member == c)
 		{
 			members[x].member = nullptr;
+			gid = members[x].GroupNumber;
 		}
 	}
+
+	if (gid < 12 && group_mentor[gid].mentoree == c)
+		group_mentor[gid].mentoree = nullptr;
 }
 
 void Raid::SendHPPacketsTo(Client *c)
@@ -1597,7 +1611,56 @@ void Raid::LoadLeadership()
 {
 	database.GetRaidLeadershipInfo(GetID(), nullptr, nullptr, nullptr, nullptr, &raid_aa);
 
-	for (uint32 group_id = 0; group_id < MAX_RAID_GROUPS; group_id++)
-		database.GetGroupLeadershipInfo(group_id, GetID(), nullptr, nullptr, nullptr, nullptr, &group_aa[group_id]);
+	char mentor_name[64];
+	for (uint32 group_id = 0; group_id < MAX_RAID_GROUPS; group_id++) {
+		database.GetGroupLeadershipInfo(group_id, GetID(), nullptr, nullptr, nullptr, nullptr,
+				mentor_name, &group_mentor[group_id].mentor_percent, &group_aa[group_id]);
+		if (strlen(mentor_name)) {
+			group_mentor[group_id].name = mentor_name;
+			mentor_name[0] = '\0';
+		}
+	}
+}
+
+void Raid::SetGroupMentor(uint32 group_id, int percent, char *name)
+{
+	if (group_id > 11)
+		return;
+	group_mentor[group_id].name = name;
+	group_mentor[group_id].mentor_percent = percent;
+	Client *client = entity_list.GetClientByName(name);
+	group_mentor[group_id].mentoree = client ? client : nullptr;
+
+	std::string query = StringFormat("UPDATE raid_leaders SET mentoree = '%s', mentor_percent = %i WHERE gid = %i AND rid = %i LIMIT 1",
+			name, percent, group_id, GetID());
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Unable to set raid group mentor: %s\n", results.ErrorMessage().c_str());
+}
+
+void Raid::ClearGroupMentor(uint32 group_id)
+{
+	if (group_id > 11)
+		return;
+	group_mentor[group_id].name.clear();
+	group_mentor[group_id].mentor_percent = 0;
+	group_mentor[group_id].mentoree = nullptr;
+
+	std::string query = StringFormat("UPDATE raid_leaders SET mentoree = '', mentor_percent = 0 WHERE gid = %i AND rid = %i LIMIT 1",
+			group_id, GetID());
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Unable to clear raid group mentor: %s\n", results.ErrorMessage().c_str());
+}
+
+// there isn't a nice place to add this in another function, unlike groups
+// so we do it here instead
+void Raid::CheckGroupMentor(uint32 group_id, Client *c)
+{
+	if (!c || group_id > 11)
+		return;
+
+	if (group_mentor[group_id].name == c->GetName())
+		group_mentor[group_id].mentoree = c;
 }
 

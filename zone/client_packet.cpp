@@ -576,6 +576,7 @@ void Client::CompleteConnect()
 			if (grpID < 12){
 				raid->SendRaidGroupRemove(GetName(), grpID);
 				raid->SendRaidGroupAdd(GetName(), grpID);
+				raid->CheckGroupMentor(grpID, this);
 				if (raid->IsGroupLeader(GetName())) { // group leader same thing!
 					raid->UpdateGroupAAs(raid->GetGroup(this));
 					raid->GroupUpdate(grpID, false);
@@ -6869,10 +6870,25 @@ void Client::Handle_OP_GroupMentor(const EQApplicationPacket *app)
 		return;
 	}
 	GroupMentor_Struct *gms = (GroupMentor_Struct *)app->pBuffer;
+	gms->name[63] = '\0';
+
+	if (IsRaidGrouped()) {
+		Raid *raid = GetRaid();
+		if (!raid)
+			return;
+		uint32 group_id = raid->GetGroup(this);
+		if (group_id > 11)
+			return;
+		if (strlen(gms->name))
+			raid->SetGroupMentor(group_id, gms->percent, gms->name);
+		else
+			raid->ClearGroupMentor(group_id);
+		return;
+	}
+
 	Group *group = GetGroup();
 	if (!group)
 		return;
-	gms->name[63] = '\0';
 
 	if (strlen(gms->name))
 		group->SetGroupMentor(gms->percent, gms->name);
