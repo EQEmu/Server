@@ -5338,6 +5338,17 @@ void Client::Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app)
 		if (!Target || !Target->IsClient())
 			return;
 
+		if (IsRaidGrouped()) {
+			Raid *raid = GetRaid();
+			if (!raid)
+				return;
+			uint32 group_id = raid->GetGroup(this);
+			if (group_id > 11 || raid->GroupCount(group_id) < 3)
+				return;
+			Target->CastToClient()->InspectBuffs(this, raid->GetLeadershipAA(groupAAInspectBuffs, group_id));
+			return;
+		}
+
 		Group *g = GetGroup();
 
 		if (!g || (g->GroupCount() < 3))
