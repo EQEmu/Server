@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/19/2014 ==
+Uleat: Updated command #peekinv to display item links properly in RoF clients
+
 == 10/18/2014==
 demonstar55: Implement group mentor, sharing leadership exp (SoF+ only)
 demonstar55: Add gaining of group leadership while in raids

@@ -2780,6 +2780,21 @@ void command_peekinv(Client *c, const Seperator *sep)
 		return;
 	}
 
+	// linkcore_# indicates the number of consecutive 0's..not the actual length
+	const std::string linkcore_49 = "%c%06X0000000000000000000000000000000000000000000000000%s%c";	// RoF+
+	const std::string linkcore_44 = "%c%06X00000000000000000000000000000000000000000000%s%c";		// SoF->UF
+	const std::string linkcore_39 = "%c%06X000000000000000000000000000000000000000%s%c";			// 6.2->Ti
+	const char* linkcore = nullptr;
+	std::string linkbase = "";
+
+	// consider pushing 'linkcores' to EQLimits
+	if (c->GetClientVersion() >= EQClientRoF)
+		linkcore = linkcore_49.c_str();
+	else if (c->GetClientVersion() >= EQClientSoF)
+		linkcore = linkcore_44.c_str();
+	else
+		linkcore = linkcore_39.c_str();
+
 	bool bAll = (strcasecmp(sep->arg[1], "all") == 0);
 	bool bFound = false;
 	Client* client = c->GetTarget()->CastToClient();
@@ -2792,64 +2807,32 @@ void command_peekinv(Client *c, const Seperator *sep)
 		for (int16 i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; i++) {
 			const ItemInst* inst = client->GetInv().GetItem(i);
 			item = (inst) ? inst->GetItem() : nullptr;
-			if (c->GetClientVersion() >= EQClientSoF)
-			{
-				// this kind of stuff needs to be pushed to the client translators
-				c->Message((item==0), "WornSlot: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", i,
-					((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-					((item==0)?"null":item->Name), 0x12,
-					((item==0)?0:inst->GetCharges()));
-			}
-			else
-			{
-				c->Message((item==0), "WornSlot: %i, Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i", i,
-					((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-					((item==0)?"null":item->Name), 0x12,
-					((item==0)?0:inst->GetCharges()));
-			}
+
+			linkbase = StringFormat(linkcore, 0x12, ((item == 0) ? 0 : item->ID), ((item == 0) ? "null" : item->Name), 0x12);
+			c->Message((item == 0), "WornSlot: %i, Item: %i (%s), Charges: %i",
+				i, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
 		}
 	}
+
 	if (bAll || (strcasecmp(sep->arg[1], "inv")==0)) {
 		// Personal inventory items
 		bFound = true;
 		for (int16 i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_END; i++) {
 			const ItemInst* inst = client->GetInv().GetItem(i);
 			item = (inst) ? inst->GetItem() : nullptr;
-			if (c->GetClientVersion() >= EQClientSoF)
-			{
-				c->Message((item==0), "InvSlot: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", i,
-					((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-					((item==0)?"null":item->Name), 0x12,
-					((item==0)?0:inst->GetCharges()));
-			}
-			else
-			{
-				c->Message((item==0), "InvSlot: %i, Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i", i,
-					((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-					((item==0)?"null":item->Name), 0x12,
-					((item==0)?0:inst->GetCharges()));
-			}
+
+			linkbase = StringFormat(linkcore, 0x12, ((item == 0) ? 0 : item->ID), ((item == 0) ? "null" : item->Name), 0x12);
+			c->Message((item == 0), "InvSlot: %i, Item: %i (%s), Charges: %i",
+				i, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
 
 			if (inst && inst->IsType(ItemClassContainer)) {
 				for (uint8 j = SUB_BEGIN; j < EmuConstants::ITEM_CONTAINER_SIZE; j++) {
 					const ItemInst* instbag = client->GetInv().GetItem(i, j);
 					item = (instbag) ? instbag->GetItem() : nullptr;
-					if (c->GetClientVersion() >= EQClientSoF)
-					{
-						c->Message((item==0), "   InvBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i",
-							Inventory::CalcSlotId(i, j),
-							i, j, ((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-							((item==0)?"null":item->Name), 0x12,
-							((item==0)?0:instbag->GetCharges()));
-					}
-					else
-					{
-						c->Message((item==0), "   InvBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i",
-							Inventory::CalcSlotId(i, j),
-							i, j, ((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-							((item==0)?"null":item->Name), 0x12,
-							((item==0)?0:instbag->GetCharges()));
-					}
+
+					linkbase = StringFormat(linkcore, 0x12, ((item == 0) ? 0 : item->ID), ((item == 0) ? "null" : item->Name), 0x12);
+					c->Message((item == 0), "  InvBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
+						Inventory::CalcSlotId(i, j), i, j, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
 				}
 			}
 		}
@@ -2857,10 +2840,10 @@ void command_peekinv(Client *c, const Seperator *sep)
 		{
 			const ItemInst* inst = client->GetInv().GetItem(MainPowerSource);
 			item = (inst) ? inst->GetItem() : nullptr;
-			c->Message((item==0), "InvSlot: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", MainPowerSource,
-			((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-			((item==0)?"null":item->Name), 0x12,
-			((item==0)?0:inst->GetCharges()));
+
+			linkbase = StringFormat(linkcore, 0x12, ((item == 0) ? 0 : item->ID), ((item == 0) ? "null" : item->Name), 0x12);
+			c->Message((item == 0), "WornSlot: %i, Item: %i (%s), Charges: %i",
+				MainPowerSource, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
 		}
 	}
 
@@ -2870,59 +2853,30 @@ void command_peekinv(Client *c, const Seperator *sep)
 		// Personal inventory items
 		bFound = true;
 		iter_queue it;
-		int i=0;
+		int i = 0;
 
 		if(client->GetInv().CursorEmpty()) { // Display 'front' cursor slot even if 'empty' (item(30[0]) == null)
-			if (c->GetClientVersion() >= EQClientSoF)
-			{
-				c->Message((item == 0), "CursorSlot: %i, Depth: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", MainCursor, i,
-					0, 0x12, 0, "null", 0x12, 0);
-			}
-			else
-			{
-				c->Message((item == 0), "CursorSlot: %i, Depth: %i, Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i", MainCursor, i,
-					0, 0x12, 0, "null", 0x12, 0);
-			}
+			linkbase = StringFormat(linkcore, 0x12, 0, "null", 0x12);
+			c->Message((item == 0), "CursorSlot: %i, Item: %i (%s), Charges: %i",
+				MainCursor, 0, linkbase.c_str(), 0);
 		}
 		else {
 			for(it=client->GetInv().cursor_begin();it!=client->GetInv().cursor_end();++it,i++) {
 				const ItemInst* inst = *it;
 				item = (inst) ? inst->GetItem() : nullptr;
-				if (c->GetClientVersion() >= EQClientSoF)
-				{
-					c->Message((item == 0), "CursorSlot: %i, Depth: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", MainCursor, i,
-						((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-						((item==0)?"null":item->Name), 0x12,
-						((item==0)?0:inst->GetCharges()));
-				}
-				else
-				{
-					c->Message((item == 0), "CursorSlot: %i, Depth: %i, Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i", MainCursor, i,
-						((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-						((item==0)?"null":item->Name), 0x12,
-						((item==0)?0:inst->GetCharges()));
-				}
+
+				linkbase = StringFormat(linkcore, 0x12, ((item == 0) ? 0 : item->ID), ((item == 0) ? "null" : item->Name), 0x12);
+				c->Message((item == 0), "CursorSlot: %i, Depth: %i, Item: %i (%s), Charges: %i",
+					MainPowerSource, i, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
 
 				if (inst && inst->IsType(ItemClassContainer) && i==0) { // 'CSD 1' - only display contents of slot 30[0] container..higher ones don't exist
 					for (uint8 j = SUB_BEGIN; j < EmuConstants::ITEM_CONTAINER_SIZE; j++) {
 						const ItemInst* instbag = client->GetInv().GetItem(MainCursor, j);
 						item = (instbag) ? instbag->GetItem() : nullptr;
-						if (c->GetClientVersion() >= EQClientSoF)
-						{
-							c->Message((item==0), "   CursorBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i",
-								Inventory::CalcSlotId(MainCursor, j),
-								MainCursor, j, ((item == 0) ? 0 : item->ID), 0x12, ((item == 0) ? 0 : item->ID),
-								((item==0)?"null":item->Name), 0x12,
-								((item==0)?0:instbag->GetCharges()));
-						}
-						else
-						{
-							c->Message((item==0), "   CursorBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i",
-								Inventory::CalcSlotId(MainCursor, j),
-								MainCursor, j, ((item == 0) ? 0 : item->ID), 0x12, ((item == 0) ? 0 : item->ID),
-								((item==0)?"null":item->Name), 0x12,
-								((item==0)?0:instbag->GetCharges()));
-						}
+
+						linkbase = StringFormat(linkcore, 0x12, ((item == 0) ? 0 : item->ID), ((item == 0) ? "null" : item->Name), 0x12);
+						c->Message((item == 0), "  CursorBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
+							Inventory::CalcSlotId(i, j), i, j, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
 					}
 				}
 			}
@@ -2935,20 +2889,10 @@ void command_peekinv(Client *c, const Seperator *sep)
 		for (int16 i = EmuConstants::TRIBUTE_BEGIN; i <= EmuConstants::TRIBUTE_END; i++) {
 			const ItemInst* inst = client->GetInv().GetItem(i);
 			item = (inst) ? inst->GetItem() : nullptr;
-			if (c->GetClientVersion() >= EQClientSoF)
-			{
-				c->Message((item==0), "TributeSlot: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", i,
-				((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-				((item==0)?"null":item->Name), 0x12,
-				((item==0)?0:inst->GetCharges()));
-			}
-			else
-			{
-			c->Message((item==0), "TributeSlot: %i, Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i", i,
-				((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-				((item==0)?"null":item->Name), 0x12,
-				((item==0)?0:inst->GetCharges()));
-			}
+
+			linkbase = StringFormat(linkcore, 0x12, ((item == 0) ? 0 : item->ID), ((item == 0) ? "null" : item->Name), 0x12);
+			c->Message((item == 0), "TributeSlot: %i, Item: %i (%s), Charges: %i",
+				i, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
 		}
 	}
 
@@ -2959,128 +2903,62 @@ void command_peekinv(Client *c, const Seperator *sep)
 		for (i = EmuConstants::BANK_BEGIN; i <= EmuConstants::BANK_END; i++) {
 			const ItemInst* inst = client->GetInv().GetItem(i);
 			item = (inst) ? inst->GetItem() : nullptr;
-			if (c->GetClientVersion() >= EQClientSoF)
-			{
-				c->Message((item==0), "BankSlot: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", i,
-				((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-				((item==0)?"null":item->Name), 0x12,
-				((item==0)?0:inst->GetCharges()));
-			}
-			else
-			{
-			c->Message((item==0), "BankSlot: %i, Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i", i,
-				((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-				((item==0)?"null":item->Name), 0x12,
-				((item==0)?0:inst->GetCharges()));
-			}
+
+			linkbase = StringFormat(linkcore, 0x12, ((item == 0) ? 0 : item->ID), ((item == 0) ? "null" : item->Name), 0x12);
+			c->Message((item == 0), "BankSlot: %i, Item: %i (%s), Charges: %i",
+				i, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
 
 			if (inst && inst->IsType(ItemClassContainer)) {
 				for (uint8 j = SUB_BEGIN; j < EmuConstants::ITEM_CONTAINER_SIZE; j++) {
 					const ItemInst* instbag = client->GetInv().GetItem(i, j);
 					item = (instbag) ? instbag->GetItem() : nullptr;
-					if (c->GetClientVersion() >= EQClientSoF)
-					{
-						c->Message((item==0), "   BankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i",
-							Inventory::CalcSlotId(i, j),
-							i, j, ((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-							((item==0)?"null":item->Name), 0x12,
-							((item==0)?0:inst->GetCharges()));
-					}
-					else
-					{
-						c->Message((item==0), "   BankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i",
-							Inventory::CalcSlotId(i, j),
-							i, j, ((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-							((item==0)?"null":item->Name), 0x12,
-							((item==0)?0:inst->GetCharges()));
-					}
+
+					linkbase = StringFormat(linkcore, 0x12, ((item == 0) ? 0 : item->ID), ((item == 0) ? "null" : item->Name), 0x12);
+					c->Message((item == 0), "  BankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
+						Inventory::CalcSlotId(i, j), i, j, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
 				}
 			}
 		}
 		for (i = EmuConstants::SHARED_BANK_BEGIN; i <= EmuConstants::SHARED_BANK_END; i++) {
 			const ItemInst* inst = client->GetInv().GetItem(i);
 			item = (inst) ? inst->GetItem() : nullptr;
-			if (c->GetClientVersion() >= EQClientSoF)
-			{
-				c->Message((item==0), "ShBankSlot: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", i,
-					((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-					((item==0)?"null":item->Name), 0x12,
-					((item==0)?0:inst->GetCharges()));
-			}
-			else
-			{
-				c->Message((item==0), "ShBankSlot: %i, Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i", i,
-					((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-					((item==0)?"null":item->Name), 0x12,
-					((item==0)?0:inst->GetCharges()));
-			}
+
+			linkbase = StringFormat(linkcore, 0x12, ((item == 0) ? 0 : item->ID), ((item == 0) ? "null" : item->Name), 0x12);
+			c->Message((item == 0), "SharedBankSlot: %i, Item: %i (%s), Charges: %i",
+				i, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
 
 			if (inst && inst->IsType(ItemClassContainer)) {
 				for (uint8 j = SUB_BEGIN; j < EmuConstants::ITEM_CONTAINER_SIZE; j++) {
 					const ItemInst* instbag = client->GetInv().GetItem(i, j);
 					item = (instbag) ? instbag->GetItem() : nullptr;
-					if (c->GetClientVersion() >= EQClientSoF)
-					{
-						c->Message((item==0), "   ShBankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i",
-							Inventory::CalcSlotId(i, j),
-							i, j, ((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-							((item==0)?"null":item->Name), 0x12,
-							((item==0)?0:inst->GetCharges()));
-					}
-					else
-					{
-						c->Message((item==0), "   ShBankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i",
-							Inventory::CalcSlotId(i, j),
-							i, j, ((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-							((item==0)?"null":item->Name), 0x12,
-							((item==0)?0:inst->GetCharges()));
-					}
+
+					linkbase = StringFormat(linkcore, 0x12, ((item == 0) ? 0 : item->ID), ((item == 0) ? "null" : item->Name), 0x12);
+					c->Message((item == 0), "  SharedBankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
+						Inventory::CalcSlotId(i, j), i, j, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
 				}
 			}
 		}
 	}
+
 	if (bAll || (strcasecmp(sep->arg[1], "trade")==0)) {
 		// Items in trade window (current trader only, not the other trader)
 		bFound = true;
 		for (int16 i = EmuConstants::TRADE_BEGIN; i <= EmuConstants::TRADE_END; i++) {
 			const ItemInst* inst = client->GetInv().GetItem(i);
 			item = (inst) ? inst->GetItem() : nullptr;
-			if (c->GetClientVersion() >= EQClientSoF)
-			{
-				c->Message((item==0), "TradeSlot: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", i,
-					((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-					((item==0)?"null":item->Name), 0x12,
-					((item==0)?0:inst->GetCharges()));
-			}
-			else
-			{
-				c->Message((item==0), "TradeSlot: %i, Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i", i,
-					((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-					((item==0)?"null":item->Name), 0x12,
-					((item==0)?0:inst->GetCharges()));
-			}
+
+			linkbase = StringFormat(linkcore, 0x12, ((item == 0) ? 0 : item->ID), ((item == 0) ? "null" : item->Name), 0x12);
+			c->Message((item == 0), "TradeSlot: %i, Item: %i (%s), Charges: %i",
+				i, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
 
 			if (inst && inst->IsType(ItemClassContainer)) {
 				for (uint8 j = SUB_BEGIN; j < EmuConstants::ITEM_CONTAINER_SIZE; j++) {
 					const ItemInst* instbag = client->GetInv().GetItem(i, j);
 					item = (instbag) ? instbag->GetItem() : nullptr;
-					if (c->GetClientVersion() >= EQClientSoF)
-					{
-						c->Message((item==0), "   TradeBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i",
-							Inventory::CalcSlotId(i, j),
-							i, j, ((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-							((item==0)?"null":item->Name), 0x12,
-							((item==0)?0:inst->GetCharges()));
-					}
-					else
-					{
-						c->Message((item==0), "   TradeBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i",
-							Inventory::CalcSlotId(i, j),
-							i, j, ((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-							((item==0)?"null":item->Name), 0x12,
-							((item==0)?0:inst->GetCharges()));
-					}
 
+					linkbase = StringFormat(linkcore, 0x12, ((item == 0) ? 0 : item->ID), ((item == 0) ? "null" : item->Name), 0x12);
+					c->Message((item == 0), "  TradeBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
+						Inventory::CalcSlotId(i, j), i, j, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
 				}
 			}
 		}
