@@ -2812,6 +2812,16 @@ void command_peekinv(Client *c, const Seperator *sep)
 			c->Message((item == 0), "WornSlot: %i, Item: %i (%s), Charges: %i",
 				i, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
 		}
+		if (c->GetClientVersion() >= EQClientSoF)
+		{
+			const ItemInst* inst = client->GetInv().GetItem(MainPowerSource);
+			item = (inst) ? inst->GetItem() : nullptr;
+
+			linkbase = StringFormat(linkcore, 0x12, ((item == 0) ? 0 : item->ID), ((item == 0) ? "null" : item->Name), 0x12);
+			c->Message((item == 0), "WornSlot: %i, Item: %i (%s), Charges: %i",
+				MainPowerSource, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
+		}
+
 	}
 
 	if (bAll || (strcasecmp(sep->arg[1], "inv")==0)) {
@@ -2836,15 +2846,6 @@ void command_peekinv(Client *c, const Seperator *sep)
 				}
 			}
 		}
-		if(c->GetClientVersion() >= EQClientSoF)
-		{
-			const ItemInst* inst = client->GetInv().GetItem(MainPowerSource);
-			item = (inst) ? inst->GetItem() : nullptr;
-
-			linkbase = StringFormat(linkcore, 0x12, ((item == 0) ? 0 : item->ID), ((item == 0) ? "null" : item->Name), 0x12);
-			c->Message((item == 0), "WornSlot: %i, Item: %i (%s), Charges: %i",
-				MainPowerSource, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
-		}
 	}
 
 	// Changed to show 'empty' cursors and not to show bag slots on 'queued' cursor slots (cursor bag slots 331 to 340 are not arrayed...)
@@ -2867,7 +2868,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 				linkbase = StringFormat(linkcore, 0x12, ((item == 0) ? 0 : item->ID), ((item == 0) ? "null" : item->Name), 0x12);
 				c->Message((item == 0), "CursorSlot: %i, Depth: %i, Item: %i (%s), Charges: %i",
-					MainPowerSource, i, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
+					MainCursor, i, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
 
 				if (inst && inst->IsType(ItemClassContainer) && i==0) { // 'CSD 1' - only display contents of slot 30[0] container..higher ones don't exist
 					for (uint8 j = SUB_BEGIN; j < EmuConstants::ITEM_CONTAINER_SIZE; j++) {
@@ -2876,7 +2877,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 						linkbase = StringFormat(linkcore, 0x12, ((item == 0) ? 0 : item->ID), ((item == 0) ? "null" : item->Name), 0x12);
 						c->Message((item == 0), "  CursorBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
-							Inventory::CalcSlotId(i, j), i, j, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
+							Inventory::CalcSlotId(MainCursor, j), MainCursor, j, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
 					}
 				}
 			}
