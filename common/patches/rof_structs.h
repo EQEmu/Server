@@ -2473,6 +2473,11 @@ struct GroupFollow_Struct { // Live Follow Struct
 /*0152*/
 };
 
+struct InspectBuffs_Struct {
+/*000*/ uint32 spell_id[BUFF_COUNT];
+/*168*/ uint32 tics_remaining[BUFF_COUNT];
+};
+
 struct LFG_Struct {
 /*000*/	uint32 unknown000;
 /*004*/	uint32 value; // 0x00 = off 0x01 = on

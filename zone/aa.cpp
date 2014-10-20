@@ -1793,29 +1793,26 @@ int Client::GroupLeadershipAAOffenseEnhancement()
 
 void Client::InspectBuffs(Client* Inspector, int Rank)
 {
-	if(!Inspector || (Rank == 0)) return;
+	// At some point the removed the restriction of being a group member for this to work
+	// not sure when, but the way it's coded now, it wouldn't work with mobs.
+	if (!Inspector || Rank == 0)
+		return;
 
-	Inspector->Message_StringID(0, CURRENT_SPELL_EFFECTS, GetName());
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_InspectBuffs, sizeof(InspectBuffs_Struct));
+	InspectBuffs_Struct *ib = (InspectBuffs_Struct *)outapp->pBuffer;
+
 	uint32 buff_count = GetMaxTotalSlots();
-	for (uint32 i = 0; i < buff_count; ++i)
-	{
-		if (buffs[i].spellid != SPELL_UNKNOWN)
-		{
-			if(Rank == 1)
-				Inspector->Message(0, "%s", spells[buffs[i].spellid].name);
-			else
-			{
-				if (spells[buffs[i].spellid].buffdurationformula == DF_Permanent)
-					Inspector->Message(0, "%s (Permanent)", spells[buffs[i].spellid].name);
-				else {
-					char *TempString = nullptr;
-					MakeAnyLenString(&TempString, "%.1f", static_cast<float>(buffs[i].ticsremaining) / 10.0f);
-					Inspector->Message_StringID(0, BUFF_MINUTES_REMAINING, spells[buffs[i].spellid].name, TempString);
-					safe_delete_array(TempString);
-				}
-			}
-		}
+	uint32 packet_index = 0;
+	for (uint32 i = 0; i < buff_count; i++) {
+		if (buffs[i].spellid == SPELL_UNKNOWN)
+			continue;
+		ib->spell_id[packet_index] = buffs[i].spellid;
+		if (Rank > 1)
+			ib->tics_remaining[packet_index] = spells[buffs[i].spellid].buffdurationformula == DF_Permanent ? 0xFFFFFFFF : buffs[i].ticsremaining;
+		packet_index++;
 	}
+
+	Inspector->FastQueuePacket(&outapp);
 }
 
 //this really need to be renamed to LoadAAActions()

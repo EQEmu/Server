@@ -2166,6 +2166,14 @@ struct GroupFollow_Struct { // Underfoot Follow Struct
 /*0152*/
 };
 
+struct InspectBuffs_Struct {
+/*000*/ uint32 spell_id[BUFF_COUNT];
+/*100*/ uint32 filler100[5];	// BUFF_COUNT is really 30...
+/*120*/ uint32 tics_remaining[BUFF_COUNT];
+/*220*/ uint32 filler220[5];	// BUFF_COUNT is really 30...
+};
+
+
 struct LFG_Struct {
 /*000*/	uint32 unknown000;
 /*004*/	uint32 value; // 0x00 = off 0x01 = on

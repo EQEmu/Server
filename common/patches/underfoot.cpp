@@ -1125,6 +1125,20 @@ namespace Underfoot
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_InspectBuffs)
+	{
+		ENCODE_LENGTH_EXACT(InspectBuffs_Struct);
+		SETUP_DIRECT_ENCODE(InspectBuffs_Struct, structs::InspectBuffs_Struct);
+
+		// we go over the internal 25 instead of the packet's since no entry is 0, which it will be already
+		for (int i = 0; i < BUFF_COUNT; i++) {
+			OUT(spell_id[i]);
+			OUT(tics_remaining[i]);
+		}
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_InspectRequest)
 	{
 		ENCODE_LENGTH_EXACT(Inspect_Struct);
