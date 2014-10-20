@@ -2,6 +2,9 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 10/19/2014 ==
 Uleat: Updated command #peekinv to display item links properly in RoF clients
+demonstar55: Group Mentoring in raids
+demonstar55: Inspect Buffs (text only version) works in raid groups
+demonstar55: Make use of the Inspect Buffs op/packet. 62 SOL until someone finds its op
 
 == 10/18/2014==
 demonstar55: Implement group mentor, sharing leadership exp (SoF+ only)

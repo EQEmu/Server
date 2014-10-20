@@ -3968,6 +3968,11 @@ struct MarkNPC_Struct
 /*08**/	char	Name[64];
 };
 
+struct InspectBuffs_Struct {
+/*000*/ uint32 spell_id[BUFF_COUNT];
+/*100*/ uint32 tics_remaining[BUFF_COUNT];
+};
+
 struct RaidGeneral_Struct {
 /*00*/	uint32		action;	//=10
 /*04*/	char		player_name[64];	//should both be the player's name

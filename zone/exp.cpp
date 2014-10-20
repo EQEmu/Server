@@ -169,9 +169,20 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 				} else {
 					if (m_pp.group_leadership_points < MaxBankedGroupLeadershipPoints(GetLevel())
 							&& RuleI(Character, KillsPerGroupLeadershipAA) > 0) {
-						// mentoring stuff needs to be added here when raids are have support for it
-						AddLeadershipEXP(0, GROUP_EXP_PER_POINT / RuleI(Character, KillsPerGroupLeadershipAA));
-						Message_StringID(MT_Leadership, GAIN_GROUP_LEADERSHIP_EXP);
+						uint32 group_id = raid->GetGroup(this);
+						uint32 exp = GROUP_EXP_PER_POINT / RuleI(Character, KillsPerGroupLeadershipAA);
+						Client *mentoree = raid->GetMentoree(group_id);
+						if (raid->GetMentorPercent(group_id) && mentoree &&
+								mentoree->GetGroupPoints() < MaxBankedGroupLeadershipPoints(mentoree->GetLevel())) {
+							uint32 mentor_exp = exp * (raid->GetMentorPercent(group_id) / 100.0f);
+							exp -= mentor_exp;
+							mentoree->AddLeadershipEXP(mentor_exp, 0);
+							mentoree->Message_StringID(MT_Leadership, GAIN_GROUP_LEADERSHIP_EXP);
+						}
+						if (exp > 0) {
+							AddLeadershipEXP(exp, 0);
+							Message_StringID(MT_Leadership, GAIN_GROUP_LEADERSHIP_EXP);
+						}
 					} else {
 						Message_StringID(MT_Leadership, MAX_GROUP_LEADERSHIP_POINTS);
 					}
