@@ -3128,6 +3128,12 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 		safe_delete(outapp);
 	}
 
+	if (IsNPC()) {
+		EQApplicationPacket *outapp = MakeBuffsPacket();
+		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, BIT_SoDAndLater, true);
+		safe_delete(outapp);
+	}
+
 	// recalculate bonuses since we stripped/added buffs
 	CalcBonuses();
 

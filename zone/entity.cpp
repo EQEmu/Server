@@ -1351,7 +1351,7 @@ void EntityList::RefreshClientXTargets(Client *c)
 }
 
 void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *app,
-		bool iSendToSender, Mob *SkipThisMob, bool ackreq, bool HoTT, uint32 ClientVersionBits)
+		bool iSendToSender, Mob *SkipThisMob, bool ackreq, bool HoTT, uint32 ClientVersionBits, bool inspect_buffs)
 {
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
@@ -1365,8 +1365,7 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 
 		Mob *TargetsTarget = nullptr;
 
-		if (Target)
-			TargetsTarget = Target->GetTarget();
+		TargetsTarget = Target->GetTarget();
 
 		bool Send = false;
 
@@ -1378,11 +1377,30 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 				Send = true;
 
 		if (c != sender) {
-			if (Target == sender)
-				Send = true;
-			else if (HoTT)
-				if (TargetsTarget == sender)
+			if (Target == sender) {
+				if (inspect_buffs) { // if inspect_buffs is true we're sending a mob's buffs to those with the LAA
+					if (c->IsRaidGrouped()) {
+						Raid *raid = c->GetRaid();
+						if (!raid)
+							continue;
+						uint32 gid = raid->GetGroup(c);
+						if (gid > 11 || raid->GroupCount(gid) < 3)
+							continue;
+						if (raid->GetLeadershipAA(groupAAInspectBuffs, gid))
+							Send = true;
+					} else {
+						Group *group = c->GetGroup();
+						if (!group || group->GroupCount() < 3)
+							continue;
+						if (group->GetLeadershipAA(groupAAInspectBuffs))
+							Send = true;
+					}
+				} else {
 					Send = true;
+				}
+			} else if (HoTT && TargetsTarget == sender) {
+				Send = true;
+			}
 		}
 
 		if (Send && (c->GetClientVersionBit() & ClientVersionBits))
