@@ -685,7 +685,8 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		reduced_recast -= CastToClient()->GetFocusEffect(focusReduceRecastTime, spell_id);
 		if(reduced_recast <= 0){
 			reduced_recast = 0;
-			CastToClient()->GetPTimers().Clear(&database, (uint32)DiscTimer);
+			if (GetPTimers().Enabled((uint32)DiscTimer))
+				GetPTimers().Clear(&database, (uint32)DiscTimer);
 		}
 
 		if (reduced_recast > 0)
