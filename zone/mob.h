@@ -205,7 +205,7 @@ public:
 	void SendSpellBarEnable(uint16 spellid);
 	void ZeroCastingVars();
 	virtual void SpellProcess();
-	virtual bool CastSpell(uint16 spell_id, uint16 target_id, uint16 slot = 10, int32 casttime = -1,
+	virtual bool CastSpell(uint16 spell_id, uint16 target_id, uint16 slot = USE_ITEM_SPELL_SLOT, int32 casttime = -1,
 		int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF,
 		uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, uint32 type = 0, int16 *resist_adjust = nullptr);
 	virtual bool DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot = 10, int32 casttime = -1,
@@ -526,7 +526,7 @@ public:
 
 
 	//More stuff to sort:
-	virtual bool IsRaidTarget() { return false; };
+	virtual bool IsRaidTarget() const { return false; };
 	virtual bool IsAttackAllowed(Mob *target, bool isSpellAttack = false);
 	bool IsTargeted() const { return (targeted > 0); }
 	inline void IsTargeted(int in_tar) { targeted += in_tar; if(targeted < 0) targeted = 0;}
@@ -579,8 +579,7 @@ public:
 	void DoBuffWearOffEffect(uint32 index);
 	void TryTriggerOnCast(uint32 spell_id, bool aa_trigger);
 	void TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger);
-	void TrySpellTrigger(Mob *target, uint32 spell_id);
-	void TryApplyEffect(Mob *target, uint32 spell_id);
+	bool TrySpellTrigger(Mob *target, uint32 spell_id, int effect);
 	void TryTriggerOnValueAmount(bool IsHP = false, bool IsMana = false, bool IsEndur = false, bool IsPet = false);
 	void TryTwincast(Mob *caster, Mob *target, uint32 spell_id);
 	void TrySympatheticProc(Mob *target, uint32 spell_id);
@@ -621,6 +620,7 @@ public:
 	void CalcSpellPowerDistanceMod(uint16 spell_id, float range, Mob* caster = nullptr);
 	inline int16 GetSpellPowerDistanceMod() const { return SpellPowerDistanceMod; };
 	inline void SetSpellPowerDistanceMod(int16 value) { SpellPowerDistanceMod = value; };
+	int32 GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot = 0);
 
 	void ModSkillDmgTaken(SkillUseTypes skill_num, int value);
 	int16 GetModSkillDmgTaken(const SkillUseTypes skill_num);
@@ -684,7 +684,6 @@ public:
 	inline bool GetInvul(void) { return invulnerable; }
 	inline void SetExtraHaste(int Haste) { ExtraHaste = Haste; }
 	virtual int GetHaste();
-	inline float GetPermaHaste() { return GetHaste() ? 100.0f / (1.0f + static_cast<float>(GetHaste()) / 100.0f) : 100.0f; }
 
 	uint8 GetWeaponDamageBonus(const Item_Struct* Weapon);
 	uint16 GetDamageTable(SkillUseTypes skillinuse);
@@ -769,6 +768,7 @@ public:
 	inline void StartFleeing() { flee_mode = true; CalculateNewFearpoint(); }
 	void ProcessFlee();
 	void CheckFlee();
+	inline bool IsBlind() { return spellbonuses.IsBlind; }
 
 	inline bool			CheckAggro(Mob* other) {return hate_list.IsOnHateList(other);}
 	float				CalculateHeadingToTarget(float in_x, float in_y);

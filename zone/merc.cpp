@@ -4619,13 +4619,7 @@ void Merc::DoClassAttacks(Mob *target) {
 	if(!ca_time)
 		return;
 
-	float HasteModifier = 0;
-	if(GetHaste() > 0)
-		HasteModifier = 10000 / (100 + GetHaste());
-	else if(GetHaste() < 0)
-		HasteModifier = (100 - GetHaste());
-	else
-		HasteModifier = 100;
+	float HasteModifier = GetHaste() * 0.01f;
 
 	int level = GetLevel();
 	int reuse = TauntReuseTime * 1000;	//make this very long since if they dont use it once, they prolly never will
@@ -4689,7 +4683,7 @@ void Merc::DoClassAttacks(Mob *target) {
 		}
 	}
 
-	classattack_timer.Start(reuse*HasteModifier/100);
+	classattack_timer.Start(reuse / HasteModifier);
 }
 
 bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)

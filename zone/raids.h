@@ -38,13 +38,13 @@ enum {	//raid packet types:
 	raidMembers = 6,	//len 395+, details + members list
 	raidNoAssignLeadership	= 7,
 	raidCreate = 8,		//len 72
-	raidUnknown				= 9,
+	raidUnknown				= 9, // unused?
 	raidNoRaid = 10,		//parameter=0
 	raidChangeLootType		= 11,
 	raidStringID			= 12,
 	raidChangeGroupLeader = 13,	//136 raid leader, new group leader, group_id?
-	raidBecomeGroupLeader = 14,	//472
-	raidUnknown2			= 15,
+	raidSetLeaderAbilities	= 14,	//472
+	raidSetLeaderData		= 15,	// 14,15 SoE names, not sure on difference, 14 packet has 0x100 bytes 15 0x214 in addition to raid general
 	raidChangeGroup = 16,	//?? len 136 old leader, new leader, 0 (preceeded with a remove2)
 	raidLock = 17,		//len 136 leader?, leader, 0
 	raidUnlock = 18,		//len 136 leader?, leader, 0
@@ -79,6 +79,7 @@ enum { //raid command types
 
 #define MAX_RAID_GROUPS 12
 #define MAX_RAID_MEMBERS 72
+const uint32 RAID_GROUPLESS = 0xFFFFFFFF;
 
 struct RaidMember{
 	char membername[64];
@@ -89,6 +90,12 @@ struct RaidMember{
 	bool IsGroupLeader;
 	bool IsRaidLeader;
 	bool IsLooter;
+};
+
+struct GroupMentor {
+	std::string name;
+	Client *mentoree;
+	int mentor_percent;
 };
 
 class Raid : public GroupIDConsumer {
@@ -111,6 +118,7 @@ public:
 	void	DisbandRaid();
 	void	MoveMember(const char *name, uint32 newGroup);
 	void	SetGroupLeader(const char *who, bool glFlag = true);
+	Client	*GetGroupLeader(uint32 group_id);
 	void	RemoveGroupLeader(const char *who);
 	bool	IsGroupLeader(const char *who);
 	bool	IsRaidMember(const char *name);
@@ -129,6 +137,8 @@ public:
 	void	ChangeLootType(uint32 type);
 	void	AddRaidLooter(const char* looter);
 	void	RemoveRaidLooter(const char* looter);
+
+	inline void	SetRaidMOTD(std::string in_motd) { motd = in_motd; };
 
 	//util func
 	//keeps me from having to keep iterating through the list
@@ -160,6 +170,7 @@ public:
 	//also learns raid structure based on db.
 	void	SetRaidDetails();
 	void	GetRaidDetails();
+	void	SaveRaidMOTD();
 	bool	LearnMembers();
 	void	VerifyRaid();
 	void	MemberZoned(Client *c);
@@ -194,8 +205,33 @@ public:
 	void	SendMakeGroupLeaderPacketAll();
 	void	SendMakeGroupLeaderPacket(const char *who); //13
 	void	SendMakeGroupLeaderPacketTo(const char *who, Client *to);
+	void	SendRaidMOTD(Client *c);
+	void	SendRaidMOTD();
+	void	SendRaidMOTDToWorld();
 
 	void	QueuePacket(const EQApplicationPacket *app, bool ack_req = true);
+
+	// Leadership
+	void	UpdateGroupAAs(uint32 gid);
+	void	SaveGroupLeaderAA(uint32 gid);
+	void	UpdateRaidAAs();
+	void	SaveRaidLeaderAA();
+	void	SendGroupLeadershipAA(Client *c, uint32 gid);
+	void	SendGroupLeadershipAA(uint32 gid);
+	void	SendAllRaidLeadershipAA();
+	void	LoadLeadership();
+	inline int GetLeadershipAA(int AAID, uint32 gid = 0)
+		{ if (AAID >= 16) return raid_aa.ranks[AAID - 16]; else return group_aa[gid].ranks[AAID]; }
+	inline void SetGroupAAs(uint32 gid, GroupLeadershipAA_Struct *glaa)
+		{ memcpy(&group_aa[gid], glaa, sizeof(GroupLeadershipAA_Struct)); }
+	inline void SetRaidAAs(RaidLeadershipAA_Struct *rlaa)
+		{ memcpy(&raid_aa, rlaa, sizeof(RaidLeadershipAA_Struct)); }
+
+	void	SetGroupMentor(uint32 group_id, int percent, char *name);
+	void	ClearGroupMentor(uint32 group_id);
+	void	CheckGroupMentor(uint32 group_id, Client *c); // this just checks if we should be fixing the pointer in group mentor struct on zone
+	inline int GetMentorPercent(uint32 group_id) { return group_mentor[group_id].mentor_percent; }
+	inline Client *GetMentoree(uint32 group_id) { return group_mentor[group_id].mentoree; }
 
 	RaidMember members[MAX_RAID_MEMBERS];
 	char leadername[64];
@@ -206,6 +242,11 @@ protected:
 	uint32 LootType;
 	bool disbandCheck;
 	bool forceDisband;
+	std::string motd;
+	RaidLeadershipAA_Struct raid_aa;
+	GroupLeadershipAA_Struct group_aa[MAX_RAID_GROUPS];
+
+	GroupMentor group_mentor[MAX_RAID_GROUPS];
 };
 
 

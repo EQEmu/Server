@@ -97,16 +97,15 @@ protected:
 };
 
 class EQApplicationPacket : public EQPacket {
-//	friend class EQProtocolPacket;
 	friend class EQStream;
 public:
-	EQApplicationPacket() : EQPacket(OP_Unknown,nullptr,0)
+	EQApplicationPacket() : EQPacket(OP_Unknown, nullptr, 0), opcode_bypass(0)
 		{ app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
-	EQApplicationPacket(const EmuOpcode op) : EQPacket(op,nullptr,0)
+	EQApplicationPacket(const EmuOpcode op) : EQPacket(op, nullptr, 0), opcode_bypass(0)
 		{ app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
-	EQApplicationPacket(const EmuOpcode op, const uint32 len) : EQPacket(op,nullptr,len)
+	EQApplicationPacket(const EmuOpcode op, const uint32 len) : EQPacket(op, nullptr, len), opcode_bypass(0)
 		{ app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
-	EQApplicationPacket(const EmuOpcode op, const unsigned char *buf, const uint32 len) : EQPacket(op,buf,len)
+	EQApplicationPacket(const EmuOpcode op, const unsigned char *buf, const uint32 len) : EQPacket(op, buf, len), opcode_bypass(0)
 		{ app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
 	bool combine(const EQApplicationPacket *rhs);
 	uint32 serialize (uint16 opcode, unsigned char *dest) const;
@@ -119,12 +118,16 @@ public:
 	virtual void DumpRawHeader(uint16 seq=0xffff, FILE *to = stdout) const;
 	virtual void DumpRawHeaderNoTime(uint16 seq=0xffff, FILE *to = stdout) const;
 
+	uint16 GetOpcodeBypass() { return opcode_bypass; }
+	void SetOpcodeBypass(uint16 v) { opcode_bypass = v; }
+
 protected:
 
 	uint8 app_opcode_size;
+	uint16 opcode_bypass;
 private:
 
-	EQApplicationPacket(const EQApplicationPacket &p) : EQPacket(p.emu_opcode, p.pBuffer, p.size) { app_opcode_size = p.app_opcode_size; }
+	EQApplicationPacket(const EQApplicationPacket &p) : EQPacket(p.emu_opcode, p.pBuffer, p.size), opcode_bypass(p.opcode_bypass) { app_opcode_size = p.app_opcode_size; }
 
 };
 

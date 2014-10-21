@@ -56,7 +56,7 @@ int32 NPC::GetActSpellDamage(uint16 spell_id, int32 value,  Mob* target) {
 			value -= target->GetFcDamageAmtIncoming(this, spell_id)/spells[spell_id].buffduration;
 	 }
 	  	 
-	 value += dmg*SpellFocusDMG/100; 
+	 value += dmg*GetSpellFocusDMG()/100; 
 
 	if (AI_HasSpellsEffects()){
 		int16 chance = 0;
@@ -275,7 +275,7 @@ int32 NPC::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 	//Scale all NPC spell healing via SetSpellFocusHeal(value)
 
-	value += value*SpellFocusHeal/100; 
+	value += value*GetSpellFocusHeal()/100; 
 
 	 if (target) {
 		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id); 
@@ -606,6 +606,7 @@ bool Client::TrainDiscipline(uint32 itemid) {
 			return(false);
 		} else if(m_pp.disciplines.values[r] == 0) {
 			m_pp.disciplines.values[r] = spell_id;
+			database.SaveCharacterDisc(this->CharacterID(), r, spell_id);
 			SendDisciplineUpdate();
 			Message(0, "You have learned a new discipline!");
 			return(true);
@@ -616,13 +617,9 @@ bool Client::TrainDiscipline(uint32 itemid) {
 }
 
 void Client::SendDisciplineUpdate() {
-	//this dosent seem to work right now
-
 	EQApplicationPacket app(OP_DisciplineUpdate, sizeof(Disciplines_Struct));
 	Disciplines_Struct *d = (Disciplines_Struct*)app.pBuffer;
-	//dunno why I dont just send the one from m_pp
 	memcpy(d, &m_pp.disciplines, sizeof(m_pp.disciplines));
-
 	QueuePacket(&app);
 }
 

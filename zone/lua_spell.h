@@ -96,6 +96,16 @@ public:
 	int GetPowerfulFlag();
 	int GetCastRestriction();
 	bool GetAllowRest();
+	bool GetInCombat();
+	bool GetOutOfCombat();
+	int GetAEMaxTargets();
+	int GetMaxTargets();
+	bool GetPersistDeath();
+	float GetMinDist();
+	float GetMinDistMod();
+	float GetMaxDist();
+	float GetMaxDistMod();
+	float GetMinRange();
 	int GetDamageShieldType();
 };
 

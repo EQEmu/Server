@@ -14,14 +14,31 @@ Lua_Packet::Lua_Packet(int opcode, int size) {
 	owned_ = true;
 }
 
+Lua_Packet::Lua_Packet(int opcode, int size, bool raw) {
+	if(raw) {
+		SetLuaPtrData(new EQApplicationPacket(OP_Unknown, size));
+		owned_ = true;
+	
+		EQApplicationPacket *self = reinterpret_cast<EQApplicationPacket*>(d_);
+		self->SetOpcodeBypass(opcode);
+	} else {
+		SetLuaPtrData(new EQApplicationPacket(static_cast<EmuOpcode>(opcode), size));
+		owned_ = true;
+	}
+}
+
 Lua_Packet& Lua_Packet::operator=(const Lua_Packet& o) {
 	if(o.owned_) {
 		owned_ = true;
 		EQApplicationPacket *app = reinterpret_cast<EQApplicationPacket*>(o.d_);
-		if(app)
+		if(app) {
 			d_ = new EQApplicationPacket(app->GetOpcode(), app->pBuffer, app->size);
-		else
+
+			EQApplicationPacket *self = reinterpret_cast<EQApplicationPacket*>(d_);
+			self->SetOpcodeBypass(app->GetOpcodeBypass());
+		} else {
 			d_ = nullptr;
+		}
 	} else {
 		owned_ = false;
 		d_ = o.d_;
@@ -33,10 +50,14 @@ Lua_Packet::Lua_Packet(const Lua_Packet& o) {
 	if(o.owned_) {
 		owned_ = true;
 		EQApplicationPacket *app = reinterpret_cast<EQApplicationPacket*>(o.d_);
-		if(app)
+		if(app) {
 			d_ = new EQApplicationPacket(app->GetOpcode(), app->pBuffer, app->size);
-		else
+
+			EQApplicationPacket *self = reinterpret_cast<EQApplicationPacket*>(d_);
+			self->SetOpcodeBypass(app->GetOpcodeBypass());
+		} else {
 			d_ = nullptr;
+		}
 	} else {
 		owned_ = false;
 		d_ = o.d_;
@@ -54,6 +75,16 @@ int Lua_Packet::GetOpcode() {
 }
 
 void Lua_Packet::SetOpcode(int op) {
+	Lua_Safe_Call_Void();
+	self->SetOpcodeBypass(static_cast<uint16>(op));
+}
+
+int Lua_Packet::GetRawOpcode() {
+	Lua_Safe_Call_Int();
+	return static_cast<int>(self->GetOpcodeBypass());
+}
+
+void Lua_Packet::SetRawOpcode(int op) {
 	Lua_Safe_Call_Void();
 	self->SetOpcode(static_cast<EmuOpcode>(op));
 }
@@ -244,11 +275,14 @@ luabind::scope lua_register_packet() {
 	return luabind::class_<Lua_Packet>("Packet")
 		.def(luabind::constructor<>())
 		.def(luabind::constructor<int,int>())
+		.def(luabind::constructor<int,int,bool>())
 		.property("null", &Lua_Packet::Null)
 		.property("valid", &Lua_Packet::Valid)
 		.def("GetSize", &Lua_Packet::GetSize)
 		.def("GetOpcode", &Lua_Packet::GetOpcode)
 		.def("SetOpcode", &Lua_Packet::SetOpcode)
+		.def("GetRawOpcode", &Lua_Packet::GetRawOpcode)
+		.def("SetRawOpcode", &Lua_Packet::SetRawOpcode)
 		.def("WriteInt8", &Lua_Packet::WriteInt8)
 		.def("WriteInt16", &Lua_Packet::WriteInt16)
 		.def("WriteInt32", &Lua_Packet::WriteInt32)
@@ -267,6 +301,7 @@ luabind::scope lua_register_packet() {
 		.def("ReadFixedLengthString", &Lua_Packet::ReadFixedLengthString);
 }
 
+//TODO: Reorder these to match emu_oplist.h again
 luabind::scope lua_register_packet_opcodes() {
 	return luabind::class_<Opcodes>("Opcode")
 		.enum_("constants")
@@ -412,7 +447,7 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("YellForHelp", static_cast<int>(OP_YellForHelp)),
 			luabind::value("SafePoint", static_cast<int>(OP_SafePoint)),
 			luabind::value("Buff", static_cast<int>(OP_Buff)),
-			luabind::value("BuffFadeMsg", static_cast<int>(OP_BuffFadeMsg)),
+			luabind::value("ColoredText", static_cast<int>(OP_ColoredText)),
 			luabind::value("SpecialMesg", static_cast<int>(OP_SpecialMesg)),
 			luabind::value("Consent", static_cast<int>(OP_Consent)),
 			luabind::value("ConsentResponse", static_cast<int>(OP_ConsentResponse)),
@@ -809,7 +844,10 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("MercenaryDismiss", static_cast<int>(OP_MercenaryDismiss)),
 			luabind::value("MercenaryTimerRequest", static_cast<int>(OP_MercenaryTimerRequest)),
 			luabind::value("OpenInventory", static_cast<int>(OP_OpenInventory)),
-			luabind::value("OpenContainer", static_cast<int>(OP_OpenContainer))
+			luabind::value("OpenContainer", static_cast<int>(OP_OpenContainer)),
+			luabind::value("Marquee", static_cast<int>(OP_Marquee)),
+			luabind::value("ClientTimeStamp", static_cast<int>(OP_ClientTimeStamp)),
+			luabind::value("GuildPromote", static_cast<int>(OP_GuildPromote))
 		];
 }
 

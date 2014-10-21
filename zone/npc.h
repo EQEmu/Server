@@ -136,10 +136,6 @@ public:
 
 	int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target = nullptr);
 	int32 GetActSpellHealing(uint16 spell_id, int32 value, Mob* target = nullptr);
-	inline void SetSpellFocusDMG(int32 NewSpellFocusDMG) {SpellFocusDMG = NewSpellFocusDMG;}
-	inline void SetSpellFocusHeal(int32 NewSpellFocusHeal) {SpellFocusHeal = NewSpellFocusHeal;}
-	int32 SpellFocusDMG;
-	int32 SpellFocusHeal;
 
 	virtual void SetTarget(Mob* mob);
 	virtual uint16 GetSkill(SkillUseTypes skill_num) const { if (skill_num <= HIGHEST_SKILL) { return skills[skill_num]; } return 0; }
@@ -387,6 +383,12 @@ public:
 
 	inline void SetHealScale(float amt)		{ healscale = amt; }
 	inline float GetHealScale()					{ return healscale; }
+	
+	inline void SetSpellFocusDMG(int32 NewSpellFocusDMG) {SpellFocusDMG = NewSpellFocusDMG;}
+	inline int32 GetSpellFocusDMG() const { return SpellFocusDMG;}
+
+	inline void SetSpellFocusHeal(int32 NewSpellFocusHeal) {SpellFocusHeal = NewSpellFocusHeal;}
+	inline int32 GetSpellFocusHeal() const {return SpellFocusHeal;}
 
 	uint32	GetSpawnKillCount();
 	int	GetScore();
@@ -452,6 +454,8 @@ protected:
 	uint32	npc_mana;
 	float	spellscale;
 	float	healscale;
+	int32 SpellFocusDMG;
+	int32 SpellFocusHeal;
 
 	//pet crap:
 	uint16	pet_spell_id;

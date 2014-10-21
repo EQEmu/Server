@@ -1069,7 +1069,7 @@ void AdventureManager::LoadLeaderboardInfo()
 	leaderboard_info_percentage_tak.clear();
 
 	std::string query = "SELECT ch.name, ch.id, adv_stats.* FROM adventure_stats "
-		"AS adv_stats LEFT JOIN character_ AS ch ON adv_stats.player_id = ch.id;";
+		"AS adv_stats LEFT JOIN `character_data` AS ch ON adv_stats.player_id = ch.id;";
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
         LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::GetLeaderboardInfo: %s (%s)", query.c_str(), results.ErrorMessage().c_str());

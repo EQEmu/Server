@@ -1040,7 +1040,7 @@ void Mob::AI_Process() {
 	//
 	if(RuleB(Combat, EnableFearPathing)){
 		if(curfp) {
-			if(IsRooted()) {
+			if(IsRooted() || (IsBlind() && CombatRange(hate_list.GetClosest(this)))) {
 				//make sure everybody knows were not moving, for appearance sake
 				if(IsMoving())
 				{
@@ -1087,7 +1087,9 @@ void Mob::AI_Process() {
 
 	if (engaged)
 	{
-		if (IsRooted())
+		// we are prevented from getting here if we are blind and don't have a target in range
+		// from above, so no extra blind checks needed
+		if (IsRooted() || IsBlind())
 			SetTarget(hate_list.GetClosest(this));
 		else
 		{

@@ -8,7 +8,6 @@ SET(common_sources
 	crc16.cpp
 	crc32.cpp
 	database.cpp
-	dbasync.cpp
 	dbcore.cpp
 	debug.cpp
 	emu_opcodes.cpp
@@ -56,8 +55,9 @@ SET(common_sources
 	rulesys.cpp
 	serverinfo.cpp
 	shareddb.cpp
+	skills.cpp
 	spdat.cpp
-    string_util.cpp
+	string_util.cpp
 	struct_strategy.cpp
 	tcp_connection.cpp
 	tcp_server.cpp
@@ -103,8 +103,8 @@ SET(common_headers
 	crash.h
 	crc16.h
 	crc32.h
+	data_verification.h
 	database.h
-	dbasync.h
 	dbcore.h
 	debug.h
 	deity.h

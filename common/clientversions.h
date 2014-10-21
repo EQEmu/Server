@@ -17,7 +17,8 @@ static const uint32 BIT_RoFAndLater			= 0xFFFFFFE0;
 static const uint32 BIT_RoF2AndLater		= 0xFFFFFFC0;
 static const uint32 BIT_AllClients			= 0xFFFFFFFF;
 
-typedef enum {
+typedef enum
+{
 	EQClientUnknown = 0,
 	EQClient62,				// Build: 'Aug  4 2005 15:40:59'
 	EQClientTitanium,		// Build: 'Oct 31 2005 10:33:37'
@@ -26,17 +27,50 @@ typedef enum {
 	EQClientUnderfoot,		// Build: 'Jun  8 2010 16:44:32'
 	EQClientRoF,			// Build: 'Dec 10 2012 17:35:44'
 	EQClientRoF2,			// Build: 'May 10 2013 23:30:08'
-	
+
 	_EQClientCount,			// place new clients before this point (preferably, in release/attribute order)
-	
+
 	// Values below are not implemented, as yet...
-	
+
 	EmuNPC = _EQClientCount,
 	EmuMerc,
 	EmuBot,
 	EmuPet,
-	
+
 	_EmuClientCount			// array size for EQLimits
 } EQClientVersion;
+
+static const char* EQClientVersionName(EQClientVersion version)
+{
+	switch (version)
+	{
+	case EQClientUnknown:
+		return "EQClientUnknown";
+	case EQClient62:
+		return "EQClient62";
+	case EQClientTitanium:
+		return "EQClientTitanium";
+	case EQClientSoF:
+		return "EQClientSoF";
+	case EQClientSoD:
+		return "EQClientSoD";
+	case EQClientUnderfoot:
+		return "EQClientUnderfoot";
+	case EQClientRoF:
+		return "EQClientRoF";
+	case EQClientRoF2:
+		return "EQClientRoF2";
+	case EmuNPC:
+		return "EmuNPC";
+	case EmuMerc:
+		return "EmuMerc";
+	case EmuBot:
+		return "EmuBot";
+	case EmuPet:
+		return "EmuPet";
+	default:
+		return "ERROR: Invalid EQClientVersion";
+	};
+}
 
 #endif /* CLIENTVERSIONS_H */

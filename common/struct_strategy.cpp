@@ -17,6 +17,11 @@ StructStrategy::StructStrategy() {
 }
 
 void StructStrategy::Encode(EQApplicationPacket **p, EQStream *dest, bool ack_req) const {
+	if((*p)->GetOpcodeBypass() != 0) {
+		PassEncoder(p, dest, ack_req);
+		return;
+	}
+
 	EmuOpcode op = (*p)->GetOpcode();
 	Encoder proc = encoders[op];
 	proc(p, dest, ack_req);

@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifndef RoF_CONSTANTS_H_
 #define RoF_CONSTANTS_H_
 
-#include "../common/types.h"
+#include "../types.h"
 
 namespace RoF {
 	namespace maps {
@@ -184,6 +184,7 @@ namespace RoF {
 
 	namespace limits {
 		static const bool ALLOWS_EMPTY_BAG_IN_BAG = true;
+		static const bool ALLOWS_CLICK_CAST_FROM_BAG = true;
 		static const bool COIN_HAS_WEIGHT = false;
 	}
 

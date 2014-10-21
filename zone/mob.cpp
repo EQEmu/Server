@@ -1932,6 +1932,7 @@ void Mob::SetZone(uint32 zone_id, uint32 instance_id)
 	{
 		CastToClient()->GetPP().zone_id = zone_id;
 		CastToClient()->GetPP().zoneInstance = instance_id;
+		CastToClient()->Save();
 	}
 	Save();
 }
@@ -2734,11 +2735,28 @@ uint32 Mob::GetZoneID() const {
 	return(zone->GetZoneID());
 }
 
-int Mob::GetHaste() {
-	int h = spellbonuses.haste + spellbonuses.hastetype2;
+int Mob::GetHaste()
+{
+	// See notes in Client::CalcHaste
+	// Need to check if the effect of inhibit melee differs for NPCs
+	if (spellbonuses.haste < 0) {
+		if (-spellbonuses.haste <= spellbonuses.inhibitmelee)
+			return 100 - spellbonuses.inhibitmelee;
+		else
+			return 100 + spellbonuses.haste;
+	}
+
+	if (spellbonuses.haste == 0 && spellbonuses.inhibitmelee)
+		return 100 - spellbonuses.inhibitmelee;
+
+	int h = 0;
 	int cap = 0;
-	int overhaste = 0;
 	int level = GetLevel();
+
+	if (spellbonuses.haste)
+		h += spellbonuses.haste - spellbonuses.inhibitmelee;
+	if (spellbonuses.hastetype2 && level > 49)
+		h += spellbonuses.hastetype2 > 10 ? 10 : spellbonuses.hastetype2;
 
 	// 26+ no cap, 1-25 10
 	if (level > 25) // 26+
@@ -2759,21 +2777,13 @@ int Mob::GetHaste() {
 
 	// 51+ 25 (despite there being higher spells...), 1-50 10
 	if (level > 50) // 51+
-		overhaste = spellbonuses.hastetype3 > 25 ? 25 : spellbonuses.hastetype3;
+		h += spellbonuses.hastetype3 > 25 ? 25 : spellbonuses.hastetype3;
 	else // 1-50
-		overhaste = spellbonuses.hastetype3 > 10 ? 10 : spellbonuses.hastetype3;
+		h += spellbonuses.hastetype3 > 10 ? 10 : spellbonuses.hastetype3;
 
-	h += overhaste;
 	h += ExtraHaste;	//GM granted haste.
 
-	if (spellbonuses.inhibitmelee) {
-		if (h >= 0)
-			h -= spellbonuses.inhibitmelee;
-		else
-			h -= ((100 + h) * spellbonuses.inhibitmelee / 100);
-	}
-
-	return(h);
+	return 100 + h;
 }
 
 void Mob::SetTarget(Mob* mob) {
@@ -3030,12 +3040,11 @@ void Mob::TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger)
 	}
 }
 
-void Mob::TrySpellTrigger(Mob *target, uint32 spell_id)
+bool Mob::TrySpellTrigger(Mob *target, uint32 spell_id, int effect)
 {
-	if(target == nullptr || !IsValidSpell(spell_id))
-	{
-		return;
-	}
+	if(!target || !IsValidSpell(spell_id))
+		return false;
+	
 	int spell_trig = 0;
 	// Count all the percentage chances to trigger for all effects
 	for(int i = 0; i < EFFECT_COUNT; i++)
@@ -3054,8 +3063,10 @@ void Mob::TrySpellTrigger(Mob *target, uint32 spell_id)
 				if(MakeRandomInt(0, trig_chance) <= spells[spell_id].base[i])
 				{
 					// If we trigger an effect then its over.
-					SpellFinished(spells[spell_id].base2[i], target, 10, 0, -1, spells[spell_id].ResistDiff);
-					break;
+					if (IsValidSpell(spells[spell_id].base2[i])){
+						SpellFinished(spells[spell_id].base2[i], target, 10, 0, -1, spells[spells[spell_id].base2[i]].ResistDiff);
+						return true;
+					}
 				}
 				else
 				{
@@ -3069,37 +3080,15 @@ void Mob::TrySpellTrigger(Mob *target, uint32 spell_id)
 	// if the chances don't add to 100, then each effect gets a chance to fire, chance for no trigger as well.
 	else
 	{
-		for(int i = 0; i < EFFECT_COUNT; i++)
+		if(MakeRandomInt(0, 100) <= spells[spell_id].base[effect])
 		{
-			if (spells[spell_id].effectid[i] == SE_SpellTrigger)
-			{
-				if(MakeRandomInt(0, 100) <= spells[spell_id].base[i])
-				{
-					SpellFinished(spells[spell_id].base2[i], target, 10, 0, -1, spells[spell_id].ResistDiff);
-				}
+			if (IsValidSpell(spells[spell_id].base2[effect])){
+				SpellFinished(spells[spell_id].base2[effect], target, 10, 0, -1, spells[spells[spell_id].base2[effect]].ResistDiff);
+				return true; //Only trigger once of these per spell effect.
 			}
 		}
 	}
-}
-
-void Mob::TryApplyEffect(Mob *target, uint32 spell_id)
-{
-	if(target == nullptr || !IsValidSpell(spell_id))
-	{
-		return;
-	}
-
-	for(int i = 0; i < EFFECT_COUNT; i++)
-	{
-		if (spells[spell_id].effectid[i] == SE_ApplyEffect)
-		{
-			if(MakeRandomInt(0, 100) <= spells[spell_id].base[i])
-			{
-				if(target)
-					SpellFinished(spells[spell_id].base2[i], target, 10, 0, -1, spells[spell_id].ResistDiff);
-			}
-		}
-	}
+	return false;
 }
 
 void Mob::TryTriggerOnValueAmount(bool IsHP, bool IsMana, bool IsEndur, bool IsPet)
@@ -5011,5 +5000,121 @@ float Mob::HeadingAngleToMob(Mob *other)
 		return angle * 511.5 * 0.0027777778;
 	else
 		return (90.0 - angle + 270.0) * 511.5 * 0.0027777778;
+}
+
+int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
+{
+	if (!IsValidSpell(spell_id))
+		return 0;
+
+	if (!identifier)
+		return 0;
+
+	int32 stat = 0;
+
+	if (slot > 0)
+		slot = slot - 1;
+
+	std::string id = identifier;
+	for(int i = 0; i < id.length(); ++i)
+	{
+		id[i] = tolower(id[i]);
+	}
+
+	if (slot < 16){
+		if (id == "classes") {stat = spells[spell_id].classes[slot]; }
+		else if (id == "dieties") {stat = spells[spell_id].deities[slot];}
+	}
+
+	if (slot < 12){
+		if (id == "base") {stat = spells[spell_id].base[slot];}
+		else if (id == "base2") {stat = spells[spell_id].base2[slot];}
+		else if (id == "max") {stat = spells[spell_id].max[slot];}
+		else if (id == "formula") {spells[spell_id].formula[slot];}
+		else if (id == "effectid") {spells[spell_id].effectid[slot];}
+	}
+
+	if (slot < 4){
+		if (id == "components") { spells[spell_id].components[slot];}
+		else if (id == "component_counts") {spells[spell_id].component_counts[slot];} 
+		else if (id == "NoexpendReagent") {spells[spell_id].NoexpendReagent[slot];}
+	}
+
+	if (id == "range") {stat = spells[spell_id].range; }
+	else if (id == "aoerange") {stat = spells[spell_id].aoerange;}
+	else if (id == "pushback") {stat = spells[spell_id].pushback;}
+	else if (id == "pushup") {stat = spells[spell_id].pushup;}
+	else if (id == "cast_time") {stat = spells[spell_id].cast_time;}
+	else if (id == "recovery_time") {stat = spells[spell_id].recovery_time;}
+	else if (id == "recast_time") {stat = spells[spell_id].recast_time;}
+	else if (id == "buffdurationformula") {stat = spells[spell_id].buffdurationformula;}
+	else if (id == "buffduration") {stat = spells[spell_id].buffduration;}
+	else if (id == "AEDuration") {stat = spells[spell_id].AEDuration;}
+	else if (id == "mana") {stat = spells[spell_id].mana;}
+	//else if (id == "LightType") {stat = spells[spell_id].LightType;} - Not implemented
+	else if (id == "goodEffect") {stat = spells[spell_id].goodEffect;}
+	else if (id == "Activated") {stat = spells[spell_id].Activated;}
+	else if (id == "resisttype") {stat = spells[spell_id].resisttype;}
+	else if (id == "targettype") {stat = spells[spell_id].targettype;}
+	else if (id == "basedeiff") {stat = spells[spell_id].basediff;}
+	else if (id == "skill") {stat = spells[spell_id].skill;}
+	else if (id == "zonetype") {stat = spells[spell_id].zonetype;}
+	else if (id == "EnvironmentType") {stat = spells[spell_id].EnvironmentType;}
+	else if (id == "TimeOfDay") {stat = spells[spell_id].TimeOfDay;}
+	else if (id == "CastingAnim") {stat = spells[spell_id].CastingAnim;}
+	else if (id == "SpellAffectIndex") {stat = spells[spell_id].SpellAffectIndex; }
+	else if (id == "disallow_sit") {stat = spells[spell_id].disallow_sit; }
+	//else if (id == "spellanim") {stat = spells[spell_id].spellanim; } - Not implemented
+	else if (id == "uninterruptable") {stat = spells[spell_id].uninterruptable; }
+	else if (id == "ResistDiff") {stat = spells[spell_id].ResistDiff; }
+	else if (id == "dot_stacking_exemp") {stat = spells[spell_id].dot_stacking_exempt; }
+	else if (id == "RecourseLink") {stat = spells[spell_id].RecourseLink; }
+	else if (id == "no_partial_resist") {stat = spells[spell_id].no_partial_resist; }
+	else if (id == "short_buff_box") {stat = spells[spell_id].short_buff_box; }
+	else if (id == "descnum") {stat = spells[spell_id].descnum; }
+	else if (id == "effectdescnum") {stat = spells[spell_id].effectdescnum; }
+	else if (id == "npc_no_los") {stat = spells[spell_id].npc_no_los; }
+	else if (id == "reflectable") {stat = spells[spell_id].reflectable; }
+	else if (id == "bonushate") {stat = spells[spell_id].bonushate; }
+	else if (id == "EndurCost") {stat = spells[spell_id].EndurCost; }
+	else if (id == "EndurTimerIndex") {stat = spells[spell_id].EndurTimerIndex; }
+	else if (id == "IsDisciplineBuf") {stat = spells[spell_id].IsDisciplineBuff; }
+	else if (id == "HateAdded") {stat = spells[spell_id].HateAdded; }
+	else if (id == "EndurUpkeep") {stat = spells[spell_id].EndurUpkeep; }
+	else if (id == "numhitstype") {stat = spells[spell_id].numhitstype; }
+	else if (id == "numhits") {stat = spells[spell_id].numhits; }
+	else if (id == "pvpresistbase") {stat = spells[spell_id].pvpresistbase; }
+	else if (id == "pvpresistcalc") {stat = spells[spell_id].pvpresistcalc; }
+	else if (id == "pvpresistcap") {stat = spells[spell_id].pvpresistcap; }
+	else if (id == "spell_category") {stat = spells[spell_id].spell_category; }
+	else if (id == "can_mgb") {stat = spells[spell_id].can_mgb; }
+	else if (id == "dispel_flag") {stat = spells[spell_id].dispel_flag; }
+	else if (id == "MinResist") {stat = spells[spell_id].MinResist; }
+	else if (id == "MaxResist") {stat = spells[spell_id].MaxResist; }
+	else if (id == "viral_targets") {stat = spells[spell_id].viral_targets; }
+	else if (id == "viral_timer") {stat = spells[spell_id].viral_timer; }
+	else if (id == "NimbusEffect") {stat = spells[spell_id].NimbusEffect; }
+	else if (id == "directional_start") {stat = spells[spell_id].directional_start; }
+	else if (id == "directional_end") {stat = spells[spell_id].directional_end; }
+	else if (id == "not_extendable") {stat = spells[spell_id].not_extendable; }
+	else if (id == "suspendable") {stat = spells[spell_id].suspendable; }
+	else if (id == "viral_range") {stat = spells[spell_id].viral_range; }
+	else if (id == "spellgroup") {stat = spells[spell_id].spellgroup; }
+	else if (id == "rank") {stat = spells[spell_id].rank; }
+	else if (id == "powerful_flag") {stat = spells[spell_id].powerful_flag; }
+	else if (id == "CastRestriction") {stat = spells[spell_id].CastRestriction; }
+	else if (id == "AllowRest") {stat = spells[spell_id].AllowRest; }
+	else if (id == "InCombat") {stat = spells[spell_id].InCombat; }
+	else if (id == "OutofCombat") {stat = spells[spell_id].OutofCombat; }
+	else if (id == "aemaxtargets") {stat = spells[spell_id].aemaxtargets; }
+	else if (id == "maxtargets") {stat = spells[spell_id].maxtargets; }
+	else if (id == "persistdeath") {stat = spells[spell_id].persistdeath; }
+	else if (id == "min_dist") {stat = spells[spell_id].min_dist; }
+	else if (id == "min_dist_mod") {stat = spells[spell_id].min_dist_mod; }
+	else if (id == "max_dist") {stat = spells[spell_id].max_dist; }
+	else if (id == "min_range") {stat = spells[spell_id].min_range; }
+	else if (id == "DamageShieldType") {stat = spells[spell_id].DamageShieldType; }
+	
+	return stat;
 }
 

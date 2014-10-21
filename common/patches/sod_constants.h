@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifndef SoD_CONSTANTS_H_
 #define SoD_CONSTANTS_H_
 
-#include "../common/types.h"
+#include "../types.h"
 
 namespace SoD {
 	namespace maps {
@@ -181,6 +181,7 @@ namespace SoD {
 
 	namespace limits {
 		static const bool ALLOWS_EMPTY_BAG_IN_BAG = false;
+		static const bool ALLOWS_CLICK_CAST_FROM_BAG = false;
 		static const bool COIN_HAS_WEIGHT = false;
 	}
 

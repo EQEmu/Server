@@ -21,6 +21,7 @@ public:
 	Lua_Packet() : Lua_Ptr(nullptr), owned_(false) { }
 	Lua_Packet(EQApplicationPacket *d) : Lua_Ptr(d), owned_(false) { }
 	Lua_Packet(int opcode, int size);
+	Lua_Packet(int opcode, int size, bool raw);
 	Lua_Packet& operator=(const Lua_Packet& o);
 	Lua_Packet(const Lua_Packet& o);
 	virtual ~Lua_Packet() { if(owned_) { EQApplicationPacket *ptr = GetLuaPtrData(); if(ptr) { delete ptr; } } }
@@ -28,6 +29,8 @@ public:
 	int GetSize();
 	int GetOpcode();
 	void SetOpcode(int op);
+	int GetRawOpcode();
+	void SetRawOpcode(int op);
 	void WriteInt8(int offset, int value);
 	void WriteInt16(int offset, int value);
 	void WriteInt32(int offset, int value);

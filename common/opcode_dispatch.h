@@ -305,7 +305,8 @@ OUTz(OP_FinishWindow2);
 //OUTv(OP_AdventureInfo, strlen(p)+1);
 //OUTv(OP_AdventureMerchantResponse, strlen(msg)+2);
 OUTv(OP_ItemPacket, ItemPacket_Struct);
-OUTv(OP_BuffFadeMsg, BuffFadeMsg_Struct);
+OUTv(OP_ColoredText, ColoredText_Struct);
+OUTv(OP_ItemRecastDelay, ItemRecastDelay_Struct);
 OUTv(OP_FormattedMessage, FormattedMessage_Struct);
 OUTv(OP_GuildMemberList, uint32);		//variable length, but nasty
 OUTv(OP_InterruptCast, InterruptCast_Struct);

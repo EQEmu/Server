@@ -419,7 +419,7 @@ struct CastSpell_Struct
 	uint32	spell_id;
 	uint32	inventoryslot;  // slot for clicky item, 0xFFFF = normal cast
 	uint32	target_id;
-	uint8    cs_unknown[4];
+	uint8	cs_unknown[4];
 };
 
 /*
@@ -565,7 +565,7 @@ struct CharCreate_Struct
 /*0064*/	uint32	face;		// Could be unknown0076
 /*0068*/	uint32	eyecolor1;	//its possiable we could have these switched
 /*0073*/	uint32	eyecolor2;	//since setting one sets the other we really can't check
-/*0076*/	uint32	unknown0076;	// Could be face
+/*0076*/	uint32	tutorial;
 /*0080*/
 };
 
@@ -619,14 +619,62 @@ struct PotionBelt_Struct {
 static const uint32 MAX_GROUP_LEADERSHIP_AA_ARRAY = 16;
 static const uint32 MAX_RAID_LEADERSHIP_AA_ARRAY = 16;
 static const uint32 MAX_LEADERSHIP_AA_ARRAY = (MAX_GROUP_LEADERSHIP_AA_ARRAY+MAX_RAID_LEADERSHIP_AA_ARRAY);
-struct LeadershipAA_Struct {
-	uint32 ranks[MAX_LEADERSHIP_AA_ARRAY];
-};
 struct GroupLeadershipAA_Struct {
-	uint32 ranks[MAX_GROUP_LEADERSHIP_AA_ARRAY];
+	union {
+		struct {
+			uint32 groupAAMarkNPC;
+			uint32 groupAANPCHealth;
+			uint32 groupAADelegateMainAssist;
+			uint32 groupAADelegateMarkNPC;
+			uint32 groupAA4;
+			uint32 groupAA5;
+			uint32 groupAAInspectBuffs;
+			uint32 groupAA7;
+			uint32 groupAASpellAwareness;
+			uint32 groupAAOffenseEnhancement;
+			uint32 groupAAManaEnhancement;
+			uint32 groupAAHealthEnhancement;
+			uint32 groupAAHealthRegeneration;
+			uint32 groupAAFindPathToPC;
+			uint32 groupAAHealthOfTargetsTarget;
+			uint32 groupAA15;
+		};
+		uint32 ranks[MAX_GROUP_LEADERSHIP_AA_ARRAY];
+	};
 };
+
 struct RaidLeadershipAA_Struct {
-	uint32 ranks[MAX_RAID_LEADERSHIP_AA_ARRAY];
+	union {
+		struct {
+			uint32 raidAAMarkNPC;
+			uint32 raidAANPCHealth;
+			uint32 raidAADelegateMainAssist;
+			uint32 raidAADelegateMarkNPC;
+			uint32 raidAA4;
+			uint32 raidAA5;
+			uint32 raidAA6;
+			uint32 raidAASpellAwareness;
+			uint32 raidAAOffenseEnhancement;
+			uint32 raidAAManaEnhancement;
+			uint32 raidAAHealthEnhancement;
+			uint32 raidAAHealthRegeneration;
+			uint32 raidAAFindPathToPC;
+			uint32 raidAAHealthOfTargetsTarget;
+			uint32 raidAA14;
+			uint32 raidAA15;
+		};
+		uint32 ranks[MAX_RAID_LEADERSHIP_AA_ARRAY];
+	};
+};
+
+struct LeadershipAA_Struct {
+	union {
+		struct {
+			GroupLeadershipAA_Struct group;
+			RaidLeadershipAA_Struct raid;
+		};
+		uint32 ranks[MAX_LEADERSHIP_AA_ARRAY];
+	};
 };
 
  /**
@@ -1217,19 +1265,27 @@ struct BulkItemPacket_Struct
 
 struct Consume_Struct
 {
-/*0000*/ uint32 slot;
-/*0004*/ uint32 auto_consumed; // 0xffffffff when auto eating e7030000 when right click
-/*0008*/ uint8  c_unknown1[4];
-/*0012*/ uint8  type; // 0x01=Food 0x02=Water
-/*0013*/ uint8  unknown13[3];
+/*0000*/ uint32	slot;
+/*0004*/ uint32	auto_consumed; // 0xffffffff when auto eating e7030000 when right click
+/*0008*/ uint8	c_unknown1[4];
+/*0012*/ uint8	type; // 0x01=Food 0x02=Water
+/*0013*/ uint8	unknown13[3];
 };
 
+struct DeleteItem_Struct
+{
+/*0000*/ uint32	from_slot;
+/*0004*/ uint32	to_slot;
+/*0008*/ uint32	number_in_stack;
+/*0012*/
+};
 
 struct MoveItem_Struct
 {
-/*0000*/ uint32 from_slot;
-/*0004*/ uint32 to_slot;
-/*0008*/ uint32 number_in_stack;
+/*0000*/ uint32	from_slot;
+/*0004*/ uint32	to_slot;
+/*0008*/ uint32	number_in_stack;
+/*0012*/
 };
 
 //
@@ -1431,12 +1487,6 @@ struct CombatAbility_Struct {
 	uint32 m_skill;
 };
 
-struct DeleteItem_Struct {
-/*0000*/ uint32 from_slot;
-/*0004*/ uint32 to_slot;
-/*0008*/ uint32 number_in_stack;
-};
-
 //Instill Doubt
 struct Instill_Doubt_Struct {
 	uint8 i_id;
@@ -1588,6 +1638,14 @@ struct Adventure_Purchase_Struct {
 /*000*/	uint32	npcid;
 /*004*/	uint32	itemid;
 /*008*/	uint32	variable;
+};
+
+struct Adventure_Sell_Struct {
+/*000*/	uint32	unknown000;	//0x01
+/*004*/	uint32	npcid;
+/*008*/	uint32	slot;
+/*012*/	uint32	charges;
+/*016*/	uint32	sell_price;
 };
 
 struct AdventurePoints_Update_Struct {
@@ -2583,10 +2641,10 @@ struct TributeInfo_Struct {
 };
 
 struct TributeItem_Struct {
-	uint32   slot;
-	uint32   quantity;
-	uint32   tribute_master_id;
-	int32  tribute_points;
+	uint32	slot;
+	uint32	quantity;
+	uint32	tribute_master_id;
+	int32	tribute_points;
 };
 
 struct TributePoint_Struct {
@@ -2622,7 +2680,7 @@ struct Split_Struct
 */
 struct NewCombine_Struct {
 /*00*/	int16	container_slot;
-/*02*/	char	unknown02[2];
+/*02*/	int16	guildtribute_slot;
 /*04*/
 };
 
@@ -3046,7 +3104,7 @@ struct GroupInvite_Struct {
 //	uint8	unknown128[65];
 };
 
-struct BuffFadeMsg_Struct {
+struct ColoredText_Struct {
 	uint32 color;
 	char msg[1];
 };
@@ -3152,6 +3210,11 @@ struct MobHealth_Struct {
 struct AnnoyingZoneUnknown_Struct {
 	uint32	entity_id;
 	uint32	value;		//always 4
+};
+
+struct ApplyPoison_Struct {
+	uint32 inventorySlot;
+	uint32 success;
 };
 
 struct GuildMemberUpdate_Struct {

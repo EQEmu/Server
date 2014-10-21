@@ -171,6 +171,7 @@ RULE_INT ( World, PVPSettings, 0) // Sets the PVP settings for the server, 1 = R
 RULE_BOOL (World, IsGMPetitionWindowEnabled, false)
 RULE_INT (World, FVNoDropFlag, 0) // Sets the Firiona Vie settings on the client. If set to 2, the flag will be set for GMs only, allowing trading of no-drop items.
 RULE_BOOL (World, IPLimitDisconnectAll, false)
+RULE_INT (World, TellQueueSize, 20)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Zone )
@@ -200,6 +201,8 @@ RULE_INT ( Zone, EbonCrystalItemID, 40902)
 RULE_INT ( Zone, RadiantCrystalItemID, 40903)
 RULE_BOOL ( Zone, LevelBasedEXPMods, false) // Allows you to use the level_exp_mods table in consideration to your players EXP hits
 RULE_INT ( Zone, WeatherTimer, 600) // Weather timer when no duration is available
+RULE_BOOL ( Zone, EnableLoggedOffReplenishments, true)
+RULE_INT ( Zone, MinOfflineTimeToReplenishments, 21600) // 21600 seconds is 6 Hours
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Map )
@@ -320,6 +323,8 @@ RULE_INT ( Spells, AI_PursueDetrimentalChance, 90) // Chance while chasing targe
 RULE_INT ( Spells, AI_IdleNoSpellMinRecast, 500) // AI spell recast time(MS) check when no spell is cast while idle. (min time in random)
 RULE_INT ( Spells, AI_IdleNoSpellMaxRecast, 2000) // AI spell recast time(MS) check when no spell is cast while chasing target. (max time in random)
 RULE_INT ( Spells, AI_IdleBeneficialChance, 100) // Chance while idle to do a beneficial spell on self or others.
+RULE_BOOL ( Spells, SHDProcIDOffByOne, true) // pre June 2009 SHD spell procs were off by 1, they stopped doing this in June 2009 (so UF+ spell files need this false)
+RULE_BOOL ( Spells, Jun182014HundredHandsRevamp, false) // this should be true for if you import a spell file newer than June 18, 2014
 
 RULE_CATEGORY_END()
 

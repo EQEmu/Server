@@ -407,8 +407,18 @@ void Lua_NPC::SetSpellFocusHeal(int focus) {
 	self->SetSpellFocusHeal(focus);
 }
 
-float Lua_NPC::GetSlowMitigation() {
+int Lua_NPC::GetSpellFocusDMG() {
 	Lua_Safe_Call_Int();
+	return self->GetSpellFocusDMG();
+}
+
+int Lua_NPC::GetSpellFocusHeal() {
+	Lua_Safe_Call_Int();
+	return self->GetSpellFocusHeal();
+}
+
+float Lua_NPC::GetSlowMitigation() {
+	Lua_Safe_Call_Real();
 	return self->GetSlowMitigation();
 }
 
@@ -535,6 +545,8 @@ luabind::scope lua_register_npc() {
 		.def("RemoveAISpell", (void(Lua_NPC::*)(int))&Lua_NPC::RemoveAISpell)
 		.def("SetSpellFocusDMG", (void(Lua_NPC::*)(int))&Lua_NPC::SetSpellFocusDMG)
 		.def("SetSpellFocusHeal", (void(Lua_NPC::*)(int))&Lua_NPC::SetSpellFocusHeal)
+		.def("GetSpellFocusDMG", (void(Lua_NPC::*)(int))&Lua_NPC::GetSpellFocusDMG)
+		.def("GetSpellFocusHeal", (void(Lua_NPC::*)(int))&Lua_NPC::GetSpellFocusHeal)
 		.def("GetSlowMitigation", (int(Lua_NPC::*)(void))&Lua_NPC::GetSlowMitigation)
 		.def("GetAttackSpeed", (float(Lua_NPC::*)(void))&Lua_NPC::GetAttackSpeed)
 		.def("GetAccuracyRating", (int(Lua_NPC::*)(void))&Lua_NPC::GetAccuracyRating)

@@ -239,8 +239,10 @@ public:
 	uint16 CreateDoor( const char* model, float x, float y, float z, float heading, uint8 opentype, uint16 size);
     int32 GetZoneID(const char *zone);
     const char *GetZoneLongName(const char *zone);
-	void CrossZoneSignalPlayerByCharID(int charid, uint32 data);
+	void CrossZoneSignalPlayerByCharID(int charid, uint32 data); 
+	void CrossZoneSignalNPCByNPCTypeID(uint32 npctype_id, uint32 data);
 	void CrossZoneSignalPlayerByName(const char *CharName, uint32 data);
+	void CrossZoneSetEntityVariableByNPCTypeID(uint32 npctype_id, const char *id, const char *m_var);
 	void CrossZoneMessagePlayerByName(uint32 Type, const char *CharName, const char *Message);
 	bool EnableRecipe(uint32 recipe_id);
 	bool DisableRecipe(uint32 recipe_id);

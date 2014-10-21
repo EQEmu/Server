@@ -200,14 +200,7 @@ bool Client::CheckLoreConflict(const Item_Struct* item) {
 }
 
 bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, bool attuned, uint16 to_slot) {
-	/* Set a timestamp in an entity variable for plugin check_handin.pl in return_items
-		This will stopgap players from items being returned if global_npc.pl has a catch all return_items
-	*/
-	struct timeval read_time;
-	char buffer[50];
-	gettimeofday(&read_time, 0);
-	sprintf(buffer, "%li.%li \n", read_time.tv_sec, read_time.tv_usec);
-	this->SetEntityVariable("Recieved_Item", buffer);
+	this->EVENT_ITEM_ScriptStopReturn();
 
 	// TODO: update calling methods and script apis to handle a failure return
 
@@ -1877,7 +1870,9 @@ void Client::DyeArmor(DyeStruct* dye){
 				uint8 slot2=SlotConvert(i);
 				ItemInst* inst = this->m_inv.GetItem(slot2);
 				if(inst){
-					inst->SetColor((dye->dye[i].rgb.red*65536)+(dye->dye[i].rgb.green*256)+(dye->dye[i].rgb.blue));
+					uint32 armor_color = (dye->dye[i].rgb.red * 65536) + (dye->dye[i].rgb.green * 256) + (dye->dye[i].rgb.blue);
+					inst->SetColor(armor_color); 
+					database.SaveCharacterMaterialColor(this->CharacterID(), i, armor_color);
 					database.SaveInventory(CharacterID(),inst,slot2);
 					if(dye->dye[i].rgb.use_tint)
 						m_pp.item_tint[i].rgb.use_tint = 0xFF;
@@ -1898,7 +1893,7 @@ void Client::DyeArmor(DyeStruct* dye){
 	EQApplicationPacket* outapp=new EQApplicationPacket(OP_Dye,0);
 	QueuePacket(outapp);
 	safe_delete(outapp);
-	Save();
+	
 }
 
 /*bool Client::DecreaseByItemType(uint32 type, uint8 amt) {
@@ -2417,10 +2412,8 @@ void Client::CreateBandolier(const EQApplicationPacket *app) {
 	_log(INVENTORY__BANDOLIER, "Char: %s Creating Bandolier Set %i, Set Name: %s", GetName(), bs->number, bs->name);
 	strcpy(m_pp.bandoliers[bs->number].name, bs->name);
 
-	const ItemInst* InvItem;
-
-	const Item_Struct *BaseItem;
-
+	const ItemInst* InvItem; 
+	const Item_Struct *BaseItem; 
 	int16 WeaponSlot;
 
 	for(int BandolierSlot = bandolierMainHand; BandolierSlot <= bandolierAmmo; BandolierSlot++) {
@@ -2431,6 +2424,7 @@ void Client::CreateBandolier(const EQApplicationPacket *app) {
 			_log(INVENTORY__BANDOLIER, "Char: %s adding item %s to slot %i", GetName(),BaseItem->Name, WeaponSlot);
 			m_pp.bandoliers[bs->number].items[BandolierSlot].item_id = BaseItem->ID;
 			m_pp.bandoliers[bs->number].items[BandolierSlot].icon = BaseItem->Icon;
+			database.SaveCharacterBandolier(this->CharacterID(), bs->number, BandolierSlot, m_pp.bandoliers[bs->number].items[BandolierSlot].item_id, m_pp.bandoliers[bs->number].items[BandolierSlot].icon, bs->name);
 		}
 		else {
 			_log(INVENTORY__BANDOLIER, "Char: %s no item in slot %i", GetName(), WeaponSlot);
@@ -2438,21 +2432,17 @@ void Client::CreateBandolier(const EQApplicationPacket *app) {
 			m_pp.bandoliers[bs->number].items[BandolierSlot].icon = 0;
 		}
 	}
-	Save();
 }
 
 void Client::RemoveBandolier(const EQApplicationPacket *app) {
-
-	// Delete bandolier with the specified number
-
 	BandolierDelete_Struct *bds = (BandolierDelete_Struct*)app->pBuffer;
 	_log(INVENTORY__BANDOLIER, "Char: %s removing set", GetName(), bds->number);
 	memset(m_pp.bandoliers[bds->number].name, 0, 32);
 	for(int i = bandolierMainHand; i <= bandolierAmmo; i++) {
 		m_pp.bandoliers[bds->number].items[i].item_id = 0;
-		m_pp.bandoliers[bds->number].items[i].icon = 0;
+		m_pp.bandoliers[bds->number].items[i].icon = 0; 
 	}
-	Save();
+	database.DeleteCharacterBandolier(this->CharacterID(), bds->number);
 }
 
 void Client::SetBandolier(const EQApplicationPacket *app) {

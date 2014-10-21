@@ -28,7 +28,6 @@
 
 #include "zonedb.h"
 #include "zonedump.h"
-#include "zonedbasync.h"
 #include "qglobals.h"
 
 class EQApplicationPacket;
@@ -53,7 +52,7 @@ class Bot;
 class BotRaids;
 #endif
 
-extern EntityList entity_list;
+extern EntityList entity_list; 
 
 class Entity
 {
@@ -100,7 +99,6 @@ public:
 	inline const uint16& GetID() const { return id; }
 
 	virtual const char* GetName() { return ""; }
-	virtual void DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) { pDBAsyncWorkID = 0; }
 	bool CheckCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z, float trg_x, float trg_y, float trg_z, float perwalk=1);
 
 #ifdef BOTS
@@ -299,7 +297,7 @@ public:
 	void	QueueClientsGuild(Mob* sender, const EQApplicationPacket* app, bool ignore_sender = false, uint32 guildeqid = 0);
 	void	QueueClientsGuildBankItemUpdate(const GuildBankItemUpdate_Struct *gbius, uint32 GuildID);
 	void	QueueClientsByTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true, Mob* SkipThisMob = 0, bool ackreq = true,
-						bool HoTT = true, uint32 ClientVersionBits = 0xFFFFFFFF);
+						bool HoTT = true, uint32 ClientVersionBits = 0xFFFFFFFF, bool inspect_buffs = false);
 
 	void	QueueClientsByXTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true);
 	void	QueueToGroupsForNPCHealthAA(Mob* sender, const EQApplicationPacket* app);

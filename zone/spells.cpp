@@ -2215,6 +2215,12 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		ItemInst *itm = CastToClient()->GetInv().GetItem(inventory_slot);
 		if(itm && itm->GetItem()->RecastDelay > 0){
 			CastToClient()->GetPTimers().Start((pTimerItemStart + itm->GetItem()->RecastType), itm->GetItem()->RecastDelay);
+			EQApplicationPacket *outapp = new EQApplicationPacket(OP_ItemRecastDelay, sizeof(ItemRecastDelay_Struct));
+			ItemRecastDelay_Struct *ird = (ItemRecastDelay_Struct *)outapp->pBuffer;
+			ird->recast_delay = itm->GetItem()->RecastDelay;
+			ird->recast_type = itm->GetItem()->RecastType;
+			CastToClient()->QueuePacket(outapp);
+			safe_delete(outapp);
 		}
 	}
 
@@ -3122,6 +3128,12 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 		safe_delete(outapp);
 	}
 
+	if (IsNPC()) {
+		EQApplicationPacket *outapp = MakeBuffsPacket();
+		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, BIT_SoDAndLater, true);
+		safe_delete(outapp);
+	}
+
 	// recalculate bonuses since we stripped/added buffs
 	CalcBonuses();
 
@@ -3606,107 +3618,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		spell_effectiveness = 100;
 	}
 
-		// Recourse means there is a spell linked to that spell in that the recourse spell will
-		// be automatically casted on the casters group or the caster only depending on Targettype
-		// this is for things like dark empathy, shadow vortex
-		int recourse_spell=0;
-		recourse_spell = spells[spell_id].RecourseLink;
-		if(recourse_spell)
-		{
-			if(spells[recourse_spell].targettype == ST_Group || spells[recourse_spell].targettype == ST_GroupTeleport)
-			{
-				if(IsGrouped())
-				{
-					Group *g = entity_list.GetGroupByMob(this);
-					if(g)
-						g->CastGroupSpell(this, recourse_spell);
-					else{
-						SpellOnTarget(recourse_spell, this);
-#ifdef GROUP_BUFF_PETS
-						if (GetPet())
-							SpellOnTarget(recourse_spell, GetPet());
-#endif
-					}
-				}
-				else if(IsRaidGrouped() && IsClient())
-				{
-					Raid *r = entity_list.GetRaidByClient(CastToClient());
-					uint32 gid = 0xFFFFFFFF;
-					if(r)
-						gid = r->GetGroup(GetName());
-					else
-						gid = 13;	// Forces ungrouped spell casting
-
-					if(gid < 12)
-					{
-						r->CastGroupSpell(this, recourse_spell, gid);
-					}
-					else{
-						SpellOnTarget(recourse_spell, this);
-#ifdef GROUP_BUFF_PETS
-						if (GetPet())
-							SpellOnTarget(recourse_spell, GetPet());
-#endif
-					}
-				}
-				else if(HasOwner())
-				{
-					if(GetOwner()->IsGrouped())
-					{
-						Group *g = entity_list.GetGroupByMob(GetOwner());
-						if(g)
-							g->CastGroupSpell(this, recourse_spell);
-						else{
-							SpellOnTarget(recourse_spell, GetOwner());
-							SpellOnTarget(recourse_spell, this);
-						}
-					}
-					else if(GetOwner()->IsRaidGrouped() && GetOwner()->IsClient())
-					{
-						Raid *r = entity_list.GetRaidByClient(GetOwner()->CastToClient());
-						uint32 gid = 0xFFFFFFFF;
-						if(r)
-							gid = r->GetGroup(GetOwner()->GetName());
-						else
-							gid = 13;	// Forces ungrouped spell casting
-
-						if(gid < 12)
-						{
-							r->CastGroupSpell(this, recourse_spell, gid);
-						}
-						else
-						{
-							SpellOnTarget(recourse_spell, GetOwner());
-							SpellOnTarget(recourse_spell, this);
-						}
-					}
-					else
-					{
-						SpellOnTarget(recourse_spell, GetOwner());
-						SpellOnTarget(recourse_spell, this);
-					}
-				}
-				else
-				{
-					SpellOnTarget(recourse_spell, this);
-#ifdef GROUP_BUFF_PETS
-					if (GetPet())
-						SpellOnTarget(recourse_spell, GetPet());
-#endif
-				}
-
-			}
-			else
-			{
-				SpellOnTarget(recourse_spell, this);
-			}
-		}
-
 	if(spelltar->spellbonuses.SpellDamageShield && IsDetrimentalSpell(spell_id))
 		spelltar->DamageShield(this, true);
-
-	TrySpellTrigger(spelltar, spell_id);
-	TryApplyEffect(spelltar, spell_id);
 
 	if (spelltar->IsAIControlled() && IsDetrimentalSpell(spell_id) && !IsHarmonySpell(spell_id)) {
 		int32 aggro_amount = CheckAggroAmount(spell_id, isproc);
@@ -3746,7 +3659,9 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		return false;
 	}
 
-
+	if (IsValidSpell(spells[spell_id].RecourseLink))
+		SpellFinished(spells[spell_id].RecourseLink, this, 10, 0, -1, spells[spells[spell_id].RecourseLink].ResistDiff);
+		
 	if (IsDetrimentalSpell(spell_id)) {
 
 		CheckNumHitsRemaining(NUMHIT_OutgoingSpells);
@@ -4817,8 +4732,8 @@ void Client::MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message)
 	if(send_message)
 	{
 		const char *fadetext = spells[spell_id].spell_fades;
-		outapp = new EQApplicationPacket(OP_BuffFadeMsg, sizeof(BuffFadeMsg_Struct) + strlen(fadetext));
-		BuffFadeMsg_Struct *bfm = (BuffFadeMsg_Struct *) outapp->pBuffer;
+		outapp = new EQApplicationPacket(OP_ColoredText, sizeof(ColoredText_Struct) + strlen(fadetext));
+		ColoredText_Struct *bfm = (ColoredText_Struct *) outapp->pBuffer;
 		bfm->color = MT_Spells;
 		memcpy(bfm->msg, fadetext, strlen(fadetext));
 		QueuePacket(outapp);
@@ -4841,6 +4756,8 @@ void Client::MemSpell(uint16 spell_id, int slot, bool update_client)
 	m_pp.mem_spells[slot] = spell_id;
 	mlog(CLIENT__SPELLS, "Spell %d memorized into slot %d", spell_id, slot);
 
+	database.SaveCharacterMemorizedSpell(this->CharacterID(), m_pp.mem_spells[slot], slot);
+
 	if(update_client)
 	{
 		MemorizeSpell(slot, spell_id, memSpellMemorize);
@@ -4855,6 +4772,8 @@ void Client::UnmemSpell(int slot, bool update_client)
 	mlog(CLIENT__SPELLS, "Spell %d forgotten from slot %d", m_pp.mem_spells[slot], slot);
 	m_pp.mem_spells[slot] = 0xFFFFFFFF;
 
+	database.DeleteCharacterMemorizedSpell(this->CharacterID(), m_pp.mem_spells[slot], slot);
+	
 	if(update_client)
 	{
 		MemorizeSpell(slot, m_pp.mem_spells[slot], memSpellForget);
@@ -4882,6 +4801,7 @@ void Client::ScribeSpell(uint16 spell_id, int slot, bool update_client)
 	}
 
 	m_pp.spell_book[slot] = spell_id;
+	database.SaveCharacterSpell(this->CharacterID(), spell_id, slot);
 	mlog(CLIENT__SPELLS, "Spell %d scribed into spell book slot %d", spell_id, slot);
 
 	if(update_client)
@@ -4897,7 +4817,8 @@ void Client::UnscribeSpell(int slot, bool update_client)
 
 	mlog(CLIENT__SPELLS, "Spell %d erased from spell book slot %d", m_pp.spell_book[slot], slot);
 	m_pp.spell_book[slot] = 0xFFFFFFFF;
-
+	
+	database.DeleteCharacterSpell(this->CharacterID(), m_pp.spell_book[slot], slot); 
 	if(update_client)
 	{
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_DeleteSpell, sizeof(DeleteSpell_Struct));
@@ -4925,8 +4846,9 @@ void Client::UntrainDisc(int slot, bool update_client)
 	if(slot >= MAX_PP_DISCIPLINES || slot < 0)
 		return;
 
-	mlog(CLIENT__SPELLS, "Discipline %d untrained from slot %d", m_pp.disciplines.values[slot], slot);
+	mlog(CLIENT__SPELLS, "Discipline %d untrained from slot %d", m_pp.disciplines.values[slot], slot); 
 	m_pp.disciplines.values[slot] = 0;
+	database.DeleteCharacterDisc(this->CharacterID(), slot);
 
 	if(update_client)
 	{
@@ -5241,20 +5163,40 @@ void Mob::_StopSong()
 //Thus I use this in the buff process to update the correct duration once after casting
 //this allows AAs and focus effects that increase buff duration to work correctly, but could probably
 //be used for other things as well
-void Client::SendBuffDurationPacket(uint16 spell_id, int duration, int inlevel)
+void Client::SendBuffDurationPacket(Buffs_Struct &buff)
 {
 	EQApplicationPacket* outapp;
 	outapp = new EQApplicationPacket(OP_Buff, sizeof(SpellBuffFade_Struct));
 	SpellBuffFade_Struct* sbf = (SpellBuffFade_Struct*) outapp->pBuffer;
 
 	sbf->entityid = GetID();
-	sbf->slot=2;
-	sbf->spellid=spell_id;
-	sbf->slotid=0;
-	sbf->effect = inlevel > 0 ? inlevel : GetLevel();
-	sbf->level = inlevel > 0 ? inlevel : GetLevel();
+	sbf->slot = 2;
+	sbf->spellid = buff.spellid;
+	sbf->slotid = 0;
+	sbf->effect = buff.casterlevel > 0 ? buff.casterlevel : GetLevel();
+	sbf->level = buff.casterlevel > 0 ? buff.casterlevel : GetLevel();
 	sbf->bufffade = 0;
-	sbf->duration = duration;
+	sbf->duration = buff.ticsremaining;
+	sbf->num_hits = buff.numhits;
+	FastQueuePacket(&outapp);
+}
+
+void Client::SendBuffNumHitPacket(Buffs_Struct &buff, int slot)
+{
+	// UF+ use this packet
+	if (GetClientVersion() < EQClientUnderfoot)
+		return;
+	EQApplicationPacket *outapp;
+	outapp = new EQApplicationPacket(OP_BuffCreate, sizeof(BuffIcon_Struct) + sizeof(BuffIconEntry_Struct));
+	BuffIcon_Struct *bi = (BuffIcon_Struct *)outapp->pBuffer;
+	bi->entity_id = GetID();
+	bi->count = 1;
+	bi->all_buffs = 0;
+
+	bi->entries[0].buff_slot = slot;
+	bi->entries[0].spell_id = buff.spellid;
+	bi->entries[0].tics_remaining = buff.ticsremaining;
+	bi->entries[0].num_hits = buff.numhits;
 	FastQueuePacket(&outapp);
 }
 
@@ -5329,6 +5271,7 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 	BuffIcon_Struct *buff = (BuffIcon_Struct*)outapp->pBuffer;
 	buff->entity_id = GetID();
 	buff->count = count;
+	buff->all_buffs = 1;
 
 	uint32 index = 0;
 	for(unsigned int i = 0; i < buff_count; ++i)
@@ -5338,6 +5281,7 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 			buff->entries[index].buff_slot = i;
 			buff->entries[index].spell_id = buffs[i].spellid;
 			buff->entries[index].tics_remaining = buffs[i].ticsremaining;
+			buff->entries[index].num_hits = buffs[i].numhits;
 			++index;
 		}
 	}
@@ -5355,7 +5299,7 @@ void Mob::BuffModifyDurationBySpellID(uint16 spell_id, int32 newDuration)
 			buffs[i].ticsremaining = newDuration;
 			if(IsClient())
 			{
-				CastToClient()->SendBuffDurationPacket(buffs[i].spellid, buffs[i].ticsremaining, buffs[i].casterlevel);
+				CastToClient()->SendBuffDurationPacket(buffs[i]);
 			}
 		}
 	}
@@ -5406,3 +5350,19 @@ void NPC::UninitializeBuffSlots()
 	safe_delete_array(buffs);
 }
 
+void Client::SendSpellAnim(uint16 targetid, uint16 spell_id)
+{
+	if (!targetid || !IsValidSpell(spell_id))
+		return;
+
+	EQApplicationPacket app(OP_Action, sizeof(Action_Struct));
+	Action_Struct* a = (Action_Struct*)app.pBuffer;
+	a->target = targetid;
+	a->source = this->GetID();
+	a->type = 231;
+	a->spell = spell_id;
+	a->sequence = 231;
+
+	app.priority = 1;
+	entity_list.QueueCloseClients(this, &app);
+}

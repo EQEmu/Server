@@ -40,7 +40,6 @@
 #include "../common/spdat.h"
 #include "../common/features.h"
 #include "string_ids.h"
-#include "../common/dbasync.h"
 #include "guild_mgr.h"
 #include "raids.h"
 #include "quest_parser_collection.h"
@@ -57,7 +56,6 @@ extern WorldServer worldserver;
 extern NetConnection net;
 extern uint32 numclients;
 extern PetitionList petition_list;
-extern DBAsync *dbasync;
 
 extern char errorname[32];
 extern uint16 adverrornum;
@@ -65,12 +63,11 @@ extern uint16 adverrornum;
 Entity::Entity()
 {
 	id = 0;
-	pDBAsyncWorkID = 0;
 }
 
 Entity::~Entity()
 {
-	dbasync->CancelWork(pDBAsyncWorkID);
+	
 }
 
 Client *Entity::CastToClient()
@@ -493,23 +490,36 @@ void EntityList::MobProcess()
 #endif
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
-		if (!it->second) {
+		uint16 id = it->first;
+		Mob *mob = it->second;
+		
+		size_t sz = mob_list.size();
+		bool p_val = mob->Process();
+		size_t a_sz = mob_list.size();
+		
+		if(a_sz > sz) {
+			//increased size can potentially screw with iterators so reset it to current value
+			//if buckets are re-orderered we may skip a process here and there but since 
+			//process happens so often it shouldn't matter much
+			it = mob_list.find(id);
 			++it;
-			continue;
+		} else {
+			++it;
 		}
-		if (!it->second->Process()) {
-			Mob *mob = it->second;
-			uint16 tempid = it->first;
-			++it; // we don't erase here because the destructor will
-			if (mob->IsNPC()) {
-				entity_list.RemoveNPC(mob->CastToNPC()->GetID());
-			} else if (mob->IsMerc()) {
-				entity_list.RemoveMerc(mob->CastToMerc()->GetID());
+
+		if(!p_val) {
+			if(mob->IsNPC()) {
+				entity_list.RemoveNPC(id);
+			}
+			else if(mob->IsMerc()) {
+				entity_list.RemoveMerc(id);
 #ifdef BOTS
-			} else if (mob->IsBot()) {
-				entity_list.RemoveBot(mob->CastToBot()->GetID());
+			}
+			else if(mob->IsBot()) {
+				entity_list.RemoveBot(id);
 #endif
-			} else {
+			}
+			else {
 #ifdef _WINDOWS
 				struct in_addr in;
 				in.s_addr = mob->CastToClient()->GetIP();
@@ -517,20 +527,19 @@ void EntityList::MobProcess()
 #endif
 				zone->StartShutdownTimer();
 				Group *g = GetGroupByMob(mob);
-				if (g) {
+				if(g) {
 					LogFile->write(EQEMuLog::Error, "About to delete a client still in a group.");
 					g->DelMember(mob);
 				}
 				Raid *r = entity_list.GetRaidByClient(mob->CastToClient());
-				if (r) {
+				if(r) {
 					LogFile->write(EQEMuLog::Error, "About to delete a client still in a raid.");
 					r->MemberZoned(mob->CastToClient());
 				}
-				entity_list.RemoveClient(mob->GetID());
+				entity_list.RemoveClient(id);
 			}
-			entity_list.RemoveMob(tempid);
-		} else {
-			++it;
+
+			entity_list.RemoveMob(id);
 		}
 	}
 }
@@ -1342,7 +1351,7 @@ void EntityList::RefreshClientXTargets(Client *c)
 }
 
 void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *app,
-		bool iSendToSender, Mob *SkipThisMob, bool ackreq, bool HoTT, uint32 ClientVersionBits)
+		bool iSendToSender, Mob *SkipThisMob, bool ackreq, bool HoTT, uint32 ClientVersionBits, bool inspect_buffs)
 {
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
@@ -1356,8 +1365,7 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 
 		Mob *TargetsTarget = nullptr;
 
-		if (Target)
-			TargetsTarget = Target->GetTarget();
+		TargetsTarget = Target->GetTarget();
 
 		bool Send = false;
 
@@ -1369,11 +1377,30 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 				Send = true;
 
 		if (c != sender) {
-			if (Target == sender)
-				Send = true;
-			else if (HoTT)
-				if (TargetsTarget == sender)
+			if (Target == sender) {
+				if (inspect_buffs) { // if inspect_buffs is true we're sending a mob's buffs to those with the LAA
+					if (c->IsRaidGrouped()) {
+						Raid *raid = c->GetRaid();
+						if (!raid)
+							continue;
+						uint32 gid = raid->GetGroup(c);
+						if (gid > 11 || raid->GroupCount(gid) < 3)
+							continue;
+						if (raid->GetLeadershipAA(groupAAInspectBuffs, gid))
+							Send = true;
+					} else {
+						Group *group = c->GetGroup();
+						if (!group || group->GroupCount() < 3)
+							continue;
+						if (group->GetLeadershipAA(groupAAInspectBuffs))
+							Send = true;
+					}
+				} else {
 					Send = true;
+				}
+			} else if (HoTT && TargetsTarget == sender) {
+				Send = true;
+			}
 		}
 
 		if (Send && (c->GetClientVersionBit() & ClientVersionBits))
@@ -4111,15 +4138,10 @@ void EntityList::UnMarkNPC(uint16 ID)
 	// each group to remove the dead mobs entity ID from the groups list of NPCs marked via the
 	// Group Leadership AA Mark NPC ability.
 	//
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		if (it->second) {
-			Group *g = nullptr;
-			g = it->second->GetGroup();
-
-			if (g)
-				g->UnMarkNPC(ID);
-		}
+	auto it = group_list.begin();
+	while (it != group_list.end()) {
+		if (*it)
+			(*it)->UnMarkNPC(ID);
 		++it;
 	}
 }

@@ -18,6 +18,8 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 
 // Test 1
 
+#include <iostream>
+
 #include "../common/debug.h"
 #include "aa.h"
 #include "mob.h"
@@ -300,7 +302,7 @@ void Client::ActivateAA(aaID activate){
 					return;
 				}
 			} else {
-				if(!CastSpell(caa->spell_id, target_id, 10, -1, -1, 0, -1, AATimerID + pTimerAAStart, timer_base, 1)) {
+				if (!CastSpell(caa->spell_id, target_id, USE_ITEM_SPELL_SLOT, -1, -1, 0, -1, AATimerID + pTimerAAStart, timer_base, 1)) {
 					//Reset on failed cast
 					SendAATimer(AATimerID, 0, 0xFFFFFF);
 					Message_StringID(15,ABILITY_FAILED);
@@ -316,13 +318,14 @@ void Client::ActivateAA(aaID activate){
 		}
 	}
 	// Check if AA is expendable
-	if (aas_send[activate - activate_val]->special_category == 7)
-	{
+	if (aas_send[activate - activate_val]->special_category == 7) {
+		
 		// Add the AA cost to the extended profile to track overall total
 		m_epp.expended_aa += aas_send[activate]->cost;
+		
 		SetAA(activate, 0);
 
-		Save();
+		SaveAA(); /* Save Character AA */
 		SendAA(activate);
 		SendAATable();
 	}
@@ -525,7 +528,7 @@ void Client::HandleAAAction(aaID activate) {
 	//cast the spell, if we have one
 	if(IsValidSpell(spell_id)) {
 		int aatid = GetAATimerID(activate);
-		if(!CastSpell(spell_id, target_id , 10, -1, -1, 0, -1, pTimerAAStart + aatid , CalcAAReuseTimer(caa), 1)) {
+		if (!CastSpell(spell_id, target_id, USE_ITEM_SPELL_SLOT, -1, -1, 0, -1, pTimerAAStart + aatid, CalcAAReuseTimer(caa), 1)) {
 			SendAATimer(aatid, 0, 0xFFFFFF);
 			Message_StringID(15,ABILITY_FAILED);
 			p_timers.Clear(&database, pTimerAAStart + aatid);
@@ -1035,8 +1038,7 @@ void Client::BuyAA(AA_Action* action)
 	uint32 real_cost;
 	std::map<uint32, AALevelCost_Struct>::iterator RequiredLevel = AARequiredLevelAndCost.find(action->ability);
 
-	if(RequiredLevel != AARequiredLevelAndCost.end())
-	{
+	if(RequiredLevel != AARequiredLevelAndCost.end()) {
 		real_cost = RequiredLevel->second.Cost;
 	}
 	else
@@ -1049,7 +1051,11 @@ void Client::BuyAA(AA_Action* action)
 
 		m_pp.aapoints -= real_cost;
 
-		Save();
+		/* Do Player Profile rank calculations and set player profile */
+		SaveAA();
+		/* Save to Database to avoid having to write the whole AA array to the profile, only write changes*/
+		// database.SaveCharacterAA(this->CharacterID(), aa2->id, (cur_level + 1)); 
+
 		if ((RuleB(AA, Stacking) && (GetClientVersionBit() >= 4) && (aa2->hotkey_sid == 4294967295u))
 			&& ((aa2->max_level == (cur_level + 1)) && aa2->sof_next_id)){
 			SendAA(aa2->id);
@@ -1060,8 +1066,10 @@ void Client::BuyAA(AA_Action* action)
 
 		SendAATable();
 
-		//we are building these messages ourself instead of using the stringID to work around patch discrepencies
-		//these are AA_GAIN_ABILITY	(410) & AA_IMPROVE (411), respectively, in both Titanium & SoF. not sure about 6.2
+		/*
+			We are building these messages ourself instead of using the stringID to work around patch discrepencies
+				these are AA_GAIN_ABILITY	(410) & AA_IMPROVE (411), respectively, in both Titanium & SoF. not sure about 6.2
+		*/
 
 		/* Initial purchase of an AA ability */
 		if (cur_level < 1){
@@ -1083,8 +1091,6 @@ void Client::BuyAA(AA_Action* action)
 				QServ->PlayerLogEvent(Player_Log_AA_Purchases, this->CharacterID(), event_desc);
 			}
 		}
-
-
 
 		SendAAStats();
 
@@ -1514,11 +1520,15 @@ bool ZoneDatabase::LoadAAEffects2() {
 	return true;
 }
 void Client::ResetAA(){
+	RefundAA(); 
 	uint32 i;
 	for(i=0;i<MAX_PP_AA_ARRAY;i++){
 		aa[i]->AA = 0;
 		aa[i]->value = 0;
+		m_pp.aa_array[MAX_PP_AA_ARRAY].AA = 0;
+		m_pp.aa_array[MAX_PP_AA_ARRAY].value = 0; 
 	}
+
 	std::map<uint32,uint8>::iterator itr;
 	for(itr=aa_points.begin();itr!=aa_points.end();++itr)
 		aa_points[itr->first] = 0;
@@ -1530,10 +1540,51 @@ void Client::ResetAA(){
 	m_pp.raid_leadership_points = 0;
 	m_pp.group_leadership_exp = 0;
 	m_pp.raid_leadership_exp = 0;
+
+	database.DeleteCharacterAAs(this->CharacterID());
+	SaveAA(); 
+	SendAATable();
+	database.DeleteCharacterLeadershipAAs(this->CharacterID());
+	Kick();
 }
 
 int Client::GroupLeadershipAAHealthEnhancement()
 {
+	if (IsRaidGrouped()) {
+		int bonus = 0;
+		Raid *raid = GetRaid();
+		if (!raid)
+			return 0;
+		uint32 group_id = raid->GetGroup(this);
+		if (group_id < 12 && raid->GroupCount(group_id) >= 3) {
+			switch (raid->GetLeadershipAA(groupAAHealthEnhancement, group_id)) {
+			case 1:
+				bonus = 30;
+				break;
+			case 2:
+				bonus = 60;
+				break;
+			case 3:
+				bonus = 100;
+				break;
+			}
+		}
+		if (raid->RaidCount() >= 18) {
+			switch (raid->GetLeadershipAA(raidAAHealthEnhancement)) {
+			case 1:
+				bonus += 30;
+				break;
+			case 2:
+				bonus += 60;
+				break;
+			case 3:
+				bonus += 100;
+				break;
+			}
+		}
+		return bonus;
+	}
+
 	Group *g = GetGroup();
 
 	if(!g || (g->GroupCount() < 3))
@@ -1556,6 +1607,41 @@ int Client::GroupLeadershipAAHealthEnhancement()
 
 int Client::GroupLeadershipAAManaEnhancement()
 {
+	if (IsRaidGrouped()) {
+		int bonus = 0;
+		Raid *raid = GetRaid();
+		if (!raid)
+			return 0;
+		uint32 group_id = raid->GetGroup(this);
+		if (group_id < 12 && raid->GroupCount(group_id) >= 3) {
+			switch (raid->GetLeadershipAA(groupAAManaEnhancement, group_id)) {
+			case 1:
+				bonus = 30;
+				break;
+			case 2:
+				bonus = 60;
+				break;
+			case 3:
+				bonus = 100;
+				break;
+			}
+		}
+		if (raid->RaidCount() >= 18) {
+			switch (raid->GetLeadershipAA(raidAAManaEnhancement)) {
+			case 1:
+				bonus += 30;
+				break;
+			case 2:
+				bonus += 60;
+				break;
+			case 3:
+				bonus += 100;
+				break;
+			}
+		}
+		return bonus;
+	}
+
 	Group *g = GetGroup();
 
 	if(!g || (g->GroupCount() < 3))
@@ -1578,6 +1664,41 @@ int Client::GroupLeadershipAAManaEnhancement()
 
 int Client::GroupLeadershipAAHealthRegeneration()
 {
+	if (IsRaidGrouped()) {
+		int bonus = 0;
+		Raid *raid = GetRaid();
+		if (!raid)
+			return 0;
+		uint32 group_id = raid->GetGroup(this);
+		if (group_id < 12 && raid->GroupCount(group_id) >= 3) {
+			switch (raid->GetLeadershipAA(groupAAHealthRegeneration, group_id)) {
+			case 1:
+				bonus = 4;
+				break;
+			case 2:
+				bonus = 6;
+				break;
+			case 3:
+				bonus = 8;
+				break;
+			}
+		}
+		if (raid->RaidCount() >= 18) {
+			switch (raid->GetLeadershipAA(raidAAHealthRegeneration)) {
+			case 1:
+				bonus += 4;
+				break;
+			case 2:
+				bonus += 6;
+				break;
+			case 3:
+				bonus += 8;
+				break;
+			}
+		}
+		return bonus;
+	}
+
 	Group *g = GetGroup();
 
 	if(!g || (g->GroupCount() < 3))
@@ -1600,6 +1721,53 @@ int Client::GroupLeadershipAAHealthRegeneration()
 
 int Client::GroupLeadershipAAOffenseEnhancement()
 {
+	if (IsRaidGrouped()) {
+		int bonus = 0;
+		Raid *raid = GetRaid();
+		if (!raid)
+			return 0;
+		uint32 group_id = raid->GetGroup(this);
+		if (group_id < 12 && raid->GroupCount(group_id) >= 3) {
+			switch (raid->GetLeadershipAA(groupAAOffenseEnhancement, group_id)) {
+			case 1:
+				bonus = 10;
+				break;
+			case 2:
+				bonus = 19;
+				break;
+			case 3:
+				bonus = 28;
+				break;
+			case 4:
+				bonus = 34;
+				break;
+			case 5:
+				bonus = 40;
+				break;
+			}
+		}
+		if (raid->RaidCount() >= 18) {
+			switch (raid->GetLeadershipAA(raidAAOffenseEnhancement)) {
+			case 1:
+				bonus += 10;
+				break;
+			case 2:
+				bonus += 19;
+				break;
+			case 3:
+				bonus += 28;
+				break;
+			case 4:
+				bonus += 34;
+				break;
+			case 5:
+				bonus += 40;
+				break;
+			}
+		}
+		return bonus;
+	}
+
 	Group *g = GetGroup();
 
 	if(!g || (g->GroupCount() < 3))
@@ -1625,29 +1793,26 @@ int Client::GroupLeadershipAAOffenseEnhancement()
 
 void Client::InspectBuffs(Client* Inspector, int Rank)
 {
-	if(!Inspector || (Rank == 0)) return;
+	// At some point the removed the restriction of being a group member for this to work
+	// not sure when, but the way it's coded now, it wouldn't work with mobs.
+	if (!Inspector || Rank == 0)
+		return;
 
-	Inspector->Message_StringID(0, CURRENT_SPELL_EFFECTS, GetName());
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_InspectBuffs, sizeof(InspectBuffs_Struct));
+	InspectBuffs_Struct *ib = (InspectBuffs_Struct *)outapp->pBuffer;
+
 	uint32 buff_count = GetMaxTotalSlots();
-	for (uint32 i = 0; i < buff_count; ++i)
-	{
-		if (buffs[i].spellid != SPELL_UNKNOWN)
-		{
-			if(Rank == 1)
-				Inspector->Message(0, "%s", spells[buffs[i].spellid].name);
-			else
-			{
-				if (spells[buffs[i].spellid].buffdurationformula == DF_Permanent)
-					Inspector->Message(0, "%s (Permanent)", spells[buffs[i].spellid].name);
-				else {
-					char *TempString = nullptr;
-					MakeAnyLenString(&TempString, "%.1f", static_cast<float>(buffs[i].ticsremaining) / 10.0f);
-					Inspector->Message_StringID(0, BUFF_MINUTES_REMAINING, spells[buffs[i].spellid].name, TempString);
-					safe_delete_array(TempString);
-				}
-			}
-		}
+	uint32 packet_index = 0;
+	for (uint32 i = 0; i < buff_count; i++) {
+		if (buffs[i].spellid == SPELL_UNKNOWN)
+			continue;
+		ib->spell_id[packet_index] = buffs[i].spellid;
+		if (Rank > 1)
+			ib->tics_remaining[packet_index] = spells[buffs[i].spellid].buffdurationformula == DF_Permanent ? 0xFFFFFFFF : buffs[i].ticsremaining;
+		packet_index++;
 	}
+
+	Inspector->FastQueuePacket(&outapp);
 }
 
 //this really need to be renamed to LoadAAActions()
@@ -1735,19 +1900,15 @@ void ZoneDatabase::FillAAEffects(SendAA_Struct* aa_struct){
 	if(!aa_struct)
 		return;
 
-	std::string query = StringFormat("SELECT effectid, base1, base2, slot from aa_effects where aaid=%i order by slot asc", aa_struct->id);
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in Client::FillAAEffects query: '%s': %s", query.c_str(), results.ErrorMessage().c_str());
-        return;
-	}
-
-	int index = 0;
-    for (auto row = results.begin(); row != results.end(); ++row, ++index) {
-		aa_struct->abilities[index].skill_id=atoi(row[0]);
-		aa_struct->abilities[index].base1=atoi(row[1]);
-		aa_struct->abilities[index].base2=atoi(row[2]);
-		aa_struct->abilities[index].slot=atoi(row[3]);
+	auto it = aa_effects.find(aa_struct->id);
+	if (it != aa_effects.end()) {
+		for (int slot = 0; slot < aa_struct->total_abilities; slot++) {
+			// aa_effects is a map of a map, so the slot reference does not start at 0
+			aa_struct->abilities[slot].skill_id = it->second[slot + 1].skill_id;
+			aa_struct->abilities[slot].base1 = it->second[slot + 1].base1;
+			aa_struct->abilities[slot].base2 = it->second[slot + 1].base2;
+			aa_struct->abilities[slot].slot = it->second[slot + 1].slot;
+		}
 	}
 }
 
@@ -1818,8 +1979,7 @@ void ZoneDatabase::LoadAAs(SendAA_Struct **load){
     }
 
     AALevelCost_Struct aalcs;
-    for (auto row = results.begin(); row != results.end(); ++row)
-    {
+    for (auto row = results.begin(); row != results.end(); ++row) {
         aalcs.Level = atoi(row[1]);
         aalcs.Cost = atoi(row[2]);
         AARequiredLevelAndCost[atoi(row[0])] = aalcs;

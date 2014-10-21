@@ -102,6 +102,8 @@ int FloatToEQ13(float d);
 int NewFloatToEQ13(float d);
 int FloatToEQ19(float d);
 int FloatToEQH(float d);
+uint32 SwapBits21and22(uint32 mask);
+uint32 Catch22(uint32 mask);
 
 // macro to catch fp errors (provided by noudness)
 #define FCMP(a,b) (fabs(a-b) < FLT_EPSILON)

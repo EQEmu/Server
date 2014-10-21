@@ -107,6 +107,8 @@ public:
 	void RemoveAISpell(int spell_id);
 	void SetSpellFocusDMG(int focus);
 	void SetSpellFocusHeal(int focus);
+	int GetSpellFocusDMG();
+	int GetSpellFocusHeal();
 	float GetSlowMitigation();
 	float GetAttackSpeed();
 	int GetAccuracyRating();

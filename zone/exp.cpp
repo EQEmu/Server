@@ -51,14 +51,7 @@ static uint32 MaxBankedRaidLeadershipPoints(int Level)
 
 void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 
-	/* Set a timestamp in an entity variable for plugin check_handin.pl in return_items
-		This will stopgap players from items being returned if global_npc.pl has a catch all return_items
-	*/
-	struct timeval read_time;
-	char buffer[50];
-	gettimeofday(&read_time, 0);
-	sprintf(buffer, "%li.%li \n", read_time.tv_sec, read_time.tv_usec);
-	this->SetEntityVariable("Stop_Return", buffer);
+	this->EVENT_ITEM_ScriptStopReturn();
 
 	uint32 add_exp = in_add_exp;
 
@@ -140,30 +133,60 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 			}
 		}
 
-		if(IsLeadershipEXPOn() && ((conlevel == CON_BLUE) || (conlevel == CON_WHITE) || (conlevel == CON_YELLOW) || (conlevel == CON_RED))) {
+		if (IsLeadershipEXPOn() && (conlevel == CON_BLUE || conlevel == CON_WHITE || conlevel == CON_YELLOW || conlevel == CON_RED)) {
 			add_exp = static_cast<uint32>(static_cast<float>(add_exp) * 0.8f);
 
-			if(GetGroup())
-			{
-				if((m_pp.group_leadership_points < MaxBankedGroupLeadershipPoints(GetLevel()))
-					&& (RuleI(Character, KillsPerGroupLeadershipAA) > 0))
-				{
-					AddLeadershipEXP(GROUP_EXP_PER_POINT / RuleI(Character, KillsPerGroupLeadershipAA), 0);
-					Message_StringID(MT_Leadership, GAIN_GROUP_LEADERSHIP_EXP);
-				}
-				else
+			if (GetGroup()) {
+				if (m_pp.group_leadership_points < MaxBankedGroupLeadershipPoints(GetLevel())
+						&& RuleI(Character, KillsPerGroupLeadershipAA) > 0) {
+					uint32 exp = GROUP_EXP_PER_POINT / RuleI(Character, KillsPerGroupLeadershipAA);
+					Client *mentoree = GetGroup()->GetMentoree();
+					if (GetGroup()->GetMentorPercent() && mentoree &&
+							mentoree->GetGroupPoints() < MaxBankedGroupLeadershipPoints(mentoree->GetLevel())) {
+						uint32 mentor_exp = exp * (GetGroup()->GetMentorPercent() / 100.0f);
+						exp -= mentor_exp;
+						mentoree->AddLeadershipEXP(mentor_exp, 0); // ends up rounded down
+						mentoree->Message_StringID(MT_Leadership, GAIN_GROUP_LEADERSHIP_EXP);
+					}
+					if (exp > 0) { // possible if you mentor 100% to the other client
+						AddLeadershipEXP(exp, 0); // ends up rounded up if mentored, no idea how live actually does it
+						Message_StringID(MT_Leadership, GAIN_GROUP_LEADERSHIP_EXP);
+					}
+				} else {
 					Message_StringID(MT_Leadership, MAX_GROUP_LEADERSHIP_POINTS);
-			}
-			else
-			{
-				if((m_pp.raid_leadership_points < MaxBankedRaidLeadershipPoints(GetLevel()))
-					&& (RuleI(Character, KillsPerRaidLeadershipAA) > 0))
-				{
-					AddLeadershipEXP(0, RAID_EXP_PER_POINT / RuleI(Character, KillsPerRaidLeadershipAA));
-					Message_StringID(MT_Leadership, GAIN_RAID_LEADERSHIP_EXP);
 				}
-				else
-					Message_StringID(MT_Leadership, MAX_RAID_LEADERSHIP_POINTS);
+			} else {
+				Raid *raid = GetRaid();
+				// Raid leaders CAN NOT gain group AA XP, other group leaders can though!
+				if (raid->IsLeader(this)) {
+					if (m_pp.raid_leadership_points < MaxBankedRaidLeadershipPoints(GetLevel())
+							&& RuleI(Character, KillsPerRaidLeadershipAA) > 0) {
+						AddLeadershipEXP(0, RAID_EXP_PER_POINT / RuleI(Character, KillsPerRaidLeadershipAA));
+						Message_StringID(MT_Leadership, GAIN_RAID_LEADERSHIP_EXP);
+					} else {
+						Message_StringID(MT_Leadership, MAX_RAID_LEADERSHIP_POINTS);
+					}
+				} else {
+					if (m_pp.group_leadership_points < MaxBankedGroupLeadershipPoints(GetLevel())
+							&& RuleI(Character, KillsPerGroupLeadershipAA) > 0) {
+						uint32 group_id = raid->GetGroup(this);
+						uint32 exp = GROUP_EXP_PER_POINT / RuleI(Character, KillsPerGroupLeadershipAA);
+						Client *mentoree = raid->GetMentoree(group_id);
+						if (raid->GetMentorPercent(group_id) && mentoree &&
+								mentoree->GetGroupPoints() < MaxBankedGroupLeadershipPoints(mentoree->GetLevel())) {
+							uint32 mentor_exp = exp * (raid->GetMentorPercent(group_id) / 100.0f);
+							exp -= mentor_exp;
+							mentoree->AddLeadershipEXP(mentor_exp, 0);
+							mentoree->Message_StringID(MT_Leadership, GAIN_GROUP_LEADERSHIP_EXP);
+						}
+						if (exp > 0) {
+							AddLeadershipEXP(exp, 0);
+							Message_StringID(MT_Leadership, GAIN_GROUP_LEADERSHIP_EXP);
+						}
+					} else {
+						Message_StringID(MT_Leadership, MAX_GROUP_LEADERSHIP_POINTS);
+					}
+				}
 			}
 
 		}

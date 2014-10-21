@@ -260,4 +260,10 @@ typedef enum {
 #define HIGHEST_SKILL	FRENZY
 */
 
+// for skill related helper functions
+namespace EQEmu {
+	bool IsTradeskill(SkillUseTypes skill);
+	bool IsSpecializedSkill(SkillUseTypes skill);
+}
+
 #endif

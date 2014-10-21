@@ -3315,7 +3315,10 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 
 		if(damage < 1)
 			return 0;
-
+			
+		//Regular runes absorb spell damage (except dots) - Confirmed on live.
+		if (spellbonuses.MeleeRune[0] && spellbonuses.MeleeRune[1] >= 0)
+			damage = RuneAbsorb(damage, SE_Rune);	
 
 		if (spellbonuses.AbsorbMagicAtt[0] && spellbonuses.AbsorbMagicAtt[1] >= 0)
 			damage = RuneAbsorb(damage, SE_AbsorbMagicAtt);
@@ -3331,10 +3334,13 @@ int32 Mob::ReduceAllDamage(int32 damage)
 	if(damage <= 0)
 		return damage;
 
-	if(spellbonuses.ManaAbsorbPercentDamage[0] && (GetMana() > damage * spellbonuses.ManaAbsorbPercentDamage[0] / 100)) {
-		damage -= (damage * spellbonuses.ManaAbsorbPercentDamage[0] / 100);
-		SetMana(GetMana() - damage);
-		TryTriggerOnValueAmount(false, true);
+	if(spellbonuses.ManaAbsorbPercentDamage[0]) {
+		int32 mana_reduced =  damage * spellbonuses.ManaAbsorbPercentDamage[0] / 100;
+		if (GetMana() >= mana_reduced){
+			damage -= mana_reduced;
+			SetMana(GetMana() - mana_reduced);
+			TryTriggerOnValueAmount(false, true);
+		}
 	}
 	
 	CheckNumHitsRemaining(NUMHIT_IncomingDamage);
@@ -4197,24 +4203,26 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 	}
 #endif //BOTS
 
-
 	float critChance = 0.0f;
 	bool IsBerskerSPA = false;
 
 	//1: Try Slay Undead
-	if(defender && defender->GetBodyType() == BT_Undead || defender->GetBodyType() == BT_SummonedUndead || defender->GetBodyType() == BT_Vampire){
-
+	if (defender && (defender->GetBodyType() == BT_Undead ||
+				defender->GetBodyType() == BT_SummonedUndead || defender->GetBodyType() == BT_Vampire)) {
 		int16 SlayRateBonus = aabonuses.SlayUndead[0] + itembonuses.SlayUndead[0] + spellbonuses.SlayUndead[0];
-
 		if (SlayRateBonus) {
-
-			critChance += (float(SlayRateBonus)/100.0f);
-			critChance /= 100.0f;
-
-			if(MakeRandomFloat(0, 1) < critChance){
+			float slayChance = static_cast<float>(SlayRateBonus) / 10000.0f;
+			if (MakeRandomFloat(0, 1) < slayChance) {
 				int16 SlayDmgBonus = aabonuses.SlayUndead[1] + itembonuses.SlayUndead[1] + spellbonuses.SlayUndead[1];
-				damage = (damage*SlayDmgBonus*2.25)/100;
-				entity_list.MessageClose(this, false, 200, MT_CritMelee, "%s cleanses %s target!(%d)", GetCleanName(), this->GetGender() == 0 ? "his" : this->GetGender() == 1 ? "her" : "its", damage);
+				damage = (damage * SlayDmgBonus * 2.25) / 100;
+				if (GetGender() == 1) // female
+					entity_list.FilteredMessageClose_StringID(this, false, 200,
+							MT_CritMelee, FilterMeleeCrits, FEMALE_SLAYUNDEAD,
+							GetCleanName(), itoa(damage));
+				else // males and neuter I guess
+					entity_list.FilteredMessageClose_StringID(this, false, 200,
+							MT_CritMelee, FilterMeleeCrits, MALE_SLAYUNDEAD,
+							GetCleanName(), itoa(damage));
 				return;
 			}
 		}
@@ -4804,6 +4812,26 @@ void Mob::CommonBreakInvisible()
 	improved_hidden = false;
 }
 
+/* Dev quotes:
+ * Old formula
+ *     Final delay = (Original Delay / (haste mod *.01f)) + ((Hundred Hands / 100) * Original Delay)
+ * New formula
+ *     Final delay = (Original Delay / (haste mod *.01f)) + ((Hundred Hands / 1000) * (Original Delay / (haste mod *.01f))
+ * Base Delay      20              25              30              37
+ * Haste           2.25            2.25            2.25            2.25
+ * HHE (old)      -17             -17             -17             -17
+ * Final Delay     5.488888889     6.861111111     8.233333333     10.15444444
+ *
+ * Base Delay      20              25              30              37
+ * Haste           2.25            2.25            2.25            2.25
+ * HHE (new)      -383            -383            -383            -383
+ * Final Delay     5.484444444     6.855555556     8.226666667     10.14622222
+ *
+ * Difference     -0.004444444   -0.005555556   -0.006666667   -0.008222222
+ *
+ * These times are in 10th of a second
+ */
+
 void Mob::SetAttackTimer()
 {
 	attack_timer.SetAtTrigger(4000, true);
@@ -4811,7 +4839,7 @@ void Mob::SetAttackTimer()
 
 void Client::SetAttackTimer()
 {
-	float PermaHaste = GetPermaHaste();
+	float haste_mod = GetHaste() * 0.01f;
 
 	//default value for attack timer in case they have
 	//an invalid weapon equipped:
@@ -4876,28 +4904,30 @@ void Client::SetAttackTimer()
 			}
 		}
 
-		int16 DelayMod = std::max(itembonuses.HundredHands + spellbonuses.HundredHands, -99);
+		int hhe = itembonuses.HundredHands + spellbonuses.HundredHands;
 		int speed = 0;
+		int delay = 36;
+		float quiver_haste = 0.0f;
 
 		//if we have no weapon..
 		if (ItemToUse == nullptr) {
 			//above checks ensure ranged weapons do not fall into here
 			// Work out if we're a monk
-			if ((GetClass() == MONK) || (GetClass() == BEASTLORD))
-				speed = static_cast<int>((GetMonkHandToHandDelay() * (100 + DelayMod) / 100) * PermaHaste);
-			else
-				speed = static_cast<int>((36 * (100 + DelayMod) / 100) * PermaHaste);
+			if (GetClass() == MONK || GetClass() == BEASTLORD)
+				delay = GetMonkHandToHandDelay();
 		} else {
 			//we have a weapon, use its delay
-			// Convert weapon delay to timer resolution (milliseconds)
-			//delay * 100
-			speed = static_cast<int>((ItemToUse->Delay * (100 + DelayMod) / 100) * PermaHaste);
-			if (ItemToUse->ItemType == ItemTypeBow || ItemToUse->ItemType == ItemTypeLargeThrowing) {
-				float quiver_haste = GetQuiverHaste();
-				if (quiver_haste > 0)
-					speed *= quiver_haste;
-			}
+			delay = ItemToUse->Delay;
+			if (ItemToUse->ItemType == ItemTypeBow || ItemToUse->ItemType == ItemTypeLargeThrowing)
+				quiver_haste = GetQuiverHaste();
 		}
+		if (RuleB(Spells, Jun182014HundredHandsRevamp))
+			speed = static_cast<int>(((delay / haste_mod) + ((hhe / 1000.0f) * (delay / haste_mod))) * 100);
+		else
+			speed = static_cast<int>(((delay / haste_mod) + ((hhe / 100.0f) * delay)) * 100);
+		// this is probably wrong
+		if (quiver_haste > 0)
+			speed *= quiver_haste;
 		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true);
 
 		if (i == MainPrimary)
@@ -4907,13 +4937,24 @@ void Client::SetAttackTimer()
 
 void NPC::SetAttackTimer()
 {
-	float PermaHaste = GetPermaHaste();
+	float haste_mod = GetHaste() * 0.01f;
 
 	//default value for attack timer in case they have
 	//an invalid weapon equipped:
 	attack_timer.SetAtTrigger(4000, true);
 
 	Timer *TimerToUse = nullptr;
+	int hhe = itembonuses.HundredHands + spellbonuses.HundredHands;
+
+	// Technically NPCs should do some logic for weapons, but the effect is minimal
+	// What they do is take the lower of their set delay and the weapon's
+	// ex. Mob's delay set to 20, weapon set to 19, delay 19
+	// Mob's delay set to 20, weapon set to 21, delay 20
+	int speed = 0;
+	if (RuleB(Spells, Jun182014HundredHandsRevamp))
+		speed = static_cast<int>(((attack_delay / haste_mod) + ((hhe / 1000.0f) * (attack_delay / haste_mod))) * 100);
+	else
+		speed = static_cast<int>(((attack_delay / haste_mod) + ((hhe / 100.0f) * attack_delay)) * 100);
 
 	for (int i = MainRange; i <= MainSecondary; i++) {
 		//pick a timer
@@ -4935,13 +4976,6 @@ void NPC::SetAttackTimer()
 			}
 		}
 
-		int16 DelayMod = std::max(itembonuses.HundredHands + spellbonuses.HundredHands, -99);
-
-		// Technically NPCs should do some logic for weapons, but the effect is minimal
-		// What they do is take the lower of their set delay and the weapon's
-		// ex. Mob's delay set to 20, weapon set to 19, delay 19
-		// Mob's delay set to 20, weapon set to 21, delay 20
-		int speed = static_cast<int>((attack_delay * (100 + DelayMod) / 100) * PermaHaste);
 		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true);
 	}
 }

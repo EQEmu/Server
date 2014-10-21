@@ -113,7 +113,7 @@ bool Console::SendChannelMessage(const ServerChannelMessage_Struct* scm) {
 			break;
 		}
 		case 7: {
-			SendMessage(1, "%s tells you, '%s'", scm->from, scm->message);
+			SendMessage(1, "[%s] tells you, '%s'", scm->from, scm->message);
 			ServerPacket* pack = new ServerPacket(ServerOP_ChannelMessage, sizeof(ServerChannelMessage_Struct) + strlen(scm->message) + 1);
 			memcpy(pack->pBuffer, scm, pack->size);
 			ServerChannelMessage_Struct* scm2 = (ServerChannelMessage_Struct*) pack->pBuffer;
@@ -846,6 +846,9 @@ void Console::ProcessCommand(const char* command) {
 				RW->Option = 1;
 				zoneserver_list.SendPacket(pack);
 				safe_delete(pack);
+			}
+			else if (strcasecmp(sep.arg[0], "") == 0){
+				/* Hit Enter with no command */
 			}
 			else {
 				SendMessage(1, "Command unknown.");

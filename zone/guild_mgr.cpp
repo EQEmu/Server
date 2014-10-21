@@ -24,59 +24,6 @@
 #include "client.h"
 #include "entity.h"
 
-/*
-
-CREATE TABLE guilds (
-	id MEDIUMINT UNSIGNED NOT NULL,
-	name VARCHAR(32) NOT NULL,
-	leader int NOT NULL,
-	minstatus SMALLINT NOT NULL,
-	tribute INT UNSIGNED NOT NULL,
-	motd TEXT NOT NULL DEFAULT '',
-	PRIMARY KEY(id),
-	UNIQUE KEY(name),
-	UNIQUE KEY(leader)
-);
-
-CREATE TABLE guild_ranks (
-	guild_id MEDIUMINT UNSIGNED NOT NULL,
-	rank TINYINT UNSIGNED NOT NULL,
-	title VARCHAR(128) NOT NULL,
-	can_hear TINYINT UNSIGNED NOT NULL,
-	can_speak TINYINT UNSIGNED NOT NULL,
-	can_invite TINYINT UNSIGNED NOT NULL,
-	can_remove TINYINT UNSIGNED NOT NULL,
-	can_promote TINYINT UNSIGNED NOT NULL,
-	can_demote TINYINT UNSIGNED NOT NULL,
-	can_motd TINYINT UNSIGNED NOT NULL,
-	can_warpeace TINYINT UNSIGNED NOT NULL,
-	PRIMARY KEY(guild_id,rank)
-);
-
-# guild1 < guild2 by definition.
-CREATE TABLE guild_relations (
-	guild1 MEDIUMINT UNSIGNED NOT NULL,
-	guild2 MEDIUMINT UNSIGNED NOT NULL,
-	relation TINYINT NOT NULL,
-	PRIMARY KEY(guild1, guild1)
-);
-
-CREATE TABLE guild_members (
-	char_id INT NOT NULL,
-	guild_id MEDIUMINT UNSIGNED NOT NULL,
-	rank TINYINT UNSIGNED NOT NULL,
-	tribute_enable TINYINT UNSIGNED NOT NULL DEFAULT 0,
-	total_tribute INT UNSIGNED NOT NULL DEFAULT 0,
-	last_tribute INT UNSIGNED NOT NULL DEFAULT 0,
-	banker TINYINT UNSIGNED NOT NULL DEFAULT 0,
-	public_note TEXT NOT NULL DEFAULT '',
-	PRIMARY KEY(char_id)
-);
-
-
-*/
-
-
 ZoneGuildManager guild_mgr;
 GuildBankManager *GuildBanks;
 

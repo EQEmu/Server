@@ -6,6 +6,8 @@
 #include "../common/loottable.h"
 #include "zonedump.h"
 #include "../common/faction.h"
+#include <limits>
+
 //#include "doors.h"
 
 struct wplist {
@@ -212,9 +214,7 @@ public:
 	ZoneDatabase(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
 	virtual ~ZoneDatabase();
 
-	/*
-	* Objects and World Containers
-	*/
+	/* Objects and World Containers */
 	void	LoadWorldContainer(uint32 parentid, ItemInst* container);
 	void	SaveWorldContainer(uint32 zone_id, uint32 parent_id, const ItemInst* container);
 	void	DeleteWorldContainer(uint32 parent_id,uint32 zone_id);
@@ -223,10 +223,7 @@ public:
 	void	DeleteObject(uint32 id);
 	Ground_Spawns*	LoadGroundSpawns(uint32 zone_id, int16 version, Ground_Spawns* gs);
 
-	/*
-	* Traders
-	*/
-
+	/* Traders */
 	void	SaveTraderItem(uint32 char_id,uint32 itemid,uint32 uniqueid, int32 charges,uint32 itemcost,uint8 slot);
 	void	UpdateTraderItemCharges(int char_id, uint32 ItemInstID, int32 charges);
 	void	UpdateTraderItemPrice(int CharID, uint32 ItemID, uint32 Charges, uint32 NewPrice);
@@ -236,38 +233,67 @@ public:
 	Trader_Struct* LoadTraderItem(uint32 char_id);
 	TraderCharges_Struct* LoadTraderItemWithCharges(uint32 char_id);
 
-	// Buyer/Barter
-	//
+	/* Buyer/Barter */
 	void AddBuyLine(uint32 CharID, uint32 BuySlot, uint32 ItemID, const char *ItemName, uint32 Quantity, uint32 Price);
 	void RemoveBuyLine(uint32 CharID, uint32 BuySlot);
 	void DeleteBuyLines(uint32 CharID);
 	void UpdateBuyLine(uint32 CharID, uint32 BuySlot, uint32 Quantity);
 
-	/*
-	* General Character Related Stuff
-	*/
-    void	StoreCharacterLookup(uint32 char_id);
-	bool	GetAccountInfoForLogin_result(MYSQL_RES* result, int16* admin = 0, char* account_name = 0,
-				uint32* lsaccountid = 0, uint8* gmspeed = 0, bool* revoked = 0, bool* gmhideme = nullptr,
-				uint32* account_creation = 0);
-	bool	GetCharacterInfoForLogin_result(MYSQL_RES* result, uint32* character_id = 0, char* current_zone = 0,
-				PlayerProfile_Struct* pp = 0, Inventory* inv = 0, ExtendedProfile_Struct *ext = 0, uint32* pplen = 0,
-				uint32* guilddbid = 0, uint8* guildrank = 0, uint8 *class_= 0, uint8 *level = 0, bool *LFP = 0,
-				bool *LFG = 0, uint8 *NumXTargets = 0, uint8* firstlogon = 0);
+	/* General Character Related Stuff */
+	bool	SetServerFilters(char* name, ServerSideFilters_Struct *ssfs);
+	uint32	GetServerFilters(char* name, ServerSideFilters_Struct *ssfs);
+
 	void SaveBuffs(Client *c);
 	void LoadBuffs(Client *c);
 	void LoadPetInfo(Client *c);
 	void SavePetInfo(Client *c);
 	void RemoveTempFactions(Client *c);
 
-	/*
-	* Character Inventory
-	*/
+	/* Character Data Loaders */
+	bool	LoadCharacterFactionValues(uint32 character_id, faction_map & val_list);
+	bool	LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Struct* pp);
+	bool	LoadCharacterMemmedSpells(uint32 character_id, PlayerProfile_Struct* pp);
+	bool	LoadCharacterLanguages(uint32 character_id, PlayerProfile_Struct* pp);
+	bool	LoadCharacterDisciplines(uint32 character_id, PlayerProfile_Struct* pp);
+	bool	LoadCharacterSkills(uint32 character_id, PlayerProfile_Struct* pp);
+	bool	LoadCharacterData(uint32 character_id, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp);
+	bool	LoadCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
+	bool	LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Struct* pp);
+	bool	LoadCharacterMaterialColor(uint32 character_id, PlayerProfile_Struct* pp);
+	bool	LoadCharacterBandolier(uint32 character_id, PlayerProfile_Struct* pp);
+	bool	LoadCharacterTribute(uint32 character_id, PlayerProfile_Struct* pp);
+	bool	LoadCharacterPotions(uint32 character_id, PlayerProfile_Struct* pp);
+	bool	LoadCharacterLeadershipAA(uint32 character_id, PlayerProfile_Struct* pp);
+
+	/* Character Data Saves */ 
+	bool	SaveCharacterBindPoint(uint32 character_id, uint32 zone_id, uint32 instance_id, float x, float y, float z, float heading, uint8 is_home);
+	bool	SaveCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
+	bool	SaveCharacterData(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp);
+	bool	SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 current_level);
+	bool	SaveCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
+	bool	SaveCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
+	bool	SaveCharacterMaterialColor(uint32 character_id, uint32 slot_id, uint32 color); 
+	bool	SaveCharacterSkill(uint32 character_id, uint32 skill_id, uint32 value);
+	bool	SaveCharacterLanguage(uint32 character_id, uint32 lang_id, uint32 value);
+	bool	SaveCharacterDisc(uint32 character_id, uint32 slot_id, uint32 disc_id);
+	bool	SaveCharacterTribute(uint32 character_id, PlayerProfile_Struct* pp);
+	bool	SaveCharacterBandolier(uint32 character_id, uint8 bandolier_id, uint8 bandolier_slot, uint32 item_id, uint32 icon, const char* bandolier_name);
+	bool	SaveCharacterPotionBelt(uint32 character_id, uint8 potion_id, uint32 item_id, uint32 icon);
+	bool	SaveCharacterLeadershipAA(uint32 character_id, PlayerProfile_Struct* pp);
+
+	/* Character Data Deletes */
+	bool	DeleteCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
+	bool	DeleteCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
+	bool	DeleteCharacterDisc(uint32 character_id, uint32 slot_id); 
+	bool	DeleteCharacterBandolier(uint32 character_id, uint32 band_id);
+	bool	DeleteCharacterLeadershipAAs(uint32 character_id);
+	bool	DeleteCharacterAAs(uint32 character_id);
+	bool	DeleteCharacterDye(uint32 character_id);
+
+	/* Character Inventory */
 	bool	NoRentExpired(const char* name);
 
-	/*
-	* Corpses
-	*/
+	/* Corpses */
 	bool	GetDecayTimes(npcDecayTimes_Struct* npcCorpseDecayTimes);
 	uint32	CreatePlayerCorpse(uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, uchar* data, uint32 datasize, float x, float y, float z, float heading);
 	bool	CreatePlayerCorpseBackup(uint32 dbid, uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, uchar* data, uint32 datasize, float x, float y, float z, float heading);
@@ -293,21 +319,15 @@ public:
 	uint32	GetPlayerCorpseItemAt(uint32 corpse_id, uint16 slotid);
 	uint32	GetPlayerCorpseTimeLeft(uint8 corpse, uint8 type);
 
-	/*
-	* Faction
-	*/
+	/* Faction */
 	bool	GetNPCFactionList(uint32 npcfaction_id, int32* faction_id, int32* value, uint8* temp, int32* primary_faction = 0);
 	bool	GetFactionData(FactionMods* fd, uint32 class_mod, uint32 race_mod, uint32 deity_mod, int32 faction_id); //rembrant, needed for factions Dec, 16 2001
 	bool	GetFactionName(int32 faction_id, char* name, uint32 buflen); // rembrant, needed for factions Dec, 16 2001
 	bool	GetFactionIdsForNPC(uint32 nfl_id, std::list<struct NPCFaction*> *faction_list, int32* primary_faction = 0); // neotokyo: improve faction handling
 	bool	SetCharacterFactionLevel(uint32 char_id, int32 faction_id, int32 value, uint8 temp, faction_map &val_list); // rembrant, needed for factions Dec, 16 2001
 	bool	LoadFactionData();
-	bool	LoadFactionValues(uint32 char_id, faction_map & val_list);
-	bool	LoadFactionValues_result(MYSQL_RES* result, faction_map & val_list);
 
-	/*
-	* AAs
-	*/
+	/* AAs */
 	bool	LoadAAEffects();
 	bool	LoadAAEffects2();
 	bool	LoadSwarmSpells();
@@ -319,9 +339,7 @@ public:
 	uint32 CountAAEffects();
 	void FillAAEffects(SendAA_Struct* aa_struct);
 
-	/*
-	* Zone related
-	*/
+	/* Zone related */
 	bool	GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct *data, bool &can_bind, bool &can_combat, bool &can_levitate, bool &can_castoutdoor, bool &is_city, bool &is_hotzone, bool &allow_mercs, uint8 &zone_type, int &ruleset, char **map_filename);
 	bool	SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct* zd);
 	bool	LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,const char* zonename, uint32 version);
@@ -329,9 +347,7 @@ public:
 	uint8	GetUseCFGSafeCoords();
 	int		getZoneShutDownDelay(uint32 zoneID, uint32 version);
 
-	/*
-	* Spawns and Spawn Points
-	*/
+	/* Spawns and Spawn Points */
 	bool	LoadSpawnGroups(const char* zone_name, uint16 version, SpawnGroupList* spawn_group_list);
 	bool	LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList* spawn_group_list);
 	bool	PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version, uint32 repopdelay = 0);
@@ -341,9 +357,7 @@ public:
 	uint32	GetSpawnTimeLeft(uint32 id, uint16 instance_id);
 	void	UpdateSpawn2Status(uint32 id, uint8 new_status);
 
-	/*
-	* Grids/Paths
-	*/
+	/* Grids/Paths */
 	uint32	GetFreeGrid(uint16 zoneid);
 	void	DeleteGrid(Client *c, uint32 sg2, uint32 grid_num, bool grid_too,uint16 zoneid);
 	void	DeleteWaypoint(Client *c, uint32 grid_num, uint32 wp_num,uint16 zoneid);
@@ -359,11 +373,16 @@ public:
 	int		GetHighestGrid(uint32 zoneid);
 	int		GetHighestWaypoint(uint32 zoneid, uint32 gridid);
 
-	/*
-	* NPCs
-	*/
+	/* NPCs */
 	const NPCType*			GetNPCType(uint32 id);
 	uint32	NPCSpawnDB(uint8 command, const char* zone, uint32 zone_version, Client *c, NPC* spawn = 0, uint32 extra = 0); // 0 = Create 1 = Add; 2 = Update; 3 = Remove; 4 = Delete
+    uint32  CreateNewNPCCommand(const char* zone, uint32 zone_version, Client *client, NPC* spawn, uint32 extra);
+    uint32  AddNewNPCSpawnGroupCommand(const char* zone, uint32 zone_version, Client *client, NPC* spawn, uint32 respawnTime);
+    uint32  DeleteSpawnLeaveInNPCTypeTable(const char* zone, Client *client, NPC* spawn);
+    uint32  DeleteSpawnRemoveFromNPCTypeTable(const char* zone, uint32 zone_version, Client *client, NPC* spawn);
+    uint32  AddSpawnFromSpawnGroup(const char* zone, uint32 zone_version, Client *client, NPC* spawn, uint32 spawnGroupID);
+    uint32  AddNPCTypes(const char* zone, uint32 zone_version, Client *client, NPC* spawn, uint32 spawnGroupID);
+    uint32  UpdateNPCTypeAppearance(Client *client, NPC* spawn);
 	bool	SetSpecialAttkFlag(uint8 id, const char* flag);
 	bool	GetPetEntry(const char *pet_type, PetRecord *into);
 	bool	GetPoweredPetEntry(const char *pet_type, int16 petpower, PetRecord *into);
@@ -375,9 +394,7 @@ public:
 	DBnpcspells_Struct* GetNPCSpells(uint32 iDBSpellsID);
 	DBnpcspellseffects_Struct* GetNPCSpellsEffects(uint32 iDBSpellsEffectsID);
 
-	/*
-	* Mercs
-	*/
+	/* Mercs */
 	const	NPCType*	GetMercType(uint32 id, uint16 raceid, uint32 clientlevel);
 	void	LoadMercEquipment(Merc *merc);
 	void	SaveMercBuffs(Merc *merc);
@@ -389,9 +406,7 @@ public:
 	//void	LoadMercTypesForMercMerchant(NPC *merchant);
 	//void	LoadMercsForMercMerchant(NPC *merchant);
 
-	/*
-	* Petitions
-	*/
+	/* Petitions */
 	void	UpdateBug(BugStruct* bug);
 	void	UpdateBug(PetitionBug_Struct* bug);
 	void	DeletePetitionFromDB(Petition* wpet);
@@ -399,16 +414,11 @@ public:
 	void	InsertPetitionToDB(Petition* wpet);
 	void	RefreshPetitionsFromDB();
 
-
-	/*
-	* Merchants
-	*/
+	/* Merchants */
 	void	SaveMerchantTemp(uint32 npcid, uint32 slot, uint32 item, uint32 charges);
 	void	DeleteMerchantTemp(uint32 npcid, uint32 slot);
 
-	/*
-	* Tradeskills
-	*/
+	/* Tradeskills */
 	bool	GetTradeRecipe(const ItemInst* container, uint8 c_type, uint32 some_id, uint32 char_id, DBTradeskillRecipe_Struct *spec);
 	bool	GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id, uint32 char_id, DBTradeskillRecipe_Struct *spec);
 	uint32	GetZoneForage(uint32 ZoneID, uint8 skill); /* for foraging */
@@ -417,14 +427,10 @@ public:
 	bool    EnableRecipe(uint32 recipe_id);
 	bool    DisableRecipe(uint32 recipe_id);
 
-	/*
-	* Tribute
-	*/
+	/* Tribute */
 	bool	LoadTributes();
 
-	/*
-	* Doors
-	*/
+	/* Doors */
 	bool	DoorIsOpen(uint8 door_id,const char* zone_name);
 	void	SetDoorPlace(uint8 value,uint8 door_id,const char* zone_name);
 	bool	LoadDoors(int32 iDoorCount, Door *into, const char *zone_name, int16 version);
@@ -437,64 +443,46 @@ public:
 	int32	GetDoorsDBCountPlusOne(const char *zone_name, int16 version);
 	void InsertDoor(uint32 did, uint16 ddoorid, const char* ddoor_name, float dxpos, float dypos, float dzpos, float dheading, uint8 dopentype, uint16 dguildid, uint32 dlockpick, uint32 dkeyitem, uint8 ddoor_param, uint8 dinvert, int dincline, uint16 dsize);
 
-	/*
-	* Blocked Spells
-	*/
-
+	/* Blocked Spells */ 
 	int32	GetBlockedSpellsCount(uint32 zoneid);
 	bool	LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked* into, uint32 zoneid);
 
-	/*
-	* Traps
-	*/
+	/* Traps */
 	bool	LoadTraps(const char* zonename, int16 version);
 	char*	GetTrapMessage(uint32 trap_id);
 
-	/*
-	* Time
-	*/
+	/* Time */
 	uint32	GetZoneTZ(uint32 zoneid, uint32 version);
 	bool	SetZoneTZ(uint32 zoneid, uint32 version, uint32 tz);
 
-	/*
-	* Group
-	*/
+	/* Group */
 	void RefreshGroupFromDB(Client *c);
 	uint8 GroupCount(uint32 groupid);
-	/*
-	* Raid
-	*/
+
+	/* Raid */
 	uint8 RaidGroupCount(uint32 raidid, uint32 groupid);
 
-	/*
-	* Instancing
-	*/
+	/* Instancing */
 	void ListAllInstances(Client* c, uint32 charid);
 
-	/*
-	* QGlobals
-	*/
+	/* QGlobals */
 	void QGlobalPurge();
 
-	/*
-	* Alternate Currency
-	*/
+	/* Alternate Currency */
 	void LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32> &currency);
 	void UpdateAltCurrencyValue(uint32 char_id, uint32 currency_id, uint32 value);
 
 	/*
-	* Misc stuff.
-	* PLEASE DO NOT ADD TO THIS COLLECTION OF CRAP UNLESS YOUR METHOD
-	* REALLY HAS NO BETTER SECTION
+		* Misc stuff.
+		* PLEASE DO NOT ADD TO THIS COLLECTION OF CRAP UNLESS YOUR METHOD
+		* REALLY HAS NO BETTER SECTION
 	*/
 	bool	logevents(const char* accountname,uint32 accountid,uint8 status,const char* charname,const char* target, const char* descriptiontype, const char* description,int event_nid);
 	void	GetEventLogs(const char* name,char* target,uint32 account_id=0,uint8 eventid=0,char* detail=0,char* timestamp=0, CharacterEventLog_Struct* cel=0);
 	uint32	GetKarma(uint32 acct_id);
 	void	UpdateKarma(uint32 acct_id, uint32 amount);
 
-	/*
-	* Things which really dont belong here...
-	*/
+	/* Things which really dont belong here... */
 	int16	CommandRequirement(const char* commandname);
 
 protected:

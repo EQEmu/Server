@@ -712,7 +712,8 @@ struct SpellBuffFade_Struct_Live {
 /*012*/	uint32 spellid;
 /*016*/	uint32 duration;
 /*020*/ uint32 playerId;	// Global player ID?
-/*024*/ uint8 unknown0028[68];
+/*024*/	uint32 num_hits;
+/*028*/ uint8 unknown0028[64];
 /*092*/	uint32 slotid;
 /*096*/	uint32 bufffade;
 /*100*/
@@ -726,7 +727,7 @@ struct SpellBuffFade_Struct {
 /*007*/	uint8 unknown7;
 /*008*/	uint32 spellid;
 /*012*/	uint32 duration;
-/*016*/	uint32 unknown016;
+/*016*/	uint32 num_hits;
 /*020*/	uint32 unknown020;		// Global player ID?
 /*024*/ uint32 playerId;		// Player id who cast the buff
 /*028*/	uint32 slotid;
@@ -740,6 +741,27 @@ struct BuffRemoveRequest_Struct
 /*04*/ uint32 EntityID;
 /*08*/
 };
+
+#if 0
+// not in use
+struct BuffIconEntry_Struct {
+/*000*/ uint32 buff_slot;
+/*004*/ uint32 spell_id;
+/*008*/ uint32 tics_remaining;
+/*012*/ uint32 num_hits;
+// char name[0]; caster name is also here sometimes
+// uint8  unknownend; 1 when single, 0 when all opposite of all_buffs?
+};
+
+// not in use
+struct BuffIcon_Struct {
+/*000*/ uint32 entity_id;
+/*004*/ uint32 unknown004;
+/*008*/ uint8  all_buffs; // 1 when updating all buffs, 0 when doing one
+/*009*/ uint16 count;
+/*011*/ BuffIconEntry_Struct entires[0];
+};
+#endif
 
 struct GMTrainee_Struct
 {
@@ -893,14 +915,62 @@ struct PotionBelt_Struct {
 	BandolierItem_Struct items[MAX_POTIONS_IN_BELT];
 };
 
-struct LeadershipAA_Struct {
-	uint32 ranks[MAX_LEADERSHIP_AA_ARRAY];
-};
 struct GroupLeadershipAA_Struct {
-	uint32 ranks[MAX_GROUP_LEADERSHIP_AA_ARRAY];
+	union {
+		struct {
+			uint32 groupAAMarkNPC;
+			uint32 groupAANPCHealth;
+			uint32 groupAADelegateMainAssist;
+			uint32 groupAADelegateMarkNPC;
+			uint32 groupAA4;
+			uint32 groupAA5;
+			uint32 groupAAInspectBuffs;
+			uint32 groupAA7;
+			uint32 groupAASpellAwareness;
+			uint32 groupAAOffenseEnhancement;
+			uint32 groupAAManaEnhancement;
+			uint32 groupAAHealthEnhancement;
+			uint32 groupAAHealthRegeneration;
+			uint32 groupAAFindPathToPC;
+			uint32 groupAAHealthOfTargetsTarget;
+			uint32 groupAA15;
+		};
+		uint32 ranks[MAX_GROUP_LEADERSHIP_AA_ARRAY];
+	};
 };
+
 struct RaidLeadershipAA_Struct {
-	uint32 ranks[MAX_RAID_LEADERSHIP_AA_ARRAY];
+	union {
+		struct {
+			uint32 raidAAMarkNPC;
+			uint32 raidAANPCHealth;
+			uint32 raidAADelegateMainAssist;
+			uint32 raidAADelegateMarkNPC;
+			uint32 raidAA4;
+			uint32 raidAA5;
+			uint32 raidAA6;
+			uint32 raidAASpellAwareness;
+			uint32 raidAAOffenseEnhancement;
+			uint32 raidAAManaEnhancement;
+			uint32 raidAAHealthEnhancement;
+			uint32 raidAAHealthRegeneration;
+			uint32 raidAAFindPathToPC;
+			uint32 raidAAHealthOfTargetsTarget;
+			uint32 raidAA14;
+			uint32 raidAA15;
+		};
+		uint32 ranks[MAX_RAID_LEADERSHIP_AA_ARRAY];
+	};
+};
+
+struct LeadershipAA_Struct {
+	union {
+		struct {
+			GroupLeadershipAA_Struct group;
+			RaidLeadershipAA_Struct raid;
+		};
+		uint32 ranks[MAX_LEADERSHIP_AA_ARRAY];
+	};
 };
 
  /**
@@ -1678,7 +1748,7 @@ struct BulkItemPacket_Struct
 
 struct Consume_Struct
 {
-/*000*/ ItemSlotStruct slot;
+/*000*/ ItemSlotStruct	slot;
 /*012*/ uint32	auto_consumed;	// 0xffffffff when auto eating e7030000 when right click
 /*016*/ uint32	type;			// 0x01=Food 0x02=Water
 /*020*/ uint32	c_unknown1;		// Seen 2
@@ -1711,17 +1781,17 @@ struct ItemProperties_Struct {
 };
 
 struct DeleteItem_Struct {
-/*0000*/ ItemSlotStruct from_slot;
-/*0004*/ ItemSlotStruct to_slot;
-/*0008*/ uint32 number_in_stack;
-/*0012*/
+/*0000*/ ItemSlotStruct	from_slot;
+/*0012*/ ItemSlotStruct	to_slot;
+/*0024*/ uint32			number_in_stack;
+/*0028*/
 };
 
 struct MoveItem_Struct {
-/*0000*/ ItemSlotStruct from_slot;
-/*0004*/ ItemSlotStruct to_slot;
-/*0008*/ uint32 number_in_stack;
-/*0012*/
+/*0000*/ ItemSlotStruct	from_slot;
+/*0012*/ ItemSlotStruct	to_slot;
+/*0024*/ uint32			number_in_stack;
+/*0028*/
 };
 
 //
@@ -2045,7 +2115,7 @@ struct Merchant_Sell_Struct {
 
 struct Merchant_Purchase_Struct {
 /*000*/	uint32	npcid;			// Merchant NPC's entity id
-/*004*/	MainInvItemSlotStruct itemslot;
+/*004*/	MainInvItemSlotStruct	itemslot;
 /*012*/	uint32	quantity;
 /*016*/	uint32	price;
 /*020*/
@@ -2401,6 +2471,11 @@ struct GroupFollow_Struct { // Live Follow Struct
 /*0144*/	uint32	unknown0144;	// Seen 0
 /*0148*/	uint32	unknown0148;
 /*0152*/
+};
+
+struct InspectBuffs_Struct {
+/*000*/ uint32 spell_id[BUFF_COUNT];
+/*168*/ uint32 tics_remaining[BUFF_COUNT];
 };
 
 struct LFG_Struct {
@@ -3488,10 +3563,10 @@ struct TributeInfo_Struct {
 
 struct TributeItem_Struct
 {
-/*00*/	ItemSlotStruct slot;
-/*12*/	uint32   quantity;
-/*16*/	uint32   tribute_master_id;
-/*20*/	int32  tribute_points;
+/*00*/	ItemSlotStruct	slot;
+/*12*/	uint32	quantity;
+/*16*/	uint32	tribute_master_id;
+/*20*/	int32	tribute_points;
 /*24*/
 };
 
@@ -3527,7 +3602,7 @@ struct Split_Struct
 */
 struct NewCombine_Struct {
 /*00*/	ItemSlotStruct container_slot;
-/*12*/	ItemSlotStruct unknown_slot;	// Slot type is 8?
+/*12*/	ItemSlotStruct guildtribute_slot;	// Slot type is 8? (MapGuildTribute = 8 -U)
 /*24*/
 };
 
@@ -3972,6 +4047,21 @@ struct RaidAddMember_Struct {
 /*139*/	uint8 flags[5]; //no idea if these are needed...
 };
 
+struct RaidMOTD_Struct {
+/*000*/ RaidGeneral_Struct general; // leader_name and action only used
+/*140*/ char motd[0]; // max size 1024, but reply is variable
+};
+
+struct RaidLeadershipUpdate_Struct {
+/*000*/	uint32 action;
+/*004*/	char player_name[64];
+/*068*/	uint32 Unknown068;
+/*072*/	char leader_name[64];
+/*136*/	GroupLeadershipAA_Struct group; //unneeded
+/*200*/	RaidLeadershipAA_Struct raid;
+/*264*/	char Unknown264[128];
+};
+
 struct RaidAdd_Struct {
 /*000*/	uint32		action;	//=0
 /*004*/	char		player_name[64];	//should both be the player's name
@@ -4106,7 +4196,7 @@ struct GMToggle_Struct {
 	uint32 toggle;
 };
 
-struct BuffFadeMsg_Struct {
+struct ColoredText_Struct {
 	uint32 color;
 	char msg[1]; //was 1
 /*0???*/ uint8  paddingXXX[3];          // always 0's
@@ -4585,9 +4675,9 @@ struct ItemQuaternaryBodyStruct
 
 struct AugmentInfo_Struct
 {
-/*000*/ uint32	itemid;		// id of the solvent needed
-/*004*/ uint8		window;		// window to display the information in
-/*005*/ uint8		unknown005[71];	// total packet length 76, all the rest were always 00
+/*000*/ uint32	itemid;			// id of the solvent needed
+/*004*/ uint8	window;			// window to display the information in
+/*005*/ uint8	unknown005[71];	// total packet length 76, all the rest were always 00
 /*076*/
 };
 
