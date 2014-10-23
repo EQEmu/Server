@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/22/2014 ==
+Uleat: Fix for stacking items in a world object..added a new command option: #peekinv world - will show world container contents, if one is in use by target.
+
 == 10/20/2014 ==
 demonstar55: Inspect Buffs rank 1 will now show NPC buffs in target window (SoD+)
 

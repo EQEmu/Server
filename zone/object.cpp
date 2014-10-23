@@ -318,6 +318,14 @@ void Object::Delete(bool reset_state)
 	}
 }
 
+const ItemInst* Object::GetItem(uint8 index) {
+	if (index < EmuConstants::MAP_WORLD_SIZE) {
+		return m_inst->GetItem(index);
+	}
+
+	return nullptr;
+}
+
 // Add item to object (only logical for world tradeskill containers
 void Object::PutItem(uint8 index, const ItemInst* inst)
 {

@@ -258,7 +258,7 @@ int command_init(void) {
 		command_add("heal","- Completely heal your target",10,command_heal) ||
 		command_add("appearance","[type] [value] - Send an appearance packet for you or your target",150,command_appearance) ||
 		command_add("nukeitem","[itemid] - Remove itemid from your player target's inventory",150,command_nukeitem) ||
-		command_add("peekinv","[worn/cursor/inv/bank/trade/trib/all] - Print out contents of your player target's inventory",100,command_peekinv) ||
+		command_add("peekinv","[worn/inv/cursor/trib/bank/trade/world/all] - Print out contents of your player target's inventory",100,command_peekinv) ||
 		command_add("findnpctype","[search criteria] - Search database NPC types",100,command_findnpctype) ||
 		command_add("findzone","[search criteria] - Search database zones",100,command_findzone) ||
 		command_add("fz",nullptr,100, command_findzone) ||
@@ -2960,6 +2960,41 @@ void command_peekinv(Client *c, const Seperator *sep)
 					linkbase = StringFormat(linkcore, 0x12, ((item == 0) ? 0 : item->ID), ((item == 0) ? "null" : item->Name), 0x12);
 					c->Message((item == 0), "  TradeBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
 						Inventory::CalcSlotId(i, j), i, j, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
+				}
+			}
+		}
+	}
+
+	if (bAll || (strcasecmp(sep->arg[1], "world") == 0)) {
+		// Items in world container (if present)
+		bFound = true;
+
+		Object* tsobject = c->GetTradeskillObject();
+
+		if (tsobject == nullptr) {
+			c->Message(1, "No world tradeskill object selected...");
+		}
+		else {
+			c->Message(0, "[WorldObject DBID: %i (entityid: %i)]", tsobject->GetDBID(), tsobject->GetID());
+
+			for (int16 i = MAIN_BEGIN; i < EmuConstants::MAP_WORLD_SIZE; ++i) {
+				const ItemInst* inst = tsobject->GetItem(i);
+				item = (inst) ? inst->GetItem() : nullptr;
+
+				linkbase = StringFormat(linkcore, 0x12, ((item == 0) ? 0 : item->ID), ((item == 0) ? "null" : item->Name), 0x12);
+				c->Message((item == 0), "WorldSlot: %i, Item: %i (%s), Charges: %i",
+					(EmuConstants::WORLD_BEGIN + i), ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
+
+				// this should never happen ('WorldBagSlot' as -1 indicates an error state in this implementation)
+				if (inst && inst->IsType(ItemClassContainer)) {
+					for (uint8 j = SUB_BEGIN; j < EmuConstants::ITEM_CONTAINER_SIZE; ++j) {
+						const ItemInst* instbag = inst->GetItem(j);
+						item = (instbag) ? instbag->GetItem() : nullptr;
+
+						linkbase = StringFormat(linkcore, 0x12, ((item == 0) ? 0 : item->ID), ((item == 0) ? "null" : item->Name), 0x12);
+						c->Message((item == 0), "  WorldBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
+							-1, i, j, ((item == 0) ? 0 : item->ID), linkbase.c_str(), ((item == 0) ? 0 : inst->GetCharges()));
+					}
 				}
 			}
 		}
