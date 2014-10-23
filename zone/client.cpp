@@ -327,6 +327,7 @@ Client::Client(EQStreamInterface* ieqs)
 
 	EngagedRaidTarget = false;
 	SavedRaidRestTimer = 0;
+	
 }
 
 Client::~Client() {
