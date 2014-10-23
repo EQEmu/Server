@@ -56,7 +56,8 @@ void register_remote_call_handlers() {
 	remote_call_methods["Zone.GetInitialEntityPositions"] = handle_rc_relay;
 	remote_call_methods["Zone.MoveEntity"] = handle_rc_relay;
 	remote_call_methods["Zone.Action"] = handle_rc_relay;
-	remote_call_methods["Quest.GetScript"] = handle_rc_quest_interface;
+	remote_call_methods["World.GetFileContents"] = handle_rc_get_file_contents;
+	remote_call_methods["World.SaveFileContents"] = handle_rc_save_file_contents;
 }
 
 void handle_rc_list_zones(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
@@ -162,13 +163,19 @@ void handle_rc_relay(const std::string &method, const std::string &connection_id
 	safe_delete(pack);
 }
 
-void handle_rc_quest_interface(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
+//TODO: We need to look at potential security concerns on direct file access like this.
+void handle_rc_get_file_contents(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
 	std::string error;
 	std::map<std::string, std::string> res;
+	if(params.size() != 1) {
+		error = "Expected only one filename.";
+		RemoteCallResponse(connection_id, request_id, res, error);
+		return;
+	}
 
-	FILE *f = fopen("quests/global/Waypoint.pl", "rb");
+	FILE *f = fopen(params[0].c_str(), "rb");
 	if(!f) {
-		error = "File not found";
+		error = "File not found: " + params[0];
 		RemoteCallResponse(connection_id, request_id, res, error);
 		return;
 	}
@@ -180,7 +187,7 @@ void handle_rc_quest_interface(const std::string &method, const std::string &con
 	char *buffer = new char[sz + 1];
 	size_t r = fread(buffer, 1, sz, f);
 	if(r != sz) {
-		error = "Unable to read file";
+		error = "Unable to read file: " + params[0];
 		RemoteCallResponse(connection_id, request_id, res, error);
 		fclose(f);
 		delete[] buffer;
@@ -190,6 +197,44 @@ void handle_rc_quest_interface(const std::string &method, const std::string &con
 	fclose(f);
 	buffer[sz] = '\0';
 
-	res["quest_text"] = buffer; 
-	RemoteCallResponse(connection_id, request_id, res, error); 
+	res["quest_text"] = buffer;
+	res["file_name"] = params[0];
+	delete[] buffer;
+	RemoteCallResponse(connection_id, request_id, res, error);
+}
+
+void handle_rc_save_file_contents(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
+	std::string error;
+	std::map<std::string, std::string> res;
+	if(params.size() != 2) {
+		error = "Expected [filename, content]";
+		RemoteCallResponse(connection_id, request_id, res, error);
+		return;
+	}
+
+	FILE *f = fopen(params[0].c_str(), "wb");
+	if(!f) {
+		error = "File not found: " + params[0];
+		RemoteCallResponse(connection_id, request_id, res, error);
+		return;
+	}
+
+	if(params[1].size() == 0) {
+		fclose(f);
+		res["status"] = "success";
+		RemoteCallResponse(connection_id, request_id, res, error);
+		return;
+	}
+
+	size_t r = fwrite(params[1].c_str(), 1, params[1].size(), f);
+	fclose(f);
+
+	if(r != params[1].size()) {
+		error = "Unable to write file: " + params[0];
+		RemoteCallResponse(connection_id, request_id, res, error);
+		return;
+	}
+
+	res["status"] = "success";
+	RemoteCallResponse(connection_id, request_id, res, error);
 }
