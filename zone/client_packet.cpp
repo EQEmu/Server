@@ -1374,10 +1374,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	query = StringFormat("SELECT `status`, `name`, `lsaccount_id`, `gmspeed`, `revoked`, `hideme` FROM `account` WHERE `id` = %u", this->AccountID());
 	auto results = database.QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		if (admin){ admin = atoi(row[0]); }
-		if (account_name){ strcpy(account_name, row[1]); }
-		if (lsaccountid && atoi(row[2]) > 0){ lsaccountid = atoi(row[2]); }
-		else{ lsaccountid = 0; }
+		admin = atoi(row[0]);
+		strncpy(account_name, row[1], 30);
+		lsaccountid = atoi(row[2]);
 		gmspeed = atoi(row[3]);
 		revoked = atoi(row[4]);
 		gmhideme = atoi(row[5]);
