@@ -4168,6 +4168,12 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 		safe_delete(outapp);
 	}
 
+	if (IsNPC()) {
+		EQApplicationPacket *outapp = MakeBuffsPacket();
+		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, BIT_SoDAndLater, true);
+		safe_delete(outapp);
+	}
+
 	if(IsClient() && CastToClient()->GetClientVersionBit() & BIT_UnderfootAndLater)
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket(false);

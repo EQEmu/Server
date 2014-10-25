@@ -1480,6 +1480,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 						}
 
 						world_inst->SetCharges(world_charges);
+						m_tradeskill_object->PutItem(world_idx, world_inst);
 						m_tradeskill_object->Save();
 
 						if (src_charges == 0) {

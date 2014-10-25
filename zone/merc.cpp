@@ -1044,7 +1044,7 @@ int32 Merc::CalcManaRegenCap()
 
 void Merc::CalcMaxEndurance()
 {
-	max_end = CalcBaseEndurance() + spellbonuses.Endurance + itembonuses.Endurance;
+	max_end = CalcBaseEndurance() + spellbonuses.Endurance + itembonuses.Endurance + aabonuses.Endurance;
 
 	if (max_end < 0) {
 		max_end = 0;

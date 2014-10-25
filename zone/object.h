@@ -121,6 +121,7 @@ public:
 	void StartDecay() {decay_timer.Start();}
 
 	// Container functions
+	const ItemInst* GetItem(uint8 index);
 	void PutItem(uint8 index, const ItemInst* inst);
 	void DeleteItem(uint8 index); // Item inside container
 	ItemInst* PopItem(uint8 index); // Pop item out of container
