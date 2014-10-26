@@ -4612,9 +4612,12 @@ Client *EntityList::FindCorpseDragger(uint16 CorpseID)
 	return nullptr;
 }
 
-Mob *EntityList::GetTargetForVirus(Mob *spreader)
+Mob *EntityList::GetTargetForVirus(Mob *spreader, int range)
 {
-	int max_spread_range = RuleI(Spells, VirusSpreadDistance);
+ 	int max_spread_range = RuleI(Spells, VirusSpreadDistance);
+ 
+	if (range)
+		max_spread_range = range;
 
 	std::vector<Mob *> TargetsInRange;
 
