@@ -4614,8 +4614,8 @@ Client *EntityList::FindCorpseDragger(uint16 CorpseID)
 
 Mob *EntityList::GetTargetForVirus(Mob *spreader, int range)
 {
- 	int max_spread_range = RuleI(Spells, VirusSpreadDistance);
- 
+	int max_spread_range = RuleI(Spells, VirusSpreadDistance);
+
 	if (range)
 		max_spread_range = range;
 
@@ -4623,34 +4623,38 @@ Mob *EntityList::GetTargetForVirus(Mob *spreader, int range)
 
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
+		Mob *cur = it->second;
 		// Make sure the target is in range, has los and is not the mob doing the spreading
-		if ((it->second->GetID() != spreader->GetID()) &&
-				(it->second->CalculateDistance(spreader->GetX(), spreader->GetY(),
+		if ((cur->GetID() != spreader->GetID()) &&
+				(cur->CalculateDistance(spreader->GetX(), spreader->GetY(),
 					spreader->GetZ()) <= max_spread_range) &&
-				(spreader->CheckLosFN(it->second))) {
+				(spreader->CheckLosFN(cur))) {
 			// If the spreader is an npc it can only spread to other npc controlled mobs
-			if (spreader->IsNPC() && !spreader->IsPet() && it->second->IsNPC()) {
-				TargetsInRange.push_back(it->second);
+			if (spreader->IsNPC() && !spreader->IsPet() && !spreader->CastToNPC()->GetSwarmOwner() && cur->IsNPC()) {
+				TargetsInRange.push_back(cur);
 			}
 			// If the spreader is an npc controlled pet it can spread to any other npc or an npc controlled pet
 			else if (spreader->IsNPC() && spreader->IsPet() && spreader->GetOwner()->IsNPC()) {
-				if (it->second->IsNPC() && !it->second->IsPet()) {
-					TargetsInRange.push_back(it->second);
-				} else if (it->second->IsNPC() && it->second->IsPet() && it->second->GetOwner()->IsNPC()) {
-					TargetsInRange.push_back(it->second);
+				if (cur->IsNPC() && !cur->IsPet()) {
+					TargetsInRange.push_back(cur);
+				} else if (cur->IsNPC() && cur->IsPet() && cur->GetOwner()->IsNPC()) {
+					TargetsInRange.push_back(cur);
+				}
+				else if (cur->IsNPC() && cur->CastToNPC()->GetSwarmOwner() && cur->GetOwner()->IsNPC()) {
+					TargetsInRange.push_back(cur);
 				}
 			}
 			// if the spreader is anything else(bot, pet, etc) then it should spread to everything but non client controlled npcs
-			else if (!spreader->IsNPC() && !it->second->IsNPC()) {
-				TargetsInRange.push_back(it->second);
+			else if (!spreader->IsNPC() && !cur->IsNPC()) {
+				TargetsInRange.push_back(cur);
 			}
 			// if its a pet we need to determine appropriate targets(pet to client, pet to pet, pet to bot, etc)
-			else if (spreader->IsNPC() && spreader->IsPet() && !spreader->GetOwner()->IsNPC()) {
-				if (!it->second->IsNPC()) {
-					TargetsInRange.push_back(it->second);
+			else if (spreader->IsNPC() && (spreader->IsPet() || spreader->CastToNPC()->GetSwarmOwner()) && !spreader->GetOwner()->IsNPC()) {
+				if (!cur->IsNPC()) {
+					TargetsInRange.push_back(cur);
 				}
-				else if (it->second->IsNPC() && it->second->IsPet() && !it->second->GetOwner()->IsNPC()) {
-					TargetsInRange.push_back(it->second);
+				else if (cur->IsNPC() && (cur->IsPet() || cur->CastToNPC()->GetSwarmOwner()) && !cur->GetOwner()->IsNPC()) {
+					TargetsInRange.push_back(cur);
 				}
 			}
 		}
