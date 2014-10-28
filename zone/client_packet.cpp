@@ -5501,7 +5501,7 @@ void Client::Handle_OP_EndLootRequest(const EQApplicationPacket *app)
 		return;
 	}
 
-	SetLooting(false);
+	SetLooting(0);
 
 	Entity* entity = entity_list.GetID(*((uint16*)app->pBuffer));
 	if (entity == 0) {
@@ -9342,9 +9342,6 @@ void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 		std::cout << "Wrong size: OP_LootRequest, size=" << app->size << ", expected " << sizeof(uint32) << std::endl;
 		return;
 	}
-
-	SetLooting(true);
-
 	Entity* ent = entity_list.GetID(*((uint32*)app->pBuffer));
 	if (ent == 0) {
 		Message(13, "Error: OP_LootRequest: Corpse not found (ent = 0)");
@@ -9353,6 +9350,7 @@ void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 	}
 	if (ent->IsCorpse())
 	{
+		SetLooting(ent->GetID()); //store the entity we are looting
 		Corpse *ent_corpse = ent->CastToCorpse();
 		if (DistNoRootNoZ(ent_corpse->GetX(), ent_corpse->GetY()) > 625)
 		{
@@ -9360,7 +9358,7 @@ void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 			Corpse::SendLootReqErrorPacket(this);
 			return;
 		}
-
+		
 		if (invisible) {
 			BuffFadeByEffect(SE_Invisibility);
 			BuffFadeByEffect(SE_Invisibility2);
