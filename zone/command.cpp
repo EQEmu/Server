@@ -259,6 +259,7 @@ int command_init(void) {
 		command_add("appearance","[type] [value] - Send an appearance packet for you or your target",150,command_appearance) ||
 		command_add("nukeitem","[itemid] - Remove itemid from your player target's inventory",150,command_nukeitem) ||
 		command_add("peekinv","[worn/inv/cursor/trib/bank/trade/world/all] - Print out contents of your player target's inventory",100,command_peekinv) ||
+		command_add("interrogateinv","- use [help] argument for available options",0,command_interrogateinv) ||
 		command_add("findnpctype","[search criteria] - Search database NPC types",100,command_findnpctype) ||
 		command_add("findzone","[search criteria] - Search database zones",100,command_findzone) ||
 		command_add("fz",nullptr,100, command_findzone) ||
@@ -3002,10 +3003,78 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 	if (!bFound)
 	{
-		c->Message(0, "Usage: #peekinv [worn|cursor|inv|bank|trade|trib|all]");
+		c->Message(0, "Usage: #peekinv [worn|inv|cursor|trib|bank|trade|world|all]");
 		c->Message(0, "  Displays a portion of the targeted user's inventory");
 		c->Message(0, "  Caution: 'all' is a lot of information!");
 	}
+}
+
+void command_interrogateinv(Client *c, const Seperator *sep)
+{
+	// 'command_interrogateinv' is an in-memory inventory interrogation tool only.
+	//
+	// it does not verify against actual database entries..but, the output can be
+	// used to verify that something has been corrupted in a player's inventory.
+	// any error condition should be assumed that the item in question will be
+	// lost when the player logs out or zones (or incurrs any action that will
+	// consume the Client-Inventory object instance in question.)
+	//
+	// any item instances located at a greater depth than a reported error should
+	// be treated as an error themselves regardless of whether they report as the
+	// same or not.
+
+	if (strcasecmp(sep->arg[1], "help") == 0) {
+		if (c->Admin() < commandInterrogateInv) {
+			c->Message(0, "Usage: #interrogateinv");
+			c->Message(0, "  Displays your inventory's current in-memory nested storage references");
+		}
+		else {
+			c->Message(0, "Usage: #interrogateinv [log] [silent]");
+			c->Message(0, "  Displays your or your Player target inventory's current in-memory nested storage references");
+			c->Message(0, "  [log] - Logs interrogation to file");
+			c->Message(0, "  [silent] - Omits the in-game message portion of the interrogation");
+		}
+		return;
+	}
+
+	Client* target = nullptr;
+	std::map<int16, const ItemInst*> instmap;
+	bool log = false;
+	bool silent = false;
+	bool error = false;
+	bool allowtrip = false;
+
+	if (c->Admin() < commandInterrogateInv) {
+		if (c->GetInterrogateInvState()) {
+			c->Message(13, "The last use of #interrogateinv on this inventory instance discovered an error...");
+			c->Message(13, "Logging out, zoning or re-arranging items at this point will result in item loss!");
+			return;
+		}
+		target = c;
+		allowtrip = true;
+	}
+	else {
+		if (c->GetTarget() == nullptr) {
+			target = c;
+		}
+		else if (c->GetTarget()->IsClient()) {
+			target = c->GetTarget()->CastToClient();
+		}
+		else {
+			c->Message(1, "Use of this command is limited to Client entities");
+			return;
+		}
+
+		if (strcasecmp(sep->arg[1], "log") == 0)
+			log = true;
+		if (strcasecmp(sep->arg[2], "silent") == 0)
+			silent = true;
+	}
+
+	bool success = target->InterrogateInventory(c, log, silent, allowtrip, error);
+
+	if (!success)
+		c->Message(13, "An unknown error occurred while processing Client::InterrogateInventory()");
 }
 
 void command_findnpctype(Client *c, const Seperator *sep)

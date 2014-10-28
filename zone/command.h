@@ -152,6 +152,7 @@ void command_heal(Client *c, const Seperator *sep);
 void command_appearance(Client *c, const Seperator *sep);
 void command_nukeitem(Client *c, const Seperator *sep);
 void command_peekinv(Client *c, const Seperator *sep);
+void command_interrogateinv(Client *c, const Seperator *sep);
 void command_findnpctype(Client *c, const Seperator *sep);
 void command_findzone(Client *c, const Seperator *sep);
 void command_viewnpctype(Client *c, const Seperator *sep);

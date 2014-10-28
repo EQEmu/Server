@@ -261,7 +261,8 @@ enum {
 	commandChangeFlags = 200,		//ability to set/refresh flags
 	commandBanPlayers = 100,		//can set bans on players
 	commandChangeDatarate = 201,	//edit client's data rate
-	commandZoneToCoords = 0			//can #zone with coords
+	commandZoneToCoords = 0,		//can #zone with coords
+	commandInterrogateInv = 100		//below this == only log on error state and self-only target dump
 };
 
 //default states for logging flag on NPCs and clients (having NPCs on by default is prolly a bad idea)
