@@ -2732,6 +2732,211 @@ bool Client::MoveItemToInventory(ItemInst *ItemToReturn, bool UpdateClient) {
 	return true;
 }
 
+bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool allowtrip, bool& error, bool autolog)
+{
+	if (!requester)
+		return false;
+
+	std::map<int16, const ItemInst*> instmap;
+
+	// build reference map
+	for (int16 index = MAIN_BEGIN; index < EmuConstants::MAP_POSSESSIONS_SIZE; ++index)
+		if (m_inv[index])
+			instmap[index] = m_inv[index];
+	for (int16 index = EmuConstants::TRIBUTE_BEGIN; index <= EmuConstants::TRIBUTE_END; ++index)
+		if (m_inv[index])
+			instmap[index] = m_inv[index];
+	for (int16 index = EmuConstants::BANK_BEGIN; index <= EmuConstants::BANK_END; ++index)
+		if (m_inv[index])
+			instmap[index] = m_inv[index];
+	for (int16 index = EmuConstants::SHARED_BANK_BEGIN; index <= EmuConstants::SHARED_BANK_END; ++index)
+		if (m_inv[index])
+			instmap[index] = m_inv[index];
+	for (int16 index = EmuConstants::TRADE_BEGIN; index <= EmuConstants::TRADE_END; ++index)
+		if (m_inv[index])
+			instmap[index] = m_inv[index];
+
+	if (Object* tsobject = GetTradeskillObject())
+		for (int16 index = MAIN_BEGIN; index < EmuConstants::MAP_WORLD_SIZE; ++index)
+			if (tsobject->GetItem(index))
+				instmap[EmuConstants::WORLD_BEGIN + index] = tsobject->GetItem(index);
+
+	int limbo = 0;
+	for (iter_queue cursor_itr = m_inv.cursor_begin(); cursor_itr != m_inv.cursor_end(); ++cursor_itr, ++limbo) {
+		if (cursor_itr == m_inv.cursor_begin()) // m_inv.cursor_begin() is referenced as MainCursor in MapPossessions above
+			continue;
+
+		instmap[8000 + limbo] = *cursor_itr;
+	}
+
+	if (m_inv[MainPowerSource])
+		instmap[MainPowerSource] = m_inv[MainPowerSource];
+
+	// call InterrogateInventory_ for error check
+	for (std::map<int16, const ItemInst*>::iterator instmap_itr = instmap.begin(); (instmap_itr != instmap.end()) && (!error); ++instmap_itr)
+		InterrogateInventory_(true, requester, instmap_itr->first, INVALID_INDEX, instmap_itr->second, nullptr, log, silent, error, 0);
+
+	if (autolog && error && (!log))
+		log = true;
+
+	if (log)
+		_log(INVENTORY__ERROR, "Client::InterrogateInventory() called for %s by %s with an error state of %s", GetName(), requester->GetName(), (error ? "TRUE" : "FALSE"));
+	if (!silent)
+		requester->Message(1, "--- Inventory Interrogation Report for %s (requested by: %s, error state: %s) ---", GetName(), requester->GetName(), (error ? "TRUE" : "FALSE"));
+
+	// call InterrogateInventory_ for report
+	for (std::map<int16, const ItemInst*>::iterator instmap_itr = instmap.begin(); (instmap_itr != instmap.end()); ++instmap_itr)
+		InterrogateInventory_(false, requester, instmap_itr->first, INVALID_INDEX, instmap_itr->second, nullptr, log, silent, error, 0);
+
+	if (error) {
+		Message(13, "An error has been discovered in your inventory!");
+		Message(13, "Do not log out, zone or re-arrange items until this");
+		Message(13, "issue has been resolved or item loss may occur!");
+
+		if (allowtrip)
+			TripInterrogateInvState();
+	}
+
+	if (log) {
+		_log(INVENTORY__ERROR, "Target interrogate inventory flag: %s", (GetInterrogateInvState() ? "TRUE" : "FALSE"));
+		_log(INVENTORY__ERROR, "Client::InterrogateInventory() -- End");
+	}
+	if (!silent) {
+		requester->Message(1, "Target interrogation flag: %s", (GetInterrogateInvState() ? "TRUE" : "FALSE"));
+		requester->Message(1, "--- End of Interrogation Report ---");
+	}
+
+	instmap.clear();
+
+	return true;
+}
+
+void Client::InterrogateInventory_(bool errorcheck, Client* requester, int16 head, int16 index, const ItemInst* inst, const ItemInst* parent, bool log, bool silent, bool &error, int depth)
+{
+	if (depth >= 10) {
+		_log(INVENTORY__ERROR, "Client::InterrogateInventory_() - Recursion count has exceeded the maximum allowable (You have a REALLY BIG PROBLEM!!)");
+		return;
+	}
+
+	if (errorcheck) {
+		if (InterrogateInventory_error(head, index, inst, parent, depth)) {
+			error = true;
+		}
+		else {
+			if (inst)
+				for (int16 sub = SUB_BEGIN; (sub < EmuConstants::ITEM_CONTAINER_SIZE) && (!error); ++sub) // treat any ItemInst as having the max internal slots available
+					if (inst->GetItem(sub))
+						InterrogateInventory_(true, requester, head, sub, inst->GetItem(sub), inst, log, silent, error, depth + 1);
+		}
+	}
+	else {
+		bool localerror = InterrogateInventory_error(head, index, inst, parent, depth);
+		std::string i;
+		std::string p;
+		std::string e;
+
+		if (inst) { i = StringFormat("%s (class: %u | augtype: %u)", inst->GetItem()->Name, inst->GetItem()->ItemClass, inst->GetItem()->AugType); }
+		else { i = "NONE"; }
+		if (parent) { p = StringFormat("%s (class: %u | augtype: %u), index: %i", parent->GetItem()->Name, parent->GetItem()->ItemClass, parent->GetItem()->AugType, index); }
+		else { p = "NONE"; }
+		if (localerror) { e = " [ERROR]"; }
+		else { e = ""; }
+
+		if (log)
+			_log(INVENTORY__ERROR, "Head: %i, Depth: %i, Instance: %s, Parent: %s%s",
+			head, depth, i.c_str(), p.c_str(), e.c_str());
+		if (!silent)
+			requester->Message(1, "%i:%i - inst: %s - parent: %s%s",
+			head, depth, i.c_str(), p.c_str(), e.c_str());
+
+		if (inst)
+			for (int16 sub = SUB_BEGIN; (sub < EmuConstants::ITEM_CONTAINER_SIZE); ++sub)
+				if (inst->GetItem(sub))
+					InterrogateInventory_(false, requester, head, sub, inst->GetItem(sub), inst, log, silent, error, depth + 1);
+	}
+
+	return;
+}
+
+bool Client::InterrogateInventory_error(int16 head, int16 index, const ItemInst* inst, const ItemInst* parent, int depth)
+{
+	// very basic error checking - can be elaborated upon if more in-depth testing is needed...
+
+	if (
+		(head >= EmuConstants::EQUIPMENT_BEGIN && head <= EmuConstants::EQUIPMENT_END) ||
+		(head >= EmuConstants::TRIBUTE_BEGIN && head <= EmuConstants::TRIBUTE_END) ||
+		(head >= EmuConstants::WORLD_BEGIN && head <= EmuConstants::WORLD_END) ||
+		(head >= 8000 && head <= 8101) ||
+		(head == MainPowerSource)) {
+		switch (depth)
+		{
+		case 0: // requirement: inst is extant
+			if (!inst)
+				return true;
+			break;
+		case 1: // requirement: parent is common and inst is augment
+			if ((!parent) || (!inst))
+				return true;
+			if (!parent->IsType(ItemClassCommon))
+				return true;
+			if (index >= EmuConstants::ITEM_COMMON_SIZE)
+				return true;
+			break;
+		default: // requirement: none (something bad happened...)
+			return true;
+		}
+	}
+	else if (
+		(head >= EmuConstants::GENERAL_BEGIN && head <= EmuConstants::GENERAL_END) ||
+		(head == MainCursor) ||
+		(head >= EmuConstants::BANK_BEGIN && head <= EmuConstants::BANK_END) ||
+		(head >= EmuConstants::SHARED_BANK_BEGIN && head <= EmuConstants::SHARED_BANK_END) ||
+		(head >= EmuConstants::TRADE_BEGIN && head <= EmuConstants::TRADE_END)) {
+		switch (depth)
+		{
+		case 0: // requirement: inst is extant
+			if (!inst)
+				return true;
+			break;
+		case 1: // requirement: parent is common and inst is augment ..or.. parent is container and inst is extant
+			if ((!parent) || (!inst))
+				return true;
+			if (parent->IsType(ItemClassContainer))
+				break;
+			if (parent->IsType(ItemClassBook))
+				return true;
+			if (parent->IsType(ItemClassCommon)) {
+				if (!(inst->GetItem()->AugType > 0))
+					return true;
+				if (index >= EmuConstants::ITEM_COMMON_SIZE)
+					return true;
+			}
+			break;
+		case 2: // requirement: parent is common and inst is augment
+			if ((!parent) || (!inst))
+				return true;
+			if (parent->IsType(ItemClassContainer))
+				return true;
+			if (parent->IsType(ItemClassBook))
+				return true;
+			if (parent->IsType(ItemClassCommon)) {
+				if (!(inst->GetItem()->AugType > 0))
+					return true;
+				if (index >= EmuConstants::ITEM_COMMON_SIZE)
+					return true;
+			}
+			break;
+		default: // requirement: none (something bad happened again...)
+			return true;
+		}
+	}
+	else {
+		return true;
+	}
+
+	return false;
+}
+
 void Inventory::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, std::string value) {
 	ItemInst *inst = GetItem(slot_id);
 	if(inst) {

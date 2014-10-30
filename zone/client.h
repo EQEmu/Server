@@ -1212,6 +1212,11 @@ public:
 
 	void ShowNumHits(); // work around function for numhits not showing on buffs
 
+	void TripInterrogateInvState() { interrogateinv_flag = true; }
+	bool GetInterrogateInvState() { return interrogateinv_flag; }
+
+	bool InterrogateInventory(Client* requester, bool log, bool silent, bool allowtrip, bool& error, bool autolog = true);
+
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);
@@ -1524,6 +1529,11 @@ private:
 	std::map<std::string,std::string> accountflags;
 
 	uint8 initial_respawn_selection;
+
+	bool interrogateinv_flag; // used to minimize log spamming by players
+
+	void InterrogateInventory_(bool errorcheck, Client* requester, int16 head, int16 index, const ItemInst* inst, const ItemInst* parent, bool log, bool silent, bool &error, int depth);
+	bool InterrogateInventory_error(int16 head, int16 index, const ItemInst* inst, const ItemInst* parent, int depth);
 };
 
 #endif

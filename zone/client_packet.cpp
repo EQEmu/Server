@@ -9915,7 +9915,14 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 
 	if (mi_hack) { Message(15, "Caution: Illegal use of inaccessable bag slots!"); }
 
-	if (!SwapItem(mi) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) { SwapItemResync(mi); }
+	if (!SwapItem(mi) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) {
+		SwapItemResync(mi);
+
+		bool error = false;
+		InterrogateInventory(this, false, true, false, error, false);
+		if (error)
+			InterrogateInventory(this, true, false, true, error);
+	}
 
 	return;
 }

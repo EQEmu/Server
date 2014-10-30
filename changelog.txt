@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/28/2014 ==
+Uleat: Added Client::InterrogateInventory(). Can be invoked by #interrogateinv and is also called when Handle_OP_MoveItem() calls for SwapItemResync()
+
 == 10/22/2014 ==
 Uleat: Fix for stacking items in a world object..added a new command option: #peekinv world - will show world container contents, if one is in use by target.
 
