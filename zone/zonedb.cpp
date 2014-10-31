@@ -1820,7 +1820,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 		if (row[34] != nullptr)
 			strn0cpy(tmpNPCType->special_abilities, row[34], 512);
 		else
-			tmpNPCTYpe->special_abilities[0] = '\0';
+			tmpNPCType->special_abilities[0] = '\0';
 
 		tmpNPCType->npc_spells_id = atoi(row[35]);
 		tmpNPCType->npc_spells_effects_id = atoi(row[36]);
@@ -2027,7 +2027,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 		if (row[27] != nullptr)
 			strn0cpy(tmpNPCType->special_abilities, row[27], 512);
 		else
-			tmpNPCTYpe->special_abilities[0] = '\0';
+			tmpNPCType->special_abilities[0] = '\0';
 
         tmpNPCType->d_meele_texture1 = atoi(row[28]);
         tmpNPCType->d_meele_texture2 = atoi(row[29]);
