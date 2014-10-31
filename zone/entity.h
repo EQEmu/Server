@@ -134,7 +134,7 @@ public:
 	Mob *GetMob(const char* name);
 	Mob *GetMobByNpcTypeID(uint32 get_id);
 	bool IsMobSpawnedByNpcTypeID(uint32 get_id);
-	Mob *GetTargetForVirus(Mob* spreader);
+	Mob *GetTargetForVirus(Mob* spreader, int range);
 	inline NPC *GetNPCByID(uint16 id)
 		{ return npc_list.count(id) ? npc_list.at(id) : nullptr; }
 	NPC *GetNPCByNPCTypeID(uint32 npc_id);

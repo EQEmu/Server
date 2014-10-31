@@ -4349,7 +4349,7 @@ void Mob::SpreadVirus(uint16 spell_id, uint16 casterID)
 	// Only spread in zones without perm buffs
 	if(!zone->BuffTimersSuspended()) {
 		for(int i = 0; i < num_targs; i++) {
-			target = entity_list.GetTargetForVirus(this);
+			target = entity_list.GetTargetForVirus(this, spells[spell_id].viral_range);
 			if(target) {
 				// Only spreads to the uninfected
 				if(!target->FindBuff(spell_id)) {
