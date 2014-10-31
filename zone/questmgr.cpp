@@ -1290,9 +1290,9 @@ void QuestManager::signal(int npc_id, int wait_ms) {
 
 void QuestManager::setglobal(const char *varname, const char *newvalue, int options, const char *duration) {
 	QuestManagerCurrentQuestVars();
-	int qgZoneid=zone->GetZoneID();
-	int qgCharid=0;
-	int qgNpcid = owner->GetNPCTypeID();
+	int qgZoneid = zone->GetZoneID();
+	int qgCharid = 0;
+	int qgNpcid = owner ? owner->GetNPCTypeID() : 0; // encounter scripts don't have an owner
 
 	/*	options value determines the availability of global variables to NPCs when a quest begins
 		------------------------------------------------------------------
@@ -1410,9 +1410,9 @@ void QuestManager::targlobal(const char *varname, const char *value, const char 
 
 void QuestManager::delglobal(const char *varname) {
 	QuestManagerCurrentQuestVars();
-	int qgZoneid=zone->GetZoneID();
-	int qgCharid=0;
-	int qgNpcid=owner->GetNPCTypeID();
+	int qgZoneid = zone->GetZoneID();
+	int qgCharid = 0;
+	int qgNpcid = owner ? owner->GetNPCTypeID() : 0; // encounter scripts don't have an owner
 
 	if (initiator && initiator->IsClient()) // some events like waypoint and spawn don't have a player involved
 		qgCharid=initiator->CharacterID();
