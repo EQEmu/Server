@@ -1295,7 +1295,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 			damage += opts->damage_flat;
 			hate *= opts->hate_percent;
 			hate += opts->hate_flat;
-			hit_chance_bonus += opts->hate_flat;
+			hit_chance_bonus += opts->hit_chance;
 		}
 
 		//check to see if we hit..
