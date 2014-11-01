@@ -471,7 +471,7 @@ void Zone::GetMerchantDataForZoneLoad() {
 	LogFile->write(EQEMuLog::Status, "Loading Merchant Lists...");
 	std::string query = StringFormat(												   
 		"SELECT																		   "
-		"ml.merchantid,																   "
+		"DISTINCT ml.merchantid,													   "
 		"ml.slot,																	   "
 		"ml.item,																	   "
 		"ml.faction_required,														   "
