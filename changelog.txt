@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/01/2014 ==
+Trevius: Fixed potential crash related to Pets/Mercs buffs when targeting themselves.
+
 == 10/28/2014 ==
 Uleat: Added Client::InterrogateInventory(). Can be invoked by #interrogateinv and is also called when Handle_OP_MoveItem() calls for SwapItemResync()
 

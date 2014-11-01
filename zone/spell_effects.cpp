@@ -4161,7 +4161,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 		EQApplicationPacket *outapp = MakeBuffsPacket();
 
 		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, BIT_SoDAndLater);
-		if(GetTarget() == this) {
+		if(IsClient() && GetTarget() == this) {
 			CastToClient()->QueuePacket(outapp);
 		}
 

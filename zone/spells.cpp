@@ -3126,7 +3126,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, BIT_SoDAndLater);
 
-		if(GetTarget() == this)
+		if(IsClient() && GetTarget() == this)
 			CastToClient()->QueuePacket(outapp);
 
 		safe_delete(outapp);
