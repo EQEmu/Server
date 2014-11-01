@@ -39,8 +39,61 @@ void load_encounter(std::string name) {
 	parse->EventEncounter(EVENT_ENCOUNTER_LOAD, name, 0);
 }
 
+void load_encounter_with_data(std::string name, std::string info_str) {
+	std::vector<EQEmu::Any> info_ptrs;
+	info_ptrs.push_back(&info_str);
+	parse->EventEncounter(EVENT_ENCOUNTER_LOAD, name, 0, &info_ptrs);
+}
+
 void unload_encounter(std::string name) {
+	auto liter = lua_encounter_events_registered.begin();
+	while(liter != lua_encounter_events_registered.end()) {
+		std::list<lua_registered_event> &elist = liter->second;
+		auto iter = elist.begin();
+		while(iter != elist.end()) {
+			if((*iter).encounter_name.compare(name) == 0) {
+				iter = elist.erase(iter);
+			} else {
+				++iter;
+			}
+		}
+
+		if(elist.size() == 0) {
+			lua_encounter_events_registered.erase(liter++);
+		} else {
+			++liter;
+		}
+	}
+
 	parse->EventEncounter(EVENT_ENCOUNTER_UNLOAD, name, 0);
+}
+
+void unload_encounter_with_data(std::string name, std::string info_str) {
+
+	auto liter = lua_encounter_events_registered.begin();
+	while(liter != lua_encounter_events_registered.end()) {
+		std::list<lua_registered_event> &elist = liter->second;
+		auto iter = elist.begin();
+		while(iter != elist.end()) {
+			if((*iter).encounter_name.compare(name) == 0) {
+				iter = elist.erase(iter);
+			}
+			else {
+				++iter;
+			}
+		}
+
+		if(elist.size() == 0) {
+			lua_encounter_events_registered.erase(liter++);
+		}
+		else {
+			++liter;
+		}
+	}
+
+	std::vector<EQEmu::Any> info_ptrs;
+	info_ptrs.push_back(&info_str);
+	parse->EventEncounter(EVENT_ENCOUNTER_UNLOAD, name, 0, &info_ptrs);
 }
 
 void register_event(std::string package_name, std::string name, int evt, luabind::adl::object func) {
@@ -55,7 +108,7 @@ void register_event(std::string package_name, std::string name, int evt, luabind
 		elist.push_back(e);
 		lua_encounter_events_registered[package_name] = elist;
 	} else {
-		std::list<lua_registered_event> elist = liter->second;
+		std::list<lua_registered_event> &elist = liter->second;
 		auto iter = elist.begin();
 		while(iter != elist.end()) {
 			if(iter->event_id == evt && iter->encounter_name.compare(name) == 0) {
@@ -66,7 +119,6 @@ void register_event(std::string package_name, std::string name, int evt, luabind
 		}
 
 		elist.push_back(e);
-		lua_encounter_events_registered[package_name] = elist;
 	}
 }
 
@@ -1141,6 +1193,8 @@ luabind::scope lua_register_general() {
 	[
 		luabind::def("load_encounter", &load_encounter),
 		luabind::def("unload_encounter", &unload_encounter),
+		luabind::def("load_encounter_with_data", &load_encounter_with_data),
+		luabind::def("unload_encounter_with_data", &unload_encounter_with_data),
 		luabind::def("register_npc_event", &register_npc_event),
 		luabind::def("unregister_npc_event", &unregister_npc_event),
 		luabind::def("register_player_event", &register_player_event),

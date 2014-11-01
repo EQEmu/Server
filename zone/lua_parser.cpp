@@ -601,6 +601,12 @@ int LuaParser::_EventEncounter(std::string package_name, QuestEventID evt, std::
 		lua_pushstring(L, encounter_name.c_str());
 		lua_setfield(L, -2, "name");
 
+		if(extra_pointers) {
+			std::string *str = EQEmu::any_cast<std::string*>(extra_pointers->at(0));
+			lua_pushstring(L, str->c_str());
+			lua_setfield(L, -2, "data");
+		}
+
 		quest_manager.StartQuest(nullptr, nullptr, nullptr);
 		if(lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
@@ -839,7 +845,7 @@ void LuaParser::ReloadQuests() {
 	if(f) {
 		fclose(f);
 	
-		if(luaL_dofile(L, "quests/global/script_init.lua")) {
+		if(luaL_dofile(L, path.c_str())) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
 		}
