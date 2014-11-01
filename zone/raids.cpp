@@ -511,7 +511,7 @@ uint32 Raid::GetTotalRaidDamage(Mob* other)
 	return total;
 }
 
-void Raid::HealGroup(uint32 heal_amt, Mob* caster, uint32 gid, int32 range)
+void Raid::HealGroup(uint32 heal_amt, Mob* caster, uint32 gid, float range)
 {
 	if (!caster)
 		return;
@@ -554,7 +554,7 @@ void Raid::HealGroup(uint32 heal_amt, Mob* caster, uint32 gid, int32 range)
 }
 
 
-void Raid::BalanceHP(int32 penalty, uint32 gid, int32 range, Mob* caster, int32 limit)
+void Raid::BalanceHP(int32 penalty, uint32 gid, float range, Mob* caster, int32 limit)
 {
 	if (!caster)
 		return;
@@ -610,7 +610,7 @@ void Raid::BalanceHP(int32 penalty, uint32 gid, int32 range, Mob* caster, int32 
 	}
 }
 
-void Raid::BalanceMana(int32 penalty, uint32 gid, int32 range, Mob* caster, int32 limit)
+void Raid::BalanceMana(int32 penalty, uint32 gid, float range, Mob* caster, int32 limit)
 {
 	if (!caster)
 		return;
