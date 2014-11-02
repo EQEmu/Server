@@ -86,9 +86,9 @@ public:
 	uint16	GetAvgLevel();
 	bool	LearnMembers();
 	void	VerifyGroup();
-	void	BalanceHP(int32 penalty, int32 range = 0, Mob* caster = nullptr, int32 limit = 0);
-	void	BalanceMana(int32 penalty, int32 range = 0, Mob* caster = nullptr, int32 limit = 0);
-	void	HealGroup(uint32 heal_amt, Mob* caster, int32 range = 0);
+	void	BalanceHP(int32 penalty, float range = 0, Mob* caster = nullptr, int32 limit = 0);
+	void	BalanceMana(int32 penalty, float range = 0, Mob* caster = nullptr, int32 limit = 0);
+	void	HealGroup(uint32 heal_amt, Mob* caster, float range = 0);
 	inline	void SetGroupAAs(GroupLeadershipAA_Struct *From) { memcpy(&LeaderAbilities, From, sizeof(GroupLeadershipAA_Struct)); }
 	inline	void GetGroupAAs(GroupLeadershipAA_Struct *Into) { memcpy(Into, &LeaderAbilities, sizeof(GroupLeadershipAA_Struct)); }
 	void	UpdateGroupAAs();
