@@ -434,6 +434,8 @@ bool ZoneServer::Process() {
 				break;
 			}
 			case ServerOP_ChannelMessage: {
+				if (pack->size < sizeof(ServerChannelMessage_Struct))
+					break;
 				ServerChannelMessage_Struct* scm = (ServerChannelMessage_Struct*) pack->pBuffer;
 				if(scm->chan_num == 20)
 				{
