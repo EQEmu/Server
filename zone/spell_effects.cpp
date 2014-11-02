@@ -158,7 +158,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 		}
 	}
 
-	if(buffslot >= 0 && spells[spell_id].viral_targets > 0) {
+	if(spells[spell_id].viral_targets > 0) {
 		if(!viral_timer.Enabled())
 			viral_timer.Start(1000);
 
