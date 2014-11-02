@@ -2160,7 +2160,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 			case SE_TemporaryPets: //Dook- swarms and wards:
 			{
-				// EverHood - this makes necro epic 1.5/2.0 proc work properly
+				// this makes necro epic 1.5/2.0 proc work properly
 				if((spell_id != 6882) && (spell_id != 6884)) // Chaotic Jester/Steadfast Servant
 				{
 					char pet_name[64];
@@ -3065,7 +3065,7 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 int Mob::CalcSpellEffectValue_formula(int formula, int base, int max, int caster_level, uint16 spell_id, int ticsremaining)
 {
 /*
-neotokyo: i need those formulas checked!!!!
+i need those formulas checked!!!!
 
 0 = base
 1 - 99 = base + level * formulaID

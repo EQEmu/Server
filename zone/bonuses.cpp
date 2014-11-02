@@ -1484,7 +1484,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_Harmony:
 			{
-				// neotokyo: Harmony effect as buff - kinda tricky
+				// Harmony effect as buff - kinda tricky
 				// harmony could stack with a lull spell, which has better aggro range
 				// take the one with less range in any case
 				if(newbon->AssistRange == -1 || effect_value < newbon->AssistRange)

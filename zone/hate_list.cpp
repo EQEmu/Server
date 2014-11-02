@@ -40,7 +40,7 @@ HateList::~HateList()
 {
 }
 
-// neotokyo: added for frenzy support
+// added for frenzy support
 // checks if target still is in frenzy mode
 void HateList::CheckFrenzyHate()
 {
@@ -170,7 +170,7 @@ Mob* HateList::GetClosest(Mob *hater) {
 }
 
 
-// neotokyo: a few comments added, rearranged code for readability
+// a few comments added, rearranged code for readability
 void HateList::Add(Mob *ent, int32 in_hate, int32 in_dam, bool bFrenzy, bool iAddIfNotExist)
 {
 	if(!ent)

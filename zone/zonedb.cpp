@@ -3146,7 +3146,7 @@ bool ZoneDatabase::GetFactionData(FactionMods* fm, uint32 class_mod, uint32 race
 }
 
 //o--------------------------------------------------------------
-//| Name: GetFactionName; rembrant, Dec. 16
+//| Name: GetFactionName; Dec. 16
 //o--------------------------------------------------------------
 //| Notes: Retrieves the name of the specified faction .Returns false on failure.
 //o--------------------------------------------------------------
@@ -3162,7 +3162,7 @@ bool ZoneDatabase::GetFactionName(int32 faction_id, char* name, uint32 buflen) {
 }
 
 //o--------------------------------------------------------------
-//| Name: GetNPCFactionList; rembrant, Dec. 16, 2001
+//| Name: GetNPCFactionList; Dec. 16, 2001
 //o--------------------------------------------------------------
 //| Purpose: Gets a list of faction_id's and values bound to the npc_id. Returns false on failure.
 //o--------------------------------------------------------------
@@ -3186,7 +3186,7 @@ bool ZoneDatabase::GetNPCFactionList(uint32 npcfaction_id, int32* faction_id, in
 }
 
 //o--------------------------------------------------------------
-//| Name: SetCharacterFactionLevel; rembrant, Dec. 20, 2001
+//| Name: SetCharacterFactionLevel; Dec. 20, 2001
 //o--------------------------------------------------------------
 //| Purpose: Update characters faction level with specified faction_id to specified value. Returns false on failure.
 //o--------------------------------------------------------------

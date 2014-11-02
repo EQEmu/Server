@@ -1408,7 +1408,7 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes att
 	}
 
 	// cut all PVP spell damage to 2/3 -solar
-	// EverHood - Blasting ourselfs is considered PvP
+	// Blasting ourselfs is considered PvP
 	//Don't do PvP mitigation if the caster is damaging himself
 	if(other && other->IsClient() && (other != this) && damage > 0) {
 		int PvPMitigation = 100;
@@ -3777,7 +3777,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		safe_delete(outapp);
 	} else {
 		//else, it is a buff tic...
-		// Everhood - So we can see our dot dmg like live shows it.
+		// So we can see our dot dmg like live shows it.
 		if(spell_id != SPELL_UNKNOWN && damage > 0 && attacker && attacker != this && attacker->IsClient()) {
 			//might filter on (attack_skill>200 && attack_skill<250), but I dont think we need it
 			attacker->FilteredMessage_StringID(attacker, MT_DoTDamage, FilterDOT,
