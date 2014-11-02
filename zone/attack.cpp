@@ -451,19 +451,16 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		&& (other->InFrontMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
 
 		float bonusShieldBlock = 0.0f;
-		bonusShieldBlock = aabonuses.ShieldBlock + spellbonuses.ShieldBlock + itembonuses.ShieldBlock;
+		bonusShieldBlock = static_cast<float>(aabonuses.ShieldBlock + spellbonuses.ShieldBlock + itembonuses.ShieldBlock);
 		RollTable[1] += bonusShieldBlock;
 	}
 
-	if(damage > 0 && (aabonuses.TwoHandBluntBlock || spellbonuses.TwoHandBluntBlock || itembonuses.TwoHandBluntBlock)
+	if(IsClient() && damage > 0 && (aabonuses.TwoHandBluntBlock || spellbonuses.TwoHandBluntBlock || itembonuses.TwoHandBluntBlock)
 		&& (other->InFrontMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
-		bool equiped2 = CastToClient()->m_inv.GetItem(MainPrimary);
-		if(equiped2) {
-			uint8 TwoHandBlunt = CastToClient()->m_inv.GetItem(MainPrimary)->GetItem()->ItemType;
+		if(CastToClient()->m_inv.GetItem(MainPrimary)) {
 			float bonusStaffBlock = 0.0f;
-			if(TwoHandBlunt == ItemType2HBlunt) {
-
-				bonusStaffBlock = aabonuses.TwoHandBluntBlock + spellbonuses.TwoHandBluntBlock + itembonuses.TwoHandBluntBlock;
+			if (CastToClient()->m_inv.GetItem(MainPrimary)->GetItem()->ItemType == ItemType2HBlunt){
+				bonusStaffBlock = static_cast<float>(aabonuses.TwoHandBluntBlock + spellbonuses.TwoHandBluntBlock + itembonuses.TwoHandBluntBlock);
 				RollTable[1] += bonusStaffBlock;
 			}
 		}
@@ -4717,7 +4714,7 @@ int32 Mob::RuneAbsorb(int32 damage, uint16 type)
 	if (type == SE_Rune){
 		for(uint32 slot = 0; slot < buff_max; slot++) {
 			if(slot == spellbonuses.MeleeRune[1] && spellbonuses.MeleeRune[0] && buffs[slot].melee_rune && IsValidSpell(buffs[slot].spellid)){
-				uint32 melee_rune_left = buffs[slot].melee_rune;
+				int melee_rune_left = buffs[slot].melee_rune;
 				
 				if(melee_rune_left > damage)
 				{
@@ -4742,7 +4739,7 @@ int32 Mob::RuneAbsorb(int32 damage, uint16 type)
 	else{
 		for(uint32 slot = 0; slot < buff_max; slot++) {
 			if(slot == spellbonuses.AbsorbMagicAtt[1] && spellbonuses.AbsorbMagicAtt[0] && buffs[slot].magic_rune && IsValidSpell(buffs[slot].spellid)){
-				uint32 magic_rune_left = buffs[slot].magic_rune;
+				int magic_rune_left = buffs[slot].magic_rune;
 				if(magic_rune_left > damage)
 				{
 					magic_rune_left -= damage;
