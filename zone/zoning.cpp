@@ -549,9 +549,35 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			break;
 	}
 
-	if(ReadyToZone) {
+	if (ReadyToZone)
+	{
+		//if client is looting, we need to send an end loot
+		if (IsLooting())
+		{
+			Entity* entity = entity_list.GetID(entity_id_being_looted);
+			if (entity == 0)
+			{
+				Message(13, "Error: OP_EndLootRequest: Corpse not found (ent = 0)");
+				if (GetClientVersion() >= EQClientSoD)
+					Corpse::SendEndLootErrorPacket(this);
+				else
+					Corpse::SendLootReqErrorPacket(this);
+			}
+			else if (!entity->IsCorpse())
+			{
+				Message(13, "Error: OP_EndLootRequest: Corpse not found (!entity->IsCorpse())");
+				Corpse::SendLootReqErrorPacket(this);
+			}
+			else
+			{
+				Corpse::SendEndLootErrorPacket(this);
+				entity->CastToCorpse()->EndLoot(this, nullptr);
+			}
+			SetLooting(0);
+		}
+
 		zone_mode = zm;
-		if(zm == ZoneToBindPoint) {
+		if (zm == ZoneToBindPoint) {
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + iZoneNameLength);
 			ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
 

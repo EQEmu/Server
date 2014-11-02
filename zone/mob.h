@@ -801,8 +801,8 @@ public:
 	void SetGrouped(bool v);
 	inline bool IsRaidGrouped() const { return israidgrouped; }
 	void SetRaidGrouped(bool v);
-	inline bool IsLooting() const { return islooting; }
-	void SetLooting(bool val) { islooting = val; }
+	inline bool IsLooting() const { return entity_id_being_looted; }
+	void SetLooting(uint16 val) { entity_id_being_looted = val; }
 
 	bool CheckWillAggro(Mob *mob);
 
@@ -927,7 +927,7 @@ protected:
 	bool isgrouped;
 	bool israidgrouped;
 	bool pendinggroup;
-	bool islooting;
+	uint16 entity_id_being_looted; //the id of the entity being looted, 0 if not looting.
 	uint8 texture;
 	uint8 helmtexture;
 
