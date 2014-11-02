@@ -708,7 +708,7 @@ bool Client::CheckFizzle(uint16 spell_id)
 			break;
 		}
 		if(((specialize/6.0f) + 15.0f) < MakeRandomFloat(0, 100)) {
-			specialize *= SPECIALIZE_FIZZLE / 200;
+			specialize *= SPECIALIZE_FIZZLE / 200.0f;
 		} else {
 			specialize = 0.0f;
 		}
@@ -718,7 +718,7 @@ bool Client::CheckFizzle(uint16 spell_id)
 	// > 0 --> skill is lower, higher chance of fizzle
 	// < 0 --> skill is better, lower chance of fizzle
 	// the max that diff can be is +- 235
-	float diff = par_skill + spells[spell_id].basediff - act_skill;
+	float diff = par_skill + static_cast<float>(spells[spell_id].basediff) - act_skill;
 
 	// if you have high int/wis you fizzle less, you fizzle more if you are stupid
 	if(GetClass() == BARD)
@@ -2396,7 +2396,7 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 
 void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 	int buffs_i;
-	uint32 buff_count = GetMaxTotalSlots();
+	int buff_count = GetMaxTotalSlots();
 	for (buffs_i = 0; buffs_i < buff_count; buffs_i++) {
 		if(buffs[buffs_i].spellid != spell_id)
 			continue;
@@ -3001,7 +3001,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	// it would overwrite, and then hitting a buff we can't stack with.
 	// we also check if overwriting will occur. this is so after this loop
 	// we can determine if there will be room for this buff
-	uint32 buff_count = GetMaxTotalSlots();
+	int buff_count = GetMaxTotalSlots();
 	uint32 start_slot = 0;
 	uint32 end_slot = 0;
 	if (IsDisciplineBuff(spell_id)) {
@@ -3155,7 +3155,7 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 
 	mlog(AI__BUFFS, "Checking if buff %d cast at level %d can stack on me.%s", spellid, caster_level, iFailIfOverwrite?" failing if we would overwrite something":"");
 
-	uint32 buff_count = GetMaxTotalSlots();
+	int buff_count = GetMaxTotalSlots();
 	for (i=0; i < buff_count; i++)
 	{
 		const Buffs_Struct &curbuf = buffs[i];
@@ -3503,7 +3503,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	}
 	// Block next spell effect should be used up first(since its blocking the next spell)
 	if(CanBlockSpell()) {
-		uint32 buff_count = GetMaxTotalSlots();
+		int buff_count = GetMaxTotalSlots();
 		int focus = 0;
 		for (int b=0; b < buff_count; b++) {
 			if(IsEffectInSpell(buffs[b].spellid, SE_BlockNextSpellFocus)) {
@@ -3819,7 +3819,7 @@ bool Mob::FindBuff(uint16 spellid)
 // removes all buffs
 void Mob::BuffFadeAll()
 {
-	uint32 buff_count = GetMaxTotalSlots();
+	int buff_count = GetMaxTotalSlots();
 	for (int j = 0; j < buff_count; j++) {
 		if(buffs[j].spellid != SPELL_UNKNOWN)
 			BuffFadeBySlot(j, false);
@@ -3830,7 +3830,7 @@ void Mob::BuffFadeAll()
 
 void Mob::BuffFadeNonPersistDeath()
 {
-	uint32 buff_count = GetMaxTotalSlots();
+	int buff_count = GetMaxTotalSlots();
 	for (int j = 0; j < buff_count; j++) {
 		if (buffs[j].spellid != SPELL_UNKNOWN && !IsPersistDeathSpell(buffs[j].spellid))
 			BuffFadeBySlot(j, false);
@@ -3840,7 +3840,7 @@ void Mob::BuffFadeNonPersistDeath()
 }
 
 void Mob::BuffFadeDetrimental() {
-	uint32 buff_count = GetMaxTotalSlots();
+	int buff_count = GetMaxTotalSlots();
 	for (int j = 0; j < buff_count; j++) {
 		if(buffs[j].spellid != SPELL_UNKNOWN) {
 			if(IsDetrimentalSpell(buffs[j].spellid))
@@ -3854,7 +3854,7 @@ void Mob::BuffFadeDetrimentalByCaster(Mob *caster)
 	if(!caster)
 		return;
 
-	uint32 buff_count = GetMaxTotalSlots();
+	int buff_count = GetMaxTotalSlots();
 	for (int j = 0; j < buff_count; j++) {
 		if(buffs[j].spellid != SPELL_UNKNOWN) {
 			if(IsDetrimentalSpell(buffs[j].spellid))
@@ -3894,7 +3894,7 @@ void Mob::BuffFadeBySitModifier()
 // removes the buff matching spell_id
 void Mob::BuffFadeBySpellID(uint16 spell_id)
 {
-	uint32 buff_count = GetMaxTotalSlots();
+	int buff_count = GetMaxTotalSlots();
 	for (int j = 0; j < buff_count; j++)
 	{
 		if (buffs[j].spellid == spell_id)
@@ -3910,7 +3910,7 @@ void Mob::BuffFadeByEffect(int effectid, int skipslot)
 {
 	int i;
 
-	uint32 buff_count = GetMaxTotalSlots();
+	int buff_count = GetMaxTotalSlots();
 	for(i = 0; i < buff_count; i++)
 	{
 		if(buffs[i].spellid == SPELL_UNKNOWN)
@@ -4541,7 +4541,7 @@ float Mob::GetAOERange(uint16 spell_id) {
 
 		if(IsBardSong(spell_id) && IsBeneficialSpell(spell_id)) {
 			//Live AA - Extended Notes, SionachiesCrescendo
-			float song_bonus = aabonuses.SongRange + spellbonuses.SongRange + itembonuses.SongRange;
+			float song_bonus = static_cast<float>(aabonuses.SongRange + spellbonuses.SongRange + itembonuses.SongRange);
 			range += range*song_bonus /100.0f;
 		}
 
@@ -4963,7 +4963,7 @@ uint16 Mob::GetSpellIDFromSlot(uint8 slot)
 }
 
 bool Mob::FindType(uint16 type, bool bOffensive, uint16 threshold) {
-	uint32 buff_count = GetMaxTotalSlots();
+	int buff_count = GetMaxTotalSlots();
 	for (int i = 0; i < buff_count; i++) {
 		if (buffs[i].spellid != SPELL_UNKNOWN) {
 
@@ -5295,7 +5295,7 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 
 void Mob::BuffModifyDurationBySpellID(uint16 spell_id, int32 newDuration)
 {
-	uint32 buff_count = GetMaxTotalSlots();
+	int buff_count = GetMaxTotalSlots();
 	for(int i = 0; i < buff_count; ++i)
 	{
 		if (buffs[i].spellid == spell_id)
