@@ -966,7 +966,7 @@ bool ZoneDatabase::LoadCharacterMemmedSpells(uint32 character_id, PlayerProfile_
 	}
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		i = atoi(row[0]); 
-		if (i < MAX_PP_MEMSPELL){ 
+		if (i < MAX_PP_MEMSPELL && atoi(row[1]) <= SPDAT_RECORDS){
 			pp->mem_spells[i] = atoi(row[1]); 
 		}
 	}
@@ -989,7 +989,7 @@ bool ZoneDatabase::LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Str
 	}
 	for (auto row = results.begin(); row != results.end(); ++row) { 
 		i = atoi(row[0]);
-		if (i < MAX_PP_SPELLBOOK){
+		if (i < MAX_PP_SPELLBOOK && atoi(row[1]) <= SPDAT_RECORDS){
 			pp->spell_book[i] = atoi(row[1]); 
 		} 
 	} 
@@ -1655,14 +1655,14 @@ bool ZoneDatabase::SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 cur
 }
 
 bool ZoneDatabase::SaveCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id){
-	if (spell_id == 65535 || spell_id == 4294967295){ return false; }
+	if (spell_id > SPDAT_RECORDS){ return false; }
 	std::string query = StringFormat("REPLACE INTO `character_memmed_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, slot_id, spell_id); 
 	QueryDatabase(query); 
 	return true;
 }
 
 bool ZoneDatabase::SaveCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id){
-	if (spell_id == 65535 || spell_id == 4294967295){ return false; }
+	if (spell_id > SPDAT_RECORDS){ return false; }
 	std::string query = StringFormat("REPLACE INTO `character_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, slot_id, spell_id); 
 	QueryDatabase(query); 
 	return true;
