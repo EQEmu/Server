@@ -2876,11 +2876,16 @@ XS(XS__GetCharactersInInstance) {
 	if (charid_list.size() > 0)
 	{
 		charid_string = itoa(charid_list.size());
-		charid_string += " player(s) in instance. CharID list: ";
+		charid_string += " player(s) in instance: ";
 		auto iter = charid_list.begin();
 		while (iter != charid_list.end())
 		{
+			char char_name[64];
+			database.GetCharName(*iter, char_name);
+			charid_string += char_name;
+			charid_string += "(";
 			charid_string += itoa(*iter);
+			charid_string += ")";
 			++iter;
 			if (iter != charid_list.end())
 				charid_string += ", ";
