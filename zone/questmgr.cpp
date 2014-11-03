@@ -2545,7 +2545,7 @@ void QuestManager::DestroyInstance(uint16 instance_id)
 uint16 QuestManager::GetInstanceID(const char *zone, int16 version)
 {
 	QuestManagerCurrentQuestVars();
-	if(initiator)
+	if (initiator)
 	{
 		return database.GetInstanceID(zone, initiator->CharacterID(), version);
 	}
@@ -2555,7 +2555,7 @@ uint16 QuestManager::GetInstanceID(const char *zone, int16 version)
 void QuestManager::AssignToInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
-	if(initiator)
+	if (initiator)
 	{
 		database.AddClientToInstance(instance_id, initiator->CharacterID());
 	}
@@ -2564,10 +2564,10 @@ void QuestManager::AssignToInstance(uint16 instance_id)
 void QuestManager::AssignGroupToInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
-	if(initiator)
+	if (initiator)
 	{
 		Group *g = initiator->GetGroup();
-		if(g)
+		if (g)
 		{
 			uint32 gid = g->GetID();
 			database.AssignGroupToInstance(gid, instance_id);
@@ -2578,7 +2578,7 @@ void QuestManager::AssignGroupToInstance(uint16 instance_id)
 void QuestManager::AssignRaidToInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
-	if(initiator)
+	if (initiator)
 	{
 		Raid *r = initiator->GetRaid();
 		if(r)
@@ -2592,36 +2592,28 @@ void QuestManager::AssignRaidToInstance(uint16 instance_id)
 void QuestManager::RemoveFromInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
-	if(initiator) {
-		if(database.RemoveClientFromInstance(instance_id, initiator->CharacterID())) {
+	if (initiator)
+	{
+		if (database.RemoveClientFromInstance(instance_id, initiator->CharacterID()))
 			initiator->Message(MT_Say, "Removed client from instance.");
-		} else {
+		else
 			initiator->Message(MT_Say, "Failed to remove client from instance.");
-		}
 	}
 }
 
 void QuestManager::RemoveAllFromInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
-	if(initiator) {
+	if (initiator)
+	{
 		std::list<uint32> charid_list;
-		bool removed_all = true;
-		uint16 fail_count = 0;
-		database.GetCharactersInInstance(instance_id,charid_list);
-		auto iter = charid_list.begin();
-		while(iter != charid_list.end()) {
-			if(!database.RemoveClientFromInstance(instance_id, *iter)) {
-				removed_all = false;
-				++fail_count;
-			}
-			++iter;
-		}
-		if (removed_all) {
+
+		if (database.RemoveClientsFromInstance(instance_id))
 			initiator->Message(MT_Say, "Removed all players from instance.");
-		} else {
-			// once the expedition system is in, this message it not relevant
-			initiator->Message(MT_Say, "Failed to remove %i player(s) from instance.", fail_count);
+		else
+		{
+			database.GetCharactersInInstance(instance_id, charid_list);
+			initiator->Message(MT_Say, "Failed to remove %i player(s) from instance.", charid_list.size()); // once the expedition system is in, this message it not relevant
 		}
 	}
 }

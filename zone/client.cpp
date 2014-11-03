@@ -6270,6 +6270,11 @@ void Client::AssignToInstance(uint16 instance_id)
 	database.AddClientToInstance(instance_id, CharacterID());
 }
 
+void Client::RemoveFromInstance(uint16 instance_id)
+{
+	database.RemoveClientFromInstance(instance_id, CharacterID());
+}
+
 void Client::SendStatsWindow(Client* client, bool use_window)
 {
 	// Define the types of page breaks we need

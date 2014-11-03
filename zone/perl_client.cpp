@@ -5337,6 +5337,30 @@ XS(XS_Client_AssignToInstance)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_RemoveFromInstance); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_RemoveFromInstance)
+{
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::RemoveFromInstance(THIS, instance_id)");
+	{
+		Client *		THIS;
+		uint16		instance_id = (uint16)SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->RemoveFromInstance(instance_id);
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Client_Freeze);
 XS(XS_Client_Freeze)
 {
