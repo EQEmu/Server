@@ -4179,7 +4179,7 @@ int16 Mob::GetSkillDmgAmt(uint16 skill)
 
 void Mob::MeleeLifeTap(int32 damage) {
 
-	int16 lifetap_amt = 0;
+	int32 lifetap_amt = 0;
 	lifetap_amt = spellbonuses.MeleeLifetap + itembonuses.MeleeLifetap + aabonuses.MeleeLifetap
 				+ spellbonuses.Vampirism + itembonuses.Vampirism + aabonuses.Vampirism;
 
