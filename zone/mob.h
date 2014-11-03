@@ -801,7 +801,7 @@ public:
 	void SetGrouped(bool v);
 	inline bool IsRaidGrouped() const { return israidgrouped; }
 	void SetRaidGrouped(bool v);
-	inline bool IsLooting() const { return entity_id_being_looted; }
+	inline uint16 IsLooting() const { return entity_id_being_looted; }
 	void SetLooting(uint16 val) { entity_id_being_looted = val; }
 
 	bool CheckWillAggro(Mob *mob);

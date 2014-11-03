@@ -1902,7 +1902,7 @@ void ZoneDatabase::FillAAEffects(SendAA_Struct* aa_struct){
 
 	auto it = aa_effects.find(aa_struct->id);
 	if (it != aa_effects.end()) {
-		for (int slot = 0; slot < aa_struct->total_abilities; slot++) {
+		for (uint32 slot = 0; slot < aa_struct->total_abilities; slot++) {
 			// aa_effects is a map of a map, so the slot reference does not start at 0
 			aa_struct->abilities[slot].skill_id = it->second[slot + 1].skill_id;
 			aa_struct->abilities[slot].base1 = it->second[slot + 1].base1;
