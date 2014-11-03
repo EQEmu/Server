@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/02/2014 ==
+Akkadius: Added out of range checking for Spell Save/Loads
+
 == 11/01/2014 ==
 Trevius: Fixed potential crash related to Pets/Mercs buffs when targeting themselves.
 JJ: (noudess) Revamped faction system. See https://github.com/EQEmu/Server/pull/256

@@ -1655,12 +1655,14 @@ bool ZoneDatabase::SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 cur
 }
 
 bool ZoneDatabase::SaveCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id){
+	if (spell_id == 65535 || spell_id == 4294967295){ return false; }
 	std::string query = StringFormat("REPLACE INTO `character_memmed_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, slot_id, spell_id); 
 	QueryDatabase(query); 
 	return true;
 }
 
 bool ZoneDatabase::SaveCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id){
+	if (spell_id == 65535 || spell_id == 4294967295){ return false; }
 	std::string query = StringFormat("REPLACE INTO `character_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, slot_id, spell_id); 
 	QueryDatabase(query); 
 	return true;
@@ -1675,7 +1677,7 @@ bool ZoneDatabase::DeleteCharacterSpell(uint32 character_id, uint32 spell_id, ui
 bool ZoneDatabase::DeleteCharacterDisc(uint32 character_id, uint32 slot_id){
 	std::string query = StringFormat("DELETE FROM `character_disciplines` WHERE `slot_id` = %u AND `id` = %u", slot_id, character_id); 
 	QueryDatabase(query); 
-	return true;
+	return true;  
 }
 
 bool ZoneDatabase::DeleteCharacterBandolier(uint32 character_id, uint32 band_id){
