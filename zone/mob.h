@@ -340,9 +340,9 @@ public:
 	inline Mob* GetTarget() const { return target; }
 	virtual void SetTarget(Mob* mob);
 	virtual inline float GetHPRatio() const { return max_hp == 0 ? 0 : ((float)cur_hp/max_hp*100); }
-	inline virtual int16 GetAC() const { return AC + itembonuses.AC + spellbonuses.AC; }
-	inline virtual int16 GetATK() const { return ATK + itembonuses.ATK + spellbonuses.ATK; }
-	inline virtual int16 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
+	inline virtual int32 GetAC() const { return AC + itembonuses.AC + spellbonuses.AC; }
+	inline virtual int32 GetATK() const { return ATK + itembonuses.ATK + spellbonuses.ATK; }
+	inline virtual int32 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
 	inline virtual int16 GetSTR() const { return STR + itembonuses.STR + spellbonuses.STR; }
 	inline virtual int16 GetSTA() const { return STA + itembonuses.STA + spellbonuses.STA; }
 	inline virtual int16 GetDEX() const { return DEX + itembonuses.DEX + spellbonuses.DEX; }

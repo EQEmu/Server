@@ -403,9 +403,9 @@ public:
 
 	virtual void CalcBonuses();
 	//these are all precalculated now
-	inline virtual int16	GetAC()		const { return AC; }
-	inline virtual int16 GetATK() const { return ATK + itembonuses.ATK + spellbonuses.ATK + ((GetSTR() + GetSkill(SkillOffense)) * 9 / 10); }
-	inline virtual int16 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
+	inline virtual int32	GetAC()		const { return AC; }
+	inline virtual int32 GetATK() const { return ATK + itembonuses.ATK + spellbonuses.ATK + ((GetSTR() + GetSkill(SkillOffense)) * 9 / 10); }
+	inline virtual int32 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
 	inline virtual int	GetHaste() const { return Haste; }
 	int GetRawACNoShield(int &shield_ac) const;
 

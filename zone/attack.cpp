@@ -665,7 +665,7 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 		////////////////////////////////////////////////////////
 		// Scorpious2k: Include AC in the calculation
 		// use serverop variables to set values
-		int myac = GetAC();
+		int32 myac = GetAC();
 		if(opts) {
 			myac *= (1.0f - opts->armor_pen_percent);
 			myac -= opts->armor_pen_flat;
@@ -696,7 +696,7 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 				}
 
 				if (acreduction>0) {
-					damage -= (int) (GetAC() * acreduction/100.0f);
+					damage -= (int32) (GetAC() * acreduction/100.0f);
 				}
 				if (acrandom>0) {
 					damage -= (myac * MakeRandomInt(0, acrandom) / 10000);
