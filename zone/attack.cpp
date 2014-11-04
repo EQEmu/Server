@@ -1316,7 +1316,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 				if (Hand == MainSecondary) {// Do we even have it & was attack with mainhand? If not, don't bother with other calculations
 					//Live AA - SlipperyAttacks
 					//This spell effect most likely directly modifies the actual riposte chance when using offhand attack.
-					int16 OffhandRiposteFail = aabonuses.OffhandRiposteFail + itembonuses.OffhandRiposteFail + spellbonuses.OffhandRiposteFail;
+					int32 OffhandRiposteFail = aabonuses.OffhandRiposteFail + itembonuses.OffhandRiposteFail + spellbonuses.OffhandRiposteFail;
 					OffhandRiposteFail *= -1; //Live uses a negative value for this.
 
 					if (OffhandRiposteFail &&
@@ -1334,7 +1334,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		}
 
 		if (((damage < 0) || slippery_attack) && !bRiposte && !IsStrikethrough) { // Hack to still allow Strikethrough chance w/ Slippery Attacks AA
-			int16 bonusStrikeThrough = itembonuses.StrikeThrough + spellbonuses.StrikeThrough + aabonuses.StrikeThrough;
+			int32 bonusStrikeThrough = itembonuses.StrikeThrough + spellbonuses.StrikeThrough + aabonuses.StrikeThrough;
 
 			if(bonusStrikeThrough && (MakeRandomInt(0, 100) < bonusStrikeThrough)) {
 				Message_StringID(MT_StrikeThrough, STRIKETHROUGH_STRING); // You strike through your opponents defenses!
@@ -1821,7 +1821,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		//ele and bane dmg too
 		//NPCs add this differently than PCs
 		//if NPCs can't inheriently hit the target we don't add bane/magic dmg which isn't exactly the same as PCs
-		uint16 eleBane = 0;
+		uint32 eleBane = 0;
 		if(weapon){
 			if(weapon->BaneDmgBody == other->GetBodyType()){
 				eleBane += weapon->BaneDmgAmt;
@@ -2413,7 +2413,7 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 		AddRampage(other);
 		int hatemod = 100 + other->spellbonuses.hatemod + other->itembonuses.hatemod + other->aabonuses.hatemod;
 		
-		int16 shieldhatemod = other->spellbonuses.ShieldEquipHateMod + other->itembonuses.ShieldEquipHateMod + other->aabonuses.ShieldEquipHateMod;
+		int32 shieldhatemod = other->spellbonuses.ShieldEquipHateMod + other->itembonuses.ShieldEquipHateMod + other->aabonuses.ShieldEquipHateMod;
 
 		if (shieldhatemod && other->HasShieldEquiped())
 			hatemod += shieldhatemod;
@@ -2589,7 +2589,7 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 			//Spell data for damage shield mitigation shows a negative value for spells for clients and positive
 			//value for spells that effect pets. Unclear as to why. For now will convert all positive to be consistent.
 			if (attacker->IsOffHandAtk()){
-				int16 mitigation = attacker->itembonuses.DSMitigationOffHand +
+				int32 mitigation = attacker->itembonuses.DSMitigationOffHand +
 									attacker->spellbonuses.DSMitigationOffHand +
 									attacker->aabonuses.DSMitigationOffHand;
 				DS -= DS*mitigation/100;
@@ -3398,7 +3398,7 @@ bool Mob::HasRangedProcs() const
 bool Client::CheckDoubleAttack(bool tripleAttack) {
 
 	//Check for bonuses that give you a double attack chance regardless of skill (ie Bestial Frenzy/Harmonious Attack AA)
-	uint16 bonusGiveDA = aabonuses.GiveDoubleAttack + spellbonuses.GiveDoubleAttack + itembonuses.GiveDoubleAttack;
+	uint32 bonusGiveDA = aabonuses.GiveDoubleAttack + spellbonuses.GiveDoubleAttack + itembonuses.GiveDoubleAttack;
 
 	if(!HasSkill(SkillDoubleAttack) && !bonusGiveDA)
 		return false;
@@ -3407,7 +3407,7 @@ bool Client::CheckDoubleAttack(bool tripleAttack) {
 
 	uint16 skill = GetSkill(SkillDoubleAttack);
 
-	int16 bonusDA = aabonuses.DoubleAttackChance + spellbonuses.DoubleAttackChance + itembonuses.DoubleAttackChance;
+	int32 bonusDA = aabonuses.DoubleAttackChance + spellbonuses.DoubleAttackChance + itembonuses.DoubleAttackChance;
 
 	//Use skill calculations otherwise, if you only have AA applied GiveDoubleAttack chance then use that value as the base.
 	if (skill)
@@ -3421,7 +3421,7 @@ bool Client::CheckDoubleAttack(bool tripleAttack) {
 	//Kayen: Need to decide if we can implement triple attack skill before working in over the cap effect.
 	if(tripleAttack) {
 		// Only some Double Attack classes get Triple Attack [This is already checked in client_processes.cpp]
-		int16 triple_bonus = spellbonuses.TripleAttackChance + itembonuses.TripleAttackChance;
+		int32 triple_bonus = spellbonuses.TripleAttackChance + itembonuses.TripleAttackChance;
 		chance *= 0.2f; //Baseline chance is 20% of your double attack chance.
 		chance *= float(100.0f+triple_bonus)/100.0f; //Apply modifiers.
 	}
@@ -3434,7 +3434,7 @@ bool Client::CheckDoubleAttack(bool tripleAttack) {
 
 bool Client::CheckDoubleRangedAttack() {
 		
-	int16 chance = spellbonuses.DoubleRangedAttack + itembonuses.DoubleRangedAttack + aabonuses.DoubleRangedAttack;
+	int32 chance = spellbonuses.DoubleRangedAttack + itembonuses.DoubleRangedAttack + aabonuses.DoubleRangedAttack;
 
 	if(chance && (MakeRandomInt(0, 100) < chance))
 		return true;
@@ -3866,7 +3866,7 @@ float Mob::GetProcChances(float ProcBonus, uint16 hand)
 	int mydex = GetDEX();
 	float ProcChance = 0.0f;
 
-	uint16 weapon_speed = GetWeaponSpeedbyHand(hand);
+	uint32 weapon_speed = GetWeaponSpeedbyHand(hand);
 
 	if (RuleB(Combat, AdjustProcPerMinute)) {
 		ProcChance = (static_cast<float>(weapon_speed) *
@@ -3892,7 +3892,7 @@ float Mob::GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 h
 	ProcBonus = 0;
 	ProcChance = 0;
 
-	uint16 weapon_speed = GetWeaponSpeedbyHand(hand);
+	uint32 weapon_speed = GetWeaponSpeedbyHand(hand);
 
 	ProcChance = (static_cast<float>(weapon_speed) * RuleR(Combat, AvgDefProcsPerMinute) / 60000.0f); // compensate for weapon_speed being in ms
 	ProcBonus += static_cast<float>(myagi) * RuleR(Combat, DefProcPerMinAgiContrib) / 100.0f;
@@ -4147,7 +4147,7 @@ void Mob::TryPetCriticalHit(Mob *defender, uint16 skill, int32 &damage)
 	Mob *owner = nullptr;
 	float critChance = 0.0f;
 	critChance += RuleI(Combat, MeleeBaseCritChance);
-	uint16 critMod = 163;
+	uint32 critMod = 163;
 
 	if (damage < 1) //We can't critical hit if we don't hit.
 		return;
@@ -4162,8 +4162,8 @@ void Mob::TryPetCriticalHit(Mob *defender, uint16 skill, int32 &damage)
 	if (!owner)
 		return;
 
-	int16 CritPetChance = owner->aabonuses.PetCriticalHit + owner->itembonuses.PetCriticalHit + owner->spellbonuses.PetCriticalHit;
-	int16 CritChanceBonus = GetCriticalChanceBonus(skill);
+	int32 CritPetChance = owner->aabonuses.PetCriticalHit + owner->itembonuses.PetCriticalHit + owner->spellbonuses.PetCriticalHit;
+	int32 CritChanceBonus = GetCriticalChanceBonus(skill);
 
 	if (CritPetChance || critChance) {
 
@@ -4213,11 +4213,11 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 	//1: Try Slay Undead
 	if (defender && (defender->GetBodyType() == BT_Undead ||
 				defender->GetBodyType() == BT_SummonedUndead || defender->GetBodyType() == BT_Vampire)) {
-		int16 SlayRateBonus = aabonuses.SlayUndead[0] + itembonuses.SlayUndead[0] + spellbonuses.SlayUndead[0];
+		int32 SlayRateBonus = aabonuses.SlayUndead[0] + itembonuses.SlayUndead[0] + spellbonuses.SlayUndead[0];
 		if (SlayRateBonus) {
 			float slayChance = static_cast<float>(SlayRateBonus) / 10000.0f;
 			if (MakeRandomFloat(0, 1) < slayChance) {
-				int16 SlayDmgBonus = aabonuses.SlayUndead[1] + itembonuses.SlayUndead[1] + spellbonuses.SlayUndead[1];
+				int32 SlayDmgBonus = aabonuses.SlayUndead[1] + itembonuses.SlayUndead[1] + spellbonuses.SlayUndead[1];
 				damage = (damage * SlayDmgBonus * 2.25) / 100;
 				if (GetGender() == 1) // female
 					entity_list.FilteredMessageClose_StringID(this, false, 200,
@@ -4289,9 +4289,9 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 
 		if(MakeRandomFloat(0, 1) < critChance)
 		{
-			uint16 critMod = 200;
+			uint32 critMod = 200;
 			bool crip_success = false;
-			int16 CripplingBlowChance = GetCrippBlowChance();
+			int32 CripplingBlowChance = GetCrippBlowChance();
 			
 			//Crippling Blow Chance: The percent value of the effect is applied
 			//to the your Chance to Critical. (ie You have 10% chance to critical and you
@@ -4347,7 +4347,7 @@ bool Mob::TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse)
 
 		uint32 FB_Dmg = aabonuses.FinishingBlow[1] + spellbonuses.FinishingBlow[1] + itembonuses.FinishingBlow[1];
 		
-		uint16 FB_Level = 0;
+		uint32 FB_Level = 0;
 		FB_Level = aabonuses.FinishingBlowLvl[0];
 		if (FB_Level < spellbonuses.FinishingBlowLvl[0])
 			FB_Level = spellbonuses.FinishingBlowLvl[0];
@@ -4375,7 +4375,7 @@ void Mob::DoRiposte(Mob* defender) {
 	defender->Attack(this, MainPrimary, true);
 	if (HasDied()) return;
 
-	int16 DoubleRipChance = defender->aabonuses.GiveDoubleRiposte[0] +
+	int32 DoubleRipChance = defender->aabonuses.GiveDoubleRiposte[0] +
 							defender->spellbonuses.GiveDoubleRiposte[0] +
 							defender->itembonuses.GiveDoubleRiposte[0];
 
@@ -4423,7 +4423,7 @@ void Mob::ApplyMeleeDamageBonus(uint16 skill, int32 &damage){
 
 bool Mob::HasDied() {
 	bool Result = false;
-	int16 hp_below = 0;
+	int32 hp_below = 0;
 
 	hp_below = (GetDelayDeath() * -1);
 
@@ -4437,7 +4437,7 @@ uint16 Mob::GetDamageTable(SkillUseTypes skillinuse)
 {
 	if(GetLevel() <= 51)
 	{
-		uint16 ret_table = 0;
+		uint32 ret_table = 0;
 		int str_over_75 = 0;
 		if(GetSTR() > 75)
 			str_over_75 = GetSTR() - 75;
@@ -4460,7 +4460,7 @@ uint16 Mob::GetDamageTable(SkillUseTypes skillinuse)
 	}
 	else
 	{
-		uint16 dmg_table[] = {
+		uint32 dmg_table[] = {
 			275, 275, 275, 275, 275,
 			280, 280, 280, 280,	285,
 			285, 285, 290, 290, 295,
@@ -4637,7 +4637,7 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 
 float Mob::GetSkillProcChances(uint16 ReuseTime, uint16 hand) {
 
-	uint16 weapon_speed;
+	uint32 weapon_speed;
 	float ProcChance = 0;
 	
 	if (!ReuseTime && hand) {

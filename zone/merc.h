@@ -181,58 +181,58 @@ public:
 	inline virtual int32	GetAC()		const { return AC; }
 	inline virtual int32 GetATK() const { return ATK; }
 	inline virtual int32 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
-	int GetRawACNoShield(int &shield_ac) const;
+	int32 GetRawACNoShield(int &shield_ac) const;
 
-	inline virtual int16	GetSTR()	const { return STR; }
-	inline virtual int16	GetSTA()	const { return STA; }
-	inline virtual int16	GetDEX()	const { return DEX; }
-	inline virtual int16	GetAGI()	const { return AGI; }
-	inline virtual int16	GetINT()	const { return INT; }
-	inline virtual int16	GetWIS()	const { return WIS; }
-	inline virtual int16	GetCHA()	const { return CHA; }
-	inline virtual int16	GetMR()	const { return MR; }
-	inline virtual int16	GetFR()	const { return FR; }
-	inline virtual int16	GetDR()	const { return DR; }
-	inline virtual int16	GetPR()	const { return PR; }
-	inline virtual int16	GetCR()	const { return CR; }
-	inline virtual int16	GetCorrup()	const { return Corrup; }
+	inline virtual int32	GetSTR()	const { return STR; }
+	inline virtual int32	GetSTA()	const { return STA; }
+	inline virtual int32	GetDEX()	const { return DEX; }
+	inline virtual int32	GetAGI()	const { return AGI; }
+	inline virtual int32	GetINT()	const { return INT; }
+	inline virtual int32	GetWIS()	const { return WIS; }
+	inline virtual int32	GetCHA()	const { return CHA; }
+	inline virtual int32	GetMR()	const { return MR; }
+	inline virtual int32	GetFR()	const { return FR; }
+	inline virtual int32	GetDR()	const { return DR; }
+	inline virtual int32	GetPR()	const { return PR; }
+	inline virtual int32	GetCR()	const { return CR; }
+	inline virtual int32	GetCorrup()	const { return Corrup; }
 
-	inline virtual int16	GetHeroicSTR()	const { return itembonuses.HeroicSTR; }
-	inline virtual int16	GetHeroicSTA()	const { return itembonuses.HeroicSTA; }
-	inline virtual int16	GetHeroicDEX()	const { return itembonuses.HeroicDEX; }
-	inline virtual int16	GetHeroicAGI()	const { return itembonuses.HeroicAGI; }
-	inline virtual int16	GetHeroicINT()	const { return itembonuses.HeroicINT; }
-	inline virtual int16	GetHeroicWIS()	const { return itembonuses.HeroicWIS; }
-	inline virtual int16	GetHeroicCHA()	const { return itembonuses.HeroicCHA; }
-	inline virtual int16	GetHeroicMR()	const { return itembonuses.HeroicMR; }
-	inline virtual int16	GetHeroicFR()	const { return itembonuses.HeroicFR; }
-	inline virtual int16	GetHeroicDR()	const { return itembonuses.HeroicDR; }
-	inline virtual int16	GetHeroicPR()	const { return itembonuses.HeroicPR; }
-	inline virtual int16	GetHeroicCR()	const { return itembonuses.HeroicCR; }
-	inline virtual int16	GetHeroicCorrup()	const { return itembonuses.HeroicCorrup; }
+	inline virtual int32	GetHeroicSTR()	const { return itembonuses.HeroicSTR; }
+	inline virtual int32	GetHeroicSTA()	const { return itembonuses.HeroicSTA; }
+	inline virtual int32	GetHeroicDEX()	const { return itembonuses.HeroicDEX; }
+	inline virtual int32	GetHeroicAGI()	const { return itembonuses.HeroicAGI; }
+	inline virtual int32	GetHeroicINT()	const { return itembonuses.HeroicINT; }
+	inline virtual int32	GetHeroicWIS()	const { return itembonuses.HeroicWIS; }
+	inline virtual int32	GetHeroicCHA()	const { return itembonuses.HeroicCHA; }
+	inline virtual int32	GetHeroicMR()	const { return itembonuses.HeroicMR; }
+	inline virtual int32	GetHeroicFR()	const { return itembonuses.HeroicFR; }
+	inline virtual int32	GetHeroicDR()	const { return itembonuses.HeroicDR; }
+	inline virtual int32	GetHeroicPR()	const { return itembonuses.HeroicPR; }
+	inline virtual int32	GetHeroicCR()	const { return itembonuses.HeroicCR; }
+	inline virtual int32	GetHeroicCorrup()	const { return itembonuses.HeroicCorrup; }
 	// Mod2
-	inline virtual int16	GetShielding()		const { return itembonuses.MeleeMitigation; }
-	inline virtual int16	GetSpellShield()	const { return itembonuses.SpellShield; }
-	inline virtual int16	GetDoTShield()		const { return itembonuses.DoTShielding; }
-	inline virtual int16	GetStunResist()		const { return itembonuses.StunResist; }
-	inline virtual int16	GetStrikeThrough()	const { return itembonuses.StrikeThrough; }
-	inline virtual int16	GetAvoidance()		const { return itembonuses.AvoidMeleeChance; }
-	inline virtual int16	GetAccuracy()		const { return itembonuses.HitChance; }
-	inline virtual int16	GetCombatEffects()	const { return itembonuses.ProcChance; }
-	inline virtual int16	GetDS()				const { return itembonuses.DamageShield; }
+	inline virtual int32	GetShielding()		const { return itembonuses.MeleeMitigation; }
+	inline virtual int32	GetSpellShield()	const { return itembonuses.SpellShield; }
+	inline virtual int32	GetDoTShield()		const { return itembonuses.DoTShielding; }
+	inline virtual int32	GetStunResist()		const { return itembonuses.StunResist; }
+	inline virtual int32	GetStrikeThrough()	const { return itembonuses.StrikeThrough; }
+	inline virtual int32	GetAvoidance()		const { return itembonuses.AvoidMeleeChance; }
+	inline virtual int32	GetAccuracy()		const { return itembonuses.HitChance; }
+	inline virtual int32	GetCombatEffects()	const { return itembonuses.ProcChance; }
+	inline virtual int32	GetDS()				const { return itembonuses.DamageShield; }
 	// Mod3
-	inline virtual int16	GetHealAmt()		const { return itembonuses.HealAmt; }
-	inline virtual int16	GetSpellDmg()		const { return itembonuses.SpellDmg; }
-	inline virtual int16	GetClair()			const { return itembonuses.Clairvoyance; }
-	inline virtual int16	GetDSMit()			const { return itembonuses.DSMitigation; }
+	inline virtual int32	GetHealAmt()		const { return itembonuses.HealAmt; }
+	inline virtual int32	GetSpellDmg()		const { return itembonuses.SpellDmg; }
+	inline virtual int32	GetClair()			const { return itembonuses.Clairvoyance; }
+	inline virtual int32	GetDSMit()			const { return itembonuses.DSMitigation; }
 
-	inline virtual int16	GetSingMod()		const { return itembonuses.singingMod; }
-	inline virtual int16	GetBrassMod()		const { return itembonuses.brassMod; }
-	inline virtual int16	GetPercMod()		const { return itembonuses.percussionMod; }
-	inline virtual int16	GetStringMod()		const { return itembonuses.stringedMod; }
-	inline virtual int16	GetWindMod()		const { return itembonuses.windMod; }
+	inline virtual int32	GetSingMod()		const { return itembonuses.singingMod; }
+	inline virtual int32	GetBrassMod()		const { return itembonuses.brassMod; }
+	inline virtual int32	GetPercMod()		const { return itembonuses.percussionMod; }
+	inline virtual int32	GetStringMod()		const { return itembonuses.stringedMod; }
+	inline virtual int32	GetWindMod()		const { return itembonuses.windMod; }
 
-	inline virtual int16	GetDelayDeath()		const { return aabonuses.DelayDeath + spellbonuses.DelayDeath + itembonuses.DelayDeath + 11; }
+	inline virtual int32	GetDelayDeath()		const { return aabonuses.DelayDeath + spellbonuses.DelayDeath + itembonuses.DelayDeath + 11; }
 
 	// "SET" Class Methods
 	void SetMercData (uint32 templateID );
@@ -281,27 +281,27 @@ protected:
 
 private:
 
-	int16	CalcAC();
-	int16	GetACMit();
-	int16	GetACAvoid();
-	int16	acmod();
-	int16	CalcATK();
+	int32	CalcAC();
+	int32	GetACMit();
+	int32	GetACAvoid();
+	int32	acmod();
+	int32	CalcATK();
 	//int	CalcHaste();
 
-	int16	CalcSTR();
-	int16	CalcSTA();
-	int16	CalcDEX();
-	int16	CalcAGI();
-	int16	CalcINT();
-	int16	CalcWIS();
-	int16	CalcCHA();
+	int32	CalcSTR();
+	int32	CalcSTA();
+	int32	CalcDEX();
+	int32	CalcAGI();
+	int32	CalcINT();
+	int32	CalcWIS();
+	int32	CalcCHA();
 
-	int16	CalcMR();
-	int16	CalcFR();
-	int16	CalcDR();
-	int16	CalcPR();
-	int16	CalcCR();
-	int16	CalcCorrup();
+	int32	CalcMR();
+	int32	CalcFR();
+	int32	CalcDR();
+	int32	CalcPR();
+	int32	CalcCR();
+	int32	CalcCorrup();
 	int32	CalcMaxHP();
 	int32	CalcBaseHP();
 	int32	GetClassHPFactor();
@@ -335,23 +335,23 @@ private:
 
 	// Private "base stats" Members
 	int32 base_mana;
-	int _baseAC;
-	uint16 _baseSTR;
-	uint16 _baseSTA;
-	uint16 _baseDEX;
-	uint16 _baseAGI;
-	uint16 _baseINT;
-	uint16 _baseWIS;
-	uint16 _baseCHA;
-	uint16 _baseATK;
-	uint16 _baseRace;	// Necessary to preserve the race otherwise mercs get their race updated in the db when they get an illusion.
+	int32 _baseAC;
+	uint32 _baseSTR;
+	uint32 _baseSTA;
+	uint32 _baseDEX;
+	uint32 _baseAGI;
+	uint32 _baseINT;
+	uint32 _baseWIS;
+	uint32 _baseCHA;
+	uint32 _baseATK;
+	uint32 _baseRace;	// Necessary to preserve the race otherwise mercs get their race updated in the db when they get an illusion.
 	uint8 _baseGender;	// Merc gender. Necessary to preserve the original value otherwise it can be changed by illusions.
-	uint16 _baseMR;
-	uint16 _baseCR;
-	uint16 _baseDR;
-	uint16 _baseFR;
-	uint16 _basePR;
-	uint16 _baseCorrup;
+	uint32 _baseMR;
+	uint32 _baseCR;
+	uint32 _baseDR;
+	uint32 _baseFR;
+	uint32 _basePR;
+	uint32 _baseCorrup;
 	uint32 RestRegenHP;
 	uint32 RestRegenMana;
 	uint32 RestRegenEndurance;

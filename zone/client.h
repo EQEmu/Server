@@ -409,35 +409,35 @@ public:
 	inline virtual int	GetHaste() const { return Haste; }
 	int GetRawACNoShield(int &shield_ac) const;
 
-	inline virtual int16	GetSTR()	const { return STR; }
-	inline virtual int16	GetSTA()	const { return STA; }
-	inline virtual int16	GetDEX()	const { return DEX; }
-	inline virtual int16	GetAGI()	const { return AGI; }
-	inline virtual int16	GetINT()	const { return INT; }
-	inline virtual int16	GetWIS()	const { return WIS; }
-	inline virtual int16	GetCHA()	const { return CHA; }
-	inline virtual int16	GetMR()	const { return MR; }
-	inline virtual int16	GetFR()	const { return FR; }
-	inline virtual int16	GetDR()	const { return DR; }
-	inline virtual int16	GetPR()	const { return PR; }
-	inline virtual int16	GetCR()	const { return CR; }
-	inline virtual int16	GetCorrup()	const { return Corrup; }
+	inline virtual int32	GetSTR()	const { return STR; }
+	inline virtual int32	GetSTA()	const { return STA; }
+	inline virtual int32	GetDEX()	const { return DEX; }
+	inline virtual int32	GetAGI()	const { return AGI; }
+	inline virtual int32	GetINT()	const { return INT; }
+	inline virtual int32	GetWIS()	const { return WIS; }
+	inline virtual int32	GetCHA()	const { return CHA; }
+	inline virtual int32	GetMR()	const { return MR; }
+	inline virtual int32	GetFR()	const { return FR; }
+	inline virtual int32	GetDR()	const { return DR; }
+	inline virtual int32	GetPR()	const { return PR; }
+	inline virtual int32	GetCR()	const { return CR; }
+	inline virtual int32	GetCorrup()	const { return Corrup; }
 
-	int16	GetMaxStat() const;
-	int16	GetMaxResist() const;
-	int16	GetMaxSTR() const;
-	int16	GetMaxSTA() const;
-	int16	GetMaxDEX() const;
-	int16	GetMaxAGI() const;
-	int16	GetMaxINT() const;
-	int16	GetMaxWIS() const;
-	int16	GetMaxCHA() const;
-	int16	GetMaxMR() const;
-	int16	GetMaxPR() const;
-	int16	GetMaxDR() const;
-	int16	GetMaxCR() const;
-	int16	GetMaxFR() const;
-	int16	GetMaxCorrup() const;
+	int32	GetMaxStat() const;
+	int32	GetMaxResist() const;
+	int32	GetMaxSTR() const;
+	int32	GetMaxSTA() const;
+	int32	GetMaxDEX() const;
+	int32	GetMaxAGI() const;
+	int32	GetMaxINT() const;
+	int32	GetMaxWIS() const;
+	int32	GetMaxCHA() const;
+	int32	GetMaxMR() const;
+	int32	GetMaxPR() const;
+	int32	GetMaxDR() const;
+	int32	GetMaxCR() const;
+	int32	GetMaxFR() const;
+	int32	GetMaxCorrup() const;
 	inline uint8	GetBaseSTR()	const { return m_pp.STR; }
 	inline uint8	GetBaseSTA()	const { return m_pp.STA; }
 	inline uint8	GetBaseCHA()	const { return m_pp.CHA; }
@@ -447,42 +447,42 @@ public:
 	inline uint8	GetBaseWIS()	const { return m_pp.WIS; }
 	inline uint8	GetBaseCorrup()	const { return 15; } // Same for all
 
-	inline virtual int16	GetHeroicSTR()	const { return itembonuses.HeroicSTR; }
-	inline virtual int16	GetHeroicSTA()	const { return itembonuses.HeroicSTA; }
-	inline virtual int16	GetHeroicDEX()	const { return itembonuses.HeroicDEX; }
-	inline virtual int16	GetHeroicAGI()	const { return itembonuses.HeroicAGI; }
-	inline virtual int16	GetHeroicINT()	const { return itembonuses.HeroicINT; }
-	inline virtual int16	GetHeroicWIS()	const { return itembonuses.HeroicWIS; }
-	inline virtual int16	GetHeroicCHA()	const { return itembonuses.HeroicCHA; }
-	inline virtual int16	GetHeroicMR()	const { return itembonuses.HeroicMR; }
-	inline virtual int16	GetHeroicFR()	const { return itembonuses.HeroicFR; }
-	inline virtual int16	GetHeroicDR()	const { return itembonuses.HeroicDR; }
-	inline virtual int16	GetHeroicPR()	const { return itembonuses.HeroicPR; }
-	inline virtual int16	GetHeroicCR()	const { return itembonuses.HeroicCR; }
-	inline virtual int16	GetHeroicCorrup()	const { return itembonuses.HeroicCorrup; }
+	inline virtual int32	GetHeroicSTR()	const { return itembonuses.HeroicSTR; }
+	inline virtual int32	GetHeroicSTA()	const { return itembonuses.HeroicSTA; }
+	inline virtual int32	GetHeroicDEX()	const { return itembonuses.HeroicDEX; }
+	inline virtual int32	GetHeroicAGI()	const { return itembonuses.HeroicAGI; }
+	inline virtual int32	GetHeroicINT()	const { return itembonuses.HeroicINT; }
+	inline virtual int32	GetHeroicWIS()	const { return itembonuses.HeroicWIS; }
+	inline virtual int32	GetHeroicCHA()	const { return itembonuses.HeroicCHA; }
+	inline virtual int32	GetHeroicMR()	const { return itembonuses.HeroicMR; }
+	inline virtual int32	GetHeroicFR()	const { return itembonuses.HeroicFR; }
+	inline virtual int32	GetHeroicDR()	const { return itembonuses.HeroicDR; }
+	inline virtual int32	GetHeroicPR()	const { return itembonuses.HeroicPR; }
+	inline virtual int32	GetHeroicCR()	const { return itembonuses.HeroicCR; }
+	inline virtual int32	GetHeroicCorrup()	const { return itembonuses.HeroicCorrup; }
 	// Mod2
-	inline virtual int16	GetShielding()		const { return itembonuses.MeleeMitigation; }
-	inline virtual int16	GetSpellShield()	const { return itembonuses.SpellShield; }
-	inline virtual int16	GetDoTShield()		const { return itembonuses.DoTShielding; }
-	inline virtual int16	GetStunResist()		const { return itembonuses.StunResist; }
-	inline virtual int16	GetStrikeThrough()	const { return itembonuses.StrikeThrough; }
-	inline virtual int16	GetAvoidance()		const { return itembonuses.AvoidMeleeChance; }
-	inline virtual int16	GetAccuracy()		const { return itembonuses.HitChance; }
-	inline virtual int16	GetCombatEffects()	const { return itembonuses.ProcChance; }
-	inline virtual int16	GetDS()				const { return itembonuses.DamageShield; }
+	inline virtual int32	GetShielding()		const { return itembonuses.MeleeMitigation; }
+	inline virtual int32	GetSpellShield()	const { return itembonuses.SpellShield; }
+	inline virtual int32	GetDoTShield()		const { return itembonuses.DoTShielding; }
+	inline virtual int32	GetStunResist()		const { return itembonuses.StunResist; }
+	inline virtual int32	GetStrikeThrough()	const { return itembonuses.StrikeThrough; }
+	inline virtual int32	GetAvoidance()		const { return itembonuses.AvoidMeleeChance; }
+	inline virtual int32	GetAccuracy()		const { return itembonuses.HitChance; }
+	inline virtual int32	GetCombatEffects()	const { return itembonuses.ProcChance; }
+	inline virtual int32	GetDS()				const { return itembonuses.DamageShield; }
 	// Mod3
-	inline virtual int16	GetHealAmt()		const { return itembonuses.HealAmt; }
-	inline virtual int16	GetSpellDmg()		const { return itembonuses.SpellDmg; }
-	inline virtual int16	GetClair()			const { return itembonuses.Clairvoyance; }
-	inline virtual int16	GetDSMit()			const { return itembonuses.DSMitigation; }
+	inline virtual int32	GetHealAmt()		const { return itembonuses.HealAmt; }
+	inline virtual int32	GetSpellDmg()		const { return itembonuses.SpellDmg; }
+	inline virtual int32	GetClair()			const { return itembonuses.Clairvoyance; }
+	inline virtual int32	GetDSMit()			const { return itembonuses.DSMitigation; }
 
-	inline virtual int16	GetSingMod()		const { return itembonuses.singingMod; }
-	inline virtual int16	GetBrassMod()		const { return itembonuses.brassMod; }
-	inline virtual int16	GetPercMod()		const { return itembonuses.percussionMod; }
-	inline virtual int16	GetStringMod()		const { return itembonuses.stringedMod; }
-	inline virtual int16	GetWindMod()		const { return itembonuses.windMod; }
+	inline virtual int32	GetSingMod()		const { return itembonuses.singingMod; }
+	inline virtual int32	GetBrassMod()		const { return itembonuses.brassMod; }
+	inline virtual int32	GetPercMod()		const { return itembonuses.percussionMod; }
+	inline virtual int32	GetStringMod()		const { return itembonuses.stringedMod; }
+	inline virtual int32	GetWindMod()		const { return itembonuses.windMod; }
 
-	inline virtual int16	GetDelayDeath()		const { return aabonuses.DelayDeath + spellbonuses.DelayDeath + itembonuses.DelayDeath + 11; }
+	inline virtual int32	GetDelayDeath()		const { return aabonuses.DelayDeath + spellbonuses.DelayDeath + itembonuses.DelayDeath + 11; }
 
 	float GetActSpellRange(uint16 spell_id, float range, bool IsBard = false);
 	int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target = nullptr);
@@ -529,8 +529,8 @@ public:
 	void DoEnduranceUpkeep();	//does the endurance upkeep
 
 	//This calculates total Attack Rating to match very close to what the client should show
-	uint16 GetTotalATK();
-	uint16 GetATKRating();
+	uint32 GetTotalATK();
+	uint32 GetATKRating();
 	//This gets the skill value of the item type equiped in the Primary Slot
 	uint16 GetPrimarySkillValue();
 
@@ -606,7 +606,7 @@ public:
 
 	void	SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, uint8 char_race, uint8 char_deity);
 	void	SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class, uint8 char_race, uint8 char_deity, int32 value, uint8 temp);
-	int16	GetRawItemAC();
+	int32	GetRawItemAC();
 	uint16	GetCombinedAC_TEST();
 
 	inline uint32	LSAccountID()	const { return lsaccountid; }
@@ -787,7 +787,7 @@ public:
 	int32 GetAAEffectid(uint32 aa_ID, uint32 slot_id) { return GetAAEffectDataBySlot(aa_ID, slot_id, true, false,false); }
 	int32 GetAABase1(uint32 aa_ID, uint32 slot_id) { return GetAAEffectDataBySlot(aa_ID, slot_id, false, true,false); }
 	int32 GetAABase2(uint32 aa_ID, uint32 slot_id) { return GetAAEffectDataBySlot(aa_ID, slot_id, false, false,true); }
-	int16 acmod();
+	int32 acmod();
 
 	// Item methods
 	void EVENT_ITEM_ScriptStopReturn();
@@ -1172,13 +1172,13 @@ public:
 	void TryItemTimer(int slot);
 	void SendItemScale(ItemInst *inst);
 
-	int16 GetActSTR() { return( std::min(GetMaxSTR(), GetSTR()) ); }
-	int16 GetActSTA() { return( std::min(GetMaxSTA(), GetSTA()) ); }
-	int16 GetActDEX() { return( std::min(GetMaxDEX(), GetDEX()) ); }
-	int16 GetActAGI() { return( std::min(GetMaxAGI(), GetAGI()) ); }
-	int16 GetActINT() { return( std::min(GetMaxINT(), GetINT()) ); }
-	int16 GetActWIS() { return( std::min(GetMaxWIS(), GetWIS()) ); }
-	int16 GetActCHA() { return( std::min(GetMaxCHA(), GetCHA()) ); }
+	int32 GetActSTR() { return( std::min(GetMaxSTR(), GetSTR()) ); }
+	int32 GetActSTA() { return( std::min(GetMaxSTA(), GetSTA()) ); }
+	int32 GetActDEX() { return( std::min(GetMaxDEX(), GetDEX()) ); }
+	int32 GetActAGI() { return( std::min(GetMaxAGI(), GetAGI()) ); }
+	int32 GetActINT() { return( std::min(GetMaxINT(), GetINT()) ); }
+	int32 GetActWIS() { return( std::min(GetMaxWIS(), GetWIS()) ); }
+	int32 GetActCHA() { return( std::min(GetMaxCHA(), GetCHA()) ); }
 	void LoadAccountFlags();
 	void SetAccountFlag(std::string flag, std::string val);
 	std::string GetAccountFlag(std::string flag);    float GetDamageMultiplier(SkillUseTypes);
@@ -1276,27 +1276,27 @@ private:
 
 	void	HandleTraderPriceUpdate(const EQApplicationPacket *app);
 
-	int16	CalcAC();
-	int16	GetACMit();
-	int16	GetACAvoid();
-	int16	CalcATK();
-	int		CalcHaste();
+	int32	CalcAC();
+	int32	GetACMit();
+	int32	GetACAvoid();
+	int32	CalcATK();
+	int32	CalcHaste();
 
-	int16	CalcAlcoholPhysicalEffect();
-	int16	CalcSTR();
-	int16	CalcSTA();
-	int16	CalcDEX();
-	int16	CalcAGI();
-	int16	CalcINT();
-	int16	CalcWIS();
-	int16	CalcCHA();
+	int32	CalcAlcoholPhysicalEffect();
+	int32	CalcSTR();
+	int32	CalcSTA();
+	int32	CalcDEX();
+	int32	CalcAGI();
+	int32	CalcINT();
+	int32	CalcWIS();
+	int32	CalcCHA();
 
-	int16	CalcMR();
-	int16	CalcFR();
-	int16	CalcDR();
-	int16	CalcPR();
-	int16	CalcCR();
-	int16	CalcCorrup();
+	int32	CalcMR();
+	int32	CalcFR();
+	int32	CalcDR();
+	int32	CalcPR();
+	int32	CalcCR();
+	int32	CalcCorrup();
 	int32	CalcMaxHP();
 	int32	CalcBaseHP();
 	int32	CalcHPRegen();

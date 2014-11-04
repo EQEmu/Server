@@ -2312,7 +2312,7 @@ bool Client::CheckIncreaseSkill(SkillUseTypes skillid, Mob *against_who, int cha
 	if (skillval < maxskill)
 	{
 		// the higher your current skill level, the harder it is
-		int16 Chance = 10 + chancemodi + ((252 - skillval) / 20);
+		int32 Chance = 10 + chancemodi + ((252 - skillval) / 20);
 
 		Chance = (Chance * RuleI(Character, SkillUpModifier) / 100);
 
@@ -2346,7 +2346,7 @@ void Client::CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill) {
 	int LangSkill = m_pp.languages[langid];		// get current language skill
 
 	if (LangSkill < 100) {	// if the language isn't already maxed
-		int16 Chance = 5 + ((TeacherSkill - LangSkill)/10);	// greater chance to learn if teacher's skill is much higher than yours
+		int32 Chance = 5 + ((TeacherSkill - LangSkill)/10);	// greater chance to learn if teacher's skill is much higher than yours
 		Chance = (Chance * RuleI(Character, SkillUpModifier)/100);
 
 		if(MakeRandomFloat(0,100) < Chance) {	// if they make the roll
@@ -4163,10 +4163,10 @@ uint16 Client::GetPrimarySkillValue()
 	return GetSkill(skill);
 }
 
-uint16 Client::GetTotalATK()
+uint32 Client::GetTotalATK()
 {
-	uint16 AttackRating = 0;
-	uint16 WornCap = itembonuses.ATK;
+	uint32 AttackRating = 0;
+	uint32 WornCap = itembonuses.ATK;
 
 	if(IsClient()) {
 		AttackRating = ((WornCap * 1.342) + (GetSkill(SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69));
@@ -4183,9 +4183,9 @@ uint16 Client::GetTotalATK()
 	return AttackRating;
 }
 
-uint16 Client::GetATKRating()
+uint32 Client::GetATKRating()
 {
-	uint16 AttackRating = 0;
+	uint32 AttackRating = 0;
 	if(IsClient()) {
 		AttackRating = (GetSkill(SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69);
 
@@ -8087,9 +8087,9 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
 {
    if(!item) { return; }
 
-    uint16 cons_mod = 180;
+    uint32 cons_mod = 180;
 
-	int16 metabolism_bonus = spellbonuses.Metabolism + itembonuses.Metabolism + aabonuses.Metabolism;
+	int32 metabolism_bonus = spellbonuses.Metabolism + itembonuses.Metabolism + aabonuses.Metabolism;
 
 	if (metabolism_bonus)
 		cons_mod = cons_mod * metabolism_bonus * RuleI(Character, ConsumptionMultiplier) / 10000;

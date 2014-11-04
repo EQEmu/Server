@@ -306,7 +306,7 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 	}
 
 	//FatherNitwit: New style haste, shields, and regens
-	if(newbon->haste < (int16)item->Haste) {
+	if(newbon->haste < (int32)item->Haste) {
 		newbon->haste = item->Haste;
 	}
 	if(item->Regen > 0)
