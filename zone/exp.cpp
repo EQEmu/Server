@@ -375,7 +375,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 
 			if (check_level == RuleI(Character, DeathExpLossLevel))
 				Message_StringID(MT_Experience, CORPSE_EXP_LOST);
-			}
+		}
 		else
 		{
 			Message_StringID(MT_Experience, LOSE_LEVEL, ConvertArray(check_level, val1));
