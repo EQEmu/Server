@@ -178,9 +178,9 @@ public:
 	// stat functions
 	virtual void CalcBonuses();
 	int32	GetEndurance()	const {return cur_end;}	//This gets our current endurance
-	inline virtual int16	GetAC()		const { return AC; }
-	inline virtual int16 GetATK() const { return ATK; }
-	inline virtual int16 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
+	inline virtual int32	GetAC()		const { return AC; }
+	inline virtual int32 GetATK() const { return ATK; }
+	inline virtual int32 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
 	int GetRawACNoShield(int &shield_ac) const;
 
 	inline virtual int16	GetSTR()	const { return STR; }

@@ -172,8 +172,8 @@ public:
 	virtual int GetMonkHandToHandDamage(void);
 	virtual bool TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse);
 	virtual void DoRiposte(Mob* defender);
-	inline virtual int16 GetATK() const { return ATK + itembonuses.ATK + spellbonuses.ATK + ((GetSTR() + GetSkill(SkillOffense)) * 9 / 10); }
-	inline virtual int16 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
+	inline virtual int32 GetATK() const { return ATK + itembonuses.ATK + spellbonuses.ATK + ((GetSTR() + GetSkill(SkillOffense)) * 9 / 10); }
+	inline virtual int32 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
 	uint16 GetTotalATK();
 	uint16 GetATKRating();
 	uint16 GetPrimarySkillValue();
@@ -465,7 +465,7 @@ public:
 	uint32 GetHealRotationNextHealTime() { return _healRotationNextHeal; }
 	uint32 GetHealRotationTimer () { return _healRotationTimer; }
 	bool GetBardUseOutOfCombatSongs() { return _bardUseOutOfCombatSongs;}
-	inline virtual int16	GetAC()	const { return AC; }
+	inline virtual int32	GetAC()	const { return AC; }
 	inline virtual int16	GetSTR()	const { return STR; }
 	inline virtual int16	GetSTA()	const { return STA; }
 	inline virtual int16	GetDEX()	const { return DEX; }
