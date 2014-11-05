@@ -1,5 +1,15 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/03/2014 ==
+Secrets: Fixed an overflow in melee lifetap calculations (int16 vs int32)
+Secrets: Fixed overflow on AC and ATK values that can go out of range.
+Secrets: Merc/Bot fixes for previous updates.
+Secrets: Changed a lot of int16s for stat-related functions to int32 because they were causing combat formula overflows (int16/int32 mismatch).
+Secrets: Linux fix?
+
+== 11/02/2014 ==
+Akkadius: Added out of range checking for Spell Save/Loads
+
 == 11/01/2014 ==
 Trevius: Fixed potential crash related to Pets/Mercs buffs when targeting themselves.
 JJ: (noudess) Revamped faction system. See https://github.com/EQEmu/Server/pull/256

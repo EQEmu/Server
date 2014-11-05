@@ -717,10 +717,10 @@ int Merc::GroupLeadershipAAOffenseEnhancement()
 	return 0;
 }
 
-int16 Merc::CalcSTR() {
-	int16 val = _baseSTR + itembonuses.STR + spellbonuses.STR;
+int32 Merc::CalcSTR() {
+	int32 val = _baseSTR + itembonuses.STR + spellbonuses.STR;
 
-	int16 mod = aabonuses.STR;
+	int32 mod = aabonuses.STR;
 
 	STR = val + mod;
 
@@ -730,10 +730,10 @@ int16 Merc::CalcSTR() {
 	return(STR);
 }
 
-int16 Merc::CalcSTA() {
-	int16 val = _baseSTA + itembonuses.STA + spellbonuses.STA;
+int32 Merc::CalcSTA() {
+	int32 val = _baseSTA + itembonuses.STA + spellbonuses.STA;
 
-	int16 mod = aabonuses.STA;
+	int32 mod = aabonuses.STA;
 
 	STA = val + mod;
 
@@ -743,11 +743,11 @@ int16 Merc::CalcSTA() {
 	return(STA);
 }
 
-int16 Merc::CalcAGI() {
-	int16 val = _baseAGI + itembonuses.AGI + spellbonuses.AGI;
-	int16 mod = aabonuses.AGI;
+int32 Merc::CalcAGI() {
+	int32 val = _baseAGI + itembonuses.AGI + spellbonuses.AGI;
+	int32 mod = aabonuses.AGI;
 
-	int16 str = GetSTR();
+	int32 str = GetSTR();
 
 	AGI = val + mod;
 
@@ -757,10 +757,10 @@ int16 Merc::CalcAGI() {
 	return(AGI);
 }
 
-int16 Merc::CalcDEX() {
-	int16 val = _baseDEX + itembonuses.DEX + spellbonuses.DEX;
+int32 Merc::CalcDEX() {
+	int32 val = _baseDEX + itembonuses.DEX + spellbonuses.DEX;
 
-	int16 mod = aabonuses.DEX;
+	int32 mod = aabonuses.DEX;
 
 	DEX = val + mod;
 
@@ -770,10 +770,10 @@ int16 Merc::CalcDEX() {
 	return(DEX);
 }
 
-int16 Merc::CalcINT() {
-	int16 val = _baseINT + itembonuses.INT + spellbonuses.INT;
+int32 Merc::CalcINT() {
+	int32 val = _baseINT + itembonuses.INT + spellbonuses.INT;
 
-	int16 mod = aabonuses.INT;
+	int32 mod = aabonuses.INT;
 
 	INT = val + mod;
 
@@ -783,10 +783,10 @@ int16 Merc::CalcINT() {
 	return(INT);
 }
 
-int16 Merc::CalcWIS() {
-	int16 val = _baseWIS + itembonuses.WIS + spellbonuses.WIS;
+int32 Merc::CalcWIS() {
+	int32 val = _baseWIS + itembonuses.WIS + spellbonuses.WIS;
 
-	int16 mod = aabonuses.WIS;
+	int32 mod = aabonuses.WIS;
 
 	WIS = val + mod;
 
@@ -796,10 +796,10 @@ int16 Merc::CalcWIS() {
 	return(WIS);
 }
 
-int16 Merc::CalcCHA() {
-	int16 val = _baseCHA + itembonuses.CHA + spellbonuses.CHA;
+int32 Merc::CalcCHA() {
+	int32 val = _baseCHA + itembonuses.CHA + spellbonuses.CHA;
 
-	int16 mod = aabonuses.CHA;
+	int32 mod = aabonuses.CHA;
 
 	CHA = val + mod;
 
@@ -812,7 +812,7 @@ int16 Merc::CalcCHA() {
 //The AA multipliers are set to be 5, but were 2 on WR
 //The resistant discipline which I think should be here is implemented
 //in Mob::ResistSpell
-int16	Merc::CalcMR()
+int32	Merc::CalcMR()
 {
 	MR = _baseMR + itembonuses.MR + spellbonuses.MR + aabonuses.MR;
 
@@ -822,7 +822,7 @@ int16	Merc::CalcMR()
 	return(MR);
 }
 
-int16	Merc::CalcFR()
+int32	Merc::CalcFR()
 {
 	FR = _baseFR + itembonuses.FR + spellbonuses.FR + aabonuses.FR;
 
@@ -832,7 +832,7 @@ int16	Merc::CalcFR()
 	return(FR);
 }
 
-int16	Merc::CalcDR()
+int32	Merc::CalcDR()
 {
 	DR = _baseDR + itembonuses.DR + spellbonuses.DR + aabonuses.DR;
 
@@ -842,7 +842,7 @@ int16	Merc::CalcDR()
 	return(DR);
 }
 
-int16	Merc::CalcPR()
+int32	Merc::CalcPR()
 {
 	PR = _basePR + itembonuses.PR + spellbonuses.PR + aabonuses.PR;
 
@@ -852,7 +852,7 @@ int16	Merc::CalcPR()
 	return(PR);
 }
 
-int16	Merc::CalcCR()
+int32	Merc::CalcCR()
 {
 	CR = _baseCR + itembonuses.CR + spellbonuses.CR + aabonuses.CR;
 
@@ -862,19 +862,19 @@ int16	Merc::CalcCR()
 	return(CR);
 }
 
-int16	Merc::CalcCorrup()
+int32	Merc::CalcCorrup()
 {
 	Corrup = _baseCorrup + itembonuses.Corrup + spellbonuses.Corrup + aabonuses.Corrup;
 
 	return(Corrup);
 }
 
-int16 Merc::CalcATK() {
+int32 Merc::CalcATK() {
 	ATK = _baseATK + itembonuses.ATK + spellbonuses.ATK + aabonuses.ATK + GroupLeadershipAAOffenseEnhancement();
 	return(ATK);
 }
 
-int16 Merc::CalcAC() {
+int32 Merc::CalcAC() {
 	//spell AC bonuses are added directly to natural total
 	AC = _baseAC + spellbonuses.AC;
 	return(AC);

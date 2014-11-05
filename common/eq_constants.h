@@ -968,4 +968,6 @@ namespace legacy {
 	} InventorySlot;
 }
 
+static const uint32 MAX_SPELL_DB_ID_VAL = 65535;
+
 #endif

@@ -1907,7 +1907,7 @@ void Mob::AI_Event_NoLongerEngaged() {
 }
 
 //this gets called from InterruptSpell() for failure or SpellFinished() for success
-void NPC::AI_Event_SpellCastFinished(bool iCastSucceeded, uint8 slot) {
+void NPC::AI_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot) {
 	if (slot == 1) {
 		uint32 recovery_time = 0;
 		if (iCastSucceeded) {

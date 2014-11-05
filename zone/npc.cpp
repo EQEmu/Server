@@ -2098,7 +2098,7 @@ void NPC::CalcNPCDamage() {
 			max_dmg = (GetLevel()*2)*AC_adjust/10;
 	}
 
-	int clfact = GetClassLevelFactor();
+	int32 clfact = GetClassLevelFactor();
 	min_dmg = (min_dmg * clfact) / 220;
 	max_dmg = (max_dmg * clfact) / 220;
 

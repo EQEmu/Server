@@ -340,39 +340,39 @@ public:
 	inline Mob* GetTarget() const { return target; }
 	virtual void SetTarget(Mob* mob);
 	virtual inline float GetHPRatio() const { return max_hp == 0 ? 0 : ((float)cur_hp/max_hp*100); }
-	inline virtual int16 GetAC() const { return AC + itembonuses.AC + spellbonuses.AC; }
-	inline virtual int16 GetATK() const { return ATK + itembonuses.ATK + spellbonuses.ATK; }
-	inline virtual int16 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
-	inline virtual int16 GetSTR() const { return STR + itembonuses.STR + spellbonuses.STR; }
-	inline virtual int16 GetSTA() const { return STA + itembonuses.STA + spellbonuses.STA; }
-	inline virtual int16 GetDEX() const { return DEX + itembonuses.DEX + spellbonuses.DEX; }
-	inline virtual int16 GetAGI() const { return AGI + itembonuses.AGI + spellbonuses.AGI; }
-	inline virtual int16 GetINT() const { return INT + itembonuses.INT + spellbonuses.INT; }
-	inline virtual int16 GetWIS() const { return WIS + itembonuses.WIS + spellbonuses.WIS; }
-	inline virtual int16 GetCHA() const { return CHA + itembonuses.CHA + spellbonuses.CHA; }
-	inline virtual int16 GetMR() const { return MR + itembonuses.MR + spellbonuses.MR; }
-	inline virtual int16 GetFR() const { return FR + itembonuses.FR + spellbonuses.FR; }
-	inline virtual int16 GetDR() const { return DR + itembonuses.DR + spellbonuses.DR; }
-	inline virtual int16 GetPR() const { return PR + itembonuses.PR + spellbonuses.PR; }
-	inline virtual int16 GetCR() const { return CR + itembonuses.CR + spellbonuses.CR; }
-	inline virtual int16 GetCorrup() const { return Corrup + itembonuses.Corrup + spellbonuses.Corrup; }
-	inline virtual int16 GetPhR() const { return PhR; }
+	inline virtual int32 GetAC() const { return AC + itembonuses.AC + spellbonuses.AC; }
+	inline virtual int32 GetATK() const { return ATK + itembonuses.ATK + spellbonuses.ATK; }
+	inline virtual int32 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
+	inline virtual int32 GetSTR() const { return STR + itembonuses.STR + spellbonuses.STR; }
+	inline virtual int32 GetSTA() const { return STA + itembonuses.STA + spellbonuses.STA; }
+	inline virtual int32 GetDEX() const { return DEX + itembonuses.DEX + spellbonuses.DEX; }
+	inline virtual int32 GetAGI() const { return AGI + itembonuses.AGI + spellbonuses.AGI; }
+	inline virtual int32 GetINT() const { return INT + itembonuses.INT + spellbonuses.INT; }
+	inline virtual int32 GetWIS() const { return WIS + itembonuses.WIS + spellbonuses.WIS; }
+	inline virtual int32 GetCHA() const { return CHA + itembonuses.CHA + spellbonuses.CHA; }
+	inline virtual int32 GetMR() const { return MR + itembonuses.MR + spellbonuses.MR; }
+	inline virtual int32 GetFR() const { return FR + itembonuses.FR + spellbonuses.FR; }
+	inline virtual int32 GetDR() const { return DR + itembonuses.DR + spellbonuses.DR; }
+	inline virtual int32 GetPR() const { return PR + itembonuses.PR + spellbonuses.PR; }
+	inline virtual int32 GetCR() const { return CR + itembonuses.CR + spellbonuses.CR; }
+	inline virtual int32 GetCorrup() const { return Corrup + itembonuses.Corrup + spellbonuses.Corrup; }
+	inline virtual int32 GetPhR() const { return PhR; }
 	inline StatBonuses GetItemBonuses() const { return itembonuses; }
 	inline StatBonuses GetSpellBonuses() const { return spellbonuses; }
 	inline StatBonuses GetAABonuses() const { return aabonuses; }
-	inline virtual int16 GetMaxSTR() const { return GetSTR(); }
-	inline virtual int16 GetMaxSTA() const { return GetSTA(); }
-	inline virtual int16 GetMaxDEX() const { return GetDEX(); }
-	inline virtual int16 GetMaxAGI() const { return GetAGI(); }
-	inline virtual int16 GetMaxINT() const { return GetINT(); }
-	inline virtual int16 GetMaxWIS() const { return GetWIS(); }
-	inline virtual int16 GetMaxCHA() const { return GetCHA(); }
-	inline virtual int16 GetMaxMR() const { return 255; }
-	inline virtual int16 GetMaxPR() const { return 255; }
-	inline virtual int16 GetMaxDR() const { return 255; }
-	inline virtual int16 GetMaxCR() const { return 255; }
-	inline virtual int16 GetMaxFR() const { return 255; }
-	inline virtual int16 GetDelayDeath() const { return 0; }
+	inline virtual int32 GetMaxSTR() const { return GetSTR(); }
+	inline virtual int32 GetMaxSTA() const { return GetSTA(); }
+	inline virtual int32 GetMaxDEX() const { return GetDEX(); }
+	inline virtual int32 GetMaxAGI() const { return GetAGI(); }
+	inline virtual int32 GetMaxINT() const { return GetINT(); }
+	inline virtual int32 GetMaxWIS() const { return GetWIS(); }
+	inline virtual int32 GetMaxCHA() const { return GetCHA(); }
+	inline virtual int32 GetMaxMR() const { return 255; }
+	inline virtual int32 GetMaxPR() const { return 255; }
+	inline virtual int32 GetMaxDR() const { return 255; }
+	inline virtual int32 GetMaxCR() const { return 255; }
+	inline virtual int32 GetMaxFR() const { return 255; }
+	inline virtual int32 GetDelayDeath() const { return 0; }
 	inline int32 GetHP() const { return cur_hp; }
 	inline int32 GetMaxHP() const { return max_hp; }
 	virtual int32 CalcMaxHP();
@@ -697,7 +697,7 @@ public:
 	bool CanThisClassBlock(void) const;
 
 	int GetMonkHandToHandDelay(void);
-	uint16 GetClassLevelFactor();
+	uint32 GetClassLevelFactor();
 	void Mesmerize();
 	inline bool IsMezzed() const { return mezzed; }
 	inline bool IsStunned() const { return stunned; }
@@ -801,7 +801,7 @@ public:
 	void SetGrouped(bool v);
 	inline bool IsRaidGrouped() const { return israidgrouped; }
 	void SetRaidGrouped(bool v);
-	inline bool IsLooting() const { return entity_id_being_looted; }
+	inline uint16 IsLooting() const { return entity_id_being_looted; }
 	void SetLooting(uint16 val) { entity_id_being_looted = val; }
 
 	bool CheckWillAggro(Mob *mob);
@@ -818,7 +818,7 @@ public:
 	virtual int32 CheckHealAggroAmount(uint16 spell_id, uint32 heal_possible = 0);
 	virtual uint32 GetAA(uint32 aa_id) const { return(0); }
 
-	uint16 GetInstrumentMod(uint16 spell_id) const;
+	uint32 GetInstrumentMod(uint16 spell_id) const;
 	int CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level = 1, Mob *caster = nullptr, int ticsremaining = 0);
 	int CalcSpellEffectValue_formula(int formula, int base, int max, int caster_level, uint16 spell_id, int ticsremaining = 0);
 	virtual int CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2, int caster_level2, Mob* caster1 = nullptr, Mob* caster2 = nullptr, int buffslot = -1);
@@ -932,21 +932,21 @@ protected:
 	uint8 helmtexture;
 
 	int AC;
-	int16 ATK;
-	int16 STR;
-	int16 STA;
-	int16 DEX;
-	int16 AGI;
-	int16 INT;
-	int16 WIS;
-	int16 CHA;
-	int16 MR;
-	int16 CR;
-	int16 FR;
-	int16 DR;
-	int16 PR;
-	int16 Corrup;
-	int16 PhR;
+	int32 ATK;
+	int32 STR;
+	int32 STA;
+	int32 DEX;
+	int32 AGI;
+	int32 INT;
+	int32 WIS;
+	int32 CHA;
+	int32 MR;
+	int32 CR;
+	int32 FR;
+	int32 DR;
+	int32 PR;
+	int32 Corrup;
+	int32 PhR;
 	bool moving;
 	int targeted;
 	bool findable;

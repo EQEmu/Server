@@ -2536,7 +2536,7 @@ XS(XS_Mob_GetAC)
 		Perl_croak(aTHX_ "Usage: Mob::GetAC(THIS)");
 	{
 		Mob *		THIS;
-		uint16		RETVAL;
+		uint32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -2562,7 +2562,7 @@ XS(XS_Mob_GetATK)
 		Perl_croak(aTHX_ "Usage: Mob::GetATK(THIS)");
 	{
 		Mob *		THIS;
-		uint16		RETVAL;
+		uint32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -2588,7 +2588,7 @@ XS(XS_Mob_GetSTR)
 		Perl_croak(aTHX_ "Usage: Mob::GetSTR(THIS)");
 	{
 		Mob *		THIS;
-		int16		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -2614,7 +2614,7 @@ XS(XS_Mob_GetSTA)
 		Perl_croak(aTHX_ "Usage: Mob::GetSTA(THIS)");
 	{
 		Mob *		THIS;
-		int16		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -2640,7 +2640,7 @@ XS(XS_Mob_GetDEX)
 		Perl_croak(aTHX_ "Usage: Mob::GetDEX(THIS)");
 	{
 		Mob *		THIS;
-		int16		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -2666,7 +2666,7 @@ XS(XS_Mob_GetAGI)
 		Perl_croak(aTHX_ "Usage: Mob::GetAGI(THIS)");
 	{
 		Mob *		THIS;
-		int16		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -2692,7 +2692,7 @@ XS(XS_Mob_GetINT)
 		Perl_croak(aTHX_ "Usage: Mob::GetINT(THIS)");
 	{
 		Mob *		THIS;
-		int16		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -2718,7 +2718,7 @@ XS(XS_Mob_GetWIS)
 		Perl_croak(aTHX_ "Usage: Mob::GetWIS(THIS)");
 	{
 		Mob *		THIS;
-		int16		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -2744,7 +2744,7 @@ XS(XS_Mob_GetCHA)
 		Perl_croak(aTHX_ "Usage: Mob::GetCHA(THIS)");
 	{
 		Mob *		THIS;
-		int16		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -2770,7 +2770,7 @@ XS(XS_Mob_GetMR)
 		Perl_croak(aTHX_ "Usage: Mob::GetMR(THIS)");
 	{
 		Mob *		THIS;
-		int16		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -2796,7 +2796,7 @@ XS(XS_Mob_GetFR)
 		Perl_croak(aTHX_ "Usage: Mob::GetFR(THIS)");
 	{
 		Mob *		THIS;
-		int16		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -2822,7 +2822,7 @@ XS(XS_Mob_GetDR)
 		Perl_croak(aTHX_ "Usage: Mob::GetDR(THIS)");
 	{
 		Mob *		THIS;
-		int16		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -2848,7 +2848,7 @@ XS(XS_Mob_GetPR)
 		Perl_croak(aTHX_ "Usage: Mob::GetPR(THIS)");
 	{
 		Mob *		THIS;
-		int16		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -2874,7 +2874,7 @@ XS(XS_Mob_GetCR)
 		Perl_croak(aTHX_ "Usage: Mob::GetCR(THIS)");
 	{
 		Mob *		THIS;
-		int16		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -2900,7 +2900,7 @@ XS(XS_Mob_GetCorruption)
 		Perl_croak(aTHX_ "Usage: Mob::GetCorruption(THIS)");
 	{
 		Mob *		THIS;
-		int16		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -2926,7 +2926,7 @@ XS(XS_Mob_GetMaxSTR)
 		Perl_croak(aTHX_ "Usage: Mob::GetMaxSTR(THIS)");
 	{
 		Mob *		THIS;
-		int16		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -2952,7 +2952,7 @@ XS(XS_Mob_GetMaxSTA)
 		Perl_croak(aTHX_ "Usage: Mob::GetMaxSTA(THIS)");
 	{
 		Mob *		THIS;
-		int16		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -2978,7 +2978,7 @@ XS(XS_Mob_GetMaxDEX)
 		Perl_croak(aTHX_ "Usage: Mob::GetMaxDEX(THIS)");
 	{
 		Mob *		THIS;
-		int16		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -3004,7 +3004,7 @@ XS(XS_Mob_GetMaxAGI)
 		Perl_croak(aTHX_ "Usage: Mob::GetMaxAGI(THIS)");
 	{
 		Mob *		THIS;
-		int16		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -3030,7 +3030,7 @@ XS(XS_Mob_GetMaxINT)
 		Perl_croak(aTHX_ "Usage: Mob::GetMaxINT(THIS)");
 	{
 		Mob *		THIS;
-		int16		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -3056,7 +3056,7 @@ XS(XS_Mob_GetMaxWIS)
 		Perl_croak(aTHX_ "Usage: Mob::GetMaxWIS(THIS)");
 	{
 		Mob *		THIS;
-		int16		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -3082,7 +3082,7 @@ XS(XS_Mob_GetMaxCHA)
 		Perl_croak(aTHX_ "Usage: Mob::GetMaxCHA(THIS)");
 	{
 		Mob *		THIS;
-		int16		RETVAL;
+		int32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -6259,7 +6259,7 @@ XS(XS_Mob_CheckAggroAmount)
 		Perl_croak(aTHX_ "Usage: Mob::CheckAggroAmount(THIS, spellid)");
 	{
 		Mob *		THIS;
-		uint16		RETVAL;
+		uint32		RETVAL;
 		dXSTARG;
 		uint16		spellid = (uint16)SvUV(ST(1));
 
@@ -6286,7 +6286,7 @@ XS(XS_Mob_CheckHealAggroAmount)
 		Perl_croak(aTHX_ "Usage: Mob::CheckHealAggroAmount(THIS, spellid, possible_heal_amt)");
 	{
 		Mob *		THIS;
-		uint16		RETVAL;
+		uint32		RETVAL;
 		dXSTARG;
 		uint16		spellid = (uint16)SvUV(ST(1));
 		uint32		possible = 0;

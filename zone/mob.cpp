@@ -608,7 +608,7 @@ int32 Mob::CalcMaxMana() {
 
 int32 Mob::CalcMaxHP() {
 	max_hp = (base_hp + itembonuses.HP + spellbonuses.HP);
-	max_hp += max_hp * ((aabonuses.MaxHPChange + spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f);
+	max_hp += max_hp * ((aabonuses.MaxHPChange + spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000);
 	return max_hp;
 }
 
@@ -3392,7 +3392,7 @@ int32 Mob::GetItemStat(uint32 itemid, const char *identifier)
 	int32 stat = 0;
 
 	std::string id = identifier;
-	for(int i = 0; i < id.length(); ++i)
+	for(uint32 i = 0; i < id.length(); ++i)
 	{
 		id[i] = tolower(id[i]);
 	}
@@ -4179,7 +4179,7 @@ int16 Mob::GetSkillDmgAmt(uint16 skill)
 
 void Mob::MeleeLifeTap(int32 damage) {
 
-	int16 lifetap_amt = 0;
+	int32 lifetap_amt = 0;
 	lifetap_amt = spellbonuses.MeleeLifetap + itembonuses.MeleeLifetap + aabonuses.MeleeLifetap
 				+ spellbonuses.Vampirism + itembonuses.Vampirism + aabonuses.Vampirism;
 
@@ -4223,10 +4223,10 @@ void Mob::SpellProjectileEffect()
 		float dist = 0;
 
 		if (target)
-				dist = target->CalculateDistance(projectile_x[i], projectile_y[i],  projectile_z[i]);
+			dist = target->CalculateDistance(projectile_x[i], projectile_y[i],  projectile_z[i]);
 
 		int increment_end = 0;
-		increment_end = (dist / 10) - 1; //This pretty accurately determines end time for speed for 1.5 and timer of 250 ms
+		increment_end = static_cast<int>(dist / 10) - 1; //This pretty accurately determines end time for speed for 1.5 and timer of 250 ms
 
 		if (increment_end <= projectile_increment[i]){
 
@@ -4829,7 +4829,7 @@ bool Mob::HasSpellEffect(int effectid)
 {
     int i;
 
-    uint32 buff_count = GetMaxTotalSlots();
+    int buff_count = GetMaxTotalSlots();
     for(i = 0; i < buff_count; i++)
     {
         if(buffs[i].spellid == SPELL_UNKNOWN) { continue; }
@@ -4960,7 +4960,7 @@ bool Mob::IsFacingMob(Mob *other)
 		return false;
 	float angle = HeadingAngleToMob(other);
 	// what the client uses appears to be 2x our internal heading
-	float heading = GetHeading() * 2.0;
+	float heading = GetHeading() * 2.0f;
 
 	if (angle > 472.0 && heading < 40.0)
 		angle = heading;
@@ -4986,20 +4986,20 @@ float Mob::HeadingAngleToMob(Mob *other)
 	if (y_diff < 0.0000009999999974752427)
 		y_diff = 0.0000009999999974752427;
 
-	float angle = atan2(x_diff, y_diff) * 180.0 * 0.3183099014828645; // angle, nice "pi"
+	float angle = atan2(x_diff, y_diff) * 180.0f * 0.3183099014828645f; // angle, nice "pi"
 
 	// return the right thing based on relative quadrant
 	// I'm sure this could be improved for readability, but whatever
 	if (this_y >= mob_y) {
 		if (mob_x >= this_x)
-			return (90.0 - angle + 90.0) * 511.5 * 0.0027777778;
+			return (90.0f - angle + 90.0f) * 511.5f * 0.0027777778f;
 		if (mob_x <= this_x)
-			return (angle + 180.0) * 511.5 * 0.0027777778;
+			return (angle + 180.0f) * 511.5f * 0.0027777778f;
 	}
 	if (this_y > mob_y || mob_x > this_x)
-		return angle * 511.5 * 0.0027777778;
+		return angle * 511.5f * 0.0027777778f;
 	else
-		return (90.0 - angle + 270.0) * 511.5 * 0.0027777778;
+		return (90.0f - angle + 270.0f) * 511.5f * 0.0027777778f;
 }
 
 int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
@@ -5016,7 +5016,7 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 		slot = slot - 1;
 
 	std::string id = identifier;
-	for(int i = 0; i < id.length(); ++i)
+	for(uint32 i = 0; i < id.length(); ++i)
 	{
 		id[i] = tolower(id[i]);
 	}
@@ -5040,10 +5040,10 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 		else if (id == "NoexpendReagent") {spells[spell_id].NoexpendReagent[slot];}
 	}
 
-	if (id == "range") {stat = spells[spell_id].range; }
-	else if (id == "aoerange") {stat = spells[spell_id].aoerange;}
-	else if (id == "pushback") {stat = spells[spell_id].pushback;}
-	else if (id == "pushup") {stat = spells[spell_id].pushup;}
+	if (id == "range") {stat = static_cast<int32>(spells[spell_id].range); }
+	else if (id == "aoerange") {stat = static_cast<int32>(spells[spell_id].aoerange);}
+	else if (id == "pushback") {stat = static_cast<int32>(spells[spell_id].pushback);}
+	else if (id == "pushup") {stat = static_cast<int32>(spells[spell_id].pushup);}
 	else if (id == "cast_time") {stat = spells[spell_id].cast_time;}
 	else if (id == "recovery_time") {stat = spells[spell_id].recovery_time;}
 	else if (id == "recast_time") {stat = spells[spell_id].recast_time;}
@@ -5094,8 +5094,8 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 	else if (id == "viral_targets") {stat = spells[spell_id].viral_targets; }
 	else if (id == "viral_timer") {stat = spells[spell_id].viral_timer; }
 	else if (id == "NimbusEffect") {stat = spells[spell_id].NimbusEffect; }
-	else if (id == "directional_start") {stat = spells[spell_id].directional_start; }
-	else if (id == "directional_end") {stat = spells[spell_id].directional_end; }
+	else if (id == "directional_start") {stat = static_cast<int32>(spells[spell_id].directional_start); }
+	else if (id == "directional_end") {stat = static_cast<int32>(spells[spell_id].directional_end); }
 	else if (id == "not_extendable") {stat = spells[spell_id].not_extendable; }
 	else if (id == "suspendable") {stat = spells[spell_id].suspendable; }
 	else if (id == "viral_range") {stat = spells[spell_id].viral_range; }
@@ -5109,10 +5109,10 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 	else if (id == "aemaxtargets") {stat = spells[spell_id].aemaxtargets; }
 	else if (id == "maxtargets") {stat = spells[spell_id].maxtargets; }
 	else if (id == "persistdeath") {stat = spells[spell_id].persistdeath; }
-	else if (id == "min_dist") {stat = spells[spell_id].min_dist; }
-	else if (id == "min_dist_mod") {stat = spells[spell_id].min_dist_mod; }
-	else if (id == "max_dist") {stat = spells[spell_id].max_dist; }
-	else if (id == "min_range") {stat = spells[spell_id].min_range; }
+	else if (id == "min_dist") {stat = static_cast<int32>(spells[spell_id].min_dist); }
+	else if (id == "min_dist_mod") {stat = static_cast<int32>(spells[spell_id].min_dist_mod); }
+	else if (id == "max_dist") {stat = static_cast<int32>(spells[spell_id].max_dist); }
+	else if (id == "min_range") {stat = static_cast<int32>(spells[spell_id].min_range); }
 	else if (id == "DamageShieldType") {stat = spells[spell_id].DamageShieldType; }
 	
 	return stat;

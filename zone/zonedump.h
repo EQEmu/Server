@@ -60,23 +60,23 @@ struct NPCType
 	uint32	adventure_template;
 	uint32	trap_template;
 	uint8	light;		//not loaded from DB
-	uint16	AC;
+	uint32	AC;
 	uint32	Mana;	//not loaded from DB
-	uint16	ATK;	//not loaded from DB
-	uint16	STR;
-	uint16	STA;
-	uint16	DEX;
-	uint16	AGI;
-	uint16	INT;
-	uint16	WIS;
-	uint16	CHA;
-	int16	MR;
-	int16	FR;
-	int16	CR;
-	int16	PR;
-	int16	DR;
-	int16	Corrup;
-	int16   PhR;
+	uint32	ATK;	//not loaded from DB
+	uint32	STR;
+	uint32	STA;
+	uint32	DEX;
+	uint32	AGI;
+	uint32	INT;
+	uint32	WIS;
+	uint32	CHA;
+	int32	MR;
+	int32	FR;
+	int32	CR;
+	int32	PR;
+	int32	DR;
+	int32	Corrup;
+	int32   PhR;
 	uint8	haircolor;
 	uint8	beardcolor;
 	uint8	eyecolor1;			// the eyecolors always seem to be the same, maybe left and right eye?

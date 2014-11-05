@@ -5664,7 +5664,7 @@ bool Mob::TryDivineSave()
 	{
 		SetHP(1);
 
-		int16 EffectsToTry[] =
+		int32 EffectsToTry[] =
 		{
 			aabonuses.DivineSaveChance[1],
 			itembonuses.DivineSaveChance[1],
@@ -5707,7 +5707,7 @@ bool Mob::TryDeathSave() {
 
 		int SuccessChance = 0;
 		int buffSlot = spellbonuses.DeathSave[1];
-		int16 UD_HealMod = 0;
+		int32 UD_HealMod = 0;
 		int HealAmt = 300; //Death Pact max Heal
 
 		if(buffSlot >= 0){

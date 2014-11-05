@@ -434,6 +434,8 @@ bool ZoneServer::Process() {
 				break;
 			}
 			case ServerOP_ChannelMessage: {
+				if (pack->size < sizeof(ServerChannelMessage_Struct))
+					break;
 				ServerChannelMessage_Struct* scm = (ServerChannelMessage_Struct*) pack->pBuffer;
 				if(scm->chan_num == 20)
 				{
@@ -453,7 +455,7 @@ bool ZoneServer::Process() {
 							(cle->TellsOff() && ((cle->Anon() == 1 && scm->fromadmin < cle->Admin()) || scm->fromadmin < 80))) {
 						if (!scm->noreply) {
 							ClientListEntry* sender = client_list.FindCharacter(scm->from);
-							if (!sender)
+							if (!sender || !sender->Server())
 								break;
 							scm->noreply = true;
 							scm->queued = 3; // offline
@@ -465,7 +467,7 @@ bool ZoneServer::Process() {
 						if (!scm->noreply) {
 							ClientListEntry* sender = client_list.FindCharacter(scm->from);
 							if (cle->TellQueueFull()) {
-								if (!sender)
+								if (!sender || !sender->Server())
 									break;
 								scm->noreply = true;
 								scm->queued = 2; // queue full
@@ -479,7 +481,7 @@ bool ZoneServer::Process() {
 								temp->noreply = true;
 								cle->PushToTellQueue(temp); // deallocation is handled in processing or deconstructor
 
-								if (!sender)
+								if (!sender || !sender->Server())
 									break;
 								scm->noreply = true;
 								scm->queued = 1; // queued

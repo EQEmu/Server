@@ -12928,8 +12928,13 @@ void Client::Handle_OP_SwapSpell(const EQApplicationPacket *app)
 	m_pp.spell_book[swapspell->from_slot] = m_pp.spell_book[swapspell->to_slot];
 	m_pp.spell_book[swapspell->to_slot] = swapspelltemp;
 
-	database.SaveCharacterSpell(this->CharacterID(), m_pp.spell_book[swapspell->from_slot], swapspell->from_slot);
-	database.SaveCharacterSpell(this->CharacterID(), swapspelltemp, swapspell->to_slot);
+	/* Save Spell Swaps */ 
+	if (!database.SaveCharacterSpell(this->CharacterID(), m_pp.spell_book[swapspell->from_slot], swapspell->from_slot)){
+		database.DeleteCharacterSpell(this->CharacterID(), m_pp.spell_book[swapspell->from_slot], swapspell->from_slot); 
+	}
+	if (!database.SaveCharacterSpell(this->CharacterID(), swapspelltemp, swapspell->to_slot)){
+		database.DeleteCharacterSpell(this->CharacterID(), swapspelltemp, swapspell->to_slot);
+	}
 
 	QueuePacket(app);
 	return;
