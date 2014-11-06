@@ -299,7 +299,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				//This effect can also do damage by percent.
 				if (val < 0) {
 
-					if (-val > spell.max[i])
+					if (spell.max[i] && -val > spell.max[i])
 						val = -spell.max[i];
 
 					if (caster)
@@ -309,7 +309,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 				else
 				{
-					if (val > spell.max[i])
+					if (spell.max[i] && val > spell.max[i])
 						val = spell.max[i];
 
 					if(caster)
@@ -2647,7 +2647,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_Taunt:
 			{
 				if (IsNPC()){
-					caster->Taunt(this->CastToNPC(), false, spell.base[i]);
+					caster->Taunt(this->CastToNPC(), false, static_cast<float>(spell.base[i]));
 					
 					if (spell.base2[i] > 0)
 						CastToNPC()->SetHate(caster, (CastToNPC()->GetHateAmount(caster) + spell.base2[i]));
