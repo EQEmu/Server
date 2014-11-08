@@ -234,6 +234,18 @@ bool DBcore::RunQuery(const char* query, uint32 querylen, char* errbuf, MYSQL_RE
 	return ret;
 }
 
+void DBcore::TransactionBegin() {
+	QueryDatabase("START TRANSACTION");
+}
+
+void DBcore::TransactionCommit() {
+	QueryDatabase("COMMIT");
+}
+
+void DBcore::TransactionRollback() {
+	QueryDatabase("ROLLBACK");
+}
+
 uint32 DBcore::DoEscapeString(char* tobuf, const char* frombuf, uint32 fromlen) {
 //	No good reason to lock the DB, we only need it in the first place to check char encoding.
 //	LockMutex lock(&MDatabase);

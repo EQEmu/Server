@@ -146,6 +146,7 @@ void unregister_event(std::string package_name, std::string name, int evt) {
 				iter = elist.erase(iter);
 				break;
 			}
+			++iter;
 		}
 		lua_encounter_events_registered[package_name] = elist;
 	}

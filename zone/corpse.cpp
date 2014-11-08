@@ -402,6 +402,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp)
 			}
 		}
 
+		database.TransactionBegin();
 		if(removed_list.size() != 0) {
 			std::stringstream ss("");
 			ss << "DELETE FROM inventory WHERE charid=" << client->CharacterID();
@@ -433,6 +434,12 @@ Corpse::Corpse(Client* client, int32 in_rezexp)
 
 		client->CalcBonuses(); // will only affect offline profile viewing of dead characters..unneeded overhead
 		client->Save();
+
+		Rezzed(false);
+		Save();
+		database.TransactionCommit();
+
+		return;
 	} //end "not leaving naked corpses"
 
 	Rezzed(false);
