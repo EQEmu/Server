@@ -3558,6 +3558,8 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 
 			case SE_WipeHateList:
 			{
+				if (IsMezSpell(spell_id))
+					break;
 
 				int wipechance = spells[spell_id].base[i];
 				int bonus = 0;
