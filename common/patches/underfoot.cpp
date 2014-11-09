@@ -3594,6 +3594,7 @@ namespace Underfoot
 
 	char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint8 depth)
 	{
+		int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 		uint8 null_term = 0;
 		bool stackable = inst->IsStackable();
 		uint32 merchant_slot = inst->GetMerchantSlot();
@@ -3623,13 +3624,40 @@ namespace Underfoot
 		hdr.unknown044 = 0;
 		hdr.unknown048 = 0;
 		hdr.unknown052 = 0;
-		hdr.unknown056 = 0;
-		hdr.unknown060 = 0;
-		hdr.unknown061 = 0;
-		hdr.unknown062 = 0;
-		hdr.ItemClass = item->ItemClass;
-
+		hdr.isEvolving = item->EvolvingLevel > 0 ? 1 : 0;
 		ss.write((const char*)&hdr, sizeof(Underfoot::structs::ItemSerializationHeader));
+		
+		if (item->EvolvingLevel > 0) {
+			Underfoot::structs::EvolvingItem evotop;
+			evotop.unknown001 = 0;
+			evotop.unknown002 = 0;
+			evotop.unknown003 = 0;
+			evotop.unknown004 = 0;
+			evotop.evoLevel = item->EvolvingLevel;
+			evotop.progress = 95.512;
+			evotop.Activated = 1;
+			evotop.evomaxlevel = 7;
+			ss.write((const char*)&evotop, sizeof(Underfoot::structs::EvolvingItem));
+		}
+		//ORNAMENT IDFILE / ICON -
+		uint16 ornaIcon = 0;
+		if (inst->GetOrnamentationAug(ornamentationAugtype)) {
+			const Item_Struct *aug_weap = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
+			ss.write(aug_weap->IDFile, strlen(aug_weap->IDFile));
+			ss.write((const char*)&null_term, sizeof(uint8));
+			ornaIcon = aug_weap->Icon;
+		}
+		else {
+			ss.write((const char*)&null_term, sizeof(uint8)); //no idfile
+		}
+		
+		Underfoot::structs::ItemSerializationHeaderFinish hdrf;
+		hdrf.ornamentIcon = ornaIcon;
+		hdrf.unknown060 = 0; //This is Always 0.. or it breaks shit.. 
+		hdrf.unknown061 = 0; //possibly ornament / special ornament
+		hdrf.isCopied = 0; //Flag for item to be 'Copied'
+		hdrf.ItemClass = item->ItemClass;
+		ss.write((const char*)&hdrf, sizeof(Underfoot::structs::ItemSerializationHeaderFinish));
 
 		if (strlen(item->Name) > 0)
 		{
