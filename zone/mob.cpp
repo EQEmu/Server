@@ -2430,7 +2430,7 @@ void Mob::WearChange(uint8 material_slot, uint16 texture, uint32 color)
 int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 {
 	const Item_Struct *item;
-
+	int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 	item = database.GetItem(GetEquipment(material_slot));
 	if(item != 0)
 	{
@@ -2440,10 +2440,26 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 			material_slot == MaterialSecondary
 		)
 		{
-			if(strlen(item->IDFile) > 2)
-				return atoi(&item->IDFile[2]);
-			else	//may as well try this, since were going to 0 anyways
-				return item->Material;
+			if (this->IsClient()){
+				int currMatslot = MaterialPrimary == material_slot ? MainPrimary : MainSecondary;
+				const ItemInst* inst = CastToClient()->m_inv[currMatslot];
+				if (inst && inst->GetOrnamentationAug(ornamentationAugtype)) {
+					item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
+					return atoi(&item->IDFile[2]);
+				}
+				else {
+					if (strlen(item->IDFile) > 2)
+						return atoi(&item->IDFile[2]);
+					else	//may as well try this, since were going to 0 anyways
+						return item->Material;
+				}
+			}
+			else {
+				if (strlen(item->IDFile) > 2)
+					return atoi(&item->IDFile[2]);
+				else	//may as well try this, since were going to 0 anyways
+					return item->Material;
+			}
 		}
 		else
 		{

@@ -192,7 +192,15 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 				/* Weapons are handled a bit differently */
 				if ((material == MaterialPrimary) || (material == MaterialSecondary)) {
 					if (strlen(item->GetItem()->IDFile) > 2) {
-						uint32 idfile = atoi(&item->GetItem()->IDFile[2]);
+						int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
+						uint32 idfile;
+						if (item->GetOrnamentationAug(ornamentationAugtype)) {
+							idfile = atoi(&item->GetOrnamentationAug(ornamentationAugtype)->GetItem()->IDFile[2]);
+						}
+						else {
+							idfile = atoi(&item->GetItem()->IDFile[2]);
+						}
+
 						if (material == MaterialPrimary)
 							cs->primary[char_num] = idfile;
 						else

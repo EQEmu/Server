@@ -4405,8 +4405,24 @@ struct ItemSerializationHeader
 /*064*/	uint32 unknown044;	// 0
 /*068*/	uint32 unknown048;	// 0
 /*072*/	uint32 unknown052;	// 0
-/*076*/	uint32 unknown056;	// 0
-/*080*/	uint8 unknown060;	// 0
+		uint8 isEvolving;
+};
+
+struct EvolvingItem {
+	uint8 unknown001;
+	uint8 unknown002;
+	uint8 unknown003;
+	uint8 unknown004;
+	int32 evoLevel;
+	double progress;
+	uint8 Activated;
+	int32 evomaxlevel;
+	uint8 unknown005[4];
+};
+
+struct ItemSerializationHeaderFinish
+{
+		uint16 ornamentIcon;
 /*081*/	uint8 unknown061;	// 0 - Add Evolving Item struct if this isn't set to 0?
 /*082*/	uint8 unknown062;	// 0
 /*083*/	uint32 unknowna1;	// 0xffffffff

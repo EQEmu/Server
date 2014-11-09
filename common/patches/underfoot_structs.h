@@ -4001,25 +4001,42 @@ struct ItemVerifyReply_Struct {
 
 struct ItemSerializationHeader
 {
-/*000*/	uint32 stacksize;
-/*004*/	uint32 unknown004;
-/*008*/	uint32 slot;
-/*012*/	uint32 price;
-/*016*/	uint32 merchant_slot; //1 if not a merchant item
-/*020*/	uint32 unknown020; //0
-/*024*/	uint32 instance_id; //unique instance id if not merchant item, else is merchant slot
-/*028*/	uint32 unknown028; //0
-/*032*/	uint32 last_cast_time;	// Unix Time from PP of last cast for this recast type if recast delay > 0
-/*036*/	uint32 charges; //Total Charges an item has (-1 for unlimited)
-/*040*/	uint32 inst_nodrop; // 1 if the item is no drop (attuned items)
-/*044*/	uint32 unknown044; //0
-/*048*/	uint32 unknown048; //0
-/*052*/	uint32 unknown052; //0
-/*056*/	uint32 unknown056; //0
-/*060*/	uint8 unknown060; //0
-/*061*/	uint8 unknown061; //0 - Add Evolving Item struct if this isn't set to 0?
-/*062*/	uint8 unknown062; // New to Underfoot
-/*063*/	uint8 ItemClass; //0, 1, or 2
+	/*000*/	uint32 stacksize;
+	/*004*/	uint32 unknown004;
+	/*008*/	uint32 slot;
+	/*012*/	uint32 price;
+	/*016*/	uint32 merchant_slot; //1 if not a merchant item
+	/*020*/	uint32 unknown020; //0
+	/*024*/	uint32 instance_id; //unique instance id if not merchant item, else is merchant slot
+	/*028*/	uint32 unknown028; //0
+	/*032*/	uint32 last_cast_time;	// Unix Time from PP of last cast for this recast type if recast delay > 0
+	/*036*/	uint32 charges; //Total Charges an item has (-1 for unlimited)
+	/*040*/	uint32 inst_nodrop; // 1 if the item is no drop (attuned items)
+	/*044*/	uint32 unknown044; //0
+	/*048*/	uint32 unknown048; //0
+	/*052*/	uint32 unknown052; //0
+	/*056*/ uint8 isEvolving; //0 // If 1 Add evolving item data in between Header and HeaderFinish
+};
+
+struct EvolvingItem {
+	uint8 unknown001;
+	uint8 unknown002;
+	uint8 unknown003;
+	uint8 unknown004;
+	int32 evoLevel;
+	double progress;
+	uint8 Activated;
+	int32 evomaxlevel;
+	uint8 unknown02[4];
+};
+
+struct ItemSerializationHeaderFinish
+{
+	uint16 ornamentIcon;
+	/*060*/	uint8 unknown060; //0
+	/*061*/	uint8 unknown061; //0 - 
+	/*062*/	uint8 isCopied; // New to Underfoot // Copied flag on item
+	/*063*/	uint8 ItemClass; //0, 1, or 2
 };
 
 struct ItemBodyStruct

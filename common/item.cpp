@@ -1774,6 +1774,21 @@ ItemInst* ItemInst::GetAugment(uint8 slot) const
 	return nullptr;
 }
 
+ItemInst* ItemInst::GetOrnamentationAug(int ornamentationAugtype) const
+{
+	for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+		if (GetAugment(i) && m_item->AugSlotType[i] == ornamentationAugtype) {
+			const char *item_IDFile = GetAugment(i)->GetItem()->IDFile;
+			if (strncmp(item_IDFile, "IT64", strlen(item_IDFile)) == 0 || strncmp(item_IDFile, "IT63", strlen(item_IDFile)) == 0)
+				continue;
+
+				return this->GetAugment(i);
+		}
+	}
+
+	return nullptr;
+}
+
 uint32 ItemInst::GetAugmentItemID(uint8 slot) const
 {
 	uint32 id = NO_ITEM;
