@@ -8174,14 +8174,22 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app)
 	InspectResponse_Struct* insr = (InspectResponse_Struct*)outapp->pBuffer;
 	Mob* tmp = entity_list.GetMob(insr->TargetID);
 	const Item_Struct* item = nullptr;
-
+	
+	int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 	for (int16 L = EmuConstants::EQUIPMENT_BEGIN; L <= MainWaist; L++) {
 		const ItemInst* inst = GetInv().GetItem(L);
 		item = inst ? inst->GetItem() : nullptr;
 
 		if (item) {
-			strcpy(insr->itemnames[L], item->Name);
-			insr->itemicons[L] = item->Icon;
+			if (inst && inst->GetOrnamentationAug(ornamentationAugtype)) {
+				const Item_Struct *aug_weap = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
+				strcpy(insr->itemnames[L], item->Name);
+				insr->itemicons[L] = aug_weap->Icon;
+			}
+			else {
+				strcpy(insr->itemnames[L], item->Name);
+				insr->itemicons[L] = item->Icon;
+			}
 		}
 		else { insr->itemicons[L] = 0xFFFFFFFF; }
 	}
