@@ -126,6 +126,7 @@ struct lua_registered_event {
 };
 
 std::map<std::string, std::list<lua_registered_event>> lua_encounter_events_registered;
+std::map<std::string, bool> lua_encounters_loaded;
 
 LuaParser::LuaParser() {
 	for(int i = 0; i < _LargestEventID; ++i) {
@@ -607,7 +608,7 @@ int LuaParser::_EventEncounter(std::string package_name, QuestEventID evt, std::
 			lua_setfield(L, -2, "data");
 		}
 
-		quest_manager.StartQuest(nullptr, nullptr, nullptr);
+		quest_manager.StartQuest(nullptr, nullptr, nullptr, encounter_name);
 		if(lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
@@ -776,6 +777,7 @@ void LuaParser::ReloadQuests() {
 	loaded_.clear();
 	errors_.clear();
 	lua_encounter_events_registered.clear();
+	lua_encounters_loaded.clear();
 
 	if(L) {
 		lua_close(L);

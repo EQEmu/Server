@@ -94,6 +94,10 @@ void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bo
                                     c->GetName(), groupleader, rleader, looter);
     auto results = database.QueryDatabase(query);
 
+	if(!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error inserting into raid members: %s", results.ErrorMessage().c_str());
+	}
+
 	LearnMembers();
 	VerifyRaid();
 	if (rleader) {
@@ -225,12 +229,12 @@ void Raid::SetRaidLeader(const char *wasLead, const char *name)
 	std::string query = StringFormat("UPDATE raid_members SET israidleader = 0 WHERE name = '%s'", wasLead);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
-		printf("Set Raid Leader error: %s\n", results.ErrorMessage().c_str());
+		LogFile->write(EQEMuLog::Error, "Set Raid Leader error: %s\n", results.ErrorMessage().c_str());
 
 	query = StringFormat("UPDATE raid_members SET israidleader = 1 WHERE name = '%s'", name);
 	results = database.QueryDatabase(query);
 	if (!results.Success())
-		printf("Set Raid Leader error: %s\n", results.ErrorMessage().c_str());
+		LogFile->write(EQEMuLog::Error, "Set Raid Leader error: %s\n", results.ErrorMessage().c_str());
 
 	strn0cpy(leadername, name, 64);
 

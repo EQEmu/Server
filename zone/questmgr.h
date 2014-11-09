@@ -34,12 +34,13 @@ class QuestManager {
 		Client *initiator;
 		ItemInst* questitem;
 		bool depop_npc;
+		std::string encounter;
 	};
 public:
 	QuestManager();
 	virtual ~QuestManager();
 
-	void StartQuest(Mob *_owner, Client *_initiator = nullptr, ItemInst* _questitem = nullptr);
+	void StartQuest(Mob *_owner, Client *_initiator = nullptr, ItemInst* _questitem = nullptr, std::string encounter = "");
 	void EndQuest();
 	bool QuestsRunning() { return !quests_running_.empty(); }
 
@@ -252,6 +253,7 @@ public:
 	NPC *GetNPC() const;
 	Mob *GetOwner() const;
 	ItemInst *GetQuestItem() const;
+	std::string GetEncounter() const;
 	inline bool ProximitySayInUse() { return HaveProximitySays; }
 
 #ifdef BOTS

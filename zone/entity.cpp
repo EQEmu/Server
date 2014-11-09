@@ -63,6 +63,7 @@ extern uint16 adverrornum;
 Entity::Entity()
 {
 	id = 0;
+	spawn_timestamp = time(nullptr);
 }
 
 Entity::~Entity()
@@ -2934,8 +2935,14 @@ void EntityList::SignalMobsByNPCID(uint32 snpc, int signal_id)
 	}
 }
 
+bool tracking_compare(const std::pair<Mob *, float> &a, const std::pair<Mob *, float> &b)
+{
+	return a.first->GetSpawnTimeStamp() > b.first->GetSpawnTimeStamp();
+}
+
 bool EntityList::MakeTrackPacket(Client *client)
 {
+	std::list<std::pair<Mob *, float> > tracking_list;
 	uint32 distance = 0;
 	float MobDistance;
 
@@ -2950,60 +2957,42 @@ bool EntityList::MakeTrackPacket(Client *client)
 	if (distance < 300)
 		distance = 300;
 
-	uint32 spe= 0;
-	bool ret = false;
-
-	spe = mob_list.size() + 50;
-
-	uchar *buffer1 = new uchar[sizeof(Track_Struct)];
-	Track_Struct *track_ent = (Track_Struct*) buffer1;
-
-	uchar *buffer2 = new uchar[sizeof(Track_Struct)*spe];
-	Tracking_Struct *track_array = (Tracking_Struct*) buffer2;
-	memset(track_array, 0, sizeof(Track_Struct)*spe);
-
-	uint32 array_counter = 0;
-
 	Group *g = client->GetGroup();
 
-	auto it = mob_list.begin();
-	while (it != mob_list.end()) {
-		if (it->second && ((MobDistance = it->second->DistNoZ(*client)) <= distance)) {
-			if ((it->second != client) && it->second->IsTrackable()) {
-				memset(track_ent, 0, sizeof(Track_Struct));
-				Mob *cur_entity = it->second;
-				track_ent->entityid = cur_entity->GetID();
-				track_ent->distance = MobDistance;
-				track_ent->level = cur_entity->GetLevel();
-				track_ent->NPC = !cur_entity->IsClient();
-				if (g && cur_entity->IsClient() && g->IsGroupMember(cur_entity->CastToMob()))
-					track_ent->GroupMember = 1;
-				else
-					track_ent->GroupMember = 0;
-				strn0cpy(track_ent->name, cur_entity->GetName(), sizeof(track_ent->name));
-				memcpy(&track_array->Entrys[array_counter], track_ent, sizeof(Track_Struct));
-				array_counter++;
-			}
-		}
+	for (auto it = mob_list.cbegin(); it != mob_list.cend(); ++it) {
+		if (!it->second || it->second == client || !it->second->IsTrackable())
+			continue;
 
-		++it;
+		MobDistance = it->second->DistNoZ(*client);
+		if (MobDistance > distance)
+			continue;
+
+		tracking_list.push_back(std::make_pair(it->second, MobDistance));
 	}
 
-	if (array_counter <= spe) {
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Track,sizeof(Track_Struct)*(array_counter));
-		memcpy(outapp->pBuffer, track_array,sizeof(Track_Struct)*(array_counter));
-		outapp->priority = 6;
-		client->QueuePacket(outapp);
-		safe_delete(outapp);
-		ret = true;
-	} else {
-		LogFile->write(EQEMuLog::Status, "ERROR: Unable to transmit a Tracking_Struct packet. Mobs in zone = %i. Mobs in packet = %i", array_counter, spe);
+	tracking_list.sort(tracking_compare);
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_Track, sizeof(Track_Struct) * tracking_list.size());
+	Tracking_Struct *outtrack = (Tracking_Struct *)outapp->pBuffer;
+	outapp->priority = 6;
+
+	int index = 0;
+	for (auto it = tracking_list.cbegin(); it != tracking_list.cend(); ++it, ++index) {
+		Mob *cur_entity = it->first;
+		outtrack->Entrys[index].entityid = cur_entity->GetID();
+		outtrack->Entrys[index].distance = it->second;
+		outtrack->Entrys[index].level = cur_entity->GetLevel();
+		outtrack->Entrys[index].NPC = !cur_entity->IsClient();
+		if (g && cur_entity->IsClient() && g->IsGroupMember(cur_entity->CastToMob()))
+			outtrack->Entrys[index].GroupMember = 1;
+		else
+			outtrack->Entrys[index].GroupMember = 0;
+		strn0cpy(outtrack->Entrys[index].name, cur_entity->GetName(), sizeof(outtrack->Entrys[index].name));
 	}
 
-	safe_delete_array(buffer1);
-	safe_delete_array(buffer2);
+	client->QueuePacket(outapp);
+	safe_delete(outapp);
 
-	return ret;
+	return true;
 }
 
 void EntityList::MessageGroup(Mob *sender, bool skipclose, uint32 type, const char *message, ...)
