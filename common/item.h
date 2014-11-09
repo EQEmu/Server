@@ -329,7 +329,7 @@ public:
 	void DeleteAugment(uint8 slot);
 	ItemInst* RemoveAugment(uint8 index);
 	bool IsAugmented();
-	ItemInst* ItemInst::GetOrnamentationAug(int ornamentationAugtype) const;
+	ItemInst* GetOrnamentationAug(int ornamentationAugtype) const;
 	
 	// Has attack/delay?
 	bool IsWeapon() const;
