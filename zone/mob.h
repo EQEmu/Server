@@ -287,6 +287,9 @@ public:
 	inline virtual uint32 GetNimbusEffect2() const { return nimbus_effect2; }
 	inline virtual uint32 GetNimbusEffect3() const { return nimbus_effect3; }
 	void RemoveNimbusEffect(int effectid);
+	inline float GetTargetRingX() const { return targetring_x; }
+	inline float GetTargetRingY() const { return targetring_y; }
+	inline float GetTargetRingZ() const { return targetring_z; }
 
 	//Basic Stats/Inventory
 	virtual void SetLevel(uint8 in_level, bool command = false) { level = in_level; }
@@ -1230,6 +1233,10 @@ protected:
 	float tar_vy;
 	float tar_vz;
 	float test_vector;
+
+	float targetring_x;
+	float targetring_y;
+	float targetring_z;
 
 	uint32 m_spellHitsLeft[38]; // Used to track which spells will have their numhits incremented when spell finishes casting, 38 Buffslots
 	int flymode;
