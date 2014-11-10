@@ -132,7 +132,7 @@ typedef enum {
 /* 42 */	ST_Directional = 0x2a, //ae around this target between two angles
 /* 43 */	ST_GroupClientAndPet = 0x2b,
 /* 44 */	//ST_Beam = 0x2c, //like directional but facing in front of you always
-/* 45 */	//ST_Ring = 0x2d, // Like a mix of PB ae + rain spell(has ae duration)
+/* 45 */	ST_Ring = 0x2d, 
 /* 46 */	ST_TargetsTarget = 0x2e, // uses the target of your target
 /* 47 */	ST_PetMaster = 0x2f, // uses the master as target
 } SpellTargetType;
