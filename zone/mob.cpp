@@ -369,6 +369,10 @@ Mob::Mob(const char* in_name,
 	nimbus_effect3 = 0;
 	m_targetable = true;
 
+	targetring_x = 0.0f;
+	targetring_y = 0.0f; 
+	targetring_z = 0.0f;
+
 	flymode = FlyMode3;
 	// Pathing
 	PathingLOSState = UnknownLOS;
