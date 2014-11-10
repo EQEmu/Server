@@ -765,10 +765,10 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 		if (curmob == caster && !affect_caster)	//watch for caster too
 			continue;
 
-		if (spells[spell_id].targettype == ST_Ring){
-			dist_targ = curmob->DistNoRoot(caster->GetTargetRingX(), caster->GetTargetRingY(),caster->GetTargetRingZ());
+		if (spells[spell_id].targettype == ST_Ring) {
+			dist_targ = curmob->DistNoRoot(caster->GetTargetRingX(), caster->GetTargetRingY(), caster->GetTargetRingZ());
 		}
-		else if (center){
+		else if (center) {
 			dist_targ = center->DistNoRoot(*curmob);
 		}
 
@@ -795,7 +795,7 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 				continue;
 			if (center && !center->CheckLosFN(curmob))
 				continue;
-			if  (!center && !caster->CheckLosFN(caster->GetTargetRingX(), caster->GetTargetRingY(),caster->GetTargetRingZ(), curmob->GetSize()))
+			if (!center && !caster->CheckLosFN(caster->GetTargetRingX(), caster->GetTargetRingY(), caster->GetTargetRingZ(), curmob->GetSize()))
 				continue;
 		} else { // check to stop casting beneficial ae buffs (to wit: bard songs) on enemies...
 			// This does not check faction for beneficial AE buffs..only agro and attackable.

@@ -2175,7 +2175,8 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			break;
 		}
 
-		case TargetRing:{
+		case TargetRing:
+		{
 			entity_list.AESpell(this, nullptr, spell_id, false, resist_adjust);
 			break;
 		}

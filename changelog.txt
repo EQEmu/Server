@@ -5,6 +5,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 Kayen: Implemented support for spell target type (45) 'Target Rings' on Underfoot (does work earlier expansions)
 Thanks to Lecht for figuring out the op_code side.
 Implement new Live-like faction adjustment message using rule Client:UseLiveFactionMessage.
+JJ: Implement new Live-like faction adjustment message using rule Client:UseLiveFactionMessage.
 Optional SQL: utils/sql/git/optional/2014_11_09_LiveFactionMessages.sql
 
 == 11/06/2014 ==

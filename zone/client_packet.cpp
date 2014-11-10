@@ -4038,6 +4038,10 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			return;
 		}
 
+		targetring_x = castspell->x_pos;
+		targetring_y = castspell->y_pos;
+		targetring_z = castspell->z_pos;
+
 		CastSpell(spell_to_cast, castspell->target_id, castspell->slot);
 	}
 	/* Spell Slot or Potion Belt Slot */
