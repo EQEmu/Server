@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/09/2014 ==
+Implement new Live-like faction adjustment message using rule Client:UseLiveFactionMessage.
+Optional SQL: utils/sql/git/optional/2014_11_09_LiveFactionMessages.sql
+
 == 11/06/2014 ==
 demonstar55: Tracking default sort will now be correct order
 Trevius: Fixed dynamic merchant list loading.  Allows any merchant to be used in any zone.
