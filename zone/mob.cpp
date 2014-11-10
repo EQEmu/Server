@@ -370,7 +370,7 @@ Mob::Mob(const char* in_name,
 	m_targetable = true;
 
 	targetring_x = 0.0f;
-	targetring_y = 0.0f;
+	targetring_y = 0.0f; 
 	targetring_z = 0.0f;
 
 	flymode = FlyMode3;
