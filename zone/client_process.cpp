@@ -1611,12 +1611,11 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 	if(DistNoRoot(*pTrainer) > USE_NPC_RANGE2)
 		return;
 
-	SkillUseTypes sk;
-	for (sk = Skill1HBlunt; sk <= HIGHEST_SKILL; sk = (SkillUseTypes)(sk+1)) {
+	for (int sk = Skill1HBlunt; sk <= HIGHEST_SKILL; ++sk) {
 		if(sk == SkillTinkering && GetRace() != GNOME) {
 			gmtrain->skills[sk] = 0; //Non gnomes can't tinker!
 		} else {
-			gmtrain->skills[sk] = GetMaxSkillAfterSpecializationRules(sk, MaxSkill(sk, GetClass(), RuleI(Character, MaxLevel)));
+			gmtrain->skills[sk] = GetMaxSkillAfterSpecializationRules((SkillUseTypes)sk, MaxSkill((SkillUseTypes)sk, GetClass(), RuleI(Character, MaxLevel)));
 			//this is the highest level that the trainer can train you to, this is enforced clientside so we can't just
 			//Set it to 1 with CanHaveSkill or you wont be able to train past 1.
 		}
