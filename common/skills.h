@@ -30,7 +30,7 @@
 **
 **	(ref: eqstr_us.txt [05-10-2013])
 */
-enum SkillUseTypes : uint32
+enum SkillUseTypes
 {
 /*13855*/	Skill1HBlunt = 0,
 /*13856*/	Skill1HSlashing,

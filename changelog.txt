@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/11/2014 ==
+Uleat: Third attempt at a fix for GM trainer zone crashes... (this is starting to look like a KLS fix...)
+
 == 11/10/2014 ==
 Uleat: Fix for GM Trainer crashing server (really!)
 JJ: Yellow faction messages.
