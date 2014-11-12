@@ -108,7 +108,7 @@ enum SkillUseTypes
 /*13869*/	SkillBerserking,
 /*13902*/	SkillTaunt,
 /*05837*/	SkillFrenzy,					// This appears to be the only listed one not grouped with the others
-/*00000*/	_SkillCount,
+/*00000*/	_EmuSkillCount					// move to last position of active enumeration labels
 
 // SoF+ specific skills
 // /*03670*/	SkillRemoveTraps,
@@ -125,7 +125,6 @@ enum SkillUseTypes
 
 // Support values
 // /*-----*/	_SkillServerArraySize = _SkillCount_RoF2,	// Should reflect last client '_SkillCount'
-/*-----*/	_SkillPacketArraySize = 100,				// Currently supported clients appear to iterate full 100 dword buffer range
 
 // Superfluous additions to SkillUseTypes..server-use only
 // /*-----*/	ExtSkillGenericTradeskill = 100
@@ -153,7 +152,7 @@ enum SkillUseTypes
 	NOTE: Disregard this until it is sorted out
 
 	I changed (tradeskill==75) to ExtSkillGenericTradeskill in tradeskills.cpp for both instances. 	If it's a pseudo-enumeration of
-	an AA ability, then use the 'ExtSkill' ('ExtentedSkill') prefix with a value >= 100. (current implementation)
+	an AA ability, then use the 'ExtSkill' ('ExtendedSkill') prefix with a value >= 100. (current implementation)
 
 	We probably need to recode ALL of the skill checks to use the new Skill2HPiercing and ensure that the animation value is
 	properly changed in the patch files. As far as earlier clients using this new skill, it can be done, but we just need to ensure
@@ -164,6 +163,7 @@ enum SkillUseTypes
 
 	In addition to the above re-coding, we're probably going to need to rework the database pp blob to reserve space for the current
 	100-dword buffer allocation. This way, we can just add new ones without having to rework it each time.
+	(Wasn't done for this in particular..but, thanks Akkadius!)
 
 	-U
 */
@@ -171,6 +171,9 @@ enum SkillUseTypes
 
 // temporary until it can be sorted out...
 #define HIGHEST_SKILL	SkillFrenzy
+
+// server profile does not reflect this yet..so, prefixed with 'PACKET_'
+#define PACKET_SKILL_ARRAY_SIZE 100
 
 // TODO: add string return for skill names
 
