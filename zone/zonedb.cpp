@@ -1892,7 +1892,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
             if (!armortint_results.Success() || armortint_results.RowCount() == 0)
                 armor_tint_id = 0;
             else {
-                auto armorTint_row = results.begin();
+                auto armorTint_row = armortint_results.begin();
 
                 for (int index = EmuConstants::MATERIAL_BEGIN; index <= EmuConstants::MATERIAL_END; index++) {
                     tmpNPCType->armor_tint[index] = atoi(armorTint_row[index * 3]) << 16;
