@@ -1160,16 +1160,21 @@ void Merc::SetEndurance(int32 newEnd)
 }
 
 void Merc::DoEnduranceUpkeep() {
-	int upkeep_sum = 0;
 
+	if (!HasEndurUpkeep())
+		return;
+
+	int upkeep_sum = 0;
 	int cost_redux = spellbonuses.EnduranceReduction + itembonuses.EnduranceReduction;
 
+	bool has_effect = false;
 	uint32 buffs_i;
 	uint32 buff_count = GetMaxTotalSlots();
 	for (buffs_i = 0; buffs_i < buff_count; buffs_i++) {
 		if (buffs[buffs_i].spellid != SPELL_UNKNOWN) {
 			int upkeep = spells[buffs[buffs_i].spellid].EndurUpkeep;
 			if(upkeep > 0) {
+				has_effect = true;
 				if(cost_redux > 0) {
 					if(upkeep <= cost_redux)
 						continue;	//reduced to 0
@@ -1187,6 +1192,9 @@ void Merc::DoEnduranceUpkeep() {
 
 	if(upkeep_sum != 0)
 		SetEndurance(GetEndurance() - upkeep_sum);
+
+	if (!has_effect)
+		SetEndurUpkeep(false);
 }
 
 void Merc::CalcRestState() {
