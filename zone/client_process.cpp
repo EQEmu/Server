@@ -1928,10 +1928,14 @@ void Client::DoEnduranceRegen()
 }
 
 void Client::DoEnduranceUpkeep() {
+
+	if (!HasEndurUpkeep())
+		return;
+
 	int upkeep_sum = 0;
-
-	int cost_redux = spellbonuses.EnduranceReduction + itembonuses.EnduranceReduction;
-
+	int cost_redux = spellbonuses.EnduranceReduction + itembonuses.EnduranceReduction + aabonuses.EnduranceReduction;
+	
+	bool has_effect = false;
 	uint32 buffs_i;
 	uint32 buff_count = GetMaxTotalSlots();
 	for (buffs_i = 0; buffs_i < buff_count; buffs_i++) {
@@ -1957,6 +1961,9 @@ void Client::DoEnduranceUpkeep() {
 		SetEndurance(GetEndurance() - upkeep_sum);
 		TryTriggerOnValueAmount(false, false, true);
 	}
+
+	if (!has_effect)
+		SetEndurUpkeep(false);
 }
 
 void Client::CalcRestState() {

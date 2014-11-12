@@ -290,6 +290,8 @@ public:
 	inline float GetTargetRingX() const { return targetring_x; }
 	inline float GetTargetRingY() const { return targetring_y; }
 	inline float GetTargetRingZ() const { return targetring_z; }
+	inline bool HasEndurUpkeep() const { return endur_upkeep; }
+	inline void SetEndurUpkeep(bool val) { endur_upkeep = val; }
 
 	//Basic Stats/Inventory
 	virtual void SetLevel(uint8 in_level, bool command = false) { level = in_level; }
@@ -1130,6 +1132,7 @@ protected:
 	int16 SpellPowerDistanceMod;
 	bool last_los_check;
 	bool pseudo_rooted;
+	bool endur_upkeep;
 
 	// Bind wound
 	Timer bindwound_timer;
