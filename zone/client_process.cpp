@@ -1942,6 +1942,7 @@ void Client::DoEnduranceUpkeep() {
 		if (buffs[buffs_i].spellid != SPELL_UNKNOWN) {
 			int upkeep = spells[buffs[buffs_i].spellid].EndurUpkeep;
 			if(upkeep > 0) {
+				has_effect = true;
 				if(cost_redux > 0) {
 					if(upkeep <= cost_redux)
 						continue;	//reduced to 0
