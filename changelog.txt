@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/13/2014 ==
+Uleat: PlayerLogMerchantTransactions does not support partial stack purchase logging at this time
+
 == 11/12/2014 ==
 Uleat: Changed 'GMTrainee' struct to reflect the actual client hard-coded max skill count (100) - applies to all currently supported clients (6.2->RoF)
 
