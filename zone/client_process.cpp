@@ -1611,6 +1611,9 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 	if(DistNoRoot(*pTrainer) > USE_NPC_RANGE2)
 		return;
 
+	// if this for-loop acts up again (crashes linux), try enabling the before and after #pragmas
+//#pragma GCC push_options
+//#pragma GCC optimize ("O0")
 	for (int sk = Skill1HBlunt; sk <= HIGHEST_SKILL; ++sk) {
 		if(sk == SkillTinkering && GetRace() != GNOME) {
 			gmtrain->skills[sk] = 0; //Non gnomes can't tinker!
@@ -1620,6 +1623,7 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 			//Set it to 1 with CanHaveSkill or you wont be able to train past 1.
 		}
 	}
+//#pragma GCC pop_options
 
 	uchar ending[]={0x34,0x87,0x8a,0x3F,0x01
 		,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9
