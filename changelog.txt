@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/13/2014 ==
+Kayen: Implemented target type (44) 'Beams' (which projects an AE infront of caster with a specified length and width).
+
 == 11/12/2014 ==
 Uleat: Changed 'GMTrainee' struct to reflect the actual client hard-coded max skill count (100) - applies to all currently supported clients (6.2->RoF)
 

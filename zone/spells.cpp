@@ -369,6 +369,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		spell.targettype == ST_Self ||
 		spell.targettype == ST_AECaster ||
 		spell.targettype == ST_Ring ||
+		spell.targettype == ST_Beam ||
 		spell.targettype == ST_TargetOptional) && target_id == 0)
 	{
 		mlog(SPELLS__CASTING, "Spell %d auto-targeted the caster. Group? %d, target type %d", spell_id, IsGroupSpell(spell_id), spell.targettype);
@@ -1803,6 +1804,14 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			break;
 		}
 
+		case ST_Beam:
+		{
+			CastAction = Beam;
+			spell_target = nullptr;
+			ae_center = nullptr;
+			break;
+		}
+
 		case ST_Ring:
 		{
 			CastAction = TargetRing;
@@ -2126,54 +2135,15 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 
 		case DirectionalAE:
 		{
-			float angle_start = spells[spell_id].directional_start + (GetHeading() * 360.0f / 256.0f);
-			float angle_end = spells[spell_id].directional_end + (GetHeading() * 360.0f / 256.0f);
-
-			while(angle_start > 360.0f)
-				angle_start -= 360.0f;
-
-			while(angle_end > 360.0f)
-				angle_end -= 360.0f;
-
-			std::list<Mob*> targets_in_range;
-			std::list<Mob*>::iterator iter;
-
-			entity_list.GetTargetsForConeArea(this, spells[spell_id].min_range, spells[spell_id].aoerange, spells[spell_id].aoerange / 2, targets_in_range);
-			iter = targets_in_range.begin();
-			while(iter != targets_in_range.end())
-			{
-				float heading_to_target = (CalculateHeadingToTarget((*iter)->GetX(), (*iter)->GetY()) * 360.0f / 256.0f);
-				while(heading_to_target < 0.0f)
-					heading_to_target += 360.0f;
-
-				while(heading_to_target > 360.0f)
-					heading_to_target -= 360.0f;
-
-				if(angle_start > angle_end)
-				{
-					if((heading_to_target >= angle_start && heading_to_target <= 360.0f) ||
-						(heading_to_target >= 0.0f && heading_to_target <= angle_end))
-					{
-						if(CheckLosFN((*iter)) || spells[spell_id].npc_no_los){
-							(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
-							SpellOnTarget(spell_id, (*iter), false, true, resist_adjust);
-						}
-					}
-				}
-				else
-				{
-					if(heading_to_target >= angle_start && heading_to_target <= angle_end)
-					{
-						if(CheckLosFN((*iter)) || spells[spell_id].npc_no_los){
-							(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
-							SpellOnTarget(spell_id, (*iter), false, true, resist_adjust);
-						}
-					}
-				}
-				++iter;
-			}
+			ConeDirectional(spell_id, resist_adjust);
 			break;
 		}
+ 
+		case Beam:
+		{
+			BeamDirectional(spell_id, resist_adjust);
+ 			break;
+ 		}
 
 		case TargetRing:
 		{
@@ -5384,4 +5354,140 @@ void Client::SendSpellAnim(uint16 targetid, uint16 spell_id)
 
 	app.priority = 1;
 	entity_list.QueueCloseClients(this, &app);
+}
+
+void Mob::CalcDestFromHeading(float heading, float distance, float MaxZDiff, float StartX, float StartY, float &dX, float &dY, float &dZ)
+{
+	if (!distance) { return; }
+	if (!MaxZDiff) { MaxZDiff = 5; }
+
+	float ReverseHeading = 256 - heading;
+	float ConvertAngle = ReverseHeading * 1.40625f;
+	if (ConvertAngle <= 270)
+		ConvertAngle = ConvertAngle + 90;
+	else
+		ConvertAngle = ConvertAngle - 270;
+
+	float Radian = ConvertAngle * (3.1415927f / 180.0f);
+
+	float CircleX = distance * cos(Radian);
+	float CircleY = distance * sin(Radian);
+	dX = CircleX + StartX;
+	dY = CircleY + StartY;
+	dZ = FindGroundZ(dX, dY, MaxZDiff);
+}
+
+void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
+{
+	int maxtarget_count = 0;
+	bool beneficial_targets = false;
+
+	if (IsBeneficialSpell(spell_id) && IsClient())
+		beneficial_targets = true;
+	
+	std::list<Mob*> targets_in_range;
+	std::list<Mob*>::iterator iter;
+
+	entity_list.GetTargetsForConeArea(this, spells[spell_id].min_range, spells[spell_id].range, spells[spell_id].range / 2, targets_in_range);
+	iter = targets_in_range.begin();
+	
+	float dX = 0;
+	float dY = 0;
+	float dZ = 0;
+	
+	CalcDestFromHeading(GetHeading(), spells[spell_id].range, 5, GetX(), GetY(), dX, dY, dZ);
+	dZ = GetZ();
+	
+	//FIND SLOPE: Put it into the form y = mx + b
+	float m = (dY - GetY()) / (dX - GetX());
+	float b = (GetY() * dX - dY * GetX()) / (dX - GetX());
+ 
+	while(iter != targets_in_range.end())
+	{
+		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerClient())) 
+			|| (*iter)->BehindMob(this, (*iter)->GetX(),(*iter)->GetY())){
+		    ++iter;
+			continue;
+		}
+
+		//# shortest distance from line to target point
+		float d = abs( (*iter)->GetY() - m * (*iter)->GetX() - b) / sqrt(m * m + 1);
+					
+		if (d <= spells[spell_id].aoerange)
+		{
+			if(CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
+				(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
+				SpellOnTarget(spell_id, (*iter), false, true, resist_adjust);
+				maxtarget_count++;
+			}
+
+			if (maxtarget_count >= spells[spell_id].aemaxtargets)
+				return;
+		}
+		++iter;
+	}
+}
+
+void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
+{
+	int maxtarget_count = 0;
+	bool beneficial_targets = false;
+
+	if (IsBeneficialSpell(spell_id) && IsClient())
+		beneficial_targets = true;
+
+	float angle_start = spells[spell_id].directional_start + (GetHeading() * 360.0f / 256.0f);
+	float angle_end = spells[spell_id].directional_end + (GetHeading() * 360.0f / 256.0f);
+
+	while(angle_start > 360.0f)
+		angle_start -= 360.0f;
+
+	while(angle_end > 360.0f)
+		angle_end -= 360.0f;
+
+	std::list<Mob*> targets_in_range;
+	std::list<Mob*>::iterator iter;
+
+	entity_list.GetTargetsForConeArea(this, spells[spell_id].min_range, spells[spell_id].aoerange, spells[spell_id].aoerange / 2, targets_in_range);
+	iter = targets_in_range.begin();
+
+	while(iter != targets_in_range.end()){
+
+		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerClient()))){
+		    ++iter;
+			continue;
+		}
+
+		float heading_to_target = (CalculateHeadingToTarget((*iter)->GetX(), (*iter)->GetY()) * 360.0f / 256.0f);
+	
+		while(heading_to_target < 0.0f)
+			heading_to_target += 360.0f;
+
+		while(heading_to_target > 360.0f)
+			heading_to_target -= 360.0f;
+
+		if(angle_start > angle_end){
+			if((heading_to_target >= angle_start && heading_to_target <= 360.0f) ||	(heading_to_target >= 0.0f && heading_to_target <= angle_end)){
+				if(CheckLosFN((*iter)) || spells[spell_id].npc_no_los){
+					(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
+					SpellOnTarget(spell_id,(*iter), false, true, resist_adjust);
+					maxtarget_count++;
+				}
+			}
+		}
+		else{
+			if(heading_to_target >= angle_start && heading_to_target <= angle_end){
+				if(CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
+					(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
+					SpellOnTarget(spell_id, (*iter), false, true, resist_adjust);
+					maxtarget_count++;
+				}
+			}
+		}
+
+		if (maxtarget_count >= spells[spell_id].aemaxtargets)
+			return;
+
+		++iter;
+	}
 }
