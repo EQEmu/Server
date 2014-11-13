@@ -752,7 +752,11 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 
 	bool bad = IsDetrimentalSpell(spell_id);
 	bool isnpc = caster->IsNPC();
-	const int MAX_TARGETS_ALLOWED = 4;
+	int MAX_TARGETS_ALLOWED = 4;
+
+	if (spells[spell_id].aemaxtargets)
+		MAX_TARGETS_ALLOWED = spells[spell_id].aemaxtargets;
+
 	int iCounter = 0;
 
 	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
@@ -821,10 +825,13 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 				caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
 			}
 		} else {
-			caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
+			if (spells[spell_id].aemaxtargets && iCounter < spells[spell_id].aemaxtargets) 
+				caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
+			if (!spells[spell_id].aemaxtargets)
+				caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
 		}
 
-		if (!isnpc) //npcs are not target limited...
+		if (!isnpc || spells[spell_id].aemaxtargets) //npcs are not target limited (unless casting a spell with a target limit)...
 			iCounter++;
 	}
 }
