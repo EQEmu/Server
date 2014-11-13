@@ -764,6 +764,8 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 			continue;
 		if (curmob == caster && !affect_caster)	//watch for caster too
 			continue;
+		if (spells[spell_id].targettype == ST_TargetAENoPlayersPets && curmob->IsPetOwnerClient())
+			continue;
 
 		if (spells[spell_id].targettype == ST_Ring) {
 			dist_targ = curmob->DistNoRoot(caster->GetTargetRingX(), caster->GetTargetRingY(), caster->GetTargetRingZ());
