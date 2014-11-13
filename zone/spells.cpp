@@ -1611,7 +1611,45 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			break;
 		}
 
+		case ST_AETargetHateList:
+		{
+			if (spells[spell_id].range > 0)
+			{
+				if(!spell_target)
+					return false;
+				
+				ae_center = spell_target;
+				CastAction = AETarget;
+			}
+			else {
+				spell_target = nullptr;
+				ae_center = this;
+				CastAction = CAHateList;
+			}
+			break;
+		}
+
+		case ST_AreaClientOnly:
+		case ST_AreaNPCOnly:
+		{
+			if (spells[spell_id].range > 0)
+			{
+				if(!spell_target)
+					return false;
+				
+				ae_center = spell_target;
+				CastAction = AETarget;
+			}
+			else {
+				spell_target = nullptr;
+				ae_center = this;
+				CastAction = AECaster;
+			}
+			break;
+		}
+
 		case ST_UndeadAE:	//should only affect undead...
+		case ST_SummonedAE:
 		case ST_TargetAETap:
 		case ST_AETarget:
 		case ST_TargetAENoPlayersPets:
@@ -1630,6 +1668,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		// Group spells
 		case ST_GroupTeleport:
 		case ST_Group:
+		case ST_GroupNoPets:
 		{
 			if(IsClient() && CastToClient()->TGB() && IsTGBCompatibleSpell(spell_id)) {
 				if( (!target) ||
@@ -2043,15 +2082,28 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			} else {
 				// regular PB AE or targeted AE spell - spell_target is null if PB
 				if(spell_target)	// this must be an AETarget spell
-				{
+				{	
+					bool cast_on_target = true;
+					if (spells[spell_id].targettype == ST_TargetAENoPlayersPets && spell_target->IsPetOwnerClient())
+						cast_on_target = false;
+					if (spells[spell_id].targettype == ST_AreaClientOnly && !spell_target->IsClient())
+						cast_on_target = false;
+					if (spells[spell_id].targettype == ST_AreaNPCOnly && !spell_target->IsNPC())
+						cast_on_target = false;
+
 					// affect the target too
-					SpellOnTarget(spell_id, spell_target, false, true, resist_adjust);
+					if (cast_on_target)
+						SpellOnTarget(spell_id, spell_target, false, true, resist_adjust);
 				}
 				if(ae_center && ae_center == this && IsBeneficialSpell(spell_id))
 					SpellOnTarget(spell_id, this);
 
 				bool affect_caster = !IsNPC();	//NPC AE spells do not affect the NPC caster
-				entity_list.AESpell(this, ae_center, spell_id, affect_caster, resist_adjust);
+
+				if (spells[spell_id].targettype == ST_AETargetHateList)
+					hate_list.SpellCast(this, spell_id, spells[spell_id].aoerange, ae_center);
+				else
+					entity_list.AESpell(this, ae_center, spell_id, affect_caster, resist_adjust);
 			}
 			break;
 		}
@@ -2109,7 +2161,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 						SpellOnTarget(spell_id, this);
 	#ifdef GROUP_BUFF_PETS
 						//pet too
-						if (GetPet() && HasPetAffinity() && !GetPet()->IsCharmed())
+						if (spells[spell_id].targettype != ST_GroupNoPets && GetPet() && HasPetAffinity() && !GetPet()->IsCharmed())
 							SpellOnTarget(spell_id, GetPet());
 	#endif
 					}
@@ -2117,7 +2169,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 					SpellOnTarget(spell_id, spell_target);
 	#ifdef GROUP_BUFF_PETS
 					//pet too
-					if (spell_target->GetPet() && HasPetAffinity() && !spell_target->GetPet()->IsCharmed())
+					if (spells[spell_id].targettype != ST_GroupNoPets && spell_target->GetPet() && HasPetAffinity() && !spell_target->GetPet()->IsCharmed())
 						SpellOnTarget(spell_id, spell_target->GetPet());
 	#endif
 				}

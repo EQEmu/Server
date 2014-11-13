@@ -119,7 +119,7 @@ typedef enum {
 /* 29 */	// NOT USED
 /* 30 */	// NOT USED
 /* 31 */	// NOT USED
-/* 32 */	ST_AECaster2 = 0x20, //ae caster hatelist maybe?
+/* 32 */	ST_AETargetHateList = 0x20,
 /* 33 */	ST_HateList = 0x21,
 /* 34 */	ST_LDoNChest_Cursed = 0x22,
 /* 35 */	ST_Muramite = 0x23, //only works on special muramites

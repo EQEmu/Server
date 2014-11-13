@@ -693,7 +693,7 @@ void Group::CastGroupSpell(Mob* caster, uint16 spell_id) {
 		if(members[z] == caster) {
 			caster->SpellOnTarget(spell_id, caster);
 #ifdef GROUP_BUFF_PETS
-			if(caster->GetPet() && caster->HasPetAffinity() && !caster->GetPet()->IsCharmed())
+			if(spells[spell_id].targettype != ST_GroupNoPets && caster->GetPet() && caster->HasPetAffinity() && !caster->GetPet()->IsCharmed())
 				caster->SpellOnTarget(spell_id, caster->GetPet());
 #endif
 		}
@@ -704,7 +704,7 @@ void Group::CastGroupSpell(Mob* caster, uint16 spell_id) {
 				members[z]->CalcSpellPowerDistanceMod(spell_id, distance);
 				caster->SpellOnTarget(spell_id, members[z]);
 #ifdef GROUP_BUFF_PETS
-				if(members[z]->GetPet() && members[z]->HasPetAffinity() && !members[z]->GetPet()->IsCharmed())
+				if(spells[spell_id].targettype != ST_GroupNoPets && members[z]->GetPet() && members[z]->HasPetAffinity() && !members[z]->GetPet()->IsCharmed())
 					caster->SpellOnTarget(spell_id, members[z]->GetPet());
 #endif
 			} else
