@@ -492,7 +492,7 @@ void Zone::GetMerchantDataForZoneLoad() {
 	std::map<uint32, std::list<MerchantList> >::iterator cur;
 	uint32 npcid = 0;
 	if (results.RowCount() == 0) {
-		LogFile->write(EQEMuLog::Error, "Error in loading Merchant Data for zone");
+		LogFile->write(EQEMuLog::Debug, "No Merchant Data found for %s.", GetShortName());
 		return;
 	}
 	for (auto row = results.begin(); row != results.end(); ++row) { 
