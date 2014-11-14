@@ -715,8 +715,12 @@ struct SPDat_Spell_Struct
 /* 180 */	int spell_category;
 /* 181 */	//unknown - likely buff duration related
 /* 182 */   //unknown - likely buff duration related
+/* 183 */
+/* 184 */
 /* 185 */	int8 can_mgb; // 0=no, -1 or 1 = yes
 /* 186 */	int dispel_flag;
+/* 187 */	//int npc_category;
+/* 188 */	//int npc_usefulness;
 /* 189 */	int MinResist;
 /* 190 */	int MaxResist;
 /* 191 */	uint8 viral_targets;
