@@ -12245,7 +12245,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	mpo->npcid = mp->npcid;
 	mpo->itemslot = mp->itemslot;
 
-	int16 freeslotid = 0;
+	int16 freeslotid = INVALID_INDEX;
 	int16 charges = 0;
 	if (item->Stackable || item->MaxCharges > 1)
 		charges = mp->quantity;
@@ -12271,6 +12271,9 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		return;
 	}
 
+	// this area needs some work..two inventory insertion check failure points
+	// below do not return player's money..is this the intended behavior?
+
 	if (!TakeMoneyFromPP(mpo->price))
 	{
 		char *hacker_str = nullptr;
@@ -12287,6 +12290,8 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	bool stacked = TryStacking(inst);
 	if (!stacked)
 		freeslotid = m_inv.FindFreeSlot(false, true, item->Size);
+
+	// shouldn't we be reimbursing if these two fail?
 
 	//make sure we are not completely full...
 	if (freeslotid == MainCursor) {
@@ -12342,7 +12347,8 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	safe_delete(outapp);
 
 	// start QS code
-	if (RuleB(QueryServ, PlayerLogMerchantTransactions)) {
+	// stacking purchases not supported at this time - entire process will need some work to catch them properly
+	if (RuleB(QueryServ, PlayerLogMerchantTransactions) && (!stacked) && m_inv[freeslotid]) {
 		ServerPacket* qspack = new ServerPacket(ServerOP_QSPlayerLogMerchantTransactions, sizeof(QSMerchantLogTransaction_Struct)+sizeof(QSTransactionItems_Struct));
 		QSMerchantLogTransaction_Struct* qsaudit = (QSMerchantLogTransaction_Struct*)qspack->pBuffer;
 
@@ -12363,11 +12369,11 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		qsaudit->items[0].char_slot = freeslotid;
 		qsaudit->items[0].item_id = m_inv[freeslotid]->GetID();
 		qsaudit->items[0].charges = mpo->quantity;
-		qsaudit->items[0].aug_1 = m_inv[freeslotid]->GetAugmentItemID(1);
-		qsaudit->items[0].aug_2 = m_inv[freeslotid]->GetAugmentItemID(2);
-		qsaudit->items[0].aug_3 = m_inv[freeslotid]->GetAugmentItemID(3);
-		qsaudit->items[0].aug_4 = m_inv[freeslotid]->GetAugmentItemID(4);
-		qsaudit->items[0].aug_5 = m_inv[freeslotid]->GetAugmentItemID(5);
+		qsaudit->items[0].aug_1 = m_inv[freeslotid]->GetAugmentItemID(0);
+		qsaudit->items[0].aug_2 = m_inv[freeslotid]->GetAugmentItemID(1);
+		qsaudit->items[0].aug_3 = m_inv[freeslotid]->GetAugmentItemID(2);
+		qsaudit->items[0].aug_4 = m_inv[freeslotid]->GetAugmentItemID(3);
+		qsaudit->items[0].aug_5 = m_inv[freeslotid]->GetAugmentItemID(4);
 
 		qspack->Deflate();
 		if (worldserver.Connected()) { worldserver.SendPacket(qspack); }
