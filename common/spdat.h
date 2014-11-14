@@ -722,7 +722,7 @@ struct SPDat_Spell_Struct
 /* 193 */	int NimbusEffect;
 /* 194 */	float directional_start; //Cone Start Angle:
 /* 195 */	float directional_end; // Cone End Angle:
-/* 196 */
+/* 196 */   bool sneak; // effect can only be used if sneaking (rogue 'Daggerfall' ect)
 /* 197 */	bool not_extendable;
 /* 198- 199 */
 /* 200 */	bool suspendable; // buff is suspended in suspended buff zones
