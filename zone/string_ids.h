@@ -338,6 +338,7 @@
 #define STRIKETHROUGH_STRING		9078	//You strike through your opponent's defenses!
 #define SPELL_REFLECT				9082	//%1's spell has been reflected by %2.
 #define NEW_SPELLS_AVAIL			9149	//You have new spells available to you. Check the merchants near your guild master.
+#define SNEAK_RESTRICT				9240	//You can not use this ability because you have not been hidden for long enough.
 #define PET_NOW_FOCUSING			9254	//Focusing on one target, Master.
 #define PET_NOT_FOCUSING			9263	//No longer focusing on one target, Master.
 #define PET_NOT_CASTING				9264	//Not casting spells, Master.

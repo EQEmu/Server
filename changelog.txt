@@ -1,6 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+
 == 11/13/2014 ==
+Kayen: Implemented target type (44) 'Beams' (which projects an AE infront of caster with a specified length and width).
+Kayen: Implemented target type (32) AE Target HateList
+Kayen: Implemented target type (36) Area Client Only
+Kayen: Implemented target type (37) Area PC Only
+Kayen: Implemented target type (39) Group No Pet
 Uleat: PlayerLogMerchantTransactions does not support partial stack purchase logging at this time
 
 == 11/12/2014 ==

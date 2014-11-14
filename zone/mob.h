@@ -235,7 +235,9 @@ public:
 	void ResourceTap(int32 damage, uint16 spell_id);
 	void TryTriggerThreshHold(int32 damage, int effect_id, Mob* attacker);
 	bool CheckSpellCategory(uint16 spell_id, int category_id, int effect_id);
-	
+	void CalcDestFromHeading(float heading, float distance, float MaxZDiff, float StartX, float StartY, float &dX, float &dY, float &dZ);
+	void BeamDirectional(uint16 spell_id, int16 resist_adjust);
+	void ConeDirectional(uint16 spell_id, int16 resist_adjust);
 
 	//Buff
 	void BuffProcess();
@@ -674,6 +676,10 @@ public:
 	bool HadTempPets() const { return(hasTempPet); }
 	void TempPets(bool i) { hasTempPet = i; }
 	bool HasPetAffinity() { if (aabonuses.GivePetGroupTarget || itembonuses.GivePetGroupTarget || spellbonuses.GivePetGroupTarget) return true; return false; }
+	inline bool IsPetOwnerClient() const { return pet_owner_client; } 
+	inline void SetPetOwnerClient(bool value) { pet_owner_client = value; }
+	inline bool IsTempPet() const { return _IsTempPet; } 
+	inline void SetTempPet(bool value) { _IsTempPet = value; }
 
 	inline const bodyType GetBodyType() const { return bodytype; }
 	inline const bodyType GetOrigBodyType() const { return orig_bodytype; }
@@ -1225,6 +1231,8 @@ protected:
 
 	//temppet
 	bool hasTempPet;
+	bool _IsTempPet;
+	bool pet_owner_client; //Flags regular and pets as belonging to a client
 
 	EGNode *_egnode; //the EG node we are in
 	float tarx;

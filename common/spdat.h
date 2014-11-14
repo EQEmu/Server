@@ -119,7 +119,7 @@ typedef enum {
 /* 29 */	// NOT USED
 /* 30 */	// NOT USED
 /* 31 */	// NOT USED
-/* 32 */	ST_AECaster2 = 0x20, //ae caster hatelist maybe?
+/* 32 */	ST_AETargetHateList = 0x20,
 /* 33 */	ST_HateList = 0x21,
 /* 34 */	ST_LDoNChest_Cursed = 0x22,
 /* 35 */	ST_Muramite = 0x23, //only works on special muramites
@@ -131,10 +131,13 @@ typedef enum {
 /* 41 */	ST_Group = 0x29,
 /* 42 */	ST_Directional = 0x2a, //ae around this target between two angles
 /* 43 */	ST_GroupClientAndPet = 0x2b,
-/* 44 */	//ST_Beam = 0x2c, //like directional but facing in front of you always
+/* 44 */	ST_Beam = 0x2c,
 /* 45 */	ST_Ring = 0x2d, 
 /* 46 */	ST_TargetsTarget = 0x2e, // uses the target of your target
 /* 47 */	ST_PetMaster = 0x2f, // uses the master as target
+/* 48 */	// UNKNOWN
+/* 49 */	// NOT USED
+/* 50 */	ST_TargetAENoPlayersPets = 0x32,
 } SpellTargetType;
 
 typedef enum {
@@ -719,7 +722,7 @@ struct SPDat_Spell_Struct
 /* 193 */	int NimbusEffect;
 /* 194 */	float directional_start; //Cone Start Angle:
 /* 195 */	float directional_end; // Cone End Angle:
-/* 196 */
+/* 196 */   bool sneak; // effect can only be used if sneaking (rogue 'Daggerfall' ect)
 /* 197 */	bool not_extendable;
 /* 198- 199 */
 /* 200 */	bool suspendable; // buff is suspended in suspended buff zones

@@ -1564,6 +1564,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].NimbusEffect = atoi(row[193]);
 		sp[tempid].directional_start = static_cast<float>(atoi(row[194]));
 		sp[tempid].directional_end = static_cast<float>(atoi(row[195]));
+		sp[tempid].sneak = atoi(row[196]) != 0;
 		sp[tempid].not_extendable = atoi(row[197]) != 0;
 		sp[tempid].suspendable = atoi(row[200]) != 0;
 		sp[tempid].viral_range = atoi(row[201]);
