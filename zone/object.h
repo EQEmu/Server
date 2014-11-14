@@ -157,6 +157,10 @@ public:
 	void SetZ(float pos);
 	void SetModelName(const char* modelname);
 	const char* GetModelName();
+	uint16 GetSize();
+	void SetSize(uint16 size);
+	uint16 GetSolidType();
+	void SetSolidType(uint16 size);
 
 	const char* GetEntityVariable(const char *id);
 	void SetEntityVariable(const char *id, const char *m_var);

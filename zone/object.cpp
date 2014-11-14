@@ -798,6 +798,42 @@ void Object::SetModelName(const char* modelname)
 	safe_delete(app2);
 }
 
+void Object::SetSize(uint16 size)
+{
+	m_data.unknown008 = size;
+	EQApplicationPacket* app = new EQApplicationPacket();
+	EQApplicationPacket* app2 = new EQApplicationPacket();
+	this->CreateDeSpawnPacket(app);
+	this->CreateSpawnPacket(app2);
+	entity_list.QueueClients(0, app);
+	entity_list.QueueClients(0, app2);
+	safe_delete(app);
+	safe_delete(app2);
+}
+
+void Object::SetSolidType(uint16 solidtype)
+{
+	m_data.unknown010 = solidtype;
+	EQApplicationPacket* app = new EQApplicationPacket();
+	EQApplicationPacket* app2 = new EQApplicationPacket();
+	this->CreateDeSpawnPacket(app);
+	this->CreateSpawnPacket(app2);
+	entity_list.QueueClients(0, app);
+	entity_list.QueueClients(0, app2);
+	safe_delete(app);
+	safe_delete(app2);
+}
+
+uint16 Object::GetSize()
+{
+	return m_data.unknown008;
+}
+
+uint16 Object::GetSolidType()
+{
+	return m_data.unknown010;
+}
+
 const char* Object::GetModelName()
 {
 	return this->m_data.object_name;

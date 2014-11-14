@@ -1,6 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 11/14/2014 ==
+Secrets: Identified object size and solidtype as flags. Exported them as functions to Perl.
+
 == 11/13/2014 ==
 Kayen: Implemented target type (44) 'Beams' (which projects an AE infront of caster with a specified length and width).
 Kayen: Implemented target type (32) AE Target HateList
