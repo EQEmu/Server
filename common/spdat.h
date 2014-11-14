@@ -676,7 +676,7 @@ struct SPDat_Spell_Struct
 /* 122 */	//uint32 TravelType;
 /* 123 */	uint16 SpellAffectIndex;
 /* 124 */	int8 disallow_sit; // 124: high-end Yaulp spells (V, VI, VII, VIII [Rk 1, 2, & 3], & Gallenite's Bark of Fury
-/* 125 */								// 125: Words of the Skeptic
+/* 125 */	int8 diety_agnostic;// 125: Words of the Skeptic
 /* 126 */	int8 deities[16];	// Deity check. 201 - 216 per http://www.eqemulator.net/wiki/wikka.php?wakka=DeityList
 										// -1: Restrict to Deity; 1: Restrict to Deity, but only used on non-Live (Test Server "Blessing of ...") spells; 0: Don't restrict
 /* 142 */						// 142: between 0 & 100
@@ -700,6 +700,7 @@ struct SPDat_Spell_Struct
 /* 162 */	int bonushate;
 /* 163 */
 /* 164 */	// for most spells this appears to mimic ResistDiff
+/* 165 */	bool ldon_trap; //Flag found on all LDON trap / chest related spells.
 /* 166 */	int EndurCost;
 /* 167 */	int8 EndurTimerIndex;
 /* 168 */	bool IsDisciplineBuff; //Will goto the combat window when cast
@@ -712,7 +713,8 @@ struct SPDat_Spell_Struct
 /* 178 */	int pvpresistcalc;
 /* 179 */	int pvpresistcap;
 /* 180 */	int spell_category;
-/* 181 */
+/* 181 */	//unknown - likely buff duration related
+/* 182 */   //unknown - likely buff duration related
 /* 185 */	int8 can_mgb; // 0=no, -1 or 1 = yes
 /* 186 */	int dispel_flag;
 /* 189 */	int MinResist;
@@ -729,7 +731,9 @@ struct SPDat_Spell_Struct
 /* 201 */	int viral_range; 
 /* 202 */
 /* 203 */	//int songcap; // individual song cap (how live currently does it, not implemented)
-/* 204 - 206 */
+/* 204 */
+/* 205 */	bool no_block;
+/* 206 */   
 /* 207 */	int spellgroup;
 /* 208 */	int rank; //increments AA effects with same name
 /* 209 */	int powerful_flag; //  Need more investigation to figure out what to call this, for now we know -1 makes charm spells not break before their duration is complete, it does alot more though

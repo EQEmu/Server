@@ -1526,6 +1526,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].CastingAnim=atoi(row[120]);
 		sp[tempid].SpellAffectIndex=atoi(row[123]);
 		sp[tempid].disallow_sit=atoi(row[124]);
+		sp[tempid].diety_agnostic=atoi(row[125]);
 
 		for (y = 0; y < 16; y++)
 			sp[tempid].deities[y]=atoi(row[126+y]);
@@ -1544,6 +1545,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].reflectable = atoi(row[161]) != 0;
 		sp[tempid].bonushate=atoi(row[162]);
 
+		sp[tempid].ldon_trap = atoi(row[165]) != 0;
 		sp[tempid].EndurCost=atoi(row[166]);
 		sp[tempid].EndurTimerIndex=atoi(row[167]);
 		sp[tempid].IsDisciplineBuff = atoi(row[168]) != 0;
@@ -1568,6 +1570,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].not_extendable = atoi(row[197]) != 0;
 		sp[tempid].suspendable = atoi(row[200]) != 0;
 		sp[tempid].viral_range = atoi(row[201]);
+		sp[tempid].no_block = atoi(row[205]);
 		sp[tempid].spellgroup=atoi(row[207]);
 		sp[tempid].rank = atoi(row[208]);
 		sp[tempid].powerful_flag=atoi(row[209]);

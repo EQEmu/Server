@@ -3770,7 +3770,7 @@ void Client::Handle_OP_BlockedBuffs(const EQApplicationPacket *app)
 
 		for (unsigned int i = 0; i < BLOCKED_BUFF_COUNT; ++i)
 		{
-			if ((bbs->SpellID[i] > 0) && IsBeneficialSpell(bbs->SpellID[i]))
+			if ((IsValidSpell(bbs->SpellID[i])) && IsBeneficialSpell(bbs->SpellID[i]) && !spells[bbs->SpellID[i]].no_block)
 			{
 				if (BlockedBuffs->find(bbs->SpellID[i]) == BlockedBuffs->end())
 					BlockedBuffs->insert(bbs->SpellID[i]);
@@ -3818,7 +3818,7 @@ void Client::Handle_OP_BlockedBuffs(const EQApplicationPacket *app)
 
 		for (unsigned int i = 0; i < BLOCKED_BUFF_COUNT; ++i)
 		{
-			if (!IsBeneficialSpell(bbs->SpellID[i]))
+			if (!IsValidSpell(bbs->SpellID[i]) || !IsBeneficialSpell(bbs->SpellID[i]) || spells[bbs->SpellID[i]].no_block)
 				continue;
 
 			if ((BlockedBuffs->size() < BLOCKED_BUFF_COUNT) && (BlockedBuffs->find(bbs->SpellID[i]) == BlockedBuffs->end()))
