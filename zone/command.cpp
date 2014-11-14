@@ -2775,7 +2775,7 @@ void command_nukeitem(Client *c, const Seperator *sep)
 
 void command_peekinv(Client *c, const Seperator *sep)
 {
-	static enum {
+	enum {
 		peekWorn = 0x01,
 		peekInv = 0x02,
 		peekCursor = 0x04,
@@ -2783,7 +2783,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		peekBank = 0x10,
 		peekTrade = 0x20,
 		peekWorld = 0x40
-	};
+	} ;
 	
 	if (!c->GetTarget() || !c->GetTarget()->IsClient()) {
 		c->Message(0, "You must have a PC target selected for this command");
