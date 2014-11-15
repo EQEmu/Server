@@ -7,6 +7,7 @@ demonstar55: Don't use the hack for charms that doesn't work on RoF
 demonstar55: UF too
 demonstar55: Tit
 demonstar55: SoF
+demonstar55: SoD
 
 == 11/13/2014 ==
 Kayen: Implemented target type (44) 'Beams' (which projects an AE infront of caster with a specified length and width).

@@ -3931,7 +3931,7 @@ struct ItemSerializationHeader
 /*008*/	uint32 slot;
 /*012*/	uint32 price;
 /*016*/	uint32 merchant_slot; //1 if not a merchant item
-/*020*/	uint32 unknown020; //0
+/*020*/	uint32 scaled_value; //0
 /*024*/	uint32 instance_id; //unique instance id if not merchant item, else is merchant slot
 /*028*/	uint32 unknown028; //0
 /*032*/	uint32 last_cast_time;	// Unix Time from PP of last cast for this recast type if recast delay > 0

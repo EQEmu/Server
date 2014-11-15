@@ -3195,7 +3195,7 @@ namespace SoD
 
 		std::stringstream ss(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
 
-		const Item_Struct *item = inst->GetItem();
+		const Item_Struct *item = inst->GetUnscaledItem();
 		//_log(NET__ERROR, "Serialize called for: %s", item->Name);
 		SoD::structs::ItemSerializationHeader hdr;
 		hdr.stacksize = stackable ? charges : 1;
@@ -3206,7 +3206,7 @@ namespace SoD
 		hdr.slot = (merchant_slot == 0) ? slot_id : merchant_slot;
 		hdr.price = inst->GetPrice();
 		hdr.merchant_slot = (merchant_slot == 0) ? 1 : inst->GetMerchantCount();
-		hdr.unknown020 = 0;
+		hdr.scaled_value = inst->IsScaling() ? inst->GetExp() / 100 : 0;
 		hdr.instance_id = (merchant_slot == 0) ? inst->GetSerialNumber() : merchant_slot;
 		hdr.unknown028 = 0;
 		hdr.last_cast_time = ((item->RecastDelay > 1) ? 1212693140 : 0);
@@ -3329,6 +3329,7 @@ namespace SoD
 		ibs.SpellShield = item->SpellShield;
 		ibs.Avoidance = item->Avoidance;
 		ibs.Accuracy = item->Accuracy;
+		ibs.CharmFileID = item->CharmFileID;
 		ibs.FactionAmt1 = item->FactionAmt1;
 		ibs.FactionMod1 = item->FactionMod1;
 		ibs.FactionAmt2 = item->FactionAmt2;
