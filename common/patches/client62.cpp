@@ -1231,7 +1231,7 @@ namespace Client62
 		int16 slot_id = ServerToClient62Slot(slot_id_in);
 		uint32 merchant_slot = inst->GetMerchantSlot();
 		int16 charges = inst->GetCharges();
-		const Item_Struct *item = inst->GetItem();
+		const Item_Struct *item = inst->GetUnscaledItem();
 		int i;
 		uint32 sub_length;
 
@@ -1244,7 +1244,7 @@ namespace Client62
 			(merchant_slot == 0) ? slot_id_in : merchant_slot,
 			inst->GetPrice(),
 			(merchant_slot == 0) ? 1 : inst->GetMerchantCount(),
-			0,
+			inst->IsScaling() ? inst->GetExp() / 100 : 0,
 			//merchant_slot,	//instance ID, bullshit for now
 			// The 'Merchant Slot' needs to be some unique id for bazaar to work properly
 			(merchant_slot == 0) ? inst->GetSerialNumber() : merchant_slot,
