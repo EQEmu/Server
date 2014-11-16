@@ -3339,6 +3339,12 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		sprintf(temp1, "%d", spell_id);
 		parse->EventNPC(EVENT_CAST_ON, spelltar->CastToNPC(), this, temp1, 0);
 	}
+	else if (spelltar->IsClient())
+	{
+		char temp1[100];
+		sprintf(temp1, "%d", spell_id);
+		parse->EventPlayer(EVENT_CAST_ON, spelltar->CastToClient(),temp1, 0);
+	}
 
 	mod_spell_cast(spell_id, spelltar, reflect, use_resist_adjust, resist_adjust, isproc);
 
