@@ -3971,7 +3971,10 @@ XS(XS_Mob_CastSpell)
             resist_adjust = (int16)SvIV(ST(6));
         }
 
-		THIS->CastSpell(spell_id, target_id, slot, casttime, mana_cost, 0, 0xFFFFFFFF, 0xFFFFFFFF, 0, 0, &resist_adjust);
+		if (resist_adjust == 0)//If you do not pass resist adjust as nullptr it will ignore the spells default resist adjust
+			THIS->CastSpell(spell_id, target_id, slot, casttime, mana_cost, 0, 0xFFFFFFFF, 0xFFFFFFFF, 0, 0);
+		else
+			THIS->CastSpell(spell_id, target_id, slot, casttime, mana_cost, 0, 0xFFFFFFFF, 0xFFFFFFFF, 0, 0, &resist_adjust);
 	}
 	XSRETURN_EMPTY;
 }
