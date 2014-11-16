@@ -291,7 +291,7 @@
 9032|2014_04_12_SlowMitigation.sql|SHOW COLUMNS FROM `npc_types` LIKE 'slow_mitigation'|contains|float
 9034|2014_04_25_spawn_events.sql|SHOW COLUMNS FROM `spawn_events` LIKE 'strict'|empty|
 9035|2014_04_27_AISpellEffects.sql|SHOW COLUMNS FROM `npc_types` LIKE 'npc_spells_effects_id'|empty|
-9036|2014_05_04_SlowMitigationFix.sql|SHOW COLUMNS FROM `npc_types` LIKE 'slow_mitigation'|empty|
+9036|2014_05_04_SlowMitigationFix.sql|SHOW COLUMNS FROM `npc_types` LIKE 'slow_mitigation'|contains|float
 9038|2014_06_25_AA_Updates.sql|SELECT * FROM `altadv_vars` WHERE `skill_id` = '1604'|empty
 9039|2014_07_04_AA_Updates.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '158' AND `slot` = '1' AND `effectid` = '238'|empty
 9040|2014_07_10_npc_spells.sql|SHOW COLUMNS FROM `npc_spells` LIKE 'engaged_no_sp_recast_min'|empty|

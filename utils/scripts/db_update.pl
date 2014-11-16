@@ -77,6 +77,11 @@ mkdir('db_update');
 # print `"$path" --user $user --password="$pass" $db < db_update/db_update_run_file.txt`;
 
 #::: Check if db_version table exists... 
+if(trim(GetMySQLResult("SHOW COLUMNS FROM `db_version` LIKE 'Revision'")) ne ""){
+	print GetMySQLResult("DROP TABLE db_version");
+	print "Old `db_version` table present, dropping...\n\n";
+}
+
 if(GetMySQLResult("SHOW TABLES LIKE 'db_version'") eq ""){
 	print GetMySQLResult("
 		CREATE TABLE `db_version` (
@@ -253,7 +258,8 @@ sub Run_Database_Check{
 			print "Running Update: " . $val . " - " . $file_name . "\n";
 			print GetMySQLResultFromFile("db_update/$file_name");
 			print GetMySQLResult("UPDATE `db_version` SET `version` = $val");
-		}
+		} 
+		print "Continuing World Bootup...\n";
 		return;
 	}
 	
@@ -357,5 +363,3 @@ sub print_break{
 	if(!$debug){ return; } 
 	print "\n==============================================\n"; 
 }
-
-if($ARGV[0] eq "ran_from_world"){ print "Continuing World Bootup...\n"; }

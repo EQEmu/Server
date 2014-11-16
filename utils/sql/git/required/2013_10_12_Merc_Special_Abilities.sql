@@ -1,4 +1,5 @@
 ALTER TABLE `merc_stats`  ADD COLUMN `special_abilities` TEXT NOT NULL DEFAULT '' AFTER `specialattks`;
+ALTER TABLE `merc_stats` MODIFY COLUMN `special_abilities`  text CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL;
  
 UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "1,1^") WHERE specialattks LIKE BINARY '%S%';
 UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "2,1^") WHERE specialattks LIKE BINARY '%E%';
