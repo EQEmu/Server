@@ -3842,19 +3842,23 @@ void Client::Handle_OP_BlockedBuffs(const EQApplicationPacket *app)
 
 void Client::Handle_OP_BoardBoat(const EQApplicationPacket *app)
 {
-
-	if (app->size <= 5)
+	// this sends unclean mob name, so capped at 64
+	// a_boat006
+	if (app->size <= 5 || app->size > 64) {
+		LogFile->write(EQEMuLog::Error, "Size mismatch in OP_BoardBoad. Expected greater than 5 less than 64, got %i", app->size);
+		DumpPacket(app);
 		return;
+	}
 
-	char *boatname;
-	boatname = new char[app->size - 3];
-	memset(boatname, 0, app->size - 3);
-	memcpy(boatname, app->pBuffer, app->size - 4);
+	char boatname[64];
+	memcpy(boatname, app->pBuffer, app->size);
+	boatname[63] = '\0';
 
 	Mob* boat = entity_list.GetMob(boatname);
-	if (boat)
-		this->BoatID = boat->GetID();	// set the client's BoatID to show that it's on this boat
-	safe_delete_array(boatname);
+	if (!boat || (boat->GetRace() != CONTROLLED_BOAT && boat->GetRace() != 502))
+		return;
+	BoatID = boat->GetID();	// set the client's BoatID to show that it's on this boat
+
 	return;
 }
 
