@@ -12303,7 +12303,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		}
 	}
 
-	if (freeslotid == INVALID_INDEX)
+	if (!stacked && freeslotid == INVALID_INDEX)
 	{
 		Message(13, "You do not have room for any more items.");
 		safe_delete(outapp);
@@ -12348,7 +12348,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 
 	// start QS code
 	// stacking purchases not supported at this time - entire process will need some work to catch them properly
-	if (RuleB(QueryServ, PlayerLogMerchantTransactions) && (!stacked) && m_inv[freeslotid]) {
+	if (RuleB(QueryServ, PlayerLogMerchantTransactions)) {
 		ServerPacket* qspack = new ServerPacket(ServerOP_QSPlayerLogMerchantTransactions, sizeof(QSMerchantLogTransaction_Struct)+sizeof(QSTransactionItems_Struct));
 		QSMerchantLogTransaction_Struct* qsaudit = (QSMerchantLogTransaction_Struct*)qspack->pBuffer;
 
@@ -12366,14 +12366,24 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		qsaudit->char_money.copper = mpo->price % 10;
 		qsaudit->char_count = 0;
 
-		qsaudit->items[0].char_slot = freeslotid;
-		qsaudit->items[0].item_id = m_inv[freeslotid]->GetID();
+		qsaudit->items[0].char_slot = freeslotid == INVALID_INDEX ? 0 : freeslotid;
+		qsaudit->items[0].item_id = item->ID;
 		qsaudit->items[0].charges = mpo->quantity;
-		qsaudit->items[0].aug_1 = m_inv[freeslotid]->GetAugmentItemID(0);
-		qsaudit->items[0].aug_2 = m_inv[freeslotid]->GetAugmentItemID(1);
-		qsaudit->items[0].aug_3 = m_inv[freeslotid]->GetAugmentItemID(2);
-		qsaudit->items[0].aug_4 = m_inv[freeslotid]->GetAugmentItemID(3);
-		qsaudit->items[0].aug_5 = m_inv[freeslotid]->GetAugmentItemID(4);
+
+		if (freeslotid == INVALID_INDEX) {
+			qsaudit->items[0].aug_1 = 0;
+			qsaudit->items[0].aug_2 = 0;
+			qsaudit->items[0].aug_3 = 0;
+			qsaudit->items[0].aug_4 = 0;
+			qsaudit->items[0].aug_5 = 0;
+		}
+		else {
+			qsaudit->items[0].aug_1 = m_inv[freeslotid]->GetAugmentItemID(0);
+			qsaudit->items[0].aug_2 = m_inv[freeslotid]->GetAugmentItemID(1);
+			qsaudit->items[0].aug_3 = m_inv[freeslotid]->GetAugmentItemID(2);
+			qsaudit->items[0].aug_4 = m_inv[freeslotid]->GetAugmentItemID(3);
+			qsaudit->items[0].aug_5 = m_inv[freeslotid]->GetAugmentItemID(4);
+		}
 
 		qspack->Deflate();
 		if (worldserver.Connected()) { worldserver.SendPacket(qspack); }
@@ -12394,7 +12404,6 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	std::cout << "At 1: " << t1.getDuration() << std::endl;
 	return;
 }
-
 void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Merchant_Purchase_Struct)) {
