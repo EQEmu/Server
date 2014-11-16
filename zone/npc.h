@@ -243,6 +243,8 @@ public:
 	uint32	GetSwarmOwner();
 	uint32	GetSwarmTarget();
 	void	SetSwarmTarget(int target_id = 0);
+	void	DepopSwarmPets();
+	void	PetOnSpawn(NewSpawn_Struct* ns);
 
 	void	SignalNPC(int _signal_id);
 

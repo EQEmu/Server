@@ -6264,7 +6264,6 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 
 	static const float swarm_pet_x[MAX_SWARM_PETS] = { 5, -5, 5, -5, 10, -10, 10, -10, 8, -8, 8, -8 };
 	static const float swarm_pet_y[MAX_SWARM_PETS] = { 5, 5, -5, -5, 10, 10, -10, -10, 8, 8, -8, -8 };
-	TempPets(true);
 
 	while(summon_count > 0) {
 		NPCType *npc_dup = nullptr;

@@ -3622,6 +3622,42 @@ void EntityList::DestroyTempPets(Mob *owner)
 	}
 }
 
+int16 EntityList::CountTempPets(Mob *owner)
+{
+	int16 count = 0;
+	auto it = npc_list.begin();
+	while (it != npc_list.end()) {
+		NPC* n = it->second;
+		if (n->GetSwarmInfo()) {
+			if (n->GetSwarmInfo()->owner_id == owner->GetID()) {
+				count++;
+			}
+		}
+		++it;
+	}
+	
+	owner->SetTempPetCount(count);
+
+	return count;
+}
+
+void EntityList::AddTempPetsToHateList(Mob *owner, Mob* other, bool bFrenzy)
+{
+	if (!other || !owner)
+		return;
+
+	auto it = npc_list.begin();
+	while (it != npc_list.end()) {
+		NPC* n = it->second;
+		if (n->GetSwarmInfo()) {
+			if (n->GetSwarmInfo()->owner_id == owner->GetID()) {
+				n->CastToNPC()->hate_list.Add(other, 0, 0, bFrenzy);
+			}
+		}
+		++it;
+	}
+}
+
 bool Entity::CheckCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z,
 		float trg_x, float trg_y, float trg_z, float perwalk)
 {

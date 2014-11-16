@@ -122,17 +122,7 @@ void Mob::SpellProcess()
 void NPC::SpellProcess()
 {
 	Mob::SpellProcess();
-
-	if (GetSwarmInfo()) {
-		if (GetSwarmInfo()->duration->Check(false))
-			Depop();
-
-		Mob *targMob = entity_list.GetMob(GetSwarmInfo()->target);
-		if (GetSwarmInfo()->target != 0) {
-			if(!targMob || (targMob && targMob->IsCorpse()))
-				Depop();
-		}
-	}
+	DepopSwarmPets();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

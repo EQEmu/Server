@@ -405,8 +405,8 @@ void NPC::SetTarget(Mob* mob) {
 	if(mob == GetTarget())		//dont bother if they are allready our target
 		return;
 
-	//our target is already set, do not turn from the course, unless our current target is dead.
-	if(GetSwarmInfo() && GetTarget() && (GetTarget()->GetHP() > 0)) {
+	//This is not the default behavior for swarm pets, must be specified from quest functions or rules value.
+	if(GetSwarmInfo() && GetSwarmInfo()->target && GetTarget() && (GetTarget()->GetHP() > 0)) {
 		Mob *targ = entity_list.GetMob(GetSwarmInfo()->target);
 		if(targ != mob){
 			return;
@@ -1841,60 +1841,53 @@ bool Mob::HasNPCSpecialAtk(const char* parse) {
 void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 {
 	Mob::FillSpawnStruct(ns, ForWho);
+	PetOnSpawn(ns);
+	ns->spawn.is_npc = 1;
+}
 
+void NPC::PetOnSpawn(NewSpawn_Struct* ns)
+{
 	//Basic settings to make sure swarm pets work properly.
 	if  (GetSwarmOwner()) {
-		Client *c = entity_list.GetClientByID(GetSwarmOwner());
-			if(c) {
-				SetAllowBeneficial(1); //Allow client cast swarm pets to be heal/buffed.
-				SetPetOwnerClient(true);
-				//This is a hack to allow CLIENT swarm pets NOT to be targeted with F8. Warning: Will turn name 'Yellow'!
-				if (RuleB(Pets, SwarmPetNotTargetableWithHotKey))
-					ns->spawn.IsMercenary = 1;
+				
+		Mob *m = entity_list.GetMobID(GetSwarmOwner());
+			
+		if(m->IsClient()) {
+			SetPetOwnerClient(true); //Simple flag to determine if pet belongs to a client
+			SetAllowBeneficial(1);//Allow temp pets to receive buffs and heals if owner is client.
+			//This is a hack to allow CLIENT swarm pets NOT to be targeted with F8. Warning: Will turn name 'Yellow'!
+			if (RuleB(Pets, SwarmPetNotTargetableWithHotKey))
+				ns->spawn.IsMercenary = 1;
 			}
 			//NPC cast swarm pets should still be targetable with F8.
-			else
-				ns->spawn.IsMercenary = 0;
-	}
+		else
+			ns->spawn.IsMercenary = 0;
 
-	//Not recommended if using above (However, this will work better on older clients).
-	if (RuleB(Pets, UnTargetableSwarmPet)) {
-		if(GetOwnerID() || GetSwarmOwner()) {
-			ns->spawn.is_pet = 1;
-			if (!IsCharmed() && GetOwnerID()) {
-				Client *c = entity_list.GetClientByID(GetOwnerID());
-				if(c){
-					SetPetOwnerClient(true);
-					sprintf(ns->spawn.lastName, "%s's Pet", c->GetName());
-				}
-			}
-			else if (GetSwarmOwner()) {
-				ns->spawn.bodytype = 11;
-				if(!IsCharmed())
-				{
-					Client *c = entity_list.GetClientByID(GetSwarmOwner());
-					if(c){
-						SetPetOwnerClient(true);
-						sprintf(ns->spawn.lastName, "%s's Pet", c->GetName());
-					}
-				}
+		SetTempPet(true); //Simple mob flag for checking if temp pet
+		m->SetTempPetsActive(true); //Neccessary fail safe flag set if mob ever had a swarm pet to ensure they are removed.
+		m->SetTempPetCount(m->GetTempPetCount() + 1);
+	
+		//Not recommended if using above (However, this will work better on older clients).
+		if (RuleB(Pets, UnTargetableSwarmPet)) {
+			ns->spawn.bodytype = 11;
+			if(!IsCharmed() && m->IsClient())
+				sprintf(ns->spawn.lastName, "%s's Pet", m->GetName());
+		}
+	} 
+	
+	else if(GetOwnerID()) {
+		ns->spawn.is_pet = 1;
+		if (!IsCharmed() && GetOwnerID()) {
+			Client *c = entity_list.GetClientByID(GetOwnerID());
+			if(c){
+				SetPetOwnerClient(true);
+				sprintf(ns->spawn.lastName, "%s's Pet", c->GetName());
 			}
 		}
-	} else {
-		if(GetOwnerID()) {
-			ns->spawn.is_pet = 1;
-			if (!IsCharmed() && GetOwnerID()) {
-				Client *c = entity_list.GetClientByID(GetOwnerID());
-				if(c){
-					SetPetOwnerClient(true);
-					sprintf(ns->spawn.lastName, "%s's Pet", c->GetName());
-				}
-			}
-		} else
-			ns->spawn.is_pet = 0;
-	}
+	} 
 
-	ns->spawn.is_npc = 1;
+	else
+		ns->spawn.is_pet = 0;
 }
 
 void NPC::SetLevel(uint8 in_level, bool command)
@@ -2416,4 +2409,31 @@ void NPC::DoQuestPause(Mob *other) {
 		FaceTarget(other);
 	}
 
+}
+
+void NPC::DepopSwarmPets()
+{
+	if (GetSwarmInfo()) {
+		if (GetSwarmInfo()->duration->Check(false)){
+			Mob* owner = entity_list.GetMobID(GetSwarmInfo()->owner_id);
+			if (owner)
+				owner->SetTempPetCount(owner->GetTempPetCount() - 1);
+			
+			Depop();
+			return;
+		}
+
+		//This is only used for optional quest or rule derived behavior now if you force a temp pet on a specific target.
+		if (GetSwarmInfo()->target) {
+			Mob *targMob = entity_list.GetMob(GetSwarmInfo()->target);
+			if(!targMob || (targMob && targMob->IsCorpse())){
+				Mob* owner = entity_list.GetMobID(GetSwarmInfo()->owner_id);
+				if (owner)
+					owner->SetTempPetCount(owner->GetTempPetCount() - 1);
+
+				Depop();
+				return;
+			}
+		}
+	}
 }

@@ -2062,6 +2062,13 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	}
 	SetHP(0);
 	SetPet(0);
+
+	if (GetSwarmOwner()){
+		Mob* owner = entity_list.GetMobID(GetSwarmOwner());
+		if (owner)
+			owner->SetTempPetCount(owner->GetTempPetCount() - 1);
+	}
+
 	Mob* killer = GetHateDamageTop(this);
 
 	entity_list.RemoveFromTargets(this, p_depop);
@@ -2535,6 +2542,10 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 		if (myowner->IsAIControlled() && !myowner->GetSpecialAbility(IMMUNE_AGGRO))
 			myowner->hate_list.Add(other, 0, 0, bFrenzy);
 	}
+
+	if (other->GetTempPetCount())
+		entity_list.AddTempPetsToHateList(other, this, bFrenzy);
+
 	if (!wasengaged) {
 		if(IsNPC() && other->IsClient() && other->CastToClient())
 			parse->EventNPC(EVENT_AGGRO, this->CastToNPC(), other, "", 0);
