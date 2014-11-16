@@ -293,7 +293,6 @@
 9034, 2014_04_25_spawn_events.sql
 9035, 2014_04_27_AISpellEffects.sql
 9036, 2014_05_04_SlowMitigationFix.sql
-9037, 2014_06_25_AA_Updates..sql
 9038, 2014_06_25_AA_Updates.sql
 9039, 2014_07_04_AA_Updates.sql
 9040, 2014_07_10_npc_spells.sql
