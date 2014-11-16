@@ -20,9 +20,9 @@ while(<F>) {
 	elsif(/<db>(.*)<\/db>/i) { $db = $1; } 
 }
 
-print "
-============================================================
-#          EQEmu: Automatic Database Upgrade Check         #
+print 
+"============================================================
+           EQEmu: Automatic Database Upgrade Check         
 ============================================================
 ";
 
@@ -89,15 +89,19 @@ if(GetMySQLResult("SHOW TABLES LIKE 'db_version'") eq ""){
 @db_version = split(': ', `world db_version`);
 $bin_db_ver = trim($db_version[1]);
 $local_db_ver = trim(GetMySQLResult("SELECT `version` FROM `db_version` LIMIT 1"));
-print "Binary Database Version is: (" . $bin_db_ver . ")\n";
-print "Local Database Version is: (" . $local_db_ver . ")\n\n";
+print "	Binary Database Version: (" . $bin_db_ver . ")\n";
+print "	Local Database Version: (" . $local_db_ver . ")\n\n";
 
 #::: If World ran this script, and our version is up to date, continue...
-if($bin_db_ver == $local_db_ver && $ARGV[0] eq "ran_from_world"){ exit; }
+if($bin_db_ver == $local_db_ver && $ARGV[0] eq "ran_from_world"){ 
+	print "	Database up to Date: Continuing World Bootup...\n";
+	print "============================================================\n";
+	exit; 
+}
 
 print "Retrieving latest database manifest...\n";
-GetRemoteFile("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt", "db_update/db_update_manifest.txt");
-# GetRemoteFile("https://dl.dropboxusercontent.com/u/50023467/dl/db_update_manifest.txt", "db_update/db_update_manifest.txt");
+#GetRemoteFile("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt", "db_update/db_update_manifest.txt");
+GetRemoteFile("https://dl.dropboxusercontent.com/u/50023467/dl/db_update_manifest.txt", "db_update/db_update_manifest.txt");
 
 if($local_db_ver < $bin_db_ver){
 	print "You have missing database updates, type 1 or 2 to backup your database before running them as recommended...\n\n";
@@ -248,6 +252,7 @@ sub Run_Database_Check{
 			$file_name 		= trim($m_d{$val}[1]);
 			print "Running Update: " . $val . " - " . $file_name . "\n";
 			print GetMySQLResultFromFile("db_update/$file_name");
+			print GetMySQLResult("UPDATE `db_version` SET `version` = $val");
 		}
 		return;
 	}
@@ -352,3 +357,5 @@ sub print_break{
 	if(!$debug){ return; } 
 	print "\n==============================================\n"; 
 }
+
+if($ARGV[0] eq "ran_from_world"){ print "Continuing World Bootup...\n"; }
