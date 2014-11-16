@@ -1,5 +1,7 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/15/2014 ==
+Uleat(Natedog): A better fix for OP_ShopPlayerBuy - doesn't cause the issues that I introduced
 
 == 11/16/2014 ==
 Kayen: Implemented NPC Special Ability 41 'Allow To Tank', gives NPC opportunity to take aggro over a client in melee range.
