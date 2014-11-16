@@ -403,6 +403,13 @@ Mob *HateList::GetTop(Mob *center)
 				}
 			}
 
+			if (!isTopClientType) {
+				if (top->GetSpecialAbility(ALLOW_TO_TANK)){
+					isTopClientType = true;
+					topClientTypeInRange = top;
+				}
+			}
+
 			if(!isTopClientType)
 				return topClientTypeInRange ? topClientTypeInRange : nullptr;
 

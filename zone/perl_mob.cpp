@@ -1571,7 +1571,7 @@ XS(XS_Mob_TypesTempPet)
 {
 	dXSARGS;
 	if (items < 2 || items > 7)
-		Perl_croak(aTHX_ "Usage: Mob::TypesTempPet(THIS, typesid, name=nullptr, duration=0, follow=0, sticktarg=0, target=nullptr)");
+		Perl_croak(aTHX_ "Usage: Mob::TypesTempPet(THIS, typesid, name=nullptr, duration=0, follow=0, target=nullptr, sticktarg=0,)");
 	{
 		Mob *		THIS;
 		uint32		typesid = (uint32)SvUV(ST(1));
