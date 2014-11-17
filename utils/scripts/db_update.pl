@@ -135,6 +135,10 @@ sub ShowMenuPrompt {
     while (1) { 
 		{
 			local $| = 1;
+			if(!$menu_show && $ARGV[0] eq "ran_from_world"){
+				$menu_show++;
+				next;
+			}
 			print MenuOptions(), '> ';
 		}
 
@@ -151,7 +155,7 @@ sub ShowMenuPrompt {
 		}
 		else {
 			if($ARGV[0] ne "ran_from_world"){
-				warn "\n\nInvalid selection\n\n";
+				# warn "\n\nInvalid selection\n\n";
 			}
 		}
 	}
