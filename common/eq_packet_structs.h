@@ -4389,8 +4389,8 @@ struct ControlBoat_Struct {
 struct AugmentInfo_Struct
 {
 /*000*/ uint32	itemid;			// id of the solvent needed
-/*004*/ uint8	window;			// window to display the information in
-/*005*/ uint8	unknown005[67];	// total packet length 72, all the rest were always 00
+/*004*/ uint32	window;			// window to display the information in
+/*008*/ char	augment_info[64];	// the reply has the text here
 /*072*/
 };
 

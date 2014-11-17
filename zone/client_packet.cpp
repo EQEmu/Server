@@ -3034,47 +3034,23 @@ void Client::Handle_OP_AssistGroup(const EQApplicationPacket *app)
 
 void Client::Handle_OP_AugmentInfo(const EQApplicationPacket *app)
 {
-
 	// This packet is sent by the client when an Augment item information window is opened.
-	// We respond with an OP_ReadBook containing the type of distiller required to remove the augment.
-	// The OP_Augment packet includes a window parameter to determine which Item window in the UI the
-	// text is to be displayed in. out->type = 2 indicates the BookText_Struct contains item information.
-	//
+	// Some clients this seems to nuke the charm text (ex. Adventurer's Stone)
 
-	if (app->size != sizeof(AugmentInfo_Struct))
-	{
+	if (app->size != sizeof(AugmentInfo_Struct)) {
 		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_AugmentInfo expected %i got %i",
 			sizeof(AugmentInfo_Struct), app->size);
-
 		DumpPacket(app);
-
 		return;
 	}
+
 	AugmentInfo_Struct* AugInfo = (AugmentInfo_Struct*)app->pBuffer;
-
-	char *outstring = nullptr;
-
 	const Item_Struct * item = database.GetItem(AugInfo->itemid);
 
-	if (item)
-	{
-		MakeAnyLenString(&outstring, "You must use the solvent %s to remove this augment safely.", item->Name);
-
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ReadBook, strlen(outstring) + sizeof(BookText_Struct));
-
-		BookText_Struct *out = (BookText_Struct *)outapp->pBuffer;
-
-		out->window = AugInfo->window;
-
-		out->type = 2;
-
-		out->invslot = 0;
-
-		strcpy(out->booktext, outstring);
-
-		safe_delete_array(outstring);
-
-		FastQueuePacket(&outapp);
+	if (item) {
+		strn0cpy(AugInfo->augment_info, item->Name, 64);
+		AugInfo->itemid = 0;
+		QueuePacket(app);
 	}
 }
 
