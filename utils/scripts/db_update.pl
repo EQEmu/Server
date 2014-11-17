@@ -6,6 +6,11 @@
 #::: Purpose: To upgrade databases with ease and maintain versioning
 ###########################################################
 
+$perl_version = $^V;
+$perl_version =~s/v//g;
+print "Perl Version is " . $perl_version . "\n";
+if($perl_version > 5.12){ no warnings 'uninitialized';  }
+
 my $confile = "eqemu_config.xml"; #default
 open(F, "<$confile") or die "Unable to open config: $confile\n";
 my $indb = 0;
@@ -49,19 +54,15 @@ if($OS eq "Windows"){
 
 #::: Linux Check
 if($OS eq "Linux"){
-	$has_mysql_path = `whereis mysql`; 
-	if($has_mysql_path=~/MySQL|MariaDB/i){ 
-		@mysql = split(' ', $has_mysql_path);
-		foreach my $v (@mysql){
-			if($v=~/MySQL|MariaDB/i){ 
-				$path = $v; 
-				last;
-			}
-		}
-		print "	(Linux) MySQL is in system path \n";
-		print "	Path = " . $path . "\n";
-		print "============================================================\n";
+	$path = `which mysql`; 
+	if ($path eq "") {
+		$path = `which mariadb`;
 	}
+	$path =~s/\n//g; 
+	
+	print "	(Linux) MySQL is in system path \n";
+	print "	Path = " . $path . "\n";
+	print "============================================================\n";
 }
 
 #::: Path not found, error and exit
@@ -74,26 +75,26 @@ if($path eq ""){
 #::: Create db_update working directory if not created
 mkdir('db_update'); 
 
-# print `"$path" --user $user --password="$pass" $db < db_update/db_update_run_file.txt`;
-
 #::: Check if db_version table exists... 
-if(trim(GetMySQLResult("SHOW COLUMNS FROM `db_version` LIKE 'Revision'")) ne ""){
+if(trim(GetMySQLResult("SHOW COLUMNS FROM db_version LIKE 'Revision'")) ne ""){
 	print GetMySQLResult("DROP TABLE db_version");
-	print "Old `db_version` table present, dropping...\n\n";
+	print "Old db_version table present, dropping...\n\n";
 }
 
 if(GetMySQLResult("SHOW TABLES LIKE 'db_version'") eq ""){
 	print GetMySQLResult("
-		CREATE TABLE `db_version` (
-		  `version` int(11) DEFAULT '0'
+		CREATE TABLE db_version (
+		  version int(11) DEFAULT '0'
 		) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-		INSERT INTO `db_version` (`version`) VALUES ('1000');");
+		INSERT INTO db_version (version) VALUES ('1000');");
 	print "Table 'db_version' does not exists.... Creating...\n\n";
 }
 
-@db_version = split(': ', `world db_version`);
+if($OS eq "Windows"){ @db_version = split(': ', `world db_version`); }
+if($OS eq "Linux"){ @db_version = split(': ', `./world db_version`); }
+
 $bin_db_ver = trim($db_version[1]);
-$local_db_ver = trim(GetMySQLResult("SELECT `version` FROM `db_version` LIMIT 1"));
+$local_db_ver = trim(GetMySQLResult("SELECT version FROM db_version LIMIT 1"));
 print "	Binary Database Version: (" . $bin_db_ver . ")\n";
 print "	Local Database Version: (" . $local_db_ver . ")\n\n";
 
@@ -103,6 +104,8 @@ if($bin_db_ver == $local_db_ver && $ARGV[0] eq "ran_from_world"){
 	print "============================================================\n";
 	exit; 
 }
+
+if(!$bin_db_ver){ $bin_db_ver = 9100; }
 
 print "Retrieving latest database manifest...\n";
 GetRemoteFile("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt", "db_update/db_update_manifest.txt");
@@ -198,17 +201,22 @@ sub database_dump_compress {
 	print "Performing database backup....\n";
 	print `perl db_dumper.pl database="$db"  loc="backups" compress`;
 }
-sub Exit{}
+sub Exit{ }
 
 #::: Returns Tab Delimited MySQL Result from Command Line
 sub GetMySQLResult{
 	my $run_query = $_[0];
-	return `"$path" --user $user --password="$pass" $db -N -B -e "$run_query"`;
+	if($OS eq "Windows"){ return `"$path" --user $user --password="$pass" $db -N -B -e "$run_query"`; }
+	if($OS eq "Linux"){ 
+		$run_query =~s/`//g;
+		return `$path --user="$user" --password="$pass" $db -N -B -e "$run_query"`; 
+	}
 }
 
 sub GetMySQLResultFromFile{
 	my $update_file = $_[0];
-	return `"$path" --user $user --password="$pass" --force $db < $update_file`; 
+	if($OS eq "Windows"){ return `"$path" --user $user --password="$pass" --force $db < $update_file`;  }
+	if($OS eq "Linux"){ return `"$path" --user $user --password="$pass" --force $db < $update_file`;  }
 }
 
 #::: Gets Remote File based on URL (1st Arg), and saves to destination file (2nd Arg)
@@ -238,7 +246,7 @@ sub GetRemoteFile{
 	}
 	if($OS eq "Linux"){ 
 		#::: wget -O db_update/db_update_manifest.txt https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt
-		$wget = `wget -O $Dest_File $URL`;
+		$wget = `wget --quiet -O $Dest_File $URL`;
 		print "	URL:	" . $URL . "\n";
 		print "	Saved:	" . $Dest_File . " \n";
 		if($wget=~/unable to resolve/i){
@@ -265,7 +273,7 @@ sub Run_Database_Check{
 			$file_name 		= trim($m_d{$val}[1]);
 			print "Running Update: " . $val . " - " . $file_name . "\n";
 			print GetMySQLResultFromFile("db_update/$file_name");
-			print GetMySQLResult("UPDATE `db_version` SET `version` = $val WHERE `version` < $val");
+			print GetMySQLResult("UPDATE db_version SET version = $val WHERE version < $val");
 		} 
 	} 
 	
@@ -277,7 +285,6 @@ sub Run_Database_Check{
 		chomp;
 		$o = $_;
 		if($o=~/#/i){ next; }
-		#print $o . "\n";
 		@manifest = split('\|', $o);
 		$m_d{$manifest[0]} = [@manifest];
 	}
