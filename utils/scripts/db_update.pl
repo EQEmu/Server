@@ -10,6 +10,7 @@ $perl_version = $^V;
 $perl_version =~s/v//g;
 print "Perl Version is " . $perl_version . "\n";
 if($perl_version > 5.12){ no warnings 'uninitialized';  }
+no warnings;
 
 my $confile = "eqemu_config.xml"; #default
 open(F, "<$confile") or die "Unable to open config: $confile\n";
@@ -157,7 +158,7 @@ sub ShowMenuPrompt {
 }
 
 sub MenuOptions { 
-	if(defined(@total_updates)){ 
+	if(@total_updates){ 
 		$option[3] = "Run pending updates... (" . scalar (@total_updates) . ")";
 	}
 	else{

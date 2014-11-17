@@ -2094,6 +2094,7 @@ bool Database::CheckDatabaseConversions() {
 #endif
 	}
 	/* Run Automatic Database Upgrade Script */
+
 	system("perl db_update.pl ran_from_world"); 
 
 	return true;
