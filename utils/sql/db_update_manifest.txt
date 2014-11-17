@@ -256,6 +256,7 @@
 5256|2471_required_aa_updates.sql
 5257|2482_required_start_zones.sql
 5258|2504_required_aa_updates.sql
+8000|mercs.sql|SHOW TABLES LIKE 'merc_stats'|empty|
 9000|2013_02_18_Merc_Rules_and_Tables.sql|SELECT * FROM `rule_values` WHERE `rule_name` LIKE '%Mercs:ResurrectRadius%'|empty|
 9001|2013_02_25_Impr_HT_LT.sql|SHOW TABLES LIKE 'merc_inventory'|empty|
 9002|2013_03_1_Merc_Rules_and_Equipment.sql|SHOW TABLES LIKE 'merc_inventory'|empty|

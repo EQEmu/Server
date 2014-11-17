@@ -257,7 +257,7 @@ sub Run_Database_Check{
 			$file_name 		= trim($m_d{$val}[1]);
 			print "Running Update: " . $val . " - " . $file_name . "\n";
 			print GetMySQLResultFromFile("db_update/$file_name");
-			print GetMySQLResult("UPDATE `db_version` SET `version` = $val");
+			print GetMySQLResult("UPDATE `db_version` SET `version` = $val WHERE `version` < $val");
 		} 
 		print "Continuing World Bootup...\n";
 		return;
