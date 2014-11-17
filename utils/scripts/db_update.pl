@@ -108,11 +108,17 @@ print "Retrieving latest database manifest...\n";
 #GetRemoteFile("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt", "db_update/db_update_manifest.txt");
 GetRemoteFile("https://dl.dropboxusercontent.com/u/50023467/dl/db_update_manifest.txt", "db_update/db_update_manifest.txt");
 
-if($local_db_ver < $bin_db_ver){
+if($local_db_ver < $bin_db_ver && $ARGV[0] eq "ran_from_world"){
 	print "You have missing database updates, type 1 or 2 to backup your database before running them as recommended...\n\n";
 	#::: Display Menu 
 	ShowMenuPrompt();
 }
+else{
+	#::: Most likely ran standalone
+	print "\n";
+	ShowMenuPrompt();
+}
+
 
 sub ShowMenuPrompt {
     my %dispatch = (
@@ -152,14 +158,16 @@ sub MenuOptions {
 		$option[3] = "Run pending updates... (" . scalar (@total_updates) . ")";
 	}
 	else{
-		$option[3] = "Check for pending Database updates - Stages updates for automatic upgrade...";
+		$option[3] = "Check for pending Database updates
+		Stages updates for automatic upgrade...";
 	}
 
 return <<EO_MENU;
 Database Management Menu (Please Select):
-	1) Backup Database - Ideal to perform before performing updates (Saves to Backups folder)
-	2) Backup Database Compressed (Saves Space, Takes Longer)
-		Ideal to perform before performing updates  (Saves to Backups folder)
+	1) Backup Database - (Saves to Backups folder) 
+		Ideal to perform before performing updates
+	2) Backup Database Compressed - (Saves to Backups folder)
+		Ideal to perform before performing updates
 	3) $option[3]
 	0) Exit
 	
@@ -200,7 +208,7 @@ sub GetMySQLResult{
 
 sub GetMySQLResultFromFile{
 	my $update_file = $_[0];
-	return `"$path" --user $user --password="$pass" $db < $update_file`;
+	return `"$path" --user $user --password="$pass" --force $db < $update_file`; 
 }
 
 #::: Gets Remote File based on URL (1st Arg), and saves to destination file (2nd Arg)
@@ -259,9 +267,7 @@ sub Run_Database_Check{
 			print GetMySQLResultFromFile("db_update/$file_name");
 			print GetMySQLResult("UPDATE `db_version` SET `version` = $val WHERE `version` < $val");
 		} 
-		print "Continuing World Bootup...\n";
-		return;
-	}
+	} 
 	
 	#::: Run 1 - Initial checking of needed updates...
 	print "Reading manifest...\n\n";
@@ -279,7 +285,7 @@ sub Run_Database_Check{
 	@total_updates = ();
 	
 	#::: Iterate through Manifest backwards from binary version down to local version...
-	for($i = $bin_db_ver; $i > $local_db_ver; $i--){ 
+	for($i = $bin_db_ver; $i > 1000; $i--){ 
 		if(!defined($m_d{$i}[0])){ next; } 
 		
 		$file_name 		= trim($m_d{$i}[1]);
