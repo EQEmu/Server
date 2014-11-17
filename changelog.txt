@@ -2,6 +2,60 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 11/16/2014 ==
 demonstar55: fix size issue with ControlBoat_Struct and exploit fix in OP_BoardBoat
+Akkadius: Implemented Automatic Database update and versioning system
+Akkadius: Created database revision define, this is located in version.h in common #define CURRENT_BINARY_DATABASE_VERSION 9057
+	- This revision define will need to be incremented each time a database update is made
+	- Along with a revision define increment, you will need to update the db_update manifest located in:
+		- https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt
+		- An entry needs to be made at the bottom of the manifest, the entry is quite simple
+		- Example: 9057|2014_11_13_spells_new_updates.sql|SHOW COLUMNS FROM `spells_new` LIKE 'disallow_sit'|empty|
+			- This latest example is checking to see if the spells_new table contains the column 'disallow_sit', if its empty, the update needs to be ran
+				- More examples of match types below:
+		# Example: Version|Filename.sql|Query_to_Check_Condition_For_Needed_Update|match type|text to match
+		#	0 = Database Version
+		#	1 = Filename.sql
+		#	2 = Query_to_Check_Condition_For_Needed_Update
+		#	3 = Match Type - If condition from match type to Value 4 is true, update will flag for needing to be ran
+		#		contains = If query results contains text from 4th value
+		#		match = If query results matches text from 4th value
+		#		missing = If query result is missing text from 4th value
+		#		empty = If the query results in no results
+		#		not_empty = If the query is not empty
+		#	4 = Text to match
+	- The manifest contains all database updates 'Required' to be made to the schema, and it will contain a working backport all the way back to SVN - 
+		currently it is tested and backported through the beginning of our Github repo
+	- On world bootup or standalone run of db_update.pl, users will be prompted with a simple menu that we will expand upon later:
+	
+		============================================================
+			   EQEmu: Automatic Database Upgrade Check
+		============================================================
+				Operating System is: MSWin32
+				(Windows) MySQL is in system path
+				Path = C:\Program Files\MariaDB 10.0\bin/mysql
+		============================================================
+				Binary Database Version: (9057)
+				Local Database Version: (9057)
+
+				Database up to Date: Continuing World Bootup...
+		============================================================
+		Retrieving latest database manifest...
+        URL:    https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt
+        Saved:  db_update/db_update_manifest.txt
+
+Database Management Menu (Please Select):
+        1) Backup Database - (Saves to Backups folder)
+                Ideal to perform before performing updates
+        2) Backup Database Compressed - (Saves to Backups folder)
+                Ideal to perform before performing updates
+        3) Check for pending Database updates
+                Stages updates for automatic upgrade...
+        0) Exit
+
+Akkadius: Created db_update.pl, placed in utils/scripts folder, used for the automatic database update routine (Linux/Windows)
+	- db_update.pl script created db_version table if not created, if old one is present it will remove it
+Akkadius: Created db_dumper.pl, placed in utils/scripts folder, used for the automatic database update routine backups and standalone backups (Linux/Windows)
+Akkadius: World will now check the db_update.pl script on bootup, if the db_update.pl script is not present, it will fetch it remotely before running - 
+	when db_update.pl is done running, world will continue with bootup
 
 == 11/15/2014 ==
 Uleat(Natedog): A better fix for OP_ShopPlayerBuy - doesn't cause the issues that I introduced

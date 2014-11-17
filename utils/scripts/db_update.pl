@@ -105,8 +105,8 @@ if($bin_db_ver == $local_db_ver && $ARGV[0] eq "ran_from_world"){
 }
 
 print "Retrieving latest database manifest...\n";
-#GetRemoteFile("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt", "db_update/db_update_manifest.txt");
-GetRemoteFile("https://dl.dropboxusercontent.com/u/50023467/dl/db_update_manifest.txt", "db_update/db_update_manifest.txt");
+GetRemoteFile("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt", "db_update/db_update_manifest.txt");
+# GetRemoteFile("https://dl.dropboxusercontent.com/u/50023467/dl/db_update_manifest.txt", "db_update/db_update_manifest.txt");
 
 if($local_db_ver < $bin_db_ver && $ARGV[0] eq "ran_from_world"){
 	print "You have missing database updates, type 1 or 2 to backup your database before running them as recommended...\n\n";

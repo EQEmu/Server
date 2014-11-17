@@ -111,6 +111,15 @@ int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformWorld);
 	set_exception_handler();
 
+	/* Database Version Check */
+	uint32 Database_Version = CURRENT_BINARY_DATABASE_VERSION;
+	if (argc >= 2) { 
+		if (strcasecmp(argv[1], "db_version") == 0) {
+			std::cout << "Binary Database Version: " << Database_Version << std::endl;
+			return 0;
+		}
+	}
+
 	// Load server configuration
 	_log(WORLD__INIT, "Loading server configuration..");
 	if (!WorldConfig::LoadConfig()) {
