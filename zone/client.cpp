@@ -7297,26 +7297,24 @@ void Client::SendMercPersonalInfo()
 {
 	uint32 mercTypeCount = 1;
 	uint32 mercCount = 1; //TODO: Un-hardcode this and support multiple mercs like in later clients than SoD.
-	//uint32 packetSize = 0;
-	uint32 i=0;
+	uint32 i = 0;
 	uint32 altCurrentType = 19; //TODO: Implement alternate currency purchases involving mercs!
 
-	if (GetClientVersion() >= EQClientRoF)
+	MercTemplate *mercData = &zone->merc_templates[GetMercInfo().MercTemplateID];
+	
+	int stancecount = 0;
+	stancecount += zone->merc_stance_list[GetMercInfo().MercTemplateID].size();
+	if(stancecount > MAX_MERC_STANCES || mercCount > MAX_MERC || mercTypeCount > MAX_MERC_GRADES)
 	{
-		MercTemplate *mercData = &zone->merc_templates[GetMercInfo().MercTemplateID];
+		SendMercMerchantResponsePacket(0);
+		return;
+	}
 
-		if (mercData)
+	if(mercData)
+	{
+		if (GetClientVersion() >= EQClientRoF)
 		{
-			int i = 0;
-			int stancecount = 0;
-			stancecount += zone->merc_stance_list[GetMercInfo().MercTemplateID].size();
-
-			if(stancecount > MAX_MERC_STANCES || mercCount > MAX_MERC || mercTypeCount > MAX_MERC_GRADES)
-			{
-				SendMercMerchantResponsePacket(0);
-				return;
-			}
-			if (mercCount > 0 && mercCount)
+			if (mercCount > 0)
 			{
 				EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryDataUpdate, sizeof(MercenaryDataUpdate_Struct));
 				MercenaryDataUpdate_Struct* mdus = (MercenaryDataUpdate_Struct*)outapp->pBuffer;
@@ -7354,40 +7352,19 @@ void Client::SendMercPersonalInfo()
 
 				mdus->MercData[i].MercUnk05 = 1;
 				FastQueuePacket(&outapp);
+				safe_delete(outapp);
 				return;
 			}
 		}
-	}
-	else
-	{
-		int stancecount = 0;
-		stancecount += zone->merc_stance_list[GetMercInfo().MercTemplateID].size();
-
-		if(mercCount > MAX_MERC || mercTypeCount > MAX_MERC_GRADES)
+		else
 		{
-			if (GetClientVersion() == EQClientSoD)
+			if(mercTypeCount > 0 && mercCount > 0)
 			{
-				SendMercMerchantResponsePacket(0);
-			}
-			return;
-		}
-
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryDataResponse, sizeof(MercenaryMerchantList_Struct));
-		MercenaryMerchantList_Struct* mml = (MercenaryMerchantList_Struct*)outapp->pBuffer;
-		MercTemplate *mercData = &zone->merc_templates[GetMercInfo().MercTemplateID];
-
-
-		if(mercData)
-		{
-			if(mercTypeCount > 0)
-			{
-				mml->MercTypeCount = mercTypeCount; //We only should have one merc entry.
+				EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryDataResponse, sizeof(MercenaryMerchantList_Struct));
+				MercenaryMerchantList_Struct* mml = (MercenaryMerchantList_Struct*)outapp->pBuffer;
+				mml->MercTypeCount = mercTypeCount; //We should only have one merc entry.
 				mml->MercGrades[i] = 1;
-			}
-			mml->MercCount = mercCount;
-			if(mercCount > 0)
-			{
-
+				mml->MercCount = mercCount;
 				mml->Mercs[i].MercID = mercData->MercTemplateID;
 				mml->Mercs[i].MercType = mercData->MercType;
 				mml->Mercs[i].MercSubType = mercData->MercSubType;
@@ -7404,7 +7381,7 @@ void Client::SendMercPersonalInfo()
 				mml->Mercs[i].StanceCount = zone->merc_stance_list[mercData->MercTemplateID].size();
 				mml->Mercs[i].MercUnk03 = 0;
 				mml->Mercs[i].MercUnk04 = 1;
-				//mml->Mercs[i].MercName;
+				strn0cpy(mml->Mercs[i].MercName, GetMercInfo().merc_name , sizeof(mml->Mercs[i].MercName));
 				int stanceindex = 0;
 				if(mml->Mercs[i].StanceCount != 0)
 				{
@@ -7418,31 +7395,12 @@ void Client::SendMercPersonalInfo()
 					}
 				}
 				FastQueuePacket(&outapp);
-			}
-			else
-			{
 				safe_delete(outapp);
-				if (GetClientVersion() == EQClientSoD)
-				{
-					SendMercMerchantResponsePacket(0);
-				}
 				return;
 			}
-			if (GetClientVersion() == EQClientSoD)
-			{
-				SendMercMerchantResponsePacket(0);
-			}
-		}
-		else
-		{
-			safe_delete(outapp);
-			if (GetClientVersion() == EQClientSoD)
-			{
-			SendMercMerchantResponsePacket(0);
-			}
-			return;
 		}
 	}
+	SendMercMerchantResponsePacket(0);
 }
 
 void Client::SendClearMercInfo()

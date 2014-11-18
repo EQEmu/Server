@@ -9699,17 +9699,13 @@ void Client::Handle_OP_MercenaryDismiss(const EQApplicationPacket *app)
 		Message(7, "Mercenary Debug: Dismiss Request ( %i ) Received.", Command);
 
 	// Handle the dismiss here...
-	if (GetMercID()) {
-		Merc* merc = GetMerc();
-
-		if (merc) {
-			if (CheckCanDismissMerc()) {
-				merc->Dismiss();
-			}
+	Merc* merc = GetMerc();
+	if (merc) {
+		if (CheckCanDismissMerc()) {
+			merc->Dismiss();
 		}
 	}
 
-	//SendMercMerchantResponsePacket(10);
 }
 
 void Client::Handle_OP_MercenaryHire(const EQApplicationPacket *app)
@@ -9749,20 +9745,21 @@ void Client::Handle_OP_MercenaryHire(const EQApplicationPacket *app)
 			return;
 		}
 
-		if (RuleB(Mercs, ChargeMercPurchaseCost)) {
-			uint32 cost = Merc::CalcPurchaseCost(merc_template->MercTemplateID, GetLevel()) * 100; // Cost is in gold
-			TakeMoneyFromPP(cost, true);
-		}
-
 		// Set time remaining to max on Hire
 		GetMercInfo().MercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS);
 
 		// Get merc, assign it to client & spawn
 		Merc* merc = Merc::LoadMerc(this, merc_template, merchant_id, false);
 
-		if (merc) {
+		if (merc)
+		{
 			SpawnMerc(merc, true);
 			merc->Save();
+
+			if (RuleB(Mercs, ChargeMercPurchaseCost)) {
+				uint32 cost = Merc::CalcPurchaseCost(merc_template->MercTemplateID, GetLevel()) * 100; // Cost is in gold
+				TakeMoneyFromPP(cost, true);
+			}
 
 			// 0 is approved hire request
 			SendMercMerchantResponsePacket(0);

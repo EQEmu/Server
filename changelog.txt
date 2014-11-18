@@ -1,11 +1,14 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
-== 11/16/2014 ==
-demonstar55: Correct OP_AugmentInfo reply. This fixes RoF display issue with Adventurer's Stone
-	Still issues with UF/SoF/SoD though.
+== 11/18/2014 ==
+Trevius: Mercenaries can now zone once again.
+
+== 11/17/2014 ==
+demonstar55: Correct OP_AugmentInfo reply. This fixes RoF display issue with Adventurer's Stone. Still issues with UF/SoF/SoD though.
 
 == 11/16/2014 ==
 demonstar55: fix size issue with ControlBoat_Struct and exploit fix in OP_BoardBoat
+
 Akkadius: Implemented Automatic Database update and versioning system
 Akkadius: Created database revision define, this is located in version.h in common #define CURRENT_BINARY_DATABASE_VERSION 9057
 	- This revision define will need to be incremented each time a database update is made
