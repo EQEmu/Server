@@ -66,6 +66,21 @@ Akkadius: World will now check the db_update.pl script on bootup, if the db_upda
 
 == 11/15/2014 ==
 Uleat(Natedog): A better fix for OP_ShopPlayerBuy - doesn't cause the issues that I introduced
+Kayen: Implemented NPC Special Ability 41 'Allow To Tank', gives NPC opportunity to take aggro over a client in melee range.
+Kayen: Updated swarm pet AI to be consistent with live.
+
+*OLD AI: Swarm pet would lock on to target until target died, then depop as soon as target died.
+
+*NEW AI: Swarm pet will attack cast on target, NOT perma locked it can change targets if attacked
+by something else that generate more hate. When target dies swarm pet will follow owner, if owner is
+attacked by something else the swarm pet will attack it (until duration timer despawns the pet).
+
+Kayen: Updated perl quest function: MakeTempPet(Tspell_id, name=nullptr, duration=0, target=nullptr, sticktarg=0)
+Kayen: Implemented perl quest function:  Mob::TypesTempPet(npctypesid, name=nullptr, duration=0, follow=0, target=nullptr, sticktarg=0)
+Note: 'sticktarg' field will cause the swarm pet to use the OLD AI
+
+Rule to use OLD AI only - default is disabled.
+Optional SQL: utils/sql/git/optional/2014_11_15_SwarmPetTargetLock.sql
 
 == 11/14/2014 ==
 Secrets: Identified object size and solidtype as flags. Exported them as functions to Perl.

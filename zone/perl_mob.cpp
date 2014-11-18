@@ -1517,14 +1517,15 @@ XS(XS_Mob_MakeTempPet); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_MakeTempPet)
 {
 	dXSARGS;
-	if (items < 2 || items > 5)
-		Perl_croak(aTHX_ "Usage: Mob::MakeTempPet(THIS, spell_id, name=nullptr, duration=0, target=nullptr)");
+	if (items < 2 || items > 6)
+		Perl_croak(aTHX_ "Usage: Mob::MakeTempPet(THIS, spell_id, name=nullptr, duration=0, target=nullptr, sticktarg=0)");
 	{
 		Mob *		THIS;
 		uint16		spell_id = (uint16)SvUV(ST(1));
 		char *		name;
 		uint32		duration;
 		Mob *		target;
+		bool		sticktarg;
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -1554,7 +1555,13 @@ XS(XS_Mob_MakeTempPet)
 		else
 			Perl_croak(aTHX_ "owner is not of type Mob");
 
-		THIS->TemporaryPets(spell_id, target, name, duration);
+		if (items < 6)
+			sticktarg = false;
+		else {
+			sticktarg = (bool)SvTRUE(ST(5));
+		}
+
+		THIS->TemporaryPets(spell_id, target, name, duration, true, sticktarg);
 	}
 	XSRETURN_EMPTY;
 }
@@ -1563,15 +1570,16 @@ XS(XS_Mob_TypesTempPet); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_TypesTempPet)
 {
 	dXSARGS;
-	if (items < 2 || items > 6)
-		Perl_croak(aTHX_ "Usage: Mob::TypesTempPet(THIS, typesid, name=nullptr, duration=0, target=nullptr, follow=0)");
+	if (items < 2 || items > 7)
+		Perl_croak(aTHX_ "Usage: Mob::TypesTempPet(THIS, typesid, name=nullptr, duration=0, follow=0, target=nullptr, sticktarg=0,)");
 	{
 		Mob *		THIS;
 		uint32		typesid = (uint32)SvUV(ST(1));
 		char *		name;
 		uint32		duration;
-		Mob *		target;
 		bool		follow;
+		Mob *		target;
+		bool		sticktarg;
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -1593,21 +1601,28 @@ XS(XS_Mob_TypesTempPet)
 			duration = (uint32)SvUV(ST(3));
 
 		if (items < 5)
+			follow = true;
+		else {
+			follow = (bool)SvTRUE(ST(4));
+		}
+
+		if (items < 6)
 			target = nullptr;
-		else if (sv_derived_from(ST(4), "Mob")) {
-			IV tmp = SvIV((SV*)SvRV(ST(4)));
+		else if (sv_derived_from(ST(5), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(5)));
 			target = INT2PTR(Mob *,tmp);
 		}
 		else
 			Perl_croak(aTHX_ "target is not of type Mob");
 
-		if (items < 6)
-			follow = false;
+		
+		if (items < 7)
+			sticktarg = false;
 		else {
-			follow = (bool)SvTRUE(ST(5));
+			sticktarg = (bool)SvTRUE(ST(6));
 		}
 
-		THIS->TypesTemporaryPets(typesid, target, name, duration, follow);
+		THIS->TypesTemporaryPets(typesid, target, name, duration, follow, sticktarg);
 	}
 	XSRETURN_EMPTY;
 }
@@ -3956,7 +3971,10 @@ XS(XS_Mob_CastSpell)
             resist_adjust = (int16)SvIV(ST(6));
         }
 
-		THIS->CastSpell(spell_id, target_id, slot, casttime, mana_cost, 0, 0xFFFFFFFF, 0xFFFFFFFF, 0, 0, &resist_adjust);
+		if (resist_adjust == 0)//If you do not pass resist adjust as nullptr it will ignore the spells default resist adjust
+			THIS->CastSpell(spell_id, target_id, slot, casttime, mana_cost, 0, 0xFFFFFFFF, 0xFFFFFFFF, 0, 0);
+		else
+			THIS->CastSpell(spell_id, target_id, slot, casttime, mana_cost, 0, 0xFFFFFFFF, 0xFFFFFFFF, 0, 0, &resist_adjust);
 	}
 	XSRETURN_EMPTY;
 }
@@ -8433,7 +8451,8 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "SetRace"), XS_Mob_SetRace, file, "$$");
 		newXSproto(strcpy(buf, "SetGender"), XS_Mob_SetGender, file, "$$");
 		newXSproto(strcpy(buf, "SendIllusion"), XS_Mob_SendIllusion, file, "$$;$$$$$$$$$$$$");
-		newXSproto(strcpy(buf, "MakeTempPet"), XS_Mob_MakeTempPet, file, "$$;$$$");
+		newXSproto(strcpy(buf, "MakeTempPet"), XS_Mob_MakeTempPet, file, "$$;$$$$");
+		newXSproto(strcpy(buf, "TypesTempPet"), XS_Mob_TypesTempPet, file, "$$;$$$$$");
 		newXSproto(strcpy(buf, "QuestReward"), XS_Mob_QuestReward, file, "$$;$$$");
 		newXSproto(strcpy(buf, "CameraEffect"), XS_Mob_CameraEffect, file, "$$;$$$");
 		newXSproto(strcpy(buf, "SpellEffect"), XS_Mob_SpellEffect, file, "$$;$$$$$$");

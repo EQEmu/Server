@@ -575,8 +575,8 @@ public:
 	virtual void UnStun();
 	inline void Silence(bool newval) { silenced = newval; }
 	inline void Amnesia(bool newval) { amnesiad = newval; }
-	void TemporaryPets(uint16 spell_id, Mob *target, const char *name_override = nullptr, uint32 duration_override = 0);
-	void TypesTemporaryPets(uint32 typesid, Mob *target, const char *name_override = nullptr, uint32 duration_override = 0, bool followme = false);
+	void TemporaryPets(uint16 spell_id, Mob *target, const char *name_override = nullptr, uint32 duration_override = 0, bool followme=true, bool sticktarg=false);
+	void TypesTemporaryPets(uint32 typesid, Mob *target, const char *name_override = nullptr, uint32 duration_override = 0, bool followme=true, bool sticktarg=false);
 	void WakeTheDead(uint16 spell_id, Mob *target, uint32 duration);
 	void Spin();
 	void Kill();
@@ -673,8 +673,10 @@ public:
 	inline virtual bool HasOwner() { if(GetOwnerID()==0){return false;} return( entity_list.GetMob(GetOwnerID()) != 0); }
 	inline virtual bool IsPet() { return(HasOwner() && !IsMerc()); }
 	inline bool HasPet() const { if(GetPetID()==0){return false;} return (entity_list.GetMob(GetPetID()) != 0);}
-	bool HadTempPets() const { return(hasTempPet); }
-	void TempPets(bool i) { hasTempPet = i; }
+	inline bool HasTempPetsActive() const { return(hasTempPet); }
+	inline void SetTempPetsActive(bool i) { hasTempPet = i; }
+	inline int16 GetTempPetCount() const { return count_TempPet; }
+	inline void SetTempPetCount(int16 i) { count_TempPet = i; }
 	bool HasPetAffinity() { if (aabonuses.GivePetGroupTarget || itembonuses.GivePetGroupTarget || spellbonuses.GivePetGroupTarget) return true; return false; }
 	inline bool IsPetOwnerClient() const { return pet_owner_client; } 
 	inline void SetPetOwnerClient(bool value) { pet_owner_client = value; }
@@ -1232,6 +1234,7 @@ protected:
 	//temppet
 	bool hasTempPet;
 	bool _IsTempPet;
+	int16 count_TempPet;
 	bool pet_owner_client; //Flags regular and pets as belonging to a client
 
 	EGNode *_egnode; //the EG node we are in
