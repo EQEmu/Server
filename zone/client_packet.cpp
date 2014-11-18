@@ -3034,47 +3034,23 @@ void Client::Handle_OP_AssistGroup(const EQApplicationPacket *app)
 
 void Client::Handle_OP_AugmentInfo(const EQApplicationPacket *app)
 {
-
 	// This packet is sent by the client when an Augment item information window is opened.
-	// We respond with an OP_ReadBook containing the type of distiller required to remove the augment.
-	// The OP_Augment packet includes a window parameter to determine which Item window in the UI the
-	// text is to be displayed in. out->type = 2 indicates the BookText_Struct contains item information.
-	//
+	// Some clients this seems to nuke the charm text (ex. Adventurer's Stone)
 
-	if (app->size != sizeof(AugmentInfo_Struct))
-	{
+	if (app->size != sizeof(AugmentInfo_Struct)) {
 		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_AugmentInfo expected %i got %i",
 			sizeof(AugmentInfo_Struct), app->size);
-
 		DumpPacket(app);
-
 		return;
 	}
+
 	AugmentInfo_Struct* AugInfo = (AugmentInfo_Struct*)app->pBuffer;
-
-	char *outstring = nullptr;
-
 	const Item_Struct * item = database.GetItem(AugInfo->itemid);
 
-	if (item)
-	{
-		MakeAnyLenString(&outstring, "You must use the solvent %s to remove this augment safely.", item->Name);
-
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ReadBook, strlen(outstring) + sizeof(BookText_Struct));
-
-		BookText_Struct *out = (BookText_Struct *)outapp->pBuffer;
-
-		out->window = AugInfo->window;
-
-		out->type = 2;
-
-		out->invslot = 0;
-
-		strcpy(out->booktext, outstring);
-
-		safe_delete_array(outstring);
-
-		FastQueuePacket(&outapp);
+	if (item) {
+		strn0cpy(AugInfo->augment_info, item->Name, 64);
+		AugInfo->itemid = 0;
+		QueuePacket(app);
 	}
 }
 
@@ -3842,19 +3818,23 @@ void Client::Handle_OP_BlockedBuffs(const EQApplicationPacket *app)
 
 void Client::Handle_OP_BoardBoat(const EQApplicationPacket *app)
 {
-
-	if (app->size <= 5)
+	// this sends unclean mob name, so capped at 64
+	// a_boat006
+	if (app->size <= 5 || app->size > 64) {
+		LogFile->write(EQEMuLog::Error, "Size mismatch in OP_BoardBoad. Expected greater than 5 less than 64, got %i", app->size);
+		DumpPacket(app);
 		return;
+	}
 
-	char *boatname;
-	boatname = new char[app->size - 3];
-	memset(boatname, 0, app->size - 3);
-	memcpy(boatname, app->pBuffer, app->size - 4);
+	char boatname[64];
+	memcpy(boatname, app->pBuffer, app->size);
+	boatname[63] = '\0';
 
 	Mob* boat = entity_list.GetMob(boatname);
-	if (boat)
-		this->BoatID = boat->GetID();	// set the client's BoatID to show that it's on this boat
-	safe_delete_array(boatname);
+	if (!boat || (boat->GetRace() != CONTROLLED_BOAT && boat->GetRace() != 502))
+		return;
+	BoatID = boat->GetID();	// set the client's BoatID to show that it's on this boat
+
 	return;
 }
 
@@ -9719,17 +9699,13 @@ void Client::Handle_OP_MercenaryDismiss(const EQApplicationPacket *app)
 		Message(7, "Mercenary Debug: Dismiss Request ( %i ) Received.", Command);
 
 	// Handle the dismiss here...
-	if (GetMercID()) {
-		Merc* merc = GetMerc();
-
-		if (merc) {
-			if (CheckCanDismissMerc()) {
-				merc->Dismiss();
-			}
+	Merc* merc = GetMerc();
+	if (merc) {
+		if (CheckCanDismissMerc()) {
+			merc->Dismiss();
 		}
 	}
 
-	//SendMercMerchantResponsePacket(10);
 }
 
 void Client::Handle_OP_MercenaryHire(const EQApplicationPacket *app)
@@ -9769,20 +9745,21 @@ void Client::Handle_OP_MercenaryHire(const EQApplicationPacket *app)
 			return;
 		}
 
-		if (RuleB(Mercs, ChargeMercPurchaseCost)) {
-			uint32 cost = Merc::CalcPurchaseCost(merc_template->MercTemplateID, GetLevel()) * 100; // Cost is in gold
-			TakeMoneyFromPP(cost, true);
-		}
-
 		// Set time remaining to max on Hire
 		GetMercInfo().MercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS);
 
 		// Get merc, assign it to client & spawn
 		Merc* merc = Merc::LoadMerc(this, merc_template, merchant_id, false);
 
-		if (merc) {
+		if (merc)
+		{
 			SpawnMerc(merc, true);
 			merc->Save();
+
+			if (RuleB(Mercs, ChargeMercPurchaseCost)) {
+				uint32 cost = Merc::CalcPurchaseCost(merc_template->MercTemplateID, GetLevel()) * 100; // Cost is in gold
+				TakeMoneyFromPP(cost, true);
+			}
 
 			// 0 is approved hire request
 			SendMercMerchantResponsePacket(0);

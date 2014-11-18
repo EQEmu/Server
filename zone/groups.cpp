@@ -1069,14 +1069,29 @@ void Group::GroupMessage_StringID(Mob* sender, uint32 type, uint32 string_id, co
 void Client::LeaveGroup() {
 	Group *g = GetGroup();
 
-	if(g) {
+	if(g)
+	{
 		if(g->GroupCount() < 3)
+		{
 			g->DisbandGroup();
+		}
 		else
+		{
 			g->DelMember(this);
-	} else {
+			if (GetMerc() && GetMerc()->HasGroup() && GetMerc()->GetGroup() == g)
+			{
+				g->DelMember(GetMerc());
+			}
+		}
+	}
+	else
+	{
 		//force things a little
 		database.SetGroupID(GetName(), 0, CharacterID());
+		if (GetMerc())
+		{
+			database.SetGroupID(GetMerc()->GetName(), 0, CharacterID());
+		}
 	}
 
 	isgrouped = false;

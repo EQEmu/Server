@@ -2107,9 +2107,6 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 
 bool ZoneDatabase::LoadMercInfo(Client *client) {
 
-	if(client->GetEPP().merc_name[0] == 0)
-        return false;
-
 	std::string query = StringFormat("SELECT MercID, Slot, Name, TemplateID, SuspendedTime, "
                                     "IsSuspended, TimerRemaining, Gender, StanceID, HP, Mana, "
                                     "Endurance, Face, LuclinHairStyle, LuclinHairColor, "
@@ -2119,6 +2116,9 @@ bool ZoneDatabase::LoadMercInfo(Client *client) {
     auto results = QueryDatabase(query);
     if (!results.Success())
         return false;
+		
+	if(results.RowCount() == 0)
+		return false;
 
     for (auto row = results.begin(); row != results.end(); ++row) {
         uint8 slot = atoi(row[1]);
@@ -2156,9 +2156,6 @@ bool ZoneDatabase::LoadMercInfo(Client *client) {
 
 bool ZoneDatabase::LoadCurrentMerc(Client *client) {
 
-	if(client->GetEPP().merc_name[0] == 0)
-        return false;
-
 	uint8 slot = client->GetMercSlot();
 
 	if(slot > MAXMERCS)
@@ -2174,6 +2171,9 @@ bool ZoneDatabase::LoadCurrentMerc(Client *client) {
     auto results = database.QueryDatabase(query);
 
     if(!results.Success())
+		return false;
+		
+	if(results.RowCount() == 0)
 		return false;
 
 
@@ -2211,71 +2211,73 @@ bool ZoneDatabase::SaveMerc(Merc *merc) {
 	if(!owner)
 		return false;
 
-	if(merc->GetMercID() == 0) {
+	if(merc->GetMercID() == 0)
+	{
 		// New merc record
-		uint32 TempNewMercID = 0;
 		std::string query = StringFormat("INSERT INTO mercs "
-                                        "(OwnerCharacterID, Slot, Name, TemplateID, "
-                                        "SuspendedTime, IsSuspended, TimerRemaining, "
-                                        "Gender, StanceID, HP, Mana, Endurance, Face, "
-                                        "LuclinHairStyle, LuclinHairColor, LuclinEyeColor, "
-                                        "LuclinEyeColor2, LuclinBeardColor, LuclinBeard, "
-                                        "DrakkinHeritage, DrakkinTattoo, DrakkinDetails) "
-                                        "VALUES('%u', '%u', '%s', '%u', '%u', '%u', '%u', "
-                                        "'%u', '%u', '%u', '%u', '%u', '%i', '%i', '%i', "
-                                        "'%i', '%i', '%i', '%i', '%i', '%i', '%i')",
-                                        merc->GetMercCharacterID(), owner->GetNumMercs(),
-                                        merc->GetCleanName(), merc->GetMercTemplateID(),
-                                        owner->GetMercInfo().SuspendedTime, merc->IsSuspended(),
-                                        owner->GetMercInfo().MercTimerRemaining, merc->GetGender(),
-                                        merc->GetStance(), merc->GetHP(), merc->GetMana(),
-                                        merc->GetEndurance(), merc->GetLuclinFace(),
-                                        merc->GetHairStyle(), merc->GetHairColor(), merc->GetEyeColor1(),
-                                        merc->GetEyeColor2(), merc->GetBeardColor(),
-                                        merc->GetBeard(), merc->GetDrakkinHeritage(),
-                                        merc->GetDrakkinTattoo(), merc->GetDrakkinDetails());
-        auto results = database.QueryDatabase(query);
+		"(OwnerCharacterID, Slot, Name, TemplateID, "
+		"SuspendedTime, IsSuspended, TimerRemaining, "
+		"Gender, StanceID, HP, Mana, Endurance, Face, "
+		"LuclinHairStyle, LuclinHairColor, LuclinEyeColor, "
+		"LuclinEyeColor2, LuclinBeardColor, LuclinBeard, "
+		"DrakkinHeritage, DrakkinTattoo, DrakkinDetails) "
+		"VALUES('%u', '%u', '%s', '%u', '%u', '%u', '%u', "
+		"'%u', '%u', '%u', '%u', '%u', '%i', '%i', '%i', "
+		"'%i', '%i', '%i', '%i', '%i', '%i', '%i')",
+		merc->GetMercCharacterID(), owner->GetNumMercs(),
+		merc->GetCleanName(), merc->GetMercTemplateID(),
+		owner->GetMercInfo().SuspendedTime, merc->IsSuspended(),
+		owner->GetMercInfo().MercTimerRemaining, merc->GetGender(),
+		merc->GetStance(), merc->GetHP(), merc->GetMana(),
+		merc->GetEndurance(), merc->GetLuclinFace(),
+		merc->GetHairStyle(), merc->GetHairColor(), merc->GetEyeColor1(),
+		merc->GetEyeColor2(), merc->GetBeardColor(),
+		merc->GetBeard(), merc->GetDrakkinHeritage(),
+		merc->GetDrakkinTattoo(), merc->GetDrakkinDetails());
+
+		auto results = database.QueryDatabase(query);
 		if(!results.Success()) {
 			owner->Message(13, results.ErrorMessage().c_str());
 			return false;
 		} else if (results.RowsAffected() != 1) {
-            owner->Message(13, "Unable to save merc to the database.");
-            return false;
+			owner->Message(13, "Unable to save merc to the database.");
+			return false;
 		}
 
-        merc->SetMercID(TempNewMercID);
-        merc->UpdateMercInfo(owner);
+		merc->SetMercID(results.LastInsertedID());
+		merc->UpdateMercInfo(owner);
 		database.SaveMercBuffs(merc);
-        return true;
+		return true;
 	}
 
-    // Update existing merc record
-    std::string query = StringFormat("UPDATE mercs SET OwnerCharacterID = '%u', Slot = '%u', "
-                                    "Name = '%s', TemplateID = '%u', SuspendedTime = '%u', "
-                                    "IsSuspended = '%u', TimerRemaining = '%u', Gender = '%u', "
-                                    "StanceID = '%u', HP = '%u', Mana = '%u', Endurance = '%u', "
-                                    "Face = '%i', LuclinHairStyle = '%i', LuclinHairColor = '%i', "
-                                    "LuclinEyeColor = '%i', LuclinEyeColor2 = '%i', LuclinBeardColor = '%i', "
-                                    "LuclinBeard = '%i', DrakkinHeritage = '%i', DrakkinTattoo = '%i', "
-                                    "DrakkinDetails = '%i' WHERE MercID = '%u'",
-                                    merc->GetMercCharacterID(), owner->GetMercSlot(), merc->GetCleanName(),
-                                    merc->GetMercTemplateID(), owner->GetMercInfo().SuspendedTime,
-                                    merc->IsSuspended(), owner->GetMercInfo().MercTimerRemaining,
-                                    merc->GetGender(), merc->GetStance(), merc->GetHP(), merc->GetMana(),
-                                    merc->GetEndurance(), merc->GetLuclinFace(), merc->GetHairStyle(),
-                                    merc->GetHairColor(), merc->GetEyeColor1(), merc->GetEyeColor2(),
-                                    merc->GetBeardColor(), merc->GetBeard(), merc->GetDrakkinHeritage(),
-                                    merc->GetDrakkinTattoo(), merc->GetDrakkinDetails(), merc->GetMercID());
-    auto results = database.QueryDatabase(query);
-    if (!results.Success()) {
-        owner->Message(13, results.ErrorMessage().c_str());
-        return false;
-    } else if (results.RowsAffected() != 1) {
-        owner->Message(13, "Unable to save merc to the database.");
-        return false;
-    }
+	// Update existing merc record
+	std::string query = StringFormat("UPDATE mercs SET OwnerCharacterID = '%u', Slot = '%u', "
+	"Name = '%s', TemplateID = '%u', SuspendedTime = '%u', "
+	"IsSuspended = '%u', TimerRemaining = '%u', Gender = '%u', "
+	"StanceID = '%u', HP = '%u', Mana = '%u', Endurance = '%u', "
+	"Face = '%i', LuclinHairStyle = '%i', LuclinHairColor = '%i', "
+	"LuclinEyeColor = '%i', LuclinEyeColor2 = '%i', LuclinBeardColor = '%i', "
+	"LuclinBeard = '%i', DrakkinHeritage = '%i', DrakkinTattoo = '%i', "
+	"DrakkinDetails = '%i' WHERE MercID = '%u'",
+	merc->GetMercCharacterID(), owner->GetMercSlot(), merc->GetCleanName(),
+	merc->GetMercTemplateID(), owner->GetMercInfo().SuspendedTime,
+	merc->IsSuspended(), owner->GetMercInfo().MercTimerRemaining,
+	merc->GetGender(), merc->GetStance(), merc->GetHP(), merc->GetMana(),
+	merc->GetEndurance(), merc->GetLuclinFace(), merc->GetHairStyle(),
+	merc->GetHairColor(), merc->GetEyeColor1(), merc->GetEyeColor2(),
+	merc->GetBeardColor(), merc->GetBeard(), merc->GetDrakkinHeritage(),
+	merc->GetDrakkinTattoo(), merc->GetDrakkinDetails(), merc->GetMercID());
 
-    merc->UpdateMercInfo(owner);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		owner->Message(13, results.ErrorMessage().c_str());
+		return false;
+	} else if (results.RowsAffected() != 1) {
+		owner->Message(13, "Unable to save merc to the database.");
+		return false;
+	}
+
+	merc->UpdateMercInfo(owner);
 	database.SaveMercBuffs(merc);
 
 	return true;
@@ -2386,25 +2388,27 @@ void ZoneDatabase::LoadMercBuffs(Merc *merc) {
 bool ZoneDatabase::DeleteMerc(uint32 merc_id) {
 
 	if(merc_id == 0)
-        return false;
+		return false;
 
-    bool firstQueryWorked = false;
-    // TODO: These queries need to be ran together as a transaction.. ie,
-    // if one or more fail then they all will fail to commit to the database.
-    std::string query = StringFormat("DELETE FROM merc_buffs WHERE MercID = '%u'", merc_id);
-    auto results = database.QueryDatabase(query);
+	// TODO: These queries need to be ran together as a transaction.. ie,
+	// if one or more fail then they all will fail to commit to the database.
+	// ...Not all mercs will have buffs, so why is it required that both deletes succeed?
+	std::string query = StringFormat("DELETE FROM merc_buffs WHERE MercId = '%u'", merc_id);
+	auto results = database.QueryDatabase(query);
 	if(!results.Success())
-		LogFile->write(EQEMuLog::Error, "Error Deleting Merc: %s", results.ErrorMessage().c_str());
-	else
-        firstQueryWorked = true;
+	{
+		LogFile->write(EQEMuLog::Error, "Error Deleting Merc Buffs: %s", results.ErrorMessage().c_str());
+	}
 
 	query = StringFormat("DELETE FROM mercs WHERE MercID = '%u'", merc_id);
-	if(!results.Success()) {
+	results = database.QueryDatabase(query);
+	if(!results.Success())
+	{
 		LogFile->write(EQEMuLog::Error, "Error Deleting Merc: %s", results.ErrorMessage().c_str());
 		return false;
-    }
+	}
 
-	return firstQueryWorked;
+	return true;
 }
 
 void ZoneDatabase::LoadMercEquipment(Merc *merc) {

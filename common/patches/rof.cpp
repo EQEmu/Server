@@ -235,6 +235,18 @@ namespace RoF
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_AugmentInfo)
+	{
+		ENCODE_LENGTH_EXACT(AugmentInfo_Struct);
+		SETUP_DIRECT_ENCODE(AugmentInfo_Struct, structs::AugmentInfo_Struct);
+
+		OUT(itemid);
+		OUT(window);
+		strn0cpy(eq->augment_info, emu->augment_info, 64);
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_Barter)
 	{
 		EQApplicationPacket *in = *p;

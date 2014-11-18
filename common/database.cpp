@@ -2084,6 +2084,19 @@ bool Database::CheckDatabaseConversions() {
 
 #endif
 
+	/* Fetch Automatic Database Upgrade Script */
+	if (!std::ifstream("db_update.pl")){
+		std::cout << "Pulling down automatic database upgrade script...\n" << std::endl;
+#ifdef _WIN32
+		system("perl -MLWP::UserAgent -e \"require LWP::UserAgent;  my $ua = LWP::UserAgent->new; $ua->timeout(10); $ua->env_proxy; my $response = $ua->get('https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/db_update.pl'); if ($response->is_success){ open(FILE, '> db_update.pl'); print FILE $response->decoded_content; close(FILE); }\"");
+#else
+		system("wget -O db_update.pl https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/db_update.pl");
+#endif
+	}
+	/* Run Automatic Database Upgrade Script */
+
+	system("perl db_update.pl ran_from_world"); 
+
 	return true;
 }
 

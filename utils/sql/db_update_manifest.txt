@@ -1,316 +1,332 @@
-5001, 1_task_system.sql
-5002, 2_optional_maxclients.sql
-5003, 14_optional_merchantlist.sql
-5004, 35_task_stepped.sql
-5005, 42_task_min_maxlevel.sql
-5006, 55_zone_shutdowndeleay.sql
-5007, 68_optional_character_maxexplevel.sql
-5008, 103_optional_chat_rules.sql
-5009, 104_traps.sql
-5010, 106_optional_proc_rules.sql
-5011, 120_damageshieldtypes.sql
-5012, 125_aggrozone.sql
-5013, 127_optional_spell_rules.sql
-5014, 129_optional_shared_plat_rule.sql
-5015, 131_optional_combat_rules.sql
-5016, 133_task_repeatable.sql
-5017, 142_deathpeace_and_lifetap_aas.sql
-5018, 158_optional_death_exp_loss.sql
-5019, 176_melody.sql
-5020, 189_character_.sql
-5021, 196_trader.sql
-5022, 210_undyeme.sql
-5023, 222_buyer.sql
-5024, 226_account_limiting.sql
-5025, 230_spells_table.sql
-5026, 235_horses_table.sql
-5027, 243_spawn_timers.sql
-5028, 247_mail.sql
-5029, 249_chatchannels.sql
-5030, 250_bot_spell_update.sql
-5031, 250_optional_bot_spell_update.sql
-5032, 285_optional_bot_spell_update.sql
-5033, 292_augslots.sql
-5034, 294_merchant_logging.sql
-5035, 304_faction_list.sql
-5036, 326_aas.sql
-5037, 328_bot_management.sql
-5038, 328_optional_bot_management.sql
-5039, 340_gm_ips.sql
-5040, 356_combat.sql
-5041, 360_peqzone.sql
-5042, 364_ranged_dist_rule.sql
-5043, 386_bot_save_raid.sql
-5044, 434_optional_rest_state_rules.sql
-5045, 447_sof_startzone_rule.sql
-5046, 463_altadv_vars.sql
-5047, 475_aa_actions.sql
-5048, 500_spawn2_optimization.sql
-5049, 503_bugs.sql
-5050, 518_drakkin_npc_type_features.sql
-5051, 524_rule_values_notes.sql
-5052, 527_npc_armor_tint.sql
-5053, 553_saylink_table.sql
-5054, 564_nokeyring.sql
-5055, 600_group_leadership.sql
-5056, 612_instance_changes.sql
-5057, 615_adventure_assassination.sql
-5058, 619_Adventure_Recruiter_Flavor.sql
-5059, 621_LDoNTraps.sql
-5060, 633_ucs.sql
-5061, 634_TrapTemplateDefaultValue.sql
-5062, 643_BotsTable.sql
-5063, 646_archery_penalty_rule.sql
-5064, 665_heroic_resists.sql
-5065, 667_titles.sql
-5066, 687_aa_table_changes.sql
-5067, 699_peqzone_rule.sql
-5068, 702_aashieldblock_tint_table.sql
-5069, 703_peqzone_rule.sql
-5070, 704_rules.sql
-5071, 710_tint_set_naming.sql
-5072, 721_pathing_rules.sql
-5073, 730_smart_delay_moving.sql
-5074, 731_rule_assist_notarget_self.sql
-5075, 732_sacrifice_rules.sql
-5076, 745_slow_mitigation.sql
-5077, 754_archery_base_damage_rule.sql
-5078, 755_sof_altadv_vars_updates.sql
-5079, 773_monk_rules.sql
-5080, 853_optional_rule_aaexp.sql
-5081, 858_optional_rule_ip_limit_by_status.sql
-5082, 892_optional_bots_table_mod.sql
-5083, 893_optional_bots_table_mod.sql
-5084, 898_npc_maxlevel_scalerate.sql
-5085, 902_optional_rule_snareflee.sql
-5086, 923_spawn2_enabled.sql
-5087, 962_hot_zone.sql
-5088, 964_reports.sql
-5089, 971_veteran_rewards.sql
-5090, 977_raid_npc_private_corpses.sql
-5091, 979_unique_spawn_by_name.sql
-5092, 980_account_ip.sql
-5093, 1022_botadventuring.sql
-5094, 1027_botactives.sql
-5095, 1030_botzoningsupport.sql
-5096, 1036_botbuffs.sql
-5097, 1038_botpetstatepersists.sql
-5098, 1038_grouptablesuniquecolumndefinitions.sql
-5099, 1039_botguilds.sql
-5100, 1040_DeprecatedBotRaidsSystems.sql
-5101, 1057_titles.sql
-5102, 1077_botgroups.sql
-5103, 1136_spell_globals.sql
-5104, 1144_optional_rule_return_nodrop.sql
-5105, 1195_account_suspendeduntil.sql
-5106, 1259_npc_skill_types.sql
-5107, 1280_bot_augs.sql
-5108, 1290_optional_exp_loss_rule.sql
-5109, 1293_guild_bank.sql
-5110, 1379_loginserver_trusted_server.sql
-5111, 1392_recipe_learning.sql
-5112, 1394_optional_rule_sod_hp_mana_end.sql
-5113, 1404_faction_list.sql
-5114, 1410_optional_sod_aas_ht_and_loh.sql
-5115, 1436_login_server_table_fix.sql
-5116, 1446_allowrest_optional.sql
-5117, 1446_allowrest_required.sql
-5118, 1450_cvs.sql
-5119, 1451_guilds.sql
-5120, 1498_instance_adventure.sql
-5121, 1510_global_instances.sql
-5122, 1511_map_path_loading.sql
-5123, 1513_zone_points.sql
-5124, 1519_zone_primary_key_id.sql
-5125, 1542_items_table_cleanup.sql
-5126, 1548_nimbuseffect_required.sql
-5127, 1562_instanced_spawnconditions.sql
-5128, 1586_waypoints_optional.sql
-5129, 1610_tradeskill_required.sql
-5130, 1618_zone.sql
-5131, 1625_optional_rule_class_race_exp_bonus.sql
-5132, 1672_optional_rules_respawn_window.sql
-5133, 1679_optional_rules_blocked_buffs.sql
-5134, 1696_modify_zone_and_object_tables.sql
-5135, 1711_account_restricted_aa.sql
-5136, 1717_optional_rule_bash_stun_chance.sql
-5137, 1718_optional_rules_mod3s.sql
-5138, 1719_optional_triggerOnCastAAs.sql
-5139, 1720_optional_sql_AAs.sql
-5140, 1720_required_sql_AA_effects_update.sql
-5141, 1721_optional_sql_drakkin_breath_update.sql
-5142, 1721_required_sql_altadv_vars_update.sql
-5143, 1723_optional_sql_new_stats_window_rule.sql
-5144, 1723_required_sql_corruption.sql
-5145, 1736_optional_sql_feral_swipe.sql
-5146, 1737_required_sql_rule_and_aa_update.sql
-5147, 1746_optional_sql_bot_manaregen.sql
-5148, 1747_optional_HoT_zone_and_zonepoints.sql
-5149, 1750_optional_sql_reflect_rule.sql
-5150, 1753_optional_haste_cap_rule.sql
-5151, 1753_required_sql_healing_adept_aa.sql
-5152, 1754_required_sql_healing_adept_aa_fix.sql
-5153, 1755_required_sql_fear_resist_aas.sql
-5154, 1784_optional_corpsedrag_rules.sql
-5155, 1786_required_update_to_aas.sql
-5156, 1790_required_aa_required_level_cost.sql
-5157, 1793_resist_adjust.sql
-5158, 1799_optional_rest_regen_endurance_rule.sql
-5159, 1802_required_doppelganger.sql
-5160, 1803_required_tasks_xpreward_signed.sql
-5161, 1804_required_ae_melee_updates.sql
-5162, 1809_optional_rules.sql
-5163, 1813_required_doppelganger_npcid_change.sql
-5164, 1817_optional_npc_archery_bonus_rule.sql
-5165, 1823_optional_delay_death.sql
-5166, 1847_required_doors_dest_zone_size_32.sql
-5167, 1859_optional_item_casts_use_focus_rule.sql
-5168, 1884_optional_bot_spells_update.sql
-5169, 1885_optional_rules_fv_pvp_expansions.sql
-5170, 1889_optional_skill_cap_rule.sql
-5171, 1908_required_npc_types_definitions.sql
-5172, 1926_optional_stat_cap.sql
-5173, 1944_spawn2.sql
-5174, 1946_doors.sql
-5175, 1960_optional_console_timeout_rule.sql
-5176, 1962_optional_guild_creation_window_rules.sql
-5177, 1963_optional_rule_live_like_focuses.sql
-5178, 1968_optional_enrage_rules.sql
-5179, 1972_optional_extradmg_item_cap.sql
-5180, 1974_required_bot_spells_update.sql
-5181, 1977_underwater.sql
-5182, 1998_optional_intoxication_and_looting_rules.sql
-5183, 2004_charges_alt_currency.sql
-5184, 2015_optional_specialization_training_rule.sql
-5185, 2016_optional_rule_bot_aa_expansion.sql
-5186, 2023_optional_mysqlcli.sql
-5187, 2024_optional_update_crystals.sql
-5188, 2024_required_update.sql
-5189, 2057_required_discovered_items.sql
-5190, 2058_optional_rule_discovered_items.sql
-5191, 2062_required_version_changes.sql
-5192, 2069_required_pets.sql
-5193, 2079_player_speech.sql
-5194, 2087_required_bots_hp_and_mana_and_spell_updates.sql
-5195, 2098_required_zonepoint_version_changes.sql
-5196, 2099_required_discovered_items_account_status.sql
-5197, 2104_required_group_roles.sql
-5198, 2107_required_bot_stances.sql
-5199, 2129_required_lfguild.sql
-5200, 2133_required_faction_loot_despawn.sql
-5201, 2136_extended_targets.sql
-5202, 2142_emotes.sql
-5203, 2154_optional_rule_spell_procs_resists_falloff.sql
-5204, 2156_optional_charm_break_rule.sql
-5205, 2159_optional_defensiveproc_rules.sql
-5206, 2164_require_bots_bottimers.sql
-5207, 2171_optional_SpecialAttackACBonus_rule.sql
-5208, 2176_optional_aa_expansion_SOF_fix.sql
-5209, 2176_optional_FrenzyBonus_rule.sql
-5210, 2176_required_aa_updates.sql
-5211, 2178_required_aa_updates.sql
-5212, 2183_optional_bot_xp_rule.sql
-5213, 2185_optional_NPCFlurryChacne_rule
-5214, 2185_optional_NPCFlurryChacne_rule.sql
-5215, 2185_optional_NPCFlurryChance_rule.sql
-5216, 2185_required_aa_updates
-5217, 2185_required_aa_updates.sql
-5218, 2188_optional_miscspelleffect_rules
-5219, 2188_optional_miscspelleffect_rules.sql
-5220, 2188_required_aa_updates
-5221, 2188_required_aa_updates.sql
-5222, 2189_optional_taunt_rules
-5223, 2189_optional_taunt_rules.sql
-5224, 2195_required_sharedplatupdates.sql
-5225, 2208_optional_aa_stacking_rule.sql
-5226, 2208_optional_EnableSoulAbrasionAA.sql
-5227, 2208_required_aa_updates.sql
-5228, 2209_optional_additive_bonus_rule.sql
-5229, 2213_loot_changes.sql
-5230, 2214_faction_list_mod.sql
-5231, 2215_required_aa_updates.sql
-5232, 2243_optional_char_max_level_rule.sql
-5233, 2260_probability.sql
-5234, 2262_required_pet_discipline_update.sql
-5235, 2264_required_aa_updates.sql
-5236, 2268_QueryServ.sql
-5237, 2268_required_updates.sql
-5238, 2274_optional_rule_iplimitdisconnectall.sql
-5239, 2278_optional_rule_targetableswarmpet.sql
-5240, 2280_optional_rule_targetableswarmpet-rename.sql
-5241, 2283_required_npc_changes.sql
-5242, 2299_required_inspectmessage_fields.sql
-5243, 2300_optional_loot_changes.sql
-5244, 2304_QueryServ.sql
-5245, 2340_required_maxbuffslotspet.sql
-5246, 2361_QueryServ.sql
-5247, 2361_required_qs_rule_values.sql
-5248, 2370_required_aa_updates.sql
-5249, 2376_required_aa_updates.sql
-5250, 2380_optional_merc_data.sql
-5251, 2380_optional_merc_merchant_npctypes_update.sql
-5252, 2380_optional_merc_rules.sql
-5253, 2383_required_group_ismerc.sql
-5254, 2428_optional_levelbasedexpmods.sql
-5255, 2448_optional_stun_proc_aggro_rule.sql
-5256, 2471_required_aa_updates.sql
-5257, 2482_required_start_zones.sql
-5258, 2504_required_aa_updates.sql
-9000, 2013_02_18_Merc_Rules_and_Tables.sql
-9001, 2013_02_25_Impr_HT_LT.sql
-9002, 2013_03_1_Merc_Rules_and_Equipment.sql
-9003, 2013_03_23_Escape_FadingMemories.sql
-9004, 2013_04_04_NaturesBounty.sql
-9005, 2013_04_08_Salvage.sql
-9006, 2013_05_05_Account_Flags.sql
-9007, 2013_05_05_Item_Tick.sql
-9008, 2013_07_11_NPC_Special_Abilities.sql
-9009, 2013_10_12_Merc_Special_Abilities.sql
-9010, 2013_10_12_Merc_vwMercNpcTypes.sql
-9011, 2013_10_31_Recipe_disabling.sql
-9012, 2013_11_07_BaseData.sql
-9013, 2013_11_13_Instrument_Singing_Mastery.sql
-9014, 2013_11_18_AssistRadius.sql
-9015, 2013_12_26_MerchantList_Class_Required.sql
-9016, 2014_01_04_SongModCapAAs.sql
-9017, 2014_01_08_SpellsNewAdditions.sql
-9018, 2014_01_09_PreservePetSize.sql
-9019, 2014_01_20_MezMastery.sql
-9020, 2014_01_20_Not_Extendable.sql
-9021, 2014_01_20_SpellCastingReinforcement.sql
-9022, 2014_01_20_Weather.sql
-9023, 2014_01_27_CritcalMendAA.sql
-9024, 2014_02_02_SpellCriticalsAA.sql
-9025, 2014_02_13_Rename_instance_lockout_tables.sql
-9026, 2014_02_13_spells_new_update.sql
-9027, 2014_02_20_buff_update.sql
-9028, 2014_02_26_roambox_update.sql
-9029, 2014_02_26_virulentvenomAA.sql
-9030, 2014_04_04_PhysicalResist.sql
-9031, 2014_04_10_No_Target_With_Hotkey.sql
-9032, 2014_04_12_SlowMitigation.sql
-9033, 2014_04_18_Suppress_Command_Error.sql
-9034, 2014_04_25_spawn_events.sql
-9035, 2014_04_27_AISpellEffects.sql
-9036, 2014_05_04_SlowMitigationFix.sql
-9037, 2014_06_25_AA_Updates..sql
-9038, 2014_06_25_AA_Updates.sql
-9039, 2014_07_04_AA_Updates.sql
-9040, 2014_07_10_npc_spells.sql
-9041, 2014_08_02_spells_new.sql
-9042, 2014_08_12_NPC_raid_targets.sql
-9043, 2014_08_18_spells_new_update.sql
-9044, 2014_08_20_merchantlist_probability.sql
-9045, 2014_08_23_Complete_QueryServ_Table_Structures.sql
-9046, 2014_08_23_player_events_and_player_aa_rate_hourly.sql
-9047, 2014_08_24_character_lookup.sql
-9048, 2014_09_09_attack_delay.sql
-9049, 2014_09_18_tellqueuesclean.sql
-9050, 2014_09_20_ban_messages.sql
-9051, 2014_10_11_RaidMOTD.sql
-9052, 2014_10_13_RaidLeadership.sql
-9053, 2014_10_18_group_mentor.sql
-9054, 2014_10_19_raid_group_mentor.sql
-9055, 2014_10_30_special_abilities_null.sql
-9056, 2014_11_08_RaidMembers.sql
-9057, 2014_11_13_spells_new_updates.sql
+5001|1_task_system.sql
+# 5002|2_optional_maxclients.sql
+# 5003|14_optional_merchantlist.sql
+5004|35_task_stepped.sql
+5005|42_task_min_maxlevel.sql
+5006|55_zone_shutdowndeleay.sql
+# 5007|68_optional_character_maxexplevel.sql
+# 5008|103_optional_chat_rules.sql
+5009|104_traps.sql
+# 5010|106_optional_proc_rules.sql
+5011|120_damageshieldtypes.sql
+5012|125_aggrozone.sql
+# 5013|127_optional_spell_rules.sql
+# 5014|129_optional_shared_plat_rule.sql
+# 5015|131_optional_combat_rules.sql
+5016|133_task_repeatable.sql
+5017|142_deathpeace_and_lifetap_aas.sql
+# 5018|158_optional_death_exp_loss.sql
+5019|176_melody.sql
+5020|189_character_.sql
+5021|196_trader.sql
+5022|210_undyeme.sql
+5023|222_buyer.sql
+5024|226_account_limiting.sql
+5025|230_spells_table.sql
+5026|235_horses_table.sql
+5027|243_spawn_timers.sql
+5028|247_mail.sql
+5029|249_chatchannels.sql
+5030|250_bot_spell_update.sql
+# 5031|250_optional_bot_spell_update.sql
+# 5032|285_optional_bot_spell_update.sql
+5033|292_augslots.sql
+5034|294_merchant_logging.sql
+5035|304_faction_list.sql
+5036|326_aas.sql
+5037|328_bot_management.sql
+# 5038|328_optional_bot_management.sql
+5039|340_gm_ips.sql
+5040|356_combat.sql
+5041|360_peqzone.sql
+5042|364_ranged_dist_rule.sql
+5043|386_bot_save_raid.sql
+# 5044|434_optional_rest_state_rules.sql
+5045|447_sof_startzone_rule.sql
+5046|463_altadv_vars.sql
+5047|475_aa_actions.sql
+5048|500_spawn2_optimization.sql
+5049|503_bugs.sql
+5050|518_drakkin_npc_type_features.sql
+5051|524_rule_values_notes.sql
+5052|527_npc_armor_tint.sql
+5053|553_saylink_table.sql
+5054|564_nokeyring.sql
+5055|600_group_leadership.sql
+5056|612_instance_changes.sql
+5057|615_adventure_assassination.sql
+5058|619_Adventure_Recruiter_Flavor.sql
+5059|621_LDoNTraps.sql
+5060|633_ucs.sql
+5061|634_TrapTemplateDefaultValue.sql
+5062|643_BotsTable.sql
+5063|646_archery_penalty_rule.sql
+5064|665_heroic_resists.sql
+5065|667_titles.sql
+5066|687_aa_table_changes.sql
+5067|699_peqzone_rule.sql
+5068|702_aashieldblock_tint_table.sql
+5069|703_peqzone_rule.sql
+5070|704_rules.sql
+5071|710_tint_set_naming.sql
+5072|721_pathing_rules.sql
+5073|730_smart_delay_moving.sql
+5074|731_rule_assist_notarget_self.sql
+5075|732_sacrifice_rules.sql
+5076|745_slow_mitigation.sql
+5077|754_archery_base_damage_rule.sql
+5078|755_sof_altadv_vars_updates.sql
+5079|773_monk_rules.sql
+# 5080|853_optional_rule_aaexp.sql
+# 5081|858_optional_rule_ip_limit_by_status.sql
+# 5082|892_optional_bots_table_mod.sql
+# 5083|893_optional_bots_table_mod.sql
+5084|898_npc_maxlevel_scalerate.sql
+# 5085|902_optional_rule_snareflee.sql
+5086|923_spawn2_enabled.sql
+5087|962_hot_zone.sql
+5088|964_reports.sql
+5089|971_veteran_rewards.sql
+5090|977_raid_npc_private_corpses.sql
+5091|979_unique_spawn_by_name.sql
+5092|980_account_ip.sql
+5093|1022_botadventuring.sql
+5094|1027_botactives.sql
+5095|1030_botzoningsupport.sql
+5096|1036_botbuffs.sql
+5097|1038_botpetstatepersists.sql
+5098|1038_grouptablesuniquecolumndefinitions.sql
+5099|1039_botguilds.sql
+5100|1040_DeprecatedBotRaidsSystems.sql
+5101|1057_titles.sql
+5102|1077_botgroups.sql
+5103|1136_spell_globals.sql
+# 5104|1144_optional_rule_return_nodrop.sql
+5105|1195_account_suspendeduntil.sql
+5106|1259_npc_skill_types.sql
+5107|1280_bot_augs.sql
+# 5108|1290_optional_exp_loss_rule.sql
+5109|1293_guild_bank.sql
+5110|1379_loginserver_trusted_server.sql
+5111|1392_recipe_learning.sql
+# 5112|1394_optional_rule_sod_hp_mana_end.sql
+5113|1404_faction_list.sql
+# 5114|1410_optional_sod_aas_ht_and_loh.sql
+5115|1436_login_server_table_fix.sql
+5116|1446_allowrest_optional.sql
+5117|1446_allowrest_required.sql
+5118|1450_cvs.sql
+5119|1451_guilds.sql
+5120|1498_instance_adventure.sql
+5121|1510_global_instances.sql
+5122|1511_map_path_loading.sql
+5123|1513_zone_points.sql
+5124|1519_zone_primary_key_id.sql
+5125|1542_items_table_cleanup.sql
+5126|1548_nimbuseffect_required.sql
+5127|1562_instanced_spawnconditions.sql
+5128|1586_waypoints_optional.sql
+5129|1610_tradeskill_required.sql
+5130|1618_zone.sql
+# 5131|1625_optional_rule_class_race_exp_bonus.sql
+# 5132|1672_optional_rules_respawn_window.sql
+# 5133|1679_optional_rules_blocked_buffs.sql
+5134|1696_modify_zone_and_object_tables.sql
+5135|1711_account_restricted_aa.sql
+# 5136|1717_optional_rule_bash_stun_chance.sql
+# 5137|1718_optional_rules_mod3s.sql
+# 5138|1719_optional_triggerOnCastAAs.sql
+# 5139|1720_optional_sql_AAs.sql
+5140|1720_required_sql_AA_effects_update.sql
+# 5141|1721_optional_sql_drakkin_breath_update.sql
+5142|1721_required_sql_altadv_vars_update.sql
+# 5143|1723_optional_sql_new_stats_window_rule.sql
+5144|1723_required_sql_corruption.sql
+# 5145|1736_optional_sql_feral_swipe.sql
+5146|1737_required_sql_rule_and_aa_update.sql
+# 5147|1746_optional_sql_bot_manaregen.sql
+# 5148|1747_optional_HoT_zone_and_zonepoints.sql
+# 5149|1750_optional_sql_reflect_rule.sql
+# 5150|1753_optional_haste_cap_rule.sql
+5151|1753_required_sql_healing_adept_aa.sql
+5152|1754_required_sql_healing_adept_aa_fix.sql
+5153|1755_required_sql_fear_resist_aas.sql
+# 5154|1784_optional_corpsedrag_rules.sql
+5155|1786_required_update_to_aas.sql
+5156|1790_required_aa_required_level_cost.sql
+5157|1793_resist_adjust.sql
+# 5158|1799_optional_rest_regen_endurance_rule.sql
+5159|1802_required_doppelganger.sql
+5160|1803_required_tasks_xpreward_signed.sql
+5161|1804_required_ae_melee_updates.sql
+# 5162|1809_optional_rules.sql
+5163|1813_required_doppelganger_npcid_change.sql
+# 5164|1817_optional_npc_archery_bonus_rule.sql
+# 5165|1823_optional_delay_death.sql
+5166|1847_required_doors_dest_zone_size_32.sql
+# 5167|1859_optional_item_casts_use_focus_rule.sql
+# 5168|1884_optional_bot_spells_update.sql
+# 5169|1885_optional_rules_fv_pvp_expansions.sql
+# 5170|1889_optional_skill_cap_rule.sql
+5171|1908_required_npc_types_definitions.sql
+# 5172|1926_optional_stat_cap.sql
+5173|1944_spawn2.sql
+5174|1946_doors.sql
+# 5175|1960_optional_console_timeout_rule.sql
+# 5176|1962_optional_guild_creation_window_rules.sql
+# 5177|1963_optional_rule_live_like_focuses.sql
+# 5178|1968_optional_enrage_rules.sql
+# 5179|1972_optional_extradmg_item_cap.sql
+5180|1974_required_bot_spells_update.sql
+5181|1977_underwater.sql
+# 5182|1998_optional_intoxication_and_looting_rules.sql
+5183|2004_charges_alt_currency.sql
+# 5184|2015_optional_specialization_training_rule.sql
+# 5185|2016_optional_rule_bot_aa_expansion.sql
+# 5186|2023_optional_mysqlcli.sql
+# 5187|2024_optional_update_crystals.sql
+5188|2024_required_update.sql
+5189|2057_required_discovered_items.sql
+# 5190|2058_optional_rule_discovered_items.sql
+5191|2062_required_version_changes.sql
+5192|2069_required_pets.sql
+5193|2079_player_speech.sql
+5194|2087_required_bots_hp_and_mana_and_spell_updates.sql
+5195|2098_required_zonepoint_version_changes.sql
+5196|2099_required_discovered_items_account_status.sql
+5197|2104_required_group_roles.sql
+5198|2107_required_bot_stances.sql
+5199|2129_required_lfguild.sql
+5200|2133_required_faction_loot_despawn.sql
+5201|2136_extended_targets.sql
+5202|2142_emotes.sql
+# 5203|2154_optional_rule_spell_procs_resists_falloff.sql
+# 5204|2156_optional_charm_break_rule.sql
+# 5205|2159_optional_defensiveproc_rules.sql
+5206|2164_require_bots_bottimers.sql
+# 5207|2171_optional_SpecialAttackACBonus_rule.sql
+# 5208|2176_optional_aa_expansion_SOF_fix.sql
+# 5209|2176_optional_FrenzyBonus_rule.sql
+5210|2176_required_aa_updates.sql
+5211|2178_required_aa_updates.sql
+# 5212|2183_optional_bot_xp_rule.sql
+# 5213|2185_optional_NPCFlurryChacne_rule
+# 5214|2185_optional_NPCFlurryChacne_rule.sql
+# 5215|2185_optional_NPCFlurryChance_rule.sql
+5216|2185_required_aa_updates
+5217|2185_required_aa_updates.sql
+# 5218|2188_optional_miscspelleffect_rules
+# 5219|2188_optional_miscspelleffect_rules.sql
+5220|2188_required_aa_updates
+5221|2188_required_aa_updates.sql
+# 5222|2189_optional_taunt_rules
+# 5223|2189_optional_taunt_rules.sql
+5224|2195_required_sharedplatupdates.sql
+# 5225|2208_optional_aa_stacking_rule.sql
+# 5226|2208_optional_EnableSoulAbrasionAA.sql
+5227|2208_required_aa_updates.sql
+# 5228|2209_optional_additive_bonus_rule.sql
+5229|2213_loot_changes.sql
+5230|2214_faction_list_mod.sql
+5231|2215_required_aa_updates.sql
+# 5232|2243_optional_char_max_level_rule.sql
+5233|2260_probability.sql
+5234|2262_required_pet_discipline_update.sql
+5235|2264_required_aa_updates.sql
+5236|2268_QueryServ.sql
+5237|2268_required_updates.sql
+# 5238|2274_optional_rule_iplimitdisconnectall.sql
+# 5239|2278_optional_rule_targetableswarmpet.sql
+# 5240|2280_optional_rule_targetableswarmpet-rename.sql
+5241|2283_required_npc_changes.sql
+5242|2299_required_inspectmessage_fields.sql
+# 5243|2300_optional_loot_changes.sql
+5244|2304_QueryServ.sql
+5245|2340_required_maxbuffslotspet.sql
+5246|2361_QueryServ.sql
+5247|2361_required_qs_rule_values.sql
+5248|2370_required_aa_updates.sql
+5249|2376_required_aa_updates.sql
+# 5250|2380_optional_merc_data.sql
+# 5251|2380_optional_merc_merchant_npctypes_update.sql
+# 5252|2380_optional_merc_rules.sql
+5253|2383_required_group_ismerc.sql
+# 5254|2428_optional_levelbasedexpmods.sql
+# 5255|2448_optional_stun_proc_aggro_rule.sql
+5256|2471_required_aa_updates.sql
+5257|2482_required_start_zones.sql
+5258|2504_required_aa_updates.sql
+8000|mercs.sql|SHOW TABLES LIKE 'merc_stats'|empty|
+9000|2013_02_18_Merc_Rules_and_Tables.sql|SELECT * FROM `rule_values` WHERE `rule_name` LIKE '%Mercs:ResurrectRadius%'|empty|
+9001|2013_02_25_Impr_HT_LT.sql|SHOW TABLES LIKE 'merc_inventory'|empty|
+9002|2013_03_1_Merc_Rules_and_Equipment.sql|SHOW TABLES LIKE 'merc_inventory'|empty|
+# 9003|2013_03_23_Escape_FadingMemories.sql
+9004|2013_04_04_NaturesBounty.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '1230' AND `slot` = '1' AND `effectid` = '313' AND `base1` = '15' AND `base2` = '0'|empty|
+9005|2013_04_08_Salvage.sql|SHOW COLUMNS FROM `tradeskill_recipe_entries` LIKE 'salvagecount'|empty|
+9006|2013_05_05_Account_Flags.sql|SHOW TABLES LIKE 'account_flags'|empty|
+9007|2013_05_05_Item_Tick.sql|SHOW TABLES LIKE 'item_tick'|empty|
+9008|2013_07_11_NPC_Special_Abilities.sql|SHOW COLUMNS FROM `npc_types` LIKE 'special_abilities'|empty|
+9009|2013_10_12_Merc_Special_Abilities.sql|SHOW COLUMNS FROM `merc_stats` LIKE 'special_abilities'|empty|
+# 9010|2013_10_12_Merc_vwMercNpcTypes.sql
+9011|2013_10_31_Recipe_disabling.sql|SHOW COLUMNS FROM `tradeskill_recipe` LIKE 'enabled'|empty|
+9012|2013_11_07_BaseData.sql|SHOW TABLES LIKE 'base_data'|empty|
+9013|2013_11_13_Instrument_Singing_Mastery.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '213' AND `slot` = '1' AND `effectid` = '260' AND `base1` = '2' AND `base2` = '23'|empty|
+9014|2013_11_18_AssistRadius.sql|SHOW COLUMNS FROM `npc_types` LIKE 'assistradius'|empty|
+9015|2013_12_26_MerchantList_Class_Required.sql|SHOW COLUMNS FROM `merchantlist` LIKE 'classes_required'|empty|
+9016|2014_01_04_SongModCapAAs.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '571' AND `slot` = '1' AND `effectid` = '261'|empty|
+9017|2014_01_08_SpellsNewAdditions.sql|SHOW COLUMNS FROM `spells_new` LIKE 'persistdeath'|empty|
+9018|2014_01_09_PreservePetSize.sql|SHOW COLUMNS FROM `character_pet_info` LIKE 'size'|empty|
+9019|2014_01_20_MezMastery.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '781' AND `slot` = '1' AND `effectid` = '287'|empty|
+9020|2014_01_20_Not_Extendable.sql|SHOW COLUMNS FROM `spells_new` LIKE 'not_extendable'|empty|
+9021|2014_01_20_SpellCastingReinforcement.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '86' AND `slot` = '1' AND `effectid` = '128'|empty|
+9022|2014_01_20_Weather.sql|SHOW COLUMNS FROM `zone` LIKE 'rain_chance1'|empty|
+9023|2014_01_27_CritcalMendAA.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '230' AND `slot` = '1' AND `effectid` = '275'|empty
+9024|2014_02_02_SpellCriticalsAA.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '4755' AND `slot` = '1' AND `effectid` = '294'|empty
+9025|2014_02_13_Rename_instance_lockout_tables.sql|SHOW TABLES LIKE 'instance_list'|empty|
+9026|2014_02_13_spells_new_update.sql|SHOW COLUMNS FROM `spells_new` LIKE 'ConeStartAngle'|empty|
+9027|2014_02_20_buff_update.sql|SHOW COLUMNS FROM `character_buffs` LIKE 'caston_y'|empty|
+9028|2014_02_26_roambox_update.sql|SHOW COLUMNS FROM `spawngroup` LIKE 'mindelay'|empty|
+9029|2014_02_26_virulentvenomAA.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '888' AND `slot` = '1' AND `effectid` = '250'|empty|
+9030|2014_04_04_PhysicalResist.sql|SHOW COLUMNS FROM `npc_types` LIKE 'PhR'|empty|
+9031|2014_04_10_No_Target_With_Hotkey.sql|SHOW COLUMNS FROM `npc_types` LIKE 'no_target_hotkey'|empty|
+9032|2014_04_12_SlowMitigation.sql|SHOW COLUMNS FROM `npc_types` LIKE 'slow_mitigation'|contains|float
+9034|2014_04_25_spawn_events.sql|SHOW COLUMNS FROM `spawn_events` LIKE 'strict'|empty|
+9035|2014_04_27_AISpellEffects.sql|SHOW COLUMNS FROM `npc_types` LIKE 'npc_spells_effects_id'|empty|
+9036|2014_05_04_SlowMitigationFix.sql|SHOW COLUMNS FROM `npc_types` LIKE 'slow_mitigation'|contains|float
+9038|2014_06_25_AA_Updates.sql|SELECT * FROM `altadv_vars` WHERE `skill_id` = '1604'|empty
+9039|2014_07_04_AA_Updates.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '158' AND `slot` = '1' AND `effectid` = '238'|empty
+9040|2014_07_10_npc_spells.sql|SHOW COLUMNS FROM `npc_spells` LIKE 'engaged_no_sp_recast_min'|empty|
+9041|2014_08_02_spells_new.sql|SHOW COLUMNS FROM `spells_new` LIKE 'viral_range'|empty|
+9042|2014_08_12_NPC_raid_targets.sql|SHOW COLUMNS FROM `npc_types` LIKE 'raid_target'|empty|
+9043|2014_08_18_spells_new_update.sql|SHOW COLUMNS FROM `spells_new` LIKE 'viral_targets'|empty|
+9044|2014_08_20_merchantlist_probability.sql|SHOW COLUMNS FROM `merchantlist` LIKE 'probability'|empty|
+9045|2014_08_23_Complete_QueryServ_Table_Structures.sql|SHOW TABLES LIKE 'qs_player_aa_rate_hourly'|empty|
+9046|2014_08_23_player_events_and_player_aa_rate_hourly.sql|SHOW TABLES LIKE 'qs_player_events'|empty|
+9048|2014_09_09_attack_delay.sql|SHOW COLUMNS FROM `npc_types` LIKE 'attack_delay'|empty|
+9050|2014_09_20_ban_messages.sql|SHOW COLUMNS FROM `account` LIKE 'ban_reason'|empty|
+9051|2014_10_11_RaidMOTD.sql|SHOW COLUMNS FROM `raid_details` LIKE 'motd'|empty|
+9052|2014_10_13_RaidLeadership.sql|SHOW TABLES LIKE 'raid_leaders'|empty|
+9053|2014_10_18_group_mentor.sql|SHOW COLUMNS FROM `group_leaders` LIKE 'mentoree'|empty|
+9054|2014_10_19_raid_group_mentor.sql|SHOW COLUMNS FROM `raid_leaders` LIKE 'mentoree'|empty|
+9055|2014_10_30_special_abilities_null.sql|SHOW COLUMNS FROM `npc_types` LIKE 'special_abilities'|contains|NO
+9056|2014_11_08_RaidMembers.sql|SHOW COLUMNS FROM `raid_members` LIKE 'groupid'|missing|unsigned
+9057|2014_11_13_spells_new_updates.sql|SHOW COLUMNS FROM `spells_new` LIKE 'disallow_sit'|empty|
+
+# Upgrade conditions:
+# 	This won't be needed after this system is implemented, but it is used database that are not 
+#	yet using the versioning system to figure out where the database is schema wise to determine
+#	which updates are necessary to run
+#
+# Example: Version|Filename.sql|Query_to_Check_Condition_For_Needed_Update|match type|text to match
+#	0 = Database Version
+#	1 = Filename.sql
+#	2 = Query_to_Check_Condition_For_Needed_Update
+#	3 = Match Type - If condition from match type to Value 4 is true, update will flag for needing to be ran
+#		contains = If query results contains text from 4th value
+#		match = If query results matches text from 4th value
+#		missing = If query result is missing text from 4th value
+#		empty = If the query results in no results
+#		not_empty = If the query is not empty
+#	4 = Text to match
+#
+#

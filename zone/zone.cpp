@@ -400,7 +400,7 @@ void Zone::LoadTempMerchantData() {
 	LogFile->write(EQEMuLog::Status, "Loading Temporary Merchant Lists...");
 	std::string query = StringFormat(
 		"SELECT								   "
-		"ml.npcid,							   "
+		"DISTINCT ml.npcid,					   "
 		"ml.slot,							   "
 		"ml.charges,						   "
 		"ml.itemid							   "
