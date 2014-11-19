@@ -831,17 +831,18 @@ struct BindStruct {
 	/*008*/ float y;
 	/*012*/ float z;
 	/*016*/ float heading;
-	/*020*/
+	/*020*/ uint32 instance_id;
+	/*024*/
 };
 
 struct SuspendedMinion_Struct
 {
-	/*000*/	uint16	SpellID;
-	/*002*/	uint32	HP;
-	/*006*/	uint32	Mana;
-	/*010*/	SpellBuff_Struct	Buffs[BUFF_COUNT];
-	/*510*/	uint32	Items[_MaterialCount];
-	/*546*/	char	Name[64];
+	/*000*/	uint16 SpellID;
+	/*002*/	uint32 HP;
+	/*006*/	uint32 Mana;
+	/*010*/	SpellBuff_Struct Buffs[BUFF_COUNT];
+	/*510*/	uint32 Items[_MaterialCount];
+	/*546*/	char Name[64];
 	/*610*/
 };
 
@@ -2661,6 +2662,17 @@ struct Translocate_Struct {
 /*080*/	float	x;
 /*084*/	float	z;
 /*088*/	uint32	Complete;
+};
+
+struct PendingTranslocate_Struct
+{
+	uint32 zone_id;
+	uint16 instance_id;
+	float heading;
+	float x;
+	float y;
+	float z;
+	uint32 spell_id;
 };
 
 struct Sacrifice_Struct {

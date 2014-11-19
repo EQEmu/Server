@@ -1249,6 +1249,152 @@ double lua_clock() {
 	return static_cast<double>(t) / 1000.0;
 }
 
+#define LuaCreateNPCParse(name, c_type, default_value) do { \
+	cur = table[#name]; \
+	if(luabind::type(cur) != LUA_TNIL) { \
+		try { \
+			npc_type->name = luabind::object_cast<c_type>(cur); \
+		} \
+		catch(luabind::cast_failed) { \
+			npc_type->size = default_value; \
+		} \
+	} \
+	else { \
+		npc_type->size = default_value; \
+	} \
+} while(0)
+
+#define LuaCreateNPCParseString(name, str_length, default_value) do { \
+	cur = table[#name]; \
+	if(luabind::type(cur) != LUA_TNIL) { \
+		try { \
+			std::string tmp = luabind::object_cast<std::string>(cur); \
+			strncpy(npc_type->name, tmp.c_str(), str_length); \
+		} \
+		catch(luabind::cast_failed) { \
+			strncpy(npc_type->name, default_value, str_length); \
+		} \
+	} \
+	else { \
+		strncpy(npc_type->name, default_value, str_length); \
+	} \
+} while(0)
+
+void lua_create_npc(luabind::adl::object table, float x, float y, float z, float heading) {
+	if(luabind::type(table) != LUA_TTABLE) {
+		return;
+	}
+	
+	NPCType* npc_type = new NPCType;
+	memset(npc_type, 0, sizeof(NPCType));
+
+
+	luabind::adl::index_proxy<luabind::adl::object> cur = table["name"];
+	LuaCreateNPCParseString(name, 64, "_");
+	LuaCreateNPCParseString(lastname, 64, "");
+	LuaCreateNPCParse(cur_hp, int32, 30);
+	LuaCreateNPCParse(max_hp, int32, 30);
+	LuaCreateNPCParse(size, float, 6.0f);
+	LuaCreateNPCParse(runspeed, float, 1.25f);
+	LuaCreateNPCParse(gender, uint8, 0);
+	LuaCreateNPCParse(race, uint16, 1);
+	LuaCreateNPCParse(class_, uint8, WARRIOR);
+	LuaCreateNPCParse(bodytype, uint8, 0);
+	LuaCreateNPCParse(deity, uint8, 0);
+	LuaCreateNPCParse(level, uint8, 1);
+	LuaCreateNPCParse(npc_id, uint32, 1);
+	LuaCreateNPCParse(texture, uint8, 0);
+	LuaCreateNPCParse(helmtexture, uint8, 0);
+	LuaCreateNPCParse(loottable_id, uint32, 0);
+	LuaCreateNPCParse(npc_spells_id, uint32, 0);
+	LuaCreateNPCParse(npc_spells_effects_id, uint32, 0);
+	LuaCreateNPCParse(npc_faction_id, int32, 0);
+	LuaCreateNPCParse(merchanttype, uint32, 0);
+	LuaCreateNPCParse(alt_currency_type, uint32, 0);
+	LuaCreateNPCParse(adventure_template, uint32, 0);
+	LuaCreateNPCParse(trap_template, uint32, 0);
+	LuaCreateNPCParse(light, uint8, 0);
+	LuaCreateNPCParse(AC, uint32, 0);
+	LuaCreateNPCParse(Mana, uint32, 0);
+	LuaCreateNPCParse(ATK, uint32, 0);
+	LuaCreateNPCParse(STR, uint32, 75);
+	LuaCreateNPCParse(STA, uint32, 75);
+	LuaCreateNPCParse(DEX, uint32, 75);
+	LuaCreateNPCParse(AGI, uint32, 75);
+	LuaCreateNPCParse(INT, uint32, 75);
+	LuaCreateNPCParse(WIS, uint32, 75);
+	LuaCreateNPCParse(CHA, uint32, 75);
+	LuaCreateNPCParse(MR, int32, 25);
+	LuaCreateNPCParse(FR, int32, 25);
+	LuaCreateNPCParse(CR, int32, 25);
+	LuaCreateNPCParse(PR, int32, 25);
+	LuaCreateNPCParse(DR, int32, 25);
+	LuaCreateNPCParse(Corrup, int32, 25);
+	LuaCreateNPCParse(PhR, int32, 0);
+	LuaCreateNPCParse(haircolor, uint8, 0);
+	LuaCreateNPCParse(beardcolor, uint8, 0);
+	LuaCreateNPCParse(eyecolor1, uint8, 0);
+	LuaCreateNPCParse(eyecolor2, uint8, 0);
+	LuaCreateNPCParse(hairstyle, uint8, 0);
+	LuaCreateNPCParse(luclinface, uint8, 0);
+	LuaCreateNPCParse(beard, uint8, 0);
+	LuaCreateNPCParse(drakkin_heritage, uint32, 0);
+	LuaCreateNPCParse(drakkin_tattoo, uint32, 0);
+	LuaCreateNPCParse(drakkin_details, uint32, 0);
+	LuaCreateNPCParse(armor_tint[0], uint32, 0);
+	LuaCreateNPCParse(armor_tint[1], uint32, 0);
+	LuaCreateNPCParse(armor_tint[2], uint32, 0);
+	LuaCreateNPCParse(armor_tint[3], uint32, 0);
+	LuaCreateNPCParse(armor_tint[4], uint32, 0);
+	LuaCreateNPCParse(armor_tint[5], uint32, 0);
+	LuaCreateNPCParse(armor_tint[6], uint32, 0);
+	LuaCreateNPCParse(armor_tint[7], uint32, 0);
+	LuaCreateNPCParse(armor_tint[8], uint32, 0);
+	LuaCreateNPCParse(min_dmg, uint32, 2);
+	LuaCreateNPCParse(max_dmg, uint32, 4);
+	LuaCreateNPCParse(attack_count, int16, 0);
+	LuaCreateNPCParseString(special_abilities, 512, "");
+	LuaCreateNPCParse(d_meele_texture1, uint16, 0);
+	LuaCreateNPCParse(d_meele_texture2, uint16, 0);
+	LuaCreateNPCParseString(ammo_idfile, 32, "");
+	LuaCreateNPCParse(prim_melee_type, uint8, 0);
+	LuaCreateNPCParse(sec_melee_type, uint8, 0);
+	LuaCreateNPCParse(ranged_type, uint8, 0);
+	LuaCreateNPCParse(hp_regen, int32, 1);
+	LuaCreateNPCParse(mana_regen, int32, 1);
+	LuaCreateNPCParse(aggroradius, int32, 0);
+	LuaCreateNPCParse(assistradius, int32, 0);
+	LuaCreateNPCParse(see_invis, uint8, 0);
+	LuaCreateNPCParse(see_invis_undead, bool, false);
+	LuaCreateNPCParse(see_hide, bool, false);
+	LuaCreateNPCParse(see_improved_hide, bool, false);
+	LuaCreateNPCParse(qglobal, bool, false);
+	LuaCreateNPCParse(npc_aggro, bool, false);
+	LuaCreateNPCParse(spawn_limit, uint8, false);
+	LuaCreateNPCParse(mount_color, uint8, false);
+	LuaCreateNPCParse(attack_speed, float, 0);
+	LuaCreateNPCParse(attack_delay, uint8, 30);
+	LuaCreateNPCParse(accuracy_rating, int, 0);
+	LuaCreateNPCParse(avoidance_rating, int, 0);
+	LuaCreateNPCParse(findable, bool, false);
+	LuaCreateNPCParse(trackable, bool, false);
+	LuaCreateNPCParse(slow_mitigation, int16, 0);
+	LuaCreateNPCParse(maxlevel, uint8, 0);
+	LuaCreateNPCParse(scalerate, uint32, 0);
+	LuaCreateNPCParse(private_corpse, bool, false);
+	LuaCreateNPCParse(unique_spawn_by_name, bool, false);
+	LuaCreateNPCParse(underwater, bool, false);
+	LuaCreateNPCParse(emoteid, uint32, 0);
+	LuaCreateNPCParse(spellscale, float, 0);
+	LuaCreateNPCParse(healscale, float, 0);
+	LuaCreateNPCParse(no_target_hotkey, bool, false);
+	LuaCreateNPCParse(raid_target, bool, false);
+	LuaCreateNPCParse(probability, uint8, 0);
+
+	NPC* npc = new NPC(npc_type, nullptr, x, y, z, heading, FlyMode3);
+	npc->GiveNPCTypeData(npc_type);
+	entity_list.AddNPC(npc);
+}
 luabind::scope lua_register_general() {
 	return luabind::namespace_("eq")
 	[
@@ -1435,7 +1581,8 @@ luabind::scope lua_register_general() {
 		luabind::def("enable_recipe", &lua_enable_recipe),
 		luabind::def("disable_recipe", &lua_disable_recipe),
 		luabind::def("clear_npctype_cache", &lua_clear_npctype_cache),
-		luabind::def("clock", &lua_clock)
+		luabind::def("clock", &lua_clock),
+		luabind::def("create_npc", &lua_create_npc)
 	];
 }
 

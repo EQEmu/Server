@@ -71,9 +71,11 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 			break;
 		case GateToBindPoint:
 			target_zone_id = m_pp.binds[0].zoneId;
+			target_instance_id = m_pp.binds[0].instance_id;
 			break;
 		case ZoneToBindPoint:
 			target_zone_id = m_pp.binds[0].zoneId;
+			target_instance_id = m_pp.binds[0].instance_id;
 			break;
 		case ZoneSolicited: //we told the client to zone somewhere, so we know where they are going.
 			target_zone_id = zonesummon_id;
@@ -717,20 +719,22 @@ void NPC::Gate() {
 	Mob::Gate();
 }
 
-void Client::SetBindPoint(int to_zone, float new_x, float new_y, float new_z) {
+void Client::SetBindPoint(int to_zone, int to_instance, float new_x, float new_y, float new_z) {
 	if (to_zone == -1) {
 		m_pp.binds[0].zoneId = zone->GetZoneID();
+		m_pp.binds[0].instance_id = (zone->GetInstanceID() != 0 && zone->IsInstancePersistent()) ? zone->GetInstanceID() : 0;
 		m_pp.binds[0].x = x_pos;
 		m_pp.binds[0].y = y_pos;
 		m_pp.binds[0].z = z_pos;
 	}
 	else {
 		m_pp.binds[0].zoneId = to_zone;
+		m_pp.binds[0].instance_id = to_instance;
 		m_pp.binds[0].x = new_x;
 		m_pp.binds[0].y = new_y;
 		m_pp.binds[0].z = new_z;
 	}
-	database.SaveCharacterBindPoint(this->CharacterID(), m_pp.binds[0].zoneId, 0, m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, 0, 0);
+	database.SaveCharacterBindPoint(this->CharacterID(), m_pp.binds[0].zoneId, m_pp.binds[0].instance_id, m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, 0, 0);
 }
 
 void Client::GoToBind(uint8 bindnum) {
@@ -741,13 +745,13 @@ void Client::GoToBind(uint8 bindnum) {
 	// move the client, which will zone them if needed.
 	// ignore restrictions on the zone request..?
 	if(bindnum == 0)
-		MovePC(m_pp.binds[0].zoneId, 0.0f, 0.0f, 0.0f, 0.0f, 1, GateToBindPoint);
+		MovePC(m_pp.binds[0].zoneId, m_pp.binds[0].instance_id, 0.0f, 0.0f, 0.0f, 0.0f, 1, GateToBindPoint);
 	else
-		MovePC(m_pp.binds[bindnum].zoneId, m_pp.binds[bindnum].x, m_pp.binds[bindnum].y, m_pp.binds[bindnum].z, m_pp.binds[bindnum].heading, 1);
+		MovePC(m_pp.binds[bindnum].zoneId, m_pp.binds[bindnum].instance_id, m_pp.binds[bindnum].x, m_pp.binds[bindnum].y, m_pp.binds[bindnum].z, m_pp.binds[bindnum].heading, 1);
 }
 
 void Client::GoToDeath() {
-	MovePC(m_pp.binds[0].zoneId, 0.0f, 0.0f, 0.0f, 0.0f, 1, ZoneToBindPoint);
+	MovePC(m_pp.binds[0].zoneId, m_pp.binds[0].instance_id, 0.0f, 0.0f, 0.0f, 0.0f, 1, ZoneToBindPoint);
 }
 
 void Client::SetZoneFlag(uint32 zone_id) {

@@ -1023,11 +1023,12 @@ XS(XS_Client_SetBindPoint); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetBindPoint)
 {
 	dXSARGS;
-	if (items < 1 || items > 5)
-		Perl_croak(aTHX_ "Usage: Client::SetBindPoint(THIS, to_zone= -1, new_x= 0.0f, new_y= 0.0f, new_z= 0.0f)");
+	if (items < 1 || items > 6)
+		Perl_croak(aTHX_ "Usage: Client::SetBindPoint(THIS, to_zone= -1, to_instance = 0, new_x= 0.0f, new_y= 0.0f, new_z= 0.0f)");
 	{
 		Client *		THIS;
 		int		to_zone;
+		int		to_instance;
 		float		new_x;
 		float		new_y;
 		float		new_z;
@@ -1047,25 +1048,31 @@ XS(XS_Client_SetBindPoint)
 			to_zone = (int)SvIV(ST(1));
 		}
 
-		if (items < 3)
-			new_x = 0.0f;
+		if(items < 3)
+			to_instance = 0;
 		else {
-			new_x = (float)SvNV(ST(2));
+			to_instance = (int)SvIV(ST(2));
 		}
 
 		if (items < 4)
-			new_y = 0.0f;
+			new_x = 0.0f;
 		else {
-			new_y = (float)SvNV(ST(3));
+			new_x = (float)SvNV(ST(3));
 		}
 
 		if (items < 5)
-			new_z = 0.0f;
+			new_y = 0.0f;
 		else {
-			new_z = (float)SvNV(ST(4));
+			new_y = (float)SvNV(ST(4));
 		}
 
-		THIS->SetBindPoint(to_zone, new_x, new_y, new_z);
+		if (items < 6)
+			new_z = 0.0f;
+		else {
+			new_z = (float)SvNV(ST(5));
+		}
+
+		THIS->SetBindPoint(to_zone, to_instance, new_x, new_y, new_z);
 	}
 	XSRETURN_EMPTY;
 }
@@ -6155,7 +6162,7 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "SetDeity"), XS_Client_SetDeity, file, "$$");
 		newXSproto(strcpy(buf, "AddEXP"), XS_Client_AddEXP, file, "$$;$$");
 		newXSproto(strcpy(buf, "SetEXP"), XS_Client_SetEXP, file, "$$$;$");
-		newXSproto(strcpy(buf, "SetBindPoint"), XS_Client_SetBindPoint, file, "$;$$$$");
+		newXSproto(strcpy(buf, "SetBindPoint"), XS_Client_SetBindPoint, file, "$;$$$$$");
 		newXSproto(strcpy(buf, "GetBindX"), XS_Client_GetBindX, file, "$$");
 		newXSproto(strcpy(buf, "GetBindY"), XS_Client_GetBindY, file, "$$");
 		newXSproto(strcpy(buf, "GetBindZ"), XS_Client_GetBindZ, file, "$$");

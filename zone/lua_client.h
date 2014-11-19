@@ -73,9 +73,10 @@ public:
 	void SetEXP(uint32 set_exp, uint32 set_aaxp, bool resexp);
 	void SetBindPoint();
 	void SetBindPoint(int to_zone);
-	void SetBindPoint(int to_zone, float new_x);
-	void SetBindPoint(int to_zone, float new_x, float new_y);
-	void SetBindPoint(int to_zone, float new_x, float new_y, float new_z);
+	void SetBindPoint(int to_zone, int to_instance);
+	void SetBindPoint(int to_zone, int to_instance, float new_x);
+	void SetBindPoint(int to_zone, int to_instance, float new_x, float new_y);
+	void SetBindPoint(int to_zone, int to_instance, float new_x, float new_y, float new_z);
 	float GetBindX();
 	float GetBindX(int index);
 	float GetBindY();

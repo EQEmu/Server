@@ -4,17 +4,17 @@
 #include "zonedb.h"
 #include "npc.h"
 
-#define MAXMERCS        1
-#define MERC_DEBUG      0
-#define TANK            1
-#define HEALER          2
-#define MELEEDPS        9
-#define CASTERDPS       12
+#define MAXMERCS 1
+#define MERC_DEBUG 0
+#define TANK 1
+#define HEALER 2
+#define MELEEDPS 9
+#define CASTERDPS 12
 
-#define NO_MERC_ID           0
-#define MERC_STATE_NORMAL    5
+#define NO_MERC_ID 0
+#define MERC_STATE_NORMAL 5
 #define MERC_STATE_SUSPENDED 1
-#define NOT_SUSPENDED_TIME   0
+#define NOT_SUSPENDED_TIME 0
 
 const int MercAISpellRange = 100; // TODO: Write a method that calcs what the merc's spell range is based on spell, equipment, AA, whatever and replace this
 
@@ -31,19 +31,19 @@ enum MercStanceType {
 };
 
 struct MercSpell {
-	uint16  spellid;                // <= 0 = no spell
-	uint32  type;                   // 0 = never, must be one (and only one) of the defined values
-	int16   stance;                 // 0 = all, + = only this stance, - = all except this stance
-	int16   slot;
-	uint16  proc_chance;
-	uint32  time_cancast;   // when we can cast this spell next
+	uint16 spellid; // <= 0 = no spell
+	uint32 type; // 0 = never, must be one (and only one) of the defined values
+	int16 stance; // 0 = all, + = only this stance, - = all except this stance
+	int16 slot;
+	uint16 proc_chance;
+	uint32 time_cancast; // when we can cast this spell next
 };
 
 struct MercTimer {
-	uint16  timerid;                // EndurTimerIndex
-	uint8   timertype;              // 1 = spell, 2 = disc
-	uint16  spellid;                // <= 0 = no spell
-	uint32  time_cancast;   // when we can cast this spell next
+	uint16 timerid; // EndurTimerIndex
+	uint8 timertype; // 1 = spell, 2 = disc
+	uint16 spellid; // <= 0 = no spell
+	uint32 time_cancast; // when we can cast this spell next
 };
 
 class Merc : public NPC {
@@ -170,16 +170,16 @@ public:
 	inline const uint8 GetClientVersion() const { return _OwnerClientVersion; }
 
 	virtual void SetTarget(Mob* mob);
-	bool    HasSkill(SkillUseTypes skill_id) const;
-	bool    CanHaveSkill(SkillUseTypes skill_id) const;
-	uint16  MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) const;
-	inline  uint16  MaxSkill(SkillUseTypes skillid) const { return MaxSkill(skillid, GetClass(), GetLevel()); }
+	bool HasSkill(SkillUseTypes skill_id) const;
+	bool CanHaveSkill(SkillUseTypes skill_id) const;
+	uint16 MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) const;
+	inline uint16 MaxSkill(SkillUseTypes skillid) const { return MaxSkill(skillid, GetClass(), GetLevel()); }
 	virtual void DoClassAttacks(Mob *target);
-	void    CheckHateList();
-	bool    CheckTaunt();
-	bool    CheckAETaunt();
-	bool    CheckConfidence();
-	bool    TryHide();
+	void CheckHateList();
+	bool CheckTaunt();
+	bool CheckAETaunt();
+	bool CheckConfidence();
+	bool TryHide();
 
 	// stat functions
 	virtual void CalcBonuses();
@@ -189,56 +189,56 @@ public:
 	inline virtual int32 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
 	int32 GetRawACNoShield(int &shield_ac) const;
 
-	inline virtual int32    GetSTR()        const { return STR; }
-	inline virtual int32    GetSTA()        const { return STA; }
-	inline virtual int32    GetDEX()        const { return DEX; }
-	inline virtual int32    GetAGI()        const { return AGI; }
-	inline virtual int32    GetINT()        const { return INT; }
-	inline virtual int32    GetWIS()        const { return WIS; }
-	inline virtual int32    GetCHA()        const { return CHA; }
-	inline virtual int32    GetMR() const { return MR; }
-	inline virtual int32    GetFR() const { return FR; }
-	inline virtual int32    GetDR() const { return DR; }
-	inline virtual int32    GetPR() const { return PR; }
-	inline virtual int32    GetCR() const { return CR; }
-	inline virtual int32    GetCorrup()     const { return Corrup; }
+	inline virtual int32 GetSTR() const { return STR; }
+	inline virtual int32 GetSTA() const { return STA; }
+	inline virtual int32 GetDEX() const { return DEX; }
+	inline virtual int32 GetAGI() const { return AGI; }
+	inline virtual int32 GetINT() const { return INT; }
+	inline virtual int32 GetWIS() const { return WIS; }
+	inline virtual int32 GetCHA() const { return CHA; }
+	inline virtual int32 GetMR() const { return MR; }
+	inline virtual int32 GetFR() const { return FR; }
+	inline virtual int32 GetDR() const { return DR; }
+	inline virtual int32 GetPR() const { return PR; }
+	inline virtual int32 GetCR() const { return CR; }
+	inline virtual int32 GetCorrup() const { return Corrup; }
 
-	inline virtual int32    GetHeroicSTR()  const { return itembonuses.HeroicSTR; }
-	inline virtual int32    GetHeroicSTA()  const { return itembonuses.HeroicSTA; }
-	inline virtual int32    GetHeroicDEX()  const { return itembonuses.HeroicDEX; }
-	inline virtual int32    GetHeroicAGI()  const { return itembonuses.HeroicAGI; }
-	inline virtual int32    GetHeroicINT()  const { return itembonuses.HeroicINT; }
-	inline virtual int32    GetHeroicWIS()  const { return itembonuses.HeroicWIS; }
-	inline virtual int32    GetHeroicCHA()  const { return itembonuses.HeroicCHA; }
-	inline virtual int32    GetHeroicMR()   const { return itembonuses.HeroicMR; }
-	inline virtual int32    GetHeroicFR()   const { return itembonuses.HeroicFR; }
-	inline virtual int32    GetHeroicDR()   const { return itembonuses.HeroicDR; }
-	inline virtual int32    GetHeroicPR()   const { return itembonuses.HeroicPR; }
-	inline virtual int32    GetHeroicCR()   const { return itembonuses.HeroicCR; }
-	inline virtual int32    GetHeroicCorrup()       const { return itembonuses.HeroicCorrup; }
+	inline virtual int32 GetHeroicSTR() const { return itembonuses.HeroicSTR; }
+	inline virtual int32 GetHeroicSTA() const { return itembonuses.HeroicSTA; }
+	inline virtual int32 GetHeroicDEX() const { return itembonuses.HeroicDEX; }
+	inline virtual int32 GetHeroicAGI() const { return itembonuses.HeroicAGI; }
+	inline virtual int32 GetHeroicINT() const { return itembonuses.HeroicINT; }
+	inline virtual int32 GetHeroicWIS() const { return itembonuses.HeroicWIS; }
+	inline virtual int32 GetHeroicCHA() const { return itembonuses.HeroicCHA; }
+	inline virtual int32 GetHeroicMR() const { return itembonuses.HeroicMR; }
+	inline virtual int32 GetHeroicFR() const { return itembonuses.HeroicFR; }
+	inline virtual int32 GetHeroicDR() const { return itembonuses.HeroicDR; }
+	inline virtual int32 GetHeroicPR() const { return itembonuses.HeroicPR; }
+	inline virtual int32 GetHeroicCR() const { return itembonuses.HeroicCR; }
+	inline virtual int32 GetHeroicCorrup() const { return itembonuses.HeroicCorrup; }
 	// Mod2
-	inline virtual int32    GetShielding()          const { return itembonuses.MeleeMitigation; }
-	inline virtual int32    GetSpellShield()        const { return itembonuses.SpellShield; }
-	inline virtual int32    GetDoTShield()          const { return itembonuses.DoTShielding; }
-	inline virtual int32    GetStunResist()         const { return itembonuses.StunResist; }
-	inline virtual int32    GetStrikeThrough()      const { return itembonuses.StrikeThrough; }
-	inline virtual int32    GetAvoidance()          const { return itembonuses.AvoidMeleeChance; }
-	inline virtual int32    GetAccuracy()           const { return itembonuses.HitChance; }
-	inline virtual int32    GetCombatEffects()      const { return itembonuses.ProcChance; }
-	inline virtual int32    GetDS()                         const { return itembonuses.DamageShield; }
+	inline virtual int32 GetShielding() const { return itembonuses.MeleeMitigation; }
+	inline virtual int32 GetSpellShield() const { return itembonuses.SpellShield; }
+	inline virtual int32 GetDoTShield() const { return itembonuses.DoTShielding; }
+	inline virtual int32 GetStunResist() const { return itembonuses.StunResist; }
+	inline virtual int32 GetStrikeThrough() const { return itembonuses.StrikeThrough; }
+	inline virtual int32 GetAvoidance() const { return itembonuses.AvoidMeleeChance; }
+	inline virtual int32 GetAccuracy() const { return itembonuses.HitChance; }
+	inline virtual int32 GetCombatEffects() const { return itembonuses.ProcChance; }
+	inline virtual int32 GetDS() const { return itembonuses.DamageShield; }
 	// Mod3
-	inline virtual int32    GetHealAmt()            const { return itembonuses.HealAmt; }
-	inline virtual int32    GetSpellDmg()           const { return itembonuses.SpellDmg; }
-	inline virtual int32    GetClair()                      const { return itembonuses.Clairvoyance; }
-	inline virtual int32    GetDSMit()                      const { return itembonuses.DSMitigation; }
+	inline virtual int32 GetHealAmt() const { return itembonuses.HealAmt; }
+	inline virtual int32 GetSpellDmg() const { return itembonuses.SpellDmg; }
+	inline virtual int32 GetClair() const { return itembonuses.Clairvoyance; }
+	inline virtual int32 GetDSMit() const { return itembonuses.DSMitigation; }
 
-	inline virtual int32    GetSingMod()            const { return itembonuses.singingMod; }
-	inline virtual int32    GetBrassMod()           const { return itembonuses.brassMod; }
-	inline virtual int32    GetPercMod()            const { return itembonuses.percussionMod; }
-	inline virtual int32    GetStringMod()          const { return itembonuses.stringedMod; }
-	inline virtual int32    GetWindMod()            const { return itembonuses.windMod; }
+	inline virtual int32 GetSingMod() const { return itembonuses.singingMod; }
+	inline virtual int32 GetBrassMod() const { return itembonuses.brassMod; }
+	inline virtual int32 GetPercMod() const { return itembonuses.percussionMod; }
+	inline virtual int32 GetStringMod() const { return itembonuses.stringedMod; }
+	inline virtual int32 GetWindMod() const { return itembonuses.windMod; }
 
-	inline virtual int32    GetDelayDeath()         const { return aabonuses.DelayDeath + spellbonuses.DelayDeath + itembonuses.DelayDeath + 11; }
+	inline virtual int32 GetDelayDeath() const { return aabonuses.DelayDeath + spellbonuses.DelayDeath + itembonuses.DelayDeath + 11; }
 
 	// "SET" Class Methods
 	void SetMercData (uint32 templateID );
@@ -279,53 +279,53 @@ protected:
 	std::map<uint32,MercTimer> timers;
 
 	uint16 skills[HIGHEST_SKILL+1];
-	uint32 equipment[EmuConstants::EQUIPMENT_SIZE];        //this is an array of item IDs
-	uint16 d_meele_texture1;                                                       //this is an item Material value
-	uint16 d_meele_texture2;                                                       //this is an item Material value (offhand)
-	uint8 prim_melee_type;                                                        //Sets the Primary Weapon attack message and animation
-	uint8 sec_melee_type;                                                         //Sets the Secondary Weapon attack message and animation
+	uint32 equipment[EmuConstants::EQUIPMENT_SIZE]; //this is an array of item IDs
+	uint16 d_meele_texture1; //this is an item Material value
+	uint16 d_meele_texture2; //this is an item Material value (offhand)
+	uint8 prim_melee_type; //Sets the Primary Weapon attack message and animation
+	uint8 sec_melee_type; //Sets the Secondary Weapon attack message and animation
 
 private:
 
-	int32   CalcAC();
-	int32   GetACMit();
-	int32   GetACAvoid();
-	int32   acmod();
-	int32   CalcATK();
-	//int   CalcHaste();
+	int32 CalcAC();
+	int32 GetACMit();
+	int32 GetACAvoid();
+	int32 acmod();
+	int32 CalcATK();
+	//int CalcHaste();
 
-	int32   CalcSTR();
-	int32   CalcSTA();
-	int32   CalcDEX();
-	int32   CalcAGI();
-	int32   CalcINT();
-	int32   CalcWIS();
-	int32   CalcCHA();
+	int32 CalcSTR();
+	int32 CalcSTA();
+	int32 CalcDEX();
+	int32 CalcAGI();
+	int32 CalcINT();
+	int32 CalcWIS();
+	int32 CalcCHA();
 
-	int32   CalcMR();
-	int32   CalcFR();
-	int32   CalcDR();
-	int32   CalcPR();
-	int32   CalcCR();
-	int32   CalcCorrup();
-	int32   CalcMaxHP();
-	int32   CalcBaseHP();
-	int32   GetClassHPFactor();
-	int32   CalcHPRegen();
-	int32   CalcHPRegenCap();
-	int32   CalcMaxMana();
-	int32   CalcBaseMana();
-	int32   CalcManaRegen();
-	int32   CalcBaseManaRegen();
-	int32   CalcManaRegenCap();
-	void    CalcMaxEndurance();     //This calculates the maximum endurance we can have
-	int32   CalcBaseEndurance();    //Calculates Base End
-	int32   GetMaxEndurance() const {return max_end;}       //This gets our endurance from the last CalcMaxEndurance() call
-	int32   CalcEnduranceRegen();   //Calculates endurance regen used in DoEnduranceRegen()
-	int32   CalcEnduranceRegenCap();
-	void    SetEndurance(int32 newEnd);     //This sets the current endurance to the new value
-	void    DoEnduranceUpkeep();    //does the endurance upkeep
-	void    CalcRestState();
+	int32 CalcMR();
+	int32 CalcFR();
+	int32 CalcDR();
+	int32 CalcPR();
+	int32 CalcCR();
+	int32 CalcCorrup();
+	int32 CalcMaxHP();
+	int32 CalcBaseHP();
+	int32 GetClassHPFactor();
+	int32 CalcHPRegen();
+	int32 CalcHPRegenCap();
+	int32 CalcMaxMana();
+	int32 CalcBaseMana();
+	int32 CalcManaRegen();
+	int32 CalcBaseManaRegen();
+	int32 CalcManaRegenCap();
+	void CalcMaxEndurance(); //This calculates the maximum endurance we can have
+	int32 CalcBaseEndurance(); //Calculates Base End
+	int32 GetMaxEndurance() const {return max_end;} //This gets our endurance from the last CalcMaxEndurance() call
+	int32 CalcEnduranceRegen(); //Calculates endurance regen used in DoEnduranceRegen()
+	int32 CalcEnduranceRegenCap();
+	void SetEndurance(int32 newEnd); //This sets the current endurance to the new value
+	void DoEnduranceUpkeep(); //does the endurance upkeep
+	void CalcRestState();
 
 	int GroupLeadershipAAHealthEnhancement();
 	int GroupLeadershipAAManaEnhancement();
@@ -351,8 +351,8 @@ private:
 	uint32 _baseWIS;
 	uint32 _baseCHA;
 	uint32 _baseATK;
-	uint32 _baseRace;       // Necessary to preserve the race otherwise mercs get their race updated in the db when they get an illusion.
-	uint8 _baseGender;      // Merc gender. Necessary to preserve the original value otherwise it can be changed by illusions.
+	uint32 _baseRace; // Necessary to preserve the race otherwise mercs get their race updated in the db when they get an illusion.
+	uint8 _baseGender; // Merc gender. Necessary to preserve the original value otherwise it can be changed by illusions.
 	uint32 _baseMR;
 	uint32 _baseCR;
 	uint32 _baseDR;
