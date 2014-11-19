@@ -128,6 +128,7 @@ sub ShowMenuPrompt {
         1 => \&database_dump,
         2 => \&database_dump_compress,
         3 => \&Run_Database_Check,
+        4 => \&AA_Fetch,
         0 => \&Exit,
     );
 
@@ -176,6 +177,7 @@ Database Management Menu (Please Select):
 	2) Backup Database Compressed - (Saves to Backups folder)
 		Ideal to perform before performing updates
 	3) $option[3]
+	4) AAs - Get Latest AA's from PEQ (This deletes AA's already in the database)
 	0) Exit
 	
 EO_MENU
@@ -266,6 +268,15 @@ sub trim {
 	$string =~ s/^\s+//; 
 	$string =~ s/\s+$//; 
 	return $string; 
+}
+
+#::: Fetch Latest PEQ AA's
+sub AA_Fetch{
+	print "Pulling down PEQ AA Tables...\n";
+	GetRemoteFile("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/peq_aa_tables.sql", "db_update/peq_aa_tables.sql");
+	print "\n\nInstalling AA Tables...\n";
+	print GetMySQLResultFromFile("db_update/peq_aa_tables.sql");
+	print "\nDone...\n\n";
 }
 
 #::: Responsible for Database Upgrade Routines
