@@ -244,8 +244,8 @@ int WorldDatabase::MoveCharacterToBind(int CharID, uint8 bindnum) {
 		heading = atof(row[5]);
 	}
 
-	query = StringFormat("UPDATE character_data SET zone_id = '%d', zone_instance = '%d', x = '%f', y = '%f', z = '%f', heading = '%f'", 
-						 zone_id, instance_id, x, y, z, heading);
+	query = StringFormat("UPDATE character_data SET zone_id = '%d', zone_instance = '%d', x = '%f', y = '%f', z = '%f', heading = '%f' WHERE id = %u", 
+						 zone_id, instance_id, x, y, z, heading, CharID);
 
 	results = database.QueryDatabase(query);
 	if(!results.Success()) {
