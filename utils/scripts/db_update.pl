@@ -43,7 +43,8 @@ if($OS eq "Windows"){
 		@mysql = split(';', $has_mysql_path);
 		foreach my $v (@mysql){
 			if($v=~/MySQL|MariaDB/i){ 
-				$path = $v . "/mysql"; 
+				$v =~s/\n//g; 
+				$path = trim($v) . "/mysql";
 				last;
 			}
 		}
@@ -106,8 +107,6 @@ if($bin_db_ver == $local_db_ver && $ARGV[0] eq "ran_from_world"){
 	exit; 
 }
 
-if(!$bin_db_ver){ $bin_db_ver = 9100; }
-
 print "Retrieving latest database manifest...\n";
 GetRemoteFile("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt", "db_update/db_update_manifest.txt");
 # GetRemoteFile("https://dl.dropboxusercontent.com/u/50023467/dl/db_update_manifest.txt", "db_update/db_update_manifest.txt");
@@ -163,10 +162,10 @@ sub ShowMenuPrompt {
 
 sub MenuOptions { 
 	if(@total_updates){ 
-		$option[3] = "Run pending updates... (" . scalar (@total_updates) . ")";
+		$option[3] = "Run pending REQUIRED updates... (" . scalar (@total_updates) . ")";
 	}
 	else{
-		$option[3] = "Check for pending Database updates
+		$option[3] = "Check for pending REQUIRED Database updates 
 		Stages updates for automatic upgrade...";
 	}
 
@@ -313,14 +312,14 @@ sub Run_Database_Check{
 				push(@total_updates, $i);
 			}
 			else{
-				print "DB up to date with: " . $i . " '" . $file_name . "' \n";
+				print "DB up to date with: " . $i . " - '" . $file_name . "' \n";
 			}
 			print_match_debug();
 			print_break();
 		}
 		if($match_type eq "missing"){
 			if(GetMySQLResult($query_check)=~/$match_text/i){  
-				print "DB up to date with: " . $i . " '" . $file_name . "' \n";
+				print "DB up to date with: " . $i . " - '" . $file_name . "' \n";
 				next; 
 			}
 			else{
@@ -338,7 +337,7 @@ sub Run_Database_Check{
 				push(@total_updates, $i);
 			}
 			else{
-				print "DB up to date with: " . $i . " '" . $file_name . "' \n";
+				print "DB up to date with: " . $i . " - '" . $file_name . "' \n";
 			}
 			print_match_debug();
 			print_break();
@@ -350,13 +349,19 @@ sub Run_Database_Check{
 				push(@total_updates, $i);
 			}
 			else{
-				print "DB up to date with: " . $i . " '" . $file_name . "' \n";
+				print "DB up to date with: " . $i . " - '" . $file_name . "' \n";
 			}
 			print_match_debug();
 			print_break();
 		}
 	}
-	print "\n\n";
+	print "\n";
+	
+	if(scalar (@total_updates) == 0){
+		print "No updates need to be run...\n";
+		print "Setting Database to Binary Version (" . $bin_db_ver . ") if not already...\n\n";
+		GetMySQLResult("UPDATE db_version SET version = $bin_db_ver"); 
+	}
 }
 
 sub FetchMissingUpdate{
