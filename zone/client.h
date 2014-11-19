@@ -177,7 +177,8 @@ struct XTarget_Struct
 struct RespawnOption
 {
 	std::string name;
-	uint32 zoneid;
+	uint32 zone_id;
+	uint16 instance_id;
 	float x;
 	float y;
 	float z;
@@ -376,6 +377,7 @@ public:
 	inline const float GetBindZ(uint32 index = 0) const { return m_pp.binds[index].z; }
 	inline const float GetBindHeading(uint32 index = 0) const { return m_pp.binds[index].heading; }
 	inline uint32 GetBindZoneID(uint32 index = 0) const { return m_pp.binds[index].zoneId; }
+	inline uint32 GetBindInstanceID(uint32 index = 0) const { return m_pp.binds[index].instance_id; }
 	int32 CalcMaxMana();
 	int32 CalcBaseMana();
 	const int32& SetMana(int32 amount);
@@ -573,10 +575,11 @@ public:
 	uint32 GetGroupEXP() { return(m_pp.group_leadership_exp); }
 	uint32 GetTotalSecondsPlayed() { return(TotalSecondsPlayed); }
 	virtual void SetLevel(uint8 set_level, bool command = false);
+
 	void GoToBind(uint8 bindnum = 0);
 	void GoToSafeCoords(uint16 zone_id, uint16 instance_id);
 	void Gate();
-	void SetBindPoint(int to_zone = -1, float new_x = 0.0f, float new_y = 0.0f, float new_z = 0.0f);
+	void SetBindPoint(int to_zone = -1, int to_instance = 0, float new_x = 0.0f, float new_y = 0.0f, float new_z = 0.0f);
 	void SetStartZone(uint32 zoneid, float x = 0.0f, float y =0.0f, float z = 0.0f);
 	uint32 GetStartZone(void);
 	void MovePC(const char* zonename, float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
@@ -613,6 +616,7 @@ public:
 	inline uint32 GetWID() const { return WID; }
 	inline void SetWID(uint32 iWID) { WID = iWID; }
 	inline uint32 AccountID() const { return account_id; }
+
 	inline const char* AccountName()const { return account_name; }
 	inline int16 Admin() const { return admin; }
 	inline uint32 CharacterID() const { return character_id; }
@@ -917,7 +921,7 @@ void SetConsumption(int32 in_hunger, int32 in_thirst);
 	time_t TranslocateTime;
 	bool PendingSacrifice;
 	std::string SacrificeCaster;
-	struct Translocate_Struct PendingTranslocateData;
+	PendingTranslocate_Struct PendingTranslocateData;
 	void SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID);
 
 	// Task System Methods
@@ -1057,7 +1061,7 @@ void SetConsumption(int32 in_hunger, int32 in_thirst);
 	void HandleRespawnFromHover(uint32 Option);
 	bool IsHoveringForRespawn() { return RespawnFromHoverTimer.Enabled(); }
 	std::list<RespawnOption> respawn_options;
-	void AddRespawnOption(std::string option_name, uint32 zoneid, float x, float y, float z, float h = 0, bool initial_selection = false, int8 position = -1);
+	void AddRespawnOption(std::string option_name, uint32 zoneid, uint16 instance_id, float x, float y, float z, float h = 0, bool initial_selection = false, int8 position = -1);
 	bool RemoveRespawnOption(std::string option_name);
 	bool RemoveRespawnOption(uint8 position);
 	void ClearRespawnOptions() { respawn_options.clear(); }

@@ -104,6 +104,7 @@ public:
 	inline const uint32	GetZoneID() const { return zoneid; }
 	inline const uint32	GetInstanceID() const { return instanceid; }
 	inline const uint16	GetInstanceVersion() const { return instanceversion; }
+	inline const bool IsInstancePersistent() const { return pers_instance; }
 	inline const uint8	GetZoneType() const { return zone_type; }
 
 	inline Timer* GetInstanceTimer() { return Instance_Timer; }
@@ -274,6 +275,7 @@ private:
 	uint32	zoneid;
 	uint32	instanceid;
 	uint16	instanceversion;
+	bool pers_instance;
 	char*	short_name;
 	char	file_name[16];
 	char*	long_name;

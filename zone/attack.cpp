@@ -1695,7 +1695,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 
 		dead_timer.Start(5000, true); 
 		m_pp.zone_id = m_pp.binds[0].zoneId;
-		m_pp.zoneInstance = 0;
+		m_pp.zoneInstance = m_pp.binds[0].instance_id;
 		database.MoveCharacterToZone(this->CharacterID(), database.GetZoneName(m_pp.zone_id)); 
 		Save(); 
 		GoToDeath();

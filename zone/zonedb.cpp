@@ -1197,21 +1197,21 @@ bool ZoneDatabase::LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Str
 		i = 0;
 		/* Is home bind */
 		if (atoi(row[6]) == 1){ 
-			pp->binds[4].zoneId = atoi(row[i]); i++;
-			i++; /* Instance ID can go here eventually */
-			pp->binds[4].x = atoi(row[i]); i++;
-			pp->binds[4].y = atoi(row[i]); i++;
-			pp->binds[4].z = atoi(row[i]); i++;
-			pp->binds[4].heading = atoi(row[i]); i++;
+			pp->binds[4].zoneId = atoi(row[i++]);
+			pp->binds[4].instance_id = atoi(row[i++]);
+			pp->binds[4].x = atoi(row[i++]);
+			pp->binds[4].y = atoi(row[i++]);
+			pp->binds[4].z = atoi(row[i++]);
+			pp->binds[4].heading = atoi(row[i++]);
 		}
 		/* Is regular bind point */
 		else{
-			pp->binds[0].zoneId = atoi(row[i]); i++;
-			i++; /* Instance ID can go here eventually */
-			pp->binds[0].x = atoi(row[i]); i++;
-			pp->binds[0].y = atoi(row[i]); i++;
-			pp->binds[0].z = atoi(row[i]); i++; 
-			pp->binds[0].heading = atoi(row[i]); i++;
+			pp->binds[0].zoneId = atoi(row[i++]);
+			pp->binds[0].instance_id = atoi(row[i++]);
+			pp->binds[0].x = atoi(row[i++]);
+			pp->binds[0].y = atoi(row[i++]);
+			pp->binds[0].z = atoi(row[i++]);
+			pp->binds[0].heading = atoi(row[i++]);
 		}
 	}
 	return true;
@@ -1224,12 +1224,18 @@ bool ZoneDatabase::SaveCharacterLanguage(uint32 character_id, uint32 lang_id, ui
 }
 
 bool ZoneDatabase::SaveCharacterBindPoint(uint32 character_id, uint32 zone_id, uint32 instance_id, float x, float y, float z, float heading, uint8 is_home){
-	if (zone_id <= 0){ return false; }
+	if (zone_id <= 0) { 
+		return false;
+	}
+
 	/* Save Home Bind Point */
 	std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
 		" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)", character_id, zone_id, instance_id, x, y, z, heading, is_home);
 	LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterBindPoint for character ID: %i zone_id: %u instance_id: %u x: %f y: %f z: %f heading: %f ishome: %u", character_id, zone_id, instance_id, x, y, z, heading, is_home);
-	auto results = QueryDatabase(query); if (!results.RowsAffected()){ std::cout << "ERROR Bind Home Save: " << results.ErrorMessage() << "\n\n" << query << "\n" << std::endl; }
+	auto results = QueryDatabase(query); 
+	if (!results.RowsAffected()) {
+		LogFile->write(EQEMuLog::Debug, "ERROR Bind Home Save: %s. %s", results.ErrorMessage().c_str(), query.c_str());
+	}
 	ThrowDBError(results.ErrorMessage(), "ZoneDatabase::SaveCharacterBindPoint", query);
 	return true;
 }
@@ -3234,7 +3240,6 @@ bool ZoneDatabase::SetCharacterFactionLevel(uint32 char_id, int32 faction_id, in
 
 bool ZoneDatabase::LoadFactionData()
 {
-
 	std::string query = "SELECT MAX(id) FROM faction_list";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
@@ -3265,7 +3270,6 @@ bool ZoneDatabase::LoadFactionData()
 		strn0cpy(faction_array[index]->name, row[1], 50);
 		faction_array[index]->base = atoi(row[2]);
 
-
         query = StringFormat("SELECT `mod`, `mod_name` FROM `faction_list_mod` WHERE faction_id = %u", index);
         auto modResults = QueryDatabase(query);
         if (!modResults.Success())
@@ -3273,8 +3277,9 @@ bool ZoneDatabase::LoadFactionData()
 
 		for (auto modRow = modResults.begin(); modRow != modResults.end(); ++modRow)
             faction_array[index]->mods[modRow[1]] = atoi(modRow[0]);
-
     }
+
+	return true;
 }
 
 bool ZoneDatabase::GetFactionIdsForNPC(uint32 nfl_id, std::list<struct NPCFaction*> *faction_list, int32* primary_faction) {
