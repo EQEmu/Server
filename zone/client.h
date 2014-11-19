@@ -875,6 +875,7 @@ void SetConsumption(int32 in_hunger, int32 in_thirst);
 	bool TrainDiscipline(uint32 itemid);
 	void SendDisciplineUpdate();
 	bool UseDiscipline(uint32 spell_id, uint32 target);
+	void SendDisciplineTimer(uint32 timer_id, uint32 duration, uint16 spell_id = SPELL_UNKNOWN);
 
 	bool CheckTitle(int titleset);
 	void EnableTitle(int titleset);
