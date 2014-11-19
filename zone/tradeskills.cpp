@@ -1184,14 +1184,22 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 	if(count == 0)
 		return false;	//no items == no recipe
 
-	std::string query = StringFormat("SELECT tre.recipe_id "
-                                    "FROM tradeskill_recipe_entries AS tre "
-                                    "INNER JOIN tradeskill_recipe AS tr ON (tre.recipe_id = tr.id) "
-                                    "WHERE tr.enabled AND (( tre.item_id IN(%s) AND tre.componentcount > 0) "
-                                    "OR ( tre.item_id %s AND tre.iscontainer=1 ))"
-                                    "GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u "
-                                    "AND sum(tre.item_id * tre.componentcount) = %u",
-                                    buf2.c_str(), containers.c_str(), count, sum);
+	std::string query = StringFormat("SELECT recipe_id "
+									"FROM tradeskill_recipe_entries "
+									"WHERE recipe_id IN "
+									"( "
+									"  SELECT tre.recipe_id "
+									"  FROM tradeskill_recipe_entries AS tre "
+									"  INNER JOIN tradeskill_recipe AS tr ON (tre.recipe_id = tr.id) "
+									"  WHERE tr.enabled AND (( tre.item_id IN(%s) AND tre.componentcount > 0) "
+									"  OR ( tre.item_id %s AND tre.iscontainer=1 ))"
+									"  GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u "
+									"  AND sum(tre.item_id * tre.componentcount) = %u "
+									") "
+									"GROUP BY recipe_id "
+									"HAVING sum(componentcount) = %u AND "
+									"sum(componentcount * item_id) = %u",
+									buf2.c_str(), containers.c_str(), count, sum, count, sum);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe search, query: %s", query.c_str());
