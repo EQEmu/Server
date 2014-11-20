@@ -398,7 +398,7 @@ Client::~Client() {
 	if(IsHoveringForRespawn())
 	{
 		m_pp.zone_id = m_pp.binds[0].zoneId;
-		m_pp.zoneInstance = 0;
+		m_pp.zoneInstance = m_pp.binds[0].instance_id;
 		x_pos = m_pp.binds[0].x;
 		y_pos = m_pp.binds[0].y;
 		z_pos = m_pp.binds[0].z;
@@ -543,11 +543,11 @@ bool Client::Save(uint8 iCommitNow) {
 	m_pp.endurance = cur_end;
 
 	/* Save Character Currency */
-	database.SaveCharacterCurrency(this->CharacterID(), &m_pp);
+	database.SaveCharacterCurrency(CharacterID(), &m_pp);
 
-	/* Save Current Bind Points : Sets Instance to 0 because it is currently not implemented */
-	database.SaveCharacterBindPoint(this->CharacterID(), m_pp.binds[0].zoneId, 0, m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, 0, 0); /* Regular bind */
-	database.SaveCharacterBindPoint(this->CharacterID(), m_pp.binds[4].zoneId, 0, m_pp.binds[4].x, m_pp.binds[4].y, m_pp.binds[4].z, 0, 1); /* Home Bind */
+	/* Save Current Bind Points */
+	database.SaveCharacterBindPoint(CharacterID(), m_pp.binds[0].zoneId, m_pp.binds[0].instance_id, m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, 0, 0); /* Regular bind */
+	database.SaveCharacterBindPoint(CharacterID(), m_pp.binds[4].zoneId, m_pp.binds[4].instance_id, m_pp.binds[4].x, m_pp.binds[4].y, m_pp.binds[4].z, 0, 1); /* Home Bind */
 
 	/* Save Character Buffs */
 	database.SaveBuffs(this);
@@ -3848,7 +3848,8 @@ void Client::Sacrifice(Client *caster)
 
 void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
 
-	if(!Caster || PendingTranslocate) return;
+	if(!Caster || PendingTranslocate) 
+		return;
 
 	const SPDat_Spell_Struct &Spell = spells[SpellID];
 
@@ -3856,26 +3857,29 @@ void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
 	Translocate_Struct *ts = (Translocate_Struct*)outapp->pBuffer;
 
 	strcpy(ts->Caster, Caster->GetName());
-	ts->SpellID = SpellID;
+	PendingTranslocateData.spell_id = ts->SpellID = SpellID;
 
 	if((SpellID == 1422) || (SpellID == 1334) || (SpellID == 3243)) {
-		ts->ZoneID = m_pp.binds[0].zoneId;
-		ts->x = m_pp.binds[0].x;
-		ts->y = m_pp.binds[0].y;
-		ts->z = m_pp.binds[0].z;
+		PendingTranslocateData.zone_id = ts->ZoneID = m_pp.binds[0].zoneId;
+		PendingTranslocateData.instance_id = m_pp.binds[0].instance_id;
+		PendingTranslocateData.x = ts->x = m_pp.binds[0].x;
+		PendingTranslocateData.y = ts->y = m_pp.binds[0].y;
+		PendingTranslocateData.z = ts->z = m_pp.binds[0].z;
+		PendingTranslocateData.heading = m_pp.binds[0].heading;
 	}
 	else {
 		ts->ZoneID = database.GetZoneID(Spell.teleport_zone);
+		PendingTranslocateData.instance_id = 0;
 		ts->y = Spell.base[0];
 		ts->x = Spell.base[1];
 		ts->z = Spell.base[2];
+		PendingTranslocateData.heading = 0.0;
 	}
 
 	ts->unknown008 = 0;
 	ts->Complete = 0;
 
-	PendingTranslocateData = *ts;
-	PendingTranslocate=true;
+	PendingTranslocate = true;
 	TranslocateTime = time(nullptr);
 
 	QueuePacket(outapp);
@@ -4473,7 +4477,8 @@ void Client::SendRespawnBinds()
 		BindStruct* b = &m_pp.binds[0];
 		RespawnOption opt;
 		opt.name = "Bind Location";
-		opt.zoneid = b->zoneId;
+		opt.zone_id = b->zoneId;
+		opt.instance_id = b->instance_id;
 		opt.x = b->x;
 		opt.y = b->y;
 		opt.z = b->z;
@@ -4483,7 +4488,8 @@ void Client::SendRespawnBinds()
 	//Rez is always added at the end
 	RespawnOption rez;
 	rez.name = "Resurrect";
-	rez.zoneid = zone->GetZoneID();
+	rez.zone_id = zone->GetZoneID();
+	rez.instance_id = zone->GetInstanceID();
 	rez.x = GetX();
 	rez.y = GetY();
 	rez.z = GetZ();
@@ -4518,7 +4524,7 @@ void Client::SendRespawnBinds()
 	{
 		opt = &(*itr);
 		VARSTRUCT_ENCODE_TYPE(uint32, buffer, count++); //option num (from 0)
-		VARSTRUCT_ENCODE_TYPE(uint32, buffer, opt->zoneid);
+		VARSTRUCT_ENCODE_TYPE(uint32, buffer, opt->zone_id);
 		VARSTRUCT_ENCODE_TYPE(float, buffer, opt->x);
 		VARSTRUCT_ENCODE_TYPE(float, buffer, opt->y);
 		VARSTRUCT_ENCODE_TYPE(float, buffer, opt->z);
@@ -4891,6 +4897,10 @@ void Client::SetStartZone(uint32 zoneid, float x, float y, float z)
 		return;
 
 	m_pp.binds[4].zoneId = zoneid;
+	if(zone->GetInstanceID() != 0 && zone->IsInstancePersistent()) {
+		m_pp.binds[4].instance_id = zone->GetInstanceID();
+	}
+
 	if (x == 0 && y == 0 && z ==0)
 		database.GetSafePoints(m_pp.binds[4].zoneId, 0, &m_pp.binds[4].x, &m_pp.binds[4].y, &m_pp.binds[4].z);
 	else {
@@ -7946,7 +7956,7 @@ void Client::SendItemScale(ItemInst *inst) {
 	}
 }
 
-void Client::AddRespawnOption(std::string option_name, uint32 zoneid, float x, float y, float z, float heading, bool initial_selection, int8 position)
+void Client::AddRespawnOption(std::string option_name, uint32 zoneid, uint16 instance_id, float x, float y, float z, float heading, bool initial_selection, int8 position)
 {
 	//If respawn window is already open, any changes would create an inconsistency with the client
 	if (IsHoveringForRespawn()) { return; }
@@ -7957,7 +7967,8 @@ void Client::AddRespawnOption(std::string option_name, uint32 zoneid, float x, f
 	//Create respawn option
 	RespawnOption res_opt;
 	res_opt.name = option_name;
-	res_opt.zoneid = zoneid;
+	res_opt.zone_id = zoneid;
+	res_opt.instance_id = instance_id;
 	res_opt.x = x;
 	res_opt.y = y;
 	res_opt.z = z;

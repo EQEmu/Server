@@ -150,31 +150,19 @@ int command_init(void) {
 	if
 	(
 		command_add("resetaa","- Resets a Player's AA in their profile and refunds spent AA's to unspent, disconnects player.",200,command_resetaa) ||
-		command_add("qtest","- QueryServ testing command.",255,command_qtest) ||
 		command_add("bind","- Sets your targets bind spot to their current location",200,command_bind) ||
-		command_add("sendop","[opcode] - LE's Private test command, leave it alone",200,command_sendop) ||
-		command_add("optest","- solar's private test command",255,command_optest) ||
 		command_add("setstat","- Sets the stats to a specific value.",255,command_setstat) ||
 		command_add("incstat","- Increases or Decreases a client's stats permanently.",200,command_incstat) ||
 		command_add("help","[search term] - List available commands and their description, specify partial command as argument to search",0,command_help) ||
 		command_add("version","- Display current version of EQEmu server",0,command_version) ||
 		command_add("setfaction","[faction number] - Sets targeted NPC's faction in the database",170,command_setfaction) ||
-		command_add("serversidename","- Prints target's server side name",0,command_serversidename) ||
-		command_add("testspawn","[memloc] [value] - spawns a NPC for you only, with the specified values set in the spawn struct",200,command_testspawn) ||
-		command_add("testspawnkill","- Sends an OP_Death packet for spawn made with #testspawn",200,command_testspawnkill) ||
 		command_add("wc","[wear slot] [material] - Sends an OP_WearChange for your target",200,command_wc) ||
-		command_add("numauths","- TODO: describe this command",200,command_numauths) ||
 		command_add("setanim","[animnum] - Set target's appearance to animnum",200,command_setanim) ||
 		command_add("connectworldserver","- Make zone attempt to connect to worldserver",200,command_connectworldserver) ||
 		command_add("connectworld",nullptr,0,command_connectworldserver) ||
 		command_add("serverinfo","- Get OS info about server host",200,command_serverinfo) ||
-		command_add("crashtest","- Crash the zoneserver",200,command_crashtest) ||
 		command_add("getvariable","[varname] - Get the value of a variable from the database",200,command_getvariable) ||
 		command_add("chat","[channel num] [message] - Send a channel message to all zones",200,command_chat) ||
-		command_add("showpetspell","[spellid/searchstring] - search pet summoning spells",200,command_showpetspell) ||
-	#ifdef IPC
-		command_add("ipc","- Toggle an NPC's interactive flag",200,command_ipc) ||
-	#endif
 		command_add("npcloot","[show/money/add/remove] [itemid/all/money: pp gp sp cp] - Manipulate the loot an NPC is carrying",80,command_npcloot) ||
 		command_add("log","- Search character event log",80,command_log) ||
 		command_add("gm","- Turn player target's or your GM flag on or off",80,command_gm) ||
@@ -182,7 +170,6 @@ int command_init(void) {
 		command_add("zone","[zonename] [x] [y] [z] - Go to specified zone (coords optional)",50,command_zone) ||
 		command_add("zoneinstance","[instanceid] [x] [y] [z] - Go to specified instance zone (coords optional)",50,command_zone_instance) ||
 		command_add("peqzone","[zonename] - Go to specified zone, if you have > 75% health",0,command_peqzone) ||
-		command_add("tgczone",nullptr,0,command_peqzone) ||
 		command_add("showbuffs","- List buffs active on your target or you if no target",50,command_showbuffs) ||
 		command_add("movechar","[charname] [zonename] - Move charname to zonename",50,command_movechar) ||
 		command_add("viewpetition","[petition number] - View a petition",20,command_viewpetition) ||
@@ -192,14 +179,12 @@ int command_init(void) {
 		command_add("date","[yyyy] [mm] [dd] [HH] [MM] - Set EQ time",90,command_date) ||
 		command_add("time","[HH] [MM] - Set EQ time",90,command_time) ||
 		command_add("timezone","[HH] [MM] - Set timezone. Minutes are optional",90,command_timezone) ||
-		command_add("synctod","- Send a time of day update to every client in zone",90,command_synctod) ||
 		command_add("invulnerable","[on/off] - Turn player target's or your invulnerable flag on or off",80,command_invul) ||
 		command_add("invul",nullptr,0,command_invul) ||
 		command_add("hideme","[on/off] - Hide yourself from spawn lists.",80,command_hideme) ||
 		command_add("gmhideme",nullptr,0,command_hideme) ||
 		command_add("emote","['name'/'world'/'zone'] [type] [message] - Send an emote message",80,command_emote) ||
 		command_add("fov","- Check wether you're behind or in your target's field of view",80,command_fov) ||
-		command_add("manastat","- Report your or your target's cur/max mana",80,command_manastat) ||
 		command_add("npcstats","- Show stats about target NPC",80,command_npcstats) ||
 		command_add("zclip","[min] [max] - modifies and resends zhdr packet",80,command_zclip) ||
 		command_add("npccast","[targetname/entityid] [spellid] - Causes NPC target to cast spellid on targetname/entityid",80,command_npccast) ||
@@ -210,7 +195,6 @@ int command_init(void) {
 		command_add("permagender","[gendernum] - Change your or your player target's gender (zone to take effect)",80,command_permagender) ||
 		command_add("weather","[0/1/2/3] (Off/Rain/Snow/Manual) - Change the weather",80,command_weather) ||
 		command_add("zheader","[zonename] - Load zheader for zonename from the database",80,command_zheader) ||
-		command_add("zhdr",nullptr,0,command_zheader) ||
 		command_add("zsky","[skytype] - Change zone sky type",80,command_zsky) ||
 		command_add("zcolor","[red] [green] [blue] - Change sky color",80,command_zcolor) ||
 		command_add("zuwcoords","[z coord] - Set underworld coord",80,command_zuwcoords) ||
@@ -218,7 +202,6 @@ int command_init(void) {
 		command_add("zunderworld","[zcoord] - Sets the underworld using zcoord",80,command_zunderworld) ||
 		command_add("spon","- Sends OP_MemorizeSpell",80,command_spon) ||
 		command_add("spoff","- Sends OP_ManaChange",80,command_spoff) ||
-		command_add("itemtest","- merth's test function",250,command_itemtest) ||
 		command_add("gassign","[id] - Assign targetted NPC to predefined wandering grid id",100,command_gassign) ||
 		command_add("ai","[factionid/spellslist/con/guard/roambox/stop/start] - Modify AI on NPC target",100,command_ai) ||
 		command_add("showspellslist","Shows spell list of targeted NPC",100,command_showspellslist) ||
@@ -254,7 +237,7 @@ int command_init(void) {
 		command_add("spawn","[name] [race] [level] [material] [hp] [gender] [class] [priweapon] [secweapon] [merchantid] - Spawn an NPC",10,command_spawn) ||
 		command_add("texture","[texture] [helmtexture] - Change your or your target's appearance, use 255 to show equipment",10,command_texture) ||
 		command_add("npctypespawn","[npctypeid] [factionid] - Spawn an NPC from the db",10,command_npctypespawn) ||
-		command_add("dbspawn",nullptr,0,command_npctypespawn) ||
+		command_add("dbspawn",nullptr,10,command_npctypespawn) ||
 		command_add("heal","- Completely heal your target",10,command_heal) ||
 		command_add("appearance","[type] [value] - Send an appearance packet for you or your target",150,command_appearance) ||
 		command_add("nukeitem","[itemid] - Remove itemid from your player target's inventory",150,command_nukeitem) ||
@@ -262,14 +245,12 @@ int command_init(void) {
 		command_add("interrogateinv","- use [help] argument for available options",0,command_interrogateinv) ||
 		command_add("findnpctype","[search criteria] - Search database NPC types",100,command_findnpctype) ||
 		command_add("findzone","[search criteria] - Search database zones",100,command_findzone) ||
-		command_add("fz",nullptr,100, command_findzone) ||
 		command_add("viewnpctype","[npctype id] - Show info about an npctype",100,command_viewnpctype) ||
 		command_add("reloadstatic","- Reload Static Zone Data",150,command_reloadstatic) ||
 		command_add("reloadquest"," - Clear quest cache (any argument causes it to also stop all timers)",150,command_reloadqst) ||
 		command_add("reloadqst"," - Clear quest cache (any argument causes it to also stop all timers)",150,command_reloadqst) ||
 		command_add("reloadworld",nullptr,255,command_reloadworld) ||
 		command_add("reloadlevelmods",nullptr,255,command_reloadlevelmods) ||
-		command_add("rq",nullptr,0,command_reloadqst) ||
 		command_add("reloadzonepoints","- Reload zone points from database",150,command_reloadzps) ||
 		command_add("reloadzps",nullptr,0,command_reloadzps) ||
 		command_add("zoneshutdown","[shortname] - Shut down a zone server",150,command_zoneshutdown) ||
@@ -334,7 +315,6 @@ int command_init(void) {
 		command_add("manaburn","- Use AA Wizard class skill manaburn on target",10,command_manaburn) ||
 		command_add("doanim","[animnum] [type] - Send an EmoteAnim for you or your target",50,command_doanim) ||
 		command_add("randomfeatures","- Temporarily randomizes the Facial Features of your target",80,command_randomfeatures) ||
-		command_add("rf",nullptr,80,command_randomfeatures) ||
 		command_add("face","- Change the face of your target",80,command_face) ||
 		command_add("helm","- Change the helm of your target",80,command_helm) ||
 		command_add("hair","- Change the hair style of your target",80,command_hair) ||
@@ -349,7 +329,6 @@ int command_init(void) {
 		command_add("scribespell", "[spellid] - Scribe specified spell in your target's spell book.", 180, command_scribespell) ||
 		command_add("unscribespell", "[spellid] - Unscribe specified spell from your target's spell book.", 180, command_unscribespell) ||
 		command_add("interrupt","[message id] [color] - Interrupt your casting. Arguments are optional.",50,command_interrupt) ||
-		command_add("d1","[type] [spell] [damage] - Send an OP_Action packet with the specified values",200,command_d1) ||
 		command_add("summonitem","[itemid] [charges] - Summon an item onto your cursor. Charges are optional.",200,command_summonitem) ||
 		command_add("si",nullptr,200,command_summonitem) ||
 		command_add("giveitem","[itemid] [charges] - Summon an item onto your target's cursor. Charges are optional.",200,command_giveitem) ||
@@ -709,77 +688,6 @@ void command_resetaa(Client* c,const Seperator *sep){
 		c->Message(0,"Usage: Target a client and use #resetaa to reset the AA data in their Profile.");
 }
 
-void command_sendop(Client *c,const Seperator *sep){
-
-	int RezSpell = 0;
-
-	if(sep->arg[1][0]) {
-		RezSpell = atoi(sep->arg[1]);
-	}
-
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RezzRequest, sizeof(Resurrect_Struct));
-	Resurrect_Struct *rs = (Resurrect_Struct*)outapp->pBuffer;
-
-	strcpy(rs->your_name, c->GetName());
-	strcpy(rs->rezzer_name, "A Cleric01");
-	rs->spellid = RezSpell;
-	DumpPacket(outapp);
-	c->QueuePacket(outapp);
-	safe_delete(outapp);
-	return;
-}
-
-void command_optest(Client *c, const Seperator *sep)
-{
-	if(sep->IsNumber(1))
-	{
-		switch(atoi(sep->arg[1]))
-		{
-			case 1:
-			{
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventureFinish, sizeof(AdventureFinish_Struct));
-				AdventureFinish_Struct *af = (AdventureFinish_Struct*)outapp->pBuffer;
-				af->win_lose = 1;
-				af->points = 125;
-				c->FastQueuePacket(&outapp);
-				break;
-			}
-			case 2:
-			{
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventureData, sizeof(AdventureRequestResponse_Struct));
-				AdventureRequestResponse_Struct *arr = (AdventureRequestResponse_Struct*)outapp->pBuffer;
-				if(sep->IsHexNumber(2))
-					arr->unknown000 = hextoi(sep->arg[2]);
-				else
-					arr->unknown000 = 0xBFC40100;
-				arr->risk = 1;
-				arr->showcompass = 1;
-				strcpy(arr->text, "This is some text for an adventure packet!\0");
-				arr->timeleft = 60*60;
-				//arr->timetoenter = 30*60;
-				if(sep->IsHexNumber(3))
-					arr->unknown2080=hextoi(sep->arg[3]);
-				else
-					arr->unknown2080=0x0A;
-				arr->x = c->GetY();
-				arr->y = c->GetX();
-				arr->z = c->GetZ();
-				c->FastQueuePacket(&outapp);
-				break;
-			}
-			case 3:
-			{
-				c->SendMarqueeMessage(15, 250, 0, 500, 5000, "Some msg");
-				break;
-			}
-			default:
-			{
-				break;
-			}
-		}
-	}
-}
-
 void command_help(Client *c, const Seperator *sep)
 {
 	int commands_shown=0;
@@ -838,50 +746,6 @@ void command_serversidename(Client *c, const Seperator *sep)
 		c->Message(0, "Error: no target");
 }
 
-void command_testspawnkill(Client *c, const Seperator *sep)
-{
-/*	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Death, sizeof(Death_Struct));
-	Death_Struct* d = (Death_Struct*)outapp->pBuffer;
-	d->corpseid = 1000;
-	//	d->unknown011 = 0x05;
-	d->spawn_id = 1000;
-	d->killer_id = c->GetID();
-	d->damage = 1;
-	d->spell_id = 0;
-	d->type = BASH;
-	d->bindzoneid = 0;
-	c->FastQueuePacket(&outapp);*/
-}
-
-void command_testspawn(Client *c, const Seperator *sep)
-{
-	if (sep->IsNumber(1)) {
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewSpawn, sizeof(NewSpawn_Struct));
-		NewSpawn_Struct* ns = (NewSpawn_Struct*)outapp->pBuffer;
-		c->FillSpawnStruct(ns, c);
-		strcpy(ns->spawn.name, "Test");
-		ns->spawn.spawnId = 1000;
-		ns->spawn.NPC = 1;
-		if (sep->IsHexNumber(2)) {
-			if (strlen(sep->arg[2]) >= 3) // 0x00, 1 byte
-				*(&((uint8*) &ns->spawn)[atoi(sep->arg[1])]) = hextoi(sep->arg[2]);
-			else if (strlen(sep->arg[2]) >= 5) // 0x0000, 2 bytes
-				*((uint16*) &(((uint8*) &ns->spawn)[atoi(sep->arg[1])])) = hextoi(sep->arg[2]);
-			else if (strlen(sep->arg[2]) >= 9) // 0x0000, 2 bytes
-				*((uint32*) &(((uint8*) &ns->spawn)[atoi(sep->arg[1])])) = hextoi(sep->arg[2]);
-			else
-				c->Message(0, "Error: unexpected hex string length");
-		}
-		else {
-			strcpy((char*) (&((uint8*) &ns->spawn)[atoi(sep->arg[1])]), sep->argplus[2]);
-		}
-		EncryptSpawnPacket(outapp);
-		c->FastQueuePacket(&outapp);
-	}
-	else
-		c->Message(0, "Usage: #testspawn [memloc] [value] - spawns a NPC for you only, with the specified values set in the spawn struct");
-}
-
 void command_wc(Client *c, const Seperator *sep)
 {
 	if(sep->argnum < 2)
@@ -927,12 +791,6 @@ void command_wc(Client *c, const Seperator *sep)
 	}
 }
 
-void command_numauths(Client *c, const Seperator *sep)
-{
-	c->Message(0, "NumAuths: %i", zone->CountAuth());
-	c->Message(0, "Your WID: %i", c->GetWID());
-}
-
 void command_setanim(Client *c, const Seperator *sep)
 {
 	if (c->GetTarget() && sep->IsNumber(1)) {
@@ -972,13 +830,6 @@ char buffer[255];
 #endif
 }
 
-void command_crashtest(Client *c, const Seperator *sep)
-{
-	c->Message(0,"Alright, now we get an GPF ;) ");
-	char* gpf=0;
-	memcpy(gpf, "Ready to crash", 30);
-}
-
 void command_getvariable(Client *c, const Seperator *sep)
 {
 	char tmp[512];
@@ -996,71 +847,6 @@ void command_chat(Client *c, const Seperator *sep)
 		if (!worldserver.SendChannelMessage(0, 0, (uint8) atoi(sep->arg[1]), 0, 0, sep->argplus[2]))
 			c->Message(0, "Error: World server disconnected");
 }
-
-void command_showpetspell(Client *c, const Seperator *sep)
-{
-	if (sep->arg[1][0] == 0)
-		c->Message(0, "Usage: #ShowPetSpells [spellid | searchstring]");
-	else if (SPDAT_RECORDS <= 0)
-		c->Message(0, "Spells not loaded");
-	else if (Seperator::IsNumber(sep->argplus[1]))
-	{
-		int spellid = atoi(sep->argplus[1]);
-		if (spellid <= 0 || spellid >= SPDAT_RECORDS)
-			c->Message(0, "Error: Number out of range");
-		else
-			c->Message(0, "	%i: %s, %s", spellid, spells[spellid].teleport_zone, spells[spellid].name);
-	}
-	else
-	{
-		int count=0;
-		char sName[64];
-		char sCriteria[65];
-		strn0cpy(sCriteria, sep->argplus[1], 64);
-		strupr(sCriteria);
-		for (int i = 0; i < SPDAT_RECORDS; i++)
-		{
-			if (spells[i].name[0] != 0 && (spells[i].effectid[0] == SE_SummonPet || spells[i].effectid[0] == SE_NecPet))
-			{
-				strcpy(sName, spells[i].teleport_zone);
-				strupr(sName);
-				char* pdest = strstr(sName, sCriteria);
-				if ((pdest != nullptr) && (count <=20))
-				{
-					c->Message(0, "	%i: %s, %s", i, spells[i].teleport_zone, spells[i].name);
-					count++;
-				}
-				else if (count > 20)
-					break;
-			}
-		}
-		if (count > 20)
-			c->Message(0, "20 spells found... max reached.");
-		else
-			c->Message(0, "%i spells found.", count);
-	}
-}
-
-#ifdef IPC
-void command_ipc(Client *c, const Seperator *sep)
-{
-	if (c->GetTarget() && c->GetTarget()->IsNPC())
-	{
-		if (c->GetTarget()->CastToNPC()->IsInteractive())
-		{
-			c->GetTarget()->CastToNPC()->interactive = false;
-			c->Message(0, "Disabling IPC");
-		}
-		else
-		{
-			c->GetTarget()->CastToNPC()->interactive = true;
-			c->Message(0, "Enabling IPC");
-		}
-	}
-	else
-		c->Message(0, "Error: You must target an NPC");
-}
-#endif /* IPC */
 
 void command_npcloot(Client *c, const Seperator *sep)
 {
@@ -1641,16 +1427,6 @@ void command_timezone(Client *c, const Seperator *sep)
 	}
 }
 
-void command_synctod(Client *c, const Seperator *sep)
-{
-	c->Message(13, "Updating Time/Date for all clients in zone...");
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
-	TimeOfDay_Struct* tod = (TimeOfDay_Struct*)outapp->pBuffer;
-	zone->zone_time.getEQTimeOfDay(time(0), tod);
-	entity_list.QueueClients(c, outapp);
-	safe_delete(outapp);
-}
-
 void command_invul(Client *c, const Seperator *sep)
 {
 	bool state=atobool(sep->arg[1]);
@@ -1712,15 +1488,6 @@ void command_fov(Client *c, const Seperator *sep)
 			c->Message(0, "You are NOT behind mob %s, it is looking to %d", c->GetTarget()->GetName(), c->GetTarget()->GetHeading());
 	else
 		c->Message(0, "I Need a target!");
-}
-
-void command_manastat(Client *c, const Seperator *sep)
-{
-	Mob *target=c->GetTarget()?c->GetTarget():c;
-
-	c->Message(0, "Mana for %s:", target->GetName());
-	c->Message(0, "  Current Mana: %d",target->GetMana());
-	c->Message(0, "  Max Mana: %d",target->GetMaxMana());
 }
 
 void command_npcstats(Client *c, const Seperator *sep)
@@ -5913,19 +5680,6 @@ void command_interrupt(Client *c, const Seperator *sep)
 		ci_color=atoi(sep->arg[2]);
 
 	c->InterruptSpell(ci_message, ci_color);
-}
-
-void command_d1(Client *c, const Seperator *sep)
-{
-	EQApplicationPacket app(OP_Action, sizeof(Action_Struct));
-	Action_Struct* a = (Action_Struct*)app.pBuffer;
-	a->target = c->GetTarget()->GetID();
-	a->source = c->GetID();
-	a->type = atoi(sep->arg[1]);
-	a->spell = atoi(sep->arg[2]);
-	a->sequence = atoi(sep->arg[3]);
-	app.priority = 1;
-	entity_list.QueueCloseClients(c, &app);
 }
 
 void command_summonitem(Client *c, const Seperator *sep)
@@ -10868,28 +10622,6 @@ void command_picklock(Client *c, const Seperator *sep)
 		}
 		else
 			c->Message(13, "You do not have the pick locks skill.");
-	}
-}
-
-void command_qtest(Client *c, const Seperator *sep)
-{
-
-
-	if(c && sep->arg[1][0])
-	{
-		if(c->GetTarget())
-		{
-	ServerPacket* pack = new ServerPacket(ServerOP_Speech, sizeof(Server_Speech_Struct)+strlen(sep->arg[1])+1);
-	Server_Speech_Struct* sem = (Server_Speech_Struct*) pack->pBuffer;
-	strcpy(sem->message, sep->arg[1]);
-	sem->minstatus = c->Admin();
-	sem->type = 1;
-	strncpy(sem->to,c->GetTarget()->GetCleanName(), 64);
-	strncpy(sem->to,c->GetCleanName(), 64);
-	sem->guilddbid = c->GuildID();
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-		}
 	}
 }
 

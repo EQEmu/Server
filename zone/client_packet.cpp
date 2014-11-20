@@ -13731,7 +13731,8 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 	}
 	Translocate_Struct *its = (Translocate_Struct*)app->pBuffer;
 
-	if (!PendingTranslocate) return;
+	if (!PendingTranslocate) 
+		return;
 
 	if ((RuleI(Spells, TranslocateTimeLimit) > 0) && (time(nullptr) > (TranslocateTime + RuleI(Spells, TranslocateTimeLimit)))) {
 		Message(13, "You did not accept the Translocate within the required time limit.");
@@ -13741,7 +13742,7 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 
 	if (its->Complete == 1) {
 
-		int SpellID = PendingTranslocateData.SpellID;
+		int SpellID = PendingTranslocateData.spell_id;
 		int i = parse->EventSpell(EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE, nullptr, this, SpellID, 0);
 
 		if (i == 0)
@@ -13751,20 +13752,19 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 			// to the bind coords it has from the PlayerProfile, but with the X and Y reversed. I suspect they are
 			// reversed in the pp, and since spells like Gate are handled serverside, this has not mattered before.
 			if (((SpellID == 1422) || (SpellID == 1334) || (SpellID == 3243)) &&
-				zone->GetZoneID() == PendingTranslocateData.ZoneID)
+				(zone->GetZoneID() == PendingTranslocateData.zone_id && 
+				zone->GetInstanceID() == PendingTranslocateData.instance_id))
 			{
 				PendingTranslocate = false;
 				GoToBind();
 				return;
 			}
 
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Translocate, sizeof(Translocate_Struct));
-			Translocate_Struct *ots = (Translocate_Struct*)outapp->pBuffer;
-			memcpy(ots, &PendingTranslocateData, sizeof(Translocate_Struct));
-
-			//Was sending the packet back to initiate client zone...
-			//but that could be abusable, so lets go through proper channels
-			MovePC(ots->ZoneID, 0, ots->x, ots->y, ots->z, GetHeading(), 0, ZoneSolicited);
+			////Was sending the packet back to initiate client zone...
+			////but that could be abusable, so lets go through proper channels
+			MovePC(PendingTranslocateData.zone_id, PendingTranslocateData.instance_id,
+				   PendingTranslocateData.x, PendingTranslocateData.y, 
+				   PendingTranslocateData.z, PendingTranslocateData.heading, 0, ZoneSolicited);
 		}
 	}
 

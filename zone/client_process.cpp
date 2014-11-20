@@ -147,11 +147,11 @@ bool Client::Process() {
 		if(mana_timer.Check())
 			SendManaUpdatePacket();
 
-		if(dead && dead_timer.Check())
-		{
-			database.MoveCharacterToZone(GetName(),database.GetZoneName(m_pp.binds[0].zoneId));
+			if(dead && dead_timer.Check()) {
+				database.MoveCharacterToZone(GetName(), database.GetZoneName(m_pp.binds[0].zoneId));
+
 			m_pp.zone_id = m_pp.binds[0].zoneId;
-			m_pp.zoneInstance = 0;
+			m_pp.zoneInstance = m_pp.binds[0].instance_id;
 			m_pp.x = m_pp.binds[0].x;
 			m_pp.y = m_pp.binds[0].y;
 			m_pp.z = m_pp.binds[0].z;
@@ -2120,7 +2120,8 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		BindStruct* b = &m_pp.binds[0];
 		default_to_bind = new RespawnOption;
 		default_to_bind->name = "Bind Location";
-		default_to_bind->zoneid = b->zoneId;
+		default_to_bind->zone_id = b->zoneId;
+		default_to_bind->instance_id = b->instance_id;
 		default_to_bind->x = b->x;
 		default_to_bind->y = b->y;
 		default_to_bind->z = b->z;
@@ -2129,7 +2130,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		is_rez = false;
 	}
 
-	if (chosen->zoneid == zone->GetZoneID()) //If they should respawn in the current zone...
+	if (chosen->zone_id == zone->GetZoneID() && chosen->instance_id == zone->GetInstanceID()) //If they should respawn in the current zone...
 	{
 		if (is_rez)
 		{
@@ -2185,6 +2186,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 			ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
 
 			gmg->bind_zone_id = zone->GetZoneID();
+			gmg->bind_instance_id = chosen->instance_id;
 			gmg->x = chosen->x;
 			gmg->y = chosen->y;
 			gmg->z = chosen->z;
@@ -2230,13 +2232,13 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		if(r)
 			r->MemberZoned(this);
 
-		m_pp.zone_id = chosen->zoneid;
-		m_pp.zoneInstance = 0;
-		database.MoveCharacterToZone(this->CharacterID(), database.GetZoneName(chosen->zoneid));
+		m_pp.zone_id = chosen->zone_id;
+		m_pp.zoneInstance = chosen->instance_id;
+		database.MoveCharacterToZone(CharacterID(), database.GetZoneName(chosen->zone_id));
 
 		Save();
 
-		MovePC(chosen->zoneid,chosen->x,chosen->y,chosen->z,chosen->heading,1);
+		MovePC(chosen->zone_id, chosen->instance_id, chosen->x, chosen->y, chosen->z, chosen->heading, 1);
 	}
 
 	safe_delete(default_to_bind);

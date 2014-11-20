@@ -755,6 +755,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	zoneid = in_zoneid;
 	instanceid = in_instanceid;
 	instanceversion = database.GetInstanceVersion(instanceid);
+	pers_instance = false;
 	zonemap = nullptr;
 	watermap = nullptr;
 	pathing = nullptr;
@@ -824,11 +825,12 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 		if(!is_perma)
 		{
 			if(rem < 150) //give some leeway to people who are zoning in 2.5 minutes to finish zoning in and get ported out
-			rem = 150;
+				rem = 150;
 			Instance_Timer = new Timer(rem * 1000);
 		}
 		else
 		{
+			pers_instance = true;
 			Instance_Timer = nullptr;
 		}
 	}

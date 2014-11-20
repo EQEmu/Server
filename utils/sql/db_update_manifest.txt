@@ -261,7 +261,7 @@
 9001|2013_02_25_Impr_HT_LT.sql|SHOW TABLES LIKE 'merc_inventory'|empty|
 9002|2013_03_1_Merc_Rules_and_Equipment.sql|SHOW TABLES LIKE 'merc_inventory'|empty|
 # 9003|2013_03_23_Escape_FadingMemories.sql
-9004|2013_04_04_NaturesBounty.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '1230' AND `slot` = '1' AND `effectid` = '313' AND `base1` = '15' AND `base2` = '0'|empty|
+# 9004|2013_04_04_NaturesBounty.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '1230' AND `slot` = '1' AND `effectid` = '313' AND `base1` = '15' AND `base2` = '0'|empty|
 9005|2013_04_08_Salvage.sql|SHOW COLUMNS FROM `tradeskill_recipe_entries` LIKE 'salvagecount'|empty|
 9006|2013_05_05_Account_Flags.sql|SHOW TABLES LIKE 'account_flags'|empty|
 9007|2013_05_05_Item_Tick.sql|SHOW TABLES LIKE 'item_tick'|empty|
@@ -270,31 +270,31 @@
 # 9010|2013_10_12_Merc_vwMercNpcTypes.sql
 9011|2013_10_31_Recipe_disabling.sql|SHOW COLUMNS FROM `tradeskill_recipe` LIKE 'enabled'|empty|
 9012|2013_11_07_BaseData.sql|SHOW TABLES LIKE 'base_data'|empty|
-9013|2013_11_13_Instrument_Singing_Mastery.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '213' AND `slot` = '1' AND `effectid` = '260' AND `base1` = '2' AND `base2` = '23'|empty|
+# 9013|2013_11_13_Instrument_Singing_Mastery.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '213' AND `slot` = '1' AND `effectid` = '260' AND `base1` = '2' AND `base2` = '23'|empty|
 9014|2013_11_18_AssistRadius.sql|SHOW COLUMNS FROM `npc_types` LIKE 'assistradius'|empty|
 9015|2013_12_26_MerchantList_Class_Required.sql|SHOW COLUMNS FROM `merchantlist` LIKE 'classes_required'|empty|
-9016|2014_01_04_SongModCapAAs.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '571' AND `slot` = '1' AND `effectid` = '261'|empty|
+# 9016|2014_01_04_SongModCapAAs.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '571' AND `slot` = '1' AND `effectid` = '261'|empty|
 9017|2014_01_08_SpellsNewAdditions.sql|SHOW COLUMNS FROM `spells_new` LIKE 'persistdeath'|empty|
 9018|2014_01_09_PreservePetSize.sql|SHOW COLUMNS FROM `character_pet_info` LIKE 'size'|empty|
-9019|2014_01_20_MezMastery.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '781' AND `slot` = '1' AND `effectid` = '287'|empty|
+# 9019|2014_01_20_MezMastery.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '781' AND `slot` = '1' AND `effectid` = '287'|empty|
 9020|2014_01_20_Not_Extendable.sql|SHOW COLUMNS FROM `spells_new` LIKE 'not_extendable'|empty|
-9021|2014_01_20_SpellCastingReinforcement.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '86' AND `slot` = '1' AND `effectid` = '128'|empty|
+# 9021|2014_01_20_SpellCastingReinforcement.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '86' AND `slot` = '1' AND `effectid` = '128'|empty|
 9022|2014_01_20_Weather.sql|SHOW COLUMNS FROM `zone` LIKE 'rain_chance1'|empty|
-9023|2014_01_27_CritcalMendAA.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '230' AND `slot` = '1' AND `effectid` = '275'|empty
-9024|2014_02_02_SpellCriticalsAA.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '4755' AND `slot` = '1' AND `effectid` = '294'|empty
+# 9023|2014_01_27_CritcalMendAA.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '230' AND `slot` = '1' AND `effectid` = '275'|empty
+# 9024|2014_02_02_SpellCriticalsAA.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '4755' AND `slot` = '1' AND `effectid` = '294'|empty
 9025|2014_02_13_Rename_instance_lockout_tables.sql|SHOW TABLES LIKE 'instance_list'|empty|
 9026|2014_02_13_spells_new_update.sql|SHOW COLUMNS FROM `spells_new` LIKE 'ConeStartAngle'|empty|
 9027|2014_02_20_buff_update.sql|SHOW COLUMNS FROM `character_buffs` LIKE 'caston_y'|empty|
 9028|2014_02_26_roambox_update.sql|SHOW COLUMNS FROM `spawngroup` LIKE 'mindelay'|empty|
-9029|2014_02_26_virulentvenomAA.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '888' AND `slot` = '1' AND `effectid` = '250'|empty|
+# 9029|2014_02_26_virulentvenomAA.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '888' AND `slot` = '1' AND `effectid` = '250'|empty|
 9030|2014_04_04_PhysicalResist.sql|SHOW COLUMNS FROM `npc_types` LIKE 'PhR'|empty|
 9031|2014_04_10_No_Target_With_Hotkey.sql|SHOW COLUMNS FROM `npc_types` LIKE 'no_target_hotkey'|empty|
 9032|2014_04_12_SlowMitigation.sql|SHOW COLUMNS FROM `npc_types` LIKE 'slow_mitigation'|contains|float
 9034|2014_04_25_spawn_events.sql|SHOW COLUMNS FROM `spawn_events` LIKE 'strict'|empty|
 9035|2014_04_27_AISpellEffects.sql|SHOW COLUMNS FROM `npc_types` LIKE 'npc_spells_effects_id'|empty|
 9036|2014_05_04_SlowMitigationFix.sql|SHOW COLUMNS FROM `npc_types` LIKE 'slow_mitigation'|contains|float
-9038|2014_06_25_AA_Updates.sql|SELECT * FROM `altadv_vars` WHERE `skill_id` = '1604'|empty
-9039|2014_07_04_AA_Updates.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '158' AND `slot` = '1' AND `effectid` = '238'|empty
+# 9038|2014_06_25_AA_Updates.sql|SELECT * FROM `altadv_vars` WHERE `skill_id` = '1604'|empty
+# 9039|2014_07_04_AA_Updates.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '158' AND `slot` = '1' AND `effectid` = '238'|empty
 9040|2014_07_10_npc_spells.sql|SHOW COLUMNS FROM `npc_spells` LIKE 'engaged_no_sp_recast_min'|empty|
 9041|2014_08_02_spells_new.sql|SHOW COLUMNS FROM `spells_new` LIKE 'viral_range'|empty|
 9042|2014_08_12_NPC_raid_targets.sql|SHOW COLUMNS FROM `npc_types` LIKE 'raid_target'|empty|
