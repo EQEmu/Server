@@ -9557,6 +9557,17 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 	if (merchant_id == 0) {
 
 		//send info about your current merc(s)
+		if (GetMercID())
+		{
+			if (MERC_DEBUG > 0)
+				Message(7, "Mercenary Debug: SendMercPersonalInfo Request");
+			SendMercPersonalInfo();
+		}
+		else
+		{
+			if (MERC_DEBUG > 0)
+				Message(7, "Mercenary Debug: SendMercPersonalInfo Not Sent - MercID (%i)", GetMercID());
+		}
 	}
 
 	if (!RuleB(Mercs, AllowMercs)) {
@@ -9699,12 +9710,7 @@ void Client::Handle_OP_MercenaryDismiss(const EQApplicationPacket *app)
 		Message(7, "Mercenary Debug: Dismiss Request ( %i ) Received.", Command);
 
 	// Handle the dismiss here...
-	Merc* merc = GetMerc();
-	if (merc) {
-		if (CheckCanDismissMerc()) {
-			merc->Dismiss();
-		}
-	}
+	DismissMerc(GetMercInfo().mercid); // GetMercID()
 
 }
 

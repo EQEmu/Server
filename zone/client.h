@@ -1094,12 +1094,13 @@ void SetConsumption(int32 in_hunger, int32 in_thirst);
 	void RemoveGroupXTargets();
 	void RemoveAutoXTargets();
 	void ShowXTargets(Client *c);
+
 	void InitializeMercInfo();
 	bool CheckCanSpawnMerc(uint32 template_id);
 	bool CheckCanHireMerc(Mob* merchant, uint32 template_id);
 	bool CheckCanRetainMerc(uint32 upkeep);
 	bool CheckCanUnsuspendMerc();
-	bool CheckCanDismissMerc();
+	bool DismissMerc(uint32 MercID);
 	inline uint32 GetMercID() const { return mercid; }
 	inline uint8 GetMercSlot() const { return mercSlot; }
 	void SetMercID( uint32 newmercid) { mercid = newmercid; }
@@ -1126,6 +1127,7 @@ void SetConsumption(int32 in_hunger, int32 in_thirst);
 	void UpdateMercLevel();
 	void CheckMercSuspendTimer();
 	Timer* GetMercTimer() { return &merc_timer; };
+
 	const char* GetRacePlural(Client* client);
 	const char* GetClassPlural(Client* client);
 	void SendWebLink(const char* website);
