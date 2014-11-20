@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/19/2014 ==
+Trevius: Mercenaries now Dismiss, Suspend, Unsuspend, and Die correctly.
+
 == 11/18/2014 ==
 Trevius: Mercenaries can now zone once again.
 

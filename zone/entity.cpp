@@ -2960,7 +2960,8 @@ bool EntityList::MakeTrackPacket(Client *client)
 	Group *g = client->GetGroup();
 
 	for (auto it = mob_list.cbegin(); it != mob_list.cend(); ++it) {
-		if (!it->second || it->second == client || !it->second->IsTrackable())
+		if (!it->second || it->second == client || !it->second->IsTrackable() ||
+				it->second->IsInvisible(client))
 			continue;
 
 		MobDistance = it->second->DistNoZ(*client);

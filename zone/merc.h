@@ -4,8 +4,8 @@
 #include "zonedb.h"
 #include "npc.h"
 
-#define MAXMERCS 1
 #define MERC_DEBUG 0
+#define MAXMERCS 1
 #define TANK 1
 #define HEALER 2
 #define MELEEDPS 9
@@ -136,7 +136,6 @@ public:
 	void AddItem(uint8 slot, uint32 item_id);
 	static const char *GetRandomName();
 	bool Spawn(Client *owner);
-	bool Dismiss();
 	bool Suspend();
 	bool Unsuspend(bool setMaxStats);
 	void Zone();

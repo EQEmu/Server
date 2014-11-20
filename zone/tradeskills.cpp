@@ -1226,7 +1226,7 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
                             "WHERE tre.recipe_id IN (%s) "
                             "GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u "
                             "AND sum(tre.item_id * tre.componentcount) = %u", buf2.c_str(), count, sum);
-        auto results = QueryDatabase(query);
+		results = QueryDatabase(query);
         if (!results.Success()) {
             LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, re-query: %s", query.c_str());
             LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, error: %s", results.ErrorMessage().c_str());
