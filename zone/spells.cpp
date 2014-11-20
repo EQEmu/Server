@@ -2256,10 +2256,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		}
 	}
 
-	//Disc Timer needs to be sent before and after the spell packet.
-	if (IsClient() && spells[spell_id].IsDisciplineBuff && spells[spell_id].EndurTimerIndex)
-		CastToClient()->SendDisciplineTimer(casting_spell_timer, casting_spell_timer_duration);
-
 	if(IsNPC())
 		CastToNPC()->AI_Event_SpellCastFinished(true, slot);
 
