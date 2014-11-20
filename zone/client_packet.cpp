@@ -9557,7 +9557,7 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 	if (merchant_id == 0) {
 
 		//send info about your current merc(s)
-		if (GetMercID())
+		if (GetMercInfo().mercid)
 		{
 			if (MERC_DEBUG > 0)
 				Message(7, "Mercenary Debug: SendMercPersonalInfo Request");
@@ -9566,7 +9566,7 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 		else
 		{
 			if (MERC_DEBUG > 0)
-				Message(7, "Mercenary Debug: SendMercPersonalInfo Not Sent - MercID (%i)", GetMercID());
+				Message(7, "Mercenary Debug: SendMercPersonalInfo Not Sent - MercID (%i)", GetMercInfo().mercid);
 		}
 	}
 
