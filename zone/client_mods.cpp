@@ -23,7 +23,6 @@
 #include "../common/packet_functions.h"
 #include "../common/serverinfo.h"
 #include "../common/zone_numbers.h"
-#include "../common/moremath.h"
 #include "../common/guilds.h"
 #include "../common/logsys.h"
 #include "masterentity.h"
@@ -377,7 +376,7 @@ int32 Client::CalcBaseHP()
 			stats = (stats - 255) / 2;
 			stats += 255;
 		}
-		
+
 		base_hp = 5;
 		auto base_data = database.GetBaseData(GetLevel(), GetClass());
 		if(base_data) {

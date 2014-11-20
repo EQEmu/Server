@@ -37,7 +37,6 @@ SET(common_sources
 	memory_mapped_file.cpp
 	misc.cpp
 	misc_functions.cpp
-	moremath.cpp
 	mutex.cpp
 	mysql_request_result.cpp
 	mysql_request_row.cpp
@@ -152,7 +151,6 @@ SET(common_headers
 	memory_mapped_file.h
 	misc.h
 	misc_functions.h
-	moremath.h
 	mutex.h
 	mysql_request_result.h
 	mysql_request_row.h

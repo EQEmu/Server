@@ -20,7 +20,6 @@
 #include <string>
 #include <cctype>
 #include <math.h>
-#include "../common/moremath.h"
 #include <stdio.h>
 #include "../common/packet_dump_file.h"
 #include "zone.h"
@@ -1849,9 +1848,9 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 {
 	//Basic settings to make sure swarm pets work properly.
 	if  (GetSwarmOwner()) {
-				
+
 		Mob *m = entity_list.GetMobID(GetSwarmOwner());
-			
+
 		if(m->IsClient()) {
 			SetPetOwnerClient(true); //Simple flag to determine if pet belongs to a client
 			SetAllowBeneficial(1);//Allow temp pets to receive buffs and heals if owner is client.
@@ -1866,15 +1865,15 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 		SetTempPet(true); //Simple mob flag for checking if temp pet
 		m->SetTempPetsActive(true); //Neccessary fail safe flag set if mob ever had a swarm pet to ensure they are removed.
 		m->SetTempPetCount(m->GetTempPetCount() + 1);
-	
+
 		//Not recommended if using above (However, this will work better on older clients).
 		if (RuleB(Pets, UnTargetableSwarmPet)) {
 			ns->spawn.bodytype = 11;
 			if(!IsCharmed() && m->IsClient())
 				sprintf(ns->spawn.lastName, "%s's Pet", m->GetName());
 		}
-	} 
-	
+	}
+
 	else if(GetOwnerID()) {
 		ns->spawn.is_pet = 1;
 		if (!IsCharmed() && GetOwnerID()) {
@@ -1884,7 +1883,7 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 				sprintf(ns->spawn.lastName, "%s's Pet", c->GetName());
 			}
 		}
-	} 
+	}
 
 	else
 		ns->spawn.is_pet = 0;
@@ -2419,7 +2418,7 @@ void NPC::DepopSwarmPets()
 			Mob* owner = entity_list.GetMobID(GetSwarmInfo()->owner_id);
 			if (owner)
 				owner->SetTempPetCount(owner->GetTempPetCount() - 1);
-			
+
 			Depop();
 			return;
 		}

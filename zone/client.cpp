@@ -45,7 +45,6 @@ extern volatile bool RunLoops;
 #include "../common/packet_functions.h"
 #include "../common/serverinfo.h"
 #include "../common/zone_numbers.h"
-#include "../common/moremath.h"
 #include "../common/guilds.h"
 #include "../common/breakdowns.h"
 #include "../common/rulesys.h"
@@ -3848,7 +3847,7 @@ void Client::Sacrifice(Client *caster)
 
 void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
 
-	if(!Caster || PendingTranslocate) 
+	if(!Caster || PendingTranslocate)
 		return;
 
 	const SPDat_Spell_Struct &Spell = spells[SpellID];
@@ -5682,7 +5681,7 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 						const Item_Struct *aug_weap = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
 						strcpy(insr->itemnames[L], item->Name);
 						insr->itemicons[L] = aug_weap->Icon;
-					} 
+					}
 					else {
 						strcpy(insr->itemnames[L], item->Name);
 						insr->itemicons[L] = item->Icon;
@@ -7310,7 +7309,7 @@ void Client::SendMercPersonalInfo()
 	uint32 altCurrentType = 19; //TODO: Implement alternate currency purchases involving mercs!
 
 	MercTemplate *mercData = &zone->merc_templates[GetMercInfo().MercTemplateID];
-	
+
 	int stancecount = 0;
 	stancecount += zone->merc_stance_list[GetMercInfo().MercTemplateID].size();
 	if(stancecount > MAX_MERC_STANCES || mercCount > MAX_MERC || mercTypeCount > MAX_MERC_GRADES)
