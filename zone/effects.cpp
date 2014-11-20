@@ -696,22 +696,26 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 			return true;
 		}
 
-		CastSpell(spell_id, target, DISCIPLINE_SPELL_SLOT, -1, -1, 0, -1, (uint32)DiscTimer, reduced_recast);
-		if(spells[spell_id].EndurTimerIndex < MAX_DISCIPLINE_TIMERS)
-		{
-			EQApplicationPacket *outapp = new EQApplicationPacket(OP_DisciplineTimer, sizeof(DisciplineTimer_Struct));
-			DisciplineTimer_Struct *dts = (DisciplineTimer_Struct *)outapp->pBuffer;
-			dts->TimerID = spells[spell_id].EndurTimerIndex;
-			dts->Duration = reduced_recast;
-			QueuePacket(outapp);
-			safe_delete(outapp);
-		}
+		SendDisciplineTimer(spells[spell_id].EndurTimerIndex, reduced_recast);
 	}
 	else
 	{
 		CastSpell(spell_id, target, DISCIPLINE_SPELL_SLOT);
 	}
 	return(true);
+}
+
+void Client::SendDisciplineTimer(uint32 timer_id, uint32 duration)
+{
+	if (timer_id < MAX_DISCIPLINE_TIMERS)
+	{
+		EQApplicationPacket *outapp = new EQApplicationPacket(OP_DisciplineTimer, sizeof(DisciplineTimer_Struct));
+		DisciplineTimer_Struct *dts = (DisciplineTimer_Struct *)outapp->pBuffer;
+		dts->TimerID = timer_id;
+		dts->Duration = duration;
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
 }
 
 void EntityList::AETaunt(Client* taunter, float range)
