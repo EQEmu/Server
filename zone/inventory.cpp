@@ -26,7 +26,6 @@
 #include "petitions.h"
 #include "../common/serverinfo.h"
 #include "../common/zone_numbers.h"
-#include "../common/moremath.h"
 #include "../common/guilds.h"
 #include "../common/logsys.h"
 #include "../common/string_util.h"
@@ -254,7 +253,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	bool enforcewear	= RuleB(Inventory, EnforceAugmentWear);
 	bool enforcerestr	= RuleB(Inventory, EnforceAugmentRestriction);
 	bool enforceusable	= RuleB(Inventory, EnforceAugmentUsability);
-	
+
 	for (int iter = AUG_BEGIN; iter < EmuConstants::ITEM_COMMON_SIZE; ++iter) {
 		const Item_Struct* augtest = database.GetItem(augments[iter]);
 
@@ -272,7 +271,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 			if(CheckLoreConflict(augtest)) {
 				// DuplicateLoreMessage(augtest->ID);
 				Message(13, "You already have a lore %s (%u) in your inventory.", augtest->Name, augtest->ID);
-				
+
 				return false;
 			}
 			// check that augment is an actual augment
@@ -280,7 +279,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 				Message(13, "%s (%u) (Aug%i) is not an actual augment.", augtest->Name, augtest->ID, iter + 1);
 				mlog(INVENTORY__ERROR, "Player %s on account %s attempted to use a non-augment item (Aug%i) as an augment.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
 					GetName(), account_name, item->ID, (iter + 1), aug1, aug2, aug3, aug4, aug5);
-				
+
 				return false;
 			}
 
@@ -527,7 +526,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	// validation passed..so, set the charges and create the actual item
 
 	// if the item is stackable and the charge amount is -1 or 0 then set to 1 charge.
-	// removed && item->MaxCharges == 0 if -1 or 0 was passed max charges is irrelevant 
+	// removed && item->MaxCharges == 0 if -1 or 0 was passed max charges is irrelevant
 	if(charges <= 0 && item->Stackable)
 		charges = 1;
 
@@ -955,7 +954,7 @@ bool Client::AutoPutLootInInventory(ItemInst& inst, bool try_worn, bool try_curs
 					{
 						SendWearChange(worn_slot_material);
 					}
-					
+
 					parse->EventItem(EVENT_EQUIP_ITEM, this, &inst, nullptr, "", i);
 					return true;
 				}
@@ -1872,7 +1871,7 @@ void Client::DyeArmor(DyeStruct* dye){
 				ItemInst* inst = this->m_inv.GetItem(slot2);
 				if(inst){
 					uint32 armor_color = (dye->dye[i].rgb.red * 65536) + (dye->dye[i].rgb.green * 256) + (dye->dye[i].rgb.blue);
-					inst->SetColor(armor_color); 
+					inst->SetColor(armor_color);
 					database.SaveCharacterMaterialColor(this->CharacterID(), i, armor_color);
 					database.SaveInventory(CharacterID(),inst,slot2);
 					if(dye->dye[i].rgb.use_tint)
@@ -1894,7 +1893,7 @@ void Client::DyeArmor(DyeStruct* dye){
 	EQApplicationPacket* outapp=new EQApplicationPacket(OP_Dye,0);
 	QueuePacket(outapp);
 	safe_delete(outapp);
-	
+
 }
 
 /*bool Client::DecreaseByItemType(uint32 type, uint8 amt) {
@@ -2227,7 +2226,7 @@ void Client::RemoveDuplicateLore(bool client_update) {
 			if (!inst->GetItem()->LoreFlag ||
 				((inst->GetItem()->LoreGroup == -1) && (m_inv.HasItem(inst->GetID(), 0, invWhereCursor) == INVALID_INDEX)) ||
 				(inst->GetItem()->LoreGroup && ~inst->GetItem()->LoreGroup && (m_inv.HasItemByLoreGroup(inst->GetItem()->LoreGroup, invWhereCursor) == INVALID_INDEX))) {
-				
+
 				m_inv.PushCursor(**iter);
 			}
 			else {
@@ -2413,8 +2412,8 @@ void Client::CreateBandolier(const EQApplicationPacket *app) {
 	_log(INVENTORY__BANDOLIER, "Char: %s Creating Bandolier Set %i, Set Name: %s", GetName(), bs->number, bs->name);
 	strcpy(m_pp.bandoliers[bs->number].name, bs->name);
 
-	const ItemInst* InvItem; 
-	const Item_Struct *BaseItem; 
+	const ItemInst* InvItem;
+	const Item_Struct *BaseItem;
 	int16 WeaponSlot;
 
 	for(int BandolierSlot = bandolierMainHand; BandolierSlot <= bandolierAmmo; BandolierSlot++) {
@@ -2441,7 +2440,7 @@ void Client::RemoveBandolier(const EQApplicationPacket *app) {
 	memset(m_pp.bandoliers[bds->number].name, 0, 32);
 	for(int i = bandolierMainHand; i <= bandolierAmmo; i++) {
 		m_pp.bandoliers[bds->number].items[i].item_id = 0;
-		m_pp.bandoliers[bds->number].items[i].icon = 0; 
+		m_pp.bandoliers[bds->number].items[i].icon = 0;
 	}
 	database.DeleteCharacterBandolier(this->CharacterID(), bds->number);
 }

@@ -19,7 +19,6 @@
 #include "../common/spdat.h"
 #include "masterentity.h"
 #include "../common/packet_dump.h"
-#include "../common/moremath.h"
 #include "../common/item.h"
 #include "worldserver.h"
 #include "../common/skills.h"
@@ -637,7 +636,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			continue;
 
 		_log(AA__BONUSES, "Applying Effect %d from AA %u in slot %d (base1: %d, base2: %d) on %s", effect, aaid, slot, base1, base2, this->GetCleanName());
-			
+
 		uint8 focus = IsFocusEffect(0, 0, true,effect);
 		if (focus)
 		{
@@ -953,7 +952,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			case SE_BlockBehind:
 				newbon->BlockBehind += base1;
 				break;
-			
+
 			case SE_StrikeThrough:
 			case SE_StrikeThrough2:
 				newbon->StrikeThrough += base1;
@@ -1259,7 +1258,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 
 			case SE_Vampirism:
 				newbon->Vampirism += base1;
-				break;			
+				break;
 
 			case SE_FrenziedDevastation:
 				newbon->FrenziedDevastation += base2;
@@ -1362,7 +1361,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			}
 
 			case SE_SkillProcSuccess:{
-				
+
 				for(int e = 0; e < MAX_SKILL_PROCS; e++)
 				{
 					if(newbon->SkillProcSuccess[e] && newbon->SkillProcSuccess[e] == aaid)
@@ -1445,7 +1444,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				continue;
 			}
 
-		
+
 			effectid = spells[spell_id].effectid[i];
 			effect_value = CalcSpellEffectValue(spell_id, i, casterlevel, caster, ticsremaining);
 			base2 = spells[spell_id].base2[i];
@@ -1556,10 +1555,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 				if (effect_value > 0 && effect_value > newbon->inhibitmelee) {
 					effect_value -= ((effect_value * GetSlowMitigation()/100));
-					if (effect_value > newbon->inhibitmelee) 
+					if (effect_value > newbon->inhibitmelee)
 						newbon->inhibitmelee = effect_value;
 				}
-			
+
 				break;
 			}
 
@@ -1775,7 +1774,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					newbon->DamageShieldType = GetDamageShieldType(spell_id, max);
 				else
 					newbon->DamageShieldType = GetDamageShieldType(spell_id);
-				
+
 				break;
 			}
 
@@ -1956,7 +1955,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_Vampirism:
 				newbon->Vampirism += effect_value;
-				break;	
+				break;
 
 			case SE_AllInstrumentMod:
 			{
@@ -2200,7 +2199,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_CriticalSpellChance:
 			{
 				newbon->CriticalSpellChance += effect_value;
-				
+
 				if (base2 > newbon->SpellCritDmgIncNoStack)
 					newbon->SpellCritDmgIncNoStack = base2;
 				break;
@@ -2410,7 +2409,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_NegateAttacks:
 			{
-				if (!newbon->NegateAttacks[0] || 
+				if (!newbon->NegateAttacks[0] ||
 					((newbon->NegateAttacks[0] && newbon->NegateAttacks[2]) && (newbon->NegateAttacks[2] < max))){
 					newbon->NegateAttacks[0] = 1;
 					newbon->NegateAttacks[1] = buffslot;
@@ -2430,7 +2429,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				break;
 			}
 
-			
+
 			case SE_MeleeThresholdGuard:
 			{
 				if (newbon->MeleeThresholdGuard[0] < effect_value){
@@ -2797,17 +2796,17 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->NegateIfCombat = true;
 				break;
 
-			case SE_Screech: 
+			case SE_Screech:
 				newbon->Screech = effect_value;
 				break;
 
 			case SE_AlterNPCLevel:
 
 				if (IsNPC()){
-					if (!newbon->AlterNPCLevel 
-					|| ((effect_value < 0) && (newbon->AlterNPCLevel > effect_value)) 
+					if (!newbon->AlterNPCLevel
+					|| ((effect_value < 0) && (newbon->AlterNPCLevel > effect_value))
 					|| ((effect_value > 0) && (newbon->AlterNPCLevel < effect_value))) {
-	
+
 						int tmp_lv =  GetOrigLevel() + effect_value;
 						if (tmp_lv < 1)
 							tmp_lv = 1;
@@ -2845,7 +2844,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->BerserkSPA = true;
 				break;
 
-				
+
 			case SE_Metabolism:
 				newbon->Metabolism += effect_value;
 				break;
@@ -2946,7 +2945,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			}
 
 			case SE_SkillProc:{
-				
+
 				for(int e = 0; e < MAX_SKILL_PROCS; e++)
 				{
 					if(newbon->SkillProc[e] && newbon->SkillProc[e] == spell_id)
@@ -2961,7 +2960,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			}
 
 			case SE_SkillProcSuccess:{
-				
+
 				for(int e = 0; e < MAX_SKILL_PROCS; e++)
 				{
 					if(newbon->SkillProcSuccess[e] && newbon->SkillProcSuccess[e] == spell_id)
@@ -2977,9 +2976,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
-				
+
 				//Non-Focused Effect to modify incomming spell damage by resist type.
-				case SE_FcSpellVulnerability: 
+				case SE_FcSpellVulnerability:
 					ModVulnerability(base2, effect_value);
 				break;
 			}
@@ -4324,7 +4323,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					aabonuses.SlayUndead[0] = effect_value;
 					aabonuses.SlayUndead[1] = effect_value;
 					break;
-			
+
 				case SE_DoubleRangedAttack:
 					spellbonuses.DoubleRangedAttack = effect_value;
 					aabonuses.DoubleRangedAttack = effect_value;
@@ -4344,7 +4343,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					aabonuses.ShieldEquipDmgMod[1] = effect_value;
 					itembonuses.ShieldEquipDmgMod[0] = effect_value;
 					itembonuses.ShieldEquipDmgMod[1] = effect_value;
-					break; 
+					break;
 
 				case SE_TriggerMeleeThreshold:
 					spellbonuses.TriggerMeleeThreshold = false;

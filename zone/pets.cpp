@@ -19,7 +19,6 @@
 #include "../common/spdat.h"
 #include "masterentity.h"
 #include "../common/packet_dump.h"
-#include "../common/moremath.h"
 #include "../common/item.h"
 #include "zonedb.h"
 #include "worldserver.h"
