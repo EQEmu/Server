@@ -857,11 +857,28 @@ void LuaParser::ReloadQuests() {
 	if(zone) {
 		std::string zone_script = "quests/";
 		zone_script += zone->GetShortName();
-		zone_script += "/script_init.lua";
+		zone_script += "/script_init_v";
+		zone_script += std::to_string(zone->GetInstanceVersion());
+		zone_script += ".lua";
 		f = fopen(zone_script.c_str(), "r");
 		if(f) {
 			fclose(f);
 		
+			if(luaL_dofile(L, zone_script.c_str())) {
+				std::string error = lua_tostring(L, -1);
+				AddError(error);
+			}
+
+			return;
+		}
+
+		zone_script = "quests/";
+		zone_script += zone->GetShortName();
+		zone_script += "/script_init.lua";
+		f = fopen(zone_script.c_str(), "r");
+		if(f) {
+			fclose(f);
+
 			if(luaL_dofile(L, zone_script.c_str())) {
 				std::string error = lua_tostring(L, -1);
 				AddError(error);
