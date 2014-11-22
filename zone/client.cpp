@@ -3218,6 +3218,10 @@ void Client::LinkDead()
 	{
 		entity_list.MessageGroup(this,true,15,"%s has gone linkdead.",GetName());
 		GetGroup()->DelMember(this);
+		if (GetMerc())
+		{
+			GetMerc()->RemoveMercFromGroup(GetMerc(), GetMerc()->GetGroup());
+		}
 	}
 	Raid *raid = entity_list.GetRaidByClient(this);
 	if(raid){
@@ -4137,6 +4141,184 @@ void Client::UpdateLFP() {
 		}
 	}
 	worldserver.UpdateLFP(CharacterID(), LFPMembers);
+}
+
+bool Client::GroupFollow(Client* inviter) {
+
+	if (inviter)
+	{
+		isgrouped = true;
+		Raid* raid = entity_list.GetRaidByClient(inviter);
+		Raid* iraid = entity_list.GetRaidByClient(this);
+
+		//inviter has a raid don't do group stuff instead do raid stuff!
+		if (raid)
+		{
+			// Suspend the merc while in a raid (maybe a rule could be added for this)
+			if (GetMerc())
+				GetMerc()->Suspend();
+
+			uint32 groupToUse = 0xFFFFFFFF;
+			for (int x = 0; x < MAX_RAID_MEMBERS; x++)
+			{
+				if (raid->members[x].member)
+				{
+					//this assumes the inviter is in the zone
+					if (raid->members[x].member == inviter){
+						groupToUse = raid->members[x].GroupNumber;
+						break;
+					}
+				}
+			}
+			if (iraid == raid)
+			{
+				//both in same raid
+				uint32 ngid = raid->GetGroup(inviter->GetName());
+				if (raid->GroupCount(ngid) < 6)
+				{
+					raid->MoveMember(GetName(), ngid);
+					raid->SendGroupDisband(this);
+					//raid->SendRaidGroupAdd(GetName(), ngid);
+					//raid->SendGroupUpdate(this);
+					raid->GroupUpdate(ngid); //break
+				}
+				return false;
+			}
+			if (raid->RaidCount() < MAX_RAID_MEMBERS)
+			{
+				if (raid->GroupCount(groupToUse) < 6)
+				{
+					raid->SendRaidCreate(this);
+					raid->SendMakeLeaderPacketTo(raid->leadername, this);
+					raid->AddMember(this, groupToUse);
+					raid->SendBulkRaid(this);
+					//raid->SendRaidGroupAdd(GetName(), groupToUse);
+					//raid->SendGroupUpdate(this);
+					raid->GroupUpdate(groupToUse); //break
+					if (raid->IsLocked())
+					{
+						raid->SendRaidLockTo(this);
+					}
+					return false;
+				}
+				else
+				{
+					raid->SendRaidCreate(this);
+					raid->SendMakeLeaderPacketTo(raid->leadername, this);
+					raid->AddMember(this);
+					raid->SendBulkRaid(this);
+					if (raid->IsLocked())
+					{
+						raid->SendRaidLockTo(this);
+					}
+					return false;
+				}
+			}
+		}
+
+		Group* group = entity_list.GetGroupByClient(inviter);
+
+		if (!group)
+		{
+			//Make new group
+			group = new Group(inviter);
+
+			if (!group)
+			{
+				return false;
+			}
+
+			entity_list.AddGroup(group);
+
+			if (group->GetID() == 0)
+			{
+				Message(13, "Unable to get new group id. Cannot create group.");
+				inviter->Message(13, "Unable to get new group id. Cannot create group.");
+				return false;
+			}
+
+			//now we have a group id, can set inviter's id
+			database.SetGroupID(inviter->GetName(), group->GetID(), inviter->CharacterID(), false);
+			database.SetGroupLeaderName(group->GetID(), inviter->GetName());
+			group->UpdateGroupAAs();
+
+			//Invite the inviter into the group first.....dont ask
+			if (inviter->GetClientVersion() < EQClientSoD)
+			{
+				EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
+				GroupJoin_Struct* outgj = (GroupJoin_Struct*)outapp->pBuffer;
+				strcpy(outgj->membername, inviter->GetName());
+				strcpy(outgj->yourname, inviter->GetName());
+				outgj->action = groupActInviteInitial; // 'You have formed the group'.
+				group->GetGroupAAs(&outgj->leader_aas);
+				inviter->QueuePacket(outapp);
+				safe_delete(outapp);
+			}
+			else
+			{
+				// SoD and later
+				inviter->SendGroupCreatePacket();
+				inviter->SendGroupLeaderChangePacket(inviter->GetName());
+				inviter->SendGroupJoinAcknowledge();
+			}
+
+		}
+
+		if (!group)
+		{
+			return false;
+		}
+
+		// Remove merc from old group before adding client to the new one
+		if (GetMerc() && GetMerc()->HasGroup())
+		{
+			GetMerc()->RemoveMercFromGroup(GetMerc(), GetMerc()->GetGroup());
+		}
+
+		if (!group->AddMember(this))
+		{
+			// If failed to add client to new group, regroup with merc
+			if (GetMerc())
+			{
+				GetMerc()->MercJoinClientGroup();
+			}
+			else
+			{
+				isgrouped = false;
+			}
+			return false;
+		}
+
+		if (GetClientVersion() >= EQClientSoD)
+		{
+			SendGroupJoinAcknowledge();
+		}
+
+		// Temporary hack for SoD, as things seem to work quite differently
+		if (inviter->IsClient() && inviter->GetClientVersion() >= EQClientSoD)
+		{
+			database.RefreshGroupFromDB(inviter);
+		}
+
+		// Add the merc back into the new group if possible
+		if (GetMerc())
+		{
+			GetMerc()->MercJoinClientGroup();
+		}
+		
+		if (inviter->IsLFP())
+		{
+			// If the player who invited us to a group is LFP, have them update world now that we have joined their group.
+			inviter->UpdateLFP();
+		}
+
+		database.RefreshGroupFromDB(this);
+		group->SendHPPacketsTo(this);
+		//send updates to clients out of zone...
+		group->SendGroupJoinOOZ(this);
+		return true;
+	}
+	return false;
 }
 
 uint16 Client::GetPrimarySkillValue()
@@ -7412,13 +7594,15 @@ void Client::SendMercPersonalInfo()
 		}
 		if (MERC_DEBUG > 0)
 			Message(7, "Mercenary Debug: SendMercPersonalInfo Send Successful");
+			
+		SendMercMerchantResponsePacket(0);
 	}
 	else
 	{
 		if (MERC_DEBUG > 0)
 			Message(7, "Mercenary Debug: SendMercPersonalInfo Send Failed Due to no MercData for %i", GetMercInfo().MercTemplateID);
 	}
-	SendMercMerchantResponsePacket(0);
+
 }
 
 void Client::SendClearMercInfo()

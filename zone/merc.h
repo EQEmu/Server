@@ -138,6 +138,7 @@ public:
 	bool Spawn(Client *owner);
 	bool Suspend();
 	bool Unsuspend(bool setMaxStats);
+	bool MercJoinClientGroup();
 	void Zone();
 	virtual void Depop();
 	virtual bool Save();

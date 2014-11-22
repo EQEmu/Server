@@ -2563,18 +2563,22 @@ void ZoneDatabase::RefreshGroupFromDB(Client *client){
 	std::string query = StringFormat("SELECT name FROM group_id WHERE groupid = %d", group->GetID());
 	auto results = QueryDatabase(query);
 	if (!results.Success())
-        printf("Error in group update query: %s\n", results.ErrorMessage().c_str());
-    else
+	{
+		printf("Error in group update query: %s\n", results.ErrorMessage().c_str());
+	}
+	else
+	{
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			if(index >= 6)
-                continue;
+				continue;
 
             if(strcmp(client->GetName(), row[0]) == 0)
-                continue;
+				continue;
 
 			strcpy(gu->membername[index], row[0]);
 			index++;
 		}
+	}
 
 	client->QueuePacket(outapp);
 	safe_delete(outapp);

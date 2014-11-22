@@ -907,7 +907,7 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 	uint16 book_slot, count;
 	uint16 curspell;
 
-	uint16 Char_ID = initiator->CharacterID();
+	uint32 Char_ID = initiator->CharacterID();
 	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
 	bool SpellGlobalCheckResult = 0;
 

@@ -208,7 +208,7 @@ public:
 	Client(EQStreamInterface * ieqs);
 	~Client();
 
-	//abstract virtual function implementations requird by base abstract class
+	//abstract virtual function implementations required by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill);
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false);
 	virtual bool Attack(Mob* other, int Hand = MainPrimary, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false,
@@ -710,7 +710,7 @@ public:
 	void UnscribeSpellAll(bool update_client = true);
 	void UntrainDisc(int slot, bool update_client = true);
 	void UntrainDiscAll(bool update_client = true);
-	bool SpellGlobalCheck(uint16 Spell_ID, uint16 Char_ID);
+	bool SpellGlobalCheck(uint16 Spell_ID, uint32 Char_ID);
 	uint32 GetCharMaxLevelFromQGlobal();
 
 	inline bool IsSitting() const {return (playeraction == 1);}
@@ -1098,6 +1098,7 @@ void SetConsumption(int32 in_hunger, int32 in_thirst);
 	void RemoveGroupXTargets();
 	void RemoveAutoXTargets();
 	void ShowXTargets(Client *c);
+	bool GroupFollow(Client* inviter);
 
 	void InitializeMercInfo();
 	bool CheckCanSpawnMerc(uint32 template_id);
@@ -1105,6 +1106,7 @@ void SetConsumption(int32 in_hunger, int32 in_thirst);
 	bool CheckCanRetainMerc(uint32 upkeep);
 	bool CheckCanUnsuspendMerc();
 	bool DismissMerc(uint32 MercID);
+	bool MercOnlyOrNoGroup();
 	inline uint32 GetMercID() const { return mercid; }
 	inline uint8 GetMercSlot() const { return mercSlot; }
 	void SetMercID( uint32 newmercid) { mercid = newmercid; }

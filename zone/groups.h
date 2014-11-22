@@ -51,7 +51,7 @@ public:
 	Group(uint32 gid);
 	~Group();
 
-	bool	AddMember(Mob* newmember, const char* NewMemberName = nullptr, uint32 CharacterID = 0);
+	bool	AddMember(Mob* newmember, const char* NewMemberName = nullptr, uint32 CharacterID = 0, bool ismerc = false);
 	void	AddMember(const char* NewMemberName);
 	void	SendUpdate(uint32 type,Mob* member);
 	void	SendLeadershipAAUpdate();
@@ -63,6 +63,7 @@ public:
 	bool	IsGroupMember(const char *Name);
 	bool	Process();
 	bool	IsGroup()			{ return true; }
+	void	SendGroupJoinOOZ(Mob* NewMember);
 	void	CastGroupSpell(Mob* caster,uint16 spellid);
 	void	GroupBardPulse(Mob* caster,uint16 spellid);
 	void	SplitExp(uint32 exp, Mob* other);

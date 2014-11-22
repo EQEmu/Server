@@ -4928,7 +4928,7 @@ int Client::FindSpellBookSlotBySpellID(uint16 spellid) {
 	return -1;	//default
 }
 
-bool Client::SpellGlobalCheck(uint16 spell_ID, uint16 char_ID) {
+bool Client::SpellGlobalCheck(uint16 spell_ID, uint32 char_ID) {
 
 	std::string spell_Global_Name;
 	int spell_Global_Value;

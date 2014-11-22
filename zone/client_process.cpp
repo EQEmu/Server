@@ -245,7 +245,6 @@ bool Client::Process() {
 
 		if(GetMercInfo().MercTemplateID != 0 && GetMercInfo().IsSuspended)
 		{
-			//CheckMercSuspendTimer();
 			if(p_timers.Expired(&database, pTimerMercSuspend, false))
 			{
 				CheckMercSuspendTimer();
@@ -746,9 +745,9 @@ bool Client::Process() {
 				{
 					entity_list.MessageGroup(this, true, 15, "%s left the zone.", GetName());
 					mygroup->MemberZoned(this);
-					if (GetMerc() && GetMerc()->HasGroup() && GetMerc()->GetGroup() == mygroup)
+					if (GetMerc() && GetMerc()->HasGroup())
 					{
-						mygroup->DelMember(GetMerc());
+						GetMerc()->RemoveMercFromGroup(GetMerc(), GetMerc()->GetGroup());
 					}
 				}
 

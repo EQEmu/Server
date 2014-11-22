@@ -1287,8 +1287,8 @@ bool Merc::Process()
 
 	if (GetDepop())
 	{
-		//SetMercCharacterID(0);
-		//SetOwnerID(0);
+		SetMercCharacterID(0);
+		SetOwnerID(0);
 		return false;
 	}
 
@@ -1297,7 +1297,8 @@ bool Merc::Process()
 		//return false;                 //merc can live after client dies, not sure how long
 	}
 
-	if(IsSuspended()) {
+	if(IsSuspended())
+	{
 		return false;
 	}
 
@@ -5368,12 +5369,14 @@ bool Client::CheckCanRetainMerc(uint32 upkeep) {
 bool Client::CheckCanSpawnMerc(uint32 template_id) {
 
 	// Check if mercs are enabled globally
-	if(!RuleB(Mercs, AllowMercs)) {
+	if(!RuleB(Mercs, AllowMercs))
+	{
 		return false;
 	}
 
 	// Check if zone allows mercs
-	if(!zone->AllowMercs()) {
+	if(!zone->AllowMercs())
+	{
 		SendMercResponsePackets(3);
 		return false;
 	}
@@ -5381,31 +5384,36 @@ bool Client::CheckCanSpawnMerc(uint32 template_id) {
 	MercTemplate* mercTemplate = zone->GetMercTemplate(template_id);
 
 	// Invalid merc data
-	if(!mercTemplate) {
+	if(!mercTemplate)
+	{
 		SendMercResponsePackets(11);
 		return false;
 	}
 
 	// Check client version
-	if(GetClientVersion() < mercTemplate->ClientVersion) {
+	if(GetClientVersion() < mercTemplate->ClientVersion)
+	{
 		SendMercResponsePackets(3);
 		return false;
 	}
 
 	// Check for raid
-	if(HasRaid()) {
+	if(HasRaid())
+	{
 		SendMercResponsePackets(4);
 		return false;
 	}
 
 	// Check group size
-	if(HasGroup() && GetGroup()->GroupCount() >= MAX_GROUP_MEMBERS) {
+	if(GetGroup() &&  GetGroup()->GroupCount() >= MAX_GROUP_MEMBERS)	// database.GroupCount(GetGroup()->GetID())
+	{
 		SendMercResponsePackets(8);
 		return false;
 	}
 
 	// Check in combat
-	if(GetAggroCount() > 0) {
+	if(GetAggroCount() > 0)
+	{
 		SendMercResponsePackets(9);
 		return false;
 	}
@@ -5584,6 +5592,10 @@ void Client::SpawnMerc(Merc* merc, bool setMaxStats) {
 
 	if (!merc || !CheckCanSpawnMerc(merc->GetMercTemplateID()))
 	{
+		if (merc)
+		{
+			merc->Suspend();
+		}
 		return;
 	}
 
@@ -5618,9 +5630,7 @@ bool Merc::Suspend() {
 	mercOwner->GetMercInfo().Stance = GetStance();
 	Save();
 	mercOwner->GetMercTimer()->Disable();
-
 	mercOwner->SendMercSuspendResponsePacket(mercOwner->GetMercInfo().SuspendedTime);
-
 	mercOwner->SendMercTimer(this);
 	
 	Depop();
@@ -5632,6 +5642,25 @@ bool Merc::Suspend() {
 		mercOwner->Message(7, "Mercenary Debug: Suspend Complete.");
 
 	return true;
+}
+
+bool Client::MercOnlyOrNoGroup() {
+
+	if (!GetGroup())
+	{
+		return true;
+	}
+	if (GetMerc())
+	{
+		if (GetMerc()->HasGroup() && GetMerc()->GetGroup() == GetGroup())
+		{
+			if (GetGroup()->GroupCount() < 3)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 bool Merc::Unsuspend(bool setMaxStats) {
@@ -5657,65 +5686,15 @@ bool Merc::Unsuspend(bool setMaxStats) {
 		mercOwner->SendMercenaryUnsuspendPacket(0);
 		mercOwner->SendMercenaryUnknownPacket(1);
 		mercOwner->GetMercInfo().SuspendedTime = 0;
+		// Reset the upkeep timer
+		mercOwner->GetMercInfo().MercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS);
 		mercOwner->GetMercTimer()->Start(RuleI(Mercs, UpkeepIntervalMS));
-		mercOwner->GetMercTimer()->SetTimer(mercOwner->GetMercInfo().MercTimerRemaining);
+		//mercOwner->GetMercTimer()->SetTimer(mercOwner->GetMercInfo().MercTimerRemaining);
 		mercOwner->SendMercTimer(this);
 		if(!mercOwner->GetPTimers().Expired(&database, pTimerMercSuspend, false))
 			mercOwner->GetPTimers().Clear(&database, pTimerMercSuspend);
 
-		//mercOwner->SendMercPersonalInfo();
-		Group* g = entity_list.GetGroupByClient(mercOwner);
-
-		//nobody from our group is here... start a new group
-		if(!g)
-		{
-			g = new Group(mercOwner);
-
-			if(!g) {
-				delete g;
-				g = nullptr;
-				return false;
-			}
-
-			entity_list.AddGroup(g);
-
-			if(g->GetID() == 0) {
-				delete g;
-				g = nullptr;
-				return false;
-			}
-
-			if(AddMercToGroup(this, g))
-			{
-				entity_list.AddGroup(g, g->GetID());
-				database.SetGroupLeaderName(g->GetID(), mercOwner->GetName());
-				database.SetGroupID(mercOwner->GetName(), g->GetID(), mercOwner->CharacterID());
-				database.SetGroupID(this->GetName(), g->GetID(), mercOwner->CharacterID(), true);
-				database.RefreshGroupFromDB(mercOwner);
-				g->SaveGroupLeaderAA();
-				loaded = true;
-			}
-			else
-			{
-				g->DisbandGroup();
-			}
-		}
-		else if (AddMercToGroup(this, mercOwner->GetGroup()))
-		{
-			// Group already exists
-			database.SetGroupID(GetName(), mercOwner->GetGroup()->GetID(), mercOwner->CharacterID(), true);
-			database.RefreshGroupFromDB(mercOwner);
-
-			loaded = true;
-		}
-		else
-		{
-			if(MERC_DEBUG > 0)
-				mercOwner->Message(7, "Mercenary failed to join the group - Suspending");
-
-			Suspend();
-		}
-
+		MercJoinClientGroup();
 
 		if(loaded)
 		{
@@ -5788,7 +5767,7 @@ void Merc::Depop() {
 
 	entity_list.RemoveFromHateLists(this);
 
-	if(HasGroup())
+	if(GetGroup())
 	{
 		RemoveMercFromGroup(this, GetGroup());
 	}
@@ -5820,7 +5799,9 @@ bool Merc::RemoveMercFromGroup(Merc* merc, Group* group) {
 				if(group->DelMember(merc, true))
 				{
 					if(merc->GetMercCharacterID() != 0)
+					{
 						database.SetGroupID(merc->GetName(), 0, merc->GetMercCharacterID(), true);
+					}
 				}
 
 				if(group->GroupCount() <= 1 && ZoneLoaded)
@@ -5830,6 +5811,17 @@ bool Merc::RemoveMercFromGroup(Merc* merc, Group* group) {
 			}
 			else
 			{
+				// A merc is group leader - Disband and re-group each member with their mercs
+				for(int i = 0; i < MAX_GROUP_MEMBERS; i++)
+				{
+					if(!group->members[i])
+						continue;
+
+					if(!group->members[i]->IsClient())
+						continue;
+
+					group->members[i]->CastToClient()->LeaveGroup();
+				}
 				for(int i = 0; i < MAX_GROUP_MEMBERS; i++)
 				{
 					if(!group->members[i])
@@ -5838,15 +5830,9 @@ bool Merc::RemoveMercFromGroup(Merc* merc, Group* group) {
 					if(!group->members[i]->IsMerc())
 						continue;
 
-					Merc* groupmerc = group->members[i]->CastToMerc();
-
-					//groupmerc->SetOwnerID(0);
-					if (!groupmerc->IsSuspended())
-					{
-						groupmerc->Suspend();
-						database.SetGroupID(groupmerc->GetCleanName(), 0, groupmerc->GetMercCharacterID(), true);
-					}
+					group->members[i]->CastToMerc()->MercJoinClientGroup();
 				}
+				// Group should be removed by now, but just in case:
 				group->DisbandGroup();
 			}
 
@@ -5857,16 +5843,112 @@ bool Merc::RemoveMercFromGroup(Merc* merc, Group* group) {
 	return Result;
 }
 
+bool Merc::MercJoinClientGroup() {
+
+	Client* mercOwner = nullptr;
+
+	if(GetMercOwner())
+	{
+		mercOwner = GetMercOwner();
+	}
+
+	if(!mercOwner)
+	{
+		Suspend();
+		return false;
+	}
+
+	if(GetID())
+	{
+		if (HasGroup())
+		{
+			RemoveMercFromGroup(this, GetGroup());
+		}
+
+		Group* g = entity_list.GetGroupByClient(mercOwner);
+
+		//nobody from our group is here... start a new group
+		if(!g)
+		{
+			g = new Group(mercOwner);
+
+			if(!g)
+			{
+				delete g;
+				g = nullptr;
+				return false;
+			}
+
+			entity_list.AddGroup(g);
+
+			if(g->GetID() == 0)
+			{
+				delete g;
+				g = nullptr;
+				return false;
+			}
+
+			if(AddMercToGroup(this, g))
+			{
+				entity_list.AddGroup(g, g->GetID());
+				database.SetGroupLeaderName(g->GetID(), mercOwner->GetName());
+				database.SetGroupID(mercOwner->GetName(), g->GetID(), mercOwner->CharacterID(), false);
+				database.SetGroupID(this->GetName(), g->GetID(), mercOwner->CharacterID(), true);
+				database.RefreshGroupFromDB(mercOwner);
+				g->SaveGroupLeaderAA();
+				if(MERC_DEBUG > 0)
+					mercOwner->Message(7, "Mercenary Debug: Mercenary joined new group.");
+			}
+			else
+			{
+				g->DisbandGroup();
+				Suspend();
+
+				if(MERC_DEBUG > 0)
+					mercOwner->Message(7, "Mercenary Debug: Mercenary disbanded new group.");
+			}
+			
+		}
+		else if (AddMercToGroup(this, mercOwner->GetGroup()))
+		{
+			// Group already exists
+			database.SetGroupID(GetName(), mercOwner->GetGroup()->GetID(), mercOwner->CharacterID(), true);
+			database.RefreshGroupFromDB(mercOwner);
+			// Update members that are out of zone
+			GetGroup()->SendGroupJoinOOZ(this);
+
+			if(MERC_DEBUG > 0)
+				mercOwner->Message(7, "Mercenary Debug: Mercenary joined existing group.");
+		}
+		else
+		{
+			Suspend();
+
+			if(MERC_DEBUG > 0)
+				mercOwner->Message(7, "Mercenary Debug: Mercenary failed to join the group - Suspending");
+		}
+	}
+
+	return true;
+}
+
 bool Merc::AddMercToGroup(Merc* merc, Group* group) {
 	bool Result = false;
 
 	if(merc && group) {
-		// Remove merc from current group if any
-		if(merc->HasGroup()) {
+		// Remove merc from current group if it's not the destination group
+		if(merc->HasGroup())
+		{
+			if(merc->GetGroup() == group && merc->GetMercOwner())
+			{
+				// Merc is already in the destination group
+				merc->SetFollowID(merc->GetMercOwner()->GetID());
+				return true;
+			}
 			merc->RemoveMercFromGroup(merc, merc->GetGroup());
 		}
 		//Try and add the member, followed by checking if the merc owner exists.
-		if(group->AddMember(merc) && merc->GetMercOwner() != nullptr)
+		if(group->AddMember(merc) && merc->GetMercOwner())
 		{
 			merc->SetFollowID(merc->GetMercOwner()->GetID());
 			Result = true;
