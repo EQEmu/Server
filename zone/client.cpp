@@ -3872,11 +3872,11 @@ void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
 		PendingTranslocateData.heading = m_pp.binds[0].heading;
 	}
 	else {
-		ts->ZoneID = database.GetZoneID(Spell.teleport_zone);
+		PendingTranslocateData.zone_id = ts->ZoneID = database.GetZoneID(Spell.teleport_zone);
 		PendingTranslocateData.instance_id = 0;
-		ts->y = Spell.base[0];
-		ts->x = Spell.base[1];
-		ts->z = Spell.base[2];
+		PendingTranslocateData.y = ts->y = Spell.base[0];
+		PendingTranslocateData.x = ts->x = Spell.base[1];
+		PendingTranslocateData.z = ts->z = Spell.base[2];
 		PendingTranslocateData.heading = 0.0;
 	}
 
