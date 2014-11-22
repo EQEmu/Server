@@ -44,7 +44,7 @@ uint32 Lua_Corpse::GetDBID() {
 
 bool Lua_Corpse::IsRezzed() {
 	Lua_Safe_Call_Bool();
-	return self->Rezzed();
+	return self->IsRezzed();
 }
 
 const char* Lua_Corpse::GetOwnerName() {

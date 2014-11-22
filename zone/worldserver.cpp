@@ -704,7 +704,7 @@ void WorldServer::Process() {
 
 					_log(SPELLS__REZ, "Found corpse. Marking corpse as rezzed.");
 					// I don't know why Rezzed is not set to true in CompleteRezz().
-					corpse->Rezzed(true);
+					corpse->IsRezzed(true);
 					corpse->CompleteRezz();
 				}
 			}
@@ -1382,7 +1382,7 @@ void WorldServer::Process() {
 
 		case ServerOP_SpawnPlayerCorpse: {
 			SpawnPlayerCorpse_Struct* s = (SpawnPlayerCorpse_Struct*)pack->pBuffer;
-			Corpse* NewCorpse = database.LoadPlayerCorpse(s->player_corpse_id);
+			Corpse* NewCorpse = database.LoadCharacterCorpse(s->player_corpse_id);
 			if(NewCorpse)
 				NewCorpse->Spawn();
 			else

@@ -4,6 +4,7 @@
 #include <winsock2.h>
 #endif
 
+#include <fstream>
 #include <iostream>
 #include <errmsg.h>
 #include <mysqld_error.h>
@@ -126,6 +127,16 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
 
 	MySQLRequestResult requestResult(res, (uint32)mysql_affected_rows(&mysql), rowCount, (uint32)mysql_field_count(&mysql), (uint32)mysql_insert_id(&mysql));
 
+	/* Implement Logging at the Root*/
+	if (requestResult.ErrorMessage() != ""){
+		std::cout << "\n[MYSQL ERR] " << requestResult.ErrorMessage() << "\n\n" << query << "\n" << std::endl; 
+		/* Write to log file */
+		std::ofstream log("eqemu_query_error_log.txt", std::ios_base::app | std::ios_base::out);
+		log << "[MYSQL ERR] " << requestResult.ErrorMessage() << "\n" << query << "\n";
+		log.close(); 
+	}
+
+	
 
 #if DEBUG_MYSQL_QUERIES >= 1
 	if (requestResult.Success())

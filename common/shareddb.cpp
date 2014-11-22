@@ -1217,8 +1217,8 @@ ItemInst* SharedDatabase::CreateBaseItem(const Item_Struct* item, int16 charges)
 int32 SharedDatabase::DeleteStalePlayerCorpses() {
 	if(RuleB(Zone, EnableShadowrest))
 	{
-        std::string query = StringFormat("UPDATE player_corpses SET IsBurried = 1 WHERE IsBurried = 0 AND "
-                                        "(UNIX_TIMESTAMP() - UNIX_TIMESTAMP(timeofdeath)) > %d AND NOT timeofdeath = 0",
+        std::string query = StringFormat("UPDATE character_corpses SET IsBurried = 1 WHERE IsBurried = 0 AND "
+                                        "(UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) > %d AND NOT time_of_death = 0",
                                         (RuleI(Character, CorpseDecayTimeMS) / 1000));
         auto results = QueryDatabase(query);
 		if (!results.Success())
@@ -1227,8 +1227,8 @@ int32 SharedDatabase::DeleteStalePlayerCorpses() {
 		return results.RowsAffected();
 	}
 
-    std::string query = StringFormat("DELETE FROM player_corpses WHERE (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(timeofdeath)) > %d "
-                                    "AND NOT timeofdeath = 0", (RuleI(Character, CorpseDecayTimeMS) / 1000));
+    std::string query = StringFormat("DELETE FROM character_corpses WHERE (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) > %d "
+                                    "AND NOT time_of_death = 0", (RuleI(Character, CorpseDecayTimeMS) / 1000));
     auto results = QueryDatabase(query);
     if (!results.Success())
         return -1;
@@ -1238,7 +1238,7 @@ int32 SharedDatabase::DeleteStalePlayerCorpses() {
 
 int32 SharedDatabase::DeleteStalePlayerBackups() {
 	// 1209600 seconds = 2 weeks
-	const std::string query = "DELETE FROM player_corpses_backup WHERE (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(timeofdeath)) > 1209600";
+	const std::string query = "DELETE FROM player_corpses_backup WHERE (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) > 1209600";
 	auto results = QueryDatabase(query);
 	if (!results.Success())
         return -1;

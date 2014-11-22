@@ -48,6 +48,7 @@
 #include "guilds.h"
 #include "string_util.h"
 #include "extprofile.h"
+
 extern Client client;
 
 #ifdef _WINDOWS
@@ -1349,7 +1350,6 @@ bool Database::CheckDatabaseConversions() {
 		printf("Starting conversion...\n\n");
 	}
 
-	// Testing account = 11001
 	int char_iter_count = 0;
 	rquery = StringFormat("SELECT `id` FROM `character_`");
 	results = QueryDatabase(rquery);
@@ -2084,6 +2084,275 @@ bool Database::CheckDatabaseConversions() {
 
 #endif
 
+	DBPlayerCorpse_Struct_temp* dbpc;
+	classic_db_temp::DBPlayerCorpse_Struct_temp* dbpc_c;
+	uint32 in_datasize;
+	bool is_sof = false;
+	std::string c_type;
+	std::string scquery;
+	int8 first_entry = 0;
+
+	rquery = StringFormat("SHOW COLUMNS FROM `character_corpses` LIKE 'data'");
+	results = QueryDatabase(rquery);
+	if (results.RowCount() != 0){
+		rquery = StringFormat("SELECT DISTINCT charid FROM character_corpses");
+		results = QueryDatabase(rquery);
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			squery = StringFormat("SELECT id, charname, data, time_of_death, is_rezzed FROM character_corpses WHERE `charid` = %i", atoi(row[0]));
+			auto results2 = QueryDatabase(squery);
+			for (auto row2 = results2.begin(); row2 != results2.end(); ++row2) {
+				in_datasize = results2.LengthOfColumn(2);
+				dbpc = (DBPlayerCorpse_Struct_temp*)row2[2];
+				dbpc_c = (classic_db_temp::DBPlayerCorpse_Struct_temp*)row2[2];
+
+				if (dbpc == nullptr)
+					continue;
+				if (dbpc_c == nullptr)
+					continue;
+
+
+				/* SoF+ */
+				uint32 esize1 = (sizeof(DBPlayerCorpse_Struct_temp)+(dbpc->itemcount * sizeof(player_lootitem_temp::ServerLootItem_Struct_temp)));
+				uint32 esize2 = (sizeof(classic_db_temp::DBPlayerCorpse_Struct_temp) + (dbpc_c->itemcount * sizeof(player_lootitem_temp::ServerLootItem_Struct_temp)));
+
+				/* SoF */
+				if (in_datasize == esize1) {
+					is_sof = true;
+					c_type = "SOF";
+				}
+				/* Classic */
+				if (in_datasize == esize2) {
+					is_sof = false;
+					c_type = "Legacy";
+				}
+				if (in_datasize != esize2 && in_datasize != esize1) {
+					std::cout << "[Error] in Corpse Size - OLD SIZE: " << esize1 << " SOF SIZE: " << esize2 << " db_blob_datasize: " << in_datasize << std::endl;
+					is_sof = false;
+					c_type = "NULL";
+					continue;
+				}
+				std::cout << "Corpse: OK [" << c_type << "]: " << "Corpse ID: " << atoi(row2[0]) << std::endl;
+
+				if (is_sof){
+					scquery = StringFormat("UPDATE `character_corpses` SET \n"
+						"`is_locked` =          %d,\n"
+						"`exp` =                 %u,\n"
+						"`size` =               %f,\n"
+						"`level` =              %u,\n"
+						"`race` =               %u,\n"
+						"`gender` =             %u,\n"
+						"`class` =              %u,\n"
+						"`deity` =              %u,\n"
+						"`texture` =            %u,\n"
+						"`helm_texture` =       %u,\n"
+						"`copper` =             %u,\n"
+						"`silver` =             %u,\n"
+						"`gold` =               %u,\n"
+						"`platinum` =           %u,\n"
+						"`hair_color`  =        %u,\n"
+						"`beard_color` =        %u,\n"
+						"`eye_color_1` =        %u,\n"
+						"`eye_color_2` =        %u,\n"
+						"`hair_style`  =        %u,\n"
+						"`face` =               %u,\n"
+						"`beard` =              %u,\n"
+						"`drakkin_heritage` =    %u,\n"
+						"`drakkin_tattoo`  =    %u,\n"
+						"`drakkin_details` =    %u,\n"
+						"`wc_1` =               %u,\n"
+						"`wc_2` =               %u,\n"
+						"`wc_3` =               %u,\n"
+						"`wc_4` =               %u,\n"
+						"`wc_5` =               %u,\n"
+						"`wc_6` =               %u,\n"
+						"`wc_7` =               %u,\n"
+						"`wc_8` =               %u,\n"
+						"`wc_9`	=                %u \n"
+						"WHERE `id` = %u		   \n",
+						dbpc->locked,
+						dbpc->exp,
+						dbpc->size,
+						dbpc->level,
+						dbpc->race,
+						dbpc->gender,
+						dbpc->class_,
+						dbpc->deity,
+						dbpc->texture,
+						dbpc->helmtexture,
+						dbpc->copper,
+						dbpc->silver,
+						dbpc->gold,
+						dbpc->plat,
+						dbpc->haircolor,
+						dbpc->beardcolor,
+						dbpc->eyecolor1,
+						dbpc->eyecolor2,
+						dbpc->hairstyle,
+						dbpc->face,
+						dbpc->beard,
+						dbpc->drakkin_heritage,
+						dbpc->drakkin_tattoo,
+						dbpc->drakkin_details,
+						dbpc->item_tint[0].color,
+						dbpc->item_tint[1].color,
+						dbpc->item_tint[2].color,
+						dbpc->item_tint[3].color,
+						dbpc->item_tint[4].color,
+						dbpc->item_tint[5].color,
+						dbpc->item_tint[6].color,
+						dbpc->item_tint[7].color,
+						dbpc->item_tint[8].color,
+						atoi(row2[0])
+						);
+					if (scquery != ""){ auto sc_results = QueryDatabase(scquery); ThrowDBError(sc_results.ErrorMessage(), "Corpse Convert: Base Data", scquery); }
+
+					first_entry = 0;
+					scquery = "";
+					/* Print Items */
+					for (unsigned int i = 0; i < dbpc->itemcount; i++) {
+						if (first_entry != 1){
+							scquery = StringFormat("REPLACE INTO `character_corpse_items` \n"
+								" (corpse_id, equip_slot, item_id, charges, aug_1, aug_2, aug_3, aug_4, aug_5, attuned) \n"
+								" VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, 0) \n",
+								atoi(row2[0]),
+								dbpc->items[i].equipSlot,
+								dbpc->items[i].item_id,
+								dbpc->items[i].charges,
+								dbpc->items[i].aug1,
+								dbpc->items[i].aug2,
+								dbpc->items[i].aug3,
+								dbpc->items[i].aug4,
+								dbpc->items[i].aug5
+								);
+							first_entry = 1;
+						}
+						else{
+							scquery = scquery + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, 0) \n",
+								atoi(row2[0]),
+								dbpc->items[i].equipSlot,
+								dbpc->items[i].item_id,
+								dbpc->items[i].charges,
+								dbpc->items[i].aug1,
+								dbpc->items[i].aug2,
+								dbpc->items[i].aug3,
+								dbpc->items[i].aug4,
+								dbpc->items[i].aug5
+								);
+						}
+					}
+					if (scquery != ""){ auto sc_results = QueryDatabase(scquery); ThrowDBError(sc_results.ErrorMessage(), "Corpse Convert: SOF: Items", scquery); }
+				}
+				else{
+					/* Classic Converter */
+					scquery = StringFormat("UPDATE `character_corpses` SET \n"
+						"`is_locked` =          %d,\n"
+						"`exp` =                 %u,\n"
+						"`size` =               %f,\n"
+						"`level` =              %u,\n"
+						"`race` =               %u,\n"
+						"`gender` =             %u,\n"
+						"`class` =              %u,\n"
+						"`deity` =              %u,\n"
+						"`texture` =            %u,\n"
+						"`helm_texture` =       %u,\n"
+						"`copper` =             %u,\n"
+						"`silver` =             %u,\n"
+						"`gold` =               %u,\n"
+						"`platinum` =           %u,\n"
+						"`hair_color`  =        %u,\n"
+						"`beard_color` =        %u,\n"
+						"`eye_color_1` =        %u,\n"
+						"`eye_color_2` =        %u,\n"
+						"`hair_style`  =        %u,\n"
+						"`face` =               %u,\n"
+						"`beard` =              %u,\n"
+						"`wc_1` =               %u,\n"
+						"`wc_2` =               %u,\n"
+						"`wc_3` =               %u,\n"
+						"`wc_4` =               %u,\n"
+						"`wc_5` =               %u,\n"
+						"`wc_6` =               %u,\n"
+						"`wc_7` =               %u,\n"
+						"`wc_8` =               %u,\n"
+						"`wc_9`	=                %u \n"
+						"WHERE `id` = %u		   \n",
+						dbpc_c->locked,
+						dbpc_c->exp,
+						dbpc_c->size,
+						dbpc_c->level,
+						dbpc_c->race,
+						dbpc_c->gender,
+						dbpc_c->class_,
+						dbpc_c->deity,
+						dbpc_c->texture,
+						dbpc_c->helmtexture,
+						dbpc_c->copper,
+						dbpc_c->silver,
+						dbpc_c->gold,
+						dbpc_c->plat,
+						dbpc_c->haircolor,
+						dbpc_c->beardcolor,
+						dbpc_c->eyecolor1,
+						dbpc_c->eyecolor2,
+						dbpc_c->hairstyle,
+						dbpc_c->face,
+						dbpc_c->beard,
+						dbpc_c->item_tint[0].color,
+						dbpc_c->item_tint[1].color,
+						dbpc_c->item_tint[2].color,
+						dbpc_c->item_tint[3].color,
+						dbpc_c->item_tint[4].color,
+						dbpc_c->item_tint[5].color,
+						dbpc_c->item_tint[6].color,
+						dbpc_c->item_tint[7].color,
+						dbpc_c->item_tint[8].color,
+						atoi(row2[0])
+						);
+					if (scquery != ""){ auto sc_results = QueryDatabase(scquery); ThrowDBError(sc_results.ErrorMessage(), "Corpse Convert: Legacy :: Base Data", scquery); }
+
+					first_entry = 0;
+					scquery = "";
+
+					/* Print Items */
+					for (unsigned int i = 0; i < dbpc_c->itemcount; i++) {
+						if (first_entry != 1){
+							scquery = StringFormat("REPLACE INTO `character_corpse_items` \n"
+								" (corpse_id, equip_slot, item_id, charges, aug_1, aug_2, aug_3, aug_4, aug_5, attuned) \n"
+								" VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, 0) \n",
+								atoi(row2[0]),
+								dbpc_c->items[i].equipSlot,
+								dbpc_c->items[i].item_id,
+								dbpc_c->items[i].charges,
+								dbpc_c->items[i].aug1,
+								dbpc_c->items[i].aug2,
+								dbpc_c->items[i].aug3,
+								dbpc_c->items[i].aug4,
+								dbpc_c->items[i].aug5
+								);
+							first_entry = 1;
+						}
+						else{
+							scquery = scquery + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, 0) \n",
+								atoi(row2[0]),
+								dbpc_c->items[i].equipSlot,
+								dbpc_c->items[i].item_id,
+								dbpc_c->items[i].charges,
+								dbpc_c->items[i].aug1,
+								dbpc_c->items[i].aug2,
+								dbpc_c->items[i].aug3,
+								dbpc_c->items[i].aug4,
+								dbpc_c->items[i].aug5
+								);
+						}
+					}
+					if (scquery != ""){ auto sc_results = QueryDatabase(scquery); ThrowDBError(sc_results.ErrorMessage(), "Corpse Convert: Legacy : Items", scquery); }
+				}
+			}
+		}
+		QueryDatabase(StringFormat("ALTER TABLE `character_corpses` DROP COLUMN `data`"));
+	}
+
+
 	/* Fetch Automatic Database Upgrade Script */
 	if (!std::ifstream("db_update.pl")){
 		std::cout << "Pulling down automatic database upgrade script...\n" << std::endl;
@@ -2093,8 +2362,8 @@ bool Database::CheckDatabaseConversions() {
 		system("wget -O db_update.pl https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/db_update.pl");
 #endif
 	}
-	/* Run Automatic Database Upgrade Script */
 
+	/* Run Automatic Database Upgrade Script */
 	system("perl db_update.pl ran_from_world"); 
 
 	return true;
@@ -3659,7 +3928,7 @@ bool Database::CheckInstanceExists(uint16 instance_id)
 void Database::BuryCorpsesInInstance(uint16 instance_id)
 {
 
-	std::string query = StringFormat("UPDATE player_corpses SET IsBurried=1, instanceid=0 WHERE instanceid=%u", instance_id);
+	std::string query = StringFormat("UPDATE character_corpses SET IsBurried=1, instanceid=0 WHERE instanceid=%u", instance_id);
 	auto results = QueryDatabase(query);
 }
 

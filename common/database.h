@@ -93,6 +93,87 @@ struct ExtendedProfile_Struct;
 struct GuildMember_Struct;
 class PTimerList;
 
+#pragma pack(1)
+
+namespace player_lootitem_temp
+{
+	struct ServerLootItem_Struct_temp {
+		uint32	item_id;
+		int16	equipSlot;
+		uint8	charges;
+		uint16	lootslot;
+		uint32 aug1;
+		uint32 aug2;
+		uint32 aug3;
+		uint32 aug4;
+		uint32 aug5;
+	};
+}
+
+struct DBPlayerCorpse_Struct_temp {
+	uint32	crc;
+	bool	locked;
+	uint32	itemcount;
+	uint32	exp;
+	float	size;
+	uint8	level;
+	uint8	race;
+	uint8	gender;
+	uint8	class_;
+	uint8	deity;
+	uint8	texture;
+	uint8	helmtexture;
+	uint32	copper;
+	uint32	silver;
+	uint32	gold;
+	uint32	plat;
+	Color_Struct item_tint[9];
+	uint8 haircolor;
+	uint8 beardcolor;
+	uint8 eyecolor1;
+	uint8 eyecolor2;
+	uint8 hairstyle;
+	uint8 face;
+	uint8 beard;
+	uint32 drakkin_heritage;
+	uint32 drakkin_tattoo;
+	uint32 drakkin_details;
+	player_lootitem_temp::ServerLootItem_Struct_temp	items[0];
+};
+
+namespace classic_db_temp
+{
+	struct DBPlayerCorpse_Struct_temp {
+		uint32	crc;
+		bool	locked;
+		uint32	itemcount;
+		uint32	exp;
+		float	size;
+		uint8	level;
+		uint8	race;
+		uint8	gender;
+		uint8	class_;
+		uint8	deity;
+		uint8	texture;
+		uint8	helmtexture;
+		uint32	copper;
+		uint32	silver;
+		uint32	gold;
+		uint32	plat;
+		Color_Struct item_tint[9];
+		uint8 haircolor;
+		uint8 beardcolor;
+		uint8 eyecolor1;
+		uint8 eyecolor2;
+		uint8 hairstyle;
+		uint8 face;
+		uint8 beard;
+		player_lootitem_temp::ServerLootItem_Struct_temp	items[0];
+	};
+}
+
+#pragma pack()
+
 class Database : public DBcore {
 public:
 	Database();

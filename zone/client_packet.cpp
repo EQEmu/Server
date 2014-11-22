@@ -4827,7 +4827,7 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 			else
 				Message(0, "This corpse will decay in %i minutes and %i seconds.", min, sec);
 
-			Message(0, "This corpse %s be resurrected.", tcorpse->Rezzed() ? "cannot" : "can");
+			Message(0, "This corpse %s be resurrected.", tcorpse->IsRezzed() ? "cannot" : "can");
 			/*
 			hour = 0;
 
@@ -6175,8 +6175,8 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 	char *escSearchString = new char[129];
 	database.DoEscapeString(escSearchString, gmscs->Name, strlen(gmscs->Name));
 
-	std::string query = StringFormat("SELECT charname, zoneid, x, y, z, timeofdeath, rezzed, IsBurried "
-		"FROM player_corpses WheRE charname LIKE '%%%s%%' ORDER BY charname LIMIT %i",
+	std::string query = StringFormat("SELECT charname, zoneid, x, y, z, time_of_death, rezzed, IsBurried "
+		"FROM character_corpses WheRE charname LIKE '%%%s%%' ORDER BY charname LIMIT %i",
 		escSearchString, maxResults);
 	safe_delete_array(escSearchString);
 	auto results = database.QueryDatabase(query);
@@ -6193,7 +6193,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 	else
 		Message(clientMessageYellow, "There are %i corpse(s) that match the search string '%s'.", results.RowCount(), gmscs->Name);
 
-	char charName[64], timeOfDeath[20];
+	char charName[64], time_of_death[20];
 
 	std::string popupText = "<table><tr><td>Name</td><td>Zone</td><td>X</td><td>Y</td><td>Z</td><td>Date</td><td>"
 		"Rezzed</td><td>Buried</td></tr><tr><td>&nbsp</td><td></td><td></td><td></td><td></td><td>"
@@ -6208,13 +6208,13 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 		float CorpseY = atof(row[3]);
 		float CorpseZ = atof(row[4]);
 
-		strn0cpy(timeOfDeath, row[5], sizeof(timeOfDeath));
+		strn0cpy(time_of_death, row[5], sizeof(time_of_death));
 
 		bool corpseRezzed = atoi(row[6]);
 		bool corpseBuried = atoi(row[7]);
 
 		popupText += StringFormat("<tr><td>%s</td><td>%s</td><td>%8.0f</td><td>%8.0f</td><td>%8.0f</td><td>%s</td><td>%s</td><td>%s</td></tr>",
-			charName, StaticGetZoneName(ZoneID), CorpseX, CorpseY, CorpseZ, timeOfDeath,
+			charName, StaticGetZoneName(ZoneID), CorpseX, CorpseY, CorpseZ, time_of_death,
 			corpseRezzed ? "Yes" : "No", corpseBuried ? "Yes" : "No");
 
 		if (popupText.size() > 4000) {

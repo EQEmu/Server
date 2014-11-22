@@ -4969,7 +4969,7 @@ void Client::SummonAndRezzAllCorpses()
 
 	entity_list.RemoveAllCorpsesByCharID(CharacterID());
 
-	int CorpseCount = database.SummonAllPlayerCorpses(CharacterID(), zone->GetZoneID(), zone->GetInstanceID(),
+	int CorpseCount = database.SummonAllCharacterCorpses(CharacterID(), zone->GetZoneID(), zone->GetInstanceID(),
 								GetX(), GetY(), GetZ(), GetHeading());
 	if(CorpseCount <= 0)
 	{
@@ -5007,7 +5007,7 @@ void Client::SummonAllCorpses(float dest_x, float dest_y, float dest_z, float de
 
 	entity_list.RemoveAllCorpsesByCharID(CharacterID());
 
-	int CorpseCount = database.SummonAllPlayerCorpses(CharacterID(), zone->GetZoneID(), zone->GetInstanceID(),
+	int CorpseCount = database.SummonAllCharacterCorpses(CharacterID(), zone->GetZoneID(), zone->GetInstanceID(),
 								dest_x, dest_y, dest_z, dest_heading);
 	if(CorpseCount <= 0)
 	{
@@ -5051,7 +5051,7 @@ void Client::DepopPlayerCorpse(uint32 dbid)
 
 void Client::BuryPlayerCorpses()
 {
-	database.BuryAllPlayerCorpses(CharacterID());
+	database.BuryAllCharacterCorpses(CharacterID());
 }
 
 void Client::NotifyNewTitlesAvailable()
