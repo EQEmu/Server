@@ -1848,46 +1848,57 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 {
 	//Basic settings to make sure swarm pets work properly.
-	if  (GetSwarmOwner()) {
-				
-		Mob *m = entity_list.GetMobID(GetSwarmOwner());
-			
-		if(m->IsClient()) {
+	Mob *swarmOwner = nullptr;
+	if  (GetSwarmOwner())
+	{
+		Mob *swarmOwner = entity_list.GetMobID(GetSwarmOwner());
+	}
+	
+	if  (swarmOwner != nullptr)
+	{
+		if(swarmOwner->IsClient())
+		{
 			SetPetOwnerClient(true); //Simple flag to determine if pet belongs to a client
 			SetAllowBeneficial(1);//Allow temp pets to receive buffs and heals if owner is client.
 			//This is a hack to allow CLIENT swarm pets NOT to be targeted with F8. Warning: Will turn name 'Yellow'!
 			if (RuleB(Pets, SwarmPetNotTargetableWithHotKey))
 				ns->spawn.IsMercenary = 1;
-			}
-			//NPC cast swarm pets should still be targetable with F8.
+		}
 		else
+		{
+			//NPC cast swarm pets should still be targetable with F8.
 			ns->spawn.IsMercenary = 0;
+		}
 
 		SetTempPet(true); //Simple mob flag for checking if temp pet
-		m->SetTempPetsActive(true); //Neccessary fail safe flag set if mob ever had a swarm pet to ensure they are removed.
-		m->SetTempPetCount(m->GetTempPetCount() + 1);
+		swarmOwner->SetTempPetsActive(true); //Necessary fail safe flag set if mob ever had a swarm pet to ensure they are removed.
+		swarmOwner->SetTempPetCount(swarmOwner->GetTempPetCount() + 1);
 	
 		//Not recommended if using above (However, this will work better on older clients).
-		if (RuleB(Pets, UnTargetableSwarmPet)) {
+		if (RuleB(Pets, UnTargetableSwarmPet))
+		{
 			ns->spawn.bodytype = 11;
-			if(!IsCharmed() && m->IsClient())
-				sprintf(ns->spawn.lastName, "%s's Pet", m->GetName());
+			if(!IsCharmed() && swarmOwner->IsClient())
+				sprintf(ns->spawn.lastName, "%s's Pet", swarmOwner->GetName());
 		}
 	} 
-	
-	else if(GetOwnerID()) {
+	else if(GetOwnerID())
+	{
 		ns->spawn.is_pet = 1;
-		if (!IsCharmed() && GetOwnerID()) {
-			Client *c = entity_list.GetClientByID(GetOwnerID());
-			if(c){
+		if (!IsCharmed())
+		{
+			Client *client = entity_list.GetClientByID(GetOwnerID());
+			if(client)
+			{
 				SetPetOwnerClient(true);
-				sprintf(ns->spawn.lastName, "%s's Pet", c->GetName());
+				sprintf(ns->spawn.lastName, "%s's Pet", client->GetName());
 			}
 		}
-	} 
-
+	}
 	else
+	{
 		ns->spawn.is_pet = 0;
+	}
 }
 
 void NPC::SetLevel(uint8 in_level, bool command)
