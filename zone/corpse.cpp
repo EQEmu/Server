@@ -636,6 +636,8 @@ ServerLootItem_Struct* Corpse::GetItem(uint16 lootslot, ServerLootItem_Struct** 
 		}
 	}
 
+	std::cout << "sitem EQUIPSLOT: " << sitem->equip_slot << std::endl; 
+
 	return sitem;
 }
 
@@ -865,28 +867,6 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		d->unknown1		= 0x42;
 		d->unknown2		= 0xef;
 		if(tCanLoot == 2 || (tCanLoot >= 3 && lootcoin)) { // dont take the coin off if it's a gm peeking at the corpse
-			if(zone->lootvar != 0) {
-				int admin = client->Admin();
-				if(zone->lootvar == 7) { client->LogLoot(client, this, 0); }
-				else if((admin >= 10) && (admin < 20)) {
-					if((zone->lootvar < 8) && (zone->lootvar > 5)) { client->LogLoot(client, this, 0); }
-				}
-				else if(admin <= 20) {
-					if((zone->lootvar < 8) && (zone->lootvar > 4)) { client->LogLoot(client, this, 0); }
-				}
-				else if(admin <= 80) {
-					if((zone->lootvar < 8) && (zone->lootvar > 3)) { client->LogLoot(client, this, 0); }
-				}
-				else if(admin <= 100) {
-					if((zone->lootvar < 9) && (zone->lootvar > 2)) { client->LogLoot(client, this, 0); }
-				}
-				else if(admin <= 150) {
-					if(((zone->lootvar < 8) && (zone->lootvar > 1)) || (zone->lootvar == 9)) { client->LogLoot(client, this, 0); }
-				}
-				else if (admin <= 255) {
-					if((zone->lootvar < 8) && (zone->lootvar > 0)) { client->LogLoot(client, this, 0); }
-				}
-			}
 
 			if(!IsPlayerCorpse() && client->IsGrouped() && client->AutoSplitEnabled() && client->GetGroup()) {
 				d->copper		= 0;
@@ -994,13 +974,11 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 	if(client->GetClientVersion() >= EQClientSoD) { SendLootReqErrorPacket(client, 6); }
 }
 
-void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
-{
-	//this gets sent out no matter what as a sort of 'ack', so send it here.
+void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
+	/* This gets sent no matter what as a sort of ACK */
 	client->QueuePacket(app);
 
-	if(!loot_cooldown_timer.Check())
-	{
+	if (!loot_cooldown_timer.Check()) {
 		SendEndLootErrorPacket(client);
 		//unlock corpse for others
 		if (this->BeingLootedBy = client->GetID()) {
@@ -1009,9 +987,8 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 		return;
 	}
 
-	// To prevent item loss for a player using 'Loot All' who doesn't have inventory space for all their items.
-	if(RuleB(Character, CheckCursorEmptyWhenLooting) && !client->GetInv().CursorEmpty())
-	{
+	/* To prevent item loss for a player using 'Loot All' who doesn't have inventory space for all their items. */
+	if (RuleB(Character, CheckCursorEmptyWhenLooting) && !client->GetInv().CursorEmpty()) {
 		client->Message(13, "You may not loot an item while you have an item on your cursor.");
 		SendEndLootErrorPacket(client);
 		//unlock corpse for others
@@ -1038,7 +1015,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 		client->Message(13, "Error: Corpse locked by GM.");
 		return;
 	}
-	if(IsPlayerCorpse() && (charid != client->CharacterID()) && CanMobLoot(client->CharacterID()) && GetPKItem()==0){
+	if (IsPlayerCorpse() && (charid != client->CharacterID()) && CanMobLoot(client->CharacterID()) && GetPKItem() == 0){
 		client->Message(13, "Error: You cannot loot any more items from this corpse.");
 		SendEndLootErrorPacket(client);
 		BeingLootedBy = 0xFFFFFFFF;
@@ -1049,48 +1026,46 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 	ServerLootItem_Struct* item_data = nullptr, *bag_item_data[10];
 
 	memset(bag_item_data, 0, sizeof(bag_item_data));
-	if(GetPKItem()>1)
+	if (GetPKItem() > 1){
 		item = database.GetItem(GetPKItem());
-	else if(GetPKItem()==-1 || GetPKItem()==1)
+	}
+	else if (GetPKItem() == -1 || GetPKItem() == 1){
 		item_data = GetItem(lootitem->slot_id - EmuConstants::CORPSE_BEGIN); //dont allow them to loot entire bags of items as pvp reward
-	else
+	}
+	else{
 		item_data = GetItem(lootitem->slot_id - EmuConstants::CORPSE_BEGIN, bag_item_data);
+	}
 
-	if (GetPKItem()<=1 && item_data != 0)
-	{
+	std::cout << "ITEM_DATA EQUIP SLOT: " << item_data->equip_slot << std::endl; 
+
+	if (GetPKItem()<=1 && item_data != 0) {
 		item = database.GetItem(item_data->item_id);
 	}
 
-	if (item != 0)
-	{
-		if(item_data)
-			inst = database.CreateItem(item, item_data?item_data->charges:0, item_data->aug_1, item_data->aug_2, item_data->aug_3, item_data->aug_4, item_data->aug_5);
-		else
+	if (item != 0) {
+		if (item_data){
+			inst = database.CreateItem(item, item_data ? item_data->charges : 0, item_data->aug_1, item_data->aug_2, item_data->aug_3, item_data->aug_4, item_data->aug_5);
+		}
+		else {
 			inst = database.CreateItem(item);
+		}
 	}
 
-	if (client && inst)
-	{
-
-		if (client->CheckLoreConflict(item))
-		{
-			client->Message_StringID(0,LOOT_LORE_ERROR);
+	if (client && inst) {
+		if (client->CheckLoreConflict(item)) {
+			client->Message_StringID(0, LOOT_LORE_ERROR);
 			SendEndLootErrorPacket(client);
 			BeingLootedBy = 0;
 			delete inst;
 			return;
 		}
 
-		if(inst->IsAugmented())
-		{
-			for (int i = AUG_BEGIN; i<EmuConstants::ITEM_COMMON_SIZE; i++)
-			{
+		if (inst->IsAugmented()) {
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
 				ItemInst *itm = inst->GetAugment(i);
-				if(itm)
-				{
-					if(client->CheckLoreConflict(itm->GetItem()))
-					{
-						client->Message_StringID(0,LOOT_LORE_ERROR);
+				if (itm) {
+					if (client->CheckLoreConflict(itm->GetItem())) {
+						client->Message_StringID(0, LOOT_LORE_ERROR);
 						SendEndLootErrorPacket(client);
 						BeingLootedBy = 0;
 						delete inst;
@@ -1111,86 +1086,57 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 		parse->EventPlayer(EVENT_LOOT, client, buf, 0, &args);
 		parse->EventItem(EVENT_LOOT, client, inst, this, buf, 0);
 
-		if ((RuleB(Character, EnableDiscoveredItems)))
-		{
-			if(client && !client->GetGM() && !client->IsDiscovered(inst->GetItem()->ID))
+		if ((RuleB(Character, EnableDiscoveredItems))) {
+			if (client && !client->GetGM() && !client->IsDiscovered(inst->GetItem()->ID))
 				client->DiscoverItem(inst->GetItem()->ID);
 		}
 
-		if (zone->lootvar != 0)
-		{
-			int admin=client->Admin();
-			if (zone->lootvar==7){
-					client->LogLoot(client,this,item);
-			}
-			else if ((admin>=10) && (admin<20)){
-				if ((zone->lootvar<8) && (zone->lootvar>5))
-					client->LogLoot(client,this,item);
-			}
-			else if (admin<=20){
-				if ((zone->lootvar<8) && (zone->lootvar>4))
-					client->LogLoot(client,this,item);
-			}
-			else if (admin<=80){
-				if ((zone->lootvar<8) && (zone->lootvar>3))
-					client->LogLoot(client,this,item);
-			}
-			else if (admin<=100){
-				if ((zone->lootvar<9) && (zone->lootvar>2))
-					client->LogLoot(client,this,item);
-			}
-			else if (admin<=150){
-				if (((zone->lootvar<8) && (zone->lootvar>1)) || (zone->lootvar==9))
-					client->LogLoot(client,this,item);
-			}
-			else if (admin<=255){
-				if ((zone->lootvar<8) && (zone->lootvar>0))
-					client->LogLoot(client,this,item);
-			}
-		}
-
-		if(zone->adv_data)
-		{
+		if (zone->adv_data) {
 			ServerZoneAdventureDataReply_Struct *ad = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
-			if(ad->type == Adventure_Collect && !IsPlayerCorpse())
-			{
-				if(ad->data_id == inst->GetItem()->ID)
-				{
+			if (ad->type == Adventure_Collect && !IsPlayerCorpse()) {
+				if (ad->data_id == inst->GetItem()->ID) {
 					zone->DoAdventureCountIncrease();
 				}
 			}
 		}
 
-		// first add it to the looter - this will do the bag contents too
-		if(lootitem->auto_loot)
-		{
-			if(!client->AutoPutLootInInventory(*inst, true, true, bag_item_data))
+		/* First add it to the looter - this will do the bag contents too */
+		if (lootitem->auto_loot) {
+			if (!client->AutoPutLootInInventory(*inst, true, true, bag_item_data))
 				client->PutLootInInventory(MainCursor, *inst, bag_item_data);
 		}
-		else
-		{
+		else {
 			client->PutLootInInventory(MainCursor, *inst, bag_item_data);
 		}
-		// Update any tasks that have an activity to loot this item.
-		if(RuleB(TaskSystem, EnableTaskSystem))
+
+		/* Update any tasks that have an activity to loot this item */
+		if (RuleB(TaskSystem, EnableTaskSystem))
 			client->UpdateTasksForItem(ActivityLoot, item->ID);
-		// now remove it from the corpse
-		if(item_data)
+
+		/* Remove it from Corpse */
+		if (item_data){
 			RemoveItem(item_data->lootslot);
-		// remove bag contents too
-		if (item->ItemClass == ItemClassContainer && (GetPKItem()!=-1 || GetPKItem()!=1))
-		{
-			for (int i = SUB_BEGIN; i < EmuConstants::ITEM_CONTAINER_SIZE; i++)
-			{
-				if (bag_item_data[i])
-				{
+			std::cout << "CORPSE DB ID: " << this->corpse_db_id << std::endl;
+			std::cout << "CORPSE EQUIP SLOT: " << item_data->equip_slot << std::endl;
+			std::cout << "ITEM SLOT: " << item->Slots << std::endl;
+			database.DeleteItemOffCharacterCorpse(this->corpse_db_id, item_data->equip_slot, item->ID);  
+		}
+
+		/* Remove Bag Contents */
+		if (item->ItemClass == ItemClassContainer && (GetPKItem() != -1 || GetPKItem() != 1)) {
+			for (int i = SUB_BEGIN; i < EmuConstants::ITEM_CONTAINER_SIZE; i++) {
+				if (bag_item_data[i]) {
 					RemoveItem(bag_item_data[i]);
+					std::cout << "CORPSE BAG DB ID: " << this->corpse_db_id << std::endl;
+					std::cout << "CORPSE BAG EQUIP SLOT: " << item_data->equip_slot << std::endl;
+					database.DeleteItemOffCharacterCorpse(this->corpse_db_id, item_data->equip_slot, item->ID);
 				}
 			}
 		}
 
-		if(GetPKItem()!=-1)
+		if (GetPKItem() != -1){
 			SetPKItem(0);
+		}
 
 		//now send messages to all interested parties
 
@@ -1218,8 +1164,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 		}
 		safe_delete_array(link);
 	}
-	else
-	{
+	else {
 		SendEndLootErrorPacket(client);
 		safe_delete(inst);
 		return;

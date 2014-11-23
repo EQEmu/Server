@@ -2582,38 +2582,6 @@ void Client::LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 
 	}
 }
 
-void Client::LogLoot(Client* player, Corpse* corpse, const Item_Struct* item){
-	char* logtext;
-	char itemid[100];
-	char itemname[100];
-	char coinloot[100];
-	if (item!=0){
-		memset(itemid,0,sizeof(itemid));
-		memset(itemname,0,sizeof(itemid));
-		itoa(item->ID,itemid,10);
-		sprintf(itemname,"%s",item->Name);
-		logtext=itemname;
-
-		strcat(logtext,"(");
-		strcat(logtext,itemid);
-		strcat(logtext,") Looted");
-		database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),corpse->orgname,"Looting Item",logtext,4);
-	}
-	else{
-		if ((corpse->GetPlatinum() + corpse->GetGold() + corpse->GetSilver() + corpse->GetCopper())>0) {
-			memset(coinloot,0,sizeof(coinloot));
-			sprintf(coinloot,"%i PP %i GP %i SP %i CP",corpse->GetPlatinum(),corpse->GetGold(),corpse->GetSilver(),corpse->GetCopper());
-			logtext=coinloot;
-			strcat(logtext," Looted");
-			if (corpse->GetPlatinum()>10000)
-				database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),corpse->orgname,"Excessive Loot!",logtext,9);
-			else
-				database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),corpse->orgname,"Looting Money",logtext,5);
-		}
-	}
-}
-
-
 bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 	EQApplicationPacket* outapp = 0;
 	if(!fail) {

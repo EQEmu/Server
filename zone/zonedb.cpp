@@ -3530,44 +3530,6 @@ uint32 ZoneDatabase::UpdateCharacterCorpse(uint32 db_id, uint32 char_id, const c
 	);
 	auto results = QueryDatabase(query);
 
-	query = StringFormat("DELETE FROM `character_corpse_items` WHERE `corpse_id` = %u", db_id);
-	results = QueryDatabase(query);
-
-	/* Dump Items from Inventory */
-	uint8 first_entry = 0;
-	for (unsigned int i = 0; i < dbpc->itemcount; i++) {
-		if (first_entry != 1){
-			query = StringFormat("REPLACE INTO `character_corpse_items` \n"
-				" (corpse_id, equip_slot, item_id, charges, aug_1, aug_2, aug_3, aug_4, aug_5, attuned) \n"
-				" VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, 0) \n",
-				db_id,
-				dbpc->items[i].equip_slot, 
-				dbpc->items[i].item_id,
-				dbpc->items[i].charges,
-				dbpc->items[i].aug_1,
-				dbpc->items[i].aug_2,
-				dbpc->items[i].aug_3,
-				dbpc->items[i].aug_4,
-				dbpc->items[i].aug_5
-			);
-			first_entry = 1;
-		}
-		else{
-			query = query + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, 0) \n",
-				db_id,
-				dbpc->items[i].equip_slot,
-				dbpc->items[i].item_id,
-				dbpc->items[i].charges,
-				dbpc->items[i].aug_1,
-				dbpc->items[i].aug_2,
-				dbpc->items[i].aug_3,
-				dbpc->items[i].aug_4,
-				dbpc->items[i].aug_5
-			);
-		}
-	}
-	results = QueryDatabase(query);
-
 	return db_id;
 }
 
@@ -4042,6 +4004,17 @@ bool ZoneDatabase::ClearCorpseItems(uint32 db_id){
 		return true;
 	}
 	return false;	
+}
+
+bool ZoneDatabase::DeleteItemOffCharacterCorpse(uint32 db_id, uint32 equip_slot, uint32 item_id){
+	std::string query = StringFormat("DELETE FROM `character_corpse_items` WHERE `corpse_id` = %u AND equip_slot = %u AND item_id = %u", db_id, equip_slot, item_id);
+	auto results = QueryDatabase(query);
+	std::cout << "QUERY: " << query << std::endl;
+	if (results.Success() && results.RowsAffected() != 0){
+		std::cout << "Item Delete Successfully" << std::endl;
+		return true;
+	}
+	return false;
 }
 
 bool ZoneDatabase::BuryCharacterCorpse(uint32 db_id) {
