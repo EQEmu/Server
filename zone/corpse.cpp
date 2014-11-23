@@ -65,23 +65,17 @@ void Corpse::SendLootReqErrorPacket(Client* client, uint8 response) {
 
 Corpse* Corpse::LoadFromDBData(uint32 in_dbid, uint32 in_charid, std::string in_charname, float in_x, float in_y, float in_z, float in_heading, std::string time_of_death, bool rezzed, bool was_at_graveyard)
 {
-
-	std::cout << "LoadFromDBData: 0 " << in_dbid << std::endl;
-	std::cout << "LoadFromDBData: 1 " << in_charid << std::endl;
-	std::cout << "LoadFromDBData: 2 " << in_charname << std::endl;
-	std::cout << "LoadFromDBData: 3 " << in_x << std::endl;
-	std::cout << "LoadFromDBData: 4 " << in_y << std::endl;
-	std::cout << "LoadFromDBData: 5 " << in_z << std::endl;
-
-	PlayerCorpse_Struct pcs;
-	database.LoadCharacterCorpseData(in_dbid, &pcs);
+	uint32 item_count = database.GetCharacterCorpseItemCount(in_dbid);
+	char *buffer = new char[sizeof(PlayerCorpse_Struct) + (item_count * sizeof(player_lootitem::ServerLootItem_Struct))];
+	PlayerCorpse_Struct *pcs = (PlayerCorpse_Struct*)buffer;
+	database.LoadCharacterCorpseData(in_dbid, pcs);
 
 	/* Load Items */
 	ItemList itemlist;
 	ServerLootItem_Struct* tmp = 0;
-	for (unsigned int i = 0; i < pcs.itemcount; i++) {
+	for (unsigned int i = 0; i < pcs->itemcount; i++) {
 		tmp = new ServerLootItem_Struct;
-		memcpy(tmp, &pcs.items[i], sizeof(player_lootitem::ServerLootItem_Struct));
+		memcpy(tmp, &pcs->items[i], sizeof(player_lootitem::ServerLootItem_Struct));
 		tmp->equip_slot = CorpseToServerSlot(tmp->equip_slot);
 		itemlist.push_back(tmp);
 	}
@@ -92,44 +86,56 @@ Corpse* Corpse::LoadFromDBData(uint32 in_dbid, uint32 in_charid, std::string in_
 		in_charid,			   // uint32 in_charid
 		in_charname.c_str(),   // char* in_charname
 		&itemlist,			   // ItemList* in_itemlist
-		pcs.copper,			   // uint32 in_copper
-		pcs.silver,			   // uint32 in_silver
-		pcs.gold,			   // uint32 in_gold
-		pcs.plat,			   // uint32 in_plat
+		pcs->copper,		   // uint32 in_copper
+		pcs->silver,		   // uint32 in_silver
+		pcs->gold,			   // uint32 in_gold
+		pcs->plat,			   // uint32 in_plat
 		in_x,				   // float in_x
 		in_y,				   // float in_y
 		in_z,				   // float in_z
 		in_heading,			   // float in_heading
-		pcs.size,			   // float in_size
-		pcs.gender,			   // uint8 in_gender
-		pcs.race,			   // uint16 in_race
-		pcs.class_,			   // uint8 in_class
-		pcs.deity,			   // uint8 in_deity
-		pcs.level,			   // uint8 in_level
-		pcs.texture,		   // uint8 in_texture
-		pcs.helmtexture,	   // uint8 in_helmtexture
-		pcs.exp,			   // uint32 in_rezexp
+		pcs->size,			   // float in_size
+		pcs->gender,		   // uint8 in_gender
+		pcs->race,			   // uint16 in_race
+		pcs->class_,		   // uint8 in_class
+		pcs->deity,			   // uint8 in_deity
+		pcs->level,			   // uint8 in_level
+		pcs->texture,		   // uint8 in_texture
+		pcs->helmtexture,	   // uint8 in_helmtexture
+		pcs->exp,			   // uint32 in_rezexp
 		was_at_graveyard	   // bool wasAtGraveyard
 	);
-	if (pcs.locked)
+	if (pcs->locked)
 		pc->Lock();
 
 	/* Load Item Tints */
-	memcpy(pc->item_tint, pcs.item_tint, sizeof(pc->item_tint));
-	
+	// memcpy(pc->item_tint, pcs->item_tint, sizeof(pc->item_tint));
+	pc->item_tint[0].color = pcs->item_tint[0].color;
+	pc->item_tint[1].color = pcs->item_tint[1].color;
+	pc->item_tint[2].color = pcs->item_tint[2].color;
+	pc->item_tint[3].color = pcs->item_tint[3].color;
+	pc->item_tint[4].color = pcs->item_tint[4].color;
+	pc->item_tint[5].color = pcs->item_tint[5].color;
+	pc->item_tint[6].color = pcs->item_tint[6].color;
+	pc->item_tint[7].color = pcs->item_tint[7].color;
+	pc->item_tint[8].color = pcs->item_tint[8].color;
+
+
 	/* Load Physical Appearance */
-	pc->haircolor = pcs.haircolor;
-	pc->beardcolor = pcs.beardcolor;
-	pc->eyecolor1 = pcs.eyecolor1;
-	pc->eyecolor2 = pcs.eyecolor2;
-	pc->hairstyle = pcs.hairstyle;
-	pc->luclinface = pcs.face;
-	pc->beard = pcs.beard;
-	pc->drakkin_heritage = pcs.drakkin_heritage;
-	pc->drakkin_tattoo = pcs.drakkin_tattoo;
-	pc->drakkin_details = pcs.drakkin_details;
+	pc->haircolor = pcs->haircolor;
+	pc->beardcolor = pcs->beardcolor;
+	pc->eyecolor1 = pcs->eyecolor1;
+	pc->eyecolor2 = pcs->eyecolor2;
+	pc->hairstyle = pcs->hairstyle;
+	pc->luclinface = pcs->face;
+	pc->beard = pcs->beard;
+	pc->drakkin_heritage = pcs->drakkin_heritage;
+	pc->drakkin_tattoo = pcs->drakkin_tattoo;
+	pc->drakkin_details = pcs->drakkin_details;
 	pc->IsRezzed(rezzed);
 	pc->become_npc = false;
+
+	safe_delete_array(pcs);
 
 	return pc;
 }
@@ -531,9 +537,6 @@ bool Corpse::Save() {
 	dbpc->drakkin_heritage = drakkin_heritage;
 	dbpc->drakkin_tattoo = drakkin_tattoo;
 	dbpc->drakkin_details = drakkin_details;
-
-	std::cout << "SLI1: " << sizeof(player_lootitem::ServerLootItem_Struct) << std::endl;
-	std::cout << "SLI2: " << sizeof(ServerLootItem_Struct) << std::endl;
 
 	uint32 x = 0;
 	ItemList::iterator cur, end;

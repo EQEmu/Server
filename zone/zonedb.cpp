@@ -3530,7 +3530,7 @@ uint32 ZoneDatabase::UpdateCharacterCorpse(uint32 db_id, uint32 char_id, const c
 	);
 	auto results = QueryDatabase(query);
 
-	query = StringFormat("DELETE FROM `character_corpse_items` WHERE `corpse_id` = %u");
+	query = StringFormat("DELETE FROM `character_corpse_items` WHERE `corpse_id` = %u", db_id);
 	results = QueryDatabase(query);
 
 	/* Dump Items from Inventory */
@@ -3736,6 +3736,18 @@ uint32 ZoneDatabase::GetCharacterCorpseID(uint32 char_id, uint8 corpse) {
 	return 0;
 }
 
+uint32 ZoneDatabase::GetCharacterCorpseItemCount(uint32 corpse_id){
+	std::string query = StringFormat("SELECT COUNT(*) FROM character_corpse_items WHERE `corpse_id` = %u",
+		corpse_id
+	);
+	auto results = QueryDatabase(query);
+	auto row = results.begin();
+	if (results.Success() && results.RowsAffected() != 0){
+		return atoi(row[0]);
+	}
+	return 0;
+}
+
 uint32 ZoneDatabase::GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slotid) {
 	Corpse* tmp = LoadCharacterCorpse(corpse_id);
 	uint32 itemid = 0;
@@ -3791,39 +3803,39 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 	auto results = QueryDatabase(query); 
 	uint16 i = 0;
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		pcs->locked = atoi(row[i]); i++;						// is_locked,
-		pcs->exp = atoi(row[i]); i++;							// exp,
-		pcs->size = atoi(row[i]); i++;							// size,
-		pcs->level = atoi(row[i]); i++;							// `level`,
-		pcs->race = atoi(row[i]); i++;							// race,
-		pcs->gender = atoi(row[i]); i++;						// gender,
-		pcs->class_ = atoi(row[i]); i++;						// class,
-		pcs->deity = atoi(row[i]); i++;							// deity,
-		pcs->texture = atoi(row[i]); i++;						// texture,
-		pcs->helmtexture = atoi(row[i]); i++;					// helm_texture,
-		pcs->copper = atoi(row[i]); i++;						// copper,
-		pcs->silver = atoi(row[i]); i++;						// silver,
-		pcs->gold = atoi(row[i]); i++;							// gold,
-		pcs->plat = atoi(row[i]); i++;							// platinum,
-		pcs->haircolor = atoi(row[i]); i++;						// hair_color,
-		pcs->beardcolor = atoi(row[i]); i++;					// beard_color,
-		pcs->eyecolor1 = atoi(row[i]); i++;						// eye_color_1,
-		pcs->eyecolor2 = atoi(row[i]); i++;						// eye_color_2,
-		pcs->hairstyle = atoi(row[i]); i++;						// hair_style,
-		pcs->face = atoi(row[i]); i++;							// face,
-		pcs->beard = atoi(row[i]); i++;							// beard,
-		pcs->drakkin_heritage = atoi(row[i]); i++;				// drakkin_heritage,
-		pcs->drakkin_tattoo = atoi(row[i]); i++;				// drakkin_tattoo,
-		pcs->drakkin_details = atoi(row[i]); i++;				// drakkin_details,
-		pcs->item_tint[0].color = atoi(row[i]); i++;			// wc_1,
-		pcs->item_tint[1].color = atoi(row[i]); i++;			// wc_2,
-		pcs->item_tint[2].color = atoi(row[i]); i++;			// wc_3,
-		pcs->item_tint[3].color = atoi(row[i]); i++;			// wc_4,
-		pcs->item_tint[4].color = atoi(row[i]); i++;			// wc_5,
-		pcs->item_tint[5].color = atoi(row[i]); i++;			// wc_6,
-		pcs->item_tint[6].color = atoi(row[i]); i++;			// wc_7,
-		pcs->item_tint[7].color = atoi(row[i]); i++;			// wc_8,
-		pcs->item_tint[8].color = atoi(row[i]); i++;			// wc_9
+		pcs->locked = atoi(row[i++]);						// is_locked,
+		pcs->exp = atoi(row[i++]);							// exp,
+		pcs->size = atoi(row[i++]);							// size,
+		pcs->level = atoi(row[i++]);						// `level`,
+		pcs->race = atoi(row[i++]);							// race,
+		pcs->gender = atoi(row[i++]);						// gender,
+		pcs->class_ = atoi(row[i++]);						// class,
+		pcs->deity = atoi(row[i++]);						// deity,
+		pcs->texture = atoi(row[i++]);						// texture,
+		pcs->helmtexture = atoi(row[i++]);					// helm_texture,
+		pcs->copper = atoi(row[i++]);						// copper,
+		pcs->silver = atoi(row[i++]);						// silver,
+		pcs->gold = atoi(row[i++]);							// gold,
+		pcs->plat = atoi(row[i++]);							// platinum,
+		pcs->haircolor = atoi(row[i++]);					// hair_color,
+		pcs->beardcolor = atoi(row[i++]);					// beard_color,
+		pcs->eyecolor1 = atoi(row[i++]);					// eye_color_1,
+		pcs->eyecolor2 = atoi(row[i++]);					// eye_color_2,
+		pcs->hairstyle = atoi(row[i++]);					// hair_style,
+		pcs->face = atoi(row[i++]);							// face,
+		pcs->beard = atoi(row[i++]);						// beard,
+		pcs->drakkin_heritage = atoi(row[i++]);				// drakkin_heritage,
+		pcs->drakkin_tattoo = atoi(row[i++]);				// drakkin_tattoo,
+		pcs->drakkin_details = atoi(row[i++]);				// drakkin_details,
+		pcs->item_tint[0].color = atoi(row[i++]);			// wc_1,
+		pcs->item_tint[1].color = atoi(row[i++]);			// wc_2,
+		pcs->item_tint[2].color = atoi(row[i++]);			// wc_3,
+		pcs->item_tint[3].color = atoi(row[i++]);			// wc_4,
+		pcs->item_tint[4].color = atoi(row[i++]);			// wc_5,
+		pcs->item_tint[5].color = atoi(row[i++]);			// wc_6,
+		pcs->item_tint[6].color = atoi(row[i++]);			// wc_7,
+		pcs->item_tint[7].color = atoi(row[i++]);			// wc_8,
+		pcs->item_tint[8].color = atoi(row[i++]);			// wc_9
 	}
 	query = StringFormat(
 		"SELECT                       \n"
@@ -3847,19 +3859,16 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 	
 	pcs->itemcount = results.RowCount();
 	uint16 r = 0;
-	// Allocate memory for items.
-	// pcs->items = reinterpret_cast<player_lootitem::ServerLootItem_Struct*>(new char[pcs->itemcount * sizeof(player_lootitem::ServerLootItem_Struct)]);
-
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		memset(&pcs->items[i], 0, sizeof (player_lootitem::ServerLootItem_Struct));
-		pcs->items[i].equip_slot = atoi(row[r]); r++;   // equip_slot,
-		pcs->items[i].item_id = atoi(row[r]); r++;		// item_id,
-		pcs->items[i].charges = atoi(row[r]); r++;		// charges,
-		pcs->items[i].aug_1 = atoi(row[r]); r++;		// aug_1,
-		pcs->items[i].aug_2 = atoi(row[r]); r++;		// aug_2,
-		pcs->items[i].aug_3 = atoi(row[r]); r++;		// aug_3,
-		pcs->items[i].aug_4 = atoi(row[r]); r++;		// aug_4,
-		pcs->items[i].aug_5 = atoi(row[r]); r++;		// aug_5,
+		pcs->items[i].equip_slot = atoi(row[r++]);		// equip_slot,
+		pcs->items[i].item_id = atoi(row[r++]); 		// item_id,
+		pcs->items[i].charges = atoi(row[r++]); 		// charges,
+		pcs->items[i].aug_1 = atoi(row[r++]); 			// aug_1,
+		pcs->items[i].aug_2 = atoi(row[r++]); 			// aug_2,
+		pcs->items[i].aug_3 = atoi(row[r++]); 			// aug_3,
+		pcs->items[i].aug_4 = atoi(row[r++]); 			// aug_4,
+		pcs->items[i].aug_5 = atoi(row[r++]); 			// aug_5,
 		r = 0;
 		i++;
 	}
@@ -3913,7 +3922,7 @@ bool ZoneDatabase::SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zone_id
 		"SELECT `id`, `charname`, `time_of_death`, `is_rezzed` FROM `character_corpses` WHERE `charid` = '%u'"
 		"ORDER BY time_of_death", 
 		char_id
-		);
+	);
 	results = QueryDatabase(query);
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
@@ -4026,19 +4035,30 @@ uint32 ZoneDatabase::GetFirstCorpseID(uint32 char_id) {
 	return 0;
 }
 
+bool ZoneDatabase::ClearCorpseItems(uint32 db_id){
+	std::string query = StringFormat("DELETE FROM `character_corpse_items` WHERE `corpse_id` = %u", db_id);
+	auto results = QueryDatabase(query);
+	if (results.Success() && results.RowsAffected() != 0){ 
+		return true;
+	}
+	return false;	
+}
+
 bool ZoneDatabase::BuryCharacterCorpse(uint32 db_id) {
-	std::string query = StringFormat("UPDATE `character_corpses` SET `is_buried` = 1 WHERE `id` = %d", db_id);
+	std::string query = StringFormat("UPDATE `character_corpses` SET `is_buried` = 1 WHERE `id` = %u", db_id);
 	auto results = QueryDatabase(query);
 	if (results.Success() && results.RowsAffected() != 0){
+		ClearCorpseItems(db_id);
 		return true;
 	}
 	return false;
 }
 
 bool ZoneDatabase::BuryAllCharacterCorpses(uint32 char_id) {
-	std::string query = StringFormat("UPDATE `character_corpses` SET `is_buried` = 1 WHERE `charid` = %d", char_id);
+	std::string query = StringFormat("SELECT `id` FROM `character_corpses` WHERE `charid` = %u", char_id);
 	auto results = QueryDatabase(query);
-	if (results.Success() && results.RowsAffected() != 0){
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		BuryCharacterCorpse(atoi(row[0]));
 		return true;
 	}
 	return false;
