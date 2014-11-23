@@ -3750,20 +3750,6 @@ uint32 ZoneDatabase::GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slotid) {
 bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct* pcs){
 	std::string query = StringFormat(
 		"SELECT           \n"
-		"id,              \n"
-		"charid,          \n"
-		"charname,        \n"
-		"zone_id,          \n"
-		"instance_id,      \n"
-		"x,               \n"
-		"y,               \n"
-		"z,               \n" 
-		"heading,         \n"
-		"`data`,          \n"
-		"time_of_death,     \n"
-		"is_rezzed,          \n"
-		"is_buried,       \n"
-		"was_at_graveyard,  \n"
 		"is_locked,       \n"
 		"exp,             \n"
 		"size,            \n"
@@ -3862,9 +3848,10 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 	pcs->itemcount = results.RowCount();
 	uint16 r = 0;
 	// Allocate memory for items.
-	pcs->items = reinterpret_cast<player_lootitem::ServerLootItem_Struct*>(new char[pcs->itemcount * sizeof(player_lootitem::ServerLootItem_Struct)]);
+	// pcs->items = reinterpret_cast<player_lootitem::ServerLootItem_Struct*>(new char[pcs->itemcount * sizeof(player_lootitem::ServerLootItem_Struct)]);
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
+		memset(&pcs->items[i], 0, sizeof (player_lootitem::ServerLootItem_Struct));
 		pcs->items[i].equip_slot = atoi(row[r]); r++;   // equip_slot,
 		pcs->items[i].item_id = atoi(row[r]); r++;		// item_id,
 		pcs->items[i].charges = atoi(row[r]); r++;		// charges,
@@ -4001,18 +3988,29 @@ bool ZoneDatabase::LoadCharacterCorpses(uint32 zone_id, uint16 instance_id) {
 	
 	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		entity_list.AddCorpse( 
+		std::cout << row[0] << std::endl;
+		std::cout << row[1] << std::endl;
+		std::cout << row[2] << std::endl;
+		std::cout << row[3] << std::endl;
+		std::cout << row[4] << std::endl;
+		std::cout << row[5] << std::endl;
+		std::cout << row[6] << std::endl; 
+		std::cout << row[7] << std::endl;
+		std::cout << row[8] << std::endl;
+		std::cout << row[9] << std::endl;
+
+		entity_list.AddCorpse(
 			 Corpse::LoadFromDBData(
 				atoi(row[0]), 		  // id					  uint32 in_dbid
 				atoi(row[1]), 		  // charid				  uint32 in_charid
-				row[2], 			  //					  PlayerCorpse_tSruct* pcs
+				row[2], 			  //					  char_name 
 				atof(row[3]),		  // x					  float in_x
 				atof(row[4]), 		  // y					  float in_y
 				atof(row[5]), 		  // z					  float in_z
 				atof(row[6]), 		  // heading			  float in_heading
 				row[7], 			  // time_of_death		  char* time_of_death
 				atoi(row[8]) == 1, 	  // is_rezzed			  bool rezzed
-				atoi(row[9]))		  
+				atoi(row[9]))
 		);
 	}
 

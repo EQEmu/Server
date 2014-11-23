@@ -63,10 +63,19 @@ void Corpse::SendLootReqErrorPacket(Client* client, uint8 response) {
 	safe_delete(outapp);
 }
 
-Corpse* Corpse::LoadFromDBData(uint32 in_dbid, uint32 in_charid, char* in_charname, float in_x, float in_y, float in_z, float in_heading, char* time_of_death, bool rezzed, bool was_at_graveyard) {
+Corpse* Corpse::LoadFromDBData(uint32 in_dbid, uint32 in_charid, std::string in_charname, float in_x, float in_y, float in_z, float in_heading, std::string time_of_death, bool rezzed, bool was_at_graveyard)
+{
+
+	std::cout << "LoadFromDBData: 0 " << in_dbid << std::endl;
+	std::cout << "LoadFromDBData: 1 " << in_charid << std::endl;
+	std::cout << "LoadFromDBData: 2 " << in_charname << std::endl;
+	std::cout << "LoadFromDBData: 3 " << in_x << std::endl;
+	std::cout << "LoadFromDBData: 4 " << in_y << std::endl;
+	std::cout << "LoadFromDBData: 5 " << in_z << std::endl;
+
 	PlayerCorpse_Struct pcs;
 	database.LoadCharacterCorpseData(in_dbid, &pcs);
-	
+
 	/* Load Items */
 	ItemList itemlist;
 	ServerLootItem_Struct* tmp = 0;
@@ -81,7 +90,7 @@ Corpse* Corpse::LoadFromDBData(uint32 in_dbid, uint32 in_charid, char* in_charna
 	Corpse* pc = new Corpse(
 		in_dbid,			   // uint32 in_dbid
 		in_charid,			   // uint32 in_charid
-		in_charname,		   // char* in_charname
+		in_charname.c_str(),   // char* in_charname
 		&itemlist,			   // ItemList* in_itemlist
 		pcs.copper,			   // uint32 in_copper
 		pcs.silver,			   // uint32 in_silver
@@ -412,7 +421,7 @@ std::list<uint32> Corpse::MoveItemToCorpse(Client *client, ItemInst *item, int16
 
 // To be called from LoadFromDBData
 // Mongrel: added see_invis and see_invis_undead
-Corpse::Corpse(uint32 in_dbid, uint32 in_charid, char* in_charname, ItemList* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, float in_x, float in_y, float in_z, float in_heading, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture,uint32 in_rezexp, bool wasAtGraveyard)
+Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, ItemList* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, float in_x, float in_y, float in_z, float in_heading, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture,uint32 in_rezexp, bool wasAtGraveyard)
  : Mob("Unnamed_Corpse","",0,0,in_gender, in_race, in_class, BT_Humanoid, in_deity, in_level,0, in_size, 0, in_heading, in_x, in_y, in_z,0,in_texture,in_helmtexture,
 	0,0,0,0,0,0,0,0,0,
 	0,0,0,0,0,0,0,0,0,0,0,0xff,
