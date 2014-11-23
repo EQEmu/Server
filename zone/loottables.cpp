@@ -195,13 +195,13 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 
 	item->item_id = item2->ID;
 	item->charges = charges;
-	item->aug1 = 0;
-	item->aug2 = 0;
-	item->aug3 = 0;
-	item->aug4 = 0;
-	item->aug5 = 0;
-	item->minlevel = minlevel;
-	item->maxlevel = maxlevel;
+	item->aug_1 = 0;
+	item->aug_2 = 0;
+	item->aug_3 = 0;
+	item->aug_4 = 0;
+	item->aug_5 = 0;
+	item->min_level = minlevel;
+	item->max_level = maxlevel;
 	if (equipit) {
 		uint8 eslot = 0xFF;
 		char newid[20];
@@ -339,7 +339,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		if (found) {
 			CalcBonuses(); // This is less than ideal for bulk adding of items
 		}
-		item->equipSlot = item2->Slots;
+		item->equip_slot = item2->Slots;
 	}
 
 	if(itemlist != nullptr)

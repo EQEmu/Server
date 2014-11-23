@@ -139,6 +139,8 @@ namespace player_lootitem {
 		uint32	aug_3;
 		uint32	aug_4;
 		uint32	aug_5;
+		uint8	min_level;		  // 
+		uint8	max_level;		  // 
 	};
 }
 
@@ -170,7 +172,8 @@ struct PlayerCorpse_Struct {
 	uint32 drakkin_heritage;
 	uint32 drakkin_tattoo;
 	uint32 drakkin_details;
-	player_lootitem::ServerLootItem_Struct	items[0];
+	player_lootitem::ServerLootItem_Struct*	items[0];
+	//std::list<player_lootitem::ServerLootItem_Struct*> items;
 };
 
 struct Door {

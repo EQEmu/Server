@@ -3858,20 +3858,24 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 	);
 	results = QueryDatabase(query);
 	i = 0; 
+	
+	pcs->itemcount = results.RowCount();
 	uint16 r = 0;
+	// Allocate memory for items.
+	pcs->items = reinterpret_cast<player_lootitem::ServerLootItem_Struct*>(new char[pcs->itemcount * sizeof(player_lootitem::ServerLootItem_Struct)]);
+
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		pcs->items[i].equip_slot = atoi(row[r]); r++;   // equip_slot,
-		pcs->items[i].item_id = atoi(row[r]); r++;	   // item_id,
-		pcs->items[i].charges = atoi(row[r]); r++;	   // charges,
-		pcs->items[i].aug_1 = atoi(row[r]); r++;		   // aug_1,
-		pcs->items[i].aug_2 = atoi(row[r]); r++;		   // aug_2,
-		pcs->items[i].aug_3 = atoi(row[r]); r++;		   // aug_3,
-		pcs->items[i].aug_4 = atoi(row[r]); r++;		   // aug_4,
-		pcs->items[i].aug_5 = atoi(row[r]); r++;		   // aug_5,
-		r = 0; 
+		pcs->items[i].item_id = atoi(row[r]); r++;		// item_id,
+		pcs->items[i].charges = atoi(row[r]); r++;		// charges,
+		pcs->items[i].aug_1 = atoi(row[r]); r++;		// aug_1,
+		pcs->items[i].aug_2 = atoi(row[r]); r++;		// aug_2,
+		pcs->items[i].aug_3 = atoi(row[r]); r++;		// aug_3,
+		pcs->items[i].aug_4 = atoi(row[r]); r++;		// aug_4,
+		pcs->items[i].aug_5 = atoi(row[r]); r++;		// aug_5,
+		r = 0;
 		i++;
 	}
-	pcs->itemcount = i;
 	return true;
 }
 

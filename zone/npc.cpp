@@ -429,7 +429,7 @@ ServerLootItem_Struct* NPC::GetItem(int slot_id) {
 	end = itemlist.end();
 	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* item = *cur;
-		if (item->equipSlot == slot_id) {
+		if (item->equip_slot == slot_id) {
 			return item;
 		}
 	}
@@ -446,7 +446,7 @@ void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot) {
 			itemlist.erase(cur);
 			return;
 		}
-		else if (item->item_id == item_id && item->equipSlot == slot && quantity >= 1) {
+		else if (item->item_id == item_id && item->equip_slot == slot && quantity >= 1) {
 			//std::cout<<"NPC::RemoveItem"<<" equipSlot:"<<iterator.GetData()->equipSlot<<" quantity:"<< quantity<<std::endl; // iterator undefined [CODEBUG]
 			if (item->charges <= quantity)
 				itemlist.erase(cur);
@@ -471,9 +471,9 @@ void NPC::CheckMinMaxLevel(Mob *them)
 		if(!(*cur))
 			return;
 
-		if(themlevel < (*cur)->minlevel || themlevel > (*cur)->maxlevel)
+		if(themlevel < (*cur)->min_level || themlevel > (*cur)->max_level)
 		{
-			material = Inventory::CalcMaterialFromSlot((*cur)->equipSlot);
+			material = Inventory::CalcMaterialFromSlot((*cur)->equip_slot);
 			if(material != 0xFF)
 				SendWearChange(material);
 
@@ -508,15 +508,15 @@ void NPC::QueryLoot(Client* to) {
 		if (item)
 			if (to->GetClientVersion() >= EQClientRoF)
 			{
-				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%06X0000000000000000000000000000000000000000000000000%s%c",(*cur)->minlevel, (*cur)->maxlevel, (int) item->ID,0x12, item->ID, item->Name, 0x12);
+				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%06X0000000000000000000000000000000000000000000000000%s%c",(*cur)->min_level, (*cur)->max_level, (int) item->ID,0x12, item->ID, item->Name, 0x12);
 			}
 			else if (to->GetClientVersion() >= EQClientSoF)
 			{
-				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%06X00000000000000000000000000000000000000000000%s%c",(*cur)->minlevel, (*cur)->maxlevel, (int) item->ID,0x12, item->ID, item->Name, 0x12);
+				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%06X00000000000000000000000000000000000000000000%s%c",(*cur)->min_level, (*cur)->max_level, (int) item->ID,0x12, item->ID, item->Name, 0x12);
 			}
 			else
 			{
-				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%06X000000000000000000000000000000000000000%s%c",(*cur)->minlevel, (*cur)->maxlevel, (int) item->ID,0x12, item->ID, item->Name, 0x12);
+				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%06X000000000000000000000000000000000000000%s%c",(*cur)->min_level, (*cur)->max_level, (int) item->ID,0x12, item->ID, item->Name, 0x12);
 			}
 		else
 			LogFile->write(EQEMuLog::Error, "Database error, invalid item");
