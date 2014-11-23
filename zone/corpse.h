@@ -30,13 +30,14 @@ class Corpse : public Mob
 {
 public:
 	static void SendEndLootErrorPacket(Client* client);
-	static void SendLootReqErrorPacket(Client* client, uint8 response = 2); 
-	static Corpse* LoadFromDBData(uint32 in_corpseid, uint32 in_charid, char* in_charname, PlayerCorpse_Struct* pcs, float in_x, float in_y, float in_z, float in_heading, char* time_of_death, bool rezzed = false, bool wasAtGraveyard = false);
+	static void SendLootReqErrorPacket(Client* client, uint8 response = 2);  
+	
 
 	Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NPCType** in_npctypedata, uint32 in_decaytime = 600000);
 	Corpse(Client* client, int32 in_rezexp);
 	Corpse(uint32 in_corpseid, uint32 in_charid, char* in_charname, ItemList* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, float in_x, float in_y, float in_z, float in_heading, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture,uint32 in_rezexp, bool wasAtGraveyard = false);
 	~Corpse();
+	static Corpse*		LoadFromDBData(uint32 in_dbid, uint32 in_charid, char* in_charname, float in_x, float in_y, float in_z, float in_heading, char* time_of_death, bool rezzed, bool was_at_graveyard);
 
 	//abstract virtual function implementations requird by base abstract class
 	virtual bool	Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill) { return true; }

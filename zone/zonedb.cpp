@@ -3884,9 +3884,18 @@ Corpse* ZoneDatabase::SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_z
 	auto results = QueryDatabase(query);
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		PlayerCorpse_Struct pcs;
-		database.LoadCharacterCorpseData(atoi(row[0]), &pcs);
-		NewCorpse = Corpse::LoadFromDBData(atoi(row[0]), char_id, row[1], &pcs, dest_x, dest_y, dest_z, dest_heading, row[2], atoi(row[3]) == 1, false);
+		NewCorpse = Corpse::LoadFromDBData(
+			atoi(row[0]), 			 // uint32 in_dbid
+			char_id, 				 // uint32 in_charid
+			row[1], 				 // char* in_charname
+			dest_x, 				 // float in_x
+			dest_y, 				 // float in_y
+			dest_z, 				 // float in_z
+			dest_heading, 			 // float in_heading
+			row[2], 				 // char* time_of_death
+			atoi(row[3]) == 1, 		 // bool rezzed
+			false					 // bool was_at_graveyard
+		);
 		if (NewCorpse) { 
 			entity_list.AddCorpse(NewCorpse);
 			NewCorpse->SetDecayTimer(RuleI(Character, CorpseDecayTimeMS));
@@ -3917,18 +3926,17 @@ bool ZoneDatabase::SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zone_id
 	results = QueryDatabase(query);
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		PlayerCorpse_Struct pcs;
-		database.LoadCharacterCorpseData(atoi(row[0]), &pcs);
-		NewCorpse = Corpse::LoadFromDBData(atoi(row[0]),
+		NewCorpse = Corpse::LoadFromDBData(
+			atoi(row[0]),
 			char_id,
 			row[1],
-			&pcs,
 			dest_x,
 			dest_y,
 			dest_z,
 			dest_heading,
 			row[2],
-			atoi(row[3]) == 1, false);
+			atoi(row[3]) == 1,
+			false);
 		if (NewCorpse) {
 			entity_list.AddCorpse(NewCorpse);
 			NewCorpse->SetDecayTimer(RuleI(Character, CorpseDecayTimeMS));
@@ -3963,18 +3971,15 @@ Corpse* ZoneDatabase::LoadCharacterCorpse(uint32 player_corpse_id) {
 	);
 	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		PlayerCorpse_Struct pcs;
-		database.LoadCharacterCorpseData(atoi(row[0]), &pcs);
 		NewCorpse = Corpse::LoadFromDBData(
 				atoi(row[0]), 		 // id					  uint32 in_dbid
 				atoi(row[1]), 		 // charid				  uint32 in_charid
-				row[2], 			 // charname			  char* in_charname
-				&pcs, 				 //					  PlayerCorpse_Struct* pcs
+				row[2], 			 //	char_name
 				atof(row[3]), 		 // x					  float in_x
-				atof(row[4]),		 // y					  float in_y
+				atof(row[4]), 		 // y					  float in_y
 				atof(row[5]),		 // z					  float in_z
-				atof(row[6]),		 // heading			  float in_heading
-				row[7], 			 // time_of_death		  char* time_of_death
+				atof(row[6]),		 // heading				  float in_heading
+				row[7],				 // time_of_death		  char* time_of_death
 				atoi(row[8]) == 1, 	 // is_rezzed			  bool rezzed
 				atoi(row[9])		 // was_at_graveyard	  bool was_at_graveyard
 			);
@@ -3992,22 +3997,18 @@ bool ZoneDatabase::LoadCharacterCorpses(uint32 zone_id, uint16 instance_id) {
 	
 	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		PlayerCorpse_Struct pcs;
-		database.LoadCharacterCorpseData(atoi(row[0]), &pcs); 
-		entity_list.AddCorpse(
+		entity_list.AddCorpse( 
 			 Corpse::LoadFromDBData(
 				atoi(row[0]), 		  // id					  uint32 in_dbid
 				atoi(row[1]), 		  // charid				  uint32 in_charid
-				row[2], 			  // charname			  char* in_charname
-				&pcs,				  //					  PlayerCorpse_tSruct* pcs
-				atof(row[3]), 		  // x					  float in_x
+				row[2], 			  //					  PlayerCorpse_tSruct* pcs
+				atof(row[3]),		  // x					  float in_x
 				atof(row[4]), 		  // y					  float in_y
 				atof(row[5]), 		  // z					  float in_z
 				atof(row[6]), 		  // heading			  float in_heading
 				row[7], 			  // time_of_death		  char* time_of_death
 				atoi(row[8]) == 1, 	  // is_rezzed			  bool rezzed
-				atoi(row[9]) 
-			)		  
+				atoi(row[9]))		  
 		);
 	}
 

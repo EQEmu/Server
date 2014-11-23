@@ -63,36 +63,62 @@ void Corpse::SendLootReqErrorPacket(Client* client, uint8 response) {
 	safe_delete(outapp);
 }
 
-Corpse* Corpse::LoadFromDBData(uint32 in_dbid, uint32 in_charid, char* in_charname, PlayerCorpse_Struct* pcs, float in_x, float in_y, float in_z, float in_heading, char* time_of_death, bool rezzed, bool was_at_graveyard) {
+Corpse* Corpse::LoadFromDBData(uint32 in_dbid, uint32 in_charid, char* in_charname, float in_x, float in_y, float in_z, float in_heading, char* time_of_death, bool rezzed, bool was_at_graveyard) {
+	PlayerCorpse_Struct pcs;
+	database.LoadCharacterCorpseData(in_dbid, &pcs);
+	
 	/* Load Items */
 	ItemList itemlist;
 	ServerLootItem_Struct* tmp = 0;
-	for (unsigned int i = 0; i < pcs->itemcount; i++) {
+	for (unsigned int i = 0; i < pcs.itemcount; i++) {
 		tmp = new ServerLootItem_Struct;
-		memcpy(tmp, &pcs->items[i], sizeof(player_lootitem::ServerLootItem_Struct));
+		memcpy(tmp, &pcs.items[i], sizeof(player_lootitem::ServerLootItem_Struct));
 		tmp->equipSlot = CorpseToServerSlot(tmp->equipSlot);
 		itemlist.push_back(tmp);
 	}
 
 	/* Create Corpse Entity */
-	Corpse* pc = new Corpse(in_dbid, in_charid, in_charname, &itemlist, pcs->copper, pcs->silver, pcs->gold, pcs->plat, in_x, in_y, in_z, in_heading, pcs->size, pcs->gender, pcs->race, pcs->class_, pcs->deity, pcs->level, pcs->texture, pcs->helmtexture, pcs->exp, was_at_graveyard);
-	if (pcs->locked)
+	Corpse* pc = new Corpse(
+		in_dbid,
+		in_charid,
+		in_charname,
+		&itemlist,
+		pcs.copper,
+		pcs.silver,
+		pcs.gold,
+		pcs.plat,
+		in_x,
+		in_y,
+		in_z,
+		in_heading,
+		pcs.size,
+		pcs.gender,
+		pcs.race,
+		pcs.class_,
+		pcs.deity,
+		pcs.level,
+		pcs.texture,
+		pcs.helmtexture,
+		pcs.exp,
+		was_at_graveyard
+		);
+	if (pcs.locked)
 		pc->Lock();
 
 	/* Load Item Tints */
-	memcpy(pc->item_tint, pcs->item_tint, sizeof(pc->item_tint));
+	memcpy(pc->item_tint, pcs.item_tint, sizeof(pc->item_tint));
 	
 	/* Load Physical Appearance */
-	pc->haircolor = pcs->haircolor;
-	pc->beardcolor = pcs->beardcolor;
-	pc->eyecolor1 = pcs->eyecolor1;
-	pc->eyecolor2 = pcs->eyecolor2;
-	pc->hairstyle = pcs->hairstyle;
-	pc->luclinface = pcs->face;
-	pc->beard = pcs->beard;
-	pc->drakkin_heritage = pcs->drakkin_heritage;
-	pc->drakkin_tattoo = pcs->drakkin_tattoo;
-	pc->drakkin_details = pcs->drakkin_details;
+	pc->haircolor = pcs.haircolor;
+	pc->beardcolor = pcs.beardcolor;
+	pc->eyecolor1 = pcs.eyecolor1;
+	pc->eyecolor2 = pcs.eyecolor2;
+	pc->hairstyle = pcs.hairstyle;
+	pc->luclinface = pcs.face;
+	pc->beard = pcs.beard;
+	pc->drakkin_heritage = pcs.drakkin_heritage;
+	pc->drakkin_tattoo = pcs.drakkin_tattoo;
+	pc->drakkin_details = pcs.drakkin_details;
 	pc->IsRezzed(rezzed);
 	pc->become_npc = false;
 
