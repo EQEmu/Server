@@ -1915,7 +1915,7 @@ const LootDrop_Struct* SharedDatabase::GetLootDrop(uint32 lootdrop_id) {
 
 void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* message) {
 	std::string query = StringFormat("SELECT `inspect_message` FROM `character_inspect_messages` WHERE `id` = %u LIMIT 1", character_id);
-	auto results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "SharedDatabase::LoadCharacterInspectMessage", query);
+	auto results = QueryDatabase(query); 
 	auto row = results.begin();
 	memcpy(message, "", sizeof(InspectMessage_Struct));
 	for (auto row = results.begin(); row != results.end(); ++row) {
@@ -1925,7 +1925,7 @@ void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMes
 
 void SharedDatabase::SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* message) {
 	std::string query = StringFormat("REPLACE INTO `character_inspect_messages` (id, inspect_message) VALUES (%u, '%s')", character_id, EscapeString(message->text).c_str());
-	auto results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "SharedDatabase::SaveCharacterInspectMessage", query);
+	auto results = QueryDatabase(query); 
 }
 
 void SharedDatabase::GetBotInspectMessage(uint32 botid, InspectMessage_Struct* message) {

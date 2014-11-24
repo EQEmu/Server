@@ -52,21 +52,21 @@ public:
 	void			LoadPlayerCorpseDecayTime(uint32 dbid);
 
 	bool			IsCorpse()			const { return true; }
-	bool			IsPlayerCorpse()	const { return p_PlayerCorpse; }
-	bool			IsNPCCorpse()		const { return !p_PlayerCorpse; }
+	bool			IsPlayerCorpse()	const { return is_player_corpse; }
+	bool			IsNPCCorpse()		const { return !is_player_corpse; }
 	bool			IsBecomeNPCCorpse() const { return become_npc; }
 	bool			Process();
 	bool			Save();
-	uint32			GetCharID()			{ return charid; }
-	uint32			SetCharID(uint32 iCharID) { if (IsPlayerCorpse()) { return (charid = iCharID); } return 0xFFFFFFFF; };
+	uint32			GetCharID()			{ return char_id; }
+	uint32			SetCharID(uint32 iCharID) { if (IsPlayerCorpse()) { return (char_id = iCharID); } return 0xFFFFFFFF; };
 	uint32			GetDecayTime()		{ if (!corpse_decay_timer.Enabled()) return 0xFFFFFFFF; else return corpse_decay_timer.GetRemainingTime(); }
 	uint32			GetResTime()		{ if (!corpse_res_timer.Enabled()) return 0; else return corpse_res_timer.GetRemainingTime(); }
 	void			CalcCorpseName();
-	inline void		Lock()			{ pLocked = true; }
-	inline void		UnLock()		{ pLocked = false; }
-	inline bool		IsLocked()		{ return pLocked; }
-	inline void		ResetLooter()	{ BeingLootedBy = 0xFFFFFFFF; }
-	inline bool		IsBeingLooted() { return (BeingLootedBy != 0xFFFFFFFF); }
+	inline void		Lock()			{ is_locked = true; }
+	inline void		UnLock()		{ is_locked = false; }
+	inline bool		IsLocked()		{ return is_locked; }
+	inline void		ResetLooter()	{ being_looted_by = 0xFFFFFFFF; }
+	inline bool		IsBeingLooted() { return (being_looted_by != 0xFFFFFFFF); }
 	inline uint32	GetDBID()		{ return corpse_db_id; }
 	inline char*	GetOwnerName()	{ return orgname;}
 
@@ -98,8 +98,8 @@ public:
 	bool	Summon(Client* client, bool spell, bool CheckDistance);
 	void	CastRezz(uint16 spellid, Mob* Caster);
 	void	CompleteRezz();
-	void	SetPKItem(int32 id) { pkitem = id; }
-	int32	GetPKItem() { return pkitem; }
+	void	SetPKItem(int32 id) { player_kill_item = id; }
+	int32	GetPKItem() { return player_kill_item; }
 	bool	CanMobLoot(int charid);
 	void	AllowMobLoot(Mob *them, uint8 slot);
 	void	AddLooter(Mob *who);
@@ -120,24 +120,25 @@ protected:
 	std::list<uint32> MoveItemToCorpse(Client *client, ItemInst *item, int16 equipslot);
 
 private:
-	bool		p_PlayerCorpse;	bool		pIsChanged;
-	bool		pLocked;
-	int32		pkitem;
+	bool		is_player_corpse;	
+	bool		is_corpse_changed;
+	bool		is_locked;
+	int32		player_kill_item;
 	uint32		corpse_db_id;
-	uint32		charid;
+	uint32		char_id;
 	ItemList	itemlist;
 	uint32		copper;
 	uint32		silver;
 	uint32		gold;
 	uint32		platinum;
-	bool		p_depop;
-	uint32		BeingLootedBy;
+	bool		player_corpse_depop;
+	uint32		being_looted_by;
 	uint32		rezzexp;
 	bool		rez;
 	bool		can_rez;
 	bool		become_npc;
 	int			looters[MAX_LOOTERS]; // People allowed to loot the corpse, character id
-	Timer		corpse_decay_timer;
+	Timer		corpse_decay_timer; 
 	Timer		corpse_res_timer;
 	Timer		corpse_delay_timer;
 	Timer		corpse_graveyard_timer;

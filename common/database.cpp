@@ -323,20 +323,6 @@ bool Database::ReserveName(uint32 account_id, char* name) {
 	return true;
 }
 
-bool Database::ThrowDBError(std::string ErrorMessage, std::string query_title, std::string query){  
-	if (ErrorMessage != ""){ 
-		std::cout << "\nERROR " << query_title << ": " << ErrorMessage << "\n\n" << query << "\n" << std::endl; 
-
-		/* Write to log file */
-		std::ofstream log("eqemu_query_error_log.txt", std::ios_base::app | std::ios_base::out);
-		log << "ERROR " << query_title << ": " << ErrorMessage << "\n" << query << "\n";
-		log.close();
-
-		return true; 
-	}
-	return false;
-}
-
 /*
 	Delete the character with the name "name"
 	returns false on failure, true otherwise
@@ -355,39 +341,39 @@ bool Database::DeleteCharacter(char *name) {
 	for (auto row = results.begin(); row != results.end(); ++row) { charid = atoi(row[0]); }
 	if (charid <= 0){ std::cerr << "Database::DeleteCharacter :: Character not found, stopping delete...\n"; return false; }
 
-	query = StringFormat("DELETE FROM `quest_globals` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);			  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_activities` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);	  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_enabledtasks` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);	  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `completed_tasks` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);		  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `friends` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `mail` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);					  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `timers` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `inventory` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `char_recipe_list` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);		  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `adventure_stats` WHERE `player_id` ='%d'", charid); results = QueryDatabase(query);		  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `zone_flags` WHERE `charID` = '%d'", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `titles` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `player_titlesets` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);		  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `keyring` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `faction_values` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);		  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `instance_list_player` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);	  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_data` WHERE `id` = '%d'", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_skills` WHERE `id` = %u", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_languages` WHERE `id` = %u", charid); results = QueryDatabase(query);			  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_bind` WHERE `id` = %u", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_alternate_abilities` WHERE `id` = %u", charid); results = QueryDatabase(query);  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_currency` WHERE `id` = %u", charid); results = QueryDatabase(query);			  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_data` WHERE `id` = %u", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_spells` WHERE `id` = %u", charid); results = QueryDatabase(query);				  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_memmed_spells` WHERE `id` = %u", charid); results = QueryDatabase(query);		  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_disciplines` WHERE `id` = %u", charid); results = QueryDatabase(query);		  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_material` WHERE `id` = %u", charid); results = QueryDatabase(query);			  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_tribute` WHERE `id` = %u", charid); results = QueryDatabase(query);			  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_bandolier` WHERE `id` = %u", charid); results = QueryDatabase(query);			  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_potionbelt` WHERE `id` = %u", charid); results = QueryDatabase(query);			  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_inspect_messages` WHERE `id` = %u", charid); results = QueryDatabase(query);	  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_leadership_abilities` WHERE `id` = %u", charid); results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
-	query = StringFormat("DELETE FROM `character_alt_currency` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);  ThrowDBError(results.ErrorMessage(), "Database::DeleteCharacter", query);
+	query = StringFormat("DELETE FROM `quest_globals` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);			  
+	query = StringFormat("DELETE FROM `character_activities` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);	  
+	query = StringFormat("DELETE FROM `character_enabledtasks` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);	  
+	query = StringFormat("DELETE FROM `completed_tasks` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);		  
+	query = StringFormat("DELETE FROM `friends` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);				  
+	query = StringFormat("DELETE FROM `mail` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);					  
+	query = StringFormat("DELETE FROM `timers` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);				  
+	query = StringFormat("DELETE FROM `inventory` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);				  
+	query = StringFormat("DELETE FROM `char_recipe_list` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);		  
+	query = StringFormat("DELETE FROM `adventure_stats` WHERE `player_id` ='%d'", charid); results = QueryDatabase(query);		  
+	query = StringFormat("DELETE FROM `zone_flags` WHERE `charID` = '%d'", charid); results = QueryDatabase(query);				  
+	query = StringFormat("DELETE FROM `titles` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);				  
+	query = StringFormat("DELETE FROM `player_titlesets` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);		  
+	query = StringFormat("DELETE FROM `keyring` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);				  
+	query = StringFormat("DELETE FROM `faction_values` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);		  
+	query = StringFormat("DELETE FROM `instance_list_player` WHERE `charid` = '%d'", charid); results = QueryDatabase(query);	  
+	query = StringFormat("DELETE FROM `character_data` WHERE `id` = '%d'", charid); results = QueryDatabase(query);				  
+	query = StringFormat("DELETE FROM `character_skills` WHERE `id` = %u", charid); results = QueryDatabase(query);				  
+	query = StringFormat("DELETE FROM `character_languages` WHERE `id` = %u", charid); results = QueryDatabase(query);			  
+	query = StringFormat("DELETE FROM `character_bind` WHERE `id` = %u", charid); results = QueryDatabase(query);				  
+	query = StringFormat("DELETE FROM `character_alternate_abilities` WHERE `id` = %u", charid); results = QueryDatabase(query);  
+	query = StringFormat("DELETE FROM `character_currency` WHERE `id` = %u", charid); results = QueryDatabase(query);			  
+	query = StringFormat("DELETE FROM `character_data` WHERE `id` = %u", charid); results = QueryDatabase(query);				  
+	query = StringFormat("DELETE FROM `character_spells` WHERE `id` = %u", charid); results = QueryDatabase(query);				  
+	query = StringFormat("DELETE FROM `character_memmed_spells` WHERE `id` = %u", charid); results = QueryDatabase(query);		  
+	query = StringFormat("DELETE FROM `character_disciplines` WHERE `id` = %u", charid); results = QueryDatabase(query);		  
+	query = StringFormat("DELETE FROM `character_material` WHERE `id` = %u", charid); results = QueryDatabase(query);			  
+	query = StringFormat("DELETE FROM `character_tribute` WHERE `id` = %u", charid); results = QueryDatabase(query);			  
+	query = StringFormat("DELETE FROM `character_bandolier` WHERE `id` = %u", charid); results = QueryDatabase(query);			  
+	query = StringFormat("DELETE FROM `character_potionbelt` WHERE `id` = %u", charid); results = QueryDatabase(query);			  
+	query = StringFormat("DELETE FROM `character_inspect_messages` WHERE `id` = %u", charid); results = QueryDatabase(query);	  
+	query = StringFormat("DELETE FROM `character_leadership_abilities` WHERE `id` = %u", charid); results = QueryDatabase(query); 
+	query = StringFormat("DELETE FROM `character_alt_currency` WHERE `char_id` = '%d'", charid); results = QueryDatabase(query);  
 #ifdef BOTS																														 
 	query = StringFormat("DELETE FROM `guild_members` WHERE `char_id` = '%d' AND GetMobTypeById(%i) = 'C'", charid);
 #else																															 
@@ -675,14 +661,13 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 		pp->RestTimer					  // " RestTimer)                 "
 	);
 	auto results = QueryDatabase(query);
-	ThrowDBError(results.ErrorMessage(), "Database::SaveCharacterCreate Character Data", query); 
 	/* Save Bind Points */
 	query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
 		" VALUES (%u, %u, %u, %f, %f, %f, %f, %i), "
 		"(%u, %u, %u, %f, %f, %f, %f, %i)",
 		character_id, pp->binds[0].zoneId, 0, pp->binds[0].x, pp->binds[0].y, pp->binds[0].z, pp->binds[0].heading, 0,
 		character_id, pp->binds[4].zoneId, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading, 1
-	); results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "Database::SaveCharacterCreate Bind Point", query);
+	); results = QueryDatabase(query); 
 
 	/* Save Skills */
 	int firstquery = 0;
@@ -697,7 +682,7 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 			}
 		}
 	}
-	results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "Database::SaveCharacterCreate Starting Skills", query);
+	results = QueryDatabase(query); 
 
 	/* Save Language */
 	firstquery = 0;
@@ -712,7 +697,7 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 			}
 		}
 	}
-	results = QueryDatabase(query); ThrowDBError(results.ErrorMessage(), "Database::SaveCharacterCreate Starting Languages", query);
+	results = QueryDatabase(query); 
 
 	return true;
 }
@@ -1064,7 +1049,6 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;		"
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_currency` */
@@ -1096,7 +1080,6 @@ bool Database::CheckDatabaseConversions() {
 				" ) ENGINE=InnoDB DEFAULT CHARSET=latin1;             "
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_alternate_abilities` */
@@ -1115,7 +1098,6 @@ bool Database::CheckDatabaseConversions() {
 				" ) ENGINE = InnoDB DEFAULT CHARSET = latin1;		"
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_bind` */
@@ -1138,7 +1120,6 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;" 
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_languages` */
@@ -1156,7 +1137,6 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_skills` */
@@ -1174,7 +1154,6 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			); 
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_spells` */
@@ -1192,7 +1171,6 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		} 
 		/* Check for table `character_memmed_spells` */
@@ -1210,7 +1188,6 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n"); 
 		}
 		/* Check for table `character_disciplines` */
@@ -1228,7 +1205,6 @@ bool Database::CheckDatabaseConversions() {
 				" ) ENGINE = InnoDB DEFAULT CHARSET = latin1;  " 
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_material` */
@@ -1250,7 +1226,6 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;"
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		} 
 		/* Check for table `character_tribute` */
@@ -1267,7 +1242,6 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_bandolier` */
@@ -1288,7 +1262,6 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;	"
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_potionbelt` */
@@ -1307,7 +1280,6 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_potionbelt` */
@@ -1324,7 +1296,6 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 				);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_leadership_abilities` */
@@ -1342,7 +1313,6 @@ bool Database::CheckDatabaseConversions() {
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1; "
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Table create", rquery);
 			printf(" done...\n");
 		}
 
@@ -1409,7 +1379,6 @@ bool Database::CheckDatabaseConversions() {
 					EscapeString(inspectmessage).c_str()
 					);
 				auto results = QueryDatabase(rquery);
-				ThrowDBError(results.ErrorMessage(), "Character Inspect Message Convert", rquery);
 			}
 
 			/* Run Currency Convert */
@@ -1437,7 +1406,6 @@ bool Database::CheckDatabaseConversions() {
 				pp->careerEbonCrystals
 			);
 			auto results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Character Currency Convert", rquery);
 
 			if (pp->tribute_time_remaining < 0 || pp->tribute_time_remaining == 4294967295){ pp->tribute_time_remaining = 0; }
 
@@ -1743,7 +1711,6 @@ bool Database::CheckDatabaseConversions() {
 				e_pp->expended_aa
 			);
 			results = QueryDatabase(rquery);
-			ThrowDBError(results.ErrorMessage(), "Character Data Convert", rquery);
 			
 
 			/*
@@ -1764,14 +1731,14 @@ bool Database::CheckDatabaseConversions() {
 					}
 				}
 			}
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "AA Convert", rquery); } 
+			if (rquery != ""){ results = QueryDatabase(rquery); } 
 			
 			/* Run Bind Home Convert */
 			if(pp->binds[4].zoneId < 999 && !_ISNAN_(pp->binds[4].x) && !_ISNAN_(pp->binds[4].y) && !_ISNAN_(pp->binds[4].z) && !_ISNAN_(pp->binds[4].heading)) {
 				rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
 					" VALUES (%u, %u, %u, %f, %f, %f, %f, 1)",
 					character_id, pp->binds[4].zoneId, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading);
-				if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Bind Home Convert", rquery); }  
+				if (rquery != ""){ results = QueryDatabase(rquery); }  
 			}
 
 			/* Run Bind Convert */
@@ -1779,7 +1746,7 @@ bool Database::CheckDatabaseConversions() {
 				rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
 					" VALUES (%u, %u, %u, %f, %f, %f, %f, 0)",
 					character_id, pp->binds[0].zoneId, 0, pp->binds[0].x, pp->binds[0].y, pp->binds[0].z, pp->binds[0].heading);
-				if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Bind Convert", rquery); }  
+				if (rquery != ""){ results = QueryDatabase(rquery);  }  
 			}
 			/* Run Language Convert */
 			first_entry = 0; rquery = "";
@@ -1792,7 +1759,7 @@ bool Database::CheckDatabaseConversions() {
 					rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->languages[i]);
 				}
 			}
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Language Convert", rquery);  } 
+			if (rquery != ""){ results = QueryDatabase(rquery);  } 
 			/* Run Skill Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i < MAX_PP_SKILL; i++){
@@ -1804,7 +1771,7 @@ bool Database::CheckDatabaseConversions() {
 					rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->skills[i]);
 				}
 			}
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Skills Convert Convert", rquery);  } 
+			if (rquery != ""){ results = QueryDatabase(rquery);  } 
 			/* Run Spell Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i < MAX_PP_REF_SPELLBOOK; i++){
@@ -1817,7 +1784,7 @@ bool Database::CheckDatabaseConversions() {
 				}
 			}
 			// std::cout << rquery << "\n";
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Spell Convert", rquery);  }  
+			if (rquery != ""){ results = QueryDatabase(rquery); }  
 			/* Run Max Memmed Spell Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i < MAX_PP_REF_MEMSPELL; i++){
@@ -1829,7 +1796,7 @@ bool Database::CheckDatabaseConversions() {
 					rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->mem_spells[i]);
 				}
 			}
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Memmed Spells Convert", rquery);  }  
+			if (rquery != ""){ results = QueryDatabase(rquery); }  
 			/* Run Discipline Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i < MAX_PP_DISCIPLINES; i++){
@@ -1841,7 +1808,7 @@ bool Database::CheckDatabaseConversions() {
 					rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->disciplines.values[i]);
 				}
 			}
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Discipline Convert", rquery);  } 
+			if (rquery != ""){ results = QueryDatabase(rquery); } 
 			/* Run Material Color Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i < _MaterialCount; i++){
@@ -1853,7 +1820,7 @@ bool Database::CheckDatabaseConversions() {
 					rquery = rquery + StringFormat(", (%u, %u, %u, %u, %u, %u, %u)", character_id, i, pp->item_tint[i].rgb.blue, pp->item_tint[i].rgb.green, pp->item_tint[i].rgb.red, pp->item_tint[i].rgb.use_tint, pp->item_tint[i].color);
 				}
 			}
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Material Convert", rquery);  } 
+			if (rquery != ""){ results = QueryDatabase(rquery); } 
 			/* Run Tribute Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i < EmuConstants::TRIBUTE_SIZE; i++){
@@ -1865,7 +1832,7 @@ bool Database::CheckDatabaseConversions() {
 					rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
 				}
 			}
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Tribute Convert", rquery);  }
+			if (rquery != ""){ results = QueryDatabase(rquery);  }
 			/* Run Bandolier Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i < EmuConstants::BANDOLIERS_COUNT; i++){
@@ -1881,7 +1848,7 @@ bool Database::CheckDatabaseConversions() {
 					}
 				}
 			}
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Bandolier Convert", rquery);  } 
+			if (rquery != ""){ results = QueryDatabase(rquery); } 
 			/* Run Potion Belt Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i < EmuConstants::POTION_BELT_SIZE; i++){
@@ -1894,7 +1861,7 @@ bool Database::CheckDatabaseConversions() {
 
 				}
 			}
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Potion Belt Convert", rquery);  } 
+			if (rquery != ""){ results = QueryDatabase(rquery); } 
 			/* Run Leadership AA Convert */
 			first_entry = 0; rquery = "";
 			for (i = 0; i < MAX_LEADERSHIP_AA_ARRAY; i++){
@@ -1906,7 +1873,7 @@ bool Database::CheckDatabaseConversions() {
 					rquery = rquery + StringFormat(", (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);
 				}
 			} 
-			if (rquery != ""){ results = QueryDatabase(rquery); ThrowDBError(results.ErrorMessage(), "Character Leadership AA Convert", rquery);  }
+			if (rquery != ""){ results = QueryDatabase(rquery); }
 		}
 	}
 	if (runconvert == 1){
@@ -1940,9 +1907,6 @@ bool Database::CheckDatabaseConversions() {
 			std::cin.ignore(1);
 		}
 	}
-	else{
-		ThrowDBError(results.ErrorMessage(), "Bot View Discovery", rquery);
-	}
 
 	if (runbotsconvert == 1){
 		printf("Running bot views/function database conversion... \n");
@@ -1950,7 +1914,6 @@ bool Database::CheckDatabaseConversions() {
 		/* Update view `vwbotcharactermobs` */
 		rquery = StringFormat("DROP VIEW `vwBotCharacterMobs`;");
 		results = QueryDatabase(rquery);
-		ThrowDBError(results.ErrorMessage(), "Drop View `vwBotCharacterMobs`", rquery);
 
 		rquery = StringFormat(
 			"CREATE VIEW `vwBotCharacterMobs` AS\n"
@@ -1973,13 +1936,11 @@ bool Database::CheckDatabaseConversions() {
 			"FROM bots AS b;"
 			);
 		results = QueryDatabase(rquery);
-		ThrowDBError(results.ErrorMessage(), "Create View `vwBotCharacterMobs`", rquery);
 
 
 		/* Update function `GetMobType` */
 		rquery = StringFormat("DROP FUNCTION IF EXISTS `GetMobType`;");
 		results = QueryDatabase(rquery);
-		ThrowDBError(results.ErrorMessage(), "Drop Function `GetMobType`", rquery);
 
 		rquery = StringFormat(
 			"CREATE FUNCTION `GetMobType` (mobname VARCHAR(64)) RETURNS CHAR(1)\n"
@@ -1998,13 +1959,11 @@ bool Database::CheckDatabaseConversions() {
 			"END"
 			);
 		results = QueryDatabase(rquery);
-		ThrowDBError(results.ErrorMessage(), "Create Function `GetMobType`", rquery);
 
 
 		/* Update view `vwgroups` */
 		rquery = StringFormat("DROP VIEW IF EXISTS `vwGroups`;");
 		results = QueryDatabase(rquery);
-		ThrowDBError(results.ErrorMessage(), "Drop View `vwGroups`", rquery);
 
 		rquery = StringFormat(
 			"CREATE VIEW `vwGroups` AS\n"
@@ -2018,13 +1977,11 @@ bool Database::CheckDatabaseConversions() {
 			"LEFT JOIN `bots` AS b ON g.`name` = b.`Name`;"
 			);
 		results = QueryDatabase(rquery);
-		ThrowDBError(results.ErrorMessage(), "Create View `vwGroups`", rquery);
 
 
 		/* Update view `vwbotgroups` */
 		rquery = StringFormat("DROP VIEW IF EXISTS `vwBotGroups`;");
 		results = QueryDatabase(rquery);
-		ThrowDBError(results.ErrorMessage(), "Drop View `vwBotGroups`", rquery);
 
 		rquery = StringFormat(
 			"CREATE VIEW `vwBotGroups` AS\n"
@@ -2040,13 +1997,11 @@ bool Database::CheckDatabaseConversions() {
 			"ORDER BY b.`BotOwnerCharacterId`, g.`BotGroupName`;"
 			);
 		results = QueryDatabase(rquery);
-		ThrowDBError(results.ErrorMessage(), "Create View `vwBotGroups`", rquery);
 
 
 		/* Update view `vwguildmembers` */
 		rquery = StringFormat("DROP VIEW IF EXISTS `vwGuildMembers`;");
 		results = QueryDatabase(rquery);
-		ThrowDBError(results.ErrorMessage(), "Drop View `vwGuildMembers`", rquery);
 
 		rquery = StringFormat(
 			"CREATE VIEW `vwGuildMembers` AS\n"
@@ -2075,7 +2030,6 @@ bool Database::CheckDatabaseConversions() {
 			"FROM `botguildmembers` AS bm;"
 			);
 		results = QueryDatabase(rquery);
-		ThrowDBError(results.ErrorMessage(), "Create View `vwGuildMembers`", rquery);
 	}
 
 	if (runbotsconvert == 1){
@@ -2204,7 +2158,7 @@ bool Database::CheckDatabaseConversions() {
 						dbpc->item_tint[8].color,
 						atoi(row2[0])
 						);
-					if (scquery != ""){ auto sc_results = QueryDatabase(scquery); ThrowDBError(sc_results.ErrorMessage(), "Corpse Convert: Base Data", scquery); }
+					if (scquery != ""){ auto sc_results = QueryDatabase(scquery); }
 
 					first_entry = 0;
 					scquery = "";
@@ -2240,7 +2194,7 @@ bool Database::CheckDatabaseConversions() {
 								);
 						}
 					}
-					if (scquery != ""){ auto sc_results = QueryDatabase(scquery); ThrowDBError(sc_results.ErrorMessage(), "Corpse Convert: SOF: Items", scquery); }
+					if (scquery != ""){ auto sc_results = QueryDatabase(scquery); }
 				}
 				else{
 					/* Classic Converter */
@@ -2308,7 +2262,7 @@ bool Database::CheckDatabaseConversions() {
 						dbpc_c->item_tint[8].color,
 						atoi(row2[0])
 						);
-					if (scquery != ""){ auto sc_results = QueryDatabase(scquery); ThrowDBError(sc_results.ErrorMessage(), "Corpse Convert: Legacy :: Base Data", scquery); }
+					if (scquery != ""){ auto sc_results = QueryDatabase(scquery);  }
 
 					first_entry = 0;
 					scquery = "";
@@ -2345,7 +2299,7 @@ bool Database::CheckDatabaseConversions() {
 								);
 						}
 					}
-					if (scquery != ""){ auto sc_results = QueryDatabase(scquery); ThrowDBError(sc_results.ErrorMessage(), "Corpse Convert: Legacy : Items", scquery); }
+					if (scquery != ""){ auto sc_results = QueryDatabase(scquery); }
 				}
 			}
 		}

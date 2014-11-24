@@ -180,7 +180,6 @@ public:
 	Database(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
 	bool Connect(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
 	~Database();
-	bool	ThrowDBError(std::string ErrorMessage, std::string query_title, std::string query);
 
 
 	/*

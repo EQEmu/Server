@@ -1237,7 +1237,6 @@ bool ZoneDatabase::SaveCharacterBindPoint(uint32 character_id, uint32 zone_id, u
 	if (!results.RowsAffected()) {
 		LogFile->write(EQEMuLog::Debug, "ERROR Bind Home Save: %s. %s", results.ErrorMessage().c_str(), query.c_str());
 	}
-	ThrowDBError(results.ErrorMessage(), "ZoneDatabase::SaveCharacterBindPoint", query);
 	return true;
 }
 
@@ -1248,14 +1247,12 @@ bool ZoneDatabase::SaveCharacterMaterialColor(uint32 character_id, uint32 slot_i
 
 	std::string query = StringFormat("REPLACE INTO `character_material` (id, slot, red, green, blue, color, use_tint) VALUES (%u, %u, %u, %u, %u, %u, 255)", character_id, slot_id, red, green, blue, color); auto results = QueryDatabase(query);
 	LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterMaterialColor for character ID: %i, slot_id: %u color: %u done", character_id, slot_id, color);
-	ThrowDBError(results.ErrorMessage(), "ZoneDatabase::SaveCharacterMaterialColor", query);
 	return true;
 }
 
 bool ZoneDatabase::SaveCharacterSkill(uint32 character_id, uint32 skill_id, uint32 value){
 	std::string query = StringFormat("REPLACE INTO `character_skills` (id, skill_id, value) VALUES (%u, %u, %u)", character_id, skill_id, value); auto results = QueryDatabase(query);
 	LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterSkill for character ID: %i, skill_id:%u value:%u done", character_id, skill_id, value);
-	ThrowDBError(results.ErrorMessage(), "ZoneDatabase::SaveCharacterSkill", query);
 	return true;
 }
 
@@ -1263,7 +1260,6 @@ bool ZoneDatabase::SaveCharacterDisc(uint32 character_id, uint32 slot_id, uint32
 	std::string query = StringFormat("REPLACE INTO `character_disciplines` (id, slot_id, disc_id) VALUES (%u, %u, %u)", character_id, slot_id, disc_id); 
 	auto results = QueryDatabase(query);
 	LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterDisc for character ID: %i, slot:%u disc_id:%u done", character_id, slot_id, disc_id);
-	ThrowDBError(results.ErrorMessage(), "ZoneDatabase::SaveCharacterDisc", query);
 	return true; 
 }
 
@@ -1286,7 +1282,6 @@ bool ZoneDatabase::SaveCharacterBandolier(uint32 character_id, uint8 bandolier_i
 	DoEscapeString(bandolier_name_esc, bandolier_name, strlen(bandolier_name));
 	std::string query = StringFormat("REPLACE INTO `character_bandolier` (id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name) VALUES (%u, %u, %u, %u, %u,'%s')", character_id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name_esc); 
 	auto results = QueryDatabase(query);
-	ThrowDBError(results.ErrorMessage(), "ZoneDatabase::SaveCharacterBandolier", query);
 	LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterBandolier for character ID: %i, bandolier_id: %u, bandolier_slot: %u item_id: %u, icon:%u band_name:%s  done", character_id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name);
 	if (!results.RowsAffected()){ std::cout << "ERROR Bandolier Save: " << results.ErrorMessage() << "\n\n" << query << "\n" << std::endl; }
 	return true;
@@ -1295,7 +1290,6 @@ bool ZoneDatabase::SaveCharacterBandolier(uint32 character_id, uint8 bandolier_i
 bool ZoneDatabase::SaveCharacterPotionBelt(uint32 character_id, uint8 potion_id, uint32 item_id, uint32 icon) {
 	std::string query = StringFormat("REPLACE INTO `character_potionbelt` (id, potion_id, item_id, icon) VALUES (%u, %u, %u, %u)", character_id, potion_id, item_id, icon);
 	auto results = QueryDatabase(query);
-	ThrowDBError(results.ErrorMessage(), "ZoneDatabase::SaveCharacterPotionBelt", query); 
 	if (!results.RowsAffected()){ std::cout << "ERROR Potionbelt Save: " << results.ErrorMessage() << "\n\n" << query << "\n" << std::endl; }
 	return true;
 }
@@ -1312,7 +1306,6 @@ bool ZoneDatabase::SaveCharacterLeadershipAA(uint32 character_id, PlayerProfile_
 		}
 	}
 	auto results = QueryDatabase(query);
-	ThrowDBError(results.ErrorMessage(), "ZoneDatabase::SaveCharacterLeadershipAA", query);
 	return true;
 }
 
@@ -1604,7 +1597,6 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 		m_epp->expended_aa
 	);
 	auto results = database.QueryDatabase(query);
-	ThrowDBError(results.ErrorMessage(), "ZoneDatabase:SaveCharacterData", query);
 	LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterData %i, done... Took %f seconds", character_id, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 	return true;
 }
@@ -1646,7 +1638,6 @@ bool ZoneDatabase::SaveCharacterCurrency(uint32 character_id, PlayerProfile_Stru
 		pp->currentEbonCrystals,
 		pp->careerEbonCrystals);
 	auto results = database.QueryDatabase(query); 
-	ThrowDBError(results.ErrorMessage(), "ZoneDatabase::SaveCharacterCurrency", query);
 	LogFile->write(EQEMuLog::Debug, "Saving Currency for character ID: %i, done", character_id); 
 	return true;
 }
@@ -1656,7 +1647,6 @@ bool ZoneDatabase::SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 cur
 		" VALUES (%u, %u, %u)",
 		character_id, aa_id, current_level);
 	auto results = QueryDatabase(rquery);
-	ThrowDBError(results.ErrorMessage(), "ZoneDatabase::SaveCharacterAA", rquery);
 	LogFile->write(EQEMuLog::Debug, "Saving AA for character ID: %u, aa_id: %u current_level: %u", character_id, aa_id, current_level);
 	return true;
 }
@@ -3441,6 +3431,7 @@ uint32 ZoneDatabase::SendCharacterCorpseToGraveyard(uint32 dbid, uint32 zone_id,
 	}
 	return dbid;
 }
+
 uint32 ZoneDatabase::UpdateCharacterCorpse(uint32 db_id, uint32 char_id, const char* char_name, uint32 zone_id, uint16 instance_id, PlayerCorpse_Struct* dbpc, float x, float y, float z, float heading, bool is_rezzed) {
 	std::string query = StringFormat("UPDATE `character_corpses` SET \n"
 		"`charname` =		  '%s',\n"
@@ -3692,7 +3683,7 @@ uint32 ZoneDatabase::GetCharacterCorpseID(uint32 char_id, uint8 corpse) {
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		for (int i = 0; i < corpse; i++) {
-			return atoi(row[0]);
+			return atoll(row[0]);
 		}
 	}
 	return 0;
@@ -3778,8 +3769,8 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 		pcs->helmtexture = atoi(row[i++]);					// helm_texture,
 		pcs->copper = atoll(row[i++]);						// copper,
 		pcs->silver = atoll(row[i++]);						// silver,
-		pcs->gold = atoll(row[i++]);							// gold,
-		pcs->plat = atoll(row[i++]);							// platinum,
+		pcs->gold = atoll(row[i++]);						// gold,
+		pcs->plat = atoll(row[i++]);						// platinum,
 		pcs->haircolor = atoi(row[i++]);					// hair_color,
 		pcs->beardcolor = atoi(row[i++]);					// beard_color,
 		pcs->eyecolor1 = atoi(row[i++]);					// eye_color_1,
@@ -3787,7 +3778,7 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 		pcs->hairstyle = atoi(row[i++]);					// hair_style,
 		pcs->face = atoi(row[i++]);							// face,
 		pcs->beard = atoi(row[i++]);						// beard,
-		pcs->drakkin_heritage = atoll(row[i++]);				// drakkin_heritage,
+		pcs->drakkin_heritage = atoll(row[i++]);			// drakkin_heritage,
 		pcs->drakkin_tattoo = atoll(row[i++]);				// drakkin_tattoo,
 		pcs->drakkin_details = atoll(row[i++]);				// drakkin_details,
 		pcs->item_tint[0].color = atoll(row[i++]);			// wc_1,
@@ -3826,7 +3817,7 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		memset(&pcs->items[i], 0, sizeof (player_lootitem::ServerLootItem_Struct));
 		pcs->items[i].equip_slot = atoi(row[r++]);		// equip_slot,
-		pcs->items[i].item_id = atoi(row[r++]); 		// item_id,
+		pcs->items[i].item_id = atoll(row[r++]); 		// item_id,
 		pcs->items[i].charges = atoi(row[r++]); 		// charges,
 		pcs->items[i].aug_1 = atoi(row[r++]); 			// aug_1,
 		pcs->items[i].aug_2 = atoi(row[r++]); 			// aug_2,
@@ -3836,6 +3827,7 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 		r = 0;
 		i++;
 	}
+
 	return true;
 }
 
@@ -3849,7 +3841,7 @@ Corpse* ZoneDatabase::SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_z
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		NewCorpse = Corpse::LoadFromDBData(
-			atoi(row[0]), 			 // uint32 in_dbid
+			atoll(row[0]), 			 // uint32 in_dbid
 			char_id, 				 // uint32 in_charid
 			row[1], 				 // char* in_charname
 			dest_x, 				 // float in_x
@@ -3891,7 +3883,7 @@ bool ZoneDatabase::SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zone_id
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		NewCorpse = Corpse::LoadFromDBData(
-			atoi(row[0]),
+			atoll(row[0]),
 			char_id,
 			row[1],
 			dest_x,
@@ -3936,8 +3928,8 @@ Corpse* ZoneDatabase::LoadCharacterCorpse(uint32 player_corpse_id) {
 	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		NewCorpse = Corpse::LoadFromDBData(
-				atoi(row[0]), 		 // id					  uint32 in_dbid
-				atoi(row[1]), 		 // charid				  uint32 in_charid
+				atoll(row[0]), 		 // id					  uint32 in_dbid
+				atoll(row[1]),		 // charid				  uint32 in_charid
 				row[2], 			 //	char_name
 				atof(row[3]), 		 // x					  float in_x
 				atof(row[4]), 		 // y					  float in_y
@@ -3954,28 +3946,30 @@ Corpse* ZoneDatabase::LoadCharacterCorpse(uint32 player_corpse_id) {
 
 bool ZoneDatabase::LoadCharacterCorpses(uint32 zone_id, uint16 instance_id) {
 	std::string query; 
-	if (!RuleB(Zone, EnableShadowrest))
-		query = StringFormat( "SELECT id, charid, charname, x, y, z, heading, time_of_death, is_rezzed, was_at_graveyard FROM character_corpses WHERE zone_id='%u' AND instance_id='%u'", zone_id, instance_id);
-	else
+	if (!RuleB(Zone, EnableShadowrest)){
+		query = StringFormat("SELECT id, charid, charname, x, y, z, heading, time_of_death, is_rezzed, was_at_graveyard FROM character_corpses WHERE zone_id='%u' AND instance_id='%u'", zone_id, instance_id);
+	}
+	else{
 		query = StringFormat("SELECT id, charid, charname, x, y, z, heading, time_of_death, is_rezzed, 0 as was_at_graveyard FROM character_corpses WHERE zone_id='%u' AND instance_id='%u' AND is_buried=0", zone_id, instance_id);
-	
+	}
+
 	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		std::cout << row[0] << std::endl;
-		std::cout << row[1] << std::endl;
-		std::cout << row[2] << std::endl;
-		std::cout << row[3] << std::endl;
-		std::cout << row[4] << std::endl;
-		std::cout << row[5] << std::endl;
-		std::cout << row[6] << std::endl; 
-		std::cout << row[7] << std::endl;
-		std::cout << row[8] << std::endl;
-		std::cout << row[9] << std::endl;
+		// std::cout << row[0] << std::endl;
+		// std::cout << row[1] << std::endl;
+		// std::cout << row[2] << std::endl;
+		// std::cout << row[3] << std::endl;
+		// std::cout << row[4] << std::endl;
+		// std::cout << row[5] << std::endl;
+		// std::cout << row[6] << std::endl; 
+		// std::cout << row[7] << std::endl;
+		// std::cout << row[8] << std::endl;
+		// std::cout << row[9] << std::endl;
 
 		entity_list.AddCorpse(
 			 Corpse::LoadFromDBData(
-				atoi(row[0]), 		  // id					  uint32 in_dbid
-				atoi(row[1]), 		  // charid				  uint32 in_charid
+				atoll(row[0]), 		  // id					  uint32 in_dbid
+				atoll(row[1]), 		  // charid				  uint32 in_charid
 				row[2], 			  //					  char_name 
 				atof(row[3]),		  // x					  float in_x
 				atof(row[4]), 		  // y					  float in_y
