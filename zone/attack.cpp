@@ -2131,7 +2131,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 		give_exp_client = give_exp->CastToClient();
 
 	bool IsLdonTreasure = (this->GetClass() == LDON_TREASURE);
-	if (give_exp_client && !IsCorpse() && MerchantType == 0)
+	if (give_exp_client && !IsCorpse())
 	{
 		Group *kg = entity_list.GetGroupByClient(give_exp_client);
 		Raid *kr = entity_list.GetRaidByClient(give_exp_client);
@@ -2141,15 +2141,19 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 
 		if(kr)
 		{
-			if(!IsLdonTreasure) {
+			if(!IsLdonTreasure && MerchantType == 0) {
 				kr->SplitExp((finalxp), this);
 				if(killerMob && (kr->IsRaidMember(killerMob->GetName()) || kr->IsRaidMember(killerMob->GetUltimateOwner()->GetName())))
 					killerMob->TrySpellOnKill(killed_level,spell);
 			}
 			/* Send the EVENT_KILLED_MERIT event for all raid members */
 			for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
-				if (kr->members[i].member != nullptr) { // If Group Member is Client
-					parse->EventNPC(EVENT_KILLED_MERIT, this, kr->members[i].member, "killed", 0);
+				if (kr->members[i].member != nullptr && kr->members[i].member->IsClient()) { // If Group Member is Client
+					Client *c = kr->members[i].member;
+					parse->EventNPC(EVENT_KILLED_MERIT, this, c, "killed", 0);
+
+					if(RuleB(NPC, EnableMeritBasedFaction))
+						c->SetFactionLevel(c->CharacterID(), GetNPCFactionID(), c->GetBaseClass(), c->GetBaseRace(), c->GetDeity());
 
 					mod_npc_killed_merit(kr->members[i].member);
 
@@ -2168,7 +2172,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 				QS->s1.ZoneID = this->GetZoneID();
 				QS->s1.Type = 2; // Raid Fight
 				for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
-					if (kr->members[i].member != nullptr) { // If Group Member is Client
+					if (kr->members[i].member != nullptr && kr->members[i].member->IsClient()) { // If Group Member is Client
 						Client *c = kr->members[i].member;
 						QS->Chars[PlayerCount].char_id = c->CharacterID();
 						PlayerCount++;
@@ -2182,7 +2186,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 		}
 		else if (give_exp_client->IsGrouped() && kg != nullptr)
 		{
-			if(!IsLdonTreasure) {
+			if(!IsLdonTreasure && MerchantType == 0) {
 				kg->SplitExp((finalxp), this);
 				if(killerMob && (kg->IsGroupMember(killerMob->GetName()) || kg->IsGroupMember(killerMob->GetUltimateOwner()->GetName())))
 					killerMob->TrySpellOnKill(killed_level,spell);
@@ -2193,6 +2197,9 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 				if (kg->members[i] != nullptr && kg->members[i]->IsClient()) { // If Group Member is Client
 					Client *c = kg->members[i]->CastToClient();
 					parse->EventNPC(EVENT_KILLED_MERIT, this, c, "killed", 0);
+
+					if(RuleB(NPC, EnableMeritBasedFaction))
+						c->SetFactionLevel(c->CharacterID(), GetNPCFactionID(), c->GetBaseClass(), c->GetBaseRace(), c->GetDeity());
 
 					mod_npc_killed_merit(c);
 
@@ -2225,14 +2232,13 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 		}
 		else
 		{
-			if(!IsLdonTreasure) {
+			if(!IsLdonTreasure && MerchantType == 0) {
 				int conlevel = give_exp->GetLevelCon(GetLevel());
 				if (conlevel != CON_GREEN)
 				{
-					if(GetOwner() && GetOwner()->IsClient()){
-					}
-					else {
-						give_exp_client->AddEXP((finalxp), conlevel); // Pyro: Comment this if NPC death crashes zone
+					if(!GetOwner() || (GetOwner() && !GetOwner()->IsClient()))
+					{
+						give_exp_client->AddEXP((finalxp), conlevel);
 						if(killerMob && (killerMob->GetID() == give_exp_client->GetID() || killerMob->GetUltimateOwner()->GetID() == give_exp_client->GetID()))
 							killerMob->TrySpellOnKill(killed_level,spell);
 					}
@@ -2240,6 +2246,10 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 			}
 			 /* Send the EVENT_KILLED_MERIT event */
 			parse->EventNPC(EVENT_KILLED_MERIT, this, give_exp_client, "killed", 0);
+
+			if(RuleB(NPC, EnableMeritBasedFaction))
+				give_exp_client->SetFactionLevel(give_exp_client->CharacterID(), GetNPCFactionID(), give_exp_client->GetBaseClass(), 
+					give_exp_client->GetBaseRace(), give_exp_client->GetDeity());
 
 			mod_npc_killed_merit(give_exp_client);
 
@@ -2264,7 +2274,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	}
 
 	//do faction hits even if we are a merchant, so long as a player killed us
-	if(give_exp_client)
+	if(give_exp_client && !RuleB(NPC, EnableMeritBasedFaction))
 		hate_list.DoFactionHits(GetNPCFactionID());
 
 	if (!HasOwner() && !IsMerc() && class_ != MERCHANT && class_ != ADVENTUREMERCHANT && !GetSwarmInfo()

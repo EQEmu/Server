@@ -437,6 +437,7 @@ RULE_BOOL ( NPC, SmartLastFightingDelayMoving, true)
 RULE_BOOL ( NPC, ReturnNonQuestNoDropItems, false)	// Returns NO DROP items on NPCs that don't have an EVENT_TRADE sub in their script
 RULE_INT ( NPC, StartEnrageValue, 9) // % HP that an NPC will begin to enrage
 RULE_BOOL ( NPC, LiveLikeEnrage, false) // If set to true then only player controlled pets will enrage
+RULE_BOOL ( NPC, EnableMeritBasedFaction, false) // If set to true, faction will given in the same way as experience (solo/group/raid)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY ( Aggro )
