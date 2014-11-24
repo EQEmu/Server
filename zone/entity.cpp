@@ -3652,7 +3652,8 @@ void EntityList::AddTempPetsToHateList(Mob *owner, Mob* other, bool bFrenzy)
 		NPC* n = it->second;
 		if (n->GetSwarmInfo()) {
 			if (n->GetSwarmInfo()->owner_id == owner->GetID()) {
-				n->CastToNPC()->hate_list.Add(other, 0, 0, bFrenzy);
+				if (!n->GetSpecialAbility(IMMUNE_AGGRO))
+					n->hate_list.Add(other, 0, 0, bFrenzy);
 			}
 		}
 		++it;
