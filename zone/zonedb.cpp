@@ -3320,115 +3320,50 @@ bool ZoneDatabase::GetFactionIdsForNPC(uint32 nfl_id, std::list<struct NPCFactio
 	return true;
 }
 
-/* 
-	Corpse Queries
-*/
+/*  Corpse Queries */
 
 bool ZoneDatabase::DeleteGraveyard(uint32 zone_id, uint32 graveyard_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = new char[256];
-	uint32 query_length = 0;
-	uint32 affected_rows = 0;
+	std::string query = StringFormat( "UPDATE `zone` SET `graveyard_id` = 0 WHERE `zone_idnumber` = %u AND `version` = 0", zone_id);
+	auto results = QueryDatabase(query);
 
-	query_length = sprintf(query, "UPDATE zone SET graveyard_id=0 WHERE zone_idnumber=%u AND version=0", zone_id);
+	query = StringFormat("DELETE FROM `graveyard` WHERE `id` = %u",  graveyard_id);
+	auto results2 = QueryDatabase(query);
 
-	if (!RunQuery(query, query_length, errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
-		std::cerr << "Error1 in DeleteGraveyard query " << errbuf << std::endl;
-		return false;
+	if (results.Success() && results2.Success()){
+		return true;
 	}
-
-	if (affected_rows == 0) {
-		std::cerr << "Error2 in DeleteGraveyard query: affected_rows = 0" << std::endl;
-		return false;
-	}
-
-	query_length = sprintf(query, "DELETE FROM graveyard WHERE id=%u", graveyard_id);
-
-	if (!RunQuery(query, query_length, errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
-		std::cerr << "Error3 in DeleteGraveyard query " << errbuf << std::endl;
-		return false;
-	}
-	safe_delete_array(query);
-
-	if (affected_rows == 0) {
-		std::cerr << "Error4 in DeleteGraveyard query: affected_rows = 0" << std::endl;
-		return false;
-	}
-
-	return true;
+	
+	return false;
 }
+
 uint32 ZoneDatabase::AddGraveyardIDToZone(uint32 zone_id, uint32 graveyard_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = new char[256];
-	char* end = query;
-	uint32 affected_rows = 0;
-
-	end += sprintf(end, "UPDATE zone SET graveyard_id=%u WHERE zone_idnumber=%u AND version=0", graveyard_id, zone_id);
-
-	if (!RunQuery(query, (uint32)(end - query), errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
-		std::cerr << "Error1 in AddGraveyardIDToZone query " << errbuf << std::endl;
-		return 0;
-	}
-	safe_delete_array(query);
-
-	if (affected_rows == 0) {
-		std::cerr << "Error2 in AddGraveyardIDToZone query: affected_rows = 0" << std::endl;
-		return 0;
-	}
-
+	std::string query = StringFormat(
+		"UPDATE `zone` SET `graveyard_id` = %u WHERE `zone_idnumber` = %u AND `version` = 0", 
+		graveyard_id, zone_id
+	);
+	auto results = QueryDatabase(query);
 	return zone_id;
 }
+
 uint32 ZoneDatabase::CreateGraveyardRecord(uint32 graveyard_zone_id, float graveyard_x, float graveyard_y, float graveyard_z, float graveyard_heading) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = new char[256];
-	char* end = query;
-	uint32 affected_rows = 0;
-	uint32 new_graveyard_id = 0;
-
-	end += sprintf(end, "INSERT INTO graveyard SET zone_id=%u, x=%1.1f, y=%1.1f, z=%1.1f, heading=%1.1f", graveyard_zone_id, graveyard_x, graveyard_y, graveyard_z, graveyard_heading);
-
-	if (!RunQuery(query, (uint32)(end - query), errbuf, 0, &affected_rows, &new_graveyard_id)) {
-		safe_delete_array(query);
-		std::cerr << "Error1 in NewGraveyardRecord query " << errbuf << std::endl;
-		return 0;
+	std::string query = StringFormat(
+		"INSERT INTO `graveyard` SET `zone_id` = %u, `x` = %1.1f, `y` = %1.1f, `z` = %1.1f, `heading` = %1.1f", 
+		graveyard_zone_id, graveyard_x, graveyard_y, graveyard_z, graveyard_heading
+	);
+	auto results = QueryDatabase(query);
+	if (results.Success()){
+		return results.LastInsertedID();
 	}
-	safe_delete_array(query);
-
-	if (affected_rows == 0) {
-		std::cerr << "Error2 in NewGraveyardRecord query: affected_rows = 0" << std::endl;
-		return 0;
-	}
-
-	if (new_graveyard_id <= 0) {
-		std::cerr << "Error3 in NewGraveyardRecord query: new_graveyard_id <= 0" << std::endl;
-		return 0;
-	}
-
-	return new_graveyard_id;
+	return 0;
 }
 uint32 ZoneDatabase::SendCharacterCorpseToGraveyard(uint32 dbid, uint32 zone_id, uint16 instance_id, float x, float y, float z, float heading) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = new char[256];
-	char* end = query;
-	uint32 affected_rows = 0;
-
-	// We probably don't want a graveyard located in an instance.
-	end += sprintf(end, "Update character_corpses SET zone_id=%u, instance_id=0, x=%1.1f, y=%1.1f, z=%1.1f, heading=%1.1f, was_at_graveyard=1 WHERE id=%d", zone_id, x, y, z, heading, dbid);
-
-	if (!RunQuery(query, (uint32)(end - query), errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
-		std::cerr << "Error1 in GraveyardPlayerCorpse query " << errbuf << std::endl;
-		return 0;
-	}
-	safe_delete_array(query);
-
-	if (affected_rows == 0) {
-		std::cerr << "Error2 in GraveyardPlayerCorpse query: affected_rows = 0" << std::endl;
-		return 0;
-	}
+	std::string query = StringFormat(
+			"UPDATE `character_corpses` "
+			"SET `zone_id` = %u, `instance_id` = 0, `x` = %1.1f, `y` = %1.1f, `z` = %1.1f, `heading` = %1.1f, `was_at_graveyard` = 1 "
+			"WHERE `id` = %d", 
+			zone_id, x, y, z, heading, dbid
+		);
+	QueryDatabase(query);
 	return dbid;
 }
 

@@ -183,19 +183,18 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 			break;
 		}
 	}
-	if(IsEmpty())
-	{
+	if(IsEmpty()) {
 		corpse_decay_timer.SetTimer(RuleI(NPC,EmptyNPCCorpseDecayTimeMS)+1000);
 	}
 
-	if(in_npc->HasPrivateCorpse())
-	{
+	if(in_npc->HasPrivateCorpse()) {
 		corpse_delay_timer.SetTimer(corpse_decay_timer.GetRemainingTime() + 1000);
 	}
 
 	// Added By Hogie -- End
-	for (int i=0; i<MAX_LOOTERS; i++)
-		looters[i] = 0;
+	for (int i = 0; i < MAX_LOOTERS; i++){
+		allowed_looters[i] = 0;
+	}
 	this->rezzexp = 0;
 }
 
@@ -262,13 +261,16 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	PlayerProfile_Struct *pp = &client->GetPP();
 	ItemInst *item;
 
+	/* Check if Zone has Graveyard First */
 	if(!zone->HasGraveyard()) {
 		corpse_graveyard_timer.Disable();
 	}
 
 	memset(item_tint, 0, sizeof(item_tint));
-	for (i=0; i < MAX_LOOTERS; i++)
-		looters[i] = 0;
+
+	for (i = 0; i < MAX_LOOTERS; i++){
+		allowed_looters[i] = 0;
+	}
 
 	is_corpse_changed		= true;
 	rezzexp			= in_rezexp;
@@ -283,14 +285,16 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	silver			= 0;
 	gold			= 0;
 	platinum		= 0;
+
 	strcpy(orgname, pp->name);
 	strcpy(name, pp->name); 
 
-	//become_npc was not being initialized which led to some pretty funky things with newly created corpses
+	/* become_npc was not being initialized which led to some pretty funky things with newly created corpses */
 	become_npc = false;
 
 	SetPKItem(0);
 
+	/* Check Rule to see if we can leave corpses */
 	if(!RuleB(Character, LeaveNakedCorpses) || 
 		RuleB(Character, LeaveCorpses) && 
 		GetLevel() >= RuleI(Character, DeathItemLossLevel)) {
@@ -405,16 +409,13 @@ std::list<uint32> Corpse::MoveItemToCorpse(Client *client, ItemInst *item, int16
 	returnlist.push_back(equipslot);
 
 	// Qualified bag slot iterations. processing bag slots that don't exist is probably not a good idea.
-	if(item->IsType(ItemClassContainer) && ((equipslot >= EmuConstants::GENERAL_BEGIN && equipslot <= MainCursor))) // Limit the bag check to inventory and cursor slots.
-	{
-		for(bagindex = SUB_BEGIN; bagindex <= EmuConstants::ITEM_CONTAINER_SIZE; bagindex++)
-		{
+	if(item->IsType(ItemClassContainer) && ((equipslot >= EmuConstants::GENERAL_BEGIN && equipslot <= MainCursor))) {
+		for(bagindex = SUB_BEGIN; bagindex <= EmuConstants::ITEM_CONTAINER_SIZE; bagindex++) {
 			// For empty bags in cursor queue, slot was previously being resolved as SLOT_INVALID (-1)
 			interior_slot = Inventory::CalcSlotId(equipslot, bagindex);
 			interior_item = client->GetInv().GetItem(interior_slot);
 
-			if(interior_item)
-			{
+			if(interior_item) {
 				AddItem(interior_item->GetItem()->ID, interior_item->GetCharges(), interior_slot, interior_item->GetAugmentItemID(0), interior_item->GetAugmentItemID(1), interior_item->GetAugmentItemID(2), interior_item->GetAugmentItemID(3), interior_item->GetAugmentItemID(4));
 				returnlist.push_back(Inventory::CalcSlotId(equipslot, bagindex));
 				client->DeleteItemInInventory(interior_slot, 0, true, false);
@@ -485,13 +486,13 @@ in_helmtexture,
 	loot_cooldown_timer(10)
 {
 
-	//we really should be loading the decay timer here...
 	LoadPlayerCorpseDecayTime(in_dbid);
 
 	if(!zone->HasGraveyard() || wasAtGraveyard)
 		corpse_graveyard_timer.Disable();
 
 	memset(item_tint, 0, sizeof(item_tint));
+
 	is_corpse_changed = false;
 	is_player_corpse = true;
 	is_locked = false;
@@ -509,8 +510,10 @@ in_helmtexture,
 	this->gold = in_gold;
 	this->platinum = in_plat;
 	rezzexp = in_rezexp;
-	for (int i=0; i<MAX_LOOTERS; i++)
-		looters[i] = 0;
+
+	for (int i = 0; i < MAX_LOOTERS; i++){
+		allowed_looters[i] = 0;
+	}
 	SetPKItem(0);
 }
 
@@ -535,10 +538,12 @@ the client does this too, so it's unchangable
 void Corpse::CalcCorpseName() {
 	EntityList::RemoveNumbers(name);
 	char tmp[64];
-	if (is_player_corpse)
+	if (is_player_corpse){
 		snprintf(tmp, sizeof(tmp), "'s corpse%d", GetID());
-	else
+	}
+	else{
 		snprintf(tmp, sizeof(tmp), "`s_corpse%d", GetID());
+	}
 	name[(sizeof(name) - 1) - strlen(tmp)] = 0;
 	strcat(name, tmp);
 }
@@ -551,9 +556,6 @@ bool Corpse::Save() {
 
 	uint32 tmp = this->CountItems();
 	uint32 tmpsize = sizeof(PlayerCorpse_Struct) + (tmp * sizeof(player_lootitem::ServerLootItem_Struct));
-
-	std::cout << "tmp: " << tmp << std::endl;
-	std::cout << "tmpsize: " << tmpsize << std::endl;
 
 	PlayerCorpse_Struct* dbpc = (PlayerCorpse_Struct*) new uchar[tmpsize];
 	memset(dbpc, 0, tmpsize);
@@ -594,9 +596,11 @@ bool Corpse::Save() {
 		memcpy((char*)&dbpc->items[x++], (char*)item, sizeof(ServerLootItem_Struct));
 	}
 
+	/* Create New Corpse*/
 	if (corpse_db_id == 0) {
 		corpse_db_id = database.SaveCharacterCorpse(char_id, orgname, zone->GetZoneID(), zone->GetInstanceID(), dbpc, x_pos, y_pos, z_pos, heading);
 	}
+	/* Update Corpse Data */
 	else{
 		corpse_db_id = database.UpdateCharacterCorpse(corpse_db_id, char_id, orgname, zone->GetZoneID(), zone->GetInstanceID(), dbpc, x_pos, y_pos, z_pos, heading, IsRezzed());
 	}
@@ -661,23 +665,20 @@ ServerLootItem_Struct* Corpse::GetItem(uint16 lootslot, ServerLootItem_Struct** 
 	cur = itemlist.begin();
 	end = itemlist.end();
 	for(; cur != end; ++cur) {
-		if((*cur)->lootslot == lootslot)
-		{
+		if((*cur)->lootslot == lootslot) {
 			sitem = *cur;
 			break;
 		}
 	}
 
-	if (sitem && bag_item_data && Inventory::SupportsContainers(sitem->equip_slot))
-	{
+	if (sitem && bag_item_data && Inventory::SupportsContainers(sitem->equip_slot)) {
 		int16 bagstart = Inventory::CalcSlotId(sitem->equip_slot, SUB_BEGIN);
 
 		cur = itemlist.begin();
 		end = itemlist.end();
 		for(; cur != end; ++cur) {
 			sitem2 = *cur;
-			if(sitem2->equip_slot >= bagstart && sitem2->equip_slot < bagstart + 10)
-			{
+			if(sitem2->equip_slot >= bagstart && sitem2->equip_slot < bagstart + 10) {
 				bag_item_data[sitem2->equip_slot - bagstart] = sitem2;
 			}
 		}
@@ -692,8 +693,7 @@ uint32 Corpse::GetWornItem(int16 equipSlot) const {
 	end = itemlist.end();
 	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* item = *cur;
-		if (item->equip_slot == equipSlot)
-		{
+		if (item->equip_slot == equipSlot) {
 			return item->item_id;
 		}
 	}
@@ -710,8 +710,7 @@ void Corpse::RemoveItem(uint16 lootslot) {
 	end = itemlist.end();
 	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* sitem = *cur;
-		if (sitem->lootslot == lootslot)
-		{
+		if (sitem->lootslot == lootslot) {
 			RemoveItem(sitem);
 			return;
 		}
@@ -725,8 +724,7 @@ void Corpse::RemoveItem(ServerLootItem_Struct* item_data){
 	end = itemlist.end();
 	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* sitem = *cur;
-		if (sitem == item_data)
-		{
+		if (sitem == item_data) {
 			is_corpse_changed = true;
 			itemlist.erase(cur);
 
@@ -769,7 +767,7 @@ bool Corpse::Process() {
 
 	if(corpse_delay_timer.Check()) {
 		for (int i=0; i<MAX_LOOTERS; i++)
-			looters[i] = 0;
+			allowed_looters[i] = 0;
 		corpse_delay_timer.Disable();
 		return true;
 	}
@@ -834,10 +832,10 @@ void Corpse::SetDecayTimer(uint32 decaytime) {
 bool Corpse::CanMobLoot(int charid) {
 	uint8 z=0;
 	for(int i=0; i<MAX_LOOTERS; i++) {
-		if(looters[i] != 0)
+		if(allowed_looters[i] != 0)
 			z++;
 
-		if (looters[i] == charid)
+		if (allowed_looters[i] == charid)
 			return true;
 	}
 	if(z == 0)
@@ -852,7 +850,7 @@ void Corpse::AllowMobLoot(Mob *them, uint8 slot) {
 	if(them == nullptr || !them->IsClient())
 		return;
 
-	looters[slot] = them->CastToClient()->CharacterID();
+	allowed_looters[slot] = them->CastToClient()->CharacterID();
 }
 
 // @merth: this function needs some work
@@ -1390,8 +1388,8 @@ uint32 Corpse::GetEquipmentColor(uint8 material_slot) const {
 
 void Corpse::AddLooter(Mob* who) {
 	for (int i=0; i<MAX_LOOTERS; i++) {
-		if (looters[i] == 0) {
-			looters[i] = who->CastToClient()->CharacterID();
+		if (allowed_looters[i] == 0) {
+			allowed_looters[i] = who->CastToClient()->CharacterID();
 			break;
 		}
 	}

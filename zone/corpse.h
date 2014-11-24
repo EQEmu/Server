@@ -26,12 +26,11 @@ class NPC;
 
 #define MAX_LOOTERS 72
 
-class Corpse : public Mob
-{
+class Corpse : public Mob {
 public:
+
 	static void SendEndLootErrorPacket(Client* client);
 	static void SendLootReqErrorPacket(Client* client, uint8 response = 2);  
-	
 	
 	Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NPCType** in_npctypedata, uint32 in_decaytime = 600000);
 	Corpse(Client* client, int32 in_rezexp);
@@ -137,7 +136,7 @@ private:
 	bool		rez;
 	bool		can_rez;
 	bool		become_npc;
-	int			looters[MAX_LOOTERS]; // People allowed to loot the corpse, character id
+	int			allowed_looters[MAX_LOOTERS]; // People allowed to loot the corpse, character id
 	Timer		corpse_decay_timer; 
 	Timer		corpse_res_timer;
 	Timer		corpse_delay_timer;
