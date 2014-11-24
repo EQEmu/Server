@@ -920,7 +920,7 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 	unsigned int lengths;
 	unsigned int lengths_e;
 	std::string squery;
-	PlayerProfile_Struct* pp;
+	Convert::PlayerProfile_Struct* pp;
 	ExtendedProfile_Struct* e_pp;
 	uint32 pplen = 0;
 	uint32 i;
@@ -1357,7 +1357,7 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 			squery = StringFormat("SELECT `id`, `profile`, `name`, `level`, `account_id`, `firstlogon`, `lfg`, `lfp`, `mailkey`, `xtargets`, `inspectmessage`, `extprofile` FROM `character_` WHERE `id` = %i", atoi(row[0]));
 			auto results2 = QueryDatabase(squery);
 			auto row2 = results2.begin();
-			pp = (PlayerProfile_Struct*)row2[1];
+			pp = (Convert::PlayerProfile_Struct*)row2[1];
 			e_pp = (ExtendedProfile_Struct*)row2[11];
 			character_id = atoi(row[0]);
 			account_id = atoi(row2[4]);
@@ -1371,13 +1371,13 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 
 			/* Verify PP Integrity */
 			lengths = results2.LengthOfColumn(1);
-			if (lengths == sizeof(PlayerProfile_Struct)) { /* If PP is the size it is expected to be */
-				memcpy(pp, row2[1], sizeof(PlayerProfile_Struct));
+			if (lengths == sizeof(Convert::PlayerProfile_Struct)) { /* If PP is the size it is expected to be */
+				memcpy(pp, row2[1], sizeof(Convert::PlayerProfile_Struct));
 			}
 			/* Continue of PP Size does not match (Usually a created character never logged in) */
 			else {
 				// printf("%s ID: %i profile mismatch, not converting. PP %u - Profile Length %u \n", row2[2] ? row2[2] : "Unknown", character_id, sizeof(PlayerProfile_Struct), lengths);
-				std::cout << (row2[2] ? row2[2] : "Unknown") << " ID: " << character_id << " size mismatch. Expected Size: " << sizeof(PlayerProfile_Struct) << " Seen: " << lengths << std::endl;
+				std::cout << (row2[2] ? row2[2] : "Unknown") << " ID: " << character_id << " size mismatch. Expected Size: " << sizeof(Convert::PlayerProfile_Struct) << " Seen: " << lengths << std::endl;
 				continue;
 			}
 
@@ -1730,7 +1730,7 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 					e_pp->aa_effects,
 					e_pp->perAA,
 					e_pp->expended_aa
-					);
+				);
 				results = QueryDatabase(rquery);
 
 
@@ -2065,8 +2065,8 @@ bool Database::CheckDatabaseConvertBotsPostPPDeblob(){
 }
 
 bool Database::CheckDatabaseConvertCorpseDeblob(){
-	DBPlayerCorpse_Struct_temp* dbpc;
-	classic_db_temp::DBPlayerCorpse_Struct_temp* dbpc_c;
+	Convert::DBPlayerCorpse_Struct_temp* dbpc;
+	Convert::classic_db_temp::DBPlayerCorpse_Struct_temp* dbpc_c;
 	uint32 in_datasize;
 	bool is_sof = false;
 	std::string c_type;
@@ -2083,8 +2083,8 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 			auto results2 = QueryDatabase(squery);
 			for (auto row2 = results2.begin(); row2 != results2.end(); ++row2) {
 				in_datasize = results2.LengthOfColumn(2);
-				dbpc = (DBPlayerCorpse_Struct_temp*)row2[2];
-				dbpc_c = (classic_db_temp::DBPlayerCorpse_Struct_temp*)row2[2];
+				dbpc = (Convert::DBPlayerCorpse_Struct_temp*)row2[2];
+				dbpc_c = (Convert::classic_db_temp::DBPlayerCorpse_Struct_temp*)row2[2];
 
 				if (dbpc == nullptr)
 					continue;
@@ -2093,8 +2093,8 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 
 
 				/* SoF+ */
-				uint32 esize1 = (sizeof(DBPlayerCorpse_Struct_temp)+(dbpc->itemcount * sizeof(player_lootitem_temp::ServerLootItem_Struct_temp)));
-				uint32 esize2 = (sizeof(classic_db_temp::DBPlayerCorpse_Struct_temp) + (dbpc_c->itemcount * sizeof(player_lootitem_temp::ServerLootItem_Struct_temp)));
+				uint32 esize1 = (sizeof(Convert::DBPlayerCorpse_Struct_temp) + (dbpc->itemcount * sizeof(Convert::player_lootitem_temp::ServerLootItem_Struct_temp)));
+				uint32 esize2 = (sizeof(Convert::classic_db_temp::DBPlayerCorpse_Struct_temp) + (dbpc_c->itemcount * sizeof(Convert::player_lootitem_temp::ServerLootItem_Struct_temp)));
 
 				/* SoF */
 				if (in_datasize == esize1) {
