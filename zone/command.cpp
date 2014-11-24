@@ -8456,7 +8456,7 @@ void command_setgraveyard(Client *c, const Seperator *sep)
 	zoneid = database.GetZoneID(sep->arg[1]);
 
 	if(zoneid > 0) {
-		graveyard_id = database.NewGraveyardRecord(zoneid, t->GetX(), t->GetY(), t->GetZ(), t->GetHeading());
+		graveyard_id = database.CreateGraveyardRecord(zoneid, t->GetX(), t->GetY(), t->GetZ(), t->GetHeading());
 
 		if(graveyard_id > 0) {
 			c->Message(0, "Successfuly added a new record for this graveyard!");
@@ -8519,7 +8519,7 @@ void command_summonburriedplayercorpse(Client *c, const Seperator *sep)
 		return;
 	}
 
-	Corpse* PlayerCorpse = database.SummonBurriedPlayerCorpse(t->CharacterID(), t->GetZoneID(), zone->GetInstanceID(), t->GetX(), t->GetY(), t->GetZ(), t->GetHeading());
+	Corpse* PlayerCorpse = database.SummonBuriedCharacterCorpses(t->CharacterID(), t->GetZoneID(), zone->GetInstanceID(), t->GetX(), t->GetY(), t->GetZ(), t->GetHeading());
 
 	if(!PlayerCorpse)
 		c->Message(0, "Your target doesn't have any burried corpses.");
@@ -8538,7 +8538,7 @@ void command_getplayerburriedcorpsecount(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint32 CorpseCount = database.GetPlayerBurriedCorpseCount(t->CharacterID());
+	uint32 CorpseCount = database.GetCharacterBuriedCorpseCount(t->CharacterID());
 
 	if(CorpseCount > 0)
 		c->Message(0, "Your target has a total of %u burried corpses.", CorpseCount);

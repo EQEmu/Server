@@ -1678,7 +1678,7 @@ int EntityList::RezzAllCorpsesByCharID(uint32 charid)
 	while (it != corpse_list.end()) {
 		if (it->second->GetCharID() == charid) {
 			RezzExp += it->second->GetRezzExp();
-			it->second->Rezzed(true);
+			it->second->IsRezzed(true);
 			it->second->CompleteRezz();
 		}
 		++it;

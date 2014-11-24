@@ -5209,17 +5209,17 @@ struct MercenaryMerchantResponse_Struct {
 };
 
 struct ServerLootItem_Struct {
-	uint32	item_id;
-	int16	equipSlot;
-	uint8	charges;
-	uint16	lootslot;
-	uint32 aug1;
-	uint32 aug2;
-	uint32 aug3;
-	uint32 aug4;
-	uint32 aug5;
-	uint8 minlevel;
-	uint8 maxlevel;
+	uint32	item_id;	  // uint32	item_id;
+	int16	equip_slot;	  // int16	equip_slot;
+	uint16	charges;	  // uint8	charges; 
+	uint16	lootslot;	  // uint16	lootslot;
+	uint32	aug_1;		  // uint32	aug_1;
+	uint32	aug_2;		  // uint32	aug_2;
+	uint32	aug_3;		  // uint32	aug_3;
+	uint32	aug_4;		  // uint32	aug_4;
+	uint32	aug_5;		  // uint32	aug_5;
+	uint8	min_level;		  // 
+	uint8	max_level;		  // 
 };
 
 //Found in client near a ref to the string:

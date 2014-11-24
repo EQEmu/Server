@@ -780,7 +780,7 @@ XS(XS_Corpse_IsRezzed)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->Rezzed();
+		RETVAL = THIS->IsRezzed();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}

@@ -736,8 +736,6 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 	//clear out old stuff..
 	spawn_conditions.clear();
 
-
-
 	std::string query = StringFormat("SELECT id, onchange, value "
                                     "FROM spawn_conditions "
                                     "WHERE zone = '%s'", zone_name);

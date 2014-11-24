@@ -50,7 +50,7 @@ Doors::Doors(const Door* door)
 	incline = door->incline;
 	opentype = door->opentype;
 	guild_id = door->guild_id;
-	lockpick = door->lockpick;
+	lockpick = door->lock_pick;
 	keyitem = door->keyitem;
 	nokeyring = door->nokeyring;
 	trigger_door = door->trigger_door;
@@ -678,7 +678,7 @@ bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name
 		into[rowIndex].heading = (float)atof(row[7]);
 		into[rowIndex].opentype = atoi(row[8]);
 		into[rowIndex].guild_id = atoi(row[9]);
-		into[rowIndex].lockpick = atoi(row[10]);
+		into[rowIndex].lock_pick = atoi(row[10]);
 		into[rowIndex].keyitem = atoi(row[11]);
 		into[rowIndex].nokeyring = atoi(row[12]);
 		into[rowIndex].trigger_door = atoi(row[13]);

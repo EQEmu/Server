@@ -142,14 +142,14 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
 					" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)",
 					character_id, pp.binds[4].zoneId, 0, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z, pp.binds[4].heading, 1);
-				auto results_bset = QueryDatabase(query); ThrowDBError(results_bset.ErrorMessage(), "WorldDatabase::GetCharSelectInfo Set Home Point", query);
+				auto results_bset = QueryDatabase(query); 
 			}
 			/* If no regular bind set, set it */
 			if (has_bind == 0){
 				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
 					" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)",
 					character_id, pp.binds[0].zoneId, 0, pp.binds[0].x, pp.binds[0].y, pp.binds[0].z, pp.binds[0].heading, 0);
-				auto results_bset = QueryDatabase(query); ThrowDBError(results_bset.ErrorMessage(), "WorldDatabase::GetCharSelectInfo Set Bind Point", query);
+				auto results_bset = QueryDatabase(query); 
 			}
 		}
 		/* Bind End */

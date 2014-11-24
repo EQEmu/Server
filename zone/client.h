@@ -335,7 +335,6 @@ public:
 	bool CheckAccess(int16 iDBLevel, int16 iDefaultLevel);
 
 	void CheckQuests(const char* zonename, const char* message, uint32 npc_id, uint32 item_id, Mob* other);
-	void LogLoot(Client* player,Corpse* corpse,const Item_Struct* item);
 	bool AutoAttackEnabled() const { return auto_attack; }
 	bool AutoFireEnabled() const { return auto_fire; }
 	void MakeCorpse(uint32 exploss);
@@ -1031,9 +1030,9 @@ void SetConsumption(int32 in_hunger, int32 in_thirst);
 	void DepopAllCorpses();
 	void DepopPlayerCorpse(uint32 dbid);
 	void BuryPlayerCorpses();
-	uint32 GetCorpseCount() { return database.GetPlayerCorpseCount(CharacterID()); }
-	uint32 GetCorpseID(int corpse) { return database.GetPlayerCorpseID(CharacterID(), corpse); }
-	uint32 GetCorpseItemAt(int corpse_id, int slot_id) { return database.GetPlayerCorpseItemAt(corpse_id, slot_id); }
+	uint32 GetCorpseCount() { return database.GetCharacterCorpseCount(CharacterID()); }
+	uint32 GetCorpseID(int corpse) { return database.GetCharacterCorpseID(CharacterID(), corpse); }
+	uint32 GetCorpseItemAt(int corpse_id, int slot_id) { return database.GetCharacterCorpseItemAt(corpse_id, slot_id); }
 	void SuspendMinion();
 	void Doppelganger(uint16 spell_id, Mob *target, const char *name_override, int pet_count, int pet_duration);
 	void NotifyNewTitlesAvailable();
