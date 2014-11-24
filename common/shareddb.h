@@ -41,7 +41,6 @@ public:
 	uint8	GetGMSpeed(uint32 account_id);
 	bool	SetHideMe(uint32 account_id, uint8 hideme);
 	int32	DeleteStalePlayerCorpses();
-	int32	DeleteStalePlayerBackups();
 	void	LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* message);
 	void	SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* message);
 	void	GetBotInspectMessage(uint32 botid, InspectMessage_Struct* message);

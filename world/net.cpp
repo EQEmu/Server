@@ -336,9 +336,6 @@ int main(int argc, char** argv) {
 	_log(WORLD__INIT, "Reboot zone modes %s",holdzones ? "ON" : "OFF");
 
 	_log(WORLD__INIT, "Deleted %i stale player corpses from database", database.DeleteStalePlayerCorpses());
-	if (RuleB(World, DeleteStaleCorpeBackups) == true) {
-	_log(WORLD__INIT, "Deleted %i stale player backups from database", database.DeleteStalePlayerBackups());
-	}
 
 	_log(WORLD__INIT, "Loading adventures...");
 	if(!adventure_manager.LoadAdventureTemplates())

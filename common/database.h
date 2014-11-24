@@ -301,7 +301,11 @@ public:
 	void	SetRaidGroupLeaderInfo(uint32 gid, uint32 rid);
 	void	ClearRaidLeader(uint32 gid = 0xFFFFFFFF, uint32 rid = 0);
 
-	bool CheckDatabaseConversions();
+	/* Database Conversions*/
+	bool	CheckDatabaseConversions();
+	bool	CheckDatabaseConvertPPDeblob();
+	bool	CheckDatabaseConvertCorpseDeblob();
+	bool	CheckDatabaseConvertBotsPostPPDeblob();
 
 	/*
 	* Database Variables

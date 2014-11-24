@@ -3699,7 +3699,6 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 		corpse_id
 	);
 	auto results = QueryDatabase(query); 
-	std::cout << query << std::endl;
 	uint16 i = 0;
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		pcs->locked = atoi(row[i++]);						// is_locked,
