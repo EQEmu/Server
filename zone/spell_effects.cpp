@@ -5586,8 +5586,8 @@ void Mob::CheckNumHitsRemaining(uint8 type, uint32 buff_slot, uint16 spell_id)
 				}
 			}
 		}
-	} else if (type == 7) {
-		if (buff_slot > 0) {
+	} else if (type == NUMHIT_MatchingSpells) {
+		if (buff_slot >= 0) {
 			if (--buffs[buff_slot].numhits == 0) {
 				CastOnNumHitFade(buffs[buff_slot].spellid);
 				if (!TryFadeEffect(buff_slot))
