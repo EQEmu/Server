@@ -2073,8 +2073,79 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 	std::string scquery;
 	int8 first_entry = 0;
 
+	std::string query = StringFormat("SHOW TABLES LIKE 'player_corpses'");
+	auto results = QueryDatabase(query);
+	if (results.RowCount() != 0){
+		query = StringFormat(
+			"CREATE TABLE `character_corpse_items` (	  "
+			"`corpse_id` int(11) unsigned NOT NULL,		  "
+			"`equip_slot` int(11) unsigned NOT NULL,	  "
+			"`item_id` int(11) unsigned DEFAULT NULL,	  "
+			"`charges` int(11) unsigned DEFAULT NULL,	  "
+			"`aug_1` int(11) unsigned DEFAULT '0',		  "
+			"`aug_2` int(11) unsigned DEFAULT '0',		  "
+			"`aug_3` int(11) unsigned DEFAULT '0',		  "
+			"`aug_4` int(11) unsigned DEFAULT '0',		  "
+			"`aug_5` int(11) unsigned DEFAULT '0',		  "
+			"`attuned` smallint(5) NOT NULL DEFAULT '0',  "
+			"PRIMARY KEY(`corpse_id`, `equip_slot`)		  "
+			") ENGINE = InnoDB DEFAULT CHARSET = latin1;  "
+		);
+		results = QueryDatabase(query);
+		query = StringFormat("RENAME TABLE `player_corpses` TO `character_corpses`");
+		results = QueryDatabase(query);
+		query = StringFormat(
+			" ALTER TABLE `character_corpses`																				\n"
+			" ADD COLUMN `is_locked`  		   tinyint(11) NULL DEFAULT 0 AFTER `WasAtGraveyard`,							\n"
+			" ADD COLUMN `exp`  			       int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `size`                  int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `level`                 int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `race`                  int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `gender`                int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `class`                 int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `deity`                 int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `texture`               int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `helm_texture`          int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `copper`                int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `silver`                int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `gold`                  int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `platinum`              int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `hair_color`            int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `beard_color`           int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `eye_color_1`           int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `eye_color_2`           int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `hair_style`            int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `face`                  int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `beard`                 int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `drakkin_heritage`      int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `drakkin_tattoo`        int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `drakkin_details`       int(11) UNSIGNED NULL DEFAULT 0,											\n"
+			" ADD COLUMN `wc_1`       		   int(11) UNSIGNED NULL DEFAULT 0,												\n"
+			" ADD COLUMN `wc_2`       		   int(11) UNSIGNED NULL DEFAULT 0,												\n"
+			" ADD COLUMN `wc_3`       		   int(11) UNSIGNED NULL DEFAULT 0,												\n"
+			" ADD COLUMN `wc_4`       		   int(11) UNSIGNED NULL DEFAULT 0,												\n"
+			" ADD COLUMN `wc_5`       		   int(11) UNSIGNED NULL DEFAULT 0,												\n"
+			" ADD COLUMN `wc_6`       		   int(11) UNSIGNED NULL DEFAULT 0,												\n"
+			" ADD COLUMN `wc_7`       		   int(11) UNSIGNED NULL DEFAULT 0,												\n"
+			" ADD COLUMN `wc_8`       		   int(11) UNSIGNED NULL DEFAULT 0,												\n"
+			" ADD COLUMN `wc_9`       		   int(11) UNSIGNED NULL DEFAULT 0,												\n"
+			" CHANGE COLUMN `zoneid` `zone_id`  smallint(5) NOT NULL DEFAULT 0 AFTER `charname`,							\n"
+			" CHANGE COLUMN `instanceid` `instance_id`  smallint(5) UNSIGNED NOT NULL DEFAULT 0 AFTER `zone_id`,			\n"
+			" CHANGE COLUMN `timeofdeath` `time_of_death`  datetime NOT NULL DEFAULT '0000-00-00 00:00:00' AFTER `data`,	\n"
+			" CHANGE COLUMN `rezzed` `is_rezzed`  tinyint(3) UNSIGNED NULL DEFAULT 0 AFTER `time_of_death`,					\n"
+			" CHANGE COLUMN `IsBurried` `is_buried`  tinyint(3) NOT NULL DEFAULT 0 AFTER `is_rezzed`;						\n"
+			
+			);																										
+		results = QueryDatabase(query);
+		query = StringFormat(
+			" ALTER TABLE `character_corpses`																	 \n"
+			" CHANGE COLUMN `WasAtGraveyard` `was_at_graveyard`  tinyint(3) NOT NULL DEFAULT 0 AFTER `is_buried` \n" 
+			);
+		results = QueryDatabase(query);
+	}
+
 	std::string rquery = StringFormat("SHOW COLUMNS FROM `character_corpses` LIKE 'data'");
-	auto results = QueryDatabase(rquery);
+	results = QueryDatabase(rquery);
 	if (results.RowCount() != 0){
 		rquery = StringFormat("SELECT DISTINCT charid FROM character_corpses");
 		results = QueryDatabase(rquery);
@@ -2107,12 +2178,12 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 					c_type = "Legacy";
 				}
 				if (in_datasize != esize2 && in_datasize != esize1) {
-					std::cout << "[Error] in Corpse Size - OLD SIZE: " << esize1 << " SOF SIZE: " << esize2 << " db_blob_datasize: " << in_datasize << std::endl;
+					// std::cout << "[Error] in Corpse Size - OLD SIZE: " << esize1 << " SOF SIZE: " << esize2 << " db_blob_datasize: " << in_datasize << std::endl;
 					is_sof = false;
 					c_type = "NULL";
 					continue;
 				}
-				std::cout << "Corpse: OK [" << c_type << "]: " << "Corpse ID: " << atoi(row2[0]) << std::endl;
+				std::cout << "Converting Corpse: [OK] [" << c_type << "]: " << "ID: " << atoi(row2[0]) << std::endl;
 
 				if (is_sof){
 					scquery = StringFormat("UPDATE `character_corpses` SET \n"
