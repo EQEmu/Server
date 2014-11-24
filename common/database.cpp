@@ -1912,8 +1912,8 @@ bool Database::CheckDatabaseConvertBotsPostPPDeblob(){
 	int runbotsconvert = 0;
 
 	/* Check For Legacy Bot References */
-	rquery = StringFormat("SHOW CREATE VIEW `vwBotCharacterMobs`");
-	results = QueryDatabase(rquery);
+	std::string rquery = StringFormat("SHOW CREATE VIEW `vwBotCharacterMobs`");
+	auto results = QueryDatabase(rquery);
 	if (results.RowCount() == 1){
 		auto row = results.begin();
 		std::string table_check = row[1];
