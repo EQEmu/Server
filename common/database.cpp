@@ -2303,7 +2303,7 @@ bool Database::CheckDatabaseConversions() {
 				}
 			}
 		}
-		QueryDatabase(StringFormat("ALTER TABLE `character_corpses` DROP COLUMN `data`"));
+		QueryDatabase(StringFormat("ALTER TABLE `character_corpses` DROP COLUMN `data`"));  
 	}
 
 

@@ -3367,6 +3367,16 @@ uint32 ZoneDatabase::SendCharacterCorpseToGraveyard(uint32 dbid, uint32 zone_id,
 	return dbid;
 }
 
+uint32 ZoneDatabase::GetCharacterCorpseDecayTimer(uint32 corpse_db_id){
+	std::string query = StringFormat("SELECT(UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) FROM `character_corpses` WHERE `id` = %d AND NOT `time_of_death` = 0", corpse_db_id);
+	auto results = QueryDatabase(query);
+	auto row = results.begin();
+	if (results.Success() && results.RowsAffected() != 0){
+		return atoll(row[0]); 
+	}
+	return 0;
+}
+
 uint32 ZoneDatabase::UpdateCharacterCorpse(uint32 db_id, uint32 char_id, const char* char_name, uint32 zone_id, uint16 instance_id, PlayerCorpse_Struct* dbpc, float x, float y, float z, float heading, bool is_rezzed) {
 	std::string query = StringFormat("UPDATE `character_corpses` SET \n"
 		"`charname` =		  '%s',\n"

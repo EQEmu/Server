@@ -344,8 +344,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 			iter_queue it;
 			for(it=client->GetInv().cursor_begin(),i=8001; it!=client->GetInv().cursor_end(); ++it,i++) {
 				item = *it;
-				if((item && (!client->IsBecomeNPC())) || (item && client->IsBecomeNPC() && !item->GetItem()->NoRent))
-				{
+				if((item && (!client->IsBecomeNPC())) || (item && client->IsBecomeNPC() && !item->GetItem()->NoRent)) {
 					std::list<uint32> slot_list = MoveItemToCorpse(client, item, i);
 					removed_list.merge(slot_list);
 					cursor = true;
@@ -370,7 +369,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 				++iter;
 			}
 			ss << ")";
-			database.RunQuery(ss.str().c_str(), ss.str().length());
+			database.QueryDatabase(ss.str().c_str());
 		}
 
 		if(cursor) { // all cursor items should be on corpse (client < SoF or RespawnFromHover = false)
@@ -1395,44 +1394,23 @@ void Corpse::AddLooter(Mob* who) {
 	}
 }
 
-void Corpse::LoadPlayerCorpseDecayTime(uint32 dbid){
-	if(!dbid)
+void Corpse::LoadPlayerCorpseDecayTime(uint32 corpse_db_id){
+	if(!corpse_db_id)
 		return;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) FROM character_corpses WHERE id=%d and not time_of_death=0", dbid), errbuf, &result)) {
-		safe_delete_array(query);
-		while ((row = mysql_fetch_row(result))) {
-			if(atoi(row[0]) > 0 && RuleI(Character, CorpseDecayTimeMS) > (atoi(row[0]) * 1000)) {
-				corpse_decay_timer.SetTimer(RuleI(Character, CorpseDecayTimeMS) - (atoi(row[0]) * 1000));
-				/*
-				if(RuleI(Character, CorpseResTimeMS) > (atoi(row[0]) * 1000)) {
-					corpse_res_timer.SetTimer(RuleI(Character, CorpseResTimeMS) - (atoi(row[0]) * 1000));
-				}
-				else {
-					corpse_res_timer.Disable();
-					can_rez = false;
-				}
-				*/
-			}
-			else {
-				corpse_decay_timer.SetTimer(2000);
-				//corpse_res_timer.SetTimer(300000);
-			}
-			if(atoi(row[0]) > 0 && RuleI(Zone, GraveyardTimeMS) > (atoi(row[0]) * 1000)) {
-				corpse_graveyard_timer.SetTimer(RuleI(Zone, GraveyardTimeMS) - (atoi(row[0]) * 1000));
-			}
-			else {
-				corpse_graveyard_timer.SetTimer(3000);
-			}
 
-		}
-		mysql_free_result(result);
+	uint32 active_corpse_decay_timer = database.GetCharacterCorpseDecayTimer(corpse_db_id);
+	if (active_corpse_decay_timer > 0 && RuleI(Character, CorpseDecayTimeMS) > (active_corpse_decay_timer * 1000)) {
+		corpse_decay_timer.SetTimer(RuleI(Character, CorpseDecayTimeMS) - (active_corpse_decay_timer * 1000));
 	}
-	else
-		safe_delete_array(query);
+	else {
+		corpse_decay_timer.SetTimer(2000);
+	}
+	if (active_corpse_decay_timer > 0 && RuleI(Zone, GraveyardTimeMS) > (active_corpse_decay_timer * 1000)) {
+		corpse_graveyard_timer.SetTimer(RuleI(Zone, GraveyardTimeMS) - (active_corpse_decay_timer * 1000));
+	}
+	else {
+		corpse_graveyard_timer.SetTimer(3000);
+	}
 }
 
 /*
