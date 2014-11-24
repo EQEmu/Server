@@ -1851,7 +1851,7 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 	Mob *swarmOwner = nullptr;
 	if  (GetSwarmOwner())
 	{
-		Mob *swarmOwner = entity_list.GetMobID(GetSwarmOwner());
+		swarmOwner = entity_list.GetMobID(GetSwarmOwner());
 	}
 	
 	if  (swarmOwner != nullptr)
