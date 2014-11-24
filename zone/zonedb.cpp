@@ -3763,10 +3763,11 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 		corpse_id
 	);
 	auto results = QueryDatabase(query); 
+	std::cout << query << std::endl;
 	uint16 i = 0;
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		pcs->locked = atoi(row[i++]);						// is_locked,
-		pcs->exp = atoi(row[i++]);							// exp,
+		pcs->exp = atoll(row[i++]);							// exp,
 		pcs->size = atoi(row[i++]);							// size,
 		pcs->level = atoi(row[i++]);						// `level`,
 		pcs->race = atoi(row[i++]);							// race,
@@ -3775,10 +3776,10 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 		pcs->deity = atoi(row[i++]);						// deity,
 		pcs->texture = atoi(row[i++]);						// texture,
 		pcs->helmtexture = atoi(row[i++]);					// helm_texture,
-		pcs->copper = atoi(row[i++]);						// copper,
-		pcs->silver = atoi(row[i++]);						// silver,
-		pcs->gold = atoi(row[i++]);							// gold,
-		pcs->plat = atoi(row[i++]);							// platinum,
+		pcs->copper = atoll(row[i++]);						// copper,
+		pcs->silver = atoll(row[i++]);						// silver,
+		pcs->gold = atoll(row[i++]);							// gold,
+		pcs->plat = atoll(row[i++]);							// platinum,
 		pcs->haircolor = atoi(row[i++]);					// hair_color,
 		pcs->beardcolor = atoi(row[i++]);					// beard_color,
 		pcs->eyecolor1 = atoi(row[i++]);					// eye_color_1,
@@ -3786,18 +3787,18 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 		pcs->hairstyle = atoi(row[i++]);					// hair_style,
 		pcs->face = atoi(row[i++]);							// face,
 		pcs->beard = atoi(row[i++]);						// beard,
-		pcs->drakkin_heritage = atoi(row[i++]);				// drakkin_heritage,
-		pcs->drakkin_tattoo = atoi(row[i++]);				// drakkin_tattoo,
-		pcs->drakkin_details = atoi(row[i++]);				// drakkin_details,
-		pcs->item_tint[0].color = atoi(row[i++]);			// wc_1,
-		pcs->item_tint[1].color = atoi(row[i++]);			// wc_2,
-		pcs->item_tint[2].color = atoi(row[i++]);			// wc_3,
-		pcs->item_tint[3].color = atoi(row[i++]);			// wc_4,
-		pcs->item_tint[4].color = atoi(row[i++]);			// wc_5,
-		pcs->item_tint[5].color = atoi(row[i++]);			// wc_6,
-		pcs->item_tint[6].color = atoi(row[i++]);			// wc_7,
-		pcs->item_tint[7].color = atoi(row[i++]);			// wc_8,
-		pcs->item_tint[8].color = atoi(row[i++]);			// wc_9
+		pcs->drakkin_heritage = atoll(row[i++]);				// drakkin_heritage,
+		pcs->drakkin_tattoo = atoll(row[i++]);				// drakkin_tattoo,
+		pcs->drakkin_details = atoll(row[i++]);				// drakkin_details,
+		pcs->item_tint[0].color = atoll(row[i++]);			// wc_1,
+		pcs->item_tint[1].color = atoll(row[i++]);			// wc_2,
+		pcs->item_tint[2].color = atoll(row[i++]);			// wc_3,
+		pcs->item_tint[3].color = atoll(row[i++]);			// wc_4,
+		pcs->item_tint[4].color = atoll(row[i++]);			// wc_5,
+		pcs->item_tint[5].color = atoll(row[i++]);			// wc_6,
+		pcs->item_tint[6].color = atoll(row[i++]);			// wc_7,
+		pcs->item_tint[7].color = atoll(row[i++]);			// wc_8,
+		pcs->item_tint[8].color = atoll(row[i++]);			// wc_9
 	}
 	query = StringFormat(
 		"SELECT                       \n"
@@ -3813,12 +3814,13 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 		"FROM                         \n"
 		"character_corpse_items       \n"
 		"WHERE `corpse_id` = %u\n"
-		"ORDER BY `equip_slot`",
+		// "ORDER BY `equip_slot`"
+		,
 		corpse_id
 	);
 	results = QueryDatabase(query);
-	i = 0; 
-	
+
+	i = 0;  
 	pcs->itemcount = results.RowCount();
 	uint16 r = 0;
 	for (auto row = results.begin(); row != results.end(); ++row) {
@@ -4009,9 +4011,7 @@ bool ZoneDatabase::ClearCorpseItems(uint32 db_id){
 bool ZoneDatabase::DeleteItemOffCharacterCorpse(uint32 db_id, uint32 equip_slot, uint32 item_id){
 	std::string query = StringFormat("DELETE FROM `character_corpse_items` WHERE `corpse_id` = %u AND equip_slot = %u AND item_id = %u", db_id, equip_slot, item_id);
 	auto results = QueryDatabase(query);
-	std::cout << "QUERY: " << query << std::endl;
 	if (results.Success() && results.RowsAffected() != 0){
-		std::cout << "Item Delete Successfully" << std::endl;
 		return true;
 	}
 	return false;

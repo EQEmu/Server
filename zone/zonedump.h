@@ -132,7 +132,7 @@ namespace player_lootitem {
 	struct ServerLootItem_Struct {
 		uint32	item_id;
 		int16	equip_slot;
-		uint8	charges;
+		uint16	charges;
 		uint16	lootslot;
 		uint32	aug_1;
 		uint32	aug_2;

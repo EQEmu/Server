@@ -5211,7 +5211,7 @@ struct MercenaryMerchantResponse_Struct {
 struct ServerLootItem_Struct {
 	uint32	item_id;	  // uint32	item_id;
 	int16	equip_slot;	  // int16	equip_slot;
-	uint8	charges;	  // uint8	charges;
+	uint16	charges;	  // uint8	charges; 
 	uint16	lootslot;	  // uint16	lootslot;
 	uint32	aug_1;		  // uint32	aug_1;
 	uint32	aug_2;		  // uint32	aug_2;

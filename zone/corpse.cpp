@@ -636,8 +636,6 @@ ServerLootItem_Struct* Corpse::GetItem(uint16 lootslot, ServerLootItem_Struct** 
 		}
 	}
 
-	std::cout << "sitem EQUIPSLOT: " << sitem->equip_slot << std::endl; 
-
 	return sitem;
 }
 
@@ -991,7 +989,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 	if (RuleB(Character, CheckCursorEmptyWhenLooting) && !client->GetInv().CursorEmpty()) {
 		client->Message(13, "You may not loot an item while you have an item on your cursor.");
 		SendEndLootErrorPacket(client);
-		//unlock corpse for others
+		/* Unlock corpse for others */
 		if (this->BeingLootedBy = client->GetID()) {
 			BeingLootedBy = 0xFFFFFFFF;
 		}
@@ -1036,14 +1034,12 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 		item_data = GetItem(lootitem->slot_id - EmuConstants::CORPSE_BEGIN, bag_item_data);
 	}
 
-	std::cout << "ITEM_DATA EQUIP SLOT: " << item_data->equip_slot << std::endl; 
-
 	if (GetPKItem()<=1 && item_data != 0) {
 		item = database.GetItem(item_data->item_id);
 	}
 
 	if (item != 0) {
-		if (item_data){
+		if (item_data){ 
 			inst = database.CreateItem(item, item_data ? item_data->charges : 0, item_data->aug_1, item_data->aug_2, item_data->aug_3, item_data->aug_4, item_data->aug_5);
 		}
 		else {
@@ -1115,21 +1111,20 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 
 		/* Remove it from Corpse */
 		if (item_data){
-			RemoveItem(item_data->lootslot);
-			std::cout << "CORPSE DB ID: " << this->corpse_db_id << std::endl;
-			std::cout << "CORPSE EQUIP SLOT: " << item_data->equip_slot << std::endl;
-			std::cout << "ITEM SLOT: " << item->Slots << std::endl;
-			database.DeleteItemOffCharacterCorpse(this->corpse_db_id, item_data->equip_slot, item->ID);  
+			/* Delete needs to be before RemoveItem because its deletes the pointer for item_data/bag_item_data */
+			database.DeleteItemOffCharacterCorpse(this->corpse_db_id, item_data->equip_slot, item_data->item_id);
+			/* Delete Item Instance */
+			RemoveItem(item_data->lootslot);  
 		}
 
 		/* Remove Bag Contents */
 		if (item->ItemClass == ItemClassContainer && (GetPKItem() != -1 || GetPKItem() != 1)) {
 			for (int i = SUB_BEGIN; i < EmuConstants::ITEM_CONTAINER_SIZE; i++) {
 				if (bag_item_data[i]) {
-					RemoveItem(bag_item_data[i]);
-					std::cout << "CORPSE BAG DB ID: " << this->corpse_db_id << std::endl;
-					std::cout << "CORPSE BAG EQUIP SLOT: " << item_data->equip_slot << std::endl;
-					database.DeleteItemOffCharacterCorpse(this->corpse_db_id, item_data->equip_slot, item->ID);
+					/* Delete needs to be before RemoveItem because its deletes the pointer for item_data/bag_item_data */
+					database.DeleteItemOffCharacterCorpse(this->corpse_db_id, bag_item_data[i]->equip_slot, bag_item_data[i]->item_id); 
+					/* Delete Item Instance */
+					RemoveItem(bag_item_data[i]); 
 				}
 			}
 		}
@@ -1138,9 +1133,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 			SetPKItem(0);
 		}
 
-		//now send messages to all interested parties
-
-		//creates a link for the item
+		/* Send message with item link to groups and such */
 		char *link = 0, *link2 = 0; //just like a db query :-)
 		client->MakeItemLink(link2, inst);
 		MakeAnyLenString(&link, "%c" "%s" "%s" "%c",
@@ -1170,10 +1163,12 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 		return;
 	}
 
-	if (IsPlayerCorpse())
+	if (IsPlayerCorpse()){
 		client->SendItemLink(inst);
-	else
+	}
+	else{
 		client->SendItemLink(inst, true);
+	}
 
 	safe_delete(inst);
 }

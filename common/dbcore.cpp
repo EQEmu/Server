@@ -105,6 +105,15 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
 
 			std::cout << "DB Query Error #" << mysql_errno(&mysql) << ": " << mysql_error(&mysql) << std::endl;
 
+			/* Implement Logging at the Root*/
+			
+			std::cout << "\n[MYSQL ERR] " << mysql_errno(&mysql) << ": " << mysql_error(&mysql) << "\n\n" << query << "\n" << std::endl;
+			/* Write to log file */
+			std::ofstream log("eqemu_query_error_log.txt", std::ios_base::app | std::ios_base::out);
+			log << "[MYSQL ERR] " << mysql_error(&mysql) << "\n" << query << "\n";
+			log.close();
+			
+
 			return MySQLRequestResult(nullptr, 0, 0, 0, 0, (uint32)mysql_errno(&mysql), errorBuffer);
 		}
 
@@ -126,17 +135,6 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
         rowCount = (uint32)mysql_num_rows(res);
 
 	MySQLRequestResult requestResult(res, (uint32)mysql_affected_rows(&mysql), rowCount, (uint32)mysql_field_count(&mysql), (uint32)mysql_insert_id(&mysql));
-
-	/* Implement Logging at the Root*/
-	if (requestResult.ErrorMessage() != ""){
-		std::cout << "\n[MYSQL ERR] " << requestResult.ErrorMessage() << "\n\n" << query << "\n" << std::endl; 
-		/* Write to log file */
-		std::ofstream log("eqemu_query_error_log.txt", std::ios_base::app | std::ios_base::out);
-		log << "[MYSQL ERR] " << requestResult.ErrorMessage() << "\n" << query << "\n";
-		log.close(); 
-	}
-
-	
 
 #if DEBUG_MYSQL_QUERIES >= 1
 	if (requestResult.Success())
