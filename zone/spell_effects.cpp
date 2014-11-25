@@ -1665,7 +1665,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Model Size: %d%%", effect_value);
 #endif
-				ChangeSize(GetSize() * (static_cast<float>(effect_value) / 100.0f));
+				// Only allow 2 size changes from Base Size
+				float modifyAmount = (static_cast<float>(effect_value) / 100.0f);
+				float maxModAmount = GetBaseSize() * modifyAmount * modifyAmount;
+				if ((GetSize() <= GetBaseSize() && GetSize() > maxModAmount) || 
+					(GetSize() >= GetBaseSize() && GetSize() < maxModAmount) ||
+					(GetSize() <= GetBaseSize() && maxModAmount > 1.0f) || 
+					(GetSize() >= GetBaseSize() && maxModAmount < 1.0f))
+				{
+					ChangeSize(GetSize() * modifyAmount);
+				}
 				break;
 			}
 

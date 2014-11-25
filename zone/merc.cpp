@@ -4338,7 +4338,7 @@ Corpse* Merc::GetGroupMemberCorpse() {
 				if(g->members[i] && g->members[i]->IsClient()) {
 					corpse = entity_list.GetCorpseByOwnerWithinRange(g->members[i]->CastToClient(), this, RuleI(Mercs, ResurrectRadius));
 
-					if(corpse && !corpse->IsRezzed()) {
+					if(corpse && !corpse->Rezzed()) {
 						return corpse;
 					}
 				}
@@ -5540,7 +5540,7 @@ void Client::SpawnMercOnZone() {
 		}
 		else
 		{
-			int32 TimeDiff = GetMercInfo().SuspendedTime + RuleI(Mercs, SuspendIntervalS) - time(nullptr);
+			int32 TimeDiff = GetMercInfo().SuspendedTime - time(nullptr);
 			if (TimeDiff > 0)
 			{
 				if (!GetPTimers().Enabled(pTimerMercSuspend))
