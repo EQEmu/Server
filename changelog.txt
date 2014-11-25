@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 11/24/2014 ==
 Trevius: Spells that modify model size are now limited to 2 size adjustments from the base size.
+Trevius: Fix to prevent Mercenaries from being set as Group Leader.
 
 == 11/24/2014 ==
 Trevius: Added Rule NPC:EnableMeritBasedFaction (disabled by default) - Allows faction gain to work similar to experience.
