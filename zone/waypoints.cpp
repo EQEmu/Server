@@ -122,7 +122,7 @@ void NPC::ResumeWandering()
 			return;
 		}
 
-		if (cur_wp_x == GetX() && cur_wp_y == GetY())
+		if (m_CurrentWayPoint.m_X == GetX() && m_CurrentWayPoint.m_Y == GetY())
 		{	// are we we at a waypoint? if so, trigger event and start to next
 			char temp[100];
 			itoa(cur_wp,temp,10);	//do this before updating to next waypoint
@@ -201,11 +201,8 @@ void NPC::MoveTo(float mtx, float mty, float mtz, float mth, bool saveguardspot)
 		mlog(AI__WAYPOINTS, "Setting guard position to (%.3f, %.3f, %.3f)", guard_x, guard_y, guard_z);
 	}
 
-	cur_wp_x = mtx;
-	cur_wp_y = mty;
-	cur_wp_z = mtz;
+    m_CurrentWayPoint = xyz_heading(mtx, mty, mtz, mth);
 	cur_wp_pause = 0;
-	cur_wp_heading = mth;
 	pLastFightingDelayMoving = 0;
 	if(AIwalking_timer->Enabled())
 		AIwalking_timer->Start(100);
@@ -221,26 +218,23 @@ void NPC::UpdateWaypoint(int wp_index)
 	cur = Waypoints.begin();
 	cur += wp_index;
 
-	cur_wp_x = cur->x;
-	cur_wp_y = cur->y;
-	cur_wp_z = cur->z;
+    m_CurrentWayPoint = xyz_heading(cur->x, cur->y, cur->z, cur->heading);
 	cur_wp_pause = cur->pause;
-	cur_wp_heading = cur->heading;
-	mlog(AI__WAYPOINTS, "Next waypoint %d: (%.3f, %.3f, %.3f, %.3f)", wp_index, cur_wp_x, cur_wp_y, cur_wp_z, cur_wp_heading);
+	mlog(AI__WAYPOINTS, "Next waypoint %d: (%.3f, %.3f, %.3f, %.3f)", wp_index, m_CurrentWayPoint.m_X, m_CurrentWayPoint.m_Y, m_CurrentWayPoint.m_Z, m_CurrentWayPoint.m_Heading);
 
 	//fix up pathing Z
 	if(zone->HasMap() && RuleB(Map, FixPathingZAtWaypoints))
 	{
 
 		if(!RuleB(Watermap, CheckForWaterAtWaypoints) || !zone->HasWaterMap() ||
-			(zone->HasWaterMap() && !zone->watermap->InWater(cur_wp_x, cur_wp_y, cur_wp_z)))
+			(zone->HasWaterMap() && !zone->watermap->InWater(m_CurrentWayPoint.m_X, m_CurrentWayPoint.m_Y, m_CurrentWayPoint.m_Z)))
 		{
-			Map::Vertex dest(cur_wp_x, cur_wp_y, cur_wp_z);
+			Map::Vertex dest(m_CurrentWayPoint.m_X, m_CurrentWayPoint.m_Y, m_CurrentWayPoint.m_Z);
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
 			if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaWaypoint))
-				cur_wp_z = newz + 1;
+				m_CurrentWayPoint.m_Z = newz + 1;
 		}
 	}
 

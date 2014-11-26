@@ -1724,15 +1724,15 @@ void NPC::AI_DoMovement() {
 			}	// endif (movetimercompleted==true)
 			else if (!(AIwalking_timer->Enabled()))
 			{	// currently moving
-				if (cur_wp_x == GetX() && cur_wp_y == GetY())
+				if (m_CurrentWayPoint.m_X == GetX() && m_CurrentWayPoint.m_Y == GetY())
 				{	// are we there yet? then stop
 					mlog(AI__WAYPOINTS, "We have reached waypoint %d (%.3f,%.3f,%.3f) on grid %d", cur_wp, GetX(), GetY(), GetZ(), GetGrid());
 					SetWaypointPause();
 					if(GetAppearance() != eaStanding)
 						SetAppearance(eaStanding, false);
 					SetMoving(false);
-					if (cur_wp_heading >= 0.0) {
-						SetHeading(cur_wp_heading);
+					if (m_CurrentWayPoint.m_Heading >= 0.0) {
+						SetHeading(m_CurrentWayPoint.m_Heading);
 					}
 					SendPosition();
 
@@ -1748,12 +1748,12 @@ void NPC::AI_DoMovement() {
 				else
 				{	// not at waypoint yet, so keep moving
 					if(!RuleB(Pathing, AggroReturnToGrid) || !zone->pathing || (DistractedFromGrid == 0))
-						CalculateNewPosition2(cur_wp_x, cur_wp_y, cur_wp_z, walksp, true);
+						CalculateNewPosition2(m_CurrentWayPoint.m_X, m_CurrentWayPoint.m_Y, m_CurrentWayPoint.m_Z, walksp, true);
 					else
 					{
 						bool WaypointChanged;
 						bool NodeReached;
-						Map::Vertex Goal = UpdatePath(cur_wp_x, cur_wp_y, cur_wp_z, walksp, WaypointChanged, NodeReached);
+						Map::Vertex Goal = UpdatePath(m_CurrentWayPoint.m_X, m_CurrentWayPoint.m_Y, m_CurrentWayPoint.m_Z, walksp, WaypointChanged, NodeReached);
 						if(WaypointChanged)
 							tar_ndx = 20;
 

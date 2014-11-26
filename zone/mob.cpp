@@ -317,9 +317,7 @@ Mob::Mob(const char* in_name,
 	wandertype=0;
 	pausetype=0;
 	cur_wp = 0;
-	cur_wp_x = 0;
-	cur_wp_y = 0;
-	cur_wp_z = 0;
+	m_CurrentWayPoint = xyz_heading::Origin();
 	cur_wp_pause = 0;
 	patrol=0;
 	follow=0;
