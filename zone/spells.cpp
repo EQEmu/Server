@@ -3825,7 +3825,7 @@ void Corpse::CastRezz(uint16 spellid, Mob* Caster)
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RezzRequest, sizeof(Resurrect_Struct));
 	Resurrect_Struct* rezz = (Resurrect_Struct*) outapp->pBuffer;
 	// Why are we truncating these names to 30 characters ?
-	memcpy(rezz->your_name,this->orgname,30);
+	memcpy(rezz->your_name,this->corpse_name,30);
 	memcpy(rezz->corpse_name,this->name,30);
 	memcpy(rezz->rezzer_name,Caster->GetName(),30);
 	rezz->zone_id = zone->GetZoneID();

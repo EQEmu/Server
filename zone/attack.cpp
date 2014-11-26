@@ -1631,14 +1631,14 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 					database.GetVariable("PvPitem", tmp2, 9);
 					int pvpitem = atoi(tmp2);
 					if(pvpitem>0 && pvpitem<200000)
-						new_corpse->SetPKItem(pvpitem);
+						new_corpse->SetPlayerKillItemID(pvpitem);
 				}
 				else if(reward==2)
-					new_corpse->SetPKItem(-1);
+					new_corpse->SetPlayerKillItemID(-1);
 				else if(reward==1)
-					new_corpse->SetPKItem(1);
+					new_corpse->SetPlayerKillItemID(1);
 				else
-					new_corpse->SetPKItem(0);
+					new_corpse->SetPlayerKillItemID(0);
 				if(killerMob->CastToClient()->isgrouped) {
 					Group* group = entity_list.GetGroupByClient(killerMob->CastToClient());
 					if(group != 0)
@@ -1647,7 +1647,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 						{
 							if(group->members[i] != nullptr)
 							{
-								new_corpse->AllowMobLoot(group->members[i],i);
+								new_corpse->AllowPlayerLoot(group->members[i],i);
 							}
 						}
 					}
@@ -2301,13 +2301,13 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 		if(killer != 0 && emoteid != 0)
 			corpse->CastToNPC()->DoNPCEmote(AFTERDEATH, emoteid);
 		if(killer != 0 && killer->IsClient()) {
-			corpse->AllowMobLoot(killer, 0);
+			corpse->AllowPlayerLoot(killer, 0);
 			if(killer->IsGrouped()) {
 				Group* group = entity_list.GetGroupByClient(killer->CastToClient());
 				if(group != 0) {
 					for(int i=0;i<6;i++) { // Doesnt work right, needs work
 						if(group->members[i] != nullptr) {
-							corpse->AllowMobLoot(group->members[i],i);
+							corpse->AllowPlayerLoot(group->members[i],i);
 						}
 					}
 				}
@@ -2323,30 +2323,30 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 						case 0:
 						case 1:
 							if(r->members[x].member && r->members[x].IsRaidLeader){
-								corpse->AllowMobLoot(r->members[x].member, i);
+								corpse->AllowPlayerLoot(r->members[x].member, i);
 								i++;
 							}
 							break;
 						case 2:
 							if(r->members[x].member && r->members[x].IsRaidLeader){
-								corpse->AllowMobLoot(r->members[x].member, i);
+								corpse->AllowPlayerLoot(r->members[x].member, i);
 								i++;
 							}
 							else if(r->members[x].member && r->members[x].IsGroupLeader){
-								corpse->AllowMobLoot(r->members[x].member, i);
+								corpse->AllowPlayerLoot(r->members[x].member, i);
 								i++;
 							}
 							break;
 						case 3:
 							if(r->members[x].member && r->members[x].IsLooter){
-								corpse->AllowMobLoot(r->members[x].member, i);
+								corpse->AllowPlayerLoot(r->members[x].member, i);
 								i++;
 							}
 							break;
 						case 4:
 							if(r->members[x].member)
 							{
-								corpse->AllowMobLoot(r->members[x].member, i);
+								corpse->AllowPlayerLoot(r->members[x].member, i);
 								i++;
 							}
 							break;

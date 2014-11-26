@@ -208,7 +208,7 @@ XS(XS_Corpse_GetDBID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetDBID();
+		RETVAL = THIS->GetCorpseDBID();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -662,7 +662,7 @@ XS(XS_Corpse_CompleteRezz)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->CompleteRezz();
+		THIS->CompleteResurrection();
 	}
 	XSRETURN_EMPTY;
 }
@@ -723,7 +723,7 @@ XS(XS_Corpse_AllowMobLoot)
 		if(them == nullptr)
 			Perl_croak(aTHX_ "them is nullptr, avoiding crash.");
 
-		THIS->AllowMobLoot(them, slot);
+		THIS->AllowPlayerLoot(them, slot);
 	}
 	XSRETURN_EMPTY;
 }

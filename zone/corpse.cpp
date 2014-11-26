@@ -69,13 +69,12 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 	PlayerCorpse_Struct *pcs = (PlayerCorpse_Struct*)buffer;
 	database.LoadCharacterCorpseData(in_dbid, pcs);
 
-	/* Load Items */
+	/* Load Items */ 
 	ItemList itemlist;
 	ServerLootItem_Struct* tmp = 0;
 	for (unsigned int i = 0; i < pcs->itemcount; i++) {
 		tmp = new ServerLootItem_Struct;
 		memcpy(tmp, &pcs->items[i], sizeof(player_lootitem::ServerLootItem_Struct));
-		tmp->equip_slot = CorpseToServerSlot(tmp->equip_slot);
 		itemlist.push_back(tmp);
 	}
 
@@ -191,7 +190,7 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 	0							// uint32		in_scalerate
 ),									  
 	corpse_decay_timer(in_decaytime),
-	corpse_res_timer(0),
+	corpse_rez_timer(0),
 	corpse_delay_timer(RuleI(NPC, CorpseUnlockTimer)),
 	corpse_graveyard_timer(0),
 	loot_cooldown_timer(10)
@@ -212,13 +211,13 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 	SetCash(in_npc->GetCopper(), in_npc->GetSilver(), in_npc->GetGold(), in_npc->GetPlatinum());
 
 	npctype_id = in_npctypeid;
-	SetPKItem(0);
+	SetPlayerKillItemID(0);
 	char_id = 0;
 	corpse_db_id = 0;
 	player_corpse_depop = false;
-	strcpy(orgname, in_npc->GetName());
+	strcpy(corpse_name, in_npc->GetName());
 	strcpy(name, in_npc->GetName());
-	// Added By Hogie
+	
 	for(int count = 0; count < 100; count++) {
 		if ((level >= npcCorpseDecayTimes[count].minlvl) && (level <= npcCorpseDecayTimes[count].maxlvl)) {
 			corpse_decay_timer.SetTimer(npcCorpseDecayTimes[count].seconds*1000);
@@ -293,7 +292,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	0								  // uint32		in_scalerate
 	),									
 	corpse_decay_timer(RuleI(Character, CorpseDecayTimeMS)),
-	corpse_res_timer(RuleI(Character, CorpseResTimeMS)),
+	corpse_rez_timer(RuleI(Character, CorpseResTimeMS)),
 	corpse_delay_timer(RuleI(NPC, CorpseUnlockTimer)),
 	corpse_graveyard_timer(RuleI(Zone, GraveyardTimeMS)),
 	loot_cooldown_timer(10) 
@@ -328,13 +327,13 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	gold			= 0;
 	platinum		= 0;
 
-	strcpy(orgname, pp->name);
+	strcpy(corpse_name, pp->name);
 	strcpy(name, pp->name); 
 
 	/* become_npc was not being initialized which led to some pretty funky things with newly created corpses */
 	become_npc = false;
 
-	SetPKItem(0);
+	SetPlayerKillItemID(0);
 
 	/* Check Rule to see if we can leave corpses */
 	if(!RuleB(Character, LeaveNakedCorpses) || 
@@ -521,7 +520,7 @@ Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, ItemLi
 	0,						// uint8		in_maxlevel,
 	0),						// uint32		in_scalerate
 	corpse_decay_timer(RuleI(Character, CorpseDecayTimeMS)),
-	corpse_res_timer(RuleI(Character, CorpseResTimeMS)),
+	corpse_rez_timer(RuleI(Character, CorpseResTimeMS)),
 	corpse_delay_timer(RuleI(NPC, CorpseUnlockTimer)),
 	corpse_graveyard_timer(RuleI(Zone, GraveyardTimeMS)),
 	loot_cooldown_timer(10)
@@ -545,7 +544,7 @@ Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, ItemLi
 	itemlist = *in_itemlist;
 	in_itemlist->clear();
 
-	strcpy(orgname, in_charname);
+	strcpy(corpse_name, in_charname);
 	strcpy(name, in_charname);
 
 	this->copper = in_copper;
@@ -558,7 +557,7 @@ Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, ItemLi
 	for (int i = 0; i < MAX_LOOTERS; i++){
 		allowed_looters[i] = 0;
 	}
-	SetPKItem(0);
+	SetPlayerKillItemID(0);
 }
 
 Corpse::~Corpse() {
@@ -636,17 +635,16 @@ bool Corpse::Save() {
 	end = itemlist.end();
 	for (; cur != end; ++cur) { 
 		ServerLootItem_Struct* item = *cur;
-		item->equip_slot = ServerToCorpseSlot(item->equip_slot); // temp hack until corpse blobs are removed
 		memcpy((char*)&dbpc->items[x++], (char*)item, sizeof(ServerLootItem_Struct));
 	}
 
 	/* Create New Corpse*/
 	if (corpse_db_id == 0) {
-		corpse_db_id = database.SaveCharacterCorpse(char_id, orgname, zone->GetZoneID(), zone->GetInstanceID(), dbpc, x_pos, y_pos, z_pos, heading);
+		corpse_db_id = database.SaveCharacterCorpse(char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), dbpc, x_pos, y_pos, z_pos, heading);
 	}
 	/* Update Corpse Data */
 	else{
-		corpse_db_id = database.UpdateCharacterCorpse(corpse_db_id, char_id, orgname, zone->GetZoneID(), zone->GetInstanceID(), dbpc, x_pos, y_pos, z_pos, heading, IsRezzed());
+		corpse_db_id = database.UpdateCharacterCorpse(corpse_db_id, char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), dbpc, x_pos, y_pos, z_pos, heading, IsRezzed());
 	}
 
 	safe_delete_array(dbpc);
@@ -670,12 +668,12 @@ void Corpse::Bury() {
 	player_corpse_depop = true;
 }
 
-void Corpse::Depop() {
+void Corpse::DepopNPCCorpse() {
 	if (IsNPCCorpse())
 		player_corpse_depop = true;
 }
 
-void Corpse::DepopCorpse() {
+void Corpse::DepopPlayerCorpse() {
 	player_corpse_depop = true;
 }
 
@@ -903,7 +901,7 @@ bool Corpse::CanPlayerLoot(int charid) {
 	return false;
 }
 
-void Corpse::AllowMobLoot(Mob *them, uint8 slot) {
+void Corpse::AllowPlayerLoot(Mob *them, uint8 slot) {
 	if(slot >= MAX_LOOTERS)
 		return;
 	if(them == nullptr || !them->IsClient())
@@ -959,13 +957,13 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 	else if ((IsNPCCorpse() || become_npc) && CanPlayerLoot(client->CharacterID())) {
 		Loot_Request_Type = 2;
 	}
-	else if (GetPKItem() == -1 && CanPlayerLoot(client->CharacterID())) { /* PVP loot all items, variable cash */
+	else if (GetPlayerKillItem() == -1 && CanPlayerLoot(client->CharacterID())) { /* PVP loot all items, variable cash */
 		Loot_Request_Type = 3;
 	}
-	else if (GetPKItem() == 1 && CanPlayerLoot(client->CharacterID())) { /* PVP loot 1 item, variable cash */
+	else if (GetPlayerKillItem() == 1 && CanPlayerLoot(client->CharacterID())) { /* PVP loot 1 item, variable cash */
 		Loot_Request_Type = 4;
 	}
-	else if (GetPKItem() > 1 && CanPlayerLoot(client->CharacterID())) { /* PVP loot 1 set item, variable cash */
+	else if (GetPlayerKillItem() > 1 && CanPlayerLoot(client->CharacterID())) { /* PVP loot 1 set item, variable cash */
 		Loot_Request_Type = 5;
 	}
 
@@ -1010,14 +1008,14 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		client->QueuePacket(outapp);
 		safe_delete(outapp);
 		if(Loot_Request_Type == 5) {
-			int pkitem = GetPKItem();
+			int pkitem = GetPlayerKillItem();
 			const Item_Struct* item = database.GetItem(pkitem);
 			ItemInst* inst = database.CreateItem(item, item->MaxCharges);
 			if(inst) {
 				client->SendItemPacket(EmuConstants::CORPSE_BEGIN, inst, ItemPacketLoot);
 				safe_delete(inst);
 			}
-			else { client->Message(13, "Could not find item number %i to send!!", GetPKItem()); }
+			else { client->Message(13, "Could not find item number %i to send!!", GetPlayerKillItem()); }
 
 			client->QueuePacket(app);
 			return;
@@ -1068,14 +1066,14 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 			if(IsPlayerCorpse() && i == 0 && itemlist.size() > 0) { // somehow, player corpse contains items, but client doesn't see them...
 				client->Message(13, "This corpse contains items that are inaccessable!");
 				client->Message(15, "Contact a GM for item replacement, if necessary.");
-				client->Message(15, "BUGGED CORPSE [DBID: %i, Name: %s, Item Count: %i]", GetDBID(), GetName(), itemlist.size());
+				client->Message(15, "BUGGED CORPSE [DBID: %i, Name: %s, Item Count: %i]", GetCorpseDBID(), GetName(), itemlist.size());
 
 				cur = itemlist.begin();
 				end = itemlist.end();
 				for(; cur != end; ++cur) {
 					ServerLootItem_Struct* item_data = *cur;
 					item = database.GetItem(item_data->item_id);
-					LogFile->write(EQEMuLog::Debug, "Corpse Looting: %s was not sent to client loot window (corpse_dbid: %i, charname: %s(%s))", item->Name, GetDBID(), client->GetName(), client->GetGM() ? "GM" : "Owner");
+					LogFile->write(EQEMuLog::Debug, "Corpse Looting: %s was not sent to client loot window (corpse_dbid: %i, charname: %s(%s))", item->Name, GetCorpseDBID(), client->GetName(), client->GetGM() ? "GM" : "Owner");
 					client->Message(0, "Inaccessable Corpse Item: %s", item->Name);
 				}
 			}
@@ -1131,7 +1129,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 		client->Message(13, "Error: Corpse locked by GM.");
 		return;
 	}
-	if (IsPlayerCorpse() && (char_id != client->CharacterID()) && CanPlayerLoot(client->CharacterID()) && GetPKItem() == 0){
+	if (IsPlayerCorpse() && (char_id != client->CharacterID()) && CanPlayerLoot(client->CharacterID()) && GetPlayerKillItem() == 0){
 		client->Message(13, "Error: You cannot loot any more items from this corpse.");
 		SendEndLootErrorPacket(client);
 		being_looted_by = 0xFFFFFFFF;
@@ -1142,17 +1140,17 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 	ServerLootItem_Struct* item_data = nullptr, *bag_item_data[10];
 
 	memset(bag_item_data, 0, sizeof(bag_item_data));
-	if (GetPKItem() > 1){
-		item = database.GetItem(GetPKItem());
+	if (GetPlayerKillItem() > 1){
+		item = database.GetItem(GetPlayerKillItem());
 	}
-	else if (GetPKItem() == -1 || GetPKItem() == 1){
+	else if (GetPlayerKillItem() == -1 || GetPlayerKillItem() == 1){
 		item_data = GetItem(lootitem->slot_id - EmuConstants::CORPSE_BEGIN); //dont allow them to loot entire bags of items as pvp reward
 	}
 	else{
 		item_data = GetItem(lootitem->slot_id - EmuConstants::CORPSE_BEGIN, bag_item_data);
 	}
 
-	if (GetPKItem()<=1 && item_data != 0) {
+	if (GetPlayerKillItem()<=1 && item_data != 0) {
 		item = database.GetItem(item_data->item_id);
 	}
 
@@ -1191,7 +1189,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 
 		char buf[88];
 		char corpse_name[64];
-		strcpy(corpse_name, orgname);
+		strcpy(corpse_name, corpse_name);
 		snprintf(buf, 87, "%d %d %s", inst->GetItem()->ID, inst->GetCharges(), EntityList::RemoveNumbers(corpse_name));
 		buf[87] = '\0';
 		std::vector<EQEmu::Any> args;
@@ -1236,7 +1234,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 		}
 
 		/* Remove Bag Contents */
-		if (item->ItemClass == ItemClassContainer && (GetPKItem() != -1 || GetPKItem() != 1)) {
+		if (item->ItemClass == ItemClassContainer && (GetPlayerKillItem() != -1 || GetPlayerKillItem() != 1)) {
 			for (int i = SUB_BEGIN; i < EmuConstants::ITEM_CONTAINER_SIZE; i++) {
 				if (bag_item_data[i]) {
 					/* Delete needs to be before RemoveItem because its deletes the pointer for item_data/bag_item_data */
@@ -1247,8 +1245,8 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 			}
 		}
 
-		if (GetPKItem() != -1){
-			SetPKItem(0);
+		if (GetPlayerKillItem() != -1){
+			SetPlayerKillItemID(0);
 		}
 
 		/* Send message with item link to groups and such */
@@ -1361,7 +1359,7 @@ void Corpse::QueryLoot(Client* to) {
 	}
 
 	if (IsPlayerCorpse()) {
-		to->Message(0, "%i visible %s (%i total) on %s (DBID: %i).", x, x==1?"item":"items", y, this->GetName(), this->GetDBID());
+		to->Message(0, "%i visible %s (%i total) on %s (DBID: %i).", x, x==1?"item":"items", y, this->GetName(), this->GetCorpseDBID());
 	}
 	else {
 		to->Message(0, "%i %s on %s.", y, y==1?"item":"items", this->GetName());
@@ -1416,7 +1414,7 @@ bool Corpse::Summon(Client* client, bool spell, bool CheckDistance) {
 	return true;
 }
 
-void Corpse::CompleteRezz(){
+void Corpse::CompleteResurrection(){
 	rez_experience = 0;
 	is_corpse_changed = true;
 	this->Save();
@@ -1461,7 +1459,7 @@ uint32 Corpse::GetEquipmentColor(uint8 material_slot) const {
 }
 
 void Corpse::AddLooter(Mob* who) {
-	for (int i=0; i<MAX_LOOTERS; i++) {
+	for (int i = 0; i < MAX_LOOTERS; i++) {
 		if (allowed_looters[i] == 0) {
 			allowed_looters[i] = who->CastToClient()->CharacterID();
 			break;
@@ -1486,111 +1484,4 @@ void Corpse::LoadPlayerCorpseDecayTime(uint32 corpse_db_id){
 	else {
 		corpse_graveyard_timer.SetTimer(3000);
 	}
-}
-
-/*
-**	Corpse slot translations are needed until corpse database blobs are converted
-**	
-**	To account for the addition of MainPowerSource, MainGeneral9 and MainGeneral10 into
-**	the contiguous possessions slot enumeration, the following designations will be used:
-**	
-**	Designatiom			Server		Corpse		Offset
-**	--------------------------------------------------
-**	MainCharm			0			0			0
-**	...					...			...			0
-**	MainWaist			20			20			0
-**	MainPowerSource		21			9999		+9978
-**	MainAmmo			22			21			-1
-**
-**	MainGeneral1		23			22			-1
-**	...					...			...			-1
-**	MainGeneral8		30			29			-1
-**	MainGeneral9		31			9997		+9966
-**	MainGeneral10		32			9998		+9966
-**
-**	MainCursor			33			30			-3
-**
-**	MainGeneral1_1		251			251			0
-**	...					...			...			0
-**	MainGeneral8_10		330			330			0
-**	MainGeneral9_1		331			341			+10
-**	...					...			...			+10
-**	MainGeneral10_10	350			360			+10
-**
-**	MainCursor_1		351			331			-20
-**	...					...			...			-20
-**	MainCursor_10		360			340			-20
-**
-**	(Not all slot designations are valid to all clients..see <client>##_constants.h files for valid slot enumerations)
-*/
-int16 Corpse::ServerToCorpseSlot(int16 server_slot)
-{
-	return server_slot; // temporary return
-
-	/*
-	switch (server_slot)
-	{
-	case MainPowerSource:
-		return 9999;
-	case MainGeneral9:
-		return 9997;
-	case MainGeneral10:
-		return 9998;
-	case MainCursor:
-		return 30;
-	case MainAmmo:
-	case MainGeneral1:
-	case MainGeneral2:
-	case MainGeneral3:
-	case MainGeneral4:
-	case MainGeneral5:
-	case MainGeneral6:
-	case MainGeneral7:
-	case MainGeneral8:
-		return server_slot - 1;
-	default:
-		if (server_slot >= EmuConstants::CURSOR_BAG_BEGIN && server_slot <= EmuConstants::CURSOR_BAG_END)
-			return server_slot - 20;
-		else if (server_slot >= EmuConstants::GENERAL_BAGS_END - 19 && server_slot <= EmuConstants::GENERAL_BAGS_END)
-			return server_slot + 10;
-		else
-			return server_slot;
-	}
-	*/
-}
-
-int16 Corpse::CorpseToServerSlot(int16 corpse_slot)
-{
-	return corpse_slot; // temporary return
-
-	/*
-	switch (corpse_slot)
-	{
-	case 9999:
-		return MainPowerSource;
-	case 9997:
-		return MainGeneral9;
-	case 9998:
-		return MainGeneral10;
-	case 30:
-		return MainCursor;
-	case 21: // old SLOT_AMMO
-	case 22: // old PERSONAL_BEGIN
-	case 23:
-	case 24:
-	case 25:
-	case 26:
-	case 27:
-	case 28:
-	case 29: // old PERSONAL_END
-		return corpse_slot + 1;
-	default:
-		if (corpse_slot >= 331 && corpse_slot <= 340)
-			return corpse_slot + 20;
-		else if (corpse_slot >= 341 && corpse_slot <= 360)
-			return corpse_slot - 10;
-		else
-			return corpse_slot;
-	}
-	*/
 }

@@ -3652,7 +3652,7 @@ uint32 ZoneDatabase::GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slotid) {
 
 	if (tmp) {
 		itemid = tmp->GetWornItem(slotid);
-		tmp->DepopCorpse();
+		tmp->DepopPlayerCorpse();
 	}
 	return itemid;
 }
@@ -3800,7 +3800,7 @@ Corpse* ZoneDatabase::SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_z
 			entity_list.AddCorpse(NewCorpse);
 			NewCorpse->SetDecayTimer(RuleI(Character, CorpseDecayTimeMS));
 			NewCorpse->Spawn();
-			if (!UnburyCharacterCorpse(NewCorpse->GetDBID(), dest_zone_id, dest_instance_id, dest_x, dest_y, dest_z, dest_heading))
+			if (!UnburyCharacterCorpse(NewCorpse->GetCorpseDBID(), dest_zone_id, dest_instance_id, dest_x, dest_y, dest_z, dest_heading))
 				LogFile->write(EQEMuLog::Error, "Unable to unbury a summoned player corpse for character id %u.", char_id);
 		}
 	}

@@ -39,7 +39,7 @@ void Lua_Corpse::ResetLooter() {
 
 uint32 Lua_Corpse::GetDBID() {
 	Lua_Safe_Call_Int();
-	return self->GetDBID();
+	return self->GetCorpseDBID();
 }
 
 bool Lua_Corpse::IsRezzed() {
@@ -119,7 +119,7 @@ bool Lua_Corpse::CanMobLoot(int charid) {
 
 void Lua_Corpse::AllowMobLoot(Lua_Mob them, uint8 slot) {
 	Lua_Safe_Call_Void();
-	self->AllowMobLoot(them, slot);
+	self->AllowPlayerLoot(them, slot);
 }
 
 bool Lua_Corpse::Summon(Lua_Client client, bool spell, bool checkdistance) {
