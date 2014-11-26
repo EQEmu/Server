@@ -6,7 +6,7 @@ xy_location::xy_location(float x, float y) :
 }
 
 const xy_location xy_location::operator -(const xy_location& rhs) {
-    xy_location minus{m_X - rhs.m_X, m_Y - rhs.m_Y};
+    xy_location minus(m_X - rhs.m_X, m_Y - rhs.m_Y);
     return minus;
 }
 
@@ -54,23 +54,23 @@ xyz_heading::xyz_heading(const xy_location locationDir, float z, float heading) 
 }
 
 xyz_heading::operator xyz_location() const {
-    return xyz_location{m_X,m_Y,m_Z};
+    return xyz_location(m_X,m_Y,m_Z);
 }
 
 xyz_heading::operator xy_location() const {
-    return xy_location{m_X,m_Y};
+    return xy_location(m_X,m_Y);
 }
 
 const xyz_heading xyz_heading::operator +(const xyz_location& rhs) {
-    return xyz_heading{m_X + rhs.m_X, m_Y + rhs.m_Y, m_Z + rhs.m_Z, m_Heading};
+    return xyz_heading(m_X + rhs.m_X, m_Y + rhs.m_Y, m_Z + rhs.m_Z, m_Heading);
 }
 
 const xyz_heading xyz_heading::operator +(const xy_location& rhs) {
-    return xyz_heading{m_X + rhs.m_X, m_Y + rhs.m_Y, m_Z, m_Heading};
+    return xyz_heading(m_X + rhs.m_X, m_Y + rhs.m_Y, m_Z, m_Heading);
 }
 
 const xyz_heading xyz_heading::operator -(const xyz_location& rhs) {
-    return xyz_heading{m_X - rhs.m_X, m_Y - rhs.m_Y, m_Z - rhs.m_Z, m_Heading};
+    return xyz_heading(m_X - rhs.m_X, m_Y - rhs.m_Y, m_Z - rhs.m_Z, m_Heading);
 }
 
 
@@ -87,11 +87,11 @@ xyz_location::xyz_location(double x, double y, double z) :
 }
 
 xyz_location::operator xy_location() const {
-    return xy_location{m_X, m_Y};
+    return xy_location(m_X, m_Y);
 }
 
 const xyz_location xyz_location::operator -(const xyz_location& rhs) {
-    return xyz_location{m_X - rhs.m_X, m_Y - rhs.m_Y, m_Z - rhs.m_Z};
+    return xyz_location(m_X - rhs.m_X, m_Y - rhs.m_Y, m_Z - rhs.m_Z);
 }
 
 void xyz_location::ABS_XYZ(void) {

@@ -543,7 +543,7 @@ bool Client::Process() {
 				else
 				{
 					animation = 0;
-					m_Delta = {0.0f, 0.0f, 0.0f, m_Delta.m_Heading};
+					m_Delta = xyz_heading(0.0f, 0.0f, 0.0f, m_Delta.m_Heading);
 					SendPosUpdate(2);
 				}
 			}

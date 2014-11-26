@@ -718,7 +718,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	SetMoving(true);
 	moved=true;
 
-    m_Delta = {m_Position.m_X - nx, m_Position.m_Y - ny, m_Position.m_Z - nz, 0.0f};
+    m_Delta = xyz_heading(m_Position.m_X - nx, m_Position.m_Y - ny, m_Position.m_Z - nz, 0.0f);
 
 	if (IsClient())
 		SendPosUpdate(1);
@@ -842,7 +842,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 		tar_ndx=0;
 		this->SetMoving(true);
 		moved=true;
-		m_Delta = {m_Position.m_X - nx, m_Position.m_Y - ny, m_Position.m_Z - nz, 0.0f};
+		m_Delta = xyz_heading(m_Position.m_X - nx, m_Position.m_Y - ny, m_Position.m_Z - nz, 0.0f);
 		SendPosUpdate();
 	}
 	tar_ndx++;
