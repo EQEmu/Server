@@ -493,10 +493,7 @@ void Mob::AI_Start(uint32 iMoveDelay) {
 		pAssistRange = 70;
 	hate_list.Wipe();
 
-	delta_heading = 0;
-	delta_x = 0;
-	delta_y = 0;
-	delta_z = 0;
+	m_Delta = xyz_heading::Origin();
 	pRunAnimSpeed = 0;
 	pLastChange = Timer::GetCurrentTime();
 }

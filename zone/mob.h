@@ -421,7 +421,7 @@ public:
 	//Movement
 	void Warp( float x, float y, float z );
 	inline bool IsMoving() const { return moving; }
-	virtual void SetMoving(bool move) { moving = move; delta_x = 0; delta_y = 0; delta_z = 0; delta_heading = 0; }
+	virtual void SetMoving(bool move) { moving = move; m_Delta = xyz_heading::Origin(); }
 	virtual void GoToBind(uint8 bindnum = 0) { }
 	virtual void Gate();
 	float GetWalkspeed() const { return(_GetMovementSpeed(-47)); }
@@ -1047,10 +1047,7 @@ protected:
 	char clean_name[64];
 	char lastname[64];
 
-	int32 delta_heading;
-	float delta_x;
-	float delta_y;
-	float delta_z;
+	xyz_heading m_Delta;
 
 	uint8 light;
 

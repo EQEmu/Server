@@ -4558,10 +4558,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	}
 
 	// Update internal state
-	delta_x			= ppu->delta_x;
-	delta_y			= ppu->delta_y;
-	delta_z			= ppu->delta_z;
-	delta_heading	= ppu->delta_heading;
+	m_Delta = {ppu->delta_x, ppu->delta_y, ppu->delta_z, ppu->delta_heading};
 
 	if(IsTracking() && ((m_Position.m_X!=ppu->x_pos) || (m_Position.m_Y!=ppu->y_pos))){
 		if(MakeRandomFloat(0, 100) < 70)//should be good

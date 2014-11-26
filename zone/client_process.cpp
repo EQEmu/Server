@@ -543,9 +543,7 @@ bool Client::Process() {
 				else
 				{
 					animation = 0;
-					delta_x = 0;
-					delta_y = 0;
-					delta_z = 0;
+					m_Delta = {0.0f, 0.0f, 0.0f, m_Delta.m_Heading};
 					SendPosUpdate(2);
 				}
 			}
