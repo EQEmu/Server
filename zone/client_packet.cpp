@@ -8031,6 +8031,10 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app)
 				strcpy(insr->itemnames[L], item->Name);
 				insr->itemicons[L] = aug_weap->Icon;
 			}
+			else if (inst->GetOrnamentationIcon() && inst->GetOrnamentationIDFile()) {
+				strcpy(insr->itemnames[L], item->Name);
+				insr->itemicons[L] = inst->GetOrnamentationIcon();
+			}
 			else {
 				strcpy(insr->itemnames[L], item->Name);
 				insr->itemicons[L] = item->Icon;

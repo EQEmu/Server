@@ -1412,6 +1412,8 @@ ItemInst::ItemInst(const Item_Struct* item, int16 charges) {
 	m_scaledItem = nullptr;
 	m_evolveInfo = nullptr;
 	m_scaling = false;
+	m_ornamenticon = 0;
+	m_ornamentidfile = 0;
 }
 
 ItemInst::ItemInst(SharedDatabase *db, uint32 item_id, int16 charges) {
@@ -1434,6 +1436,8 @@ ItemInst::ItemInst(SharedDatabase *db, uint32 item_id, int16 charges) {
 	m_scaledItem = nullptr;
 	m_evolveInfo = nullptr;
 	m_scaling = false;
+	m_ornamenticon = 0;
+	m_ornamentidfile = 0;
 }
 
 ItemInst::ItemInst(ItemInstTypes use_type) {
@@ -1451,6 +1455,8 @@ ItemInst::ItemInst(ItemInstTypes use_type) {
 	m_scaledItem = nullptr;
 	m_evolveInfo = nullptr;
 	m_scaling = false;
+	m_ornamenticon = 0;
+	m_ornamentidfile = 0;
 }
 
 // Make a copy of an ItemInst object
@@ -1501,6 +1507,8 @@ ItemInst::ItemInst(const ItemInst& copy)
 		m_evolveInfo = nullptr;
 
 	m_scaling = copy.m_scaling;
+	m_ornamenticon = copy.m_ornamenticon;
+	m_ornamentidfile = copy.m_ornamentidfile;
 }
 
 // Clean up container contents
@@ -1787,6 +1795,54 @@ ItemInst* ItemInst::GetOrnamentationAug(int ornamentationAugtype) const
 	}
 
 	return nullptr;
+}
+
+bool ItemInst::CanTransform(const Item_Struct *ItemToTry, const Item_Struct *Container, bool AllowAll) {
+	if (!ItemToTry || !Container) return false;
+
+	if (ItemToTry->ItemType == ItemTypeArrow || strnlen(Container->CharmFile, 30) == 0)
+		return false;
+
+	if (AllowAll && Container->CharmFile != "ITEMTRANSFIGSHIELD" && Container->CharmFile != "ITEMTransfigBow") {
+		switch (ItemToTry->ItemType) {
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+			case 35:
+			case 45:
+				return true;
+		}
+	}
+
+	static std::map<std::string, int> types = {
+		  { "ITEMTransfig1HP", 2 },
+		  { "ITEMTransfig1HS", 0 },
+		  { "ITEMTransfig2HB", 4 },
+		  { "ITEMTransfig2HP", 35 },
+		  { "ITEMTransfig2HS", 1 },
+		  { "ITEMTransfigBlunt", 3 },
+		  { "ITEMTransfigBow", 5 },
+		  { "ITEMTransfigHTH", 45 },
+		  { "ITEMTRANSFIGSHIELD", 8 },
+		  { "ITEMTransfigSlashing", 0 }
+		 };
+
+	auto i = types.find(Container->CharmFile);
+	if (i != types.end() && i->second == ItemToTry->ItemType)
+		return true;
+
+	static std::map<std::string, int> typestwo = {
+		{ "ITEMTransfigBlunt", 4 },
+		{ "ITEMTransfigSlashing", 1 }
+	};
+	
+	i = typestwo.find(Container->CharmFile);
+	if (i != typestwo.end() && i->second == ItemToTry->ItemType)
+		return true;
+
+	return false;
 }
 
 uint32 ItemInst::GetAugmentItemID(uint8 slot) const

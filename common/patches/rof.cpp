@@ -4888,6 +4888,16 @@ namespace RoF
 			//Icon
 			ornaIcon = aug_weap->Icon;
 		}
+		else if (inst->GetOrnamentationIDFile() && inst->GetOrnamentationIcon()) {
+			char tmp[30]; memset(tmp, 0x0, 30); sprintf(tmp, "IT%d", inst->GetOrnamentationIDFile());
+			//Mainhand
+			ss.write(tmp, strlen(tmp));
+			ss.write((const char*)&null_term, sizeof(uint8));
+			//Offhand
+			ss.write(tmp, strlen(tmp));
+			ss.write((const char*)&null_term, sizeof(uint8));
+			ornaIcon = inst->GetOrnamentationIcon();
+		}
 		else {
 			ss.write((const char*)&null_term, sizeof(uint8)); //no mh
 			ss.write((const char*)&null_term, sizeof(uint8));//no of

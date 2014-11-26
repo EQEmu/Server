@@ -2455,6 +2455,9 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 					item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
 					return atoi(&item->IDFile[2]);
 				}
+				else if (inst->GetOrnamentationIcon() && inst->GetOrnamentationIDFile()) {
+					return inst->GetOrnamentationIDFile();
+				}
 				else {
 					if (strlen(item->IDFile) > 2)
 						return atoi(&item->IDFile[2]);

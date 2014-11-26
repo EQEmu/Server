@@ -330,6 +330,7 @@ public:
 	ItemInst* RemoveAugment(uint8 index);
 	bool IsAugmented();
 	ItemInst* GetOrnamentationAug(int ornamentationAugtype) const;
+	static bool CanTransform(const Item_Struct *ItemToTry, const Item_Struct *Container, bool AllowAll = false);
 	
 	// Has attack/delay?
 	bool IsWeapon() const;
@@ -392,6 +393,10 @@ public:
 	void SetActivated(bool activated)	{ m_activated = activated; }
 	int8 GetEvolveLvl() const			{ return m_evolveLvl; }
 	void SetScaling(bool v)				{ m_scaling = v; }
+	uint32 GetOrnamentationIcon() const					{ return m_ornamenticon; }
+	void SetOrnamentIcon(uint32 ornament_icon)  		{ m_ornamenticon = ornament_icon; }
+	uint32 GetOrnamentationIDFile() const 				{ return m_ornamentidfile; }
+	void SetOrnamentationIDFile(uint32 ornament_idfile) { m_ornamentidfile = ornament_idfile; }
 
 	void Initialize(SharedDatabase *db = nullptr);
 	void ScaleItem();
@@ -436,6 +441,8 @@ protected:
 	Item_Struct*		m_scaledItem;
 	EvolveInfo*			m_evolveInfo;
 	bool				m_scaling;
+	uint32				m_ornamenticon;
+	uint32				m_ornamentidfile;
 
 	//
 	// Items inside of this item (augs or contents);

@@ -1889,6 +1889,9 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 			if (strlen(item->IDFile) > 2)
 				ns->spawn.equipment[MaterialPrimary] = atoi(&item->IDFile[2]);
 		}
+		else if (inst->GetOrnamentationIcon() && inst->GetOrnamentationIDFile()) {
+			ns->spawn.equipment[MaterialPrimary] = inst->GetOrnamentationIDFile();
+		}
 		else {
 			item = inst->GetItem();
 			if (strlen(item->IDFile) > 2)
@@ -1900,6 +1903,9 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 			item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
 			if (strlen(item->IDFile) > 2)
 				ns->spawn.equipment[MaterialSecondary] = atoi(&item->IDFile[2]);
+		}
+		else if (inst->GetOrnamentationIcon() && inst->GetOrnamentationIDFile()) {
+			ns->spawn.equipment[MaterialSecondary] = inst->GetOrnamentationIDFile();
 		}
 		else {
 			item = inst->GetItem();
@@ -2766,6 +2772,9 @@ void Client::SetMaterial(int16 in_slot, uint32 item_id) {
 				item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
 				m_pp.item_material[MaterialPrimary] = atoi(item->IDFile + 2);
 			}
+			else if (inst && inst->GetOrnamentationIcon() && inst->GetOrnamentationIDFile()) {
+				m_pp.item_material[MaterialPrimary] = inst->GetOrnamentationIDFile();
+			}
 			else {
 				m_pp.item_material[MaterialPrimary] = atoi(item->IDFile + 2);
 			}
@@ -2775,6 +2784,9 @@ void Client::SetMaterial(int16 in_slot, uint32 item_id) {
 			if (inst && inst->GetOrnamentationAug(ornamentationAugtype)) {
 				item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
 				m_pp.item_material[MaterialSecondary] = atoi(item->IDFile + 2);
+			}
+			else if (inst && inst->GetOrnamentationIcon() && inst->GetOrnamentationIDFile()) {
+				m_pp.item_material[MaterialSecondary] = inst->GetOrnamentationIDFile();
 			}
 			else {
 				m_pp.item_material[MaterialSecondary] = atoi(item->IDFile + 2);
@@ -5832,7 +5844,11 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 						const Item_Struct *aug_weap = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
 						strcpy(insr->itemnames[L], item->Name);
 						insr->itemicons[L] = aug_weap->Icon;
-					} 
+					}
+					else if (inst->GetOrnamentationIcon() && inst->GetOrnamentationIDFile()) {
+						strcpy(insr->itemnames[L], item->Name);
+						insr->itemicons[L] = inst->GetOrnamentationIcon();
+					}					
 					else {
 						strcpy(insr->itemnames[L], item->Name);
 						insr->itemicons[L] = item->Icon;
