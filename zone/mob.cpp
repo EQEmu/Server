@@ -98,6 +98,7 @@ Mob::Mob(const char* in_name,
 		bardsong_timer(6000),
 		gravity_timer(1000),
 		viral_timer(0),
+		m_FearWalkTarget(-999999.0f,-999999.0f,-999999.0f),
 		flee_timer(FLEE_CHECK_TIMER)
 
 {
@@ -110,9 +111,6 @@ Mob::Mob(const char* in_name,
 	tarx=0;
 	tary=0;
 	tarz=0;
-	fear_walkto_x = -999999;
-	fear_walkto_y = -999999;
-	fear_walkto_z = -999999;
 	curfp = false;
 
 	AI_Init();
@@ -321,9 +319,6 @@ Mob::Mob(const char* in_name,
 	follow=0;
 	follow_dist = 100;	// Default Distance for Follow
 	flee_mode = false;
-	fear_walkto_x = -999999;
-	fear_walkto_y = -999999;
-	fear_walkto_z = -999999;
 	curfp = false;
 	flee_timer.Start();
 

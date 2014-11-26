@@ -785,17 +785,17 @@ void Client::AI_Process()
 				if(AImovement_timer->Check()) {
 					animation = GetRunspeed() * 21;
 					// Check if we have reached the last fear point
-					if((ABS(GetX()-fear_walkto_x) < 0.1) && (ABS(GetY()-fear_walkto_y) <0.1)) {
+					if((ABS(GetX()-m_FearWalkTarget.m_X) < 0.1) && (ABS(GetY()-m_FearWalkTarget.m_Y) <0.1)) {
 						// Calculate a new point to run to
 						CalculateNewFearpoint();
 					}
 					if(!RuleB(Pathing, Fear) || !zone->pathing)
-						CalculateNewPosition2(fear_walkto_x, fear_walkto_y, fear_walkto_z, GetFearSpeed(), true);
+						CalculateNewPosition2(m_FearWalkTarget.m_X, m_FearWalkTarget.m_Y, m_FearWalkTarget.m_Z, GetFearSpeed(), true);
 					else
 					{
 						bool WaypointChanged, NodeReached;
 
-						Map::Vertex Goal = UpdatePath(fear_walkto_x, fear_walkto_y, fear_walkto_z,
+						Map::Vertex Goal = UpdatePath(m_FearWalkTarget.m_X, m_FearWalkTarget.m_Y, m_FearWalkTarget.m_Z,
 									GetFearSpeed(), WaypointChanged, NodeReached);
 
 						if(WaypointChanged)
@@ -1053,17 +1053,17 @@ void Mob::AI_Process() {
 			} else {
 				if(AImovement_timer->Check()) {
 					// Check if we have reached the last fear point
-					if((ABS(GetX()-fear_walkto_x) < 0.1) && (ABS(GetY()-fear_walkto_y) <0.1)) {
+					if((ABS(GetX()-m_FearWalkTarget.m_X) < 0.1) && (ABS(GetY()-m_FearWalkTarget.m_Y) <0.1)) {
 						// Calculate a new point to run to
 						CalculateNewFearpoint();
 					}
 					if(!RuleB(Pathing, Fear) || !zone->pathing)
-						CalculateNewPosition2(fear_walkto_x, fear_walkto_y, fear_walkto_z, GetFearSpeed(), true);
+						CalculateNewPosition2(m_FearWalkTarget.m_X, m_FearWalkTarget.m_Y, m_FearWalkTarget.m_Z, GetFearSpeed(), true);
 					else
 					{
 						bool WaypointChanged, NodeReached;
 
-						Map::Vertex Goal = UpdatePath(fear_walkto_x, fear_walkto_y, fear_walkto_z,
+						Map::Vertex Goal = UpdatePath(m_FearWalkTarget.m_X, m_FearWalkTarget.m_Y, m_FearWalkTarget.m_Z,
 									GetFearSpeed(), WaypointChanged, NodeReached);
 
 						if(WaypointChanged)

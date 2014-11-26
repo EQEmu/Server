@@ -1192,9 +1192,7 @@ protected:
 
 
 	int patrol;
-	float fear_walkto_x;
-	float fear_walkto_y;
-	float fear_walkto_z;
+	xyz_location m_FearWalkTarget;
 	bool curfp;
 
 	// Pathing
