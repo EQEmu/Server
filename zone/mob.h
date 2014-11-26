@@ -807,10 +807,10 @@ public:
 	void				SetDontCureMeBefore(uint32 time) { pDontCureMeBefore = time; }
 
 	// calculate interruption of spell via movement of mob
-	void SaveSpellLoc() {spell_x = m_Position.m_X; spell_y = m_Position.m_Y; spell_z = m_Position.m_Z; }
-	inline float GetSpellX() const {return spell_x;}
-	inline float GetSpellY() const {return spell_y;}
-	inline float GetSpellZ() const {return spell_z;}
+	void SaveSpellLoc() {m_SpellLocation = m_Position; }
+	inline float GetSpellX() const {return m_SpellLocation.m_X;}
+	inline float GetSpellY() const {return m_SpellLocation.m_Y;}
+	inline float GetSpellZ() const {return m_SpellLocation.m_Z;}
 	inline bool IsGrouped() const { return isgrouped; }
 	void SetGrouped(bool v);
 	inline bool IsRaidGrouped() const { return israidgrouped; }
@@ -1069,7 +1069,7 @@ protected:
 	//spell casting vars
 	Timer spellend_timer;
 	uint16 casting_spell_id;
-	float spell_x, spell_y, spell_z;
+	xyz_location m_SpellLocation;
 	int attacked_count;
 	bool delaytimer;
 	uint16 casting_spell_targetid;
