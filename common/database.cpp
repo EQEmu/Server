@@ -3254,7 +3254,7 @@ char* Database::GetGroupLeaderForLogin(const char* name, char* leaderbuf) {
 	strcpy(leaderbuf, "");
 	uint32 group_id = 0;
 
-	std::string query = StringFormat("SELECT `groupid` FROM `group_id` WHERE `name = '%s'", name);
+	std::string query = StringFormat("SELECT `groupid` FROM `group_id` WHERE `name` = '%s'", name);
 	auto results = QueryDatabase(query);
 
 	for (auto row = results.begin(); row != results.end(); ++row)
