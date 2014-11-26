@@ -1670,6 +1670,12 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			} else {
 				spell_target = this;
 			}
+
+			if (spell_target && spell_target->IsPet() && spells[spell_id].targettype == ST_GroupNoPets){
+				Message_StringID(13,NO_CAST_ON_PET);
+				return false;
+			}
+
 			CastAction = GroupSpell;
 			break;
 		}
