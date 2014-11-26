@@ -69,7 +69,7 @@ public:
 	inline uint32	GetDBID()		{ return corpse_db_id; }
 	inline char*	GetOwnerName()	{ return orgname;}
 
-	void					SetDecayTimer(uint32 decaytime);
+	void					SetDecayTimer(uint32 decay_time);
 	bool					IsEmpty() const;
 	void					AddItem(uint32 itemnum, uint16 charges, int16 slot = 0, uint32 aug1=0, uint32 aug2=0, uint32 aug3=0, uint32 aug4=0, uint32 aug5=0);
 	uint32					GetWornItem(int16 equipSlot) const;
@@ -99,7 +99,7 @@ public:
 	void	CompleteRezz();
 	void	SetPKItem(int32 id) { player_kill_item = id; }
 	int32	GetPKItem() { return player_kill_item; }
-	bool	CanMobLoot(int charid);
+	bool	CanPlayerLoot(int charid);
 	void	AllowMobLoot(Mob *them, uint8 slot);
 	void	AddLooter(Mob *who);
 	bool	IsRezzed() { return rez; }

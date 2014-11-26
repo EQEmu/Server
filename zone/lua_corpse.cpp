@@ -114,7 +114,7 @@ void Lua_Corpse::SetDecayTimer(uint32 decaytime) {
 
 bool Lua_Corpse::CanMobLoot(int charid) {
 	Lua_Safe_Call_Bool();
-	return self->CanMobLoot(charid);
+	return self->CanPlayerLoot(charid);
 }
 
 void Lua_Corpse::AllowMobLoot(Lua_Mob them, uint8 slot) {

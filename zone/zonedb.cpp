@@ -3937,15 +3937,6 @@ uint32 ZoneDatabase::GetFirstCorpseID(uint32 char_id) {
 	return 0;
 }
 
-bool ZoneDatabase::ClearCorpseItems(uint32 db_id){
-	std::string query = StringFormat("DELETE FROM `character_corpse_items` WHERE `corpse_id` = %u", db_id);
-	auto results = QueryDatabase(query);
-	if (results.Success() && results.RowsAffected() != 0){ 
-		return true;
-	}
-	return false;	
-}
-
 bool ZoneDatabase::DeleteItemOffCharacterCorpse(uint32 db_id, uint32 equip_slot, uint32 item_id){
 	std::string query = StringFormat("DELETE FROM `character_corpse_items` WHERE `corpse_id` = %u AND equip_slot = %u AND item_id = %u", db_id, equip_slot, item_id);
 	auto results = QueryDatabase(query);
@@ -3959,7 +3950,6 @@ bool ZoneDatabase::BuryCharacterCorpse(uint32 db_id) {
 	std::string query = StringFormat("UPDATE `character_corpses` SET `is_buried` = 1 WHERE `id` = %u", db_id);
 	auto results = QueryDatabase(query);
 	if (results.Success() && results.RowsAffected() != 0){
-		ClearCorpseItems(db_id);
 		return true;
 	}
 	return false;
