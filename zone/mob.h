@@ -1056,7 +1056,6 @@ protected:
 	uint8 pRunAnimSpeed;
 	bool m_is_running;
 
-
 	Timer attack_timer;
 	Timer attack_dw_timer;
 	Timer ranged_timer;
@@ -1091,9 +1090,8 @@ protected:
 	uint8 projectile_increment[MAX_SPELL_PROJECTILE];
 	float projectile_x[MAX_SPELL_PROJECTILE], projectile_y[MAX_SPELL_PROJECTILE], projectile_z[MAX_SPELL_PROJECTILE];
 
-	float rewind_x;
-	float rewind_y;
-	float rewind_z;
+	xyz_location m_RewindLocation;
+
 	Timer rewind_timer;
 
 	// Currently 3 max nimbus particle effects at a time

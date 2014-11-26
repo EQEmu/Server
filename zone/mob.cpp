@@ -118,9 +118,7 @@ Mob::Mob(const char* in_name,
 	AI_Init();
 	SetMoving(false);
 	moved=false;
-	rewind_x = 0;		//Stored x_pos for /rewind
-	rewind_y = 0;		//Stored y_pos for /rewind
-	rewind_z = 0;		//Stored z_pos for /rewind
+	m_RewindLocation = xyz_location::Origin();
 	move_tic_count = 0;
 
 	_egnode = nullptr;

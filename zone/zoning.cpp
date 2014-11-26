@@ -539,7 +539,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			SetHeading(heading);
 			break;
 		case Rewind:
-			LogFile->write(EQEMuLog::Debug, "%s has requested a /rewind from %f, %f, %f, to %f, %f, %f in %s", GetName(), m_Position.m_X, m_Position.m_Y, m_Position.m_Z, rewind_x, rewind_y, rewind_z, zone->GetShortName());
+			LogFile->write(EQEMuLog::Debug, "%s has requested a /rewind from %f, %f, %f, to %f, %f, %f in %s", GetName(), m_Position.m_X, m_Position.m_Y, m_Position.m_Z, m_RewindLocation.m_X, m_RewindLocation.m_Y, m_RewindLocation.m_Z, zone->GetShortName());
 			zonesummon_x = m_Position.m_X = x;
 			zonesummon_y = m_Position.m_Y = y;
 			zonesummon_z = m_Position.m_Z = z;
