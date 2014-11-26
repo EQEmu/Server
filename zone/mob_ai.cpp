@@ -1792,7 +1792,7 @@ void NPC::AI_DoMovement() {
 			CP2Moved = CalculateNewPosition2(guard_x, guard_y, guard_z, walksp);
 		else
 		{
-			if(!((x_pos == guard_x) && (y_pos == guard_y) && (z_pos == guard_z)))
+			if(!((m_Position.m_X == guard_x) && (m_Position.m_Y == guard_y) && (m_Position.m_Z == guard_z)))
 			{
 				bool WaypointChanged, NodeReached;
 				Map::Vertex Goal = UpdatePath(guard_x, guard_y, guard_z, walksp, WaypointChanged, NodeReached);

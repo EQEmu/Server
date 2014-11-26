@@ -347,16 +347,16 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 
 	//set the player's coordinates in the new zone so they have them
 	//when they zone into it
-	x_pos = dest_x; //these coordinates will now be saved when ~client is called
-	y_pos = dest_y;
-	z_pos = dest_z;
-	heading = dest_h; // Cripp: fix for zone heading
+	m_Position.m_X = dest_x; //these coordinates will now be saved when ~client is called
+	m_Position.m_Y = dest_y;
+	m_Position.m_Z = dest_z;
+	m_Position.m_Heading = dest_h; // Cripp: fix for zone heading
 	m_pp.heading = dest_h;
 	m_pp.zone_id = zone_id;
 	m_pp.zoneInstance = instance_id;
 
 	//Force a save so its waiting for them when they zone
-	Save(2); 
+	Save(2);
 
 	if (zone_id == zone->GetZoneID() && instance_id == zone->GetInstanceID()) {
 		// No need to ask worldserver if we're zoning to ourselves (most
@@ -500,9 +500,9 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			SetHeading(heading);
 			break;
 		case GMSummon:
-			zonesummon_x = x_pos = x;
-			zonesummon_y = y_pos = y;
-			zonesummon_z = z_pos = z;
+			zonesummon_x = m_Position.m_X = x;
+			zonesummon_y = m_Position.m_Y = y;
+			zonesummon_z = m_Position.m_Z = z;
 			SetHeading(heading);
 
 			zonesummon_id = zoneID;
@@ -518,31 +518,31 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			zonesummon_ignorerestrictions = ignorerestrictions;
 			break;
 		case GateToBindPoint:
-			x = x_pos = m_pp.binds[0].x;
-			y = y_pos = m_pp.binds[0].y;
-			z = z_pos = m_pp.binds[0].z;
+			x = m_Position.m_X = m_pp.binds[0].x;
+			y = m_Position.m_Y = m_pp.binds[0].y;
+			z = m_Position.m_Z = m_pp.binds[0].z;
 			heading = m_pp.binds[0].heading;
 			break;
 		case ZoneToBindPoint:
-			x = x_pos = m_pp.binds[0].x;
-			y = y_pos = m_pp.binds[0].y;
-			z = z_pos = m_pp.binds[0].z;
+			x = m_Position.m_X = m_pp.binds[0].x;
+			y = m_Position.m_Y = m_pp.binds[0].y;
+			z = m_Position.m_Z = m_pp.binds[0].z;
 			heading = m_pp.binds[0].heading;
 
 			zonesummon_ignorerestrictions = 1;
 			LogFile->write(EQEMuLog::Debug, "Player %s has died and will be zoned to bind point in zone: %s at LOC x=%f, y=%f, z=%f, heading=%f", GetName(), pZoneName, m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, m_pp.binds[0].heading);
 			break;
 		case SummonPC:
-			zonesummon_x = x_pos = x;
-			zonesummon_y = y_pos = y;
-			zonesummon_z = z_pos = z;
+			zonesummon_x = m_Position.m_X = x;
+			zonesummon_y = m_Position.m_Y = y;
+			zonesummon_z = m_Position.m_Z = z;
 			SetHeading(heading);
 			break;
 		case Rewind:
-			LogFile->write(EQEMuLog::Debug, "%s has requested a /rewind from %f, %f, %f, to %f, %f, %f in %s", GetName(), x_pos, y_pos, z_pos, rewind_x, rewind_y, rewind_z, zone->GetShortName());
-			zonesummon_x = x_pos = x;
-			zonesummon_y = y_pos = y;
-			zonesummon_z = z_pos = z;
+			LogFile->write(EQEMuLog::Debug, "%s has requested a /rewind from %f, %f, %f, to %f, %f, %f in %s", GetName(), m_Position.m_X, m_Position.m_Y, m_Position.m_Z, rewind_x, rewind_y, rewind_z, zone->GetShortName());
+			zonesummon_x = m_Position.m_X = x;
+			zonesummon_y = m_Position.m_Y = y;
+			zonesummon_z = m_Position.m_Z = z;
 			SetHeading(heading);
 			break;
 		default:
@@ -652,10 +652,10 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 		else {
 			if(zoneID == GetZoneID()) {
 				//properly handle proximities
-				entity_list.ProcessMove(this, x_pos, y_pos, z_pos);
-				proximity_x = x_pos;
-				proximity_y = y_pos;
-				proximity_z = z_pos;
+				entity_list.ProcessMove(this, m_Position.m_X, m_Position.m_Y, m_Position.m_Z);
+				proximity_x = m_Position.m_X;
+				proximity_y = m_Position.m_Y;
+				proximity_z = m_Position.m_Z;
 
 				//send out updates to people in zone.
 				SendPosition();
@@ -723,9 +723,9 @@ void Client::SetBindPoint(int to_zone, int to_instance, float new_x, float new_y
 	if (to_zone == -1) {
 		m_pp.binds[0].zoneId = zone->GetZoneID();
 		m_pp.binds[0].instance_id = (zone->GetInstanceID() != 0 && zone->IsInstancePersistent()) ? zone->GetInstanceID() : 0;
-		m_pp.binds[0].x = x_pos;
-		m_pp.binds[0].y = y_pos;
-		m_pp.binds[0].z = z_pos;
+		m_pp.binds[0].x = m_Position.m_X;
+		m_pp.binds[0].y = m_Position.m_Y;
+		m_pp.binds[0].z = m_Position.m_Z;
 	}
 	else {
 		m_pp.binds[0].zoneId = to_zone;

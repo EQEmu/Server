@@ -399,9 +399,9 @@ Client::~Client() {
 	{
 		m_pp.zone_id = m_pp.binds[0].zoneId;
 		m_pp.zoneInstance = m_pp.binds[0].instance_id;
-		x_pos = m_pp.binds[0].x;
-		y_pos = m_pp.binds[0].y;
-		z_pos = m_pp.binds[0].z;
+		m_Position.m_X = m_pp.binds[0].x;
+		m_Position.m_Y = m_pp.binds[0].y;
+		m_Position.m_Z = m_pp.binds[0].z;
 	}
 
 	// we save right now, because the client might be zoning and the world
@@ -525,11 +525,11 @@ bool Client::Save(uint8 iCommitNow) {
 		return false;
 
 	/* Wrote current basics to PP for saves */
-	m_pp.x = x_pos;
-	m_pp.y = y_pos;
-	m_pp.z = z_pos;
+	m_pp.x = m_Position.m_X;
+	m_pp.y = m_Position.m_Y;
+	m_pp.z = m_Position.m_Z;
 	m_pp.guildrank = guildrank;
-	m_pp.heading = heading;
+	m_pp.heading = m_Position.m_Heading;
 
 	/* Mana and HP */
 	if (GetHP() <= 0) {
@@ -3820,7 +3820,7 @@ void Client::Sacrifice(Client *caster)
 
 void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
 
-	if(!Caster || PendingTranslocate) 
+	if(!Caster || PendingTranslocate)
 		return;
 
 	const SPDat_Spell_Struct &Spell = spells[SpellID];
@@ -4273,7 +4273,7 @@ bool Client::GroupFollow(Client* inviter) {
 		{
 			GetMerc()->MercJoinClientGroup();
 		}
-		
+
 		if (inviter->IsLFP())
 		{
 			// If the player who invited us to a group is LFP, have them update world now that we have joined their group.
@@ -5832,7 +5832,7 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 						const Item_Struct *aug_weap = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
 						strcpy(insr->itemnames[L], item->Name);
 						insr->itemicons[L] = aug_weap->Icon;
-					} 
+					}
 					else {
 						strcpy(insr->itemnames[L], item->Name);
 						insr->itemicons[L] = item->Icon;
@@ -7460,7 +7460,7 @@ void Client::SendMercPersonalInfo()
 	uint32 altCurrentType = 19; //TODO: Implement alternate currency purchases involving mercs!
 
 	MercTemplate *mercData = &zone->merc_templates[GetMercInfo().MercTemplateID];
-	
+
 	int stancecount = 0;
 	stancecount += zone->merc_stance_list[GetMercInfo().MercTemplateID].size();
 	if(stancecount > MAX_MERC_STANCES || mercCount > MAX_MERC || mercTypeCount > MAX_MERC_GRADES)
@@ -7562,7 +7562,7 @@ void Client::SendMercPersonalInfo()
 		}
 		if (MERC_DEBUG > 0)
 			Message(7, "Mercenary Debug: SendMercPersonalInfo Send Successful");
-			
+
 		SendMercMerchantResponsePacket(0);
 	}
 	else

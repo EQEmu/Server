@@ -188,7 +188,7 @@ bool Client::Process() {
 				GetMerc()->Save();
 				GetMerc()->Depop();
 			}
-			
+
 			Raid *myraid = entity_list.GetRaidByClient(this);
 			if (myraid)
 			{
@@ -581,7 +581,7 @@ bool Client::Process() {
 
 		if(projectile_timer.Check())
 			SpellProjectileEffect();
-					
+
 		if(spellbonuses.GravityEffect == 1) {
 			if(gravity_timer.Check())
 				DoGravityEffect();
@@ -800,32 +800,32 @@ void Client::OnDisconnect(bool hard_disconnect) {
 		if (MyRaid)
 			MyRaid->MemberZoned(this);
 
-		parse->EventPlayer(EVENT_DISCONNECT, this, "", 0); 
+		parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
 
 		/* QS: PlayerLogConnectDisconnect */
 		if (RuleB(QueryServ, PlayerLogConnectDisconnect)){
 			std::string event_desc = StringFormat("Disconnect :: in zoneid:%i instid:%i", this->GetZoneID(), this->GetInstanceID());
 			QServ->PlayerLogEvent(Player_Log_Connect_State, this->CharacterID(), event_desc);
-		} 
+		}
 	}
 
-	Mob *Other = trade->With(); 
+	Mob *Other = trade->With();
 	if(Other)
 	{
-		mlog(TRADING__CLIENT, "Client disconnected during a trade. Returning their items."); 
+		mlog(TRADING__CLIENT, "Client disconnected during a trade. Returning their items.");
 		FinishTrade(this);
 
 		if(Other->IsClient())
 			Other->CastToClient()->FinishTrade(Other);
 
 		/* Reset both sides of the trade */
-		trade->Reset(); 
+		trade->Reset();
 		Other->trade->Reset();
 	}
 
 	database.SetFirstLogon(CharacterID(), 0); //We change firstlogon status regardless of if a player logs out to zone or not, because we only want to trigger it on their first login from world.
 
-	/* Remove ourself from all proximities */ 
+	/* Remove ourself from all proximities */
 	ClearAllProximities();
 
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_LogoutReply);
@@ -1570,7 +1570,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 				if (from_bucket == &m_pp.platinum_shared)
 					amount_to_add = 0 - amount_to_take;
 
-				database.SetSharedPlatinum(AccountID(),amount_to_add); 
+				database.SetSharedPlatinum(AccountID(),amount_to_add);
 			}
 		}
 		else{
@@ -1756,7 +1756,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			}
 
 			SetSkill(skill, t_level);
-		} else { 
+		} else {
 			switch(skill) {
 			case SkillBrewing:
 			case SkillMakePoison:
@@ -1958,7 +1958,7 @@ void Client::DoEnduranceUpkeep() {
 
 	int upkeep_sum = 0;
 	int cost_redux = spellbonuses.EnduranceReduction + itembonuses.EnduranceReduction + aabonuses.EnduranceReduction;
-	
+
 	bool has_effect = false;
 	uint32 buffs_i;
 	uint32 buff_count = GetMaxTotalSlots();
@@ -2144,9 +2144,9 @@ void Client::HandleRespawnFromHover(uint32 Option)
 
 			if (corpse)
 			{
-				x_pos = corpse->GetX();
-				y_pos = corpse->GetY();
-				z_pos = corpse->GetZ();
+				m_Position.m_X = corpse->GetX();
+				m_Position.m_Y = corpse->GetY();
+				m_Position.m_Z = corpse->GetZ();
 			}
 
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + 10);
@@ -2199,10 +2199,10 @@ void Client::HandleRespawnFromHover(uint32 Option)
 			SetMana(GetMaxMana());
 			SetEndurance(GetMaxEndurance());
 
-			x_pos = chosen->x;
-			y_pos = chosen->y;
-			z_pos = chosen->z;
-			heading = chosen->heading;
+			m_Position.m_X = chosen->x;
+			m_Position.m_Y = chosen->y;
+			m_Position.m_Z = chosen->z;
+			m_Position.m_Heading = chosen->heading;
 
 			ClearHover();
 			entity_list.RefreshClientXTargets(this);
@@ -2212,7 +2212,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		//After they've respawned into the same zone, trigger EVENT_RESPAWN
 		parse->EventPlayer(EVENT_RESPAWN, this, static_cast<std::string>(itoa(Option)), is_rez ? 1 : 0);
 
-		//Pop Rez option from the respawn options list; 
+		//Pop Rez option from the respawn options list;
 		//easiest way to make sure it stays at the end and
 		//doesn't disrupt adding/removing scripted options
 		respawn_options.pop_back();

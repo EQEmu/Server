@@ -23,6 +23,7 @@
 #include "entity.h"
 #include "hate_list.h"
 #include "pathing.h"
+#include "position.h"
 #include <set>
 #include <vector>
 #include <string>
@@ -176,7 +177,7 @@ public:
 	bool IsInvisible(Mob* other = 0) const;
 	void SetInvisible(uint8 state);
 	bool AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* weapon);
-	
+
 	//Song
 	bool UseBardSpellLogic(uint16 spell_id = 0xffff, int slot = -1);
 	bool ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot);
@@ -392,10 +393,10 @@ public:
 		((static_cast<float>(cur_mana) / max_mana) * 100); }
 	virtual int32 CalcMaxMana();
 	uint32 GetNPCTypeID() const { return npctype_id; }
-	inline const float GetX() const { return x_pos; }
-	inline const float GetY() const { return y_pos; }
-	inline const float GetZ() const { return z_pos; }
-	inline const float GetHeading() const { return heading; }
+	inline const float GetX() const { return m_Position.m_X; }
+	inline const float GetY() const { return m_Position.m_Y; }
+	inline const float GetZ() const { return m_Position.m_Z; }
+	inline const float GetHeading() const { return m_Position.m_Heading; }
 	inline const float GetSize() const { return size; }
 	inline const float GetBaseSize() const { return base_size; }
 	inline const float GetTarX() const { return tarx; }
@@ -437,8 +438,8 @@ public:
 	void MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu);
 	void SendPosition();
 	void SetFlyMode(uint8 flymode);
-	inline void Teleport(Map::Vertex NewPosition) { x_pos = NewPosition.x; y_pos = NewPosition.y;
-		z_pos = NewPosition.z; };
+	inline void Teleport(Map::Vertex NewPosition) { m_Position.m_X = NewPosition.x; m_Position.m_Y = NewPosition.y;
+		m_Position.m_Z = NewPosition.z; };
 
 	//AI
 	static uint32 GetLevelCon(uint8 mylevel, uint8 iOtherLevel);
@@ -459,8 +460,8 @@ public:
 	bool IsEngaged() { return(!hate_list.IsEmpty()); }
 	bool HateSummon();
 	void FaceTarget(Mob* MobToFace = 0);
-	void SetHeading(float iHeading) { if(heading != iHeading) { pLastChange = Timer::GetCurrentTime();
-		heading = iHeading; } }
+	void SetHeading(float iHeading) { if(m_Position.m_Heading != iHeading) { pLastChange = Timer::GetCurrentTime();
+		m_Position.m_Heading = iHeading; } }
 	void WipeHateList();
 	void AddFeignMemory(Client* attacker);
 	void RemoveFromFeignMemory(Client* attacker);
@@ -566,10 +567,10 @@ public:
 
 	int16 CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, bool best_focus=false);
 	uint8 IsFocusEffect(uint16 spellid, int effect_index, bool AA=false,uint32 aa_effect=0);
-	void SendIllusionPacket(uint16 in_race, uint8 in_gender = 0xFF, uint8 in_texture = 0xFF, uint8 in_helmtexture = 0xFF, 
-		uint8 in_haircolor = 0xFF, uint8 in_beardcolor = 0xFF, uint8 in_eyecolor1 = 0xFF, uint8 in_eyecolor2 = 0xFF, 
-		uint8 in_hairstyle = 0xFF, uint8 in_luclinface = 0xFF, uint8 in_beard = 0xFF, uint8 in_aa_title = 0xFF, 
-		uint32 in_drakkin_heritage = 0xFFFFFFFF, uint32 in_drakkin_tattoo = 0xFFFFFFFF, 
+	void SendIllusionPacket(uint16 in_race, uint8 in_gender = 0xFF, uint8 in_texture = 0xFF, uint8 in_helmtexture = 0xFF,
+		uint8 in_haircolor = 0xFF, uint8 in_beardcolor = 0xFF, uint8 in_eyecolor1 = 0xFF, uint8 in_eyecolor2 = 0xFF,
+		uint8 in_hairstyle = 0xFF, uint8 in_luclinface = 0xFF, uint8 in_beard = 0xFF, uint8 in_aa_title = 0xFF,
+		uint32 in_drakkin_heritage = 0xFFFFFFFF, uint32 in_drakkin_tattoo = 0xFFFFFFFF,
 		uint32 in_drakkin_details = 0xFFFFFFFF, float in_size = -1.0f);
 	virtual void Stun(int duration);
 	virtual void UnStun();
@@ -617,7 +618,7 @@ public:
 	bool CanBlockSpell() const { return(spellbonuses.BlockNextSpell); }
 	bool DoHPToManaCovert(uint16 mana_cost = 0);
 	int32 ApplySpellEffectiveness(Mob* caster, int16 spell_id, int32 value, bool IsBard = false);
-	int8 GetDecayEffectValue(uint16 spell_id, uint16 spelleffect); 
+	int8 GetDecayEffectValue(uint16 spell_id, uint16 spelleffect);
 	int32 GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_spell_dmg);
 	void MeleeLifeTap(int32 damage);
 	bool PassCastRestriction(bool UseCastRestriction = true, int16 value = 0, bool IsDamage = true);
@@ -678,9 +679,9 @@ public:
 	inline int16 GetTempPetCount() const { return count_TempPet; }
 	inline void SetTempPetCount(int16 i) { count_TempPet = i; }
 	bool HasPetAffinity() { if (aabonuses.GivePetGroupTarget || itembonuses.GivePetGroupTarget || spellbonuses.GivePetGroupTarget) return true; return false; }
-	inline bool IsPetOwnerClient() const { return pet_owner_client; } 
+	inline bool IsPetOwnerClient() const { return pet_owner_client; }
 	inline void SetPetOwnerClient(bool value) { pet_owner_client = value; }
-	inline bool IsTempPet() const { return _IsTempPet; } 
+	inline bool IsTempPet() const { return _IsTempPet; }
 	inline void SetTempPet(bool value) { _IsTempPet = value; }
 
 	inline const bodyType GetBodyType() const { return bodytype; }
@@ -806,7 +807,7 @@ public:
 	void				SetDontCureMeBefore(uint32 time) { pDontCureMeBefore = time; }
 
 	// calculate interruption of spell via movement of mob
-	void SaveSpellLoc() {spell_x = x_pos; spell_y = y_pos; spell_z = z_pos; }
+	void SaveSpellLoc() {spell_x = m_Position.m_X; spell_y = m_Position.m_Y; spell_z = m_Position.m_Z; }
 	inline float GetSpellX() const {return spell_x;}
 	inline float GetSpellY() const {return spell_y;}
 	inline float GetSpellZ() const {return spell_z;}
@@ -860,7 +861,7 @@ public:
 
 	Shielders_Struct shielder[MAX_SHIELDERS];
 	Trade* trade;
-	
+
 	inline float GetCWPX() const { return(cur_wp_x); }
 	inline float GetCWPY() const { return(cur_wp_y); }
 	inline float GetCWPZ() const { return(cur_wp_z); }
@@ -998,10 +999,7 @@ protected:
 	uint8 level;
 	uint8 orig_level;
 	uint32 npctype_id;
-	float x_pos;
-	float y_pos;
-	float z_pos;
-	float heading;
+	xyz_heading m_Position;
 	uint16 animation;
 	float base_size;
 	float size;

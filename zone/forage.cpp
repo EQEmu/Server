@@ -225,15 +225,15 @@ bool Client::CanFish() {
 		HeadingDegrees = (int) ((GetHeading()*360)/256);
 		HeadingDegrees = HeadingDegrees % 360;
 
-		RodX = x_pos + RodLength * sin(HeadingDegrees * M_PI/180.0f);
-		RodY = y_pos + RodLength * cos(HeadingDegrees * M_PI/180.0f);
+		RodX = m_Position.m_X + RodLength * sin(HeadingDegrees * M_PI/180.0f);
+		RodY = m_Position.m_Y + RodLength * cos(HeadingDegrees * M_PI/180.0f);
 
 		// Do BestZ to find where the line hanging from the rod intersects the water (if it is water).
 		// and go 1 unit into the water.
 		Map::Vertex dest;
 		dest.x = RodX;
 		dest.y = RodY;
-		dest.z = z_pos+10;
+		dest.z = m_Position.m_Z+10;
 
 		RodZ = zone->zonemap->FindBestZ(dest, nullptr) + 4;
 		bool in_lava = zone->watermap->InLava(RodX, RodY, RodZ);
@@ -243,7 +243,7 @@ bool Client::CanFish() {
 			Message_StringID(MT_Skills, FISHING_LAVA);	//Trying to catch a fire elemental or something?
 			return false;
 		}
-		if((!in_water) || (z_pos-RodZ)>LineLength) {	//Didn't hit the water OR the water is too far below us
+		if((!in_water) || (m_Position.m_Z-RodZ)>LineLength) {	//Didn't hit the water OR the water is too far below us
 			Message_StringID(MT_Skills, FISHING_LAND);	//Trying to catch land sharks perhaps?
 			return false;
 		}

@@ -437,10 +437,10 @@ void NPC::SaveGuardSpot(bool iClearGuardSpot) {
 		guard_heading = 0;
 	}
 	else {
-		guard_x = x_pos;
-		guard_y = y_pos;
-		guard_z = z_pos;
-		guard_heading = heading;
+		guard_x = m_Position.m_X;
+		guard_y = m_Position.m_Y;
+		guard_z = m_Position.m_Z;
+		guard_heading = m_Position.m_Heading;
 		if(guard_heading == 0)
 			guard_heading = 0.0001;		//hack to make IsGuarding simpler
 		mlog(AI__WAYPOINTS, "Setting guard position to (%.3f, %.3f, %.3f)", guard_x, guard_y, guard_z);
@@ -452,7 +452,7 @@ void NPC::NextGuardPosition() {
 		SetHeading(guard_heading);
 		mlog(AI__WAYPOINTS, "Unable to move to next guard position. Probably rooted.");
 	}
-	else if((x_pos == guard_x) && (y_pos == guard_y) && (z_pos == guard_z))
+	else if((m_Position.m_X == guard_x) && (m_Position.m_Y == guard_y) && (m_Position.m_Z == guard_z))
 	{
 		if(moved)
 		{
@@ -480,7 +480,7 @@ void Mob::SaveSpawnSpot() {
 }*/
 
 float Mob::CalculateDistance(float x, float y, float z) {
-	return (float)sqrtf( ((x_pos-x)*(x_pos-x)) + ((y_pos-y)*(y_pos-y)) + ((z_pos-z)*(z_pos-z)) );
+	return (float)sqrtf( ((m_Position.m_X-x)*(m_Position.m_X-x)) + ((m_Position.m_Y-y)*(m_Position.m_Y-y)) + ((m_Position.m_Z-z)*(m_Position.m_Z-z)) );
 }
 
 /*
@@ -491,13 +491,13 @@ uint8 NPC::CalculateHeadingToNextWaypoint() {
 float Mob::CalculateHeadingToTarget(float in_x, float in_y) {
 	float angle;
 
-	if (in_x-x_pos > 0)
-		angle = - 90 + atan((float)(in_y-y_pos) / (float)(in_x-x_pos)) * 180 / M_PI;
-	else if (in_x-x_pos < 0)
-		angle = + 90 + atan((float)(in_y-y_pos) / (float)(in_x-x_pos)) * 180 / M_PI;
+	if (in_x-m_Position.m_X > 0)
+		angle = - 90 + atan((float)(in_y-m_Position.m_Y) / (float)(in_x-m_Position.m_X)) * 180 / M_PI;
+	else if (in_x-m_Position.m_X < 0)
+		angle = + 90 + atan((float)(in_y-m_Position.m_Y) / (float)(in_x-m_Position.m_X)) * 180 / M_PI;
 	else // Added?
 	{
-		if (in_y-y_pos > 0)
+		if (in_y-m_Position.m_Y > 0)
 			angle = 0;
 		else
 			angle = 180;
@@ -513,16 +513,16 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	if(GetID()==0)
 		return true;
 
-	if ((x_pos-x == 0) && (y_pos-y == 0)) {//spawn is at target coords
-		if(z_pos-z != 0) {
-			z_pos = z;
+	if ((m_Position.m_X-x == 0) && (m_Position.m_Y-y == 0)) {//spawn is at target coords
+		if(m_Position.m_Z-z != 0) {
+			m_Position.m_Z = z;
 			mlog(AI__WAYPOINTS, "Calc Position2 (%.3f, %.3f, %.3f): Jumping pure Z.", x, y, z);
 			return true;
 		}
 		mlog(AI__WAYPOINTS, "Calc Position2 (%.3f, %.3f, %.3f) inWater=%d: We are there.", x, y, z, inWater);
 		return false;
 	}
-	else if ((ABS(x_pos - x) < 0.1) && (ABS(y_pos - y) < 0.1))
+	else if ((ABS(m_Position.m_X - x) < 0.1) && (ABS(m_Position.m_Y - y) < 0.1))
 	{
 		mlog(AI__WAYPOINTS, "Calc Position2 (%.3f, %.3f, %.3f): X/Y difference <0.1, Jumping to target.", x, y, z);
 
@@ -530,25 +530,25 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 			entity_list.ProcessMove(CastToNPC(), x, y, z);
 		}
 
-		x_pos = x;
-		y_pos = y;
-		z_pos = z;
+		m_Position.m_X = x;
+		m_Position.m_Y = y;
+		m_Position.m_Z = z;
 		return true;
 	}
 
 	int compare_steps = IsBoat() ? 1 : 20;
 	if(tar_ndx < compare_steps && tarx==x && tary==y) {
 
-		float new_x = x_pos + tar_vx*tar_vector;
-		float new_y = y_pos + tar_vy*tar_vector;
-		float new_z = z_pos + tar_vz*tar_vector;
+		float new_x = m_Position.m_X + tar_vx*tar_vector;
+		float new_y = m_Position.m_Y + tar_vy*tar_vector;
+		float new_z = m_Position.m_Z + tar_vz*tar_vector;
 		if(IsNPC()) {
 			entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
 		}
 
-		x_pos = new_x;
-		y_pos = new_y;
-		z_pos = new_z;
+		m_Position.m_X = new_x;
+		m_Position.m_Y = new_y;
+		m_Position.m_Z = new_z;
 
 		mlog(AI__WAYPOINTS, "Calculating new position2 to (%.3f, %.3f, %.3f), old vector (%.3f, %.3f, %.3f)", x, y, z, tar_vx, tar_vy, tar_vz);
 
@@ -563,25 +563,25 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		if(!NPCFlyMode && checkZ && zone->HasMap() && RuleB(Map, FixPathingZWhenMoving))
 		{
 			if(!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap() ||
-				(zone->HasWaterMap() && !zone->watermap->InWater(x_pos, y_pos, z_pos)))
+				(zone->HasWaterMap() && !zone->watermap->InWater(m_Position.m_X, m_Position.m_Y, m_Position.m_Z)))
 			{
-				Map::Vertex dest(x_pos, y_pos, z_pos);
+				Map::Vertex dest(m_Position.m_X, m_Position.m_Y, m_Position.m_Z);
 
 				float newz = zone->zonemap->FindBestZ(dest, nullptr) + 2.0f;
 
-				mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
+				mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.m_X,m_Position.m_Y,m_Position.m_Z);
 
 				if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
 				{
-					if((ABS(x - x_pos) < 0.5) && (ABS(y - y_pos) < 0.5))
+					if((ABS(x - m_Position.m_X) < 0.5) && (ABS(y - m_Position.m_Y) < 0.5))
 					{
-						if(ABS(z-z_pos) <= RuleR(Map, FixPathingZMaxDeltaMoving))
-							z_pos = z;
+						if(ABS(z-m_Position.m_Z) <= RuleR(Map, FixPathingZMaxDeltaMoving))
+							m_Position.m_Z = z;
 						else
-							z_pos = newz + 1;
+							m_Position.m_Z = newz + 1;
 					}
 					else
-						z_pos = newz + 1;
+						m_Position.m_Z = newz + 1;
 				}
 			}
 		}
@@ -600,9 +600,9 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	tary=y;
 	tarz=z;
 
-	float nx = this->x_pos;
-	float ny = this->y_pos;
-	float nz = this->z_pos;
+	float nx = this->m_Position.m_X;
+	float ny = this->m_Position.m_Y;
+	float nz = this->m_Position.m_Z;
 //	float nh = this->heading;
 
 	tar_vx = x - nx;
@@ -635,19 +635,19 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 			tar_vy = tar_vy/numsteps;
 			tar_vz = tar_vz/numsteps;
 
-			float new_x = x_pos + tar_vx;
-			float new_y = y_pos + tar_vy;
-			float new_z = z_pos + tar_vz;
+			float new_x = m_Position.m_X + tar_vx;
+			float new_y = m_Position.m_Y + tar_vy;
+			float new_z = m_Position.m_Z + tar_vz;
 			if(IsNPC()) {
 				entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
 			}
 
-			x_pos = new_x;
-			y_pos = new_y;
-			z_pos = new_z;
+			m_Position.m_X = new_x;
+			m_Position.m_Y = new_y;
+			m_Position.m_Z = new_z;
+			m_Position.m_Heading = CalculateHeadingToTarget(x, y);
 			tar_ndx=22-numsteps;
-			heading = CalculateHeadingToTarget(x, y);
-			mlog(AI__WAYPOINTS, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", x_pos, y_pos, z_pos, numsteps);
+			mlog(AI__WAYPOINTS, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", m_Position.m_X, m_Position.m_Y, m_Position.m_Z, numsteps);
 		}
 		else
 		{
@@ -655,9 +655,9 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 				entity_list.ProcessMove(CastToNPC(), x, y, z);
 			}
 
-			x_pos = x;
-			y_pos = y;
-			z_pos = z;
+			m_Position.m_X = x;
+			m_Position.m_Y = y;
+			m_Position.m_Z = z;
 
 			mlog(AI__WAYPOINTS, "Only a single step to get there... jumping.");
 
@@ -667,18 +667,18 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	else {
 		tar_vector/=20;
 
-		float new_x = x_pos + tar_vx*tar_vector;
-		float new_y = y_pos + tar_vy*tar_vector;
-		float new_z = z_pos + tar_vz*tar_vector;
+		float new_x = m_Position.m_X + tar_vx*tar_vector;
+		float new_y = m_Position.m_Y + tar_vy*tar_vector;
+		float new_z = m_Position.m_Z + tar_vz*tar_vector;
 		if(IsNPC()) {
 			entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
 		}
 
-		x_pos = new_x;
-		y_pos = new_y;
-		z_pos = new_z;
-		heading = CalculateHeadingToTarget(x, y);
-		mlog(AI__WAYPOINTS, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", x_pos, y_pos, z_pos, numsteps);
+		m_Position.m_X = new_x;
+		m_Position.m_Y = new_y;
+		m_Position.m_Z = new_z;
+		m_Position.m_Heading = CalculateHeadingToTarget(x, y);
+		mlog(AI__WAYPOINTS, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", m_Position.m_X, m_Position.m_Y, m_Position.m_Z, numsteps);
 	}
 
 	uint8 NPCFlyMode = 0;
@@ -692,25 +692,25 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	if(!NPCFlyMode && checkZ && zone->HasMap() && RuleB(Map, FixPathingZWhenMoving)) {
 
 		if(!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap() ||
-			(zone->HasWaterMap() && !zone->watermap->InWater(x_pos, y_pos, z_pos)))
+			(zone->HasWaterMap() && !zone->watermap->InWater(m_Position.m_X, m_Position.m_Y, m_Position.m_Z)))
 		{
-			Map::Vertex dest(x_pos, y_pos, z_pos);
+			Map::Vertex dest(m_Position.m_X, m_Position.m_Y, m_Position.m_Z);
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr); + 2.0f;
 
-			mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
+			mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.m_X,m_Position.m_Y,m_Position.m_Z);
 
 			if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
 			{
-				if(ABS(x - x_pos) < 0.5 && ABS(y - y_pos) < 0.5)
+				if(ABS(x - m_Position.m_X) < 0.5 && ABS(y - m_Position.m_Y) < 0.5)
 				{
-					if(ABS(z - z_pos) <= RuleR(Map, FixPathingZMaxDeltaMoving))
-						z_pos = z;
+					if(ABS(z - m_Position.m_Z) <= RuleR(Map, FixPathingZMaxDeltaMoving))
+						m_Position.m_Z = z;
 					else
-						z_pos = newz + 1;
+						m_Position.m_Z = newz + 1;
 				}
 				else
-					z_pos = newz+1;
+					m_Position.m_Z = newz+1;
 				}
 		}
 	}
@@ -718,9 +718,9 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	SetMoving(true);
 	moved=true;
 
-	delta_x=x_pos-nx;
-	delta_y=y_pos-ny;
-	delta_z=z_pos-nz;
+	delta_x=m_Position.m_X-nx;
+	delta_y=m_Position.m_Y-ny;
+	delta_z=m_Position.m_Z-nz;
 	delta_heading=0;
 
 	if (IsClient())
@@ -746,9 +746,9 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 	if(GetID()==0)
 		return true;
 
-	float nx = x_pos;
-	float ny = y_pos;
-	float nz = z_pos;
+	float nx = m_Position.m_X;
+	float ny = m_Position.m_Y;
+	float nz = m_Position.m_Z;
 
 	// if NPC is rooted
 	if (speed == 0.0) {
@@ -780,30 +780,30 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 	// --------------------------------------------------------------------------
 	test_vector=sqrtf (x*x + y*y + z*z);
 	tar_vector = speed / sqrtf (tar_vx*tar_vx + tar_vy*tar_vy + tar_vz*tar_vz);
-	heading = CalculateHeadingToTarget(x, y);
+	m_Position.m_Heading = CalculateHeadingToTarget(x, y);
 
 	if (tar_vector >= 1.0) {
 		if(IsNPC()) {
 			entity_list.ProcessMove(CastToNPC(), x, y, z);
 		}
 
-		x_pos = x;
-		y_pos = y;
-		z_pos = z;
+		m_Position.m_X = x;
+		m_Position.m_Y = y;
+		m_Position.m_Z = z;
 		mlog(AI__WAYPOINTS, "Close enough, jumping to waypoint");
 	}
 	else {
-		float new_x = x_pos + tar_vx*tar_vector;
-		float new_y = y_pos + tar_vy*tar_vector;
-		float new_z = z_pos + tar_vz*tar_vector;
+		float new_x = m_Position.m_X + tar_vx*tar_vector;
+		float new_y = m_Position.m_Y + tar_vy*tar_vector;
+		float new_z = m_Position.m_Z + tar_vz*tar_vector;
 		if(IsNPC()) {
 			entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
 		}
 
-		x_pos = new_x;
-		y_pos = new_y;
-		z_pos = new_z;
-		mlog(AI__WAYPOINTS, "Next position (%.3f, %.3f, %.3f)", x_pos, y_pos, z_pos);
+		m_Position.m_X = new_x;
+		m_Position.m_Y = new_y;
+		m_Position.m_Z = new_z;
+		mlog(AI__WAYPOINTS, "Next position (%.3f, %.3f, %.3f)", m_Position.m_X, m_Position.m_Y, m_Position.m_Z);
 	}
 
 	uint8 NPCFlyMode = 0;
@@ -817,25 +817,25 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 	if(!NPCFlyMode && checkZ && zone->HasMap() && RuleB(Map, FixPathingZWhenMoving))
 	{
 		if(!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap() ||
-			(zone->HasWaterMap() && !zone->watermap->InWater(x_pos, y_pos, z_pos)))
+			(zone->HasWaterMap() && !zone->watermap->InWater(m_Position.m_X, m_Position.m_Y, m_Position.m_Z)))
 		{
-			Map::Vertex dest(x_pos, y_pos, z_pos);
+			Map::Vertex dest(m_Position.m_X, m_Position.m_Y, m_Position.m_Z);
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr) + 2.0f;
 
-			mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
+			mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.m_X,m_Position.m_Y,m_Position.m_Z);
 
 			if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
 			{
-				if(ABS(x - x_pos) < 0.5 && ABS(y - y_pos) < 0.5)
+				if(ABS(x - m_Position.m_X) < 0.5 && ABS(y - m_Position.m_Y) < 0.5)
 				{
-					if(ABS(z - z_pos) <= RuleR(Map, FixPathingZMaxDeltaMoving))
-						z_pos = z;
+					if(ABS(z - m_Position.m_Z) <= RuleR(Map, FixPathingZMaxDeltaMoving))
+						m_Position.m_Z = z;
 					else
-						z_pos = newz + 1;
+						m_Position.m_Z = newz + 1;
 				}
 				else
-					z_pos = newz+1;
+					m_Position.m_Z = newz+1;
 			}
 		}
 	}
@@ -845,9 +845,9 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 		tar_ndx=0;
 		this->SetMoving(true);
 		moved=true;
-		delta_x=(x_pos-nx);
-		delta_y=(y_pos-ny);
-		delta_z=(z_pos-nz);
+		delta_x=(m_Position.m_X-nx);
+		delta_y=(m_Position.m_Y-ny);
+		delta_z=(m_Position.m_Z-nz);
 		delta_heading=0;//(heading-nh)*8;
 		SendPosUpdate();
 	}
@@ -948,9 +948,9 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 		entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
 	}
 
-	x_pos = new_x;
-	y_pos = new_y;
-	z_pos = new_z;
+	m_Position.m_X = new_x;
+	m_Position.m_Y = new_y;
+	m_Position.m_Z = new_z;
 	mlog(AI__WAYPOINTS, "Sent To (%.3f, %.3f, %.3f)", new_x, new_y, new_z);
 
 	if(flymode == FlyMode1)
@@ -961,20 +961,20 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 	if(zone->HasMap() && RuleB(Map, FixPathingZOnSendTo) )
 	{
 		if(!RuleB(Watermap, CheckForWaterOnSendTo) || !zone->HasWaterMap() ||
-			(zone->HasWaterMap() && !zone->watermap->InWater(x_pos, y_pos, z_pos)))
+			(zone->HasWaterMap() && !zone->watermap->InWater(m_Position.m_X, m_Position.m_Y, m_Position.m_Z)))
 		{
-			Map::Vertex dest(x_pos, y_pos, z_pos);
+			Map::Vertex dest(m_Position.m_X, m_Position.m_Y, m_Position.m_Z);
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-			mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
+			mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.m_X,m_Position.m_Y,m_Position.m_Z);
 
 			if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaSendTo)) // Sanity check.
-				z_pos = newz + 1;
+				m_Position.m_Z = newz + 1;
 		}
 	}
 	else
-		z_pos += 0.1;
+		m_Position.m_Z += 0.1;
 }
 
 void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
@@ -982,9 +982,9 @@ void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 		entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z + 0.1);
 	}
 
-	x_pos = new_x;
-	y_pos = new_y;
-	z_pos = new_z + 0.1;
+	m_Position.m_X = new_x;
+	m_Position.m_Y = new_y;
+	m_Position.m_Z = new_z + 0.1;
 
 	//fix up pathing Z, this shouldent be needed IF our waypoints
 	//are corrected instead
@@ -992,16 +992,16 @@ void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 	if(zone->HasMap() && RuleB(Map, FixPathingZOnSendTo))
 	{
 		if(!RuleB(Watermap, CheckForWaterOnSendTo) || !zone->HasWaterMap() ||
-			(zone->HasWaterMap() && !zone->watermap->InWater(x_pos, y_pos, z_pos)))
+			(zone->HasWaterMap() && !zone->watermap->InWater(m_Position.m_X, m_Position.m_Y, m_Position.m_Z)))
 		{
-			Map::Vertex dest(x_pos, y_pos, z_pos);
+			Map::Vertex dest(m_Position.m_X, m_Position.m_Y, m_Position.m_Z);
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-			mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
+			mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.m_X,m_Position.m_Y,m_Position.m_Z);
 
 			if( (newz > -2000) && ABS(newz-dest.z) < RuleR(Map, FixPathingZMaxDeltaSendTo)) // Sanity check.
-				z_pos = newz + 1;
+				m_Position.m_Z = newz + 1;
 		}
 	}
 }

@@ -4122,9 +4122,9 @@ void Bot::Spawn(Client* botCharacterOwner, std::string* errorMessage) {
 			this->GetBotOwner()->CastToClient()->Message(13, "%s save failed!", this->GetCleanName());
 
 		// Spawn the bot at the bow owner's loc
-		this->x_pos = botCharacterOwner->GetX();
-		this->y_pos = botCharacterOwner->GetY();
-		this->z_pos = botCharacterOwner->GetZ();
+		this->m_Position.m_X = botCharacterOwner->GetX();
+		this->m_Position.m_Y = botCharacterOwner->GetY();
+		this->m_Position.m_Z = botCharacterOwner->GetZ();
 
 		// Make the bot look at the bot owner
 		FaceTarget(botCharacterOwner);

@@ -1472,10 +1472,10 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	/* Set Mob variables for spawn */
 	class_ = m_pp.class_;
 	level = m_pp.level;
-	x_pos = m_pp.x;
-	y_pos = m_pp.y;
-	z_pos = m_pp.z;
-	heading = m_pp.heading;
+	m_Position.m_X = m_pp.x;
+	m_Position.m_Y = m_pp.y;
+	m_Position.m_Z = m_pp.z;
+	m_Position.m_Heading = m_pp.heading;
 	race = m_pp.race;
 	base_race = m_pp.race;
 	gender = m_pp.gender;
@@ -4380,9 +4380,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 
 	float dist = 0;
 	float tmp;
-	tmp = x_pos - ppu->x_pos;
+	tmp = m_Position.m_X - ppu->x_pos;
 	dist += tmp*tmp;
-	tmp = y_pos - ppu->y_pos;
+	tmp = m_Position.m_Y - ppu->y_pos;
 	dist += tmp*tmp;
 	dist = sqrt(dist);
 
@@ -4534,9 +4534,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	//If the player has moved more than units for x or y, then we'll store
 	//his pre-PPU x and y for /rewind, in case he gets stuck.
 	if ((rewind_x_diff > 750) || (rewind_y_diff > 750)) {
-		rewind_x = x_pos;
-		rewind_y = y_pos;
-		rewind_z = z_pos;
+		rewind_x = m_Position.m_X;
+		rewind_y = m_Position.m_Y;
+		rewind_z = m_Position.m_Z;
 	}
 
 	//If the PPU was a large jump, such as a cross zone gate or Call of Hero,
@@ -4563,13 +4563,13 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	delta_z			= ppu->delta_z;
 	delta_heading	= ppu->delta_heading;
 
-	if(IsTracking() && ((x_pos!=ppu->x_pos) || (y_pos!=ppu->y_pos))){
+	if(IsTracking() && ((m_Position.m_X!=ppu->x_pos) || (m_Position.m_Y!=ppu->y_pos))){
 		if(MakeRandomFloat(0, 100) < 70)//should be good
 			CheckIncreaseSkill(SkillTracking, nullptr, -20);
 	}
 
 	// Break Hide if moving without sneaking and set rewind timer if moved
-	if(ppu->y_pos != y_pos || ppu->x_pos != x_pos){
+	if(ppu->y_pos != m_Position.m_Y || ppu->x_pos != m_Position.m_X){
 		if((hidden || improved_hidden) && !sneaking){
 			hidden = false;
 			improved_hidden = false;
@@ -4589,13 +4589,14 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	// Outgoing client packet
 	float tmpheading = EQ19toFloat(ppu->heading);
 
-	if (!FCMP(ppu->y_pos, y_pos) || !FCMP(ppu->x_pos, x_pos) || !FCMP(tmpheading, heading) || ppu->animation != animation)
+	if (!FCMP(ppu->y_pos, m_Position.m_Y) || !FCMP(ppu->x_pos, m_Position.m_X) || !FCMP(tmpheading, m_Position.m_Heading) || ppu->animation != animation)
 	{
-		x_pos			= ppu->x_pos;
-		y_pos			= ppu->y_pos;
-		z_pos			= ppu->z_pos;
-		animation		= ppu->animation;
-		heading			= tmpheading;
+		m_Position.m_X = ppu->x_pos;
+		m_Position.m_Y = ppu->y_pos;
+		m_Position.m_Z = ppu->z_pos;
+		m_Position.m_Heading = tmpheading;
+		animation = ppu->animation;
+
 
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 		PlayerPositionUpdateServer_Struct* ppu = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
@@ -4609,7 +4610,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 
 	if(zone->watermap)
 	{
-		if(zone->watermap->InLiquid(x_pos, y_pos, z_pos))
+		if(zone->watermap->InLiquid(m_Position.m_X, m_Position.m_Y, m_Position.m_Z))
 		{
 			CheckIncreaseSkill(SkillSwimming, nullptr, -17);
 		}
@@ -6607,7 +6608,7 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 
 	GroupGeneric_Struct* gf = (GroupGeneric_Struct*)app->pBuffer;
 	Mob* inviter = entity_list.GetClientByName(gf->name1);
-	
+
 	// Inviter and Invitee are in the same zone
 	if (inviter != nullptr && inviter->IsClient())
 	{
@@ -6622,7 +6623,7 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 	{
 		// Inviter is in another zone - Remove merc from group now if any
 		LeaveGroup();
-		
+
 		ServerPacket* pack = new ServerPacket(ServerOP_GroupFollow, sizeof(ServerGroupFollow_Struct));
 		ServerGroupFollow_Struct *sgfs = (ServerGroupFollow_Struct *)pack->pBuffer;
 		sgfs->CharacterID = CharacterID();
@@ -8019,7 +8020,7 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app)
 	InspectResponse_Struct* insr = (InspectResponse_Struct*)outapp->pBuffer;
 	Mob* tmp = entity_list.GetMob(insr->TargetID);
 	const Item_Struct* item = nullptr;
-	
+
 	int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 	for (int16 L = EmuConstants::EQUIPMENT_BEGIN; L <= MainWaist; L++) {
 		const ItemInst* inst = GetInv().GetItem(L);
@@ -12807,9 +12808,9 @@ void Client::Handle_OP_SwapSpell(const EQApplicationPacket *app)
 	m_pp.spell_book[swapspell->from_slot] = m_pp.spell_book[swapspell->to_slot];
 	m_pp.spell_book[swapspell->to_slot] = swapspelltemp;
 
-	/* Save Spell Swaps */ 
+	/* Save Spell Swaps */
 	if (!database.SaveCharacterSpell(this->CharacterID(), m_pp.spell_book[swapspell->from_slot], swapspell->from_slot)){
-		database.DeleteCharacterSpell(this->CharacterID(), m_pp.spell_book[swapspell->from_slot], swapspell->from_slot); 
+		database.DeleteCharacterSpell(this->CharacterID(), m_pp.spell_book[swapspell->from_slot], swapspell->from_slot);
 	}
 	if (!database.SaveCharacterSpell(this->CharacterID(), swapspelltemp, swapspell->to_slot)){
 		database.DeleteCharacterSpell(this->CharacterID(), swapspelltemp, swapspell->to_slot);
@@ -13595,7 +13596,7 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 	}
 	Translocate_Struct *its = (Translocate_Struct*)app->pBuffer;
 
-	if (!PendingTranslocate) 
+	if (!PendingTranslocate)
 		return;
 
 	if ((RuleI(Spells, TranslocateTimeLimit) > 0) && (time(nullptr) > (TranslocateTime + RuleI(Spells, TranslocateTimeLimit)))) {
@@ -13616,7 +13617,7 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 			// to the bind coords it has from the PlayerProfile, but with the X and Y reversed. I suspect they are
 			// reversed in the pp, and since spells like Gate are handled serverside, this has not mattered before.
 			if (((SpellID == 1422) || (SpellID == 1334) || (SpellID == 3243)) &&
-				(zone->GetZoneID() == PendingTranslocateData.zone_id && 
+				(zone->GetZoneID() == PendingTranslocateData.zone_id &&
 				zone->GetInstanceID() == PendingTranslocateData.instance_id))
 			{
 				PendingTranslocate = false;
@@ -13627,7 +13628,7 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 			////Was sending the packet back to initiate client zone...
 			////but that could be abusable, so lets go through proper channels
 			MovePC(PendingTranslocateData.zone_id, PendingTranslocateData.instance_id,
-				   PendingTranslocateData.x, PendingTranslocateData.y, 
+				   PendingTranslocateData.x, PendingTranslocateData.y,
 				   PendingTranslocateData.z, PendingTranslocateData.heading, 0, ZoneSolicited);
 		}
 	}

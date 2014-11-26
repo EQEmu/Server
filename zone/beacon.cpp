@@ -58,10 +58,10 @@ Beacon::Beacon(Mob *at_mob, int lifetime)
 	caster_id = 0;
 
 	// copy location
-	x_pos = at_mob->GetX();
-	y_pos = at_mob->GetY();
-	z_pos = at_mob->GetZ();
-	heading = at_mob->GetHeading();
+	m_Position.m_X = at_mob->GetX();
+	m_Position.m_Y = at_mob->GetY();
+	m_Position.m_Z = at_mob->GetZ();
+	m_Position.m_Heading = at_mob->GetHeading();
 
 	if(lifetime)
 	{
