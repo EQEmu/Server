@@ -359,8 +359,9 @@ public:
 	const bool GetCombatEvent() const { return combat_event; }
 	void SetCombatEvent(bool b) { combat_event = b; }
 
-	//The corpse we make can only be looted by people who got credit for the kill
+	/* Only allows players that killed corpse to loot */
 	const bool HasPrivateCorpse() const { return NPCTypedata->private_corpse; }
+
 	const bool IsUnderwaterOnly() const { return NPCTypedata->underwater; }
 	const char* GetRawNPCTypeName() const { return NPCTypedata->name; }
 

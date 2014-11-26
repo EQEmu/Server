@@ -3784,7 +3784,7 @@ Corpse* ZoneDatabase::SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_z
 	auto results = QueryDatabase(query);
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		NewCorpse = Corpse::LoadFromDBData(
+		NewCorpse = Corpse::LoadCharacterCorpseEntity(
 			atoll(row[0]), 			 // uint32 in_dbid
 			char_id, 				 // uint32 in_charid
 			row[1], 				 // char* in_charname
@@ -3826,7 +3826,7 @@ bool ZoneDatabase::SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zone_id
 	results = QueryDatabase(query);
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		NewCorpse = Corpse::LoadFromDBData(
+		NewCorpse = Corpse::LoadCharacterCorpseEntity(
 			atoll(row[0]),
 			char_id,
 			row[1],
@@ -3871,7 +3871,7 @@ Corpse* ZoneDatabase::LoadCharacterCorpse(uint32 player_corpse_id) {
 	);
 	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		NewCorpse = Corpse::LoadFromDBData(
+		NewCorpse = Corpse::LoadCharacterCorpseEntity(
 				atoll(row[0]), 		 // id					  uint32 in_dbid
 				atoll(row[1]),		 // charid				  uint32 in_charid
 				row[2], 			 //	char_name
@@ -3911,7 +3911,7 @@ bool ZoneDatabase::LoadCharacterCorpses(uint32 zone_id, uint16 instance_id) {
 		// std::cout << row[9] << std::endl;
 
 		entity_list.AddCorpse(
-			 Corpse::LoadFromDBData(
+			 Corpse::LoadCharacterCorpseEntity(
 				atoll(row[0]), 		  // id					  uint32 in_dbid
 				atoll(row[1]), 		  // charid				  uint32 in_charid
 				row[2], 			  //					  char_name 

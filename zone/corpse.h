@@ -36,7 +36,7 @@ public:
 	Corpse(Client* client, int32 in_rezexp);
 	Corpse(uint32 in_corpseid, uint32 in_charid, const char* in_charname, ItemList* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, float in_x, float in_y, float in_z, float in_heading, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture, uint32 in_rezexp, bool wasAtGraveyard = false);
 	~Corpse();
-	static Corpse* LoadFromDBData(uint32 in_dbid, uint32 in_charid, std::string in_charname, float in_x, float in_y, float in_z, float in_heading, std::string time_of_death, bool rezzed, bool was_at_graveyard);
+	static Corpse* LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std::string in_charname, float in_x, float in_y, float in_z, float in_heading, std::string time_of_death, bool rezzed, bool was_at_graveyard);
 
 	//abstract virtual function implementations requird by base abstract class
 	virtual bool	Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill) { return true; }
@@ -109,7 +109,7 @@ public:
 	char		orgname[64];
 	uint32		GetEquipment(uint8 material_slot) const;	// returns item id
 	uint32		GetEquipmentColor(uint8 material_slot) const;
-	inline int	GetRezzExp() { return rezzexp; }
+	inline int	GetRezzExp() { return rez_experience; }
 
 	// these are a temporary work-around until corpse inventory is removed from the database blob
 	static int16	ServerToCorpseSlot(int16 server_slot);	// encode
@@ -119,30 +119,31 @@ protected:
 	std::list<uint32> MoveItemToCorpse(Client *client, ItemInst *item, int16 equipslot);
 
 private:
-	bool		is_player_corpse;	
-	bool		is_corpse_changed;
-	bool		is_locked;
-	int32		player_kill_item;
-	uint32		corpse_db_id;
-	uint32		char_id;
-	ItemList	itemlist;
-	uint32		copper;
+	bool		is_player_corpse; /* Determines if Player Corpse or not */
+	bool		is_corpse_changed; /* Determines if corpse has changed or not */
+	bool		is_locked; /* Determines if corpse is locked */
+	int32		player_kill_item; /* Determines if Player Kill Item */
+	uint32		corpse_db_id; /* Corpse Database ID (Player Corpse) */
+	uint32		char_id; /* Character ID */
+	ItemList	itemlist; /* Internal Item list used for corpses */
+	uint32		copper; 
 	uint32		silver;
 	uint32		gold;
 	uint32		platinum;
-	bool		player_corpse_depop;
-	uint32		being_looted_by;
-	uint32		rezzexp;
+	bool		player_corpse_depop; /* Sets up Corpse::Process to depop the player corpse */
+	uint32		being_looted_by; /* Determines what the corpse is being looted by internally for logic */
+	uint32		rez_experience; /* Amount of experience that the corpse would rez for */
 	bool		rez;
-	bool		can_rez;
+	bool		can_corpse_be_rezzed; /* Bool declaring whether or not a corpse can be rezzed */
 	bool		become_npc;
-	int			allowed_looters[MAX_LOOTERS]; // People allowed to loot the corpse, character id
-	Timer		corpse_decay_timer; 
-	Timer		corpse_res_timer;
-	Timer		corpse_delay_timer;
+	int			allowed_looters[MAX_LOOTERS]; /* People allowed to loot the corpse, character id */
+	Timer		corpse_decay_timer; /* The amount of time in millseconds in which a corpse will take to decay (Depop/Poof) */
+	Timer		corpse_res_timer; /* The amount of time in millseconds in which a corpse can be rezzed */
+	Timer		corpse_delay_timer; 
 	Timer		corpse_graveyard_timer;
-	Timer		loot_cooldown_timer;
+	Timer		loot_cooldown_timer; /* Delay between loot actions on the corpse entity */
 	Color_Struct item_tint[9];
+
 };
 
 #endif

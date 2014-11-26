@@ -63,8 +63,7 @@ void Corpse::SendLootReqErrorPacket(Client* client, uint8 response) {
 	safe_delete(outapp);
 }
 
-Corpse* Corpse::LoadFromDBData(uint32 in_dbid, uint32 in_charid, std::string in_charname, float in_x, float in_y, float in_z, float in_heading, std::string time_of_death, bool rezzed, bool was_at_graveyard)
-{
+Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std::string in_charname, float in_x, float in_y, float in_z, float in_heading, std::string time_of_death, bool rezzed, bool was_at_graveyard){
 	uint32 item_count = database.GetCharacterCorpseItemCount(in_dbid);
 	char *buffer = new char[sizeof(PlayerCorpse_Struct) + (item_count * sizeof(player_lootitem::ServerLootItem_Struct))];
 	PlayerCorpse_Struct *pcs = (PlayerCorpse_Struct*)buffer;
@@ -105,11 +104,11 @@ Corpse* Corpse::LoadFromDBData(uint32 in_dbid, uint32 in_charid, std::string in_
 		pcs->exp,			   // uint32 in_rezexp
 		was_at_graveyard	   // bool wasAtGraveyard
 	);
-	if (pcs->locked)
+	if (pcs->locked){
 		pc->Lock();
+	}
 
 	/* Load Item Tints */
-	// memcpy(pc->item_tint, pcs->item_tint, sizeof(pc->item_tint));
 	pc->item_tint[0].color = pcs->item_tint[0].color;
 	pc->item_tint[1].color = pcs->item_tint[1].color;
 	pc->item_tint[2].color = pcs->item_tint[2].color;
@@ -118,8 +117,7 @@ Corpse* Corpse::LoadFromDBData(uint32 in_dbid, uint32 in_charid, std::string in_
 	pc->item_tint[5].color = pcs->item_tint[5].color;
 	pc->item_tint[6].color = pcs->item_tint[6].color;
 	pc->item_tint[7].color = pcs->item_tint[7].color;
-	pc->item_tint[8].color = pcs->item_tint[8].color;
-
+	pc->item_tint[8].color = pcs->item_tint[8].color; 
 
 	/* Load Physical Appearance */
 	pc->haircolor = pcs->haircolor;
@@ -231,15 +229,15 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 		corpse_decay_timer.SetTimer(RuleI(NPC,EmptyNPCCorpseDecayTimeMS)+1000);
 	}
 
+	
 	if(in_npc->HasPrivateCorpse()) {
 		corpse_delay_timer.SetTimer(corpse_decay_timer.GetRemainingTime() + 1000);
 	}
 
-	// Added By Hogie -- End
 	for (int i = 0; i < MAX_LOOTERS; i++){
 		allowed_looters[i] = 0;
 	}
-	this->rezzexp = 0;
+	this->rez_experience = 0;
 }
 
 Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
@@ -317,8 +315,8 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	}
 
 	is_corpse_changed		= true;
-	rezzexp			= in_rezexp;
-	can_rez			= true;
+	rez_experience			= in_rezexp;
+	can_corpse_be_rezzed			= true;
 	is_player_corpse	= true;
 	is_locked			= false;
 	being_looted_by	= 0xFFFFFFFF;
@@ -386,9 +384,9 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 			// this was mainly for client profile state reflection..should match db player inventory entries now.
 
 			iter_queue it;
-			for(it=client->GetInv().cursor_begin(),i=8001; it!=client->GetInv().cursor_end(); ++it,i++) {
+			for (it = client->GetInv().cursor_begin(), i = 8001; it != client->GetInv().cursor_end(); ++it, i++) {
 				item = *it;
-				if((item && (!client->IsBecomeNPC())) || (item && client->IsBecomeNPC() && !item->GetItem()->NoRent)) {
+				if ((item && (!client->IsBecomeNPC())) || (item && client->IsBecomeNPC() && !item->GetItem()->NoRent)) {
 					std::list<uint32> slot_list = MoveItemToCorpse(client, item, i);
 					removed_list.merge(slot_list);
 					cursor = true;
@@ -397,16 +395,17 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 		}
 
 		database.TransactionBegin();
-		if(removed_list.size() != 0) {
+		if (removed_list.size() != 0) {
 			std::stringstream ss("");
 			ss << "DELETE FROM inventory WHERE charid=" << client->CharacterID();
 			ss << " AND (";
 			std::list<uint32>::const_iterator iter = removed_list.begin();
 			bool first = true;
-			while(iter != removed_list.end()) {
-				if(first) {
+			while (iter != removed_list.end()) {
+				if (first) {
 					first = false;
-				} else {
+				}
+				else {
 					ss << " OR ";
 				}
 				ss << "slotid=" << (*iter);
@@ -416,8 +415,8 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 			database.QueryDatabase(ss.str().c_str());
 		}
 
-		if(cursor) { // all cursor items should be on corpse (client < SoF or RespawnFromHover = false)
-			while(!client->GetInv().CursorEmpty())
+		if (cursor) { // all cursor items should be on corpse (client < SoF or RespawnFromHover = false)
+			while (!client->GetInv().CursorEmpty())
 				client->DeleteItemInInventory(MainCursor, 0, false, false);
 		}
 		else { // only visible cursor made it to corpse (client >= Sof and RespawnFromHover = true)
@@ -451,13 +450,13 @@ std::list<uint32> Corpse::MoveItemToCorpse(Client *client, ItemInst *item, int16
 	returnlist.push_back(equipslot);
 
 	// Qualified bag slot iterations. processing bag slots that don't exist is probably not a good idea.
-	if(item->IsType(ItemClassContainer) && ((equipslot >= EmuConstants::GENERAL_BEGIN && equipslot <= MainCursor))) {
-		for(bagindex = SUB_BEGIN; bagindex <= EmuConstants::ITEM_CONTAINER_SIZE; bagindex++) {
+	if (item->IsType(ItemClassContainer) && ((equipslot >= EmuConstants::GENERAL_BEGIN && equipslot <= MainCursor))) {
+		for (bagindex = SUB_BEGIN; bagindex <= EmuConstants::ITEM_CONTAINER_SIZE; bagindex++) {
 			// For empty bags in cursor queue, slot was previously being resolved as SLOT_INVALID (-1)
 			interior_slot = Inventory::CalcSlotId(equipslot, bagindex);
 			interior_item = client->GetInv().GetItem(interior_slot);
 
-			if(interior_item) {
+			if (interior_item) {
 				AddItem(interior_item->GetItem()->ID, interior_item->GetCharges(), interior_slot, interior_item->GetAugmentItemID(0), interior_item->GetAugmentItemID(1), interior_item->GetAugmentItemID(2), interior_item->GetAugmentItemID(3), interior_item->GetAugmentItemID(4));
 				returnlist.push_back(Inventory::CalcSlotId(equipslot, bagindex));
 				client->DeleteItemInInventory(interior_slot, 0, true, false);
@@ -554,7 +553,7 @@ Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, ItemLi
 	this->gold = in_gold;
 	this->platinum = in_plat;
 
-	rezzexp = in_rezexp;
+	rez_experience = in_rezexp;
 
 	for (int i = 0; i < MAX_LOOTERS; i++){
 		allowed_looters[i] = 0;
@@ -564,7 +563,7 @@ Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, ItemLi
 
 Corpse::~Corpse() {
 	if (is_player_corpse && !(player_corpse_depop && corpse_db_id == 0)) {
-			Save();
+		Save();
 	}
 	ItemList::iterator cur,end;
 	cur = itemlist.begin();
@@ -618,7 +617,7 @@ bool Corpse::Save() {
 	dbpc->level = level;
 	dbpc->texture = this->texture;
 	dbpc->helmtexture = this->helmtexture;
-	dbpc->exp = rezzexp;
+	dbpc->exp = rez_experience;
 
 	memcpy(dbpc->item_tint, item_tint, sizeof(dbpc->item_tint));
 	dbpc->haircolor = haircolor;
@@ -664,10 +663,10 @@ void Corpse::Delete() {
 }
 
 void Corpse::Bury() {
-	if (IsPlayerCorpse() && corpse_db_id != 0)
+	if (IsPlayerCorpse() && corpse_db_id != 0){
 		database.BuryCharacterCorpse(corpse_db_id);
+	}
 	corpse_db_id = 0;
-
 	player_corpse_depop = true;
 }
 
@@ -677,7 +676,7 @@ void Corpse::Depop() {
 }
 
 void Corpse::DepopCorpse() {
-		player_corpse_depop = true;
+	player_corpse_depop = true;
 }
 
 uint32 Corpse::CountItems() {
@@ -689,7 +688,9 @@ void Corpse::AddItem(uint32 itemnum, uint16 charges, int16 slot, uint32 aug1, ui
 		return;
 
 	is_corpse_changed = true;
+
 	ServerLootItem_Struct* item = new ServerLootItem_Struct;
+	
 	memset(item, 0, sizeof(ServerLootItem_Struct));
 	item->item_id = itemnum;
 	item->charges = charges;
@@ -705,7 +706,6 @@ void Corpse::AddItem(uint32 itemnum, uint16 charges, int16 slot, uint32 aug1, ui
 ServerLootItem_Struct* Corpse::GetItem(uint16 lootslot, ServerLootItem_Struct** bag_item_data) {
 	ServerLootItem_Struct *sitem = 0, *sitem2;
 
-	// find the item
 	ItemList::iterator cur,end;
 	cur = itemlist.begin();
 	end = itemlist.end();
@@ -721,9 +721,9 @@ ServerLootItem_Struct* Corpse::GetItem(uint16 lootslot, ServerLootItem_Struct** 
 
 		cur = itemlist.begin();
 		end = itemlist.end();
-		for(; cur != end; ++cur) {
+		for (; cur != end; ++cur) {
 			sitem2 = *cur;
-			if(sitem2->equip_slot >= bagstart && sitem2->equip_slot < bagstart + 10) {
+			if (sitem2->equip_slot >= bagstart && sitem2->equip_slot < bagstart + 10) {
 				bag_item_data[sitem2->equip_slot - bagstart] = sitem2;
 			}
 		}
@@ -753,7 +753,7 @@ void Corpse::RemoveItem(uint16 lootslot) {
 	ItemList::iterator cur,end;
 	cur = itemlist.begin();
 	end = itemlist.end();
-	for(; cur != end; ++cur) {
+	for (; cur != end; ++cur) {
 		ServerLootItem_Struct* sitem = *cur;
 		if (sitem->lootslot == lootslot) {
 			RemoveItem(sitem);
@@ -812,7 +812,7 @@ bool Corpse::Process() {
 		return false;
 	}
 
-	if(corpse_delay_timer.Check()) {
+	if (corpse_delay_timer.Check()) {
 		for (int i = 0; i < MAX_LOOTERS; i++){
 			allowed_looters[i] = 0;
 		}
@@ -820,8 +820,8 @@ bool Corpse::Process() {
 		return true;
 	}
 
-	if(corpse_graveyard_timer.Check()) {
-		if(zone->HasGraveyard()) {
+	if (corpse_graveyard_timer.Check()) {
+		if (zone->HasGraveyard()) {
 			Save();
 			player_corpse_depop = true;
 			database.SendCharacterCorpseToGraveyard(corpse_db_id, zone->graveyard_zoneid(),
@@ -849,7 +849,7 @@ bool Corpse::Process() {
 	*/
 
 	/* This is when a corpse hits decay timer and does checks*/
-	if(corpse_decay_timer.Check()) {
+	if (corpse_decay_timer.Check()) {
 		/* NPC */
 		if (IsNPCCorpse()){
 			corpse_decay_timer.Disable();
@@ -860,7 +860,7 @@ bool Corpse::Process() {
 			Delete();
 		}
 		else {
-			if(database.BuryCharacterCorpse(corpse_db_id)) {
+			if (database.BuryCharacterCorpse(corpse_db_id)) {
 				Save();
 				player_corpse_depop = true;
 				corpse_db_id = 0;
@@ -887,7 +887,7 @@ void Corpse::SetDecayTimer(uint32 decaytime) {
 
 bool Corpse::CanPlayerLoot(int charid) {
 	uint8 looters = 0;
-	for(int i = 0; i < MAX_LOOTERS; i++) {
+	for (int i = 0; i < MAX_LOOTERS; i++) {
 		if (allowed_looters[i] != 0){
 			looters++;
 		}
@@ -933,31 +933,49 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		return;
 	}
 
-	if(being_looted_by == 0) { being_looted_by = 0xFFFFFFFF; }
+	if(being_looted_by == 0) { 
+		being_looted_by = 0xFFFFFFFF; 
+	}
 
 	if(this->being_looted_by != 0xFFFFFFFF) {
 		// lets double check....
 		Entity* looter = entity_list.GetID(this->being_looted_by);
-		if(looter == 0) { this->being_looted_by = 0xFFFFFFFF; }
+		if(looter == 0) { 
+			this->being_looted_by = 0xFFFFFFFF; 
+		}
 	}
 
-	uint8 tCanLoot = 1;
+	uint8 Loot_Request_Type = 1;
 	bool loot_coin = false;
 	if(database.GetVariable("LootCoin", tmp, 9)) { loot_coin = (atoi(tmp) == 1); }
 
-	if(this->being_looted_by != 0xFFFFFFFF && this->being_looted_by != client->GetID()) {
+	if (this->being_looted_by != 0xFFFFFFFF && this->being_looted_by != client->GetID()) {
 		SendLootReqErrorPacket(client, 0);
-		tCanLoot = 0;
+		Loot_Request_Type = 0;
 	}
-	else if(IsPlayerCorpse() && char_id == client->CharacterID()) { tCanLoot = 2; }
-	else if((IsNPCCorpse() || become_npc) && CanPlayerLoot(client->CharacterID())) { tCanLoot = 2; }
-	else if(GetPKItem() == -1 && CanPlayerLoot(client->CharacterID())) { tCanLoot = 3; } //pvp loot all items, variable cash
-	else if(GetPKItem() == 1 && CanPlayerLoot(client->CharacterID())) { tCanLoot = 4; } //pvp loot 1 item, variable cash
-	else if(GetPKItem() > 1 && CanPlayerLoot(client->CharacterID())) { tCanLoot = 5; } //pvp loot 1 set item, variable cash
+	else if (IsPlayerCorpse() && char_id == client->CharacterID()) {
+		Loot_Request_Type = 2;
+	}
+	else if ((IsNPCCorpse() || become_npc) && CanPlayerLoot(client->CharacterID())) {
+		Loot_Request_Type = 2;
+	}
+	else if (GetPKItem() == -1 && CanPlayerLoot(client->CharacterID())) { /* PVP loot all items, variable cash */
+		Loot_Request_Type = 3;
+	}
+	else if (GetPKItem() == 1 && CanPlayerLoot(client->CharacterID())) { /* PVP loot 1 item, variable cash */
+		Loot_Request_Type = 4;
+	}
+	else if (GetPKItem() > 1 && CanPlayerLoot(client->CharacterID())) { /* PVP loot 1 set item, variable cash */
+		Loot_Request_Type = 5;
+	}
 
-	if(tCanLoot == 1) { if(client->Admin() < 100 || !client->GetGM()) { SendLootReqErrorPacket(client, 2); } }
+	if (Loot_Request_Type == 1) {
+		if (client->Admin() < 100 || !client->GetGM()) {
+			SendLootReqErrorPacket(client, 2);
+		}
+	}
 
-	if(tCanLoot >= 2 || (tCanLoot == 1 && client->Admin() >= 100 && client->GetGM())) {
+	if(Loot_Request_Type >= 2 || (Loot_Request_Type == 1 && client->Admin() >= 100 && client->GetGM())) {
 		this->being_looted_by = client->GetID();
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_MoneyOnCorpse, sizeof(moneyOnCorpseStruct));
 		moneyOnCorpseStruct* d = (moneyOnCorpseStruct*) outapp->pBuffer;
@@ -965,8 +983,9 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		d->response		= 1;
 		d->unknown1		= 0x42;
 		d->unknown2		= 0xef;
-		if(tCanLoot == 2 || (tCanLoot >= 3 && loot_coin)) { // dont take the coin off if it's a gm peeking at the corpse
 
+		/* Dont take the coin off if it's a gm peeking at the corpse */
+		if(Loot_Request_Type == 2 || (Loot_Request_Type >= 3 && loot_coin)) { 
 			if(!IsPlayerCorpse() && client->IsGrouped() && client->AutoSplitEnabled() && client->GetGroup()) {
 				d->copper		= 0;
 				d->silver		= 0;
@@ -990,7 +1009,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		outapp->priority = 6;
 		client->QueuePacket(outapp);
 		safe_delete(outapp);
-		if(tCanLoot == 5) {
+		if(Loot_Request_Type == 5) {
 			int pkitem = GetPKItem();
 			const Item_Struct* item = database.GetItem(pkitem);
 			ItemInst* inst = database.CreateItem(item, item->MaxCharges);
@@ -1019,7 +1038,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 			// Dont display the item if it's in a bag
 
 			// Added cursor queue slots to corpse item visibility list. Nothing else should be making it to corpse.
-			if(!IsPlayerCorpse() || item_data->equip_slot <= MainCursor || item_data->equip_slot == MainPowerSource || tCanLoot>=3 ||
+			if(!IsPlayerCorpse() || item_data->equip_slot <= MainCursor || item_data->equip_slot == MainPowerSource || Loot_Request_Type>=3 ||
 				(item_data->equip_slot >= 8000 && item_data->equip_slot <= 8999)) {
 				if(i < corpselootlimit) {
 					item = database.GetItem(item_data->item_id);
@@ -1398,7 +1417,7 @@ bool Corpse::Summon(Client* client, bool spell, bool CheckDistance) {
 }
 
 void Corpse::CompleteRezz(){
-	rezzexp = 0;
+	rez_experience = 0;
 	is_corpse_changed = true;
 	this->Save();
 }
