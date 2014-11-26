@@ -99,6 +99,7 @@ Mob::Mob(const char* in_name,
 		gravity_timer(1000),
 		viral_timer(0),
 		m_FearWalkTarget(-999999.0f,-999999.0f,-999999.0f),
+		m_TargetLocation(0.0f, 0.0f, 0.0f),
 		flee_timer(FLEE_CHECK_TIMER)
 
 {
@@ -108,9 +109,6 @@ Mob::Mob(const char* in_name,
 	tar_vx=0;
 	tar_vy=0;
 	tar_vz=0;
-	tarx=0;
-	tary=0;
-	tarz=0;
 	curfp = false;
 
 	AI_Init();

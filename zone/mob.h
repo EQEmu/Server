@@ -399,9 +399,9 @@ public:
 	inline const float GetHeading() const { return m_Position.m_Heading; }
 	inline const float GetSize() const { return size; }
 	inline const float GetBaseSize() const { return base_size; }
-	inline const float GetTarX() const { return tarx; }
-	inline const float GetTarY() const { return tary; }
-	inline const float GetTarZ() const { return tarz; }
+	inline const float GetTarX() const { return m_TargetLocation.m_X; }
+	inline const float GetTarY() const { return m_TargetLocation.m_Y; }
+	inline const float GetTarZ() const { return m_TargetLocation.m_Z; }
 	inline const float GetTarVX() const { return tar_vx; }
 	inline const float GetTarVY() const { return tar_vy; }
 	inline const float GetTarVZ() const { return tar_vz; }
@@ -1227,9 +1227,7 @@ protected:
 	bool pet_owner_client; //Flags regular and pets as belonging to a client
 
 	EGNode *_egnode; //the EG node we are in
-	float tarx;
-	float tary;
-	float tarz;
+	xyz_location m_TargetLocation;
 	uint8 tar_ndx;
 	float tar_vector;
 	float tar_vx;

@@ -531,7 +531,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	}
 
 	int compare_steps = IsBoat() ? 1 : 20;
-	if(tar_ndx < compare_steps && tarx==x && tary==y) {
+	if(tar_ndx < compare_steps && m_TargetLocation.m_X==x && m_TargetLocation.m_Y==y) {
 
 		float new_x = m_Position.m_X + tar_vx*tar_vector;
 		float new_y = m_Position.m_Y + tar_vy*tar_vector;
@@ -590,9 +590,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	} else {
 		tar_ndx=0;
 	}
-	tarx=x;
-	tary=y;
-	tarz=z;
+	m_TargetLocation = xyz_location(x, y, z);
 
 	float nx = this->m_Position.m_X;
 	float ny = this->m_Position.m_Y;
