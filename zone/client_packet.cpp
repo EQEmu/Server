@@ -3984,9 +3984,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 
 	CastSpell_Struct* castspell = (CastSpell_Struct*)app->pBuffer;
 
-	targetring_x = castspell->x_pos;
-	targetring_y = castspell->y_pos;
-	targetring_z = castspell->z_pos;
+    m_TargetRing = xyz_location(castspell->x_pos, castspell->y_pos, castspell->z_pos);
 
 #ifdef _EQDEBUG
 	LogFile->write(EQEMuLog::Debug, "cs_unknown2: %u %i", (uint8)castspell->cs_unknown[0], castspell->cs_unknown[0]);
@@ -4018,9 +4016,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			return;
 		}
 
-		targetring_x = castspell->x_pos;
-		targetring_y = castspell->y_pos;
-		targetring_z = castspell->z_pos;
+        m_TargetRing = xyz_location(castspell->x_pos, castspell->y_pos, castspell->z_pos);
 
 		CastSpell(spell_to_cast, castspell->target_id, castspell->slot);
 	}
