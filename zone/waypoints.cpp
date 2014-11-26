@@ -533,9 +533,9 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	int compare_steps = IsBoat() ? 1 : 20;
 	if(tar_ndx < compare_steps && m_TargetLocation.m_X==x && m_TargetLocation.m_Y==y) {
 
-		float new_x = m_Position.m_X + tar_vx*tar_vector;
-		float new_y = m_Position.m_Y + tar_vy*tar_vector;
-		float new_z = m_Position.m_Z + tar_vz*tar_vector;
+		float new_x = m_Position.m_X + m_TargetV.m_X*tar_vector;
+		float new_y = m_Position.m_Y + m_TargetV.m_Y*tar_vector;
+		float new_z = m_Position.m_Z + m_TargetV.m_Z*tar_vector;
 		if(IsNPC()) {
 			entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
 		}
@@ -544,7 +544,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		m_Position.m_Y = new_y;
 		m_Position.m_Z = new_z;
 
-		mlog(AI__WAYPOINTS, "Calculating new position2 to (%.3f, %.3f, %.3f), old vector (%.3f, %.3f, %.3f)", x, y, z, tar_vx, tar_vy, tar_vz);
+		mlog(AI__WAYPOINTS, "Calculating new position2 to (%.3f, %.3f, %.3f), old vector (%.3f, %.3f, %.3f)", x, y, z, m_TargetV.m_X, m_TargetV.m_Y, m_TargetV.m_Z);
 
 		uint8 NPCFlyMode = 0;
 
@@ -597,19 +597,19 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	float nz = this->m_Position.m_Z;
 //	float nh = this->heading;
 
-	tar_vx = x - nx;
-	tar_vy = y - ny;
-	tar_vz = z - nz;
+	m_TargetV.m_X = x - nx;
+	m_TargetV.m_Y = y - ny;
+	m_TargetV.m_Z = z - nz;
 
 	//pRunAnimSpeed = (int8)(speed*NPC_RUNANIM_RATIO);
 	//speed *= NPC_SPEED_MULTIPLIER;
 
-	mlog(AI__WAYPOINTS, "Calculating new position2 to (%.3f, %.3f, %.3f), new vector (%.3f, %.3f, %.3f) rate %.3f, RAS %d", x, y, z, tar_vx, tar_vy, tar_vz, speed, pRunAnimSpeed);
+	mlog(AI__WAYPOINTS, "Calculating new position2 to (%.3f, %.3f, %.3f), new vector (%.3f, %.3f, %.3f) rate %.3f, RAS %d", x, y, z, m_TargetV.m_X, m_TargetV.m_Y, m_TargetV.m_Z, speed, pRunAnimSpeed);
 
 	// --------------------------------------------------------------------------
 	// 2: get unit vector
 	// --------------------------------------------------------------------------
-	float mag = sqrtf (tar_vx*tar_vx + tar_vy*tar_vy + tar_vz*tar_vz);
+	float mag = sqrtf (m_TargetV.m_X*m_TargetV.m_X + m_TargetV.m_Y*m_TargetV.m_Y + m_TargetV.m_Z*m_TargetV.m_Z);
 	tar_vector = speed / mag;
 
 // mob move fix
@@ -622,14 +622,14 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	{
 		if (numsteps>1)
 		{
-			tar_vector=1.0f				;
-			tar_vx = tar_vx/numsteps;
-			tar_vy = tar_vy/numsteps;
-			tar_vz = tar_vz/numsteps;
+			tar_vector=1.0f	;
+			m_TargetV.m_X = m_TargetV.m_X/numsteps;
+			m_TargetV.m_Y = m_TargetV.m_Y/numsteps;
+			m_TargetV.m_Z = m_TargetV.m_Z/numsteps;
 
-			float new_x = m_Position.m_X + tar_vx;
-			float new_y = m_Position.m_Y + tar_vy;
-			float new_z = m_Position.m_Z + tar_vz;
+			float new_x = m_Position.m_X + m_TargetV.m_X;
+			float new_y = m_Position.m_Y + m_TargetV.m_Y;
+			float new_z = m_Position.m_Z + m_TargetV.m_Z;
 			if(IsNPC()) {
 				entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
 			}
@@ -659,9 +659,9 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	else {
 		tar_vector/=20;
 
-		float new_x = m_Position.m_X + tar_vx*tar_vector;
-		float new_y = m_Position.m_Y + tar_vy*tar_vector;
-		float new_z = m_Position.m_Z + tar_vz*tar_vector;
+		float new_x = m_Position.m_X + m_TargetV.m_X*tar_vector;
+		float new_y = m_Position.m_Y + m_TargetV.m_Y*tar_vector;
+		float new_z = m_Position.m_Z + m_TargetV.m_Z*tar_vector;
 		if(IsNPC()) {
 			entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
 		}
@@ -753,22 +753,22 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 	}
 
 	float old_test_vector=test_vector;
-	tar_vx = x - nx;
-	tar_vy = y - ny;
-	tar_vz = z - nz;
+	m_TargetV.m_X = x - nx;
+	m_TargetV.m_Y = y - ny;
+	m_TargetV.m_Z = z - nz;
 
-	if (tar_vx == 0 && tar_vy == 0)
+	if (m_TargetV.m_X == 0 && m_TargetV.m_Y == 0)
 		return false;
 	pRunAnimSpeed = (uint8)(speed*NPC_RUNANIM_RATIO);
 	speed *= NPC_SPEED_MULTIPLIER;
 
-	mlog(AI__WAYPOINTS, "Calculating new position to (%.3f, %.3f, %.3f) vector (%.3f, %.3f, %.3f) rate %.3f RAS %d", x, y, z, tar_vx, tar_vy, tar_vz, speed, pRunAnimSpeed);
+	mlog(AI__WAYPOINTS, "Calculating new position to (%.3f, %.3f, %.3f) vector (%.3f, %.3f, %.3f) rate %.3f RAS %d", x, y, z, m_TargetV.m_X, m_TargetV.m_Y, m_TargetV.m_Z, speed, pRunAnimSpeed);
 
 	// --------------------------------------------------------------------------
 	// 2: get unit vector
 	// --------------------------------------------------------------------------
 	test_vector=sqrtf (x*x + y*y + z*z);
-	tar_vector = speed / sqrtf (tar_vx*tar_vx + tar_vy*tar_vy + tar_vz*tar_vz);
+	tar_vector = speed / sqrtf (m_TargetV.m_X*m_TargetV.m_X + m_TargetV.m_Y*m_TargetV.m_Y + m_TargetV.m_Z*m_TargetV.m_Z);
 	m_Position.m_Heading = CalculateHeadingToTarget(x, y);
 
 	if (tar_vector >= 1.0) {
@@ -782,9 +782,9 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 		mlog(AI__WAYPOINTS, "Close enough, jumping to waypoint");
 	}
 	else {
-		float new_x = m_Position.m_X + tar_vx*tar_vector;
-		float new_y = m_Position.m_Y + tar_vy*tar_vector;
-		float new_z = m_Position.m_Z + tar_vz*tar_vector;
+		float new_x = m_Position.m_X + m_TargetV.m_X*tar_vector;
+		float new_y = m_Position.m_Y + m_TargetV.m_Y*tar_vector;
+		float new_z = m_Position.m_Z + m_TargetV.m_Z*tar_vector;
 		if(IsNPC()) {
 			entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
 		}

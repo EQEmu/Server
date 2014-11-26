@@ -402,9 +402,9 @@ public:
 	inline const float GetTarX() const { return m_TargetLocation.m_X; }
 	inline const float GetTarY() const { return m_TargetLocation.m_Y; }
 	inline const float GetTarZ() const { return m_TargetLocation.m_Z; }
-	inline const float GetTarVX() const { return tar_vx; }
-	inline const float GetTarVY() const { return tar_vy; }
-	inline const float GetTarVZ() const { return tar_vz; }
+	inline const float GetTarVX() const { return m_TargetV.m_X; }
+	inline const float GetTarVY() const { return m_TargetV.m_Y; }
+	inline const float GetTarVZ() const { return m_TargetV.m_Z; }
 	inline const float GetTarVector() const { return tar_vector; }
 	inline const uint8 GetTarNDX() const { return tar_ndx; }
 	bool IsBoat() const;
@@ -1230,9 +1230,7 @@ protected:
 	xyz_location m_TargetLocation;
 	uint8 tar_ndx;
 	float tar_vector;
-	float tar_vx;
-	float tar_vy;
-	float tar_vz;
+	xyz_location m_TargetV;
 	float test_vector;
 
 	xyz_location m_TargetRing;
