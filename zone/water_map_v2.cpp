@@ -25,14 +25,13 @@ bool WaterMapV2::InVWater(const xyz_location& location) const {
 	return ReturnRegionType(location) == RegionTypeVWater;
 }
 
-bool WaterMapV2::InLava(float y, float x, float z) const {
-    auto location = xyz_location(x, y, z);
+bool WaterMapV2::InLava(const xyz_location& location) const {
 	return ReturnRegionType(location) == RegionTypeLava;
 }
 
 bool WaterMapV2::InLiquid(float y, float x, float z) const {
     auto location = xyz_location(x, y, z);
-	return InWater(location) || InLava(y, x, z);
+	return InWater(location) || InLava(location);
 }
 
 bool WaterMapV2::Load(FILE *fp) {
