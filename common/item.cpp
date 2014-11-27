@@ -1803,7 +1803,7 @@ bool ItemInst::CanTransform(const Item_Struct *ItemToTry, const Item_Struct *Con
 	if (ItemToTry->ItemType == ItemTypeArrow || strnlen(Container->CharmFile, 30) == 0)
 		return false;
 
-	if (AllowAll && !strncasecmp(Container->CharmFile, "ITEMTRANSFIGSHIELD", 18) && !strncasecmp(Container->CharmFile, "ITEMTransfigBow", 15)) {
+	if (AllowAll && strncasecmp(Container->CharmFile, "ITEMTRANSFIGSHIELD", 18) && strncasecmp(Container->CharmFile, "ITEMTransfigBow", 15)) {
 		switch (ItemToTry->ItemType) {
 			case 0:
 			case 1:
