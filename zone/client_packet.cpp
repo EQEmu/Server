@@ -4595,13 +4595,8 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 		safe_delete(outapp);
 	}
 
-	if(zone->watermap)
-	{
-		if(zone->watermap->InLiquid(m_Position.m_X, m_Position.m_Y, m_Position.m_Z))
-		{
-			CheckIncreaseSkill(SkillSwimming, nullptr, -17);
-		}
-	}
+	if(zone->watermap && zone->watermap->InLiquid(m_Position))
+        CheckIncreaseSkill(SkillSwimming, nullptr, -17);
 
 	return;
 }

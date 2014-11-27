@@ -1372,7 +1372,8 @@ void Mob::AI_Process() {
 			//we cannot reach our target...
 			//underwater stuff only works with water maps in the zone!
 			if(IsNPC() && CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
-				if(!zone->watermap->InLiquid(target->GetX(), target->GetY(), target->GetZ())) {
+                auto targetPosition = xyz_location(target->GetX(), target->GetY(), target->GetZ());
+				if(!zone->watermap->InLiquid(targetPosition)) {
 					Mob *tar = hate_list.GetTop(this);
 					if(tar == target) {
 						WipeHateList();

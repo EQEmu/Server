@@ -29,7 +29,7 @@ public:
 	virtual bool InWater(const xyz_location& location) const { return false; }
 	virtual bool InVWater(const xyz_location& location) const { return false; }
 	virtual bool InLava(const xyz_location& location) const { return false; }
-	virtual bool InLiquid(float y, float x, float z) const { return false; }
+	virtual bool InLiquid(const xyz_location& location) const { return false; }
 
 protected:
 	virtual bool Load(FILE *fp) { return false; }

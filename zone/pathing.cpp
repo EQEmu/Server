@@ -1197,12 +1197,14 @@ bool PathManager::NoHazardsAccurate(Map::Vertex From, Map::Vertex To)
 
 		if (zone->watermap)
 		{
-			if (zone->watermap->InLiquid(From.x, From.y, From.z) || zone->watermap->InLiquid(To.x, To.y, To.z))
+            auto from = xyz_location(From.x, From.y, From.z);
+            auto to = xyz_location(To.x, To.y, To.z);
+			if (zone->watermap->InLiquid(from) || zone->watermap->InLiquid(to))
 			{
 				break;
 			}
-
-			if (zone->watermap->InLiquid(TestPoint.x, TestPoint.y, NewZ))
+            auto testPointNewZ = xyz_location(TestPoint.x, TestPoint.y, NewZ);
+			if (zone->watermap->InLiquid(testPointNewZ))
 			{
 				Map::Vertex TestPointWater(TestPoint.x, TestPoint.y, NewZ - 0.5f);
 				Map::Vertex TestPointWaterDest = TestPointWater;
