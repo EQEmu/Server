@@ -1816,28 +1816,26 @@ bool ItemInst::CanTransform(const Item_Struct *ItemToTry, const Item_Struct *Con
 		}
 	}
 
-	static std::map<std::string, int> types = {
-		  { "itemtransfig1hp", 2 },
-		  { "itemtransfig1hs", 0 },
-		  { "itemtransfig2hb", 4 },
-		  { "itemtransfig2hp", 35 },
-		  { "itemtransfig2hs", 1 },
-		  { "itemtransfigblunt", 3 },
-		  { "itemtransfigbow", 5 },
-		  { "itemtransfighth", 45 },
-		  { "itemtransfigshield", 8 },
-		  { "itemtransfigslashing", 0 }
-		 };
+	static std::map<std::string, int> types;
+	types["itemtransfig1hp"] = 2;
+	types["itemtransfig1hs"] = 0;
+	types["itemtransfig2hb"] = 4;
+	types["itemtransfig2hp"] = 35;
+	types["itemtransfig2hs"] = 1;
+	types["itemtransfigblunt"] = 3;
+	types["itemtransfigbow"] = 5;
+	types["itemtransfighth"] = 45;
+	types["itemtransfigshield"] = 8;
+	types["itemtransfigslashing"] = 0;
 
 	auto i = types.find(MakeLowerString(Container->CharmFile));
 	if (i != types.end() && i->second == ItemToTry->ItemType)
 		return true;
 
-	static std::map<std::string, int> typestwo = {
-		{ "itemtransfigblunt", 4 },
-		{ "itemtransfigslashing", 1 }
-	};
-	
+	static std::map<std::string, int> typestwo;
+	typestwo["itemtransfigblunt"] = 4;
+	typestwo["itemtransfigslashing"] = 1;
+
 	i = typestwo.find(MakeLowerString(Container->CharmFile));
 	if (i != typestwo.end() && i->second == ItemToTry->ItemType)
 		return true;
