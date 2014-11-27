@@ -1,4 +1,6 @@
 #include "position.h"
+#include <string>
+#include "../common/string_util.h"
 
 xy_location::xy_location(float x, float y) :
     m_X(x),
@@ -104,3 +106,16 @@ void xyz_location::ABS_XYZ(void) {
     if (m_Z < 0)
         m_Z = -m_Z;
 }
+
+std::string to_string(const xyz_heading &position) {
+    return StringFormat("(%.3f, %.3f, %.3f, %.3f)", position.m_X,position.m_Y,position.m_Z,position.m_Heading);
+}
+
+std::string to_string(const xyz_location &position){
+    return StringFormat("(%.3f, %.3f, %.3f)", position.m_X,position.m_Y,position.m_Z);
+}
+
+std::string to_string(const xy_location &position){
+    return StringFormat("(%.3f, %.3f)", position.m_X,position.m_Y);
+}
+

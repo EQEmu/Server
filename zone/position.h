@@ -18,6 +18,8 @@
 #ifndef POSITION_H
 #define POSITION_H
 
+#include <string>
+
 class xy_location {
 public:
     float m_X;
@@ -76,5 +78,8 @@ public:
     bool isOrigin() const { return m_X == 0.0f && m_Y == 0.0f && m_Z == 0.0f;}
 };
 
+std::string to_string(const xyz_heading &position);
+std::string to_string(const xyz_location &position);
+std::string to_string(const xy_location &position);
 
 #endif
