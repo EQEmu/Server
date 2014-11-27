@@ -17,8 +17,8 @@ WaterRegionType WaterMapV2::ReturnRegionType(float y, float x, float z) const {
 	return RegionTypeNormal;
 }
 
-bool WaterMapV2::InWater(float y, float x, float z) const {
-	return ReturnRegionType(y, x, z) == RegionTypeWater;
+bool WaterMapV2::InWater(const xyz_location& location) const {
+	return ReturnRegionType(location.m_Y, location.m_X, location.m_Z) == RegionTypeWater;
 }
 
 bool WaterMapV2::InVWater(float y, float x, float z) const {
@@ -30,7 +30,8 @@ bool WaterMapV2::InLava(float y, float x, float z) const {
 }
 
 bool WaterMapV2::InLiquid(float y, float x, float z) const {
-	return InWater(y, x, z) || InLava(y, x, z);
+    auto location = xyz_location(y, x, z);
+	return InWater(location) || InLava(y, x, z);
 }
 
 bool WaterMapV2::Load(FILE *fp) {
@@ -106,7 +107,7 @@ bool WaterMapV2::Load(FILE *fp) {
 			return false;
 		}
 
-		regions.push_back(std::make_pair((WaterRegionType)region_type, 
+		regions.push_back(std::make_pair((WaterRegionType)region_type,
 			OrientedBoundingBox(glm::vec3(x, y, z), glm::vec3(x_rot, y_rot, z_rot), glm::vec3(x_scale, y_scale, z_scale), glm::vec3(x_extent, y_extent, z_extent))));
 	}
 

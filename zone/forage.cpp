@@ -216,7 +216,8 @@ bool Client::CanFish() {
 	}
 
 	if(zone->zonemap != nullptr && zone->watermap != nullptr && RuleB(Watermap, CheckForWaterWhenFishing)) {
-		float RodX, RodY, RodZ;
+
+		xyz_location rodPosition;
 		// Tweak Rod and LineLength if required
 		const float RodLength = RuleR(Watermap, FishingRodLength);
 		const float LineLength = RuleR(Watermap, FishingLineLength);
@@ -225,25 +226,25 @@ bool Client::CanFish() {
 		HeadingDegrees = (int) ((GetHeading()*360)/256);
 		HeadingDegrees = HeadingDegrees % 360;
 
-		RodX = m_Position.m_X + RodLength * sin(HeadingDegrees * M_PI/180.0f);
-		RodY = m_Position.m_Y + RodLength * cos(HeadingDegrees * M_PI/180.0f);
+		rodPosition.m_X = m_Position.m_X + RodLength * sin(HeadingDegrees * M_PI/180.0f);
+		rodPosition.m_Y = m_Position.m_Y + RodLength * cos(HeadingDegrees * M_PI/180.0f);
 
 		// Do BestZ to find where the line hanging from the rod intersects the water (if it is water).
 		// and go 1 unit into the water.
 		Map::Vertex dest;
-		dest.x = RodX;
-		dest.y = RodY;
+		dest.x = rodPosition.m_X;
+		dest.y = rodPosition.m_Y;
 		dest.z = m_Position.m_Z+10;
 
-		RodZ = zone->zonemap->FindBestZ(dest, nullptr) + 4;
-		bool in_lava = zone->watermap->InLava(RodX, RodY, RodZ);
-		bool in_water = zone->watermap->InWater(RodX, RodY, RodZ) || zone->watermap->InVWater(RodX, RodY, RodZ);
+		rodPosition.m_Z = zone->zonemap->FindBestZ(dest, nullptr) + 4;
+		bool in_lava = zone->watermap->InLava(rodPosition.m_X, rodPosition.m_Y, rodPosition.m_Z);
+		bool in_water = zone->watermap->InWater(rodPosition) || zone->watermap->InVWater(rodPosition.m_X, rodPosition.m_Y, rodPosition.m_Z);
 		//Message(0, "Rod is at %4.3f, %4.3f, %4.3f, InWater says %d, InLava says %d", RodX, RodY, RodZ, in_water, in_lava);
 		if (in_lava) {
 			Message_StringID(MT_Skills, FISHING_LAVA);	//Trying to catch a fire elemental or something?
 			return false;
 		}
-		if((!in_water) || (m_Position.m_Z-RodZ)>LineLength) {	//Didn't hit the water OR the water is too far below us
+		if((!in_water) || (m_Position.m_Z-rodPosition.m_Z)>LineLength) {	//Didn't hit the water OR the water is too far below us
 			Message_StringID(MT_Skills, FISHING_LAND);	//Trying to catch land sharks perhaps?
 			return false;
 		}

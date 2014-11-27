@@ -227,7 +227,7 @@ void NPC::UpdateWaypoint(int wp_index)
 	{
 
 		if(!RuleB(Watermap, CheckForWaterAtWaypoints) || !zone->HasWaterMap() ||
-			(zone->HasWaterMap() && !zone->watermap->InWater(m_CurrentWayPoint.m_X, m_CurrentWayPoint.m_Y, m_CurrentWayPoint.m_Z)))
+			(zone->HasWaterMap() && !zone->watermap->InWater(m_CurrentWayPoint)))
 		{
 			Map::Vertex dest(m_CurrentWayPoint.m_X, m_CurrentWayPoint.m_Y, m_CurrentWayPoint.m_Z);
 
@@ -557,7 +557,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		if(!NPCFlyMode && checkZ && zone->HasMap() && RuleB(Map, FixPathingZWhenMoving))
 		{
 			if(!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap() ||
-				(zone->HasWaterMap() && !zone->watermap->InWater(m_Position.m_X, m_Position.m_Y, m_Position.m_Z)))
+				(zone->HasWaterMap() && !zone->watermap->InWater(m_Position.m_X)))
 			{
 				Map::Vertex dest(m_Position.m_X, m_Position.m_Y, m_Position.m_Z);
 
@@ -684,7 +684,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	if(!NPCFlyMode && checkZ && zone->HasMap() && RuleB(Map, FixPathingZWhenMoving)) {
 
 		if(!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap() ||
-			(zone->HasWaterMap() && !zone->watermap->InWater(m_Position.m_X, m_Position.m_Y, m_Position.m_Z)))
+			(zone->HasWaterMap() && !zone->watermap->InWater(m_Position)))
 		{
 			Map::Vertex dest(m_Position.m_X, m_Position.m_Y, m_Position.m_Z);
 
@@ -806,7 +806,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 	if(!NPCFlyMode && checkZ && zone->HasMap() && RuleB(Map, FixPathingZWhenMoving))
 	{
 		if(!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap() ||
-			(zone->HasWaterMap() && !zone->watermap->InWater(m_Position.m_X, m_Position.m_Y, m_Position.m_Z)))
+			(zone->HasWaterMap() && !zone->watermap->InWater(m_Position)))
 		{
 			Map::Vertex dest(m_Position.m_X, m_Position.m_Y, m_Position.m_Z);
 
@@ -900,8 +900,9 @@ void NPC::AssignWaypoints(int32 grid) {
 
         if(zone->HasMap() && RuleB(Map, FixPathingZWhenLoading) )
         {
+            auto positon = xyz_location(newwp.x,newwp.y,newwp.z);
             if(!RuleB(Watermap, CheckWaypointsInWaterWhenLoading) || !zone->HasWaterMap() ||
-                (zone->HasWaterMap() && !zone->watermap->InWater(newwp.x, newwp.y, newwp.z)))
+                (zone->HasWaterMap() && !zone->watermap->InWater(positon)))
             {
                 Map::Vertex dest(newwp.x, newwp.y, newwp.z);
 
@@ -947,7 +948,7 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 	if(zone->HasMap() && RuleB(Map, FixPathingZOnSendTo) )
 	{
 		if(!RuleB(Watermap, CheckForWaterOnSendTo) || !zone->HasWaterMap() ||
-			(zone->HasWaterMap() && !zone->watermap->InWater(m_Position.m_X, m_Position.m_Y, m_Position.m_Z)))
+			(zone->HasWaterMap() && !zone->watermap->InWater(m_Position)))
 		{
 			Map::Vertex dest(m_Position.m_X, m_Position.m_Y, m_Position.m_Z);
 
@@ -978,7 +979,7 @@ void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 	if(zone->HasMap() && RuleB(Map, FixPathingZOnSendTo))
 	{
 		if(!RuleB(Watermap, CheckForWaterOnSendTo) || !zone->HasWaterMap() ||
-			(zone->HasWaterMap() && !zone->watermap->InWater(m_Position.m_X, m_Position.m_Y, m_Position.m_Z)))
+			(zone->HasWaterMap() && !zone->watermap->InWater(m_Position)))
 		{
 			Map::Vertex dest(m_Position.m_X, m_Position.m_Y, m_Position.m_Z);
 
