@@ -862,10 +862,7 @@ public:
 	Shielders_Struct shielder[MAX_SHIELDERS];
 	Trade* trade;
 
-	inline float GetCWPX() const { return(m_CurrentWayPoint.m_X); }
-	inline float GetCWPY() const { return(m_CurrentWayPoint.m_Y); }
-	inline float GetCWPZ() const { return(m_CurrentWayPoint.m_Z); }
-	inline float GetCWPH() const { return(m_CurrentWayPoint.m_Heading); }
+	inline xyz_heading GetCurrentWayPoint() const { return m_CurrentWayPoint; }
 	inline float GetCWPP() const { return(static_cast<float>(cur_wp_pause)); }
 	inline int GetCWP() const { return(cur_wp); }
 	void SetCurrentWP(uint16 waypoint) { cur_wp = waypoint; }

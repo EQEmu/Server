@@ -2551,7 +2551,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		peekTrade = 0x20,
 		peekWorld = 0x40
 	} ;
-	
+
 	if (!c->GetTarget() || !c->GetTarget()->IsClient()) {
 		c->Message(0, "You must have a PC target selected for this command");
 		return;
@@ -2605,10 +2605,10 @@ void command_peekinv(Client *c, const Seperator *sep)
 		instMain = targetClient->GetInv().GetItem(MainPowerSource);
 		itemData = (instMain ? instMain->GetItem() : nullptr);
 		itemLinkCore = nullptr;
-		
+
 		if (itemData)
 			c->MakeItemLink(itemLinkCore, instMain);
-		
+
 		itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instMain->GetItem()->Name, 0x12) : "null");
 
 		c->Message((itemData == 0), "WornSlot: %i, Item: %i (%s), Charges: %i",
@@ -2625,9 +2625,9 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 		if (itemData)
 			c->MakeItemLink(itemLinkCore, instMain);
-		
+
 		itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instMain->GetItem()->Name, 0x12) : "null");
-		
+
 		c->Message((itemData == 0), "InvSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instMain->GetCharges()));
 
@@ -2640,9 +2640,9 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 			if (itemData)
 				c->MakeItemLink(itemLinkCore, instSub);
-			
+
 			itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instSub->GetItem()->Name, 0x12) : "null");
-			
+
 			c->Message((itemData == 0), "  InvBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
 				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instSub->GetCharges()));
 
@@ -2665,9 +2665,9 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 				if (itemData)
 					c->MakeItemLink(itemLinkCore, instMain);
-				
+
 				itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instMain->GetItem()->Name, 0x12) : "null");
-				
+
 				c->Message((itemData == 0), "CursorSlot: %i, Depth: %i, Item: %i (%s), Charges: %i",
 					MainCursor, cursorDepth, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instMain->GetCharges()));
 
@@ -2680,9 +2680,9 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 					if (itemData)
 						c->MakeItemLink(itemLinkCore, instSub);
-					
+
 					itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instSub->GetItem()->Name, 0x12) : "null");
-					
+
 					c->Message((itemData == 0), "  CursorBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
 						Inventory::CalcSlotId(MainCursor, indexSub), MainCursor, indexSub, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instSub->GetCharges()));
 
@@ -2700,9 +2700,9 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 		if (itemData)
 			c->MakeItemLink(itemLinkCore, instMain);
-		
+
 		itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instMain->GetItem()->Name, 0x12) : "null");
-		
+
 		c->Message((itemData == 0), "TributeSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instMain->GetCharges()));
 
@@ -2717,9 +2717,9 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 		if (itemData)
 			c->MakeItemLink(itemLinkCore, instMain);
-		
+
 		itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instMain->GetItem()->Name, 0x12) : "null" );
-		
+
 		c->Message((itemData == 0), "BankSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instMain->GetCharges()));
 
@@ -2732,9 +2732,9 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 			if (itemData)
 				c->MakeItemLink(itemLinkCore, instSub);
-			
+
 			itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instSub->GetItem()->Name, 0x12) : "null");
-			
+
 			c->Message((itemData == 0), "  BankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
 				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instSub->GetCharges()));
 
@@ -2749,9 +2749,9 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 		if (itemData)
 			c->MakeItemLink(itemLinkCore, instMain);
-		
+
 		itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instMain->GetItem()->Name, 0x12) : "null");
-		
+
 		c->Message((itemData == 0), "SharedBankSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instMain->GetCharges()));
 
@@ -2764,9 +2764,9 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 			if (itemData)
 				c->MakeItemLink(itemLinkCore, instSub);
-			
+
 			itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instSub->GetItem()->Name, 0x12) : "null");
-			
+
 			c->Message((itemData == 0), "  SharedBankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
 				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instSub->GetCharges()));
 
@@ -2782,9 +2782,9 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 		if (itemData)
 			c->MakeItemLink(itemLinkCore, instMain);
-		
+
 		itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instMain->GetItem()->Name, 0x12) : "null");
-		
+
 		c->Message((itemData == 0), "TradeSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instMain->GetCharges()));
 
@@ -2797,9 +2797,9 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 			if (itemData)
 				c->MakeItemLink(itemLinkCore, instSub);
-			
+
 			itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instSub->GetItem()->Name, 0x12) : "null");
-			
+
 			c->Message((itemData == 0), "  TradeBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
 				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instSub->GetCharges()));
 
@@ -2824,9 +2824,9 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 				if (itemData)
 					c->MakeItemLink(itemLinkCore, instMain);
-				
+
 				itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instMain->GetItem()->Name, 0x12) : "null");
-				
+
 				c->Message((itemData == 0), "WorldSlot: %i, Item: %i (%s), Charges: %i",
 					(EmuConstants::WORLD_BEGIN + indexMain), ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instMain->GetCharges()));
 
@@ -2839,9 +2839,9 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 					if (itemData)
 						c->MakeItemLink(itemLinkCore, instSub);
-					
+
 					itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instSub->GetItem()->Name, 0x12) : "null");
-					
+
 					c->Message((itemData == 0), "  WorldBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
 						INVALID_INDEX, indexMain, indexSub, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instSub->GetCharges()));
 
@@ -7590,7 +7590,7 @@ void command_pf(Client *c, const Seperator *sep)
 	{
 		Mob *who = c->GetTarget();
 		c->Message(0, "POS: (%.2f, %.2f, %.2f)", who->GetX(), who->GetY(), who->GetZ());
-		c->Message(0, "WP: (%.2f, %.2f, %.2f) (%d/%d)", who->GetCWPX(), who->GetCWPY(), who->GetCWPZ(), who->GetCWP(), who->IsNPC()?who->CastToNPC()->GetMaxWp():-1);
+		c->Message(0, "WP: %s (%d/%d)", to_string(who->GetCurrentWayPoint()).c_str(), who->IsNPC()?who->CastToNPC()->GetMaxWp():-1);
 		c->Message(0, "TAR: (%.2f, %.2f, %.2f)", who->GetTarX(), who->GetTarY(), who->GetTarZ());
 		c->Message(0, "TARV: (%.2f, %.2f, %.2f)", who->GetTarVX(), who->GetTarVY(), who->GetTarVZ());
 		c->Message(0, "|TV|=%.2f index=%d", who->GetTarVector(), who->GetTarNDX());

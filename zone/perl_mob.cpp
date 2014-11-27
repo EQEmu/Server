@@ -1615,7 +1615,7 @@ XS(XS_Mob_TypesTempPet)
 		else
 			Perl_croak(aTHX_ "target is not of type Mob");
 
-		
+
 		if (items < 7)
 			sticktarg = false;
 		else {
@@ -3525,7 +3525,7 @@ XS(XS_Mob_GetWaypointX)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetCWPX();
+		RETVAL = THIS->GetCurrentWayPoint().m_X;
 		XSprePUSH; PUSHn((double)RETVAL);
 	}
 	XSRETURN(1);
@@ -3551,7 +3551,7 @@ XS(XS_Mob_GetWaypointY)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetCWPY();
+		RETVAL = THIS->GetCurrentWayPoint().m_Y;
 		XSprePUSH; PUSHn((double)RETVAL);
 	}
 	XSRETURN(1);
@@ -3577,7 +3577,7 @@ XS(XS_Mob_GetWaypointZ)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetCWPZ();
+		RETVAL = THIS->GetCurrentWayPoint().m_Z;
 		XSprePUSH; PUSHn((double)RETVAL);
 	}
 	XSRETURN(1);
@@ -3603,7 +3603,7 @@ XS(XS_Mob_GetWaypointH)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetCWPH();
+		RETVAL = THIS->GetCurrentWayPoint().m_Heading;
 		XSprePUSH; PUSHn((double)RETVAL);
 	}
 	XSRETURN(1);
