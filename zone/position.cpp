@@ -63,15 +63,15 @@ xyz_heading::operator xy_location() const {
     return xy_location(m_X,m_Y);
 }
 
-const xyz_heading xyz_heading::operator +(const xyz_location& rhs) {
+const xyz_heading xyz_heading::operator +(const xyz_location& rhs) const{
     return xyz_heading(m_X + rhs.m_X, m_Y + rhs.m_Y, m_Z + rhs.m_Z, m_Heading);
 }
 
-const xyz_heading xyz_heading::operator +(const xy_location& rhs) {
+const xyz_heading xyz_heading::operator +(const xy_location& rhs) const{
     return xyz_heading(m_X + rhs.m_X, m_Y + rhs.m_Y, m_Z, m_Heading);
 }
 
-const xyz_heading xyz_heading::operator -(const xyz_location& rhs) {
+const xyz_heading xyz_heading::operator -(const xyz_location& rhs) const{
     return xyz_heading(m_X - rhs.m_X, m_Y - rhs.m_Y, m_Z - rhs.m_Z, m_Heading);
 }
 
@@ -92,7 +92,7 @@ xyz_location::operator xy_location() const {
     return xy_location(m_X, m_Y);
 }
 
-const xyz_location xyz_location::operator -(const xyz_location& rhs) {
+const xyz_location xyz_location::operator -(const xyz_location& rhs) const {
     return xyz_location(m_X - rhs.m_X, m_Y - rhs.m_Y, m_Z - rhs.m_Z);
 }
 

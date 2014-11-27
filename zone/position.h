@@ -43,7 +43,7 @@ public:
 
     operator xy_location() const;
 
-    const xyz_location operator -(const xyz_location& rhs);
+    const xyz_location operator -(const xyz_location& rhs) const;
 
     void ABS_XYZ();
     bool isOrigin() const { return m_X == 0 && m_Y == 0 && m_Z == 0;}
@@ -70,10 +70,10 @@ public:
     operator xyz_location() const;
     operator xy_location() const;
 
-    const xyz_heading operator +(const xyz_location& rhs);
-    const xyz_heading operator +(const xy_location& rhs);
+    const xyz_heading operator +(const xyz_location& rhs) const;
+    const xyz_heading operator +(const xy_location& rhs) const;
 
-    const xyz_heading operator -(const xyz_location& rhs);
+    const xyz_heading operator -(const xyz_location& rhs) const;
 
     bool isOrigin() const { return m_X == 0.0f && m_Y == 0.0f && m_Z == 0.0f;}
 };
