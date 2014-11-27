@@ -910,6 +910,19 @@ bool Database::CheckDatabaseConversions() {
 #endif
 	}
 
+	/* 
+		Automatic Database Upgrade Script
+		Script: db_updater.pl V 1 - the number that world passes to the script will 
+			force the script to check for a newer version to update itself with
+				db_updater.pl ran_from_world - won't bring up a menu if your database versions match
+				db_updater.pl - ran standalone will bring up a menu prompt 
+	*/
+
+	/* Check for a new version of this script, the arg passed 
+		would have to be higher than the copy they have downloaded 
+		locally and they will re fetch */
+	system("perl db_update.pl V 1");
+
 	/* Run Automatic Database Upgrade Script */
 	system("perl db_update.pl ran_from_world"); 
 
