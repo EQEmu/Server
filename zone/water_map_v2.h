@@ -14,7 +14,7 @@ public:
 
 	virtual WaterRegionType ReturnRegionType(const xyz_location& location) const;
 	virtual bool InWater(const xyz_location& location) const;
-	virtual bool InVWater(float y, float x, float z) const;
+	virtual bool InVWater(const xyz_location& location) const;
 	virtual bool InLava(float y, float x, float z) const;
 	virtual bool InLiquid(float y, float x, float z) const;
 

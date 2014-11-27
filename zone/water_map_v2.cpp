@@ -21,8 +21,7 @@ bool WaterMapV2::InWater(const xyz_location& location) const {
 	return ReturnRegionType(location) == RegionTypeWater;
 }
 
-bool WaterMapV2::InVWater(float y, float x, float z) const {
-    auto location = xyz_location(x, y, z);
+bool WaterMapV2::InVWater(const xyz_location& location) const {
 	return ReturnRegionType(location) == RegionTypeVWater;
 }
 
