@@ -304,6 +304,24 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		return;
 	}
 
+	if (container->GetItem()->BagType == BagTypeDetransformationmold) {
+		const ItemInst* inst = container->GetItem(0);
+		if (inst && inst->GetOrnamentationIcon() && inst->GetOrnamentationIcon()) {
+			const Item_Struct* new_weapon = inst->GetItem();
+			user->DeleteItemInInventory(Inventory::CalcSlotId(in_combine->container_slot, 0), 0, true);
+			container->Clear();
+			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->IsInstNoDrop(), MainCursor, 0, 0);
+			user->Message_StringID(4, TRANSFORM_COMPLETE, inst->GetItem()->Name);
+		}
+		else if (inst) {
+			user->Message_StringID(4, DETRANSFORM_FAILED, inst->GetItem()->Name);
+		}
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		user->QueuePacket(outapp);
+		safe_delete(outapp);
+		return;
+	}
+
 	DBTradeskillRecipe_Struct spec;
 	if (!database.GetTradeRecipe(container, c_type, some_id, user->CharacterID(), &spec)) {
 		user->Message_StringID(MT_Emote,TRADESKILL_NOCOMBINE);
