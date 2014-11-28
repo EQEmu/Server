@@ -1075,9 +1075,14 @@ void Mob::ProjectileAttack()
 		Mob* target = entity_list.GetMobID(ProjectileAtk[i].target_id);
 		
 		if (target && target->IsMoving()){ //Only recalculate hit increment if target moving
-			float distance = target->CalculateDistance(ProjectileAtk[i].origin_x, ProjectileAtk[i].origin_y,  ProjectileAtk[i].origin_z);
-			float hit = 60.0f + (distance / 1.8f); //Calcuation: 60 = Animation Lag, 1.8 = Speed modifier for speed of (4)
-			ProjectileAtk[i].hit_increment = static_cast<uint16>(hit);
+			
+			//Due to frequency that we need to check increment the targets position variables may not be updated even if moving. Do a simple check before calculating distance.
+			if (ProjectileAtk[i].sanitycheck != target->GetX() * target->GetY()){
+				ProjectileAtk[i].sanitycheck = target->GetX() * target->GetY();
+				float distance = target->CalculateDistance(ProjectileAtk[i].origin_x, ProjectileAtk[i].origin_y,  ProjectileAtk[i].origin_z);
+				float hit = 60.0f + (distance / 1.8f); //Calcuation: 60 = Animation Lag, 1.8 = Speed modifier for speed of (4)
+				ProjectileAtk[i].hit_increment = static_cast<uint16>(hit);
+			}
 		}
 
 		if (ProjectileAtk[i].hit_increment <= ProjectileAtk[i].increment){

@@ -468,6 +468,7 @@ typedef struct
 	float origin_x;
 	float origin_y;
 	float origin_z;
+	float sanitycheck;
 	uint32 ranged_id;
 	uint32 ammo_id;
 	int ammo_slot;
