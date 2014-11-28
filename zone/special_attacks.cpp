@@ -1098,8 +1098,10 @@ void Mob::ProjectileAttack()
 			ProjectileAtk[i].origin_x = 0.0f;
 			ProjectileAtk[i].origin_y = 0.0f;
 			ProjectileAtk[i].origin_z = 0.0f;
+			ProjectileAtk[i].sanitycheck = 0.0f;
 			ProjectileAtk[i].ranged_id = 0;
 			ProjectileAtk[i].ammo_id = 0;
+			ProjectileAtk[i].ammo_slot = 0;
 			ProjectileAtk[i].skill = 0;
 		}
 
