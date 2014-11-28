@@ -790,7 +790,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 	}
 
 	//Shoots projectile and/or applies the archery damage
-	DoArcheryAttackDmg(GetTarget(), RangeWeapon, Ammo,0,0,0,0,0,0, AmmoItem);
+	DoArcheryAttackDmg(GetTarget(), RangeWeapon, Ammo,0,0,0,0,0,0, AmmoItem, ammo_slot);
 
 	//EndlessQuiver AA base1 = 100% Chance to avoid consumption arrow.
 	int ChanceAvoidConsume = aabonuses.ConsumeProjectile + itembonuses.ConsumeProjectile + spellbonuses.ConsumeProjectile;
@@ -807,7 +807,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 }
 
 void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const ItemInst* Ammo, uint16 weapon_damage, int16 chance_mod, int16 focus, int ReuseTime, 
-							uint32 range_id, uint32 ammo_id, const Item_Struct *AmmoItem) {
+							uint32 range_id, uint32 ammo_id, const Item_Struct *AmmoItem, int AmmoSlot) {
 	
 	if ((other == nullptr || 
 		((IsClient() && CastToClient()->dead) || 
@@ -857,7 +857,7 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const Ite
 					else
 						RangeWeapon = _RangeWeapon;
 			
-					_Ammo = CastToClient()->m_inv[MainAmmo];
+					_Ammo = CastToClient()->m_inv[AmmoSlot];
 					if (!_Ammo || _Ammo->GetItem()->ID != ammo_id)
 						ammo_lost = database.GetItem(ammo_id);
 					else
@@ -873,7 +873,7 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const Ite
 		mlog(COMBAT__RANGED, "Ranged attack missed %s.", other->GetName());
 
 		if (LaunchProjectile){
-			TryProjectileAttack(other, AmmoItem, SkillArchery, 0, RangeWeapon, Ammo);
+			TryProjectileAttack(other, AmmoItem, SkillArchery, 0, RangeWeapon, Ammo, AmmoSlot);
 			return;
 		}
 		else
@@ -898,7 +898,7 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const Ite
 			WDmg = weapon_damage;
 
 		if (LaunchProjectile){//1: Shoot the Projectile once we calculate weapon damage.
-			TryProjectileAttack(other, AmmoItem, SkillArchery, WDmg, RangeWeapon, Ammo);
+			TryProjectileAttack(other, AmmoItem, SkillArchery, WDmg, RangeWeapon, Ammo, AmmoSlot);
 			return;
 		}
 
@@ -1013,7 +1013,7 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const Ite
 	}
 }
 
-bool Mob::TryProjectileAttack(Mob* other, const Item_Struct *item, SkillUseTypes skillInUse, uint16 weapon_dmg, const ItemInst* RangeWeapon, const ItemInst* Ammo){
+bool Mob::TryProjectileAttack(Mob* other, const Item_Struct *item, SkillUseTypes skillInUse, uint16 weapon_dmg, const ItemInst* RangeWeapon, const ItemInst* Ammo, int AmmoSlot){
 
 	if (!other)
 		return false;
@@ -1043,6 +1043,7 @@ bool Mob::TryProjectileAttack(Mob* other, const Item_Struct *item, SkillUseTypes
 	ProjectileAtk[slot].origin_z = GetZ();
 	ProjectileAtk[slot].ranged_id = RangeWeapon->GetItem()->ID;
 	ProjectileAtk[slot].ammo_id = Ammo->GetItem()->ID;
+	ProjectileAtk[slot].ammo_slot = 0;
 	ProjectileAtk[slot].skill = skillInUse;
 
 	SetProjectileAttack(true);
@@ -1084,7 +1085,7 @@ void Mob::ProjectileAttack()
 		if (ProjectileAtk[i].hit_increment <= ProjectileAtk[i].increment){
 
 			if (ProjectileAtk[i].skill == SkillArchery)
-				DoArcheryAttackDmg(target, nullptr, nullptr,ProjectileAtk[i].wpn_dmg,0,0,0,ProjectileAtk[i].ranged_id, ProjectileAtk[i].ammo_id);
+				DoArcheryAttackDmg(target, nullptr, nullptr,ProjectileAtk[i].wpn_dmg,0,0,0,ProjectileAtk[i].ranged_id, ProjectileAtk[i].ammo_id, nullptr, ProjectileAtk[i].ammo_slot);
 			
 			ProjectileAtk[i].increment = 0;
 			ProjectileAtk[i].target_id = 0;

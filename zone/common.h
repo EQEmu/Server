@@ -470,6 +470,7 @@ typedef struct
 	float origin_z;
 	uint32 ranged_id;
 	uint32 ammo_id;
+	int ammo_slot;
 	uint8 skill;
 } tProjatk;
 
