@@ -283,7 +283,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	container = inst;
-	if (container->GetItem()->BagType == BagTypeTransformationmold) {
+	if (containe->GetItem() && container->GetItem()->BagType == BagTypeTransformationmold) {
 		const ItemInst* inst = container->GetItem(0);
 		bool AllowAll = RuleB(Inventory, AllowAnyWeaponTransformation);
 		if (inst && ItemInst::CanTransform(inst->GetItem(), container->GetItem(), AllowAll)) {
@@ -304,7 +304,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		return;
 	}
 
-	if (container->GetItem()->BagType == BagTypeDetransformationmold) {
+	if (container->GetItem() && container->GetItem()->BagType == BagTypeDetransformationmold) {
 		const ItemInst* inst = container->GetItem(0);
 		if (inst && inst->GetOrnamentationIcon() && inst->GetOrnamentationIcon()) {
 			const Item_Struct* new_weapon = inst->GetItem();
