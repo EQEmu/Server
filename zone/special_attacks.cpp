@@ -199,7 +199,7 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 			SetAttackTimer();
 			ThrowingAttack(GetTarget());
 			if (CheckDoubleRangedAttack())
-				RangedAttack(GetTarget(), true);
+				ThrowingAttack(GetTarget(), true);
 			return;
 		}
 		//ranged attack (archery)
@@ -1074,18 +1074,18 @@ void Mob::ProjectileAttack()
 		disable = false;
 		Mob* target = entity_list.GetMobID(ProjectileAtk[i].target_id);
 		
-		float distance = 0.0f;
-		
-		if (target && IsMoving()){ //Only recalculate hit increment if target moving
-			distance = target->CalculateDistance(ProjectileAtk[i].origin_x, ProjectileAtk[i].origin_y,  ProjectileAtk[i].origin_z);
+		if (target && target->IsMoving()){ //Only recalculate hit increment if target moving
+			float distance = target->CalculateDistance(ProjectileAtk[i].origin_x, ProjectileAtk[i].origin_y,  ProjectileAtk[i].origin_z);
 			float hit = 60.0f + (distance / 1.8f); //Calcuation: 60 = Animation Lag, 1.8 = Speed modifier for speed of (4)
 			ProjectileAtk[i].hit_increment = static_cast<uint16>(hit);
 		}
 
 		if (ProjectileAtk[i].hit_increment <= ProjectileAtk[i].increment){
 
-			if (ProjectileAtk[i].skill == SkillArchery)
-				DoArcheryAttackDmg(target, nullptr, nullptr,ProjectileAtk[i].wpn_dmg,0,0,0,ProjectileAtk[i].ranged_id, ProjectileAtk[i].ammo_id, nullptr, ProjectileAtk[i].ammo_slot);
+			if (target){
+				if (ProjectileAtk[i].skill == SkillArchery)
+					DoArcheryAttackDmg(target, nullptr, nullptr,ProjectileAtk[i].wpn_dmg,0,0,0,ProjectileAtk[i].ranged_id, ProjectileAtk[i].ammo_id, nullptr, ProjectileAtk[i].ammo_slot);
+			}
 			
 			ProjectileAtk[i].increment = 0;
 			ProjectileAtk[i].target_id = 0;
@@ -1323,7 +1323,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 	else if(DistNoRootNoZ(*GetTarget()) < (RuleI(Combat, MinRangedAttackDist)*RuleI(Combat, MinRangedAttackDist))){
 		return;
 	}
-
+	Shout("SLOT = %i", ammo_slot);
 	if(!IsAttackAllowed(GetTarget()) ||
 		IsCasting() ||
 		IsSitting() ||
@@ -1345,7 +1345,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 	CommonBreakInvisible();
 }
 
-void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item_Struct* item, uint16 weapon_damage, int16 chance_mod,int16 focus, int ReuseTime)
+void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item_Struct* item, uint16 weapon_damage, int16 chance_mod,int16 focus, int ReuseTime, uint32 ammo_id, int AmmoSlot)
 {
 	if (!CanDoSpecialAttack(other))
 		return;
@@ -1358,8 +1358,12 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 
 		int16 WDmg = 0;
 
-		if (!weapon_damage && item != nullptr)
-			WDmg = GetWeaponDamage(other, item);
+		if (!weapon_damage){
+			if (IsClient() && RangeWeapon)
+				WDmg = GetWeaponDamage(other, RangeWeapon);
+			else if (item)
+				WDmg = GetWeaponDamage(other, item);
+		}
 		else 
 			WDmg = weapon_damage;
 
@@ -1396,7 +1400,7 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 		other->AddToHateList(this, 2*WDmg, 0, false);
 		other->Damage(this, TotalDmg, SPELL_UNKNOWN, SkillThrowing);
 
-		if (TotalDmg > 0 && HasSkillProcSuccess() && GetTarget() && other && !other->HasDied()){
+		if (TotalDmg > 0 && HasSkillProcSuccess() && other && !other->HasDied()){
 			if (ReuseTime)
 				TrySkillProc(other, SkillThrowing, ReuseTime);
 			else
@@ -1404,10 +1408,10 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 		}
 	}
 
-	if((RangeWeapon != nullptr) && GetTarget() && other && (other->GetHP() > -10))
+	if((RangeWeapon != nullptr) && other && (other->GetHP() > -10))
 		TryWeaponProc(RangeWeapon, other, MainRange);
 
-	if (HasSkillProcs() && GetTarget() && other && !other->HasDied()){
+	if (HasSkillProcs() && other && !other->HasDied()){
 		if (ReuseTime)
 			TrySkillProc(other, SkillThrowing, ReuseTime);
 		else
