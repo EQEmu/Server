@@ -579,6 +579,8 @@ bool Client::Process() {
 				viral_timer_counter = 0;
 		}
 
+		ProjectileAttack();
+
 		if(projectile_timer.Check())
 			SpellProjectileEffect();
 					

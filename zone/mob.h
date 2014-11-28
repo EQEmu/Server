@@ -724,7 +724,11 @@ public:
 	virtual void DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage, int32 min_damage = 1, int32 hate_override = -1, int ReuseTime = 10, bool HitChance=false, bool CanAvoid=true);
 	virtual void DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon=nullptr, const Item_Struct* item=nullptr, uint16 weapon_damage=0, int16 chance_mod=0,int16 focus=0, int ReuseTime=0);
 	virtual void DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes skillinuse, int16 chance_mod=0, int16 focus=0, bool CanRiposte=false, int ReuseTime=0);
-	virtual void DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon=nullptr, const ItemInst* Ammo=nullptr, uint16 weapon_damage=0, int16 chance_mod=0, int16 focus=0, int ReuseTime=0);
+	virtual void DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon=nullptr, const ItemInst* Ammo=nullptr, uint16 weapon_damage=0, int16 chance_mod=0, int16 focus=0, int ReuseTime=0, uint32 range_id=0, uint32 ammo_id=0, const Item_Struct *AmmoItem=nullptr);
+	bool TryProjectileAttack(Mob* other, const Item_Struct *item, SkillUseTypes skillInUse, uint16 weapon_dmg, const ItemInst* RangeWeapon, const ItemInst* Ammo);
+	void ProjectileAttack();
+	inline bool HasProjectileAttack() const { return ActiveProjectileATK; }
+	inline void SetProjectileAttack(bool value) { ActiveProjectileATK = value; }
 	bool CanDoSpecialAttack(Mob *other);
 	bool Flurry(ExtraAttackOptions *opts);
 	bool Rampage(ExtraAttackOptions *opts);
@@ -1095,6 +1099,9 @@ protected:
 	uint16 projectile_target_id[MAX_SPELL_PROJECTILE];
 	uint8 projectile_increment[MAX_SPELL_PROJECTILE];
 	float projectile_x[MAX_SPELL_PROJECTILE], projectile_y[MAX_SPELL_PROJECTILE], projectile_z[MAX_SPELL_PROJECTILE];
+
+	bool ActiveProjectileATK;
+	tProjatk ProjectileAtk[MAX_SPELL_PROJECTILE];
 
 	float rewind_x;
 	float rewind_y;

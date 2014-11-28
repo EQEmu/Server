@@ -287,6 +287,21 @@ Mob::Mob(const char* in_name,
 	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) { projectile_z[i] = 0; }
 	projectile_timer.Disable();
 
+	ActiveProjectileATK = false;
+	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++)
+	{
+		ProjectileAtk[i].increment = 0;
+		ProjectileAtk[i].hit_increment = 0;
+		ProjectileAtk[i].target_id = 0;
+		ProjectileAtk[i].wpn_dmg = 0;
+		ProjectileAtk[i].origin_x = 0.0f;
+		ProjectileAtk[i].origin_y = 0.0f;
+		ProjectileAtk[i].origin_z = 0.0f;
+		ProjectileAtk[i].ranged_id = 0;
+		ProjectileAtk[i].ammo_id = 0;
+		ProjectileAtk[i].skill = 0;
+	}
+
 	memset(&itembonuses, 0, sizeof(StatBonuses));
 	memset(&spellbonuses, 0, sizeof(StatBonuses));
 	memset(&aabonuses, 0, sizeof(StatBonuses));

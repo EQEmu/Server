@@ -459,6 +459,20 @@ struct Shielders_Struct {
 	uint16 shielder_bonus;
 };
 
+typedef struct
+{
+	uint16 increment;
+	uint16 hit_increment;
+	uint16 target_id;
+	int32 wpn_dmg;
+	float origin_x;
+	float origin_y;
+	float origin_z;
+	uint32 ranged_id;
+	uint32 ammo_id;
+	uint8 skill;
+} tProjatk;
+
 //eventually turn this into a typedef and
 //make DoAnim take it instead of int, to enforce its use.
 enum {	//type arguments to DoAnim
