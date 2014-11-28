@@ -283,7 +283,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	container = inst;
-	if (containe->GetItem() && container->GetItem()->BagType == BagTypeTransformationmold) {
+	if (container->GetItem() && container->GetItem()->BagType == BagTypeTransformationmold) {
 		const ItemInst* inst = container->GetItem(0);
 		bool AllowAll = RuleB(Inventory, AllowAnyWeaponTransformation);
 		if (inst && ItemInst::CanTransform(inst->GetItem(), container->GetItem(), AllowAll)) {
