@@ -25,10 +25,10 @@
 #include "../common/spdat.h"
 #include "../common/string_util.h"
 #include "../common/clientversions.h"
-#include "../common/features.h"    //
-#include "../common/item.h"        //
-#include "../common/item_struct.h"        //
-#include "../common/linked_list.h"  //
+#include "../common/features.h"    
+#include "../common/item.h"        
+#include "../common/item_struct.h" 
+#include "../common/linked_list.h" 
 #include "../common/servertalk.h"
 
 #include "aa.h"
