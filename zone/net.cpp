@@ -18,57 +18,39 @@
 
 #define DONT_SHARED_OPCODES
 
-#include "../common/debug.h"
-#include "../common/features.h"
-#include "../common/queue.h"
-#include "../common/timer.h"
-#include "../common/eq_stream.h"
-#include "../common/eq_stream_factory.h"
-#include "../common/eq_packet_structs.h"
-#include "../common/mutex.h"
-#include "../common/version.h"
-#include "../common/eqemu_error.h"
-#include "../common/packet_dump_file.h"
-#include "../common/opcodemgr.h"
-#include "../common/guilds.h"
-#include "../common/eq_stream_ident.h"
-#include "../common/patches/patches.h"
-#include "../common/rulesys.h"
-#include "../common/misc_functions.h"
-#include "../common/string_util.h"
-#include "../common/platform.h"
+
 #include "../common/crash.h"
+#include "../common/debug.h"
+#include "../common/eq_stream_factory.h"
+#include "../common/eq_stream_ident.h"
+#include "../common/eqemu_error.h"
+#include "../common/eqemu_exception.h"
+#include "../common/features.h"
 #include "../common/ipc_mutex.h"
 #include "../common/memory_mapped_file.h"
-#include "../common/eqemu_exception.h"
+#include "../common/patches/patches.h"
+#include "../common/platform.h"
+#include "../common/rulesys.h"
 #include "../common/spdat.h"
+#include "../common/timer.h"
+#include "../common/version.h"
 
-#include "zone_config.h"
-#include "masterentity.h"
-#include "worldserver.h"
-#include "net.h"
-#include "zone.h"
-#include "queryserv.h"
-#include "command.h"
-#include "zone_config.h"
-#include "titles.h"
-#include "guild_mgr.h"
-#include "tasks.h"
-
-#include "quest_parser_collection.h"
-#include "embparser.h"
-#include "lua_parser.h"
 #include "client_logs.h"
+#include "command.h"
+#include "embparser.h"
+#include "guild_mgr.h"
+#include "lua_parser.h"
+#include "net.h"
+#include "queryserv.h"
+#include "quest_parser_collection.h"
 #include "questmgr.h"
+#include "tasks.h"
+#include "titles.h"
+#include "worldserver.h"
+#include "zone_config.h"
+#include "zone.h"
 
-#include <iostream>
-#include <string>
-#include <fstream>
-
-#include <stdlib.h>
-#include <stdio.h>
 #include <signal.h>
-#include <time.h>
 
 #ifdef _CRTDBG_MAP_ALLOC
 	#undef new
@@ -86,20 +68,25 @@
 volatile bool RunLoops = true;
 extern volatile bool ZoneLoaded;
 
-TimeoutManager timeout_manager;
-NetConnection net;
-EntityList entity_list;
-WorldServer worldserver;
-uint32 numclients = 0;
+class EQStream;
+class EQStreamInterface;
+
 char errorname[32];
-uint16 adverrornum = 0;
-extern Zone* zone;
+EntityList entity_list;
 EQStreamFactory eqsf(ZoneStream);
+extern Zone* zone;
+NetConnection net;
 npcDecayTimes_Struct npcCorpseDecayTimes[100];
-TitleManager title_manager;
 QueryServ *QServ = 0;
-TaskManager *taskmanager = 0;
 QuestParserCollection *parse = 0;
+TaskManager *taskmanager = 0;
+TimeoutManager timeout_manager;
+TitleManager title_manager;
+WorldServer worldserver;
+
+uint16 adverrornum = 0;
+uint32 numclients = 0;
+
 
 const SPDat_Spell_Struct* spells;
 void LoadSpells(EQEmu::MemoryMappedFile **mmf);
