@@ -17,19 +17,16 @@
 */
 #include "../common/debug.h"
 #include "../common/rulesys.h"
-#include <iostream>
-#include <fstream>
+#include <cmath>
+#include <ctype.h>
 #include <iomanip>
+#include <iostream>
+#include <limits.h>
+#include <map>
+#include <mysqld_error.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errmsg.h>
-#include <mysqld_error.h>
-#include <limits.h>
-#include <ctype.h>
-#include <assert.h>
-#include <cmath>
-#include <map>
 
 // Disgrace: for windows compile
 #ifdef _WINDOWS
@@ -45,7 +42,6 @@
 
 #include "database.h"
 #include "eq_packet_structs.h"
-#include "guilds.h"
 #include "string_util.h"
 #include "extprofile.h"
 
