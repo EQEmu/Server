@@ -5558,7 +5558,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 	return realTotal + realTotal2 + realTotal3;
 }
 
-void Mob::CheckNumHitsRemaining(uint8 type, uint32 buff_slot, uint16 spell_id)
+void Mob::CheckNumHitsRemaining(uint8 type, int32 buff_slot, uint16 spell_id)
 {
 	/*
 	Field 175 = numhits type
