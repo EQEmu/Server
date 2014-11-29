@@ -18,19 +18,16 @@
 #ifndef NPC_H
 #define NPC_H
 
-class NPC;
-#include "zonedb.h"
-#include "mob.h"
-//#include "spawn.h"
-
-#include <list>
-#include <deque>
-
-#include "spawn2.h"
-#include "../common/loottable.h"
-#include "zonedump.h"
-#include "qglobals.h"
 #include "../common/rulesys.h"
+
+#include "mob.h"
+#include "qglobals.h"
+#include "zonedb.h"
+#include "zonedump.h"
+
+#include <deque>
+#include <list>
+
 
 #ifdef _WINDOWS
 	#define M_PI	3.141592
@@ -88,8 +85,12 @@ struct AISpellsVar_Struct {
 	uint8	idle_beneficial_chance;
 }; 
 
-
 class AA_SwarmPetInfo;
+class Client;
+class Group;
+class Raid;
+class Spawn2;
+struct Item_Struct;
 
 class NPC : public Mob
 {

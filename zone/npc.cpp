@@ -15,15 +15,34 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
+#include "../common/bodytypes.h"
+#include "../common/classes.h"
 #include "../common/debug.h"
-#include <iostream>
-#include <string>
-#include <cctype>
-#include <math.h>
-#include "../common/moremath.h"
-#include <stdio.h>
-#include "../common/packet_dump_file.h"
+#include "../common/misc_functions.h"
+#include "../common/rulesys.h"
+#include "../common/seperator.h"
+#include "../common/spdat.h"
+#include "../common/string_util.h"
+#include "../common/clientversions.h"
+#include "../common/features.h"    //
+#include "../common/item.h"        //
+#include "../common/item_struct.h"        //
+#include "../common/linked_list.h"  //
+#include "../common/servertalk.h"
+
+#include "aa.h"
+#include "client.h"
+#include "entity.h"
+#include "npc.h"
+#include "string_ids.h"
+#include "spawn2.h"
 #include "zone.h"
+
+#include <cctype>
+#include <stdio.h>
+#include <string>
+
 #ifdef _WINDOWS
 #define snprintf	_snprintf
 #define strncasecmp	_strnicmp
@@ -33,26 +52,9 @@
 #include <pthread.h>
 #endif
 
-#include "npc.h"
-#include "map.h"
-#include "entity.h"
-#include "masterentity.h"
-#include "../common/spdat.h"
-#include "../common/bodytypes.h"
-#include "spawngroup.h"
-#include "../common/misc_functions.h"
-#include "../common/string_util.h"
-#include "../common/rulesys.h"
-#include "string_ids.h"
-
-//#define SPELLQUEUE //Use only if you want to be spammed by spell testing
-
-
 extern Zone* zone;
 extern volatile bool ZoneLoaded;
 extern EntityList entity_list;
-
-#include "quest_parser_collection.h"
 
 NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float heading, int iflymode, bool IsCorpse)
 : Mob(d->name,
