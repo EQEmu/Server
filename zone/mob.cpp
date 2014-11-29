@@ -15,17 +15,17 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
-#include "masterentity.h"
+
 #include "../common/spdat.h"
-#include "string_ids.h"
-#include "worldserver.h"
-#include "quest_parser_collection.h"
 #include "../common/string_util.h"
 
-#include <sstream>
-#include <math.h>
+#include "quest_parser_collection.h"
+#include "string_ids.h"
+#include "worldserver.h"
+
 #include <limits.h>
+#include <math.h>
+#include <sstream>
 
 extern EntityList entity_list;
 

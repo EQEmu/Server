@@ -18,21 +18,28 @@
 #ifndef MOB_H
 #define MOB_H
 
-#include "../common/features.h"
 #include "common.h"
 #include "entity.h"
 #include "hate_list.h"
 #include "pathing.h"
 #include <set>
 #include <vector>
-#include <string>
 
 char* strn0cpy(char* dest, const char* source, uint32 size);
 
 #define MAX_SPECIAL_ATTACK_PARAMS 8
 
 class EGNode;
-class MobFearState;
+class Client;
+class EQApplicationPacket;
+class Group;
+class ItemInst;
+class NPC;
+class Raid;
+struct Item_Struct;
+struct NewSpawn_Struct;
+struct PlayerPositionUpdateServer_Struct;
+
 class Mob : public Entity {
 public:
 	enum CLIENT_CONN_STATUS { CLIENT_CONNECTING, CLIENT_CONNECTED, CLIENT_LINKDEAD,
