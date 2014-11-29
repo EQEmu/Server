@@ -15,17 +15,15 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
 
-#include "zone.h"
-#include "worldserver.h"
-#include "masterentity.h"
-#include "../common/packet_dump.h"
+#include "../common/debug.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
-#include "string_ids.h"
-#include "quest_parser_collection.h"
 #include "queryserv.h"
+#include "quest_parser_collection.h"
+#include "string_ids.h"
+#include "worldserver.h"
+#include "zone.h"
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;
