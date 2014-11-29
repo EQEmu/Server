@@ -22,6 +22,7 @@
 #include "quest_parser_collection.h"
 #include "worldserver.h"
 #include "zonedb.h"
+
 extern WorldServer worldserver;
 
 // @merth: this needs to be touched up
