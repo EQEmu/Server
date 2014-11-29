@@ -24,17 +24,14 @@
 #include <netinet/in.h>	//for htonl
 #endif
 
-#include "masterentity.h"
-#include "zonedb.h"
-#include "../common/packet_functions.h"
-#include "../common/packet_dump.h"
-#include "titles.h"
-#include "string_ids.h"
 #include "../common/misc_functions.h"
-#include "../common/string_util.h"
 #include "../common/rulesys.h"
-#include "quest_parser_collection.h"
+#include "../common/string_util.h"
 #include "queryserv.h"
+#include "quest_parser_collection.h"
+#include "string_ids.h"
+#include "titles.h"
+#include "zonedb.h"
 
 extern QueryServ* QServ;
 
