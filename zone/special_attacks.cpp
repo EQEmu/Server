@@ -14,19 +14,18 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
+	*/
+
+
 
 #include "../common/debug.h"
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <math.h>
-
-#include "masterentity.h"
-#include "string_ids.h"
 #include "../common/misc_functions.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
+#include "masterentity.h"
+#include "string_ids.h"
+#include <stdio.h>
+#include <string.h>
 
 
 int Mob::GetKickDamage() {
