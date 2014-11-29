@@ -68,7 +68,6 @@ void Adventure::RemovePlayer(std::string character_name)
 	std::list<std::string>::iterator iter = players.begin();
 	while(iter != players.end())
 	{
-		
 		if((*iter).compare(character_name) == 0)
 		{
 			int32 character_id = database.GetCharacterID(character_name.c_str());
@@ -76,8 +75,8 @@ void Adventure::RemovePlayer(std::string character_name)
 			{
 				database.RemoveClientFromInstance(instance_id, character_id);
 				players.erase(iter);
-				return;
 			}
+			return;
 		}
 		++iter;
 	}
