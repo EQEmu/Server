@@ -768,7 +768,10 @@ uint32 Database::GetCharacterID(const char *name) {
 	std::string query = StringFormat("SELECT `id` FROM `character_data` WHERE `name` = '%s'", name);
 	auto results = QueryDatabase(query);
 	auto row = results.begin();
-	if (row[0]){ return atoi(row[0]); }
+	if (results.RowCount() == 1)
+	{
+		return atoi(row[0]);
+	}
 	return 0; 
 }
 
@@ -3277,7 +3280,7 @@ char* Database::GetGroupLeaderForLogin(const char* name, char* leaderbuf) {
 	if (group_id == 0)
 		return leaderbuf;
 
-	query = StringFormat("SELECT `leadername` FROM `group_leader` WHERE `gid` = '%u' AND `groupid` = %u LIMIT 1", group_id);
+	query = StringFormat("SELECT `leadername` FROM `group_leaders` WHERE `gid` = '%u' LIMIT 1", group_id);
 	results = QueryDatabase(query);
 
 	for (auto row = results.begin(); row != results.end(); ++row)

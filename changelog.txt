@@ -1,6 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
-== 11/24/2014 ==
+== 11/28/2014 ==
+Trevius: Fixed a zone crash related to numhits for spells.
+Trevius: Fixed a query related to group leaders logging in.
+Trevius (Natedog): Fixed a world crash related to attempting to join an adventure with Mercenaries.
+
+== 11/25/2014 ==
 Trevius: Spells that modify model size are now limited to 2 size adjustments from the base size.
 Trevius: Fix to prevent Mercenaries from being set as Group Leader.
 

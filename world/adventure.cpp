@@ -54,10 +54,10 @@ void Adventure::AddPlayer(std::string character_name, bool add_client_to_instanc
 {
 	if(!PlayerExists(character_name))
 	{
-		int client_id = database.GetCharacterID(character_name.c_str());
-		if(add_client_to_instance)
+		int32 character_id = database.GetCharacterID(character_name.c_str());
+		if(character_id && add_client_to_instance)
 		{
-			database.AddClientToInstance(instance_id, client_id);
+			database.AddClientToInstance(instance_id, character_id);
 		}
 		players.push_back(character_name);
 	}
@@ -68,11 +68,16 @@ void Adventure::RemovePlayer(std::string character_name)
 	std::list<std::string>::iterator iter = players.begin();
 	while(iter != players.end())
 	{
+		
 		if((*iter).compare(character_name) == 0)
 		{
-			database.RemoveClientFromInstance(instance_id, database.GetCharacterID(character_name.c_str()));
-			players.erase(iter);
-			return;
+			int32 character_id = database.GetCharacterID(character_name.c_str());
+			if (character_id)
+			{
+				database.RemoveClientFromInstance(instance_id, character_id);
+				players.erase(iter);
+				return;
+			}
 		}
 		++iter;
 	}
