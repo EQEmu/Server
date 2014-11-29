@@ -16,66 +16,28 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-/*
-
-Assuming you want to add a new perl quest function named joe
-that takes 1 integer argument....
-
-1. Add the prototype to the quest manager:
-questmgr.h: add (~line 50)
-	void joe(int arg);
-
-2. Define the actual function in questmgr.cpp:
-void QuestManager::joe(int arg) {
-	//... do something
-}
-
-3. Copy one of the XS routines in perlparser.cpp, preferably
- one with the same number of arguments as your routine. Rename
- as needed.
- Finally, add your routine to the list at the bottom of perlparser.cpp
-
-
-4.
-If you want it to work in old mode perl and .qst, edit parser.cpp
-Parser::ExCommands (~line 777)
-	else if (!strcmp(command,"joe")) {
-		quest_manager.joe(atoi(arglist[0]));
-	}
-
-And then at then end of embparser.cpp, add:
-"sub joe{push(@cmd_queue,{func=>'joe',args=>join(',',@_)});}"
-
-
-
-*/
-
-#include "../common/debug.h"
-#include "entity.h"
-#include "masterentity.h"
-#include <limits.h>
-
-#include <sstream>
-#include <iostream>
-#include <list>
-
-#include "worldserver.h"
-#include "net.h"
-#include "../common/skills.h"
 #include "../common/classes.h"
-#include "../common/races.h"
-#include "zonedb.h"
+#include "../common/debug.h"
+#include "../common/rulesys.h"
+#include "../common/skills.h"
 #include "../common/spdat.h"
-#include "../common/packet_functions.h"
 #include "../common/string_util.h"
-#include "spawn2.h"
-#include "zone.h"
+#include "entity.h"
 #include "event_codes.h"
 #include "guild_mgr.h"
-#include "../common/rulesys.h"
+#include "net.h"
 #include "qglobals.h"
-#include "quest_parser_collection.h"
 #include "queryserv.h"
+#include "questmgr.h"
+#include "quest_parser_collection.h"
+#include "spawn2.h"
+#include "worldserver.h"
+#include "zone.h"
+#include "zonedb.h"
+#include <iostream>
+#include <limits.h>
+#include <list>
+
 #ifdef BOTS
 #include "bot.h"
 #endif
@@ -85,9 +47,6 @@ extern Zone* zone;
 extern WorldServer worldserver;
 extern EntityList entity_list;
 
-#include "questmgr.h"
-
-//declare our global instance
 QuestManager quest_manager;
 
 #define QuestManagerCurrentQuestVars() \
