@@ -21,28 +21,22 @@
 #endif
 
 #include "../common/debug.h"
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <math.h>
-#include <iostream>
-#include <assert.h>
-
-#include "masterentity.h"
-#include "npc_ai.h"
-#include "../common/packet_dump.h"
-#include "../common/eq_packet_structs.h"
 #include "../common/eq_constants.h"
+#include "../common/eq_packet_structs.h"
+#include "../common/rulesys.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
-#include "zone.h"
-#include "string_ids.h"
 #include "../common/string_util.h"
-#include "../common/rulesys.h"
+#include "queryserv.h"
 #include "quest_parser_collection.h"
+#include "string_ids.h"
 #include "water_map.h"
 #include "worldserver.h"
-#include "queryserv.h"
+#include "zone.h"
+
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;
