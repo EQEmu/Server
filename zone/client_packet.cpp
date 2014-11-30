@@ -460,10 +460,10 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 			mlog(CLIENT__NET_ERR, "Unhandled incoming opcode: %s", buffer);
 
 			if(app->size < 1000)
-				DumpPacket(app->pBuffer, app->size);
+				DumpPacket(app, app->size);
 			else{
 				std::cout << "Dump limited to 1000 characters:\n";
-				DumpPacket(app->pBuffer, 1000);
+				DumpPacket(app, 1000);
 			}
 #endif
 			break;
