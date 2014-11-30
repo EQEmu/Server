@@ -334,17 +334,17 @@ float Lua_NPC::GetSpawnPointH() {
 
 float Lua_NPC::GetGuardPointX() {
 	Lua_Safe_Call_Real();
-	return self->GetGuardPointX();
+	return self->GetGuardPoint().m_X;
 }
 
 float Lua_NPC::GetGuardPointY() {
 	Lua_Safe_Call_Real();
-	return self->GetGuardPointY();
+	return self->GetGuardPoint().m_Y;
 }
 
 float Lua_NPC::GetGuardPointZ() {
 	Lua_Safe_Call_Real();
-	return self->GetGuardPointZ();
+	return self->GetGuardPoint().m_Z;
 }
 
 void Lua_NPC::SetPrimSkill(int skill_id) {

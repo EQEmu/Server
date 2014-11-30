@@ -215,10 +215,7 @@ public:
 	float GetSpawnPointY()	const { return m_SpawnPoint.m_Y; }
 	float GetSpawnPointZ()	const { return m_SpawnPoint.m_Z; }
 	float GetSpawnPointH()	const { return m_SpawnPoint.m_Heading; }
-	float GetGuardPointX()	const { return m_GuardPoint.m_X; }
-	float GetGuardPointY()	const { return m_GuardPoint.m_Y; }
-	float GetGuardPointZ()	const { return m_GuardPoint.m_Z; }
-	float GetGuardPointH()	const { return m_GuardPoint.m_Heading; }
+	xyz_heading const GetGuardPoint() const { return m_GuardPoint; }
 	EmuAppearance GetGuardPointAnim() const { return guard_anim; }
 	void SaveGuardPointAnim(EmuAppearance anim) { guard_anim = anim; }
 

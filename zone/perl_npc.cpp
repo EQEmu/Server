@@ -1653,7 +1653,7 @@ XS(XS_NPC_GetGuardPointX)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 
-		RETVAL = THIS->GetGuardPointX();
+		RETVAL = THIS->GetGuardPoint().m_X;
 		XSprePUSH; PUSHn((double)RETVAL);
 	}
 	XSRETURN(1);
@@ -1680,7 +1680,7 @@ XS(XS_NPC_GetGuardPointY)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 
-		RETVAL = THIS->GetGuardPointY();
+		RETVAL = THIS->GetGuardPoint().m_Y;
 		XSprePUSH; PUSHn((double)RETVAL);
 	}
 	XSRETURN(1);
@@ -1707,7 +1707,7 @@ XS(XS_NPC_GetGuardPointZ)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 
-		RETVAL = THIS->GetGuardPointZ();
+		RETVAL = THIS->GetGuardPoint().m_Z;
 		XSprePUSH; PUSHn((double)RETVAL);
 	}
 	XSRETURN(1);
