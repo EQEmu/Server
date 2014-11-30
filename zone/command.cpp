@@ -9996,7 +9996,8 @@ void command_object(Client *c, const Seperator *sep)
 
         // Couldn't copy the object.
 
-        if (results.ErrorMessage().c_str() != '\0') {
+        // got an error message
+        if (!results.Success()) {
             c->Message(0, "Database Error: %s", results.ErrorMessage().c_str());
             return;
         }
