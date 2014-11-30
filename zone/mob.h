@@ -420,7 +420,7 @@ public:
 	virtual inline int32 GetPrimaryFaction() const { return 0; }
 
 	//Movement
-	void Warp( float x, float y, float z );
+	void Warp(const xyz_location& location);
 	inline bool IsMoving() const { return moving; }
 	virtual void SetMoving(bool move) { moving = move; m_Delta = xyz_heading::Origin(); }
 	virtual void GoToBind(uint8 bindnum = 0) { }

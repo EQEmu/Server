@@ -40,14 +40,6 @@ xyz_heading::xyz_heading(const xy_location& locationDir, float z, float heading)
     m_Heading(heading) {
 }
 
-
-xyz_heading::xyz_heading(const xyz_location locationDir, float heading) :
-    m_X(locationDir.m_X),
-    m_Y(locationDir.m_Y),
-    m_Z(locationDir.m_Z),
-    m_Heading(heading) {
-}
-
 xyz_heading::xyz_heading(const xy_location locationDir, float z, float heading) :
     m_X(locationDir.m_X),
     m_Y(locationDir.m_Y),

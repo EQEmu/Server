@@ -63,7 +63,6 @@ public:
     xyz_heading(float x = 0.0f, float y = 0.0f, float z = 0.0f, float heading = 0.0f);
     xyz_heading(const xyz_heading& locationDir);
     xyz_heading(const xyz_location& locationDir, float heading = 0.0f);
-    xyz_heading(const xyz_location locationDir, float heading = 0.0f);
     explicit xyz_heading(const xy_location& locationDir, float z, float heading);
     explicit xyz_heading(const xy_location locationDir, float z, float heading);
 

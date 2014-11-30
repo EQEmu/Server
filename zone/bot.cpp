@@ -10715,12 +10715,12 @@ void Bot::BotGroupSummon(Group* group, Client* client) {
 				if(botMember->GetBotOwnerCharacterID() == client->CharacterID()) {
 					botMember->SetTarget(botMember->GetBotOwner());
 					botMember->WipeHateList();
-					botMember->Warp(botMember->GetBotOwner()->GetX(), botMember->GetBotOwner()->GetY(), botMember->GetBotOwner()->GetZ());
+					botMember->Warp(botMember->GetBotOwner()->GetPosition());
 
 					if(botMember->HasPet() && botMember->GetPet()) {
 						botMember->GetPet()->SetTarget(botMember);
 						botMember->GetPet()->WipeHateList();
-						botMember->GetPet()->Warp(botMember->GetBotOwner()->GetX(), botMember->GetBotOwner()->GetY(), botMember->GetBotOwner()->GetZ());
+						botMember->GetPet()->Warp(botMember->GetBotOwner()->GetPosition());
 					}
 				}
 			}
@@ -11729,7 +11729,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				else
 				{
 					b->SetTarget(c->CastToMob());
-					b->Warp(c->GetX(), c->GetY(), c->GetZ());
+					b->Warp(c->GetPosition());
 				}
 			}
 		}

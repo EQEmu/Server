@@ -2590,20 +2590,16 @@ void Mob::SetNextIncHPEvent( int inchpevent )
 	nextinchpevent = inchpevent;
 }
 //warp for quest function,from sandy
-void Mob::Warp( float x, float y, float z )
+void Mob::Warp(const xyz_location& location)
 {
-	if(IsNPC()) {
-		entity_list.ProcessMove(CastToNPC(), x, y, z);
-	}
+	if(IsNPC())
+		entity_list.ProcessMove(CastToNPC(), location.m_X, location.m_Y, location.m_Z);
 
-	m_Position.m_X = x;
-	m_Position.m_Y = y;
-	m_Position.m_Z = z;
+	m_Position = location;
 
 	Mob* target = GetTarget();
-	if (target) {
+	if (target)
 		FaceTarget( target );
-	}
 
 	SendPosition();
 }
