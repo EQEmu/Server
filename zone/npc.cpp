@@ -113,7 +113,8 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	qglobal_purge_timer(30000),
 	sendhpupdate_timer(1000),
 	enraged_timer(1000),
-	taunt_timer(TauntReuseTime * 1000)
+	taunt_timer(TauntReuseTime * 1000),
+	m_SpawnPoint(x,y,z,heading)
 {
 	//What is the point of this, since the names get mangled..
 	Mob* mob = entity_list.GetMob(name);
@@ -203,9 +204,6 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	MerchantType = d->merchanttype;
 	merchant_open = GetClass() == MERCHANT;
 	adventure_template_id = d->adventure_template;
-	org_x = x;
-	org_y = y;
-	org_z = z;
 	flymode = iflymode;
 	guard_x = -1;	//just some value we might be able to recongize as "unset"
 	guard_y = -1;
@@ -221,7 +219,6 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	roambox_movingto_y = -2;
 	roambox_min_delay = 1000;
 	roambox_delay = 1000;
-	org_heading = heading;
 	p_depop = false;
 	loottable_id = d->loottable_id;
 
@@ -1853,7 +1850,7 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 	{
 		swarmOwner = entity_list.GetMobID(GetSwarmOwner());
 	}
-	
+
 	if  (swarmOwner != nullptr)
 	{
 		if(swarmOwner->IsClient())
@@ -1873,7 +1870,7 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 		SetTempPet(true); //Simple mob flag for checking if temp pet
 		swarmOwner->SetTempPetsActive(true); //Necessary fail safe flag set if mob ever had a swarm pet to ensure they are removed.
 		swarmOwner->SetTempPetCount(swarmOwner->GetTempPetCount() + 1);
-	
+
 		//Not recommended if using above (However, this will work better on older clients).
 		if (RuleB(Pets, UnTargetableSwarmPet))
 		{
@@ -1881,7 +1878,7 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 			if(!IsCharmed() && swarmOwner->IsClient())
 				sprintf(ns->spawn.lastName, "%s's Pet", swarmOwner->GetName());
 		}
-	} 
+	}
 	else if(GetOwnerID())
 	{
 		ns->spawn.is_pet = 1;
@@ -2430,7 +2427,7 @@ void NPC::DepopSwarmPets()
 			Mob* owner = entity_list.GetMobID(GetSwarmInfo()->owner_id);
 			if (owner)
 				owner->SetTempPetCount(owner->GetTempPetCount() - 1);
-			
+
 			Depop();
 			return;
 		}

@@ -67,10 +67,10 @@ struct AISpells_Struct {
 };
 
 struct AISpellsEffects_Struct {
-	uint16	spelleffectid;		
-	int32	base;		
-	int32	limit;	
-	int32	max;	
+	uint16	spelleffectid;
+	int32	base;
+	int32	limit;
+	int32	max;
 };
 
 struct AISpellsVar_Struct {
@@ -86,7 +86,7 @@ struct AISpellsVar_Struct {
 	uint32  idle_no_sp_recast_min;
 	uint32  idle_no_sp_recast_max;
 	uint8	idle_beneficial_chance;
-}; 
+};
 
 
 class AA_SwarmPetInfo;
@@ -163,7 +163,7 @@ public:
 	FACTION_VALUE CheckNPCFactionAlly(int32 other_faction);
 	virtual FACTION_VALUE GetReverseFactionCon(Mob* iOther);
 
-	void	GoToBind(uint8 bindnum = 0)	{ GMMove(org_x, org_y, org_z, org_heading); }
+	void	GoToBind(uint8 bindnum = 0)	{ GMMove(m_SpawnPoint.m_X, m_SpawnPoint.m_Y, m_SpawnPoint.m_Z, m_SpawnPoint.m_Heading); }
 	void	Gate();
 
 	void	GetPetState(SpellBuff_Struct *buffs, uint32 *items, char *name);
@@ -211,10 +211,10 @@ public:
 	uint32 GetSp2() const { return spawn_group; }
 	uint32 GetSpawnPointID() const;
 
-	float GetSpawnPointX()	const { return org_x; }
-	float GetSpawnPointY()	const { return org_y; }
-	float GetSpawnPointZ()	const { return org_z; }
-	float GetSpawnPointH()	const { return org_heading; }
+	float GetSpawnPointX()	const { return m_SpawnPoint.m_X; }
+	float GetSpawnPointY()	const { return m_SpawnPoint.m_Y; }
+	float GetSpawnPointZ()	const { return m_SpawnPoint.m_Z; }
+	float GetSpawnPointH()	const { return m_SpawnPoint.m_Heading; }
 	float GetGuardPointX()	const { return guard_x; }
 	float GetGuardPointY()	const { return guard_y; }
 	float GetGuardPointZ()	const { return guard_z; }
@@ -255,7 +255,7 @@ public:
 
 	void	SetNPCFactionID(int32 in) { npc_faction_id = in; database.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction); }
 
-	float	org_x, org_y, org_z, org_heading;
+    xyz_heading m_SpawnPoint;
 
 	uint32	GetMaxDMG() const {return max_dmg;}
 	uint32	GetMinDMG() const {return min_dmg;}
@@ -385,7 +385,7 @@ public:
 
 	inline void SetHealScale(float amt)		{ healscale = amt; }
 	inline float GetHealScale()					{ return healscale; }
-	
+
 	inline void SetSpellFocusDMG(int32 NewSpellFocusDMG) {SpellFocusDMG = NewSpellFocusDMG;}
 	inline int32 GetSpellFocusDMG() const { return SpellFocusDMG;}
 
@@ -443,7 +443,7 @@ protected:
 	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 	AISpellsVar_Struct AISpellVar;
-	
+
 	uint32	npc_spells_effects_id;
 	std::vector<AISpellsEffects_Struct> AIspellsEffects;
 	bool HasAISpellEffects;
@@ -510,7 +510,7 @@ protected:
 	//mercenary stuff
 	std::list<MercType> mercTypeList;
 	std::list<MercData> mercDataList;
-	
+
 	bool raid_target;
 	uint8	probability;
 

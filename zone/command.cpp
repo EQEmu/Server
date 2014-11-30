@@ -1800,10 +1800,11 @@ void command_gassign(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(1) && c->GetTarget() && c->GetTarget()->IsNPC())
 	{
+        auto npcBind = c->GetTarget()->CastToNPC()->m_SpawnPoint;
 		database.AssignGrid(
 			c,
-			(c->GetTarget()->CastToNPC()->org_x),
-			(c->GetTarget()->CastToNPC()->org_y),
+			npcBind.m_X,
+			npcBind.m_Y,
 			atoi(sep->arg[1])
 		);
 	}
