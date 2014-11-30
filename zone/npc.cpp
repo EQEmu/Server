@@ -670,8 +670,7 @@ bool NPC::Process()
 			viral_timer_counter = 0;
 	}
 
-	if(projectile_timer.Check())
-		SpellProjectileEffect();
+	ProjectileAttack();
 
 	if(spellbonuses.GravityEffect == 1) {
 		if(gravity_timer.Check())

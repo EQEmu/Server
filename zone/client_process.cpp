@@ -566,9 +566,6 @@ bool Client::Process() {
 		}
 
 		ProjectileAttack();
-
-		if(projectile_timer.Check())
-			SpellProjectileEffect();
 					
 		if(spellbonuses.GravityEffect == 1) {
 			if(gravity_timer.Check())

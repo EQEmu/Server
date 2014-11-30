@@ -474,6 +474,7 @@ typedef struct
 	uint32 ammo_id;
 	int ammo_slot;
 	uint8 skill;
+	float speed_mod;
 } tProjatk;
 
 //eventually turn this into a typedef and
