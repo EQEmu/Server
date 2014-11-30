@@ -393,6 +393,7 @@ public:
 		((static_cast<float>(cur_mana) / max_mana) * 100); }
 	virtual int32 CalcMaxMana();
 	uint32 GetNPCTypeID() const { return npctype_id; }
+	inline const xyz_heading GetPosition() const { return m_Position; }
 	inline const float GetX() const { return m_Position.m_X; }
 	inline const float GetY() const { return m_Position.m_Y; }
 	inline const float GetZ() const { return m_Position.m_Z; }
