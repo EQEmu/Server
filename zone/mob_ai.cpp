@@ -1787,13 +1787,13 @@ void NPC::AI_DoMovement() {
 	{
 		bool CP2Moved;
 		if(!RuleB(Pathing, Guard) || !zone->pathing)
-			CP2Moved = CalculateNewPosition2(guard_x, guard_y, guard_z, walksp);
+			CP2Moved = CalculateNewPosition2(m_GuardPoint.m_X, m_GuardPoint.m_Y, m_GuardPoint.m_Z, walksp);
 		else
 		{
-			if(!((m_Position.m_X == guard_x) && (m_Position.m_Y == guard_y) && (m_Position.m_Z == guard_z)))
+			if(!((m_Position.m_X == m_GuardPoint.m_X) && (m_Position.m_Y == m_GuardPoint.m_Y) && (m_Position.m_Z == m_GuardPoint.m_Z)))
 			{
 				bool WaypointChanged, NodeReached;
-				Map::Vertex Goal = UpdatePath(guard_x, guard_y, guard_z, walksp, WaypointChanged, NodeReached);
+				Map::Vertex Goal = UpdatePath(m_GuardPoint.m_X, m_GuardPoint.m_Y, m_GuardPoint.m_Z, walksp, WaypointChanged, NodeReached);
 				if(WaypointChanged)
 					tar_ndx = 20;
 
@@ -1809,13 +1809,13 @@ void NPC::AI_DoMovement() {
 		if (!CP2Moved)
 		{
 			if(moved) {
-				mlog(AI__WAYPOINTS, "Reached guard point (%.3f,%.3f,%.3f)", guard_x, guard_y, guard_z);
+				mlog(AI__WAYPOINTS, "Reached guard point (%.3f,%.3f,%.3f)", m_GuardPoint.m_X, m_GuardPoint.m_Y, m_GuardPoint.m_Z);
 				ClearFeignMemory();
 				moved=false;
 				SetMoving(false);
 				if (GetTarget() == nullptr || DistNoRoot(*GetTarget()) >= 5*5 )
 				{
-					SetHeading(guard_heading);
+					SetHeading(m_GuardPoint.m_Heading);
 				} else {
 					FaceTarget(GetTarget());
 				}

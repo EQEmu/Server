@@ -187,18 +187,15 @@ void NPC::MoveTo(float mtx, float mty, float mtz, float mth, bool saveguardspot)
 	}
 	if (saveguardspot)
 	{
-		guard_x = mtx;
-		guard_y = mty;
-		guard_z = mtz;
-		guard_heading = mth;
+        m_GuardPoint = xyz_heading(mtx, mty, mtz, mth);
 
-		if(guard_heading == 0)
-			guard_heading = 0.0001;		//hack to make IsGuarding simpler
+		if(m_GuardPoint.m_Heading == 0)
+			m_GuardPoint.m_Heading  = 0.0001;		//hack to make IsGuarding simpler
 
-		if(guard_heading == -1)
-			guard_heading = this->CalculateHeadingToTarget(mtx, mty);
+		if(m_GuardPoint.m_Heading  == -1)
+			m_GuardPoint.m_Heading  = this->CalculateHeadingToTarget(mtx, mty);
 
-		mlog(AI__WAYPOINTS, "Setting guard position to (%.3f, %.3f, %.3f)", guard_x, guard_y, guard_z);
+		mlog(AI__WAYPOINTS, "Setting guard position to %s", to_string(static_cast<xyz_location>(m_GuardPoint)).c_str());
 	}
 
     m_CurrentWayPoint = xyz_heading(mtx, mty, mtz, mth);
@@ -425,28 +422,23 @@ void NPC::SetWaypointPause()
 void NPC::SaveGuardSpot(bool iClearGuardSpot) {
 	if (iClearGuardSpot) {
 		mlog(AI__WAYPOINTS, "Clearing guard order.");
-		guard_x = 0;
-		guard_y = 0;
-		guard_z = 0;
-		guard_heading = 0;
+		m_GuardPoint = xyz_heading(0, 0, 0, 0);
 	}
 	else {
-		guard_x = m_Position.m_X;
-		guard_y = m_Position.m_Y;
-		guard_z = m_Position.m_Z;
-		guard_heading = m_Position.m_Heading;
-		if(guard_heading == 0)
-			guard_heading = 0.0001;		//hack to make IsGuarding simpler
-		mlog(AI__WAYPOINTS, "Setting guard position to (%.3f, %.3f, %.3f)", guard_x, guard_y, guard_z);
+        m_GuardPoint = m_Position;
+
+		if(m_GuardPoint.m_Heading == 0)
+			m_GuardPoint.m_Heading = 0.0001;		//hack to make IsGuarding simpler
+		mlog(AI__WAYPOINTS, "Setting guard position to %s", to_string(static_cast<xyz_location>(m_GuardPoint)).c_str());
 	}
 }
 
 void NPC::NextGuardPosition() {
-	if (!CalculateNewPosition2(guard_x, guard_y, guard_z, GetMovespeed())) {
-		SetHeading(guard_heading);
+	if (!CalculateNewPosition2(m_GuardPoint.m_X, m_GuardPoint.m_Y, m_GuardPoint.m_Z, GetMovespeed())) {
+		SetHeading(m_GuardPoint.m_Heading);
 		mlog(AI__WAYPOINTS, "Unable to move to next guard position. Probably rooted.");
 	}
-	else if((m_Position.m_X == guard_x) && (m_Position.m_Y == guard_y) && (m_Position.m_Z == guard_z))
+	else if((m_Position.m_X == m_GuardPoint.m_X) && (m_Position.m_Y == m_GuardPoint.m_Y) && (m_Position.m_Z == m_GuardPoint.m_Z))
 	{
 		if(moved)
 		{
@@ -1336,16 +1328,16 @@ int ZoneDatabase::GetHighestWaypoint(uint32 zoneid, uint32 gridid) {
 
 void NPC::SaveGuardSpotCharm()
 {
-	guard_x_saved = guard_x;
-	guard_y_saved = guard_y;
-	guard_z_saved = guard_z;
-	guard_heading_saved = guard_heading;
+	guard_x_saved = m_GuardPoint.m_X;
+	guard_y_saved = m_GuardPoint.m_Y;
+	guard_z_saved = m_GuardPoint.m_Z;
+	guard_heading_saved = m_GuardPoint.m_Heading;
 }
 
 void NPC::RestoreGuardSpotCharm()
 {
-	guard_x = guard_x_saved;
-	guard_y = guard_y_saved;
-	guard_z = guard_z_saved;
-	guard_heading = guard_heading_saved;
+	m_GuardPoint.m_X = guard_x_saved;
+	m_GuardPoint.m_Y = guard_y_saved;
+	m_GuardPoint.m_Z = guard_z_saved;
+	m_GuardPoint.m_Heading = guard_heading_saved;
 }

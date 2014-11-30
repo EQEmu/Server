@@ -114,7 +114,8 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	sendhpupdate_timer(1000),
 	enraged_timer(1000),
 	taunt_timer(TauntReuseTime * 1000),
-	m_SpawnPoint(x,y,z,heading)
+	m_SpawnPoint(x,y,z,heading),
+	m_GuardPoint(-1,-1,-1,0)
 {
 	//What is the point of this, since the names get mangled..
 	Mob* mob = entity_list.GetMob(name);
@@ -205,10 +206,6 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	merchant_open = GetClass() == MERCHANT;
 	adventure_template_id = d->adventure_template;
 	flymode = iflymode;
-	guard_x = -1;	//just some value we might be able to recongize as "unset"
-	guard_y = -1;
-	guard_z = -1;
-	guard_heading = 0;
 	guard_anim = eaStanding;
 	roambox_distance = 0;
 	roambox_max_x = -2;
@@ -673,8 +670,8 @@ bool NPC::Process()
 			DoGravityEffect();
 	}
 
-	if(reface_timer->Check() && !IsEngaged() && (guard_x == GetX() && guard_y == GetY() && guard_z == GetZ())) {
-		SetHeading(guard_heading);
+	if(reface_timer->Check() && !IsEngaged() && (m_GuardPoint.m_X == GetX() && m_GuardPoint.m_Y == GetY() && m_GuardPoint.m_Z == GetZ())) {
+		SetHeading(m_GuardPoint.m_Heading);
 		SendPosition();
 		reface_timer->Disable();
 	}

@@ -215,10 +215,10 @@ public:
 	float GetSpawnPointY()	const { return m_SpawnPoint.m_Y; }
 	float GetSpawnPointZ()	const { return m_SpawnPoint.m_Z; }
 	float GetSpawnPointH()	const { return m_SpawnPoint.m_Heading; }
-	float GetGuardPointX()	const { return guard_x; }
-	float GetGuardPointY()	const { return guard_y; }
-	float GetGuardPointZ()	const { return guard_z; }
-	float GetGuardPointH()	const { return guard_heading; }
+	float GetGuardPointX()	const { return m_GuardPoint.m_X; }
+	float GetGuardPointY()	const { return m_GuardPoint.m_Y; }
+	float GetGuardPointZ()	const { return m_GuardPoint.m_Z; }
+	float GetGuardPointH()	const { return m_GuardPoint.m_Heading; }
 	EmuAppearance GetGuardPointAnim() const { return guard_anim; }
 	void SaveGuardPointAnim(EmuAppearance anim) { guard_anim = anim; }
 
@@ -295,7 +295,7 @@ public:
 
 	void				NextGuardPosition();
 	void				SaveGuardSpot(bool iClearGuardSpot = false);
-	inline bool			IsGuarding() const { return(guard_heading != 0); }
+	inline bool			IsGuarding() const { return(m_GuardPoint.m_Heading != 0); }
 	void				SaveGuardSpotCharm();
 	void				RestoreGuardSpotCharm();
 	void				AI_SetRoambox(float iDist, float iRoamDist, uint32 iDelay = 2500, uint32 iMinDelay = 2500);
@@ -473,7 +473,7 @@ protected:
 	void _ClearWaypints();
 	int max_wp;
 	int save_wp;
-	float guard_x, guard_y, guard_z, guard_heading;
+	xyz_heading m_GuardPoint;
 	float guard_x_saved, guard_y_saved, guard_z_saved, guard_heading_saved;
 	EmuAppearance guard_anim;
 	float roambox_max_x;
