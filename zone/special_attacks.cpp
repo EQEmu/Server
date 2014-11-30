@@ -1077,11 +1077,10 @@ void Mob::ProjectileAttack()
 		Mob* target = entity_list.GetMobID(ProjectileAtk[i].target_id);
 		
 		if (target && target->IsMoving()){ //Only recalculate hit increment if target moving
-			
 			//Due to frequency that we need to check increment the targets position variables may not be updated even if moving. Do a simple check before calculating distance.
-			float _sanitycheck = target->GetX() * target->GetY();
-			if (ProjectileAtk[i].sanitycheck != _sanitycheck){
-				ProjectileAtk[i].sanitycheck = _sanitycheck;
+			if (ProjectileAtk[i].tlast_x != target->GetX() || ProjectileAtk[i].tlast_y != target->GetY()){
+				ProjectileAtk[i].tlast_x = target->GetX();
+				ProjectileAtk[i].tlast_y = target->GetY();
 				float distance = target->CalculateDistance(ProjectileAtk[i].origin_x, ProjectileAtk[i].origin_y,  ProjectileAtk[i].origin_z);
 				float hit = 60.0f + (distance / 1.8f); //Calcuation: 60 = Animation Lag, 1.8 = Speed modifier for speed of (4)
 				ProjectileAtk[i].hit_increment = static_cast<uint16>(hit);
@@ -1103,7 +1102,8 @@ void Mob::ProjectileAttack()
 			ProjectileAtk[i].origin_x = 0.0f;
 			ProjectileAtk[i].origin_y = 0.0f;
 			ProjectileAtk[i].origin_z = 0.0f;
-			ProjectileAtk[i].sanitycheck = 0.0f;
+			ProjectileAtk[i].tlast_x = 0.0f;
+			ProjectileAtk[i].tlast_y = 0.0f;
 			ProjectileAtk[i].ranged_id = 0;
 			ProjectileAtk[i].ammo_id = 0;
 			ProjectileAtk[i].ammo_slot = 0;

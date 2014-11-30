@@ -297,7 +297,8 @@ Mob::Mob(const char* in_name,
 		ProjectileAtk[i].origin_x = 0.0f;
 		ProjectileAtk[i].origin_y = 0.0f;
 		ProjectileAtk[i].origin_z = 0.0f;
-		ProjectileAtk[i].sanitycheck = 0.0f;
+		ProjectileAtk[i].tlast_x = 0.0f;
+		ProjectileAtk[i].tlast_y = 0.0f;
 		ProjectileAtk[i].ranged_id = 0;
 		ProjectileAtk[i].ammo_id = 0;
 		ProjectileAtk[i].ammo_slot = 0;
