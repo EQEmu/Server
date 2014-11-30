@@ -281,8 +281,8 @@ public:
 	void				StopWandering();
 	void				ResumeWandering();
 	void				PauseWandering(int pausetime);
-	void				MoveTo(float mtx, float mty, float mtz, float mth, bool saveguardspot);
-	void				GetClosestWaypoint(std::list<wplist> &wp_list, int count, const xyz_location& location );
+	void				MoveTo(const xyz_heading& position, bool saveguardspot);
+	void				GetClosestWaypoint(std::list<wplist> &wp_list, int count, const xyz_location& location);
 
 	uint32				GetEquipment(uint8 material_slot) const;	// returns item id
 	int32				GetEquipmentMaterial(uint8 material_slot) const;

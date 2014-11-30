@@ -269,7 +269,8 @@ void Lua_NPC::PauseWandering(int pause_time) {
 
 void Lua_NPC::MoveTo(float x, float y, float z, float h, bool save) {
 	Lua_Safe_Call_Void();
-	self->MoveTo(x, y, z, h, save);
+	auto position = xyz_heading(x, y, z, h);
+	self->MoveTo(position, save);
 }
 
 void Lua_NPC::NextGuardPosition() {

@@ -1345,7 +1345,8 @@ XS(XS_NPC_MoveTo)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->MoveTo(mtx, mty, mtz, mth, saveguard);
+        auto position = xyz_heading(mtx, mty, mtz, mth);
+		THIS->MoveTo(position, saveguard);
 	}
 	XSRETURN_EMPTY;
 }
