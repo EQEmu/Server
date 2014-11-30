@@ -1328,16 +1328,10 @@ int ZoneDatabase::GetHighestWaypoint(uint32 zoneid, uint32 gridid) {
 
 void NPC::SaveGuardSpotCharm()
 {
-	guard_x_saved = m_GuardPoint.m_X;
-	guard_y_saved = m_GuardPoint.m_Y;
-	guard_z_saved = m_GuardPoint.m_Z;
-	guard_heading_saved = m_GuardPoint.m_Heading;
+    m_GuardPointSaved = m_GuardPoint;
 }
 
 void NPC::RestoreGuardSpotCharm()
 {
-	m_GuardPoint.m_X = guard_x_saved;
-	m_GuardPoint.m_Y = guard_y_saved;
-	m_GuardPoint.m_Z = guard_z_saved;
-	m_GuardPoint.m_Heading = guard_heading_saved;
+    m_GuardPoint = m_GuardPointSaved;
 }

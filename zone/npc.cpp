@@ -115,7 +115,8 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	enraged_timer(1000),
 	taunt_timer(TauntReuseTime * 1000),
 	m_SpawnPoint(x,y,z,heading),
-	m_GuardPoint(-1,-1,-1,0)
+	m_GuardPoint(-1,-1,-1,0),
+	m_GuardPointSaved(0,0,0,0)
 {
 	//What is the point of this, since the names get mangled..
 	Mob* mob = entity_list.GetMob(name);
@@ -346,10 +347,6 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	reface_timer = new Timer(15000);
 	reface_timer->Disable();
 	qGlobals = nullptr;
-	guard_x_saved = 0;
-	guard_y_saved = 0;
-	guard_z_saved = 0;
-	guard_heading_saved = 0;
 	SetEmoteID(d->emoteid);
 	InitializeBuffSlots();
 	CalcBonuses();

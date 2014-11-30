@@ -474,7 +474,7 @@ protected:
 	int max_wp;
 	int save_wp;
 	xyz_heading m_GuardPoint;
-	float guard_x_saved, guard_y_saved, guard_z_saved, guard_heading_saved;
+	xyz_heading m_GuardPointSaved;
 	EmuAppearance guard_anim;
 	float roambox_max_x;
 	float roambox_max_y;
