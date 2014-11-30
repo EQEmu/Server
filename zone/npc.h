@@ -282,7 +282,7 @@ public:
 	void				ResumeWandering();
 	void				PauseWandering(int pausetime);
 	void				MoveTo(float mtx, float mty, float mtz, float mth, bool saveguardspot);
-	void				GetClosestWaypoint(std::list<wplist> &wp_list, int count, float m_x, float m_y, float m_z);
+	void				GetClosestWaypoint(std::list<wplist> &wp_list, int count, const xyz_location& location );
 
 	uint32				GetEquipment(uint8 material_slot) const;	// returns item id
 	int32				GetEquipmentMaterial(uint8 material_slot) const;
