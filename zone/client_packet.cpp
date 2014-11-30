@@ -4360,7 +4360,8 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			}
 
 			// set the boat's position deltas
-			boat->SetDeltas(ppu->delta_x, ppu->delta_y, ppu->delta_z, ppu->delta_heading);
+			auto boatDelta = xyz_heading(ppu->delta_x, ppu->delta_y, ppu->delta_z, ppu->delta_heading);
+			boat->SetDelta(boatDelta);
 			// send an update to everyone nearby except the client controlling the boat
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 			PlayerPositionUpdateServer_Struct* ppus = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;

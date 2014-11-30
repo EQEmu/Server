@@ -7632,10 +7632,7 @@ XS(XS_Mob_SetDeltas)
 		Perl_croak(aTHX_ "Usage: Mob::SetDeltas(THIS, delta_x, delta_y, delta_z, delta_h)");
 	{
 		Mob *		THIS;
-		float		delta_x = (float)SvNV(ST(1));
-		float		delta_y = (float)SvNV(ST(2));
-		float		delta_z = (float)SvNV(ST(3));
-		float		delta_h = (float)SvNV(ST(4));
+		auto delta = xyz_heading((float)SvNV(ST(1)), (float)SvNV(ST(2)), (float)SvNV(ST(3)), (float)SvNV(ST(4)));
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -7646,7 +7643,7 @@ XS(XS_Mob_SetDeltas)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->SetDeltas(delta_x, delta_y, delta_z, delta_h);
+		THIS->SetDelta(delta);
 	}
 	XSRETURN_EMPTY;
 }

@@ -432,7 +432,7 @@ public:
 	bool IsRunning() const { return m_is_running; }
 	void SetRunning(bool val) { m_is_running = val; }
 	virtual void GMMove(float x, float y, float z, float heading = 0.01, bool SendUpdate = true);
-	void SetDeltas(float delta_x, float delta_y, float delta_z, float delta_h);
+	void SetDelta(const xyz_heading& delta);
 	void SetTargetDestSteps(uint8 target_steps) { tar_ndx = target_steps; }
 	void SendPosUpdate(uint8 iSendToSelf = 0);
 	void MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct* spu);

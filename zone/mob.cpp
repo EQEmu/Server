@@ -2928,8 +2928,8 @@ void Mob::TriggerDefensiveProcs(const ItemInst* weapon, Mob *on, uint16 hand, in
 	}
 }
 
-void Mob::SetDeltas(float dx, float dy, float dz, float dh) {
-	m_Delta = xyz_heading(dx,dy,dz,dh);
+void Mob::SetDelta(const xyz_heading& delta) {
+	m_Delta = delta;
 }
 
 void Mob::SetEntityVariable(const char *id, const char *m_var)
