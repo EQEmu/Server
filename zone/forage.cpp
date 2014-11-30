@@ -15,75 +15,33 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "../common/debug.h"
-#include <iostream>
-#include <stdlib.h>
-#include <math.h>
-
-#ifdef _WINDOWS
-#define snprintf	_snprintf
-#endif
-
-#include "forage.h"
-#include "entity.h"
-#include "masterentity.h"
-#include "npc.h"
-#include "water_map.h"
-#include "titles.h"
-#include "string_ids.h"
 #include "../common/misc_functions.h"
-#include "../common/string_util.h"
 #include "../common/rulesys.h"
+#include "../common/string_util.h"
 
+#include "entity.h"
+#include "forage.h"
+#include "npc.h"
+#include "quest_parser_collection.h"
+#include "string_ids.h"
+#include "titles.h"
+#include "water_map.h"
 #include "zonedb.h"
+
+#include <iostream>
+
 #ifdef _WINDOWS
 #define snprintf	_snprintf
 #endif
 
-#include "quest_parser_collection.h"
+struct NPCType;
 
 //max number of items which can be in the foraging table
 //for a given zone.
 #define FORAGE_ITEM_LIMIT 50
 
-/*
-
-The fishing and foraging need some work...
-foraging currently gives each item an equal chance of dropping
-fishing gives items which come in last from the select a very
-very low chance of dropping.
-
-
-Schema:
-CREATE TABLE forage (
-  id int(11) NOT NULL auto_increment,
-  zoneid int(4) NOT NULL default '0',
-  Itemid int(11) NOT NULL default '0',
-  level smallint(6) NOT NULL default '0',
-  chance smallint(6) NOT NULL default '0',
-  PRIMARY KEY  (id)
-) TYPE=MyISAM;
-
-old table upgrade:
-alter table forage add chance smallint(6) NOT NULL default '0';
-update forage set chance=100;
-
-
-CREATE TABLE fishing (
-  id int(11) NOT NULL auto_increment,
-  zoneid int(4) NOT NULL default '0',
-  Itemid int(11) NOT NULL default '0',
-  skill_level smallint(6) NOT NULL default '0',
-  chance smallint(6) NOT NULL default '0',
-  npc_id int NOT NULL default 0,
-  npc_chance int NOT NULL default 0,
-  PRIMARY KEY  (id)
-) TYPE=MyISAM;
-
-
-*/
-
-// This allows EqEmu to have zone specific foraging - BoB
 uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 
 	uint32 item[FORAGE_ITEM_LIMIT];

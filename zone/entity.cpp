@@ -19,7 +19,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include <ctype.h>
 #include <string.h>
 #include <iostream>
 
@@ -30,19 +29,16 @@
 #include "../common/unix.h"
 #endif
 
-#include "net.h"
-#include "masterentity.h"
-#include "worldserver.h"
-#include "../common/guilds.h"
-#include "../common/packet_dump.h"
-#include "../common/packet_functions.h"
-#include "petitions.h"
-#include "../common/spdat.h"
 #include "../common/features.h"
-#include "string_ids.h"
+#include "../common/guilds.h"
+#include "../common/spdat.h"
 #include "guild_mgr.h"
-#include "raids.h"
+#include "net.h"
+#include "petitions.h"
 #include "quest_parser_collection.h"
+#include "raids.h"
+#include "string_ids.h"
+#include "worldserver.h"
 
 #ifdef _WINDOWS
 	#define snprintf	_snprintf

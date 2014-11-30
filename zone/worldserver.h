@@ -20,12 +20,10 @@
 
 #include "../common/worldconn.h"
 #include "../common/eq_packet_structs.h"
-#include <string>
 
-struct GuildJoin_Struct;
+class ServerPacket;
 class EQApplicationPacket;
 class Client;
-class Database;
 
 class WorldServer : public WorldConnection {
 public:

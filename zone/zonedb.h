@@ -3,10 +3,24 @@
 
 #include "../common/shareddb.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/loottable.h"
-#include "zonedump.h"
 #include "../common/faction.h"
-#include <limits>
+
+class Client;
+class Corpse;
+class Merc;
+class NPC;
+class Petition;
+class Spawn2;
+class SpawnGroupList;
+class ItemInst;
+struct CharacterEventLog_Struct;
+struct Door;
+struct ExtendedProfile_Struct;
+struct NPCType;
+struct PlayerCorpse_Struct;
+struct ZonePoint;
+struct npcDecayTimes_Struct;
+template <class TYPE> class LinkedList;
 
 //#include "doors.h"
 
@@ -200,12 +214,6 @@ struct ClientMercEntry {
 	uint32 id;
 	uint32 npcid;
 };
-
-class ItemInst;
-struct FactionMods;
-struct FactionValue;
-struct LootTable_Struct;
-
 
 class ZoneDatabase : public SharedDatabase {
 	typedef std::list<ServerLootItem_Struct*> ItemList;

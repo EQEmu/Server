@@ -17,13 +17,9 @@
 */
 #include "../common/debug.h"
 #include <iostream>
-#include <iomanip>
-#include <sstream>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <signal.h>
-#include <math.h>
 
 // for windows compile
 #ifdef _WINDOWS
@@ -39,27 +35,17 @@
 extern volatile bool RunLoops;
 
 #include "../common/features.h"
-#include "../common/misc.h"
 #include "../common/spdat.h"
-#include "../common/packet_dump.h"
-#include "../common/packet_functions.h"
-#include "../common/serverinfo.h"
-#include "../common/zone_numbers.h"
-#include "../common/moremath.h"
 #include "../common/guilds.h"
-#include "../common/breakdowns.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
 #include "../common/data_verification.h"
 #include "net.h"
-#include "masterentity.h"
 #include "worldserver.h"
 #include "zonedb.h"
 #include "petitions.h"
-#include "forage.h"
 #include "command.h"
 #include "string_ids.h"
-#include "npc_ai.h"
 #include "client_logs.h"
 #include "guild_mgr.h"
 #include "quest_parser_collection.h"

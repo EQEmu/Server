@@ -16,14 +16,11 @@
 */
 
 #include "../common/debug.h"
-#include <assert.h>
 #include <iomanip>
 #include <iostream>
 #include <math.h>
 #include <set>
-#include <sstream>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <zlib.h>
 
@@ -38,39 +35,28 @@
 	#include <unistd.h>
 #endif
 
-#include "../common/packet_functions.h"
-#include "../common/packet_dump.h"
-#include "worldserver.h"
-#include "../common/rdtsc.h"
-#include "../common/packet_dump_file.h"
-#include "../common/string_util.h"
-#include "../common/breakdowns.h"
-#include "../common/guilds.h"
-#include "../common/rulesys.h"
-#include "../common/spdat.h"
-#include "../common/data_verification.h"
-#include "petitions.h"
-#include "npc_ai.h"
-#include "../common/skills.h"
-#include "forage.h"
-#include "zone.h"
-#include "event_codes.h"
-#include "../common/faction.h"
 #include "../common/crc32.h"
+#include "../common/data_verification.h"
+#include "../common/faction.h"
+#include "../common/guilds.h"
+#include "../common/rdtsc.h"
+#include "../common/rulesys.h"
+#include "../common/skills.h"
+#include "../common/spdat.h"
+#include "../common/string_util.h"
+#include "../common/zone_numbers.h"
+#include "event_codes.h"
+#include "guild_mgr.h"
+#include "merc.h"
+#include "petitions.h"
+#include "pets.h"
+#include "queryserv.h"
+#include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "titles.h"
 #include "water_map.h"
 #include "worldserver.h"
 #include "zone.h"
-#include "zone_config.h"
-#include "guild_mgr.h"
-#include "pathing.h"
-#include "water_map.h"
-#include "merc.h"
-#include "pets.h"
-#include "../common/zone_numbers.h"
-#include "quest_parser_collection.h"
-#include "queryserv.h"
 
 extern QueryServ* QServ;
 extern Zone* zone;

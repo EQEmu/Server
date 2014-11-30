@@ -19,21 +19,17 @@
 #ifdef _EQDEBUG
 #include <iostream>
 #endif
-//#include <iomanip>
-#include <stdlib.h>
-#include <math.h>
-#include "npc.h"
-#include "masterentity.h"
-#include "npc_ai.h"
-#include "map.h"
-#include "water_map.h"
-#include "../common/moremath.h"
-#include "string_ids.h"
-#include "../common/misc_functions.h"
-#include "../common/string_util.h"
-#include "../common/rulesys.h"
+
 #include "../common/features.h"
+#include "../common/misc_functions.h"
+#include "../common/rulesys.h"
+#include "../common/string_util.h"
+#include "map.h"
+#include "npc.h"
 #include "quest_parser_collection.h"
+#include "water_map.h"
+#include <math.h>
+#include <stdlib.h>
 
 struct wp_distance
 {

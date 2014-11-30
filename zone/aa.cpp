@@ -16,84 +16,34 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-// Test 1
-
-#include <iostream>
-
-#include "../common/debug.h"
-#include "aa.h"
-#include "mob.h"
-#include "client.h"
-#include "groups.h"
-#include "raids.h"
-#include "../common/spdat.h"
-#include "object.h"
-#include "doors.h"
-#include "beacon.h"
-#include "corpse.h"
-#include "titles.h"
-#include "../common/races.h"
 #include "../common/classes.h"
+#include "../common/debug.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/packet_dump.h"
+#include "../common/races.h"
+#include "../common/spdat.h"
 #include "../common/string_util.h"
-#include "../common/logsys.h"
-#include "zonedb.h"
-#include "string_ids.h"
+
+#include "aa.h"
+#include "client.h"
+#include "corpse.h"
+#include "groups.h"
+#include "mob.h"
 #include "queryserv.h"
+#include "raids.h"
+#include "string_ids.h"
+#include "titles.h"
+#include "zonedb.h"
 
 extern QueryServ* QServ;
 
-//static data arrays, really not big enough to warrant shared mem.
+
 AA_DBAction AA_Actions[aaHighestID][MAX_AA_ACTION_RANKS];	//[aaid][rank]
 std::map<uint32,SendAA_Struct*>aas_send;
 std::map<uint32, std::map<uint32, AA_Ability> > aa_effects;	//stores the effects from the aa_effects table in memory
 std::map<uint32, AALevelCost_Struct> AARequiredLevelAndCost;
 
-/*
 
-
-Schema:
-
-spell_id is spell to cast, SPELL_UNKNOWN == no spell
-nonspell_action is action to preform on activation which is not a spell, 0=none
-nonspell_mana is mana that the nonspell action consumes
-nonspell_duration is a duration which may be used by the nonspell action
-redux_aa is the aa which reduces the reuse timer of the skill
-redux_rate is the multiplier of redux_aa, as a percentage of total rate (10 == 10% faster)
-
-CREATE TABLE aa_actions (
-	aaid mediumint unsigned not null,
-	rank tinyint unsigned not null,
-	reuse_time mediumint unsigned not null,
-	spell_id mediumint unsigned not null,
-	target tinyint unsigned not null,
-	nonspell_action tinyint unsigned not null,
-	nonspell_mana mediumint unsigned not null,
-	nonspell_duration mediumint unsigned not null,
-	redux_aa mediumint unsigned not null,
-	redux_rate tinyint not null,
-
-	PRIMARY KEY(aaid, rank)
-);
-
-CREATE TABLE aa_swarmpets (
-	spell_id mediumint unsigned not null,
-	count tinyint unsigned not null,
-	npc_id int not null,
-	duration mediumint unsigned not null,
-	PRIMARY KEY(spell_id)
-);
-*/
-
-/*
-
-Credits for this function:
-	-FatherNitwit: Structure and mechanism
-	-Wiz: Initial set of AAs, original function contents
-	-Branks: Much updated info and a bunch of higher-numbered AAs
-
-*/
 int Client::GetAATimerID(aaID activate)
 {
 	SendAA_Struct* aa2 = zone->FindAA(activate);

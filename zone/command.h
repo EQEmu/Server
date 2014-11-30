@@ -20,6 +20,9 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
+class Client;
+class Seperator;
+
 #include "../common/seperator.h"
 #include "../common/eq_stream.h"
 #include "client.h"

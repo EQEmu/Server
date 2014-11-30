@@ -42,27 +42,22 @@
 #endif
 
 #include "../common/debug.h"
-#include "../common/ptimer.h"
-#include "../common/packet_functions.h"
-#include "../common/packet_dump.h"
-#include "../common/serverinfo.h"
-#include "../common/opcodemgr.h"
 #include "../common/eq_packet.h"
-#include "../common/guilds.h"
-#include "../common/rulesys.h"
-#include "../common/string_util.h"
-//#include "../common/servertalk.h" // for oocmute and revoke
-#include "worldserver.h"
-#include "masterentity.h"
-#include "map.h"
-#include "water_map.h"
 #include "../common/features.h"
-#include "pathing.h"
+#include "../common/guilds.h"
+#include "../common/patches/patches.h"
+#include "../common/ptimer.h"
+#include "../common/rulesys.h"
+#include "../common/serverinfo.h"
+#include "../common/string_util.h"
 #include "client_logs.h"
 #include "guild_mgr.h"
-#include "titles.h"
-#include "../common/patches/patches.h"
+#include "map.h"
+#include "pathing.h"
 #include "queryserv.h"
+#include "titles.h"
+#include "water_map.h"
+#include "worldserver.h"
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;

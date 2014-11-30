@@ -25,8 +25,10 @@
 #include <list>
 #include <stack>
 
-class NPC;
 class Client;
+class ItemInst;
+class Mob;
+class NPC;
 
 class QuestManager {
 	struct running_quest {
