@@ -296,7 +296,6 @@ Mob::Mob(const char* in_name,
 		ProjectileAtk[i].ammo_slot = 0;
 		ProjectileAtk[i].skill = 0;
 		ProjectileAtk[i].speed_mod = 0.0f;
-		
 	}
 
 	memset(&itembonuses, 0, sizeof(StatBonuses));

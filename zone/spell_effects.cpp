@@ -6425,7 +6425,7 @@ bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id, float speed){
 
 	//Make sure there is an avialable bolt to be cast.
 	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) {
-		if (ProjectileAtk[slot].target_id == 0){
+		if (ProjectileAtk[i].target_id == 0){
 			slot = i;
 			break;
 		}
@@ -6433,7 +6433,7 @@ bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id, float speed){
 
 	if (slot < 0)
 		return false;
-
+	
 	if (CheckLosFN(spell_target)) {
 		
 		float speed_mod = speed * 0.45f; //Constant for adjusting speeds to match calculated impact time.

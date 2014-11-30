@@ -1023,8 +1023,7 @@ bool Mob::TryProjectileAttack(Mob* other, const Item_Struct *item, SkillUseTypes
 			break;
 		}
 	}
-	speed = 2.0f;
-	Shout("Speed %.2f", speed);
+
 	if (slot < 0)
 		return false;
 
