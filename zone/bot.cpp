@@ -11864,7 +11864,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	}
 
 	if(!strcasecmp(sep->arg[1], "inventory") && !strcasecmp(sep->arg[2], "remove")) {
-		if((c->GetTarget() == nullptr) || (sep->arg[3] == '\0') || !c->GetTarget()->IsBot())
+		if((c->GetTarget() == nullptr) || (sep->arg[3][0] == '\0') || !c->GetTarget()->IsBot())
 		{
 			c->Message(15, "Usage: #bot inventory remove [slotid] (You must have a bot targetted) ");
 			return;
