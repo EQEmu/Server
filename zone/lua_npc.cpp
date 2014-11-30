@@ -314,22 +314,22 @@ int Lua_NPC::GetSpawnPointID() {
 
 float Lua_NPC::GetSpawnPointX() {
 	Lua_Safe_Call_Real();
-	return self->GetSpawnPointX();
+	return self->GetSpawnPoint().m_X;
 }
 
 float Lua_NPC::GetSpawnPointY() {
 	Lua_Safe_Call_Real();
-	return self->GetSpawnPointY();
+	return self->GetSpawnPoint().m_Y;
 }
 
 float Lua_NPC::GetSpawnPointZ() {
 	Lua_Safe_Call_Real();
-	return self->GetSpawnPointZ();
+	return self->GetSpawnPoint().m_Z;
 }
 
 float Lua_NPC::GetSpawnPointH() {
 	Lua_Safe_Call_Real();
-	return self->GetSpawnPointH();
+	return self->GetSpawnPoint().m_Heading;
 }
 
 float Lua_NPC::GetGuardPointX() {

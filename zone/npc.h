@@ -211,10 +211,7 @@ public:
 	uint32 GetSp2() const { return spawn_group; }
 	uint32 GetSpawnPointID() const;
 
-	float GetSpawnPointX()	const { return m_SpawnPoint.m_X; }
-	float GetSpawnPointY()	const { return m_SpawnPoint.m_Y; }
-	float GetSpawnPointZ()	const { return m_SpawnPoint.m_Z; }
-	float GetSpawnPointH()	const { return m_SpawnPoint.m_Heading; }
+	xyz_heading const GetSpawnPoint() const { return m_SpawnPoint; }
 	xyz_heading const GetGuardPoint() const { return m_GuardPoint; }
 	EmuAppearance GetGuardPointAnim() const { return guard_anim; }
 	void SaveGuardPointAnim(EmuAppearance anim) { guard_anim = anim; }

@@ -1545,7 +1545,7 @@ XS(XS_NPC_GetSpawnPointX)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 
-		RETVAL = THIS->GetSpawnPointX();
+		RETVAL = THIS->GetSpawnPoint().m_X;
 		XSprePUSH; PUSHn((double)RETVAL);
 	}
 	XSRETURN(1);
@@ -1572,7 +1572,7 @@ XS(XS_NPC_GetSpawnPointY)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 
-		RETVAL = THIS->GetSpawnPointY();
+		RETVAL = THIS->GetSpawnPoint().m_Y;
 		XSprePUSH; PUSHn((double)RETVAL);
 	}
 	XSRETURN(1);
@@ -1599,7 +1599,7 @@ XS(XS_NPC_GetSpawnPointZ)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 
-		RETVAL = THIS->GetSpawnPointZ();
+		RETVAL = THIS->GetSpawnPoint().m_Z;
 		XSprePUSH; PUSHn((double)RETVAL);
 	}
 	XSRETURN(1);
@@ -1626,7 +1626,7 @@ XS(XS_NPC_GetSpawnPointH)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 
-		RETVAL = THIS->GetSpawnPointH();
+		RETVAL = THIS->GetSpawnPoint().m_Heading;
 		XSprePUSH; PUSHn((double)RETVAL);
 	}
 	XSRETURN(1);
