@@ -25,10 +25,10 @@ public:
 	char*	GetDoorName() { return door_name; }
 	uint32	GetDoorParam() { return door_param; }
 	int		GetInvertState() { return invert_state; }
-	float	GetX() { return pos_x; }
-	float	GetY() { return pos_y; }
-	float	GetZ() { return pos_z; }
-	float	GetHeading() { return heading; }
+	float	GetX() { return m_Position.m_X; }
+	float	GetY() { return m_Position.m_Y; }
+	float	GetZ() { return m_Position.m_Z; }
+	float	GetHeading() { return m_Position.m_Heading; }
 	int		GetIncline() { return incline; }
 	bool	triggered;
 	void	SetOpenState(bool st) { isopen = st; }
@@ -80,10 +80,7 @@ private:
 	uint8	door_id;
 	char	zone_name[32];
 	char	door_name[32];
-	float	pos_x;
-	float	pos_y;
-	float	pos_z;
-	float	heading;
+	xyz_heading m_Position;
 	int		incline;
 	uint8	opentype;
 	uint32	guild_id;

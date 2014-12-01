@@ -36,17 +36,14 @@
 extern EntityList entity_list;
 extern WorldServer worldserver;
 
-Doors::Doors(const Door* door)
-:	close_timer(5000)
+Doors::Doors(const Door* door) :
+    close_timer(5000),
+    m_Position(door->pos_x, door->pos_y, door->pos_z, door->heading)
 {
 	db_id = door->db_id;
 	door_id = door->door_id;
 	strn0cpy(zone_name,door->zone_name,32);
 	strn0cpy(door_name,door->door_name,32);
-	pos_x = door->pos_x;
-	pos_y = door->pos_y;
-	pos_z = door->pos_z;
-	heading = door->heading;
 	incline = door->incline;
 	opentype = door->opentype;
 	guild_id = door->guild_id;
@@ -74,17 +71,14 @@ Doors::Doors(const Door* door)
 	client_version_mask = door->client_version_mask;
 }
 
-Doors::Doors(const char *dmodel, float dx, float dy, float dz, float dheading, uint8 dopentype, uint16 dsize)
-:	close_timer(5000)
+Doors::Doors(const char *dmodel, float dx, float dy, float dz, float dheading, uint8 dopentype, uint16 dsize) :
+    close_timer(5000),
+    m_Position(dx, dy, dz, dheading)
 {
 	db_id = database.GetDoorsCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion());
 	door_id = database.GetDoorsDBCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion());
 	strn0cpy(zone_name,zone->GetShortName(),32);
 	strn0cpy(door_name,dmodel,32);
-	pos_x = dx;
-	pos_y = dy;
-	pos_z = dz;
-	heading = dheading;
 	incline = 0;
 	opentype = dopentype;
 	guild_id = 0;
@@ -141,7 +135,7 @@ bool Doors::Process()
 void Doors::HandleClick(Client* sender, uint8 trigger)
 {
 	//door debugging info dump
-	_log(DOORS__INFO, "%s clicked door %s (dbid %d, eqid %d) at (%.4f,%.4f,%.4f @%.4f)", sender->GetName(), door_name, db_id, door_id, pos_x, pos_y, pos_z, heading);
+	_log(DOORS__INFO, "%s clicked door %s (dbid %d, eqid %d) at %s", sender->GetName(), door_name, db_id, door_id, to_string(m_Position).c_str());
 	_log(DOORS__INFO, "  incline %d, opentype %d, lockpick %d, key %d, nokeyring %d, trigger %d type %d, param %d", incline, opentype, lockpick, keyitem, nokeyring, trigger_door, trigger_type, door_param);
 	_log(DOORS__INFO, "  size %d, invert %d, dest: %s (%.4f,%.4f,%.4f @%.4f)", size, invert_state, dest_zone, dest_x, dest_y, dest_z, dest_heading);
 
@@ -557,8 +551,8 @@ void Doors::ToggleState(Mob *sender)
 
 void Doors::DumpDoor(){
 	LogFile->write(EQEMuLog::Debug,
-		"db_id:%i door_id:%i zone_name:%s door_name:%s pos_x:%f pos_y:%f pos_z:%f heading:%f",
-		db_id, door_id, zone_name, door_name, pos_x, pos_y, pos_z, heading);
+		"db_id:%i door_id:%i zone_name:%s door_name:%s %s",
+		db_id, door_id, zone_name, door_name, to_string(m_Position).c_str());
 	LogFile->write(EQEMuLog::Debug,
 		"opentype:%i guild_id:%i lockpick:%i keyitem:%i nokeyring:%i trigger_door:%i trigger_type:%i door_param:%i open:%s",
 		opentype, guild_id, lockpick, keyitem, nokeyring, trigger_door, trigger_type, door_param, (isopen) ? "open":"closed");
@@ -706,30 +700,28 @@ bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name
 void Doors::SetLocation(float x, float y, float z)
 {
 	entity_list.DespawnAllDoors();
-	pos_x = x;
-	pos_y = y;
-	pos_z = z;
+    m_Position = xyz_location(x, y, z);
 	entity_list.RespawnAllDoors();
 }
 
 void Doors::SetX(float in) {
 	entity_list.DespawnAllDoors();
-	pos_x = in;
+	m_Position.m_X = in;
 	entity_list.RespawnAllDoors();
 }
 void Doors::SetY(float in) {
 	entity_list.DespawnAllDoors();
-	pos_y = in;
+	m_Position.m_Y = in;
 	entity_list.RespawnAllDoors();
 }
 void Doors::SetZ(float in) {
 	entity_list.DespawnAllDoors();
-	pos_z = in;
+	m_Position.m_Z = in;
 	entity_list.RespawnAllDoors();
 }
 void Doors::SetHeading(float in) {
 	entity_list.DespawnAllDoors();
-	heading = in;
+	m_Position.m_Heading = in;
 	entity_list.RespawnAllDoors();
 }
 
