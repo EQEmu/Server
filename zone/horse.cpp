@@ -28,8 +28,8 @@
 std::map<uint16, const NPCType *> Horse::horse_types;
 LinkedList<NPCType *> horses_auto_delete;
 
-Horse::Horse(Client *_owner, uint16 spell_id, float x, float y, float z, float heading)
- : NPC(GetHorseType(spell_id), nullptr, xyz_heading(x, y, z, heading), FlyMode3)
+Horse::Horse(Client *_owner, uint16 spell_id, const xyz_heading& position)
+ : NPC(GetHorseType(spell_id), nullptr, position, FlyMode3)
 {
 	//give the horse its proper name.
 	strn0cpy(name, _owner->GetCleanName(), 55);
@@ -126,7 +126,7 @@ void Client::SummonHorse(uint16 spell_id) {
 
 	// No Horse, lets get them one.
 
-	Horse* horse = new Horse(this, spell_id, GetX(), GetY(), GetZ(), GetHeading());
+	Horse* horse = new Horse(this, spell_id, GetPosition());
 
 	//we want to manage the spawn packet ourself.
 	//another reason is we dont want quests executing on it.
