@@ -246,7 +246,7 @@ public:
 	void		LoadBlockedSpells(uint32 zoneid);
 	void		ClearBlockedSpells();
 	bool		IsSpellBlocked(uint32 spell_id, float nx, float ny, float nz);
-	const char *GetSpellBlockedMessage(uint32 spell_id, float nx, float ny, float nz);
+	const char *GetSpellBlockedMessage(uint32 spell_id, const xyz_location& location);
 	int			GetTotalBlockedSpells() { return totalBS; }
 	inline bool HasMap() { return zonemap != nullptr; }
 	inline bool HasWaterMap() { return watermap != nullptr; }
@@ -324,7 +324,7 @@ private:
 	Timer*	Instance_Warning_timer;
 	LinkedList<ZoneClientAuth_Struct*> client_auth_list;
 	QGlobalCache *qGlobals;
-	
+
 	Timer	hotzone_timer;
 };
 
