@@ -2342,10 +2342,10 @@ int QuestManager::getlevel(uint8 type)
 		return 0;
 }
 
-uint16 QuestManager::CreateGroundObject(uint32 itemid, float x, float y, float z, float heading, uint32 decay_time)
+uint16 QuestManager::CreateGroundObject(uint32 itemid, const xyz_heading& position, uint32 decay_time)
 {
 	uint16 entid = 0; //safety check
-	entid = entity_list.CreateGroundObject(itemid, xyz_heading(x, y, z, heading), decay_time);
+	entid = entity_list.CreateGroundObject(itemid, position, decay_time);
 	return entid;
 }
 

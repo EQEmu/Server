@@ -685,11 +685,11 @@ int lua_get_level(int type) {
 }
 
 void lua_create_ground_object(uint32 item_id, float x, float y, float z, float h) {
-	quest_manager.CreateGroundObject(item_id, x, y, z, h);
+	quest_manager.CreateGroundObject(item_id, xyz_heading(x, y, z, h));
 }
 
 void lua_create_ground_object(uint32 item_id, float x, float y, float z, float h, uint32 decay_time) {
-	quest_manager.CreateGroundObject(item_id, x, y, z, h, decay_time);
+	quest_manager.CreateGroundObject(item_id, xyz_heading(x, y, z, h), decay_time);
 }
 
 void lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h) {

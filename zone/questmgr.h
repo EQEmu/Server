@@ -207,7 +207,7 @@ public:
     void enabletitle(int titleset);
    	bool checktitle(int titlecheck);
    	void removetitle(int titlecheck);
-	uint16 CreateGroundObject(uint32 itemid, float x, float y, float z, float heading, uint32 decay_time = 300000);
+	uint16 CreateGroundObject(uint32 itemid, const xyz_heading& position, uint32 decay_time = 300000);
 	uint16 CreateGroundObjectFromModel(const char* model, float x, float y, float z, float heading, uint8 type = 0x00, uint32 decay_time = 0);
 	void ModifyNPCStat(const char *identifier, const char *newValue);
 	void UpdateSpawnTimer(uint32 id, uint32 newTime);
@@ -240,7 +240,7 @@ public:
 	uint16 CreateDoor( const char* model, float x, float y, float z, float heading, uint8 opentype, uint16 size);
     int32 GetZoneID(const char *zone);
     const char *GetZoneLongName(const char *zone);
-	void CrossZoneSignalPlayerByCharID(int charid, uint32 data); 
+	void CrossZoneSignalPlayerByCharID(int charid, uint32 data);
 	void CrossZoneSignalNPCByNPCTypeID(uint32 npctype_id, uint32 data);
 	void CrossZoneSignalPlayerByName(const char *CharName, uint32 data);
 	void CrossZoneSetEntityVariableByNPCTypeID(uint32 npctype_id, const char *id, const char *m_var);

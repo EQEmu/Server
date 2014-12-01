@@ -31,7 +31,7 @@
 #include "queryserv.h"
 
 extern Zone* zone;
-extern QueryServ* QServ; 
+extern QueryServ* QServ;
 
 /*
 
@@ -1174,7 +1174,7 @@ XS(XS__createguild)
 		Perl_croak(aTHX_ "Usage: createguild(guild_name, leader)");
 
 		char *	guild_name = (char *)SvPV_nolen(ST(0));
-		char *	leader = (char *)SvPV_nolen(ST(1));		
+		char *	leader = (char *)SvPV_nolen(ST(1));
 
 	quest_manager.CreateGuild(guild_name, leader);
 
@@ -2668,10 +2668,10 @@ XS(XS__CreateGroundObject)
 	uint16 id = 0;
 
 	if(items == 5)
-		id = quest_manager.CreateGroundObject(itemid, x, y, z, heading);
+		id = quest_manager.CreateGroundObject(itemid, xyz_heading(x, y, z, heading));
 	else{
 		uint32 decay_time = (uint32)SvIV(ST(5));
-		id = quest_manager.CreateGroundObject(itemid, x, y, z, heading, decay_time);
+		id = quest_manager.CreateGroundObject(itemid, xyz_heading(x, y, z, heading), decay_time);
 	}
 
 	XSRETURN_IV(id);
@@ -3289,7 +3289,7 @@ XS(XS__GetZoneID)
 
 	char *zone = (char *)SvPV_nolen(ST(0));
 	int32 id = quest_manager.GetZoneID(zone);
-	
+
 	XSRETURN_IV(id);
 }
 
@@ -3302,7 +3302,7 @@ XS(XS__GetZoneLongName)
 	dXSTARG;
 	char *zone = (char *)SvPV_nolen(ST(0));
 	Const_char* RETVAL = quest_manager.GetZoneLongName(zone);
-	
+
 	sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
 	XSRETURN(1);
 }
@@ -3432,7 +3432,7 @@ XS(XS__clear_npctype_cache)
 		int32 npctype_id = (int32)SvIV(ST(0));
 		quest_manager.ClearNPCTypeCache(npctype_id);
 	}
-	
+
 	XSRETURN_EMPTY;
 }
 
@@ -3455,11 +3455,11 @@ XS(XS__qs_player_event);
 XS(XS__qs_player_event)
 {
 	dXSARGS;
-	if (items != 2){ 
+	if (items != 2){
 		Perl_croak(aTHX_ "Usage: qs_player_event(char_id, event_desc)");
 	}
 	else{
-		int	char_id = (int)SvIV(ST(0)); 
+		int	char_id = (int)SvIV(ST(0));
 		std::string event_desc = (std::string)SvPV_nolen(ST(1));
 		QServ->PlayerLogEvent(Player_Log_Quest, char_id, event_desc);
 	}
@@ -3494,7 +3494,7 @@ XS(XS__crosszonesignalnpcbynpctypeid)
 
 	if (items == 2) {
 		uint32 npctype_id = (uint32)SvIV(ST(0));
-		uint32 data = (uint32)SvIV(ST(1)); 
+		uint32 data = (uint32)SvIV(ST(1));
 		quest_manager.CrossZoneSignalNPCByNPCTypeID(npctype_id, data);
 	}
 
@@ -3725,8 +3725,8 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "enablerecipe"), XS__enablerecipe, file);
 		newXS(strcpy(buf, "disablerecipe"), XS__disablerecipe, file);
 		newXS(strcpy(buf, "clear_npctype_cache"), XS__clear_npctype_cache, file);
-		newXS(strcpy(buf, "qs_send_query"), XS__qs_send_query, file); 
-		newXS(strcpy(buf, "qs_player_event"), XS__qs_player_event, file); 
+		newXS(strcpy(buf, "qs_send_query"), XS__qs_send_query, file);
+		newXS(strcpy(buf, "qs_player_event"), XS__qs_player_event, file);
 		newXS(strcpy(buf, "crosszonesetentityvariablebynpctypeid"), XS__crosszonesetentityvariablebynpctypeid, file);
 		newXS(strcpy(buf, "crosszonesignalnpcbynpctypeid"), XS__crosszonesignalnpcbynpctypeid, file);
 		XSRETURN_YES;
