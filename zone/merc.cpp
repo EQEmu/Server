@@ -170,49 +170,49 @@ void Merc::GenerateAppearance() {
 	// Randomize facial appearance
 	int iFace = 0;
 	if(this->GetRace() == 2) { // Barbarian w/Tatoo
-		iFace = MakeRandomInt(0, 79);
+		iFace = zone->random.Int(0, 79);
 	}
 	else {
-		iFace = MakeRandomInt(0, 7);
+		iFace = zone->random.Int(0, 7);
 	}
 
 	int iHair = 0;
 	int iBeard = 0;
 	int iBeardColor = 1;
 	if(this->GetRace() == 522) {
-		iHair = MakeRandomInt(0, 8);
-		iBeard = MakeRandomInt(0, 11);
-		iBeardColor = MakeRandomInt(0, 3);
+		iHair = zone->random.Int(0, 8);
+		iBeard = zone->random.Int(0, 11);
+		iBeardColor = zone->random.Int(0, 3);
 	}
 	else if(this->GetGender()) {
-		iHair = MakeRandomInt(0, 2);
+		iHair = zone->random.Int(0, 2);
 		if(this->GetRace() == 8) { // Dwarven Females can have a beard
-			if(MakeRandomInt(1, 100) < 50) {
+			if(zone->random.Roll(50)) {
 				iFace += 10;
 			}
 		}
 	}
 	else {
-		iHair = MakeRandomInt(0, 3);
-		iBeard = MakeRandomInt(0, 5);
-		iBeardColor = MakeRandomInt(0, 19);
+		iHair = zone->random.Int(0, 3);
+		iBeard = zone->random.Int(0, 5);
+		iBeardColor = zone->random.Int(0, 19);
 	}
 
 	int iHairColor = 0;
 	if(this->GetRace() == 522) {
-		iHairColor = MakeRandomInt(0, 3);
+		iHairColor = zone->random.Int(0, 3);
 	}
 	else {
-		iHairColor = MakeRandomInt(0, 19);
+		iHairColor = zone->random.Int(0, 19);
 	}
 
-	uint8 iEyeColor1 = (uint8)MakeRandomInt(0, 9);
+	uint8 iEyeColor1 = (uint8)zone->random.Int(0, 9);
 	uint8 iEyeColor2 = 0;
 	if(this->GetRace() == 522) {
-		iEyeColor1 = iEyeColor2 = (uint8)MakeRandomInt(0, 11);
+		iEyeColor1 = iEyeColor2 = (uint8)zone->random.Int(0, 11);
 	}
-	else if(MakeRandomInt(1, 100) > 96) {
-		iEyeColor2 = MakeRandomInt(0, 9);
+	else if(zone->random.Int(1, 100) > 96) {
+		iEyeColor2 = zone->random.Int(0, 9);
 	}
 	else {
 		iEyeColor2 = iEyeColor1;
@@ -222,9 +222,9 @@ void Merc::GenerateAppearance() {
 	int iTattoo = 0;
 	int iDetails = 0;
 	if(this->GetRace() == 522) {
-		iHeritage = MakeRandomInt(0, 6);
-		iTattoo = MakeRandomInt(0, 7);
-		iDetails = MakeRandomInt(0, 7);
+		iHeritage = zone->random.Int(0, 6);
+		iTattoo = zone->random.Int(0, 7);
+		iDetails = zone->random.Int(0, 7);
 	}
 
 	this->luclinface = iFace;
@@ -1523,7 +1523,7 @@ void Merc::AI_Process() {
 			meleeDistance = meleeDistance * .30;
 		}
 		else {
-			meleeDistance *= (float)MakeRandomFloat(.50, .85);
+			meleeDistance *= (float)zone->random.Real(.50, .85);
 		}
 		if(IsMercCaster() && GetLevel() > 12) {
 			if(IsMercCasterCombatRange(GetTarget()))
@@ -1624,7 +1624,7 @@ void Merc::AI_Process() {
 
 					if (GetTarget() && flurrychance)
 					{
-						if(MakeRandomInt(0, 100) < flurrychance)
+						if(zone->random.Roll(flurrychance))
 						{
 							Message_StringID(MT_NPCFlurry, YOU_FLURRY);
 							Attack(GetTarget(), MainPrimary, false);
@@ -1635,7 +1635,7 @@ void Merc::AI_Process() {
 					int16 ExtraAttackChanceBonus = spellbonuses.ExtraAttackChance + itembonuses.ExtraAttackChance + aabonuses.ExtraAttackChance;
 
 					if (GetTarget() && ExtraAttackChanceBonus) {
-						if(MakeRandomInt(0, 100) < ExtraAttackChanceBonus)
+						if(zone->random.Roll(ExtraAttackChanceBonus))
 						{
 							Attack(GetTarget(), MainPrimary, false);
 						}
@@ -1669,10 +1669,8 @@ void Merc::AI_Process() {
 						int16 DWBonus = spellbonuses.DualWieldChance + itembonuses.DualWieldChance;
 						DualWieldProbability += DualWieldProbability*float(DWBonus)/ 100.0f;
 
-						float random = MakeRandomFloat(0, 1);
-
 						// Max 78% of DW
-						if (random < DualWieldProbability)
+						if (zone->random.Roll(DualWieldProbability))
 						{
 							Attack(GetTarget(), MainSecondary);     // Single attack with offhand
 
@@ -1934,7 +1932,7 @@ bool EntityList::Merc_AICheckCloseBeneficialSpells(Merc* caster, uint8 iChance, 
 		return false;
 
 	if (iChance < 100) {
-		int8 tmp = MakeRandomInt(1, 100);
+		int8 tmp = zone->random.Int(1, 100);
 		if (tmp > iChance)
 			return false;
 	}
@@ -2030,7 +2028,7 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 		return false;
 
 	if (iChance < 100) {
-		if (MakeRandomInt(0, 100) > iChance){
+		if (zone->random.Int(0, 100) > iChance){
 			return false;
 		}
 	}
@@ -2315,14 +2313,14 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 
 									if(selectedMercSpell.spellid == 0 && !tar->GetSpecialAbility(UNSTUNABLE) && !tar->IsStunned()) {
 										uint8 stunChance = 15;
-										if(MakeRandomInt(1, 100) <= stunChance) {
+										if(zone->random.Roll(stunChance)) {
 											selectedMercSpell = GetBestMercSpellForStun(this);
 										}
 									}
 
 									if(selectedMercSpell.spellid == 0) {
 										uint8 lureChance = 25;
-										if(MakeRandomInt(1, 100) <= lureChance) {
+										if(zone->random.Roll(lureChance)) {
 											selectedMercSpell = GetBestMercSpellForNukeByTargetResists(this, tar);
 										}
 									}
@@ -2742,14 +2740,14 @@ int32 Merc::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
 		int32 ratio = RuleI(Spells, BaseCritRatio); //Critical modifier is applied from spell effects only. Keep at 100 for live like criticals.
 
-		if (MakeRandomInt(1,100) <= chance){
+		if (zone->random.Roll(chance)) {
 			Critical = true;
 			ratio += itembonuses.SpellCritDmgIncrease + spellbonuses.SpellCritDmgIncrease + aabonuses.SpellCritDmgIncrease;
 			ratio += itembonuses.SpellCritDmgIncNoStack + spellbonuses.SpellCritDmgIncNoStack + aabonuses.SpellCritDmgIncNoStack;
 		}
 
-		else if (GetClass() == CASTERDPS && (GetLevel() >= RuleI(Spells, WizCritLevel)) && (MakeRandomInt(1,100) <= RuleI(Spells, WizCritChance))) {
-			ratio = MakeRandomInt(1,100); //Wizard innate critical chance is calculated seperately from spell effect and is not a set ratio.
+		else if (GetClass() == CASTERDPS && (GetLevel() >= RuleI(Spells, WizCritLevel)) && (zone->random.Roll(RuleI(Spells, WizCritChance)))) {
+			ratio = zone->random.Int(1,100); //Wizard innate critical chance is calculated seperately from spell effect and is not a set ratio.
 			Critical = true;
 		}
 
@@ -2833,7 +2831,7 @@ int32 Merc::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		if (spellbonuses.CriticalHealDecay)
 			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay);
 
-		if(chance && (MakeRandomInt(0,99) < chance)) {
+		if(chance && zone->random.Roll(chance)) {
 			Critical = true;
 			modifier = 2; //At present time no critical heal amount modifier SPA exists.
 		}
@@ -2864,7 +2862,7 @@ int32 Merc::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		if (spellbonuses.CriticalRegenDecay)
 			chance += GetDecayEffectValue(spell_id, SE_CriticalRegenDecay);
 
-		if(chance && (MakeRandomInt(0,99) < chance))
+		if(chance && zone->random.Roll(chance))
 			return (value * 2);
 	}
 
@@ -2876,7 +2874,7 @@ int32 Merc::GetActSpellCost(uint16 spell_id, int32 cost)
 	// Formula = Unknown exact, based off a random percent chance up to mana cost(after focuses) of the cast spell
 	if(this->itembonuses.Clairvoyance && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
 	{
-		int16 mana_back = this->itembonuses.Clairvoyance * MakeRandomInt(1, 100) / 100;
+		int16 mana_back = this->itembonuses.Clairvoyance * zone->random.Int(1, 100) / 100;
 		// Doesnt generate mana, so best case is a free spell
 		if(mana_back > cost)
 			mana_back = cost;
@@ -2893,7 +2891,7 @@ int32 Merc::GetActSpellCost(uint16 spell_id, int32 cost)
 
 	if(focus_redux > 0)
 	{
-		PercentManaReduction += MakeRandomFloat(1, (double)focus_redux);
+		PercentManaReduction += zone->random.Real(1, (double)focus_redux);
 	}
 
 	cost -= (cost * (PercentManaReduction / 100));
@@ -3825,17 +3823,17 @@ MercSpell Merc::GetBestMercSpellForAENuke(Merc* caster, Mob* tar) {
 		}
 
 		//check of we even want to cast an AE nuke
-		if(MakeRandomInt(1, 100) <= initialCastChance) {
+		if(zone->random.Roll(initialCastChance)) {
 
 			result = GetBestMercSpellForAERainNuke(caster, tar);
 
 			//check if we have a spell & allow for other AE nuke types
-			if(result.spellid == 0 && MakeRandomInt(1, 100) <= castChanceFalloff) {
+			if(result.spellid == 0 && zone->random.Roll(castChanceFalloff)) {
 
 				result = GetBestMercSpellForPBAENuke(caster, tar);
 
 				//check if we have a spell & allow for other AE nuke types
-				if(result.spellid == 0 && MakeRandomInt(1, 100) <= castChanceFalloff) {
+				if(result.spellid == 0 && zone->random.Roll(castChanceFalloff)) {
 
 					result = GetBestMercSpellForTargetedAENuke(caster, tar);
 				}
@@ -3879,7 +3877,7 @@ MercSpell Merc::GetBestMercSpellForTargetedAENuke(Merc* caster, Mob* tar) {
 				&& !IsPBAENukeSpell(mercSpellListItr->spellid) && CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
 					uint8 numTargets = 0;
 					if(CheckAENuke(caster, tar, mercSpellListItr->spellid, numTargets)) {
-						if(numTargets >= numTargetsCheck && MakeRandomInt(1, 100) <= castChance) {
+						if(numTargets >= numTargetsCheck && zone->random.Roll(castChance)) {
 							result.spellid = mercSpellListItr->spellid;
 							result.stance = mercSpellListItr->stance;
 							result.type = mercSpellListItr->type;
@@ -3929,7 +3927,7 @@ MercSpell Merc::GetBestMercSpellForPBAENuke(Merc* caster, Mob* tar) {
 			if(IsPBAENukeSpell(mercSpellListItr->spellid) && CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
 				uint8 numTargets = 0;
 				if(CheckAENuke(caster, caster, mercSpellListItr->spellid, numTargets)) {
-					if(numTargets >= numTargetsCheck && MakeRandomInt(1, 100) <= castChance) {
+					if(numTargets >= numTargetsCheck && zone->random.Roll(castChance)) {
 						result.spellid = mercSpellListItr->spellid;
 						result.stance = mercSpellListItr->stance;
 						result.type = mercSpellListItr->type;
@@ -3976,7 +3974,7 @@ MercSpell Merc::GetBestMercSpellForAERainNuke(Merc* caster, Mob* tar) {
 
 		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if(IsAERainNukeSpell(mercSpellListItr->spellid) && MakeRandomInt(1, 100) <= castChance && CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
+			if(IsAERainNukeSpell(mercSpellListItr->spellid) && zone->random.Roll(castChance) && CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
 				uint8 numTargets = 0;
 				if(CheckAENuke(caster, tar, mercSpellListItr->spellid, numTargets)) {
 					if(numTargets >= numTargetsCheck) {
@@ -4015,7 +4013,7 @@ MercSpell Merc::GetBestMercSpellForNuke(Merc* caster) {
 		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsPureNukeSpell(mercSpellListItr->spellid) && !IsAENukeSpell(mercSpellListItr->spellid)
-				&& MakeRandomInt(1, 100) <= castChance && CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
+				&& zone->random.Roll(castChance) && CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
 					result.spellid = mercSpellListItr->spellid;
 					result.stance = mercSpellListItr->stance;
 					result.type = mercSpellListItr->type;
@@ -4447,7 +4445,7 @@ bool Merc::CheckConfidence() {
 		ConfidenceLossChance = 25 - ( 5 * (GetTierID() - 1));
 	}
 
-	if(MakeRandomInt(0 ,100) < ConfidenceLossChance) {
+	if(zone->random.Roll(ConfidenceLossChance)) {
 		result = false;
 	}
 
@@ -4593,7 +4591,7 @@ void Merc::DoClassAttacks(Mob *target) {
 				break;
 			case TANK:{
 				if(level >= RuleI(Combat, NPCBashKickLevel)){
-					if(MakeRandomInt(0, 100) > 25) //tested on live, warrior mobs both kick and bash, kick about 75% of the time, casting doesn't seem to make a difference.
+					if(zone->random.Int(0, 100) > 25) //tested on live, warrior mobs both kick and bash, kick about 75% of the time, casting doesn't seem to make a difference.
 					{
 						DoAnim(animKick);
 						int32 dmg = 0;
@@ -4606,7 +4604,7 @@ void Merc::DoClassAttacks(Mob *target) {
 								if(RuleB(Combat, UseIntervalAC))
 									dmg = GetKickDamage();
 								else
-									dmg = MakeRandomInt(1, GetKickDamage());
+									dmg = zone->random.Int(1, GetKickDamage());
 
 							}
 						}
@@ -4628,7 +4626,7 @@ void Merc::DoClassAttacks(Mob *target) {
 								if(RuleB(Combat, UseIntervalAC))
 									dmg = GetBashDamage();
 								else
-									dmg = MakeRandomInt(1, GetBashDamage());
+									dmg = zone->random.Int(1, GetBashDamage());
 							}
 						}
 
@@ -4756,7 +4754,7 @@ const char* Merc::GetRandomName(){
 	bool valid = false;
 
 	while(!valid) {
-		int rndnum=MakeRandomInt(0, 75),n=1;
+		int rndnum=zone->random.Int(0, 75),n=1;
 		bool dlc=false;
 		bool vwl=false;
 		bool dbl=false;
@@ -4777,18 +4775,18 @@ const char* Merc::GetRandomName(){
 			rndname[0]=vowels[rndnum];
 			vwl=true;
 		}
-		int namlen=MakeRandomInt(5, 10);
+		int namlen=zone->random.Int(5, 10);
 		for (int i=n;i<namlen;i++)
 		{
 			dlc=false;
 			if (vwl)        //last char was a vowel
 			{                       // so pick a cons or cons pair
-				rndnum=MakeRandomInt(0, 62);
+				rndnum=zone->random.Int(0, 62);
 				if (rndnum>46)
 				{       // pick a cons pair
 					if (i>namlen-3) // last 2 chars in name?
 					{       // name can only end in cons pair "rk" "st" "sh" "th" "ph" "sk" "nd" or "ng"
-						rndnum=MakeRandomInt(0, 7)*2;
+						rndnum=zone->random.Int(0, 7)*2;
 					}
 					else
 					{       // pick any from the set
@@ -4806,12 +4804,12 @@ const char* Merc::GetRandomName(){
 			}
 			else
 			{               // select a vowel
-				rndname[i]=vowels[MakeRandomInt(0, 16)];
+				rndname[i]=vowels[zone->random.Int(0, 16)];
 			}
 			vwl=!vwl;
 			if (!dbl && !dlc)
 			{       // one chance at double letters in name
-				if (!MakeRandomInt(0, i+9))     // chances decrease towards end of name
+				if (!zone->random.Int(0, i+9))     // chances decrease towards end of name
 				{
 					rndname[i+1]=rndname[i];
 					dbl=true;

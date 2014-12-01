@@ -339,7 +339,7 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 	// Did we hit?
 	//
 
-	float tohit_roll = MakeRandomFloat(0, 100);
+	float tohit_roll = zone->random.Real(0, 100);
 
 	mlog(COMBAT__TOHIT, "Final hit chance: %.2f%%. Hit roll %.2f", chancetohit, tohit_roll);
 
@@ -415,7 +415,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		//Live AA - HightenedAwareness
 		int BlockBehindChance = aabonuses.BlockBehind + spellbonuses.BlockBehind + itembonuses.BlockBehind;
 
-		if (BlockBehindChance && (BlockBehindChance > MakeRandomInt(1, 100))){
+		if (BlockBehindChance && zone->random.Roll(BlockBehindChance)) {
 			bBlockFromRear = true;
 
 			if (spellbonuses.BlockBehind || itembonuses.BlockBehind)
@@ -508,7 +508,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	}
 
 	if(damage > 0){
-		roll = MakeRandomFloat(0,100);
+		roll = zone->random.Real(0,100);
 		if(roll <= RollTable[0]){
 			damage = -3;
 		}
@@ -674,7 +674,7 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 				if (acfail>100) acfail=100;
 			}
 
-			if (acfail<=0 || MakeRandomInt(0, 100)>acfail) {
+			if (acfail<=0 || zone->random.Int(0, 100)>acfail) {
 				float acreduction=1;
 				int acrandom=300;
 				if (database.GetVariable("ACreduction", tmp, 9))
@@ -693,7 +693,7 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 					damage -= (int32) (GetAC() * acreduction/100.0f);
 				}
 				if (acrandom>0) {
-					damage -= (myac * MakeRandomInt(0, acrandom) / 10000);
+					damage -= (myac * zone->random.Int(0, acrandom) / 10000);
 				}
 				if (damage<1) damage=1;
 				mlog(COMBAT__DAMAGE, "AC Damage Reduction: fail chance %d%%. Failed. Reduction %.3f%%, random %d. Resulting damage %d.", acfail, acreduction, acrandom, damage);
@@ -721,8 +721,8 @@ int32 Mob::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 		float mit_rating, float atk_rating)
 {
 	float d = 10.0;
-	float mit_roll = MakeRandomFloat(0, mit_rating);
-	float atk_roll = MakeRandomFloat(0, atk_rating);
+	float mit_roll = zone->random.Real(0, mit_rating);
+	float atk_roll = zone->random.Real(0, atk_rating);
 
 	if (atk_roll > mit_roll) {
 		float a_diff = atk_roll - mit_roll;
@@ -771,8 +771,8 @@ int32 Client::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 	dmg_bonus -= dmg_bonus * (itembonuses.MeleeMitigation / 100.0);
 	dmg_interval -= dmg_interval * spellMeleeMit;
 
-	float mit_roll = MakeRandomFloat(0, mit_rating);
-	float atk_roll = MakeRandomFloat(0, atk_rating);
+	float mit_roll = zone->random.Real(0, mit_rating);
+	float atk_roll = zone->random.Real(0, atk_rating);
 
 	if (atk_roll > mit_roll) {
 		float a_diff = atk_roll - mit_roll;
@@ -1272,7 +1272,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		if(RuleB(Combat, UseIntervalAC))
 			damage = max_hit;
 		else
-			damage = MakeRandomInt(min_hit, max_hit);
+			damage = zone->random.Int(min_hit, max_hit);
 
 		damage = mod_client_damage(damage, skillinuse, Hand, weapon, other);
 
@@ -1296,9 +1296,9 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		} else {	//we hit, try to avoid it
 			other->AvoidDamage(this, damage);
 			other->MeleeMitigation(this, damage, min_hit, opts);
-			if(damage > 0) 
+			if(damage > 0)
 				CommonOutgoingHitSuccess(other, damage, skillinuse);
-			
+
 			mlog(COMBAT__DAMAGE, "Final damage after all reductions: %d", damage);
 		}
 
@@ -1314,7 +1314,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 					OffhandRiposteFail *= -1; //Live uses a negative value for this.
 
 					if (OffhandRiposteFail &&
-						(OffhandRiposteFail > 99 || (MakeRandomInt(0, 100) < OffhandRiposteFail))) {
+						(OffhandRiposteFail > 99 || zone->random.Roll(OffhandRiposteFail))) {
 						damage = 0; // Counts as a miss
 						slippery_attack = true;
 					} else
@@ -1330,7 +1330,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		if (((damage < 0) || slippery_attack) && !bRiposte && !IsStrikethrough) { // Hack to still allow Strikethrough chance w/ Slippery Attacks AA
 			int32 bonusStrikeThrough = itembonuses.StrikeThrough + spellbonuses.StrikeThrough + aabonuses.StrikeThrough;
 
-			if(bonusStrikeThrough && (MakeRandomInt(0, 100) < bonusStrikeThrough)) {
+			if(bonusStrikeThrough && zone->random.Roll(bonusStrikeThrough)) {
 				Message_StringID(MT_StrikeThrough, STRIKETHROUGH_STRING); // You strike through your opponents defenses!
 				Attack(other, Hand, false, true); // Strikethrough only gives another attempted hit
 				return false;
@@ -1843,7 +1843,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		if(RuleB(Combat, UseIntervalAC))
 			damage = (max_dmg+eleBane);
 		else
-			damage = MakeRandomInt((min_dmg+eleBane),(max_dmg+eleBane));
+			damage = zone->random.Int((min_dmg+eleBane),(max_dmg+eleBane));
 
 
 		//check if we're hitting above our max or below it.
@@ -3438,17 +3438,16 @@ bool Client::CheckDoubleAttack(bool tripleAttack) {
 		chance *= float(100.0f+triple_bonus)/100.0f; //Apply modifiers.
 	}
 
-	if((MakeRandomFloat(0, 1) < chance))
+	if(zone->random.Roll(chance))
 		return true;
 
 	return false;
 }
 
 bool Client::CheckDoubleRangedAttack() {
-		
 	int32 chance = spellbonuses.DoubleRangedAttack + itembonuses.DoubleRangedAttack + aabonuses.DoubleRangedAttack;
 
-	if(chance && (MakeRandomInt(0, 100) < chance))
+	if(chance && zone->random.Roll(chance))
 		return true;
 
 	return false;
@@ -3465,7 +3464,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		mlog(COMBAT__DAMAGE, "Avoiding %d damage due to invulnerability.", damage);
 		damage = -5;
 	}
-	
+
 	if( spell_id != SPELL_UNKNOWN || attacker == nullptr )
 		avoidable = false;
 
@@ -3632,7 +3631,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 				}
 			}
 
-			if (stun_chance && MakeRandomInt(0, 99) < stun_chance) {
+			if (stun_chance && zone->random.Roll(stun_chance)) {
 				// Passed stun, try to resist now
 				int stun_resist = itembonuses.StunResist + spellbonuses.StunResist;
 				int frontal_stun_resist = itembonuses.FrontalStunResist + spellbonuses.FrontalStunResist;
@@ -3645,18 +3644,18 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 
 				// frontal stun check for ogres/bonuses
 				if (((GetBaseRace() == OGRE && IsClient()) ||
-						(frontal_stun_resist && MakeRandomInt(0, 99) < frontal_stun_resist)) &&
+						(frontal_stun_resist && zone->random.Roll(frontal_stun_resist))) &&
 						!attacker->BehindMob(this, attacker->GetX(), attacker->GetY())) {
 					mlog(COMBAT__HITS, "Frontal stun resisted. %d chance.", frontal_stun_resist);
 				} else {
 					// Normal stun resist check.
-					if (stun_resist && MakeRandomInt(0, 99) < stun_resist) {
+					if (stun_resist && zone->random.Roll(stun_resist)) {
 						if (IsClient())
 							Message_StringID(MT_Stun, SHAKE_OFF_STUN);
 						mlog(COMBAT__HITS, "Stun Resisted. %d chance.", stun_resist);
 					} else {
 						mlog(COMBAT__HITS, "Stunned. %d resist chance.", stun_resist);
-						Stun(MakeRandomInt(0, 2) * 1000); // 0-2 seconds
+						Stun(zone->random.Int(0, 2) * 1000); // 0-2 seconds
 					}
 				}
 			} else {
@@ -3937,7 +3936,7 @@ void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand) {
 			for (int i = 0; i < MAX_PROCS; i++) {
 				if (IsValidSpell(DefensiveProcs[i].spellID)) {
 					float chance = ProcChance * (static_cast<float>(DefensiveProcs[i].chance)/100.0f);
-					if ((MakeRandomFloat(0, 1) <= chance)) {
+					if (zone->random.Roll(chance)) {
 						ExecWeaponProc(nullptr, DefensiveProcs[i].spellID, on);
 						CheckNumHitsRemaining(NUMHIT_DefensiveSpellProcs,0,DefensiveProcs[i].base_spellID);
 					}
@@ -3999,7 +3998,7 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 	if (weapon->Proc.Type == ET_CombatProc) {
 		float WPC = ProcChance * (100.0f + // Proc chance for this weapon
 				static_cast<float>(weapon->ProcRate)) / 100.0f;
-		if (MakeRandomFloat(0, 1) <= WPC) {	// 255 dex = 0.084 chance of proc. No idea what this number should be really.
+		if (zone->random.Roll(WPC)) {	// 255 dex = 0.084 chance of proc. No idea what this number should be really.
 			if (weapon->Proc.Level > ourlevel) {
 				mlog(COMBAT__PROCS,
 						"Tried to proc (%s), but our level (%d) is lower than required (%d)",
@@ -4037,7 +4036,7 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 			if (aug->Proc.Type == ET_CombatProc) {
 				float APC = ProcChance * (100.0f + // Proc chance for this aug
 					static_cast<float>(aug->ProcRate)) / 100.0f;
-				if (MakeRandomFloat(0, 1) <= APC) {
+				if (zone->random.Roll(APC)) {
 					if (aug->Proc.Level > ourlevel) {
 						if (IsPet()) {
 							Mob *own = GetOwner();
@@ -4090,7 +4089,7 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 		if (!rangedattk) {
 			// Perma procs (AAs)
 			if (PermaProcs[i].spellID != SPELL_UNKNOWN) {
-				if (MakeRandomInt(0, 99) < PermaProcs[i].chance) { // TODO: Do these get spell bonus?
+				if (zone->random.Roll(PermaProcs[i].chance)) { // TODO: Do these get spell bonus?
 					mlog(COMBAT__PROCS,
 							"Permanent proc %d procing spell %d (%d percent chance)",
 							i, PermaProcs[i].spellID, PermaProcs[i].chance);
@@ -4105,7 +4104,7 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 			// Spell procs (buffs)
 			if (SpellProcs[i].spellID != SPELL_UNKNOWN) {
 				float chance = ProcChance * (static_cast<float>(SpellProcs[i].chance) / 100.0f);
-				if (MakeRandomFloat(0, 1) <= chance) {
+				if (zone->random.Roll(chance)) {
 					mlog(COMBAT__PROCS,
 							"Spell proc %d procing spell %d (%.2f percent chance)",
 							i, SpellProcs[i].spellID, chance);
@@ -4121,7 +4120,7 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 			// ranged spell procs (buffs)
 			if (RangedProcs[i].spellID != SPELL_UNKNOWN) {
 				float chance = ProcChance * (static_cast<float>(RangedProcs[i].chance) / 100.0f);
-					if (MakeRandomFloat(0, 1) <= chance) {
+					if (zone->random.Roll(chance)) {
 					mlog(COMBAT__PROCS,
 							"Ranged proc %d procing spell %d (%.2f percent chance)",
 							i, RangedProcs[i].spellID, chance);
@@ -4189,7 +4188,7 @@ void Mob::TryPetCriticalHit(Mob *defender, uint16 skill, int32 &damage)
 
 		critChance /= 100;
 
-		if(MakeRandomFloat(0, 1) < critChance)
+		if(zone->random.Roll(critChance))
 		{
 			critMod += GetCritDmgMob(skill) * 2; // To account for base crit mod being 200 not 100
 			damage = (damage * critMod) / 100;
@@ -4228,7 +4227,7 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 		int32 SlayRateBonus = aabonuses.SlayUndead[0] + itembonuses.SlayUndead[0] + spellbonuses.SlayUndead[0];
 		if (SlayRateBonus) {
 			float slayChance = static_cast<float>(SlayRateBonus) / 10000.0f;
-			if (MakeRandomFloat(0, 1) < slayChance) {
+			if (zone->random.Roll(slayChance)) {
 				int32 SlayDmgBonus = aabonuses.SlayUndead[1] + itembonuses.SlayUndead[1] + spellbonuses.SlayUndead[1];
 				damage = (damage * SlayDmgBonus * 2.25) / 100;
 				if (GetGender() == 1) // female
@@ -4299,12 +4298,12 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 
 		critChance /= 100;
 
-		if(MakeRandomFloat(0, 1) < critChance)
+		if(zone->random.Roll(critChance))
 		{
 			uint32 critMod = 200;
 			bool crip_success = false;
 			int32 CripplingBlowChance = GetCrippBlowChance();
-			
+
 			//Crippling Blow Chance: The percent value of the effect is applied
 			//to the your Chance to Critical. (ie You have 10% chance to critical and you
 			//have a 200% Chance to Critical Blow effect, therefore you have a 20% Chance to Critical Blow.
@@ -4312,7 +4311,7 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 				if (!IsBerserk() && !IsBerskerSPA)
 					critChance *= float(CripplingBlowChance)/100.0f;
 
-				if ((IsBerserk() || IsBerskerSPA) || MakeRandomFloat(0, 1) < critChance) {
+				if ((IsBerserk() || IsBerskerSPA) || zone->random.Roll(critChance)) {
 					critMod = 400;
 					crip_success = true;
 				}
@@ -4322,7 +4321,7 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 			damage = damage * critMod / 100;
 
 			bool deadlySuccess = false;
-			if (deadlyChance && MakeRandomFloat(0, 1) < static_cast<float>(deadlyChance) / 100.0f) {
+			if (deadlyChance && zone->random.Roll(static_cast<float>(deadlyChance) / 100.0f)) {
 				if (BehindMob(defender, GetX(), GetY())) {
 					damage *= deadlyMod;
 					deadlySuccess = true;
@@ -4358,7 +4357,7 @@ bool Mob::TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse)
 	if (defender && !defender->IsClient() && defender->GetHPRatio() < 10){
 
 		uint32 FB_Dmg = aabonuses.FinishingBlow[1] + spellbonuses.FinishingBlow[1] + itembonuses.FinishingBlow[1];
-		
+
 		uint32 FB_Level = 0;
 		FB_Level = aabonuses.FinishingBlowLvl[0];
 		if (FB_Level < spellbonuses.FinishingBlowLvl[0])
@@ -4369,7 +4368,7 @@ bool Mob::TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse)
 		//Proc Chance value of 500 = 5%
 		uint32 ProcChance = (aabonuses.FinishingBlow[0] + spellbonuses.FinishingBlow[0] + spellbonuses.FinishingBlow[0])/10;
 
-		if(FB_Level && FB_Dmg && (defender->GetLevel() <= FB_Level) && (ProcChance >= MakeRandomInt(0, 1000))){
+		if(FB_Level && FB_Dmg && (defender->GetLevel() <= FB_Level) && (ProcChance >= zone->random.Int(0, 1000))){
 			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FINISHING_BLOW, GetName());
 			DoSpecialAttackDamage(defender, skillinuse, FB_Dmg, 1, -1, 10, false, false);
 			return true;
@@ -4396,7 +4395,7 @@ void Mob::DoRiposte(Mob* defender) {
 							defender->itembonuses.DoubleRiposte;
 
 	//Live AA - Double Riposte
-	if(DoubleRipChance && (DoubleRipChance >= MakeRandomInt(0, 100))) {
+	if(DoubleRipChance && zone->random.Roll(DoubleRipChance)) {
 		mlog(COMBAT__ATTACKS, "Preforming a double riposed (%d percent chance)", DoubleRipChance);
 		defender->Attack(this, MainPrimary, true);
 		if (HasDied()) return;
@@ -4407,7 +4406,7 @@ void Mob::DoRiposte(Mob* defender) {
 
 	DoubleRipChance = defender->aabonuses.GiveDoubleRiposte[1];
 
-	if(DoubleRipChance && (DoubleRipChance >= MakeRandomInt(0, 100))) {
+	if(DoubleRipChance && zone->random.Roll(DoubleRipChance)) {
 	mlog(COMBAT__ATTACKS, "Preforming a return SPECIAL ATTACK (%d percent chance)", DoubleRipChance);
 
 		if (defender->GetClass() == MONK)
@@ -4510,7 +4509,7 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 	uint16 proc_spell_id = 0;
 	float ProcMod = 0;
 	float chance = 0;
-	
+
 	if (IsDefensive)
 		chance = on->GetSkillProcChances(ReuseTime, hand);
 	else
@@ -4519,16 +4518,14 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 	if (spellbonuses.LimitToSkill[skill]){
 
 		for(int e = 0; e < MAX_SKILL_PROCS; e++){
-		
-			if (CanProc && 
+			if (CanProc &&
 				(!Success && spellbonuses.SkillProc[e] && IsValidSpell(spellbonuses.SkillProc[e])) 
 				|| (Success && spellbonuses.SkillProcSuccess[e] && IsValidSpell(spellbonuses.SkillProcSuccess[e]))) {
 				base_spell_id = spellbonuses.SkillProc[e];
 				base_spell_id = 0;
 				ProcMod = 0;
-				
+
 				for (int i = 0; i < EFFECT_COUNT; i++) {
-				
 					if (spells[base_spell_id].effectid[i] == SE_SkillProc) {
 						proc_spell_id = spells[base_spell_id].base[i];
 						ProcMod = static_cast<float>(spells[base_spell_id].base2[i]);
@@ -4538,7 +4535,7 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 
 						if (CanProc && spells[base_spell_id].base[i] == skill && IsValidSpell(proc_spell_id)) {
 							float final_chance = chance * (ProcMod / 100.0f);
-							if (MakeRandomFloat(0, 1) <= final_chance) {
+							if (zone->random.Roll(final_chance)) {
 								ExecWeaponProc(nullptr, proc_spell_id, on);
 								CheckNumHitsRemaining(NUMHIT_OffensiveSpellProcs,0, base_spell_id);
 								CanProc = false;
@@ -4558,8 +4555,7 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 	if (itembonuses.LimitToSkill[skill]){
 		CanProc = true;
 		for(int e = 0; e < MAX_SKILL_PROCS; e++){
-		
-			if (CanProc && 
+			if (CanProc &&
 				(!Success && itembonuses.SkillProc[e] && IsValidSpell(itembonuses.SkillProc[e])) 
 				|| (Success && itembonuses.SkillProcSuccess[e] && IsValidSpell(itembonuses.SkillProcSuccess[e]))) {
 				base_spell_id = itembonuses.SkillProc[e];
@@ -4567,7 +4563,6 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 				ProcMod = 0;
 
 				for (int i = 0; i < EFFECT_COUNT; i++) {
-				
 					if (spells[base_spell_id].effectid[i] == SE_SkillProc) {
 						proc_spell_id = spells[base_spell_id].base[i];
 						ProcMod = static_cast<float>(spells[base_spell_id].base2[i]);
@@ -4577,7 +4572,7 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 
 						if (CanProc && spells[base_spell_id].base[i] == skill && IsValidSpell(proc_spell_id)) {
 							float final_chance = chance * (ProcMod / 100.0f);
-							if (MakeRandomFloat(0, 1) <= final_chance) {
+							if (zone->random.Roll(final_chance)) {
 								ExecWeaponProc(nullptr, proc_spell_id, on);
 								CanProc = false;
 								break;
@@ -4602,8 +4597,7 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 		uint32 slot = 0;
 
 		for(int e = 0; e < MAX_SKILL_PROCS; e++){
-		
-			if (CanProc && 
+			if (CanProc &&
 				(!Success && aabonuses.SkillProc[e])
 				|| (Success && aabonuses.SkillProcSuccess[e])){
 				int aaid = aabonuses.SkillProc[e];
@@ -4630,7 +4624,7 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 						if (CanProc && base1 == skill && IsValidSpell(proc_spell_id)) {
 							float final_chance = chance * (ProcMod / 100.0f);
 
-							if (MakeRandomFloat(0, 1) <= final_chance) {
+							if (zone->random.Roll(final_chance)) {
 								ExecWeaponProc(nullptr, proc_spell_id, on);
 								CanProc = false;
 								break;
@@ -4651,62 +4645,58 @@ float Mob::GetSkillProcChances(uint16 ReuseTime, uint16 hand) {
 
 	uint32 weapon_speed;
 	float ProcChance = 0;
-	
+
 	if (!ReuseTime && hand) {
-
 		weapon_speed = GetWeaponSpeedbyHand(hand);
-
 		ProcChance = static_cast<float>(weapon_speed) * (RuleR(Combat, AvgProcsPerMinute) / 60000.0f);
-		
 		if (hand != MainPrimary)
 			ProcChance /= 2;
 	}
 
-	else 
+	else
 		ProcChance = static_cast<float>(ReuseTime) * (RuleR(Combat, AvgProcsPerMinute) / 60000.0f);
 
 	return ProcChance;
 }
 
 bool Mob::TryRootFadeByDamage(int buffslot, Mob* attacker) {
- 
- 	/*Dev Quote 2010: http://forums.station.sony.com/eq/posts/list.m?topic_id=161443
- 	The Viscid Roots AA does the following: Reduces the chance for root to break by X percent.
- 	There is no distinction of any kind between the caster inflicted damage, or anyone
- 	else's damage. There is also no distinction between Direct and DOT damage in the root code.
- 
- 	/* General Mechanics
- 	- Check buffslot to make sure damage from a root does not cancel the root
- 	- If multiple roots on target, always and only checks first root slot and if broken only removes that slots root. 
- 	- Only roots on determental spells can be broken by damage.
+
+	/*Dev Quote 2010: http://forums.station.sony.com/eq/posts/list.m?topic_id=161443
+	The Viscid Roots AA does the following: Reduces the chance for root to break by X percent.
+	There is no distinction of any kind between the caster inflicted damage, or anyone
+	else's damage. There is also no distinction between Direct and DOT damage in the root code.
+
+	General Mechanics
+	- Check buffslot to make sure damage from a root does not cancel the root
+	- If multiple roots on target, always and only checks first root slot and if broken only removes that slots root. 
+	- Only roots on determental spells can be broken by damage.
 	- Root break chance values obtained from live parses.
- 	*/
- 	
+	*/
+
 	if (!attacker || !spellbonuses.Root[0] || spellbonuses.Root[1] < 0)
- 		return false;
- 
- 	if (IsDetrimentalSpell(spellbonuses.Root[1]) && spellbonuses.Root[1] != buffslot){
- 	
- 		int BreakChance = RuleI(Spells, RootBreakFromSpells);
-		
- 		BreakChance -= BreakChance*buffs[spellbonuses.Root[1]].RootBreakChance/100;
+		return false;
+
+	if (IsDetrimentalSpell(spellbonuses.Root[1]) && spellbonuses.Root[1] != buffslot){
+		int BreakChance = RuleI(Spells, RootBreakFromSpells);
+
+		BreakChance -= BreakChance*buffs[spellbonuses.Root[1]].RootBreakChance/100;
 		int level_diff = attacker->GetLevel() - GetLevel();
 
 		//Use baseline if level difference <= 1 (ie. If target is (1) level less than you, or equal or greater level)
 
 		if (level_diff == 2)
 			BreakChance = (BreakChance * 80) /100; //Decrease by 20%;
- 
+
 		else if (level_diff >= 3 && level_diff <= 20)
 			BreakChance = (BreakChance * 60) /100; //Decrease by 40%;
 
 		else if (level_diff > 21)
 			BreakChance = (BreakChance * 20) /100; //Decrease by 80%;
-		
- 		if (BreakChance < 1)
- 			BreakChance = 1;
 
-		if (MakeRandomInt(0, 99) < BreakChance) {
+		if (BreakChance < 1)
+			BreakChance = 1;
+
+		if (zone->random.Roll(BreakChance)) {
 
 			if (!TryFadeEffect(spellbonuses.Root[1])) {
 				BuffFadeBySlot(spellbonuses.Root[1]);
@@ -4727,7 +4717,7 @@ int32 Mob::RuneAbsorb(int32 damage, uint16 type)
 		for(uint32 slot = 0; slot < buff_max; slot++) {
 			if(slot == spellbonuses.MeleeRune[1] && spellbonuses.MeleeRune[0] && buffs[slot].melee_rune && IsValidSpell(buffs[slot].spellid)){
 				int melee_rune_left = buffs[slot].melee_rune;
-				
+
 				if(melee_rune_left > damage)
 				{
 					melee_rune_left -= damage;

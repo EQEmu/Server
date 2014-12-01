@@ -441,8 +441,8 @@ void Object::RandomSpawn(bool send_packet) {
 	if(!m_ground_spawn)
 		return;
 
-	m_data.x = MakeRandomFloat(m_min_x, m_max_x);
-	m_data.y = MakeRandomFloat(m_min_y, m_max_y);
+	m_data.x = zone->random.Real(m_min_x, m_max_x);
+	m_data.y = zone->random.Real(m_min_y, m_max_y);
 	respawn_timer.Disable();
 
 	if(send_packet) {

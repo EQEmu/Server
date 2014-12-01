@@ -69,6 +69,7 @@
 
 #include "../common/emu_tcp_server.h"
 #include "../common/patches/patches.h"
+#include "../common/random.h"
 #include "zoneserver.h"
 #include "console.h"
 #include "login_server.h"
@@ -97,6 +98,7 @@ UCSConnection UCSLink;
 QueryServConnection QSLink;
 LauncherList launcher_list;
 AdventureManager adventure_manager;
+EQEmu::Random emu_random;
 volatile bool RunLoops = true;
 uint32 numclients = 0;
 uint32 numzones = 0;

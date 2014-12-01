@@ -270,7 +270,7 @@ void NPC::CalculateNewWaypoint()
 		if(closest.size() != 0)
 		{
 			iter = closest.begin();
-			std::advance(iter, MakeRandomInt(0, closest.size() - 1));
+			std::advance(iter, zone->random.Int(0, closest.size() - 1));
 			cur_wp = (*iter).index;
 		}
 
@@ -278,7 +278,7 @@ void NPC::CalculateNewWaypoint()
 	}
 	case 2: //random
 	{
-		cur_wp = MakeRandomInt(0, Waypoints.size() - 1);
+		cur_wp = zone->random.Int(0, Waypoints.size() - 1);
 		if(cur_wp == old_wp)
 		{
 			if(cur_wp == (Waypoints.size() - 1))
@@ -339,7 +339,7 @@ void NPC::CalculateNewWaypoint()
 		if(closest.size() != 0)
 		{
 			iter = closest.begin();
-			std::advance(iter, MakeRandomInt(0, closest.size() - 1));
+			std::advance(iter, zone->random.Int(0, closest.size() - 1));
 			cur_wp = (*iter).index;
 		}
 		break;
@@ -412,13 +412,13 @@ void NPC::SetWaypointPause()
 		switch (pausetype)
 		{
 			case 0: //Random Half
-				AIwalking_timer->Start((cur_wp_pause - MakeRandomInt(0, cur_wp_pause-1)/2)*1000);
+				AIwalking_timer->Start((cur_wp_pause - zone->random.Int(0, cur_wp_pause-1)/2)*1000);
 				break;
 			case 1: //Full
 				AIwalking_timer->Start(cur_wp_pause*1000);
 				break;
 			case 2: //Random Full
-				AIwalking_timer->Start(MakeRandomInt(0, cur_wp_pause-1)*1000);
+				AIwalking_timer->Start(zone->random.Int(0, cur_wp_pause-1)*1000);
 				break;
 		}
 	}
