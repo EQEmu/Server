@@ -1368,9 +1368,8 @@ private:
 	void DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instance_id, float dest_x, float dest_y, float dest_z, float dest_h, int8 ignore_r);
 	void ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z, float heading, uint8 ignorerestrictions, ZoneMode zm);
 	void ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
-	float zonesummon_x;
-	float zonesummon_y;
-	float zonesummon_z;
+
+	xyz_location m_ZoneSummonLocation;
 	uint16 zonesummon_id;
 	uint8 zonesummon_ignorerestrictions;
 	ZoneMode zone_mode;

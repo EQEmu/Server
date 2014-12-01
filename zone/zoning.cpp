@@ -195,9 +195,9 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		dest_z = safe_z;
 		break;
 	case GMSummon:
-		dest_x = zonesummon_x;
-		dest_y = zonesummon_y;
-		dest_z = zonesummon_z;
+		dest_x = m_ZoneSummonLocation.m_X;
+		dest_y = m_ZoneSummonLocation.m_Y;
+		dest_z = m_ZoneSummonLocation.m_Z;
 		ignorerestrictions = 1;
 		break;
 	case GateToBindPoint:
@@ -213,9 +213,9 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		break;
 	case ZoneSolicited: //we told the client to zone somewhere, so we know where they are going.
 		//recycle zonesummon variables
-		dest_x = zonesummon_x;
-		dest_y = zonesummon_y;
-		dest_z = zonesummon_z;
+		dest_x = m_ZoneSummonLocation.m_X;
+		dest_y = m_ZoneSummonLocation.m_Y;
+		dest_z = m_ZoneSummonLocation.m_Z;
 		break;
 	case ZoneUnsolicited: //client came up with this on its own.
 		//client requested a zoning... what are the cases when this could happen?
@@ -391,9 +391,7 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 
 	//reset to unsolicited.
 	zone_mode = ZoneUnsolicited;
-	zonesummon_x = 0;
-	zonesummon_y = 0;
-	zonesummon_z = 0;
+	m_ZoneSummonLocation = xyz_location::Origin();
 	zonesummon_id = 0;
 	zonesummon_ignorerestrictions = 0;
 }
@@ -500,18 +498,14 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			SetHeading(heading);
 			break;
 		case GMSummon:
-			zonesummon_x = m_Position.m_X = x;
-			zonesummon_y = m_Position.m_Y = y;
-			zonesummon_z = m_Position.m_Z = z;
+            m_ZoneSummonLocation = m_Position = xyz_heading(x,y,z,heading);
 			SetHeading(heading);
 
 			zonesummon_id = zoneID;
 			zonesummon_ignorerestrictions = 1;
 			break;
 		case ZoneSolicited:
-			zonesummon_x = x;
-			zonesummon_y = y;
-			zonesummon_z = z;
+			m_ZoneSummonLocation = xyz_location(x,y,z);
 			SetHeading(heading);
 
 			zonesummon_id = zoneID;
@@ -533,16 +527,12 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			LogFile->write(EQEMuLog::Debug, "Player %s has died and will be zoned to bind point in zone: %s at LOC x=%f, y=%f, z=%f, heading=%f", GetName(), pZoneName, m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, m_pp.binds[0].heading);
 			break;
 		case SummonPC:
-			zonesummon_x = m_Position.m_X = x;
-			zonesummon_y = m_Position.m_Y = y;
-			zonesummon_z = m_Position.m_Z = z;
+            m_ZoneSummonLocation = m_Position = xyz_location(x, y, z);
 			SetHeading(heading);
 			break;
 		case Rewind:
 			LogFile->write(EQEMuLog::Debug, "%s has requested a /rewind from %f, %f, %f, to %f, %f, %f in %s", GetName(), m_Position.m_X, m_Position.m_Y, m_Position.m_Z, m_RewindLocation.m_X, m_RewindLocation.m_Y, m_RewindLocation.m_Z, zone->GetShortName());
-			zonesummon_x = m_Position.m_X = x;
-			zonesummon_y = m_Position.m_Y = y;
-			zonesummon_z = m_Position.m_Z = z;
+			m_ZoneSummonLocation = m_Position = xyz_location(x, y, z);
 			SetHeading(heading);
 			break;
 		default:
@@ -682,9 +672,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 		{
 			if(zm != EvacToSafeCoords && zm != ZoneToSafeCoords && zm != ZoneToBindPoint)
 			{
-				zonesummon_x = 0;
-				zonesummon_y = 0;
-				zonesummon_z = 0;
+                m_ZoneSummonLocation = xyz_location::Origin();
 				zonesummon_id = 0;
 				zonesummon_ignorerestrictions = 0;
 				zone_mode = ZoneUnsolicited;
