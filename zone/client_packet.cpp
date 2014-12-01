@@ -11699,29 +11699,29 @@ void Client::Handle_OP_SenseTraps(const EQApplicationPacket *app)
 		int uskill = GetSkill(SkillSenseTraps);
 		if ((MakeRandomInt(0, 99) + uskill) >= (MakeRandomInt(0, 99) + trap->skill*0.75))
 		{
-			float xdif = trap->x - GetX();
-			float ydif = trap->y - GetY();
-			if (xdif == 0 && ydif == 0)
+			auto diff = trap->m_Position - GetPosition();
+
+			if (diff.m_X == 0 && diff.m_Y == 0)
 				Message(MT_Skills, "You sense a trap right under your feet!");
-			else if (xdif > 10 && ydif > 10)
+			else if (diff.m_X > 10 && diff.m_Y > 10)
 				Message(MT_Skills, "You sense a trap to the NorthWest.");
-			else if (xdif < -10 && ydif > 10)
+			else if (diff.m_X < -10 && diff.m_Y > 10)
 				Message(MT_Skills, "You sense a trap to the NorthEast.");
-			else if (ydif > 10)
+			else if (diff.m_Y > 10)
 				Message(MT_Skills, "You sense a trap to the North.");
-			else if (xdif > 10 && ydif < -10)
+			else if (diff.m_X > 10 && diff.m_Y < -10)
 				Message(MT_Skills, "You sense a trap to the SouthWest.");
-			else if (xdif < -10 && ydif < -10)
+			else if (diff.m_X < -10 && diff.m_Y < -10)
 				Message(MT_Skills, "You sense a trap to the SouthEast.");
-			else if (ydif < -10)
+			else if (diff.m_Y < -10)
 				Message(MT_Skills, "You sense a trap to the South.");
-			else if (xdif > 10)
+			else if (diff.m_X > 10)
 				Message(MT_Skills, "You sense a trap to the West.");
 			else
 				Message(MT_Skills, "You sense a trap to the East.");
 			trap->detected = true;
 
-			float angle = CalculateHeadingToTarget(trap->x, trap->y);
+			float angle = CalculateHeadingToTarget(trap->m_Position.m_X, trap->m_Position.m_Y);
 
 			if (angle < 0)
 				angle = (256 + angle);

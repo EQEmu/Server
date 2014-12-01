@@ -74,6 +74,7 @@ public:
 
     const xyz_heading operator -(const xyz_location& rhs) const;
 
+    void ABS_XYZ();
     bool isOrigin() const { return m_X == 0.0f && m_Y == 0.0f && m_Z == 0.0f;}
 };
 

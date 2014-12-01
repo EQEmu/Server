@@ -67,6 +67,16 @@ const xyz_heading xyz_heading::operator -(const xyz_location& rhs) const{
     return xyz_heading(m_X - rhs.m_X, m_Y - rhs.m_Y, m_Z - rhs.m_Z, m_Heading);
 }
 
+void xyz_heading::ABS_XYZ(void) {
+    if (m_X < 0)
+        m_X = -m_X;
+
+    if (m_Y < 0)
+        m_Y = -m_Y;
+
+    if (m_Z < 0)
+        m_Z = -m_Z;
+}
 
 xyz_location::xyz_location(float x, float y, float z) :
     m_X(x),

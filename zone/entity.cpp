@@ -68,7 +68,7 @@ Entity::Entity()
 
 Entity::~Entity()
 {
-	
+
 }
 
 Client *Entity::CastToClient()
@@ -493,14 +493,14 @@ void EntityList::MobProcess()
 	while (it != mob_list.end()) {
 		uint16 id = it->first;
 		Mob *mob = it->second;
-		
+
 		size_t sz = mob_list.size();
 		bool p_val = mob->Process();
 		size_t a_sz = mob_list.size();
-		
+
 		if(a_sz > sz) {
 			//increased size can potentially screw with iterators so reset it to current value
-			//if buckets are re-orderered we may skip a process here and there but since 
+			//if buckets are re-orderered we may skip a process here and there but since
 			//process happens so often it shouldn't matter much
 			it = mob_list.find(id);
 			++it;
@@ -3106,33 +3106,25 @@ void EntityList::OpenDoorsNear(NPC *who)
 
 void EntityList::SendAlarm(Trap *trap, Mob *currenttarget, uint8 kos)
 {
-	float val2 = trap->effectvalue * trap->effectvalue;
+	float preSquareDistance = trap->effectvalue * trap->effectvalue;
 
-	auto it = npc_list.begin();
-	while (it != npc_list.end()) {
+	for (auto it = npc_list.begin();it != npc_list.end(); ++it) {
 		NPC *cur = it->second;
-		float curdist = 0;
-		float tmp = cur->GetX() - trap->x;
-		curdist += tmp*tmp;
-		tmp = cur->GetY() - trap->y;
-		curdist += tmp*tmp;
-		tmp = cur->GetZ() - trap->z;
-		curdist += tmp*tmp;
-		if (!cur->GetOwner() &&
-			/*!cur->CastToMob()->dead && */
-			!cur->IsEngaged() &&
-			curdist <= val2 )
-		{
-			if (kos) {
-				uint8 factioncon = currenttarget->GetReverseFactionCon(cur);
-				if (factioncon == FACTION_THREATENLY || factioncon == FACTION_SCOWLS) {
-					cur->AddToHateList(currenttarget,1);
-				}
-			} else {
+
+		auto diff = cur->GetPosition() - trap->m_Position;
+		float curdist = diff.m_X * diff.m_X + diff.m_Y * diff.m_Y + diff.m_Z * diff.m_Z;
+
+		if (cur->GetOwner() || cur->IsEngaged() || curdist > preSquareDistance )
+			continue;
+
+		if (kos) {
+            uint8 factioncon = currenttarget->GetReverseFactionCon(cur);
+			if (factioncon == FACTION_THREATENLY || factioncon == FACTION_SCOWLS) {
 				cur->AddToHateList(currenttarget,1);
 			}
-		}
-		++it;
+        }
+        else
+            cur->AddToHateList(currenttarget,1);
 	}
 }
 
@@ -3636,7 +3628,7 @@ int16 EntityList::CountTempPets(Mob *owner)
 		}
 		++it;
 	}
-	
+
 	owner->SetTempPetCount(count);
 
 	return count;
