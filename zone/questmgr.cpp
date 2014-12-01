@@ -2878,7 +2878,7 @@ void QuestManager::SendMail(const char *to, const char *from, const char *subjec
 uint16 QuestManager::CreateDoor(const char* model, float x, float y, float z, float heading, uint8 opentype, uint16 size)
 {
 	uint16 entid = 0; //safety check
-	entid = entity_list.CreateDoor(model, x, y, z, heading, opentype, size);
+	entid = entity_list.CreateDoor(model, xyz_heading(x, y, z, heading), opentype, size);
 	return entid;
 }
 
