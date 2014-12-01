@@ -3816,23 +3816,24 @@ void EntityList::GroupMessage(uint32 gid, const char *from, const char *message)
 	}
 }
 
-uint16 EntityList::CreateGroundObject(uint32 itemid, float x, float y, float z,
-		float heading, uint32 decay_time)
+uint16 EntityList::CreateGroundObject(uint32 itemid, const xyz_heading& position, uint32 decay_time)
 {
 	const Item_Struct *is = database.GetItem(itemid);
-	if (is) {
-		ItemInst *i = new ItemInst(is, is->MaxCharges);
-		if (i) {
-			Object *object = new Object(i, x, y, z, heading,decay_time);
-			entity_list.AddObject(object, true);
+	if (!is)
+        return 0;
 
-			safe_delete(i);
-			if (object)
-				return object->GetID();
-		}
-		return 0; // fell through itemstruct
-	}
-	return 0; // fell through everything, this is bad/incomplete from perl
+    ItemInst *i = new ItemInst(is, is->MaxCharges);
+    if (!i)
+        return 0;
+
+    Object *object = new Object(i, position.m_X, position.m_Y, position.m_Z, position.m_Heading,decay_time);
+    entity_list.AddObject(object, true);
+
+    safe_delete(i);
+    if (!object)
+        return 0;
+
+    return object->GetID();
 }
 
 uint16 EntityList::CreateGroundObjectFromModel(const char *model, const xyz_heading& position, uint8 type, uint32 decay_time)
