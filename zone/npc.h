@@ -94,7 +94,7 @@ class AA_SwarmPetInfo;
 class NPC : public Mob
 {
 public:
-	static NPC* SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z, float in_heading = 0, Client* client = 0);
+	static NPC* SpawnNPC(const char* spawncommand, const xyz_heading& position, Client* client = 0);
 	static int8 GetAILevel(bool iForceReRead = false);
 
 	NPC(const NPCType* data, Spawn2* respawn, float x, float y, float z, float heading, int iflymode, bool IsCorpse = false);

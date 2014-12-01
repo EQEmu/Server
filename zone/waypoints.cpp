@@ -161,7 +161,7 @@ void NPC::PauseWandering(int pausetime)
 	return;
 }
 
-void NPC::MoveTo(float mtx, float mty, float mtz, float mth, bool saveguardspot)
+void NPC::MoveTo(const xyz_heading& position, bool saveguardspot)
 {	// makes mob walk to specified location
 	if (IsNPC() && GetGrid() != 0)
 	{	// he is on a grid
@@ -176,29 +176,29 @@ void NPC::MoveTo(float mtx, float mty, float mtz, float mth, bool saveguardspot)
 			save_wp=cur_wp;	// save the current waypoint
 			cur_wp=-1;		// flag this move as quest controlled
 		}
-		mlog(AI__WAYPOINTS, "MoveTo (%.3f, %.3f, %.3f), pausing regular grid wandering. Grid %d, save_wp %d", mtx, mty, mtz, -GetGrid(), save_wp);
+		mlog(AI__WAYPOINTS, "MoveTo %s, pausing regular grid wandering. Grid %d, save_wp %d",to_string(static_cast<xyz_location>(position)).c_str(), -GetGrid(), save_wp);
 	}
 	else
 	{	// not on a grid
 		roamer=true;
 		save_wp=0;
 		cur_wp=-2;		// flag as quest controlled w/no grid
-		mlog(AI__WAYPOINTS, "MoveTo (%.3f, %.3f, %.3f) without a grid.", mtx, mty, mtz);
+		mlog(AI__WAYPOINTS, "MoveTo %s without a grid.", to_string(static_cast<xyz_location>(position)).c_str());
 	}
 	if (saveguardspot)
 	{
-        m_GuardPoint = xyz_heading(mtx, mty, mtz, mth);
+        m_GuardPoint = position;
 
 		if(m_GuardPoint.m_Heading == 0)
 			m_GuardPoint.m_Heading  = 0.0001;		//hack to make IsGuarding simpler
 
 		if(m_GuardPoint.m_Heading  == -1)
-			m_GuardPoint.m_Heading  = this->CalculateHeadingToTarget(mtx, mty);
+			m_GuardPoint.m_Heading  = this->CalculateHeadingToTarget(position.m_X, position.m_Y);
 
 		mlog(AI__WAYPOINTS, "Setting guard position to %s", to_string(static_cast<xyz_location>(m_GuardPoint)).c_str());
 	}
 
-    m_CurrentWayPoint = xyz_heading(mtx, mty, mtz, mth);
+    m_CurrentWayPoint = position;
 	cur_wp_pause = 0;
 	pLastFightingDelayMoving = 0;
 	if(AIwalking_timer->Enabled())
