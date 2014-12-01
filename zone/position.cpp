@@ -95,6 +95,10 @@ const xyz_location xyz_location::operator -(const xyz_location& rhs) const {
     return xyz_location(m_X - rhs.m_X, m_Y - rhs.m_Y, m_Z - rhs.m_Z);
 }
 
+const xyz_location xyz_location::operator +(const xyz_location& rhs) const {
+    return xyz_location(m_X + rhs.m_X, m_Y + rhs.m_Y, m_Z + rhs.m_Z);
+}
+
 void xyz_location::ABS_XYZ(void) {
     m_X = abs(m_X);
     m_Y = abs(m_Y);
@@ -113,3 +117,31 @@ std::string to_string(const xy_location &position){
     return StringFormat("(%.3f, %.3f)", position.m_X,position.m_Y);
 }
 
+/**
+* Determines if 'position' is within (inclusive) the axis aligned
+* box (3 dimensional) formed from the points minimum and maximum.
+*/
+bool IsWithinAxisAlignedBox(const xyz_location &position, const xyz_location &minimum, const xyz_location &maximum) {
+    auto actualMinimum = xyz_location(std::min(minimum.m_X, maximum.m_X), std::min(minimum.m_Y, maximum.m_Y),std::min(minimum.m_Z, maximum.m_Z));
+    auto actualMaximum = xyz_location(std::max(minimum.m_X, maximum.m_X), std::max(minimum.m_Y, maximum.m_Y),std::max(minimum.m_Z, maximum.m_Z));
+
+    bool xcheck = position.m_X >= actualMinimum.m_X && position.m_X <= actualMaximum.m_X;
+    bool ycheck = position.m_Y >= actualMinimum.m_Y && position.m_Y <= actualMaximum.m_Y;
+    bool zcheck = position.m_Z >= actualMinimum.m_Z && position.m_Z <= actualMaximum.m_Z;
+
+    return xcheck && ycheck && zcheck;
+}
+
+/**
+* Determines if 'position' is within (inclusive) the axis aligned
+* box (2 dimensional) formed from the points minimum and maximum.
+*/
+bool IsWithinAxisAlignedBox(const xy_location &position, const xy_location &minimum, const xy_location &maximum) {
+    auto actualMinimum = xy_location(std::min(minimum.m_X, maximum.m_X), std::min(minimum.m_Y, maximum.m_Y));
+    auto actualMaximum = xy_location(std::max(minimum.m_X, maximum.m_X), std::max(minimum.m_Y, maximum.m_Y));
+
+    bool xcheck = position.m_X >= actualMinimum.m_X && position.m_X <= actualMaximum.m_X;
+    bool ycheck = position.m_Y >= actualMinimum.m_Y && position.m_Y <= actualMaximum.m_Y;
+
+    return xcheck && ycheck;
+}

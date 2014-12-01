@@ -44,6 +44,7 @@ public:
     operator xy_location() const;
 
     const xyz_location operator -(const xyz_location& rhs) const;
+    const xyz_location operator +(const xyz_location& rhs) const;
 
     void ABS_XYZ();
     bool isOrigin() const { return m_X == 0 && m_Y == 0 && m_Z == 0;}
@@ -81,5 +82,8 @@ public:
 std::string to_string(const xyz_heading &position);
 std::string to_string(const xyz_location &position);
 std::string to_string(const xy_location &position);
+
+bool IsWithinAxisAlignedBox(const xyz_location &position, const xyz_location &minimum, const xyz_location &maximum);
+bool IsWithinAxisAlignedBox(const xy_location &position, const xy_location &minimum, const xy_location &maximum);
 
 #endif
