@@ -3225,9 +3225,7 @@ void Client::Handle_OP_AutoAttack(const EQApplicationPacket *app)
 		attack_dw_timer.Disable();
 
         m_AutoAttackPosition = xyz_heading::Origin();
-		aa_los_them.x = 0;
-		aa_los_them.y = 0;
-		aa_los_them.z = 0;
+        m_AutoAttackTargetLocation = xyz_location::Origin();
 		aa_los_them_mob = nullptr;
 	}
 	else if (app->pBuffer[0] == 1)
@@ -3242,18 +3240,14 @@ void Client::Handle_OP_AutoAttack(const EQApplicationPacket *app)
 		{
 			aa_los_them_mob = GetTarget();
 			m_AutoAttackPosition = GetPosition();
-			aa_los_them.x = aa_los_them_mob->GetX();
-			aa_los_them.y = aa_los_them_mob->GetY();
-			aa_los_them.z = aa_los_them_mob->GetZ();
+			m_AutoAttackTargetLocation = aa_los_them_mob->GetPosition();
 			los_status = CheckLosFN(aa_los_them_mob);
 			los_status_facing = IsFacingMob(aa_los_them_mob);
 		}
 		else
 		{
 			m_AutoAttackPosition = GetPosition();
-			aa_los_them.x = 0;
-			aa_los_them.y = 0;
-			aa_los_them.z = 0;
+			m_AutoAttackTargetLocation = xyz_location::Origin();
 			aa_los_them_mob = nullptr;
 			los_status = false;
 			los_status_facing = false;

@@ -357,15 +357,13 @@ bool Client::Process() {
 					m_AutoAttackPosition.m_X != GetX() ||
 					m_AutoAttackPosition.m_Y != GetY() ||
 					m_AutoAttackPosition.m_Z != GetZ() ||
-					aa_los_them.x != aa_los_them_mob->GetX() ||
-					aa_los_them.y != aa_los_them_mob->GetY() ||
-					aa_los_them.z != aa_los_them_mob->GetZ())
+					m_AutoAttackTargetLocation.m_X != aa_los_them_mob->GetX() ||
+					m_AutoAttackTargetLocation.m_Y != aa_los_them_mob->GetY() ||
+					m_AutoAttackTargetLocation.m_Z != aa_los_them_mob->GetZ())
 				{
 					aa_los_them_mob = auto_attack_target;
 					m_AutoAttackPosition = GetPosition();
-					aa_los_them.x = aa_los_them_mob->GetX();
-					aa_los_them.y = aa_los_them_mob->GetY();
-					aa_los_them.z = aa_los_them_mob->GetZ();
+					m_AutoAttackTargetLocation = aa_los_them_mob->GetPosition();
 					los_status = CheckLosFN(auto_attack_target);
 					los_status_facing = IsFacingMob(aa_los_them_mob);
 				}
@@ -380,9 +378,7 @@ bool Client::Process() {
 			{
 				aa_los_them_mob = auto_attack_target;
 				m_AutoAttackPosition = GetPosition();
-				aa_los_them.x = aa_los_them_mob->GetX();
-				aa_los_them.y = aa_los_them_mob->GetY();
-				aa_los_them.z = aa_los_them_mob->GetZ();
+				m_AutoAttackTargetLocation = aa_los_them_mob->GetPosition();
 				los_status = CheckLosFN(auto_attack_target);
 				los_status_facing = IsFacingMob(aa_los_them_mob);
 			}
