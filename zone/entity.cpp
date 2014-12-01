@@ -855,10 +855,11 @@ bool EntityList::MakeDoorSpawnPacket(EQApplicationPacket *app, Client *client)
 				strlen(door->GetDoorName()) > 3) {
 			memset(&nd, 0, sizeof(nd));
 			memcpy(nd.name, door->GetDoorName(), 32);
-			nd.xPos = door->GetX();
-			nd.yPos = door->GetY();
-			nd.zPos = door->GetZ();
-			nd.heading = door->GetHeading();
+			auto position = door->GetPosition();
+			nd.xPos = position.m_X;
+			nd.yPos = position.m_Y;
+			nd.zPos = position.m_Z;
+			nd.heading = position.m_Heading;
 			nd.incline = door->GetIncline();
 			nd.size = door->GetSize();
 			nd.doorId = door->GetDoorID();
@@ -3085,22 +3086,19 @@ void EntityList::AddHealAggro(Mob *target, Mob *caster, uint16 thedam)
 
 void EntityList::OpenDoorsNear(NPC *who)
 {
-	auto it = door_list.begin();
-	while (it != door_list.end()) {
+
+	for (auto it = door_list.begin();it != door_list.end(); ++it) {
 		Doors *cdoor = it->second;
-		if (cdoor && !cdoor->IsDoorOpen()) {
-			float zdiff = who->GetZ() - cdoor->GetZ();
-			if (zdiff < 0)
-				zdiff = 0 - zdiff;
-			float curdist = 0;
-			float tmp = who->GetX() - cdoor->GetX();
-			curdist += tmp * tmp;
-			tmp = who->GetY() - cdoor->GetY();
-			curdist += tmp * tmp;
-			if (zdiff < 10 && curdist <= 100)
-				cdoor->NPCOpen(who);
-		}
-		++it;
+		if (!cdoor || cdoor->IsDoorOpen())
+            continue;
+
+		auto diff = who->GetPosition() - cdoor->GetPosition();
+        diff.ABS_XYZ();
+
+		float curdist = diff.m_X * diff.m_X + diff.m_Y * diff.m_Y;
+
+		if (diff.m_Z * diff.m_Z < 10 && curdist <= 100)
+			cdoor->NPCOpen(who);
 	}
 }
 

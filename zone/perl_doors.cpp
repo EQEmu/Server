@@ -138,7 +138,7 @@ XS(XS_Doors_GetX)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetX();
+		RETVAL = THIS->GetPosition().m_X;
 		XSprePUSH; PUSHn((double)RETVAL);
 	}
 	XSRETURN(1);
@@ -164,7 +164,7 @@ XS(XS_Doors_GetY)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetY();
+		RETVAL = THIS->GetPosition().m_Y;
 		XSprePUSH; PUSHn((double)RETVAL);
 	}
 	XSRETURN(1);
@@ -190,7 +190,7 @@ XS(XS_Doors_GetZ)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetZ();
+		RETVAL = THIS->GetPosition().m_Z;
 		XSprePUSH; PUSHn((double)RETVAL);
 	}
 	XSRETURN(1);
@@ -216,7 +216,7 @@ XS(XS_Doors_GetHeading)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetHeading();
+		RETVAL = THIS->GetPosition().m_Heading;
 		XSprePUSH; PUSHn((double)RETVAL);
 	}
 	XSRETURN(1);

@@ -15854,47 +15854,39 @@ std::list<Bot*> EntityList::GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacte
 
 void EntityList::BotPickLock(Bot* rogue)
 {
-	auto it = door_list.begin();
 	for (auto it = door_list.begin(); it != door_list.end(); ++it) {
 		Doors *cdoor = it->second;
-		if(cdoor && !cdoor->IsDoorOpen()) {
-			float zdiff = rogue->GetZ() - cdoor->GetZ();
-			if(zdiff < 0)
-				zdiff = 0 - zdiff;
-			float curdist = 0;
-			float tmp = rogue->GetX() - cdoor->GetX();
-			curdist += (tmp * tmp);
-			tmp = rogue->GetY() - cdoor->GetY();
-			curdist += (tmp * tmp);
-			if((zdiff < 10) && (curdist <= 130)) {
-				// All rogue items with lock pick bonuses are hands or primary
-				const ItemInst* item1 = rogue->GetBotItem(MainHands);
-				const ItemInst* item2 = rogue->GetBotItem(MainPrimary);
+		if(!cdoor || cdoor->IsDoorOpen())
+            continue;
 
-				float bonus1 = 0.0f;
-				float bonus2 = 0.0f;
-				float skill = rogue->GetSkill(SkillPickLock);
+        auto diff = rogue->GetPosition() - cdoor->GetPosition();
+        diff.ABS_XYZ();
 
-				if(item1) { // Hand slot item
-					if(item1->GetItem()->SkillModType == SkillPickLock) {
-						bonus1 = skill * (((float)item1->GetItem()->SkillModValue) / 100.0f);
-					}
-				}
+		float curdist = diff.m_X * diff.m_X + diff.m_Y * diff.m_Y;
 
-				if(item2) { // Primary slot item
-					if(item2->GetItem()->SkillModType == SkillPickLock) {
-						bonus2 = skill * (((float)item2->GetItem()->SkillModValue) / 100.0f);
-					}
-				}
+        if((diff.m_Z * diff.m_Z >= 10) || (curdist > 130))
+            continue;
 
-				if((skill+bonus1+bonus2) >= cdoor->GetLockpick()) {
-					cdoor->ForceOpen(rogue);
-				}
-				else {
-					rogue->Say("I am not skilled enough for this lock.");
-				}
-			}
-		}
+        // All rogue items with lock pick bonuses are hands or primary
+        const ItemInst* item1 = rogue->GetBotItem(MainHands);
+        const ItemInst* item2 = rogue->GetBotItem(MainPrimary);
+
+        float bonus1 = 0.0f;
+        float bonus2 = 0.0f;
+        float skill = rogue->GetSkill(SkillPickLock);
+
+        if(item1) // Hand slot item
+            if(item1->GetItem()->SkillModType == SkillPickLock)
+                bonus1 = skill * (((float)item1->GetItem()->SkillModValue) / 100.0f);
+
+        if(item2) // Primary slot item
+            if(item2->GetItem()->SkillModType == SkillPickLock)
+                bonus2 = skill * (((float)item2->GetItem()->SkillModValue) / 100.0f);
+
+        if((skill+bonus1+bonus2) >= cdoor->GetLockpick())
+            cdoor->ForceOpen(rogue);
+        else
+            rogue->Say("I am not skilled enough for this lock.");
 	}
 }
 

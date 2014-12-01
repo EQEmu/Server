@@ -25,10 +25,7 @@ public:
 	char*	GetDoorName() { return door_name; }
 	uint32	GetDoorParam() { return door_param; }
 	int		GetInvertState() { return invert_state; }
-	float	GetX() { return m_Position.m_X; }
-	float	GetY() { return m_Position.m_Y; }
-	float	GetZ() { return m_Position.m_Z; }
-	float	GetHeading() { return m_Position.m_Heading; }
+	const xyz_heading GetPosition() const{ return m_Position; }
 	int		GetIncline() { return incline; }
 	bool	triggered;
 	void	SetOpenState(bool st) { isopen = st; }
