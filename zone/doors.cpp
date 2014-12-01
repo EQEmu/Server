@@ -38,7 +38,8 @@ extern WorldServer worldserver;
 
 Doors::Doors(const Door* door) :
     close_timer(5000),
-    m_Position(door->pos_x, door->pos_y, door->pos_z, door->heading)
+    m_Position(door->pos_x, door->pos_y, door->pos_z, door->heading),
+    m_Destination(door->dest_x, door->dest_y, door->dest_z, door->dest_heading)
 {
 	db_id = door->db_id;
 	door_id = door->door_id;
@@ -62,10 +63,6 @@ Doors::Doors(const Door* door) :
 
 	strn0cpy(dest_zone,door->dest_zone,32);
 	dest_instance_id = door->dest_instance_id;
-	dest_x = door->dest_x;
-	dest_y = door->dest_y;
-	dest_z = door->dest_z;
-	dest_heading = door->dest_heading;
 
 	is_ldon_door = door->is_ldon_door;
 	client_version_mask = door->client_version_mask;
@@ -73,7 +70,8 @@ Doors::Doors(const Door* door) :
 
 Doors::Doors(const char *dmodel, float dx, float dy, float dz, float dheading, uint8 dopentype, uint16 dsize) :
     close_timer(5000),
-    m_Position(dx, dy, dz, dheading)
+    m_Position(dx, dy, dz, dheading),
+    m_Destination(xyz_heading::Origin())
 {
 	db_id = database.GetDoorsCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion());
 	door_id = database.GetDoorsDBCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion());
@@ -97,10 +95,6 @@ Doors::Doors(const char *dmodel, float dx, float dy, float dz, float dheading, u
 
 	strn0cpy(dest_zone,"NONE",32);
 	dest_instance_id = 0;
-	dest_x = 0;
-	dest_y = 0;
-	dest_z = 0;
-	dest_heading = 0;
 
 	is_ldon_door = 0;
 	client_version_mask = 4294967295u;
@@ -137,7 +131,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 	//door debugging info dump
 	_log(DOORS__INFO, "%s clicked door %s (dbid %d, eqid %d) at %s", sender->GetName(), door_name, db_id, door_id, to_string(m_Position).c_str());
 	_log(DOORS__INFO, "  incline %d, opentype %d, lockpick %d, key %d, nokeyring %d, trigger %d type %d, param %d", incline, opentype, lockpick, keyitem, nokeyring, trigger_door, trigger_type, door_param);
-	_log(DOORS__INFO, "  size %d, invert %d, dest: %s (%.4f,%.4f,%.4f @%.4f)", size, invert_state, dest_zone, dest_x, dest_y, dest_z, dest_heading);
+	_log(DOORS__INFO, "  size %d, invert %d, dest: %s %s", size, invert_state, dest_zone, to_string(m_Destination).c_str());
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_MoveDoor, sizeof(MoveDoor_Struct));
 	MoveDoor_Struct* md = (MoveDoor_Struct*)outapp->pBuffer;
@@ -413,7 +407,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 			{
 				sender->KeyRingAdd(playerkey);
 			}
-			sender->MovePC(zone->GetZoneID(), zone->GetInstanceID(), dest_x, dest_y, dest_z, dest_heading);
+			sender->MovePC(zone->GetZoneID(), zone->GetInstanceID(), m_Destination.m_X, m_Destination.m_Y, m_Destination.m_Z, m_Destination.m_Heading);
 		}
 		else if (( !IsDoorOpen() || opentype == 58 ) && (keyneeded && ((keyneeded == playerkey) || sender->GetGM())))
 		{
@@ -423,22 +417,22 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 			}
 			if(database.GetZoneID(dest_zone) == zone->GetZoneID())
 			{
-				sender->MovePC(zone->GetZoneID(), zone->GetInstanceID(), dest_x, dest_y, dest_z, dest_heading);
+				sender->MovePC(zone->GetZoneID(), zone->GetInstanceID(), m_Destination.m_X, m_Destination.m_Y, m_Destination.m_Z, m_Destination.m_Heading);
 			}
 			else
 			{
-				sender->MovePC(database.GetZoneID(dest_zone), dest_instance_id, dest_x, dest_y, dest_z, dest_heading);
+				sender->MovePC(database.GetZoneID(dest_zone), dest_instance_id, m_Destination.m_X, m_Destination.m_Y, m_Destination.m_Z, m_Destination.m_Heading);
 			}
 		}
 		if (( !IsDoorOpen() || opentype == 58 ) && (!keyneeded))
 		{
 			if(database.GetZoneID(dest_zone) == zone->GetZoneID())
 			{
-				sender->MovePC(zone->GetZoneID(), zone->GetInstanceID(), dest_x, dest_y, dest_z, dest_heading);
+				sender->MovePC(zone->GetZoneID(), zone->GetInstanceID(), m_Destination.m_X, m_Destination.m_Y, m_Destination.m_Z, m_Destination.m_Heading);
 			}
 			else
 			{
-				sender->MovePC(database.GetZoneID(dest_zone), dest_instance_id, dest_x, dest_y, dest_z, dest_heading);
+				sender->MovePC(database.GetZoneID(dest_zone), dest_instance_id, m_Destination.m_X, m_Destination.m_Y, m_Destination.m_Z, m_Destination.m_Heading);
 			}
 		}
 	}
@@ -557,8 +551,8 @@ void Doors::DumpDoor(){
 		"opentype:%i guild_id:%i lockpick:%i keyitem:%i nokeyring:%i trigger_door:%i trigger_type:%i door_param:%i open:%s",
 		opentype, guild_id, lockpick, keyitem, nokeyring, trigger_door, trigger_type, door_param, (isopen) ? "open":"closed");
 	LogFile->write(EQEMuLog::Debug,
-		"dest_zone:%s dest_x:%f dest_y:%f dest_z:%f dest_heading:%f",
-		dest_zone, dest_x, dest_y, dest_z, dest_heading);
+		"dest_zone:%s destination:%s ",
+		dest_zone, to_string(m_Destination).c_str());
 }
 
 int32 ZoneDatabase::GetDoorsCount(uint32* oMaxID, const char *zone_name, int16 version) {

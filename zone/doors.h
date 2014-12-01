@@ -50,10 +50,10 @@ public:
 	void	SetEntityID(uint32 entity) { entity_id = entity; }
 
 	void	DumpDoor();
-	float	GetDestX() { return dest_x; }
-	float	GetDestY() { return dest_y; }
-	float	GetDestZ() { return dest_z; }
-	float	GetDestHeading() { return dest_heading; }
+	float	GetDestX() { return m_Destination.m_X; }
+	float	GetDestY() { return m_Destination.m_Y; }
+	float	GetDestZ() { return m_Destination.m_Z; }
+	float	GetDestHeading() { return m_Destination.m_Heading; }
 
 	uint8	IsLDoNDoor() { return is_ldon_door; }
 	uint32	GetClientVersionMask() { return client_version_mask; }
@@ -99,10 +99,7 @@ private:
 
 	char	dest_zone[16];
 	int		dest_instance_id;
-	float	dest_x;
-	float	dest_y;
-	float	dest_z;
-	float	dest_heading;
+	xyz_heading m_Destination;
 
 	uint8	is_ldon_door;
 	uint32	client_version_mask;
