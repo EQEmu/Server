@@ -45,11 +45,7 @@ Mob::Mob(const char* in_name,
 		uint32		in_npctype_id,
 		float		in_size,
 		float		in_runspeed,
-		float		in_heading,
-		float		in_x_pos,
-		float		in_y_pos,
-		float		in_z_pos,
-
+		const xyz_heading& position,
 		uint8		in_light,
 		uint8		in_texture,
 		uint8		in_helmtexture,
@@ -101,8 +97,8 @@ Mob::Mob(const char* in_name,
 		m_FearWalkTarget(-999999.0f,-999999.0f,-999999.0f),
 		m_TargetLocation(xyz_location::Origin()),
 		m_TargetV(xyz_location::Origin()),
-		flee_timer(FLEE_CHECK_TIMER)
-
+		flee_timer(FLEE_CHECK_TIMER),
+		m_Position(position)
 {
 	targeted = 0;
 	tar_ndx=0;
@@ -149,10 +145,6 @@ Mob::Mob(const char* in_name,
 	if (runspeed < 0 || runspeed > 20)
 		runspeed = 1.25f;
 
-	m_Position.m_Heading = in_heading;
-	m_Position.m_X = in_x_pos;
-	m_Position.m_Y = in_y_pos;
-	m_Position.m_Z = in_z_pos;
 	light		= in_light;
 	texture		= in_texture;
 	helmtexture	= in_helmtexture;

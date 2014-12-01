@@ -43,7 +43,7 @@ extern Zone* zone;
 Beacon::Beacon(Mob *at_mob, int lifetime)
 :Mob
 (
-	nullptr, nullptr, 0, 0, 0, INVISIBLE_MAN, 0, BT_NoTarget, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, 0, 0, 0, INVISIBLE_MAN, 0, BT_NoTarget, 0, 0, 0, 0, 0, at_mob->GetPosition(), 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 ),
 		remove_timer(lifetime),
@@ -56,12 +56,6 @@ Beacon::Beacon(Mob *at_mob, int lifetime)
 	resist_adjust = 0;
 	spell_iterations = 0;
 	caster_id = 0;
-
-	// copy location
-	m_Position.m_X = at_mob->GetX();
-	m_Position.m_Y = at_mob->GetY();
-	m_Position.m_Z = at_mob->GetZ();
-	m_Position.m_Heading = at_mob->GetHeading();
 
 	if(lifetime)
 	{
