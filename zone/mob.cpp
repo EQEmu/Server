@@ -2234,9 +2234,7 @@ bool Mob::HateSummon() {
 				if(target && target->IsBot()) {
 					// set pre summoning info to return to (to get out of melee range for caster)
 					target->CastToBot()->SetHasBeenSummoned(true);
-					target->CastToBot()->SetPreSummonX(target->GetX());
-					target->CastToBot()->SetPreSummonY(target->GetY());
-					target->CastToBot()->SetPreSummonZ(target->GetZ());
+					target->CastToBot()->SetPreSummonLocation(target->GetPosition());
 
 				}
 #endif //BOTS

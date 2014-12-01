@@ -533,9 +533,7 @@ public:
 	void SetSpellRecastTimer(int timer_index, int32 recast_delay);
 	void SetDisciplineRecastTimer(int timer_index, int32 recast_delay);
 	void SetHasBeenSummoned(bool s);
-	void SetPreSummonX(float x) { m_PreSummonLocation.m_X = x; }
-	void SetPreSummonY(float y) { m_PreSummonLocation.m_Y = y; }
-	void SetPreSummonZ(float z) { m_PreSummonLocation.m_Z = z; }
+	void SetPreSummonLocation(const xyz_location& location) { m_PreSummonLocation = location; }
 	void SetGroupMessagesOn(bool groupMessagesOn) { _groupMessagesOn = groupMessagesOn; }
 	void SetInHealRotation( bool inRotation ) { _isInHealRotation = inRotation; }
 	void SetHealRotationActive( bool isActive ) { _isHealRotationActive = isActive; }
