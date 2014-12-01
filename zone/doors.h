@@ -50,10 +50,7 @@ public:
 	void	SetEntityID(uint32 entity) { entity_id = entity; }
 
 	void	DumpDoor();
-	float	GetDestX() { return m_Destination.m_X; }
-	float	GetDestY() { return m_Destination.m_Y; }
-	float	GetDestZ() { return m_Destination.m_Z; }
-	float	GetDestHeading() { return m_Destination.m_Heading; }
+	const xyz_heading GetDestination() const { return m_Destination; }
 
 	uint8	IsLDoNDoor() { return is_ldon_door; }
 	uint32	GetClientVersionMask() { return client_version_mask; }
