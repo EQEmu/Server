@@ -6422,8 +6422,11 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	if(summon_count > MAX_SWARM_PETS)
 		summon_count = MAX_SWARM_PETS;
 
-	static const float swarm_pet_x[MAX_SWARM_PETS] = { 5, -5, 5, -5, 10, -10, 10, -10, 8, -8, 8, -8 };
-	static const float swarm_pet_y[MAX_SWARM_PETS] = { 5, 5, -5, -5, 10, 10, -10, -10, 8, 8, -8, -8 };
+	static const xy_location swarmPetLocations[MAX_SWARM_PETS] = {
+        {5, 5}, {-5, 5}, {5, -5}, {-5, -5},
+		{10, 10}, {-10, 10}, {10, -10}, {-10, -10},
+        {8, 8}, {-8, 8}, {8, -8}, {-8, -8}
+    };
 
 	while(summon_count > 0) {
 		NPCType *npc_dup = nullptr;
@@ -6435,8 +6438,8 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 		NPC* npca = new NPC(
 				(npc_dup!=nullptr)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
 				0,
-				GetX()+swarm_pet_x[summon_count], GetY()+swarm_pet_y[summon_count],
-				GetZ(), GetHeading(), FlyMode3);
+				GetPosition()+swarmPetLocations[summon_count],
+				FlyMode3);
 
 		if(!npca->GetSwarmInfo()){
 			AA_SwarmPetInfo* nSI = new AA_SwarmPetInfo;

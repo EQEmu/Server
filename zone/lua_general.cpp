@@ -124,7 +124,7 @@ void register_event(std::string package_name, std::string name, int evt, luabind
 	e.encounter_name = name;
 	e.lua_reference = func;
 	e.event_id = static_cast<QuestEventID>(evt);
-	
+
 	auto liter = lua_encounter_events_registered.find(package_name);
 	if(liter == lua_encounter_events_registered.end()) {
 		std::list<lua_registered_event> elist;
@@ -201,7 +201,7 @@ void unregister_player_event(int evt) {
 void register_item_event(std::string name, int evt, int item_id, luabind::adl::object func) {
 	std::string package_name = "item_";
 	package_name += std::to_string(static_cast<long long>(item_id));
-	
+
 	if(luabind::type(func) == LUA_TFUNCTION) {
 		register_event(package_name, name, evt, func);
 	}
@@ -1036,7 +1036,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		int condition_min_value = 0;
 		bool enabled = true;
 		int animation = 0;
-		
+
 		auto cur = table["spawn2_id"];
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
@@ -1284,7 +1284,7 @@ void lua_create_npc(luabind::adl::object table, float x, float y, float z, float
 	if(luabind::type(table) != LUA_TTABLE) {
 		return;
 	}
-	
+
 	NPCType* npc_type = new NPCType;
 	memset(npc_type, 0, sizeof(NPCType));
 
@@ -1391,7 +1391,7 @@ void lua_create_npc(luabind::adl::object table, float x, float y, float z, float
 	LuaCreateNPCParse(raid_target, bool, false);
 	LuaCreateNPCParse(probability, uint8, 0);
 
-	NPC* npc = new NPC(npc_type, nullptr, x, y, z, heading, FlyMode3);
+	NPC* npc = new NPC(npc_type, nullptr, xyz_heading(x, y, z, heading), FlyMode3);
 	npc->GiveNPCTypeData(npc_type);
 	entity_list.AddNPC(npc);
 }

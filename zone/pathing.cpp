@@ -587,8 +587,8 @@ void PathManager::SpawnPathNodes()
 		npc_type->CHA = 150;
 
 		npc_type->findable = 1;
-
-		NPC* npc = new NPC(npc_type, 0, PathNodes[i].v.x, PathNodes[i].v.y, PathNodes[i].v.z, 0, FlyMode1);
+        auto position = xyz_heading(PathNodes[i].v.x, PathNodes[i].v.y, PathNodes[i].v.z, 0.0f);
+		NPC* npc = new NPC(npc_type, nullptr, position, FlyMode1);
 		npc->GiveNPCTypeData(npc_type);
 
 		entity_list.AddNPC(npc, true, true);
@@ -1578,7 +1578,8 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 		npc_type->CHA = 150;
 		npc_type->findable = 1;
 
-		NPC* npc = new NPC(npc_type, 0, new_node.v.x, new_node.v.y, new_node.v.z, 0, FlyMode1);
+        auto position = xyz_heading(new_node.v.x, new_node.v.y, new_node.v.z, 0.0f);
+		NPC* npc = new NPC(npc_type, nullptr, position, FlyMode1);
 		npc->GiveNPCTypeData(npc_type);
 		entity_list.AddNPC(npc, true, true);
 
@@ -1638,7 +1639,8 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 		npc_type->CHA = 150;
 		npc_type->findable = 1;
 
-		NPC* npc = new NPC(npc_type, 0, new_node.v.x, new_node.v.y, new_node.v.z, 0, FlyMode1);
+        auto position = xyz_heading(new_node.v.x, new_node.v.y, new_node.v.z, 0.0f);
+		NPC* npc = new NPC(npc_type, nullptr, position, FlyMode1);
 		npc->GiveNPCTypeData(npc_type);
 		entity_list.AddNPC(npc, true, true);
 

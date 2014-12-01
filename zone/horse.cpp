@@ -29,7 +29,7 @@ std::map<uint16, const NPCType *> Horse::horse_types;
 LinkedList<NPCType *> horses_auto_delete;
 
 Horse::Horse(Client *_owner, uint16 spell_id, float x, float y, float z, float heading)
- : NPC(GetHorseType(spell_id), nullptr, x, y, z, heading, FlyMode3)
+ : NPC(GetHorseType(spell_id), nullptr, xyz_heading(x, y, z, heading), FlyMode3)
 {
 	//give the horse its proper name.
 	strn0cpy(name, _owner->GetCleanName(), 55);

@@ -217,7 +217,7 @@ bool Spawn2::Process() {
 			database.UpdateSpawn2Timeleft(spawn2_id, zone->GetInstanceID(), 0);
 
 		currentnpcid = npcid;
-		NPC* npc = new NPC(tmp, this, x, y, z, heading, FlyMode3);
+		NPC* npc = new NPC(tmp, this, xyz_heading(x, y, z, heading), FlyMode3);
 
 		npc->mod_prespawn(this);
 

@@ -2489,7 +2489,7 @@ void command_npctypespawn(Client *c, const Seperator *sep)
 		const NPCType* tmp = 0;
 		if ((tmp = database.GetNPCType(atoi(sep->arg[1])))) {
 			//tmp->fixedZ = 1;
-			NPC* npc = new NPC(tmp, 0, c->GetX(), c->GetY(), c->GetZ(), c->GetHeading(), FlyMode3);
+			NPC* npc = new NPC(tmp, 0, c->GetPosition(), FlyMode3);
 			if (npc && sep->IsNumber(2))
 				npc->SetNPCFactionID(atoi(sep->arg[2]));
 

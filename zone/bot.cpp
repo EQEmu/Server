@@ -9,7 +9,7 @@
 extern volatile bool ZoneLoaded;
 
 // This constructor is used during the bot create command
-Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, 0, 0, 0, 0, 0, 0, false), rest_timer(1) {
+Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, xyz_heading::Origin(), 0, false), rest_timer(1) {
 	if(botOwner) {
 		this->SetBotOwner(botOwner);
 		this->_botOwnerCharacterID = botOwner->CharacterID();
@@ -99,7 +99,7 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, 0, 0, 0, 0, 
 }
 
 // This constructor is used when the bot is loaded out of the database
-Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType npcTypeData) : NPC(&npcTypeData, 0, 0, 0, 0, 0, 0, false), rest_timer(1) {
+Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType npcTypeData) : NPC(&npcTypeData, nullptr, xyz_heading::Origin(), 0, false), rest_timer(1) {
 	this->_botOwnerCharacterID = botOwnerCharacterID;
 
 	if(this->_botOwnerCharacterID > 0) {

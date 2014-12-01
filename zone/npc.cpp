@@ -54,7 +54,7 @@ extern EntityList entity_list;
 
 #include "quest_parser_collection.h"
 
-NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float heading, int iflymode, bool IsCorpse)
+NPC::NPC(const NPCType* d, Spawn2* in_respawn, const xyz_heading& position, int iflymode, bool IsCorpse)
 : Mob(d->name,
 		d->lastname,
 		d->max_hp,
@@ -68,10 +68,10 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 		d->npc_id,
 		d->size,
 		d->runspeed,
-		heading,
-		x,
-		y,
-		z,
+		position.m_Heading,
+		position.m_X,
+		position.m_Y,
+		position.m_Z,
 		d->light,
 		d->texture,
 		d->helmtexture,
@@ -114,7 +114,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	sendhpupdate_timer(1000),
 	enraged_timer(1000),
 	taunt_timer(TauntReuseTime * 1000),
-	m_SpawnPoint(x,y,z,heading),
+	m_SpawnPoint(position),
 	m_GuardPoint(-1,-1,-1,0),
 	m_GuardPointSaved(0,0,0,0)
 {
@@ -932,7 +932,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const xyz_heading& position, Client
 		npc_type->prim_melee_type = 28;
 		npc_type->sec_melee_type = 28;
 
-		NPC* npc = new NPC(npc_type, 0, position.m_X, position.m_Y, position.m_Z, position.m_Heading, FlyMode3);
+		NPC* npc = new NPC(npc_type, nullptr, position, FlyMode3);
 		npc->GiveNPCTypeData(npc_type);
 
 		entity_list.AddNPC(npc);

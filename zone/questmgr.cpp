@@ -245,7 +245,7 @@ Mob* QuestManager::spawn2(int npc_type, int grid, int unused, float x, float y, 
 	const NPCType* tmp = 0;
 	if (tmp = database.GetNPCType(npc_type))
 	{
-		NPC* npc = new NPC(tmp, 0, x, y, z, heading, FlyMode3);
+		NPC* npc = new NPC(tmp, nullptr, xyz_heading(x, y, z, heading), FlyMode3);
 		npc->AddLootTable();
 		entity_list.AddNPC(npc,true,true);
 		if(grid > 0)
@@ -267,7 +267,7 @@ Mob* QuestManager::unique_spawn(int npc_type, int grid, int unused, float x, flo
 	const NPCType* tmp = 0;
 	if (tmp = database.GetNPCType(npc_type))
 	{
-		NPC* npc = new NPC(tmp, 0, x, y, z, heading, FlyMode3);
+		NPC* npc = new NPC(tmp, nullptr, xyz_heading(x, y, z, heading), FlyMode3);
 		npc->AddLootTable();
 		entity_list.AddNPC(npc,true,true);
 		if(grid > 0)
@@ -340,8 +340,8 @@ Mob* QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 		database.UpdateSpawn2Timeleft(spawn2_id, zone->GetInstanceID(), 0);
 		found_spawn->SetCurrentNPCID(npcid);
 
-		NPC* npc = new NPC(tmp, found_spawn, found_spawn->GetX(), found_spawn->GetY(), found_spawn->GetZ(),
-			found_spawn->GetHeading(), FlyMode3);
+        auto position = xyz_heading(found_spawn->GetX(), found_spawn->GetY(), found_spawn->GetZ(), found_spawn->GetHeading());
+		NPC* npc = new NPC(tmp, found_spawn, position, FlyMode3);
 
 		found_spawn->SetNPCPointer(npc);
 		npc->AddLootTable();
@@ -1600,26 +1600,20 @@ void QuestManager::setnextinchpevent(int at) {
 		owner->SetNextIncHPEvent(at);
 }
 
-void QuestManager::respawn(int npc_type, int grid) {
+void QuestManager::respawn(int npcTypeID, int grid) {
 	QuestManagerCurrentQuestVars();
 	if (!owner || !owner->IsNPC())
 		return;
-	float x,y,z,h;
-
-	x = owner->GetX();
-	y = owner->GetY();
-	z = owner->GetZ();
-	h = owner->GetHeading();
 
 	running_quest e = quests_running_.top();
 	e.depop_npc = true;
 	quests_running_.pop();
 	quests_running_.push(e);
 
-	const NPCType* tmp = 0;
-	if ((tmp = database.GetNPCType(npc_type)))
+	const NPCType* npcType = nullptr;
+	if ((npcType = database.GetNPCType(npcTypeID)))
 	{
-		owner = new NPC(tmp, 0, x, y, z, h, FlyMode3);
+		owner = new NPC(npcType, nullptr, owner->GetPosition(), FlyMode3);
 		owner->CastToNPC()->AddLootTable();
 		entity_list.AddNPC(owner->CastToNPC(),true,true);
 		if(grid > 0)
