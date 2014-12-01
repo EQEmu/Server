@@ -23,9 +23,7 @@
 class Client;
 class Seperator;
 
-#include "../common/seperator.h"
-#include "../common/eq_stream.h"
-#include "client.h"
+#include "../common/types.h"
 
 #define	COMMAND_CHAR	'#'
 #define CMDALIASES	5

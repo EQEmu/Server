@@ -50,11 +50,16 @@
 #include "../common/rulesys.h"
 #include "../common/serverinfo.h"
 #include "../common/string_util.h"
+
 #include "client_logs.h"
+#include "command.h"
 #include "guild_mgr.h"
 #include "map.h"
 #include "pathing.h"
+#include "qglobals.h"
 #include "queryserv.h"
+#include "quest_parser_collection.h"
+#include "string_ids.h"
 #include "titles.h"
 #include "water_map.h"
 #include "worldserver.h"
@@ -64,11 +69,7 @@ extern WorldServer worldserver;
 extern TaskManager *taskmanager;
 void CatchSignal(int sig_num);
 
-#include "quest_parser_collection.h"
 
-#include "string_ids.h"
-#include "command.h"
-#include "qglobals.h"
 
 //struct cl_struct *commandlist;	// the actual linked list of commands
 int commandcount;								// how many commands we have
