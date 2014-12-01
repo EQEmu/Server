@@ -4540,7 +4540,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
         m_RewindLocation = xyz_location(ppu->x_pos, ppu->y_pos, ppu->z_pos);
 
 	if(proximity_timer.Check()) {
-		entity_list.ProcessMove(this, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+		entity_list.ProcessMove(this, xyz_location(ppu->x_pos, ppu->y_pos, ppu->z_pos));
 		if(RuleB(TaskSystem, EnableTaskSystem) && RuleB(TaskSystem,EnableTaskProximity))
 			ProcessTaskProximities(ppu->x_pos, ppu->y_pos, ppu->z_pos);
 		proximity_x = ppu->x_pos;

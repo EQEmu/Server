@@ -198,7 +198,7 @@ public:
 	void	MobProcess();
 	void	TrapProcess();
 	void	BeaconProcess();
-	void	ProcessMove(Client *c, float x, float y, float z);
+	void	ProcessMove(Client *c, const xyz_location& location);
 	void	ProcessMove(NPC *n, float x, float y, float z);
 	void	AddArea(int id, int type, float min_x, float max_x, float min_y, float max_y, float min_z, float max_z);
 	void	RemoveArea(int id);

@@ -396,7 +396,7 @@ public:
 	inline float ProximityX() const { return(proximity_x); }
 	inline float ProximityY() const { return(proximity_y); }
 	inline float ProximityZ() const { return(proximity_z); }
-	inline void ClearAllProximities() { entity_list.ProcessMove(this, FLT_MAX, FLT_MAX, FLT_MAX); proximity_x = FLT_MAX; proximity_y = FLT_MAX; proximity_z = FLT_MAX; }
+	inline void ClearAllProximities() { entity_list.ProcessMove(this, xyz_location(FLT_MAX, FLT_MAX, FLT_MAX)); proximity_x = FLT_MAX; proximity_y = FLT_MAX; proximity_z = FLT_MAX; }
 
 	/*
 			Begin client modifiers

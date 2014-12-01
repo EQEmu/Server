@@ -3160,7 +3160,7 @@ struct quest_proximity_event {
 	int area_type;
 };
 
-void EntityList::ProcessMove(Client *c, float x, float y, float z)
+void EntityList::ProcessMove(Client *c, const xyz_location& location)
 {
 	float last_x = c->ProximityX();
 	float last_y = c->ProximityY();
@@ -3182,9 +3182,9 @@ void EntityList::ProcessMove(Client *c, float x, float y, float z)
 				last_z < l->min_z || last_z > l->max_z) {
 			old_in = false;
 		}
-		if (x < l->min_x || x > l->max_x ||
-				y < l->min_y || y > l->max_y ||
-				z < l->min_z || z > l->max_z) {
+		if (location.m_X < l->min_x || location.m_X > l->max_x ||
+				location.m_Y < l->min_y || location.m_Y > l->max_y ||
+				location.m_Z < l->min_z || location.m_Z > l->max_z) {
 			new_in = false;
 		}
 
@@ -3217,9 +3217,9 @@ void EntityList::ProcessMove(Client *c, float x, float y, float z)
 			old_in = false;
 		}
 
-		if (x < a.min_x || x > a.max_x ||
-				y < a.min_y || y > a.max_y ||
-				z < a.min_z || z > a.max_z ) {
+		if (location.m_X < a.min_x || location.m_X > a.max_x ||
+				location.m_Y < a.min_y || location.m_Y > a.max_y ||
+				location.m_Z < a.min_z || location.m_Z > a.max_z ) {
 			new_in = false;
 		}
 
