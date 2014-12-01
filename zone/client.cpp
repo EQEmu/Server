@@ -157,7 +157,8 @@ Client::Client(EQStreamInterface* ieqs)
 	ItemTickTimer(10000),
 	ItemQuestTimer(500),
 	m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
-	m_ZoneSummonLocation(-2.0f,-2.0f,-2.0f)
+	m_ZoneSummonLocation(-2.0f,-2.0f,-2.0f),
+	m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f)
 {
 	for(int cf=0; cf < _FilterCount; cf++)
 		ClientFilters[cf] = FilterShow;
@@ -275,10 +276,6 @@ Client::Client(EQStreamInterface* ieqs)
 	m_AssistExemption = 0;
 	m_CheatDetectMoved = false;
 	CanUseReport = true;
-	aa_los_me.x = 0;
-	aa_los_me.y = 0;
-	aa_los_me.z = 0;
-	aa_los_me_heading = 0;
 	aa_los_them.x = 0;
 	aa_los_them.y = 0;
 	aa_los_them.z = 0;

@@ -354,38 +354,32 @@ bool Client::Process() {
 			if(aa_los_them_mob)
 			{
 				if(auto_attack_target != aa_los_them_mob ||
-					aa_los_me.x != GetX() ||
-					aa_los_me.y != GetY() ||
-					aa_los_me.z != GetZ() ||
+					m_AutoAttackPosition.m_X != GetX() ||
+					m_AutoAttackPosition.m_Y != GetY() ||
+					m_AutoAttackPosition.m_Z != GetZ() ||
 					aa_los_them.x != aa_los_them_mob->GetX() ||
 					aa_los_them.y != aa_los_them_mob->GetY() ||
 					aa_los_them.z != aa_los_them_mob->GetZ())
 				{
 					aa_los_them_mob = auto_attack_target;
-					aa_los_me.x = GetX();
-					aa_los_me.y = GetY();
-					aa_los_me.z = GetZ();
+					m_AutoAttackPosition = GetPosition();
 					aa_los_them.x = aa_los_them_mob->GetX();
 					aa_los_them.y = aa_los_them_mob->GetY();
 					aa_los_them.z = aa_los_them_mob->GetZ();
 					los_status = CheckLosFN(auto_attack_target);
-					aa_los_me_heading = GetHeading();
 					los_status_facing = IsFacingMob(aa_los_them_mob);
 				}
 				// If only our heading changes, we can skip the CheckLosFN call
 				// but above we still need to update los_status_facing
-				if (aa_los_me_heading != GetHeading()) {
-					aa_los_me_heading = GetHeading();
+				if (m_AutoAttackPosition.m_Heading != GetHeading()) {
+					m_AutoAttackPosition.m_Heading = GetHeading();
 					los_status_facing = IsFacingMob(aa_los_them_mob);
 				}
 			}
 			else
 			{
 				aa_los_them_mob = auto_attack_target;
-				aa_los_me.x = GetX();
-				aa_los_me.y = GetY();
-				aa_los_me.z = GetZ();
-				aa_los_me_heading = GetHeading();
+				m_AutoAttackPosition = GetPosition();
 				aa_los_them.x = aa_los_them_mob->GetX();
 				aa_los_them.y = aa_los_them_mob->GetY();
 				aa_los_them.z = aa_los_them_mob->GetZ();

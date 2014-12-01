@@ -1211,11 +1211,10 @@ protected:
 
 	Mob* bind_sight_target;
 
-	Map::Vertex aa_los_me;
+	xyz_heading m_AutoAttackPosition;
 	Map::Vertex aa_los_them;
 	Mob *aa_los_them_mob;
 	bool los_status;
-	float aa_los_me_heading;
 	bool los_status_facing;
 	QGlobalCache *qGlobals;
 
