@@ -1,5 +1,7 @@
-#include "position.h"
 #include <string>
+#include <cmath>
+
+#include "position.h"
 #include "../common/string_util.h"
 
 xy_location::xy_location(float x, float y) :
@@ -68,14 +70,9 @@ const xyz_heading xyz_heading::operator -(const xyz_location& rhs) const{
 }
 
 void xyz_heading::ABS_XYZ(void) {
-    if (m_X < 0)
-        m_X = -m_X;
-
-    if (m_Y < 0)
-        m_Y = -m_Y;
-
-    if (m_Z < 0)
-        m_Z = -m_Z;
+    m_X = abs(m_X);
+    m_Y = abs(m_Y);
+    m_Z = abs(m_Z);
 }
 
 xyz_location::xyz_location(float x, float y, float z) :
@@ -99,14 +96,9 @@ const xyz_location xyz_location::operator -(const xyz_location& rhs) const {
 }
 
 void xyz_location::ABS_XYZ(void) {
-    if (m_X < 0)
-        m_X = -m_X;
-
-    if (m_Y < 0)
-        m_Y = -m_Y;
-
-    if (m_Z < 0)
-        m_Z = -m_Z;
+    m_X = abs(m_X);
+    m_Y = abs(m_Y);
+    m_Z = abs(m_Z);
 }
 
 std::string to_string(const xyz_heading &position) {
