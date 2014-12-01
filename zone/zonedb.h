@@ -117,9 +117,7 @@ struct ZoneSpellsBlocked {
 	uint32 spellid;
 	int8 type;
 	xyz_location m_Location;
-	float xdiff;
-	float ydiff;
-	float zdiff;
+	xyz_location m_Difference;
 	char message[256];
 };
 
