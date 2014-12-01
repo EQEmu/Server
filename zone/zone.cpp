@@ -1957,12 +1957,8 @@ const char* Zone::GetSpellBlockedMessage(uint32 spell_id, const xyz_location& lo
 				}
 				case 2:
 				{
-					if((( location.m_X > (blocked_spells[x].m_Location.m_X-blocked_spells[x].m_Difference.m_X)) && (location.m_X < (blocked_spells[x].m_Location.m_X+blocked_spells[x].m_Difference.m_X))) &&
-						(( location.m_Y > (blocked_spells[x].m_Location.m_Y-blocked_spells[x].m_Difference.m_Y)) && (location.m_Y < (blocked_spells[x].m_Location.m_Y+blocked_spells[x].m_Difference.m_Y))) &&
-						(( location.m_Z > (blocked_spells[x].m_Location.m_Z-blocked_spells[x].m_Difference.m_Z)) && (location.m_Z < (blocked_spells[x].m_Location.m_Z+blocked_spells[x].m_Difference.m_Z))))
-					{
+					if(!IsWithinAxisAlignedBox(location, blocked_spells[x].m_Location - blocked_spells[x].m_Difference, blocked_spells[x].m_Location + blocked_spells[x].m_Difference))
 						return blocked_spells[x].message;
-					}
 					break;
 				}
 				default:
