@@ -223,7 +223,7 @@ public:
 	//void RemoveGroupFromInstance(uint16 instance_id);	//potentially useful but not implmented at this time.
 	//void RemoveRaidFromInstance(uint16 instance_id);	//potentially useful but not implmented at this time.
 	void RemoveAllFromInstance(uint16 instance_id);
-	void MovePCInstance(int zone_id, int instance_id, float x, float y, float z, float heading);
+	void MovePCInstance(int zone_id, int instance_id, const xyz_heading& position);
 	void FlagInstanceByGroupLeader(uint32 zone, int16 version);
 	void FlagInstanceByRaidLeader(uint32 zone, int16 version);
 	const char* varlink(char* perltext, int item_id);

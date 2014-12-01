@@ -2616,12 +2616,12 @@ void QuestManager::RemoveAllFromInstance(uint16 instance_id)
 	}
 }
 
-void QuestManager::MovePCInstance(int zone_id, int instance_id, float x, float y, float z, float heading)
+void QuestManager::MovePCInstance(int zone_id, int instance_id, const xyz_heading& position)
 {
 	QuestManagerCurrentQuestVars();
 	if(initiator)
 	{
-		initiator->MovePC(zone_id, instance_id, x, y, z, heading);
+		initiator->MovePC(zone_id, instance_id, position.m_X, position.m_Y, position.m_Z, position.m_Heading);
 	}
 }
 

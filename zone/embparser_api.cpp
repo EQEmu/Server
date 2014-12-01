@@ -2974,12 +2974,12 @@ XS(XS__MovePCInstance)
 
 	if (items == 4)
 	{
-		quest_manager.MovePCInstance(zoneid, instanceid, x, y, z, 0.0f);
+		quest_manager.MovePCInstance(zoneid, instanceid, xyz_heading(x, y, z, 0.0f));
 	}
 	else
 	{
 		float heading = (float)SvNV(ST(5));
-		quest_manager.MovePCInstance(zoneid, instanceid, x, y, z, heading);
+		quest_manager.MovePCInstance(zoneid, instanceid, xyz_heading(x, y, z, heading));
 	}
 
 	XSRETURN_EMPTY;
