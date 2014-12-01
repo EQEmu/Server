@@ -3371,7 +3371,7 @@ void Bot::AI_Process() {
 	if(GetHasBeenSummoned()) {
 		if(IsBotCaster() || IsBotArcher()) {
 			if (AImovement_timer->Check()) {
-				if(!GetTarget() || (IsBotCaster() && !IsBotCasterCombatRange(GetTarget())) || (IsBotArcher() && IsArcheryRange(GetTarget())) || (DistNoRootNoZ(GetPreSummonX(), GetPreSummonY()) < 10)) {
+				if(!GetTarget() || (IsBotCaster() && !IsBotCasterCombatRange(GetTarget())) || (IsBotArcher() && IsArcheryRange(GetTarget())) || (DistNoRootNoZ(m_PreSummonLocation.m_X, m_PreSummonLocation.m_Y) < 10)) {
 					if(GetTarget())
 						FaceTarget(GetTarget());
 					SetHasBeenSummoned(false);
@@ -3380,8 +3380,8 @@ void Bot::AI_Process() {
 					if(GetTarget() && GetTarget()->GetHateTop() && GetTarget()->GetHateTop() != this)
 					{
 						mlog(AI__WAYPOINTS, "Returning to location prior to being summoned.");
-						CalculateNewPosition2(GetPreSummonX(), GetPreSummonY(), GetPreSummonZ(), GetRunspeed());
-						SetHeading(CalculateHeadingToTarget(GetPreSummonX(), GetPreSummonY()));
+						CalculateNewPosition2(m_PreSummonLocation.m_X, m_PreSummonLocation.m_Y, m_PreSummonLocation.m_Z, GetRunspeed());
+						SetHeading(CalculateHeadingToTarget(m_PreSummonLocation.m_X, m_PreSummonLocation.m_Y));
 						return;
 					}
 				}

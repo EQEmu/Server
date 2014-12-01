@@ -448,9 +448,7 @@ public:
 	uint32 GetAA(uint32 aa_id);
 	void ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon);
 	bool GetHasBeenSummoned() { return _hasBeenSummoned; }
-	float GetPreSummonX() { return m_PreSummonLocation.m_X; }
-	float GetPreSummonY() { return m_PreSummonLocation.m_Y; }
-	float GetPreSummonZ() { return m_PreSummonLocation.m_Z; }
+	const xyz_location GetPreSummonLocation() const { return m_PreSummonLocation; }
 	bool GetGroupMessagesOn() { return _groupMessagesOn; }
 	bool GetInHealRotation() { return _isInHealRotation; }
 	bool GetHealRotationActive() { return (GetInHealRotation() && _isHealRotationActive); }
