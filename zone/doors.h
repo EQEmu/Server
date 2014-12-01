@@ -13,7 +13,7 @@ class Doors : public Entity
 {
 public:
 	Doors(const Door* door);
-	Doors(const char *dmodel, float dx, float dy, float dz, float dheading, uint8 dopentype = 58, uint16 dsize = 100);
+	Doors(const char *dmodel, const xyz_heading& position, uint8 dopentype = 58, uint16 dsize = 100);
 	~Doors();
 	bool	IsDoor() const { return true; }
 	void	HandleClick(Client* sender, uint8 trigger);

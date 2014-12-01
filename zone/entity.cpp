@@ -3852,7 +3852,7 @@ uint16 EntityList::CreateDoor(const char *model, float x, float y, float z,
 		float heading, uint8 opentype, uint16 size)
 {
 	if (model) {
-			Doors *door = new Doors(model, x, y, z, heading, opentype, size);
+			Doors *door = new Doors(model, xyz_heading(x, y, z, heading), opentype, size);
 			RemoveAllDoors();
 			zone->LoadZoneDoors(zone->GetShortName(), zone->GetInstanceVersion());
 			entity_list.AddDoor(door);

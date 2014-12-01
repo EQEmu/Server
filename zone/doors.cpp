@@ -68,9 +68,9 @@ Doors::Doors(const Door* door) :
 	client_version_mask = door->client_version_mask;
 }
 
-Doors::Doors(const char *dmodel, float dx, float dy, float dz, float dheading, uint8 dopentype, uint16 dsize) :
+Doors::Doors(const char *dmodel, const xyz_heading& position, uint8 dopentype, uint16 dsize) :
     close_timer(5000),
-    m_Position(dx, dy, dz, dheading),
+    m_Position(position),
     m_Destination(xyz_heading::Origin())
 {
 	db_id = database.GetDoorsCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion());
