@@ -2666,9 +2666,7 @@ bool ZoneDatabase::LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked
         memset(&into[index], 0, sizeof(ZoneSpellsBlocked));
         into[index].spellid = atoi(row[1]);
         into[index].type = atoi(row[2]);
-        into[index].x = atof(row[3]);
-        into[index].y = atof(row[4]);
-        into[index].z = atof(row[5]);
+        into[index].m_Location = xyz_location(atof(row[3]), atof(row[4]), atof(row[5]));
         into[index].xdiff = atof(row[6]);
         into[index].ydiff = atof(row[7]);
         into[index].zdiff = atof(row[8]);

@@ -1919,9 +1919,9 @@ bool Zone::IsSpellBlocked(uint32 spell_id, float nx, float ny, float nz)
 					}
 					case 2:
 					{
-						if ((( nx >= (blocked_spells[x].x-blocked_spells[x].xdiff)) && (nx <= (blocked_spells[x].x+blocked_spells[x].xdiff))) &&
-							(( ny >= (blocked_spells[x].y-blocked_spells[x].ydiff)) && (ny <= (blocked_spells[x].y+blocked_spells[x].ydiff))) &&
-							(( nz >= (blocked_spells[x].z-blocked_spells[x].zdiff)) && (nz <= (blocked_spells[x].z+blocked_spells[x].zdiff))))
+						if ((( nx >= (blocked_spells[x].m_Location.m_X-blocked_spells[x].xdiff)) && (nx <= (blocked_spells[x].m_Location.m_X+blocked_spells[x].xdiff))) &&
+							(( ny >= (blocked_spells[x].m_Location.m_Y-blocked_spells[x].ydiff)) && (ny <= (blocked_spells[x].m_Location.m_Y+blocked_spells[x].ydiff))) &&
+							(( nz >= (blocked_spells[x].m_Location.m_Z-blocked_spells[x].zdiff)) && (nz <= (blocked_spells[x].m_Location.m_Z+blocked_spells[x].zdiff))))
 						{
 							return true;
 						}
@@ -1957,9 +1957,9 @@ const char* Zone::GetSpellBlockedMessage(uint32 spell_id, float nx, float ny, fl
 				}
 				case 2:
 				{
-					if((( nx > (blocked_spells[x].x-blocked_spells[x].xdiff)) && (nx < (blocked_spells[x].x+blocked_spells[x].xdiff))) &&
-						(( ny > (blocked_spells[x].y-blocked_spells[x].ydiff)) && (ny < (blocked_spells[x].y+blocked_spells[x].ydiff))) &&
-						(( nz > (blocked_spells[x].z-blocked_spells[x].zdiff)) && (nz < (blocked_spells[x].z+blocked_spells[x].zdiff))))
+					if((( nx > (blocked_spells[x].m_Location.m_X-blocked_spells[x].xdiff)) && (nx < (blocked_spells[x].m_Location.m_X+blocked_spells[x].xdiff))) &&
+						(( ny > (blocked_spells[x].m_Location.m_Y-blocked_spells[x].ydiff)) && (ny < (blocked_spells[x].m_Location.m_Y+blocked_spells[x].ydiff))) &&
+						(( nz > (blocked_spells[x].m_Location.m_Z-blocked_spells[x].zdiff)) && (nz < (blocked_spells[x].m_Location.m_Z+blocked_spells[x].zdiff))))
 					{
 						return blocked_spells[x].message;
 					}

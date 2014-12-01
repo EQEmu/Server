@@ -116,9 +116,7 @@ struct PetInfo {
 struct ZoneSpellsBlocked {
 	uint32 spellid;
 	int8 type;
-	float x;
-	float y;
-	float z;
+	xyz_location m_Location;
 	float xdiff;
 	float ydiff;
 	float zdiff;
