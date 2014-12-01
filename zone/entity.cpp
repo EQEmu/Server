@@ -1561,16 +1561,14 @@ Client *EntityList::GetClientByWID(uint32 iWID)
 	return nullptr;
 }
 
-Client *EntityList::GetRandomClient(float x, float y, float z, float Distance, Client *ExcludeClient)
+Client *EntityList::GetRandomClient(const xyz_location& location, float Distance, Client *ExcludeClient)
 {
 	std::vector<Client *> ClientsInRange;
 
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		if ((it->second != ExcludeClient) && (it->second->DistNoRoot(x, y, z) <= Distance))
+
+	for (auto it = client_list.begin();it != client_list.end(); ++it)
+		if ((it->second != ExcludeClient) && (it->second->DistNoRoot(location.m_X, location.m_Y, location.m_Z) <= Distance))
 			ClientsInRange.push_back(it->second);
-		++it;
-	}
 
 	if (ClientsInRange.empty())
 		return nullptr;

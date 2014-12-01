@@ -150,7 +150,7 @@ public:
 	Client *GetClientByCharID(uint32 iCharID);
 	Client *GetClientByWID(uint32 iWID);
 	Client *GetClient(uint32 ip, uint16 port);
-	Client *GetRandomClient(float x, float y, float z, float Distance, Client *ExcludeClient = nullptr);
+	Client *GetRandomClient(const xyz_location& location, float Distance, Client *ExcludeClient = nullptr);
 	Group *GetGroupByMob(Mob* mob);
 	Group *GetGroupByClient(Client* client);
 	Group *GetGroupByID(uint32 id);

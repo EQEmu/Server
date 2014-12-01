@@ -1875,7 +1875,7 @@ XS(XS_EntityList_GetRandomClient)
 				c = INT2PTR(Client *,tmp);
 			}
 		}
-		RETVAL = entity_list.GetRandomClient(x, y, z, d * d, c);
+		RETVAL = entity_list.GetRandomClient(xyz_location(x, y, z), d * d, c);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void*)RETVAL);
 	}
