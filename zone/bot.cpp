@@ -16279,11 +16279,9 @@ bool Bot::HasOrMayGetAggro() {
 
 void Bot::SetHasBeenSummoned(bool wasSummoned) {
 	_hasBeenSummoned = wasSummoned;
-	if(!wasSummoned) {
-		_preSummonX = 0;
-		_preSummonY = 0;
-		_preSummonZ = 0;
-	}
+	if(!wasSummoned)
+        m_PreSummonLocation = xyz_location::Origin();
+
 }
 
 void Bot::SetDefaultBotStance() {
