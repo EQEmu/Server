@@ -3835,17 +3835,18 @@ uint16 EntityList::CreateGroundObject(uint32 itemid, float x, float y, float z,
 	return 0; // fell through everything, this is bad/incomplete from perl
 }
 
-uint16 EntityList::CreateGroundObjectFromModel(const char *model, float x,
-		float y, float z, float heading, uint8 type, uint32 decay_time)
+uint16 EntityList::CreateGroundObjectFromModel(const char *model, const xyz_heading& position, uint8 type, uint32 decay_time)
 {
-	if (model) {
-			Object *object = new Object(model, x, y, z, heading, type);
-			entity_list.AddObject(object, true);
+	if (!model)
+        return 0;
 
-			if (object)
-				return object->GetID();
-	}
-	return 0; // fell through everything, this is bad/incomplete from perl
+    Object *object = new Object(model, position.m_X, position.m_Y, position.m_Z, position.m_Heading, type);
+    entity_list.AddObject(object, true);
+
+    if (!object)
+        return 0;
+
+    return object->GetID();
 }
 
 uint16 EntityList::CreateDoor(const char *model, const xyz_heading& position, uint8 opentype, uint16 size)
