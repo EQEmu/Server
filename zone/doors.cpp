@@ -735,6 +735,6 @@ void Doors::CreateDatabaseEntry()
 	{
 		return;
 	}
-	database.InsertDoor(GetDoorDBID(), GetDoorID(), GetDoorName(), m_Position.m_X, m_Position.m_Y, m_Position.m_Z, m_Position.m_Heading, GetOpenType(), GetGuildID(), GetLockpick(), GetKeyItem(), GetDoorParam(), GetInvertState(), GetIncline(), GetSize());
+	database.InsertDoor(GetDoorDBID(), GetDoorID(), GetDoorName(), m_Position, GetOpenType(), GetGuildID(), GetLockpick(), GetKeyItem(), GetDoorParam(), GetInvertState(), GetIncline(), GetSize());
 }
 

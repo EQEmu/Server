@@ -5,6 +5,7 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/loottable.h"
 #include "zonedump.h"
+#include "position.h"
 #include "../common/faction.h"
 #include <limits>
 
@@ -226,7 +227,7 @@ public:
 	/* Traders  */
 	void	SaveTraderItem(uint32 char_id,uint32 itemid,uint32 uniqueid, int32 charges,uint32 itemcost,uint8 slot);
 	void	UpdateTraderItemCharges(int char_id, uint32 ItemInstID, int32 charges);
-	void	UpdateTraderItemPrice(int CharID, uint32 ItemID, uint32 Charges, uint32 NewPrice); 
+	void	UpdateTraderItemPrice(int CharID, uint32 ItemID, uint32 Charges, uint32 NewPrice);
 	void	DeleteTraderItem(uint32 char_id);
 	void	DeleteTraderItem(uint32 char_id,uint16 slot_id);
 
@@ -302,14 +303,14 @@ public:
 	Corpse*		LoadCharacterCorpse(uint32 player_corpse_id);
 	Corpse*		SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_zoneid, uint16 dest_instanceid, float dest_x, float dest_y, float dest_z, float dest_heading);
 	void		MarkCorpseAsRezzed(uint32 dbid);
-	bool		GetDecayTimes(npcDecayTimes_Struct* npcCorpseDecayTimes); 
+	bool		GetDecayTimes(npcDecayTimes_Struct* npcCorpseDecayTimes);
 	bool		BuryCharacterCorpse(uint32 dbid);
 	bool		BuryAllCharacterCorpses(uint32 charid);
-	bool		DeleteCharacterCorpse(uint32 dbid); 
+	bool		DeleteCharacterCorpse(uint32 dbid);
 	bool		SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zoneid, uint16 dest_instanceid, float dest_x, float dest_y, float dest_z, float dest_heading);
-	bool		SummonAllGraveyardCorpses(uint32 cur_zoneid, uint32 dest_zoneid, uint16 dest_instanceid, float dest_x, float dest_y, float dest_z, float dest_heading); 
+	bool		SummonAllGraveyardCorpses(uint32 cur_zoneid, uint32 dest_zoneid, uint16 dest_instanceid, float dest_x, float dest_y, float dest_z, float dest_heading);
 	bool		UnburyCharacterCorpse(uint32 dbid, uint32 new_zoneid, uint16 dest_instanceid, float new_x, float new_y, float new_z, float new_heading);
-	bool		LoadCharacterCorpses(uint32 iZoneID, uint16 iInstanceID); 
+	bool		LoadCharacterCorpses(uint32 iZoneID, uint16 iInstanceID);
 	bool		DeleteGraveyard(uint32 zone_id, uint32 graveyard_id);
 	uint32		GetCharacterCorpseDecayTimer(uint32 corpse_db_id);
 	uint32		GetCharacterBuriedCorpseCount(uint32 char_id);
@@ -378,7 +379,7 @@ public:
 	int			GetHighestWaypoint(uint32 zoneid, uint32 gridid);
 
 	/* NPCs  */
-	
+
 	uint32		NPCSpawnDB(uint8 command, const char* zone, uint32 zone_version, Client *c, NPC* spawn = 0, uint32 extra = 0); // 0 = Create 1 = Add; 2 = Update; 3 = Remove; 4 = Delete
 	uint32		CreateNewNPCCommand(const char* zone, uint32 zone_version, Client *client, NPC* spawn, uint32 extra);
 	uint32		AddNewNPCSpawnGroupCommand(const char* zone, uint32 zone_version, Client *client, NPC* spawn, uint32 respawnTime);
@@ -445,7 +446,7 @@ public:
 	int32	GetDoorsCount(uint32* oMaxID, const char *zone_name, int16 version);
 	int32	GetDoorsCountPlusOne(const char *zone_name, int16 version);
 	int32	GetDoorsDBCountPlusOne(const char *zone_name, int16 version);
-	void	InsertDoor(uint32 did, uint16 ddoorid, const char* ddoor_name, float dxpos, float dypos, float dzpos, float dheading, uint8 dopentype, uint16 dguildid, uint32 dlockpick, uint32 dkeyitem, uint8 ddoor_param, uint8 dinvert, int dincline, uint16 dsize);
+	void	InsertDoor(uint32 did, uint16 ddoorid, const char* ddoor_name, const xyz_heading& position, uint8 dopentype, uint16 dguildid, uint32 dlockpick, uint32 dkeyitem, uint8 ddoor_param, uint8 dinvert, int dincline, uint16 dsize);
 
 	/* Blocked Spells   */
 	int32	GetBlockedSpellsCount(uint32 zoneid);
