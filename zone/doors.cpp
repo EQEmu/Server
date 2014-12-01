@@ -698,24 +698,9 @@ void Doors::SetLocation(float x, float y, float z)
 	entity_list.RespawnAllDoors();
 }
 
-void Doors::SetX(float in) {
+void Doors::SetPosition(const xyz_heading& position) {
 	entity_list.DespawnAllDoors();
-	m_Position.m_X = in;
-	entity_list.RespawnAllDoors();
-}
-void Doors::SetY(float in) {
-	entity_list.DespawnAllDoors();
-	m_Position.m_Y = in;
-	entity_list.RespawnAllDoors();
-}
-void Doors::SetZ(float in) {
-	entity_list.DespawnAllDoors();
-	m_Position.m_Z = in;
-	entity_list.RespawnAllDoors();
-}
-void Doors::SetHeading(float in) {
-	entity_list.DespawnAllDoors();
-	m_Position.m_Heading = in;
+	m_Position = position;
 	entity_list.RespawnAllDoors();
 }
 

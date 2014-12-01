@@ -57,14 +57,11 @@ public:
 	void	ForceClose(Mob *sender, bool alt_mode=false);
 	void	ToggleState(Mob *sender);
 
-	void	SetX(float in);
-	void	SetY(float in);
-	void	SetZ(float in);
-	void	SetHeading(float in);
+	void	SetPosition(const xyz_heading& position);
+	void	SetLocation(float x, float y, float z);
 	void	SetIncline(int in);
 	void	SetDoorName(const char* name);
 	void	SetOpenType(uint8 in);
-	void	SetLocation(float x, float y, float z);
 	void	SetSize(uint16 size);
 	void	CreateDatabaseEntry();
 

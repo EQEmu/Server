@@ -40,22 +40,30 @@ float Lua_Door::GetHeading() {
 
 void Lua_Door::SetX(float x) {
 	Lua_Safe_Call_Void();
-	self->SetX(x);
+	auto position = self->GetPosition();
+	position.m_X = x;
+	self->SetPosition(position);
 }
 
 void Lua_Door::SetY(float y) {
 	Lua_Safe_Call_Void();
-	self->SetY(y);
+	auto position = self->GetPosition();
+	position.m_Y = y;
+	self->SetPosition(position);
 }
 
 void Lua_Door::SetZ(float z) {
 	Lua_Safe_Call_Void();
-	self->SetZ(z);
+	auto position = self->GetPosition();
+	position.m_Z = z;
+	self->SetPosition(position);
 }
 
 void Lua_Door::SetHeading(float h) {
 	Lua_Safe_Call_Void();
-	self->SetHeading(h);
+	auto position = self->GetPosition();
+	position.m_Heading = h;
+	self->SetPosition(position);
 }
 
 void Lua_Door::SetLocation(float x, float y, float z) {
