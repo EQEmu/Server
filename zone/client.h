@@ -393,10 +393,10 @@ public:
 
 	inline const char* GetLastName() const { return lastname; }
 
-	inline float ProximityX() const { return(proximity_x); }
-	inline float ProximityY() const { return(proximity_y); }
-	inline float ProximityZ() const { return(proximity_z); }
-	inline void ClearAllProximities() { entity_list.ProcessMove(this, xyz_location(FLT_MAX, FLT_MAX, FLT_MAX)); proximity_x = FLT_MAX; proximity_y = FLT_MAX; proximity_z = FLT_MAX; }
+	inline float ProximityX() const { return m_Proximity.m_X; }
+	inline float ProximityY() const { return m_Proximity.m_Y; }
+	inline float ProximityZ() const { return m_Proximity.m_Z; }
+	inline void ClearAllProximities() { entity_list.ProcessMove(this, xyz_location(FLT_MAX, FLT_MAX, FLT_MAX)); m_Proximity = xyz_location(FLT_MAX,FLT_MAX,FLT_MAX); }
 
 	/*
 			Begin client modifiers
@@ -1409,10 +1409,7 @@ private:
 	Timer RespawnFromHoverTimer;
 	Timer merc_timer;
 
-	float proximity_x;
-	float proximity_y;
-	float proximity_z;
-
+    xyz_location m_Proximity;
 
 	void BulkSendInventoryItems();
 

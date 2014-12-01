@@ -4543,9 +4543,8 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 		entity_list.ProcessMove(this, xyz_location(ppu->x_pos, ppu->y_pos, ppu->z_pos));
 		if(RuleB(TaskSystem, EnableTaskSystem) && RuleB(TaskSystem,EnableTaskProximity))
 			ProcessTaskProximities(ppu->x_pos, ppu->y_pos, ppu->z_pos);
-		proximity_x = ppu->x_pos;
-		proximity_y = ppu->y_pos;
-		proximity_z = ppu->z_pos;
+
+		m_Proximity = xyz_location(ppu->x_pos, ppu->y_pos, ppu->z_pos);
 	}
 
 	// Update internal state

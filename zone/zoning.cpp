@@ -653,9 +653,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			if(zoneID == GetZoneID()) {
 				//properly handle proximities
 				entity_list.ProcessMove(this, m_Position);
-				proximity_x = m_Position.m_X;
-				proximity_y = m_Position.m_Y;
-				proximity_z = m_Position.m_Z;
+				m_Proximity = m_Position;
 
 				//send out updates to people in zone.
 				SendPosition();
