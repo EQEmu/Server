@@ -2699,7 +2699,7 @@ XS(XS__CreateGroundObjectFromModel)
 	if (items > 6)
 		decay_time = (uint32)SvIV(ST(6));
 
-	id = quest_manager.CreateGroundObjectFromModel(modelname, x, y, z, heading, type, decay_time);
+	id = quest_manager.CreateGroundObjectFromModel(modelname, xyz_heading(x, y, z, heading), type, decay_time);
 	XSRETURN_IV(id);
 }
 

@@ -208,7 +208,7 @@ public:
    	bool checktitle(int titlecheck);
    	void removetitle(int titlecheck);
 	uint16 CreateGroundObject(uint32 itemid, const xyz_heading& position, uint32 decay_time = 300000);
-	uint16 CreateGroundObjectFromModel(const char* model, float x, float y, float z, float heading, uint8 type = 0x00, uint32 decay_time = 0);
+	uint16 CreateGroundObjectFromModel(const char* model, const xyz_heading& position, uint8 type = 0x00, uint32 decay_time = 0);
 	void ModifyNPCStat(const char *identifier, const char *newValue);
 	void UpdateSpawnTimer(uint32 id, uint32 newTime);
 	void MerchantSetItem(uint32 NPCid, uint32 itemid, uint32 quantity = 0);

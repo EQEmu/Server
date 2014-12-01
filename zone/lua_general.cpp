@@ -693,15 +693,15 @@ void lua_create_ground_object(uint32 item_id, float x, float y, float z, float h
 }
 
 void lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h) {
-	quest_manager.CreateGroundObjectFromModel(model, x, y, z, h);
+	quest_manager.CreateGroundObjectFromModel(model, xyz_heading(x, y, z, h));
 }
 
 void lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h, int type) {
-	quest_manager.CreateGroundObjectFromModel(model, x, y, z, h, type);
+	quest_manager.CreateGroundObjectFromModel(model, xyz_heading(x, y, z, h), type);
 }
 
 void lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h, int type, uint32 decay_time) {
-	quest_manager.CreateGroundObjectFromModel(model, x, y, z, h, type, decay_time);
+	quest_manager.CreateGroundObjectFromModel(model, xyz_heading(x, y, z, h), type, decay_time);
 }
 
 void lua_create_door(const char *model, float x, float y, float z, float h, int open_type, int size) {
