@@ -597,7 +597,6 @@ void Mob::AI_ShutDown() {
 	tic_timer.Disable();
 	mana_timer.Disable();
 	spellend_timer.Disable();
-	projectile_timer.Disable();
 	rewind_timer.Disable();
 	bindwound_timer.Disable();
 	stunned_timer.Disable();

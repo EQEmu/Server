@@ -198,7 +198,7 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 			SetAttackTimer();
 			ThrowingAttack(GetTarget());
 			if (CheckDoubleRangedAttack())
-				RangedAttack(GetTarget(), true);
+				ThrowingAttack(GetTarget(), true);
 			return;
 		}
 		//ranged attack (archery)
@@ -596,7 +596,6 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 			for (int i = 0; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
 			{
 				ItemInst *aug = wpn->GetAugment(i);
-				if(aug)
 				{
 					backstab_dmg += aug->GetItem()->BackstabDmg;
 				}
@@ -788,8 +787,8 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 		return;
 	}
 
-	SendItemAnimation(GetTarget(), AmmoItem, SkillArchery); 
-	DoArcheryAttackDmg(GetTarget(), RangeWeapon, Ammo);
+	//Shoots projectile and/or applies the archery damage
+	DoArcheryAttackDmg(GetTarget(), RangeWeapon, Ammo,0,0,0,0,0,0, AmmoItem, ammo_slot);
 
 	//EndlessQuiver AA base1 = 100% Chance to avoid consumption arrow.
 	int ChanceAvoidConsume = aabonuses.ConsumeProjectile + itembonuses.ConsumeProjectile + spellbonuses.ConsumeProjectile;
@@ -805,152 +804,324 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 	CommonBreakInvisible();
 }
 
-void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const ItemInst* Ammo, uint16 weapon_damage, int16 chance_mod, int16 focus, int ReuseTime) {
-	if (!CanDoSpecialAttack(other))
+void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const ItemInst* Ammo, uint16 weapon_damage, int16 chance_mod, int16 focus, int ReuseTime, 
+							uint32 range_id, uint32 ammo_id, const Item_Struct *AmmoItem, int AmmoSlot, float speed) {
+	
+	if ((other == nullptr || 
+		((IsClient() && CastToClient()->dead) || 
+		(other->IsClient() && other->CastToClient()->dead)) || 
+		HasDied() || 
+		(!IsAttackAllowed(other)) ||
+		(other->GetInvul() || 
+		other->GetSpecialAbility(IMMUNE_MELEE))))
+	{
 		return;
+	}
 
-	if (!other->CheckHitChance(this, SkillArchery, MainPrimary, chance_mod)) {
+	const ItemInst* _RangeWeapon = nullptr;
+	const ItemInst* _Ammo = nullptr;
+	const Item_Struct* ammo_lost = nullptr;
+
+	/*
+	If LaunchProjectile is false this function will do archery damage on target,
+	otherwise it will shoot the projectile at the target, once the projectile hits target
+	this function is then run again to do the damage portion
+	*/
+	bool LaunchProjectile = false;
+	bool ProjectileMiss = false;
+
+	if (RuleB(Combat, ProjectileDmgOnImpact)){
+
+		if (AmmoItem)
+			LaunchProjectile = true;
+		else{
+			/*
+			Item sync check on projectile landing. 
+			Weapon damage is already calculated so this only affects procs!
+			Ammo proc check will use database to find proc if you used up your last ammo.
+			If you change range item mid projectile flight, you loose your chance to proc from bow (Deal with it!).
+			*/
+			
+			if (!RangeWeapon && !Ammo && range_id && ammo_id){
+
+				if (weapon_damage == 0)
+					ProjectileMiss = true; //This indicates that MISS was originally calculated.
+
+				if (IsClient()){
+
+					_RangeWeapon = CastToClient()->m_inv[MainRange];
+					if (_RangeWeapon && !_RangeWeapon->GetItem() && _RangeWeapon->GetItem()->ID == range_id)
+						RangeWeapon = _RangeWeapon;					
+			
+					_Ammo = CastToClient()->m_inv[AmmoSlot];
+					if (_Ammo && _Ammo->GetItem() && _Ammo->GetItem()->ID == ammo_id)
+						Ammo = _Ammo;
+					else
+						ammo_lost = database.GetItem(ammo_id);
+				}
+			}
+		}
+	}
+	else if (AmmoItem)
+		SendItemAnimation(other, AmmoItem, SkillArchery);
+
+	if (ProjectileMiss || !other->CheckHitChance(this, SkillArchery, MainPrimary, chance_mod)) {
 		mlog(COMBAT__RANGED, "Ranged attack missed %s.", other->GetName());
-		other->Damage(this, 0, SPELL_UNKNOWN, SkillArchery);
+
+		if (LaunchProjectile){
+			TryProjectileAttack(other, AmmoItem, SkillArchery, 0, RangeWeapon, Ammo, AmmoSlot, speed);
+			return;
+		}
+		else
+			other->Damage(this, 0, SPELL_UNKNOWN, SkillArchery);
 	} else {
 		mlog(COMBAT__RANGED, "Ranged attack hit %s.", other->GetName());
 
+		bool HeadShot = false;
+		uint32 HeadShot_Dmg = TryHeadShot(other, SkillArchery);
+		if (HeadShot_Dmg)
+			HeadShot = true;
 
-			bool HeadShot = false;
-			uint32 HeadShot_Dmg = TryHeadShot(other, SkillArchery);
-			if (HeadShot_Dmg)
-				HeadShot = true;
+		int32 hate = 0;
+		int32 TotalDmg = 0;
+		int16 WDmg = 0;
+		int16 ADmg = 0;
+		if (!weapon_damage){
+			WDmg = GetWeaponDamage(other, RangeWeapon);
+			ADmg = GetWeaponDamage(other, Ammo);
+		}
+		else
+			WDmg = weapon_damage;
 
-			int32 TotalDmg = 0;
-			int16 WDmg = 0;
-			int16 ADmg = 0;
-			if (!weapon_damage){
-				WDmg = GetWeaponDamage(other, RangeWeapon);
-				ADmg = GetWeaponDamage(other, Ammo);
-			}
-			else
-				WDmg = weapon_damage;
+		if (LaunchProjectile){//1: Shoot the Projectile once we calculate weapon damage.
+			TryProjectileAttack(other, AmmoItem, SkillArchery, WDmg, RangeWeapon, Ammo, AmmoSlot, speed);
+			return;
+		}
 
-			if (focus) //From FcBaseEffects
-				WDmg += WDmg*focus/100;
+		if (focus) //From FcBaseEffects
+			WDmg += WDmg*focus/100;
 
-			if((WDmg > 0) || (ADmg > 0)) {
-				if(WDmg < 0)
-					WDmg = 0;
-				if(ADmg < 0)
-					ADmg = 0;
-				uint32 MaxDmg = (RuleR(Combat, ArcheryBaseDamageBonus)*(WDmg+ADmg)*GetDamageTable(SkillArchery)) / 100;
-				int32 hate = ((WDmg+ADmg));
-
-				if (HeadShot)
-					MaxDmg = HeadShot_Dmg;
-
-				uint16 bonusArcheryDamageModifier = aabonuses.ArcheryDamageModifier + itembonuses.ArcheryDamageModifier + spellbonuses.ArcheryDamageModifier;
-
-				MaxDmg += MaxDmg*bonusArcheryDamageModifier / 100;
-
-				mlog(COMBAT__RANGED, "Bow DMG %d, Arrow DMG %d, Max Damage %d.", WDmg, ADmg, MaxDmg);
-
-				bool dobonus = false;
-				if(GetClass() == RANGER && GetLevel() > 50)
-				{
-					int bonuschance = RuleI(Combat, ArcheryBonusChance);
-
-					bonuschance = mod_archery_bonus_chance(bonuschance, RangeWeapon);
-
-					if( !RuleB(Combat, UseArcheryBonusRoll) || (MakeRandomInt(1, 100) < bonuschance) )
-					{
-						if(RuleB(Combat, ArcheryBonusRequiresStationary))
-						{
-							if(other->IsNPC() && !other->IsMoving() && !other->IsRooted())
-							{
-								dobonus = true;
-							}
-						}
-						else
-						{
-							dobonus = true;
-						}
-					}
-
-					if(dobonus)
-					{
-						MaxDmg *= 2;
-						hate *= 2;
-						MaxDmg = mod_archery_bonus_damage(MaxDmg, RangeWeapon);
-
-						mlog(COMBAT__RANGED, "Ranger. Double damage success roll, doubling damage to %d", MaxDmg);
-						Message_StringID(MT_CritMelee, BOW_DOUBLE_DAMAGE);
-					}
-				}
-
-				if (MaxDmg == 0)
-					MaxDmg = 1;
-
-				if(RuleB(Combat, UseIntervalAC))
-					TotalDmg = MaxDmg;
-				else
-					TotalDmg = MakeRandomInt(1, MaxDmg);
-
-				int minDmg = 1;
-				if(GetLevel() > 25){
-					//twice, for ammo and weapon
-					TotalDmg += (2*((GetLevel()-25)/3));
-					minDmg += (2*((GetLevel()-25)/3));
-					minDmg += minDmg * GetMeleeMinDamageMod_SE(SkillArchery) / 100;
-					hate += (2*((GetLevel()-25)/3));
-				}
-
-				if (!HeadShot)
-					other->AvoidDamage(this, TotalDmg, false);
-
-				other->MeleeMitigation(this, TotalDmg, minDmg);
-				if(TotalDmg > 0)
-				{
-					ApplyMeleeDamageBonus(SkillArchery, TotalDmg);
-					TotalDmg += other->GetFcDamageAmtIncoming(this, 0, true, SkillArchery);
-					TotalDmg += (itembonuses.HeroicDEX / 10) + (TotalDmg * other->GetSkillDmgTaken(SkillArchery) / 100) + GetSkillDmgAmt(SkillArchery);
-
-					TotalDmg = mod_archery_damage(TotalDmg, dobonus, RangeWeapon);
-
-					TryCriticalHit(other, SkillArchery, TotalDmg);
-					other->AddToHateList(this, hate, 0, false);
-					CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
-				}
-			}
-			else
-				TotalDmg = -5;
+		if((WDmg > 0) || (ADmg > 0)) {
+			if(WDmg < 0)
+				WDmg = 0;
+			if(ADmg < 0)
+				ADmg = 0;
+			uint32 MaxDmg = (RuleR(Combat, ArcheryBaseDamageBonus)*(WDmg+ADmg)*GetDamageTable(SkillArchery)) / 100;
+			hate = ((WDmg+ADmg));
 
 			if (HeadShot)
-				entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FATAL_BOW_SHOT, GetName());
-			
-			other->Damage(this, TotalDmg, SPELL_UNKNOWN, SkillArchery);
-			
-			if (TotalDmg > 0 && HasSkillProcSuccess() && GetTarget() && other && !other->HasDied()){
-				if (ReuseTime)
-					TrySkillProc(other, SkillArchery, ReuseTime);
-				else
-					TrySkillProc(other, SkillArchery, 0, true, MainRange);
+				MaxDmg = HeadShot_Dmg;
+
+			uint16 bonusArcheryDamageModifier = aabonuses.ArcheryDamageModifier + itembonuses.ArcheryDamageModifier + spellbonuses.ArcheryDamageModifier;
+
+			MaxDmg += MaxDmg*bonusArcheryDamageModifier / 100;
+
+			mlog(COMBAT__RANGED, "Bow DMG %d, Arrow DMG %d, Max Damage %d.", WDmg, ADmg, MaxDmg);
+
+			bool dobonus = false;
+			if(GetClass() == RANGER && GetLevel() > 50){
+				
+				int bonuschance = RuleI(Combat, ArcheryBonusChance);
+				bonuschance = mod_archery_bonus_chance(bonuschance, RangeWeapon);
+
+				if( !RuleB(Combat, UseArcheryBonusRoll) || (MakeRandomInt(1, 100) < bonuschance)){
+					if(RuleB(Combat, ArcheryBonusRequiresStationary)){
+						if(other->IsNPC() && !other->IsMoving() && !other->IsRooted())
+							dobonus = true;
+					}
+					else
+						dobonus = true;
+				}
+
+				if(dobonus){
+					MaxDmg *= 2;
+					hate *= 2;
+					MaxDmg = mod_archery_bonus_damage(MaxDmg, RangeWeapon);
+
+					mlog(COMBAT__RANGED, "Ranger. Double damage success roll, doubling damage to %d", MaxDmg);
+					Message_StringID(MT_CritMelee, BOW_DOUBLE_DAMAGE);
+				}
 			}
+
+			if (MaxDmg == 0)
+				MaxDmg = 1;
+
+			if(RuleB(Combat, UseIntervalAC))
+				TotalDmg = MaxDmg;
+			else
+				TotalDmg = MakeRandomInt(1, MaxDmg);
+
+			int minDmg = 1;
+			if(GetLevel() > 25){
+				//twice, for ammo and weapon
+				TotalDmg += (2*((GetLevel()-25)/3));
+				minDmg += (2*((GetLevel()-25)/3));
+				minDmg += minDmg * GetMeleeMinDamageMod_SE(SkillArchery) / 100;
+				hate += (2*((GetLevel()-25)/3));
+			}
+
+			if (!HeadShot)
+				other->AvoidDamage(this, TotalDmg, false);
+
+			other->MeleeMitigation(this, TotalDmg, minDmg);
+			if(TotalDmg > 0){
+				CommonOutgoingHitSuccess(other, TotalDmg, SkillArchery);
+				TotalDmg = mod_archery_damage(TotalDmg, dobonus, RangeWeapon);
+			}
+		}
+		else
+			TotalDmg = -5;
+
+		if (HeadShot)
+			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FATAL_BOW_SHOT, GetName());
+
+		other->AddToHateList(this, hate, 0, false);
+		other->Damage(this, TotalDmg, SPELL_UNKNOWN, SkillArchery);
+			
+		//Skill Proc Success
+		if (TotalDmg > 0 && HasSkillProcSuccess() && other && !other->HasDied()){
+			if (ReuseTime)
+				TrySkillProc(other, SkillArchery, ReuseTime);
+			else
+				TrySkillProc(other, SkillArchery, 0, true, MainRange);
+		}
 	}
 
-	//try proc on hits and misses
-	if((RangeWeapon != nullptr) && GetTarget() && other && !other->HasDied()){
+	if (LaunchProjectile)
+		return;//Shouldn't reach this point, but just in case.
+
+	//Weapon Proc
+	if(!RangeWeapon && other && !other->HasDied())
 		TryWeaponProc(RangeWeapon, other, MainRange);
-	}
 
-	//Arrow procs because why not?
-    if((Ammo != NULL) && GetTarget() && other && !other->HasDied())
-    {
-        TryWeaponProc(Ammo, other, MainRange);
-    }
+	//Ammo Proc
+	if (ammo_lost)
+		TryWeaponProc(nullptr, ammo_lost, other, MainRange);
+	else if(Ammo && other && !other->HasDied())
+		TryWeaponProc(Ammo, other, MainRange);
 
-	if (HasSkillProcs() && GetTarget() && other && !other->HasDied()){
+	//Skill Proc
+	if (HasSkillProcs() && other && !other->HasDied()){
 		if (ReuseTime)
 			TrySkillProc(other, SkillArchery, ReuseTime);
 		else
 			TrySkillProc(other, SkillArchery, 0, false, MainRange);
 	}
+}
+
+bool Mob::TryProjectileAttack(Mob* other, const Item_Struct *item, SkillUseTypes skillInUse, uint16 weapon_dmg, const ItemInst* RangeWeapon, const ItemInst* Ammo, int AmmoSlot, float speed){
+
+	if (!other)
+		return false;
+
+	int slot = -1;
+
+	//Make sure there is an avialable slot.
+	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) {
+		if (ProjectileAtk[i].target_id == 0){
+			slot = i;
+			break;
+		}
+	}
+
+	if (slot < 0)
+		return false;
+
+	float speed_mod = speed * 0.45f;
+
+	float distance = other->CalculateDistance(GetX(), GetY(), GetZ());
+	float hit = 60.0f + (distance / speed_mod); //Calcuation: 60 = Animation Lag, 1.8 = Speed modifier for speed of (4)
+
+	ProjectileAtk[slot].increment = 1;
+	ProjectileAtk[slot].hit_increment = static_cast<uint16>(hit); //This projected hit time if target does NOT MOVE
+	ProjectileAtk[slot].target_id = other->GetID();
+	ProjectileAtk[slot].wpn_dmg = weapon_dmg;
+	ProjectileAtk[slot].origin_x = GetX();
+	ProjectileAtk[slot].origin_y = GetY();
+	ProjectileAtk[slot].origin_z = GetZ();
+	
+	if (RangeWeapon && RangeWeapon->GetItem())
+		ProjectileAtk[slot].ranged_id = RangeWeapon->GetItem()->ID;
+	
+	if (Ammo && Ammo->GetItem())
+		ProjectileAtk[slot].ammo_id = Ammo->GetItem()->ID;
+
+	ProjectileAtk[slot].ammo_slot = 0;
+	ProjectileAtk[slot].skill = skillInUse;
+	ProjectileAtk[slot].speed_mod = speed_mod;
+
+	SetProjectileAttack(true);
+
+	if(item)
+		SendItemAnimation(other, item, skillInUse, speed);
+	else if (IsNPC())
+		ProjectileAnimation(other, 0,false,speed,0,0,0,CastToNPC()->GetAmmoIDfile(),skillInUse);
+
+	return true;
+}
+
+
+void Mob::ProjectileAttack()
+{
+	if (!HasProjectileAttack())
+		return;;
+
+	Mob* target = nullptr;
+	bool disable = true;
+
+	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) {
+
+		if (ProjectileAtk[i].increment == 0){
+			continue;
+		}
+
+		disable = false;
+		Mob* target = entity_list.GetMobID(ProjectileAtk[i].target_id);
+		
+		if (target && target->IsMoving()){ //Only recalculate hit increment if target moving
+			//Due to frequency that we need to check increment the targets position variables may not be updated even if moving. Do a simple check before calculating distance.
+			if (ProjectileAtk[i].tlast_x != target->GetX() || ProjectileAtk[i].tlast_y != target->GetY()){
+				ProjectileAtk[i].tlast_x = target->GetX();
+				ProjectileAtk[i].tlast_y = target->GetY();
+				float distance = target->CalculateDistance(ProjectileAtk[i].origin_x, ProjectileAtk[i].origin_y,  ProjectileAtk[i].origin_z);
+				float hit = 60.0f + (distance / ProjectileAtk[i].speed_mod); //Calcuation: 60 = Animation Lag, 1.8 = Speed modifier for speed of (4)
+				ProjectileAtk[i].hit_increment = static_cast<uint16>(hit);
+			}
+		}
+
+		if (ProjectileAtk[i].hit_increment <= ProjectileAtk[i].increment){
+
+			if (target){
+				if (ProjectileAtk[i].skill == SkillArchery)
+					DoArcheryAttackDmg(target, nullptr, nullptr,ProjectileAtk[i].wpn_dmg,0,0,0,ProjectileAtk[i].ranged_id, ProjectileAtk[i].ammo_id, nullptr, ProjectileAtk[i].ammo_slot);
+				else if (ProjectileAtk[i].skill == SkillThrowing)
+					DoThrowingAttackDmg(target, nullptr, nullptr,ProjectileAtk[i].wpn_dmg,0,0,0, ProjectileAtk[i].ranged_id, ProjectileAtk[i].ammo_slot);
+				else if (ProjectileAtk[i].skill == SkillConjuration && IsValidSpell(ProjectileAtk[i].wpn_dmg))
+					SpellOnTarget(ProjectileAtk[i].wpn_dmg, target, false, true, spells[ProjectileAtk[i].wpn_dmg].ResistDiff, true);
+			}
+			
+			ProjectileAtk[i].increment = 0;
+			ProjectileAtk[i].target_id = 0;
+			ProjectileAtk[i].wpn_dmg = 0;
+			ProjectileAtk[i].origin_x = 0.0f;
+			ProjectileAtk[i].origin_y = 0.0f;
+			ProjectileAtk[i].origin_z = 0.0f;
+			ProjectileAtk[i].tlast_x = 0.0f;
+			ProjectileAtk[i].tlast_y = 0.0f;
+			ProjectileAtk[i].ranged_id = 0;
+			ProjectileAtk[i].ammo_id = 0;
+			ProjectileAtk[i].ammo_slot = 0;
+			ProjectileAtk[i].skill = 0;
+			ProjectileAtk[i].speed_mod = 0.0f;
+		}
+
+		else {
+			ProjectileAtk[i].increment++;
+		}
+	}
+
+	if (disable)
+		SetProjectileAttack(false);
 }
 
 void NPC::RangedAttack(Mob* other)
@@ -1180,8 +1351,6 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 		(GetAppearance() == eaDead)){
 		return;
 	}
-	//send item animation, also does the throw animation
-	SendItemAnimation(GetTarget(), item, SkillThrowing);
 
 	DoThrowingAttackDmg(GetTarget(), RangeWeapon, item);
 
@@ -1191,21 +1360,78 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 	CommonBreakInvisible();
 }
 
-void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item_Struct* item, uint16 weapon_damage, int16 chance_mod,int16 focus, int ReuseTime)
+void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item_Struct* AmmoItem, uint16 weapon_damage, int16 chance_mod,int16 focus, int ReuseTime, uint32 range_id, int AmmoSlot, float speed)
 {
-	if (!CanDoSpecialAttack(other))
+	if ((other == nullptr || 
+		((IsClient() && CastToClient()->dead) || 
+		(other->IsClient() && other->CastToClient()->dead)) || 
+		HasDied() || 
+		(!IsAttackAllowed(other)) ||
+		(other->GetInvul() || 
+		other->GetSpecialAbility(IMMUNE_MELEE))))
+	{
 		return;
+	}
 
-	if (!other->CheckHitChance(this, SkillThrowing, MainPrimary, chance_mod)){
+	const ItemInst* _RangeWeapon = nullptr;
+	const Item_Struct* ammo_lost = nullptr;
+
+	/*
+	If LaunchProjectile is false this function will do archery damage on target,
+	otherwise it will shoot the projectile at the target, once the projectile hits target
+	this function is then run again to do the damage portion
+	*/
+	bool LaunchProjectile = false;
+	bool ProjectileMiss = false;
+
+	if (RuleB(Combat, ProjectileDmgOnImpact)){
+
+		if (AmmoItem)
+			LaunchProjectile = true;
+		else{
+			if (!RangeWeapon && range_id){
+
+				if (weapon_damage == 0)
+					ProjectileMiss = true; //This indicates that MISS was originally calculated.
+
+				if (IsClient()){
+
+					_RangeWeapon = CastToClient()->m_inv[AmmoSlot];
+					if (_RangeWeapon && _RangeWeapon->GetItem() && _RangeWeapon->GetItem()->ID != range_id)
+						RangeWeapon = _RangeWeapon;
+					else
+						ammo_lost = database.GetItem(range_id);
+				}
+			}
+		}
+	}
+	else if (AmmoItem)
+		SendItemAnimation(other, AmmoItem, SkillThrowing);
+
+	if (ProjectileMiss || !other->CheckHitChance(this, SkillThrowing, MainPrimary, chance_mod)){
 		mlog(COMBAT__RANGED, "Ranged attack missed %s.", other->GetName());
-		other->Damage(this, 0, SPELL_UNKNOWN, SkillThrowing);
+		if (LaunchProjectile){
+			TryProjectileAttack(other, AmmoItem, SkillThrowing, 0, RangeWeapon, nullptr, AmmoSlot, speed);
+			return;
+		}
+		else
+			other->Damage(this, 0, SPELL_UNKNOWN, SkillThrowing);
 	} else {
 		mlog(COMBAT__RANGED, "Throwing attack hit %s.", other->GetName());
 
 		int16 WDmg = 0;
 
-		if (!weapon_damage && item != nullptr)
-			WDmg = GetWeaponDamage(other, item);
+		if (!weapon_damage){
+			if (IsClient() && RangeWeapon)
+				WDmg = GetWeaponDamage(other, RangeWeapon);
+			else if (AmmoItem)
+				WDmg = GetWeaponDamage(other, AmmoItem);
+
+			if (LaunchProjectile){
+				TryProjectileAttack(other, AmmoItem, SkillThrowing, WDmg, RangeWeapon, nullptr, AmmoSlot, speed);
+				return;
+			}
+		}
 		else 
 			WDmg = weapon_damage;
 
@@ -1242,7 +1468,7 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 		other->AddToHateList(this, 2*WDmg, 0, false);
 		other->Damage(this, TotalDmg, SPELL_UNKNOWN, SkillThrowing);
 
-		if (TotalDmg > 0 && HasSkillProcSuccess() && GetTarget() && other && !other->HasDied()){
+		if (TotalDmg > 0 && HasSkillProcSuccess() && other && !other->HasDied()){
 			if (ReuseTime)
 				TrySkillProc(other, SkillThrowing, ReuseTime);
 			else
@@ -1250,19 +1476,24 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 		}
 	}
 
-	if((RangeWeapon != nullptr) && GetTarget() && other && (other->GetHP() > -10))
+	if (LaunchProjectile)
+		return;
+
+	//Throwing item Proc
+	if (ammo_lost)
+		TryWeaponProc(nullptr, ammo_lost, other, MainRange);
+	else if(RangeWeapon && other && !other->HasDied())
 		TryWeaponProc(RangeWeapon, other, MainRange);
 
-	if (HasSkillProcs() && GetTarget() && other && !other->HasDied()){
+	if (HasSkillProcs() && other && !other->HasDied()){
 		if (ReuseTime)
 			TrySkillProc(other, SkillThrowing, ReuseTime);
 		else
 			TrySkillProc(other, SkillThrowing, 0, false, MainRange);
 	}
-
 }
 
-void Mob::SendItemAnimation(Mob *to, const Item_Struct *item, SkillUseTypes skillInUse) {
+void Mob::SendItemAnimation(Mob *to, const Item_Struct *item, SkillUseTypes skillInUse, float velocity) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SomeItemPacketMaybe, sizeof(Arrow_Struct));
 	Arrow_Struct *as = (Arrow_Struct *) outapp->pBuffer;
 	as->type = 1;
@@ -1290,7 +1521,7 @@ void Mob::SendItemAnimation(Mob *to, const Item_Struct *item, SkillUseTypes skil
 
 		Arc causes the object to form an arc in motion. A value too high will
 	*/
-	as->velocity = 4.0;
+	as->velocity = velocity;
 
 	//these angle and tilt used together seem to make the arrow/knife throw as straight as I can make it
 

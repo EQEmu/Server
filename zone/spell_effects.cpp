@@ -6400,17 +6400,16 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 	return false;
 }
 
-bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id){
+bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id, float speed){
 
 	/*For mage 'Bolt' line and other various spells.
 	-This is mostly accurate for how the modern clients handle this effect.
 	-It was changed at some point to use an actual projectile as done here (opposed to a particle effect in classic)
-	-The projectile graphic appears to be that of 'Ball of Sunlight' ID 80648 and will be visible to anyone in SoF+
 	-There is no LOS check to prevent a bolt from being cast. If you don't have LOS your bolt simply goes into whatever barrier
 	and you lose your mana. If there is LOS the bolt will lock onto your target and the damage is applied when it hits the target.
 	-If your target moves the bolt moves with it in any direction or angle (consistent with other projectiles).
-	-The way this is written once a bolt is cast a timer checks the distance from the initial cast to the target repeatedly
-	and calculates at what predicted time the bolt should hit that target in client_process (therefore accounting for any target movement). 
+	-The way this is written once a bolt is cast a the distance from the initial cast to the target repeatedly
+	check and if target is moving recalculates at what predicted time the bolt should hit that target in client_process  
 	When bolt hits its predicted point the damage is then done to target.
 	Note: Projectile speed of 1 takes 3 seconds to go 100 distance units. Calculations are based on this constant.
 	Live Bolt speed: Projectile speed of X takes 5 seconds to go 300 distance units. 
@@ -6422,31 +6421,41 @@ bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id){
 		return false;
 	
 	uint8 anim = spells[spell_id].CastingAnim; 
-	int bolt_id = -1;
+	int slot = -1;
 
 	//Make sure there is an avialable bolt to be cast.
 	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) {
-		if (projectile_spell_id[i] == 0){
-			bolt_id = i;
+		if (ProjectileAtk[i].target_id == 0){
+			slot = i;
 			break;
 		}
 	}
 
-	if (bolt_id < 0)
+	if (slot < 0)
 		return false;
-
+	
 	if (CheckLosFN(spell_target)) {
 		
-		projectile_spell_id[bolt_id] = spell_id;
-		projectile_target_id[bolt_id] = spell_target->GetID();
-		projectile_x[bolt_id] = GetX(), projectile_y[bolt_id] = GetY(), projectile_z[bolt_id] = GetZ();
-		projectile_increment[bolt_id] = 1;
-		projectile_timer.Start(250);
+		float speed_mod = speed * 0.45f; //Constant for adjusting speeds to match calculated impact time.
+		float distance = spell_target->CalculateDistance(GetX(), GetY(), GetZ());
+		float hit = 60.0f + (distance / speed_mod);
+
+		ProjectileAtk[slot].increment = 1;
+		ProjectileAtk[slot].hit_increment = static_cast<uint16>(hit); //This projected hit time if target does NOT MOVE
+		ProjectileAtk[slot].target_id = spell_target->GetID();
+		ProjectileAtk[slot].wpn_dmg = spell_id; //Store spell_id in weapon damage field
+		ProjectileAtk[slot].origin_x = GetX();
+		ProjectileAtk[slot].origin_y = GetY();
+		ProjectileAtk[slot].origin_z = GetZ();
+		ProjectileAtk[slot].skill = SkillConjuration;
+		ProjectileAtk[slot].speed_mod = speed_mod;
+
+		SetProjectileAttack(true);
 	}
 
 	//This will use the correct graphic as defined in the player_1 field of spells_new table. Found in UF+ spell files.
 	if (RuleB(Spells, UseLiveSpellProjectileGFX)) {
-		ProjectileAnimation(spell_target,0, false, 1.5,0,0,0, spells[spell_id].player_1);
+		ProjectileAnimation(spell_target,0, false, speed,0,0,0, spells[spell_id].player_1);
 	}
 
 	//This allows limited support for server using older spell files that do not contain data for bolt graphics. 
@@ -6456,19 +6465,17 @@ bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id){
 		
 			if (IsClient()){
 				if (CastToClient()->GetClientVersionBit() <= 4) //Titanium needs alternate graphic.
-					ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_Titanium)), false, 1.5);
+					ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_Titanium)), false, speed);
 				else 
-					ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_SOF)), false, 1.5);
+					ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_SOF)), false, speed);
 				}
 		
 			else
-				ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_NPC)), false, 1.5);
-
+				ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_NPC)), false, speed);
 		}
-
 		//Default to an arrow if not using a mage bolt (Use up to date spell file and enable above rules for best results)
 		else
-			ProjectileAnimation(spell_target,0, 1, 1.5);
+			ProjectileAnimation(spell_target,0, 1, speed);
 	}
 
 	if (spells[spell_id].CastingAnim == 64)
