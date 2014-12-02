@@ -1734,16 +1734,17 @@ void QuestManager::sethp(int hpperc) {
 	owner->Damage(owner, newhp, SPELL_UNKNOWN, SkillHandtoHand, false, 0, false);
 }
 
-bool QuestManager::summonburriedplayercorpse(uint32 char_id, float dest_x, float dest_y, float dest_z, float dest_heading) {
+bool QuestManager::summonburriedplayercorpse(uint32 char_id, const xyz_heading& position) {
 	bool Result = false;
 
-	if(char_id > 0) {
-		Corpse* PlayerCorpse = database.SummonBuriedCharacterCorpses(char_id, zone->GetZoneID(), zone->GetInstanceID(), dest_x, dest_y, dest_z, dest_heading);
-		if(PlayerCorpse) {
-			Result = true;
-		}
-	}
-	return Result;
+	if(char_id <= 0)
+        return false;
+
+	Corpse* PlayerCorpse = database.SummonBuriedCharacterCorpses(char_id, zone->GetZoneID(), zone->GetInstanceID(), position.m_X, position.m_Y, position.m_Z, position.m_Heading);
+	if(!PlayerCorpse)
+		return false;
+
+	return true;
 }
 
 bool QuestManager::summonallplayercorpses(uint32 char_id, float dest_x, float dest_y, float dest_z, float dest_heading) {

@@ -485,7 +485,7 @@ void lua_toggle_spawn_event(int event_id, bool enable, bool strict, bool reset) 
 }
 
 void lua_summon_burried_player_corpse(uint32 char_id, float x, float y, float z, float h) {
-	quest_manager.summonburriedplayercorpse(char_id, x, y, z, h);
+	quest_manager.summonburriedplayercorpse(char_id, xyz_heading(x, y, z, h));
 }
 
 void lua_summon_all_player_corpses(uint32 char_id, float x, float y, float z, float h) {
