@@ -751,7 +751,8 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	spawn2_timer(1000),
 	qglobal_purge_timer(30000),
 	hotzone_timer(120000),
-	m_SafePoint(0.0f,0.0f,0.0f)
+	m_SafePoint(0.0f,0.0f,0.0f),
+	m_Graveyard(0.0f,0.0f,0.0f,0.0f)
 {
 	zoneid = in_zoneid;
 	instanceid = in_instanceid;
@@ -777,13 +778,8 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	memset(file_name, 0, sizeof(file_name));
 	long_name = 0;
 	aggroedmobs =0;
-
 	pgraveyard_id = 0;
 	pgraveyard_zoneid = 0;
-	pgraveyard_x = 0;
-	pgraveyard_y = 0;
-	pgraveyard_z = 0;
-	pgraveyard_heading = 0;
 	pMaxClients = 0;
 	pQueuedMerchantsWorkID = 0;
 	pvpzone = false;
@@ -793,7 +789,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	if(graveyard_id() > 0)
 	{
 		LogFile->write(EQEMuLog::Debug, "Graveyard ID is %i.", graveyard_id());
-		bool GraveYardLoaded = database.GetZoneGraveyard(graveyard_id(), &pgraveyard_zoneid, &pgraveyard_x, &pgraveyard_y, &pgraveyard_z, &pgraveyard_heading);
+		bool GraveYardLoaded = database.GetZoneGraveyard(graveyard_id(), &pgraveyard_zoneid, &m_Graveyard.m_X, &m_Graveyard.m_Y, &m_Graveyard.m_Z, &m_Graveyard.m_Heading);
 		if(GraveYardLoaded)
 			LogFile->write(EQEMuLog::Debug, "Loaded a graveyard for zone %s: graveyard zoneid is %u x is %f y is %f z is %f heading is %f.", short_name, graveyard_zoneid(), graveyard_x(), graveyard_y(), graveyard_z(), graveyard_heading());
 		else
@@ -1837,10 +1833,7 @@ bool Zone::HasGraveyard() {
 
 void Zone::SetGraveyard(uint32 zoneid, uint32 x, uint32 y, uint32 z, uint32 heading) {
 	pgraveyard_zoneid = zoneid;
-	pgraveyard_x = x;
-	pgraveyard_y = y;
-	pgraveyard_z = z;
-	pgraveyard_heading = heading;
+	m_Graveyard = xyz_heading(x, y, z, heading);
 }
 
 void Zone::LoadBlockedSpells(uint32 zoneid)

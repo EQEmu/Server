@@ -113,10 +113,10 @@ public:
 	inline const float&	safe_y()		{ return m_SafePoint.m_Y; }
 	inline const float&	safe_z()		{ return m_SafePoint.m_Z; }
 	inline const uint32& graveyard_zoneid()	{ return pgraveyard_zoneid; }
-	inline const float& graveyard_x()	{ return pgraveyard_x; }
-	inline const float& graveyard_y()	{ return pgraveyard_y; }
-	inline const float& graveyard_z()	{ return pgraveyard_z; }
-	inline const float& graveyard_heading() { return pgraveyard_heading; }
+	inline const float& graveyard_x()	{ return m_Graveyard.m_X; }
+	inline const float& graveyard_y()	{ return m_Graveyard.m_Y; }
+	inline const float& graveyard_z()	{ return m_Graveyard.m_Z; }
+	inline const float& graveyard_heading() { return m_Graveyard.m_Heading; }
 	inline const uint32& graveyard_id()	{ return pgraveyard_id; }
 
 	inline const uint32& GetMaxClients() { return pMaxClients; }
@@ -292,7 +292,7 @@ private:
 	uint8	zone_type;
 	bool	allow_mercs;
 	uint32	pgraveyard_id, pgraveyard_zoneid;
-	float	pgraveyard_x, pgraveyard_y, pgraveyard_z, pgraveyard_heading;
+	xyz_heading m_Graveyard;
 	int		default_ruleset;
 
 	int	totalBS;
