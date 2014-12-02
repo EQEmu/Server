@@ -297,7 +297,7 @@ public:
 	uint32		GetCharacterCorpseItemCount(uint32 corpse_id);
 	bool		LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct* pcs);
 	Corpse*		LoadCharacterCorpse(uint32 player_corpse_id);
-	Corpse*		SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_zoneid, uint16 dest_instanceid, float dest_x, float dest_y, float dest_z, float dest_heading);
+	Corpse*		SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_zoneid, uint16 dest_instanceid, const xyz_heading& position);
 	void		MarkCorpseAsRezzed(uint32 dbid);
 	bool		GetDecayTimes(npcDecayTimes_Struct* npcCorpseDecayTimes);
 	bool		BuryCharacterCorpse(uint32 dbid);

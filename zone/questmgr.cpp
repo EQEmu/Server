@@ -1740,7 +1740,7 @@ bool QuestManager::summonburriedplayercorpse(uint32 char_id, const xyz_heading& 
 	if(char_id <= 0)
         return false;
 
-	Corpse* PlayerCorpse = database.SummonBuriedCharacterCorpses(char_id, zone->GetZoneID(), zone->GetInstanceID(), position.m_X, position.m_Y, position.m_Z, position.m_Heading);
+	Corpse* PlayerCorpse = database.SummonBuriedCharacterCorpses(char_id, zone->GetZoneID(), zone->GetInstanceID(), position);
 	if(!PlayerCorpse)
 		return false;
 
