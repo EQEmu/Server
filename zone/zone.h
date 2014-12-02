@@ -109,9 +109,9 @@ public:
 
 	inline Timer* GetInstanceTimer() { return Instance_Timer; }
 
-	inline const float&	safe_x()		{ return psafe_x; }
-	inline const float&	safe_y()		{ return psafe_y; }
-	inline const float&	safe_z()		{ return psafe_z; }
+	inline const float&	safe_x()		{ return m_SafePoint.m_X; }
+	inline const float&	safe_y()		{ return m_SafePoint.m_Y; }
+	inline const float&	safe_z()		{ return m_SafePoint.m_Z; }
 	inline const uint32& graveyard_zoneid()	{ return pgraveyard_zoneid; }
 	inline const float& graveyard_x()	{ return pgraveyard_x; }
 	inline const float& graveyard_y()	{ return pgraveyard_y; }
@@ -281,7 +281,7 @@ private:
 	char*	long_name;
 	char*	map_name;
 	bool pvpzone;
-	float	psafe_x, psafe_y, psafe_z;
+	xyz_location m_SafePoint;
 	uint32	pMaxClients;
 	bool	can_bind;
 	bool	is_city;
