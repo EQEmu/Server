@@ -2100,7 +2100,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 bool ZoneDatabase::LoadMercInfo(Client *client) {
 
 	std::string query = StringFormat("SELECT MercID, Slot, Name, TemplateID, SuspendedTime, "
-                                    "IsSuspended, TimerRemaining, Gender, StanceID, HP, Mana, "
+                                    "IsSuspended, TimerRemaining, Gender, MercSize, StanceID, HP, Mana, "
                                     "Endurance, Face, LuclinHairStyle, LuclinHairColor, "
                                     "LuclinEyeColor, LuclinEyeColor2, LuclinBeardColor, LuclinBeard, "
                                     "DrakkinHeritage, DrakkinTattoo, DrakkinDetails "
@@ -2126,21 +2126,22 @@ bool ZoneDatabase::LoadMercInfo(Client *client) {
         client->GetMercInfo(slot).IsSuspended = atoi(row[5]) == 1 ? true : false;
 		client->GetMercInfo(slot).MercTimerRemaining = atoi(row[6]);
 		client->GetMercInfo(slot).Gender = atoi(row[7]);
+		client->GetMercInfo(slot).MercSize = atof(row[8]);
 		client->GetMercInfo(slot).State = 5;
-		client->GetMercInfo(slot).Stance = atoi(row[8]);
-		client->GetMercInfo(slot).hp = atoi(row[9]);
-		client->GetMercInfo(slot).mana = atoi(row[10]);
-		client->GetMercInfo(slot).endurance = atoi(row[11]);
-		client->GetMercInfo(slot).face = atoi(row[12]);
-		client->GetMercInfo(slot).luclinHairStyle = atoi(row[13]);
-		client->GetMercInfo(slot).luclinHairColor = atoi(row[14]);
-		client->GetMercInfo(slot).luclinEyeColor = atoi(row[15]);
-		client->GetMercInfo(slot).luclinEyeColor2 = atoi(row[16]);
-		client->GetMercInfo(slot).luclinBeardColor = atoi(row[17]);
-		client->GetMercInfo(slot).luclinBeard = atoi(row[18]);
-		client->GetMercInfo(slot).drakkinHeritage = atoi(row[19]);
-		client->GetMercInfo(slot).drakkinTattoo = atoi(row[20]);
-		client->GetMercInfo(slot).drakkinDetails = atoi(row[21]);
+		client->GetMercInfo(slot).Stance = atoi(row[9]);
+		client->GetMercInfo(slot).hp = atoi(row[10]);
+		client->GetMercInfo(slot).mana = atoi(row[11]);
+		client->GetMercInfo(slot).endurance = atoi(row[12]);
+		client->GetMercInfo(slot).face = atoi(row[13]);
+		client->GetMercInfo(slot).luclinHairStyle = atoi(row[14]);
+		client->GetMercInfo(slot).luclinHairColor = atoi(row[15]);
+		client->GetMercInfo(slot).luclinEyeColor = atoi(row[16]);
+		client->GetMercInfo(slot).luclinEyeColor2 = atoi(row[17]);
+		client->GetMercInfo(slot).luclinBeardColor = atoi(row[18]);
+		client->GetMercInfo(slot).luclinBeard = atoi(row[19]);
+		client->GetMercInfo(slot).drakkinHeritage = atoi(row[20]);
+		client->GetMercInfo(slot).drakkinTattoo = atoi(row[21]);
+		client->GetMercInfo(slot).drakkinDetails = atoi(row[22]);
     }
 
 	return true;
@@ -2154,7 +2155,7 @@ bool ZoneDatabase::LoadCurrentMerc(Client *client) {
         return false;
 
     std::string query = StringFormat("SELECT MercID, Name, TemplateID, SuspendedTime, "
-                                    "IsSuspended, TimerRemaining, Gender, StanceID, HP, "
+                                    "IsSuspended, TimerRemaining, Gender, MercSize, StanceID, HP, "
                                     "Mana, Endurance, Face, LuclinHairStyle, LuclinHairColor, "
                                     "LuclinEyeColor, LuclinEyeColor2, LuclinBeardColor, "
                                     "LuclinBeard, DrakkinHeritage, DrakkinTattoo, DrakkinDetails "
@@ -2178,20 +2179,21 @@ bool ZoneDatabase::LoadCurrentMerc(Client *client) {
         client->GetMercInfo(slot).IsSuspended = atoi(row[4]) == 1? true: false;
         client->GetMercInfo(slot).MercTimerRemaining = atoi(row[5]);
 		client->GetMercInfo(slot).Gender = atoi(row[6]);
-		client->GetMercInfo(slot).State = atoi(row[7]);
-		client->GetMercInfo(slot).hp = atoi(row[8]);
-		client->GetMercInfo(slot).mana = atoi(row[9]);
-		client->GetMercInfo(slot).endurance = atoi(row[10]);
-		client->GetMercInfo(slot).face = atoi(row[11]);
-		client->GetMercInfo(slot).luclinHairStyle = atoi(row[12]);
-		client->GetMercInfo(slot).luclinHairColor = atoi(row[13]);
-		client->GetMercInfo(slot).luclinEyeColor = atoi(row[14]);
-		client->GetMercInfo(slot).luclinEyeColor2 = atoi(row[15]);
-		client->GetMercInfo(slot).luclinBeardColor = atoi(row[16]);
-		client->GetMercInfo(slot).luclinBeard = atoi(row[17]);
-		client->GetMercInfo(slot).drakkinHeritage = atoi(row[18]);
-		client->GetMercInfo(slot).drakkinTattoo = atoi(row[19]);
-		client->GetMercInfo(slot).drakkinDetails = atoi(row[20]);
+		client->GetMercInfo(slot).MercSize = atof(row[7]);
+		client->GetMercInfo(slot).State = atoi(row[8]);
+		client->GetMercInfo(slot).hp = atoi(row[9]);
+		client->GetMercInfo(slot).mana = atoi(row[10]);
+		client->GetMercInfo(slot).endurance = atoi(row[11]);
+		client->GetMercInfo(slot).face = atoi(row[12]);
+		client->GetMercInfo(slot).luclinHairStyle = atoi(row[13]);
+		client->GetMercInfo(slot).luclinHairColor = atoi(row[14]);
+		client->GetMercInfo(slot).luclinEyeColor = atoi(row[15]);
+		client->GetMercInfo(slot).luclinEyeColor2 = atoi(row[16]);
+		client->GetMercInfo(slot).luclinBeardColor = atoi(row[17]);
+		client->GetMercInfo(slot).luclinBeard = atoi(row[18]);
+		client->GetMercInfo(slot).drakkinHeritage = atoi(row[19]);
+		client->GetMercInfo(slot).drakkinTattoo = atoi(row[20]);
+		client->GetMercInfo(slot).drakkinDetails = atoi(row[21]);
 	}
 
 	return true;
@@ -2209,19 +2211,19 @@ bool ZoneDatabase::SaveMerc(Merc *merc) {
 		std::string query = StringFormat("INSERT INTO mercs "
 		"(OwnerCharacterID, Slot, Name, TemplateID, "
 		"SuspendedTime, IsSuspended, TimerRemaining, "
-		"Gender, StanceID, HP, Mana, Endurance, Face, "
+		"Gender, MercSize, StanceID, HP, Mana, Endurance, Face, "
 		"LuclinHairStyle, LuclinHairColor, LuclinEyeColor, "
 		"LuclinEyeColor2, LuclinBeardColor, LuclinBeard, "
 		"DrakkinHeritage, DrakkinTattoo, DrakkinDetails) "
 		"VALUES('%u', '%u', '%s', '%u', '%u', '%u', '%u', "
-		"'%u', '%u', '%u', '%u', '%u', '%i', '%i', '%i', "
+		"'%u', '%u', '%f', '%u', '%u', '%u', '%i', '%i', '%i', "
 		"'%i', '%i', '%i', '%i', '%i', '%i', '%i')",
 		merc->GetMercCharacterID(), owner->GetNumMercs(),
 		merc->GetCleanName(), merc->GetMercTemplateID(),
 		owner->GetMercInfo().SuspendedTime, merc->IsSuspended(),
 		owner->GetMercInfo().MercTimerRemaining, merc->GetGender(),
-		merc->GetStance(), merc->GetHP(), merc->GetMana(),
-		merc->GetEndurance(), merc->GetLuclinFace(),
+		merc->GetSize(), merc->GetStance(), merc->GetHP(),
+		merc->GetMana(), merc->GetEndurance(), merc->GetLuclinFace(),
 		merc->GetHairStyle(), merc->GetHairColor(), merc->GetEyeColor1(),
 		merc->GetEyeColor2(), merc->GetBeardColor(),
 		merc->GetBeard(), merc->GetDrakkinHeritage(),
@@ -2245,7 +2247,7 @@ bool ZoneDatabase::SaveMerc(Merc *merc) {
 	// Update existing merc record
 	std::string query = StringFormat("UPDATE mercs SET OwnerCharacterID = '%u', Slot = '%u', "
 	"Name = '%s', TemplateID = '%u', SuspendedTime = '%u', "
-	"IsSuspended = '%u', TimerRemaining = '%u', Gender = '%u', "
+	"IsSuspended = '%u', TimerRemaining = '%u', Gender = '%u', MercSize = '%f', "
 	"StanceID = '%u', HP = '%u', Mana = '%u', Endurance = '%u', "
 	"Face = '%i', LuclinHairStyle = '%i', LuclinHairColor = '%i', "
 	"LuclinEyeColor = '%i', LuclinEyeColor2 = '%i', LuclinBeardColor = '%i', "
@@ -2254,11 +2256,12 @@ bool ZoneDatabase::SaveMerc(Merc *merc) {
 	merc->GetMercCharacterID(), owner->GetMercSlot(), merc->GetCleanName(),
 	merc->GetMercTemplateID(), owner->GetMercInfo().SuspendedTime,
 	merc->IsSuspended(), owner->GetMercInfo().MercTimerRemaining,
-	merc->GetGender(), merc->GetStance(), merc->GetHP(), merc->GetMana(),
-	merc->GetEndurance(), merc->GetLuclinFace(), merc->GetHairStyle(),
-	merc->GetHairColor(), merc->GetEyeColor1(), merc->GetEyeColor2(),
-	merc->GetBeardColor(), merc->GetBeard(), merc->GetDrakkinHeritage(),
-	merc->GetDrakkinTattoo(), merc->GetDrakkinDetails(), merc->GetMercID());
+	merc->GetGender(), merc->GetSize(), merc->GetStance(), merc->GetHP(),
+	merc->GetMana(), merc->GetEndurance(), merc->GetLuclinFace(),
+	merc->GetHairStyle(), merc->GetHairColor(), merc->GetEyeColor1(),
+	merc->GetEyeColor2(), merc->GetBeardColor(), merc->GetBeard(),
+	merc->GetDrakkinHeritage(), merc->GetDrakkinTattoo(), merc->GetDrakkinDetails(),
+	merc->GetMercID());
 
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {

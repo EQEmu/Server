@@ -332,9 +332,7 @@ private:
 	int GroupLeadershipAAHealthRegeneration();
 	int GroupLeadershipAAOffenseEnhancement();
 
-	void GetMercSize();
-	void GenerateAppearance();
-
+	float GetDefaultSize();
 
 	bool LoadMercSpells();
 	bool CheckStance(int16 stance);

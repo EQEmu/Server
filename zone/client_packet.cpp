@@ -9619,7 +9619,7 @@ void Client::Handle_OP_MercenaryHire(const EQApplicationPacket *app)
 				TakeMoneyFromPP(cost, true);
 			}
 
-			// 0 is approved hire request
+			// approved hire request
 			SendMercMerchantResponsePacket(0);
 		}
 		else

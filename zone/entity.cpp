@@ -658,10 +658,12 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 
 void EntityList::AddMerc(Merc *merc, bool SendSpawnPacket, bool dontqueue)
 {
-	if (merc) {
+	if (merc)
+	{
 		merc->SetID(GetFreeID());
 
-		if (SendSpawnPacket) {
+		if (SendSpawnPacket)
+		{
 			if (dontqueue) {
 				// Send immediately
 				EQApplicationPacket *outapp = new EQApplicationPacket();
@@ -673,12 +675,10 @@ void EntityList::AddMerc(Merc *merc, bool SendSpawnPacket, bool dontqueue)
 				// Queue the packet
 				NewSpawn_Struct *ns = new NewSpawn_Struct;
 				memset(ns, 0, sizeof(NewSpawn_Struct));
-				merc->FillSpawnStruct(ns, merc);
+				merc->FillSpawnStruct(ns, 0);
 				AddToSpawnQueue(merc->GetID(), &ns);
 				safe_delete(ns);
 			}
-
-			//parse->EventMERC(EVENT_SPAWN, merc, nullptr, "", 0);
 		}
 
 		merc_list.insert(std::pair<uint16, Merc *>(merc->GetID(), merc));

@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/01/2014 ==
+Trevius: Mercenaries now spawn as the same Gender and Size of the Merchant they are purchased from.
+Trevius: Mercenaries now spawn with randomized facial features when purchased.
+Trevius: Setting a lastname for NPCs will now override any hard coded lastname (such as GM Trainers).
+
+Required SQL: utils/sql/git/required/2014_12_01_mercs_table_update.sql
 
 == 11/28/2014 ==
 Trevius: Fixed a zone crash related to numhits for spells.
