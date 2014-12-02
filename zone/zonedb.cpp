@@ -3352,13 +3352,13 @@ uint32 ZoneDatabase::CreateGraveyardRecord(uint32 graveyard_zone_id, float grave
 	}
 	return 0;
 }
-uint32 ZoneDatabase::SendCharacterCorpseToGraveyard(uint32 dbid, uint32 zone_id, uint16 instance_id, float x, float y, float z, float heading) {
-	std::string query = StringFormat(
-			"UPDATE `character_corpses` "
-			"SET `zone_id` = %u, `instance_id` = 0, `x` = %1.1f, `y` = %1.1f, `z` = %1.1f, `heading` = %1.1f, `was_at_graveyard` = 1 "
-			"WHERE `id` = %d",
-			zone_id, x, y, z, heading, dbid
-		);
+uint32 ZoneDatabase::SendCharacterCorpseToGraveyard(uint32 dbid, uint32 zone_id, uint16 instance_id, const xyz_heading& position) {
+	std::string query = StringFormat("UPDATE `character_corpses` "
+                                    "SET `zone_id` = %u, `instance_id` = 0, "
+                                    "`x` = %1.1f, `y` = %1.1f, `z` = %1.1f, `heading` = %1.1f, "
+                                    "`was_at_graveyard` = 1 "
+                                    "WHERE `id` = %d",
+                                    zone_id, position.m_X, position.m_Y, position.m_Z, position.m_Heading, dbid);
 	QueryDatabase(query);
 	return dbid;
 }

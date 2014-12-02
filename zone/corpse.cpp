@@ -769,8 +769,8 @@ bool Corpse::Process() {
 			Save();
 			player_corpse_depop = true;
 			database.SendCharacterCorpseToGraveyard(corpse_db_id, zone->graveyard_zoneid(),
-				(zone->GetZoneID() == zone->graveyard_zoneid()) ? zone->GetInstanceID() : 0, zone->graveyard_x(),
-				zone->graveyard_y(), zone->graveyard_z(), zone->graveyard_heading());
+				(zone->GetZoneID() == zone->graveyard_zoneid()) ? zone->GetInstanceID() : 0, xyz_heading(zone->graveyard_x(),
+				zone->graveyard_y(), zone->graveyard_z(), zone->graveyard_heading()));
 			corpse_graveyard_timer.Disable();
 			ServerPacket* pack = new ServerPacket(ServerOP_SpawnPlayerCorpse, sizeof(SpawnPlayerCorpse_Struct));
 			SpawnPlayerCorpse_Struct* spc = (SpawnPlayerCorpse_Struct*)pack->pBuffer;
