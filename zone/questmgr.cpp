@@ -241,11 +241,11 @@ void QuestManager::write(const char *file, const char *str) {
 	fclose (pFile);
 }
 
-Mob* QuestManager::spawn2(int npc_type, int grid, int unused, float x, float y, float z, float heading) {
+Mob* QuestManager::spawn2(int npc_type, int grid, int unused, const xyz_heading& position) {
 	const NPCType* tmp = 0;
 	if (tmp = database.GetNPCType(npc_type))
 	{
-		NPC* npc = new NPC(tmp, nullptr, xyz_heading(x, y, z, heading), FlyMode3);
+		NPC* npc = new NPC(tmp, nullptr, position, FlyMode3);
 		npc->AddLootTable();
 		entity_list.AddNPC(npc,true,true);
 		if(grid > 0)

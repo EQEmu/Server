@@ -56,7 +56,7 @@ public:
 	void me(const char *str);
 	void summonitem(uint32 itemid, int16 charges = -1);
 	void write(const char *file, const char *str);
-	Mob* spawn2(int npc_type, int grid, int unused, float x, float y, float z, float heading);
+	Mob* spawn2(int npc_type, int grid, int unused, const xyz_heading& position);
 	Mob* unique_spawn(int npc_type, int grid, int unused, float x, float y, float z, float heading = 0);
 	Mob* spawn_from_spawn2(uint32 spawn2_id);
 	void enable_spawn2(uint32 spawn2_id);

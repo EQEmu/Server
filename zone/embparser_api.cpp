@@ -218,11 +218,9 @@ XS(XS__spawn)
 	int	npc_type = (int)SvIV(ST(0));
 	int	grid = (int)SvIV(ST(1));
 	int	unused = (int)SvIV(ST(2));
-	float	x = (float)SvNV(ST(3));
-	float	y = (float)SvNV(ST(4));
-	float	z = (float)SvNV(ST(5));
+	auto position = xyz_heading((float)SvNV(ST(3)), (float)SvNV(ST(4)), (float)SvNV(ST(5)), 0.0f);
 
-	Mob *r = quest_manager.spawn2(npc_type, grid, unused, x, y, z, 0);
+	Mob *r = quest_manager.spawn2(npc_type, grid, unused, position);
 	RETVAL = (r != nullptr) ? r->GetID() : 0;
 	XSprePUSH; PUSHu((UV)RETVAL);
 
@@ -242,12 +240,9 @@ XS(XS__spawn2)
 	int	npc_type = (int)SvIV(ST(0));
 	int	grid = (int)SvIV(ST(1));
 	int	unused = (int)SvIV(ST(2));
-	float	x = (float)SvNV(ST(3));
-	float	y = (float)SvNV(ST(4));
-	float	z = (float)SvNV(ST(5));
-	float	heading = (float)SvNV(ST(6));
+	auto position = xyz_heading((float)SvNV(ST(3)), (float)SvNV(ST(4)), (float)SvNV(ST(5)), (float)SvNV(ST(6)));
 
-	Mob *r = quest_manager.spawn2(npc_type, grid, unused, x, y, z, heading);
+	Mob *r = quest_manager.spawn2(npc_type, grid, unused, position);
 	RETVAL = (r != nullptr) ? r->GetID() : 0;
 	XSprePUSH; PUSHu((UV)RETVAL);
 
