@@ -720,7 +720,8 @@ void Client::SetBindPoint(int to_zone, int to_instance, float new_x, float new_y
 		m_pp.binds[0].y = new_y;
 		m_pp.binds[0].z = new_z;
 	}
-	database.SaveCharacterBindPoint(this->CharacterID(), m_pp.binds[0].zoneId, m_pp.binds[0].instance_id, m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, 0, 0);
+	auto regularBindPoint = xyz_heading(m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, 0.0f);
+	database.SaveCharacterBindPoint(this->CharacterID(), m_pp.binds[0].zoneId, m_pp.binds[0].instance_id, regularBindPoint, 0);
 }
 
 void Client::GoToBind(uint8 bindnum) {
