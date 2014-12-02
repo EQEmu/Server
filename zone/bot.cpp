@@ -9128,7 +9128,7 @@ void Bot::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot, int16 *resist_adjust) {
 	bool Result = false;
 
-	if(zone && !zone->IsSpellBlocked(spell_id, GetX(), GetY(), GetZ())) {
+	if(zone && !zone->IsSpellBlocked(spell_id, GetPosition())) {
 
 		mlog(SPELLS__CASTING, "CastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item slot %d",
 			spells[spell_id].name, spell_id, target_id, slot, cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);

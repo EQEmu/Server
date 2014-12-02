@@ -521,7 +521,7 @@ bool Mob::DoCastingChecks()
 		return false;
 	}
 
-	if (zone->IsSpellBlocked(spell_id, GetX(), GetY(), GetZ())) {
+	if (zone->IsSpellBlocked(spell_id, GetPosition())) {
 		const char *msg = zone->GetSpellBlockedMessage(spell_id, GetPosition());
 		if (msg) {
 			Message(13, msg);
@@ -1893,7 +1893,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 
 	if(IsClient() && !CastToClient()->GetGM()){
 
-		if(zone->IsSpellBlocked(spell_id, GetX(), GetY(), GetZ())){
+		if(zone->IsSpellBlocked(spell_id, GetPosition())){
 			const char *msg = zone->GetSpellBlockedMessage(spell_id, GetPosition());
 			if(msg){
 				Message(13, msg);
