@@ -3796,7 +3796,7 @@ Corpse* ZoneDatabase::SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_z
         entity_list.AddCorpse(corpse);
         corpse->SetDecayTimer(RuleI(Character, CorpseDecayTimeMS));
         corpse->Spawn();
-        if (!UnburyCharacterCorpse(corpse->GetDBID(), dest_zone_id, dest_instance_id, position.m_X, position.m_Y, position.m_Z, position.m_Heading))
+        if (!UnburyCharacterCorpse(corpse->GetDBID(), dest_zone_id, dest_instance_id, position))
             LogFile->write(EQEMuLog::Error, "Unable to unbury a summoned player corpse for character id %u.", char_id);
 	}
 
@@ -3842,15 +3842,18 @@ bool ZoneDatabase::SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zone_id
 	return (CorpseCount > 0);
 }
 
-bool ZoneDatabase::UnburyCharacterCorpse(uint32 db_id, uint32 new_zone_id, uint16 new_instance_id, float new_x, float new_y, float new_z, float new_heading) {
-	std::string query = StringFormat(
-		"UPDATE `character_corpses` SET `is_buried` = 0, `zone_id` = %u, `instance_id` = %u, `x` = %f, `y` = %f, `z` = %f, `heading` = %f, `time_of_death` = Now(), `was_at_graveyard` = 0 WHERE `id` = %u",
-		new_zone_id, new_instance_id, new_x, new_y, new_z, new_heading, db_id
-	);
+bool ZoneDatabase::UnburyCharacterCorpse(uint32 db_id, uint32 new_zone_id, uint16 new_instance_id, const xyz_heading& position) {
+	std::string query = StringFormat("UPDATE `character_corpses` "
+                                    "SET `is_buried` = 0, `zone_id` = %u, `instance_id` = %u, "
+                                    "`x` = %f, `y` = %f, `z` = %f, `heading` = %f, "
+                                    "`time_of_death` = Now(), `was_at_graveyard` = 0 "
+                                    "WHERE `id` = %u",
+                                    new_zone_id, new_instance_id,
+                                    position.m_X, position.m_Y, position.m_Z, position.m_Heading, db_id);
 	auto results = QueryDatabase(query);
-	if (results.Success() && results.RowsAffected() != 0){
+	if (results.Success() && results.RowsAffected() != 0)
 		return true;
-	}
+
 	return false;
 }
 
