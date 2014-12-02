@@ -1590,157 +1590,157 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 		uint32 DrakkinDetails = 0xFFFFFFFF;
 
 		// Set some common feature settings
-		EyeColor1 = MakeRandomInt(0, 9);
-		EyeColor2 = MakeRandomInt(0, 9);
-		LuclinFace = MakeRandomInt(0, 7);
+		EyeColor1 = zone->random.Int(0, 9);
+		EyeColor2 = zone->random.Int(0, 9);
+		LuclinFace = zone->random.Int(0, 7);
 
 		// Adjust all settings based on the min and max for each feature of each race and gender
 		switch (GetRace())
 		{
 			case 1:	// Human
-				HairColor = MakeRandomInt(0, 19);
+				HairColor = zone->random.Int(0, 19);
 				if (Gender == 0) {
 					BeardColor = HairColor;
-					HairStyle = MakeRandomInt(0, 3);
-					Beard = MakeRandomInt(0, 5);
+					HairStyle = zone->random.Int(0, 3);
+					Beard = zone->random.Int(0, 5);
 				}
 				if (Gender == 1) {
-					HairStyle = MakeRandomInt(0, 2);
+					HairStyle = zone->random.Int(0, 2);
 				}
 				break;
 			case 2:	// Barbarian
-				HairColor = MakeRandomInt(0, 19);
-				LuclinFace = MakeRandomInt(0, 87);
+				HairColor = zone->random.Int(0, 19);
+				LuclinFace = zone->random.Int(0, 87);
 				if (Gender == 0) {
 					BeardColor = HairColor;
-					HairStyle = MakeRandomInt(0, 3);
-					Beard = MakeRandomInt(0, 5);
+					HairStyle = zone->random.Int(0, 3);
+					Beard = zone->random.Int(0, 5);
 				}
 				if (Gender == 1) {
-					HairStyle = MakeRandomInt(0, 2);
+					HairStyle = zone->random.Int(0, 2);
 				}
 				break;
 			case 3: // Erudite
 				if (Gender == 0) {
-					BeardColor = MakeRandomInt(0, 19);
-					Beard = MakeRandomInt(0, 5);
-					LuclinFace = MakeRandomInt(0, 57);
+					BeardColor = zone->random.Int(0, 19);
+					Beard = zone->random.Int(0, 5);
+					LuclinFace = zone->random.Int(0, 57);
 				}
 				if (Gender == 1) {
-					LuclinFace = MakeRandomInt(0, 87);
+					LuclinFace = zone->random.Int(0, 87);
 				}
 				break;
 			case 4: // WoodElf
-				HairColor = MakeRandomInt(0, 19);
+				HairColor = zone->random.Int(0, 19);
 				if (Gender == 0) {
-					HairStyle = MakeRandomInt(0, 3);
+					HairStyle = zone->random.Int(0, 3);
 				}
 				if (Gender == 1) {
-					HairStyle = MakeRandomInt(0, 2);
+					HairStyle = zone->random.Int(0, 2);
 				}
 				break;
 			case 5: // HighElf
-				HairColor = MakeRandomInt(0, 14);
+				HairColor = zone->random.Int(0, 14);
 				if (Gender == 0) {
-					HairStyle = MakeRandomInt(0, 3);
-					LuclinFace = MakeRandomInt(0, 37);
+					HairStyle = zone->random.Int(0, 3);
+					LuclinFace = zone->random.Int(0, 37);
 					BeardColor = HairColor;
 				}
 				if (Gender == 1) {
-					HairStyle = MakeRandomInt(0, 2);
+					HairStyle = zone->random.Int(0, 2);
 				}
 				break;
 			case 6: // DarkElf
-				HairColor = MakeRandomInt(13, 18);
+				HairColor = zone->random.Int(13, 18);
 				if (Gender == 0) {
-					HairStyle = MakeRandomInt(0, 3);
-					LuclinFace = MakeRandomInt(0, 37);
+					HairStyle = zone->random.Int(0, 3);
+					LuclinFace = zone->random.Int(0, 37);
 					BeardColor = HairColor;
 				}
 				if (Gender == 1) {
-					HairStyle = MakeRandomInt(0, 2);
+					HairStyle = zone->random.Int(0, 2);
 				}
 				break;
 			case 7: // HalfElf
-				HairColor = MakeRandomInt(0, 19);
+				HairColor = zone->random.Int(0, 19);
 				if (Gender == 0) {
-					HairStyle = MakeRandomInt(0, 3);
-					LuclinFace = MakeRandomInt(0, 37);
+					HairStyle = zone->random.Int(0, 3);
+					LuclinFace = zone->random.Int(0, 37);
 					BeardColor = HairColor;
 				}
 				if (Gender == 1) {
-					HairStyle = MakeRandomInt(0, 2);
+					HairStyle = zone->random.Int(0, 2);
 				}
 				break;
 			case 8: // Dwarf
-				HairColor = MakeRandomInt(0, 19);
+				HairColor = zone->random.Int(0, 19);
 				BeardColor = HairColor;
 				if (Gender == 0) {
-					HairStyle = MakeRandomInt(0, 3);
-					Beard = MakeRandomInt(0, 5);
+					HairStyle = zone->random.Int(0, 3);
+					Beard = zone->random.Int(0, 5);
 				}
 				if (Gender == 1) {
-					HairStyle = MakeRandomInt(0, 2);
-					LuclinFace = MakeRandomInt(0, 17);
+					HairStyle = zone->random.Int(0, 2);
+					LuclinFace = zone->random.Int(0, 17);
 				}
 				break;
 			case 9: // Troll
-				EyeColor1 = MakeRandomInt(0, 10);
-				EyeColor2 = MakeRandomInt(0, 10);
+				EyeColor1 = zone->random.Int(0, 10);
+				EyeColor2 = zone->random.Int(0, 10);
 				if (Gender == 1) {
-					HairStyle = MakeRandomInt(0, 3);
-					HairColor = MakeRandomInt(0, 23);
+					HairStyle = zone->random.Int(0, 3);
+					HairColor = zone->random.Int(0, 23);
 				}
 				break;
 			case 10: // Ogre
 				if (Gender == 1) {
-					HairStyle = MakeRandomInt(0, 3);
-					HairColor = MakeRandomInt(0, 23);
+					HairStyle = zone->random.Int(0, 3);
+					HairColor = zone->random.Int(0, 23);
 				}
 				break;
 			case 11: // Halfling
-				HairColor = MakeRandomInt(0, 19);
+				HairColor = zone->random.Int(0, 19);
 				if (Gender == 0) {
 					BeardColor = HairColor;
-					HairStyle = MakeRandomInt(0, 3);
-					Beard = MakeRandomInt(0, 5);
+					HairStyle = zone->random.Int(0, 3);
+					Beard = zone->random.Int(0, 5);
 				}
 				if (Gender == 1) {
-					HairStyle = MakeRandomInt(0, 2);
+					HairStyle = zone->random.Int(0, 2);
 				}
 				break;
 			case 12: // Gnome
-				HairColor = MakeRandomInt(0, 24);
+				HairColor = zone->random.Int(0, 24);
 				if (Gender == 0) {
 					BeardColor = HairColor;
-					HairStyle = MakeRandomInt(0, 3);
-					Beard = MakeRandomInt(0, 5);
+					HairStyle = zone->random.Int(0, 3);
+					Beard = zone->random.Int(0, 5);
 				}
 				if (Gender == 1) {
-					HairStyle = MakeRandomInt(0, 2);
+					HairStyle = zone->random.Int(0, 2);
 				}
 				break;
 			case 128: // Iksar
 			case 130: // VahShir
 				break;
 			case 330: // Froglok
-				LuclinFace = MakeRandomInt(0, 9);
+				LuclinFace = zone->random.Int(0, 9);
 			case 522: // Drakkin
-				HairColor = MakeRandomInt(0, 3);
+				HairColor = zone->random.Int(0, 3);
 				BeardColor = HairColor;
-				EyeColor1 = MakeRandomInt(0, 11);
-				EyeColor2 = MakeRandomInt(0, 11);
-				LuclinFace = MakeRandomInt(0, 6);
-				DrakkinHeritage = MakeRandomInt(0, 6);
-				DrakkinTattoo = MakeRandomInt(0, 7);
-				DrakkinDetails = MakeRandomInt(0, 7);
+				EyeColor1 = zone->random.Int(0, 11);
+				EyeColor2 = zone->random.Int(0, 11);
+				LuclinFace = zone->random.Int(0, 6);
+				DrakkinHeritage = zone->random.Int(0, 6);
+				DrakkinTattoo = zone->random.Int(0, 7);
+				DrakkinDetails = zone->random.Int(0, 7);
 				if (Gender == 0) {
-					Beard = MakeRandomInt(0, 12);
-					HairStyle = MakeRandomInt(0, 8);
+					Beard = zone->random.Int(0, 12);
+					HairStyle = zone->random.Int(0, 8);
 				}
 				if (Gender == 1) {
-					Beard = MakeRandomInt(0, 3);
-					HairStyle = MakeRandomInt(0, 7);
+					Beard = zone->random.Int(0, 3);
+					HairStyle = zone->random.Int(0, 7);
 				}
 				break;
 			default:
