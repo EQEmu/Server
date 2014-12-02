@@ -1525,7 +1525,7 @@ void QuestManager::ding() {
 void QuestManager::rebind(int zoneid, float x, float y, float z) {
 	QuestManagerCurrentQuestVars();
 	if(initiator && initiator->IsClient()) {
-		initiator->SetBindPoint(zoneid, x, y, z);
+		initiator->SetBindPoint(zoneid, 0, xyz_location(x, y, z));
 	}
 }
 

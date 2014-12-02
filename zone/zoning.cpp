@@ -705,7 +705,7 @@ void NPC::Gate() {
 	Mob::Gate();
 }
 
-void Client::SetBindPoint(int to_zone, int to_instance, float new_x, float new_y, float new_z) {
+void Client::SetBindPoint(int to_zone, int to_instance, const xyz_location& location) {
 	if (to_zone == -1) {
 		m_pp.binds[0].zoneId = zone->GetZoneID();
 		m_pp.binds[0].instance_id = (zone->GetInstanceID() != 0 && zone->IsInstancePersistent()) ? zone->GetInstanceID() : 0;
@@ -716,9 +716,9 @@ void Client::SetBindPoint(int to_zone, int to_instance, float new_x, float new_y
 	else {
 		m_pp.binds[0].zoneId = to_zone;
 		m_pp.binds[0].instance_id = to_instance;
-		m_pp.binds[0].x = new_x;
-		m_pp.binds[0].y = new_y;
-		m_pp.binds[0].z = new_z;
+		m_pp.binds[0].x = location.m_X;
+		m_pp.binds[0].y = location.m_Y;
+		m_pp.binds[0].z = location.m_Z;
 	}
 	auto regularBindPoint = xyz_heading(m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, 0.0f);
 	database.SaveCharacterBindPoint(this->CharacterID(), m_pp.binds[0].zoneId, m_pp.binds[0].instance_id, regularBindPoint, 0);
