@@ -5930,7 +5930,7 @@ Merc* Client::GetMerc() {
 	if(GetMercID() == 0)
 	{
 		if (MERC_DEBUG > 0)
-			//Message(7, "Mercenary Debug: GetMerc 0.");
+			Message(7, "Mercenary Debug: GetMerc 0.");
 		return (nullptr);
 	}
 
@@ -5950,9 +5950,6 @@ Merc* Client::GetMerc() {
 			Message(7, "Mercenary Debug: GetMerc Owner Mismatch.");
 		return (nullptr);
 	}
-	
-	if (MERC_DEBUG > 0)
-		//Message(7, "Mercenary Debug: GetMerc Success.");
 
 	return (tmp);
 }
