@@ -63,7 +63,7 @@ void Corpse::SendLootReqErrorPacket(Client* client, uint8 response) {
 	safe_delete(outapp);
 }
 
-Corpse* Corpse::LoadFromDBData(uint32 in_dbid, uint32 in_charid, std::string in_charname, float in_x, float in_y, float in_z, float in_heading, std::string time_of_death, bool rezzed, bool was_at_graveyard)
+Corpse* Corpse::LoadFromDBData(uint32 in_dbid, uint32 in_charid, std::string in_charname, const xyz_heading& position, std::string time_of_death, bool rezzed, bool was_at_graveyard)
 {
 	uint32 item_count = database.GetCharacterCorpseItemCount(in_dbid);
 	char *buffer = new char[sizeof(PlayerCorpse_Struct) + (item_count * sizeof(player_lootitem::ServerLootItem_Struct))];
@@ -90,10 +90,10 @@ Corpse* Corpse::LoadFromDBData(uint32 in_dbid, uint32 in_charid, std::string in_
 		pcs->silver,		   // uint32 in_silver
 		pcs->gold,			   // uint32 in_gold
 		pcs->plat,			   // uint32 in_plat
-		in_x,				   // float in_x
-		in_y,				   // float in_y
-		in_z,				   // float in_z
-		in_heading,			   // float in_heading
+		position.m_X,		   // float in_x
+		position.m_Y,		   // float in_y
+		position.m_Z,		   // float in_z
+		position.m_Heading,	   // float in_heading
 		pcs->size,			   // float in_size
 		pcs->gender,		   // uint8 in_gender
 		pcs->race,			   // uint16 in_race

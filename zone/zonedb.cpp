@@ -3785,10 +3785,7 @@ Corpse* ZoneDatabase::SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_z
 			atoll(row[0]), 			 // uint32 in_dbid
 			char_id, 				 // uint32 in_charid
 			row[1], 				 // char* in_charname
-			position.m_X, 		     // float in_x
-			position.m_Y, 			 // float in_y
-			position.m_Z, 			 // float in_z
-			position.m_Heading, 	 // float in_heading
+			position,
 			row[2], 				 // char* time_of_death
 			atoi(row[3]) == 1, 		 // bool rezzed
 			false					 // bool was_at_graveyard
@@ -3827,10 +3824,7 @@ bool ZoneDatabase::SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zone_id
 			atoll(row[0]),
 			char_id,
 			row[1],
-			position.m_X,
-			position.m_Y,
-			position.m_Z,
-			position.m_Heading,
+			position,
 			row[2],
 			atoi(row[3]) == 1,
 			false);
@@ -3868,14 +3862,12 @@ Corpse* ZoneDatabase::LoadCharacterCorpse(uint32 player_corpse_id) {
 	);
 	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
+        auto position = xyz_heading(atof(row[3]), atof(row[4]), atof(row[5]), atof(row[6]));
 		NewCorpse = Corpse::LoadFromDBData(
 				atoll(row[0]), 		 // id					  uint32 in_dbid
 				atoll(row[1]),		 // charid				  uint32 in_charid
 				row[2], 			 //	char_name
-				atof(row[3]), 		 // x					  float in_x
-				atof(row[4]), 		 // y					  float in_y
-				atof(row[5]),		 // z					  float in_z
-				atof(row[6]),		 // heading				  float in_heading
+				position,
 				row[7],				 // time_of_death		  char* time_of_death
 				atoi(row[8]) == 1, 	 // is_rezzed			  bool rezzed
 				atoi(row[9])		 // was_at_graveyard	  bool was_at_graveyard
@@ -3896,26 +3888,13 @@ bool ZoneDatabase::LoadCharacterCorpses(uint32 zone_id, uint16 instance_id) {
 
 	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		// std::cout << row[0] << std::endl;
-		// std::cout << row[1] << std::endl;
-		// std::cout << row[2] << std::endl;
-		// std::cout << row[3] << std::endl;
-		// std::cout << row[4] << std::endl;
-		// std::cout << row[5] << std::endl;
-		// std::cout << row[6] << std::endl;
-		// std::cout << row[7] << std::endl;
-		// std::cout << row[8] << std::endl;
-		// std::cout << row[9] << std::endl;
-
+        auto position = xyz_heading(atof(row[3]), atof(row[4]), atof(row[5]), atof(row[6]));
 		entity_list.AddCorpse(
 			 Corpse::LoadFromDBData(
 				atoll(row[0]), 		  // id					  uint32 in_dbid
 				atoll(row[1]), 		  // charid				  uint32 in_charid
 				row[2], 			  //					  char_name
-				atof(row[3]),		  // x					  float in_x
-				atof(row[4]), 		  // y					  float in_y
-				atof(row[5]), 		  // z					  float in_z
-				atof(row[6]), 		  // heading			  float in_heading
+				position,
 				row[7], 			  // time_of_death		  char* time_of_death
 				atoi(row[8]) == 1, 	  // is_rezzed			  bool rezzed
 				atoi(row[9]))
