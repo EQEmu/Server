@@ -241,7 +241,7 @@ public:
 	uint8 lootvar;
 
 	bool	HasGraveyard();
-	void	SetGraveyard(uint32 zoneid, uint32 x, uint32 y, uint32 z, uint32 heading);
+	void	SetGraveyard(uint32 zoneid, const xyz_heading& graveyardPosition);
 
 	void		LoadBlockedSpells(uint32 zoneid);
 	void		ClearBlockedSpells();

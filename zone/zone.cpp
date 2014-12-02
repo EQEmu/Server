@@ -1831,9 +1831,9 @@ bool Zone::HasGraveyard() {
 	return Result;
 }
 
-void Zone::SetGraveyard(uint32 zoneid, uint32 x, uint32 y, uint32 z, uint32 heading) {
+void Zone::SetGraveyard(uint32 zoneid, const xyz_heading& graveyardPosition) {
 	pgraveyard_zoneid = zoneid;
-	m_Graveyard = xyz_heading(x, y, z, heading);
+	m_Graveyard = graveyardPosition;
 }
 
 void Zone::LoadBlockedSpells(uint32 zoneid)
