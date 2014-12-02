@@ -828,6 +828,7 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const Ite
 	this function is then run again to do the damage portion
 	*/
 	bool LaunchProjectile = false;
+	bool ProjectileImpact = false;
 	bool ProjectileMiss = false;
 
 	if (RuleB(Combat, ProjectileDmgOnImpact)){
@@ -843,6 +844,8 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const Ite
 			*/
 			
 			if (!RangeWeapon && !Ammo && range_id && ammo_id){
+
+				ProjectileImpact = true;
 
 				if (weapon_damage == 0)
 					ProjectileMiss = true; //This indicates that MISS was originally calculated.
@@ -865,7 +868,7 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const Ite
 	else if (AmmoItem)
 		SendItemAnimation(other, AmmoItem, SkillArchery);
 
-	if (ProjectileMiss || !other->CheckHitChance(this, SkillArchery, MainPrimary, chance_mod)) {
+	if (ProjectileMiss || (!ProjectileImpact && !other->CheckHitChance(this, SkillArchery, MainPrimary, chance_mod))) {
 		mlog(COMBAT__RANGED, "Ranged attack missed %s.", other->GetName());
 
 		if (LaunchProjectile){
@@ -1382,6 +1385,7 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 	this function is then run again to do the damage portion
 	*/
 	bool LaunchProjectile = false;
+	bool ProjectileImpact = false;
 	bool ProjectileMiss = false;
 
 	if (RuleB(Combat, ProjectileDmgOnImpact)){
@@ -1390,6 +1394,8 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 			LaunchProjectile = true;
 		else{
 			if (!RangeWeapon && range_id){
+
+				ProjectileImpact = true;
 
 				if (weapon_damage == 0)
 					ProjectileMiss = true; //This indicates that MISS was originally calculated.
@@ -1408,7 +1414,7 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 	else if (AmmoItem)
 		SendItemAnimation(other, AmmoItem, SkillThrowing);
 
-	if (ProjectileMiss || !other->CheckHitChance(this, SkillThrowing, MainPrimary, chance_mod)){
+	if (ProjectileMiss || (!ProjectileImpact && !other->CheckHitChance(this, SkillThrowing, MainPrimary, chance_mod))){
 		mlog(COMBAT__RANGED, "Ranged attack missed %s.", other->GetName());
 		if (LaunchProjectile){
 			TryProjectileAttack(other, AmmoItem, SkillThrowing, 0, RangeWeapon, nullptr, AmmoSlot, speed);
