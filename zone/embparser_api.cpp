@@ -269,7 +269,8 @@ XS(XS__unique_spawn)
 	if(items == 7)
 		heading = (float)SvNV(ST(6));
 
-	Mob *r =  quest_manager.unique_spawn(npc_type, grid, unused, x, y, z, heading);
+
+	Mob *r =  quest_manager.unique_spawn(npc_type, grid, unused, xyz_heading(x, y, z, heading));
 	RETVAL = (r != nullptr) ? r->GetID() : 0;
 
 	XSprePUSH; PUSHu((UV)RETVAL);

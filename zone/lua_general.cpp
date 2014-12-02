@@ -256,8 +256,8 @@ Lua_Mob lua_spawn2(int npc_type, int grid, int unused, double x, double y, doubl
 }
 
 Lua_Mob lua_unique_spawn(int npc_type, int grid, int unused, double x, double y, double z, double heading = 0.0) {
-	return Lua_Mob(quest_manager.unique_spawn(npc_type, grid, unused,
-		static_cast<float>(x), static_cast<float>(y), static_cast<float>(z), static_cast<float>(heading)));
+    auto position = xyz_heading(x,y,z,heading);
+	return Lua_Mob(quest_manager.unique_spawn(npc_type, grid, unused, position));
 }
 
 Lua_Mob lua_spawn_from_spawn2(uint32 spawn2_id) {

@@ -258,7 +258,7 @@ Mob* QuestManager::spawn2(int npc_type, int grid, int unused, const xyz_heading&
 	return nullptr;
 }
 
-Mob* QuestManager::unique_spawn(int npc_type, int grid, int unused, float x, float y, float z, float heading) {
+Mob* QuestManager::unique_spawn(int npc_type, int grid, int unused, const xyz_heading& position) {
 	Mob *other = entity_list.GetMobByNpcTypeID(npc_type);
 	if(other != nullptr) {
 		return other;
@@ -267,7 +267,7 @@ Mob* QuestManager::unique_spawn(int npc_type, int grid, int unused, float x, flo
 	const NPCType* tmp = 0;
 	if (tmp = database.GetNPCType(npc_type))
 	{
-		NPC* npc = new NPC(tmp, nullptr, xyz_heading(x, y, z, heading), FlyMode3);
+		NPC* npc = new NPC(tmp, nullptr, position, FlyMode3);
 		npc->AddLootTable();
 		entity_list.AddNPC(npc,true,true);
 		if(grid > 0)
