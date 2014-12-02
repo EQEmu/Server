@@ -1026,7 +1026,7 @@ void SetConsumption(int32 in_hunger, int32 in_thirst);
 	void DoItemEnterZone();
 	bool DoItemEnterZone(uint32 slot_x, uint32 slot_y); // behavior change: 'slot_y' is now [RANGE]_END and not [RANGE]_END + 1
 	void SummonAndRezzAllCorpses();
-	void SummonAllCorpses(float dest_x, float dest_y, float dest_z, float dest_heading);
+	void SummonAllCorpses(const xyz_heading& position);
 	void DepopAllCorpses();
 	void DepopPlayerCorpse(uint32 dbid);
 	void BuryPlayerCorpses();

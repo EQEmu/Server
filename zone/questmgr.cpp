@@ -1753,7 +1753,7 @@ bool QuestManager::summonallplayercorpses(uint32 char_id, const xyz_heading& pos
         return false;
 
 	Client* c = entity_list.GetClientByCharID(char_id);
-	c->SummonAllCorpses(position.m_X, position.m_Y, position.m_Z, position.m_Heading);
+	c->SummonAllCorpses(position);
 
 	return true;
 }
