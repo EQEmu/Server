@@ -4927,8 +4927,7 @@ void Client::SummonAndRezzAllCorpses()
 
 	entity_list.RemoveAllCorpsesByCharID(CharacterID());
 
-	int CorpseCount = database.SummonAllCharacterCorpses(CharacterID(), zone->GetZoneID(), zone->GetInstanceID(),
-								GetX(), GetY(), GetZ(), GetHeading());
+	int CorpseCount = database.SummonAllCharacterCorpses(CharacterID(), zone->GetZoneID(), zone->GetInstanceID(), GetPosition());
 	if(CorpseCount <= 0)
 	{
 		Message(clientMessageYellow, "You have no corpses to summnon.");
@@ -4966,7 +4965,7 @@ void Client::SummonAllCorpses(float dest_x, float dest_y, float dest_z, float de
 	entity_list.RemoveAllCorpsesByCharID(CharacterID());
 
 	int CorpseCount = database.SummonAllCharacterCorpses(CharacterID(), zone->GetZoneID(), zone->GetInstanceID(),
-								dest_x, dest_y, dest_z, dest_heading);
+								xyz_heading(dest_x, dest_y, dest_z, dest_heading));
 	if(CorpseCount <= 0)
 	{
 		return;
