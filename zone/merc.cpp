@@ -62,7 +62,7 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 		skills[r] = database.GetSkillCap(GetClass(),(SkillUseTypes)r,GetLevel());
 	}
 
-	GetMercSize();
+	size = d->size;
 	CalcBonuses();
 
 	SetHP(GetMaxHP());
@@ -112,131 +112,66 @@ void Merc::CalcBonuses()
 	rooted = FindType(SE_Root);
 }
 
-void Merc::GetMercSize() {
+float Merc::GetDefaultSize() {
 
 	float MercSize = GetSize();
 
-	switch(this->GetRace()) {
-					case 1: // Humans have no race bonus
-						break;
-					case 2: // Barbarian
-						MercSize = 7.0;
-						break;
-					case 3: // Erudite
-						break;
-					case 4: // Wood Elf
-						MercSize = 5.0;
-						break;
-					case 5: // High Elf
-						break;
-					case 6: // Dark Elf
-						MercSize = 5.0;
-						break;
-					case 7: // Half Elf
-						MercSize = 5.5;
-						break;
-					case 8: // Dwarf
-						MercSize = 4.0;
-						break;
-					case 9: // Troll
-						MercSize = 8.0;
-						break;
-					case 10: // Ogre
-						MercSize = 9.0;
-						break;
-					case 11: // Halfling
-						MercSize = 3.5;
-						break;
-					case 12: // Gnome
-						MercSize = 3.0;
-						break;
-					case 128: // Iksar
-						break;
-					case 130: // Vah Shir
-						MercSize = 7.0;
-						break;
-					case 330: // Froglok
-						MercSize = 5.0;
-						break;
-					case 522: // Drakkin
-						MercSize = 5.0;
-						break;
+	switch(this->GetRace())
+	{
+		case 1: // Humans
+			MercSize = 6.0;
+			break;
+		case 2: // Barbarian
+			MercSize = 7.0;
+			break;
+		case 3: // Erudite
+			MercSize = 6.0;
+			break;
+		case 4: // Wood Elf
+			MercSize = 5.0;
+			break;
+		case 5: // High Elf
+			MercSize = 6.0;
+			break;
+		case 6: // Dark Elf
+			MercSize = 5.0;
+			break;
+		case 7: // Half Elf
+			MercSize = 5.5;
+			break;
+		case 8: // Dwarf
+			MercSize = 4.0;
+			break;
+		case 9: // Troll
+			MercSize = 8.0;
+			break;
+		case 10: // Ogre
+			MercSize = 9.0;
+			break;
+		case 11: // Halfling
+			MercSize = 3.5;
+			break;
+		case 12: // Gnome
+			MercSize = 3.0;
+			break;
+		case 128: // Iksar
+			MercSize = 6.0;
+			break;
+		case 130: // Vah Shir
+			MercSize = 7.0;
+			break;
+		case 330: // Froglok
+			MercSize = 5.0;
+			break;
+		case 522: // Drakkin
+			MercSize = 5.0;
+			break;
+		default:
+			MercSize = 6.0;
+			break;
 	}
 
-	this->size = MercSize;
-}
-
-void Merc::GenerateAppearance() {
-	// Randomize facial appearance
-	int iFace = 0;
-	if(this->GetRace() == 2) { // Barbarian w/Tatoo
-		iFace = MakeRandomInt(0, 79);
-	}
-	else {
-		iFace = MakeRandomInt(0, 7);
-	}
-
-	int iHair = 0;
-	int iBeard = 0;
-	int iBeardColor = 1;
-	if(this->GetRace() == 522) {
-		iHair = MakeRandomInt(0, 8);
-		iBeard = MakeRandomInt(0, 11);
-		iBeardColor = MakeRandomInt(0, 3);
-	}
-	else if(this->GetGender()) {
-		iHair = MakeRandomInt(0, 2);
-		if(this->GetRace() == 8) { // Dwarven Females can have a beard
-			if(MakeRandomInt(1, 100) < 50) {
-				iFace += 10;
-			}
-		}
-	}
-	else {
-		iHair = MakeRandomInt(0, 3);
-		iBeard = MakeRandomInt(0, 5);
-		iBeardColor = MakeRandomInt(0, 19);
-	}
-
-	int iHairColor = 0;
-	if(this->GetRace() == 522) {
-		iHairColor = MakeRandomInt(0, 3);
-	}
-	else {
-		iHairColor = MakeRandomInt(0, 19);
-	}
-
-	uint8 iEyeColor1 = (uint8)MakeRandomInt(0, 9);
-	uint8 iEyeColor2 = 0;
-	if(this->GetRace() == 522) {
-		iEyeColor1 = iEyeColor2 = (uint8)MakeRandomInt(0, 11);
-	}
-	else if(MakeRandomInt(1, 100) > 96) {
-		iEyeColor2 = MakeRandomInt(0, 9);
-	}
-	else {
-		iEyeColor2 = iEyeColor1;
-	}
-
-	int iHeritage = 0;
-	int iTattoo = 0;
-	int iDetails = 0;
-	if(this->GetRace() == 522) {
-		iHeritage = MakeRandomInt(0, 6);
-		iTattoo = MakeRandomInt(0, 7);
-		iDetails = MakeRandomInt(0, 7);
-	}
-
-	this->luclinface = iFace;
-	this->hairstyle = iHair;
-	this->beard = iBeard;
-	this->beardcolor = iBeardColor;
-	this->haircolor = iHairColor;
-	this->eyecolor1 = iEyeColor1;
-	this->eyecolor2 = iEyeColor2;
-	this->drakkin_heritage = iHeritage;
-	this->drakkin_tattoo = iTattoo;
-	this->drakkin_details = iDetails;
+	return MercSize;
 }
 
 int Merc::CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat)
@@ -1258,7 +1193,6 @@ void Merc::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.guildrank = 0;
 		ns->spawn.showhelm = 1;
 		ns->spawn.flymode = 0;
-		ns->spawn.size = 0;
 		ns->spawn.NPC = 1;                                      // 0=player,1=npc,2=pc corpse,3=npc corpse
 		ns->spawn.IsMercenary = 1;
 
@@ -4940,22 +4874,37 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 				}
 				snprintf(npc_type->name, 64, "%s", c->GetMercInfo().merc_name);
 			}
-			uint8 gender = 0;
-			if(merchant_id > 0) {
+
+			npc_type->race = merc_template->RaceID;
+
+			// Use the Gender and Size of the Merchant if possible
+			uint8 tmpgender = 0;
+			float tmpsize = 6.0f;
+			if(merchant_id > 0)
+			{
 				NPC* tar = entity_list.GetNPCByID(merchant_id);
-				if(tar) {
-					gender = Mob::GetDefaultGender(npc_type->race, tar->GetGender());
+				if(tar)
+				{
+					tmpgender = tar->GetGender();
+					tmpsize = tar->GetSize();
 				}
+				else
+				{
+					tmpgender = Mob::GetDefaultGender(npc_type->race, c->GetMercInfo().Gender);
+				}
+
 			}
-			else {
-				gender = c->GetMercInfo().Gender;
+			else
+			{
+				tmpgender = c->GetMercInfo().Gender;
+				tmpsize = c->GetMercInfo().MercSize;
 			}
 
-			sprintf(npc_type->lastname, "%s's %s", c->GetName(), "Mercenary");
-			npc_type->gender = gender;
+			sprintf(npc_type->lastname, "%s's Mercenary", c->GetName());
+			npc_type->gender = tmpgender;
+			npc_type->size = tmpsize;
 			npc_type->loottable_id = 0; // Loottable has to be 0, otherwise we'll be leavin' some corpses!
 			npc_type->npc_id = 0; //NPC ID has to be 0, otherwise db gets all confuzzled.
-			npc_type->race = merc_template->RaceID;
 			npc_type->class_ = merc_template->ClassID;
 			npc_type->maxlevel = 0; //We should hard-set this to override scalerate's functionality in the NPC class when it is constructed.
 
@@ -4975,6 +4924,7 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 					snprintf(merc->name, 64, "%s", c->GetMercInfo().merc_name);
 					merc->SetSuspended(c->GetMercInfo().IsSuspended);
 					merc->gender = c->GetMercInfo().Gender;
+					merc->size = c->GetMercInfo().MercSize;
 					merc->SetHP(c->GetMercInfo().hp <= 0 ? merc->GetMaxHP() : c->GetMercInfo().hp);
 					merc->SetMana(c->GetMercInfo().hp <= 0 ? merc->GetMaxMana() : c->GetMercInfo().mana);
 					merc->SetEndurance(c->GetMercInfo().endurance);
@@ -4988,6 +4938,11 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 					merc->drakkin_heritage = c->GetMercInfo().drakkinHeritage;
 					merc->drakkin_tattoo = c->GetMercInfo().drakkinTattoo;
 					merc->drakkin_details = c->GetMercInfo().drakkinDetails;
+				}
+				else
+				{
+					// Give Random Features to newly hired Mercs
+					merc->RandomizeFeatures(false, true);
 				}
 
 				if(merc->GetMercID()) {
@@ -5008,7 +4963,8 @@ void Merc::UpdateMercInfo(Client *c) {
 	snprintf(c->GetMercInfo().merc_name, 64, "%s", name);
 	c->GetMercInfo().mercid = GetMercID();
 	c->GetMercInfo().IsSuspended = IsSuspended();
-	c->GetMercInfo().Gender = gender;
+	c->GetMercInfo().Gender = GetGender();
+	c->GetMercInfo().MercSize = GetSize();
 	c->GetMercInfo().hp = GetHP();
 	c->GetMercInfo().mana = GetMana();
 	c->GetMercInfo().endurance = GetEndurance();
@@ -5558,6 +5514,11 @@ void Client::SpawnMercOnZone() {
 			Message(7, "Mercenary Debug: SpawnMercOnZone Suspended Merc.");
 		}
 	}
+	else
+	{
+		// No Merc Hired
+		SendClearMercInfo();
+	}
 }
 
 void Client::SendMercTimer(Merc* merc) {
@@ -5604,10 +5565,7 @@ void Client::SpawnMerc(Merc* merc, bool setMaxStats) {
 	SetMerc(merc);
 	merc->Unsuspend(setMaxStats);
 	merc->SetStance(GetMercInfo().Stance);
-	GetMercInfo().SuspendedTime = 0;
 
-	//SendMercTimer(merc);
-	
 	if (MERC_DEBUG > 0)
 		Message(7, "Mercenary Debug: SpawnMerc Success.");
 
@@ -5666,7 +5624,6 @@ bool Client::MercOnlyOrNoGroup() {
 bool Merc::Unsuspend(bool setMaxStats) {
 
 	Client* mercOwner = nullptr;
-	bool loaded = false;
 
 	if(GetMercOwner()) {
 		mercOwner = GetMercOwner();
@@ -5694,12 +5651,8 @@ bool Merc::Unsuspend(bool setMaxStats) {
 		if(!mercOwner->GetPTimers().Expired(&database, pTimerMercSuspend, false))
 			mercOwner->GetPTimers().Clear(&database, pTimerMercSuspend);
 
-		MercJoinClientGroup();
-
-		if(loaded)
+		if (MercJoinClientGroup())
 		{
-			LoadMercSpells();
-
 			if(setMaxStats)
 			{
 				SetHP(GetMaxHP());
@@ -6073,7 +6026,7 @@ void Client::SetMerc(Merc* newmerc) {
 		GetMercInfo().IsSuspended = newmerc->IsSuspended();
 		GetMercInfo().SuspendedTime = 0;
 		GetMercInfo().Gender = newmerc->GetGender();
-		//GetMercInfo().State = newmerc->GetStance();
+		GetMercInfo().State = newmerc->IsSuspended() ? MERC_STATE_SUSPENDED : MERC_STATE_NORMAL;
 		snprintf(GetMercInfo().merc_name, 64, "%s", newmerc->GetName());
 		if (MERC_DEBUG > 0)
 			Message(7, "Mercenary Debug: SetMerc New Merc.");

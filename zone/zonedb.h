@@ -181,6 +181,7 @@ struct MercInfo {
 	bool	IsSuspended;
 	uint32	MercTimerRemaining;
 	uint8	Gender;
+	float	MercSize;
 	int32	State;
 	uint32	Stance;
 	int32	hp;
