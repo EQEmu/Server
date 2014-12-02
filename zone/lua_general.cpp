@@ -489,7 +489,7 @@ void lua_summon_burried_player_corpse(uint32 char_id, float x, float y, float z,
 }
 
 void lua_summon_all_player_corpses(uint32 char_id, float x, float y, float z, float h) {
-	quest_manager.summonallplayercorpses(char_id, x, y, z, h);
+	quest_manager.summonallplayercorpses(char_id, xyz_heading(x, y, z, h));
 }
 
 int lua_get_player_burried_corpse_count(uint32 char_id) {

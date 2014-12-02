@@ -1765,12 +1765,9 @@ XS(XS__summonallplayercorpses)
 
 	bool RETVAL;
 	uint32	char_id = (int)SvIV(ST(0));
-	float	dest_x = (float)SvIV(ST(1));
-	float	dest_y = (float)SvIV(ST(2));
-	float	dest_z = (float)SvIV(ST(3));
-	float	dest_heading = (float)SvIV(ST(4));
+	auto position = xyz_heading((float)SvIV(ST(1)),(float)SvIV(ST(2)),(float)SvIV(ST(3)),(float)SvIV(ST(4)));
 
-	RETVAL = quest_manager.summonallplayercorpses(char_id, dest_x, dest_y, dest_z, dest_heading);
+	RETVAL = quest_manager.summonallplayercorpses(char_id, position);
 
 	ST(0) = boolSV(RETVAL);
 	sv_2mortal(ST(0));
