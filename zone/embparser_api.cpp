@@ -1392,7 +1392,7 @@ XS(XS__moveto)
 	else
 		saveguard = false;
 
-	quest_manager.moveto(x, y, z, h, saveguard);
+	quest_manager.moveto(xyz_heading(x, y, z, h), saveguard);
 
 	XSRETURN_EMPTY;
 }

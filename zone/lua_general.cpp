@@ -421,15 +421,15 @@ void lua_pause(int duration) {
 }
 
 void lua_move_to(float x, float y, float z) {
-	quest_manager.moveto(x, y, z, 0, false);
+	quest_manager.moveto(xyz_heading(x, y, z, 0.0f), false);
 }
 
 void lua_move_to(float x, float y, float z, float h) {
-	quest_manager.moveto(x, y, z, h, false);
+	quest_manager.moveto(xyz_heading(x, y, z, h), false);
 }
 
 void lua_move_to(float x, float y, float z, float h, bool save_guard_spot) {
-	quest_manager.moveto(x, y, z, h, save_guard_spot);
+	quest_manager.moveto(xyz_heading(x, y, z, h), save_guard_spot);
 }
 
 void lua_path_resume() {
