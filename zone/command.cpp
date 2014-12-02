@@ -8459,7 +8459,7 @@ void command_setgraveyard(Client *c, const Seperator *sep)
 	zoneid = database.GetZoneID(sep->arg[1]);
 
 	if(zoneid > 0) {
-		graveyard_id = database.CreateGraveyardRecord(zoneid, t->GetX(), t->GetY(), t->GetZ(), t->GetHeading());
+		graveyard_id = database.CreateGraveyardRecord(zoneid, t->GetPosition());
 
 		if(graveyard_id > 0) {
 			c->Message(0, "Successfuly added a new record for this graveyard!");
