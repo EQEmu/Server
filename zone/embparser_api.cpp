@@ -1321,11 +1321,9 @@ XS(XS__rebind)
 		Perl_croak(aTHX_ "Usage: rebind(zoneid, x, y, z)");
 
 	int	zoneid = (int)SvIV(ST(0));
-	float	x = (float)SvNV(ST(1));
-	float	y = (float)SvNV(ST(2));
-	float	z = (float)SvNV(ST(3));
+	auto location = xyz_location((float)SvNV(ST(1)),(float)SvNV(ST(2)),(float)SvNV(ST(3)));
 
-	quest_manager.rebind(zoneid, x, y, z);
+	quest_manager.rebind(zoneid, location);
 
 	XSRETURN_EMPTY;
 }

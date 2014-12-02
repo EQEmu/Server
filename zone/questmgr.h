@@ -131,7 +131,7 @@ public:
 	void targlobal(const char *varname, const char *value, const char *duration, int npcid, int charid, int zoneid);
 	void delglobal(const char *varname);
 	void ding();
-	void rebind(int zoneid, float x, float y, float z);
+	void rebind(int zoneid, const xyz_location& location);
 	void start(int wp);
 	void stop();
 	void pause(int duration);
