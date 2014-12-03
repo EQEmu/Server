@@ -366,7 +366,7 @@ public:
 	void		AddWP(Client *c, uint32 gridid, uint32 wpnum, const xyz_heading& position, uint32 pause, uint16 zoneid);
 	uint32		AddWPForSpawn(Client *c, uint32 spawn2id, const xyz_heading& position, uint32 pause, int type1, int type2, uint16 zoneid);
 	void		ModifyGrid(Client *c, bool remove, uint32 id, uint8 type = 0, uint8 type2 = 0, uint16 zoneid = 0);
-	void		ModifyWP(Client *c, uint32 grid_id, uint32 wp_num, float xpos, float ypos, float zpos, uint32 script = 0, uint16 zoneid = 0);
+	void		ModifyWP(Client *c, uint32 grid_id, uint32 wp_num, const xyz_location& location, uint32 script = 0, uint16 zoneid = 0);
 	uint8		GetGridType(uint32 grid, uint32 zoneid);
 	uint8		GetGridType2(uint32 grid, uint16 zoneid);
 	bool		GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* wp);
