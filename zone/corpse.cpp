@@ -90,10 +90,7 @@ Corpse* Corpse::LoadFromDBData(uint32 in_dbid, uint32 in_charid, std::string in_
 		pcs->silver,		   // uint32 in_silver
 		pcs->gold,			   // uint32 in_gold
 		pcs->plat,			   // uint32 in_plat
-		position.m_X,		   // float in_x
-		position.m_Y,		   // float in_y
-		position.m_Z,		   // float in_z
-		position.m_Heading,	   // float in_heading
+		position,
 		pcs->size,			   // float in_size
 		pcs->gender,		   // uint8 in_gender
 		pcs->race,			   // uint16 in_race
@@ -423,7 +420,7 @@ std::list<uint32> Corpse::MoveItemToCorpse(Client *client, ItemInst *item, int16
 
 // To be called from LoadFromDBData
 // Mongrel: added see_invis and see_invis_undead
-Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, ItemList* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, float in_x, float in_y, float in_z, float in_heading, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture,uint32 in_rezexp, bool wasAtGraveyard)
+Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, ItemList* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, const xyz_heading& position, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture,uint32 in_rezexp, bool wasAtGraveyard)
 : Mob("Unnamed_Corpse",
 "",
 0,
@@ -437,7 +434,7 @@ in_level,
 0,
 in_size,
 0,
-xyz_heading(in_x, in_y,in_z,in_heading),
+position,
 0,
 in_texture,
 in_helmtexture,
@@ -503,9 +500,9 @@ in_helmtexture,
 	this->platinum = in_plat;
 	rezzexp = in_rezexp;
 
-	for (int i = 0; i < MAX_LOOTERS; i++){
+	for (int i = 0; i < MAX_LOOTERS; i++)
 		allowed_looters[i] = 0;
-	}
+
 	SetPKItem(0);
 }
 
