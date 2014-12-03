@@ -4945,7 +4945,7 @@ void Client::SummonAndRezzAllCorpses()
 void Client::SummonAllCorpses(const xyz_heading& position)
 {
     auto summonLocation = position;
-	if(position.m_X == 0.0f && position.m_Y == 0.0f && position.m_Z == 0.0f && position.m_Heading == 0.0f)
+	if(position.isOrigin() && position.m_Heading == 0.0f)
         summonLocation = GetPosition();
 
 	ServerPacket *Pack = new ServerPacket(ServerOP_DepopAllPlayersCorpses, sizeof(ServerDepopAllPlayersCorpses_Struct));
