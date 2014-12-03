@@ -1799,15 +1799,7 @@ void command_itemtest(Client *c, const Seperator *sep)
 void command_gassign(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(1) && c->GetTarget() && c->GetTarget()->IsNPC())
-	{
-        auto npcBind = c->GetTarget()->CastToNPC()->m_SpawnPoint;
-		database.AssignGrid(
-			c,
-			npcBind.m_X,
-			npcBind.m_Y,
-			atoi(sep->arg[1])
-		);
-	}
+		database.AssignGrid(c, c->GetTarget()->CastToNPC()->m_SpawnPoint, atoi(sep->arg[1]));
 	else
 		c->Message(0,"Usage: #gassign [num] - must have an npc target!");
 }

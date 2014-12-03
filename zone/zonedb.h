@@ -370,7 +370,7 @@ public:
 	uint8		GetGridType(uint32 grid, uint32 zoneid);
 	uint8		GetGridType2(uint32 grid, uint16 zoneid);
 	bool		GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* wp);
-	void		AssignGrid(Client *client, float x, float y, uint32 id);
+	void		AssignGrid(Client *client, const xy_location& location, uint32 id);
 	int			GetHighestGrid(uint32 zoneid);
 	int			GetHighestWaypoint(uint32 zoneid, uint32 gridid);
 

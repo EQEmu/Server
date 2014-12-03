@@ -9,9 +9,14 @@ xy_location::xy_location(float x, float y) :
     m_Y(y) {
 }
 
-const xy_location xy_location::operator -(const xy_location& rhs) {
+xy_location xy_location::operator -(const xy_location& rhs) const {
     xy_location minus(m_X - rhs.m_X, m_Y - rhs.m_Y);
     return minus;
+}
+
+xy_location xy_location::operator +(const xy_location& rhs) const {
+    xy_location addition(m_X + rhs.m_X, m_Y + rhs.m_Y);
+    return addition;
 }
 
 xyz_heading::xyz_heading(float x, float y, float z, float heading) :
@@ -91,11 +96,11 @@ xyz_location::operator xy_location() const {
     return xy_location(m_X, m_Y);
 }
 
-const xyz_location xyz_location::operator -(const xyz_location& rhs) const {
+xyz_location xyz_location::operator -(const xyz_location& rhs) const {
     return xyz_location(m_X - rhs.m_X, m_Y - rhs.m_Y, m_Z - rhs.m_Z);
 }
 
-const xyz_location xyz_location::operator +(const xyz_location& rhs) const {
+xyz_location xyz_location::operator +(const xyz_location& rhs) const {
     return xyz_location(m_X + rhs.m_X, m_Y + rhs.m_Y, m_Z + rhs.m_Z);
 }
 
@@ -115,6 +120,50 @@ std::string to_string(const xyz_location &position){
 
 std::string to_string(const xy_location &position){
     return StringFormat("(%.3f, %.3f)", position.m_X,position.m_Y);
+}
+
+/**
+* Produces the non square root'ed distance between the two points within the XY plane.
+*/
+float ComparativeDistance(const xy_location& point1, const xy_location& point2) {
+    auto diff = point1 - point2;
+    return diff.m_X * diff.m_X + diff.m_Y * diff.m_Y;
+}
+
+/**
+* Produces the distance between the two points on the XY plane.
+*/
+float Distance(const xy_location& point1, const xy_location& point2) {
+    return sqrt(ComparativeDistance(point1, point2));
+}
+
+/**
+* Produces the non square root'ed distance between the two points.
+*/
+float ComparativeDistance(const xyz_location& point1, const xyz_location& point2) {
+    auto diff = point1 - point2;
+    return diff.m_X * diff.m_X + diff.m_Y * diff.m_Y + diff.m_Z * diff.m_Z;
+}
+
+/**
+* Produces the distance between the two points.
+*/
+float Distance(const xyz_location& point1, const xyz_location& point2) {
+    return sqrt(ComparativeDistance(point1, point2));
+}
+
+/**
+* Produces the distance between the two points within the XY plane.
+*/
+float DistanceNoZ(const xyz_location& point1, const xyz_location& point2) {
+    return Distance(static_cast<xy_location>(point1),static_cast<xy_location>(point2));
+}
+
+/**
+* Produces the non square root'ed distance between the two points within the XY plane.
+*/
+float ComparativeDistanceNoZ(const xyz_location& point1, const xyz_location& point2) {
+    return ComparativeDistance(static_cast<xy_location>(point1),static_cast<xy_location>(point2));
 }
 
 /**

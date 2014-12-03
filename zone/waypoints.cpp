@@ -1046,15 +1046,14 @@ bool ZoneDatabase::GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* 
     return true;
 }
 
-void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
+void ZoneDatabase::AssignGrid(Client *client, const xy_location& location, uint32 grid)
 {
 	int matches = 0, fuzzy = 0, spawn2id = 0;
-	float dbx = 0, dby = 0;
 
 	// looks like most of the stuff in spawn2 is straight integers
 	// so let's try that first
 	std::string query = StringFormat("SELECT id, x, y FROM spawn2 WHERE zone = '%s' AND x = %i AND y = %i",
-                                    zone->GetShortName(), (int)x, (int)y);
+                                    zone->GetShortName(), (int)location.m_X, (int)location.m_Y);
     auto results = QueryDatabase(query);
 	if(!results.Success()) {
 		LogFile->write(EQEMuLog::Error, "Error querying spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
@@ -1068,7 +1067,7 @@ void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
         query = StringFormat("SELECT id,x,y FROM spawn2 WHERE zone='%s' AND "
                             "ABS( ABS(x) - ABS(%f) ) < %f AND "
                             "ABS( ABS(y) - ABS(%f) ) < %f",
-                            zone->GetShortName(), x, _GASSIGN_TOLERANCE, y, _GASSIGN_TOLERANCE);
+                            zone->GetShortName(), location.m_X, _GASSIGN_TOLERANCE, location.m_Y, _GASSIGN_TOLERANCE);
         results = QueryDatabase(query);
 		if (!results.Success()) {
 			LogFile->write(EQEMuLog::Error, "Error querying fuzzy spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
@@ -1094,8 +1093,7 @@ void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
     auto row = results.begin();
 
     spawn2id = atoi(row[0]);
-	dbx = atof(row[1]);
-	dby = atof(row[2]);
+    xy_location dbLocation = xy_location(atof(row[1]), atof(row[2]));
 
 	query = StringFormat("UPDATE spawn2 SET pathgrid = %d WHERE id = %d", grid, spawn2id);
 	results = QueryDatabase(query);
@@ -1120,7 +1118,7 @@ void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
         return;
     }
 
-    float difference = sqrtf(pow(fabs(x - dbx) , 2) + pow(fabs(y - dby), 2));
+    float difference = sqrtf(pow(fabs(location.m_X - dbLocation.m_X) , 2) + pow(fabs(location.m_Y - dbLocation.m_Y), 2));
     client->Message(0, "Grid assign: spawn2 id = %d updated - fuzzy match: deviation %f", spawn2id, difference);
 }
 

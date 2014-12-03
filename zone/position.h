@@ -27,7 +27,8 @@ public:
 
     xy_location(float x = 0.0f, float y = 0.0f);
 
-    const xy_location operator -(const xy_location& rhs);
+    xy_location operator -(const xy_location& rhs) const;
+    xy_location operator +(const xy_location& rhs) const;
 };
 
 class xyz_location {
@@ -43,8 +44,8 @@ public:
 
     operator xy_location() const;
 
-    const xyz_location operator -(const xyz_location& rhs) const;
-    const xyz_location operator +(const xyz_location& rhs) const;
+    xyz_location operator -(const xyz_location& rhs) const;
+    xyz_location operator +(const xyz_location& rhs) const;
 
     void ABS_XYZ();
     bool isOrigin() const { return m_X == 0 && m_Y == 0 && m_Z == 0;}
@@ -85,5 +86,12 @@ std::string to_string(const xy_location &position);
 
 bool IsWithinAxisAlignedBox(const xyz_location &position, const xyz_location &minimum, const xyz_location &maximum);
 bool IsWithinAxisAlignedBox(const xy_location &position, const xy_location &minimum, const xy_location &maximum);
+
+float ComparativeDistance(const xy_location& point1, const xy_location& point2);
+float Distance(const xy_location& point1, const xy_location& point2);
+float ComparativeDistance(const xyz_location& point1, const xyz_location& point2);
+float Distance(const xyz_location& point1, const xyz_location& point2);
+float DistanceNoZ(const xyz_location& point1, const xyz_location& point2);
+float ComparativeDistanceNoZ(const xyz_location& point1, const xyz_location& point2);
 
 #endif
