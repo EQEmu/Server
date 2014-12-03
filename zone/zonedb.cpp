@@ -2471,10 +2471,11 @@ void ZoneDatabase::DeleteMerchantTemp(uint32 npcid, uint32 slot){
 
 }
 
-bool ZoneDatabase::UpdateZoneSafeCoords(const char* zonename, float x=0, float y=0, float z=0) {
+bool ZoneDatabase::UpdateZoneSafeCoords(const char* zonename, const xyz_location& location) {
 
 	std::string query = StringFormat("UPDATE zone SET safe_x='%f', safe_y='%f', safe_z='%f' "
-                                    "WHERE short_name='%s';", x, y, z, zonename);
+                                    "WHERE short_name='%s';",
+                                    location.m_X, location.m_Y, location.m_Z, zonename);
 	auto results = QueryDatabase(query);
 	if (!results.Success() || results.RowsAffected() == 0)
 		return false;
