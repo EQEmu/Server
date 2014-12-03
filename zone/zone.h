@@ -111,6 +111,7 @@ public:
 
     inline xyz_location GetSafePoint() { return m_SafePoint; }
 	inline const uint32& graveyard_zoneid()	{ return pgraveyard_zoneid; }
+	inline xyz_heading GetGraveyardPoint() { return m_Graveyard; }
 	inline const float& graveyard_x()	{ return m_Graveyard.m_X; }
 	inline const float& graveyard_y()	{ return m_Graveyard.m_Y; }
 	inline const float& graveyard_z()	{ return m_Graveyard.m_Z; }
