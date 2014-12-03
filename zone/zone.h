@@ -109,6 +109,7 @@ public:
 
 	inline Timer* GetInstanceTimer() { return Instance_Timer; }
 
+    inline xyz_heading GetSafePoint() { return m_SafePoint; }
 	inline const float&	safe_x()		{ return m_SafePoint.m_X; }
 	inline const float&	safe_y()		{ return m_SafePoint.m_Y; }
 	inline const float&	safe_z()		{ return m_SafePoint.m_Z; }
