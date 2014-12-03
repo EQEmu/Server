@@ -590,7 +590,7 @@ bool Corpse::Save() {
 
 	/* Create New Corpse*/
 	if (corpse_db_id == 0) {
-		corpse_db_id = database.SaveCharacterCorpse(char_id, orgname, zone->GetZoneID(), zone->GetInstanceID(), dbpc, m_Position.m_X, m_Position.m_Y, m_Position.m_Z, m_Position.m_Heading);
+		corpse_db_id = database.SaveCharacterCorpse(char_id, orgname, zone->GetZoneID(), zone->GetInstanceID(), dbpc, m_Position);
 	}
 	/* Update Corpse Data */
 	else{
