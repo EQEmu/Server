@@ -791,7 +791,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 		LogFile->write(EQEMuLog::Debug, "Graveyard ID is %i.", graveyard_id());
 		bool GraveYardLoaded = database.GetZoneGraveyard(graveyard_id(), &pgraveyard_zoneid, &m_Graveyard.m_X, &m_Graveyard.m_Y, &m_Graveyard.m_Z, &m_Graveyard.m_Heading);
 		if(GraveYardLoaded)
-			LogFile->write(EQEMuLog::Debug, "Loaded a graveyard for zone %s: graveyard zoneid is %u x is %f y is %f z is %f heading is %f.", short_name, graveyard_zoneid(), graveyard_x(), graveyard_y(), graveyard_z(), graveyard_heading());
+			LogFile->write(EQEMuLog::Debug, "Loaded a graveyard for zone %s: graveyard zoneid is %u at %s.", short_name, graveyard_zoneid(), to_string(m_Graveyard).c_str());
 		else
 			LogFile->write(EQEMuLog::Error, "Unable to load the graveyard id %i for zone %s.", graveyard_id(), short_name);
 	}
