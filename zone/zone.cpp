@@ -1580,10 +1580,10 @@ ZonePoint* Zone::GetClosestZonePoint(float x, float y, float z, uint32 to, Clien
 	return closest_zp;
 }
 
-ZonePoint* Zone::GetClosestZonePoint(float x, float y, float z, const char* to_name, Client* client, float max_distance) {
+ZonePoint* Zone::GetClosestZonePoint(const xyz_location& location, const char* to_name, Client* client, float max_distance) {
 	if(to_name == nullptr)
-		return GetClosestZonePointWithoutZone(x,y,z, client, max_distance);
-	return GetClosestZonePoint(x, y, z, database.GetZoneID(to_name), client, max_distance);
+		return GetClosestZonePointWithoutZone(location.m_X, location.m_Y, location.m_Z, client, max_distance);
+	return GetClosestZonePoint(location.m_X, location.m_Y, location.m_Z, database.GetZoneID(to_name), client, max_distance);
 }
 
 ZonePoint* Zone::GetClosestZonePointWithoutZone(float x, float y, float z, Client* client, float max_distance) {

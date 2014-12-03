@@ -127,7 +127,7 @@ public:
 	void	ReloadStaticData();
 
 	uint32	CountSpawn2();
-	ZonePoint* GetClosestZonePoint(float x, float y, float z, const char* to_name, Client *client, float max_distance = 40000.0f);
+	ZonePoint* GetClosestZonePoint(const xyz_location& location, const char* to_name, Client *client, float max_distance = 40000.0f);
 	ZonePoint* GetClosestZonePoint(float x, float y, float z, uint32	to, Client *client, float max_distance = 40000.0f);
 	ZonePoint* GetClosestZonePointWithoutZone(float x, float y, float z, Client *client, float max_distance = 40000.0f);
 	SpawnGroupList spawn_group_list;
