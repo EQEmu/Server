@@ -1460,9 +1460,10 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	strcpy(lastname, m_pp.last_name);
 	/* If PP is set to weird coordinates */
 	if ((m_pp.x == -1 && m_pp.y == -1 && m_pp.z == -1) || (m_pp.x == -2 && m_pp.y == -2 && m_pp.z == -2)) {
-		m_pp.x = zone->safe_x();
-		m_pp.y = zone->safe_y();
-		m_pp.z = zone->safe_z();
+        auto safePoint = zone->GetSafePoint();
+		m_pp.x = safePoint.m_X;
+		m_pp.y = safePoint.m_Y;
+		m_pp.z = safePoint.m_Z;
 	}
 	/* If too far below ground, then fix */
 	// float ground_z = GetGroundZ(m_pp.x, m_pp.y, m_pp.z);

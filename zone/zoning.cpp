@@ -488,13 +488,15 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 		return;
 	}
 	iZoneNameLength = strlen(pZoneName);
+    xyz_heading safePoint;
 
 	switch(zm) {
 		case EvacToSafeCoords:
 		case ZoneToSafeCoords:
-			x = zone->safe_x();
-			y = zone->safe_y();
-			z = zone->safe_z();
+            safePoint = zone->GetSafePoint();
+			x = safePoint.m_X;
+			y = safePoint.m_Y;
+			z = safePoint.m_Z;
 			SetHeading(heading);
 			break;
 		case GMSummon:
