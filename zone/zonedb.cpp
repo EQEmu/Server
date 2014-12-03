@@ -3372,93 +3372,32 @@ uint32 ZoneDatabase::GetCharacterCorpseDecayTimer(uint32 corpse_db_id){
 	return 0;
 }
 
-uint32 ZoneDatabase::UpdateCharacterCorpse(uint32 db_id, uint32 char_id, const char* char_name, uint32 zone_id, uint16 instance_id, PlayerCorpse_Struct* dbpc, float x, float y, float z, float heading, bool is_rezzed) {
-	std::string query = StringFormat("UPDATE `character_corpses` SET \n"
-		"`charname` =		  '%s',\n"
-		"`zone_id` =				%u,\n"
-		"`instance_id` =			%u,\n"
-		"`charid` =				%d,\n"
-		"`x` =					%1.1f,\n"
-		"`y` =					%1.1f,\n"
-		"`z` =					%1.1f,\n"
-		"`heading` =			%1.1f,\n"
-		"`is_locked` =          %d,\n"
-		"`exp` =                 %u,\n"
-		"`size` =               %f,\n"
-		"`level` =              %u,\n"
-		"`race` =               %u,\n"
-		"`gender` =             %u,\n"
-		"`class` =              %u,\n"
-		"`deity` =              %u,\n"
-		"`texture` =            %u,\n"
-		"`helm_texture` =       %u,\n"
-		"`copper` =             %u,\n"
-		"`silver` =             %u,\n"
-		"`gold` =               %u,\n"
-		"`platinum` =           %u,\n"
-		"`hair_color`  =        %u,\n"
-		"`beard_color` =        %u,\n"
-		"`eye_color_1` =        %u,\n"
-		"`eye_color_2` =        %u,\n"
-		"`hair_style`  =        %u,\n"
-		"`face` =               %u,\n"
-		"`beard` =              %u,\n"
-		"`drakkin_heritage` =    %u,\n"
-		"`drakkin_tattoo`  =    %u,\n"
-		"`drakkin_details` =    %u,\n"
-		"`wc_1` =               %u,\n"
-		"`wc_2` =               %u,\n"
-		"`wc_3` =               %u,\n"
-		"`wc_4` =               %u,\n"
-		"`wc_5` =               %u,\n"
-		"`wc_6` =               %u,\n"
-		"`wc_7` =               %u,\n"
-		"`wc_8` =               %u,\n"
-		"`wc_9`	=                %u \n"
-		"WHERE `id` = %u",
-		EscapeString(char_name).c_str(),
-		zone_id,
-		instance_id,
-		char_id,
-		x,
-		y,
-		z,
-		heading,
-		dbpc->locked,
-		dbpc->exp,
-		dbpc->size,
-		dbpc->level,
-		dbpc->race,
-		dbpc->gender,
-		dbpc->class_,
-		dbpc->deity,
-		dbpc->texture,
-		dbpc->helmtexture,
-		dbpc->copper,
-		dbpc->silver,
-		dbpc->gold,
-		dbpc->plat,
-		dbpc->haircolor,
-		dbpc->beardcolor,
-		dbpc->eyecolor1,
-		dbpc->eyecolor2,
-		dbpc->hairstyle,
-		dbpc->face,
-		dbpc->beard,
-		dbpc->drakkin_heritage,
-		dbpc->drakkin_tattoo,
-		dbpc->drakkin_details,
-		dbpc->item_tint[0].color,
-		dbpc->item_tint[1].color,
-		dbpc->item_tint[2].color,
-		dbpc->item_tint[3].color,
-		dbpc->item_tint[4].color,
-		dbpc->item_tint[5].color,
-		dbpc->item_tint[6].color,
-		dbpc->item_tint[7].color,
-		dbpc->item_tint[8].color,
-		db_id
-	);
+uint32 ZoneDatabase::UpdateCharacterCorpse(uint32 db_id, uint32 char_id, const char* char_name, uint32 zone_id, uint16 instance_id, PlayerCorpse_Struct* dbpc, const xyz_heading& position, bool is_rezzed) {
+	std::string query = StringFormat("UPDATE `character_corpses` "
+                                    "SET `charname` = '%s', `zone_id` = %u, `instance_id` = %u, `charid` = %d, "
+                                    "`x` = %1.1f,`y` =	%1.1f,`z` =	%1.1f, `heading` = %1.1f, "
+                                    "`is_locked` = %d, `exp` = %u, `size` = %f, `level` = %u, "
+                                    "`race` = %u, `gender` = %u, `class` = %u, `deity` = %u, "
+                                    "`texture` = %u, `helm_texture` = %u, `copper` = %u, "
+                                    "`silver` = %u, `gold` = %u, `platinum` = %u, `hair_color`  = %u, "
+                                    "`beard_color` = %u, `eye_color_1` = %u, `eye_color_2` = %u, "
+                                    "`hair_style`  = %u, `face` = %u, `beard` = %u, `drakkin_heritage` = %u, "
+                                    "`drakkin_tattoo`  = %u, `drakkin_details` = %u, `wc_1` = %u, "
+                                    "`wc_2` = %u, `wc_3` = %u, `wc_4` = %u, `wc_5` = %u, `wc_6` = %u, "
+                                    "`wc_7` = %u, `wc_8` = %u, `wc_9` = %u "
+                                    "WHERE `id` = %u",
+                                    EscapeString(char_name).c_str(), zone_id, instance_id, char_id,
+                                    position.m_X, position.m_Y, position.m_Z, position.m_Heading,
+                                    dbpc->locked, dbpc->exp, dbpc->size, dbpc->level, dbpc->race,
+                                    dbpc->gender, dbpc->class_, dbpc->deity, dbpc->texture,
+                                    dbpc->helmtexture, dbpc->copper, dbpc->silver, dbpc->gold,
+                                    dbpc->plat, dbpc->haircolor, dbpc->beardcolor, dbpc->eyecolor1,
+                                    dbpc->eyecolor2, dbpc->hairstyle, dbpc->face, dbpc->beard,
+                                    dbpc->drakkin_heritage, dbpc->drakkin_tattoo, dbpc->drakkin_details,
+                                    dbpc->item_tint[0].color, dbpc->item_tint[1].color, dbpc->item_tint[2].color,
+                                    dbpc->item_tint[3].color, dbpc->item_tint[4].color, dbpc->item_tint[5].color,
+                                    dbpc->item_tint[6].color, dbpc->item_tint[7].color, dbpc->item_tint[8].color,
+                                    db_id);
 	auto results = QueryDatabase(query);
 
 	return db_id;
