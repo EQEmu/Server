@@ -1217,7 +1217,7 @@ void ZoneDatabase::DeleteWaypoint(Client *client, uint32 grid_num, uint32 wp_num
 * Returns 0 if the function didn't have to create a new grid. If the function had to create a new grid for the spawn, then the ID of
 * the created grid is returned.
 */
-uint32 ZoneDatabase::AddWPForSpawn(Client *client, uint32 spawn2id, float xpos, float ypos, float zpos, uint32 pause, int type1, int type2, uint16 zoneid, float heading) {
+uint32 ZoneDatabase::AddWPForSpawn(Client *client, uint32 spawn2id, const xyz_heading& position, uint32 pause, int type1, int type2, uint16 zoneid) {
 
 	uint32 grid_num;	 // The grid number the spawn is assigned to (if spawn has no grid, will be the grid number we end up creating)
 	uint32 next_wp_num;	 // The waypoint number we should be assigning to the new waypoint
@@ -1280,7 +1280,7 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *client, uint32 spawn2id, float xpos, 
 
 	query = StringFormat("INSERT INTO grid_entries(gridid, zoneid, `number`, x, y, z, pause, heading) "
 						"VALUES (%i, %i, %i, %f, %f, %f, %i, %f)",
-						grid_num, zoneid, next_wp_num, xpos, ypos, zpos, pause, heading);
+						grid_num, zoneid, next_wp_num, position.m_X, position.m_Y, position.m_Z, pause, position.m_Heading);
 	results = QueryDatabase(query);
 	if(!results.Success())
 		LogFile->write(EQEMuLog::Error, "Error adding grid entry '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
