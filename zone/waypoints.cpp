@@ -1168,11 +1168,11 @@ void ZoneDatabase::ModifyGrid(Client *client, bool remove, uint32 id, uint8 type
 /**************************************
 * AddWP - Adds a new waypoint to a specific grid for a specific zone.
 */
-void ZoneDatabase::AddWP(Client *client, uint32 gridid, uint32 wpnum, float xpos, float ypos, float zpos, uint32 pause, uint16 zoneid, float heading)
+void ZoneDatabase::AddWP(Client *client, uint32 gridid, uint32 wpnum, const xyz_heading& position, uint32 pause, uint16 zoneid)
 {
 	std::string query = StringFormat("INSERT INTO grid_entries (gridid, zoneid, `number`, x, y, z, pause, heading) "
                                     "VALUES (%i, %i, %i, %f, %f, %f, %i, %f)",
-                                    gridid, zoneid, wpnum, xpos, ypos, zpos, pause, heading);
+                                    gridid, zoneid, wpnum, position.m_X, position.m_Y, position.m_Z, pause, position.m_Heading);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
 		LogFile->write(EQEMuLog::Error, "Error adding waypoint '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());

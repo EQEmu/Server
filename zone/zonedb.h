@@ -363,7 +363,7 @@ public:
 	uint32		GetFreeGrid(uint16 zoneid);
 	void		DeleteGrid(Client *c, uint32 sg2, uint32 grid_num, bool grid_too, uint16 zoneid);
 	void		DeleteWaypoint(Client *c, uint32 grid_num, uint32 wp_num, uint16 zoneid);
-	void		AddWP(Client *c, uint32 gridid, uint32 wpnum, float xpos, float ypos, float zpos, uint32 pause, uint16 zoneid, float heading);
+	void		AddWP(Client *c, uint32 gridid, uint32 wpnum, const xyz_heading& position, uint32 pause, uint16 zoneid);
 	uint32		AddWPForSpawn(Client *c, uint32 spawn2id, float xpos, float ypos, float zpos, uint32 pause, int type1, int type2, uint16 zoneid, float heading);
 	void		ModifyGrid(Client *c, bool remove, uint32 id, uint8 type = 0, uint8 type2 = 0, uint16 zoneid = 0);
 	void		ModifyWP(Client *c, uint32 grid_id, uint32 wp_num, float xpos, float ypos, float zpos, uint32 script = 0, uint16 zoneid = 0);
