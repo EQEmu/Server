@@ -765,15 +765,16 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 		}
 	}
 
-	float range = RangeItem->Range + AmmoItem->Range + 5.0f; //Fudge it a little, client will let you hit something at 0 0 0 when you are at 205 0 0
+	float range = RangeItem->Range + AmmoItem->Range + GetRangeDistTargetSizeMod(GetTarget());
 	mlog(COMBAT__RANGED, "Calculated bow range to be %.1f", range);
 	range *= range;
-	if(DistNoRootNoZ(*GetTarget()) > range) {
+	if(DistNoRoot(*GetTarget()) > range) {
 		mlog(COMBAT__RANGED, "Ranged attack out of range... client should catch this. (%f > %f).\n", DistNoRootNoZ(*GetTarget()), range);
-		//target is out of range, client does a message
+		Message_StringID(13,TARGET_OUT_OF_RANGE);//Client enforces range and sends the message, this is a backup just incase.
 		return;
 	}
-	else if(DistNoRootNoZ(*GetTarget()) < (RuleI(Combat, MinRangedAttackDist)*RuleI(Combat, MinRangedAttackDist))){
+	else if(DistNoRoot(*GetTarget()) < (RuleI(Combat, MinRangedAttackDist)*RuleI(Combat, MinRangedAttackDist))){
+		Message_StringID(15,RANGED_TOO_CLOSE);//Client enforces range and sends the message, this is a backup just incase.
 		return;
 	}
 
@@ -1128,6 +1129,45 @@ void Mob::ProjectileAttack()
 		SetProjectileAttack(false);
 }
 
+float Mob::GetRangeDistTargetSizeMod(Mob* other)
+{
+	/*
+	Range is enforced client side, therefore these numbers do not need to be 100% accurate just close enough to
+	prevent any exploitation. The range mod changes in some situations depending on if size is from spawn or from SendIllusionPacket changes.
+	At present time only calculate from spawn (it is no consistent what happens to the calc when changing it after spawn).
+	*/
+	if (!other)
+		return 0.0f;
+
+	float tsize = other->GetSize();
+
+	if (GetSize() > tsize)
+		tsize = GetSize();
+
+	float mod = 0.0f;
+	/*These are correct numbers if mob size is changed via #size (Don't know why it matters but it does)
+	if (tsize < 7)
+		mod = 16.0f;
+	else if (tsize >=7 && tsize <= 20)
+		mod = 16.0f + (0.6f * (tsize - 6.0f));
+	else if (tsize >=20 && tsize <= 60)
+		mod = 25.0f + (1.25f * (tsize - 20.0f));
+	else
+		mod = 75.0f;
+	*/
+
+	if (tsize < 10)
+		mod = 18.0f;
+	else if (tsize >=10 && tsize < 15)
+		mod = 20.0f + (4.0f * (tsize - 10.0f));
+	else if (tsize >=15 && tsize <= 20)
+		mod = 42.0f + (5.8f * (tsize - 15.0f));
+	else
+		mod = 75.0f;
+	
+	return (mod + 2.0f); //Add 2.0f as buffer to prevent any chance of failures, client enforce range check regardless.
+}
+
 void NPC::RangedAttack(Mob* other)
 {
 
@@ -1333,16 +1373,16 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 		}
 	}
 
-	int range = item->Range +50/*Fudge it a little, client will let you hit something at 0 0 0 when you are at 205 0 0*/;
+	float range = item->Range + GetRangeDistTargetSizeMod(GetTarget());
 	mlog(COMBAT__RANGED, "Calculated bow range to be %.1f", range);
 	range *= range;
-	if(DistNoRootNoZ(*GetTarget()) > range) {
+	if(DistNoRoot(*GetTarget()) > range) {
 		mlog(COMBAT__RANGED, "Throwing attack out of range... client should catch this. (%f > %f).\n", DistNoRootNoZ(*GetTarget()), range);
-		//target is out of range, client does a message
+		Message_StringID(13,TARGET_OUT_OF_RANGE);//Client enforces range and sends the message, this is a backup just incase.
 		return;
 	}
-	else if(DistNoRootNoZ(*GetTarget()) < (RuleI(Combat, MinRangedAttackDist)*RuleI(Combat, MinRangedAttackDist))){
-		return;
+	else if(DistNoRoot(*GetTarget()) < (RuleI(Combat, MinRangedAttackDist)*RuleI(Combat, MinRangedAttackDist))){
+		Message_StringID(15,RANGED_TOO_CLOSE);//Client enforces range and sends the message, this is a backup just incase.
 	}
 
 	if(!IsAttackAllowed(GetTarget()) ||

@@ -396,7 +396,8 @@
 #define SONG_ENDS_OTHER				12688	//%1's song ends.
 #define SONG_ENDS_ABRUPTLY_OTHER	12689	//%1's song ends abruptly.
 #define DIVINE_AURA_NO_ATK			12695	//You can't attack while invulnerable!
-#define TRY_ATTACKING_SOMEONE		12696	//Try attacking someone other than yourself, it's more productive.
+#define TRY_ATTACKING_SOMEONE		12696	//Try attacking someone other than yourself, it's more productive
+#define RANGED_TOO_CLOSE			12698	//Your target is too close to use a ranged weapon!
 #define BACKSTAB_WEAPON				12874	//You need a piercing weapon as your primary weapon in order to backstab
 #define MORE_SKILLED_THAN_I			12931	//%1 tells you, 'You are more skilled than I! What could I possibly teach you?'
 #define SURNAME_EXISTS				12939	//You already have a surname. Operation failed.
