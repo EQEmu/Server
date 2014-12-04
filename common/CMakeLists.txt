@@ -72,6 +72,7 @@ SET(common_sources
 	patches/sod.cpp
 	patches/sof.cpp
 	patches/rof.cpp
+	patches/rof2.cpp
 	patches/titanium.cpp
 	patches/underfoot.cpp
 	SocketLib/Base64.cpp
@@ -217,6 +218,11 @@ SET(common_headers
 	patches/rof_itemfields.h
 	patches/rof_ops.h
 	patches/rof_structs.h
+	patches/rof2.h
+	patches/rof2_constants.h
+	patches/rof2_itemfields.h
+	patches/rof2_ops.h
+	patches/rof2_structs.h
 	patches/titanium.h
 	patches/titanium_constants.h
 	patches/titanium_itemfields.h
@@ -270,6 +276,11 @@ SOURCE_GROUP(Patches FILES
 	patches/rof_ops.h
 	patches/rof_constants.h
 	patches/rof_structs.h
+	patches/rof2.h
+	patches/rof2_itemfields.h
+	patches/rof2_ops.h
+	patches/rof2_constants.h
+	patches/rof2_structs.h
 	patches/titanium.h
 	patches/titanium_itemfields.h
 	patches/titanium_ops.h
@@ -285,6 +296,7 @@ SOURCE_GROUP(Patches FILES
 	patches/sod.cpp
 	patches/sof.cpp
 	patches/rof.cpp
+	patches/rof2.cpp
 	patches/titanium.cpp
 	patches/underfoot.cpp
 )
@@ -336,7 +348,7 @@ ADD_LIBRARY(common ${common_sources} ${common_headers})
 IF(UNIX)
 	ADD_DEFINITIONS(-fPIC)
 	SET_SOURCE_FILES_PROPERTIES("SocketLib/Mime.cpp" PROPERTY COMPILE_FLAGS -Wno-unused-result)
-	SET_SOURCE_FILES_PROPERTIES("patches/sod.cpp" "patches/sof.cpp" "patches/rof.cpp" "patches/underfoot.cpp" PROPERTIES COMPILE_FLAGS -O0)
+	SET_SOURCE_FILES_PROPERTIES("patches/sod.cpp" "patches/sof.cpp" "patches/rof.cpp"  "patches/rof2.cpp" "patches/underfoot.cpp" PROPERTIES COMPILE_FLAGS -O0)
 ENDIF(UNIX)
 
 
