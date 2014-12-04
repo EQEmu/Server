@@ -17,8 +17,10 @@ void RegisterAllPatches(EQStreamIdentifier &into) {
 	SoD::Register(into);
 	Underfoot::Register(into);
 	RoF::Register(into);
-	// Uncomment the line below to enable RoF2 Client
-	//RoF2::Register(into);
+	// Preprocessor #define ENABLE_ROF2 to enable RoF2 Client
+#ifdef ENABLE_ROF2
+	RoF2::Register(into);
+#endif
 }
 
 void ReloadAllPatches() {
@@ -28,6 +30,8 @@ void ReloadAllPatches() {
 	SoD::Reload();
 	Underfoot::Reload();
 	RoF::Reload();
-	// Uncomment the line below to enable RoF2 Client
-	//RoF2::Reload();
+	// Preprocessor #define ENABLE_ROF2 to enable RoF2 Client
+#ifdef ENABLE_ROF2
+	RoF2::Reload();
+#endif
 }
