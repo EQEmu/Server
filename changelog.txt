@@ -3,6 +3,8 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 == 12/04/2014 ==
 Kayen: Ranged attacks will now more accurately check MAX firing range, fixing the issue where you would
 hit ranged attack and nothing would happpen due to incorrect server side range checks.
+Trevius: Initial addition of the RoF2 client from May 10th 2013 (currently available on Steam as the F2P client).
+Trevius: RoF2 is disabled by default, but you can enable by editing /common/patches/patches.cpp (see comments)
 
 == 12/01/2014 ==
 Trevius: Mercenaries now spawn as the same Gender and Size of the Merchant they are purchased from.
