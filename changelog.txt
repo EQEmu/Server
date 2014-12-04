@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/04/2014 ==
+Kayen: Ranged attacks will now more accurately check MAX firing range, fixing the issue where you would
+hit ranged attack and nothing would happpen due to incorrect server side range checks.
+
 == 12/01/2014 ==
 Trevius: Mercenaries now spawn as the same Gender and Size of the Merchant they are purchased from.
 Trevius: Mercenaries now spawn with randomized facial features when purchased.
