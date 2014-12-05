@@ -968,6 +968,28 @@ namespace legacy {
 	} InventorySlot;
 }
 
+#pragma pack(1) // will be used in packets as well as other inventory-related systems
+
+struct ItemSlot_Struct
+{
+	int16 indexMap;
+	int16 unknown02;
+	int16 indexMain;
+	int16 indexSub;
+	int16 indexAug;
+	int16 unknown01;
+};
+
+struct ItemSlotShort_Struct
+{
+	int16 indexMain;
+	int16 indexSub;
+	int16 indexAug;
+	int16 unknown01;
+};
+
+#pragma pack()
+
 static const uint32 MAX_SPELL_DB_ID_VAL = 65535;
 
 #endif
