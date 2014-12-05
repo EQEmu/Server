@@ -178,7 +178,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	if(IsClient()){
 		int chance = CastToClient()->GetFocusEffect(focusFcMute, spell_id);
 
-		if (MakeRandomInt(0,99) < chance){
+		if (zone->random.Roll(chance)) {
 			Message_StringID(13, SILENCED_STRING);
 			if(IsClient())
 				CastToClient()->SendSpellBarEnable(spell_id);
@@ -697,7 +697,7 @@ bool Client::CheckFizzle(uint16 spell_id)
 			specialize = specialize * 1.3;
 			break;
 		}
-		if(((specialize/6.0f) + 15.0f) < MakeRandomFloat(0, 100)) {
+		if(((specialize/6.0f) + 15.0f) < zone->random.Real(0, 100)) {
 			specialize *= SPECIALIZE_FIZZLE / 200.0f;
 		} else {
 			specialize = 0.0f;
@@ -739,7 +739,7 @@ bool Client::CheckFizzle(uint16 spell_id)
 	}
 	*/
 
-	float fizzle_roll = MakeRandomFloat(0, 100);
+	float fizzle_roll = zone->random.Real(0, 100);
 
 	mlog(SPELLS__CASTING, "Check Fizzle %s  spell %d  fizzlechance: %0.2f%%   diff: %0.2f  roll: %0.2f", GetName(), spell_id, fizzlechance, diff, fizzle_roll);
 
@@ -1028,7 +1028,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 
 			mlog(SPELLS__CASTING, "Checking Interruption: spell x: %f  spell y: %f  cur x: %f  cur y: %f channelchance %f channeling skill %d\n", GetSpellX(), GetSpellY(), GetX(), GetY(), channelchance, GetSkill(SkillChanneling));
 
-			if(!spells[spell_id].uninterruptable && MakeRandomFloat(0, 100) > channelchance) {
+			if(!spells[spell_id].uninterruptable && zone->random.Real(0, 100) > channelchance) {
 				mlog(SPELLS__CASTING_ERR, "Casting of %d canceled: interrupted.", spell_id);
 				InterruptSpell();
 				return;
@@ -1044,7 +1044,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 	// first check for component reduction
 	if(IsClient()) {
 		int reg_focus = CastToClient()->GetFocusEffect(focusReagentCost,spell_id);
-		if(MakeRandomInt(1, 100) <= reg_focus) {
+		if(zone->random.Roll(reg_focus)) {
 			mlog(SPELLS__CASTING, "Spell %d: Reagent focus item prevented reagent consumption (%d chance)", spell_id, reg_focus);
 		} else {
 			if(reg_focus > 0)
@@ -4204,7 +4204,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	{
 		IsFear = true;
 		int fear_resist_bonuses = CalcFearResistChance();
-		if(MakeRandomInt(0, 99) < fear_resist_bonuses)
+		if(zone->random.Roll(fear_resist_bonuses))
 		{
 			mlog(SPELLS__RESISTS, "Resisted spell in fear resistance, had %d chance to resist", fear_resist_bonuses);
 			return 0;
@@ -4215,14 +4215,14 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 
 		//Check for Spell Effect specific resistance chances (ie AA Mental Fortitude)
 		int se_resist_bonuses = GetSpellEffectResistChance(spell_id);
-		if(se_resist_bonuses && (MakeRandomInt(0, 99) < se_resist_bonuses))
+		if(se_resist_bonuses && zone->random.Roll(se_resist_bonuses))
 		{
 			return 0;
 		}
 
 		// Check for Chance to Resist Spell bonuses (ie Sanctification Discipline)
 		int resist_bonuses = CalcResistChanceBonus();
-		if(resist_bonuses && (MakeRandomInt(0, 99) < resist_bonuses))
+		if(resist_bonuses && zone->random.Roll(resist_bonuses))
 		{
 			mlog(SPELLS__RESISTS, "Resisted spell in sanctification, had %d chance to resist", resist_bonuses);
 			return 0;
@@ -4448,7 +4448,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	}
 
 	//Finally our roll
-	int roll = MakeRandomInt(0, 200);
+	int roll = zone->random.Int(0, 200);
 	if(roll > resist_chance)
 	{
 		return 100;
@@ -4665,7 +4665,7 @@ void Mob::Stun(int duration)
 	if(IsValidSpell(casting_spell_id) && !spells[casting_spell_id].uninterruptable) {
 		int persistent_casting = spellbonuses.PersistantCasting + itembonuses.PersistantCasting + aabonuses.PersistantCasting;
 
-		if(MakeRandomInt(0,99) > persistent_casting)
+		if(zone->random.Int(0,99) > persistent_casting)
 			InterruptSpell();
 	}
 

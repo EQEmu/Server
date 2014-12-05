@@ -628,7 +628,7 @@ void EntityList::AddCorpse(Corpse *corpse, uint32 in_id)
 void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 {
 	npc->SetID(GetFreeID());
-	npc->SetMerchantProbability((uint8) MakeRandomInt(0, 99));
+	npc->SetMerchantProbability((uint8) zone->random.Int(0, 99));
 	parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
 
 	uint16 emoteid = npc->GetEmoteID();
@@ -1570,7 +1570,7 @@ Client *EntityList::GetRandomClient(float x, float y, float z, float Distance, C
 	if (ClientsInRange.empty())
 		return nullptr;
 
-	return ClientsInRange[MakeRandomInt(0, ClientsInRange.size() - 1)];
+	return ClientsInRange[zone->random.Int(0, ClientsInRange.size() - 1)];
 }
 
 Corpse *EntityList::GetCorpseByOwner(Client *client)
@@ -2890,7 +2890,7 @@ void EntityList::ClearFeignAggro(Mob *targ)
 
 			it->second->RemoveFromHateList(targ);
 			if (targ->IsClient()) {
-				if (it->second->GetLevel() >= 35 && MakeRandomInt(1, 100) <= 60)
+				if (it->second->GetLevel() >= 35 && zone->random.Roll(60))
 					it->second->AddFeignMemory(targ->CastToClient());
 				else
 					targ->CastToClient()->RemoveXTarget(it->second, false);
@@ -4505,7 +4505,7 @@ void EntityList::AddLootToNPCS(uint32 item_id, uint32 count)
 			selection.push_back(j);
 
 		while (selection.size() > 0 && count > 0) {
-			int k = MakeRandomInt(0, selection.size() - 1);
+			int k = zone->random.Int(0, selection.size() - 1);
 			counts[selection[k]]++;
 			count--;
 			selection.erase(selection.begin() + k);
@@ -4687,6 +4687,6 @@ Mob *EntityList::GetTargetForVirus(Mob *spreader, int range)
 	if(TargetsInRange.size() == 0)
 		return nullptr;
 
-	return TargetsInRange[MakeRandomInt(0, TargetsInRange.size() - 1)];
+	return TargetsInRange[zone->random.Int(0, TargetsInRange.size() - 1)];
 }
 

@@ -436,7 +436,7 @@ bool Client::Process() {
 
 				if (auto_attack_target && flurrychance)
 				{
-					if(MakeRandomInt(0, 99) < flurrychance)
+					if(zone->random.Int(0, 99) < flurrychance)
 					{
 						Message_StringID(MT_NPCFlurry, YOU_FLURRY);
 						Attack(auto_attack_target, MainPrimary, false);
@@ -453,7 +453,7 @@ bool Client::Process() {
 							wpn->GetItem()->ItemType == ItemType2HBlunt ||
 							wpn->GetItem()->ItemType == ItemType2HPiercing )
 						{
-							if(MakeRandomInt(0, 99) < ExtraAttackChanceBonus)
+							if(zone->random.Int(0, 99) < ExtraAttackChanceBonus)
 							{
 								Attack(auto_attack_target, MainPrimary, false);
 							}
@@ -498,7 +498,7 @@ bool Client::Process() {
 				int16 DWBonus = spellbonuses.DualWieldChance + itembonuses.DualWieldChance;
 				DualWieldProbability += DualWieldProbability*float(DWBonus)/ 100.0f;
 
-				float random = MakeRandomFloat(0, 1);
+				float random = zone->random.Real(0, 1);
 				CheckIncreaseSkill(SkillDualWield, auto_attack_target, -10);
 				if (random < DualWieldProbability){ // Max 78% of DW
 					if(CheckAAEffect(aaEffectRampage)) {
@@ -1003,7 +1003,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 		if (fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required)
 			continue;
 
-		handychance = MakeRandomInt(0, merlist.size() + tmp_merlist.size() - 1);
+		handychance = zone->random.Int(0, merlist.size() + tmp_merlist.size() - 1);
 
 		item = database.GetItem(ml.item);
 		if (item) {
@@ -1079,7 +1079,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	zone->tmpmerchanttable[npcid] = tmp_merlist;
 	if (merch != nullptr && handyitem) {
 		char handy_id[8] = { 0 };
-		int greeting = MakeRandomInt(0, 4);
+		int greeting = zone->random.Int(0, 4);
 		int greet_id = 0;
 		switch (greeting) {
 			case 1:
@@ -1640,7 +1640,7 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 	// welcome message
 	if (pTrainer && pTrainer->IsNPC())
 	{
-		pTrainer->Say_StringID(MakeRandomInt(1204, 1207), GetCleanName());
+		pTrainer->Say_StringID(zone->random.Int(1204, 1207), GetCleanName());
 	}
 }
 
@@ -1667,7 +1667,7 @@ void Client::OPGMEndTraining(const EQApplicationPacket *app)
 	// goodbye message
 	if (pTrainer->IsNPC())
 	{
-		pTrainer->Say_StringID(MakeRandomInt(1208, 1211), GetCleanName());
+		pTrainer->Say_StringID(zone->random.Int(1208, 1211), GetCleanName());
 	}
 }
 

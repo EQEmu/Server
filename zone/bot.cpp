@@ -775,49 +775,49 @@ void Bot::GenerateAppearance() {
 	// Randomize facial appearance
 	int iFace = 0;
 	if(this->GetRace() == 2) { // Barbarian w/Tatoo
-		iFace = MakeRandomInt(0, 79);
+		iFace = zone->random.Int(0, 79);
 	}
 	else {
-		iFace = MakeRandomInt(0, 7);
+		iFace = zone->random.Int(0, 7);
 	}
 
 	int iHair = 0;
 	int iBeard = 0;
 	int iBeardColor = 1;
 	if(this->GetRace() == 522) {
-		iHair = MakeRandomInt(0, 8);
-		iBeard = MakeRandomInt(0, 11);
-		iBeardColor = MakeRandomInt(0, 3);
+		iHair = zone->random.Int(0, 8);
+		iBeard = zone->random.Int(0, 11);
+		iBeardColor = zone->random.Int(0, 3);
 	}
 	else if(this->GetGender()) {
-		iHair = MakeRandomInt(0, 2);
+		iHair = zone->random.Int(0, 2);
 		if(this->GetRace() == 8) { // Dwarven Females can have a beard
-			if(MakeRandomInt(1, 100) < 50) {
+			if(zone->random.Int(1, 100) < 50) {
 				iFace += 10;
 			}
 		}
 	}
 	else {
-		iHair = MakeRandomInt(0, 3);
-		iBeard = MakeRandomInt(0, 5);
-		iBeardColor = MakeRandomInt(0, 19);
+		iHair = zone->random.Int(0, 3);
+		iBeard = zone->random.Int(0, 5);
+		iBeardColor = zone->random.Int(0, 19);
 	}
 
 	int iHairColor = 0;
 	if(this->GetRace() == 522) {
-		iHairColor = MakeRandomInt(0, 3);
+		iHairColor = zone->random.Int(0, 3);
 	}
 	else {
-		iHairColor = MakeRandomInt(0, 19);
+		iHairColor = zone->random.Int(0, 19);
 	}
 
-	uint8 iEyeColor1 = (uint8)MakeRandomInt(0, 9);
+	uint8 iEyeColor1 = (uint8)zone->random.Int(0, 9);
 	uint8 iEyeColor2 = 0;
 	if(this->GetRace() == 522) {
-		iEyeColor1 = iEyeColor2 = (uint8)MakeRandomInt(0, 11);
+		iEyeColor1 = iEyeColor2 = (uint8)zone->random.Int(0, 11);
 	}
-	else if(MakeRandomInt(1, 100) > 96) {
-		iEyeColor2 = MakeRandomInt(0, 9);
+	else if(zone->random.Int(1, 100) > 96) {
+		iEyeColor2 = zone->random.Int(0, 9);
 	}
 	else {
 		iEyeColor2 = iEyeColor1;
@@ -827,9 +827,9 @@ void Bot::GenerateAppearance() {
 	int iTattoo = 0;
 	int iDetails = 0;
 	if(this->GetRace() == 522) {
-		iHeritage = MakeRandomInt(0, 6);
-		iTattoo = MakeRandomInt(0, 7);
-		iDetails = MakeRandomInt(0, 7);
+		iHeritage = zone->random.Int(0, 6);
+		iTattoo = zone->random.Int(0, 7);
+		iDetails = zone->random.Int(0, 7);
 	}
 
 	this->luclinface = iFace;
@@ -3098,7 +3098,7 @@ bool Bot::CheckBotDoubleAttack(bool tripleAttack) {
 		chance *= float(100.0f+triple_bonus)/100.0f; //Apply modifiers.
 	}
 
-	if((MakeRandomFloat(0, 1) < chance))
+	if((zone->random.Real(0, 1) < chance))
 		return true;
 
 	return false;
@@ -3148,7 +3148,7 @@ void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 		if(RuleB(Combat, UseIntervalAC))
 			damage = max_hit;
 		else
-			damage = MakeRandomInt(min_hit, max_hit);
+			damage = zone->random.Int(min_hit, max_hit);
 
 		if(!other->CheckHitChance(this, skillinuse, Hand, chance_mod)) {
 			damage = 0;
@@ -3203,7 +3203,7 @@ void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 	if (damage > 0)
 		CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
 
-	if((skillinuse == SkillDragonPunch) && GetAA(aaDragonPunch) && MakeRandomInt(0, 99) < 25){
+	if((skillinuse == SkillDragonPunch) && GetAA(aaDragonPunch) && zone->random.Int(0, 99) < 25){
 		SpellFinished(904, other, 10, 0, -1, spells[904].ResistDiff);
 		other->Stun(100);
 	}
@@ -3483,7 +3483,7 @@ void Bot::AI_Process() {
 			meleeDistance = meleeDistance * .30;
 		}
 		else {
-			meleeDistance *= (float)MakeRandomFloat(.50, .85);
+			meleeDistance *= (float)zone->random.Real(.50, .85);
 		}
 
 		bool atArcheryRange = IsArcheryRange(GetTarget());
@@ -3616,7 +3616,7 @@ void Bot::AI_Process() {
 
 					if (GetTarget() && flurrychance)
 					{
-						if(MakeRandomInt(0, 100) < flurrychance)
+						if(zone->random.Int(0, 100) < flurrychance)
 						{
 							Message_StringID(MT_NPCFlurry, YOU_FLURRY);
 							Attack(GetTarget(), MainPrimary, false);
@@ -3633,7 +3633,7 @@ void Bot::AI_Process() {
 								wpn->GetItem()->ItemType == ItemType2HBlunt ||
 								wpn->GetItem()->ItemType == ItemType2HPiercing )
 							{
-								if(MakeRandomInt(0, 100) < ExtraAttackChanceBonus)
+								if(zone->random.Int(0, 100) < ExtraAttackChanceBonus)
 								{
 									Attack(GetTarget(), MainPrimary, false);
 								}
@@ -3678,7 +3678,7 @@ void Bot::AI_Process() {
 							int32 DWBonus = spellbonuses.DualWieldChance + itembonuses.DualWieldChance;
 							DualWieldProbability += DualWieldProbability*float(DWBonus)/ 100.0f;
 
-							float random = MakeRandomFloat(0, 1);
+							float random = zone->random.Real(0, 1);
 
 							if (random < DualWieldProbability){ // Max 78% of DW
 
@@ -3912,7 +3912,7 @@ void Bot::PetAIProcess() {
 						if (botPet->GetTarget())					// Do we still have a target?
 						{
 							// We're a pet so we re able to dual attack
-							int32 RandRoll = MakeRandomInt(0, 99);
+							int32 RandRoll = zone->random.Int(0, 99);
 							if (botPet->CanThisClassDoubleAttack() && (RandRoll < (botPet->GetLevel() + NPCDualAttackModifier)))
 							{
 								if(botPet->Attack(botPet->GetTarget(), MainPrimary))
@@ -3945,7 +3945,7 @@ void Bot::PetAIProcess() {
 
 							//aa_chance += botPet->GetOwner()->GetAA(aaCompanionsAlacrity) * 3;
 
-							if (MakeRandomInt(1, 100) < aa_chance)
+							if (zone->random.Int(1, 100) < aa_chance)
 								Flurry(nullptr);
 						}
 
@@ -3955,12 +3955,12 @@ void Bot::PetAIProcess() {
 							if(botPet->GetOwner()->GetLevel() >= 24)
 							{
 								float DualWieldProbability = (botPet->GetSkill(SkillDualWield) + botPet->GetLevel()) / 400.0f;
-								DualWieldProbability -= MakeRandomFloat(0, 1);
+								DualWieldProbability -= zone->random.Real(0, 1);
 								if(DualWieldProbability < 0){
 									botPet->Attack(botPet->GetTarget(), MainSecondary);
 									if (botPet->CanThisClassDoubleAttack())
 									{
-										int32 RandRoll = MakeRandomInt(0, 99);
+										int32 RandRoll = zone->random.Int(0, 99);
 										if (RandRoll < (botPet->GetLevel() + 20))
 										{
 											botPet->Attack(botPet->GetTarget(), MainSecondary);
@@ -6213,7 +6213,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		if(RuleB(Combat, UseIntervalAC))
 			damage = max_hit;
 		else
-			damage = MakeRandomInt(min_hit, max_hit);
+			damage = zone->random.Int(min_hit, max_hit);
 
 		mlog(COMBAT__DAMAGE, "Damage calculated to %d (min %d, max %d, str %d, skill %d, DMG %d, lv %d)",
 			damage, min_hit, max_hit, GetSTR(), GetSkill(skillinuse), weapon_damage, GetLevel());
@@ -6258,7 +6258,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 					OffhandRiposteFail *= -1; //Live uses a negative value for this.
 
 					if (OffhandRiposteFail &&
-						(OffhandRiposteFail > 99 || (MakeRandomInt(0, 100) < OffhandRiposteFail))) {
+						(OffhandRiposteFail > 99 || (zone->random.Int(0, 100) < OffhandRiposteFail))) {
 						damage = 0; // Counts as a miss
 						slippery_attack = true;
 					} else
@@ -6274,7 +6274,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		if (((damage < 0) || slippery_attack) && !FromRiposte && !IsStrikethrough) { // Hack to still allow Strikethrough chance w/ Slippery Attacks AA
 			int32 bonusStrikeThrough = itembonuses.StrikeThrough + spellbonuses.StrikeThrough + aabonuses.StrikeThrough;
 
-			if(bonusStrikeThrough && (MakeRandomInt(0, 100) < bonusStrikeThrough)) {
+			if(bonusStrikeThrough && (zone->random.Int(0, 100) < bonusStrikeThrough)) {
 				Message_StringID(MT_StrikeThrough, STRIKETHROUGH_STRING); // You strike through your opponents defenses!
 				Attack(other, Hand, false, true); // Strikethrough only gives another attempted hit
 				return false;
@@ -6623,7 +6623,7 @@ int32 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 			{
 				if(type == focusTriggerOnCast)
 				{
-					if(MakeRandomInt(0, 100) <= base1){
+					if(zone->random.Int(0, 100) <= base1){
 						value = base2;
 					}
 
@@ -6646,7 +6646,7 @@ int32 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 			{
 				if(type == focusBlockNextSpell)
 				{
-					if(MakeRandomInt(1, 100) <= base1)
+					if(zone->random.Int(1, 100) <= base1)
 						value = 1;
 				}
 				break;
@@ -6670,7 +6670,7 @@ int32 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 					int32 cast_time = GetActSpellCasttime(spell_id, spells[spell_id].cast_time);
 					GetSympatheticProcChances(ProcBonus, ProcChance, cast_time, ProcRateMod);
 
-					if(MakeRandomFloat(0, 1) <= ProcChance)
+					if(zone->random.Real(0, 1) <= ProcChance)
 						value = focus_id;
 
 					else
@@ -7147,7 +7147,7 @@ int32 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 					value = focus_spell.base[i];
 				}
 				else {
-					value = MakeRandomInt(focus_spell.base[i], focus_spell.base2[i]);
+					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]);
 				}
 			}
 			break;
@@ -7165,7 +7165,7 @@ int32 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 					value = focus_spell.base[i];
 				}
 				else {
-					value = MakeRandomInt(focus_spell.base[i], focus_spell.base2[i]);
+					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]);
 				}
 			}
 			break;
@@ -7183,7 +7183,7 @@ int32 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 					value = focus_spell.base[i];
 				}
 				else {
-					value = MakeRandomInt(focus_spell.base[i], focus_spell.base2[i]);
+					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]);
 				}
 			}
 			break;
@@ -7273,7 +7273,7 @@ int32 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 		{
 			if(bottype == BotfocusTriggerOnCast)
 
-				if(MakeRandomInt(0, 100) <= focus_spell.base[i])
+				if(zone->random.Int(0, 100) <= focus_spell.base[i])
 					value = focus_spell.base2[i];
 
 				else
@@ -7293,7 +7293,7 @@ int32 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 		{
 			if(bottype == BotfocusBlockNextSpell)
 			{
-				if(MakeRandomInt(1, 100) <= focus_spell.base[i])
+				if(zone->random.Int(1, 100) <= focus_spell.base[i])
 					value = 1;
 			}
 			break;
@@ -7313,7 +7313,7 @@ int32 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 
 				float ProcChance = GetSympatheticProcChances(spell_id, focus_spell.base[i]);
 
-				if(MakeRandomFloat(0, 1) <= ProcChance)
+				if(zone->random.Real(0, 1) <= ProcChance)
 					value = focus_id;
 
 				else
@@ -7503,7 +7503,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		//Live AA - HightenedAwareness
 		int BlockBehindChance = aabonuses.BlockBehind + spellbonuses.BlockBehind + itembonuses.BlockBehind;
 
-		if (BlockBehindChance && (BlockBehindChance > MakeRandomInt(1, 100))){
+		if (BlockBehindChance && (BlockBehindChance > zone->random.Int(1, 100))){
 			bBlockFromRear = true;
 
 			if (spellbonuses.BlockBehind || itembonuses.BlockBehind)
@@ -7595,7 +7595,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 
 	if(damage > 0)
 	{
-		roll = MakeRandomFloat(0,100);
+		roll = zone->random.Real(0,100);
 		if(roll <= RollTable[0]){
 			damage = -3;
 		}
@@ -7662,7 +7662,7 @@ bool Bot::TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse)
 		uint32 damage = aabonuses.FinishingBlow[1];
 		uint16 levelreq = aabonuses.FinishingBlowLvl[0];
 
-		if(defender->GetLevel() <= levelreq && (chance >= MakeRandomInt(0, 1000))){
+		if(defender->GetLevel() <= levelreq && (chance >= zone->random.Int(0, 1000))){
 			mlog(COMBAT__ATTACKS, "Landed a finishing blow: levelreq at %d, other level %d", levelreq , defender->GetLevel());
 			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FINISHING_BLOW, GetName());
 			defender->Damage(this, damage, SPELL_UNKNOWN, skillinuse);
@@ -7690,7 +7690,7 @@ void Bot::DoRiposte(Mob* defender) {
 							defender->GetSpellBonuses().GiveDoubleRiposte[0] +
 							defender->GetItemBonuses().GiveDoubleRiposte[0];
 
-	if(DoubleRipChance && (DoubleRipChance >= MakeRandomInt(0, 100))) {
+	if(DoubleRipChance && (DoubleRipChance >= zone->random.Int(0, 100))) {
 		mlog(COMBAT__ATTACKS, "Preforming a double riposte (%d percent chance)", DoubleRipChance);
 
 		defender->Attack(this, MainPrimary, true);
@@ -7700,7 +7700,7 @@ void Bot::DoRiposte(Mob* defender) {
 	//Coded narrowly: Limit to one per client. Limit AA only. [1 = Skill Attack Chance, 2 = Skill]
 	DoubleRipChance = defender->GetAABonuses().GiveDoubleRiposte[1];
 
-	if(DoubleRipChance && (DoubleRipChance >= MakeRandomInt(0, 100))) {
+	if(DoubleRipChance && (DoubleRipChance >= zone->random.Int(0, 100))) {
 		if (defender->GetClass() == MONK)
 			defender->MonkSpecialAttack(this, defender->GetAABonuses().GiveDoubleRiposte[2]);
 		else if (defender->IsBot())
@@ -7766,7 +7766,7 @@ void Bot::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 		int kb_chance = 25;
 		kb_chance += kb_chance*(100-aabonuses.SpecialAttackKBProc[0])/100;
 
-		if (MakeRandomInt(0, 99) < kb_chance)
+		if (zone->random.Int(0, 99) < kb_chance)
 			SpellFinished(904, who, 10, 0, -1, spells[904].ResistDiff);
 			//who->Stun(100); Kayen: This effect does not stun on live, it only moves the NPC.
 	}
@@ -7807,7 +7807,7 @@ void Bot::TryBackstab(Mob *other, int ReuseTime) {
 		//Live AA - Seized Opportunity
 		int FrontalBSChance = itembonuses.FrontalBackstabChance + spellbonuses.FrontalBackstabChance + aabonuses.FrontalBackstabChance;
 
-		if (FrontalBSChance && (FrontalBSChance > MakeRandomInt(0, 100)))
+		if (FrontalBSChance && (FrontalBSChance > zone->random.Int(0, 100)))
 			bCanFrontalBS = true;
 	}
 
@@ -7821,7 +7821,7 @@ void Bot::TryBackstab(Mob *other, int ReuseTime) {
 			!other->CastToNPC()->IsEngaged() && // not aggro
 			other->GetHP()<=32000
 			&& other->IsNPC()
-			&& MakeRandomFloat(0, 99) < chance // chance
+			&& zone->random.Real(0, 99) < chance // chance
 			) {
 			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, ASSASSINATES, GetName());
 			RogueAssassinate(other);
@@ -7832,12 +7832,12 @@ void Bot::TryBackstab(Mob *other, int ReuseTime) {
 				float DoubleAttackProbability = (GetSkill(SkillDoubleAttack) + GetLevel()) / 500.0f; // 62.4 max
 				// Check for double attack with main hand assuming maxed DA Skill (MS)
 
-				if(MakeRandomFloat(0, 1) < DoubleAttackProbability)	// Max 62.4 % chance of DA
+				if(zone->random.Real(0, 1) < DoubleAttackProbability)	// Max 62.4 % chance of DA
 				{
 					if(other->GetHP() > 0)
 						RogueBackstab(other,false,ReuseTime);
 
-					if (tripleChance && other->GetHP() > 0 && tripleChance > MakeRandomInt(0, 100))
+					if (tripleChance && other->GetHP() > 0 && tripleChance > zone->random.Int(0, 100))
 						RogueBackstab(other,false,ReuseTime);
 				}
 			}
@@ -7851,11 +7851,11 @@ void Bot::TryBackstab(Mob *other, int ReuseTime) {
 		if (level > 54) {
 			float DoubleAttackProbability = (GetSkill(SkillDoubleAttack) + GetLevel()) / 500.0f; // 62.4 max
 			// Check for double attack with main hand assuming maxed DA Skill (MS)
-			if(MakeRandomFloat(0, 1) < DoubleAttackProbability)		// Max 62.4 % chance of DA
+			if(zone->random.Real(0, 1) < DoubleAttackProbability)		// Max 62.4 % chance of DA
 				if(other->GetHP() > 0)
 					RogueBackstab(other,true, ReuseTime);
 
-			if (tripleChance && other->GetHP() > 0 && tripleChance > MakeRandomInt(0, 100))
+			if (tripleChance && other->GetHP() > 0 && tripleChance > zone->random.Int(0, 100))
 					RogueBackstab(other,false,ReuseTime);
 		}
 	}
@@ -7929,7 +7929,7 @@ void Bot::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 				if(RuleB(Combat, UseIntervalAC))
 					ndamage = max_hit;
 				else
-					ndamage = MakeRandomInt(min_hit, max_hit);
+					ndamage = zone->random.Int(min_hit, max_hit);
 
 			}
 		}
@@ -8036,7 +8036,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 				canBash = true;
 			}
 
-			if(!canBash || MakeRandomInt(0, 100) > 25) { //tested on live, warrior mobs both kick and bash, kick about 75% of the time, casting doesn't seem to make a difference.
+			if(!canBash || zone->random.Int(0, 100) > 25) { //tested on live, warrior mobs both kick and bash, kick about 75% of the time, casting doesn't seem to make a difference.
 				skill_to_use = SkillKick;
 			}
 			else {
@@ -8117,7 +8117,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 					if(RuleB(Combat, UseIntervalAC))
 						dmg = GetBashDamage();
 					else
-						dmg = MakeRandomInt(1, GetBashDamage());
+						dmg = zone->random.Int(1, GetBashDamage());
 
 				}
 			}
@@ -8164,7 +8164,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		//Live parses show around 55% Triple 35% Double 10% Single, you will always get first hit.
 		while(AtkRounds > 0) {
 
-			if (GetTarget() && (AtkRounds == 1 || MakeRandomInt(0,100) < 75)){
+			if (GetTarget() && (AtkRounds == 1 || zone->random.Int(0,100) < 75)){
 				DoSpecialAttackDamage(GetTarget(), SkillFrenzy, max_dmg, min_dmg, max_dmg , reuse, true);
 			}
 			AtkRounds--;
@@ -8192,7 +8192,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 					if(RuleB(Combat, UseIntervalAC))
 						dmg = GetKickDamage();
 					else
-						dmg = MakeRandomInt(1, GetKickDamage());
+						dmg = zone->random.Int(1, GetKickDamage());
 				}
 			}
 
@@ -8215,18 +8215,18 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 
 		//Live AA - Technique of Master Wu
 		uint32 bDoubleSpecialAttack = itembonuses.DoubleSpecialAttack + spellbonuses.DoubleSpecialAttack + aabonuses.DoubleSpecialAttack;
-		if( bDoubleSpecialAttack && (bDoubleSpecialAttack >= 100 || bDoubleSpecialAttack > MakeRandomInt(0,100))) {
+		if( bDoubleSpecialAttack && (bDoubleSpecialAttack >= 100 || bDoubleSpecialAttack > zone->random.Int(0,100))) {
 
 			int MonkSPA [5] = { SkillFlyingKick, SkillDragonPunch, SkillEagleStrike, SkillTigerClaw, SkillRoundKick };
-			MonkSpecialAttack(target, MonkSPA[MakeRandomInt(0,4)]);
+			MonkSpecialAttack(target, MonkSPA[zone->random.Int(0,4)]);
 
 			int TripleChance = 25;
 
 			if (bDoubleSpecialAttack > 100)
 				TripleChance += TripleChance*(100-bDoubleSpecialAttack)/100;
 
-			if(TripleChance > MakeRandomInt(0,100)) {
-				MonkSpecialAttack(target, MonkSPA[MakeRandomInt(0,4)]);
+			if(TripleChance > zone->random.Int(0,100)) {
+				MonkSpecialAttack(target, MonkSPA[zone->random.Int(0,4)]);
 			}
 		}
 
@@ -8259,7 +8259,7 @@ bool Bot::TryHeadShot(Mob* defender, SkillUseTypes skillInUse) {
 			// WildcardX: These chance formula's below are arbitrary. If someone has a better formula that is more
 			// consistent with live, feel free to update these.
 			float AttackerChance = 0.20f + ((float)(rangerLevel - 51) * 0.005f);
-			float DefenderChance = (float)MakeRandomFloat(0.00f, 1.00f);
+			float DefenderChance = (float)zone->random.Real(0.00f, 1.00f);
 			if(AttackerChance > DefenderChance) {
 				mlog(COMBAT__ATTACKS, "Landed a headshot: Attacker chance was %f and Defender chance was %f.", AttackerChance, DefenderChance);
 				// WildcardX: At the time I wrote this, there wasnt a string id for something like HEADSHOT_BLOW
@@ -8734,14 +8734,14 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 		 if (spell_id == SPELL_IMP_HARM_TOUCH && (GetAA(aaSpellCastingFury) > 0) && (GetAA(aaUnholyTouch) > 0))
 			 chance = 100;
 
-		 if (MakeRandomInt(1,100) <= chance){
+		 if (zone->random.Int(1,100) <= chance){
 			Critical = true;
 			ratio += itembonuses.SpellCritDmgIncrease + spellbonuses.SpellCritDmgIncrease + aabonuses.SpellCritDmgIncrease;
 			ratio += itembonuses.SpellCritDmgIncNoStack + spellbonuses.SpellCritDmgIncNoStack + aabonuses.SpellCritDmgIncNoStack;
 		}
 
-		else if (GetClass() == WIZARD && (GetLevel() >= RuleI(Spells, WizCritLevel)) && (MakeRandomInt(1,100) <= RuleI(Spells, WizCritChance))) {
-			ratio = MakeRandomInt(1,100); //Wizard innate critical chance is calculated seperately from spell effect and is not a set ratio.
+		else if (GetClass() == WIZARD && (GetLevel() >= RuleI(Spells, WizCritLevel)) && (zone->random.Int(1,100) <= RuleI(Spells, WizCritChance))) {
+			ratio = zone->random.Int(1,100); //Wizard innate critical chance is calculated seperately from spell effect and is not a set ratio.
 			Critical = true;
 		}
 
@@ -8820,7 +8820,7 @@ int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		if (spellbonuses.CriticalHealDecay)
 			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay);
 
-		if(chance && (MakeRandomInt(0,99) < chance)) {
+		if(chance && (zone->random.Int(0,99) < chance)) {
 			Critical = true;
 			modifier = 2; //At present time no critical heal amount modifier SPA exists.
 		}
@@ -8851,7 +8851,7 @@ int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		if (spellbonuses.CriticalRegenDecay)
 			chance += GetDecayEffectValue(spell_id, SE_CriticalRegenDecay);
 
-		if(chance && (MakeRandomInt(0,99) < chance))
+		if(chance && (zone->random.Int(0,99) < chance))
 			return (value * 2);
 	}
 
@@ -8950,7 +8950,7 @@ int32 Bot::GetActSpellCost(uint16 spell_id, int32 cost) {
 	// Formula = Unknown exact, based off a random percent chance up to mana cost(after focuses) of the cast spell
 	if(this->itembonuses.Clairvoyance && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
 	{
-		int32 mana_back = this->itembonuses.Clairvoyance * MakeRandomInt(1, 100) / 100;
+		int32 mana_back = this->itembonuses.Clairvoyance * zone->random.Int(1, 100) / 100;
 		// Doesnt generate mana, so best case is a free spell
 		if(mana_back > cost)
 			mana_back = cost;
@@ -8963,7 +8963,7 @@ int32 Bot::GetActSpellCost(uint16 spell_id, int32 cost) {
 	// WildcardX
 	float PercentManaReduction = 0;
 	float SpecializeSkill = GetSpecializeSkillValue(spell_id);
-	int SuccessChance = MakeRandomInt(0, 100);
+	int SuccessChance = zone->random.Int(0, 100);
 
 	float bonus = 1.0;
 	switch(GetAA(aaSpellCastingMastery))
@@ -9015,7 +9015,7 @@ int32 Bot::GetActSpellCost(uint16 spell_id, int32 cost) {
 
 	if(focus_redux > 0)
 	{
-		PercentManaReduction += MakeRandomFloat(1, (double)focus_redux);
+		PercentManaReduction += zone->random.Real(1, (double)focus_redux);
 	}
 
 	cost -= (cost * (PercentManaReduction / 100));
@@ -15580,7 +15580,7 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 		return false;
 
 	if (iChance < 100) {
-		uint8 tmp = MakeRandomInt(1, 100);
+		uint8 tmp = zone->random.Int(1, 100);
 		if (tmp > iChance)
 			return false;
 	}

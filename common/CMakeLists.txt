@@ -169,6 +169,7 @@ SET(common_headers
 	ptimer.h
 	queue.h
 	races.h
+	random.h
 	rdtsc.h
 	rulesys.h
 	ruletypes.h

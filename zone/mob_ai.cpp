@@ -57,7 +57,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 		return false;
 
 	if (iChance < 100) {
-		if (MakeRandomInt(0, 100) >= iChance)
+		if (zone->random.Int(0, 100) >= iChance)
 			return false;
 	}
 
@@ -94,7 +94,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 				dist2 <= spells[AIspells[i].spellid].range*spells[AIspells[i].spellid].range
 				)
 				&& (mana_cost <= GetMana() || GetMana() == GetMaxMana())
-				&& (AIspells[i].time_cancast + (MakeRandomInt(0, 4) * 1000)) <= Timer::GetCurrentTime() //break up the spelling casting over a period of time.
+				&& (AIspells[i].time_cancast + (zone->random.Int(0, 4) * 1000)) <= Timer::GetCurrentTime() //break up the spelling casting over a period of time.
 				) {
 
 #if MobAI_DEBUG_Spells >= 21
@@ -126,7 +126,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 					}
 					case SpellType_Root: {
 						Mob *rootee = GetHateRandom();
-						if (rootee && !rootee->IsRooted() && MakeRandomInt(0, 99) < 50
+						if (rootee && !rootee->IsRooted() && zone->random.Roll(50)
 							&& rootee->DontRootMeBefore() < Timer::GetCurrentTime()
 							&& rootee->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0
 							) {
@@ -165,7 +165,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 					}
 
 					case SpellType_InCombatBuff: {
-						if(MakeRandomInt(0, 99) < 50)
+						if(zone->random.Roll(50))
 						{
 							AIDoSpellCast(i, tar, mana_cost);
 							return true;
@@ -184,7 +184,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 					case SpellType_Slow:
 					case SpellType_Debuff: {
 						Mob * debuffee = GetHateRandom();
-						if (debuffee && manaR >= 10 && MakeRandomInt(0, 99 < 70) &&
+						if (debuffee && manaR >= 10 && zone->random.Roll(70) &&
 								debuffee->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0) {
 							if (!checked_los) {
 								if (!CheckLosFN(debuffee))
@@ -198,7 +198,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 					}
 					case SpellType_Nuke: {
 						if (
-							manaR >= 10 && MakeRandomInt(0, 99) < 70
+							manaR >= 10 && zone->random.Roll(70)
 							&& tar->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0
 							) {
 							if(!checked_los) {
@@ -212,7 +212,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 						break;
 					}
 					case SpellType_Dispel: {
-						if(MakeRandomInt(0, 99) < 15)
+						if(zone->random.Roll(15))
 						{
 							if(!checked_los) {
 								if(!CheckLosFN(tar))
@@ -228,7 +228,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 						break;
 					}
 					case SpellType_Mez: {
-						if(MakeRandomInt(0, 99) < 20)
+						if(zone->random.Roll(20))
 						{
 							Mob * mezTar = nullptr;
 							mezTar = entity_list.GetTargetForMez(this);
@@ -244,7 +244,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 
 					case SpellType_Charm:
 					{
-						if(!IsPet() && MakeRandomInt(0, 99) < 20)
+						if(!IsPet() && zone->random.Roll(20))
 						{
 							Mob * chrmTar = GetHateRandom();
 							if(chrmTar && chrmTar->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0)
@@ -258,7 +258,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 
 					case SpellType_Pet: {
 						//keep mobs from recasting pets when they have them.
-						if (!IsPet() && !GetPetID() && MakeRandomInt(0, 99) < 25) {
+						if (!IsPet() && !GetPetID() && zone->random.Roll(25)) {
 							AIDoSpellCast(i, tar, mana_cost);
 							return true;
 						}
@@ -266,7 +266,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 					}
 					case SpellType_Lifetap: {
 						if (GetHPRatio() <= 95
-							&& MakeRandomInt(0, 99) < 50
+							&& zone->random.Roll(50)
 							&& tar->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0
 							) {
 							if(!checked_los) {
@@ -282,7 +282,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 					case SpellType_Snare: {
 						if (
 							!tar->IsRooted()
-							&& MakeRandomInt(0, 99) < 50
+							&& zone->random.Roll(50)
 							&& tar->DontSnareMeBefore() < Timer::GetCurrentTime()
 							&& tar->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0
 							) {
@@ -300,7 +300,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 					}
 					case SpellType_DOT: {
 						if (
-							MakeRandomInt(0, 99) < 60
+							zone->random.Roll(60)
 							&& tar->DontDotMeBefore() < Timer::GetCurrentTime()
 							&& tar->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0
 							) {
@@ -369,7 +369,7 @@ bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float 
 		return false;
 
 	if (iChance < 100) {
-		uint8 tmp = MakeRandomInt(0, 99);
+		uint8 tmp = zone->random.Int(0, 99);
 		if (tmp >= iChance)
 			return false;
 	}
@@ -687,7 +687,7 @@ void Client::AI_SpellCast()
 	}
 	else
 	{
-		uint32 idx = MakeRandomInt(0, (valid_spells.size()-1));
+		uint32 idx = zone->random.Int(0, (valid_spells.size()-1));
 		spell_to_cast = valid_spells[idx];
 		slot_to_use = slots[idx];
 	}
@@ -875,7 +875,7 @@ void Client::AI_Process()
 
 									if (flurrychance)
 									{
-										if(MakeRandomInt(0, 100) < flurrychance)
+										if(zone->random.Roll(flurrychance))
 										{
 											Message_StringID(MT_NPCFlurry, YOU_FLURRY);
 											Attack(GetTarget(), MainPrimary, false);
@@ -892,7 +892,7 @@ void Client::AI_Process()
 												wpn->GetItem()->ItemType == ItemType2HBlunt ||
 												wpn->GetItem()->ItemType == ItemType2HPiercing )
 											{
-												if(MakeRandomInt(0, 100) < ExtraAttackChanceBonus)
+												if(zone->random.Roll(ExtraAttackChanceBonus))
 												{
 													Attack(GetTarget(), MainPrimary, false);
 												}
@@ -931,7 +931,7 @@ void Client::AI_Process()
 					int16 DWBonus = spellbonuses.DualWieldChance + itembonuses.DualWieldChance;
 					DualWieldProbability += DualWieldProbability*float(DWBonus)/ 100.0f;
 
-					if(MakeRandomFloat(0.0, 1.0) < DualWieldProbability)
+					if(zone->random.Roll(DualWieldProbability))
 					{
 						Attack(GetTarget(), MainSecondary);
 						if(CheckDoubleAttack())
@@ -1191,7 +1191,7 @@ void Mob::AI_Process() {
 						//we use this random value in three comparisons with different
 						//thresholds, and if its truely random, then this should work
 						//out reasonably and will save us compute resources.
-						int32 RandRoll = MakeRandomInt(0, 99);
+						int32 RandRoll = zone->random.Int(0, 99);
 						if ((CanThisClassDoubleAttack() || GetSpecialAbility(SPECATK_TRIPLE)
 								|| GetSpecialAbility(SPECATK_QUAD))
 								//check double attack, this is NOT the same rules that clients use...
@@ -1215,7 +1215,7 @@ void Mob::AI_Process() {
 						int flurry_chance = GetSpecialAbilityParam(SPECATK_FLURRY, 0);
 						flurry_chance = flurry_chance > 0 ? flurry_chance : RuleI(Combat, NPCFlurryChance);
 
-						if (MakeRandomInt(0, 99) < flurry_chance) {
+						if (zone->random.Roll(flurry_chance)) {
 							ExtraAttackOptions opts;
 							int cur = GetSpecialAbilityParam(SPECATK_FLURRY, 2);
 							if (cur > 0)
@@ -1257,7 +1257,7 @@ void Mob::AI_Process() {
 						int16 flurry_chance = owner->aabonuses.PetFlurry +
 							owner->spellbonuses.PetFlurry + owner->itembonuses.PetFlurry;
 
-							if (flurry_chance && (MakeRandomInt(0, 99) < flurry_chance))
+							if (flurry_chance && zone->random.Roll(flurry_chance))
 								Flurry(nullptr);
 						}
 					}
@@ -1266,7 +1266,7 @@ void Mob::AI_Process() {
 					{
 						int rampage_chance = GetSpecialAbilityParam(SPECATK_RAMPAGE, 0);
 						rampage_chance = rampage_chance > 0 ? rampage_chance : 20;
-						if(MakeRandomInt(0, 99) < rampage_chance) {
+						if(zone->random.Roll(rampage_chance)) {
 							ExtraAttackOptions opts;
 							int cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 2);
 							if(cur > 0) {
@@ -1305,7 +1305,7 @@ void Mob::AI_Process() {
 					{
 						int rampage_chance = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 0);
 						rampage_chance = rampage_chance > 0 ? rampage_chance : 20;
-						if(MakeRandomInt(0, 99) < rampage_chance) {
+						if(zone->random.Roll(rampage_chance)) {
 							ExtraAttackOptions opts;
 							int cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 2);
 							if(cur > 0) {
@@ -1349,13 +1349,12 @@ void Mob::AI_Process() {
 					//can only dual wield without a weapon if your a monk
 					if(GetSpecialAbility(SPECATK_INNATE_DW) || (GetEquipment(MaterialSecondary) != 0 && GetLevel() > 29) || myclass == MONK || myclass == MONKGM) {
 						float DualWieldProbability = (GetSkill(SkillDualWield) + GetLevel()) / 400.0f;
-						if(MakeRandomFloat(0.0, 1.0) < DualWieldProbability)
+						if(zone->random.Roll(DualWieldProbability))
 						{
 							Attack(target, MainSecondary);
 							if (CanThisClassDoubleAttack())
 							{
-								int32 RandRoll = MakeRandomInt(0, 99);
-								if (RandRoll < (GetLevel() + 20))
+								if (zone->random.Roll(GetLevel() + 20))
 								{
 									Attack(target, MainSecondary);
 								}
@@ -1619,12 +1618,12 @@ void NPC::AI_DoMovement() {
 			)
 		{
 			float movedist = roambox_distance*roambox_distance;
-			float movex = MakeRandomFloat(0, movedist);
+			float movex = zone->random.Real(0, movedist);
 			float movey = movedist - movex;
 			movex = sqrtf(movex);
 			movey = sqrtf(movey);
-			movex *= MakeRandomInt(0, 1) ? 1 : -1;
-			movey *= MakeRandomInt(0, 1) ? 1 : -1;
+			movex *= zone->random.Int(0, 1) ? 1 : -1;
+			movey *= zone->random.Int(0, 1) ? 1 : -1;
 			roambox_movingto_x = GetX() + movex;
 			roambox_movingto_y = GetY() + movey;
 			//Try to calculate new coord using distance.
@@ -1635,9 +1634,9 @@ void NPC::AI_DoMovement() {
 			//New coord is still invalid, ignore distance and just pick a new random coord.
 			//If we're here we may have a roambox where one side is shorter than the specified distance. Commons, Wkarana, etc.
 			if (roambox_movingto_x > roambox_max_x || roambox_movingto_x < roambox_min_x)
-				roambox_movingto_x = MakeRandomFloat(roambox_min_x+1,roambox_max_x-1);
+				roambox_movingto_x = zone->random.Real(roambox_min_x+1,roambox_max_x-1);
 			if (roambox_movingto_y > roambox_max_y || roambox_movingto_y < roambox_min_y)
-				roambox_movingto_y = MakeRandomFloat(roambox_min_y+1,roambox_max_y-1);
+				roambox_movingto_y = zone->random.Real(roambox_min_y+1,roambox_max_y-1);
 		}
 
 		mlog(AI__WAYPOINTS, "Roam Box: d=%.3f (%.3f->%.3f,%.3f->%.3f): Go To (%.3f,%.3f)",
@@ -1879,7 +1878,7 @@ void Mob::AI_Event_NoLongerEngaged() {
 	if (minLastFightingDelayMoving == maxLastFightingDelayMoving)
 		pLastFightingDelayMoving += minLastFightingDelayMoving;
 	else
-		pLastFightingDelayMoving += MakeRandomInt(minLastFightingDelayMoving, maxLastFightingDelayMoving);
+		pLastFightingDelayMoving += zone->random.Int(minLastFightingDelayMoving, maxLastFightingDelayMoving);
 	// So mobs don't keep running as a ghost until AIwalking_timer fires
 	// if they were moving prior to losing all hate
 	if(IsMoving()){

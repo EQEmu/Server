@@ -109,7 +109,7 @@ uint32 Spawn2::resetTimer()
 
 	if (variance_ != 0) {
 		int var_over_2 = (variance_ * 1000) / 2;
-		rspawn = MakeRandomInt(rspawn - var_over_2, rspawn + var_over_2);
+		rspawn = zone->random.Int(rspawn - var_over_2, rspawn + var_over_2);
 
 		//put a lower bound on it, not a lot of difference below 100, so set that as the bound.
 		if(rspawn < 100)
@@ -126,7 +126,7 @@ uint32 Spawn2::despawnTimer(uint32 despawn_timer)
 
 	if (variance_ != 0) {
 		int var_over_2 = (variance_ * 1000) / 2;
-		dspawn = MakeRandomInt(dspawn - var_over_2, dspawn + var_over_2);
+		dspawn = zone->random.Int(dspawn - var_over_2, dspawn + var_over_2);
 
 		//put a lower bound on it, not a lot of difference below 100, so set that as the bound.
 		if(dspawn < 100)

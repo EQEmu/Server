@@ -4,6 +4,7 @@
 #include "../common/rulesys.h"
 #include "../common/misc_functions.h"
 #include "../common/string_util.h"
+#include "../common/random.h"
 #include "adventure.h"
 #include "adventure_manager.h"
 #include "worlddb.h"
@@ -14,6 +15,7 @@
 extern ZSList zoneserver_list;
 extern ClientList client_list;
 extern AdventureManager adventure_manager;
+extern EQEmu::Random emu_random;
 
 Adventure::Adventure(AdventureTemplate *t)
 {
@@ -392,8 +394,8 @@ void Adventure::MoveCorpsesToGraveyard()
 
 	for (auto iter = dbid_list.begin(); iter != dbid_list.end(); ++iter)
 	{
-		float x = GetTemplate()->graveyard_x + MakeRandomFloat(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
-		float y = GetTemplate()->graveyard_y + MakeRandomFloat(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
+		float x = GetTemplate()->graveyard_x + emu_random.Real(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
+		float y = GetTemplate()->graveyard_y + emu_random.Real(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
 		float z = GetTemplate()->graveyard_z;
 
 		query = StringFormat("UPDATE character_corpses "

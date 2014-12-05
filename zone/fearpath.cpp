@@ -186,8 +186,8 @@ void Mob::CalculateNewFearpoint()
 	{
 		int ran = 250 - (loop*2);
 		loop++;
-		ranx = GetX()+MakeRandomInt(0, ran-1)-MakeRandomInt(0, ran-1);
-		rany = GetY()+MakeRandomInt(0, ran-1)-MakeRandomInt(0, ran-1);
+		ranx = GetX()+zone->random.Int(0, ran-1)-zone->random.Int(0, ran-1);
+		rany = GetY()+zone->random.Int(0, ran-1)-zone->random.Int(0, ran-1);
 		ranz = FindGroundZ(ranx,rany);
 		if (ranz == -999999)
 			continue;

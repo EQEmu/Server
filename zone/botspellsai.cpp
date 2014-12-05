@@ -13,7 +13,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 		return false;
 
 	if (iChance < 100) {
-		if (MakeRandomInt(0, 100) > iChance){
+		if (zone->random.Int(0, 100) > iChance){
 			return false;
 		}
 	}
@@ -485,7 +485,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 						if(botClass == PALADIN)
 							stunChance = 50;
 
-						if(!tar->GetSpecialAbility(UNSTUNABLE) && !tar->IsStunned() && (MakeRandomInt(1, 100) <= stunChance)) {
+						if(!tar->GetSpecialAbility(UNSTUNABLE) && !tar->IsStunned() && (zone->random.Int(1, 100) <= stunChance)) {
 							botSpell = GetBestBotSpellForStunByTargetType(this, ST_Target);
 						}
 					}
@@ -1843,7 +1843,7 @@ std::string Bot::GetBotMagicianPetType(Bot* botCaster) {
 				result = std::string("SumEarth");
 			else if(botCaster->GetLevel() < 30) {
 				// Under level 30
-				int counter = MakeRandomInt(0, 3);
+				int counter = zone->random.Int(0, 3);
 
 				switch(counter) {
 					case 0:
@@ -1865,7 +1865,7 @@ std::string Bot::GetBotMagicianPetType(Bot* botCaster) {
 			}
 			else {
 				// Over level 30
-				int counter = MakeRandomInt(0, 4);
+				int counter = zone->random.Int(0, 4);
 
 				switch(counter) {
 					case 0:

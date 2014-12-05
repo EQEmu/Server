@@ -923,7 +923,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	_log(TRADESKILLS__TRACE, "...Current skill: %d , Trivial: %d , Success chance: %f percent", user_skill , spec->trivial , chance);
 	_log(TRADESKILLS__TRACE, "...Bonusstat: %d , INT: %d , WIS: %d , DEX: %d , STR: %d", bonusstat , GetINT() , GetWIS() , GetDEX() , GetSTR());
 
-	float res = MakeRandomFloat(0, 99);
+	float res = zone->random.Real(0, 99);
 	int aa_chance = 0;
 
 	//AA modifiers
@@ -1057,7 +1057,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 
 	chance = mod_tradeskill_chance(chance, spec);
 
-	if (((spec->tradeskill==75) || GetGM() || (chance > res)) || MakeRandomInt(0, 99) < aa_chance){
+	if (((spec->tradeskill==75) || GetGM() || (chance > res)) || zone->random.Roll(aa_chance)) {
 		success_modifier = 1;
 
 		if(over_trivial < 0)
@@ -1127,7 +1127,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 			uint8 sc = 0;
 			while(itr != spec->salvage.end()) {
 				for(sc = 0; sc < itr->second; sc++)
-					if(MakeRandomInt(0,99) < SalvageChance)
+					if(zone->random.Roll(SalvageChance))
 						SummonItem(itr->first, 1);
 				++itr;
 			}
@@ -1153,7 +1153,7 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 	//In stage2 the only thing that matters is your current unmodified skill.
 	//If you want to customize here you probbably need to implement your own
 	//formula instead of tweaking the below one.
-	if (chance_stage1 > MakeRandomFloat(0, 99)) {
+	if (chance_stage1 > zone->random.Real(0, 99)) {
 		if (current_raw_skill < 15) {
 			//Always succeed
 			chance_stage2 = 100;
@@ -1168,7 +1168,7 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 
 	chance_stage2 = mod_tradeskill_skillup(chance_stage2);
 
-	if (chance_stage2 > MakeRandomFloat(0, 99)) {
+	if (chance_stage2 > zone->random.Real(0, 99)) {
 		//Only if stage1 and stage2 succeeded you get a skillup.
 		SetSkill(tradeskill, current_raw_skill + 1);
 
