@@ -455,7 +455,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 				if(IsClient())
 				{
-					if(MakeRandomInt(0, 99) < RuleI(Spells, SuccorFailChance)) { //2% Fail chance by default
+					if(zone->random.Roll(RuleI(Spells, SuccorFailChance))) { //2% Fail chance by default
 
 						if(IsClient()) {
 							CastToClient()->Message_StringID(MT_SpellFailure,SUCCOR_FAIL);
@@ -710,9 +710,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					if (IsClient())
 						stun_resist += aabonuses.StunResist;
 
-					if (stun_resist <= 0 || MakeRandomInt(0,99) >= stun_resist) {
+					if (stun_resist <= 0 || zone->random.Int(0,99) >= stun_resist) {
 						mlog(COMBAT__HITS, "Stunned. We had %d percent resist chance.", stun_resist);
-						
+
 						if (caster->IsClient())
 							effect_value += effect_value*caster->CastToClient()->GetFocusEffect(focusFcStunTimeMod, spell_id)/100;
 
@@ -1033,8 +1033,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 				if(!spellbonuses.AntiGate){
 
-					if(MakeRandomInt(0, 99) < effect_value)
-						Gate();						
+					if(zone->random.Roll(effect_value))
+						Gate();
 					else
 						caster->Message_StringID(MT_SpellFailure,GATE_FAIL);
 				}
@@ -1475,16 +1475,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 				int wipechance = spells[spell_id].base[i];
 				int bonus = 0;
-				
+
 				if (caster){
-				bonus = caster->spellbonuses.IncreaseChanceMemwipe + 
-						caster->itembonuses.IncreaseChanceMemwipe + 
+					bonus = caster->spellbonuses.IncreaseChanceMemwipe +
+						caster->itembonuses.IncreaseChanceMemwipe +
 						caster->aabonuses.IncreaseChanceMemwipe;
 				}
 
 				wipechance += wipechance*bonus/100;
-				
-				if(MakeRandomInt(0, 99) < wipechance)
+
+				if(zone->random.Roll(wipechance))
 				{
 					if(IsAIControlled())
 					{
@@ -1597,7 +1597,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 				if(IsClient()) {
 
-					if (MakeRandomInt(0, 99) > spells[spell_id].base[i]) {
+					if (zone->random.Int(0, 99) > spells[spell_id].base[i]) {
 						CastToClient()->SetFeigned(false);
 						entity_list.MessageClose_StringID(this, false, 200, 10, STRING_FEIGNFAILED, GetName());
 						}
@@ -2187,7 +2187,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Fading Memories");
 #endif
-				if(MakeRandomInt(0, 99) < spells[spell_id].base[i] ) {
+				if(zone->random.Roll(spells[spell_id].base[i])) {
 
 					if(caster && caster->IsClient())
 						caster->CastToClient()->Escape();
@@ -2711,11 +2711,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						}
 					}else{
 						int32 newhate = GetHateAmount(caster) + effect_value;
-						if (newhate < 1) 
+						if (newhate < 1)
 							SetHate(caster,1);
-						 else 
+						else
 							SetHate(caster,newhate);
-						}	
+						}
 				}
 				break;
 			}
@@ -2724,9 +2724,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if (buffslot >= 0)
 					break;
 
-				if(!spells[spell_id].uninterruptable && IsCasting() && MakeRandomInt(0, 100) <= spells[spell_id].base[i])
+				if(!spells[spell_id].uninterruptable && IsCasting() && zone->random.Roll(spells[spell_id].base[i]))
 					InterruptSpell();
-				
+
 				break;
 			}
 
@@ -2742,17 +2742,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				Message(10, "The power of your next illusion spell will flow to your grouped target in your place.");
 				break;
 			}
-			
+
 			case SE_ApplyEffect: {
 
 				if (caster && IsValidSpell(spells[spell_id].base2[i])){
-					
-					if(MakeRandomInt(0, 100) <= spells[spell_id].base[i])
+					if(zone->random.Roll(spells[spell_id].base[i]))
 						caster->SpellFinished(spells[spell_id].base2[i], this, 10, 0, -1, spells[spells[spell_id].base2[i]].ResistDiff);
 				}
 				break;
 			}
-			
+
 			case SE_SpellTrigger: {
 
 				if (!SE_SpellTrigger_HasCast) {
@@ -3209,7 +3208,7 @@ snare has both of them negative, yet their range should work the same:
 			break;
 		}
 		case 123:	// added 2/6/04
-			result = MakeRandomInt(ubase, abs(max));
+			result = zone->random.Int(ubase, abs(max));
 			break;
 
 		case 124:	// check sign
@@ -3573,16 +3572,16 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 
 				int wipechance = spells[spell_id].base[i];
 				int bonus = 0;
-				
+
 				if (caster){
-					bonus =	caster->spellbonuses.IncreaseChanceMemwipe + 
-							caster->itembonuses.IncreaseChanceMemwipe + 
+					bonus =	caster->spellbonuses.IncreaseChanceMemwipe +
+							caster->itembonuses.IncreaseChanceMemwipe +
 							caster->aabonuses.IncreaseChanceMemwipe;
 				}
-				
+
 				wipechance += wipechance*bonus/100;
-				
-				if(MakeRandomInt(0, 99) < wipechance)
+
+				if(zone->random.Roll(wipechance))
 				{
 					if(IsAIControlled())
 					{
@@ -3602,16 +3601,14 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 			}
 
 			case SE_Root: {
-				
 				/* Root formula derived from extensive personal live parses - Kayen
 				ROOT has a 70% chance to do a resist check to break.
 				*/
 
-				if (MakeRandomInt(0, 99) < RuleI(Spells, RootBreakCheckChance)){
-				
+				if (zone->random.Roll(RuleI(Spells, RootBreakCheckChance))) {
 					float resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster, 0,0,0,0,true);
 
-					if(resist_check == 100) 
+					if(resist_check == 100)
 						break;
 					else
 						if(!TryFadeEffect(slot))
@@ -3623,11 +3620,10 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 
 			case SE_Fear:
 			{
-				if (MakeRandomInt(0, 99) < RuleI(Spells, FearBreakCheckChance)){
-				
+				if (zone->random.Roll(RuleI(Spells, FearBreakCheckChance))) {
 					float resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster);
 
-					if(resist_check == 100) 
+					if(resist_check == 100)
 						break;
 					else
 						if(!TryFadeEffect(slot))
@@ -3664,7 +3660,7 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 							break_chance -= (2 * (((double)GetSkill(SkillDivination) + ((double)GetLevel() * 3.0)) / 650.0));
 						}
 
-						if(MakeRandomFloat(0.0, 100.0) < break_chance)
+						if(zone->random.Real(0.0, 100.0) < break_chance)
 						{
 							BuffModifyDurationBySpellID(spell_id, 3);
 						}
@@ -3684,7 +3680,7 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 			{
 				if(IsCasting())
 				{
-					if(MakeRandomInt(0, 100) <= spells[spell_id].base[i])
+					if(zone->random.Roll(spells[spell_id].base[i]))
 					{
 						InterruptSpell();
 					}
@@ -4582,11 +4578,9 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 
 			case SE_TriggerOnCast:
 				if(type == focusTriggerOnCast){
-					if(MakeRandomInt(0, 100) <= base1){
+					if(zone->random.Roll(base1)) {
 						value = base2;
-					}
-
-					else{
+					} else {
 						value = 0;
 						LimitFailure = true;
 					}
@@ -4600,7 +4594,7 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 
 			case SE_BlockNextSpellFocus:
 				if(type == focusBlockNextSpell){
-					if(MakeRandomInt(1, 100) <= base1)
+					if(zone->random.Roll(base1))
 						value = 1;
 				}
 				break;
@@ -4955,7 +4949,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 					value = focus_spell.base[i];
 				}
 				else {
-					value = MakeRandomInt(focus_spell.base[i], focus_spell.base2[i]);
+					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]);
 				}
 			}
 			break;
@@ -4974,7 +4968,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 					value = focus_spell.base[i];
 				}
 				else {
-					value = MakeRandomInt(focus_spell.base[i], focus_spell.base2[i]);
+					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]);
 				}
 			}
 			break;
@@ -4993,7 +4987,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 					value = focus_spell.base[i];
 				}
 				else {
-					value = MakeRandomInt(focus_spell.base[i], focus_spell.base2[i]);
+					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]);
 				}
 			}
 			break;
@@ -5062,7 +5056,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		case SE_TriggerOnCast:
 			if(type == focusTriggerOnCast){
-				if(MakeRandomInt(1, 100) <= focus_spell.base[i])
+				if(zone->random.Roll(focus_spell.base[i]))
 					value = focus_spell.base2[i];
 				else
 					value = 0;
@@ -5071,7 +5065,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		case SE_BlockNextSpellFocus:
 			if(type == focusBlockNextSpell){
-				if(MakeRandomInt(1, 100) <= focus_spell.base[i])
+				if(zone->random.Roll(focus_spell.base[i]))
 					value = 1;
 			}
 			break;
@@ -5219,12 +5213,9 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 			if (TempItem && TempItem->Focus.Effect > 0 && IsValidSpell(TempItem->Focus.Effect)) {
 
 				proc_spellid = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id);
-					
 				if (IsValidSpell(proc_spellid)){
-
 					ProcChance = GetSympatheticProcChances(spell_id, spells[TempItem->Focus.Effect].base[0], TempItem->ProcRate);
-					
-					if(MakeRandomFloat(0, 1) <= ProcChance) 
+					if(zone->random.Roll(ProcChance))
  						SympatheticProcList.push_back(proc_spellid);
 				}
 			}
@@ -5240,14 +5231,10 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 				{
 					const Item_Struct* TempItemAug = aug->GetItem();
 					if (TempItemAug && TempItemAug->Focus.Effect > 0 && IsValidSpell(TempItemAug->Focus.Effect)) {
-
 						proc_spellid = CalcFocusEffect(type, TempItemAug->Focus.Effect, spell_id);
-
 						if (IsValidSpell(proc_spellid)){
-	
 							ProcChance = GetSympatheticProcChances(spell_id, spells[TempItemAug->Focus.Effect].base[0], TempItemAug->ProcRate);
-					
-							if(MakeRandomFloat(0, 1) <= ProcChance) 
+							if(zone->random.Roll(ProcChance))
 								SympatheticProcList.push_back(proc_spellid);
 						}
 					}
@@ -5275,8 +5262,7 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 			if (IsValidSpell(proc_spellid)){
 
 				ProcChance = GetSympatheticProcChances(spell_id, spells[focusspellid].base[0]);
-				
-				if(MakeRandomFloat(0, 1) <= ProcChance) 
+				if(zone->random.Roll(ProcChance))
  					SympatheticProcList.push_back(proc_spellid);
 			}
 		}
@@ -5302,10 +5288,8 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 			proc_spellid = CalcAAFocus(type, aa_AA, spell_id);
 
 			if (IsValidSpell(proc_spellid)){
-				
 				ProcChance = GetSympatheticProcChances(spell_id, GetAABase1(aa_AA, 1));
-				
-				if(MakeRandomFloat(0, 1) <= ProcChance) 
+				if(zone->random.Roll(ProcChance))
 					SympatheticProcList.push_back(proc_spellid);
 			}
 		}
@@ -5313,7 +5297,7 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 	if (SympatheticProcList.size() > 0)
 	{
-		uint8 random = MakeRandomInt(0, SympatheticProcList.size()-1);
+		uint8 random = zone->random.Int(0, SympatheticProcList.size()-1);
 		int FinalSympatheticProc = SympatheticProcList[random];
 		SympatheticProcList.clear();
 		return FinalSympatheticProc;
@@ -5672,7 +5656,7 @@ bool Mob::TryDivineSave()
 	*/
 
 	int32 SuccessChance = aabonuses.DivineSaveChance[0] + itembonuses.DivineSaveChance[0] + spellbonuses.DivineSaveChance[0];
-	if (SuccessChance && MakeRandomInt(0, 100) <= SuccessChance)
+	if (SuccessChance && zone->random.Roll(SuccessChance))
 	{
 		SetHP(1);
 
@@ -5731,7 +5715,7 @@ bool Mob::TryDeathSave() {
 			if (SuccessChance > 95)
 				SuccessChance = 95;
 
-			if(SuccessChance >= MakeRandomInt(0, 100)) {
+			if(zone->random.Roll(SuccessChance)) {
 
 				if(spellbonuses.DeathSave[0] == 2)
 					HealAmt = RuleI(Spells, DivineInterventionHeal); //8000HP is how much LIVE Divine Intervention max heals
@@ -5762,7 +5746,7 @@ bool Mob::TryDeathSave() {
 				if (SuccessChance > 95)
 					SuccessChance = 95;
 
-				if(SuccessChance >= MakeRandomInt(0, 100)) {
+				if(zone->random.Roll(SuccessChance)) {
 
 					if(spellbonuses.DeathSave[0] == 2)
 						HealAmt = RuleI(Spells, DivineInterventionHeal);
@@ -6064,7 +6048,7 @@ bool Mob::TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier){
 	else if (dispel_chance < 10)
 		dispel_chance = 10;
 
-	if (MakeRandomInt(0,99) < dispel_chance)
+	if (zone->random.Roll(dispel_chance))
 		return true;
 	else
 		return false;

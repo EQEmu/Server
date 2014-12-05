@@ -3,6 +3,7 @@
 #include "../common/string_util.h"
 #include "../common/servertalk.h"
 #include "../common/rulesys.h"
+#include "../common/random.h"
 #include "adventure.h"
 #include "adventure_manager.h"
 #include "worlddb.h"
@@ -14,6 +15,7 @@
 
 extern ZSList zoneserver_list;
 extern ClientList client_list;
+extern EQEmu::Random emu_random;
 
 AdventureManager::AdventureManager()
 {
@@ -325,7 +327,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	if(eligible_adventures.size() > 0)
 	{
 		ea_iter = eligible_adventures.begin();
-		int c_index = MakeRandomInt(0, (eligible_adventures.size()-1));
+		int c_index = emu_random.Int(0, (eligible_adventures.size()-1));
 		for(int i = 0; i < c_index; ++i)
 		{
 			++ea_iter;

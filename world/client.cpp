@@ -15,6 +15,7 @@
 #include "../common/extprofile.h"
 #include "../common/string_util.h"
 #include "../common/clientversions.h"
+#include "../common/random.h"
 
 #include "client.h"
 #include "worlddb.h"
@@ -61,6 +62,7 @@ std::vector<RaceClassCombos> character_create_race_class_combos;
 extern ZSList zoneserver_list;
 extern LoginServerList loginserverlist;
 extern ClientList client_list;
+extern EQEmu::Random emu_random;
 extern uint32 numclients;
 extern volatile bool RunLoops;
 
@@ -519,7 +521,7 @@ bool Client::HandleGenerateRandomNamePacket(const EQApplicationPacket *app) {
 	char cons[48]="bcdfghjklmnpqrstvwxzybcdgklmnprstvwbcdgkpstrkd";
 	char rndname[17]="\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
 	char paircons[33]="ngrkndstshthphsktrdrbrgrfrclcr";
-	int rndnum=MakeRandomInt(0, 75),n=1;
+	int rndnum=emu_random.Int(0, 75),n=1;
 	bool dlc=false;
 	bool vwl=false;
 	bool dbl=false;
@@ -540,18 +542,18 @@ bool Client::HandleGenerateRandomNamePacket(const EQApplicationPacket *app) {
 		rndname[0]=vowels[rndnum];
 		vwl=true;
 	}
-	int namlen=MakeRandomInt(5, 10);
+	int namlen=emu_random.Int(5, 10);
 	for (int i=n;i<namlen;i++)
 	{
 		dlc=false;
 		if (vwl)	//last char was a vowel
 		{			// so pick a cons or cons pair
-			rndnum=MakeRandomInt(0, 62);
+			rndnum=emu_random.Int(0, 62);
 			if (rndnum>46)
 			{	// pick a cons pair
 				if (i>namlen-3)	// last 2 chars in name?
 				{	// name can only end in cons pair "rk" "st" "sh" "th" "ph" "sk" "nd" or "ng"
-					rndnum=MakeRandomInt(0, 7)*2;
+					rndnum=emu_random.Int(0, 7)*2;
 				}
 				else
 				{	// pick any from the set
@@ -569,12 +571,12 @@ bool Client::HandleGenerateRandomNamePacket(const EQApplicationPacket *app) {
 		}
 		else
 		{		// select a vowel
-			rndname[i]=vowels[MakeRandomInt(0, 16)];
+			rndname[i]=vowels[emu_random.Int(0, 16)];
 		}
 		vwl=!vwl;
 		if (!dbl && !dlc)
 		{	// one chance at double letters in name
-			if (!MakeRandomInt(0, i+9))	// chances decrease towards end of name
+			if (!emu_random.Int(0, i+9))	// chances decrease towards end of name
 			{
 				rndname[i+1]=rndname[i];
 				dbl=true;
@@ -831,7 +833,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	int MailKey = MakeRandomInt(1, INT_MAX);
+	int MailKey = emu_random.Int(1, INT_MAX);
 
 	database.SetMailKey(charid, GetIP(), MailKey);
 
@@ -1242,8 +1244,8 @@ void Client::ZoneUnavail() {
 
 bool Client::GenPassKey(char* key) {
 	char* passKey=nullptr;
-	*passKey += ((char)('A'+((int)MakeRandomInt(0, 25))));
-	*passKey += ((char)('A'+((int)MakeRandomInt(0, 25))));
+	*passKey += ((char)('A'+((int)emu_random.Int(0, 25))));
+	*passKey += ((char)('A'+((int)emu_random.Int(0, 25))));
 	memcpy(key, passKey, strlen(passKey));
 	return true;
 }

@@ -83,7 +83,7 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 
 	ret = 0;
 
-	uint32 rindex = MakeRandomInt(1, chancepool);
+	uint32 rindex = zone->random.Int(1, chancepool);
 
 	for(int i = 0; i < index; i++) {
 		if(rindex <= chance[i]) {
@@ -136,7 +136,7 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
 	if (index <= 0)
         return 0;
 
-    uint32 random = MakeRandomInt(1, chancepool);
+    uint32 random = zone->random.Int(1, chancepool);
     for (int i = 0; i < index; i++)
     {
         if (random > chance[i])
@@ -258,18 +258,18 @@ void Client::GoFish()
 		fishing_skill = 100+((fishing_skill-100)/2);
 	}
 
-	if (MakeRandomInt(0,175) < fishing_skill) {
+	if (zone->random.Int(0,175) < fishing_skill) {
 		uint32 food_id = 0;
 
 		//25% chance to fish an item.
-		if (MakeRandomInt(0, 399) <= fishing_skill ) {
+		if (zone->random.Int(0, 399) <= fishing_skill ) {
 			uint32 npc_id = 0;
 			uint8 npc_chance = 0;
 			food_id = database.GetZoneFishing(m_pp.zone_id, fishing_skill, npc_id, npc_chance);
 
 			//check for add NPC
 			if(npc_chance > 0 && npc_id) {
-				if(npc_chance < MakeRandomInt(0, 99)) {
+				if(npc_chance < zone->random.Int(0, 99)) {
 					const NPCType* tmp = database.GetNPCType(npc_id);
 					if(tmp != nullptr) {
 						NPC* npc = new NPC(tmp, nullptr, GetX()+3, GetY(), GetZ(), GetHeading(), FlyMode3);
@@ -289,7 +289,7 @@ void Client::GoFish()
 		DeleteItemInInventory(bslot, 1, true);	//do we need client update?
 
 		if(food_id == 0) {
-			int index = MakeRandomInt(0, MAX_COMMON_FISH_IDS-1);
+			int index = zone->random.Int(0, MAX_COMMON_FISH_IDS-1);
 			food_id = common_fish_ids[index];
 		}
 
@@ -324,11 +324,11 @@ void Client::GoFish()
 	else
 	{
 		//chance to use bait when you dont catch anything...
-		if (MakeRandomInt(0, 4) == 1) {
+		if (zone->random.Int(0, 4) == 1) {
 			DeleteItemInInventory(bslot, 1, true);	//do we need client update?
 			Message_StringID(MT_Skills, FISHING_LOST_BAIT);	//You lost your bait!
 		} else {
-			if (MakeRandomInt(0, 15) == 1)	//give about a 1 in 15 chance to spill your beer. we could make this a rule, but it doesn't really seem worth it
+			if (zone->random.Int(0, 15) == 1)	//give about a 1 in 15 chance to spill your beer. we could make this a rule, but it doesn't really seem worth it
 				//TODO: check for & consume an alcoholic beverage from inventory when this triggers, and set it as a rule that's disabled by default
 				Message_StringID(MT_Skills, FISHING_SPILL_BEER);	//You spill your beer while bringing in your line.
 			else
@@ -341,7 +341,7 @@ void Client::GoFish()
 	//chance to break fishing pole...
 	//this is potentially exploitable in that they can fish
 	//and then swap out items in primary slot... too lazy to fix right now
-	if (MakeRandomInt(0, 49) == 1) {
+	if (zone->random.Int(0, 49) == 1) {
 		Message_StringID(MT_Skills, FISHING_POLE_BROKE);	//Your fishing pole broke!
 		DeleteItemInInventory(MainPrimary, 0, true);
 	}
@@ -370,18 +370,18 @@ void Client::ForageItem(bool guarantee) {
 	};
 
 	// these may need to be fine tuned, I am just guessing here
-	if (guarantee || MakeRandomInt(0,199) < skill_level) {
+	if (guarantee || zone->random.Int(0,199) < skill_level) {
 		uint32 foragedfood = 0;
 		uint32 stringid = FORAGE_NOEAT;
 
-		if (MakeRandomInt(0,99) <= 25) {
+		if (zone->random.Roll(25)) {
 			foragedfood = database.GetZoneForage(m_pp.zone_id, skill_level);
 		}
 
 		//not an else in case theres no DB food
 		if(foragedfood == 0) {
 			uint8 index = 0;
-			index = MakeRandomInt(0, MAX_COMMON_FOOD_IDS-1);
+			index = zone->random.Int(0, MAX_COMMON_FOOD_IDS-1);
 			foragedfood = common_food_ids[index];
 		}
 
@@ -438,7 +438,7 @@ void Client::ForageItem(bool guarantee) {
 		}
 
 		int ChanceSecondForage = aabonuses.ForageAdditionalItems + itembonuses.ForageAdditionalItems + spellbonuses.ForageAdditionalItems;
-		if(!guarantee && MakeRandomInt(0,99) < ChanceSecondForage) {
+		if(!guarantee && zone->random.Roll(ChanceSecondForage)) {
 			Message_StringID(MT_Skills, FORAGE_MASTERY);
 			ForageItem(true);
 		}
