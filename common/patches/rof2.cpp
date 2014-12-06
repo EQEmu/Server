@@ -2045,15 +2045,6 @@ namespace RoF2
 			outapp->WriteUInt32(emu->skills[r]);
 		}
 
-		// deprecated
-		// Write zeroes for the rest of the skills
-		/*
-		for(uint32 r = 0; r < structs::MAX_PP_SKILL - MAX_PP_SKILL; r++)
-		{
-		outapp->WriteUInt32(emu->skills[r]);
-		}
-		*/
-
 		outapp->WriteUInt32(25);			// Unknown count
 
 		for (uint32 r = 0; r < 25; r++)
@@ -2334,7 +2325,6 @@ namespace RoF2
 		outapp->WriteUInt8(emu->pvp);
 		outapp->WriteUInt8(0);				// Unknown
 		outapp->WriteUInt8(emu->gm);
-
 		outapp->WriteUInt32(emu->guild_id);
 		outapp->WriteUInt8(0);				// Unknown - observed 1 in a live packet.
 		outapp->WriteUInt32(0);				// Unknown - observed 1 in a live packet.
@@ -2349,6 +2339,7 @@ namespace RoF2
 		outapp->WriteUInt32(emu->silver_bank);
 		outapp->WriteUInt32(emu->copper_bank);
 
+		// Commenting out for RoF Test
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
@@ -2395,6 +2386,13 @@ namespace RoF2
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
+
+		/*
+
+		// Begin RoF2 Test
+		for (uint32 r = 0; r < 1000; r++)
+			outapp->WriteUInt8(0);				// Unknown
+		// End RoF2 Test
 
 		// Block of 121 unknown bytes
 		for (uint32 r = 0; r < 121; r++)
@@ -2536,6 +2534,8 @@ namespace RoF2
 		outapp->WriteUInt32(emu->expAA);
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
+
+		*/
 
 		outapp->WriteUInt8(emu->groupAutoconsent);
 		outapp->WriteUInt8(emu->raidAutoconsent);

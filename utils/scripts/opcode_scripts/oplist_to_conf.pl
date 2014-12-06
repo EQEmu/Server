@@ -6,11 +6,12 @@
 # Directions to use this script:
 # 1. Copy the opcodes and opcode names columns from the opcode spreadsheet
 #        for the columns you want to create a new .conf file from into the file.
-# 2. Remove the header row entries in the newly created text file and save it.
-# 3. Paste the contents of the current patch file in the patch_OLD.conf file.
-# 4. Run this script using "perl oplist_to_conf.pl"
-# 5. This creates a new .conf file named patch_NEW.conf
-# 6. Rename patch_NEW.conf to the desired name and you are all done
+# 2. Remove the header row entries in the text file.
+# 3. Find/Replace all Tabs "	" with 2 spaces "  " and save the file.
+# 4. Paste the contents of the current patch file in the patch_OLD.conf file.
+# 5. Run this script using "perl oplist_to_conf.pl"
+# 6. This creates a new .conf file named patch_NEW.conf
+# 7. Rename patch_NEW.conf to the desired name and you are all done
 
 
 $stopmessage = "Failed to open file";

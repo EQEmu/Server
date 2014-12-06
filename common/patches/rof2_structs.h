@@ -1205,7 +1205,7 @@ union
 /*00000*/ uint8 unknown_rof52[82];		//
 /*00000*/ uint32 unknown_rof53;			// Seen 50
 
-uint8 unknown_rof54[1325];	// Unknown Section
+/*00000*/ uint8 unknown_rof54[1325];	// Unknown Section
 
 // Bottom of Struct:
 /*00000*/ uint8  groupAutoconsent;		// 0=off, 1=on
@@ -2833,8 +2833,8 @@ struct Door_Struct
 /*0085*/ uint8	unknown0085; // seen 1 or 0 or rarely 2C or 90 or ED or 2D or A1
 /*0086*/ uint8  unknown0086; // seen 0 or rarely FF or FE or 10 or 5A or 82
 /*0087*/ uint8  unknown0087; // seen 0 or rarely 02 or 7C
-/*0088*/ uint8  unknown0088[8]; // mostly 0s, the last 3 bytes are something tho
-/*0096*/
+/*0088*/ uint8  unknown0088[12]; // mostly 0s, the last 3 bytes are something tho
+/*0100*/
 };
 
 struct DoorSpawns_Struct {

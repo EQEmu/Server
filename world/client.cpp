@@ -223,7 +223,7 @@ void Client::SendMembership() {
 	mc->entries[1] = 0xffffffff;	// Max Level Restriction
 	mc->entries[2] = 0xffffffff;	// Max Char Slots per Account (not used by client?)
 	mc->entries[3] = 0xffffffff;	// 1 for Silver
-	mc->entries[4] = 8;				// Main Inventory Size (0xffffffff on Live for Gold, but limitting to 8 until 10 is supported)
+	mc->entries[4] = 8;				// Main Inventory Size (0xffffffff on Live for Gold, but limiting to 8 until 10 is supported)
 	mc->entries[5] = 0xffffffff;	// Max Platinum per level
 	mc->entries[6] = 1;				// 0 for Silver
 	mc->entries[7] = 1;				// 0 for Silver
