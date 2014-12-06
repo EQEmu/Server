@@ -50,6 +50,7 @@ namespace RoF2 {
 			MapArchived,
 			MapMail,
 			MapGuildTrophyTribute,
+			MapKrono,
 			MapOther,
 			_MapCount
 		} InventoryMaps;
