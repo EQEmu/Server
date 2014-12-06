@@ -1528,7 +1528,7 @@ void Zone::SetTime(uint8 hour, uint8 minute)
 	}
 }
 
-ZonePoint* Zone::GetClosestZonePoint(float x, float y, float z, uint32 to, Client* client, float max_distance) {
+ZonePoint* Zone::GetClosestZonePoint(const xyz_location& location, uint32 to, Client* client, float max_distance) {
 	LinkedListIterator<ZonePoint*> iterator(zone_point_list);
 	ZonePoint* closest_zp = 0;
 	float closest_dist = FLT_MAX;
@@ -1546,14 +1546,10 @@ ZonePoint* Zone::GetClosestZonePoint(float x, float y, float z, uint32 to, Clien
 
 		if (zp->target_zone_id == to)
 		{
-			float delta_x = zp->x - x;
-			float delta_y = zp->y - y;
-			if(zp->x == 999999 || zp->x == -999999)
-				delta_x = 0;
-			if(zp->y == 999999 || zp->y == -999999)
-				delta_y = 0;
+            auto dist = Distance(xy_location(zp->x,zp->y), location);
+			if ((zp->x == 999999 || zp->x == -999999) && (zp->y == 999999 || zp->y == -999999))
+				dist = 0;
 
-			float dist = sqrt(delta_x * delta_x + delta_y * delta_y);
 			if (dist < closest_dist)
 			{
 				closest_zp = zp;
@@ -1566,16 +1562,16 @@ ZonePoint* Zone::GetClosestZonePoint(float x, float y, float z, uint32 to, Clien
 	if(closest_dist > 400.0f && closest_dist < max_distance2)
 	{
 		if(client)
-			client->CheatDetected(MQZoneUnknownDest, x, y, z); // Someone is trying to use /zone
+			client->CheatDetected(MQZoneUnknownDest, location.m_X, location.m_Y, location.m_Z); // Someone is trying to use /zone
 		LogFile->write(EQEMuLog::Status, "WARNING: Closest zone point for zone id %d is %f, you might need to update your zone_points table if you dont arrive at the right spot.", to, closest_dist);
-		LogFile->write(EQEMuLog::Status, "<Real Zone Points>. %f x %f y %f z ", x, y, z);
+		LogFile->write(EQEMuLog::Status, "<Real Zone Points>. %s", to_string(location).c_str());
 	}
 
 	if(closest_dist > max_distance2)
 		closest_zp = nullptr;
 
 	if(!closest_zp)
-		closest_zp = GetClosestZonePointWithoutZone(x, y, z, client);
+		closest_zp = GetClosestZonePointWithoutZone(location.m_X, location.m_Y, location.m_Z, client);
 
 	return closest_zp;
 }
@@ -1583,7 +1579,7 @@ ZonePoint* Zone::GetClosestZonePoint(float x, float y, float z, uint32 to, Clien
 ZonePoint* Zone::GetClosestZonePoint(const xyz_location& location, const char* to_name, Client* client, float max_distance) {
 	if(to_name == nullptr)
 		return GetClosestZonePointWithoutZone(location.m_X, location.m_Y, location.m_Z, client, max_distance);
-	return GetClosestZonePoint(location.m_X, location.m_Y, location.m_Z, database.GetZoneID(to_name), client, max_distance);
+	return GetClosestZonePoint(location, database.GetZoneID(to_name), client, max_distance);
 }
 
 ZonePoint* Zone::GetClosestZonePointWithoutZone(float x, float y, float z, Client* client, float max_distance) {
