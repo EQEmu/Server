@@ -755,6 +755,7 @@ public:
 	//AA Methods
 	void SendAAList();
 	void ResetAA();
+	void SendClearAA();
 	void SendAA(uint32 id, int seq=1);
 	void SendPreviousAA(uint32 id, int seq=1);
 	void BuyAA(AA_Action* action);
