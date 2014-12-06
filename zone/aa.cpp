@@ -1502,7 +1502,7 @@ void Client::ResetAA(){
 	SendAAStats();
 	database.DeleteCharacterLeadershipAAs(this->CharacterID());
 	// undefined for these clients
-	if (GetClientVersionBit & BIT_TitaniumAndEarlier)
+	if (GetClientVersionBit() & BIT_TitaniumAndEarlier)
 		Kick();
 }
 
