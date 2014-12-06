@@ -18,25 +18,14 @@
 #ifndef ZONE_H
 #define ZONE_H
 
-#include "../common/mutex.h"
-#include "../common/linked_list.h"
-#include "../common/types.h"
 #include "../common/eqtime.h"
-#include "../common/servertalk.h"
+#include "../common/linked_list.h"
 #include "../common/rulesys.h"
-#include "../common/eq_packet_structs.h"
-#include "../common/features.h"
-#include "spawngroup.h"
-//#include "mob.h"
-#include "zonedump.h"
-#include "spawn2.h"
-#include "tasks.h"
-#include "pathing.h"
+#include "../common/types.h"
+#include "../common/random.h"
 #include "qglobals.h"
-#include <unordered_map>
-
-class Map;
-class WaterMap;
+#include "spawn2.h"
+#include "spawngroup.h"
 
 struct ZonePoint
 {
@@ -78,12 +67,10 @@ struct item_tick_struct {
     std::string qglobal;
 };
 
-extern EntityList entity_list;
-class database;
+class Map;
+class WaterMap;
 class PathManager;
-struct SendAA_Struct;
-
-class database;
+extern EntityList entity_list;
 
 class Zone
 {
@@ -261,6 +248,9 @@ public:
     uint32  GetSpawnKillCount(uint32 in_spawnid);
     void    UpdateHotzone();
 	std::unordered_map<int, item_tick_struct> tick_items;
+
+	// random object that provides random values for the zone
+	EQEmu::Random random;
 
 	//MODDING HOOKS
 	void mod_init();

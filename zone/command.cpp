@@ -42,38 +42,34 @@
 #endif
 
 #include "../common/debug.h"
-#include "../common/ptimer.h"
-#include "../common/packet_functions.h"
-#include "../common/packet_dump.h"
-#include "../common/serverinfo.h"
-#include "../common/opcodemgr.h"
 #include "../common/eq_packet.h"
-#include "../common/guilds.h"
-#include "../common/rulesys.h"
-#include "../common/string_util.h"
-//#include "../common/servertalk.h" // for oocmute and revoke
-#include "worldserver.h"
-#include "masterentity.h"
-#include "map.h"
-#include "water_map.h"
 #include "../common/features.h"
-#include "pathing.h"
-#include "client_logs.h"
-#include "guild_mgr.h"
-#include "titles.h"
+#include "../common/guilds.h"
 #include "../common/patches/patches.h"
+#include "../common/ptimer.h"
+#include "../common/rulesys.h"
+#include "../common/serverinfo.h"
+#include "../common/string_util.h"
+
+#include "client_logs.h"
+#include "command.h"
+#include "guild_mgr.h"
+#include "map.h"
+#include "pathing.h"
+#include "qglobals.h"
 #include "queryserv.h"
+#include "quest_parser_collection.h"
+#include "string_ids.h"
+#include "titles.h"
+#include "water_map.h"
+#include "worldserver.h"
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;
 extern TaskManager *taskmanager;
 void CatchSignal(int sig_num);
 
-#include "quest_parser_collection.h"
 
-#include "string_ids.h"
-#include "command.h"
-#include "qglobals.h"
 
 //struct cl_struct *commandlist;	// the actual linked list of commands
 int commandcount;								// how many commands we have
@@ -3416,7 +3412,7 @@ void command_corpse(Client *c, const Seperator *sep)
 			c->Message(0, "Error: Target must be a player corpse.");
 		else if (c->Admin() >= commandEditPlayerCorpses && target->IsPlayerCorpse()) {
 			c->Message(0, "Depoping %s.", target->GetName());
-			target->CastToCorpse()->DepopCorpse();
+			target->CastToCorpse()->DepopPlayerCorpse();
 			if(!sep->arg[2][0] || atoi(sep->arg[2]) != 0)
 				target->CastToCorpse()->Bury();
 		}
@@ -3901,7 +3897,7 @@ void command_save(Client *c, const Seperator *sep)
 	}
 	else if (c->GetTarget()->IsPlayerCorpse()) {
 		if (c->GetTarget()->CastToMob()->Save())
-			c->Message(0, "%s successfully saved. (dbid=%u)", c->GetTarget()->GetName(), c->GetTarget()->CastToCorpse()->GetDBID());
+			c->Message(0, "%s successfully saved. (dbid=%u)", c->GetTarget()->GetName(), c->GetTarget()->CastToCorpse()->GetCorpseDBID());
 		else
 			c->Message(0, "Manual save for %s failed.", c->GetTarget()->GetName());
 	}
@@ -4984,189 +4980,10 @@ void command_randomfeatures(Client *c, const Seperator *sep)
 		c->Message(0,"Error: This command requires a target");
 	else
 	{
-		uint16 Race = target->GetRace();
-		if (Race <= 12 || Race == 128 || Race == 130 || Race == 330 || Race == 522) {
-
-			uint8 Gender = target->GetGender();
-			uint8 Texture = 0xFF;
-			uint8 HelmTexture = 0xFF;
-			uint8 HairColor = 0xFF;
-			uint8 BeardColor = 0xFF;
-			uint8 EyeColor1 = 0xFF;
-			uint8 EyeColor2 = 0xFF;
-			uint8 HairStyle = 0xFF;
-			uint8 LuclinFace = 0xFF;
-			uint8 Beard = 0xFF;
-			uint32 DrakkinHeritage = 0xFFFFFFFF;
-			uint32 DrakkinTattoo = 0xFFFFFFFF;
-			uint32 DrakkinDetails = 0xFFFFFFFF;
-
-			// Set some common feature settings
-			EyeColor1 = MakeRandomInt(0, 9);
-			EyeColor2 = MakeRandomInt(0, 9);
-			LuclinFace = MakeRandomInt(0, 7);
-
-			// Adjust all settings based on the min and max for each feature of each race and gender
-			switch (Race)
-			{
-				case 1:	// Human
-					HairColor = MakeRandomInt(0, 19);
-					if (Gender == 0) {
-						BeardColor = HairColor;
-						HairStyle = MakeRandomInt(0, 3);
-						Beard = MakeRandomInt(0, 5);
-					}
-					if (Gender == 1) {
-						HairStyle = MakeRandomInt(0, 2);
-					}
-					break;
-				case 2:	// Barbarian
-					HairColor = MakeRandomInt(0, 19);
-					LuclinFace = MakeRandomInt(0, 87);
-					if (Gender == 0) {
-						BeardColor = HairColor;
-						HairStyle = MakeRandomInt(0, 3);
-						Beard = MakeRandomInt(0, 5);
-					}
-					if (Gender == 1) {
-						HairStyle = MakeRandomInt(0, 2);
-					}
-					break;
-				case 3: // Erudite
-					if (Gender == 0) {
-						BeardColor = MakeRandomInt(0, 19);
-						Beard = MakeRandomInt(0, 5);
-						LuclinFace = MakeRandomInt(0, 57);
-					}
-					if (Gender == 1) {
-						LuclinFace = MakeRandomInt(0, 87);
-					}
-					break;
-				case 4: // WoodElf
-					HairColor = MakeRandomInt(0, 19);
-					if (Gender == 0) {
-						HairStyle = MakeRandomInt(0, 3);
-					}
-					if (Gender == 1) {
-						HairStyle = MakeRandomInt(0, 2);
-					}
-					break;
-				case 5: // HighElf
-					HairColor = MakeRandomInt(0, 14);
-					if (Gender == 0) {
-						HairStyle = MakeRandomInt(0, 3);
-						LuclinFace = MakeRandomInt(0, 37);
-						BeardColor = HairColor;
-					}
-					if (Gender == 1) {
-						HairStyle = MakeRandomInt(0, 2);
-					}
-					break;
-				case 6: // DarkElf
-					HairColor = MakeRandomInt(13, 18);
-					if (Gender == 0) {
-						HairStyle = MakeRandomInt(0, 3);
-						LuclinFace = MakeRandomInt(0, 37);
-						BeardColor = HairColor;
-					}
-					if (Gender == 1) {
-						HairStyle = MakeRandomInt(0, 2);
-					}
-					break;
-				case 7: // HalfElf
-					HairColor = MakeRandomInt(0, 19);
-					if (Gender == 0) {
-						HairStyle = MakeRandomInt(0, 3);
-						LuclinFace = MakeRandomInt(0, 37);
-						BeardColor = HairColor;
-					}
-					if (Gender == 1) {
-						HairStyle = MakeRandomInt(0, 2);
-					}
-					break;
-				case 8: // Dwarf
-					HairColor = MakeRandomInt(0, 19);
-					BeardColor = HairColor;
-					if (Gender == 0) {
-						HairStyle = MakeRandomInt(0, 3);
-						Beard = MakeRandomInt(0, 5);
-					}
-					if (Gender == 1) {
-						HairStyle = MakeRandomInt(0, 2);
-						LuclinFace = MakeRandomInt(0, 17);
-					}
-					break;
-				case 9: // Troll
-					EyeColor1 = MakeRandomInt(0, 10);
-					EyeColor2 = MakeRandomInt(0, 10);
-					if (Gender == 1) {
-						HairStyle = MakeRandomInt(0, 3);
-						HairColor = MakeRandomInt(0, 23);
-					}
-					break;
-				case 10: // Ogre
-					if (Gender == 1) {
-						HairStyle = MakeRandomInt(0, 3);
-						HairColor = MakeRandomInt(0, 23);
-					}
-					break;
-				case 11: // Halfling
-					HairColor = MakeRandomInt(0, 19);
-					if (Gender == 0) {
-						BeardColor = HairColor;
-						HairStyle = MakeRandomInt(0, 3);
-						Beard = MakeRandomInt(0, 5);
-					}
-					if (Gender == 1) {
-						HairStyle = MakeRandomInt(0, 2);
-					}
-					break;
-				case 12: // Gnome
-					HairColor = MakeRandomInt(0, 24);
-					if (Gender == 0) {
-						BeardColor = HairColor;
-						HairStyle = MakeRandomInt(0, 3);
-						Beard = MakeRandomInt(0, 5);
-					}
-					if (Gender == 1) {
-						HairStyle = MakeRandomInt(0, 2);
-					}
-					break;
-				case 128: // Iksar
-				case 130: // VahShir
-					break;
-				case 330: // Froglok
-					LuclinFace = MakeRandomInt(0, 9);
-				case 522: // Drakkin
-					HairColor = MakeRandomInt(0, 3);
-					BeardColor = HairColor;
-					EyeColor1 = MakeRandomInt(0, 11);
-					EyeColor2 = MakeRandomInt(0, 11);
-					LuclinFace = MakeRandomInt(0, 6);
-					DrakkinHeritage = MakeRandomInt(0, 6);
-					DrakkinTattoo = MakeRandomInt(0, 7);
-					DrakkinDetails = MakeRandomInt(0, 7);
-					if (Gender == 0) {
-						Beard = MakeRandomInt(0, 12);
-						HairStyle = MakeRandomInt(0, 8);
-					}
-					if (Gender == 1) {
-						Beard = MakeRandomInt(0, 3);
-						HairStyle = MakeRandomInt(0, 7);
-					}
-					break;
-				default:
-					break;
-			}
-
-			target->SendIllusionPacket(Race, Gender, Texture, HelmTexture, HairColor, BeardColor,
-										EyeColor1, EyeColor2, HairStyle, LuclinFace, Beard, 0xFF,
-										DrakkinHeritage, DrakkinTattoo, DrakkinDetails);
-
-			c->Message(0,"NPC Features Randomized");
-		}
+		if (target->RandomizeFeatures())
+			c->Message(0,"Features Randomized");
 		else
-			c->Message(0,"This command requires a Playable Race as the Target");
+			c->Message(0,"This command requires a Playable Race as the target");
 	}
 }
 
@@ -9999,7 +9816,8 @@ void command_object(Client *c, const Seperator *sep)
 
         // Couldn't copy the object.
 
-        if (results.ErrorMessage().c_str() != '\0') {
+        // got an error message
+        if (!results.Success()) {
             c->Message(0, "Database Error: %s", results.ErrorMessage().c_str());
             return;
         }

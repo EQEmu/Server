@@ -487,7 +487,7 @@ Mob *HateList::GetRandom()
 	}
 
 	auto iterator = list.begin();
-	int random = MakeRandomInt(0, count - 1);
+	int random = zone->random.Int(0, count - 1);
 	for (int i = 0; i < random; i++)
 		++iterator;
 

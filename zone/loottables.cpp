@@ -22,6 +22,7 @@
 #include "npc.h"
 #include "masterentity.h"
 #include "zonedb.h"
+#include "../common/loottable.h"
 #include "../common/misc_functions.h"
 #ifdef _WINDOWS
 #define snprintf	_snprintf
@@ -48,15 +49,15 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* ite
 		if (lts->mincash == lts->maxcash)
 			cash = lts->mincash;
 		else
-			cash = MakeRandomInt(lts->mincash, lts->maxcash);
+			cash = zone->random.Int(lts->mincash, lts->maxcash);
 		if (cash != 0) {
 			if (lts->avgcoin != 0) {
 				//this is some crazy ass stuff... and makes very little sense... dont use it, k?
 				uint32 mincoin = (uint32) (lts->avgcoin * 0.75 + 1);
 				uint32 maxcoin = (uint32) (lts->avgcoin * 1.25 + 1);
-				*copper = MakeRandomInt(mincoin, maxcoin);
-				*silver = MakeRandomInt(mincoin, maxcoin);
-				*gold = MakeRandomInt(mincoin, maxcoin);
+				*copper = zone->random.Int(mincoin, maxcoin);
+				*silver = zone->random.Int(mincoin, maxcoin);
+				*gold = zone->random.Int(mincoin, maxcoin);
 				if(*copper > cash) { *copper = cash; }
 					cash -= *copper;
 				if(*silver>(cash/10)) { *silver = (cash/10); }
@@ -91,7 +92,7 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* ite
 
 			float drop_chance = 0.0f;
 			if(ltchance > 0.0 && ltchance < 100.0) {
-				drop_chance = MakeRandomFloat(0.0, 100.0);
+				drop_chance = zone->random.Real(0.0, 100.0);
 			}
 
 			if (ltchance != 0.0 && (ltchance == 100.0 || drop_chance < ltchance)) {
@@ -117,7 +118,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 
 	uint8 limit = 0;
 	// Start at a random point in itemlist.
-	uint32 item = MakeRandomInt(0, lds->NumEntries-1);
+	uint32 item = zone->random.Int(0, lds->NumEntries-1);
 	// Main loop.
 	for (uint32 i=0; i<lds->NumEntries;)
 	{
@@ -136,7 +137,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 
 			float drop_chance = 0.0;
 			if(thischance != 100.0)
-				drop_chance = MakeRandomFloat(0.0, 100.0);
+				drop_chance = zone->random.Real(0.0, 100.0);
 
 #if EQDEBUG>=11
 			LogFile->write(EQEMuLog::Debug, "Drop chance for npc: %s, this chance:%f, drop roll:%f", npc->GetName(), thischance, drop_chance);
@@ -281,7 +282,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 			eslot = MaterialPrimary;
 		}
 		else if (foundslot == MainSecondary
-			&& (GetOwner() != nullptr || (GetLevel() >= 13 && MakeRandomInt(0,99) < NPC_DW_CHANCE) || (item2->Damage==0)) &&
+			&& (GetOwner() != nullptr || (GetLevel() >= 13 && zone->random.Roll(NPC_DW_CHANCE)) || (item2->Damage==0)) &&
 			(item2->ItemType == ItemType1HSlash || item2->ItemType == ItemType1HBlunt || item2->ItemType == ItemTypeShield ||
 			item2->ItemType == ItemType1HPiercing))
 		{

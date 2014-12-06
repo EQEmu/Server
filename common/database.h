@@ -41,6 +41,7 @@ class SpawnGroupList;
 class Petition;
 class Client;
 class Merc;
+class MySQLRequestResult;
 struct Combine_Struct;
 //struct Faction;
 //struct FactionMods;
@@ -68,21 +69,15 @@ uint8	eventid;
 EventLogDetails_Struct eld[255];
 };
 
-
-// Added By Hogie
-// INSERT into variables (varname,value) values('decaytime [minlevel] [maxlevel]','[number of seconds]');
-// IE: decaytime 1 54 = Levels 1 through 54
-// decaytime 55 100 = Levels 55 through 100
-// It will always put the LAST time for the level (I think) from the Database
 struct npcDecayTimes_Struct {
 	uint16 minlvl;
 	uint16 maxlvl;
 	uint32 seconds;
 };
-// Added By Hogie -- End
+
 
 struct VarCache_Struct {
-	char varname[26];	// varname is char(25) in database
+	char varname[26];	
 	char value[0];
 };
 

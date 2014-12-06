@@ -15,30 +15,26 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "../common/debug.h"
+#include "../common/misc_functions.h"
 #include "../common/spdat.h"
-#include "masterentity.h"
-#include "../common/packet_dump.h"
-#include "../common/moremath.h"
-#include "../common/item.h"
-#include "zonedb.h"
-#include "worldserver.h"
-#include "../common/skills.h"
-#include "../common/bodytypes.h"
-#include "../common/classes.h"
 #include "../common/string_util.h"
+#include "../common/types.h"
+
+#include "entity.h"
+#include "client.h"
+#include "mob.h"
+
 #include "pets.h"
-#include <math.h>
-#include <assert.h>
+#include "worldserver.h"
+#include "zonedb.h"
+
 #ifndef WIN32
 #include <stdlib.h>
 #include "../common/unix.h"
 #endif
 
-#include "string_ids.h"
-
-///////////////////////////////////////////////////////////////////////////////
-// pet related functions
 
 const char *GetRandPetName()
 {
@@ -113,7 +109,7 @@ const char *GetRandPetName()
 		"Zibann","Zibarer","Zibartik","Zibekn","Zibn","Zibobn","Zobaner","Zobann",
 		"Zobarn","Zober","Zobn","Zonanab","Zonaner","Zonann","Zonantik","Zonarer",
 		"Zonartik","Zonobn","Zonobtik","Zontik","Ztik" };
-	int r = MakeRandomInt(0, (sizeof(petnames)/sizeof(const char *))-1);
+	int r = zone->random.Int(0, (sizeof(petnames)/sizeof(const char *))-1);
 	printf("Pet being created: %s\n",petnames[r]); // DO NOT COMMENT THIS OUT!
 	return petnames[r];
 }

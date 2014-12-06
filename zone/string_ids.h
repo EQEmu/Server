@@ -264,6 +264,7 @@
 #define TRADESKILL_MISSING_COMPONENTS	3456	//Sorry, but you don't have everything you need for this recipe in your general inventory.
 #define TRADESKILL_LEARN_RECIPE		3457	//You have learned the recipe %1!
 #define EXPEDITION_MIN_REMAIN		3551	//You only have %1 minutes remaining before this expedition comes to an end.
+#define NO_CAST_ON_PET				4045	//You cannot cast this spell on your pet.
 #define REWIND_WAIT					4059	//You must wait a bit longer before using the rewind command again.
 #define CORPSEDRAG_LIMIT			4061	//You are already dragging as much as you can!
 #define CORPSEDRAG_ALREADY			4062	//You are already dragging %1.
@@ -295,6 +296,9 @@
 #define GUILD_BANK_FULL				6098	// There is no more room in the Guild Bank.
 #define GUILD_BANK_TRANSFERRED		6100	// '%1' transferred to Guild Bank from Deposits.
 #define GUILD_BANK_EMPTY_HANDS		6108	// You must empty your hands to withdraw from the Guild Bank.
+#define TRANSFORM_FAILED			6326	//This mold cannot be applied to your %1.
+#define TRANSFORM_COMPLETE			6327	//You have successfully transformed your %1.
+#define DETRANSFORM_FAILED			6341 	//%1 has no transformation that can be removed.
 #define GENERIC_STRING				6688	//%1 (used to any basic message)
 #define SENTINEL_TRIG_YOU			6724	//You have triggered your sentinel.
 #define SENTINEL_TRIG_OTHER			6725	//%1 has triggered your sentinel.
@@ -392,7 +396,8 @@
 #define SONG_ENDS_OTHER				12688	//%1's song ends.
 #define SONG_ENDS_ABRUPTLY_OTHER	12689	//%1's song ends abruptly.
 #define DIVINE_AURA_NO_ATK			12695	//You can't attack while invulnerable!
-#define TRY_ATTACKING_SOMEONE		12696	//Try attacking someone other than yourself, it's more productive.
+#define TRY_ATTACKING_SOMEONE		12696	//Try attacking someone other than yourself, it's more productive
+#define RANGED_TOO_CLOSE			12698	//Your target is too close to use a ranged weapon!
 #define BACKSTAB_WEAPON				12874	//You need a piercing weapon as your primary weapon in order to backstab
 #define MORE_SKILLED_THAN_I			12931	//%1 tells you, 'You are more skilled than I! What could I possibly teach you?'
 #define SURNAME_EXISTS				12939	//You already have a surname. Operation failed.

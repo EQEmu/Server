@@ -15,26 +15,24 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
-#include "../common/spdat.h"
-#include "masterentity.h"
-#include "../common/packet_dump.h"
-#include "../common/moremath.h"
-#include "../common/item.h"
-#include "worldserver.h"
-#include "../common/skills.h"
+
 #include "../common/bodytypes.h"
 #include "../common/classes.h"
+#include "../common/debug.h"
+#include "../common/item.h"
 #include "../common/rulesys.h"
+#include "../common/skills.h"
+#include "../common/spdat.h"
+#include "quest_parser_collection.h"
+#include "string_ids.h"
+#include "worldserver.h"
 #include <math.h>
-#include <assert.h>
+
 #ifndef WIN32
 #include <stdlib.h>
 #include "../common/unix.h"
 #endif
 
-#include "string_ids.h"
-#include "quest_parser_collection.h"
 
 extern Zone* zone;
 extern volatile bool ZoneLoaded;
@@ -457,7 +455,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 				if(IsClient())
 				{
-					if(MakeRandomInt(0, 99) < RuleI(Spells, SuccorFailChance)) { //2% Fail chance by default
+					if(zone->random.Roll(RuleI(Spells, SuccorFailChance))) { //2% Fail chance by default
 
 						if(IsClient()) {
 							CastToClient()->Message_StringID(MT_SpellFailure,SUCCOR_FAIL);
@@ -712,9 +710,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					if (IsClient())
 						stun_resist += aabonuses.StunResist;
 
-					if (stun_resist <= 0 || MakeRandomInt(0,99) >= stun_resist) {
+					if (stun_resist <= 0 || zone->random.Int(0,99) >= stun_resist) {
 						mlog(COMBAT__HITS, "Stunned. We had %d percent resist chance.", stun_resist);
-						
+
 						if (caster->IsClient())
 							effect_value += effect_value*caster->CastToClient()->GetFocusEffect(focusFcStunTimeMod, spell_id)/100;
 
@@ -1035,8 +1033,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 				if(!spellbonuses.AntiGate){
 
-					if(MakeRandomInt(0, 99) < effect_value)
-						Gate();						
+					if(zone->random.Roll(effect_value))
+						Gate();
 					else
 						caster->Message_StringID(MT_SpellFailure,GATE_FAIL);
 				}
@@ -1477,16 +1475,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 				int wipechance = spells[spell_id].base[i];
 				int bonus = 0;
-				
+
 				if (caster){
-				bonus = caster->spellbonuses.IncreaseChanceMemwipe + 
-						caster->itembonuses.IncreaseChanceMemwipe + 
+					bonus = caster->spellbonuses.IncreaseChanceMemwipe +
+						caster->itembonuses.IncreaseChanceMemwipe +
 						caster->aabonuses.IncreaseChanceMemwipe;
 				}
 
 				wipechance += wipechance*bonus/100;
-				
-				if(MakeRandomInt(0, 99) < wipechance)
+
+				if(zone->random.Roll(wipechance))
 				{
 					if(IsAIControlled())
 					{
@@ -1599,7 +1597,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 				if(IsClient()) {
 
-					if (MakeRandomInt(0, 99) > spells[spell_id].base[i]) {
+					if (zone->random.Int(0, 99) > spells[spell_id].base[i]) {
 						CastToClient()->SetFeigned(false);
 						entity_list.MessageClose_StringID(this, false, 200, 10, STRING_FEIGNFAILED, GetName());
 						}
@@ -1665,7 +1663,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Model Size: %d%%", effect_value);
 #endif
-				ChangeSize(GetSize() * (static_cast<float>(effect_value) / 100.0f));
+				// Only allow 2 size changes from Base Size
+				float modifyAmount = (static_cast<float>(effect_value) / 100.0f);
+				float maxModAmount = GetBaseSize() * modifyAmount * modifyAmount;
+				if ((GetSize() <= GetBaseSize() && GetSize() > maxModAmount) || 
+					(GetSize() >= GetBaseSize() && GetSize() < maxModAmount) ||
+					(GetSize() <= GetBaseSize() && maxModAmount > 1.0f) || 
+					(GetSize() >= GetBaseSize() && maxModAmount < 1.0f))
+				{
+					ChangeSize(GetSize() * modifyAmount);
+				}
 				break;
 			}
 
@@ -2180,7 +2187,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Fading Memories");
 #endif
-				if(MakeRandomInt(0, 99) < spells[spell_id].base[i] ) {
+				if(zone->random.Roll(spells[spell_id].base[i])) {
 
 					if(caster && caster->IsClient())
 						caster->CastToClient()->Escape();
@@ -2704,11 +2711,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						}
 					}else{
 						int32 newhate = GetHateAmount(caster) + effect_value;
-						if (newhate < 1) 
+						if (newhate < 1)
 							SetHate(caster,1);
-						 else 
+						else
 							SetHate(caster,newhate);
-						}	
+						}
 				}
 				break;
 			}
@@ -2717,9 +2724,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if (buffslot >= 0)
 					break;
 
-				if(!spells[spell_id].uninterruptable && IsCasting() && MakeRandomInt(0, 100) <= spells[spell_id].base[i])
+				if(!spells[spell_id].uninterruptable && IsCasting() && zone->random.Roll(spells[spell_id].base[i]))
 					InterruptSpell();
-				
+
 				break;
 			}
 
@@ -2735,17 +2742,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				Message(10, "The power of your next illusion spell will flow to your grouped target in your place.");
 				break;
 			}
-			
+
 			case SE_ApplyEffect: {
 
 				if (caster && IsValidSpell(spells[spell_id].base2[i])){
-					
-					if(MakeRandomInt(0, 100) <= spells[spell_id].base[i])
+					if(zone->random.Roll(spells[spell_id].base[i]))
 						caster->SpellFinished(spells[spell_id].base2[i], this, 10, 0, -1, spells[spells[spell_id].base2[i]].ResistDiff);
 				}
 				break;
 			}
-			
+
 			case SE_SpellTrigger: {
 
 				if (!SE_SpellTrigger_HasCast) {
@@ -3202,7 +3208,7 @@ snare has both of them negative, yet their range should work the same:
 			break;
 		}
 		case 123:	// added 2/6/04
-			result = MakeRandomInt(ubase, abs(max));
+			result = zone->random.Int(ubase, abs(max));
 			break;
 
 		case 124:	// check sign
@@ -3566,16 +3572,16 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 
 				int wipechance = spells[spell_id].base[i];
 				int bonus = 0;
-				
+
 				if (caster){
-					bonus =	caster->spellbonuses.IncreaseChanceMemwipe + 
-							caster->itembonuses.IncreaseChanceMemwipe + 
+					bonus =	caster->spellbonuses.IncreaseChanceMemwipe +
+							caster->itembonuses.IncreaseChanceMemwipe +
 							caster->aabonuses.IncreaseChanceMemwipe;
 				}
-				
+
 				wipechance += wipechance*bonus/100;
-				
-				if(MakeRandomInt(0, 99) < wipechance)
+
+				if(zone->random.Roll(wipechance))
 				{
 					if(IsAIControlled())
 					{
@@ -3595,16 +3601,14 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 			}
 
 			case SE_Root: {
-				
 				/* Root formula derived from extensive personal live parses - Kayen
 				ROOT has a 70% chance to do a resist check to break.
 				*/
 
-				if (MakeRandomInt(0, 99) < RuleI(Spells, RootBreakCheckChance)){
-				
+				if (zone->random.Roll(RuleI(Spells, RootBreakCheckChance))) {
 					float resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster, 0,0,0,0,true);
 
-					if(resist_check == 100) 
+					if(resist_check == 100)
 						break;
 					else
 						if(!TryFadeEffect(slot))
@@ -3616,11 +3620,10 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 
 			case SE_Fear:
 			{
-				if (MakeRandomInt(0, 99) < RuleI(Spells, FearBreakCheckChance)){
-				
+				if (zone->random.Roll(RuleI(Spells, FearBreakCheckChance))) {
 					float resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster);
 
-					if(resist_check == 100) 
+					if(resist_check == 100)
 						break;
 					else
 						if(!TryFadeEffect(slot))
@@ -3657,7 +3660,7 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 							break_chance -= (2 * (((double)GetSkill(SkillDivination) + ((double)GetLevel() * 3.0)) / 650.0));
 						}
 
-						if(MakeRandomFloat(0.0, 100.0) < break_chance)
+						if(zone->random.Real(0.0, 100.0) < break_chance)
 						{
 							BuffModifyDurationBySpellID(spell_id, 3);
 						}
@@ -3677,7 +3680,7 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 			{
 				if(IsCasting())
 				{
-					if(MakeRandomInt(0, 100) <= spells[spell_id].base[i])
+					if(zone->random.Roll(spells[spell_id].base[i]))
 					{
 						InterruptSpell();
 					}
@@ -4575,11 +4578,9 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 
 			case SE_TriggerOnCast:
 				if(type == focusTriggerOnCast){
-					if(MakeRandomInt(0, 100) <= base1){
+					if(zone->random.Roll(base1)) {
 						value = base2;
-					}
-
-					else{
+					} else {
 						value = 0;
 						LimitFailure = true;
 					}
@@ -4593,7 +4594,7 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 
 			case SE_BlockNextSpellFocus:
 				if(type == focusBlockNextSpell){
-					if(MakeRandomInt(1, 100) <= base1)
+					if(zone->random.Roll(base1))
 						value = 1;
 				}
 				break;
@@ -4948,7 +4949,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 					value = focus_spell.base[i];
 				}
 				else {
-					value = MakeRandomInt(focus_spell.base[i], focus_spell.base2[i]);
+					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]);
 				}
 			}
 			break;
@@ -4967,7 +4968,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 					value = focus_spell.base[i];
 				}
 				else {
-					value = MakeRandomInt(focus_spell.base[i], focus_spell.base2[i]);
+					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]);
 				}
 			}
 			break;
@@ -4986,7 +4987,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 					value = focus_spell.base[i];
 				}
 				else {
-					value = MakeRandomInt(focus_spell.base[i], focus_spell.base2[i]);
+					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]);
 				}
 			}
 			break;
@@ -5055,7 +5056,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		case SE_TriggerOnCast:
 			if(type == focusTriggerOnCast){
-				if(MakeRandomInt(1, 100) <= focus_spell.base[i])
+				if(zone->random.Roll(focus_spell.base[i]))
 					value = focus_spell.base2[i];
 				else
 					value = 0;
@@ -5064,7 +5065,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		case SE_BlockNextSpellFocus:
 			if(type == focusBlockNextSpell){
-				if(MakeRandomInt(1, 100) <= focus_spell.base[i])
+				if(zone->random.Roll(focus_spell.base[i]))
 					value = 1;
 			}
 			break;
@@ -5212,12 +5213,9 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 			if (TempItem && TempItem->Focus.Effect > 0 && IsValidSpell(TempItem->Focus.Effect)) {
 
 				proc_spellid = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id);
-					
 				if (IsValidSpell(proc_spellid)){
-
 					ProcChance = GetSympatheticProcChances(spell_id, spells[TempItem->Focus.Effect].base[0], TempItem->ProcRate);
-					
-					if(MakeRandomFloat(0, 1) <= ProcChance) 
+					if(zone->random.Roll(ProcChance))
  						SympatheticProcList.push_back(proc_spellid);
 				}
 			}
@@ -5233,14 +5231,10 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 				{
 					const Item_Struct* TempItemAug = aug->GetItem();
 					if (TempItemAug && TempItemAug->Focus.Effect > 0 && IsValidSpell(TempItemAug->Focus.Effect)) {
-
 						proc_spellid = CalcFocusEffect(type, TempItemAug->Focus.Effect, spell_id);
-
 						if (IsValidSpell(proc_spellid)){
-	
 							ProcChance = GetSympatheticProcChances(spell_id, spells[TempItemAug->Focus.Effect].base[0], TempItemAug->ProcRate);
-					
-							if(MakeRandomFloat(0, 1) <= ProcChance) 
+							if(zone->random.Roll(ProcChance))
 								SympatheticProcList.push_back(proc_spellid);
 						}
 					}
@@ -5268,8 +5262,7 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 			if (IsValidSpell(proc_spellid)){
 
 				ProcChance = GetSympatheticProcChances(spell_id, spells[focusspellid].base[0]);
-				
-				if(MakeRandomFloat(0, 1) <= ProcChance) 
+				if(zone->random.Roll(ProcChance))
  					SympatheticProcList.push_back(proc_spellid);
 			}
 		}
@@ -5295,10 +5288,8 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 			proc_spellid = CalcAAFocus(type, aa_AA, spell_id);
 
 			if (IsValidSpell(proc_spellid)){
-				
 				ProcChance = GetSympatheticProcChances(spell_id, GetAABase1(aa_AA, 1));
-				
-				if(MakeRandomFloat(0, 1) <= ProcChance) 
+				if(zone->random.Roll(ProcChance))
 					SympatheticProcList.push_back(proc_spellid);
 			}
 		}
@@ -5306,7 +5297,7 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 	if (SympatheticProcList.size() > 0)
 	{
-		uint8 random = MakeRandomInt(0, SympatheticProcList.size()-1);
+		uint8 random = zone->random.Int(0, SympatheticProcList.size()-1);
 		int FinalSympatheticProc = SympatheticProcList[random];
 		SympatheticProcList.clear();
 		return FinalSympatheticProc;
@@ -5549,7 +5540,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 	return realTotal + realTotal2 + realTotal3;
 }
 
-void Mob::CheckNumHitsRemaining(uint8 type, uint32 buff_slot, uint16 spell_id)
+void Mob::CheckNumHitsRemaining(uint8 type, int32 buff_slot, uint16 spell_id)
 {
 	/*
 	Field 175 = numhits type
@@ -5586,8 +5577,8 @@ void Mob::CheckNumHitsRemaining(uint8 type, uint32 buff_slot, uint16 spell_id)
 				}
 			}
 		}
-	} else if (type == 7) {
-		if (buff_slot > 0) {
+	} else if (type == NUMHIT_MatchingSpells) {
+		if (buff_slot >= 0) {
 			if (--buffs[buff_slot].numhits == 0) {
 				CastOnNumHitFade(buffs[buff_slot].spellid);
 				if (!TryFadeEffect(buff_slot))
@@ -5665,7 +5656,7 @@ bool Mob::TryDivineSave()
 	*/
 
 	int32 SuccessChance = aabonuses.DivineSaveChance[0] + itembonuses.DivineSaveChance[0] + spellbonuses.DivineSaveChance[0];
-	if (SuccessChance && MakeRandomInt(0, 100) <= SuccessChance)
+	if (SuccessChance && zone->random.Roll(SuccessChance))
 	{
 		SetHP(1);
 
@@ -5724,7 +5715,7 @@ bool Mob::TryDeathSave() {
 			if (SuccessChance > 95)
 				SuccessChance = 95;
 
-			if(SuccessChance >= MakeRandomInt(0, 100)) {
+			if(zone->random.Roll(SuccessChance)) {
 
 				if(spellbonuses.DeathSave[0] == 2)
 					HealAmt = RuleI(Spells, DivineInterventionHeal); //8000HP is how much LIVE Divine Intervention max heals
@@ -5755,7 +5746,7 @@ bool Mob::TryDeathSave() {
 				if (SuccessChance > 95)
 					SuccessChance = 95;
 
-				if(SuccessChance >= MakeRandomInt(0, 100)) {
+				if(zone->random.Roll(SuccessChance)) {
 
 					if(spellbonuses.DeathSave[0] == 2)
 						HealAmt = RuleI(Spells, DivineInterventionHeal);
@@ -6057,7 +6048,7 @@ bool Mob::TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier){
 	else if (dispel_chance < 10)
 		dispel_chance = 10;
 
-	if (MakeRandomInt(0,99) < dispel_chance)
+	if (zone->random.Roll(dispel_chance))
 		return true;
 	else
 		return false;
@@ -6393,17 +6384,16 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 	return false;
 }
 
-bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id){
+bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id, float speed){
 
 	/*For mage 'Bolt' line and other various spells.
 	-This is mostly accurate for how the modern clients handle this effect.
 	-It was changed at some point to use an actual projectile as done here (opposed to a particle effect in classic)
-	-The projectile graphic appears to be that of 'Ball of Sunlight' ID 80648 and will be visible to anyone in SoF+
 	-There is no LOS check to prevent a bolt from being cast. If you don't have LOS your bolt simply goes into whatever barrier
 	and you lose your mana. If there is LOS the bolt will lock onto your target and the damage is applied when it hits the target.
 	-If your target moves the bolt moves with it in any direction or angle (consistent with other projectiles).
-	-The way this is written once a bolt is cast a timer checks the distance from the initial cast to the target repeatedly
-	and calculates at what predicted time the bolt should hit that target in client_process (therefore accounting for any target movement). 
+	-The way this is written once a bolt is cast a the distance from the initial cast to the target repeatedly
+	check and if target is moving recalculates at what predicted time the bolt should hit that target in client_process  
 	When bolt hits its predicted point the damage is then done to target.
 	Note: Projectile speed of 1 takes 3 seconds to go 100 distance units. Calculations are based on this constant.
 	Live Bolt speed: Projectile speed of X takes 5 seconds to go 300 distance units. 
@@ -6415,31 +6405,41 @@ bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id){
 		return false;
 	
 	uint8 anim = spells[spell_id].CastingAnim; 
-	int bolt_id = -1;
+	int slot = -1;
 
 	//Make sure there is an avialable bolt to be cast.
 	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) {
-		if (projectile_spell_id[i] == 0){
-			bolt_id = i;
+		if (ProjectileAtk[i].target_id == 0){
+			slot = i;
 			break;
 		}
 	}
 
-	if (bolt_id < 0)
+	if (slot < 0)
 		return false;
-
+	
 	if (CheckLosFN(spell_target)) {
 		
-		projectile_spell_id[bolt_id] = spell_id;
-		projectile_target_id[bolt_id] = spell_target->GetID();
-		projectile_x[bolt_id] = GetX(), projectile_y[bolt_id] = GetY(), projectile_z[bolt_id] = GetZ();
-		projectile_increment[bolt_id] = 1;
-		projectile_timer.Start(250);
+		float speed_mod = speed * 0.45f; //Constant for adjusting speeds to match calculated impact time.
+		float distance = spell_target->CalculateDistance(GetX(), GetY(), GetZ());
+		float hit = 60.0f + (distance / speed_mod);
+
+		ProjectileAtk[slot].increment = 1;
+		ProjectileAtk[slot].hit_increment = static_cast<uint16>(hit); //This projected hit time if target does NOT MOVE
+		ProjectileAtk[slot].target_id = spell_target->GetID();
+		ProjectileAtk[slot].wpn_dmg = spell_id; //Store spell_id in weapon damage field
+		ProjectileAtk[slot].origin_x = GetX();
+		ProjectileAtk[slot].origin_y = GetY();
+		ProjectileAtk[slot].origin_z = GetZ();
+		ProjectileAtk[slot].skill = SkillConjuration;
+		ProjectileAtk[slot].speed_mod = speed_mod;
+
+		SetProjectileAttack(true);
 	}
 
 	//This will use the correct graphic as defined in the player_1 field of spells_new table. Found in UF+ spell files.
 	if (RuleB(Spells, UseLiveSpellProjectileGFX)) {
-		ProjectileAnimation(spell_target,0, false, 1.5,0,0,0, spells[spell_id].player_1);
+		ProjectileAnimation(spell_target,0, false, speed,0,0,0, spells[spell_id].player_1);
 	}
 
 	//This allows limited support for server using older spell files that do not contain data for bolt graphics. 
@@ -6449,19 +6449,17 @@ bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id){
 		
 			if (IsClient()){
 				if (CastToClient()->GetClientVersionBit() <= 4) //Titanium needs alternate graphic.
-					ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_Titanium)), false, 1.5);
+					ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_Titanium)), false, speed);
 				else 
-					ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_SOF)), false, 1.5);
+					ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_SOF)), false, speed);
 				}
 		
 			else
-				ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_NPC)), false, 1.5);
-
+				ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_NPC)), false, speed);
 		}
-
 		//Default to an arrow if not using a mage bolt (Use up to date spell file and enable above rules for best results)
 		else
-			ProjectileAnimation(spell_target,0, 1, 1.5);
+			ProjectileAnimation(spell_target,0, 1, speed);
 	}
 
 	if (spells[spell_id].CastingAnim == 64)

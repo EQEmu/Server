@@ -197,6 +197,9 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 						if (item->GetOrnamentationAug(ornamentationAugtype)) {
 							idfile = atoi(&item->GetOrnamentationAug(ornamentationAugtype)->GetItem()->IDFile[2]);
 						}
+						else if (item->GetOrnamentationIcon() && item->GetOrnamentationIDFile()) {
+							idfile = item->GetOrnamentationIDFile();
+						}
 						else {
 							idfile = atoi(&item->GetItem()->IDFile[2]);
 						}

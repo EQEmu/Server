@@ -1515,7 +1515,7 @@ XS(XS__ChooseRandom)
 	if (items < 1)
 		Perl_croak(aTHX_ "Usage: ChooseRandom(... list ...)");
 
-	int index = MakeRandomInt(0, items-1);
+	int index = zone->random.Int(0, items-1);
 
 	SV *tmp = ST(0);
 	ST(0) = ST(index);

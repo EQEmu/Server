@@ -20,13 +20,8 @@
 */
 #include "../common/debug.h"
 #include <iostream>
-#include <iomanip>
-#include <string.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
 #include <zlib.h>
-#include <assert.h>
 
 #ifdef _WINDOWS
 	#include <windows.h>
@@ -41,29 +36,20 @@
 	#include <unistd.h>
 #endif
 
-#include "masterentity.h"
-#include "zonedb.h"
-#include "../common/packet_functions.h"
-#include "../common/packet_dump.h"
-#include "worldserver.h"
-#include "../common/packet_dump_file.h"
-#include "../common/string_util.h"
-#include "../common/spdat.h"
-#include "petitions.h"
-#include "npc_ai.h"
-#include "../common/skills.h"
-#include "forage.h"
-#include "zone.h"
-#include "event_codes.h"
-#include "../common/faction.h"
-#include "../common/crc32.h"
 #include "../common/rulesys.h"
-#include "string_ids.h"
-#include "map.h"
+#include "../common/skills.h"
+#include "../common/spdat.h"
+#include "../common/string_util.h"
+#include "event_codes.h"
 #include "guild_mgr.h"
-#include <string>
-#include "quest_parser_collection.h"
+#include "map.h"
+#include "petitions.h"
 #include "queryserv.h"
+#include "quest_parser_collection.h"
+#include "string_ids.h"
+#include "worldserver.h"
+#include "zone.h"
+#include "zonedb.h"
 
 extern QueryServ* QServ;
 extern Zone* zone;
@@ -440,7 +426,7 @@ bool Client::Process() {
 
 				if (auto_attack_target && flurrychance)
 				{
-					if(MakeRandomInt(0, 99) < flurrychance)
+					if(zone->random.Int(0, 99) < flurrychance)
 					{
 						Message_StringID(MT_NPCFlurry, YOU_FLURRY);
 						Attack(auto_attack_target, MainPrimary, false);
@@ -457,7 +443,7 @@ bool Client::Process() {
 							wpn->GetItem()->ItemType == ItemType2HBlunt ||
 							wpn->GetItem()->ItemType == ItemType2HPiercing )
 						{
-							if(MakeRandomInt(0, 99) < ExtraAttackChanceBonus)
+							if(zone->random.Int(0, 99) < ExtraAttackChanceBonus)
 							{
 								Attack(auto_attack_target, MainPrimary, false);
 							}
@@ -502,7 +488,7 @@ bool Client::Process() {
 				int16 DWBonus = spellbonuses.DualWieldChance + itembonuses.DualWieldChance;
 				DualWieldProbability += DualWieldProbability*float(DWBonus)/ 100.0f;
 
-				float random = MakeRandomFloat(0, 1);
+				float random = zone->random.Real(0, 1);
 				CheckIncreaseSkill(SkillDualWield, auto_attack_target, -10);
 				if (random < DualWieldProbability){ // Max 78% of DW
 					if(CheckAAEffect(aaEffectRampage)) {
@@ -567,9 +553,8 @@ bool Client::Process() {
 				viral_timer_counter = 0;
 		}
 
-		if(projectile_timer.Check())
-			SpellProjectileEffect();
-
+		ProjectileAttack();
+					
 		if(spellbonuses.GravityEffect == 1) {
 			if(gravity_timer.Check())
 				DoGravityEffect();
@@ -1006,7 +991,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 		if (fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required)
 			continue;
 
-		handychance = MakeRandomInt(0, merlist.size() + tmp_merlist.size() - 1);
+		handychance = zone->random.Int(0, merlist.size() + tmp_merlist.size() - 1);
 
 		item = database.GetItem(ml.item);
 		if (item) {
@@ -1082,7 +1067,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	zone->tmpmerchanttable[npcid] = tmp_merlist;
 	if (merch != nullptr && handyitem) {
 		char handy_id[8] = { 0 };
-		int greeting = MakeRandomInt(0, 4);
+		int greeting = zone->random.Int(0, 4);
 		int greet_id = 0;
 		switch (greeting) {
 			case 1:
@@ -1643,7 +1628,7 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 	// welcome message
 	if (pTrainer && pTrainer->IsNPC())
 	{
-		pTrainer->Say_StringID(MakeRandomInt(1204, 1207), GetCleanName());
+		pTrainer->Say_StringID(zone->random.Int(1204, 1207), GetCleanName());
 	}
 }
 
@@ -1670,7 +1655,7 @@ void Client::OPGMEndTraining(const EQApplicationPacket *app)
 	// goodbye message
 	if (pTrainer->IsNPC())
 	{
-		pTrainer->Say_StringID(MakeRandomInt(1208, 1211), GetCleanName());
+		pTrainer->Say_StringID(zone->random.Int(1208, 1211), GetCleanName());
 	}
 }
 
@@ -2162,7 +2147,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 				_log(SPELLS__REZ, "Found corpse. Marking corpse as rezzed.");
 
 				corpse->IsRezzed(true);
-				corpse->CompleteRezz();
+				corpse->CompleteResurrection();
 			}
 		}
 		else //Not rez

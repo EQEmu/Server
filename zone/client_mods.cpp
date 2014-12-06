@@ -18,23 +18,17 @@
 #include <algorithm>
 
 #include "../common/debug.h"
-#include "../common/spdat.h"
-#include "../common/packet_dump.h"
-#include "../common/packet_functions.h"
-#include "../common/serverinfo.h"
-#include "../common/zone_numbers.h"
-#include "../common/moremath.h"
-#include "../common/guilds.h"
 #include "../common/logsys.h"
+#include "../common/spdat.h"
+#include "../common/rulesys.h"
 #include "masterentity.h"
-#include "worldserver.h"
-#include "zonedb.h"
+#include "npc_ai.h"
 #include "petitions.h"
 #include "string_ids.h"
-#include "npc_ai.h"
+#include "worldserver.h"
+#include "zonedb.h"
 
 
-// Return max stat value for level
 int32 Client::GetMaxStat() const {
 
 	if((RuleI(Character, StatCap)) > 0)

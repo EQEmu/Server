@@ -389,7 +389,7 @@ void Client::GenerateKey()
 			'6', '7', '8', '9'
 		};
 
-		key.append((const char*)&key_selection[MakeRandomInt(0, 35)], 1);
+		key.append((const char*)&key_selection[random.Int(0, 35)], 1);
 		count++;
 	}
 }

@@ -199,14 +199,14 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, i
 	// Update/Insert item
     std::string query = StringFormat("REPLACE INTO inventory "
                                     "(charid, slotid, itemid, charges, instnodrop, custom_data, color, "
-                                    "augslot1, augslot2, augslot3, augslot4, augslot5) "
+                                    "augslot1, augslot2, augslot3, augslot4, augslot5, ornamenticon, ornamentidfile) "
                                     "VALUES( %lu, %lu, %lu, %lu, %lu, '%s', %lu, "
-                                    "%lu, %lu, %lu, %lu, %lu)",
+                                    "%lu, %lu, %lu, %lu, %lu, %lu, %lu)",
                                     (unsigned long)char_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID,
                                     (unsigned long)charges, (unsigned long)(inst->IsInstNoDrop()? 1: 0),
                                     inst->GetCustomDataString().c_str(), (unsigned long)inst->GetColor(),
                                     (unsigned long)augslot[0], (unsigned long)augslot[1], (unsigned long)augslot[2],
-                                    (unsigned long)augslot[3],(unsigned long)augslot[4]);
+                                    (unsigned long)augslot[3],(unsigned long)augslot[4], (unsigned long)inst->GetOrnamentationIcon(), (unsigned long)inst->GetOrnamentationIDFile());
 	auto results = QueryDatabase(query);
 
     // Save bag contents, if slot supports bag contents
@@ -488,7 +488,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
 bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
 	// Retrieve character inventory
 	std::string query = StringFormat("SELECT slotid, itemid, charges, color, augslot1, "
-                                    "augslot2, augslot3, augslot4, augslot5, instnodrop, custom_data "
+                                    "augslot2, augslot3, augslot4, augslot5, instnodrop, custom_data, ornamenticon, ornamentidfile "
                                     "FROM inventory WHERE charid = %i ORDER BY slotid", char_id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
@@ -512,6 +512,9 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
         aug[4]	= (uint32)atoul(row[8]);
 
         bool instnodrop	= (row[9] && (uint16)atoi(row[9]))? true: false;
+
+		uint32 ornament_icon = (uint32)atoul(row[11]);
+		uint32 ornament_idfile = (uint32)atoul(row[12]);
 
         const Item_Struct* item = GetItem(item_id);
 
@@ -549,6 +552,11 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
                     value.push_back(v);
             }
         }
+		if (ornament_icon > 0)
+			inst->SetOrnamentIcon(ornament_icon);
+
+		if (ornament_idfile > 0)
+			inst->SetOrnamentationIDFile(ornament_idfile);
 
         if (instnodrop || (((slot_id >= EmuConstants::EQUIPMENT_BEGIN && slot_id <= EmuConstants::EQUIPMENT_END) || slot_id == MainPowerSource) && inst->GetItem()->Attuneable))
             inst->SetInstNoDrop(true);
@@ -591,7 +599,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
 bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv) {
 	// Retrieve character inventory
 	std::string query = StringFormat("SELECT slotid, itemid, charges, color, augslot1, "
-                                    "augslot2, augslot3, augslot4, augslot5, instnodrop, custom_data "
+                                    "augslot2, augslot3, augslot4, augslot5, instnodrop, custom_data, ornamenticon, ornamentidfile  "
                                     "FROM inventory INNER JOIN character_data ch "
                                     "ON ch.id = charid WHERE ch.name = '%s' AND ch.account_id = %i ORDER BY slotid",
                                     name, account_id);
@@ -617,6 +625,9 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
         aug[4]	= (uint32)atoi(row[8]);
 
         bool instnodrop	= (row[9] && (uint16)atoi(row[9])) ? true : false;
+		uint32 ornament_icon = (uint32)atoul(row[11]);
+		uint32 ornament_idfile = (uint32)atoul(row[12]);
+		
         const Item_Struct* item = GetItem(item_id);
         int16 put_slot_id = INVALID_INDEX;
         if(!item)
@@ -651,6 +662,12 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
 
             }
         }
+		
+		if (ornament_icon > 0)
+			inst->SetOrnamentIcon(ornament_icon);
+
+		if (ornament_idfile > 0)
+			inst->SetOrnamentationIDFile(ornament_idfile);
 
         if (color > 0)
             inst->SetColor(color);

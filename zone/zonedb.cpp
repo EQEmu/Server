@@ -1,21 +1,16 @@
 
-#include "zonedb.h"
-#include "../common/item.h"
-#include "../common/string_util.h"
 #include "../common/extprofile.h"
-#include "../common/guilds.h"
+#include "../common/item.h"
 #include "../common/rulesys.h"
-#include "../common/rdtsc.h"
-#include "zone.h"
-#include "corpse.h"
+#include "../common/string_util.h"
 #include "client.h"
-#include "merc.h"
+#include "corpse.h"
 #include "groups.h"
-#include "raids.h"
-#include <iostream>
-#include <string>
-#include <sstream>
+#include "merc.h"
+#include "zone.h"
+#include "zonedb.h"
 #include <ctime>
+#include <iostream>
 
 extern Zone* zone;
 
@@ -3368,7 +3363,7 @@ uint32 ZoneDatabase::GetCharacterCorpseDecayTimer(uint32 corpse_db_id){
 	auto results = QueryDatabase(query);
 	auto row = results.begin();
 	if (results.Success() && results.RowsAffected() != 0){
-		return atoll(row[0]);
+		return atoul(row[0]);
 	}
 	return 0;
 }
@@ -3501,7 +3496,7 @@ uint32 ZoneDatabase::GetCharacterCorpseID(uint32 char_id, uint8 corpse) {
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		for (int i = 0; i < corpse; i++) {
-			return atoll(row[0]);
+			return atoul(row[0]);
 		}
 	}
 	return 0;
@@ -3525,7 +3520,7 @@ uint32 ZoneDatabase::GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slotid) {
 
 	if (tmp) {
 		itemid = tmp->GetWornItem(slotid);
-		tmp->DepopCorpse();
+		tmp->DepopPlayerCorpse();
 	}
 	return itemid;
 }
@@ -3575,7 +3570,7 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 	uint16 i = 0;
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		pcs->locked = atoi(row[i++]);						// is_locked,
-		pcs->exp = atoll(row[i++]);							// exp,
+		pcs->exp = atoul(row[i++]);							// exp,
 		pcs->size = atoi(row[i++]);							// size,
 		pcs->level = atoi(row[i++]);						// `level`,
 		pcs->race = atoi(row[i++]);							// race,
@@ -3584,10 +3579,10 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 		pcs->deity = atoi(row[i++]);						// deity,
 		pcs->texture = atoi(row[i++]);						// texture,
 		pcs->helmtexture = atoi(row[i++]);					// helm_texture,
-		pcs->copper = atoll(row[i++]);						// copper,
-		pcs->silver = atoll(row[i++]);						// silver,
-		pcs->gold = atoll(row[i++]);						// gold,
-		pcs->plat = atoll(row[i++]);						// platinum,
+		pcs->copper = atoul(row[i++]);						// copper,
+		pcs->silver = atoul(row[i++]);						// silver,
+		pcs->gold = atoul(row[i++]);						// gold,
+		pcs->plat = atoul(row[i++]);						// platinum,
 		pcs->haircolor = atoi(row[i++]);					// hair_color,
 		pcs->beardcolor = atoi(row[i++]);					// beard_color,
 		pcs->eyecolor1 = atoi(row[i++]);					// eye_color_1,
@@ -3595,18 +3590,18 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 		pcs->hairstyle = atoi(row[i++]);					// hair_style,
 		pcs->face = atoi(row[i++]);							// face,
 		pcs->beard = atoi(row[i++]);						// beard,
-		pcs->drakkin_heritage = atoll(row[i++]);			// drakkin_heritage,
-		pcs->drakkin_tattoo = atoll(row[i++]);				// drakkin_tattoo,
-		pcs->drakkin_details = atoll(row[i++]);				// drakkin_details,
-		pcs->item_tint[0].color = atoll(row[i++]);			// wc_1,
-		pcs->item_tint[1].color = atoll(row[i++]);			// wc_2,
-		pcs->item_tint[2].color = atoll(row[i++]);			// wc_3,
-		pcs->item_tint[3].color = atoll(row[i++]);			// wc_4,
-		pcs->item_tint[4].color = atoll(row[i++]);			// wc_5,
-		pcs->item_tint[5].color = atoll(row[i++]);			// wc_6,
-		pcs->item_tint[6].color = atoll(row[i++]);			// wc_7,
-		pcs->item_tint[7].color = atoll(row[i++]);			// wc_8,
-		pcs->item_tint[8].color = atoll(row[i++]);			// wc_9
+		pcs->drakkin_heritage = atoul(row[i++]);			// drakkin_heritage,
+		pcs->drakkin_tattoo = atoul(row[i++]);				// drakkin_tattoo,
+		pcs->drakkin_details = atoul(row[i++]);				// drakkin_details,
+		pcs->item_tint[0].color = atoul(row[i++]);			// wc_1,
+		pcs->item_tint[1].color = atoul(row[i++]);			// wc_2,
+		pcs->item_tint[2].color = atoul(row[i++]);			// wc_3,
+		pcs->item_tint[3].color = atoul(row[i++]);			// wc_4,
+		pcs->item_tint[4].color = atoul(row[i++]);			// wc_5,
+		pcs->item_tint[5].color = atoul(row[i++]);			// wc_6,
+		pcs->item_tint[6].color = atoul(row[i++]);			// wc_7,
+		pcs->item_tint[7].color = atoul(row[i++]);			// wc_8,
+		pcs->item_tint[8].color = atoul(row[i++]);			// wc_9
 	}
 	query = StringFormat(
 		"SELECT                       \n"
@@ -3622,7 +3617,6 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 		"FROM                         \n"
 		"character_corpse_items       \n"
 		"WHERE `corpse_id` = %u\n"
-		// "ORDER BY `equip_slot`"
 		,
 		corpse_id
 	);
@@ -3634,7 +3628,7 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		memset(&pcs->items[i], 0, sizeof (player_lootitem::ServerLootItem_Struct));
 		pcs->items[i].equip_slot = atoi(row[r++]);		// equip_slot,
-		pcs->items[i].item_id = atoll(row[r++]); 		// item_id,
+		pcs->items[i].item_id = atoul(row[r++]); 		// item_id,
 		pcs->items[i].charges = atoi(row[r++]); 		// charges,
 		pcs->items[i].aug_1 = atoi(row[r++]); 			// aug_1,
 		pcs->items[i].aug_2 = atoi(row[r++]); 			// aug_2,
@@ -3658,8 +3652,8 @@ Corpse* ZoneDatabase::SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_z
 	auto results = QueryDatabase(query);
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		corpse = Corpse::LoadFromDBData(
-			atoll(row[0]), 			 // uint32 in_dbid
+		corpse = Corpse::LoadCharacterCorpseEntity(
+			atoul(row[0]), 			 // uint32 in_dbid
 			char_id, 				 // uint32 in_charid
 			row[1], 				 // char* in_charname
 			position,
@@ -3673,7 +3667,7 @@ Corpse* ZoneDatabase::SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_z
         entity_list.AddCorpse(corpse);
         corpse->SetDecayTimer(RuleI(Character, CorpseDecayTimeMS));
         corpse->Spawn();
-        if (!UnburyCharacterCorpse(corpse->GetDBID(), dest_zone_id, dest_instance_id, position))
+        if (!UnburyCharacterCorpse(corpse->GetCorpseDBID(), dest_zone_id, dest_instance_id, position))
             LogFile->write(EQEMuLog::Error, "Unable to unbury a summoned player corpse for character id %u.", char_id);
 	}
 
@@ -3681,7 +3675,7 @@ Corpse* ZoneDatabase::SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_z
 }
 
 bool ZoneDatabase::SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zone_id, uint16 dest_instance_id, const xyz_heading& position) {
-	Corpse* NewCorpse = 0;
+	Corpse* corpse = nullptr;
 	int CorpseCount = 0;
 
 	std::string query = StringFormat(
@@ -3697,18 +3691,19 @@ bool ZoneDatabase::SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zone_id
 	results = QueryDatabase(query);
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		NewCorpse = Corpse::LoadFromDBData(
-			atoll(row[0]),
+		corpse = Corpse::LoadCharacterCorpseEntity(
+			atoul(row[0]),
 			char_id,
 			row[1],
 			position,
 			row[2],
 			atoi(row[3]) == 1,
 			false);
-		if (NewCorpse) {
-			entity_list.AddCorpse(NewCorpse);
-			NewCorpse->SetDecayTimer(RuleI(Character, CorpseDecayTimeMS));
-			NewCorpse->Spawn();
+
+		if (corpse) {
+			entity_list.AddCorpse(corpse);
+			corpse->SetDecayTimer(RuleI(Character, CorpseDecayTimeMS));
+			corpse->Spawn();
 			++CorpseCount;
 		}
 		else{
@@ -3743,9 +3738,9 @@ Corpse* ZoneDatabase::LoadCharacterCorpse(uint32 player_corpse_id) {
 	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
         auto position = xyz_heading(atof(row[3]), atof(row[4]), atof(row[5]), atof(row[6]));
-		NewCorpse = Corpse::LoadFromDBData(
-				atoll(row[0]), 		 // id					  uint32 in_dbid
-				atoll(row[1]),		 // charid				  uint32 in_charid
+		NewCorpse = Corpse::LoadCharacterCorpseEntity(
+				atoul(row[0]), 		 // id					  uint32 in_dbid
+				atoul(row[1]),		 // charid				  uint32 in_charid
 				row[2], 			 //	char_name
 				position,
 				row[7],				 // time_of_death		  char* time_of_death
@@ -3770,9 +3765,9 @@ bool ZoneDatabase::LoadCharacterCorpses(uint32 zone_id, uint16 instance_id) {
 	for (auto row = results.begin(); row != results.end(); ++row) {
         auto position = xyz_heading(atof(row[3]), atof(row[4]), atof(row[5]), atof(row[6]));
 		entity_list.AddCorpse(
-			 Corpse::LoadFromDBData(
-				atoll(row[0]), 		  // id					  uint32 in_dbid
-				atoll(row[1]), 		  // charid				  uint32 in_charid
+			 Corpse::LoadCharacterCorpseEntity(
+				atoul(row[0]), 		  // id					  uint32 in_dbid
+				atoul(row[1]), 		  // charid				  uint32 in_charid
 				row[2], 			  //					  char_name
 				position,
 				row[7], 			  // time_of_death		  char* time_of_death
@@ -3793,15 +3788,6 @@ uint32 ZoneDatabase::GetFirstCorpseID(uint32 char_id) {
 	return 0;
 }
 
-bool ZoneDatabase::ClearCorpseItems(uint32 db_id){
-	std::string query = StringFormat("DELETE FROM `character_corpse_items` WHERE `corpse_id` = %u", db_id);
-	auto results = QueryDatabase(query);
-	if (results.Success() && results.RowsAffected() != 0){
-		return true;
-	}
-	return false;
-}
-
 bool ZoneDatabase::DeleteItemOffCharacterCorpse(uint32 db_id, uint32 equip_slot, uint32 item_id){
 	std::string query = StringFormat("DELETE FROM `character_corpse_items` WHERE `corpse_id` = %u AND equip_slot = %u AND item_id = %u", db_id, equip_slot, item_id);
 	auto results = QueryDatabase(query);
@@ -3815,7 +3801,6 @@ bool ZoneDatabase::BuryCharacterCorpse(uint32 db_id) {
 	std::string query = StringFormat("UPDATE `character_corpses` SET `is_buried` = 1 WHERE `id` = %u", db_id);
 	auto results = QueryDatabase(query);
 	if (results.Success() && results.RowsAffected() != 0){
-		ClearCorpseItems(db_id);
 		return true;
 	}
 	return false;
@@ -3834,8 +3819,8 @@ bool ZoneDatabase::BuryAllCharacterCorpses(uint32 char_id) {
 bool ZoneDatabase::DeleteCharacterCorpse(uint32 db_id) {
 	std::string query = StringFormat("DELETE FROM `character_corpses` WHERE `id` = %d", db_id);
 	auto results = QueryDatabase(query);
-	if (results.Success() && results.RowsAffected() != 0){
+	if (results.Success() && results.RowsAffected() != 0)
 		return true;
-	}
+
 	return false;
 }

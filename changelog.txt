@@ -1,5 +1,31 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/04/2014 ==
+Kayen: Ranged attacks will now more accurately check MAX firing range, fixing the issue where you would
+hit ranged attack and nothing would happpen due to incorrect server side range checks.
+Trevius: Initial addition of the RoF2 client from May 10th 2013 (currently available on Steam as the F2P client).
+Trevius: RoF2 is disabled by default, but you can enable by editing /common/patches/patches.cpp (see comments)
+
+== 12/01/2014 ==
+Trevius: Mercenaries now spawn as the same Gender and Size of the Merchant they are purchased from.
+Trevius: Mercenaries now spawn with randomized facial features when purchased.
+Trevius: Setting a lastname for NPCs will now override any hard coded lastname (such as GM Trainers).
+
+Required SQL: utils/sql/git/required/2014_12_01_mercs_table_update.sql
+
+== 11/28/2014 ==
+Trevius: Fixed a zone crash related to numhits for spells.
+Trevius: Fixed a query related to group leaders logging in.
+Trevius (Natedog): Fixed a world crash related to attempting to join an adventure with Mercenaries.
+
+== 11/27/2014 ==
+Kayen: Projectiles (ie Arrows) fired from archery will now do damage upon impact instead of instantly (consistent w/ live).
+Optional SQL: utils/sql/git/optional/2014_11_27_ProjectileDmgOnImpact.sql
+
+== 11/25/2014 ==
+Trevius: Spells that modify model size are now limited to 2 size adjustments from the base size.
+Trevius: Fix to prevent Mercenaries from being set as Group Leader.
+
 == 11/24/2014 ==
 Trevius: Added Rule NPC:EnableMeritBasedFaction (disabled by default) - Allows faction gain to work similar to experience.
 

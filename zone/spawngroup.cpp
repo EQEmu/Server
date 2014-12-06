@@ -25,8 +25,10 @@
 #include "zonedb.h"
 #include "../common/misc_functions.h"
 #include "../common/string_util.h"
+#include "zone.h"
 
 extern EntityList entity_list;
+extern Zone* zone;
 
 SpawnEntry::SpawnEntry( uint32 in_NPCType, int in_chance, uint8 in_npc_spawn_limit ) {
 	NPCType = in_NPCType;
@@ -77,7 +79,7 @@ uint32 SpawnGroup::GetNPCType() {
 
 
 	int32 roll = 0;
-	roll = MakeRandomInt(0, totalchance-1);
+	roll = zone->random.Int(0, totalchance-1);
 
 	cur = possible.begin();
 	end = possible.end();

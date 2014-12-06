@@ -17,19 +17,16 @@
 */
 #include "../common/debug.h"
 #include "../common/rulesys.h"
-#include <iostream>
-#include <fstream>
+#include <cmath>
+#include <ctype.h>
 #include <iomanip>
+#include <iostream>
+#include <limits.h>
+#include <map>
+#include <mysqld_error.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errmsg.h>
-#include <mysqld_error.h>
-#include <limits.h>
-#include <ctype.h>
-#include <assert.h>
-#include <cmath>
-#include <map>
 
 // Disgrace: for windows compile
 #ifdef _WINDOWS
@@ -45,7 +42,6 @@
 
 #include "database.h"
 #include "eq_packet_structs.h"
-#include "guilds.h"
 #include "string_util.h"
 #include "extprofile.h"
 
@@ -768,7 +764,10 @@ uint32 Database::GetCharacterID(const char *name) {
 	std::string query = StringFormat("SELECT `id` FROM `character_data` WHERE `name` = '%s'", name);
 	auto results = QueryDatabase(query);
 	auto row = results.begin();
-	if (row[0]){ return atoi(row[0]); }
+	if (results.RowCount() == 1)
+	{
+		return atoi(row[0]);
+	}
 	return 0; 
 }
 
@@ -901,14 +900,27 @@ bool Database::CheckDatabaseConversions() {
 	CheckDatabaseConvertCorpseDeblob();
 
 	/* Fetch Automatic Database Upgrade Script */
-	if (!std::ifstream("db_update.pl")){
+	// if (!std::ifstream("db_update.pl")){
 		std::cout << "Pulling down automatic database upgrade script...\n" << std::endl;
 #ifdef _WIN32
 		system("perl -MLWP::UserAgent -e \"require LWP::UserAgent;  my $ua = LWP::UserAgent->new; $ua->timeout(10); $ua->env_proxy; my $response = $ua->get('https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/db_update.pl'); if ($response->is_success){ open(FILE, '> db_update.pl'); print FILE $response->decoded_content; close(FILE); }\"");
 #else
 		system("wget -O db_update.pl https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/db_update.pl");
 #endif
-	}
+	// }
+
+	/* 
+		Automatic Database Upgrade Script
+		Script: db_update.pl V 1 - the number that world passes to the script will 
+			force the script to check for a newer version to update itself with
+				db_update.pl ran_from_world - won't bring up a menu if your database versions match
+				db_update.pl - ran standalone will bring up a menu prompt 
+	*/
+
+	/* Check for a new version of this script, the arg passed 
+		would have to be higher than the copy they have downloaded 
+		locally and they will re fetch */
+	system("perl db_update.pl V 1");
 
 	/* Run Automatic Database Upgrade Script */
 	system("perl db_update.pl ran_from_world"); 
@@ -3254,7 +3266,7 @@ char* Database::GetGroupLeaderForLogin(const char* name, char* leaderbuf) {
 	strcpy(leaderbuf, "");
 	uint32 group_id = 0;
 
-	std::string query = StringFormat("SELECT `groupid` FROM `group_id` WHERE `name = '%s'", name);
+	std::string query = StringFormat("SELECT `groupid` FROM `group_id` WHERE `name` = '%s'", name);
 	auto results = QueryDatabase(query);
 
 	for (auto row = results.begin(); row != results.end(); ++row)
@@ -3264,7 +3276,7 @@ char* Database::GetGroupLeaderForLogin(const char* name, char* leaderbuf) {
 	if (group_id == 0)
 		return leaderbuf;
 
-	query = StringFormat("SELECT `leadername` FROM `group_leader` WHERE `gid` = '%u' AND `groupid` = %u LIMIT 1", group_id);
+	query = StringFormat("SELECT `leadername` FROM `group_leaders` WHERE `gid` = '%u' LIMIT 1", group_id);
 	results = QueryDatabase(query);
 
 	for (auto row = results.begin(); row != results.end(); ++row)

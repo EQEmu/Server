@@ -3664,6 +3664,12 @@ namespace Underfoot
 			ss.write((const char*)&null_term, sizeof(uint8));
 			ornaIcon = aug_weap->Icon;
 		}
+		else if (inst->GetOrnamentationIDFile() && inst->GetOrnamentationIcon()) {
+			char tmp[30]; memset(tmp, 0x0, 30); sprintf(tmp, "IT%d", inst->GetOrnamentationIDFile());
+			ss.write(tmp, strlen(tmp));
+			ss.write((const char*)&null_term, sizeof(uint8));
+			ornaIcon = inst->GetOrnamentationIcon();
+		}
 		else {
 			ss.write((const char*)&null_term, sizeof(uint8)); //no idfile
 		}

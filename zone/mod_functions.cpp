@@ -1,22 +1,15 @@
-#include "../common/debug.h"
-#include "../common/timer.h"
-#include <cmath>
-#include <stdlib.h>
-#include "spawn2.h"
-#include "entity.h"
-#include "masterentity.h"
-#include "zone.h"
-#include "spawngroup.h"
-#include "zonedb.h"
-#include "npc.h"
-#include "mob.h"
 #include "client.h"
+#include "entity.h"
+#include "mob.h"
+#include "npc.h"
 #include "worldserver.h"
-#include "quest_parser_collection.h"
-#include "event_codes.h"
-#include "embparser.h"
-#include <string>
-#include <iostream>
+#include "zone.h"
+
+class ItemInst;
+class Spawn2;
+struct Consider_Struct;
+struct DBTradeskillRecipe_Struct;
+struct Item_Struct;
 
 extern EntityList entity_list;
 extern Zone* zone;

@@ -592,27 +592,20 @@ bool Group::DelMemberOOZ(const char *Name) {
 
 bool Group::DelMember(Mob* oldmember,bool ignoresender)
 {
-	if (oldmember == nullptr){
+	if (oldmember == nullptr)
+	{
 		return false;
 	}
 
-	for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++) {
-		if (members[i] == oldmember) {
+	for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++)
+	{
+		if (members[i] == oldmember)
+		{
 			members[i] = nullptr;
 			membername[i][0] = '\0';
 			memset(membername[i],0,64);
 			MemberRoles[i] = 0;
 			break;
-		}
-	}
-
-	//handle leader quitting group gracefully
-	if (oldmember == GetLeader() && GroupCount() >= 2) {
-		for(uint32 nl = 0; nl < MAX_GROUP_MEMBERS; nl++) {
-			if(members[nl]) {
-				ChangeLeader(members[nl]);
-				break;
-			}
 		}
 	}
 
@@ -624,8 +617,31 @@ bool Group::DelMember(Mob* oldmember,bool ignoresender)
 	 * a is still "leader" from GetLeader()'s perspective and will crash the zone when we DelMember(b)
 	 * Ultimately we should think up a better solution to this.
 	 */
-	if(oldmember == GetLeader()) {
+	if(oldmember == GetLeader())
+	{
 		SetLeader(nullptr);
+	}
+
+	//handle leader quitting group gracefully
+	if (oldmember == GetLeader() && GroupCount() >= 2)
+	{
+		for(uint32 nl = 0; nl < MAX_GROUP_MEMBERS; nl++)
+		{
+			if(members[nl]) 
+			{
+				if (members[nl]->IsClient())
+				{
+					ChangeLeader(members[nl]);
+					break;
+				}
+			}
+		}
+	}
+	
+	if (GetLeader() == nullptr)
+	{
+		DisbandGroup();
+		return true;
 	}
 
 	ServerPacket* pack = new ServerPacket(ServerOP_GroupLeave, sizeof(ServerGroupLeave_Struct));

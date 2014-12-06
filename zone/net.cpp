@@ -97,7 +97,7 @@ extern Zone* zone;
 EQStreamFactory eqsf(ZoneStream);
 npcDecayTimes_Struct npcCorpseDecayTimes[100];
 TitleManager title_manager;
-QueryServ *QServ = 0; 
+QueryServ *QServ = 0;
 TaskManager *taskmanager = 0;
 QuestParserCollection *parse = 0;
 
@@ -642,4 +642,3 @@ void UpdateWindowTitle(char* iNewTitle) {
 	SetConsoleTitle(tmp);
 #endif
 }
-

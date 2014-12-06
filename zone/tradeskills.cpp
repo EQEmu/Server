@@ -24,17 +24,14 @@
 #include <netinet/in.h>	//for htonl
 #endif
 
-#include "masterentity.h"
-#include "zonedb.h"
-#include "../common/packet_functions.h"
-#include "../common/packet_dump.h"
-#include "titles.h"
-#include "string_ids.h"
 #include "../common/misc_functions.h"
-#include "../common/string_util.h"
 #include "../common/rulesys.h"
-#include "quest_parser_collection.h"
+#include "../common/string_util.h"
 #include "queryserv.h"
+#include "quest_parser_collection.h"
+#include "string_ids.h"
+#include "titles.h"
+#include "zonedb.h"
 
 extern QueryServ* QServ;
 
@@ -283,6 +280,44 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	container = inst;
+	if (container->GetItem() && container->GetItem()->BagType == BagTypeTransformationmold) {
+		const ItemInst* inst = container->GetItem(0);
+		bool AllowAll = RuleB(Inventory, AllowAnyWeaponTransformation);
+		if (inst && ItemInst::CanTransform(inst->GetItem(), container->GetItem(), AllowAll)) {
+			const Item_Struct* new_weapon = inst->GetItem();
+			user->DeleteItemInInventory(Inventory::CalcSlotId(in_combine->container_slot, 0), 0, true);
+			container->Clear();
+			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->IsInstNoDrop(), MainCursor, container->GetItem()->Icon, atoi(container->GetItem()->IDFile + 2));
+			user->Message_StringID(4, TRANSFORM_COMPLETE, inst->GetItem()->Name);
+			if (RuleB(Inventory, DeleteTransformationMold))
+				user->DeleteItemInInventory(in_combine->container_slot, 0, true);
+		}
+		else if (inst) {
+			user->Message_StringID(4, TRANSFORM_FAILED, inst->GetItem()->Name);
+		}
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		user->QueuePacket(outapp);
+		safe_delete(outapp);
+		return;
+	}
+
+	if (container->GetItem() && container->GetItem()->BagType == BagTypeDetransformationmold) {
+		const ItemInst* inst = container->GetItem(0);
+		if (inst && inst->GetOrnamentationIcon() && inst->GetOrnamentationIcon()) {
+			const Item_Struct* new_weapon = inst->GetItem();
+			user->DeleteItemInInventory(Inventory::CalcSlotId(in_combine->container_slot, 0), 0, true);
+			container->Clear();
+			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->IsInstNoDrop(), MainCursor, 0, 0);
+			user->Message_StringID(4, TRANSFORM_COMPLETE, inst->GetItem()->Name);
+		}
+		else if (inst) {
+			user->Message_StringID(4, DETRANSFORM_FAILED, inst->GetItem()->Name);
+		}
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		user->QueuePacket(outapp);
+		safe_delete(outapp);
+		return;
+	}
 
 	DBTradeskillRecipe_Struct spec;
 	if (!database.GetTradeRecipe(container, c_type, some_id, user->CharacterID(), &spec)) {
@@ -888,7 +923,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	_log(TRADESKILLS__TRACE, "...Current skill: %d , Trivial: %d , Success chance: %f percent", user_skill , spec->trivial , chance);
 	_log(TRADESKILLS__TRACE, "...Bonusstat: %d , INT: %d , WIS: %d , DEX: %d , STR: %d", bonusstat , GetINT() , GetWIS() , GetDEX() , GetSTR());
 
-	float res = MakeRandomFloat(0, 99);
+	float res = zone->random.Real(0, 99);
 	int aa_chance = 0;
 
 	//AA modifiers
@@ -1022,7 +1057,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 
 	chance = mod_tradeskill_chance(chance, spec);
 
-	if (((spec->tradeskill==75) || GetGM() || (chance > res)) || MakeRandomInt(0, 99) < aa_chance){
+	if (((spec->tradeskill==75) || GetGM() || (chance > res)) || zone->random.Roll(aa_chance)) {
 		success_modifier = 1;
 
 		if(over_trivial < 0)
@@ -1092,7 +1127,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 			uint8 sc = 0;
 			while(itr != spec->salvage.end()) {
 				for(sc = 0; sc < itr->second; sc++)
-					if(MakeRandomInt(0,99) < SalvageChance)
+					if(zone->random.Roll(SalvageChance))
 						SummonItem(itr->first, 1);
 				++itr;
 			}
@@ -1118,7 +1153,7 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 	//In stage2 the only thing that matters is your current unmodified skill.
 	//If you want to customize here you probbably need to implement your own
 	//formula instead of tweaking the below one.
-	if (chance_stage1 > MakeRandomFloat(0, 99)) {
+	if (chance_stage1 > zone->random.Real(0, 99)) {
 		if (current_raw_skill < 15) {
 			//Always succeed
 			chance_stage2 = 100;
@@ -1133,7 +1168,7 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 
 	chance_stage2 = mod_tradeskill_skillup(chance_stage2);
 
-	if (chance_stage2 > MakeRandomFloat(0, 99)) {
+	if (chance_stage2 > zone->random.Real(0, 99)) {
 		//Only if stage1 and stage2 succeeded you get a skillup.
 		SetSkill(tradeskill, current_raw_skill + 1);
 

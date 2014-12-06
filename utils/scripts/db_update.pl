@@ -6,6 +6,21 @@
 #::: Purpose: To upgrade databases with ease and maintain versioning
 ###########################################################
 
+
+#::: If current version is less than what world is reporting, then download a new one...
+$current_version = 1;
+if($ARGV[0] eq "V"){
+	if($ARGV[1] > $current_version){ 
+		print "Retrieving latest database manifest...\n";
+		GetRemoteFile("https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/db_update.pl", "db_update.pl");
+		exit;
+	}
+	else{
+		print "No update necessary \n";
+	}
+	exit;
+}
+
 $perl_version = $^V;
 $perl_version =~s/v//g;
 print "Perl Version is " . $perl_version . "\n";
@@ -26,14 +41,14 @@ while(<F>) {
 	elsif(/<db>(.*)<\/db>/i) { $db = $1; } 
 }
 
-print 
+$console_output = 
 "============================================================
            EQEmu: Automatic Database Upgrade Check         
 ============================================================
 ";
 
 use Config;
-print "	Operating System is: $Config{osname}\n";
+$console_output .= "	Operating System is: $Config{osname}\n";
 if($Config{osname}=~/linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 
@@ -48,9 +63,9 @@ if($OS eq "Windows"){
 				last;
 			}
 		}
-		print "	(Windows) MySQL is in system path \n";
-		print "	Path = " . $path . "\n";
-		print "============================================================\n";
+		$console_output .= "	(Windows) MySQL is in system path \n";
+		$console_output .= "	Path = " . $path . "\n";
+		$console_output .= "============================================================\n";
 	}
 }
 
@@ -62,9 +77,9 @@ if($OS eq "Linux"){
 	}
 	$path =~s/\n//g; 
 	
-	print "	(Linux) MySQL is in system path \n";
-	print "	Path = " . $path . "\n";
-	print "============================================================\n";
+	$console_output .= "	(Linux) MySQL is in system path \n";
+	$console_output .= "	Path = " . $path . "\n";
+	$console_output .= "============================================================\n";
 }
 
 #::: Path not found, error and exit
@@ -93,10 +108,21 @@ if(GetMySQLResult("SHOW TABLES LIKE 'db_version'") eq ""){
 }
 
 if($OS eq "Windows"){ @db_version = split(': ', `world db_version`); }
-if($OS eq "Linux"){ @db_version = split(': ', `./world db_version`); }
+if($OS eq "Linux"){ @db_version = split(': ', `./world db_version`); }  
 
 $bin_db_ver = trim($db_version[1]);
 $local_db_ver = trim(GetMySQLResult("SELECT version FROM db_version LIMIT 1"));
+
+#::: If ran from Linux startup script, supress output
+if($bin_db_ver == $local_db_ver && $ARGV[0] eq "ran_from_start"){ 
+	print "Database up to date...\n"; 
+	exit; 
+}
+else{ 
+	print $console_output; 
+}
+
+
 print "	Binary Database Version: (" . $bin_db_ver . ")\n";
 print "	Local Database Version: (" . $local_db_ver . ")\n\n";
 
@@ -135,7 +161,7 @@ sub ShowMenuPrompt {
     while (1) { 
 		{
 			local $| = 1;
-			if(!$menu_show && $ARGV[0] eq "ran_from_world"){
+			if(!$menu_show && ($ARGV[0] eq "ran_from_world" || $ARGV[0] eq "ran_from_start")){ 
 				$menu_show++;
 				next;
 			}

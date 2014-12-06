@@ -32,7 +32,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "../common/patches/sod_constants.h"
 #include "../common/patches/underfoot_constants.h"
 #include "../common/patches/rof_constants.h"
-//#include "../common/patches/rof2_constants.h"
+#include "../common/patches/rof2_constants.h"
 
 // *** DO NOT CHANGE without a full understanding of the consequences..the server is set up to use these settings explicitly!! ***
 // *** You will cause compilation failures and corrupt your database if partial or incorrect attempts to change them are made!! ***

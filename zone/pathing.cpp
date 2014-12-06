@@ -1346,7 +1346,7 @@ PathNode* PathManager::FindPathNodeByCoordinates(float x, float y, float z)
 
 int PathManager::GetRandomPathNode()
 {
-	return MakeRandomInt(0, Head.PathNodeCount - 1);
+	return zone->random.Int(0, Head.PathNodeCount - 1);
 
 }
 

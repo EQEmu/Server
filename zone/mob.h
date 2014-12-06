@@ -18,7 +18,6 @@
 #ifndef MOB_H
 #define MOB_H
 
-#include "../common/features.h"
 #include "common.h"
 #include "entity.h"
 #include "hate_list.h"
@@ -26,14 +25,22 @@
 #include "position.h"
 #include <set>
 #include <vector>
-#include <string>
 
 char* strn0cpy(char* dest, const char* source, uint32 size);
 
 #define MAX_SPECIAL_ATTACK_PARAMS 8
 
 class EGNode;
-class MobFearState;
+class Client;
+class EQApplicationPacket;
+class Group;
+class ItemInst;
+class NPC;
+class Raid;
+struct Item_Struct;
+struct NewSpawn_Struct;
+struct PlayerPositionUpdateServer_Struct;
+
 class Mob : public Entity {
 public:
 	enum CLIENT_CONN_STATUS { CLIENT_CONNECTING, CLIENT_CONNECTED, CLIENT_LINKDEAD,
@@ -228,8 +235,7 @@ public:
 	uint16 CastingSpellID() const { return casting_spell_id; }
 	bool DoCastingChecks();
 	bool TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier);
-	void SpellProjectileEffect();
-	bool TrySpellProjectile(Mob* spell_target,  uint16 spell_id);
+	bool TrySpellProjectile(Mob* spell_target,  uint16 spell_id, float speed = 1.5f);
 	void ResourceTap(int32 damage, uint16 spell_id);
 	void TryTriggerThreshHold(int32 damage, int effect_id, Mob* attacker);
 	bool CheckSpellCategory(uint16 spell_id, int category_id, int effect_id);
@@ -273,7 +279,7 @@ public:
 	int16 GetBuffSlotFromType(uint16 type);
 	uint16 GetSpellIDFromSlot(uint8 slot);
 	int CountDispellableBuffs();
-	void CheckNumHitsRemaining(uint8 type, uint32 buff_slot=0, uint16 spell_id=SPELL_UNKNOWN);
+	void CheckNumHitsRemaining(uint8 type, int32 buff_slot=-1, uint16 spell_id=SPELL_UNKNOWN);
 	bool HasNumhits() const { return has_numhits; }
 	inline void Numhits(bool val) { has_numhits = val; }
 	bool HasMGB() const { return has_MGB; }
@@ -490,6 +496,7 @@ public:
 	//Util
 	static uint32 RandomTimer(int min, int max);
 	static uint8 GetDefaultGender(uint16 in_race, uint8 in_gender = 0xFF);
+	static bool IsPlayerRace(uint16 in_race);
 	uint16 GetSkillByItemType(int ItemType);
 	uint8 GetItemTypeBySkill(SkillUseTypes skill);
 	virtual void MakePet(uint16 spell_id, const char* pettype, const char *petname = nullptr);
@@ -570,6 +577,7 @@ public:
 		uint8 in_hairstyle = 0xFF, uint8 in_luclinface = 0xFF, uint8 in_beard = 0xFF, uint8 in_aa_title = 0xFF,
 		uint32 in_drakkin_heritage = 0xFFFFFFFF, uint32 in_drakkin_tattoo = 0xFFFFFFFF,
 		uint32 in_drakkin_details = 0xFFFFFFFF, float in_size = -1.0f);
+	bool RandomizeFeatures(bool send_illusion = true, bool set_variables = true);
 	virtual void Stun(int duration);
 	virtual void UnStun();
 	inline void Silence(bool newval) { silenced = newval; }
@@ -721,9 +729,14 @@ public:
 	int32 ReduceAllDamage(int32 damage);
 
 	virtual void DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage, int32 min_damage = 1, int32 hate_override = -1, int ReuseTime = 10, bool HitChance=false, bool CanAvoid=true);
-	virtual void DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon=nullptr, const Item_Struct* item=nullptr, uint16 weapon_damage=0, int16 chance_mod=0,int16 focus=0, int ReuseTime=0);
+	virtual void DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon=nullptr, const Item_Struct* AmmoItem=nullptr, uint16 weapon_damage=0, int16 chance_mod=0,int16 focus=0, int ReuseTime=0, uint32 range_id=0, int AmmoSlot=0, float speed = 4.0f);
 	virtual void DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes skillinuse, int16 chance_mod=0, int16 focus=0, bool CanRiposte=false, int ReuseTime=0);
-	virtual void DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon=nullptr, const ItemInst* Ammo=nullptr, uint16 weapon_damage=0, int16 chance_mod=0, int16 focus=0, int ReuseTime=0);
+	virtual void DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon=nullptr, const ItemInst* Ammo=nullptr, uint16 weapon_damage=0, int16 chance_mod=0, int16 focus=0, int ReuseTime=0, uint32 range_id=0, uint32 ammo_id=0, const Item_Struct *AmmoItem=nullptr, int AmmoSlot=0, float speed= 4.0f);
+	bool TryProjectileAttack(Mob* other, const Item_Struct *item, SkillUseTypes skillInUse, uint16 weapon_dmg, const ItemInst* RangeWeapon, const ItemInst* Ammo, int AmmoSlot, float speed);
+	void ProjectileAttack();
+	inline bool HasProjectileAttack() const { return ActiveProjectileATK; }
+	inline void SetProjectileAttack(bool value) { ActiveProjectileATK = value; }
+	float GetRangeDistTargetSizeMod(Mob* other);
 	bool CanDoSpecialAttack(Mob *other);
 	bool Flurry(ExtraAttackOptions *opts);
 	bool Rampage(ExtraAttackOptions *opts);
@@ -839,7 +852,7 @@ public:
 	// HP Event
 	inline int GetNextHPEvent() const { return nexthpevent; }
 	void SetNextHPEvent( int hpevent );
-	void SendItemAnimation(Mob *to, const Item_Struct *item, SkillUseTypes skillInUse);
+	void SendItemAnimation(Mob *to, const Item_Struct *item, SkillUseTypes skillInUse, float velocity= 4.0);
 	inline int& GetNextIncHPEvent() { return nextinchpevent; }
 	void SetNextIncHPEvent( int inchpevent );
 
@@ -1079,11 +1092,8 @@ protected:
 	uint8 bardsong_slot;
 	uint32 bardsong_target_id;
 
-	Timer projectile_timer;
-	uint32 projectile_spell_id[MAX_SPELL_PROJECTILE];
-	uint16 projectile_target_id[MAX_SPELL_PROJECTILE];
-	uint8 projectile_increment[MAX_SPELL_PROJECTILE];
-	float projectile_x[MAX_SPELL_PROJECTILE], projectile_y[MAX_SPELL_PROJECTILE], projectile_z[MAX_SPELL_PROJECTILE];
+	bool ActiveProjectileATK;
+	tProjatk ProjectileAtk[MAX_SPELL_PROJECTILE];
 
 	xyz_location m_RewindLocation;
 

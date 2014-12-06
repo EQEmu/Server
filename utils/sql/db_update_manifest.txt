@@ -311,6 +311,8 @@
 9055|2014_10_30_special_abilities_null.sql|SHOW COLUMNS FROM `npc_types` LIKE 'special_abilities'|contains|NO
 9056|2014_11_08_RaidMembers.sql|SHOW COLUMNS FROM `raid_members` LIKE 'groupid'|missing|unsigned
 9057|2014_11_13_spells_new_updates.sql|SHOW COLUMNS FROM `spells_new` LIKE 'disallow_sit'|empty|
+9058|2014_11_26_InventoryTableUpdate.sql|SHOW COLUMNS FROM `inventory` LIKE 'ornamenticon'|empty|
+9059|2014_12_01_mercs_table_update.sql|SHOW COLUMNS FROM `mercs` LIKE 'MercSize'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not 

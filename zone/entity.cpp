@@ -19,7 +19,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include <ctype.h>
 #include <string.h>
 #include <iostream>
 
@@ -30,19 +29,16 @@
 #include "../common/unix.h"
 #endif
 
-#include "net.h"
-#include "masterentity.h"
-#include "worldserver.h"
-#include "../common/guilds.h"
-#include "../common/packet_dump.h"
-#include "../common/packet_functions.h"
-#include "petitions.h"
-#include "../common/spdat.h"
 #include "../common/features.h"
-#include "string_ids.h"
+#include "../common/guilds.h"
+#include "../common/spdat.h"
 #include "guild_mgr.h"
-#include "raids.h"
+#include "net.h"
+#include "petitions.h"
 #include "quest_parser_collection.h"
+#include "raids.h"
+#include "string_ids.h"
+#include "worldserver.h"
 
 #ifdef _WINDOWS
 	#define snprintf	_snprintf
@@ -632,7 +628,7 @@ void EntityList::AddCorpse(Corpse *corpse, uint32 in_id)
 void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 {
 	npc->SetID(GetFreeID());
-	npc->SetMerchantProbability((uint8) MakeRandomInt(0, 99));
+	npc->SetMerchantProbability((uint8) zone->random.Int(0, 99));
 	parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
 
 	uint16 emoteid = npc->GetEmoteID();
@@ -662,10 +658,12 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 
 void EntityList::AddMerc(Merc *merc, bool SendSpawnPacket, bool dontqueue)
 {
-	if (merc) {
+	if (merc)
+	{
 		merc->SetID(GetFreeID());
 
-		if (SendSpawnPacket) {
+		if (SendSpawnPacket)
+		{
 			if (dontqueue) {
 				// Send immediately
 				EQApplicationPacket *outapp = new EQApplicationPacket();
@@ -677,12 +675,10 @@ void EntityList::AddMerc(Merc *merc, bool SendSpawnPacket, bool dontqueue)
 				// Queue the packet
 				NewSpawn_Struct *ns = new NewSpawn_Struct;
 				memset(ns, 0, sizeof(NewSpawn_Struct));
-				merc->FillSpawnStruct(ns, merc);
+				merc->FillSpawnStruct(ns, 0);
 				AddToSpawnQueue(merc->GetID(), &ns);
 				safe_delete(ns);
 			}
-
-			//parse->EventMERC(EVENT_SPAWN, merc, nullptr, "", 0);
 		}
 
 		merc_list.insert(std::pair<uint16, Merc *>(merc->GetID(), merc));
@@ -1573,7 +1569,7 @@ Client *EntityList::GetRandomClient(const xyz_location& location, float Distance
 	if (ClientsInRange.empty())
 		return nullptr;
 
-	return ClientsInRange[MakeRandomInt(0, ClientsInRange.size() - 1)];
+	return ClientsInRange[zone->random.Int(0, ClientsInRange.size() - 1)];
 }
 
 Corpse *EntityList::GetCorpseByOwner(Client *client)
@@ -1605,7 +1601,7 @@ Corpse *EntityList::GetCorpseByDBID(uint32 dbid)
 {
 	auto it = corpse_list.begin();
 	while (it != corpse_list.end()) {
-		if (it->second->GetDBID() == dbid)
+		if (it->second->GetCorpseDBID() == dbid)
 			return it->second;
 		++it;
 	}
@@ -1659,7 +1655,7 @@ void EntityList::RemoveCorpseByDBID(uint32 dbid)
 {
 	auto it = corpse_list.begin();
 	while (it != corpse_list.end()) {
-		if (it->second->GetDBID() == dbid) {
+		if (it->second->GetCorpseDBID() == dbid) {
 			safe_delete(it->second);
 			free_ids.push(it->first);
 			it = corpse_list.erase(it);
@@ -1676,9 +1672,9 @@ int EntityList::RezzAllCorpsesByCharID(uint32 charid)
 	auto it = corpse_list.begin();
 	while (it != corpse_list.end()) {
 		if (it->second->GetCharID() == charid) {
-			RezzExp += it->second->GetRezzExp();
+			RezzExp += it->second->GetRezExp();
 			it->second->IsRezzed(true);
-			it->second->CompleteRezz();
+			it->second->CompleteResurrection();
 		}
 		++it;
 	}
@@ -2654,7 +2650,7 @@ int32 EntityList::DeleteNPCCorpses()
 	auto it = corpse_list.begin();
 	while (it != corpse_list.end()) {
 		if (it->second->IsNPCCorpse()) {
-			it->second->Depop();
+			it->second->DepopNPCCorpse();
 			x++;
 		}
 		++it;
@@ -2893,7 +2889,7 @@ void EntityList::ClearFeignAggro(Mob *targ)
 
 			it->second->RemoveFromHateList(targ);
 			if (targ->IsClient()) {
-				if (it->second->GetLevel() >= 35 && MakeRandomInt(1, 100) <= 60)
+				if (it->second->GetLevel() >= 35 && zone->random.Roll(60))
 					it->second->AddFeignMemory(targ->CastToClient());
 				else
 					targ->CastToClient()->RemoveXTarget(it->second, false);
@@ -3640,7 +3636,8 @@ void EntityList::AddTempPetsToHateList(Mob *owner, Mob* other, bool bFrenzy)
 		NPC* n = it->second;
 		if (n->GetSwarmInfo()) {
 			if (n->GetSwarmInfo()->owner_id == owner->GetID()) {
-				n->CastToNPC()->hate_list.Add(other, 0, 0, bFrenzy);
+				if (!n->GetSpecialAbility(IMMUNE_AGGRO))
+					n->hate_list.Add(other, 0, 0, bFrenzy);
 			}
 		}
 		++it;
@@ -4499,7 +4496,7 @@ void EntityList::AddLootToNPCS(uint32 item_id, uint32 count)
 			selection.push_back(j);
 
 		while (selection.size() > 0 && count > 0) {
-			int k = MakeRandomInt(0, selection.size() - 1);
+			int k = zone->random.Int(0, selection.size() - 1);
 			counts[selection[k]]++;
 			count--;
 			selection.erase(selection.begin() + k);
@@ -4681,6 +4678,6 @@ Mob *EntityList::GetTargetForVirus(Mob *spreader, int range)
 	if(TargetsInRange.size() == 0)
 		return nullptr;
 
-	return TargetsInRange[MakeRandomInt(0, TargetsInRange.size() - 1)];
+	return TargetsInRange[zone->random.Int(0, TargetsInRange.size() - 1)];
 }
 

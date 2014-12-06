@@ -15,24 +15,14 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "../common/debug.h"
-#include "masterentity.h"
-#include "worldserver.h"
-#include "net.h"
-#include "zonedb.h"
-#include "../common/spdat.h"
-#include "../common/packet_dump.h"
-#include "../common/packet_functions.h"
-#include "petitions.h"
-#include "../common/serverinfo.h"
-#include "../common/zone_numbers.h"
-#include "../common/moremath.h"
-#include "../common/guilds.h"
 #include "../common/logsys.h"
 #include "../common/string_util.h"
-#include "string_ids.h"
-#include "npc_ai.h"
 #include "quest_parser_collection.h"
+#include "worldserver.h"
+#include "zonedb.h"
+
 extern WorldServer worldserver;
 
 // @merth: this needs to be touched up
@@ -199,7 +189,7 @@ bool Client::CheckLoreConflict(const Item_Struct* item) {
 	return (m_inv.HasItemByLoreGroup(item->LoreGroup, ~invWhereSharedBank) != INVALID_INDEX);
 }
 
-bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, bool attuned, uint16 to_slot) {
+bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile) {
 	this->EVENT_ITEM_ScriptStopReturn();
 
 	// TODO: update calling methods and script apis to handle a failure return
@@ -557,6 +547,11 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	// attune item
 	if(attuned && inst->GetItem()->Attuneable)
 		inst->SetInstNoDrop(true);
+		
+	if(ornament_icon > 0 && ornament_idfile > 0) {
+		inst->SetOrnamentIcon(ornament_icon);
+		inst->SetOrnamentationIDFile(ornament_idfile);
+	}
 
 	// check to see if item is usable in requested slot
 	if(enforceusable && (((to_slot >= MainCharm) && (to_slot <= MainAmmo)) || (to_slot == MainPowerSource))) {

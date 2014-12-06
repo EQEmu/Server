@@ -2,7 +2,8 @@
 #ifndef AA_H
 #define AA_H
 
-#include "../common/eq_packet_structs.h"
+struct AA_Ability;
+struct SendAA_Struct;
 
 #define MANA_BURN 664
 

@@ -26,9 +26,6 @@
 	#include <netdb.h>
 #endif
 
-
-#include <errno.h>
-#include <fcntl.h>
 #include "../common/types.h"
 #include "../common/timer.h"
 void CatchSignal(int);

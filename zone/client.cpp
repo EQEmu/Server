@@ -17,13 +17,9 @@
 */
 #include "../common/debug.h"
 #include <iostream>
-#include <iomanip>
-#include <sstream>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <signal.h>
-#include <math.h>
 
 // for windows compile
 #ifdef _WINDOWS
@@ -39,27 +35,17 @@
 extern volatile bool RunLoops;
 
 #include "../common/features.h"
-#include "../common/misc.h"
 #include "../common/spdat.h"
-#include "../common/packet_dump.h"
-#include "../common/packet_functions.h"
-#include "../common/serverinfo.h"
-#include "../common/zone_numbers.h"
-#include "../common/moremath.h"
 #include "../common/guilds.h"
-#include "../common/breakdowns.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
 #include "../common/data_verification.h"
 #include "net.h"
-#include "masterentity.h"
 #include "worldserver.h"
 #include "zonedb.h"
 #include "petitions.h"
-#include "forage.h"
 #include "command.h"
 #include "string_ids.h"
-#include "npc_ai.h"
 #include "client_logs.h"
 #include "guild_mgr.h"
 #include "quest_parser_collection.h"
@@ -1879,6 +1865,9 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 			if (strlen(item->IDFile) > 2)
 				ns->spawn.equipment[MaterialPrimary] = atoi(&item->IDFile[2]);
 		}
+		else if (inst->GetOrnamentationIcon() && inst->GetOrnamentationIDFile()) {
+			ns->spawn.equipment[MaterialPrimary] = inst->GetOrnamentationIDFile();
+		}
 		else {
 			item = inst->GetItem();
 			if (strlen(item->IDFile) > 2)
@@ -1890,6 +1879,9 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 			item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
 			if (strlen(item->IDFile) > 2)
 				ns->spawn.equipment[MaterialSecondary] = atoi(&item->IDFile[2]);
+		}
+		else if (inst->GetOrnamentationIcon() && inst->GetOrnamentationIDFile()) {
+			ns->spawn.equipment[MaterialSecondary] = inst->GetOrnamentationIDFile();
 		}
 		else {
 			item = inst->GetItem();
@@ -2326,7 +2318,7 @@ bool Client::CheckIncreaseSkill(SkillUseTypes skillid, Mob *against_who, int cha
 		if(Chance < 1)
 			Chance = 1; // Make it always possible
 
-		if(MakeRandomFloat(0, 99) < Chance)
+		if(zone->random.Real(0, 99) < Chance)
 		{
 			SetSkill(skillid, GetRawSkill(skillid) + 1);
 			_log(SKILLS__GAIN, "Skill %d at value %d successfully gain with %.4f%%chance (mod %d)", skillid, skillval, Chance, chancemodi);
@@ -2354,7 +2346,7 @@ void Client::CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill) {
 		int32 Chance = 5 + ((TeacherSkill - LangSkill)/10);	// greater chance to learn if teacher's skill is much higher than yours
 		Chance = (Chance * RuleI(Character, SkillUpModifier)/100);
 
-		if(MakeRandomFloat(0,100) < Chance) {	// if they make the roll
+		if(zone->random.Real(0,100) < Chance) {	// if they make the roll
 			IncreaseLanguageSkill(langid);	// increase the language skill by 1
 			_log(SKILLS__GAIN, "Language %d at value %d successfully gain with %.4f%%chance", langid, LangSkill, Chance);
 		}
@@ -2756,6 +2748,9 @@ void Client::SetMaterial(int16 in_slot, uint32 item_id) {
 				item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
 				m_pp.item_material[MaterialPrimary] = atoi(item->IDFile + 2);
 			}
+			else if (inst && inst->GetOrnamentationIcon() && inst->GetOrnamentationIDFile()) {
+				m_pp.item_material[MaterialPrimary] = inst->GetOrnamentationIDFile();
+			}
 			else {
 				m_pp.item_material[MaterialPrimary] = atoi(item->IDFile + 2);
 			}
@@ -2765,6 +2760,9 @@ void Client::SetMaterial(int16 in_slot, uint32 item_id) {
 			if (inst && inst->GetOrnamentationAug(ornamentationAugtype)) {
 				item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
 				m_pp.item_material[MaterialSecondary] = atoi(item->IDFile + 2);
+			}
+			else if (inst && inst->GetOrnamentationIcon() && inst->GetOrnamentationIDFile()) {
+				m_pp.item_material[MaterialSecondary] = inst->GetOrnamentationIDFile();
 			}
 			else {
 				m_pp.item_material[MaterialSecondary] = atoi(item->IDFile + 2);
@@ -4896,7 +4894,7 @@ int	Client::LDoNChest_SkillCheck(NPC *target, int skill)
 		chance = 100.0f - base_difficulty;
 	}
 
-	float d100 = (float)MakeRandomFloat(0, 100);
+	float d100 = (float)zone->random.Real(0, 100);
 
 	if(d100 <= chance)
 		return 1;
@@ -5815,6 +5813,10 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 						strcpy(insr->itemnames[L], item->Name);
 						insr->itemicons[L] = aug_weap->Icon;
 					}
+					else if (inst->GetOrnamentationIcon() && inst->GetOrnamentationIDFile()) {
+						strcpy(insr->itemnames[L], item->Name);
+						insr->itemicons[L] = inst->GetOrnamentationIcon();
+					}					
 					else {
 						strcpy(insr->itemnames[L], item->Name);
 						insr->itemicons[L] = item->Icon;
@@ -7591,9 +7593,9 @@ void Client::GarbleMessage(char *message, uint8 variance)
 	const char alpha_list[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"; // only change alpha characters for now
 
 	for (size_t i = 0; i < strlen(message); i++) {
-		uint8 chance = (uint8)MakeRandomInt(0, 115); // variation just over worst possible scrambling
+		uint8 chance = (uint8)zone->random.Int(0, 115); // variation just over worst possible scrambling
 		if (isalpha(message[i]) && (chance <= variance)) {
-			uint8 rand_char = (uint8)MakeRandomInt(0,51); // choose a random character from the alpha list
+			uint8 rand_char = (uint8)zone->random.Int(0,51); // choose a random character from the alpha list
 			message[i] = alpha_list[rand_char];
 		}
 	}
@@ -7711,7 +7713,7 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 				// If our result is truncated, then double a mob's value every once and a while to equal what they would have got
 				else
 				{
-					if (MakeRandomInt(0, 100) < faction_mod)
+					if (zone->random.Int(0, 100) < faction_mod)
 						npc_value[i] *= 2;
 				}
 			}
@@ -7804,11 +7806,11 @@ void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 	}
 	// If no primary faction or biggest influence is your faction hit
 	if (primaryfaction <= 0 || lowestvalue == tmpFactionValue) {
-		merchant->Say_StringID(MakeRandomInt(WONT_SELL_DEEDS1, WONT_SELL_DEEDS6));
+		merchant->Say_StringID(zone->random.Int(WONT_SELL_DEEDS1, WONT_SELL_DEEDS6));
 	} else if (lowestvalue == fmod.race_mod) { // race biggest
 		// Non-standard race (ex. illusioned to wolf)
 		if (GetRace() > PLAYER_RACE_COUNT) {
-			messageid = MakeRandomInt(1, 3); // these aren't sequential StringIDs :(
+			messageid = zone->random.Int(1, 3); // these aren't sequential StringIDs :(
 			switch (messageid) {
 			case 1:
 				messageid = WONT_SELL_NONSTDRACE1;
@@ -7825,7 +7827,7 @@ void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 			}
 			merchant->Say_StringID(messageid);
 		} else { // normal player races
-			messageid = MakeRandomInt(1, 4);
+			messageid = zone->random.Int(1, 4);
 			switch (messageid) {
 			case 1:
 				messageid = WONT_SELL_RACE1;
@@ -7846,7 +7848,7 @@ void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 			merchant->Say_StringID(messageid, itoa(GetRace()));
 		}
 	} else if (lowestvalue == fmod.class_mod) {
-		merchant->Say_StringID(MakeRandomInt(WONT_SELL_CLASS1, WONT_SELL_CLASS5), itoa(GetClass()));
+		merchant->Say_StringID(zone->random.Int(WONT_SELL_CLASS1, WONT_SELL_CLASS5), itoa(GetClass()));
 	}
 	return;
 }
@@ -7949,7 +7951,7 @@ void Client::TryItemTick(int slot)
 
 	if(zone->tick_items.count(iid) > 0)
 	{
-		if( GetLevel() >= zone->tick_items[iid].level && MakeRandomInt(0, 100) >= (100 - zone->tick_items[iid].chance) && (zone->tick_items[iid].bagslot || slot <= EmuConstants::EQUIPMENT_END) )
+		if( GetLevel() >= zone->tick_items[iid].level && zone->random.Int(0, 100) >= (100 - zone->tick_items[iid].chance) && (zone->tick_items[iid].bagslot || slot <= EmuConstants::EQUIPMENT_END) )
 		{
 			ItemInst* e_inst = (ItemInst*)inst;
 			parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
@@ -7968,7 +7970,7 @@ void Client::TryItemTick(int slot)
 
 		if(zone->tick_items.count(iid) > 0)
 		{
-			if( GetLevel() >= zone->tick_items[iid].level && MakeRandomInt(0, 100) >= (100 - zone->tick_items[iid].chance) )
+			if( GetLevel() >= zone->tick_items[iid].level && zone->random.Int(0, 100) >= (100 - zone->tick_items[iid].chance) )
 			{
 				ItemInst* e_inst = (ItemInst*)a_inst;
 				parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);

@@ -4,6 +4,7 @@
 #include "../common/rulesys.h"
 #include "../common/misc_functions.h"
 #include "../common/string_util.h"
+#include "../common/random.h"
 #include "adventure.h"
 #include "adventure_manager.h"
 #include "worlddb.h"
@@ -14,6 +15,7 @@
 extern ZSList zoneserver_list;
 extern ClientList client_list;
 extern AdventureManager adventure_manager;
+extern EQEmu::Random emu_random;
 
 Adventure::Adventure(AdventureTemplate *t)
 {
@@ -54,10 +56,10 @@ void Adventure::AddPlayer(std::string character_name, bool add_client_to_instanc
 {
 	if(!PlayerExists(character_name))
 	{
-		int client_id = database.GetCharacterID(character_name.c_str());
-		if(add_client_to_instance)
+		int32 character_id = database.GetCharacterID(character_name.c_str());
+		if(character_id && add_client_to_instance)
 		{
-			database.AddClientToInstance(instance_id, client_id);
+			database.AddClientToInstance(instance_id, character_id);
 		}
 		players.push_back(character_name);
 	}
@@ -70,8 +72,12 @@ void Adventure::RemovePlayer(std::string character_name)
 	{
 		if((*iter).compare(character_name) == 0)
 		{
-			database.RemoveClientFromInstance(instance_id, database.GetCharacterID(character_name.c_str()));
-			players.erase(iter);
+			int32 character_id = database.GetCharacterID(character_name.c_str());
+			if (character_id)
+			{
+				database.RemoveClientFromInstance(instance_id, character_id);
+				players.erase(iter);
+			}
 			return;
 		}
 		++iter;
@@ -388,8 +394,8 @@ void Adventure::MoveCorpsesToGraveyard()
 
 	for (auto iter = dbid_list.begin(); iter != dbid_list.end(); ++iter)
 	{
-		float x = GetTemplate()->graveyard_x + MakeRandomFloat(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
-		float y = GetTemplate()->graveyard_y + MakeRandomFloat(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
+		float x = GetTemplate()->graveyard_x + emu_random.Real(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
+		float y = GetTemplate()->graveyard_y + emu_random.Real(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
 		float z = GetTemplate()->graveyard_z;
 
 		query = StringFormat("UPDATE character_corpses "

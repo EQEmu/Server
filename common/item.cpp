@@ -1412,6 +1412,8 @@ ItemInst::ItemInst(const Item_Struct* item, int16 charges) {
 	m_scaledItem = nullptr;
 	m_evolveInfo = nullptr;
 	m_scaling = false;
+	m_ornamenticon = 0;
+	m_ornamentidfile = 0;
 }
 
 ItemInst::ItemInst(SharedDatabase *db, uint32 item_id, int16 charges) {
@@ -1434,6 +1436,8 @@ ItemInst::ItemInst(SharedDatabase *db, uint32 item_id, int16 charges) {
 	m_scaledItem = nullptr;
 	m_evolveInfo = nullptr;
 	m_scaling = false;
+	m_ornamenticon = 0;
+	m_ornamentidfile = 0;
 }
 
 ItemInst::ItemInst(ItemInstTypes use_type) {
@@ -1451,6 +1455,8 @@ ItemInst::ItemInst(ItemInstTypes use_type) {
 	m_scaledItem = nullptr;
 	m_evolveInfo = nullptr;
 	m_scaling = false;
+	m_ornamenticon = 0;
+	m_ornamentidfile = 0;
 }
 
 // Make a copy of an ItemInst object
@@ -1501,6 +1507,8 @@ ItemInst::ItemInst(const ItemInst& copy)
 		m_evolveInfo = nullptr;
 
 	m_scaling = copy.m_scaling;
+	m_ornamenticon = copy.m_ornamenticon;
+	m_ornamentidfile = copy.m_ornamentidfile;
 }
 
 // Clean up container contents
@@ -1787,6 +1795,52 @@ ItemInst* ItemInst::GetOrnamentationAug(int ornamentationAugtype) const
 	}
 
 	return nullptr;
+}
+
+bool ItemInst::CanTransform(const Item_Struct *ItemToTry, const Item_Struct *Container, bool AllowAll) {
+	if (!ItemToTry || !Container) return false;
+
+	if (ItemToTry->ItemType == ItemTypeArrow || strnlen(Container->CharmFile, 30) == 0)
+		return false;
+
+	if (AllowAll && strncasecmp(Container->CharmFile, "ITEMTRANSFIGSHIELD", 18) && strncasecmp(Container->CharmFile, "ITEMTransfigBow", 15)) {
+		switch (ItemToTry->ItemType) {
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+			case 35:
+			case 45:
+				return true;
+		}
+	}
+
+	static std::map<std::string, int> types;
+	types["itemtransfig1hp"] = 2;
+	types["itemtransfig1hs"] = 0;
+	types["itemtransfig2hb"] = 4;
+	types["itemtransfig2hp"] = 35;
+	types["itemtransfig2hs"] = 1;
+	types["itemtransfigblunt"] = 3;
+	types["itemtransfigbow"] = 5;
+	types["itemtransfighth"] = 45;
+	types["itemtransfigshield"] = 8;
+	types["itemtransfigslashing"] = 0;
+
+	auto i = types.find(MakeLowerString(Container->CharmFile));
+	if (i != types.end() && i->second == ItemToTry->ItemType)
+		return true;
+
+	static std::map<std::string, int> typestwo;
+	typestwo["itemtransfigblunt"] = 4;
+	typestwo["itemtransfigslashing"] = 1;
+
+	i = typestwo.find(MakeLowerString(Container->CharmFile));
+	if (i != typestwo.end() && i->second == ItemToTry->ItemType)
+		return true;
+
+	return false;
 }
 
 uint32 ItemInst::GetAugmentItemID(uint8 slot) const

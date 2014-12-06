@@ -329,7 +329,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 			||
 			(
 				fv == FACTION_THREATENLY
-				&& MakeRandomInt(0,99) < THREATENLY_ARRGO_CHANCE - heroicCHA_mod
+				&& zone->random.Roll(THREATENLY_ARRGO_CHANCE - heroicCHA_mod)
 			)
 		)
 	)
@@ -1254,7 +1254,7 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 			return true;
 
 		//1: The mob has a default 25% chance of being allowed a resistance check against the charm.
-		if (MakeRandomInt(0, 99) > RuleI(Spells, CharmBreakCheckChance))
+		if (zone->random.Int(0, 99) > RuleI(Spells, CharmBreakCheckChance))
 			return true;
 
 		if (RuleB(Spells, CharismaCharmDuration))
@@ -1273,7 +1273,7 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 				//3: At maxed ability, Total Domination has a 50% chance of preventing the charm break that otherwise would have occurred.
 				int16 TotalDominationBonus = caster->aabonuses.CharmBreakChance + caster->spellbonuses.CharmBreakChance + caster->itembonuses.CharmBreakChance;
 
-				if (MakeRandomInt(0, 99) < TotalDominationBonus)
+				if (zone->random.Int(0, 99) < TotalDominationBonus)
 					return true;
 
 			}
