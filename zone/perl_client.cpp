@@ -1023,11 +1023,12 @@ XS(XS_Client_SetBindPoint); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetBindPoint)
 {
 	dXSARGS;
-	if (items < 1 || items > 5)
-		Perl_croak(aTHX_ "Usage: Client::SetBindPoint(THIS, to_zone= -1, new_x= 0.0f, new_y= 0.0f, new_z= 0.0f)");
+	if (items < 1 || items > 6)
+		Perl_croak(aTHX_ "Usage: Client::SetBindPoint(THIS, to_zone= -1, to_instance = 0, new_x= 0.0f, new_y= 0.0f, new_z= 0.0f)");
 	{
 		Client *		THIS;
 		int		to_zone;
+		int		to_instance;
 		float		new_x;
 		float		new_y;
 		float		new_z;
@@ -1047,25 +1048,31 @@ XS(XS_Client_SetBindPoint)
 			to_zone = (int)SvIV(ST(1));
 		}
 
-		if (items < 3)
-			new_x = 0.0f;
+		if(items < 3)
+			to_instance = 0;
 		else {
-			new_x = (float)SvNV(ST(2));
+			to_instance = (int)SvIV(ST(2));
 		}
 
 		if (items < 4)
-			new_y = 0.0f;
+			new_x = 0.0f;
 		else {
-			new_y = (float)SvNV(ST(3));
+			new_x = (float)SvNV(ST(3));
 		}
 
 		if (items < 5)
-			new_z = 0.0f;
+			new_y = 0.0f;
 		else {
-			new_z = (float)SvNV(ST(4));
+			new_y = (float)SvNV(ST(4));
 		}
 
-		THIS->SetBindPoint(to_zone, new_x, new_y, new_z);
+		if (items < 6)
+			new_z = 0.0f;
+		else {
+			new_z = (float)SvNV(ST(5));
+		}
+
+		THIS->SetBindPoint(to_zone, to_instance, new_x, new_y, new_z);
 	}
 	XSRETURN_EMPTY;
 }
@@ -1259,7 +1266,24 @@ XS(XS_Client_MovePC)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->MovePC(zoneID, x, y, z, heading);
+		if (THIS->IsClient()) {
+			THIS->MovePC(zoneID, x, y, z, heading);
+		}
+		else {
+			if (THIS->IsMerc())
+				_log(CLIENT__ERROR, "Perl(XS_Client_MovePC) attempted to process a type Merc reference");
+			else if (THIS->IsNPC())
+				_log(CLIENT__ERROR, "Perl(XS_Client_MovePC) attempted to process a type NPC reference");
+		#ifdef BOTS
+			else if (THIS->IsBot())
+				_log(CLIENT__ERROR, "Perl(XS_Client_MovePC) attempted to process a type Bot reference");
+		#endif	 
+			else
+				_log(CLIENT__ERROR, "Perl(XS_Client_MovePC) attempted to process an Unknown type reference");
+
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		}
+
 	}
 	XSRETURN_EMPTY;
 }
@@ -1288,7 +1312,25 @@ XS(XS_Client_MovePCInstance)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->MovePC(zoneID, instanceID, x, y, z, heading);
+		if (THIS->IsClient()) {
+			THIS->MovePC(zoneID, instanceID, x, y, z, heading);
+		}
+		else {
+			if (THIS->IsMerc())
+				_log(CLIENT__ERROR, "Perl(XS_Client_MovePCInstance) attempted to process a type Merc reference");
+			else if (THIS->IsNPC())
+				_log(CLIENT__ERROR, "Perl(XS_Client_MovePCInstance) attempted to process a type NPC reference");
+		#ifdef BOTS
+			else if (THIS->IsBot())
+				_log(CLIENT__ERROR, "Perl(XS_Client_MovePCInstance) attempted to process a type Bot reference");
+		#endif
+			else
+				_log(CLIENT__ERROR, "Perl(XS_Client_MovePCInstance) attempted to process an Unknown type reference");
+
+			Perl_croak(aTHX_ "THIS is not of type Client"); 
+
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		}
 	}
 	XSRETURN_EMPTY;
 }
@@ -5037,6 +5079,35 @@ XS(XS_Client_UpdateTaskActivity)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_GetTaskActivityDoneCount); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetTaskActivityDoneCount)
+{
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: Client::GetTaskActivityDoneCount(THIS, TaskID, ActivityID)");
+	{
+		Client *	THIS;
+		int		RETVAL; 
+		int		TaskID = (int)SvIV(ST(1));
+		int		ActivityID = (int)SvIV(ST(2));
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		
+		RETVAL = THIS->GetTaskActivityDoneCountFromTaskID(TaskID, ActivityID);
+		XSprePUSH; PUSHi((IV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
 XS(XS_Client_AssignTask); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AssignTask)
 {
@@ -5269,6 +5340,30 @@ XS(XS_Client_AssignToInstance)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->AssignToInstance(instance_id);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_RemoveFromInstance); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_RemoveFromInstance)
+{
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::RemoveFromInstance(THIS, instance_id)");
+	{
+		Client *		THIS;
+		uint16		instance_id = (uint16)SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->RemoveFromInstance(instance_id);
 	}
 	XSRETURN_EMPTY;
 }
@@ -5956,6 +6051,58 @@ XS(XS_Client_SendMarqueeMessage)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_SendColoredText); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SendColoredText)
+{
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: Client::SendColoredText(color, message)");
+	{
+		Client *		THIS;
+		uint32 color =	(uint32)SvUV(ST(1));
+		std::string msg = (std::string)SvPV_nolen(ST(2));
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if(THIS == NULL)
+			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+
+		THIS->SendColoredText(color, msg);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_SendSpellAnim); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SendSpellAnim)
+{
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: SendSpellAnim(uint16 spell_id, uint32 seq)");
+	{
+		Client *		THIS;
+		uint16 targetid =	(uint16)SvUV(ST(1));
+		uint16 spell_id =	(uint16)SvUV(ST(2));
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if(THIS == NULL)
+			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+
+		THIS->SendSpellAnim(targetid,spell_id);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6015,7 +6162,7 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "SetDeity"), XS_Client_SetDeity, file, "$$");
 		newXSproto(strcpy(buf, "AddEXP"), XS_Client_AddEXP, file, "$$;$$");
 		newXSproto(strcpy(buf, "SetEXP"), XS_Client_SetEXP, file, "$$$;$");
-		newXSproto(strcpy(buf, "SetBindPoint"), XS_Client_SetBindPoint, file, "$;$$$$");
+		newXSproto(strcpy(buf, "SetBindPoint"), XS_Client_SetBindPoint, file, "$;$$$$$");
 		newXSproto(strcpy(buf, "GetBindX"), XS_Client_GetBindX, file, "$$");
 		newXSproto(strcpy(buf, "GetBindY"), XS_Client_GetBindY, file, "$$");
 		newXSproto(strcpy(buf, "GetBindZ"), XS_Client_GetBindZ, file, "$$");
@@ -6164,6 +6311,7 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "IsTaskCompleted"), XS_Client_IsTaskCompleted, file, "$$");
 		newXSproto(strcpy(buf, "IsTaskActive"), XS_Client_IsTaskActive, file, "$$");
 		newXSproto(strcpy(buf, "IsTaskActivityActive"), XS_Client_IsTaskActivityActive, file, "$$$");
+		newXSproto(strcpy(buf, "GetTaskActivityDoneCount"), XS_Client_GetTaskActivityDoneCount, file, "$$$");
 		newXSproto(strcpy(buf, "GetCorpseCount"), XS_Client_GetCorpseCount, file, "$");
 		newXSproto(strcpy(buf, "GetCorpseID"), XS_Client_GetCorpseID, file, "$$");
 		newXSproto(strcpy(buf, "GetCorpseItemAt"), XS_Client_GetCorpseItemAt, file, "$$$");
@@ -6194,6 +6342,9 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "SendTargetCommand"), XS_Client_SendTargetCommand, file, "$$");
 		newXSproto(strcpy(buf, "ExpeditionMessage"), XS_Client_ExpeditionMessage, file, "$$$");
 		newXSproto(strcpy(buf, "SendMarqueeMessage"), XS_Client_SendMarqueeMessage, file, "$$$$$$$");
+		newXSproto(strcpy(buf, "SendColoredText"), XS_Client_SendColoredText, file, "$$$");
+		newXSproto(strcpy(buf, "SendSpellAnim"), XS_Client_SendSpellAnim, file, "$$$");
+		
 		XSRETURN_YES;
 }
 

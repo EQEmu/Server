@@ -20,13 +20,13 @@
 #include "masterentity.h"
 #include "../common/packet_dump.h"
 #include "../common/moremath.h"
-#include "../common/Item.h"
+#include "../common/item.h"
 #include "worldserver.h"
 #include "../common/skills.h"
 #include "../common/bodytypes.h"
 #include "../common/classes.h"
 #include "../common/rulesys.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 #include <math.h>
 #include <assert.h>
 #include <iostream>
@@ -35,7 +35,7 @@
 #include "../common/unix.h"
 #endif
 
-#include "StringIDs.h"
+#include "string_ids.h"
 
 void Mob::CalcBonuses()
 {
@@ -103,6 +103,8 @@ void Client::CalcBonuses()
 	CalcMaxHP();
 	CalcMaxMana();
 	CalcMaxEndurance();
+
+	SetAttackTimer();
 
 	rooted = FindType(SE_Root);
 
@@ -174,8 +176,6 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 
 	if(newbon->EnduranceRegen > CalcEnduranceRegenCap())
 		newbon->EnduranceRegen = CalcEnduranceRegenCap();
-
-	SetAttackTimer();
 }
 
 void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug, bool isTribute) {
@@ -306,7 +306,7 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 	}
 
 	//FatherNitwit: New style haste, shields, and regens
-	if(newbon->haste < (int16)item->Haste) {
+	if(newbon->haste < (int32)item->Haste) {
 		newbon->haste = item->Haste;
 	}
 	if(item->Regen > 0)
@@ -1392,7 +1392,7 @@ void Mob::CalcSpellBonuses(StatBonuses* newbon)
 	newbon->AggroRange = -1;
 	newbon->AssistRange = -1;
 
-	uint32 buff_count = GetMaxTotalSlots();
+	int buff_count = GetMaxTotalSlots();
 	for(i = 0; i < buff_count; i++) {
 		if(buffs[i].spellid != SPELL_UNKNOWN){
 			ApplySpellsBonuses(buffs[i].spellid, buffs[i].casterlevel, newbon, buffs[i].casterid, false, buffs[i].ticsremaining,i);
@@ -1477,19 +1477,19 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				// redundant to have level check here
 				if(newbon->AggroRange == -1 || effect_value < newbon->AggroRange)
 				{
-					newbon->AggroRange = effect_value;
+					newbon->AggroRange = static_cast<float>(effect_value);
 				}
 				break;
 			}
 
 			case SE_Harmony:
 			{
-				// neotokyo: Harmony effect as buff - kinda tricky
+				// Harmony effect as buff - kinda tricky
 				// harmony could stack with a lull spell, which has better aggro range
 				// take the one with less range in any case
 				if(newbon->AssistRange == -1 || effect_value < newbon->AssistRange)
 				{
-					newbon->AssistRange = effect_value;
+					newbon->AssistRange = static_cast<float>(effect_value);
 				}
 				break;
 			}
@@ -1546,6 +1546,11 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_AttackSpeed4:
 			{
+				// These don't generate the IMMUNE_ATKSPEED message and the icon shows up
+				// but have no effect on the mobs attack speed
+				if (GetSpecialAbility(UNSLOWABLE))
+					break;
+
 				if (effect_value < 0) //A few spells use negative values(Descriptions all indicate it should be a slow)
 					effect_value = effect_value * -1;
 
@@ -2467,7 +2472,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				}
 				break;
 			}
-			
+
 			case SE_ManaAbsorbPercentDamage:
 			{
 				if (newbon->ManaAbsorbPercentDamage[0] < effect_value){
@@ -2488,7 +2493,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_ShieldBlock:
 				newbon->ShieldBlock += effect_value;
 				break;
-			
+
 			case SE_ShieldEquipHateMod:
 				newbon->ShieldEquipHateMod += effect_value;
 				break;
@@ -2500,6 +2505,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_BlockBehind:
 				newbon->BlockBehind += effect_value;
+				break;
+
+			case SE_Blind:
+				newbon->IsBlind = true;
 				break;
 
 			case SE_Fear:
@@ -2799,7 +2808,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					|| ((effect_value < 0) && (newbon->AlterNPCLevel > effect_value)) 
 					|| ((effect_value > 0) && (newbon->AlterNPCLevel < effect_value))) {
 	
-						int16 tmp_lv =  GetOrigLevel() + effect_value;
+						int tmp_lv =  GetOrigLevel() + effect_value;
 						if (tmp_lv < 1)
 							tmp_lv = 1;
 						else if (tmp_lv > 255)
@@ -3083,7 +3092,7 @@ void Client::CalcItemScale() {
 bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y) {
 	// behavior change: 'slot_y' is now [RANGE]_END and not [RANGE]_END + 1
 	bool changed = false;
-	int i;
+	uint32 i;
 	for (i = slot_x; i <= slot_y; i++) {
 		if (i == MainAmmo) // moved here from calling procedure to facilitate future range changes where MainAmmo may not be the last slot
 			continue;
@@ -3177,7 +3186,7 @@ void Client::DoItemEnterZone() {
 bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 	// behavior change: 'slot_y' is now [RANGE]_END and not [RANGE]_END + 1
 	bool changed = false;
-	for(int i = slot_x; i <= slot_y; i++) {
+	for(uint32 i = slot_x; i <= slot_y; i++) {
 		if (i == MainAmmo) // moved here from calling procedure to facilitate future range changes where MainAmmo may not be the last slot
 			continue;
 
@@ -3371,15 +3380,15 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_ChangeFrenzyRad:
-					spellbonuses.AggroRange = effect_value;
-					aabonuses.AggroRange = effect_value;
-					itembonuses.AggroRange = effect_value;
+					spellbonuses.AggroRange = static_cast<float>(effect_value);
+					aabonuses.AggroRange = static_cast<float>(effect_value);
+					itembonuses.AggroRange = static_cast<float>(effect_value);
 					break;
 
 				case SE_Harmony:
-					spellbonuses.AssistRange = effect_value;
-					aabonuses.AssistRange = effect_value;
-					itembonuses.AssistRange = effect_value;
+					spellbonuses.AssistRange = static_cast<float>(effect_value);
+					aabonuses.AssistRange = static_cast<float>(effect_value);
+					itembonuses.AssistRange = static_cast<float>(effect_value);
 					break;
 
 				case SE_AttackSpeed:
@@ -4081,6 +4090,10 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					itembonuses.BlockBehind = effect_value;
 					break;
 
+				case SE_Blind:
+					spellbonuses.IsBlind = false;
+					break;
+
 				case SE_Fear:
 					spellbonuses.IsFeared = false;
 					break;
@@ -4334,11 +4347,11 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break; 
 
 				case SE_TriggerMeleeThreshold:
-					spellbonuses.TriggerMeleeThreshold = effect_value;
+					spellbonuses.TriggerMeleeThreshold = false;
 					break;
 
 				case SE_TriggerSpellThreshold:
-					spellbonuses.TriggerSpellThreshold = effect_value;
+					spellbonuses.TriggerSpellThreshold = false;
 					break;
 
 				case SE_DivineAura:
@@ -4364,7 +4377,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_DistanceRemoval:
-					spellbonuses.DistanceRemoval = effect_value;
+					spellbonuses.DistanceRemoval = false;
 					break;
 
 				case SE_ImprovedTaunt:
@@ -4467,7 +4480,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_Sanctuary:
-					spellbonuses.Sanctuary = effect_value;
+					spellbonuses.Sanctuary = false;
 					break;
 
 				case SE_FactionModPct:
@@ -4483,10 +4496,28 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_IllusionPersistence:
-					spellbonuses.IllusionPersistence = effect_value;
-					itembonuses.IllusionPersistence = effect_value;
-					aabonuses.IllusionPersistence = effect_value;
+					spellbonuses.IllusionPersistence = false;
+					itembonuses.IllusionPersistence = false;
+					aabonuses.IllusionPersistence = false;
 					break;
+
+				case SE_SkillProcSuccess:{
+					for(int e = 0; e < MAX_SKILL_PROCS; e++)
+					{
+						spellbonuses.SkillProcSuccess[e] = effect_value;
+						itembonuses.SkillProcSuccess[e] = effect_value;
+						aabonuses.SkillProcSuccess[e] = effect_value;
+					}
+				 }
+
+				case SE_SkillProc:{
+					for(int e = 0; e < MAX_SKILL_PROCS; e++)
+					{
+						spellbonuses.SkillProc[e] = effect_value;
+						itembonuses.SkillProc[e] = effect_value;
+						aabonuses.SkillProc[e] = effect_value;
+					}
+				 }
 			}
 		}
 	}

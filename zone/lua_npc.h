@@ -107,6 +107,8 @@ public:
 	void RemoveAISpell(int spell_id);
 	void SetSpellFocusDMG(int focus);
 	void SetSpellFocusHeal(int focus);
+	int GetSpellFocusDMG();
+	int GetSpellFocusHeal();
 	float GetSlowMitigation();
 	float GetAttackSpeed();
 	int GetAccuracyRating();
@@ -114,6 +116,8 @@ public:
 	int GetScore();
 	void MerchantOpenShop();
 	void MerchantCloseShop();
+	void SetMerchantProbability(uint8 amt);
+	uint8 GetMerchantProbability();
 };
 
 #endif

@@ -20,7 +20,7 @@
 #include "../common/features.h"
 #include "masterentity.h"
 #include "../common/packet_dump.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 #include <string>
 #include <map>
 
@@ -254,8 +254,10 @@ int32 Client::TributeItem(uint32 slot, uint32 quantity) {
 		return(0);
 	}
 
-	//make sure they have enough of them
-	//and remove it from inventory
+	/*
+		Make sure they have enough of them
+		and remove it from inventory
+	*/
 	if(inst->IsStackable()) {
 		if(inst->GetCharges() < (int32)quantity)	//dont have enough....
 			return(0);
@@ -267,7 +269,7 @@ int32 Client::TributeItem(uint32 slot, uint32 quantity) {
 
 	pts *= quantity;
 
-	//add the tribute value in points
+	/* Add the tribute value in points */
 	AddTributePoints(pts);
 	return(pts);
 }
@@ -279,7 +281,7 @@ int32 Client::TributeMoney(uint32 platinum) {
 		return(0);
 	}
 
-	//add the tribute value in points
+	/* Add the tribute value in points */
 	AddTributePoints(platinum);
 	return(platinum);
 }
@@ -378,67 +380,59 @@ void Client::SendGuildTributes() {
 }
 
 bool ZoneDatabase::LoadTributes() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	TributeData t;
-	memset(&t.tiers, 0, sizeof(t.tiers));
-	t.tier_count = 0;
+	TributeData tributeData;
+	memset(&tributeData.tiers, 0, sizeof(tributeData.tiers));
+	tributeData.tier_count = 0;
 
 	tribute_list.clear();
 
-	const char *query = "SELECT id,name,descr,unknown,isguild FROM tributes";
-	if (RunQuery(query, strlen(query), errbuf, &result)) {
-		int r;
-		while ((row = mysql_fetch_row(result))) {
-			r = 0;
-			uint32 id = atoul(row[r++]);
-			t.name = row[r++];
-			t.description = row[r++];
-			t.unknown = strtoul(row[r++], nullptr, 10);
-			t.is_guild = atol(row[r++])==0?false:true;
-
-			tribute_list[id] = t;
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadTributes first query '%s': %s", query, errbuf);
+	const std::string query = "SELECT id, name, descr, unknown, isguild FROM tributes";
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadTributes first query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        uint32 id = atoul(row[0]);
+		tributeData.name = row[1];
+		tributeData.description = row[2];
+		tributeData.unknown = strtoul(row[3], nullptr, 10);
+		tributeData.is_guild = atol(row[4]) == 0? false: true;
 
-	const char *query2 = "SELECT tribute_id,level,cost,item_id FROM tribute_levels ORDER BY tribute_id,level";
-	if (RunQuery(query2, strlen(query2), errbuf, &result)) {
-		int r;
-		while ((row = mysql_fetch_row(result))) {
-			r = 0;
-			uint32 id = atoul(row[r++]);
+		tribute_list[id] = tributeData;
+    }
 
-			if(tribute_list.count(id) != 1) {
-				LogFile->write(EQEMuLog::Error, "Error in LoadTributes: unknown tribute %lu in tribute_levels", (unsigned long)id);
-				continue;
-			}
-
-			TributeData &cur = tribute_list[id];
-
-			if(cur.tier_count >= MAX_TRIBUTE_TIERS) {
-				LogFile->write(EQEMuLog::Error, "Error in LoadTributes: on tribute %lu: more tiers defined than permitted", (unsigned long)id);
-				continue;
-			}
-
-			TributeLevel_Struct &s = cur.tiers[cur.tier_count];
-
-			s.level = atoul(row[r++]);
-			s.cost = atoul(row[r++]);
-			s.tribute_item_id = atoul(row[r++]);
-			cur.tier_count++;
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadTributes level query '%s': %s", query, errbuf);
+	const std::string query2 = "SELECT tribute_id, level, cost, item_id FROM tribute_levels ORDER BY tribute_id, level";
+	results = QueryDatabase(query2);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadTributes level query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        uint32 id = atoul(row[0]);
+
+        if(tribute_list.count(id) != 1) {
+            LogFile->write(EQEMuLog::Error, "Error in LoadTributes: unknown tribute %lu in tribute_levels", (unsigned long)id);
+            continue;
+        }
+
+        TributeData &cur = tribute_list[id];
+
+        if(cur.tier_count >= MAX_TRIBUTE_TIERS) {
+            LogFile->write(EQEMuLog::Error, "Error in LoadTributes: on tribute %lu: more tiers defined than permitted", (unsigned long)id);
+            continue;
+        }
+
+        TributeLevel_Struct &s = cur.tiers[cur.tier_count];
+
+        s.level = atoul(row[1]);
+        s.cost = atoul(row[2]);
+        s.tribute_item_id = atoul(row[3]);
+        cur.tier_count++;
+    }
 
 	return true;
 }

@@ -29,6 +29,7 @@
 #include <ctype.h>
 #include <assert.h>
 #include <map>
+#include <vector>
 
 // Disgrace: for windows compile
 #ifdef _WINDOWS
@@ -43,7 +44,7 @@
 
 #include "database.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "../common/servertalk.h"
 
 Database::Database ()
@@ -96,226 +97,268 @@ Database::~Database()
 {
 }
 
-bool Database::GetVariable(const char* varname, char* varvalue, uint16 varvalue_len) {
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (!RunQuery(query,MakeAnyLenString(&query, "select `value` from `variables` where `varname`='%s'", varname), errbuf, &result)) {
-
-		_log(UCS__ERROR, "Unable to get message count from database. %s %s", query, errbuf);
-
-		safe_delete_array(query);
-
-		return false;
-	}
-
-	safe_delete_array(query);
-
-	if (mysql_num_rows(result) != 1) {
-
-		mysql_free_result(result);
-
-		return false;
-	}
-
-	row = mysql_fetch_row(result);
-
-	snprintf(varvalue, varvalue_len, "%s", row[0]);
-
-	mysql_free_result(result);
-
-	return true;
-}
-
-
 void Database::AddSpeech(const char* from, const char* to, const char* message, uint16 minstatus, uint32 guilddbid, uint8 type) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
 
-	char *S1 = new char[strlen(from) * 2 + 1];
-	char *S2 = new char[strlen(to) * 2 + 1];
-	char *S3 = new char[strlen(message) * 2 + 1];
-	DoEscapeString(S1, from, strlen(from));
-	DoEscapeString(S2, to, strlen(to));
-	DoEscapeString(S3, message, strlen(message));
+	char *escapedFrom = new char[strlen(from) * 2 + 1];
+	char *escapedTo = new char[strlen(to) * 2 + 1];
+	char *escapedMessage = new char[strlen(message) * 2 + 1];
+	DoEscapeString(escapedFrom, from, strlen(from));
+	DoEscapeString(escapedTo, to, strlen(to));
+	DoEscapeString(escapedMessage, message, strlen(message));
 
-	if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_speech` SET `from`='%s', `to`='%s', `message`='%s', `minstatus`='%i', `guilddbid`='%i', `type`='%i'", S1, S2, S3, minstatus, guilddbid, type), errbuf, 0, 0)) {
-		_log(NET__WORLD, "Failed Speech Entry Insert: %s", errbuf);
-		_log(NET__WORLD, "%s", query);
+    std::string query = StringFormat("INSERT INTO `qs_player_speech` "
+                                    "SET `from` = '%s', `to` = '%s', `message`='%s', "
+                                    "`minstatus`='%i', `guilddbid`='%i', `type`='%i'",
+                                    escapedFrom, escapedTo, escapedMessage, minstatus, guilddbid, type);
+    safe_delete_array(escapedFrom);
+	safe_delete_array(escapedTo);
+	safe_delete_array(escapedMessage);
+	auto results = QueryDatabase(query);
+	if(!results.Success()) {
+		_log(QUERYSERV__ERROR, "Failed Speech Entry Insert: %s", results.ErrorMessage().c_str());
+		_log(QUERYSERV__ERROR, "%s", query.c_str());
 	}
 
-	safe_delete_array(query);
-	safe_delete_array(S1);
-	safe_delete_array(S2);
-	safe_delete_array(S3);
+
 }
 
-void Database::LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 Items) {
+void Database::LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 detailCount) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	uint32 lastid = 0;
-	if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_trade_record` SET `time`=NOW(), "
-		"`char1_id`='%i', `char1_pp`='%i', `char1_gp`='%i', `char1_sp`='%i', `char1_cp`='%i', `char1_items`='%i', "
-		"`char2_id`='%i', `char2_pp`='%i', `char2_gp`='%i', `char2_sp`='%i', `char2_cp`='%i', `char2_items`='%i'",
-		QS->char1_id, QS->char1_money.platinum, QS->char1_money.gold, QS->char1_money.silver, QS->char1_money.copper, QS->char1_count,
-		QS->char2_id, QS->char2_money.platinum, QS->char2_money.gold, QS->char2_money.silver, QS->char2_money.copper, QS->char2_count),
-		errbuf, 0, 0, &lastid)) {
-		_log(NET__WORLD, "Failed Trade Log Record Insert: %s", errbuf);
-		_log(NET__WORLD, "%s", query);
+	std::string query = StringFormat("INSERT INTO `qs_player_trade_record` SET `time` = NOW(), "
+                                    "`char1_id` = '%i', `char1_pp` = '%i', `char1_gp` = '%i', "
+                                    "`char1_sp` = '%i', `char1_cp` = '%i', `char1_items` = '%i', "
+                                    "`char2_id` = '%i', `char2_pp` = '%i', `char2_gp` = '%i', "
+                                    "`char2_sp` = '%i', `char2_cp` = '%i', `char2_items` = '%i'",
+                                    QS->char1_id, QS->char1_money.platinum, QS->char1_money.gold,
+                                    QS->char1_money.silver, QS->char1_money.copper, QS->char1_count,
+                                    QS->char2_id, QS->char2_money.platinum, QS->char2_money.gold,
+                                    QS->char2_money.silver, QS->char2_money.copper, QS->char2_count);
+    auto results = QueryDatabase(query);
+	if(!results.Success()) {
+		_log(QUERYSERV__ERROR, "Failed Trade Log Record Insert: %s", results.ErrorMessage().c_str());
+		_log(QUERYSERV__ERROR, "%s", query.c_str());
 	}
 
-	if(Items > 0) {
-		for(int i = 0; i < Items; i++) {
-			if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_trade_record_entries` SET `event_id`='%i', "
-				"`from_id`='%i', `from_slot`='%i', `to_id`='%i', `to_slot`='%i', `item_id`='%i', "
-				"`charges`='%i', `aug_1`='%i', `aug_2`='%i', `aug_3`='%i', `aug_4`='%i', `aug_5`='%i'",
-				lastid, QS->items[i].from_id, QS->items[i].from_slot, QS->items[i].to_id, QS->items[i].to_slot, QS->items[i].item_id,
-				QS->items[i].charges, QS->items[i].aug_1, QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5,
-				errbuf, 0, 0))) {
-				_log(NET__WORLD, "Failed Trade Log Record Entry Insert: %s", errbuf);
-				_log(NET__WORLD, "%s", query);
-			}
+	if(detailCount == 0)
+        return;
+
+	int lastIndex = results.LastInsertedID();
+
+    for(int i = 0; i < detailCount; i++) {
+        query = StringFormat("INSERT INTO `qs_player_trade_record_entries` SET `event_id` = '%i', "
+                            "`from_id` = '%i', `from_slot` = '%i', `to_id` = '%i', `to_slot` = '%i', "
+                            "`item_id` = '%i', `charges` = '%i', `aug_1` = '%i', `aug_2` = '%i', "
+                            "`aug_3` = '%i', `aug_4` = '%i', `aug_5` = '%i'",
+                            lastIndex, QS->items[i].from_id, QS->items[i].from_slot,
+                            QS->items[i].to_id, QS->items[i].to_slot, QS->items[i].item_id,
+                            QS->items[i].charges, QS->items[i].aug_1, QS->items[i].aug_2,
+                            QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5);
+        results = QueryDatabase(query);
+        if(!results.Success()) {
+            _log(QUERYSERV__ERROR, "Failed Trade Log Record Entry Insert: %s", results.ErrorMessage().c_str());
+            _log(QUERYSERV__ERROR, "%s", query.c_str());
+        }
+
+    }
+
+}
+
+void Database::LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 detailCount) {
+
+    std::string query = StringFormat("INSERT INTO `qs_player_handin_record` SET `time` = NOW(), "
+                                    "`quest_id` = '%i', `char_id` = '%i', `char_pp` = '%i', "
+                                    "`char_gp` = '%i', `char_sp` = '%i', `char_cp` = '%i', "
+                                    "`char_items` = '%i', `npc_id` = '%i', `npc_pp` = '%i', "
+                                    "`npc_gp` = '%i', `npc_sp` = '%i', `npc_cp` = '%i', "
+                                    "`npc_items`='%i'",
+                                    QS->quest_id, QS->char_id, QS->char_money.platinum,
+                                    QS->char_money.gold, QS->char_money.silver, QS->char_money.copper,
+                                    QS->char_count, QS->npc_id, QS->npc_money.platinum,
+                                    QS->npc_money.gold, QS->npc_money.silver, QS->npc_money.copper,
+                                    QS->npc_count);
+    auto results = QueryDatabase(query);
+	if(!results.Success()) {
+		_log(QUERYSERV__ERROR, "Failed Handin Log Record Insert: %s", results.ErrorMessage().c_str());
+		_log(QUERYSERV__ERROR, "%s", query.c_str());
+	}
+
+	if(detailCount == 0)
+        return;
+
+	int lastIndex = results.LastInsertedID();
+
+    for(int i = 0; i < detailCount; i++) {
+        query = StringFormat("INSERT INTO `qs_player_handin_record_entries` SET `event_id` = '%i', "
+                            "`action_type` = '%s', `char_slot` = '%i', `item_id` = '%i', "
+                            "`charges` = '%i', `aug_1` = '%i', `aug_2` = '%i', `aug_3` = '%i', "
+                            "`aug_4` = '%i', `aug_5` = '%i'",
+                            lastIndex, QS->items[i].action_type, QS->items[i].char_slot,
+                            QS->items[i].item_id, QS->items[i].charges, QS->items[i].aug_1,
+                            QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4,
+                            QS->items[i].aug_5);
+        if(!results.Success()) {
+            _log(QUERYSERV__ERROR, "Failed Handin Log Record Entry Insert: %s", results.ErrorMessage().c_str());
+            _log(QUERYSERV__ERROR, "%s", query.c_str());
+        }
+    }
+
+}
+
+void Database::LogPlayerNPCKill(QSPlayerLogNPCKill_Struct* QS, uint32 members){
+
+	std::string query = StringFormat("INSERT INTO `qs_player_npc_kill_record` "
+                                    "SET `npc_id` = '%i', `type` = '%i', "
+                                    "`zone_id` = '%i', `time` = NOW()",
+                                    QS->s1.NPCID, QS->s1.Type, QS->s1.ZoneID);
+	auto results = QueryDatabase(query);
+	if(!results.Success()) {
+		_log(QUERYSERV__ERROR, "Failed NPC Kill Log Record Insert: %s", results.ErrorMessage().c_str());
+		_log(QUERYSERV__ERROR, "%s", query.c_str());
+	}
+
+	if(members == 0)
+        return;
+
+	int lastIndex = results.LastInsertedID();
+
+	for (int i = 0; i < members; i++) {
+        query = StringFormat("INSERT INTO `qs_player_npc_kill_record_entries` "
+                            "SET `event_id` = '%i', `char_id` = '%i'",
+                            lastIndex, QS->Chars[i].char_id);
+		auto results = QueryDatabase(query);
+		if(!results.Success()) {
+			_log(QUERYSERV__ERROR, "Failed NPC Kill Log Entry Insert: %s", results.ErrorMessage().c_str());
+			_log(QUERYSERV__ERROR, "%s", query.c_str());
 		}
+
 	}
+
 }
 
-void Database::LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 Items) {
+void Database::LogPlayerDelete(QSPlayerLogDelete_Struct* QS, uint32 items) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	uint32 lastid = 0;
-	if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_handin_record` SET `time`=NOW(), `quest_id`='%i', "
-		"`char_id`='%i', `char_pp`='%i', `char_gp`='%i', `char_sp`='%i', `char_cp`='%i', `char_items`='%i', "
-		"`npc_id`='%i', `npc_pp`='%i', `npc_gp`='%i', `npc_sp`='%i', `npc_cp`='%i', `npc_items`='%i'",
-		QS->quest_id, QS->char_id, QS->char_money.platinum, QS->char_money.gold, QS->char_money.silver, QS->char_money.copper, QS->char_count,
-		QS->npc_id, QS->npc_money.platinum, QS->npc_money.gold, QS->npc_money.silver, QS->npc_money.copper, QS->npc_count),
-		errbuf, 0, 0, &lastid)) {
-		_log(NET__WORLD, "Failed Handin Log Record Insert: %s", errbuf);
-		_log(NET__WORLD, "%s", query);
+	std::string query = StringFormat("INSERT INTO `qs_player_delete_record` SET `time` = NOW(), "
+                                    "`char_id` = '%i', `stack_size` = '%i', `char_items` = '%i'",
+                                    QS->char_id, QS->stack_size, QS->char_count, QS->char_count);
+    auto results = QueryDatabase(query);
+	if(!results.Success()) {
+		_log(QUERYSERV__ERROR, "Failed Delete Log Record Insert: %s", results.ErrorMessage().c_str());
+		_log(QUERYSERV__ERROR, "%s", query.c_str());
 	}
 
-	if(Items > 0) {
-		for(int i = 0; i < Items; i++) {
-			if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_handin_record_entries` SET `event_id`='%i', "
-				"`action_type`='%s', `char_slot`='%i', `item_id`='%i', `charges`='%i', "
-				"`aug_1`='%i', `aug_2`='%i', `aug_3`='%i', `aug_4`='%i', `aug_5`='%i'",
-				lastid, QS->items[i].action_type, QS->items[i].char_slot, QS->items[i].item_id, QS->items[i].charges,
-				QS->items[i].aug_1, QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5,
-				errbuf, 0, 0))) {
-				_log(NET__WORLD, "Failed Handin Log Record Entry Insert: %s", errbuf);
-				_log(NET__WORLD, "%s", query);
-			}
-		}
-	}
+	if(items == 0)
+        return;
+
+    int lastIndex = results.LastInsertedID();
+
+    for(int i = 0; i < items; i++) {
+        query = StringFormat("INSERT INTO `qs_player_delete_record_entries` SET `event_id` = '%i', "
+                            "`char_slot` = '%i', `item_id` = '%i', `charges` = '%i', `aug_1` = '%i', "
+                            "`aug_2` = '%i', `aug_3` = '%i', `aug_4` = '%i', `aug_5` = '%i'",
+                            lastIndex, QS->items[i].char_slot, QS->items[i].item_id, QS->items[i].charges,
+                            QS->items[i].aug_1, QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4,
+                            QS->items[i].aug_5);
+        results = QueryDatabase(query);
+        if(!results.Success()) {
+            _log(QUERYSERV__ERROR, "Failed Delete Log Record Entry Insert: %s", results.ErrorMessage().c_str());
+            _log(QUERYSERV__ERROR, "%s", query.c_str());
+        }
+
+    }
+
 }
 
-void Database::LogPlayerNPCKill(QSPlayerLogNPCKill_Struct* QS, uint32 Members){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	uint32 lastid = 0;
-	if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_npc_kill_record` SET `npc_id`='%i', `type`='%i', `zone_id`='%i', `time`=NOW()", QS->s1.NPCID, QS->s1.Type, QS->s1.ZoneID), errbuf, 0, 0, &lastid)) {
-		_log(NET__WORLD, "Failed NPC Kill Log Record Insert: %s", errbuf);
-		_log(NET__WORLD, "%s", query);
+void Database::LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 items) {
+	/* These are item moves */
+
+	std::string query = StringFormat("INSERT INTO `qs_player_move_record` SET `time` = NOW(), "
+                                    "`char_id` = '%i', `from_slot` = '%i', `to_slot` = '%i', "
+                                    "`stack_size` = '%i', `char_items` = '%i', `postaction` = '%i'",
+                                    QS->char_id, QS->from_slot, QS->to_slot, QS->stack_size,
+                                    QS->char_count, QS->postaction);
+    auto results = QueryDatabase(query);
+	if(!results.Success()) {
+		_log(QUERYSERV__ERROR, "Failed Move Log Record Insert: %s", results.ErrorMessage().c_str());
+		_log(QUERYSERV__ERROR, "%s", query.c_str());
 	}
 
-	if(Members > 0){
-		for (int i = 0; i < Members; i++) {
-			if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_npc_kill_record_entries` SET `event_id`='%i', `char_id`='%i'", lastid, QS->Chars[i].char_id, errbuf, 0, 0))) {
-				_log(NET__WORLD, "Failed NPC Kill Log Entry Insert: %s", errbuf);
-				_log(NET__WORLD, "%s", query);
-			}
-		}
-	}
+	if(items == 0)
+        return;
+
+    int lastIndex = results.LastInsertedID();
+
+    for(int i = 0; i < items; i++) {
+        query = StringFormat("INSERT INTO `qs_player_move_record_entries` SET `event_id` = '%i', "
+                            "`from_slot` = '%i', `to_slot` = '%i', `item_id` = '%i', `charges` = '%i', "
+                            "`aug_1` = '%i', `aug_2` = '%i', `aug_3` = '%i', `aug_4` = '%i', `aug_5` = '%i'",
+                            lastIndex, QS->items[i].from_slot, QS->items[i].to_slot, QS->items[i].item_id,
+                            QS->items[i].charges, QS->items[i].aug_1, QS->items[i].aug_2,
+                            QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5);
+        results = QueryDatabase(query);
+        if(!results.Success()) {
+            _log(QUERYSERV__ERROR, "Failed Move Log Record Entry Insert: %s", results.ErrorMessage().c_str());
+            _log(QUERYSERV__ERROR, "%s", query.c_str());
+        }
+
+    }
+
 }
 
-void Database::LogPlayerDelete(QSPlayerLogDelete_Struct* QS, uint32 Items) {
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	uint32 lastid = 0;
-	if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_delete_record` SET `time`=NOW(), "
-		"`char_id`='%i', `stack_size`='%i', `char_items`='%i'",
-		QS->char_id, QS->stack_size, QS->char_count, QS->char_count),
-		errbuf, 0, 0, &lastid)) {
-		_log(NET__WORLD, "Failed Delete Log Record Insert: %s", errbuf);
-		_log(NET__WORLD, "%s", query);
+void Database::LogMerchantTransaction(QSMerchantLogTransaction_Struct* QS, uint32 items) {
+	/* Merchant transactions are from the perspective of the merchant, not the player -U */
+	std::string query = StringFormat("INSERT INTO `qs_merchant_transaction_record` SET `time` = NOW(), "
+                                    "`zone_id` = '%i', `merchant_id` = '%i', `merchant_pp` = '%i', "
+                                    "`merchant_gp` = '%i', `merchant_sp` = '%i', `merchant_cp` = '%i', "
+                                    "`merchant_items` = '%i', `char_id` = '%i', `char_pp` = '%i', "
+                                    "`char_gp` = '%i', `char_sp` = '%i', `char_cp` = '%i', "
+                                    "`char_items` = '%i'",
+                                    QS->zone_id, QS->merchant_id, QS->merchant_money.platinum,
+                                    QS->merchant_money.gold, QS->merchant_money.silver,
+                                    QS->merchant_money.copper, QS->merchant_count, QS->char_id,
+                                    QS->char_money.platinum, QS->char_money.gold, QS->char_money.silver,
+                                    QS->char_money.copper, QS->char_count);
+    auto results = QueryDatabase(query);
+	if(!results.Success()) {
+		_log(QUERYSERV__ERROR, "Failed Transaction Log Record Insert: %s", results.ErrorMessage().c_str());
+		_log(QUERYSERV__ERROR, "%s", query.c_str());
 	}
 
-	if(Items > 0) {
-		for(int i = 0; i < Items; i++) {
-			if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_delete_record_entries` SET `event_id`='%i', "
-				"`char_slot`='%i', `item_id`='%i', `charges`='%i', `aug_1`='%i', "
-				"`aug_2`='%i', `aug_3`='%i', `aug_4`='%i', `aug_5`='%i'",
-				lastid, QS->items[i].char_slot, QS->items[i].item_id, QS->items[i].charges, QS->items[i].aug_1,
-				QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5,
-				errbuf, 0, 0))) {
-				_log(NET__WORLD, "Failed Delete Log Record Entry Insert: %s", errbuf);
-				_log(NET__WORLD, "%s", query);
-			}
-		}
-	}
+	if(items == 0)
+        return;
+
+    int lastIndex = results.LastInsertedID();
+
+    for(int i = 0; i < items; i++) {
+        query = StringFormat("INSERT INTO `qs_merchant_transaction_record_entries` SET `event_id` = '%i', "
+                            "`char_slot` = '%i', `item_id` = '%i', `charges` = '%i', `aug_1` = '%i', "
+                            "`aug_2` = '%i', `aug_3` = '%i', `aug_4` = '%i', `aug_5` = '%i'",
+                            lastIndex, QS->items[i].char_slot, QS->items[i].item_id, QS->items[i].charges,
+                            QS->items[i].aug_1, QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4,
+                            QS->items[i].aug_5);
+        results = QueryDatabase(query);
+        if(!results.Success()) {
+            _log(QUERYSERV__ERROR, "Failed Transaction Log Record Entry Insert: %s", results.ErrorMessage().c_str());
+            _log(QUERYSERV__ERROR, "%s", query.c_str());
+        }
+
+    }
+
 }
 
-void Database::LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 Items) {
+void Database::GeneralQueryReceive(ServerPacket *pack) {
+	/*
+		These are general queries passed from anywhere in zone instead of packing structures and breaking them down again and again
+	*/
+	char *queryBuffer = new char[pack->ReadUInt32() + 1];
+	pack->ReadString(queryBuffer);
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	uint32 lastid = 0;
-	if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_move_record` SET `time`=NOW(), "
-		"`char_id`='%i', `from_slot`='%i', `to_slot`='%i', `stack_size`='%i', `char_items`='%i', `postaction`='%i'",
-		QS->char_id, QS->from_slot, QS->to_slot, QS->stack_size, QS->char_count, QS->postaction),
-		errbuf, 0, 0, &lastid)) {
-		_log(NET__WORLD, "Failed Move Log Record Insert: %s", errbuf);
-		_log(NET__WORLD, "%s", query);
+	std::string query(queryBuffer);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		_log(QUERYSERV__ERROR, "Failed Delete Log Record Insert: %s", results.ErrorMessage().c_str());
+		_log(QUERYSERV__ERROR, "%s", query.c_str());
 	}
 
-	if(Items > 0) {
-		for(int i = 0; i < Items; i++) {
-			if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_player_move_record_entries` SET `event_id`='%i', "
-				"`from_slot`='%i', `to_slot`='%i', `item_id`='%i', `charges`='%i', "
-				"`aug_1`='%i', `aug_2`='%i', `aug_3`='%i', `aug_4`='%i', `aug_5`='%i'", lastid,
-				QS->items[i].from_slot, QS->items[i].to_slot, QS->items[i].item_id, QS->items[i].charges,
-				QS->items[i].aug_1, QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5,
-				errbuf, 0, 0))) {
-				_log(NET__WORLD, "Failed Move Log Record Entry Insert: %s", errbuf);
-				_log(NET__WORLD, "%s", query);
-			}
-		}
-	}
+	safe_delete(pack);
+	safe_delete(queryBuffer);
 }
-
-void Database::LogMerchantTransaction(QSMerchantLogTransaction_Struct* QS, uint32 Items) {
-	// Merchant transactions are from the perspective of the merchant, not the player -U
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	uint32 lastid = 0;
-	if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_merchant_transaction_record` SET `time`=NOW(), "
-		"`zone_id`='%i', `merchant_id`='%i', `merchant_pp`='%i', `merchant_gp`='%i', `merchant_sp`='%i', `merchant_cp`='%i', `merchant_items`='%i', "
-		"`char_id`='%i', `char_pp`='%i', `char_gp`='%i', `char_sp`='%i', `char_cp`='%i', `char_items`='%i'",
-		QS->zone_id, QS->merchant_id, QS->merchant_money.platinum, QS->merchant_money.gold, QS->merchant_money.silver, QS->merchant_money.copper, QS->merchant_count,
-		QS->char_id, QS->char_money.platinum, QS->char_money.gold, QS->char_money.silver, QS->char_money.copper, QS->char_count),
-		errbuf, 0, 0, &lastid)) {
-		_log(NET__WORLD, "Failed Transaction Log Record Insert: %s", errbuf);
-		_log(NET__WORLD, "%s", query);
-	}
-
-	if(Items > 0) {
-		for(int i = 0; i < Items; i++) {
-			if(!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `qs_merchant_transaction_record_entries` SET `event_id`='%i', "
-				"`char_slot`='%i', `item_id`='%i', `charges`='%i', `aug_1`='%i', "
-				"`aug_2`='%i', `aug_3`='%i', `aug_4`='%i', `aug_5`='%i'",
-				lastid, QS->items[i].char_slot, QS->items[i].item_id, QS->items[i].charges, QS->items[i].aug_1,
-				QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5,
-				errbuf, 0, 0))) {
-				_log(NET__WORLD, "Failed Transaction Log Record Entry Insert: %s", errbuf);
-				_log(NET__WORLD, "%s", query);
-			}
-		}
-	}
-}
-

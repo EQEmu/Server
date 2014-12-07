@@ -100,6 +100,7 @@ RULE_BOOL ( Character, KeepLevelOverMax, false) // Don't delevel a character tha
 RULE_INT ( Character, FoodLossPerUpdate, 35) // How much food/water you lose per stamina update
 RULE_INT ( Character, BaseInstrumentSoftCap, 36) // Softcap for instrument mods, 36 commonly referred to as "3.6" as well.
 RULE_INT ( Character, BaseRunSpeedCap, 158) // Base Run Speed Cap, on live it's 158% which will give you a runspeed of 1.580 hard capped to 225.
+RULE_INT ( Character, OrnamentationAugmentType, 20) //Ornamentation Augment Type
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Mercs )
@@ -123,7 +124,6 @@ RULE_INT ( Guild, PlayerCreationLimit, 1)		// Only allow use of the UF+ window i
 RULE_INT ( Guild, PlayerCreationRequiredStatus, 0)	// Required admin status.
 RULE_INT ( Guild, PlayerCreationRequiredLevel, 0)	// Required Level of the player attempting to create the guild.
 RULE_INT ( Guild, PlayerCreationRequiredTime, 0)	// Required Time Entitled On Account (in Minutes) to create the guild.
-
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Skills )
@@ -171,6 +171,7 @@ RULE_INT ( World, PVPSettings, 0) // Sets the PVP settings for the server, 1 = R
 RULE_BOOL (World, IsGMPetitionWindowEnabled, false)
 RULE_INT (World, FVNoDropFlag, 0) // Sets the Firiona Vie settings on the client. If set to 2, the flag will be set for GMs only, allowing trading of no-drop items.
 RULE_BOOL (World, IPLimitDisconnectAll, false)
+RULE_INT (World, TellQueueSize, 20)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Zone )
@@ -200,6 +201,8 @@ RULE_INT ( Zone, EbonCrystalItemID, 40902)
 RULE_INT ( Zone, RadiantCrystalItemID, 40903)
 RULE_BOOL ( Zone, LevelBasedEXPMods, false) // Allows you to use the level_exp_mods table in consideration to your players EXP hits
 RULE_INT ( Zone, WeatherTimer, 600) // Weather timer when no duration is available
+RULE_BOOL ( Zone, EnableLoggedOffReplenishments, true)
+RULE_INT ( Zone, MinOfflineTimeToReplenishments, 21600) // 21600 seconds is 6 Hours
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Map )
@@ -212,10 +215,6 @@ RULE_REAL ( Map, FixPathingZMaxDeltaMoving, 20 )	//at runtime while pathing: max
 RULE_REAL ( Map, FixPathingZMaxDeltaWaypoint, 20 )	//at runtime at each waypoint: max change in Z to allow the BestZ code to apply.
 RULE_REAL ( Map, FixPathingZMaxDeltaSendTo, 20 )	//at runtime in SendTo: max change in Z to allow the BestZ code to apply.
 RULE_REAL ( Map, FixPathingZMaxDeltaLoading, 45 )	//while loading each waypoint: max change in Z to allow the BestZ code to apply.
-RULE_BOOL ( Map, UseClosestZ, false)			// Move mobs to the nearest Z above or below, rather than just the nearest below.
-							// Only set UseClosestZ true if all your .map files generated from EQGs were created
-							// with azone2.
-							//
 RULE_INT ( Map, FindBestZHeightAdjust, 1)		// Adds this to the current Z before seeking the best Z position
 RULE_CATEGORY_END()
 
@@ -248,7 +247,6 @@ RULE_INT ( Pathing, CullNodesFromStart, 1)		// Checks LOS from Start point to se
 RULE_INT ( Pathing, CullNodesFromEnd, 1)		// Checks LOS from End point to second to last node for this many nodes and removes last node if there is LOS
 RULE_REAL ( Pathing, CandidateNodeRangeXY, 400)		// When searching for path start/end nodes, only nodes within this range will be considered.
 RULE_REAL ( Pathing, CandidateNodeRangeZ, 10)		// When searching for path start/end nodes, only nodes within this range will be considered.
-
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Watermap )
@@ -324,7 +322,9 @@ RULE_INT ( Spells, AI_PursueDetrimentalChance, 90) // Chance while chasing targe
 RULE_INT ( Spells, AI_IdleNoSpellMinRecast, 500) // AI spell recast time(MS) check when no spell is cast while idle. (min time in random)
 RULE_INT ( Spells, AI_IdleNoSpellMaxRecast, 2000) // AI spell recast time(MS) check when no spell is cast while chasing target. (max time in random)
 RULE_INT ( Spells, AI_IdleBeneficialChance, 100) // Chance while idle to do a beneficial spell on self or others.
-
+RULE_BOOL ( Spells, SHDProcIDOffByOne, true) // pre June 2009 SHD spell procs were off by 1, they stopped doing this in June 2009 (so UF+ spell files need this false)
+RULE_BOOL ( Spells, Jun182014HundredHandsRevamp, false) // this should be true for if you import a spell file newer than June 18, 2014
+RULE_BOOL ( Spells, SwarmPetTargetLock, false) // Use old method of swarm pets target locking till target dies then despawning.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Combat )
@@ -419,6 +419,7 @@ RULE_INT ( Combat, ArcheryBonusChance, 50)
 RULE_INT ( Combat, BerserkerFrenzyStart, 35)
 RULE_INT ( Combat, BerserkerFrenzyEnd, 45)
 RULE_BOOL ( Combat, OneProcPerWeapon, true) //If enabled, One proc per weapon per round
+RULE_BOOL ( Combat, ProjectileDmgOnImpact, true) //If enabled, projectiles (ie arrows) will hit on impact, instead of instantly.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( NPC )
@@ -437,6 +438,7 @@ RULE_BOOL ( NPC, SmartLastFightingDelayMoving, true)
 RULE_BOOL ( NPC, ReturnNonQuestNoDropItems, false)	// Returns NO DROP items on NPCs that don't have an EVENT_TRADE sub in their script
 RULE_INT ( NPC, StartEnrageValue, 9) // % HP that an NPC will begin to enrage
 RULE_BOOL ( NPC, LiveLikeEnrage, false) // If set to true then only player controlled pets will enrage
+RULE_BOOL ( NPC, EnableMeritBasedFaction, false) // If set to true, faction will given in the same way as experience (solo/group/raid)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY ( Aggro )
@@ -504,7 +506,6 @@ RULE_INT ( Merchant, PricePenaltyPct, 4) // Determines maximum price penalty fro
 RULE_REAL( Merchant, ChaBonusMod, 3.45) // Determines CHA cap, from 104 CHA. 3.45 is 132 CHA at apprehensive. 0.34 is 400 CHA at apprehensive.
 RULE_REAL ( Merchant, ChaPenaltyMod, 1.52) // Determines CHA bottom, up to 102 CHA. 1.52 is 37 CHA at apprehensive. 0.98 is 0 CHA at apprehensive.
 RULE_BOOL ( Merchant, EnableAltCurrencySell, true) // Enables the ability to resell items to alternate currency merchants
-
 RULE_CATEGORY_END()
 
 RULE_CATEGORY ( Bazaar )
@@ -558,20 +559,40 @@ RULE_INT ( Console, SessionTimeOut, 600000 )	// Amount of time in ms for the con
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( QueryServ )
-RULE_BOOL( QueryServ, PlayerChatLogging, false) // Logs Player Chat
+RULE_BOOL( QueryServ, PlayerLogChat, false) // Logs Player Chat 
 RULE_BOOL( QueryServ, PlayerLogTrades, false) // Logs Player Trades
 RULE_BOOL( QueryServ, PlayerLogHandins, false) // Logs Player Handins
 RULE_BOOL( QueryServ, PlayerLogNPCKills, false) // Logs Player NPC Kills
 RULE_BOOL( QueryServ, PlayerLogDeletes, false) // Logs Player Deletes
 RULE_BOOL( QueryServ, PlayerLogMoves, false) // Logs Player Moves
-RULE_BOOL( QueryServ, MerchantLogTransactions, false) // Logs Merchant Transactions
+RULE_BOOL( QueryServ, PlayerLogMerchantTransactions, false) // Logs Merchant Transactions
 RULE_BOOL( QueryServ, PlayerLogPCCoordinates, false) // Logs Player Coordinates with certain events
+RULE_BOOL( QueryServ, PlayerLogDropItem, false) // Logs Player Drop Item
+RULE_BOOL( QueryServ, PlayerLogZone, false) // Logs Player Zone Events
+RULE_BOOL( QueryServ, PlayerLogDeaths, false) // Logs Player Deaths
+RULE_BOOL( QueryServ, PlayerLogConnectDisconnect, false) // Logs Player Connect Disconnect State
+RULE_BOOL( QueryServ, PlayerLogLevels, false) // Logs Player Leveling/Deleveling
+RULE_BOOL( QueryServ, PlayerLogAARate, false) // Logs Player AA Experience Rates 
+RULE_BOOL( QueryServ, PlayerLogQGlobalUpdate, false) // Logs Player QGlobal Updates
+RULE_BOOL( QueryServ, PlayerLogTaskUpdates, false) // Logs Player Task Updates
+RULE_BOOL( QueryServ, PlayerLogKeyringAddition, false) // Log PLayer Keyring additions
+RULE_BOOL( QueryServ, PlayerLogAAPurchases, false) // Log Player AA Purchases
+RULE_BOOL( QueryServ, PlayerLogTradeSkillEvents, false) // Log Player Tradeskill Transactions
+RULE_BOOL( QueryServ, PlayerLogIssuedCommandes, false ) // Log Player Issued Commands
+RULE_BOOL( QueryServ, PlayerLogMoneyTransactions, false) // Log Player Money Transaction/Splits
+RULE_BOOL( QueryServ, PlayerLogAlternateCurrencyTransactions, false) // Log Ploayer Alternate Currency Transactions
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Inventory )
 RULE_BOOL ( Inventory, EnforceAugmentRestriction, true) // Forces augment slot restrictions
 RULE_BOOL ( Inventory, EnforceAugmentUsability, true) // Forces augmented item usability
 RULE_BOOL ( Inventory, EnforceAugmentWear, true) // Forces augment wear slot validation
+RULE_BOOL ( Inventory, DeleteTransformationMold, true) //False if you want mold to last forever
+RULE_BOOL ( Inventory, AllowAnyWeaponTransformation, false) //Weapons can use any weapon transformation
+RULE_CATEGORY_END()
+
+RULE_CATEGORY( Client )
+RULE_BOOL( Client, UseLiveFactionMessage, false) // Allows players to see faction adjustments like Live
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY

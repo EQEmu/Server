@@ -38,9 +38,9 @@ enum {
 #include "../common/linked_list.h"
 #include "../common/timer.h"
 #include "../common/queue.h"
-#include "../common/EmuTCPConnection.h"
-#include "WorldTCPConnection.h"
-#include "../common/Mutex.h"
+#include "../common/emu_tcp_connection.h"
+#include "world_tcp_connection.h"
+#include "../common/mutex.h"
 
 struct ServerChannelMessage_Struct;
 

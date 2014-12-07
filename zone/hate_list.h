@@ -63,7 +63,7 @@ public:
 
 	int AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOptions *opts);
 
-	void SpellCast(Mob *caster, uint32 spell_id, float range);
+	void SpellCast(Mob *caster, uint32 spell_id, float range, Mob *ae_center  = nullptr);
 
 	bool IsEmpty();
 	void PrintToClient(Client *c);

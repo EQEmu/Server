@@ -19,8 +19,7 @@
 #define EXTENDED_PROFILE_H
 
 #include "eq_packet_structs.h"
-#include "Item.h"
-
+#include "item.h"
 
 #pragma pack(1)
 
@@ -37,24 +36,24 @@
 */
 struct ExtendedProfile_Struct {
 	// Pet stuff
-	uint16				pet_id;
-	uint16				old_pet_hp;
-	uint16				old_pet_mana;
-	SpellBuff_Struct	pet_buffs[BUFF_COUNT];
-	uint32				pet_items[_MaterialCount];
-	char				merc_name[64];
+	uint16				pet_id; /* Not Used */
+	uint16				old_pet_hp; /* Not Used */
+	uint16				old_pet_mana; /* Not Used */
+	SpellBuff_Struct	pet_buffs[BUFF_COUNT]; /* Not Used */
+	uint32				pet_items[_MaterialCount]; /* Not Used */
+	char				merc_name[64]; /* Used */
 
-	uint32				aa_effects;
-	uint32				perAA;		//% of exp going to AAs
-	uint32				expended_aa;		// Total of expended AA
-	uint32				pet_hp;
-	uint32				pet_mana;
-	uint32				mercTemplateID;
-	uint32				mercSuspendedTime;
-	bool				mercIsSuspended;
-	uint32				mercTimerRemaining;
-	uint8				mercGender;
-	int32				mercState;
+	uint32				aa_effects; /* Used */
+	uint32				perAA; /* Used: % of exp going to AAs */
+	uint32				expended_aa; /* Used: Total of expended AA */
+	uint32				pet_hp;  /* Not Used */
+	uint32				pet_mana; /* Not Used */
+	uint32				mercTemplateID; /* Not Used */
+	uint32				mercSuspendedTime; /* Not Used */
+	bool				mercIsSuspended; /* Not Used */
+	uint32				mercTimerRemaining; /* Not Used */
+	uint8				mercGender; /* Not Used */
+	int32				mercState; /* Not Used */
 };
 
 #pragma pack()

@@ -5,12 +5,12 @@
 #include <luabind/luabind.hpp>
 #include <luabind/object.hpp>
 
-#include "QuestParserCollection.h"
-#include "QuestInterface.h"
+#include "quest_parser_collection.h"
+#include "quest_interface.h"
 
 #include "masterentity.h"
 #include "../common/seperator.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
 #include "lua_entity.h"
@@ -27,7 +27,7 @@
 
 //NPC
 void handle_npc_event_say(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-						  std::vector<void*> *extra_pointers) {
+						  std::vector<EQEmu::Any> *extra_pointers) {
 	npc->DoQuestPause(init);
 
 	Lua_Client l_client(reinterpret_cast<Client*>(init));
@@ -43,7 +43,7 @@ void handle_npc_event_say(QuestInterface *parse, lua_State* L, NPC* npc, Mob *in
 }
 
 void handle_npc_event_trade(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-						  std::vector<void*> *extra_pointers) {
+						  std::vector<EQEmu::Any> *extra_pointers) {
 	Lua_Client l_client(reinterpret_cast<Client*>(init));
 	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
 	l_client_o.push(L);
@@ -54,9 +54,12 @@ void handle_npc_event_trade(QuestInterface *parse, lua_State* L, NPC* npc, Mob *
 	ident << npc->GetNPCTypeID();
 	
 	if(extra_pointers) {
-		for(size_t i = 0; i < extra_pointers->size(); ++i) {
+		size_t sz = extra_pointers->size();
+		for(size_t i = 0; i < sz; ++i) {
 			std::string prefix = "item" + std::to_string(static_cast<long long>(i + 1));
-			Lua_ItemInst l_inst = reinterpret_cast<ItemInst*>(extra_pointers->at(i));
+			ItemInst *inst = EQEmu::any_cast<ItemInst*>(extra_pointers->at(i));
+
+			Lua_ItemInst l_inst = inst;
 			luabind::adl::object l_inst_o = luabind::adl::object(L, l_inst);
 			l_inst_o.push(L);
 
@@ -79,7 +82,7 @@ void handle_npc_event_trade(QuestInterface *parse, lua_State* L, NPC* npc, Mob *
 }
 
 void handle_npc_event_hp(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-						  std::vector<void*> *extra_pointers) {
+						  std::vector<EQEmu::Any> *extra_pointers) {
 	if(extra_data == 1) {
 		lua_pushinteger(L, -1);
 		lua_setfield(L, -2, "hp_event");
@@ -96,7 +99,7 @@ void handle_npc_event_hp(QuestInterface *parse, lua_State* L, NPC* npc, Mob *ini
 }
 
 void handle_npc_single_mob(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-						  std::vector<void*> *extra_pointers) {
+						  std::vector<EQEmu::Any> *extra_pointers) {
 	Lua_Mob l_mob(init);
 	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
 	l_mob_o.push(L);
@@ -104,7 +107,7 @@ void handle_npc_single_mob(QuestInterface *parse, lua_State* L, NPC* npc, Mob *i
 }
 
 void handle_npc_single_client(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-						  std::vector<void*> *extra_pointers) {
+						  std::vector<EQEmu::Any> *extra_pointers) {
 	Lua_Client l_client(reinterpret_cast<Client*>(init));
 	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
 	l_client_o.push(L);
@@ -112,7 +115,7 @@ void handle_npc_single_client(QuestInterface *parse, lua_State* L, NPC* npc, Mob
 }
 
 void handle_npc_single_npc(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-						  std::vector<void*> *extra_pointers) {
+						  std::vector<EQEmu::Any> *extra_pointers) {
 	Lua_NPC l_npc(reinterpret_cast<NPC*>(init));
 	luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
 	l_npc_o.push(L);
@@ -120,7 +123,7 @@ void handle_npc_single_npc(QuestInterface *parse, lua_State* L, NPC* npc, Mob *i
 }
 
 void handle_npc_task_accepted(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-						  std::vector<void*> *extra_pointers) {
+						  std::vector<EQEmu::Any> *extra_pointers) {
 	Lua_Client l_client(reinterpret_cast<Client*>(init));
 	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
 	l_client_o.push(L);
@@ -131,7 +134,7 @@ void handle_npc_task_accepted(QuestInterface *parse, lua_State* L, NPC* npc, Mob
 }
 
 void handle_npc_popup(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-						  std::vector<void*> *extra_pointers) {
+						  std::vector<EQEmu::Any> *extra_pointers) {
 	Lua_Mob l_mob(init);
 	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
 	l_mob_o.push(L);
@@ -142,7 +145,7 @@ void handle_npc_popup(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, 
 }
 
 void handle_npc_waypoint(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-						  std::vector<void*> *extra_pointers) {
+						  std::vector<EQEmu::Any> *extra_pointers) {
 	Lua_Mob l_mob(init);
 	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
 	l_mob_o.push(L);
@@ -153,7 +156,7 @@ void handle_npc_waypoint(QuestInterface *parse, lua_State* L, NPC* npc, Mob *ini
 }
 
 void handle_npc_hate(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-						  std::vector<void*> *extra_pointers) {
+						  std::vector<EQEmu::Any> *extra_pointers) {
 	Lua_Mob l_mob(init);
 	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
 	l_mob_o.push(L);
@@ -165,19 +168,19 @@ void handle_npc_hate(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, s
 
 
 void handle_npc_signal(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-						  std::vector<void*> *extra_pointers) {
+						  std::vector<EQEmu::Any> *extra_pointers) {
 	lua_pushinteger(L, std::stoi(data));
 	lua_setfield(L, -2, "signal");
 }
 
 void handle_npc_timer(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-						  std::vector<void*> *extra_pointers) {
+						  std::vector<EQEmu::Any> *extra_pointers) {
 	lua_pushstring(L, data.c_str());
 	lua_setfield(L, -2, "timer");
 }
 
 void handle_npc_death(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-						  std::vector<void*> *extra_pointers) {
+						  std::vector<EQEmu::Any> *extra_pointers) {
 	Lua_Mob l_mob(init);
 	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
 	l_mob_o.push(L);
@@ -205,7 +208,7 @@ void handle_npc_death(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, 
 }
 
 void handle_npc_cast(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-						  std::vector<void*> *extra_pointers) {
+						  std::vector<EQEmu::Any> *extra_pointers) {
 	int spell_id = std::stoi(data);
 	if(IsValidSpell(spell_id)) {
 		Lua_Spell l_spell(&spells[spell_id]);
@@ -221,21 +224,21 @@ void handle_npc_cast(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, s
 }
 
 void handle_npc_area(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-						  std::vector<void*> *extra_pointers) {
-	lua_pushinteger(L, *reinterpret_cast<int*>(extra_pointers->at(0)));
+						  std::vector<EQEmu::Any> *extra_pointers) {
+	lua_pushinteger(L, *EQEmu::any_cast<int*>(extra_pointers->at(0)));
 	lua_setfield(L, -2, "area_id");
 
-	lua_pushinteger(L, *reinterpret_cast<int*>(extra_pointers->at(1)));
+	lua_pushinteger(L, *EQEmu::any_cast<int*>(extra_pointers->at(1)));
 	lua_setfield(L, -2, "area_type");
 }
 
 void handle_npc_null(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-						  std::vector<void*> *extra_pointers) {
+						  std::vector<EQEmu::Any> *extra_pointers) {
 }
 
 //Player
 void handle_player_say(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-					   std::vector<void*> *extra_pointers) {
+					   std::vector<EQEmu::Any> *extra_pointers) {
 	lua_pushstring(L, data.c_str());
 	lua_setfield(L, -2, "message");
 
@@ -244,7 +247,7 @@ void handle_player_say(QuestInterface *parse, lua_State* L, Client* client, std:
 }
 
 void handle_player_death(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-						 std::vector<void*> *extra_pointers) {
+						 std::vector<EQEmu::Any> *extra_pointers) {
 	Seperator sep(data.c_str());
 
 	Mob *o = entity_list.GetMobID(std::stoi(sep.arg[0]));
@@ -274,13 +277,13 @@ void handle_player_death(QuestInterface *parse, lua_State* L, Client* client, st
 }
 
 void handle_player_timer(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-						 std::vector<void*> *extra_pointers) {
+						 std::vector<EQEmu::Any> *extra_pointers) {
 	lua_pushstring(L, data.c_str());
 	lua_setfield(L, -2, "timer");
 }
 
 void handle_player_discover_item(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-								 std::vector<void*> *extra_pointers) {
+								 std::vector<EQEmu::Any> *extra_pointers) {
 	const Item_Struct *item = database.GetItem(extra_data);
 	if(item) {
 		Lua_Item l_item(item);
@@ -296,51 +299,51 @@ void handle_player_discover_item(QuestInterface *parse, lua_State* L, Client* cl
 }
 
 void handle_player_fish_forage_success(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-									   std::vector<void*> *extra_pointers) {
-	Lua_ItemInst l_item(reinterpret_cast<ItemInst*>(extra_pointers->at(0)));
+									   std::vector<EQEmu::Any> *extra_pointers) {
+	Lua_ItemInst l_item(EQEmu::any_cast<ItemInst*>(extra_pointers->at(0)));
 	luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
 	l_item_o.push(L);
 	lua_setfield(L, -2, "item");
 }
 
 void handle_player_click_object(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-								std::vector<void*> *extra_pointers) {
-	Lua_Object l_object(reinterpret_cast<Object*>(extra_pointers->at(0)));
+								std::vector<EQEmu::Any> *extra_pointers) {
+	Lua_Object l_object(EQEmu::any_cast<Object*>(extra_pointers->at(0)));
 	luabind::adl::object l_object_o = luabind::adl::object(L, l_object);
 	l_object_o.push(L);
 	lua_setfield(L, -2, "object");
 }
 
 void handle_player_click_door(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-							  std::vector<void*> *extra_pointers) {
-	Lua_Door l_door(reinterpret_cast<Doors*>(extra_pointers->at(0)));
+							  std::vector<EQEmu::Any> *extra_pointers) {
+	Lua_Door l_door(EQEmu::any_cast<Doors*>(extra_pointers->at(0)));
 	luabind::adl::object l_door_o = luabind::adl::object(L, l_door);
 	l_door_o.push(L);
 	lua_setfield(L, -2, "door");
 }
 
 void handle_player_signal(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-						  std::vector<void*> *extra_pointers) {
+						  std::vector<EQEmu::Any> *extra_pointers) {
 	lua_pushinteger(L, std::stoi(data));
 	lua_setfield(L, -2, "signal");
 }
 
 void handle_player_popup_response(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-								  std::vector<void*> *extra_pointers) {
+								  std::vector<EQEmu::Any> *extra_pointers) {
 	lua_pushinteger(L, std::stoi(data));
 	lua_setfield(L, -2, "popup_id");
 }
 
 void handle_player_pick_up(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-						   std::vector<void*> *extra_pointers) {
-	Lua_ItemInst l_item(reinterpret_cast<ItemInst*>(extra_pointers->at(0)));
+						   std::vector<EQEmu::Any> *extra_pointers) {
+	Lua_ItemInst l_item(EQEmu::any_cast<ItemInst*>(extra_pointers->at(0)));
 	luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
 	l_item_o.push(L);
 	lua_setfield(L, -2, "item");
 }
 
 void handle_player_cast(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-						std::vector<void*> *extra_pointers) {
+						std::vector<EQEmu::Any> *extra_pointers) {
 	int spell_id = std::stoi(data);
 	if(IsValidSpell(spell_id)) {
 		Lua_Spell l_spell(&spells[spell_id]);
@@ -356,48 +359,48 @@ void handle_player_cast(QuestInterface *parse, lua_State* L, Client* client, std
 }
 
 void handle_player_task_fail(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-							 std::vector<void*> *extra_pointers) {
+							 std::vector<EQEmu::Any> *extra_pointers) {
 	lua_pushinteger(L, std::stoi(data));
 	lua_setfield(L, -2, "task_id");
 }
 
 void handle_player_zone(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-						std::vector<void*> *extra_pointers) {
+						std::vector<EQEmu::Any> *extra_pointers) {
 	lua_pushinteger(L, std::stoi(data));
 	lua_setfield(L, -2, "zone_id");
 }
 
 void handle_player_duel_win(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-							std::vector<void*> *extra_pointers) {
-	Lua_Client l_client(reinterpret_cast<Client*>(extra_pointers->at(1)));
+							std::vector<EQEmu::Any> *extra_pointers) {
+	Lua_Client l_client(EQEmu::any_cast<Client*>(extra_pointers->at(1)));
 	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
 	l_client_o.push(L);
 	lua_setfield(L, -2, "other");
 }
 
 void handle_player_duel_loss(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-							 std::vector<void*> *extra_pointers) {
-	Lua_Client l_client(reinterpret_cast<Client*>(extra_pointers->at(0)));
+							 std::vector<EQEmu::Any> *extra_pointers) {
+	Lua_Client l_client(EQEmu::any_cast<Client*>(extra_pointers->at(0)));
 	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
 	l_client_o.push(L);
 	lua_setfield(L, -2, "other");
 }
 
 void handle_player_loot(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-						std::vector<void*> *extra_pointers) {
-	Lua_ItemInst l_item(reinterpret_cast<ItemInst*>(extra_pointers->at(0)));
+						std::vector<EQEmu::Any> *extra_pointers) {
+	Lua_ItemInst l_item(EQEmu::any_cast<ItemInst*>(extra_pointers->at(0)));
 	luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
 	l_item_o.push(L);
 	lua_setfield(L, -2, "item");
 
-	Lua_Corpse l_corpse(reinterpret_cast<Corpse*>(extra_pointers->at(1)));
+	Lua_Corpse l_corpse(EQEmu::any_cast<Corpse*>(extra_pointers->at(1)));
 	luabind::adl::object l_corpse_o = luabind::adl::object(L, l_corpse);
 	l_corpse_o.push(L);
 	lua_setfield(L, -2, "corpse");
 }
 
 void handle_player_task_stage_complete(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-									   std::vector<void*> *extra_pointers) {
+									   std::vector<EQEmu::Any> *extra_pointers) {
 	Seperator sep(data.c_str());
 	lua_pushinteger(L, std::stoi(sep.arg[0]));
 	lua_setfield(L, -2, "task_id");
@@ -407,7 +410,7 @@ void handle_player_task_stage_complete(QuestInterface *parse, lua_State* L, Clie
 }
 
 void handle_player_task_update(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-								 std::vector<void*> *extra_pointers) {
+								 std::vector<EQEmu::Any> *extra_pointers) {
 	Seperator sep(data.c_str());
 	lua_pushinteger(L, std::stoi(sep.arg[0]));
 	lua_setfield(L, -2, "count");
@@ -420,7 +423,7 @@ void handle_player_task_update(QuestInterface *parse, lua_State* L, Client* clie
 }
 
 void handle_player_command(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-						   std::vector<void*> *extra_pointers) {
+						   std::vector<EQEmu::Any> *extra_pointers) {
 	Seperator sep(data.c_str(), ' ', 10, 100, true);
 	std::string command(sep.arg[0] + 1);
 	lua_pushstring(L, command.c_str());
@@ -439,7 +442,7 @@ void handle_player_command(QuestInterface *parse, lua_State* L, Client* client, 
 }
 
 void handle_player_combine(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-						   std::vector<void*> *extra_pointers) {
+						   std::vector<EQEmu::Any> *extra_pointers) {
 	lua_pushinteger(L, extra_data);
 	lua_setfield(L, -2, "recipe_id");
 
@@ -448,24 +451,24 @@ void handle_player_combine(QuestInterface *parse, lua_State* L, Client* client, 
 }
 
 void handle_player_feign(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-						std::vector<void*> *extra_pointers) {
-	Lua_NPC l_npc(reinterpret_cast<NPC*>(extra_pointers->at(0)));
+						std::vector<EQEmu::Any> *extra_pointers) {
+	Lua_NPC l_npc(EQEmu::any_cast<NPC*>(extra_pointers->at(0)));
 	luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
 	l_npc_o.push(L);
 	lua_setfield(L, -2, "other");
 }
 
 void handle_player_area(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-						std::vector<void*> *extra_pointers) {
-	lua_pushinteger(L, *reinterpret_cast<int*>(extra_pointers->at(0)));
+						std::vector<EQEmu::Any> *extra_pointers) {
+	lua_pushinteger(L, *EQEmu::any_cast<int*>(extra_pointers->at(0)));
 	lua_setfield(L, -2, "area_id");
 
-	lua_pushinteger(L, *reinterpret_cast<int*>(extra_pointers->at(1)));
+	lua_pushinteger(L, *EQEmu::any_cast<int*>(extra_pointers->at(1)));
 	lua_setfield(L, -2, "area_type");
 }
 
 void handle_player_respawn(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-						std::vector<void*> *extra_pointers) {
+						std::vector<EQEmu::Any> *extra_pointers) {
 	lua_pushinteger(L, std::stoi(data));
 	lua_setfield(L, -2, "option");
 
@@ -474,8 +477,8 @@ void handle_player_respawn(QuestInterface *parse, lua_State* L, Client* client, 
 }
 
 void handle_player_packet(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-						std::vector<void*> *extra_pointers) {
-	Lua_Packet l_packet(reinterpret_cast<EQApplicationPacket*>(extra_pointers->at(0)));
+						std::vector<EQEmu::Any> *extra_pointers) {
+	Lua_Packet l_packet(EQEmu::any_cast<EQApplicationPacket*>(extra_pointers->at(0)));
 	luabind::adl::object l_packet_o = luabind::adl::object(L, l_packet);
 	l_packet_o.push(L);
 	lua_setfield(L, -2, "packet");
@@ -485,24 +488,24 @@ void handle_player_packet(QuestInterface *parse, lua_State* L, Client* client, s
 }
 
 void handle_player_null(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-						std::vector<void*> *extra_pointers) {
+						std::vector<EQEmu::Any> *extra_pointers) {
 }
 
 //Item
 void handle_item_click(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, Mob *mob, std::string data, uint32 extra_data,
-					   std::vector<void*> *extra_pointers) {
+					   std::vector<EQEmu::Any> *extra_pointers) {
 	lua_pushinteger(L, extra_data);
 	lua_setfield(L, -2, "slot_id");
 }
 
 void handle_item_timer(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, Mob *mob, std::string data, uint32 extra_data,
-					  std::vector<void*> *extra_pointers) {
+					  std::vector<EQEmu::Any> *extra_pointers) {
 	lua_pushstring(L, data.c_str());
 	lua_setfield(L, -2, "timer");
 }
 
 void handle_item_proc(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, Mob *mob, std::string data, uint32 extra_data,
-					   std::vector<void*> *extra_pointers) {
+					   std::vector<EQEmu::Any> *extra_pointers) {
 
 	Lua_Mob l_mob(mob);
 	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
@@ -523,7 +526,7 @@ void handle_item_proc(QuestInterface *parse, lua_State* L, Client* client, ItemI
 }
 
 void handle_item_loot(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, Mob *mob, std::string data, uint32 extra_data,
-					  std::vector<void*> *extra_pointers) {
+					  std::vector<EQEmu::Any> *extra_pointers) {
 	if(mob && mob->IsCorpse()) {
 		Lua_Corpse l_corpse(mob->CastToCorpse());
 		luabind::adl::object l_corpse_o = luabind::adl::object(L, l_corpse);
@@ -538,14 +541,14 @@ void handle_item_loot(QuestInterface *parse, lua_State* L, Client* client, ItemI
 }
 
 void handle_item_equip(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, Mob *mob, std::string data, uint32 extra_data,
-					   std::vector<void*> *extra_pointers) {
+					   std::vector<EQEmu::Any> *extra_pointers) {
 	lua_pushinteger(L, extra_data);
 	lua_setfield(L, -2, "slot_id");
 }
 
 void handle_item_augment(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, Mob *mob, std::string data, uint32 extra_data,
-					  std::vector<void*> *extra_pointers) {
-	Lua_ItemInst l_item(reinterpret_cast<ItemInst*>(extra_pointers->at(0)));
+					  std::vector<EQEmu::Any> *extra_pointers) {
+	Lua_ItemInst l_item(EQEmu::any_cast<ItemInst*>(extra_pointers->at(0)));
 	luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
 	l_item_o.push(L);
 	lua_setfield(L, -2, "aug");
@@ -555,8 +558,8 @@ void handle_item_augment(QuestInterface *parse, lua_State* L, Client* client, It
 }
 
 void handle_item_augment_insert(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, Mob *mob, std::string data, uint32 extra_data,
-					  std::vector<void*> *extra_pointers) {
-	Lua_ItemInst l_item(reinterpret_cast<ItemInst*>(extra_pointers->at(0)));
+					  std::vector<EQEmu::Any> *extra_pointers) {
+	Lua_ItemInst l_item(EQEmu::any_cast<ItemInst*>(extra_pointers->at(0)));
 	luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
 	l_item_o.push(L);
 	lua_setfield(L, -2, "item");
@@ -566,8 +569,8 @@ void handle_item_augment_insert(QuestInterface *parse, lua_State* L, Client* cli
 }
 
 void handle_item_augment_remove(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, Mob *mob, std::string data, uint32 extra_data,
-					  std::vector<void*> *extra_pointers) {
-	Lua_ItemInst l_item(reinterpret_cast<ItemInst*>(extra_pointers->at(0)));
+					  std::vector<EQEmu::Any> *extra_pointers) {
+	Lua_ItemInst l_item(EQEmu::any_cast<ItemInst*>(extra_pointers->at(0)));
 	luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
 	l_item_o.push(L);
 	lua_setfield(L, -2, "item");
@@ -575,17 +578,17 @@ void handle_item_augment_remove(QuestInterface *parse, lua_State* L, Client* cli
 	lua_pushinteger(L, extra_data);
 	lua_setfield(L, -2, "slot_id");
 
-	lua_pushboolean(L, *reinterpret_cast<bool*>(extra_pointers->at(1)));
+	lua_pushboolean(L, *EQEmu::any_cast<bool*>(extra_pointers->at(1)));
 	lua_setfield(L, -2, "destroyed");
 }
 
 void handle_item_null(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, Mob *mob, std::string data, uint32 extra_data,
-					  std::vector<void*> *extra_pointers) {
+					  std::vector<EQEmu::Any> *extra_pointers) {
 }
 
 //Spell
 void handle_spell_effect(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, uint32 extra_data,
-						 std::vector<void*> *extra_pointers) {
+						 std::vector<EQEmu::Any> *extra_pointers) {
 	if(npc) {
 		Lua_Mob l_npc(npc);
 		luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
@@ -602,7 +605,7 @@ void handle_spell_effect(QuestInterface *parse, lua_State* L, NPC* npc, Client* 
 
 	lua_setfield(L, -2, "target");
 
-	lua_pushinteger(L, *reinterpret_cast<int*>(extra_pointers->at(0)));
+	lua_pushinteger(L, *EQEmu::any_cast<int*>(extra_pointers->at(0)));
 	lua_setfield(L, -2, "buff_slot");
 
 	lua_pushinteger(L, extra_data);
@@ -610,7 +613,7 @@ void handle_spell_effect(QuestInterface *parse, lua_State* L, NPC* npc, Client* 
 }
 
 void handle_spell_tic(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, uint32 extra_data,
-						 std::vector<void*> *extra_pointers) {
+						 std::vector<EQEmu::Any> *extra_pointers) {
 	if(npc) {
 		Lua_Mob l_npc(npc);
 		luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
@@ -627,13 +630,13 @@ void handle_spell_tic(QuestInterface *parse, lua_State* L, NPC* npc, Client* cli
 
 	lua_setfield(L, -2, "target");
 
-	lua_pushinteger(L, *reinterpret_cast<int*>(extra_pointers->at(0)));
+	lua_pushinteger(L, *EQEmu::any_cast<int*>(extra_pointers->at(0)));
 	lua_setfield(L, -2, "tics_remaining");
 
-	lua_pushinteger(L, *reinterpret_cast<uint8*>(extra_pointers->at(1)));
+	lua_pushinteger(L, *EQEmu::any_cast<uint8*>(extra_pointers->at(1)));
 	lua_setfield(L, -2, "caster_level");
 
-	lua_pushinteger(L, *reinterpret_cast<int*>(extra_pointers->at(2)));
+	lua_pushinteger(L, *EQEmu::any_cast<int*>(extra_pointers->at(2)));
 	lua_setfield(L, -2, "buff_slot");
 
 	lua_pushinteger(L, extra_data);
@@ -641,7 +644,7 @@ void handle_spell_tic(QuestInterface *parse, lua_State* L, NPC* npc, Client* cli
 }
 
 void handle_spell_fade(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, uint32 extra_data,
-					   std::vector<void*> *extra_pointers) {
+					   std::vector<EQEmu::Any> *extra_pointers) {
 	if(npc) {
 		Lua_Mob l_npc(npc);
 		luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
@@ -661,12 +664,12 @@ void handle_spell_fade(QuestInterface *parse, lua_State* L, NPC* npc, Client* cl
 	lua_pushinteger(L, extra_data);
 	lua_setfield(L, -2, "buff_slot");
 
-	lua_pushinteger(L, *reinterpret_cast<uint16*>(extra_pointers->at(0)));
+	lua_pushinteger(L, *EQEmu::any_cast<uint16*>(extra_pointers->at(0)));
 	lua_setfield(L, -2, "caster_id");
 }
 
 void handle_translocate_finish(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, uint32 extra_data,
-					   std::vector<void*> *extra_pointers) {
+					   std::vector<EQEmu::Any> *extra_pointers) {
 	if(npc) {
 		Lua_Mob l_npc(npc);
 		luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
@@ -685,7 +688,7 @@ void handle_translocate_finish(QuestInterface *parse, lua_State* L, NPC* npc, Cl
 }
 
 void handle_spell_null(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, uint32 extra_data,
-					   std::vector<void*> *extra_pointers) {
+					   std::vector<EQEmu::Any> *extra_pointers) {
 }
 
 #endif

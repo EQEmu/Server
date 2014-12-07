@@ -19,11 +19,13 @@
 #define PETITIONS_H
 
 #include "../common/linked_list.h"
+#include "../common/misc_functions.h"
+#include "../common/mutex.h"
 #include "../common/types.h"
-#include "zonedb.h"
 #include "client.h"
-#include "../common/Mutex.h"
-#include "../common/MiscFunctions.h"
+#include "zonedb.h"
+
+class Client;
 
 class Petition
 {

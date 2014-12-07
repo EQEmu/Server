@@ -23,7 +23,7 @@
 #include <cstdlib>
 
 #include "../common/rulesys.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 #include "map.h"
 #include "zone.h"
 #include "pathing.h"
@@ -31,11 +31,9 @@
 #define snprintf	_snprintf
 #endif
 
-
 extern Zone* zone;
 
 #define FEAR_PATHING_DEBUG
-
 
 //this is called whenever we are damaged to process possible fleeing
 void Mob::CheckFlee() {
@@ -55,7 +53,7 @@ void Mob::CheckFlee() {
 	float ratio = GetHPRatio();
 	float fleeratio = GetSpecialAbility(FLEE_PERCENT);
 	fleeratio = fleeratio > 0 ? fleeratio : RuleI(Combat, FleeHPRatio);
-	
+
 	if(ratio >= fleeratio)
 		return;
 
@@ -101,12 +99,13 @@ void Mob::CheckFlee() {
 	}
 }
 
-
-void Mob::ProcessFlee() {
+void Mob::ProcessFlee()
+{
 
 	//Stop fleeing if effect is applied after they start to run.
 	//When ImmuneToFlee effect fades it will turn fear back on and check if it can still flee.
-	if(flee_mode && (GetSpecialAbility(IMMUNE_FLEEING) || spellbonuses.ImmuneToFlee) && !spellbonuses.IsFeared){
+	if (flee_mode && (GetSpecialAbility(IMMUNE_FLEEING) || spellbonuses.ImmuneToFlee) &&
+			!spellbonuses.IsFeared && !spellbonuses.IsBlind) {
 		curfp = false;
 		return;
 	}
@@ -114,40 +113,42 @@ void Mob::ProcessFlee() {
 	//see if we are still dying, if so, do nothing
 	float fleeratio = GetSpecialAbility(FLEE_PERCENT);
 	fleeratio = fleeratio > 0 ? fleeratio : RuleI(Combat, FleeHPRatio);
-	if(GetHPRatio() < fleeratio)
+	if (GetHPRatio() < fleeratio)
 		return;
 
 	//we are not dying anymore... see what we do next
 
 	flee_mode = false;
 
-	//see if we are legitimately feared now
-	if(!spellbonuses.IsFeared) {
-		//not feared... were done...
+	//see if we are legitimately feared or blind now
+	if (!spellbonuses.IsFeared && !spellbonuses.IsBlind) {
+		//not feared or blind... were done...
 		curfp = false;
 		return;
 	}
 }
 
-float Mob::GetFearSpeed() {
-	if(flee_mode) {
+float Mob::GetFearSpeed()
+{
+	if (flee_mode) {
 		//we know ratio < FLEE_HP_RATIO
 		float speed = GetBaseRunspeed();
 		float ratio = GetHPRatio();
 		float multiplier = RuleR(Combat, FleeMultiplier);
 
-		if(GetSnaredAmount() > 40)
+		if (GetSnaredAmount() > 40)
 			multiplier = multiplier / 6.0f;
 
 		speed = speed * ratio * multiplier / 100;
 
 		//NPC will eventually stop. Snares speeds this up.
-		if(speed < 0.09)
+		if (speed < 0.09)
 			speed = 0.0001f;
-		
-		return(speed);
+
+		return speed;
 	}
-	return(GetRunspeed());
+	// fear and blind use their normal run speed
+	return GetRunspeed();
 }
 
 void Mob::CalculateNewFearpoint()
@@ -208,18 +209,4 @@ void Mob::CalculateNewFearpoint()
 		BuffFadeByEffect(SE_Fear);
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

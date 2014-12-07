@@ -20,7 +20,7 @@
 
 #include <string>
 
-//#include "../common/EQStream.h"
+//#include "../common/eq_stream.h"
 #include "../common/linked_list.h"
 #include "../common/timer.h"
 //#include "zoneserver.h"
@@ -90,6 +90,7 @@ private:
 	void SetClassStartingSkills( PlayerProfile_Struct *pp );
 	void SetRaceStartingSkills( PlayerProfile_Struct *pp );
 	void SetRacialLanguages( PlayerProfile_Struct *pp );
+	void SetClassLanguages(PlayerProfile_Struct *pp);
 
 	ClientListEntry* cle;
 	Timer	CLE_keepalive_timer;

@@ -1991,6 +1991,32 @@ XS(XS_NPC_SetSpellFocusDMG)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_NPC_GetSpellFocusDMG); /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_GetSpellFocusDMG)
+{
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: NPC::GetSpellFocusDMG(THIS)");
+	{
+		NPC *		THIS;
+		int32		RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(NPC *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetSpellFocusDMG();
+		XSprePUSH; PUSHu((UV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
 XS(XS_NPC_SetSpellFocusHeal); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SetSpellFocusHeal)
 {
@@ -2013,6 +2039,32 @@ XS(XS_NPC_SetSpellFocusHeal)
 		THIS->SetSpellFocusHeal(NewSpellFocusHeal);
 	}
 	XSRETURN_EMPTY;
+}
+
+XS(XS_NPC_GetSpellFocusHeal); /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_GetSpellFocusHeal)
+{
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: NPC::GetSpellFocusHeal(THIS)");
+	{
+		NPC *		THIS;
+		int32		RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(NPC *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetSpellFocusHeal();
+		XSprePUSH; PUSHu((UV)RETVAL);
+	}
+	XSRETURN(1);
 }
 
 XS(XS_NPC_GetSlowMitigation); /* prototype to pass -Wmissing-prototypes */
@@ -2145,6 +2197,54 @@ XS(XS_NPC_GetScore)
 	XSRETURN(1);
 }
 
+XS(XS_NPC_SetMerchantProbability);
+XS(XS_NPC_SetMerchantProbability) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: NPC::SetMerchantProbability(THIS, Probability)");
+	{
+		NPC 	*THIS;
+		uint8	Probability = (uint8)SvIV(ST(1));
+
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(NPC *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->SetMerchantProbability(Probability);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_NPC_GetMerchantProbability);
+XS(XS_NPC_GetMerchantProbability) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: NPC::GetMerchantProbability(THIS)");
+	{
+		NPC 	*THIS;
+		uint8	RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(NPC *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		if(THIS == NULL)
+			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+
+		RETVAL = THIS->GetMerchantProbability();
+		XSprePUSH; PUSHu((UV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -2238,11 +2338,15 @@ XS(boot_NPC)
 		newXSproto(strcpy(buf, "RemoveAISpell"), XS_NPC_RemoveSpellFromNPCList, file, "$$");
 		newXSproto(strcpy(buf, "SetSpellFocusDMG"), XS_NPC_SetSpellFocusDMG, file, "$$");
 		newXSproto(strcpy(buf, "SetSpellFocusHeal"), XS_NPC_SetSpellFocusHeal, file, "$$");
-		newXSproto(strcpy(buf, "GetSlowMitigation"), XS_NPC_GetAttackSpeed, file, "$");
-		newXSproto(strcpy(buf, "GetAttackSpeed"), XS_NPC_GetSlowMitigation, file, "$");
+		newXSproto(strcpy(buf, "GetSpellFocusDMG"), XS_NPC_GetSpellFocusDMG, file, "$");
+		newXSproto(strcpy(buf, "GetSpellFocusHeal"), XS_NPC_GetSpellFocusHeal, file, "$");
+		newXSproto(strcpy(buf, "GetSlowMitigation"), XS_NPC_GetSlowMitigation, file, "$");
+		newXSproto(strcpy(buf, "GetAttackSpeed"), XS_NPC_GetAttackSpeed, file, "$");
 		newXSproto(strcpy(buf, "GetAccuracyRating"), XS_NPC_GetAccuracyRating, file, "$");
 		newXSproto(strcpy(buf, "GetSpawnKillCount"), XS_NPC_GetSpawnKillCount, file, "$");
 		newXSproto(strcpy(buf, "GetScore"), XS_NPC_GetScore, file, "$");
+		newXSproto(strcpy(buf, "SetMerchantProbability"), XS_NPC_SetMerchantProbability, file, "$$");
+		newXSproto(strcpy(buf, "GetMerchantProbability"), XS_NPC_GetMerchantProbability, file, "$");
 	XSRETURN_YES;
 }
 

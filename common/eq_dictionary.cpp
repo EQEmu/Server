@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 #include "eq_dictionary.h"
-#include "StringUtil.h"
+#include "string_util.h"
 
 //
 // class EmuConstants
@@ -1022,6 +1022,26 @@ bool EQLimits::AllowsEmptyBagInBag(uint32 version) {
 
 	return false; // not implemented
 	//return local[ValidateMobVersion(version)];
+}
+
+bool EQLimits::AllowsClickCastFromBag(uint32 version) {
+	static const bool local[_EmuClientCount] = {
+/*Unknown*/		false,
+/*62*/			Client62::limits::ALLOWS_CLICK_CAST_FROM_BAG,
+/*Titanium*/	Titanium::limits::ALLOWS_CLICK_CAST_FROM_BAG,
+/*SoF*/			SoF::limits::ALLOWS_CLICK_CAST_FROM_BAG,
+/*SoD*/			SoD::limits::ALLOWS_CLICK_CAST_FROM_BAG,
+/*Underfoot*/	Underfoot::limits::ALLOWS_CLICK_CAST_FROM_BAG,
+/*RoF*/			RoF::limits::ALLOWS_CLICK_CAST_FROM_BAG,
+/*RoF2*/		false,
+
+/*NPC*/			false,
+/*Merc*/		false,
+/*Bot*/			false,
+/*Pet*/			false
+	};
+
+	return local[ValidateMobVersion(version)];
 }
 
 // items

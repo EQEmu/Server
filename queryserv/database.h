@@ -42,14 +42,14 @@ public:
 	bool Connect(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
 	~Database();
 
-	bool GetVariable(const char* varname, char* varvalue, uint16 varvalue_len);
 	void AddSpeech(const char* from, const char* to, const char* message, uint16 minstatus, uint32 guilddbid, uint8 type);
-	void LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 Items);
-	void LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 Items);
+	void LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 DetailCount);
+	void LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 DetailCount);
 	void LogPlayerNPCKill(QSPlayerLogNPCKill_Struct* QS, uint32 Members);
 	void LogPlayerDelete(QSPlayerLogDelete_Struct* QS, uint32 Items);
 	void LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 Items);
 	void LogMerchantTransaction(QSMerchantLogTransaction_Struct* QS, uint32 Items);
+	void GeneralQueryReceive(ServerPacket *pack);
 protected:
 	void HandleMysqlError(uint32 errnum);
 private:

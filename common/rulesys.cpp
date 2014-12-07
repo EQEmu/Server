@@ -19,7 +19,7 @@
 #include "rulesys.h"
 #include "logsys.h"
 #include "database.h"
-#include "StringUtil.h"
+#include "string_util.h"
 #include <cstdlib>
 #include <cstring>
 
@@ -266,10 +266,6 @@ void RuleManager::SaveRules(Database *db, const char *ruleset) {
 
 
 bool RuleManager::LoadRules(Database *db, const char *ruleset) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
 	int rsid = GetRulesetID(db, ruleset);
 	if(rsid < 0) {
@@ -282,24 +278,19 @@ bool RuleManager::LoadRules(Database *db, const char *ruleset) {
 	m_activeRuleset = rsid;
 	m_activeName = ruleset;
 
-	if (db->RunQuery(query, MakeAnyLenString(&query,
-		"SELECT rule_name, rule_value"
-		" FROM rule_values"
-		" WHERE ruleset_id=%d", rsid), errbuf, &result))
+    std::string query = StringFormat("SELECT rule_name, rule_value FROM rule_values WHERE ruleset_id=%d", rsid);
+    auto results = db->QueryDatabase(query);
+	if (!results.Success())
 	{
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result))) {
-			if(!SetRule(row[0], row[1], nullptr, false))
-				_log(RULES__ERROR, "Unable to interpret rule record for %s", row[0]);
-		}
-		mysql_free_result(result);
-	} else {
-		safe_delete_array(query);
-		LogFile->write(EQEMuLog::Error, "Error in LoadRules query %s: %s", query, errbuf);
-		return(false);
+        LogFile->write(EQEMuLog::Error, "Error in LoadRules query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
 
-	return(true);
+    for(auto row = results.begin(); row != results.end(); ++row)
+        if(!SetRule(row[0], row[1], nullptr, false))
+            _log(RULES__ERROR, "Unable to interpret rule record for %s", row[0]);
+
+	return true;
 }
 
 void RuleManager::_SaveRule(Database *db, RuleType type, uint16 index) {
@@ -317,127 +308,96 @@ void RuleManager::_SaveRule(Database *db, RuleType type, uint16 index) {
 		break;
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	if (!db->RunQuery(query, MakeAnyLenString(&query,
-		"REPLACE INTO rule_values (ruleset_id, rule_name, rule_value) "
-		" VALUES(%d, '%s', '%s')",
-		m_activeRuleset, _GetRuleName(type, index), vstr),errbuf))
-	{
-		_log(RULES__ERROR, "Fauled to set rule in the database: %s: %s", query,errbuf);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("REPLACE INTO rule_values "
+                                    "(ruleset_id, rule_name, rule_value) "
+                                    " VALUES(%d, '%s', '%s')",
+                                    m_activeRuleset, _GetRuleName(type, index), vstr);
+    auto results = db->QueryDatabase(query);
+	if (!results.Success())
+		_log(RULES__ERROR, "Fauled to set rule in the database: %s: %s", query.c_str(), results.ErrorMessage().c_str());
+
 }
 
 
 int RuleManager::GetRulesetID(Database *db, const char *rulesetname) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
 	uint32 len = strlen(rulesetname);
 	char* rst = new char[2*len+1];
 	db->DoEscapeString(rst, rulesetname, len);
 
-	int res = -1;
+    std::string query = StringFormat("SELECT ruleset_id FROM rule_sets WHERE name='%s'", rst);
+    safe_delete_array(rst);
+    auto results = db->QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in LoadRules query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+        return -1;
+    }
 
-	if (db->RunQuery(query, MakeAnyLenString(&query,
-		"SELECT ruleset_id"
-		" FROM rule_sets"
-		" WHERE name='%s'", rst), errbuf, &result))
-	{
-		if((row = mysql_fetch_row(result))) {
-			res = atoi(row[0]);
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadRules query %s: %s", query, errbuf);
-	}
-	safe_delete_array(query);
-	safe_delete_array(rst);
+    if (results.RowCount() == 0)
+        return -1;
 
-	return(res);
+    auto row = results.begin();
+
+	return atoi(row[0]);
 }
 
 int RuleManager::_FindOrCreateRuleset(Database *db, const char *ruleset) {
-	int res;
 
-	res = GetRulesetID(db, ruleset);
+	int res = GetRulesetID(db, ruleset);
 	if(res >= 0)
-		return(res);	//found and existing one...
+		return res;	//found and existing one...
 
 	uint32 len = strlen(ruleset);
 	char* rst = new char[2*len+1];
 	db->DoEscapeString(rst, ruleset, len);
 
-	uint32 new_id;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	if (!db->RunQuery(query, MakeAnyLenString(&query,
-		"INSERT INTO rule_sets (ruleset_id, name) "
-		" VALUES(0, '%s')",
-		rst),errbuf,nullptr,nullptr,&new_id))
+	std::string query = StringFormat("INSERT INTO rule_sets (ruleset_id, name) VALUES(0, '%s')", rst);
+	safe_delete_array(rst);
+	auto results = db->QueryDatabase(query);
+	if (!results.Success())
 	{
-		_log(RULES__ERROR, "Fauled to create rule set in the database: %s: %s", query,errbuf);
-		res = -1;
-	} else {
-		res = new_id;
+		_log(RULES__ERROR, "Fauled to create rule set in the database: %s: %s", query.c_str(), results.ErrorMessage().c_str());
+		return -1;
 	}
-	safe_delete_array(query);
 
-	return(res);
+    return results.LastInsertedID();
 }
 
 std::string RuleManager::GetRulesetName(Database *db, int id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	std::string res;
-
-	if (db->RunQuery(query, MakeAnyLenString(&query,
-		"SELECT name"
-		" FROM rule_sets"
-		" WHERE ruleset_id=%d", id), errbuf, &result))
+    std::string query = StringFormat("SELECT name FROM rule_sets WHERE ruleset_id=%d", id);
+    auto results = db->QueryDatabase(query);
+	if (!results.Success())
 	{
-		if((row = mysql_fetch_row(result))) {
-			res = row[0];
-		}
-		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadRules query %s: %s", query, errbuf);
+        LogFile->write(EQEMuLog::Error, "Error in LoadRules query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+        return "";
 	}
-	safe_delete_array(query);
 
-	return(res);
+	if (results.RowCount() == 0)
+        return "";
+
+    auto row = results.begin();
+
+	return row[0];
 }
 
 bool RuleManager::ListRulesets(Database *db, std::map<int, std::string> &into) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
 	//start out with the default set which is always present.
 	into[0] = "default";
 
-	if (db->RunQuery(query, MakeAnyLenString(&query,
-		"SELECT ruleset_id,name"
-		" FROM rule_sets"), errbuf, &result))
+    std::string query = "SELECT ruleset_id, name FROM rule_sets";
+    auto results = db->QueryDatabase(query);
+	if (results.Success())
 	{
-		while((row = mysql_fetch_row(result))) {
-			into[ atoi(row[0]) ] = row[1];
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in ListRulesets query %s: %s", query, errbuf);
-		safe_delete_array(query);
-		return(false);
+		LogFile->write(EQEMuLog::Error, "Error in ListRulesets query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
-	return(true);
+
+	for (auto row = results.begin(); row != results.end(); ++row)
+        into[ atoi(row[0]) ] = row[1];
+
+	return true;
 }
 
 int32 RuleManager::GetIntRule(RuleManager::IntType t) const

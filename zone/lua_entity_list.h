@@ -106,6 +106,7 @@ public:
 	Lua_Doors_List GetDoorsList();
 	Lua_Spawn_List GetSpawnList();
 	void SignalAllClients(int signal);
+	void ChannelMessage(Lua_Mob from, int channel_num, int language, const char *message);
 };
 
 #endif

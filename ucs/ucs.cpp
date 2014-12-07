@@ -20,7 +20,7 @@
 #include "../common/debug.h"
 #include "clientlist.h"
 #include "../common/opcodemgr.h"
-#include "../common/EQStreamFactory.h"
+#include "../common/eq_stream_factory.h"
 #include "../common/rulesys.h"
 #include "../common/servertalk.h"
 #include "../common/platform.h"

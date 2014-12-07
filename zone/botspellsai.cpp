@@ -1,7 +1,7 @@
 #ifdef BOTS
 
 #include "bot.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 
 bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 

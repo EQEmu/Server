@@ -20,7 +20,7 @@
 #define __EQEMU_TESTS_HEXTOI_32_64_H
 
 #include "cppunit/cpptest.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 
 class hextoi_32_64_Test : public Test::Suite {
 	typedef void(hextoi_32_64_Test::*TestFunction)(void);

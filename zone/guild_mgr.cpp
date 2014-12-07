@@ -20,62 +20,9 @@
 #include "zonedb.h"
 #include "worldserver.h"
 #include "../common/servertalk.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "client.h"
 #include "entity.h"
-
-/*
-
-CREATE TABLE guilds (
-	id MEDIUMINT UNSIGNED NOT NULL,
-	name VARCHAR(32) NOT NULL,
-	leader int NOT NULL,
-	minstatus SMALLINT NOT NULL,
-	tribute INT UNSIGNED NOT NULL,
-	motd TEXT NOT NULL DEFAULT '',
-	PRIMARY KEY(id),
-	UNIQUE KEY(name),
-	UNIQUE KEY(leader)
-);
-
-CREATE TABLE guild_ranks (
-	guild_id MEDIUMINT UNSIGNED NOT NULL,
-	rank TINYINT UNSIGNED NOT NULL,
-	title VARCHAR(128) NOT NULL,
-	can_hear TINYINT UNSIGNED NOT NULL,
-	can_speak TINYINT UNSIGNED NOT NULL,
-	can_invite TINYINT UNSIGNED NOT NULL,
-	can_remove TINYINT UNSIGNED NOT NULL,
-	can_promote TINYINT UNSIGNED NOT NULL,
-	can_demote TINYINT UNSIGNED NOT NULL,
-	can_motd TINYINT UNSIGNED NOT NULL,
-	can_warpeace TINYINT UNSIGNED NOT NULL,
-	PRIMARY KEY(guild_id,rank)
-);
-
-# guild1 < guild2 by definition.
-CREATE TABLE guild_relations (
-	guild1 MEDIUMINT UNSIGNED NOT NULL,
-	guild2 MEDIUMINT UNSIGNED NOT NULL,
-	relation TINYINT NOT NULL,
-	PRIMARY KEY(guild1, guild1)
-);
-
-CREATE TABLE guild_members (
-	char_id INT NOT NULL,
-	guild_id MEDIUMINT UNSIGNED NOT NULL,
-	rank TINYINT UNSIGNED NOT NULL,
-	tribute_enable TINYINT UNSIGNED NOT NULL DEFAULT 0,
-	total_tribute INT UNSIGNED NOT NULL DEFAULT 0,
-	last_tribute INT UNSIGNED NOT NULL DEFAULT 0,
-	banker TINYINT UNSIGNED NOT NULL DEFAULT 0,
-	public_note TEXT NOT NULL DEFAULT '',
-	PRIMARY KEY(char_id)
-);
-
-
-*/
-
 
 ZoneGuildManager guild_mgr;
 GuildBankManager *GuildBanks;
@@ -374,6 +321,10 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 		else if(c != nullptr && s->guild_id != GUILD_NONE) {
 			//char is in zone, and has changed into a new guild, send MOTD.
 			c->SendGuildMOTD();
+			if(c->GetClientVersion() >= EQClientRoF)
+			{
+				c->SendGuildRanks();
+			}
 		}
 
 
@@ -644,104 +595,73 @@ GuildBankManager::~GuildBankManager()
 	}
 }
 
-bool GuildBankManager::Load(uint32 GuildID)
+bool GuildBankManager::Load(uint32 guildID)
 {
-	const char *LoadQuery = "SELECT `area`, `slot`, `itemid`, `qty`, `donator`, `permissions`, `whofor` from `guild_bank` "
-				"WHERE `guildid` = %i";
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-
-	char* query = 0;
-
-	MYSQL_RES *result;
-
-	MYSQL_ROW row;
-
-	if(database.RunQuery(query, MakeAnyLenString(&query, LoadQuery, GuildID), errbuf, &result))
-	{
-		GuildBank *Bank = new GuildBank;
-
-		Bank->GuildID = GuildID;
-
-		for(int i = 0; i < GUILD_BANK_MAIN_AREA_SIZE; ++i)
-			Bank->Items.MainArea[i].ItemID = 0;
-
-		for(int i = 0; i < GUILD_BANK_DEPOSIT_AREA_SIZE; ++i)
-			Bank->Items.DepositArea[i].ItemID = 0;
-
-		char Donator[64], WhoFor[64];
-
-		while((row = mysql_fetch_row(result)))
-		{
-			int Area = atoi(row[0]);
-
-			int Slot = atoi(row[1]);
-
-			int ItemID = atoi(row[2]);
-
-			int Qty = atoi(row[3]);
-
-			if(row[4])
-				strn0cpy(Donator, row[4], sizeof(Donator));
-			else
-				Donator[0] = '\0';
-
-			int Permissions = atoi(row[5]);
-
-			if(row[6])
-				strn0cpy(WhoFor, row[6], sizeof(WhoFor));
-			else
-				WhoFor[0] = '\0';
-
-			if(Area == GuildBankMainArea)
-			{
-				if((Slot >= 0) && (Slot < GUILD_BANK_MAIN_AREA_SIZE))
-				{
-					Bank->Items.MainArea[Slot].ItemID = ItemID;
-
-					Bank->Items.MainArea[Slot].Quantity = Qty;
-
-					strn0cpy(Bank->Items.MainArea[Slot].Donator, Donator, sizeof(Donator));
-
-					Bank->Items.MainArea[Slot].Permissions = Permissions;
-
-					strn0cpy(Bank->Items.MainArea[Slot].WhoFor, WhoFor, sizeof(WhoFor));
-				}
-			}
-			else
-			{
-				if((Slot >= 0 ) && (Slot < GUILD_BANK_DEPOSIT_AREA_SIZE))
-				{
-					Bank->Items.DepositArea[Slot].ItemID = ItemID;
-
-					Bank->Items.DepositArea[Slot].Quantity = Qty;
-
-					strn0cpy(Bank->Items.DepositArea[Slot].Donator, Donator, sizeof(Donator));
-
-					Bank->Items.DepositArea[Slot].Permissions = Permissions;
-
-					strn0cpy(Bank->Items.DepositArea[Slot].WhoFor, WhoFor, sizeof(WhoFor));
-				}
-			}
-
-		}
-		mysql_free_result(result);
-
-		safe_delete_array(query);
-
-		Banks.push_back(Bank);
-	}
-	else
-	{
-		_log(GUILDS__BANK_ERROR, "Error Loading guild bank: %s, %s", query, errbuf);
-
-		safe_delete_array(query);
-
+	std::string query = StringFormat("SELECT `area`, `slot`, `itemid`, `qty`, `donator`, `permissions`, `whofor` "
+                                    "FROM `guild_bank` WHERE `guildid` = %i", guildID);
+    auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
+        _log(GUILDS__BANK_ERROR, "Error Loading guild bank: %s, %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
-	return true;
+    GuildBank *bank = new GuildBank;
 
+    bank->GuildID = guildID;
+
+    for(int i = 0; i < GUILD_BANK_MAIN_AREA_SIZE; ++i)
+        bank->Items.MainArea[i].ItemID = 0;
+
+    for(int i = 0; i < GUILD_BANK_DEPOSIT_AREA_SIZE; ++i)
+        bank->Items.DepositArea[i].ItemID = 0;
+
+    char donator[64], whoFor[64];
+
+    for (auto row = results.begin(); row != results.end(); ++row)
+    {
+        int area = atoi(row[0]);
+        int slot = atoi(row[1]);
+        int itemID = atoi(row[2]);
+        int qty = atoi(row[3]);
+
+        if(row[4])
+            strn0cpy(donator, row[4], sizeof(donator));
+        else
+            donator[0] = '\0';
+
+        int permissions = atoi(row[5]);
+
+        if(row[6])
+            strn0cpy(whoFor, row[6], sizeof(whoFor));
+        else
+            whoFor[0] = '\0';
+
+        if(slot < 0)
+            continue;
+
+        GuildBankItem *itemSection = nullptr;
+
+        if (area == GuildBankMainArea && slot < GUILD_BANK_MAIN_AREA_SIZE)
+            itemSection = bank->Items.MainArea;
+        else if (area != GuildBankMainArea && slot < GUILD_BANK_DEPOSIT_AREA_SIZE)
+            itemSection = bank->Items.DepositArea;
+        else
+            continue;
+
+        itemSection[slot].ItemID = itemID;
+        itemSection[slot].Quantity = qty;
+
+        strn0cpy(itemSection[slot].Donator, donator, sizeof(donator));
+
+        itemSection[slot].Permissions = permissions;
+
+        strn0cpy(itemSection[slot].WhoFor, whoFor, sizeof(whoFor));
+    }
+
+    Banks.push_back(bank);
+
+	return true;
 }
 
 bool GuildBankManager::IsLoaded(uint32 GuildID)
@@ -930,23 +850,15 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
 		return false;
 	}
 
-	const char *Query="INSERT INTO `guild_bank` (`guildid`, `area`, `slot`, `itemid`, `qty`, `donator`, `permissions`, `WhoFor`) "
-				"VALUES (%i, %i, %i, %i, %i, '%s', %i, '%s')";
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-
-	char* query = 0;
-
-	if(!database.RunQuery(query, MakeAnyLenString(&query, Query, GuildID, Area, Slot, ItemID, QtyOrCharges, Donator, Permissions, WhoFor), errbuf))
-	{
-		_log(GUILDS__BANK_ERROR, "Insert Error: %s : %s", query, errbuf);
-
-		safe_delete_array(query);
-
+	std::string query = StringFormat("INSERT INTO `guild_bank` "
+                                    "(`guildid`, `area`, `slot`, `itemid`, `qty`, `donator`, `permissions`, `WhoFor`) "
+                                    "VALUES (%i, %i, %i, %i, %i, '%s', %i, '%s')",
+                                    GuildID, Area, Slot, ItemID, QtyOrCharges, Donator, Permissions, WhoFor);
+    auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
+		_log(GUILDS__BANK_ERROR, "Insert Error: %s : %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
-
-	safe_delete_array(query);
 
 	const Item_Struct *Item = database.GetItem(ItemID);
 
@@ -973,156 +885,127 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
 	return true;
 }
 
-int GuildBankManager::Promote(uint32 GuildID, int SlotID)
+int GuildBankManager::Promote(uint32 guildID, int slotID)
 {
-	if((SlotID < 0) || (SlotID > (GUILD_BANK_DEPOSIT_AREA_SIZE - 1)))
+	if((slotID < 0) || (slotID > (GUILD_BANK_DEPOSIT_AREA_SIZE - 1)))
 		return -1;
 
-	std::list<GuildBank*>::iterator Iterator = GetGuildBank(GuildID);
+	auto iter = GetGuildBank(guildID);
 
-	if(Iterator == Banks.end())
-	{
+	if(iter == Banks.end())
 		return -1;
-	}
 
-	if((*Iterator)->Items.DepositArea[SlotID].ItemID == 0)
-	{
+	if((*iter)->Items.DepositArea[slotID].ItemID == 0)
 		return -1;
-	}
 
-	int MainSlot = -1;
+	int mainSlot = -1;
 
 	for(int i = 0; i < GUILD_BANK_MAIN_AREA_SIZE; ++i)
-		if((*Iterator)->Items.MainArea[i].ItemID == 0)
-		{
-			MainSlot = i;
-
+		if((*iter)->Items.MainArea[i].ItemID == 0) {
+			mainSlot = i;
 			break;
 		}
 
-	if(MainSlot == -1)
+	if(mainSlot == -1)
 		return -1;
 
+	(*iter)->Items.MainArea[mainSlot].ItemID = (*iter)->Items.DepositArea[slotID].ItemID;
+	(*iter)->Items.MainArea[mainSlot].Quantity = (*iter)->Items.DepositArea[slotID].Quantity;
+    (*iter)->Items.MainArea[mainSlot].Permissions = (*iter)->Items.DepositArea[slotID].Permissions;
 
-	(*Iterator)->Items.MainArea[MainSlot].ItemID = (*Iterator)->Items.DepositArea[SlotID].ItemID;
+	strn0cpy((*iter)->Items.MainArea[mainSlot].Donator, (*iter)->Items.DepositArea[slotID].Donator, sizeof((*iter)->Items.MainArea[mainSlot].Donator));
+	strn0cpy((*iter)->Items.MainArea[mainSlot].WhoFor, (*iter)->Items.DepositArea[slotID].WhoFor, sizeof((*iter)->Items.MainArea[mainSlot].WhoFor));
 
-	(*Iterator)->Items.MainArea[MainSlot].Quantity = (*Iterator)->Items.DepositArea[SlotID].Quantity;
-
-	strn0cpy((*Iterator)->Items.MainArea[MainSlot].Donator, (*Iterator)->Items.DepositArea[SlotID].Donator, sizeof((*Iterator)->Items.MainArea[MainSlot].Donator));
-	(*Iterator)->Items.MainArea[MainSlot].Permissions = (*Iterator)->Items.DepositArea[SlotID].Permissions;
-
-	strn0cpy((*Iterator)->Items.MainArea[MainSlot].WhoFor, (*Iterator)->Items.DepositArea[SlotID].WhoFor, sizeof((*Iterator)->Items.MainArea[MainSlot].WhoFor));
-
-	const char *Query="UPDATE `guild_bank` SET `area` = 1, `slot` = %i WHERE `guildid` = %i AND `area` = 0 AND `slot` = %i LIMIT 1";
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-
-	char* query = 0;
-
-	if(!database.RunQuery(query, MakeAnyLenString(&query, Query, MainSlot, GuildID, SlotID), errbuf))
-	{
-		_log(GUILDS__BANK_ERROR, "error promoting item: %s : %s", query, errbuf);
-
-		safe_delete_array(query);
-
+	std::string query = StringFormat("UPDATE `guild_bank` SET `area` = 1, `slot` = %i "
+                                    "WHERE `guildid` = %i AND `area` = 0 AND `slot` = %i "
+                                    "LIMIT 1", mainSlot, guildID, slotID);
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+		_log(GUILDS__BANK_ERROR, "error promoting item: %s : %s", query.c_str(), results.ErrorMessage().c_str());
 		return -1;
 	}
 
-	safe_delete_array(query);
+	(*iter)->Items.DepositArea[slotID].ItemID = 0;
 
-	(*Iterator)->Items.DepositArea[SlotID].ItemID = 0;
-
-	const Item_Struct *Item = database.GetItem((*Iterator)->Items.MainArea[MainSlot].ItemID);
+	const Item_Struct *Item = database.GetItem((*iter)->Items.MainArea[mainSlot].ItemID);
 
 	GuildBankItemUpdate_Struct gbius;
 
 	if(!Item->Stackable)
-		gbius.Init(GuildBankItemUpdate, 1, MainSlot, GuildBankMainArea, 1, Item->ID, Item->Icon, 1, 0, 0, 0);
+		gbius.Init(GuildBankItemUpdate, 1, mainSlot, GuildBankMainArea, 1, Item->ID, Item->Icon, 1, 0, 0, 0);
 	else
 	{
-		if((*Iterator)->Items.MainArea[MainSlot].Quantity == Item->StackSize)
-			gbius.Init(GuildBankItemUpdate, 1, MainSlot, GuildBankMainArea, 1, Item->ID, Item->Icon,
-					(*Iterator)->Items.MainArea[MainSlot].Quantity, 0, 0, 0);
+		if((*iter)->Items.MainArea[mainSlot].Quantity == Item->StackSize)
+			gbius.Init(GuildBankItemUpdate, 1, mainSlot, GuildBankMainArea, 1, Item->ID, Item->Icon,
+					(*iter)->Items.MainArea[mainSlot].Quantity, 0, 0, 0);
 		else
-			gbius.Init(GuildBankItemUpdate, 1, MainSlot, GuildBankMainArea, 1, Item->ID, Item->Icon,
-					(*Iterator)->Items.MainArea[MainSlot].Quantity, 0, 1, 0);
+			gbius.Init(GuildBankItemUpdate, 1, mainSlot, GuildBankMainArea, 1, Item->ID, Item->Icon,
+					(*iter)->Items.MainArea[mainSlot].Quantity, 0, 1, 0);
 	}
 
 	strn0cpy(gbius.ItemName, Item->Name, sizeof(gbius.ItemName));
 
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, GuildID);
+	entity_list.QueueClientsGuildBankItemUpdate(&gbius, guildID);
 
-	gbius.Init(GuildBankItemUpdate, 1, SlotID, GuildBankDepositArea, 0, 0, 0, 0, 0, 0, 0);
+	gbius.Init(GuildBankItemUpdate, 1, slotID, GuildBankDepositArea, 0, 0, 0, 0, 0, 0, 0);
 
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, GuildID);
+	entity_list.QueueClientsGuildBankItemUpdate(&gbius, guildID);
 
-	return MainSlot;
+	return mainSlot;
 }
 
-void GuildBankManager::SetPermissions(uint32 GuildID, uint16 SlotID, uint32 Permissions, const char *MemberName)
+void GuildBankManager::SetPermissions(uint32 guildID, uint16 slotID, uint32 permissions, const char *memberName)
 {
-	if((SlotID > (GUILD_BANK_MAIN_AREA_SIZE - 1)))
+	if((slotID > (GUILD_BANK_MAIN_AREA_SIZE - 1)))
 		return;
 
-	std::list<GuildBank*>::iterator Iterator = GetGuildBank(GuildID);
+	auto iter = GetGuildBank(guildID);
 
-	if(Iterator == Banks.end())
+	if(iter == Banks.end())
+		return;
+
+	if((*iter)->Items.MainArea[slotID].ItemID == 0)
+		return;
+
+	std::string query = StringFormat("UPDATE `guild_bank` SET `permissions` = %i, `whofor` = '%s' "
+                                "WHERE `guildid` = %i AND `area` = 1 AND `slot` = %i LIMIT 1",
+                                permissions, memberName, guildID, slotID);
+    auto results = database.QueryDatabase(query);
+	if(!results.Success())
 	{
+		_log(GUILDS__BANK_ERROR, "error changing permissions: %s : %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
-	if((*Iterator)->Items.MainArea[SlotID].ItemID == 0)
-	{
-		return;
-	}
+	(*iter)->Items.MainArea[slotID].Permissions = permissions;
 
-	const char *Query="UPDATE `guild_bank` SET `permissions` = %i, `whofor` = '%s' WHERE `guildid` = %i AND `area` = 1 AND `slot` = %i LIMIT 1";
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-
-	char* query = 0;
-
-	if(!database.RunQuery(query, MakeAnyLenString(&query, Query, Permissions, MemberName, GuildID, SlotID), errbuf))
-	{
-		_log(GUILDS__BANK_ERROR, "error changing permissions: %s : %s", query, errbuf);
-
-		safe_delete_array(query);
-
-		return;
-	}
-
-	safe_delete_array(query);
-
-	(*Iterator)->Items.MainArea[SlotID].Permissions = Permissions;
-
-	if(Permissions == GuildBankSingleMember)
-		strn0cpy((*Iterator)->Items.MainArea[SlotID].WhoFor, MemberName, sizeof((*Iterator)->Items.MainArea[SlotID].WhoFor));
+	if(permissions == GuildBankSingleMember)
+		strn0cpy((*iter)->Items.MainArea[slotID].WhoFor, memberName, sizeof((*iter)->Items.MainArea[slotID].WhoFor));
 	else
-		(*Iterator)->Items.MainArea[SlotID].WhoFor[0] = '\0';
+		(*iter)->Items.MainArea[slotID].WhoFor[0] = '\0';
 
-
-	const Item_Struct *Item = database.GetItem((*Iterator)->Items.MainArea[SlotID].ItemID);
+	const Item_Struct *Item = database.GetItem((*iter)->Items.MainArea[slotID].ItemID);
 
 	GuildBankItemUpdate_Struct gbius;
 
 	if(!Item->Stackable)
-		gbius.Init(GuildBankItemUpdate, 1, SlotID, GuildBankMainArea, 1, Item->ID, Item->Icon, 1, (*Iterator)->Items.MainArea[SlotID].Permissions, 0, 0);
+		gbius.Init(GuildBankItemUpdate, 1, slotID, GuildBankMainArea, 1, Item->ID, Item->Icon, 1, (*iter)->Items.MainArea[slotID].Permissions, 0, 0);
 	else
 	{
-		if((*Iterator)->Items.MainArea[SlotID].Quantity == Item->StackSize)
-			gbius.Init(GuildBankItemUpdate, 1, SlotID, GuildBankMainArea, 1, Item->ID, Item->Icon,
-					(*Iterator)->Items.MainArea[SlotID].Quantity, (*Iterator)->Items.MainArea[SlotID].Permissions, 0, 0);
+		if((*iter)->Items.MainArea[slotID].Quantity == Item->StackSize)
+			gbius.Init(GuildBankItemUpdate, 1, slotID, GuildBankMainArea, 1, Item->ID, Item->Icon,
+					(*iter)->Items.MainArea[slotID].Quantity, (*iter)->Items.MainArea[slotID].Permissions, 0, 0);
 		else
-			gbius.Init(GuildBankItemUpdate, 1, SlotID, GuildBankMainArea, 1, Item->ID, Item->Icon,
-					(*Iterator)->Items.MainArea[SlotID].Quantity, (*Iterator)->Items.MainArea[SlotID].Permissions, 1, 0);
+			gbius.Init(GuildBankItemUpdate, 1, slotID, GuildBankMainArea, 1, Item->ID, Item->Icon,
+					(*iter)->Items.MainArea[slotID].Quantity, (*iter)->Items.MainArea[slotID].Permissions, 1, 0);
 	}
 
 
 	strn0cpy(gbius.ItemName, Item->Name, sizeof(gbius.ItemName));
 
-	strn0cpy(gbius.WhoFor, (*Iterator)->Items.MainArea[SlotID].WhoFor, sizeof(gbius.WhoFor));
+	strn0cpy(gbius.WhoFor, (*iter)->Items.MainArea[slotID].WhoFor, sizeof(gbius.WhoFor));
 
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, GuildID);
+	entity_list.QueueClientsGuildBankItemUpdate(&gbius, guildID);
 }
 
 ItemInst* GuildBankManager::GetItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity)
@@ -1208,90 +1091,73 @@ std::list<GuildBank*>::iterator GuildBankManager::GetGuildBank(uint32 GuildID)
 	return Iterator;
 }
 
-bool GuildBankManager::DeleteItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity)
+bool GuildBankManager::DeleteItem(uint32 guildID, uint16 area, uint16 slotID, uint32 quantity)
 {
-	std::list<GuildBank*>::iterator Iterator = GetGuildBank(GuildID);
+	auto iter = GetGuildBank(guildID);
 
-	if(Iterator == Banks.end())
+	if(iter == Banks.end())
 		return false;
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-
-	char* query = 0;
 
 	GuildBankItem* BankArea = nullptr;
 
-	if(Area == GuildBankMainArea)
+	if(area == GuildBankMainArea)
 	{
-		if(SlotID > (GUILD_BANK_MAIN_AREA_SIZE - 1))
+		if(slotID > (GUILD_BANK_MAIN_AREA_SIZE - 1))
 			return false;
 
-		BankArea = &(*Iterator)->Items.MainArea[0];
-	}
-	else
-	{
-		if(SlotID > (GUILD_BANK_DEPOSIT_AREA_SIZE - 1))
+		BankArea = &(*iter)->Items.MainArea[0];
+	} else {
+		if(slotID > (GUILD_BANK_DEPOSIT_AREA_SIZE - 1))
 			return false;
 
-		BankArea = &(*Iterator)->Items.DepositArea[0];
+		BankArea = &(*iter)->Items.DepositArea[0];
 	}
 
+	bool deleted = true;
 
-	bool Deleted = true;
+	const Item_Struct *Item = database.GetItem(BankArea[slotID].ItemID);
 
-	const Item_Struct *Item = database.GetItem(BankArea[SlotID].ItemID);
-
-	if(!Item->Stackable || (Quantity >= BankArea[SlotID].Quantity))
-	{
-		const char *Query = "DELETE from `guild_bank` where `guildid` = %i AND `area` = %i AND `slot` = %i LIMIT 1";
-
-		if(!database.RunQuery(query, MakeAnyLenString(&query, Query, GuildID, Area, SlotID), errbuf))
-		{
-			_log(GUILDS__BANK_ERROR, "Delete item failed. %s : %s", query, errbuf);
-
-			safe_delete_array(query);
-
+	if(!Item->Stackable || (quantity >= BankArea[slotID].Quantity)) {
+        std::string query = StringFormat("DELETE FROM `guild_bank` WHERE `guildid` = %i "
+                                        "AND `area` = %i AND `slot` = %i LIMIT 1",
+                                        guildID, area, slotID);
+        auto results = database.QueryDatabase(query);
+		if(!results.Success()) {
+			_log(GUILDS__BANK_ERROR, "Delete item failed. %s : %s", query.c_str(), results.ErrorMessage().c_str());
 			return false;
 		}
 
-		safe_delete_array(query);
+		BankArea[slotID].ItemID = 0;
 
-		BankArea[SlotID].ItemID = 0;
-	}
-	else
-	{
-		const char *Query = "UPDATE `guild_bank` SET `qty` = %i where `guildid` = %i AND `area` = %i AND `slot` = %i LIMIT 1";
-
-		if(!database.RunQuery(query, MakeAnyLenString(&query, Query, BankArea[SlotID].Quantity - Quantity,
-				GuildID, Area, SlotID), errbuf))
-		{
-			_log(GUILDS__BANK_ERROR, "Update item failed. %s : %s", query, errbuf);
-
-			safe_delete_array(query);
-
+	} else {
+		std::string query = StringFormat("UPDATE `guild_bank` SET `qty` = %i WHERE `guildid` = %i "
+                                        "AND `area` = %i AND `slot` = %i LIMIT 1",
+                                        BankArea[slotID].Quantity - quantity, guildID, area, slotID);
+        auto results = database.QueryDatabase(query);
+		if(!results.Success()) {
+			_log(GUILDS__BANK_ERROR, "Update item failed. %s : %s", query.c_str(), results.ErrorMessage().c_str());
 			return false;
 		}
 
-		safe_delete_array(query);
+		BankArea[slotID].Quantity -= quantity;
 
-		BankArea[SlotID].Quantity -= Quantity;
-
-		Deleted = false;
+		deleted = false;
 	}
+
 	GuildBankItemUpdate_Struct gbius;
 
-	if(!Deleted)
+	if(!deleted)
 	{
-		gbius.Init(GuildBankItemUpdate, 1, SlotID, Area, 1, Item->ID, Item->Icon, BankArea[SlotID].Quantity, BankArea[SlotID].Permissions, 1, 0);
+		gbius.Init(GuildBankItemUpdate, 1, slotID, area, 1, Item->ID, Item->Icon, BankArea[slotID].Quantity, BankArea[slotID].Permissions, 1, 0);
 
 		strn0cpy(gbius.ItemName, Item->Name, sizeof(gbius.ItemName));
 
-		strn0cpy(gbius.WhoFor, BankArea[SlotID].WhoFor, sizeof(gbius.WhoFor));
+		strn0cpy(gbius.WhoFor, BankArea[slotID].WhoFor, sizeof(gbius.WhoFor));
 	}
 	else
-		gbius.Init(GuildBankItemUpdate, 1, SlotID, Area, 0, 0, 0, 0, 0, 0, 0);
+		gbius.Init(GuildBankItemUpdate, 1, slotID, area, 0, 0, 0, 0, 0, 0, 0);
 
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, GuildID);
+	entity_list.QueueClientsGuildBankItemUpdate(&gbius, guildID);
 
 	return true;
 
@@ -1422,26 +1288,20 @@ bool GuildBankManager::SplitStack(uint32 GuildID, uint16 SlotID, uint32 Quantity
 	return true;
 }
 
-void GuildBankManager::UpdateItemQuantity(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity)
+void GuildBankManager::UpdateItemQuantity(uint32 guildID, uint16 area, uint16 slotID, uint32 quantity)
 {
 	// Helper method for MergeStacks. Assuming all passed parameters are valid.
 	//
-	char errbuf[MYSQL_ERRMSG_SIZE];
-
-	char* query = 0;
-
-	const char *Query = "UPDATE `guild_bank` SET `qty` = %i where `guildid` = %i AND `area` = %i AND `slot` = %i LIMIT 1";
-
-	if(!database.RunQuery(query, MakeAnyLenString(&query, Query, Quantity, GuildID, Area, SlotID), errbuf))
-	{
-		_log(GUILDS__BANK_ERROR, "Update item quantity failed. %s : %s", query, errbuf);
-
-		safe_delete_array(query);
-
+	std::string query = StringFormat("UPDATE `guild_bank` SET `qty` = %i "
+                                    "WHERE `guildid` = %i AND `area` = %i "
+                                    "AND `slot` = %i LIMIT 1",
+                                    quantity, guildID, area, slotID);
+    auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
+		_log(GUILDS__BANK_ERROR, "Update item quantity failed. %s : %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
-	safe_delete_array(query);
 }
 
 bool GuildBankManager::AllowedToWithdraw(uint32 GuildID, uint16 Area, uint16 SlotID, const char *Name)

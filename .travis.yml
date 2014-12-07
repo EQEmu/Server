@@ -8,7 +8,9 @@ script:
   - make
   - ./bin/tests
 branches:
-  only: master
+  only:
+    - master
+    - stable
 notifications:
   email: false
   irc:

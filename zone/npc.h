@@ -18,19 +18,16 @@
 #ifndef NPC_H
 #define NPC_H
 
-class NPC;
-#include "zonedb.h"
-#include "mob.h"
-//#include "spawn.h"
-
-#include <list>
-#include <deque>
-
-#include "spawn2.h"
-#include "../common/loottable.h"
-#include "zonedump.h"
-#include "QGlobals.h"
 #include "../common/rulesys.h"
+
+#include "mob.h"
+#include "qglobals.h"
+#include "zonedb.h"
+#include "zonedump.h"
+
+#include <deque>
+#include <list>
+
 
 #ifdef _WINDOWS
 	#define M_PI	3.141592
@@ -88,8 +85,12 @@ struct AISpellsVar_Struct {
 	uint8	idle_beneficial_chance;
 }; 
 
-
 class AA_SwarmPetInfo;
+class Client;
+class Group;
+class Raid;
+class Spawn2;
+struct Item_Struct;
 
 class NPC : public Mob
 {
@@ -127,20 +128,15 @@ public:
 
 	virtual bool	AI_PursueCastCheck();
 	virtual bool	AI_IdleCastCheck();
-	virtual void	AI_Event_SpellCastFinished(bool iCastSucceeded, uint8 slot);
+	virtual void	AI_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot);
 
 	void LevelScale();
 	void CalcNPCResists();
 	void CalcNPCRegen();
 	void CalcNPCDamage();
 
-
 	int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target = nullptr);
 	int32 GetActSpellHealing(uint16 spell_id, int32 value, Mob* target = nullptr);
-	inline void SetSpellFocusDMG(int32 NewSpellFocusDMG) {SpellFocusDMG = NewSpellFocusDMG;}
-	inline void SetSpellFocusHeal(int32 NewSpellFocusHeal) {SpellFocusHeal = NewSpellFocusHeal;}
-	int32 SpellFocusDMG;
-	int32 SpellFocusHeal;
 
 	virtual void SetTarget(Mob* mob);
 	virtual uint16 GetSkill(SkillUseTypes skill_num) const { if (skill_num <= HIGHEST_SKILL) { return skills[skill_num]; } return 0; }
@@ -158,6 +154,7 @@ public:
 	virtual void InitializeBuffSlots();
 	virtual void UninitializeBuffSlots();
 
+	virtual void	SetAttackTimer();
 	virtual void	RangedAttack(Mob* other);
 	virtual void	ThrowingAttack(Mob* other) { }
 	int32 GetNumberOfAttacks() const { return attack_count; }
@@ -247,6 +244,8 @@ public:
 	uint32	GetSwarmOwner();
 	uint32	GetSwarmTarget();
 	void	SetSwarmTarget(int target_id = 0);
+	void	DepopSwarmPets();
+	void	PetOnSpawn(NewSpawn_Struct* ns);
 
 	void	SignalNPC(int _signal_id);
 
@@ -361,8 +360,9 @@ public:
 	const bool GetCombatEvent() const { return combat_event; }
 	void SetCombatEvent(bool b) { combat_event = b; }
 
-	//The corpse we make can only be looted by people who got credit for the kill
+	/* Only allows players that killed corpse to loot */
 	const bool HasPrivateCorpse() const { return NPCTypedata->private_corpse; }
+
 	const bool IsUnderwaterOnly() const { return NPCTypedata->underwater; }
 	const char* GetRawNPCTypeName() const { return NPCTypedata->name; }
 
@@ -387,15 +387,23 @@ public:
 
 	inline void SetHealScale(float amt)		{ healscale = amt; }
 	inline float GetHealScale()					{ return healscale; }
+	
+	inline void SetSpellFocusDMG(int32 NewSpellFocusDMG) {SpellFocusDMG = NewSpellFocusDMG;}
+	inline int32 GetSpellFocusDMG() const { return SpellFocusDMG;}
 
-    uint32 	GetSpawnKillCount();
-    int 	GetScore();
-    void 	mod_prespawn(Spawn2 *sp);
-	int 	mod_npc_damage(int damage, SkillUseTypes skillinuse, int hand, const Item_Struct* weapon, Mob* other);
+	inline void SetSpellFocusHeal(int32 NewSpellFocusHeal) {SpellFocusHeal = NewSpellFocusHeal;}
+	inline int32 GetSpellFocusHeal() const {return SpellFocusHeal;}
+
+	uint32	GetSpawnKillCount();
+	int	GetScore();
+	void	SetMerchantProbability(uint8 amt) { probability = amt; }
+	uint8	GetMerchantProbability() { return probability; }
+	void	mod_prespawn(Spawn2 *sp);
+	int	mod_npc_damage(int damage, SkillUseTypes skillinuse, int hand, const Item_Struct* weapon, Mob* other);
 	void	mod_npc_killed_merit(Mob* c);
 	void	mod_npc_killed(Mob* oos);
-	void AISpellsList(Client *c);
-	
+	void	AISpellsList(Client *c);
+
 	bool IsRaidTarget() const { return raid_target; };
 
 protected:
@@ -450,6 +458,8 @@ protected:
 	uint32	npc_mana;
 	float	spellscale;
 	float	healscale;
+	int32 SpellFocusDMG;
+	int32 SpellFocusHeal;
 
 	//pet crap:
 	uint16	pet_spell_id;
@@ -504,6 +514,7 @@ protected:
 	std::list<MercData> mercDataList;
 	
 	bool raid_target;
+	uint8	probability;
 
 private:
 	uint32	loottable_id;

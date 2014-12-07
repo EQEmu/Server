@@ -23,9 +23,9 @@
 #include <list>
 #include "masterentity.h"
 #include "../common/rulesys.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 #include "hate_list.h"
-#include "QuestParserCollection.h"
+#include "quest_parser_collection.h"
 #include "zone.h"
 #include "water_map.h"
 
@@ -40,7 +40,7 @@ HateList::~HateList()
 {
 }
 
-// neotokyo: added for frenzy support
+// added for frenzy support
 // checks if target still is in frenzy mode
 void HateList::CheckFrenzyHate()
 {
@@ -163,14 +163,14 @@ Mob* HateList::GetClosest(Mob *hater) {
 		++iterator;
 	}
 
-	if (close == 0 && hater->IsNPC() || close->DivineAura())
+	if ((!close && hater->IsNPC()) || (close && close->DivineAura()))
 		close = hater->CastToNPC()->GetHateTop();
 
 	return close;
 }
 
 
-// neotokyo: a few comments added, rearranged code for readability
+// a few comments added, rearranged code for readability
 void HateList::Add(Mob *ent, int32 in_hate, int32 in_dam, bool bFrenzy, bool iAddIfNotExist)
 {
 	if(!ent)
@@ -311,7 +311,7 @@ Mob *HateList::GetTop(Mob *center)
 				}
 			}
 
-			if (cur->ent->Sanctuary()) {
+			if (cur->ent->Sanctuary()) { 
 				if(hate == -1)
 				{
 					top = cur->ent;
@@ -398,6 +398,13 @@ Mob *HateList::GetTop(Mob *center)
 
 			if(!isTopClientType) {
 				if(top->IsMerc()) {
+					isTopClientType = true;
+					topClientTypeInRange = top;
+				}
+			}
+
+			if (!isTopClientType) {
+				if (top->GetSpecialAbility(ALLOW_TO_TANK)){
 					isTopClientType = true;
 					topClientTypeInRange = top;
 				}
@@ -557,12 +564,15 @@ int HateList::AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOption
 	return ret;
 }
 
-void HateList::SpellCast(Mob *caster, uint32 spell_id, float range)
+void HateList::SpellCast(Mob *caster, uint32 spell_id, float range, Mob* ae_center)
 {
 	if(!caster)
-	{
 		return;
-	}
+
+	Mob* center = caster;
+
+	if (ae_center)
+		center = ae_center;
 
 	//this is slower than just iterating through the list but avoids
 	//crashes when people kick the bucket in the middle of this call
@@ -578,7 +588,7 @@ void HateList::SpellCast(Mob *caster, uint32 spell_id, float range)
 		tHateEntry *h = (*iterator);
 		if(range > 0)
 		{
-			dist_targ = caster->DistNoRoot(*h->ent);
+			dist_targ = center->DistNoRoot(*h->ent);
 			if(dist_targ <= range && dist_targ >= min_range2)
 			{
 				id_list.push_back(h->ent->GetID());

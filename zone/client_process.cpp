@@ -20,13 +20,8 @@
 */
 #include "../common/debug.h"
 #include <iostream>
-#include <iomanip>
-#include <string.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
 #include <zlib.h>
-#include <assert.h>
 
 #ifdef _WINDOWS
 	#include <windows.h>
@@ -41,29 +36,22 @@
 	#include <unistd.h>
 #endif
 
-#include "masterentity.h"
-#include "zonedb.h"
-#include "../common/packet_functions.h"
-#include "../common/packet_dump.h"
-#include "worldserver.h"
-#include "../common/packet_dump_file.h"
-#include "../common/StringUtil.h"
-#include "../common/spdat.h"
-#include "petitions.h"
-#include "NpcAI.h"
-#include "../common/skills.h"
-#include "forage.h"
-#include "zone.h"
-#include "event_codes.h"
-#include "../common/faction.h"
-#include "../common/crc32.h"
 #include "../common/rulesys.h"
-#include "StringIDs.h"
-#include "map.h"
+#include "../common/skills.h"
+#include "../common/spdat.h"
+#include "../common/string_util.h"
+#include "event_codes.h"
 #include "guild_mgr.h"
-#include <string>
-#include "QuestParserCollection.h"
+#include "map.h"
+#include "petitions.h"
+#include "queryserv.h"
+#include "quest_parser_collection.h"
+#include "string_ids.h"
+#include "worldserver.h"
+#include "zone.h"
+#include "zonedb.h"
 
+extern QueryServ* QServ;
 extern Zone* zone;
 extern volatile bool ZoneLoaded;
 extern WorldServer worldserver;
@@ -76,7 +64,8 @@ bool Client::Process() {
 	if(Connected() || IsLD())
 	{
 		// try to send all packets that weren't sent before
-		if(!IsLD() && zoneinpacket_timer.Check()){
+		if(!IsLD() && zoneinpacket_timer.Check())
+		{
 			SendAllPackets();
 		}
 
@@ -143,10 +132,12 @@ bool Client::Process() {
 
 		if(mana_timer.Check())
 			SendManaUpdatePacket();
-		if(dead && dead_timer.Check()) {
-			database.MoveCharacterToZone(GetName(),database.GetZoneName(m_pp.binds[0].zoneId));
+
+			if(dead && dead_timer.Check()) {
+				database.MoveCharacterToZone(GetName(), database.GetZoneName(m_pp.binds[0].zoneId));
+
 			m_pp.zone_id = m_pp.binds[0].zoneId;
-			m_pp.zoneInstance = 0;
+			m_pp.zoneInstance = m_pp.binds[0].instance_id;
 			m_pp.x = m_pp.binds[0].x;
 			m_pp.y = m_pp.binds[0].y;
 			m_pp.z = m_pp.binds[0].z;
@@ -174,14 +165,16 @@ bool Client::Process() {
 		if(TaskPeriodic_Timer.Check() && taskstate)
 			taskstate->TaskPeriodicChecks(this);
 
-		if(linkdead_timer.Check()){
+		if(linkdead_timer.Check())
+		{
+			LeaveGroup();
 			Save();
 			if (GetMerc())
 			{
 				GetMerc()->Save();
 				GetMerc()->Depop();
 			}
-			LeaveGroup();
+			
 			Raid *myraid = entity_list.GetRaidByClient(this);
 			if (myraid)
 			{
@@ -190,7 +183,8 @@ bool Client::Process() {
 			return false; //delete client
 		}
 
-		if (camp_timer.Check()) {
+		if (camp_timer.Check())
+		{
 			LeaveGroup();
 			Save();
 			if (GetMerc())
@@ -226,20 +220,21 @@ bool Client::Process() {
 			} else {
 				if(!ApplyNextBardPulse(bardsong, song_target, bardsong_slot))
 					InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
-//				SpellFinished(bardsong, bardsong_target, bardsong_slot, spells[bardsong].mana);
+				//SpellFinished(bardsong, bardsong_target, bardsong_slot, spells[bardsong].mana);
 			}
 		}
 
 		if(GetMerc())
 		{
-				UpdateMercTimer();
+			UpdateMercTimer();
 		}
 
 		if(GetMercInfo().MercTemplateID != 0 && GetMercInfo().IsSuspended)
 		{
-			if(p_timers.Expired(&database, pTimerMercSuspend, false)) {
-					CheckMercSuspendTimer();
-				}
+			if(p_timers.Expired(&database, pTimerMercSuspend, false))
+			{
+				CheckMercSuspendTimer();
+			}
 		}
 
 		if(IsAIControlled())
@@ -570,8 +565,7 @@ bool Client::Process() {
 				viral_timer_counter = 0;
 		}
 
-		if(projectile_timer.Check())
-			SpellProjectileEffect();
+		ProjectileAttack();
 					
 		if(spellbonuses.GravityEffect == 1) {
 			if(gravity_timer.Check())
@@ -713,15 +707,12 @@ bool Client::Process() {
 	}
 #endif
 
-	if (client_state != CLIENT_LINKDEAD && (client_state == CLIENT_ERROR || client_state == DISCONNECTED || client_state == CLIENT_KICKED || !eqs->CheckState(ESTABLISHED))) {
+	if (client_state != CLIENT_LINKDEAD && (client_state == CLIENT_ERROR || client_state == DISCONNECTED || client_state == CLIENT_KICKED || !eqs->CheckState(ESTABLISHED)))
+	{
 		//client logged out or errored out
 		//ResetTrade();
 		if (client_state != CLIENT_KICKED) {
 			Save();
-		}
-		if (GetMerc())
-		{
-			GetMerc()->Depop();
 		}
 
 		client_state = CLIENT_LINKDEAD;
@@ -730,23 +721,32 @@ bool Client::Process() {
 			Group *mygroup = GetGroup();
 			if (mygroup)
 			{
-				if (!zoning) {
+				if (!zoning)
+				{
 					entity_list.MessageGroup(this, true, 15, "%s logged out.", GetName());
-					mygroup->DelMember(this);
-				} else {
+					LeaveGroup();
+				}
+				else
+				{
 					entity_list.MessageGroup(this, true, 15, "%s left the zone.", GetName());
 					mygroup->MemberZoned(this);
+					if (GetMerc() && GetMerc()->HasGroup())
+					{
+						GetMerc()->RemoveMercFromGroup(GetMerc(), GetMerc()->GetGroup());
+					}
 				}
 
 			}
 			Raid *myraid = entity_list.GetRaidByClient(this);
 			if (myraid)
 			{
-				if (!zoning) {
+				if (!zoning)
+				{
 					//entity_list.MessageGroup(this,true,15,"%s logged out.",GetName());
-					//mygroup->DelMember(this);
 					myraid->MemberZoned(this);
-				} else {
+				}
+				else
+				{
 					//entity_list.MessageGroup(this,true,15,"%s left the zone.",GetName());
 					myraid->MemberZoned(this);
 				}
@@ -770,38 +770,47 @@ bool Client::Process() {
 	return ret;
 }
 
-//just a set of actions preformed all over in Client::Process
+/* Just a set of actions preformed all over in Client::Process */
 void Client::OnDisconnect(bool hard_disconnect) {
-	if(hard_disconnect) {
+	if(hard_disconnect)
+	{
 		LeaveGroup();
-
+		if (GetMerc())
+		{
+			GetMerc()->Save();
+			GetMerc()->Depop();
+		}
 		Raid *MyRaid = entity_list.GetRaidByClient(this);
 
 		if (MyRaid)
 			MyRaid->MemberZoned(this);
 
-		parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
+		parse->EventPlayer(EVENT_DISCONNECT, this, "", 0); 
+
+		/* QS: PlayerLogConnectDisconnect */
+		if (RuleB(QueryServ, PlayerLogConnectDisconnect)){
+			std::string event_desc = StringFormat("Disconnect :: in zoneid:%i instid:%i", this->GetZoneID(), this->GetInstanceID());
+			QServ->PlayerLogEvent(Player_Log_Connect_State, this->CharacterID(), event_desc);
+		} 
 	}
 
-	Mob *Other = trade->With();
-
+	Mob *Other = trade->With(); 
 	if(Other)
 	{
-		mlog(TRADING__CLIENT, "Client disconnected during a trade. Returning their items.");
-
+		mlog(TRADING__CLIENT, "Client disconnected during a trade. Returning their items."); 
 		FinishTrade(this);
 
 		if(Other->IsClient())
 			Other->CastToClient()->FinishTrade(Other);
 
-		trade->Reset();
-
+		/* Reset both sides of the trade */
+		trade->Reset(); 
 		Other->trade->Reset();
 	}
 
 	database.SetFirstLogon(CharacterID(), 0); //We change firstlogon status regardless of if a player logs out to zone or not, because we only want to trigger it on their first login from world.
 
-	//remove ourself from all proximities
+	/* Remove ourself from all proximities */ 
 	ClearAllProximities();
 
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_LogoutReply);
@@ -831,8 +840,6 @@ void Client::BulkSendInventoryItems() {
 			safe_delete(inst);
 		}
 	}
-
-	// Where are cursor buffer items processed? They need to be validated as well... -U
 
 	bool deletenorent = database.NoRentExpired(GetName());
 	if(deletenorent){ RemoveNoRent(false); } //client was offline for more than 30 minutes, delete no rent items
@@ -965,92 +972,96 @@ void Client::BulkSendInventoryItems()
 
 void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	const Item_Struct* handyitem = nullptr;
-	uint32 numItemSlots=80; //The max number of items passed in the transaction.
+	uint32 numItemSlots = 80; //The max number of items passed in the transaction.
 	const Item_Struct *item;
 	std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
 	std::list<MerchantList>::const_iterator itr;
 	Mob* merch = entity_list.GetMobByNpcTypeID(npcid);
-	if(merlist.size()==0){ //Attempt to load the data, it might have been missed if someone spawned the merchant after the zone was loaded
+	if (merlist.size() == 0) { //Attempt to load the data, it might have been missed if someone spawned the merchant after the zone was loaded
 		zone->LoadNewMerchantData(merchant_id);
 		merlist = zone->merchanttable[merchant_id];
-		if(merlist.size()==0)
+		if (merlist.size() == 0)
 			return;
 	}
 	std::list<TempMerchantList> tmp_merlist = zone->tmpmerchanttable[npcid];
 	std::list<TempMerchantList>::iterator tmp_itr;
 
-	uint32 i=1;
+	uint32 i = 1;
 	uint8 handychance = 0;
-	for (itr = merlist.begin(); itr != merlist.end() && i < numItemSlots; ++itr) {
+	for (itr = merlist.begin(); itr != merlist.end() && i <= numItemSlots; ++itr) {
 		MerchantList ml = *itr;
-		if(GetLevel() < ml.level_required) {
+		if (merch->CastToNPC()->GetMerchantProbability() > ml.probability)
 			continue;
-		}
+
+		if (GetLevel() < ml.level_required)
+			continue;
 
 		if (!(ml.classes_required & (1 << (GetClass() - 1))))
 			continue;
 
 		int32 fac = merch ? merch->GetPrimaryFaction() : 0;
-		if(fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required) {
+		if (fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required)
 			continue;
-		}
 
-		handychance = MakeRandomInt(0, merlist.size() + tmp_merlist.size() - 1 );
+		handychance = MakeRandomInt(0, merlist.size() + tmp_merlist.size() - 1);
 
 		item = database.GetItem(ml.item);
-		if(item) {
-			if(handychance==0)
-				handyitem=item;
+		if (item) {
+			if (handychance == 0)
+				handyitem = item;
 			else
 				handychance--;
-			int charges=1;
-			if(item->ItemClass==ItemClassCommon)
-				charges=item->MaxCharges;
+			int charges = 1;
+			if (item->ItemClass == ItemClassCommon)
+				charges = item->MaxCharges;
 			ItemInst* inst = database.CreateItem(item, charges);
 			if (inst) {
-				if (RuleB(Merchant, UsePriceMod)){
-				inst->SetPrice((item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(merch,false)));
+				if (RuleB(Merchant, UsePriceMod)) {
+					inst->SetPrice((item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate * Client::CalcPriceMod(merch, false)));
 				}
 				else
-					inst->SetPrice((item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate));
+					inst->SetPrice((item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate));
 				inst->SetMerchantSlot(ml.slot);
 				inst->SetMerchantCount(-1);		//unlimited
-				if(charges > 0)
+				if (charges > 0)
 					inst->SetCharges(charges);
 				else
 					inst->SetCharges(1);
 
-				SendItemPacket(ml.slot-1, inst, ItemPacketMerchant);
+				SendItemPacket(ml.slot - 1, inst, ItemPacketMerchant);
 				safe_delete(inst);
 			}
 		}
 		// Account for merchant lists with gaps.
-		if(ml.slot >= i)
+		if (ml.slot >= i) {
+			if (ml.slot > i)
+				LogFile->write(EQEMuLog::Debug, "(WARNING) Merchantlist contains gap at slot %d. Merchant: %d, NPC: %d", i, merchant_id, npcid);
 			i = ml.slot + 1;
+		}
 	}
 	std::list<TempMerchantList> origtmp_merlist = zone->tmpmerchanttable[npcid];
 	tmp_merlist.clear();
-	for(tmp_itr = origtmp_merlist.begin();tmp_itr != origtmp_merlist.end() && i<numItemSlots;++tmp_itr){
+	for (tmp_itr = origtmp_merlist.begin(); tmp_itr != origtmp_merlist.end() && i <= numItemSlots; ++tmp_itr) {
 		TempMerchantList ml = *tmp_itr;
-		item=database.GetItem(ml.item);
-		ml.slot=i;
+		item = database.GetItem(ml.item);
+		ml.slot = i;
 		if (item) {
-			if(handychance==0)
-				handyitem=item;
+			if (handychance == 0)
+				handyitem = item;
 			else
 				handychance--;
-			int charges=1;
+			int charges = 1;
 			//if(item->ItemClass==ItemClassCommon && (int16)ml.charges <= item->MaxCharges)
 			//	charges=ml.charges;
 			//else
 			charges = item->MaxCharges;
 			ItemInst* inst = database.CreateItem(item, charges);
 			if (inst) {
-				if (RuleB(Merchant, UsePriceMod)){
-				inst->SetPrice((item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(merch,false)));
+				if (RuleB(Merchant, UsePriceMod)) {
+					inst->SetPrice((item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate * Client::CalcPriceMod(merch, false)));
 				}
 				else
-					inst->SetPrice((item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate));
+					inst->SetPrice((item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate));
 				inst->SetMerchantSlot(ml.slot);
 				inst->SetMerchantCount(ml.charges);
 				if(charges > 0)
@@ -1066,32 +1077,32 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	}
 	//this resets the slot
 	zone->tmpmerchanttable[npcid] = tmp_merlist;
-	if(merch != nullptr && handyitem){
-		char handy_id[8]={0};
-		int greeting=MakeRandomInt(0, 4);
-		int greet_id=0;
-		switch(greeting){
+	if (merch != nullptr && handyitem) {
+		char handy_id[8] = { 0 };
+		int greeting = MakeRandomInt(0, 4);
+		int greet_id = 0;
+		switch (greeting) {
 			case 1:
-				greet_id=MERCHANT_GREETING;
+				greet_id = MERCHANT_GREETING;
 				break;
 			case 2:
-				greet_id=MERCHANT_HANDY_ITEM1;
+				greet_id = MERCHANT_HANDY_ITEM1;
 				break;
 			case 3:
-				greet_id=MERCHANT_HANDY_ITEM2;
+				greet_id = MERCHANT_HANDY_ITEM2;
 				break;
 			case 4:
-				greet_id=MERCHANT_HANDY_ITEM3;
+				greet_id = MERCHANT_HANDY_ITEM3;
 				break;
 			default:
-				greet_id=MERCHANT_HANDY_ITEM4;
+				greet_id = MERCHANT_HANDY_ITEM4;
 		}
-		sprintf(handy_id,"%i",greet_id);
+		sprintf(handy_id, "%i", greet_id);
 
-		if(greet_id!=MERCHANT_GREETING)
-			Message_StringID(10,GENERIC_STRINGID_SAY,merch->GetCleanName(),handy_id,this->GetName(),handyitem->Name);
+		if (greet_id != MERCHANT_GREETING)
+			Message_StringID(10, GENERIC_STRINGID_SAY, merch->GetCleanName(), handy_id, this->GetName(), handyitem->Name);
 		else
-			Message_StringID(10,GENERIC_STRINGID_SAY,merch->GetCleanName(),handy_id,this->GetName());
+			Message_StringID(10, GENERIC_STRINGID_SAY, merch->GetCleanName(), handy_id, this->GetName());
 
 		merch->CastToNPC()->FaceTarget(this->CastToMob());
 	}
@@ -1544,7 +1555,12 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 				if (from_bucket == &m_pp.platinum_shared)
 					amount_to_add = 0 - amount_to_take;
 
-				database.SetSharedPlatinum(AccountID(),amount_to_add);
+				database.SetSharedPlatinum(AccountID(),amount_to_add); 
+			}
+		}
+		else{
+			if (to_bucket == &m_pp.platinum_shared || from_bucket == &m_pp.platinum_shared){
+				this->Message(13, "::: WARNING! ::: SHARED BANK IS DISABLED AND YOUR PLATINUM WILL BE DESTROYED IF YOU PUT IT HERE");
 			}
 		}
 	}
@@ -1577,7 +1593,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 		safe_delete(outapp);
 	}
 
-	Save();
+	SaveCurrency();
 }
 
 void Client::OPGMTraining(const EQApplicationPacket *app)
@@ -1600,16 +1616,19 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 	if(DistNoRoot(*pTrainer) > USE_NPC_RANGE2)
 		return;
 
-	SkillUseTypes sk;
-	for (sk = Skill1HBlunt; sk <= HIGHEST_SKILL; sk = (SkillUseTypes)(sk+1)) {
+	// if this for-loop acts up again (crashes linux), try enabling the before and after #pragmas
+//#pragma GCC push_options
+//#pragma GCC optimize ("O0")
+	for (int sk = Skill1HBlunt; sk <= HIGHEST_SKILL; ++sk) {
 		if(sk == SkillTinkering && GetRace() != GNOME) {
 			gmtrain->skills[sk] = 0; //Non gnomes can't tinker!
 		} else {
-			gmtrain->skills[sk] = GetMaxSkillAfterSpecializationRules(sk, MaxSkill(sk, GetClass(), RuleI(Character, MaxLevel)));
+			gmtrain->skills[sk] = GetMaxSkillAfterSpecializationRules((SkillUseTypes)sk, MaxSkill((SkillUseTypes)sk, GetClass(), RuleI(Character, MaxLevel)));
 			//this is the highest level that the trainer can train you to, this is enforced clientside so we can't just
 			//Set it to 1 with CanHaveSkill or you wont be able to train past 1.
 		}
 	}
+//#pragma GCC pop_options
 
 	uchar ending[]={0x34,0x87,0x8a,0x3F,0x01
 		,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9
@@ -1712,6 +1731,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		}
 
 		uint16 skilllevel = GetRawSkill(skill);
+
 		if(skilllevel == 0) {
 			//this is a new skill..
 			uint16 t_level = SkillTrainLevel(skill, GetClass());
@@ -1721,7 +1741,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			}
 
 			SetSkill(skill, t_level);
-		} else {
+		} else { 
 			switch(skill) {
 			case SkillBrewing:
 			case SkillMakePoison:
@@ -1917,16 +1937,21 @@ void Client::DoEnduranceRegen()
 }
 
 void Client::DoEnduranceUpkeep() {
+
+	if (!HasEndurUpkeep())
+		return;
+
 	int upkeep_sum = 0;
-
-	int cost_redux = spellbonuses.EnduranceReduction + itembonuses.EnduranceReduction;
-
+	int cost_redux = spellbonuses.EnduranceReduction + itembonuses.EnduranceReduction + aabonuses.EnduranceReduction;
+	
+	bool has_effect = false;
 	uint32 buffs_i;
 	uint32 buff_count = GetMaxTotalSlots();
 	for (buffs_i = 0; buffs_i < buff_count; buffs_i++) {
 		if (buffs[buffs_i].spellid != SPELL_UNKNOWN) {
 			int upkeep = spells[buffs[buffs_i].spellid].EndurUpkeep;
 			if(upkeep > 0) {
+				has_effect = true;
 				if(cost_redux > 0) {
 					if(upkeep <= cost_redux)
 						continue;	//reduced to 0
@@ -1946,6 +1971,9 @@ void Client::DoEnduranceUpkeep() {
 		SetEndurance(GetEndurance() - upkeep_sum);
 		TryTriggerOnValueAmount(false, false, true);
 	}
+
+	if (!has_effect)
+		SetEndurUpkeep(false);
 }
 
 void Client::CalcRestState() {
@@ -2076,7 +2104,8 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		BindStruct* b = &m_pp.binds[0];
 		default_to_bind = new RespawnOption;
 		default_to_bind->name = "Bind Location";
-		default_to_bind->zoneid = b->zoneId;
+		default_to_bind->zone_id = b->zoneId;
+		default_to_bind->instance_id = b->instance_id;
 		default_to_bind->x = b->x;
 		default_to_bind->y = b->y;
 		default_to_bind->z = b->z;
@@ -2085,7 +2114,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		is_rez = false;
 	}
 
-	if (chosen->zoneid == zone->GetZoneID()) //If they should respawn in the current zone...
+	if (chosen->zone_id == zone->GetZoneID() && chosen->instance_id == zone->GetInstanceID()) //If they should respawn in the current zone...
 	{
 		if (is_rez)
 		{
@@ -2129,8 +2158,8 @@ void Client::HandleRespawnFromHover(uint32 Option)
 
 				_log(SPELLS__REZ, "Found corpse. Marking corpse as rezzed.");
 
-				corpse->Rezzed(true);
-				corpse->CompleteRezz();
+				corpse->IsRezzed(true);
+				corpse->CompleteResurrection();
 			}
 		}
 		else //Not rez
@@ -2141,6 +2170,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 			ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
 
 			gmg->bind_zone_id = zone->GetZoneID();
+			gmg->bind_instance_id = chosen->instance_id;
 			gmg->x = chosen->x;
 			gmg->y = chosen->y;
 			gmg->z = chosen->z;
@@ -2186,13 +2216,13 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		if(r)
 			r->MemberZoned(this);
 
-		m_pp.zone_id = chosen->zoneid;
-		m_pp.zoneInstance = 0;
-		database.MoveCharacterToZone(this->CharacterID(), database.GetZoneName(chosen->zoneid));
+		m_pp.zone_id = chosen->zone_id;
+		m_pp.zoneInstance = chosen->instance_id;
+		database.MoveCharacterToZone(CharacterID(), database.GetZoneName(chosen->zone_id));
 
 		Save();
 
-		MovePC(chosen->zoneid,chosen->x,chosen->y,chosen->z,chosen->heading,1);
+		MovePC(chosen->zone_id, chosen->instance_id, chosen->x, chosen->y, chosen->z, chosen->heading, 1);
 	}
 
 	safe_delete(default_to_bind);

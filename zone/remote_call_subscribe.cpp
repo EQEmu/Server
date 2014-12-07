@@ -2,7 +2,7 @@
 #include "../common/logsys.h"
 #include "../common/logtypes.h"
 #include "../common/md5.h"
-#include "../common/EmuTCPConnection.h"
+#include "../common/emu_tcp_connection.h"
 #include "../common/packet_functions.h"
 #include "../common/packet_dump.h"
 #include "../common/servertalk.h"

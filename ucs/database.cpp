@@ -43,8 +43,8 @@
 
 #include "database.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/MiscFunctions.h"
-#include "../common/StringUtil.h"
+#include "../common/misc_functions.h"
+#include "../common/string_util.h"
 #include "chatchannel.h"
 
 extern Clientlist *CL;
@@ -102,207 +102,142 @@ Database::~Database()
 {
 }
 
-void Database::GetAccountStatus(Client *c) {
+void Database::GetAccountStatus(Client *client) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (!RunQuery(query,MakeAnyLenString(&query, "select `status`, `hideme`, `karma`, `revoked` from `account` where `id`='%i' limit 1",
-						c->GetAccountID()),errbuf,&result)){
-
-		_log(UCS__ERROR, "Unable to get account status for character %s, error %s", c->GetName().c_str(), errbuf);
-
-		safe_delete_array(query);
-
+	std::string query = StringFormat("SELECT `status`, `hideme`, `karma`, `revoked` "
+                                    "FROM `account` WHERE `id` = '%i' LIMIT 1",
+                                    client->GetAccountID());
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+		_log(UCS__ERROR, "Unable to get account status for character %s, error %s", client->GetName().c_str(), results.ErrorMessage().c_str());
 		return;
 	}
-	_log(UCS__TRACE, "GetAccountStatus Query: %s", query);
-	safe_delete_array(query);
 
-	if(mysql_num_rows(result) != 1)
+	_log(UCS__TRACE, "GetAccountStatus Query: %s", query.c_str());
+
+	if(results.RowCount() != 1)
 	{
 		_log(UCS__ERROR, "Error in GetAccountStatus");
-		mysql_free_result(result);
 		return;
 	}
 
-	row = mysql_fetch_row(result);
+	auto row = results.begin();
 
-	c->SetAccountStatus(atoi(row[0]));
-	c->SetHideMe(atoi(row[1]) != 0);
-	c->SetKarma(atoi(row[2]));
-	c->SetRevoked((atoi(row[3])==1?true:false));
+	client->SetAccountStatus(atoi(row[0]));
+	client->SetHideMe(atoi(row[1]) != 0);
+	client->SetKarma(atoi(row[2]));
+	client->SetRevoked((atoi(row[3])==1?true:false));
 
-	_log(UCS__TRACE, "Set account status to %i, hideme to %i and karma to %i for %s", c->GetAccountStatus(), c->GetHideMe(), c->GetKarma(), c->GetName().c_str());
-	mysql_free_result(result);
+	_log(UCS__TRACE, "Set account status to %i, hideme to %i and karma to %i for %s", client->GetAccountStatus(), client->GetHideMe(), client->GetKarma(), client->GetName().c_str());
+
 }
 
-int Database::FindAccount(const char *CharacterName, Client *c) {
+int Database::FindAccount(const char *characterName, Client *client) {
 
-	_log(UCS__TRACE, "FindAccount for character %s", CharacterName);
+	_log(UCS__TRACE, "FindAccount for character %s", characterName);
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	c->ClearCharacters();
-
-	if (!RunQuery(query,MakeAnyLenString(&query, "select `id`, `account_id`, `level` from `character_` where `name`='%s' limit 1",
-						CharacterName),errbuf,&result))
-	{
-		_log(UCS__ERROR, "FindAccount query failed: %s", query);
-		safe_delete_array(query);
+	client->ClearCharacters();
+    std::string query = StringFormat("SELECT `id`, `account_id`, `level` "
+                                    "FROM `character_data` WHERE `name` = '%s' LIMIT 1",
+                                    characterName);
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		_log(UCS__ERROR, "FindAccount query failed: %s", query.c_str());
 		return -1;
 	}
-	safe_delete_array(query);
 
-	if (mysql_num_rows(result) != 1)
-	{
+	if (results.RowCount() != 1) {
 		_log(UCS__ERROR, "Bad result from query");
-		mysql_free_result(result);
 		return -1;
 	}
 
-	row = mysql_fetch_row(result);
-	c->AddCharacter(atoi(row[0]), CharacterName, atoi(row[2]));
-	int AccountID = atoi(row[1]);
+	auto row = results.begin();
+	client->AddCharacter(atoi(row[0]), characterName, atoi(row[2]));
 
-	mysql_free_result(result);
-	_log(UCS__TRACE, "Account ID for %s is %i", CharacterName, AccountID);
+	int accountID = atoi(row[1]);
 
-	if (!RunQuery(query,MakeAnyLenString(&query, "select `id`, `name`, `level` from `character_` where `account_id`=%i and `name` !='%s'",
-						AccountID, CharacterName),errbuf,&result))
-	{
-		safe_delete_array(query);
-		return AccountID;
-	}
-	safe_delete_array(query);
+	_log(UCS__TRACE, "Account ID for %s is %i", characterName, accountID);
 
-	for(unsigned int i = 0; i < mysql_num_rows(result); i++)
-	{
-		row = mysql_fetch_row(result);
-		c->AddCharacter(atoi(row[0]), row[1], atoi(row[2]));
-	}
-	mysql_free_result(result);
-	return AccountID;
+    query = StringFormat("SELECT `id`, `name`, `level` FROM `character_data` "
+                        "WHERE `account_id` = %i AND `name` != '%s'",
+						accountID, characterName);
+    results = QueryDatabase(query);
+	if (!results.Success())
+		return accountID;
+
+	for (auto row = results.begin(); row != results.end(); ++row)
+		client->AddCharacter(atoi(row[0]), row[1], atoi(row[2]));
+
+	return accountID;
 }
 
-bool Database::VerifyMailKey(std::string CharacterName, int IPAddress, std::string MailKey) {
+bool Database::VerifyMailKey(std::string characterName, int IPAddress, std::string MailKey) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (!RunQuery(query,MakeAnyLenString(&query, "select `mailkey` from `character_` where `name`='%s' limit 1",
-						CharacterName.c_str()),errbuf,&result)){
-
-		safe_delete_array(query);
-
-		_log(UCS__ERROR, "Error retrieving mailkey from database: %s", errbuf);
-
+	std::string query = StringFormat("SELECT `mailkey` FROM `character_data` WHERE `name`='%s' LIMIT 1",
+                                    characterName.c_str());
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		_log(UCS__ERROR, "Error retrieving mailkey from database: %s", results.ErrorMessage().c_str());
 		return false;
 	}
 
-	safe_delete_array(query);
-
-	row = mysql_fetch_row(result);
+	auto row = results.begin();
 
 	// The key is the client's IP address (expressed as 8 hex digits) and an 8 hex digit random string generated
 	// by world.
 	//
-	char CombinedKey[17];
+	char combinedKey[17];
 
 	if(RuleB(Chat, EnableMailKeyIPVerification) == true)
-		sprintf(CombinedKey, "%08X%s", IPAddress, MailKey.c_str());
+		sprintf(combinedKey, "%08X%s", IPAddress, MailKey.c_str());
 	else
-		sprintf(CombinedKey, "%s", MailKey.c_str());
+		sprintf(combinedKey, "%s", MailKey.c_str());
 
-	_log(UCS__TRACE, "DB key is [%s], Client key is [%s]", row[0], CombinedKey);
+	_log(UCS__TRACE, "DB key is [%s], Client key is [%s]", row[0], combinedKey);
 
-	bool Valid = !strcmp(row[0], CombinedKey);
-
-	mysql_free_result(result);
-
-	return Valid;
-
+	return !strcmp(row[0], combinedKey);
 }
 
-int Database::FindCharacter(const char *CharacterName) {
+int Database::FindCharacter(const char *characterName) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *safeCharName = RemoveApostrophes(characterName);
+    std::string query = StringFormat("SELECT `id` FROM `character_data` WHERE `name`='%s' LIMIT 1", safeCharName);
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		_log(UCS__ERROR, "FindCharacter failed. %s %s", query.c_str(), results.ErrorMessage().c_str());
+		safe_delete(safeCharName);
+		return -1;
+	}
+    safe_delete(safeCharName);
 
-	char *SafeCharName = RemoveApostrophes(CharacterName);
-
-	if (!RunQuery(query,MakeAnyLenString(&query, "select `id` from `character_` where `name`='%s' limit 1",
-						SafeCharName),errbuf,&result)){
-
-		_log(UCS__ERROR, "FindCharacter failed. %s %s", query, errbuf);
-
-		safe_delete_array(query);
-		safe_delete_array(SafeCharName);
-
+	if (results.RowCount() != 1) {
+		_log(UCS__ERROR, "Bad result from FindCharacter query for character %s", characterName);
 		return -1;
 	}
 
-	safe_delete_array(query);
-	safe_delete_array(SafeCharName);
+	auto row = results.begin();
 
-	if (mysql_num_rows(result) != 1) {
+	int characterID = atoi(row[0]);
 
-		_log(UCS__ERROR, "Bad result from FindCharacter query for character %s", CharacterName);
-
-		mysql_free_result(result);
-
-		return -1;
-	}
-
-	row = mysql_fetch_row(result);
-
-	int CharacterID = atoi(row[0]);
-
-	mysql_free_result(result);
-
-	return CharacterID;
-
+	return characterID;
 }
 
 bool Database::GetVariable(const char* varname, char* varvalue, uint16 varvalue_len) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (!RunQuery(query,MakeAnyLenString(&query, "select `value` from `variables` where `varname`='%s'", varname), errbuf, &result)) {
-
-		_log(UCS__ERROR, "Unable to get message count from database. %s %s", query, errbuf);
-
-		safe_delete_array(query);
-
+	std::string query = StringFormat("SELECT `value` FROM `variables` WHERE `varname` = '%s'", varname);
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		_log(UCS__ERROR, "Unable to get message count from database. %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
-	safe_delete_array(query);
-
-	if (mysql_num_rows(result) != 1) {
-
-		mysql_free_result(result);
-
+	if (results.RowCount() != 1)
 		return false;
-	}
 
-	row = mysql_fetch_row(result);
+	auto row = results.begin();
 
 	snprintf(varvalue, varvalue_len, "%s", row[0]);
-
-	mysql_free_result(result);
 
 	return true;
 }
@@ -311,302 +246,238 @@ bool Database::LoadChatChannels() {
 
 	_log(UCS__INIT, "Loading chat channels from the database.");
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (!RunQuery(query,MakeAnyLenString(&query, "select `name`,`owner`,`password`, `minstatus` from `chatchannels`"),errbuf,&result)){
-
-		_log(UCS__ERROR, "Failed to load channels. %s %s", query, errbuf);
-		safe_delete_array(query);
-
+	const std::string query = "SELECT `name`, `owner`, `password`, `minstatus` FROM `chatchannels`";
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		_log(UCS__ERROR, "Failed to load channels. %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
-	safe_delete_array(query);
+	for (auto row = results.begin();row != results.end(); ++row) {
+		std::string channelName = row[0];
+		std::string channelOwner = row[1];
+		std::string channelPassword = row[2];
 
-	while((row = mysql_fetch_row(result))) {
-
-		std::string ChannelName = row[0];
-		std::string ChannelOwner = row[1];
-		std::string ChannelPassword = row[2];
-
-		ChannelList->CreateChannel(ChannelName, ChannelOwner, ChannelPassword, true, atoi(row[3]));
+		ChannelList->CreateChannel(channelName, channelOwner, channelPassword, true, atoi(row[3]));
 	}
-
-	mysql_free_result(result);
 
 	return true;
 }
 
-void Database::SetChannelPassword(std::string ChannelName, std::string Password) {
+void Database::SetChannelPassword(std::string channelName, std::string password) {
 
-	_log(UCS__TRACE, "Database::SetChannelPassword(%s, %s)", ChannelName.c_str(), Password.c_str());
+	_log(UCS__TRACE, "Database::SetChannelPassword(%s, %s)", channelName.c_str(), password.c_str());
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query = StringFormat("UPDATE `chatchannels` SET `password` = '%s' WHERE `name` = '%s'",
+                                    password.c_str(), channelName.c_str());
+    auto results = QueryDatabase(query);
+	if(!results.Success())
+		_log(UCS__ERROR, "Error updating password in database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
-	if(!RunQuery(query, MakeAnyLenString(&query, "UPDATE `chatchannels` set `password`='%s' where `name`='%s'", Password.c_str(),
-						ChannelName.c_str()), errbuf)) {
-
-		_log(UCS__ERROR, "Error updating password in database: %s, %s", query, errbuf);
-
-	}
-
-	safe_delete_array(query);
 }
 
-void Database::SetChannelOwner(std::string ChannelName, std::string Owner) {
+void Database::SetChannelOwner(std::string channelName, std::string owner) {
 
-	_log(UCS__TRACE, "Database::SetChannelOwner(%s, %s)", ChannelName.c_str(), Owner.c_str());
+	_log(UCS__TRACE, "Database::SetChannelOwner(%s, %s)", channelName.c_str(), owner.c_str());
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query = StringFormat("UPDATE `chatchannels` SET `owner` = '%s' WHERE `name` = '%s'",
+                                    owner.c_str(), channelName.c_str());
+    auto results = QueryDatabase(query);
+	if(!results.Success())
+		_log(UCS__ERROR, "Error updating Owner in database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
-	if(!RunQuery(query, MakeAnyLenString(&query, "UPDATE `chatchannels` set `owner`='%s' where `name`='%s'", Owner.c_str(),
-						ChannelName.c_str()), errbuf)) {
-
-		_log(UCS__ERROR, "Error updating Owner in database: %s, %s", query, errbuf);
-
-	}
-
-	safe_delete_array(query);
 }
 
-void Database::SendHeaders(Client *c) {
+void Database::SendHeaders(Client *client) {
 
-	int UnknownField2 = 25015275;
-	int UnknownField3 = 1;
+	int unknownField2 = 25015275;
+	int unknownField3 = 1;
+	int characterID = FindCharacter(client->MailBoxName().c_str());
 
-	int CharacterID = FindCharacter(c->MailBoxName().c_str());
-	_log(UCS__TRACE, "Sendheaders for %s, CharID is %i", c->MailBoxName().c_str(), CharacterID);
-	if(CharacterID <= 0)
+	_log(UCS__TRACE, "Sendheaders for %s, CharID is %i", client->MailBoxName().c_str(), characterID);
+
+	if(characterID <= 0)
 		return;
 
+	std::string query = StringFormat("SELECT `msgid`,`timestamp`, `from`, `subject`, `status` "
+                                    "FROM `mail` WHERE `charid`=%i", characterID);
+    auto results = QueryDatabase(query);
+	if (!results.Success())
+		return;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char buffer[100];
 
-	if (!RunQuery(query,MakeAnyLenString(&query, "select `msgid`,`timestamp`,`from`,`subject`, `status` from `mail` "
-							"where `charid`=%i", CharacterID),errbuf,&result)){
+	int headerCountPacketLength = 0;
 
-		safe_delete_array(query);
+	sprintf(buffer, "%i", client->GetMailBoxNumber());
+	headerCountPacketLength += (strlen(buffer) + 1);
 
-		return ;
-	}
+	sprintf(buffer, "%i", unknownField2);
+	headerCountPacketLength += (strlen(buffer) + 1);
 
-	safe_delete_array(query);
+	sprintf(buffer, "%i", unknownField3);
+	headerCountPacketLength += (strlen(buffer) + 1);
 
-	char Buf[100];
+	sprintf(buffer, "%i", results.RowCount());
+	headerCountPacketLength += (strlen(buffer) + 1);
 
-	uint32 NumRows = mysql_num_rows(result);
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MailHeaderCount, headerCountPacketLength);
 
-	int HeaderCountPacketLength = 0;
+	char *packetBuffer = (char *)outapp->pBuffer;
 
-	sprintf(Buf, "%i", c->GetMailBoxNumber());
-	HeaderCountPacketLength += (strlen(Buf) + 1);
-
-	sprintf(Buf, "%i", UnknownField2);
-	HeaderCountPacketLength += (strlen(Buf) + 1);
-
-	sprintf(Buf, "%i", UnknownField3);
-	HeaderCountPacketLength += (strlen(Buf) + 1);
-
-	sprintf(Buf, "%i", NumRows);
-	HeaderCountPacketLength += (strlen(Buf) + 1);
-
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MailHeaderCount, HeaderCountPacketLength);
-
-	char *PacketBuffer = (char *)outapp->pBuffer;
-
-	VARSTRUCT_ENCODE_INTSTRING(PacketBuffer, c->GetMailBoxNumber());
-	VARSTRUCT_ENCODE_INTSTRING(PacketBuffer, UnknownField2);
-	VARSTRUCT_ENCODE_INTSTRING(PacketBuffer, UnknownField3);
-	VARSTRUCT_ENCODE_INTSTRING(PacketBuffer, NumRows);
+	VARSTRUCT_ENCODE_INTSTRING(packetBuffer, client->GetMailBoxNumber());
+	VARSTRUCT_ENCODE_INTSTRING(packetBuffer, unknownField2);
+	VARSTRUCT_ENCODE_INTSTRING(packetBuffer, unknownField3);
+	VARSTRUCT_ENCODE_INTSTRING(packetBuffer, results.RowCount());
 
 	_pkt(UCS__PACKETS, outapp);
 
-	c->QueuePacket(outapp);
+	client->QueuePacket(outapp);
 
 	safe_delete(outapp);
 
-	int RowNum = 0;
+	int rowIndex = 0;
+	for(auto row = results.begin(); row != results.end(); ++row, ++rowIndex) {
+		int headerPacketLength = 0;
 
-	while((row = mysql_fetch_row(result))) {
+		sprintf(buffer, "%i", client->GetMailBoxNumber());
+		headerPacketLength += strlen(buffer) + 1;
+		sprintf(buffer, "%i", unknownField2);
+		headerPacketLength += strlen(buffer) + 1;
+		sprintf(buffer, "%i", rowIndex);
+		headerPacketLength += strlen(buffer) + 1;
 
+		headerPacketLength += strlen(row[0]) + 1;
+		headerPacketLength += strlen(row[1]) + 1;
+		headerPacketLength += strlen(row[4]) + 1;
+		headerPacketLength += GetMailPrefix().length() + strlen(row[2]) + 1;
+		headerPacketLength += strlen(row[3]) + 1;
 
-		int HeaderPacketLength = 0;
+		outapp = new EQApplicationPacket(OP_MailHeader, headerPacketLength);
 
-		sprintf(Buf, "%i", c->GetMailBoxNumber());
-		HeaderPacketLength = HeaderPacketLength + strlen(Buf) + 1;
-		sprintf(Buf, "%i", UnknownField2);
-		HeaderPacketLength = HeaderPacketLength + strlen(Buf) + 1;
-		sprintf(Buf, "%i", RowNum);
-		HeaderPacketLength = HeaderPacketLength + strlen(Buf) + 1;
+		packetBuffer = (char *)outapp->pBuffer;
 
-		HeaderPacketLength = HeaderPacketLength + strlen(row[0]) + 1;
-		HeaderPacketLength = HeaderPacketLength + strlen(row[1]) + 1;
-		HeaderPacketLength = HeaderPacketLength + strlen(row[4]) + 1;
-		HeaderPacketLength = HeaderPacketLength + GetMailPrefix().length() + strlen(row[2]) + 1;
-		HeaderPacketLength = HeaderPacketLength + strlen(row[3]) + 1;
-
-		outapp = new EQApplicationPacket(OP_MailHeader, HeaderPacketLength);
-
-		PacketBuffer = (char *)outapp->pBuffer;
-
-		VARSTRUCT_ENCODE_INTSTRING(PacketBuffer, c->GetMailBoxNumber());
-		VARSTRUCT_ENCODE_INTSTRING(PacketBuffer, UnknownField2);
-		VARSTRUCT_ENCODE_INTSTRING(PacketBuffer, RowNum);
-		VARSTRUCT_ENCODE_STRING(PacketBuffer, row[0]);
-		VARSTRUCT_ENCODE_STRING(PacketBuffer, row[1]);
-		VARSTRUCT_ENCODE_STRING(PacketBuffer, row[4]);
-		VARSTRUCT_ENCODE_STRING(PacketBuffer, GetMailPrefix().c_str()); PacketBuffer--;
-		VARSTRUCT_ENCODE_STRING(PacketBuffer, row[2]);
-		VARSTRUCT_ENCODE_STRING(PacketBuffer, row[3]);
+		VARSTRUCT_ENCODE_INTSTRING(packetBuffer, client->GetMailBoxNumber());
+		VARSTRUCT_ENCODE_INTSTRING(packetBuffer, unknownField2);
+		VARSTRUCT_ENCODE_INTSTRING(packetBuffer, rowIndex);
+		VARSTRUCT_ENCODE_STRING(packetBuffer, row[0]);
+		VARSTRUCT_ENCODE_STRING(packetBuffer, row[1]);
+		VARSTRUCT_ENCODE_STRING(packetBuffer, row[4]);
+		VARSTRUCT_ENCODE_STRING(packetBuffer, GetMailPrefix().c_str());
+		packetBuffer--;
+		VARSTRUCT_ENCODE_STRING(packetBuffer, row[2]);
+		VARSTRUCT_ENCODE_STRING(packetBuffer, row[3]);
 
 		_pkt(UCS__PACKETS, outapp);
 
-		c->QueuePacket(outapp);
+		client->QueuePacket(outapp);
 
 		safe_delete(outapp);
-
-		RowNum++;
 	}
-
-	mysql_free_result(result);
 
 }
 
-void Database::SendBody(Client *c, int MessageNumber) {
+void Database::SendBody(Client *client, int messageNumber) {
 
-	int CharacterID = FindCharacter(c->MailBoxName().c_str());
+	int characterID = FindCharacter(client->MailBoxName().c_str());
 
-	_log(UCS__TRACE, "SendBody: MsgID %i, to %s, CharID is %i", MessageNumber, c->MailBoxName().c_str(), CharacterID);
+	_log(UCS__TRACE, "SendBody: MsgID %i, to %s, CharID is %i", messageNumber, client->MailBoxName().c_str(), characterID);
 
-	if(CharacterID <= 0)
+	if(characterID <= 0)
 		return;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (!RunQuery(query,MakeAnyLenString(&query, "select `msgid`, `body`, `to` from `mail` "
-							"where `charid`=%i and `msgid`=%i", CharacterID, MessageNumber), errbuf, &result)){
-		safe_delete_array(query);
-
-		return ;
-	}
-
-	safe_delete_array(query);
-
-	if (mysql_num_rows(result) != 1) {
-
-		mysql_free_result(result);
-
+	std::string query = StringFormat("SELECT `msgid`, `body`, `to` FROM `mail` "
+                                    "WHERE `charid`=%i AND `msgid`=%i", characterID, messageNumber);
+    auto results = QueryDatabase(query);
+	if (!results.Success())
 		return;
-	}
 
-	row = mysql_fetch_row(result);
 
-	_log(UCS__TRACE, "Message: %i  body (%i bytes)", MessageNumber, strlen(row[1]));
+	if (results.RowCount() != 1)
+		return;
 
-	int PacketLength = 12 + strlen(row[0]) + strlen(row[1]) + strlen(row[2]);
+	auto row = results.begin();
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MailSendBody,PacketLength);
+	_log(UCS__TRACE, "Message: %i  body (%i bytes)", messageNumber, strlen(row[1]));
 
-	char *PacketBuffer = (char *)outapp->pBuffer;
+	int packetLength = 12 + strlen(row[0]) + strlen(row[1]) + strlen(row[2]);
 
-	VARSTRUCT_ENCODE_INTSTRING(PacketBuffer, c->GetMailBoxNumber());
-	VARSTRUCT_ENCODE_STRING(PacketBuffer,row[0]);
-	VARSTRUCT_ENCODE_STRING(PacketBuffer,row[1]);
-	VARSTRUCT_ENCODE_STRING(PacketBuffer,"1");
-	VARSTRUCT_ENCODE_TYPE(uint8, PacketBuffer, 0);
-	VARSTRUCT_ENCODE_TYPE(uint8, PacketBuffer, 0x0a);
-	VARSTRUCT_ENCODE_STRING(PacketBuffer, "TO:"); PacketBuffer--;
-	VARSTRUCT_ENCODE_STRING(PacketBuffer, row[2]); PacketBuffer--; // Overwrite the null terminator
-	VARSTRUCT_ENCODE_TYPE(uint8, PacketBuffer, 0x0a);
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MailSendBody,packetLength);
 
-	mysql_free_result(result);
+	char *packetBuffer = (char *)outapp->pBuffer;
+
+	VARSTRUCT_ENCODE_INTSTRING(packetBuffer, client->GetMailBoxNumber());
+	VARSTRUCT_ENCODE_STRING(packetBuffer,row[0]);
+	VARSTRUCT_ENCODE_STRING(packetBuffer,row[1]);
+	VARSTRUCT_ENCODE_STRING(packetBuffer,"1");
+	VARSTRUCT_ENCODE_TYPE(uint8, packetBuffer, 0);
+	VARSTRUCT_ENCODE_TYPE(uint8, packetBuffer, 0x0a);
+	VARSTRUCT_ENCODE_STRING(packetBuffer, "TO:");
+	packetBuffer--;
+	VARSTRUCT_ENCODE_STRING(packetBuffer, row[2]);
+	packetBuffer--; // Overwrite the null terminator
+	VARSTRUCT_ENCODE_TYPE(uint8, packetBuffer, 0x0a);
 
 	_pkt(UCS__PACKETS, outapp);
 
-	c->QueuePacket(outapp);
+	client->QueuePacket(outapp);
 
 	safe_delete(outapp);
-
-
 }
 
-bool Database::SendMail(std::string Recipient, std::string From, std::string Subject, std::string Body, std::string RecipientsString) {
+bool Database::SendMail(std::string recipient, std::string from, std::string subject, std::string body, std::string recipientsString) {
 
-	int CharacterID;
+	int characterID;
+	std::string characterName;
 
-	std::string CharacterName;
+	auto lastPeriod = recipient.find_last_of(".");
 
-	//printf("Database::SendMail(%s, %s, %s)\n", Recipient.c_str(), From.c_str(), Subject.c_str());
-
-	std::string::size_type LastPeriod = Recipient.find_last_of(".");
-
-	if(LastPeriod == std::string::npos)
-		CharacterName = Recipient;
+	if(lastPeriod == std::string::npos)
+		characterName = recipient;
 	else
-		CharacterName = Recipient.substr(LastPeriod+1);
+		characterName = recipient.substr(lastPeriod+1);
 
-	CharacterName[0] = toupper(CharacterName[0]);
+	characterName[0] = toupper(characterName[0]);
 
-	for(unsigned int i = 1; i < CharacterName.length(); i++)
-		CharacterName[i] = tolower(CharacterName[i]);
+	for(unsigned int i = 1; i < characterName.length(); i++)
+		characterName[i] = tolower(characterName[i]);
 
-	CharacterID = FindCharacter(CharacterName.c_str());
+	characterID = FindCharacter(characterName.c_str());
 
-	_log(UCS__TRACE, "SendMail: CharacterID for recipient %s is %i", CharacterName.c_str(), CharacterID);
+	_log(UCS__TRACE, "SendMail: CharacterID for recipient %s is %i", characterName.c_str(), characterID);
 
-	if(CharacterID <= 0) return false;
+	if(characterID <= 0)
+        return false;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+	char *escSubject = new char[subject.length() * 2 + 1];
+	char *escBody = new char[body.length() * 2 + 1];
 
-	char *EscSubject = new char[Subject.length() * 2 + 1];
-	char *EscBody = new char[Body.length() * 2 + 1];
+	DoEscapeString(escSubject, subject.c_str(), subject.length());
+	DoEscapeString(escBody, body.c_str(), body.length());
 
-	DoEscapeString(EscSubject, Subject.c_str(), Subject.length());
-	DoEscapeString(EscBody, Body.c_str(), Body.length());
+	int now = time(nullptr); // time returns a 64 bit int on Windows at least, which vsnprintf doesn't like.
 
-	const char *MailQuery="INSERT INTO `mail` (`charid`, `timestamp`, `from`, `subject`, `body`, `to`, `status`) "
-				"VALUES ('%i', %i, '%s', '%s', '%s', '%s', %i)";
-
-	uint32 LastMsgID;
-
-	int Now = time(nullptr); // time returns a 64 bit int on Windows at least, which vsnprintf doesn't like.
-
-	if(!RunQuery(query, MakeAnyLenString(&query, MailQuery, CharacterID, Now, From.c_str(), EscSubject, EscBody,
-						RecipientsString.c_str(), 1), errbuf, 0, 0, &LastMsgID)) {
-
-		_log(UCS__ERROR, "SendMail: Query %s failed with error %s", query, errbuf);
-
-		safe_delete_array(EscSubject);
-		safe_delete_array(EscBody);
-		safe_delete_array(query);
-
+    std::string query = StringFormat("INSERT INTO `mail` "
+                                    "(`charid`, `timestamp`, `from`, `subject`, `body`, `to`, `status`) "
+                                    "VALUES ('%i', %i, '%s', '%s', '%s', '%s', %i)",
+                                    characterID, now, from.c_str(), escSubject, escBody,
+                                    recipientsString.c_str(), 1);
+    safe_delete_array(escSubject);
+    safe_delete_array(escBody);
+    auto results = QueryDatabase(query);
+	if(!results.Success()) {
+		_log(UCS__ERROR, "SendMail: Query %s failed with error %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
-	_log(UCS__TRACE, "MessageID %i generated, from %s, to %s", LastMsgID, From.c_str(), Recipient.c_str());
+	_log(UCS__TRACE, "MessageID %i generated, from %s, to %s", results.LastInsertedID(), from.c_str(), recipient.c_str());
 
-	safe_delete_array(EscSubject);
-	safe_delete_array(EscBody);
-	safe_delete_array(query);
 
-	Client *c = CL->IsCharacterOnline(CharacterName);
+	Client *client = CL->IsCharacterOnline(characterName);
 
-	if(c) {
-		std::string FQN = GetMailPrefix() + From;
-
-		c->SendNotification(c->GetMailBoxNumber(CharacterName), Subject, FQN, LastMsgID);
+	if(client) {
+		std::string FQN = GetMailPrefix() + from;
+		client->SendNotification(client->GetMailBoxNumber(characterName), subject, FQN, results.LastInsertedID());
 	}
 
 	MailMessagesSent++;
@@ -614,156 +485,122 @@ bool Database::SendMail(std::string Recipient, std::string From, std::string Sub
 	return true;
 }
 
-void Database::SetMessageStatus(int MessageNumber, int Status) {
+void Database::SetMessageStatus(int messageNumber, int status) {
 
-	_log(UCS__TRACE, "SetMessageStatus %i %i", MessageNumber, Status);
+	_log(UCS__TRACE, "SetMessageStatus %i %i", messageNumber, status);
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	if(status == 0) {
+        std::string query = StringFormat("DELETE FROM `mail` WHERE `msgid` = %i", messageNumber);
+		auto results = QueryDatabase(query);
+        return;
+    }
 
-	if(Status == 0)
-		RunQuery(query, MakeAnyLenString(&query, "delete from `mail` where `msgid`=%i", MessageNumber), errbuf);
-	else if (!RunQuery(query, MakeAnyLenString(&query, "update `mail` set `status`=%i where `msgid`=%i", Status, MessageNumber), errbuf)) {
+    std::string query = StringFormat("UPDATE `mail` SET `status` = %i WHERE `msgid`=%i", status, messageNumber);
+    auto results = QueryDatabase(query);
+	if (!results.Success())
+		_log(UCS__ERROR, "Error updating status %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
-		_log(UCS__ERROR, "Error updating status %s, %s", query, errbuf);
-
-	}
-
-	safe_delete_array(query);
 }
 
 void Database::ExpireMail() {
 
 	_log(UCS__INIT, "Expiring mail...");
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	uint32 AffectedRows;
-
-	if (!RunQuery(query,MakeAnyLenString(&query, "select COUNT(*) from `mail` "),errbuf,&result)){
-		_log(UCS__ERROR, "Unable to get message count from database. %s %s", query, errbuf);
-		safe_delete_array(query);
-		return ;
+	std::string query = "SELECT COUNT(*) FROM `mail`";
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+		_log(UCS__ERROR, "Unable to get message count from database. %s %s", query.c_str(), results.ErrorMessage().c_str());
+		return;
 	}
-	safe_delete_array(query);
 
-	row = mysql_fetch_row(result);
+	auto row = results.begin();
 
 	_log(UCS__INIT, "There are %s messages in the database.", row[0]);
 
-	mysql_free_result(result);
-
 	// Expire Trash
 	if(RuleI(Mail, ExpireTrash) >= 0) {
-		if(RunQuery(query, MakeAnyLenString(&query, "delete from `mail` where `status`=4 and `timestamp` < %i",
-				time(nullptr) - RuleI(Mail, ExpireTrash)), errbuf, 0, &AffectedRows)) {
-				_log(UCS__INIT, "Expired %i trash messages.", AffectedRows);
-		}
-		else {
-			_log(UCS__ERROR, "Error expiring trash messages, %s %s", query, errbuf);
-		}
-		safe_delete_array(query);
+        query = StringFormat("DELETE FROM `mail` WHERE `status`=4 AND `timestamp` < %i",
+                            time(nullptr) - RuleI(Mail, ExpireTrash));
+        results = QueryDatabase(query);
+		if(results.Success())
+            _log(UCS__INIT, "Expired %i trash messages.", results.RowsAffected());
+		else
+            _log(UCS__ERROR, "Error expiring trash messages, %s %s", query.c_str(), results.ErrorMessage().c_str());
+
 	}
+
 	// Expire Read
 	if(RuleI(Mail, ExpireRead) >= 0) {
-		if(RunQuery(query, MakeAnyLenString(&query, "delete from `mail` where `status`=3 and `timestamp` < %i",
-				time(nullptr) - RuleI(Mail, ExpireRead)), errbuf, 0, &AffectedRows)) {
-				_log(UCS__INIT, "Expired %i read messages.", AffectedRows);
-		}
-		else {
-			_log(UCS__ERROR, "Error expiring read messages, %s %s", query, errbuf);
-		}
-		safe_delete_array(query);
+        query = StringFormat("DELETE FROM `mail` WHERE `status` = 3 AND `timestamp` < %i",
+                            time(nullptr) - RuleI(Mail, ExpireRead));
+        results = QueryDatabase(query);
+		if(results.Success())
+            _log(UCS__INIT, "Expired %i read messages.", results.RowsAffected());
+		else
+			_log(UCS__ERROR, "Error expiring read messages, %s %s", query.c_str(), results.ErrorMessage().c_str());
 	}
+
 	// Expire Unread
 	if(RuleI(Mail, ExpireUnread) >= 0) {
-		if(RunQuery(query, MakeAnyLenString(&query, "delete from `mail` where `status`=1 and `timestamp` < %i",
-				time(nullptr) - RuleI(Mail, ExpireUnread)), errbuf, 0, &AffectedRows)) {
-				_log(UCS__INIT, "Expired %i unread messages.", AffectedRows);
-		}
-		else {
-			_log(UCS__ERROR, "Error expiring unread messages, %s %s", query, errbuf);
-		}
-		safe_delete_array(query);
+        query = StringFormat("DELETE FROM `mail` WHERE `status`=1 AND `timestamp` < %i",
+                            time(nullptr) - RuleI(Mail, ExpireUnread));
+        results = QueryDatabase(query);
+		if(results.Success())
+            _log(UCS__INIT, "Expired %i unread messages.", results.RowsAffected());
+		else
+			_log(UCS__ERROR, "Error expiring unread messages, %s %s", query.c_str(), results.ErrorMessage().c_str());
 	}
 }
 
-void Database::AddFriendOrIgnore(int CharID, int Type, std::string Name) {
+void Database::AddFriendOrIgnore(int charID, int type, std::string name) {
 
-	const char *FriendsQuery="INSERT INTO `friends` (`charid`, `type`, `name`) VALUES ('%i', %i, '%s')";
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-
-
-	if(!RunQuery(query, MakeAnyLenString(&query, FriendsQuery, CharID, Type, CapitaliseName(Name).c_str()), errbuf, 0, 0))
-		_log(UCS__ERROR, "Error adding friend/ignore, query was %s : %s", query, errbuf);
+    std::string query = StringFormat("INSERT INTO `friends` (`charid`, `type`, `name`) "
+                                    "VALUES('%i', %i, '%s')",
+                                    charID, type, CapitaliseName(name).c_str());
+    auto results = QueryDatabase(query);
+	if(!results.Success())
+		_log(UCS__ERROR, "Error adding friend/ignore, query was %s : %s", query.c_str(), results.ErrorMessage().c_str());
 	else
-		_log(UCS__TRACE, "Wrote Friend/Ignore entry for charid %i, type %i, name %s to database.",
-			CharID, Type, Name.c_str());
+		_log(UCS__TRACE, "Wrote Friend/Ignore entry for charid %i, type %i, name %s to database.", charID, type, name.c_str());
 
-
-	safe_delete_array(query);
 }
 
-void Database::RemoveFriendOrIgnore(int CharID, int Type, std::string Name) {
+void Database::RemoveFriendOrIgnore(int charID, int type, std::string name) {
 
-	const char *FriendsQuery="DELETE FROM `friends` WHERE `charid`=%i AND `type`=%i and `name`='%s'";
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-
-	if(!RunQuery(query, MakeAnyLenString(&query, FriendsQuery, CharID, Type, CapitaliseName(Name).c_str()), errbuf, 0, 0))
-		_log(UCS__ERROR, "Error removing friend/ignore, query was %s", query);
+	std::string query = StringFormat("DELETE FROM `friends` WHERE `charid` = %i "
+                                    "AND `type` = %i AND `name` = '%s'",
+                                    charID, type, CapitaliseName(name).c_str());
+    auto results = QueryDatabase(query);
+	if(!results.Success())
+		_log(UCS__ERROR, "Error removing friend/ignore, query was %s", query.c_str());
 	else
-		_log(UCS__TRACE, "Removed Friend/Ignore entry for charid %i, type %i, name %s from database.",
-			CharID, Type, Name.c_str());
+		_log(UCS__TRACE, "Removed Friend/Ignore entry for charid %i, type %i, name %s from database.", charID, type, name.c_str());
 
-
-	safe_delete_array(query);
 }
 
-void Database::GetFriendsAndIgnore(int CharID, std::vector<std::string> &Friends, std::vector<std::string> &Ignorees) {
+void Database::GetFriendsAndIgnore(int charID, std::vector<std::string> &friends, std::vector<std::string> &ignorees) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	const char *FriendsQuery="select `type`, `name` from `friends` WHERE `charid`=%i";
-
-	if (!RunQuery(query,MakeAnyLenString(&query, FriendsQuery, CharID),errbuf,&result)){
-
-		_log(UCS__ERROR, "GetFriendsAndIgnore query error %s, %s", query, errbuf);
-
-		safe_delete_array(query);
-
-		return ;
+	std::string query = StringFormat("select `type`, `name` FROM `friends` WHERE `charid`=%i", charID);
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		_log(UCS__ERROR, "GetFriendsAndIgnore query error %s, %s", query.c_str(), results.ErrorMessage().c_str());
+		return;
 	}
 
-	safe_delete_array(query);
 
-	while((row = mysql_fetch_row(result))) {
-
-		std::string Name = row[1];
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		std::string name = row[1];
 
 		if(atoi(row[0]) == 0)
 		{
-			Ignorees.push_back(Name);
-			_log(UCS__TRACE, "Added Ignoree from DB %s", Name.c_str());
+			ignorees.push_back(name);
+			_log(UCS__TRACE, "Added Ignoree from DB %s", name.c_str());
+			continue;
 		}
-		else
-		{
-			Friends.push_back(Name);
-			_log(UCS__TRACE, "Added Friend from DB %s", Name.c_str());
-		}
+
+        friends.push_back(name);
+        _log(UCS__TRACE, "Added Friend from DB %s", name.c_str());
 	}
 
-	mysql_free_result(result);
-
-	return;
 }
 

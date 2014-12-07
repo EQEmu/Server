@@ -18,12 +18,12 @@
 #include "../common/debug.h"
 #include "zonelist.h"
 #include "zoneserver.h"
-#include "WorldTCPConnection.h"
+#include "world_tcp_connection.h"
 #include "worlddb.h"
 #include "console.h"
-#include "WorldConfig.h"
+#include "world_config.h"
 #include "../common/servertalk.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 
 extern uint32			numzones;
 extern bool holdzones;
@@ -87,7 +87,7 @@ void ZSList::Process() {
 		CatchSignal(2);
 	}
 	if(reminder && reminder->Check()){
-		SendEmoteMessage(0,0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down, everyone log out now. World will shut down in %i seconds...",shutdowntimer->GetRemainingTime()/1000);
+		SendEmoteMessage(0,0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down, everyone log out now. World will shut down in %i minutes...", ((shutdowntimer->GetRemainingTime()/1000) / 60));
 	}
 	LinkedListIterator<ZoneServer*> iterator(list);
 
@@ -718,7 +718,7 @@ void ZSList::GetZoneIDList(std::vector<uint32> &zones) {
 void ZSList::WorldShutDown(uint32 time, uint32 interval)
 {
 	if( time > 0 ) {
-		SendEmoteMessage(0,0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down in %i seconds, everyone log out before this time.",time);
+		SendEmoteMessage(0,0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down in %i minutes, everyone log out before this time.", (time / 60));
 
 		time *= 1000;
 		interval *= 1000;

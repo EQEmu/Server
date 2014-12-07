@@ -16,78 +16,37 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-/*
-
-Assuming you want to add a new perl quest function named joe
-that takes 1 integer argument....
-
-1. Add the prototype to the quest manager:
-questmgr.h: add (~line 50)
-	void joe(int arg);
-
-2. Define the actual function in questmgr.cpp:
-void QuestManager::joe(int arg) {
-	//... do something
-}
-
-3. Copy one of the XS routines in perlparser.cpp, preferably
- one with the same number of arguments as your routine. Rename
- as needed.
- Finally, add your routine to the list at the bottom of perlparser.cpp
-
-
-4.
-If you want it to work in old mode perl and .qst, edit parser.cpp
-Parser::ExCommands (~line 777)
-	else if (!strcmp(command,"joe")) {
-		quest_manager.joe(atoi(arglist[0]));
-	}
-
-And then at then end of embparser.cpp, add:
-"sub joe{push(@cmd_queue,{func=>'joe',args=>join(',',@_)});}"
-
-
-
-*/
-
-#include "../common/debug.h"
-#include "entity.h"
-#include "masterentity.h"
-#include <limits.h>
-
-#include <sstream>
-#include <iostream>
-#include <list>
-
-#include "worldserver.h"
-#include "net.h"
-#include "../common/skills.h"
 #include "../common/classes.h"
-#include "../common/races.h"
-#include "zonedb.h"
+#include "../common/debug.h"
+#include "../common/rulesys.h"
+#include "../common/skills.h"
 #include "../common/spdat.h"
-#include "../common/packet_functions.h"
-#include "../common/StringUtil.h"
-#include "spawn2.h"
-#include "zone.h"
+#include "../common/string_util.h"
+#include "entity.h"
 #include "event_codes.h"
 #include "guild_mgr.h"
-#include "../common/rulesys.h"
-#include "QGlobals.h"
-#include "QuestParserCollection.h"
+#include "net.h"
+#include "qglobals.h"
+#include "queryserv.h"
+#include "questmgr.h"
+#include "quest_parser_collection.h"
+#include "spawn2.h"
+#include "worldserver.h"
+#include "zone.h"
+#include "zonedb.h"
+#include <iostream>
+#include <limits.h>
+#include <list>
 
 #ifdef BOTS
 #include "bot.h"
 #endif
 
-
+extern QueryServ* QServ;
 extern Zone* zone;
 extern WorldServer worldserver;
 extern EntityList entity_list;
 
-#include "questmgr.h"
-
-//declare our global instance
 QuestManager quest_manager;
 
 #define QuestManagerCurrentQuestVars() \
@@ -95,6 +54,7 @@ QuestManager quest_manager;
 	Client *initiator = nullptr; \
 	ItemInst* questitem = nullptr; \
 	bool depop_npc = false; \
+	std::string encounter; \
 	do { \
 		if(!quests_running_.empty()) { \
 			running_quest e = quests_running_.top(); \
@@ -102,6 +62,7 @@ QuestManager quest_manager;
 			initiator = e.initiator; \
 			questitem = e.questitem; \
 			depop_npc = e.depop_npc; \
+			encounter = e.encounter; \
 		} \
 	} while(0)
 
@@ -151,12 +112,13 @@ void QuestManager::Process() {
 	}
 }
 
-void QuestManager::StartQuest(Mob *_owner, Client *_initiator, ItemInst* _questitem) {
+void QuestManager::StartQuest(Mob *_owner, Client *_initiator, ItemInst* _questitem, std::string encounter) {
 	running_quest run;
 	run.owner = _owner;
 	run.initiator = _initiator;
 	run.questitem = _questitem;
 	run.depop_npc = false;
+	run.encounter = encounter;
 	quests_running_.push(run);
 }
 
@@ -173,7 +135,6 @@ void QuestManager::EndQuest() {
 			else
 				++cur;
 		}
-
 		run.owner->Depop();
 	}
 	quests_running_.pop();
@@ -448,7 +409,7 @@ void QuestManager::settimer(const char *timer_name, int seconds) {
 
 	end = QTimerList.end();
 	while (cur != end) {
-		if(cur->mob && cur->mob == owner && cur->name == timer_name) 
+		if(cur->mob && cur->mob == owner && cur->name == timer_name)
 		{
 			cur->Timer_.Enable();
 			cur->Timer_.Start(seconds * 1000, false);
@@ -472,7 +433,7 @@ void QuestManager::settimerMS(const char *timer_name, int milliseconds) {
 
 	end = QTimerList.end();
 	while (cur != end) {
-		if(cur->mob && cur->mob == owner && cur->name == timer_name) 
+		if(cur->mob && cur->mob == owner && cur->name == timer_name)
 		{
 			cur->Timer_.Enable();
 			cur->Timer_.Start(milliseconds, false);
@@ -905,7 +866,7 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 	uint16 book_slot, count;
 	uint16 curspell;
 
-	uint16 Char_ID = initiator->CharacterID();
+	uint32 Char_ID = initiator->CharacterID();
 	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
 	bool SpellGlobalCheckResult = 0;
 
@@ -947,7 +908,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 	uint16 count;
 	uint16 curspell;
 
-	uint16 Char_ID = initiator->CharacterID();
+	uint32 Char_ID = initiator->CharacterID();
 	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
 	bool SpellGlobalCheckResult = 0;
 
@@ -961,7 +922,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 			spells[curspell].skill != 52 &&
 			( !RuleB(Spells, UseCHAScribeHack) || spells[curspell].effectid[EFFECT_COUNT - 1] != 10 )
 		)
-		{
+		{ 
 			if(IsDiscipline(curspell)){
 				//we may want to come up with a function like Client::GetNextAvailableSpellBookSlot() to help speed this up a little
 				for(uint32 r = 0; r < MAX_PP_DISCIPLINES; r++) {
@@ -975,18 +936,20 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 							SpellGlobalCheckResult = initiator->SpellGlobalCheck(curspell, Char_ID);
 							if (SpellGlobalCheckResult) {
 								initiator->GetPP().disciplines.values[r] = curspell;
+								database.SaveCharacterDisc(Char_ID, r, curspell); 
 								initiator->SendDisciplineUpdate();
 								initiator->Message(0, "You have learned a new discipline!");
 								count++;	//success counter
 							}
-							break;	//continue the 1st loop
+							break;	//continue the 1st loop 
 						}
 						else {
-						initiator->GetPP().disciplines.values[r] = curspell;
-						initiator->SendDisciplineUpdate();
-						initiator->Message(0, "You have learned a new discipline!");
-						count++;	//success counter
-						break;	//continue the 1st loop
+							initiator->GetPP().disciplines.values[r] = curspell;
+							database.SaveCharacterDisc(Char_ID, r, curspell);
+							initiator->SendDisciplineUpdate();
+							initiator->Message(0, "You have learned a new discipline!");
+							count++;	//success counter
+							break;	//continue the 1st loop
 						}
 					}	//if we get to this point, there's already a discipline in this slot, so we skip it
 				}
@@ -1289,38 +1252,34 @@ void QuestManager::signal(int npc_id, int wait_ms) {
 
 void QuestManager::setglobal(const char *varname, const char *newvalue, int options, const char *duration) {
 	QuestManagerCurrentQuestVars();
-	int qgZoneid=zone->GetZoneID();
-	int qgCharid=0;
-	int qgNpcid = owner->GetNPCTypeID();
+	int qgZoneid = zone->GetZoneID();
+	int qgCharid = 0;
+	int qgNpcid = owner ? owner->GetNPCTypeID() : 0; // encounter scripts don't have an owner
 
 	/*	options value determines the availability of global variables to NPCs when a quest begins
-	------------------------------------------------------------------
-		value		npcid		player		zone
-	------------------------------------------------------------------
-		0			this		this		this
-		1			all			this		this
-		2			this		all			this
-		3			all			all			this
-		4			this		this		all
-		5			all			this		all
-		6			this		all			all
-		7			all			all			all
+		------------------------------------------------------------------
+			value		npcid		player		zone
+		------------------------------------------------------------------
+			0			this		this		this
+			1			all			this		this
+			2			this		all			this
+			3			all			all			this
+			4			this		this		all
+			5			all			this		all
+			6			this		all			all
+			7			all			all			all
 	*/
-	if (initiator && initiator->IsClient()) // some events like waypoint and spawn don't have a player involved
-	{
+
+	if (initiator && initiator->IsClient()){ // some events like waypoint and spawn don't have a player involved
 		qgCharid=initiator->CharacterID();
 	}
-
-	else
-	{
+	else {
 		qgCharid=-qgNpcid;		// make char id negative npc id as a fudge
 	}
-	if (options < 0 || options > 7)
-	{
+	if (options < 0 || options > 7) {
 		std::cerr << "Invalid options for global var " << varname << " using defaults" << std::endl;
 	}	// default = 0 (only this npcid,player and zone)
-	else
-	{
+	else {
 		if (options & 1)
 			qgNpcid=0;
 		if (options & 2)
@@ -1330,143 +1289,130 @@ void QuestManager::setglobal(const char *varname, const char *newvalue, int opti
 	}
 
 	InsertQuestGlobal(qgCharid, qgNpcid, qgZoneid, varname, newvalue, QGVarDuration(duration));
+
+	/* QS: PlayerLogQGlobalUpdate */
+	if (RuleB(QueryServ, PlayerLogQGlobalUpdate) && qgCharid && qgCharid > 0 && initiator && initiator->IsClient()){
+		std::string event_desc = StringFormat("Update :: qglobal:%s to qvalue:%s zoneid:%i instid:%i", varname, newvalue, initiator->GetZoneID(), initiator->GetInstanceID());
+		QServ->PlayerLogEvent(Player_Log_QGlobal_Update, qgCharid, event_desc);
+	}
 }
 
 /* Inserts global variable into quest_globals table */
-int QuestManager::InsertQuestGlobal(
-									int charid, int npcid, int zoneid,
-									const char *varname, const char *varvalue,
-									int duration)
-{
-	char *query = 0;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+int QuestManager::InsertQuestGlobal(int charid, int npcid, int zoneid, const char *varname, const char *varvalue, int duration) {
 
 	// Make duration string either "unix_timestamp(now()) + xxx" or "NULL"
-	std::stringstream duration_ss;
-	if (duration == INT_MAX)
-	{
-		duration_ss << "NULL";
-	}
-	else
-	{
-		duration_ss << "unix_timestamp(now()) + " << duration;
-	}
+	std::string durationText = (duration == INT_MAX)? "NULL": StringFormat("unix_timestamp(now()) + %i", duration);
 
-	//NOTE: this should be escaping the contents of arglist
-	//npcwise a malicious script can arbitrarily alter the DB
-	uint32 last_id = 0;
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"REPLACE INTO quest_globals (charid, npcid, zoneid, name, value, expdate)"
-		"VALUES (%i, %i, %i, '%s', '%s', %s)",
-		charid, npcid, zoneid, varname, varvalue, duration_ss.str().c_str()
-		), errbuf, nullptr, nullptr, &last_id))
-	{
-		std::cerr << "setglobal error inserting " << varname << " : " << errbuf << std::endl;
-	}
-	safe_delete_array(query);
+	/*
+		NOTE: this should be escaping the contents of arglist
+		npcwise a malicious script can arbitrarily alter the DB
+	*/
 
-	if(zone)
-	{
-		//first delete our global
-		ServerPacket* pack = new ServerPacket(ServerOP_QGlobalDelete, sizeof(ServerQGlobalDelete_Struct));
-		ServerQGlobalDelete_Struct *qgd = (ServerQGlobalDelete_Struct*)pack->pBuffer;
-		qgd->npc_id = npcid;
-		qgd->char_id = charid;
-		qgd->zone_id = zoneid;
-		qgd->from_zone_id = zone->GetZoneID();
-		qgd->from_instance_id = zone->GetInstanceID();
-		strcpy(qgd->name, varname);
+	std::string query = StringFormat("REPLACE INTO quest_globals "
+                                    "(charid, npcid, zoneid, name, value, expdate)"
+                                    "VALUES (%i, %i, %i, '%s', '%s', %s)",
+                                    charid, npcid, zoneid, varname, varvalue, durationText.c_str());
+    auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		std::cerr << "setglobal error inserting " << varname << " : " << results.ErrorMessage() << std::endl;
 
-		entity_list.DeleteQGlobal(std::string((char*)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
-		zone->DeleteQGlobal(std::string((char*)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
+	if(!zone)
+        return 0;
 
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
+    /* Delete existing qglobal data and update zone processes */
+    ServerPacket* pack = new ServerPacket(ServerOP_QGlobalDelete, sizeof(ServerQGlobalDelete_Struct));
+    ServerQGlobalDelete_Struct *qgd = (ServerQGlobalDelete_Struct*)pack->pBuffer;
+    qgd->npc_id = npcid;
+    qgd->char_id = charid;
+    qgd->zone_id = zoneid;
+    qgd->from_zone_id = zone->GetZoneID();
+    qgd->from_instance_id = zone->GetInstanceID();
+    strcpy(qgd->name, varname);
 
-		//then create a new one with the new id
-		pack = new ServerPacket(ServerOP_QGlobalUpdate, sizeof(ServerQGlobalUpdate_Struct));
-		ServerQGlobalUpdate_Struct *qgu = (ServerQGlobalUpdate_Struct*)pack->pBuffer;
-		qgu->npc_id = npcid;
-		qgu->char_id = charid;
-		qgu->zone_id = zoneid;
-		if(duration == INT_MAX)
-		{
-			qgu->expdate = 0xFFFFFFFF;
-		}
-		else
-		{
-			qgu->expdate = Timer::GetTimeSeconds() + duration;
-		}
-		strcpy((char*)qgu->name, varname);
-		strn0cpy((char*)qgu->value, varvalue, 128);
-		qgu->id = last_id;
-		qgu->from_zone_id = zone->GetZoneID();
-		qgu->from_instance_id = zone->GetInstanceID();
+    entity_list.DeleteQGlobal(std::string((char*)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
+    zone->DeleteQGlobal(std::string((char*)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
 
-		QGlobal temp;
-		temp.npc_id = npcid;
-		temp.char_id = charid;
-		temp.zone_id = zoneid;
-		temp.expdate = qgu->expdate;
-		temp.name.assign(qgu->name);
-		temp.value.assign(qgu->value);
-		entity_list.UpdateQGlobal(qgu->id, temp);
-		zone->UpdateQGlobal(qgu->id, temp);
+    worldserver.SendPacket(pack);
+    safe_delete(pack);
 
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
+    /* Create new qglobal data and update zone processes */
+    pack = new ServerPacket(ServerOP_QGlobalUpdate, sizeof(ServerQGlobalUpdate_Struct));
+	ServerQGlobalUpdate_Struct *qgu = (ServerQGlobalUpdate_Struct*)pack->pBuffer;
+	qgu->npc_id = npcid;
+	qgu->char_id = charid;
+	qgu->zone_id = zoneid;
+
+	qgu->expdate = (duration == INT_MAX)? 0xFFFFFFFF: Timer::GetTimeSeconds() + duration;
+
+    strcpy((char*)qgu->name, varname);
+    strn0cpy((char*)qgu->value, varvalue, 128);
+	qgu->id = results.LastInsertedID();
+	qgu->from_zone_id = zone->GetZoneID();
+	qgu->from_instance_id = zone->GetInstanceID();
+
+	QGlobal temp;
+	temp.npc_id = npcid;
+	temp.char_id = charid;
+	temp.zone_id = zoneid;
+	temp.expdate = qgu->expdate;
+	temp.name.assign(qgu->name);
+	temp.value.assign(qgu->value);
+	entity_list.UpdateQGlobal(qgu->id, temp);
+	zone->UpdateQGlobal(qgu->id, temp);
+
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
 
 	return 0;
 }
 
-void QuestManager::targlobal(const char *varname, const char *value, const char *duration, int qgNpcid, int qgCharid, int qgZoneid)
-{
+void QuestManager::targlobal(const char *varname, const char *value, const char *duration, int qgNpcid, int qgCharid, int qgZoneid) {
 	InsertQuestGlobal(qgCharid, qgNpcid, qgZoneid, varname, value, QGVarDuration(duration));
 }
 
 void QuestManager::delglobal(const char *varname) {
 	QuestManagerCurrentQuestVars();
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	int qgZoneid=zone->GetZoneID();
-	int qgCharid=0;
-	int qgNpcid=owner->GetNPCTypeID();
+	int qgZoneid = zone->GetZoneID();
+	int qgCharid = 0;
+	int qgNpcid = owner ? owner->GetNPCTypeID() : 0; // encounter scripts don't have an owner
+
 	if (initiator && initiator->IsClient()) // some events like waypoint and spawn don't have a player involved
-	{
 		qgCharid=initiator->CharacterID();
-	}
-
 	else
-	{
 		qgCharid=-qgNpcid;		// make char id negative npc id as a fudge
+
+	/* QS: PlayerLogQGlobalUpdate */
+	if (RuleB(QueryServ, PlayerLogQGlobalUpdate) && qgCharid && qgCharid > 0 && initiator && initiator->IsClient()){
+		std::string event_desc = StringFormat("Deleted :: qglobal:%s zoneid:%i instid:%i", varname, initiator->GetZoneID(), initiator->GetInstanceID());
+		QServ->PlayerLogEvent(Player_Log_QGlobal_Update, qgCharid, event_desc);
 	}
-	if (!database.RunQuery(query,
-		MakeAnyLenString(&query,
-		"DELETE FROM quest_globals WHERE name='%s'"
-		" && (npcid=0 || npcid=%i) && (charid=0 || charid=%i) && (zoneid=%i || zoneid=0)",
-		varname,qgNpcid,qgCharid,qgZoneid),errbuf))
-	{
-		std::cerr << "delglobal error deleting " << varname << " : " << errbuf << std::endl;
-	}
-	safe_delete_array(query);
 
-	if(zone)
-	{
-		ServerPacket* pack = new ServerPacket(ServerOP_QGlobalDelete, sizeof(ServerQGlobalDelete_Struct));
-		ServerQGlobalDelete_Struct *qgu = (ServerQGlobalDelete_Struct*)pack->pBuffer;
+    std::string query = StringFormat("DELETE FROM quest_globals "
+                                    "WHERE name = '%s' "
+                                    "&& (npcid=0 || npcid=%i) "
+                                    "&& (charid=0 || charid=%i) "
+                                    "&& (zoneid=%i || zoneid=0)",
+                                    varname, qgNpcid, qgCharid, qgZoneid);
+    auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		std::cerr << "delglobal error deleting " << varname << " : " << results.ErrorMessage() << std::endl;
 
-		qgu->npc_id = qgNpcid;
-		qgu->char_id = qgCharid;
-		qgu->zone_id = qgZoneid;
-		strcpy(qgu->name, varname);
+	if(!zone)
+        return;
 
-		entity_list.DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
-		zone->DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
+    ServerPacket* pack = new ServerPacket(ServerOP_QGlobalDelete, sizeof(ServerQGlobalDelete_Struct));
+    ServerQGlobalDelete_Struct *qgu = (ServerQGlobalDelete_Struct*)pack->pBuffer;
 
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
+    qgu->npc_id = qgNpcid;
+    qgu->char_id = qgCharid;
+    qgu->zone_id = qgZoneid;
+    strcpy(qgu->name, varname);
+
+    entity_list.DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
+    zone->DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
+
+    worldserver.SendPacket(pack);
+    safe_delete(pack);
 }
 
 // Converts duration string to duration value (in seconds)
@@ -1687,11 +1633,6 @@ void QuestManager::showgrid(int grid) {
 	if(initiator == nullptr)
 		return;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
 	FindPerson_Point pt;
 	std::vector<FindPerson_Point> pts;
 
@@ -1701,25 +1642,25 @@ void QuestManager::showgrid(int grid) {
 	pts.push_back(pt);
 
 	// Retrieve all waypoints for this grid
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `x`,`y`,`z` FROM grid_entries WHERE `gridid`=%i AND `zoneid`=%i ORDER BY `number`",grid,zone->GetZoneID()),errbuf,&result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			pt.x = atof(row[0]);
-			pt.y = atof(row[1]);
-			pt.z = atof(row[2]);
-			pts.push_back(pt);
-		}
-		mysql_free_result(result);
-
-		initiator->SendPathPacket(pts);
-	}
-	else	// DB query error!
-	{
-		LogFile->write(EQEMuLog::Quest, "Error loading grid %d for showgrid(): %s", grid, errbuf);
+	std::string query = StringFormat("SELECT `x`,`y`,`z` FROM grid_entries "
+                                    "WHERE `gridid` = %i AND `zoneid` = %i "
+                                    "ORDER BY `number`", grid, zone->GetZoneID());
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+        LogFile->write(EQEMuLog::Quest, "Error loading grid %d for showgrid(): %s", grid, results.ErrorMessage().c_str());
 		return;
-	}
-	safe_delete_array(query);
+    }
+
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        pt.x = atof(row[0]);
+        pt.y = atof(row[1]);
+        pt.z = atof(row[2]);
+
+        pts.push_back(pt);
+    }
+
+    initiator->SendPathPacket(pts);
+
 }
 
 //change the value of a spawn condition
@@ -1762,7 +1703,7 @@ bool QuestManager::summonburriedplayercorpse(uint32 char_id, float dest_x, float
 	bool Result = false;
 
 	if(char_id > 0) {
-		Corpse* PlayerCorpse = database.SummonBurriedPlayerCorpse(char_id, zone->GetZoneID(), zone->GetInstanceID(), dest_x, dest_y, dest_z, dest_heading);
+		Corpse* PlayerCorpse = database.SummonBuriedCharacterCorpses(char_id, zone->GetZoneID(), zone->GetInstanceID(), dest_x, dest_y, dest_z, dest_heading);
 		if(PlayerCorpse) {
 			Result = true;
 		}
@@ -1785,7 +1726,7 @@ uint32 QuestManager::getplayerburriedcorpsecount(uint32 char_id) {
 	uint32 Result = 0;
 
 	if(char_id > 0) {
-		Result = database.GetPlayerBurriedCorpseCount(char_id);
+		Result = database.GetCharacterBuriedCorpseCount(char_id);
 	}
 	return Result;
 }
@@ -1799,12 +1740,12 @@ bool QuestManager::buryplayercorpse(uint32 char_id)
 		uint32 PlayerCorpse = database.GetFirstCorpseID(char_id);
 		if(PlayerCorpse > 0)
 		{
-			database.BuryPlayerCorpse(PlayerCorpse);
+			database.BuryCharacterCorpse(PlayerCorpse);
 			Corpse* corpse = entity_list.GetCorpseByDBID(PlayerCorpse);
 			if(corpse)
 			{
 				corpse->Save();
-				corpse->DepopCorpse();
+				corpse->DepopPlayerCorpse();
 			}
 			else
 			{
@@ -2295,19 +2236,19 @@ bool QuestManager::istaskappropriate(int task) {
 }
 
 void QuestManager::clearspawntimers() {
-	if(zone) {
-		//TODO: Dec 19, 2008, replace with code updated for current spawn timers.
-		LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
-		iterator.Reset();
-		while (iterator.MoreElements())
-		{
-			char errbuf[MYSQL_ERRMSG_SIZE];
-			char *query = 0;
-			database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM respawn_times WHERE id=%lu AND "
-				"instance_id=%lu",(unsigned long)iterator.GetData()->GetID(), (unsigned long)zone->GetInstanceID()), errbuf);
-			safe_delete_array(query);
-			iterator.Advance();
-		}
+	if(!zone)
+        return;
+
+	//TODO: Dec 19, 2008, replace with code updated for current spawn timers.
+    LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
+	iterator.Reset();
+	while (iterator.MoreElements()) {
+		std::string query = StringFormat("DELETE FROM respawn_times "
+                                        "WHERE id = %lu AND instance_id = %lu",
+                                        (unsigned long)iterator.GetData()->GetID(),
+                                        (unsigned long)zone->GetInstanceID());
+        auto results = database.QueryDatabase(query);
+		iterator.Advance();
 	}
 }
 
@@ -2566,7 +2507,7 @@ void QuestManager::DestroyInstance(uint16 instance_id)
 uint16 QuestManager::GetInstanceID(const char *zone, int16 version)
 {
 	QuestManagerCurrentQuestVars();
-	if(initiator)
+	if (initiator)
 	{
 		return database.GetInstanceID(zone, initiator->CharacterID(), version);
 	}
@@ -2576,7 +2517,7 @@ uint16 QuestManager::GetInstanceID(const char *zone, int16 version)
 void QuestManager::AssignToInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
-	if(initiator)
+	if (initiator)
 	{
 		database.AddClientToInstance(instance_id, initiator->CharacterID());
 	}
@@ -2585,10 +2526,10 @@ void QuestManager::AssignToInstance(uint16 instance_id)
 void QuestManager::AssignGroupToInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
-	if(initiator)
+	if (initiator)
 	{
 		Group *g = initiator->GetGroup();
-		if(g)
+		if (g)
 		{
 			uint32 gid = g->GetID();
 			database.AssignGroupToInstance(gid, instance_id);
@@ -2599,7 +2540,7 @@ void QuestManager::AssignGroupToInstance(uint16 instance_id)
 void QuestManager::AssignRaidToInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
-	if(initiator)
+	if (initiator)
 	{
 		Raid *r = initiator->GetRaid();
 		if(r)
@@ -2613,36 +2554,28 @@ void QuestManager::AssignRaidToInstance(uint16 instance_id)
 void QuestManager::RemoveFromInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
-	if(initiator) {
-		if(database.RemoveClientFromInstance(instance_id, initiator->CharacterID())) {
+	if (initiator)
+	{
+		if (database.RemoveClientFromInstance(instance_id, initiator->CharacterID()))
 			initiator->Message(MT_Say, "Removed client from instance.");
-		} else {
+		else
 			initiator->Message(MT_Say, "Failed to remove client from instance.");
-		}
 	}
 }
 
 void QuestManager::RemoveAllFromInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
-	if(initiator) {
+	if (initiator)
+	{
 		std::list<uint32> charid_list;
-		bool removed_all = true;
-		uint16 fail_count = 0;
-		database.GetCharactersInInstance(instance_id,charid_list);
-		auto iter = charid_list.begin();
-		while(iter != charid_list.end()) {
-			if(!database.RemoveClientFromInstance(instance_id, *iter)) {
-				removed_all = false;
-				++fail_count;
-			}
-			++iter;
-		}
-		if (removed_all) {
+
+		if (database.RemoveClientsFromInstance(instance_id))
 			initiator->Message(MT_Say, "Removed all players from instance.");
-		} else {
-			// once the expedition system is in, this message it not relevant
-			initiator->Message(MT_Say, "Failed to remove %i player(s) from instance.", fail_count);
+		else
+		{
+			database.GetCharactersInInstance(instance_id, charid_list);
+			initiator->Message(MT_Say, "Failed to remove %i player(s) from instance.", charid_list.size()); // once the expedition system is in, this message it not relevant
 		}
 	}
 }
@@ -2684,11 +2617,6 @@ void QuestManager::FlagInstanceByRaidLeader(uint32 zone, int16 version)
 const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkName) {
 	QuestManagerCurrentQuestVars();
 
-	const char *ERR_MYSQLERROR = "Error in saylink phrase queries";
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 	int sayid = 0;
 
 	int sz = strlen(Phrase);
@@ -2696,70 +2624,50 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 	database.DoEscapeString(escaped_string, Phrase, sz);
 
 	// Query for an existing phrase and id in the saylink table
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `id` FROM `saylink` WHERE `phrase` = '%s'", escaped_string),errbuf,&result))
-	{
-		if (mysql_num_rows(result) >= 1)
-		{
-			while((row = mysql_fetch_row(result)))
-			{
+	std::string query = StringFormat("SELECT `id` FROM `saylink` WHERE `phrase` = '%s'", escaped_string);
+	auto results = database.QueryDatabase(query);
+	if (results.Success()) {
+		if (results.RowCount() >= 1) {
+			for (auto row = results.begin();row != results.end(); ++row)
 				sayid = atoi(row[0]);
-			}
-			mysql_free_result(result);
-		}
-		else // Add a new saylink entry to the database and query it again for the new sayid number
-		{
-			safe_delete_array(query);
-
-			database.RunQuery(query,MakeAnyLenString(&query,"INSERT INTO `saylink` (`phrase`) VALUES ('%s')", escaped_string),errbuf);
-			safe_delete_array(query);
-
-			if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `id` FROM saylink WHERE `phrase` = '%s'", escaped_string),errbuf,&result))
-			{
-				if (mysql_num_rows(result) >= 1)
-				{
-					while((row = mysql_fetch_row(result)))
-					{
-						sayid = atoi(row[0]);
-					}
-					mysql_free_result(result);
+		} else { // Add a new saylink entry to the database and query it again for the new sayid number
+			std::string insert_query = StringFormat("INSERT INTO `saylink` (`phrase`) VALUES ('%s')", escaped_string);
+			results = database.QueryDatabase(insert_query);
+			if (!results.Success()) {
+				LogFile->write(EQEMuLog::Error, "Error in saylink phrase queries", results.ErrorMessage().c_str());
+			} else {
+				results = database.QueryDatabase(query);
+				if (results.Success()) {
+					if (results.RowCount() >= 1)
+						for(auto row = results.begin(); row != results.end(); ++row)
+							sayid = atoi(row[0]);
+				} else {
+					LogFile->write(EQEMuLog::Error, "Error in saylink phrase queries", results.ErrorMessage().c_str());
 				}
 			}
-			else
-			{
-				LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, errbuf);
-			}
-			safe_delete_array(query);
 		}
 	}
-	safe_delete_array(query);
 	safe_delete_array(escaped_string);
 
-	if(silent)
+	if (silent)
 		sayid = sayid + 750000;
 	else
 		sayid = sayid + 500000;
 
-		//Create the say link as an item link hash
-		char linktext[250];
+	//Create the say link as an item link hash
+	char linktext[250];
 
-	if(initiator)
-	{
+	if (initiator) {
 		if (initiator->GetClientVersion() >= EQClientRoF)
-		{
 			sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"0000000000000000000000000000000000000000000000000",LinkName,0x12);
-		}
 		else if (initiator->GetClientVersion() >= EQClientSoF)
-		{
 			sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"00000000000000000000000000000000000000000000",LinkName,0x12);
-		}
 		else
-		{
 			sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"000000000000000000000000000000000000000",LinkName,0x12);
-		}
-	}
-	else {	// If no initiator, create an RoF saylink, since older clients handle RoF ones better than RoF handles older ones.
+	} else { // If no initiator, create an RoF saylink, since older clients handle RoF ones better than RoF handles older ones.
 		sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"0000000000000000000000000000000000000000000000000",LinkName,0x12);
 	}
+
 	strcpy(Phrase,linktext);
 	return Phrase;
 
@@ -2951,6 +2859,15 @@ const char* QuestManager::GetZoneLongName(const char *zone) {
 	return ln.c_str();
 }
 
+void QuestManager::CrossZoneSignalNPCByNPCTypeID(uint32 npctype_id, uint32 data){
+	ServerPacket* pack = new ServerPacket(ServerOP_CZSignalNPC, sizeof(CZNPCSignal_Struct));
+	CZNPCSignal_Struct* CZSN = (CZNPCSignal_Struct*)pack->pBuffer;
+	CZSN->npctype_id = npctype_id;
+	CZSN->data = data;
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
 void QuestManager::CrossZoneSignalPlayerByCharID(int charid, uint32 data){
 	ServerPacket* pack = new ServerPacket(ServerOP_CZSignalClient, sizeof(CZClientSignal_Struct));
 	CZClientSignal_Struct* CZSC = (CZClientSignal_Struct*) pack->pBuffer;
@@ -2968,7 +2885,7 @@ void QuestManager::CrossZoneSignalPlayerByName(const char *CharName, uint32 data
 	CZSC->data = data;
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
-}
+} 
 
 void QuestManager::CrossZoneMessagePlayerByName(uint32 Type, const char *CharName, const char *Message){
 	uint32 message_len = strlen(CharName) + 1;
@@ -2978,6 +2895,18 @@ void QuestManager::CrossZoneMessagePlayerByName(uint32 Type, const char *CharNam
 	CZSC->Type = Type;
 	strn0cpy(CZSC->CharName, CharName, 64);
 	strn0cpy(CZSC->Message, Message, 512);
+	worldserver.SendPacket(pack); 
+	safe_delete(pack);
+}
+
+void QuestManager::CrossZoneSetEntityVariableByNPCTypeID(uint32 npctype_id, const char *id, const char *m_var){
+	uint32 message_len = strlen(id) + 1;
+	uint32 message_len2 = strlen(m_var) + 1;
+	ServerPacket* pack = new ServerPacket(ServerOP_CZSetEntityVariableByNPCTypeID, sizeof(CZSetEntVarByNPCTypeID_Struct) + message_len + message_len2);
+	CZSetEntVarByNPCTypeID_Struct* CZSNBYNID = (CZSetEntVarByNPCTypeID_Struct*)pack->pBuffer;
+	CZSNBYNID->npctype_id = npctype_id;
+	strn0cpy(CZSNBYNID->id, id, 256); 
+	strn0cpy(CZSNBYNID->m_var, m_var, 256);
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }
@@ -3038,4 +2967,13 @@ ItemInst *QuestManager::GetQuestItem() const {
 	}
 
 	return nullptr;
+}
+
+std::string QuestManager::GetEncounter() const {
+	if(!quests_running_.empty()) {
+		running_quest e = quests_running_.top();
+		return e.encounter;
+	}
+
+	return "";
 }

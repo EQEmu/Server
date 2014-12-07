@@ -33,8 +33,6 @@ void ClientLogs::subscribe(EQEMuLog::LogIDs id, Client *c) {
 	if(c == nullptr)
 		return;
 
-	//make sure they arnt allready subscribed.
-
 	std::vector<Client *>::iterator cur,end;
 	cur = entries[id].begin();
 	end = entries[id].end();
@@ -98,6 +96,7 @@ void ClientLogs::msg(EQEMuLog::LogIDs id, const char *buf) {
 	for(; cur != end; ++cur) {
 		if(!(*cur)->InZone())
 			continue;
+
 		(*cur)->Message(CLIENT_LOG_CHANNEL, buf);
 	}
 }

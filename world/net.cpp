@@ -27,22 +27,21 @@
 #include "../common/debug.h"
 #include "../common/queue.h"
 #include "../common/timer.h"
-#include "../common/EQStreamFactory.h"
-#include "../common/EQPacket.h"
-#include "client.h"
-#include "worlddb.h"
+#include "../common/eq_stream_factory.h"
+#include "../common/eq_packet.h"
 #include "../common/seperator.h"
 #include "../common/version.h"
 #include "../common/eqtime.h"
 #include "../common/timeoutmgr.h"
-#include "../common/EQEMuError.h"
+#include "../common/eqemu_error.h"
 #include "../common/opcodemgr.h"
 #include "../common/guilds.h"
-#include "../common/EQStreamIdent.h"
-//#include "../common/patches/Client62.h"
+#include "../common/eq_stream_ident.h"
 #include "../common/rulesys.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
+#include "client.h"
+#include "worlddb.h"
 #ifdef _WINDOWS
 	#include <process.h>
 	#define snprintf	_snprintf
@@ -68,22 +67,21 @@
 
 #endif
 
+#include "../common/emu_tcp_server.h"
+#include "../common/patches/patches.h"
 #include "zoneserver.h"
 #include "console.h"
-#include "LoginServer.h"
-#include "LoginServerList.h"
-#include "EQWHTTPHandler.h"
-#include "../common/dbasync.h"
-#include "../common/EmuTCPServer.h"
-#include "WorldConfig.h"
-#include "../common/patches/patches.h"
+#include "login_server.h"
+#include "login_server_list.h"
+#include "eqw_http_handler.h"
+#include "world_config.h"
 #include "zoneserver.h"
 #include "zonelist.h"
 #include "clientlist.h"
-#include "LauncherList.h"
+#include "launcher_list.h"
 #include "wguild_mgr.h"
 #include "lfplist.h"
-#include "AdventureManager.h"
+#include "adventure_manager.h"
 #include "ucs.h"
 #include "queryserv.h"
 #include "web_interface.h"
@@ -102,7 +100,6 @@ QueryServConnection QSLink;
 WebInterfaceConnection WILink;
 LauncherList launcher_list;
 AdventureManager adventure_manager;
-DBAsync *dbasync = nullptr;
 volatile bool RunLoops = true;
 uint32 numclients = 0;
 uint32 numzones = 0;
@@ -116,6 +113,15 @@ int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformWorld);
 	set_exception_handler();
 	register_remote_call_handlers();
+
+	/* Database Version Check */
+	uint32 Database_Version = CURRENT_BINARY_DATABASE_VERSION;
+	if (argc >= 2) { 
+		if (strcasecmp(argv[1], "db_version") == 0) {
+			std::cout << "Binary Database Version: " << Database_Version << std::endl;
+			return 0;
+		}
+	}
 
 	// Load server configuration
 	_log(WORLD__INIT, "Loading server configuration..");
@@ -179,7 +185,6 @@ int main(int argc, char** argv) {
 		_log(WORLD__INIT_ERR, "Cannot continue without a database connection.");
 		return 1;
 	}
-	dbasync = new DBAsync(&database);
 	guild_mgr.SetDatabase(&database);
 
 	if (argc >= 2) {
@@ -226,9 +231,8 @@ int main(int argc, char** argv) {
 		else if (strcasecmp(argv[1], "flag") == 0) {
 			if (argc == 4) {
 				if (Seperator::IsNumber(argv[3])) {
-
 					if (atoi(argv[3]) >= 0 && atoi(argv[3]) <= 255) {
-						if (database.SetAccountStatus(argv[2], atoi(argv[3]))) {
+						if (database.SetAccountStatus(argv[2], atoi(argv[3]))){
 							std::cout << "Account flagged: Username='" << argv[2] << "', status=" << argv[3] << std::endl;
 							return 0;
 						}
@@ -280,6 +284,8 @@ int main(int argc, char** argv) {
 		_log(WORLD__INIT, "HTTP world service disabled.");
 	}
 
+	_log(WORLD__INIT, "Checking Database Conversions..");
+	database.CheckDatabaseConversions(); 
 	_log(WORLD__INIT, "Loading variables..");
 	database.LoadVariables();
 	_log(WORLD__INIT, "Loading zones..");
@@ -289,10 +295,13 @@ int main(int argc, char** argv) {
 	_log(WORLD__INIT, "Clearing raids..");
 	database.ClearRaid();
 	database.ClearRaidDetails();
+	database.ClearRaidLeader();
 	_log(WORLD__INIT, "Loading items..");
-	if (!database.LoadItems()) {
+	if (!database.LoadItems())
 		_log(WORLD__INIT_ERR, "Error: Could not load item data. But ignoring");
-	}
+	_log(WORLD__INIT, "Loading skill caps..");
+	if (!database.LoadSkillCaps())
+		_log(WORLD__INIT_ERR, "Error: Could not load skill cap data. But ignoring");
 	_log(WORLD__INIT, "Loading guilds..");
 	guild_mgr.LoadGuilds();
 	//rules:
@@ -330,9 +339,6 @@ int main(int argc, char** argv) {
 	_log(WORLD__INIT, "Reboot zone modes %s",holdzones ? "ON" : "OFF");
 
 	_log(WORLD__INIT, "Deleted %i stale player corpses from database", database.DeleteStalePlayerCorpses());
-	if (RuleB(World, DeleteStaleCorpeBackups) == true) {
-	_log(WORLD__INIT, "Deleted %i stale player backups from database", database.DeleteStalePlayerBackups());
-	}
 
 	_log(WORLD__INIT, "Loading adventures...");
 	if(!adventure_manager.LoadAdventureTemplates())

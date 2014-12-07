@@ -20,13 +20,13 @@
 
 #include "../common/debug.h"
 #include "../common/seperator.h"
-#include "../common/MiscFunctions.h"
-#include "../common/StringUtil.h"
+#include "../common/misc_functions.h"
+#include "../common/string_util.h"
 #include "../common/features.h"
 #include "masterentity.h"
 #include "embparser.h"
 #include "questmgr.h"
-#include "QGlobals.h"
+#include "qglobals.h"
 #include "zone.h"
 #include <algorithm>
 #include <sstream>
@@ -154,7 +154,7 @@ void PerlembParser::ReloadQuests() {
 }
 
 int PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, ItemInst* iteminst, Mob* mob, 
-	uint32 extradata, bool global, std::vector<void*> *extra_pointers)
+	uint32 extradata, bool global, std::vector<EQEmu::Any> *extra_pointers)
 {
 	if(!perl)
 		return 0;
@@ -211,32 +211,32 @@ int PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * da
 }
 
 int PerlembParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-							std::vector<void*> *extra_pointers) {
+							std::vector<EQEmu::Any> *extra_pointers) {
 	return EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, false, extra_pointers);
 }
 
 int PerlembParser::EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-								  std::vector<void*> *extra_pointers) {
+								  std::vector<EQEmu::Any> *extra_pointers) {
 	return EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, true, extra_pointers);
 }
 
 int PerlembParser::EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-								std::vector<void*> *extra_pointers) {
+								std::vector<EQEmu::Any> *extra_pointers) {
 	return EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, false, extra_pointers);
 }
 
 int PerlembParser::EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-									std::vector<void*> *extra_pointers) {
+									std::vector<EQEmu::Any> *extra_pointers) {
 	return EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, true, extra_pointers);
 }
 
 int PerlembParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
-							std::vector<void*> *extra_pointers) {
+							std::vector<EQEmu::Any> *extra_pointers) {
 	return EventCommon(evt, item->GetID(), nullptr, nullptr, item, client, extra_data, false, extra_pointers);
 }
 
 int PerlembParser::EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
-							std::vector<void*> *extra_pointers) {
+							std::vector<EQEmu::Any> *extra_pointers) {
 	return EventCommon(evt, 0, itoa(spell_id), npc, nullptr, client, extra_data, false, extra_pointers);
 }
 
@@ -1114,7 +1114,7 @@ void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob) {
 #undef HASITEM_ISNULLITEM
 
 void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID event, uint32 objid, const char * data, 
-	NPC* npcmob, ItemInst* iteminst, Mob* mob, uint32 extradata, std::vector<void*> *extra_pointers) 
+	NPC* npcmob, ItemInst* iteminst, Mob* mob, uint32 extradata, std::vector<EQEmu::Any> *extra_pointers) 
 {
 	switch (event) {
 		case EVENT_SAY: {
@@ -1130,8 +1130,10 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 
 		case EVENT_TRADE: {
 			if(extra_pointers) {
-				for(size_t i = 0; i < extra_pointers->size(); ++i) {
-					ItemInst *inst = reinterpret_cast<ItemInst*>(extra_pointers->at(i));
+				size_t sz = extra_pointers->size();
+				for(size_t i = 0; i < sz; ++i) {
+					ItemInst *inst = EQEmu::any_cast<ItemInst*>(extra_pointers->at(i));
+
 					std::string var_name = "item";
 					var_name += std::to_string(static_cast<long long>(i + 1));
 

@@ -22,14 +22,16 @@
 #ifdef EMBPERL_XS
 
 #include "../common/debug.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 #include "embparser.h"
 #include "questmgr.h"
 #include "embxs.h"
 #include "entity.h"
 #include "zone.h"
+#include "queryserv.h"
 
 extern Zone* zone;
+extern QueryServ* QServ; 
 
 /*
 
@@ -2857,14 +2859,54 @@ XS(XS__GetInstanceID) {
 	XSRETURN_UV(id);
 }
 
+XS(XS__GetCharactersInInstance);
+XS(XS__GetCharactersInInstance) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: GetCharactersInInstance(instance_id)");
+	dXSTARG;
+
+	Const_char * RETVAL;
+	uint16 instance_id = (int)SvUV(ST(0));
+	std::list<uint32> charid_list;
+	std::string charid_string;
+
+	database.GetCharactersInInstance(instance_id, charid_list);
+
+	if (charid_list.size() > 0)
+	{
+		charid_string = itoa(charid_list.size());
+		charid_string += " player(s) in instance: ";
+		auto iter = charid_list.begin();
+		while (iter != charid_list.end())
+		{
+			char char_name[64];
+			database.GetCharName(*iter, char_name);
+			charid_string += char_name;
+			charid_string += "(";
+			charid_string += itoa(*iter);
+			charid_string += ")";
+			++iter;
+			if (iter != charid_list.end())
+				charid_string += ", ";
+		}
+		RETVAL = charid_string.c_str();
+	}
+	else
+		RETVAL = "No players in that instance.";
+
+	sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
+	XSRETURN(1);
+}
+
 XS(XS__AssignToInstance);
 XS(XS__AssignToInstance) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: AssignToInstance(id)");
+		Perl_croak(aTHX_ "Usage: AssignToInstance(instance_id)");
 
-	uint16 id = (int)SvUV(ST(0));
-	quest_manager.AssignToInstance(id);
+	uint16 instance_id = (int)SvUV(ST(0));
+	quest_manager.AssignToInstance(instance_id);
 
 	XSRETURN_EMPTY;
 }
@@ -2873,10 +2915,10 @@ XS(XS__AssignGroupToInstance);
 XS(XS__AssignGroupToInstance) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: AssignGroupToInstance(id)");
+		Perl_croak(aTHX_ "Usage: AssignGroupToInstance(instance_id)");
 
-	uint16 id = (int)SvUV(ST(0));
-	quest_manager.AssignGroupToInstance(id);
+	uint16 instance_id = (int)SvUV(ST(0));
+	quest_manager.AssignGroupToInstance(instance_id);
 
 	XSRETURN_EMPTY;
 }
@@ -2885,10 +2927,34 @@ XS(XS__AssignRaidToInstance);
 XS(XS__AssignRaidToInstance) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: AssignRaidToInstance(id)");
+		Perl_croak(aTHX_ "Usage: AssignRaidToInstance(instance_id)");
 
-	uint16 id = (int)SvUV(ST(0));
-	quest_manager.AssignRaidToInstance(id);
+	uint16 instance_id = (int)SvUV(ST(0));
+	quest_manager.AssignRaidToInstance(instance_id);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__RemoveFromInstance);
+XS(XS__RemoveFromInstance) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: RemoveFromInstance(instance_id)");
+
+	uint16 instance_id = (int)SvUV(ST(0));
+	quest_manager.RemoveFromInstance(instance_id);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__RemoveAllFromInstance);
+XS(XS__RemoveAllFromInstance) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: RemoveAllFromInstance(instance_id)");
+
+	uint16 instance_id = (int)SvUV(ST(0));
+	quest_manager.RemoveAllFromInstance(instance_id);
 
 	XSRETURN_EMPTY;
 }
@@ -3370,6 +3436,71 @@ XS(XS__clear_npctype_cache)
 	XSRETURN_EMPTY;
 }
 
+XS(XS__qs_send_query);
+XS(XS__qs_send_query)
+{
+	dXSARGS;
+	if (items != 1){
+		Perl_croak(aTHX_ "Usage: qs_send_query(query)");
+	}
+	else{
+		// char *Query = (char *)SvPV_nolen(ST(0));
+		std::string Query = (std::string)SvPV_nolen(ST(0));
+		QServ->SendQuery(Query);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS__qs_player_event);
+XS(XS__qs_player_event)
+{
+	dXSARGS;
+	if (items != 2){ 
+		Perl_croak(aTHX_ "Usage: qs_player_event(char_id, event_desc)");
+	}
+	else{
+		int	char_id = (int)SvIV(ST(0)); 
+		std::string event_desc = (std::string)SvPV_nolen(ST(1));
+		QServ->PlayerLogEvent(Player_Log_Quest, char_id, event_desc);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonesetentityvariablebynpctypeid);
+XS(XS__crosszonesetentityvariablebynpctypeid)
+{
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: crosszonesetentityvariablebynpctypeid(npctype_id, id, m_var)");
+
+	if (items == 3) {
+		uint32 npctype_id = (uint32)SvIV(ST(0));
+		const char *id = (const char *)SvPV_nolen(ST(1));
+		const char *m_var = (const char *)SvPV_nolen(ST(2));
+		quest_manager.CrossZoneSetEntityVariableByNPCTypeID(npctype_id, id, m_var);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonesignalnpcbynpctypeid);
+XS(XS__crosszonesignalnpcbynpctypeid)
+{
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: crosszonesignalnpcbynpctypeid(npctype_id, data)");
+
+	if (items == 2) {
+		uint32 npctype_id = (uint32)SvIV(ST(0));
+		uint32 data = (uint32)SvIV(ST(1)); 
+		quest_manager.CrossZoneSignalNPCByNPCTypeID(npctype_id, data);
+	}
+
+	XSRETURN_EMPTY;
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -3561,9 +3692,12 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "CreateInstance"), XS__CreateInstance, file);
 		newXS(strcpy(buf, "DestroyInstance"), XS__DestroyInstance, file);
 		newXS(strcpy(buf, "GetInstanceID"), XS__GetInstanceID, file);
+		newXS(strcpy(buf, "GetCharactersInInstance"), XS__GetCharactersInInstance, file);
 		newXS(strcpy(buf, "AssignToInstance"), XS__AssignToInstance, file);
 		newXS(strcpy(buf, "AssignGroupToInstance"), XS__AssignGroupToInstance, file);
 		newXS(strcpy(buf, "AssignRaidToInstance"), XS__AssignRaidToInstance, file);
+		newXS(strcpy(buf, "RemoveFromInstance"), XS__RemoveFromInstance, file);
+		newXS(strcpy(buf, "RemoveAllFromInstance"), XS__RemoveAllFromInstance, file);
 		newXS(strcpy(buf, "MovePCInstance"), XS__MovePCInstance, file);
 		newXS(strcpy(buf, "FlagInstanceByGroupLeader"), XS__FlagInstanceByGroupLeader, file);
 		newXS(strcpy(buf, "FlagInstanceByRaidLeader"), XS__FlagInstanceByRaidLeader, file);
@@ -3591,6 +3725,10 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "enablerecipe"), XS__enablerecipe, file);
 		newXS(strcpy(buf, "disablerecipe"), XS__disablerecipe, file);
 		newXS(strcpy(buf, "clear_npctype_cache"), XS__clear_npctype_cache, file);
+		newXS(strcpy(buf, "qs_send_query"), XS__qs_send_query, file); 
+		newXS(strcpy(buf, "qs_player_event"), XS__qs_player_event, file); 
+		newXS(strcpy(buf, "crosszonesetentityvariablebynpctypeid"), XS__crosszonesetentityvariablebynpctypeid, file);
+		newXS(strcpy(buf, "crosszonesignalnpcbynpctypeid"), XS__crosszonesignalnpcbynpctypeid, file);
 		XSRETURN_YES;
 }
 

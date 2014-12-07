@@ -1,6 +1,6 @@
 #include "../common/debug.h"
 #include "web_interface.h"
-#include "WorldConfig.h"
+#include "world_config.h"
 #include "clientlist.h"
 #include "zonelist.h"
 #include "zoneserver.h"
@@ -8,7 +8,7 @@
 #include "../common/logsys.h"
 #include "../common/logtypes.h"
 #include "../common/md5.h"
-#include "../common/EmuTCPConnection.h"
+#include "../common/emu_tcp_connection.h"
 #include "../common/packet_dump.h"
 
 extern ClientList client_list;

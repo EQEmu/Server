@@ -20,8 +20,8 @@
 #define EQMEU_EMBPARSER_H
 #ifdef EMBPERL
 
-#include "QuestParserCollection.h"
-#include "QuestInterface.h"
+#include "quest_parser_collection.h"
+#include "quest_interface.h"
 #include <string>
 #include <queue>
 #include <map>
@@ -45,17 +45,17 @@ public:
 	~PerlembParser();
 	
 	virtual int EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-		std::vector<void*> *extra_pointers);
+		std::vector<EQEmu::Any> *extra_pointers);
 	virtual int EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-		std::vector<void*> *extra_pointers);
+		std::vector<EQEmu::Any> *extra_pointers);
 	virtual int EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-		std::vector<void*> *extra_pointers);
+		std::vector<EQEmu::Any> *extra_pointers);
 	virtual int EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-		std::vector<void*> *extra_pointers);
+		std::vector<EQEmu::Any> *extra_pointers);
 	virtual int EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
-		std::vector<void*> *extra_pointers);
+		std::vector<EQEmu::Any> *extra_pointers);
 	virtual int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
-		std::vector<void*> *extra_pointers);
+		std::vector<EQEmu::Any> *extra_pointers);
 
 	virtual bool HasQuestSub(uint32 npcid, QuestEventID evt);
 	virtual bool HasGlobalQuestSub(QuestEventID evt);
@@ -86,7 +86,7 @@ private:
 	void ExportVarComplex(const char *pkgprefix, const char *varname, const char *value);
 
 	int EventCommon(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, ItemInst* iteminst, Mob* mob, 
-		uint32 extradata, bool global, std::vector<void*> *extra_pointers);
+		uint32 extradata, bool global, std::vector<EQEmu::Any> *extra_pointers);
 	int SendCommands(const char *pkgprefix, const char *event, uint32 npcid, Mob* other, Mob* mob, ItemInst *iteminst);
 	void MapFunctions();
 
@@ -103,7 +103,7 @@ private:
 	void ExportZoneVariables(std::string &package_name);
 	void ExportItemVariables(std::string &package_name, Mob *mob);
 	void ExportEventVariables(std::string &package_name, QuestEventID event, uint32 objid, const char * data, 
-		NPC* npcmob, ItemInst* iteminst, Mob* mob, uint32 extradata, std::vector<void*> *extra_pointers);
+		NPC* npcmob, ItemInst* iteminst, Mob* mob, uint32 extradata, std::vector<EQEmu::Any> *extra_pointers);
 	
 	std::map<uint32, PerlQuestStatus> npc_quest_status_;
 	PerlQuestStatus global_npc_quest_status_;

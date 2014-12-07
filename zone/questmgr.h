@@ -25,8 +25,10 @@
 #include <list>
 #include <stack>
 
-class NPC;
 class Client;
+class ItemInst;
+class Mob;
+class NPC;
 
 class QuestManager {
 	struct running_quest {
@@ -34,12 +36,13 @@ class QuestManager {
 		Client *initiator;
 		ItemInst* questitem;
 		bool depop_npc;
+		std::string encounter;
 	};
 public:
 	QuestManager();
 	virtual ~QuestManager();
 
-	void StartQuest(Mob *_owner, Client *_initiator = nullptr, ItemInst* _questitem = nullptr);
+	void StartQuest(Mob *_owner, Client *_initiator = nullptr, ItemInst* _questitem = nullptr, std::string encounter = "");
 	void EndQuest();
 	bool QuestsRunning() { return !quests_running_.empty(); }
 
@@ -239,8 +242,10 @@ public:
 	uint16 CreateDoor( const char* model, float x, float y, float z, float heading, uint8 opentype, uint16 size);
     int32 GetZoneID(const char *zone);
     const char *GetZoneLongName(const char *zone);
-	void CrossZoneSignalPlayerByCharID(int charid, uint32 data);
+	void CrossZoneSignalPlayerByCharID(int charid, uint32 data); 
+	void CrossZoneSignalNPCByNPCTypeID(uint32 npctype_id, uint32 data);
 	void CrossZoneSignalPlayerByName(const char *CharName, uint32 data);
+	void CrossZoneSetEntityVariableByNPCTypeID(uint32 npctype_id, const char *id, const char *m_var);
 	void CrossZoneMessagePlayerByName(uint32 Type, const char *CharName, const char *Message);
 	bool EnableRecipe(uint32 recipe_id);
 	bool DisableRecipe(uint32 recipe_id);
@@ -250,6 +255,7 @@ public:
 	NPC *GetNPC() const;
 	Mob *GetOwner() const;
 	ItemInst *GetQuestItem() const;
+	std::string GetEncounter() const;
 	inline bool ProximitySayInUse() { return HaveProximitySays; }
 
 #ifdef BOTS

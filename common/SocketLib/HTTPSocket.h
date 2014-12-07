@@ -42,7 +42,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <map>
 #include <string>
-#include "../TCPConnection.h"
+#include "../tcp_connection.h"
 
 
 #ifdef SOCKETS_NAMESPACE

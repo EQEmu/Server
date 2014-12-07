@@ -28,18 +28,16 @@ spawn2 mediumblob, npcs mediumblob, npc_loot mediumblob, gmspawntype mediumblob,
 #define ZONEDUMP_H
 #include "../common/faction.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/Item.h"
+#include "../common/item.h"
 
 #pragma pack(1)
 
 struct NPCType
 {
 	char	name[64];
-	char	lastname[70];
-
+	char	lastname[70]; 
 	int32	cur_hp;
-	int32	max_hp;
-
+	int32	max_hp; 
 	float	size;
 	float	runspeed;
 	uint8	gender;
@@ -60,23 +58,23 @@ struct NPCType
 	uint32	adventure_template;
 	uint32	trap_template;
 	uint8	light;		//not loaded from DB
-	uint16	AC;
+	uint32	AC;
 	uint32	Mana;	//not loaded from DB
-	uint16	ATK;	//not loaded from DB
-	uint16	STR;
-	uint16	STA;
-	uint16	DEX;
-	uint16	AGI;
-	uint16	INT;
-	uint16	WIS;
-	uint16	CHA;
-	int16	MR;
-	int16	FR;
-	int16	CR;
-	int16	PR;
-	int16	DR;
-	int16	Corrup;
-	int16   PhR;
+	uint32	ATK;	//not loaded from DB
+	uint32	STR;
+	uint32	STA;
+	uint32	DEX;
+	uint32	AGI;
+	uint32	INT;
+	uint32	WIS;
+	uint32	CHA;
+	int32	MR;
+	int32	FR;
+	int32	CR;
+	int32	PR;
+	int32	DR;
+	int32	Corrup;
+	int32   PhR;
 	uint8	haircolor;
 	uint8	beardcolor;
 	uint8	eyecolor1;			// the eyecolors always seem to be the same, maybe left and right eye?
@@ -91,7 +89,7 @@ struct NPCType
 	uint32	min_dmg;
 	uint32	max_dmg;
 	int16	attack_count;
-	char special_abilities[512];
+	char	special_abilities[512];
 	uint16	d_meele_texture1;
 	uint16	d_meele_texture2;
 	char	ammo_idfile[30];
@@ -111,6 +109,7 @@ struct NPCType
 	uint8	spawn_limit;	//only this many may be in zone at a time (0=no limit)
 	uint8	mount_color;	//only used by horse class
 	float	attack_speed;	//%+- on attack delay of the mob.
+	uint8	attack_delay;	//delay between attacks in 10ths of a second
 	int		accuracy_rating;	//10 = 1% accuracy
 	int		avoidance_rating;	//10 = 1% avoidance
 	bool	findable;		//can be found with find command
@@ -126,40 +125,33 @@ struct NPCType
 	float	healscale;
 	bool	no_target_hotkey;
 	bool	raid_target;
+	uint8 	probability;
 };
 
-/*
-Below are the blob structures for saving player corpses to the database
--Quagmire
-
-create table player_corpses (id int(11) unsigned not null auto_increment primary key, charid int(11) unsigned not null,
-charname varchar(30) not null, zonename varchar(16)not null, x float not null, y float not null, z float not null,
-heading float not null, data blob not null, time timestamp(14), index zonename (zonename));
-*/
-
-namespace player_lootitem
-{
+namespace player_lootitem {
 	struct ServerLootItem_Struct {
-	uint32	item_id;
-	int16	equipSlot;
-	uint8	charges;
-	uint16	lootslot;
-	uint32 aug1;
-	uint32 aug2;
-	uint32 aug3;
-	uint32 aug4;
-	uint32 aug5;
+		uint32	item_id;
+		int16	equip_slot;
+		uint16	charges;
+		uint16	lootslot;
+		uint32	aug_1;
+		uint32	aug_2;
+		uint32	aug_3;
+		uint32	aug_4;
+		uint32	aug_5;
+		uint8	min_level;		  // 
+		uint8	max_level;		  // 
 	};
 }
 
-struct DBPlayerCorpse_Struct {
+struct PlayerCorpse_Struct {
 	uint32	crc;
 	bool	locked;
 	uint32	itemcount;
 	uint32	exp;
 	float	size;
 	uint8	level;
-	uint8	race;
+	uint32	race;
 	uint8	gender;
 	uint8	class_;
 	uint8	deity;
@@ -181,38 +173,8 @@ struct DBPlayerCorpse_Struct {
 	uint32 drakkin_tattoo;
 	uint32 drakkin_details;
 	player_lootitem::ServerLootItem_Struct	items[0];
+	//std::list<player_lootitem::ServerLootItem_Struct*> items;
 };
-
-namespace classic_db
-{
-	struct DBPlayerCorpse_Struct {
-		uint32	crc;
-		bool	locked;
-		uint32	itemcount;
-		uint32	exp;
-		float	size;
-		uint8	level;
-		uint8	race;
-		uint8	gender;
-		uint8	class_;
-		uint8	deity;
-		uint8	texture;
-		uint8	helmtexture;
-		uint32	copper;
-		uint32	silver;
-		uint32	gold;
-		uint32	plat;
-		Color_Struct item_tint[9];
-		uint8 haircolor;
-		uint8 beardcolor;
-		uint8 eyecolor1;
-		uint8 eyecolor2;
-		uint8 hairstyle;
-		uint8 face;
-		uint8 beard;
-		player_lootitem::ServerLootItem_Struct	items[0];
-	};
-}
 
 struct Door {
 	uint32	db_id;
@@ -226,7 +188,7 @@ struct Door {
 	int		incline;
 	uint8	opentype;
 	uint32	guild_id;
-	uint16	lockpick;
+	uint16	lock_pick;
 	uint32	keyitem;
 	uint8	nokeyring;
 	uint8	trigger_door;

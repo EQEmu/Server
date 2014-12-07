@@ -15,23 +15,13 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
-#include "masterentity.h"
-#include "worldserver.h"
-#include "net.h"
+
 #include "../common/database.h"
-#include "../common/spdat.h"
-#include "../common/packet_dump.h"
-#include "../common/packet_functions.h"
-#include "petitions.h"
-#include "../common/serverinfo.h"
-#include "../common/ZoneNumbers.h"
-#include "../common/moremath.h"
 #include "../common/guilds.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
+
 #include "guild_mgr.h"
-#include "StringIDs.h"
-#include "NpcAI.h"
+#include "worldserver.h"
 
 extern WorldServer worldserver;
 
@@ -160,9 +150,17 @@ void Client::SendGuildSpawnAppearance() {
 		uint8 rank = guild_mgr.GetDisplayedRank(GuildID(), GuildRank(), CharacterID());
 		mlog(GUILDS__OUT_PACKETS, "Sending spawn appearance for guild %d at rank %d", GuildID(), rank);
 		SendAppearancePacket(AT_GuildID, GuildID());
+		if(GetClientVersion() >= EQClientRoF)
+		{
+			switch (rank) {
+				case 0: { rank = 5; break; }	// GUILD_MEMBER	0
+				case 1: { rank = 3; break; }	// GUILD_OFFICER 1
+				case 2: { rank = 1; break; }	// GUILD_LEADER	2
+				default: { break; }				// GUILD_NONE
+			}
+		}
 		SendAppearancePacket(AT_GuildRank, rank);
 	}
-
 	UpdateWho();
 }
 
@@ -409,57 +407,36 @@ void Client::GuildChangeRank(const char* name, uint32 guild_id, uint32 oldrank, 
 }*/
 
 
-bool ZoneDatabase::CheckGuildDoor(uint8 doorid,uint16 guild_id,const char* zone) {
-	MYSQL_ROW row;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	if (!RunQuery(query, MakeAnyLenString(&query,
-		"SELECT guild FROM doors where doorid=%i AND zone='%s'",
-		doorid-128, zone), errbuf, &result))
-	{
-		LogFile->write(EQEMuLog::Error, "Error in CheckGuildDoor query '%s': %s", query, errbuf);
-		safe_delete_array(query);
-		return false;
-	} else {
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			if (atoi(row[0]) == guild_id)
-			{
-				mysql_free_result(result);
-				return true;
-			}
-			else
-			{
-				mysql_free_result(result);
-				return false;
-			}
+bool ZoneDatabase::CheckGuildDoor(uint8 doorid, uint16 guild_id, const char* zone) {
 
-			// code below will never be reached
-			mysql_free_result(result);
-			return false;
-		}
+	std::string query = StringFormat("SELECT guild FROM doors WHERE doorid = %i AND zone = '%s'",
+                                    doorid-128, zone);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in CheckGuildDoor query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
-	return false;
+
+	if (results.RowCount() != 1)
+        return false;
+
+    auto row = results.begin();
+    return atoi(row[0]) == guild_id;
 }
 
 bool ZoneDatabase::SetGuildDoor(uint8 doorid,uint16 guild_id, const char* zone) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32	affected_rows = 0;
+
 	if (doorid > 127)
 		doorid = doorid - 128;
-	if (!RunQuery(query, MakeAnyLenString(&query,
-		"UPDATE doors SET guild = %i WHERE (doorid=%i) AND (zone='%s')",
-		guild_id, doorid, zone), errbuf, 0,&affected_rows))
-	{
-		LogFile->write(EQEMuLog::Error, "Error in SetGuildDoor query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+
+    std::string query = StringFormat("UPDATE doors SET guild = %i WHERE (doorid=%i) AND (zone='%s')",
+                                        guild_id, doorid, zone);
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEMuLog::Error, "Error in SetGuildDoor query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
-	safe_delete_array(query);
-
-	return(affected_rows > 0);
+	return (results.RowsAffected() > 0);
 }
 

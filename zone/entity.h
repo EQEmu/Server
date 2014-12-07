@@ -28,8 +28,7 @@
 
 #include "zonedb.h"
 #include "zonedump.h"
-#include "zonedbasync.h"
-#include "QGlobals.h"
+#include "qglobals.h"
 
 class EQApplicationPacket;
 
@@ -53,7 +52,7 @@ class Bot;
 class BotRaids;
 #endif
 
-extern EntityList entity_list;
+extern EntityList entity_list; 
 
 class Entity
 {
@@ -98,9 +97,9 @@ public:
 	const Beacon	*CastToBeacon() const;
 
 	inline const uint16& GetID() const { return id; }
+	inline const time_t& GetSpawnTimeStamp() const { return spawn_timestamp; }
 
 	virtual const char* GetName() { return ""; }
-	virtual void DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) { pDBAsyncWorkID = 0; }
 	bool CheckCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z, float trg_x, float trg_y, float trg_z, float perwalk=1);
 
 #ifdef BOTS
@@ -114,6 +113,7 @@ protected:
 	uint32 pDBAsyncWorkID;
 private:
 	uint16 id;
+	time_t spawn_timestamp;
 };
 
 class EntityList
@@ -136,7 +136,7 @@ public:
 	Mob *GetMob(const char* name);
 	Mob *GetMobByNpcTypeID(uint32 get_id);
 	bool IsMobSpawnedByNpcTypeID(uint32 get_id);
-	Mob *GetTargetForVirus(Mob* spreader);
+	Mob *GetTargetForVirus(Mob* spreader, int range);
 	inline NPC *GetNPCByID(uint16 id)
 		{ return npc_list.count(id) ? npc_list.at(id) : nullptr; }
 	NPC *GetNPCByNPCTypeID(uint32 npc_id);
@@ -251,6 +251,8 @@ public:
 	void	RemoveAllLocalities();
 	void	RemoveAllRaids();
 	void	DestroyTempPets(Mob *owner);
+	int16	CountTempPets(Mob *owner);
+	void	AddTempPetsToHateList(Mob *owner, Mob* other, bool bFrenzy = false);
 	Entity *GetEntityMob(uint16 id);
 	Entity *GetEntityMerc(uint16 id);
 	Entity *GetEntityDoor(uint16 id);
@@ -299,7 +301,7 @@ public:
 	void	QueueClientsGuild(Mob* sender, const EQApplicationPacket* app, bool ignore_sender = false, uint32 guildeqid = 0);
 	void	QueueClientsGuildBankItemUpdate(const GuildBankItemUpdate_Struct *gbius, uint32 GuildID);
 	void	QueueClientsByTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true, Mob* SkipThisMob = 0, bool ackreq = true,
-						bool HoTT = true, uint32 ClientVersionBits = 0xFFFFFFFF);
+						bool HoTT = true, uint32 ClientVersionBits = 0xFFFFFFFF, bool inspect_buffs = false);
 
 	void	QueueClientsByXTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true);
 	void	QueueToGroupsForNPCHealthAA(Mob* sender, const EQApplicationPacket* app);
@@ -398,6 +400,7 @@ public:
 	void	UpdateFindableNPCState(NPC *n, bool Remove);
 	void	HideCorpses(Client *c, uint8 CurrentMode, uint8 NewMode);
 
+	uint16 GetClientCount();
 	void GetMobList(std::list<Mob*> &m_list);
 	void GetNPCList(std::list<NPC*> &n_list);
 	void GetMercList(std::list<Merc*> &n_list);

@@ -18,22 +18,22 @@
 #include "../common/debug.h"
 #include "zoneserver.h"
 #include "clientlist.h"
-#include "LoginServer.h"
-#include "LoginServerList.h"
+#include "login_server.h"
+#include "login_server_list.h"
 #include "zonelist.h"
 #include "worlddb.h"
 #include "console.h"
 #include "client.h"
 #include "../common/md5.h"
-#include "WorldConfig.h"
+#include "world_config.h"
 #include "../common/guilds.h"
 #include "../common/packet_dump.h"
 #include "../common/misc.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 #include "cliententry.h"
 #include "wguild_mgr.h"
 #include "lfplist.h"
-#include "AdventureManager.h"
+#include "adventure_manager.h"
 #include "ucs.h"
 #include "queryserv.h"
 #include "web_interface.h"
@@ -411,6 +411,14 @@ bool ZoneServer::Process() {
 				break;
 			}
 
+			case ServerOP_RaidMOTD: {
+				if (pack->size < sizeof(ServerRaidMOTD_Struct))
+					break;
+
+				zoneserver_list.SendPacket(pack);
+				break;
+			}
+
 			case ServerOP_SpawnCondition: {
 				if(pack->size != sizeof(ServerSpawnCondition_Struct))
 					break;
@@ -428,6 +436,8 @@ bool ZoneServer::Process() {
 				break;
 			}
 			case ServerOP_ChannelMessage: {
+				if (pack->size < sizeof(ServerChannelMessage_Struct))
+					break;
 				ServerChannelMessage_Struct* scm = (ServerChannelMessage_Struct*) pack->pBuffer;
 				if(scm->chan_num == 20)
 				{
@@ -439,42 +449,48 @@ bool ZoneServer::Process() {
 						Console* con = 0;
 						con = console_list.FindByAccountName(&scm->deliverto[1]);
 						if (((!con) || (!con->SendChannelMessage(scm))) && (!scm->noreply))
-							zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);
+							zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "%s is not online at this time.", scm->to);
 						break;
 					}
 					ClientListEntry* cle = client_list.FindCharacter(scm->deliverto);
-					if (cle == 0 || cle->Online() < CLE_Status_Zoning || (cle->TellsOff() && ((cle->Anon() == 1 && scm->fromadmin < cle->Admin()) || scm->fromadmin < 80))) {
-						if (!scm->noreply)
-							zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);
-					}
-					else if (cle->Online() == CLE_Status_Zoning) {
+					if (cle == 0 || cle->Online() < CLE_Status_Zoning ||
+							(cle->TellsOff() && ((cle->Anon() == 1 && scm->fromadmin < cle->Admin()) || scm->fromadmin < 80))) {
 						if (!scm->noreply) {
-							char errbuf[MYSQL_ERRMSG_SIZE];
-							char *query = 0;
-							MYSQL_RES *result;
-							//MYSQL_ROW row; Trumpcard - commenting. Currently unused.
-							time_t rawtime;
-							struct tm * timeinfo;
-							time ( &rawtime );
-							timeinfo = localtime ( &rawtime );
-							char *telldate=asctime(timeinfo);
-							if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT name from character_ where name='%s'",scm->deliverto), errbuf, &result)) {
-								safe_delete(query);
-								if (result!=0) {
-									if (database.RunQuery(query, MakeAnyLenString(&query, "INSERT INTO tellque (Date,Receiver,Sender,Message) values('%s','%s','%s','%s')",telldate,scm->deliverto,scm->from,scm->message), errbuf, &result))
-										zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "Your message has been added to the %s's que.", scm->to);
-									else
-										zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);
-									safe_delete(query);
-								}
-								else
-									zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);
-								mysql_free_result(result);
-							}
-							else
-								safe_delete(query);
+							ClientListEntry* sender = client_list.FindCharacter(scm->from);
+							if (!sender || !sender->Server())
+								break;
+							scm->noreply = true;
+							scm->queued = 3; // offline
+							strcpy(scm->deliverto, scm->from);
+							// ideally this would be trimming off the message too, oh well
+							sender->Server()->SendPacket(pack);
 						}
-					//		zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);
+					} else if (cle->Online() == CLE_Status_Zoning) {
+						if (!scm->noreply) {
+							ClientListEntry* sender = client_list.FindCharacter(scm->from);
+							if (cle->TellQueueFull()) {
+								if (!sender || !sender->Server())
+									break;
+								scm->noreply = true;
+								scm->queued = 2; // queue full
+								strcpy(scm->deliverto, scm->from);
+								sender->Server()->SendPacket(pack);
+							} else {
+								size_t struct_size = sizeof(ServerChannelMessage_Struct) + strlen(scm->message) + 1;
+								ServerChannelMessage_Struct *temp = (ServerChannelMessage_Struct *) new uchar[struct_size];
+								memset(temp, 0, struct_size); // just in case, was seeing some corrupt messages, but it shouldn't happen
+								memcpy(temp, scm, struct_size);
+								temp->noreply = true;
+								cle->PushToTellQueue(temp); // deallocation is handled in processing or deconstructor
+
+								if (!sender || !sender->Server())
+									break;
+								scm->noreply = true;
+								scm->queued = 1; // queued
+								strcpy(scm->deliverto, scm->from);
+								sender->Server()->SendPacket(pack);
+							}
+						}
 					}
 					else if (cle->Server() == 0) {
 						if (!scm->noreply)
@@ -651,17 +667,17 @@ bool ZoneServer::Process() {
 					client->Clearance(wtz->response);
 			}
 			case ServerOP_ZoneToZoneRequest: {
-			//
-			// solar: ZoneChange is received by the zone the player is in, then the
-			// zone sends a ZTZ which ends up here. This code then find the target
-			// (ingress point) and boots it if needed, then sends the ZTZ to it.
-			// The ingress server will decide wether the player can enter, then will
-			// send back the ZTZ to here. This packet is passed back to the egress
-			// server, which will send a ZoneChange response back to the client
-			// which can be an error, or a success, in which case the client will
-			// disconnect, and their zone location will be saved when ~Client is
-			// called, so it will be available when they ask to zone.
-			//
+				//
+				// solar: ZoneChange is received by the zone the player is in, then the
+				// zone sends a ZTZ which ends up here. This code then find the target
+				// (ingress point) and boots it if needed, then sends the ZTZ to it.
+				// The ingress server will decide wether the player can enter, then will
+				// send back the ZTZ to here. This packet is passed back to the egress
+				// server, which will send a ZoneChange response back to the client
+				// which can be an error, or a success, in which case the client will
+				// disconnect, and their zone location will be saved when ~Client is
+				// called, so it will be available when they ask to zone.
+				//
 
 
 				if(pack->size != sizeof(ZoneToZone_Struct))
@@ -674,40 +690,31 @@ bool ZoneServer::Process() {
 				zlog(WORLD__ZONE,"ZoneToZone request for %s current zone %d req zone %d\n",
 					ztz->name, ztz->current_zone_id, ztz->requested_zone_id);
 
-				if(GetZoneID() == ztz->current_zone_id && GetInstanceID() == ztz->current_instance_id)	// this is a request from the egress zone
-				{
+				/* This is a request from the egress zone */
+				if(GetZoneID() == ztz->current_zone_id && GetInstanceID() == ztz->current_instance_id) {
 					zlog(WORLD__ZONE,"Processing ZTZ for egress from zone for client %s\n", ztz->name);
 
-					if
-					(
-						ztz->admin < 80 &&
-						ztz->ignorerestrictions < 2 &&
-						zoneserver_list.IsZoneLocked(ztz->requested_zone_id)
-					)
-					{
+					if (ztz->admin < 80 && ztz->ignorerestrictions < 2 && zoneserver_list.IsZoneLocked(ztz->requested_zone_id)) {
 						ztz->response = 0;
 						SendPacket(pack);
 						break;
 					}
 
 					ZoneServer *ingress_server = nullptr;
-					if(ztz->requested_instance_id > 0)
-					{
+					if(ztz->requested_instance_id > 0) {
 						ingress_server = zoneserver_list.FindByInstanceID(ztz->requested_instance_id);
 					}
-					else
-					{
-						ingress_server = zoneserver_list.FindByZoneID(ztz->requested_zone_id);
-
+					else {
+						ingress_server = zoneserver_list.FindByZoneID(ztz->requested_zone_id); 
 					}
 
-					if(ingress_server)	// found a zone already running
-					{
+					/* Zone was already running*/
+					if(ingress_server) {
 						_log(WORLD__ZONE,"Found a zone already booted for %s\n", ztz->name);
 						ztz->response = 1;
 					}
-					else	// need to boot one
-					{
+					/* Boot the Zone*/
+					else {
 						int server_id;
 						if ((server_id = zoneserver_list.TriggerBootup(ztz->requested_zone_id, ztz->requested_instance_id))){
 							_log(WORLD__ZONE,"Successfully booted a zone for %s\n", ztz->name);
@@ -715,8 +722,7 @@ bool ZoneServer::Process() {
 							ztz->response = 1;
 							ingress_server = zoneserver_list.FindByID(server_id);
 						}
-						else
-						{
+						else {
 							_log(WORLD__ZONE_ERR,"FAILED to boot a zone for %s\n", ztz->name);
 							// bootup failed, send back error code 0
 							ztz->response = 0;
@@ -724,27 +730,24 @@ bool ZoneServer::Process() {
 					}
 					if(ztz->response!=0 && client)
 						client->LSZoneChange(ztz);
-					SendPacket(pack);	// send back to egress server
-					if(ingress_server)	// if we couldn't boot one, this is 0
-					{
-						ingress_server->SendPacket(pack);	// inform target server
-					}
+						SendPacket(pack);	// send back to egress server
+						if(ingress_server) {
+							ingress_server->SendPacket(pack);	// inform target server
+						}
 				}
-				else	// this is response from the ingress server, route it back to the egress server
-				{
+				/* Response from Ingress server, route back to egress */
+				else{
+				
 					zlog(WORLD__ZONE,"Processing ZTZ for ingress to zone for client %s\n", ztz->name);
 					ZoneServer *egress_server = nullptr;
-					if(ztz->current_instance_id > 0)
-					{
+					if(ztz->current_instance_id > 0) {
 						egress_server = zoneserver_list.FindByInstanceID(ztz->current_instance_id);
 					}
-					else
-					{
+					else {
 						egress_server = zoneserver_list.FindByZoneID(ztz->current_zone_id);
 					}
 
-					if(egress_server)
-					{
+					if(egress_server) {
 						egress_server->SendPacket(pack);
 					}
 				}
@@ -782,21 +785,18 @@ bool ZoneServer::Process() {
 				delete whom;
 				break;
 			}
-			case ServerOP_RequestOnlineGuildMembers:
-			{
+			case ServerOP_RequestOnlineGuildMembers: {
 				ServerRequestOnlineGuildMembers_Struct *srogms = (ServerRequestOnlineGuildMembers_Struct*) pack->pBuffer;
 				zlog(GUILDS__IN_PACKETS, "ServerOP_RequestOnlineGuildMembers Recieved. FromID=%i GuildID=%i", srogms->FromID, srogms->GuildID);
 				client_list.SendOnlineGuildMembers(srogms->FromID, srogms->GuildID);
 				break;
 			}
-			case ServerOP_ClientVersionSummary:
-			{
+			case ServerOP_ClientVersionSummary: {
 				ServerRequestClientVersionSummary_Struct *srcvss = (ServerRequestClientVersionSummary_Struct*) pack->pBuffer;
 				client_list.SendClientVersionSummary(srcvss->Name);
 				break;
 			}
-			case ServerOP_ReloadRules:
-			{
+			case ServerOP_ReloadRules: {
 				zoneserver_list.SendPacket(pack);
 				RuleManager::Instance()->LoadRules(&database, "default");
 				break;
@@ -1267,39 +1267,20 @@ bool ZoneServer::Process() {
 				UCSLink.SendPacket(pack);
 				break;
 			}
-
+			case ServerOP_QSSendQuery:
 			case ServerOP_QueryServGeneric:
 			case ServerOP_Speech:
 			case ServerOP_QSPlayerLogTrades:
-			{
-				QSLink.SendPacket(pack);
-				break;
-			}
 			case ServerOP_QSPlayerLogHandins:
-			{
-				QSLink.SendPacket(pack);
-				break;
-			}
 			case ServerOP_QSPlayerLogNPCKills:
-			{
-				QSLink.SendPacket(pack);
-				break;
-			}
 			case ServerOP_QSPlayerLogDeletes:
-			{
-				QSLink.SendPacket(pack);
-				break;
-			}
 			case ServerOP_QSPlayerLogMoves:
+			case ServerOP_QSPlayerLogMerchantTransactions:
 			{
 				QSLink.SendPacket(pack);
 				break;
 			}
-			case ServerOP_QSMerchantLogTransactions:
-			{
-				QSLink.SendPacket(pack);
-				break;
-			}
+
 			case ServerOP_WIRemoteCallResponse:
 			case ServerOP_WIClientSession:
 			case ServerOP_WIRemoteCallToClient:
@@ -1308,7 +1289,9 @@ bool ZoneServer::Process() {
 				break;
 			}
 			case ServerOP_CZSignalClientByName:
-			case ServerOP_CZMessagePlayer:
+			case ServerOP_CZMessagePlayer: 
+			case ServerOP_CZSignalNPC:
+			case ServerOP_CZSetEntityVariableByNPCTypeID:
 			case ServerOP_CZSignalClient:
 			case ServerOP_DepopAllPlayersCorpses:
 			case ServerOP_DepopPlayerCorpse:
@@ -1319,6 +1302,16 @@ bool ZoneServer::Process() {
 			case ServerOP_UpdateSpawn:
 			{
 				zoneserver_list.SendPacket(pack);
+				break;
+			}
+			case ServerOP_RequestTellQueue:
+			{
+				ServerRequestTellQueue_Struct* rtq = (ServerRequestTellQueue_Struct*) pack->pBuffer;
+				ClientListEntry *cle = client_list.FindCharacter(rtq->name);
+				if (!cle || cle->TellQueueEmpty())
+					break;
+
+				cle->ProcessTellQueue();
 				break;
 			}
 			default:

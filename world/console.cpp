@@ -30,20 +30,20 @@
 #include "../common/packet_dump.h"
 #include "../common/seperator.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/EQPacket.h"
-#include "LoginServer.h"
-#include "LoginServerList.h"
+#include "../common/eq_packet.h"
+#include "login_server.h"
+#include "login_server_list.h"
 #include "../common/serverinfo.h"
 #include "../common/md5.h"
 #include "../common/opcodemgr.h"
 #include "../common/rulesys.h"
 #include "../common/ruletypes.h"
-#include "../common/StringUtil.h"
-#include "WorldConfig.h"
+#include "../common/string_util.h"
+#include "world_config.h"
 #include "zoneserver.h"
 #include "zonelist.h"
 #include "clientlist.h"
-#include "LauncherList.h"
+#include "launcher_list.h"
 #include "ucs.h"
 #include "queryserv.h"
 #include "web_interface.h"
@@ -115,7 +115,7 @@ bool Console::SendChannelMessage(const ServerChannelMessage_Struct* scm) {
 			break;
 		}
 		case 7: {
-			SendMessage(1, "%s tells you, '%s'", scm->from, scm->message);
+			SendMessage(1, "[%s] tells you, '%s'", scm->from, scm->message);
 			ServerPacket* pack = new ServerPacket(ServerOP_ChannelMessage, sizeof(ServerChannelMessage_Struct) + strlen(scm->message) + 1);
 			memcpy(pack->pBuffer, scm, pack->size);
 			ServerChannelMessage_Struct* scm2 = (ServerChannelMessage_Struct*) pack->pBuffer;
@@ -854,6 +854,9 @@ void Console::ProcessCommand(const char* command) {
 				RW->Option = 1;
 				zoneserver_list.SendPacket(pack);
 				safe_delete(pack);
+			}
+			else if (strcasecmp(sep.arg[0], "") == 0){
+				/* Hit Enter with no command */
 			}
 			else {
 				SendMessage(1, "Command unknown.");

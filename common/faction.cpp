@@ -47,7 +47,7 @@ const char *FactionValueToString(FACTION_VALUE fv) {
 
 
 //o--------------------------------------------------------------
-//| Name: CalculateFaction; rembrant, Dec. 16, 2001
+//| Name: CalculateFaction; Dec. 16, 2001
 //o--------------------------------------------------------------
 //| Notes: Returns the faction message value.
 //|		Modify these values to taste.
@@ -69,7 +69,7 @@ FACTION_VALUE CalculateFaction(FactionMods* fm, int32 tmpCharacter_value)
 	return FACTION_INDIFFERENT;
 }
 
-// neotokyo: this function should check if some races have more than one race define
+// this function should check if some races have more than one race define
 bool IsOfEqualRace(int r1, int r2)
 {
 	if (r1 == r2)
@@ -88,7 +88,7 @@ bool IsOfEqualRace(int r1, int r2)
 	return false;
 }
 
-// neotokyo: trolls endure ogres, dark elves, ...
+// trolls endure ogres, dark elves, ...
 bool IsOfIndiffRace(int r1, int r2)
 {
 	if (r1 == r2)

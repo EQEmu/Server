@@ -20,8 +20,8 @@
 #include "guild_base.h"
 #include "database.h"
 #include "logsys.h"
-//#include "MiscFunctions.h"
-#include "StringUtil.h"
+//#include "misc_functions.h"
+#include "string_util.h"
 #include <cstdlib>
 #include <cstring>
 
@@ -40,6 +40,8 @@ BaseGuildManager::~BaseGuildManager() {
 	ClearGuilds();
 }
 
+
+
 bool BaseGuildManager::LoadGuilds() {
 
 	ClearGuilds();
@@ -49,36 +51,34 @@ bool BaseGuildManager::LoadGuilds() {
 		return(false);
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	std::string query("SELECT id, name, leader, minstatus, motd, motd_setter,channel,url FROM guilds");
 	std::map<uint32, GuildInfo *>::iterator res;
 
-	// load up all the guilds
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"SELECT id, name, leader, minstatus, motd, motd_setter,channel,url FROM guilds"), errbuf, &result)) {
-		_log(GUILDS__ERROR, "Error loading guilds '%s': %s", query, errbuf);
-		safe_delete_array(query);
-		return(false);
-	}
-	safe_delete_array(query);
-	while ((row = mysql_fetch_row(result))) {
-		_CreateGuild(atoi(row[0]), row[1], atoi(row[2]), atoi(row[3]), row[4], row[5], row[6], row[7]);
-	}
-	mysql_free_result(result);
+	auto results = m_db->QueryDatabase(query);
 
-	//load up the rank info for each guild.
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"SELECT guild_id,rank,title,can_hear,can_speak,can_invite,can_remove,can_promote,can_demote,can_motd,can_warpeace FROM guild_ranks"), errbuf, &result)) {
-		_log(GUILDS__ERROR, "Error loading guild ranks '%s': %s", query, errbuf);
-		safe_delete_array(query);
-		return(false);
+	if (!results.Success())
+	{
+		_log(GUILDS__ERROR, "Error loading guilds '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
-	safe_delete_array(query);
-	while ((row = mysql_fetch_row(result))) {
+
+	for (auto row=results.begin();row!=results.end();++row)
+		_CreateGuild(atoi(row[0]), row[1], atoi(row[2]), atoi(row[3]), row[4], row[5], row[6], row[7]);
+
+    query = "SELECT guild_id,rank,title,can_hear,can_speak,can_invite,can_remove,can_promote,can_demote,can_motd,can_warpeace FROM guild_ranks";
+	results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
+	{
+		_log(GUILDS__ERROR, "Error loading guild ranks '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
+	}
+
+	for (auto row=results.begin();row!=results.end();++row)
+	{
 		uint32 guild_id = atoi(row[0]);
 		uint8 rankn = atoi(row[1]);
+
 		if(rankn > GUILD_MAX_RANK) {
 			_log(GUILDS__ERROR, "Found invalid (too high) rank %d for guild %d, skipping.", rankn, guild_id);
 			continue;
@@ -102,9 +102,8 @@ bool BaseGuildManager::LoadGuilds() {
 		rank.permissions[GUILD_MOTD] = (row[9][0] == '1')?true:false;
 		rank.permissions[GUILD_WARPEACE] = (row[10][0] == '1')?true:false;
 	}
-	mysql_free_result(result);
 
-	return(true);
+	return true;
 }
 
 bool BaseGuildManager::RefreshGuild(uint32 guild_id) {
@@ -113,63 +112,64 @@ bool BaseGuildManager::RefreshGuild(uint32 guild_id) {
 		return(false);
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	std::string query = StringFormat("SELECT name, leader, minstatus, motd, motd_setter, channel,url FROM guilds WHERE id=%lu", (unsigned long)guild_id);
 	std::map<uint32, GuildInfo *>::iterator res;
 	GuildInfo *info;
 
 	// load up all the guilds
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"SELECT name, leader, minstatus, motd, motd_setter, channel,url FROM guilds WHERE id=%lu", (unsigned long)guild_id), errbuf, &result)) {
-		_log(GUILDS__ERROR, "Error reloading guilds '%s': %s", query, errbuf);
-		safe_delete_array(query);
-		return(false);
+	auto results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
+	{
+		_log(GUILDS__ERROR, "Error reloading guilds '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
-	safe_delete_array(query);
-	if ((row = mysql_fetch_row(result))) {
-		//delete the old entry and create the new one.
-		info = _CreateGuild(guild_id, row[0], atoi(row[1]), atoi(row[2]), row[3], row[4], row[5], row[6]);
-	} else {
+
+	if (results.RowCount() == 0)
+	{
 		_log(GUILDS__ERROR, "Unable to find guild %d in the database.", guild_id);
-		return(false);
+		return false;
 	}
-	mysql_free_result(result);
 
-	//load up the rank info for each guild.
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"SELECT guild_id,rank,title,can_hear,can_speak,can_invite,can_remove,can_promote,can_demote,can_motd,can_warpeace "
-		"FROM guild_ranks WHERE guild_id=%lu", (unsigned long)guild_id), errbuf, &result)) {
-		_log(GUILDS__ERROR, "Error reloading guild ranks '%s': %s", query, errbuf);
-		safe_delete_array(query);
-		return(false);
+	auto row = results.begin();
+
+	info = _CreateGuild(guild_id, row[0], atoi(row[1]), atoi(row[2]), row[3], row[4], row[5], row[6]);
+
+    query = StringFormat("SELECT guild_id, rank, title, can_hear, can_speak, can_invite, can_remove, can_promote, can_demote, can_motd, can_warpeace "
+                        "FROM guild_ranks WHERE guild_id=%lu", (unsigned long)guild_id);
+	results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
+	{
+		_log(GUILDS__ERROR, "Error reloading guild ranks '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
-	safe_delete_array(query);
 
-	while((row = mysql_fetch_row(result))) {
+	for (auto row=results.begin();row!=results.end();++row)
+	{
 		uint8 rankn = atoi(row[1]);
+
 		if(rankn > GUILD_MAX_RANK) {
 			_log(GUILDS__ERROR, "Found invalid (too high) rank %d for guild %d, skipping.", rankn, guild_id);
 			continue;
 		}
+
 		RankInfo &rank = info->ranks[rankn];
 
 		rank.name = row[2];
-		rank.permissions[GUILD_HEAR] = (row[3][0] == '1')?true:false;
-		rank.permissions[GUILD_SPEAK] = (row[4][0] == '1')?true:false;
-		rank.permissions[GUILD_INVITE] = (row[5][0] == '1')?true:false;
-		rank.permissions[GUILD_REMOVE] = (row[6][0] == '1')?true:false;
-		rank.permissions[GUILD_PROMOTE] = (row[7][0] == '1')?true:false;
-		rank.permissions[GUILD_DEMOTE] = (row[8][0] == '1')?true:false;
-		rank.permissions[GUILD_MOTD] = (row[9][0] == '1')?true:false;
-		rank.permissions[GUILD_WARPEACE] = (row[10][0] == '1')?true:false;
+		rank.permissions[GUILD_HEAR] = (row[3][0] == '1') ? true: false;
+		rank.permissions[GUILD_SPEAK] = (row[4][0] == '1') ? true: false;
+		rank.permissions[GUILD_INVITE] = (row[5][0] == '1') ? true: false;
+		rank.permissions[GUILD_REMOVE] = (row[6][0] == '1') ? true: false;
+		rank.permissions[GUILD_PROMOTE] = (row[7][0] == '1') ? true: false;
+		rank.permissions[GUILD_DEMOTE] = (row[8][0] == '1') ? true: false;
+		rank.permissions[GUILD_MOTD] = (row[9][0] == '1') ? true: false;
+		rank.permissions[GUILD_WARPEACE] = (row[10][0] == '1') ? true: false;
 	}
-	mysql_free_result(result);
 
 	_log(GUILDS__DB, "Successfully refreshed guild %d from the database.", guild_id);
 
-	return(true);
+	return true;
 }
 
 BaseGuildManager::GuildInfo *BaseGuildManager::_CreateGuild(uint32 guild_id, const char *guild_name, uint32 leader_char_id, uint8 minstatus, const char *guild_motd, const char *motd_setter, const char *Channel, const char *URL)
@@ -231,24 +231,20 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id) {
 	}
 	GuildInfo *info = res->second;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query = StringFormat("DELETE FROM guilds WHERE id=%lu", (unsigned long)guild_id);
 
 	//clear out old `guilds` entry
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"DELETE FROM guilds WHERE id=%lu", (unsigned long)guild_id), errbuf))
-	{
-		_log(GUILDS__ERROR, "Error clearing old guild record when storing %d '%s': %s", guild_id, query, errbuf);
-	}
-	safe_delete_array(query);
+	auto results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
+		_log(GUILDS__ERROR, "Error clearing old guild record when storing %d '%s': %s", guild_id, query.c_str(), results.ErrorMessage().c_str());
 
 	//clear out old `guild_ranks` entries
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"DELETE FROM guild_ranks WHERE guild_id=%lu", (unsigned long)guild_id), errbuf))
-	{
-		_log(GUILDS__ERROR, "Error clearing old guild_ranks records when storing %d '%s': %s", guild_id, query, errbuf);
-	}
-	safe_delete_array(query);
+	query = StringFormat("DELETE FROM guild_ranks WHERE guild_id=%lu", (unsigned long)guild_id);
+	results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
+		_log(GUILDS__ERROR, "Error clearing old guild_ranks records when storing %d '%s': %s", guild_id, query.c_str(), results.ErrorMessage().c_str());
 
 	//escape our strings.
 	char *name_esc = new char[info->name.length()*2+1];
@@ -259,18 +255,18 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id) {
 	m_db->DoEscapeString(motd_set_esc, info->motd_setter.c_str(), info->motd_setter.length());
 
 	//insert the new `guilds` entry
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"INSERT INTO guilds (id,name,leader,minstatus,motd,motd_setter) VALUES(%lu,'%s',%lu,%d,'%s', '%s')",
-		(unsigned long)guild_id, name_esc, (unsigned long)info->leader_char_id, info->minstatus, motd_esc, motd_set_esc), errbuf))
+	query = StringFormat("INSERT INTO guilds (id,name,leader,minstatus,motd,motd_setter) VALUES(%lu,'%s',%lu,%d,'%s', '%s')",
+		(unsigned long)guild_id, name_esc, (unsigned long)info->leader_char_id, info->minstatus, motd_esc, motd_set_esc);
+	results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
 	{
-		_log(GUILDS__ERROR, "Error inserting new guild record when storing %d. Giving up. '%s': %s", guild_id, query, errbuf);
-		safe_delete_array(query);
+		_log(GUILDS__ERROR, "Error inserting new guild record when storing %d. Giving up. '%s': %s", guild_id, query.c_str(), results.ErrorMessage().c_str());
 		safe_delete_array(name_esc);
 		safe_delete_array(motd_esc);
 		safe_delete_array(motd_set_esc);
-		return(false);
+		return false;
 	}
-	safe_delete_array(query);
 	safe_delete_array(name_esc);
 	safe_delete_array(motd_esc);
 	safe_delete_array(motd_set_esc);
@@ -278,36 +274,37 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id) {
 	//now insert the new ranks
 	uint8 rank;
 	for(rank = 0; rank <= GUILD_MAX_RANK; rank++) {
-		const RankInfo &r = info->ranks[rank];
+		const RankInfo &rankInfo = info->ranks[rank];
 
-		char *title_esc = new char[r.name.length()*2+1];
-		m_db->DoEscapeString(title_esc, r.name.c_str(), r.name.length());
+		char *title_esc = new char[rankInfo.name.length()*2+1];
+		m_db->DoEscapeString(title_esc, rankInfo.name.c_str(), rankInfo.name.length());
 
-		if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"INSERT INTO guild_ranks (guild_id,rank,title,can_hear,can_speak,can_invite,can_remove,can_promote,can_demote,can_motd,can_warpeace)"
+        query = StringFormat("INSERT INTO guild_ranks "
+        "(guild_id,rank,title,can_hear,can_speak,can_invite,can_remove,can_promote,can_demote,can_motd,can_warpeace)"
 		" VALUES(%d,%d,'%s',%d,%d,%d,%d,%d,%d,%d,%d)",
 			guild_id, rank, title_esc,
-			r.permissions[GUILD_HEAR],
-			r.permissions[GUILD_SPEAK],
-			r.permissions[GUILD_INVITE],
-			r.permissions[GUILD_REMOVE],
-			r.permissions[GUILD_PROMOTE],
-			r.permissions[GUILD_DEMOTE],
-			r.permissions[GUILD_MOTD],
-			r.permissions[GUILD_WARPEACE]), errbuf))
+			rankInfo.permissions[GUILD_HEAR],
+			rankInfo.permissions[GUILD_SPEAK],
+			rankInfo.permissions[GUILD_INVITE],
+			rankInfo.permissions[GUILD_REMOVE],
+			rankInfo.permissions[GUILD_PROMOTE],
+			rankInfo.permissions[GUILD_DEMOTE],
+			rankInfo.permissions[GUILD_MOTD],
+			rankInfo.permissions[GUILD_WARPEACE]);
+		results = m_db->QueryDatabase(query);
+
+		if (!results.Success())
 		{
-			_log(GUILDS__ERROR, "Error inserting new guild rank record when storing %d for %d. Giving up. '%s': %s", rank, guild_id, query, errbuf);
-			safe_delete_array(query);
+			_log(GUILDS__ERROR, "Error inserting new guild rank record when storing %d for %d. Giving up. '%s': %s", rank, guild_id, query.c_str(), results.ErrorMessage().c_str());
 			safe_delete_array(title_esc);
-			return(false);
+			return false;
 		}
-		safe_delete_array(query);
 		safe_delete_array(title_esc);
 	}
 
 	_log(GUILDS__DB, "Stored guild %d in the database", guild_id);
 
-	return(true);
+	return true;
 }
 
 uint32 BaseGuildManager::_GetFreeGuildID() {
@@ -316,27 +313,39 @@ uint32 BaseGuildManager::_GetFreeGuildID() {
 		return(GUILD_NONE);
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char query[100];
-	MYSQL_RES *result;
-
+	std::string query;
 	//this has got to be one of the more retarded things I have seen.
 	//none the less, im too lazy to rewrite it right now.
+	//possibly:
+	//
+	// SELECT t1.id + 1
+	// FROM guilds t1
+	// WHERE NOT EXISTS (
+    //	SELECT *
+    //	FROM guilds t2
+    //	WHERE t2.id = t1.id + 1
+	// )
+	// LIMIT 1
+	//
+	// Seems likely what we should be doing is auto incrementing the guild table
+	// inserting, then getting the id. NOT getting a free id then inserting.
+	// could be a race condition.
 
-	uint16 x;
-	for (x = 1; x < MAX_NUMBER_GUILDS; x++) {
-		snprintf(query, 100, "SELECT id FROM guilds where id=%i;", x);
+	for (auto index = 1; index < MAX_NUMBER_GUILDS; ++index)
+	{
+        query = StringFormat("SELECT id FROM guilds where id=%i;", index);
+		auto results = m_db->QueryDatabase(query);
 
-		if (m_db->RunQuery(query, strlen(query), errbuf, &result)) {
-			if (mysql_num_rows(result) == 0) {
-				mysql_free_result(result);
-				_log(GUILDS__DB, "Located free guild ID %d in the database", x);
-				return x;
-			}
-			mysql_free_result(result);
+		if (!results.Success())
+		{
+			LogFile->write(EQEMuLog::Error, "Error in _GetFreeGuildID query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+			continue;
 		}
-		else {
-			LogFile->write(EQEMuLog::Error, "Error in _GetFreeGuildID query '%s': %s", query, errbuf);
+
+		if (results.RowCount() == 0)
+		{
+			_log(GUILDS__DB, "Located free guild ID %d in the database", index);
+			return index;
 		}
 	}
 
@@ -465,6 +474,11 @@ bool BaseGuildManager::SetBankerFlag(uint32 charid, bool is_banker) {
 	return(true);
 }
 
+bool BaseGuildManager::ForceRankUpdate(uint32 charid) {
+	SendRankUpdate(charid);
+	return(true);
+}
+
 bool BaseGuildManager::SetAltFlag(uint32 charid, bool is_alt)
 {
 	if(!DBSetAltFlag(charid, is_alt))
@@ -529,23 +543,21 @@ bool BaseGuildManager::DBDeleteGuild(uint32 guild_id) {
 		return(false);
 	}
 
-	char *query = 0;
-
 	//clear out old `guilds` entry
-	_RunQuery(query, MakeAnyLenString(&query,
-		"DELETE FROM guilds WHERE id=%lu", (unsigned long)guild_id), "clearing old guild record");
+	std::string query = StringFormat("DELETE FROM guilds WHERE id=%lu", (unsigned long)guild_id);
+	QueryWithLogging(query, "clearing old guild record");
 
 	//clear out old `guild_ranks` entries
-	_RunQuery(query, MakeAnyLenString(&query,
-		"DELETE FROM guild_ranks WHERE guild_id=%lu", (unsigned long)guild_id), "clearing old guild_ranks records");
+	query = StringFormat("DELETE FROM guild_ranks WHERE guild_id=%lu", (unsigned long)guild_id);
+	QueryWithLogging(query, "clearing old guild_ranks records");
 
 	//clear out people belonging to this guild.
-	_RunQuery(query, MakeAnyLenString(&query,
-		"DELETE FROM guild_members WHERE guild_id=%lu", (unsigned long)guild_id), "clearing chars in guild");
+	query = StringFormat("DELETE FROM guild_members WHERE guild_id=%lu", (unsigned long)guild_id);
+	QueryWithLogging(query, "clearing chars in guild");
 
 	// Delete the guild bank
-	_RunQuery(query, MakeAnyLenString(&query,
-		"DELETE FROM guild_bank WHERE guildid=%lu", (unsigned long)guild_id), "deleting guild bank");
+	query = StringFormat("DELETE FROM guild_bank WHERE guildid=%lu", (unsigned long)guild_id);
+	QueryWithLogging(query, "deleting guild bank");
 
 	_log(GUILDS__DB, "Deleted guild %d from the database.", guild_id);
 
@@ -555,17 +567,14 @@ bool BaseGuildManager::DBDeleteGuild(uint32 guild_id) {
 bool BaseGuildManager::DBRenameGuild(uint32 guild_id, const char* name) {
 	if(m_db == nullptr) {
 		_log(GUILDS__DB, "Requested to rename guild %d when we have no database object.", guild_id);
-		return(false);
+		return false;
 	}
 
 	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(guild_id);
 	if(res == m_guilds.end())
-		return(false);
+		return false;
 	GuildInfo *info = res->second;
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 
 	//escape our strings.
 	uint32 len = strlen(name);
@@ -573,63 +582,58 @@ bool BaseGuildManager::DBRenameGuild(uint32 guild_id, const char* name) {
 	m_db->DoEscapeString(esc, name, len);
 
 	//insert the new `guilds` entry
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"UPDATE guilds SET name='%s' WHERE id=%d",
-		esc, guild_id), errbuf))
+	std::string query = StringFormat("UPDATE guilds SET name='%s' WHERE id=%d", esc, guild_id);
+	auto results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
 	{
-		_log(GUILDS__ERROR, "Error renaming guild %d '%s': %s", guild_id, query, errbuf);
-		safe_delete_array(query);
+		_log(GUILDS__ERROR, "Error renaming guild %d '%s': %s", guild_id, query.c_str(), results.Success());
 		safe_delete_array(esc);
-		return(false);
+		return false;
 	}
-	safe_delete_array(query);
 	safe_delete_array(esc);
 
 	_log(GUILDS__DB, "Renamed guild %s (%d) to %s in database.", info->name.c_str(), guild_id, name);
 
 	info->name = name;	//update our local record.
 
-	return(true);
+	return true;
 }
 
 bool BaseGuildManager::DBSetGuildLeader(uint32 guild_id, uint32 leader) {
 	if(m_db == nullptr) {
 		_log(GUILDS__DB, "Requested to set the leader for guild %d when we have no database object.", guild_id);
-		return(false);
+		return false;
 	}
 
 	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(guild_id);
 	if(res == m_guilds.end())
-		return(false);
+		return false;
 	GuildInfo *info = res->second;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
 	//insert the new `guilds` entry
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"UPDATE guilds SET leader='%d' WHERE id=%d",
-		leader, guild_id), errbuf))
+    std::string query = StringFormat("UPDATE guilds SET leader='%d' WHERE id=%d",leader, guild_id);
+	auto results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
 	{
-		_log(GUILDS__ERROR, "Error changing leader on guild %d '%s': %s", guild_id, query, errbuf);
-		safe_delete_array(query);
-		return(false);
+		_log(GUILDS__ERROR, "Error changing leader on guild %d '%s': %s", guild_id, query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
-	safe_delete_array(query);
 
 	//set the old leader to officer
 	if(!DBSetGuildRank(info->leader_char_id, GUILD_OFFICER))
-		return(false);
+		return false;
 	//set the new leader to leader
 	if(!DBSetGuildRank(leader, GUILD_LEADER))
-		return(false);
+		return false;
 
 	_log(GUILDS__DB, "Set guild leader for guild %d to %d in the database", guild_id, leader);
 
 	info->leader_char_id = leader;	//update our local record.
 
-	return(true);
+	return true;
 }
 
 bool BaseGuildManager::DBSetGuildMOTD(uint32 guild_id, const char* motd, const char *setter) {
@@ -644,9 +648,6 @@ bool BaseGuildManager::DBSetGuildMOTD(uint32 guild_id, const char* motd, const c
 		return(false);
 	GuildInfo *info = res->second;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
 	//escape our strings.
 	uint32 len = strlen(motd);
 	uint32 len2 = strlen(setter);
@@ -656,17 +657,16 @@ bool BaseGuildManager::DBSetGuildMOTD(uint32 guild_id, const char* motd, const c
 	m_db->DoEscapeString(esc_set, setter, len2);
 
 	//insert the new `guilds` entry
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"UPDATE guilds SET motd='%s',motd_setter='%s' WHERE id=%d",
-		esc, esc_set, guild_id), errbuf))
+	std::string query = StringFormat("UPDATE guilds SET motd='%s',motd_setter='%s' WHERE id=%d", esc, esc_set, guild_id);
+	auto results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
 	{
-		_log(GUILDS__ERROR, "Error setting MOTD for guild %d '%s': %s", guild_id, query, errbuf);
-		safe_delete_array(query);
+		_log(GUILDS__ERROR, "Error setting MOTD for guild %d '%s': %s", guild_id, query.c_str(), results.ErrorMessage().c_str());
 		safe_delete_array(esc);
 		safe_delete_array(esc_set);
-		return(false);
+		return false;
 	}
-	safe_delete_array(query);
 	safe_delete_array(esc);
 	safe_delete_array(esc_set);
 
@@ -675,48 +675,41 @@ bool BaseGuildManager::DBSetGuildMOTD(uint32 guild_id, const char* motd, const c
 	info->motd = motd;	//update our local record.
 	info->motd_setter = setter;	//update our local record.
 
-	return(true);
+	return true;
 }
 
 bool BaseGuildManager::DBSetGuildURL(uint32 GuildID, const char* URL)
 {
 	if(m_db == nullptr)
-		return(false);
+		return false;
 
-	std::map<uint32, GuildInfo *>::const_iterator res;
-
-	res = m_guilds.find(GuildID);
-
+	auto res = m_guilds.find(GuildID);
 	if(res == m_guilds.end())
-		return(false);
+		return false;
 
 	GuildInfo *info = res->second;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
 	//escape our strings.
 	uint32 len = strlen(URL);
-
 	char *esc = new char[len*2+1];
-
 	m_db->DoEscapeString(esc, URL, len);
 
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query, "UPDATE guilds SET url='%s' WHERE id=%d", esc, GuildID), errbuf))
+    std::string query = StringFormat("UPDATE guilds SET url='%s' WHERE id=%d", esc, GuildID);
+	auto results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
 	{
-		_log(GUILDS__ERROR, "Error setting URL for guild %d '%s': %s", GuildID, query, errbuf);
-		safe_delete_array(query);
+		_log(GUILDS__ERROR, "Error setting URL for guild %d '%s': %s", GuildID, query.c_str(), results.ErrorMessage().c_str());
 		safe_delete_array(esc);
 		return(false);
 	}
-	safe_delete_array(query);
 	safe_delete_array(esc);
 
 	_log(GUILDS__DB, "Set URL for guild %d in the database", GuildID);
 
 	info->url = URL;	//update our local record.
 
-	return(true);
+	return true;
 }
 
 bool BaseGuildManager::DBSetGuildChannel(uint32 GuildID, const char* Channel)
@@ -724,33 +717,27 @@ bool BaseGuildManager::DBSetGuildChannel(uint32 GuildID, const char* Channel)
 	if(m_db == nullptr)
 		return(false);
 
-	std::map<uint32, GuildInfo *>::const_iterator res;
-
-	res = m_guilds.find(GuildID);
+	auto res = m_guilds.find(GuildID);
 
 	if(res == m_guilds.end())
 		return(false);
 
 	GuildInfo *info = res->second;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
 	//escape our strings.
 	uint32 len = strlen(Channel);
-
 	char *esc = new char[len*2+1];
-
 	m_db->DoEscapeString(esc, Channel, len);
 
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query, "UPDATE guilds SET channel='%s' WHERE id=%d", esc, GuildID), errbuf))
+    std::string query = StringFormat("UPDATE guilds SET channel='%s' WHERE id=%d", esc, GuildID);
+    auto results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
 	{
-		_log(GUILDS__ERROR, "Error setting Channel for guild %d '%s': %s", GuildID, query, errbuf);
-		safe_delete_array(query);
+		_log(GUILDS__ERROR, "Error setting Channel for guild %d '%s': %s", GuildID, query.c_str(), results.ErrorMessage().c_str());
 		safe_delete_array(esc);
 		return(false);
 	}
-	safe_delete_array(query);
 	safe_delete_array(esc);
 
 	_log(GUILDS__DB, "Set Channel for guild %d in the database", GuildID);
@@ -766,137 +753,104 @@ bool BaseGuildManager::DBSetGuild(uint32 charid, uint32 guild_id, uint8 rank) {
 		return(false);
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query;
 
 	if(guild_id != GUILD_NONE) {
-		if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-			"REPLACE INTO guild_members (char_id,guild_id,rank) VALUES(%d,%d,%d)",
-			charid, guild_id, rank), errbuf))
-		{
-			_log(GUILDS__ERROR, "Error Changing char %d to guild %d '%s': %s", charid, guild_id, query, errbuf);
-			safe_delete_array(query);
-			return(false);
+        query = StringFormat("REPLACE INTO guild_members (char_id,guild_id,rank,public_note) VALUES(%d,%d,%d,'')", charid, guild_id, rank);
+        auto results = m_db->QueryDatabase(query);
+
+		if (!results.Success()) {
+			_log(GUILDS__ERROR, "Error Changing char %d to guild %d '%s': %s", charid, guild_id, query.c_str(), results.ErrorMessage().c_str());
+			return false;
 		}
+
 	} else {
-		if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-			"DELETE FROM guild_members WHERE char_id=%d",
-			charid), errbuf))
+        query = StringFormat("DELETE FROM guild_members WHERE char_id=%d", charid);
+        auto results = m_db->QueryDatabase(query);
+        if (!results.Success())
 		{
-			_log(GUILDS__ERROR, "Error removing char %d from guild '%s': %s", charid, guild_id, query, errbuf);
-			safe_delete_array(query);
-			return(false);
+			_log(GUILDS__ERROR, "Error removing char %d from guild '%s': %s", charid, guild_id, query.c_str(), results.ErrorMessage().c_str());
+			return false;
 		}
-	}
-	safe_delete_array(query);
-
+    }
 	_log(GUILDS__DB, "Set char %d to guild %d and rank %d in the database.", charid, guild_id, rank);
-
-	return(true);
+	return true;
 }
 
 bool BaseGuildManager::DBSetGuildRank(uint32 charid, uint8 rank) {
-	char *query = 0;
-	return(_RunQuery(query, MakeAnyLenString(&query,
-		"UPDATE guild_members SET rank=%d WHERE char_id=%d",
-		rank, charid), "setting a guild member's rank"));
+	std::string query = StringFormat("UPDATE guild_members SET rank=%d WHERE char_id=%d", rank, charid);
+	return(QueryWithLogging(query, "setting a guild member's rank"));
 }
 
 bool BaseGuildManager::DBSetBankerFlag(uint32 charid, bool is_banker) {
-	char *query = 0;
-	return(_RunQuery(query, MakeAnyLenString(&query,
-		"UPDATE guild_members SET banker=%d WHERE char_id=%d",
-		is_banker?1:0, charid), "setting a guild member's banker flag"));
+	std::string query = StringFormat("UPDATE guild_members SET banker=%d WHERE char_id=%d",
+		is_banker? 1: 0, charid);
+	return(QueryWithLogging(query, "setting a guild member's banker flag"));
 }
 
 bool BaseGuildManager::GetBankerFlag(uint32 CharID)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
 	if(!m_db)
 		return false;
 
-	if(!m_db->RunQuery(query, MakeAnyLenString(&query, "select `banker` from `guild_members` where char_id=%i LIMIT 1", CharID), errbuf, &result))
+    std::string query = StringFormat("select `banker` from `guild_members` where char_id=%i LIMIT 1", CharID);
+    auto results = m_db->QueryDatabase(query);
+	if(!results.Success())
 	{
-		_log(GUILDS__ERROR, "Error retrieving banker flag '%s': %s", query, errbuf);
-
-		safe_delete_array(query);
-
+		_log(GUILDS__ERROR, "Error retrieving banker flag '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
-	safe_delete_array(query);
-
-	if(mysql_num_rows(result) != 1)
+	if(results.RowCount() != 1)
 		return false;
 
-	row = mysql_fetch_row(result);
+	auto row = results.begin();
 
 	bool IsBanker = atoi(row[0]);
-
-	mysql_free_result(result);
 
 	return IsBanker;
 }
 
 bool BaseGuildManager::DBSetAltFlag(uint32 charid, bool is_alt)
 {
-	char *query = 0;
+	std::string query = StringFormat("UPDATE guild_members SET alt=%d WHERE char_id=%d",
+		is_alt ? 1: 0, charid);
 
-	return(_RunQuery(query, MakeAnyLenString(&query,
-		"UPDATE guild_members SET alt=%d WHERE char_id=%d",
-		is_alt?1:0, charid), "setting a guild member's alt flag"));
+	return(QueryWithLogging(query, "setting a guild member's alt flag"));
 }
 
 bool BaseGuildManager::GetAltFlag(uint32 CharID)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if(!m_db)
+    if(!m_db)
 		return false;
 
-	if(!m_db->RunQuery(query, MakeAnyLenString(&query, "select `alt` from `guild_members` where char_id=%i LIMIT 1", CharID), errbuf, &result))
+    std::string query = StringFormat("SELECT `alt` FROM `guild_members` WHERE char_id=%i LIMIT 1", CharID);
+    auto results = m_db->QueryDatabase(query);
+	if(!results.Success())
 	{
-		_log(GUILDS__ERROR, "Error retrieving alt flag '%s': %s", query, errbuf);
-
-		safe_delete_array(query);
-
+		_log(GUILDS__ERROR, "Error retrieving alt flag '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
-	safe_delete_array(query);
-
-	if(mysql_num_rows(result) != 1)
+	if(results.RowCount() != 1)
 		return false;
 
-	row = mysql_fetch_row(result);
+	auto row = results.begin();
 
 	bool IsAlt = atoi(row[0]);
-
-	mysql_free_result(result);
 
 	return IsAlt;
 }
 
 bool BaseGuildManager::DBSetTributeFlag(uint32 charid, bool enabled) {
-	char *query = 0;
-	return(_RunQuery(query, MakeAnyLenString(&query,
-		"UPDATE guild_members SET tribute_enable=%d WHERE char_id=%d",
-		enabled?1:0, charid), "setting a guild member's tribute flag"));
+	std::string query = StringFormat("UPDATE guild_members SET tribute_enable=%d WHERE char_id=%d",
+		enabled ? 1: 0, charid);
+	return(QueryWithLogging(query, "setting a guild member's tribute flag"));
 }
 
 bool BaseGuildManager::DBSetPublicNote(uint32 charid, const char* note) {
 	if(m_db == nullptr)
 		return(false);
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 
 	//escape our strings.
 	uint32 len = strlen(note);
@@ -904,36 +858,32 @@ bool BaseGuildManager::DBSetPublicNote(uint32 charid, const char* note) {
 	m_db->DoEscapeString(esc, note, len);
 
 	//insert the new `guilds` entry
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		"UPDATE guild_members SET public_note='%s' WHERE char_id=%d",
-		esc, charid), errbuf))
-	{
-		_log(GUILDS__ERROR, "Error setting public note for char %d '%s': %s", charid, query, errbuf);
-		safe_delete_array(query);
-		safe_delete_array(esc);
-		return(false);
-	}
-	safe_delete_array(query);
+	std::string query = StringFormat("UPDATE guild_members SET public_note='%s' WHERE char_id=%d", esc, charid);
 	safe_delete_array(esc);
+	auto results = m_db->QueryDatabase(query);
+
+	if (!results.Success())
+	{
+		_log(GUILDS__ERROR, "Error setting public note for char %d '%s': %s", charid, query.c_str(), results.ErrorMessage().c_str());
+		return false;
+	}
 
 	_log(GUILDS__DB, "Set public not for char %d", charid);
 
-	return(true);
+	return true;
 }
 
-bool BaseGuildManager::_RunQuery(char *&query, int len, const char *errmsg) {
+bool BaseGuildManager::QueryWithLogging(std::string query, const char *errmsg) {
 	if(m_db == nullptr)
 		return(false);
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+    auto results = m_db->QueryDatabase(query);
 
-	if (!m_db->RunQuery(query, len, errbuf))
+	if (!results.Success())
 	{
-		_log(GUILDS__ERROR, "Error %s: '%s': %s", errmsg, query, errbuf);
-		safe_delete_array(query);
+		_log(GUILDS__ERROR, "Error %s: '%s': %s", errmsg, query.c_str(), results.ErrorMessage().c_str());
 		return(false);
 	}
-	safe_delete_array(query);
 
 	return(true);
 }
@@ -947,12 +897,12 @@ bool BaseGuildManager::_RunQuery(char *&query, int len, const char *errmsg) {
 " FROM vwBotCharacterMobs AS c LEFT JOIN vwGuildMembers AS g ON c.id=g.char_id AND c.mobtype = g.mobtype "
 #else
 #define GuildMemberBaseQuery \
-"SELECT c.id,c.name,c.class,c.level,c.timelaston,c.zoneid," \
+"SELECT c.id,c.name,c.class,c.level,c.last_login,c.zone_id," \
 " g.guild_id,g.rank,g.tribute_enable,g.total_tribute,g.last_tribute," \
 " g.banker,g.public_note,g.alt " \
-" FROM character_ AS c LEFT JOIN guild_members AS g ON c.id=g.char_id "
+" FROM `character_data` AS c LEFT JOIN guild_members AS g ON c.id=g.char_id "
 #endif
-static void ProcessGuildMember(MYSQL_ROW &row, CharGuildInfo &into) {
+static void ProcessGuildMember(MySQLRequestRow row, CharGuildInfo &into) {
 	//fields from `characer_`
 	into.char_id		= atoi(row[0]);
 	into.char_name		= row[1];
@@ -985,31 +935,23 @@ bool BaseGuildManager::GetEntireGuild(uint32 guild_id, std::vector<CharGuildInfo
 	if(m_db == nullptr)
 		return(false);
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
 	//load up the rank info for each guild.
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		GuildMemberBaseQuery " WHERE g.guild_id=%d", guild_id
-		), errbuf, &result)) {
-		_log(GUILDS__ERROR, "Error loading guild member list '%s': %s", query, errbuf);
-		safe_delete_array(query);
-		return(false);
+	std::string query = StringFormat(GuildMemberBaseQuery " WHERE g.guild_id=%d", guild_id);
+	auto results = m_db->QueryDatabase(query);
+	if (!results.Success()) {
+		_log(GUILDS__ERROR, "Error loading guild member list '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
-	safe_delete_array(query);
 
-	while ((row = mysql_fetch_row(result))) {
+    for (auto row = results.begin(); row != results.end(); ++row) {
 		CharGuildInfo *ci = new CharGuildInfo;
 		ProcessGuildMember(row, *ci);
 		members.push_back(ci);
 	}
-	mysql_free_result(result);
 
 	_log(GUILDS__DB, "Retreived entire guild member list for guild %d from the database", guild_id);
 
-	return(true);
+	return true;
 }
 
 bool BaseGuildManager::GetCharInfo(const char *char_name, CharGuildInfo &into) {
@@ -1018,38 +960,28 @@ bool BaseGuildManager::GetCharInfo(const char *char_name, CharGuildInfo &into) {
 		return(false);
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
 	//escape our strings.
 	uint32 nl = strlen(char_name);
 	char *esc = new char[nl*2+1];
 	m_db->DoEscapeString(esc, char_name, nl);
 
 	//load up the rank info for each guild.
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-		GuildMemberBaseQuery " WHERE c.name='%s'", esc
-		), errbuf, &result)) {
-		_log(GUILDS__ERROR, "Error loading guild member '%s': %s", query, errbuf);
-		safe_delete_array(query);
-		safe_delete_array(esc);
-		return(false);
+    std::string query = StringFormat(GuildMemberBaseQuery " WHERE c.name='%s'", esc);
+    safe_delete_array(esc);
+    auto results = m_db->QueryDatabase(query);
+	if (!results.Success()) {
+		_log(GUILDS__ERROR, "Error loading guild member '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
-	safe_delete_array(query);
-	safe_delete_array(esc);
 
-	bool ret = true;
-	if ((row = mysql_fetch_row(result))) {
-		ProcessGuildMember(row, into);
-		_log(GUILDS__DB, "Retreived guild member info for char %s from the database", char_name);
-	} else {
-		ret = true;
-	}
-	mysql_free_result(result);
+	if (results.RowCount() == 0)
+        return false;
 
-	return(ret);
+    auto row = results.begin();
+    ProcessGuildMember(row, into);
+    _log(GUILDS__DB, "Retreived guild member info for char %s from the database", char_name);
+
+	return true;
 
 
 }
@@ -1057,38 +989,30 @@ bool BaseGuildManager::GetCharInfo(const char *char_name, CharGuildInfo &into) {
 bool BaseGuildManager::GetCharInfo(uint32 char_id, CharGuildInfo &into) {
 	if(m_db == nullptr) {
 		_log(GUILDS__DB, "Requested char info on %d when we have no database object.", char_id);
-		return(false);
+		return false;
 	}
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
 	//load up the rank info for each guild.
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
+	std::string query;
 #ifdef BOTS
-		GuildMemberBaseQuery " WHERE c.id=%d AND c.mobtype = 'C'", char_id
+    query = StringFormat(GuildMemberBaseQuery " WHERE c.id=%d AND c.mobtype = 'C'", char_id);
 #else
-		GuildMemberBaseQuery " WHERE c.id=%d", char_id
+    query = StringFormat(GuildMemberBaseQuery " WHERE c.id=%d", char_id);
 #endif
-		), errbuf, &result)) {
-		_log(GUILDS__ERROR, "Error loading guild member '%s': %s", query, errbuf);
-		safe_delete_array(query);
-		return(false);
+    auto results = m_db->QueryDatabase(query);
+	if (!results.Success()) {
+		_log(GUILDS__ERROR, "Error loading guild member '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return false;
 	}
-	safe_delete_array(query);
 
-	bool ret = true;
-	if ((row = mysql_fetch_row(result))) {
-		ProcessGuildMember(row, into);
-		_log(GUILDS__DB, "Retreived guild member info for char %d", char_id);
-	} else {
-		ret = true;
-	}
-	mysql_free_result(result);
+    if (results.RowCount() == 0)
+        return false;
 
-	return(ret);
+    auto row = results.begin();
+    ProcessGuildMember(row, into);
+    _log(GUILDS__DB, "Retreived guild member info for char %d", char_id);
+
+	return true;
 
 }
 
@@ -1316,251 +1240,18 @@ BaseGuildManager::GuildInfo::GuildInfo() {
 
 uint32 BaseGuildManager::DoesAccountContainAGuildLeader(uint32 AccountID)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-
-	if (!m_db->RunQuery(query,
-				MakeAnyLenString(&query,
-							"select guild_id from guild_members where char_id in (select id from character_ where account_id = %i) and rank = 2",
-							AccountID), errbuf, &result))
+	std::string query = StringFormat("SELECT guild_id FROM guild_members WHERE char_id IN "
+		"(SELECT id FROM `character_data` WHERE account_id = %i) AND rank = 2",
+                                    AccountID);
+    auto results = m_db->QueryDatabase(query);
+	if (!results.Success())
 	{
-		_log(GUILDS__ERROR, "Error executing query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+		_log(GUILDS__ERROR, "Error executing query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
-	safe_delete_array(query);
 
-	uint32 Rows = mysql_num_rows(result);
-	mysql_free_result(result);
-
-	return Rows;
+	return results.RowCount();
 }
-
-
-/*
-
-bool Database::LoadGuilds(GuildRanks_Struct* guilds) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	//	int i;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	for (int a = 0; a < 512; a++) {
-		guilds[a].leader = 0;
-		guilds[a].databaseID = 0;
-		memset(guilds[a].name, 0, sizeof(guilds[a].name));
-		for (int i = 0; i <= GUILD_MAX_RANK; i++) {
-			snprintf(guilds[a].rank[i].rankname, 100, "Guild Rank %i", i);
-			if (i == 0) {
-				guilds[a].rank[i].heargu = 1;
-				guilds[a].rank[i].speakgu = 1;
-				guilds[a].rank[i].invite = 1;
-				guilds[a].rank[i].remove = 1;
-				guilds[a].rank[i].promote = 1;
-				guilds[a].rank[i].demote = 1;
-				guilds[a].rank[i].motd = 1;
-				guilds[a].rank[i].warpeace = 1;
-			}
-			else {
-				guilds[a].rank[i].heargu = 0;
-				guilds[a].rank[i].speakgu = 0;
-				guilds[a].rank[i].invite = 0;
-				guilds[a].rank[i].remove = 0;
-				guilds[a].rank[i].promote = 0;
-				guilds[a].rank[i].demote = 0;
-				guilds[a].rank[i].motd = 0;
-				guilds[a].rank[i].warpeace = 0;
-			}
-		}
-		Sleep(0);
-	}
-
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, eqid, name, leader, minstatus, rank0title, rank1, rank1title, rank2, rank2title, rank3, rank3title, rank4, rank4title, rank5, rank5title from guilds"), errbuf, &result)) {
-
-		safe_delete_array(query);
-		uint32 guildeqid = 0xFFFFFFFF;
-		while ((row = mysql_fetch_row(result))) {
-			guildeqid = atoi(row[1]);
-			if (guildeqid < 512) {
-				guilds[guildeqid].leader = atoi(row[3]);
-				guilds[guildeqid].databaseID = atoi(row[0]);
-				guilds[guildeqid].minstatus = atoi(row[4]);
-				strcpy(guilds[guildeqid].name, row[2]);
-				for (int i = 0; i <= GUILD_MAX_RANK; i++) {
-					strcpy(guilds[guildeqid].rank[i].rankname, row[5 + (i*2)]);
-					if (i == 0) {
-						guilds[guildeqid].rank[i].heargu = 1;
-						guilds[guildeqid].rank[i].speakgu = 1;
-						guilds[guildeqid].rank[i].invite = 1;
-						guilds[guildeqid].rank[i].remove = 1;
-						guilds[guildeqid].rank[i].promote = 1;
-						guilds[guildeqid].rank[i].demote = 1;
-						guilds[guildeqid].rank[i].motd = 1;
-						guilds[guildeqid].rank[i].warpeace = 1;
-					}
-					else if (strlen(row[4 + (i*2)]) >= 8) {
-						guilds[guildeqid].rank[i].heargu = (row[4 + (i*2)][GUILD_HEAR] == '1');
-						guilds[guildeqid].rank[i].speakgu = (row[4 + (i*2)][GUILD_SPEAK] == '1');
-						guilds[guildeqid].rank[i].invite = (row[4 + (i*2)][GUILD_INVITE] == '1');
-						guilds[guildeqid].rank[i].remove = (row[4 + (i*2)][GUILD_REMOVE] == '1');
-						guilds[guildeqid].rank[i].promote = (row[4 + (i*2)][GUILD_PROMOTE] == '1');
-						guilds[guildeqid].rank[i].demote = (row[4 + (i*2)][GUILD_DEMOTE] == '1');
-						guilds[guildeqid].rank[i].motd = (row[4 + (i*2)][GUILD_MOTD] == '1');
-						guilds[guildeqid].rank[i].warpeace = (row[4 + (i*2)][GUILD_WARPEACE] == '1');
-					}
-					else {
-
-						guilds[guildeqid].rank[i].heargu = 1;
-						guilds[guildeqid].rank[i].speakgu = 1;
-						guilds[guildeqid].rank[i].invite = 0;
-
-						guilds[guildeqid].rank[i].remove = 0;
-						guilds[guildeqid].rank[i].promote = 0;
-						guilds[guildeqid].rank[i].demote = 0;
-						guilds[guildeqid].rank[i].motd = 0;
-						guilds[guildeqid].rank[i].warpeace = 0;
-					}
-
-					if (guilds[guildeqid].rank[i].rankname[0] == 0)
-						snprintf(guilds[guildeqid].rank[i].rankname, 100, "Guild Rank %i", i);
-				}
-			}
-			Sleep(0);
-		}
-		mysql_free_result(result);
-		return true;
-	}
-	else
-	{
-		cerr << "Error in LoadGuilds query '" << query << "' " << errbuf << endl;
-		safe_delete_array(query);
-		return false;
-	}
-
-	return false;
-}
-
-
-void Database::SetPublicNote(uint32 guild_id,char* charname, char* note){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	char* notebuf = new char[(strlen(note)*2)+3];
-	DoEscapeString(notebuf, note, strlen(note)) ;
-	if (!RunQuery(query, MakeAnyLenString(&query, "update character_ set publicnote='%s' where name='%s' and guild=%i", notebuf,charname,guild_id), errbuf)) {
-		cerr << "Error running SetPublicNote query: " << errbuf << endl;
-	}
-	safe_delete_array(query);
-	safe_delete_array(notebuf);
-}
-
-
-
-bool Database::GetGuildRanks(uint32 guildeqid, GuildRanks_Struct* gr) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, eqid, name, leader, minstatus, rank0title, rank1, rank1title, rank2, rank2title, rank3, rank3title, rank4, rank4title, rank5, rank5title from guilds where eqid=%i;", guildeqid), errbuf, &result))
-	{
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			gr->leader = atoi(row[3]);
-			gr->databaseID = atoi(row[0]);
-			gr->minstatus = atoi(row[4]);
-			strcpy(gr->name, row[2]);
-			for (int i = 0; i <= GUILD_MAX_RANK; i++) {
-				strcpy(gr->rank[i].rankname, row[5 + (i*2)]);
-				if (i == 0) {
-					gr->rank[i].heargu = 1;
-					gr->rank[i].speakgu = 1;
-					gr->rank[i].invite = 1;
-					gr->rank[i].remove = 1;
-					gr->rank[i].promote = 1;
-					gr->rank[i].demote = 1;
-					gr->rank[i].motd = 1;
-					gr->rank[i].warpeace = 1;
-				}
-				else if (strlen(row[4 + (i*2)]) >= 8) {
-					gr->rank[i].heargu = (row[4 + (i*2)][GUILD_HEAR] == '1');
-					gr->rank[i].speakgu = (row[4 + (i*2)][GUILD_SPEAK] == '1');
-					gr->rank[i].invite = (row[4 + (i*2)][GUILD_INVITE] == '1');
-					gr->rank[i].remove = (row[4 + (i*2)][GUILD_REMOVE] == '1');
-					gr->rank[i].promote = (row[4 + (i*2)][GUILD_PROMOTE] == '1');
-					gr->rank[i].demote = (row[4 + (i*2)][GUILD_DEMOTE] == '1');
-					gr->rank[i].motd = (row[4 + (i*2)][GUILD_MOTD] == '1');
-					gr->rank[i].warpeace = (row[4 + (i*2)][GUILD_WARPEACE] == '1');
-				}
-				else {
-					gr->rank[i].heargu = 1;
-					gr->rank[i].speakgu = 1;
-					gr->rank[i].invite = 0;
-					gr->rank[i].remove = 0;
-					gr->rank[i].promote = 0;
-					gr->rank[i].demote = 0;
-					gr->rank[i].motd = 0;
-					gr->rank[i].warpeace = 0;
-				}
-
-				if (gr->rank[i].rankname[0] == 0)
-					snprintf(gr->rank[i].rankname, 100, "Guild Rank %i", i);
-			}
-		}
-		else {
-			gr->leader = 0;
-			gr->databaseID = 0;
-			gr->minstatus = 0;
-			memset(gr->name, 0, sizeof(gr->name));
-			for (int i = 0; i <= GUILD_MAX_RANK; i++) {
-				snprintf(gr->rank[i].rankname, 100, "Guild Rank %i", i);
-				if (i == 0) {
-					gr->rank[i].heargu = 1;
-					gr->rank[i].speakgu = 1;
-					gr->rank[i].invite = 1;
-					gr->rank[i].remove = 1;
-					gr->rank[i].promote = 1;
-					gr->rank[i].demote = 1;
-					gr->rank[i].motd = 1;
-					gr->rank[i].warpeace = 1;
-				}
-				else {
-					gr->rank[i].heargu = 0;
-					gr->rank[i].speakgu = 0;
-					gr->rank[i].invite = 0;
-					gr->rank[i].remove = 0;
-					gr->rank[i].promote = 0;
-					gr->rank[i].demote = 0;
-					gr->rank[i].motd = 0;
-
-					gr->rank[i].warpeace = 0;
-				}
-			}
-		}
-		mysql_free_result(result);
-		return true;
-	}
-	else {
-		cerr << "Error in GetGuildRank query '" << query << "' " << errbuf << endl;
-		safe_delete_array(query);
-		return false;
-	}
-
-	return false;
-}
-
-
-
-
-
-
-
-*/
-
-
 
 
 

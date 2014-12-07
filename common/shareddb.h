@@ -6,7 +6,7 @@
 #include "database.h"
 #include "skills.h"
 #include "spdat.h"
-#include "Item.h"
+#include "item.h"
 #include "base_data.h"
 #include "fixed_memory_hash_set.h"
 #include "fixed_memory_variable_hash_set.h"
@@ -40,13 +40,9 @@ public:
 	bool	SetGMSpeed(uint32 account_id, uint8 gmspeed);
 	uint8	GetGMSpeed(uint32 account_id);
 	bool	SetHideMe(uint32 account_id, uint8 hideme);
-	bool	GetPlayerProfile(uint32 account_id, char* name, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, char* current_zone = 0, uint32 *current_instance = 0);
-	bool	SetPlayerProfile(uint32 account_id, uint32 charid, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, uint32 current_zone, uint32 current_instance, uint8 MaxXTargets);
-	uint32	SetPlayerProfile_MQ(char** query, uint32 account_id, uint32 charid, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, uint32 current_zone, uint32 current_instance, uint8 MaxXTargets);
 	int32	DeleteStalePlayerCorpses();
-	int32	DeleteStalePlayerBackups();
-	void	GetPlayerInspectMessage(char* playername, InspectMessage_Struct* message);
-	void	SetPlayerInspectMessage(char* playername, const InspectMessage_Struct* message);
+	void	LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* message);
+	void	SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* message);
 	void	GetBotInspectMessage(uint32 botid, InspectMessage_Struct* message);
 	void	SetBotInspectMessage(uint32 botid, const InspectMessage_Struct* message);
 	bool	GetCommandSettings(std::map<std::string,uint8> &commands);
@@ -57,6 +53,10 @@ public:
 	*/
 	bool	SaveCursor(uint32 char_id, std::list<ItemInst*>::const_iterator &start, std::list<ItemInst*>::const_iterator &end);
 	bool	SaveInventory(uint32 char_id, const ItemInst* inst, int16 slot_id);
+	bool    DeleteSharedBankSlot(uint32 char_id, int16 slot_id);
+	bool    DeleteInventorySlot(uint32 char_id, int16 slot_id);
+	bool    UpdateInventorySlot(uint32 char_id, const ItemInst* inst, int16 slot_id);
+	bool    UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, int16 slot_id);
 	bool	VerifyInventory(uint32 account_id, int16 slot_id, const ItemInst* inst);
 	bool	GetSharedBank(uint32 id, Inventory* inv, bool is_charid);
 	int32	GetSharedPlatinum(uint32 account_id);

@@ -16,12 +16,11 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
-#include "worldserver.h"
 #include "../common/servertalk.h"
-#include "ZoneLaunch.h"
-#include "../common/EQEmuConfig.h"
-#include "../common/StringUtil.h"
-
+#include "../common/eqemu_config.h"
+#include "../common/string_util.h"
+#include "worldserver.h"
+#include "zone_launch.h"
 
 WorldServer::WorldServer(std::map<std::string, ZoneLaunch *> &zones, const char *name, const EQEmuConfig *config)
 : WorldConnection(EmuTCPConnection::packetModeLauncher, config->SharedKey.c_str()),

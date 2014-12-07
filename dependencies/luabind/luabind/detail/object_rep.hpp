@@ -28,6 +28,7 @@
 #include <luabind/config.hpp>
 #include <luabind/detail/instance_holder.hpp>
 #include <luabind/detail/ref.hpp>
+#include <cstdlib>
 
 namespace luabind { namespace detail
 {

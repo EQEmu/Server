@@ -407,8 +407,18 @@ void Lua_NPC::SetSpellFocusHeal(int focus) {
 	self->SetSpellFocusHeal(focus);
 }
 
-float Lua_NPC::GetSlowMitigation() {
+int Lua_NPC::GetSpellFocusDMG() {
 	Lua_Safe_Call_Int();
+	return self->GetSpellFocusDMG();
+}
+
+int Lua_NPC::GetSpellFocusHeal() {
+	Lua_Safe_Call_Int();
+	return self->GetSpellFocusHeal();
+}
+
+float Lua_NPC::GetSlowMitigation() {
+	Lua_Safe_Call_Real();
 	return self->GetSlowMitigation();
 }
 
@@ -442,6 +452,15 @@ void Lua_NPC::MerchantCloseShop() {
 	self->MerchantCloseShop();
 }
 
+void Lua_NPC::SetMerchantProbability(uint8 amt) {
+	Lua_Safe_Call_Void();
+	self->SetMerchantProbability(amt);
+}
+
+uint8 Lua_NPC::GetMerchantProbability() {
+	Lua_Safe_Call_Int();
+	return self->GetMerchantProbability();
+}
 
 luabind::scope lua_register_npc() {
 	return luabind::class_<Lua_NPC, Lua_Mob>("NPC")
@@ -526,13 +545,17 @@ luabind::scope lua_register_npc() {
 		.def("RemoveAISpell", (void(Lua_NPC::*)(int))&Lua_NPC::RemoveAISpell)
 		.def("SetSpellFocusDMG", (void(Lua_NPC::*)(int))&Lua_NPC::SetSpellFocusDMG)
 		.def("SetSpellFocusHeal", (void(Lua_NPC::*)(int))&Lua_NPC::SetSpellFocusHeal)
+		.def("GetSpellFocusDMG", (void(Lua_NPC::*)(int))&Lua_NPC::GetSpellFocusDMG)
+		.def("GetSpellFocusHeal", (void(Lua_NPC::*)(int))&Lua_NPC::GetSpellFocusHeal)
 		.def("GetSlowMitigation", (int(Lua_NPC::*)(void))&Lua_NPC::GetSlowMitigation)
 		.def("GetAttackSpeed", (float(Lua_NPC::*)(void))&Lua_NPC::GetAttackSpeed)
 		.def("GetAccuracyRating", (int(Lua_NPC::*)(void))&Lua_NPC::GetAccuracyRating)
 		.def("GetSpawnKillCount", (int(Lua_NPC::*)(void))&Lua_NPC::GetSpawnKillCount)
 		.def("GetScore", (int(Lua_NPC::*)(void))&Lua_NPC::GetScore)
 		.def("MerchantOpenShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantOpenShop)
-		.def("MerchantCloseShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantCloseShop);
+		.def("MerchantCloseShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantCloseShop)
+		.def("SetMerchantProbability", (void(Lua_NPC::*)(void))&Lua_NPC::SetMerchantProbability)
+		.def("GetMerchantProbability", (uint8(Lua_NPC::*)(void))&Lua_NPC::GetMerchantProbability);
 }
 
 #endif

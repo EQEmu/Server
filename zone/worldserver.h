@@ -20,12 +20,10 @@
 
 #include "../common/worldconn.h"
 #include "../common/eq_packet_structs.h"
-#include <string>
 
-struct GuildJoin_Struct;
+class ServerPacket;
 class EQApplicationPacket;
 class Client;
-class Database;
 
 class WorldServer : public WorldConnection {
 public:
@@ -56,6 +54,8 @@ public:
 	void StopLFP(uint32 LeaderID);
 	void HandleLFGMatches(ServerPacket *pack);
 	void HandleLFPMatches(ServerPacket *pack);
+
+	void RequestTellQueue(const char *who);
 
 private:
 	virtual void OnConnected();

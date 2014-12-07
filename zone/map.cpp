@@ -1,7 +1,7 @@
 #include "../common/debug.h"
-#include "../common/MiscFunctions.h"
+#include "../common/misc_functions.h"
 #include "map.h"
-#include "RaycastMesh.h"
+#include "raycast_mesh.h"
 #include "zone.h"
 #include <stdint.h>
 #include <algorithm>

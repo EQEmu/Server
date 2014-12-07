@@ -18,13 +18,13 @@
 #include "../common/debug.h"
 #include "cliententry.h"
 #include "clientlist.h"
-#include "LoginServer.h"
-#include "LoginServerList.h"
+#include "login_server.h"
+#include "login_server_list.h"
 #include "worlddb.h"
 #include "zoneserver.h"
-#include "WorldConfig.h"
+#include "world_config.h"
 #include "../common/guilds.h"
-#include "../common/StringUtil.h"
+#include "../common/string_util.h"
 
 extern uint32 numplayers;
 extern LoginServerList loginserverlist;
@@ -93,6 +93,7 @@ ClientListEntry::~ClientListEntry() {
 		Camp(); // updates zoneserver's numplayers
 		client_list.RemoveCLEReferances(this);
 	}
+	tell_queue.clear();
 }
 
 void ClientListEntry::SetChar(uint32 iCharID, const char* iCharName) {
@@ -233,6 +234,7 @@ void ClientListEntry::ClearVars(bool iAll) {
 	pLFG = 0;
 	gm = 0;
 	pClientVersion = 0;
+	tell_queue.clear();
 }
 
 void ClientListEntry::Camp(ZoneServer* iZS) {
@@ -293,5 +295,23 @@ bool ClientListEntry::CheckAuth(uint32 id, const char* iKey, uint32 ip) {
 		return true;
 	}
 	return false;
+}
+
+void ClientListEntry::ProcessTellQueue()
+{
+	if (!Server())
+		return;
+
+	ServerPacket *pack;
+	auto it = tell_queue.begin();
+	while (it != tell_queue.end()) {
+		pack = new ServerPacket(ServerOP_ChannelMessage, sizeof(ServerChannelMessage_Struct) + strlen((*it)->message) + 1);
+		memcpy(pack->pBuffer, *it, pack->size);
+		pack->Deflate();
+		Server()->SendPacket(pack);
+		safe_delete(pack);
+		it = tell_queue.erase(it);
+	}
+	return;
 }
 

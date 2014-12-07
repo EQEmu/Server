@@ -1,0 +1,1 @@
+ALTER TABLE `merchantlist` ADD `probability` INT(3) NOT NULL DEFAULT '100' AFTER `classes_required`;

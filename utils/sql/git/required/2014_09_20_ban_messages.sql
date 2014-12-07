@@ -1,0 +1,1 @@
+ALTER TABLE `account` ADD COLUMN `ban_reason` TEXT NULL DEFAULT NULL, ADD COLUMN `suspend_reason` TEXT NULL DEFAULT NULL AFTER `ban_reason`;

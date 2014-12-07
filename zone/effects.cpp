@@ -24,11 +24,11 @@
 #include "../common/packet_functions.h"
 #include "petitions.h"
 #include "../common/serverinfo.h"
-#include "../common/ZoneNumbers.h"
+#include "../common/zone_numbers.h"
 #include "../common/moremath.h"
 #include "../common/guilds.h"
-#include "StringIDs.h"
-#include "NpcAI.h"
+#include "string_ids.h"
+#include "npc_ai.h"
 
 float Client::GetActSpellRange(uint16 spell_id, float range, bool IsBard)
 {
@@ -56,7 +56,7 @@ int32 NPC::GetActSpellDamage(uint16 spell_id, int32 value,  Mob* target) {
 			value -= target->GetFcDamageAmtIncoming(this, spell_id)/spells[spell_id].buffduration;
 	 }
 	  	 
-	 value += dmg*SpellFocusDMG/100; 
+	 value += dmg*GetSpellFocusDMG()/100; 
 
 	if (AI_HasSpellsEffects()){
 		int16 chance = 0;
@@ -260,7 +260,7 @@ int32 Mob::GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_s
 	if (total_cast_time > 0 && total_cast_time <= 2500)
 		extra_spell_amt = extra_spell_amt*25/100; 
 	 else if (total_cast_time > 2500 && total_cast_time < 7000) 
-		 extra_spell_amt = extra_spell_amt*(0.167*((total_cast_time - 1000)/1000)); 
+		 extra_spell_amt = extra_spell_amt*(167*((total_cast_time - 1000)/1000)) / 1000; 
 	 else 
 		 extra_spell_amt = extra_spell_amt * total_cast_time / 7000; 
 
@@ -275,7 +275,7 @@ int32 NPC::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 	//Scale all NPC spell healing via SetSpellFocusHeal(value)
 
-	value += value*SpellFocusHeal/100; 
+	value += value*GetSpellFocusHeal()/100; 
 
 	 if (target) {
 		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id); 
@@ -408,11 +408,11 @@ int32 Client::GetActSpellCost(uint16 spell_id, int32 cost)
 		break;
 	}
 
-	bonus += 0.05 * GetAA(aaAdvancedSpellCastingMastery);
+	bonus += 0.05f * GetAA(aaAdvancedSpellCastingMastery);
 
 	if(SuccessChance <= (SpecializeSkill * 0.3 * bonus))
 	{
-		PercentManaReduction = 1 + 0.05 * SpecializeSkill;
+		PercentManaReduction = 1 + 0.05f * SpecializeSkill;
 		switch(GetAA(aaSpellCastingMastery))
 		{
 		case 1:
@@ -451,7 +451,7 @@ int32 Client::GetActSpellCost(uint16 spell_id, int32 cost)
 
 	// Gift of Mana - reduces spell cost to 1 mana
 	if(focus_redux >= 100) {
-		uint32 buff_max = GetMaxTotalSlots();
+		int buff_max = GetMaxTotalSlots();
 		for (int buffSlot = 0; buffSlot < buff_max; buffSlot++) {
 			if (buffs[buffSlot].spellid == 0 || buffs[buffSlot].spellid >= SPDAT_RECORDS)
 				continue;
@@ -606,6 +606,7 @@ bool Client::TrainDiscipline(uint32 itemid) {
 			return(false);
 		} else if(m_pp.disciplines.values[r] == 0) {
 			m_pp.disciplines.values[r] = spell_id;
+			database.SaveCharacterDisc(this->CharacterID(), r, spell_id);
 			SendDisciplineUpdate();
 			Message(0, "You have learned a new discipline!");
 			return(true);
@@ -616,13 +617,9 @@ bool Client::TrainDiscipline(uint32 itemid) {
 }
 
 void Client::SendDisciplineUpdate() {
-	//this dosent seem to work right now
-
 	EQApplicationPacket app(OP_DisciplineUpdate, sizeof(Disciplines_Struct));
 	Disciplines_Struct *d = (Disciplines_Struct*)app.pBuffer;
-	//dunno why I dont just send the one from m_pp
 	memcpy(d, &m_pp.disciplines, sizeof(m_pp.disciplines));
-
 	QueuePacket(&app);
 }
 
@@ -686,25 +683,39 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	{
 		uint32 reduced_recast = spell.recast_time / 1000;
 		reduced_recast -= CastToClient()->GetFocusEffect(focusReduceRecastTime, spell_id);
-		if(reduced_recast < 0)
+		if(reduced_recast <= 0){
 			reduced_recast = 0;
-
-		CastSpell(spell_id, target, DISCIPLINE_SPELL_SLOT, -1, -1, 0, -1, (uint32)DiscTimer, reduced_recast);
-		if(spells[spell_id].EndurTimerIndex < MAX_DISCIPLINE_TIMERS)
-		{
-			EQApplicationPacket *outapp = new EQApplicationPacket(OP_DisciplineTimer, sizeof(DisciplineTimer_Struct));
-			DisciplineTimer_Struct *dts = (DisciplineTimer_Struct *)outapp->pBuffer;
-			dts->TimerID = spells[spell_id].EndurTimerIndex;
-			dts->Duration = reduced_recast;
-			QueuePacket(outapp);
-			safe_delete(outapp);
+			if (GetPTimers().Enabled((uint32)DiscTimer))
+				GetPTimers().Clear(&database, (uint32)DiscTimer);
 		}
+
+		if (reduced_recast > 0)
+			CastSpell(spell_id, target, DISCIPLINE_SPELL_SLOT, -1, -1, 0, -1, (uint32)DiscTimer, reduced_recast);
+		else{
+			CastSpell(spell_id, target, DISCIPLINE_SPELL_SLOT);
+			return true;
+		}
+
+		SendDisciplineTimer(spells[spell_id].EndurTimerIndex, reduced_recast);
 	}
 	else
 	{
 		CastSpell(spell_id, target, DISCIPLINE_SPELL_SLOT);
 	}
 	return(true);
+}
+
+void Client::SendDisciplineTimer(uint32 timer_id, uint32 duration)
+{
+	if (timer_id < MAX_DISCIPLINE_TIMERS)
+	{
+		EQApplicationPacket *outapp = new EQApplicationPacket(OP_DisciplineTimer, sizeof(DisciplineTimer_Struct));
+		DisciplineTimer_Struct *dts = (DisciplineTimer_Struct *)outapp->pBuffer;
+		dts->TimerID = timer_id;
+		dts->Duration = duration;
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
 }
 
 void EntityList::AETaunt(Client* taunter, float range)
@@ -745,7 +756,11 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 
 	bool bad = IsDetrimentalSpell(spell_id);
 	bool isnpc = caster->IsNPC();
-	const int MAX_TARGETS_ALLOWED = 4;
+	int MAX_TARGETS_ALLOWED = 4;
+
+	if (spells[spell_id].aemaxtargets)
+		MAX_TARGETS_ALLOWED = spells[spell_id].aemaxtargets;
+
 	int iCounter = 0;
 
 	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
@@ -757,8 +772,20 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 			continue;
 		if (curmob == caster && !affect_caster)	//watch for caster too
 			continue;
-		
-		dist_targ = center->DistNoRoot(*curmob);
+		if (spells[spell_id].targettype == ST_TargetAENoPlayersPets && curmob->IsPetOwnerClient())
+			continue;
+		if (spells[spell_id].targettype == ST_AreaClientOnly && !curmob->IsClient())
+			continue;
+		if (spells[spell_id].targettype == ST_AreaNPCOnly && !curmob->IsNPC())
+			continue;
+
+		if (spells[spell_id].targettype == ST_Ring) {
+			dist_targ = curmob->DistNoRoot(caster->GetTargetRingX(), caster->GetTargetRingY(), caster->GetTargetRingZ());
+		}
+		else if (center) {
+			dist_targ = center->DistNoRoot(*curmob);
+		}
+
 		if (dist_targ > dist2)	//make sure they are in range
 			continue;
 		if (dist_targ < min_range2)	//make sure they are in range
@@ -780,7 +807,9 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 		if (bad) {
 			if (!caster->IsAttackAllowed(curmob, true))
 				continue;
-			if (!center->CheckLosFN(curmob))
+			if (center && !center->CheckLosFN(curmob))
+				continue;
+			if (!center && !caster->CheckLosFN(caster->GetTargetRingX(), caster->GetTargetRingY(), caster->GetTargetRingZ(), curmob->GetSize()))
 				continue;
 		} else { // check to stop casting beneficial ae buffs (to wit: bard songs) on enemies...
 			// This does not check faction for beneficial AE buffs..only agro and attackable.
@@ -800,10 +829,13 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 				caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
 			}
 		} else {
-			caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
+			if (spells[spell_id].aemaxtargets && iCounter < spells[spell_id].aemaxtargets) 
+				caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
+			if (!spells[spell_id].aemaxtargets)
+				caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
 		}
 
-		if (!isnpc) //npcs are not target limited...
+		if (!isnpc || spells[spell_id].aemaxtargets) //npcs are not target limited (unless casting a spell with a target limit)...
 			iCounter++;
 	}
 }

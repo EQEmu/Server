@@ -15,82 +15,35 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "../common/debug.h"
-#include <iostream>
-#include <stdlib.h>
-#include <math.h>
-
-#ifdef _WINDOWS
-#define snprintf	_snprintf
-#endif
-
-#include "forage.h"
-#include "entity.h"
-#include "masterentity.h"
-#include "npc.h"
-#include "water_map.h"
-#include "titles.h"
-#include "StringIDs.h"
-#include "../common/MiscFunctions.h"
-#include "../common/StringUtil.h"
+#include "../common/misc_functions.h"
 #include "../common/rulesys.h"
+#include "../common/string_util.h"
 
+#include "entity.h"
+#include "forage.h"
+#include "npc.h"
+#include "quest_parser_collection.h"
+#include "string_ids.h"
+#include "titles.h"
+#include "water_map.h"
 #include "zonedb.h"
+
+#include <iostream>
+
 #ifdef _WINDOWS
 #define snprintf	_snprintf
 #endif
 
-#include "QuestParserCollection.h"
+struct NPCType;
 
 //max number of items which can be in the foraging table
 //for a given zone.
 #define FORAGE_ITEM_LIMIT 50
 
-/*
-
-The fishing and foraging need some work...
-foraging currently gives each item an equal chance of dropping
-fishing gives items which come in last from the select a very
-very low chance of dropping.
-
-
-Schema:
-CREATE TABLE forage (
-  id int(11) NOT NULL auto_increment,
-  zoneid int(4) NOT NULL default '0',
-  Itemid int(11) NOT NULL default '0',
-  level smallint(6) NOT NULL default '0',
-  chance smallint(6) NOT NULL default '0',
-  PRIMARY KEY  (id)
-) TYPE=MyISAM;
-
-old table upgrade:
-alter table forage add chance smallint(6) NOT NULL default '0';
-update forage set chance=100;
-
-
-CREATE TABLE fishing (
-  id int(11) NOT NULL auto_increment,
-  zoneid int(4) NOT NULL default '0',
-  Itemid int(11) NOT NULL default '0',
-  skill_level smallint(6) NOT NULL default '0',
-  chance smallint(6) NOT NULL default '0',
-  npc_id int NOT NULL default 0,
-  npc_chance int NOT NULL default 0,
-  PRIMARY KEY  (id)
-) TYPE=MyISAM;
-
-
-*/
-
-// This allows EqEmu to have zone specific foraging - BoB
 uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	uint8 index = 0;
 	uint32 item[FORAGE_ITEM_LIMIT];
 	uint32 chance[FORAGE_ITEM_LIMIT];
 	uint32 ret;
@@ -100,31 +53,32 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 	}
 
 	uint32 chancepool = 0;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT itemid,chance FROM forage WHERE zoneid= '%i' and level <= '%i' LIMIT %i", ZoneID, skill, FORAGE_ITEM_LIMIT), errbuf, &result))
-	{
-		safe_delete_array(query);
-		while ((row = mysql_fetch_row(result)) && (index < FORAGE_ITEM_LIMIT)) {
-			item[index] = atoi(row[0]);
-			chance[index] = atoi(row[1])+chancepool;
-LogFile->write(EQEMuLog::Error, "Possible Forage: %d with a %d chance", item[index], chance[index]);
-			chancepool = chance[index];
-			index++;
-		}
-
-		mysql_free_result(result);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in Forage query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+    std::string query = StringFormat("SELECT itemid, chance FROM "
+                                    "forage WHERE zoneid = '%i' and level <= '%i' "
+                                    "LIMIT %i", ZoneID, skill, FORAGE_ITEM_LIMIT);
+    auto results = QueryDatabase(query);
+	if (!results.Success()) {
+        LogFile->write(EQEMuLog::Error, "Error in Forage query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
 
+	uint8 index = 0;
+    for (auto row = results.begin(); row != results.end(); ++row, ++index) {
+        if (index >= FORAGE_ITEM_LIMIT)
+            break;
+
+        item[index] = atoi(row[0]);
+        chance[index] = atoi(row[1]) + chancepool;
+        LogFile->write(EQEMuLog::Error, "Possible Forage: %d with a %d chance", item[index], chance[index]);
+        chancepool = chance[index];
+    }
+
+
 	if(chancepool == 0 || index < 1)
-		return(0);
+		return 0;
 
 	if(index == 1) {
-		return(item[0]);
+		return item[0];
 	}
 
 	ret = 0;
@@ -143,12 +97,6 @@ LogFile->write(EQEMuLog::Error, "Possible Forage: %d with a %d chance", item[ind
 
 uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, uint8 &npc_chance)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	uint8 index = 0;
 	uint32 item[50];
 	uint32 chance[50];
 	uint32 npc_ids[50];
@@ -161,44 +109,44 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
 		chance[c]=0;
 	}
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT itemid,chance,npc_id,npc_chance FROM fishing WHERE (zoneid= '%i' || zoneid = 0) and skill_level <= '%i'",ZoneID, skill ), errbuf, &result))
-	{
-		safe_delete_array(query);
-		while ((row = mysql_fetch_row(result))&&(index<50)) {
-			item[index] = atoi(row[0]);
-			chance[index] = atoi(row[1])+chancepool;
-			chancepool = chance[index];
-
-			npc_ids[index] = atoi(row[2]);
-			npc_chances[index] = atoi(row[3]);
-			index++;
-		}
-
-		mysql_free_result(result);
-	}
-	else {
-		std::cerr << "Error in Fishing query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+    std::string query = StringFormat("SELECT itemid, chance, npc_id, npc_chance "
+                                    "FROM fishing WHERE (zoneid = '%i' || zoneid = 0) AND skill_level <= '%i'",
+                                    ZoneID, skill);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        std::cerr << "Error in Fishing query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
-	}
+    }
+
+    uint8 index = 0;
+    for (auto row = results.begin(); row != results.end(); ++row, ++index) {
+        if (index >= 50)
+            break;
+
+        item[index] = atoi(row[0]);
+        chance[index] = atoi(row[1])+chancepool;
+        chancepool = chance[index];
+
+        npc_ids[index] = atoi(row[2]);
+        npc_chances[index] = atoi(row[3]);
+    }
 
 	npc_id = 0;
 	npc_chance = 0;
-	if (index>0) {
-		uint32 random = MakeRandomInt(1, chancepool);
-		for (int i = 0; i < index; i++)
-		{
-			if (random <= chance[i])
-			{
-				ret = item[i];
-				npc_id = npc_ids[i];
-				npc_chance = npc_chances[i];
-				break;
-			}
-		}
-	} else {
-		ret = 0;
-	}
+	if (index <= 0)
+        return 0;
+
+    uint32 random = MakeRandomInt(1, chancepool);
+    for (int i = 0; i < index; i++)
+    {
+        if (random > chance[i])
+            continue;
+
+        ret = item[i];
+        npc_id = npc_ids[i];
+        npc_chance = npc_chances[i];
+        break;
+    }
 
 	return ret;
 }
@@ -245,7 +193,7 @@ bool Client::CanFish() {
 		dest.y = RodY;
 		dest.z = z_pos+10;
 
-		RodZ = zone->zonemap->FindBestZ(dest, nullptr) - 1;
+		RodZ = zone->zonemap->FindBestZ(dest, nullptr) + 4;
 		bool in_lava = zone->watermap->InLava(RodX, RodY, RodZ);
 		bool in_water = zone->watermap->InWater(RodX, RodY, RodZ) || zone->watermap->InVWater(RodX, RodY, RodZ);
 		//Message(0, "Rod is at %4.3f, %4.3f, %4.3f, InWater says %d, InLava says %d", RodX, RodY, RodZ, in_water, in_lava);
@@ -365,11 +313,13 @@ void Client::GoFish()
 				safe_delete(inst);
 				inst = m_inv.GetItem(MainCursor);
 			}
-		}
 
-		std::vector<void*> args;
-		args.push_back(inst);
-		parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst != nullptr ? inst->GetItem()->ID : 0, &args);
+			if(inst) {
+				std::vector<EQEmu::Any> args;
+				args.push_back(inst);
+				parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst->GetID(), &args);
+			}
+		}
 	}
 	else
 	{
@@ -479,11 +429,13 @@ void Client::ForageItem(bool guarantee) {
 				safe_delete(inst);
 				inst = m_inv.GetItem(MainCursor);
 			}
-		}
 
-		std::vector<void*> args;
-		args.push_back(inst);
-		parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "", inst ? inst->GetItem()->ID : 0, &args);
+			if(inst) {
+				std::vector<EQEmu::Any> args;
+				args.push_back(inst);
+				parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "", inst->GetID(), &args);
+			}
+		}
 
 		int ChanceSecondForage = aabonuses.ForageAdditionalItems + itembonuses.ForageAdditionalItems + spellbonuses.ForageAdditionalItems;
 		if(!guarantee && MakeRandomInt(0,99) < ChanceSecondForage) {
