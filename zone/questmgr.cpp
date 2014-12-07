@@ -2658,14 +2658,16 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 	char linktext[250];
 
 	if (initiator) {
-		if (initiator->GetClientVersion() >= EQClientRoF)
-			sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"0000000000000000000000000000000000000000000000000",LinkName,0x12);
+		if (initiator->GetClientVersion() >= EQClientRoF2)
+			sprintf(linktext, "%c%06X%s%s%c", 0x12, sayid, "00000000000000000000000000000000000000000000000000", LinkName, 0x12);
+		else if (initiator->GetClientVersion() >= EQClientRoF)
+			sprintf(linktext, "%c%06X%s%s%c", 0x12, sayid, "0000000000000000000000000000000000000000000000000", LinkName, 0x12);
 		else if (initiator->GetClientVersion() >= EQClientSoF)
-			sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"00000000000000000000000000000000000000000000",LinkName,0x12);
+			sprintf(linktext, "%c%06X%s%s%c", 0x12, sayid, "00000000000000000000000000000000000000000000", LinkName, 0x12);
 		else
-			sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"000000000000000000000000000000000000000",LinkName,0x12);
-	} else { // If no initiator, create an RoF saylink, since older clients handle RoF ones better than RoF handles older ones.
-		sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"0000000000000000000000000000000000000000000000000",LinkName,0x12);
+			sprintf(linktext, "%c%06X%s%s%c", 0x12, sayid, "000000000000000000000000000000000000000", LinkName, 0x12);
+	} else { // If no initiator, create an RoF2 saylink, since older clients handle RoF2 ones better than RoF2 handles older ones.
+		sprintf(linktext, "%c%06X%s%s%c", 0x12, sayid, "00000000000000000000000000000000000000000000000000", LinkName, 0x12);
 	}
 
 	strcpy(Phrase,linktext);

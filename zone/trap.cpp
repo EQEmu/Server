@@ -144,7 +144,7 @@ void Trap::Trigger(Mob* trigger)
 			{
 				if ((tmp = database.GetNPCType(effectvalue)))
 				{
-					NPC* new_npc = new NPC(tmp, 0, x-5+MakeRandomInt(0, 10), y-5+MakeRandomInt(0, 10), z-5+MakeRandomInt(0, 10), MakeRandomInt(0, 249), FlyMode3);
+					NPC* new_npc = new NPC(tmp, 0, x-5+zone->random.Int(0, 10), y-5+zone->random.Int(0, 10), z-5+zone->random.Int(0, 10), zone->random.Int(0, 249), FlyMode3);
 					new_npc->AddLootTable();
 					entity_list.AddNPC(new_npc);
 					new_npc->AddToHateList(trigger,1);
@@ -165,7 +165,7 @@ void Trap::Trigger(Mob* trigger)
 			{
 				if ((tmp = database.GetNPCType(effectvalue)))
 				{
-					NPC* new_npc = new NPC(tmp, 0, x-2+MakeRandomInt(0, 5), y-2+MakeRandomInt(0, 5), z-2+MakeRandomInt(0, 5), MakeRandomInt(0, 249), FlyMode3);
+					NPC* new_npc = new NPC(tmp, 0, x-2+zone->random.Int(0, 5), y-2+zone->random.Int(0, 5), z-2+zone->random.Int(0, 5), zone->random.Int(0, 249), FlyMode3);
 					new_npc->AddLootTable();
 					entity_list.AddNPC(new_npc);
 					new_npc->AddToHateList(trigger,1);
@@ -185,10 +185,10 @@ void Trap::Trigger(Mob* trigger)
 			{
 				EQApplicationPacket* outapp = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
 				CombatDamage_Struct* a = (CombatDamage_Struct*)outapp->pBuffer;
-				int dmg = MakeRandomInt(effectvalue, effectvalue2);
+				int dmg = zone->random.Int(effectvalue, effectvalue2);
 				trigger->SetHP(trigger->GetHP() - dmg);
 				a->damage = dmg;
-				a->sequence = MakeRandomInt(0, 1234567);
+				a->sequence = zone->random.Int(0, 1234567);
 				a->source = GetHiddenTrigger()!=nullptr ? GetHiddenTrigger()->GetID() : trigger->GetID();
 				a->spellid = 0;
 				a->target = trigger->GetID();
@@ -197,7 +197,7 @@ void Trap::Trigger(Mob* trigger)
 				safe_delete(outapp);
 			}
 	}
-	respawn_timer.Start((respawn_time + MakeRandomInt(0, respawn_var)) * 1000);
+	respawn_timer.Start((respawn_time + zone->random.Int(0, respawn_var)) * 1000);
 	chkarea_timer.Disable();
 	disarmed = true;
 }
@@ -250,7 +250,7 @@ Mob* EntityList::GetTrapTrigger(Trap* trap) {
 		if ((xdiff*xdiff + ydiff*ydiff) <= maxdist
 			&& zdiff < trap->maxzdiff)
 		{
-			if (MakeRandomInt(0,100) < trap->chance)
+			if (zone->random.Roll(trap->chance))
 				return(cur);
 			else
 				savemob = cur;

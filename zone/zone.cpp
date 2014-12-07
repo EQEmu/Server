@@ -1302,13 +1302,13 @@ void Zone::ChangeWeather()
 		return;
 	}
 
-	int chance = MakeRandomInt(0, 3);
+	int chance = zone->random.Int(0, 3);
 	uint8 rainchance = zone->newzone_data.rain_chance[chance];
 	uint8 rainduration = zone->newzone_data.rain_duration[chance];
 	uint8 snowchance = zone->newzone_data.snow_chance[chance];
 	uint8 snowduration = zone->newzone_data.snow_duration[chance];
 	uint32 weathertimer = 0;
-	uint16 tmpweather = MakeRandomInt(0, 100);
+	uint16 tmpweather = zone->random.Int(0, 100);
 	uint8 duration = 0;
 	uint8 tmpOldWeather = zone->zone_weather;
 	bool changed = false;
@@ -1317,7 +1317,7 @@ void Zone::ChangeWeather()
 	{
 		if(rainchance > 0 || snowchance > 0)
 		{
-			uint8 intensity = MakeRandomInt(1, 10);
+			uint8 intensity = zone->random.Int(1, 10);
 			if((rainchance > snowchance) || (rainchance == snowchance))
 			{
 				//It's gunna rain!

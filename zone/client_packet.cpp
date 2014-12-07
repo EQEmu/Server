@@ -2956,7 +2956,7 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 		if ((PrimaryWeapon && PrimaryWeapon->GetItem()->ItemType == ItemType1HPiercing) ||
 			(SecondaryWeapon && SecondaryWeapon->GetItem()->ItemType == ItemType1HPiercing)) {
 			float SuccessChance = (GetSkill(SkillApplyPoison) + GetLevel()) / 400.0f;
-			double ChanceRoll = MakeRandomFloat(0, 1);
+			double ChanceRoll = zone->random.Real(0, 1);
 
 			CheckIncreaseSkill(SkillApplyPoison, nullptr, 10);
 
@@ -3660,14 +3660,14 @@ void Client::Handle_OP_Begging(const EQApplicationPacket *app)
 		return;
 	}
 
-	int RandomChance = MakeRandomInt(0, 100);
+	int RandomChance = zone->random.Int(0, 100);
 
 	int ChanceToAttack = 0;
 
 	if (GetLevel() > GetTarget()->GetLevel())
-		ChanceToAttack = MakeRandomInt(0, 15);
+		ChanceToAttack = zone->random.Int(0, 15);
 	else
-		ChanceToAttack = MakeRandomInt(((this->GetTarget()->GetLevel() - this->GetLevel()) * 10) - 5, ((this->GetTarget()->GetLevel() - this->GetLevel()) * 10));
+		ChanceToAttack = zone->random.Int(((this->GetTarget()->GetLevel() - this->GetLevel()) * 10) - 5, ((this->GetTarget()->GetLevel() - this->GetLevel()) * 10));
 
 	if (ChanceToAttack < 0)
 		ChanceToAttack = -ChanceToAttack;
@@ -3686,7 +3686,7 @@ void Client::Handle_OP_Begging(const EQApplicationPacket *app)
 
 	if (RandomChance < ChanceToBeg)
 	{
-		brs->Amount = MakeRandomInt(1, 10);
+		brs->Amount = zone->random.Int(1, 10);
 		// This needs some work to determine how much money they can beg, based on skill level etc.
 		if (CurrentSkill < 50)
 		{
@@ -4581,7 +4581,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	delta_heading	= ppu->delta_heading;
 
 	if(IsTracking() && ((x_pos!=ppu->x_pos) || (y_pos!=ppu->y_pos))){
-		if(MakeRandomFloat(0, 100) < 70)//should be good
+		if(zone->random.Real(0, 100) < 70)//should be good
 			CheckIncreaseSkill(SkillTracking, nullptr, -20);
 	}
 
@@ -5283,16 +5283,16 @@ void Client::Handle_OP_DisarmTraps(const EQApplicationPacket *app)
 	if (trap && trap->detected)
 	{
 		int uskill = GetSkill(SkillDisarmTraps);
-		if ((MakeRandomInt(0, 49) + uskill) >= (MakeRandomInt(0, 49) + trap->skill))
+		if ((zone->random.Int(0, 49) + uskill) >= (zone->random.Int(0, 49) + trap->skill))
 		{
 			Message(MT_Skills, "You disarm a trap.");
 			trap->disarmed = true;
 			trap->chkarea_timer.Disable();
-			trap->respawn_timer.Start((trap->respawn_time + MakeRandomInt(0, trap->respawn_var)) * 1000);
+			trap->respawn_timer.Start((trap->respawn_time + zone->random.Int(0, trap->respawn_var)) * 1000);
 		}
 		else
 		{
-			if (MakeRandomInt(0, 99) < 25){
+			if (zone->random.Int(0, 99) < 25){
 				Message(MT_Skills, "You set off the trap while trying to disarm it!");
 				trap->Trigger(this);
 			}
@@ -5653,7 +5653,7 @@ void Client::Handle_OP_FeignDeath(const EQApplicationPacket *app)
 		secfeign = 0;
 
 	uint16 totalfeign = primfeign + secfeign;
-	if (MakeRandomFloat(0, 160) > totalfeign) {
+	if (zone->random.Real(0, 160) > totalfeign) {
 		SetFeigned(false);
 		entity_list.MessageClose_StringID(this, false, 200, 10, STRING_FEIGNFAILED, GetName());
 	}
@@ -7917,7 +7917,7 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 	p_timers.Start(pTimerHide, reuse - 1);
 
 	float hidechance = ((GetSkill(SkillHide) / 250.0f) + .25) * 100;
-	float random = MakeRandomFloat(0, 100);
+	float random = zone->random.Real(0, 100);
 	CheckIncreaseSkill(SkillHide, nullptr, 5);
 	if (random < hidechance) {
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
@@ -7941,7 +7941,7 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 		Mob *evadetar = GetTarget();
 		if (!auto_attack && (evadetar && evadetar->CheckAggro(this)
 			&& evadetar->IsNPC())) {
-			if (MakeRandomInt(0, 260) < (int)GetSkill(SkillHide)) {
+			if (zone->random.Int(0, 260) < (int)GetSkill(SkillHide)) {
 				msg->string_id = EVADE_SUCCESS;
 				RogueEvade(evadetar);
 			}
@@ -9324,11 +9324,11 @@ void Client::Handle_OP_Mend(const EQApplicationPacket *app)
 
 	int mendhp = GetMaxHP() / 4;
 	int currenthp = GetHP();
-	if (MakeRandomInt(0, 199) < (int)GetSkill(SkillMend)) {
+	if (zone->random.Int(0, 199) < (int)GetSkill(SkillMend)) {
 
 		int criticalchance = spellbonuses.CriticalMend + itembonuses.CriticalMend + aabonuses.CriticalMend;
 
-		if (MakeRandomInt(0, 99) < criticalchance){
+		if (zone->random.Int(0, 99) < criticalchance){
 			mendhp *= 2;
 			Message_StringID(4, MEND_CRITICAL);
 		}
@@ -9343,7 +9343,7 @@ void Client::Handle_OP_Mend(const EQApplicationPacket *app)
 		0 skill - 25% chance to worsen
 		20 skill - 23% chance to worsen
 		50 skill - 16% chance to worsen */
-		if ((GetSkill(SkillMend) <= 75) && (MakeRandomInt(GetSkill(SkillMend), 100) < 75) && (MakeRandomInt(1, 3) == 1))
+		if ((GetSkill(SkillMend) <= 75) && (zone->random.Int(GetSkill(SkillMend), 100) < 75) && (zone->random.Int(1, 3) == 1))
 		{
 			SetHP(currenthp > mendhp ? (GetHP() - mendhp) : 1);
 			SendHPUpdate();
@@ -10648,37 +10648,28 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 	case RaidCommandInviteIntoExisting:
 	case RaidCommandInvite: {
 		Client *i = entity_list.GetClientByName(ri->player_name);
-		if (i){
-			Group *g = i->GetGroup();
-			if (g){
-				if (g->IsLeader(i) == false)
-					Message(13, "You can only invite an ungrouped player or group leader to join your raid.");
-				else{
-					//This sends an "invite" to the client in question.
-					EQApplicationPacket* outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
-					RaidGeneral_Struct *rg = (RaidGeneral_Struct*)outapp->pBuffer;
-					strn0cpy(rg->leader_name, ri->leader_name, 64);
-					strn0cpy(rg->player_name, ri->player_name, 64);
-
-					rg->parameter = 0;
-					rg->action = 20;
-					i->QueuePacket(outapp);
-					safe_delete(outapp);
-				}
-			}
-			else{
-				//This sends an "invite" to the client in question.
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
-				RaidGeneral_Struct *rg = (RaidGeneral_Struct*)outapp->pBuffer;
-				strn0cpy(rg->leader_name, ri->leader_name, 64);
-				strn0cpy(rg->player_name, ri->player_name, 64);
-
-				rg->parameter = 0;
-				rg->action = 20;
-				i->QueuePacket(outapp);
-				safe_delete(outapp);
-			}
+		if (!i)
+			break;
+		Group *g = i->GetGroup();
+		// These two messages should be generated by the client I think, just do this for now
+		if (i->HasRaid()) {
+			Message(13, "%s is already in a raid.", i->GetName());
+			break;
 		}
+		if (g && !g->IsLeader(i)) {
+			Message(13, "You can only invite an ungrouped player or group leader to join your raid.");
+			break;
+		}
+		//This sends an "invite" to the client in question.
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
+		RaidGeneral_Struct *rg = (RaidGeneral_Struct*)outapp->pBuffer;
+		strn0cpy(rg->leader_name, ri->leader_name, 64);
+		strn0cpy(rg->player_name, ri->player_name, 64);
+
+		rg->parameter = 0;
+		rg->action = 20;
+		i->QueuePacket(outapp);
+		safe_delete(outapp);
 		break;
 	}
 	case RaidCommandAcceptInvite: {
@@ -11244,7 +11235,7 @@ void Client::Handle_OP_RandomReq(const EQApplicationPacket *app)
 		randLow = 0;
 		randHigh = 100;
 	}
-	randResult = MakeRandomInt(randLow, randHigh);
+	randResult = zone->random.Int(randLow, randHigh);
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RandomReply, sizeof(RandomReply_Struct));
 	RandomReply_Struct* rr = (RandomReply_Struct*)outapp->pBuffer;
@@ -11734,7 +11725,7 @@ void Client::Handle_OP_SenseTraps(const EQApplicationPacket *app)
 
 	if (trap && trap->skill > 0) {
 		int uskill = GetSkill(SkillSenseTraps);
-		if ((MakeRandomInt(0, 99) + uskill) >= (MakeRandomInt(0, 99) + trap->skill*0.75))
+		if ((zone->random.Int(0, 99) + uskill) >= (zone->random.Int(0, 99) + trap->skill*0.75))
 		{
 			float xdif = trap->x - GetX();
 			float ydif = trap->y - GetY();
@@ -12477,7 +12468,7 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 
 	// 1199 I don't have time for that now. etc
 	if (!tmp->CastToNPC()->IsMerchantOpen()) {
-		tmp->Say_StringID(MakeRandomInt(1199, 1202));
+		tmp->Say_StringID(zone->random.Int(1199, 1202));
 		action = 0;
 	}
 
@@ -12532,7 +12523,7 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 		CheckIncreaseSkill(SkillSneak, nullptr, 5);
 	}
 	float hidechance = ((GetSkill(SkillSneak) / 300.0f) + .25) * 100;
-	float random = MakeRandomFloat(0, 99);
+	float random = zone->random.Real(0, 99);
 	if (!was && random < hidechance) {
 		sneaking = true;
 	}

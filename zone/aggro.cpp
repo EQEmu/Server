@@ -15,18 +15,22 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "../common/debug.h"
-#include <stdlib.h>
-#include <math.h>
-#include "masterentity.h"
 #include "../common/faction.h"
-#include "map.h"
-#include "../common/spdat.h"
-#include "../common/skills.h"
-#include "../common/misc_functions.h"
 #include "../common/rulesys.h"
-#include "string_ids.h"
-#include <iostream>
+#include "../common/spdat.h"
+
+#include "client.h"
+#include "corpse.h"
+#include "entity.h"
+#include "mob.h"
+
+#ifdef BOTS
+#include "bot.h"
+#endif
+
+#include "map.h"
 
 extern Zone* zone;
 //#define LOSDEBUG 6
@@ -329,7 +333,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 			||
 			(
 				fv == FACTION_THREATENLY
-				&& MakeRandomInt(0,99) < THREATENLY_ARRGO_CHANCE - heroicCHA_mod
+				&& zone->random.Roll(THREATENLY_ARRGO_CHANCE - heroicCHA_mod)
 			)
 		)
 	)
@@ -1254,7 +1258,7 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 			return true;
 
 		//1: The mob has a default 25% chance of being allowed a resistance check against the charm.
-		if (MakeRandomInt(0, 99) > RuleI(Spells, CharmBreakCheckChance))
+		if (zone->random.Int(0, 99) > RuleI(Spells, CharmBreakCheckChance))
 			return true;
 
 		if (RuleB(Spells, CharismaCharmDuration))
@@ -1273,7 +1277,7 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 				//3: At maxed ability, Total Domination has a 50% chance of preventing the charm break that otherwise would have occurred.
 				int16 TotalDominationBonus = caster->aabonuses.CharmBreakChance + caster->spellbonuses.CharmBreakChance + caster->itembonuses.CharmBreakChance;
 
-				if (MakeRandomInt(0, 99) < TotalDominationBonus)
+				if (zone->random.Int(0, 99) < TotalDominationBonus)
 					return true;
 
 			}

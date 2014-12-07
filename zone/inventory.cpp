@@ -1032,7 +1032,25 @@ bool Client::MakeItemLink(char* &ret_link, const ItemInst *inst) {
 	uint8 evolvedlevel = 0;
 	int hash = 0;
 	//int hash = GetItemLinkHash(inst);	//eventually this will work (currently crashes zone), but for now we'll skip the extra overhead
-	if (GetClientVersion() >= EQClientRoF)
+	if (GetClientVersion() >= EQClientRoF2)
+	{
+		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%01X" "%1X" "%04X" "%1X" "%05X" "%08X",
+			0,
+			item->ID,
+			inst->GetAugmentItemID(0),
+			inst->GetAugmentItemID(1),
+			inst->GetAugmentItemID(2),
+			inst->GetAugmentItemID(3),
+			inst->GetAugmentItemID(4),
+			inst->GetAugmentItemID(5),
+			evolving,
+			loregroup,
+			evolvedlevel,
+			0,
+			hash
+			);
+	}
+	else if (GetClientVersion() >= EQClientRoF)
 	{
 		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%05X" "%08X",
 			0,

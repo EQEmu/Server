@@ -539,7 +539,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			EmuConstants::MAP_POSSESSIONS_SIZE,
 /*Underfoot*/	EmuConstants::MAP_POSSESSIONS_SIZE,
 /*RoF*/			EmuConstants::MAP_POSSESSIONS_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_POSSESSIONS_SIZE,
 
 /*NPC*/			EmuConstants::MAP_POSSESSIONS_SIZE,
 /*Merc*/		EmuConstants::MAP_POSSESSIONS_SIZE,
@@ -554,7 +554,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			EmuConstants::MAP_BANK_SIZE,
 /*Underfoot*/	EmuConstants::MAP_BANK_SIZE,
 /*RoF*/			EmuConstants::MAP_BANK_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_BANK_SIZE,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
@@ -569,7 +569,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			EmuConstants::MAP_SHARED_BANK_SIZE,
 /*Underfoot*/	EmuConstants::MAP_SHARED_BANK_SIZE,
 /*RoF*/			EmuConstants::MAP_SHARED_BANK_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_SHARED_BANK_SIZE,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
@@ -584,7 +584,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			EmuConstants::MAP_TRADE_SIZE,
 /*Underfoot*/	EmuConstants::MAP_TRADE_SIZE,
 /*RoF*/			EmuConstants::MAP_TRADE_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_TRADE_SIZE,
 
 /*NPC*/			4,
 /*Merc*/		4,
@@ -599,7 +599,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			EmuConstants::MAP_WORLD_SIZE,
 /*Underfoot*/	EmuConstants::MAP_WORLD_SIZE,
 /*RoF*/			EmuConstants::MAP_WORLD_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_WORLD_SIZE,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
@@ -614,7 +614,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			EmuConstants::MAP_LIMBO_SIZE,
 /*Underfoot*/	EmuConstants::MAP_LIMBO_SIZE,
 /*RoF*/			EmuConstants::MAP_LIMBO_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_LIMBO_SIZE,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
@@ -629,7 +629,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			EmuConstants::MAP_TRIBUTE_SIZE,
 /*Underfoot*/	EmuConstants::MAP_TRIBUTE_SIZE,
 /*RoF*/			EmuConstants::MAP_TRIBUTE_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_TRIBUTE_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -644,7 +644,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_TROPHY_TRIBUTE_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_TROPHY_TRIBUTE_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -659,7 +659,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_GUILD_TRIBUTE_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_GUILD_TRIBUTE_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -674,7 +674,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_MERCHANT_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_MERCHANT_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -689,7 +689,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_DELETED_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_DELETED_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -704,7 +704,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			SoD::consts::MAP_CORPSE_SIZE,
 /*Underfoot*/	Underfoot::consts::MAP_CORPSE_SIZE,
 /*RoF*/			RoF::consts::MAP_CORPSE_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		RoF2::consts::MAP_CORPSE_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -719,7 +719,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			EmuConstants::MAP_BAZAAR_SIZE,
 /*Underfoot*/	EmuConstants::MAP_BAZAAR_SIZE,
 /*RoF*/			EmuConstants::MAP_BAZAAR_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_BAZAAR_SIZE,
 
 /*NPC*/			0, // this may need to be 'EmuConstants::MAP_BAZAAR_SIZE' if offline client traders respawn as an npc
 /*Merc*/		0,
@@ -734,7 +734,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			SoD::consts::MAP_INSPECT_SIZE,
 /*Underfoot*/	Underfoot::consts::MAP_INSPECT_SIZE,
 /*RoF*/			RoF::consts::MAP_INSPECT_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		RoF2::consts::MAP_INSPECT_SIZE,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
@@ -749,7 +749,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_REAL_ESTATE_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_REAL_ESTATE_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -764,7 +764,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_VIEW_MOD_PC_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_VIEW_MOD_PC_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -779,7 +779,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_VIEW_MOD_BANK_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_VIEW_MOD_BANK_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -794,7 +794,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_VIEW_MOD_SHARED_BANK_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_VIEW_MOD_SHARED_BANK_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -809,7 +809,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_VIEW_MOD_LIMBO_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_VIEW_MOD_LIMBO_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -824,7 +824,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_ALT_STORAGE_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_ALT_STORAGE_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -839,7 +839,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_ARCHIVED_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_ARCHIVED_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -854,7 +854,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_MAIL_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_MAIL_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -869,7 +869,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_GUILD_TROPHY_TRIBUTE_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_GUILD_TROPHY_TRIBUTE_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -884,7 +884,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			NOT_USED,
 /*Underfoot*/	NOT_USED,
 /*RoF*/			EmuConstants::MAP_KRONO_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_KRONO_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -899,7 +899,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_OTHER_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_OTHER_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -1012,7 +1012,7 @@ bool EQLimits::AllowsEmptyBagInBag(uint32 version) {
 /*SoD*/			SoD::limits::ALLOWS_EMPTY_BAG_IN_BAG,
 /*Underfoot*/	Underfoot::limits::ALLOWS_EMPTY_BAG_IN_BAG,
 /*RoF*/			RoF::limits::ALLOWS_EMPTY_BAG_IN_BAG,
-/*RoF2*/		false,
+/*RoF2*/		RoF2::limits::ALLOWS_EMPTY_BAG_IN_BAG,
 
 /*NPC*/			false,
 /*Merc*/		false,
@@ -1033,7 +1033,7 @@ bool EQLimits::AllowsClickCastFromBag(uint32 version) {
 /*SoD*/			SoD::limits::ALLOWS_CLICK_CAST_FROM_BAG,
 /*Underfoot*/	Underfoot::limits::ALLOWS_CLICK_CAST_FROM_BAG,
 /*RoF*/			RoF::limits::ALLOWS_CLICK_CAST_FROM_BAG,
-/*RoF2*/		false,
+/*RoF2*/		RoF2::limits::ALLOWS_CLICK_CAST_FROM_BAG,
 
 /*NPC*/			false,
 /*Merc*/		false,
@@ -1054,7 +1054,7 @@ uint16 EQLimits::ItemCommonSize(uint32 version) {
 /*SoD*/			EmuConstants::ITEM_COMMON_SIZE,
 /*Underfoot*/	EmuConstants::ITEM_COMMON_SIZE,
 /*RoF*/			EmuConstants::ITEM_COMMON_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::ITEM_COMMON_SIZE,
 
 /*NPC*/			EmuConstants::ITEM_COMMON_SIZE,
 /*Merc*/		EmuConstants::ITEM_COMMON_SIZE,
@@ -1074,7 +1074,7 @@ uint16 EQLimits::ItemContainerSize(uint32 version) {
 /*SoD*/			EmuConstants::ITEM_CONTAINER_SIZE,
 /*Underfoot*/	EmuConstants::ITEM_CONTAINER_SIZE,
 /*RoF*/			EmuConstants::ITEM_CONTAINER_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::ITEM_CONTAINER_SIZE,
 
 /*NPC*/			EmuConstants::ITEM_CONTAINER_SIZE,
 /*Merc*/		EmuConstants::ITEM_CONTAINER_SIZE,
@@ -1094,7 +1094,7 @@ bool EQLimits::CoinHasWeight(uint32 version) {
 /*SoD*/			SoD::limits::COIN_HAS_WEIGHT,
 /*Underfoot*/	Underfoot::limits::COIN_HAS_WEIGHT,
 /*RoF*/			RoF::limits::COIN_HAS_WEIGHT,
-/*RoF2*/		true,
+/*RoF2*/		RoF::limits::COIN_HAS_WEIGHT,
 
 /*NPC*/			true,
 /*Merc*/		true,
@@ -1114,7 +1114,7 @@ uint32 EQLimits::BandoliersCount(uint32 version) {
 /*SoD*/			EmuConstants::BANDOLIERS_COUNT,
 /*Underfoot*/	EmuConstants::BANDOLIERS_COUNT,
 /*RoF*/			EmuConstants::BANDOLIERS_COUNT,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::BANDOLIERS_COUNT,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
@@ -1134,7 +1134,7 @@ uint32 EQLimits::BandolierSize(uint32 version) {
 /*SoD*/			EmuConstants::BANDOLIER_SIZE,
 /*Underfoot*/	EmuConstants::BANDOLIER_SIZE,
 /*RoF*/			EmuConstants::BANDOLIER_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::BANDOLIER_SIZE,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
@@ -1154,7 +1154,7 @@ uint32 EQLimits::PotionBeltSize(uint32 version) {
 /*SoD*/			EmuConstants::POTION_BELT_SIZE,
 /*Underfoot*/	EmuConstants::POTION_BELT_SIZE,
 /*RoF*/			EmuConstants::POTION_BELT_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::POTION_BELT_SIZE,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,

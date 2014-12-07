@@ -293,7 +293,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 			if(trap_list.size() > 0)
 			{
 				std::list<LDoNTrapTemplate*>::iterator trap_list_iter = trap_list.begin();
-				std::advance(trap_list_iter, MakeRandomInt(0, trap_list.size() - 1));
+				std::advance(trap_list_iter, zone->random.Int(0, trap_list.size() - 1));
 				LDoNTrapTemplate* tt = (*trap_list_iter);
 				if(tt)
 				{
@@ -550,10 +550,10 @@ void NPC::AddCash(uint16 in_copper, uint16 in_silver, uint16 in_gold, uint16 in_
 }
 
 void NPC::AddCash() {
-	copper = MakeRandomInt(1, 100);
-	silver = MakeRandomInt(1, 50);
-	gold = MakeRandomInt(1, 10);
-	platinum = MakeRandomInt(1, 5);
+	copper = zone->random.Int(1, 100);
+	silver = zone->random.Int(1, 50);
+	gold = zone->random.Int(1, 10);
+	platinum = zone->random.Int(1, 5);
 }
 
 void NPC::RemoveCash() {
@@ -1372,7 +1372,7 @@ void NPC::PickPocket(Client* thief) {
 		return;
 	}
 
-	if(MakeRandomInt(0, 100) > 95){
+	if(zone->random.Roll(5)) {
 		AddToHateList(thief, 50);
 		Say("Stop thief!");
 		thief->Message(13, "You are noticed trying to steal!");
@@ -1401,7 +1401,7 @@ void NPC::PickPocket(Client* thief) {
 	memset(charges,0,50);
 	//Determine wheter to steal money or an item.
 	bool no_coin = ((money[0] + money[1] + money[2] + money[3]) == 0);
-	bool steal_item = (MakeRandomInt(0, 99) < 50 || no_coin);
+	bool steal_item = (zone->random.Roll(50) || no_coin);
 	if (steal_item)
 	{
 		ItemList::iterator cur,end;
@@ -1431,7 +1431,7 @@ void NPC::PickPocket(Client* thief) {
 		}
 		if (x > 0)
 		{
-			int random = MakeRandomInt(0, x-1);
+			int random = zone->random.Int(0, x-1);
 			inst = database.CreateItem(steal_items[random], charges[random]);
 			if (inst)
 			{
@@ -1466,7 +1466,7 @@ void NPC::PickPocket(Client* thief) {
 	}
 	if (!steal_item) //Steal money
 	{
-		uint32 amt = MakeRandomInt(1, (steal_skill/25)+1);
+		uint32 amt = zone->random.Int(1, (steal_skill/25)+1);
 		int steal_type = 0;
 		if (!money[0])
 		{
@@ -1481,7 +1481,7 @@ void NPC::PickPocket(Client* thief) {
 			}
 		}
 
-		if (MakeRandomInt(0, 100) <= stealchance)
+		if (zone->random.Roll(stealchance))
 		{
 			switch (steal_type)
 			{
@@ -1962,7 +1962,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 
 void NPC::LevelScale() {
 
-	uint8 random_level = (MakeRandomInt(level, maxlevel));
+	uint8 random_level = (zone->random.Int(level, maxlevel));
 
 	float scaling = (((random_level / (float)level) - 1) * (scalerate / 100.0f));
 

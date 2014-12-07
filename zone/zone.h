@@ -22,6 +22,7 @@
 #include "../common/linked_list.h"
 #include "../common/rulesys.h"
 #include "../common/types.h"
+#include "../common/random.h"
 #include "qglobals.h"
 #include "spawn2.h"
 #include "spawngroup.h"
@@ -253,6 +254,9 @@ public:
     void    UpdateHotzone();
 	std::unordered_map<int, item_tick_struct> tick_items;
 
+	// random object that provides random values for the zone
+	EQEmu::Random random;
+
 	//MODDING HOOKS
 	void mod_init();
 	void mod_repop();
@@ -310,7 +314,7 @@ private:
 	Timer*	Instance_Warning_timer;
 	LinkedList<ZoneClientAuth_Struct*> client_auth_list;
 	QGlobalCache *qGlobals;
-	
+
 	Timer	hotzone_timer;
 };
 

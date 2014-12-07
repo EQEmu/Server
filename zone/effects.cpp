@@ -55,30 +55,25 @@ int32 NPC::GetActSpellDamage(uint16 spell_id, int32 value,  Mob* target) {
 		else
 			value -= target->GetFcDamageAmtIncoming(this, spell_id)/spells[spell_id].buffduration;
 	 }
-	  	 
-	 value += dmg*GetSpellFocusDMG()/100; 
+
+	 value += dmg*GetSpellFocusDMG()/100;
 
 	if (AI_HasSpellsEffects()){
 		int16 chance = 0;
 		int ratio = 0;
 
 		if (spells[spell_id].buffduration == 0) {
-		
 			chance += spellbonuses.CriticalSpellChance + spellbonuses.FrenziedDevastation;
-		
-			if (chance && MakeRandomInt(1,100) <= chance){
-			
+
+			if (chance && zone->random.Roll(chance)) {
 				ratio += spellbonuses.SpellCritDmgIncrease + spellbonuses.SpellCritDmgIncNoStack;
 				value += (value*ratio)/100;
 				entity_list.MessageClose_StringID(this, true, 100, MT_SpellCrits, OTHER_CRIT_BLAST, GetCleanName(), itoa(-value));
 			}
 		}
 		else {
-			
 			chance += spellbonuses.CriticalDoTChance;
-		
-			if (chance && MakeRandomInt(1,100) <= chance){
-			
+			if (chance && zone->random.Roll(chance)) {
 				ratio += spellbonuses.DotCritDmgIncrease;
 				value += (value*ratio)/100;
 			}
@@ -119,14 +114,14 @@ int32 Client::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 		 if (spell_id == SPELL_IMP_HARM_TOUCH && (GetAA(aaSpellCastingFury) > 0) && (GetAA(aaUnholyTouch) > 0))
 			 chance = 100;
 
-		 if (MakeRandomInt(1,100) <= chance){
+		 if (zone->random.Roll(chance)) {
 			Critical = true;
 			ratio += itembonuses.SpellCritDmgIncrease + spellbonuses.SpellCritDmgIncrease + aabonuses.SpellCritDmgIncrease;
 			ratio += itembonuses.SpellCritDmgIncNoStack + spellbonuses.SpellCritDmgIncNoStack + aabonuses.SpellCritDmgIncNoStack;
 		}
 
-		else if (GetClass() == WIZARD && (GetLevel() >= RuleI(Spells, WizCritLevel)) && (MakeRandomInt(1,100) <= RuleI(Spells, WizCritChance))) {
-			ratio += MakeRandomInt(20,70); //Wizard innate critical chance is calculated seperately from spell effect and is not a set ratio. (20-70 is parse confirmed)
+		else if (GetClass() == WIZARD && (GetLevel() >= RuleI(Spells, WizCritLevel)) && (zone->random.Roll(RuleI(Spells, WizCritChance)))) {
+			ratio += zone->random.Int(20,70); //Wizard innate critical chance is calculated seperately from spell effect and is not a set ratio. (20-70 is parse confirmed)
 			Critical = true;
 		}
 
@@ -193,22 +188,16 @@ int32 Client::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 
 	if (spellbonuses.CriticalDotDecay)
 			chance += GetDecayEffectValue(spell_id, SE_CriticalDotDecay);
-	
+
 	value_BaseEffect = value + (value*GetFocusEffect(focusFcBaseEffects, spell_id)/100);
 
-	if (chance > 0 && (MakeRandomInt(1, 100) <= chance)) {
-	
+	if (chance > 0 && (zone->random.Roll(chance))) {
 		int32 ratio = 200;
 		ratio += itembonuses.DotCritDmgIncrease + spellbonuses.DotCritDmgIncrease + aabonuses.DotCritDmgIncrease;
-
-		value = value_BaseEffect*ratio/100;  
-
-		value += int(value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100)*ratio/100; 
-
+		value = value_BaseEffect*ratio/100;
+		value += int(value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100)*ratio/100;
 		value += int(value_BaseEffect*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100)*ratio/100;
-	
-		value += int(value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100)*ratio/100; 
-
+		value += int(value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100)*ratio/100;
 		extra_dmg = target->GetFcDamageAmtIncoming(this, spell_id) + 
 					int(GetFocusEffect(focusFcDamageAmtCrit, spell_id)*ratio/100) +
 					GetFocusEffect(focusFcDamageAmt, spell_id);
@@ -216,7 +205,7 @@ int32 Client::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 		if (extra_dmg) {
 			int duration = CalcBuffDuration(this, this, spell_id);
 			if (duration > 0)
-				extra_dmg /= duration; 
+				extra_dmg /= duration;
 		}
 
 		value -= extra_dmg;
@@ -224,25 +213,20 @@ int32 Client::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 		return value;
 	}
 
-
 	value = value_BaseEffect;
-
-	value += value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100; 
-
-	value += value_BaseEffect*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100; 
-
-	value += value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100; 
-	
-	extra_dmg = target->GetFcDamageAmtIncoming(this, spell_id) + 
+	value += value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100;
+	value += value_BaseEffect*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100;
+	value += value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100;
+	extra_dmg = target->GetFcDamageAmtIncoming(this, spell_id) +
 				GetFocusEffect(focusFcDamageAmtCrit, spell_id) +
-				GetFocusEffect(focusFcDamageAmt, spell_id); 
+				GetFocusEffect(focusFcDamageAmt, spell_id);
 
 	if (extra_dmg) {
 		int duration = CalcBuffDuration(this, this, spell_id);
 		if (duration > 0)
-			extra_dmg /= duration; 
-	} 
-	
+			extra_dmg /= duration;
+	}
+
 	value -= extra_dmg;
 
 	return value;
@@ -275,28 +259,26 @@ int32 NPC::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 	//Scale all NPC spell healing via SetSpellFocusHeal(value)
 
-	value += value*GetSpellFocusHeal()/100; 
+	value += value*GetSpellFocusHeal()/100;
 
 	 if (target) {
-		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id); 
+		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id);
 		value += value*target->GetHealRate(spell_id, this)/100;
 	 }
 
 	 //Allow for critical heal chance if NPC is loading spell effect bonuses.
 	 if (AI_HasSpellsEffects()){
-
 		if(spells[spell_id].buffduration < 1) {
-
-			if(spellbonuses.CriticalHealChance && (MakeRandomInt(0,99) < spellbonuses.CriticalHealChance)) {
-				value = value*2;	 			
+			if(spellbonuses.CriticalHealChance && (zone->random.Roll(spellbonuses.CriticalHealChance))) {
+				value = value*2;
 				entity_list.MessageClose_StringID(this, true, 100, MT_SpellCrits, OTHER_CRIT_HEAL, GetCleanName(), itoa(value));
 			}
 		}
-		else if(spellbonuses.CriticalHealOverTime && (MakeRandomInt(0,99) < spellbonuses.CriticalHealOverTime)) {
-				value = value*2;	 			
+		else if(spellbonuses.CriticalHealOverTime && (zone->random.Roll(spellbonuses.CriticalHealOverTime))) {
+				value = value*2;
 		}
 	 }
-	 
+
 	return value;
 }
 
@@ -326,7 +308,7 @@ int32 Client::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		if (spellbonuses.CriticalHealDecay)
 			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay);
 
-		if(chance && (MakeRandomInt(0,99) < chance)) {
+		if(chance && (zone->random.Roll(chance))) {
 			Critical = true;
 			modifier = 2; //At present time no critical heal amount modifier SPA exists.
 		}
@@ -360,7 +342,7 @@ int32 Client::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		if (spellbonuses.CriticalRegenDecay)
 			chance += GetDecayEffectValue(spell_id, SE_CriticalRegenDecay);
 
-		if(chance && (MakeRandomInt(0,99) < chance))
+		if(chance && zone->random.Roll(chance))
 			return (value * 2);
 	}
 
@@ -374,12 +356,12 @@ int32 Client::GetActSpellCost(uint16 spell_id, int32 cost)
 	int16 FrenziedDevastation = itembonuses.FrenziedDevastation + spellbonuses.FrenziedDevastation + aabonuses.FrenziedDevastation;
 
 	if (FrenziedDevastation && IsPureNukeSpell(spell_id))
-		cost *= 2;	
-	
+		cost *= 2;
+
 	// Formula = Unknown exact, based off a random percent chance up to mana cost(after focuses) of the cast spell
 	if(this->itembonuses.Clairvoyance && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
 	{
-		int16 mana_back = this->itembonuses.Clairvoyance * MakeRandomInt(1, 100) / 100;
+		int16 mana_back = this->itembonuses.Clairvoyance * zone->random.Int(1, 100) / 100;
 		// Doesnt generate mana, so best case is a free spell
 		if(mana_back > cost)
 			mana_back = cost;
@@ -392,7 +374,7 @@ int32 Client::GetActSpellCost(uint16 spell_id, int32 cost)
 	// WildcardX
 	float PercentManaReduction = 0;
 	float SpecializeSkill = GetSpecializeSkillValue(spell_id);
-	int SuccessChance = MakeRandomInt(0, 100);
+	int SuccessChance = zone->random.Int(0, 100);
 
 	float bonus = 1.0;
 	switch(GetAA(aaSpellCastingMastery))
@@ -444,7 +426,7 @@ int32 Client::GetActSpellCost(uint16 spell_id, int32 cost)
 
 	if(focus_redux > 0)
 	{
-		PercentManaReduction += MakeRandomFloat(1, (double)focus_redux);
+		PercentManaReduction += zone->random.Real(1, (double)focus_redux);
 	}
 
 	cost -= (cost * (PercentManaReduction / 100));

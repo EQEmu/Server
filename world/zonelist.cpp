@@ -24,10 +24,12 @@
 #include "world_config.h"
 #include "../common/servertalk.h"
 #include "../common/string_util.h"
+#include "../common/random.h"
 
 extern uint32			numzones;
 extern bool holdzones;
 extern ConsoleList		console_list;
+extern EQEmu::Random emu_random;
 void CatchSignal(int sig_num);
 
 ZSList::ZSList()
@@ -565,7 +567,7 @@ void ZSList::RebootZone(const char* ip1,uint16 port,const char* ip2, uint32 skip
 		safe_delete(tmp);
 		return;
 	}
-	uint32 z = MakeRandomInt(0, y-1);
+	uint32 z = emu_random.Int(0, y-1);
 
 	ServerPacket* pack = new ServerPacket(ServerOP_ZoneReboot, sizeof(ServerZoneReboot_Struct));
 	ServerZoneReboot_Struct* s = (ServerZoneReboot_Struct*) pack->pBuffer;
