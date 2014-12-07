@@ -3781,6 +3781,10 @@ namespace RoF2
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->light);
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->flymode);
 
+			//VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 100); // LiveUnknown1 12/06/14 (possibly mana percent?)
+			//VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 10); // LiveUnknown2 12/06/14
+			//VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // LiveUnknown3 12/06/14
+
 			VARSTRUCT_ENCODE_STRING(Buffer, emu->lastName);
 
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// aatitle ??
