@@ -190,6 +190,19 @@ void handle_rc_get_initial_entity_positions(const std::string &method, const std
 		res["h"] = itoa(c->GetHeading()); 
 		RemoteCallResponse(connection_id, request_id, res, error);
 	}
+	std::list<Object*> object_list;
+	entity_list.GetObjectList(object_list);
+	for (std::list<Object*>::iterator itr = object_list.begin(); itr != object_list.end(); ++itr) {
+		Object* c = *itr;
+		res["ent_id"] = itoa(c->GetID());
+		res["type"] = "Object";
+		res["name"] = c->GetModelName();
+		res["x"] = itoa(c->GetX());
+		res["y"] = itoa(c->GetY());
+		res["z"] = itoa(c->GetZ());
+		res["h"] = itoa(c->GetHeadingData());
+		RemoteCallResponse(connection_id, request_id, res, error);
+	}
 }
 
 void handle_rc_move_entity(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
