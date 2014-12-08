@@ -1508,6 +1508,10 @@ void Mob::SendIllusionPacket(uint16 in_race, uint8 in_gender, uint8 in_texture, 
 	else
 		size = in_size;
 
+	if (IsNPC()){
+		base_race = race;
+	}
+
 	// Reset features to Base from the Player Profile
 	if (IsClient() && in_race == 0)
 	{
