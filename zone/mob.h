@@ -198,11 +198,12 @@ public:
 		bool item_bonus = false, uint32 ticsremaining = 0, int buffslot = -1,
 		bool IsAISpellEffect = false, uint16 effect_id = 0, int32 se_base = 0, int32 se_limit = 0, int32 se_max = 0);
 	void NegateSpellsBonuses(uint16 spell_id);
-	virtual float GetActSpellRange(uint16 spell_id, float range, bool IsBard = false) { return range;}
-	virtual int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target = nullptr) { return value; }
-	virtual int32 GetActSpellHealing(uint16 spell_id, int32 value, Mob* target = nullptr) { return value; }
+	virtual float GetActSpellRange(uint16 spell_id, float range, bool IsBard = false);
+	virtual int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target = nullptr);
+	virtual int32 GetActDoTDamage(uint16 spell_id, int32 value, Mob* target);
+	virtual int32 GetActSpellHealing(uint16 spell_id, int32 value, Mob* target = nullptr);
 	virtual int32 GetActSpellCost(uint16 spell_id, int32 cost){ return cost;}
-	virtual int32 GetActSpellDuration(uint16 spell_id, int32 duration){ return duration;}
+	virtual int32 GetActSpellDuration(uint16 spell_id, int32 duration);
 	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
 	float ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override = false,
 		int resist_override = 0, bool CharismaCheck = false, bool CharmTick = false, bool IsRoot = false);
@@ -1044,6 +1045,7 @@ protected:
 	int GetKickDamage();
 	int GetBashDamage();
 	virtual void ApplySpecialAttackMod(SkillUseTypes skill, int32 &dmg, int32 &mindmg);
+	virtual int16 GetFocusEffect(focusType type, uint16 spell_id) { return 0; }
 	void CalculateNewFearpoint();
 	float FindGroundZ(float new_x, float new_y, float z_offset=0.0);
 	Map::Vertex UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChange, bool &NodeReached);
