@@ -56,6 +56,8 @@ void register_remote_call_handlers() {
 	remote_call_methods["Zone.GetInitialEntityPositions"] = handle_rc_relay;
 	remote_call_methods["Zone.MoveEntity"] = handle_rc_relay;
 	remote_call_methods["Zone.Action"] = handle_rc_relay;
+	remote_call_methods["Zone.GetEntityAttributes"] = handle_rc_relay;
+	remote_call_methods["Zone.SetEntityAttribute"] = handle_rc_relay;
 	remote_call_methods["World.GetFileContents"] = handle_rc_get_file_contents;
 	remote_call_methods["World.SaveFileContents"] = handle_rc_save_file_contents;
 }

@@ -17,6 +17,8 @@ void register_authorized_methods()
 	authorized_methods["Zone.GetInitialEntityPositions"] = std::make_pair(10, handle_method_zone);
 	authorized_methods["Zone.MoveEntity"] = std::make_pair(10, handle_method_zone); 
 	authorized_methods["Zone.Action"] = std::make_pair(10, handle_method_zone);
+	authorized_methods["Zone.GetEntityAttributes"] = std::make_pair(10, handle_method_zone);
+	authorized_methods["Zone.SetEntityAttribute"] = std::make_pair(10, handle_method_zone);
 	authorized_methods["World.GetFileContents"] = std::make_pair(10, handle_method_world);
 	authorized_methods["World.SaveFileContents"] = std::make_pair(10, handle_method_world);
 }

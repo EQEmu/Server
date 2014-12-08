@@ -83,6 +83,8 @@ void register_remote_call_handlers() {
 	remote_call_methods["Zone.Unsubscribe"] = handle_rc_unsubscribe;
 	remote_call_methods["Zone.GetInitialEntityPositions"] = handle_rc_get_initial_entity_positions;
 	remote_call_methods["Zone.MoveEntity"] = handle_rc_move_entity;
+	remote_call_methods["Zone.GetEntityAttributes"] = handle_rc_get_entity_attributes;
+	remote_call_methods["Zone.SetEntityAttribute"] = handle_rc_set_entity_attribute;
 	remote_call_methods["Zone.Action"] = handle_rc_zone_action;
 }
 
@@ -263,4 +265,46 @@ void handle_rc_zone_action(const std::string &method, const std::string &connect
 		Mob *ent = entity_list.GetMob(atoi(params[1].c_str()));
 		if (ent){ ent->Kill(); }
 	}
+}
+
+void handle_rc_get_entity_attributes(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
+	std::string error;
+	std::map<std::string, std::string> res;
+
+	if (params.size() != 1) {
+		error = "Missing function data";
+		std::cout << error << "\n" << std::endl;
+		RemoteCallResponse(connection_id, request_id, res, error);
+		return;
+	}
+
+	Mob *ent = entity_list.GetMob(atoi(params[0].c_str()));
+	if (ent){
+		res["ent_id"] = itoa(ent->GetID());
+		res["clean_name"] = ent->GetCleanName();
+		res["name"] = ent->GetName();
+		res["race"] = itoa(ent->GetRace());
+		res["class"] = itoa(ent->GetClass());
+		RemoteCallResponse(connection_id, request_id, res, error);
+	}
+}
+
+void handle_rc_set_entity_attribute(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
+	std::string error;
+	std::map<std::string, std::string> res;
+
+	if (params.size() != 3) {
+		error = "Missing function data";
+		std::cout << error << "\n" << std::endl;
+		RemoteCallResponse(connection_id, request_id, res, error);
+		return;
+	}
+
+	Mob *ent = entity_list.GetMob(atoi(params[0].c_str()));
+	if (ent){
+		if (params[1] == "race"){ 
+			ent->SendIllusionPacket(atoi(params[2].c_str())); 
+		}
+	}
+
 }
