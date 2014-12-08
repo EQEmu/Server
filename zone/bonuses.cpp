@@ -3050,6 +3050,13 @@ void NPC::CalcItemBonuses(StatBonuses *newbon)
 				if (cur->Worn.Effect>0 && (cur->Worn.Type == ET_WornEffect)) { // latent effects
 					ApplySpellsBonuses(cur->Worn.Effect, cur->Worn.Level, newbon);
 				}
+
+				if (RuleB(Spells, NPC_UseFocusFromItems)){
+					if (cur->Focus.Effect>0 && (cur->Focus.Type == ET_Focus)){  // focus effects
+						ApplySpellsBonuses(cur->Focus.Effect, cur->Focus.Level, newbon, 0, true);
+					}
+				}
+
 				if (cur->Haste > newbon->haste)
 					newbon->haste = cur->Haste;
 			}

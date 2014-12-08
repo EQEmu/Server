@@ -485,14 +485,8 @@ public:
 
 	inline virtual int32 GetDelayDeath() const { return aabonuses.DelayDeath + spellbonuses.DelayDeath + itembonuses.DelayDeath + 11; }
 
-	float GetActSpellRange(uint16 spell_id, float range, bool IsBard = false);
-	int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target = nullptr);
-	int32 GetActSpellHealing(uint16 spell_id, int32 value, Mob* target = nullptr);
 	int32 GetActSpellCost(uint16 spell_id, int32);
-	int32 GetActSpellDuration(uint16 spell_id, int32);
 	int32 GetActSpellCasttime(uint16 spell_id, int32);
-	int32 GetDotFocus(uint16 spell_id, int32 value);
-	int32 GetActDoTDamage(uint16 spell_id, int32 value, Mob* target = nullptr);
 	virtual bool CheckFizzle(uint16 spell_id);
 	virtual bool CheckSpellLevelRestriction(uint16 spell_id);
 	virtual int GetCurrentBuffSlots() const;

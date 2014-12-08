@@ -1386,15 +1386,6 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes att
 	if(spell_id==0)
 		spell_id = SPELL_UNKNOWN;
 
-	if(spell_id!=0 && spell_id != SPELL_UNKNOWN && other && damage > 0)
-	{
-		if(other->IsNPC() && !other->IsPet())
-		{
-			float npcspellscale = other->CastToNPC()->GetSpellScale();
-			damage = ((float)damage * npcspellscale) / (float)100;
-		}
-	}
-
 	// cut all PVP spell damage to 2/3 -solar
 	// Blasting ourselfs is considered PvP
 	//Don't do PvP mitigation if the caster is damaging himself
@@ -3805,13 +3796,6 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 	int32 maxhp = GetMaxHP();
 	int32 curhp = GetHP();
 	uint32 acthealed = 0;
-
-	if (caster && amount > 0) {
-		if (caster->IsNPC() && !caster->IsPet()) {
-			float npchealscale = caster->CastToNPC()->GetHealScale();
-			amount = (static_cast<float>(amount) * npchealscale) / 100.0f;
-		}
-	}
 
 	if (amount > (maxhp - curhp))
 		acthealed = (maxhp - curhp);

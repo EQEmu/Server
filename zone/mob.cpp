@@ -2926,6 +2926,10 @@ uint32 Mob::GetLevelHP(uint8 tlevel)
 }
 
 int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
+	
+	int32 cast_reducer = 0;
+	cast_reducer += GetFocusEffect(focusSpellHaste, spell_id);
+		
 	if (level >= 60 && casttime > 1000)
 	{
 		casttime = casttime / 2;
@@ -2938,6 +2942,8 @@ int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
 		else
 			casttime -= cast_deduction;
 	}
+
+	casttime = (casttime*(100 - cast_reducer)/100);
 	return(casttime);
 }
 
@@ -2973,8 +2979,7 @@ void Mob::ExecWeaponProc(const ItemInst *inst, uint16 spell_id, Mob *on) {
 	bool twinproc = false;
 	int32 twinproc_chance = 0;
 
-	if(IsClient())
-		twinproc_chance = CastToClient()->GetFocusEffect(focusTwincast, spell_id);
+	twinproc_chance = GetFocusEffect(focusTwincast, spell_id);
 
 	if(twinproc_chance && zone->random.Roll(twinproc_chance))
 		twinproc = true;
