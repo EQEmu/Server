@@ -402,9 +402,7 @@ public:
 	void	AISpellsList(Client *c);
 
 	bool IsRaidTarget() const { return raid_target; };
-
-	int16 GetFocusEffect(focusType type, uint16 spell_id);
-
+	
 protected:
 
 	const NPCType*	NPCTypedata;
@@ -444,6 +442,7 @@ protected:
 	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 	AISpellsVar_Struct AISpellVar;
+	int16 GetFocusEffect(focusType type, uint16 spell_id);
 	
 	
 	uint32	npc_spells_effects_id;
