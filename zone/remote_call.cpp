@@ -144,6 +144,7 @@ void handle_rc_get_initial_entity_positions(const std::string &method, const std
 		res["y"] = std::to_string((double)npc->GetY());
 		res["z"] = std::to_string((double)npc->GetZ());
 		res["h"] = std::to_string((double)npc->GetHeading());
+		res["aggro_range"] = std::to_string((double)npc->GetAggroRange()); 
 		RemoteCallResponse(connection_id, request_id, res, error);
 	}
 	std::list<Client*> client_list;
@@ -176,19 +177,19 @@ void handle_rc_get_initial_entity_positions(const std::string &method, const std
 		res["h"] = itoa(c->GetHeading());
 		RemoteCallResponse(connection_id, request_id, res, error);
 	}
-	// std::list<Doors*> door_list;
-	// entity_list.GetDoorsList(door_list);
-	// std::list<Doors*>::iterator iter = door_list.begin(); 
-	// while (iter != door_list.end()) {
-	// 	Doors *c = (*iter);
-	// 	res["ent_id"] = itoa(c->GetID());
-	// 	res["type"] = "Door";
-	// 	res["x"] = itoa(c->GetX());
-	// 	res["y"] = itoa(c->GetY());
-	// 	res["z"] = itoa(c->GetZ());
-	// 	res["h"] = itoa(c->GetHeading());
-	// 	RemoteCallResponse(connection_id, request_id, res, error);
-	// }
+	std::list<Doors*> door_list;
+	entity_list.GetDoorsList(door_list);
+	for (std::list<Doors*>::iterator itr = door_list.begin(); itr != door_list.end(); ++itr) {
+		Doors* c = *itr;
+		res["ent_id"] = itoa(c->GetEntityID());
+		res["type"] = "Door";
+		res["name"] = c->GetDoorName();
+		res["x"] = itoa(c->GetX());
+		res["y"] = itoa(c->GetY());
+		res["z"] = itoa(c->GetZ());
+		res["h"] = itoa(c->GetHeading()); 
+		RemoteCallResponse(connection_id, request_id, res, error);
+	}
 }
 
 void handle_rc_move_entity(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
@@ -267,6 +268,7 @@ void handle_rc_zone_action(const std::string &method, const std::string &connect
 	}
 }
 
+/* Server -> Client */
 void handle_rc_get_entity_attributes(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
 	std::string error;
 	std::map<std::string, std::string> res;
@@ -285,10 +287,17 @@ void handle_rc_get_entity_attributes(const std::string &method, const std::strin
 		res["name"] = ent->GetName();
 		res["race"] = itoa(ent->GetRace());
 		res["class"] = itoa(ent->GetClass());
+		res["size"] = itoa(ent->GetSize());
+		res["texture"] = itoa(ent->GetTexture());
+		res["gender"] = itoa(ent->GetGender()); 
+		res["weapon_1"] = itoa(ent->GetEquipmentMaterial(7));
+		res["weapon_2"] = itoa(ent->GetEquipmentMaterial(8));
+		res["heading"] = itoa(ent->GetHeading());
 		RemoteCallResponse(connection_id, request_id, res, error);
 	}
 }
 
+/* Client -> Server */
 void handle_rc_set_entity_attribute(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
 	std::string error;
 	std::map<std::string, std::string> res;
@@ -302,9 +311,7 @@ void handle_rc_set_entity_attribute(const std::string &method, const std::string
 
 	Mob *ent = entity_list.GetMob(atoi(params[0].c_str()));
 	if (ent){
-		if (params[1] == "race"){ 
-			ent->SendIllusionPacket(atoi(params[2].c_str())); 
-		}
+		if (params[1] == "race"){ ent->SendIllusionPacket(atoi(params[2].c_str())); }
+		if (params[1] == "appearance_effect"){ ent->SendAppearanceEffect(atoi(params[2].c_str()), 0, 0, 0, 0); }
 	}
-
 }
