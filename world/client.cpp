@@ -397,6 +397,11 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 	}
 	else if(strncasecmp(name, "LS#", 3) == 0)
 		id=atoi(&name[3]);
+	else if(database.GetAccountIDByName(name)){
+		int16 status = 0;
+		uint32 lsid = 0;		
+		id = database.GetAccountIDByName(name, &status, &lsid);
+	}
 	else
 		id=atoi(name);
 #ifdef IPBASED_AUTH_HACK
@@ -406,7 +411,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 		clog(WORLD__CLIENT_ERR,"Error: Login server login while not connected to login server.");
 		return false;
 	}
-	if ((minilogin && (cle = client_list.CheckAuth(id,password,ip))) || (cle = client_list.CheckAuth(id, password)))
+	if (((cle = client_list.CheckAuth(name, password)) || (cle = client_list.CheckAuth(id, password))))
 #endif
 	{
 		if (cle->AccountID() == 0 || (!minilogin && cle->LSID()==0)) {

@@ -424,11 +424,13 @@ ClientListEntry* ClientList::CheckAuth(const char* iName, const char* iPassword)
 	}
 	int16 tmpadmin;
 
-	_log(WORLD__ZONELIST,"Login with '%s' and '%s'", iName, iPassword);
+	//_log(WORLD__ZONELIST,"Login with '%s' and '%s'", iName, iPassword);
 
 	uint32 accid = database.CheckLogin(iName, iPassword, &tmpadmin);
 	if (accid) {
-		ClientListEntry* tmp = new ClientListEntry(GetNextCLEID(), accid, iName, tmpMD5, tmpadmin);
+		uint32 lsid = 0;
+		database.GetAccountIDByName(iName, &tmpadmin, &lsid);
+		ClientListEntry* tmp = new ClientListEntry(GetNextCLEID(), lsid, iName, tmpMD5, tmpadmin, 0, 0);
 		clientlist.Append(tmp);
 		return tmp;
 	}
