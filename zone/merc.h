@@ -83,8 +83,6 @@ public:
 	Corpse* GetGroupMemberCorpse();
 
 	// Merc Spell Casting Methods
-	virtual int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target = nullptr);
-	virtual int32 GetActSpellHealing(uint16 spell_id, int32 value, Mob* target = nullptr);
 	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
 	virtual int32 GetActSpellCost(uint16 spell_id, int32 cost);
 	int8 GetChanceToCastBySpellType(int16 spellType);
