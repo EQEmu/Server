@@ -4505,17 +4505,23 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 			if (CanProc &&
 				(!Success && spellbonuses.SkillProc[e] && IsValidSpell(spellbonuses.SkillProc[e])) 
 				|| (Success && spellbonuses.SkillProcSuccess[e] && IsValidSpell(spellbonuses.SkillProcSuccess[e]))) {
-				base_spell_id = spellbonuses.SkillProc[e];
-				base_spell_id = 0;
+				
+				if (Success)
+					base_spell_id = spellbonuses.SkillProcSuccess[e];
+				else
+					base_spell_id = spellbonuses.SkillProc[e];
+
+				proc_spell_id = 0;
 				ProcMod = 0;
 
 				for (int i = 0; i < EFFECT_COUNT; i++) {
-					if (spells[base_spell_id].effectid[i] == SE_SkillProc) {
+
+					if (spells[base_spell_id].effectid[i] == SE_SkillProc || spells[base_spell_id].effectid[i] == SE_SkillProcSuccess) {
 						proc_spell_id = spells[base_spell_id].base[i];
 						ProcMod = static_cast<float>(spells[base_spell_id].base2[i]);
 					}
 
-					else if (spells[base_spell_id].effectid[i] == SE_LimitToSkill && spells[base_spell_id].effectid[i] <= HIGHEST_SKILL) {
+					else if (spells[base_spell_id].effectid[i] == SE_LimitToSkill && spells[base_spell_id].base[i] <= HIGHEST_SKILL) {
 
 						if (CanProc && spells[base_spell_id].base[i] == skill && IsValidSpell(proc_spell_id)) {
 							float final_chance = chance * (ProcMod / 100.0f);
@@ -4528,6 +4534,7 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 						}
 					}
 					else {
+						//Reset and check for proc in sequence
 						proc_spell_id = 0;
 						ProcMod = 0;
 					}
@@ -4542,17 +4549,22 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 			if (CanProc &&
 				(!Success && itembonuses.SkillProc[e] && IsValidSpell(itembonuses.SkillProc[e])) 
 				|| (Success && itembonuses.SkillProcSuccess[e] && IsValidSpell(itembonuses.SkillProcSuccess[e]))) {
-				base_spell_id = itembonuses.SkillProc[e];
-				base_spell_id = 0;
+
+				if (Success)
+					base_spell_id = itembonuses.SkillProcSuccess[e];
+				else
+					base_spell_id = itembonuses.SkillProc[e];
+
+				proc_spell_id = 0;
 				ProcMod = 0;
 
 				for (int i = 0; i < EFFECT_COUNT; i++) {
-					if (spells[base_spell_id].effectid[i] == SE_SkillProc) {
+					if (spells[base_spell_id].effectid[i] == SE_SkillProc || spells[base_spell_id].effectid[i] == SE_SkillProcSuccess) {
 						proc_spell_id = spells[base_spell_id].base[i];
 						ProcMod = static_cast<float>(spells[base_spell_id].base2[i]);
 					}
 
-					else if (spells[base_spell_id].effectid[i] == SE_LimitToSkill && spells[base_spell_id].effectid[i] <= HIGHEST_SKILL) {
+					else if (spells[base_spell_id].effectid[i] == SE_LimitToSkill && spells[base_spell_id].base[i] <= HIGHEST_SKILL) {
 
 						if (CanProc && spells[base_spell_id].base[i] == skill && IsValidSpell(proc_spell_id)) {
 							float final_chance = chance * (ProcMod / 100.0f);
@@ -4584,8 +4596,14 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 			if (CanProc &&
 				(!Success && aabonuses.SkillProc[e])
 				|| (Success && aabonuses.SkillProcSuccess[e])){
-				int aaid = aabonuses.SkillProc[e];
-				base_spell_id = 0;
+				int aaid = 0;
+				
+				if (Success)
+					base_spell_id = aabonuses.SkillProcSuccess[e];
+				else
+					base_spell_id = aabonuses.SkillProc[e];
+
+				proc_spell_id = 0;
 				ProcMod = 0;
 
 				std::map<uint32, std::map<uint32, AA_Ability> >::const_iterator find_iter = aa_effects.find(aaid);
@@ -4598,12 +4616,12 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 					base2 = iter->second.base2;
 					slot = iter->second.slot;
 
-					if (effect == SE_SkillProc) {
+					if (effect == SE_SkillProc || effect == SE_SkillProcSuccess) {
 						proc_spell_id = base1;
 						ProcMod = static_cast<float>(base2);
 					}
 
-					else if (effect == SE_LimitToSkill && effect <= HIGHEST_SKILL) {
+					else if (effect == SE_LimitToSkill && base1 <= HIGHEST_SKILL) {
 
 						if (CanProc && base1 == skill && IsValidSpell(proc_spell_id)) {
 							float final_chance = chance * (ProcMod / 100.0f);
