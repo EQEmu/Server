@@ -979,7 +979,9 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const Ite
 		if (HeadShot)
 			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FATAL_BOW_SHOT, GetName());
 
-		other->AddToHateList(this, hate, 0, false);
+		if (IsClient() && !CastToClient()->GetFeigned())
+			other->AddToHateList(this, hate, 0, false);
+
 		other->Damage(this, TotalDmg, SPELL_UNKNOWN, SkillArchery);
 			
 		//Skill Proc Success
@@ -1513,7 +1515,9 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 		else
 			TotalDmg = -5;
 
-		other->AddToHateList(this, 2*WDmg, 0, false);
+		if (IsClient() && !CastToClient()->GetFeigned())
+			other->AddToHateList(this, 2*WDmg, 0, false);
+
 		other->Damage(this, TotalDmg, SPELL_UNKNOWN, SkillThrowing);
 
 		if (TotalDmg > 0 && HasSkillProcSuccess() && other && !other->HasDied()){
