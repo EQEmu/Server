@@ -4390,7 +4390,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		uint32 spawnedbotid = 0;
 		spawnedbotid = this->GetBotID();
 
-		for (i = 0; i < _MaterialCount; i++)
+		for (int i = 0; i < _MaterialCount; i++)
 		{
 			inst = GetBotItem(i);
 			if (inst)
