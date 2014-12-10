@@ -1863,11 +1863,13 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 			SetAllowBeneficial(1);//Allow temp pets to receive buffs and heals if owner is client.
 			//This will allow CLIENT swarm pets NOT to be targeted with F8.
 			ns->spawn.targetable_with_hotkey = 0;
+			no_target_hotkey = 1;
 		}
 		else
 		{
 			//NPC cast swarm pets should still be targetable with F8.
 			ns->spawn.targetable_with_hotkey = 1;
+			no_target_hotkey = 0;
 		}
 
 		SetTempPet(true); //Simple mob flag for checking if temp pet
