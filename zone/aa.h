@@ -51,7 +51,8 @@ typedef enum {	//AA Effect IDs
 	aaEffectFrostArrows,
 	aaEffectWarcry,
 	aaEffectLeechTouch,
-	aaEffectProjectIllusion // unused - Handled via spell effect
+	aaEffectProjectIllusion, // unused - Handled via spell effect
+	_maxaaEffectType = 32
 } aaEffectType;
 
 

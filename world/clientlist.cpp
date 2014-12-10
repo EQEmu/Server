@@ -547,7 +547,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 				if(totalusers<=20 || admin>=100)
 					totallength=totallength+strlen(countcle->name())+strlen(countcle->AccountName())+strlen(guild_mgr.GetGuildName(countcle->GuildID()))+5;
 			}
-			else if((countcle->Anon()>0 && admin<=countcle->Admin()) || countcle->Anon()==0 && !countcle->GetGM()){
+			else if((countcle->Anon()>0 && admin<=countcle->Admin()) || (countcle->Anon()==0 && !countcle->GetGM())) {
 				totalusers++;
 				if(totalusers<=20 || admin>=100)
 					totallength=totallength+strlen(countcle->name())+strlen(guild_mgr.GetGuildName(countcle->GuildID()))+5;
