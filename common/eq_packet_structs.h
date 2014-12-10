@@ -363,6 +363,7 @@ union
 	uint32 DestructibleUnk7;
 	uint8 DestructibleUnk8;
 	uint32 DestructibleUnk9;
+	bool targetable_with_hotkey;
 
 };
 

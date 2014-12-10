@@ -1889,7 +1889,7 @@ namespace SoF
 			eq->beard = emu->beard;
 			eq->targetable = 1; //New Field - Toggle Targetable on or off - 0 = off, 1 = on
 			eq->NPC = emu->NPC;
-			eq->targetable_with_hotkey = 1;//New Field - Toggle Targetable on or off - 0 = off, 1 = on
+			eq->targetable_with_hotkey = emu->targetable_with_hotkey ? 1 : 0; //New Field - Toggle Targetable on or off - 0 = off, 1 = on
 			eq->x = emu->x;
 			eq->deltaX = emu->deltaX;
 			eq->deltaY = emu->deltaY;

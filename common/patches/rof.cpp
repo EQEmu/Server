@@ -3706,7 +3706,7 @@ namespace RoF
 			Bitfields->showhelm = emu->showhelm;
 			Bitfields->trader = 0;
 			Bitfields->targetable = 1;
-			Bitfields->targetable_with_hotkey = (emu->IsMercenary ? 0 : 1);
+			Bitfields->targetable_with_hotkey = emu->targetable_with_hotkey ? 1 : 0;
 			Bitfields->showname = ShowName;
 
 			// Not currently found

@@ -4772,6 +4772,7 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 			npc_type->npc_id = 0; //NPC ID has to be 0, otherwise db gets all confuzzled.
 			npc_type->class_ = merc_template->ClassID;
 			npc_type->maxlevel = 0; //We should hard-set this to override scalerate's functionality in the NPC class when it is constructed.
+			npc_type->no_target_hotkey = 1;
 
 			Merc* merc = new Merc(npc_type, c->GetX(), c->GetY(), c->GetZ(), 0);
 

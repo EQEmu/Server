@@ -600,6 +600,9 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		if(npc_dup != nullptr)
 			npca->GiveNPCTypeData(npc_dup);
 
+		if (IsClient())
+			npca->no_target_hotkey = 1;
+
 		entity_list.AddNPC(npca, true, true);
 		summon_count--;
 	}
@@ -695,6 +698,9 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 		//we allocated a new NPC type object, give the NPC ownership of that memory
 		if(npc_dup != nullptr)
 			npca->GiveNPCTypeData(npc_dup);
+
+		if (IsClient())
+			npca->no_target_hotkey = 1;
 
 		entity_list.AddNPC(npca, true, true);
 		summon_count--;
@@ -882,6 +888,9 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 	//we allocated a new NPC type object, give the NPC ownership of that memory
 	if(make_npc != nullptr)
 		npca->GiveNPCTypeData(make_npc);
+
+	if (IsClient())
+		npca->no_target_hotkey = 1;
 
 	entity_list.AddNPC(npca, true, true);
 

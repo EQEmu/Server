@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 12/09/2014 ==
 Trevius: (RoF+) Implemented Hero's Forge Armor Models for Items.  To use, set herosforgemodel field in the item table to a model number such as 63 (for example).
+demonstar55: SoF+ swarm pets will no longer be F8able (without a hack!)
 
 == 12/08/2014 ==
 Secrets: Added a feature that allows an EQ client to log in directly to World without having to enter the LoginServer, provided the 'password' field is set in WorldServer.
