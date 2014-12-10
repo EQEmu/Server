@@ -7460,12 +7460,13 @@ XS(XS_Mob_WearChange)
 {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::WearChange(THIS, material_slot, texture, color)");
+		Perl_croak(aTHX_ "Usage: Mob::WearChange(THIS, material_slot, texture, [color, hero_forge_model])");
 	{
 		Mob *		THIS;
 		uint8		material_slot = (uint8)SvIV(ST(1));
 		uint16		texture = (uint16)SvUV(ST(2));
 		uint32		color = 0;
+		uint32		hero_forge_model = 0;
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -7479,8 +7480,11 @@ XS(XS_Mob_WearChange)
 		if (items > 3) {
 			color = (uint32)SvUV(ST(3));
 		}
+		if (items > 4) {
+			hero_forge_model = (uint32)SvUV(ST(3));
+		}
 
-		THIS->WearChange(material_slot, texture, color);
+		THIS->WearChange(material_slot, texture, color, hero_forge_model);
 	}
 	XSRETURN_EMPTY;
 }
@@ -8614,7 +8618,7 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "TarGlobal"), XS_Mob_TarGlobal, file, "$$$$$$$");
 		newXSproto(strcpy(buf, "DelGlobal"), XS_Mob_DelGlobal, file, "$$");
 		newXSproto(strcpy(buf, "SetSlotTint"), XS_Mob_SetSlotTint, file, "$$$$$");
-		newXSproto(strcpy(buf, "WearChange"), XS_Mob_WearChange, file, "$$$;$");
+		newXSproto(strcpy(buf, "WearChange"), XS_Mob_WearChange, file, "$$$;$$");
 		newXSproto(strcpy(buf, "DoKnockback"), XS_Mob_DoKnockback, file, "$$$$");
 		newXSproto(strcpy(buf, "RemoveNimbusEffect"), XS_Mob_RemoveNimbusEffect, file, "$$");
 		newXSproto(strcpy(buf, "IsRunning"), XS_Mob_IsRunning, file, "$");

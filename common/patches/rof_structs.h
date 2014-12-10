@@ -161,12 +161,11 @@ struct Color_Struct
 };
 
 struct CharSelectEquip {
-	//totally guessed;
-	uint32 equip0;
-	uint32 equip1;
-	uint32 equip2;
-	uint32 itemid;
-	uint32 equip3;
+	uint32 material;
+	uint32 unknown1;
+	uint32 elitematerial;
+	uint32 heroforgemodel;
+	uint32 material2;
 	Color_Struct color;
 };
 
@@ -258,11 +257,11 @@ struct Membership_Struct
 * Size: 20 Octets
 */
 struct EquipStruct {
-/*00*/ uint32 equip0;
-/*04*/ uint32 equip1;
-/*08*/ uint32 equip2;
-/*12*/ uint32 itemId;
-/*16*/ uint32 equip3;	// Same as equip0?
+/*00*/ uint32 material;
+/*04*/ uint32 unknown1;
+/*08*/ uint32 elitematerial;
+/*12*/ uint32 heroforgemodel;
+/*16*/ uint32 material2;	// Same as material?
 /*20*/
 };
 
@@ -4499,10 +4498,10 @@ struct ItemBodyStruct
 	uint32 Prestige;	// New to March 21 2012 client
 	uint8 ItemType;
 	uint32 Material;
-	uint32 unknown7;
+	uint32 MaterialUnknown1;
 	uint32 EliteMaterial;
-	uint32 unknown_RoF3;	// New to March 21 2012 client
-	uint32 unknown_RoF4;	// New to December 10th 2012 client - NEW
+	uint32 HerosForgeModel;		// New to March 21 2012 client
+	uint32 MaterialUnknown2;	// New to December 10th 2012 client - NEW
 	float  SellRate;
 	int32 CombatEffects;
 	int32 Shielding;

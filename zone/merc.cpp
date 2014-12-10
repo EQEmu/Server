@@ -1196,18 +1196,32 @@ void Merc::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.NPC = 1;                                      // 0=player,1=npc,2=pc corpse,3=npc corpse
 		ns->spawn.IsMercenary = 1;
 
+		/*
+		// Wear Slots are not setup for Mercs yet
 		unsigned int i;
-		//should not include 21 (SLOT_AMMO)
-		for (i = 0; i < MainAmmo; i++) {
-			if(equipment[i] == 0)
+		for (i = 0; i < _MaterialCount; i++)
+		{
+			if (equipment[i] == 0)
+			{
 				continue;
+			}
 			const Item_Struct* item = database.GetItem(equipment[i]);
 			if(item)
 			{
-				ns->spawn.equipment[i]  = item->Material;
-				ns->spawn.colors[i].color = item->Color;
+				ns->spawn.equipment[i].material = item->Material;
+				ns->spawn.equipment[i].elitematerial = item->EliteMaterial;
+				ns->spawn.equipment[i].heroforgemodel = item->HerosForgeModel;
+				if (armor_tint[i])
+				{
+					ns->spawn.colors[i].color = armor_tint[i];
+				}
+				else
+				{
+					ns->spawn.colors[i].color = item->Color;
+				}
 			}
 		}
+		*/
 	}
 }
 

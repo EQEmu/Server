@@ -4361,7 +4361,8 @@ void Bot::SetLevel(uint8 in_level, bool command) {
 }
 
 void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
-	if(ns) {
+	if(ns)
+	{
 		Mob::FillSpawnStruct(ns, ForWho);
 
 		ns->spawn.afk = 0;
@@ -4389,98 +4390,34 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		uint32 spawnedbotid = 0;
 		spawnedbotid = this->GetBotID();
 
-		inst = GetBotItem(MainHands);
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				ns->spawn.equipment[MaterialHands]	= item->Material;
-				ns->spawn.colors[MaterialHands].color = GetEquipmentColor(MaterialHands);
-			}
-		}
+		for (i = 0; i < _MaterialCount; i++)
+		{
+			inst = GetBotItem(i);
+			if (inst)
+			{
+				item = inst->GetItem();
+				if (item != 0)
+				{
+					ns->spawn.equipment[i].material = item->Material;
+					ns->spawn.equipment[i].elitematerial = item->EliteMaterial;
+					ns->spawn.equipment[i].heroforgemodel = item->HerosForgeModel;
+					if (armor_tint[i])
+					{
+						ns->spawn.colors[i].color = armor_tint[i];
 
-		inst = GetBotItem(MainHead);
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				ns->spawn.equipment[MaterialHead] = item->Material;
-				ns->spawn.colors[MaterialHead].color = GetEquipmentColor(MaterialHead);
-			}
-		}
-
-		inst = GetBotItem(MainArms);
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				ns->spawn.equipment[MaterialArms] = item->Material;
-				ns->spawn.colors[MaterialArms].color = GetEquipmentColor(MaterialArms);
-			}
-		}
-
-		inst = GetBotItem(MainWrist1);
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				ns->spawn.equipment[MaterialWrist] = item->Material;
-				ns->spawn.colors[MaterialWrist].color	= GetEquipmentColor(MaterialWrist);
-			}
-		}
-
-		/*
-		// non-live behavior
-		inst = GetBotItem(MainWrist2);
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				ns->spawn.equipment[MaterialWrist] = item->Material;
-				ns->spawn.colors[MaterialWrist].color	= GetEquipmentColor(MaterialWrist);
-			}
-		}
-		*/
-
-		inst = GetBotItem(MainChest);
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				ns->spawn.equipment[MaterialChest]	= item->Material;
-				ns->spawn.colors[MaterialChest].color = GetEquipmentColor(MaterialChest);
-			}
-		}
-
-		inst = GetBotItem(MainLegs);
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				ns->spawn.equipment[MaterialLegs] = item->Material;
-				ns->spawn.colors[MaterialLegs].color = GetEquipmentColor(MaterialLegs);
-			}
-		}
-
-		inst = GetBotItem(MainFeet);
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				ns->spawn.equipment[MaterialFeet] = item->Material;
-				ns->spawn.colors[MaterialFeet].color = GetEquipmentColor(MaterialFeet);
-			}
-		}
-
-		inst = GetBotItem(MainPrimary);
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				if(strlen(item->IDFile) > 2)
-					ns->spawn.equipment[MaterialPrimary] = atoi(&item->IDFile[2]);
-					ns->spawn.colors[MaterialPrimary].color = GetEquipmentColor(MaterialPrimary);
-			}
-		}
-
-		inst = GetBotItem(MainSecondary);
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				if(strlen(item->IDFile) > 2)
-					ns->spawn.equipment[MaterialSecondary] = atoi(&item->IDFile[2]);
-					ns->spawn.colors[MaterialSecondary].color = GetEquipmentColor(MaterialSecondary);
+					}
+					else
+					{
+						ns->spawn.colors[i].color = item->Color;
+					}
+				}
+				else
+				{
+					if (armor_tint[i])
+					{
+						ns->spawn.colors[i].color = armor_tint[i];
+					}
+				}
 			}
 		}
 	}

@@ -182,12 +182,16 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 				if (item == 0)
 					continue;
 
-				cs->equip[char_num][material] = item->GetItem()->Material;
+				cs->equip[char_num][material].material = item->GetItem()->Material;
+				cs->equip[char_num][material].material = 0;
+				cs->equip[char_num][material].elitematerial = item->GetItem()->EliteMaterial;
+				cs->equip[char_num][material].heroforgemodel = item->GetItem()->HerosForgeModel;
+				cs->equip[char_num][material].material2 = item->GetItem()->Material;
 
 				if (pp.item_tint[material].rgb.use_tint){ color = pp.item_tint[material].color; }
 				else{ color = item->GetItem()->Color; }
 
-				cs->cs_colors[char_num][material].color = color;
+				cs->equip[char_num][material].color.color = color;
 
 				/* Weapons are handled a bit differently */
 				if ((material == MaterialPrimary) || (material == MaterialSecondary)) {
