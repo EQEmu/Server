@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/12/2014 ==
+demonstar55: Add special attack 42, Ignore Root Aggro Rules. This allows you to root a mob and have them still use the normal aggro rules (so they will attack the one with most hate, not closest)
+
 == 12/09/2014 ==
 Trevius: (RoF+) Implemented Hero's Forge Armor Models for Items.  To use, set herosforgemodel field in the item table to a model number such as 63 (for example).
 demonstar55: SoF+ swarm pets will no longer be F8able (without a hack!)

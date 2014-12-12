@@ -1088,7 +1088,7 @@ void Mob::AI_Process() {
 	{
 		// we are prevented from getting here if we are blind and don't have a target in range
 		// from above, so no extra blind checks needed
-		if (IsRooted() || IsBlind())
+		if ((IsRooted() && !GetSpecialAbility(IGNORE_ROOT_AGGRO_RULES)) || IsBlind())
 			SetTarget(hate_list.GetClosest(this));
 		else
 		{
