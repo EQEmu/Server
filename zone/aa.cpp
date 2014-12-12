@@ -893,7 +893,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 //turn on an AA effect
 //duration == 0 means no time limit, used for one-shot deals, etc..
 void Client::EnableAAEffect(aaEffectType type, uint32 duration) {
-	if(type > 32)
+	if(type > _maxaaEffectType)
 		return;	//for now, special logic needed.
 	m_epp.aa_effects |= 1 << (type-1);
 
@@ -905,7 +905,7 @@ void Client::EnableAAEffect(aaEffectType type, uint32 duration) {
 }
 
 void Client::DisableAAEffect(aaEffectType type) {
-	if(type > 32)
+	if(type > _maxaaEffectType)
 		return;	//for now, special logic needed.
 	uint32 bit = 1 << (type-1);
 	if(m_epp.aa_effects & bit) {
@@ -919,7 +919,7 @@ By default an AA effect is a one shot deal, unless
 a duration timer is set.
 */
 bool Client::CheckAAEffect(aaEffectType type) {
-	if(type > 32)
+	if(type > _maxaaEffectType)
 		return(false);	//for now, special logic needed.
 	if(m_epp.aa_effects & (1 << (type-1))) {	//is effect enabled?
 		//has our timer expired?

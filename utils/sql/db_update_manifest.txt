@@ -313,6 +313,7 @@
 9057|2014_11_13_spells_new_updates.sql|SHOW COLUMNS FROM `spells_new` LIKE 'disallow_sit'|empty|
 9058|2014_11_26_InventoryTableUpdate.sql|SHOW COLUMNS FROM `inventory` LIKE 'ornamenticon'|empty|
 9059|2014_12_01_mercs_table_update.sql|SHOW COLUMNS FROM `mercs` LIKE 'MercSize'|empty|
+9060|2014_12_09_items_table_update.sql|SHOW COLUMNS FROM `items` LIKE 'herosforgemodel'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not 

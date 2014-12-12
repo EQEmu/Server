@@ -546,6 +546,7 @@ namespace Client62
 		for (r = 0; r < 9; r++) {
 			OUT(item_material[r]);
 			OUT(item_tint[r].color);
+
 		}
 		for (r = 0; r < structs::MAX_PP_AA_ARRAY; r++) {
 			OUT(aa_array[r].AA);
@@ -785,8 +786,8 @@ namespace Client62
 			OUT(beard[r]);
 			int k;
 			for (k = 0; k < 9; k++) {
-				OUT(equip[r][k]);
-				OUT(cs_colors[r][k].color);
+				eq->equip[r][k] = emu->equip[r][k].material;
+				eq->cs_colors[r][k].color = emu->equip[r][k].color.color;
 			}
 			OUT(haircolor[r]);
 			OUT(gohome[r]);
@@ -934,7 +935,7 @@ namespace Client62
 			eq->petOwnerId = emu->petOwnerId;
 			eq->guildrank = emu->guildrank;
 			for (k = 0; k < 9; k++) {
-				eq->equipment[k] = emu->equipment[k];
+				eq->equipment[k] = emu->equipment[k].material;
 				eq->colors[k].color = emu->colors[k].color;
 			}
 			for (k = 0; k < 8; k++) {

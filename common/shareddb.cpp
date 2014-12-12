@@ -850,11 +850,28 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		item.Classes = (uint32)atoul(row[ItemField::classes]);
 		item.Races = (uint32)atoul(row[ItemField::races]);
 
-		item.MaxCharges = (int16)atoi(row[ItemField::maxcharges]);
-		item.ItemType = (uint8)atoi(row[ItemField::itemtype]);
+        item.MaxCharges = (int16)atoi(row[ItemField::maxcharges]);
+        item.ItemType = (uint8)atoi(row[ItemField::itemtype]);
 		item.Material = (uint8)atoi(row[ItemField::material]);
-		item.SellRate = (float)atof(row[ItemField::sellrate]);
-
+		item.HerosForgeModel = (uint32)atoi(row[ItemField::herosforgemodel]);
+		if (item.HerosForgeModel > 0)
+		{
+			item.HerosForgeModel *= 100;
+			uint32 HeroSlot = 0;
+			switch (item.Slots)
+			{
+			case 4:			{ HeroSlot = 0; break; }  // Head
+			case 131072:	{ HeroSlot = 1; break; }  // Chest 
+			case 128:		{ HeroSlot = 2; break; }  // Arms
+			case 1536:		{ HeroSlot = 3; break; }  // Bracers
+			case 4096:		{ HeroSlot = 4; break; }  // Hands
+			case 262144:	{ HeroSlot = 5; break; }  // Legs
+			case 524288:	{ HeroSlot = 6; break; }  // Feet
+			default:		{ HeroSlot = 1; break; }  // Chest
+			}
+			item.HerosForgeModel += HeroSlot;
+		}
+        item.SellRate = (float)atof(row[ItemField::sellrate]);
 		item.CastTime = (uint32)atoul(row[ItemField::casttime]);
 		item.EliteMaterial = (uint32)atoul(row[ItemField::elitematerial]);
 		item.ProcRate = (int32)atoi(row[ItemField::procrate]);

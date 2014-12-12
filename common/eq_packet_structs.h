@@ -146,16 +146,39 @@ struct Color_Struct
 };
 
 /*
+* Visible equiptment.
+* Size: 20 Octets
+*/
+struct EquipStruct {
+	/*00*/ uint32 material;
+	/*04*/ uint32 unknown1;
+	/*08*/ uint32 elitematerial;
+	/*12*/ uint32 heroforgemodel;
+	/*16*/ uint32 material2;	// Same as material?
+	/*20*/
+};
+
+struct CharSelectEquip {
+	uint32 material;
+	uint32 unknown1;
+	uint32 elitematerial;
+	uint32 heroforgemodel;
+	uint32 material2;
+	Color_Struct color;
+};
+
+/*
 ** Character Selection Struct
 ** Length: 1704 Bytes
 **
 */
 struct CharacterSelect_Struct {
 /*0000*/	uint32	race[10];				// Characters Race
-/*0040*/	Color_Struct	cs_colors[10][9];	// Characters Equipment Colors
+/*0040*/	//Color_Struct	cs_colors[10][9];	// Characters Equipment Colors
 /*0400*/	uint8	beardcolor[10];			// Characters beard Color
 /*0410*/	uint8	hairstyle[10];			// Characters hair style
-/*0420*/	uint32	equip[10][9];			// 0=helm, 1=chest, 2=arm, 3=bracer, 4=hand, 5=leg, 6=boot, 7=melee1, 8=melee2 (Might not be)
+/*0420*/	//uint32	equip[10][9];			// 0=helm, 1=chest, 2=arm, 3=bracer, 4=hand, 5=leg, 6=boot, 7=melee1, 8=melee2 (Might not be)
+/*0000*/	CharSelectEquip	equip[10][9];
 /*0780*/	uint32	secondary[10];			// Characters secondary IDFile number
 /*0820*/	uint32	drakkin_heritage[10];		// added for SoF
 /*0860*/	uint32	drakkin_tattoo[10];			// added for SoF
@@ -258,21 +281,21 @@ struct Spawn_Struct {
 /*0193*/ uint8	guildrank;			// 0=normal, 1=officer, 2=leader
 /*0194*/ uint8	unknown0194[3];
 /*0197*/ union
-		 {
-			struct
-			{
-				/*0197*/ uint32 equip_helmet;		// Equipment: Helmet Visual
-				/*0201*/ uint32 equip_chest;		// Equipment: Chest Visual
-				/*0205*/ uint32 equip_arms;			// Equipment: Arms Visual
-				/*0209*/ uint32 equip_bracers;		// Equipment: Bracers Visual
-				/*0213*/ uint32 equip_hands;		// Equipment: Hands Visual
-				/*0217*/ uint32 equip_legs;			// Equipment: Legs Visual
-				/*0221*/ uint32 equip_feet;			// Equipment: Feet Visual
-				/*0225*/ uint32 equip_primary;		// Equipment: Primary Visual
-				/*0229*/ uint32 equip_secondary;	// Equipment: Secondary Visual
-			} equip;
-			/*0197*/ uint32 equipment[_MaterialCount]; // Array elements correspond to struct equipment above
-		 };
+{
+	struct
+	{
+		/*0000*/ EquipStruct equip_helmet;     // Equipment: Helmet visual
+		/*0000*/ EquipStruct equip_chest;      // Equipment: Chest visual
+		/*0000*/ EquipStruct equip_arms;       // Equipment: Arms visual
+		/*0000*/ EquipStruct equip_bracers;    // Equipment: Wrist visual
+		/*0000*/ EquipStruct equip_hands;      // Equipment: Hands visual
+		/*0000*/ EquipStruct equip_legs;       // Equipment: Legs visual
+		/*0000*/ EquipStruct equip_feet;       // Equipment: Boots visual
+		/*0000*/ EquipStruct equip_primary;    // Equipment: Main visual
+		/*0000*/ EquipStruct equip_secondary;  // Equipment: Off visual
+	} equip;
+	/*0000*/ EquipStruct equipment[_MaterialCount];
+};
 /*0233*/ float	runspeed;		// Speed when running
 /*0036*/ uint8	afk;			// 0=no, 1=afk
 /*0238*/ uint32	guildID;		// Current guild
@@ -340,6 +363,7 @@ union
 	uint32 DestructibleUnk7;
 	uint8 DestructibleUnk8;
 	uint32 DestructibleUnk9;
+	bool targetable_with_hotkey;
 
 };
 

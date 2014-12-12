@@ -1854,27 +1854,28 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 	{
 		swarmOwner = entity_list.GetMobID(GetSwarmOwner());
 	}
-	
+
 	if  (swarmOwner != nullptr)
 	{
 		if(swarmOwner->IsClient())
 		{
 			SetPetOwnerClient(true); //Simple flag to determine if pet belongs to a client
 			SetAllowBeneficial(1);//Allow temp pets to receive buffs and heals if owner is client.
-			//This is a hack to allow CLIENT swarm pets NOT to be targeted with F8. Warning: Will turn name 'Yellow'!
-			if (RuleB(Pets, SwarmPetNotTargetableWithHotKey))
-				ns->spawn.IsMercenary = 1;
+			//This will allow CLIENT swarm pets NOT to be targeted with F8.
+			ns->spawn.targetable_with_hotkey = 0;
+			no_target_hotkey = 1;
 		}
 		else
 		{
 			//NPC cast swarm pets should still be targetable with F8.
-			ns->spawn.IsMercenary = 0;
+			ns->spawn.targetable_with_hotkey = 1;
+			no_target_hotkey = 0;
 		}
 
 		SetTempPet(true); //Simple mob flag for checking if temp pet
 		swarmOwner->SetTempPetsActive(true); //Necessary fail safe flag set if mob ever had a swarm pet to ensure they are removed.
 		swarmOwner->SetTempPetCount(swarmOwner->GetTempPetCount() + 1);
-	
+
 		//Not recommended if using above (However, this will work better on older clients).
 		if (RuleB(Pets, UnTargetableSwarmPet))
 		{
@@ -1882,7 +1883,7 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 			if(!IsCharmed() && swarmOwner->IsClient())
 				sprintf(ns->spawn.lastName, "%s's Pet", swarmOwner->GetName());
 		}
-	} 
+	}
 	else if(GetOwnerID())
 	{
 		ns->spawn.is_pet = 1;

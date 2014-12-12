@@ -269,7 +269,7 @@ public:
 	void	AddLootDrop(const Item_Struct*dbitem, ItemList* itemlistconst, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange = false);
 	virtual void DoClassAttacks(Mob *target);
 	void	CheckSignal();
-	inline bool IsTargetableWithHotkey() const { return no_target_hotkey; }
+	inline bool IsNotTargetableWithHotkey() const { return no_target_hotkey; }
 	int32 GetNPCHPRegen() const { return hp_regen + itembonuses.HPRegen + spellbonuses.HPRegen; }
 	inline const char* GetAmmoIDfile() const { return ammo_idfile; }
 

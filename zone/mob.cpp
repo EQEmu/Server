@@ -923,7 +923,8 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	ns->spawn.invis		= (invisible || hidden) ? 1 : 0;	// TODO: load this before spawning players
 	ns->spawn.NPC		= IsClient() ? 0 : 1;
-	ns->spawn.IsMercenary = (IsMerc() || no_target_hotkey) ? 1 : 0;
+	ns->spawn.IsMercenary = IsMerc() ? 1 : 0;
+	ns->spawn.targetable_with_hotkey = no_target_hotkey ? 0 : 1; // opposite logic!
 
 	ns->spawn.petOwnerId	= ownerid;
 
@@ -963,22 +964,44 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		ns->spawn.flymode = FindType(SE_Levitate) ? 2 : 0;
 	}
 	else
+	{
 		ns->spawn.flymode = flymode;
+	}
 
 	ns->spawn.lastName[0] = '\0';
 
 	strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
 
-	for(i = 0; i < _MaterialCount; i++)
+	const Item_Struct *item;
+
+	for (i = 0; i < _MaterialCount; i++)
 	{
-		ns->spawn.equipment[i] = GetEquipmentMaterial(i);
-		if (armor_tint[i])
+		// Only Player Races Wear Armor
+		if (IsPlayerRace(race) || i > 6)
 		{
-			ns->spawn.colors[i].color = armor_tint[i];
-		}
-		else
-		{
-			ns->spawn.colors[i].color = GetEquipmentColor(i);
+			ns->spawn.equipment[i].material = GetEquipmentMaterial(i);
+
+			item = database.GetItem(GetEquipment(i));
+			if (item != 0)
+			{
+				ns->spawn.equipment[i].elitematerial = item->EliteMaterial;
+				ns->spawn.equipment[i].heroforgemodel = item->HerosForgeModel;
+				if (armor_tint[i])
+				{
+					ns->spawn.colors[i].color = armor_tint[i];
+				}
+				else
+				{
+					ns->spawn.colors[i].color = item->Color;
+				}
+			}
+			else
+			{
+				if (armor_tint[i])
+				{
+					ns->spawn.colors[i].color = armor_tint[i];
+				}
+			}
 		}
 	}
 
@@ -2617,8 +2640,20 @@ void Mob::SendWearChange(uint8 material_slot)
 
 	wc->spawn_id = GetID();
 	wc->material = GetEquipmentMaterial(material_slot);
-	wc->elite_material = IsEliteMaterialItem(material_slot);
-	wc->color.color = GetEquipmentColor(material_slot);
+	const Item_Struct *item;
+	item = database.GetItem(GetEquipment(material_slot));
+	if (item != 0)
+	{
+		wc->elite_material = item->EliteMaterial;
+		wc->hero_forge_model = item->HerosForgeModel;
+		wc->color.color = item->Color;
+	}
+	else
+	{
+		wc->elite_material = 0;
+		wc->hero_forge_model = 0;
+		wc->color.color = 0;
+	}
 	wc->wear_slot_id = material_slot;
 
 	entity_list.QueueClients(this, outapp);
@@ -2662,6 +2697,7 @@ void Mob::SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uin
 
 	wc->spawn_id = this->GetID();
 	wc->material = GetEquipmentMaterial(material_slot);
+	wc->hero_forge_model = GetHeroForgeModel(material_slot);
 	wc->color.color = color;
 	wc->wear_slot_id = material_slot;
 
@@ -2669,7 +2705,7 @@ void Mob::SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uin
 	safe_delete(outapp);
 }
 
-void Mob::WearChange(uint8 material_slot, uint16 texture, uint32 color)
+void Mob::WearChange(uint8 material_slot, uint16 texture, uint32 color, uint32 hero_forge_model)
 {
 	armor_tint[material_slot] = color;
 
@@ -2678,6 +2714,7 @@ void Mob::WearChange(uint8 material_slot, uint16 texture, uint32 color)
 
 	wc->spawn_id = this->GetID();
 	wc->material = texture;
+	wc->hero_forge_model = hero_forge_model;
 	wc->color.color = color;
 	wc->wear_slot_id = material_slot;
 
@@ -2752,6 +2789,19 @@ uint32 Mob::IsEliteMaterialItem(uint8 material_slot) const
 	if(item != 0)
 	{
 		return item->EliteMaterial;
+	}
+
+	return 0;
+}
+
+uint32 Mob::GetHeroForgeModel(uint8 material_slot) const
+{
+	const Item_Struct *item;
+
+	item = database.GetItem(GetEquipment(material_slot));
+	if (item != 0)
+	{
+		return item->HerosForgeModel;
 	}
 
 	return 0;
@@ -3813,6 +3863,8 @@ int32 Mob::GetItemStat(uint32 itemid, const char *identifier)
 		stat = int32(item->CastTime);
 	if (id == "elitematerial")
 		stat = int32(item->EliteMaterial);
+	if (id == "herosforgemodel")
+		stat = int32(item->HerosForgeModel);
 	if (id == "procrate")
 		stat = int32(item->ProcRate);
 	if (id == "combateffects")

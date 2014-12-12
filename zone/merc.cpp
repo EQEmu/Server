@@ -1196,18 +1196,32 @@ void Merc::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.NPC = 1;                                      // 0=player,1=npc,2=pc corpse,3=npc corpse
 		ns->spawn.IsMercenary = 1;
 
+		/*
+		// Wear Slots are not setup for Mercs yet
 		unsigned int i;
-		//should not include 21 (SLOT_AMMO)
-		for (i = 0; i < MainAmmo; i++) {
-			if(equipment[i] == 0)
+		for (i = 0; i < _MaterialCount; i++)
+		{
+			if (equipment[i] == 0)
+			{
 				continue;
+			}
 			const Item_Struct* item = database.GetItem(equipment[i]);
 			if(item)
 			{
-				ns->spawn.equipment[i]  = item->Material;
-				ns->spawn.colors[i].color = item->Color;
+				ns->spawn.equipment[i].material = item->Material;
+				ns->spawn.equipment[i].elitematerial = item->EliteMaterial;
+				ns->spawn.equipment[i].heroforgemodel = item->HerosForgeModel;
+				if (armor_tint[i])
+				{
+					ns->spawn.colors[i].color = armor_tint[i];
+				}
+				else
+				{
+					ns->spawn.colors[i].color = item->Color;
+				}
 			}
 		}
+		*/
 	}
 }
 
@@ -4758,6 +4772,7 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 			npc_type->npc_id = 0; //NPC ID has to be 0, otherwise db gets all confuzzled.
 			npc_type->class_ = merc_template->ClassID;
 			npc_type->maxlevel = 0; //We should hard-set this to override scalerate's functionality in the NPC class when it is constructed.
+			npc_type->no_target_hotkey = 1;
 
 			Merc* merc = new Merc(npc_type, c->GetX(), c->GetY(), c->GetZ(), 0);
 

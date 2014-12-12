@@ -160,13 +160,25 @@ struct Color_Struct
 	};
 };
 
+/*
+* Visible equiptment.
+* Size: 20 Octets
+*/
+struct EquipStruct {
+	/*00*/ uint32 material;
+	/*04*/ uint32 unknown1;
+	/*08*/ uint32 elitematerial;
+	/*12*/ uint32 heroforgemodel;
+	/*16*/ uint32 material2;	// Same as material?
+	/*20*/
+};
+
 struct CharSelectEquip {
-	//totally guessed;
-	uint32 equip0;
-	uint32 equip1;
-	uint32 equip2;
-	uint32 itemid;
-	uint32 equip3;
+	uint32 material;
+	uint32 unknown1;
+	uint32 elitematerial;
+	uint32 heroforgemodel;
+	uint32 material2;
 	Color_Struct color;
 };
 
@@ -251,21 +263,6 @@ struct Membership_Struct
 /*016*/ int32 entries[22]; // Most -1, 1, and 0 for Gold Status
 /*104*/
 };
-
-
-/*
-* Visible equiptment.
-* Size: 20 Octets
-*/
-struct EquipStruct {
-/*00*/ uint32 equip0;
-/*04*/ uint32 equip1;
-/*08*/ uint32 equip2;
-/*12*/ uint32 itemId;
-/*16*/ uint32 equip3;	// Same as equip0?
-/*20*/
-};
-
 
 /*
 ** Generic Spawn Struct
@@ -1018,38 +1015,38 @@ union
 {
 	struct
 	{
-		/*00184*/ EquipStruct equip_helmet; // Equiptment: Helmet visual
-		/*00204*/ EquipStruct equip_chest; // Equiptment: Chest visual
-		/*00224*/ EquipStruct equip_arms; // Equiptment: Arms visual
-		/*00244*/ EquipStruct equip_bracers; // Equiptment: Wrist visual
-		/*00264*/ EquipStruct equip_hands; // Equiptment: Hands visual
-		/*00284*/ EquipStruct equip_legs; // Equiptment: Legs visual
-		/*00304*/ EquipStruct equip_feet; // Equiptment: Boots visual
-		/*00324*/ EquipStruct equip_primary; // Equiptment: Main visual
-		/*00344*/ EquipStruct equip_secondary; // Equiptment: Off visual
+		/*00184*/ EquipStruct equip_helmet;		// Equipment: Helmet visual
+		/*00204*/ EquipStruct equip_chest;		// Equipment: Chest visual
+		/*00224*/ EquipStruct equip_arms;		// Equipment: Arms visual
+		/*00244*/ EquipStruct equip_bracers;	// Equipment: Wrist visual
+		/*00264*/ EquipStruct equip_hands;		// Equipment: Hands visual
+		/*00284*/ EquipStruct equip_legs;		// Equipment: Legs visual
+		/*00304*/ EquipStruct equip_feet;		// Equipment: Boots visual
+		/*00324*/ EquipStruct equip_primary;	// Equipment: Main visual
+		/*00344*/ EquipStruct equip_secondary;	// Equipment: Off visual
 		// Below slots are just guesses, but all 0s anyway...
-		/*00364*/ EquipStruct equip_charm; // Equiptment: Non-visual
-		/*00384*/ EquipStruct equip_ear1; // Equiptment: Non-visual
-		/*00404*/ EquipStruct equip_ear2; // Equiptment: Non-visual
-		/*00424*/ EquipStruct equip_face; // Equiptment: Non-visual
-		/*00444*/ EquipStruct equip_neck; // Equiptment: Non-visual
-		/*00464*/ EquipStruct equip_shoulder; // Equiptment: Non-visual
-		/*00484*/ EquipStruct equip_bracer2; // Equiptment: Non-visual
-		/*00504*/ EquipStruct equip_range; // Equiptment: Non-visual
-		/*00524*/ EquipStruct equip_ring1; // Equiptment: Non-visual
-		/*00544*/ EquipStruct equip_ring2; // Equiptment: Non-visual
-		/*00564*/ EquipStruct equip_waist; // Equiptment: Non-visual
-		/*00584*/ EquipStruct equip_powersource; // Equiptment: Non-visual
-		/*00604*/ EquipStruct equip_ammo; // Equiptment: Non-visual
+		/*00364*/ EquipStruct equip_charm;		// Equipment: Non-visual
+		/*00384*/ EquipStruct equip_ear1;		// Equipment: Non-visual
+		/*00404*/ EquipStruct equip_ear2;		// Equipment: Non-visual
+		/*00424*/ EquipStruct equip_face;		// Equipment: Non-visual
+		/*00444*/ EquipStruct equip_neck;		// Equipment: Non-visual
+		/*00464*/ EquipStruct equip_shoulder;	// Equipment: Non-visual
+		/*00484*/ EquipStruct equip_bracer2;	// Equipment: Non-visual
+		/*00504*/ EquipStruct equip_range;		// Equipment: Non-visual
+		/*00524*/ EquipStruct equip_ring1;		// Equipment: Non-visual
+		/*00544*/ EquipStruct equip_ring2;		// Equipment: Non-visual
+		/*00564*/ EquipStruct equip_waist;		// Equipment: Non-visual
+		/*00584*/ EquipStruct equip_powersource;// Equipment: Non-visual
+		/*00604*/ EquipStruct equip_ammo;		// Equipment: Non-visual
 	} equip;
-	/*00184*/ EquipStruct equipment[22];
+	/*00184*/ EquipStruct equipment[22];		// Total Slots
 };
 /*00624*/ uint32 equip2_count;			// Seen 9
-/*00628*/ EquipStruct equipment2[9];	// Appears to be Visible slots, but all 0s
+/*00628*/ EquipStruct equipment2[_MaterialCount];	// Appears to be Visible slots, but all 0s
 /*00808*/ uint32 tint_count;			// Seen 9
-/*00812*/ Color_Struct item_tint[9];	// RR GG BB 00
+/*00812*/ Color_Struct item_tint[_MaterialCount];	// RR GG BB 00
 /*00848*/ uint32 tint_count2;			// Seen 9
-/*00852*/ Color_Struct item_tint2[9];	// RR GG BB 00
+/*00852*/ Color_Struct item_tint2[_MaterialCount];	// RR GG BB 00
 /*00888*/ uint8   haircolor;			// Player hair color
 /*00889*/ uint8   beardcolor;			// Player beard color
 /*00890*/ uint32 unknown_rof5;			//
@@ -4504,10 +4501,10 @@ struct ItemBodyStruct
 	uint32 Prestige;	// New to March 21 2012 client
 	uint8 ItemType;
 	uint32 Material;
-	uint32 unknown7;
+	uint32 MaterialUnknown1;
 	uint32 EliteMaterial;
-	uint32 unknown_RoF23;	// New to March 21 2012 client
-	uint32 unknown_RoF24;	// New to December 10th 2012 client - NEW
+	uint32 HerosForgeModel;		// New to March 21 2012 client
+	uint32 MaterialUnknown2;	// New to December 10th 2012 client - NEW
 	float  SellRate;
 	int32 CombatEffects;
 	int32 Shielding;

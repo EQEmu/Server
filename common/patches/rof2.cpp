@@ -2874,12 +2874,12 @@ namespace RoF2
 				eq2->face = emu->face[r];
 				int k;
 				for (k = 0; k < _MaterialCount; k++) {
-					eq2->equip[k].equip0 = emu->equip[r][k];
-					eq2->equip[k].equip1 = 0;
-					eq2->equip[k].equip2 = 0;
-					eq2->equip[k].itemid = 0;
-					eq2->equip[k].equip3 = emu->equip[r][k];
-					eq2->equip[k].color.color = emu->cs_colors[r][k].color;
+					eq2->equip[k].material = emu->equip[r][k].material;
+					eq2->equip[k].unknown1 = emu->equip[r][k].unknown1;
+					eq2->equip[k].elitematerial = emu->equip[r][k].elitematerial;
+					eq2->equip[k].heroforgemodel = emu->equip[r][k].heroforgemodel;
+					eq2->equip[k].material2 = emu->equip[r][k].material2;
+					eq2->equip[k].color.color = emu->equip[r][k].color.color;
 				}
 				eq2->u15 = 0xff;
 				eq2->u19 = 0xFF;
@@ -3706,7 +3706,7 @@ namespace RoF2
 			Bitfields->showhelm = emu->showhelm;
 			Bitfields->trader = 0;
 			Bitfields->targetable = 1;
-			Bitfields->targetable_with_hotkey = (emu->IsMercenary ? 0 : 1);
+			Bitfields->targetable_with_hotkey = emu->targetable_with_hotkey ? 1 : 0;
 			Bitfields->showname = ShowName;
 
 			// Not currently found
@@ -3813,11 +3813,11 @@ namespace RoF2
 				structs::EquipStruct *Equipment = (structs::EquipStruct *)Buffer;
 
 				for (k = 0; k < 9; k++) {
-					Equipment[k].equip0 = emu->equipment[k];
-					Equipment[k].equip1 = 0;
-					Equipment[k].equip2 = 0;
-					Equipment[k].equip3 = 0;
-					Equipment[k].itemId = 0;
+					Equipment[k].material = emu->equipment[k].material;
+					Equipment[k].unknown1 = emu->equipment[k].unknown1;
+					Equipment[k].elitematerial = emu->equipment[k].elitematerial;
+					Equipment[k].material2 = emu->equipment[k].heroforgemodel;
+					Equipment[k].elitematerial = emu->equipment[k].material2;
 				}
 
 				Buffer += (sizeof(structs::EquipStruct) * 9);
@@ -3830,13 +3830,13 @@ namespace RoF2
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialPrimary]);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialPrimary].material);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialSecondary]);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialSecondary].material);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
@@ -4919,7 +4919,7 @@ namespace RoF2
 		hdrf.unknowna5 = 0;
 		hdrf.ItemClass = item->ItemClass;
 		ss.write((const char*)&hdrf, sizeof(RoF2::structs::ItemSerializationHeaderFinish));
-		
+
 		if (strlen(item->Name) > 0)
 		{
 			ss.write(item->Name, strlen(item->Name));
@@ -5021,10 +5021,10 @@ namespace RoF2
 		ibs.Prestige = 0;
 		ibs.ItemType = item->ItemType;
 		ibs.Material = item->Material;
-		ibs.unknown7 = 0;
+		ibs.MaterialUnknown1 = 0;
 		ibs.EliteMaterial = item->EliteMaterial;
-		ibs.unknown_RoF23 = 0;
-		ibs.unknown_RoF24 = 0;
+		ibs.HerosForgeModel = item->HerosForgeModel;
+		ibs.MaterialUnknown2 = 0;
 		ibs.SellRate = item->SellRate;
 		ibs.CombatEffects = item->CombatEffects;
 		ibs.Shielding = item->Shielding;

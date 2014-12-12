@@ -143,7 +143,7 @@ struct Item_Struct {
 	uint8	Delay;			// Delay * 10
 	uint8	RecLevel;		// Recommended level to use item
 	uint8	RecSkill;		// Recommended skill to use item (refers to primary skill of item)
-	uint8	ElemDmgType;		// Elemental Damage Type (1=magic, 2=fire)
+	uint8	ElemDmgType;	// Elemental Damage Type (1=magic, 2=fire)
 	uint8	ElemDmgAmt;		// Elemental Damage
 	uint8	Range;			// Range of item
 	uint32	Damage;			// Delay between item usage (in 0.1 sec increments)
@@ -154,6 +154,7 @@ struct Item_Struct {
 	int16	MaxCharges;		// Maximum charges items can hold: -1 if not a chargeable item
 	uint8	ItemType;		// Item Type/Skill (itemClass* from above)
 	uint8	Material;		// Item material type
+	uint32	HerosForgeModel;// Hero's Forge Armor Model Type (2-13?)
 	float	SellRate;		// Sell rate
 	//uint32	Unk059;
 	union {
