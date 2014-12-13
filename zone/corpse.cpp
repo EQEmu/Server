@@ -1428,7 +1428,7 @@ void Corpse::Spawn() {
 }
 
 uint32 Corpse::GetEquipment(uint8 material_slot) const {
-	int invslot;
+	int16 invslot;
 
 	if(material_slot > EmuConstants::MATERIAL_END) {
 		return NO_ITEM;

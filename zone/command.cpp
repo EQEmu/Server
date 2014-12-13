@@ -153,6 +153,8 @@ int command_init(void) {
 		command_add("version","- Display current version of EQEmu server",0,command_version) ||
 		command_add("setfaction","[faction number] - Sets targeted NPC's faction in the database",170,command_setfaction) ||
 		command_add("wc","[wear slot] [material] - Sends an OP_WearChange for your target",200,command_wc) ||
+		command_add("heromodel", "[hero model] [slot] - Full set of Hero's Forge Armor appearance. If slot is set, sends exact model just to slot.", 200, command_heromodel) ||
+		command_add("hm", "[hero model] [slot] - Full set of Hero's Forge Armor appearance. If slot is set, sends exact model just to slot.)", 200, command_heromodel) ||
 		command_add("setanim","[animnum] - Set target's appearance to animnum",200,command_setanim) ||
 		command_add("connectworldserver","- Make zone attempt to connect to worldserver",200,command_connectworldserver) ||
 		command_add("connectworld",nullptr,0,command_connectworldserver) ||
@@ -784,6 +786,47 @@ void command_wc(Client *c, const Seperator *sep)
 			Color = c->GetTarget()->GetArmorTint(atoi(sep->arg[1]));
 		*/
 		c->GetTarget()->SendTextureWC(wearslot, atoi(sep->arg[2]), hero_forge_model, atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]));
+	}
+}
+
+void command_heromodel(Client *c, const Seperator *sep)
+{
+	if (sep->argnum < 1)
+	{
+		c->Message(0, "Usage: #heromodel [hero forge model] [ [slot] ] (example: #heromodel 63)");
+	}
+	else if (c->GetTarget() == nullptr)
+	{
+		c->Message(13, "You must have a target to do a wear change for Hero's Forge Models.");
+	}
+	else
+	{
+		uint32 hero_forge_model = atoi(sep->arg[1]);
+
+		if (sep->argnum > 1)
+		{
+			uint8 wearslot = (uint8)atoi(sep->arg[2]);
+			c->GetTarget()->SendTextureWC(wearslot, 0, hero_forge_model, 0, 0, 0);
+		}
+		else
+		{
+			if (hero_forge_model > 0)
+			{
+				// Conversion to simplify the command arguments
+				// Hero's Forge model is actually model * 1000 + texture * 100 + wearslot
+				// Hero's Forge Model slot 7 is actually for Robes, but it still needs to use wearslot 1 in the packet
+				hero_forge_model *= 100;
+
+				for (uint8 wearslot = 0; wearslot < 7; wearslot++)
+				{
+					c->GetTarget()->SendTextureWC(wearslot, 0, (hero_forge_model + wearslot), 0, 0, 0);
+				}
+			}
+			else
+			{
+				c->Message(13, "Hero's Forge Model must be greater than 0.");
+			}
+		}
 	}
 }
 

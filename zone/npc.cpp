@@ -1322,11 +1322,14 @@ int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 	if (material_slot >= _MaterialCount)
 		return 0;
 
-	int inv_slot = Inventory::CalcSlotFromMaterial(material_slot);
-	if (inv_slot == -1)
+	int16 invslot = Inventory::CalcSlotFromMaterial(material_slot);
+	if (invslot == INVALID_INDEX)
 		return 0;
-	if(equipment[inv_slot] == 0) {
-		switch(material_slot) {
+
+	if (equipment[invslot] == 0)
+	{
+		switch(material_slot)
+		{
 		case MaterialHead:
 			return helmtexture;
 		case MaterialChest:
@@ -1342,7 +1345,7 @@ int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 	}
 
 	//they have some loot item in this slot, pass it up to the default handler
-	return(Mob::GetEquipmentMaterial(material_slot));
+	return (Mob::GetEquipmentMaterial(material_slot));
 }
 
 uint32 NPC::GetMaxDamage(uint8 tlevel)

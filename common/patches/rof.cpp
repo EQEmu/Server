@@ -3812,8 +3812,8 @@ namespace RoF
 					Equipment[k].material = emu->equipment[k].material;
 					Equipment[k].unknown1 = emu->equipment[k].unknown1;
 					Equipment[k].elitematerial = emu->equipment[k].elitematerial;
-					Equipment[k].material2 = emu->equipment[k].heroforgemodel;
-					Equipment[k].elitematerial = emu->equipment[k].material2;
+					Equipment[k].heroforgemodel = emu->equipment[k].heroforgemodel;
+					Equipment[k].material2 = emu->equipment[k].material2;
 				}
 
 				Buffer += (sizeof(structs::EquipStruct) * 9);
@@ -4847,7 +4847,6 @@ namespace RoF
 		hdr.main_slot = (merchant_slot == 0) ? slot_id.MainSlot : merchant_slot;
 		hdr.sub_slot = (merchant_slot == 0) ? slot_id.SubSlot : 0xffff;
 		hdr.unknown013 = (merchant_slot == 0) ? slot_id.AugSlot : 0xffff;
-		//hdr.unknown013 = 0xffff;
 		hdr.price = inst->GetPrice();
 		hdr.merchant_slot = (merchant_slot == 0) ? 1 : inst->GetMerchantCount();
 		//hdr.merchant_slot = (merchant_slot == 0) ? 1 : 0xffffffff;
@@ -4877,6 +4876,8 @@ namespace RoF
 		}
 		//ORNAMENT IDFILE / ICON
 		uint16 ornaIcon = 0;
+		int32 heroModel = 0;
+		/*
 		if (inst->GetOrnamentationAug(ornamentationAugtype)) {
 			const Item_Struct *aug_weap = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
 			//Mainhand
@@ -4887,8 +4888,16 @@ namespace RoF
 			ss.write((const char*)&null_term, sizeof(uint8));
 			//Icon
 			ornaIcon = aug_weap->Icon;
+			if (aug_weap->HerosForgeModel > 0)
+			{
+				heroModel = (aug_weap->HerosForgeModel * 100) + Inventory::CalcMaterialFromSlot(slot_id_in);
+			}
 		}
-		else if (inst->GetOrnamentationIDFile() && inst->GetOrnamentationIcon()) {
+		else 
+		*/
+
+		if (inst->GetOrnamentationIDFile() && inst->GetOrnamentationIcon())
+		{
 			char tmp[30]; memset(tmp, 0x0, 30); sprintf(tmp, "IT%d", inst->GetOrnamentationIDFile());
 			//Mainhand
 			ss.write(tmp, strlen(tmp));
@@ -4897,10 +4906,12 @@ namespace RoF
 			ss.write(tmp, strlen(tmp));
 			ss.write((const char*)&null_term, sizeof(uint8));
 			ornaIcon = inst->GetOrnamentationIcon();
+			heroModel = inst->GetOrnamentHeroModel(Inventory::CalcMaterialFromSlot(slot_id_in));
 		}
-		else {
-			ss.write((const char*)&null_term, sizeof(uint8)); //no mh
-			ss.write((const char*)&null_term, sizeof(uint8));//no of
+		else
+		{
+			ss.write((const char*)&null_term, sizeof(uint8)); // no main hand Ornamentation
+			ss.write((const char*)&null_term, sizeof(uint8)); // no off hand Ornamentation
 		}
 
 		RoF::structs::ItemSerializationHeaderFinish hdrf;
@@ -4908,12 +4919,13 @@ namespace RoF
 		hdrf.unknown061 = 0;
 		hdrf.unknown062 = 0;
 		hdrf.unknowna1 = 0xffffffff;
-		hdrf.unknowna2 = 0;
+		hdrf.ornamentHeroModel = heroModel;
 		hdrf.unknown063 = 0;
 		hdrf.unknowna3 = 0;
 		hdrf.unknowna4 = 0xffffffff;
 		hdrf.unknowna5 = 0;
 		hdrf.ItemClass = item->ItemClass;
+
 		ss.write((const char*)&hdrf, sizeof(RoF::structs::ItemSerializationHeaderFinish));
 		
 		if (strlen(item->Name) > 0)

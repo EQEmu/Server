@@ -3085,7 +3085,6 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 
 			uint16 slot_id = in_augment->container_slot;
 			uint16 aug_slot_id = in_augment->augment_slot;
-			//Message(13, "%i AugSlot", aug_slot_id);
 			if (slot_id == INVALID_INDEX || aug_slot_id == INVALID_INDEX)
 			{
 				Message(13, "Error: Invalid Aug Index.");
@@ -3101,6 +3100,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 					(tobe_auged->AvailableWearSlot(auged_with->GetItem()->Slots)))
 				{
 					tobe_auged->PutAugment(in_augment->augment_index, *auged_with);
+					tobe_auged->UpdateOrnamentationInfo();
 
 					ItemInst *aug = tobe_auged->GetAugment(in_augment->augment_index);
 					if (aug) {
@@ -3123,15 +3123,16 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 					{
 						DeleteItemInInventory(slot_id, 0, true);
 						DeleteItemInInventory(MainCursor, 0, true);
+						
 						if (PutItemInInventory(slot_id, *itemOneToPush, true))
 						{
 							CalcBonuses();
-							//Message(13, "Sucessfully added an augment to your item!");
+							// Successfully added an augment to the item
 							return;
 						}
 						else
 						{
-							Message(13, "Error: No available slot for end result. Please free up some bag space.");
+							Message(13, "Error: No available slot for end result. Please free up the augment slot.");
 						}
 					}
 					else
@@ -3185,6 +3186,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 				return;
 			}
 			old_aug = tobe_auged->RemoveAugment(in_augment->augment_index);
+			tobe_auged->UpdateOrnamentationInfo();
 
 			itemOneToPush = tobe_auged->Clone();
 			if (old_aug)
@@ -3193,9 +3195,10 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 			{
 				DeleteItemInInventory(slot_id, 0, true);
 				DeleteItemInInventory(aug_slot_id, auged_with->IsStackable() ? 1 : 0, true);
+
 				if (!PutItemInInventory(slot_id, *itemOneToPush, true))
 				{
-					Message(15, "Shouldn't happen, contact an admin!");
+					Message(15, "Failed to remove augment properly!");
 				}
 
 				if (PutItemInInventory(MainCursor, *itemTwoToPush, true))
@@ -8031,17 +8034,15 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app)
 		item = inst ? inst->GetItem() : nullptr;
 
 		if (item) {
+			strcpy(insr->itemnames[L], item->Name);
 			if (inst && inst->GetOrnamentationAug(ornamentationAugtype)) {
-				const Item_Struct *aug_weap = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
-				strcpy(insr->itemnames[L], item->Name);
-				insr->itemicons[L] = aug_weap->Icon;
+				const Item_Struct *aug_item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
+				insr->itemicons[L] = aug_item->Icon;
 			}
-			else if (inst->GetOrnamentationIcon() && inst->GetOrnamentationIDFile()) {
-				strcpy(insr->itemnames[L], item->Name);
+			else if (inst->GetOrnamentationIcon()) {
 				insr->itemicons[L] = inst->GetOrnamentationIcon();
 			}
 			else {
-				strcpy(insr->itemnames[L], item->Name);
 				insr->itemicons[L] = item->Icon;
 			}
 		}

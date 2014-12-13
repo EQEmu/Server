@@ -76,6 +76,7 @@ void command_serversidename(Client *c, const Seperator *sep);
 void command_testspawnkill(Client *c, const Seperator *sep);
 void command_testspawn(Client *c, const Seperator *sep);
 void command_wc(Client *c, const Seperator *sep);
+void command_heromodel(Client *c, const Seperator *sep);
 void command_numauths(Client *c, const Seperator *sep);
 void command_setanim(Client *c, const Seperator *sep);
 void command_connectworldserver(Client *c, const Seperator *sep);

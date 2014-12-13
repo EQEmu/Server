@@ -189,7 +189,7 @@ bool Client::CheckLoreConflict(const Item_Struct* item) {
 	return (m_inv.HasItemByLoreGroup(item->LoreGroup, ~invWhereSharedBank) != INVALID_INDEX);
 }
 
-bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile) {
+bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile, uint32 ornament_hero_model) {
 	this->EVENT_ITEM_ScriptStopReturn();
 
 	// TODO: update calling methods and script apis to handle a failure return
@@ -548,10 +548,9 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	if(attuned && inst->GetItem()->Attuneable)
 		inst->SetInstNoDrop(true);
 		
-	if(ornament_icon > 0 && ornament_idfile > 0) {
-		inst->SetOrnamentIcon(ornament_icon);
-		inst->SetOrnamentationIDFile(ornament_idfile);
-	}
+	inst->SetOrnamentIcon(ornament_icon);
+	inst->SetOrnamentationIDFile(ornament_idfile);
+	inst->SetOrnamentHeroModel(ornament_hero_model);
 
 	// check to see if item is usable in requested slot
 	if(enforceusable && (((to_slot >= MainCharm) && (to_slot <= MainAmmo)) || (to_slot == MainPowerSource))) {
@@ -581,11 +580,13 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	if((RuleB(Character, EnableDiscoveredItems)) && !GetGM()) {
 		if(!IsDiscovered(item_id))
 			DiscoverItem(item_id);
-
+		/*
+		// Augments should have been discovered prior to being placed on an item.
 		for (int iter = AUG_BEGIN; iter < EmuConstants::ITEM_COMMON_SIZE; ++iter) {
 			if(augments[iter] && !IsDiscovered(augments[iter]))
 				DiscoverItem(augments[iter]);
 		}
+		*/
 	}
 
 	return true;
@@ -819,7 +820,11 @@ bool Client::PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client
 		m_inv.PutItem(slot_id, inst);
 
 	if (client_update)
+	{
 		SendItemPacket(slot_id, &inst, ((slot_id == MainCursor) ? ItemPacketSummonItem : ItemPacketTrade));
+		//SendWearChange(Inventory::CalcMaterialFromSlot(slot_id));
+	}
+		
 
 	if (slot_id == MainCursor) {
 		std::list<ItemInst*>::const_iterator s = m_inv.cursor_begin(), e = m_inv.cursor_end();
@@ -2292,7 +2297,7 @@ void Client::MoveSlotNotAllowed(bool client_update) {
 // these functions operate with a material slot, which is from 0 to 8
 uint32 Client::GetEquipment(uint8 material_slot) const
 {
-	int invslot;
+	int16 invslot;
 	const ItemInst *item;
 
 	if(material_slot > EmuConstants::MATERIAL_END)
@@ -2301,7 +2306,7 @@ uint32 Client::GetEquipment(uint8 material_slot) const
 	}
 
 	invslot = Inventory::CalcSlotFromMaterial(material_slot);
-	if(invslot == -1)
+	if (invslot == INVALID_INDEX)
 	{
 		return 0;
 	}

@@ -154,18 +154,11 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 		}
 		/* Bind End */
 
-		/*
-			Character's equipped items
-			@merth: Haven't done bracer01/bracer02 yet.
-			Also: this needs a second look after items are a little more solid
-			NOTE: items don't have a color, players MAY have a tint, if the
-			use_tint part is set. otherwise use the regular color
-		*/
-
 		/* Load Character Material Data for Char Select */
 		cquery = StringFormat("SELECT slot, red, green, blue, use_tint, color FROM `character_material` WHERE `id` = %u", character_id);
 		auto results_b = database.QueryDatabase(cquery); uint8 slot = 0;
-		for (auto row_b = results_b.begin(); row_b != results_b.end(); ++row_b) {
+		for (auto row_b = results_b.begin(); row_b != results_b.end(); ++row_b)
+		{
 			slot = atoi(row_b[0]);
 			pp.item_tint[slot].rgb.red = atoi(row_b[1]);
 			pp.item_tint[slot].rgb.green = atoi(row_b[2]);
@@ -175,53 +168,70 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 
 		/* Load Inventory */
 		inv = new Inventory;
-		if (GetInventory(account_id, cs->name[char_num], inv)) {
-			for (uint8 material = 0; material <= 8; material++) {
-				uint32 color = 0;
-				ItemInst *item = inv->GetItem(Inventory::CalcSlotFromMaterial(material));
-				if (item == 0)
-					continue;
+		if (GetInventory(account_id, cs->name[char_num], inv))
+		{
+			const Item_Struct* item = nullptr;
+			const ItemInst* inst = nullptr;
+			int16 invslot = 0;
 
-				cs->equip[char_num][material].material = item->GetItem()->Material;
-				cs->equip[char_num][material].material = 0;
-				cs->equip[char_num][material].elitematerial = item->GetItem()->EliteMaterial;
-				cs->equip[char_num][material].heroforgemodel = item->GetItem()->HerosForgeModel;
-				cs->equip[char_num][material].material2 = item->GetItem()->Material;
+			for (uint32 matslot = 0; matslot < _MaterialCount; matslot++)
+			{
+				invslot = Inventory::CalcSlotFromMaterial(matslot);
+				if (invslot == INVALID_INDEX) { continue; }
 
-				if (pp.item_tint[material].rgb.use_tint){ color = pp.item_tint[material].color; }
-				else{ color = item->GetItem()->Color; }
+				inst = inv->GetItem(invslot);
+				if (inst == nullptr) { continue; }
 
-				cs->equip[char_num][material].color.color = color;
+				item = inst->GetItem();
+				if (item == nullptr) { continue; }
 
-				/* Weapons are handled a bit differently */
-				if ((material == MaterialPrimary) || (material == MaterialSecondary)) {
-					if (strlen(item->GetItem()->IDFile) > 2) {
-						int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-						uint32 idfile;
-						if (item->GetOrnamentationAug(ornamentationAugtype)) {
-							idfile = atoi(&item->GetOrnamentationAug(ornamentationAugtype)->GetItem()->IDFile[2]);
-						}
-						else if (item->GetOrnamentationIcon() && item->GetOrnamentationIDFile()) {
-							idfile = item->GetOrnamentationIDFile();
-						}
-						else {
-							idfile = atoi(&item->GetItem()->IDFile[2]);
-						}
-
-						if (material == MaterialPrimary)
-							cs->primary[char_num] = idfile;
-						else
-							cs->secondary[char_num] = idfile;
+				if (matslot > 6)
+				{
+					uint32 idfile = 0;
+					// Weapon Models 
+					if (inst->GetOrnamentationIDFile() != 0)
+					{
+						idfile = inst->GetOrnamentationIDFile();
+						cs->equip[char_num][matslot].material = idfile;
 					}
+					else
+					{
+						if (strlen(item->IDFile) > 2)
+						{
+							idfile = atoi(&item->IDFile[2]);
+							cs->equip[char_num][matslot].material = idfile;
+						}
+					}
+					if (matslot == MaterialPrimary)
+					{
+						cs->primary[char_num] = idfile;
+					}
+					else
+					{
+						cs->secondary[char_num] = idfile;
+					}
+				}
+				else
+				{
+					// Armor Materials/Models
+					cs->equip[char_num][matslot].material = item->Material;
+					cs->equip[char_num][matslot].elitematerial = item->EliteMaterial;
+					cs->equip[char_num][matslot].heroforgemodel = inst->GetOrnamentHeroModel(matslot);
+					cs->equip[char_num][matslot].color.color = inst->GetColor();
 				}
 			}
 		}
-		else {
+		else
+		{
 			printf("Error loading inventory for %s\n", cs->name[char_num]);
 		}
+
 		safe_delete(inv);
+
 		if (++char_num > 10)
+		{
 			break;
+		}
 	}
 
 	return;

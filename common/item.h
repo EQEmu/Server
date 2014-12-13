@@ -329,7 +329,8 @@ public:
 	void DeleteAugment(uint8 slot);
 	ItemInst* RemoveAugment(uint8 index);
 	bool IsAugmented();
-	ItemInst* GetOrnamentationAug(int ornamentationAugtype) const;
+	ItemInst* GetOrnamentationAug(int32 ornamentationAugtype) const;
+	bool UpdateOrnamentationInfo();
 	static bool CanTransform(const Item_Struct *ItemToTry, const Item_Struct *Container, bool AllowAll = false);
 	
 	// Has attack/delay?
@@ -393,10 +394,12 @@ public:
 	void SetActivated(bool activated)	{ m_activated = activated; }
 	int8 GetEvolveLvl() const			{ return m_evolveLvl; }
 	void SetScaling(bool v)				{ m_scaling = v; }
-	uint32 GetOrnamentationIcon() const					{ return m_ornamenticon; }
-	void SetOrnamentIcon(uint32 ornament_icon)  		{ m_ornamenticon = ornament_icon; }
-	uint32 GetOrnamentationIDFile() const 				{ return m_ornamentidfile; }
-	void SetOrnamentationIDFile(uint32 ornament_idfile) { m_ornamentidfile = ornament_idfile; }
+	uint32 GetOrnamentationIcon() const							{ return m_ornamenticon; }
+	void SetOrnamentIcon(uint32 ornament_icon)					{ m_ornamenticon = ornament_icon; }
+	uint32 GetOrnamentationIDFile() const						{ return m_ornamentidfile; }
+	void SetOrnamentationIDFile(uint32 ornament_idfile)			{ m_ornamentidfile = ornament_idfile; }
+	uint32 GetOrnamentHeroModel(int32 material_slot = -1) const;
+	void SetOrnamentHeroModel(uint32 ornament_hero_model)		{ m_ornament_hero_model = ornament_hero_model; }
 
 	void Initialize(SharedDatabase *db = nullptr);
 	void ScaleItem();
@@ -443,6 +446,7 @@ protected:
 	bool				m_scaling;
 	uint32				m_ornamenticon;
 	uint32				m_ornamentidfile;
+	uint32				m_ornament_hero_model;
 
 	//
 	// Items inside of this item (augs or contents);

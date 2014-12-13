@@ -199,14 +199,15 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, i
 	// Update/Insert item
     std::string query = StringFormat("REPLACE INTO inventory "
                                     "(charid, slotid, itemid, charges, instnodrop, custom_data, color, "
-                                    "augslot1, augslot2, augslot3, augslot4, augslot5, ornamenticon, ornamentidfile) "
+                                    "augslot1, augslot2, augslot3, augslot4, augslot5, ornamenticon, ornamentidfile, ornament_hero_model) "
                                     "VALUES( %lu, %lu, %lu, %lu, %lu, '%s', %lu, "
-                                    "%lu, %lu, %lu, %lu, %lu, %lu, %lu)",
+                                    "%lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu)",
                                     (unsigned long)char_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID,
                                     (unsigned long)charges, (unsigned long)(inst->IsInstNoDrop()? 1: 0),
                                     inst->GetCustomDataString().c_str(), (unsigned long)inst->GetColor(),
                                     (unsigned long)augslot[0], (unsigned long)augslot[1], (unsigned long)augslot[2],
-                                    (unsigned long)augslot[3],(unsigned long)augslot[4], (unsigned long)inst->GetOrnamentationIcon(), (unsigned long)inst->GetOrnamentationIDFile());
+                                    (unsigned long)augslot[3],(unsigned long)augslot[4], (unsigned long)inst->GetOrnamentationIcon(), 
+									(unsigned long)inst->GetOrnamentationIDFile(), (unsigned long)inst->GetOrnamentHeroModel());
 	auto results = QueryDatabase(query);
 
     // Save bag contents, if slot supports bag contents
@@ -488,7 +489,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
 bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
 	// Retrieve character inventory
 	std::string query = StringFormat("SELECT slotid, itemid, charges, color, augslot1, "
-                                    "augslot2, augslot3, augslot4, augslot5, instnodrop, custom_data, ornamenticon, ornamentidfile "
+                                    "augslot2, augslot3, augslot4, augslot5, instnodrop, custom_data, ornamenticon, ornamentidfile, ornament_hero_model "
                                     "FROM inventory WHERE charid = %i ORDER BY slotid", char_id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
@@ -515,6 +516,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
 
 		uint32 ornament_icon = (uint32)atoul(row[11]);
 		uint32 ornament_idfile = (uint32)atoul(row[12]);
+		uint32 ornament_hero_model = (uint32)atoul(row[13]);
 
         const Item_Struct* item = GetItem(item_id);
 
@@ -552,11 +554,10 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
                     value.push_back(v);
             }
         }
-		if (ornament_icon > 0)
-			inst->SetOrnamentIcon(ornament_icon);
 
-		if (ornament_idfile > 0)
-			inst->SetOrnamentationIDFile(ornament_idfile);
+		inst->SetOrnamentIcon(ornament_icon);
+		inst->SetOrnamentationIDFile(ornament_idfile);
+		inst->SetOrnamentHeroModel(ornament_hero_model);
 
         if (instnodrop || (((slot_id >= EmuConstants::EQUIPMENT_BEGIN && slot_id <= EmuConstants::EQUIPMENT_END) || slot_id == MainPowerSource) && inst->GetItem()->Attuneable))
             inst->SetInstNoDrop(true);
@@ -599,7 +600,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
 bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv) {
 	// Retrieve character inventory
 	std::string query = StringFormat("SELECT slotid, itemid, charges, color, augslot1, "
-                                    "augslot2, augslot3, augslot4, augslot5, instnodrop, custom_data, ornamenticon, ornamentidfile  "
+                                    "augslot2, augslot3, augslot4, augslot5, instnodrop, custom_data, ornamenticon, ornamentidfile, ornament_hero_model "
                                     "FROM inventory INNER JOIN character_data ch "
                                     "ON ch.id = charid WHERE ch.name = '%s' AND ch.account_id = %i ORDER BY slotid",
                                     name, account_id);
@@ -627,6 +628,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
         bool instnodrop	= (row[9] && (uint16)atoi(row[9])) ? true : false;
 		uint32 ornament_icon = (uint32)atoul(row[11]);
 		uint32 ornament_idfile = (uint32)atoul(row[12]);
+		uint32 ornament_hero_model = (uint32)atoul(row[13]);
 		
         const Item_Struct* item = GetItem(item_id);
         int16 put_slot_id = INVALID_INDEX;
@@ -663,11 +665,9 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
             }
         }
 		
-		if (ornament_icon > 0)
-			inst->SetOrnamentIcon(ornament_icon);
-
-		if (ornament_idfile > 0)
-			inst->SetOrnamentationIDFile(ornament_idfile);
+		inst->SetOrnamentIcon(ornament_icon);
+		inst->SetOrnamentationIDFile(ornament_idfile);
+		inst->SetOrnamentHeroModel(ornament_hero_model);
 
         if (color > 0)
             inst->SetColor(color);
@@ -854,23 +854,6 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
         item.ItemType = (uint8)atoi(row[ItemField::itemtype]);
 		item.Material = (uint8)atoi(row[ItemField::material]);
 		item.HerosForgeModel = (uint32)atoi(row[ItemField::herosforgemodel]);
-		if (item.HerosForgeModel > 0)
-		{
-			item.HerosForgeModel *= 100;
-			uint32 HeroSlot = 0;
-			switch (item.Slots)
-			{
-			case 4:			{ HeroSlot = 0; break; }  // Head
-			case 131072:	{ HeroSlot = 1; break; }  // Chest 
-			case 128:		{ HeroSlot = 2; break; }  // Arms
-			case 1536:		{ HeroSlot = 3; break; }  // Bracers
-			case 4096:		{ HeroSlot = 4; break; }  // Hands
-			case 262144:	{ HeroSlot = 5; break; }  // Legs
-			case 524288:	{ HeroSlot = 6; break; }  // Feet
-			default:		{ HeroSlot = 1; break; }  // Chest
-			}
-			item.HerosForgeModel += HeroSlot;
-		}
         item.SellRate = (float)atof(row[ItemField::sellrate]);
         item.CastTime = (uint32)atoul(row[ItemField::casttime]);
         item.EliteMaterial = (uint32)atoul(row[ItemField::elitematerial]);
@@ -1024,11 +1007,18 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 }
 
 const Item_Struct* SharedDatabase::GetItem(uint32 id) {
-	if(!items_hash || id > items_hash->max_key()) {
+	if (id == 0)
+	{
 		return nullptr;
 	}
 
-	if(items_hash->exists(id)) {
+	if(!items_hash || id > items_hash->max_key())
+	{
+		return nullptr;
+	}
+
+	if(items_hash->exists(id))
+	{
 		return &(items_hash->at(id));
 	}
 
