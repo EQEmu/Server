@@ -4429,7 +4429,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			{
 				if(strlen(item->IDFile) > 2)
 				{
-					ns->spawn.equipment[MaterialPrimary] = atoi(&item->IDFile[2]);
+					ns->spawn.equipment[MaterialPrimary].material = atoi(&item->IDFile[2]);
 				}
 				ns->spawn.colors[MaterialPrimary].color = GetEquipmentColor(MaterialPrimary);
 			}
@@ -4443,7 +4443,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			{
 				if(strlen(item->IDFile) > 2)
 				{
-					ns->spawn.equipment[MaterialSecondary] = atoi(&item->IDFile[2]);
+					ns->spawn.equipment[MaterialSecondary].material = atoi(&item->IDFile[2]);
 				}
 				ns->spawn.colors[MaterialSecondary].color = GetEquipmentColor(MaterialSecondary);
 			}
@@ -16040,7 +16040,7 @@ uint32 Bot::GetEquipmentColor(uint8 material_slot) const
 
 	//Translate code slot # to DB slot #
 	slotid = Inventory::CalcSlotFromMaterial(material_slot);
-	if(invslot == INVALID_INDEX) 
+	if (slotid == INVALID_INDEX)
 		return 0;
 
 	//read from db
