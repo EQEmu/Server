@@ -1483,9 +1483,28 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		m_pp.gm = 0;
 
 	/* Load Guild */
-	if (!IsInAGuild()) { m_pp.guild_id = GUILD_NONE; }
-	else {
+	if (!IsInAGuild()) {
+		m_pp.guild_id = GUILD_NONE;
+	} else {
 		m_pp.guild_id = GuildID();
+		uint8 rank = guild_mgr.GetDisplayedRank(GuildID(), GuildRank(), CharacterID());
+		// FIXME: RoF guild rank
+		if (GetClientVersion() >= EQClientRoF) {
+			switch (rank) {
+			case 0:
+				rank = 5;
+				break;
+			case 1:
+				rank = 3;
+				break;
+			case 2:
+				rank = 1;
+				break;
+			default:
+				break;
+			}
+		}
+		m_pp.guildrank = rank;
 		if (zone->GetZoneID() == RuleI(World, GuildBankZoneID))
 			GuildBanker = (guild_mgr.IsGuildLeader(GuildID(), CharacterID()) || guild_mgr.GetBankerFlag(CharacterID()));
 	}
