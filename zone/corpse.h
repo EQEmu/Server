@@ -22,7 +22,14 @@
 #include "mob.h"
 
 class Client;
+class EQApplicationPacket;
+class Group;
+class ItemInst;
 class NPC;
+class Raid;
+
+struct ExtraAttackOptions;
+struct NPCType;
 
 #define MAX_LOOTERS 72
 

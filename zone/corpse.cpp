@@ -20,12 +20,7 @@ New class for handeling corpses and everything associated with them.
 Child of the Mob class.
 -Quagmire
 */
-#include "../common/debug.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <iostream>
-#include <sstream>
+
 #ifdef _WINDOWS
     #define snprintf	_snprintf
 	#define vsnprintf	_vsnprintf
@@ -33,14 +28,26 @@ Child of the Mob class.
     #define strcasecmp	_stricmp
 #endif
 
-#include "masterentity.h"
-#include "../common/packet_functions.h"
+#include "../common/debug.h"
+#include "../common/rulesys.h"
 #include "../common/string_util.h"
-#include "../common/crc32.h"
+
+#include "client.h"
+#include "corpse.h"
+#include "entity.h"
+#include "groups.h"
+#include "mob.h"
+#include "raids.h"
+
+#ifdef BOTS
+#include "bot.h"
+#endif
+
+#include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "worldserver.h"
-#include "../common/rulesys.h"
-#include "quest_parser_collection.h"
+#include <iostream>
+
 
 extern EntityList entity_list;
 extern Zone* zone;
