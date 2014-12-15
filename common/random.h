@@ -33,31 +33,31 @@ namespace EQEmu {
 	class Random {
 	public:
 		// AKA old MakeRandomInt
-		const int Int(int low, int high)
+		int Int(int low, int high)
 		{
 			if (low > high)
 				std::swap(low, high);
-			return std::uniform_int_distribution<int>(low, high)(m_gen); // [low, high]
+			return int_dist(m_gen, int_param_t(low, high)); // [low, high]
 		}
 
 		// AKA old MakeRandomFloat
-		const double Real(double low, double high)
+		double Real(double low, double high)
 		{
 			if (low > high)
 				std::swap(low, high);
-			return std::uniform_real_distribution<double>(low, high)(m_gen); // [low, high)
+			return real_dist(m_gen, real_param_t(low, high)); // [low, high)
 		}
 
 		// example Roll(50) would have a 50% success rate
 		// Roll(100) 100%, etc
 		// valid values 0-100 (well, higher works too but ...)
-		const bool Roll(const int required)
+		bool Roll(const int required)
 		{
 			return Int(0, 99) < required;
 		}
 
 		// valid values 0.0 - 1.0
-		const bool Roll(const double required)
+		bool Roll(const double required)
 		{
 			return Real(0.0, 1.0) <= required;
 		}
@@ -76,7 +76,11 @@ namespace EQEmu {
 		}
 
 	private:
+		typedef std::uniform_int_distribution<int>::param_type int_param_t;
+		typedef std::uniform_real_distribution<double>::param_type real_param_t;
 		std::mt19937 m_gen;
+		std::uniform_int_distribution<int> int_dist;
+		std::uniform_real_distribution<double> real_dist;
 	};
 }
 
