@@ -18,14 +18,14 @@
 #ifndef GROUPS_H
 #define GROUPS_H
 
-#include "../common/types.h"
-#include "../common/linked_list.h"
-#include "../common/emu_opcodes.h"
 #include "../common/eq_packet_structs.h"
-#include "entity.h"
+#include "../common/types.h"
+
 #include "mob.h"
-#include "../common/features.h"
-#include "../common/servertalk.h"
+
+class Client;
+class EQApplicationPacket;
+class Mob;
 
 #define MAX_MARKED_NPCS 3
 
