@@ -5,6 +5,7 @@
 struct AA_Ability;
 struct SendAA_Struct;
 
+
 #define MANA_BURN 664
 
 #include <map>
