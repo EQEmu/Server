@@ -17,13 +17,13 @@
 */
 
 #include "../common/debug.h"
-#include "masterentity.h"
-#include "../common/item.h"
 #include "../common/linked_list.h"
 #include "../common/string_util.h"
-#include <math.h>
-#include <assert.h>
-#include "worldserver.h"
+
+#include "client.h"
+#include "entity.h"
+#include "horse.h"
+#include "mob.h"
 
 std::map<uint16, const NPCType *> Horse::horse_types;
 LinkedList<NPCType *> horses_auto_delete;

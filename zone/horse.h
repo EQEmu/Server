@@ -18,10 +18,14 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #ifndef HORSES_H
 #define HORSES_H
 
-#include "../common/debug.h"
 #include "npc.h"
 
 #include <map>
+
+class Client;
+class Mob;
+struct NPCType;
+struct NewSpawn_Struct;
 
 class Horse : public NPC {
 public:
