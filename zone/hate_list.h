@@ -19,6 +19,12 @@
 #ifndef HATELIST_H
 #define HATELIST_H
 
+class Client;
+class Group;
+class Mob;
+class Raid;
+struct ExtraAttackOptions;
+
 struct tHateEntry
 {
 	Mob *ent;
