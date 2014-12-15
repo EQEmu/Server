@@ -1,18 +1,21 @@
+
 #include "merc.h"
-#include "masterentity.h"
-#include "npc_ai.h"
-#include "../common/packet_dump.h"
+#include "client.h"
+#include "corpse.h"
+#include "entity.h"
+#include "groups.h"
+#include "mob.h"
+
 #include "../common/eq_packet_structs.h"
 #include "../common/eq_constants.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
+
 #include "zone.h"
 #include "string_ids.h"
-#include "../common/misc_functions.h"
+
 #include "../common/string_util.h"
 #include "../common/rulesys.h"
-#include "quest_parser_collection.h"
-#include "water_map.h"
 
 extern volatile bool ZoneLoaded;
 
