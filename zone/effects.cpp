@@ -15,20 +15,17 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "../common/debug.h"
-#include "masterentity.h"
+#include "../common/spdat.h"
+
+#include "client.h"
+#include "entity.h"
+#include "mob.h"
+
+#include "string_ids.h"
 #include "worldserver.h"
 #include "zonedb.h"
-#include "../common/spdat.h"
-#include "../common/packet_dump.h"
-#include "../common/packet_functions.h"
-#include "petitions.h"
-#include "../common/serverinfo.h"
-#include "../common/zone_numbers.h"
-#include "../common/moremath.h"
-#include "../common/guilds.h"
-#include "string_ids.h"
-#include "npc_ai.h"
 
 float Mob::GetActSpellRange(uint16 spell_id, float range, bool IsBard)
 {
