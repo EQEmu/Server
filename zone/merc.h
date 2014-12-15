@@ -1,8 +1,17 @@
 #ifndef MERC_H
 #define MERC_H
-#include "mob.h"
-#include "zonedb.h"
+
 #include "npc.h"
+
+class Client;
+class Corpse;
+class Group;
+class Mob;
+class Raid;
+struct Item_Struct;
+struct MercTemplate;
+struct NPCType;
+struct NewSpawn_Struct;
 
 #define MERC_DEBUG 0
 #define MAXMERCS 1
