@@ -31,7 +31,7 @@
 
 #include "../common/features.h"
 #include "../common/guilds.h"
-#include "../common/spdat.h"
+
 #include "guild_mgr.h"
 #include "net.h"
 #include "petitions.h"

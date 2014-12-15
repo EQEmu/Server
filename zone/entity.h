@@ -17,6 +17,7 @@
 */
 #ifndef ENTITY_H
 #define ENTITY_H
+
 #include <unordered_map>
 #include <queue>
 
@@ -26,26 +27,30 @@
 #include "../common/bodytypes.h"
 #include "../common/eq_constants.h"
 
-#include "zonedb.h"
 #include "zonedump.h"
-#include "qglobals.h"
 
-class EQApplicationPacket;
-
-class Client;
-class Mob;
-class NPC;
-class Merc;
-class Corpse;
 class Beacon;
-class Petition;
-class Object;
-class Group;
-class Raid;
+class Client;
+class Corpse;
 class Doors;
-class Trap;
+class EQApplicationPacket;
 class Entity;
 class EntityList;
+class Group;
+class Merc;
+class Mob;
+class NPC; 
+class Object;
+class Petition;
+class Raid;
+class Spawn2;
+class Trap;
+
+struct GuildBankItemUpdate_Struct;
+struct NewSpawn_Struct;
+struct QGlobal;
+struct UseAA_Struct;
+struct Who_All_Struct;
 
 #ifdef BOTS
 class Bot;
