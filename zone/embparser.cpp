@@ -1146,7 +1146,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 
 						temp_var_name = var_name;
 						temp_var_name += "_attuned";
-						ExportVar(package_name.c_str(), temp_var_name.c_str(), inst->IsInstNoDrop());
+						ExportVar(package_name.c_str(), temp_var_name.c_str(), inst->IsAttuned());
 					} else {
 						ExportVar(package_name.c_str(), var_name.c_str(), 0);
 

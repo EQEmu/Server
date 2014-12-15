@@ -2742,7 +2742,7 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app)
 			SetAlternateCurrencyValue(reclaim->currency_id, 0);
 		}
 		else {
-			SummonItem(item_id, reclaim->count, 0, 0, 0, 0, 0, false, MainCursor);
+			SummonItem(item_id, reclaim->count, 0, 0, 0, 0, 0, 0, false, MainCursor);
 			AddAlternateCurrencyValue(reclaim->currency_id, -((int32)reclaim->count));
 		}
 		/* QS: PlayerLogAlternateCurrencyTransactions :: Cursor to Item Storage */
@@ -6968,7 +6968,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 
 		const Item_Struct* CursorItem = CursorItemInst->GetItem();
 
-		if (!CursorItem->NoDrop || CursorItemInst->IsInstNoDrop())
+		if (!CursorItem->NoDrop || CursorItemInst->IsAttuned())
 		{
 			Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
 
@@ -8213,7 +8213,7 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 
 	}
 
-	ItemInst* inst = database.CreateItem(item, item->MaxCharges, ivrs->augments[0], ivrs->augments[1], ivrs->augments[2], ivrs->augments[3], ivrs->augments[4]);
+	ItemInst* inst = database.CreateItem(item, item->MaxCharges, ivrs->augments[0], ivrs->augments[1], ivrs->augments[2], ivrs->augments[3], ivrs->augments[4], ivrs->augments[5]);
 	if (inst) {
 		SendItemPacket(0, inst, ItemPacketViewLink);
 		safe_delete(inst);
@@ -8369,7 +8369,7 @@ void Client::Handle_OP_ItemPreview(const EQApplicationPacket *app)
 		}
 		outapp->WriteUInt32(0xFFFFFFFF); //Unknown but always seen as FF FF FF FF
 		outapp->WriteUInt32(0); //Unknown
-		for (spacer = 0; spacer < 5; spacer++) { //Augment stuff
+		for (spacer = 0; spacer < 6; spacer++) { //Augment stuff
 			outapp->WriteUInt32(item->AugSlotType[spacer]);
 			outapp->WriteUInt8(item->AugSlotVisible[spacer]);
 			outapp->WriteUInt8(item->AugSlotUnk2[spacer]);
