@@ -21,6 +21,9 @@
 
 #include <random>
 #include <utility>
+#include <algorithm>
+#include <iterator>
+#include <type_traits>
 
 /* This uses mt19937 seeded with the std::random_device
  * The idea is to have this be included as a member of another class
@@ -60,6 +63,16 @@ namespace EQEmu {
 		bool Roll(const double required)
 		{
 			return Real(0.0, 1.0) <= required;
+		}
+
+		// std::shuffle requires a RNG engine passed to it, so lets provide a wrapper to use our engine
+		template<typename RandomAccessIterator>
+		void Shuffle(RandomAccessIterator first, RandomAccessIterator last)
+		{
+			static_assert(std::is_same<std::random_access_iterator_tag,
+					typename std::iterator_traits<RandomAccessIterator>::iterator_category>::value,
+					"EQEmu::Random::Shuffle requires random access iterators");
+			std::shuffle(first, last, m_gen);
 		}
 
 		void Reseed()
