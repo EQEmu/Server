@@ -15,14 +15,15 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
-#include "guild_mgr.h"
-#include "zonedb.h"
-#include "worldserver.h"
+
 #include "../common/servertalk.h"
 #include "../common/string_util.h"
+
 #include "client.h"
 #include "entity.h"
+#include "guild_mgr.h"
+#include "worldserver.h"
+#include "zonedb.h"
 
 ZoneGuildManager guild_mgr;
 GuildBankManager *GuildBanks;
