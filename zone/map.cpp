@@ -1,15 +1,15 @@
 #include "../common/debug.h"
 #include "../common/misc_functions.h"
+
 #include "map.h"
 #include "raycast_mesh.h"
 #include "zone.h"
-#include <stdint.h>
+
 #include <algorithm>
-#include <locale>
-#include <vector>
+#include <map>
 #include <memory>
 #include <tuple>
-#include <map>
+#include <vector>
 #include <zlib.h>
 
 uint32 InflateData(const char* buffer, uint32 len, char* out_buffer, uint32 out_len_max) {
