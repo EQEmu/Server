@@ -15,24 +15,24 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "../common/debug.h"
-#include <iostream>
-#include <iomanip>
-#include <stdlib.h>
-#include <math.h>
-#include <algorithm>
-#include "npc.h"
-#include "masterentity.h"
-#include "npc_ai.h"
-#include "map.h"
-#include "../common/moremath.h"
-#include "string_ids.h"
-#include "../common/misc_functions.h"
-#include "../common/string_util.h"
-#include "../common/rulesys.h"
 #include "../common/features.h"
+#include "../common/rulesys.h"
+#include "../common/string_util.h"
+
+#include "client.h"
+#include "entity.h"
+#include "map.h"
+#include "mob.h"
+#include "npc.h"
 #include "quest_parser_collection.h"
+#include "string_ids.h"
 #include "water_map.h"
+
+#include <algorithm>
+#include <iostream>
+#include <math.h>
 
 extern EntityList entity_list;
 
