@@ -23,7 +23,6 @@
 #define ZONE_MAP_H
 
 #include <stdio.h>
-#include <string>
 
 #define BEST_Z_INVALID -99999
 
