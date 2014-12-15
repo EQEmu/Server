@@ -17,7 +17,17 @@
 */
 #ifndef CLIENT_H
 #define CLIENT_H
+
 class Client;
+class EQApplicationPacket;
+class EQStream;
+class Group;
+class NPC;
+class Object;
+class Raid;
+class Seperator;
+class ServerPacket;
+struct Item_Struct;
 
 #include "../common/timer.h"
 #include "../common/ptimer.h"
@@ -28,25 +38,21 @@ class Client;
 #include "../common/eq_packet.h"
 #include "../common/linked_list.h"
 #include "../common/extprofile.h"
-#include "../common/classes.h"
 #include "../common/races.h"
-#include "../common/deity.h"
 #include "../common/seperator.h"
 #include "../common/item.h"
 #include "../common/guilds.h"
 #include "../common/item_struct.h"
 #include "../common/clientversions.h"
 
-#include "common.h"
-#include "zonedb.h"
-#include "errno.h"
-#include "mob.h"
-#include "npc.h"
-#include "merc.h"
-#include "zone.h"
 #include "aa.h"
-#include "questmgr.h"
+#include "common.h"
+#include "merc.h"
+#include "mob.h"
 #include "qglobals.h"
+#include "questmgr.h"
+#include "zone.h"
+#include "zonedb.h"
 
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)
@@ -57,7 +63,6 @@ class Client;
 
 #include <float.h>
 #include <set>
-#include <string>
 #include <algorithm>
 
 
