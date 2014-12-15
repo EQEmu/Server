@@ -15,18 +15,20 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include <algorithm>
 
 #include "../common/debug.h"
 #include "../common/logsys.h"
-#include "../common/spdat.h"
 #include "../common/rulesys.h"
-#include "masterentity.h"
-#include "npc_ai.h"
-#include "petitions.h"
-#include "string_ids.h"
-#include "worldserver.h"
-#include "zonedb.h"
+#include "../common/spdat.h"
+
+#include "client.h"
+#include "mob.h"
+
+#ifdef BOTS
+#include "bot.h"
+#endif
+
+#include <algorithm>
 
 
 int32 Client::GetMaxStat() const {
