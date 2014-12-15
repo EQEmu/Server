@@ -16,17 +16,12 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "../common/debug.h"
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
-#include <cstdlib>
-
 #include "../common/rulesys.h"
-#include "../common/misc_functions.h"
+
 #include "map.h"
-#include "zone.h"
 #include "pathing.h"
+#include "zone.h"
+
 #ifdef _WINDOWS
 #define snprintf	_snprintf
 #endif
