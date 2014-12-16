@@ -16,19 +16,16 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "debug.h"
-#include "string_util.h"
-#include "item.h"
-#include "database.h"
-#include "misc.h"
-#include "races.h"
-#include "shareddb.h"
 #include "classes.h"
+#include "debug.h"
+#include "item.h"
+#include "races.h"
 #include "rulesys.h"
+#include "shareddb.h"
+#include "string_util.h"
 
 #include <limits.h>
 
-#include <sstream>
 #include <iostream>
 
 std::list<ItemInst*> dirty_inst;
