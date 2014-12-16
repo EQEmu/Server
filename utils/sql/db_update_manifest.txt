@@ -314,7 +314,7 @@
 9058|2014_11_26_InventoryTableUpdate.sql|SHOW COLUMNS FROM `inventory` LIKE 'ornamenticon'|empty|
 9059|2014_12_01_mercs_table_update.sql|SHOW COLUMNS FROM `mercs` LIKE 'MercSize'|empty|
 9060|2014_12_09_items_table_update.sql|SHOW COLUMNS FROM `items` LIKE 'herosforgemodel'|empty|
-9061|2014_12_11_inventory_table_update.sql|SHOW COLUMNS FROM `inventory` LIKE 'ornament_hero_model'|empty|
+9061|2014_12_13_inventory_table_update.sql|SHOW COLUMNS FROM `inventory` LIKE 'ornament_hero_model'|empty|
 9062|2014_12_15_multiple_table_updates.sql|SHOW COLUMNS FROM `items` LIKE 'augslot6type'|empty|
 
 # Upgrade conditions:
