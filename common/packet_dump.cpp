@@ -15,13 +15,12 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
+
 #include <iostream>
 #include <iomanip>
 #include <stdio.h>
 
 #include "packet_dump.h"
-#include "eq_packet.h"
 #include "../common/servertalk.h"
 
 void DumpPacketAscii(const uchar* buf, uint32 size, uint32 cols, uint32 skip) {
