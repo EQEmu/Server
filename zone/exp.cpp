@@ -30,6 +30,10 @@
 #include "quest_parser_collection.h"
 #include "string_ids.h"
 
+#ifdef BOTS
+#include "bot.h"
+#endif
+
 extern QueryServ* QServ;
 
 

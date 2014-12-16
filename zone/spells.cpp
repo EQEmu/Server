@@ -91,6 +91,10 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 	#include "../common/packet_dump_file.h"
 #endif
 
+#ifdef BOTS
+#include "bot.h"
+#endif
+
 
 
 extern Zone* zone;
