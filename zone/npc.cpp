@@ -1942,6 +1942,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 	else if(id == "special_attacks") { NPCSpecialAttacks(val.c_str(), 0, 1); return; }
 	else if(id == "special_abilities") { ProcessSpecialAbilities(val.c_str()); return; }
 	else if(id == "attack_speed") { attack_speed = (float)atof(val.c_str()); CalcBonuses(); return; }
+	else if(id == "attack_delay") { attack_delay = atoi(val.c_str()); CalcBonuses(); return; }	
 	else if(id == "atk") { ATK = atoi(val.c_str()); return; }
 	else if(id == "accuracy") { accuracy_rating = atoi(val.c_str()); return; }
 	else if(id == "avoidance") { avoidance_rating = atoi(val.c_str()); return; }
