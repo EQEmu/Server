@@ -1,8 +1,6 @@
 #include "debug.h"
 #include "tcp_server.h"
 #include <stdio.h>
-#include <cstdlib>
-#include <cstring>
 
 #ifdef _WINDOWS
 	#include <process.h>
