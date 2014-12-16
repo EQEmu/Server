@@ -4406,7 +4406,7 @@ namespace RoF
 
 		IN(item_id);
 		int r;
-		for (r = 0; r < 5; r++) {
+		for (r = 0; r < EmuConstants::ITEM_COMMON_SIZE; r++) {
 			IN(augments[r]);
 		}
 		// Max Augs is now 6, but no code to support that many yet
@@ -4855,7 +4855,7 @@ namespace RoF
 		hdr.unknown028 = 0;
 		hdr.last_cast_time = ((item->RecastDelay > 1) ? 1212693140 : 0);
 		hdr.charges = (stackable ? (item->MaxCharges ? 1 : 0) : charges);
-		hdr.inst_nodrop = inst->IsInstNoDrop() ? 1 : 0;
+		hdr.inst_nodrop = inst->IsAttuned() ? 1 : 0;
 		hdr.unknown044 = 0;
 		hdr.unknown048 = 0;
 		hdr.unknown052 = 0;
@@ -5074,7 +5074,7 @@ namespace RoF
 		isbs.augdistiller = 65535;
 		isbs.augrestrict = item->AugRestrict;
 
-		for (int x = AUG_BEGIN; x < EmuConstants::ITEM_COMMON_SIZE; ++x)
+		for (int x = AUG_BEGIN; x < consts::ITEM_COMMON_SIZE; x++)
 		{
 			isbs.augslots[x].type = item->AugSlotType[x];
 			isbs.augslots[x].visible = item->AugSlotVisible[x];
@@ -5082,9 +5082,9 @@ namespace RoF
 		}
 
 		// Increased to 6 max aug slots
-		isbs.augslots[5].type = 0;
-		isbs.augslots[5].visible = 1;
-		isbs.augslots[5].unknown = 0;
+		//isbs.augslots[5].type = 0;
+		//isbs.augslots[5].visible = 1;
+		//isbs.augslots[5].unknown = 0;
 
 		isbs.ldonpoint_type = item->PointType;
 		isbs.ldontheme = item->LDoNTheme;

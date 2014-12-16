@@ -1249,7 +1249,7 @@ namespace Client62
 			//merchant_slot,	//instance ID, bullshit for now
 			// The 'Merchant Slot' needs to be some unique id for bazaar to work properly
 			(merchant_slot == 0) ? inst->GetSerialNumber() : merchant_slot,
-			inst->IsInstNoDrop() ? 1 : 0,		//not sure where this field is
+			inst->IsAttuned() ? 1 : 0,		//not sure where this field is
 			(stackable ? ((inst->GetItem()->ItemType == ItemTypePotion) ? charges : 0) : charges),
 			0
 			);

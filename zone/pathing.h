@@ -8,6 +8,7 @@
 #include <algorithm>
 
 class Client;
+class Mob;
 
 #define PATHNODENEIGHBOURS 50
 

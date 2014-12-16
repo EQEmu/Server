@@ -138,8 +138,8 @@ public:
 
 	// items
 	// common and container sizes will not increase until the new 'location' struct is implemented
-	static const uint16 ITEM_COMMON_SIZE = Underfoot::consts::ITEM_COMMON_SIZE;
-	static const uint16 ITEM_CONTAINER_SIZE = Underfoot::consts::ITEM_CONTAINER_SIZE;
+	static const uint16 ITEM_COMMON_SIZE = RoF::consts::ITEM_COMMON_SIZE;
+	static const uint16 ITEM_CONTAINER_SIZE = Titanium::consts::ITEM_CONTAINER_SIZE;
 
 	// player profile
 	//static const uint32 CLASS_BITMASK = 0;	// needs value

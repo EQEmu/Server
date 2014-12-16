@@ -139,6 +139,8 @@ namespace player_lootitem {
 		uint32	aug_3;
 		uint32	aug_4;
 		uint32	aug_5;
+		uint32	aug_6;
+		int8	attuned;
 		uint8	min_level;		  // 
 		uint8	max_level;		  // 
 	};

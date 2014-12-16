@@ -294,7 +294,7 @@ public:
 	//
 	// Augements
 	//
-	inline bool IsAugmentable() const { return m_item->AugSlotType[0]!=0 || m_item->AugSlotType[1]!=0 || m_item->AugSlotType[2]!=0 || m_item->AugSlotType[3]!=0 || m_item->AugSlotType[4]!=0; }
+	inline bool IsAugmentable() const { return m_item->AugSlotType[0] != 0 || m_item->AugSlotType[1] != 0 || m_item->AugSlotType[2] != 0 || m_item->AugSlotType[3] != 0 || m_item->AugSlotType[4] != 0 || m_item->AugSlotType[5] != 0; }
 	bool AvailableWearSlot(uint32 aug_wear_slots) const;
 	int8 AvailableAugmentSlot(int32 augtype) const;
 	bool IsAugmentSlotAvailable(int32 augtype, uint8 slot) const;
@@ -362,8 +362,8 @@ public:
 	void SetCurrentSlot(int16 curr_slot)	{ m_currentslot = curr_slot; }
 
 	// Is this item already attuned?
-	bool IsInstNoDrop() const { return m_instnodrop; }
-	void SetInstNoDrop(bool flag) { m_instnodrop=flag; }
+	bool IsAttuned() const { return m_attuned; }
+	void SetAttuned(bool flag) { m_attuned=flag; }
 
 	std::string GetCustomDataString() const;
 	std::string GetCustomData(std::string identifier);
@@ -435,7 +435,7 @@ protected:
 	uint32				m_color;
 	uint32				m_merchantslot;
 	int16				m_currentslot;
-	bool				m_instnodrop;
+	bool				m_attuned;
 	int32				m_merchantcount;		//number avaliable on the merchant, -1=unlimited
 	int32				m_SerialNumber;	// Unique identifier for this instance of an item. Needed for Bazaar.
 	uint32				m_exp;

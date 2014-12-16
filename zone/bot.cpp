@@ -4173,7 +4173,7 @@ void Bot::SetBotItemInSlot(uint32 slotID, uint32 itemID, const ItemInst* inst, s
                                     "augslot1, augslot2, augslot3, augslot4, augslot5) "
                                     "VALUES(%lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu)",
                                     (unsigned long)this->GetBotID(), (unsigned long)slotID, (unsigned long)itemID,
-                                    (unsigned long)inst->GetCharges(), (unsigned long)(inst->IsInstNoDrop()? 1: 0),
+                                    (unsigned long)inst->GetCharges(), (unsigned long)(inst->IsAttuned()? 1: 0),
                                     (unsigned long)inst->GetColor(), (unsigned long)augslot[0], (unsigned long)augslot[1],
                                     (unsigned long)augslot[2], (unsigned long)augslot[3], (unsigned long)augslot[4]);
     auto results = database.QueryDatabase(query);
@@ -4235,7 +4235,7 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
         int16 put_slot_id = INVALID_INDEX;
 
         if (instnodrop || ((slot_id >= EmuConstants::EQUIPMENT_BEGIN) && (slot_id <= EmuConstants::EQUIPMENT_END) && inst->GetItem()->Attuneable))
-            inst->SetInstNoDrop(true);
+            inst->SetAttuned(true);
 
         if (color > 0)
             inst->SetColor(color);

@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/15/2014 ==
+Trevius: (RoF+) Implemented the 6th Augment Slot for Items.
+Trevius: Player Corpses now saved attuned settings for Items.
+
+Required SQL: utils/sql/git/required/2014_12_15_multiple_table_updates.sql
+
 == 12/13/2014 ==
 demonstar55: Fix guild rank spam on zone (needed to be in OP_PP).
 Trevius: (RoF+) Implemented Armor Ornamentation using Hero's Forge Armor Models.  To use, create an ornamentation augment and set the herosforgemodel field in the items table.

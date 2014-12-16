@@ -427,7 +427,7 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
 		return;
 	}
 
-	std::string query = StringFormat("SELECT bagidx, itemid, charges, augslot1, augslot2, augslot3, augslot4, augslot5 "
+	std::string query = StringFormat("SELECT bagidx, itemid, charges, augslot1, augslot2, augslot3, augslot4, augslot5, augslot6 "
                                     "FROM object_contents WHERE parentid = %i", parentid);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
@@ -440,11 +440,12 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
         uint32 item_id = (uint32)atoi(row[1]);
         int8 charges = (int8)atoi(row[2]);
         uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
-        aug[0]	= (uint32)atoi(row[3]);
-        aug[1]	= (uint32)atoi(row[4]);
-        aug[2]	= (uint32)atoi(row[5]);
-        aug[3]	= (uint32)atoi(row[6]);
-        aug[4]	= (uint32)atoi(row[7]);
+        aug[0] = (uint32)atoi(row[3]);
+        aug[1] = (uint32)atoi(row[4]);
+        aug[2] = (uint32)atoi(row[5]);
+        aug[3] = (uint32)atoi(row[6]);
+        aug[4] = (uint32)atoi(row[7]);
+		aug[5] = (uint32)atoi(row[8]);
 
         ItemInst* inst = database.CreateItem(item_id, charges);
         if (inst && inst->GetItem()->ItemClass == ItemClassCommon) {
@@ -478,7 +479,7 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const It
             continue;
 
         uint32 item_id = inst->GetItem()->ID;
-        uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
+		uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
 
         if (inst->IsType(ItemClassCommon)) {
             for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
@@ -489,10 +490,10 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const It
 
         std::string query = StringFormat("REPLACE INTO object_contents "
                                         "(zoneid, parentid, bagidx, itemid, charges, "
-                                        "augslot1, augslot2, augslot3, augslot4, augslot5, droptime) "
-                                        "VALUES (%i, %i, %i, %i, %i, %i, %i, %i, %i, %i, now())",
+                                        "augslot1, augslot2, augslot3, augslot4, augslot5, augslot6, droptime) "
+                                        "VALUES (%i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, now())",
                                         zone_id, parent_id, index, item_id, inst->GetCharges(),
-                                        augslot[0], augslot[1], augslot[2], augslot[3], augslot[4]);
+										augslot[0], augslot[1], augslot[2], augslot[3], augslot[4], augslot[5]);
         auto results = QueryDatabase(query);
         if (!results.Success())
             LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::SaveWorldContainer: %s", results.ErrorMessage().c_str());
@@ -3568,8 +3569,8 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 	for (unsigned int i = 0; i < dbpc->itemcount; i++) { 
 		if (first_entry != 1){
 			query = StringFormat("REPLACE INTO `character_corpse_items` \n"
-				" (corpse_id, equip_slot, item_id, charges, aug_1, aug_2, aug_3, aug_4, aug_5, attuned) \n"
-				" VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, 0) \n",
+				" (corpse_id, equip_slot, item_id, charges, aug_1, aug_2, aug_3, aug_4, aug_5, aug_6, attuned) \n"
+				" VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
 				last_insert_id, 
 				dbpc->items[i].equip_slot,
 				dbpc->items[i].item_id,  
@@ -3578,12 +3579,14 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 				dbpc->items[i].aug_2, 
 				dbpc->items[i].aug_3, 
 				dbpc->items[i].aug_4, 
-				dbpc->items[i].aug_5
+				dbpc->items[i].aug_5,
+				dbpc->items[i].aug_6,
+				dbpc->items[i].attuned
 			);
 			first_entry = 1;
 		}
 		else{ 
-			query = query + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, 0) \n",
+			query = query + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
 				last_insert_id,
 				dbpc->items[i].equip_slot,
 				dbpc->items[i].item_id,
@@ -3592,7 +3595,9 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 				dbpc->items[i].aug_2,
 				dbpc->items[i].aug_3,
 				dbpc->items[i].aug_4,
-				dbpc->items[i].aug_5
+				dbpc->items[i].aug_5,
+				dbpc->items[i].aug_6,
+				dbpc->items[i].attuned
 			);
 		}
 	}
@@ -3743,6 +3748,7 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 		"aug_3,                       \n"
 		"aug_4,                       \n"
 		"aug_5,                       \n"
+		"aug_6,                       \n"
 		"attuned                      \n"
 		"FROM                         \n"
 		"character_corpse_items       \n"
@@ -3765,6 +3771,8 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 		pcs->items[i].aug_3 = atoi(row[r++]); 			// aug_3,
 		pcs->items[i].aug_4 = atoi(row[r++]); 			// aug_4,
 		pcs->items[i].aug_5 = atoi(row[r++]); 			// aug_5,
+		pcs->items[i].aug_6 = atoi(row[r++]); 			// aug_6,
+		pcs->items[i].attuned = atoi(row[r++]); 		// attuned,
 		r = 0;
 		i++;
 	}

@@ -1400,7 +1400,7 @@ ItemInst::ItemInst(const Item_Struct* item, int16 charges) {
 	m_item = item;
 	m_charges = charges;
 	m_price = 0;
-	m_instnodrop = false;
+	m_attuned = false;
 	m_merchantslot = 0;
 	if(m_item &&m_item->ItemClass == ItemClassCommon)
 		m_color = m_item->Color;
@@ -1426,7 +1426,7 @@ ItemInst::ItemInst(SharedDatabase *db, uint32 item_id, int16 charges) {
 	m_charges = charges;
 	m_price = 0;
 	m_merchantslot = 0;
-	m_instnodrop=false;
+	m_attuned=false;
 	if(m_item && m_item->ItemClass == ItemClassCommon)
 		m_color = m_item->Color;
 	else
@@ -1450,7 +1450,7 @@ ItemInst::ItemInst(ItemInstTypes use_type) {
 	m_item = nullptr;
 	m_charges = 0;
 	m_price = 0;
-	m_instnodrop = false;
+	m_attuned = false;
 	m_merchantslot = 0;
 	m_color = 0;
 
@@ -1475,7 +1475,7 @@ ItemInst::ItemInst(const ItemInst& copy)
 	m_color=copy.m_color;
 	m_merchantslot=copy.m_merchantslot;
 	m_currentslot=copy.m_currentslot;
-	m_instnodrop=copy.m_instnodrop;
+	m_attuned=copy.m_attuned;
 	m_merchantcount=copy.m_merchantcount;
 	// Copy container contents
 	iter_contents it;

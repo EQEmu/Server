@@ -426,6 +426,8 @@ namespace Convert {
 			uint32 aug3;
 			uint32 aug4;
 			uint32 aug5;
+			uint32 aug6;
+			uint8 attuned;
 		};
 	}
 
