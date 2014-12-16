@@ -4,13 +4,13 @@
 #include "eq_stream.h"
 #include "timer.h"
 #include <vector>
-#include <string>
 #include <queue>
 
 #define STREAM_IDENT_WAIT_MS 10000
 
 class OpcodeManager;
 class StructStrategy;
+class EQStreamInterface;
 
 class EQStreamIdentifier {
 public:
