@@ -4,11 +4,13 @@
 
 #include <queue>
 #include <map>
+
 #include "../common/eq_stream.h"
 #include "../common/condition.h"
 #include "../common/timeoutmgr.h"
-#include "../common/opcodemgr.h"
-#include "../common/timer.h"
+
+class EQStream;
+class Timer;
 
 class EQStreamFactory : private Timeoutable {
 	private:

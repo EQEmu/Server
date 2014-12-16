@@ -1,24 +1,19 @@
 #include <iostream>
 #include <cstring>
-#include <cstdlib>
-#include <ctime>
 
-#include "shareddb.h"
-#include "mysql.h"
-#include "item.h"
 #include "classes.h"
-#include "rulesys.h"
-#include "seperator.h"
-#include "string_util.h"
 #include "eq_packet_structs.h"
-#include "guilds.h"
-#include "extprofile.h"
-#include "memory_mapped_file.h"
-#include "ipc_mutex.h"
 #include "eqemu_exception.h"
-#include "loottable.h"
 #include "faction.h"
 #include "features.h"
+#include "ipc_mutex.h"
+#include "item.h"
+#include "loottable.h"
+#include "memory_mapped_file.h"
+#include "mysql.h"
+#include "rulesys.h"
+#include "shareddb.h"
+#include "string_util.h"
 
 SharedDatabase::SharedDatabase()
 : Database(), skill_caps_mmf(nullptr), items_mmf(nullptr), items_hash(nullptr), faction_mmf(nullptr), faction_hash(nullptr),

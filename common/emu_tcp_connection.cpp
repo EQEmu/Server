@@ -27,13 +27,10 @@ tremendously.
 
 #include <iostream>
 #include <string.h>
-#include <stdio.h>
-#include <iomanip>
 
 #include "emu_tcp_connection.h"
 #include "emu_tcp_server.h"
 #include "../common/servertalk.h"
-#include "../common/packet_dump.h"
 
 #ifdef FREEBSD //Timothy Whitman - January 7, 2003
 	#define MSG_NOSIGNAL 0

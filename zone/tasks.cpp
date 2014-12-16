@@ -2773,13 +2773,6 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 			if(strlen(Tasks[TaskID]->Reward) != 0) {
 
 				switch(c->GetClientVersion()) {
-
-					case EQClient62:
-					{
-						MakeAnyLenString(&RewardTmp, "%c%07i-00001-00001-00001-00001-000013E0ABA6B%s%c",
-								0x12, ItemID, Tasks[TaskID]->Reward,0x12);
-						break;
-					}
 					case EQClientTitanium:
 					{
 						MakeAnyLenString(&RewardTmp, "%c%06X000000000000000000000000000000014505DC2%s%c",
@@ -2807,13 +2800,6 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 				if(Item) {
 
 					switch(c->GetClientVersion()) {
-
-						case EQClient62:
-						{
-							MakeAnyLenString(&RewardTmp, "%c%07i-00001-00001-00001-00001-000013E0ABA6B%s%c",
-									0x12, ItemID, Item->Name,0x12);
-							break;
-						}
 						case EQClientTitanium:
 						{
 							MakeAnyLenString(&RewardTmp, "%c%06X000000000000000000000000000000014505DC2%s%c",

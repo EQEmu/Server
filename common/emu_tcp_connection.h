@@ -26,6 +26,7 @@
 
 struct SPackSendQueue;
 class EmuTCPServer;
+class ServerPacket;
 
 class EmuTCPConnection : public TCPConnection {
 public:

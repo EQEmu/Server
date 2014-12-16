@@ -19,15 +19,12 @@
 #include "debug.h"
 #include "eq_packet.h"
 #include "eq_stream.h"
-#include "misc.h"
-#include "mutex.h"
 #include "op_codes.h"
 #include "crc16.h"
 #include "platform.h"
 
 #include <string>
 #include <iomanip>
-#include <iostream>
 #include <vector>
 #include <algorithm>
 

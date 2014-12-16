@@ -15,17 +15,14 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "../common/debug.h"
 
 #include <iostream>
 #include <string.h>
-#include <stdio.h>
 #include <iomanip>
 
 #include "tcp_connection.h"
-#include "../common/servertalk.h"
-#include "../common/timer.h"
-#include "../common/packet_dump.h"
 
 #ifdef FREEBSD //Timothy Whitman - January 7, 2003
 	#define MSG_NOSIGNAL 0

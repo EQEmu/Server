@@ -1,22 +1,26 @@
 #ifndef _EQSTREAM_H
 #define _EQSTREAM_H
 
-#include <string>
 #include <vector>
 #include <map>
 #include <queue>
 #include <deque>
+
 #ifndef WIN32
 #include <netinet/in.h>
 #endif
-#include "eq_stream_type.h"
+
+#include "../common/misc.h"
+#include "../common/opcodemgr.h"
+#include "../common/timer.h"
+
 #include "eq_packet.h"
 #include "eq_stream_intf.h"
+#include "eq_stream_type.h"
 #include "mutex.h"
-#include "../common/opcodemgr.h"
-#include "../common/misc.h"
-#include "../common/condition.h"
-#include "../common/timer.h"
+
+class EQApplicationPacket;
+class EQProtocolPacket;
 
 #define FLAG_COMPRESSED	0x01
 #define FLAG_ENCODED	0x04
@@ -78,7 +82,6 @@ struct SessionStats {
 #pragma pack()
 
 class OpcodeManager;
-class EQStreamPair;
 class EQRawApplicationPacket;
 
 class EQStream : public EQStreamInterface {

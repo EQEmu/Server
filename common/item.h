@@ -23,20 +23,15 @@
 #ifndef __ITEM_H
 #define __ITEM_H
 
-class ItemInst;				// Item belonging to a client (contains info on item, dye, augments, charges, etc)
-class ItemInstQueue;		// Queue of ItemInst objects (i.e., cursor)
-class Inventory;			// Character inventory
 class ItemParse;			// Parses item packets
 class EvolveInfo;			// Stores information about an evolving item family
 
-#include <string>
-#include <vector>
-#include <map>
-#include <list>
-#include "../common/eq_packet_structs.h"
 #include "../common/eq_constants.h"
 #include "../common/item_struct.h"
 #include "../common/timer.h"
+
+#include <list>
+#include <map>
 
 // Helper typedefs
 typedef std::list<ItemInst*>::const_iterator				iter_queue;
