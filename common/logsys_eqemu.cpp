@@ -21,6 +21,9 @@
 #include "string_util.h"
 
 #include <stdarg.h>
+#include <stdio.h>
+
+#include <string>
 
 void log_message(LogType type, const char *fmt, ...) {
 	va_list args;
