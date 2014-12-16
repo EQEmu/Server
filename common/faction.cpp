@@ -19,6 +19,8 @@
 #include "faction.h"
 #include "races.h"
 
+#include <string>
+
 const char *FactionValueToString(FACTION_VALUE fv)
 {
 	switch (fv) {
