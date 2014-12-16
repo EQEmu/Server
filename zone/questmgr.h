@@ -21,7 +21,6 @@
 #include "../common/timer.h"
 #include "tasks.h"
 
-#include <string>
 #include <list>
 #include <stack>
 

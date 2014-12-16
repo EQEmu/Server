@@ -22,18 +22,19 @@
 #include "../common/skills.h"
 #include "../common/spdat.h"
 #include "../common/string_util.h"
+
 #include "entity.h"
 #include "event_codes.h"
 #include "guild_mgr.h"
-#include "net.h"
 #include "qglobals.h"
 #include "queryserv.h"
-#include "questmgr.h"
 #include "quest_parser_collection.h"
+#include "questmgr.h"
 #include "spawn2.h"
 #include "worldserver.h"
 #include "zone.h"
 #include "zonedb.h"
+
 #include <iostream>
 #include <limits.h>
 #include <list>
