@@ -21,13 +21,14 @@
 #endif
 
 #include "../common/features.h"
-#include "../common/misc_functions.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
+
 #include "map.h"
 #include "npc.h"
 #include "quest_parser_collection.h"
 #include "water_map.h"
+
 #include <math.h>
 #include <stdlib.h>
 
