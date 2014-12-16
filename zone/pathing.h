@@ -1,11 +1,9 @@
 #ifndef PATHING_H
 #define PATHING_H
-#include <algorithm>
+
 #include "map.h"
-#include "../common/timer.h"
+
 #include <list>
-#include <vector>
-#include <algorithm>
 
 class Client;
 class Mob;
