@@ -16,18 +16,21 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "../common/debug.h"
-#include <assert.h>
-#include <stdlib.h>
-#include <math.h>
-#include <list>
-#include "masterentity.h"
+#include "client.h"
+#include "entity.h"
+#include "groups.h"
+#include "mob.h"
+#include "raids.h"
+
 #include "../common/rulesys.h"
-#include "../common/misc_functions.h"
+
 #include "hate_list.h"
 #include "quest_parser_collection.h"
 #include "zone.h"
 #include "water_map.h"
+
+#include <stdlib.h>
+#include <list>
 
 extern Zone *zone;
 

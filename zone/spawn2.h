@@ -21,8 +21,6 @@
 #include "../common/timer.h"
 #include "npc.h"
 
-#include <string>
-
 #define SC_AlwaysEnabled 0
 
 class SpawnCondition;

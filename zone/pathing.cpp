@@ -1,22 +1,22 @@
 #include "../common/debug.h"
-#include <string.h>
-#include <math.h>
-#include <list>
-#include <algorithm>
-#include <sstream>
-#include <fstream>
+
+#include "client.h"
+#include "doors.h"
 #include "pathing.h"
 #include "water_map.h"
-#include "../common/misc_functions.h"
-#include "doors.h"
-#include "client.h"
 #include "zone.h"
+
+#include <fstream>
+#include <list>
+#include <math.h>
+#include <sstream>
+#include <string.h>
 
 #ifdef _WINDOWS
 #define snprintf _snprintf
 #endif
 
-//#define PATHDEBUG
+//#define PATHDEBUG 
 #define ABS(x) ((x)<0?-(x):(x))
 
 extern Zone *zone;

@@ -16,15 +16,14 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 	*/
 
-
-
-#include "../common/debug.h"
-#include "../common/misc_functions.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
-#include "masterentity.h"
+
+#include "client.h"
+#include "entity.h"
+#include "mob.h"
 #include "string_ids.h"
-#include <stdio.h>
+
 #include <string.h>
 
 

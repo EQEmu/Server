@@ -2919,7 +2919,7 @@ uint8	npccastfilters;			// 0) No, 1) Ignore NPC Casts (all), 2) Ignore NPC Casts
 */
 struct	ItemViewRequest_Struct {
 /*000*/	uint32	item_id;
-/*004*/	uint32	augments[5];
+/*004*/	uint32	augments[6];
 /*024*/ uint32	link_hash;
 /*028*/	uint32	unknown028;
 /*032*/	char	unknown032[12];	//probably includes loregroup & evolving info. see Client::MakeItemLink() in zone/inventory.cpp:469
@@ -5242,8 +5242,10 @@ struct ServerLootItem_Struct {
 	uint32	aug_3;		  // uint32	aug_3;
 	uint32	aug_4;		  // uint32	aug_4;
 	uint32	aug_5;		  // uint32	aug_5;
-	uint8	min_level;		  // 
-	uint8	max_level;		  // 
+	uint32	aug_6;		  // uint32	aug_5;
+	uint8	attuned;
+	uint8	min_level;
+	uint8	max_level;
 };
 
 //Found in client near a ref to the string:

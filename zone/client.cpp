@@ -1819,129 +1819,43 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.runspeed		= (gmspeed == 0) ? runspeed : 3.125f;
 	if (!m_pp.showhelm) ns->spawn.showhelm = 0;
 
-	// pp also hold this info; should we pull from there or inventory?
-	// (update: i think pp should do it, as this holds LoY dye - plus, this is ugly code with Inventory!)
+	/*
+	// Equipment/Weapons already set from Mob::FillSpawnStruct
+	// Commenting this out for now
 	const Item_Struct* item = nullptr;
 	const ItemInst* inst = nullptr;
+	int16 invslot;
 
-	// Only Player Races Wear Armor
-	if (IsPlayerRace(race))
+	for (uint32 matslot = 0; matslot < _MaterialCount; matslot++)
 	{
-		if ((inst = m_inv[MainHands]) && inst->IsType(ItemClassCommon))
+		// Only Player Races Wear Armor
+		if (IsPlayerRace(race) || matslot > 6)
 		{
-			item = inst->GetItem();
-			ns->spawn.equipment[MaterialHands].material = item->Material;
-			ns->spawn.equipment[MaterialHands].elitematerial = item->EliteMaterial;
-			ns->spawn.equipment[MaterialHands].heroforgemodel = item->HerosForgeModel;
-			ns->spawn.colors[MaterialHands].color = m_pp.item_tint[MaterialHands].rgb.use_tint ? m_pp.item_tint[MaterialHands].color : item->Color;
-		}
-		if ((inst = m_inv[MainHead]) && inst->IsType(ItemClassCommon))
-		{
-			item = inst->GetItem();
-			ns->spawn.equipment[MaterialHead].material = item->Material;
-			ns->spawn.equipment[MaterialHead].elitematerial = item->EliteMaterial;
-			ns->spawn.equipment[MaterialHead].heroforgemodel = item->HerosForgeModel;
-			ns->spawn.colors[MaterialHead].color = m_pp.item_tint[MaterialHead].rgb.use_tint ? m_pp.item_tint[MaterialHead].color : item->Color;
-		}
-		if ((inst = m_inv[MainArms]) && inst->IsType(ItemClassCommon))
-		{
-			item = inst->GetItem();
-			ns->spawn.equipment[MaterialArms].material = item->Material;
-			ns->spawn.equipment[MaterialArms].elitematerial = item->EliteMaterial;
-			ns->spawn.equipment[MaterialArms].heroforgemodel = item->HerosForgeModel;
-			ns->spawn.colors[MaterialArms].color = m_pp.item_tint[MaterialArms].rgb.use_tint ? m_pp.item_tint[MaterialArms].color : item->Color;
-		}
-		if ((inst = m_inv[MainWrist1]) && inst->IsType(ItemClassCommon))
-		{
-			item = inst->GetItem();
-			ns->spawn.equipment[MaterialWrist].material = item->Material;
-			ns->spawn.equipment[MaterialWrist].elitematerial = item->EliteMaterial;
-			ns->spawn.equipment[MaterialWrist].heroforgemodel = item->HerosForgeModel;
-			ns->spawn.colors[MaterialWrist].color = m_pp.item_tint[MaterialWrist].rgb.use_tint ? m_pp.item_tint[MaterialWrist].color : item->Color;
-		}
+			invslot = Inventory::CalcSlotFromMaterial(matslot);
+			if (invslot == INVALID_INDEX)
+				continue;
 
-		if ((inst = m_inv[MainChest]) && inst->IsType(ItemClassCommon))
-		{
-			item = inst->GetItem();
-			ns->spawn.equipment[MaterialChest].material = item->Material;
-			ns->spawn.equipment[MaterialChest].elitematerial = item->EliteMaterial;
-			ns->spawn.equipment[MaterialChest].heroforgemodel = item->HerosForgeModel;
-			ns->spawn.colors[MaterialChest].color = m_pp.item_tint[MaterialChest].rgb.use_tint ? m_pp.item_tint[MaterialChest].color : item->Color;
-		}
-		if ((inst = m_inv[MainLegs]) && inst->IsType(ItemClassCommon))
-		{
-			item = inst->GetItem();
-			ns->spawn.equipment[MaterialLegs].material = item->Material;
-			ns->spawn.equipment[MaterialLegs].elitematerial = item->EliteMaterial;
-			ns->spawn.equipment[MaterialLegs].heroforgemodel = item->HerosForgeModel;
-			ns->spawn.colors[MaterialLegs].color = m_pp.item_tint[MaterialLegs].rgb.use_tint ? m_pp.item_tint[MaterialLegs].color : item->Color;
-		}
-		if ((inst = m_inv[MainFeet]) && inst->IsType(ItemClassCommon))
-		{
-			item = inst->GetItem();
-			ns->spawn.equipment[MaterialFeet].material = item->Material;
-			ns->spawn.equipment[MaterialFeet].elitematerial = item->EliteMaterial;
-			ns->spawn.equipment[MaterialFeet].heroforgemodel = item->HerosForgeModel;
-			ns->spawn.colors[MaterialFeet].color = m_pp.item_tint[MaterialFeet].rgb.use_tint ? m_pp.item_tint[MaterialFeet].color : item->Color;
-		}
-	}
-	int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-	if ((inst = m_inv[MainPrimary]) && inst->IsType(ItemClassCommon))
-	{
-		if (inst->GetOrnamentationAug(ornamentationAugtype))
-		{
-			item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
-			if (strlen(item->IDFile) > 2)
+			if ((inst = m_inv[invslot]) && inst->IsType(ItemClassCommon))
 			{
-				ns->spawn.equipment[MaterialPrimary].material = atoi(&item->IDFile[2]);
-			}
-		}
-		else if (inst->GetOrnamentationIcon() && inst->GetOrnamentationIDFile())
-		{
-			ns->spawn.equipment[MaterialPrimary].material = inst->GetOrnamentationIDFile();
-		}
-		else
-		{
-			item = inst->GetItem();
-			if (strlen(item->IDFile) > 2)
-			{
-				ns->spawn.equipment[MaterialPrimary].material = atoi(&item->IDFile[2]);
+				item = inst->GetItem();
+				
+				if (matslot > 6)
+				{
+					// Weapon Models 
+					ns->spawn.equipment[matslot].material = GetEquipmentMaterial(matslot);
+				}
+				else
+				{
+					// Armor Materials/Models
+					ns->spawn.equipment[matslot].material = item->Material;
+					ns->spawn.equipment[matslot].elitematerial = item->EliteMaterial;
+					ns->spawn.equipment[matslot].heroforgemodel = GetHerosForgeModel(matslot);
+					ns->spawn.colors[matslot].color = m_pp.item_tint[matslot].rgb.use_tint ? m_pp.item_tint[matslot].color : item->Color;
+				}
 			}
 		}
 	}
-	if ((inst = m_inv[MainSecondary]) && inst->IsType(ItemClassCommon))
-	{
-		if (inst->GetOrnamentationAug(ornamentationAugtype))
-		{
-			item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
-			if (strlen(item->IDFile) > 2)
-			{
-				ns->spawn.equipment[MaterialSecondary].material = atoi(&item->IDFile[2]);
-			}
-		}
-		else if (inst->GetOrnamentationIcon() && inst->GetOrnamentationIDFile())
-		{
-			ns->spawn.equipment[MaterialSecondary].material = inst->GetOrnamentationIDFile();
-		}
-		else
-		{
-			item = inst->GetItem();
-			if (strlen(item->IDFile) > 2)
-			{
-				ns->spawn.equipment[MaterialSecondary].material = atoi(&item->IDFile[2]);
-			}
-		}
-	}
-
-	//these two may be related to ns->spawn.texture
-	/*
-	ns->spawn.npc_armor_graphic = texture;
-	ns->spawn.npc_helm_graphic = helmtexture;
 	*/
-
-	//filling in some unknowns to make the client happy
-//	ns->spawn.unknown0002[2] = 3;
-
 }
 
 bool Client::GMHideMe(Client* client) {
@@ -2769,48 +2683,10 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 
 void Client::SetMaterial(int16 in_slot, uint32 item_id) {
 	const Item_Struct* item = database.GetItem(item_id);
-	int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-	if (item && (item->ItemClass==ItemClassCommon)) {
-		if (in_slot==MainHead)
-			m_pp.item_material[MaterialHead]		= item->Material;
-		else if (in_slot==MainChest)
-			m_pp.item_material[MaterialChest]		= item->Material;
-		else if (in_slot==MainArms)
-			m_pp.item_material[MaterialArms]		= item->Material;
-		else if (in_slot==MainWrist1)
-			m_pp.item_material[MaterialWrist]		= item->Material;
-		else if (in_slot==MainHands)
-			m_pp.item_material[MaterialHands]		= item->Material;
-		else if (in_slot==MainLegs)
-			m_pp.item_material[MaterialLegs]		= item->Material;
-		else if (in_slot==MainFeet)
-			m_pp.item_material[MaterialFeet]		= item->Material;
-		else if (in_slot == MainPrimary) {
-			const ItemInst* inst = m_inv[MainPrimary];
-			if (inst && inst->GetOrnamentationAug(ornamentationAugtype)) {
-				item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
-				m_pp.item_material[MaterialPrimary] = atoi(item->IDFile + 2);
-			}
-			else if (inst && inst->GetOrnamentationIcon() && inst->GetOrnamentationIDFile()) {
-				m_pp.item_material[MaterialPrimary] = inst->GetOrnamentationIDFile();
-			}
-			else {
-				m_pp.item_material[MaterialPrimary] = atoi(item->IDFile + 2);
-			}
-		}
-		else if (in_slot == MainSecondary) {
-			const ItemInst* inst = m_inv[MainSecondary];
-			if (inst && inst->GetOrnamentationAug(ornamentationAugtype)) {
-				item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
-				m_pp.item_material[MaterialSecondary] = atoi(item->IDFile + 2);
-			}
-			else if (inst && inst->GetOrnamentationIcon() && inst->GetOrnamentationIDFile()) {
-				m_pp.item_material[MaterialSecondary] = inst->GetOrnamentationIDFile();
-			}
-			else {
-				m_pp.item_material[MaterialSecondary] = atoi(item->IDFile + 2);
-			}
-		}
+	if (item && (item->ItemClass==ItemClassCommon))
+	{
+		uint32 matslot = Inventory::CalcMaterialFromSlot(in_slot);
+		m_pp.item_material[matslot] = GetEquipmentMaterial(matslot);
 	}
 }
 
@@ -5859,17 +5735,18 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 			if(inst) {
 				item = inst->GetItem();
 				if(item) {
-					if (inst && inst->GetOrnamentationAug(ornamentationAugtype)) {
-						const Item_Struct *aug_weap = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
-						strcpy(insr->itemnames[L], item->Name);
-						insr->itemicons[L] = aug_weap->Icon;
+					strcpy(insr->itemnames[L], item->Name);
+					if (inst && inst->GetOrnamentationAug(ornamentationAugtype))
+					{
+						const Item_Struct *aug_item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
+						insr->itemicons[L] = aug_item->Icon;
 					}
-					else if (inst->GetOrnamentationIcon() && inst->GetOrnamentationIDFile()) {
-						strcpy(insr->itemnames[L], item->Name);
+					else if (inst && inst->GetOrnamentationIcon())
+					{
 						insr->itemicons[L] = inst->GetOrnamentationIcon();
 					}					
-					else {
-						strcpy(insr->itemnames[L], item->Name);
+					else 
+					{
 						insr->itemicons[L] = item->Icon;
 					}
 				}

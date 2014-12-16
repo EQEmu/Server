@@ -21,20 +21,21 @@ Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
 #include "tasks.h"
 
 #include <string.h>
-#include <stdlib.h>
 
 #ifdef _WINDOWS
 #define strcasecmp _stricmp
 #endif
 
 #include "../common/misc_functions.h"
-#include "../common/string_util.h"
 #include "../common/rulesys.h"
-#include "masterentity.h"
-#include "../common/features.h"
-#include "quest_parser_collection.h"
+#include "../common/string_util.h"
+
+#include "client.h"
+#include "entity.h"
 #include "mob.h"
+
 #include "queryserv.h"
+#include "quest_parser_collection.h"
 
 extern QueryServ* QServ;
 

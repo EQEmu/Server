@@ -15,13 +15,13 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "../common/debug.h"
 #include "../common/rulesys.h"
-#include <cmath>
+
 #include <ctype.h>
 #include <iomanip>
 #include <iostream>
-#include <limits.h>
 #include <map>
 #include <mysqld_error.h>
 #include <stdio.h>
@@ -42,8 +42,8 @@
 
 #include "database.h"
 #include "eq_packet_structs.h"
-#include "string_util.h"
 #include "extprofile.h"
+#include "string_util.h"
 
 extern Client client;
 
@@ -2099,6 +2099,7 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 			"`aug_3` int(11) unsigned DEFAULT '0',		  "
 			"`aug_4` int(11) unsigned DEFAULT '0',		  "
 			"`aug_5` int(11) unsigned DEFAULT '0',		  "
+			"`aug_6` int(11) unsigned DEFAULT '0',		  "
 			"`attuned` smallint(5) NOT NULL DEFAULT '0',  "
 			"PRIMARY KEY(`corpse_id`, `equip_slot`)		  "
 			") ENGINE = InnoDB DEFAULT CHARSET = latin1;  "
@@ -2276,8 +2277,8 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 					for (unsigned int i = 0; i < dbpc->itemcount; i++) {
 						if (first_entry != 1){
 							scquery = StringFormat("REPLACE INTO `character_corpse_items` \n"
-								" (corpse_id, equip_slot, item_id, charges, aug_1, aug_2, aug_3, aug_4, aug_5, attuned) \n"
-								" VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, 0) \n",
+								" (corpse_id, equip_slot, item_id, charges, aug_1, aug_2, aug_3, aug_4, aug_5, aug_6, attuned) \n"
+								" VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
 								atoi(row2[0]),
 								dbpc->items[i].equipSlot,
 								dbpc->items[i].item_id,
@@ -2286,12 +2287,14 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 								dbpc->items[i].aug2,
 								dbpc->items[i].aug3,
 								dbpc->items[i].aug4,
-								dbpc->items[i].aug5
+								dbpc->items[i].aug5,
+								dbpc->items[i].aug6,
+								dbpc->items[i].attuned
 								);
 							first_entry = 1;
 						}
 						else{
-							scquery = scquery + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, 0) \n",
+							scquery = scquery + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
 								atoi(row2[0]),
 								dbpc->items[i].equipSlot,
 								dbpc->items[i].item_id,
@@ -2300,7 +2303,9 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 								dbpc->items[i].aug2,
 								dbpc->items[i].aug3,
 								dbpc->items[i].aug4,
-								dbpc->items[i].aug5
+								dbpc->items[i].aug5,
+								dbpc->items[i].aug6,
+								dbpc->items[i].attuned
 								);
 						}
 					}
@@ -2310,7 +2315,7 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 					/* Classic Converter */
 					scquery = StringFormat("UPDATE `character_corpses` SET \n"
 						"`is_locked` =          %d,\n"
-						"`exp` =                 %u,\n"
+						"`exp` =                %u,\n"
 						"`size` =               %f,\n"
 						"`level` =              %u,\n"
 						"`race` =               %u,\n"
@@ -2338,7 +2343,7 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 						"`wc_6` =               %u,\n"
 						"`wc_7` =               %u,\n"
 						"`wc_8` =               %u,\n"
-						"`wc_9`	=                %u \n"
+						"`wc_9`	=               %u \n"
 						"WHERE `id` = %u		   \n",
 						dbpc_c->locked,
 						dbpc_c->exp,
@@ -2381,8 +2386,8 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 					for (unsigned int i = 0; i < dbpc_c->itemcount; i++) {
 						if (first_entry != 1){
 							scquery = StringFormat("REPLACE INTO `character_corpse_items` \n"
-								" (corpse_id, equip_slot, item_id, charges, aug_1, aug_2, aug_3, aug_4, aug_5, attuned) \n"
-								" VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, 0) \n",
+								" (corpse_id, equip_slot, item_id, charges, aug_1, aug_2, aug_3, aug_4, aug_5, aug_6, attuned) \n"
+								" VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
 								atoi(row2[0]),
 								dbpc_c->items[i].equipSlot,
 								dbpc_c->items[i].item_id,
@@ -2391,12 +2396,14 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 								dbpc_c->items[i].aug2,
 								dbpc_c->items[i].aug3,
 								dbpc_c->items[i].aug4,
-								dbpc_c->items[i].aug5
+								dbpc_c->items[i].aug5,
+								dbpc_c->items[i].aug6,
+								dbpc_c->items[i].attuned
 								);
 							first_entry = 1;
 						}
 						else{
-							scquery = scquery + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, 0) \n",
+							scquery = scquery + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
 								atoi(row2[0]),
 								dbpc_c->items[i].equipSlot,
 								dbpc_c->items[i].item_id,
@@ -2405,7 +2412,9 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 								dbpc_c->items[i].aug2,
 								dbpc_c->items[i].aug3,
 								dbpc_c->items[i].aug4,
-								dbpc_c->items[i].aug5
+								dbpc_c->items[i].aug5,
+								dbpc_c->items[i].aug6,
+								dbpc_c->items[i].attuned
 								);
 						}
 					}

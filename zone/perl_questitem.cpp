@@ -160,7 +160,7 @@ XS(XS_QuestItem_IsAttuned)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->IsInstNoDrop();
+		RETVAL = THIS->IsAttuned();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}

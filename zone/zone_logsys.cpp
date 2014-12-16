@@ -19,9 +19,10 @@
 #include "../common/debug.h"
 #include "../common/logsys.h"
 #include "../common/base_packet.h"
+
 #include "mob.h"
+
 #include <stdarg.h>
-#include <stdio.h>
 
 void log_message_mob(LogType type, Mob *who, const char *fmt, ...) {
 	if(!who->IsLoggingEnabled())

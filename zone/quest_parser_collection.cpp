@@ -19,14 +19,13 @@
 #include "../common/debug.h"
 #include "../common/misc_functions.h"
 #include "../common/features.h"
+
 #include "quest_parser_collection.h"
 #include "quest_interface.h"
 #include "zone.h"
 #include "questmgr.h"
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
 
 extern Zone* zone;
 extern void MapOpcodes();

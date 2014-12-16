@@ -1,18 +1,16 @@
-#include "../common/debug.h"
-
 #ifdef _WINDOWS
 #include <winsock2.h>
 #endif
 
+#include "../common/misc_functions.h"
+
+#include "dbcore.h"
+
+#include <errmsg.h>
 #include <fstream>
 #include <iostream>
-#include <errmsg.h>
 #include <mysqld_error.h>
-#include <limits.h>
-#include "dbcore.h"
 #include <string.h>
-#include "../common/misc_functions.h"
-#include <cstdlib>
 
 #ifdef _WINDOWS
 	#define snprintf	_snprintf

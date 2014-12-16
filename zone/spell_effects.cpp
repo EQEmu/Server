@@ -23,9 +23,11 @@
 #include "../common/rulesys.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
+
 #include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "worldserver.h"
+
 #include <math.h>
 
 #ifndef WIN32

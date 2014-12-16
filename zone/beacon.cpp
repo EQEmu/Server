@@ -23,7 +23,7 @@ target to center around.
 
 */
 
-#include "../common/debug.h"
+class Zone;
 
 #ifdef _WINDOWS
     #define snprintf	_snprintf
@@ -32,7 +32,17 @@ target to center around.
     #define strcasecmp	_stricmp
 #endif
 
-#include "masterentity.h"
+#include "../common/races.h"
+#include "beacon.h"
+#include "entity.h"
+#include "mob.h" 
+
+
+#ifdef BOTS
+#include "bot.h"
+#endif
+
+
 #include "../common/spdat.h"
 
 extern EntityList entity_list;

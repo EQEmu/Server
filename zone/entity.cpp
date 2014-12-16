@@ -32,7 +32,7 @@
 
 #include "../common/features.h"
 #include "../common/guilds.h"
-#include "../common/spdat.h"
+
 #include "guild_mgr.h"
 #include "net.h"
 #include "petitions.h"
@@ -47,6 +47,10 @@
 	#define snprintf	_snprintf
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
+#endif
+
+#ifdef BOTS
+#include "bot.h"
 #endif
 
 extern Zone *zone;

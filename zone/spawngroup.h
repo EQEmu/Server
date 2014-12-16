@@ -18,7 +18,6 @@
 #ifndef SPAWNGROUP_H
 #define SPAWNGROUP_H
 
-#include "../common/linked_list.h"
 #include "../common/types.h"
 
 #include <map>

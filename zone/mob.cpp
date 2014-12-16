@@ -27,6 +27,10 @@
 #include <math.h>
 #include <sstream>
 
+#ifdef BOTS
+#include "bot.h"
+#endif
+
 extern EntityList entity_list;
 
 extern Zone* zone;
@@ -972,36 +976,15 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
 
-	const Item_Struct *item;
-
 	for (i = 0; i < _MaterialCount; i++)
 	{
 		// Only Player Races Wear Armor
-		if (IsPlayerRace(race) || i > 6)
+		if (Mob::IsPlayerRace(race) || i > 6)
 		{
 			ns->spawn.equipment[i].material = GetEquipmentMaterial(i);
-
-			item = database.GetItem(GetEquipment(i));
-			if (item != 0)
-			{
-				ns->spawn.equipment[i].elitematerial = item->EliteMaterial;
-				ns->spawn.equipment[i].heroforgemodel = item->HerosForgeModel;
-				if (armor_tint[i])
-				{
-					ns->spawn.colors[i].color = armor_tint[i];
-				}
-				else
-				{
-					ns->spawn.colors[i].color = item->Color;
-				}
-			}
-			else
-			{
-				if (armor_tint[i])
-				{
-					ns->spawn.colors[i].color = armor_tint[i];
-				}
-			}
+			ns->spawn.equipment[i].elitematerial = IsEliteMaterialItem(i);
+			ns->spawn.equipment[i].heroforgemodel = GetHerosForgeModel(i);
+			ns->spawn.colors[i].color = GetEquipmentColor(i);
 		}
 	}
 
@@ -1023,7 +1006,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		//ns->spawn.DestructibleAppearance = static_cast<EmuAppearance>(_appearance);
 		// #appearance 44 1 makes it jump but no visible damage
 		// #appearance 44 2 makes it look completely broken but still visible
-		// #appearnace 44 3 makes it jump but not visible difference to 3
+		// #appearance 44 3 makes it jump but not visible difference to 3
 		// #appearance 44 4 makes it disappear altogether
 		// #appearance 44 5 makes the client crash.
 
@@ -2627,8 +2610,8 @@ uint32 NPC::GetEquipment(uint8 material_slot) const
 {
 	if(material_slot > 8)
 		return 0;
-	int invslot = Inventory::CalcSlotFromMaterial(material_slot);
-	if (invslot == -1)
+	int16 invslot = Inventory::CalcSlotFromMaterial(material_slot);
+	if (invslot == INVALID_INDEX)
 		return 0;
 	return equipment[invslot];
 }
@@ -2640,20 +2623,9 @@ void Mob::SendWearChange(uint8 material_slot)
 
 	wc->spawn_id = GetID();
 	wc->material = GetEquipmentMaterial(material_slot);
-	const Item_Struct *item;
-	item = database.GetItem(GetEquipment(material_slot));
-	if (item != 0)
-	{
-		wc->elite_material = item->EliteMaterial;
-		wc->hero_forge_model = item->HerosForgeModel;
-		wc->color.color = item->Color;
-	}
-	else
-	{
-		wc->elite_material = 0;
-		wc->hero_forge_model = 0;
-		wc->color.color = 0;
-	}
+	wc->elite_material = IsEliteMaterialItem(material_slot);
+	wc->hero_forge_model = GetHerosForgeModel(material_slot);
+	wc->color.color = GetEquipmentColor(material_slot);
 	wc->wear_slot_id = material_slot;
 
 	entity_list.QueueClients(this, outapp);
@@ -2697,7 +2669,7 @@ void Mob::SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uin
 
 	wc->spawn_id = this->GetID();
 	wc->material = GetEquipmentMaterial(material_slot);
-	wc->hero_forge_model = GetHeroForgeModel(material_slot);
+	wc->hero_forge_model = GetHerosForgeModel(material_slot);
 	wc->color.color = color;
 	wc->wear_slot_id = material_slot;
 
@@ -2724,48 +2696,99 @@ void Mob::WearChange(uint8 material_slot, uint16 texture, uint32 color, uint32 h
 
 int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 {
+	uint32 equipmaterial = 0;
+	int32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 	const Item_Struct *item;
-	int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 	item = database.GetItem(GetEquipment(material_slot));
-	if(item != 0)
+	
+	if (item != 0)
 	{
-		if	// for primary and secondary we need the model, not the material
-		(
-			material_slot == MaterialPrimary ||
-			material_slot == MaterialSecondary
-		)
+		// For primary and secondary we need the model, not the material
+		if (material_slot == MaterialPrimary || material_slot == MaterialSecondary)
 		{
-			if (this->IsClient()){
-				int currMatslot = MaterialPrimary == material_slot ? MainPrimary : MainSecondary;
-				const ItemInst* inst = CastToClient()->m_inv[currMatslot];
-				if (inst && inst->GetOrnamentationAug(ornamentationAugtype)) {
-					item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
-					return atoi(&item->IDFile[2]);
+			if (this->IsClient())
+			{
+				int16 invslot = Inventory::CalcSlotFromMaterial(material_slot);
+				if (invslot == INVALID_INDEX)
+				{
+					return 0;
 				}
-				else if (inst->GetOrnamentationIcon() && inst->GetOrnamentationIDFile()) {
-					return inst->GetOrnamentationIDFile();
-				}
-				else {
-					if (strlen(item->IDFile) > 2)
-						return atoi(&item->IDFile[2]);
-					else	//may as well try this, since were going to 0 anyways
-						return item->Material;
+				const ItemInst* inst = CastToClient()->m_inv[invslot];
+				if (inst)
+				{
+					if (inst->GetOrnamentationAug(ornamentationAugtype))
+					{
+						item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
+						if (item && strlen(item->IDFile) > 2)
+						{
+							equipmaterial = atoi(&item->IDFile[2]);
+						}
+					}
+					else if (inst->GetOrnamentationIDFile())
+					{
+						equipmaterial = inst->GetOrnamentationIDFile();
+					}
 				}
 			}
-			else {
-				if (strlen(item->IDFile) > 2)
-					return atoi(&item->IDFile[2]);
-				else	//may as well try this, since were going to 0 anyways
-					return item->Material;
+
+			if (equipmaterial == 0 && strlen(item->IDFile) > 2)
+			{
+				equipmaterial = atoi(&item->IDFile[2]);
 			}
 		}
 		else
 		{
-			return item->Material;
+			equipmaterial = item->Material;
 		}
 	}
 
-	return 0;
+	return equipmaterial;
+}
+
+int32 Mob::GetHerosForgeModel(uint8 material_slot) const
+{
+	
+	uint32 HeroModel = 0;
+	if (material_slot >= 0 && material_slot < MaterialPrimary)
+	{
+		uint32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
+		const Item_Struct *item;
+		item = database.GetItem(GetEquipment(material_slot));
+		int16 invslot = Inventory::CalcSlotFromMaterial(material_slot);
+		
+		if (item != 0 && invslot != INVALID_INDEX)
+		{
+			if (this->IsClient())
+			{
+				const ItemInst* inst = CastToClient()->m_inv[invslot];
+				if (inst)
+				{
+					if (inst->GetOrnamentationAug(ornamentationAugtype))
+					{
+						item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
+						HeroModel = item->HerosForgeModel;
+					}
+					else if (inst->GetOrnamentHeroModel())
+					{
+						HeroModel = inst->GetOrnamentHeroModel();
+					}
+				}
+			}
+
+			if (HeroModel == 0)
+			{
+				HeroModel = item->HerosForgeModel;
+			}
+		}
+	}
+
+	if (HeroModel > 0)
+	{
+		HeroModel *= 100;
+		HeroModel += material_slot;
+	}
+
+	return HeroModel;
 }
 
 uint32 Mob::GetEquipmentColor(uint8 material_slot) const
@@ -2789,19 +2812,6 @@ uint32 Mob::IsEliteMaterialItem(uint8 material_slot) const
 	if(item != 0)
 	{
 		return item->EliteMaterial;
-	}
-
-	return 0;
-}
-
-uint32 Mob::GetHeroForgeModel(uint8 material_slot) const
-{
-	const Item_Struct *item;
-
-	item = database.GetItem(GetEquipment(material_slot));
-	if (item != 0)
-	{
-		return item->HerosForgeModel;
 	}
 
 	return 0;

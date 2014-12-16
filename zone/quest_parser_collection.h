@@ -20,18 +20,31 @@
 #define _EQE_QUESTPARSERCOLLECTION_H
 
 #include "../common/types.h"
-#include "../common/item.h"
 
-#include "masterentity.h"
+#include "beacon.h"
+#include "client.h"
+#include "corpse.h"
+#include "doors.h"
+#include "groups.h"
+#include "mob.h"
+#include "object.h"
+#include "raids.h"
+#include "trap.h"
+
 #include "quest_interface.h"
 
-#include <string.h>
-#include <string>
 #include <list>
 #include <map>
 
 #define QuestFailedToLoad 0xFFFFFFFF
 #define QuestUnloaded 0x00
+
+class Client;
+class ItemInst;
+class Mob;
+class NPC;
+class QuestInterface;
+namespace EQEmu { class Any; }
 
 class QuestParserCollection {
 public:

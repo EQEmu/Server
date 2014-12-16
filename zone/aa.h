@@ -5,6 +5,7 @@
 struct AA_Ability;
 struct SendAA_Struct;
 
+
 #define MANA_BURN 664
 
 #include <map>
@@ -2155,6 +2156,7 @@ enum {	//values of AA_Action.action
 };
 
 class Timer;
+class Mob;
 class AA_SwarmPetInfo {
 public:
 	AA_SwarmPetInfo();

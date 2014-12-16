@@ -39,6 +39,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef BOTS
+#include "bot.h"
+#endif
+
 extern QueryServ* QServ;
 extern WorldServer worldserver;
 

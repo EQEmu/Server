@@ -4425,14 +4425,14 @@ struct EvolvingItem {
 
 struct ItemSerializationHeaderFinish
 {
-		uint16 ornamentIcon;
+/*079*/	uint16 ornamentIcon;
 /*081*/	uint8 unknown061;	// 0 - Add Evolving Item struct if this isn't set to 0?
 /*082*/	uint8 unknown062;	// 0
-/*083*/	uint32 unknowna1;	// 0xffffffff
-/*087*/	uint32 unknowna2;	// 0
+/*083*/	int32 unknowna1;	// 0xffffffff
+/*087*/	uint32 ornamentHeroModel;	// 0
 /*091*/	uint8 unknown063;	// 0
 /*092*/	uint32 unknowna3;	// 0
-/*096*/	uint32 unknowna4;	// 0xffffffff
+/*096*/	int32 unknowna4;	// 0xffffffff
 /*100*/	uint32 unknowna5;	// 0
 /*104*/	uint8 ItemClass; //0, 1, or 2
 /*105*/

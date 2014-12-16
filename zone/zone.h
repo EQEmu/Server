@@ -67,10 +67,14 @@ struct item_tick_struct {
     std::string qglobal;
 };
 
+class Client;
 class Map;
-class WaterMap;
+class Mob;
 class PathManager;
+class WaterMap;
 extern EntityList entity_list;
+struct NPCType;
+struct ServerZoneIncommingClient_Struct;
 
 class Zone
 {
