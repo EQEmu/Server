@@ -21,6 +21,7 @@
 #include "types.h"
 #include "features.h"
 #include <map>
+#include <string>
 
 enum FACTION_VALUE {
 	FACTION_ALLY = 1,
