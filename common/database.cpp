@@ -15,13 +15,13 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "../common/debug.h"
 #include "../common/rulesys.h"
-#include <cmath>
+
 #include <ctype.h>
 #include <iomanip>
 #include <iostream>
-#include <limits.h>
 #include <map>
 #include <mysqld_error.h>
 #include <stdio.h>
@@ -42,8 +42,8 @@
 
 #include "database.h"
 #include "eq_packet_structs.h"
-#include "string_util.h"
 #include "extprofile.h"
+#include "string_util.h"
 
 extern Client client;
 

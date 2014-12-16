@@ -33,23 +33,9 @@
 //atoi is not uint32 or uint32 safe!!!!
 #define atoul(str) strtoul(str, nullptr, 10)
 
-//class Spawn;
-class Corpse;
-class Spawn2;
-class NPC;
-class SpawnGroupList;
-class Petition;
-class Client;
-class Merc;
-class MySQLRequestResult;
-struct Combine_Struct;
-//struct Faction;
-//struct FactionMods;
-//struct FactionValue;
-struct ZonePoint;
-struct NPCType;
 class Inventory;
-class ItemInst;
+class MySQLRequestResult;
+class Client;
 
 struct EventLogDetails_Struct {
 	uint32	id;
@@ -81,11 +67,6 @@ struct VarCache_Struct {
 	char value[0];
 };
 
-struct PlayerProfile_Struct;
-struct GuildRankLevel_Struct;
-struct GuildRanks_Struct;
-struct ExtendedProfile_Struct;
-struct GuildMember_Struct;
 class PTimerList;
 
 #pragma pack(1)
