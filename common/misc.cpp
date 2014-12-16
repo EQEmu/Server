@@ -9,13 +9,14 @@
 #include <map>
 #include <iostream>
 #include <zlib.h>
+
 #ifndef WIN32
 #include <sys/time.h>
 #endif
+
 #include <time.h>
 #include "misc.h"
 #include "types.h"
-#include <cstdlib>
 #include <cstring>
 
 #define ENC(c) (((c) & 0x3f) + ' ')
