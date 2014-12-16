@@ -74,9 +74,11 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/skills.h"
 #include "../common/spdat.h"
 #include "../common/string_util.h"
+
 #include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "worldserver.h"
+
 #include <assert.h>
 #include <math.h>
 
