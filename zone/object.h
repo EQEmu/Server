@@ -21,16 +21,15 @@
 // Object Class:
 // Represents Zone Objects (forges, ovens, brew barrels, items dropped to ground, etc)
 
-#include "../common/types.h"
-#include "../common/linked_list.h"
-#include "../common/emu_opcodes.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/item.h"
-#include "client.h"
-#include "mob.h"
-#include "npc.h"
-#include "entity.h"
 #include "../common/timer.h"
+#include "../common/types.h"
+
+#include "entity.h"
+
+class Client;
+class EQApplicationPacket;
+class ItemInst;
 
 /*
 item icon numbers (showeq)
