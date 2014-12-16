@@ -17,8 +17,10 @@
 #define _STRINGUTIL_H_
 
 #include <sstream>
+#include <string.h>
 #include <vector>
 #include <cstdarg>
+
 #include "types.h"
 
 
