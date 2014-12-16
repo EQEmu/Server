@@ -19,14 +19,11 @@
 #define RAIDS_H
 
 #include "../common/types.h"
-#include "../common/linked_list.h"
 #include "groups.h"
-#include <vector>
-#include <string>
-#include <queue>
 
 class Client;
 class EQApplicationPacket;
+class Mob;
 
 enum {	//raid packet types:
 	raidAdd = 0,
