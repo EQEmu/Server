@@ -15,16 +15,17 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "../common/debug.h"
 #include "../common/string_util.h"
-#include <stdlib.h>
-#include "spawn2.h"
+
+#include "client.h"
 #include "entity.h"
-#include "masterentity.h"
-#include "zone.h"
+#include "spawn2.h"
 #include "spawngroup.h"
-#include "zonedb.h"
 #include "worldserver.h"
+#include "zone.h"
+#include "zonedb.h"
 
 extern EntityList entity_list;
 extern Zone* zone;
