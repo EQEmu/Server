@@ -70,15 +70,12 @@
 
 */
 
-#include "debug.h"
-#include "spdat.h"
-#include "packet_dump.h"
-#include "moremath.h"
-#include "item.h"
-#include "skills.h"
-#include "bodytypes.h"
+#include "../common/logsys.h"
+#include "../common/logtypes.h"
+
 #include "classes.h"
-#include <math.h>
+#include "spdat.h"
+
 #ifndef WIN32
 #include <stdlib.h>
 #include "unix.h"
