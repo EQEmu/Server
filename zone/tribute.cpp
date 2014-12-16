@@ -15,13 +15,13 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "../common/debug.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/features.h"
-#include "masterentity.h"
-#include "../common/packet_dump.h"
-#include "../common/misc_functions.h"
-#include <string>
+
+#include "client.h"
+
 #include <map>
 
 #ifdef _WINDOWS
