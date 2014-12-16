@@ -1,14 +1,11 @@
 #include <iostream>
 #include <cstring>
-#include <cstdlib>
-#include <ctime>
 
 #include "classes.h"
 #include "eq_packet_structs.h"
 #include "eqemu_exception.h"
 #include "faction.h"
 #include "features.h"
-#include "guilds.h"
 #include "ipc_mutex.h"
 #include "item.h"
 #include "loottable.h"
