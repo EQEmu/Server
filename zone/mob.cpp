@@ -27,6 +27,10 @@
 #include <math.h>
 #include <sstream>
 
+#ifdef BOTS
+#include "bot.h"
+#endif
+
 extern EntityList entity_list;
 
 extern Zone* zone;

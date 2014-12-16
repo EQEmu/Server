@@ -46,6 +46,10 @@
 	#define strcasecmp	_stricmp
 #endif
 
+#ifdef BOTS
+#include "bot.h"
+#endif
+
 extern Zone *zone;
 extern volatile bool ZoneLoaded;
 extern WorldServer worldserver;
