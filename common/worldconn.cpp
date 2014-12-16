@@ -17,18 +17,11 @@
 */
 
 #include "../common/debug.h"
-#include <iostream>
-#include <string.h>
-#include <stdio.h>
 #include <iomanip>
-#include <time.h>
-#include <stdlib.h>
-#include <stdarg.h>
 
 #include "worldconn.h"
 #include "eqemu_config.h"
 #include "md5.h"
-#include "database.h"
 #include "servertalk.h"
 
 WorldConnection::WorldConnection(EmuTCPConnection::ePacketMode mode, const char *password)
