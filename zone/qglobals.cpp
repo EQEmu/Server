@@ -1,9 +1,8 @@
-#include "../common/debug.h"
 #include "../common/string_util.h"
+
 #include "qglobals.h"
-#include "masterentity.h"
+#include "client.h"
 #include "zone.h"
-#include "zonedb.h"
 
 void QGlobalCache::AddGlobal(uint32 id, QGlobal global)
 {

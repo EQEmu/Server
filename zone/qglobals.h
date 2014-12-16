@@ -2,9 +2,6 @@
 #define __QGLOBALS__H
 
 #include <list>
-#include <string>
-#include <stdlib.h>
-#include "../common/timer.h"
 
 class NPC;
 class Client;
