@@ -1,13 +1,13 @@
-#include "../common/debug.h"
-#include <stdio.h>
-#include <string.h>
-#include <algorithm>
-#include <functional>
-#include <cctype>
+
 
 #include "water_map.h"
 #include "water_map_v1.h"
 #include "water_map_v2.h"
+
+#include <algorithm>
+#include <cctype>
+#include <stdio.h>
+#include <string.h>
 
 WaterMap* WaterMap::LoadWaterMapfile(std::string zone_name) {
 	std::transform(zone_name.begin(), zone_name.end(), zone_name.begin(), ::tolower);
