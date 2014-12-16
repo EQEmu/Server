@@ -15,13 +15,12 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "../common/debug.h"
 #include <iostream>
 #include <string.h>
 #include <stdio.h>
 #include <iomanip>
-#include <time.h>
-#include <stdlib.h>
 #include <stdarg.h>
 
 #ifdef _WINDOWS
@@ -32,25 +31,24 @@
 	#define strcasecmp	_stricmp
 #endif
 
-#include "../common/servertalk.h"
-#include "worldserver.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/packet_dump.h"
 #include "../common/misc_functions.h"
-#include "zonedb.h"
-#include "zone.h"
+#include "../common/rulesys.h"
+#include "../common/servertalk.h"
+
+#include "client.h"
+#include "corpse.h"
 #include "entity.h"
-#include "masterentity.h"
+#include "guild_mgr.h"
+#include "mob.h"
 #include "net.h"
 #include "petitions.h"
-#include "../common/packet_functions.h"
-#include "../common/md5.h"
-#include "zone_config.h"
+#include "raids.h"
 #include "string_ids.h"
-#include "guild_mgr.h"
-#include "../common/rulesys.h"
 #include "titles.h"
-#include "qglobals.h"
+#include "worldserver.h"
+#include "zone.h"
+#include "zone_config.h"
 
 
 extern EntityList entity_list;
