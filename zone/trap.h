@@ -18,9 +18,10 @@
 #ifndef _TRAP_H
 #define _TRAP_H
 
-#include "../common/debug.h"
-
 #include "entity.h"
+
+class Mob;
+class NPC;
 
 //ID of the NPC type to spawn when a trap is set off, to do the damage
 #define TRAP_NPC_TYPE 1586
