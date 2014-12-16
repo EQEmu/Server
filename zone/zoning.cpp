@@ -19,6 +19,7 @@
 #include "../common/debug.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
+
 #include "queryserv.h"
 #include "quest_parser_collection.h"
 #include "string_ids.h"
