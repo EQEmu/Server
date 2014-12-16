@@ -15,14 +15,20 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "../common/debug.h"
-#include "masterentity.h"
-#include "string_ids.h"
-#include "../common/string_util.h"
 #include "../common/rulesys.h"
+#include "../common/string_util.h"
+
+#include "client.h"
+#include "entity.h"
+#include "mob.h"
+
 #include "quest_parser_collection.h"
+#include "string_ids.h"
 #include "worldserver.h"
-#include "queryserv.h"
+
+class QueryServ;
 
 extern WorldServer worldserver;
 extern QueryServ* QServ;
