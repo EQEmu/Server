@@ -26,6 +26,8 @@
 #include "dbcore.h"
 #include "linked_list.h"
 #include "eq_packet_structs.h"
+
+#include <cmath>
 #include <string>
 #include <vector>
 #include <map>
