@@ -16,6 +16,7 @@
 #endif
 
 #include <iostream>
+#include <fcntl.h>
 
 #include "op_codes.h"
 
