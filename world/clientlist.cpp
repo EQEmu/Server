@@ -1296,7 +1296,6 @@ void ClientList::GetClients(const char *zone_name, std::vector<ClientListEntry *
 
 void ClientList::SendClientVersionSummary(const char *Name)
 {
-	uint32 Client62Count = 0;
 	uint32 ClientTitaniumCount = 0;
 	uint32 ClientSoFCount = 0;
 	uint32 ClientSoDCount = 0;
@@ -1317,7 +1316,6 @@ void ClientList::SendClientVersionSummary(const char *Name)
 			{
 				case 1:
 				{
-					++Client62Count;
 					break;
 				}
 				case 2:
@@ -1354,7 +1352,7 @@ void ClientList::SendClientVersionSummary(const char *Name)
 
 	}
 
-	zoneserver_list.SendEmoteMessage(Name, 0, 0, 13, "There are %i 6.2, %i Titanium, %i SoF, %i SoD, %i UF, %i RoF clients currently connected.",
-					Client62Count, ClientTitaniumCount, ClientSoFCount, ClientSoDCount, ClientUnderfootCount, ClientRoFCount);
+	zoneserver_list.SendEmoteMessage(Name, 0, 0, 13, "There are %i Titanium, %i SoF, %i SoD, %i UF, %i RoF clients currently connected.",
+		ClientTitaniumCount, ClientSoFCount, ClientSoDCount, ClientUnderfootCount, ClientRoFCount);
 }
 
