@@ -17,6 +17,7 @@
 */
 
 #include "../common/debug.h"
+
 #include <stdlib.h>
 #include <list>
 
@@ -24,9 +25,9 @@
 #include <netinet/in.h>	//for htonl
 #endif
 
-#include "../common/misc_functions.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
+
 #include "queryserv.h"
 #include "quest_parser_collection.h"
 #include "string_ids.h"
