@@ -543,7 +543,7 @@ float Mob::_GetMovementSpeed(int mod) const
 	if (IsRooted())
 		return 0.0f;
 	else if (IsPseudoRooted())
-		return 0.000001f;
+		return 0.00001f;
 
 	float speed_mod = runspeed;
 
