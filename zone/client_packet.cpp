@@ -5714,7 +5714,7 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 			}
 			else
 			{
-				std::list<int> pathlist = zone->pathing->FindRoute(Start, End);
+				std::vector<int> pathlist = zone->pathing->FindRoute(Start, End);
 
 				if (pathlist.size() == 0)
 				{
@@ -5753,7 +5753,7 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 				p.z = GetZ();
 				points.push_back(p);
 
-				for (std::list<int>::iterator Iterator = pathlist.begin(); Iterator != pathlist.end(); ++Iterator)
+				for (auto Iterator = pathlist.begin(); Iterator != pathlist.end(); ++Iterator)
 				{
 					if ((*Iterator) == -1) // Teleporter
 					{

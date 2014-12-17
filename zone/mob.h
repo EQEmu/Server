@@ -1225,7 +1225,7 @@ protected:
 	Map::Vertex PathingLastPosition;
 	int PathingLoopCount;
 	int PathingLastNodeVisited;
-	std::list<int> Route;
+	std::vector<int> Route;
 	LOSType PathingLOSState;
 	Timer *PathingLOSCheckTimer;
 	Timer *PathingRouteUpdateTimerShort;

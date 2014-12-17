@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/17/2014 ==
+demonstar55: Use vectors for route stuff, should be more CPU cache friendly so faster
+
 == 12/15/2014 ==
 Trevius: (RoF+) Implemented the 6th Augment Slot for Items.
 Trevius: Player Corpses now saved attuned settings for Items.

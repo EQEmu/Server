@@ -2636,7 +2636,7 @@ void EntityList::FindPathsToAllNPCs()
 	while (it != npc_list.end()) {
 		Map::Vertex Node0 = zone->pathing->GetPathNodeCoordinates(0, false);
 		Map::Vertex Dest(it->second->GetX(), it->second->GetY(), it->second->GetZ());
-		std::list<int> Route = zone->pathing->FindRoute(Node0, Dest);
+		std::vector<int> Route = zone->pathing->FindRoute(Node0, Dest);
 		if (Route.size() == 0)
 			printf("Unable to find a route to %s\n", it->second->GetName());
 		else
