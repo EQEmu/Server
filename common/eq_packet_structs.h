@@ -1380,19 +1380,19 @@ struct PlayerPositionUpdateServer_Struct
 struct PlayerPositionUpdateClient_Struct
 {
 /*0000*/ uint16	spawn_id;
-/*0022*/ uint16	sequence;	//increments one each packet
+/*0002*/ uint16	sequence;			//increments one each packet
 /*0004*/ float	y_pos;				// y coord
 /*0008*/ float	delta_z;			// Change in z
-/*0016*/ float	delta_x;			// Change in x
-/*0012*/ float	delta_y;			// Change in y
+/*0012*/ float	delta_x;			// Change in x
+/*0016*/ float	delta_y;			// Change in y
 /*0020*/ int32	animation:10,		// animation
 				delta_heading:10,	// change in heading
 				padding0020:12;		// ***Placeholder (mostly 1)
 /*0024*/ float	x_pos;				// x coord
 /*0028*/ float	z_pos;				// z coord
-/*0034*/ uint16	heading:12,			// Directional heading
+/*0032*/ uint16	heading:12,			// Directional heading
 				padding0004:4;		// ***Placeholder
-/*0032*/ uint8	unknown0006[2];		// ***Placeholder
+/*0034*/ uint8	unknown0006[2];		// ***Placeholder
 /*0036*/
 };
 

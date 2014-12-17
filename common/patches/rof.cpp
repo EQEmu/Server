@@ -4878,7 +4878,8 @@ namespace RoF
 		uint16 ornaIcon = 0;
 		int32 heroModel = 0;
 		/*
-		if (inst->GetOrnamentationAug(ornamentationAugtype)) {
+		if (inst->GetOrnamentationAug(ornamentationAugtype))
+		{
 			const Item_Struct *aug_weap = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
 			//Mainhand
 			ss.write(aug_weap->IDFile, strlen(aug_weap->IDFile));

@@ -1696,6 +1696,8 @@ namespace RoF2
 		eq->unknown932 = -1;	// Set from PoK Example
 		eq->unknown936 = -1;	// Set from PoK Example
 		eq->unknown944 = 1.0;	// Set from PoK Example
+		eq->unknown948 = 0;		// New on Live as of Dec 15 2014
+		eq->unknown952 = 100;	// New on Live as of Dec 15 2014
 
 		FINISH_ENCODE();
 	}
@@ -2339,7 +2341,6 @@ namespace RoF2
 		outapp->WriteUInt32(emu->silver_bank);
 		outapp->WriteUInt32(emu->copper_bank);
 
-		// Commenting out for RoF Test
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
@@ -2387,12 +2388,7 @@ namespace RoF2
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 
-		/*
-
-		// Begin RoF2 Test
-		for (uint32 r = 0; r < 1000; r++)
-			outapp->WriteUInt8(0);				// Unknown
-		// End RoF2 Test
+		
 
 		// Block of 121 unknown bytes
 		for (uint32 r = 0; r < 121; r++)
@@ -2407,6 +2403,11 @@ namespace RoF2
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
+
+		// Begin RoF2 Test
+		//for (uint32 r = 0; r < 8000; r++)
+			//outapp->WriteUInt8(0);				// Unknown
+		// End RoF2 Test
 
 		// Unknown String ?
 		outapp->WriteUInt32(64);			// Unknown
@@ -2535,7 +2536,6 @@ namespace RoF2
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 
-		*/
 
 		outapp->WriteUInt8(emu->groupAutoconsent);
 		outapp->WriteUInt8(emu->raidAutoconsent);
@@ -4860,8 +4860,8 @@ namespace RoF2
 		hdr.charges = (stackable ? (item->MaxCharges ? 1 : 0) : charges);
 		hdr.inst_nodrop = inst->IsAttuned() ? 1 : 0;
 		hdr.unknown044 = 0;
-		hdr.unknown048 = 7300 + Inventory::CalcMaterialFromSlot(slot_id_in);  //0;
-		hdr.unknown052 = 7300 + Inventory::CalcMaterialFromSlot(slot_id_in);  //0;
+		hdr.unknown048 = 0;
+		hdr.unknown052 = 0;
 		hdr.isEvolving = item->EvolvingLevel > 0 ? 1 : 0;
 		ss.write((const char*)&hdr, sizeof(RoF2::structs::ItemSerializationHeader));
 
@@ -5325,13 +5325,8 @@ namespace RoF2
 		iqbs.SpellDmg = item->SpellDmg;
 		iqbs.clairvoyance = item->Clairvoyance;
 		iqbs.unknown28 = 0;
-		
-
-		// Begin RoF2 Test
-		iqbs.unknown_TEST1 = 0;
-		// End RoF2 Test
-
 		iqbs.unknown30 = 0;
+		iqbs.unknown37a = 0;
 		iqbs.unknown39 = 1;
 
 		iqbs.subitem_count = 0;
