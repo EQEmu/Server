@@ -49,6 +49,10 @@ class EQProtocolPacket;
 #define RETRANSMIT_ACKED_PACKETS true
 #endif
 
+#ifndef MAX_SESSION_RETRIES
+#define MAX_SESSION_RETRIES 30
+#endif
+
 #pragma pack(1)
 struct SessionRequest {
 	uint32 UnknownA;
@@ -103,6 +107,9 @@ class EQStream : public EQStreamInterface {
 		bool compressed,encoded;
 		uint32 retransmittimer;
 		uint32 retransmittimeout;
+
+		uint16 sessionAttempts;
+		bool streamactive;
 
 		//uint32 buffer_len;
 
@@ -197,9 +204,9 @@ class EQStream : public EQStreamInterface {
 
 		void _SendDisconnect();
 
-		void init();
+		void init(bool resetSession=true);
 	public:
-		EQStream() { init(); remote_ip = 0; remote_port = 0; State=UNESTABLISHED; StreamType=UnknownStream; compressed=true; encoded=false; app_opcode_size=2; bytes_sent=0; bytes_recv=0; create_time=Timer::GetTimeSeconds(); }
+		EQStream() { init(); remote_ip = 0; remote_port = 0; State=UNESTABLISHED; StreamType=UnknownStream; compressed=true; encoded=false; app_opcode_size=2; bytes_sent=0; bytes_recv=0; create_time=Timer::GetTimeSeconds(); sessionAttempts = 0; streamactive=false; }
 		EQStream(sockaddr_in addr) { init(); remote_ip=addr.sin_addr.s_addr; remote_port=addr.sin_port; State=UNESTABLISHED; StreamType=UnknownStream; compressed=true; encoded=false; app_opcode_size=2; bytes_sent=0; bytes_recv=0; create_time=Timer::GetTimeSeconds(); }
 		virtual ~EQStream() { RemoveData(); SetState(CLOSED); }
 		void SetMaxLen(uint32 length) { MaxLen=length; }
@@ -223,6 +230,9 @@ class EQStream : public EQStreamInterface {
 		void Process(const unsigned char *data, const uint32 length);
 		void SetLastPacketTime(uint32 t) {LastPacket=t;}
 		void Write(int eq_fd);
+
+		// whether or not the stream has been assigned (we passed our stream match)
+		void SetActive(bool val) { streamactive = val; }
 
 		//
 		inline bool IsInUse() { bool flag; MInUse.lock(); flag=(active_users>0); MInUse.unlock(); return flag; }
