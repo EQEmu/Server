@@ -155,6 +155,7 @@ public:
 	virtual void	RangedAttack(Mob* other);
 	virtual void	ThrowingAttack(Mob* other) { }
 	int32 GetNumberOfAttacks() const { return attack_count; }
+	void DoRangedAttackDmg(Mob* other, bool Launch=true, int16 damage_mod=0, int16 chance_mod=0, SkillUseTypes skill=SkillArchery, float speed=4.0f, const char *IDFile = nullptr);
 
 	bool	DatabaseCastAccepted(int spell_id);
 	bool	IsFactionListAlly(uint32 other_faction);
