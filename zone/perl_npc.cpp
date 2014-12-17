@@ -2119,6 +2119,32 @@ XS(XS_NPC_GetAttackSpeed)
 	XSRETURN(1);
 }
 
+XS(XS_NPC_GetAttackDelay); /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_GetAttackDelay)
+{
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: NPC::GetAttackDelay(THIS)");
+	{
+		NPC *		THIS;
+		float		RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(NPC *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetAttackDelay();
+		XSprePUSH; PUSHn((double)RETVAL);
+	}
+	XSRETURN(1);
+}
+
 XS(XS_NPC_GetAccuracyRating); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetAccuracyRating)
 {
@@ -2140,6 +2166,32 @@ XS(XS_NPC_GetAccuracyRating)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetAccuracyRating();
+		XSprePUSH; PUSHu((UV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_NPC_GetAvoidanceRating); /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_GetAvoidanceRating)
+{
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: NPC::GetAvoidanceyRating(THIS)");
+	{
+		NPC *		THIS;
+		int32		RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(NPC *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetAvoidanceRating();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -2245,6 +2297,81 @@ XS(XS_NPC_GetMerchantProbability) {
 	XSRETURN(1);
 }
 
+XS(XS_NPC_AddMeleeProc);
+XS(XS_NPC_AddMeleeProc) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: NPC::AddMeleeProc(THIS,spellid,chance)");
+	{
+		NPC * THIS;
+		int	spell_id = (int)SvIV(ST(1));
+		int	chance = (int)SvIV(ST(2));
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(NPC *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		if(THIS == NULL)
+			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+
+		THIS->AddProcToWeapon(spell_id, true, chance);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_NPC_AddRangedProc);
+XS(XS_NPC_AddRangedProc) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: NPC::AddRangedProc(THIS,spellid,chance)");
+	{
+		NPC * THIS;
+		int	spell_id = (int)SvIV(ST(1));
+		int	chance = (int)SvIV(ST(2));
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(NPC *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		if(THIS == NULL)
+			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+
+		THIS->AddDefensiveProc(spell_id,chance);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_NPC_AddDefensiveProc);
+XS(XS_NPC_AddDefensiveProc) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: NPC::AddDefensiveProc(THIS,spellid,chance)");
+	{
+		NPC * THIS;
+		int	spell_id = (int)SvIV(ST(1));
+		int	chance = (int)SvIV(ST(2));
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(NPC *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		if(THIS == NULL)
+			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+
+		THIS->AddProcToWeapon(spell_id, true, chance);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -2342,11 +2469,16 @@ XS(boot_NPC)
 		newXSproto(strcpy(buf, "GetSpellFocusHeal"), XS_NPC_GetSpellFocusHeal, file, "$");
 		newXSproto(strcpy(buf, "GetSlowMitigation"), XS_NPC_GetSlowMitigation, file, "$");
 		newXSproto(strcpy(buf, "GetAttackSpeed"), XS_NPC_GetAttackSpeed, file, "$");
+		newXSproto(strcpy(buf, "GetAttackDelay"), XS_NPC_GetAttackDelay, file, "$");
 		newXSproto(strcpy(buf, "GetAccuracyRating"), XS_NPC_GetAccuracyRating, file, "$");
+		newXSproto(strcpy(buf, "GetAvoidanceRating"), XS_NPC_GetAvoidanceRating, file, "$");
 		newXSproto(strcpy(buf, "GetSpawnKillCount"), XS_NPC_GetSpawnKillCount, file, "$");
 		newXSproto(strcpy(buf, "GetScore"), XS_NPC_GetScore, file, "$");
 		newXSproto(strcpy(buf, "SetMerchantProbability"), XS_NPC_SetMerchantProbability, file, "$$");
 		newXSproto(strcpy(buf, "GetMerchantProbability"), XS_NPC_GetMerchantProbability, file, "$");
+		newXSproto(strcpy(buf, "AddMeleeProc"), XS_NPC_AddMeleeProc, file, "$$$");
+		newXSproto(strcpy(buf, "AddRangedProc"), XS_NPC_AddRangedProc, file, "$$$");
+		newXSproto(strcpy(buf, "AddDefensiveProc"), XS_NPC_AddDefensiveProc, file, "$$$");
 	XSRETURN_YES;
 }
 

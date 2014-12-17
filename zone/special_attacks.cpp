@@ -103,6 +103,9 @@ void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 	if (!who)
 		return;
 
+	if(who->GetInvul() || who->GetSpecialAbility(IMMUNE_MELEE) || who->GetSpecialAbility(IMMUNE_MELEE_EXCEPT_BANE))
+		return; //-5?
+
 	int32 hate = max_damage;
 	if(hate_override > -1)
 		hate = hate_override;
