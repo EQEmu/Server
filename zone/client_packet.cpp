@@ -5714,7 +5714,7 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 			}
 			else
 			{
-				std::vector<int> pathlist = zone->pathing->FindRoute(Start, End);
+				std::deque<int> pathlist = zone->pathing->FindRoute(Start, End);
 
 				if (pathlist.size() == 0)
 				{

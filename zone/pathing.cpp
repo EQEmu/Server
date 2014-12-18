@@ -205,15 +205,15 @@ Map::Vertex PathManager::GetPathNodeCoordinates(int NodeNumber, bool BestZ)
 
 }
 
-std::vector<int> PathManager::FindRoute(int startID, int endID)
+std::deque<int> PathManager::FindRoute(int startID, int endID)
 {
 	_log(PATHING__DEBUG, "FindRoute from node %i to %i", startID, endID);
 
 	memset(ClosedListFlag, 0, sizeof(int) * Head.PathNodeCount);
 
-	std::vector<AStarNode> OpenList, ClosedList;
+	std::deque<AStarNode> OpenList, ClosedList;
 
-	std::vector<int>Route;
+	std::deque<int>Route;
 
 	AStarNode AStarEntry, CurrentNode;
 
@@ -235,7 +235,7 @@ std::vector<int> PathManager::FindRoute(int startID, int endID)
 
 		ClosedListFlag[CurrentNode.PathNodeID] = true;
 
-		OpenList.erase(OpenList.begin());
+		OpenList.pop_front();
 
 		for(int i = 0; i < PATHNODENEIGHBOURS; ++i)
 		{
@@ -251,7 +251,7 @@ std::vector<int> PathManager::FindRoute(int startID, int endID)
 
 				Route.push_back(endID);
 
-				std::vector<AStarNode>::iterator RouteIterator;
+				std::deque<AStarNode>::iterator RouteIterator;
 
 				while(CurrentNode.PathNodeID != startID)
 				{
@@ -300,7 +300,7 @@ std::vector<int> PathManager::FindRoute(int startID, int endID)
 
 			bool AlreadyInOpenList = false;
 
-			std::vector<AStarNode>::iterator OpenListIterator, InsertionPoint = OpenList.end();
+			std::deque<AStarNode>::iterator OpenListIterator, InsertionPoint = OpenList.end();
 
 			for(OpenListIterator = OpenList.begin(); OpenListIterator != OpenList.end(); ++OpenListIterator)
 			{
@@ -350,11 +350,11 @@ bool SortPathNodesByDistance(PathNodeSortStruct n1, PathNodeSortStruct n2)
 	return n1.Distance < n2.Distance;
 }
 
-std::vector<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
+std::deque<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 {
 	_log(PATHING__DEBUG, "FindRoute(%8.3f, %8.3f, %8.3f, %8.3f, %8.3f, %8.3f)", Start.x, Start.y, Start.z, End.x, End.y, End.z);
 
-	std::vector<int> noderoute;
+	std::deque<int> noderoute;
 
 	float CandidateNodeRangeXY = RuleR(Pathing, CandidateNodeRangeXY);
 
@@ -365,7 +365,7 @@ std::vector<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 	//
 	int ClosestPathNodeToStart = -1;
 
-	std::vector<PathNodeSortStruct> SortedByDistance;
+	std::deque<PathNodeSortStruct> SortedByDistance;
 
 	PathNodeSortStruct TempNode;
 
@@ -456,7 +456,7 @@ std::vector<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 	{
 		int CulledNodes = 0;
 
-		std::vector<int>::iterator First, Second;
+		std::deque<int>::iterator First, Second;
 
 		while((noderoute.size() >= 2) && (CulledNodes < NodesToAttemptToCull))
 		{
@@ -487,7 +487,7 @@ std::vector<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 	{
 		int CulledNodes = 0;
 
-		std::vector<int>::iterator First, Second;
+		std::deque<int>::iterator First, Second;
 
 		while((noderoute.size() >= 2) && (CulledNodes < NodesToAttemptToCull))
 		{
@@ -611,7 +611,7 @@ void PathManager::MeshTest()
 			if(j == i)
 				continue;
 
-			std::vector<int> Route = FindRoute(PathNodes[i].id, PathNodes[j].id);
+			std::deque<int> Route = FindRoute(PathNodes[i].id, PathNodes[j].id);
 
 			if(Route.size() == 0)
 			{
@@ -638,7 +638,7 @@ void PathManager::SimpleMeshTest()
 
 	for(uint32 j = 1; j < Head.PathNodeCount; ++j)
 	{
-		std::vector<int> Route = FindRoute(PathNodes[0].id, PathNodes[j].id);
+		std::deque<int> Route = FindRoute(PathNodes[0].id, PathNodes[j].id);
 
 		if(Route.size() == 0)
 		{
@@ -695,7 +695,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 			}
 			NodeLoc = zone->pathing->GetPathNodeCoordinates(Route.front());
 
-			Route.erase(Route.begin());
+			Route.pop_front();
 
 			++PathingTraversedNodes;
 
@@ -784,7 +784,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 				}
 				// We are on the same route, no LOS (or not checking this time, so pop off the node we just reached
 				//
-				Route.erase(Route.begin());
+				Route.pop_front();
 
 				++PathingTraversedNodes;
 
@@ -798,7 +798,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 					if(NextNode == -1)
 					{
 						// -1 indicates a teleport to the next node
-						Route.erase(Route.begin());
+						Route.pop_front();
 
 						if(Route.size() == 0)
 						{
@@ -814,7 +814,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 						mlog(PATHING__DEBUG, "  TELEPORTED to %8.3f, %8.3f, %8.3f\n", NodeLoc.x, NodeLoc.y, NodeLoc.z);
 
-						Route.erase(Route.begin());
+						Route.pop_front();
 
 						if(Route.size() == 0)
 							return To;
@@ -962,7 +962,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 					PathingLastNodeVisited = Route.front();
 
-					Route.erase(Route.begin());
+					Route.pop_front();
 
 					++PathingTraversedNodes;
 
@@ -975,7 +975,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 						if(NextNode == -1)
 						{
 							// -1 indicates a teleport to the next node
-							Route.erase(Route.begin());
+							Route.pop_front();
 
 							if(Route.size() == 0)
 							{
@@ -991,7 +991,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 							mlog(PATHING__DEBUG, "  TELEPORTED to %8.3f, %8.3f, %8.3f\n", NodeLoc.x, NodeLoc.y, NodeLoc.z);
 
-							Route.erase(Route.begin());
+							Route.pop_front();
 
 							if(Route.size() == 0)
 								return To;
@@ -1103,7 +1103,7 @@ int PathManager::FindNearestPathNode(Map::Vertex Position)
 
 	int ClosestPathNodeToStart = -1;
 
-	std::vector<PathNodeSortStruct> SortedByDistance;
+	std::deque<PathNodeSortStruct> SortedByDistance;
 
 	PathNodeSortStruct TempNode;
 

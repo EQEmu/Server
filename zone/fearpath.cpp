@@ -158,7 +158,7 @@ void Mob::CalculateNewFearpoint()
 
 		Map::Vertex CurrentPosition(GetX(), GetY(), GetZ());
 
-		std::vector<int> Route = zone->pathing->FindRoute(CurrentPosition, Loc);
+		std::deque<int> Route = zone->pathing->FindRoute(CurrentPosition, Loc);
 
 		if(Route.size() > 0)
 		{
