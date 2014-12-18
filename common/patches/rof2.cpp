@@ -2123,18 +2123,6 @@ namespace RoF2
 
 		outapp->WriteUInt32(structs::BUFF_COUNT);
 
-		//*000*/ uint8 slotid;				// badly named... seems to be 2 for a real buff, 0 otherwise
-		//*001*/ float unknown004;			// Seen 1 for no buff
-		//*005*/ uint32 player_id;			// 'global' ID of the caster, for wearoff messages
-		//*009*/ uint32 unknown016;
-		//*013*/ uint8 bard_modifier;
-		//*014*/ uint32 duration;
-		//*018*/ uint8 level;
-		//*019*/ uint32 spellid;
-		//*023*/ uint32 counters;
-		//*027*/ uint8 unknown0028[53];
-		//*080*/
-
 		for (uint32 r = 0; r < BUFF_COUNT; r++)
 		{
 			float instrument_mod = 0.0f;
@@ -2174,7 +2162,6 @@ namespace RoF2
 			// 80 bytes of zeroes
 			for (uint32 j = 0; j < 20; ++j)
 				outapp->WriteUInt32(0);
-
 		}
 
 		outapp->WriteUInt32(emu->platinum);
@@ -2199,8 +2186,8 @@ namespace RoF2
 
 		outapp->WriteUInt32(emu->aapoints_spent);
 
-		outapp->WriteUInt32(5);				// AA Points count ??
-		outapp->WriteUInt32(1234);			// AA Points assigned
+		outapp->WriteUInt32(5);				// AA Window Tab Count
+		outapp->WriteUInt32(0);				// AA Points assigned ?
 		outapp->WriteUInt32(0);				// AA Points in General ?
 		outapp->WriteUInt32(0);				// AA Points in Class ?
 		outapp->WriteUInt32(0);				// AA Points in Archetype ?
@@ -2328,13 +2315,15 @@ namespace RoF2
 		outapp->WriteUInt8(0);				// Unknown
 		outapp->WriteUInt8(emu->gm);
 		outapp->WriteUInt32(emu->guild_id);
-		outapp->WriteUInt8(0);				// Unknown - observed 1 in a live packet.
-		outapp->WriteUInt32(0);				// Unknown - observed 1 in a live packet.
-		outapp->WriteUInt8(0);				// Unknown - observed 1 in a live packet.
+		
+		outapp->WriteUInt8(0);			// Unknown
+		outapp->WriteUInt32(0);				// Unknown
+		outapp->WriteUInt8(0);			// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 
-		outapp->WriteUInt64(emu->exp);
-		outapp->WriteUInt8(0);				// Unknown
+		outapp->WriteUInt64(emu->exp);		// int32 in client
+
+		outapp->WriteUInt8(0);			// Unknown - Seen 5 on Live
 
 		outapp->WriteUInt32(emu->platinum_bank);
 		outapp->WriteUInt32(emu->gold_bank);
@@ -2346,16 +2335,10 @@ namespace RoF2
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 
-		outapp->WriteUInt32(42);			// The meaning of life ?
-
-		for (uint32 r = 0; r < 42; r++)
-		{
-			outapp->WriteUInt32(0);				// Unknown
-			outapp->WriteUInt32(0);				// Unknown
-		}
-
 		outapp->WriteUInt32(0);				// Unknown
-		outapp->WriteUInt32(0);				// Unknown
+
+		outapp->WriteSInt32(-1);				// Unknown
+		outapp->WriteSInt32(-1);				// Unknown
 
 		outapp->WriteUInt32(emu->career_tribute_points);
 		outapp->WriteUInt32(0);				// Unknown
@@ -2387,13 +2370,12 @@ namespace RoF2
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
-
 		
-
-		// Block of 121 unknown bytes
-		for (uint32 r = 0; r < 121; r++)
+		for (uint32 r = 0; r < 125; r++)
+		{
 			outapp->WriteUInt8(0);				// Unknown
-
+		}
+		
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(emu->currentRadCrystals);
@@ -2404,58 +2386,63 @@ namespace RoF2
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 
-		// Begin RoF2 Test
-		//for (uint32 r = 0; r < 8000; r++)
-			//outapp->WriteUInt8(0);				// Unknown
-		// End RoF2 Test
+		// Unknown String ?
+		outapp->WriteUInt32(64);			// Unknown
+		for (uint32 r = 0; r < 64; r++)
+		{
+			outapp->WriteUInt8(0);				// Unknown
+		}
+
+		outapp->WriteUInt8(0);				// Unknown
+		outapp->WriteUInt8(0);				// Unknown
+		outapp->WriteUInt8(0);				// Unknown
+
+		outapp->WriteUInt32(0);				// Unknown
+		outapp->WriteUInt32(0);				// Unknown
+
+		outapp->WriteUInt8(0);				// Unknown
+		outapp->WriteUInt8(0);				// Unknown
+		outapp->WriteUInt8(0);				// Unknown
+
+		outapp->WriteUInt32(0);				// Unknown
+
+		outapp->WriteUInt8(0);				// Unknown
+		outapp->WriteUInt8(0);				// Unknown
+		outapp->WriteUInt8(0);				// Unknown
+
+		outapp->WriteUInt32(0);				// Unknown
+
+		outapp->WriteUInt8(0);				// Unknown
+
+		outapp->WriteUInt32(0);				// Unknown
 
 		// Unknown String ?
 		outapp->WriteUInt32(64);			// Unknown
 		for (uint32 r = 0; r < 64; r++)
+		{
 			outapp->WriteUInt8(0);				// Unknown
-
-		outapp->WriteUInt8(0);				// Unknown
-		outapp->WriteUInt8(0);				// Unknown
-		outapp->WriteUInt8(0);				// Unknown
-
-		outapp->WriteUInt32(0);				// Unknown
-		outapp->WriteUInt32(0);				// Unknown
-
-		outapp->WriteUInt8(0);				// Unknown
-		outapp->WriteUInt8(0);				// Unknown
-		outapp->WriteUInt8(0);				// Unknown
-
-		outapp->WriteUInt32(0);				// Unknown
-
-		outapp->WriteUInt8(0);				// Unknown
-		outapp->WriteUInt8(0);				// Unknown
-		outapp->WriteUInt8(0);				// Unknown
-
-		outapp->WriteUInt32(0);				// Unknown
-
-		outapp->WriteUInt8(0);				// Unknown
-
-		outapp->WriteUInt32(0);				// Unknown
+		}
 
 		// Unknown String ?
 		outapp->WriteUInt32(64);			// Unknown
 		for (uint32 r = 0; r < 64; r++)
+		{
 			outapp->WriteUInt8(0);				// Unknown
-
-		// Unknown String ?
-		outapp->WriteUInt32(64);			// Unknown
-		for (uint32 r = 0; r < 64; r++)
-			outapp->WriteUInt8(0);				// Unknown
+		}
 
 		outapp->WriteUInt32(0);				// Unknown
 
 		// Block of 320 unknown bytes
 		for (uint32 r = 0; r < 320; r++)
+		{
 			outapp->WriteUInt8(0);				// Unknown
+		}
 
 		// Block of 343 unknown bytes
 		for (uint32 r = 0; r < 343; r++)
+		{
 			outapp->WriteUInt8(0);				// Unknown
+		}
 
 		outapp->WriteUInt32(0);				// Unknown
 
@@ -2480,10 +2467,14 @@ namespace RoF2
 		outapp->WriteUInt32(64);			// Group of 64 int32s follow	Group/Raid Leadership abilities ?
 
 		for (uint32 r = 0; r < MAX_LEADERSHIP_AA_ARRAY; r++)
+		{
 			outapp->WriteUInt32(emu->leader_abilities.ranks[r]);
+		}
 
 		for (uint32 r = 0; r < 64 - MAX_LEADERSHIP_AA_ARRAY; r++)
+		{
 			outapp->WriteUInt32(0);				// Unused/unsupported Leadership abilities
+		}
 
 		outapp->WriteUInt32(emu->air_remaining);		// ?
 
@@ -2536,7 +2527,6 @@ namespace RoF2
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 
-
 		outapp->WriteUInt8(emu->groupAutoconsent);
 		outapp->WriteUInt8(emu->raidAutoconsent);
 		outapp->WriteUInt8(emu->guildAutoconsent);
@@ -2551,18 +2541,18 @@ namespace RoF2
 
 		outapp->WriteUInt32(1024);			// Unknown Count
 
-		// Block of 1024 unknown bytes
+		
 		outapp->WriteUInt8(31);				// Unknown
 
-		for (uint32 r = 0; r < 1023; r++)
+		// Block of 1024 unknown bytes
+		for (uint32 r = 0; r < 1024; r++)
+		{
 			outapp->WriteUInt8(0);				// Unknown
+		}
 
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 
-		// Think we need 1 byte of padding at the end
-
-		outapp->WriteUInt8(0);				// Unknown
 
 		_log(NET__STRUCTS, "Player Profile Packet is %i bytes", outapp->GetWritePosition());
 

@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/18/2014 ==
+Trevius: Finished lining up the RoF2 Player Profile Struct.  Zone times are now normal, and everything from the PP is accurate in game now.
+
 == 12/17/2014 ==
 demonstar55: Use vectors for route stuff, should be more CPU cache friendly so faster
 Secrets: EQStream changes as recommended by a community member in private.

@@ -2045,15 +2045,6 @@ namespace RoF
 			outapp->WriteUInt32(emu->skills[r]);
 		}
 
-		// deprecated
-		// Write zeroes for the rest of the skills
-		/*
-		for(uint32 r = 0; r < structs::MAX_PP_SKILL - MAX_PP_SKILL; r++)
-		{
-		outapp->WriteUInt32(emu->skills[r]);
-		}
-		*/
-
 		outapp->WriteUInt32(25);			// Unknown count
 
 		for (uint32 r = 0; r < 25; r++)
@@ -2129,18 +2120,6 @@ namespace RoF
 		outapp->WriteUInt8(0);			// Unknown
 
 		outapp->WriteUInt32(structs::BUFF_COUNT);
-
-		//*000*/ uint8 slotid;				// badly named... seems to be 2 for a real buff, 0 otherwise
-		//*001*/ float unknown004;			// Seen 1 for no buff
-		//*005*/ uint32 player_id;			// 'global' ID of the caster, for wearoff messages
-		//*009*/ uint32 unknown016;
-		//*013*/ uint8 bard_modifier;
-		//*014*/ uint32 duration;
-		//*018*/ uint8 level;
-		//*019*/ uint32 spellid;
-		//*023*/ uint32 counters;
-		//*027*/ uint8 unknown0028[53];
-		//*080*/
 
 		for (uint32 r = 0; r < BUFF_COUNT; r++)
 		{
