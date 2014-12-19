@@ -3934,6 +3934,11 @@ void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
 		return;
 	}
 
+	if (DivineAura()) {
+		mlog(COMBAT__PROCS, "Procs canceled, Divine Aura is in effect.");
+		return;
+	}
+
 	if(!weapon_g) {
 		TrySpellProc(nullptr, (const Item_Struct*)nullptr, on);
 		return;

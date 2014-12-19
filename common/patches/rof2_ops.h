@@ -4,7 +4,6 @@
 // incoming packets that require a DECODE translation:
 // Begin RoF2 Decodes
 
-
 // End RoF2 Encodes/Decodes
 
 // These require Encodes/Decodes for RoF, so they do for RoF2 as well
