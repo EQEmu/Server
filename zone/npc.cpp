@@ -476,7 +476,7 @@ void NPC::CheckMinMaxLevel(Mob *them)
 		if(themlevel < (*cur)->min_level || themlevel > (*cur)->max_level)
 		{
 			material = Inventory::CalcMaterialFromSlot((*cur)->equip_slot);
-			if(material != 0xFF)
+			if (material != _MaterialInvalid)
 				SendWearChange(material);
 
 			cur = itemlist.erase(cur);

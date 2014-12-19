@@ -11276,7 +11276,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			if(!results.Success())
                 return;
 
-			int slotmaterial = Inventory::CalcMaterialFromSlot(setslot);
+			uint8 slotmaterial = Inventory::CalcMaterialFromSlot(setslot);
             c->GetTarget()->CastToBot()->SendWearChange(slotmaterial);
 		}
 		else {

@@ -2685,8 +2685,11 @@ void Client::SetMaterial(int16 in_slot, uint32 item_id) {
 	const Item_Struct* item = database.GetItem(item_id);
 	if (item && (item->ItemClass==ItemClassCommon))
 	{
-		uint32 matslot = Inventory::CalcMaterialFromSlot(in_slot);
-		m_pp.item_material[matslot] = GetEquipmentMaterial(matslot);
+		uint8 matslot = Inventory::CalcMaterialFromSlot(in_slot);
+		if (matslot != _MaterialInvalid)
+		{
+			m_pp.item_material[matslot] = GetEquipmentMaterial(matslot);
+		}
 	}
 }
 
@@ -3016,31 +3019,14 @@ void Client::SetTint(int16 in_slot, uint32 color) {
 
 // Still need to reconcile bracer01 versus bracer02
 void Client::SetTint(int16 in_slot, Color_Struct& color) {
-	if (in_slot==MainHead)
-		m_pp.item_tint[MaterialHead].color=color.color;
-	else if (in_slot==MainArms)
-		m_pp.item_tint[MaterialArms].color=color.color;
-	else if (in_slot==MainWrist1)
-		m_pp.item_tint[MaterialWrist].color=color.color;
-	/*
-	// non-live behavior
-	else if (in_slot==SLOT_BRACER02)
-		m_pp.item_tint[MaterialWrist].color=color.color;
-	*/
-	else if (in_slot==MainHands)
-		m_pp.item_tint[MaterialHands].color=color.color;
-	else if (in_slot==MainPrimary)
-		m_pp.item_tint[MaterialPrimary].color=color.color;
-	else if (in_slot==MainSecondary)
-		m_pp.item_tint[MaterialSecondary].color=color.color;
-	else if (in_slot==MainChest)
-		m_pp.item_tint[MaterialChest].color=color.color;
-	else if (in_slot==MainLegs)
-		m_pp.item_tint[MaterialLegs].color=color.color;
-	else if (in_slot==MainFeet)
-		m_pp.item_tint[MaterialFeet].color=color.color;
 
-	database.SaveCharacterMaterialColor(this->CharacterID(), in_slot, color.color);
+	uint8 matslot = Inventory::CalcMaterialFromSlot(in_slot);
+	if (matslot != _MaterialInvalid)
+	{
+		m_pp.item_tint[matslot].color = color.color;
+		database.SaveCharacterMaterialColor(this->CharacterID(), in_slot, color.color);
+	}
+
 }
 
 void Client::SetHideMe(bool flag)

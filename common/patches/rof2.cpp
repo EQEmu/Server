@@ -5076,11 +5076,6 @@ namespace RoF2
 			isbs.augslots[x].unknown = item->AugSlotUnk2[x];
 		}
 
-		// Increased to 6 max aug slots
-		//isbs.augslots[5].type = 0;
-		//isbs.augslots[5].visible = 1;
-		//isbs.augslots[5].unknown = 0;
-
 		isbs.ldonpoint_type = item->PointType;
 		isbs.ldontheme = item->LDoNTheme;
 		isbs.ldonprice = item->LDoNPrice;

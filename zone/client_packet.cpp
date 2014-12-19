@@ -1425,8 +1425,12 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	/* Set item material tint */
 	for (int i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_END; i++)
-	if (m_pp.item_tint[i].rgb.use_tint == 1 || m_pp.item_tint[i].rgb.use_tint == 255)
-		m_pp.item_tint[i].rgb.use_tint = 0xFF;
+	{
+		if (m_pp.item_tint[i].rgb.use_tint == 1 || m_pp.item_tint[i].rgb.use_tint == 255)
+		{
+				m_pp.item_tint[i].rgb.use_tint = 0xFF;
+		}
+	}
 
 	if (level){ level = m_pp.level; }
 

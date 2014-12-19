@@ -2781,10 +2781,17 @@ uint32 Mob::GetEquipmentColor(uint8 material_slot) const
 {
 	const Item_Struct *item;
 
-	item = database.GetItem(GetEquipment(material_slot));
-	if(item != 0)
+	if (armor_tint[material_slot])
 	{
-		return item->Color;
+		return armor_tint[material_slot];
+	}
+	else
+	{
+		item = database.GetItem(GetEquipment(material_slot));
+		if (item != 0)
+		{
+			return item->Color;
+		}
 	}
 
 	return 0;
