@@ -3877,6 +3877,7 @@ namespace RoF2
 	}
 
 // DECODE methods
+
 	DECODE(OP_AdventureMerchantSell)
 	{
 		DECODE_LENGTH_EXACT(structs::Adventure_Sell_Struct);
