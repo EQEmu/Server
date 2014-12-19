@@ -548,6 +548,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapBank]
 /*Unknown*/		NOT_USED,
+/*62*/			NOT_USED,
 /*Titanium*/	Titanium::consts::MAP_BANK_SIZE,
 /*SoF*/			EmuConstants::MAP_BANK_SIZE,
 /*SoD*/			EmuConstants::MAP_BANK_SIZE,
@@ -697,6 +698,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapCorpse]
 /*Unknown*/		NOT_USED,
+/*62*/			NOT_USED,
 /*Titanium*/	Titanium::consts::MAP_CORPSE_SIZE,
 /*SoF*/			SoF::consts::MAP_CORPSE_SIZE,
 /*SoD*/			SoD::consts::MAP_CORPSE_SIZE,
@@ -726,6 +728,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapInspect]
 /*Unknown*/		NOT_USED,
+/*62*/			NOT_USED,
 /*Titanium*/	Titanium::consts::MAP_INSPECT_SIZE,
 /*SoF*/			SoF::consts::MAP_INSPECT_SIZE,
 /*SoD*/			SoD::consts::MAP_INSPECT_SIZE,
@@ -1003,6 +1006,7 @@ uint64 EQLimits::CursorBitmask(uint32 version) {
 bool EQLimits::AllowsEmptyBagInBag(uint32 version) {
 	static const bool local[_EmuClientCount] = {
 /*Unknown*/		false,
+/*62*/			false,
 /*Titanium*/	Titanium::limits::ALLOWS_EMPTY_BAG_IN_BAG,
 /*SoF*/			SoF::limits::ALLOWS_EMPTY_BAG_IN_BAG,
 /*SoD*/			SoD::limits::ALLOWS_EMPTY_BAG_IN_BAG,
@@ -1023,6 +1027,8 @@ bool EQLimits::AllowsEmptyBagInBag(uint32 version) {
 bool EQLimits::AllowsClickCastFromBag(uint32 version) {
 	static const bool local[_EmuClientCount] = {
 /*Unknown*/		false,
+/*62*/			false,
+/*Titanium*/	Titanium::limits::ALLOWS_CLICK_CAST_FROM_BAG,
 /*SoF*/			SoF::limits::ALLOWS_CLICK_CAST_FROM_BAG,
 /*SoD*/			SoD::limits::ALLOWS_CLICK_CAST_FROM_BAG,
 /*Underfoot*/	Underfoot::limits::ALLOWS_CLICK_CAST_FROM_BAG,
@@ -1082,6 +1088,7 @@ uint16 EQLimits::ItemContainerSize(uint32 version) {
 bool EQLimits::CoinHasWeight(uint32 version) {
 	static const bool local[_EmuClientCount] = {
 /*Unknown*/		true,
+/*62*/			true,
 /*Titanium*/	Titanium::limits::COIN_HAS_WEIGHT,
 /*SoF*/			SoF::limits::COIN_HAS_WEIGHT,
 /*SoD*/			SoD::limits::COIN_HAS_WEIGHT,
