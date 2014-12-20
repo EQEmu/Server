@@ -3,6 +3,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 == 12/19/2014 ==
 Trevius: (RoF2) Fixed Leadership AA Purchasing and Recipe Search by correcting opcodes.
 Trevius: Fixed Armor Tinting (players and NPCs) that was broken during a previous update.
+Trevius: (RoF2) Fixed Rest Timer, Show Helm Option, Auto-Consent Options, and identified Krono in the PP.
 
 == 12/18/2014 ==
 Trevius: Finished lining up the RoF2 Player Profile Struct.  Zone times are now normal, and everything from the PP is accurate in game now.

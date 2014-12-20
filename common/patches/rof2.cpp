@@ -2527,23 +2527,21 @@ namespace RoF2
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 
+		outapp->WriteUInt32(0);				// Unknown
+		outapp->WriteUInt32(0);				// Krono - itemid 88888 Hard coded in client?
+
 		outapp->WriteUInt8(emu->groupAutoconsent);
 		outapp->WriteUInt8(emu->raidAutoconsent);
 		outapp->WriteUInt8(emu->guildAutoconsent);
-
 		outapp->WriteUInt8(0);				// Unknown
 
-		outapp->WriteUInt32(emu->level);				// Level3 ?
+		outapp->WriteUInt32(emu->level);	// Level3 ?
 
 		outapp->WriteUInt8(emu->showhelm);
 
 		outapp->WriteUInt32(emu->RestTimer);
 
 		outapp->WriteUInt32(1024);			// Unknown Count
-
-		
-		outapp->WriteUInt8(31);				// Unknown
-
 		// Block of 1024 unknown bytes
 		for (uint32 r = 0; r < 1024; r++)
 		{
