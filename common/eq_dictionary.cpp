@@ -533,6 +533,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		// for partial range validation checks and 'EmuConstants::MAP_POSSESSIONS_SIZE' for full range iterations
 		{ // local[MainPossessions]
 /*Unknown*/		NOT_USED,
+/*62*/			EmuConstants::MAP_POSSESSIONS_SIZE,
 /*Titanium*/	EmuConstants::MAP_POSSESSIONS_SIZE,
 /*SoF*/			EmuConstants::MAP_POSSESSIONS_SIZE,
 /*SoD*/			EmuConstants::MAP_POSSESSIONS_SIZE,
@@ -547,6 +548,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapBank]
 /*Unknown*/		NOT_USED,
+/*62*/			NOT_USED,
 /*Titanium*/	Titanium::consts::MAP_BANK_SIZE,
 /*SoF*/			EmuConstants::MAP_BANK_SIZE,
 /*SoD*/			EmuConstants::MAP_BANK_SIZE,
@@ -561,6 +563,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapSharedBank]
 /*Unknown*/		NOT_USED,
+/*62*/			EmuConstants::MAP_SHARED_BANK_SIZE,
 /*Titanium*/	EmuConstants::MAP_SHARED_BANK_SIZE,
 /*SoF*/			EmuConstants::MAP_SHARED_BANK_SIZE,
 /*SoD*/			EmuConstants::MAP_SHARED_BANK_SIZE,
@@ -575,6 +578,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapTrade]
 /*Unknown*/		NOT_USED,
+/*62*/			EmuConstants::MAP_TRADE_SIZE,
 /*Titanium*/	EmuConstants::MAP_TRADE_SIZE,
 /*SoF*/			EmuConstants::MAP_TRADE_SIZE,
 /*SoD*/			EmuConstants::MAP_TRADE_SIZE,
@@ -589,6 +593,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapWorld]
 /*Unknown*/		NOT_USED,
+/*62*/			EmuConstants::MAP_WORLD_SIZE,
 /*Titanium*/	EmuConstants::MAP_WORLD_SIZE,
 /*SoF*/			EmuConstants::MAP_WORLD_SIZE,
 /*SoD*/			EmuConstants::MAP_WORLD_SIZE,
@@ -603,6 +608,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapLimbo]
 /*Unknown*/		NOT_USED,
+/*62*/			EmuConstants::MAP_LIMBO_SIZE,
 /*Titanium*/	EmuConstants::MAP_LIMBO_SIZE,
 /*SoF*/			EmuConstants::MAP_LIMBO_SIZE,
 /*SoD*/			EmuConstants::MAP_LIMBO_SIZE,
@@ -617,6 +623,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapTribute]
 /*Unknown*/		NOT_USED,
+/*62*/			EmuConstants::MAP_TRIBUTE_SIZE,
 /*Titanium*/	EmuConstants::MAP_TRIBUTE_SIZE,
 /*SoF*/			EmuConstants::MAP_TRIBUTE_SIZE,
 /*SoD*/			EmuConstants::MAP_TRIBUTE_SIZE,
@@ -631,6 +638,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapTrophyTribute]
 /*Unknown*/		NOT_USED,
+/*62*/			0,
 /*Titanium*/	0,
 /*SoF*/			0,
 /*SoD*/			0,
@@ -645,6 +653,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapGuildTribute]
 /*Unknown*/		NOT_USED,
+/*62*/			0,
 /*Titanium*/	0,
 /*SoF*/			0,
 /*SoD*/			0,
@@ -659,6 +668,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapMerchant]
 /*Unknown*/		NOT_USED,
+/*62*/			0,
 /*Titanium*/	0,
 /*SoF*/			0,
 /*SoD*/			0,
@@ -673,6 +683,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapDeleted]
 /*Unknown*/		NOT_USED,
+/*62*/			0,
 /*Titanium*/	0,
 /*SoF*/			0,
 /*SoD*/			0,
@@ -687,6 +698,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapCorpse]
 /*Unknown*/		NOT_USED,
+/*62*/			NOT_USED,
 /*Titanium*/	Titanium::consts::MAP_CORPSE_SIZE,
 /*SoF*/			SoF::consts::MAP_CORPSE_SIZE,
 /*SoD*/			SoD::consts::MAP_CORPSE_SIZE,
@@ -701,6 +713,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapBazaar]
 /*Unknown*/		NOT_USED,
+/*62*/			EmuConstants::MAP_BAZAAR_SIZE,
 /*Titanium*/	EmuConstants::MAP_BAZAAR_SIZE,
 /*SoF*/			EmuConstants::MAP_BAZAAR_SIZE,
 /*SoD*/			EmuConstants::MAP_BAZAAR_SIZE,
@@ -715,6 +728,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapInspect]
 /*Unknown*/		NOT_USED,
+/*62*/			NOT_USED,
 /*Titanium*/	Titanium::consts::MAP_INSPECT_SIZE,
 /*SoF*/			SoF::consts::MAP_INSPECT_SIZE,
 /*SoD*/			SoD::consts::MAP_INSPECT_SIZE,
@@ -729,6 +743,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapRealEstate]
 /*Unknown*/		NOT_USED,
+/*62*/			0,
 /*Titanium*/	0,
 /*SoF*/			0,
 /*SoD*/			0,
@@ -743,6 +758,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapViewMODPC]
 /*Unknown*/		NOT_USED,
+/*62*/			0,
 /*Titanium*/	0,
 /*SoF*/			0,
 /*SoD*/			0,
@@ -757,6 +773,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapViewMODBank]
 /*Unknown*/		NOT_USED,
+/*62*/			0,
 /*Titanium*/	0,
 /*SoF*/			0,
 /*SoD*/			0,
@@ -771,6 +788,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapViewMODSharedBank]
 /*Unknown*/		NOT_USED,
+/*62*/			0,
 /*Titanium*/	0,
 /*SoF*/			0,
 /*SoD*/			0,
@@ -785,6 +803,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapViewMODLimbo]
 /*Unknown*/		NOT_USED,
+/*62*/			0,
 /*Titanium*/	0,
 /*SoF*/			0,
 /*SoD*/			0,
@@ -799,6 +818,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapAltStorage]
 /*Unknown*/		NOT_USED,
+/*62*/			0,
 /*Titanium*/	0,
 /*SoF*/			0,
 /*SoD*/			0,
@@ -813,6 +833,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapArchived]
 /*Unknown*/		NOT_USED,
+/*62*/			0,
 /*Titanium*/	0,
 /*SoF*/			0,
 /*SoD*/			0,
@@ -827,6 +848,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapMail]
 /*Unknown*/		NOT_USED,
+/*62*/			0,
 /*Titanium*/	0,
 /*SoF*/			0,
 /*SoD*/			0,
@@ -841,6 +863,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapGuildTrophyTribute]
 /*Unknown*/		NOT_USED,
+/*62*/			0,
 /*Titanium*/	0,
 /*SoF*/			0,
 /*SoD*/			0,
@@ -855,6 +878,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapKrono]
 /*Unknown*/		NOT_USED,
+/*62*/			NOT_USED,
 /*Titanium*/	NOT_USED,
 /*SoF*/			NOT_USED,
 /*SoD*/			NOT_USED,
@@ -869,6 +893,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapOther]
 /*Unknown*/		NOT_USED,
+/*62*/			0,
 /*Titanium*/	0,
 /*SoF*/			0,
 /*SoD*/			0,
@@ -897,6 +922,7 @@ uint64 EQLimits::PossessionsBitmask(uint32 version) {
 
 	static const uint64 local[_EmuClientCount] = {
 /*Unknown*/		NOT_USED,
+/*62*/			0x000000027FDFFFFF,
 /*Titanium*/	0x000000027FDFFFFF,
 /*SoF*/			0x000000027FFFFFFF,
 /*SoD*/			0x000000027FFFFFFF,
@@ -917,6 +943,7 @@ uint64 EQLimits::PossessionsBitmask(uint32 version) {
 uint64 EQLimits::EquipmentBitmask(uint32 version) {
 	static const uint64 local[_EmuClientCount] = {
 /*Unknown*/		NOT_USED,
+/*62*/			0x00000000005FFFFF,
 /*Titanium*/	0x00000000005FFFFF,
 /*SoF*/			0x00000000007FFFFF,
 /*SoD*/			0x00000000007FFFFF,
@@ -937,6 +964,7 @@ uint64 EQLimits::EquipmentBitmask(uint32 version) {
 uint64 EQLimits::GeneralBitmask(uint32 version) {
 	static const uint64 local[_EmuClientCount] = {
 /*Unknown*/		NOT_USED,
+/*62*/			0x000000007F800000,
 /*Titanium*/	0x000000007F800000,
 /*SoF*/			0x000000007F800000,
 /*SoD*/			0x000000007F800000,
@@ -957,6 +985,7 @@ uint64 EQLimits::GeneralBitmask(uint32 version) {
 uint64 EQLimits::CursorBitmask(uint32 version) {
 	static const uint64 local[_EmuClientCount] = {
 /*Unknown*/		NOT_USED,
+/*62*/			0x0000000200000000,
 /*Titanium*/	0x0000000200000000,
 /*SoF*/			0x0000000200000000,
 /*SoD*/			0x0000000200000000,
@@ -977,6 +1006,7 @@ uint64 EQLimits::CursorBitmask(uint32 version) {
 bool EQLimits::AllowsEmptyBagInBag(uint32 version) {
 	static const bool local[_EmuClientCount] = {
 /*Unknown*/		false,
+/*62*/			false,
 /*Titanium*/	Titanium::limits::ALLOWS_EMPTY_BAG_IN_BAG,
 /*SoF*/			SoF::limits::ALLOWS_EMPTY_BAG_IN_BAG,
 /*SoD*/			SoD::limits::ALLOWS_EMPTY_BAG_IN_BAG,
@@ -997,6 +1027,7 @@ bool EQLimits::AllowsEmptyBagInBag(uint32 version) {
 bool EQLimits::AllowsClickCastFromBag(uint32 version) {
 	static const bool local[_EmuClientCount] = {
 /*Unknown*/		false,
+/*62*/			false,
 /*Titanium*/	Titanium::limits::ALLOWS_CLICK_CAST_FROM_BAG,
 /*SoF*/			SoF::limits::ALLOWS_CLICK_CAST_FROM_BAG,
 /*SoD*/			SoD::limits::ALLOWS_CLICK_CAST_FROM_BAG,
@@ -1017,6 +1048,7 @@ bool EQLimits::AllowsClickCastFromBag(uint32 version) {
 uint16 EQLimits::ItemCommonSize(uint32 version) {
 	static const uint16 local[_EmuClientCount] = {
 /*Unknown*/		NOT_USED,
+/*62*/			EmuConstants::ITEM_COMMON_SIZE,
 /*Titanium*/	EmuConstants::ITEM_COMMON_SIZE,
 /*SoF*/			EmuConstants::ITEM_COMMON_SIZE,
 /*SoD*/			EmuConstants::ITEM_COMMON_SIZE,
@@ -1036,6 +1068,7 @@ uint16 EQLimits::ItemCommonSize(uint32 version) {
 uint16 EQLimits::ItemContainerSize(uint32 version) {
 	static const uint16 local[_EmuClientCount] = {
 /*Unknown*/		NOT_USED,
+/*62*/			EmuConstants::ITEM_CONTAINER_SIZE,
 /*Titanium*/	EmuConstants::ITEM_CONTAINER_SIZE,
 /*SoF*/			EmuConstants::ITEM_CONTAINER_SIZE,
 /*SoD*/			EmuConstants::ITEM_CONTAINER_SIZE,
@@ -1055,6 +1088,7 @@ uint16 EQLimits::ItemContainerSize(uint32 version) {
 bool EQLimits::CoinHasWeight(uint32 version) {
 	static const bool local[_EmuClientCount] = {
 /*Unknown*/		true,
+/*62*/			true,
 /*Titanium*/	Titanium::limits::COIN_HAS_WEIGHT,
 /*SoF*/			SoF::limits::COIN_HAS_WEIGHT,
 /*SoD*/			SoD::limits::COIN_HAS_WEIGHT,
@@ -1074,6 +1108,7 @@ bool EQLimits::CoinHasWeight(uint32 version) {
 uint32 EQLimits::BandoliersCount(uint32 version) {
 	static const uint32 local[_EmuClientCount] = {
 /*Unknown*/		NOT_USED,
+/*62*/			EmuConstants::BANDOLIERS_COUNT,
 /*Titanium*/	EmuConstants::BANDOLIERS_COUNT,
 /*SoF*/			EmuConstants::BANDOLIERS_COUNT,
 /*SoD*/			EmuConstants::BANDOLIERS_COUNT,
@@ -1093,6 +1128,7 @@ uint32 EQLimits::BandoliersCount(uint32 version) {
 uint32 EQLimits::BandolierSize(uint32 version) {
 	static const uint32 local[_EmuClientCount] = {
 /*Unknown*/		NOT_USED,
+/*62*/			EmuConstants::BANDOLIER_SIZE,
 /*Titanium*/	EmuConstants::BANDOLIER_SIZE,
 /*SoF*/			EmuConstants::BANDOLIER_SIZE,
 /*SoD*/			EmuConstants::BANDOLIER_SIZE,
@@ -1112,6 +1148,7 @@ uint32 EQLimits::BandolierSize(uint32 version) {
 uint32 EQLimits::PotionBeltSize(uint32 version) {
 	static const uint32 local[_EmuClientCount] = {
 /*Unknown*/		NOT_USED,
+/*62*/			EmuConstants::POTION_BELT_SIZE,
 /*Titanium*/	EmuConstants::POTION_BELT_SIZE,
 /*SoF*/			EmuConstants::POTION_BELT_SIZE,
 /*SoD*/			EmuConstants::POTION_BELT_SIZE,
