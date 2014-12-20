@@ -99,7 +99,7 @@ void RemoteCallSubscriptionHandler::OnEvent(std::string method, std::vector<std:
 	std::string func = "On." + method;
 	std::vector<std::string> &conns = registered_events[method];
 	if(conns.size() > 0) {
-		auto &iter = conns.begin();
+		auto iter = conns.begin();
 		while(iter != conns.end()) {
 			RemoteCall((*iter), func, params);
 			++iter;
