@@ -151,6 +151,8 @@ public:
 
 	// Add item to cursor queue
 	int16 PushCursor(const ItemInst& inst);
+	// Remove item from cursor queue
+	ItemInst* PopCursor();
 
 	// Swap items in inventory
 	bool SwapItem(int16 slot_a, int16 slot_b);

@@ -678,6 +678,23 @@ int32 Client::GetAugmentIDAt(int16 slot_id, uint8 augslot) {
 	return INVALID_ID;
 }
 
+void Client::SummonCursorBuffer() {
+	// Temporary work-around for the RoF+ Client Buffer
+	// Instead of letting the client move items around in cursor buffer,
+	// we can just delete an item from the buffer and summon it to the cursor.
+	if (GetClientVersion() > EQClientRoF)
+	{
+		if (!GetInv().CursorEmpty())
+		{
+			const ItemInst* inst = GetInv().PopCursor();
+			SummonItem(inst->GetID(), inst->GetCharges(), inst->GetAugmentItemID(0), 
+				inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), 
+				inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), MainCursor, 
+				inst->GetOrnamentationIcon(), inst->GetOrnamentationIDFile(), inst->GetOrnamentHeroModel());
+		}
+	}
+}
+
 // Remove item from inventory
 void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_update, bool update_db) {
 	#if (EQDEBUG >= 5)
@@ -794,10 +811,6 @@ void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_upd
 	}
 }
 
-// Puts an item into the person's inventory
-// Any items already there will be removed from user's inventory
-// (Also saves changes back to the database: this may be optimized in the future)
-// client_update: Sends packet to client
 bool Client::PushItemOnCursor(const ItemInst& inst, bool client_update)
 {
 	mlog(INVENTORY__SLOTS, "Putting item %s (%d) on the cursor", inst.GetItem()->Name, inst.GetItem()->ID);
@@ -811,6 +824,10 @@ bool Client::PushItemOnCursor(const ItemInst& inst, bool client_update)
 	return database.SaveCursor(CharacterID(), s, e);
 }
 
+// Puts an item into the person's inventory
+// Any items already there will be removed from user's inventory
+// (Also saves changes back to the database: this may be optimized in the future)
+// client_update: Sends packet to client
 bool Client::PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client_update) {
 	mlog(INVENTORY__SLOTS, "Putting item %s (%d) into slot %d", inst.GetItem()->Name, inst.GetItem()->ID, slot_id);
 
@@ -1299,7 +1316,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 	// This could be expounded upon at some point to let the server know that
 	// the client has moved a buffered cursor item onto the active cursor -U
-	if (move_in->from_slot == move_in->to_slot) { // Item summon, no further proccessing needed
+	if (move_in->from_slot == move_in->to_slot) { // Item summon, no further processing needed
 		if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
 		return true;
 	}
@@ -1315,13 +1332,15 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			}
 
 			DeleteItemInInventory(move_in->from_slot);
+			SummonCursorBuffer();
+
 			return true; // Item destroyed by client
 		}
 		else {
 			mlog(INVENTORY__SLOTS, "Deleted item from slot %d as a result of an inventory container tradeskill combine.", move_in->from_slot);
 			if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
 			DeleteItemInInventory(move_in->from_slot);
-			return true; // Item deletetion
+			return true; // Item deletion
 		}
 	}
 	if(auto_attack && (move_in->from_slot == MainPrimary || move_in->from_slot == MainSecondary || move_in->from_slot == MainRange))
@@ -1363,7 +1382,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		//SetTint(dst_slot_id,src_inst->GetColor());
 		if (src_inst->GetCharges() > 0 && (src_inst->GetCharges() < (int16)move_in->number_in_stack || move_in->number_in_stack > src_inst->GetItem()->StackSize))
 		{
-			Message(13,"Error: Insufficent number in stack.");
+			Message(13,"Error: Insufficient number in stack.");
 			return false;
 		}
 	}
@@ -1521,7 +1540,11 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 			safe_delete(world_inst);
 			if (src_slot_id == MainCursor) {
-				std::list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
+				std::list<ItemInst*>::const_iterator s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+				if (dstitemid == 0)
+				{
+					SummonCursorBuffer();
+				}
 				database.SaveCursor(character_id, s, e);
 			} else
 				database.SaveInventory(character_id, m_inv[src_slot_id], src_slot_id);
@@ -1551,6 +1574,10 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
 
 			trade->AddEntity(dst_slot_id, move_in->number_in_stack);
+			if (dstitemid == 0)
+			{
+				SummonCursorBuffer();
+			}
 
 			return true;
 		} else {
@@ -1563,6 +1590,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		}
 	}
 
+	bool all_to_stack = false;
 	// Step 5: Swap (or stack) items
 	if (move_in->number_in_stack > 0) {
 		// Determine if charged items can stack
@@ -1593,6 +1621,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 					mlog(INVENTORY__SLOTS, "Dest (%d) now has %d charges, source (%d) was entirely consumed. (%d moved)", dst_slot_id, dst_inst->GetCharges(), src_slot_id, usedcharges);
 					database.SaveInventory(CharacterID(),nullptr,src_slot_id);
 					m_inv.DeleteItem(src_slot_id);
+					all_to_stack = true;
 				} else {
 					mlog(INVENTORY__SLOTS, "Dest (%d) now has %d charges, source (%d) has %d (%d moved)", dst_slot_id, dst_inst->GetCharges(), src_slot_id, src_inst->GetCharges(), usedcharges);
 				}
@@ -1666,6 +1695,11 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 	// Step 7: Save change to the database
 	if (src_slot_id == MainCursor){
+		// If not swapping another item to cursor and stacking items were depleted
+		if (dstitemid == 0 || all_to_stack == true)
+		{
+			SummonCursorBuffer();
+		}
 		std::list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
 		database.SaveCursor(character_id, s, e);
 	} else

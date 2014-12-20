@@ -259,6 +259,11 @@ int16 Inventory::PushCursor(const ItemInst& inst)
 	return MainCursor;
 }
 
+ItemInst* Inventory::PopCursor()
+{
+	return m_cursor.pop();
+}
+
 // Swap items in inventory
 bool Inventory::SwapItem(int16 slot_a, int16 slot_b)
 {
