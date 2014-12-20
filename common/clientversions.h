@@ -20,7 +20,6 @@ static const uint32 BIT_AllClients			= 0xFFFFFFFF;
 typedef enum
 {
 	EQClientUnknown = 0,
-	EQClient62,				// Build: 'Aug  4 2005 15:40:59'
 	EQClientTitanium,		// Build: 'Oct 31 2005 10:33:37'
 	EQClientSoF,			// Build: 'Sep  7 2007 09:11:49'
 	EQClientSoD,			// Build: 'Dec 19 2008 15:22:49'
@@ -46,8 +45,6 @@ static const char* EQClientVersionName(EQClientVersion version)
 	{
 	case EQClientUnknown:
 		return "EQClientUnknown";
-	case EQClient62:
-		return "EQClient62";
 	case EQClientTitanium:
 		return "EQClientTitanium";
 	case EQClientSoF:
