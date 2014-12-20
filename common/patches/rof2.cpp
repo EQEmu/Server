@@ -2551,6 +2551,8 @@ namespace RoF2
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 
+		// Think we need 1 byte of padding at the end
+		outapp->WriteUInt8(0);				// Unknown
 
 		_log(NET__STRUCTS, "Player Profile Packet is %i bytes", outapp->GetWritePosition());
 
