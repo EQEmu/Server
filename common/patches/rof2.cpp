@@ -205,7 +205,7 @@ namespace RoF2
 		SETUP_DIRECT_ENCODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
 
 		OUT(merchant_entity_id);
-		eq->slot_id = ServerToRoF2Slot(emu->slot_id);
+		eq->slot_id = ServerToRoF2MainInvSlot(emu->slot_id);
 		OUT(charges);
 		OUT(cost);
 
@@ -3895,7 +3895,7 @@ namespace RoF2
 		SETUP_DIRECT_DECODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
 
 		IN(merchant_entity_id);
-		emu->slot_id = RoF2ToServerSlot(eq->slot_id);
+		emu->slot_id = RoF2ToServerMainInvSlot(eq->slot_id);
 		IN(charges);
 		IN(cost);
 
@@ -3908,7 +3908,7 @@ namespace RoF2
 		SETUP_DIRECT_DECODE(AltCurrencySelectItem_Struct, structs::AltCurrencySelectItem_Struct);
 
 		IN(merchant_entity_id);
-		emu->slot_id = RoF2ToServerSlot(eq->slot_id);
+		emu->slot_id = RoF2ToServerMainInvSlot(eq->slot_id);
 
 		FINISH_DIRECT_DECODE();
 	}

@@ -4365,8 +4365,8 @@ struct AltCurrencySelectItem_Struct {
 struct AltCurrencySellItem_Struct {
 /*000*/ uint32 merchant_entity_id;
 /*004*/ uint32 slot_id;
-/*006*/ uint32 charges;
-/*010*/ uint32 cost;
+/*008*/ uint32 charges;
+/*012*/ uint32 cost;
 };
 
 struct AltCurrencyPopulateEntry_Struct

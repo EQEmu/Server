@@ -2180,8 +2180,8 @@ struct AltCurrencyUpdate_Struct {
 //When an item is selected while the alt currency merchant window is open
 struct AltCurrencySelectItem_Struct {
 /*000*/ uint32 merchant_entity_id;
+/*004*/ MainInvItemSlotStruct slot_id;
 /*004*/ //uint32 slot_id;
-		ItemSlotStruct slot_id;
 /*008*/ uint32 unknown008;
 /*012*/ uint32 unknown012;
 /*016*/ uint32 unknown016;
@@ -2238,10 +2238,10 @@ struct AltCurrencyReclaim_Struct {
 
 struct AltCurrencySellItem_Struct {
 /*000*/ uint32 merchant_entity_id;
+/*004*/	MainInvItemSlotStruct slot_id;
 /*004*/ //uint32 slot_id;
-		ItemSlotStruct slot_id;
-/*008*/ uint32 charges;
-/*012*/ uint32 cost;
+/*016*/ uint32 charges;
+/*020*/ uint32 cost;
 };
 
 struct Adventure_Purchase_Struct {
@@ -2261,14 +2261,14 @@ struct Adventure_Sell_Struct {
 };
 
 struct AdventurePoints_Update_Struct {
-/*000*/	uint32				ldon_available_points;		// Total available points
-/*004*/ uint8				unkown_apu004[20];
-/*024*/	uint32				ldon_guk_points;		// Earned Deepest Guk points
-/*028*/	uint32				ldon_mirugal_points;		// Earned Mirugal' Mebagerie points
-/*032*/	uint32				ldon_mistmoore_points;		// Earned Mismoore Catacombs Points
-/*036*/	uint32				ldon_rujarkian_points;		// Earned Rujarkian Hills points
-/*040*/	uint32				ldon_takish_points;		// Earned Takish points
-/*044*/	uint8				unknown_apu042[216];
+/*000*/	uint32	ldon_available_points;		// Total available points
+/*004*/ uint8	unkown_apu004[20];
+/*024*/	uint32	ldon_guk_points;		// Earned Deepest Guk points
+/*028*/	uint32	ldon_mirugal_points;		// Earned Mirugal' Mebagerie points
+/*032*/	uint32	ldon_mistmoore_points;		// Earned Mismoore Catacombs Points
+/*036*/	uint32	ldon_rujarkian_points;		// Earned Rujarkian Hills points
+/*040*/	uint32	ldon_takish_points;		// Earned Takish points
+/*044*/	uint8	unknown_apu042[216];
 };
 
 

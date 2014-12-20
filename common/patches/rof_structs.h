@@ -2174,8 +2174,7 @@ struct AltCurrencyUpdate_Struct {
 //When an item is selected while the alt currency merchant window is open
 struct AltCurrencySelectItem_Struct {
 /*000*/ uint32 merchant_entity_id;
-/*004*/ //uint32 slot_id;
-		ItemSlotStruct slot_id;
+/*004*/ MainInvItemSlotStruct slot_id;
 /*008*/ uint32 unknown008;
 /*012*/ uint32 unknown012;
 /*016*/ uint32 unknown016;
@@ -2232,8 +2231,7 @@ struct AltCurrencyReclaim_Struct {
 
 struct AltCurrencySellItem_Struct {
 /*000*/ uint32 merchant_entity_id;
-/*004*/ //uint32 slot_id;
-		ItemSlotStruct slot_id;
+/*004*/ MainInvItemSlotStruct slot_id;
 /*008*/ uint32 charges;
 /*012*/ uint32 cost;
 };
