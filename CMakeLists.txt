@@ -264,6 +264,8 @@ IF(NOT MSVC)
 	IF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reserved-user-defined-literal")
 	ENDIF()
+	
+	ADD_DEFINITIONS(-D__STDC_CONSTANT_MACROS)
 ENDIF(NOT MSVC)
 
 #Various definitions
