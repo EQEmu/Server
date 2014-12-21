@@ -682,7 +682,7 @@ void Client::SummonCursorBuffer() {
 	// Temporary work-around for the RoF+ Client Buffer
 	// Instead of letting the client move items around in cursor buffer,
 	// we can just delete an item from the buffer and summon it to the cursor.
-	if (GetClientVersion() > EQClientRoF)
+	if (GetClientVersion() >= EQClientRoF)
 	{
 		if (!GetInv().CursorEmpty())
 		{
@@ -1539,15 +1539,19 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			}
 
 			safe_delete(world_inst);
-			if (src_slot_id == MainCursor) {
-				std::list<ItemInst*>::const_iterator s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+			if (src_slot_id == MainCursor)
+			{
 				if (dstitemid == 0)
 				{
 					SummonCursorBuffer();
 				}
+				std::list<ItemInst*>::const_iterator s = m_inv.cursor_begin(), e = m_inv.cursor_end();
 				database.SaveCursor(character_id, s, e);
-			} else
+			}
+			else
+			{
 				database.SaveInventory(character_id, m_inv[src_slot_id], src_slot_id);
+			}
 
 			if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in, true); } // QS Audit
 
