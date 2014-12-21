@@ -213,11 +213,21 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 				}
 				else
 				{
+					uint32 color = 0;
+					if (pp.item_tint[matslot].rgb.use_tint)
+					{
+						color = pp.item_tint[matslot].color;
+					}
+					else
+					{
+						color = inst->GetColor();
+					}
+
 					// Armor Materials/Models
 					cs->equip[char_num][matslot].material = item->Material;
 					cs->equip[char_num][matslot].elitematerial = item->EliteMaterial;
 					cs->equip[char_num][matslot].heroforgemodel = inst->GetOrnamentHeroModel(matslot);
-					cs->equip[char_num][matslot].color.color = inst->GetColor();
+					cs->equip[char_num][matslot].color.color = color;
 				}
 			}
 		}

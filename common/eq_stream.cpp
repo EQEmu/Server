@@ -47,7 +47,13 @@
 
 uint16 EQStream::MaxWindowSize=2048;
 
-void EQStream::init() {
+void EQStream::init(bool resetSession) {
+	// we only reset these statistics if it is a 'new' connection
+	if ( resetSession )
+	{
+		streamactive = false;
+		sessionAttempts = 0;
+	}
 	active_users = 0;
 	Session=0;
 	Key=0;
@@ -313,18 +319,22 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 			}
 #ifndef COLLECTOR
 			if (GetState()==ESTABLISHED) {
-				_log(NET__ERROR, _L "Received OP_SessionRequest in ESTABLISHED state (%d)" __L, GetState());
+				_log(NET__ERROR, _L "Received OP_SessionRequest in ESTABLISHED state (%d) streamactive (%i) attempt (%i)" __L, GetState(),streamactive,sessionAttempts);
 
-				/*RemoveData();
-				init();
-				State=UNESTABLISHED;*/
-				_SendDisconnect();
-				SetState(CLOSED);
-				break;
+				// client seems to try a max of 30 times (initial+3 retries) then gives up, giving it a few more attempts just in case
+				// streamactive means we identified the opcode for the stream, we cannot re-establish this connection
+				if ( streamactive || ( sessionAttempts > MAX_SESSION_RETRIES ) )
+				{
+					_SendDisconnect();
+					SetState(CLOSED);
+					break;
+				}
 			}
 #endif
 			//std::cout << "Got OP_SessionRequest" << std::endl;
-			init();
+			sessionAttempts++;
+			// we set established below, so statistics will not be reset for session attempts/stream active.
+			init(GetState()!=ESTABLISHED);
 			OutboundQueueClear();
 			SessionRequest *Request=(SessionRequest *)p->pBuffer;
 			Session=ntohl(Request->Session);

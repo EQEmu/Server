@@ -205,7 +205,7 @@ namespace RoF2
 		SETUP_DIRECT_ENCODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
 
 		OUT(merchant_entity_id);
-		eq->slot_id = ServerToRoF2Slot(emu->slot_id);
+		eq->slot_id = ServerToRoF2MainInvSlot(emu->slot_id);
 		OUT(charges);
 		OUT(cost);
 
@@ -1696,6 +1696,8 @@ namespace RoF2
 		eq->unknown932 = -1;	// Set from PoK Example
 		eq->unknown936 = -1;	// Set from PoK Example
 		eq->unknown944 = 1.0;	// Set from PoK Example
+		eq->unknown948 = 0;		// New on Live as of Dec 15 2014
+		eq->unknown952 = 100;	// New on Live as of Dec 15 2014
 
 		FINISH_ENCODE();
 	}
@@ -2121,18 +2123,6 @@ namespace RoF2
 
 		outapp->WriteUInt32(structs::BUFF_COUNT);
 
-		//*000*/ uint8 slotid;				// badly named... seems to be 2 for a real buff, 0 otherwise
-		//*001*/ float unknown004;			// Seen 1 for no buff
-		//*005*/ uint32 player_id;			// 'global' ID of the caster, for wearoff messages
-		//*009*/ uint32 unknown016;
-		//*013*/ uint8 bard_modifier;
-		//*014*/ uint32 duration;
-		//*018*/ uint8 level;
-		//*019*/ uint32 spellid;
-		//*023*/ uint32 counters;
-		//*027*/ uint8 unknown0028[53];
-		//*080*/
-
 		for (uint32 r = 0; r < BUFF_COUNT; r++)
 		{
 			float instrument_mod = 0.0f;
@@ -2172,7 +2162,6 @@ namespace RoF2
 			// 80 bytes of zeroes
 			for (uint32 j = 0; j < 20; ++j)
 				outapp->WriteUInt32(0);
-
 		}
 
 		outapp->WriteUInt32(emu->platinum);
@@ -2197,8 +2186,8 @@ namespace RoF2
 
 		outapp->WriteUInt32(emu->aapoints_spent);
 
-		outapp->WriteUInt32(5);				// AA Points count ??
-		outapp->WriteUInt32(1234);			// AA Points assigned
+		outapp->WriteUInt32(5);				// AA Window Tab Count
+		outapp->WriteUInt32(0);				// AA Points assigned ?
 		outapp->WriteUInt32(0);				// AA Points in General ?
 		outapp->WriteUInt32(0);				// AA Points in Class ?
 		outapp->WriteUInt32(0);				// AA Points in Archetype ?
@@ -2326,35 +2315,30 @@ namespace RoF2
 		outapp->WriteUInt8(0);				// Unknown
 		outapp->WriteUInt8(emu->gm);
 		outapp->WriteUInt32(emu->guild_id);
-		outapp->WriteUInt8(0);				// Unknown - observed 1 in a live packet.
-		outapp->WriteUInt32(0);				// Unknown - observed 1 in a live packet.
-		outapp->WriteUInt8(0);				// Unknown - observed 1 in a live packet.
+		
+		outapp->WriteUInt8(0);			// Unknown
+		outapp->WriteUInt32(0);				// Unknown
+		outapp->WriteUInt8(0);			// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 
-		outapp->WriteUInt64(emu->exp);
-		outapp->WriteUInt8(0);				// Unknown
+		outapp->WriteUInt64(emu->exp);		// int32 in client
+
+		outapp->WriteUInt8(0);			// Unknown - Seen 5 on Live
 
 		outapp->WriteUInt32(emu->platinum_bank);
 		outapp->WriteUInt32(emu->gold_bank);
 		outapp->WriteUInt32(emu->silver_bank);
 		outapp->WriteUInt32(emu->copper_bank);
 
-		// Commenting out for RoF Test
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 
-		outapp->WriteUInt32(42);			// The meaning of life ?
-
-		for (uint32 r = 0; r < 42; r++)
-		{
-			outapp->WriteUInt32(0);				// Unknown
-			outapp->WriteUInt32(0);				// Unknown
-		}
-
 		outapp->WriteUInt32(0);				// Unknown
-		outapp->WriteUInt32(0);				// Unknown
+
+		outapp->WriteSInt32(-1);				// Unknown
+		outapp->WriteSInt32(-1);				// Unknown
 
 		outapp->WriteUInt32(emu->career_tribute_points);
 		outapp->WriteUInt32(0);				// Unknown
@@ -2386,18 +2370,12 @@ namespace RoF2
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
-
-		/*
-
-		// Begin RoF2 Test
-		for (uint32 r = 0; r < 1000; r++)
+		
+		for (uint32 r = 0; r < 125; r++)
+		{
 			outapp->WriteUInt8(0);				// Unknown
-		// End RoF2 Test
-
-		// Block of 121 unknown bytes
-		for (uint32 r = 0; r < 121; r++)
-			outapp->WriteUInt8(0);				// Unknown
-
+		}
+		
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(emu->currentRadCrystals);
@@ -2411,7 +2389,9 @@ namespace RoF2
 		// Unknown String ?
 		outapp->WriteUInt32(64);			// Unknown
 		for (uint32 r = 0; r < 64; r++)
+		{
 			outapp->WriteUInt8(0);				// Unknown
+		}
 
 		outapp->WriteUInt8(0);				// Unknown
 		outapp->WriteUInt8(0);				// Unknown
@@ -2439,22 +2419,30 @@ namespace RoF2
 		// Unknown String ?
 		outapp->WriteUInt32(64);			// Unknown
 		for (uint32 r = 0; r < 64; r++)
+		{
 			outapp->WriteUInt8(0);				// Unknown
+		}
 
 		// Unknown String ?
 		outapp->WriteUInt32(64);			// Unknown
 		for (uint32 r = 0; r < 64; r++)
+		{
 			outapp->WriteUInt8(0);				// Unknown
+		}
 
 		outapp->WriteUInt32(0);				// Unknown
 
 		// Block of 320 unknown bytes
 		for (uint32 r = 0; r < 320; r++)
+		{
 			outapp->WriteUInt8(0);				// Unknown
+		}
 
 		// Block of 343 unknown bytes
 		for (uint32 r = 0; r < 343; r++)
+		{
 			outapp->WriteUInt8(0);				// Unknown
+		}
 
 		outapp->WriteUInt32(0);				// Unknown
 
@@ -2479,10 +2467,14 @@ namespace RoF2
 		outapp->WriteUInt32(64);			// Group of 64 int32s follow	Group/Raid Leadership abilities ?
 
 		for (uint32 r = 0; r < MAX_LEADERSHIP_AA_ARRAY; r++)
+		{
 			outapp->WriteUInt32(emu->leader_abilities.ranks[r]);
+		}
 
 		for (uint32 r = 0; r < 64 - MAX_LEADERSHIP_AA_ARRAY; r++)
+		{
 			outapp->WriteUInt32(0);				// Unused/unsupported Leadership abilities
+		}
 
 		outapp->WriteUInt32(emu->air_remaining);		// ?
 
@@ -2535,33 +2527,31 @@ namespace RoF2
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 
-		*/
+		outapp->WriteUInt32(0);				// Unknown
+		outapp->WriteUInt32(0);				// Krono - itemid 88888 Hard coded in client?
 
 		outapp->WriteUInt8(emu->groupAutoconsent);
 		outapp->WriteUInt8(emu->raidAutoconsent);
 		outapp->WriteUInt8(emu->guildAutoconsent);
-
 		outapp->WriteUInt8(0);				// Unknown
 
-		outapp->WriteUInt32(emu->level);				// Level3 ?
+		outapp->WriteUInt32(emu->level);	// Level3 ?
 
 		outapp->WriteUInt8(emu->showhelm);
 
 		outapp->WriteUInt32(emu->RestTimer);
 
 		outapp->WriteUInt32(1024);			// Unknown Count
-
 		// Block of 1024 unknown bytes
-		outapp->WriteUInt8(31);				// Unknown
-
-		for (uint32 r = 0; r < 1023; r++)
+		for (uint32 r = 0; r < 1024; r++)
+		{
 			outapp->WriteUInt8(0);				// Unknown
+		}
 
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 
 		// Think we need 1 byte of padding at the end
-
 		outapp->WriteUInt8(0);				// Unknown
 
 		_log(NET__STRUCTS, "Player Profile Packet is %i bytes", outapp->GetWritePosition());
@@ -3887,6 +3877,7 @@ namespace RoF2
 	}
 
 // DECODE methods
+
 	DECODE(OP_AdventureMerchantSell)
 	{
 		DECODE_LENGTH_EXACT(structs::Adventure_Sell_Struct);
@@ -3906,7 +3897,7 @@ namespace RoF2
 		SETUP_DIRECT_DECODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
 
 		IN(merchant_entity_id);
-		emu->slot_id = RoF2ToServerSlot(eq->slot_id);
+		emu->slot_id = RoF2ToServerMainInvSlot(eq->slot_id);
 		IN(charges);
 		IN(cost);
 
@@ -3919,7 +3910,7 @@ namespace RoF2
 		SETUP_DIRECT_DECODE(AltCurrencySelectItem_Struct, structs::AltCurrencySelectItem_Struct);
 
 		IN(merchant_entity_id);
-		emu->slot_id = RoF2ToServerSlot(eq->slot_id);
+		emu->slot_id = RoF2ToServerMainInvSlot(eq->slot_id);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -4860,8 +4851,8 @@ namespace RoF2
 		hdr.charges = (stackable ? (item->MaxCharges ? 1 : 0) : charges);
 		hdr.inst_nodrop = inst->IsAttuned() ? 1 : 0;
 		hdr.unknown044 = 0;
-		hdr.unknown048 = 7300 + Inventory::CalcMaterialFromSlot(slot_id_in);  //0;
-		hdr.unknown052 = 7300 + Inventory::CalcMaterialFromSlot(slot_id_in);  //0;
+		hdr.unknown048 = 0;
+		hdr.unknown052 = 0;
 		hdr.isEvolving = item->EvolvingLevel > 0 ? 1 : 0;
 		ss.write((const char*)&hdr, sizeof(RoF2::structs::ItemSerializationHeader));
 
@@ -5084,11 +5075,6 @@ namespace RoF2
 			isbs.augslots[x].visible = item->AugSlotVisible[x];
 			isbs.augslots[x].unknown = item->AugSlotUnk2[x];
 		}
-
-		// Increased to 6 max aug slots
-		//isbs.augslots[5].type = 0;
-		//isbs.augslots[5].visible = 1;
-		//isbs.augslots[5].unknown = 0;
 
 		isbs.ldonpoint_type = item->PointType;
 		isbs.ldontheme = item->LDoNTheme;
@@ -5325,13 +5311,8 @@ namespace RoF2
 		iqbs.SpellDmg = item->SpellDmg;
 		iqbs.clairvoyance = item->Clairvoyance;
 		iqbs.unknown28 = 0;
-		
-
-		// Begin RoF2 Test
-		iqbs.unknown_TEST1 = 0;
-		// End RoF2 Test
-
 		iqbs.unknown30 = 0;
+		iqbs.unknown37a = 0;
 		iqbs.unknown39 = 1;
 
 		iqbs.subitem_count = 0;

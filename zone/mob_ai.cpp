@@ -2751,7 +2751,7 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
         npc_spells_cache[iDBSpellsID]->attack_proc = tmpattack_proc;
         npc_spells_cache[iDBSpellsID]->proc_chance = tmpproc_chance;
         npc_spells_cache[iDBSpellsID]->range_proc = tmprange_proc;
-        npc_spells_cache[iDBSpellsID]->rproc_chance = tmpdproc_chance;
+        npc_spells_cache[iDBSpellsID]->rproc_chance = tmprproc_chance;
         npc_spells_cache[iDBSpellsID]->defensive_proc = tmpdefensive_proc;
         npc_spells_cache[iDBSpellsID]->dproc_chance = tmpdproc_chance;
         npc_spells_cache[iDBSpellsID]->fail_recast = tmppfail_recast;

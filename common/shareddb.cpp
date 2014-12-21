@@ -1234,6 +1234,9 @@ ItemInst* SharedDatabase::CreateBaseItem(const Item_Struct* item, int16 charges)
 		// set it to 1 charge so that it is usable on creation
 		if (charges == 0 && item->MaxCharges == -1)
 			charges = 1;
+		// Stackable items need a minimum charge of 1 to remain moveable.
+		if(charges <= 0 && item->Stackable)
+			charges = 1;
 
 		inst = new ItemInst(item, charges);
 

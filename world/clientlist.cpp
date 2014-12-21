@@ -1301,6 +1301,8 @@ void ClientList::SendClientVersionSummary(const char *Name)
 	uint32 ClientSoDCount = 0;
 	uint32 ClientUnderfootCount = 0;
 	uint32 ClientRoFCount = 0;
+	uint32 ClientRoF2Count = 0;
+
 
 	LinkedListIterator<ClientListEntry*> Iterator(clientlist);
 
@@ -1343,6 +1345,11 @@ void ClientList::SendClientVersionSummary(const char *Name)
 					++ClientRoFCount;
 					break;
 				}
+				case 7:
+				{
+					++ClientRoF2Count;
+					break;
+				}
 				default:
 					break;
 			}
@@ -1352,7 +1359,7 @@ void ClientList::SendClientVersionSummary(const char *Name)
 
 	}
 
-	zoneserver_list.SendEmoteMessage(Name, 0, 0, 13, "There are %i Titanium, %i SoF, %i SoD, %i UF, %i RoF clients currently connected.",
-		ClientTitaniumCount, ClientSoFCount, ClientSoDCount, ClientUnderfootCount, ClientRoFCount);
+	zoneserver_list.SendEmoteMessage(Name, 0, 0, 13, "There are %i Titanium, %i SoF, %i SoD, %i UF, %i RoF, %i RoF2 clients currently connected.",
+		ClientTitaniumCount, ClientSoFCount, ClientSoDCount, ClientUnderfootCount, ClientRoFCount, ClientRoF2Count); 
 }
 

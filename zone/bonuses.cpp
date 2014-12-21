@@ -538,9 +538,9 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 }
 
 void Client::CalcEdibleBonuses(StatBonuses* newbon) {
-#if EQDEBUG >= 11
-	std::cout<<"Client::CalcEdibleBonuses(StatBonuses* newbon)"<<std::endl;
-#endif
+//#if EQDEBUG >= 11
+//	std::cout<<"Client::CalcEdibleBonuses(StatBonuses* newbon)"<<std::endl;
+//#endif
 	// Search player slots for skill=14(food) and skill=15(drink)
 		uint32 i;
 

@@ -1428,8 +1428,12 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	/* Set item material tint */
 	for (int i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_END; i++)
-	if (m_pp.item_tint[i].rgb.use_tint == 1 || m_pp.item_tint[i].rgb.use_tint == 255)
-		m_pp.item_tint[i].rgb.use_tint = 0xFF;
+	{
+		if (m_pp.item_tint[i].rgb.use_tint == 1 || m_pp.item_tint[i].rgb.use_tint == 255)
+		{
+				m_pp.item_tint[i].rgb.use_tint = 0xFF;
+		}
+	}
 
 	if (level){ level = m_pp.level; }
 
@@ -5745,7 +5749,7 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 			}
 			else
 			{
-				std::list<int> pathlist = zone->pathing->FindRoute(Start, End);
+				std::deque<int> pathlist = zone->pathing->FindRoute(Start, End);
 
 				if (pathlist.size() == 0)
 				{
@@ -5784,7 +5788,7 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 				p.z = GetZ();
 				points.push_back(p);
 
-				for (std::list<int>::iterator Iterator = pathlist.begin(); Iterator != pathlist.end(); ++Iterator)
+				for (auto Iterator = pathlist.begin(); Iterator != pathlist.end(); ++Iterator)
 				{
 					if ((*Iterator) == -1) // Teleporter
 					{

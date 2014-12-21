@@ -205,7 +205,7 @@ namespace RoF
 		SETUP_DIRECT_ENCODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
 
 		OUT(merchant_entity_id);
-		eq->slot_id = ServerToRoFSlot(emu->slot_id);
+		eq->slot_id = ServerToRoFMainInvSlot(emu->slot_id);
 		OUT(charges);
 		OUT(cost);
 
@@ -2045,15 +2045,6 @@ namespace RoF
 			outapp->WriteUInt32(emu->skills[r]);
 		}
 
-		// deprecated
-		// Write zeroes for the rest of the skills
-		/*
-		for(uint32 r = 0; r < structs::MAX_PP_SKILL - MAX_PP_SKILL; r++)
-		{
-		outapp->WriteUInt32(emu->skills[r]);
-		}
-		*/
-
 		outapp->WriteUInt32(25);			// Unknown count
 
 		for (uint32 r = 0; r < 25; r++)
@@ -2129,18 +2120,6 @@ namespace RoF
 		outapp->WriteUInt8(0);			// Unknown
 
 		outapp->WriteUInt32(structs::BUFF_COUNT);
-
-		//*000*/ uint8 slotid;				// badly named... seems to be 2 for a real buff, 0 otherwise
-		//*001*/ float unknown004;			// Seen 1 for no buff
-		//*005*/ uint32 player_id;			// 'global' ID of the caster, for wearoff messages
-		//*009*/ uint32 unknown016;
-		//*013*/ uint8 bard_modifier;
-		//*014*/ uint32 duration;
-		//*018*/ uint8 level;
-		//*019*/ uint32 spellid;
-		//*023*/ uint32 counters;
-		//*027*/ uint8 unknown0028[53];
-		//*080*/
 
 		for (uint32 r = 0; r < BUFF_COUNT; r++)
 		{
@@ -3902,7 +3881,7 @@ namespace RoF
 		SETUP_DIRECT_DECODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
 
 		IN(merchant_entity_id);
-		emu->slot_id = RoFToServerSlot(eq->slot_id);
+		emu->slot_id = RoFToServerMainInvSlot(eq->slot_id);
 		IN(charges);
 		IN(cost);
 
@@ -3915,7 +3894,7 @@ namespace RoF
 		SETUP_DIRECT_DECODE(AltCurrencySelectItem_Struct, structs::AltCurrencySelectItem_Struct);
 
 		IN(merchant_entity_id);
-		emu->slot_id = RoFToServerSlot(eq->slot_id);
+		emu->slot_id = RoFToServerMainInvSlot(eq->slot_id);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -4878,7 +4857,8 @@ namespace RoF
 		uint16 ornaIcon = 0;
 		int32 heroModel = 0;
 		/*
-		if (inst->GetOrnamentationAug(ornamentationAugtype)) {
+		if (inst->GetOrnamentationAug(ornamentationAugtype))
+		{
 			const Item_Struct *aug_weap = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
 			//Mainhand
 			ss.write(aug_weap->IDFile, strlen(aug_weap->IDFile));
@@ -5080,11 +5060,6 @@ namespace RoF
 			isbs.augslots[x].visible = item->AugSlotVisible[x];
 			isbs.augslots[x].unknown = item->AugSlotUnk2[x];
 		}
-
-		// Increased to 6 max aug slots
-		//isbs.augslots[5].type = 0;
-		//isbs.augslots[5].visible = 1;
-		//isbs.augslots[5].unknown = 0;
 
 		isbs.ldonpoint_type = item->PointType;
 		isbs.ldontheme = item->LDoNTheme;

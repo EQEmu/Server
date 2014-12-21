@@ -2107,6 +2107,18 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 #endif //BOTS
 	}
 
+	if(give_exp && give_exp->IsTempPet() && give_exp->IsPetOwnerClient()) {
+
+		if (give_exp->IsNPC() && give_exp->CastToNPC()->GetSwarmOwner()){
+			Mob* temp_owner = nullptr;
+			temp_owner = entity_list.GetMobID(give_exp->CastToNPC()->GetSwarmOwner());
+
+			if (temp_owner)
+				give_exp = temp_owner;
+		}
+	}
+
+
 	int PlayerCount = 0; // QueryServ Player Counting
 
 	Client *give_exp_client = nullptr;
@@ -3934,6 +3946,11 @@ void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
 
 	if (!IsAttackAllowed(on)) {
 		mlog(COMBAT__PROCS, "Preventing procing off of unattackable things.");
+		return;
+	}
+
+	if (DivineAura()) {
+		mlog(COMBAT__PROCS, "Procs canceled, Divine Aura is in effect.");
 		return;
 	}
 
