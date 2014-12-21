@@ -19,10 +19,13 @@
 #ifndef BEACON_H
 #define BEACON_H
 
-#include "entity.h"
 #include "mob.h"
 #include "../common/types.h"
 #include "../common/timer.h"
+
+class Group;
+class Raid;
+struct ExtraAttackOptions;
 
 class Beacon : public Mob
 {

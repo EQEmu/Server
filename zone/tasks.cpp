@@ -21,20 +21,21 @@ Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
 #include "tasks.h"
 
 #include <string.h>
-#include <stdlib.h>
 
 #ifdef _WINDOWS
 #define strcasecmp _stricmp
 #endif
 
 #include "../common/misc_functions.h"
-#include "../common/string_util.h"
 #include "../common/rulesys.h"
-#include "masterentity.h"
-#include "../common/features.h"
-#include "quest_parser_collection.h"
+#include "../common/string_util.h"
+
+#include "client.h"
+#include "entity.h"
 #include "mob.h"
+
 #include "queryserv.h"
+#include "quest_parser_collection.h"
 
 extern QueryServ* QServ;
 
@@ -2772,13 +2773,6 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 			if(strlen(Tasks[TaskID]->Reward) != 0) {
 
 				switch(c->GetClientVersion()) {
-
-					case EQClient62:
-					{
-						MakeAnyLenString(&RewardTmp, "%c%07i-00001-00001-00001-00001-000013E0ABA6B%s%c",
-								0x12, ItemID, Tasks[TaskID]->Reward,0x12);
-						break;
-					}
 					case EQClientTitanium:
 					{
 						MakeAnyLenString(&RewardTmp, "%c%06X000000000000000000000000000000014505DC2%s%c",
@@ -2806,13 +2800,6 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 				if(Item) {
 
 					switch(c->GetClientVersion()) {
-
-						case EQClient62:
-						{
-							MakeAnyLenString(&RewardTmp, "%c%07i-00001-00001-00001-00001-000013E0ABA6B%s%c",
-									0x12, ItemID, Item->Name,0x12);
-							break;
-						}
 						case EQClientTitanium:
 						{
 							MakeAnyLenString(&RewardTmp, "%c%06X000000000000000000000000000000014505DC2%s%c",

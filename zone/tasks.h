@@ -21,9 +21,8 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 #define TASKS_H
 
 #include "../common/types.h"
-#include "mob.h"
+
 #include <vector>
-#include <queue>
 
 #define MAXTASKS 10000
 #define MAXTASKSETS 1000
@@ -44,6 +43,7 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 #define RELOADTASKSETS		3
 
 class Client;
+class Mob;
 
 struct TaskGoalList_Struct {
 	int ListID;

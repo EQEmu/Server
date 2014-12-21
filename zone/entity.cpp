@@ -31,7 +31,7 @@
 
 #include "../common/features.h"
 #include "../common/guilds.h"
-#include "../common/spdat.h"
+
 #include "guild_mgr.h"
 #include "net.h"
 #include "petitions.h"
@@ -44,6 +44,10 @@
 	#define snprintf	_snprintf
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
+#endif
+
+#ifdef BOTS
+#include "bot.h"
 #endif
 
 extern Zone *zone;
@@ -2631,7 +2635,7 @@ void EntityList::FindPathsToAllNPCs()
 	while (it != npc_list.end()) {
 		Map::Vertex Node0 = zone->pathing->GetPathNodeCoordinates(0, false);
 		Map::Vertex Dest(it->second->GetX(), it->second->GetY(), it->second->GetZ());
-		std::list<int> Route = zone->pathing->FindRoute(Node0, Dest);
+		std::deque<int> Route = zone->pathing->FindRoute(Node0, Dest);
 		if (Route.size() == 0)
 			printf("Unable to find a route to %s\n", it->second->GetName());
 		else

@@ -135,9 +135,6 @@ public:
 	void CalcNPCRegen();
 	void CalcNPCDamage();
 
-	int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target = nullptr);
-	int32 GetActSpellHealing(uint16 spell_id, int32 value, Mob* target = nullptr);
-
 	virtual void SetTarget(Mob* mob);
 	virtual uint16 GetSkill(SkillUseTypes skill_num) const { if (skill_num <= HIGHEST_SKILL) { return skills[skill_num]; } return 0; }
 
@@ -158,6 +155,7 @@ public:
 	virtual void	RangedAttack(Mob* other);
 	virtual void	ThrowingAttack(Mob* other) { }
 	int32 GetNumberOfAttacks() const { return attack_count; }
+	void DoRangedAttackDmg(Mob* other, bool Launch=true, int16 damage_mod=0, int16 chance_mod=0, SkillUseTypes skill=SkillArchery, float speed=4.0f, const char *IDFile = nullptr);
 
 	bool	DatabaseCastAccepted(int spell_id);
 	bool	IsFactionListAlly(uint32 other_faction);
@@ -256,6 +254,7 @@ public:
 	uint32	GetMinDMG() const {return min_dmg;}
 	int16	GetSlowMitigation() const {return slow_mitigation;}
 	float	GetAttackSpeed() const {return attack_speed;}
+	uint8	GetAttackDelay() const {return attack_delay;}
 	bool	IsAnimal() const { return(bodytype == BT_Animal); }
 	uint16	GetPetSpellID() const {return pet_spell_id;}
 	void	SetPetSpellID(uint16 amt) {pet_spell_id = amt;}
@@ -266,7 +265,7 @@ public:
 	void	AddLootDrop(const Item_Struct*dbitem, ItemList* itemlistconst, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange = false);
 	virtual void DoClassAttacks(Mob *target);
 	void	CheckSignal();
-	inline bool IsTargetableWithHotkey() const { return no_target_hotkey; }
+	inline bool IsNotTargetableWithHotkey() const { return no_target_hotkey; }
 	int32 GetNPCHPRegen() const { return hp_regen + itembonuses.HPRegen + spellbonuses.HPRegen; }
 	inline const char* GetAmmoIDfile() const { return ammo_idfile; }
 
@@ -439,7 +438,8 @@ protected:
 	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 	AISpellsVar_Struct AISpellVar;
-
+	int16 GetFocusEffect(focusType type, uint16 spell_id);
+	
 	uint32	npc_spells_effects_id;
 	std::vector<AISpellsEffects_Struct> AIspellsEffects;
 	bool HasAISpellEffects;

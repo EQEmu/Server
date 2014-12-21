@@ -1,0 +1,1 @@
+ALTER TABLE `inventory` ADD `ornament_hero_model` int( 11 ) NOT NULL DEFAULT '0' AFTER `ornamentidfile`;

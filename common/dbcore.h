@@ -6,15 +6,12 @@
 	#include <windows.h>
 #endif
 
+#include "../common/mutex.h"
+#include "../common/mysql_request_result.h"
+#include "../common/types.h"
+
 #include <mysql.h>
 #include <string.h>
-#include "../common/types.h"
-#include "../common/mutex.h"
-#include "../common/linked_list.h"
-#include "../common/queue.h"
-#include "../common/timer.h"
-#include "../common/condition.h"
-#include "../common/mysql_request_result.h"
 
 class DBcore {
 public:

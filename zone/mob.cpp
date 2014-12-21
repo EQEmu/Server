@@ -27,6 +27,10 @@
 #include <math.h>
 #include <sstream>
 
+#ifdef BOTS
+#include "bot.h"
+#endif
+
 extern EntityList entity_list;
 
 extern Zone* zone;
@@ -512,6 +516,8 @@ float Mob::_GetMovementSpeed(int mod) const
 	// http://everquest.allakhazam.com/db/item.html?item=1721;page=1;howmany=50#m10822246245352
 	if (IsRooted())
 		return 0.0f;
+	else if (IsPseudoRooted())
+		return 0.00001f;
 
 	float speed_mod = runspeed;
 
@@ -897,7 +903,8 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	ns->spawn.invis		= (invisible || hidden) ? 1 : 0;	// TODO: load this before spawning players
 	ns->spawn.NPC		= IsClient() ? 0 : 1;
-	ns->spawn.IsMercenary = (IsMerc() || no_target_hotkey) ? 1 : 0;
+	ns->spawn.IsMercenary = IsMerc() ? 1 : 0;
+	ns->spawn.targetable_with_hotkey = no_target_hotkey ? 0 : 1; // opposite logic!
 
 	ns->spawn.petOwnerId	= ownerid;
 
@@ -933,9 +940,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	// 3 - Mobs in water do not sink. A value of 3 in this field appears to be the default setting for all mobs
 	// (in water or not) according to 6.2 era packet collects.
 	if(IsClient())
-	{
 		ns->spawn.flymode = FindType(SE_Levitate) ? 2 : 0;
-	}
 	else
 		ns->spawn.flymode = flymode;
 
@@ -943,15 +948,14 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
 
-	for(i = 0; i < _MaterialCount; i++)
+	for (i = 0; i < _MaterialCount; i++)
 	{
-		ns->spawn.equipment[i] = GetEquipmentMaterial(i);
-		if (armor_tint[i])
+		// Only Player Races Wear Armor
+		if (Mob::IsPlayerRace(race) || i > 6)
 		{
-			ns->spawn.colors[i].color = armor_tint[i];
-		}
-		else
-		{
+			ns->spawn.equipment[i].material = GetEquipmentMaterial(i);
+			ns->spawn.equipment[i].elitematerial = IsEliteMaterialItem(i);
+			ns->spawn.equipment[i].heroforgemodel = GetHerosForgeModel(i);
 			ns->spawn.colors[i].color = GetEquipmentColor(i);
 		}
 	}
@@ -974,7 +978,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		//ns->spawn.DestructibleAppearance = static_cast<EmuAppearance>(_appearance);
 		// #appearance 44 1 makes it jump but no visible damage
 		// #appearance 44 2 makes it look completely broken but still visible
-		// #appearnace 44 3 makes it jump but not visible difference to 3
+		// #appearance 44 3 makes it jump but not visible difference to 3
 		// #appearance 44 4 makes it disappear altogether
 		// #appearance 44 5 makes the client crash.
 
@@ -2560,8 +2564,8 @@ uint32 NPC::GetEquipment(uint8 material_slot) const
 {
 	if(material_slot > 8)
 		return 0;
-	int invslot = Inventory::CalcSlotFromMaterial(material_slot);
-	if (invslot == -1)
+	int16 invslot = Inventory::CalcSlotFromMaterial(material_slot);
+	if (invslot == INVALID_INDEX)
 		return 0;
 	return equipment[invslot];
 }
@@ -2574,6 +2578,7 @@ void Mob::SendWearChange(uint8 material_slot)
 	wc->spawn_id = GetID();
 	wc->material = GetEquipmentMaterial(material_slot);
 	wc->elite_material = IsEliteMaterialItem(material_slot);
+	wc->hero_forge_model = GetHerosForgeModel(material_slot);
 	wc->color.color = GetEquipmentColor(material_slot);
 	wc->wear_slot_id = material_slot;
 
@@ -2618,6 +2623,7 @@ void Mob::SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uin
 
 	wc->spawn_id = this->GetID();
 	wc->material = GetEquipmentMaterial(material_slot);
+	wc->hero_forge_model = GetHerosForgeModel(material_slot);
 	wc->color.color = color;
 	wc->wear_slot_id = material_slot;
 
@@ -2625,7 +2631,7 @@ void Mob::SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uin
 	safe_delete(outapp);
 }
 
-void Mob::WearChange(uint8 material_slot, uint16 texture, uint32 color)
+void Mob::WearChange(uint8 material_slot, uint16 texture, uint32 color, uint32 hero_forge_model)
 {
 	armor_tint[material_slot] = color;
 
@@ -2634,6 +2640,7 @@ void Mob::WearChange(uint8 material_slot, uint16 texture, uint32 color)
 
 	wc->spawn_id = this->GetID();
 	wc->material = texture;
+	wc->hero_forge_model = hero_forge_model;
 	wc->color.color = color;
 	wc->wear_slot_id = material_slot;
 
@@ -2643,59 +2650,113 @@ void Mob::WearChange(uint8 material_slot, uint16 texture, uint32 color)
 
 int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 {
+	uint32 equipmaterial = 0;
+	int32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 	const Item_Struct *item;
-	int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 	item = database.GetItem(GetEquipment(material_slot));
-	if(item != 0)
+
+	if (item != 0)
 	{
-		if	// for primary and secondary we need the model, not the material
-		(
-			material_slot == MaterialPrimary ||
-			material_slot == MaterialSecondary
-		)
+		// For primary and secondary we need the model, not the material
+		if (material_slot == MaterialPrimary || material_slot == MaterialSecondary)
 		{
-			if (this->IsClient()){
-				int currMatslot = MaterialPrimary == material_slot ? MainPrimary : MainSecondary;
-				const ItemInst* inst = CastToClient()->m_inv[currMatslot];
-				if (inst && inst->GetOrnamentationAug(ornamentationAugtype)) {
-					item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
-					return atoi(&item->IDFile[2]);
+			if (this->IsClient())
+			{
+				int16 invslot = Inventory::CalcSlotFromMaterial(material_slot);
+				if (invslot == INVALID_INDEX)
+				{
+					return 0;
 				}
-				else if (inst->GetOrnamentationIcon() && inst->GetOrnamentationIDFile()) {
-					return inst->GetOrnamentationIDFile();
-				}
-				else {
-					if (strlen(item->IDFile) > 2)
-						return atoi(&item->IDFile[2]);
-					else	//may as well try this, since were going to 0 anyways
-						return item->Material;
+				const ItemInst* inst = CastToClient()->m_inv[invslot];
+				if (inst)
+				{
+					if (inst->GetOrnamentationAug(ornamentationAugtype))
+					{
+						item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
+						if (item && strlen(item->IDFile) > 2)
+						{
+							equipmaterial = atoi(&item->IDFile[2]);
+						}
+					}
+					else if (inst->GetOrnamentationIDFile())
+					{
+						equipmaterial = inst->GetOrnamentationIDFile();
+					}
 				}
 			}
-			else {
-				if (strlen(item->IDFile) > 2)
-					return atoi(&item->IDFile[2]);
-				else	//may as well try this, since were going to 0 anyways
-					return item->Material;
+
+			if (equipmaterial == 0 && strlen(item->IDFile) > 2)
+			{
+				equipmaterial = atoi(&item->IDFile[2]);
 			}
 		}
 		else
 		{
-			return item->Material;
+			equipmaterial = item->Material;
 		}
 	}
 
-	return 0;
+	return equipmaterial;
+}
+
+int32 Mob::GetHerosForgeModel(uint8 material_slot) const
+{
+	
+	uint32 HeroModel = 0;
+	if (material_slot >= 0 && material_slot < MaterialPrimary)
+	{
+		uint32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
+		const Item_Struct *item;
+		item = database.GetItem(GetEquipment(material_slot));
+		int16 invslot = Inventory::CalcSlotFromMaterial(material_slot);
+		
+		if (item != 0 && invslot != INVALID_INDEX)
+		{
+			if (this->IsClient())
+			{
+				const ItemInst* inst = CastToClient()->m_inv[invslot];
+				if (inst)
+				{
+					if (inst->GetOrnamentationAug(ornamentationAugtype))
+					{
+						item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
+						HeroModel = item->HerosForgeModel;
+					}
+					else if (inst->GetOrnamentHeroModel())
+					{
+						HeroModel = inst->GetOrnamentHeroModel();
+					}
+				}
+			}
+
+			if (HeroModel == 0)
+			{
+				HeroModel = item->HerosForgeModel;
+			}
+		}
+	}
+
+	if (HeroModel > 0)
+	{
+		HeroModel *= 100;
+		HeroModel += material_slot;
+	}
+
+	return HeroModel;
 }
 
 uint32 Mob::GetEquipmentColor(uint8 material_slot) const
 {
 	const Item_Struct *item;
 
-	item = database.GetItem(GetEquipment(material_slot));
-	if(item != 0)
+	if (armor_tint[material_slot])
 	{
-		return item->Color;
+		return armor_tint[material_slot];
 	}
+
+	item = database.GetItem(GetEquipment(material_slot));
+	if (item != 0)
+		return item->Color;
 
 	return 0;
 }
@@ -2894,6 +2955,10 @@ uint32 Mob::GetLevelHP(uint8 tlevel)
 }
 
 int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
+	
+	int32 cast_reducer = 0;
+	cast_reducer += GetFocusEffect(focusSpellHaste, spell_id);
+		
 	if (level >= 60 && casttime > 1000)
 	{
 		casttime = casttime / 2;
@@ -2906,7 +2971,9 @@ int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
 		else
 			casttime -= cast_deduction;
 	}
-	return(casttime);
+
+	casttime = (casttime*(100 - cast_reducer)/100);
+	return casttime;
 }
 
 void Mob::ExecWeaponProc(const ItemInst *inst, uint16 spell_id, Mob *on) {
@@ -3757,6 +3824,8 @@ int32 Mob::GetItemStat(uint32 itemid, const char *identifier)
 		stat = int32(item->CastTime);
 	if (id == "elitematerial")
 		stat = int32(item->EliteMaterial);
+	if (id == "herosforgemodel")
+		stat = int32(item->HerosForgeModel);
 	if (id == "procrate")
 		stat = int32(item->ProcRate);
 	if (id == "combateffects")
@@ -5205,99 +5274,99 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 	}
 
 	if (slot < 16){
-		if (id == "classes") {stat = spells[spell_id].classes[slot]; }
-		else if (id == "dieties") {stat = spells[spell_id].deities[slot];}
+		if (id == "classes") {return spells[spell_id].classes[slot]; }
+		else if (id == "dieties") {return spells[spell_id].deities[slot];}
 	}
 
 	if (slot < 12){
-		if (id == "base") {stat = spells[spell_id].base[slot];}
-		else if (id == "base2") {stat = spells[spell_id].base2[slot];}
-		else if (id == "max") {stat = spells[spell_id].max[slot];}
-		else if (id == "formula") {spells[spell_id].formula[slot];}
-		else if (id == "effectid") {spells[spell_id].effectid[slot];}
+		if (id == "base") {return spells[spell_id].base[slot];}
+		else if (id == "base2") {return spells[spell_id].base2[slot];}
+		else if (id == "max") {return spells[spell_id].max[slot];}
+		else if (id == "formula") {return spells[spell_id].formula[slot];}
+		else if (id == "effectid") {return spells[spell_id].effectid[slot];}
 	}
 
 	if (slot < 4){
-		if (id == "components") { spells[spell_id].components[slot];}
-		else if (id == "component_counts") {spells[spell_id].component_counts[slot];}
-		else if (id == "NoexpendReagent") {spells[spell_id].NoexpendReagent[slot];}
+		if (id == "components") { return spells[spell_id].components[slot];}
+		else if (id == "component_counts") { return spells[spell_id].component_counts[slot];} 
+		else if (id == "NoexpendReagent") {return spells[spell_id].NoexpendReagent[slot];}
 	}
 
-	if (id == "range") {stat = static_cast<int32>(spells[spell_id].range); }
-	else if (id == "aoerange") {stat = static_cast<int32>(spells[spell_id].aoerange);}
-	else if (id == "pushback") {stat = static_cast<int32>(spells[spell_id].pushback);}
-	else if (id == "pushup") {stat = static_cast<int32>(spells[spell_id].pushup);}
-	else if (id == "cast_time") {stat = spells[spell_id].cast_time;}
-	else if (id == "recovery_time") {stat = spells[spell_id].recovery_time;}
-	else if (id == "recast_time") {stat = spells[spell_id].recast_time;}
-	else if (id == "buffdurationformula") {stat = spells[spell_id].buffdurationformula;}
-	else if (id == "buffduration") {stat = spells[spell_id].buffduration;}
-	else if (id == "AEDuration") {stat = spells[spell_id].AEDuration;}
-	else if (id == "mana") {stat = spells[spell_id].mana;}
+	if (id == "range") {return static_cast<int32>(spells[spell_id].range); }
+	else if (id == "aoerange") {return static_cast<int32>(spells[spell_id].aoerange);}
+	else if (id == "pushback") {return static_cast<int32>(spells[spell_id].pushback);}
+	else if (id == "pushup") {return static_cast<int32>(spells[spell_id].pushup);}
+	else if (id == "cast_time") {return spells[spell_id].cast_time;}
+	else if (id == "recovery_time") {return spells[spell_id].recovery_time;}
+	else if (id == "recast_time") {return spells[spell_id].recast_time;}
+	else if (id == "buffdurationformula") {return spells[spell_id].buffdurationformula;}
+	else if (id == "buffduration") {return spells[spell_id].buffduration;}
+	else if (id == "AEDuration") {return spells[spell_id].AEDuration;}
+	else if (id == "mana") {return spells[spell_id].mana;}
 	//else if (id == "LightType") {stat = spells[spell_id].LightType;} - Not implemented
-	else if (id == "goodEffect") {stat = spells[spell_id].goodEffect;}
-	else if (id == "Activated") {stat = spells[spell_id].Activated;}
-	else if (id == "resisttype") {stat = spells[spell_id].resisttype;}
-	else if (id == "targettype") {stat = spells[spell_id].targettype;}
-	else if (id == "basedeiff") {stat = spells[spell_id].basediff;}
-	else if (id == "skill") {stat = spells[spell_id].skill;}
-	else if (id == "zonetype") {stat = spells[spell_id].zonetype;}
-	else if (id == "EnvironmentType") {stat = spells[spell_id].EnvironmentType;}
-	else if (id == "TimeOfDay") {stat = spells[spell_id].TimeOfDay;}
-	else if (id == "CastingAnim") {stat = spells[spell_id].CastingAnim;}
-	else if (id == "SpellAffectIndex") {stat = spells[spell_id].SpellAffectIndex; }
-	else if (id == "disallow_sit") {stat = spells[spell_id].disallow_sit; }
+	else if (id == "goodEffect") {return spells[spell_id].goodEffect;}
+	else if (id == "Activated") {return spells[spell_id].Activated;}
+	else if (id == "resisttype") {return spells[spell_id].resisttype;}
+	else if (id == "targettype") {return spells[spell_id].targettype;}
+	else if (id == "basedeiff") {return spells[spell_id].basediff;}
+	else if (id == "skill") {return spells[spell_id].skill;}
+	else if (id == "zonetype") {return spells[spell_id].zonetype;}
+	else if (id == "EnvironmentType") {return spells[spell_id].EnvironmentType;}
+	else if (id == "TimeOfDay") {return spells[spell_id].TimeOfDay;}
+	else if (id == "CastingAnim") {return spells[spell_id].CastingAnim;}
+	else if (id == "SpellAffectIndex") {return spells[spell_id].SpellAffectIndex; }
+	else if (id == "disallow_sit") {return spells[spell_id].disallow_sit; }
 	//else if (id == "spellanim") {stat = spells[spell_id].spellanim; } - Not implemented
-	else if (id == "uninterruptable") {stat = spells[spell_id].uninterruptable; }
-	else if (id == "ResistDiff") {stat = spells[spell_id].ResistDiff; }
-	else if (id == "dot_stacking_exemp") {stat = spells[spell_id].dot_stacking_exempt; }
-	else if (id == "RecourseLink") {stat = spells[spell_id].RecourseLink; }
-	else if (id == "no_partial_resist") {stat = spells[spell_id].no_partial_resist; }
-	else if (id == "short_buff_box") {stat = spells[spell_id].short_buff_box; }
-	else if (id == "descnum") {stat = spells[spell_id].descnum; }
-	else if (id == "effectdescnum") {stat = spells[spell_id].effectdescnum; }
-	else if (id == "npc_no_los") {stat = spells[spell_id].npc_no_los; }
-	else if (id == "reflectable") {stat = spells[spell_id].reflectable; }
-	else if (id == "bonushate") {stat = spells[spell_id].bonushate; }
-	else if (id == "EndurCost") {stat = spells[spell_id].EndurCost; }
-	else if (id == "EndurTimerIndex") {stat = spells[spell_id].EndurTimerIndex; }
-	else if (id == "IsDisciplineBuf") {stat = spells[spell_id].IsDisciplineBuff; }
-	else if (id == "HateAdded") {stat = spells[spell_id].HateAdded; }
-	else if (id == "EndurUpkeep") {stat = spells[spell_id].EndurUpkeep; }
-	else if (id == "numhitstype") {stat = spells[spell_id].numhitstype; }
-	else if (id == "numhits") {stat = spells[spell_id].numhits; }
-	else if (id == "pvpresistbase") {stat = spells[spell_id].pvpresistbase; }
-	else if (id == "pvpresistcalc") {stat = spells[spell_id].pvpresistcalc; }
-	else if (id == "pvpresistcap") {stat = spells[spell_id].pvpresistcap; }
-	else if (id == "spell_category") {stat = spells[spell_id].spell_category; }
-	else if (id == "can_mgb") {stat = spells[spell_id].can_mgb; }
-	else if (id == "dispel_flag") {stat = spells[spell_id].dispel_flag; }
-	else if (id == "MinResist") {stat = spells[spell_id].MinResist; }
-	else if (id == "MaxResist") {stat = spells[spell_id].MaxResist; }
-	else if (id == "viral_targets") {stat = spells[spell_id].viral_targets; }
-	else if (id == "viral_timer") {stat = spells[spell_id].viral_timer; }
-	else if (id == "NimbusEffect") {stat = spells[spell_id].NimbusEffect; }
-	else if (id == "directional_start") {stat = static_cast<int32>(spells[spell_id].directional_start); }
-	else if (id == "directional_end") {stat = static_cast<int32>(spells[spell_id].directional_end); }
-	else if (id == "not_extendable") {stat = spells[spell_id].not_extendable; }
-	else if (id == "suspendable") {stat = spells[spell_id].suspendable; }
-	else if (id == "viral_range") {stat = spells[spell_id].viral_range; }
-	else if (id == "spellgroup") {stat = spells[spell_id].spellgroup; }
-	else if (id == "rank") {stat = spells[spell_id].rank; }
-	else if (id == "powerful_flag") {stat = spells[spell_id].powerful_flag; }
-	else if (id == "CastRestriction") {stat = spells[spell_id].CastRestriction; }
-	else if (id == "AllowRest") {stat = spells[spell_id].AllowRest; }
-	else if (id == "InCombat") {stat = spells[spell_id].InCombat; }
-	else if (id == "OutofCombat") {stat = spells[spell_id].OutofCombat; }
-	else if (id == "aemaxtargets") {stat = spells[spell_id].aemaxtargets; }
-	else if (id == "maxtargets") {stat = spells[spell_id].maxtargets; }
-	else if (id == "persistdeath") {stat = spells[spell_id].persistdeath; }
-	else if (id == "min_dist") {stat = static_cast<int32>(spells[spell_id].min_dist); }
-	else if (id == "min_dist_mod") {stat = static_cast<int32>(spells[spell_id].min_dist_mod); }
-	else if (id == "max_dist") {stat = static_cast<int32>(spells[spell_id].max_dist); }
-	else if (id == "min_range") {stat = static_cast<int32>(spells[spell_id].min_range); }
-	else if (id == "DamageShieldType") {stat = spells[spell_id].DamageShieldType; }
-
+	else if (id == "uninterruptable") {return spells[spell_id].uninterruptable; }
+	else if (id == "ResistDiff") {return spells[spell_id].ResistDiff; }
+	else if (id == "dot_stacking_exemp") {return spells[spell_id].dot_stacking_exempt; }
+	else if (id == "RecourseLink") {return spells[spell_id].RecourseLink; }
+	else if (id == "no_partial_resist") {return spells[spell_id].no_partial_resist; }
+	else if (id == "short_buff_box") {return spells[spell_id].short_buff_box; }
+	else if (id == "descnum") {return spells[spell_id].descnum; }
+	else if (id == "effectdescnum") {return spells[spell_id].effectdescnum; }
+	else if (id == "npc_no_los") {return spells[spell_id].npc_no_los; }
+	else if (id == "reflectable") {return spells[spell_id].reflectable; }
+	else if (id == "bonushate") {return spells[spell_id].bonushate; }
+	else if (id == "EndurCost") {return spells[spell_id].EndurCost; }
+	else if (id == "EndurTimerIndex") {return spells[spell_id].EndurTimerIndex; }
+	else if (id == "IsDisciplineBuf") {return spells[spell_id].IsDisciplineBuff; }
+	else if (id == "HateAdded") {return spells[spell_id].HateAdded; }
+	else if (id == "EndurUpkeep") {return spells[spell_id].EndurUpkeep; }
+	else if (id == "numhitstype") {return spells[spell_id].numhitstype; }
+	else if (id == "numhits") {return spells[spell_id].numhits; }
+	else if (id == "pvpresistbase") {return spells[spell_id].pvpresistbase; }
+	else if (id == "pvpresistcalc") {return spells[spell_id].pvpresistcalc; }
+	else if (id == "pvpresistcap") {return spells[spell_id].pvpresistcap; }
+	else if (id == "spell_category") {return spells[spell_id].spell_category; }
+	else if (id == "can_mgb") {return spells[spell_id].can_mgb; }
+	else if (id == "dispel_flag") {return spells[spell_id].dispel_flag; }
+	else if (id == "MinResist") {return spells[spell_id].MinResist; }
+	else if (id == "MaxResist") {return spells[spell_id].MaxResist; }
+	else if (id == "viral_targets") {return spells[spell_id].viral_targets; }
+	else if (id == "viral_timer") {return spells[spell_id].viral_timer; }
+	else if (id == "NimbusEffect") {return spells[spell_id].NimbusEffect; }
+	else if (id == "directional_start") {return static_cast<int32>(spells[spell_id].directional_start); }
+	else if (id == "directional_end") {return static_cast<int32>(spells[spell_id].directional_end); }
+	else if (id == "not_extendable") {return spells[spell_id].not_extendable; }
+	else if (id == "suspendable") {return spells[spell_id].suspendable; }
+	else if (id == "viral_range") {return spells[spell_id].viral_range; }
+	else if (id == "spellgroup") {return spells[spell_id].spellgroup; }
+	else if (id == "rank") {return spells[spell_id].rank; }
+	else if (id == "powerful_flag") {return spells[spell_id].powerful_flag; }
+	else if (id == "CastRestriction") {return spells[spell_id].CastRestriction; }
+	else if (id == "AllowRest") {return spells[spell_id].AllowRest; }
+	else if (id == "InCombat") {return spells[spell_id].InCombat; }
+	else if (id == "OutofCombat") {return spells[spell_id].OutofCombat; }
+	else if (id == "aemaxtargets") {return spells[spell_id].aemaxtargets; }
+	else if (id == "maxtargets") {return spells[spell_id].maxtargets; }
+	else if (id == "persistdeath") {return spells[spell_id].persistdeath; }
+	else if (id == "min_dist") {return static_cast<int32>(spells[spell_id].min_dist); }
+	else if (id == "min_dist_mod") {return static_cast<int32>(spells[spell_id].min_dist_mod); }
+	else if (id == "max_dist") {return static_cast<int32>(spells[spell_id].max_dist); }
+	else if (id == "min_range") {return static_cast<int32>(spells[spell_id].min_range); }
+	else if (id == "DamageShieldType") {return spells[spell_id].DamageShieldType; }
+	
 	return stat;
 }
 

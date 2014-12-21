@@ -110,6 +110,9 @@ void EQStreamIdentifier::Process() {
 
 				_log(NET__IDENTIFY, "Identified stream %s:%d with signature %s", long2ip(r->stream->GetRemoteIP()).c_str(), ntohs(r->stream->GetRemotePort()), p->name.c_str());
 
+				// before we assign the eqstream to an interface, let the stream recognize it is in use and the session should not be reset any further
+				r->stream->SetActive(true);
+
 				//might want to do something less-specific here... some day..
 				EQStreamInterface *s = new EQStreamProxy(r->stream, p->structs, p->opcodes);
 				m_identified.push(s);

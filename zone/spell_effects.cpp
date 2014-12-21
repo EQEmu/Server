@@ -23,9 +23,11 @@
 #include "../common/rulesys.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
+
 #include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "worldserver.h"
+
 #include <math.h>
 
 #ifndef WIN32
@@ -179,11 +181,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 		int numhit = spells[spell_id].numhits;
 
-		if (caster && caster->IsClient()){
-			numhit += numhit*caster->CastToClient()->GetFocusEffect(focusFcLimitUse, spell_id)/100;
-			numhit += caster->CastToClient()->GetFocusEffect(focusIncreaseNumHits, spell_id);
-		}
-		
+		numhit += numhit*caster->GetFocusEffect(focusFcLimitUse, spell_id)/100;
+		numhit += caster->GetFocusEffect(focusIncreaseNumHits, spell_id);
 		buffs[buffslot].numhits = numhit;
 	}
 
@@ -714,7 +713,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						mlog(COMBAT__HITS, "Stunned. We had %d percent resist chance.", stun_resist);
 
 						if (caster->IsClient())
-							effect_value += effect_value*caster->CastToClient()->GetFocusEffect(focusFcStunTimeMod, spell_id)/100;
+							effect_value += effect_value*caster->GetFocusEffect(focusFcStunTimeMod, spell_id)/100;
 
 						Stun(effect_value);
 					} else {
@@ -2265,8 +2264,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				int16 focus = 0;
 				int ReuseTime = spells[spell_id].recast_time + spells[spell_id].recovery_time;
 
-				if(caster->IsClient())
-					focus = caster->CastToClient()->GetFocusEffect(focusFcBaseEffects, spell_id);
+				focus = caster->GetFocusEffect(focusFcBaseEffects, spell_id);
 
 				switch(spells[spell_id].skill)
 				{
@@ -3469,30 +3467,18 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 			{
 				effect_value = CalcSpellEffectValue(spell_id, i, caster_level, caster, ticsremaining);
 				//Handle client cast DOTs here.
-				if (caster && caster->IsClient() && IsDetrimentalSpell(spell_id) && effect_value < 0) {
-
-					effect_value = caster->CastToClient()->GetActDoTDamage(spell_id, effect_value, this);
-
-					if (!caster->CastToClient()->GetFeigned())
-						AddToHateList(caster, -effect_value);
-				}
-
-				if(effect_value < 0)
-				{
-					if(caster)
-					{
-						if(!caster->IsClient()){
-
-							if (!IsClient()) //Allow NPC's to generate hate if casted on other NPC's.
-								AddToHateList(caster, -effect_value);
-						}
-
-						if(caster->IsNPC())
-							effect_value = caster->CastToNPC()->GetActSpellDamage(spell_id, effect_value, this);
-
-						caster->ResourceTap(-effect_value, spell_id);
+				if (caster && effect_value < 0 && IsDetrimentalSpell(spell_id)){
+					
+					if (caster->IsClient()){
+						if (!caster->CastToClient()->GetFeigned())
+							AddToHateList(caster, -effect_value);
 					}
+					else if (!IsClient()) //Allow NPC's to generate hate if casted on other NPC's.
+						AddToHateList(caster, -effect_value);
 
+					effect_value = caster->GetActDoTDamage(spell_id, effect_value, this);
+
+					caster->ResourceTap(-effect_value, spell_id);
 					effect_value = -effect_value;
 					Damage(caster, effect_value, spell_id, spell.skill, false, i, true);
 				} else if(effect_value > 0) {
@@ -5318,11 +5304,8 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 
 	//Improved Healing, Damage & Mana Reduction are handled differently in that some are random percentages
 	//In these cases we need to find the most powerful effect, so that each piece of gear wont get its own chance
-	if((type == focusManaCost || type == focusImprovedHeal || type == focusImprovedDamage)
-		&& RuleB(Spells, LiveLikeFocusEffects))
-	{
+	if(RuleB(Spells, LiveLikeFocusEffects) && (type == focusManaCost || type == focusImprovedHeal || type == focusImprovedDamage))
 		rand_effectiveness = true;
-	}
 
 	//Check if item focus effect exists for the client.
 	if (itembonuses.FocusEffects[type]){
@@ -5538,6 +5521,122 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 	//by reagent conservation for obvious reasons.
 
 	return realTotal + realTotal2 + realTotal3;
+}
+
+int16 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
+
+	int16 realTotal = 0;
+	int16 realTotal2 = 0;
+	bool rand_effectiveness = false;
+
+	//Improved Healing, Damage & Mana Reduction are handled differently in that some are random percentages
+	//In these cases we need to find the most powerful effect, so that each piece of gear wont get its own chance
+	if(RuleB(Spells, LiveLikeFocusEffects) && (type == focusManaCost || type == focusImprovedHeal || type == focusImprovedDamage))
+		rand_effectiveness = true;
+
+	if (RuleB(Spells, NPC_UseFocusFromItems) && itembonuses.FocusEffects[type]){
+
+		const Item_Struct* TempItem = 0;
+		const Item_Struct* UsedItem = 0;
+		uint16 UsedFocusID = 0;
+		int16 Total = 0;
+		int16 focus_max = 0;
+		int16 focus_max_real = 0;
+
+		//item focus
+		for(int i = 0; i < EmuConstants::EQUIPMENT_SIZE; i++){
+			const Item_Struct *cur = database.GetItem(equipment[i]);
+	
+			if(!cur)
+				continue;
+	
+			TempItem = cur;
+
+			if (TempItem && TempItem->Focus.Effect > 0 && TempItem->Focus.Effect != SPELL_UNKNOWN) {
+				if(rand_effectiveness) {
+					focus_max = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id, true);
+					if (focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) {
+						focus_max_real = focus_max;
+						UsedItem = TempItem;
+						UsedFocusID = TempItem->Focus.Effect;
+					} else if (focus_max < 0 && focus_max < focus_max_real) {
+						focus_max_real = focus_max;
+						UsedItem = TempItem;
+						UsedFocusID = TempItem->Focus.Effect;
+					}
+				}
+				else {
+					Total = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id);
+					if (Total > 0 && realTotal >= 0 && Total > realTotal) {
+						realTotal = Total;
+						UsedItem = TempItem;
+						UsedFocusID = TempItem->Focus.Effect;
+					} else if (Total < 0 && Total < realTotal) {
+						realTotal = Total;
+						UsedItem = TempItem;
+						UsedFocusID = TempItem->Focus.Effect;
+					}
+				}
+			}
+		}
+			
+		if(UsedItem && rand_effectiveness && focus_max_real != 0)
+			realTotal = CalcFocusEffect(type, UsedFocusID, spell_id);
+	}
+
+	if (RuleB(Spells, NPC_UseFocusFromSpells) && spellbonuses.FocusEffects[type]){
+
+		//Spell Focus
+		int16 Total2 = 0;
+		int16 focus_max2 = 0;
+		int16 focus_max_real2 = 0;
+
+		int buff_tracker = -1;
+		int buff_slot = 0;
+		uint16 focusspellid = 0;
+		uint16 focusspell_tracker = 0;
+		int buff_max = GetMaxTotalSlots();
+		for (buff_slot = 0; buff_slot < buff_max; buff_slot++) {
+			focusspellid = buffs[buff_slot].spellid;
+			if (focusspellid == 0 || focusspellid >= SPDAT_RECORDS)
+				continue;
+
+			if(rand_effectiveness) {
+				focus_max2 = CalcFocusEffect(type, focusspellid, spell_id, true);
+				if (focus_max2 > 0 && focus_max_real2 >= 0 && focus_max2 > focus_max_real2) {
+					focus_max_real2 = focus_max2;
+					buff_tracker = buff_slot;
+					focusspell_tracker = focusspellid;
+				} else if (focus_max2 < 0 && focus_max2 < focus_max_real2) {
+					focus_max_real2 = focus_max2;
+					buff_tracker = buff_slot;
+					focusspell_tracker = focusspellid;
+				}
+			}
+			else {
+				Total2 = CalcFocusEffect(type, focusspellid, spell_id);
+				if (Total2 > 0 && realTotal2 >= 0 && Total2 > realTotal2) {
+					realTotal2 = Total2;
+					buff_tracker = buff_slot;
+					focusspell_tracker = focusspellid;
+				} else if (Total2 < 0 && Total2 < realTotal2) {
+					realTotal2 = Total2;
+					buff_tracker = buff_slot;
+					focusspell_tracker = focusspellid;
+				}
+			}
+		}
+
+		if(focusspell_tracker && rand_effectiveness && focus_max_real2 != 0)
+			realTotal2 = CalcFocusEffect(type, focusspell_tracker, spell_id);
+
+		// For effects like gift of mana that only fire once, save the spellid into an array that consists of all available buff slots.
+		if(buff_tracker >= 0 && buffs[buff_tracker].numhits > 0) {
+			m_spellHitsLeft[buff_tracker] = focusspell_tracker;
+		}
+	}
+
+	return realTotal + realTotal2;
 }
 
 void Mob::CheckNumHitsRemaining(uint8 type, int32 buff_slot, uint16 spell_id)
@@ -5946,15 +6045,13 @@ int32 Mob::ApplySpellEffectiveness(Mob* caster, int16 spell_id, int32 value, boo
 	if (!caster)
 		return value;
 
-	if (caster->IsClient()){
-		int16 focus = caster->CastToClient()->GetFocusEffect(focusFcBaseEffects, spell_id);
+	int16 focus = GetFocusEffect(focusFcBaseEffects, spell_id);
 
-			if (IsBard)
-				value += focus;
+	if (IsBard)
+		value += focus;
+	else
+		value += value*focus/100;
 
-			else
-				value += value*focus/100;
-	}
 	return value;
 }
 

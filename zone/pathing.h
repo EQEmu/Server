@@ -1,13 +1,12 @@
 #ifndef PATHING_H
 #define PATHING_H
-#include <algorithm>
+
 #include "map.h"
-#include "../common/timer.h"
-#include <list>
-#include <vector>
-#include <algorithm>
+
+#include <deque>
 
 class Client;
+class Mob;
 
 #define PATHNODENEIGHBOURS 50
 
@@ -61,8 +60,8 @@ public:
 	static PathManager *LoadPathFile(const char *ZoneName);
 	bool loadPaths(FILE *fp);
 	void PrintPathing();
-	std::list<int> FindRoute(Map::Vertex Start, Map::Vertex End);
-	std::list<int> FindRoute(int startID, int endID);
+	std::deque<int> FindRoute(Map::Vertex Start, Map::Vertex End);
+	std::deque<int> FindRoute(int startID, int endID);
 
 	Map::Vertex GetPathNodeCoordinates(int NodeNumber, bool BestZ = true);
 	bool CheckLosFN(Map::Vertex a, Map::Vertex b);

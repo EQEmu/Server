@@ -15,27 +15,29 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
-#include "../common/spdat.h"
-#include "masterentity.h"
-#include "../common/packet_dump.h"
-#include "../common/moremath.h"
-#include "../common/item.h"
-#include "worldserver.h"
-#include "../common/skills.h"
-#include "../common/bodytypes.h"
 #include "../common/classes.h"
+#include "../common/debug.h"
+#include "../common/item.h"
 #include "../common/rulesys.h"
+#include "../common/skills.h"
+#include "../common/spdat.h"
+
+#include "client.h"
+#include "entity.h"
+#include "mob.h"
+
+#ifdef BOTS
+#include "bot.h"
+#endif
+
 #include "quest_parser_collection.h"
-#include <math.h>
-#include <assert.h>
-#include <iostream>
+
+
 #ifndef WIN32
 #include <stdlib.h>
 #include "../common/unix.h"
 #endif
 
-#include "string_ids.h"
 
 void Mob::CalcBonuses()
 {
@@ -536,9 +538,9 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 }
 
 void Client::CalcEdibleBonuses(StatBonuses* newbon) {
-#if EQDEBUG >= 11
-	std::cout<<"Client::CalcEdibleBonuses(StatBonuses* newbon)"<<std::endl;
-#endif
+//#if EQDEBUG >= 11
+//	std::cout<<"Client::CalcEdibleBonuses(StatBonuses* newbon)"<<std::endl;
+//#endif
 	// Search player slots for skill=14(food) and skill=15(drink)
 		uint32 i;
 
@@ -3050,6 +3052,13 @@ void NPC::CalcItemBonuses(StatBonuses *newbon)
 				if (cur->Worn.Effect>0 && (cur->Worn.Type == ET_WornEffect)) { // latent effects
 					ApplySpellsBonuses(cur->Worn.Effect, cur->Worn.Level, newbon);
 				}
+
+				if (RuleB(Spells, NPC_UseFocusFromItems)){
+					if (cur->Focus.Effect>0 && (cur->Focus.Type == ET_Focus)){  // focus effects
+						ApplySpellsBonuses(cur->Focus.Effect, cur->Focus.Level, newbon, 0, true);
+					}
+				}
+
 				if (cur->Haste > newbon->haste)
 					newbon->haste = cur->Haste;
 			}

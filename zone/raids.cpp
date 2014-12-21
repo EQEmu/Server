@@ -15,13 +15,17 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
-#include "masterentity.h"
-#include "npc_ai.h"
-#include "../common/packet_functions.h"
-#include "../common/packet_dump.h"
+
 #include "../common/string_util.h"
+
+#include "client.h"
+#include "entity.h"
+#include "groups.h"
+#include "mob.h"
+#include "raids.h"
+
 #include "worldserver.h"
+
 extern EntityList entity_list;
 extern WorldServer worldserver;
 

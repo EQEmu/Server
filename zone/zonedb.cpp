@@ -3,12 +3,14 @@
 #include "../common/item.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
+
 #include "client.h"
 #include "corpse.h"
 #include "groups.h"
 #include "merc.h"
 #include "zone.h"
 #include "zonedb.h"
+
 #include <ctime>
 #include <iostream>
 
@@ -427,7 +429,7 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
 		return;
 	}
 
-	std::string query = StringFormat("SELECT bagidx, itemid, charges, augslot1, augslot2, augslot3, augslot4, augslot5 "
+	std::string query = StringFormat("SELECT bagidx, itemid, charges, augslot1, augslot2, augslot3, augslot4, augslot5, augslot6 "
                                     "FROM object_contents WHERE parentid = %i", parentid);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
@@ -440,11 +442,12 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
         uint32 item_id = (uint32)atoi(row[1]);
         int8 charges = (int8)atoi(row[2]);
         uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
-        aug[0]	= (uint32)atoi(row[3]);
-        aug[1]	= (uint32)atoi(row[4]);
-        aug[2]	= (uint32)atoi(row[5]);
-        aug[3]	= (uint32)atoi(row[6]);
-        aug[4]	= (uint32)atoi(row[7]);
+        aug[0] = (uint32)atoi(row[3]);
+        aug[1] = (uint32)atoi(row[4]);
+        aug[2] = (uint32)atoi(row[5]);
+        aug[3] = (uint32)atoi(row[6]);
+        aug[4] = (uint32)atoi(row[7]);
+		aug[5] = (uint32)atoi(row[8]);
 
         ItemInst* inst = database.CreateItem(item_id, charges);
         if (inst && inst->GetItem()->ItemClass == ItemClassCommon) {
@@ -478,7 +481,7 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const It
             continue;
 
         uint32 item_id = inst->GetItem()->ID;
-        uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
+		uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
 
         if (inst->IsType(ItemClassCommon)) {
             for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
@@ -489,10 +492,10 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const It
 
         std::string query = StringFormat("REPLACE INTO object_contents "
                                         "(zoneid, parentid, bagidx, itemid, charges, "
-                                        "augslot1, augslot2, augslot3, augslot4, augslot5, droptime) "
-                                        "VALUES (%i, %i, %i, %i, %i, %i, %i, %i, %i, %i, now())",
+                                        "augslot1, augslot2, augslot3, augslot4, augslot5, augslot6, droptime) "
+                                        "VALUES (%i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, now())",
                                         zone_id, parent_id, index, item_id, inst->GetCharges(),
-                                        augslot[0], augslot[1], augslot[2], augslot[3], augslot[4]);
+										augslot[0], augslot[1], augslot[2], augslot[3], augslot[4], augslot[5]);
         auto results = QueryDatabase(query);
         if (!results.Success())
             LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::SaveWorldContainer: %s", results.ErrorMessage().c_str());
@@ -1002,15 +1005,16 @@ bool ZoneDatabase::LoadCharacterLanguages(uint32 character_id, PlayerProfile_Str
 		"WHERE `id` = %u ORDER BY `lang_id`", character_id);
 	auto results = database.QueryDatabase(query); int i = 0;
 	/* Initialize Languages */
-	for (i = 0; i < MAX_PP_LANGUAGE; i++){
+	for (i = 0; i < MAX_PP_LANGUAGE; ++i)
 		pp->languages[i] = 0;
-	}
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		i = atoi(row[0]);
+
+	for (auto row = results.begin(); row != results.end(); ++row) { 
+		i = atoi(row[0]); 
 		if (i < MAX_PP_LANGUAGE){
 			pp->languages[i] = atoi(row[1]);
 		}
 	}
+
 	return true;
 }
 
@@ -1033,14 +1037,14 @@ bool ZoneDatabase::LoadCharacterDisciplines(uint32 character_id, PlayerProfile_S
 		"WHERE `id` = %u ORDER BY `slot_id`", character_id);
 	auto results = database.QueryDatabase(query);
 	int i = 0;
+
 	/* Initialize Disciplines */
 	memset(pp->disciplines.values, 0, (sizeof(pp->disciplines.values[0]) * MAX_PP_DISCIPLINES));
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		if (i < MAX_PP_DISCIPLINES){
+		if (i < MAX_PP_DISCIPLINES)
 			pp->disciplines.values[i] = atoi(row[0]);
-		}
-		i++;
-	}
+        ++i;
+    }
 	return true;
 }
 
@@ -1052,17 +1056,18 @@ bool ZoneDatabase::LoadCharacterSkills(uint32 character_id, PlayerProfile_Struct
 		"FROM				"
 		"`character_skills` "
 		"WHERE `id` = %u ORDER BY `skill_id`", character_id);
-	auto results = database.QueryDatabase(query); int i = 0;
+	auto results = database.QueryDatabase(query); 
+	int i = 0;
 	/* Initialize Skill */
-	for (i = 0; i < MAX_PP_SKILL; i++){
+	for (i = 0; i < MAX_PP_SKILL; ++i)
 		pp->skills[i] = 0;
-	}
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		i = atoi(row[0]);
-		if (i < MAX_PP_SKILL){
+
+	for (auto row = results.begin(); row != results.end(); ++row) { 
+		i = atoi(row[0]); 
+		if (i < MAX_PP_SKILL)
 			pp->skills[i] = atoi(row[1]);
-		}
 	}
+
 	return true;
 }
 
@@ -1172,44 +1177,49 @@ bool ZoneDatabase::LoadCharacterPotions(uint32 character_id, PlayerProfile_Struc
 		pp->potionbelt.items[i].item_id = 0;
 		strncpy(pp->potionbelt.items[i].item_name, "\0", 1);
 	}
+
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		i = atoi(row[0]); /* Potion belt slot number */
 		uint32 item_id = atoi(row[1]);
 		const Item_Struct *item = database.GetItem(item_id);
 
-		if(item) {
-			pp->potionbelt.items[i].item_id = item_id;
-			pp->potionbelt.items[i].icon = atoi(row[2]);
-			strncpy(pp->potionbelt.items[i].item_name, item->Name, 64);
-		}
+		if(!item)
+			continue;
+
+		pp->potionbelt.items[i].item_id = item_id;
+		pp->potionbelt.items[i].icon = atoi(row[2]);
+		strncpy(pp->potionbelt.items[i].item_name, item->Name, 64);
 	}
+
 	return true;
 }
 
 bool ZoneDatabase::LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Struct* pp){
 	std::string query = StringFormat("SELECT `zone_id`, `instance_id`, `x`, `y`, `z`, `heading`, `is_home` FROM `character_bind` WHERE `id` = %u LIMIT 2", character_id);
-	auto results = database.QueryDatabase(query); int i = 0;
+	auto results = database.QueryDatabase(query); 
+
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		i = 0;
+
 		/* Is home bind */
 		if (atoi(row[6]) == 1){
-			pp->binds[4].zoneId = atoi(row[i++]);
-			pp->binds[4].instance_id = atoi(row[i++]);
-			pp->binds[4].x = atoi(row[i++]);
-			pp->binds[4].y = atoi(row[i++]);
-			pp->binds[4].z = atoi(row[i++]);
-			pp->binds[4].heading = atoi(row[i++]);
+			pp->binds[4].zoneId = atoi(row[0]);
+			pp->binds[4].instance_id = atoi(row[1]);
+			pp->binds[4].x = atoi(row[2]);
+			pp->binds[4].y = atoi(row[3]);
+			pp->binds[4].z = atoi(row[4]);
+			pp->binds[4].heading = atoi(row[5]);
+			continue;
 		}
+
 		/* Is regular bind point */
-		else{
-			pp->binds[0].zoneId = atoi(row[i++]);
-			pp->binds[0].instance_id = atoi(row[i++]);
-			pp->binds[0].x = atoi(row[i++]);
-			pp->binds[0].y = atoi(row[i++]);
-			pp->binds[0].z = atoi(row[i++]);
-			pp->binds[0].heading = atoi(row[i++]);
-		}
+		pp->binds[0].zoneId = atoi(row[0]);
+		pp->binds[0].instance_id = atoi(row[1]);
+		pp->binds[0].x = atoi(row[2]);
+		pp->binds[0].y = atoi(row[3]);
+		pp->binds[0].z = atoi(row[4]);
+		pp->binds[0].heading = atoi(row[5]);
 	}
+
 	return true;
 }
 
@@ -2100,7 +2110,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 bool ZoneDatabase::LoadMercInfo(Client *client) {
 
 	std::string query = StringFormat("SELECT MercID, Slot, Name, TemplateID, SuspendedTime, "
-                                    "IsSuspended, TimerRemaining, Gender, StanceID, HP, Mana, "
+                                    "IsSuspended, TimerRemaining, Gender, MercSize, StanceID, HP, Mana, "
                                     "Endurance, Face, LuclinHairStyle, LuclinHairColor, "
                                     "LuclinEyeColor, LuclinEyeColor2, LuclinBeardColor, LuclinBeard, "
                                     "DrakkinHeritage, DrakkinTattoo, DrakkinDetails "
@@ -2126,21 +2136,22 @@ bool ZoneDatabase::LoadMercInfo(Client *client) {
         client->GetMercInfo(slot).IsSuspended = atoi(row[5]) == 1 ? true : false;
 		client->GetMercInfo(slot).MercTimerRemaining = atoi(row[6]);
 		client->GetMercInfo(slot).Gender = atoi(row[7]);
+		client->GetMercInfo(slot).MercSize = atof(row[8]);
 		client->GetMercInfo(slot).State = 5;
-		client->GetMercInfo(slot).Stance = atoi(row[8]);
-		client->GetMercInfo(slot).hp = atoi(row[9]);
-		client->GetMercInfo(slot).mana = atoi(row[10]);
-		client->GetMercInfo(slot).endurance = atoi(row[11]);
-		client->GetMercInfo(slot).face = atoi(row[12]);
-		client->GetMercInfo(slot).luclinHairStyle = atoi(row[13]);
-		client->GetMercInfo(slot).luclinHairColor = atoi(row[14]);
-		client->GetMercInfo(slot).luclinEyeColor = atoi(row[15]);
-		client->GetMercInfo(slot).luclinEyeColor2 = atoi(row[16]);
-		client->GetMercInfo(slot).luclinBeardColor = atoi(row[17]);
-		client->GetMercInfo(slot).luclinBeard = atoi(row[18]);
-		client->GetMercInfo(slot).drakkinHeritage = atoi(row[19]);
-		client->GetMercInfo(slot).drakkinTattoo = atoi(row[20]);
-		client->GetMercInfo(slot).drakkinDetails = atoi(row[21]);
+		client->GetMercInfo(slot).Stance = atoi(row[9]);
+		client->GetMercInfo(slot).hp = atoi(row[10]);
+		client->GetMercInfo(slot).mana = atoi(row[11]);
+		client->GetMercInfo(slot).endurance = atoi(row[12]);
+		client->GetMercInfo(slot).face = atoi(row[13]);
+		client->GetMercInfo(slot).luclinHairStyle = atoi(row[14]);
+		client->GetMercInfo(slot).luclinHairColor = atoi(row[15]);
+		client->GetMercInfo(slot).luclinEyeColor = atoi(row[16]);
+		client->GetMercInfo(slot).luclinEyeColor2 = atoi(row[17]);
+		client->GetMercInfo(slot).luclinBeardColor = atoi(row[18]);
+		client->GetMercInfo(slot).luclinBeard = atoi(row[19]);
+		client->GetMercInfo(slot).drakkinHeritage = atoi(row[20]);
+		client->GetMercInfo(slot).drakkinTattoo = atoi(row[21]);
+		client->GetMercInfo(slot).drakkinDetails = atoi(row[22]);
     }
 
 	return true;
@@ -2154,7 +2165,7 @@ bool ZoneDatabase::LoadCurrentMerc(Client *client) {
         return false;
 
     std::string query = StringFormat("SELECT MercID, Name, TemplateID, SuspendedTime, "
-                                    "IsSuspended, TimerRemaining, Gender, StanceID, HP, "
+                                    "IsSuspended, TimerRemaining, Gender, MercSize, StanceID, HP, "
                                     "Mana, Endurance, Face, LuclinHairStyle, LuclinHairColor, "
                                     "LuclinEyeColor, LuclinEyeColor2, LuclinBeardColor, "
                                     "LuclinBeard, DrakkinHeritage, DrakkinTattoo, DrakkinDetails "
@@ -2164,7 +2175,7 @@ bool ZoneDatabase::LoadCurrentMerc(Client *client) {
 
     if(!results.Success())
 		return false;
-
+		
 	if(results.RowCount() == 0)
 		return false;
 
@@ -2178,20 +2189,21 @@ bool ZoneDatabase::LoadCurrentMerc(Client *client) {
         client->GetMercInfo(slot).IsSuspended = atoi(row[4]) == 1? true: false;
         client->GetMercInfo(slot).MercTimerRemaining = atoi(row[5]);
 		client->GetMercInfo(slot).Gender = atoi(row[6]);
-		client->GetMercInfo(slot).State = atoi(row[7]);
-		client->GetMercInfo(slot).hp = atoi(row[8]);
-		client->GetMercInfo(slot).mana = atoi(row[9]);
-		client->GetMercInfo(slot).endurance = atoi(row[10]);
-		client->GetMercInfo(slot).face = atoi(row[11]);
-		client->GetMercInfo(slot).luclinHairStyle = atoi(row[12]);
-		client->GetMercInfo(slot).luclinHairColor = atoi(row[13]);
-		client->GetMercInfo(slot).luclinEyeColor = atoi(row[14]);
-		client->GetMercInfo(slot).luclinEyeColor2 = atoi(row[15]);
-		client->GetMercInfo(slot).luclinBeardColor = atoi(row[16]);
-		client->GetMercInfo(slot).luclinBeard = atoi(row[17]);
-		client->GetMercInfo(slot).drakkinHeritage = atoi(row[18]);
-		client->GetMercInfo(slot).drakkinTattoo = atoi(row[19]);
-		client->GetMercInfo(slot).drakkinDetails = atoi(row[20]);
+		client->GetMercInfo(slot).MercSize = atof(row[7]);
+		client->GetMercInfo(slot).State = atoi(row[8]);
+		client->GetMercInfo(slot).hp = atoi(row[9]);
+		client->GetMercInfo(slot).mana = atoi(row[10]);
+		client->GetMercInfo(slot).endurance = atoi(row[11]);
+		client->GetMercInfo(slot).face = atoi(row[12]);
+		client->GetMercInfo(slot).luclinHairStyle = atoi(row[13]);
+		client->GetMercInfo(slot).luclinHairColor = atoi(row[14]);
+		client->GetMercInfo(slot).luclinEyeColor = atoi(row[15]);
+		client->GetMercInfo(slot).luclinEyeColor2 = atoi(row[16]);
+		client->GetMercInfo(slot).luclinBeardColor = atoi(row[17]);
+		client->GetMercInfo(slot).luclinBeard = atoi(row[18]);
+		client->GetMercInfo(slot).drakkinHeritage = atoi(row[19]);
+		client->GetMercInfo(slot).drakkinTattoo = atoi(row[20]);
+		client->GetMercInfo(slot).drakkinDetails = atoi(row[21]);
 	}
 
 	return true;
@@ -2209,19 +2221,19 @@ bool ZoneDatabase::SaveMerc(Merc *merc) {
 		std::string query = StringFormat("INSERT INTO mercs "
 		"(OwnerCharacterID, Slot, Name, TemplateID, "
 		"SuspendedTime, IsSuspended, TimerRemaining, "
-		"Gender, StanceID, HP, Mana, Endurance, Face, "
+		"Gender, MercSize, StanceID, HP, Mana, Endurance, Face, "
 		"LuclinHairStyle, LuclinHairColor, LuclinEyeColor, "
 		"LuclinEyeColor2, LuclinBeardColor, LuclinBeard, "
 		"DrakkinHeritage, DrakkinTattoo, DrakkinDetails) "
 		"VALUES('%u', '%u', '%s', '%u', '%u', '%u', '%u', "
-		"'%u', '%u', '%u', '%u', '%u', '%i', '%i', '%i', "
+		"'%u', '%u', '%f', '%u', '%u', '%u', '%i', '%i', '%i', "
 		"'%i', '%i', '%i', '%i', '%i', '%i', '%i')",
 		merc->GetMercCharacterID(), owner->GetNumMercs(),
 		merc->GetCleanName(), merc->GetMercTemplateID(),
 		owner->GetMercInfo().SuspendedTime, merc->IsSuspended(),
 		owner->GetMercInfo().MercTimerRemaining, merc->GetGender(),
-		merc->GetStance(), merc->GetHP(), merc->GetMana(),
-		merc->GetEndurance(), merc->GetLuclinFace(),
+		merc->GetSize(), merc->GetStance(), merc->GetHP(),
+		merc->GetMana(), merc->GetEndurance(), merc->GetLuclinFace(),
 		merc->GetHairStyle(), merc->GetHairColor(), merc->GetEyeColor1(),
 		merc->GetEyeColor2(), merc->GetBeardColor(),
 		merc->GetBeard(), merc->GetDrakkinHeritage(),
@@ -2245,7 +2257,7 @@ bool ZoneDatabase::SaveMerc(Merc *merc) {
 	// Update existing merc record
 	std::string query = StringFormat("UPDATE mercs SET OwnerCharacterID = '%u', Slot = '%u', "
 	"Name = '%s', TemplateID = '%u', SuspendedTime = '%u', "
-	"IsSuspended = '%u', TimerRemaining = '%u', Gender = '%u', "
+	"IsSuspended = '%u', TimerRemaining = '%u', Gender = '%u', MercSize = '%f', "
 	"StanceID = '%u', HP = '%u', Mana = '%u', Endurance = '%u', "
 	"Face = '%i', LuclinHairStyle = '%i', LuclinHairColor = '%i', "
 	"LuclinEyeColor = '%i', LuclinEyeColor2 = '%i', LuclinBeardColor = '%i', "
@@ -2254,11 +2266,12 @@ bool ZoneDatabase::SaveMerc(Merc *merc) {
 	merc->GetMercCharacterID(), owner->GetMercSlot(), merc->GetCleanName(),
 	merc->GetMercTemplateID(), owner->GetMercInfo().SuspendedTime,
 	merc->IsSuspended(), owner->GetMercInfo().MercTimerRemaining,
-	merc->GetGender(), merc->GetStance(), merc->GetHP(), merc->GetMana(),
-	merc->GetEndurance(), merc->GetLuclinFace(), merc->GetHairStyle(),
-	merc->GetHairColor(), merc->GetEyeColor1(), merc->GetEyeColor2(),
-	merc->GetBeardColor(), merc->GetBeard(), merc->GetDrakkinHeritage(),
-	merc->GetDrakkinTattoo(), merc->GetDrakkinDetails(), merc->GetMercID());
+	merc->GetGender(), merc->GetSize(), merc->GetStance(), merc->GetHP(),
+	merc->GetMana(), merc->GetEndurance(), merc->GetLuclinFace(),
+	merc->GetHairStyle(), merc->GetHairColor(), merc->GetEyeColor1(),
+	merc->GetEyeColor2(), merc->GetBeardColor(), merc->GetBeard(),
+	merc->GetDrakkinHeritage(), merc->GetDrakkinTattoo(), merc->GetDrakkinDetails(),
+	merc->GetMercID());
 
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
@@ -3362,9 +3375,9 @@ uint32 ZoneDatabase::GetCharacterCorpseDecayTimer(uint32 corpse_db_id){
 	std::string query = StringFormat("SELECT(UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) FROM `character_corpses` WHERE `id` = %d AND NOT `time_of_death` = 0", corpse_db_id);
 	auto results = QueryDatabase(query);
 	auto row = results.begin();
-	if (results.Success() && results.RowsAffected() != 0){
-		return atoul(row[0]);
-	}
+	if (results.Success() && results.RowsAffected() != 0)
+		return atoul(row[0]); 
+
 	return 0;
 }
 
@@ -3438,22 +3451,24 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 	for (unsigned int i = 0; i < dbpc->itemcount; i++) {
 		if (first_entry != 1){
 			query = StringFormat("REPLACE INTO `character_corpse_items` \n"
-				" (corpse_id, equip_slot, item_id, charges, aug_1, aug_2, aug_3, aug_4, aug_5, attuned) \n"
-				" VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, 0) \n",
-				last_insert_id,
+				" (corpse_id, equip_slot, item_id, charges, aug_1, aug_2, aug_3, aug_4, aug_5, aug_6, attuned) \n"
+				" VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
+				last_insert_id, 
 				dbpc->items[i].equip_slot,
-				dbpc->items[i].item_id,
-				dbpc->items[i].charges,
-				dbpc->items[i].aug_1,
-				dbpc->items[i].aug_2,
-				dbpc->items[i].aug_3,
-				dbpc->items[i].aug_4,
-				dbpc->items[i].aug_5
+				dbpc->items[i].item_id,  
+				dbpc->items[i].charges, 
+				dbpc->items[i].aug_1, 
+				dbpc->items[i].aug_2, 
+				dbpc->items[i].aug_3, 
+				dbpc->items[i].aug_4, 
+				dbpc->items[i].aug_5,
+				dbpc->items[i].aug_6,
+				dbpc->items[i].attuned
 			);
 			first_entry = 1;
 		}
-		else{
-			query = query + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, 0) \n",
+		else{ 
+			query = query + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
 				last_insert_id,
 				dbpc->items[i].equip_slot,
 				dbpc->items[i].item_id,
@@ -3462,7 +3477,9 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 				dbpc->items[i].aug_2,
 				dbpc->items[i].aug_3,
 				dbpc->items[i].aug_4,
-				dbpc->items[i].aug_5
+				dbpc->items[i].aug_5,
+				dbpc->items[i].aug_6,
+				dbpc->items[i].attuned
 			);
 		}
 	}
@@ -3613,6 +3630,7 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 		"aug_3,                       \n"
 		"aug_4,                       \n"
 		"aug_5,                       \n"
+		"aug_6,                       \n"
 		"attuned                      \n"
 		"FROM                         \n"
 		"character_corpse_items       \n"
@@ -3635,6 +3653,8 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 		pcs->items[i].aug_3 = atoi(row[r++]); 			// aug_3,
 		pcs->items[i].aug_4 = atoi(row[r++]); 			// aug_4,
 		pcs->items[i].aug_5 = atoi(row[r++]); 			// aug_5,
+		pcs->items[i].aug_6 = atoi(row[r++]); 			// aug_6,
+		pcs->items[i].attuned = atoi(row[r++]); 		// attuned,
 		r = 0;
 		i++;
 	}
@@ -3824,3 +3844,4 @@ bool ZoneDatabase::DeleteCharacterCorpse(uint32 db_id) {
 
 	return false;
 }
+

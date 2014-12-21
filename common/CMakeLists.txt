@@ -67,7 +67,6 @@ SET(common_sources
 	worldconn.cpp
 	xml_parser.cpp
 	platform.cpp
-	patches/client62.cpp
 	patches/patches.cpp
 	patches/sod.cpp
 	patches/sof.cpp
@@ -193,11 +192,6 @@ SET(common_headers
 	worldconn.h
 	xml_parser.h
 	zone_numbers.h
-	patches/client62.h
-	patches/client62_constants.h
-	patches/client62_itemfields.h
-	patches/client62_ops.h
-	patches/client62_structs.h
 	patches/patches.h
 	patches/sod.h
 	patches/sod_constants.h
@@ -251,11 +245,6 @@ SET(common_headers
 )
 
 SOURCE_GROUP(Patches FILES
-	patches/client62.h
-	patches/client62_itemfields.h
-	patches/client62_ops.h
-	patches/client62_constants.h
-	patches/client62_structs.h
 	patches/patches.h
 	patches/sod.h
 	patches/sod_itemfields.h
@@ -291,7 +280,6 @@ SOURCE_GROUP(Patches FILES
 	patches/underfoot_ops.h
 	patches/underfoot_constants.h
 	patches/underfoot_structs.h
-	patches/client62.cpp
 	patches/patches.cpp
 	patches/sod.cpp
 	patches/sof.cpp

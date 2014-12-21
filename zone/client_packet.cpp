@@ -58,6 +58,10 @@
 #include "worldserver.h"
 #include "zone.h"
 
+#ifdef BOTS
+#include "bot.h"
+#endif
+
 extern QueryServ* QServ;
 extern Zone* zone;
 extern volatile bool ZoneLoaded;
@@ -1421,8 +1425,12 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	/* Set item material tint */
 	for (int i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_END; i++)
-	if (m_pp.item_tint[i].rgb.use_tint == 1 || m_pp.item_tint[i].rgb.use_tint == 255)
-		m_pp.item_tint[i].rgb.use_tint = 0xFF;
+	{
+		if (m_pp.item_tint[i].rgb.use_tint == 1 || m_pp.item_tint[i].rgb.use_tint == 255)
+		{
+				m_pp.item_tint[i].rgb.use_tint = 0xFF;
+		}
+	}
 
 	if (level){ level = m_pp.level; }
 
@@ -1484,9 +1492,28 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		m_pp.gm = 0;
 
 	/* Load Guild */
-	if (!IsInAGuild()) { m_pp.guild_id = GUILD_NONE; }
-	else {
+	if (!IsInAGuild()) {
+		m_pp.guild_id = GUILD_NONE;
+	} else {
 		m_pp.guild_id = GuildID();
+		uint8 rank = guild_mgr.GetDisplayedRank(GuildID(), GuildRank(), CharacterID());
+		// FIXME: RoF guild rank
+		if (GetClientVersion() >= EQClientRoF) {
+			switch (rank) {
+			case 0:
+				rank = 5;
+				break;
+			case 1:
+				rank = 3;
+				break;
+			case 2:
+				rank = 1;
+				break;
+			default:
+				break;
+			}
+		}
+		m_pp.guildrank = rank;
 		if (zone->GetZoneID() == RuleI(World, GuildBankZoneID))
 			GuildBanker = (guild_mgr.IsGuildLeader(GuildID(), CharacterID()) || guild_mgr.GetBankerFlag(CharacterID()));
 	}
@@ -2724,7 +2751,7 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app)
 			SetAlternateCurrencyValue(reclaim->currency_id, 0);
 		}
 		else {
-			SummonItem(item_id, reclaim->count, 0, 0, 0, 0, 0, false, MainCursor);
+			SummonItem(item_id, reclaim->count, 0, 0, 0, 0, 0, 0, false, MainCursor);
 			AddAlternateCurrencyValue(reclaim->currency_id, -((int32)reclaim->count));
 		}
 		/* QS: PlayerLogAlternateCurrencyTransactions :: Cursor to Item Storage */
@@ -3067,7 +3094,6 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 
 			uint16 slot_id = in_augment->container_slot;
 			uint16 aug_slot_id = in_augment->augment_slot;
-			//Message(13, "%i AugSlot", aug_slot_id);
 			if (slot_id == INVALID_INDEX || aug_slot_id == INVALID_INDEX)
 			{
 				Message(13, "Error: Invalid Aug Index.");
@@ -3083,6 +3109,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 					(tobe_auged->AvailableWearSlot(auged_with->GetItem()->Slots)))
 				{
 					tobe_auged->PutAugment(in_augment->augment_index, *auged_with);
+					tobe_auged->UpdateOrnamentationInfo();
 
 					ItemInst *aug = tobe_auged->GetAugment(in_augment->augment_index);
 					if (aug) {
@@ -3105,15 +3132,16 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 					{
 						DeleteItemInInventory(slot_id, 0, true);
 						DeleteItemInInventory(MainCursor, 0, true);
+						
 						if (PutItemInInventory(slot_id, *itemOneToPush, true))
 						{
 							CalcBonuses();
-							//Message(13, "Sucessfully added an augment to your item!");
+							// Successfully added an augment to the item
 							return;
 						}
 						else
 						{
-							Message(13, "Error: No available slot for end result. Please free up some bag space.");
+							Message(13, "Error: No available slot for end result. Please free up the augment slot.");
 						}
 					}
 					else
@@ -3167,6 +3195,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 				return;
 			}
 			old_aug = tobe_auged->RemoveAugment(in_augment->augment_index);
+			tobe_auged->UpdateOrnamentationInfo();
 
 			itemOneToPush = tobe_auged->Clone();
 			if (old_aug)
@@ -3175,9 +3204,10 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 			{
 				DeleteItemInInventory(slot_id, 0, true);
 				DeleteItemInInventory(aug_slot_id, auged_with->IsStackable() ? 1 : 0, true);
+
 				if (!PutItemInInventory(slot_id, *itemOneToPush, true))
 				{
-					Message(15, "Shouldn't happen, contact an admin!");
+					Message(15, "Failed to remove augment properly!");
 				}
 
 				if (PutItemInInventory(MainCursor, *itemTwoToPush, true))
@@ -5657,7 +5687,7 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 			}
 			else
 			{
-				std::list<int> pathlist = zone->pathing->FindRoute(Start, End);
+				std::deque<int> pathlist = zone->pathing->FindRoute(Start, End);
 
 				if (pathlist.size() == 0)
 				{
@@ -5696,7 +5726,7 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 				p.z = GetZ();
 				points.push_back(p);
 
-				for (std::list<int>::iterator Iterator = pathlist.begin(); Iterator != pathlist.end(); ++Iterator)
+				for (auto Iterator = pathlist.begin(); Iterator != pathlist.end(); ++Iterator)
 				{
 					if ((*Iterator) == -1) // Teleporter
 					{
@@ -6915,7 +6945,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 
 		const Item_Struct* CursorItem = CursorItemInst->GetItem();
 
-		if (!CursorItem->NoDrop || CursorItemInst->IsInstNoDrop())
+		if (!CursorItem->NoDrop || CursorItemInst->IsAttuned())
 		{
 			Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
 
@@ -7981,17 +8011,15 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app)
 		item = inst ? inst->GetItem() : nullptr;
 
 		if (item) {
+			strcpy(insr->itemnames[L], item->Name);
 			if (inst && inst->GetOrnamentationAug(ornamentationAugtype)) {
-				const Item_Struct *aug_weap = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
-				strcpy(insr->itemnames[L], item->Name);
-				insr->itemicons[L] = aug_weap->Icon;
+				const Item_Struct *aug_item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
+				insr->itemicons[L] = aug_item->Icon;
 			}
-			else if (inst->GetOrnamentationIcon() && inst->GetOrnamentationIDFile()) {
-				strcpy(insr->itemnames[L], item->Name);
+			else if (inst->GetOrnamentationIcon()) {
 				insr->itemicons[L] = inst->GetOrnamentationIcon();
 			}
 			else {
-				strcpy(insr->itemnames[L], item->Name);
 				insr->itemicons[L] = item->Icon;
 			}
 		}
@@ -8162,7 +8190,7 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 
 	}
 
-	ItemInst* inst = database.CreateItem(item, item->MaxCharges, ivrs->augments[0], ivrs->augments[1], ivrs->augments[2], ivrs->augments[3], ivrs->augments[4]);
+	ItemInst* inst = database.CreateItem(item, item->MaxCharges, ivrs->augments[0], ivrs->augments[1], ivrs->augments[2], ivrs->augments[3], ivrs->augments[4], ivrs->augments[5]);
 	if (inst) {
 		SendItemPacket(0, inst, ItemPacketViewLink);
 		safe_delete(inst);
@@ -8310,7 +8338,7 @@ void Client::Handle_OP_ItemPreview(const EQApplicationPacket *app)
 		outapp->WriteUInt32(item->Material);
 		outapp->WriteUInt32(0); //unknown
 		outapp->WriteUInt32(item->EliteMaterial);
-		outapp->WriteUInt32(0);	// unknown
+		outapp->WriteUInt32(item->HerosForgeModel);
 		outapp->WriteUInt32(0);	// unknown
 		outapp->WriteUInt32(0); //This is unknown057 from lucy
 		for (spacer = 0; spacer < 77; spacer++) { //More Item stats, but some seem to be off based on packet check
@@ -8318,7 +8346,7 @@ void Client::Handle_OP_ItemPreview(const EQApplicationPacket *app)
 		}
 		outapp->WriteUInt32(0xFFFFFFFF); //Unknown but always seen as FF FF FF FF
 		outapp->WriteUInt32(0); //Unknown
-		for (spacer = 0; spacer < 5; spacer++) { //Augment stuff
+		for (spacer = 0; spacer < 6; spacer++) { //Augment stuff
 			outapp->WriteUInt32(item->AugSlotType[spacer]);
 			outapp->WriteUInt8(item->AugSlotVisible[spacer]);
 			outapp->WriteUInt8(item->AugSlotUnk2[spacer]);

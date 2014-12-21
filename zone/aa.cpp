@@ -19,7 +19,6 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 #include "../common/classes.h"
 #include "../common/debug.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/packet_dump.h"
 #include "../common/races.h"
 #include "../common/spdat.h"
 #include "../common/string_util.h"
@@ -519,8 +518,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		}
 	}
 
-	if(IsClient())
-		pet.duration += (CastToClient()->GetFocusEffect(focusSwarmPetDuration, spell_id) / 1000);
+	pet.duration += GetFocusEffect(focusSwarmPetDuration, spell_id) / 1000;
 
 	pet.npc_id = record.npc_type;
 
@@ -893,7 +891,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 //turn on an AA effect
 //duration == 0 means no time limit, used for one-shot deals, etc..
 void Client::EnableAAEffect(aaEffectType type, uint32 duration) {
-	if(type > 32)
+	if(type > _maxaaEffectType)
 		return;	//for now, special logic needed.
 	m_epp.aa_effects |= 1 << (type-1);
 
@@ -905,7 +903,7 @@ void Client::EnableAAEffect(aaEffectType type, uint32 duration) {
 }
 
 void Client::DisableAAEffect(aaEffectType type) {
-	if(type > 32)
+	if(type > _maxaaEffectType)
 		return;	//for now, special logic needed.
 	uint32 bit = 1 << (type-1);
 	if(m_epp.aa_effects & bit) {
@@ -919,7 +917,7 @@ By default an AA effect is a one shot deal, unless
 a duration timer is set.
 */
 bool Client::CheckAAEffect(aaEffectType type) {
-	if(type > 32)
+	if(type > _maxaaEffectType)
 		return(false);	//for now, special logic needed.
 	if(m_epp.aa_effects & (1 << (type-1))) {	//is effect enabled?
 		//has our timer expired?
@@ -987,13 +985,20 @@ void Client::BuyAA(AA_Action* action)
 	}
 
 	uint32 real_cost;
+	uint8 req_level;
 	std::map<uint32, AALevelCost_Struct>::iterator RequiredLevel = AARequiredLevelAndCost.find(action->ability);
 
 	if(RequiredLevel != AARequiredLevelAndCost.end()) {
 		real_cost = RequiredLevel->second.Cost;
+		req_level = RequiredLevel->second.Level;
 	}
-	else
+	else {
 		real_cost = aa2->cost + (aa2->cost_inc * cur_level);
+		req_level = aa2->class_type + (aa2->level_inc * cur_level);
+	}
+
+	if (req_level > GetLevel())
+		return; //Cheater trying to Buy AA...
 
 	if (m_pp.aapoints >= real_cost && cur_level < aa2->max_level) {
 		SetAA(aa2->id, cur_level + 1);

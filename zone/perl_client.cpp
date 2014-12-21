@@ -3134,7 +3134,7 @@ XS(XS_Client_SummonItem)
 			slot_id = (uint16)SvUV(ST(9));
 		}
 
-		THIS->SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, attune, slot_id);
+		THIS->SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, 0, attune, slot_id);
 	}
 	XSRETURN_EMPTY;
 }

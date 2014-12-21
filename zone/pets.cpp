@@ -17,7 +17,6 @@
 */
 
 #include "../common/debug.h"
-#include "../common/misc_functions.h"
 #include "../common/spdat.h"
 #include "../common/string_util.h"
 #include "../common/types.h"
@@ -27,7 +26,6 @@
 #include "mob.h"
 
 #include "pets.h"
-#include "worldserver.h"
 #include "zonedb.h"
 
 #ifndef WIN32
@@ -230,7 +228,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	int16 act_power = 0; // The actual pet power we'll use.
 	if (petpower == -1) {
 		if (this->IsClient()) {
-			act_power = CastToClient()->GetFocusEffect(focusPetPower, spell_id);
+			act_power = CastToClient()->GetFocusEffect(focusPetPower, spell_id);//Client only
 			act_power = CastToClient()->mod_pet_power(act_power, spell_id);
 		}
 	}

@@ -1,8 +1,17 @@
 #ifndef MERC_H
 #define MERC_H
-#include "mob.h"
-#include "zonedb.h"
+
 #include "npc.h"
+
+class Client;
+class Corpse;
+class Group;
+class Mob;
+class Raid;
+struct Item_Struct;
+struct MercTemplate;
+struct NPCType;
+struct NewSpawn_Struct;
 
 #define MERC_DEBUG 0
 #define MAXMERCS 1
@@ -83,8 +92,6 @@ public:
 	Corpse* GetGroupMemberCorpse();
 
 	// Merc Spell Casting Methods
-	virtual int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target = nullptr);
-	virtual int32 GetActSpellHealing(uint16 spell_id, int32 value, Mob* target = nullptr);
 	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
 	virtual int32 GetActSpellCost(uint16 spell_id, int32 cost);
 	int8 GetChanceToCastBySpellType(int16 spellType);

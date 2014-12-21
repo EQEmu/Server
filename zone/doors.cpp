@@ -15,18 +15,21 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "../common/debug.h"
-#include <iostream>
-#include <stdlib.h>
-#include <string.h>
-#include "masterentity.h"
-#include "worldserver.h"
-#include "string_ids.h"
-#include "zonedb.h"
-#include "../common/packet_functions.h"
-#include "../common/packet_dump.h"
 #include "../common/string_util.h"
+
+#include "client.h"
+#include "doors.h"
+#include "entity.h"
 #include "guild_mgr.h"
+#include "mob.h"
+#include "string_ids.h"
+#include "worldserver.h"
+#include "zonedb.h"
+
+#include <iostream>
+#include <string.h>
 
 #define OPEN_DOOR 0x02
 #define CLOSE_DOOR 0x03

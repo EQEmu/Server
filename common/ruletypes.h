@@ -136,7 +136,6 @@ RULE_CATEGORY_END()
 RULE_CATEGORY( Pets )
 RULE_REAL( Pets, AttackCommandRange, 150 )
 RULE_BOOL( Pets, UnTargetableSwarmPet, false )
-RULE_BOOL( Pets, SwarmPetNotTargetableWithHotKey, false ) //On SOF+ clients this a semi-hack to make swarm pets not F8 targetable.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( GM )
@@ -325,6 +324,8 @@ RULE_INT ( Spells, AI_IdleBeneficialChance, 100) // Chance while idle to do a be
 RULE_BOOL ( Spells, SHDProcIDOffByOne, true) // pre June 2009 SHD spell procs were off by 1, they stopped doing this in June 2009 (so UF+ spell files need this false)
 RULE_BOOL ( Spells, Jun182014HundredHandsRevamp, false) // this should be true for if you import a spell file newer than June 18, 2014
 RULE_BOOL ( Spells, SwarmPetTargetLock, false) // Use old method of swarm pets target locking till target dies then despawning.
+RULE_BOOL ( Spells, NPC_UseFocusFromSpells, true) // Allow npcs to use most spell derived focus effects.
+RULE_BOOL ( Spells, NPC_UseFocusFromItems, false) // Allow npcs to use most item derived focus effects.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Combat )

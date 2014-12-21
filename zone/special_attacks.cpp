@@ -16,15 +16,14 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 	*/
 
-
-
-#include "../common/debug.h"
-#include "../common/misc_functions.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
-#include "masterentity.h"
+
+#include "client.h"
+#include "entity.h"
+#include "mob.h"
 #include "string_ids.h"
-#include <stdio.h>
+
 #include <string.h>
 
 
@@ -103,6 +102,9 @@ void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 
 	if (!who)
 		return;
+
+	if(who->GetInvul() || who->GetSpecialAbility(IMMUNE_MELEE) || who->GetSpecialAbility(IMMUNE_MELEE_EXCEPT_BANE))
+		return; //-5?
 
 	int32 hate = max_damage;
 	if(hate_override > -1)
@@ -979,7 +981,9 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const Ite
 		if (HeadShot)
 			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FATAL_BOW_SHOT, GetName());
 
-		other->AddToHateList(this, hate, 0, false);
+		if (IsClient() && !CastToClient()->GetFeigned())
+			other->AddToHateList(this, hate, 0, false);
+
 		other->Damage(this, TotalDmg, SPELL_UNKNOWN, SkillArchery);
 			
 		//Skill Proc Success
@@ -1058,8 +1062,8 @@ bool Mob::TryProjectileAttack(Mob* other, const Item_Struct *item, SkillUseTypes
 
 	if(item)
 		SendItemAnimation(other, item, skillInUse, speed);
-	else if (IsNPC())
-		ProjectileAnimation(other, 0,false,speed,0,0,0,CastToNPC()->GetAmmoIDfile(),skillInUse);
+	//else if (IsNPC())
+		//ProjectileAnimation(other, 0,false,speed,0,0,0,CastToNPC()->GetAmmoIDfile(),skillInUse);
 
 	return true;
 }
@@ -1096,12 +1100,19 @@ void Mob::ProjectileAttack()
 		if (ProjectileAtk[i].hit_increment <= ProjectileAtk[i].increment){
 
 			if (target){
-				if (ProjectileAtk[i].skill == SkillArchery)
-					DoArcheryAttackDmg(target, nullptr, nullptr,ProjectileAtk[i].wpn_dmg,0,0,0,ProjectileAtk[i].ranged_id, ProjectileAtk[i].ammo_id, nullptr, ProjectileAtk[i].ammo_slot);
-				else if (ProjectileAtk[i].skill == SkillThrowing)
-					DoThrowingAttackDmg(target, nullptr, nullptr,ProjectileAtk[i].wpn_dmg,0,0,0, ProjectileAtk[i].ranged_id, ProjectileAtk[i].ammo_slot);
-				else if (ProjectileAtk[i].skill == SkillConjuration && IsValidSpell(ProjectileAtk[i].wpn_dmg))
-					SpellOnTarget(ProjectileAtk[i].wpn_dmg, target, false, true, spells[ProjectileAtk[i].wpn_dmg].ResistDiff, true);
+
+				if (IsNPC())
+					CastToNPC()->DoRangedAttackDmg(target, false, ProjectileAtk[i].wpn_dmg,0, static_cast<SkillUseTypes>(ProjectileAtk[i].skill));
+	
+				else
+				{
+					if (ProjectileAtk[i].skill == SkillArchery)
+						DoArcheryAttackDmg(target, nullptr, nullptr,ProjectileAtk[i].wpn_dmg,0,0,0,ProjectileAtk[i].ranged_id, ProjectileAtk[i].ammo_id, nullptr, ProjectileAtk[i].ammo_slot);
+					else if (ProjectileAtk[i].skill == SkillThrowing)
+						DoThrowingAttackDmg(target, nullptr, nullptr,ProjectileAtk[i].wpn_dmg,0,0,0, ProjectileAtk[i].ranged_id, ProjectileAtk[i].ammo_slot);
+					else if (ProjectileAtk[i].skill == SkillConjuration && IsValidSpell(ProjectileAtk[i].wpn_dmg))
+						SpellOnTarget(ProjectileAtk[i].wpn_dmg, target, false, true, spells[ProjectileAtk[i].wpn_dmg].ResistDiff, true);
+				}
 			}
 			
 			ProjectileAtk[i].increment = 0;
@@ -1186,14 +1197,8 @@ void NPC::RangedAttack(Mob* other)
 	attacks = attacks > 0 ? attacks : 1;
 	for(int i = 0; i < attacks; ++i) {
 
-		//if we have SPECATK_RANGED_ATK set then we range attack without weapon or ammo
-		const Item_Struct* weapon = nullptr;
-		const Item_Struct* ammo = nullptr;
 		if(!GetSpecialAbility(SPECATK_RANGED_ATK))
-		{
-			//find our bow and ammo return if we can't find them...
 			return;
-		}
 
 		int sa_min_range = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 4); //Min Range of NPC attack
 		int sa_max_range = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 1); //Max Range of NPC attack
@@ -1207,16 +1212,11 @@ void NPC::RangedAttack(Mob* other)
 		if (sa_min_range)
 			min_range = static_cast<float>(sa_min_range);
 
-		mlog(COMBAT__RANGED, "Calculated bow range to be %.1f", max_range);
 		max_range *= max_range;
-		if(DistNoRootNoZ(*other) > max_range) {
-			mlog(COMBAT__RANGED, "Ranged attack out of range...%.2f vs %.2f", DistNoRootNoZ(*other), max_range);
-			//target is out of range, client does a message
+		if(DistNoRoot(*other) > max_range) 
 			return;
-		}
-		else if(DistNoRootNoZ(*other) < (min_range * min_range))
+		else if(DistNoRoot(*other) < (min_range * min_range))
 			return;
-	
 
 		if(!other || !IsAttackAllowed(other) ||
 			IsCasting() ||
@@ -1228,72 +1228,98 @@ void NPC::RangedAttack(Mob* other)
 			return;
 		}
 
-		SkillUseTypes skillinuse = SkillArchery;
-		skillinuse = static_cast<SkillUseTypes>(GetRangedSkill());
-
-		if(!ammo && !GetAmmoIDfile())
-			ammo = database.GetItem(8005);
-
-		if(ammo)
-			SendItemAnimation(other, ammo, SkillArchery);
-		else
-			ProjectileAnimation(other, 0,false,0,0,0,0,GetAmmoIDfile(),skillinuse);
-
 		FaceTarget(other);
 
-		if (!other->CheckHitChance(this, skillinuse, MainRange, GetSpecialAbilityParam(SPECATK_RANGED_ATK, 2)))
-		{
-			mlog(COMBAT__RANGED, "Ranged attack missed %s.", other->GetName());
-			other->Damage(this, 0, SPELL_UNKNOWN, skillinuse);
-		}
-		else
-		{
-			int16 WDmg = GetWeaponDamage(other, weapon);
-			int16 ADmg = GetWeaponDamage(other, ammo);
-			int32 TotalDmg = 0;
-			if(WDmg > 0 || ADmg > 0)
-			{
-				mlog(COMBAT__RANGED, "Ranged attack hit %s.", other->GetName());
-
-				int32 MaxDmg = max_dmg * RuleR(Combat, ArcheryNPCMultiplier); // should add a field to npc_types
-				int32 MinDmg = min_dmg * RuleR(Combat, ArcheryNPCMultiplier);
-
-				if(RuleB(Combat, UseIntervalAC))
-					TotalDmg = MaxDmg;
-				else
-					TotalDmg = zone->random.Int(MinDmg, MaxDmg);
-
-				TotalDmg += TotalDmg *  GetSpecialAbilityParam(SPECATK_RANGED_ATK, 3) / 100; //Damage modifier
-
-				other->AvoidDamage(this, TotalDmg, false);
-				other->MeleeMitigation(this, TotalDmg, MinDmg);
-				if (TotalDmg > 0)
-					CommonOutgoingHitSuccess(other, TotalDmg, skillinuse);
-			}
-
-			else
-				TotalDmg = -5;
-
-			if (TotalDmg > 0)
-				other->AddToHateList(this, TotalDmg, 0, false);
-			else
-				other->AddToHateList(this, 0, 0, false);
-
-			other->Damage(this, TotalDmg, SPELL_UNKNOWN, skillinuse);
-
-			if (TotalDmg > 0 && HasSkillProcSuccess() && GetTarget() && !other->HasDied())
-				TrySkillProc(other, skillinuse, 0, true, MainRange);
-		}
-
-		//try proc on hits and misses
-		if(other && !other->HasDied())
-			TrySpellProc(nullptr, (const Item_Struct*)nullptr, other, MainRange);
-
-		if (HasSkillProcs() && other && !other->HasDied())
-				TrySkillProc(other, skillinuse, 0, false, MainRange);
+		DoRangedAttackDmg(other);
 
 		CommonBreakInvisible();
 	}
+}
+
+void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 chance_mod, SkillUseTypes skill, float speed, const char *IDFile) {
+	
+	if ((other == nullptr || 
+		(other->HasDied())) || 
+		HasDied() || 
+		(!IsAttackAllowed(other)) ||
+		(other->GetInvul() || 
+		other->GetSpecialAbility(IMMUNE_MELEE)))
+	{
+		return;
+	}
+
+	SkillUseTypes skillInUse = static_cast<SkillUseTypes>(GetRangedSkill());
+
+	if (skill != skillInUse)
+		skillInUse = skill;
+
+	if (Launch)
+	{
+		const char *ammo = "IT10";
+
+		if (IDFile != nullptr)
+			ammo = IDFile;
+		else if (GetAmmoIDfile())
+			ammo = GetAmmoIDfile();
+
+		ProjectileAnimation(other, 0,false,speed,0,0,0,ammo,skillInUse);
+	
+		if (RuleB(Combat, ProjectileDmgOnImpact))
+		{
+			TryProjectileAttack(other, nullptr, skillInUse, damage_mod, nullptr, nullptr, 0, speed);
+			return;
+		}
+	}
+
+	if (!chance_mod) 
+		chance_mod = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 2);
+
+	if (!other->CheckHitChance(this, skillInUse, MainRange, chance_mod))
+	{
+		other->Damage(this, 0, SPELL_UNKNOWN, skillInUse);
+	}
+	else
+	{
+		int32 TotalDmg = 0;
+		int32 MaxDmg = max_dmg * RuleR(Combat, ArcheryNPCMultiplier); // should add a field to npc_types
+		int32 MinDmg = min_dmg * RuleR(Combat, ArcheryNPCMultiplier);
+
+		if(RuleB(Combat, UseIntervalAC))
+			TotalDmg = MaxDmg;
+		else
+			TotalDmg = zone->random.Int(MinDmg, MaxDmg);
+
+
+		if (!damage_mod)
+			 damage_mod = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 3);//Damage modifier
+
+		TotalDmg += TotalDmg *  damage_mod / 100; 
+
+		other->AvoidDamage(this, TotalDmg, false);
+		other->MeleeMitigation(this, TotalDmg, MinDmg);
+			
+		if (TotalDmg > 0)
+			CommonOutgoingHitSuccess(other, TotalDmg, skillInUse);
+		else
+			TotalDmg = -5;
+
+		if (TotalDmg > 0)
+			other->AddToHateList(this, TotalDmg, 0, false);
+		else
+			other->AddToHateList(this, 0, 0, false);
+
+		other->Damage(this, TotalDmg, SPELL_UNKNOWN, skillInUse);
+
+		if (TotalDmg > 0 && HasSkillProcSuccess() && !other->HasDied())
+			TrySkillProc(other, skillInUse, 0, true, MainRange);
+	}
+
+	//try proc on hits and misses
+	if(other && !other->HasDied())
+		TrySpellProc(nullptr, (const Item_Struct*)nullptr, other, MainRange);
+
+	if (HasSkillProcs() && other && !other->HasDied())
+		TrySkillProc(other, skillInUse, 0, false, MainRange);
 }
 
 uint16 Mob::GetThrownDamage(int16 wDmg, int32& TotalDmg, int& minDmg) {
@@ -1513,7 +1539,9 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 		else
 			TotalDmg = -5;
 
-		other->AddToHateList(this, 2*WDmg, 0, false);
+		if (IsClient() && !CastToClient()->GetFeigned())
+			other->AddToHateList(this, 2*WDmg, 0, false);
+
 		other->Damage(this, TotalDmg, SPELL_UNKNOWN, SkillThrowing);
 
 		if (TotalDmg > 0 && HasSkillProcSuccess() && other && !other->HasDied()){

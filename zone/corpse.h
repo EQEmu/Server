@@ -22,7 +22,14 @@
 #include "mob.h"
 
 class Client;
+class EQApplicationPacket;
+class Group;
+class ItemInst;
 class NPC;
+class Raid;
+
+struct ExtraAttackOptions;
+struct NPCType;
 
 #define MAX_LOOTERS 72
 
@@ -76,8 +83,8 @@ class Corpse : public Mob {
 	int32	GetPlayerKillItem() { return player_kill_item; }
 	void	RemoveItem(uint16 lootslot);
 	void	RemoveItem(ServerLootItem_Struct* item_data);
-	void	AddItem(uint32 itemnum, uint16 charges, int16 slot = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0);
-
+	void	AddItem(uint32 itemnum, uint16 charges, int16 slot = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
+	
 	/* Corpse: Coin */
 	void	SetCash(uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_platinum);
 	void	RemoveCash();

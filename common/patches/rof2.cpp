@@ -205,7 +205,7 @@ namespace RoF2
 		SETUP_DIRECT_ENCODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
 
 		OUT(merchant_entity_id);
-		eq->slot_id = ServerToRoF2Slot(emu->slot_id);
+		eq->slot_id = ServerToRoF2MainInvSlot(emu->slot_id);
 		OUT(charges);
 		OUT(cost);
 
@@ -1696,6 +1696,8 @@ namespace RoF2
 		eq->unknown932 = -1;	// Set from PoK Example
 		eq->unknown936 = -1;	// Set from PoK Example
 		eq->unknown944 = 1.0;	// Set from PoK Example
+		eq->unknown948 = 0;		// New on Live as of Dec 15 2014
+		eq->unknown952 = 100;	// New on Live as of Dec 15 2014
 
 		FINISH_ENCODE();
 	}
@@ -2045,15 +2047,6 @@ namespace RoF2
 			outapp->WriteUInt32(emu->skills[r]);
 		}
 
-		// deprecated
-		// Write zeroes for the rest of the skills
-		/*
-		for(uint32 r = 0; r < structs::MAX_PP_SKILL - MAX_PP_SKILL; r++)
-		{
-		outapp->WriteUInt32(emu->skills[r]);
-		}
-		*/
-
 		outapp->WriteUInt32(25);			// Unknown count
 
 		for (uint32 r = 0; r < 25; r++)
@@ -2130,18 +2123,6 @@ namespace RoF2
 
 		outapp->WriteUInt32(structs::BUFF_COUNT);
 
-		//*000*/ uint8 slotid;				// badly named... seems to be 2 for a real buff, 0 otherwise
-		//*001*/ float unknown004;			// Seen 1 for no buff
-		//*005*/ uint32 player_id;			// 'global' ID of the caster, for wearoff messages
-		//*009*/ uint32 unknown016;
-		//*013*/ uint8 bard_modifier;
-		//*014*/ uint32 duration;
-		//*018*/ uint8 level;
-		//*019*/ uint32 spellid;
-		//*023*/ uint32 counters;
-		//*027*/ uint8 unknown0028[53];
-		//*080*/
-
 		for (uint32 r = 0; r < BUFF_COUNT; r++)
 		{
 			float instrument_mod = 0.0f;
@@ -2181,7 +2162,6 @@ namespace RoF2
 			// 80 bytes of zeroes
 			for (uint32 j = 0; j < 20; ++j)
 				outapp->WriteUInt32(0);
-
 		}
 
 		outapp->WriteUInt32(emu->platinum);
@@ -2206,8 +2186,8 @@ namespace RoF2
 
 		outapp->WriteUInt32(emu->aapoints_spent);
 
-		outapp->WriteUInt32(5);				// AA Points count ??
-		outapp->WriteUInt32(1234);			// AA Points assigned
+		outapp->WriteUInt32(5);				// AA Window Tab Count
+		outapp->WriteUInt32(0);				// AA Points assigned ?
 		outapp->WriteUInt32(0);				// AA Points in General ?
 		outapp->WriteUInt32(0);				// AA Points in Class ?
 		outapp->WriteUInt32(0);				// AA Points in Archetype ?
@@ -2334,15 +2314,16 @@ namespace RoF2
 		outapp->WriteUInt8(emu->pvp);
 		outapp->WriteUInt8(0);				// Unknown
 		outapp->WriteUInt8(emu->gm);
-
 		outapp->WriteUInt32(emu->guild_id);
-		outapp->WriteUInt8(0);				// Unknown - observed 1 in a live packet.
-		outapp->WriteUInt32(0);				// Unknown - observed 1 in a live packet.
-		outapp->WriteUInt8(0);				// Unknown - observed 1 in a live packet.
+		
+		outapp->WriteUInt8(0);			// Unknown
+		outapp->WriteUInt32(0);				// Unknown
+		outapp->WriteUInt8(0);			// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 
-		outapp->WriteUInt64(emu->exp);
-		outapp->WriteUInt8(0);				// Unknown
+		outapp->WriteUInt64(emu->exp);		// int32 in client
+
+		outapp->WriteUInt8(0);			// Unknown - Seen 5 on Live
 
 		outapp->WriteUInt32(emu->platinum_bank);
 		outapp->WriteUInt32(emu->gold_bank);
@@ -2354,16 +2335,10 @@ namespace RoF2
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 
-		outapp->WriteUInt32(42);			// The meaning of life ?
-
-		for (uint32 r = 0; r < 42; r++)
-		{
-			outapp->WriteUInt32(0);				// Unknown
-			outapp->WriteUInt32(0);				// Unknown
-		}
-
 		outapp->WriteUInt32(0);				// Unknown
-		outapp->WriteUInt32(0);				// Unknown
+
+		outapp->WriteSInt32(-1);				// Unknown
+		outapp->WriteSInt32(-1);				// Unknown
 
 		outapp->WriteUInt32(emu->career_tribute_points);
 		outapp->WriteUInt32(0);				// Unknown
@@ -2395,11 +2370,12 @@ namespace RoF2
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
-
-		// Block of 121 unknown bytes
-		for (uint32 r = 0; r < 121; r++)
+		
+		for (uint32 r = 0; r < 125; r++)
+		{
 			outapp->WriteUInt8(0);				// Unknown
-
+		}
+		
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(emu->currentRadCrystals);
@@ -2413,7 +2389,9 @@ namespace RoF2
 		// Unknown String ?
 		outapp->WriteUInt32(64);			// Unknown
 		for (uint32 r = 0; r < 64; r++)
+		{
 			outapp->WriteUInt8(0);				// Unknown
+		}
 
 		outapp->WriteUInt8(0);				// Unknown
 		outapp->WriteUInt8(0);				// Unknown
@@ -2441,22 +2419,30 @@ namespace RoF2
 		// Unknown String ?
 		outapp->WriteUInt32(64);			// Unknown
 		for (uint32 r = 0; r < 64; r++)
+		{
 			outapp->WriteUInt8(0);				// Unknown
+		}
 
 		// Unknown String ?
 		outapp->WriteUInt32(64);			// Unknown
 		for (uint32 r = 0; r < 64; r++)
+		{
 			outapp->WriteUInt8(0);				// Unknown
+		}
 
 		outapp->WriteUInt32(0);				// Unknown
 
 		// Block of 320 unknown bytes
 		for (uint32 r = 0; r < 320; r++)
+		{
 			outapp->WriteUInt8(0);				// Unknown
+		}
 
 		// Block of 343 unknown bytes
 		for (uint32 r = 0; r < 343; r++)
+		{
 			outapp->WriteUInt8(0);				// Unknown
+		}
 
 		outapp->WriteUInt32(0);				// Unknown
 
@@ -2481,10 +2467,14 @@ namespace RoF2
 		outapp->WriteUInt32(64);			// Group of 64 int32s follow	Group/Raid Leadership abilities ?
 
 		for (uint32 r = 0; r < MAX_LEADERSHIP_AA_ARRAY; r++)
+		{
 			outapp->WriteUInt32(emu->leader_abilities.ranks[r]);
+		}
 
 		for (uint32 r = 0; r < 64 - MAX_LEADERSHIP_AA_ARRAY; r++)
+		{
 			outapp->WriteUInt32(0);				// Unused/unsupported Leadership abilities
+		}
 
 		outapp->WriteUInt32(emu->air_remaining);		// ?
 
@@ -2537,31 +2527,31 @@ namespace RoF2
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 
+		outapp->WriteUInt32(0);				// Unknown
+		outapp->WriteUInt32(0);				// Krono - itemid 88888 Hard coded in client?
+
 		outapp->WriteUInt8(emu->groupAutoconsent);
 		outapp->WriteUInt8(emu->raidAutoconsent);
 		outapp->WriteUInt8(emu->guildAutoconsent);
-
 		outapp->WriteUInt8(0);				// Unknown
 
-		outapp->WriteUInt32(emu->level);				// Level3 ?
+		outapp->WriteUInt32(emu->level);	// Level3 ?
 
 		outapp->WriteUInt8(emu->showhelm);
 
 		outapp->WriteUInt32(emu->RestTimer);
 
 		outapp->WriteUInt32(1024);			// Unknown Count
-
 		// Block of 1024 unknown bytes
-		outapp->WriteUInt8(31);				// Unknown
-
-		for (uint32 r = 0; r < 1023; r++)
+		for (uint32 r = 0; r < 1024; r++)
+		{
 			outapp->WriteUInt8(0);				// Unknown
+		}
 
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 
 		// Think we need 1 byte of padding at the end
-
 		outapp->WriteUInt8(0);				// Unknown
 
 		_log(NET__STRUCTS, "Player Profile Packet is %i bytes", outapp->GetWritePosition());
@@ -2874,12 +2864,12 @@ namespace RoF2
 				eq2->face = emu->face[r];
 				int k;
 				for (k = 0; k < _MaterialCount; k++) {
-					eq2->equip[k].equip0 = emu->equip[r][k];
-					eq2->equip[k].equip1 = 0;
-					eq2->equip[k].equip2 = 0;
-					eq2->equip[k].itemid = 0;
-					eq2->equip[k].equip3 = emu->equip[r][k];
-					eq2->equip[k].color.color = emu->cs_colors[r][k].color;
+					eq2->equip[k].material = emu->equip[r][k].material;
+					eq2->equip[k].unknown1 = emu->equip[r][k].unknown1;
+					eq2->equip[k].elitematerial = emu->equip[r][k].elitematerial;
+					eq2->equip[k].heroforgemodel = emu->equip[r][k].heroforgemodel;
+					eq2->equip[k].material2 = emu->equip[r][k].material2;
+					eq2->equip[k].color.color = emu->equip[r][k].color.color;
 				}
 				eq2->u15 = 0xff;
 				eq2->u19 = 0xFF;
@@ -3706,7 +3696,7 @@ namespace RoF2
 			Bitfields->showhelm = emu->showhelm;
 			Bitfields->trader = 0;
 			Bitfields->targetable = 1;
-			Bitfields->targetable_with_hotkey = (emu->IsMercenary ? 0 : 1);
+			Bitfields->targetable_with_hotkey = emu->targetable_with_hotkey ? 1 : 0;
 			Bitfields->showname = ShowName;
 
 			// Not currently found
@@ -3781,6 +3771,10 @@ namespace RoF2
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->light);
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->flymode);
 
+			//VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 100); // LiveUnknown1 12/06/14 (possibly mana percent?)
+			//VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 10); // LiveUnknown2 12/06/14
+			//VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // LiveUnknown3 12/06/14
+
 			VARSTRUCT_ENCODE_STRING(Buffer, emu->lastName);
 
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// aatitle ??
@@ -3809,11 +3803,11 @@ namespace RoF2
 				structs::EquipStruct *Equipment = (structs::EquipStruct *)Buffer;
 
 				for (k = 0; k < 9; k++) {
-					Equipment[k].equip0 = emu->equipment[k];
-					Equipment[k].equip1 = 0;
-					Equipment[k].equip2 = 0;
-					Equipment[k].equip3 = 0;
-					Equipment[k].itemId = 0;
+					Equipment[k].material = emu->equipment[k].material;
+					Equipment[k].unknown1 = emu->equipment[k].unknown1;
+					Equipment[k].elitematerial = emu->equipment[k].elitematerial;
+					Equipment[k].heroforgemodel = emu->equipment[k].heroforgemodel;
+					Equipment[k].material2 = emu->equipment[k].material2;
 				}
 
 				Buffer += (sizeof(structs::EquipStruct) * 9);
@@ -3826,13 +3820,13 @@ namespace RoF2
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialPrimary]);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialPrimary].material);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialSecondary]);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialSecondary].material);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
@@ -3883,6 +3877,7 @@ namespace RoF2
 	}
 
 // DECODE methods
+
 	DECODE(OP_AdventureMerchantSell)
 	{
 		DECODE_LENGTH_EXACT(structs::Adventure_Sell_Struct);
@@ -3902,7 +3897,7 @@ namespace RoF2
 		SETUP_DIRECT_DECODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
 
 		IN(merchant_entity_id);
-		emu->slot_id = RoF2ToServerSlot(eq->slot_id);
+		emu->slot_id = RoF2ToServerMainInvSlot(eq->slot_id);
 		IN(charges);
 		IN(cost);
 
@@ -3915,7 +3910,7 @@ namespace RoF2
 		SETUP_DIRECT_DECODE(AltCurrencySelectItem_Struct, structs::AltCurrencySelectItem_Struct);
 
 		IN(merchant_entity_id);
-		emu->slot_id = RoF2ToServerSlot(eq->slot_id);
+		emu->slot_id = RoF2ToServerMainInvSlot(eq->slot_id);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -4406,10 +4401,9 @@ namespace RoF2
 
 		IN(item_id);
 		int r;
-		for (r = 0; r < 5; r++) {
+		for (r = 0; r < EmuConstants::ITEM_COMMON_SIZE; r++) {
 			IN(augments[r]);
 		}
-		// Max Augs is now 6, but no code to support that many yet
 		IN(link_hash);
 		IN(icon);
 
@@ -4847,7 +4841,6 @@ namespace RoF2
 		hdr.main_slot = (merchant_slot == 0) ? slot_id.MainSlot : merchant_slot;
 		hdr.sub_slot = (merchant_slot == 0) ? slot_id.SubSlot : 0xffff;
 		hdr.unknown013 = (merchant_slot == 0) ? slot_id.AugSlot : 0xffff;
-		//hdr.unknown013 = 0xffff;
 		hdr.price = inst->GetPrice();
 		hdr.merchant_slot = (merchant_slot == 0) ? 1 : inst->GetMerchantCount();
 		//hdr.merchant_slot = (merchant_slot == 0) ? 1 : 0xffffffff;
@@ -4856,7 +4849,7 @@ namespace RoF2
 		hdr.unknown028 = 0;
 		hdr.last_cast_time = ((item->RecastDelay > 1) ? 1212693140 : 0);
 		hdr.charges = (stackable ? (item->MaxCharges ? 1 : 0) : charges);
-		hdr.inst_nodrop = inst->IsInstNoDrop() ? 1 : 0;
+		hdr.inst_nodrop = inst->IsAttuned() ? 1 : 0;
 		hdr.unknown044 = 0;
 		hdr.unknown048 = 0;
 		hdr.unknown052 = 0;
@@ -4877,7 +4870,10 @@ namespace RoF2
 		}
 		//ORNAMENT IDFILE / ICON
 		uint16 ornaIcon = 0;
-		if (inst->GetOrnamentationAug(ornamentationAugtype)) {
+		int32 heroModel = 0;
+		/*
+		if (inst->GetOrnamentationAug(ornamentationAugtype))
+		{
 			const Item_Struct *aug_weap = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
 			//Mainhand
 			ss.write(aug_weap->IDFile, strlen(aug_weap->IDFile));
@@ -4887,8 +4883,16 @@ namespace RoF2
 			ss.write((const char*)&null_term, sizeof(uint8));
 			//Icon
 			ornaIcon = aug_weap->Icon;
+			if (aug_weap->HerosForgeModel > 0)
+			{
+				heroModel = (aug_weap->HerosForgeModel * 100) + Inventory::CalcMaterialFromSlot(slot_id_in);
+			}
 		}
-		else if (inst->GetOrnamentationIDFile() && inst->GetOrnamentationIcon()) {
+		else 
+		*/
+			
+		if (inst->GetOrnamentationIDFile() && inst->GetOrnamentationIcon())
+		{
 			char tmp[30]; memset(tmp, 0x0, 30); sprintf(tmp, "IT%d", inst->GetOrnamentationIDFile());
 			//Mainhand
 			ss.write(tmp, strlen(tmp));
@@ -4897,10 +4901,12 @@ namespace RoF2
 			ss.write(tmp, strlen(tmp));
 			ss.write((const char*)&null_term, sizeof(uint8));
 			ornaIcon = inst->GetOrnamentationIcon();
+			heroModel = inst->GetOrnamentHeroModel(Inventory::CalcMaterialFromSlot(slot_id_in));
 		}
-		else {
-			ss.write((const char*)&null_term, sizeof(uint8)); //no mh
-			ss.write((const char*)&null_term, sizeof(uint8));//no of
+		else
+		{
+			ss.write((const char*)&null_term, sizeof(uint8)); // no main hand Ornamentation
+			ss.write((const char*)&null_term, sizeof(uint8)); // no off hand Ornamentation
 		}
 
 		RoF2::structs::ItemSerializationHeaderFinish hdrf;
@@ -4908,14 +4914,15 @@ namespace RoF2
 		hdrf.unknown061 = 0;
 		hdrf.unknown062 = 0;
 		hdrf.unknowna1 = 0xffffffff;
-		hdrf.unknowna2 = 0;
+		hdrf.ornamentHeroModel = heroModel;
 		hdrf.unknown063 = 0;
 		hdrf.unknowna3 = 0;
 		hdrf.unknowna4 = 0xffffffff;
 		hdrf.unknowna5 = 0;
 		hdrf.ItemClass = item->ItemClass;
+
 		ss.write((const char*)&hdrf, sizeof(RoF2::structs::ItemSerializationHeaderFinish));
-		
+
 		if (strlen(item->Name) > 0)
 		{
 			ss.write(item->Name, strlen(item->Name));
@@ -5017,10 +5024,10 @@ namespace RoF2
 		ibs.Prestige = 0;
 		ibs.ItemType = item->ItemType;
 		ibs.Material = item->Material;
-		ibs.unknown7 = 0;
+		ibs.MaterialUnknown1 = 0;
 		ibs.EliteMaterial = item->EliteMaterial;
-		ibs.unknown_RoF23 = 0;
-		ibs.unknown_RoF24 = 0;
+		ibs.HerosForgeModel = item->HerosForgeModel;
+		ibs.MaterialUnknown2 = 0;
 		ibs.SellRate = item->SellRate;
 		ibs.CombatEffects = item->CombatEffects;
 		ibs.Shielding = item->Shielding;
@@ -5062,17 +5069,12 @@ namespace RoF2
 		isbs.augdistiller = 65535;
 		isbs.augrestrict = item->AugRestrict;
 
-		for (int x = AUG_BEGIN; x < EmuConstants::ITEM_COMMON_SIZE; ++x)
+		for (int x = AUG_BEGIN; x < consts::ITEM_COMMON_SIZE; x++)
 		{
 			isbs.augslots[x].type = item->AugSlotType[x];
 			isbs.augslots[x].visible = item->AugSlotVisible[x];
 			isbs.augslots[x].unknown = item->AugSlotUnk2[x];
 		}
-
-		// Increased to 6 max aug slots
-		isbs.augslots[5].type = 0;
-		isbs.augslots[5].visible = 1;
-		isbs.augslots[5].unknown = 0;
 
 		isbs.ldonpoint_type = item->PointType;
 		isbs.ldontheme = item->LDoNTheme;
@@ -5309,13 +5311,8 @@ namespace RoF2
 		iqbs.SpellDmg = item->SpellDmg;
 		iqbs.clairvoyance = item->Clairvoyance;
 		iqbs.unknown28 = 0;
-		
-
-		// Begin RoF2 Test
-		iqbs.unknown_TEST1 = 0;
-		// End RoF2 Test
-
 		iqbs.unknown30 = 0;
+		iqbs.unknown37a = 0;
 		iqbs.unknown39 = 1;
 
 		iqbs.subitem_count = 0;

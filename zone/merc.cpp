@@ -1,18 +1,21 @@
+
 #include "merc.h"
-#include "masterentity.h"
-#include "npc_ai.h"
-#include "../common/packet_dump.h"
+#include "client.h"
+#include "corpse.h"
+#include "entity.h"
+#include "groups.h"
+#include "mob.h"
+
 #include "../common/eq_packet_structs.h"
 #include "../common/eq_constants.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
+
 #include "zone.h"
 #include "string_ids.h"
-#include "../common/misc_functions.h"
+
 #include "../common/string_util.h"
 #include "../common/rulesys.h"
-#include "quest_parser_collection.h"
-#include "water_map.h"
 
 extern volatile bool ZoneLoaded;
 
@@ -1196,18 +1199,32 @@ void Merc::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.NPC = 1;                                      // 0=player,1=npc,2=pc corpse,3=npc corpse
 		ns->spawn.IsMercenary = 1;
 
+		/*
+		// Wear Slots are not setup for Mercs yet
 		unsigned int i;
-		//should not include 21 (SLOT_AMMO)
-		for (i = 0; i < MainAmmo; i++) {
-			if(equipment[i] == 0)
+		for (i = 0; i < _MaterialCount; i++)
+		{
+			if (equipment[i] == 0)
+			{
 				continue;
+			}
 			const Item_Struct* item = database.GetItem(equipment[i]);
 			if(item)
 			{
-				ns->spawn.equipment[i]  = item->Material;
-				ns->spawn.colors[i].color = item->Color;
+				ns->spawn.equipment[i].material = item->Material;
+				ns->spawn.equipment[i].elitematerial = item->EliteMaterial;
+				ns->spawn.equipment[i].heroforgemodel = item->HerosForgeModel;
+				if (armor_tint[i])
+				{
+					ns->spawn.colors[i].color = armor_tint[i];
+				}
+				else
+				{
+					ns->spawn.colors[i].color = item->Color;
+				}
 			}
 		}
+		*/
 	}
 }
 
@@ -2654,153 +2671,6 @@ int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 	//by reagent conservation for obvious reasons.
 
 	return realTotal + realTotal2 + realTotal3;
-}
-
-
-int32 Merc::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
-
-	if (spells[spell_id].targettype == ST_Self)
-		return value;
-
-	bool Critical = false;
-	int32 value_BaseEffect = 0;
-
-	value_BaseEffect = value + (value*GetFocusEffect(focusFcBaseEffects, spell_id)/100);
-
-	int chance = RuleI(Spells, BaseCritChance);
-	chance += itembonuses.CriticalSpellChance + spellbonuses.CriticalSpellChance + aabonuses.CriticalSpellChance;
-
-	if (chance > 0){
-
-		int32 ratio = RuleI(Spells, BaseCritRatio); //Critical modifier is applied from spell effects only. Keep at 100 for live like criticals.
-
-		if (zone->random.Roll(chance)) {
-			Critical = true;
-			ratio += itembonuses.SpellCritDmgIncrease + spellbonuses.SpellCritDmgIncrease + aabonuses.SpellCritDmgIncrease;
-			ratio += itembonuses.SpellCritDmgIncNoStack + spellbonuses.SpellCritDmgIncNoStack + aabonuses.SpellCritDmgIncNoStack;
-		}
-
-		else if (GetClass() == CASTERDPS && (GetLevel() >= RuleI(Spells, WizCritLevel)) && (zone->random.Roll(RuleI(Spells, WizCritChance)))) {
-			ratio = zone->random.Int(1,100); //Wizard innate critical chance is calculated seperately from spell effect and is not a set ratio.
-			Critical = true;
-		}
-
-		ratio += RuleI(Spells, WizCritRatio); //Default is zero
-
-		if (Critical){
-
-			value = value_BaseEffect*ratio/100;
-
-			value += value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100;
-
-			value += int(value_BaseEffect*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100)*ratio/100;
-
-			if (target) {
-				value += int(value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100)*ratio/100;
-				value -= target->GetFcDamageAmtIncoming(this, spell_id);
-			}
-
-			value -= GetFocusEffect(focusFcDamageAmtCrit, spell_id)*ratio/100;
-
-			value -= GetFocusEffect(focusFcDamageAmt, spell_id);
-
-			if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
-				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value)*ratio/100;
-
-			value = (value * GetSpellScale() / 100);
-
-			entity_list.MessageClose_StringID(this, false, 100, MT_SpellCrits,
-				OTHER_CRIT_BLAST, GetName(), itoa(-value));
-
-			return value;
-		}
-	}
-
-	value = value_BaseEffect;
-
-	value += value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100;
-
-	value += value_BaseEffect*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100;
-
-	if (target) {
-		value += value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100;
-		value -= target->GetFcDamageAmtIncoming(this, spell_id);
-	}
-
-	value -= GetFocusEffect(focusFcDamageAmtCrit, spell_id);
-
-	value -= GetFocusEffect(focusFcDamageAmt, spell_id);
-
-	if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
-		value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
-
-	value = (value * GetSpellScale() / 100);
-
-	return value;
-}
-
-int32 Merc::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
-
-	if (target == nullptr)
-		target = this;
-
-	int32 value_BaseEffect = 0;
-	int16 chance = 0;
-	int8 modifier = 1;
-	bool Critical = false;
-
-	value_BaseEffect = value + (value*GetFocusEffect(focusFcBaseEffects, spell_id)/100);
-
-	value = value_BaseEffect;
-
-	value += int(value_BaseEffect*GetFocusEffect(focusImprovedHeal, spell_id)/100);
-
-	// Instant Heals
-	if(spells[spell_id].buffduration < 1) {
-
-		chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance;
-
-		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id);
-
-		if (spellbonuses.CriticalHealDecay)
-			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay);
-
-		if(chance && zone->random.Roll(chance)) {
-			Critical = true;
-			modifier = 2; //At present time no critical heal amount modifier SPA exists.
-		}
-
-		value *= modifier;
-		value += GetFocusEffect(focusFcHealAmtCrit, spell_id) * modifier;
-		value += GetFocusEffect(focusFcHealAmt, spell_id);
-		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id);
-
-		if(itembonuses.HealAmt && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
-			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value) * modifier;
-
-		value += value*target->GetHealRate(spell_id, this)/100;
-
-		if (Critical)
-			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s performs an exceptional heal! (%d)", GetName(), value);
-
-		return value;
-	}
-
-	//Heal over time spells. [Heal Rate and Additional Healing effects do not increase this value]
-	else {
-
-		chance = itembonuses.CriticalHealOverTime + spellbonuses.CriticalHealOverTime + aabonuses.CriticalHealOverTime;
-
-		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id);
-
-		if (spellbonuses.CriticalRegenDecay)
-			chance += GetDecayEffectValue(spell_id, SE_CriticalRegenDecay);
-
-		if(chance && zone->random.Roll(chance))
-			return (value * 2);
-	}
-
-	return value;
 }
 
 int32 Merc::GetActSpellCost(uint16 spell_id, int32 cost)
@@ -4905,6 +4775,7 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 			npc_type->npc_id = 0; //NPC ID has to be 0, otherwise db gets all confuzzled.
 			npc_type->class_ = merc_template->ClassID;
 			npc_type->maxlevel = 0; //We should hard-set this to override scalerate's functionality in the NPC class when it is constructed.
+			npc_type->no_target_hotkey = 1;
 
 			Merc* merc = new Merc(npc_type, c->GetX(), c->GetY(), c->GetZ(), 0);
 

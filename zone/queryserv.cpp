@@ -23,7 +23,6 @@ Copyright (C) 2001-2014 EQEMu Development Team (http://eqemulator.net)
 #include "worldserver.h"
 #include "net.h"
 
-#include <iostream>
 
 extern WorldServer worldserver;
 extern QueryServ* QServ;

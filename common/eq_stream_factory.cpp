@@ -1,5 +1,6 @@
 #include "debug.h"
 #include "eq_stream_factory.h"
+
 #ifdef _WINDOWS
 	#include <winsock.h>
 	#include <process.h>
@@ -13,11 +14,11 @@
 	#include <netdb.h>
 	#include <pthread.h>
 #endif
-#include <fcntl.h>
+
 #include <iostream>
+#include <fcntl.h>
+
 #include "op_codes.h"
-#include "eq_stream.h"
-#include "logsys.h"
 
 ThreadReturnType EQStreamFactoryReaderLoop(void *eqfs)
 {
@@ -291,7 +292,7 @@ Timer DecayTimer(20);
 
 			//bullshit checking, to see if this is really happening, GDB seems to think so...
 			if(stream_itr->second == nullptr) {
-				fprintf(stderr, "ERROR: nullptr Stream encountered in EQStreamFactory::WriterLoop for: %i", stream_itr->first.first, stream_itr->first.second);
+				fprintf(stderr, "ERROR: nullptr Stream encountered in EQStreamFactory::WriterLoop for: %i:%i", stream_itr->first.first, stream_itr->first.second);
 				continue;
 			}
 

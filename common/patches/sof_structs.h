@@ -117,10 +117,9 @@ struct Color_Struct
 };
 
 struct CharSelectEquip {
-	//totally guessed;
-	uint32 equip0;
-	uint32 equip1;
-	uint32 itemid;
+	uint32 material;
+	uint32 unknown1;
+	uint32 elitematerial;
 	Color_Struct color;
 };
 
@@ -167,9 +166,9 @@ struct CharacterSelect_Struct {
 * Size: 12 Octets
 */
 struct EquipStruct {
-/*00*/ uint32 equip0;
-/*04*/ uint32 equip1;
-/*08*/ uint32 itemId;
+/*00*/ uint32 material;
+/*04*/ uint32 unknown1;
+/*08*/ uint32 elitematerial;
 /*12*/
 };
 

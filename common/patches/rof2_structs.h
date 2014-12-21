@@ -160,13 +160,25 @@ struct Color_Struct
 	};
 };
 
+/*
+* Visible equiptment.
+* Size: 20 Octets
+*/
+struct EquipStruct {
+	/*00*/ uint32 material;
+	/*04*/ uint32 unknown1;
+	/*08*/ uint32 elitematerial;
+	/*12*/ uint32 heroforgemodel;
+	/*16*/ uint32 material2;	// Same as material?
+	/*20*/
+};
+
 struct CharSelectEquip {
-	//totally guessed;
-	uint32 equip0;
-	uint32 equip1;
-	uint32 equip2;
-	uint32 itemid;
-	uint32 equip3;
+	uint32 material;
+	uint32 unknown1;
+	uint32 elitematerial;
+	uint32 heroforgemodel;
+	uint32 material2;
 	Color_Struct color;
 };
 
@@ -251,21 +263,6 @@ struct Membership_Struct
 /*016*/ int32 entries[22]; // Most -1, 1, and 0 for Gold Status
 /*104*/
 };
-
-
-/*
-* Visible equiptment.
-* Size: 20 Octets
-*/
-struct EquipStruct {
-/*00*/ uint32 equip0;
-/*04*/ uint32 equip1;
-/*08*/ uint32 equip2;
-/*12*/ uint32 itemId;
-/*16*/ uint32 equip3;	// Same as equip0?
-/*20*/
-};
-
 
 /*
 ** Generic Spawn Struct
@@ -523,71 +520,72 @@ struct ServerZoneEntry_Struct //Adjusted from SEQ Everquest.h Struct
 
 //New Zone Struct - Size: 948
 struct NewZone_Struct {
-/*0000*/	char	char_name[64];			// Character Name
-/*0064*/	char	zone_short_name[32];	// Zone Short Name
-/*0096*/	char    unknown0096[96];
-/*0192*/	char	zone_long_name[278];	// Zone Long Name
-/*0470*/	uint8	ztype;					// Zone type (usually FF)
-/*0471*/	uint8	fog_red[4];				// Zone fog (red)
-/*0475*/	uint8	fog_green[4];				// Zone fog (green)
-/*0479*/	uint8	fog_blue[4];				// Zone fog (blue)
-/*0483*/	uint8	unknown323;
-/*0484*/	float	fog_minclip[4];
-/*0500*/	float	fog_maxclip[4];
-/*0516*/	float	gravity;
-/*0520*/	uint8	time_type;
-/*0521*/    uint8   rain_chance[4];
-/*0525*/    uint8   rain_duration[4];
-/*0529*/    uint8   snow_chance[4];
-/*0533*/    uint8   snow_duration[4];
-/*0537*/    uint8   unknown537[33];
-/*0570*/	uint8	sky;					// Sky Type
-/*0571*/	uint8	unknown571[13];			// ***Placeholder
-/*0584*/	float	zone_exp_multiplier;	// Experience Multiplier
-/*0588*/	float	safe_y;					// Zone Safe Y
-/*0592*/	float	safe_x;					// Zone Safe X
-/*0596*/	float	safe_z;					// Zone Safe Z
-/*0600*/	float	min_z;					// Guessed - NEW - Seen 0
-/*0604*/	float	max_z;					// Guessed
-/*0608*/	float	underworld;				// Underworld, min z (Not Sure?)
-/*0612*/	float	minclip;				// Minimum View Distance
-/*0616*/	float	maxclip;				// Maximum View DIstance
-/*0620*/	uint8	unknown620[84];		// ***Placeholder
-/*0704*/	char	zone_short_name2[96];	//zone file name? excludes instance number which can be in previous version.
-/*0800*/	int32	unknown800;	//seen -1
-/*0804*/	char	unknown804[40]; //
-/*0844*/	int32	unknown844;	//seen 600
-/*0848*/	int32	unknown848;
-/*0852*/	uint16	zone_id;
-/*0854*/	uint16	zone_instance;
-/*0856*/	char	unknown856[20];
-/*0876*/	uint32	SuspendBuffs;
-/*0880*/	uint32	unknown880;		// Seen 50
-/*0884*/	uint32	unknown884;		// Seen 10
-/*0888*/	uint8	unknown888;		// Seen 1
-/*0889*/	uint8	unknown889;		// Seen 0 (POK) or 1 (rujj)
-/*0890*/	uint8	unknown890;		// Seen 1
-/*0891*/	uint8	unknown891;		// Seen 0
-/*0892*/	uint8	unknown892;		// Seen 0
-/*0893*/	uint8	unknown893;		// Seen 0 - 00
-/*0894*/	uint8	fall_damage;	// 0 = Fall Damage on, 1 = Fall Damage off
-/*0895*/	uint8	unknown895;		// Seen 0 - 00
-/*0896*/	uint32	unknown896;		// Seen 180
-/*0900*/	uint32	unknown900;		// Seen 180
-/*0904*/	uint32	unknown904;		// Seen 180
-/*0908*/	uint32	unknown908;		// Seen 2
-/*0912*/	uint32	unknown912;		// Seen 2
-/*0916*/	float	FogDensity;		// Most zones have this set to 0.33 Blightfire had 0.16
-/*0920*/	uint32	unknown920;		// Seen 0
-/*0924*/	uint32	unknown924;		// Seen 0
-/*0928*/	uint32	unknown928;		// Seen 0
-/*0932*/	int32  unknown932;		// Seen -1
-/*0936*/	int32  unknown936;		// Seen -1
-/*0940*/	uint32  unknown940;		// Seen 0
-/*0944*/	float   unknown944;		// Seen 1.0
-/*0948*/
+	/*0000*/	char	char_name[64];			// Character Name
+	/*0064*/	char	zone_short_name[32];	// Zone Short Name
+	/*0096*/	char    unknown0096[96];
+	/*0192*/	char	zone_long_name[278];	// Zone Long Name
+	/*0470*/	uint8	ztype;					// Zone type (usually FF)
+	/*0471*/	uint8	fog_red[4];				// Zone fog (red)
+	/*0475*/	uint8	fog_green[4];				// Zone fog (green)
+	/*0479*/	uint8	fog_blue[4];				// Zone fog (blue)
+	/*0483*/	uint8	unknown323;
+	/*0484*/	float	fog_minclip[4];
+	/*0500*/	float	fog_maxclip[4];
+	/*0516*/	float	gravity;
+	/*0520*/	uint8	time_type;
+	/*0521*/    uint8   rain_chance[4];
+	/*0525*/    uint8   rain_duration[4];
+	/*0529*/    uint8   snow_chance[4];
+	/*0533*/    uint8   snow_duration[4];
+	/*0537*/    uint8   unknown537[33];
+	/*0570*/	uint8	sky;					// Sky Type
+	/*0571*/	uint8	unknown571[13];			// ***Placeholder
+	/*0584*/	float	zone_exp_multiplier;	// Experience Multiplier
+	/*0588*/	float	safe_y;					// Zone Safe Y
+	/*0592*/	float	safe_x;					// Zone Safe X
+	/*0596*/	float	safe_z;					// Zone Safe Z
+	/*0600*/	float	min_z;					// Guessed - NEW - Seen 0
+	/*0604*/	float	max_z;					// Guessed
+	/*0608*/	float	underworld;				// Underworld, min z (Not Sure?)
+	/*0612*/	float	minclip;				// Minimum View Distance
+	/*0616*/	float	maxclip;				// Maximum View DIstance
+	/*0620*/	uint8	unknown620[84];		// ***Placeholder
+	/*0704*/	char	zone_short_name2[96];	//zone file name? excludes instance number which can be in previous version.
+	/*0800*/	int32	unknown800;	//seen -1
+	/*0804*/	char	unknown804[40]; //
+	/*0844*/	int32	unknown844;	//seen 600
+	/*0848*/	int32	unknown848;
+	/*0852*/	uint16	zone_id;
+	/*0854*/	uint16	zone_instance;
+	/*0856*/	char	unknown856[20];
+	/*0876*/	uint32	SuspendBuffs;
+	/*0880*/	uint32	unknown880;		// Seen 50
+	/*0884*/	uint32	unknown884;		// Seen 10
+	/*0888*/	uint8	unknown888;		// Seen 1
+	/*0889*/	uint8	unknown889;		// Seen 0 (POK) or 1 (rujj)
+	/*0890*/	uint8	unknown890;		// Seen 1
+	/*0891*/	uint8	unknown891;		// Seen 0
+	/*0892*/	uint8	unknown892;		// Seen 0
+	/*0893*/	uint8	unknown893;		// Seen 0 - 00
+	/*0894*/	uint8	fall_damage;	// 0 = Fall Damage on, 1 = Fall Damage off
+	/*0895*/	uint8	unknown895;		// Seen 0 - 00
+	/*0896*/	uint32	unknown896;		// Seen 180
+	/*0900*/	uint32	unknown900;		// Seen 180
+	/*0904*/	uint32	unknown904;		// Seen 180
+	/*0908*/	uint32	unknown908;		// Seen 2
+	/*0912*/	uint32	unknown912;		// Seen 2
+	/*0916*/	float	FogDensity;		// Most zones have this set to 0.33 Blightfire had 0.16
+	/*0920*/	uint32	unknown920;		// Seen 0
+	/*0924*/	uint32	unknown924;		// Seen 0
+	/*0928*/	uint32	unknown928;		// Seen 0
+	/*0932*/	int32  unknown932;		// Seen -1
+	/*0936*/	int32  unknown936;		// Seen -1
+	/*0940*/	uint32  unknown940;		// Seen 0
+	/*0944*/	float   unknown944;		// Seen 1.0
+	/*0948*/	uint32  unknown948;		// Seen 0 - New on Live as of Dec 15 2014
+	/*0952*/	uint32  unknown952;		// Seen 100 - New on Live as of Dec 15 2014
+	/*0956*/
 };
-
 
 /*
 ** Memorize Spell Struct
@@ -1018,38 +1016,38 @@ union
 {
 	struct
 	{
-		/*00184*/ EquipStruct equip_helmet; // Equiptment: Helmet visual
-		/*00204*/ EquipStruct equip_chest; // Equiptment: Chest visual
-		/*00224*/ EquipStruct equip_arms; // Equiptment: Arms visual
-		/*00244*/ EquipStruct equip_bracers; // Equiptment: Wrist visual
-		/*00264*/ EquipStruct equip_hands; // Equiptment: Hands visual
-		/*00284*/ EquipStruct equip_legs; // Equiptment: Legs visual
-		/*00304*/ EquipStruct equip_feet; // Equiptment: Boots visual
-		/*00324*/ EquipStruct equip_primary; // Equiptment: Main visual
-		/*00344*/ EquipStruct equip_secondary; // Equiptment: Off visual
+		/*00184*/ EquipStruct equip_helmet;		// Equipment: Helmet visual
+		/*00204*/ EquipStruct equip_chest;		// Equipment: Chest visual
+		/*00224*/ EquipStruct equip_arms;		// Equipment: Arms visual
+		/*00244*/ EquipStruct equip_bracers;	// Equipment: Wrist visual
+		/*00264*/ EquipStruct equip_hands;		// Equipment: Hands visual
+		/*00284*/ EquipStruct equip_legs;		// Equipment: Legs visual
+		/*00304*/ EquipStruct equip_feet;		// Equipment: Boots visual
+		/*00324*/ EquipStruct equip_primary;	// Equipment: Main visual
+		/*00344*/ EquipStruct equip_secondary;	// Equipment: Off visual
 		// Below slots are just guesses, but all 0s anyway...
-		/*00364*/ EquipStruct equip_charm; // Equiptment: Non-visual
-		/*00384*/ EquipStruct equip_ear1; // Equiptment: Non-visual
-		/*00404*/ EquipStruct equip_ear2; // Equiptment: Non-visual
-		/*00424*/ EquipStruct equip_face; // Equiptment: Non-visual
-		/*00444*/ EquipStruct equip_neck; // Equiptment: Non-visual
-		/*00464*/ EquipStruct equip_shoulder; // Equiptment: Non-visual
-		/*00484*/ EquipStruct equip_bracer2; // Equiptment: Non-visual
-		/*00504*/ EquipStruct equip_range; // Equiptment: Non-visual
-		/*00524*/ EquipStruct equip_ring1; // Equiptment: Non-visual
-		/*00544*/ EquipStruct equip_ring2; // Equiptment: Non-visual
-		/*00564*/ EquipStruct equip_waist; // Equiptment: Non-visual
-		/*00584*/ EquipStruct equip_powersource; // Equiptment: Non-visual
-		/*00604*/ EquipStruct equip_ammo; // Equiptment: Non-visual
+		/*00364*/ EquipStruct equip_charm;		// Equipment: Non-visual
+		/*00384*/ EquipStruct equip_ear1;		// Equipment: Non-visual
+		/*00404*/ EquipStruct equip_ear2;		// Equipment: Non-visual
+		/*00424*/ EquipStruct equip_face;		// Equipment: Non-visual
+		/*00444*/ EquipStruct equip_neck;		// Equipment: Non-visual
+		/*00464*/ EquipStruct equip_shoulder;	// Equipment: Non-visual
+		/*00484*/ EquipStruct equip_bracer2;	// Equipment: Non-visual
+		/*00504*/ EquipStruct equip_range;		// Equipment: Non-visual
+		/*00524*/ EquipStruct equip_ring1;		// Equipment: Non-visual
+		/*00544*/ EquipStruct equip_ring2;		// Equipment: Non-visual
+		/*00564*/ EquipStruct equip_waist;		// Equipment: Non-visual
+		/*00584*/ EquipStruct equip_powersource;// Equipment: Non-visual
+		/*00604*/ EquipStruct equip_ammo;		// Equipment: Non-visual
 	} equip;
-	/*00184*/ EquipStruct equipment[22];
+	/*00184*/ EquipStruct equipment[22];		// Total Slots
 };
 /*00624*/ uint32 equip2_count;			// Seen 9
-/*00628*/ EquipStruct equipment2[9];	// Appears to be Visible slots, but all 0s
+/*00628*/ EquipStruct equipment2[_MaterialCount];	// Appears to be Visible slots, but all 0s
 /*00808*/ uint32 tint_count;			// Seen 9
-/*00812*/ Color_Struct item_tint[9];	// RR GG BB 00
+/*00812*/ Color_Struct item_tint[_MaterialCount];	// RR GG BB 00
 /*00848*/ uint32 tint_count2;			// Seen 9
-/*00852*/ Color_Struct item_tint2[9];	// RR GG BB 00
+/*00852*/ Color_Struct item_tint2[_MaterialCount];	// RR GG BB 00
 /*00888*/ uint8   haircolor;			// Player hair color
 /*00889*/ uint8   beardcolor;			// Player beard color
 /*00890*/ uint32 unknown_rof5;			//
@@ -1205,7 +1203,7 @@ union
 /*00000*/ uint8 unknown_rof52[82];		//
 /*00000*/ uint32 unknown_rof53;			// Seen 50
 
-uint8 unknown_rof54[1325];	// Unknown Section
+/*00000*/ uint8 unknown_rof54[1325];	// Unknown Section
 
 // Bottom of Struct:
 /*00000*/ uint8  groupAutoconsent;		// 0=off, 1=on
@@ -1601,23 +1599,24 @@ struct RespawnWindow_Struct {
 */
 struct PlayerPositionUpdateServer_Struct
 {
-	uint16	spawn_id;
-	uint16	spawnId2;
-	signed	padding0004:12;
-	signed	y_pos:19;			// y coord
-	unsigned padding:1;
-	signed	delta_z:13;			// change in z
-	signed	delta_x:13;			// change in x
-	signed	padding0008:6;
-	signed	x_pos:19;			// x coord
-	unsigned heading:12;		// heading
-	signed	padding0016:1;
-	signed	delta_heading:10;	// change in heading
-	signed	z_pos:19;			// z coord
-	signed	padding0020:3;
-	signed	animation:10;		// animation
-	signed	delta_y:13;			// change in y
-	signed	padding0024:9;
+	/*0000*/	uint16	spawn_id;
+	/*0002*/	uint16	spawnId2;
+	/*0004*/	signed	padding0004 : 12;
+				signed	y_pos : 19;			// y coord
+				unsigned padding : 1;
+	/*0008*/	signed	delta_z : 13;			// change in z
+				signed	delta_x : 13;			// change in x
+				signed	padding0008 : 6;
+	/*0012*/	signed	x_pos : 19;			// x coord
+				unsigned heading : 12;		// heading
+				signed	padding0016 : 1;
+	/*0016*/	signed	delta_heading : 10;	// change in heading
+				signed	z_pos : 19;			// z coord
+				signed	padding0020 : 3;
+	/*0020*/	signed	animation : 10;		// animation
+				signed	delta_y : 13;			// change in y
+				signed	padding0024 : 9;
+	/*0024*/
 };
 
 /*
@@ -1628,21 +1627,22 @@ struct PlayerPositionUpdateServer_Struct
 */
 struct PlayerPositionUpdateClient_Struct
 {
-	uint16		sequence;			// increments one each packet - Verified
-	uint16		spawn_id;			// Player's spawn id
-	uint8		unknown0004[6];		// ***Placeholder
-	float		delta_x;			// Change in x
-	unsigned	heading:12;			// Directional heading
-	unsigned	padding0040:20;		// ***Placeholder
-	float		x_pos;				// x coord (2nd loc value)
-	float		delta_z;			// Change in z
-	float		z_pos;				// z coord (3rd loc value)
-	float		y_pos;				// y coord (1st loc value)
-	unsigned	animation:10;		// ***Placeholder
-	unsigned	padding0024:22;		// animation
-	float		delta_y;			// Change in y
-	signed		delta_heading:10;	// change in heading
-	unsigned	padding0041:22;		// ***Placeholder
+	/*0000*/	uint16		sequence;			// increments one each packet - Verified
+	/*0002*/	uint16		spawn_id;			// Player's spawn id
+	/*0004*/	uint8		unknown0004[6];		// ***Placeholder
+	/*0010*/	float		delta_x;			// Change in x
+	/*0014*/	unsigned	heading : 12;			// Directional heading
+				unsigned	padding0040 : 20;		// ***Placeholder
+	/*0018*/	float		x_pos;				// x coord (2nd loc value)
+	/*0022*/	float		delta_z;			// Change in z
+	/*0026*/	float		z_pos;				// z coord (3rd loc value)
+	/*0030*/	float		y_pos;				// y coord (1st loc value)
+	/*0034*/	unsigned	animation : 10;		// ***Placeholder
+				unsigned	padding0024 : 22;		// animation
+	/*0038*/	float		delta_y;			// Change in y
+	/*0042*/	signed		delta_heading : 10;	// change in heading
+				unsigned	padding0041 : 22;		// ***Placeholder
+	/*0046*/
 };
 
 /*
@@ -2180,8 +2180,8 @@ struct AltCurrencyUpdate_Struct {
 //When an item is selected while the alt currency merchant window is open
 struct AltCurrencySelectItem_Struct {
 /*000*/ uint32 merchant_entity_id;
+/*004*/ MainInvItemSlotStruct slot_id;
 /*004*/ //uint32 slot_id;
-		ItemSlotStruct slot_id;
 /*008*/ uint32 unknown008;
 /*012*/ uint32 unknown012;
 /*016*/ uint32 unknown016;
@@ -2238,10 +2238,10 @@ struct AltCurrencyReclaim_Struct {
 
 struct AltCurrencySellItem_Struct {
 /*000*/ uint32 merchant_entity_id;
+/*004*/	MainInvItemSlotStruct slot_id;
 /*004*/ //uint32 slot_id;
-		ItemSlotStruct slot_id;
-/*008*/ uint32 charges;
-/*012*/ uint32 cost;
+/*016*/ uint32 charges;
+/*020*/ uint32 cost;
 };
 
 struct Adventure_Purchase_Struct {
@@ -2261,14 +2261,14 @@ struct Adventure_Sell_Struct {
 };
 
 struct AdventurePoints_Update_Struct {
-/*000*/	uint32				ldon_available_points;		// Total available points
-/*004*/ uint8				unkown_apu004[20];
-/*024*/	uint32				ldon_guk_points;		// Earned Deepest Guk points
-/*028*/	uint32				ldon_mirugal_points;		// Earned Mirugal' Mebagerie points
-/*032*/	uint32				ldon_mistmoore_points;		// Earned Mismoore Catacombs Points
-/*036*/	uint32				ldon_rujarkian_points;		// Earned Rujarkian Hills points
-/*040*/	uint32				ldon_takish_points;		// Earned Takish points
-/*044*/	uint8				unknown_apu042[216];
+/*000*/	uint32	ldon_available_points;		// Total available points
+/*004*/ uint8	unkown_apu004[20];
+/*024*/	uint32	ldon_guk_points;		// Earned Deepest Guk points
+/*028*/	uint32	ldon_mirugal_points;		// Earned Mirugal' Mebagerie points
+/*032*/	uint32	ldon_mistmoore_points;		// Earned Mismoore Catacombs Points
+/*036*/	uint32	ldon_rujarkian_points;		// Earned Rujarkian Hills points
+/*040*/	uint32	ldon_takish_points;		// Earned Takish points
+/*044*/	uint8	unknown_apu042[216];
 };
 
 
@@ -2833,8 +2833,8 @@ struct Door_Struct
 /*0085*/ uint8	unknown0085; // seen 1 or 0 or rarely 2C or 90 or ED or 2D or A1
 /*0086*/ uint8  unknown0086; // seen 0 or rarely FF or FE or 10 or 5A or 82
 /*0087*/ uint8  unknown0087; // seen 0 or rarely 02 or 7C
-/*0088*/ uint8  unknown0088[8]; // mostly 0s, the last 3 bytes are something tho
-/*0096*/
+/*0088*/ uint8  unknown0088[12]; // mostly 0s, the last 3 bytes are something tho
+/*0100*/
 };
 
 struct DoorSpawns_Struct {
@@ -4428,14 +4428,14 @@ struct EvolvingItem {
 
 struct ItemSerializationHeaderFinish
 {
-		uint16 ornamentIcon;
+/*079*/	uint16 ornamentIcon;
 /*081*/	uint8 unknown061;	// 0 - Add Evolving Item struct if this isn't set to 0?
 /*082*/	uint8 unknown062;	// 0
-/*083*/	uint32 unknowna1;	// 0xffffffff
-/*087*/	uint32 unknowna2;	// 0
+/*083*/	int32 unknowna1;	// 0xffffffff
+/*087*/	uint32 ornamentHeroModel;	// 0
 /*091*/	uint8 unknown063;	// 0
 /*092*/	uint32 unknowna3;	// 0
-/*096*/	uint32 unknowna4;	// 0xffffffff
+/*096*/	int32 unknowna4;	// 0xffffffff
 /*100*/	uint32 unknowna5;	// 0
 /*104*/	uint8 ItemClass; //0, 1, or 2
 /*105*/
@@ -4504,10 +4504,10 @@ struct ItemBodyStruct
 	uint32 Prestige;	// New to March 21 2012 client
 	uint8 ItemType;
 	uint32 Material;
-	uint32 unknown7;
+	uint32 MaterialUnknown1;
 	uint32 EliteMaterial;
-	uint32 unknown_RoF23;	// New to March 21 2012 client
-	uint32 unknown_RoF24;	// New to December 10th 2012 client - NEW
+	uint32 HerosForgeModel;		// New to March 21 2012 client
+	uint32 MaterialUnknown2;	// New to December 10th 2012 client - NEW
 	float  SellRate;
 	int32 CombatEffects;
 	int32 Shielding;
@@ -4690,11 +4690,7 @@ struct ItemQuaternaryBodyStruct
 	uint32 unknown37;
 	uint32 unknown_RoF27;
 	uint32 unknown_RoF28;
-
-	// Begin RoF2 Test
-	uint8 unknown_TEST1;
-	// End RoF2 Test
-
+	uint8 unknown37a;	// (guessed position) New to RoF2
 	uint8 unknown38;	// 0
 	uint8 unknown39;	// 1
 	uint32 subitem_count;

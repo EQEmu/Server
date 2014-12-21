@@ -1042,8 +1042,8 @@ namespace Titanium
 			OUT(beard[r]);
 			int k;
 			for (k = 0; k < 9; k++) {
-				OUT(equip[r][k]);
-				OUT(cs_colors[r][k].color);
+				eq->equip[r][k] = emu->equip[r][k].material;
+				eq->cs_colors[r][k].color = emu->equip[r][k].color.color;
 			}
 			OUT(haircolor[r]);
 			OUT(gohome[r]);
@@ -1270,7 +1270,7 @@ namespace Titanium
 			eq->guildrank = emu->guildrank;
 			//		eq->unknown0194[3] = emu->unknown0194[3];
 			for (k = 0; k < 9; k++) {
-				eq->equipment[k] = emu->equipment[k];
+				eq->equipment[k] = emu->equipment[k].material;
 				eq->colors[k].color = emu->colors[k].color;
 			}
 			for (k = 0; k < 8; k++) {
@@ -1678,7 +1678,7 @@ namespace Titanium
 			(merchant_slot == 0) ? inst->GetSerialNumber() : merchant_slot,
 			0, // item recast timer timestamp field (aka..last_cast_time field in SoF+ clients)
 			(stackable ? ((inst->GetItem()->ItemType == ItemTypePotion) ? 1 : 0) : charges),
-			inst->IsInstNoDrop() ? 1 : 0,
+			inst->IsAttuned() ? 1 : 0,
 			0
 			);
 

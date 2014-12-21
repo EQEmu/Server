@@ -19,8 +19,6 @@
 #define _EQPACKET_H
 
 #include "base_packet.h"
-#include "eq_stream_type.h"
-#include "op_codes.h"
 #include "platform.h"
 
 #ifdef STATIC_OPCODE
@@ -29,9 +27,6 @@
 #else
 #include "emu_opcodes.h"
 #endif
-
-class EQStream;
-class EQStreamPair;
 
 class EQPacket : public BasePacket {
 	friend class EQStream;

@@ -15,15 +15,20 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "../common/debug.h"
-#include <stdio.h>
-#include <iostream>
-#include <stdlib.h>
-#include "npc.h"
-#include "masterentity.h"
-#include "zonedb.h"
 #include "../common/loottable.h"
 #include "../common/misc_functions.h"
+
+#include "client.h"
+#include "entity.h"
+#include "mob.h"
+#include "npc.h"
+#include "zonedb.h"
+
+#include <iostream>
+#include <stdlib.h>
+
 #ifdef _WINDOWS
 #define snprintf	_snprintf
 #endif
@@ -201,6 +206,8 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 	item->aug_3 = 0;
 	item->aug_4 = 0;
 	item->aug_5 = 0;
+	item->aug_6 = 0;
+	item->attuned = 0;
 	item->min_level = minlevel;
 	item->max_level = maxlevel;
 	if (equipit) {

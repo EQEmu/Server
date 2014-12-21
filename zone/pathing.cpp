@@ -1,22 +1,22 @@
 #include "../common/debug.h"
-#include <string.h>
-#include <math.h>
-#include <list>
-#include <algorithm>
-#include <sstream>
-#include <fstream>
+
+#include "client.h"
+#include "doors.h"
 #include "pathing.h"
 #include "water_map.h"
-#include "../common/misc_functions.h"
-#include "doors.h"
-#include "client.h"
 #include "zone.h"
+
+#include <fstream>
+#include <list>
+#include <math.h>
+#include <sstream>
+#include <string.h>
 
 #ifdef _WINDOWS
 #define snprintf _snprintf
 #endif
 
-//#define PATHDEBUG
+//#define PATHDEBUG 
 #define ABS(x) ((x)<0?-(x):(x))
 
 extern Zone *zone;
@@ -205,15 +205,15 @@ Map::Vertex PathManager::GetPathNodeCoordinates(int NodeNumber, bool BestZ)
 
 }
 
-std::list<int> PathManager::FindRoute(int startID, int endID)
+std::deque<int> PathManager::FindRoute(int startID, int endID)
 {
 	_log(PATHING__DEBUG, "FindRoute from node %i to %i", startID, endID);
 
 	memset(ClosedListFlag, 0, sizeof(int) * Head.PathNodeCount);
 
-	std::list<AStarNode> OpenList, ClosedList;
+	std::deque<AStarNode> OpenList, ClosedList;
 
-	std::list<int>Route;
+	std::deque<int>Route;
 
 	AStarNode AStarEntry, CurrentNode;
 
@@ -251,7 +251,7 @@ std::list<int> PathManager::FindRoute(int startID, int endID)
 
 				Route.push_back(endID);
 
-				std::list<AStarNode>::iterator RouteIterator;
+				std::deque<AStarNode>::iterator RouteIterator;
 
 				while(CurrentNode.PathNodeID != startID)
 				{
@@ -300,7 +300,7 @@ std::list<int> PathManager::FindRoute(int startID, int endID)
 
 			bool AlreadyInOpenList = false;
 
-			std::list<AStarNode>::iterator OpenListIterator, InsertionPoint = OpenList.end();
+			std::deque<AStarNode>::iterator OpenListIterator, InsertionPoint = OpenList.end();
 
 			for(OpenListIterator = OpenList.begin(); OpenListIterator != OpenList.end(); ++OpenListIterator)
 			{
@@ -350,11 +350,11 @@ bool SortPathNodesByDistance(PathNodeSortStruct n1, PathNodeSortStruct n2)
 	return n1.Distance < n2.Distance;
 }
 
-std::list<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
+std::deque<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 {
 	_log(PATHING__DEBUG, "FindRoute(%8.3f, %8.3f, %8.3f, %8.3f, %8.3f, %8.3f)", Start.x, Start.y, Start.z, End.x, End.y, End.z);
 
-	std::list<int> noderoute;
+	std::deque<int> noderoute;
 
 	float CandidateNodeRangeXY = RuleR(Pathing, CandidateNodeRangeXY);
 
@@ -365,7 +365,7 @@ std::list<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 	//
 	int ClosestPathNodeToStart = -1;
 
-	std::list<PathNodeSortStruct> SortedByDistance;
+	std::deque<PathNodeSortStruct> SortedByDistance;
 
 	PathNodeSortStruct TempNode;
 
@@ -382,9 +382,9 @@ std::list<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 		}
 	}
 
-	SortedByDistance.sort(SortPathNodesByDistance);
+	std::sort(SortedByDistance.begin(), SortedByDistance.end(), SortPathNodesByDistance);
 
-	for(std::list<PathNodeSortStruct>::iterator Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
+	for(auto Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
 	{
 		_log(PATHING__DEBUG, "Checking Reachability of Node %i from Start Position.", PathNodes[(*Iterator).id].id);
 
@@ -420,9 +420,9 @@ std::list<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 		}
 	}
 
-	SortedByDistance.sort(SortPathNodesByDistance);
+	std::sort(SortedByDistance.begin(), SortedByDistance.end(), SortPathNodesByDistance);
 
-	for(std::list<PathNodeSortStruct>::iterator Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
+	for(auto Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
 	{
 		_log(PATHING__DEBUG, "Checking Reachability of Node %i from End Position.", PathNodes[(*Iterator).id].id);
 		_log(PATHING__DEBUG, " (%8.3f, %8.3f, %8.3f) to (%8.3f, %8.3f, %8.3f)",
@@ -456,7 +456,7 @@ std::list<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 	{
 		int CulledNodes = 0;
 
-		std::list<int>::iterator First, Second;
+		std::deque<int>::iterator First, Second;
 
 		while((noderoute.size() >= 2) && (CulledNodes < NodesToAttemptToCull))
 		{
@@ -487,7 +487,7 @@ std::list<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 	{
 		int CulledNodes = 0;
 
-		std::list<int>::iterator First, Second;
+		std::deque<int>::iterator First, Second;
 
 		while((noderoute.size() >= 2) && (CulledNodes < NodesToAttemptToCull))
 		{
@@ -611,7 +611,7 @@ void PathManager::MeshTest()
 			if(j == i)
 				continue;
 
-			std::list<int> Route = FindRoute(PathNodes[i].id, PathNodes[j].id);
+			std::deque<int> Route = FindRoute(PathNodes[i].id, PathNodes[j].id);
 
 			if(Route.size() == 0)
 			{
@@ -638,7 +638,7 @@ void PathManager::SimpleMeshTest()
 
 	for(uint32 j = 1; j < Head.PathNodeCount; ++j)
 	{
-		std::list<int> Route = FindRoute(PathNodes[0].id, PathNodes[j].id);
+		std::deque<int> Route = FindRoute(PathNodes[0].id, PathNodes[j].id);
 
 		if(Route.size() == 0)
 		{
@@ -1103,7 +1103,7 @@ int PathManager::FindNearestPathNode(Map::Vertex Position)
 
 	int ClosestPathNodeToStart = -1;
 
-	std::list<PathNodeSortStruct> SortedByDistance;
+	std::deque<PathNodeSortStruct> SortedByDistance;
 
 	PathNodeSortStruct TempNode;
 
@@ -1120,9 +1120,9 @@ int PathManager::FindNearestPathNode(Map::Vertex Position)
 		}
 	}
 
-	SortedByDistance.sort(SortPathNodesByDistance);
+	std::sort(SortedByDistance.begin(), SortedByDistance.end(), SortPathNodesByDistance);
 
-	for(std::list<PathNodeSortStruct>::iterator Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
+	for(auto Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
 	{
 		_log(PATHING__DEBUG, "Checking Reachability of Node %i from Start Position.", PathNodes[(*Iterator).id].id);
 
@@ -1264,9 +1264,7 @@ void Mob::PrintRoute()
 
 	printf("Route is : ");
 
-	std::list<int>::iterator Iterator;
-
-	for(Iterator = Route.begin(); Iterator !=Route.end(); ++Iterator)
+	for(auto Iterator = Route.begin(); Iterator !=Route.end(); ++Iterator)
 	{
 		printf("%i, ", (*Iterator));
 	}

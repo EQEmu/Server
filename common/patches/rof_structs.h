@@ -161,12 +161,11 @@ struct Color_Struct
 };
 
 struct CharSelectEquip {
-	//totally guessed;
-	uint32 equip0;
-	uint32 equip1;
-	uint32 equip2;
-	uint32 itemid;
-	uint32 equip3;
+	uint32 material;
+	uint32 unknown1;
+	uint32 elitematerial;
+	uint32 heroforgemodel;
+	uint32 material2;
 	Color_Struct color;
 };
 
@@ -258,11 +257,11 @@ struct Membership_Struct
 * Size: 20 Octets
 */
 struct EquipStruct {
-/*00*/ uint32 equip0;
-/*04*/ uint32 equip1;
-/*08*/ uint32 equip2;
-/*12*/ uint32 itemId;
-/*16*/ uint32 equip3;	// Same as equip0?
+/*00*/ uint32 material;
+/*04*/ uint32 unknown1;
+/*08*/ uint32 elitematerial;
+/*12*/ uint32 heroforgemodel;
+/*16*/ uint32 material2;	// Same as material?
 /*20*/
 };
 
@@ -2175,8 +2174,7 @@ struct AltCurrencyUpdate_Struct {
 //When an item is selected while the alt currency merchant window is open
 struct AltCurrencySelectItem_Struct {
 /*000*/ uint32 merchant_entity_id;
-/*004*/ //uint32 slot_id;
-		ItemSlotStruct slot_id;
+/*004*/ MainInvItemSlotStruct slot_id;
 /*008*/ uint32 unknown008;
 /*012*/ uint32 unknown012;
 /*016*/ uint32 unknown016;
@@ -2233,8 +2231,7 @@ struct AltCurrencyReclaim_Struct {
 
 struct AltCurrencySellItem_Struct {
 /*000*/ uint32 merchant_entity_id;
-/*004*/ //uint32 slot_id;
-		ItemSlotStruct slot_id;
+/*004*/ MainInvItemSlotStruct slot_id;
 /*008*/ uint32 charges;
 /*012*/ uint32 cost;
 };
@@ -4423,14 +4420,14 @@ struct EvolvingItem {
 
 struct ItemSerializationHeaderFinish
 {
-		uint16 ornamentIcon;
+/*079*/	uint16 ornamentIcon;
 /*081*/	uint8 unknown061;	// 0 - Add Evolving Item struct if this isn't set to 0?
 /*082*/	uint8 unknown062;	// 0
-/*083*/	uint32 unknowna1;	// 0xffffffff
-/*087*/	uint32 unknowna2;	// 0
+/*083*/	int32 unknowna1;	// 0xffffffff
+/*087*/	uint32 ornamentHeroModel;	// 0
 /*091*/	uint8 unknown063;	// 0
 /*092*/	uint32 unknowna3;	// 0
-/*096*/	uint32 unknowna4;	// 0xffffffff
+/*096*/	int32 unknowna4;	// 0xffffffff
 /*100*/	uint32 unknowna5;	// 0
 /*104*/	uint8 ItemClass; //0, 1, or 2
 /*105*/
@@ -4499,10 +4496,10 @@ struct ItemBodyStruct
 	uint32 Prestige;	// New to March 21 2012 client
 	uint8 ItemType;
 	uint32 Material;
-	uint32 unknown7;
+	uint32 MaterialUnknown1;
 	uint32 EliteMaterial;
-	uint32 unknown_RoF3;	// New to March 21 2012 client
-	uint32 unknown_RoF4;	// New to December 10th 2012 client - NEW
+	uint32 HerosForgeModel;		// New to March 21 2012 client
+	uint32 MaterialUnknown2;	// New to December 10th 2012 client - NEW
 	float  SellRate;
 	int32 CombatEffects;
 	int32 Shielding;

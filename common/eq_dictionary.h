@@ -26,7 +26,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "eq_constants.h"
 #include "clientversions.h"
 #include <string>
-#include "../common/patches/client62_constants.h"
 #include "../common/patches/titanium_constants.h"
 #include "../common/patches/sof_constants.h"
 #include "../common/patches/sod_constants.h"
@@ -138,8 +137,8 @@ public:
 
 	// items
 	// common and container sizes will not increase until the new 'location' struct is implemented
-	static const uint16 ITEM_COMMON_SIZE = Underfoot::consts::ITEM_COMMON_SIZE;
-	static const uint16 ITEM_CONTAINER_SIZE = Underfoot::consts::ITEM_CONTAINER_SIZE;
+	static const uint16 ITEM_COMMON_SIZE = RoF::consts::ITEM_COMMON_SIZE;
+	static const uint16 ITEM_CONTAINER_SIZE = Titanium::consts::ITEM_CONTAINER_SIZE;
 
 	// player profile
 	//static const uint32 CLASS_BITMASK = 0;	// needs value

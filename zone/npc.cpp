@@ -464,7 +464,7 @@ void NPC::CheckMinMaxLevel(Mob *them)
 		if(themlevel < (*cur)->min_level || themlevel > (*cur)->max_level)
 		{
 			material = Inventory::CalcMaterialFromSlot((*cur)->equip_slot);
-			if(material != 0xFF)
+			if (material != _MaterialInvalid)
 				SendWearChange(material);
 
 			cur = itemlist.erase(cur);
@@ -1310,11 +1310,14 @@ int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 	if (material_slot >= _MaterialCount)
 		return 0;
 
-	int inv_slot = Inventory::CalcSlotFromMaterial(material_slot);
-	if (inv_slot == -1)
+	int16 invslot = Inventory::CalcSlotFromMaterial(material_slot);
+	if (invslot == INVALID_INDEX)
 		return 0;
-	if(equipment[inv_slot] == 0) {
-		switch(material_slot) {
+
+	if (equipment[invslot] == 0)
+	{
+		switch(material_slot)
+		{
 		case MaterialHead:
 			return helmtexture;
 		case MaterialChest:
@@ -1330,7 +1333,7 @@ int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 	}
 
 	//they have some loot item in this slot, pass it up to the default handler
-	return(Mob::GetEquipmentMaterial(material_slot));
+	return (Mob::GetEquipmentMaterial(material_slot));
 }
 
 uint32 NPC::GetMaxDamage(uint8 tlevel)
@@ -1849,14 +1852,15 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 		{
 			SetPetOwnerClient(true); //Simple flag to determine if pet belongs to a client
 			SetAllowBeneficial(1);//Allow temp pets to receive buffs and heals if owner is client.
-			//This is a hack to allow CLIENT swarm pets NOT to be targeted with F8. Warning: Will turn name 'Yellow'!
-			if (RuleB(Pets, SwarmPetNotTargetableWithHotKey))
-				ns->spawn.IsMercenary = 1;
+			//This will allow CLIENT swarm pets NOT to be targeted with F8.
+			ns->spawn.targetable_with_hotkey = 0;
+			no_target_hotkey = 1;
 		}
 		else
 		{
 			//NPC cast swarm pets should still be targetable with F8.
-			ns->spawn.IsMercenary = 0;
+			ns->spawn.targetable_with_hotkey = 1;
+			no_target_hotkey = 0;
 		}
 
 		SetTempPet(true); //Simple mob flag for checking if temp pet
@@ -1926,6 +1930,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 	else if(id == "special_attacks") { NPCSpecialAttacks(val.c_str(), 0, 1); return; }
 	else if(id == "special_abilities") { ProcessSpecialAbilities(val.c_str()); return; }
 	else if(id == "attack_speed") { attack_speed = (float)atof(val.c_str()); CalcBonuses(); return; }
+	else if(id == "attack_delay") { attack_delay = atoi(val.c_str()); CalcBonuses(); return; }	
 	else if(id == "atk") { ATK = atoi(val.c_str()); return; }
 	else if(id == "accuracy") { accuracy_rating = atoi(val.c_str()); return; }
 	else if(id == "avoidance") { avoidance_rating = atoi(val.c_str()); return; }

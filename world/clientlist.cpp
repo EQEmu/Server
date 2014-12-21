@@ -424,11 +424,13 @@ ClientListEntry* ClientList::CheckAuth(const char* iName, const char* iPassword)
 	}
 	int16 tmpadmin;
 
-	_log(WORLD__ZONELIST,"Login with '%s' and '%s'", iName, iPassword);
+	//_log(WORLD__ZONELIST,"Login with '%s' and '%s'", iName, iPassword);
 
 	uint32 accid = database.CheckLogin(iName, iPassword, &tmpadmin);
 	if (accid) {
-		ClientListEntry* tmp = new ClientListEntry(GetNextCLEID(), accid, iName, tmpMD5, tmpadmin);
+		uint32 lsid = 0;
+		database.GetAccountIDByName(iName, &tmpadmin, &lsid);
+		ClientListEntry* tmp = new ClientListEntry(GetNextCLEID(), lsid, iName, tmpMD5, tmpadmin, 0, 0);
 		clientlist.Append(tmp);
 		return tmp;
 	}
@@ -545,7 +547,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 				if(totalusers<=20 || admin>=100)
 					totallength=totallength+strlen(countcle->name())+strlen(countcle->AccountName())+strlen(guild_mgr.GetGuildName(countcle->GuildID()))+5;
 			}
-			else if((countcle->Anon()>0 && admin<=countcle->Admin()) || countcle->Anon()==0 && !countcle->GetGM()){
+			else if((countcle->Anon()>0 && admin<=countcle->Admin()) || (countcle->Anon()==0 && !countcle->GetGM())) {
 				totalusers++;
 				if(totalusers<=20 || admin>=100)
 					totallength=totallength+strlen(countcle->name())+strlen(guild_mgr.GetGuildName(countcle->GuildID()))+5;
@@ -1294,12 +1296,13 @@ void ClientList::GetClients(const char *zone_name, std::vector<ClientListEntry *
 
 void ClientList::SendClientVersionSummary(const char *Name)
 {
-	uint32 Client62Count = 0;
 	uint32 ClientTitaniumCount = 0;
 	uint32 ClientSoFCount = 0;
 	uint32 ClientSoDCount = 0;
 	uint32 ClientUnderfootCount = 0;
 	uint32 ClientRoFCount = 0;
+	uint32 ClientRoF2Count = 0;
+
 
 	LinkedListIterator<ClientListEntry*> Iterator(clientlist);
 
@@ -1315,7 +1318,6 @@ void ClientList::SendClientVersionSummary(const char *Name)
 			{
 				case 1:
 				{
-					++Client62Count;
 					break;
 				}
 				case 2:
@@ -1343,6 +1345,11 @@ void ClientList::SendClientVersionSummary(const char *Name)
 					++ClientRoFCount;
 					break;
 				}
+				case 7:
+				{
+					++ClientRoF2Count;
+					break;
+				}
 				default:
 					break;
 			}
@@ -1352,7 +1359,7 @@ void ClientList::SendClientVersionSummary(const char *Name)
 
 	}
 
-	zoneserver_list.SendEmoteMessage(Name, 0, 0, 13, "There are %i 6.2, %i Titanium, %i SoF, %i SoD, %i UF, %i RoF clients currently connected.",
-					Client62Count, ClientTitaniumCount, ClientSoFCount, ClientSoDCount, ClientUnderfootCount, ClientRoFCount);
+	zoneserver_list.SendEmoteMessage(Name, 0, 0, 13, "There are %i Titanium, %i SoF, %i SoD, %i UF, %i RoF, %i RoF2 clients currently connected.",
+		ClientTitaniumCount, ClientSoFCount, ClientSoDCount, ClientUnderfootCount, ClientRoFCount, ClientRoF2Count); 
 }
 

@@ -17,19 +17,17 @@
 */
 
 #include "../common/debug.h"
-#include <iostream>
-#include <stdlib.h>
-
-#include "masterentity.h"
-#include "zonedb.h"
-#include "../common/packet_functions.h"
-#include "../common/packet_dump.h"
-#include "../common/misc_functions.h"
 #include "../common/string_util.h"
-#include "../common/features.h"
-#include "string_ids.h"
+
+#include "client.h"
+#include "entity.h"
+#include "mob.h"
+#include "object.h"
 
 #include "quest_parser_collection.h"
+#include "zonedb.h"
+
+#include <iostream>
 
 const char DEFAULT_OBJECT_NAME[] = "IT63_ACTORDEF";
 const char DEFAULT_OBJECT_NAME_SUFFIX[] = "_ACTORDEF";

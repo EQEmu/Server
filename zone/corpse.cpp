@@ -20,12 +20,7 @@ New class for handeling corpses and everything associated with them.
 Child of the Mob class.
 -Quagmire
 */
-#include "../common/debug.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <iostream>
-#include <sstream>
+
 #ifdef _WINDOWS
     #define snprintf	_snprintf
 	#define vsnprintf	_vsnprintf
@@ -33,14 +28,26 @@ Child of the Mob class.
     #define strcasecmp	_stricmp
 #endif
 
-#include "masterentity.h"
-#include "../common/packet_functions.h"
+#include "../common/debug.h"
+#include "../common/rulesys.h"
 #include "../common/string_util.h"
-#include "../common/crc32.h"
+
+#include "client.h"
+#include "corpse.h"
+#include "entity.h"
+#include "groups.h"
+#include "mob.h"
+#include "raids.h"
+
+#ifdef BOTS
+#include "bot.h"
+#endif
+
+#include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "worldserver.h"
-#include "../common/rulesys.h"
-#include "quest_parser_collection.h"
+#include <iostream>
+
 
 extern EntityList entity_list;
 extern Zone* zone;
@@ -63,8 +70,7 @@ void Corpse::SendLootReqErrorPacket(Client* client, uint8 response) {
 	safe_delete(outapp);
 }
 
-Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std::string in_charname, const xyz_heading& position, std::string time_of_death, bool rezzed, bool was_at_graveyard)
-{
+Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std::string in_charname, const xyz_heading& position, std::string time_of_death, bool rezzed, bool was_at_graveyard) {
 	uint32 item_count = database.GetCharacterCorpseItemCount(in_dbid);
 	char *buffer = new char[sizeof(PlayerCorpse_Struct) + (item_count * sizeof(player_lootitem::ServerLootItem_Struct))];
 	PlayerCorpse_Struct *pcs = (PlayerCorpse_Struct*)buffer;
@@ -101,11 +107,11 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 		pcs->exp,			   // uint32 in_rezexp
 		was_at_graveyard	   // bool wasAtGraveyard
 	);
+
 	if (pcs->locked)
 		pc->Lock();
 
 	/* Load Item Tints */
-	// memcpy(pc->item_tint, pcs->item_tint, sizeof(pc->item_tint));
 	pc->item_tint[0].color = pcs->item_tint[0].color;
 	pc->item_tint[1].color = pcs->item_tint[1].color;
 	pc->item_tint[2].color = pcs->item_tint[2].color;
@@ -115,7 +121,6 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 	pc->item_tint[6].color = pcs->item_tint[6].color;
 	pc->item_tint[7].color = pcs->item_tint[7].color;
 	pc->item_tint[8].color = pcs->item_tint[8].color;
-
 
 	/* Load Physical Appearance */
 	pc->haircolor = pcs->haircolor;
@@ -136,8 +141,6 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 	return pc;
 }
 
-// To be used on NPC death and ZoneStateLoad
-// Mongrel: added see_invis and see_invis_undead
 Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NPCType** in_npctypedata, uint32 in_decaytime)
 // vesuvias - appearence fix
 : Mob("Unnamed_Corpse","",0,0,in_npc->GetGender(),in_npc->GetRace(),in_npc->GetClass(),BT_Humanoid,//bodytype added
@@ -173,7 +176,7 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 	player_corpse_depop = false;
 	strcpy(corpse_name, in_npc->GetName());
 	strcpy(name, in_npc->GetName());
-	// Added By Hogie
+
 	for(int count = 0; count < 100; count++) {
 		if ((level >= npcCorpseDecayTimes[count].minlvl) && (level <= npcCorpseDecayTimes[count].maxlvl)) {
 			corpse_decay_timer.SetTimer(npcCorpseDecayTimes[count].seconds*1000);
@@ -189,7 +192,6 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 		corpse_delay_timer.SetTimer(corpse_decay_timer.GetRemainingTime() + 1000);
 	}
 
-	// Added By Hogie -- End
 	for (int i = 0; i < MAX_LOOTERS; i++){
 		allowed_looters[i] = 0;
 	}
@@ -392,7 +394,6 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	Save();
 }
 
-// solar: helper function for client corpse constructor
 std::list<uint32> Corpse::MoveItemToCorpse(Client *client, ItemInst *item, int16 equipslot)
 {
 	int bagindex;
@@ -400,7 +401,7 @@ std::list<uint32> Corpse::MoveItemToCorpse(Client *client, ItemInst *item, int16
 	ItemInst *interior_item;
 	std::list<uint32> returnlist;
 
-	AddItem(item->GetItem()->ID, item->GetCharges(), equipslot, item->GetAugmentItemID(0), item->GetAugmentItemID(1), item->GetAugmentItemID(2), item->GetAugmentItemID(3), item->GetAugmentItemID(4));
+	AddItem(item->GetItem()->ID, item->GetCharges(), equipslot, item->GetAugmentItemID(0), item->GetAugmentItemID(1), item->GetAugmentItemID(2), item->GetAugmentItemID(3), item->GetAugmentItemID(4), item->GetAugmentItemID(5), item->IsAttuned());
 	returnlist.push_back(equipslot);
 
 	// Qualified bag slot iterations. processing bag slots that don't exist is probably not a good idea.
@@ -411,7 +412,7 @@ std::list<uint32> Corpse::MoveItemToCorpse(Client *client, ItemInst *item, int16
 			interior_item = client->GetInv().GetItem(interior_slot);
 
 			if (interior_item) {
-				AddItem(interior_item->GetItem()->ID, interior_item->GetCharges(), interior_slot, interior_item->GetAugmentItemID(0), interior_item->GetAugmentItemID(1), interior_item->GetAugmentItemID(2), interior_item->GetAugmentItemID(3), interior_item->GetAugmentItemID(4));
+				AddItem(interior_item->GetItem()->ID, interior_item->GetCharges(), interior_slot, interior_item->GetAugmentItemID(0), interior_item->GetAugmentItemID(1), interior_item->GetAugmentItemID(2), interior_item->GetAugmentItemID(3), interior_item->GetAugmentItemID(4), interior_item->GetAugmentItemID(5), item->IsAttuned());
 				returnlist.push_back(Inventory::CalcSlotId(equipslot, bagindex));
 				client->DeleteItemInInventory(interior_slot, 0, true, false);
 			}
@@ -422,7 +423,6 @@ std::list<uint32> Corpse::MoveItemToCorpse(Client *client, ItemInst *item, int16
 }
 
 // To be called from LoadFromDBData
-// Mongrel: added see_invis and see_invis_undead
 Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, ItemList* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, const xyz_heading& position, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture,uint32 in_rezexp, bool wasAtGraveyard)
 : Mob("Unnamed_Corpse",
 "",
@@ -615,7 +615,6 @@ void Corpse::Bury() {
 	if (IsPlayerCorpse() && corpse_db_id != 0)
 		database.BuryCharacterCorpse(corpse_db_id);
 	corpse_db_id = 0;
-
 	player_corpse_depop = true;
 }
 
@@ -632,7 +631,7 @@ uint32 Corpse::CountItems() {
 	return itemlist.size();
 }
 
-void Corpse::AddItem(uint32 itemnum, uint16 charges, int16 slot, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5) {
+void Corpse::AddItem(uint32 itemnum, uint16 charges, int16 slot, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, uint8 attuned) {
 	if (!database.GetItem(itemnum))
 		return;
 
@@ -649,13 +648,14 @@ void Corpse::AddItem(uint32 itemnum, uint16 charges, int16 slot, uint32 aug1, ui
 	item->aug_3=aug3;
 	item->aug_4=aug4;
 	item->aug_5=aug5;
+	item->aug_6=aug6;
+	item->attuned=attuned;
 	itemlist.push_back(item);
 }
 
 ServerLootItem_Struct* Corpse::GetItem(uint16 lootslot, ServerLootItem_Struct** bag_item_data) {
 	ServerLootItem_Struct *sitem = 0, *sitem2;
 
-	// find the item
 	ItemList::iterator cur,end;
 	cur = itemlist.begin();
 	end = itemlist.end();
@@ -768,8 +768,8 @@ bool Corpse::Process() {
 		return true;
 	}
 
-	if(corpse_graveyard_timer.Check()) {
-		if(zone->HasGraveyard()) {
+	if (corpse_graveyard_timer.Check()) {
+		if (zone->HasGraveyard()) {
 			Save();
 			player_corpse_depop = true;
 			database.SendCharacterCorpseToGraveyard(corpse_db_id, zone->graveyard_zoneid(),
@@ -855,7 +855,6 @@ void Corpse::AllowPlayerLoot(Mob *them, uint8 slot) {
 	allowed_looters[slot] = them->CastToClient()->CharacterID();
 }
 
-// @merth: this function needs some work
 void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* app) {
 	// Added 12/08. Started compressing loot struct on live.
 	char tmp[10];
@@ -986,7 +985,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 				if(i < corpselootlimit) {
 					item = database.GetItem(item_data->item_id);
 					if(client && item) {
-						ItemInst* inst = database.CreateItem(item, item_data->charges, item_data->aug_1, item_data->aug_2, item_data->aug_3, item_data->aug_4, item_data->aug_5);
+						ItemInst* inst = database.CreateItem(item, item_data->charges, item_data->aug_1, item_data->aug_2, item_data->aug_3, item_data->aug_4, item_data->aug_5, item_data->aug_6, item_data->attuned);
 						if(inst) {
 							// MainGeneral1 is the corpse inventory start offset for Ti(EMu) - CORPSE_END = MainGeneral1 + MainCursor
 							client->SendItemPacket(i + EmuConstants::CORPSE_BEGIN, inst, ItemPacketLoot);
@@ -1100,8 +1099,8 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 	}
 
 	if (item != 0) {
-		if (item_data){
-			inst = database.CreateItem(item, item_data ? item_data->charges : 0, item_data->aug_1, item_data->aug_2, item_data->aug_3, item_data->aug_4, item_data->aug_5);
+		if (item_data){ 
+			inst = database.CreateItem(item, item_data ? item_data->charges : 0, item_data->aug_1, item_data->aug_2, item_data->aug_3, item_data->aug_4, item_data->aug_5, item_data->aug_6, item_data->attuned);
 		}
 		else {
 			inst = database.CreateItem(item);
@@ -1373,7 +1372,7 @@ void Corpse::Spawn() {
 }
 
 uint32 Corpse::GetEquipment(uint8 material_slot) const {
-	int invslot;
+	int16 invslot;
 
 	if(material_slot > EmuConstants::MATERIAL_END) {
 		return NO_ITEM;
@@ -1429,5 +1428,4 @@ void Corpse::LoadPlayerCorpseDecayTime(uint32 corpse_db_id){
 	else {
 		corpse_graveyard_timer.SetTimer(3000);
 	}
-
 }

@@ -15,18 +15,22 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "../common/debug.h"
-#include <stdlib.h>
-#include <math.h>
-#include "masterentity.h"
 #include "../common/faction.h"
-#include "map.h"
-#include "../common/spdat.h"
-#include "../common/skills.h"
-#include "../common/misc_functions.h"
 #include "../common/rulesys.h"
-#include "string_ids.h"
-#include <iostream>
+#include "../common/spdat.h"
+
+#include "client.h"
+#include "corpse.h"
+#include "entity.h"
+#include "mob.h"
+
+#ifdef BOTS
+#include "bot.h"
+#endif
+
+#include "map.h"
 
 extern Zone* zone;
 //#define LOSDEBUG 6
@@ -1124,8 +1128,7 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, bool isproc)
 
 		int HateMod = RuleI(Aggro, SpellAggroMod);
 
-		if (IsClient())
-			HateMod += CastToClient()->GetFocusEffect(focusSpellHateMod, spell_id);
+		HateMod += GetFocusEffect(focusSpellHateMod, spell_id);
 
 		AggroAmount = (AggroAmount * HateMod) / 100;
 
@@ -1174,8 +1177,7 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, uint32 heal_possible)
 	if (AggroAmount > 0) {
 		int HateMod = RuleI(Aggro, SpellAggroMod);
 
-		if (IsClient())
-			HateMod += CastToClient()->GetFocusEffect(focusSpellHateMod, spell_id);
+		HateMod += GetFocusEffect(focusSpellHateMod, spell_id);
 
 		//Live AA - Spell casting subtlety
 		HateMod += aabonuses.hatemod + spellbonuses.hatemod + itembonuses.hatemod;

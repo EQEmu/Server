@@ -1,5 +1,49 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/21/2014 ==
+Trevius: (RoF2) Fixed Extended Targets Window by correcting opcodes.
+
+== 12/20/2014 ==
+Akkadius: Updated #cvs to display RoF2 Client Stream count
+
+== 12/19/2014 ==
+Trevius: (RoF2) Fixed Leadership AA Purchasing and Recipe Search by correcting opcodes.
+Trevius: Fixed Armor Tinting (players and NPCs) that was broken during a previous update.
+Trevius: (RoF2) Fixed Rest Timer, Show Helm Option, Auto-Consent Options, and identified Krono in the PP.
+Trevius: Fixed Selling for Alternate Currency Merchants for RoF and RoF2.
+
+== 12/18/2014 ==
+Trevius: Finished lining up the RoF2 Player Profile Struct.  Zone times are now normal, and everything from the PP is accurate in game now.
+Trevius: Fixed zoning after death for RoF2.
+
+== 12/17/2014 ==
+demonstar55: Use vectors for route stuff, should be more CPU cache friendly so faster
+Secrets: EQStream changes as recommended by a community member in private.
+
+== 12/15/2014 ==
+Trevius: (RoF+) Implemented the 6th Augment Slot for Items.
+Trevius: Player Corpses now saved attuned settings for Items.
+
+Required SQL: utils/sql/git/required/2014_12_15_multiple_table_updates.sql
+
+== 12/13/2014 ==
+demonstar55: Fix guild rank spam on zone (needed to be in OP_PP).
+Trevius: (RoF+) Implemented Armor Ornamentation using Hero's Forge Armor Models.  To use, create an ornamentation augment and set the herosforgemodel field in the items table.
+Trevius: (RoF+) Added command #heromodel (#hm for short) - Usage: #heromodel [hero forge model] [ [slot] ] (example: #heromodel 63)
+
+Be sure to run this or there will be item loss:
+Required SQL: utils/sql/git/required/2014_12_13_inventory_table_update.sql
+
+== 12/12/2014 ==
+demonstar55: Add special attack 42, Ignore Root Aggro Rules. This allows you to root a mob and have them still use the normal aggro rules (so they will attack the one with most hate, not closest)
+
+== 12/09/2014 ==
+Trevius: (RoF+) Implemented Hero's Forge Armor Models for Items.  To use, set herosforgemodel field in the item table to a model number such as 63 (for example).
+demonstar55: SoF+ swarm pets will no longer be F8able (without a hack!)
+
+== 12/08/2014 ==
+Secrets: Added a feature that allows an EQ client to log in directly to World without having to enter the LoginServer, provided the 'password' field is set in WorldServer.
+
 == 12/04/2014 ==
 Kayen: Ranged attacks will now more accurately check MAX firing range, fixing the issue where you would
 hit ranged attack and nothing would happpen due to incorrect server side range checks.

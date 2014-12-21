@@ -4173,7 +4173,7 @@ void Bot::SetBotItemInSlot(uint32 slotID, uint32 itemID, const ItemInst* inst, s
                                     "augslot1, augslot2, augslot3, augslot4, augslot5) "
                                     "VALUES(%lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu)",
                                     (unsigned long)this->GetBotID(), (unsigned long)slotID, (unsigned long)itemID,
-                                    (unsigned long)inst->GetCharges(), (unsigned long)(inst->IsInstNoDrop()? 1: 0),
+                                    (unsigned long)inst->GetCharges(), (unsigned long)(inst->IsAttuned()? 1: 0),
                                     (unsigned long)inst->GetColor(), (unsigned long)augslot[0], (unsigned long)augslot[1],
                                     (unsigned long)augslot[2], (unsigned long)augslot[3], (unsigned long)augslot[4]);
     auto results = database.QueryDatabase(query);
@@ -4235,7 +4235,7 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
         int16 put_slot_id = INVALID_INDEX;
 
         if (instnodrop || ((slot_id >= EmuConstants::EQUIPMENT_BEGIN) && (slot_id <= EmuConstants::EQUIPMENT_END) && inst->GetItem()->Attuneable))
-            inst->SetInstNoDrop(true);
+            inst->SetAttuned(true);
 
         if (color > 0)
             inst->SetColor(color);
@@ -4361,7 +4361,8 @@ void Bot::SetLevel(uint8 in_level, bool command) {
 }
 
 void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
-	if(ns) {
+	if(ns)
+	{
 		Mob::FillSpawnStruct(ns, ForWho);
 
 		ns->spawn.afk = 0;
@@ -4389,98 +4390,62 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		uint32 spawnedbotid = 0;
 		spawnedbotid = this->GetBotID();
 
-		inst = GetBotItem(MainHands);
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				ns->spawn.equipment[MaterialHands]	= item->Material;
-				ns->spawn.colors[MaterialHands].color = GetEquipmentColor(MaterialHands);
-			}
-		}
+		for (int i = 0; i < MaterialPrimary; i++)
+		{
+			inst = GetBotItem(i);
+			if (inst)
+			{
+				item = inst->GetItem();
+				if (item != 0)
+				{
+					ns->spawn.equipment[i].material = item->Material;
+					ns->spawn.equipment[i].elitematerial = item->EliteMaterial;
+					ns->spawn.equipment[i].heroforgemodel = item->HerosForgeModel;
+					if (armor_tint[i])
+					{
+						ns->spawn.colors[i].color = armor_tint[i];
 
-		inst = GetBotItem(MainHead);
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				ns->spawn.equipment[MaterialHead] = item->Material;
-				ns->spawn.colors[MaterialHead].color = GetEquipmentColor(MaterialHead);
-			}
-		}
-
-		inst = GetBotItem(MainArms);
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				ns->spawn.equipment[MaterialArms] = item->Material;
-				ns->spawn.colors[MaterialArms].color = GetEquipmentColor(MaterialArms);
-			}
-		}
-
-		inst = GetBotItem(MainWrist1);
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				ns->spawn.equipment[MaterialWrist] = item->Material;
-				ns->spawn.colors[MaterialWrist].color	= GetEquipmentColor(MaterialWrist);
-			}
-		}
-
-		/*
-		// non-live behavior
-		inst = GetBotItem(MainWrist2);
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				ns->spawn.equipment[MaterialWrist] = item->Material;
-				ns->spawn.colors[MaterialWrist].color	= GetEquipmentColor(MaterialWrist);
-			}
-		}
-		*/
-
-		inst = GetBotItem(MainChest);
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				ns->spawn.equipment[MaterialChest]	= item->Material;
-				ns->spawn.colors[MaterialChest].color = GetEquipmentColor(MaterialChest);
-			}
-		}
-
-		inst = GetBotItem(MainLegs);
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				ns->spawn.equipment[MaterialLegs] = item->Material;
-				ns->spawn.colors[MaterialLegs].color = GetEquipmentColor(MaterialLegs);
-			}
-		}
-
-		inst = GetBotItem(MainFeet);
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				ns->spawn.equipment[MaterialFeet] = item->Material;
-				ns->spawn.colors[MaterialFeet].color = GetEquipmentColor(MaterialFeet);
+					}
+					else
+					{
+						ns->spawn.colors[i].color = item->Color;
+					}
+				}
+				else
+				{
+					if (armor_tint[i])
+					{
+						ns->spawn.colors[i].color = armor_tint[i];
+					}
+				}
 			}
 		}
 
 		inst = GetBotItem(MainPrimary);
-		if(inst) {
+		if(inst)
+		{
 			item = inst->GetItem();
-			if(item) {
+			if(item)
+			{
 				if(strlen(item->IDFile) > 2)
-					ns->spawn.equipment[MaterialPrimary] = atoi(&item->IDFile[2]);
-					ns->spawn.colors[MaterialPrimary].color = GetEquipmentColor(MaterialPrimary);
+				{
+					ns->spawn.equipment[MaterialPrimary].material = atoi(&item->IDFile[2]);
+				}
+				ns->spawn.colors[MaterialPrimary].color = GetEquipmentColor(MaterialPrimary);
 			}
 		}
 
 		inst = GetBotItem(MainSecondary);
-		if(inst) {
+		if(inst)
+		{
 			item = inst->GetItem();
-			if(item) {
+			if(item)
+			{
 				if(strlen(item->IDFile) > 2)
-					ns->spawn.equipment[MaterialSecondary] = atoi(&item->IDFile[2]);
-					ns->spawn.colors[MaterialSecondary].color = GetEquipmentColor(MaterialSecondary);
+				{
+					ns->spawn.equipment[MaterialSecondary].material = atoi(&item->IDFile[2]);
+				}
+				ns->spawn.colors[MaterialSecondary].color = GetEquipmentColor(MaterialSecondary);
 			}
 		}
 	}
@@ -11311,7 +11276,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			if(!results.Success())
                 return;
 
-			int slotmaterial = Inventory::CalcMaterialFromSlot(setslot);
+			uint8 slotmaterial = Inventory::CalcMaterialFromSlot(setslot);
             c->GetTarget()->CastToBot()->SendWearChange(slotmaterial);
 		}
 		else {
@@ -16062,11 +16027,13 @@ uint8 Bot::GetNumberNeedingHealedInGroup(uint8 hpr, bool includePets) {
 uint32 Bot::GetEquipmentColor(uint8 material_slot) const
 {
 	//Bot tints
-	uint32 slotid = 0;
+	int16 slotid = 0;
 	uint32 botid = this->GetBotID();
 
 	//Translate code slot # to DB slot #
 	slotid = Inventory::CalcSlotFromMaterial(material_slot);
+	if (slotid == INVALID_INDEX)
+		return 0;
 
 	//read from db
 	std::string query = StringFormat("SELECT color FROM botinventory "

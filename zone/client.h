@@ -17,7 +17,17 @@
 */
 #ifndef CLIENT_H
 #define CLIENT_H
+
 class Client;
+class EQApplicationPacket;
+class EQStream;
+class Group;
+class NPC;
+class Object;
+class Raid;
+class Seperator;
+class ServerPacket;
+struct Item_Struct;
 
 #include "../common/timer.h"
 #include "../common/ptimer.h"
@@ -28,25 +38,21 @@ class Client;
 #include "../common/eq_packet.h"
 #include "../common/linked_list.h"
 #include "../common/extprofile.h"
-#include "../common/classes.h"
 #include "../common/races.h"
-#include "../common/deity.h"
 #include "../common/seperator.h"
 #include "../common/item.h"
 #include "../common/guilds.h"
 #include "../common/item_struct.h"
 #include "../common/clientversions.h"
 
-#include "common.h"
-#include "zonedb.h"
-#include "errno.h"
-#include "mob.h"
-#include "npc.h"
-#include "merc.h"
-#include "zone.h"
 #include "aa.h"
-#include "questmgr.h"
+#include "common.h"
+#include "merc.h"
+#include "mob.h"
 #include "qglobals.h"
+#include "questmgr.h"
+#include "zone.h"
+#include "zonedb.h"
 
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)
@@ -57,7 +63,6 @@ class Client;
 
 #include <float.h>
 #include <set>
-#include <string>
 #include <algorithm>
 
 
@@ -485,14 +490,8 @@ public:
 
 	inline virtual int32 GetDelayDeath() const { return aabonuses.DelayDeath + spellbonuses.DelayDeath + itembonuses.DelayDeath + 11; }
 
-	float GetActSpellRange(uint16 spell_id, float range, bool IsBard = false);
-	int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target = nullptr);
-	int32 GetActSpellHealing(uint16 spell_id, int32 value, Mob* target = nullptr);
 	int32 GetActSpellCost(uint16 spell_id, int32);
-	int32 GetActSpellDuration(uint16 spell_id, int32);
 	int32 GetActSpellCasttime(uint16 spell_id, int32);
-	int32 GetDotFocus(uint16 spell_id, int32 value);
-	int32 GetActDoTDamage(uint16 spell_id, int32 value, Mob* target = nullptr);
 	virtual bool CheckFizzle(uint16 spell_id);
 	virtual bool CheckSpellLevelRestriction(uint16 spell_id);
 	virtual int GetCurrentBuffSlots() const;
@@ -811,7 +810,7 @@ public:
 	void QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call = false);
 	void PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootItem_Struct** bag_item_data = 0);
 	bool AutoPutLootInInventory(ItemInst& inst, bool try_worn = false, bool try_cursor = true, ServerLootItem_Struct** bag_item_data = 0);
-	bool SummonItem(uint32 item_id, int16 charges = -1, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, bool attuned = false, uint16 to_slot = MainCursor, uint32 ornament_icon = 0, uint32 ornament_idfile = 0);
+	bool SummonItem(uint32 item_id, int16 charges = -1, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, bool attuned = false, uint16 to_slot = MainCursor, uint32 ornament_icon = 0, uint32 ornament_idfile = 0, uint32 ornament_hero_model = 0);
 	void SetStats(uint8 type,int16 set_val);
 	void IncStats(uint8 type,int16 increase_val);
 	void DropItem(int16 slot_id);

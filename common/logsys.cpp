@@ -16,13 +16,14 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "logsys.h"
 #include "debug.h"
+#include "eq_packet.h"
+#include "logsys.h"
+#include "misc.h"
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-#include "misc.h"
-#include "eq_packet.h"
 
 
 #define LOG_CATEGORY(category) #category ,

@@ -15,17 +15,15 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "../common/debug.h"
-#include "spawngroup.h"
-#include "entity.h"
-#include <string.h>
-#include <stdlib.h>
-#include <iostream>
-#include "../common/types.h"
-#include "zonedb.h"
-#include "../common/misc_functions.h"
 #include "../common/string_util.h"
+#include "../common/types.h"
+
+#include "entity.h"
+#include "spawngroup.h"
 #include "zone.h"
+#include "zonedb.h"
 
 extern EntityList entity_list;
 extern Zone* zone;

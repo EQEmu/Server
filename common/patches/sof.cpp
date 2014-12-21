@@ -1087,9 +1087,9 @@ namespace SoF
 		OUT(beard);
 		//	OUT(unknown00178[10]);
 		for (r = 0; r < 9; r++) {
-			eq->equipment[r].equip0 = emu->item_material[r];
-			eq->equipment[r].equip1 = 0;
-			eq->equipment[r].itemId = 0;
+			eq->equipment[r].material = emu->item_material[r];
+			eq->equipment[r].unknown1 = 0;
+			eq->equipment[r].elitematerial = 0;
 			//eq->colors[r].color = emu->colors[r].color;
 		}
 		for (r = 0; r < 7; r++) {
@@ -1484,10 +1484,10 @@ namespace SoF
 				eq2->face = emu->face[r];
 				int k;
 				for (k = 0; k < _MaterialCount; k++) {
-					eq2->equip[k].equip0 = emu->equip[r][k];
-					eq2->equip[k].equip1 = 0;
-					eq2->equip[k].itemid = 0;
-					eq2->equip[k].color.color = emu->cs_colors[r][k].color;
+					eq2->equip[k].material = emu->equip[r][k].material;
+					eq2->equip[k].unknown1 = emu->equip[r][k].unknown1;
+					eq2->equip[k].elitematerial = emu->equip[r][k].elitematerial;
+					eq2->equip[k].color.color = emu->equip[r][k].color.color;
 				}
 				eq2->primary = emu->primary[r];
 				eq2->secondary = emu->secondary[r];
@@ -1840,9 +1840,9 @@ namespace SoF
 			eq->drakkin_heritage = emu->drakkin_heritage;
 			eq->gender = emu->gender;
 			for (k = 0; k < 9; k++) {
-				eq->equipment[k].equip0 = emu->equipment[k];
-				eq->equipment[k].equip1 = 0;
-				eq->equipment[k].itemId = 0;
+				eq->equipment[k].material = emu->equipment[k].material;
+				eq->equipment[k].unknown1 = emu->equipment[k].unknown1;
+				eq->equipment[k].elitematerial = emu->equipment[k].elitematerial;
 				eq->colors[k].color = emu->colors[k].color;
 			}
 			eq->StandState = emu->StandState;
@@ -1889,7 +1889,7 @@ namespace SoF
 			eq->beard = emu->beard;
 			eq->targetable = 1; //New Field - Toggle Targetable on or off - 0 = off, 1 = on
 			eq->NPC = emu->NPC;
-			eq->targetable_with_hotkey = 1;//New Field - Toggle Targetable on or off - 0 = off, 1 = on
+			eq->targetable_with_hotkey = emu->targetable_with_hotkey ? 1 : 0; //New Field - Toggle Targetable on or off - 0 = off, 1 = on
 			eq->x = emu->x;
 			eq->deltaX = emu->deltaX;
 			eq->deltaY = emu->deltaY;
@@ -2547,7 +2547,7 @@ namespace SoF
 		hdr.unknown028 = 0;
 		hdr.last_cast_time = ((item->RecastDelay > 1) ? 1212693140 : 0);
 		hdr.charges = (stackable ? (item->MaxCharges ? 1 : 0) : charges);
-		hdr.inst_nodrop = inst->IsInstNoDrop() ? 1 : 0;
+		hdr.inst_nodrop = inst->IsAttuned() ? 1 : 0;
 		hdr.unknown044 = 0;
 		hdr.unknown048 = 0;
 		hdr.unknown052 = 0;
@@ -2693,7 +2693,7 @@ namespace SoF
 		isbs.augtype = item->AugType;
 		isbs.augrestrict = item->AugRestrict;
 
-		for (int x = 0; x < 5; ++x)
+		for (int x = 0; x < consts::ITEM_COMMON_SIZE; x++)
 		{
 			isbs.augslots[x].type = item->AugSlotType[x];
 			isbs.augslots[x].visible = item->AugSlotVisible[x];
