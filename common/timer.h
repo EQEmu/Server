@@ -43,7 +43,7 @@ public:
 	inline const uint32& GetTimerTime()		{ return timer_time; }
 	inline const uint32& GetSetAtTrigger()	{ return set_at_trigger; }
 	void Trigger();
-	void SetAtTrigger(uint32 set_at_trigger, bool iEnableIfDisabled = false);
+	void SetAtTrigger(uint32 set_at_trigger, bool iEnableIfDisabled = false, bool ChangeTimerTime = false);
 
 	inline bool Enabled() { return enabled; }
 	inline uint32 GetStartTime() { return(start_time); }

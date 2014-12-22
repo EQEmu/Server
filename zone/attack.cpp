@@ -4932,7 +4932,7 @@ void Client::SetAttackTimer()
 		// this is probably wrong
 		if (quiver_haste > 0)
 			speed *= quiver_haste;
-		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true);
+		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true, true);
 
 		if (i == MainPrimary)
 			PrimaryWeapon = ItemToUse;
@@ -4980,6 +4980,6 @@ void NPC::SetAttackTimer()
 			}
 		}
 
-		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true);
+		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true, true);
 	}
 }
