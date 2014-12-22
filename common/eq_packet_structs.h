@@ -3015,14 +3015,14 @@ struct ClientError_Struct
 };
 
 struct Track_Struct {
-	uint16 entityid;
-	uint16 padding002;
+	uint32 entityid;
 	float distance;
 	// Fields for SoD and later
 	uint8 level;
-	uint8 NPC;
-	uint8 GroupMember;
+	uint8 is_npc;
 	char name[64];
+	uint8 is_pet;
+	uint8 is_merc;
 };
 
 struct Tracking_Struct {

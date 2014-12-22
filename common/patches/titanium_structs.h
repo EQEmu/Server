@@ -2319,8 +2319,8 @@ struct MobHealth
 };
 
 struct Track_Struct {
-	uint16 entityid;
-	uint16 padding002;
+	uint32 entityid;
+	//uint16 padding002;
 	float distance;
 };
 

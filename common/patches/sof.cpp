@@ -1645,7 +1645,7 @@ namespace SoF
 		for (int i = 0; i < EntryCount; ++i, ++eq, ++emu)
 		{
 			OUT(entityid);
-			OUT(padding002);
+			//OUT(padding002);
 			OUT(distance);
 		}
 

@@ -2957,8 +2957,6 @@ bool EntityList::MakeTrackPacket(Client *client)
 	if (distance < 300)
 		distance = 300;
 
-	Group *g = client->GetGroup();
-
 	for (auto it = mob_list.cbegin(); it != mob_list.cend(); ++it) {
 		if (!it->second || it->second == client || !it->second->IsTrackable() ||
 				it->second->IsInvisible(client))
@@ -2979,15 +2977,13 @@ bool EntityList::MakeTrackPacket(Client *client)
 	int index = 0;
 	for (auto it = tracking_list.cbegin(); it != tracking_list.cend(); ++it, ++index) {
 		Mob *cur_entity = it->first;
-		outtrack->Entrys[index].entityid = cur_entity->GetID();
+		outtrack->Entrys[index].entityid = (uint32)cur_entity->GetID();
 		outtrack->Entrys[index].distance = it->second;
 		outtrack->Entrys[index].level = cur_entity->GetLevel();
-		outtrack->Entrys[index].NPC = !cur_entity->IsClient();
-		if (g && cur_entity->IsClient() && g->IsGroupMember(cur_entity->CastToMob()))
-			outtrack->Entrys[index].GroupMember = 1;
-		else
-			outtrack->Entrys[index].GroupMember = 0;
+		outtrack->Entrys[index].is_npc = !cur_entity->IsClient();
 		strn0cpy(outtrack->Entrys[index].name, cur_entity->GetName(), sizeof(outtrack->Entrys[index].name));
+		outtrack->Entrys[index].is_pet = cur_entity->IsPet();
+		outtrack->Entrys[index].is_merc = cur_entity->IsMerc();
 	}
 
 	client->QueuePacket(outapp);

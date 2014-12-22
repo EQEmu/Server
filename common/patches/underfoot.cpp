@@ -2348,9 +2348,9 @@ namespace Underfoot
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->entityid);
 			VARSTRUCT_ENCODE_TYPE(float, Buffer, emu->distance);
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->level);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->NPC);
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->is_npc);
 			VARSTRUCT_ENCODE_STRING(Buffer, emu->name);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->GroupMember);
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->is_merc);
 		}
 
 		delete[] __emu_buffer;
