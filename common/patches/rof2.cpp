@@ -2316,7 +2316,7 @@ namespace RoF2
 		outapp->WriteUInt8(emu->gm);
 		outapp->WriteUInt32(emu->guild_id);
 		
-		outapp->WriteUInt8(0);			// Unknown
+		outapp->WriteUInt8(emu->guildrank);	// guildrank
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt8(0);			// Unknown
 		outapp->WriteUInt32(0);				// Unknown

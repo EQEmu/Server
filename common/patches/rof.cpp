@@ -2315,7 +2315,7 @@ namespace RoF
 		outapp->WriteUInt8(emu->gm);
 
 		outapp->WriteUInt32(emu->guild_id);
-		outapp->WriteUInt8(0);				// Unknown - observed 1 in a live packet.
+		outapp->WriteUInt8(emu->guildrank);	// guildrank
 		outapp->WriteUInt32(0);				// Unknown - observed 1 in a live packet.
 		outapp->WriteUInt8(0);				// Unknown - observed 1 in a live packet.
 		outapp->WriteUInt32(0);				// Unknown

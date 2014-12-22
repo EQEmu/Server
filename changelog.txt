@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 12/21/2014 ==
 Trevius: (RoF2) Fixed Extended Targets Window by correcting opcodes.
+Trevius: (RoF/RoF2) Fixed Guild Rank in the Player Profile, which prevents the guild rank message on login/zone.
 
 == 12/20/2014 ==
 Akkadius: Updated #cvs to display RoF2 Client Stream count
