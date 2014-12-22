@@ -2232,7 +2232,10 @@ void Zone::LoadNPCEmotes(LinkedList<NPC_Emote_Struct*>* NPCEmoteList)
 }
 
 void Zone::ReloadWorld(uint32 Option){
-	if(Option == 1){
+	if (Option == 0) {
+		entity_list.ClearAreas();
+		parse->ReloadQuests();
+	} else if(Option == 1) {
 		zone->Repop(0);
 		entity_list.ClearAreas();
 		parse->ReloadQuests();
