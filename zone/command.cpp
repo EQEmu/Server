@@ -247,7 +247,7 @@ int command_init(void) {
 		command_add("reloadstatic","- Reload Static Zone Data",150,command_reloadstatic) ||
 		command_add("reloadquest"," - Clear quest cache (any argument causes it to also stop all timers)",150,command_reloadqst) ||
 		command_add("reloadqst"," - Clear quest cache (any argument causes it to also stop all timers)",150,command_reloadqst) ||
-		command_add("reloadworld",nullptr,255,command_reloadworld) ||
+		command_add("reloadworld","[0|1] - Clear quest cache (0 - no repop, 1 - repop)",255,command_reloadworld) ||
 		command_add("reloadlevelmods",nullptr,255,command_reloadlevelmods) ||
 		command_add("reloadzonepoints","- Reload zone points from database",150,command_reloadzps) ||
 		command_add("reloadzps",nullptr,0,command_reloadzps) ||
@@ -3096,15 +3096,12 @@ void command_reloadqst(Client *c, const Seperator *sep)
 
 void command_reloadworld(Client *c, const Seperator *sep)
 {
-	if (sep->arg[1][0] == 0)
-	{
-		c->Message(0, "Reloading quest cache and repopping zones worldwide.");
-		ServerPacket* pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));
-		ReloadWorld_Struct* RW = (ReloadWorld_Struct*) pack->pBuffer;
-		RW->Option = 1;
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
+	c->Message(0, "Reloading quest cache and repopping zones worldwide.");
+	ServerPacket* pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));
+	ReloadWorld_Struct* RW = (ReloadWorld_Struct*) pack->pBuffer;
+	RW->Option = ((atoi(sep->arg[1]) == 1) ? 1 : 0);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
 }
 
 void command_reloadlevelmods(Client *c, const Seperator *sep)
