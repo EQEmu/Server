@@ -1897,10 +1897,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						if (CalculatePoisonCounters(buffs[j].spellid) == 0)
 							continue;
 						if (effect_value >= static_cast<int>(buffs[j].counters)) {
-							if (caster)
+							if (caster) {
 								caster->Message(MT_Spells,"You have cured your target of %s!",spells[buffs[j].spellid].name);
 								caster->CastOnCurer(buffs[j].spellid);
 								CastOnCure(buffs[j].spellid);
+							}
 							effect_value -= buffs[j].counters;
 							buffs[j].counters = 0;
 							BuffFadeBySlot(j);
@@ -1930,10 +1931,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 							continue;
 						if (effect_value >= static_cast<int>(buffs[j].counters))
 						{
-							if (caster)
+							if (caster) {
 								caster->Message(MT_Spells,"You have cured your target of %s!",spells[buffs[j].spellid].name);
 								caster->CastOnCurer(buffs[j].spellid);
 								CastOnCure(buffs[j].spellid);
+							}
 							effect_value -= buffs[j].counters;
 							buffs[j].counters = 0;
 							BuffFadeBySlot(j);
@@ -1965,10 +1967,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 							continue;
 						if (effect_value >= static_cast<int>(buffs[j].counters))
 						{
-							if (caster)
+							if (caster) {
 								caster->Message(MT_Spells,"You have cured your target of %s!",spells[buffs[j].spellid].name);
 								caster->CastOnCurer(buffs[j].spellid);
 								CastOnCure(buffs[j].spellid);
+							}
 							effect_value -= buffs[j].counters;
 							buffs[j].counters = 0;
 							BuffFadeBySlot(j);
@@ -1999,10 +2002,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						if (CalculateCorruptionCounters(buffs[j].spellid) == 0)
 							continue;
 						if (effect_value >= static_cast<int>(buffs[j].counters)) {
-							if (caster)
+							if (caster) {
 								caster->Message(MT_Spells,"You have cured your target of %s!",spells[buffs[j].spellid].name);
 								caster->CastOnCurer(buffs[j].spellid);
 								CastOnCure(buffs[j].spellid);
+							}
 							effect_value -= buffs[j].counters;
 							buffs[j].counters = 0;
 							BuffFadeBySlot(j);
