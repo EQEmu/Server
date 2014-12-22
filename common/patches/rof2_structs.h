@@ -2892,7 +2892,8 @@ struct Resurrect_Struct
 /*160*/	char	corpse_name[64];
 /*224*/	uint32	action;
 /*228*/	uint32	unknown228;
-/*232*/
+/*232*/	uint32	unknown232;
+/*236*/
 };
 
 struct SetRunMode_Struct {
