@@ -2935,11 +2935,6 @@ void EntityList::SignalMobsByNPCID(uint32 snpc, int signal_id)
 	}
 }
 
-bool tracking_compare(const std::pair<Mob *, float> &a, const std::pair<Mob *, float> &b)
-{
-	return a.first->GetSpawnTimeStamp() > b.first->GetSpawnTimeStamp();
-}
-
 bool EntityList::MakeTrackPacket(Client *client)
 {
 	std::list<std::pair<Mob *, float> > tracking_list;
@@ -2969,7 +2964,10 @@ bool EntityList::MakeTrackPacket(Client *client)
 		tracking_list.push_back(std::make_pair(it->second, MobDistance));
 	}
 
-	tracking_list.sort(tracking_compare);
+	tracking_list.sort(
+		[](const std::pair<Mob *, float> &a, const std::pair<Mob *, float> &b) {
+			return a.first->GetSpawnTimeStamp() > b.first->GetSpawnTimeStamp();
+		});
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_Track, sizeof(Track_Struct) * tracking_list.size());
 	Tracking_Struct *outtrack = (Tracking_Struct *)outapp->pBuffer;
 	outapp->priority = 6;
