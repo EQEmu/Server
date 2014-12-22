@@ -3896,6 +3896,8 @@ void Mob::BuffFadeDetrimental() {
 				BuffFadeBySlot(j, false);
 		}
 	}
+	//we tell BuffFadeBySlot not to recalc, so we can do it only once when were done
+	CalcBonuses();
 }
 
 void Mob::BuffFadeDetrimentalByCaster(Mob *caster)
@@ -3916,6 +3918,8 @@ void Mob::BuffFadeDetrimentalByCaster(Mob *caster)
 			}
 		}
 	}
+	//we tell BuffFadeBySlot not to recalc, so we can do it only once when were done
+	CalcBonuses();
 }
 
 void Mob::BuffFadeBySitModifier()
