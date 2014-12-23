@@ -159,6 +159,9 @@ Mob* Trade::With()
 // Private Method: Send item data for trade item to other person involved in trade
 void Trade::SendItemData(const ItemInst* inst, int16 dest_slot_id)
 {
+	if (inst == nullptr)
+		return;
+	
 	// @merth: This needs to be redone with new item classes
 	Mob* mob = With();
 	if (!mob->IsClient())

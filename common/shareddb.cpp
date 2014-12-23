@@ -177,6 +177,7 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 }
 
 bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, int16 slot_id) {
+	// need to check 'inst' argument for valid pointer
 
 	uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
     if (inst->IsType(ItemClassCommon))
@@ -221,6 +222,7 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, i
 }
 
 bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, int16 slot_id) {
+	// need to check 'inst' argument for valid pointer
 
 	uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
     if (inst->IsType(ItemClassCommon))
@@ -430,7 +432,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
         int16 put_slot_id = INVALID_INDEX;
 
         ItemInst* inst = CreateBaseItem(item, charges);
-        if (item->ItemClass == ItemClassCommon) {
+        if (inst && item->ItemClass == ItemClassCommon) {
             for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
                 if (aug[i]) {
 							inst->PutAugment(this, i, aug[i]);
@@ -526,6 +528,9 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
         int16 put_slot_id = INVALID_INDEX;
 
         ItemInst* inst = CreateBaseItem(item, charges);
+
+		if (inst == nullptr)
+			continue;
 
         if(row[11]) {
             std::string data_str(row[11]);
@@ -637,6 +642,10 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
             continue;
 
         ItemInst* inst = CreateBaseItem(item, charges);
+
+		if (inst == nullptr)
+			continue;
+
         inst->SetAttuned(instnodrop);
 
         if(row[11]) {
@@ -1195,9 +1204,16 @@ ItemInst* SharedDatabase::CreateItem(uint32 item_id, int16 charges, uint32 aug1,
 {
 	const Item_Struct* item = nullptr;
 	ItemInst* inst = nullptr;
+
 	item = GetItem(item_id);
 	if (item) {
 		inst = CreateBaseItem(item, charges);
+
+		if (inst == nullptr) {
+			LogFile->write(EQEMuLog::Error, "Error: valid item data returned a null reference for ItemInst creation in SharedDatabase::CreateItem()");
+			return nullptr;
+		}
+
 		inst->PutAugment(this, 0, aug1);
 		inst->PutAugment(this, 1, aug2);
 		inst->PutAugment(this, 2, aug3);
@@ -1217,6 +1233,12 @@ ItemInst* SharedDatabase::CreateItem(const Item_Struct* item, int16 charges, uin
 	ItemInst* inst = nullptr;
 	if (item) {
 		inst = CreateBaseItem(item, charges);
+
+		if (inst == nullptr) {
+			LogFile->write(EQEMuLog::Error, "Error: valid item data returned a null reference for ItemInst creation in SharedDatabase::CreateItem()");
+			return nullptr;
+		}
+
 		inst->PutAugment(this, 0, aug1);
 		inst->PutAugment(this, 1, aug2);
 		inst->PutAugment(this, 2, aug3);
@@ -1241,6 +1263,11 @@ ItemInst* SharedDatabase::CreateBaseItem(const Item_Struct* item, int16 charges)
 			charges = 1;
 
 		inst = new ItemInst(item, charges);
+
+		if (inst == nullptr) {
+			LogFile->write(EQEMuLog::Error, "Error: valid item data returned a null reference for ItemInst creation in SharedDatabase::CreateBaseItem()");
+			return nullptr;
+		}
 
 		if(item->CharmFileID != 0 || (item->LoreGroup >= 1000 && item->LoreGroup != -1)) {
 			inst->Initialize(this);

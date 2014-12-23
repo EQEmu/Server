@@ -1195,22 +1195,29 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 		uint32 recastdelay = 0;
 		uint32 recasttype = 0;
 
-		for (int r = 0; r < EmuConstants::ITEM_COMMON_SIZE; r++) {
-			const ItemInst* aug_i = inst->GetAugment(r);
-
-			if(!aug_i)
-				continue;
-			const Item_Struct* aug = aug_i->GetItem();
-			if(!aug)
-				continue;
-
-			if ( aug->Click.Effect == spell_id )
-			{
-				recastdelay = aug_i->GetItem()->RecastDelay;
-				recasttype = aug_i->GetItem()->RecastType;
-				fromaug = true;
+		while (true) {
+			if (inst == nullptr)
 				break;
+
+			for (int r = AUG_BEGIN; r < EmuConstants::ITEM_COMMON_SIZE; r++) {
+				const ItemInst* aug_i = inst->GetAugment(r);
+
+				if (!aug_i)
+					continue;
+				const Item_Struct* aug = aug_i->GetItem();
+				if (!aug)
+					continue;
+
+				if (aug->Click.Effect == spell_id)
+				{
+					recastdelay = aug_i->GetItem()->RecastDelay;
+					recasttype = aug_i->GetItem()->RecastType;
+					fromaug = true;
+					break;
+				}
 			}
+
+			break;
 		}
 
 		//Test the aug recast delay

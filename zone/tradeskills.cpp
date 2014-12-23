@@ -94,7 +94,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		return;
 	}
 
-	ItemInst *tobe_auged, *auged_with = nullptr;
+	ItemInst *tobe_auged = nullptr, *auged_with = nullptr;
 	int8 slot=-1;
 
 	// Verify 2 items in the augmentation device
@@ -1185,6 +1185,8 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint32 some_id,
 	uint32 char_id, DBTradeskillRecipe_Struct *spec)
 {
+	if (container == nullptr)
+		return false;
 
 	std::string containers;// make where clause segment for container(s)
 	if (some_id == 0)

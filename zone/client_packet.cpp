@@ -3087,7 +3087,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 		// Adding augment
 		if (in_augment->augment_action == 0)
 		{
-			ItemInst *tobe_auged, *auged_with = nullptr;
+			ItemInst *tobe_auged = nullptr, *auged_with = nullptr;
 			int8 slot = -1;
 			Inventory& user_inv = GetInv();
 
@@ -3157,7 +3157,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 		}
 		else if (in_augment->augment_action == 1)
 		{
-			ItemInst *tobe_auged, *auged_with = nullptr;
+			ItemInst *tobe_auged = nullptr, *auged_with = nullptr;
 			int8 slot = -1;
 			Inventory& user_inv = GetInv();
 
@@ -12330,22 +12330,30 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	int freeslot = 0;
 	if (charges > 0 && (freeslot = zone->SaveTempItem(vendor->CastToNPC()->MerchantType, vendor->GetNPCTypeID(), itemid, charges, true)) > 0){
 		ItemInst* inst2 = inst->Clone();
-		if (RuleB(Merchant, UsePriceMod)){
-			inst2->SetPrice(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(vendor, false));
+		
+		while (true) {
+			if (inst2 == nullptr)
+				break;
+
+			if (RuleB(Merchant, UsePriceMod)){
+				inst2->SetPrice(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(vendor, false));
+			}
+			else
+				inst2->SetPrice(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate);
+			inst2->SetMerchantSlot(freeslot);
+
+			uint32 MerchantQuantity = zone->GetTempMerchantQuantity(vendor->GetNPCTypeID(), freeslot);
+
+			if (inst2->IsStackable()) {
+				inst2->SetCharges(MerchantQuantity);
+			}
+			inst2->SetMerchantCount(MerchantQuantity);
+
+			SendItemPacket(freeslot - 1, inst2, ItemPacketMerchant);
+			safe_delete(inst2);
+
+			break;
 		}
-		else
-			inst2->SetPrice(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate);
-		inst2->SetMerchantSlot(freeslot);
-
-		uint32 MerchantQuantity = zone->GetTempMerchantQuantity(vendor->GetNPCTypeID(), freeslot);
-
-		if (inst2->IsStackable()) {
-			inst2->SetCharges(MerchantQuantity);
-		}
-		inst2->SetMerchantCount(MerchantQuantity);
-
-		SendItemPacket(freeslot - 1, inst2, ItemPacketMerchant);
-		safe_delete(inst2);
 	}
 
 	// start QS code

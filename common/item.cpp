@@ -1186,13 +1186,13 @@ int16 Inventory::_HasItem(std::map<int16, ItemInst*>& bucket, uint32 item_id, ui
 
 			for (itb = inst->_begin(); itb != inst->_end(); ++itb) {
 				ItemInst* baginst = itb->second;
-				if (baginst->GetID() == item_id) {
+				if (baginst && baginst->GetID() == item_id) {
 					quantity_found += (baginst->GetCharges() <= 0) ? 1 : baginst->GetCharges();
 					if (quantity_found >= quantity)
 						return Inventory::CalcSlotId(it->first, itb->first);
 				}
 				for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
-					if (baginst->GetAugmentItemID(i) == item_id && quantity <= 1)
+					if (baginst && baginst->GetAugmentItemID(i) == item_id && quantity <= 1)
 						return legacy::SLOT_AUGMENT; // Only one augment per slot.
 				}
 			}
@@ -1230,13 +1230,13 @@ int16 Inventory::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity)
 
 			for (itb = inst->_begin(); itb != inst->_end(); ++itb) {
 				ItemInst* baginst = itb->second;
-				if (baginst->GetID() == item_id) {
+				if (baginst && baginst->GetID() == item_id) {
 					quantity_found += (baginst->GetCharges() <= 0) ? 1 : baginst->GetCharges();
 					if (quantity_found >= quantity)
 						return Inventory::CalcSlotId(MainCursor, itb->first);
 				}
 				for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
-					if (baginst->GetAugmentItemID(i) == item_id && quantity <= 1)
+					if (baginst && baginst->GetAugmentItemID(i) == item_id && quantity <= 1)
 						return legacy::SLOT_AUGMENT; // Only one augment per slot.
 				}
 
@@ -1330,7 +1330,7 @@ int16 Inventory::_HasItemByLoreGroup(std::map<int16, ItemInst*>& bucket, uint32 
 			if (inst->GetItem()->LoreGroup == loregroup)
 				return it->first;
 
-			ItemInst* Aug;
+			ItemInst* Aug = nullptr;
 			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
 				Aug = inst->GetAugment(i);
 				if (Aug && Aug->GetItem()->LoreGroup == loregroup)
@@ -1345,7 +1345,7 @@ int16 Inventory::_HasItemByLoreGroup(std::map<int16, ItemInst*>& bucket, uint32 
 				if (baginst && baginst->IsType(ItemClassCommon) && baginst->GetItem()->LoreGroup == loregroup)
 					return Inventory::CalcSlotId(it->first, itb->first);
 
-				ItemInst* Aug2;
+				ItemInst* Aug2 = nullptr;
 				for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
 					Aug2 = baginst->GetAugment(i);
 					if (Aug2 && Aug2->GetItem()->LoreGroup == loregroup)
@@ -1373,7 +1373,7 @@ int16 Inventory::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup)
 			if (inst->GetItem()->LoreGroup == loregroup)
 				return MainCursor;
 
-			ItemInst* Aug;
+			ItemInst* Aug = nullptr;
 			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
 				Aug = inst->GetAugment(i);
 				if (Aug && Aug->GetItem()->LoreGroup == loregroup)
@@ -1389,7 +1389,7 @@ int16 Inventory::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup)
 					return Inventory::CalcSlotId(MainCursor, itb->first);
 
 
-				ItemInst* Aug2;
+				ItemInst* Aug2 = nullptr;
 				for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
 					Aug2 = baginst->GetAugment(i);
 					if (Aug2 && Aug2->GetItem()->LoreGroup == loregroup)
@@ -1719,6 +1719,8 @@ void ItemInst::ClearByFlags(byFlagSetting is_nodrop, byFlagSetting is_norent)
 	end = m_contents.end();
 	for (; cur != end;) {
 		ItemInst* inst = cur->second;
+		if (inst == nullptr)
+			continue;
 		const Item_Struct* item = inst->GetItem();
 		del = cur;
 		++cur;
