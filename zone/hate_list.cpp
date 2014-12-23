@@ -279,6 +279,10 @@ int HateList::SummonedPetCount(Mob *hater) {
 
 Mob *HateList::GetTop(Mob *center)
 {
+	// hack fix for zone shutdown crashes on some servers
+	if (!zone->IsLoaded())
+		return nullptr;
+	
 	Mob* top = nullptr;
 	int32 hate = -1;
 
