@@ -2768,7 +2768,10 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 		}
 	}
 
-	if (HeroModel > 0)
+	// Auto-Convert Hero Model to match the slot
+	// Otherwise, use the exact Model if model is > 999
+	// Robes for example are 11607 to 12107 in RoF
+	if (HeroModel > 0 && HeroModel < 1000)
 	{
 		HeroModel *= 100;
 		HeroModel += material_slot;

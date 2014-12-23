@@ -1676,8 +1676,15 @@ namespace RoF2
 		eq->FogDensity = emu->fog_density;
 
 		/*fill in some unknowns with observed values, hopefully it will help */
+		eq->unknown569 = 0;
+		eq->unknown571 = 0;
+		eq->unknown572 = 4;
+		eq->unknown576 = 2;
+		eq->unknown580 = 0;
+
 		eq->unknown800 = -1;
 		eq->unknown844 = 600;
+		eq->unknown848 = 2008; // Guild Lobby observed value
 		eq->unknown880 = 50;
 		eq->unknown884 = 10;
 		eq->unknown888 = 1;

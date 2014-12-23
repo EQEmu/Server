@@ -243,11 +243,11 @@ struct Membership_Setting_Struct
 struct Membership_Details_Struct
 {
 /*0000*/ uint32 membership_setting_count;	// Seen 66
-/*0016*/ Membership_Setting_Struct settings[66];
+/*0016*/ Membership_Setting_Struct settings[66]; // 792 Bytes
 /*0012*/ uint32 race_entry_count;	// Seen 15
-/*1044*/ Membership_Entry_Struct membership_races[15];
+/*1044*/ Membership_Entry_Struct membership_races[15]; // 120 Bytes
 /*0012*/ uint32 class_entry_count;	// Seen 15
-/*1044*/ Membership_Entry_Struct membership_classes[15];
+/*1044*/ Membership_Entry_Struct membership_classes[15]; // 120 Bytes
 /*1044*/ uint32 exit_url_length;	// Length of the exit_url string (0 for none)
 /*1048*/ //char exit_url[42];		// Upgrade to Silver or Gold Membership URL
 /*1048*/ uint32 exit_url_length2;	// Length of the exit_url2 string (0 for none)
@@ -537,9 +537,13 @@ struct NewZone_Struct {
 	/*0525*/    uint8   rain_duration[4];
 	/*0529*/    uint8   snow_chance[4];
 	/*0533*/    uint8   snow_duration[4];
-	/*0537*/    uint8   unknown537[33];
+	/*0537*/    uint8   unknown537[32];			// Seen all 0xff
+	/*0569*/	uint8	unknown569;				// Unknown - Seen 0
 	/*0570*/	uint8	sky;					// Sky Type
-	/*0571*/	uint8	unknown571[13];			// ***Placeholder
+	/*0571*/	uint8	unknown571;				// Unknown - Seen 0
+	/*0572*/	uint32	unknown572;				// Unknown - Seen 4 in Guild Lobby
+	/*0576*/	uint32	unknown576;				// Unknown - Seen 2 in Guild Lobby
+	/*0580*/	uint32	unknown580;				// Unknown - Seen 0 in Guild Lobby
 	/*0584*/	float	zone_exp_multiplier;	// Experience Multiplier
 	/*0588*/	float	safe_y;					// Zone Safe Y
 	/*0592*/	float	safe_x;					// Zone Safe X
@@ -554,7 +558,7 @@ struct NewZone_Struct {
 	/*0800*/	int32	unknown800;	//seen -1
 	/*0804*/	char	unknown804[40]; //
 	/*0844*/	int32	unknown844;	//seen 600
-	/*0848*/	int32	unknown848;
+	/*0848*/	int32	unknown848; //seen 2008
 	/*0852*/	uint16	zone_id;
 	/*0854*/	uint16	zone_instance;
 	/*0856*/	char	unknown856[20];
@@ -581,7 +585,7 @@ struct NewZone_Struct {
 	/*0932*/	int32  unknown932;		// Seen -1
 	/*0936*/	int32  unknown936;		// Seen -1
 	/*0940*/	uint32  unknown940;		// Seen 0
-	/*0944*/	float   unknown944;		// Seen 1.0
+	/*0944*/	float   unknown944;		// Seen 1.0 in PoK, and 0.25 in Guild Lobby
 	/*0948*/	uint32  unknown948;		// Seen 0 - New on Live as of Dec 15 2014
 	/*0952*/	uint32  unknown952;		// Seen 100 - New on Live as of Dec 15 2014
 	/*0956*/
@@ -1219,64 +1223,17 @@ union
 
 /*
 ///////////////////// - Haven't identified the below fields in the PP yet
-uint8   pvp;					// 1=pvp, 0=not pvp
 uint8   anon;					// 2=roleplay, 1=anon, 0=not anon
-uint8   gm;					// 0=no, 1=yes (guessing!)
-uint32   guild_id;				// guildid
-uint8    guildrank;			// 0=member, 1=officer, 2=guildleader -1=no guild
-uint32  guildbanker;
 uint32 available_slots;
-uint32  endurance;			// Current endurance
 uint32  spellSlotRefresh[MAX_PP_MEMSPELL]; // Refresh time (millis) - 4 bytes Each * 16 = 64 bytes
 uint32  abilitySlotRefresh;
 ///////////////////////
 
-uint32  platinum_bank;		// Platinum Pieces in Bank
-uint32  gold_bank;			// Gold Pieces in Bank
-uint32  silver_bank;			// Silver Pieces in Bank
-uint32  copper_bank;			// Copper Pieces in Bank
 uint32  platinum_shared;		// Shared platinum pieces
-
 uint32  autosplit;			// 0 = off, 1 = on
-
 char      groupMembers[MAX_GROUP_MEMBERS][64];// 384 all the members in group, including self
 char      groupLeader[64];	// Leader of the group ?
 uint32  entityid;
-
-uint32  leadAAActive;			// 0 = leader AA off, 1 = leader AA on
-int32  ldon_points_guk;		// Earned GUK points
-int32  ldon_points_mir;		// Earned MIR points
-int32  ldon_points_mmc;		// Earned MMC points
-int32  ldon_points_ruj;		// Earned RUJ points
-int32  ldon_points_tak;		// Earned TAK points
-int32  ldon_points_available;// Available LDON points
-float  tribute_time_remaining;// Time remaining on tribute (millisecs)
-uint32  career_tribute_points;// Total favor points for this char
-uint32  tribute_points;		// Current tribute points
-uint32  tribute_active;		// 0 = off, 1=on
-Tribute_Struct tributes[MAX_PLAYER_TRIBUTES]; // [40] Current tribute loadout
-double group_leadership_exp;	// Current group lead exp points
-double raid_leadership_exp;	// Current raid lead AA exp points
-uint32  group_leadership_points; // Unspent group lead AA points
-uint32  raid_leadership_points;  // Unspent raid lead AA points
-LeadershipAA_Struct leader_abilities; // [128]Leader AA ranks 19332
-
-uint32  PVPKills;
-uint32  PVPDeaths;
-uint32  PVPCurrentPoints;
-uint32  PVPCareerPoints;
-uint32  PVPBestKillStreak;
-uint32  PVPWorstDeathStreak;
-uint32  PVPCurrentKillStreak;
-PVPStatsEntry_Struct PVPLastKill;		// size 88
-PVPStatsEntry_Struct PVPLastDeath;	// size 88
-uint32  PVPNumberOfKillsInLast24Hours;
-PVPStatsEntry_Struct PVPRecentKills[50];	// size 4400 - 88 each
-uint32 expAA;					// Exp earned in current AA point
-uint32 currentRadCrystals;	// Current count of radiant crystals
-uint32 careerRadCrystals;		// Total count of radiant crystals ever
-uint32 currentEbonCrystals;	// Current count of ebon crystals
-uint32 careerEbonCrystals;	// Total count of ebon crystals ever
 */
 
 };

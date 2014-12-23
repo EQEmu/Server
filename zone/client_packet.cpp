@@ -6978,37 +6978,28 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 
 		if (!CursorItem->NoDrop || CursorItemInst->IsAttuned())
 		{
-			Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
-
 			Allowed = false;
 		}
 		else if (CursorItemInst->IsNoneEmptyContainer())
 		{
-			Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
-
 			Allowed = false;
 		}
 		else if (CursorItemInst->IsAugmented())
 		{
-			Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
-
 			Allowed = false;
 		}
 		else if (CursorItem->NoRent == 0)
 		{
-			Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
-
 			Allowed = false;
 		}
 		else if (CursorItem->LoreFlag && GuildBanks->HasItem(GuildID(), CursorItem->ID))
 		{
-			Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
-
 			Allowed = false;
 		}
 
 		if (!Allowed)
 		{
+			Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
 			GuildBankDepositAck(true);
 
 			return;
