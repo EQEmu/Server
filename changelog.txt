@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 12/22/2014 ==
 Trevius: (RoF2) Fixed Tracking.
+Trevius: (RoF+) Added a work-around for the cursor buffer issue.
 
 == 12/21/2014 ==
 Trevius: (RoF2) Fixed Extended Targets Window by correcting opcodes.

@@ -93,6 +93,7 @@ public:
 	void push(ItemInst* inst);
 	void push_front(ItemInst* inst);
 	ItemInst* pop();
+	ItemInst* pop_back();
 	ItemInst* peek_front() const;
 	inline int size()		{ return static_cast<int>(m_list.size()); }
 
@@ -151,8 +152,9 @@ public:
 
 	// Add item to cursor queue
 	int16 PushCursor(const ItemInst& inst);
-	// Remove item from cursor queue
-	ItemInst* PopCursor();
+
+	// Get cursor item in front of queue
+	ItemInst* GetCursorItem();
 
 	// Swap items in inventory
 	bool SwapItem(int16 slot_a, int16 slot_b);

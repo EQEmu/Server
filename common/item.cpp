@@ -89,6 +89,17 @@ ItemInst* ItemInstQueue::pop()
 	return inst;
 }
 
+// Remove item from back of queue
+ItemInst* ItemInstQueue::pop_back()
+{
+	if (m_list.size() == 0)
+		return nullptr;
+
+	ItemInst* inst = m_list.back();
+	m_list.pop_back();
+	return inst;
+}
+
 // Look at item at front of queue
 ItemInst* ItemInstQueue::peek_front() const
 {
@@ -259,9 +270,9 @@ int16 Inventory::PushCursor(const ItemInst& inst)
 	return MainCursor;
 }
 
-ItemInst* Inventory::PopCursor()
+ItemInst* Inventory::GetCursorItem()
 {
-	return m_cursor.pop();
+	return m_cursor.peek_front();
 }
 
 // Swap items in inventory

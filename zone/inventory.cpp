@@ -617,6 +617,7 @@ void Client::DropItem(int16 slot_id)
 
 	// Save client inventory change to database
 	if (slot_id == MainCursor) {
+		SendCursorBuffer();
 		std::list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
 		database.SaveCursor(CharacterID(), s, e);
 	} else {
@@ -678,19 +679,19 @@ int32 Client::GetAugmentIDAt(int16 slot_id, uint8 augslot) {
 	return INVALID_ID;
 }
 
-void Client::SummonCursorBuffer() {
+void Client::SendCursorBuffer() {
 	// Temporary work-around for the RoF+ Client Buffer
-	// Instead of letting the client move items around in cursor buffer,
-	// we can just delete an item from the buffer and summon it to the cursor.
+	// Instead of dealing with client moving items in cursor buffer,
+	// we can just send the next item in the cursor buffer to the cursor.
 	if (GetClientVersion() >= EQClientRoF)
 	{
 		if (!GetInv().CursorEmpty())
 		{
-			const ItemInst* inst = GetInv().PopCursor();
-			SummonItem(inst->GetID(), inst->GetCharges(), inst->GetAugmentItemID(0), 
-				inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), 
-				inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), MainCursor, 
-				inst->GetOrnamentationIcon(), inst->GetOrnamentationIDFile(), inst->GetOrnamentHeroModel());
+			const ItemInst* inst = GetInv().GetCursorItem();
+			if (inst)
+			{
+				SendItemPacket(MainCursor, inst, ItemPacketSummonItem);
+			}
 		}
 	}
 }
@@ -1332,7 +1333,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			}
 
 			DeleteItemInInventory(move_in->from_slot);
-			SummonCursorBuffer();
+			SendCursorBuffer();
 
 			return true; // Item destroyed by client
 		}
@@ -1543,7 +1544,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			{
 				if (dstitemid == 0)
 				{
-					SummonCursorBuffer();
+					SendCursorBuffer();
 				}
 				std::list<ItemInst*>::const_iterator s = m_inv.cursor_begin(), e = m_inv.cursor_end();
 				database.SaveCursor(character_id, s, e);
@@ -1580,7 +1581,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			trade->AddEntity(dst_slot_id, move_in->number_in_stack);
 			if (dstitemid == 0)
 			{
-				SummonCursorBuffer();
+				SendCursorBuffer();
 			}
 
 			return true;
@@ -1702,7 +1703,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		// If not swapping another item to cursor and stacking items were depleted
 		if (dstitemid == 0 || all_to_stack == true)
 		{
-			SummonCursorBuffer();
+			SendCursorBuffer();
 		}
 		std::list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
 		database.SaveCursor(character_id, s, e);
