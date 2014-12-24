@@ -1211,6 +1211,7 @@ ItemInst* SharedDatabase::CreateItem(uint32 item_id, int16 charges, uint32 aug1,
 
 		if (inst == nullptr) {
 			LogFile->write(EQEMuLog::Error, "Error: valid item data returned a null reference for ItemInst creation in SharedDatabase::CreateItem()");
+			LogFile->write(EQEMuLog::Error, "Item Data = ID: %u, Name: %s, Charges: %i", item->ID, item->Name, charges);
 			return nullptr;
 		}
 
@@ -1236,6 +1237,7 @@ ItemInst* SharedDatabase::CreateItem(const Item_Struct* item, int16 charges, uin
 
 		if (inst == nullptr) {
 			LogFile->write(EQEMuLog::Error, "Error: valid item data returned a null reference for ItemInst creation in SharedDatabase::CreateItem()");
+			LogFile->write(EQEMuLog::Error, "Item Data = ID: %u, Name: %s, Charges: %i", item->ID, item->Name, charges);
 			return nullptr;
 		}
 
@@ -1266,6 +1268,7 @@ ItemInst* SharedDatabase::CreateBaseItem(const Item_Struct* item, int16 charges)
 
 		if (inst == nullptr) {
 			LogFile->write(EQEMuLog::Error, "Error: valid item data returned a null reference for ItemInst creation in SharedDatabase::CreateBaseItem()");
+			LogFile->write(EQEMuLog::Error, "Item Data = ID: %u, Name: %s, Charges: %i", item->ID, item->Name, charges);
 			return nullptr;
 		}
 
