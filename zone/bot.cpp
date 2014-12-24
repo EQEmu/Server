@@ -234,45 +234,28 @@ void Bot::SetBotSpellID(uint32 newSpellID) {
 	this->npc_spells_id = newSpellID;
 }
 
-uint32 Bot::GetBotArcheryRange() {
-	uint32 result = 0;
+uint32 Bot::GetBotArcheryRange()
+{
+	const ItemInst *range_inst = GetBotItem(MainRange);
+	const ItemInst *ammo_inst = GetBotItem(MainAmmo);
 
-	ItemInst* rangeItem = GetBotItem(MainRange);
-
-	if(!rangeItem)
+	// empty slots
+	if (!range_inst || !ammo_inst)
 		return 0;
 
-	const Item_Struct* botweapon = rangeItem->GetItem();
+	const Item_Struct *range_item = range_inst->GetItem();
+	const Item_Struct *ammo_item = ammo_inst->GetItem();
 
-	uint32 archeryMaterial;
-	uint32 archeryColor;
-	uint32 archeryBowID;
-	uint32 archeryAmmoID;
+	// no item struct for whatever reason
+	if (!range_item || !ammo_item)
+		return 0;
 
-	if(botweapon && botweapon->ItemType == ItemTypeBow) {
-		uint32 range = 0;
+	// bad item types
+	if (range_item->ItemType != ItemTypeBow || ammo_item->ItemType != ItemTypeArrow)
+		return 0;
 
-		archeryMaterial = atoi(botweapon->IDFile + 2);
-		archeryBowID = botweapon->ID;
-		archeryColor = botweapon->Color;
-		range =+ botweapon->Range;
-
-		rangeItem = GetBotItem(MainAmmo);
-		if(rangeItem)
-			botweapon = rangeItem->GetItem();
-
-		if(!botweapon || (botweapon->ItemType != ItemTypeArrow)) {
-			return 0;
-		}
-
-		range += botweapon->Range;
-
-		archeryAmmoID = botweapon->ID;
-
-		result = range;
-	}
-
-	return result;
+	// everything is good!
+	return range_item->Range + ammo_item->Range;
 }
 
 void Bot::ChangeBotArcherWeapons(bool isArcher) {
@@ -14364,8 +14347,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			return;
 		}
 
-		std::list<BotGroup>::iterator botGroupItr = botGroup.begin();
-		for(botGroupItr; botGroupItr != botGroup.end(); ++botGroupItr) {
+		for(auto botGroupItr = botGroup.begin(); botGroupItr != botGroup.end(); ++botGroupItr) {
 			// Don't try to re-spawn the botgroup's leader.
 			if(botGroupItr->BotID == botGroupLeader->GetBotID()) { continue; }
 
