@@ -324,7 +324,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		what was this about???
 
 		if (((npc->GetRace()==127) && (npc->CastToMob()->GetOwnerID()!=0)) && (item2->Slots==24576) || (item2->Slots==8192) || (item2->Slots==16384)){
-			npc->d_meele_texture2=atoi(newid);
+			npc->d_melee_texture2=atoi(newid);
 			wc->wear_slot_id=8;
 			if (item2->Material >0)
 				wc->material=item2->Material;
