@@ -15474,7 +15474,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		else {
 			Mob *target = c->GetTarget();
 
-			if(target->IsBot() && (c == target->GetOwner()->CastToClient())) {
+			if(target && target->IsBot() && (c == target->GetOwner()->CastToClient())) {
 				const InspectMessage_Struct& playermessage = c->GetInspectMessage();
 				InspectMessage_Struct& botmessage = target->CastToBot()->GetInspectMessage();
 
@@ -15504,7 +15504,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 			Mob *target = c->GetTarget();
 
-			if(target->IsBot() && (c == target->GetOwner()->CastToClient())) {
+			if(target && target->IsBot() && (c == target->GetOwner()->CastToClient())) {
 				Bot* bardBot = target->CastToBot();
 
 				if(bardBot) {
