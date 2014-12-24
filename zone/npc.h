@@ -403,6 +403,9 @@ public:
 	void	mod_npc_killed(Mob* oos);
 	void	AISpellsList(Client *c);
 
+	uint32	GetHeroForgeModel() const { return herosforgemodel; }
+	void	SetHeroForgeModel(uint32 model) { herosforgemodel = model; }
+
 	bool IsRaidTarget() const { return raid_target; };
 	
 protected:
@@ -492,6 +495,8 @@ protected:
 	uint16	skills[HIGHEST_SKILL+1];
 
 	uint32	equipment[EmuConstants::EQUIPMENT_SIZE];	//this is an array of item IDs
+
+	uint32	herosforgemodel;			//this is the Hero Forge Armor Model (i.e 63 or 84 or 203)
 	uint16	d_melee_texture1;			//this is an item Material value
 	uint16	d_melee_texture2;			//this is an item Material value (offhand)
 	const char*	ammo_idfile;			//this determines projectile graphic "IT###" (see item field 'idfile')

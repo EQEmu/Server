@@ -49,6 +49,7 @@ struct NPCType
 	uint32	npc_id;
 	uint8	texture;
 	uint8	helmtexture;
+	uint32	herosforgemodel;
 	uint32	loottable_id;
 	uint32	npc_spells_id;
 	uint32	npc_spells_effects_id;

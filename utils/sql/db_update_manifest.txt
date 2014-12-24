@@ -317,6 +317,7 @@
 9061|2014_12_13_inventory_table_update.sql|SHOW COLUMNS FROM `inventory` LIKE 'ornament_hero_model'|empty|
 9062|2014_12_15_multiple_table_updates.sql|SHOW COLUMNS FROM `items` LIKE 'augslot6type'|empty|
 9063|2014_12_24_npc_types_update.sql|SHOW COLUMNS FROM `npc_types` LIKE 'd_melee_texture1'|empty|
+9064|2014_12_24_npc_types_table_update.sql|SHOW COLUMNS FROM `npc_types` LIKE 'herosforgemodel'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not 

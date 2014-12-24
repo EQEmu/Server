@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/24/2014 ==
+Trevius: (RoF+) Added herosforgemodel field to the npc_types table.  Not fully functional yet for NPCs (currently only displays helm correctly).
+Trevius: (RoF2) Updated item links from #npcstat command output.
+
 == 12/23/2014 ==
 Uleat: Tidied up some ItemInst* declarations and added some nullptr checks.
 Trevius: (RoF+) Added support for Hero's Forge Robe Models.  Set herosforgemodel field in items table to exact model such as 11607, 11707, etc.

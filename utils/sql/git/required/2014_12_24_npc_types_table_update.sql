@@ -1,0 +1,1 @@
+ALTER TABLE `npc_types` ADD `herosforgemodel` int( 11 ) NOT NULL DEFAULT '0' AFTER `helmtexture`;

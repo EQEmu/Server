@@ -978,7 +978,8 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
 
-	for (i = 0; i < _MaterialCount; i++)
+	//for (i = 0; i < _MaterialCount; i++)
+	for (i = 0; i < 9; i++)
 	{
 		// Only Player Races Wear Armor
 		if (Mob::IsPlayerRace(race) || i > 6)
@@ -2733,7 +2734,6 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 
 int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 {
-	
 	uint32 HeroModel = 0;
 	if (material_slot >= 0 && material_slot < MaterialPrimary)
 	{
@@ -2744,7 +2744,7 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 		
 		if (item != 0 && invslot != INVALID_INDEX)
 		{
-			if (this->IsClient())
+			if (IsClient())
 			{
 				const ItemInst* inst = CastToClient()->m_inv[invslot];
 				if (inst)
@@ -2764,6 +2764,16 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 			if (HeroModel == 0)
 			{
 				HeroModel = item->HerosForgeModel;
+			}
+		}
+
+		if (IsNPC())
+		{
+			HeroModel = CastToNPC()->GetHeroForgeModel();
+			// Robes require full model number, and should only be sent to chest slot
+			if (HeroModel > 1000 && material_slot != 1)
+			{
+				HeroModel = 0;
 			}
 		}
 	}

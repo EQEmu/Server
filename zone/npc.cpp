@@ -263,6 +263,8 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 
 	d_melee_texture1 = d->d_melee_texture1;
 	d_melee_texture2 = d->d_melee_texture2;
+	herosforgemodel = d->herosforgemodel;
+
 	ammo_idfile = d->ammo_idfile;
 	memset(equipment, 0, sizeof(equipment));
 	prim_melee_type = d->prim_melee_type;
@@ -508,7 +510,11 @@ void NPC::QueryLoot(Client* to) {
 	for(; cur != end; ++cur) {
 		const Item_Struct* item = database.GetItem((*cur)->item_id);
 		if (item)
-			if (to->GetClientVersion() >= EQClientRoF)
+			if (to->GetClientVersion() >= EQClientRoF2)
+			{
+				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%06X00000000000000000000000000000000000000000000000000%s%c", (*cur)->min_level, (*cur)->max_level, (int)item->ID, 0x12, item->ID, item->Name, 0x12);
+			}
+			else if (to->GetClientVersion() >= EQClientRoF)
 			{
 				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%06X0000000000000000000000000000000000000000000000000%s%c",(*cur)->min_level, (*cur)->max_level, (int) item->ID,0x12, item->ID, item->Name, 0x12);
 			}
