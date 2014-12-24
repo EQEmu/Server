@@ -925,7 +925,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.animation	= 0;
 	ns->spawn.findable	= findable?1:0;
 	ns->spawn.light		= light;
-	ns->spawn.showhelm = 1;
+	ns->spawn.showhelm = (helmtexture && helmtexture != 0xFF) ? 1 : 0;
 
 	ns->spawn.invis		= (invisible || hidden) ? 1 : 0;	// TODO: load this before spawning players
 	ns->spawn.NPC		= IsClient() ? 0 : 1;
@@ -945,11 +945,11 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.drakkin_heritage = drakkin_heritage;
 	ns->spawn.drakkin_tattoo = drakkin_tattoo;
 	ns->spawn.drakkin_details = drakkin_details;
-	ns->spawn.equip_chest2 = texture;
+	ns->spawn.equip_chest2 = GetHerosForgeModel(1) != 0 ? 0xff : texture;
 
 //	ns->spawn.invis2 = 0xff;//this used to be labeled beard.. if its not FF it will turn mob invis
 
-	if(helmtexture && helmtexture != 0xFF)
+	if (helmtexture && helmtexture != 0xFF && GetHerosForgeModel(0) == 0)
 	{
 		ns->spawn.helm=helmtexture;
 	} else {
@@ -2770,8 +2770,8 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 		if (IsNPC())
 		{
 			HeroModel = CastToNPC()->GetHeroForgeModel();
-			// Robes require full model number, and should only be sent to chest slot
-			if (HeroModel > 1000 && material_slot != 1)
+			// Robes require full model number, and should only be sent to chest, arms, wrists, and legs slots
+			if (HeroModel > 1000 && material_slot != 1 && material_slot != 2 && material_slot != 3 && material_slot != 5)
 			{
 				HeroModel = 0;
 			}

@@ -1790,7 +1790,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 		tmpNPCType->gender = atoi(row[7]);
 		tmpNPCType->texture = atoi(row[8]);
 		tmpNPCType->helmtexture = atoi(row[9]);
-		tmpNPCType->herosforgemodel = atoi(row[10]);
+		tmpNPCType->herosforgemodel = atoul(row[10]);
 		tmpNPCType->size = atof(row[11]);
         tmpNPCType->loottable_id = atoi(row[12]);
 		tmpNPCType->merchanttype = atoi(row[13]);
@@ -1816,7 +1816,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 		tmpNPCType->max_dmg = atoi(row[33]);
 		tmpNPCType->attack_count = atoi(row[34]);
 
-		if (row[34] != nullptr)
+		if (row[35] != nullptr)
 			strn0cpy(tmpNPCType->special_abilities, row[35], 512);
 		else
 			tmpNPCType->special_abilities[0] = '\0';
@@ -1835,7 +1835,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 		tmpNPCType->hp_regen = atoi(row[47]);
 		tmpNPCType->mana_regen = atoi(row[48]);
 
-		// set defaultvalue for aggroradius
+		// set default value for aggroradius
         tmpNPCType->aggroradius = (int32)atoi(row[49]);
 		if (tmpNPCType->aggroradius <= 0)
 			tmpNPCType->aggroradius = 70;
@@ -1844,7 +1844,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 		if (tmpNPCType->assistradius <= 0)
 			tmpNPCType->assistradius = tmpNPCType->aggroradius;
 
-		if (row[50] && strlen(row[50]))
+		if (row[51] && strlen(row[51]))
             tmpNPCType->bodytype = (uint8)atoi(row[51]);
         else
             tmpNPCType->bodytype = 0;
@@ -1869,10 +1869,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 		tmpNPCType->armor_tint[0] |= (atoi(row[66]) & 0xFF);
 		tmpNPCType->armor_tint[0] |= (tmpNPCType->armor_tint[0]) ? (0xFF << 24) : 0;
 
-		if (armor_tint_id == 0)
-			for (int index = MaterialChest; index <= EmuConstants::MATERIAL_END; index++)
-				tmpNPCType->armor_tint[index] = tmpNPCType->armor_tint[0];
-		else if (tmpNPCType->armor_tint[0] == 0)
+		if (armor_tint_id != 0)
         {
 			std::string armortint_query = StringFormat("SELECT red1h, grn1h, blu1h, "
                                                     "red2c, grn2c, blu2c, "
@@ -1887,23 +1884,34 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
                                                     armor_tint_id);
             auto armortint_results = QueryDatabase(armortint_query);
             if (!armortint_results.Success() || armortint_results.RowCount() == 0)
-                armor_tint_id = 0;
-            else {
+			{
+				armor_tint_id = 0;
+			}
+			else
+			{
                 auto armorTint_row = armortint_results.begin();
 
-                for (int index = EmuConstants::MATERIAL_BEGIN; index <= EmuConstants::MATERIAL_END; index++) {
+                for (int index = EmuConstants::MATERIAL_BEGIN; index <= EmuConstants::MATERIAL_END; index++)
+				{
                     tmpNPCType->armor_tint[index] = atoi(armorTint_row[index * 3]) << 16;
 					tmpNPCType->armor_tint[index] |= atoi(armorTint_row[index * 3 + 1]) << 8;
 					tmpNPCType->armor_tint[index] |= atoi(armorTint_row[index * 3 + 2]);
 					tmpNPCType->armor_tint[index] |= (tmpNPCType->armor_tint[index]) ? (0xFF << 24) : 0;
                 }
             }
-        } else
-            armor_tint_id = 0;
+        }
+		// Try loading npc_types tint fields if armor tint is 0 or query failed to get results
+		if (armor_tint_id == 0)
+		{
+			for (int index = MaterialChest; index < _MaterialCount; index++)
+			{
+				tmpNPCType->armor_tint[index] = tmpNPCType->armor_tint[0];
+			}
+		}
 
 		tmpNPCType->see_invis = atoi(row[67]);
 		tmpNPCType->see_invis_undead = atoi(row[68]) == 0? false: true;	// Set see_invis_undead flag
-		if (row[68] != nullptr)
+		if (row[69] != nullptr)
 			strn0cpy(tmpNPCType->lastname, row[69], 32);
 
 		tmpNPCType->qglobal = atoi(row[70]) == 0? false: true;	// qglobal

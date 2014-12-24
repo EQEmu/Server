@@ -1,8 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 12/24/2014 ==
-Trevius: (RoF+) Added herosforgemodel field to the npc_types table.  Not fully functional yet for NPCs (currently only displays helm correctly).
+Trevius: (RoF+) Added herosforgemodel field to the npc_types table.
 Trevius: (RoF2) Updated item links from #npcstat command output.
+Trevius: (RoF+) Implemented Hero's Forge Armor for NPCs.  Set the herosforgemodel field in npc_types table to the model (example: 84 for full set, or 12107 for robe).
+Trevius: (RoF+) Hero's Forge Armor now overrides NPC texture settings.  To display Hero's Forge Armor Helms, set helmtexture field to anything other than 0.
 
 == 12/23/2014 ==
 Uleat: Tidied up some ItemInst* declarations and added some nullptr checks.
