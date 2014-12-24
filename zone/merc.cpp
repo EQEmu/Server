@@ -4644,13 +4644,6 @@ const char* Merc::GetRandomName(){
 	return name;
 }
 
-bool Compare_Merc_Spells(MercSpell i, MercSpell j);
-
-bool Compare_Merc_Spells(MercSpell i, MercSpell j)
-{
-	return(i.slot > j.slot);
-}
-
 bool Merc::LoadMercSpells() {
 	// loads mercs spells into list
 	merc_spells.clear();
@@ -4683,7 +4676,9 @@ bool Merc::LoadMercSpells() {
 				AddProcToWeapon(mercSpellEntryItr->spellid, true, mercSpellEntryItr->proc_chance);
 		}
 	}
-	std::sort(merc_spells.begin(), merc_spells.end(), Compare_Merc_Spells);
+	std::sort(merc_spells.begin(), merc_spells.end(), [](const MercSpell& a, const MercSpell& b) {
+		return a.slot > b.slot;
+	});
 
 	if (merc_spells.size() == 0)
 		AIautocastspell_timer->Disable();

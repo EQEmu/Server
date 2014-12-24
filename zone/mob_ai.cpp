@@ -2334,7 +2334,6 @@ create table npc_spells_entries (
 
 bool IsSpellInList(DBnpcspells_Struct* spell_list, int16 iSpellID);
 bool IsSpellEffectInList(DBnpcspellseffects_Struct* spelleffect_list, uint16 iSpellEffectID, int32 base, int32 limit, int32 max);
-bool Compare_AI_Spells(AISpells_Struct i, AISpells_Struct j);
 
 bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 	// ok, this function should load the list, and the parent list then shove them into the struct and sort
@@ -2459,7 +2458,9 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 				spell_list->entries[i].resist_adjust);
 		}
 	}
-	std::sort(AIspells.begin(), AIspells.end(), Compare_AI_Spells);
+	std::sort(AIspells.begin(), AIspells.end(), [](const AISpells_Struct& a, const AISpells_Struct& b) {
+		return a.priority > b.priority;
+	});
 
 	if (IsValidSpell(attack_proc_spell))
 		AddProcToWeapon(attack_proc_spell, true, proc_chance);
@@ -2597,11 +2598,6 @@ bool IsSpellInList(DBnpcspells_Struct* spell_list, int16 iSpellID) {
 			return true;
 	}
 	return false;
-}
-
-bool Compare_AI_Spells(AISpells_Struct i, AISpells_Struct j)
-{
-	return(i.priority > j.priority);
 }
 
 // adds a spell to the list, taking into account priority and resorting list as needed.
