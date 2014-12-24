@@ -386,8 +386,8 @@ NPCType Bot::FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::str
 
 	BotNPCType.npc_id = 0;
 	BotNPCType.texture = 0;
-	BotNPCType.d_meele_texture1 = 0;
-	BotNPCType.d_meele_texture2 = 0;
+	BotNPCType.d_melee_texture1 = 0;
+	BotNPCType.d_melee_texture2 = 0;
 	BotNPCType.qglobal = false;
 	BotNPCType.attack_speed = 0;
 	BotNPCType.runspeed = 1.25;
@@ -431,8 +431,8 @@ NPCType Bot::CreateDefaultNPCTypeStructForBot(std::string botName, std::string b
 	Result.hp_regen = 1;
 	Result.mana_regen = 1;
 	Result.texture = 0;
-	Result.d_meele_texture1 = 0;
-	Result.d_meele_texture2 = 0;
+	Result.d_melee_texture1 = 0;
+	Result.d_melee_texture2 = 0;
 	Result.qglobal = false;
 	Result.npc_spells_id = 0;
 	Result.attack_speed = 0;

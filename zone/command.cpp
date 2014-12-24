@@ -6732,7 +6732,7 @@ void command_npcedit(Client *c, const Seperator *sep)
         c->Message(15,"NPCID %u will have item graphic %i set to his primary on repop.",
                         npcTypeID, atoi(sep->arg[2]));
 
-		std::string query = StringFormat("UPDATE npc_types SET d_meele_texture1 = %i WHERE id = %i",
+		std::string query = StringFormat("UPDATE npc_types SET d_melee_texture1 = %i WHERE id = %i",
                                         atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
@@ -6743,7 +6743,7 @@ void command_npcedit(Client *c, const Seperator *sep)
         c->Message(15,"NPCID %u will have item graphic %i set to his secondary on repop.",
                         npcTypeID, atoi(sep->arg[2]));
 
-		std::string query = StringFormat("UPDATE npc_types SET d_meele_texture2 = %i WHERE id = %i",
+		std::string query = StringFormat("UPDATE npc_types SET d_melee_texture2 = %i WHERE id = %i",
                                         atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());

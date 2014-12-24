@@ -844,8 +844,8 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 
 	make_npc->loottable_id = 0;
 	make_npc->merchanttype = 0;
-	make_npc->d_meele_texture1 = 0;
-	make_npc->d_meele_texture2 = 0;
+	make_npc->d_melee_texture1 = 0;
+	make_npc->d_melee_texture2 = 0;
 
 	NPC* npca = new NPC(make_npc, 0, GetX(), GetY(), GetZ(), GetHeading(), FlyMode3);
 
