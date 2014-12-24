@@ -4413,9 +4413,7 @@ struct EvolvingItem {
 
 struct ItemSerializationHeaderFinish
 {
-/*079*/	uint16 ornamentIcon;
-/*081*/	uint8 unknown061;	// 0 - Add Evolving Item struct if this isn't set to 0?
-/*082*/	uint8 unknown062;	// 0
+/*079*/	uint32 ornamentIcon;
 /*083*/	int32 unknowna1;	// 0xffffffff
 /*087*/	uint32 ornamentHeroModel;	// 0
 /*091*/	uint8 unknown063;	// 0

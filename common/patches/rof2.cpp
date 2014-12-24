@@ -4877,28 +4877,9 @@ namespace RoF2
 			ss.write((const char*)&evotop, sizeof(RoF2::structs::EvolvingItem));
 		}
 		//ORNAMENT IDFILE / ICON
-		uint16 ornaIcon = 0;
-		int32 heroModel = 0;
-		/*
-		if (inst->GetOrnamentationAug(ornamentationAugtype))
-		{
-			const Item_Struct *aug_weap = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
-			//Mainhand
-			ss.write(aug_weap->IDFile, strlen(aug_weap->IDFile));
-			ss.write((const char*)&null_term, sizeof(uint8));
-			//Offhand
-			ss.write(aug_weap->IDFile, strlen(aug_weap->IDFile));
-			ss.write((const char*)&null_term, sizeof(uint8));
-			//Icon
-			ornaIcon = aug_weap->Icon;
-			if (aug_weap->HerosForgeModel > 0)
-			{
-				heroModel = (aug_weap->HerosForgeModel * 100) + Inventory::CalcMaterialFromSlot(slot_id_in);
-			}
-		}
-		else 
-		*/
-			
+		uint32 ornaIcon = 0;
+		uint32 heroModel = 0;
+
 		if (inst->GetOrnamentationIDFile() && inst->GetOrnamentationIcon())
 		{
 			char tmp[30]; memset(tmp, 0x0, 30); sprintf(tmp, "IT%d", inst->GetOrnamentationIDFile());
@@ -4919,8 +4900,6 @@ namespace RoF2
 
 		RoF2::structs::ItemSerializationHeaderFinish hdrf;
 		hdrf.ornamentIcon = ornaIcon;
-		hdrf.unknown061 = 0;
-		hdrf.unknown062 = 0;
 		hdrf.unknowna1 = 0xffffffff;
 		hdrf.ornamentHeroModel = heroModel;
 		hdrf.unknown063 = 0;
