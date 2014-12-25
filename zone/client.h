@@ -815,6 +815,7 @@ public:
 	void SetStats(uint8 type,int16 set_val);
 	void IncStats(uint8 type,int16 increase_val);
 	void DropItem(int16 slot_id);
+	bool MakeItemLink(char* &ret_link, const Item_Struct* item, uint32 aug0=0, uint32 aug1=0, uint32 aug2=0, uint32 aug3=0, uint32 aug4=0, uint32 aug5=0);
 	bool MakeItemLink(char* &ret_link, const ItemInst* inst);
 	int GetItemLinkHash(const ItemInst* inst);
 	void SendItemLink(const ItemInst* inst, bool sendtoall=false);

@@ -1027,23 +1027,22 @@ void Client::MoveItemCharges(ItemInst &from, int16 to_slot, uint8 type)
 	}
 }
 
-bool Client::MakeItemLink(char* &ret_link, const ItemInst *inst) {
+bool Client::MakeItemLink(char* &ret_link, const Item_Struct *item, uint32 aug0, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5) {
 	//we're sending back the entire "link", minus the null characters & item name
 	//that way, we can use it for regular links & Task links
 	//note: initiator needs to pass us ret_link
 
-/*
+	/*
 	--- Usage ---
 	Chat: "%c" "%s" "%s" "%c", 0x12, ret_link, inst->GetItem()->name, 0x12
 	Task: "<a WndNotify=\"27," "%s" "\">" "%s" "</a>", ret_link, inst->GetItem()->name
-		<a WndNotify="27,00960F000000000000000000000000000000000000000">Master's Book of Wood Elven Culture</a>
-		http://eqitems.13th-floor.org/phpBB2/viewtopic.php?p=510#510
-*/
+	<a WndNotify="27,00960F000000000000000000000000000000000000000">Master's Book of Wood Elven Culture</a>
+	http://eqitems.13th-floor.org/phpBB2/viewtopic.php?p=510#510
+	*/
 
-	if (!inst) //have to have an item to make the link
+	if (!item) //have to have an item to make the link
 		return false;
 
-	const Item_Struct* item = inst->GetItem();
 	//format:
 	//0	itemid	aug1	aug2	aug3	aug4	aug5	evolving?	loregroup	evolved level	hash
 	//0	00000	00000	00000	00000	00000	00000	0			0000		0				00000000
@@ -1057,16 +1056,18 @@ bool Client::MakeItemLink(char* &ret_link, const ItemInst *inst) {
 	//int hash = GetItemLinkHash(inst);	//eventually this will work (currently crashes zone), but for now we'll skip the extra overhead
 	if (GetClientVersion() >= EQClientRoF2)
 	{
-		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%01X" "%1X" "%04X" "%1X" "%05X" "%08X",
+		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%1X" "%04X" "%1X" "%05X" "%08X",
 			0,
 			item->ID,
-			inst->GetAugmentItemID(0),
-			inst->GetAugmentItemID(1),
-			inst->GetAugmentItemID(2),
-			inst->GetAugmentItemID(3),
-			inst->GetAugmentItemID(4),
-			inst->GetAugmentItemID(5),
+			aug0,
+			aug1,
+			aug2,
+			aug3,
+			aug4,
+			aug5,
+			//0, this, or below, needs to be activated..not sure which yet
 			evolving,
+			//0, this, or above, needs to be activated..not sure which yet
 			loregroup,
 			evolvedlevel,
 			0,
@@ -1078,54 +1079,70 @@ bool Client::MakeItemLink(char* &ret_link, const ItemInst *inst) {
 		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%05X" "%08X",
 			0,
 			item->ID,
-			inst->GetAugmentItemID(0),
-			inst->GetAugmentItemID(1),
-			inst->GetAugmentItemID(2),
-			inst->GetAugmentItemID(3),
-			inst->GetAugmentItemID(4),
-			inst->GetAugmentItemID(5),
+			aug0,
+			aug1,
+			aug2,
+			aug3,
+			aug4,
+			aug5,
 			evolving,
 			loregroup,
 			evolvedlevel,
 			0,
 			hash
-		);
+			);
 	}
 	else if (GetClientVersion() >= EQClientSoF)
 	{
 		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%05X" "%08X",
 			0,
 			item->ID,
-			inst->GetAugmentItemID(0),
-			inst->GetAugmentItemID(1),
-			inst->GetAugmentItemID(2),
-			inst->GetAugmentItemID(3),
-			inst->GetAugmentItemID(4),
+			aug0,
+			aug1,
+			aug2,
+			aug3,
+			aug4,
 			evolving,
 			loregroup,
 			evolvedlevel,
 			0,
 			hash
-		);
+			);
 	}
 	else
 	{
 		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%08X",
 			0,
 			item->ID,
-			inst->GetAugmentItemID(0),
-			inst->GetAugmentItemID(1),
-			inst->GetAugmentItemID(2),
-			inst->GetAugmentItemID(3),
-			inst->GetAugmentItemID(4),
+			aug0,
+			aug1,
+			aug2,
+			aug3,
+			aug4,
 			evolving,
 			loregroup,
 			evolvedlevel,
 			hash
-		);
+			);
 	}
 
 	return true;
+}
+
+bool Client::MakeItemLink(char* &ret_link, const ItemInst *inst) {
+	if (!inst)
+		return false;
+
+	return MakeItemLink(
+		ret_link,
+		inst->GetItem(),
+		inst->GetAugmentItemID(0),
+		inst->GetAugmentItemID(1),
+		inst->GetAugmentItemID(2),
+		inst->GetAugmentItemID(3),
+		inst->GetAugmentItemID(4),
+		inst->GetAugmentItemID(5)
+		);
 }
 
 int Client::GetItemLinkHash(const ItemInst* inst) {
