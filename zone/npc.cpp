@@ -517,7 +517,7 @@ void NPC::QueryLoot(Client* to)
 
 		to->MakeItemLink(itemLinkCore, item);
 		itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, item->Name, 0x12) : "null");
-		to->Message(0, "%s, ID: %u, Level: (min: , max: )", itemLink.c_str(), item->ID, (*cur)->min_level, (*cur)->max_level);
+		to->Message(0, "%s, ID: %u, Level: (min: %u, max: %u)", itemLink.c_str(), item->ID, (*cur)->min_level, (*cur)->max_level);
 
 		safe_delete_array(itemLinkCore);
 	}

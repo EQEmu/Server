@@ -815,8 +815,11 @@ public:
 	void SetStats(uint8 type,int16 set_val);
 	void IncStats(uint8 type,int16 increase_val);
 	void DropItem(int16 slot_id);
-	bool MakeItemLink(char* &ret_link, const Item_Struct* item, uint32 aug0=0, uint32 aug1=0, uint32 aug2=0, uint32 aug3=0, uint32 aug4=0, uint32 aug5=0);
+	bool MakeItemLink(char* &ret_link, const Item_Struct* item, uint32 aug0=0, uint32 aug1=0, uint32 aug2=0, uint32 aug3=0, uint32 aug4=0, uint32 aug5=0, uint8 evolving=0, uint8 evolvedlevel=0);
 	bool MakeItemLink(char* &ret_link, const ItemInst* inst);
+	bool MakeTaskLink(char* &ret_link);
+	bool MakeBlankLink(char* &ret_link);
+	static bool MakeBlankLink_(char* &ret_link);
 	int GetItemLinkHash(const ItemInst* inst);
 	void SendItemLink(const ItemInst* inst, bool sendtoall=false);
 	void SendLootItemInPacket(const ItemInst* inst, int16 slot_id);
@@ -834,11 +837,11 @@ public:
 
 	bool Hungry() const {if (GetGM()) return false; return m_pp.hunger_level <= 3000;}
 	bool Thirsty() const {if (GetGM()) return false; return m_pp.thirst_level <= 3000;}
-int32 GetHunger() const { return m_pp.hunger_level; }
-int32 GetThirst() const { return m_pp.thirst_level; }
-void SetHunger(int32 in_hunger);
-void SetThirst(int32 in_thirst);
-void SetConsumption(int32 in_hunger, int32 in_thirst);
+	int32 GetHunger() const { return m_pp.hunger_level; }
+	int32 GetThirst() const { return m_pp.thirst_level; }
+	void SetHunger(int32 in_hunger);
+	void SetThirst(int32 in_thirst);
+	void SetConsumption(int32 in_hunger, int32 in_thirst);
 
 	bool CheckTradeLoreConflict(Client* other);
 	void LinkDead();

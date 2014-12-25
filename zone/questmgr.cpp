@@ -2468,6 +2468,7 @@ const char* QuestManager::varlink(char* perltext, int item_id) {
 		return "INVALID ITEM ID IN VARLINK";
 	char* link = 0;
 	char* tempstr = 0;
+	// already uses Client::operator-based item link method
 	if (initiator->MakeItemLink(link, inst)) {	// make a link to the item
 		snprintf(perltext, 250, "%c%s%s%c", 0x12, link, inst->GetItem()->Name, 0x12);
 	}
@@ -2658,24 +2659,33 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 		sayid = sayid + 500000;
 
 	//Create the say link as an item link hash
-	char linktext[250];
+	char* link_core = nullptr;
+	std::string say_link;
 
 	if (initiator) {
-		if (initiator->GetClientVersion() >= EQClientRoF2)
-			sprintf(linktext, "%c%06X%s%s%c", 0x12, sayid, "00000000000000000000000000000000000000000000000000", LinkName, 0x12);
-		else if (initiator->GetClientVersion() >= EQClientRoF)
-			sprintf(linktext, "%c%06X%s%s%c", 0x12, sayid, "0000000000000000000000000000000000000000000000000", LinkName, 0x12);
-		else if (initiator->GetClientVersion() >= EQClientSoF)
-			sprintf(linktext, "%c%06X%s%s%c", 0x12, sayid, "00000000000000000000000000000000000000000000", LinkName, 0x12);
+		initiator->MakeBlankLink(link_core);
+
+		if (link_core)
+			say_link = StringFormat("%c%06x%s%s%c", 0x12, sayid, link_core, LinkName, 0x12);
 		else
-			sprintf(linktext, "%c%06X%s%s%c", 0x12, sayid, "000000000000000000000000000000000000000", LinkName, 0x12);
-	} else { // If no initiator, create an RoF2 saylink, since older clients handle RoF2 ones better than RoF2 handles older ones.
-		sprintf(linktext, "%c%06X%s%s%c", 0x12, sayid, "00000000000000000000000000000000000000000000000000", LinkName, 0x12);
+			say_link = "<CLIENT VERSION ERROR>";
+
+		safe_delete_array(link_core);
+	}
+	else { // If no initiator, create an RoF2 saylink, since older clients handle RoF2 ones better than RoF2 handles older ones.
+		Client::MakeBlankLink_(link_core); // Note: this is a global operator
 	}
 
-	strcpy(Phrase,linktext);
-	return Phrase;
+	if (say_link.length() > 250)
+		strcpy(Phrase, "<SAYLINK OVER-LENGTH ERROR>");
+	else if (say_link.length() == 0)
+		strcpy(Phrase, "<SAYLINK NULL-LENGTH ERROR>");
+	else
+		strcpy(Phrase, say_link.c_str());
 
+	// Why do we have '(char*)Phrase' as an argument and then return it?
+	// The current behavior of this function doesn't allow recursive action
+	return Phrase;
 }
 
 const char* QuestManager::getguildnamebyid(int guild_id) {

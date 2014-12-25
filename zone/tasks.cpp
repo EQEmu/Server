@@ -2743,17 +2743,17 @@ void TaskManager::SendSingleActiveTaskToClient(Client *c, int TaskIndex, bool Ta
 	}
 }
 
-void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceNumber, int StartTime, int Duration, bool BringUpTaskJournal) {
-
-
-	if((TaskID<1) || (TaskID>=MAXTASKS) || !Tasks[TaskID]) return;
+void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceNumber, int StartTime, int Duration, bool BringUpTaskJournal)
+{
+	if ((TaskID < 1) || (TaskID >= MAXTASKS) || !Tasks[TaskID])
+		return;
 
 	int PacketLength = sizeof(TaskDescriptionHeader_Struct) + strlen(Tasks[TaskID]->Title) + 1
 				+ sizeof(TaskDescriptionData1_Struct) + strlen(Tasks[TaskID]->Description) + 1
 				+ sizeof(TaskDescriptionData2_Struct) + 1 + sizeof(TaskDescriptionTrailer_Struct);
 
 	std::string RewardText;
-	int ItemID = 0;
+	int ItemID = NOT_USED;
 
 	// If there is an item make the Reward text into a link to the item (only the first item if a list
 	// is specified). I have been unable to get multiple item links to work.
@@ -2768,62 +2768,31 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 			if(ItemID < 0)
 				ItemID = 0;
 		}
+
 		if(ItemID) {
-			char *RewardTmp = 0;
-			if(strlen(Tasks[TaskID]->Reward) != 0) {
+			char* link_core = nullptr;
+			std::string reward_link;
 
-				switch(c->GetClientVersion()) {
-					case EQClientTitanium:
-					{
-						MakeAnyLenString(&RewardTmp, "%c%06X000000000000000000000000000000014505DC2%s%c",
-								0x12, ItemID, Tasks[TaskID]->Reward,0x12);
-						break;
-					}
-					case EQClientRoF:
-					{
-						MakeAnyLenString(&RewardTmp, "%c%06X0000000000000000000000000000000000000000014505DC2%s%c",
-								0x12, ItemID, Tasks[TaskID]->Reward,0x12);
-						break;
-					}
-					default:
-					{
-						// All clients after Titanium
-						MakeAnyLenString(&RewardTmp, "%c%06X00000000000000000000000000000000000014505DC2%s%c",
-								0x12, ItemID, Tasks[TaskID]->Reward,0x12);
-					}
-				}
+			c->MakeTaskLink(link_core);
 
+			if (link_core && (strlen(Tasks[TaskID]->Reward) != 0)) {
+				reward_link = StringFormat("%c%06x%s%s%c", 0x12, ItemID, link_core, Tasks[TaskID]->Reward, 0x12);
+			}
+			else if (link_core) {
+				const Item_Struct* Item = database.GetItem(ItemID);
+				if (Item)
+					reward_link = StringFormat("%c%06x%s%s%c", 0x12, ItemID, link_core, Item->Name, 0x12);
+				else
+					reward_link = "<ITEM ID ERROR>";
 			}
 			else {
-				const Item_Struct *Item = database.GetItem(ItemID);
-
-				if(Item) {
-
-					switch(c->GetClientVersion()) {
-						case EQClientTitanium:
-						{
-							MakeAnyLenString(&RewardTmp, "%c%06X000000000000000000000000000000014505DC2%s%c",
-									0x12, ItemID, Item->Name ,0x12);
-							break;
-						}
-						case EQClientRoF:
-						{
-							MakeAnyLenString(&RewardTmp, "%c%06X0000000000000000000000000000000000000000014505DC2%s%c",
-									0x12, ItemID, Item->Name ,0x12);
-							break;
-						}
-						default:
-						{
-							// All clients after Titanium
-							MakeAnyLenString(&RewardTmp, "%c%06X00000000000000000000000000000000000014505DC2%s%c",
-									0x12, ItemID, Item->Name ,0x12);
-						}
-					}
-				}
+				reward_link = "<CLIENT VERSION ERROR>";
 			}
 
-			if(RewardTmp) RewardText += RewardTmp;
-			safe_delete_array(RewardTmp);
+			if(reward_link.length() != 0)
+				RewardText += reward_link.c_str();
+
+			safe_delete_array(link_core);
 		}
 		else {
 			RewardText += Tasks[TaskID]->Reward;

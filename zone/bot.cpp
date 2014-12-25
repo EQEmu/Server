@@ -11718,7 +11718,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
 						return;
 					}
-					if(item2 == 0) {
+					if(item2 == nullptr) {
 						c->Message(15, "I need something for my %s (Item %i)", equipped[i], i);
 						continue;
 					}
@@ -11726,79 +11726,31 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						is2Hweapon = true;
 					}
 
-					char* itemLink = 0;
-					if((i == MainCharm) || (i == MainRange) || (i == MainPrimary) || (i == MainSecondary) || (i == MainAmmo)) {
-						if (c->GetClientVersion() >= EQClientSoF)
-						{
-							MakeAnyLenString(&itemLink, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%05X" "%08X",
-								0,
-								item2->ID,
-								item1->GetAugmentItemID(0),
-								item1->GetAugmentItemID(1),
-								item1->GetAugmentItemID(2),
-								item1->GetAugmentItemID(3),
-								item1->GetAugmentItemID(4),
-								0,
-								0,
-								0,
-								0,
-								0
-								);
-							c->Message(15, "Using %c%s%s%c in my %s (Item %i)", 0x12, itemLink, item2->Name, 0x12, equipped[i], i);
-						}
-						else
-						{
-							MakeAnyLenString(&itemLink, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%08X",
-								0,
-								item2->ID,
-								item1->GetAugmentItemID(0),
-								item1->GetAugmentItemID(1),
-								item1->GetAugmentItemID(2),
-								item1->GetAugmentItemID(3),
-								item1->GetAugmentItemID(4),
-								0,
-								0,
-								0,
-								0);
-							c->Message(15, "Using %c%s%s%c in my %s (Item %i)", 0x12, itemLink, item2->Name, 0x12, equipped[i], i);
-						}
-					}
-					else {
-						if (c->GetClientVersion() >= EQClientSoF)
-						{
-							MakeAnyLenString(&itemLink, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%05X" "%08X",
-								0,
-								item2->ID,
-								item1->GetAugmentItemID(0),
-								item1->GetAugmentItemID(1),
-								item1->GetAugmentItemID(2),
-								item1->GetAugmentItemID(3),
-								item1->GetAugmentItemID(4),
-								0,
-								0,
-								0,
-								0,
-								0
-								);
-							c->Message(15, "Using %c%s%s%c in my %s (Item %i)", 0x12, itemLink, item2->Name, 0x12, equipped[i], i);
-						}
-						else
-						{
-							MakeAnyLenString(&itemLink, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%08X",
-								0,
-								item2->ID,
-								item1->GetAugmentItemID(0),
-								item1->GetAugmentItemID(1),
-								item1->GetAugmentItemID(2),
-								item1->GetAugmentItemID(3),
-								item1->GetAugmentItemID(4),
-								0,
-								0,
-								0,
-								0);
-							c->Message(15, "Using %c%s%s%c in my %s (Item %i)", 0x12, itemLink, item2->Name, 0x12, equipped[i], i);
-						}
-					}
+					char* link_core = nullptr;
+					std::string link_base;
+
+					// I could not find a difference between the criteria positive code and the criteria negative code..
+					// ..so, I deleted the check (criteria: i = { MainCharm, MainRange, MainPrimary, MainSecondary, MainAmmo })
+
+					c->MakeItemLink(
+						link_core,
+						item2,
+						item1->GetAugmentItemID(0),
+						item1->GetAugmentItemID(1),
+						item1->GetAugmentItemID(2),
+						item1->GetAugmentItemID(3),
+						item1->GetAugmentItemID(4),
+						item1->GetAugmentItemID(5)
+						);
+
+					if (link_core)
+						link_base = StringFormat("%c%s%s%c", 0x12, link_core, item2->Name, 0x12);
+					else
+						link_base = "<CLIENT VERSION ERROR>";
+
+					c->Message(15, "Using %s in my %s (Item %i)", link_base.c_str(), equipped[i], i);
+
+					safe_delete_array(link_core);
 				}
 			}
 			else {

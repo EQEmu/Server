@@ -5632,75 +5632,74 @@ void command_givemoney(Client *c, const Seperator *sep)
 
 void command_itemsearch(Client *c, const Seperator *sep)
 {
-	if (sep->arg[1][0] == 0)
+	if (sep->arg[1][0] == 0) {
 		c->Message(0, "Usage: #itemsearch [search string]");
+	}
 	else
 	{
 		const char *search_criteria=sep->argplus[1];
 
-		const Item_Struct* item = 0;
+		const Item_Struct* item = nullptr;
 		if (Seperator::IsNumber(search_criteria)) {
 			item = database.GetItem(atoi(search_criteria));
-			if (item)
-				if (c->GetClientVersion() >= EQClientRoF2)
-				{
-					c->Message(0, "  %i: %c%06X00000000000000000000000000000000000000000000000000%s%c", (int)item->ID, 0x12, item->ID, item->Name, 0x12);
-				}
-				else if (c->GetClientVersion() >= EQClientRoF)
-				{
-					c->Message(0, "  %i: %c%06X0000000000000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
-				}
-				else if (c->GetClientVersion() >= EQClientSoF)
-				{
-					c->Message(0, "  %i: %c%06X00000000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
-				}
+			if (item) {
+				char* link_core = nullptr;
+				std::string link_base;
+
+				c->MakeItemLink(link_core, item);
+
+				if (link_core)
+					link_base = StringFormat("%c%s%s%c", 0x12, link_core, item->Name, 0x12);
 				else
-				{
-					c->Message(0, "  %i: %c%06X000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
-				}
-			else
+					link_base = "<CLIENT VERSION ERROR>";
+
+				c->Message(0, "%i: %s", (int)item->ID, link_base.c_str());
+
+				safe_delete_array(link_core);
+			}
+			else {
 				c->Message(0, "Item #%s not found", search_criteria);
+			}
+
 			return;
 		}
 
-		int count = 0;
+		int count = NOT_USED;
 		char sName[64];
 		char sCriteria[255];
 		strn0cpy(sCriteria, search_criteria, sizeof(sCriteria));
 		strupr(sCriteria);
 		char* pdest;
-		uint32 it = 0;
+		uint32 it = NOT_USED;
 		while ((item = database.IterateItems(&it))) {
 			strn0cpy(sName, item->Name, sizeof(sName));
 			strupr(sName);
 			pdest = strstr(sName, sCriteria);
 			if (pdest != nullptr) {
-				if (c->GetClientVersion() >= EQClientRoF2)
-				{
-					c->Message(0, "  %i: %c%06X00000000000000000000000000000000000000000000000000%s%c", (int)item->ID, 0x12, item->ID, item->Name, 0x12);
-				}
-				else if (c->GetClientVersion() >= EQClientRoF)
-				{
-					c->Message(0, "  %i: %c%06X0000000000000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
-				}
-				else if (c->GetClientVersion() >= EQClientSoF)
-				{
-					c->Message(0, "  %i: %c%06X00000000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
-				}
+				char* link_core = nullptr;
+				std::string link_base;
+
+				c->MakeItemLink(link_core, item);
+
+				if (link_core)
+					link_base = StringFormat("%c%s%s%c", 0x12, link_core, item->Name, 0x12);
 				else
-				{
-					c->Message(0, "  %i: %c%06X000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
-				}
-				count++;
+					link_base = "<CLIENT VERSION ERROR>";
+
+				c->Message(0, "%i: %s", (int)item->ID, link_base.c_str());
+
+				safe_delete_array(link_core);
+				++count;
 			}
+
 			if (count == 50)
 				break;
 		}
+
 		if (count == 50)
 			c->Message(0, "50 items shown...too many results.");
 		else
 			c->Message(0, "%i items found", count);
-
 	}
 }
 

@@ -1027,7 +1027,7 @@ void Client::MoveItemCharges(ItemInst &from, int16 to_slot, uint8 type)
 	}
 }
 
-bool Client::MakeItemLink(char* &ret_link, const Item_Struct *item, uint32 aug0, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5) {
+bool Client::MakeItemLink(char* &ret_link, const Item_Struct *item, uint32 aug0, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint8 evolving, uint8 evolvedlevel) {
 	//we're sending back the entire "link", minus the null characters & item name
 	//that way, we can use it for regular links & Task links
 	//note: initiator needs to pass us ret_link
@@ -1049,13 +1049,19 @@ bool Client::MakeItemLink(char* &ret_link, const Item_Struct *item, uint32 aug0,
 	//length:
 	//1	5		5		5		5		5		5		1			4			1				8		= 45
 	//evolving item info: http://eqitems.13th-floor.org/phpBB2/viewtopic.php?t=145#558
-	uint8 evolving = 0;
-	uint16 loregroup = 0;
-	uint8 evolvedlevel = 0;
-	int hash = 0;
+
 	//int hash = GetItemLinkHash(inst);	//eventually this will work (currently crashes zone), but for now we'll skip the extra overhead
-	if (GetClientVersion() >= EQClientRoF2)
-	{
+	int hash = NOT_USED;
+	
+	// Tested with UF and RoF..there appears to be a problem with using non-augment arguments below...
+	// Currently, enabling them causes misalignments in what the client expects. I haven't looked
+	// into it further to determine the cause..but, the function is setup to accept the parameters.
+	// Note: some links appear with '00000' in front of the name..so, it's likely we need to send
+	// some additional information when certain parameters are true -U
+	switch (GetClientVersion()) {
+	case EQClientRoF2:
+		// This operator contains 14 parameter masks..but, only 13 parameter values.
+		// Even so, the client link appears ok... Need to figure out the discrepancy -U
 		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%1X" "%04X" "%1X" "%05X" "%08X",
 			0,
 			item->ID,
@@ -1065,17 +1071,14 @@ bool Client::MakeItemLink(char* &ret_link, const Item_Struct *item, uint32 aug0,
 			aug3,
 			aug4,
 			aug5,
-			//0, this, or below, needs to be activated..not sure which yet
-			evolving,
-			//0, this, or above, needs to be activated..not sure which yet
-			loregroup,
-			evolvedlevel,
+			0,//evolving,
+			0,//item->LoreGroup,
+			0,//evolvedlevel,
 			0,
 			hash
 			);
-	}
-	else if (GetClientVersion() >= EQClientRoF)
-	{
+		return true;
+	case EQClientRoF:
 		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%05X" "%08X",
 			0,
 			item->ID,
@@ -1085,15 +1088,16 @@ bool Client::MakeItemLink(char* &ret_link, const Item_Struct *item, uint32 aug0,
 			aug3,
 			aug4,
 			aug5,
-			evolving,
-			loregroup,
-			evolvedlevel,
+			0,//evolving,
+			0,//item->LoreGroup,
+			0,//evolvedlevel,
 			0,
 			hash
 			);
-	}
-	else if (GetClientVersion() >= EQClientSoF)
-	{
+		return true;
+	case EQClientUnderfoot:
+	case EQClientSoD:
+	case EQClientSoF:
 		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%05X" "%08X",
 			0,
 			item->ID,
@@ -1102,15 +1106,14 @@ bool Client::MakeItemLink(char* &ret_link, const Item_Struct *item, uint32 aug0,
 			aug2,
 			aug3,
 			aug4,
-			evolving,
-			loregroup,
-			evolvedlevel,
+			0,//evolving,
+			0,//item->LoreGroup,
+			0,//evolvedlevel,
 			0,
 			hash
 			);
-	}
-	else
-	{
+		return true;
+	case EQClientTitanium:
 		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%08X",
 			0,
 			item->ID,
@@ -1119,14 +1122,16 @@ bool Client::MakeItemLink(char* &ret_link, const Item_Struct *item, uint32 aug0,
 			aug2,
 			aug3,
 			aug4,
-			evolving,
-			loregroup,
-			evolvedlevel,
+			0,//evolving,
+			0,//item->LoreGroup,
+			0,//evolvedlevel,
 			hash
 			);
+		return true;
+	case EQClient62:
+	default:
+		return false;
 	}
-
-	return true;
 }
 
 bool Client::MakeItemLink(char* &ret_link, const ItemInst *inst) {
@@ -1141,8 +1146,62 @@ bool Client::MakeItemLink(char* &ret_link, const ItemInst *inst) {
 		inst->GetAugmentItemID(2),
 		inst->GetAugmentItemID(3),
 		inst->GetAugmentItemID(4),
-		inst->GetAugmentItemID(5)
+		inst->GetAugmentItemID(5),
+		inst->IsEvolving(),
+		inst->GetEvolveLvl()
 		);
+}
+
+bool Client::MakeTaskLink(char* &ret_link)
+{
+	switch (GetClientVersion()) {
+	case EQClientRoF2:
+		MakeAnyLenString(&ret_link, "00000000000000000000000000000000000000000014505DC2");
+		return true;
+	case EQClientRoF:
+		MakeAnyLenString(&ret_link, "0000000000000000000000000000000000000000014505DC2");
+		return true;
+	case EQClientUnderfoot:
+	case EQClientSoD:
+	case EQClientSoF:
+		MakeAnyLenString(&ret_link, "00000000000000000000000000000000000014505DC2");
+		return true;
+	case EQClientTitanium:
+		MakeAnyLenString(&ret_link, "000000000000000000000000000000014505DC2");
+		return true;
+	case EQClient62:
+	default:
+		return false;
+	}
+}
+
+bool Client::MakeBlankLink(char* &ret_link)
+{
+	switch (GetClientVersion()) {
+	case EQClientRoF2:
+		MakeAnyLenString(&ret_link, "00000000000000000000000000000000000000000000000000");
+		return true;
+	case EQClientRoF:
+		MakeAnyLenString(&ret_link, "0000000000000000000000000000000000000000000000000");
+		return true;
+	case EQClientUnderfoot:
+	case EQClientSoD:
+	case EQClientSoF:
+		MakeAnyLenString(&ret_link, "00000000000000000000000000000000000000000000");
+		return true;
+	case EQClientTitanium:
+		MakeAnyLenString(&ret_link, "000000000000000000000000000000000000000");
+		return true;
+	case EQClient62:
+	default:
+		return false;
+	}
+}
+
+bool Client::MakeBlankLink_(char* &ret_link)
+{
+	MakeAnyLenString(&ret_link, "00000000000000000000000000000000000000000000000000"); // should be same as newest/longest client in local operator
+	return true;
 }
 
 int Client::GetItemLinkHash(const ItemInst* inst) {
