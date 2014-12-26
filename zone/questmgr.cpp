@@ -2669,12 +2669,13 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 			say_link = StringFormat("%c%06x%s%s%c", 0x12, sayid, link_core, LinkName, 0x12);
 		else
 			say_link = "<CLIENT VERSION ERROR>";
-
-		safe_delete_array(link_core);
 	}
 	else { // If no initiator, create an RoF2 saylink, since older clients handle RoF2 ones better than RoF2 handles older ones.
 		Client::MakeBlankLink_(link_core); // Note: this is a global operator
+		say_link = StringFormat("%c%06x%s%s%c", 0x12, sayid, link_core, LinkName, 0x12);
 	}
+
+	safe_delete_array(link_core);
 
 	if (say_link.length() > 250)
 		strcpy(Phrase, "<SAYLINK OVER-LENGTH ERROR>");
