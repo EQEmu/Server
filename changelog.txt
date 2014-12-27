@@ -3,6 +3,24 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 == 12/27/2014 ==
 Akkadius: Add option to automatic database upgrade script 5) Download latest Opcodes from Github
 
+== 12/24/2014 ==
+Trevius: (RoF+) Added herosforgemodel field to the npc_types table.
+Trevius: (RoF2) Updated item links from #npcstat command output.
+Trevius: (RoF+) Implemented Hero's Forge Armor for NPCs.  Set the herosforgemodel field in npc_types table to the model (example: 84 for full set, or 12107 for robe).
+Trevius: (RoF+) Hero's Forge Armor now overrides NPC texture settings.  To display Hero's Forge Armor Helms, set helmtexture field to anything other than 0.
+
+== 12/23/2014 ==
+Uleat: Tidied up some ItemInst* declarations and added some nullptr checks.
+Trevius: (RoF+) Added support for Hero's Forge Robe Models.  Set herosforgemodel field in items table to exact model such as 11607, 11707, etc.
+
+== 12/22/2014 ==
+Trevius: (RoF2) Fixed Tracking.
+Trevius: (RoF+) Added a work-around for the cursor buffer issue.
+
+== 12/21/2014 ==
+Trevius: (RoF2) Fixed Extended Targets Window by correcting opcodes.
+Trevius: (RoF/RoF2) Fixed Guild Rank in the Player Profile, which prevents the guild rank message on login/zone.
+
 == 12/20/2014 ==
 Akkadius: Updated #cvs to display RoF2 Client Stream count
 
