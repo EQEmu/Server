@@ -155,6 +155,7 @@ sub ShowMenuPrompt {
         2 => \&database_dump_compress,
         3 => \&Run_Database_Check,
         4 => \&AA_Fetch,
+        5 => \&OpCodes_Fetch,
         0 => \&Exit,
     );
 
@@ -204,6 +205,7 @@ Database Management Menu (Please Select):
 		Ideal to perform before performing updates
 	3) $option[3]
 	4) AAs - Get Latest AA's from PEQ (This deletes AA's already in the database)
+	5) OPCodes - Download latest opcodes from repository
 	0) Exit
 	
 EO_MENU
@@ -302,6 +304,36 @@ sub AA_Fetch{
 	GetRemoteFile("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/peq_aa_tables.sql", "db_update/peq_aa_tables.sql");
 	print "\n\nInstalling AA Tables...\n";
 	print GetMySQLResultFromFile("db_update/peq_aa_tables.sql");
+	print "\nDone...\n\n";
+}
+
+#::: Fetch Latest Opcodes
+sub OpCodes_Fetch{
+	print "Pulling down latest opcodes...\n"; 
+	%opcodes = (
+		1 => ["opcodes", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/opcodes.conf"],
+		2 => ["mail_opcodes", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/mail_opcodes.conf"],
+		3 => ["Titanium", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_Titanium.conf"],
+		4 => ["Secrets of Faydwer", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_SoF.conf"],
+		5 => ["Seeds of Destruction", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_SoD.conf"],
+		6 => ["Underfoot", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_Underfoot.conf"],
+		7 => ["Rain of Fear", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_RoF.conf"],
+		8 => ["Rain of Fear 2", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_RoF2.conf"],
+	);
+	$loop = 1;
+	while($opcodes{$loop}[0]){ 
+		#::: Split the URL by the patches folder to get the file name from URL
+		@real_file = split("patches/", $opcodes{$loop}[1]);
+		$find = 0;
+		while($real_file[$find]){
+			$file_name = $real_file[$find]; 
+			$find++;
+		}
+		
+		print "\nDownloading (" . $opcodes{$loop}[0] . ") File: '" . $file_name . "'...\n\n"; 
+		GetRemoteFile($opcodes{$loop}[1], $file_name);
+		$loop++;
+	}
 	print "\nDone...\n\n";
 }
 
