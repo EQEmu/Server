@@ -28,7 +28,8 @@ struct ExtraAttackOptions;
 struct struct_HateList
 {
 	Mob *entity_on_hatelist;
-	int32 hatelist_damage, stored_hate_amount;
+	int32 hatelist_damage;
+	uint32 stored_hate_amount;
 	bool is_entity_frenzy;
 };
 
@@ -44,7 +45,7 @@ public:
 	Mob *GetRandomEntOnHateList();
 	Mob* GetEntWithMostHateOnList();
 
-	bool IsEntOnHateList(Mob *);
+	bool IsEntOnHateList(Mob *mob);
 	bool IsHateListEmpty();
 	bool RemoveEntFromHateList(Mob *ent);
 
@@ -60,7 +61,7 @@ public:
 	void IsEntityInFrenzyMode();
 	void PrintHateListToClient(Client *c);
 	void SetHateAmountOnEnt(Mob *other, uint32 in_hate, uint32 in_damage);
-	void SetOwner(Mob *new_hate_owner) { hate_owner = new_hate_owner; }
+	void SetHateOwner(Mob *new_hate_owner) { hate_owner = new_hate_owner; }
 	void SpellCast(Mob *caster, uint32 spell_id, float range, Mob *ae_center = nullptr);
 	void WipeHateList();
 

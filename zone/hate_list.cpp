@@ -152,7 +152,7 @@ Mob* HateList::GetDamageTopOnHateList(Mob* hater)
 }
 
 Mob* HateList::GetClosestEntOnHateList(Mob *hater) {
-	Mob* close = nullptr;
+	Mob* close_entity = nullptr;
 	float close_distance = 99999.9f;
 	float this_distance;
 
@@ -161,15 +161,15 @@ Mob* HateList::GetClosestEntOnHateList(Mob *hater) {
 		this_distance = (*iterator)->entity_on_hatelist->DistNoRootNoZ(*hater);
 		if ((*iterator)->entity_on_hatelist != nullptr && this_distance <= close_distance) {
 			close_distance = this_distance;
-			close = (*iterator)->entity_on_hatelist;
+			close_entity = (*iterator)->entity_on_hatelist;
 		}
 		++iterator;
 	}
 
-	if ((!close && hater->IsNPC()) || (close && close->DivineAura()))
-		close = hater->CastToNPC()->GetHateTop();
+	if ((!close_entity && hater->IsNPC()) || (close_entity && close_entity->DivineAura()))
+		close_entity = hater->CastToNPC()->GetHateTop();
 
-	return close;
+	return close_entity;
 }
 
 void HateList::AddEntToHateList(Mob *in_entity, int32 in_hate, int32 in_damage, bool in_is_entity_frenzied, bool iAddIfNotExist)
