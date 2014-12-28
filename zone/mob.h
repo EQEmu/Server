@@ -463,7 +463,7 @@ public:
 	Mob* GetHateTop() { return hate_list.GetEntWithMostHateInRange(this);}
 	Mob* GetHateDamageTop(Mob* other) { return hate_list.GetDamageTopOnHateList(other);}
 	Mob* GetHateRandom() { return hate_list.GetRandomEntOnHateList();}
-	Mob* GetHateMost() { return hate_list.GetEntWithMostHateOnList();}
+	Mob* GetHateMost() { return hate_list.GetEntWithMostHateInRange();}
 	bool IsEngaged() { return(!hate_list.IsHateListEmpty()); }
 	bool HateSummon();
 	void FaceTarget(Mob* MobToFace = 0);

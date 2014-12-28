@@ -1,19 +1,19 @@
-/*	 EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2015 EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; version 2 of the License.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; version 2 of the License.
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY except by those people which sell it, which
-	are required to give you total support for your newly bought product;
-	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY except by those people which sell it, which
+are required to give you total support for your newly bought product;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 #ifndef HATELIST_H
@@ -25,60 +25,66 @@ class Mob;
 class Raid;
 struct ExtraAttackOptions;
 
-struct struct_HateList {
+struct struct_HateList
+{
 	Mob *entity_on_hatelist;
-	uint32 hatelist_damage; 
-	uint32 stored_hate_amount;
+	int32 hatelist_damage, stored_hate_amount;
 	bool is_entity_frenzy;
 };
 
 class HateList
 {
-	public:
-		HateList();
-		~HateList();
+public:
+	HateList();
+	~HateList();
 
-		Mob *GetClosestEntOnHateList(Mob *hater);
-		Mob *GetDamageTopOnHateList(Mob *hater);
-		Mob *GetRandomEntOnHateList();
-		Mob *GetEntWithMostHateInRange(Mob *center);
-		Mob* GetEntWithMostHateOnList();
+	// adds a mob to the hatelist
+	void AddEntToHateList(Mob *ent, int32 in_hate = 0, int32 in_dam = 0, bool bFrenzy = false, bool iAddIfNotExist = true);
+	// sets existing hate
+	void SetHateAmountOnEnt(Mob *other, uint32 in_hate, uint32 in_dam);
+	// removes mobs from hatelist
+	bool RemoveEntFromHateList(Mob *ent);
+	// Remove all
+	void WipeHateList();
+	// ???
+	void DoFactionHits(int32 nfl_id);
+	// Gets Hate amount for mob
+	int32 GetEntHateAmount(Mob *ent, bool damage = false);
+	// gets top hated mob
+	Mob *GetEntWithMostHateInRange(Mob *center);
+	// gets any on the list
+	Mob *GetRandomEntOnHateList();
+	// get closest mob or nullptr if list empty
+	Mob *GetClosestEntOnHateList(Mob *hater);
+	// gets top mob or nullptr if hate list empty
+	Mob *GetDamageTopOnHateList(Mob *hater);
+	// used to check if mob is on hatelist
+	bool IsEntOnHateList(Mob *);
+	// used to remove or add frenzy hate
+	void IsEntityInFrenzyMode();
+	//Gets the target with the most hate regardless of things like frenzy etc.
+	Mob* GetEntWithMostHateInRange();
+	// Count 'Summoned' pets on hatelist
+	int GetSummonedPetCountOnHateList(Mob *hater);
 
-		bool IsEntOnHateList(Mob *mob);
-		bool IsHateListEmpty();
-		bool RemoveEntFromHateList(Mob *ent);
+	int AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOptions *opts);
 
-		int AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOptions *opts);
-		int GetSummonedPetCountOnHateList(Mob *hater);
+	void SpellCast(Mob *caster, uint32 spell_id, float range, Mob *ae_center = nullptr);
 
-		uint32 GetEntHateAmount(Mob *in_entity, bool damage = false);
+	bool IsHateListEmpty();
+	void PrintHateListToClient(Client *c);
 
-		void AddEntToHateList(Mob *in_entity, uint32 in_hate = 0, int32 in_damage = 0, bool in_is_frenzied = false, bool add_to_hate_list_if_not_exist = true);
-		void DoFactionHits(int32 npc_faction_level_id);
-		void IsEntityInFrenzyMode();
-		void PrintHateListToClient(Client *c);
-		void SetHateAmountOnEnt(Mob *other, uint32 in_hate, uint32 in_dam);
-		void SpellCast(Mob *caster, uint32 spell_id, float range, Mob *ae_center  = nullptr);
-		void WipeHateList(); 
+	//For accessing the hate list via perl; don't use for anything else
+	std::list<struct_HateList*>& GetHateList() { return list; }
 
+	//setting owner
+	void SetOwner(Mob *newOwner) { owner = newOwner; }
 
-		/* For accessing the hate list via perl; don't use for anything else */
-		std::list<struct_HateList*>& GetHateList()
-		{
-			return list;
-		}
-
-		/* Setting owner*/
-		void SetOwner(Mob *new_owner)
-		{
-			owner = new_owner;
-		}
-
-	protected:
-		struct_HateList* Find(Mob *ent);
-	private:
-		std::list<struct_HateList*> list;
-		Mob *owner;
+protected:
+	struct_HateList* Find(Mob *ent);
+private:
+	std::list<struct_HateList*> list;
+	Mob *owner;
 };
 
 #endif
