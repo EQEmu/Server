@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/28/2014 ==
+Uleat: Implemented class Client::TextLink as a replacement for the dozens of individual link formatters.
+
 == 12/27/2014 ==
 Akkadius: Add option to automatic database upgrade script 5) Download latest Opcodes from Github
 Trevius: (RoF2) Fixed dropping items on the ground so they go to ground level instead of camera height.

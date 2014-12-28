@@ -2770,29 +2770,18 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 		}
 
 		if(ItemID) {
-			char* link_core = nullptr;
-			std::string reward_link;
+			const Item_Struct* reward_item = database.GetItem(ItemID);
 
-			c->MakeTaskLink(link_core);
+			Client::TextLink linker;
+			linker.SetLinkType(linker.linkItemData);
+			linker.SetItemData(reward_item);
+			linker.SetClientVersion(c->GetClientVersion());
+			linker.SetTaskUse();
+			if (strlen(Tasks[TaskID]->Reward) != 0)
+				linker.SetProxyText(Tasks[TaskID]->Reward);
 
-			if (link_core && (strlen(Tasks[TaskID]->Reward) != 0)) {
-				reward_link = StringFormat("%c%06x%s%s%c", 0x12, ItemID, link_core, Tasks[TaskID]->Reward, 0x12);
-			}
-			else if (link_core) {
-				const Item_Struct* Item = database.GetItem(ItemID);
-				if (Item)
-					reward_link = StringFormat("%c%06x%s%s%c", 0x12, ItemID, link_core, Item->Name, 0x12);
-				else
-					reward_link = "<ITEM ID ERROR>";
-			}
-			else {
-				reward_link = "<CLIENT VERSION ERROR>";
-			}
-
-			if(reward_link.length() != 0)
-				RewardText += reward_link.c_str();
-
-			safe_delete_array(link_core);
+			auto reward_link = linker.GenerateLink();
+			RewardText += reward_link.c_str();
 		}
 		else {
 			RewardText += Tasks[TaskID]->Reward;

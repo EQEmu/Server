@@ -1027,7 +1027,8 @@ void Client::MoveItemCharges(ItemInst &from, int16 to_slot, uint8 type)
 	}
 }
 
-bool Client::MakeItemLink(char* &ret_link, const Item_Struct *item, uint32 aug0, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint8 evolving, uint8 evolvedlevel) {
+// TODO: needs clean-up to save references
+bool MakeItemLink(char* &ret_link, const Item_Struct *item, uint32 aug0, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint8 evolving, uint8 evolvedlevel) {
 	//we're sending back the entire "link", minus the null characters & item name
 	//that way, we can use it for regular links & Task links
 	//note: initiator needs to pass us ret_link
@@ -1058,7 +1059,8 @@ bool Client::MakeItemLink(char* &ret_link, const Item_Struct *item, uint32 aug0,
 	// into it further to determine the cause..but, the function is setup to accept the parameters.
 	// Note: some links appear with '00000' in front of the name..so, it's likely we need to send
 	// some additional information when certain parameters are true -U
-	switch (GetClientVersion()) {
+	//switch (GetClientVersion()) {
+	switch (0) {
 	case EQClientRoF2:
 		// This operator contains 14 parameter masks..but, only 13 parameter values.
 		// Even so, the client link appears ok... Need to figure out the discrepancy -U
@@ -1132,76 +1134,6 @@ bool Client::MakeItemLink(char* &ret_link, const Item_Struct *item, uint32 aug0,
 	default:
 		return false;
 	}
-}
-
-bool Client::MakeItemLink(char* &ret_link, const ItemInst *inst) {
-	if (!inst)
-		return false;
-
-	return MakeItemLink(
-		ret_link,
-		inst->GetItem(),
-		inst->GetAugmentItemID(0),
-		inst->GetAugmentItemID(1),
-		inst->GetAugmentItemID(2),
-		inst->GetAugmentItemID(3),
-		inst->GetAugmentItemID(4),
-		inst->GetAugmentItemID(5),
-		inst->IsEvolving(),
-		inst->GetEvolveLvl()
-		);
-}
-
-bool Client::MakeTaskLink(char* &ret_link)
-{
-	switch (GetClientVersion()) {
-	case EQClientRoF2:
-		MakeAnyLenString(&ret_link, "00000000000000000000000000000000000000000014505DC2");
-		return true;
-	case EQClientRoF:
-		MakeAnyLenString(&ret_link, "0000000000000000000000000000000000000000014505DC2");
-		return true;
-	case EQClientUnderfoot:
-	case EQClientSoD:
-	case EQClientSoF:
-		MakeAnyLenString(&ret_link, "00000000000000000000000000000000000014505DC2");
-		return true;
-	case EQClientTitanium:
-		MakeAnyLenString(&ret_link, "000000000000000000000000000000014505DC2");
-		return true;
-	case EQClient62:
-	default:
-		return false;
-	}
-}
-
-bool Client::MakeBlankLink(char* &ret_link)
-{
-	switch (GetClientVersion()) {
-	case EQClientRoF2:
-		MakeAnyLenString(&ret_link, "00000000000000000000000000000000000000000000000000");
-		return true;
-	case EQClientRoF:
-		MakeAnyLenString(&ret_link, "0000000000000000000000000000000000000000000000000");
-		return true;
-	case EQClientUnderfoot:
-	case EQClientSoD:
-	case EQClientSoF:
-		MakeAnyLenString(&ret_link, "00000000000000000000000000000000000000000000");
-		return true;
-	case EQClientTitanium:
-		MakeAnyLenString(&ret_link, "000000000000000000000000000000000000000");
-		return true;
-	case EQClient62:
-	default:
-		return false;
-	}
-}
-
-bool Client::MakeBlankLink_(char* &ret_link)
-{
-	MakeAnyLenString(&ret_link, "00000000000000000000000000000000000000000000000000"); // should be same as newest/longest client in local operator
-	return true;
 }
 
 int Client::GetItemLinkHash(const ItemInst* inst) {
@@ -1292,6 +1224,7 @@ int Client::GetItemLinkHash(const ItemInst* inst) {
 	return hash;
 }
 
+// This appears to still be in use... The core of this should be incorporated into class Client::TextLink
 void Client::SendItemLink(const ItemInst* inst, bool send_to_all)
 {
 /*

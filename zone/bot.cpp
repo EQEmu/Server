@@ -11699,58 +11699,47 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				const char* equipped[EmuConstants::EQUIPMENT_SIZE] = {"Charm", "Left Ear", "Head", "Face", "Right Ear", "Neck", "Shoulders", "Arms", "Back",
 					"Left Wrist", "Right Wrist", "Range", "Hands", "Primary Hand", "Secondary Hand",
 					"Left Finger", "Right Finger", "Chest", "Legs", "Feet", "Waist", "Ammo" };
-				const ItemInst* item1 = nullptr;
-				const Item_Struct* item2 = nullptr;
+				
+				const ItemInst* inst = nullptr;
+				const Item_Struct* item = nullptr;
 				bool is2Hweapon = false;
-				for(int i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; ++i)
-				{
+				
+				std::string item_link;
+				Client::TextLink linker;
+				linker.SetLinkType(linker.linkItemInst);
+				linker.SetClientVersion(c->GetClientVersion());
+
+				for(int i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; ++i) {
 					if((i == MainSecondary) && is2Hweapon) {
 						continue;
 					}
 
-					item1 = b->CastToBot()->GetBotItem(i);
-					if(item1)
-						item2 = item1->GetItem();
+					inst = b->CastToBot()->GetBotItem(i);
+					if (inst)
+						item = inst->GetItem();
 					else
-						item2 = nullptr;
+						item = nullptr;
 
 					if(!TempErrorMessage.empty()) {
 						c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
 						return;
 					}
-					if(item2 == nullptr) {
+					if(item == nullptr) {
 						c->Message(15, "I need something for my %s (Item %i)", equipped[i], i);
 						continue;
 					}
-					if((i == MainPrimary) && ((item2->ItemType == ItemType2HSlash) || (item2->ItemType == ItemType2HBlunt) || (item2->ItemType == ItemType2HPiercing))) {
+					if((i == MainPrimary) && ((item->ItemType == ItemType2HSlash) || (item->ItemType == ItemType2HBlunt) || (item->ItemType == ItemType2HPiercing))) {
 						is2Hweapon = true;
 					}
 
-					char* link_core = nullptr;
-					std::string link_base;
-
 					// I could not find a difference between the criteria positive code and the criteria negative code..
-					// ..so, I deleted the check (criteria: i = { MainCharm, MainRange, MainPrimary, MainSecondary, MainAmmo })
+					// ..so, I deleted the check (old criteria: i = { MainCharm, MainRange, MainPrimary, MainSecondary, MainAmmo })
+					
+					linker.SetItemInst(inst);
 
-					c->MakeItemLink(
-						link_core,
-						item2,
-						item1->GetAugmentItemID(0),
-						item1->GetAugmentItemID(1),
-						item1->GetAugmentItemID(2),
-						item1->GetAugmentItemID(3),
-						item1->GetAugmentItemID(4),
-						item1->GetAugmentItemID(5)
-						);
+					item_link = linker.GenerateLink();
 
-					if (link_core)
-						link_base = StringFormat("%c%s%s%c", 0x12, link_core, item2->Name, 0x12);
-					else
-						link_base = "<CLIENT VERSION ERROR>";
-
-					c->Message(15, "Using %s in my %s (Item %i)", link_base.c_str(), equipped[i], i);
-
-					safe_delete_array(link_core);
+					c->Message(15, "Using %s in my %s (Item %i)", item_link.c_str(), equipped[i], i);
 				}
 			}
 			else {

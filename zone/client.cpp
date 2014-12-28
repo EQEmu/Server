@@ -8258,3 +8258,236 @@ void Client::SendColoredText(uint32 color, std::string message)
 	safe_delete(outapp);
 }
 
+
+//
+// class Client::TextLink
+//
+std::string Client::TextLink::GenerateLink()
+{
+	m_Link.clear();
+	m_LinkBody.clear();
+	m_LinkText.clear();
+	
+	generate_body();
+	generate_text();
+	
+	if (m_LinkBody.length() && m_LinkText.length()) {
+		m_Link.append(StringFormat("%c", 0x12));
+		m_Link.append(m_LinkBody);
+		m_Link.append(m_LinkText);
+		m_Link.append(StringFormat("%c", 0x12));
+	}
+
+	if ((m_Link.length() == 0) || (m_Link.length() > 250)) {
+		m_Error = true;
+		m_Link = "<LINKER ERROR>";
+		_log(CHANNELS__ERROR, "TextLink::GenerateLink() failed to generate a useable text link (LinkType: %i, Lengths: {l: %u, b: %u, t: %u})",
+			m_LinkType, m_Link.length(), m_LinkBody.length(), m_LinkText.length());
+	}
+
+	return m_Link;
+}
+
+const char* Client::TextLink::GetLink()
+{
+	if (m_Link.length() == 0)
+		return nullptr;
+
+	return m_Link.c_str();
+}
+
+const char* Client::TextLink::GetLinkBody()
+{
+	if (m_LinkBody.length() == 0)
+		return nullptr;
+
+	return m_LinkBody.c_str();
+}
+
+const char* Client::TextLink::GetLinkText()
+{
+	if (m_LinkText.length() == 0)
+		return nullptr;
+
+	return m_LinkText.c_str();
+}
+
+std::string Client::TextLink::GetLinkString()
+{
+	if (m_Link.length() == 0)
+		return "";
+
+	return m_Link;
+}
+
+std::string Client::TextLink::GetLinkBodyString()
+{
+	if (m_LinkBody.length() == 0)
+		return "";
+
+	return m_LinkBody;
+}
+
+std::string Client::TextLink::GetLinkTextString()
+{
+	if (m_LinkText.length() == 0)
+		return "";
+
+	return m_LinkText;
+}
+
+void Client::TextLink::Reset()
+{
+	m_LinkType = linkBlank;
+	m_ItemData = nullptr;
+	m_LootData = nullptr;
+	m_ItemInst = nullptr;
+	m_ProxyItemID = NOT_USED;
+	m_ProxyText = nullptr;
+	m_TaskUse = false;
+	m_Link.clear();
+	m_LinkBody.clear();
+	m_LinkText.clear();
+	m_ClientVersion = EQClientUnknown;
+	m_Error = false;
+}
+
+void Client::TextLink::generate_body()
+{
+	enum { field_0 = 0, field_1, field_2, field_3, field_4, field_5, field_6, field_7, field_8, field_9, field_10, field_11, field_12, field_13 };
+	static const int field_count = 14;
+	static const bool field_use[_EQClientCount][field_count] = {
+		// 6.2:  MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"              "%1X" "%04X" "%1X"        "%08X"
+		// SoF:  MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"              "%1X" "%04X" "%1X" "%05X" "%08X"
+		// RoF:  MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"       "%1X" "%04X" "%1X" "%05X" "%08X"
+		// RoF2: MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%1X" "%04X" "%1X" "%05X" "%08X"
+
+//(RoF2)  %01x   %05x   %05x   %05x   %05x   %05x   %05x   %05x   %01x   %01x   %04x   %01x   %05x   %08x
+		{  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true }, // EQClientUnknown
+		{  true,  true,  true,  true,  true,  true,  true, false, false,  true,  true,  true, false,  true }, // EQClient6.2
+		{  true,  true,  true,  true,  true,  true,  true, false, false,  true,  true,  true, false,  true }, // EQClientTitanium
+		{  true,  true,  true,  true,  true,  true,  true, false, false,  true,  true,  true,  true,  true }, // EQClientSoF
+		{  true,  true,  true,  true,  true,  true,  true, false, false,  true,  true,  true,  true,  true }, // EQClientSoD
+		{  true,  true,  true,  true,  true,  true,  true, false, false,  true,  true,  true,  true,  true }, // EQClientUnderfoot
+		{  true,  true,  true,  true,  true,  true,  true,  true, false,  true,  true,  true,  true,  true }, // EQClientRoF
+		{  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true } // EQClientRoF2
+	};
+	
+/*%01X*/	uint8 unknown_0 = NOT_USED;
+/*%05X*/	uint32 item_id = NOT_USED;
+/*%05X*/	uint32 augment_0 = NOT_USED;
+/*%05X*/	uint32 augment_1 = NOT_USED;
+/*%05X*/	uint32 augment_2 = NOT_USED;
+/*%05X*/	uint32 augment_3 = NOT_USED;
+/*%05X*/	uint32 augment_4 = NOT_USED;
+/*%05X*/	uint32 augment_5 = NOT_USED;
+/*%01X*/	uint8 unknown_8 = NOT_USED;
+/*%01X*/	uint8 unknown_9 = NOT_USED;
+/*%04X*/	uint32 unknown_10 = NOT_USED;
+/*%01X*/	uint8 unknown_11 = NOT_USED;
+/*%05X*/	uint32 unknown_12 = NOT_USED;
+/*%08X*/	int hash = NOT_USED;
+	
+	switch (m_LinkType) {
+	case linkBlank:
+		break;
+	case linkItemData:
+		if (m_ItemData != nullptr) {
+			item_id = m_ItemData->ID;
+			// TODO: add hash call
+		}
+		break;
+	case linkLootItem:
+		if (m_LootData != nullptr) {
+			const Item_Struct* item_data = database.GetItem(m_LootData->item_id);
+			if (item_data == nullptr) { break; }
+			item_id = item_data->ID;
+			augment_0 = m_LootData->aug_1;
+			augment_1 = m_LootData->aug_2;
+			augment_2 = m_LootData->aug_3;
+			augment_3 = m_LootData->aug_4;
+			augment_4 = m_LootData->aug_5;
+			augment_5 = m_LootData->aug_6;
+			// TODO: add hash call
+		}
+		break;
+	case linkItemInst:
+		if (m_ItemInst != nullptr) {
+			if (m_ItemInst->GetItem() == nullptr) { break; }
+			item_id = m_ItemInst->GetItem()->ID;
+			augment_0 = m_ItemInst->GetAugmentItemID(0);
+			augment_1 = m_ItemInst->GetAugmentItemID(1);
+			augment_2 = m_ItemInst->GetAugmentItemID(2);
+			augment_3 = m_ItemInst->GetAugmentItemID(3);
+			augment_4 = m_ItemInst->GetAugmentItemID(4);
+			augment_5 = m_ItemInst->GetAugmentItemID(5);
+			// TODO: add hash call
+		}
+		break;
+	default:
+		break;
+	}
+	
+	if (m_ProxyItemID != NOT_USED) {
+		item_id = m_ProxyItemID;
+	}
+
+	if (m_TaskUse) {
+		hash = 0x0000000014505DC2;
+	}
+
+	if (field_use[m_ClientVersion][field_0]) { m_LinkBody.append(StringFormat("%01x", unknown_0)); }
+	if (field_use[m_ClientVersion][field_1]) { m_LinkBody.append(StringFormat("%05x", item_id)); }
+	if (field_use[m_ClientVersion][field_2]) { m_LinkBody.append(StringFormat("%05x", augment_0)); }
+	if (field_use[m_ClientVersion][field_3]) { m_LinkBody.append(StringFormat("%05x", augment_1)); }
+	if (field_use[m_ClientVersion][field_4]) { m_LinkBody.append(StringFormat("%05x", augment_2)); }
+	if (field_use[m_ClientVersion][field_5]) { m_LinkBody.append(StringFormat("%05x", augment_3)); }
+	if (field_use[m_ClientVersion][field_6]) { m_LinkBody.append(StringFormat("%05x", augment_4)); }
+	if (field_use[m_ClientVersion][field_7]) { m_LinkBody.append(StringFormat("%05x", augment_5)); }
+	if (field_use[m_ClientVersion][field_8]) { m_LinkBody.append(StringFormat("%01x", unknown_8)); }
+	if (field_use[m_ClientVersion][field_9]) { m_LinkBody.append(StringFormat("%01x", unknown_9)); }
+	if (field_use[m_ClientVersion][field_10]) { m_LinkBody.append(StringFormat("%04x", unknown_10)); }
+	if (field_use[m_ClientVersion][field_11]) { m_LinkBody.append(StringFormat("%01x", unknown_11)); }
+	if (field_use[m_ClientVersion][field_12]) { m_LinkBody.append(StringFormat("%05x", unknown_12)); }
+	if (field_use[m_ClientVersion][field_13]) { m_LinkBody.append(StringFormat("%08x", hash)); }
+}
+
+void Client::TextLink::generate_text()
+{
+	if (m_ProxyText != nullptr) {
+		m_LinkText = m_ProxyText;
+		return;
+	}
+
+	switch (m_LinkType) {
+	case linkBlank:
+		break;
+	case linkItemData:
+		if (m_ItemData != nullptr) {
+			m_LinkText = m_ItemData->Name;
+			return;
+		}
+		break;
+	case linkLootItem:
+		if (m_LootData != nullptr) {
+			const Item_Struct* item_data = database.GetItem(m_LootData->item_id);
+			if (item_data != nullptr) {
+				m_LinkText = item_data->Name;
+				return;
+			}
+		}
+		break;
+	case linkItemInst:
+		if (m_ItemInst != nullptr) {
+			if (m_ItemInst->GetItem() != nullptr) {
+				m_LinkText = m_ItemInst->GetItem()->Name;
+				return;
+			}
+		}
+		break;
+	default:
+		break;
+	}
+
+	m_LinkText = "null";
+}

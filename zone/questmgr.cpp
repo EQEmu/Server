@@ -1227,15 +1227,18 @@ void QuestManager::settime(uint8 new_hour, uint8 new_min) {
 void QuestManager::itemlink(int item_id) {
 	QuestManagerCurrentQuestVars();
 	if (initiator) {
-		const ItemInst* inst = database.CreateItem(item_id);
-		char* link = 0;
-		if (inst == nullptr)
+		const Item_Struct* item = database.GetItem(item_id);
+		if (item == nullptr)
 			return;
-		if (initiator->MakeItemLink(link, inst))
-			initiator->Message(0, "%s tells you, %c%s%s%c", owner->GetCleanName(),
-					0x12, link, inst->GetItem()->Name, 0x12);
-		safe_delete_array(link);
-		safe_delete(inst);
+
+		Client::TextLink linker;
+		linker.SetLinkType(linker.linkItemData);
+		linker.SetItemData(item);
+		linker.SetClientVersion(initiator->GetClientVersion());
+
+		auto item_link = linker.GenerateLink();
+
+		initiator->Message(0, "%s tells you, %s", owner->GetCleanName(), item_link.c_str());
 	}
 }
 
@@ -2463,17 +2466,19 @@ uint32 QuestManager::MerchantCountItem(uint32 NPCid, uint32 itemid) {
 // Item Link for use in Variables - "my $example_link = quest::varlink(item_id);"
 const char* QuestManager::varlink(char* perltext, int item_id) {
 	QuestManagerCurrentQuestVars();
-	const ItemInst* inst = database.CreateItem(item_id);
-	if (!inst)
+	const Item_Struct* item = database.GetItem(item_id);
+	if (!item)
 		return "INVALID ITEM ID IN VARLINK";
-	char* link = 0;
-	char* tempstr = 0;
-	// already uses Client::operator-based item link method
-	if (initiator->MakeItemLink(link, inst)) {	// make a link to the item
-		snprintf(perltext, 250, "%c%s%s%c", 0x12, link, inst->GetItem()->Name, 0x12);
-	}
-	safe_delete_array(link);	// MakeItemLink() uses new also
-	safe_delete(inst);
+
+	Client::TextLink linker;
+	linker.SetLinkType(linker.linkItemData);
+	linker.SetItemData(item);
+	if (initiator)
+		linker.SetClientVersion(initiator->GetClientVersion());
+
+	auto item_link = linker.GenerateLink();
+	strcpy(perltext, item_link.c_str()); // link length is currently ranged from 1 to 250 in TextLink::GenerateLink()
+	
 	return perltext;
 }
 
@@ -2659,33 +2664,15 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 		sayid = sayid + 500000;
 
 	//Create the say link as an item link hash
-	char* link_core = nullptr;
-	std::string say_link;
+	Client::TextLink linker;
+	linker.SetProxyItemID(sayid);
+	linker.SetProxyText(LinkName);
+	if (initiator)
+		linker.SetClientVersion(initiator->GetClientVersion());
 
-	if (initiator) {
-		initiator->MakeBlankLink(link_core);
+	auto say_link = linker.GenerateLink();
+	strcpy(Phrase, say_link.c_str());  // link length is currently ranged from 1 to 250 in TextLink::GenerateLink()
 
-		if (link_core)
-			say_link = StringFormat("%c%06x%s%s%c", 0x12, sayid, link_core, LinkName, 0x12);
-		else
-			say_link = "<CLIENT VERSION ERROR>";
-	}
-	else { // If no initiator, create an RoF2 saylink, since older clients handle RoF2 ones better than RoF2 handles older ones.
-		Client::MakeBlankLink_(link_core); // Note: this is a global operator
-		say_link = StringFormat("%c%06x%s%s%c", 0x12, sayid, link_core, LinkName, 0x12);
-	}
-
-	safe_delete_array(link_core);
-
-	if (say_link.length() > 250)
-		strcpy(Phrase, "<SAYLINK OVER-LENGTH ERROR>");
-	else if (say_link.length() == 0)
-		strcpy(Phrase, "<SAYLINK NULL-LENGTH ERROR>");
-	else
-		strcpy(Phrase, say_link.c_str());
-
-	// Why do we have '(char*)Phrase' as an argument and then return it?
-	// The current behavior of this function doesn't allow recursive action
 	return Phrase;
 }
 

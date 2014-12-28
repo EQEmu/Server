@@ -512,14 +512,14 @@ void NPC::QueryLoot(Client* to)
 			continue;
 		}
 
-		char* itemLinkCore = nullptr;
-		std::string itemLink;
+		Client::TextLink linker;
+		linker.SetLinkType(linker.linkItemData);
+		linker.SetItemData(item);
+		linker.SetClientVersion(to->GetClientVersion());
 
-		to->MakeItemLink(itemLinkCore, item);
-		itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, item->Name, 0x12) : "null");
-		to->Message(0, "%s, ID: %u, Level: (min: %u, max: %u)", itemLink.c_str(), item->ID, (*cur)->min_level, (*cur)->max_level);
-
-		safe_delete_array(itemLinkCore);
+		auto item_link = linker.GenerateLink();
+		
+		to->Message(0, "%s, ID: %u, Level: (min: %u, max: %u)", item_link.c_str(), item->ID, (*cur)->min_level, (*cur)->max_level);
 	}
 
 	to->Message(0, "%i items on %s.", x, GetName());
