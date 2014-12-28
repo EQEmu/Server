@@ -3656,7 +3656,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 								spelltar->AddToHateList(this, aggro);
 					}
 					else{
-						int32 newhate = spelltar->GetHateAmount(this) + aggro;
+						uint32 newhate = spelltar->GetHateAmount(this) + aggro;
 						if (newhate < 1) {
 							spelltar->SetHateAmountOnEnt(this,1);
 						} else {

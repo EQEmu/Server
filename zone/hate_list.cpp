@@ -158,8 +158,11 @@ Mob* HateList::GetClosestEntOnHateList(Mob *hater)
 	return close_entity;
 }
 
-void HateList::AddEntToHateList(Mob *in_entity, int32 in_hate, int32 in_damage, bool in_is_entity_frenzy, bool iAddIfNotExist)
+#include <iostream>
+void HateList::AddEntToHateList(Mob *in_entity, uint32 in_hate, int32 in_damage, bool in_is_entity_frenzy, bool iAddIfNotExist)
 {
+	std::cout << "AddEntToHateList name: " << owner->GetCleanName() << " in_hate " << in_hate << " in_damage " << in_damage << std::endl;
+
 	if (!in_entity) {
 		return;
 	}

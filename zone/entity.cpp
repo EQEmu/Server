@@ -2914,7 +2914,7 @@ void EntityList::ClearZoneFeignAggro(Client *targ)
 	}
 }
 
-void EntityList::AggroZone(Mob *who, int hate)
+void EntityList::AggroZone(Mob *who, uint32 hate)
 {
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
