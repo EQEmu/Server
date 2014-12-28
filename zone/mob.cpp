@@ -401,7 +401,7 @@ Mob::Mob(const char* in_name,
 	PathingRouteUpdateTimerLong = new Timer(RuleI(Pathing, RouteUpdateFrequencyLong));
 	DistractedFromGrid = false;
 	PathingTraversedNodes = 0;
-	hate_list.SetOwner(this);
+	hate_list.SetHateOwner(this);
 
 	m_AllowBeneficial = false;
 	m_DisableMelee = false;
