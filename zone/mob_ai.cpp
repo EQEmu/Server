@@ -819,7 +819,7 @@ void Client::AI_Process()
 		{
 			if(AItarget_check_timer->Check())
 			{
-				SetTarget(hate_list.GetEntWithMostHateInRange(this));
+				SetTarget(hate_list.GetEntWithMostHateOnList(this));
 			}
 		}
 
@@ -1096,11 +1096,11 @@ void Mob::AI_Process() {
 			{
 				if (IsFocused()) {
 					if (!target) {
-						SetTarget(hate_list.GetEntWithMostHateInRange(this));
+						SetTarget(hate_list.GetEntWithMostHateOnList(this));
 					}
 				} else {
 					if (!ImprovedTaunt())
-						SetTarget(hate_list.GetEntWithMostHateInRange(this));
+						SetTarget(hate_list.GetEntWithMostHateOnList(this));
 				}
 
 			}
@@ -1374,7 +1374,7 @@ void Mob::AI_Process() {
 			//underwater stuff only works with water maps in the zone!
 			if(IsNPC() && CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
 				if(!zone->watermap->InLiquid(target->GetX(), target->GetY(), target->GetZ())) {
-					Mob *tar = hate_list.GetEntWithMostHateInRange(this);
+					Mob *tar = hate_list.GetEntWithMostHateOnList(this);
 					if(tar == target) {
 						WipeHateList();
 						Heal();

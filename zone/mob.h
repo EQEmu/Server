@@ -460,10 +460,10 @@ public:
 	void DoubleAggro(Mob *other) { uint32 in_hate = GetHateAmount(other); SetHateAmountOnEnt(other, (in_hate ? in_hate * 2 : 1)); }
 	uint32 GetHateAmount(Mob* tmob, bool is_dam = false) { return hate_list.GetEntHateAmount(tmob,is_dam);}
 	uint32 GetDamageAmount(Mob* tmob) { return hate_list.GetEntHateAmount(tmob, true);}
-	Mob* GetHateTop() { return hate_list.GetEntWithMostHateInRange(this);}
+	Mob* GetHateTop() { return hate_list.GetEntWithMostHateOnList(this);}
 	Mob* GetHateDamageTop(Mob* other) { return hate_list.GetDamageTopOnHateList(other);}
 	Mob* GetHateRandom() { return hate_list.GetRandomEntOnHateList();}
-	Mob* GetHateMost() { return hate_list.GetEntWithMostHateInRange();}
+	Mob* GetHateMost() { return hate_list.GetEntWithMostHateOnList();}
 	bool IsEngaged() { return(!hate_list.IsHateListEmpty()); }
 	bool HateSummon();
 	void FaceTarget(Mob* MobToFace = 0);

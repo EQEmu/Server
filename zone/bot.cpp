@@ -3424,7 +3424,7 @@ void Bot::AI_Process() {
 		if(IsRooted())
 			SetTarget(hate_list.GetClosestEntOnHateList(this));
 		else
-			SetTarget(hate_list.GetEntWithMostHateInRange(this));
+			SetTarget(hate_list.GetEntWithMostHateOnList(this));
 
 		if(!GetTarget())
 			return;
@@ -3793,7 +3793,7 @@ void Bot::PetAIProcess() {
 		if (botPet->IsRooted())
 			botPet->SetTarget(hate_list.GetClosestEntOnHateList(botPet));
 		else
-			botPet->SetTarget(hate_list.GetEntWithMostHateInRange(botPet));
+			botPet->SetTarget(hate_list.GetEntWithMostHateOnList(botPet));
 
 		// Let's check if we have a los with our target.
 		// If we don't, our hate_list is wiped.

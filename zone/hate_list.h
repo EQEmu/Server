@@ -38,53 +38,38 @@ public:
 	HateList();
 	~HateList();
 
-	// adds a mob to the hatelist
-	void AddEntToHateList(Mob *ent, int32 in_hate = 0, int32 in_dam = 0, bool bFrenzy = false, bool iAddIfNotExist = true);
-	// sets existing hate
-	void SetHateAmountOnEnt(Mob *other, uint32 in_hate, uint32 in_dam);
-	// removes mobs from hatelist
-	bool RemoveEntFromHateList(Mob *ent);
-	// Remove all
-	void WipeHateList();
-	// ???
-	void DoFactionHits(int32 nfl_id);
-	// Gets Hate amount for mob
-	int32 GetEntHateAmount(Mob *ent, bool damage = false);
-	// gets top hated mob
-	Mob *GetEntWithMostHateInRange(Mob *center);
-	// gets any on the list
-	Mob *GetRandomEntOnHateList();
-	// get closest mob or nullptr if list empty
 	Mob *GetClosestEntOnHateList(Mob *hater);
-	// gets top mob or nullptr if hate list empty
 	Mob *GetDamageTopOnHateList(Mob *hater);
-	// used to check if mob is on hatelist
+	Mob *GetEntWithMostHateOnList(Mob *center);
+	Mob *GetRandomEntOnHateList();
+	Mob* GetEntWithMostHateOnList();
+
 	bool IsEntOnHateList(Mob *);
-	// used to remove or add frenzy hate
-	void IsEntityInFrenzyMode();
-	//Gets the target with the most hate regardless of things like frenzy etc.
-	Mob* GetEntWithMostHateInRange();
-	// Count 'Summoned' pets on hatelist
-	int GetSummonedPetCountOnHateList(Mob *hater);
+	bool IsHateListEmpty();
+	bool RemoveEntFromHateList(Mob *ent);
 
 	int AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOptions *opts);
+	int GetSummonedPetCountOnHateList(Mob *hater);
 
-	void SpellCast(Mob *caster, uint32 spell_id, float range, Mob *ae_center = nullptr);
+	int32 GetEntHateAmount(Mob *ent, bool in_damage = false);
 
-	bool IsHateListEmpty();
-	void PrintHateListToClient(Client *c);
-
-	//For accessing the hate list via perl; don't use for anything else
 	std::list<struct_HateList*>& GetHateList() { return list; }
 
-	//setting owner
-	void SetOwner(Mob *newOwner) { owner = newOwner; }
+	void AddEntToHateList(Mob *ent, int32 in_hate = 0, int32 in_damage = 0, bool in_is_frenzied = false, bool add_to_hate_list_if_not_exist = true);
+	void DoFactionHits(int32 npc_faction_level_id);
+	void IsEntityInFrenzyMode();
+	void PrintHateListToClient(Client *c);
+	void SetHateAmountOnEnt(Mob *other, uint32 in_hate, uint32 in_damage);
+	void SetOwner(Mob *new_hate_owner) { hate_owner = new_hate_owner; }
+	void SpellCast(Mob *caster, uint32 spell_id, float range, Mob *ae_center = nullptr);
+	void WipeHateList();
+
 
 protected:
 	struct_HateList* Find(Mob *ent);
 private:
 	std::list<struct_HateList*> list;
-	Mob *owner;
+	Mob *hate_owner;
 };
 
 #endif

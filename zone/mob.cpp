@@ -2565,7 +2565,7 @@ bool Mob::RemoveFromHateList(Mob* mob)
 	}
 	if(GetTarget() == mob)
 	{
-		SetTarget(hate_list.GetEntWithMostHateInRange(this));
+		SetTarget(hate_list.GetEntWithMostHateOnList(this));
 	}
 
 	return bFound;
