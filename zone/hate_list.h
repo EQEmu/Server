@@ -27,7 +27,7 @@ struct ExtraAttackOptions;
 
 struct struct_HateList {
 	Mob *entity_on_hatelist;
-	int32 hatelist_damage;
+	uint32 hatelist_damage; 
 	uint32 stored_hate_amount;
 	bool is_entity_frenzy;
 };

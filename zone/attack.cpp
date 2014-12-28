@@ -2414,7 +2414,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 
 	bool wasengaged = IsEngaged();
 	Mob* owner = other->GetOwner();
-	Mob* mypet = this->GetPet();
+	Mob* mypet = this->GetPet(); 
 	Mob* myowner = this->GetOwner();
 	Mob* targetmob = this->GetTarget();
 
