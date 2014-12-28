@@ -1385,7 +1385,7 @@ void Merc::AI_Process() {
 			rest_timer.Disable();
 
 		if(IsRooted())
-			SetTarget(hate_list.GetClosest(this));
+			SetTarget(hate_list.GetClosestEntOnHateList(this));
 		else
 			FindTarget();
 
@@ -2454,11 +2454,11 @@ void Merc::CheckHateList() {
 								Mob* groupMember = g->members[counter];
 								if(groupMember) {
 									if(npc->IsOnHatelist(groupMember)) {
-										if(!hate_list.IsOnHateList(npc)) {
+										if(!hate_list.IsEntOnHateList(npc)) {
 											float range = g->HasRole(groupMember, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
 											range *= range;
 											if(npc->DistNoRootNoZ(*this) < range) {
-												hate_list.Add(npc, 1);
+												hate_list.AddEntToHateList(npc, 1);
 											}
 										}
 									}

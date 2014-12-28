@@ -5227,7 +5227,7 @@ void Client::Handle_OP_DeleteSpawn(const EQApplicationPacket *app)
 	entity_list.QueueClients(this, outapp, false);
 	safe_delete(outapp);
 
-	hate_list.RemoveEnt(this->CastToMob());
+	hate_list.RemoveEntFromHateList(this->CastToMob());
 
 	Disconnect();
 	return;

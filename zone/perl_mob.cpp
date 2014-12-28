@@ -5354,7 +5354,7 @@ XS(XS_Mob_SetHate)
 			damage = (int32)SvIV(ST(3));
 		}
 
-		THIS->SetHate(other, hate, damage);
+		THIS->SetHateAmountOnEnt(other, hate, damage);
 	}
 	XSRETURN_EMPTY;
 }
@@ -6599,7 +6599,7 @@ XS(XS_Mob_GetHateList)
 
 		while(iter != hate_list.end())
 		{
-			tHateEntry *entry = (*iter);
+			struct_HateList *entry = (*iter);
 			ST(0) = sv_newmortal();
 			sv_setref_pv(ST(0), "HateEntry", (void*)entry);
 			XPUSHs(ST(0));
