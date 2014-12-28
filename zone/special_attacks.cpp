@@ -106,7 +106,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 	if(who->GetInvul() || who->GetSpecialAbility(IMMUNE_MELEE) || who->GetSpecialAbility(IMMUNE_MELEE_EXCEPT_BANE))
 		return; //-5?
 
-	int32 hate = max_damage;
+	uint32 hate = max_damage;
 	if(hate_override > -1)
 		hate = hate_override;
 
@@ -583,7 +583,7 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 	int32 ndamage = 0;
 	int32 max_hit = 0;
 	int32 min_hit = 0;
-	int32 hate = 0;
+	uint32 hate = 0;
 	int32 primaryweapondamage = 0;
 	int32 backstab_dmg = 0;
 
@@ -889,7 +889,7 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const Ite
 		if (HeadShot_Dmg)
 			HeadShot = true;
 
-		int32 hate = 0;
+		uint32 hate = 0;
 		int32 TotalDmg = 0;
 		int16 WDmg = 0;
 		int16 ADmg = 0;
@@ -2354,7 +2354,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 		skillinuse = SkillOffense;
 
 	int damage = 0;
-	int32 hate = 0;
+	uint32 hate = 0;
 	int Hand = MainPrimary;
 	if (hate == 0 && weapon_damage > 1) hate = weapon_damage;
 

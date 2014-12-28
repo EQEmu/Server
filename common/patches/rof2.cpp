@@ -1994,17 +1994,17 @@ namespace RoF2
 		outapp->WriteUInt32(emu->drakkin_tattoo);
 		outapp->WriteUInt32(emu->drakkin_details);
 
-		outapp->WriteUInt8(0);			// Unknown
-		outapp->WriteUInt8(0);			// Unknown
-		outapp->WriteUInt8(0);			// Unknown
-		outapp->WriteUInt8(0);			// Unknown
-		outapp->WriteUInt8(0);			// Unknown
+		outapp->WriteUInt8(0);			// Unknown 0
+		outapp->WriteUInt8(0xff);		// Unknown 0xff
+		outapp->WriteUInt8(1);			// Unknown 1
+		outapp->WriteUInt8(0xff);		// Unknown 0xff
+		outapp->WriteUInt8(1);			// Unknown 1
 
-		outapp->WriteFloat(5.0f);		// Height ?
+		outapp->WriteFloat(5.0f);		// Height
 
-		outapp->WriteFloat(3.0f);			// Unknown
-		outapp->WriteFloat(2.5f);			// Unknown
-		outapp->WriteFloat(5.5f);			// Unknown
+		outapp->WriteFloat(3.0f);		// Unknown 3.0
+		outapp->WriteFloat(2.5f);		// Unknown 2.5
+		outapp->WriteFloat(5.5f);		// Unknown 5.5
 
 		outapp->WriteUInt32(0);			// Primary ?
 		outapp->WriteUInt32(0);			// Secondary ?
@@ -2330,7 +2330,7 @@ namespace RoF2
 
 		outapp->WriteUInt64(emu->exp);		// int32 in client
 
-		outapp->WriteUInt8(0);			// Unknown - Seen 5 on Live
+		outapp->WriteUInt8(5);			// Unknown - Seen 5 on Live - Eye Height?
 
 		outapp->WriteUInt32(emu->platinum_bank);
 		outapp->WriteUInt32(emu->gold_bank);

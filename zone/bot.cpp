@@ -3422,9 +3422,9 @@ void Bot::AI_Process() {
 			rest_timer.Disable();
 
 		if(IsRooted())
-			SetTarget(hate_list.GetClosest(this));
+			SetTarget(hate_list.GetClosestEntOnHateList(this));
 		else
-			SetTarget(hate_list.GetTop(this));
+			SetTarget(hate_list.GetEntWithMostHateOnList(this));
 
 		if(!GetTarget())
 			return;
@@ -3791,9 +3791,9 @@ void Bot::PetAIProcess() {
 	if (IsEngaged()) {
 
 		if (botPet->IsRooted())
-			botPet->SetTarget(hate_list.GetClosest(botPet));
+			botPet->SetTarget(hate_list.GetClosestEntOnHateList(botPet));
 		else
-			botPet->SetTarget(hate_list.GetTop(botPet));
+			botPet->SetTarget(hate_list.GetEntWithMostHateOnList(botPet));
 
 		// Let's check if we have a los with our target.
 		// If we don't, our hate_list is wiped.
@@ -5854,7 +5854,7 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, SkillUseTypes att
 
 	Save();
 
-	Mob *give_exp = hate_list.GetDamageTop(this);
+	Mob *give_exp = hate_list.GetDamageTopOnHateList(this);
 	Client *give_exp_client = nullptr;
 
 	if(give_exp && give_exp->IsClient())
@@ -6008,7 +6008,7 @@ void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, SkillUseTypes attack_
 	}
 }
 
-void Bot::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp, bool bFrenzy, bool iBuffTic)
+void Bot::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, bool iYellForHelp /*= true*/, bool bFrenzy /*= false*/, bool iBuffTic /*= false*/)
 {
 	Mob::AddToHateList(other, hate, damage, iYellForHelp, bFrenzy, iBuffTic);
 }

@@ -8655,8 +8655,8 @@ void command_aggrozone(Client *c, const Seperator *sep) {
 	if (!m)
 		return;
 
-	int hate = atoi(sep->arg[1]); //should default to 0 if we don't enter anything
-	entity_list.AggroZone(m,hate);
+	uint32 hate = atoi(sep->arg[1]); //should default to 0 if we don't enter anything
+	entity_list.AggroZone(m, hate);
 	c->Message(0, "Train to you! Last chance to go invulnerable...");
 }
 

@@ -1298,7 +1298,7 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 void Mob::RogueEvade(Mob *other)
 {
 	int amount = other->GetHateAmount(this) - (GetLevel() * 13);
-	other->SetHate(this, std::max(1, amount));
+	other->SetHateAmountOnEnt(this, std::max(1, amount));
 
 	return;
 }

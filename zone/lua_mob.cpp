@@ -895,17 +895,17 @@ void Lua_Mob::AddToHateList(Lua_Mob other, int hate, int damage, bool yell_for_h
 
 void Lua_Mob::SetHate(Lua_Mob other) {
 	Lua_Safe_Call_Void();
-	self->SetHate(other);
+	self->SetHateAmountOnEnt(other);
 }
 
 void Lua_Mob::SetHate(Lua_Mob other, int hate) {
 	Lua_Safe_Call_Void();
-	self->SetHate(other, hate);
+	self->SetHateAmountOnEnt(other, hate);
 }
 
 void Lua_Mob::SetHate(Lua_Mob other, int hate, int damage) {
 	Lua_Safe_Call_Void();
-	self->SetHate(other, hate, damage);
+	self->SetHateAmountOnEnt(other, hate, damage);
 }
 
 void Lua_Mob::HalveAggro(Lua_Mob other) {

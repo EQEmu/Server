@@ -3656,11 +3656,11 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 								spelltar->AddToHateList(this, aggro);
 					}
 					else{
-						int32 newhate = spelltar->GetHateAmount(this) + aggro;
+						uint32 newhate = spelltar->GetHateAmount(this) + aggro;
 						if (newhate < 1) {
-							spelltar->SetHate(this,1);
+							spelltar->SetHateAmountOnEnt(this,1);
 						} else {
-							spelltar->SetHate(this,newhate);
+							spelltar->SetHateAmountOnEnt(this,newhate);
 						}
 					}
 				}
@@ -3688,9 +3688,9 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 			spelltar->AddToHateList(this, aggro_amount);		else{
 			int32 newhate = spelltar->GetHateAmount(this) + aggro_amount;
 			if (newhate < 1) {
-				spelltar->SetHate(this,1);
+				spelltar->SetHateAmountOnEnt(this,1);
 			} else {
-				spelltar->SetHate(this,newhate);
+				spelltar->SetHateAmountOnEnt(this,newhate);
 			}
 		}
 	}
@@ -4206,6 +4206,10 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 
 	//Get resist modifier and adjust it based on focus 2 resist about eq to 1% resist chance
 	int resist_modifier = (use_resist_override) ? resist_override : spells[spell_id].ResistDiff;
+
+	if(caster->GetSpecialAbility(CASTING_RESIST_DIFF))
+		resist_modifier += caster->GetSpecialAbilityParam(CASTING_RESIST_DIFF, 0);
+
 	int focus_resist = caster->GetFocusEffect(focusResistRate, spell_id);
 	resist_modifier -= 2 * focus_resist;
 
