@@ -1817,45 +1817,8 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	}
 	ns->spawn.size			= 0; // Changing size works, but then movement stops! (wth?)
 	ns->spawn.runspeed		= (gmspeed == 0) ? runspeed : 3.125f;
-	if (!m_pp.showhelm) ns->spawn.showhelm = 0;
+	ns->spawn.showhelm = m_pp.showhelm ? 1 : 0;
 
-	/*
-	// Equipment/Weapons already set from Mob::FillSpawnStruct
-	// Commenting this out for now
-	const Item_Struct* item = nullptr;
-	const ItemInst* inst = nullptr;
-	int16 invslot;
-
-	for (uint32 matslot = 0; matslot < _MaterialCount; matslot++)
-	{
-		// Only Player Races Wear Armor
-		if (IsPlayerRace(race) || matslot > 6)
-		{
-			invslot = Inventory::CalcSlotFromMaterial(matslot);
-			if (invslot == INVALID_INDEX)
-				continue;
-
-			if ((inst = m_inv[invslot]) && inst->IsType(ItemClassCommon))
-			{
-				item = inst->GetItem();
-				
-				if (matslot > 6)
-				{
-					// Weapon Models 
-					ns->spawn.equipment[matslot].material = GetEquipmentMaterial(matslot);
-				}
-				else
-				{
-					// Armor Materials/Models
-					ns->spawn.equipment[matslot].material = item->Material;
-					ns->spawn.equipment[matslot].elitematerial = item->EliteMaterial;
-					ns->spawn.equipment[matslot].heroforgemodel = GetHerosForgeModel(matslot);
-					ns->spawn.colors[matslot].color = m_pp.item_tint[matslot].rgb.use_tint ? m_pp.item_tint[matslot].color : item->Color;
-				}
-			}
-		}
-	}
-	*/
 }
 
 bool Client::GMHideMe(Client* client) {

@@ -118,7 +118,15 @@ Object::Object(Client* client, const ItemInst* inst)
 	m_data.heading = client->GetHeading();
 	m_data.x = client->GetX();
 	m_data.y = client->GetY();
-	m_data.z = client->GetZ();
+	if (client->GetClientVersion() >= EQClientRoF2)
+	{
+		// RoF2 places items at player's Z, which is 0.625 of their height.
+		m_data.z = client->GetZ() - (client->GetSize() * 0.625f);
+	}
+	else
+	{
+		m_data.z = client->GetZ();
+	}
 	m_data.zone_id = zone->GetZoneID();
 
 	decay_timer.Start();

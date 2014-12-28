@@ -2,6 +2,11 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 12/27/2014 ==
 Akkadius: Add option to automatic database upgrade script 5) Download latest Opcodes from Github
+Trevius: (RoF2) Fixed dropping items on the ground so they go to ground level instead of camera height.
+Trevius: Show Helm Option should be functional again.
+Kayen: Implemened npc special ability (43) CASTING_RESIST_DIFF which sets innate resist modifier on
+ALL spells used by that NPC. Ie. 43,1,-200 will set a -200 innate resist diff, so if your npc cast
+a spell that has a -10 resist modifier the final resist diff would be -210.
 
 == 12/24/2014 ==
 Trevius: (RoF+) Added herosforgemodel field to the npc_types table.
