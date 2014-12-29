@@ -4848,10 +4848,9 @@ namespace RoF2
 		hdr.slot_type = (merchant_slot == 0) ? slot_id.SlotType : 9; // 9 is merchant 20 is reclaim items?
 		hdr.main_slot = (merchant_slot == 0) ? slot_id.MainSlot : merchant_slot;
 		hdr.sub_slot = (merchant_slot == 0) ? slot_id.SubSlot : 0xffff;
-		hdr.unknown013 = (merchant_slot == 0) ? slot_id.AugSlot : 0xffff;
+		hdr.aug_slot = (merchant_slot == 0) ? slot_id.AugSlot : 0xffff;
 		hdr.price = inst->GetPrice();
 		hdr.merchant_slot = (merchant_slot == 0) ? 1 : inst->GetMerchantCount();
-		//hdr.merchant_slot = (merchant_slot == 0) ? 1 : 0xffffffff;
 		hdr.scaled_value = inst->IsScaling() ? inst->GetExp() / 100 : 0;
 		hdr.instance_id = (merchant_slot == 0) ? inst->GetSerialNumber() : merchant_slot;
 		hdr.unknown028 = 0;
@@ -5053,7 +5052,7 @@ namespace RoF2
 		memset(&isbs, 0, sizeof(RoF2::structs::ItemSecondaryBodyStruct));
 
 		isbs.augtype = item->AugType;
-		isbs.augdistiller = 65535;
+		isbs.augrestrict2 = -1;
 		isbs.augrestrict = item->AugRestrict;
 
 		for (int x = AUG_BEGIN; x < consts::ITEM_COMMON_SIZE; x++)
@@ -5297,9 +5296,21 @@ namespace RoF2
 		iqbs.HealAmt = item->HealAmt;
 		iqbs.SpellDmg = item->SpellDmg;
 		iqbs.clairvoyance = item->Clairvoyance;
-		iqbs.unknown28 = 0;
-		iqbs.unknown30 = 0;
-		iqbs.unknown37a = 0;
+
+		//unknown18;	//Power Source Capacity or evolve filename?
+		//evolve_string; // Some String, but being evolution related is just a guess
+
+		iqbs.Heirloom = 0;
+		iqbs.Placeable = 0;
+
+		iqbs.unknown28 = -1;
+		iqbs.unknown30 = -1;
+
+		iqbs.NoZone = 0;
+		iqbs.NoGround = 0;
+		iqbs.unknown37a = 0;	// (guessed position) New to RoF2
+		iqbs.unknown38 = 0;
+
 		iqbs.unknown39 = 1;
 
 		iqbs.subitem_count = 0;
