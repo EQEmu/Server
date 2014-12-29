@@ -2108,11 +2108,12 @@ int QuestManager::gettaskactivitydonecount(int task, int activity) {
 
 }
 
-void QuestManager::updatetaskactivity(int task, int activity, int count) {
+void QuestManager::updatetaskactivity(int task, int activity, int count, bool ignore_quest_update /*= false*/)
+{
 	QuestManagerCurrentQuestVars();
 
 	if(RuleB(TaskSystem, EnableTaskSystem) && initiator)
-		initiator->UpdateTaskActivity(task, activity, count);
+		initiator->UpdateTaskActivity(task, activity, count, ignore_quest_update);
 }
 
 void QuestManager::resettaskactivity(int task, int activity) {
