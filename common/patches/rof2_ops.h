@@ -1,6 +1,8 @@
 // out-going packets that require an ENCODE translation:
 // Begin RoF2 Encodes
 
+E(OP_SendMembershipDetails)
+
 // incoming packets that require a DECODE translation:
 // Begin RoF2 Decodes
 

@@ -243,7 +243,7 @@ struct Membership_Setting_Struct
 struct Membership_Details_Struct
 {
 /*0000*/ uint32 membership_setting_count;	// Seen 66
-/*0016*/ Membership_Setting_Struct settings[66]; // 792 Bytes
+/*0016*/ Membership_Setting_Struct settings[72]; // 864 Bytes
 /*0012*/ uint32 race_entry_count;	// Seen 15
 /*1044*/ Membership_Entry_Struct membership_races[15]; // 120 Bytes
 /*0012*/ uint32 class_entry_count;	// Seen 15
@@ -260,7 +260,7 @@ struct Membership_Struct
 /*004*/ uint32 races;	// Seen ff ff 01 00
 /*008*/ uint32 classes;	// Seen ff ff 01 01
 /*012*/ uint32 entrysize; // Seen 22
-/*016*/ int32 entries[22]; // Most -1, 1, and 0 for Gold Status
+/*016*/ int32 entries[25]; // Most -1, 1, and 0 for Gold Status
 /*104*/
 };
 
@@ -4381,15 +4381,14 @@ struct EvolvingItem {
 
 struct ItemSerializationHeaderFinish
 {
-/*079*/	uint32 ornamentIcon;
-/*083*/	int32 unknowna1;	// 0xffffffff
-/*087*/	uint32 ornamentHeroModel;	// 0
-/*091*/	uint8 unknown063;	// 0
-/*092*/	uint32 unknowna3;	// 0
-/*096*/	int32 unknowna4;	// 0xffffffff
-/*100*/	uint32 unknowna5;	// 0
-/*104*/	uint8 ItemClass; //0, 1, or 2
-/*105*/
+	uint32 ornamentIcon;
+	int32 unknowna1;	// 0xffffffff
+	uint32 ornamentHeroModel;
+	int32 unknown063;	// 0
+	uint8 Copied;		// Copied Flag - Possibly for items copied during server transfer?
+	int32 unknowna4;	// 0xffffffff
+	int32 unknowna5;	// 0
+	uint8 ItemClass; //0, 1, or 2
 };
 
 struct ItemBodyStruct
@@ -4622,8 +4621,8 @@ struct ItemQuaternaryBodyStruct
 	uint8 unknown19;
 	uint16 unknown20;
 	uint8 unknown21;
-	uint8 Heirloom;
-	uint8 Placeable;
+	uint8 Heirloom;		// Heirloom Flag
+	uint8 Placeable;	// Placeable Flag
 	uint8 unknown22b;
 	uint8 unknown22c;
 	uint8 unknown22d;
@@ -4643,12 +4642,12 @@ struct ItemQuaternaryBodyStruct
 	uint32 unknown35;
 	uint32 unknown36;
 	uint32 unknown37;
-	uint8 NoZone;	// Item will disappear upon zoning?
+	uint8 NoZone;		// No Zone Flag - Item will disappear upon zoning?
 	uint8 unknown_RoF_7b; // Maybe Uint32 ?
 	uint8 unknown_RoF_7c;
 	uint8 unknown_RoF_7d;
 	uint8 unknown_RoF_8a;
-	uint8 NoGround;	// Item cannot be dropped on the ground?
+	uint8 NoGround;		// No Ground Flag - Item cannot be dropped on the ground?
 	uint8 unknown_RoF_8c;
 	uint8 unknown_RoF_8d;
 	uint8 unknown37a;	// New to RoF2 - Probably variable length string

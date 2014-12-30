@@ -116,6 +116,72 @@ namespace RoF2
 #include "ss_define.h"
 
 // ENCODE methods
+
+
+	// RoF2 Specific Encodes Begin
+	ENCODE(OP_SendMembershipDetails)
+	{
+		ENCODE_LENGTH_EXACT(Membership_Details_Struct);
+		SETUP_DIRECT_ENCODE(Membership_Details_Struct, structs::Membership_Details_Struct);
+
+		eq->membership_setting_count = 72;
+		for (uint32 i = 0; i < emu->membership_setting_count; ++i) // 66
+		{
+			OUT(settings[i].setting_index);
+			OUT(settings[i].setting_id);
+			OUT(settings[i].setting_value);
+		}
+		// Last 6 new settings fields are all 0s on Live as of 12/29/14
+
+		eq->race_entry_count = emu->race_entry_count;
+		for (uint32 i = 0; i < emu->race_entry_count; ++i) // 15
+		{
+			OUT(membership_races[i].purchase_id);
+			OUT(membership_races[i].bitwise_entry);
+		}
+
+		eq->class_entry_count = emu->class_entry_count;
+		for (uint32 i = 0; i < emu->class_entry_count; ++i) // 15
+		{
+			OUT(membership_classes[i].purchase_id);
+			OUT(membership_classes[i].bitwise_entry);
+		}
+
+		eq->exit_url_length = emu->exit_url_length;
+		eq->exit_url_length2 = emu->exit_url_length2;
+		
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_SendMembership)
+	{
+		ENCODE_LENGTH_EXACT(Membership_Struct);
+		SETUP_DIRECT_ENCODE(Membership_Struct, structs::Membership_Struct);
+
+		eq->membership = emu->membership;
+		eq->races = emu->races;
+		eq->classes = emu->classes;
+		eq->entrysize = 25; //emu->entrysize;
+
+		for (uint32 i = 0; i < emu->entrysize; ++i) // 21
+		{
+			OUT(entries[i]);
+		}
+		// Last 4 new entries are 0s on Live Silver as of 12/29/14
+		// Setting them each to 1 for now.
+		// This removes the "Buy Now" button from aug type 21 slots on items.
+		for (uint32 i = 21; i < 25; ++i) // 4
+		{
+			eq->entries[i] = 1;
+		}
+		
+
+		FINISH_ENCODE();
+	}
+
+	// RoF2 Specific Encodes End
+
+
 	ENCODE(OP_Action)
 	{
 		ENCODE_LENGTH_EXACT(Action_Struct);
@@ -2905,24 +2971,6 @@ namespace RoF2
 		FINISH_ENCODE();
 	}
 
-	ENCODE(OP_SendMembership)
-	{
-		ENCODE_LENGTH_EXACT(Membership_Struct);
-		SETUP_DIRECT_ENCODE(Membership_Struct, structs::Membership_Struct);
-
-		eq->membership = emu->membership;
-		eq->races = emu->races;
-		eq->classes = emu->classes;
-		eq->entrysize = 22;
-		for (int i = 0; i<21; i++)
-		{
-			eq->entries[i] = emu->entries[i];
-		}
-		eq->entries[21] = 0;
-
-		FINISH_ENCODE();
-	}
-
 	ENCODE(OP_SendZonepoints)
 	{
 		SETUP_VAR_ENCODE(ZonePoints);
@@ -4902,7 +4950,7 @@ namespace RoF2
 		hdrf.unknowna1 = 0xffffffff;
 		hdrf.ornamentHeroModel = heroModel;
 		hdrf.unknown063 = 0;
-		hdrf.unknowna3 = 0;
+		hdrf.Copied = 0;
 		hdrf.unknowna4 = 0xffffffff;
 		hdrf.unknowna5 = 0;
 		hdrf.ItemClass = item->ItemClass;

@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/30/2014 ==
+Trevius: (RoF2) Aug Type 21 no longer shows the "Buy Now" button in the aug slot of items.
+Trevius: (RoF2) Identified the "Copied" item flag with the help of Uleat.
+
 == 12/29/2014 ==
 Trevius: (RoF2) Identified a few Item Fields and resolved an issue with cloth armor not accepting certain augments that they should.
 Akkadius: Updated $client->UpdateTaskActivity to have optional argument ignore_quest_update IE: Client::UpdateTaskActivity(THIS, TaskID, ActivityID, Count, [ignore_quest_update])
