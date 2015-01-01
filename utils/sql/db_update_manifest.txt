@@ -319,6 +319,7 @@
 9063|2014_12_24_npc_types_update.sql|SHOW COLUMNS FROM `npc_types` LIKE 'd_melee_texture1'|empty|
 9064|2014_12_24_npc_types_table_update.sql|SHOW COLUMNS FROM `npc_types` LIKE 'herosforgemodel'|empty|
 9065|2014_12_26_merc_weaponinfo_table_update.sql|SHOW COLUMNS FROM `vwMercNpcTypes` LIKE 'd_melee_texture1'|empty|
+9066|2014_12_31_npc_types_default_values_update.sql|SHOW COLUMNS FROM `npc_types` LIKE 'bodytype'|contains|YES
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not 
