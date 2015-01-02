@@ -5485,7 +5485,6 @@ namespace RoF
 
 	static inline uint32 ServerToRoFCorpseSlot(uint32 ServerCorpse)
 	{
-		//uint32 RoFCorpse;
 		return (ServerCorpse + 1);
 	}
 
@@ -5626,7 +5625,6 @@ namespace RoF
 
 	static inline uint32 RoFToServerCorpseSlot(uint32 RoFCorpse)
 	{
-		//uint32 ServerCorpse;
 		return (RoFCorpse - 1);
 	}
 }

@@ -926,7 +926,7 @@ bool Client::TryStacking(ItemInst* item, uint8 type, bool try_worn, bool try_cur
 bool Client::AutoPutLootInInventory(ItemInst& inst, bool try_worn, bool try_cursor, ServerLootItem_Struct** bag_item_data)
 {
 	// #1: Try to auto equip
-	if (try_worn && inst.IsEquipable(GetBaseRace(), GetClass()) && inst.GetItem()->ReqLevel<=level && !inst.GetItem()->Attuneable && inst.GetItem()->ItemType != ItemTypeAugmentation)
+	if (try_worn && inst.IsEquipable(GetBaseRace(), GetClass()) && inst.GetItem()->ReqLevel<=level && (!inst.GetItem()->Attuneable || inst.IsAttuned()) && inst.GetItem()->ItemType != ItemTypeAugmentation)
 	{
 		// too messy as-is... <watch>
 		for (int16 i = EmuConstants::EQUIPMENT_BEGIN; i < MainPowerSource; i++) // originally (i < 22)

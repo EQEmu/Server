@@ -9170,12 +9170,6 @@ void Client::Handle_OP_LootItem(const EQApplicationPacket *app)
 		LogFile->write(EQEMuLog::Error, "Wrong size: OP_LootItem, size=%i, expected %i", app->size, sizeof(LootingItem_Struct));
 		return;
 	}
-	/*
-	**	fixed the looting code so that it sends the correct opcodes
-	**	and now correctly removes the looted item the player selected
-	**	as well as gives the player the proper item.
-	**	Also fixed a few UI lock ups that would occur.
-	*/
 
 	EQApplicationPacket* outapp = 0;
 	Entity* entity = entity_list.GetID(*((uint16*)app->pBuffer));

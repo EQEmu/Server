@@ -21,15 +21,15 @@ namespace RoF2
 	static OpcodeManager *opcodes = nullptr;
 	static Strategy struct_strategy;
 
-	char* SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 depth);
+	char* SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 depth, ItemPacketType packet_type);
 
 	// server to client inventory location converters
-	static inline structs::ItemSlotStruct ServerToRoF2Slot(uint32 ServerSlot);
+	static inline structs::ItemSlotStruct ServerToRoF2Slot(uint32 ServerSlot, ItemPacketType PacketType = ItemPacketInvalid);
 	static inline structs::MainInvItemSlotStruct ServerToRoF2MainInvSlot(uint32 ServerSlot);
 	static inline uint32 ServerToRoF2CorpseSlot(uint32 ServerCorpse);
 
 	// client to server inventory location converters
-	static inline uint32 RoF2ToServerSlot(structs::ItemSlotStruct RoF2Slot);
+	static inline uint32 RoF2ToServerSlot(structs::ItemSlotStruct RoF2Slot, ItemPacketType PacketType = ItemPacketInvalid);
 	static inline uint32 RoF2ToServerMainInvSlot(structs::MainInvItemSlotStruct RoF2Slot);
 	static inline uint32 RoF2ToServerCorpseSlot(uint32 RoF2Corpse);
 
@@ -622,7 +622,7 @@ namespace RoF2
 
 			uint32 Length = 0;
 
-			char* Serialized = SerializeItem((const ItemInst*)eq->inst, eq->slot_id, &Length, 0);
+			char* Serialized = SerializeItem((const ItemInst*)eq->inst, eq->slot_id, &Length, 0, ItemPacketCharInventory);
 
 			if (Serialized) {
 
@@ -1436,7 +1436,7 @@ namespace RoF2
 		InternalSerializedItem_Struct *int_struct = (InternalSerializedItem_Struct *)(old_item_pkt->SerializedItem);
 
 		uint32 length;
-		char *serialized = SerializeItem((ItemInst *)int_struct->inst, int_struct->slot_id, &length, 0);
+		char *serialized = SerializeItem((ItemInst *)int_struct->inst, int_struct->slot_id, &length, 0, old_item_pkt->PacketType);
 
 		if (!serialized) {
 			_log(NET__STRUCTS, "Serialization failed on item slot %d.", int_struct->slot_id);
@@ -4867,7 +4867,7 @@ namespace RoF2
 		return NextItemInstSerialNumber;
 	}
 
-	char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint8 depth)
+	char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint8 depth, ItemPacketType packet_type)
 	{
 		int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 		uint8 null_term = 0;
@@ -4891,7 +4891,7 @@ namespace RoF2
 		hdr.stacksize = stackable ? charges : 1;
 		hdr.unknown004 = 0;
 
-		structs::ItemSlotStruct slot_id = ServerToRoF2Slot(slot_id_in);
+		structs::ItemSlotStruct slot_id = ServerToRoF2Slot(slot_id_in, packet_type);
 
 		hdr.slot_type = (merchant_slot == 0) ? slot_id.SlotType : 9; // 9 is merchant 20 is reclaim items?
 		hdr.main_slot = (merchant_slot == 0) ? slot_id.MainSlot : merchant_slot;
@@ -5396,7 +5396,7 @@ namespace RoF2
 				SubSlotNumber = Inventory::CalcSlotID(slot_id_in, x);
 				*/
 
-				SubSerializations[x] = SerializeItem(subitem, SubSlotNumber, &SubLengths[x], depth + 1);
+				SubSerializations[x] = SerializeItem(subitem, SubSlotNumber, &SubLengths[x], depth + 1, packet_type);
 			}
 		}
 
@@ -5422,7 +5422,7 @@ namespace RoF2
 		return item_serial;
 	}
 
-	static inline structs::ItemSlotStruct ServerToRoF2Slot(uint32 ServerSlot)
+	static inline structs::ItemSlotStruct ServerToRoF2Slot(uint32 ServerSlot, ItemPacketType PacketType)
 	{
 		structs::ItemSlotStruct RoF2Slot;
 		RoF2Slot.SlotType = INVALID_INDEX;
@@ -5435,13 +5435,21 @@ namespace RoF2
 		uint32 TempSlot = 0;
 
 		if (ServerSlot < 56 || ServerSlot == MainPowerSource) { // Main Inventory and Cursor
-			RoF2Slot.SlotType = maps::MapPossessions;
-			RoF2Slot.MainSlot = ServerSlot;
-
+			if (PacketType == ItemPacketLoot)
+			{
+				RoF2Slot.SlotType = maps::MapCorpse;
+				RoF2Slot.MainSlot = ServerSlot - EmuConstants::CORPSE_BEGIN;
+			}
+			else
+			{
+				RoF2Slot.SlotType = maps::MapPossessions;
+				RoF2Slot.MainSlot = ServerSlot;
+			}
+			
 			if (ServerSlot == MainPowerSource)
 				RoF2Slot.MainSlot = slots::MainPowerSource;
 
-			else if (ServerSlot >= MainCursor) // Cursor and Extended Corpse Inventory
+			else if (ServerSlot >= MainCursor && PacketType != ItemPacketLoot) // Cursor and Extended Corpse Inventory
 				RoF2Slot.MainSlot += 3;
 
 			else if (ServerSlot >= MainAmmo) // (> 20)
@@ -5568,11 +5576,10 @@ namespace RoF2
 
 	static inline uint32 ServerToRoF2CorpseSlot(uint32 ServerCorpse)
 	{
-		//uint32 RoF2Corpse;
-		return (ServerCorpse + 1);
+		return (ServerCorpse - EmuConstants::CORPSE_BEGIN + 1);
 	}
 
-	static inline uint32 RoF2ToServerSlot(structs::ItemSlotStruct RoF2Slot)
+	static inline uint32 RoF2ToServerSlot(structs::ItemSlotStruct RoF2Slot, ItemPacketType PacketType)
 	{
 		uint32 ServerSlot = INVALID_INDEX;
 		uint32 TempSlot = 0;
@@ -5667,6 +5674,10 @@ namespace RoF2
 			ServerSlot = INVALID_INDEX;
 		}
 
+		else if (RoF2Slot.SlotType == maps::MapCorpse) {
+			ServerSlot = RoF2Slot.MainSlot + EmuConstants::CORPSE_BEGIN;
+		}
+
 		_log(NET__ERROR, "Convert RoF2 Slots: Type %i, Unk2 %i, Main %i, Sub %i, Aug %i, Unk1 %i to Server Slot %i", RoF2Slot.SlotType, RoF2Slot.Unknown02, RoF2Slot.MainSlot, RoF2Slot.SubSlot, RoF2Slot.AugSlot, RoF2Slot.Unknown01, ServerSlot);
 
 		return ServerSlot;
@@ -5709,8 +5720,7 @@ namespace RoF2
 
 	static inline uint32 RoF2ToServerCorpseSlot(uint32 RoF2Corpse)
 	{
-		//uint32 ServerCorpse;
-		return (RoF2Corpse - 1);
+		return (RoF2Corpse + EmuConstants::CORPSE_BEGIN - 1); 
 	}
 }
 // end namespace RoF2

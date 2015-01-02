@@ -1843,8 +1843,8 @@ struct LootingItem_Struct {
 /*000*/	uint32	lootee;
 /*004*/	uint32	looter;
 /*008*/	uint16	slot_id;
-/*010*/	uint16	unknown10;
-/*012*/	uint32	auto_loot;
+/*010*/	uint16	unknown10; // slot_id is probably uint32
+/*012*/	int32	auto_loot;
 /*016*/	uint32	unknown16;
 /*020*/
 };

@@ -1509,7 +1509,8 @@ enum ItemPacketType
 	ItemPacketTributeItem		= 0x6C,
 	ItemPacketMerchant			= 0x64,
 	ItemPacketWorldContainer	= 0x6B,
-	ItemPacketCharmUpdate		= 0x6E
+	ItemPacketCharmUpdate		= 0x6E,
+	ItemPacketInvalid			= 0xFF
 };
 struct ItemPacket_Struct
 {

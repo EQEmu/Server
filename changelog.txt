@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/02/2015 ==
+Trevius: (RoF2) *Hopefully* Fixed looting incorrect items from NPCs.  Please report any issues!
+Trevius: (RoF2) Now able to loot items past the 10th slot on NPC corpses.
+Trevius: Attuned Items can now be auto-looted and will equip properly.
+Trevius: Mercenaries and Bots will no longer take a share from /split or /autosplit.
+
 == 12/30/2014 ==
 Trevius: (RoF2) Aug Type 21 no longer shows the "Buy Now" button in the aug slot of items.
 Trevius: (RoF2) Identified the "Copied" item flag with the help of Uleat.

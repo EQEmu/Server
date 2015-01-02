@@ -1207,7 +1207,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 		parse->EventPlayer(EVENT_LOOT, client, buf, 0, &args);
 		parse->EventItem(EVENT_LOOT, client, inst, this, buf, 0);
 
-		if ((RuleB(Character, EnableDiscoveredItems))) {
+		if (!IsPlayerCorpse() && RuleB(Character, EnableDiscoveredItems)) {
 			if (client && !client->GetGM() && !client->IsDiscovered(inst->GetItem()->ID))
 				client->DiscoverItem(inst->GetItem()->ID);
 		}
