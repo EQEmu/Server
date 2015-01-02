@@ -2900,7 +2900,7 @@ namespace RoF
 		{
 			eq->entries[i] = emu->entries[i];
 		}
-		eq->entries[21] = 0;
+		eq->entries[21] = 1;
 
 		FINISH_ENCODE();
 	}
