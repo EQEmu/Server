@@ -210,6 +210,7 @@ Embperl::~Embperl()
 		"	if(tied *STDERR) { untie(*STDERR); }"
 		,FALSE);
 #endif
+	PL_perl_destruct_level = 1;
 	perl_destruct(my_perl);
 	perl_free(my_perl);
 	PERL_SYS_TERM();
