@@ -2026,13 +2026,16 @@ void EntityList::RemoveAllNPCs()
 
 void EntityList::RemoveAllMercs()
 {
+	// doesn't clear the data
 	merc_list.clear();
 }
 
 void EntityList::RemoveAllGroups()
 {
-	while (group_list.size())
+	while (group_list.size()) {
+		safe_delete(group_list.front());
 		group_list.pop_front();
+	}
 #if EQDEBUG >= 5
 	CheckGroupList (__FILE__, __LINE__);
 #endif
@@ -2040,8 +2043,10 @@ void EntityList::RemoveAllGroups()
 
 void EntityList::RemoveAllRaids()
 {
-	while (raid_list.size())
+	while (raid_list.size()) {
+		safe_delete(raid_list.front());
 		raid_list.pop_front();
+	}
 }
 
 void EntityList::RemoveAllDoors()
@@ -2251,7 +2256,8 @@ bool EntityList::RemoveGroup(uint32 delete_id)
 	while(iterator != group_list.end())
 	{
 		if((*iterator)->GetID() == delete_id) {
-			group_list.remove (*iterator);
+			safe_delete(*iterator);
+			group_list.remove(*iterator);
 #if EQDEBUG >= 5
 	CheckGroupList (__FILE__, __LINE__);
 #endif
@@ -2274,7 +2280,8 @@ bool EntityList::RemoveRaid(uint32 delete_id)
 	while(iterator != raid_list.end())
 	{
 		if((*iterator)->GetID() == delete_id) {
-			raid_list.remove (*iterator);
+			safe_delete(*iterator);
+			raid_list.remove(*iterator);
 			return true;
 		}
 		++iterator;
