@@ -1705,7 +1705,7 @@ namespace SoD
 			dest->FastQueuePacket(&outapp);
 		}
 
-		delete[] __emu_buffer;
+		safe_delete(inapp);
 	}
 
 	ENCODE(OP_ReadBook)
