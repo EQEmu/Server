@@ -1638,7 +1638,7 @@ namespace SoD
 		strn0cpy(general->player_name, raid_create->leader_name, 64);
 
 		dest->FastQueuePacket(&outapp_create);
-		delete[] __emu_buffer;
+		safe_delete(inapp);
 	}
 
 	ENCODE(OP_RaidUpdate)
