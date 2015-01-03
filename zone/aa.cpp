@@ -606,6 +606,9 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	//the target of these swarm pets will take offense to being cast on...
 	if(targ != nullptr)
 		targ->AddToHateList(this, 1, 0);
+
+	// The other pointers we make are handled elsewhere.
+	delete made_npc;
 }
 
 void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg) {
