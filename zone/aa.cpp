@@ -701,6 +701,9 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 		entity_list.AddNPC(npca, true, true);
 		summon_count--;
 	}
+
+	// The other pointers we make are handled elsewhere.
+	delete made_npc;
 }
 
 void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
