@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/03/2015 ==
+Trevius: (RoF2) /shield (shielding) and /key (key ring) are both now functional after opcode updates.
+
 == 01/02/2015 ==
 Trevius: (RoF2) *Hopefully* Fixed looting incorrect items from NPCs.  Please report any issues!
 Trevius: (RoF2) Now able to loot items past the 10th slot on NPC corpses.
