@@ -430,8 +430,11 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
 		}
 
 		int16 put_slot_id = INVALID_INDEX;
-
-							inst->PutAugment(this, i, aug[i]);
+		ItemInst* inst = CreateBaseItem(item, charges);
+		if (inst && item->ItemClass == ItemClassCommon) {
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+				if (aug[i]) {
+					inst->PutAugment(this, i, aug[i]);
 				}
 			}
 		}
