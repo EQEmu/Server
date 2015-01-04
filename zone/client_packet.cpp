@@ -1364,7 +1364,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	database.LoadCharacterFactionValues(cid, factionvalues);
 
 	/* Load Character Account Data: Temp until I move */
-	query = StringFormat("SELECT `status`, `name`, `lsaccount_id`, `gmspeed`, `revoked`, `hideme` FROM `account` WHERE `id` = %u", this->AccountID());
+	query = StringFormat("SELECT `status`, `name`, `lsaccount_id`, `gmspeed`, `revoked`, `hideme`, `time_creation` FROM `account` WHERE `id` = %u", this->AccountID());
 	auto results = database.QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		admin = atoi(row[0]);
@@ -1373,7 +1373,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		gmspeed = atoi(row[3]);
 		revoked = atoi(row[4]);
 		gmhideme = atoi(row[5]);
-		if (account_creation){ account_creation = atoul(row[6]); }
+		account_creation = atoul(row[6]);
 	}
 
 	/* Load Character Data */
@@ -1388,7 +1388,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 		if (LFP){ LFP = atoi(row[0]); }
 		if (LFG){ LFG = atoi(row[1]); }
-		if (firstlogon){ firstlogon = atoi(row[3]); }
+		if (row[3])
+			firstlogon = atoi(row[3]);
 	}
 
 	if (RuleB(Character, SharedBankPlat))
@@ -3090,7 +3091,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 		// Adding augment
 		if (in_augment->augment_action == 0)
 		{
-			ItemInst *tobe_auged, *auged_with = nullptr;
+			ItemInst *tobe_auged = nullptr, *auged_with = nullptr;
 			int8 slot = -1;
 			Inventory& user_inv = GetInv();
 
@@ -3160,7 +3161,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 		}
 		else if (in_augment->augment_action == 1)
 		{
-			ItemInst *tobe_auged, *auged_with = nullptr;
+			ItemInst *tobe_auged = nullptr, *auged_with = nullptr;
 			int8 slot = -1;
 			Inventory& user_inv = GetInv();
 
@@ -5258,7 +5259,7 @@ void Client::Handle_OP_DeleteSpawn(const EQApplicationPacket *app)
 	entity_list.QueueClients(this, outapp, false);
 	safe_delete(outapp);
 
-	hate_list.RemoveEnt(this->CastToMob());
+	hate_list.RemoveEntFromHateList(this->CastToMob());
 
 	Disconnect();
 	return;
@@ -7009,37 +7010,28 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 
 		if (!CursorItem->NoDrop || CursorItemInst->IsAttuned())
 		{
-			Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
-
 			Allowed = false;
 		}
 		else if (CursorItemInst->IsNoneEmptyContainer())
 		{
-			Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
-
 			Allowed = false;
 		}
 		else if (CursorItemInst->IsAugmented())
 		{
-			Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
-
 			Allowed = false;
 		}
 		else if (CursorItem->NoRent == 0)
 		{
-			Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
-
 			Allowed = false;
 		}
 		else if (CursorItem->LoreFlag && GuildBanks->HasItem(GuildID(), CursorItem->ID))
 		{
-			Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
-
 			Allowed = false;
 		}
 
 		if (!Allowed)
 		{
+			Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
 			GuildBankDepositAck(true);
 
 			return;
@@ -9210,12 +9202,6 @@ void Client::Handle_OP_LootItem(const EQApplicationPacket *app)
 		LogFile->write(EQEMuLog::Error, "Wrong size: OP_LootItem, size=%i, expected %i", app->size, sizeof(LootingItem_Struct));
 		return;
 	}
-	/*
-	**	fixed the looting code so that it sends the correct opcodes
-	**	and now correctly removes the looted item the player selected
-	**	as well as gives the player the proper item.
-	**	Also fixed a few UI lock ups that would occur.
-	*/
 
 	EQApplicationPacket* outapp = 0;
 	Entity* entity = entity_list.GetID(*((uint16*)app->pBuffer));
@@ -9802,7 +9788,7 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 		}
 	}
 
-	// Illegal bagslot useage checks. Currently, user only receives a message if this check is triggered.
+	// Illegal bagslot usage checks. Currently, user only receives a message if this check is triggered.
 	bool mi_hack = false;
 
 	if (mi->from_slot >= EmuConstants::GENERAL_BAGS_BEGIN && mi->from_slot <= EmuConstants::CURSOR_BAG_END) {
@@ -9825,7 +9811,7 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 		}
 	}
 
-	if (mi_hack) { Message(15, "Caution: Illegal use of inaccessable bag slots!"); }
+	if (mi_hack) { Message(15, "Caution: Illegal use of inaccessible bag slots!"); }
 
 	if (!SwapItem(mi) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) {
 		SwapItemResync(mi);
@@ -12361,22 +12347,30 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	int freeslot = 0;
 	if (charges > 0 && (freeslot = zone->SaveTempItem(vendor->CastToNPC()->MerchantType, vendor->GetNPCTypeID(), itemid, charges, true)) > 0){
 		ItemInst* inst2 = inst->Clone();
-		if (RuleB(Merchant, UsePriceMod)){
-			inst2->SetPrice(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(vendor, false));
+		
+		while (true) {
+			if (inst2 == nullptr)
+				break;
+
+			if (RuleB(Merchant, UsePriceMod)){
+				inst2->SetPrice(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(vendor, false));
+			}
+			else
+				inst2->SetPrice(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate);
+			inst2->SetMerchantSlot(freeslot);
+
+			uint32 MerchantQuantity = zone->GetTempMerchantQuantity(vendor->GetNPCTypeID(), freeslot);
+
+			if (inst2->IsStackable()) {
+				inst2->SetCharges(MerchantQuantity);
+			}
+			inst2->SetMerchantCount(MerchantQuantity);
+
+			SendItemPacket(freeslot - 1, inst2, ItemPacketMerchant);
+			safe_delete(inst2);
+
+			break;
 		}
-		else
-			inst2->SetPrice(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate);
-		inst2->SetMerchantSlot(freeslot);
-
-		uint32 MerchantQuantity = zone->GetTempMerchantQuantity(vendor->GetNPCTypeID(), freeslot);
-
-		if (inst2->IsStackable()) {
-			inst2->SetCharges(MerchantQuantity);
-		}
-		inst2->SetMerchantCount(MerchantQuantity);
-
-		SendItemPacket(freeslot - 1, inst2, ItemPacketMerchant);
-		safe_delete(inst2);
 	}
 
 	// start QS code

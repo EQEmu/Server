@@ -183,7 +183,7 @@ public:
 	bool istaskactive(int task);
 	bool istaskactivityactive(int task, int activity);
 	int gettaskactivitydonecount(int task, int activity);
-	void updatetaskactivity(int task, int activity, int count);
+	void updatetaskactivity(int task, int activity, int count, bool ignore_quest_update = false);
 	void resettaskactivity(int task, int activity);
 	void taskexploredarea(int exploreid);
 	void assigntask(int taskid);

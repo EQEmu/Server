@@ -2315,7 +2315,7 @@ namespace RoF
 		outapp->WriteUInt8(emu->gm);
 
 		outapp->WriteUInt32(emu->guild_id);
-		outapp->WriteUInt8(0);				// Unknown - observed 1 in a live packet.
+		outapp->WriteUInt8(emu->guildrank);	// guildrank
 		outapp->WriteUInt32(0);				// Unknown - observed 1 in a live packet.
 		outapp->WriteUInt8(0);				// Unknown - observed 1 in a live packet.
 		outapp->WriteUInt32(0);				// Unknown
@@ -2576,7 +2576,7 @@ namespace RoF
 		strn0cpy(general->player_name, raid_create->leader_name, 64);
 
 		dest->FastQueuePacket(&outapp_create);
-		delete[] __emu_buffer;
+		safe_delete(inapp);
 	}
 
 	ENCODE(OP_RaidUpdate)
@@ -2643,7 +2643,7 @@ namespace RoF
 			dest->FastQueuePacket(&outapp);
 		}
 
-		delete[] __emu_buffer;
+		safe_delete(inapp);
 	}
 
 	ENCODE(OP_ReadBook)
@@ -2900,7 +2900,7 @@ namespace RoF
 		{
 			eq->entries[i] = emu->entries[i];
 		}
-		eq->entries[21] = 0;
+		eq->entries[21] = 1;
 
 		FINISH_ENCODE();
 	}
@@ -3294,9 +3294,9 @@ namespace RoF
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->entityid);
 			VARSTRUCT_ENCODE_TYPE(float, Buffer, emu->distance);
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->level);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->NPC);
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->is_npc);
 			VARSTRUCT_ENCODE_STRING(Buffer, emu->name);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->GroupMember);
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->is_merc);
 		}
 
 		delete[] __emu_buffer;
@@ -4854,27 +4854,8 @@ namespace RoF
 			ss.write((const char*)&evotop, sizeof(RoF::structs::EvolvingItem));
 		}
 		//ORNAMENT IDFILE / ICON
-		uint16 ornaIcon = 0;
-		int32 heroModel = 0;
-		/*
-		if (inst->GetOrnamentationAug(ornamentationAugtype))
-		{
-			const Item_Struct *aug_weap = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
-			//Mainhand
-			ss.write(aug_weap->IDFile, strlen(aug_weap->IDFile));
-			ss.write((const char*)&null_term, sizeof(uint8));
-			//Offhand
-			ss.write(aug_weap->IDFile, strlen(aug_weap->IDFile));
-			ss.write((const char*)&null_term, sizeof(uint8));
-			//Icon
-			ornaIcon = aug_weap->Icon;
-			if (aug_weap->HerosForgeModel > 0)
-			{
-				heroModel = (aug_weap->HerosForgeModel * 100) + Inventory::CalcMaterialFromSlot(slot_id_in);
-			}
-		}
-		else 
-		*/
+		uint32 ornaIcon = 0;
+		uint32 heroModel = 0;
 
 		if (inst->GetOrnamentationIDFile() && inst->GetOrnamentationIcon())
 		{
@@ -4896,8 +4877,6 @@ namespace RoF
 
 		RoF::structs::ItemSerializationHeaderFinish hdrf;
 		hdrf.ornamentIcon = ornaIcon;
-		hdrf.unknown061 = 0;
-		hdrf.unknown062 = 0;
 		hdrf.unknowna1 = 0xffffffff;
 		hdrf.ornamentHeroModel = heroModel;
 		hdrf.unknown063 = 0;
@@ -5506,7 +5485,6 @@ namespace RoF
 
 	static inline uint32 ServerToRoFCorpseSlot(uint32 ServerCorpse)
 	{
-		//uint32 RoFCorpse;
 		return (ServerCorpse + 1);
 	}
 
@@ -5647,7 +5625,6 @@ namespace RoF
 
 	static inline uint32 RoFToServerCorpseSlot(uint32 RoFCorpse)
 	{
-		//uint32 ServerCorpse;
 		return (RoFCorpse - 1);
 	}
 }

@@ -1786,7 +1786,7 @@ void ClientTaskState::UpdateTasksOnTouch(Client *c, int ZoneID) {
 
 	return;
 }
-void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int TaskIndex, int ActivityID, int Count) {
+void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int TaskIndex, int ActivityID, int Count, bool ignore_quest_update) {
 
 	_log(TASKS__UPDATE, "IncrementDoneCount");
 
@@ -1795,10 +1795,12 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int T
 	if(ActiveTasks[TaskIndex].Activity[ActivityID].DoneCount > Task->Activity[ActivityID].GoalCount)
 		ActiveTasks[TaskIndex].Activity[ActivityID].DoneCount = Task->Activity[ActivityID].GoalCount;
 
-	char buf[24];
-	snprintf(buf, 23, "%d %d %d", ActiveTasks[TaskIndex].Activity[ActivityID].DoneCount, ActiveTasks[TaskIndex].Activity[ActivityID].ActivityID, ActiveTasks[TaskIndex].TaskID);
-	buf[23] = '\0';
-	parse->EventPlayer(EVENT_TASK_UPDATE, c, buf, 0);
+	if (!ignore_quest_update){
+		char buf[24];
+		snprintf(buf, 23, "%d %d %d", ActiveTasks[TaskIndex].Activity[ActivityID].DoneCount, ActiveTasks[TaskIndex].Activity[ActivityID].ActivityID, ActiveTasks[TaskIndex].TaskID);
+		buf[23] = '\0';
+		parse->EventPlayer(EVENT_TASK_UPDATE, c, buf, 0);
+	}
 
 	ActiveTasks[TaskIndex].Activity[ActivityID].Updated=true;
 	// Have we reached the goal count for this activity ?
@@ -1821,11 +1823,12 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int T
 		c->Message(0, "Your task '%s' has been updated.", Task->Title);
 
 		if(Task->Activity[ActivityID].GoalMethod != METHODQUEST) {
-			char buf[24];
-			snprintf(buf, 23, "%d %d", ActiveTasks[TaskIndex].TaskID, ActiveTasks[TaskIndex].Activity[ActivityID].ActivityID);
-			buf[23] = '\0';
-			parse->EventPlayer(EVENT_TASK_STAGE_COMPLETE, c, buf, 0);
-
+			if (!ignore_quest_update){
+				char buf[24];
+				snprintf(buf, 23, "%d %d", ActiveTasks[TaskIndex].TaskID, ActiveTasks[TaskIndex].Activity[ActivityID].ActivityID);
+				buf[23] = '\0';
+				parse->EventPlayer(EVENT_TASK_STAGE_COMPLETE, c, buf, 0);
+			}
 			/* QS: PlayerLogTaskUpdates :: Update */
 			if (RuleB(QueryServ, PlayerLogTaskUpdates)){
 				std::string event_desc = StringFormat("Task Stage Complete :: taskid:%i activityid:%i donecount:%i in zoneid:%i instid:%i", ActiveTasks[TaskIndex].TaskID, ActiveTasks[TaskIndex].Activity[ActivityID].ActivityID, ActiveTasks[TaskIndex].Activity[ActivityID].DoneCount, c->GetZoneID(), c->GetInstanceID());
@@ -2039,7 +2042,8 @@ bool ClientTaskState::IsTaskActivityActive(int TaskID, int ActivityID) {
 
 }
 
-void ClientTaskState::UpdateTaskActivity(Client *c, int TaskID, int ActivityID, int Count) {
+void ClientTaskState::UpdateTaskActivity(Client *c, int TaskID, int ActivityID, int Count, bool ignore_quest_update /*= false*/)
+{
 
 	_log(TASKS__UPDATE, "ClientTaskState UpdateTaskActivity(%i, %i, %i).", TaskID, ActivityID, Count);
 
@@ -2048,8 +2052,8 @@ void ClientTaskState::UpdateTaskActivity(Client *c, int TaskID, int ActivityID, 
 
 	int ActiveTaskIndex = -1;
 
-	for(int i=0; i<MAXACTIVETASKS; i++) {
-		if(ActiveTasks[i].TaskID==TaskID) {
+	for (int i = 0; i < MAXACTIVETASKS; i++) {
+		if (ActiveTasks[i].TaskID == TaskID) {
 			ActiveTaskIndex = i;
 			break;
 		}
@@ -2069,7 +2073,7 @@ void ClientTaskState::UpdateTaskActivity(Client *c, int TaskID, int ActivityID, 
 	// The Activity is not currently active
 	if(ActiveTasks[ActiveTaskIndex].Activity[ActivityID].State != ActivityActive) return;
 	_log(TASKS__UPDATE, "Increment done count on UpdateTaskActivity");
-	IncrementDoneCount(c, Task, ActiveTaskIndex, ActivityID, Count);
+	IncrementDoneCount(c, Task, ActiveTaskIndex, ActivityID, Count, ignore_quest_update);
 
 }
 
@@ -2743,17 +2747,17 @@ void TaskManager::SendSingleActiveTaskToClient(Client *c, int TaskIndex, bool Ta
 	}
 }
 
-void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceNumber, int StartTime, int Duration, bool BringUpTaskJournal) {
-
-
-	if((TaskID<1) || (TaskID>=MAXTASKS) || !Tasks[TaskID]) return;
+void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceNumber, int StartTime, int Duration, bool BringUpTaskJournal)
+{
+	if ((TaskID < 1) || (TaskID >= MAXTASKS) || !Tasks[TaskID])
+		return;
 
 	int PacketLength = sizeof(TaskDescriptionHeader_Struct) + strlen(Tasks[TaskID]->Title) + 1
 				+ sizeof(TaskDescriptionData1_Struct) + strlen(Tasks[TaskID]->Description) + 1
 				+ sizeof(TaskDescriptionData2_Struct) + 1 + sizeof(TaskDescriptionTrailer_Struct);
 
 	std::string RewardText;
-	int ItemID = 0;
+	int ItemID = NOT_USED;
 
 	// If there is an item make the Reward text into a link to the item (only the first item if a list
 	// is specified). I have been unable to get multiple item links to work.
@@ -2768,62 +2772,20 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 			if(ItemID < 0)
 				ItemID = 0;
 		}
+
 		if(ItemID) {
-			char *RewardTmp = 0;
-			if(strlen(Tasks[TaskID]->Reward) != 0) {
+			const Item_Struct* reward_item = database.GetItem(ItemID);
 
-				switch(c->GetClientVersion()) {
-					case EQClientTitanium:
-					{
-						MakeAnyLenString(&RewardTmp, "%c%06X000000000000000000000000000000014505DC2%s%c",
-								0x12, ItemID, Tasks[TaskID]->Reward,0x12);
-						break;
-					}
-					case EQClientRoF:
-					{
-						MakeAnyLenString(&RewardTmp, "%c%06X0000000000000000000000000000000000000000014505DC2%s%c",
-								0x12, ItemID, Tasks[TaskID]->Reward,0x12);
-						break;
-					}
-					default:
-					{
-						// All clients after Titanium
-						MakeAnyLenString(&RewardTmp, "%c%06X00000000000000000000000000000000000014505DC2%s%c",
-								0x12, ItemID, Tasks[TaskID]->Reward,0x12);
-					}
-				}
+			Client::TextLink linker;
+			linker.SetLinkType(linker.linkItemData);
+			linker.SetItemData(reward_item);
+			linker.SetClientVersion(c->GetClientVersion());
+			linker.SetTaskUse();
+			if (strlen(Tasks[TaskID]->Reward) != 0)
+				linker.SetProxyText(Tasks[TaskID]->Reward);
 
-			}
-			else {
-				const Item_Struct *Item = database.GetItem(ItemID);
-
-				if(Item) {
-
-					switch(c->GetClientVersion()) {
-						case EQClientTitanium:
-						{
-							MakeAnyLenString(&RewardTmp, "%c%06X000000000000000000000000000000014505DC2%s%c",
-									0x12, ItemID, Item->Name ,0x12);
-							break;
-						}
-						case EQClientRoF:
-						{
-							MakeAnyLenString(&RewardTmp, "%c%06X0000000000000000000000000000000000000000014505DC2%s%c",
-									0x12, ItemID, Item->Name ,0x12);
-							break;
-						}
-						default:
-						{
-							// All clients after Titanium
-							MakeAnyLenString(&RewardTmp, "%c%06X00000000000000000000000000000000000014505DC2%s%c",
-									0x12, ItemID, Item->Name ,0x12);
-						}
-					}
-				}
-			}
-
-			if(RewardTmp) RewardText += RewardTmp;
-			safe_delete_array(RewardTmp);
+			auto reward_link = linker.GenerateLink();
+			RewardText += reward_link.c_str();
 		}
 		else {
 			RewardText += Tasks[TaskID]->Reward;

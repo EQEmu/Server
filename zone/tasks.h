@@ -175,7 +175,7 @@ public:
 	bool IsTaskActive(int TaskID);
 	bool IsTaskActivityActive(int TaskID, int ActivityID);
 	ActivityState GetTaskActivityState(int index, int ActivityID);
-	void UpdateTaskActivity(Client *c, int TaskID, int ActivityID, int Count);
+	void UpdateTaskActivity(Client *c, int TaskID, int ActivityID, int Count, bool ignore_quest_update = false);
 	void ResetTaskActivity(Client *c, int TaskID, int ActivityID);
 	void CancelTask(Client *c, int SequenceNumber, bool RemoveFromDB = true);
 	void CancelAllTasks(Client *c);
@@ -204,7 +204,7 @@ public:
 
 private:
 	bool UnlockActivities(int CharID, int TaskIndex);
-	void IncrementDoneCount(Client *c, TaskInformation *Task, int TaskIndex, int ActivityID, int Count=1);
+	void IncrementDoneCount(Client *c, TaskInformation *Task, int TaskIndex, int ActivityID, int Count = 1, bool ignore_quest_update = false);
 	int ActiveTaskCount;
 	ClientTaskInformation ActiveTasks[MAXACTIVETASKS];
 	std::vector<int>EnabledTasks;

@@ -695,6 +695,9 @@ bool LuaParser::SpellHasQuestSub(uint32 spell_id, QuestEventID evt) {
 }
 
 bool LuaParser::ItemHasQuestSub(ItemInst *itm, QuestEventID evt) {
+	if (itm == nullptr) {
+		return false;
+	}
 	evt = ConvertLuaEvent(evt);
 	if(evt >= _LargestEventID) {
 		return false;
@@ -738,6 +741,8 @@ void LuaParser::LoadGlobalPlayerScript(std::string filename) {
 }
 
 void LuaParser::LoadItemScript(std::string filename, ItemInst *item) {
+	if (item == nullptr)
+		return;
 	std::string package_name = "item_";
 	package_name += std::to_string(static_cast<long long>(item->GetID()));
 

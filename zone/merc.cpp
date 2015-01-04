@@ -1385,7 +1385,7 @@ void Merc::AI_Process() {
 			rest_timer.Disable();
 
 		if(IsRooted())
-			SetTarget(hate_list.GetClosest(this));
+			SetTarget(hate_list.GetClosestEntOnHateList(this));
 		else
 			FindTarget();
 
@@ -2454,11 +2454,11 @@ void Merc::CheckHateList() {
 								Mob* groupMember = g->members[counter];
 								if(groupMember) {
 									if(npc->IsOnHatelist(groupMember)) {
-										if(!hate_list.IsOnHateList(npc)) {
+										if(!hate_list.IsEntOnHateList(npc)) {
 											float range = g->HasRole(groupMember, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
 											range *= range;
 											if(npc->DistNoRootNoZ(*this) < range) {
-												hate_list.Add(npc, 1);
+												hate_list.AddEntToHateList(npc, 1);
 											}
 										}
 									}
@@ -4644,13 +4644,6 @@ const char* Merc::GetRandomName(){
 	return name;
 }
 
-bool Compare_Merc_Spells(MercSpell i, MercSpell j);
-
-bool Compare_Merc_Spells(MercSpell i, MercSpell j)
-{
-	return(i.slot > j.slot);
-}
-
 bool Merc::LoadMercSpells() {
 	// loads mercs spells into list
 	merc_spells.clear();
@@ -4683,7 +4676,9 @@ bool Merc::LoadMercSpells() {
 				AddProcToWeapon(mercSpellEntryItr->spellid, true, mercSpellEntryItr->proc_chance);
 		}
 	}
-	std::sort(merc_spells.begin(), merc_spells.end(), Compare_Merc_Spells);
+	std::sort(merc_spells.begin(), merc_spells.end(), [](const MercSpell& a, const MercSpell& b) {
+		return a.slot > b.slot;
+	});
 
 	if (merc_spells.size() == 0)
 		AIautocastspell_timer->Disable();

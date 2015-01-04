@@ -606,6 +606,9 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	//the target of these swarm pets will take offense to being cast on...
 	if(targ != nullptr)
 		targ->AddToHateList(this, 1, 0);
+
+	// The other pointers we make are handled elsewhere.
+	delete made_npc;
 }
 
 void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg) {
@@ -698,6 +701,9 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 		entity_list.AddNPC(npca, true, true);
 		summon_count--;
 	}
+
+	// The other pointers we make are handled elsewhere.
+	delete made_npc;
 }
 
 void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
@@ -844,8 +850,8 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 
 	make_npc->loottable_id = 0;
 	make_npc->merchanttype = 0;
-	make_npc->d_meele_texture1 = 0;
-	make_npc->d_meele_texture2 = 0;
+	make_npc->d_melee_texture1 = 0;
+	make_npc->d_melee_texture2 = 0;
 
 	NPC* npca = new NPC(make_npc, 0, GetX(), GetY(), GetZ(), GetHeading(), FlyMode3);
 

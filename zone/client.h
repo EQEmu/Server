@@ -804,6 +804,7 @@ public:
 	int32 GetAugmentIDAt(int16 slot_id, uint8 augslot);
 	bool PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client_update = false);
 	bool PushItemOnCursor(const ItemInst& inst, bool client_update = false);
+	void SendCursorBuffer();
 	void DeleteItemInInventory(int16 slot_id, int8 quantity = 0, bool client_update = false, bool update_db = true);
 	bool SwapItem(MoveItem_Struct* move_in);
 	void SwapItemResync(MoveItem_Struct* move_slots);
@@ -814,8 +815,57 @@ public:
 	void SetStats(uint8 type,int16 set_val);
 	void IncStats(uint8 type,int16 increase_val);
 	void DropItem(int16 slot_id);
-	bool MakeItemLink(char* &ret_link, const ItemInst* inst);
-	int GetItemLinkHash(const ItemInst* inst);
+
+	//
+	// class Client::TextLink
+	//
+	class TextLink {
+	public:
+		enum LinkType { linkBlank = 0, linkItemData, linkLootItem, linkItemInst };
+
+		TextLink() { Reset(); }
+
+		void SetLinkType(LinkType linkType) { m_LinkType = linkType; }
+		void SetItemData(const Item_Struct* itemData) { m_ItemData = itemData; }
+		void SetLootData(const ServerLootItem_Struct* lootData) { m_LootData = lootData; }
+		void SetItemInst(const ItemInst* itemInst) { m_ItemInst = itemInst; }
+		void SetProxyItemID(uint32 proxyItemID) { m_ProxyItemID = proxyItemID; } // mainly for saylinks..but, not limited to
+		void SetProxyText(const char* proxyText) { m_ProxyText = proxyText; } // overrides standard text use
+		void SetTaskUse() { m_TaskUse = true; }
+		void SetClientVersion(EQClientVersion clientVersion) { m_ClientVersion = EQLimits::ValidateClientVersion(clientVersion); }
+
+		std::string GenerateLink();
+		bool LinkError() { return m_Error; }
+
+		const char* GetLink();		// contains full format: '/12x' '<LinkBody>' '<LinkText>' '/12x'
+		const char* GetLinkBody();	// contains format: '<LinkBody>'
+		const char* GetLinkText();	// contains format: '<LinkText>'
+		std::string GetLinkString();
+		std::string GetLinkBodyString();
+		std::string GetLinkTextString();
+
+		void Reset();
+
+	private:
+		void generate_body();
+		void generate_text();
+
+		int m_LinkType;
+		const Item_Struct* m_ItemData;
+		const ServerLootItem_Struct* m_LootData;
+		const ItemInst* m_ItemInst;
+		uint32 m_ProxyItemID;
+		const char* m_ProxyText;
+		bool m_TaskUse;
+		std::string m_Link;
+		std::string m_LinkBody;
+		std::string m_LinkText;
+		EQClientVersion m_ClientVersion;
+		bool m_Error;
+	};
+
+	int GetItemLinkHash(const ItemInst* inst); // move to Item_Struct..or make use of the pre-calculated database field
+
 	void SendItemLink(const ItemInst* inst, bool sendtoall=false);
 	void SendLootItemInPacket(const ItemInst* inst, int16 slot_id);
 	void SendItemPacket(int16 slot_id, const ItemInst* inst, ItemPacketType packet_type);
@@ -832,11 +882,11 @@ public:
 
 	bool Hungry() const {if (GetGM()) return false; return m_pp.hunger_level <= 3000;}
 	bool Thirsty() const {if (GetGM()) return false; return m_pp.thirst_level <= 3000;}
-int32 GetHunger() const { return m_pp.hunger_level; }
-int32 GetThirst() const { return m_pp.thirst_level; }
-void SetHunger(int32 in_hunger);
-void SetThirst(int32 in_thirst);
-void SetConsumption(int32 in_hunger, int32 in_thirst);
+	int32 GetHunger() const { return m_pp.hunger_level; }
+	int32 GetThirst() const { return m_pp.thirst_level; }
+	void SetHunger(int32 in_hunger);
+	void SetThirst(int32 in_thirst);
+	void SetConsumption(int32 in_hunger, int32 in_thirst);
 
 	bool CheckTradeLoreConflict(Client* other);
 	void LinkDead();
@@ -937,7 +987,7 @@ void SetConsumption(int32 in_hunger, int32 in_thirst);
 	inline bool IsTaskActive(int TaskID) { return (taskstate ? taskstate->IsTaskActive(TaskID) : false); }
 	inline bool IsTaskActivityActive(int TaskID, int ActivityID) { return (taskstate ? taskstate->IsTaskActivityActive(TaskID, ActivityID) : false); }
 	inline ActivityState GetTaskActivityState(int index, int ActivityID) { return (taskstate ? taskstate->GetTaskActivityState(index, ActivityID) : ActivityHidden); }
-	inline void UpdateTaskActivity(int TaskID, int ActivityID, int Count) { if(taskstate) taskstate->UpdateTaskActivity(this, TaskID, ActivityID, Count); }
+	inline void UpdateTaskActivity(int TaskID, int ActivityID, int Count, bool ignore_quest_update = false) { if (taskstate) taskstate->UpdateTaskActivity(this, TaskID, ActivityID, Count, ignore_quest_update); }
 	inline void ResetTaskActivity(int TaskID, int ActivityID) { if(taskstate) taskstate->ResetTaskActivity(this, TaskID, ActivityID); }
 	inline void UpdateTasksOnKill(int NPCTypeID) { if(taskstate) taskstate->UpdateTasksOnKill(this, NPCTypeID); }
 	inline void UpdateTasksForItem(ActivityType Type, int ItemID, int Count=1) { if(taskstate) taskstate->UpdateTasksForItem(this, Type, ItemID, Count); }

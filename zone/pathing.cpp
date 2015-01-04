@@ -345,10 +345,10 @@ bool CheckLOSBetweenPoints(Map::Vertex start, Map::Vertex end) {
 	return true;
 }
 
-bool SortPathNodesByDistance(PathNodeSortStruct n1, PathNodeSortStruct n2)
+auto path_compare = [](const PathNodeSortStruct& a, const PathNodeSortStruct& b)
 {
-	return n1.Distance < n2.Distance;
-}
+	return a.Distance < b.Distance;
+};
 
 std::deque<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 {
@@ -382,7 +382,7 @@ std::deque<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 		}
 	}
 
-	std::sort(SortedByDistance.begin(), SortedByDistance.end(), SortPathNodesByDistance);
+	std::sort(SortedByDistance.begin(), SortedByDistance.end(), path_compare);
 
 	for(auto Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
 	{
@@ -420,7 +420,7 @@ std::deque<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 		}
 	}
 
-	std::sort(SortedByDistance.begin(), SortedByDistance.end(), SortPathNodesByDistance);
+	std::sort(SortedByDistance.begin(), SortedByDistance.end(), path_compare);
 
 	for(auto Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
 	{
@@ -573,8 +573,8 @@ void PathManager::SpawnPathNodes()
 		npc_type->texture = 1;
 		npc_type->light = 0;
 		npc_type->runspeed = 0;
-		npc_type->d_meele_texture1 = 1;
-		npc_type->d_meele_texture2 = 1;
+		npc_type->d_melee_texture1 = 1;
+		npc_type->d_melee_texture2 = 1;
 		npc_type->merchanttype = 1;
 		npc_type->bodytype = 1;
 
@@ -1120,7 +1120,7 @@ int PathManager::FindNearestPathNode(Map::Vertex Position)
 		}
 	}
 
-	std::sort(SortedByDistance.begin(), SortedByDistance.end(), SortPathNodesByDistance);
+	std::sort(SortedByDistance.begin(), SortedByDistance.end(), path_compare);
 
 	for(auto Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
 	{
@@ -1561,8 +1561,8 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 		npc_type->texture = 1;
 		npc_type->light = 0;
 		npc_type->runspeed = 0;
-		npc_type->d_meele_texture1 = 1;
-		npc_type->d_meele_texture2 = 1;
+		npc_type->d_melee_texture1 = 1;
+		npc_type->d_melee_texture2 = 1;
 		npc_type->merchanttype = 1;
 		npc_type->bodytype = 1;
 		npc_type->STR = 150;
@@ -1621,8 +1621,8 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 		npc_type->texture = 1;
 		npc_type->light = 0;
 		npc_type->runspeed = 0;
-		npc_type->d_meele_texture1 = 1;
-		npc_type->d_meele_texture2 = 1;
+		npc_type->d_melee_texture1 = 1;
+		npc_type->d_melee_texture2 = 1;
 		npc_type->merchanttype = 1;
 		npc_type->bodytype = 1;
 		npc_type->STR = 150;

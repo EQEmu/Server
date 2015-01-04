@@ -1214,7 +1214,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 		parse->EventPlayer(EVENT_LOOT, client, buf, 0, &args);
 		parse->EventItem(EVENT_LOOT, client, inst, this, buf, 0);
 
-		if ((RuleB(Character, EnableDiscoveredItems))) {
+		if (!IsPlayerCorpse() && RuleB(Character, EnableDiscoveredItems)) {
 			if (client && !client->GetGM() && !client->IsDiscovered(inst->GetItem()->ID))
 				client->DiscoverItem(inst->GetItem()->ID);
 		}
@@ -1261,33 +1261,38 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 			}
 		}
 
-		if (GetPlayerKillItem() != -1){
+		if (GetPlayerKillItem() != -1) {
 			SetPlayerKillItemID(0);
 		}
 
 		/* Send message with item link to groups and such */
-		char *link = 0, *link2 = 0; //just like a db query :-)
-		client->MakeItemLink(link2, inst);
-		MakeAnyLenString(&link, "%c" "%s" "%s" "%c",
-			0x12,
-			link2,
-			item->Name,
-			0x12);
-		safe_delete_array(link2);
+		Client::TextLink linker;
+		linker.SetLinkType(linker.linkItemInst);
+		linker.SetItemInst(inst);
+		linker.SetClientVersion(client->GetClientVersion());
 
-		client->Message_StringID(MT_LootMessages, LOOTED_MESSAGE, link);
+		auto item_link = linker.GenerateLink();
+
+		client->Message_StringID(MT_LootMessages, LOOTED_MESSAGE, item_link.c_str());
+
 		if(!IsPlayerCorpse()) {
+			// When sending to multiple/unknown client types, we set for the highest client..
+			// ..which is processed when 'EQClientUnknown,' or default value, is selected.
+			// This should help with any current issues..or it may create more! O.o
+			linker.SetClientVersion(EQClientUnknown);
+			item_link = linker.GenerateLink();
+
 			Group *g = client->GetGroup();
 			if(g != nullptr) {
-				g->GroupMessage_StringID(client, MT_LootMessages, OTHER_LOOTED_MESSAGE, client->GetName(), link);
-			} else {
+				g->GroupMessage_StringID(client, MT_LootMessages, OTHER_LOOTED_MESSAGE, client->GetName(), item_link.c_str());
+			}
+			else {
 				Raid *r = client->GetRaid();
 				if(r != nullptr) {
-					r->RaidMessage_StringID(client, MT_LootMessages, OTHER_LOOTED_MESSAGE, client->GetName(), link);
+					r->RaidMessage_StringID(client, MT_LootMessages, OTHER_LOOTED_MESSAGE, client->GetName(), item_link.c_str());
 				}
 			}
 		}
-		safe_delete_array(link);
 	}
 	else {
 		SendEndLootErrorPacket(client);

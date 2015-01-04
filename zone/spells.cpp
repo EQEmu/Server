@@ -1195,22 +1195,29 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 		uint32 recastdelay = 0;
 		uint32 recasttype = 0;
 
-		for (int r = 0; r < EmuConstants::ITEM_COMMON_SIZE; r++) {
-			const ItemInst* aug_i = inst->GetAugment(r);
-
-			if(!aug_i)
-				continue;
-			const Item_Struct* aug = aug_i->GetItem();
-			if(!aug)
-				continue;
-
-			if ( aug->Click.Effect == spell_id )
-			{
-				recastdelay = aug_i->GetItem()->RecastDelay;
-				recasttype = aug_i->GetItem()->RecastType;
-				fromaug = true;
+		while (true) {
+			if (inst == nullptr)
 				break;
+
+			for (int r = AUG_BEGIN; r < EmuConstants::ITEM_COMMON_SIZE; r++) {
+				const ItemInst* aug_i = inst->GetAugment(r);
+
+				if (!aug_i)
+					continue;
+				const Item_Struct* aug = aug_i->GetItem();
+				if (!aug)
+					continue;
+
+				if (aug->Click.Effect == spell_id)
+				{
+					recastdelay = aug_i->GetItem()->RecastDelay;
+					recasttype = aug_i->GetItem()->RecastType;
+					fromaug = true;
+					break;
+				}
 			}
+
+			break;
 		}
 
 		//Test the aug recast delay
@@ -3649,11 +3656,11 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 								spelltar->AddToHateList(this, aggro);
 					}
 					else{
-						int32 newhate = spelltar->GetHateAmount(this) + aggro;
+						uint32 newhate = spelltar->GetHateAmount(this) + aggro;
 						if (newhate < 1) {
-							spelltar->SetHate(this,1);
+							spelltar->SetHateAmountOnEnt(this,1);
 						} else {
-							spelltar->SetHate(this,newhate);
+							spelltar->SetHateAmountOnEnt(this,newhate);
 						}
 					}
 				}
@@ -3681,9 +3688,9 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 			spelltar->AddToHateList(this, aggro_amount);		else{
 			int32 newhate = spelltar->GetHateAmount(this) + aggro_amount;
 			if (newhate < 1) {
-				spelltar->SetHate(this,1);
+				spelltar->SetHateAmountOnEnt(this,1);
 			} else {
-				spelltar->SetHate(this,newhate);
+				spelltar->SetHateAmountOnEnt(this,newhate);
 			}
 		}
 	}
@@ -3896,6 +3903,8 @@ void Mob::BuffFadeDetrimental() {
 				BuffFadeBySlot(j, false);
 		}
 	}
+	//we tell BuffFadeBySlot not to recalc, so we can do it only once when were done
+	CalcBonuses();
 }
 
 void Mob::BuffFadeDetrimentalByCaster(Mob *caster)
@@ -3916,6 +3925,8 @@ void Mob::BuffFadeDetrimentalByCaster(Mob *caster)
 			}
 		}
 	}
+	//we tell BuffFadeBySlot not to recalc, so we can do it only once when were done
+	CalcBonuses();
 }
 
 void Mob::BuffFadeBySitModifier()
@@ -4195,6 +4206,10 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 
 	//Get resist modifier and adjust it based on focus 2 resist about eq to 1% resist chance
 	int resist_modifier = (use_resist_override) ? resist_override : spells[spell_id].ResistDiff;
+
+	if(caster->GetSpecialAbility(CASTING_RESIST_DIFF))
+		resist_modifier += caster->GetSpecialAbilityParam(CASTING_RESIST_DIFF, 0);
+
 	int focus_resist = caster->GetFocusEffect(focusResistRate, spell_id);
 	resist_modifier -= 2 * focus_resist;
 

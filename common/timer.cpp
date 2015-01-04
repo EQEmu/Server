@@ -141,11 +141,13 @@ uint32 Timer::GetRemainingTime() {
 	}
 }
 
-void Timer::SetAtTrigger(uint32 in_set_at_trigger, bool iEnableIfDisabled) {
+void Timer::SetAtTrigger(uint32 in_set_at_trigger, bool iEnableIfDisabled, bool ChangeTimerTime) {
 	set_at_trigger = in_set_at_trigger;
 	if (!Enabled() && iEnableIfDisabled) {
 		Enable();
 	}
+	if (ChangeTimerTime)
+		timer_time = set_at_trigger;
 }
 
 void Timer::Trigger()

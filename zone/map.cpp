@@ -58,6 +58,7 @@ Map::Map() {
 Map::~Map() {
 	if(imp) {
 		imp->rm->release();
+		safe_delete(imp);
 	}
 }
 

@@ -1227,13 +1227,18 @@ void QuestManager::settime(uint8 new_hour, uint8 new_min) {
 void QuestManager::itemlink(int item_id) {
 	QuestManagerCurrentQuestVars();
 	if (initiator) {
-		const ItemInst* inst = database.CreateItem(item_id);
-		char* link = 0;
-		if (initiator->MakeItemLink(link, inst))
-			initiator->Message(0, "%s tells you, %c%s%s%c", owner->GetCleanName(),
-					0x12, link, inst->GetItem()->Name, 0x12);
-		safe_delete_array(link);
-		safe_delete(inst);
+		const Item_Struct* item = database.GetItem(item_id);
+		if (item == nullptr)
+			return;
+
+		Client::TextLink linker;
+		linker.SetLinkType(linker.linkItemData);
+		linker.SetItemData(item);
+		linker.SetClientVersion(initiator->GetClientVersion());
+
+		auto item_link = linker.GenerateLink();
+
+		initiator->Message(0, "%s tells you, %s", owner->GetCleanName(), item_link.c_str());
 	}
 }
 
@@ -2103,11 +2108,12 @@ int QuestManager::gettaskactivitydonecount(int task, int activity) {
 
 }
 
-void QuestManager::updatetaskactivity(int task, int activity, int count) {
+void QuestManager::updatetaskactivity(int task, int activity, int count, bool ignore_quest_update /*= false*/)
+{
 	QuestManagerCurrentQuestVars();
 
 	if(RuleB(TaskSystem, EnableTaskSystem) && initiator)
-		initiator->UpdateTaskActivity(task, activity, count);
+		initiator->UpdateTaskActivity(task, activity, count, ignore_quest_update);
 }
 
 void QuestManager::resettaskactivity(int task, int activity) {
@@ -2336,7 +2342,7 @@ int QuestManager::collectitems_processSlot(int16 slot_id, uint32 item_id,
 	bool remove)
 {
 	QuestManagerCurrentQuestVars();
-	ItemInst *item;
+	ItemInst *item = nullptr;
 	int quantity = 0;
 
 	item = initiator->GetInv().GetItem(slot_id);
@@ -2461,16 +2467,19 @@ uint32 QuestManager::MerchantCountItem(uint32 NPCid, uint32 itemid) {
 // Item Link for use in Variables - "my $example_link = quest::varlink(item_id);"
 const char* QuestManager::varlink(char* perltext, int item_id) {
 	QuestManagerCurrentQuestVars();
-	const ItemInst* inst = database.CreateItem(item_id);
-	if (!inst)
+	const Item_Struct* item = database.GetItem(item_id);
+	if (!item)
 		return "INVALID ITEM ID IN VARLINK";
-	char* link = 0;
-	char* tempstr = 0;
-	if (initiator->MakeItemLink(link, inst)) {	// make a link to the item
-		snprintf(perltext, 250, "%c%s%s%c", 0x12, link, inst->GetItem()->Name, 0x12);
-	}
-	safe_delete_array(link);	// MakeItemLink() uses new also
-	safe_delete(inst);
+
+	Client::TextLink linker;
+	linker.SetLinkType(linker.linkItemData);
+	linker.SetItemData(item);
+	if (initiator)
+		linker.SetClientVersion(initiator->GetClientVersion());
+
+	auto item_link = linker.GenerateLink();
+	strcpy(perltext, item_link.c_str()); // link length is currently ranged from 1 to 250 in TextLink::GenerateLink()
+	
 	return perltext;
 }
 
@@ -2656,24 +2665,16 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 		sayid = sayid + 500000;
 
 	//Create the say link as an item link hash
-	char linktext[250];
+	Client::TextLink linker;
+	linker.SetProxyItemID(sayid);
+	linker.SetProxyText(LinkName);
+	if (initiator)
+		linker.SetClientVersion(initiator->GetClientVersion());
 
-	if (initiator) {
-		if (initiator->GetClientVersion() >= EQClientRoF2)
-			sprintf(linktext, "%c%06X%s%s%c", 0x12, sayid, "00000000000000000000000000000000000000000000000000", LinkName, 0x12);
-		else if (initiator->GetClientVersion() >= EQClientRoF)
-			sprintf(linktext, "%c%06X%s%s%c", 0x12, sayid, "0000000000000000000000000000000000000000000000000", LinkName, 0x12);
-		else if (initiator->GetClientVersion() >= EQClientSoF)
-			sprintf(linktext, "%c%06X%s%s%c", 0x12, sayid, "00000000000000000000000000000000000000000000", LinkName, 0x12);
-		else
-			sprintf(linktext, "%c%06X%s%s%c", 0x12, sayid, "000000000000000000000000000000000000000", LinkName, 0x12);
-	} else { // If no initiator, create an RoF2 saylink, since older clients handle RoF2 ones better than RoF2 handles older ones.
-		sprintf(linktext, "%c%06X%s%s%c", 0x12, sayid, "00000000000000000000000000000000000000000000000000", LinkName, 0x12);
-	}
+	auto say_link = linker.GenerateLink();
+	strcpy(Phrase, say_link.c_str());  // link length is currently ranged from 1 to 250 in TextLink::GenerateLink()
 
-	strcpy(Phrase,linktext);
 	return Phrase;
-
 }
 
 const char* QuestManager::getguildnamebyid(int guild_id) {

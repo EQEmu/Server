@@ -122,7 +122,8 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
 	uint32 i;
 	uint8 membercount = 0;
 	for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
-		if (members[i] != nullptr) {
+		// Don't split with Mercs or Bots
+		if (members[i] != nullptr && members[i]->IsClient()) {
 			membercount++;
 		}
 	}

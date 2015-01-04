@@ -12,42 +12,42 @@
 
 Lua_Mob Lua_HateEntry::GetEnt() {
 	Lua_Safe_Call_Class(Lua_Mob);
-	return Lua_Mob(self->ent);
+	return Lua_Mob(self->entity_on_hatelist);
 }
 
 void Lua_HateEntry::SetEnt(Lua_Mob e) {
 	Lua_Safe_Call_Void();
-	self->ent = e;
+	self->entity_on_hatelist = e;
 }
 
 int Lua_HateEntry::GetDamage() {
 	Lua_Safe_Call_Int();
-	return self->damage;
+	return self->hatelist_damage;
 }
 
 void Lua_HateEntry::SetDamage(int value) {
 	Lua_Safe_Call_Void();
-	self->damage = value;
+	self->hatelist_damage = value;
 }
 
 int Lua_HateEntry::GetHate() {
 	Lua_Safe_Call_Int();
-	return self->hate;
+	return self->stored_hate_amount;
 }
 
 void Lua_HateEntry::SetHate(int value) {
 	Lua_Safe_Call_Void();
-	self->hate = value;
+	self->stored_hate_amount = value;
 }
 
 int Lua_HateEntry::GetFrenzy() {
 	Lua_Safe_Call_Int();
-	return self->bFrenzy;
+	return self->is_entity_frenzy;
 }
 
 void Lua_HateEntry::SetFrenzy(bool value) {
 	Lua_Safe_Call_Void();
-	self->bFrenzy = value;
+	self->is_entity_frenzy = value;
 }
 
 luabind::scope lua_register_hate_entry() {

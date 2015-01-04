@@ -493,7 +493,7 @@ void Mob::AI_Start(uint32 iMoveDelay) {
 		pAggroRange = 70;
 	if (GetAssistRange() == 0)
 		pAssistRange = 70;
-	hate_list.Wipe();
+	hate_list.WipeHateList();
 
 	delta_heading = 0;
 	delta_x = 0;
@@ -553,7 +553,7 @@ void Mob::AI_Stop() {
 	safe_delete(AIscanarea_timer);
 	safe_delete(AIfeignremember_timer);
 
-	hate_list.Wipe();
+	hate_list.WipeHateList();
 }
 
 void NPC::AI_Stop() {
@@ -816,12 +816,12 @@ void Client::AI_Process()
 	if (engaged)
 	{
 		if (IsRooted())
-			SetTarget(hate_list.GetClosest(this));
+			SetTarget(hate_list.GetClosestEntOnHateList(this));
 		else
 		{
 			if(AItarget_check_timer->Check())
 			{
-				SetTarget(hate_list.GetTop(this));
+				SetTarget(hate_list.GetEntWithMostHateOnList(this));
 			}
 		}
 
@@ -1041,7 +1041,7 @@ void Mob::AI_Process() {
 	//
 	if(RuleB(Combat, EnableFearPathing)){
 		if(curfp) {
-			if(IsRooted() || (IsBlind() && CombatRange(hate_list.GetClosest(this)))) {
+			if(IsRooted() || (IsBlind() && CombatRange(hate_list.GetClosestEntOnHateList(this)))) {
 				//make sure everybody knows were not moving, for appearance sake
 				if(IsMoving())
 				{
@@ -1091,18 +1091,18 @@ void Mob::AI_Process() {
 		// we are prevented from getting here if we are blind and don't have a target in range
 		// from above, so no extra blind checks needed
 		if ((IsRooted() && !GetSpecialAbility(IGNORE_ROOT_AGGRO_RULES)) || IsBlind())
-			SetTarget(hate_list.GetClosest(this));
+			SetTarget(hate_list.GetClosestEntOnHateList(this));
 		else
 		{
 			if(AItarget_check_timer->Check())
 			{
 				if (IsFocused()) {
 					if (!target) {
-						SetTarget(hate_list.GetTop(this));
+						SetTarget(hate_list.GetEntWithMostHateOnList(this));
 					}
 				} else {
 					if (!ImprovedTaunt())
-						SetTarget(hate_list.GetTop(this));
+						SetTarget(hate_list.GetEntWithMostHateOnList(this));
 				}
 
 			}
@@ -1376,7 +1376,7 @@ void Mob::AI_Process() {
 			//underwater stuff only works with water maps in the zone!
 			if(IsNPC() && CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
 				if(!zone->watermap->InLiquid(target->GetX(), target->GetY(), target->GetZ())) {
-					Mob *tar = hate_list.GetTop(this);
+					Mob *tar = hate_list.GetEntWithMostHateOnList(this);
 					if(tar == target) {
 						WipeHateList();
 						Heal();
@@ -2354,7 +2354,6 @@ create table npc_spells_entries (
 
 bool IsSpellInList(DBnpcspells_Struct* spell_list, int16 iSpellID);
 bool IsSpellEffectInList(DBnpcspellseffects_Struct* spelleffect_list, uint16 iSpellEffectID, int32 base, int32 limit, int32 max);
-bool Compare_AI_Spells(AISpells_Struct i, AISpells_Struct j);
 
 bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 	// ok, this function should load the list, and the parent list then shove them into the struct and sort
@@ -2479,7 +2478,9 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 				spell_list->entries[i].resist_adjust);
 		}
 	}
-	std::sort(AIspells.begin(), AIspells.end(), Compare_AI_Spells);
+	std::sort(AIspells.begin(), AIspells.end(), [](const AISpells_Struct& a, const AISpells_Struct& b) {
+		return a.priority > b.priority;
+	});
 
 	if (IsValidSpell(attack_proc_spell))
 		AddProcToWeapon(attack_proc_spell, true, proc_chance);
@@ -2617,11 +2618,6 @@ bool IsSpellInList(DBnpcspells_Struct* spell_list, int16 iSpellID) {
 			return true;
 	}
 	return false;
-}
-
-bool Compare_AI_Spells(AISpells_Struct i, AISpells_Struct j)
-{
-	return(i.priority > j.priority);
 }
 
 // adds a spell to the list, taking into account priority and resorting list as needed.

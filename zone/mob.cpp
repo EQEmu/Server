@@ -401,7 +401,7 @@ Mob::Mob(const char* in_name,
 	PathingRouteUpdateTimerLong = new Timer(RuleI(Pathing, RouteUpdateFrequencyLong));
 	DistractedFromGrid = false;
 	PathingTraversedNodes = 0;
-	hate_list.SetOwner(this);
+	hate_list.SetHateOwner(this);
 
 	m_AllowBeneficial = false;
 	m_DisableMelee = false;
@@ -925,7 +925,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.animation	= 0;
 	ns->spawn.findable	= findable?1:0;
 	ns->spawn.light		= light;
-	ns->spawn.showhelm = 1;
+	ns->spawn.showhelm = (helmtexture && helmtexture != 0xFF) ? 1 : 0;
 
 	ns->spawn.invis		= (invisible || hidden) ? 1 : 0;	// TODO: load this before spawning players
 	ns->spawn.NPC		= IsClient() ? 0 : 1;
@@ -945,11 +945,11 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.drakkin_heritage = drakkin_heritage;
 	ns->spawn.drakkin_tattoo = drakkin_tattoo;
 	ns->spawn.drakkin_details = drakkin_details;
-	ns->spawn.equip_chest2 = texture;
+	ns->spawn.equip_chest2 = GetHerosForgeModel(1) != 0 ? 0xff : texture;
 
 //	ns->spawn.invis2 = 0xff;//this used to be labeled beard.. if its not FF it will turn mob invis
 
-	if(helmtexture && helmtexture != 0xFF)
+	if (helmtexture && helmtexture != 0xFF && GetHerosForgeModel(0) == 0)
 	{
 		ns->spawn.helm=helmtexture;
 	} else {
@@ -978,7 +978,8 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
 
-	for (i = 0; i < _MaterialCount; i++)
+	//for (i = 0; i < _MaterialCount; i++)
+	for (i = 0; i < 9; i++)
 	{
 		// Only Player Races Wear Armor
 		if (Mob::IsPlayerRace(race) || i > 6)
@@ -2571,8 +2572,8 @@ bool Mob::RemoveFromHateList(Mob* mob)
 	bool bFound = false;
 	if(IsEngaged())
 	{
-		bFound = hate_list.RemoveEnt(mob);
-		if(hate_list.IsEmpty())
+		bFound = hate_list.RemoveEntFromHateList(mob);
+		if(hate_list.IsHateListEmpty())
 		{
 			AI_Event_NoLongerEngaged();
 			zone->DelAggroMob();
@@ -2580,7 +2581,7 @@ bool Mob::RemoveFromHateList(Mob* mob)
 	}
 	if(GetTarget() == mob)
 	{
-		SetTarget(hate_list.GetTop(this));
+		SetTarget(hate_list.GetEntWithMostHateOnList(this));
 	}
 
 	return bFound;
@@ -2590,12 +2591,12 @@ void Mob::WipeHateList()
 {
 	if(IsEngaged())
 	{
-		hate_list.Wipe();
+		hate_list.WipeHateList();
 		AI_Event_NoLongerEngaged();
 	}
 	else
 	{
-		hate_list.Wipe();
+		hate_list.WipeHateList();
 	}
 }
 
@@ -2749,7 +2750,6 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 
 int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 {
-	
 	uint32 HeroModel = 0;
 	if (material_slot >= 0 && material_slot < MaterialPrimary)
 	{
@@ -2760,7 +2760,7 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 		
 		if (item != 0 && invslot != INVALID_INDEX)
 		{
-			if (this->IsClient())
+			if (IsClient())
 			{
 				const ItemInst* inst = CastToClient()->m_inv[invslot];
 				if (inst)
@@ -2782,9 +2782,22 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 				HeroModel = item->HerosForgeModel;
 			}
 		}
+
+		if (IsNPC())
+		{
+			HeroModel = CastToNPC()->GetHeroForgeModel();
+			// Robes require full model number, and should only be sent to chest, arms, wrists, and legs slots
+			if (HeroModel > 1000 && material_slot != 1 && material_slot != 2 && material_slot != 3 && material_slot != 5)
+			{
+				HeroModel = 0;
+			}
+		}
 	}
 
-	if (HeroModel > 0)
+	// Auto-Convert Hero Model to match the slot
+	// Otherwise, use the exact Model if model is > 999
+	// Robes for example are 11607 to 12107 in RoF
+	if (HeroModel > 0 && HeroModel < 1000)
 	{
 		HeroModel *= 100;
 		HeroModel += material_slot;
@@ -3504,7 +3517,7 @@ void Mob::TryTriggerOnValueAmount(bool IsHP, bool IsMana, bool IsEndur, bool IsP
 						}
 
 						else if (IsPet){
-							int count = hate_list.SummonedPetCount(this);
+							int count = hate_list.GetSummonedPetCountOnHateList(this);
 							if ((base2 >= 220 && base2 <= 250) && count >= (base2 - 220)){
 								use_spell = true;
 							}

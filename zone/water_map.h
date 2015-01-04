@@ -21,15 +21,15 @@ class WaterMap
 {
 public:
 	WaterMap() { }
-	~WaterMap() { }
-	
+	virtual ~WaterMap() { }
+
 	static WaterMap* LoadWaterMapfile(std::string zone_name);
 	virtual WaterRegionType ReturnRegionType(float y, float x, float z) const { return RegionTypeNormal; }
 	virtual bool InWater(float y, float x, float z) const { return false; }
 	virtual bool InVWater(float y, float x, float z) const { return false; }
 	virtual bool InLava(float y, float x, float z) const { return false; }
 	virtual bool InLiquid(float y, float x, float z) const { return false; }
-	
+
 protected:
 	virtual bool Load(FILE *fp) { return false; }
 };

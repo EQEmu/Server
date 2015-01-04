@@ -247,7 +247,7 @@ int command_init(void) {
 		command_add("reloadstatic","- Reload Static Zone Data",150,command_reloadstatic) ||
 		command_add("reloadquest"," - Clear quest cache (any argument causes it to also stop all timers)",150,command_reloadqst) ||
 		command_add("reloadqst"," - Clear quest cache (any argument causes it to also stop all timers)",150,command_reloadqst) ||
-		command_add("reloadworld",nullptr,255,command_reloadworld) ||
+		command_add("reloadworld","[0|1] - Clear quest cache (0 - no repop, 1 - repop)",255,command_reloadworld) ||
 		command_add("reloadlevelmods",nullptr,255,command_reloadlevelmods) ||
 		command_add("reloadzonepoints","- Reload zone points from database",150,command_reloadzps) ||
 		command_add("reloadzps",nullptr,0,command_reloadzps) ||
@@ -2280,7 +2280,7 @@ void command_castspell(Client *c, const Seperator *sep)
 
 void command_setlanguage(Client *c, const Seperator *sep)
 {
-	if ( strcasecmp( sep->arg[1], "list" ) == 0 )
+	if (strcasecmp(sep->arg[1], "list" ) == 0 )
 	{
 		c->Message(0, "Languages:");
 		c->Message(0, "(0) Common Tongue");
@@ -2615,117 +2615,93 @@ void command_peekinv(Client *c, const Seperator *sep)
 	}
 
 	Client* targetClient = c->GetTarget()->CastToClient();
-	const ItemInst* instMain = nullptr;
-	const ItemInst* instSub = nullptr;
-	const Item_Struct* itemData = nullptr;
-	char* itemLinkCore = nullptr;
-	std::string itemLink;
+	const ItemInst* inst_main = nullptr;
+	const ItemInst* inst_sub = nullptr;
+	const Item_Struct* item_data = nullptr;
+	std::string item_link;
+	Client::TextLink linker;
+	linker.SetLinkType(linker.linkItemInst);
+	linker.SetClientVersion(c->GetClientVersion());
 
 	c->Message(0, "Displaying inventory for %s...", targetClient->GetName());
 
 	// worn
 	for (int16 indexMain = EmuConstants::EQUIPMENT_BEGIN; (scopeWhere & peekWorn) && (indexMain <= EmuConstants::EQUIPMENT_END); ++indexMain) {
-		instMain = targetClient->GetInv().GetItem(indexMain);
-		itemData = (instMain ? instMain->GetItem() : nullptr);
-		itemLinkCore = nullptr;
+		inst_main = targetClient->GetInv().GetItem(indexMain);
+		item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
+		linker.SetItemInst(inst_main);
 
-		if (itemData)
-			c->MakeItemLink(itemLinkCore, instMain);
+		item_link = linker.GenerateLink();
 
-		itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instMain->GetItem()->Name, 0x12) : "null");
-
-		c->Message((itemData == 0), "WornSlot: %i, Item: %i (%s), Charges: %i",
-			indexMain, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instMain->GetCharges()));
-
-		safe_delete_array(itemLinkCore);
+		c->Message((item_data == nullptr), "WornSlot: %i, Item: %i (%s), Charges: %i",
+			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 	}
 
 	if ((scopeWhere & peekWorn) && (targetClient->GetClientVersion() >= EQClientSoF)) {
-		instMain = targetClient->GetInv().GetItem(MainPowerSource);
-		itemData = (instMain ? instMain->GetItem() : nullptr);
-		itemLinkCore = nullptr;
-		
-		if (itemData)
-			c->MakeItemLink(itemLinkCore, instMain);
-		
-		itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instMain->GetItem()->Name, 0x12) : "null");
+		inst_main = targetClient->GetInv().GetItem(MainPowerSource);
+		item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
+		linker.SetItemInst(inst_main);
 
-		c->Message((itemData == 0), "WornSlot: %i, Item: %i (%s), Charges: %i",
-			MainPowerSource, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instMain->GetCharges()));
+		item_link = linker.GenerateLink();
 
-		safe_delete_array(itemLinkCore);
+		c->Message((item_data == nullptr), "WornSlot: %i, Item: %i (%s), Charges: %i",
+			MainPowerSource, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 	}
 
 	// inv
 	for (int16 indexMain = EmuConstants::GENERAL_BEGIN; (scopeWhere & peekInv) && (indexMain <= EmuConstants::GENERAL_END); ++indexMain) {
-		instMain = targetClient->GetInv().GetItem(indexMain);
-		itemData = (instMain ? instMain->GetItem() : nullptr);
-		itemLinkCore = nullptr;
+		inst_main = targetClient->GetInv().GetItem(indexMain);
+		item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
+		linker.SetItemInst(inst_main);
 
-		if (itemData)
-			c->MakeItemLink(itemLinkCore, instMain);
-		
-		itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instMain->GetItem()->Name, 0x12) : "null");
-		
-		c->Message((itemData == 0), "InvSlot: %i, Item: %i (%s), Charges: %i",
-			indexMain, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instMain->GetCharges()));
+		item_link = linker.GenerateLink();
 
-		safe_delete_array(itemLinkCore);
+		c->Message((item_data == nullptr), "InvSlot: %i, Item: %i (%s), Charges: %i",
+			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
-		for (uint8 indexSub = SUB_BEGIN; instMain && instMain->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
-			instSub = instMain->GetItem(indexSub);
-			itemData = (instSub ? instSub->GetItem() : nullptr);
-			itemLinkCore = nullptr;
+		for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
+			inst_sub = inst_main->GetItem(indexSub);
+			item_data = (inst_sub == nullptr) ? nullptr : inst_sub->GetItem();
+			linker.SetItemInst(inst_sub);
 
-			if (itemData)
-				c->MakeItemLink(itemLinkCore, instSub);
-			
-			itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instSub->GetItem()->Name, 0x12) : "null");
-			
-			c->Message((itemData == 0), "  InvBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
-				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instSub->GetCharges()));
+			item_link = linker.GenerateLink();
 
-			safe_delete_array(itemLinkCore);
+			c->Message((item_data == nullptr), "  InvBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
+				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 		}
 	}
 
 	// cursor
 	if (scopeWhere & peekCursor) {
 		if (targetClient->GetInv().CursorEmpty()) {
+			linker.SetItemInst(nullptr);
+
+			item_link = linker.GenerateLink();
+
 			c->Message(1, "CursorSlot: %i, Item: %i (%s), Charges: %i",
-				MainCursor, 0, "null", 0);
+				MainCursor, 0, item_link.c_str(), 0);
 		}
 		else {
 			int cursorDepth = 0;
 			for (iter_queue it = targetClient->GetInv().cursor_begin(); (it != targetClient->GetInv().cursor_end()); ++it, ++cursorDepth) {
-				instMain = *it;
-				itemData = (instMain ? instMain->GetItem() : nullptr);
-				itemLinkCore = nullptr;
+				inst_main = *it;
+				item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
+				linker.SetItemInst(inst_main);
 
-				if (itemData)
-					c->MakeItemLink(itemLinkCore, instMain);
-				
-				itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instMain->GetItem()->Name, 0x12) : "null");
-				
-				c->Message((itemData == 0), "CursorSlot: %i, Depth: %i, Item: %i (%s), Charges: %i",
-					MainCursor, cursorDepth, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instMain->GetCharges()));
+				item_link = linker.GenerateLink();
 
-				safe_delete_array(itemLinkCore);
+				c->Message((item_data == nullptr), "CursorSlot: %i, Depth: %i, Item: %i (%s), Charges: %i",
+					MainCursor, cursorDepth, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
-				for (uint8 indexSub = SUB_BEGIN; (cursorDepth == 0) && instMain && instMain->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
-					instSub = instMain->GetItem(indexSub);
-					itemData = (instSub ? instSub->GetItem() : nullptr);
-					itemLinkCore = nullptr;
+				for (uint8 indexSub = SUB_BEGIN; (cursorDepth == 0) && inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
+					inst_sub = inst_main->GetItem(indexSub);
+					item_data = (inst_sub == nullptr) ? nullptr : inst_sub->GetItem();
+					linker.SetItemInst(inst_sub);
 
-					if (itemData)
-						c->MakeItemLink(itemLinkCore, instSub);
-					
-					itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instSub->GetItem()->Name, 0x12) : "null");
-					
-					c->Message((itemData == 0), "  CursorBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
-						Inventory::CalcSlotId(MainCursor, indexSub), MainCursor, indexSub, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instSub->GetCharges()));
+					item_link = linker.GenerateLink();
 
-					safe_delete_array(itemLinkCore);
+					c->Message((item_data == nullptr), "  CursorBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
+						Inventory::CalcSlotId(MainCursor, indexSub), MainCursor, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 				}
 			}
 		}
@@ -2733,116 +2709,81 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 	// trib
 	for (int16 indexMain = EmuConstants::TRIBUTE_BEGIN; (scopeWhere & peekTrib) && (indexMain <= EmuConstants::TRIBUTE_END); ++indexMain) {
-		instMain = targetClient->GetInv().GetItem(indexMain);
-		itemData = (instMain ? instMain->GetItem() : nullptr);
-		itemLinkCore = nullptr;
+		inst_main = targetClient->GetInv().GetItem(indexMain);
+		item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
+		linker.SetItemInst(inst_main);
 
-		if (itemData)
-			c->MakeItemLink(itemLinkCore, instMain);
-		
-		itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instMain->GetItem()->Name, 0x12) : "null");
-		
-		c->Message((itemData == 0), "TributeSlot: %i, Item: %i (%s), Charges: %i",
-			indexMain, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instMain->GetCharges()));
+		item_link = linker.GenerateLink();
 
-		safe_delete_array(itemLinkCore);
+		c->Message((item_data == nullptr), "TributeSlot: %i, Item: %i (%s), Charges: %i",
+			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 	}
 
 	// bank
 	for (int16 indexMain = EmuConstants::BANK_BEGIN; (scopeWhere & peekBank) && (indexMain <= EmuConstants::BANK_END); ++indexMain) {
-		instMain = targetClient->GetInv().GetItem(indexMain);
-		itemData = (instMain ? instMain->GetItem() : nullptr);
-		itemLinkCore = nullptr;
+		inst_main = targetClient->GetInv().GetItem(indexMain);
+		item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
+		linker.SetItemInst(inst_main);
 
-		if (itemData)
-			c->MakeItemLink(itemLinkCore, instMain);
-		
-		itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instMain->GetItem()->Name, 0x12) : "null" );
-		
-		c->Message((itemData == 0), "BankSlot: %i, Item: %i (%s), Charges: %i",
-			indexMain, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instMain->GetCharges()));
+		item_link = linker.GenerateLink();
 
-		safe_delete_array(itemLinkCore);
+		c->Message((item_data == nullptr), "BankSlot: %i, Item: %i (%s), Charges: %i",
+			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
-		for (uint8 indexSub = SUB_BEGIN; instMain && instMain->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
-			instSub = instMain->GetItem(indexSub);
-			itemData = (instSub ? instSub->GetItem() : nullptr);
-			itemLinkCore = nullptr;
+		for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
+			inst_sub = inst_main->GetItem(indexSub);
+			item_data = (inst_sub == nullptr) ? nullptr : inst_sub->GetItem();
+			linker.SetItemInst(inst_sub);
 
-			if (itemData)
-				c->MakeItemLink(itemLinkCore, instSub);
-			
-			itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instSub->GetItem()->Name, 0x12) : "null");
-			
-			c->Message((itemData == 0), "  BankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
-				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instSub->GetCharges()));
+			item_link = linker.GenerateLink();
 
-			safe_delete_array(itemLinkCore);
+			c->Message((item_data == nullptr), "  BankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
+				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 		}
 	}
 
 	for (int16 indexMain = EmuConstants::SHARED_BANK_BEGIN; (scopeWhere & peekBank) && (indexMain <= EmuConstants::SHARED_BANK_END); ++indexMain) {
-		instMain = targetClient->GetInv().GetItem(indexMain);
-		itemData = (instMain ? instMain->GetItem() : nullptr);
-		itemLinkCore = nullptr;
+		inst_main = targetClient->GetInv().GetItem(indexMain);
+		item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
+		linker.SetItemInst(inst_main);
 
-		if (itemData)
-			c->MakeItemLink(itemLinkCore, instMain);
+		item_link = linker.GenerateLink();
 		
-		itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instMain->GetItem()->Name, 0x12) : "null");
-		
-		c->Message((itemData == 0), "SharedBankSlot: %i, Item: %i (%s), Charges: %i",
-			indexMain, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instMain->GetCharges()));
+		c->Message((item_data == nullptr), "SharedBankSlot: %i, Item: %i (%s), Charges: %i",
+			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
-		safe_delete_array(itemLinkCore);
+		for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
+			inst_sub = inst_main->GetItem(indexSub);
+			item_data = (inst_sub == nullptr) ? nullptr : inst_sub->GetItem();
+			linker.SetItemInst(inst_sub);
 
-		for (uint8 indexSub = SUB_BEGIN; instMain && instMain->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
-			instSub = instMain->GetItem(indexSub);
-			itemData = (instSub ? instSub->GetItem() : nullptr);
-			itemLinkCore = nullptr;
+			item_link = linker.GenerateLink();
 
-			if (itemData)
-				c->MakeItemLink(itemLinkCore, instSub);
-			
-			itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instSub->GetItem()->Name, 0x12) : "null");
-			
-			c->Message((itemData == 0), "  SharedBankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
-				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instSub->GetCharges()));
-
-			safe_delete_array(itemLinkCore);
+			c->Message((item_data == nullptr), "  SharedBankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
+				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 		}
 	}
 
 	// trade
 	for (int16 indexMain = EmuConstants::TRADE_BEGIN; (scopeWhere & peekTrade) && (indexMain <= EmuConstants::TRADE_END); ++indexMain) {
-		instMain = targetClient->GetInv().GetItem(indexMain);
-		itemData = (instMain ? instMain->GetItem() : nullptr);
-		itemLinkCore = nullptr;
+		inst_main = targetClient->GetInv().GetItem(indexMain);
+		item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
+		linker.SetItemInst(inst_main);
 
-		if (itemData)
-			c->MakeItemLink(itemLinkCore, instMain);
-		
-		itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instMain->GetItem()->Name, 0x12) : "null");
-		
-		c->Message((itemData == 0), "TradeSlot: %i, Item: %i (%s), Charges: %i",
-			indexMain, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instMain->GetCharges()));
+		item_link = linker.GenerateLink();
 
-		safe_delete_array(itemLinkCore);
+		c->Message((item_data == nullptr), "TradeSlot: %i, Item: %i (%s), Charges: %i",
+			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
-		for (uint8 indexSub = SUB_BEGIN; instMain && instMain->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
-			instSub = instMain->GetItem(indexSub);
-			itemData = (instSub ? instSub->GetItem() : nullptr);
-			itemLinkCore = nullptr;
+		for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
+			inst_sub = inst_main->GetItem(indexSub);
+			item_data = (inst_sub == nullptr) ? nullptr : inst_sub->GetItem();
+			linker.SetItemInst(inst_sub);
 
-			if (itemData)
-				c->MakeItemLink(itemLinkCore, instSub);
-			
-			itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instSub->GetItem()->Name, 0x12) : "null");
-			
-			c->Message((itemData == 0), "  TradeBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
-				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instSub->GetCharges()));
+			item_link = linker.GenerateLink();
 
-			safe_delete_array(itemLinkCore);
+			c->Message((item_data == nullptr), "  TradeBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
+				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 		}
 	}
 
@@ -2857,34 +2798,24 @@ void command_peekinv(Client *c, const Seperator *sep)
 			c->Message(0, "[WorldObject DBID: %i (entityid: %i)]", objectTradeskill->GetDBID(), objectTradeskill->GetID());
 
 			for (int16 indexMain = MAIN_BEGIN; indexMain < EmuConstants::MAP_WORLD_SIZE; ++indexMain) {
-				instMain = objectTradeskill->GetItem(indexMain);
-				itemData = (instMain ? instMain->GetItem() : nullptr);
-				itemLinkCore = nullptr;
+				inst_main = objectTradeskill->GetItem(indexMain);
+				item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
+				linker.SetItemInst(inst_main);
 
-				if (itemData)
-					c->MakeItemLink(itemLinkCore, instMain);
-				
-				itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instMain->GetItem()->Name, 0x12) : "null");
-				
-				c->Message((itemData == 0), "WorldSlot: %i, Item: %i (%s), Charges: %i",
-					(EmuConstants::WORLD_BEGIN + indexMain), ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instMain->GetCharges()));
+				item_link = linker.GenerateLink();
 
-				safe_delete_array(itemLinkCore);
+				c->Message((item_data == nullptr), "WorldSlot: %i, Item: %i (%s), Charges: %i",
+					(EmuConstants::WORLD_BEGIN + indexMain), ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
-				for (uint8 indexSub = SUB_BEGIN; instMain && instMain->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
-					instSub = instMain->GetItem(indexSub);
-					itemData = (instSub ? instSub->GetItem() : nullptr);
-					itemLinkCore = nullptr;
+				for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
+					inst_sub = inst_main->GetItem(indexSub);
+					item_data = (inst_sub == nullptr) ? nullptr : inst_sub->GetItem();
+					linker.SetItemInst(inst_sub);
 
-					if (itemData)
-						c->MakeItemLink(itemLinkCore, instSub);
-					
-					itemLink = (itemLinkCore ? StringFormat("%c%s%s%c", 0x12, itemLinkCore, instSub->GetItem()->Name, 0x12) : "null");
-					
-					c->Message((itemData == 0), "  WorldBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
-						INVALID_INDEX, indexMain, indexSub, ((itemData == 0) ? 0 : itemData->ID), itemLink.c_str(), ((itemData == 0) ? 0 : instSub->GetCharges()));
+					item_link = linker.GenerateLink();
 
-					safe_delete_array(itemLinkCore);
+					c->Message((item_data == nullptr), "  WorldBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
+						INVALID_INDEX, indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 				}
 			}
 		}
@@ -3096,15 +3027,12 @@ void command_reloadqst(Client *c, const Seperator *sep)
 
 void command_reloadworld(Client *c, const Seperator *sep)
 {
-	if (sep->arg[1][0] == 0)
-	{
-		c->Message(0, "Reloading quest cache and repopping zones worldwide.");
-		ServerPacket* pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));
-		ReloadWorld_Struct* RW = (ReloadWorld_Struct*) pack->pBuffer;
-		RW->Option = 1;
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
+	c->Message(0, "Reloading quest cache and repopping zones worldwide.");
+	ServerPacket* pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));
+	ReloadWorld_Struct* RW = (ReloadWorld_Struct*) pack->pBuffer;
+	RW->Option = ((atoi(sep->arg[1]) == 1) ? 1 : 0);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
 }
 
 void command_reloadlevelmods(Client *c, const Seperator *sep)
@@ -5635,75 +5563,64 @@ void command_givemoney(Client *c, const Seperator *sep)
 
 void command_itemsearch(Client *c, const Seperator *sep)
 {
-	if (sep->arg[1][0] == 0)
+	if (sep->arg[1][0] == 0) {
 		c->Message(0, "Usage: #itemsearch [search string]");
+	}
 	else
 	{
 		const char *search_criteria=sep->argplus[1];
 
-		const Item_Struct* item = 0;
+		const Item_Struct* item = nullptr;
+		std::string item_link;
+		Client::TextLink linker;
+		linker.SetLinkType(linker.linkItemData);
+		linker.SetClientVersion(c->GetClientVersion());
+
 		if (Seperator::IsNumber(search_criteria)) {
 			item = database.GetItem(atoi(search_criteria));
-			if (item)
-				if (c->GetClientVersion() >= EQClientRoF2)
-				{
-					c->Message(0, "  %i: %c%06X00000000000000000000000000000000000000000000000000%s%c", (int)item->ID, 0x12, item->ID, item->Name, 0x12);
-				}
-				else if (c->GetClientVersion() >= EQClientRoF)
-				{
-					c->Message(0, "  %i: %c%06X0000000000000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
-				}
-				else if (c->GetClientVersion() >= EQClientSoF)
-				{
-					c->Message(0, "  %i: %c%06X00000000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
-				}
-				else
-				{
-					c->Message(0, "  %i: %c%06X000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
-				}
-			else
+			if (item) {
+				linker.SetItemData(item);
+
+				item_link = linker.GenerateLink();
+
+				c->Message(0, "%u: %s", item->ID, item_link.c_str());
+			}
+			else {
 				c->Message(0, "Item #%s not found", search_criteria);
+			}
+
 			return;
 		}
 
-		int count = 0;
+		int count = NOT_USED;
 		char sName[64];
 		char sCriteria[255];
 		strn0cpy(sCriteria, search_criteria, sizeof(sCriteria));
 		strupr(sCriteria);
 		char* pdest;
-		uint32 it = 0;
+		uint32 it = NOT_USED;
 		while ((item = database.IterateItems(&it))) {
 			strn0cpy(sName, item->Name, sizeof(sName));
 			strupr(sName);
 			pdest = strstr(sName, sCriteria);
 			if (pdest != nullptr) {
-				if (c->GetClientVersion() >= EQClientRoF2)
-				{
-					c->Message(0, "  %i: %c%06X00000000000000000000000000000000000000000000000000%s%c", (int)item->ID, 0x12, item->ID, item->Name, 0x12);
-				}
-				else if (c->GetClientVersion() >= EQClientRoF)
-				{
-					c->Message(0, "  %i: %c%06X0000000000000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
-				}
-				else if (c->GetClientVersion() >= EQClientSoF)
-				{
-					c->Message(0, "  %i: %c%06X00000000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
-				}
-				else
-				{
-					c->Message(0, "  %i: %c%06X000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
-				}
-				count++;
+				linker.SetItemData(item);
+
+				item_link = linker.GenerateLink();
+
+				c->Message(0, "%u: %s", item->ID, item_link.c_str());
+
+				++count;
 			}
+
 			if (count == 50)
 				break;
 		}
+
 		if (count == 50)
 			c->Message(0, "50 items shown...too many results.");
 		else
 			c->Message(0, "%i items found", count);
-
 	}
 }
 
@@ -6093,7 +6010,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "help" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "help") == 0) {
 
 		c->Message(0, "Help File for #npcedit. Syntax for commands are:");
 		c->Message(0, "#npcedit Name - Sets an NPC's name");
@@ -6106,7 +6023,13 @@ void command_npcedit(Client *c, const Seperator *sep)
 		c->Message(0, "#npcedit HP - Sets an NPC's hitpoints");
 		c->Message(0, "#npcedit Gender - Sets an NPC's gender");
 		c->Message(0, "#npcedit Texture - Sets an NPC's texture");
-		c->Message(0, "#npcedit Helmtexture - Sets an NPC's helmtexture");
+		c->Message(0, "#npcedit Helmtexture - Sets an NPC's helmet texture");
+		c->Message(0, "#npcedit Armtexture - Sets an NPC's arm texture");
+		c->Message(0, "#npcedit Bracertexture - Sets an NPC's bracer texture");
+		c->Message(0, "#npcedit Handtexture - Sets an NPC's hand texture");
+		c->Message(0, "#npcedit Legtexture - Sets an NPC's leg texture");
+		c->Message(0, "#npcedit Feettexture - Sets an NPC's feettexture");
+		c->Message(0, "#npcedit Herosforgemodel - Sets an NPC's Hero's Forge Model");
 		c->Message(0, "#npcedit Size - Sets an NPC's size");
 		c->Message(0, "#npcedit Hpregen - Sets an NPC's hitpoint regen rate per tick");
 		c->Message(0, "#npcedit Manaregen - Sets an NPC's mana regen rate per tick");
@@ -6119,12 +6042,15 @@ void command_npcedit(Client *c, const Seperator *sep)
 		c->Message(0, "#npcedit special_abilities - Sets the NPC's Special Abilities");
 		c->Message(0, "#npcedit Spell - Sets the npc spells list ID for an NPC");
 		c->Message(0, "#npcedit Faction - Sets the NPC's faction id");
-		c->Message(0, "#npcedit Mindmg - Sets an NPC's minimum damage");
-		c->Message(0, "#npcedit Maxdmg - Sets an NPC's maximum damage");
+		c->Message(0, "#npcedit Damage - Sets an NPC's damage");
+		c->Message(0, "#npcedit Meleetype - Sets an NPC's melee types");
+		c->Message(0, "#npcedit Rangedtype - Sets an NPC's ranged type");
+		c->Message(0, "#npcedit Ammoidfile - Sets an NPC's ammo id file");
 		c->Message(0, "#npcedit Aggroradius - Sets an NPC's aggro radius");
 		c->Message(0, "#npcedit Assistradius - Sets an NPC's assist radius");
 		c->Message(0, "#npcedit Social - Set to 1 if an NPC should assist others on its faction");
 		c->Message(0, "#npcedit Runspeed - Sets an NPC's run speed");
+		c->Message(0, "#npcedit Walkspeed - Sets an NPC's walk speed");
 		c->Message(0, "#npcedit AGI - Sets an NPC's Agility");
 		c->Message(0, "#npcedit CHA - Sets an NPC's Charisma");
 		c->Message(0, "#npcedit DEX - Sets an NPC's Dexterity");
@@ -6136,7 +6062,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		c->Message(0, "#npcedit PR - Sets an NPC's Poison Resistance");
 		c->Message(0, "#npcedit DR - Sets an NPC's Disease Resistance");
 		c->Message(0, "#npcedit FR - Sets an NPC's Fire Resistance");
-		c->Message(0, "#npcedit CR - Sets an NPC's cold resistance");
+		c->Message(0, "#npcedit CR - Sets an NPC's Cold Resistance");
 		c->Message(0, "#npcedit Corrup - Sets an NPC's Corruption Resistance");
 		c->Message(0, "#npcedit PhR - Sets and NPC's Physical Resistance");
 		c->Message(0, "#npcedit Seeinvis - Sets an NPC's ability to see invis");
@@ -6146,14 +6072,16 @@ void command_npcedit(Client *c, const Seperator *sep)
 		c->Message(0, "#npcedit AC - Sets an NPC's Armor Class");
 		c->Message(0, "#npcedit ATK - Sets an NPC's Attack");
 		c->Message(0, "#npcedit Accuracy - Sets an NPC's Accuracy");
+		c->Message(0, "#npcedit Avoidance - Sets an NPC's Avoidance");
 		c->Message(0, "#npcedit npcaggro - Sets an NPC's npc_aggro flag");
 		c->Message(0, "#npcedit qglobal - Sets an NPC's quest global flag");
-		c->Message(0, "#npcedit limit - Sets an NPC's spawn limit counter");
+		c->Message(0, "#npcedit spawn_limit - Sets an NPC's spawn limit counter");
 		c->Message(0, "#npcedit Attackspeed - Sets an NPC's attack speed modifier");
 		c->Message(0, "#npcedit Attackdelay - Sets an NPC's attack delay");
+		c->Message(0, "#npcedit Attackcount - Sets an NPC's attack count");
 		c->Message(0, "#npcedit findable - Sets an NPC's findable flag");
-		c->Message(0, "#npcedit wep1 - Sets an NPC's primary weapon model");
-		c->Message(0, "#npcedit wep2 - Sets an NPC's secondary weapon model");
+		c->Message(0, "#npcedit trackable - Sets an NPC's trackable flag");
+		c->Message(0, "#npcedit weapon - Sets an NPC's primary and secondary weapon model");
 		c->Message(0, "#npcedit featuresave - Saves all current facial features to the database");
 		c->Message(0, "#npcedit color - Sets an NPC's red, green, and blue armor tint");
 		c->Message(0, "#npcedit armortint_id - Set an NPC's Armor tint ID");
@@ -6163,602 +6091,566 @@ void command_npcedit(Client *c, const Seperator *sep)
 		c->Message(0, "#npcedit spellscale - Set an NPC's spell scaling rate");
 		c->Message(0, "#npcedit no_target - Set an NPC's ability to be targeted with the target hotkey");
 		c->Message(0, "#npcedit version - Set an NPC's version");
+		c->Message(0, "#npcedit slow_mitigation - Set an NPC's slow mitigation");
 
 	}
 
 	uint32 npcTypeID = c->GetTarget()->CastToNPC()->GetNPCTypeID();
-
-	if ( strcasecmp( sep->arg[1], "name" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "name") == 0) {
         c->Message(15,"NPCID %u now has the name %s.",npcTypeID, sep->argplus[2]);
-
-		std::string query = StringFormat("UPDATE npc_types SET name = '%s' WHERE id = %i",
-                                        sep->argplus[2],npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET name = '%s' WHERE id = %i", sep->argplus[2],npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "lastname" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "lastname") == 0) {
         c->Message(15,"NPCID %u now has the lastname %s.",npcTypeID, sep->argplus[2]);
-
-		std::string query = StringFormat("UPDATE npc_types SET lastname = '%s' WHERE id = %i",
-                                        sep->argplus[2],npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET lastname = '%s' WHERE id = %i", sep->argplus[2],npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "race" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "race") == 0) {
         c->Message(15,"NPCID %u now has the race %i.",npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET race = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]),npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET race = %i WHERE id = %i", atoi(sep->argplus[2]),npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "class" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "class") == 0) {
         c->Message(15,"NPCID %u is now class %i.",npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET class = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]),npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET class = %i WHERE id = %i", atoi(sep->argplus[2]),npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "bodytype" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "bodytype") == 0) {
         c->Message(15,"NPCID %u now has type %i bodytype.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET bodytype = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]),npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET bodytype = %i WHERE id = %i", atoi(sep->argplus[2]),npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "hp" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "hp") == 0) {
         c->Message(15,"NPCID %u now has %i Hitpoints.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET hp = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]),npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET hp = %i WHERE id = %i", atoi(sep->argplus[2]),npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "gender" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "gender") == 0) {
         c->Message(15,"NPCID %u is now gender %i.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET gender = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]),npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET gender = %i WHERE id = %i", atoi(sep->argplus[2]),npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "texture" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "texture") == 0) {
         c->Message(15,"NPCID %u now uses texture %i.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET texture = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]),npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET texture = %i WHERE id = %i", atoi(sep->argplus[2]),npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "helmtexture" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "helmtexture") == 0) {
         c->Message(15,"NPCID %u now uses helmtexture %i.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET helmtexture = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]),npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET helmtexture = %i WHERE id = %i", atoi(sep->argplus[2]),npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "size" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "armtexture") == 0) {
+        c->Message(15,"NPCID %u now uses armtexture %i.", npcTypeID, atoi(sep->argplus[2]));
+		std::string query = StringFormat("UPDATE npc_types SET armtexture = %i WHERE id = %i", atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if (strcasecmp(sep->arg[1], "bracertexture") == 0) {
+        c->Message(15,"NPCID %u now uses bracertexture %i.", npcTypeID, atoi(sep->argplus[2]));
+		std::string query = StringFormat("UPDATE npc_types SET bracertexture = %i WHERE id = %i", atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if (strcasecmp(sep->arg[1], "handtexture") == 0) {
+        c->Message(15,"NPCID %u now uses handtexture %i.", npcTypeID, atoi(sep->argplus[2]));
+		std::string query = StringFormat("UPDATE npc_types SET handtexture = %i WHERE id = %i", atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if (strcasecmp(sep->arg[1], "legtexture") == 0) {
+        c->Message(15,"NPCID %u now uses legtexture %i.", npcTypeID, atoi(sep->argplus[2]));
+		std::string query = StringFormat("UPDATE npc_types SET legtexture = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if (strcasecmp(sep->arg[1], "feettexture") == 0) {
+        c->Message(15,"NPCID %u now uses feettexture %i.", npcTypeID, atoi(sep->argplus[2]));
+		std::string query = StringFormat("UPDATE npc_types SET feettexture = %i WHERE id = %i", atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if (strcasecmp(sep->arg[1], "herosforgemodel") == 0) {
+        c->Message(15,"NPCID %u now uses herosforgemodel %i.", npcTypeID, atoi(sep->argplus[2]));
+		std::string query = StringFormat("UPDATE npc_types SET herosforgemodel = %i WHERE id = %i", atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+
+	if (strcasecmp(sep->arg[1], "size") == 0) {
         c->Message(15,"NPCID %u is now size %i.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET size = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]),npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET size = %i WHERE id = %i", atoi(sep->argplus[2]),npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "hpregen" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "hpregen") == 0) {
         c->Message(15,"NPCID %u now regens %i hitpoints per tick.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET hp_regen_rate = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]),npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET hp_regen_rate = %i WHERE id = %i", atoi(sep->argplus[2]),npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "manaregen" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "manaregen") == 0) {
         c->Message(15,"NPCID %u now regens %i mana per tick.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET mana_regen_rate = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]),npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET mana_regen_rate = %i WHERE id = %i", atoi(sep->argplus[2]),npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-    if ( strcasecmp( sep->arg[1], "loottable" ) == 0 ) {
+    if (strcasecmp(sep->arg[1], "loottable") == 0) {
         c->Message(15,"NPCID %u is now on loottable_id %i.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET loottable_id = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]),npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET loottable_id = %i WHERE id = %i", atoi(sep->argplus[2]),npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "merchantid" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "merchantid") == 0) {
         c->Message(15,"NPCID %u is now merchant_id %i.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET merchant_id = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]),npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET merchant_id = %i WHERE id = %i", atoi(sep->argplus[2]),npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "alt_currency_id" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "alt_currency_id") == 0) {
         c->Message(15,"NPCID %u now has field 'alt_currency_id' set to %s.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET alt_currency_id = '%s' WHERE id = %i",
-                                        sep->argplus[2],npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET alt_currency_id = '%s' WHERE id = %i", sep->argplus[2],npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "npc_spells_effects_id" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "npc_spells_effects_id") == 0) {
         c->Message(15,"NPCID %u now has field 'npc_spells_effects_id' set to %s.", npcTypeID, sep->argplus[2]);
-
-		std::string query = StringFormat("UPDATE npc_types SET npc_spells_effects_id = '%s' WHERE id = %i",
-                                        sep->argplus[2],npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET npc_spells_effects_id = '%s' WHERE id = %i", sep->argplus[2],npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "adventure_template_id" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "adventure_template_id") == 0) {
         c->Message(15,"NPCID %u now has field 'adventure_template_id' set to %s.", npcTypeID, sep->argplus[2]);
-
-		std::string query = StringFormat("UPDATE npc_types SET adventure_template_id = '%s' WHERE id = %i",
-                                        sep->argplus[2],npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET adventure_template_id = '%s' WHERE id = %i", sep->argplus[2],npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "trap_template" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "trap_template") == 0) {
         c->Message(15,"NPCID %u now has field 'trap_template' set to %s.", npcTypeID, sep->argplus[2]);
-
-		std::string query = StringFormat("UPDATE npc_types SET trap_template = '%s' WHERE id = %i",
-                                        sep->argplus[2],npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET trap_template = '%s' WHERE id = %i", sep->argplus[2],npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "special_abilities" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "special_abilities") == 0) {
         c->Message(15,"NPCID %u now has field 'special_abilities' set to %s.", npcTypeID, sep->argplus[2]);
-
-		std::string query = StringFormat("UPDATE npc_types SET special_abilities = '%s' WHERE id = %i",
-                                        sep->argplus[2],npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET special_abilities = '%s' WHERE id = %i", sep->argplus[2],npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "spell" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "spell") == 0) {
         c->Message(15,"NPCID %u now uses spell list %i", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET npc_spells_id = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]),npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET npc_spells_id = %i WHERE id = %i", atoi(sep->argplus[2]),npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "faction" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "faction") == 0) {
         c->Message(15,"NPCID %u is now faction %i", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET npc_faction_id = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]),npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET npc_faction_id = %i WHERE id = %i", atoi(sep->argplus[2]),npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "mindmg" ) == 0 ) {
-        c->Message(15,"NPCID %u now hits for a min of %i", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET mindmg = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]),npcTypeID);
+	if (strcasecmp(sep->arg[1], "damage") == 0) {
+        c->Message(15,"NPCID %u now hits from %i to %i", npcTypeID, atoi(sep->arg[2]), atoi(sep->arg[3]));
+		std::string query = StringFormat("UPDATE npc_types SET mindmg = %i, maxdmg = %i WHERE id = %i", atoi(sep->arg[2]), atoi(sep->arg[3]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+	
+	if (strcasecmp(sep->arg[1], "meleetype") == 0) {
+        c->Message(15,"NPCID %u now has a primary melee type of %i and a secondary melee type of %i.", npcTypeID, atoi(sep->arg[2]), atoi(sep->arg[3]));
+		std::string query = StringFormat("UPDATE npc_types SET prim_melee_type = %i, sec_melee_type = %i WHERE id = %i", atoi(sep->arg[2]), atoi(sep->arg[3]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+	
+	if (strcasecmp(sep->arg[1], "rangedtype") == 0) {
+        c->Message(15,"NPCID %u now has a ranged type of %i.", npcTypeID, atoi(sep->argplus[2]));
+		std::string query = StringFormat("UPDATE npc_types SET rangedtype = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+	
+	if (strcasecmp(sep->arg[1], "ammoidfile") == 0) {
+        c->Message(15,"NPCID %u's ammo id file is now %i", npcTypeID, atoi(sep->argplus[2]));
+		std::string query = StringFormat("UPDATE npc_types SET ammoidfile = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "maxdmg" ) == 0 ) {
-        c->Message(15,"NPCID %u now hits for a max of %i", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET maxdmg = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]),npcTypeID);
-		database.QueryDatabase(query);
-		c->LogSQL(query.c_str());
-		return;
-	}
-
-	if ( strcasecmp( sep->arg[1], "aggroradius" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "aggroradius") == 0) {
         c->Message(15,"NPCID %u now has an aggro radius of %i", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET aggroradius = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET aggroradius = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "assistradius" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "assistradius") == 0) {
         c->Message(15,"NPCID %u now has an assist radius of %i", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET assistradius = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET assistradius = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "social" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "social") == 0) {
         c->Message(15,"NPCID %u social status is now %i", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET social = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET social = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "runspeed" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "runspeed") == 0) {
         c->Message(15,"NPCID %u now runs at %f", npcTypeID, atof(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET runspeed = %f WHERE id = %i",
-                                        atof(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET runspeed = %f WHERE id = %i", atof(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+	
+	if (strcasecmp(sep->arg[1], "walkspeed") == 0) {
+        c->Message(15,"NPCID %u now walks at %f", npcTypeID, atof(sep->argplus[2]));
+		std::string query = StringFormat("UPDATE npc_types SET walkspeed = %f WHERE id = %i", atof(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "AGI" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "AGI") == 0) {
         c->Message(15,"NPCID %u now has %i Agility.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET AGI = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET AGI = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "CHA" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "CHA") == 0) {
         c->Message(15,"NPCID %u now has %i Charisma.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET CHA = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET CHA = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "DEX" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "DEX") == 0) {
         c->Message(15,"NPCID %u now has %i Dexterity.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET DEX = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET DEX = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "INT" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "INT") == 0) {
         c->Message(15,"NPCID %u now has %i Intelligence.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET _INT = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET _INT = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "STA" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "STA") == 0) {
         c->Message(15,"NPCID %u now has %i Stamina.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET STA = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET STA = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "STR" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "STR") == 0) {
         c->Message(15,"NPCID %u now has %i Strength.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET STR = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET STR = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "WIS" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "WIS") == 0) {
         c->Message(15,"NPCID %u now has a Magic Resistance of %i.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET WIS = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET WIS = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "MR" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "MR") == 0) {
         c->Message(15,"NPCID %u now has a Magic Resistance of %i.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET MR = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET MR = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "DR" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "DR") == 0) {
         c->Message(15,"NPCID %u now has a Disease Resistance of %i.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET DR = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET DR = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "CR" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "CR") == 0) {
         c->Message(15,"NPCID %u now has a Cold Resistance of %i.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET CR = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET CR = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-    if ( strcasecmp( sep->arg[1], "FR" ) == 0 ) {
+    if (strcasecmp(sep->arg[1], "FR") == 0) {
         c->Message(15,"NPCID %u now has a Fire Resistance of %i.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET FR = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET FR = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-    if ( strcasecmp( sep->arg[1], "PR" ) == 0 ) {
+    if (strcasecmp(sep->arg[1], "PR") == 0) {
         c->Message(15,"NPCID %u now has a Poison Resistance of %i.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET PR = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET PR = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "Corrup" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "Corrup") == 0) {
         c->Message(15,"NPCID %u now has a Corruption Resistance of %i.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET corrup = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET corrup = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "PhR" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "PhR") == 0) {
         c->Message(15,"NPCID %u now has a Physical Resistance of %i.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET PhR = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET PhR = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "seeinvis" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "seeinvis") == 0) {
         c->Message(15,"NPCID %u now has seeinvis set to %i.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET see_invis = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET see_invis = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "seeinvisundead" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "seeinvisundead") == 0) {
         c->Message(15,"NPCID %u now has seeinvisundead set to %i.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET see_invis_undead = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET see_invis_undead = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "seehide" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "seehide") == 0) {
         c->Message(15,"NPCID %u now has seehide set to %i.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET see_hide = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET see_hide = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "seeimprovedhide" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "seeimprovedhide") == 0) {
         c->Message(15,"NPCID %u now has seeimprovedhide set to %i.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET see_improved_hide = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET see_improved_hide = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "AC" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "AC") == 0) {
         c->Message(15,"NPCID %u now has %i Armor Class.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET ac = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET ac = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "ATK" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "ATK") == 0) {
         c->Message(15,"NPCID %u now has %i Attack.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET atk = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET atk = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "Accuracy" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "Accuracy") == 0) {
         c->Message(15,"NPCID %u now has %i Accuracy.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET accuracy = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET accuracy = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+	
+	if (strcasecmp(sep->arg[1], "Avoidance") == 0) {
+        c->Message(15,"NPCID %u now has %i Avoidance.", npcTypeID, atoi(sep->argplus[2]));
+		std::string query = StringFormat("UPDATE npc_types SET avoidance = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "level" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "level") == 0) {
         c->Message(15,"NPCID %u is now level %i.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET level = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET level = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "maxlevel" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "maxlevel") == 0) {
         c->Message(15,"NPCID %u now has a maximum level of %i.", npcTypeID, atoi(sep->argplus[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET maxlevel = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET maxlevel = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "qglobal" ) == 0 ) {
-        c->Message(15,"Quest globals have been %s for NPCID %u",
-                    atoi(sep->arg[2]) == 0 ? "disabled" : "enabled", npcTypeID);
-
-		std::string query = StringFormat("UPDATE npc_types SET qglobal = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+	if (strcasecmp(sep->arg[1], "qglobal") == 0) {
+        c->Message(15,"Quest globals have been %s for NPCID %u", atoi(sep->arg[2]) == 0 ? "disabled" : "enabled", npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET qglobal = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "npcaggro" ) == 0 ) {
-        c->Message(15,"NPCID %u will now %s other NPCs with negative faction npc_value",
-                    npcTypeID, atoi(sep->arg[2]) == 0? "not aggro": "aggro");
-
-		std::string query = StringFormat("UPDATE npc_types SET npc_aggro = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]) == 0? 0: 1, npcTypeID);
+	if (strcasecmp(sep->arg[1], "npcaggro") == 0) {
+        c->Message(15,"NPCID %u will now %s other NPCs with negative faction npc_value", npcTypeID, atoi(sep->arg[2]) == 0? "not aggro": "aggro");
+		std::string query = StringFormat("UPDATE npc_types SET npc_aggro = %i WHERE id = %i", atoi(sep->argplus[2]) == 0? 0: 1, npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "limit" ) == 0 ) {
-        c->Message(15,"NPCID %u now has a spawn limit of %i",
-                    npcTypeID, atoi(sep->arg[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET limit = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+	if (strcasecmp(sep->arg[1], "spawn_limit") == 0) {
+        c->Message(15,"NPCID %u now has a spawn limit of %i", npcTypeID, atoi(sep->arg[2]));
+		std::string query = StringFormat("UPDATE npc_types SET spawn_limit = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "Attackspeed" ) == 0 ) {
-        c->Message(15,"NPCID %u now has attack_speed set to %f",
-                    npcTypeID, atof(sep->arg[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET attack_speed = %f WHERE id = %i",
-                                        atof(sep->argplus[2]), npcTypeID);
+	if (strcasecmp(sep->arg[1], "Attackspeed") == 0) {
+        c->Message(15,"NPCID %u now has attack_speed set to %f", npcTypeID, atof(sep->arg[2]));
+		std::string query = StringFormat("UPDATE npc_types SET attack_speed = %f WHERE id = %i", atof(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "Attackdelay" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "Attackdelay") == 0) {
 		c->Message(15,"NPCID %u now has attack_delay set to %i",npcTypeID,atoi(sep->arg[2]));
-
 		std::string query = StringFormat("UPDATE npc_types SET attack_delay = %i WHERE id = %i",atoi(sep->argplus[2]),npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
+	
+	if (strcasecmp(sep->arg[1], "Attackcount") == 0) {
+		c->Message(15,"NPCID %u now has attack_count set to %i",npcTypeID,atoi(sep->arg[2]));
+		std::string query = StringFormat("UPDATE npc_types SET attack_count = %i WHERE id = %i",atoi(sep->argplus[2]),npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
 
-	if ( strcasecmp( sep->arg[1], "findable" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "findable") == 0) {
         c->Message(15,"NPCID %u is now %s", npcTypeID, atoi(sep->arg[2]) == 0? "not findable": "findable");
-
-		std::string query = StringFormat("UPDATE npc_types SET findable = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]) == 0? 0: 1, npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET findable = %i WHERE id = %i", atoi(sep->argplus[2]) == 0? 0: 1, npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "wep1" ) == 0 ) {
-        c->Message(15,"NPCID %u will have item graphic %i set to his primary on repop.",
-                        npcTypeID, atoi(sep->arg[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET d_meele_texture1 = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+	if (strcasecmp(sep->arg[1], "trackable") == 0) {
+        c->Message(15,"NPCID %u is now %s", npcTypeID, atoi(sep->arg[2]) == 0? "not trackable": "trackable");
+		std::string query = StringFormat("UPDATE npc_types SET trackable = %i WHERE id = %i", atoi(sep->argplus[2]) == 0? 0: 1, npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "wep2" ) == 0 ) {
-        c->Message(15,"NPCID %u will have item graphic %i set to his secondary on repop.",
-                        npcTypeID, atoi(sep->arg[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET d_meele_texture2 = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+	if (strcasecmp(sep->arg[1], "weapon") == 0) {
+        c->Message(15,"NPCID %u will have item graphic %i set to his primary and item graphic %i set to his secondary on repop.",  npcTypeID, atoi(sep->arg[2]), atoi(sep->arg[3]));
+		std::string query = StringFormat("UPDATE npc_types SET d_melee_texture1 = %i, d_melee_texture2 = %i WHERE id = %i", atoi(sep->arg[2]), atoi(sep->arg[3]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "featuresave" ) == 0 ) {
-        c->Message(15,"NPCID %u saved with all current facial feature settings",
-                        npcTypeID);
-
+	if (strcasecmp(sep->arg[1], "featuresave") == 0) {
+        c->Message(15,"NPCID %u saved with all current facial feature settings", npcTypeID);
         Mob* target = c->GetTarget();
-
 		std::string query = StringFormat("UPDATE npc_types "
                                         "SET luclin_haircolor = %i, luclin_beardcolor = %i, "
                                         "luclin_hairstyle = %i, luclin_beard = %i, "
@@ -6775,45 +6667,36 @@ void command_npcedit(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "color" ) == 0 ) {
-        c->Message(15,"NPCID %u now has %i red, %i green, and %i blue tinting on their armor.",
-                        npcTypeID, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]));
-
-		std::string query = StringFormat("UPDATE npc_types "
-                                        "SET armortint_red = %i, armortint_green = %i, armortint_blue = %i "
-                                        "WHERE id = %i",
-                                        atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), npcTypeID);
+	if (strcasecmp(sep->arg[1], "color") == 0) {
+        c->Message(15,"NPCID %u now has %i red, %i green, and %i blue tinting on their armor.", npcTypeID, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]));
+		std::string query = StringFormat("UPDATE npc_types SET armortint_red = %i, armortint_green = %i, armortint_blue = %i WHERE id = %i", atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "armortint_id" ) == 0 ) {
-        c->Message(15,"NPCID %u now has field 'armortint_id' set to %s",
-                        npcTypeID, sep->arg[2]);
-
-		std::string query = StringFormat("UPDATE npc_types SET armortint_id = '%s' WHERE id = %i",
-                                        sep->argplus[2], npcTypeID);
+	if (strcasecmp(sep->arg[1], "armortint_id") == 0) {
+        c->Message(15,"NPCID %u now has field 'armortint_id' set to %s", npcTypeID, sep->arg[2]);
+		std::string query = StringFormat("UPDATE npc_types SET armortint_id = '%s' WHERE id = %i", sep->argplus[2], npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "setanimation" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "setanimation") == 0) {
 		int animation = 0;
 		if(sep->arg[2] && atoi(sep->arg[2]) <= 4) {
-			if((strcasecmp( sep->arg[2], "stand" ) == 0) || atoi(sep->arg[2]) == 0)
+			if((strcasecmp(sep->arg[2], "stand" ) == 0) || atoi(sep->arg[2]) == 0)
 				animation = 0; //Stand
-			if((strcasecmp( sep->arg[2], "sit" ) == 0) || atoi(sep->arg[2]) == 1)
+			if((strcasecmp(sep->arg[2], "sit" ) == 0) || atoi(sep->arg[2]) == 1)
 				animation = 1; //Sit
-			if((strcasecmp( sep->arg[2], "crouch" ) == 0) || atoi(sep->arg[2]) == 2)
+			if((strcasecmp(sep->arg[2], "crouch" ) == 0) || atoi(sep->arg[2]) == 2)
 				animation = 2; //Crouch
-			if((strcasecmp( sep->arg[2], "dead" ) == 0) || atoi(sep->arg[2]) == 3)
+			if((strcasecmp(sep->arg[2], "dead" ) == 0) || atoi(sep->arg[2]) == 3)
 				animation = 3; //Dead
-			if((strcasecmp( sep->arg[2], "loot" ) == 0) || atoi(sep->arg[2]) == 4)
+			if((strcasecmp(sep->arg[2], "loot" ) == 0) || atoi(sep->arg[2]) == 4)
 				animation = 4; //Looting Animation
-		}
-		else {
+		} else {
 			c->Message(0, "You must specifiy an animation stand, sit, crouch, dead, loot (0-4)");
 			c->Message(0, "Example: #npcedit setanimation sit");
 			c->Message(0, "Example: #npcedit setanimation 0");
@@ -6821,10 +6704,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 
 		c->Message(15,"NPCID %u now has the animation set to %i on spawn with spawngroup %i", npcTypeID, animation, c->GetTarget()->CastToNPC()->GetSp2() );
-
-		std::string query = StringFormat("UPDATE spawn2 SET animation = %i "
-                                        "WHERE spawngroupID = %i",
-                                        animation, c->GetTarget()->CastToNPC()->GetSp2());
+		std::string query = StringFormat("UPDATE spawn2 SET animation = %i " "WHERE spawngroupID = %i", animation, c->GetTarget()->CastToNPC()->GetSp2());
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 
@@ -6832,56 +6712,49 @@ void command_npcedit(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "scalerate" ) == 0 ) {
-        c->Message(15,"NPCID %u now has a scaling rate of %i.",
-                        npcTypeID, atoi(sep->arg[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET scalerate = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+	if (strcasecmp(sep->arg[1], "scalerate") == 0) {
+        c->Message(15,"NPCID %u now has a scaling rate of %i.", npcTypeID, atoi(sep->arg[2]));
+		std::string query = StringFormat("UPDATE npc_types SET scalerate = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "healscale" ) == 0 ) {
-        c->Message(15, "NPCID %u now has a heal scaling rate of %i.",
-                        npcTypeID, atoi(sep->arg[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET healscale = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+	if (strcasecmp(sep->arg[1], "healscale") == 0) {
+        c->Message(15, "NPCID %u now has a heal scaling rate of %i.", npcTypeID, atoi(sep->arg[2]));
+		std::string query = StringFormat("UPDATE npc_types SET healscale = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "spellscale" ) == 0 ) {
-        c->Message(15, "NPCID %u now has a spell scaling rate of %i.",
-                        npcTypeID, atoi(sep->arg[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET spellscale = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+	if (strcasecmp(sep->arg[1], "spellscale") == 0) {
+        c->Message(15, "NPCID %u now has a spell scaling rate of %i.", npcTypeID, atoi(sep->arg[2]));
+		std::string query = StringFormat("UPDATE npc_types SET spellscale = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "no_target" ) == 0 ) {
-        c->Message(15, "NPCID %u is now %s.",
-                        npcTypeID, atoi(sep->arg[2]) == 0? "targetable": "untargetable");
-
-		std::string query = StringFormat("UPDATE npc_types SET no_target_hotkey = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+	if (strcasecmp(sep->arg[1], "no_target") == 0) {
+        c->Message(15, "NPCID %u is now %s.", npcTypeID, atoi(sep->arg[2]) == 0? "targetable": "untargetable");
+		std::string query = StringFormat("UPDATE npc_types SET no_target_hotkey = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "version" ) == 0 ) {
-        c->Message(15, "NPCID %u is now version %i.",
-                        npcTypeID, atoi(sep->arg[2]));
-
-		std::string query = StringFormat("UPDATE npc_types SET version = %i WHERE id = %i",
-                                        atoi(sep->argplus[2]), npcTypeID);
+	if (strcasecmp(sep->arg[1], "version") == 0) {
+        c->Message(15, "NPCID %u is now version %i.", npcTypeID, atoi(sep->arg[2]));
+		std::string query = StringFormat("UPDATE npc_types SET version = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
+		database.QueryDatabase(query);
+		c->LogSQL(query.c_str());
+		return;
+	}
+	
+	if (strcasecmp(sep->arg[1], "slow_mitigation") == 0) {
+        c->Message(15, "NPCID %u's slow mitigation limit is now %i.", npcTypeID, atoi(sep->arg[2]));
+		std::string query = StringFormat("UPDATE npc_types SET slow_mitigation = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		c->LogSQL(query.c_str());
 		return;
@@ -6913,14 +6786,14 @@ void command_profilereset(Client *c, const Seperator *sep) {
 #endif
 
 void command_opcode(Client *c, const Seperator *sep) {
-	if(!strcasecmp( sep->arg[1], "reload" )) {
+	if(!strcasecmp(sep->arg[1], "reload" )) {
 		ReloadAllPatches();
 		c->Message(0, "Opcodes for all patches have been reloaded");
 	}
 }
 
 void command_logsql(Client *c, const Seperator *sep) {
-	if(!strcasecmp( sep->arg[1], "off" )) {
+	if(!strcasecmp(sep->arg[1], "off" )) {
 		c->ChangeSQLLog(nullptr);
 	} else if(sep->arg[1][0] != '\0') {
 		c->ChangeSQLLog(sep->argplus[1]);
@@ -6937,17 +6810,17 @@ void command_logs(Client *c, const Seperator *sep)
 		t = c->GetTarget()->CastToClient();
 	}
 
-	if(!strcasecmp( sep->arg[1], "status" ) )
+	if(!strcasecmp(sep->arg[1], "status" ) )
 		client_logs.subscribe(EQEMuLog::Status, t);
-	else if(!strcasecmp( sep->arg[1], "normal" ) )
+	else if(!strcasecmp(sep->arg[1], "normal" ) )
 		client_logs.subscribe(EQEMuLog::Normal, t);
-	else if(!strcasecmp( sep->arg[1], "error" ) )
+	else if(!strcasecmp(sep->arg[1], "error" ) )
 		client_logs.subscribe(EQEMuLog::Error, t);
-	else if(!strcasecmp( sep->arg[1], "debug" ) )
+	else if(!strcasecmp(sep->arg[1], "debug" ) )
 		client_logs.subscribe(EQEMuLog::Debug, t);
-	else if(!strcasecmp( sep->arg[1], "quest" ) )
+	else if(!strcasecmp(sep->arg[1], "quest" ) )
 		client_logs.subscribe(EQEMuLog::Quest, t);
-	else if(!strcasecmp( sep->arg[1], "all" ) )
+	else if(!strcasecmp(sep->arg[1], "all" ) )
 		client_logs.subscribeAll(t);
 	else {
 		c->Message(0, "Usage: #logs [status|normal|error|debug|quest|all]");
@@ -6969,17 +6842,17 @@ void command_nologs(Client *c, const Seperator *sep)
 		t = c;
 	}
 
-	if(!strcasecmp( sep->arg[1], "status" ) )
+	if(!strcasecmp(sep->arg[1], "status" ) )
 		client_logs.unsubscribe(EQEMuLog::Status, t);
-	else if(!strcasecmp( sep->arg[1], "normal" ) )
+	else if(!strcasecmp(sep->arg[1], "normal" ) )
 		client_logs.unsubscribe(EQEMuLog::Normal, t);
-	else if(!strcasecmp( sep->arg[1], "error" ) )
+	else if(!strcasecmp(sep->arg[1], "error" ) )
 		client_logs.unsubscribe(EQEMuLog::Error, t);
-	else if(!strcasecmp( sep->arg[1], "debug" ) )
+	else if(!strcasecmp(sep->arg[1], "debug" ) )
 		client_logs.unsubscribe(EQEMuLog::Debug, t);
-	else if(!strcasecmp( sep->arg[1], "quest" ) )
+	else if(!strcasecmp(sep->arg[1], "quest" ) )
 		client_logs.unsubscribe(EQEMuLog::Quest, t);
-	else if(!strcasecmp( sep->arg[1], "all" ) )
+	else if(!strcasecmp(sep->arg[1], "all" ) )
 		client_logs.unsubscribeAll(t);
 	else {
 		c->Message(0, "Usage: #logs [status|normal|error|debug|quest|all]");
@@ -8703,8 +8576,8 @@ void command_aggrozone(Client *c, const Seperator *sep) {
 	if (!m)
 		return;
 
-	int hate = atoi(sep->arg[1]); //should default to 0 if we don't enter anything
-	entity_list.AggroZone(m,hate);
+	uint32 hate = atoi(sep->arg[1]); //should default to 0 if we don't enter anything
+	entity_list.AggroZone(m, hate);
 	c->Message(0, "Train to you! Last chance to go invulnerable...");
 }
 
@@ -10505,7 +10378,7 @@ void command_mysql(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "help" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "help") == 0) {
 		c->Message(0, "MYSQL In-Game CLI Interface:");
 		c->Message(0, "Example: #mysql query \"Query goes here quoted\" -s -h");
 		c->Message(0, "To use 'like \"%%something%%\" replace the %% with #");
@@ -10515,7 +10388,7 @@ void command_mysql(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if ( strcasecmp( sep->arg[1], "query" ) == 0 ) {
+	if (strcasecmp(sep->arg[1], "query") == 0) {
 		///Parse switches here
 		int argnum = 3;
 		bool optionS = false;

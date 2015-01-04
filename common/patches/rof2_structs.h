@@ -243,11 +243,11 @@ struct Membership_Setting_Struct
 struct Membership_Details_Struct
 {
 /*0000*/ uint32 membership_setting_count;	// Seen 66
-/*0016*/ Membership_Setting_Struct settings[66];
+/*0016*/ Membership_Setting_Struct settings[72]; // 864 Bytes
 /*0012*/ uint32 race_entry_count;	// Seen 15
-/*1044*/ Membership_Entry_Struct membership_races[15];
+/*1044*/ Membership_Entry_Struct membership_races[15]; // 120 Bytes
 /*0012*/ uint32 class_entry_count;	// Seen 15
-/*1044*/ Membership_Entry_Struct membership_classes[15];
+/*1044*/ Membership_Entry_Struct membership_classes[15]; // 120 Bytes
 /*1044*/ uint32 exit_url_length;	// Length of the exit_url string (0 for none)
 /*1048*/ //char exit_url[42];		// Upgrade to Silver or Gold Membership URL
 /*1048*/ uint32 exit_url_length2;	// Length of the exit_url2 string (0 for none)
@@ -260,7 +260,7 @@ struct Membership_Struct
 /*004*/ uint32 races;	// Seen ff ff 01 00
 /*008*/ uint32 classes;	// Seen ff ff 01 01
 /*012*/ uint32 entrysize; // Seen 22
-/*016*/ int32 entries[22]; // Most -1, 1, and 0 for Gold Status
+/*016*/ int32 entries[25]; // Most -1, 1, and 0 for Gold Status
 /*104*/
 };
 
@@ -537,9 +537,13 @@ struct NewZone_Struct {
 	/*0525*/    uint8   rain_duration[4];
 	/*0529*/    uint8   snow_chance[4];
 	/*0533*/    uint8   snow_duration[4];
-	/*0537*/    uint8   unknown537[33];
+	/*0537*/    uint8   unknown537[32];			// Seen all 0xff
+	/*0569*/	uint8	unknown569;				// Unknown - Seen 0
 	/*0570*/	uint8	sky;					// Sky Type
-	/*0571*/	uint8	unknown571[13];			// ***Placeholder
+	/*0571*/	uint8	unknown571;				// Unknown - Seen 0
+	/*0572*/	uint32	unknown572;				// Unknown - Seen 4 in Guild Lobby
+	/*0576*/	uint32	unknown576;				// Unknown - Seen 2 in Guild Lobby
+	/*0580*/	uint32	unknown580;				// Unknown - Seen 0 in Guild Lobby
 	/*0584*/	float	zone_exp_multiplier;	// Experience Multiplier
 	/*0588*/	float	safe_y;					// Zone Safe Y
 	/*0592*/	float	safe_x;					// Zone Safe X
@@ -554,7 +558,7 @@ struct NewZone_Struct {
 	/*0800*/	int32	unknown800;	//seen -1
 	/*0804*/	char	unknown804[40]; //
 	/*0844*/	int32	unknown844;	//seen 600
-	/*0848*/	int32	unknown848;
+	/*0848*/	int32	unknown848; //seen 2008
 	/*0852*/	uint16	zone_id;
 	/*0854*/	uint16	zone_instance;
 	/*0856*/	char	unknown856[20];
@@ -581,7 +585,7 @@ struct NewZone_Struct {
 	/*0932*/	int32  unknown932;		// Seen -1
 	/*0936*/	int32  unknown936;		// Seen -1
 	/*0940*/	uint32  unknown940;		// Seen 0
-	/*0944*/	float   unknown944;		// Seen 1.0
+	/*0944*/	float   unknown944;		// Seen 1.0 in PoK, and 0.25 in Guild Lobby
 	/*0948*/	uint32  unknown948;		// Seen 0 - New on Live as of Dec 15 2014
 	/*0952*/	uint32  unknown952;		// Seen 100 - New on Live as of Dec 15 2014
 	/*0956*/
@@ -1219,64 +1223,17 @@ union
 
 /*
 ///////////////////// - Haven't identified the below fields in the PP yet
-uint8   pvp;					// 1=pvp, 0=not pvp
 uint8   anon;					// 2=roleplay, 1=anon, 0=not anon
-uint8   gm;					// 0=no, 1=yes (guessing!)
-uint32   guild_id;				// guildid
-uint8    guildrank;			// 0=member, 1=officer, 2=guildleader -1=no guild
-uint32  guildbanker;
 uint32 available_slots;
-uint32  endurance;			// Current endurance
 uint32  spellSlotRefresh[MAX_PP_MEMSPELL]; // Refresh time (millis) - 4 bytes Each * 16 = 64 bytes
 uint32  abilitySlotRefresh;
 ///////////////////////
 
-uint32  platinum_bank;		// Platinum Pieces in Bank
-uint32  gold_bank;			// Gold Pieces in Bank
-uint32  silver_bank;			// Silver Pieces in Bank
-uint32  copper_bank;			// Copper Pieces in Bank
 uint32  platinum_shared;		// Shared platinum pieces
-
 uint32  autosplit;			// 0 = off, 1 = on
-
 char      groupMembers[MAX_GROUP_MEMBERS][64];// 384 all the members in group, including self
 char      groupLeader[64];	// Leader of the group ?
 uint32  entityid;
-
-uint32  leadAAActive;			// 0 = leader AA off, 1 = leader AA on
-int32  ldon_points_guk;		// Earned GUK points
-int32  ldon_points_mir;		// Earned MIR points
-int32  ldon_points_mmc;		// Earned MMC points
-int32  ldon_points_ruj;		// Earned RUJ points
-int32  ldon_points_tak;		// Earned TAK points
-int32  ldon_points_available;// Available LDON points
-float  tribute_time_remaining;// Time remaining on tribute (millisecs)
-uint32  career_tribute_points;// Total favor points for this char
-uint32  tribute_points;		// Current tribute points
-uint32  tribute_active;		// 0 = off, 1=on
-Tribute_Struct tributes[MAX_PLAYER_TRIBUTES]; // [40] Current tribute loadout
-double group_leadership_exp;	// Current group lead exp points
-double raid_leadership_exp;	// Current raid lead AA exp points
-uint32  group_leadership_points; // Unspent group lead AA points
-uint32  raid_leadership_points;  // Unspent raid lead AA points
-LeadershipAA_Struct leader_abilities; // [128]Leader AA ranks 19332
-
-uint32  PVPKills;
-uint32  PVPDeaths;
-uint32  PVPCurrentPoints;
-uint32  PVPCareerPoints;
-uint32  PVPBestKillStreak;
-uint32  PVPWorstDeathStreak;
-uint32  PVPCurrentKillStreak;
-PVPStatsEntry_Struct PVPLastKill;		// size 88
-PVPStatsEntry_Struct PVPLastDeath;	// size 88
-uint32  PVPNumberOfKillsInLast24Hours;
-PVPStatsEntry_Struct PVPRecentKills[50];	// size 4400 - 88 each
-uint32 expAA;					// Exp earned in current AA point
-uint32 currentRadCrystals;	// Current count of radiant crystals
-uint32 careerRadCrystals;		// Total count of radiant crystals ever
-uint32 currentEbonCrystals;	// Current count of ebon crystals
-uint32 careerEbonCrystals;	// Total count of ebon crystals ever
 */
 
 };
@@ -1886,8 +1843,8 @@ struct LootingItem_Struct {
 /*000*/	uint32	lootee;
 /*004*/	uint32	looter;
 /*008*/	uint16	slot_id;
-/*010*/	uint16	unknown10;
-/*012*/	uint32	auto_loot;
+/*010*/	uint16	unknown10; // slot_id is probably uint32
+/*012*/	int32	auto_loot;
 /*016*/	uint32	unknown16;
 /*020*/
 };
@@ -2892,7 +2849,8 @@ struct Resurrect_Struct
 /*160*/	char	corpse_name[64];
 /*224*/	uint32	action;
 /*228*/	uint32	unknown228;
-/*232*/
+/*232*/	uint32	unknown232;
+/*236*/
 };
 
 struct SetRunMode_Struct {
@@ -3111,29 +3069,24 @@ struct MobHealth
 };
 
 struct Track_Struct {
-	uint16 entityid;
-	uint16 y;
-	uint16 x;
-	uint16 z;
+	uint32 entityid;
+	float distance;
+	// Fields for SoD and later
+	uint8 level;
+	uint8 is_npc;
+	char name[64];
+	uint8 is_pet;
+	uint8 is_merc;
 };
 
 struct Tracking_Struct {
+	uint16 entry_count;
 	Track_Struct Entrys[0];
 };
 
-// Looks like new tracking structures - Opcode: 0x57a7
-struct Tracking_Struct_New {
-	uint16 totalcount;			// Total Count of mobs within tracking range
-	Track_Struct Entrys[0];
-};
-
-struct Track_Struct_New {
-	uint16 entityid;				// Entity ID
-	uint16 unknown002;			// 00 00
-	uint32 unknown004;			//
-	uint8  level;				// level of mob
-	uint8  unknown009;			// 01 maybe type of mob? player/npc?
-	char  name[1];				// name of mob
+struct TrackTarget_Struct
+{
+	uint32	EntityID;
 };
 
 
@@ -4399,7 +4352,7 @@ struct ItemSerializationHeader
 /*025*/	uint8  slot_type;	// 0 = normal, 1 = bank, 2 = shared bank, 9 = merchant, 20 = ?
 /*026*/	uint16 main_slot;
 /*028*/ uint16 sub_slot;
-/*030*/ uint16 unknown013;	// 0xffff
+/*030*/ uint16 aug_slot;	// 0xffff
 /*032*/	uint32 price;
 /*036*/	uint32 merchant_slot; //1 if not a merchant item
 /*040*/	uint32 scaled_value; //0
@@ -4428,17 +4381,14 @@ struct EvolvingItem {
 
 struct ItemSerializationHeaderFinish
 {
-/*079*/	uint16 ornamentIcon;
-/*081*/	uint8 unknown061;	// 0 - Add Evolving Item struct if this isn't set to 0?
-/*082*/	uint8 unknown062;	// 0
-/*083*/	int32 unknowna1;	// 0xffffffff
-/*087*/	uint32 ornamentHeroModel;	// 0
-/*091*/	uint8 unknown063;	// 0
-/*092*/	uint32 unknowna3;	// 0
-/*096*/	int32 unknowna4;	// 0xffffffff
-/*100*/	uint32 unknowna5;	// 0
-/*104*/	uint8 ItemClass; //0, 1, or 2
-/*105*/
+	uint32 ornamentIcon;
+	int32 unknowna1;	// 0xffffffff
+	uint32 ornamentHeroModel;
+	int32 unknown063;	// 0
+	uint8 Copied;		// Copied Flag - Possibly for items copied during server transfer?
+	int32 unknowna4;	// 0xffffffff
+	int32 unknowna5;	// 0
+	uint8 ItemClass; //0, 1, or 2
 };
 
 struct ItemBodyStruct
@@ -4542,7 +4492,7 @@ struct ItemSecondaryBodyStruct
 	// swapped augrestrict and augdistiller positions
 	// (this swap does show the proper augment restrictions in Item Information window now)
 	// unsure what the purpose of augdistiller is at this time -U 3/17/2014
-	uint32 augdistiller;	// New to December 10th 2012 client - NEW
+	int32 augrestrict2;	// New to December 10th 2012 client - Hidden Aug Restriction
 	uint32 augrestrict;
 	AugSlotStruct augslots[6];
 
@@ -4647,7 +4597,7 @@ struct ItemQuaternaryBodyStruct
 	uint8 quest_item;
 	uint32 Power; // Enables "Power" percentage field used by Power Sources
 	uint32 Purity;
-	uint8  unknown16;	// RoF2
+	uint8  unknown16;	// RoF
 	uint32 BackstabDmg;
 	uint32 DSMitigation;
 	int32 HeroicStr;
@@ -4669,15 +4619,19 @@ struct ItemQuaternaryBodyStruct
 	uint8 unknown18;	//Power Source Capacity or evolve filename?
 	uint32 evolve_string; // Some String, but being evolution related is just a guess
 	uint8 unknown19;
-	uint32 unknown20;	// Bard Stuff?
-	//uint32 unknown21;
-	uint8 unknown22;
+	uint16 unknown20;
+	uint8 unknown21;
+	uint8 Heirloom;		// Heirloom Flag
+	uint8 Placeable;	// Placeable Flag
+	uint8 unknown22b;
+	uint8 unknown22c;
+	uint8 unknown22d;
 	uint32 unknown23;
 	uint32 unknown24;
 	uint32 unknown25;
 	float unknown26;
 	float unknown27;
-	uint32 unknown_RoF26;	// 0 New to March 21 2012 client
+	uint32 unknown_RoF_6;	// 0 New to March 21 2012 client
 	uint32 unknown28;	// 0xffffffff
 	uint16 unknown29;
 	uint32 unknown30;	// 0xffffffff
@@ -4688,9 +4642,15 @@ struct ItemQuaternaryBodyStruct
 	uint32 unknown35;
 	uint32 unknown36;
 	uint32 unknown37;
-	uint32 unknown_RoF27;
-	uint32 unknown_RoF28;
-	uint8 unknown37a;	// (guessed position) New to RoF2
+	uint8 NoZone;		// No Zone Flag - Item will disappear upon zoning?
+	uint8 unknown_RoF_7b; // Maybe Uint32 ?
+	uint8 unknown_RoF_7c;
+	uint8 unknown_RoF_7d;
+	uint8 unknown_RoF_8a;
+	uint8 NoGround;		// No Ground Flag - Item cannot be dropped on the ground?
+	uint8 unknown_RoF_8c;
+	uint8 unknown_RoF_8d;
+	uint8 unknown37a;	// New to RoF2 - Probably variable length string
 	uint8 unknown38;	// 0
 	uint8 unknown39;	// 1
 	uint32 subitem_count;
