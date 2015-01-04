@@ -5053,8 +5053,6 @@ XS(XS_Client_GetSpellBookSlotBySpellID)
 	XSRETURN(1);
 }
 
-#include <iostream>
-
 XS(XS_Client_UpdateTaskActivity); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UpdateTaskActivity)
 {
