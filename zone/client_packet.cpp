@@ -1361,7 +1361,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	database.LoadCharacterFactionValues(cid, factionvalues);
 
 	/* Load Character Account Data: Temp until I move */
-	query = StringFormat("SELECT `status`, `name`, `lsaccount_id`, `gmspeed`, `revoked`, `hideme` FROM `account` WHERE `id` = %u", this->AccountID());
+	query = StringFormat("SELECT `status`, `name`, `lsaccount_id`, `gmspeed`, `revoked`, `hideme`, `time_creation` FROM `account` WHERE `id` = %u", this->AccountID());
 	auto results = database.QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		admin = atoi(row[0]);
@@ -1370,7 +1370,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		gmspeed = atoi(row[3]);
 		revoked = atoi(row[4]);
 		gmhideme = atoi(row[5]);
-		if (account_creation){ account_creation = atoul(row[6]); }
+		account_creation = atoul(row[6]);
 	}
 
 	/* Load Character Data */
