@@ -1385,7 +1385,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 		if (LFP){ LFP = atoi(row[0]); }
 		if (LFG){ LFG = atoi(row[1]); }
-		if (firstlogon){ firstlogon = atoi(row[3]); }
+		if (row[3])
+			firstlogon = atoi(row[3]);
 	}
 
 	if (RuleB(Character, SharedBankPlat))
