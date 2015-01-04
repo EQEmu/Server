@@ -2052,8 +2052,8 @@ void ClientTaskState::UpdateTaskActivity(Client *c, int TaskID, int ActivityID, 
 
 	int ActiveTaskIndex = -1;
 
-	for(int i=0; i<MAXACTIVETASKS; i++) {
-		if(ActiveTasks[i].TaskID==TaskID) {
+	for (int i = 0; i < MAXACTIVETASKS; i++) {
+		if (ActiveTasks[i].TaskID == TaskID) {
 			ActiveTaskIndex = i;
 			break;
 		}

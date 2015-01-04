@@ -5053,20 +5053,24 @@ XS(XS_Client_GetSpellBookSlotBySpellID)
 	XSRETURN(1);
 }
 
+#include <iostream>
+
 XS(XS_Client_UpdateTaskActivity); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UpdateTaskActivity)
 {
 	dXSARGS;
-	if (items <= 4)
+	if (items < 4)
 		Perl_croak(aTHX_ "Usage: Client::UpdateTaskActivity(THIS, TaskID, ActivityID, Count, [ignore_quest_update])");
 	{
 		bool ignore_quest_update = false;
 
 		Client *	THIS;
+
 		int		TaskID = (int)SvIV(ST(1));
 		int		ActivityID = (int)SvIV(ST(2));
 		int		Count = (int)SvUV(ST(3));
-		if (items == 4){
+
+		if (items == 5){
 			ignore_quest_update = (bool)SvTRUE(ST(4));
 		}
 
