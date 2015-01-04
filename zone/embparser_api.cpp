@@ -2277,22 +2277,24 @@ XS(XS__updatetaskactivity);
 XS(XS__updatetaskactivity)
 {
 	dXSARGS;
-	unsigned int task, activity, ignore_quest_update;
+	unsigned int task, activity;
 	int count = 1;
-	ignore_quest_update = 0;
+	bool ignore_quest_update = false;
 	if(items == 2) {
 		task = (int)SvIV(ST(0));
 		activity = (int)SvIV(ST(1));
 		quest_manager.updatetaskactivity(task, activity, count, false);
 	}
-	else if(items == 3) {
+	else if (items == 3 || items == 4) {
 		task = (int)SvIV(ST(0));
 		activity = (int)SvIV(ST(1));
 		count = (int)SvIV(ST(2));
-		bool	ignore_quest_update = (bool)SvTRUE(ST(3));
+		if (items == 4){
+			bool	ignore_quest_update = (bool)SvTRUE(ST(3)); 
+		}
 		quest_manager.updatetaskactivity(task, activity, count, ignore_quest_update);
 	} else {
-		Perl_croak(aTHX_ "Usage: updatetaskactivity(task, activity [,count])");
+		Perl_croak(aTHX_ "Usage: updatetaskactivity(task, activity, [count], [ignore_quest_update])");
 	}
 
 	XSRETURN_EMPTY;
