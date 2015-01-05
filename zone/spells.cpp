@@ -274,7 +274,15 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 					database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking race/class restricted item with an invalid class");
 				}
 				else {
-					Message_StringID(13, CANNOT_USE_ITEM);
+					if (CastToClient()->GetClientVersion() >= EQClientRoF)
+					{
+						// Line 181 in eqstr_us.txt was changed in RoF+
+						Message(15, "Your race, class, or deity cannot use this item.");
+					}
+					else
+					{
+						Message_StringID(13, CANNOT_USE_ITEM);
+					}
 				}
 				return(false);
 			}
