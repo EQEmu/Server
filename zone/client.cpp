@@ -8271,69 +8271,25 @@ std::string Client::TextLink::GenerateLink()
 	generate_body();
 	generate_text();
 	
-	if (m_LinkBody.length() && m_LinkText.length()) {
-		m_Link.append(StringFormat("%c", 0x12));
+	if ((m_LinkBody.length() == EmuConstants::TEXT_LINK_BODY_LENGTH) && (m_LinkText.length() > 0)) {
+		m_Link.push_back(0x12);
 		m_Link.append(m_LinkBody);
 		m_Link.append(m_LinkText);
-		m_Link.append(StringFormat("%c", 0x12));
+		m_Link.push_back(0x12);
 	}
 
 	if ((m_Link.length() == 0) || (m_Link.length() > 250)) {
 		m_Error = true;
 		m_Link = "<LINKER ERROR>";
-		_log(CHANNELS__ERROR, "TextLink::GenerateLink() failed to generate a useable text link (LinkType: %i, Lengths: {l: %u, b: %u, t: %u})",
+		_log(CHANNELS__ERROR, "TextLink::GenerateLink() failed to generate a useable text link (LinkType: %i, Lengths: {link: %u, body: %u, text: %u})",
 			m_LinkType, m_Link.length(), m_LinkBody.length(), m_LinkText.length());
+#if EQDEBUG >= 5
+		_log(CHANNELS__ERROR, ">> LinkBody: %s", m_LinkBody.c_str());
+		_log(CHANNELS__ERROR, ">> LinkText: %s", m_LinkText.c_str());
+#endif
 	}
 
 	return m_Link;
-}
-
-const char* Client::TextLink::GetLink()
-{
-	if (m_Link.length() == 0)
-		return nullptr;
-
-	return m_Link.c_str();
-}
-
-const char* Client::TextLink::GetLinkBody()
-{
-	if (m_LinkBody.length() == 0)
-		return nullptr;
-
-	return m_LinkBody.c_str();
-}
-
-const char* Client::TextLink::GetLinkText()
-{
-	if (m_LinkText.length() == 0)
-		return nullptr;
-
-	return m_LinkText.c_str();
-}
-
-std::string Client::TextLink::GetLinkString()
-{
-	if (m_Link.length() == 0)
-		return "";
-
-	return m_Link;
-}
-
-std::string Client::TextLink::GetLinkBodyString()
-{
-	if (m_LinkBody.length() == 0)
-		return "";
-
-	return m_LinkBody;
-}
-
-std::string Client::TextLink::GetLinkTextString()
-{
-	if (m_LinkText.length() == 0)
-		return "";
-
-	return m_LinkText;
 }
 
 void Client::TextLink::Reset()
@@ -8348,81 +8304,72 @@ void Client::TextLink::Reset()
 	m_Link.clear();
 	m_LinkBody.clear();
 	m_LinkText.clear();
-	m_ClientVersion = EQClientUnknown;
 	m_Error = false;
 }
 
 void Client::TextLink::generate_body()
 {
-	enum { field_0 = 0, field_1, field_2, field_3, field_4, field_5, field_6, field_7, field_8, field_9, field_10, field_11, field_12, field_13 };
-	static const int field_count = 14;
-	static const bool field_use[_EQClientCount][field_count] = {
-		// 6.2:  MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"              "%1X" "%04X" "%1X"        "%08X"
-		// SoF:  MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"              "%1X" "%04X" "%1X" "%05X" "%08X"
-		// RoF:  MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"       "%1X" "%04X" "%1X" "%05X" "%08X"
-		// RoF2: MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%1X" "%04X" "%1X" "%05X" "%08X"
+	/*
+	Current server mask: EQClientRoF2
+	
+	RoF2: "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%1X" "%04X" "%1X" "%05X" "%08X" (56)
+	RoF:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"       "%1X" "%04X" "%1X" "%05X" "%08X" (55)
+	SoF:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"              "%1X" "%04X" "%1X" "%05X" "%08X" (50)
+	6.2:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"              "%1X" "%04X" "%1X"        "%08X" (45)
+	*/
 
-//(RoF2)  %01x   %05x   %05x   %05x   %05x   %05x   %05x   %05x   %01x   %01x   %04x   %01x   %05x   %08x
-		{  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true }, // EQClientUnknown
-		{  true,  true,  true,  true,  true,  true,  true, false, false,  true,  true,  true, false,  true }, // EQClient6.2
-		{  true,  true,  true,  true,  true,  true,  true, false, false,  true,  true,  true, false,  true }, // EQClientTitanium
-		{  true,  true,  true,  true,  true,  true,  true, false, false,  true,  true,  true,  true,  true }, // EQClientSoF
-		{  true,  true,  true,  true,  true,  true,  true, false, false,  true,  true,  true,  true,  true }, // EQClientSoD
-		{  true,  true,  true,  true,  true,  true,  true, false, false,  true,  true,  true,  true,  true }, // EQClientUnderfoot
-		{  true,  true,  true,  true,  true,  true,  true,  true, false,  true,  true,  true,  true,  true }, // EQClientRoF
-		{  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true } // EQClientRoF2
-	};
+	// could use a ##_cast<TextLinkBody_Struct*>(&this) with a memset to '0' since these properties are inherited
+
+	unknown_1 = NOT_USED;		/* field 1 */
+	item_id = NOT_USED;			/* field 2 */
+	augment_1 = NOT_USED;		/* field 3 */
+	augment_2 = NOT_USED;		/* field 4 */
+	augment_3 = NOT_USED;		/* field 5 */
+	augment_4 = NOT_USED;		/* field 6 */
+	augment_5 = NOT_USED;		/* field 7 */
+	augment_6 = NOT_USED;		/* field 8 */
+	unknown_2 = NOT_USED;		/* field 9 */
+	unknown_3 = NOT_USED;		/* field 10 */
+	unknown_4 = NOT_USED;		/* field 11 */
+	unknown_5 = NOT_USED;		/* field 12 */
+	ornament_icon = NOT_USED;	/* field 13 */
+	hash = NOT_USED;			/* field 14 */
 	
-/*%01X*/	uint8 unknown_0 = NOT_USED;
-/*%05X*/	uint32 item_id = NOT_USED;
-/*%05X*/	uint32 augment_0 = NOT_USED;
-/*%05X*/	uint32 augment_1 = NOT_USED;
-/*%05X*/	uint32 augment_2 = NOT_USED;
-/*%05X*/	uint32 augment_3 = NOT_USED;
-/*%05X*/	uint32 augment_4 = NOT_USED;
-/*%05X*/	uint32 augment_5 = NOT_USED;
-/*%01X*/	uint8 unknown_8 = NOT_USED;
-/*%01X*/	uint8 unknown_9 = NOT_USED;
-/*%04X*/	uint32 unknown_10 = NOT_USED;
-/*%01X*/	uint8 unknown_11 = NOT_USED;
-/*%05X*/	uint32 unknown_12 = NOT_USED;
-/*%08X*/	int hash = NOT_USED;
-	
+	const Item_Struct* item_data = nullptr;
+
 	switch (m_LinkType) {
 	case linkBlank:
 		break;
 	case linkItemData:
-		if (m_ItemData != nullptr) {
-			item_id = m_ItemData->ID;
-			// TODO: add hash call
-		}
+		if (m_ItemData == nullptr) { break; }
+		item_id = m_ItemData->ID;
+		// TODO: add hash call
 		break;
 	case linkLootItem:
-		if (m_LootData != nullptr) {
-			const Item_Struct* item_data = database.GetItem(m_LootData->item_id);
-			if (item_data == nullptr) { break; }
-			item_id = item_data->ID;
-			augment_0 = m_LootData->aug_1;
-			augment_1 = m_LootData->aug_2;
-			augment_2 = m_LootData->aug_3;
-			augment_3 = m_LootData->aug_4;
-			augment_4 = m_LootData->aug_5;
-			augment_5 = m_LootData->aug_6;
-			// TODO: add hash call
-		}
+		if (m_LootData == nullptr) { break; }
+		item_data = database.GetItem(m_LootData->item_id);
+		if (item_data == nullptr) { break; }
+		item_id = item_data->ID;
+		augment_1 = m_LootData->aug_1;
+		augment_2 = m_LootData->aug_2;
+		augment_3 = m_LootData->aug_3;
+		augment_4 = m_LootData->aug_4;
+		augment_5 = m_LootData->aug_5;
+		augment_6 = m_LootData->aug_6;
+		// TODO: add hash call
 		break;
 	case linkItemInst:
-		if (m_ItemInst != nullptr) {
-			if (m_ItemInst->GetItem() == nullptr) { break; }
-			item_id = m_ItemInst->GetItem()->ID;
-			augment_0 = m_ItemInst->GetAugmentItemID(0);
-			augment_1 = m_ItemInst->GetAugmentItemID(1);
-			augment_2 = m_ItemInst->GetAugmentItemID(2);
-			augment_3 = m_ItemInst->GetAugmentItemID(3);
-			augment_4 = m_ItemInst->GetAugmentItemID(4);
-			augment_5 = m_ItemInst->GetAugmentItemID(5);
-			// TODO: add hash call
-		}
+		if (m_ItemInst == nullptr) { break; }
+		if (m_ItemInst->GetItem() == nullptr) { break; }
+		item_id = m_ItemInst->GetItem()->ID;
+		augment_1 = m_ItemInst->GetAugmentItemID(0);
+		augment_2 = m_ItemInst->GetAugmentItemID(1);
+		augment_3 = m_ItemInst->GetAugmentItemID(2);
+		augment_4 = m_ItemInst->GetAugmentItemID(3);
+		augment_5 = m_ItemInst->GetAugmentItemID(4);
+		augment_6 = m_ItemInst->GetAugmentItemID(5);
+		ornament_icon = m_ItemInst->GetOrnamentationIcon();
+		// TODO: add hash call
 		break;
 	default:
 		break;
@@ -8433,23 +8380,27 @@ void Client::TextLink::generate_body()
 	}
 
 	if (m_TaskUse) {
-		hash = 0x0000000014505DC2;
+		//hash = 0x0000000014505DC2;
+		hash = 0x14505DC2;
 	}
 
-	if (field_use[m_ClientVersion][field_0]) { m_LinkBody.append(StringFormat("%01x", unknown_0)); }
-	if (field_use[m_ClientVersion][field_1]) { m_LinkBody.append(StringFormat("%05x", item_id)); }
-	if (field_use[m_ClientVersion][field_2]) { m_LinkBody.append(StringFormat("%05x", augment_0)); }
-	if (field_use[m_ClientVersion][field_3]) { m_LinkBody.append(StringFormat("%05x", augment_1)); }
-	if (field_use[m_ClientVersion][field_4]) { m_LinkBody.append(StringFormat("%05x", augment_2)); }
-	if (field_use[m_ClientVersion][field_5]) { m_LinkBody.append(StringFormat("%05x", augment_3)); }
-	if (field_use[m_ClientVersion][field_6]) { m_LinkBody.append(StringFormat("%05x", augment_4)); }
-	if (field_use[m_ClientVersion][field_7]) { m_LinkBody.append(StringFormat("%05x", augment_5)); }
-	if (field_use[m_ClientVersion][field_8]) { m_LinkBody.append(StringFormat("%01x", unknown_8)); }
-	if (field_use[m_ClientVersion][field_9]) { m_LinkBody.append(StringFormat("%01x", unknown_9)); }
-	if (field_use[m_ClientVersion][field_10]) { m_LinkBody.append(StringFormat("%04x", unknown_10)); }
-	if (field_use[m_ClientVersion][field_11]) { m_LinkBody.append(StringFormat("%01x", unknown_11)); }
-	if (field_use[m_ClientVersion][field_12]) { m_LinkBody.append(StringFormat("%05x", unknown_12)); }
-	if (field_use[m_ClientVersion][field_13]) { m_LinkBody.append(StringFormat("%08x", hash)); }
+	m_LinkBody = StringFormat(
+		"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%1X" "%04X" "%1X" "%05X" "%08X",
+		unknown_1,
+		item_id,
+		augment_1,
+		augment_2,
+		augment_3,
+		augment_4,
+		augment_5,
+		augment_6,
+		unknown_2,
+		unknown_3,
+		unknown_4,
+		unknown_5,
+		ornament_icon,
+		hash
+		);
 }
 
 void Client::TextLink::generate_text()
@@ -8459,35 +8410,76 @@ void Client::TextLink::generate_text()
 		return;
 	}
 
+	const Item_Struct* item_data = nullptr;
+
 	switch (m_LinkType) {
 	case linkBlank:
 		break;
 	case linkItemData:
-		if (m_ItemData != nullptr) {
-			m_LinkText = m_ItemData->Name;
-			return;
-		}
-		break;
+		if (m_ItemData == nullptr) { break; }
+		m_LinkText = m_ItemData->Name;
+		return;
 	case linkLootItem:
-		if (m_LootData != nullptr) {
-			const Item_Struct* item_data = database.GetItem(m_LootData->item_id);
-			if (item_data != nullptr) {
-				m_LinkText = item_data->Name;
-				return;
-			}
-		}
-		break;
+		if (m_LootData == nullptr) { break; }
+		item_data = database.GetItem(m_LootData->item_id);
+		if (item_data == nullptr) { break; }
+		m_LinkText = item_data->Name;
+		return;
 	case linkItemInst:
-		if (m_ItemInst != nullptr) {
-			if (m_ItemInst->GetItem() != nullptr) {
-				m_LinkText = m_ItemInst->GetItem()->Name;
-				return;
-			}
-		}
-		break;
+		if (m_ItemInst == nullptr) { break; }
+		if (m_ItemInst->GetItem() == nullptr) { break; }
+		m_LinkText = m_ItemInst->GetItem()->Name;
+		return;
 	default:
 		break;
 	}
 
 	m_LinkText = "null";
+}
+
+bool Client::TextLink::DegenerateLinkBody(TextLinkBody_Struct& textLinkBodyStruct, const std::string& textLinkBody)
+{
+	memset(&textLinkBodyStruct, 0, sizeof(TextLinkBody_Struct));
+	if (textLinkBody.length() != EmuConstants::TEXT_LINK_BODY_LENGTH) { return false; }
+
+	textLinkBodyStruct.unknown_1 = (uint8)strtol(textLinkBody.substr(0, 1).c_str(), nullptr, 16);
+	textLinkBodyStruct.item_id = (uint32)strtol(textLinkBody.substr(1, 5).c_str(), nullptr, 16);
+	textLinkBodyStruct.augment_1 = (uint32)strtol(textLinkBody.substr(6, 5).c_str(), nullptr, 16);
+	textLinkBodyStruct.augment_2 = (uint32)strtol(textLinkBody.substr(11, 5).c_str(), nullptr, 16);
+	textLinkBodyStruct.augment_3 = (uint32)strtol(textLinkBody.substr(16, 5).c_str(), nullptr, 16);
+	textLinkBodyStruct.augment_4 = (uint32)strtol(textLinkBody.substr(21, 5).c_str(), nullptr, 16);
+	textLinkBodyStruct.augment_5 = (uint32)strtol(textLinkBody.substr(26, 5).c_str(), nullptr, 16);
+	textLinkBodyStruct.augment_6 = (uint32)strtol(textLinkBody.substr(31, 5).c_str(), nullptr, 16);
+	textLinkBodyStruct.unknown_2 = (uint8)strtol(textLinkBody.substr(36, 1).c_str(), nullptr, 16);
+	textLinkBodyStruct.unknown_3 = (uint8)strtol(textLinkBody.substr(37, 1).c_str(), nullptr, 16);
+	textLinkBodyStruct.unknown_4 = (uint32)strtol(textLinkBody.substr(38, 4).c_str(), nullptr, 16);
+	textLinkBodyStruct.unknown_5 = (uint8)strtol(textLinkBody.substr(42, 1).c_str(), nullptr, 16);
+	textLinkBodyStruct.ornament_icon = (uint32)strtol(textLinkBody.substr(43, 5).c_str(), nullptr, 16);
+	textLinkBodyStruct.hash = (int)strtol(textLinkBody.substr(48, 8).c_str(), nullptr, 16);
+
+	return true;
+}
+
+bool Client::TextLink::GenerateLinkBody(std::string& textLinkBody, const TextLinkBody_Struct& textLinkBodyStruct)
+{
+	textLinkBody = StringFormat(
+		"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%1X" "%04X" "%1X" "%05X" "%08X",
+		textLinkBodyStruct.unknown_1,
+		textLinkBodyStruct.item_id,
+		textLinkBodyStruct.augment_1,
+		textLinkBodyStruct.augment_2,
+		textLinkBodyStruct.augment_3,
+		textLinkBodyStruct.augment_4,
+		textLinkBodyStruct.augment_5,
+		textLinkBodyStruct.augment_6,
+		textLinkBodyStruct.unknown_2,
+		textLinkBodyStruct.unknown_3,
+		textLinkBodyStruct.unknown_4,
+		textLinkBodyStruct.unknown_5,
+		textLinkBodyStruct.ornament_icon,
+		textLinkBodyStruct.hash
+		);
+
+	if (textLinkBody.length() != EmuConstants::TEXT_LINK_BODY_LENGTH) { return false; }
+	return true;
 }

@@ -4115,18 +4115,24 @@ struct AltCurrencySellItem_Struct {
 /*010*/ uint32 cost;
 };
 
+// SoF: "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%05X" "%08X"
+struct TextLinkBody_Struct
+{
+	uint8 unknown_1;		/* '%1X' - SoF field 1 / Server field 1 */
+	uint32 item_id;			/* '%05X' - SoF field 2 / Server field 2 */
+	uint32 augment_1;		/* '%05X' - SoF field 3 / Server field 3 */
+	uint32 augment_2;		/* '%05X' - SoF field 4 / Server field 4 */
+	uint32 augment_3;		/* '%05X' - SoF field 5 / Server field 5 */
+	uint32 augment_4;		/* '%05X' - SoF field 6 / Server field 6 */
+	uint32 augment_5;		/* '%05X' - SoF field 7 / Server field 7 */
+	uint8 unknown_2;		/* '%1X' - SoF field 8 / Server field 10 */
+	uint32 unknown_3;		/* '%04X' - SoF field 9 / Server field 11 */
+	uint8 unknown_4;		/* '%1X' - SoF field 10 / Server field 12 */
+	uint32 ornament_icon;	/* '%05X' - SoF field 11 / Server field 13 */
+	int hash;				/* '%08X' - SoF field 12 / Server field 14 */
+};
 
 	};	//end namespace structs
 };	//end namespace SoF
 
 #endif /*SoF_STRUCTS_H_*/
-
-
-
-
-
-
-
-
-
-

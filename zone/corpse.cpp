@@ -1258,23 +1258,16 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 			SetPlayerKillItemID(0);
 		}
 
-		/* Send message with item link to groups and such */
-		Client::TextLink linker;
-		linker.SetLinkType(linker.linkItemInst);
-		linker.SetItemInst(inst);
-		linker.SetClientVersion(client->GetClientVersion());
+	/* Send message with item link to groups and such */
+	Client::TextLink linker;
+	linker.SetLinkType(linker.linkItemInst);
+	linker.SetItemInst(inst);
 
 		auto item_link = linker.GenerateLink();
 
 		client->Message_StringID(MT_LootMessages, LOOTED_MESSAGE, item_link.c_str());
 
-		if(!IsPlayerCorpse()) {
-			// When sending to multiple/unknown client types, we set for the highest client..
-			// ..which is processed when 'EQClientUnknown,' or default value, is selected.
-			// This should help with any current issues..or it may create more! O.o
-			linker.SetClientVersion(EQClientUnknown);
-			item_link = linker.GenerateLink();
-
+	if (!IsPlayerCorpse()) {
 			Group *g = client->GetGroup();
 			if(g != nullptr) {
 				g->GroupMessage_StringID(client, MT_LootMessages, OTHER_LOOTED_MESSAGE, client->GetName(), item_link.c_str());

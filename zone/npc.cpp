@@ -515,7 +515,6 @@ void NPC::QueryLoot(Client* to)
 		Client::TextLink linker;
 		linker.SetLinkType(linker.linkItemData);
 		linker.SetItemData(item);
-		linker.SetClientVersion(to->GetClientVersion());
 
 		auto item_link = linker.GenerateLink();
 		

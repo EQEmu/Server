@@ -2621,7 +2621,6 @@ void command_peekinv(Client *c, const Seperator *sep)
 	std::string item_link;
 	Client::TextLink linker;
 	linker.SetLinkType(linker.linkItemInst);
-	linker.SetClientVersion(c->GetClientVersion());
 
 	c->Message(0, "Displaying inventory for %s...", targetClient->GetName());
 
@@ -5574,7 +5573,6 @@ void command_itemsearch(Client *c, const Seperator *sep)
 		std::string item_link;
 		Client::TextLink linker;
 		linker.SetLinkType(linker.linkItemData);
-		linker.SetClientVersion(c->GetClientVersion());
 
 		if (Seperator::IsNumber(search_criteria)) {
 			item = database.GetItem(atoi(search_criteria));

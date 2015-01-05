@@ -2779,7 +2779,6 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 			Client::TextLink linker;
 			linker.SetLinkType(linker.linkItemData);
 			linker.SetItemData(reward_item);
-			linker.SetClientVersion(c->GetClientVersion());
 			linker.SetTaskUse();
 			if (strlen(Tasks[TaskID]->Reward) != 0)
 				linker.SetProxyText(Tasks[TaskID]->Reward);

@@ -3329,19 +3329,23 @@ struct LFGuild_GuildToggle_Struct
 /*616*/
 };
 
+// 6.2: "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%08X"
+struct TextLinkBody_Struct
+{
+	uint8 unknown_1;		/* '%1X' - Titanium field 1 / Server field 1 */
+	uint32 item_id;			/* '%05X' - Titanium field 2 / Server field 2 */
+	uint32 augment_1;		/* '%05X' - Titanium field 3 / Server field 3 */
+	uint32 augment_2;		/* '%05X' - Titanium field 4 / Server field 4 */
+	uint32 augment_3;		/* '%05X' - Titanium field 5 / Server field 5 */
+	uint32 augment_4;		/* '%05X' - Titanium field 6 / Server field 6 */
+	uint32 augment_5;		/* '%05X' - Titanium field 7 / Server field 7 */
+	uint8 unknown_2;		/* '%1X' - Titanium field 8 / Server field 10 */
+	uint32 unknown_3;		/* '%04X' - Titanium field 9 / Server field 11 */
+	uint8 unknown_4;		/* '%1X' - Titanium field 10 / Server field 12 */
+	int hash;				/* '%08X' - Titanium field 11 / Server field 14 */
+};
+
 	};	//end namespace structs
 };	//end namespace Titanium
 
-
-
 #endif /*Titanium_STRUCTS_H_*/
-
-
-
-
-
-
-
-
-
-

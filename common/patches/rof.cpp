@@ -33,6 +33,18 @@ namespace RoF
 	static inline uint32 RoFToServerMainInvSlot(structs::MainInvItemSlotStruct RoFSlot);
 	static inline uint32 RoFToServerCorpseSlot(uint32 RoFCorpse);
 
+	// server to client text link converters
+	static inline void ServerToRoFTextLinks(std::string& rofTextLink, const std::string& serverTextLink);
+	static inline bool DegenerateServerTextLinkBody(TextLinkBody_Struct& serverLinkBodyStruct, const std::string& serverLinkBody);
+	static inline void ServerToRoFTextLinkBodyStruct(structs::TextLinkBody_Struct& rofLinkBodyStruct, const TextLinkBody_Struct& serverLinkBodyStruct);
+	static inline bool GenerateRoFTextLinkBody(std::string& rofLinkBody, const structs::TextLinkBody_Struct& rofLinkBodyStruct);
+
+	// client to server text link converters
+	static inline void RoFToServerTextLinks(std::string& serverTextLink, const std::string& rofTextLink);
+	static inline bool DegenerateRoFTextLinkBody(structs::TextLinkBody_Struct& rofLinkBodyStruct, const std::string& rofLinkBody);
+	static inline void RoFToServerTextLinkBodyStruct(TextLinkBody_Struct& serverLinkBodyStruct, const structs::TextLinkBody_Struct& rofLinkBodyStruct);
+	static inline bool GenerateServerTextLinkBody(std::string& serverLinkBody, const TextLinkBody_Struct& serverLinkBodyStruct);
+
 	void Register(EQStreamIdentifier &into)
 	{
 		//create our opcode manager if we havent already
@@ -488,7 +500,13 @@ namespace RoF
 
 		unsigned char *__emu_buffer = in->pBuffer;
 
-		in->size = strlen(emu->sender) + 1 + strlen(emu->targetname) + 1 + strlen(emu->message) + 1 + 36;
+		std::string old_message = emu->message;
+		std::string new_message;
+		ServerToRoFTextLinks(new_message, old_message);
+
+		//in->size = strlen(emu->sender) + 1 + strlen(emu->targetname) + 1 + strlen(emu->message) + 1 + 36;
+		in->size = strlen(emu->sender) + strlen(emu->targetname) + new_message.length() + 39;
+
 		in->pBuffer = new unsigned char[in->size];
 
 		char *OutBuffer = (char *)in->pBuffer;
@@ -501,7 +519,7 @@ namespace RoF
 		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
 		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, 0);	// Unknown
 		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->skill_in_language);
-		VARSTRUCT_ENCODE_STRING(OutBuffer, emu->message);
+		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
 
 		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
 		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
@@ -3096,6 +3114,44 @@ namespace RoF
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_SpecialMesg)
+	{
+		EQApplicationPacket *in = *p;
+		*p = nullptr;
+
+		SpecialMesg_Struct *emu = (SpecialMesg_Struct *)in->pBuffer;
+
+		unsigned char *__emu_buffer = in->pBuffer;
+
+		std::string old_message = &emu->message[strlen(emu->sayer)];
+		std::string new_message;
+		ServerToRoFTextLinks(new_message, old_message);
+
+		//in->size = 3 + 4 + 4 + strlen(emu->sayer) + 1 + 12 + new_message.length() + 1;
+		in->size = 25 + strlen(emu->sayer) + new_message.length();
+		in->pBuffer = new unsigned char[in->size];
+
+		char *OutBuffer = (char *)in->pBuffer;
+
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->header[0]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->header[1]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->header[2]);
+
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->msg_type);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->target_spawn_id);
+
+		VARSTRUCT_ENCODE_STRING(OutBuffer, emu->sayer);
+
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);
+
+		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
+
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
+	}
+
 	ENCODE(OP_Stun)
 	{
 		ENCODE_LENGTH_EXACT(Stun_Struct);
@@ -4041,7 +4097,13 @@ namespace RoF
 
 		uint32 Skill = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
 
-		__packet->size = sizeof(ChannelMessage_Struct)+strlen(InBuffer) + 1;
+		std::string old_message = InBuffer;
+		std::string new_message;
+		RoFToServerTextLinks(new_message, old_message);
+
+		//__packet->size = sizeof(ChannelMessage_Struct)+strlen(InBuffer) + 1;
+		__packet->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
+
 		__packet->pBuffer = new unsigned char[__packet->size];
 		ChannelMessage_Struct *emu = (ChannelMessage_Struct *)__packet->pBuffer;
 
@@ -4050,7 +4112,7 @@ namespace RoF
 		emu->language = Language;
 		emu->chan_num = Channel;
 		emu->skill_in_language = Skill;
-		strcpy(emu->message, InBuffer);
+		strcpy(emu->message, new_message.c_str());
 
 		delete[] __eq_buffer;
 	}
@@ -5626,6 +5688,366 @@ namespace RoF
 	static inline uint32 RoFToServerCorpseSlot(uint32 RoFCorpse)
 	{
 		return (RoFCorpse - 1);
+	}
+
+	static inline void ServerToRoFTextLinks(std::string& rofTextLink, const std::string& serverTextLink)
+	{
+		const char delimiter = 0x12;
+		
+#if EQDEBUG >= 6
+		_log(CHANNELS__ERROR, "TextLink(Server->RoF): old message '%s'", serverTextLink.c_str());
+		
+		if (consts::TEXT_LINK_BODY_LENGTH == EmuConstants::TEXT_LINK_BODY_LENGTH) {
+			_log(CHANNELS__ERROR, "TextLink(Server->RoF): link size equal, no conversion necessary");
+			rofTextLink = serverTextLink;
+			return;
+		}
+		
+		if (serverTextLink.find(delimiter) == std::string::npos) {
+			_log(CHANNELS__ERROR, "TextLink(Server->RoF): delimiter not found, no conversion necessary");
+			rofTextLink = serverTextLink;
+			return;
+		}
+
+		bool conversion_error = false;
+		auto segments = SplitString(serverTextLink, delimiter);
+
+		for (size_t iter = 1; iter < segments.size(); iter += 2) {
+			TextLinkBody_Struct old_body_data;
+			if (!DegenerateServerTextLinkBody(old_body_data, segments[iter].substr(0, EmuConstants::TEXT_LINK_BODY_LENGTH).c_str())) {
+				_log(CHANNELS__ERROR, "TextLink(Server->RoF): body degeneration error '%s'", segments[iter].substr(0, EmuConstants::TEXT_LINK_BODY_LENGTH).c_str());
+				conversion_error = true;
+			}
+			else {
+				_log(CHANNELS__ERROR, "TextLink(Server->RoF): body degeneration success '%s'", segments[iter].substr(0, EmuConstants::TEXT_LINK_BODY_LENGTH).c_str());
+			}
+
+			structs::TextLinkBody_Struct new_body_data;
+			ServerToRoFTextLinkBodyStruct(new_body_data, old_body_data);
+
+			std::string segment;
+			if (!GenerateRoFTextLinkBody(segment, new_body_data)) {
+				_log(CHANNELS__ERROR, "TextLink(Server->RoF): body generation error '%s'", segment.c_str());
+				conversion_error = true;
+			}
+			else {
+				_log(CHANNELS__ERROR, "TextLink(Server->RoF): body generation success '%s'", segment.c_str());
+				segment.append(segments[iter].substr(EmuConstants::TEXT_LINK_BODY_LENGTH).c_str());
+				segments[iter] = segment.c_str();
+			}
+		}
+
+		if (conversion_error) {
+			_log(CHANNELS__ERROR, "TextLink(Server->RoF): conversion error");
+			rofTextLink = serverTextLink;
+			return;
+		}
+
+		for (size_t iter = 0; iter < segments.size(); ++iter) {
+			if (iter & 1) {
+				rofTextLink.push_back(delimiter);
+				rofTextLink.append(segments[iter].c_str());
+				rofTextLink.push_back(delimiter);
+			}
+			else {
+				rofTextLink.append(segments[iter].c_str());
+			}
+
+			_log(CHANNELS__ERROR, "TextLink(Server->RoF): segment[%u] '%s'", iter, segments[iter].c_str());
+		}
+
+		_log(CHANNELS__ERROR, "TextLink(Server->RoF): new message '%s'", rofTextLink.c_str());
+#else
+		if ((consts::TEXT_LINK_BODY_LENGTH == EmuConstants::TEXT_LINK_BODY_LENGTH) || (serverTextLink.find(delimiter) == std::string::npos)) {
+			rofTextLink = serverTextLink;
+			return;
+		}
+
+		bool conversion_error = false;
+		auto segments = SplitString(serverTextLink, delimiter);
+
+		for (size_t iter = 1; iter < segments.size(); iter += 2) {
+			TextLinkBody_Struct old_body_data;
+			if (!DegenerateServerTextLinkBody(old_body_data, segments[iter].substr(0, EmuConstants::TEXT_LINK_BODY_LENGTH).c_str())) {
+				conversion_error = true;
+				break;
+			}
+
+			structs::TextLinkBody_Struct new_body_data;
+			ServerToRoFTextLinkBodyStruct(new_body_data, old_body_data);
+
+			std::string segment;
+			if (!GenerateRoFTextLinkBody(segment, new_body_data)) {
+				conversion_error = true;
+				break;
+			}
+			else {
+				segment.append(segments[iter].substr(EmuConstants::TEXT_LINK_BODY_LENGTH).c_str());
+				segments[iter] = segment.c_str();
+			}
+		}
+
+		if (conversion_error) {
+			_log(CHANNELS__ERROR, "TextLink(Server->RoF): conversion error");
+			rofTextLink = serverTextLink;
+			return;
+		}
+
+		for (size_t iter = 0; iter < segments.size(); ++iter) {
+			if (iter & 1) {
+				rofTextLink.push_back(delimiter);
+				rofTextLink.append(segments[iter].c_str());
+				rofTextLink.push_back(delimiter);
+			}
+			else {
+				rofTextLink.append(segments[iter].c_str());
+			}
+		}
+#endif
+	}
+
+	static inline bool DegenerateServerTextLinkBody(TextLinkBody_Struct& serverLinkBodyStruct, const std::string& serverLinkBody)
+	{
+		memset(&serverLinkBodyStruct, 0, sizeof(TextLinkBody_Struct));
+		if (serverLinkBody.length() != EmuConstants::TEXT_LINK_BODY_LENGTH) { return false; }
+		
+		serverLinkBodyStruct.unknown_1 = (uint8)strtol(serverLinkBody.substr(0, 1).c_str(), nullptr, 16);
+		serverLinkBodyStruct.item_id = (uint32)strtol(serverLinkBody.substr(1, 5).c_str(), nullptr, 16);
+		serverLinkBodyStruct.augment_1 = (uint32)strtol(serverLinkBody.substr(6, 5).c_str(), nullptr, 16);
+		serverLinkBodyStruct.augment_2 = (uint32)strtol(serverLinkBody.substr(11, 5).c_str(), nullptr, 16);
+		serverLinkBodyStruct.augment_3 = (uint32)strtol(serverLinkBody.substr(16, 5).c_str(), nullptr, 16);
+		serverLinkBodyStruct.augment_4 = (uint32)strtol(serverLinkBody.substr(21, 5).c_str(), nullptr, 16);
+		serverLinkBodyStruct.augment_5 = (uint32)strtol(serverLinkBody.substr(26, 5).c_str(), nullptr, 16);
+		serverLinkBodyStruct.augment_6 = (uint32)strtol(serverLinkBody.substr(31, 5).c_str(), nullptr, 16);
+		serverLinkBodyStruct.unknown_2 = (uint8)strtol(serverLinkBody.substr(36, 1).c_str(), nullptr, 16);
+		serverLinkBodyStruct.unknown_3 = (uint8)strtol(serverLinkBody.substr(37, 1).c_str(), nullptr, 16);
+		serverLinkBodyStruct.unknown_4 = (uint32)strtol(serverLinkBody.substr(38, 4).c_str(), nullptr, 16);
+		serverLinkBodyStruct.unknown_5 = (uint8)strtol(serverLinkBody.substr(42, 1).c_str(), nullptr, 16);
+		serverLinkBodyStruct.ornament_icon = (uint32)strtol(serverLinkBody.substr(43, 5).c_str(), nullptr, 16);
+		serverLinkBodyStruct.hash = (int)strtol(serverLinkBody.substr(48, 8).c_str(), nullptr, 16);
+
+		return true;
+	}
+
+	static inline void ServerToRoFTextLinkBodyStruct(structs::TextLinkBody_Struct& rofLinkBodyStruct, const TextLinkBody_Struct& serverLinkBodyStruct)
+	{
+		rofLinkBodyStruct.unknown_1 = serverLinkBodyStruct.unknown_1;
+		rofLinkBodyStruct.item_id = serverLinkBodyStruct.item_id;
+		rofLinkBodyStruct.augment_1 = serverLinkBodyStruct.augment_1;
+		rofLinkBodyStruct.augment_2 = serverLinkBodyStruct.augment_2;
+		rofLinkBodyStruct.augment_3 = serverLinkBodyStruct.augment_3;
+		rofLinkBodyStruct.augment_4 = serverLinkBodyStruct.augment_4;
+		rofLinkBodyStruct.augment_5 = serverLinkBodyStruct.augment_5;
+		rofLinkBodyStruct.augment_6 = serverLinkBodyStruct.augment_6;
+		rofLinkBodyStruct.unknown_2 = serverLinkBodyStruct.unknown_3;
+		rofLinkBodyStruct.unknown_3 = serverLinkBodyStruct.unknown_4;
+		rofLinkBodyStruct.unknown_4 = serverLinkBodyStruct.unknown_5;
+		rofLinkBodyStruct.ornament_icon = serverLinkBodyStruct.ornament_icon;
+		rofLinkBodyStruct.hash = serverLinkBodyStruct.hash;
+	}
+
+	static inline bool GenerateRoFTextLinkBody(std::string& rofLinkBody, const structs::TextLinkBody_Struct& rofLinkBodyStruct)
+	{
+		rofLinkBody = StringFormat(
+			"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%05X" "%08X",
+			rofLinkBodyStruct.unknown_1,
+			rofLinkBodyStruct.item_id,
+			rofLinkBodyStruct.augment_1,
+			rofLinkBodyStruct.augment_2,
+			rofLinkBodyStruct.augment_3,
+			rofLinkBodyStruct.augment_4,
+			rofLinkBodyStruct.augment_5,
+			rofLinkBodyStruct.augment_6,
+			rofLinkBodyStruct.unknown_2,
+			rofLinkBodyStruct.unknown_3,
+			rofLinkBodyStruct.unknown_4,
+			rofLinkBodyStruct.ornament_icon,
+			rofLinkBodyStruct.hash
+			);
+
+		if (rofLinkBody.length() != consts::TEXT_LINK_BODY_LENGTH) { return false; }
+		return true;
+	}
+
+	static inline void RoFToServerTextLinks(std::string& serverTextLink, const std::string& rofTextLink)
+	{
+		const char delimiter = 0x12;
+
+#if EQDEBUG >= 6
+		_log(CHANNELS__ERROR, "TextLink(RoF->Server): old message '%s'", rofTextLink.c_str());
+
+		if (EmuConstants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) {
+			_log(CHANNELS__ERROR, "TextLink(RoF->Server): link size equal, no conversion necessary");
+			serverTextLink = rofTextLink;
+			return;
+		}
+
+		if (rofTextLink.find(delimiter) == std::string::npos) {
+			_log(CHANNELS__ERROR, "TextLink(RoF->Server): delimiter not found, no conversion necessary");
+			serverTextLink = rofTextLink;
+			return;
+		}
+
+		bool conversion_error = false;
+		auto segments = SplitString(rofTextLink, delimiter);
+
+		for (size_t iter = 1; iter < segments.size(); iter += 2) {
+			structs::TextLinkBody_Struct old_body_data;
+			if (!DegenerateRoFTextLinkBody(old_body_data, segments[iter].substr(0, consts::TEXT_LINK_BODY_LENGTH).c_str())) {
+				_log(CHANNELS__ERROR, "TextLink(RoF->Server): body degeneration error '%s'", segments[iter].substr(0, consts::TEXT_LINK_BODY_LENGTH).c_str());
+				conversion_error = true;
+			}
+			else {
+				_log(CHANNELS__ERROR, "TextLink(RoF->Server): body degeneration success '%s'", segments[iter].substr(0, consts::TEXT_LINK_BODY_LENGTH).c_str());
+			}
+
+			TextLinkBody_Struct new_body_data;
+			RoFToServerTextLinkBodyStruct(new_body_data, old_body_data);
+
+			std::string segment;
+			if (!GenerateServerTextLinkBody(segment, new_body_data)) {
+				_log(CHANNELS__ERROR, "TextLink(RoF->Server): body generation error '%s'", segment.c_str());
+				conversion_error = true;
+			}
+			else {
+				_log(CHANNELS__ERROR, "TextLink(RoF->Server): body generation success '%s'", segment.c_str());
+				segment.append(segments[iter].substr(consts::TEXT_LINK_BODY_LENGTH).c_str());
+				segments[iter] = segment.c_str();
+			}
+		}
+
+		if (conversion_error) {
+			_log(CHANNELS__ERROR, "TextLink(RoF->Server): conversion error");
+			serverTextLink = rofTextLink;
+			return;
+		}
+
+		for (size_t iter = 0; iter < segments.size(); ++iter) {
+			if (iter & 1) {
+				serverTextLink.push_back(delimiter);
+				serverTextLink.append(segments[iter].c_str());
+				serverTextLink.push_back(delimiter);
+			}
+			else {
+				serverTextLink.append(segments[iter].c_str());
+			}
+
+			_log(CHANNELS__ERROR, "TextLink(RoF->Server): segment[%u] '%s'", iter, segments[iter].c_str());
+		}
+
+		_log(CHANNELS__ERROR, "TextLink(RoF->Server): new message '%s'", serverTextLink.c_str());
+#else
+		if ((EmuConstants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) || (rofTextLink.find(delimiter) == std::string::npos)) {
+			serverTextLink = rofTextLink;
+			return;
+		}
+
+		bool conversion_error = false;
+		auto segments = SplitString(rofTextLink, delimiter);
+
+		for (size_t iter = 1; iter < segments.size(); iter += 2) {
+			structs::TextLinkBody_Struct old_body_data;
+			if (!DegenerateRoFTextLinkBody(old_body_data, segments[iter].substr(0, consts::TEXT_LINK_BODY_LENGTH).c_str())) {
+				conversion_error = true;
+				break;
+			}
+
+			TextLinkBody_Struct new_body_data;
+			RoFToServerTextLinkBodyStruct(new_body_data, old_body_data);
+
+			std::string segment;
+			if (!GenerateServerTextLinkBody(segment, new_body_data)) {
+				conversion_error = true;
+				break;
+			}
+			else {
+				segment.append(segments[iter].substr(consts::TEXT_LINK_BODY_LENGTH).c_str());
+				segments[iter] = segment.c_str();
+			}
+		}
+
+		if (conversion_error) {
+			_log(CHANNELS__ERROR, "TextLink(RoF->Server): conversion error");
+			serverTextLink = rofTextLink;
+			return;
+		}
+
+		for (size_t iter = 0; iter < segments.size(); ++iter) {
+			if (iter & 1) {
+				serverTextLink.push_back(delimiter);
+				serverTextLink.append(segments[iter].c_str());
+				serverTextLink.push_back(delimiter);
+			}
+			else {
+				serverTextLink.append(segments[iter].c_str());
+			}
+		}
+#endif
+	}
+
+	static inline bool DegenerateRoFTextLinkBody(structs::TextLinkBody_Struct& rofLinkBodyStruct, const std::string& rofLinkBody)
+	{
+		// RoF: "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%05X" "%08X"
+		memset(&rofLinkBodyStruct, 0, sizeof(structs::TextLinkBody_Struct));
+		if (rofLinkBody.length() != consts::TEXT_LINK_BODY_LENGTH) { return false; }
+
+		rofLinkBodyStruct.unknown_1 = (uint8)strtol(rofLinkBody.substr(0, 1).c_str(), nullptr, 16);
+		rofLinkBodyStruct.item_id = (uint32)strtol(rofLinkBody.substr(1, 5).c_str(), nullptr, 16);
+		rofLinkBodyStruct.augment_1 = (uint32)strtol(rofLinkBody.substr(6, 5).c_str(), nullptr, 16);
+		rofLinkBodyStruct.augment_2 = (uint32)strtol(rofLinkBody.substr(11, 5).c_str(), nullptr, 16);
+		rofLinkBodyStruct.augment_3 = (uint32)strtol(rofLinkBody.substr(16, 5).c_str(), nullptr, 16);
+		rofLinkBodyStruct.augment_4 = (uint32)strtol(rofLinkBody.substr(21, 5).c_str(), nullptr, 16);
+		rofLinkBodyStruct.augment_5 = (uint32)strtol(rofLinkBody.substr(26, 5).c_str(), nullptr, 16);
+		rofLinkBodyStruct.augment_6 = (uint32)strtol(rofLinkBody.substr(31, 5).c_str(), nullptr, 16);
+		rofLinkBodyStruct.unknown_2 = (uint8)strtol(rofLinkBody.substr(36, 1).c_str(), nullptr, 16);
+		rofLinkBodyStruct.unknown_3 = (uint32)strtol(rofLinkBody.substr(37, 4).c_str(), nullptr, 16);
+		rofLinkBodyStruct.unknown_4 = (uint8)strtol(rofLinkBody.substr(41, 1).c_str(), nullptr, 16);
+		rofLinkBodyStruct.ornament_icon = (uint32)strtol(rofLinkBody.substr(42, 5).c_str(), nullptr, 16);
+		rofLinkBodyStruct.hash = (int)strtol(rofLinkBody.substr(47, 8).c_str(), nullptr, 16);
+
+		return true;
+	}
+
+	static inline void RoFToServerTextLinkBodyStruct(TextLinkBody_Struct& serverLinkBodyStruct, const structs::TextLinkBody_Struct& rofLinkBodyStruct)
+	{
+		serverLinkBodyStruct.unknown_1 = rofLinkBodyStruct.unknown_1;
+		serverLinkBodyStruct.item_id = rofLinkBodyStruct.item_id;
+		serverLinkBodyStruct.augment_1 = rofLinkBodyStruct.augment_1;
+		serverLinkBodyStruct.augment_2 = rofLinkBodyStruct.augment_2;
+		serverLinkBodyStruct.augment_3 = rofLinkBodyStruct.augment_3;
+		serverLinkBodyStruct.augment_4 = rofLinkBodyStruct.augment_4;
+		serverLinkBodyStruct.augment_5 = rofLinkBodyStruct.augment_5;
+		serverLinkBodyStruct.augment_6 = rofLinkBodyStruct.augment_6;
+		serverLinkBodyStruct.unknown_2 = NOT_USED;
+		serverLinkBodyStruct.unknown_3 = rofLinkBodyStruct.unknown_2;
+		serverLinkBodyStruct.unknown_4 = rofLinkBodyStruct.unknown_3;
+		serverLinkBodyStruct.unknown_5 = rofLinkBodyStruct.unknown_4;
+		serverLinkBodyStruct.ornament_icon = rofLinkBodyStruct.ornament_icon;
+		serverLinkBodyStruct.hash = rofLinkBodyStruct.hash;
+	}
+
+	static inline bool GenerateServerTextLinkBody(std::string& serverLinkBody, const TextLinkBody_Struct& serverLinkBodyStruct)
+	{
+		serverLinkBody = StringFormat(
+			"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%01X" "%01X" "%04X" "%01X" "%05X" "%08X",
+			serverLinkBodyStruct.unknown_1,
+			serverLinkBodyStruct.item_id,
+			serverLinkBodyStruct.augment_1,
+			serverLinkBodyStruct.augment_2,
+			serverLinkBodyStruct.augment_3,
+			serverLinkBodyStruct.augment_4,
+			serverLinkBodyStruct.augment_5,
+			serverLinkBodyStruct.augment_6,
+			serverLinkBodyStruct.unknown_2,
+			serverLinkBodyStruct.unknown_3,
+			serverLinkBodyStruct.unknown_4,
+			serverLinkBodyStruct.unknown_5,
+			serverLinkBodyStruct.ornament_icon,
+			serverLinkBodyStruct.hash
+			);
+
+		if (serverLinkBody.length() != EmuConstants::TEXT_LINK_BODY_LENGTH) { return false; }
+		return true;
 	}
 }
 // end namespace RoF

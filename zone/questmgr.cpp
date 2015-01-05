@@ -1234,7 +1234,6 @@ void QuestManager::itemlink(int item_id) {
 		Client::TextLink linker;
 		linker.SetLinkType(linker.linkItemData);
 		linker.SetItemData(item);
-		linker.SetClientVersion(initiator->GetClientVersion());
 
 		auto item_link = linker.GenerateLink();
 
@@ -2474,8 +2473,6 @@ const char* QuestManager::varlink(char* perltext, int item_id) {
 	Client::TextLink linker;
 	linker.SetLinkType(linker.linkItemData);
 	linker.SetItemData(item);
-	if (initiator)
-		linker.SetClientVersion(initiator->GetClientVersion());
 
 	auto item_link = linker.GenerateLink();
 	strcpy(perltext, item_link.c_str()); // link length is currently ranged from 1 to 250 in TextLink::GenerateLink()
@@ -2668,8 +2665,6 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 	Client::TextLink linker;
 	linker.SetProxyItemID(sayid);
 	linker.SetProxyText(LinkName);
-	if (initiator)
-		linker.SetClientVersion(initiator->GetClientVersion());
 
 	auto say_link = linker.GenerateLink();
 	strcpy(Phrase, say_link.c_str());  // link length is currently ranged from 1 to 250 in TextLink::GenerateLink()

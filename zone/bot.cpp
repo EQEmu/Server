@@ -11707,7 +11707,6 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				std::string item_link;
 				Client::TextLink linker;
 				linker.SetLinkType(linker.linkItemInst);
-				linker.SetClientVersion(c->GetClientVersion());
 
 				for(int i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; ++i) {
 					if((i == MainSecondary) && is2Hweapon) {

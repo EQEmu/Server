@@ -819,7 +819,7 @@ public:
 	//
 	// class Client::TextLink
 	//
-	class TextLink {
+	class TextLink : TextLinkBody_Struct {
 	public:
 		enum LinkType { linkBlank = 0, linkItemData, linkLootItem, linkItemInst };
 
@@ -832,19 +832,18 @@ public:
 		void SetProxyItemID(uint32 proxyItemID) { m_ProxyItemID = proxyItemID; } // mainly for saylinks..but, not limited to
 		void SetProxyText(const char* proxyText) { m_ProxyText = proxyText; } // overrides standard text use
 		void SetTaskUse() { m_TaskUse = true; }
-		void SetClientVersion(EQClientVersion clientVersion) { m_ClientVersion = EQLimits::ValidateClientVersion(clientVersion); }
 
 		std::string GenerateLink();
 		bool LinkError() { return m_Error; }
 
-		const char* GetLink();		// contains full format: '/12x' '<LinkBody>' '<LinkText>' '/12x'
-		const char* GetLinkBody();	// contains format: '<LinkBody>'
-		const char* GetLinkText();	// contains format: '<LinkText>'
-		std::string GetLinkString();
-		std::string GetLinkBodyString();
-		std::string GetLinkTextString();
+		std::string GetLink() { return m_Link; }			// contains full string format: '/12x' '<LinkBody>' '<LinkText>' '/12x'
+		std::string GetLinkBody() { return m_LinkBody; }	// contains string format: '<LinkBody>'
+		std::string GetLinkText() { return m_LinkText; }	// contains string format: '<LinkText>'
 
 		void Reset();
+
+		static bool DegenerateLinkBody(TextLinkBody_Struct& textLinkBodyStruct, const std::string& textLinkBody);
+		static bool GenerateLinkBody(std::string& textLinkBody, const TextLinkBody_Struct& textLinkBodyStruct);
 
 	private:
 		void generate_body();
@@ -860,7 +859,6 @@ public:
 		std::string m_Link;
 		std::string m_LinkBody;
 		std::string m_LinkText;
-		EQClientVersion m_ClientVersion;
 		bool m_Error;
 	};
 
