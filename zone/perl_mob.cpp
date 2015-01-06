@@ -8488,7 +8488,8 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "GetDR"), XS_Mob_GetDR, file, "$");
 		newXSproto(strcpy(buf, "GetPR"), XS_Mob_GetPR, file, "$");
 		newXSproto(strcpy(buf, "GetCR"), XS_Mob_GetCR, file, "$");
-		newXSproto(strcpy(buf, "GetCorruption"), XS_Mob_GetCR, file, "$");
+		newXSproto(strcpy(buf, "GetCorruption"), XS_Mob_GetCorruption, file, "$");
+		newXSproto(strcpy(buf, "GetPhR"), XS_Mob_GetPhR, file, "$");
 		newXSproto(strcpy(buf, "GetMaxSTR"), XS_Mob_GetMaxSTR, file, "$");
 		newXSproto(strcpy(buf, "GetMaxSTA"), XS_Mob_GetMaxSTA, file, "$");
 		newXSproto(strcpy(buf, "GetMaxDEX"), XS_Mob_GetMaxDEX, file, "$");
