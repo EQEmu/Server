@@ -5819,10 +5819,9 @@ namespace RoF
 		serverLinkBodyStruct.augment_4 = (uint32)strtol(serverLinkBody.substr(21, 5).c_str(), nullptr, 16);
 		serverLinkBodyStruct.augment_5 = (uint32)strtol(serverLinkBody.substr(26, 5).c_str(), nullptr, 16);
 		serverLinkBodyStruct.augment_6 = (uint32)strtol(serverLinkBody.substr(31, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.unknown_2 = (uint8)strtol(serverLinkBody.substr(36, 1).c_str(), nullptr, 16);
-		serverLinkBodyStruct.unknown_3 = (uint8)strtol(serverLinkBody.substr(37, 1).c_str(), nullptr, 16);
-		serverLinkBodyStruct.unknown_4 = (uint32)strtol(serverLinkBody.substr(38, 4).c_str(), nullptr, 16);
-		serverLinkBodyStruct.unknown_5 = (uint8)strtol(serverLinkBody.substr(42, 1).c_str(), nullptr, 16);
+		serverLinkBodyStruct.is_evolving = (uint8)strtol(serverLinkBody.substr(36, 1).c_str(), nullptr, 16);
+		serverLinkBodyStruct.lore_group = (uint32)strtol(serverLinkBody.substr(37, 5).c_str(), nullptr, 16);
+		serverLinkBodyStruct.evolve_max = (uint8)strtol(serverLinkBody.substr(42, 1).c_str(), nullptr, 16);
 		serverLinkBodyStruct.ornament_icon = (uint32)strtol(serverLinkBody.substr(43, 5).c_str(), nullptr, 16);
 		serverLinkBodyStruct.hash = (int)strtol(serverLinkBody.substr(48, 8).c_str(), nullptr, 16);
 
@@ -5839,9 +5838,9 @@ namespace RoF
 		rofLinkBodyStruct.augment_4 = serverLinkBodyStruct.augment_4;
 		rofLinkBodyStruct.augment_5 = serverLinkBodyStruct.augment_5;
 		rofLinkBodyStruct.augment_6 = serverLinkBodyStruct.augment_6;
-		rofLinkBodyStruct.unknown_2 = serverLinkBodyStruct.unknown_3;
-		rofLinkBodyStruct.unknown_3 = serverLinkBodyStruct.unknown_4;
-		rofLinkBodyStruct.unknown_4 = serverLinkBodyStruct.unknown_5;
+		rofLinkBodyStruct.is_evolving = serverLinkBodyStruct.is_evolving;
+		rofLinkBodyStruct.lore_group = serverLinkBodyStruct.lore_group;
+		rofLinkBodyStruct.evolve_max = serverLinkBodyStruct.evolve_max;
 		rofLinkBodyStruct.ornament_icon = serverLinkBodyStruct.ornament_icon;
 		rofLinkBodyStruct.hash = serverLinkBodyStruct.hash;
 	}
@@ -5858,9 +5857,9 @@ namespace RoF
 			rofLinkBodyStruct.augment_4,
 			rofLinkBodyStruct.augment_5,
 			rofLinkBodyStruct.augment_6,
-			rofLinkBodyStruct.unknown_2,
-			rofLinkBodyStruct.unknown_3,
-			rofLinkBodyStruct.unknown_4,
+			rofLinkBodyStruct.is_evolving,
+			rofLinkBodyStruct.lore_group,
+			rofLinkBodyStruct.evolve_max,
 			rofLinkBodyStruct.ornament_icon,
 			rofLinkBodyStruct.hash
 			);
@@ -5999,9 +5998,9 @@ namespace RoF
 		rofLinkBodyStruct.augment_4 = (uint32)strtol(rofLinkBody.substr(21, 5).c_str(), nullptr, 16);
 		rofLinkBodyStruct.augment_5 = (uint32)strtol(rofLinkBody.substr(26, 5).c_str(), nullptr, 16);
 		rofLinkBodyStruct.augment_6 = (uint32)strtol(rofLinkBody.substr(31, 5).c_str(), nullptr, 16);
-		rofLinkBodyStruct.unknown_2 = (uint8)strtol(rofLinkBody.substr(36, 1).c_str(), nullptr, 16);
-		rofLinkBodyStruct.unknown_3 = (uint32)strtol(rofLinkBody.substr(37, 4).c_str(), nullptr, 16);
-		rofLinkBodyStruct.unknown_4 = (uint8)strtol(rofLinkBody.substr(41, 1).c_str(), nullptr, 16);
+		rofLinkBodyStruct.is_evolving = (uint8)strtol(rofLinkBody.substr(36, 1).c_str(), nullptr, 16);
+		rofLinkBodyStruct.lore_group = (uint32)strtol(rofLinkBody.substr(37, 4).c_str(), nullptr, 16);
+		rofLinkBodyStruct.evolve_max = (uint8)strtol(rofLinkBody.substr(41, 1).c_str(), nullptr, 16);
 		rofLinkBodyStruct.ornament_icon = (uint32)strtol(rofLinkBody.substr(42, 5).c_str(), nullptr, 16);
 		rofLinkBodyStruct.hash = (int)strtol(rofLinkBody.substr(47, 8).c_str(), nullptr, 16);
 
@@ -6018,10 +6017,9 @@ namespace RoF
 		serverLinkBodyStruct.augment_4 = rofLinkBodyStruct.augment_4;
 		serverLinkBodyStruct.augment_5 = rofLinkBodyStruct.augment_5;
 		serverLinkBodyStruct.augment_6 = rofLinkBodyStruct.augment_6;
-		serverLinkBodyStruct.unknown_2 = NOT_USED;
-		serverLinkBodyStruct.unknown_3 = rofLinkBodyStruct.unknown_2;
-		serverLinkBodyStruct.unknown_4 = rofLinkBodyStruct.unknown_3;
-		serverLinkBodyStruct.unknown_5 = rofLinkBodyStruct.unknown_4;
+		serverLinkBodyStruct.is_evolving = rofLinkBodyStruct.is_evolving;
+		serverLinkBodyStruct.lore_group = rofLinkBodyStruct.lore_group;
+		serverLinkBodyStruct.evolve_max = rofLinkBodyStruct.evolve_max;
 		serverLinkBodyStruct.ornament_icon = rofLinkBodyStruct.ornament_icon;
 		serverLinkBodyStruct.hash = rofLinkBodyStruct.hash;
 	}
@@ -6029,7 +6027,7 @@ namespace RoF
 	static inline bool GenerateServerTextLinkBody(std::string& serverLinkBody, const TextLinkBody_Struct& serverLinkBodyStruct)
 	{
 		serverLinkBody = StringFormat(
-			"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%01X" "%01X" "%04X" "%01X" "%05X" "%08X",
+			"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%01X" "%05X" "%01X" "%05X" "%08X",
 			serverLinkBodyStruct.unknown_1,
 			serverLinkBodyStruct.item_id,
 			serverLinkBodyStruct.augment_1,
@@ -6038,10 +6036,9 @@ namespace RoF
 			serverLinkBodyStruct.augment_4,
 			serverLinkBodyStruct.augment_5,
 			serverLinkBodyStruct.augment_6,
-			serverLinkBodyStruct.unknown_2,
-			serverLinkBodyStruct.unknown_3,
-			serverLinkBodyStruct.unknown_4,
-			serverLinkBodyStruct.unknown_5,
+			serverLinkBodyStruct.is_evolving,
+			serverLinkBodyStruct.lore_group,
+			serverLinkBodyStruct.evolve_max,
 			serverLinkBodyStruct.ornament_icon,
 			serverLinkBodyStruct.hash
 			);

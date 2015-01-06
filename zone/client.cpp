@@ -8312,10 +8312,10 @@ void Client::TextLink::generate_body()
 	/*
 	Current server mask: EQClientRoF2
 	
-	RoF2: "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%1X" "%04X" "%1X" "%05X" "%08X" (56)
-	RoF:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"       "%1X" "%04X" "%1X" "%05X" "%08X" (55)
-	SoF:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"              "%1X" "%04X" "%1X" "%05X" "%08X" (50)
-	6.2:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"              "%1X" "%04X" "%1X"        "%08X" (45)
+	RoF2: "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%05X" "%1X" "%05X" "%08X" (56)
+	RoF:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%05X" "%08X" (55)
+	SoF:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"        "%1X" "%04X" "%1X" "%05X" "%08X" (50)
+	6.2:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"        "%1X" "%04X" "%1X"        "%08X" (45)
 	*/
 
 	// could use a ##_cast<TextLinkBody_Struct*>(&this) with a memset to '0' since these properties are inherited
@@ -8328,12 +8328,11 @@ void Client::TextLink::generate_body()
 	augment_4 = NOT_USED;		/* field 6 */
 	augment_5 = NOT_USED;		/* field 7 */
 	augment_6 = NOT_USED;		/* field 8 */
-	unknown_2 = NOT_USED;		/* field 9 */
-	unknown_3 = NOT_USED;		/* field 10 */
-	unknown_4 = NOT_USED;		/* field 11 */
-	unknown_5 = NOT_USED;		/* field 12 */
-	ornament_icon = NOT_USED;	/* field 13 */
-	hash = NOT_USED;			/* field 14 */
+	is_evolving = NOT_USED;		/* field 9 */
+	lore_group = NOT_USED;		/* field 10 */
+	evolve_max = NOT_USED;	/* field 11 */
+	ornament_icon = NOT_USED;	/* field 12 */
+	hash = NOT_USED;			/* field 13 */
 	
 	const Item_Struct* item_data = nullptr;
 
@@ -8385,7 +8384,7 @@ void Client::TextLink::generate_body()
 	}
 
 	m_LinkBody = StringFormat(
-		"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%1X" "%04X" "%1X" "%05X" "%08X",
+		"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%05X" "%1X" "%05X" "%08X",
 		unknown_1,
 		item_id,
 		augment_1,
@@ -8394,10 +8393,9 @@ void Client::TextLink::generate_body()
 		augment_4,
 		augment_5,
 		augment_6,
-		unknown_2,
-		unknown_3,
-		unknown_4,
-		unknown_5,
+		is_evolving,
+		lore_group,
+		evolve_max,
 		ornament_icon,
 		hash
 		);
@@ -8450,10 +8448,9 @@ bool Client::TextLink::DegenerateLinkBody(TextLinkBody_Struct& textLinkBodyStruc
 	textLinkBodyStruct.augment_4 = (uint32)strtol(textLinkBody.substr(21, 5).c_str(), nullptr, 16);
 	textLinkBodyStruct.augment_5 = (uint32)strtol(textLinkBody.substr(26, 5).c_str(), nullptr, 16);
 	textLinkBodyStruct.augment_6 = (uint32)strtol(textLinkBody.substr(31, 5).c_str(), nullptr, 16);
-	textLinkBodyStruct.unknown_2 = (uint8)strtol(textLinkBody.substr(36, 1).c_str(), nullptr, 16);
-	textLinkBodyStruct.unknown_3 = (uint8)strtol(textLinkBody.substr(37, 1).c_str(), nullptr, 16);
-	textLinkBodyStruct.unknown_4 = (uint32)strtol(textLinkBody.substr(38, 4).c_str(), nullptr, 16);
-	textLinkBodyStruct.unknown_5 = (uint8)strtol(textLinkBody.substr(42, 1).c_str(), nullptr, 16);
+	textLinkBodyStruct.is_evolving = (uint8)strtol(textLinkBody.substr(36, 1).c_str(), nullptr, 16);
+	textLinkBodyStruct.lore_group = (uint32)strtol(textLinkBody.substr(37, 5).c_str(), nullptr, 16);
+	textLinkBodyStruct.evolve_max = (uint8)strtol(textLinkBody.substr(42, 1).c_str(), nullptr, 16);
 	textLinkBodyStruct.ornament_icon = (uint32)strtol(textLinkBody.substr(43, 5).c_str(), nullptr, 16);
 	textLinkBodyStruct.hash = (int)strtol(textLinkBody.substr(48, 8).c_str(), nullptr, 16);
 
@@ -8463,7 +8460,7 @@ bool Client::TextLink::DegenerateLinkBody(TextLinkBody_Struct& textLinkBodyStruc
 bool Client::TextLink::GenerateLinkBody(std::string& textLinkBody, const TextLinkBody_Struct& textLinkBodyStruct)
 {
 	textLinkBody = StringFormat(
-		"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%1X" "%04X" "%1X" "%05X" "%08X",
+		"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%05X" "%1X" "%05X" "%08X",
 		textLinkBodyStruct.unknown_1,
 		textLinkBodyStruct.item_id,
 		textLinkBodyStruct.augment_1,
@@ -8472,10 +8469,9 @@ bool Client::TextLink::GenerateLinkBody(std::string& textLinkBody, const TextLin
 		textLinkBodyStruct.augment_4,
 		textLinkBodyStruct.augment_5,
 		textLinkBodyStruct.augment_6,
-		textLinkBodyStruct.unknown_2,
-		textLinkBodyStruct.unknown_3,
-		textLinkBodyStruct.unknown_4,
-		textLinkBodyStruct.unknown_5,
+		textLinkBodyStruct.is_evolving,
+		textLinkBodyStruct.lore_group,
+		textLinkBodyStruct.evolve_max,
 		textLinkBodyStruct.ornament_icon,
 		textLinkBodyStruct.hash
 		);

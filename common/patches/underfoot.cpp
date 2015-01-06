@@ -4346,10 +4346,9 @@ namespace Underfoot
 		serverLinkBodyStruct.augment_4 = (uint32)strtol(serverLinkBody.substr(21, 5).c_str(), nullptr, 16);
 		serverLinkBodyStruct.augment_5 = (uint32)strtol(serverLinkBody.substr(26, 5).c_str(), nullptr, 16);
 		serverLinkBodyStruct.augment_6 = (uint32)strtol(serverLinkBody.substr(31, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.unknown_2 = (uint8)strtol(serverLinkBody.substr(36, 1).c_str(), nullptr, 16);
-		serverLinkBodyStruct.unknown_3 = (uint8)strtol(serverLinkBody.substr(37, 1).c_str(), nullptr, 16);
-		serverLinkBodyStruct.unknown_4 = (uint32)strtol(serverLinkBody.substr(38, 4).c_str(), nullptr, 16);
-		serverLinkBodyStruct.unknown_5 = (uint8)strtol(serverLinkBody.substr(42, 1).c_str(), nullptr, 16);
+		serverLinkBodyStruct.is_evolving = (uint8)strtol(serverLinkBody.substr(36, 1).c_str(), nullptr, 16);
+		serverLinkBodyStruct.lore_group = (uint32)strtol(serverLinkBody.substr(37, 5).c_str(), nullptr, 16);
+		serverLinkBodyStruct.evolve_max = (uint8)strtol(serverLinkBody.substr(42, 1).c_str(), nullptr, 16);
 		serverLinkBodyStruct.ornament_icon = (uint32)strtol(serverLinkBody.substr(43, 5).c_str(), nullptr, 16);
 		serverLinkBodyStruct.hash = (int)strtol(serverLinkBody.substr(48, 8).c_str(), nullptr, 16);
 
@@ -4365,9 +4364,9 @@ namespace Underfoot
 		underfootLinkBodyStruct.augment_3 = serverLinkBodyStruct.augment_3;
 		underfootLinkBodyStruct.augment_4 = serverLinkBodyStruct.augment_4;
 		underfootLinkBodyStruct.augment_5 = serverLinkBodyStruct.augment_5;
-		underfootLinkBodyStruct.unknown_2 = serverLinkBodyStruct.unknown_3;
-		underfootLinkBodyStruct.unknown_3 = serverLinkBodyStruct.unknown_4;
-		underfootLinkBodyStruct.unknown_4 = serverLinkBodyStruct.unknown_5;
+		underfootLinkBodyStruct.is_evolving = serverLinkBodyStruct.is_evolving;
+		underfootLinkBodyStruct.lore_group = serverLinkBodyStruct.lore_group;
+		underfootLinkBodyStruct.evolve_max = serverLinkBodyStruct.evolve_max;
 		underfootLinkBodyStruct.ornament_icon = serverLinkBodyStruct.ornament_icon;
 		underfootLinkBodyStruct.hash = serverLinkBodyStruct.hash;
 	}
@@ -4383,9 +4382,9 @@ namespace Underfoot
 			underfootLinkBodyStruct.augment_3,
 			underfootLinkBodyStruct.augment_4,
 			underfootLinkBodyStruct.augment_5,
-			underfootLinkBodyStruct.unknown_2,
-			underfootLinkBodyStruct.unknown_3,
-			underfootLinkBodyStruct.unknown_4,
+			underfootLinkBodyStruct.is_evolving,
+			underfootLinkBodyStruct.lore_group,
+			underfootLinkBodyStruct.evolve_max,
 			underfootLinkBodyStruct.ornament_icon,
 			underfootLinkBodyStruct.hash
 			);
@@ -4523,9 +4522,9 @@ namespace Underfoot
 		underfootLinkBodyStruct.augment_3 = (uint32)strtol(underfootLinkBody.substr(16, 5).c_str(), nullptr, 16);
 		underfootLinkBodyStruct.augment_4 = (uint32)strtol(underfootLinkBody.substr(21, 5).c_str(), nullptr, 16);
 		underfootLinkBodyStruct.augment_5 = (uint32)strtol(underfootLinkBody.substr(26, 5).c_str(), nullptr, 16);
-		underfootLinkBodyStruct.unknown_2 = (uint8)strtol(underfootLinkBody.substr(31, 1).c_str(), nullptr, 16);
-		underfootLinkBodyStruct.unknown_3 = (uint32)strtol(underfootLinkBody.substr(32, 4).c_str(), nullptr, 16);
-		underfootLinkBodyStruct.unknown_4 = (uint8)strtol(underfootLinkBody.substr(36, 1).c_str(), nullptr, 16);
+		underfootLinkBodyStruct.is_evolving = (uint8)strtol(underfootLinkBody.substr(31, 1).c_str(), nullptr, 16);
+		underfootLinkBodyStruct.lore_group = (uint32)strtol(underfootLinkBody.substr(32, 4).c_str(), nullptr, 16);
+		underfootLinkBodyStruct.evolve_max = (uint8)strtol(underfootLinkBody.substr(36, 1).c_str(), nullptr, 16);
 		underfootLinkBodyStruct.ornament_icon = (uint32)strtol(underfootLinkBody.substr(37, 5).c_str(), nullptr, 16);
 		underfootLinkBodyStruct.hash = (int)strtol(underfootLinkBody.substr(42, 8).c_str(), nullptr, 16);
 
@@ -4542,10 +4541,9 @@ namespace Underfoot
 		serverLinkBodyStruct.augment_4 = underfootLinkBodyStruct.augment_4;
 		serverLinkBodyStruct.augment_5 = underfootLinkBodyStruct.augment_5;
 		serverLinkBodyStruct.augment_6 = NOT_USED;
-		serverLinkBodyStruct.unknown_2 = NOT_USED;
-		serverLinkBodyStruct.unknown_3 = underfootLinkBodyStruct.unknown_2;
-		serverLinkBodyStruct.unknown_4 = underfootLinkBodyStruct.unknown_3;
-		serverLinkBodyStruct.unknown_5 = underfootLinkBodyStruct.unknown_4;
+		serverLinkBodyStruct.is_evolving = underfootLinkBodyStruct.is_evolving;
+		serverLinkBodyStruct.lore_group = underfootLinkBodyStruct.lore_group;
+		serverLinkBodyStruct.evolve_max = underfootLinkBodyStruct.evolve_max;
 		serverLinkBodyStruct.ornament_icon = underfootLinkBodyStruct.ornament_icon;
 		serverLinkBodyStruct.hash = underfootLinkBodyStruct.hash;
 	}
@@ -4553,7 +4551,7 @@ namespace Underfoot
 	static inline bool GenerateServerTextLinkBody(std::string& serverLinkBody, const TextLinkBody_Struct& serverLinkBodyStruct)
 	{
 		serverLinkBody = StringFormat(
-			"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%01X" "%01X" "%04X" "%01X" "%05X" "%08X",
+			"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%01X" "%05X" "%01X" "%05X" "%08X",
 			serverLinkBodyStruct.unknown_1,
 			serverLinkBodyStruct.item_id,
 			serverLinkBodyStruct.augment_1,
@@ -4562,10 +4560,9 @@ namespace Underfoot
 			serverLinkBodyStruct.augment_4,
 			serverLinkBodyStruct.augment_5,
 			serverLinkBodyStruct.augment_6,
-			serverLinkBodyStruct.unknown_2,
-			serverLinkBodyStruct.unknown_3,
-			serverLinkBodyStruct.unknown_4,
-			serverLinkBodyStruct.unknown_5,
+			serverLinkBodyStruct.is_evolving,
+			serverLinkBodyStruct.lore_group,
+			serverLinkBodyStruct.evolve_max,
 			serverLinkBodyStruct.ornament_icon,
 			serverLinkBodyStruct.hash
 			);

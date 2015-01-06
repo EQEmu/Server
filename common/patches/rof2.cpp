@@ -5914,10 +5914,9 @@ namespace RoF2
 		serverLinkBodyStruct.augment_4 = (uint32)strtol(serverLinkBody.substr(21, 5).c_str(), nullptr, 16);
 		serverLinkBodyStruct.augment_5 = (uint32)strtol(serverLinkBody.substr(26, 5).c_str(), nullptr, 16);
 		serverLinkBodyStruct.augment_6 = (uint32)strtol(serverLinkBody.substr(31, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.unknown_2 = (uint8)strtol(serverLinkBody.substr(36, 1).c_str(), nullptr, 16);
-		serverLinkBodyStruct.unknown_3 = (uint8)strtol(serverLinkBody.substr(37, 1).c_str(), nullptr, 16);
-		serverLinkBodyStruct.unknown_4 = (uint32)strtol(serverLinkBody.substr(38, 4).c_str(), nullptr, 16);
-		serverLinkBodyStruct.unknown_5 = (uint8)strtol(serverLinkBody.substr(42, 1).c_str(), nullptr, 16);
+		serverLinkBodyStruct.is_evolving = (uint8)strtol(serverLinkBody.substr(36, 1).c_str(), nullptr, 16);
+		serverLinkBodyStruct.lore_group = (uint32)strtol(serverLinkBody.substr(37, 5).c_str(), nullptr, 16);
+		serverLinkBodyStruct.evolve_max = (uint8)strtol(serverLinkBody.substr(42, 1).c_str(), nullptr, 16);
 		serverLinkBodyStruct.ornament_icon = (uint32)strtol(serverLinkBody.substr(43, 5).c_str(), nullptr, 16);
 		serverLinkBodyStruct.hash = (int)strtol(serverLinkBody.substr(48, 8).c_str(), nullptr, 16);
 
@@ -5934,10 +5933,9 @@ namespace RoF2
 		rof2LinkBodyStruct.augment_4 = serverLinkBodyStruct.augment_4;
 		rof2LinkBodyStruct.augment_5 = serverLinkBodyStruct.augment_5;
 		rof2LinkBodyStruct.augment_6 = serverLinkBodyStruct.augment_6;
-		rof2LinkBodyStruct.unknown_2 = serverLinkBodyStruct.unknown_2;
-		rof2LinkBodyStruct.unknown_3 = serverLinkBodyStruct.unknown_3;
-		rof2LinkBodyStruct.unknown_4 = serverLinkBodyStruct.unknown_4;
-		rof2LinkBodyStruct.unknown_5 = serverLinkBodyStruct.unknown_5;
+		rof2LinkBodyStruct.is_evolving = serverLinkBodyStruct.is_evolving;
+		rof2LinkBodyStruct.lore_group = serverLinkBodyStruct.lore_group;
+		rof2LinkBodyStruct.evolve_max = serverLinkBodyStruct.evolve_max;
 		rof2LinkBodyStruct.ornament_icon = serverLinkBodyStruct.ornament_icon;
 		rof2LinkBodyStruct.hash = serverLinkBodyStruct.hash;
 	}
@@ -5945,7 +5943,7 @@ namespace RoF2
 	static inline bool GenerateRoF2TextLinkBody(std::string& rof2LinkBody, const structs::TextLinkBody_Struct& rof2LinkBodyStruct)
 	{
 		rof2LinkBody = StringFormat(
-			"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%1X" "%04X" "%1X" "%05X" "%08X",
+			"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%05X" "%1X" "%05X" "%08X",
 			rof2LinkBodyStruct.unknown_1,
 			rof2LinkBodyStruct.item_id,
 			rof2LinkBodyStruct.augment_1,
@@ -5954,10 +5952,9 @@ namespace RoF2
 			rof2LinkBodyStruct.augment_4,
 			rof2LinkBodyStruct.augment_5,
 			rof2LinkBodyStruct.augment_6,
-			rof2LinkBodyStruct.unknown_2,
-			rof2LinkBodyStruct.unknown_3,
-			rof2LinkBodyStruct.unknown_4,
-			rof2LinkBodyStruct.unknown_5,
+			rof2LinkBodyStruct.is_evolving,
+			rof2LinkBodyStruct.lore_group,
+			rof2LinkBodyStruct.evolve_max,
 			rof2LinkBodyStruct.ornament_icon,
 			rof2LinkBodyStruct.hash
 			);
@@ -6084,7 +6081,7 @@ namespace RoF2
 
 	static inline bool DegenerateRoF2TextLinkBody(structs::TextLinkBody_Struct& rof2LinkBodyStruct, const std::string& rof2LinkBody)
 	{
-		// RoF2: "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%1X" "%04X" "%1X" "%05X" "%08X"
+		// RoF2: "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%05X" "%1X" "%05X" "%08X"
 		memset(&rof2LinkBodyStruct, 0, sizeof(structs::TextLinkBody_Struct));
 		if (rof2LinkBody.length() != consts::TEXT_LINK_BODY_LENGTH) { return false; }
 
@@ -6096,10 +6093,9 @@ namespace RoF2
 		rof2LinkBodyStruct.augment_4 = (uint32)strtol(rof2LinkBody.substr(21, 5).c_str(), nullptr, 16);
 		rof2LinkBodyStruct.augment_5 = (uint32)strtol(rof2LinkBody.substr(26, 5).c_str(), nullptr, 16);
 		rof2LinkBodyStruct.augment_6 = (uint32)strtol(rof2LinkBody.substr(31, 5).c_str(), nullptr, 16);
-		rof2LinkBodyStruct.unknown_2 = (uint8)strtol(rof2LinkBody.substr(36, 1).c_str(), nullptr, 16);
-		rof2LinkBodyStruct.unknown_3 = (uint32)strtol(rof2LinkBody.substr(37, 4).c_str(), nullptr, 16);
-		rof2LinkBodyStruct.unknown_4 = (uint8)strtol(rof2LinkBody.substr(41, 1).c_str(), nullptr, 16);
-		rof2LinkBodyStruct.unknown_5 = (uint8)strtol(rof2LinkBody.substr(42, 1).c_str(), nullptr, 16);
+		rof2LinkBodyStruct.is_evolving = (uint8)strtol(rof2LinkBody.substr(36, 1).c_str(), nullptr, 16);
+		rof2LinkBodyStruct.lore_group = (uint32)strtol(rof2LinkBody.substr(37, 5).c_str(), nullptr, 16);
+		rof2LinkBodyStruct.evolve_max = (uint8)strtol(rof2LinkBody.substr(42, 1).c_str(), nullptr, 16);
 		rof2LinkBodyStruct.ornament_icon = (uint32)strtol(rof2LinkBody.substr(43, 5).c_str(), nullptr, 16);
 		rof2LinkBodyStruct.hash = (int)strtol(rof2LinkBody.substr(48, 8).c_str(), nullptr, 16);
 
@@ -6116,10 +6112,9 @@ namespace RoF2
 		serverLinkBodyStruct.augment_4 = rof2LinkBodyStruct.augment_4;
 		serverLinkBodyStruct.augment_5 = rof2LinkBodyStruct.augment_5;
 		serverLinkBodyStruct.augment_6 = rof2LinkBodyStruct.augment_6;
-		serverLinkBodyStruct.unknown_2 = rof2LinkBodyStruct.unknown_2;
-		serverLinkBodyStruct.unknown_3 = rof2LinkBodyStruct.unknown_3;
-		serverLinkBodyStruct.unknown_4 = rof2LinkBodyStruct.unknown_4;
-		serverLinkBodyStruct.unknown_5 = rof2LinkBodyStruct.unknown_5;
+		serverLinkBodyStruct.is_evolving = rof2LinkBodyStruct.is_evolving;
+		serverLinkBodyStruct.lore_group = rof2LinkBodyStruct.lore_group;
+		serverLinkBodyStruct.evolve_max = rof2LinkBodyStruct.evolve_max;
 		serverLinkBodyStruct.ornament_icon = rof2LinkBodyStruct.ornament_icon;
 		serverLinkBodyStruct.hash = rof2LinkBodyStruct.hash;
 	}
@@ -6127,7 +6122,7 @@ namespace RoF2
 	static inline bool GenerateServerTextLinkBody(std::string& serverLinkBody, const TextLinkBody_Struct& serverLinkBodyStruct)
 	{
 		serverLinkBody = StringFormat(
-			"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%01X" "%01X" "%04X" "%01X" "%05X" "%08X",
+			"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%01X" "%05X" "%01X" "%05X" "%08X",
 			serverLinkBodyStruct.unknown_1,
 			serverLinkBodyStruct.item_id,
 			serverLinkBodyStruct.augment_1,
@@ -6136,10 +6131,9 @@ namespace RoF2
 			serverLinkBodyStruct.augment_4,
 			serverLinkBodyStruct.augment_5,
 			serverLinkBodyStruct.augment_6,
-			serverLinkBodyStruct.unknown_2,
-			serverLinkBodyStruct.unknown_3,
-			serverLinkBodyStruct.unknown_4,
-			serverLinkBodyStruct.unknown_5,
+			serverLinkBodyStruct.is_evolving,
+			serverLinkBodyStruct.lore_group,
+			serverLinkBodyStruct.evolve_max,
 			serverLinkBodyStruct.ornament_icon,
 			serverLinkBodyStruct.hash
 			);

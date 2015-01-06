@@ -3233,10 +3233,9 @@ namespace SoF
 		serverLinkBodyStruct.augment_4 = (uint32)strtol(serverLinkBody.substr(21, 5).c_str(), nullptr, 16);
 		serverLinkBodyStruct.augment_5 = (uint32)strtol(serverLinkBody.substr(26, 5).c_str(), nullptr, 16);
 		serverLinkBodyStruct.augment_6 = (uint32)strtol(serverLinkBody.substr(31, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.unknown_2 = (uint8)strtol(serverLinkBody.substr(36, 1).c_str(), nullptr, 16);
-		serverLinkBodyStruct.unknown_3 = (uint8)strtol(serverLinkBody.substr(37, 1).c_str(), nullptr, 16);
-		serverLinkBodyStruct.unknown_4 = (uint32)strtol(serverLinkBody.substr(38, 4).c_str(), nullptr, 16);
-		serverLinkBodyStruct.unknown_5 = (uint8)strtol(serverLinkBody.substr(42, 1).c_str(), nullptr, 16);
+		serverLinkBodyStruct.is_evolving = (uint8)strtol(serverLinkBody.substr(36, 1).c_str(), nullptr, 16);
+		serverLinkBodyStruct.lore_group = (uint32)strtol(serverLinkBody.substr(37, 5).c_str(), nullptr, 16);
+		serverLinkBodyStruct.evolve_max = (uint8)strtol(serverLinkBody.substr(42, 1).c_str(), nullptr, 16);
 		serverLinkBodyStruct.ornament_icon = (uint32)strtol(serverLinkBody.substr(43, 5).c_str(), nullptr, 16);
 		serverLinkBodyStruct.hash = (int)strtol(serverLinkBody.substr(48, 8).c_str(), nullptr, 16);
 
@@ -3252,9 +3251,9 @@ namespace SoF
 		sofLinkBodyStruct.augment_3 = serverLinkBodyStruct.augment_3;
 		sofLinkBodyStruct.augment_4 = serverLinkBodyStruct.augment_4;
 		sofLinkBodyStruct.augment_5 = serverLinkBodyStruct.augment_5;
-		sofLinkBodyStruct.unknown_2 = serverLinkBodyStruct.unknown_3;
-		sofLinkBodyStruct.unknown_3 = serverLinkBodyStruct.unknown_4;
-		sofLinkBodyStruct.unknown_4 = serverLinkBodyStruct.unknown_5;
+		sofLinkBodyStruct.is_evolving = serverLinkBodyStruct.is_evolving;
+		sofLinkBodyStruct.lore_group = serverLinkBodyStruct.lore_group;
+		sofLinkBodyStruct.evolve_max = serverLinkBodyStruct.evolve_max;
 		sofLinkBodyStruct.ornament_icon = serverLinkBodyStruct.ornament_icon;
 		sofLinkBodyStruct.hash = serverLinkBodyStruct.hash;
 	}
@@ -3270,9 +3269,9 @@ namespace SoF
 			sofLinkBodyStruct.augment_3,
 			sofLinkBodyStruct.augment_4,
 			sofLinkBodyStruct.augment_5,
-			sofLinkBodyStruct.unknown_2,
-			sofLinkBodyStruct.unknown_3,
-			sofLinkBodyStruct.unknown_4,
+			sofLinkBodyStruct.is_evolving,
+			sofLinkBodyStruct.lore_group,
+			sofLinkBodyStruct.evolve_max,
 			sofLinkBodyStruct.ornament_icon,
 			sofLinkBodyStruct.hash
 			);
@@ -3410,9 +3409,9 @@ namespace SoF
 		sofLinkBodyStruct.augment_3 = (uint32)strtol(sofLinkBody.substr(16, 5).c_str(), nullptr, 16);
 		sofLinkBodyStruct.augment_4 = (uint32)strtol(sofLinkBody.substr(21, 5).c_str(), nullptr, 16);
 		sofLinkBodyStruct.augment_5 = (uint32)strtol(sofLinkBody.substr(26, 5).c_str(), nullptr, 16);
-		sofLinkBodyStruct.unknown_2 = (uint8)strtol(sofLinkBody.substr(31, 1).c_str(), nullptr, 16);
-		sofLinkBodyStruct.unknown_3 = (uint32)strtol(sofLinkBody.substr(32, 4).c_str(), nullptr, 16);
-		sofLinkBodyStruct.unknown_4 = (uint8)strtol(sofLinkBody.substr(36, 1).c_str(), nullptr, 16);
+		sofLinkBodyStruct.is_evolving = (uint8)strtol(sofLinkBody.substr(31, 1).c_str(), nullptr, 16);
+		sofLinkBodyStruct.lore_group = (uint32)strtol(sofLinkBody.substr(32, 4).c_str(), nullptr, 16);
+		sofLinkBodyStruct.evolve_max = (uint8)strtol(sofLinkBody.substr(36, 1).c_str(), nullptr, 16);
 		sofLinkBodyStruct.ornament_icon = (uint32)strtol(sofLinkBody.substr(37, 5).c_str(), nullptr, 16);
 		sofLinkBodyStruct.hash = (int)strtol(sofLinkBody.substr(42, 8).c_str(), nullptr, 16);
 
@@ -3429,10 +3428,9 @@ namespace SoF
 		serverLinkBodyStruct.augment_4 = sofLinkBodyStruct.augment_4;
 		serverLinkBodyStruct.augment_5 = sofLinkBodyStruct.augment_5;
 		serverLinkBodyStruct.augment_6 = NOT_USED;
-		serverLinkBodyStruct.unknown_2 = NOT_USED;
-		serverLinkBodyStruct.unknown_3 = sofLinkBodyStruct.unknown_2;
-		serverLinkBodyStruct.unknown_4 = sofLinkBodyStruct.unknown_3;
-		serverLinkBodyStruct.unknown_5 = sofLinkBodyStruct.unknown_4;
+		serverLinkBodyStruct.is_evolving = sofLinkBodyStruct.is_evolving;
+		serverLinkBodyStruct.lore_group = sofLinkBodyStruct.lore_group;
+		serverLinkBodyStruct.evolve_max = sofLinkBodyStruct.evolve_max;
 		serverLinkBodyStruct.ornament_icon = sofLinkBodyStruct.ornament_icon;
 		serverLinkBodyStruct.hash = sofLinkBodyStruct.hash;
 	}
@@ -3440,7 +3438,7 @@ namespace SoF
 	static inline bool GenerateServerTextLinkBody(std::string& serverLinkBody, const TextLinkBody_Struct& serverLinkBodyStruct)
 	{
 		serverLinkBody = StringFormat(
-			"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%01X" "%01X" "%04X" "%01X" "%05X" "%08X",
+			"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%01X" "%05X" "%01X" "%05X" "%08X",
 			serverLinkBodyStruct.unknown_1,
 			serverLinkBodyStruct.item_id,
 			serverLinkBodyStruct.augment_1,
@@ -3449,10 +3447,9 @@ namespace SoF
 			serverLinkBodyStruct.augment_4,
 			serverLinkBodyStruct.augment_5,
 			serverLinkBodyStruct.augment_6,
-			serverLinkBodyStruct.unknown_2,
-			serverLinkBodyStruct.unknown_3,
-			serverLinkBodyStruct.unknown_4,
-			serverLinkBodyStruct.unknown_5,
+			serverLinkBodyStruct.is_evolving,
+			serverLinkBodyStruct.lore_group,
+			serverLinkBodyStruct.evolve_max,
 			serverLinkBodyStruct.ornament_icon,
 			serverLinkBodyStruct.hash
 			);

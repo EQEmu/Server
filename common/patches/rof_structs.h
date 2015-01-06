@@ -4897,19 +4897,19 @@ struct MercenaryMerchantResponse_Struct {
 // RoF: "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%05X" "%08X"
 struct TextLinkBody_Struct
 {
-	uint8 unknown_1;		/* '%1X' - RoF field 1 / Server field 1 */
-	uint32 item_id;			/* '%05X' - RoF field 2 / Server field 2 */
-	uint32 augment_1;		/* '%05X' - RoF field 3 / Server field 3 */
-	uint32 augment_2;		/* '%05X' - RoF field 4 / Server field 4 */
-	uint32 augment_3;		/* '%05X' - RoF field 5 / Server field 5 */
-	uint32 augment_4;		/* '%05X' - RoF field 6 / Server field 6 */
-	uint32 augment_5;		/* '%05X' - RoF field 7 / Server field 7 */
-	uint32 augment_6;		/* '%05X' - RoF field 8 / Server field 8 */
-	uint8 unknown_2;		/* '%1X' - RoF field 9 / Server field 10 */
-	uint32 unknown_3;		/* '%04X' - RoF field 10 / Server field 11 */
-	uint8 unknown_4;		/* '%1X' - RoF field 11 / Server field 12 */
-	uint32 ornament_icon;	/* '%05X' - RoF field 12 / Server field 13 */
-	int hash;				/* '%08X' - RoF field 13 / Server field 14 */
+	uint8 unknown_1;
+	uint32 item_id;
+	uint32 augment_1;
+	uint32 augment_2;
+	uint32 augment_3;
+	uint32 augment_4;
+	uint32 augment_5;
+	uint32 augment_6;
+	uint8 is_evolving;
+	uint32 lore_group;
+	uint8 evolve_max;
+	uint32 ornament_icon;
+	int hash;
 };
 
 	};	//end namespace structs

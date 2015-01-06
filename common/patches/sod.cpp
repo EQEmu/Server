@@ -3911,10 +3911,9 @@ namespace SoD
 		serverLinkBodyStruct.augment_4 = (uint32)strtol(serverLinkBody.substr(21, 5).c_str(), nullptr, 16);
 		serverLinkBodyStruct.augment_5 = (uint32)strtol(serverLinkBody.substr(26, 5).c_str(), nullptr, 16);
 		serverLinkBodyStruct.augment_6 = (uint32)strtol(serverLinkBody.substr(31, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.unknown_2 = (uint8)strtol(serverLinkBody.substr(36, 1).c_str(), nullptr, 16);
-		serverLinkBodyStruct.unknown_3 = (uint8)strtol(serverLinkBody.substr(37, 1).c_str(), nullptr, 16);
-		serverLinkBodyStruct.unknown_4 = (uint32)strtol(serverLinkBody.substr(38, 4).c_str(), nullptr, 16);
-		serverLinkBodyStruct.unknown_5 = (uint8)strtol(serverLinkBody.substr(42, 1).c_str(), nullptr, 16);
+		serverLinkBodyStruct.is_evolving = (uint8)strtol(serverLinkBody.substr(36, 1).c_str(), nullptr, 16);
+		serverLinkBodyStruct.lore_group = (uint32)strtol(serverLinkBody.substr(37, 5).c_str(), nullptr, 16);
+		serverLinkBodyStruct.evolve_max = (uint8)strtol(serverLinkBody.substr(42, 1).c_str(), nullptr, 16);
 		serverLinkBodyStruct.ornament_icon = (uint32)strtol(serverLinkBody.substr(43, 5).c_str(), nullptr, 16);
 		serverLinkBodyStruct.hash = (int)strtol(serverLinkBody.substr(48, 8).c_str(), nullptr, 16);
 
@@ -3930,9 +3929,9 @@ namespace SoD
 		sodLinkBodyStruct.augment_3 = serverLinkBodyStruct.augment_3;
 		sodLinkBodyStruct.augment_4 = serverLinkBodyStruct.augment_4;
 		sodLinkBodyStruct.augment_5 = serverLinkBodyStruct.augment_5;
-		sodLinkBodyStruct.unknown_2 = serverLinkBodyStruct.unknown_3;
-		sodLinkBodyStruct.unknown_3 = serverLinkBodyStruct.unknown_4;
-		sodLinkBodyStruct.unknown_4 = serverLinkBodyStruct.unknown_5;
+		sodLinkBodyStruct.is_evolving = serverLinkBodyStruct.is_evolving;
+		sodLinkBodyStruct.lore_group = serverLinkBodyStruct.lore_group;
+		sodLinkBodyStruct.evolve_max = serverLinkBodyStruct.evolve_max;
 		sodLinkBodyStruct.ornament_icon = serverLinkBodyStruct.ornament_icon;
 		sodLinkBodyStruct.hash = serverLinkBodyStruct.hash;
 	}
@@ -3948,9 +3947,9 @@ namespace SoD
 			sodLinkBodyStruct.augment_3,
 			sodLinkBodyStruct.augment_4,
 			sodLinkBodyStruct.augment_5,
-			sodLinkBodyStruct.unknown_2,
-			sodLinkBodyStruct.unknown_3,
-			sodLinkBodyStruct.unknown_4,
+			sodLinkBodyStruct.is_evolving,
+			sodLinkBodyStruct.lore_group,
+			sodLinkBodyStruct.evolve_max,
 			sodLinkBodyStruct.ornament_icon,
 			sodLinkBodyStruct.hash
 			);
@@ -4088,9 +4087,9 @@ namespace SoD
 		sodLinkBodyStruct.augment_3 = (uint32)strtol(sodLinkBody.substr(16, 5).c_str(), nullptr, 16);
 		sodLinkBodyStruct.augment_4 = (uint32)strtol(sodLinkBody.substr(21, 5).c_str(), nullptr, 16);
 		sodLinkBodyStruct.augment_5 = (uint32)strtol(sodLinkBody.substr(26, 5).c_str(), nullptr, 16);
-		sodLinkBodyStruct.unknown_2 = (uint8)strtol(sodLinkBody.substr(31, 1).c_str(), nullptr, 16);
-		sodLinkBodyStruct.unknown_3 = (uint32)strtol(sodLinkBody.substr(32, 4).c_str(), nullptr, 16);
-		sodLinkBodyStruct.unknown_4 = (uint8)strtol(sodLinkBody.substr(36, 1).c_str(), nullptr, 16);
+		sodLinkBodyStruct.is_evolving = (uint8)strtol(sodLinkBody.substr(31, 1).c_str(), nullptr, 16);
+		sodLinkBodyStruct.lore_group = (uint32)strtol(sodLinkBody.substr(32, 4).c_str(), nullptr, 16);
+		sodLinkBodyStruct.evolve_max = (uint8)strtol(sodLinkBody.substr(36, 1).c_str(), nullptr, 16);
 		sodLinkBodyStruct.ornament_icon = (uint32)strtol(sodLinkBody.substr(37, 5).c_str(), nullptr, 16);
 		sodLinkBodyStruct.hash = (int)strtol(sodLinkBody.substr(42, 8).c_str(), nullptr, 16);
 
@@ -4107,10 +4106,9 @@ namespace SoD
 		serverLinkBodyStruct.augment_4 = sodLinkBodyStruct.augment_4;
 		serverLinkBodyStruct.augment_5 = sodLinkBodyStruct.augment_5;
 		serverLinkBodyStruct.augment_6 = NOT_USED;
-		serverLinkBodyStruct.unknown_2 = NOT_USED;
-		serverLinkBodyStruct.unknown_3 = sodLinkBodyStruct.unknown_2;
-		serverLinkBodyStruct.unknown_4 = sodLinkBodyStruct.unknown_3;
-		serverLinkBodyStruct.unknown_5 = sodLinkBodyStruct.unknown_4;
+		serverLinkBodyStruct.is_evolving = sodLinkBodyStruct.is_evolving;
+		serverLinkBodyStruct.lore_group = sodLinkBodyStruct.lore_group;
+		serverLinkBodyStruct.evolve_max = sodLinkBodyStruct.evolve_max;
 		serverLinkBodyStruct.ornament_icon = sodLinkBodyStruct.ornament_icon;
 		serverLinkBodyStruct.hash = sodLinkBodyStruct.hash;
 	}
@@ -4118,7 +4116,7 @@ namespace SoD
 	static inline bool GenerateServerTextLinkBody(std::string& serverLinkBody, const TextLinkBody_Struct& serverLinkBodyStruct)
 	{
 		serverLinkBody = StringFormat(
-			"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%01X" "%01X" "%04X" "%01X" "%05X" "%08X",
+			"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%01X" "%05X" "%01X" "%05X" "%08X",
 			serverLinkBodyStruct.unknown_1,
 			serverLinkBodyStruct.item_id,
 			serverLinkBodyStruct.augment_1,
@@ -4127,10 +4125,9 @@ namespace SoD
 			serverLinkBodyStruct.augment_4,
 			serverLinkBodyStruct.augment_5,
 			serverLinkBodyStruct.augment_6,
-			serverLinkBodyStruct.unknown_2,
-			serverLinkBodyStruct.unknown_3,
-			serverLinkBodyStruct.unknown_4,
-			serverLinkBodyStruct.unknown_5,
+			serverLinkBodyStruct.is_evolving,
+			serverLinkBodyStruct.lore_group,
+			serverLinkBodyStruct.evolve_max,
 			serverLinkBodyStruct.ornament_icon,
 			serverLinkBodyStruct.hash
 			);
