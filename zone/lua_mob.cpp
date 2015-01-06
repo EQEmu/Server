@@ -1967,6 +1967,7 @@ luabind::scope lua_register_mob() {
 		.def("GetPR", &Lua_Mob::GetPR)
 		.def("GetCR", &Lua_Mob::GetCR)
 		.def("GetCorruption", &Lua_Mob::GetCorruption)
+		.def("GetPhR", &Lua_Mob::GetPhR)
 		.def("GetMaxSTR", &Lua_Mob::GetMaxSTR)
 		.def("GetMaxSTA", &Lua_Mob::GetMaxSTA)
 		.def("GetMaxDEX", &Lua_Mob::GetMaxDEX)
