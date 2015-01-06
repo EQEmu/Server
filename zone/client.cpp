@@ -6255,6 +6255,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	made_npc->DR = GetDR();
 	made_npc->PR = GetPR();
 	made_npc->Corrup = GetCorrup();
+	made_npc->PhR = GetPhR();
 	// looks
 	made_npc->texture = GetEquipmentMaterial(MaterialChest);
 	made_npc->helmtexture = GetEquipmentMaterial(MaterialHead);
@@ -6352,7 +6353,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 
 	// Set Class
 	std::string class_Name = itoa(GetClass());
-	std::string class_List[] = { "WAR", "CLR", "PAL", "RNG", "SK", "DRU", "MNK", "BRD", "ROG", "SHM", "NEC", "WIZ", "MAG", "ENC", "BST", "BER" };
+	std::string class_List[] = { "WAR", "CLR", "PAL", "RNG", "SHD", "DRU", "MNK", "BRD", "ROG", "SHM", "NEC", "WIZ", "MAG", "ENC", "BST", "BER" };
 
 	if(GetClass() < 17 && GetClass() > 0) { class_Name = class_List[GetClass()-1]; }
 
@@ -6440,7 +6441,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	/*===========================*/
 	std::string		regen_row_header = "";
 	std::string		regen_row_color = "";
-		std::string		base_regen_field = "";
+	std::string		base_regen_field = "";
 	std::string		base_regen_spacing = "";
 	std::string		item_regen_field = "";
 	std::string		item_regen_spacing = "";
@@ -6601,8 +6602,11 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 			}
 			case 6: {
 				a_stat_name = " CHA: ";
+				a_resist_name = "PhR: "; // Not implemented for clients yet
 				a_stat = itoa(GetCHA());
 				h_stat = itoa(GetHeroicCHA());
+				a_resist = itoa(GetPhR());
+				h_resist_field = itoa(GetHeroicPhR());
 				break;
 			}
 			default: { break; }
@@ -6617,8 +6621,9 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 		for(int h = a_resist.size(); h < max_stat_value_len; h++) { a_resist_spacing += " . "; }
 
 		stat_field += indP + a_stat_name + a_stat_spacing + a_stat + heroic_color + h_stat + "</c>";
+		stat_field += h_stat_spacing + a_resist_name + a_resist_spacing + a_resist + heroic_color + h_resist_field + "</c>";
 		if(stat_row_counter < 6) {
-			stat_field += h_stat_spacing + a_resist_name + a_resist_spacing + a_resist + heroic_color + h_resist_field + "</c><br>";
+			stat_field += "<br>";
 		}
 	}
 	/*##########################################################
@@ -6827,7 +6832,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	client->Message(0, " Haste: %i / %i (Item: %i + Spell: %i + Over: %i)", GetHaste(), RuleI(Character, HasteCap), itembonuses.haste, spellbonuses.haste + spellbonuses.hastetype2, spellbonuses.hastetype3 + ExtraHaste);
 	client->Message(0, " STR: %i  STA: %i  DEX: %i  AGI: %i  INT: %i  WIS: %i  CHA: %i", GetSTR(), GetSTA(), GetDEX(), GetAGI(), GetINT(), GetWIS(), GetCHA());
 	client->Message(0, " hSTR: %i  hSTA: %i  hDEX: %i  hAGI: %i  hINT: %i  hWIS: %i  hCHA: %i", GetHeroicSTR(), GetHeroicSTA(), GetHeroicDEX(), GetHeroicAGI(), GetHeroicINT(), GetHeroicWIS(), GetHeroicCHA());
-	client->Message(0, " MR: %i  PR: %i  FR: %i  CR: %i  DR: %i Corruption: %i", GetMR(), GetPR(), GetFR(), GetCR(), GetDR(), GetCorrup());
+	client->Message(0, " MR: %i  PR: %i  FR: %i  CR: %i  DR: %i Corruption: %i PhR: %i", GetMR(), GetPR(), GetFR(), GetCR(), GetDR(), GetCorrup(), GetPhR());
 	client->Message(0, " hMR: %i  hPR: %i  hFR: %i  hCR: %i  hDR: %i hCorruption: %i", GetHeroicMR(), GetHeroicPR(), GetHeroicFR(), GetHeroicCR(), GetHeroicDR(), GetHeroicCorrup());
 	client->Message(0, " Shielding: %i  Spell Shield: %i  DoT Shielding: %i Stun Resist: %i  Strikethrough: %i  Avoidance: %i  Accuracy: %i  Combat Effects: %i", GetShielding(), GetSpellShield(), GetDoTShield(), GetStunResist(), GetStrikeThrough(), GetAvoidance(), GetAccuracy(), GetCombatEffects());
 	client->Message(0, " Heal Amt.: %i  Spell Dmg.: %i  Clairvoyance: %i DS Mitigation: %i", GetHealAmt(), GetSpellDmg(), GetClair(), GetDSMit());

@@ -2933,6 +2933,32 @@ XS(XS_Mob_GetCorruption)
 	XSRETURN(1);
 }
 
+XS(XS_Mob_GetPhR); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_GetPhR)
+{
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::GetPhR(THIS)");
+	{
+		Mob *		THIS;
+		int32		RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Mob *, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetPhR();
+		XSprePUSH; PUSHi((IV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
 XS(XS_Mob_GetMaxSTR); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetMaxSTR)
 {

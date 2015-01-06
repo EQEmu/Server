@@ -428,6 +428,7 @@ public:
 	inline virtual int32 GetPR() const { return PR; }
 	inline virtual int32 GetCR() const { return CR; }
 	inline virtual int32 GetCorrup() const { return Corrup; }
+	inline virtual int32 GetPhR() const { return PhR; }
 
 	int32 GetMaxStat() const;
 	int32 GetMaxResist() const;
@@ -452,6 +453,7 @@ public:
 	inline uint8 GetBaseAGI() const { return m_pp.AGI; }
 	inline uint8 GetBaseWIS() const { return m_pp.WIS; }
 	inline uint8 GetBaseCorrup() const { return 15; } // Same for all
+	inline uint8 GetBasePhR() const { return 0; } // Guessing at 0 as base
 
 	inline virtual int32 GetHeroicSTR() const { return itembonuses.HeroicSTR; }
 	inline virtual int32 GetHeroicSTA() const { return itembonuses.HeroicSTA; }
@@ -466,6 +468,7 @@ public:
 	inline virtual int32 GetHeroicPR() const { return itembonuses.HeroicPR; }
 	inline virtual int32 GetHeroicCR() const { return itembonuses.HeroicCR; }
 	inline virtual int32 GetHeroicCorrup() const { return itembonuses.HeroicCorrup; }
+	inline virtual int32 GetHeroicPhR() const { return 0; } // Heroic PhR not implemented yet
 	// Mod2
 	inline virtual int32 GetShielding() const { return itembonuses.MeleeMitigation; }
 	inline virtual int32 GetSpellShield() const { return itembonuses.SpellShield; }

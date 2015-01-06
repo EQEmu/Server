@@ -576,6 +576,11 @@ int Lua_Mob::GetCorruption() {
 	return self->GetCorrup();
 }
 
+int Lua_Mob::GetPhR() {
+	Lua_Safe_Call_Int();
+	return self->GetPhR();
+}
+
 int Lua_Mob::GetMaxSTR() {
 	Lua_Safe_Call_Int();
 	return self->GetMaxSTR();
