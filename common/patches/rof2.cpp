@@ -4589,47 +4589,8 @@ namespace RoF2
 		DECODE_LENGTH_EXACT(structs::PetCommand_Struct);
 		SETUP_DIRECT_DECODE(PetCommand_Struct, structs::PetCommand_Struct);
 
-		switch (eq->command)
-		{
-		case 0x00:
-			emu->command = 0x04;	// Health
-			break;
-		case 0x01:
-			emu->command = 0x10;	// Leader
-			break;
-		case 0x02:
-			emu->command = 0x07;	// Attack
-			break;
-		case 0x04:
-			emu->command = 0x08;	// Follow
-			break;
-		case 0x05:
-			emu->command = 0x05;	// Guard
-			break;
-		case 0x06:
-			emu->command = 0x09;	// Sit. Needs work. This appears to be a toggle between Sit/Stand now.
-			break;
-		case 0x0c:
-			emu->command = 0x0b;	// Taunt
-			break;
-		case 0x0f:
-			emu->command = 0x0c;	// Hold
-			break;
-		case 0x10:
-			emu->command = 0x1b;	// Hold on
-			break;
-		case 0x11:
-			emu->command = 0x1c;	// Hold off
-			break;
-		case 0x1c:
-			emu->command = 0x01;	// Back
-			break;
-		case 0x1d:
-			emu->command = 0x02;	// Leave/Go Away
-			break;
-		default:
-			emu->command = eq->command;
-		}
+		IN(command);
+		emu->unknown = eq->unknown04;
 
 		FINISH_DIRECT_DECODE();
 	}

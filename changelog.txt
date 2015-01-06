@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/06/2015 ==
+Trevius: Changed the pet command #defines to be based on RoF2 list of pet commands and added decodes to Titanium, SoF and SoD.
+Trevius: (RoF+) The /pet focus on/off and /pet hold on/off commands are now functional.
+
 == 01/05/2015 ==
 Uleat: Fixed (added translators for) item/text links. Only 'OP_ChannelMessage' and 'OP_SpecialMesg' are currently handled..more text channels will be added as the need arises.
 

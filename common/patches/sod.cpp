@@ -3105,6 +3105,87 @@ namespace SoD
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_PetCommands)
+	{
+		DECODE_LENGTH_EXACT(structs::PetCommand_Struct);
+		SETUP_DIRECT_DECODE(PetCommand_Struct, structs::PetCommand_Struct);
+
+		switch (eq->command)
+		{
+		case 0x04:
+			emu->command = 0x00;	// /pet health
+			break;
+		case 0x10:
+			emu->command = 0x01;	// /pet leader
+			break;
+		case 0x07:
+			emu->command = 0x02;	// /pet attack or Pet Window
+			break;
+		case 0x08:
+			emu->command = 0x04;	// /pet follow or Pet Window
+			break;
+		case 0x05:
+			emu->command = 0x05;	// /pet guard or Pet Window
+			break;
+		case 0x09:
+			emu->command = 0x07;	// /pet sit or Pet Window
+			break;
+		case 0x0a:
+			emu->command = 0x08;	// /pet stand or Pet Window
+			break;
+		case 0x06:
+			emu->command = 0x03;	// /pet guard me
+			break;
+		case 0x03:	// Case Made Up
+			emu->command = 0x09;	// Stop?
+			break;
+		case 0x0b:
+			emu->command = 0x0d;	// /pet taunt or Pet Window
+			break;
+		case 0x0e:
+			emu->command = 0x0e;	// /pet notaunt or Pet Window
+			break;
+		case 0x0c:
+			emu->command = 0x0f;	// /pet hold
+			break;
+		case 0x1b:
+			emu->command = 0x10;	// /pet hold on
+			break;
+		case 0x1c:
+			emu->command = 0x11;	// /pet hold off
+			break;
+		case 0x11:
+			emu->command = 0x12;	// Slumber?
+			break;
+		case 0x12:
+			emu->command = 0x15;	// /pet no cast
+			break;
+		case 0x0d:	// Case Made Up
+			emu->command = 0x16;	// Pet Window No Cast
+			break;
+		case 0x13:
+			emu->command = 0x18;	// /pet focus
+			break;
+		case 0x19:
+			emu->command = 0x19;	// /pet focus on
+			break;
+		case 0x1a:
+			emu->command = 0x1a;	// /pet focus off
+			break;
+		case 0x01:
+			emu->command = 0x1c;	// /pet back off
+			break;
+		case 0x02:
+			emu->command = 0x1d;	// /pet get lost
+			break;
+		default:
+			emu->command = eq->command;
+		}
+		OUT(unknown);
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	DECODE(OP_RaidInvite)
 	{
 		DECODE_LENGTH_ATLEAST(structs::RaidGeneral_Struct);

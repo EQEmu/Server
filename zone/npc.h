@@ -266,6 +266,7 @@ public:
 	void	SetPetSpellID(uint16 amt) {pet_spell_id = amt;}
 	uint32	GetMaxDamage(uint8 tlevel);
 	void	SetTaunting(bool tog) {taunting = tog;}
+	bool	IsTaunting() const { return taunting; }
 	void	PickPocket(Client* thief);
 	void	StartSwarmTimer(uint32 duration) { swarm_timer.Start(duration); }
 	void	AddLootDrop(const Item_Struct*dbitem, ItemList* itemlistconst, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange = false);

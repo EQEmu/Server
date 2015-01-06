@@ -9925,12 +9925,14 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	uint32 PetCommand = pet->command;
 
 	// Handle Sit/Stand toggle in UF and later.
+	/*
 	if (GetClientVersion() >= EQClientUnderfoot)
 	{
 		if (PetCommand == PET_SITDOWN)
 			if (mypet->GetPetOrder() == SPO_Sit)
 				PetCommand = PET_STANDUP;
 	}
+	*/
 
 	switch (PetCommand)
 	{
@@ -10037,12 +10039,27 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	}
 	case PET_TAUNT: {
 		if ((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 3) || mypet->GetPetType() != petAnimation) {
+			if (mypet->CastToNPC()->IsTaunting())
+			{
+				Message_StringID(MT_PetResponse, PET_NO_TAUNT);
+				mypet->CastToNPC()->SetTaunting(false);
+			}
+			else
+			{
+				Message_StringID(MT_PetResponse, PET_DO_TAUNT);
+				mypet->CastToNPC()->SetTaunting(true);
+			}
+		}
+		break;
+	}	
+	case PET_TAUNT_ON: {
+		if ((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 3) || mypet->GetPetType() != petAnimation) {
 			Message_StringID(MT_PetResponse, PET_DO_TAUNT);
 			mypet->CastToNPC()->SetTaunting(true);
 		}
 		break;
 	}
-	case PET_NOTAUNT: {
+	case PET_TAUNT_OFF: {
 		if ((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 3) || mypet->GetPetType() != petAnimation) {
 			Message_StringID(MT_PetResponse, PET_NO_TAUNT);
 			mypet->CastToNPC()->SetTaunting(false);
@@ -10060,16 +10077,25 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		}
 		break;
 	}
-	case PET_SITDOWN: {
+	case PET_SIT: {
 		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
 		if ((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 3) || mypet->GetPetType() != petAnimation) {
-			mypet->Say_StringID(MT_PetResponse, PET_SIT_STRING);
-			mypet->SetPetOrder(SPO_Sit);
-			mypet->SetRunAnimSpeed(0);
-			if (!mypet->UseBardSpellLogic())	//maybe we can have a bard pet
-				mypet->InterruptSpell(); //No cast 4 u. //i guess the pet should start casting
-			mypet->SendAppearancePacket(AT_Anim, ANIM_SIT);
+			if (mypet->GetPetOrder() == SPO_Sit)
+			{
+				mypet->Say_StringID(MT_PetResponse, PET_SIT_STRING);
+				mypet->SetPetOrder(SPO_Follow);
+				mypet->SendAppearancePacket(AT_Anim, ANIM_STAND);
+			}
+			else
+			{
+				mypet->Say_StringID(MT_PetResponse, PET_SIT_STRING);
+				mypet->SetPetOrder(SPO_Sit);
+				mypet->SetRunAnimSpeed(0);
+				if (!mypet->UseBardSpellLogic())	//maybe we can have a bard pet
+					mypet->InterruptSpell(); //No cast 4 u. //i guess the pet should start casting
+				mypet->SendAppearancePacket(AT_Anim, ANIM_SIT);
+			}
 		}
 		break;
 	}
@@ -10080,6 +10106,19 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			mypet->Say_StringID(MT_PetResponse, PET_SIT_STRING);
 			mypet->SetPetOrder(SPO_Follow);
 			mypet->SendAppearancePacket(AT_Anim, ANIM_STAND);
+		}
+		break;
+	}
+	case PET_SITDOWN: {
+		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
+
+		if ((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 3) || mypet->GetPetType() != petAnimation) {
+			mypet->Say_StringID(MT_PetResponse, PET_SIT_STRING);
+			mypet->SetPetOrder(SPO_Sit);
+			mypet->SetRunAnimSpeed(0);
+			if (!mypet->UseBardSpellLogic())	//maybe we can have a bard pet
+				mypet->InterruptSpell(); //No cast 4 u. //i guess the pet should start casting
+			mypet->SendAppearancePacket(AT_Anim, ANIM_SIT);
 		}
 		break;
 	}
@@ -10101,9 +10140,16 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			if (mypet->IsFeared())
 				break; //could be exploited like PET_BACKOFF
 
-			mypet->Say_StringID(MT_PetResponse, PET_ON_HOLD);
-			mypet->WipeHateList();
-			mypet->SetHeld(true);
+			if (mypet->IsHeld())
+			{
+				mypet->SetHeld(false);
+			}
+			else
+			{
+				mypet->Say_StringID(MT_PetResponse, PET_ON_HOLD);
+				mypet->WipeHateList();
+				mypet->SetHeld(true);
+			}
 		}
 		break;
 	}
@@ -10123,6 +10169,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			mypet->SetHeld(false);
 		break;
 	}
+	case PET_NOCAST_ON:
 	case PET_NOCAST: {
 		if (GetAA(aaAdvancedPetDiscipline) == 2 && mypet->IsNPC()) {
 			if (mypet->IsFeared())
