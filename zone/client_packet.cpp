@@ -9970,6 +9970,31 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		}
 		break;
 	}
+	case PET_QATTACK: {
+		if (mypet->IsFeared())
+			break; //prevent pet from attacking stuff while feared
+
+		if (!GetTarget())
+			break;
+		if (GetTarget()->IsMezzed()) {
+			Message_StringID(10, CANNOT_WAKE, mypet->GetCleanName(), GetTarget()->GetCleanName());
+			break;
+		}
+		
+		if (!mypet->IsAttackAllowed(GetTarget())) {
+			mypet->Say_StringID(NOT_LEGAL_TARGET);
+			break;
+		}
+
+		if ((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 2) || mypet->GetPetType() != petAnimation) {
+			if (GetTarget() != this && mypet->DistNoRootNoZ(*GetTarget()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
+				zone->AddAggroMob();
+				mypet->AddToHateList(GetTarget(), 1);
+				Message_StringID(MT_PetResponse, PET_ATTACKING, mypet->GetCleanName(), GetTarget()->GetCleanName());
+			}
+		}
+		break;
+	}
 	case PET_BACKOFF: {
 		if (mypet->IsFeared()) break; //keeps pet running while feared
 
@@ -10126,12 +10151,37 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
 		if (mypet->GetPetType() != petAnimation) {
+			// Needs to have an IsSleeping() check added and this case should toggle on/off
 			mypet->Say_StringID(MT_PetResponse, PET_SIT_STRING);
 			mypet->SetPetOrder(SPO_Sit);
 			mypet->SetRunAnimSpeed(0);
 			if (!mypet->UseBardSpellLogic())	//maybe we can have a bard pet
 				mypet->InterruptSpell(); //No cast 4 u. //i guess the pet should start casting
 			mypet->SendAppearancePacket(AT_Anim, ANIM_DEATH);
+		}
+		break;
+	}
+	case PET_SLUMBER_ON: {
+		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
+
+		if (mypet->GetPetType() != petAnimation) {
+			mypet->Say_StringID(MT_PetResponse, PET_SIT_STRING);
+			mypet->SetPetOrder(SPO_Sit);
+			mypet->SetRunAnimSpeed(0);
+			if (!mypet->UseBardSpellLogic())	//maybe we can have a bard pet
+				mypet->InterruptSpell(); //No cast 4 u. //i guess the pet should start casting
+			mypet->SendAppearancePacket(AT_Anim, ANIM_DEATH);
+		}
+		break;
+	}
+	case PET_SLUMBER_OFF: {
+		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
+
+		if (mypet->GetPetType() != petAnimation) {
+			mypet->Say_StringID(MT_PetResponse, PET_SIT_STRING);
+			mypet->SetPetOrder(SPO_Follow);
+			mypet->SetRunAnimSpeed(mypet->GetBaseRunspeed());
+			mypet->SendAppearancePacket(AT_Anim, ANIM_STAND);
 		}
 		break;
 	}
@@ -10169,8 +10219,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			mypet->SetHeld(false);
 		break;
 	}
-	case PET_NOCAST_ON:
-	case PET_NOCAST: {
+	case PET_SPELLHOLD: {
 		if (GetAA(aaAdvancedPetDiscipline) == 2 && mypet->IsNPC()) {
 			if (mypet->IsFeared())
 				break;
@@ -10181,6 +10230,28 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			else {
 				Message_StringID(MT_PetResponse, PET_NOT_CASTING);
 				mypet->CastToNPC()->SetNoCast(true);
+			}
+		}
+		break;
+	}
+	case PET_SPELLHOLD_ON: {
+		if (GetAA(aaAdvancedPetDiscipline) == 2 && mypet->IsNPC()) {
+			if (mypet->IsFeared())
+				break;
+			if (!mypet->IsNoCast()) {
+				Message_StringID(MT_PetResponse, PET_NOT_CASTING);
+				mypet->CastToNPC()->SetNoCast(true);
+			}
+		}
+		break;
+	}
+	case PET_SPELLHOLD_OFF: {
+		if (GetAA(aaAdvancedPetDiscipline) == 2 && mypet->IsNPC()) {
+			if (mypet->IsFeared())
+				break;
+			if (mypet->IsNoCast()) {
+				Message_StringID(MT_PetResponse, PET_CASTING);
+				mypet->CastToNPC()->SetNoCast(false);
 			}
 		}
 		break;

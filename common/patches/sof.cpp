@@ -2459,6 +2459,8 @@ namespace SoF
 		case 0x07:
 			emu->command = 0x02;	// /pet attack or Pet Window
 			break;
+		case 0x03:	// Case Guessed
+			emu->command = 0x03;	// /pet qattack
 		case 0x08:
 			emu->command = 0x04;	// /pet follow or Pet Window
 			break;
@@ -2472,9 +2474,9 @@ namespace SoF
 			emu->command = 0x08;	// /pet stand or Pet Window
 			break;
 		case 0x06:
-			emu->command = 0x03;	// /pet guard me
+			emu->command = 0x1e;	// /pet guard me
 			break;
-		case 0x03:	// Case Made Up
+		case 0x0f:	// Case Made Up
 			emu->command = 0x09;	// Stop?
 			break;
 		case 0x0b:
