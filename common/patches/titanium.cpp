@@ -29,17 +29,11 @@ namespace Titanium
 	static inline uint32 TitaniumToServerSlot(int16 TitaniumSlot);
 	static inline uint32 TitaniumToServerCorpseSlot(int16 TitaniumCorpse);
 
-	// server to client text link converters
-	static inline void ServerToTitaniumTextLinks(std::string& titaniumTextLink, const std::string& serverTextLink);
-	static inline bool DegenerateServerTextLinkBody(TextLinkBody_Struct& serverLinkBodyStruct, const std::string& serverLinkBody);
-	static inline void ServerToTitaniumTextLinkBodyStruct(structs::TextLinkBody_Struct& titaniumLinkBodyStruct, const TextLinkBody_Struct& serverLinkBodyStruct);
-	static inline bool GenerateTitaniumTextLinkBody(std::string& titaniumLinkBody, const structs::TextLinkBody_Struct& titaniumLinkBodyStruct);
+	// server to client text link converter
+	static inline void ServerToTitaniumTextLink(std::string& titaniumTextLink, const std::string& serverTextLink);
 
-	// client to server text link converters
-	static inline void TitaniumToServerTextLinks(std::string& serverTextLink, const std::string& titaniumTextLink);
-	static inline bool DegenerateTitaniumTextLinkBody(structs::TextLinkBody_Struct& titaniumLinkBodyStruct, const std::string& titaniumLinkBody);
-	static inline void TitaniumToServerTextLinkBodyStruct(TextLinkBody_Struct& serverLinkBodyStruct, const structs::TextLinkBody_Struct& titaniumLinkBodyStruct);
-	static inline bool GenerateServerTextLinkBody(std::string& serverLinkBody, const TextLinkBody_Struct& serverLinkBodyStruct);
+	// client to server text link converter
+	static inline void TitaniumToServerTextLink(std::string& serverTextLink, const std::string& titaniumTextLink);
 
 	void Register(EQStreamIdentifier &into)
 	{
@@ -244,7 +238,7 @@ namespace Titanium
 
 		std::string old_message = emu->message;
 		std::string new_message;
-		ServerToTitaniumTextLinks(new_message, old_message);
+		ServerToTitaniumTextLink(new_message, old_message);
 
 		in->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
 
@@ -1123,7 +1117,7 @@ namespace Titanium
 
 		std::string old_message = &emu->message[strlen(emu->sayer)];
 		std::string new_message;
-		ServerToTitaniumTextLinks(new_message, old_message);
+		ServerToTitaniumTextLink(new_message, old_message);
 
 		//in->size = 3 + 4 + 4 + strlen(emu->sayer) + 1 + 12 + new_message.length() + 1;
 		in->size = 25 + strlen(emu->sayer) + new_message.length();
@@ -1457,7 +1451,7 @@ namespace Titanium
 
 		std::string old_message = (char *)&__eq_buffer[sizeof(ChannelMessage_Struct)];
 		std::string new_message;
-		TitaniumToServerTextLinks(new_message, old_message);
+		TitaniumToServerTextLink(new_message, old_message);
 
 		__packet->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
 		__packet->pBuffer = new unsigned char[__packet->size];
@@ -1946,355 +1940,82 @@ namespace Titanium
 		return TitaniumCorpse;
 	}
 
-	static inline void ServerToTitaniumTextLinks(std::string& titaniumTextLink, const std::string& serverTextLink)
+	static inline void ServerToTitaniumTextLink(std::string& titaniumTextLink, const std::string& serverTextLink)
 	{
 		const char delimiter = 0x12;
 
-#if EQDEBUG >= 6
-		_log(CHANNELS__ERROR, "TextLink(Server->Titanium): old message '%s'", serverTextLink.c_str());
-
-		if (consts::TEXT_LINK_BODY_LENGTH == EmuConstants::TEXT_LINK_BODY_LENGTH) {
-			_log(CHANNELS__ERROR, "TextLink(Server->Titanium): link size equal, no conversion necessary");
-			titaniumTextLink = serverTextLink;
-			return;
-		}
-
-		if (serverTextLink.find(delimiter) == std::string::npos) {
-			_log(CHANNELS__ERROR, "TextLink(Server->Titanium): delimiter not found, no conversion necessary");
-			titaniumTextLink = serverTextLink;
-			return;
-		}
-
-		bool conversion_error = false;
-		auto segments = SplitString(serverTextLink, delimiter);
-
-		for (size_t iter = 1; iter < segments.size(); iter += 2) {
-			TextLinkBody_Struct old_body_data;
-			if (!DegenerateServerTextLinkBody(old_body_data, segments[iter].substr(0, EmuConstants::TEXT_LINK_BODY_LENGTH).c_str())) {
-				_log(CHANNELS__ERROR, "TextLink(Server->Titanium): body degeneration error '%s'", segments[iter].substr(0, EmuConstants::TEXT_LINK_BODY_LENGTH).c_str());
-				conversion_error = true;
-			}
-			else {
-				_log(CHANNELS__ERROR, "TextLink(Server->Titanium): body degeneration success '%s'", segments[iter].substr(0, EmuConstants::TEXT_LINK_BODY_LENGTH).c_str());
-			}
-
-			structs::TextLinkBody_Struct new_body_data;
-			ServerToTitaniumTextLinkBodyStruct(new_body_data, old_body_data);
-
-			std::string segment;
-			if (!GenerateTitaniumTextLinkBody(segment, new_body_data)) {
-				_log(CHANNELS__ERROR, "TextLink(Server->Titanium): body generation error '%s'", segment.c_str());
-				conversion_error = true;
-			}
-			else {
-				_log(CHANNELS__ERROR, "TextLink(Server->Titanium): body generation success '%s'", segment.c_str());
-				segment.append(segments[iter].substr(EmuConstants::TEXT_LINK_BODY_LENGTH).c_str());
-				segments[iter] = segment.c_str();
-			}
-		}
-
-		if (conversion_error) {
-			_log(CHANNELS__ERROR, "TextLink(Server->Titanium): conversion error");
-			titaniumTextLink = serverTextLink;
-			return;
-		}
-
-		for (size_t iter = 0; iter < segments.size(); ++iter) {
-			if (iter & 1) {
-				titaniumTextLink.push_back(delimiter);
-				titaniumTextLink.append(segments[iter].c_str());
-				titaniumTextLink.push_back(delimiter);
-			}
-			else {
-				titaniumTextLink.append(segments[iter].c_str());
-			}
-
-			_log(CHANNELS__ERROR, "TextLink(Server->Titanium): segment[%u] '%s'", iter, segments[iter].c_str());
-		}
-
-		_log(CHANNELS__ERROR, "TextLink(Server->Titanium): new message '%s'", titaniumTextLink.c_str());
-#else
 		if ((consts::TEXT_LINK_BODY_LENGTH == EmuConstants::TEXT_LINK_BODY_LENGTH) || (serverTextLink.find(delimiter) == std::string::npos)) {
 			titaniumTextLink = serverTextLink;
 			return;
 		}
 
-		bool conversion_error = false;
 		auto segments = SplitString(serverTextLink, delimiter);
 
-		for (size_t iter = 1; iter < segments.size(); iter += 2) {
-			TextLinkBody_Struct old_body_data;
-			if (!DegenerateServerTextLinkBody(old_body_data, segments[iter].substr(0, EmuConstants::TEXT_LINK_BODY_LENGTH).c_str())) {
-				conversion_error = true;
-				break;
-			}
+		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
+			if (segment_iter & 1) {
+				std::string new_segment;
 
-			structs::TextLinkBody_Struct new_body_data;
-			ServerToTitaniumTextLinkBodyStruct(new_body_data, old_body_data);
+				// Idx:  0 1     6     11    16    21    26    31    36 37   41 43    48       (Source)
+				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX XXXXX XXXXXXXX (56)
+				// 6.2:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX       X  XXXX  X       XXXXXXXX (45)
+				// Diff:                                       ^^^^^         ^  ^^^^^
 
-			std::string segment;
-			if (!GenerateTitaniumTextLinkBody(segment, new_body_data)) {
-				conversion_error = true;
-				break;
-			}
-			else {
-				segment.append(segments[iter].substr(EmuConstants::TEXT_LINK_BODY_LENGTH).c_str());
-				segments[iter] = segment.c_str();
-			}
-		}
+				new_segment.append(segments[segment_iter].substr(0, 31).c_str());
+				new_segment.append(segments[segment_iter].substr(36, 5).c_str());
 
-		if (conversion_error) {
-			_log(CHANNELS__ERROR, "TextLink(Server->Titanium): conversion error");
-			titaniumTextLink = serverTextLink;
-			return;
-		}
+				if (segments[segment_iter].substr(41, 1) == "0")
+					new_segment.append(segments[segment_iter].substr(42, 1).c_str());
+				else
+					new_segment.append("F");
 
-		for (size_t iter = 0; iter < segments.size(); ++iter) {
-			if (iter & 1) {
+				new_segment.append(segments[segment_iter].substr(48).c_str());
+
 				titaniumTextLink.push_back(delimiter);
-				titaniumTextLink.append(segments[iter].c_str());
+				titaniumTextLink.append(new_segment.c_str());
 				titaniumTextLink.push_back(delimiter);
 			}
 			else {
-				titaniumTextLink.append(segments[iter].c_str());
+				titaniumTextLink.append(segments[segment_iter].c_str());
 			}
 		}
-#endif
 	}
 
-	static inline bool DegenerateServerTextLinkBody(TextLinkBody_Struct& serverLinkBodyStruct, const std::string& serverLinkBody)
-	{
-		memset(&serverLinkBodyStruct, 0, sizeof(TextLinkBody_Struct));
-		if (serverLinkBody.length() != EmuConstants::TEXT_LINK_BODY_LENGTH) { return false; }
-
-		serverLinkBodyStruct.unknown_1 = (uint8)strtol(serverLinkBody.substr(0, 1).c_str(), nullptr, 16);
-		serverLinkBodyStruct.item_id = (uint32)strtol(serverLinkBody.substr(1, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.augment_1 = (uint32)strtol(serverLinkBody.substr(6, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.augment_2 = (uint32)strtol(serverLinkBody.substr(11, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.augment_3 = (uint32)strtol(serverLinkBody.substr(16, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.augment_4 = (uint32)strtol(serverLinkBody.substr(21, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.augment_5 = (uint32)strtol(serverLinkBody.substr(26, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.augment_6 = (uint32)strtol(serverLinkBody.substr(31, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.is_evolving = (uint8)strtol(serverLinkBody.substr(36, 1).c_str(), nullptr, 16);
-		serverLinkBodyStruct.lore_group = (uint32)strtol(serverLinkBody.substr(37, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.evolve_max = (uint8)strtol(serverLinkBody.substr(42, 1).c_str(), nullptr, 16);
-		serverLinkBodyStruct.ornament_icon = (uint32)strtol(serverLinkBody.substr(43, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.hash = (int)strtol(serverLinkBody.substr(48, 8).c_str(), nullptr, 16);
-
-		return true;
-	}
-
-	static inline void ServerToTitaniumTextLinkBodyStruct(structs::TextLinkBody_Struct& titaniumLinkBodyStruct, const TextLinkBody_Struct& serverLinkBodyStruct)
-	{
-		titaniumLinkBodyStruct.unknown_1 = serverLinkBodyStruct.unknown_1;
-		titaniumLinkBodyStruct.item_id = serverLinkBodyStruct.item_id;
-		titaniumLinkBodyStruct.augment_1 = serverLinkBodyStruct.augment_1;
-		titaniumLinkBodyStruct.augment_2 = serverLinkBodyStruct.augment_2;
-		titaniumLinkBodyStruct.augment_3 = serverLinkBodyStruct.augment_3;
-		titaniumLinkBodyStruct.augment_4 = serverLinkBodyStruct.augment_4;
-		titaniumLinkBodyStruct.augment_5 = serverLinkBodyStruct.augment_5;
-		titaniumLinkBodyStruct.is_evolving = serverLinkBodyStruct.is_evolving;
-		titaniumLinkBodyStruct.lore_group = serverLinkBodyStruct.lore_group;
-		titaniumLinkBodyStruct.evolve_max = serverLinkBodyStruct.evolve_max;
-		titaniumLinkBodyStruct.hash = serverLinkBodyStruct.hash;
-	}
-
-	static inline bool GenerateTitaniumTextLinkBody(std::string& titaniumLinkBody, const structs::TextLinkBody_Struct& titaniumLinkBodyStruct)
-	{
-		titaniumLinkBody = StringFormat(
-			"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%08X",
-			titaniumLinkBodyStruct.unknown_1,
-			titaniumLinkBodyStruct.item_id,
-			titaniumLinkBodyStruct.augment_1,
-			titaniumLinkBodyStruct.augment_2,
-			titaniumLinkBodyStruct.augment_3,
-			titaniumLinkBodyStruct.augment_4,
-			titaniumLinkBodyStruct.augment_5,
-			titaniumLinkBodyStruct.is_evolving,
-			titaniumLinkBodyStruct.lore_group,
-			titaniumLinkBodyStruct.evolve_max,
-			titaniumLinkBodyStruct.hash
-			);
-
-		if (titaniumLinkBody.length() != consts::TEXT_LINK_BODY_LENGTH) { return false; }
-		return true;
-	}
-
-	static inline void TitaniumToServerTextLinks(std::string& serverTextLink, const std::string& titaniumTextLink)
+	static inline void TitaniumToServerTextLink(std::string& serverTextLink, const std::string& titaniumTextLink)
 	{
 		const char delimiter = 0x12;
 
-#if EQDEBUG >= 6
-		_log(CHANNELS__ERROR, "TextLink(Titanium->Server): old message '%s'", titaniumTextLink.c_str());
-
-		if (EmuConstants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) {
-			_log(CHANNELS__ERROR, "TextLink(Titanium->Server): link size equal, no conversion necessary");
-			serverTextLink = titaniumTextLink;
-			return;
-		}
-
-		if (titaniumTextLink.find(delimiter) == std::string::npos) {
-			_log(CHANNELS__ERROR, "TextLink(Titanium->Server): delimiter not found, no conversion necessary");
-			serverTextLink = titaniumTextLink;
-			return;
-		}
-
-		bool conversion_error = false;
-		auto segments = SplitString(titaniumTextLink, delimiter);
-
-		for (size_t iter = 1; iter < segments.size(); iter += 2) {
-			structs::TextLinkBody_Struct old_body_data;
-			if (!DegenerateTitaniumTextLinkBody(old_body_data, segments[iter].substr(0, consts::TEXT_LINK_BODY_LENGTH).c_str())) {
-				_log(CHANNELS__ERROR, "TextLink(Titanium->Server): body degeneration error '%s'", segments[iter].substr(0, consts::TEXT_LINK_BODY_LENGTH).c_str());
-				conversion_error = true;
-			}
-			else {
-				_log(CHANNELS__ERROR, "TextLink(Titanium->Server): body degeneration success '%s'", segments[iter].substr(0, consts::TEXT_LINK_BODY_LENGTH).c_str());
-			}
-
-			TextLinkBody_Struct new_body_data;
-			TitaniumToServerTextLinkBodyStruct(new_body_data, old_body_data);
-
-			std::string segment;
-			if (!GenerateServerTextLinkBody(segment, new_body_data)) {
-				_log(CHANNELS__ERROR, "TextLink(Titanium->Server): body generation error '%s'", segment.c_str());
-				conversion_error = true;
-			}
-			else {
-				_log(CHANNELS__ERROR, "TextLink(Titanium->Server): body generation success '%s'", segment.c_str());
-				segment.append(segments[iter].substr(consts::TEXT_LINK_BODY_LENGTH).c_str());
-				segments[iter] = segment.c_str();
-			}
-		}
-
-		if (conversion_error) {
-			_log(CHANNELS__ERROR, "TextLink(Titanium->Server): conversion error");
-			serverTextLink = titaniumTextLink;
-			return;
-		}
-
-		for (size_t iter = 0; iter < segments.size(); ++iter) {
-			if (iter & 1) {
-				serverTextLink.push_back(delimiter);
-				serverTextLink.append(segments[iter].c_str());
-				serverTextLink.push_back(delimiter);
-			}
-			else {
-				serverTextLink.append(segments[iter].c_str());
-			}
-
-			_log(CHANNELS__ERROR, "TextLink(Titanium->Server): segment[%u] '%s'", iter, segments[iter].c_str());
-		}
-
-		_log(CHANNELS__ERROR, "TextLink(Titanium->Server): new message '%s'", serverTextLink.c_str());
-#else
 		if ((EmuConstants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) || (titaniumTextLink.find(delimiter) == std::string::npos)) {
 			serverTextLink = titaniumTextLink;
 			return;
 		}
 
-		bool conversion_error = false;
 		auto segments = SplitString(titaniumTextLink, delimiter);
 
-		for (size_t iter = 1; iter < segments.size(); iter += 2) {
-			structs::TextLinkBody_Struct old_body_data;
-			if (!DegenerateTitaniumTextLinkBody(old_body_data, segments[iter].substr(0, consts::TEXT_LINK_BODY_LENGTH).c_str())) {
-				conversion_error = true;
-				break;
-			}
+		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
+			if (segment_iter & 1) {
+				std::string new_segment;
 
-			TextLinkBody_Struct new_body_data;
-			TitaniumToServerTextLinkBodyStruct(new_body_data, old_body_data);
+				// Idx:  0 1     6     11    16    21    26          31 32    36       37       (Source)
+				// 6.2:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX       X  XXXX  X        XXXXXXXX (45)
+				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX  XXXXX XXXXXXXX (56)
+				// Diff:                                       ^^^^^         ^   ^^^^^
 
-			std::string segment;
-			if (!GenerateServerTextLinkBody(segment, new_body_data)) {
-				conversion_error = true;
-				break;
-			}
-			else {
-				segment.append(segments[iter].substr(consts::TEXT_LINK_BODY_LENGTH).c_str());
-				segments[iter] = segment.c_str();
-			}
-		}
+				new_segment.append(segments[segment_iter].substr(0, 31).c_str());
+				new_segment.append("00000");
+				new_segment.append(segments[segment_iter].substr(31, 5).c_str());
+				new_segment.append("0");
+				new_segment.append(segments[segment_iter].substr(36, 1).c_str());
+				new_segment.append("00000");
+				new_segment.append(segments[segment_iter].substr(37).c_str());
 
-		if (conversion_error) {
-			_log(CHANNELS__ERROR, "TextLink(Titanium->Server): conversion error");
-			serverTextLink = titaniumTextLink;
-			return;
-		}
-
-		for (size_t iter = 0; iter < segments.size(); ++iter) {
-			if (iter & 1) {
 				serverTextLink.push_back(delimiter);
-				serverTextLink.append(segments[iter].c_str());
+				serverTextLink.append(new_segment.c_str());
 				serverTextLink.push_back(delimiter);
 			}
 			else {
-				serverTextLink.append(segments[iter].c_str());
+				serverTextLink.append(segments[segment_iter].c_str());
 			}
 		}
-#endif
-	}
-
-	static inline bool DegenerateTitaniumTextLinkBody(structs::TextLinkBody_Struct& titaniumLinkBodyStruct, const std::string& titaniumLinkBody)
-	{
-		// 6.2: "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%08X"
-		memset(&titaniumLinkBodyStruct, 0, sizeof(structs::TextLinkBody_Struct));
-		if (titaniumLinkBody.length() != consts::TEXT_LINK_BODY_LENGTH) { return false; }
-
-		titaniumLinkBodyStruct.unknown_1 = (uint8)strtol(titaniumLinkBody.substr(0, 1).c_str(), nullptr, 16);
-		titaniumLinkBodyStruct.item_id = (uint32)strtol(titaniumLinkBody.substr(1, 5).c_str(), nullptr, 16);
-		titaniumLinkBodyStruct.augment_1 = (uint32)strtol(titaniumLinkBody.substr(6, 5).c_str(), nullptr, 16);
-		titaniumLinkBodyStruct.augment_2 = (uint32)strtol(titaniumLinkBody.substr(11, 5).c_str(), nullptr, 16);
-		titaniumLinkBodyStruct.augment_3 = (uint32)strtol(titaniumLinkBody.substr(16, 5).c_str(), nullptr, 16);
-		titaniumLinkBodyStruct.augment_4 = (uint32)strtol(titaniumLinkBody.substr(21, 5).c_str(), nullptr, 16);
-		titaniumLinkBodyStruct.augment_5 = (uint32)strtol(titaniumLinkBody.substr(26, 5).c_str(), nullptr, 16);
-		titaniumLinkBodyStruct.is_evolving = (uint8)strtol(titaniumLinkBody.substr(31, 1).c_str(), nullptr, 16);
-		titaniumLinkBodyStruct.lore_group = (uint32)strtol(titaniumLinkBody.substr(32, 4).c_str(), nullptr, 16);
-		titaniumLinkBodyStruct.evolve_max = (uint8)strtol(titaniumLinkBody.substr(36, 1).c_str(), nullptr, 16);
-		titaniumLinkBodyStruct.hash = (int)strtol(titaniumLinkBody.substr(37, 8).c_str(), nullptr, 16);
-
-		return true;
-	}
-
-	static inline void TitaniumToServerTextLinkBodyStruct(TextLinkBody_Struct& serverLinkBodyStruct, const structs::TextLinkBody_Struct& titaniumLinkBodyStruct)
-	{
-		serverLinkBodyStruct.unknown_1 = titaniumLinkBodyStruct.unknown_1;
-		serverLinkBodyStruct.item_id = titaniumLinkBodyStruct.item_id;
-		serverLinkBodyStruct.augment_1 = titaniumLinkBodyStruct.augment_1;
-		serverLinkBodyStruct.augment_2 = titaniumLinkBodyStruct.augment_2;
-		serverLinkBodyStruct.augment_3 = titaniumLinkBodyStruct.augment_3;
-		serverLinkBodyStruct.augment_4 = titaniumLinkBodyStruct.augment_4;
-		serverLinkBodyStruct.augment_5 = titaniumLinkBodyStruct.augment_5;
-		serverLinkBodyStruct.augment_6 = NOT_USED;
-		serverLinkBodyStruct.is_evolving = titaniumLinkBodyStruct.is_evolving;
-		serverLinkBodyStruct.lore_group = titaniumLinkBodyStruct.lore_group;
-		serverLinkBodyStruct.evolve_max = titaniumLinkBodyStruct.evolve_max;
-		serverLinkBodyStruct.ornament_icon = NOT_USED;
-		serverLinkBodyStruct.hash = titaniumLinkBodyStruct.hash;
-	}
-
-	static inline bool GenerateServerTextLinkBody(std::string& serverLinkBody, const TextLinkBody_Struct& serverLinkBodyStruct)
-	{
-		serverLinkBody = StringFormat(
-			"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%01X" "%05X" "%01X" "%05X" "%08X",
-			serverLinkBodyStruct.unknown_1,
-			serverLinkBodyStruct.item_id,
-			serverLinkBodyStruct.augment_1,
-			serverLinkBodyStruct.augment_2,
-			serverLinkBodyStruct.augment_3,
-			serverLinkBodyStruct.augment_4,
-			serverLinkBodyStruct.augment_5,
-			serverLinkBodyStruct.augment_6,
-			serverLinkBodyStruct.is_evolving,
-			serverLinkBodyStruct.lore_group,
-			serverLinkBodyStruct.evolve_max,
-			serverLinkBodyStruct.ornament_icon,
-			serverLinkBodyStruct.hash
-			);
-
-		if (serverLinkBody.length() != EmuConstants::TEXT_LINK_BODY_LENGTH) { return false; }
-		return true;
 	}
 }
 // end namespace Titanium

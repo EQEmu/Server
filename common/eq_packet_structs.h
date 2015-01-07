@@ -5270,19 +5270,20 @@ struct ClientMarqueeMessage_Struct {
 typedef std::list<ServerLootItem_Struct*> ItemList;
 
 struct TextLinkBody_Struct {
-	uint8 unknown_1;
-	uint32 item_id;
-	uint32 augment_1;
-	uint32 augment_2;
-	uint32 augment_3;
-	uint32 augment_4;
-	uint32 augment_5;
-	uint32 augment_6;
-	uint8 is_evolving;
-	uint32 lore_group;
-	uint8 evolve_max;
-	uint32 ornament_icon;
-	int hash;
+	// Current server mask: EQClientRoF2
+	uint8 unknown_1;		/* %1X */
+	uint32 item_id;			/* %05X */
+	uint32 augment_1;		/* %05X */
+	uint32 augment_2;		/* %05X */
+	uint32 augment_3;		/* %05X */
+	uint32 augment_4;		/* %05X */
+	uint32 augment_5;		/* %05X */
+	uint32 augment_6;		/* %05X */
+	uint8 is_evolving;		/* %1X */
+	uint32 evolve_group;	/* %05X */
+	uint8 evolve_level;		/* %02X */
+	uint32 ornament_icon;	/* %05X */
+	int hash;				/* %08X */
 };
 
 // Restore structure packing to default

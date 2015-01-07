@@ -31,17 +31,11 @@ namespace Underfoot
 	static inline uint32 UnderfootToServerSlot(uint32 UnderfootSlot);
 	static inline uint32 UnderfootToServerCorpseSlot(uint32 UnderfootCorpse);
 
-	// server to client text link converters
-	static inline void ServerToUnderfootTextLinks(std::string& underfootTextLink, const std::string& serverTextLink);
-	static inline bool DegenerateServerTextLinkBody(TextLinkBody_Struct& serverLinkBodyStruct, const std::string& serverLinkBody);
-	static inline void ServerToUnderfootTextLinkBodyStruct(structs::TextLinkBody_Struct& underfootLinkBodyStruct, const TextLinkBody_Struct& serverLinkBodyStruct);
-	static inline bool GenerateUnderfootTextLinkBody(std::string& underfootLinkBody, const structs::TextLinkBody_Struct& underfootLinkBodyStruct);
+	// server to client text link converter
+	static inline void ServerToUnderfootTextLink(std::string& underfootTextLink, const std::string& serverTextLink);
 
-	// client to server text link converters
-	static inline void UnderfootToServerTextLinks(std::string& serverTextLink, const std::string& underfootTextLink);
-	static inline bool DegenerateUnderfootTextLinkBody(structs::TextLinkBody_Struct& underfootLinkBodyStruct, const std::string& underfootLinkBody);
-	static inline void UnderfootToServerTextLinkBodyStruct(TextLinkBody_Struct& serverLinkBodyStruct, const structs::TextLinkBody_Struct& underfootLinkBodyStruct);
-	static inline bool GenerateServerTextLinkBody(std::string& serverLinkBody, const TextLinkBody_Struct& serverLinkBodyStruct);
+	// client to server text link converter
+	static inline void UnderfootToServerTextLink(std::string& serverTextLink, const std::string& underfootTextLink);
 
 	void Register(EQStreamIdentifier &into)
 	{
@@ -446,7 +440,7 @@ namespace Underfoot
 
 		std::string old_message = emu->message;
 		std::string new_message;
-		ServerToUnderfootTextLinks(new_message, old_message);
+		ServerToUnderfootTextLink(new_message, old_message);
 
 		//in->size = strlen(emu->sender) + 1 + strlen(emu->targetname) + 1 + strlen(emu->message) + 1 + 36;
 		in->size = strlen(emu->sender) + strlen(emu->targetname) + new_message.length() + 39;
@@ -2326,7 +2320,7 @@ namespace Underfoot
 
 		std::string old_message = &emu->message[strlen(emu->sayer)];
 		std::string new_message;
-		ServerToUnderfootTextLinks(new_message, old_message);
+		ServerToUnderfootTextLink(new_message, old_message);
 
 		//in->size = 3 + 4 + 4 + strlen(emu->sayer) + 1 + 12 + new_message.length() + 1;
 		in->size = 25 + strlen(emu->sayer) + new_message.length();
@@ -3093,7 +3087,7 @@ namespace Underfoot
 
 		std::string old_message = InBuffer;
 		std::string new_message;
-		UnderfootToServerTextLinks(new_message, old_message);
+		UnderfootToServerTextLink(new_message, old_message);
 
 		//__packet->size = sizeof(ChannelMessage_Struct)+strlen(InBuffer) + 1;
 		__packet->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
@@ -4168,358 +4162,80 @@ namespace Underfoot
 		return (UnderfootCorpse - 1);
 	}
 
-	static inline void ServerToUnderfootTextLinks(std::string& underfootTextLink, const std::string& serverTextLink)
+	static inline void ServerToUnderfootTextLink(std::string& underfootTextLink, const std::string& serverTextLink)
 	{
 		const char delimiter = 0x12;
 
-#if EQDEBUG >= 6
-		_log(CHANNELS__ERROR, "TextLink(Server->Underfoot): old message '%s'", serverTextLink.c_str());
-
-		if (consts::TEXT_LINK_BODY_LENGTH == EmuConstants::TEXT_LINK_BODY_LENGTH) {
-			_log(CHANNELS__ERROR, "TextLink(Server->Underfoot): link size equal, no conversion necessary");
-			underfootTextLink = serverTextLink;
-			return;
-		}
-
-		if (serverTextLink.find(delimiter) == std::string::npos) {
-			_log(CHANNELS__ERROR, "TextLink(Server->Underfoot): delimiter not found, no conversion necessary");
-			underfootTextLink = serverTextLink;
-			return;
-		}
-
-		bool conversion_error = false;
-		auto segments = SplitString(serverTextLink, delimiter);
-
-		for (size_t iter = 1; iter < segments.size(); iter += 2) {
-			TextLinkBody_Struct old_body_data;
-			if (!DegenerateServerTextLinkBody(old_body_data, segments[iter].substr(0, EmuConstants::TEXT_LINK_BODY_LENGTH).c_str())) {
-				_log(CHANNELS__ERROR, "TextLink(Server->Underfoot): body degeneration error '%s'", segments[iter].substr(0, EmuConstants::TEXT_LINK_BODY_LENGTH).c_str());
-				conversion_error = true;
-			}
-			else {
-				_log(CHANNELS__ERROR, "TextLink(Server->Underfoot): body degeneration success '%s'", segments[iter].substr(0, EmuConstants::TEXT_LINK_BODY_LENGTH).c_str());
-			}
-
-			structs::TextLinkBody_Struct new_body_data;
-			ServerToUnderfootTextLinkBodyStruct(new_body_data, old_body_data);
-
-			std::string segment;
-			if (!GenerateUnderfootTextLinkBody(segment, new_body_data)) {
-				_log(CHANNELS__ERROR, "TextLink(Server->Underfoot): body generation error '%s'", segment.c_str());
-				conversion_error = true;
-			}
-			else {
-				_log(CHANNELS__ERROR, "TextLink(Server->Underfoot): body generation success '%s'", segment.c_str());
-				segment.append(segments[iter].substr(EmuConstants::TEXT_LINK_BODY_LENGTH).c_str());
-				segments[iter] = segment.c_str();
-			}
-		}
-
-		if (conversion_error) {
-			_log(CHANNELS__ERROR, "TextLink(Server->Underfoot): conversion error");
-			underfootTextLink = serverTextLink;
-			return;
-		}
-
-		for (size_t iter = 0; iter < segments.size(); ++iter) {
-			if (iter & 1) {
-				underfootTextLink.push_back(delimiter);
-				underfootTextLink.append(segments[iter].c_str());
-				underfootTextLink.push_back(delimiter);
-			}
-			else {
-				underfootTextLink.append(segments[iter].c_str());
-			}
-
-			_log(CHANNELS__ERROR, "TextLink(Server->Underfoot): segment[%u] '%s'", iter, segments[iter].c_str());
-		}
-
-		_log(CHANNELS__ERROR, "TextLink(Server->Underfoot): new message '%s'", underfootTextLink.c_str());
-#else
 		if ((consts::TEXT_LINK_BODY_LENGTH == EmuConstants::TEXT_LINK_BODY_LENGTH) || (serverTextLink.find(delimiter) == std::string::npos)) {
 			underfootTextLink = serverTextLink;
 			return;
 		}
 
-		bool conversion_error = false;
 		auto segments = SplitString(serverTextLink, delimiter);
 
-		for (size_t iter = 1; iter < segments.size(); iter += 2) {
-			TextLinkBody_Struct old_body_data;
-			if (!DegenerateServerTextLinkBody(old_body_data, segments[iter].substr(0, EmuConstants::TEXT_LINK_BODY_LENGTH).c_str())) {
-				conversion_error = true;
-				break;
-			}
+		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
+			if (segment_iter & 1) {
+				std::string new_segment;
 
-			structs::TextLinkBody_Struct new_body_data;
-			ServerToUnderfootTextLinkBodyStruct(new_body_data, old_body_data);
+				// Idx:  0 1     6     11    16    21    26    31    36 37   41 43    48       (Source)
+				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX XXXXX XXXXXXXX (56)
+				// SoF:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX       X  XXXX  X XXXXX XXXXXXXX (50)
+				// Diff:                                       ^^^^^         ^
 
-			std::string segment;
-			if (!GenerateUnderfootTextLinkBody(segment, new_body_data)) {
-				conversion_error = true;
-				break;
-			}
-			else {
-				segment.append(segments[iter].substr(EmuConstants::TEXT_LINK_BODY_LENGTH).c_str());
-				segments[iter] = segment.c_str();
-			}
-		}
+				new_segment.append(segments[segment_iter].substr(0, 31).c_str());
+				new_segment.append(segments[segment_iter].substr(36, 5).c_str());
 
-		if (conversion_error) {
-			_log(CHANNELS__ERROR, "TextLink(Server->Underfoot): conversion error");
-			underfootTextLink = serverTextLink;
-			return;
-		}
+				if (segments[segment_iter].substr(41, 1) == "0")
+					new_segment.append(segments[segment_iter].substr(42, 1).c_str());
+				else
+					new_segment.append("F");
 
-		for (size_t iter = 0; iter < segments.size(); ++iter) {
-			if (iter & 1) {
+				new_segment.append(segments[segment_iter].substr(43).c_str());
+
 				underfootTextLink.push_back(delimiter);
-				underfootTextLink.append(segments[iter].c_str());
+				underfootTextLink.append(new_segment.c_str());
 				underfootTextLink.push_back(delimiter);
 			}
 			else {
-				underfootTextLink.append(segments[iter].c_str());
+				underfootTextLink.append(segments[segment_iter].c_str());
 			}
 		}
-#endif
 	}
 
-	static inline bool DegenerateServerTextLinkBody(TextLinkBody_Struct& serverLinkBodyStruct, const std::string& serverLinkBody)
-	{
-		memset(&serverLinkBodyStruct, 0, sizeof(TextLinkBody_Struct));
-		if (serverLinkBody.length() != EmuConstants::TEXT_LINK_BODY_LENGTH) { return false; }
-
-		serverLinkBodyStruct.unknown_1 = (uint8)strtol(serverLinkBody.substr(0, 1).c_str(), nullptr, 16);
-		serverLinkBodyStruct.item_id = (uint32)strtol(serverLinkBody.substr(1, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.augment_1 = (uint32)strtol(serverLinkBody.substr(6, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.augment_2 = (uint32)strtol(serverLinkBody.substr(11, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.augment_3 = (uint32)strtol(serverLinkBody.substr(16, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.augment_4 = (uint32)strtol(serverLinkBody.substr(21, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.augment_5 = (uint32)strtol(serverLinkBody.substr(26, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.augment_6 = (uint32)strtol(serverLinkBody.substr(31, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.is_evolving = (uint8)strtol(serverLinkBody.substr(36, 1).c_str(), nullptr, 16);
-		serverLinkBodyStruct.lore_group = (uint32)strtol(serverLinkBody.substr(37, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.evolve_max = (uint8)strtol(serverLinkBody.substr(42, 1).c_str(), nullptr, 16);
-		serverLinkBodyStruct.ornament_icon = (uint32)strtol(serverLinkBody.substr(43, 5).c_str(), nullptr, 16);
-		serverLinkBodyStruct.hash = (int)strtol(serverLinkBody.substr(48, 8).c_str(), nullptr, 16);
-
-		return true;
-	}
-
-	static inline void ServerToUnderfootTextLinkBodyStruct(structs::TextLinkBody_Struct& underfootLinkBodyStruct, const TextLinkBody_Struct& serverLinkBodyStruct)
-	{
-		underfootLinkBodyStruct.unknown_1 = serverLinkBodyStruct.unknown_1;
-		underfootLinkBodyStruct.item_id = serverLinkBodyStruct.item_id;
-		underfootLinkBodyStruct.augment_1 = serverLinkBodyStruct.augment_1;
-		underfootLinkBodyStruct.augment_2 = serverLinkBodyStruct.augment_2;
-		underfootLinkBodyStruct.augment_3 = serverLinkBodyStruct.augment_3;
-		underfootLinkBodyStruct.augment_4 = serverLinkBodyStruct.augment_4;
-		underfootLinkBodyStruct.augment_5 = serverLinkBodyStruct.augment_5;
-		underfootLinkBodyStruct.is_evolving = serverLinkBodyStruct.is_evolving;
-		underfootLinkBodyStruct.lore_group = serverLinkBodyStruct.lore_group;
-		underfootLinkBodyStruct.evolve_max = serverLinkBodyStruct.evolve_max;
-		underfootLinkBodyStruct.ornament_icon = serverLinkBodyStruct.ornament_icon;
-		underfootLinkBodyStruct.hash = serverLinkBodyStruct.hash;
-	}
-
-	static inline bool GenerateUnderfootTextLinkBody(std::string& underfootLinkBody, const structs::TextLinkBody_Struct& underfootLinkBodyStruct)
-	{
-		underfootLinkBody = StringFormat(
-			"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%05X" "%08X",
-			underfootLinkBodyStruct.unknown_1,
-			underfootLinkBodyStruct.item_id,
-			underfootLinkBodyStruct.augment_1,
-			underfootLinkBodyStruct.augment_2,
-			underfootLinkBodyStruct.augment_3,
-			underfootLinkBodyStruct.augment_4,
-			underfootLinkBodyStruct.augment_5,
-			underfootLinkBodyStruct.is_evolving,
-			underfootLinkBodyStruct.lore_group,
-			underfootLinkBodyStruct.evolve_max,
-			underfootLinkBodyStruct.ornament_icon,
-			underfootLinkBodyStruct.hash
-			);
-
-		if (underfootLinkBody.length() != consts::TEXT_LINK_BODY_LENGTH) { return false; }
-		return true;
-	}
-
-	static inline void UnderfootToServerTextLinks(std::string& serverTextLink, const std::string& underfootTextLink)
+	static inline void UnderfootToServerTextLink(std::string& serverTextLink, const std::string& underfootTextLink)
 	{
 		const char delimiter = 0x12;
 
-#if EQDEBUG >= 6
-		_log(CHANNELS__ERROR, "TextLink(Underfoot->Server): old message '%s'", underfootTextLink.c_str());
-
-		if (EmuConstants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) {
-			_log(CHANNELS__ERROR, "TextLink(Underfoot->Server): link size equal, no conversion necessary");
-			serverTextLink = underfootTextLink;
-			return;
-		}
-
-		if (underfootTextLink.find(delimiter) == std::string::npos) {
-			_log(CHANNELS__ERROR, "TextLink(Underfoot->Server): delimiter not found, no conversion necessary");
-			serverTextLink = underfootTextLink;
-			return;
-		}
-
-		bool conversion_error = false;
-		auto segments = SplitString(underfootTextLink, delimiter);
-
-		for (size_t iter = 1; iter < segments.size(); iter += 2) {
-			structs::TextLinkBody_Struct old_body_data;
-			if (!DegenerateUnderfootTextLinkBody(old_body_data, segments[iter].substr(0, consts::TEXT_LINK_BODY_LENGTH).c_str())) {
-				_log(CHANNELS__ERROR, "TextLink(Underfoot->Server): body degeneration error '%s'", segments[iter].substr(0, consts::TEXT_LINK_BODY_LENGTH).c_str());
-				conversion_error = true;
-			}
-			else {
-				_log(CHANNELS__ERROR, "TextLink(Underfoot->Server): body degeneration success '%s'", segments[iter].substr(0, consts::TEXT_LINK_BODY_LENGTH).c_str());
-			}
-
-			TextLinkBody_Struct new_body_data;
-			UnderfootToServerTextLinkBodyStruct(new_body_data, old_body_data);
-
-			std::string segment;
-			if (!GenerateServerTextLinkBody(segment, new_body_data)) {
-				_log(CHANNELS__ERROR, "TextLink(Underfoot->Server): body generation error '%s'", segment.c_str());
-				conversion_error = true;
-			}
-			else {
-				_log(CHANNELS__ERROR, "TextLink(Underfoot->Server): body generation success '%s'", segment.c_str());
-				segment.append(segments[iter].substr(consts::TEXT_LINK_BODY_LENGTH).c_str());
-				segments[iter] = segment.c_str();
-			}
-		}
-
-		if (conversion_error) {
-			_log(CHANNELS__ERROR, "TextLink(Underfoot->Server): conversion error");
-			serverTextLink = underfootTextLink;
-			return;
-		}
-
-		for (size_t iter = 0; iter < segments.size(); ++iter) {
-			if (iter & 1) {
-				serverTextLink.push_back(delimiter);
-				serverTextLink.append(segments[iter].c_str());
-				serverTextLink.push_back(delimiter);
-			}
-			else {
-				serverTextLink.append(segments[iter].c_str());
-			}
-
-			_log(CHANNELS__ERROR, "TextLink(Underfoot->Server): segment[%u] '%s'", iter, segments[iter].c_str());
-		}
-
-		_log(CHANNELS__ERROR, "TextLink(Underfoot->Server): new message '%s'", serverTextLink.c_str());
-#else
 		if ((EmuConstants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) || (underfootTextLink.find(delimiter) == std::string::npos)) {
 			serverTextLink = underfootTextLink;
 			return;
 		}
 
-		bool conversion_error = false;
 		auto segments = SplitString(underfootTextLink, delimiter);
 
-		for (size_t iter = 1; iter < segments.size(); iter += 2) {
-			structs::TextLinkBody_Struct old_body_data;
-			if (!DegenerateUnderfootTextLinkBody(old_body_data, segments[iter].substr(0, consts::TEXT_LINK_BODY_LENGTH).c_str())) {
-				conversion_error = true;
-				break;
-			}
+		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
+			if (segment_iter & 1) {
+				std::string new_segment;
 
-			TextLinkBody_Struct new_body_data;
-			UnderfootToServerTextLinkBodyStruct(new_body_data, old_body_data);
+				// Idx:  0 1     6     11    16    21    26          31 32    36 37    42       (Source)
+				// SoF:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX       X  XXXX  X  XXXXX XXXXXXXX (50)
+				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX  XXXXX XXXXXXXX (56)
+				// Diff:                                       ^^^^^         ^
 
-			std::string segment;
-			if (!GenerateServerTextLinkBody(segment, new_body_data)) {
-				conversion_error = true;
-				break;
-			}
-			else {
-				segment.append(segments[iter].substr(consts::TEXT_LINK_BODY_LENGTH).c_str());
-				segments[iter] = segment.c_str();
-			}
-		}
+				new_segment.append(segments[segment_iter].substr(0, 31).c_str());
+				new_segment.append("00000");
+				new_segment.append(segments[segment_iter].substr(31, 5).c_str());
+				new_segment.append("0");
+				new_segment.append(segments[segment_iter].substr(36).c_str());
 
-		if (conversion_error) {
-			_log(CHANNELS__ERROR, "TextLink(Underfoot->Server): conversion error");
-			serverTextLink = underfootTextLink;
-			return;
-		}
-
-		for (size_t iter = 0; iter < segments.size(); ++iter) {
-			if (iter & 1) {
 				serverTextLink.push_back(delimiter);
-				serverTextLink.append(segments[iter].c_str());
+				serverTextLink.append(new_segment.c_str());
 				serverTextLink.push_back(delimiter);
 			}
 			else {
-				serverTextLink.append(segments[iter].c_str());
+				serverTextLink.append(segments[segment_iter].c_str());
 			}
 		}
-#endif
-	}
-
-	static inline bool DegenerateUnderfootTextLinkBody(structs::TextLinkBody_Struct& underfootLinkBodyStruct, const std::string& underfootLinkBody)
-	{
-		// SoF: "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%05X" "%08X"
-		memset(&underfootLinkBodyStruct, 0, sizeof(structs::TextLinkBody_Struct));
-		if (underfootLinkBody.length() != consts::TEXT_LINK_BODY_LENGTH) { return false; }
-
-		underfootLinkBodyStruct.unknown_1 = (uint8)strtol(underfootLinkBody.substr(0, 1).c_str(), nullptr, 16);
-		underfootLinkBodyStruct.item_id = (uint32)strtol(underfootLinkBody.substr(1, 5).c_str(), nullptr, 16);
-		underfootLinkBodyStruct.augment_1 = (uint32)strtol(underfootLinkBody.substr(6, 5).c_str(), nullptr, 16);
-		underfootLinkBodyStruct.augment_2 = (uint32)strtol(underfootLinkBody.substr(11, 5).c_str(), nullptr, 16);
-		underfootLinkBodyStruct.augment_3 = (uint32)strtol(underfootLinkBody.substr(16, 5).c_str(), nullptr, 16);
-		underfootLinkBodyStruct.augment_4 = (uint32)strtol(underfootLinkBody.substr(21, 5).c_str(), nullptr, 16);
-		underfootLinkBodyStruct.augment_5 = (uint32)strtol(underfootLinkBody.substr(26, 5).c_str(), nullptr, 16);
-		underfootLinkBodyStruct.is_evolving = (uint8)strtol(underfootLinkBody.substr(31, 1).c_str(), nullptr, 16);
-		underfootLinkBodyStruct.lore_group = (uint32)strtol(underfootLinkBody.substr(32, 4).c_str(), nullptr, 16);
-		underfootLinkBodyStruct.evolve_max = (uint8)strtol(underfootLinkBody.substr(36, 1).c_str(), nullptr, 16);
-		underfootLinkBodyStruct.ornament_icon = (uint32)strtol(underfootLinkBody.substr(37, 5).c_str(), nullptr, 16);
-		underfootLinkBodyStruct.hash = (int)strtol(underfootLinkBody.substr(42, 8).c_str(), nullptr, 16);
-
-		return true;
-	}
-
-	static inline void UnderfootToServerTextLinkBodyStruct(TextLinkBody_Struct& serverLinkBodyStruct, const structs::TextLinkBody_Struct& underfootLinkBodyStruct)
-	{
-		serverLinkBodyStruct.unknown_1 = underfootLinkBodyStruct.unknown_1;
-		serverLinkBodyStruct.item_id = underfootLinkBodyStruct.item_id;
-		serverLinkBodyStruct.augment_1 = underfootLinkBodyStruct.augment_1;
-		serverLinkBodyStruct.augment_2 = underfootLinkBodyStruct.augment_2;
-		serverLinkBodyStruct.augment_3 = underfootLinkBodyStruct.augment_3;
-		serverLinkBodyStruct.augment_4 = underfootLinkBodyStruct.augment_4;
-		serverLinkBodyStruct.augment_5 = underfootLinkBodyStruct.augment_5;
-		serverLinkBodyStruct.augment_6 = NOT_USED;
-		serverLinkBodyStruct.is_evolving = underfootLinkBodyStruct.is_evolving;
-		serverLinkBodyStruct.lore_group = underfootLinkBodyStruct.lore_group;
-		serverLinkBodyStruct.evolve_max = underfootLinkBodyStruct.evolve_max;
-		serverLinkBodyStruct.ornament_icon = underfootLinkBodyStruct.ornament_icon;
-		serverLinkBodyStruct.hash = underfootLinkBodyStruct.hash;
-	}
-
-	static inline bool GenerateServerTextLinkBody(std::string& serverLinkBody, const TextLinkBody_Struct& serverLinkBodyStruct)
-	{
-		serverLinkBody = StringFormat(
-			"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%01X" "%05X" "%01X" "%05X" "%08X",
-			serverLinkBodyStruct.unknown_1,
-			serverLinkBodyStruct.item_id,
-			serverLinkBodyStruct.augment_1,
-			serverLinkBodyStruct.augment_2,
-			serverLinkBodyStruct.augment_3,
-			serverLinkBodyStruct.augment_4,
-			serverLinkBodyStruct.augment_5,
-			serverLinkBodyStruct.augment_6,
-			serverLinkBodyStruct.is_evolving,
-			serverLinkBodyStruct.lore_group,
-			serverLinkBodyStruct.evolve_max,
-			serverLinkBodyStruct.ornament_icon,
-			serverLinkBodyStruct.hash
-			);
-
-		if (serverLinkBody.length() != EmuConstants::TEXT_LINK_BODY_LENGTH) { return false; }
-		return true;
 	}
 }
 // end namespace Underfoot

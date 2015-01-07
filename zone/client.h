@@ -822,7 +822,7 @@ public:
 	//
 	// class Client::TextLink
 	//
-	class TextLink : TextLinkBody_Struct {
+	class TextLink {
 	public:
 		enum LinkType { linkBlank = 0, linkItemData, linkLootItem, linkItemInst };
 
@@ -859,6 +859,7 @@ public:
 		uint32 m_ProxyItemID;
 		const char* m_ProxyText;
 		bool m_TaskUse;
+		TextLinkBody_Struct m_LinkBodyStruct;
 		std::string m_Link;
 		std::string m_LinkBody;
 		std::string m_LinkText;

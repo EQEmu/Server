@@ -4409,23 +4409,6 @@ struct MercenaryAssign_Struct {
 /*0012*/
 };
 
-// SoF: "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%05X" "%08X"
-struct TextLinkBody_Struct
-{
-	uint8 unknown_1;
-	uint32 item_id;
-	uint32 augment_1;
-	uint32 augment_2;
-	uint32 augment_3;
-	uint32 augment_4;
-	uint32 augment_5;
-	uint8 is_evolving;
-	uint32 lore_group;
-	uint8 evolve_max;
-	uint32 ornament_icon;
-	int hash;
-};
-
 	};	//end namespace structs
 };	//end namespace SoD
 
