@@ -7470,8 +7470,17 @@ void Client::GarbleMessage(char *message, uint8 variance)
 {
 	// Garble message by variance%
 	const char alpha_list[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"; // only change alpha characters for now
+	const char delimiter = 0x12;
+	int delimiter_count = 0;
 
 	for (size_t i = 0; i < strlen(message); i++) {
+		// Client expects hex values inside of a text link body
+		if (message[i] == delimiter) {
+			if (!(delimiter_count & 1)) { i += EmuConstants::TEXT_LINK_BODY_LENGTH; }
+			++delimiter_count;
+			continue;
+		}
+
 		uint8 chance = (uint8)zone->random.Int(0, 115); // variation just over worst possible scrambling
 		if (isalpha(message[i]) && (chance <= variance)) {
 			uint8 rand_char = (uint8)zone->random.Int(0,51); // choose a random character from the alpha list
