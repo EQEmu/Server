@@ -4115,18 +4115,7 @@ struct AltCurrencySellItem_Struct {
 /*010*/ uint32 cost;
 };
 
-
 	};	//end namespace structs
 };	//end namespace SoF
 
 #endif /*SoF_STRUCTS_H_*/
-
-
-
-
-
-
-
-
-
-

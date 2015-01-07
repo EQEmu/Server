@@ -3332,16 +3332,4 @@ struct LFGuild_GuildToggle_Struct
 	};	//end namespace structs
 };	//end namespace Titanium
 
-
-
 #endif /*Titanium_STRUCTS_H_*/
-
-
-
-
-
-
-
-
-
-

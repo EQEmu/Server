@@ -4409,7 +4409,6 @@ struct MercenaryAssign_Struct {
 /*0012*/
 };
 
-
 	};	//end namespace structs
 };	//end namespace SoD
 

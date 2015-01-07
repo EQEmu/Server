@@ -576,6 +576,11 @@ int Lua_Mob::GetCorruption() {
 	return self->GetCorrup();
 }
 
+int Lua_Mob::GetPhR() {
+	Lua_Safe_Call_Int();
+	return self->GetPhR();
+}
+
 int Lua_Mob::GetMaxSTR() {
 	Lua_Safe_Call_Int();
 	return self->GetMaxSTR();
@@ -1962,6 +1967,7 @@ luabind::scope lua_register_mob() {
 		.def("GetPR", &Lua_Mob::GetPR)
 		.def("GetCR", &Lua_Mob::GetCR)
 		.def("GetCorruption", &Lua_Mob::GetCorruption)
+		.def("GetPhR", &Lua_Mob::GetPhR)
 		.def("GetMaxSTR", &Lua_Mob::GetMaxSTR)
 		.def("GetMaxSTA", &Lua_Mob::GetMaxSTA)
 		.def("GetMaxDEX", &Lua_Mob::GetMaxDEX)

@@ -33,6 +33,12 @@ namespace RoF2
 	static inline uint32 RoF2ToServerMainInvSlot(structs::MainInvItemSlotStruct RoF2Slot);
 	static inline uint32 RoF2ToServerCorpseSlot(uint32 RoF2Corpse);
 
+	// server to client text link converter
+	static inline void ServerToRoF2TextLink(std::string& rof2TextLink, const std::string& serverTextLink);
+
+	// client to server text link converter
+	static inline void RoF2ToServerTextLink(std::string& serverTextLink, const std::string& rof2TextLink);
+
 	void Register(EQStreamIdentifier &into)
 	{
 		//create our opcode manager if we havent already
@@ -554,7 +560,13 @@ namespace RoF2
 
 		unsigned char *__emu_buffer = in->pBuffer;
 
-		in->size = strlen(emu->sender) + 1 + strlen(emu->targetname) + 1 + strlen(emu->message) + 1 + 36;
+		std::string old_message = emu->message;
+		std::string new_message;
+		ServerToRoF2TextLink(new_message, old_message);
+
+		//in->size = strlen(emu->sender) + 1 + strlen(emu->targetname) + 1 + strlen(emu->message) + 1 + 36;
+		in->size = strlen(emu->sender) + strlen(emu->targetname) + new_message.length() + 39;
+		
 		in->pBuffer = new unsigned char[in->size];
 
 		char *OutBuffer = (char *)in->pBuffer;
@@ -567,7 +579,7 @@ namespace RoF2
 		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
 		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, 0);	// Unknown
 		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->skill_in_language);
-		VARSTRUCT_ENCODE_STRING(OutBuffer, emu->message);
+		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
 
 		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
 		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
@@ -3162,6 +3174,44 @@ namespace RoF2
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_SpecialMesg)
+	{
+		EQApplicationPacket *in = *p;
+		*p = nullptr;
+
+		SpecialMesg_Struct *emu = (SpecialMesg_Struct *)in->pBuffer;
+
+		unsigned char *__emu_buffer = in->pBuffer;
+
+		std::string old_message = &emu->message[strlen(emu->sayer)];
+		std::string new_message;
+		ServerToRoF2TextLink(new_message, old_message);
+
+		//in->size = 3 + 4 + 4 + strlen(emu->sayer) + 1 + 12 + new_message.length() + 1;
+		in->size = 25 + strlen(emu->sayer) + new_message.length();
+		in->pBuffer = new unsigned char[in->size];
+
+		char *OutBuffer = (char *)in->pBuffer;
+
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->header[0]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->header[1]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->header[2]);
+
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->msg_type);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->target_spawn_id);
+
+		VARSTRUCT_ENCODE_STRING(OutBuffer, emu->sayer);
+
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);
+
+		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
+
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
+	}
+
 	ENCODE(OP_Stun)
 	{
 		ENCODE_LENGTH_EXACT(Stun_Struct);
@@ -4113,7 +4163,13 @@ namespace RoF2
 
 		uint32 Skill = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
 
-		__packet->size = sizeof(ChannelMessage_Struct)+strlen(InBuffer) + 1;
+		std::string old_message = InBuffer;
+		std::string new_message;
+		RoF2ToServerTextLink(new_message, old_message);
+
+		//__packet->size = sizeof(ChannelMessage_Struct)+strlen(InBuffer) + 1;
+		__packet->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
+
 		__packet->pBuffer = new unsigned char[__packet->size];
 		ChannelMessage_Struct *emu = (ChannelMessage_Struct *)__packet->pBuffer;
 
@@ -4122,7 +4178,7 @@ namespace RoF2
 		emu->language = Language;
 		emu->chan_num = Channel;
 		emu->skill_in_language = Skill;
-		strcpy(emu->message, InBuffer);
+		strcpy(emu->message, new_message.c_str());
 
 		delete[] __eq_buffer;
 	}
@@ -4527,47 +4583,8 @@ namespace RoF2
 		DECODE_LENGTH_EXACT(structs::PetCommand_Struct);
 		SETUP_DIRECT_DECODE(PetCommand_Struct, structs::PetCommand_Struct);
 
-		switch (eq->command)
-		{
-		case 0x00:
-			emu->command = 0x04;	// Health
-			break;
-		case 0x01:
-			emu->command = 0x10;	// Leader
-			break;
-		case 0x02:
-			emu->command = 0x07;	// Attack
-			break;
-		case 0x04:
-			emu->command = 0x08;	// Follow
-			break;
-		case 0x05:
-			emu->command = 0x05;	// Guard
-			break;
-		case 0x06:
-			emu->command = 0x09;	// Sit. Needs work. This appears to be a toggle between Sit/Stand now.
-			break;
-		case 0x0c:
-			emu->command = 0x0b;	// Taunt
-			break;
-		case 0x0f:
-			emu->command = 0x0c;	// Hold
-			break;
-		case 0x10:
-			emu->command = 0x1b;	// Hold on
-			break;
-		case 0x11:
-			emu->command = 0x1c;	// Hold off
-			break;
-		case 0x1c:
-			emu->command = 0x01;	// Back
-			break;
-		case 0x1d:
-			emu->command = 0x02;	// Leave/Go Away
-			break;
-		default:
-			emu->command = eq->command;
-		}
+		IN(command);
+		emu->unknown = eq->unknown04;
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -5721,6 +5738,70 @@ namespace RoF2
 	static inline uint32 RoF2ToServerCorpseSlot(uint32 RoF2Corpse)
 	{
 		return (RoF2Corpse + EmuConstants::CORPSE_BEGIN - 1); 
+	}
+
+	static inline void ServerToRoF2TextLink(std::string& rof2TextLink, const std::string& serverTextLink)
+	{
+		const char delimiter = 0x12;
+
+		if ((consts::TEXT_LINK_BODY_LENGTH == EmuConstants::TEXT_LINK_BODY_LENGTH) || (serverTextLink.find(delimiter) == std::string::npos)) {
+			rof2TextLink = serverTextLink;
+			return;
+		}
+
+		auto segments = SplitString(serverTextLink, delimiter);
+
+		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
+			if (segment_iter & 1) {
+				std::string new_segment;
+
+				// Idx:  0 1     6     11    16    21    26    31    36 37   41 43    48       (Source)
+				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX XXXXX XXXXXXXX (56)
+				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX XXXXX XXXXXXXX (56)
+				// Diff:
+
+				new_segment.append(segments[segment_iter]);
+
+				rof2TextLink.push_back(delimiter);
+				rof2TextLink.append(new_segment.c_str());
+				rof2TextLink.push_back(delimiter);
+			}
+			else {
+				rof2TextLink.append(segments[segment_iter].c_str());
+			}
+		}
+	}
+
+	static inline void RoF2ToServerTextLink(std::string& serverTextLink, const std::string& rof2TextLink)
+	{
+		const char delimiter = 0x12;
+
+		if ((EmuConstants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) || (rof2TextLink.find(delimiter) == std::string::npos)) {
+			serverTextLink = rof2TextLink;
+			return;
+		}
+
+		auto segments = SplitString(rof2TextLink, delimiter);
+
+		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
+			if (segment_iter & 1) {
+				std::string new_segment;
+
+				// Idx:  0 1     6     11    16    21    26    31    36 37   41 43    48       (Source)
+				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX XXXXX XXXXXXXX (56)
+				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX XXXXX XXXXXXXX (56)
+				// Diff:
+
+				new_segment.append(segments[segment_iter]);
+
+				serverTextLink.push_back(delimiter);
+				serverTextLink.append(new_segment.c_str());
+				serverTextLink.push_back(delimiter);
+			}
+			else {
+				serverTextLink.append(segments[segment_iter].c_str());
+			}
+		}
 	}
 }
 // end namespace RoF2

@@ -6255,6 +6255,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	made_npc->DR = GetDR();
 	made_npc->PR = GetPR();
 	made_npc->Corrup = GetCorrup();
+	made_npc->PhR = GetPhR();
 	// looks
 	made_npc->texture = GetEquipmentMaterial(MaterialChest);
 	made_npc->helmtexture = GetEquipmentMaterial(MaterialHead);
@@ -6352,7 +6353,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 
 	// Set Class
 	std::string class_Name = itoa(GetClass());
-	std::string class_List[] = { "WAR", "CLR", "PAL", "RNG", "SK", "DRU", "MNK", "BRD", "ROG", "SHM", "NEC", "WIZ", "MAG", "ENC", "BST", "BER" };
+	std::string class_List[] = { "WAR", "CLR", "PAL", "RNG", "SHD", "DRU", "MNK", "BRD", "ROG", "SHM", "NEC", "WIZ", "MAG", "ENC", "BST", "BER" };
 
 	if(GetClass() < 17 && GetClass() > 0) { class_Name = class_List[GetClass()-1]; }
 
@@ -6440,7 +6441,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	/*===========================*/
 	std::string		regen_row_header = "";
 	std::string		regen_row_color = "";
-		std::string		base_regen_field = "";
+	std::string		base_regen_field = "";
 	std::string		base_regen_spacing = "";
 	std::string		item_regen_field = "";
 	std::string		item_regen_spacing = "";
@@ -6601,8 +6602,11 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 			}
 			case 6: {
 				a_stat_name = " CHA: ";
+				a_resist_name = "PhR: "; // Not implemented for clients yet
 				a_stat = itoa(GetCHA());
 				h_stat = itoa(GetHeroicCHA());
+				a_resist = itoa(GetPhR());
+				h_resist_field = itoa(GetHeroicPhR());
 				break;
 			}
 			default: { break; }
@@ -6617,8 +6621,9 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 		for(int h = a_resist.size(); h < max_stat_value_len; h++) { a_resist_spacing += " . "; }
 
 		stat_field += indP + a_stat_name + a_stat_spacing + a_stat + heroic_color + h_stat + "</c>";
+		stat_field += h_stat_spacing + a_resist_name + a_resist_spacing + a_resist + heroic_color + h_resist_field + "</c>";
 		if(stat_row_counter < 6) {
-			stat_field += h_stat_spacing + a_resist_name + a_resist_spacing + a_resist + heroic_color + h_resist_field + "</c><br>";
+			stat_field += "<br>";
 		}
 	}
 	/*##########################################################
@@ -6827,7 +6832,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	client->Message(0, " Haste: %i / %i (Item: %i + Spell: %i + Over: %i)", GetHaste(), RuleI(Character, HasteCap), itembonuses.haste, spellbonuses.haste + spellbonuses.hastetype2, spellbonuses.hastetype3 + ExtraHaste);
 	client->Message(0, " STR: %i  STA: %i  DEX: %i  AGI: %i  INT: %i  WIS: %i  CHA: %i", GetSTR(), GetSTA(), GetDEX(), GetAGI(), GetINT(), GetWIS(), GetCHA());
 	client->Message(0, " hSTR: %i  hSTA: %i  hDEX: %i  hAGI: %i  hINT: %i  hWIS: %i  hCHA: %i", GetHeroicSTR(), GetHeroicSTA(), GetHeroicDEX(), GetHeroicAGI(), GetHeroicINT(), GetHeroicWIS(), GetHeroicCHA());
-	client->Message(0, " MR: %i  PR: %i  FR: %i  CR: %i  DR: %i Corruption: %i", GetMR(), GetPR(), GetFR(), GetCR(), GetDR(), GetCorrup());
+	client->Message(0, " MR: %i  PR: %i  FR: %i  CR: %i  DR: %i Corruption: %i PhR: %i", GetMR(), GetPR(), GetFR(), GetCR(), GetDR(), GetCorrup(), GetPhR());
 	client->Message(0, " hMR: %i  hPR: %i  hFR: %i  hCR: %i  hDR: %i hCorruption: %i", GetHeroicMR(), GetHeroicPR(), GetHeroicFR(), GetHeroicCR(), GetHeroicDR(), GetHeroicCorrup());
 	client->Message(0, " Shielding: %i  Spell Shield: %i  DoT Shielding: %i Stun Resist: %i  Strikethrough: %i  Avoidance: %i  Accuracy: %i  Combat Effects: %i", GetShielding(), GetSpellShield(), GetDoTShield(), GetStunResist(), GetStrikeThrough(), GetAvoidance(), GetAccuracy(), GetCombatEffects());
 	client->Message(0, " Heal Amt.: %i  Spell Dmg.: %i  Clairvoyance: %i DS Mitigation: %i", GetHealAmt(), GetSpellDmg(), GetClair(), GetDSMit());
@@ -8271,69 +8276,25 @@ std::string Client::TextLink::GenerateLink()
 	generate_body();
 	generate_text();
 	
-	if (m_LinkBody.length() && m_LinkText.length()) {
-		m_Link.append(StringFormat("%c", 0x12));
+	if ((m_LinkBody.length() == EmuConstants::TEXT_LINK_BODY_LENGTH) && (m_LinkText.length() > 0)) {
+		m_Link.push_back(0x12);
 		m_Link.append(m_LinkBody);
 		m_Link.append(m_LinkText);
-		m_Link.append(StringFormat("%c", 0x12));
+		m_Link.push_back(0x12);
 	}
 
 	if ((m_Link.length() == 0) || (m_Link.length() > 250)) {
 		m_Error = true;
 		m_Link = "<LINKER ERROR>";
-		_log(CHANNELS__ERROR, "TextLink::GenerateLink() failed to generate a useable text link (LinkType: %i, Lengths: {l: %u, b: %u, t: %u})",
+		_log(CHANNELS__ERROR, "TextLink::GenerateLink() failed to generate a useable text link (LinkType: %i, Lengths: {link: %u, body: %u, text: %u})",
 			m_LinkType, m_Link.length(), m_LinkBody.length(), m_LinkText.length());
+#if EQDEBUG >= 5
+		_log(CHANNELS__ERROR, ">> LinkBody: %s", m_LinkBody.c_str());
+		_log(CHANNELS__ERROR, ">> LinkText: %s", m_LinkText.c_str());
+#endif
 	}
 
 	return m_Link;
-}
-
-const char* Client::TextLink::GetLink()
-{
-	if (m_Link.length() == 0)
-		return nullptr;
-
-	return m_Link.c_str();
-}
-
-const char* Client::TextLink::GetLinkBody()
-{
-	if (m_LinkBody.length() == 0)
-		return nullptr;
-
-	return m_LinkBody.c_str();
-}
-
-const char* Client::TextLink::GetLinkText()
-{
-	if (m_LinkText.length() == 0)
-		return nullptr;
-
-	return m_LinkText.c_str();
-}
-
-std::string Client::TextLink::GetLinkString()
-{
-	if (m_Link.length() == 0)
-		return "";
-
-	return m_Link;
-}
-
-std::string Client::TextLink::GetLinkBodyString()
-{
-	if (m_LinkBody.length() == 0)
-		return "";
-
-	return m_LinkBody;
-}
-
-std::string Client::TextLink::GetLinkTextString()
-{
-	if (m_LinkText.length() == 0)
-		return "";
-
-	return m_LinkText;
 }
 
 void Client::TextLink::Reset()
@@ -8348,108 +8309,93 @@ void Client::TextLink::Reset()
 	m_Link.clear();
 	m_LinkBody.clear();
 	m_LinkText.clear();
-	m_ClientVersion = EQClientUnknown;
 	m_Error = false;
 }
 
 void Client::TextLink::generate_body()
 {
-	enum { field_0 = 0, field_1, field_2, field_3, field_4, field_5, field_6, field_7, field_8, field_9, field_10, field_11, field_12, field_13 };
-	static const int field_count = 14;
-	static const bool field_use[_EQClientCount][field_count] = {
-		// 6.2:  MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"              "%1X" "%04X" "%1X"        "%08X"
-		// SoF:  MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"              "%1X" "%04X" "%1X" "%05X" "%08X"
-		// RoF:  MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"       "%1X" "%04X" "%1X" "%05X" "%08X"
-		// RoF2: MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%1X" "%04X" "%1X" "%05X" "%08X"
+	/*
+	Current server mask: EQClientRoF2
+	
+	RoF2: "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%02X" "%05X" "%08X" (56)
+	RoF:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X"  "%05X" "%08X" (55)
+	SoF:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"        "%1X" "%04X" "%1X"  "%05X" "%08X" (50)
+	6.2:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"        "%1X" "%04X" "%1X"         "%08X" (45)
+	*/
 
-//(RoF2)  %01x   %05x   %05x   %05x   %05x   %05x   %05x   %05x   %01x   %01x   %04x   %01x   %05x   %08x
-		{  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true }, // EQClientUnknown
-		{  true,  true,  true,  true,  true,  true,  true, false, false,  true,  true,  true, false,  true }, // EQClient6.2
-		{  true,  true,  true,  true,  true,  true,  true, false, false,  true,  true,  true, false,  true }, // EQClientTitanium
-		{  true,  true,  true,  true,  true,  true,  true, false, false,  true,  true,  true,  true,  true }, // EQClientSoF
-		{  true,  true,  true,  true,  true,  true,  true, false, false,  true,  true,  true,  true,  true }, // EQClientSoD
-		{  true,  true,  true,  true,  true,  true,  true, false, false,  true,  true,  true,  true,  true }, // EQClientUnderfoot
-		{  true,  true,  true,  true,  true,  true,  true,  true, false,  true,  true,  true,  true,  true }, // EQClientRoF
-		{  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true } // EQClientRoF2
-	};
+	memset(&m_LinkBodyStruct, 0, sizeof(TextLinkBody_Struct));
 	
-/*%01X*/	uint8 unknown_0 = NOT_USED;
-/*%05X*/	uint32 item_id = NOT_USED;
-/*%05X*/	uint32 augment_0 = NOT_USED;
-/*%05X*/	uint32 augment_1 = NOT_USED;
-/*%05X*/	uint32 augment_2 = NOT_USED;
-/*%05X*/	uint32 augment_3 = NOT_USED;
-/*%05X*/	uint32 augment_4 = NOT_USED;
-/*%05X*/	uint32 augment_5 = NOT_USED;
-/*%01X*/	uint8 unknown_8 = NOT_USED;
-/*%01X*/	uint8 unknown_9 = NOT_USED;
-/*%04X*/	uint32 unknown_10 = NOT_USED;
-/*%01X*/	uint8 unknown_11 = NOT_USED;
-/*%05X*/	uint32 unknown_12 = NOT_USED;
-/*%08X*/	int hash = NOT_USED;
-	
+	const Item_Struct* item_data = nullptr;
+
 	switch (m_LinkType) {
 	case linkBlank:
 		break;
 	case linkItemData:
-		if (m_ItemData != nullptr) {
-			item_id = m_ItemData->ID;
-			// TODO: add hash call
-		}
+		if (m_ItemData == nullptr) { break; }
+		m_LinkBodyStruct.item_id = m_ItemData->ID;
+		m_LinkBodyStruct.evolve_group = m_ItemData->LoreGroup; // this probably won't work for all items
+		//m_LinkBodyStruct.evolve_level = m_ItemData->EvolvingLevel;
+		// TODO: add hash call
 		break;
 	case linkLootItem:
-		if (m_LootData != nullptr) {
-			const Item_Struct* item_data = database.GetItem(m_LootData->item_id);
-			if (item_data == nullptr) { break; }
-			item_id = item_data->ID;
-			augment_0 = m_LootData->aug_1;
-			augment_1 = m_LootData->aug_2;
-			augment_2 = m_LootData->aug_3;
-			augment_3 = m_LootData->aug_4;
-			augment_4 = m_LootData->aug_5;
-			augment_5 = m_LootData->aug_6;
-			// TODO: add hash call
-		}
+		if (m_LootData == nullptr) { break; }
+		item_data = database.GetItem(m_LootData->item_id);
+		if (item_data == nullptr) { break; }
+		m_LinkBodyStruct.item_id = item_data->ID;
+		m_LinkBodyStruct.augment_1 = m_LootData->aug_1;
+		m_LinkBodyStruct.augment_2 = m_LootData->aug_2;
+		m_LinkBodyStruct.augment_3 = m_LootData->aug_3;
+		m_LinkBodyStruct.augment_4 = m_LootData->aug_4;
+		m_LinkBodyStruct.augment_5 = m_LootData->aug_5;
+		m_LinkBodyStruct.augment_6 = m_LootData->aug_6;
+		m_LinkBodyStruct.evolve_group = item_data->LoreGroup; // see note above
+		//m_LinkBodyStruct.evolve_level = item_data->EvolvingLevel;
+		// TODO: add hash call
 		break;
 	case linkItemInst:
-		if (m_ItemInst != nullptr) {
-			if (m_ItemInst->GetItem() == nullptr) { break; }
-			item_id = m_ItemInst->GetItem()->ID;
-			augment_0 = m_ItemInst->GetAugmentItemID(0);
-			augment_1 = m_ItemInst->GetAugmentItemID(1);
-			augment_2 = m_ItemInst->GetAugmentItemID(2);
-			augment_3 = m_ItemInst->GetAugmentItemID(3);
-			augment_4 = m_ItemInst->GetAugmentItemID(4);
-			augment_5 = m_ItemInst->GetAugmentItemID(5);
-			// TODO: add hash call
-		}
+		if (m_ItemInst == nullptr) { break; }
+		if (m_ItemInst->GetItem() == nullptr) { break; }
+		m_LinkBodyStruct.item_id = m_ItemInst->GetItem()->ID;
+		m_LinkBodyStruct.augment_1 = m_ItemInst->GetAugmentItemID(0);
+		m_LinkBodyStruct.augment_2 = m_ItemInst->GetAugmentItemID(1);
+		m_LinkBodyStruct.augment_3 = m_ItemInst->GetAugmentItemID(2);
+		m_LinkBodyStruct.augment_4 = m_ItemInst->GetAugmentItemID(3);
+		m_LinkBodyStruct.augment_5 = m_ItemInst->GetAugmentItemID(4);
+		m_LinkBodyStruct.augment_6 = m_ItemInst->GetAugmentItemID(5);
+		m_LinkBodyStruct.is_evolving = (m_ItemInst->IsEvolving() ? 1 : 0);
+		m_LinkBodyStruct.evolve_group = m_ItemInst->GetItem()->LoreGroup; // see note above
+		m_LinkBodyStruct.evolve_level = m_ItemInst->GetEvolveLvl();
+		m_LinkBodyStruct.ornament_icon = m_ItemInst->GetOrnamentationIcon();
+		// TODO: add hash call
 		break;
 	default:
 		break;
 	}
 	
 	if (m_ProxyItemID != NOT_USED) {
-		item_id = m_ProxyItemID;
+		m_LinkBodyStruct.item_id = m_ProxyItemID;
 	}
 
 	if (m_TaskUse) {
-		hash = 0x0000000014505DC2;
+		m_LinkBodyStruct.hash = 0x14505DC2;
 	}
 
-	if (field_use[m_ClientVersion][field_0]) { m_LinkBody.append(StringFormat("%01x", unknown_0)); }
-	if (field_use[m_ClientVersion][field_1]) { m_LinkBody.append(StringFormat("%05x", item_id)); }
-	if (field_use[m_ClientVersion][field_2]) { m_LinkBody.append(StringFormat("%05x", augment_0)); }
-	if (field_use[m_ClientVersion][field_3]) { m_LinkBody.append(StringFormat("%05x", augment_1)); }
-	if (field_use[m_ClientVersion][field_4]) { m_LinkBody.append(StringFormat("%05x", augment_2)); }
-	if (field_use[m_ClientVersion][field_5]) { m_LinkBody.append(StringFormat("%05x", augment_3)); }
-	if (field_use[m_ClientVersion][field_6]) { m_LinkBody.append(StringFormat("%05x", augment_4)); }
-	if (field_use[m_ClientVersion][field_7]) { m_LinkBody.append(StringFormat("%05x", augment_5)); }
-	if (field_use[m_ClientVersion][field_8]) { m_LinkBody.append(StringFormat("%01x", unknown_8)); }
-	if (field_use[m_ClientVersion][field_9]) { m_LinkBody.append(StringFormat("%01x", unknown_9)); }
-	if (field_use[m_ClientVersion][field_10]) { m_LinkBody.append(StringFormat("%04x", unknown_10)); }
-	if (field_use[m_ClientVersion][field_11]) { m_LinkBody.append(StringFormat("%01x", unknown_11)); }
-	if (field_use[m_ClientVersion][field_12]) { m_LinkBody.append(StringFormat("%05x", unknown_12)); }
-	if (field_use[m_ClientVersion][field_13]) { m_LinkBody.append(StringFormat("%08x", hash)); }
+	m_LinkBody = StringFormat(
+		"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%02X" "%05X" "%08X",
+		(0x0F & m_LinkBodyStruct.unknown_1),
+		(0x000FFFFF & m_LinkBodyStruct.item_id),
+		(0x000FFFFF & m_LinkBodyStruct.augment_1),
+		(0x000FFFFF & m_LinkBodyStruct.augment_2),
+		(0x000FFFFF & m_LinkBodyStruct.augment_3),
+		(0x000FFFFF & m_LinkBodyStruct.augment_4),
+		(0x000FFFFF & m_LinkBodyStruct.augment_5),
+		(0x000FFFFF & m_LinkBodyStruct.augment_6),
+		(0x0F & m_LinkBodyStruct.is_evolving),
+		(0x0000FFFF & m_LinkBodyStruct.evolve_group),
+		(0xFF & m_LinkBodyStruct.evolve_level),
+		(0x000FFFFF & m_LinkBodyStruct.ornament_icon),
+		(0xFFFFFFFF & m_LinkBodyStruct.hash)
+		);
 }
 
 void Client::TextLink::generate_text()
@@ -8459,35 +8405,74 @@ void Client::TextLink::generate_text()
 		return;
 	}
 
+	const Item_Struct* item_data = nullptr;
+
 	switch (m_LinkType) {
 	case linkBlank:
 		break;
 	case linkItemData:
-		if (m_ItemData != nullptr) {
-			m_LinkText = m_ItemData->Name;
-			return;
-		}
-		break;
+		if (m_ItemData == nullptr) { break; }
+		m_LinkText = m_ItemData->Name;
+		return;
 	case linkLootItem:
-		if (m_LootData != nullptr) {
-			const Item_Struct* item_data = database.GetItem(m_LootData->item_id);
-			if (item_data != nullptr) {
-				m_LinkText = item_data->Name;
-				return;
-			}
-		}
-		break;
+		if (m_LootData == nullptr) { break; }
+		item_data = database.GetItem(m_LootData->item_id);
+		if (item_data == nullptr) { break; }
+		m_LinkText = item_data->Name;
+		return;
 	case linkItemInst:
-		if (m_ItemInst != nullptr) {
-			if (m_ItemInst->GetItem() != nullptr) {
-				m_LinkText = m_ItemInst->GetItem()->Name;
-				return;
-			}
-		}
-		break;
+		if (m_ItemInst == nullptr) { break; }
+		if (m_ItemInst->GetItem() == nullptr) { break; }
+		m_LinkText = m_ItemInst->GetItem()->Name;
+		return;
 	default:
 		break;
 	}
 
 	m_LinkText = "null";
+}
+
+bool Client::TextLink::DegenerateLinkBody(TextLinkBody_Struct& textLinkBodyStruct, const std::string& textLinkBody)
+{
+	memset(&textLinkBodyStruct, 0, sizeof(TextLinkBody_Struct));
+	if (textLinkBody.length() != EmuConstants::TEXT_LINK_BODY_LENGTH) { return false; }
+
+	textLinkBodyStruct.unknown_1 = (uint8)strtol(textLinkBody.substr(0, 1).c_str(), nullptr, 16);
+	textLinkBodyStruct.item_id = (uint32)strtol(textLinkBody.substr(1, 5).c_str(), nullptr, 16);
+	textLinkBodyStruct.augment_1 = (uint32)strtol(textLinkBody.substr(6, 5).c_str(), nullptr, 16);
+	textLinkBodyStruct.augment_2 = (uint32)strtol(textLinkBody.substr(11, 5).c_str(), nullptr, 16);
+	textLinkBodyStruct.augment_3 = (uint32)strtol(textLinkBody.substr(16, 5).c_str(), nullptr, 16);
+	textLinkBodyStruct.augment_4 = (uint32)strtol(textLinkBody.substr(21, 5).c_str(), nullptr, 16);
+	textLinkBodyStruct.augment_5 = (uint32)strtol(textLinkBody.substr(26, 5).c_str(), nullptr, 16);
+	textLinkBodyStruct.augment_6 = (uint32)strtol(textLinkBody.substr(31, 5).c_str(), nullptr, 16);
+	textLinkBodyStruct.is_evolving = (uint8)strtol(textLinkBody.substr(36, 1).c_str(), nullptr, 16);
+	textLinkBodyStruct.evolve_group = (uint32)strtol(textLinkBody.substr(37, 4).c_str(), nullptr, 16);
+	textLinkBodyStruct.evolve_level = (uint8)strtol(textLinkBody.substr(41, 2).c_str(), nullptr, 16);
+	textLinkBodyStruct.ornament_icon = (uint32)strtol(textLinkBody.substr(43, 5).c_str(), nullptr, 16);
+	textLinkBodyStruct.hash = (int)strtol(textLinkBody.substr(48, 8).c_str(), nullptr, 16);
+
+	return true;
+}
+
+bool Client::TextLink::GenerateLinkBody(std::string& textLinkBody, const TextLinkBody_Struct& textLinkBodyStruct)
+{
+	textLinkBody = StringFormat(
+		"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%02X" "%05X" "%08X",
+		(0x0F & textLinkBodyStruct.unknown_1),
+		(0x000FFFFF & textLinkBodyStruct.item_id),
+		(0x000FFFFF & textLinkBodyStruct.augment_1),
+		(0x000FFFFF & textLinkBodyStruct.augment_2),
+		(0x000FFFFF & textLinkBodyStruct.augment_3),
+		(0x000FFFFF & textLinkBodyStruct.augment_4),
+		(0x000FFFFF & textLinkBodyStruct.augment_5),
+		(0x000FFFFF & textLinkBodyStruct.augment_6),
+		(0x0F & textLinkBodyStruct.is_evolving),
+		(0x0000FFFF & textLinkBodyStruct.evolve_group),
+		(0xFF & textLinkBodyStruct.evolve_level),
+		(0x000FFFFF & textLinkBodyStruct.ornament_icon),
+		(0xFFFFFFFF & textLinkBodyStruct.hash)
+		);
+
+	if (textLinkBody.length() != EmuConstants::TEXT_LINK_BODY_LENGTH) { return false; }
+	return true;
 }

@@ -371,7 +371,7 @@ public:
 	inline virtual int32 GetPR() const { return PR + itembonuses.PR + spellbonuses.PR; }
 	inline virtual int32 GetCR() const { return CR + itembonuses.CR + spellbonuses.CR; }
 	inline virtual int32 GetCorrup() const { return Corrup + itembonuses.Corrup + spellbonuses.Corrup; }
-	inline virtual int32 GetPhR() const { return PhR; }
+	inline virtual int32 GetPhR() const { return PhR; } // PhR bonuses not implemented yet
 	inline StatBonuses GetItemBonuses() const { return itembonuses; }
 	inline StatBonuses GetSpellBonuses() const { return spellbonuses; }
 	inline StatBonuses GetAABonuses() const { return aabonuses; }

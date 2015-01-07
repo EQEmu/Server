@@ -428,6 +428,7 @@ public:
 	inline virtual int32 GetPR() const { return PR; }
 	inline virtual int32 GetCR() const { return CR; }
 	inline virtual int32 GetCorrup() const { return Corrup; }
+	inline virtual int32 GetPhR() const { return PhR; }
 
 	int32 GetMaxStat() const;
 	int32 GetMaxResist() const;
@@ -452,6 +453,7 @@ public:
 	inline uint8 GetBaseAGI() const { return m_pp.AGI; }
 	inline uint8 GetBaseWIS() const { return m_pp.WIS; }
 	inline uint8 GetBaseCorrup() const { return 15; } // Same for all
+	inline uint8 GetBasePhR() const { return 0; } // Guessing at 0 as base
 
 	inline virtual int32 GetHeroicSTR() const { return itembonuses.HeroicSTR; }
 	inline virtual int32 GetHeroicSTA() const { return itembonuses.HeroicSTA; }
@@ -466,6 +468,7 @@ public:
 	inline virtual int32 GetHeroicPR() const { return itembonuses.HeroicPR; }
 	inline virtual int32 GetHeroicCR() const { return itembonuses.HeroicCR; }
 	inline virtual int32 GetHeroicCorrup() const { return itembonuses.HeroicCorrup; }
+	inline virtual int32 GetHeroicPhR() const { return 0; } // Heroic PhR not implemented yet
 	// Mod2
 	inline virtual int32 GetShielding() const { return itembonuses.MeleeMitigation; }
 	inline virtual int32 GetSpellShield() const { return itembonuses.SpellShield; }
@@ -832,19 +835,18 @@ public:
 		void SetProxyItemID(uint32 proxyItemID) { m_ProxyItemID = proxyItemID; } // mainly for saylinks..but, not limited to
 		void SetProxyText(const char* proxyText) { m_ProxyText = proxyText; } // overrides standard text use
 		void SetTaskUse() { m_TaskUse = true; }
-		void SetClientVersion(EQClientVersion clientVersion) { m_ClientVersion = EQLimits::ValidateClientVersion(clientVersion); }
 
 		std::string GenerateLink();
 		bool LinkError() { return m_Error; }
 
-		const char* GetLink();		// contains full format: '/12x' '<LinkBody>' '<LinkText>' '/12x'
-		const char* GetLinkBody();	// contains format: '<LinkBody>'
-		const char* GetLinkText();	// contains format: '<LinkText>'
-		std::string GetLinkString();
-		std::string GetLinkBodyString();
-		std::string GetLinkTextString();
+		std::string GetLink() { return m_Link; }			// contains full string format: '/12x' '<LinkBody>' '<LinkText>' '/12x'
+		std::string GetLinkBody() { return m_LinkBody; }	// contains string format: '<LinkBody>'
+		std::string GetLinkText() { return m_LinkText; }	// contains string format: '<LinkText>'
 
 		void Reset();
+
+		static bool DegenerateLinkBody(TextLinkBody_Struct& textLinkBodyStruct, const std::string& textLinkBody);
+		static bool GenerateLinkBody(std::string& textLinkBody, const TextLinkBody_Struct& textLinkBodyStruct);
 
 	private:
 		void generate_body();
@@ -857,10 +859,10 @@ public:
 		uint32 m_ProxyItemID;
 		const char* m_ProxyText;
 		bool m_TaskUse;
+		TextLinkBody_Struct m_LinkBodyStruct;
 		std::string m_Link;
 		std::string m_LinkBody;
 		std::string m_LinkText;
-		EQClientVersion m_ClientVersion;
 		bool m_Error;
 	};
 
