@@ -9,6 +9,31 @@
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
 
+	#include <conio.h>
+	#include <iostream>
+	#include <dos.h>
+
+namespace ConsoleColor {
+	enum Colors {
+		Black = 0,
+		Blue = 1,
+		Green = 2,
+		Cyan = 3,
+		Red = 4,
+		Magenta = 5,
+		Brown = 6,
+		LightGray = 7,
+		DarkGray = 8,
+		LightBlue = 9,
+		LightGreen = 10,
+		LightCyan = 11,
+		LightRed = 12,
+		LightMagenta = 13,
+		Yellow = 14,
+		White = 15,
+	};
+}
+
 #else
 
 	#include <sys/types.h>
@@ -156,15 +181,45 @@ bool EQEMuLog::write(LogIDs id, const char *fmt, ...)
 		if (pLogStatus[id] & 8) {
 			fprintf(stderr, "[%s] ", LogNames[id]);
 			vfprintf( stderr, fmt, argptr );
-		} else {
+		} 
+		/* This is what's outputted to console */
+		else {
+
+#ifdef _WINDOWS
+			HANDLE  console_handle;
+			console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+
+			CONSOLE_FONT_INFOEX info = { 0 };
+			info.cbSize = sizeof(info);
+			info.dwFontSize.Y = 12; // leave X as zero
+			info.FontWeight = FW_NORMAL;
+			wcscpy(info.FaceName, L"Lucida Console");
+			SetCurrentConsoleFontEx(console_handle, NULL, &info);
+
+			if (id == EQEMuLog::LogIDs::Status){	SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::Yellow); }
+			if (id == EQEMuLog::LogIDs::Error){		SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightRed); }
+			if (id == EQEMuLog::LogIDs::Normal){	SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightGreen); }
+			if (id == EQEMuLog::LogIDs::Debug){		SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::Yellow); }
+			if (id == EQEMuLog::LogIDs::Quest){		SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightCyan); } 
+			if (id == EQEMuLog::LogIDs::Commands){	SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightMagenta); }
+			if (id == EQEMuLog::LogIDs::Crash){		SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightRed); } 
+#endif
+
 			fprintf(stdout, "[%s] ", LogNames[id]);
 			vfprintf( stdout, fmt, argptr );
+
+#ifdef _WINDOWS
+			/* Always set back to white*/
+			SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::White);
+#endif
 		}
 	}
 	va_end(argptr);
 	if (dofile) {
 		fprintf(fp[id], "\n");
 	}
+
+	/* Print Lind Endings */
 	if (pLogStatus[id] & 2) {
 		if (pLogStatus[id] & 8) {
 			fprintf(stderr, "\n");
@@ -223,9 +278,38 @@ bool EQEMuLog::writePVA(LogIDs id, const char *prefix, const char *fmt, va_list 
 		if (pLogStatus[id] & 8) {
 			fprintf(stderr, "[%s] %s", LogNames[id], prefix);
 			vfprintf( stderr, fmt, argptr );
-		} else {
+		} 
+		/* Console Output */
+		else {
+			
+
+#ifdef _WINDOWS
+			HANDLE  console_handle;
+			console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+
+			CONSOLE_FONT_INFOEX info = { 0 };
+			info.cbSize = sizeof(info);
+			info.dwFontSize.Y = 12; // leave X as zero
+			info.FontWeight = FW_NORMAL;
+			wcscpy(info.FaceName, L"Lucida Console");
+			SetCurrentConsoleFontEx(console_handle, NULL, &info);
+
+			if (id == EQEMuLog::LogIDs::Status){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::Yellow); }
+			if (id == EQEMuLog::LogIDs::Error){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightRed); }
+			if (id == EQEMuLog::LogIDs::Normal){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightGreen); }
+			if (id == EQEMuLog::LogIDs::Debug){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::Yellow); }
+			if (id == EQEMuLog::LogIDs::Quest){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightCyan); }
+			if (id == EQEMuLog::LogIDs::Commands){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightMagenta); }
+			if (id == EQEMuLog::LogIDs::Crash){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightRed); }
+#endif
+
 			fprintf(stdout, "[%s] %s", LogNames[id], prefix);
-			vfprintf( stdout, fmt, argptr );
+			vfprintf(stdout, fmt, argptr);
+
+#ifdef _WINDOWS
+			/* Always set back to white*/
+			SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::White);
+#endif
 		}
 	}
 	va_end(argptr);
@@ -288,9 +372,36 @@ bool EQEMuLog::writebuf(LogIDs id, const char *buf, uint8 size, uint32 count)
 			fwrite(buf, size, count, stderr);
 			fprintf(stderr, "\n");
 		} else {
+#ifdef _WINDOWS
+			HANDLE  console_handle;
+			console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+
+			CONSOLE_FONT_INFOEX info = { 0 };
+			info.cbSize = sizeof(info);
+			info.dwFontSize.Y = 12; // leave X as zero
+			info.FontWeight = FW_NORMAL;
+			wcscpy(info.FaceName, L"Lucida Console");
+			SetCurrentConsoleFontEx(console_handle, NULL, &info);
+
+			if (id == EQEMuLog::LogIDs::Status){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::Yellow); }
+			if (id == EQEMuLog::LogIDs::Error){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightRed); }
+			if (id == EQEMuLog::LogIDs::Normal){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightGreen); }
+			if (id == EQEMuLog::LogIDs::Debug){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightGreen); }
+			if (id == EQEMuLog::LogIDs::Quest){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightCyan); }
+			if (id == EQEMuLog::LogIDs::Commands){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightMagenta); }
+			if (id == EQEMuLog::LogIDs::Crash){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightRed); }
+#endif
+
 			fprintf(stdout, "[%s] ", LogNames[id]);
 			fwrite(buf, size, count, stdout);
 			fprintf(stdout, "\n");
+
+#ifdef _WINDOWS
+			/* Always set back to white*/
+			SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::White);
+#endif
+
+
 		}
 	}
 	if (dofile) {
