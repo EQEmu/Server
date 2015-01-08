@@ -3303,7 +3303,7 @@ void Database::SetGroupLeaderName(uint32 gid, const char* name) {
 		return;
 	}
 
-	query = StringFormat("INSERT INTO group_leaders(gid, leadername, marknpc, leadershipaa, maintank, assist, puller, mentoree, mentor_percent) VALUES(%u, '%s', '', '', '', '', '', '', '0')",
+	query = StringFormat("REPLACE INTO group_leaders(gid, leadername, marknpc, leadershipaa, maintank, assist, puller, mentoree, mentor_percent) VALUES(%u, '%s', '', '', '', '', '', '', '0')",
 						 gid, EscapeString(name).c_str());
 	result = QueryDatabase(query);
 
