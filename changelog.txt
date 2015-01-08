@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 01/07/2015 ==
 Uleat: Excluded text link body from message scrambling in Client::GarbleMessage()
+Trevius: Mercenaries now load directly from tables only.  The vwMercNpcTypes view is no longer required and can be deleted.
 
 == 01/06/2015 ==
 Trevius: Changed the pet command #defines to be based on RoF2 list of pet commands and added decodes to Titanium, SoF and SoD.

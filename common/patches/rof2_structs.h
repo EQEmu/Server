@@ -884,6 +884,12 @@ struct Disciplines_Struct {
 };
 
 
+struct DisciplineTimer_Struct
+{
+	/*00*/ uint32	TimerID;
+	/*04*/ uint32	Duration;
+	/*08*/ uint32	Unknown08;
+};
 
 struct Tribute_Struct {
 	uint32 tribute;

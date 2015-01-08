@@ -1956,39 +1956,81 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 	//need to save based on merc_npc_type & client level
 	uint32 merc_type_id = id * 100 + clientlevel;
 
-	// If NPC is already in tree, return it.
+	// If Merc is already in tree, return it.
 	auto itr = zone->merctable.find(merc_type_id);
 	if(itr != zone->merctable.end())
 		return itr->second;
 
-	//If the NPC type is 0, return nullptr. (sanity check)
+	//If the id is 0, return nullptr. (sanity check)
 	if(id == 0)
         return nullptr;
 
-	// Otherwise, get NPCs from database.
-	// If id is 0, load all npc_types for the current zone,
-    // according to spawn2.
-    std::string query = StringFormat("SELECT vwMercNpcTypes.merc_npc_type_id, vwMercNpcTypes.name, "
-                                    "vwMercNpcTypes.level, vwMercNpcTypes.race_id, vwMercNpcTypes.class_id, "
-                                    "vwMercNpcTypes.hp, vwMercNpcTypes.mana, vwMercNpcTypes.gender, "
-                                    "vwMercNpcTypes.texture, vwMercNpcTypes.helmtexture, vwMercNpcTypes.attack_speed, "
-                                    "vwMercNpcTypes.STR, vwMercNpcTypes.STA, vwMercNpcTypes.DEX, vwMercNpcTypes.AGI, "
-                                    "vwMercNpcTypes._INT, vwMercNpcTypes.WIS, vwMercNpcTypes.CHA, vwMercNpcTypes.MR, "
-                                    "vwMercNpcTypes.CR, vwMercNpcTypes.DR, vwMercNpcTypes.FR, vwMercNpcTypes.PR, "
-                                    "vwMercNpcTypes.Corrup, vwMercNpcTypes.mindmg, vwMercNpcTypes.maxdmg, "
-                                    "vwMercNpcTypes.attack_count, vwMercNpcTypes.special_abilities, "
-                                    "vwMercNpcTypes.d_melee_texture1, vwMercNpcTypes.d_melee_texture2, "
-                                    "vwMercNpcTypes.prim_melee_type, vwMercNpcTypes.sec_melee_type, "
-                                    "vwMercNpcTypes.runspeed, vwMercNpcTypes.hp_regen_rate, vwMercNpcTypes.mana_regen_rate, "
-                                    "vwMercNpcTypes.bodytype, vwMercNpcTypes.armortint_id, "
-                                    "vwMercNpcTypes.armortint_red, vwMercNpcTypes.armortint_green, vwMercNpcTypes.armortint_blue, "
-                                    "vwMercNpcTypes.AC, vwMercNpcTypes.ATK, vwMercNpcTypes.Accuracy, vwMercNpcTypes.spellscale, "
-                                    "vwMercNpcTypes.healscale FROM vwMercNpcTypes "
-                                    "WHERE merc_npc_type_id = %d AND clientlevel = %d AND race_id = %d",
-                                    id, clientlevel, raceid); //dual primary keys. one is ID, one is level.
+	// Otherwise, load Merc data on demand
+	std::string query = StringFormat("SELECT "
+		"m_stats.merc_npc_type_id, "
+		"'' AS name, "
+		"m_stats.level, "
+		"m_types.race_id, "
+		"m_subtypes.class_id, "
+		"m_stats.hp, "
+		"m_stats.mana, "
+		"0 AS gender, "
+		"m_armorinfo.texture, "
+		"m_armorinfo.helmtexture, "
+		"m_stats.attack_speed, "
+		"m_stats.STR, "
+		"m_stats.STA, "
+		"m_stats.DEX, "
+		"m_stats.AGI, "
+		"m_stats._INT, "
+		"m_stats.WIS, "
+		"m_stats.CHA, "
+		"m_stats.MR, "
+		"m_stats.CR, "
+		"m_stats.DR, "
+		"m_stats.FR, "
+		"m_stats.PR, "
+		"m_stats.Corrup, "
+		"m_stats.mindmg, "
+		"m_stats.maxdmg, "
+		"m_stats.attack_count, "
+		"m_stats.special_abilities, "
+		"m_weaponinfo.d_melee_texture1, "
+		"m_weaponinfo.d_melee_texture2, "
+		"m_weaponinfo.prim_melee_type, "
+		"m_weaponinfo.sec_melee_type, "
+		"m_stats.runspeed, "
+		"m_stats.hp_regen_rate, "
+		"m_stats.mana_regen_rate, "
+		"1 AS bodytype, "
+		"m_armorinfo.armortint_id, "
+		"m_armorinfo.armortint_red, "
+		"m_armorinfo.armortint_green, "
+		"m_armorinfo.armortint_blue, "
+		"m_stats.AC, "
+		"m_stats.ATK, "
+		"m_stats.Accuracy, "
+		"m_stats.spellscale, "
+		"m_stats.healscale "
+		"FROM merc_stats m_stats "
+		"INNER JOIN merc_armorinfo m_armorinfo "
+		"ON m_stats.merc_npc_type_id = m_armorinfo.merc_npc_type_id "
+		"AND m_armorinfo.minlevel <= m_stats.level AND m_armorinfo.maxlevel >= m_stats.level "
+		"INNER JOIN merc_weaponinfo m_weaponinfo "
+		"ON m_stats.merc_npc_type_id = m_weaponinfo.merc_npc_type_id "
+		"AND m_weaponinfo.minlevel <= m_stats.level AND m_weaponinfo.maxlevel >= m_stats.level "
+		"INNER JOIN merc_templates m_templates "
+		"ON m_templates.merc_npc_type_id = m_stats.merc_npc_type_id "
+		"INNER JOIN merc_types m_types "
+		"ON m_templates.merc_type_id = m_types.merc_type_id "
+		"INNER JOIN merc_subtypes m_subtypes "
+		"ON m_templates.merc_subtype_id = m_subtypes.merc_subtype_id "
+		"WHERE m_templates.merc_npc_type_id = %d AND m_stats.clientlevel = %d AND m_types.race_id = %d",
+		id, clientlevel, raceid); //dual primary keys. one is ID, one is level.
+
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        std::cerr << "Error loading NPCs from database. Bad query: " << results.ErrorMessage() << std::endl;
+        std::cerr << "Error loading Mercenaries from database. Bad query: " << results.ErrorMessage() << std::endl;
         return nullptr;
     }
 
@@ -2094,16 +2136,16 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
         tmpNPCType->accuracy_rating = atoi(row[42]);
         tmpNPCType->scalerate = RuleI(Mercs, ScaleRate);
         tmpNPCType->spellscale = atoi(row[43]);
-        tmpNPCType->healscale = atoi(row[4]);
+        tmpNPCType->healscale = atoi(row[44]);
 
-        // If NPC with duplicate NPC id already in table,
+        // If Merc with duplicate NPC id already in table,
         // free item we attempted to add.
-        if (zone->merctable.find(tmpNPCType->npc_id * 100 + clientlevel) != zone->merctable.end()) {
+		if (zone->merctable.find(merc_type_id) != zone->merctable.end()) {
             delete tmpNPCType;
             return nullptr;
         }
 
-        zone->merctable[tmpNPCType->npc_id * 100 + clientlevel]=tmpNPCType;
+		zone->merctable[merc_type_id] = tmpNPCType;
         npc = tmpNPCType;
     }
 

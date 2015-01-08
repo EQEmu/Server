@@ -581,13 +581,19 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
                     inst->PutAugment(this, i, aug[i]);
 
         if (slot_id >= 8000 && slot_id <= 8999)
+		{
             put_slot_id = inv->PushCursor(*inst);
-        else if (slot_id >= 3111 && slot_id <= 3179) {
+		}
+        else if (slot_id >= 3111 && slot_id <= 3179)
+		{
             // Admins: please report any occurrences of this error
             LogFile->write(EQEMuLog::Error, "Warning: Defunct location for item in inventory: charid=%i, item_id=%i, slot_id=%i .. pushing to cursor...", char_id, item_id, slot_id);
             put_slot_id = inv->PushCursor(*inst);
-        } else
-            put_slot_id = inv->PutItem(slot_id, *inst);
+		}
+		else
+		{
+			put_slot_id = inv->PutItem(slot_id, *inst);
+		}
 
         safe_delete(inst);
 
