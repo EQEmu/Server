@@ -28,7 +28,7 @@ public:
 	MySQLRequestRow operator++(int);
 	bool operator==(const MySQLRequestRow& rhs);
 	bool operator!=(const MySQLRequestRow& rhs);
-
+	MySQLRequestRow operator*();
 	char* operator[](int index);
 
 };
