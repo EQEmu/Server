@@ -228,7 +228,7 @@ void GroupLFPList::SendLFPMatches(ServerLFPMatchesRequest_Struct* smrs) {
 		}
 	}
 
-	ServerPacket* Pack = new ServerPacket(ServerOP_LFPMatches, (sizeof(ServerLFPMatchesResponse_Struct) * Matches) + 4);
+	auto Pack = new ServerPacket(ServerOP_LFPMatches, (sizeof(ServerLFPMatchesResponse_Struct) * Matches) + 4);
 
 	char *Buf = (char *)Pack->pBuffer;
 
