@@ -280,11 +280,11 @@ static void ProcessMailTo(Client *c, std::string MailMessage) {
 
 	int VisibleRecipients = 0;
 
-	for(unsigned int i = 0; i<Recipients.size(); i++) {
+	for (auto &Recipient : Recipients) {
 
-		if(Recipients[i][0] == '-') {
+		if (Recipient[0] == '-') {
 
-			Recipients[i] = Recipients[i].substr(1);
+			Recipient = Recipient.substr(1);
 
 		}
 		else {
@@ -294,20 +294,20 @@ static void ProcessMailTo(Client *c, std::string MailMessage) {
 
 			VisibleRecipients++;
 
-			RecipientsString = RecipientsString + GetMailPrefix() + Recipients[i];
+			RecipientsString = RecipientsString + GetMailPrefix() + Recipient;
 		}
 	}
 	if(VisibleRecipients == 0)
 		RecipientsString = "<UNDISCLOSED RECIPIENTS>";
 
-	for(unsigned int i=0; i<Recipients.size(); i++) {
+	for (auto &Recipient : Recipients) {
 
-		if(!database.SendMail(Recipients[i], c->MailBoxName(), Subject, Body, RecipientsString)) {
+		if (!database.SendMail(Recipient, c->MailBoxName(), Subject, Body, RecipientsString)) {
 
-			_log(UCS__ERROR, "Failed in SendMail(%s, %s, %s, %s)", Recipients[i].c_str(),
-						c->MailBoxName().c_str(), Subject.c_str(), RecipientsString.c_str());
+			_log(UCS__ERROR, "Failed in SendMail(%s, %s, %s, %s)", Recipient.c_str(),
+			     c->MailBoxName().c_str(), Subject.c_str(), RecipientsString.c_str());
 
-			int PacketLength = 10 + Recipients[i].length() + Subject.length();
+			int PacketLength = 10 + Recipient.length() + Subject.length();
 
 			// Failure
 			EQApplicationPacket *outapp = new EQApplicationPacket(OP_MailDeliveryStatus, PacketLength);
@@ -316,7 +316,7 @@ static void ProcessMailTo(Client *c, std::string MailMessage) {
 
 			VARSTRUCT_ENCODE_STRING(PacketBuffer, "1");
 			VARSTRUCT_ENCODE_TYPE(uint8, PacketBuffer, 0x20);
-			VARSTRUCT_ENCODE_STRING(PacketBuffer, Recipients[i].c_str());
+			VARSTRUCT_ENCODE_STRING(PacketBuffer, Recipient.c_str());
 			VARSTRUCT_ENCODE_STRING(PacketBuffer, Subject.c_str());
 			VARSTRUCT_ENCODE_STRING(PacketBuffer, "0");
 			VARSTRUCT_ENCODE_TYPE(uint16, PacketBuffer, 0x3237);
@@ -505,8 +505,8 @@ Client::Client(EQStream *eqs) {
 	AllowInvites = true;
 	Revoked = false;
 
-	for(int i = 0; i < MAX_JOINED_CHANNELS ; i++)
-		JoinedChannels[i] = nullptr;
+	for (auto &elem : JoinedChannels)
+		elem = nullptr;
 
 	TotalKarma = 0;
 	AttemptedMessages = 0;
@@ -995,8 +995,8 @@ int Client::ChannelCount() {
 
 	int NumberOfChannels = 0;
 
-	for(int i = 0; i < MAX_JOINED_CHANNELS; i++)
-		if(JoinedChannels[i])
+	for (auto &elem : JoinedChannels)
+		if (elem)
 			NumberOfChannels++;
 
 	return NumberOfChannels;
@@ -1005,11 +1005,9 @@ int Client::ChannelCount() {
 
 void Client::JoinChannels(std::string ChannelNameList) {
 
-	for(int x = 0; x < ChannelNameList.size(); ++x)
-	{
-		if(ChannelNameList[x] == '%')
-		{
-			ChannelNameList[x] = '/';
+	for (auto &elem : ChannelNameList) {
+		if (elem == '%') {
+			elem = '/';
 		}
 	}
 
@@ -1203,13 +1201,13 @@ void Client::LeaveChannels(std::string ChannelNameList) {
 
 void Client::LeaveAllChannels(bool SendUpdatedChannelList) {
 
-	for(int i = 0; i < MAX_JOINED_CHANNELS; i++) {
+	for (auto &elem : JoinedChannels) {
 
-		if(JoinedChannels[i]) {
+		if (elem) {
 
-			ChannelList->RemoveClientFromChannel(JoinedChannels[i]->GetName(), this);
+			ChannelList->RemoveClientFromChannel(elem->GetName(), this);
 
-			JoinedChannels[i] = nullptr;
+			elem = nullptr;
 		}
 	}
 
@@ -1310,11 +1308,9 @@ void Client::SendChannelMessage(std::string Message)
 		if(GetKarma() < RuleI(Chat, KarmaGlobalChatLimit))
 		{
 			CharacterEntry *char_ent = nullptr;
-			for(int x = 0; x < Characters.size(); ++x)
-			{
-				if(Characters[x].Name.compare(GetName()) == 0)
-				{
-					char_ent = &Characters[x];
+			for (auto &elem : Characters) {
+				if (elem.Name.compare(GetName()) == 0) {
+					char_ent = &elem;
 					break;
 				}
 			}
@@ -1423,11 +1419,9 @@ void Client::SendChannelMessageByNumber(std::string Message) {
 		if(GetKarma() < RuleI(Chat, KarmaGlobalChatLimit))
 		{
 			CharacterEntry *char_ent = nullptr;
-			for(int x = 0; x < Characters.size(); ++x)
-			{
-				if(Characters[x].Name.compare(GetName()) == 0)
-				{
-					char_ent = &Characters[x];
+			for (auto &elem : Characters) {
+				if (elem.Name.compare(GetName()) == 0) {
+					char_ent = &elem;
 					break;
 				}
 			}
