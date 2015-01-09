@@ -392,8 +392,7 @@ void Adventure::MoveCorpsesToGraveyard()
         charid_list.push_back(atoi(row[1]));
     }
 
-	for (auto iter = dbid_list.begin(); iter != dbid_list.end(); ++iter)
-	{
+    for (auto &elem : dbid_list) {
 		float x = GetTemplate()->graveyard_x + emu_random.Real(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
 		float y = GetTemplate()->graveyard_y + emu_random.Real(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
 		float z = GetTemplate()->graveyard_z;
