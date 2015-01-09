@@ -114,7 +114,8 @@ bool Console::SendChannelMessage(const ServerChannelMessage_Struct* scm) {
 		}
 		case 7: {
 			SendMessage(1, "[%s] tells you, '%s'", scm->from, scm->message);
-			ServerPacket* pack = new ServerPacket(ServerOP_ChannelMessage, sizeof(ServerChannelMessage_Struct) + strlen(scm->message) + 1);
+			auto pack = new ServerPacket(ServerOP_ChannelMessage,
+						     sizeof(ServerChannelMessage_Struct) + strlen(scm->message) + 1);
 			memcpy(pack->pBuffer, scm, pack->size);
 			ServerChannelMessage_Struct* scm2 = (ServerChannelMessage_Struct*) pack->pBuffer;
 			strcpy(scm2->deliverto, scm2->from);
@@ -241,7 +242,7 @@ bool Console::Process() {
 		struct in_addr	in;
 		in.s_addr = GetIP();
 		if(tcpc->GetPacketMode() == EmuTCPConnection::packetModeZone) {
-			ZoneServer* zs = new ZoneServer(tcpc);
+			auto zs = new ZoneServer(tcpc);
 			_log(WORLD__CONSOLE,"New zoneserver #%d from %s:%d", zs->GetID(), inet_ntoa(in), GetPort());
 			zoneserver_list.Add(zs);
 			numzones++;
@@ -477,7 +478,8 @@ void Console::ProcessCommand(const char* command) {
 			else if (strcasecmp(sep.arg[0], "signalcharbyname") == 0) {
 				SendMessage(1, "Signal Sent to %s with ID %i", (char*) sep.arg[1], atoi(sep.arg[2]));
 				uint32 message_len = strlen((char*) sep.arg[1]) + 1;
-				ServerPacket* pack = new ServerPacket(ServerOP_CZSignalClientByName, sizeof(CZClientSignalByName_Struct) + message_len);
+				auto pack = new ServerPacket(ServerOP_CZSignalClientByName,
+							     sizeof(CZClientSignalByName_Struct) + message_len);
 				CZClientSignalByName_Struct* CZSC = (CZClientSignalByName_Struct*) pack->pBuffer;
 				strn0cpy(CZSC->Name, (char*) sep.arg[1], 64);
 				CZSC->data = atoi(sep.arg[2]);
@@ -503,7 +505,7 @@ void Console::ProcessCommand(const char* command) {
 			}
 			else if (strcasecmp(sep.arg[0], "uptime") == 0) {
 				if (sep.IsNumber(1) && atoi(sep.arg[1]) > 0) {
-					ServerPacket* pack = new ServerPacket(ServerOP_Uptime, sizeof(ServerUptime_Struct));
+					auto pack = new ServerPacket(ServerOP_Uptime, sizeof(ServerUptime_Struct));
 					ServerUptime_Struct* sus = (ServerUptime_Struct*) pack->pBuffer;
 					snprintf(sus->adminname, sizeof(sus->adminname), "*%s", this->GetName());
 					sus->zoneserverid = atoi(sep.arg[1]);
@@ -628,7 +630,7 @@ void Console::ProcessCommand(const char* command) {
 				char tmpname[64];
 				tmpname[0] = '*';
 				strcpy(&tmpname[1], paccountname);
-				ServerPacket* pack = new ServerPacket;
+				auto pack = new ServerPacket;
 				pack->opcode = ServerOP_KickPlayer;
 				pack->size = sizeof(ServerKickPlayer_Struct);
 				pack->pBuffer = new uchar[pack->size];
@@ -640,7 +642,7 @@ void Console::ProcessCommand(const char* command) {
 				delete pack;
 			}
 			else if (strcasecmp(sep.arg[0], "who") == 0) {
-				Who_All_Struct* whom = new Who_All_Struct;
+				auto whom = new Who_All_Struct;
 				memset(whom, 0, sizeof(Who_All_Struct));
 				whom->lvllow = 0xFFFF;
 				whom->lvlhigh = 0xFFFF;
@@ -681,7 +683,7 @@ void Console::ProcessCommand(const char* command) {
 					tmpname[0] = '*';
 					strcpy(&tmpname[1], paccountname);
 
-					ServerPacket* pack = new ServerPacket;
+					auto pack = new ServerPacket;
 					pack->size = sizeof(ServerZoneStateChange_struct);
 					pack->pBuffer = new uchar[pack->size];
 					memset(pack->pBuffer, 0, sizeof(ServerZoneStateChange_struct));
@@ -841,7 +843,7 @@ void Console::ProcessCommand(const char* command) {
 			else if (strcasecmp(sep.arg[0], "reloadworld") == 0 && admin > 101)
 			{
 				SendEmoteMessage(0,0,0,15,"Reloading World...");
-				ServerPacket* pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));
+				auto pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));
 				ReloadWorld_Struct* RW = (ReloadWorld_Struct*) pack->pBuffer;
 				RW->Option = 1;
 				zoneserver_list.SendPacket(pack);
