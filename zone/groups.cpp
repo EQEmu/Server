@@ -231,7 +231,6 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 			if(owner)
 			{
 				CharacterID = owner->CastToClient()->CharacterID();
-				NewMemberName = newmember->GetName();
 			}
 			ismerc = true;
 		}
@@ -282,14 +281,7 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 		if (members[i] != nullptr && members[i] != newmember)
 		{
 			//fill in group join & send it
-			if(members[i]->IsMerc())
-			{
-				strcpy(gj->yourname, members[i]->GetName());
-			}
-			else
-			{
-				strcpy(gj->yourname, members[i]->GetCleanName());
-			}
+			strcpy(gj->yourname, members[i]->GetCleanName());
 			if(members[i]->IsClient())
 			{
 				members[i]->CastToClient()->QueuePacket(outapp);
@@ -336,7 +328,7 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 			Client* owner = newmember->CastToMerc()->GetMercOwner();
 			if(owner)
 			{
-				database.SetGroupID(newmember->GetName(), GetID(), owner->CharacterID(), true);
+				database.SetGroupID(NewMemberName, GetID(), owner->CharacterID(), true);
 			}
 		}
 #ifdef BOTS
@@ -475,7 +467,7 @@ bool Group::UpdatePlayer(Mob* update){
 
 	for (i = 0; i < MAX_GROUP_MEMBERS; i++)
 	{
-		if (!strcasecmp(membername[i],update->GetName()))
+		if (!strcasecmp(membername[i],update->GetCleanName()))
 		{
 			members[i] = update;
 			members[i]->SetGrouped(true);
@@ -545,7 +537,7 @@ void Group::SendGroupJoinOOZ(Mob* NewMember) {
 	gj->gid = GetID();
 	gj->zoneid = zone->GetZoneID();
 	gj->instance_id = zone->GetInstanceID();
-	strcpy(gj->member_name, NewMember->GetName());
+	strcpy(gj->member_name, NewMember->GetCleanName());
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 
@@ -645,7 +637,7 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 	gl->gid = GetID();
 	gl->zoneid = zone->GetZoneID();
 	gl->instance_id = zone->GetInstanceID();
-	strcpy(gl->member_name, oldmember->GetName());
+	strcpy(gl->member_name, oldmember->GetCleanName());
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 
@@ -696,7 +688,7 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 		Client* owner = oldmember->CastToMerc()->GetMercOwner();
 		if(owner)
 		{
-			database.SetGroupID(oldmember->GetName(), 0, owner->CharacterID(), true);
+			database.SetGroupID(oldmember->GetCleanName(), 0, owner->CharacterID(), true);
 		}
 	}
 
@@ -706,19 +698,19 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 	if(HasRole(oldmember, RoleTank))
 	{
 		SetGroupTankTarget(0);
-		UnDelegateMainTank(oldmember->GetName());
+		UnDelegateMainTank(oldmember->GetCleanName());
 	}
 
 	if(HasRole(oldmember, RoleAssist))
 	{
 		SetGroupAssistTarget(0);
-		UnDelegateMainAssist(oldmember->GetName());
+		UnDelegateMainAssist(oldmember->GetCleanName());
 	}
 
 	if(HasRole(oldmember, RolePuller))
 	{
 		SetGroupPullerTarget(0);
-		UnDelegatePuller(oldmember->GetName());
+		UnDelegatePuller(oldmember->GetCleanName());
 	}
 
 	if (oldmember->GetName() == mentoree_name)
@@ -858,7 +850,7 @@ void Group::GroupMessage(Mob* sender, uint8 language, uint8 lang_skill, const ch
 	gcm->zoneid = zone->GetZoneID();
 	gcm->groupid = GetID();
 	gcm->instanceid = zone->GetInstanceID();
-	strcpy(gcm->from, sender->GetName());
+	strcpy(gcm->from, sender->GetCleanName());
 	strcpy(gcm->message, message);
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
@@ -900,8 +892,8 @@ void Group::DisbandGroup() {
 				Leader = members[i]->CastToClient();
 			}
 
-			strcpy(gu->yourname, members[i]->GetName());
-			database.SetGroupID(members[i]->GetName(), 0, members[i]->CastToClient()->CharacterID(), false);
+			strcpy(gu->yourname, members[i]->GetCleanName());
+			database.SetGroupID(members[i]->GetCleanName(), 0, members[i]->CastToClient()->CharacterID(), false);
 			members[i]->CastToClient()->QueuePacket(outapp);
 			SendMarkedNPCsToMember(members[i]->CastToClient(), true);
 		}
@@ -911,7 +903,7 @@ void Group::DisbandGroup() {
 			Client* owner = members[i]->CastToMerc()->GetMercOwner();
 			if(owner)
 			{
-				database.SetGroupID(members[i]->GetName(), 0, owner->CharacterID(), true);
+				database.SetGroupID(members[i]->GetCleanName(), 0, owner->CharacterID(), true);
 			}
 		}
 
@@ -930,11 +922,12 @@ void Group::DisbandGroup() {
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 
-	entity_list.RemoveGroup(GetID());
 	if(GetID() != 0)
 	{
 		database.ClearGroup(GetID());
 	}
+
+	entity_list.RemoveGroup(GetID());
 
 	if(Leader && (Leader->IsLFP()))
 	{
@@ -975,7 +968,7 @@ void Group::SendUpdate(uint32 type, Mob* member)
 
 	for (uint32 i = 0; i < MAX_GROUP_MEMBERS; ++i)
 		if (members[i] != nullptr && members[i] != member)
-			strcpy(gu->membername[x++], members[i]->GetName());
+			strcpy(gu->membername[x++], members[i]->GetCleanName());
 
 	member->CastToClient()->QueuePacket(outapp);
 
@@ -1156,7 +1149,7 @@ void Client::LeaveGroup() {
 	{
 		int32 MemberCount = g->GroupCount();
 		// Account for both client and merc leaving the group
-		if (GetMerc() && GetMerc()->HasGroup() && GetMerc()->GetGroup() == g)
+		if (GetMerc() && g == GetMerc()->GetGroup())
 		{
 			MemberCount -= 1;
 		}
@@ -1177,10 +1170,10 @@ void Client::LeaveGroup() {
 	else
 	{
 		//force things a little
-		database.SetGroupID(GetName(), 0, CharacterID(), false);
+		database.SetGroupID(GetCleanName(), 0, CharacterID(), false);
 		if (GetMerc())
 		{
-			database.SetGroupID(GetMerc()->GetName(), 0, CharacterID(), true);
+			database.SetGroupID(GetMerc()->GetCleanName(), 0, CharacterID(), true);
 		}
 	}
 
