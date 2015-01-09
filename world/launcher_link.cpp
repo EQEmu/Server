@@ -80,7 +80,7 @@ bool LauncherLink::Process() {
 						struct in_addr in;
 						in.s_addr = GetIP();
 						_log(WORLD__LAUNCH_ERR, "Launcher authorization failed.");
-						ServerPacket* pack = new ServerPacket(ServerOP_ZAAuthFailed);
+						auto pack = new ServerPacket(ServerOP_ZAAuthFailed);
 						SendPacket(pack);
 						delete pack;
 						Disconnect();
@@ -91,7 +91,7 @@ bool LauncherLink::Process() {
 					struct in_addr in;
 					in.s_addr = GetIP();
 					_log(WORLD__LAUNCH_ERR, "Launcher authorization failed.");
-					ServerPacket* pack = new ServerPacket(ServerOP_ZAAuthFailed);
+					auto pack = new ServerPacket(ServerOP_ZAAuthFailed);
 					SendPacket(pack);
 					delete pack;
 					Disconnect();
@@ -207,7 +207,7 @@ void LauncherLink::BootZone(const char *short_name, uint16 port) {
 }
 
 void LauncherLink::StartZone(const char *short_name) {
-	ServerPacket* pack = new ServerPacket(ServerOP_LauncherZoneRequest, sizeof(LauncherZoneRequest));
+	auto pack = new ServerPacket(ServerOP_LauncherZoneRequest, sizeof(LauncherZoneRequest));
 	LauncherZoneRequest* s = (LauncherZoneRequest *) pack->pBuffer;
 
 	strn0cpy(s->short_name, short_name, 32);
@@ -218,7 +218,7 @@ void LauncherLink::StartZone(const char *short_name) {
 }
 
 void LauncherLink::RestartZone(const char *short_name) {
-	ServerPacket* pack = new ServerPacket(ServerOP_LauncherZoneRequest, sizeof(LauncherZoneRequest));
+	auto pack = new ServerPacket(ServerOP_LauncherZoneRequest, sizeof(LauncherZoneRequest));
 	LauncherZoneRequest* s = (LauncherZoneRequest *) pack->pBuffer;
 
 	strn0cpy(s->short_name, short_name, 32);
@@ -229,7 +229,7 @@ void LauncherLink::RestartZone(const char *short_name) {
 }
 
 void LauncherLink::StopZone(const char *short_name) {
-	ServerPacket* pack = new ServerPacket(ServerOP_LauncherZoneRequest, sizeof(LauncherZoneRequest));
+	auto pack = new ServerPacket(ServerOP_LauncherZoneRequest, sizeof(LauncherZoneRequest));
 	LauncherZoneRequest* s = (LauncherZoneRequest *) pack->pBuffer;
 
 	strn0cpy(s->short_name, short_name, 32);
@@ -329,7 +329,7 @@ void LauncherLink::GetZoneDetails(const char *short_name, std::map<std::string,s
 }
 
 void LauncherLink::Shutdown() {
-	ServerPacket* pack = new ServerPacket(ServerOP_ShutdownAll);
+	auto pack = new ServerPacket(ServerOP_ShutdownAll);
 	SendPacket(pack);
 	delete pack;
 }
