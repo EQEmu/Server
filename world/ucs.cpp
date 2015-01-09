@@ -52,7 +52,7 @@ bool UCSConnection::Process()
 						struct in_addr in;
 						in.s_addr = GetIP();
 						_log(UCS__ERROR, "UCS authorization failed.");
-						ServerPacket* pack = new ServerPacket(ServerOP_ZAAuthFailed);
+						auto pack = new ServerPacket(ServerOP_ZAAuthFailed);
 						SendPacket(pack);
 						delete pack;
 						Disconnect();
@@ -64,7 +64,7 @@ bool UCSConnection::Process()
 					struct in_addr in;
 					in.s_addr = GetIP();
 					_log(UCS__ERROR, "UCS authorization failed.");
-					ServerPacket* pack = new ServerPacket(ServerOP_ZAAuthFailed);
+					auto pack = new ServerPacket(ServerOP_ZAAuthFailed);
 					SendPacket(pack);
 					delete pack;
 					Disconnect();
@@ -117,7 +117,7 @@ bool UCSConnection::SendPacket(ServerPacket* pack)
 
 void UCSConnection::SendMessage(const char *From, const char *Message)
 {
-	ServerPacket* pack = new ServerPacket(ServerOP_UCSMessage, strlen(From) + strlen(Message) + 2);
+	auto pack = new ServerPacket(ServerOP_UCSMessage, strlen(From) + strlen(Message) + 2);
 
 	char *Buffer = (char *)pack->pBuffer;
 
