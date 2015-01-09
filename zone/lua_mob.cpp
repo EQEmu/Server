@@ -576,6 +576,11 @@ int Lua_Mob::GetCorruption() {
 	return self->GetCorrup();
 }
 
+int Lua_Mob::GetPhR() {
+	Lua_Safe_Call_Int();
+	return self->GetPhR();
+}
+
 int Lua_Mob::GetMaxSTR() {
 	Lua_Safe_Call_Int();
 	return self->GetMaxSTR();
@@ -895,17 +900,17 @@ void Lua_Mob::AddToHateList(Lua_Mob other, int hate, int damage, bool yell_for_h
 
 void Lua_Mob::SetHate(Lua_Mob other) {
 	Lua_Safe_Call_Void();
-	self->SetHate(other);
+	self->SetHateAmountOnEnt(other);
 }
 
 void Lua_Mob::SetHate(Lua_Mob other, int hate) {
 	Lua_Safe_Call_Void();
-	self->SetHate(other, hate);
+	self->SetHateAmountOnEnt(other, hate);
 }
 
 void Lua_Mob::SetHate(Lua_Mob other, int hate, int damage) {
 	Lua_Safe_Call_Void();
-	self->SetHate(other, hate, damage);
+	self->SetHateAmountOnEnt(other, hate, damage);
 }
 
 void Lua_Mob::HalveAggro(Lua_Mob other) {
@@ -1962,6 +1967,7 @@ luabind::scope lua_register_mob() {
 		.def("GetPR", &Lua_Mob::GetPR)
 		.def("GetCR", &Lua_Mob::GetCR)
 		.def("GetCorruption", &Lua_Mob::GetCorruption)
+		.def("GetPhR", &Lua_Mob::GetPhR)
 		.def("GetMaxSTR", &Lua_Mob::GetMaxSTR)
 		.def("GetMaxSTA", &Lua_Mob::GetMaxSTA)
 		.def("GetMaxDEX", &Lua_Mob::GetMaxDEX)

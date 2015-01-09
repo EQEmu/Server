@@ -49,6 +49,7 @@ struct NPCType
 	uint32	npc_id;
 	uint8	texture;
 	uint8	helmtexture;
+	uint32	herosforgemodel;
 	uint32	loottable_id;
 	uint32	npc_spells_id;
 	uint32	npc_spells_effects_id;
@@ -90,8 +91,8 @@ struct NPCType
 	uint32	max_dmg;
 	int16	attack_count;
 	char	special_abilities[512];
-	uint16	d_meele_texture1;
-	uint16	d_meele_texture2;
+	uint16	d_melee_texture1;
+	uint16	d_melee_texture2;
 	char	ammo_idfile[30];
 	uint8	prim_melee_type;
 	uint8	sec_melee_type;

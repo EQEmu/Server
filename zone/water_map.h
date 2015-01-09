@@ -5,6 +5,7 @@
 #include "position.h"
 #include <string>
 
+
 enum WaterRegionType {
 	RegionTypeUnsupported = -2,
 	RegionTypeUntagged = -1,
@@ -22,7 +23,7 @@ class WaterMap
 {
 public:
 	WaterMap() { }
-	~WaterMap() { }
+	virtual ~WaterMap() { }
 
 	static WaterMap* LoadWaterMapfile(std::string zone_name);
 	virtual WaterRegionType ReturnRegionType(const xyz_location& location) const { return RegionTypeNormal; }

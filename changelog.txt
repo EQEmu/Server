@@ -1,7 +1,70 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/08/2015 ==
+Trevius: Added some extra checks and clean-up related to Groups and Mercenaries. 
+
+== 01/07/2015 ==
+Uleat: Excluded text link body from message scrambling in Client::GarbleMessage()
+Trevius: Mercenaries now load directly from tables only.  The vwMercNpcTypes view is no longer required and can be deleted.
+Trevius: Query fix for group_leaders table.  This may resolve some crashes/bugs related to Mercs/Bots and Groups.
+
+== 01/06/2015 ==
+Trevius: Changed the pet command #defines to be based on RoF2 list of pet commands and added decodes to Titanium, SoF and SoD.
+Trevius: (RoF+) The /pet focus on/off and /pet hold on/off commands are now functional.
+Trevius: Added defines for all remaining pet commands and some support for them as well.
+
+== 01/05/2015 ==
+Uleat: Fixed (added translators for) item/text links. Only 'OP_ChannelMessage' and 'OP_SpecialMesg' are currently handled..more text channels will be added as the need arises.
+
+== 01/03/2015 ==
+Trevius: (RoF2) /shield (shielding) and /key (key ring) are both now functional after opcode updates.
+
+== 01/02/2015 ==
+Trevius: (RoF2) *Hopefully* Fixed looting incorrect items from NPCs.  Please report any issues!
+Trevius: (RoF2) Now able to loot items past the 10th slot on NPC corpses.
+Trevius: Attuned Items can now be auto-looted and will equip properly.
+Trevius: Mercenaries and Bots will no longer take a share from /split or /autosplit.
+
+== 12/30/2014 ==
+Trevius: (RoF2) Aug Type 21 no longer shows the "Buy Now" button in the aug slot of items.
+Trevius: (RoF2) Identified the "Copied" item flag with the help of Uleat.
+
+== 12/29/2014 ==
+Trevius: (RoF2) Identified a few Item Fields and resolved an issue with cloth armor not accepting certain augments that they should.
+Akkadius: Updated $client->UpdateTaskActivity to have optional argument ignore_quest_update IE: Client::UpdateTaskActivity(THIS, TaskID, ActivityID, Count, [ignore_quest_update])
+Akkadius: Also updated internal UpdateTaskActivity methods to optionally ignore quest based task updates to prevent feedback
+
+== 12/28/2014 ==
+Uleat: Implemented class Client::TextLink as a replacement for the dozens of individual link formatters.
+
+== 12/27/2014 ==
+Akkadius: Add option to automatic database upgrade script 5) Download latest Opcodes from Github
+Trevius: (RoF2) Fixed dropping items on the ground so they go to ground level instead of camera height.
+Trevius: Show Helm Option should be functional again.
+Kayen: Implemened npc special ability (43) CASTING_RESIST_DIFF which sets innate resist modifier on
+ALL spells used by that NPC. Ie. 43,1,-200 will set a -200 innate resist diff, so if your npc cast
+a spell that has a -10 resist modifier the final resist diff would be -210.
+
+== 12/25/2014 ==
+Uleat: Updated 'links' code for all clients
+
+== 12/24/2014 ==
+Trevius: (RoF+) Added herosforgemodel field to the npc_types table.
+Trevius: (RoF2) Updated item links from #npcstat command output.
+Trevius: (RoF+) Implemented Hero's Forge Armor for NPCs.  Set the herosforgemodel field in npc_types table to the model (example: 84 for full set, or 12107 for robe).
+Trevius: (RoF+) Hero's Forge Armor now overrides NPC texture settings.  To display Hero's Forge Armor Helms, set helmtexture field to anything other than 0.
+
+== 12/23/2014 ==
+Uleat: Tidied up some ItemInst* declarations and added some nullptr checks.
+Trevius: (RoF+) Added support for Hero's Forge Robe Models.  Set herosforgemodel field in items table to exact model such as 11607, 11707, etc.
+
+== 12/22/2014 ==
+Trevius: (RoF2) Fixed Tracking.
+Trevius: (RoF+) Added a work-around for the cursor buffer issue.
+
 == 12/21/2014 ==
 Trevius: (RoF2) Fixed Extended Targets Window by correcting opcodes.
+Trevius: (RoF/RoF2) Fixed Guild Rank in the Player Profile, which prevents the guild rank message on login/zone.
 
 == 12/20/2014 ==
 Akkadius: Updated #cvs to display RoF2 Client Stream count

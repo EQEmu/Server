@@ -609,7 +609,7 @@ void LoadSpells(EQEmu::MemoryMappedFile **mmf) {
 		spells = reinterpret_cast<SPDat_Spell_Struct*>((*mmf)->Get());
 		mutex.Unlock();
 	} catch(std::exception &ex) {
-		LogFile->write(EQEMuLog::Error, "Error loading spells: %s", ex.what());
+		LogFile->write(EQEmuLog::Error, "Error loading spells: %s", ex.what());
 		return;
 	}
 

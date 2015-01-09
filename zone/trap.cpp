@@ -264,7 +264,7 @@ bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
                                     "FROM traps WHERE zone='%s' AND version=%u", zonename, version);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in LoadTraps query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in LoadTraps query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
     }
 
@@ -307,8 +307,8 @@ void Trap::CreateHiddenTrigger()
 	make_npc->gender = 0;
 	make_npc->loottable_id = 0;
 	make_npc->npc_spells_id = 0;
-	make_npc->d_meele_texture1 = 0;
-	make_npc->d_meele_texture2 = 0;
+	make_npc->d_melee_texture1 = 0;
+	make_npc->d_melee_texture2 = 0;
 	make_npc->trackable = 0;
 	make_npc->level = level;
 	strcpy(make_npc->special_abilities, "19,1^20,1^24,1^25,1");

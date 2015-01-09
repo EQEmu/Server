@@ -884,7 +884,7 @@ int32 Merc::CalcMaxMana()
 		break;
 			  }
 	default: {
-		LogFile->write(EQEMuLog::Debug, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+		LogFile->write(EQEmuLog::Debug, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
 		max_mana = 0;
 		break;
 			 }
@@ -905,7 +905,7 @@ int32 Merc::CalcMaxMana()
 	}
 
 #if EQDEBUG >= 11
-	LogFile->write(EQEMuLog::Debug, "Merc::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
+	LogFile->write(EQEmuLog::Debug, "Merc::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
 #endif
 	return max_mana;
 }
@@ -1385,7 +1385,7 @@ void Merc::AI_Process() {
 			rest_timer.Disable();
 
 		if(IsRooted())
-			SetTarget(hate_list.GetClosest(this));
+			SetTarget(hate_list.GetClosestEntOnHateList(this));
 		else
 			FindTarget();
 
@@ -2454,11 +2454,11 @@ void Merc::CheckHateList() {
 								Mob* groupMember = g->members[counter];
 								if(groupMember) {
 									if(npc->IsOnHatelist(groupMember)) {
-										if(!hate_list.IsOnHateList(npc)) {
+										if(!hate_list.IsEntOnHateList(npc)) {
 											float range = g->HasRole(groupMember, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
 											range *= range;
 											if(npc->DistNoRootNoZ(*this) < range) {
-												hate_list.Add(npc, 1);
+												hate_list.AddEntToHateList(npc, 1);
 											}
 										}
 									}
@@ -4450,7 +4450,7 @@ bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, boo
 {
 	if (!other) {
 		SetTarget(nullptr);
-		LogFile->write(EQEMuLog::Error, "A null Mob object was passed to Merc::Attack() for evaluation!");
+		LogFile->write(EQEmuLog::Error, "A null Mob object was passed to Merc::Attack() for evaluation!");
 		return false;
 	}
 
@@ -4644,13 +4644,6 @@ const char* Merc::GetRandomName(){
 	return name;
 }
 
-bool Compare_Merc_Spells(MercSpell i, MercSpell j);
-
-bool Compare_Merc_Spells(MercSpell i, MercSpell j)
-{
-	return(i.slot > j.slot);
-}
-
 bool Merc::LoadMercSpells() {
 	// loads mercs spells into list
 	merc_spells.clear();
@@ -4683,7 +4676,9 @@ bool Merc::LoadMercSpells() {
 				AddProcToWeapon(mercSpellEntryItr->spellid, true, mercSpellEntryItr->proc_chance);
 		}
 	}
-	std::sort(merc_spells.begin(), merc_spells.end(), Compare_Merc_Spells);
+	std::sort(merc_spells.begin(), merc_spells.end(), [](const MercSpell& a, const MercSpell& b) {
+		return a.slot > b.slot;
+	});
 
 	if (merc_spells.size() == 0)
 		AIautocastspell_timer->Disable();
@@ -5990,7 +5985,7 @@ void NPC::LoadMercTypes() {
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
 	{
-		LogFile->write(EQEMuLog::Error, "Error in NPC::LoadMercTypes()");
+		LogFile->write(EQEmuLog::Error, "Error in NPC::LoadMercTypes()");
 		return;
 	}
 
@@ -6023,7 +6018,7 @@ void NPC::LoadMercs() {
 
 	if (!results.Success())
 	{
-		LogFile->write(EQEMuLog::Error, "Error in NPC::LoadMercTypes()");
+		LogFile->write(EQEmuLog::Error, "Error in NPC::LoadMercTypes()");
 		return;
 	}
 

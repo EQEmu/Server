@@ -73,14 +73,14 @@ bool Database::Connect(const char* host, const char* user, const char* passwd, c
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	if (!Open(host, user, passwd, database, port, &errnum, errbuf))
 	{
-		LogFile->write(EQEMuLog::Error, "Failed to connect to database: Error: %s", errbuf);
+		LogFile->write(EQEmuLog::Error, "Failed to connect to database: Error: %s", errbuf);
 		HandleMysqlError(errnum);
 
 		return false;
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Status, "Using database '%s' at %s:%d",database,host,port);
+		LogFile->write(EQEmuLog::Status, "Using database '%s' at %s:%d",database,host,port);
 		return true;
 	}
 }

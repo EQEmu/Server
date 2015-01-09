@@ -1,6 +1,8 @@
 // out-going packets that require an ENCODE translation:
 // Begin RoF2 Encodes
 
+E(OP_SendMembershipDetails)
+
 // incoming packets that require a DECODE translation:
 // Begin RoF2 Decodes
 
@@ -93,6 +95,7 @@ E(OP_SkillUpdate)
 E(OP_SomeItemPacketMaybe)
 E(OP_SpawnAppearance)
 E(OP_SpawnDoor)
+E(OP_SpecialMesg)
 E(OP_Stun)
 E(OP_TargetBuffs)
 E(OP_TaskDescription)

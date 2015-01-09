@@ -1,4 +1,5 @@
 
+
 #include "../common/extprofile.h"
 #include "../common/item.h"
 #include "../common/rulesys.h"
@@ -85,7 +86,7 @@ bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct
                                     zoneid, instance_id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in SaveZoneCFG query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in SaveZoneCFG query %s: %s", query.c_str(), results.ErrorMessage().c_str());
         return false;
 	}
 
@@ -111,7 +112,7 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
                                     "FROM zone WHERE zoneidnumber = %i AND version = %i", zoneid, instance_id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in GetZoneCFG query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in GetZoneCFG query %s: %s", query.c_str(), results.ErrorMessage().c_str());
         strcpy(*map_filename, "default");
 		return false;
     }
@@ -200,7 +201,7 @@ void ZoneDatabase::UpdateSpawn2Timeleft(uint32 id, uint16 instance_id, uint32 ti
                                         "AND instance_id = %lu",(unsigned long)id, (unsigned long)instance_id);
         auto results = QueryDatabase(query);
         if (!results.Success())
-			LogFile->write(EQEMuLog::Error, "Error in UpdateTimeLeft query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+			LogFile->write(EQEmuLog::Error, "Error in UpdateTimeLeft query %s: %s", query.c_str(), results.ErrorMessage().c_str());
 
 		return;
 	}
@@ -211,7 +212,7 @@ void ZoneDatabase::UpdateSpawn2Timeleft(uint32 id, uint16 instance_id, uint32 ti
                                     (unsigned long)timeleft, (unsigned long)instance_id);
     auto results = QueryDatabase(query);
     if (!results.Success())
-        LogFile->write(EQEMuLog::Error, "Error in UpdateTimeLeft query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in UpdateTimeLeft query %s: %s", query.c_str(), results.ErrorMessage().c_str());
 
 	return;
 }
@@ -224,7 +225,7 @@ uint32 ZoneDatabase::GetSpawnTimeLeft(uint32 id, uint16 instance_id)
                                     (unsigned long)id, (unsigned long)zone->GetInstanceID());
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in GetSpawnTimeLeft query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in GetSpawnTimeLeft query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
     }
 
@@ -254,7 +255,7 @@ void ZoneDatabase::UpdateSpawn2Status(uint32 id, uint8 new_status)
 	std::string query = StringFormat("UPDATE spawn2 SET enabled = %i WHERE id = %lu", new_status, (unsigned long)id);
 	auto results = QueryDatabase(query);
 	if(!results.Success())
-		LogFile->write(EQEMuLog::Error, "Error in UpdateSpawn2Status query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error in UpdateSpawn2Status query %s: %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
@@ -425,7 +426,7 @@ void ZoneDatabase::GetEventLogs(const char* name,char* target,uint32 account_id,
 void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
 {
 	if (!container) {
-		LogFile->write(EQEMuLog::Error, "Programming error: LoadWorldContainer passed nullptr pointer");
+		LogFile->write(EQEmuLog::Error, "Programming error: LoadWorldContainer passed nullptr pointer");
 		return;
 	}
 
@@ -433,7 +434,7 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
                                     "FROM object_contents WHERE parentid = %i", parentid);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in DB::LoadWorldContainer: %s", results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in DB::LoadWorldContainer: %s", results.ErrorMessage().c_str());
         return;
     }
 
@@ -498,7 +499,7 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const It
 										augslot[0], augslot[1], augslot[2], augslot[3], augslot[4], augslot[5]);
         auto results = QueryDatabase(query);
         if (!results.Success())
-            LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::SaveWorldContainer: %s", results.ErrorMessage().c_str());
+            LogFile->write(EQEmuLog::Error, "Error in ZoneDatabase::SaveWorldContainer: %s", results.ErrorMessage().c_str());
 
     }
 
@@ -510,7 +511,7 @@ void ZoneDatabase::DeleteWorldContainer(uint32 parent_id, uint32 zone_id)
 	std::string query = StringFormat("DELETE FROM object_contents WHERE parentid = %i AND zoneid = %i", parent_id, zone_id);
     auto results = QueryDatabase(query);
 	if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::DeleteWorldContainer: %s", results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error in ZoneDatabase::DeleteWorldContainer: %s", results.ErrorMessage().c_str());
 
 }
 
@@ -1225,7 +1226,7 @@ bool ZoneDatabase::LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Str
 
 bool ZoneDatabase::SaveCharacterLanguage(uint32 character_id, uint32 lang_id, uint32 value){
 	std::string query = StringFormat("REPLACE INTO `character_languages` (id, lang_id, value) VALUES (%u, %u, %u)", character_id, lang_id, value); QueryDatabase(query);
-	LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterLanguage for character ID: %i, lang_id:%u value:%u done", character_id, lang_id, value);
+	LogFile->write(EQEmuLog::Debug, "ZoneDatabase::SaveCharacterLanguage for character ID: %i, lang_id:%u value:%u done", character_id, lang_id, value);
 	return true;
 }
 
@@ -1237,10 +1238,10 @@ bool ZoneDatabase::SaveCharacterBindPoint(uint32 character_id, uint32 zone_id, u
 	/* Save Home Bind Point */
 	std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
 		" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)", character_id, zone_id, instance_id, position.m_X, position.m_Y, position.m_Z, position.m_Heading, is_home);
-	LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterBindPoint for character ID: %i zone_id: %u instance_id: %u position: %s ishome: %u", character_id, zone_id, instance_id, to_string(position).c_str(), is_home);
+	LogFile->write(EQEmuLog::Debug, "ZoneDatabase::SaveCharacterBindPoint for character ID: %i zone_id: %u instance_id: %u position: %s ishome: %u", character_id, zone_id, instance_id, to_string(position).c_str(), is_home);
 	auto results = QueryDatabase(query);
 	if (!results.RowsAffected()) {
-		LogFile->write(EQEMuLog::Debug, "ERROR Bind Home Save: %s. %s", results.ErrorMessage().c_str(), query.c_str());
+		LogFile->write(EQEmuLog::Debug, "ERROR Bind Home Save: %s. %s", results.ErrorMessage().c_str(), query.c_str());
 	}
 	return true;
 }
@@ -1251,20 +1252,20 @@ bool ZoneDatabase::SaveCharacterMaterialColor(uint32 character_id, uint32 slot_i
 	uint8 blue = (color & 0x000000FF);
 
 	std::string query = StringFormat("REPLACE INTO `character_material` (id, slot, red, green, blue, color, use_tint) VALUES (%u, %u, %u, %u, %u, %u, 255)", character_id, slot_id, red, green, blue, color); auto results = QueryDatabase(query);
-	LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterMaterialColor for character ID: %i, slot_id: %u color: %u done", character_id, slot_id, color);
+	LogFile->write(EQEmuLog::Debug, "ZoneDatabase::SaveCharacterMaterialColor for character ID: %i, slot_id: %u color: %u done", character_id, slot_id, color);
 	return true;
 }
 
 bool ZoneDatabase::SaveCharacterSkill(uint32 character_id, uint32 skill_id, uint32 value){
 	std::string query = StringFormat("REPLACE INTO `character_skills` (id, skill_id, value) VALUES (%u, %u, %u)", character_id, skill_id, value); auto results = QueryDatabase(query);
-	LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterSkill for character ID: %i, skill_id:%u value:%u done", character_id, skill_id, value);
+	LogFile->write(EQEmuLog::Debug, "ZoneDatabase::SaveCharacterSkill for character ID: %i, skill_id:%u value:%u done", character_id, skill_id, value);
 	return true;
 }
 
 bool ZoneDatabase::SaveCharacterDisc(uint32 character_id, uint32 slot_id, uint32 disc_id){
 	std::string query = StringFormat("REPLACE INTO `character_disciplines` (id, slot_id, disc_id) VALUES (%u, %u, %u)", character_id, slot_id, disc_id);
 	auto results = QueryDatabase(query);
-	LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterDisc for character ID: %i, slot:%u disc_id:%u done", character_id, slot_id, disc_id);
+	LogFile->write(EQEmuLog::Debug, "ZoneDatabase::SaveCharacterDisc for character ID: %i, slot:%u disc_id:%u done", character_id, slot_id, disc_id);
 	return true;
 }
 
@@ -1276,7 +1277,7 @@ bool ZoneDatabase::SaveCharacterTribute(uint32 character_id, PlayerProfile_Struc
 		if (pp->tributes[i].tribute > 0 && pp->tributes[i].tribute != TRIBUTE_NONE){
 			std::string query = StringFormat("REPLACE INTO `character_tribute` (id, tier, tribute) VALUES (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
 			QueryDatabase(query);
-			LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterTribute for character ID: %i, tier:%u tribute:%u done", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
+			LogFile->write(EQEmuLog::Debug, "ZoneDatabase::SaveCharacterTribute for character ID: %i, tier:%u tribute:%u done", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
 		}
 	}
 	return true;
@@ -1287,7 +1288,7 @@ bool ZoneDatabase::SaveCharacterBandolier(uint32 character_id, uint8 bandolier_i
 	DoEscapeString(bandolier_name_esc, bandolier_name, strlen(bandolier_name));
 	std::string query = StringFormat("REPLACE INTO `character_bandolier` (id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name) VALUES (%u, %u, %u, %u, %u,'%s')", character_id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name_esc);
 	auto results = QueryDatabase(query);
-	LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterBandolier for character ID: %i, bandolier_id: %u, bandolier_slot: %u item_id: %u, icon:%u band_name:%s  done", character_id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name);
+	LogFile->write(EQEmuLog::Debug, "ZoneDatabase::SaveCharacterBandolier for character ID: %i, bandolier_id: %u, bandolier_slot: %u item_id: %u, icon:%u band_name:%s  done", character_id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name);
 	if (!results.RowsAffected()){ std::cout << "ERROR Bandolier Save: " << results.ErrorMessage() << "\n\n" << query << "\n" << std::endl; }
 	return true;
 }
@@ -1602,7 +1603,7 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 		m_epp->expended_aa
 	);
 	auto results = database.QueryDatabase(query);
-	LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterData %i, done... Took %f seconds", character_id, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
+	LogFile->write(EQEmuLog::Debug, "ZoneDatabase::SaveCharacterData %i, done... Took %f seconds", character_id, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 	return true;
 }
 
@@ -1642,8 +1643,8 @@ bool ZoneDatabase::SaveCharacterCurrency(uint32 character_id, PlayerProfile_Stru
 		pp->careerRadCrystals,
 		pp->currentEbonCrystals,
 		pp->careerEbonCrystals);
-	auto results = database.QueryDatabase(query);
-	LogFile->write(EQEMuLog::Debug, "Saving Currency for character ID: %i, done", character_id);
+	auto results = database.QueryDatabase(query); 
+	LogFile->write(EQEmuLog::Debug, "Saving Currency for character ID: %i, done", character_id); 
 	return true;
 }
 
@@ -1652,7 +1653,7 @@ bool ZoneDatabase::SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 cur
 		" VALUES (%u, %u, %u)",
 		character_id, aa_id, current_level);
 	auto results = QueryDatabase(rquery);
-	LogFile->write(EQEMuLog::Debug, "Saving AA for character ID: %u, aa_id: %u current_level: %u", character_id, aa_id, current_level);
+	LogFile->write(EQEmuLog::Debug, "Saving AA for character ID: %u, aa_id: %u current_level: %u", character_id, aa_id, current_level);
 	return true;
 }
 
@@ -1746,15 +1747,15 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
     // according to spawn2.
     std::string query = StringFormat("SELECT npc_types.id, npc_types.name, npc_types.level, npc_types.race, "
                         "npc_types.class, npc_types.hp, npc_types.mana, npc_types.gender, "
-                        "npc_types.texture, npc_types.helmtexture, npc_types.size, "
+                        "npc_types.texture, npc_types.helmtexture, npc_types.herosforgemodel, npc_types.size, "
                         "npc_types.loottable_id, npc_types.merchant_id, npc_types.alt_currency_id, "
                         "npc_types.adventure_template_id, npc_types.trap_template, npc_types.attack_speed, "
                         "npc_types.STR, npc_types.STA, npc_types.DEX, npc_types.AGI, npc_types._INT, "
                         "npc_types.WIS, npc_types.CHA, npc_types.MR, npc_types.CR, npc_types.DR, "
                         "npc_types.FR, npc_types.PR, npc_types.Corrup, npc_types.PhR,"
                         "npc_types.mindmg, npc_types.maxdmg, npc_types.attack_count, npc_types.special_abilities,"
-                        "npc_types.npc_spells_id, npc_types.npc_spells_effects_id, npc_types.d_meele_texture1,"
-                        "npc_types.d_meele_texture2, npc_types.ammo_idfile, npc_types.prim_melee_type,"
+                        "npc_types.npc_spells_id, npc_types.npc_spells_effects_id, npc_types.d_melee_texture1,"
+                        "npc_types.d_melee_texture2, npc_types.ammo_idfile, npc_types.prim_melee_type,"
                         "npc_types.sec_melee_type, npc_types.ranged_type, npc_types.runspeed, npc_types.findable,"
                         "npc_types.trackable, npc_types.hp_regen_rate, npc_types.mana_regen_rate, "
                         "npc_types.aggroradius, npc_types.assistradius, npc_types.bodytype, npc_types.npc_faction_id, "
@@ -1796,88 +1797,86 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 		tmpNPCType->gender = atoi(row[7]);
 		tmpNPCType->texture = atoi(row[8]);
 		tmpNPCType->helmtexture = atoi(row[9]);
-		tmpNPCType->size = atof(row[10]);
-        tmpNPCType->loottable_id = atoi(row[11]);
-		tmpNPCType->merchanttype = atoi(row[12]);
-		tmpNPCType->alt_currency_type = atoi(row[13]);
-		tmpNPCType->adventure_template = atoi(row[14]);
-		tmpNPCType->trap_template = atoi(row[15]);
-		tmpNPCType->attack_speed = atof(row[16]);
-		tmpNPCType->STR = atoi(row[17]);
-		tmpNPCType->STA = atoi(row[18]);
-		tmpNPCType->DEX = atoi(row[19]);
-		tmpNPCType->AGI = atoi(row[20]);
-		tmpNPCType->INT = atoi(row[21]);
-		tmpNPCType->WIS = atoi(row[22]);
-		tmpNPCType->CHA = atoi(row[23]);
-		tmpNPCType->MR = atoi(row[24]);
-		tmpNPCType->CR = atoi(row[25]);
-		tmpNPCType->DR = atoi(row[26]);
-		tmpNPCType->FR = atoi(row[27]);
-		tmpNPCType->PR = atoi(row[28]);
-		tmpNPCType->Corrup = atoi(row[29]);
-		tmpNPCType->PhR = atoi(row[30]);
-		tmpNPCType->min_dmg = atoi(row[31]);
-		tmpNPCType->max_dmg = atoi(row[32]);
-		tmpNPCType->attack_count = atoi(row[33]);
+		tmpNPCType->herosforgemodel = atoul(row[10]);
+		tmpNPCType->size = atof(row[11]);
+        tmpNPCType->loottable_id = atoi(row[12]);
+		tmpNPCType->merchanttype = atoi(row[13]);
+		tmpNPCType->alt_currency_type = atoi(row[14]);
+		tmpNPCType->adventure_template = atoi(row[15]);
+		tmpNPCType->trap_template = atoi(row[16]);
+		tmpNPCType->attack_speed = atof(row[17]);
+		tmpNPCType->STR = atoi(row[18]);
+		tmpNPCType->STA = atoi(row[19]);
+		tmpNPCType->DEX = atoi(row[20]);
+		tmpNPCType->AGI = atoi(row[21]);
+		tmpNPCType->INT = atoi(row[22]);
+		tmpNPCType->WIS = atoi(row[23]);
+		tmpNPCType->CHA = atoi(row[24]);
+		tmpNPCType->MR = atoi(row[25]);
+		tmpNPCType->CR = atoi(row[26]);
+		tmpNPCType->DR = atoi(row[27]);
+		tmpNPCType->FR = atoi(row[28]);
+		tmpNPCType->PR = atoi(row[29]);
+		tmpNPCType->Corrup = atoi(row[30]);
+		tmpNPCType->PhR = atoi(row[31]);
+		tmpNPCType->min_dmg = atoi(row[32]);
+		tmpNPCType->max_dmg = atoi(row[33]);
+		tmpNPCType->attack_count = atoi(row[34]);
 
-		if (row[34] != nullptr)
-			strn0cpy(tmpNPCType->special_abilities, row[34], 512);
+		if (row[35] != nullptr)
+			strn0cpy(tmpNPCType->special_abilities, row[35], 512);
 		else
 			tmpNPCType->special_abilities[0] = '\0';
 
-		tmpNPCType->npc_spells_id = atoi(row[35]);
-		tmpNPCType->npc_spells_effects_id = atoi(row[36]);
-		tmpNPCType->d_meele_texture1 = atoi(row[37]);
-		tmpNPCType->d_meele_texture2 = atoi(row[38]);
-		strn0cpy(tmpNPCType->ammo_idfile, row[39], 30);
-		tmpNPCType->prim_melee_type = atoi(row[40]);
-		tmpNPCType->sec_melee_type = atoi(row[41]);
-		tmpNPCType->ranged_type = atoi(row[42]);
-		tmpNPCType->runspeed= atof(row[43]);
-		tmpNPCType->findable = atoi(row[44]) == 0? false : true;
-		tmpNPCType->trackable = atoi(row[45]) == 0? false : true;
-		tmpNPCType->hp_regen = atoi(row[46]);
-		tmpNPCType->mana_regen = atoi(row[47]);
+		tmpNPCType->npc_spells_id = atoi(row[36]);
+		tmpNPCType->npc_spells_effects_id = atoi(row[37]);
+		tmpNPCType->d_melee_texture1 = atoi(row[38]);
+		tmpNPCType->d_melee_texture2 = atoi(row[39]);
+		strn0cpy(tmpNPCType->ammo_idfile, row[40], 30);
+		tmpNPCType->prim_melee_type = atoi(row[41]);
+		tmpNPCType->sec_melee_type = atoi(row[42]);
+		tmpNPCType->ranged_type = atoi(row[43]);
+		tmpNPCType->runspeed= atof(row[44]);
+		tmpNPCType->findable = atoi(row[45]) == 0? false : true;
+		tmpNPCType->trackable = atoi(row[46]) == 0? false : true;
+		tmpNPCType->hp_regen = atoi(row[47]);
+		tmpNPCType->mana_regen = atoi(row[48]);
 
-		// set defaultvalue for aggroradius
-        tmpNPCType->aggroradius = (int32)atoi(row[48]);
+		// set default value for aggroradius
+        tmpNPCType->aggroradius = (int32)atoi(row[49]);
 		if (tmpNPCType->aggroradius <= 0)
 			tmpNPCType->aggroradius = 70;
 
-		tmpNPCType->assistradius = (int32)atoi(row[49]);
+		tmpNPCType->assistradius = (int32)atoi(row[50]);
 		if (tmpNPCType->assistradius <= 0)
 			tmpNPCType->assistradius = tmpNPCType->aggroradius;
 
-		if (row[50] && strlen(row[50]))
-            tmpNPCType->bodytype = (uint8)atoi(row[50]);
+		if (row[51] && strlen(row[51]))
+            tmpNPCType->bodytype = (uint8)atoi(row[51]);
         else
             tmpNPCType->bodytype = 0;
 
-		tmpNPCType->npc_faction_id = atoi(row[51]);
+		tmpNPCType->npc_faction_id = atoi(row[52]);
 
-		tmpNPCType->luclinface = atoi(row[52]);
-		tmpNPCType->hairstyle = atoi(row[53]);
-		tmpNPCType->haircolor = atoi(row[54]);
-		tmpNPCType->eyecolor1 = atoi(row[55]);
-		tmpNPCType->eyecolor2 = atoi(row[56]);
-		tmpNPCType->beardcolor = atoi(row[57]);
-		tmpNPCType->beard = atoi(row[58]);
-		tmpNPCType->drakkin_heritage = atoi(row[59]);
-		tmpNPCType->drakkin_tattoo = atoi(row[60]);
-		tmpNPCType->drakkin_details = atoi(row[61]);
+		tmpNPCType->luclinface = atoi(row[53]);
+		tmpNPCType->hairstyle = atoi(row[54]);
+		tmpNPCType->haircolor = atoi(row[55]);
+		tmpNPCType->eyecolor1 = atoi(row[56]);
+		tmpNPCType->eyecolor2 = atoi(row[57]);
+		tmpNPCType->beardcolor = atoi(row[58]);
+		tmpNPCType->beard = atoi(row[59]);
+		tmpNPCType->drakkin_heritage = atoi(row[60]);
+		tmpNPCType->drakkin_tattoo = atoi(row[61]);
+		tmpNPCType->drakkin_details = atoi(row[62]);
 
-		uint32 armor_tint_id = atoi(row[62]);
+		uint32 armor_tint_id = atoi(row[63]);
 
-		tmpNPCType->armor_tint[0] = (atoi(row[63]) & 0xFF) << 16;
-        tmpNPCType->armor_tint[0] |= (atoi(row[64]) & 0xFF) << 8;
-		tmpNPCType->armor_tint[0] |= (atoi(row[65]) & 0xFF);
+		tmpNPCType->armor_tint[0] = (atoi(row[64]) & 0xFF) << 16;
+        tmpNPCType->armor_tint[0] |= (atoi(row[65]) & 0xFF) << 8;
+		tmpNPCType->armor_tint[0] |= (atoi(row[66]) & 0xFF);
 		tmpNPCType->armor_tint[0] |= (tmpNPCType->armor_tint[0]) ? (0xFF << 24) : 0;
 
-		if (armor_tint_id == 0)
-			for (int index = MaterialChest; index <= EmuConstants::MATERIAL_END; index++)
-				tmpNPCType->armor_tint[index] = tmpNPCType->armor_tint[0];
-		else if (tmpNPCType->armor_tint[0] == 0)
+		if (armor_tint_id != 0)
         {
 			std::string armortint_query = StringFormat("SELECT red1h, grn1h, blu1h, "
                                                     "red2c, grn2c, blu2c, "
@@ -1903,35 +1902,42 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 					tmpNPCType->armor_tint[index] |= (tmpNPCType->armor_tint[index]) ? (0xFF << 24) : 0;
                 }
             }
-        } else
-            armor_tint_id = 0;
+        }
+		// Try loading npc_types tint fields if armor tint is 0 or query failed to get results
+		if (armor_tint_id == 0)
+		{
+			for (int index = MaterialChest; index < _MaterialCount; index++)
+			{
+				tmpNPCType->armor_tint[index] = tmpNPCType->armor_tint[0];
+			}
+		}
 
-		tmpNPCType->see_invis = atoi(row[66]);
-		tmpNPCType->see_invis_undead = atoi(row[67]) == 0? false: true;	// Set see_invis_undead flag
-		if (row[68] != nullptr)
-			strn0cpy(tmpNPCType->lastname, row[68], 32);
+		tmpNPCType->see_invis = atoi(row[67]);
+		tmpNPCType->see_invis_undead = atoi(row[68]) == 0? false: true;	// Set see_invis_undead flag
+		if (row[69] != nullptr)
+			strn0cpy(tmpNPCType->lastname, row[69], 32);
 
-		tmpNPCType->qglobal = atoi(row[69]) == 0? false: true;	// qglobal
-		tmpNPCType->AC = atoi(row[70]);
-		tmpNPCType->npc_aggro = atoi(row[71]) == 0? false: true;
-		tmpNPCType->spawn_limit = atoi(row[72]);
-		tmpNPCType->see_hide = atoi(row[73]) == 0? false: true;
-		tmpNPCType->see_improved_hide = atoi(row[74]) == 0? false: true;
-		tmpNPCType->ATK = atoi(row[75]);
-		tmpNPCType->accuracy_rating = atoi(row[76]);
-		tmpNPCType->avoidance_rating = atoi(row[77]);
-		tmpNPCType->slow_mitigation = atoi(row[78]);
-		tmpNPCType->maxlevel = atoi(row[79]);
-		tmpNPCType->scalerate = atoi(row[80]);
-		tmpNPCType->private_corpse = atoi(row[81]) == 1 ? true: false;
-		tmpNPCType->unique_spawn_by_name = atoi(row[82]) == 1 ? true: false;
-		tmpNPCType->underwater = atoi(row[83]) == 1 ? true: false;
-		tmpNPCType->emoteid = atoi(row[84]);
-		tmpNPCType->spellscale = atoi(row[85]);
-		tmpNPCType->healscale = atoi(row[86]);
-		tmpNPCType->no_target_hotkey = atoi(row[87]) == 1 ? true: false;
-		tmpNPCType->raid_target = atoi(row[88]) == 0 ? false: true;
-		tmpNPCType->attack_delay = atoi(row[89]);
+		tmpNPCType->qglobal = atoi(row[70]) == 0? false: true;	// qglobal
+		tmpNPCType->AC = atoi(row[71]);
+		tmpNPCType->npc_aggro = atoi(row[72]) == 0? false: true;
+		tmpNPCType->spawn_limit = atoi(row[73]);
+		tmpNPCType->see_hide = atoi(row[74]) == 0? false: true;
+		tmpNPCType->see_improved_hide = atoi(row[75]) == 0? false: true;
+		tmpNPCType->ATK = atoi(row[76]);
+		tmpNPCType->accuracy_rating = atoi(row[77]);
+		tmpNPCType->avoidance_rating = atoi(row[78]);
+		tmpNPCType->slow_mitigation = atoi(row[79]);
+		tmpNPCType->maxlevel = atoi(row[80]);
+		tmpNPCType->scalerate = atoi(row[81]);
+		tmpNPCType->private_corpse = atoi(row[82]) == 1 ? true: false;
+		tmpNPCType->unique_spawn_by_name = atoi(row[83]) == 1 ? true: false;
+		tmpNPCType->underwater = atoi(row[84]) == 1 ? true: false;
+		tmpNPCType->emoteid = atoi(row[85]);
+		tmpNPCType->spellscale = atoi(row[86]);
+		tmpNPCType->healscale = atoi(row[87]);
+		tmpNPCType->no_target_hotkey = atoi(row[88]) == 1 ? true: false;
+		tmpNPCType->raid_target = atoi(row[89]) == 0 ? false: true;
+		tmpNPCType->attack_delay = atoi(row[90]);
 
 		// If NPC with duplicate NPC id already in table,
 		// free item we attempted to add.
@@ -1953,39 +1959,81 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 	//need to save based on merc_npc_type & client level
 	uint32 merc_type_id = id * 100 + clientlevel;
 
-	// If NPC is already in tree, return it.
+	// If Merc is already in tree, return it.
 	auto itr = zone->merctable.find(merc_type_id);
 	if(itr != zone->merctable.end())
 		return itr->second;
 
-	//If the NPC type is 0, return nullptr. (sanity check)
+	//If the id is 0, return nullptr. (sanity check)
 	if(id == 0)
         return nullptr;
 
-	// Otherwise, get NPCs from database.
-	// If id is 0, load all npc_types for the current zone,
-    // according to spawn2.
-    std::string query = StringFormat("SELECT vwMercNpcTypes.merc_npc_type_id, vwMercNpcTypes.name, "
-                                    "vwMercNpcTypes.level, vwMercNpcTypes.race_id, vwMercNpcTypes.class_id, "
-                                    "vwMercNpcTypes.hp, vwMercNpcTypes.mana, vwMercNpcTypes.gender, "
-                                    "vwMercNpcTypes.texture, vwMercNpcTypes.helmtexture, vwMercNpcTypes.attack_speed, "
-                                    "vwMercNpcTypes.STR, vwMercNpcTypes.STA, vwMercNpcTypes.DEX, vwMercNpcTypes.AGI, "
-                                    "vwMercNpcTypes._INT, vwMercNpcTypes.WIS, vwMercNpcTypes.CHA, vwMercNpcTypes.MR, "
-                                    "vwMercNpcTypes.CR, vwMercNpcTypes.DR, vwMercNpcTypes.FR, vwMercNpcTypes.PR, "
-                                    "vwMercNpcTypes.Corrup, vwMercNpcTypes.mindmg, vwMercNpcTypes.maxdmg, "
-                                    "vwMercNpcTypes.attack_count, vwMercNpcTypes.special_abilities, "
-                                    "vwMercNpcTypes.d_meele_texture1, vwMercNpcTypes.d_meele_texture2, "
-                                    "vwMercNpcTypes.prim_melee_type, vwMercNpcTypes.sec_melee_type, "
-                                    "vwMercNpcTypes.runspeed, vwMercNpcTypes.hp_regen_rate, vwMercNpcTypes.mana_regen_rate, "
-                                    "vwMercNpcTypes.bodytype, vwMercNpcTypes.armortint_id, "
-                                    "vwMercNpcTypes.armortint_red, vwMercNpcTypes.armortint_green, vwMercNpcTypes.armortint_blue, "
-                                    "vwMercNpcTypes.AC, vwMercNpcTypes.ATK, vwMercNpcTypes.Accuracy, vwMercNpcTypes.spellscale, "
-                                    "vwMercNpcTypes.healscale FROM vwMercNpcTypes "
-                                    "WHERE merc_npc_type_id = %d AND clientlevel = %d AND race_id = %d",
-                                    id, clientlevel, raceid); //dual primary keys. one is ID, one is level.
+	// Otherwise, load Merc data on demand
+	std::string query = StringFormat("SELECT "
+		"m_stats.merc_npc_type_id, "
+		"'' AS name, "
+		"m_stats.level, "
+		"m_types.race_id, "
+		"m_subtypes.class_id, "
+		"m_stats.hp, "
+		"m_stats.mana, "
+		"0 AS gender, "
+		"m_armorinfo.texture, "
+		"m_armorinfo.helmtexture, "
+		"m_stats.attack_speed, "
+		"m_stats.STR, "
+		"m_stats.STA, "
+		"m_stats.DEX, "
+		"m_stats.AGI, "
+		"m_stats._INT, "
+		"m_stats.WIS, "
+		"m_stats.CHA, "
+		"m_stats.MR, "
+		"m_stats.CR, "
+		"m_stats.DR, "
+		"m_stats.FR, "
+		"m_stats.PR, "
+		"m_stats.Corrup, "
+		"m_stats.mindmg, "
+		"m_stats.maxdmg, "
+		"m_stats.attack_count, "
+		"m_stats.special_abilities, "
+		"m_weaponinfo.d_melee_texture1, "
+		"m_weaponinfo.d_melee_texture2, "
+		"m_weaponinfo.prim_melee_type, "
+		"m_weaponinfo.sec_melee_type, "
+		"m_stats.runspeed, "
+		"m_stats.hp_regen_rate, "
+		"m_stats.mana_regen_rate, "
+		"1 AS bodytype, "
+		"m_armorinfo.armortint_id, "
+		"m_armorinfo.armortint_red, "
+		"m_armorinfo.armortint_green, "
+		"m_armorinfo.armortint_blue, "
+		"m_stats.AC, "
+		"m_stats.ATK, "
+		"m_stats.Accuracy, "
+		"m_stats.spellscale, "
+		"m_stats.healscale "
+		"FROM merc_stats m_stats "
+		"INNER JOIN merc_armorinfo m_armorinfo "
+		"ON m_stats.merc_npc_type_id = m_armorinfo.merc_npc_type_id "
+		"AND m_armorinfo.minlevel <= m_stats.level AND m_armorinfo.maxlevel >= m_stats.level "
+		"INNER JOIN merc_weaponinfo m_weaponinfo "
+		"ON m_stats.merc_npc_type_id = m_weaponinfo.merc_npc_type_id "
+		"AND m_weaponinfo.minlevel <= m_stats.level AND m_weaponinfo.maxlevel >= m_stats.level "
+		"INNER JOIN merc_templates m_templates "
+		"ON m_templates.merc_npc_type_id = m_stats.merc_npc_type_id "
+		"INNER JOIN merc_types m_types "
+		"ON m_templates.merc_type_id = m_types.merc_type_id "
+		"INNER JOIN merc_subtypes m_subtypes "
+		"ON m_templates.merc_subtype_id = m_subtypes.merc_subtype_id "
+		"WHERE m_templates.merc_npc_type_id = %d AND m_stats.clientlevel = %d AND m_types.race_id = %d",
+		id, clientlevel, raceid); //dual primary keys. one is ID, one is level.
+
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        std::cerr << "Error loading NPCs from database. Bad query: " << results.ErrorMessage() << std::endl;
+        std::cerr << "Error loading Mercenaries from database. Bad query: " << results.ErrorMessage() << std::endl;
         return nullptr;
     }
 
@@ -2033,8 +2081,8 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 		else
 			tmpNPCType->special_abilities[0] = '\0';
 
-        tmpNPCType->d_meele_texture1 = atoi(row[28]);
-        tmpNPCType->d_meele_texture2 = atoi(row[29]);
+        tmpNPCType->d_melee_texture1 = atoi(row[28]);
+        tmpNPCType->d_melee_texture2 = atoi(row[29]);
         tmpNPCType->prim_melee_type = atoi(row[30]);
         tmpNPCType->sec_melee_type = atoi(row[31]);
         tmpNPCType->runspeed= atof(row[32]);
@@ -2091,16 +2139,16 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
         tmpNPCType->accuracy_rating = atoi(row[42]);
         tmpNPCType->scalerate = RuleI(Mercs, ScaleRate);
         tmpNPCType->spellscale = atoi(row[43]);
-        tmpNPCType->healscale = atoi(row[4]);
+        tmpNPCType->healscale = atoi(row[44]);
 
-        // If NPC with duplicate NPC id already in table,
+        // If Merc with duplicate NPC id already in table,
         // free item we attempted to add.
-        if (zone->merctable.find(tmpNPCType->npc_id * 100 + clientlevel) != zone->merctable.end()) {
+		if (zone->merctable.find(merc_type_id) != zone->merctable.end()) {
             delete tmpNPCType;
             return nullptr;
         }
 
-        zone->merctable[tmpNPCType->npc_id * 100 + clientlevel]=tmpNPCType;
+		zone->merctable[merc_type_id] = tmpNPCType;
         npc = tmpNPCType;
     }
 
@@ -2296,7 +2344,7 @@ void ZoneDatabase::SaveMercBuffs(Merc *merc) {
     std::string query = StringFormat("DELETE FROM merc_buffs WHERE MercId = %u", merc->GetMercID());
     auto results = database.QueryDatabase(query);
     if(!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error While Deleting Merc Buffs before save: %s", results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error While Deleting Merc Buffs before save: %s", results.ErrorMessage().c_str());
         return;
     }
 
@@ -2322,7 +2370,7 @@ void ZoneDatabase::SaveMercBuffs(Merc *merc) {
                             buffs[buffCount].caston_z, buffs[buffCount].ExtraDIChance);
         results = database.QueryDatabase(query);
         if(!results.Success()) {
-            LogFile->write(EQEMuLog::Error, "Error Saving Merc Buffs: %s", results.ErrorMessage().c_str());
+            LogFile->write(EQEmuLog::Error, "Error Saving Merc Buffs: %s", results.ErrorMessage().c_str());
             break;
         }
 	}
@@ -2341,7 +2389,7 @@ void ZoneDatabase::LoadMercBuffs(Merc *merc) {
                                     merc->GetMercID());
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error Loading Merc Buffs: %s", results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error Loading Merc Buffs: %s", results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -2386,7 +2434,7 @@ void ZoneDatabase::LoadMercBuffs(Merc *merc) {
 	query = StringFormat("DELETE FROM merc_buffs WHERE MercId = %u", merc->GetMercID());
     results = database.QueryDatabase(query);
     if(!results.Success())
-        LogFile->write(EQEMuLog::Error, "Error Loading Merc Buffs: %s", results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error Loading Merc Buffs: %s", results.ErrorMessage().c_str());
 
 }
 
@@ -2402,14 +2450,14 @@ bool ZoneDatabase::DeleteMerc(uint32 merc_id) {
 	auto results = database.QueryDatabase(query);
 	if(!results.Success())
 	{
-		LogFile->write(EQEMuLog::Error, "Error Deleting Merc Buffs: %s", results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error Deleting Merc Buffs: %s", results.ErrorMessage().c_str());
 	}
 
 	query = StringFormat("DELETE FROM mercs WHERE MercID = '%u'", merc_id);
 	results = database.QueryDatabase(query);
 	if(!results.Success())
 	{
-		LogFile->write(EQEMuLog::Error, "Error Deleting Merc: %s", results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error Deleting Merc: %s", results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -2427,7 +2475,7 @@ void ZoneDatabase::LoadMercEquipment(Merc *merc) {
                                     merc->GetLevel(), merc->GetLevel());
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error Loading Merc Inventory: %s", results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error Loading Merc Inventory: %s", results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -2602,7 +2650,7 @@ uint8 ZoneDatabase::GroupCount(uint32 groupid) {
 	std::string query = StringFormat("SELECT count(charid) FROM group_id WHERE groupid = %d", groupid);
 	auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::GroupCount query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in ZoneDatabase::GroupCount query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
 
@@ -2621,7 +2669,7 @@ uint8 ZoneDatabase::RaidGroupCount(uint32 raidid, uint32 groupid) {
     auto results = QueryDatabase(query);
 
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::RaidGroupCount query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in ZoneDatabase::RaidGroupCount query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
 
@@ -2652,7 +2700,7 @@ int32 ZoneDatabase::GetBlockedSpellsCount(uint32 zoneid)
 
 bool ZoneDatabase::LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked* into, uint32 zoneid)
 {
-	LogFile->write(EQEMuLog::Status, "Loading Blocked Spells from database...");
+	LogFile->write(EQEmuLog::Status, "Loading Blocked Spells from database...");
 
 	std::string query = StringFormat("SELECT id, spellid, type, x, y, z, x_diff, y_diff, z_diff, message "
                                     "FROM blocked_spells WHERE zoneid = %d ORDER BY id ASC", zoneid);
@@ -2777,7 +2825,7 @@ void ZoneDatabase::LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32
                                     "WHERE char_id = '%u'", char_id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in LoadAltCurrencyValues query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in LoadAltCurrencyValues query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return;
     }
 
@@ -2818,7 +2866,7 @@ void ZoneDatabase::SaveBuffs(Client *client) {
                             buffs[index].ExtraDIChance);
         auto results = QueryDatabase(query);
         if (!results.Success())
-            LogFile->write(EQEMuLog::Error, "Error in SaveBuffs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+            LogFile->write(EQEmuLog::Error, "Error in SaveBuffs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 
 	}
 }
@@ -2837,7 +2885,7 @@ void ZoneDatabase::LoadBuffs(Client *client) {
                                     "FROM `character_buffs` WHERE `character_id` = '%u'", client->CharacterID());
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in LoadBuffs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in LoadBuffs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
     }
 
@@ -3011,7 +3059,7 @@ void ZoneDatabase::LoadPetInfo(Client *client) {
                                     "WHERE `char_id` = %u", client->CharacterID());
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -3039,7 +3087,7 @@ void ZoneDatabase::LoadPetInfo(Client *client) {
                         "WHERE `char_id` = %u", client->CharacterID());
     results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
     }
 
@@ -3080,7 +3128,7 @@ void ZoneDatabase::LoadPetInfo(Client *client) {
                         "WHERE `char_id`=%u",client->CharacterID());
     results = database.QueryDatabase(query);
     if (!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -3688,7 +3736,7 @@ Corpse* ZoneDatabase::SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_z
         corpse->SetDecayTimer(RuleI(Character, CorpseDecayTimeMS));
         corpse->Spawn();
         if (!UnburyCharacterCorpse(corpse->GetCorpseDBID(), dest_zone_id, dest_instance_id, position))
-            LogFile->write(EQEMuLog::Error, "Unable to unbury a summoned player corpse for character id %u.", char_id);
+            LogFile->write(EQEmuLog::Error, "Unable to unbury a summoned player corpse for character id %u.", char_id);
 	}
 
 	return corpse;
@@ -3727,7 +3775,7 @@ bool ZoneDatabase::SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zone_id
 			++CorpseCount;
 		}
 		else{
-			LogFile->write(EQEMuLog::Error, "Unable to construct a player corpse for character id %u.", char_id);
+			LogFile->write(EQEmuLog::Error, "Unable to construct a player corpse for character id %u.", char_id);
 		}
 	}
 
@@ -3844,4 +3892,3 @@ bool ZoneDatabase::DeleteCharacterCorpse(uint32 db_id) {
 
 	return false;
 }
-

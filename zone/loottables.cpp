@@ -145,7 +145,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 				drop_chance = zone->random.Real(0.0, 100.0);
 
 #if EQDEBUG>=11
-			LogFile->write(EQEMuLog::Debug, "Drop chance for npc: %s, this chance:%f, drop roll:%f", npc->GetName(), thischance, drop_chance);
+			LogFile->write(EQEmuLog::Debug, "Drop chance for npc: %s, this chance:%f, drop roll:%f", npc->GetName(), thischance, drop_chance);
 #endif
 			if (thischance == 100.0 || drop_chance < thischance)
 			{
@@ -187,7 +187,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 
 	ServerLootItem_Struct* item = new ServerLootItem_Struct;
 #if EQDEBUG>=11
-		LogFile->write(EQEMuLog::Debug, "Adding drop to npc: %s, Item: %i", GetName(), item2->ID);
+		LogFile->write(EQEmuLog::Debug, "Adding drop to npc: %s, Item: %i", GetName(), item2->ID);
 #endif
 
 	EQApplicationPacket* outapp = nullptr;
@@ -324,7 +324,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		what was this about???
 
 		if (((npc->GetRace()==127) && (npc->CastToMob()->GetOwnerID()!=0)) && (item2->Slots==24576) || (item2->Slots==8192) || (item2->Slots==16384)){
-			npc->d_meele_texture2=atoi(newid);
+			npc->d_melee_texture2=atoi(newid);
 			wc->wear_slot_id=8;
 			if (item2->Material >0)
 				wc->material=item2->Material;

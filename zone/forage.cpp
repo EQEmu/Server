@@ -58,7 +58,7 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
                                     "LIMIT %i", ZoneID, skill, FORAGE_ITEM_LIMIT);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in Forage query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in Forage query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
 
@@ -69,7 +69,7 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 
         item[index] = atoi(row[0]);
         chance[index] = atoi(row[1]) + chancepool;
-        LogFile->write(EQEMuLog::Error, "Possible Forage: %d with a %d chance", item[index], chance[index]);
+        LogFile->write(EQEmuLog::Error, "Possible Forage: %d with a %d chance", item[index], chance[index]);
         chancepool = chance[index];
     }
 
@@ -250,7 +250,7 @@ void Client::GoFish()
 		Bait = m_inv.GetItem(bslot);
 
 	//if the bait isnt equipped, need to add its skill bonus
-	if(bslot >= EmuConstants::GENERAL_BEGIN && Bait->GetItem()->SkillModType == SkillFishing) {
+	if(bslot >= EmuConstants::GENERAL_BEGIN && Bait != nullptr && Bait->GetItem()->SkillModType == SkillFishing) {
 		fishing_skill += Bait->GetItem()->SkillModValue;
 	}
 
@@ -391,7 +391,7 @@ void Client::ForageItem(bool guarantee) {
 		const Item_Struct* food_item = database.GetItem(foragedfood);
 
 		if(!food_item) {
-			LogFile->write(EQEMuLog::Error, "nullptr returned from database.GetItem in ClientForageItem");
+			LogFile->write(EQEmuLog::Error, "nullptr returned from database.GetItem in ClientForageItem");
 			return;
 		}
 

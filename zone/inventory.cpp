@@ -532,7 +532,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	if(inst == nullptr) {
 		Message(13, "An unknown server error has occurred and your item was not created.");
 		// this goes to logfile since this is a major error
-		LogFile->write(EQEMuLog::Error, "Player %s on account %s encountered an unknown item creation error.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u, Aug6: %u)\n",
+		LogFile->write(EQEmuLog::Error, "Player %s on account %s encountered an unknown item creation error.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u, Aug6: %u)\n",
 			GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
 
 		return false;
@@ -617,6 +617,7 @@ void Client::DropItem(int16 slot_id)
 
 	// Save client inventory change to database
 	if (slot_id == MainCursor) {
+		SendCursorBuffer();
 		std::list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
 		database.SaveCursor(CharacterID(), s, e);
 	} else {
@@ -678,10 +679,27 @@ int32 Client::GetAugmentIDAt(int16 slot_id, uint8 augslot) {
 	return INVALID_ID;
 }
 
+void Client::SendCursorBuffer() {
+	// Temporary work-around for the RoF+ Client Buffer
+	// Instead of dealing with client moving items in cursor buffer,
+	// we can just send the next item in the cursor buffer to the cursor.
+	if (GetClientVersion() >= EQClientRoF)
+	{
+		if (!GetInv().CursorEmpty())
+		{
+			const ItemInst* inst = GetInv().GetCursorItem();
+			if (inst)
+			{
+				SendItemPacket(MainCursor, inst, ItemPacketSummonItem);
+			}
+		}
+	}
+}
+
 // Remove item from inventory
 void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_update, bool update_db) {
 	#if (EQDEBUG >= 5)
-		LogFile->write(EQEMuLog::Debug, "DeleteItemInInventory(%i, %i, %s)", slot_id, quantity, (client_update) ? "true":"false");
+		LogFile->write(EQEmuLog::Debug, "DeleteItemInInventory(%i, %i, %s)", slot_id, quantity, (client_update) ? "true":"false");
 	#endif
 
 	// Added 'IsSlotValid(slot_id)' check to both segments of client packet processing.
@@ -794,10 +812,6 @@ void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_upd
 	}
 }
 
-// Puts an item into the person's inventory
-// Any items already there will be removed from user's inventory
-// (Also saves changes back to the database: this may be optimized in the future)
-// client_update: Sends packet to client
 bool Client::PushItemOnCursor(const ItemInst& inst, bool client_update)
 {
 	mlog(INVENTORY__SLOTS, "Putting item %s (%d) on the cursor", inst.GetItem()->Name, inst.GetItem()->ID);
@@ -811,6 +825,10 @@ bool Client::PushItemOnCursor(const ItemInst& inst, bool client_update)
 	return database.SaveCursor(CharacterID(), s, e);
 }
 
+// Puts an item into the person's inventory
+// Any items already there will be removed from user's inventory
+// (Also saves changes back to the database: this may be optimized in the future)
+// client_update: Sends packet to client
 bool Client::PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client_update) {
 	mlog(INVENTORY__SLOTS, "Putting item %s (%d) into slot %d", inst.GetItem()->Name, inst.GetItem()->ID, slot_id);
 
@@ -908,7 +926,7 @@ bool Client::TryStacking(ItemInst* item, uint8 type, bool try_worn, bool try_cur
 bool Client::AutoPutLootInInventory(ItemInst& inst, bool try_worn, bool try_cursor, ServerLootItem_Struct** bag_item_data)
 {
 	// #1: Try to auto equip
-	if (try_worn && inst.IsEquipable(GetBaseRace(), GetClass()) && inst.GetItem()->ReqLevel<=level && !inst.GetItem()->Attuneable && inst.GetItem()->ItemType != ItemTypeAugmentation)
+	if (try_worn && inst.IsEquipable(GetBaseRace(), GetClass()) && inst.GetItem()->ReqLevel<=level && (!inst.GetItem()->Attuneable || inst.IsAttuned()) && inst.GetItem()->ItemType != ItemTypeAugmentation)
 	{
 		// too messy as-is... <watch>
 		for (int16 i = EmuConstants::EQUIPMENT_BEGIN; i < MainPowerSource; i++) // originally (i < 22)
@@ -1009,105 +1027,113 @@ void Client::MoveItemCharges(ItemInst &from, int16 to_slot, uint8 type)
 	}
 }
 
-bool Client::MakeItemLink(char* &ret_link, const ItemInst *inst) {
+// TODO: needs clean-up to save references
+bool MakeItemLink(char* &ret_link, const Item_Struct *item, uint32 aug0, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint8 evolving, uint8 evolvedlevel) {
 	//we're sending back the entire "link", minus the null characters & item name
 	//that way, we can use it for regular links & Task links
 	//note: initiator needs to pass us ret_link
 
-/*
+	/*
 	--- Usage ---
 	Chat: "%c" "%s" "%s" "%c", 0x12, ret_link, inst->GetItem()->name, 0x12
 	Task: "<a WndNotify=\"27," "%s" "\">" "%s" "</a>", ret_link, inst->GetItem()->name
-		<a WndNotify="27,00960F000000000000000000000000000000000000000">Master's Book of Wood Elven Culture</a>
-		http://eqitems.13th-floor.org/phpBB2/viewtopic.php?p=510#510
-*/
+	<a WndNotify="27,00960F000000000000000000000000000000000000000">Master's Book of Wood Elven Culture</a>
+	http://eqitems.13th-floor.org/phpBB2/viewtopic.php?p=510#510
+	*/
 
-	if (!inst) //have to have an item to make the link
+	if (!item) //have to have an item to make the link
 		return false;
 
-	const Item_Struct* item = inst->GetItem();
 	//format:
 	//0	itemid	aug1	aug2	aug3	aug4	aug5	evolving?	loregroup	evolved level	hash
 	//0	00000	00000	00000	00000	00000	00000	0			0000		0				00000000
 	//length:
 	//1	5		5		5		5		5		5		1			4			1				8		= 45
 	//evolving item info: http://eqitems.13th-floor.org/phpBB2/viewtopic.php?t=145#558
-	uint8 evolving = 0;
-	uint16 loregroup = 0;
-	uint8 evolvedlevel = 0;
-	int hash = 0;
+
 	//int hash = GetItemLinkHash(inst);	//eventually this will work (currently crashes zone), but for now we'll skip the extra overhead
-	if (GetClientVersion() >= EQClientRoF2)
-	{
-		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%01X" "%1X" "%04X" "%1X" "%05X" "%08X",
+	int hash = NOT_USED;
+	
+	// Tested with UF and RoF..there appears to be a problem with using non-augment arguments below...
+	// Currently, enabling them causes misalignments in what the client expects. I haven't looked
+	// into it further to determine the cause..but, the function is setup to accept the parameters.
+	// Note: some links appear with '00000' in front of the name..so, it's likely we need to send
+	// some additional information when certain parameters are true -U
+	//switch (GetClientVersion()) {
+	switch (0) {
+	case EQClientRoF2:
+		// This operator contains 14 parameter masks..but, only 13 parameter values.
+		// Even so, the client link appears ok... Need to figure out the discrepancy -U
+		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%1X" "%04X" "%1X" "%05X" "%08X",
 			0,
 			item->ID,
-			inst->GetAugmentItemID(0),
-			inst->GetAugmentItemID(1),
-			inst->GetAugmentItemID(2),
-			inst->GetAugmentItemID(3),
-			inst->GetAugmentItemID(4),
-			inst->GetAugmentItemID(5),
-			evolving,
-			loregroup,
-			evolvedlevel,
+			aug0,
+			aug1,
+			aug2,
+			aug3,
+			aug4,
+			aug5,
+			0,//evolving,
+			0,//item->LoreGroup,
+			0,//evolvedlevel,
 			0,
 			hash
 			);
-	}
-	else if (GetClientVersion() >= EQClientRoF)
-	{
+		return true;
+	case EQClientRoF:
 		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%05X" "%08X",
 			0,
 			item->ID,
-			inst->GetAugmentItemID(0),
-			inst->GetAugmentItemID(1),
-			inst->GetAugmentItemID(2),
-			inst->GetAugmentItemID(3),
-			inst->GetAugmentItemID(4),
-			inst->GetAugmentItemID(5),
-			evolving,
-			loregroup,
-			evolvedlevel,
+			aug0,
+			aug1,
+			aug2,
+			aug3,
+			aug4,
+			aug5,
+			0,//evolving,
+			0,//item->LoreGroup,
+			0,//evolvedlevel,
 			0,
 			hash
-		);
-	}
-	else if (GetClientVersion() >= EQClientSoF)
-	{
+			);
+		return true;
+	case EQClientUnderfoot:
+	case EQClientSoD:
+	case EQClientSoF:
 		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%05X" "%08X",
 			0,
 			item->ID,
-			inst->GetAugmentItemID(0),
-			inst->GetAugmentItemID(1),
-			inst->GetAugmentItemID(2),
-			inst->GetAugmentItemID(3),
-			inst->GetAugmentItemID(4),
-			evolving,
-			loregroup,
-			evolvedlevel,
+			aug0,
+			aug1,
+			aug2,
+			aug3,
+			aug4,
+			0,//evolving,
+			0,//item->LoreGroup,
+			0,//evolvedlevel,
 			0,
 			hash
-		);
-	}
-	else
-	{
+			);
+		return true;
+	case EQClientTitanium:
 		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%08X",
 			0,
 			item->ID,
-			inst->GetAugmentItemID(0),
-			inst->GetAugmentItemID(1),
-			inst->GetAugmentItemID(2),
-			inst->GetAugmentItemID(3),
-			inst->GetAugmentItemID(4),
-			evolving,
-			loregroup,
-			evolvedlevel,
+			aug0,
+			aug1,
+			aug2,
+			aug3,
+			aug4,
+			0,//evolving,
+			0,//item->LoreGroup,
+			0,//evolvedlevel,
 			hash
-		);
+			);
+		return true;
+	case EQClient62:
+	default:
+		return false;
 	}
-
-	return true;
 }
 
 int Client::GetItemLinkHash(const ItemInst* inst) {
@@ -1198,6 +1224,7 @@ int Client::GetItemLinkHash(const ItemInst* inst) {
 	return hash;
 }
 
+// This appears to still be in use... The core of this should be incorporated into class Client::TextLink
 void Client::SendItemLink(const ItemInst* inst, bool send_to_all)
 {
 /*
@@ -1299,7 +1326,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 	// This could be expounded upon at some point to let the server know that
 	// the client has moved a buffered cursor item onto the active cursor -U
-	if (move_in->from_slot == move_in->to_slot) { // Item summon, no further proccessing needed
+	if (move_in->from_slot == move_in->to_slot) { // Item summon, no further processing needed
 		if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
 		return true;
 	}
@@ -1315,13 +1342,15 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			}
 
 			DeleteItemInInventory(move_in->from_slot);
+			SendCursorBuffer();
+
 			return true; // Item destroyed by client
 		}
 		else {
 			mlog(INVENTORY__SLOTS, "Deleted item from slot %d as a result of an inventory container tradeskill combine.", move_in->from_slot);
 			if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
 			DeleteItemInInventory(move_in->from_slot);
-			return true; // Item deletetion
+			return true; // Item deletion
 		}
 	}
 	if(auto_attack && (move_in->from_slot == MainPrimary || move_in->from_slot == MainSecondary || move_in->from_slot == MainRange))
@@ -1363,7 +1392,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		//SetTint(dst_slot_id,src_inst->GetColor());
 		if (src_inst->GetCharges() > 0 && (src_inst->GetCharges() < (int16)move_in->number_in_stack || move_in->number_in_stack > src_inst->GetItem()->StackSize))
 		{
-			Message(13,"Error: Insufficent number in stack.");
+			Message(13,"Error: Insufficient number in stack.");
 			return false;
 		}
 	}
@@ -1413,7 +1442,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	//verify shared bank transactions in the database
 	if(src_inst && src_slot_id >= EmuConstants::SHARED_BANK_BEGIN && src_slot_id <= EmuConstants::SHARED_BANK_BAGS_END) {
 		if(!database.VerifyInventory(account_id, src_slot_id, src_inst)) {
-			LogFile->write(EQEMuLog::Error, "Player %s on account %s was found exploiting the shared bank.\n", GetName(), account_name);
+			LogFile->write(EQEmuLog::Error, "Player %s on account %s was found exploiting the shared bank.\n", GetName(), account_name);
 			DeleteItemInInventory(dst_slot_id,0,true);
 			return(false);
 		}
@@ -1428,7 +1457,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	}
 	if(dst_inst && dst_slot_id >= EmuConstants::SHARED_BANK_BEGIN && dst_slot_id <= EmuConstants::SHARED_BANK_BAGS_END) {
 		if(!database.VerifyInventory(account_id, dst_slot_id, dst_inst)) {
-			LogFile->write(EQEMuLog::Error, "Player %s on account %s was found exploting the shared bank.\n", GetName(), account_name);
+			LogFile->write(EQEmuLog::Error, "Player %s on account %s was found exploting the shared bank.\n", GetName(), account_name);
 			DeleteItemInInventory(src_slot_id,0,true);
 			return(false);
 		}
@@ -1520,11 +1549,19 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			}
 
 			safe_delete(world_inst);
-			if (src_slot_id == MainCursor) {
-				std::list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
+			if (src_slot_id == MainCursor)
+			{
+				if (dstitemid == 0)
+				{
+					SendCursorBuffer();
+				}
+				std::list<ItemInst*>::const_iterator s = m_inv.cursor_begin(), e = m_inv.cursor_end();
 				database.SaveCursor(character_id, s, e);
-			} else
+			}
+			else
+			{
 				database.SaveInventory(character_id, m_inv[src_slot_id], src_slot_id);
+			}
 
 			if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in, true); } // QS Audit
 
@@ -1551,6 +1588,10 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
 
 			trade->AddEntity(dst_slot_id, move_in->number_in_stack);
+			if (dstitemid == 0)
+			{
+				SendCursorBuffer();
+			}
 
 			return true;
 		} else {
@@ -1563,6 +1604,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		}
 	}
 
+	bool all_to_stack = false;
 	// Step 5: Swap (or stack) items
 	if (move_in->number_in_stack > 0) {
 		// Determine if charged items can stack
@@ -1593,6 +1635,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 					mlog(INVENTORY__SLOTS, "Dest (%d) now has %d charges, source (%d) was entirely consumed. (%d moved)", dst_slot_id, dst_inst->GetCharges(), src_slot_id, usedcharges);
 					database.SaveInventory(CharacterID(),nullptr,src_slot_id);
 					m_inv.DeleteItem(src_slot_id);
+					all_to_stack = true;
 				} else {
 					mlog(INVENTORY__SLOTS, "Dest (%d) now has %d charges, source (%d) has %d (%d moved)", dst_slot_id, dst_inst->GetCharges(), src_slot_id, src_inst->GetCharges(), usedcharges);
 				}
@@ -1666,6 +1709,11 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 	// Step 7: Save change to the database
 	if (src_slot_id == MainCursor){
+		// If not swapping another item to cursor and stacking items were depleted
+		if (dstitemid == 0 || all_to_stack == true)
+		{
+			SendCursorBuffer();
+		}
 		std::list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
 		database.SaveCursor(character_id, s, e);
 	} else
@@ -1968,7 +2016,7 @@ void Client::DyeArmor(DyeStruct* dye){
 
 bool Client::DecreaseByID(uint32 type, uint8 amt) {
 	const Item_Struct* TempItem = 0;
-	ItemInst* ins;
+	ItemInst* ins = nullptr;
 	int x;
 	int num = 0;
 	for(x = EmuConstants::EQUIPMENT_BEGIN; x <= EmuConstants::GENERAL_BAGS_END; x++)
@@ -2104,6 +2152,7 @@ void Client::RemoveNoRent(bool client_update) {
 		std::list<ItemInst*>::iterator iter = local.begin();
 		while (iter != local.end()) {
 			inst = *iter;
+			// should probably put a check here for valid pointer..but, that was checked when the item was put into inventory -U
 			if (!inst->GetItem()->NoRent)
 				mlog(INVENTORY__SLOTS, "NoRent Timer Lapse: Deleting %s from `Limbo`", inst->GetItem()->Name);
 			else
@@ -2229,6 +2278,7 @@ void Client::RemoveDuplicateLore(bool client_update) {
 		std::list<ItemInst*>::iterator iter = local.begin();
 		while (iter != local.end()) {
 			inst = *iter;
+			// probably needs a valid pointer check -U
 			if (CheckLoreConflict(inst->GetItem())) {
 				mlog(INVENTORY__ERROR, "Lore Duplication Error: Deleting %s from `Limbo`", inst->GetItem()->Name);
 				safe_delete(*iter);
@@ -2431,8 +2481,8 @@ void Client::CreateBandolier(const EQApplicationPacket *app) {
 	_log(INVENTORY__BANDOLIER, "Char: %s Creating Bandolier Set %i, Set Name: %s", GetName(), bs->number, bs->name);
 	strcpy(m_pp.bandoliers[bs->number].name, bs->name);
 
-	const ItemInst* InvItem; 
-	const Item_Struct *BaseItem; 
+	const ItemInst* InvItem = nullptr; 
+	const Item_Struct *BaseItem = nullptr; 
 	int16 WeaponSlot;
 
 	for(int BandolierSlot = bandolierMainHand; BandolierSlot <= bandolierAmmo; BandolierSlot++) {

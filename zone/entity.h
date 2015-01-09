@@ -356,7 +356,7 @@ public:
 	void	ClearAggro(Mob* targ);
 	void	ClearFeignAggro(Mob* targ);
 	void	ClearZoneFeignAggro(Client* targ);
-	void	AggroZone(Mob* who, int hate = 0);
+	void	AggroZone(Mob* who, uint32 hate = 0);
 
 	bool	Fighting(Mob* targ);
 	void	RemoveFromHateLists(Mob* mob, bool settoone = false);

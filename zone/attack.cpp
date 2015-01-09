@@ -61,7 +61,7 @@ bool Mob::AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* w
 	if (weapon && weapon->IsType(ItemClassCommon)) {
 		const Item_Struct* item = weapon->GetItem();
 #if EQDEBUG >= 11
-			LogFile->write(EQEMuLog::Debug, "Weapon skill:%i", item->ItemType);
+			LogFile->write(EQEmuLog::Debug, "Weapon skill:%i", item->ItemType);
 #endif
 		switch (item->ItemType)
 		{
@@ -192,7 +192,7 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 		chancetohit += RuleR(Combat, NPCBonusHitChance);
 
 #if ATTACK_DEBUG>=11
-		LogFile->write(EQEMuLog::Debug, "CheckHitChance(%s) attacked by %s", defender->GetName(), attacker->GetName());
+		LogFile->write(EQEmuLog::Debug, "CheckHitChance(%s) attacked by %s", defender->GetName(), attacker->GetName());
 #endif
 	mlog(COMBAT__TOHIT,"CheckHitChance(%s) attacked by %s", defender->GetName(), attacker->GetName());
 
@@ -334,7 +334,7 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 	//agains a garunteed riposte (for example) discipline... for now, garunteed hit wins
 
 	#if EQDEBUG>=11
-		LogFile->write(EQEMuLog::Debug, "3 FINAL calculated chance to hit is: %5.2f", chancetohit);
+		LogFile->write(EQEmuLog::Debug, "3 FINAL calculated chance to hit is: %5.2f", chancetohit);
 	#endif
 
 	//
@@ -1135,7 +1135,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 {
 	if (!other) {
 		SetTarget(nullptr);
-		LogFile->write(EQEMuLog::Error, "A null Mob object was passed to Client::Attack() for evaluation!");
+		LogFile->write(EQEmuLog::Error, "A null Mob object was passed to Client::Attack() for evaluation!");
 		return false;
 	}
 
@@ -1518,7 +1518,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 	}
 
 	entity_list.RemoveFromTargets(this);
-	hate_list.RemoveEnt(this);
+	hate_list.RemoveEntFromHateList(this);
 	RemoveAutoXTargets();
 
 	//remove ourself from all proximities
@@ -1699,7 +1699,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	if (!other) {
 		SetTarget(nullptr);
-		LogFile->write(EQEMuLog::Error, "A null Mob object was passed to NPC::Attack() for evaluation!");
+		LogFile->write(EQEmuLog::Error, "A null Mob object was passed to NPC::Attack() for evaluation!");
 		return false;
 	}
 
@@ -2036,7 +2036,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	{
 		zone->DelAggroMob();
 #if EQDEBUG >= 11
-		LogFile->write(EQEMuLog::Debug,"NPC::Death() Mobs currently Aggro %i", zone->MobsAggroCount());
+		LogFile->write(EQEmuLog::Debug,"NPC::Death() Mobs currently Aggro %i", zone->MobsAggroCount());
 #endif
 	}
 	SetHP(0);
@@ -2076,12 +2076,12 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 
 	if (killerMob) {
 		if(GetClass() != LDON_TREASURE)
-			hate_list.Add(killerMob, damage);
+			hate_list.AddEntToHateList(killerMob, damage);
 	}
 
 	safe_delete(app);
 
-	Mob *give_exp = hate_list.GetDamageTop(this);
+	Mob *give_exp = hate_list.GetDamageTopOnHateList(this);
 
 	if(give_exp == nullptr)
 		give_exp = killer;
@@ -2400,7 +2400,8 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	return true;
 }
 
-void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp, bool bFrenzy, bool iBuffTic) {
+void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, bool iYellForHelp /*= true*/, bool bFrenzy /*= false*/, bool iBuffTic /*= false*/)
+{
 
 	assert(other != nullptr);
 
@@ -2413,7 +2414,7 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 
 	bool wasengaged = IsEngaged();
 	Mob* owner = other->GetOwner();
-	Mob* mypet = this->GetPet();
+	Mob* mypet = this->GetPet(); 
 	Mob* myowner = this->GetOwner();
 	Mob* targetmob = this->GetTarget();
 
@@ -2488,7 +2489,7 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 		&& other &&  (buffs[spellbonuses.ImprovedTaunt[2]].casterid != other->GetID()))
 		hate = (hate*spellbonuses.ImprovedTaunt[1])/100;
 
-	hate_list.Add(other, hate, damage, bFrenzy, !iBuffTic);
+	hate_list.AddEntToHateList(other, hate, damage, bFrenzy, !iBuffTic);
 
 	if(other->IsClient())
 		other->CastToClient()->AddAutoXTarget(this);
@@ -2500,8 +2501,8 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 			AddFeignMemory(other->CastToBot()->GetBotOwner()->CastToClient());
 		}
 		else {
-			if(!hate_list.IsOnHateList(other->CastToBot()->GetBotOwner()))
-				hate_list.Add(other->CastToBot()->GetBotOwner(), 0, 0, false, true);
+			if(!hate_list.IsEntOnHateList(other->CastToBot()->GetBotOwner()))
+				hate_list.AddEntToHateList(other->CastToBot()->GetBotOwner(), 0, 0, false, true);
 		}
 	}
 #endif //BOTS
@@ -2512,8 +2513,8 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 			AddFeignMemory(other->CastToMerc()->GetMercOwner()->CastToClient());
 		}
 		else {
-			if(!hate_list.IsOnHateList(other->CastToMerc()->GetMercOwner()))
-				hate_list.Add(other->CastToMerc()->GetMercOwner(), 0, 0, false, true);
+			if(!hate_list.IsEntOnHateList(other->CastToMerc()->GetMercOwner()))
+				hate_list.AddEntToHateList(other->CastToMerc()->GetMercOwner(), 0, 0, false, true);
 		}
 	} //MERC
 
@@ -2528,7 +2529,7 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 			// owner must get on list, but he's not actually gained any hate yet
 			if(!owner->GetSpecialAbility(IMMUNE_AGGRO))
 			{
-				hate_list.Add(owner, 0, 0, false, !iBuffTic);
+				hate_list.AddEntToHateList(owner, 0, 0, false, !iBuffTic);
 				if(owner->IsClient())
 					owner->CastToClient()->AddAutoXTarget(this);
 			}
@@ -2537,10 +2538,10 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 
 	if (mypet && (!(GetAA(aaPetDiscipline) && mypet->IsHeld()))) { // I have a pet, add other to it
 		if(!mypet->IsFamiliar() && !mypet->GetSpecialAbility(IMMUNE_AGGRO))
-			mypet->hate_list.Add(other, 0, 0, bFrenzy);
+			mypet->hate_list.AddEntToHateList(other, 0, 0, bFrenzy);
 	} else if (myowner) { // I am a pet, add other to owner if it's NPC/LD
 		if (myowner->IsAIControlled() && !myowner->GetSpecialAbility(IMMUNE_AGGRO))
-			myowner->hate_list.Add(other, 0, 0, bFrenzy);
+			myowner->hate_list.AddEntToHateList(other, 0, 0, bFrenzy);
 	}
 
 	if (other->GetTempPetCount())
@@ -3890,11 +3891,12 @@ float Mob::GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 h
 	return ProcChance;
 }
 
+// argument 'weapon' not used
 void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand) {
 
 	if (!on) {
 		SetTarget(nullptr);
-		LogFile->write(EQEMuLog::Error, "A null Mob object was passed to Mob::TryDefensiveProc for evaluation!");
+		LogFile->write(EQEmuLog::Error, "A null Mob object was passed to Mob::TryDefensiveProc for evaluation!");
 		return;
 	}
 
@@ -3925,7 +3927,7 @@ void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand) {
 void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
 	if(!on) {
 		SetTarget(nullptr);
-		LogFile->write(EQEMuLog::Error, "A null Mob object was passed to Mob::TryWeaponProc for evaluation!");
+		LogFile->write(EQEmuLog::Error, "A null Mob object was passed to Mob::TryWeaponProc for evaluation!");
 		return;
 	}
 
@@ -4474,7 +4476,7 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 
 	if (!on) {
 		SetTarget(nullptr);
-		LogFile->write(EQEMuLog::Error, "A null Mob object was passed to Mob::TrySkillProc for evaluation!");
+		LogFile->write(EQEmuLog::Error, "A null Mob object was passed to Mob::TrySkillProc for evaluation!");
 		return;
 	}
 
@@ -4932,7 +4934,7 @@ void Client::SetAttackTimer()
 		// this is probably wrong
 		if (quiver_haste > 0)
 			speed *= quiver_haste;
-		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true);
+		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true, true);
 
 		if (i == MainPrimary)
 			PrimaryWeapon = ItemToUse;
@@ -4980,6 +4982,6 @@ void NPC::SetAttackTimer()
 			}
 		}
 
-		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true);
+		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true, true);
 	}
 }

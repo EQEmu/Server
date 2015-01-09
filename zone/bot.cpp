@@ -234,45 +234,28 @@ void Bot::SetBotSpellID(uint32 newSpellID) {
 	this->npc_spells_id = newSpellID;
 }
 
-uint32 Bot::GetBotArcheryRange() {
-	uint32 result = 0;
+uint32 Bot::GetBotArcheryRange()
+{
+	const ItemInst *range_inst = GetBotItem(MainRange);
+	const ItemInst *ammo_inst = GetBotItem(MainAmmo);
 
-	ItemInst* rangeItem = GetBotItem(MainRange);
-
-	if(!rangeItem)
+	// empty slots
+	if (!range_inst || !ammo_inst)
 		return 0;
 
-	const Item_Struct* botweapon = rangeItem->GetItem();
+	const Item_Struct *range_item = range_inst->GetItem();
+	const Item_Struct *ammo_item = ammo_inst->GetItem();
 
-	uint32 archeryMaterial;
-	uint32 archeryColor;
-	uint32 archeryBowID;
-	uint32 archeryAmmoID;
+	// no item struct for whatever reason
+	if (!range_item || !ammo_item)
+		return 0;
 
-	if(botweapon && botweapon->ItemType == ItemTypeBow) {
-		uint32 range = 0;
+	// bad item types
+	if (range_item->ItemType != ItemTypeBow || ammo_item->ItemType != ItemTypeArrow)
+		return 0;
 
-		archeryMaterial = atoi(botweapon->IDFile + 2);
-		archeryBowID = botweapon->ID;
-		archeryColor = botweapon->Color;
-		range =+ botweapon->Range;
-
-		rangeItem = GetBotItem(MainAmmo);
-		if(rangeItem)
-			botweapon = rangeItem->GetItem();
-
-		if(!botweapon || (botweapon->ItemType != ItemTypeArrow)) {
-			return 0;
-		}
-
-		range += botweapon->Range;
-
-		archeryAmmoID = botweapon->ID;
-
-		result = range;
-	}
-
-	return result;
+	// everything is good!
+	return range_item->Range + ammo_item->Range;
 }
 
 void Bot::ChangeBotArcherWeapons(bool isArcher) {
@@ -386,8 +369,8 @@ NPCType Bot::FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::str
 
 	BotNPCType.npc_id = 0;
 	BotNPCType.texture = 0;
-	BotNPCType.d_meele_texture1 = 0;
-	BotNPCType.d_meele_texture2 = 0;
+	BotNPCType.d_melee_texture1 = 0;
+	BotNPCType.d_melee_texture2 = 0;
 	BotNPCType.qglobal = false;
 	BotNPCType.attack_speed = 0;
 	BotNPCType.runspeed = 1.25;
@@ -431,8 +414,8 @@ NPCType Bot::CreateDefaultNPCTypeStructForBot(std::string botName, std::string b
 	Result.hp_regen = 1;
 	Result.mana_regen = 1;
 	Result.texture = 0;
-	Result.d_meele_texture1 = 0;
-	Result.d_meele_texture2 = 0;
+	Result.d_melee_texture1 = 0;
+	Result.d_melee_texture2 = 0;
 	Result.qglobal = false;
 	Result.npc_spells_id = 0;
 	Result.attack_speed = 0;
@@ -1242,7 +1225,7 @@ int32 Bot::acmod()
 		return (65 + ((agility-300) / 21));
 	}
 #if EQDEBUG >= 11
-	LogFile->write(EQEMuLog::Error, "Error in Bot::acmod(): Agility: %i, Level: %i",agility,level);
+	LogFile->write(EQEmuLog::Error, "Error in Bot::acmod(): Agility: %i, Level: %i",agility,level);
 #endif
 	return 0;
 }
@@ -1479,7 +1462,7 @@ void Bot::LoadAAs() {
     auto results = database.QueryDatabase(query);
 
 	if(!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error in Bot::LoadAAs()");
+		LogFile->write(EQEmuLog::Error, "Error in Bot::LoadAAs()");
 		return;
 	}
 
@@ -2791,7 +2774,7 @@ void Bot::LoadStance() {
 	std::string query = StringFormat("SELECT StanceID FROM botstances WHERE BotID = %u;", GetBotID());
 	auto results = database.QueryDatabase(query);
 	if(!results.Success() || results.RowCount() == 0) {
-		LogFile->write(EQEMuLog::Error, "Error in Bot::LoadStance()");
+		LogFile->write(EQEmuLog::Error, "Error in Bot::LoadStance()");
 		SetDefaultBotStance();
 		return;
 	}
@@ -2809,7 +2792,7 @@ void Bot::SaveStance() {
                                     "VALUES(%u, %u);", GetBotID(), GetBotStance());
     auto results = database.QueryDatabase(query);
     if(!results.Success())
-        LogFile->write(EQEMuLog::Error, "Error in Bot::SaveStance()");
+        LogFile->write(EQEmuLog::Error, "Error in Bot::SaveStance()");
 
 }
 
@@ -2824,7 +2807,7 @@ void Bot::LoadTimers() {
                                     GetBotID(), DisciplineReuseStart-1, DisciplineReuseStart-1, GetClass(), GetLevel());
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error in Bot::LoadTimers()");
+		LogFile->write(EQEmuLog::Error, "Error in Bot::LoadTimers()");
 		return;
 	}
 
@@ -2864,7 +2847,7 @@ void Bot::SaveTimers() {
 	}
 
 	if(hadError)
-		LogFile->write(EQEMuLog::Error, "Error in Bot::SaveTimers()");
+		LogFile->write(EQEmuLog::Error, "Error in Bot::SaveTimers()");
 
 }
 
@@ -3439,9 +3422,9 @@ void Bot::AI_Process() {
 			rest_timer.Disable();
 
 		if(IsRooted())
-			SetTarget(hate_list.GetClosest(this));
+			SetTarget(hate_list.GetClosestEntOnHateList(this));
 		else
-			SetTarget(hate_list.GetTop(this));
+			SetTarget(hate_list.GetEntWithMostHateOnList(this));
 
 		if(!GetTarget())
 			return;
@@ -3808,9 +3791,9 @@ void Bot::PetAIProcess() {
 	if (IsEngaged()) {
 
 		if (botPet->IsRooted())
-			botPet->SetTarget(hate_list.GetClosest(botPet));
+			botPet->SetTarget(hate_list.GetClosestEntOnHateList(botPet));
 		else
-			botPet->SetTarget(hate_list.GetTop(botPet));
+			botPet->SetTarget(hate_list.GetEntWithMostHateOnList(botPet));
 
 		// Let's check if we have a los with our target.
 		// If we don't, our hate_list is wiped.
@@ -4228,7 +4211,7 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
 
         ItemInst* inst = database.CreateItem(item_id, charges, aug[0], aug[1], aug[2], aug[3], aug[4]);
         if (!inst) {
-            LogFile->write(EQEMuLog::Error, "Warning: botid %i has an invalid item_id %i in inventory slot %i", this->GetBotID(), item_id, slot_id);
+            LogFile->write(EQEmuLog::Error, "Warning: botid %i has an invalid item_id %i in inventory slot %i", this->GetBotID(), item_id, slot_id);
             continue;
         }
 
@@ -4252,7 +4235,7 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
 
         // Save ptr to item in inventory
         if (put_slot_id == INVALID_INDEX)
-            LogFile->write(EQEMuLog::Error, "Warning: Invalid slot_id for item in inventory: botid=%i, item_id=%i, slot_id=%i",this->GetBotID(), item_id, slot_id);
+            LogFile->write(EQEmuLog::Error, "Warning: Invalid slot_id for item in inventory: botid=%i, item_id=%i, slot_id=%i",this->GetBotID(), item_id, slot_id);
 
     }
 
@@ -5871,7 +5854,7 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, SkillUseTypes att
 
 	Save();
 
-	Mob *give_exp = hate_list.GetDamageTop(this);
+	Mob *give_exp = hate_list.GetDamageTopOnHateList(this);
 	Client *give_exp_client = nullptr;
 
 	if(give_exp && give_exp->IsClient())
@@ -6025,7 +6008,7 @@ void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, SkillUseTypes attack_
 	}
 }
 
-void Bot::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp, bool bFrenzy, bool iBuffTic)
+void Bot::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, bool iYellForHelp /*= true*/, bool bFrenzy /*= false*/, bool iBuffTic /*= false*/)
 {
 	Mob::AddToHateList(other, hate, damage, iYellForHelp, bFrenzy, iBuffTic);
 }
@@ -6034,7 +6017,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 {
 	if (!other) {
 		SetTarget(nullptr);
-		LogFile->write(EQEMuLog::Error, "A null Mob object was passed to Bot::Attack for evaluation!");
+		LogFile->write(EQEmuLog::Error, "A null Mob object was passed to Bot::Attack for evaluation!");
 		return false;
 	}
 
@@ -7045,7 +7028,7 @@ int32 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 						return 0;
 					break;
 				default:
-					LogFile->write(EQEMuLog::Normal, "CalcFocusEffect: unknown limit spelltype %d", focus_spell.base[i]);
+					LogFile->write(EQEmuLog::Normal, "CalcFocusEffect: unknown limit spelltype %d", focus_spell.base[i]);
 			}
 			break;
 
@@ -7353,7 +7336,7 @@ int32 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 		//this spits up a lot of garbage when calculating spell focuses
 		//since they have all kinds of extra effects on them.
 		default:
-			LogFile->write(EQEMuLog::Normal, "CalcFocusEffect: unknown effectid %d", focus_spell.effectid[i]);
+			LogFile->write(EQEmuLog::Normal, "CalcFocusEffect: unknown effectid %d", focus_spell.effectid[i]);
 #endif
 		}
 	}
@@ -8567,7 +8550,7 @@ int32 Bot::CalcMaxMana() {
 		}
 		default:
 		{
-			LogFile->write(EQEMuLog::Debug, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+			LogFile->write(EQEmuLog::Debug, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
 			max_mana = 0;
 			break;
 		}
@@ -11716,106 +11699,46 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				const char* equipped[EmuConstants::EQUIPMENT_SIZE] = {"Charm", "Left Ear", "Head", "Face", "Right Ear", "Neck", "Shoulders", "Arms", "Back",
 					"Left Wrist", "Right Wrist", "Range", "Hands", "Primary Hand", "Secondary Hand",
 					"Left Finger", "Right Finger", "Chest", "Legs", "Feet", "Waist", "Ammo" };
-				const ItemInst* item1 = nullptr;
-				const Item_Struct* item2 = nullptr;
+				
+				const ItemInst* inst = nullptr;
+				const Item_Struct* item = nullptr;
 				bool is2Hweapon = false;
-				for(int i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; ++i)
-				{
+				
+				std::string item_link;
+				Client::TextLink linker;
+				linker.SetLinkType(linker.linkItemInst);
+
+				for(int i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; ++i) {
 					if((i == MainSecondary) && is2Hweapon) {
 						continue;
 					}
 
-					item1 = b->CastToBot()->GetBotItem(i);
-					if(item1)
-						item2 = item1->GetItem();
+					inst = b->CastToBot()->GetBotItem(i);
+					if (inst)
+						item = inst->GetItem();
 					else
-						item2 = nullptr;
+						item = nullptr;
 
 					if(!TempErrorMessage.empty()) {
 						c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
 						return;
 					}
-					if(item2 == 0) {
+					if(item == nullptr) {
 						c->Message(15, "I need something for my %s (Item %i)", equipped[i], i);
 						continue;
 					}
-					if((i == MainPrimary) && ((item2->ItemType == ItemType2HSlash) || (item2->ItemType == ItemType2HBlunt) || (item2->ItemType == ItemType2HPiercing))) {
+					if((i == MainPrimary) && ((item->ItemType == ItemType2HSlash) || (item->ItemType == ItemType2HBlunt) || (item->ItemType == ItemType2HPiercing))) {
 						is2Hweapon = true;
 					}
 
-					char* itemLink = 0;
-					if((i == MainCharm) || (i == MainRange) || (i == MainPrimary) || (i == MainSecondary) || (i == MainAmmo)) {
-						if (c->GetClientVersion() >= EQClientSoF)
-						{
-							MakeAnyLenString(&itemLink, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%05X" "%08X",
-								0,
-								item2->ID,
-								item1->GetAugmentItemID(0),
-								item1->GetAugmentItemID(1),
-								item1->GetAugmentItemID(2),
-								item1->GetAugmentItemID(3),
-								item1->GetAugmentItemID(4),
-								0,
-								0,
-								0,
-								0,
-								0
-								);
-							c->Message(15, "Using %c%s%s%c in my %s (Item %i)", 0x12, itemLink, item2->Name, 0x12, equipped[i], i);
-						}
-						else
-						{
-							MakeAnyLenString(&itemLink, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%08X",
-								0,
-								item2->ID,
-								item1->GetAugmentItemID(0),
-								item1->GetAugmentItemID(1),
-								item1->GetAugmentItemID(2),
-								item1->GetAugmentItemID(3),
-								item1->GetAugmentItemID(4),
-								0,
-								0,
-								0,
-								0);
-							c->Message(15, "Using %c%s%s%c in my %s (Item %i)", 0x12, itemLink, item2->Name, 0x12, equipped[i], i);
-						}
-					}
-					else {
-						if (c->GetClientVersion() >= EQClientSoF)
-						{
-							MakeAnyLenString(&itemLink, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%05X" "%08X",
-								0,
-								item2->ID,
-								item1->GetAugmentItemID(0),
-								item1->GetAugmentItemID(1),
-								item1->GetAugmentItemID(2),
-								item1->GetAugmentItemID(3),
-								item1->GetAugmentItemID(4),
-								0,
-								0,
-								0,
-								0,
-								0
-								);
-							c->Message(15, "Using %c%s%s%c in my %s (Item %i)", 0x12, itemLink, item2->Name, 0x12, equipped[i], i);
-						}
-						else
-						{
-							MakeAnyLenString(&itemLink, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%08X",
-								0,
-								item2->ID,
-								item1->GetAugmentItemID(0),
-								item1->GetAugmentItemID(1),
-								item1->GetAugmentItemID(2),
-								item1->GetAugmentItemID(3),
-								item1->GetAugmentItemID(4),
-								0,
-								0,
-								0,
-								0);
-							c->Message(15, "Using %c%s%s%c in my %s (Item %i)", 0x12, itemLink, item2->Name, 0x12, equipped[i], i);
-						}
-					}
+					// I could not find a difference between the criteria positive code and the criteria negative code..
+					// ..so, I deleted the check (old criteria: i = { MainCharm, MainRange, MainPrimary, MainSecondary, MainAmmo })
+					
+					linker.SetItemInst(inst);
+
+					item_link = linker.GenerateLink();
+
+					c->Message(15, "Using %s in my %s (Item %i)", item_link.c_str(), equipped[i], i);
 				}
 			}
 			else {
@@ -14364,8 +14287,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			return;
 		}
 
-		std::list<BotGroup>::iterator botGroupItr = botGroup.begin();
-		for(botGroupItr; botGroupItr != botGroup.end(); ++botGroupItr) {
+		for(auto botGroupItr = botGroup.begin(); botGroupItr != botGroup.end(); ++botGroupItr) {
 			// Don't try to re-spawn the botgroup's leader.
 			if(botGroupItr->BotID == botGroupLeader->GetBotID()) { continue; }
 
@@ -15474,7 +15396,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		else {
 			Mob *target = c->GetTarget();
 
-			if(target->IsBot() && (c == target->GetOwner()->CastToClient())) {
+			if(target && target->IsBot() && (c == target->GetOwner()->CastToClient())) {
 				const InspectMessage_Struct& playermessage = c->GetInspectMessage();
 				InspectMessage_Struct& botmessage = target->CastToBot()->GetInspectMessage();
 
@@ -15504,7 +15426,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 			Mob *target = c->GetTarget();
 
-			if(target->IsBot() && (c == target->GetOwner()->CastToClient())) {
+			if(target && target->IsBot() && (c == target->GetOwner()->CastToClient())) {
 				Bot* bardBot = target->CastToBot();
 
 				if(bardBot) {

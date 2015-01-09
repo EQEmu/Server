@@ -9,6 +9,31 @@
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
 
+	#include <conio.h>
+	#include <iostream>
+	#include <dos.h>
+
+namespace ConsoleColor {
+	enum Colors {
+		Black = 0,
+		Blue = 1,
+		Green = 2,
+		Cyan = 3,
+		Red = 4,
+		Magenta = 5,
+		Brown = 6,
+		LightGray = 7,
+		DarkGray = 8,
+		LightBlue = 9,
+		LightGreen = 10,
+		LightCyan = 11,
+		LightRed = 12,
+		LightMagenta = 13,
+		Yellow = 14,
+		White = 15,
+	};
+}
+
 #else
 
 	#include <sys/types.h>
@@ -25,13 +50,13 @@
 #endif
 
 static volatile bool logFileValid = false;
-static EQEMuLog realLogFile;
-EQEMuLog *LogFile = &realLogFile;
+static EQEmuLog realLogFile;
+EQEmuLog *LogFile = &realLogFile;
 
-static const char* FileNames[EQEMuLog::MaxLogID] = { "logs/eqemu", "logs/eqemu", "logs/eqemu_error", "logs/eqemu_debug", "logs/eqemu_quest", "logs/eqemu_commands", "logs/crash" };
-static const char* LogNames[EQEMuLog::MaxLogID] = { "Status", "Normal", "Error", "Debug", "Quest", "Command", "Crash" };
+static const char* FileNames[EQEmuLog::MaxLogID] = { "logs/eqemu", "logs/eqemu", "logs/eqemu_error", "logs/eqemu_debug", "logs/eqemu_quest", "logs/eqemu_commands", "logs/crash" };
+static const char* LogNames[EQEmuLog::MaxLogID] = { "Status", "Normal", "Error", "Debug", "Quest", "Command", "Crash" };
 
-EQEMuLog::EQEMuLog()
+EQEmuLog::EQEmuLog()
 {
 	for (int i = 0; i < MaxLogID; i++) {
 		fp[i] = 0;
@@ -39,17 +64,17 @@ EQEMuLog::EQEMuLog()
 		logCallbackBuf[i] = nullptr;
 		logCallbackPva[i] = nullptr;
 	}
-	pLogStatus[EQEMuLog::LogIDs::Status] = LOG_LEVEL_STATUS;
-	pLogStatus[EQEMuLog::LogIDs::Normal] = LOG_LEVEL_NORMAL;
-	pLogStatus[EQEMuLog::LogIDs::Error] = LOG_LEVEL_ERROR;
-	pLogStatus[EQEMuLog::LogIDs::Debug] = LOG_LEVEL_DEBUG;
-	pLogStatus[EQEMuLog::LogIDs::Quest] = LOG_LEVEL_QUEST;
-	pLogStatus[EQEMuLog::LogIDs::Commands] = LOG_LEVEL_COMMANDS;
-	pLogStatus[EQEMuLog::LogIDs::Crash] = LOG_LEVEL_CRASH;
+	pLogStatus[EQEmuLog::LogIDs::Status] = LOG_LEVEL_STATUS;
+	pLogStatus[EQEmuLog::LogIDs::Normal] = LOG_LEVEL_NORMAL;
+	pLogStatus[EQEmuLog::LogIDs::Error] = LOG_LEVEL_ERROR;
+	pLogStatus[EQEmuLog::LogIDs::Debug] = LOG_LEVEL_DEBUG;
+	pLogStatus[EQEmuLog::LogIDs::Quest] = LOG_LEVEL_QUEST;
+	pLogStatus[EQEmuLog::LogIDs::Commands] = LOG_LEVEL_COMMANDS;
+	pLogStatus[EQEmuLog::LogIDs::Crash] = LOG_LEVEL_CRASH;
 	logFileValid = true;
 }
 
-EQEMuLog::~EQEMuLog()
+EQEmuLog::~EQEmuLog()
 {
 	logFileValid = false;
 	for (int i = 0; i < MaxLogID; i++) {
@@ -60,7 +85,7 @@ EQEMuLog::~EQEMuLog()
 	}
 }
 
-bool EQEMuLog::open(LogIDs id)
+bool EQEmuLog::open(LogIDs id)
 {
 	if (!logFileValid) {
 		return false;
@@ -112,7 +137,7 @@ bool EQEMuLog::open(LogIDs id)
 	return true;
 }
 
-bool EQEMuLog::write(LogIDs id, const char *fmt, ...)
+bool EQEmuLog::write(LogIDs id, const char *fmt, ...)
 {
 	if (!logFileValid) {
 		return false;
@@ -156,15 +181,45 @@ bool EQEMuLog::write(LogIDs id, const char *fmt, ...)
 		if (pLogStatus[id] & 8) {
 			fprintf(stderr, "[%s] ", LogNames[id]);
 			vfprintf( stderr, fmt, argptr );
-		} else {
+		} 
+		/* This is what's outputted to console */
+		else {
+
+#ifdef _WINDOWS
+			HANDLE  console_handle;
+			console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+
+			CONSOLE_FONT_INFOEX info = { 0 };
+			info.cbSize = sizeof(info);
+			info.dwFontSize.Y = 12; // leave X as zero
+			info.FontWeight = FW_NORMAL;
+			wcscpy(info.FaceName, L"Lucida Console");
+			SetCurrentConsoleFontEx(console_handle, NULL, &info);
+
+			if (id == EQEmuLog::LogIDs::Status){	SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::Yellow); }
+			if (id == EQEmuLog::LogIDs::Error){		SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightRed); }
+			if (id == EQEmuLog::LogIDs::Normal){	SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightGreen); }
+			if (id == EQEmuLog::LogIDs::Debug){		SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::Yellow); }
+			if (id == EQEmuLog::LogIDs::Quest){		SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightCyan); } 
+			if (id == EQEmuLog::LogIDs::Commands){	SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightMagenta); }
+			if (id == EQEmuLog::LogIDs::Crash){		SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightRed); } 
+#endif
+
 			fprintf(stdout, "[%s] ", LogNames[id]);
 			vfprintf( stdout, fmt, argptr );
+
+#ifdef _WINDOWS
+			/* Always set back to white*/
+			SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::White);
+#endif
 		}
 	}
 	va_end(argptr);
 	if (dofile) {
 		fprintf(fp[id], "\n");
 	}
+
+	/* Print Lind Endings */
 	if (pLogStatus[id] & 2) {
 		if (pLogStatus[id] & 8) {
 			fprintf(stderr, "\n");
@@ -181,7 +236,7 @@ bool EQEMuLog::write(LogIDs id, const char *fmt, ...)
 }
 
 //write with Prefix and a VA_list
-bool EQEMuLog::writePVA(LogIDs id, const char *prefix, const char *fmt, va_list argptr)
+bool EQEmuLog::writePVA(LogIDs id, const char *prefix, const char *fmt, va_list argptr)
 {
 	if (!logFileValid) {
 		return false;
@@ -223,9 +278,38 @@ bool EQEMuLog::writePVA(LogIDs id, const char *prefix, const char *fmt, va_list 
 		if (pLogStatus[id] & 8) {
 			fprintf(stderr, "[%s] %s", LogNames[id], prefix);
 			vfprintf( stderr, fmt, argptr );
-		} else {
+		} 
+		/* Console Output */
+		else {
+			
+
+#ifdef _WINDOWS
+			HANDLE  console_handle;
+			console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+
+			CONSOLE_FONT_INFOEX info = { 0 };
+			info.cbSize = sizeof(info);
+			info.dwFontSize.Y = 12; // leave X as zero
+			info.FontWeight = FW_NORMAL;
+			wcscpy(info.FaceName, L"Lucida Console");
+			SetCurrentConsoleFontEx(console_handle, NULL, &info);
+
+			if (id == EQEmuLog::LogIDs::Status){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::Yellow); }
+			if (id == EQEmuLog::LogIDs::Error){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightRed); }
+			if (id == EQEmuLog::LogIDs::Normal){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightGreen); }
+			if (id == EQEmuLog::LogIDs::Debug){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::Yellow); }
+			if (id == EQEmuLog::LogIDs::Quest){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightCyan); }
+			if (id == EQEmuLog::LogIDs::Commands){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightMagenta); }
+			if (id == EQEmuLog::LogIDs::Crash){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightRed); }
+#endif
+
 			fprintf(stdout, "[%s] %s", LogNames[id], prefix);
-			vfprintf( stdout, fmt, argptr );
+			vfprintf(stdout, fmt, argptr);
+
+#ifdef _WINDOWS
+			/* Always set back to white*/
+			SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::White);
+#endif
 		}
 	}
 	va_end(argptr);
@@ -245,7 +329,7 @@ bool EQEMuLog::writePVA(LogIDs id, const char *prefix, const char *fmt, va_list 
 	return true;
 }
 
-bool EQEMuLog::writebuf(LogIDs id, const char *buf, uint8 size, uint32 count)
+bool EQEmuLog::writebuf(LogIDs id, const char *buf, uint8 size, uint32 count)
 {
 	if (!logFileValid) {
 		return false;
@@ -288,9 +372,36 @@ bool EQEMuLog::writebuf(LogIDs id, const char *buf, uint8 size, uint32 count)
 			fwrite(buf, size, count, stderr);
 			fprintf(stderr, "\n");
 		} else {
+#ifdef _WINDOWS
+			HANDLE  console_handle;
+			console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+
+			CONSOLE_FONT_INFOEX info = { 0 };
+			info.cbSize = sizeof(info);
+			info.dwFontSize.Y = 12; // leave X as zero
+			info.FontWeight = FW_NORMAL;
+			wcscpy(info.FaceName, L"Lucida Console");
+			SetCurrentConsoleFontEx(console_handle, NULL, &info);
+
+			if (id == EQEmuLog::LogIDs::Status){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::Yellow); }
+			if (id == EQEmuLog::LogIDs::Error){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightRed); }
+			if (id == EQEmuLog::LogIDs::Normal){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightGreen); }
+			if (id == EQEmuLog::LogIDs::Debug){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightGreen); }
+			if (id == EQEmuLog::LogIDs::Quest){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightCyan); }
+			if (id == EQEmuLog::LogIDs::Commands){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightMagenta); }
+			if (id == EQEmuLog::LogIDs::Crash){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightRed); }
+#endif
+
 			fprintf(stdout, "[%s] ", LogNames[id]);
 			fwrite(buf, size, count, stdout);
 			fprintf(stdout, "\n");
+
+#ifdef _WINDOWS
+			/* Always set back to white*/
+			SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::White);
+#endif
+
+
 		}
 	}
 	if (dofile) {
@@ -299,7 +410,7 @@ bool EQEMuLog::writebuf(LogIDs id, const char *buf, uint8 size, uint32 count)
 	return true;
 }
 
-bool EQEMuLog::writeNTS(LogIDs id, bool dofile, const char *fmt, ...)
+bool EQEmuLog::writeNTS(LogIDs id, bool dofile, const char *fmt, ...)
 {
 	va_list argptr, tmpargptr;
 	va_start(argptr, fmt);
@@ -318,7 +429,7 @@ bool EQEMuLog::writeNTS(LogIDs id, bool dofile, const char *fmt, ...)
 	return true;
 };
 
-bool EQEMuLog::Dump(LogIDs id, uint8* data, uint32 size, uint32 cols, uint32 skip)
+bool EQEmuLog::Dump(LogIDs id, uint8* data, uint32 size, uint32 cols, uint32 skip)
 {
 	if (!logFileValid) {
 		#if EQDEBUG >= 10
@@ -386,7 +497,7 @@ bool EQEMuLog::Dump(LogIDs id, uint8* data, uint32 size, uint32 cols, uint32 ski
 	return true;
 }
 
-void EQEMuLog::SetCallback(LogIDs id, msgCallbackFmt proc)
+void EQEmuLog::SetCallback(LogIDs id, msgCallbackFmt proc)
 {
 	if (!logFileValid) {
 		return;
@@ -397,7 +508,7 @@ void EQEMuLog::SetCallback(LogIDs id, msgCallbackFmt proc)
 	logCallbackFmt[id] = proc;
 }
 
-void EQEMuLog::SetCallback(LogIDs id, msgCallbackBuf proc)
+void EQEmuLog::SetCallback(LogIDs id, msgCallbackBuf proc)
 {
 	if (!logFileValid) {
 		return;
@@ -408,7 +519,7 @@ void EQEMuLog::SetCallback(LogIDs id, msgCallbackBuf proc)
 	logCallbackBuf[id] = proc;
 }
 
-void EQEMuLog::SetCallback(LogIDs id, msgCallbackPva proc)
+void EQEmuLog::SetCallback(LogIDs id, msgCallbackPva proc)
 {
 	if (!logFileValid) {
 		return;
@@ -419,7 +530,7 @@ void EQEMuLog::SetCallback(LogIDs id, msgCallbackPva proc)
 	logCallbackPva[id] = proc;
 }
 
-void EQEMuLog::SetAllCallbacks(msgCallbackFmt proc)
+void EQEmuLog::SetAllCallbacks(msgCallbackFmt proc)
 {
 	if (!logFileValid) {
 		return;
@@ -430,7 +541,7 @@ void EQEMuLog::SetAllCallbacks(msgCallbackFmt proc)
 	}
 }
 
-void EQEMuLog::SetAllCallbacks(msgCallbackBuf proc)
+void EQEmuLog::SetAllCallbacks(msgCallbackBuf proc)
 {
 	if (!logFileValid) {
 		return;
@@ -441,7 +552,7 @@ void EQEMuLog::SetAllCallbacks(msgCallbackBuf proc)
 	}
 }
 
-void EQEMuLog::SetAllCallbacks(msgCallbackPva proc)
+void EQEmuLog::SetAllCallbacks(msgCallbackPva proc)
 {
 	if (!logFileValid) {
 		return;

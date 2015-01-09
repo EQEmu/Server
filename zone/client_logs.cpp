@@ -27,8 +27,8 @@ ClientLogs client_logs;
 
 char ClientLogs::_buffer[MAX_CLIENT_LOG_MESSAGE_LENGTH+1];
 
-void ClientLogs::subscribe(EQEMuLog::LogIDs id, Client *c) {
-	if(id >= EQEMuLog::MaxLogID)
+void ClientLogs::subscribe(EQEmuLog::LogIDs id, Client *c) {
+	if(id >= EQEmuLog::MaxLogID)
 		return;
 	if(c == nullptr)
 		return;
@@ -47,8 +47,8 @@ void ClientLogs::subscribe(EQEMuLog::LogIDs id, Client *c) {
 	entries[id].push_back(c);
 }
 
-void ClientLogs::unsubscribe(EQEMuLog::LogIDs id, Client *c) {
-	if(id >= EQEMuLog::MaxLogID)
+void ClientLogs::unsubscribe(EQEmuLog::LogIDs id, Client *c) {
+	if(id >= EQEmuLog::MaxLogID)
 		return;
 	if(c == nullptr)
 		return;
@@ -68,8 +68,8 @@ void ClientLogs::subscribeAll(Client *c) {
 	if(c == nullptr)
 		return;
 	int r;
-	for(r = EQEMuLog::Status; r < EQEMuLog::MaxLogID; r++) {
-		subscribe((EQEMuLog::LogIDs)r, c);
+	for(r = EQEmuLog::Status; r < EQEmuLog::MaxLogID; r++) {
+		subscribe((EQEmuLog::LogIDs)r, c);
 	}
 }
 
@@ -77,20 +77,20 @@ void ClientLogs::unsubscribeAll(Client *c) {
 	if(c == nullptr)
 		return;
 	int r;
-	for(r = EQEMuLog::Status; r < EQEMuLog::MaxLogID; r++) {
-		unsubscribe((EQEMuLog::LogIDs)r, c);
+	for(r = EQEmuLog::Status; r < EQEmuLog::MaxLogID; r++) {
+		unsubscribe((EQEmuLog::LogIDs)r, c);
 	}
 }
 
 void ClientLogs::clear() {
 	int r;
-	for(r = EQEMuLog::Status; r < EQEMuLog::MaxLogID; r++) {
+	for(r = EQEmuLog::Status; r < EQEmuLog::MaxLogID; r++) {
 		entries[r].clear();
 	}
 }
 
-void ClientLogs::msg(EQEMuLog::LogIDs id, const char *buf) {
-	if(id >= EQEMuLog::MaxLogID)
+void ClientLogs::msg(EQEmuLog::LogIDs id, const char *buf) {
+	if(id >= EQEmuLog::MaxLogID)
 		return;
 	std::vector<Client *>::iterator cur,end;
 	cur = entries[id].begin();
@@ -103,7 +103,7 @@ void ClientLogs::msg(EQEMuLog::LogIDs id, const char *buf) {
 	}
 }
 
-void ClientLogs::EQEmuIO_buf(EQEMuLog::LogIDs id, const char *buf, uint8 size, uint32 count) {
+void ClientLogs::EQEmuIO_buf(EQEmuLog::LogIDs id, const char *buf, uint8 size, uint32 count) {
 	if(size != 1)
 		return;	//cannot print multibyte data
 	if(buf[0] == '\n' || buf[0] == '\r')
@@ -115,7 +115,7 @@ void ClientLogs::EQEmuIO_buf(EQEMuLog::LogIDs id, const char *buf, uint8 size, u
 	client_logs.msg(id, _buffer);
 }
 
-void ClientLogs::EQEmuIO_fmt(EQEMuLog::LogIDs id, const char *fmt, va_list ap) {
+void ClientLogs::EQEmuIO_fmt(EQEmuLog::LogIDs id, const char *fmt, va_list ap) {
 	if(fmt[0] == '\n' || fmt[0] == '\r')
 		return;	//skip new lines...
 	vsnprintf(_buffer, MAX_CLIENT_LOG_MESSAGE_LENGTH, fmt, ap);
@@ -123,7 +123,7 @@ void ClientLogs::EQEmuIO_fmt(EQEMuLog::LogIDs id, const char *fmt, va_list ap) {
 	client_logs.msg(id, _buffer);
 }
 
-void ClientLogs::EQEmuIO_pva(EQEMuLog::LogIDs id, const char *prefix, const char *fmt, va_list ap) {
+void ClientLogs::EQEmuIO_pva(EQEmuLog::LogIDs id, const char *prefix, const char *fmt, va_list ap) {
 	if(fmt[0] == '\n' || fmt[0] == '\r')
 		return;	//skip new lines...
 	char *buf = _buffer;

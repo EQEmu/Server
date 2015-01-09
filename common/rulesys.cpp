@@ -282,7 +282,7 @@ bool RuleManager::LoadRules(Database *db, const char *ruleset) {
     auto results = db->QueryDatabase(query);
 	if (!results.Success())
 	{
-        LogFile->write(EQEMuLog::Error, "Error in LoadRules query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in LoadRules query %s: %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -329,7 +329,7 @@ int RuleManager::GetRulesetID(Database *db, const char *rulesetname) {
     safe_delete_array(rst);
     auto results = db->QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in LoadRules query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in LoadRules query %s: %s", query.c_str(), results.ErrorMessage().c_str());
         return -1;
     }
 
@@ -369,7 +369,7 @@ std::string RuleManager::GetRulesetName(Database *db, int id) {
     auto results = db->QueryDatabase(query);
 	if (!results.Success())
 	{
-        LogFile->write(EQEMuLog::Error, "Error in LoadRules query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in LoadRules query %s: %s", query.c_str(), results.ErrorMessage().c_str());
         return "";
 	}
 
@@ -390,7 +390,7 @@ bool RuleManager::ListRulesets(Database *db, std::map<int, std::string> &into) {
     auto results = db->QueryDatabase(query);
 	if (results.Success())
 	{
-		LogFile->write(EQEMuLog::Error, "Error in ListRulesets query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error in ListRulesets query %s: %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 

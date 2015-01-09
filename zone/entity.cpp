@@ -371,7 +371,7 @@ void EntityList::CheckGroupList (const char *fname, const int fline)
 	{
 		if (*it == nullptr)
 		{
-			LogFile->write(EQEMuLog::Error, "nullptr group, %s:%i", fname, fline);
+			LogFile->write(EQEmuLog::Error, "nullptr group, %s:%i", fname, fline);
 		}
 	}
 }
@@ -529,12 +529,12 @@ void EntityList::MobProcess()
 				zone->StartShutdownTimer();
 				Group *g = GetGroupByMob(mob);
 				if(g) {
-					LogFile->write(EQEMuLog::Error, "About to delete a client still in a group.");
+					LogFile->write(EQEmuLog::Error, "About to delete a client still in a group.");
 					g->DelMember(mob);
 				}
 				Raid *r = entity_list.GetRaidByClient(mob->CastToClient());
 				if(r) {
-					LogFile->write(EQEMuLog::Error, "About to delete a client still in a raid.");
+					LogFile->write(EQEmuLog::Error, "About to delete a client still in a raid.");
 					r->MemberZoned(mob->CastToClient());
 				}
 				entity_list.RemoveClient(id);
@@ -566,7 +566,7 @@ void EntityList::AddGroup(Group *group)
 
 	uint32 gid = worldserver.NextGroupID();
 	if (gid == 0) {
-		LogFile->write(EQEMuLog::Error,
+		LogFile->write(EQEmuLog::Error,
 				"Unable to get new group ID from world server. group is going to be broken.");
 		return;
 	}
@@ -595,7 +595,7 @@ void EntityList::AddRaid(Raid *raid)
 
 	uint32 gid = worldserver.NextGroupID();
 	if (gid == 0) {
-		LogFile->write(EQEMuLog::Error,
+		LogFile->write(EQEmuLog::Error,
 				"Unable to get new group ID from world server. group is going to be broken.");
 		return;
 	}
@@ -2025,13 +2025,16 @@ void EntityList::RemoveAllNPCs()
 
 void EntityList::RemoveAllMercs()
 {
+	// doesn't clear the data
 	merc_list.clear();
 }
 
 void EntityList::RemoveAllGroups()
 {
-	while (group_list.size())
+	while (group_list.size()) {
+		safe_delete(group_list.front());
 		group_list.pop_front();
+	}
 #if EQDEBUG >= 5
 	CheckGroupList (__FILE__, __LINE__);
 #endif
@@ -2039,8 +2042,10 @@ void EntityList::RemoveAllGroups()
 
 void EntityList::RemoveAllRaids()
 {
-	while (raid_list.size())
+	while (raid_list.size()) {
+		safe_delete(raid_list.front());
 		raid_list.pop_front();
+	}
 }
 
 void EntityList::RemoveAllDoors()
@@ -2250,7 +2255,8 @@ bool EntityList::RemoveGroup(uint32 delete_id)
 	while(iterator != group_list.end())
 	{
 		if((*iterator)->GetID() == delete_id) {
-			group_list.remove (*iterator);
+			safe_delete(*iterator);
+			group_list.remove(*iterator);
 #if EQDEBUG >= 5
 	CheckGroupList (__FILE__, __LINE__);
 #endif
@@ -2273,7 +2279,8 @@ bool EntityList::RemoveRaid(uint32 delete_id)
 	while(iterator != raid_list.end())
 	{
 		if((*iterator)->GetID() == delete_id) {
-			raid_list.remove (*iterator);
+			safe_delete(*iterator);
+			raid_list.remove(*iterator);
 			return true;
 		}
 		++iterator;
@@ -2433,7 +2440,7 @@ void EntityList::RemoveFromHateLists(Mob *mob, bool settoone)
 			if (!settoone)
 				it->second->RemoveFromHateList(mob);
 			else
-				it->second->SetHate(mob, 1);
+				it->second->SetHateAmountOnEnt(mob, 1);
 		}
 		++it;
 	}
@@ -2522,7 +2529,7 @@ char *EntityList::MakeNameUnique(char *name)
 			return name;
 		}
 	}
-	LogFile->write(EQEMuLog::Error, "Fatal error in EntityList::MakeNameUnique: Unable to find unique name for '%s'", name);
+	LogFile->write(EQEmuLog::Error, "Fatal error in EntityList::MakeNameUnique: Unable to find unique name for '%s'", name);
 	char tmp[64] = "!";
 	strn0cpy(&tmp[1], name, sizeof(tmp) - 1);
 	strcpy(name, tmp);
@@ -2817,7 +2824,7 @@ void EntityList::DoubleAggro(Mob *who)
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
 		if (it->second->CheckAggro(who))
-			it->second->SetHate(who, it->second->CastToNPC()->GetHateAmount(who),
+			it->second->SetHateAmountOnEnt(who, it->second->CastToNPC()->GetHateAmount(who),
 					it->second->CastToNPC()->GetHateAmount(who) * 2);
 		++it;
 	}
@@ -2828,7 +2835,7 @@ void EntityList::HalveAggro(Mob *who)
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
 		if (it->second->CastToNPC()->CheckAggro(who))
-			it->second->CastToNPC()->SetHate(who, it->second->CastToNPC()->GetHateAmount(who) / 2);
+			it->second->CastToNPC()->SetHateAmountOnEnt(who, it->second->CastToNPC()->GetHateAmount(who) / 2);
 		++it;
 	}
 }
@@ -2843,9 +2850,9 @@ void EntityList::Evade(Mob *who)
 			amt = it->second->CastToNPC()->GetHateAmount(who);
 			amt -= flatval;
 			if (amt > 0)
-				it->second->CastToNPC()->SetHate(who, amt);
+				it->second->CastToNPC()->SetHateAmountOnEnt(who, amt);
 			else
-				it->second->CastToNPC()->SetHate(who, 0);
+				it->second->CastToNPC()->SetHateAmountOnEnt(who, 0);
 		}
 		++it;
 	}
@@ -2913,7 +2920,7 @@ void EntityList::ClearZoneFeignAggro(Client *targ)
 	}
 }
 
-void EntityList::AggroZone(Mob *who, int hate)
+void EntityList::AggroZone(Mob *who, uint32 hate)
 {
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
@@ -2934,11 +2941,6 @@ void EntityList::SignalMobsByNPCID(uint32 snpc, int signal_id)
 	}
 }
 
-bool tracking_compare(const std::pair<Mob *, float> &a, const std::pair<Mob *, float> &b)
-{
-	return a.first->GetSpawnTimeStamp() > b.first->GetSpawnTimeStamp();
-}
-
 bool EntityList::MakeTrackPacket(Client *client)
 {
 	std::list<std::pair<Mob *, float> > tracking_list;
@@ -2956,8 +2958,6 @@ bool EntityList::MakeTrackPacket(Client *client)
 	if (distance < 300)
 		distance = 300;
 
-	Group *g = client->GetGroup();
-
 	for (auto it = mob_list.cbegin(); it != mob_list.cend(); ++it) {
 		if (!it->second || it->second == client || !it->second->IsTrackable() ||
 				it->second->IsInvisible(client))
@@ -2970,7 +2970,10 @@ bool EntityList::MakeTrackPacket(Client *client)
 		tracking_list.push_back(std::make_pair(it->second, MobDistance));
 	}
 
-	tracking_list.sort(tracking_compare);
+	tracking_list.sort(
+		[](const std::pair<Mob *, float> &a, const std::pair<Mob *, float> &b) {
+			return a.first->GetSpawnTimeStamp() > b.first->GetSpawnTimeStamp();
+		});
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_Track, sizeof(Track_Struct) * tracking_list.size());
 	Tracking_Struct *outtrack = (Tracking_Struct *)outapp->pBuffer;
 	outapp->priority = 6;
@@ -2978,15 +2981,13 @@ bool EntityList::MakeTrackPacket(Client *client)
 	int index = 0;
 	for (auto it = tracking_list.cbegin(); it != tracking_list.cend(); ++it, ++index) {
 		Mob *cur_entity = it->first;
-		outtrack->Entrys[index].entityid = cur_entity->GetID();
+		outtrack->Entrys[index].entityid = (uint32)cur_entity->GetID();
 		outtrack->Entrys[index].distance = it->second;
 		outtrack->Entrys[index].level = cur_entity->GetLevel();
-		outtrack->Entrys[index].NPC = !cur_entity->IsClient();
-		if (g && cur_entity->IsClient() && g->IsGroupMember(cur_entity->CastToMob()))
-			outtrack->Entrys[index].GroupMember = 1;
-		else
-			outtrack->Entrys[index].GroupMember = 0;
+		outtrack->Entrys[index].is_npc = !cur_entity->IsClient();
 		strn0cpy(outtrack->Entrys[index].name, cur_entity->GetName(), sizeof(outtrack->Entrys[index].name));
+		outtrack->Entrys[index].is_pet = cur_entity->IsPet();
+		outtrack->Entrys[index].is_merc = cur_entity->IsMerc();
 	}
 
 	client->QueuePacket(outapp);
@@ -3641,7 +3642,7 @@ void EntityList::AddTempPetsToHateList(Mob *owner, Mob* other, bool bFrenzy)
 		if (n->GetSwarmInfo()) {
 			if (n->GetSwarmInfo()->owner_id == owner->GetID()) {
 				if (!n->GetSpecialAbility(IMMUNE_AGGRO))
-					n->hate_list.Add(other, 0, 0, bFrenzy);
+					n->hate_list.AddEntToHateList(other, 0, 0, bFrenzy);
 			}
 		}
 		++it;

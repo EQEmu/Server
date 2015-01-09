@@ -475,7 +475,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 					if(!target_zone) {
 #ifdef SPELL_EFFECT_SPAM
-						LogFile->write(EQEMuLog::Debug, "Succor/Evacuation Spell In Same Zone.");
+						LogFile->write(EQEmuLog::Debug, "Succor/Evacuation Spell In Same Zone.");
 #endif
 							if(IsClient())
 								CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x, y, z, heading, 0, EvacToSafeCoords);
@@ -484,7 +484,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					}
 					else {
 #ifdef SPELL_EFFECT_SPAM
-						LogFile->write(EQEMuLog::Debug, "Succor/Evacuation Spell To Another Zone.");
+						LogFile->write(EQEmuLog::Debug, "Succor/Evacuation Spell To Another Zone.");
 #endif
 						if(IsClient())
 							CastToClient()->MovePC(target_zone, x, y, z, heading);
@@ -1771,7 +1771,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					}
 					else {
 						Message_StringID(4, TARGET_NOT_FOUND);
-						LogFile->write(EQEMuLog::Error, "%s attempted to cast spell id %u with spell effect SE_SummonCorpse, but could not cast target into a Client object.", GetCleanName(), spell_id);
+						LogFile->write(EQEmuLog::Error, "%s attempted to cast spell id %u with spell effect SE_SummonCorpse, but could not cast target into a Client object.", GetCleanName(), spell_id);
 					}
 				}
 
@@ -1897,10 +1897,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						if (CalculatePoisonCounters(buffs[j].spellid) == 0)
 							continue;
 						if (effect_value >= static_cast<int>(buffs[j].counters)) {
-							if (caster)
+							if (caster) {
 								caster->Message(MT_Spells,"You have cured your target of %s!",spells[buffs[j].spellid].name);
 								caster->CastOnCurer(buffs[j].spellid);
 								CastOnCure(buffs[j].spellid);
+							}
 							effect_value -= buffs[j].counters;
 							buffs[j].counters = 0;
 							BuffFadeBySlot(j);
@@ -1930,10 +1931,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 							continue;
 						if (effect_value >= static_cast<int>(buffs[j].counters))
 						{
-							if (caster)
+							if (caster) {
 								caster->Message(MT_Spells,"You have cured your target of %s!",spells[buffs[j].spellid].name);
 								caster->CastOnCurer(buffs[j].spellid);
 								CastOnCure(buffs[j].spellid);
+							}
 							effect_value -= buffs[j].counters;
 							buffs[j].counters = 0;
 							BuffFadeBySlot(j);
@@ -1965,10 +1967,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 							continue;
 						if (effect_value >= static_cast<int>(buffs[j].counters))
 						{
-							if (caster)
+							if (caster) {
 								caster->Message(MT_Spells,"You have cured your target of %s!",spells[buffs[j].spellid].name);
 								caster->CastOnCurer(buffs[j].spellid);
 								CastOnCure(buffs[j].spellid);
+							}
 							effect_value -= buffs[j].counters;
 							buffs[j].counters = 0;
 							BuffFadeBySlot(j);
@@ -1999,10 +2002,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						if (CalculateCorruptionCounters(buffs[j].spellid) == 0)
 							continue;
 						if (effect_value >= static_cast<int>(buffs[j].counters)) {
-							if (caster)
+							if (caster) {
 								caster->Message(MT_Spells,"You have cured your target of %s!",spells[buffs[j].spellid].name);
 								caster->CastOnCurer(buffs[j].spellid);
 								CastOnCure(buffs[j].spellid);
+							}
 							effect_value -= buffs[j].counters;
 							buffs[j].counters = 0;
 							BuffFadeBySlot(j);
@@ -2658,7 +2662,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					caster->Taunt(this->CastToNPC(), false, static_cast<float>(spell.base[i]));
 					
 					if (spell.base2[i] > 0)
-						CastToNPC()->SetHate(caster, (CastToNPC()->GetHateAmount(caster) + spell.base2[i]));
+						CastToNPC()->SetHateAmountOnEnt(caster, (CastToNPC()->GetHateAmount(caster) + spell.base2[i]));
 				}
 				break;
 			}
@@ -2689,7 +2693,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					if (new_hate <= 0)
 						new_hate = 1;
 
-					CastToNPC()->SetHate(caster, new_hate);
+					CastToNPC()->SetHateAmountOnEnt(caster, new_hate);
 				}
 				break;
 			}
@@ -2710,9 +2714,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					}else{
 						int32 newhate = GetHateAmount(caster) + effect_value;
 						if (newhate < 1)
-							SetHate(caster,1);
+							SetHateAmountOnEnt(caster,1);
 						else
-							SetHate(caster,newhate);
+							SetHateAmountOnEnt(caster,newhate);
 						}
 				}
 				break;
@@ -3321,7 +3325,7 @@ snare has both of them negative, yet their range should work the same:
 				result = ubase * (caster_level * (formula - 2000) + 1);
 			}
 			else
-				LogFile->write(EQEMuLog::Debug, "Unknown spell effect value forumula %d", formula);
+				LogFile->write(EQEmuLog::Debug, "Unknown spell effect value forumula %d", formula);
 		}
 	}
 
@@ -3542,9 +3546,9 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 					}else{
 						int32 newhate = GetHateAmount(caster) + effect_value;
 						if (newhate < 1) {
-							SetHate(caster,1);
+							SetHateAmountOnEnt(caster,1);
 						} else {
-							SetHate(caster,newhate);
+							SetHateAmountOnEnt(caster,newhate);
 						}
 					}
 				}
@@ -3724,11 +3728,11 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 			case SE_AddHateOverTimePct:
 			{				
 				if (IsNPC()){
-					int32 new_hate = CastToNPC()->GetHateAmount(caster) * (100 + spell.base[i]) / 100;
+					uint32 new_hate = CastToNPC()->GetHateAmount(caster) * (100 + spell.base[i]) / 100;
 					if (new_hate <= 0)
 						new_hate = 1;
 					
-					CastToNPC()->SetHate(caster, new_hate);
+					CastToNPC()->SetHateAmountOnEnt(caster, new_hate);
 				}
 				break;
 			}
@@ -4812,7 +4816,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 						return 0;
 					break;
 				default:
-					LogFile->write(EQEMuLog::Normal, "CalcFocusEffect: unknown limit spelltype %d", focus_spell.base[i]);
+					LogFile->write(EQEmuLog::Normal, "CalcFocusEffect: unknown limit spelltype %d", focus_spell.base[i]);
 			}
 			break;
 
@@ -5151,7 +5155,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 		//this spits up a lot of garbage when calculating spell focuses
 		//since they have all kinds of extra effects on them.
 		default:
-			LogFile->write(EQEMuLog::Normal, "CalcFocusEffect: unknown effectid %d", focus_spell.effectid[i]);
+			LogFile->write(EQEmuLog::Normal, "CalcFocusEffect: unknown effectid %d", focus_spell.effectid[i]);
 #endif
 		}
 		
@@ -6420,7 +6424,7 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 
 		//Limit to amount of pets
 		if (value >= 221 && value <= 249){
-			int count = hate_list.SummonedPetCount(this);
+			int count = hate_list.GetSummonedPetCountOnHateList(this);
 	
 			for (int base2_value = 221; base2_value <= 249; ++base2_value){
 				if (value == base2_value){

@@ -140,7 +140,7 @@ bool EQTime::saveFile(const char *filename)
 	of.open(filename);
 	if(!of)
 	{
-		LogFile->write(EQEMuLog::Error, "EQTime::saveFile failed: Unable to open file '%s'", filename);
+		LogFile->write(EQEmuLog::Error, "EQTime::saveFile failed: Unable to open file '%s'", filename);
 		return false;
 	}
 	//Enable for debugging
@@ -164,14 +164,14 @@ bool EQTime::loadFile(const char *filename)
 	in.open(filename);
 	if(!in)
 	{
-		LogFile->write(EQEMuLog::Error, "Could not load EQTime file %s", filename);
+		LogFile->write(EQEmuLog::Error, "Could not load EQTime file %s", filename);
 		return false;
 	}
 	in >> version;
 	in.ignore(80, '\n');
 	if(version != EQT_VERSION)
 	{
-		LogFile->write(EQEMuLog::Error, "'%s' is NOT a valid EQTime file. File version is %i, EQTime version is %i", filename, version, EQT_VERSION);
+		LogFile->write(EQEmuLog::Error, "'%s' is NOT a valid EQTime file. File version is %i, EQTime version is %i", filename, version, EQT_VERSION);
 		return false;
 	}
 	//in >> eqTime.start_eqtime.day;

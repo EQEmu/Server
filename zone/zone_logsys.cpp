@@ -34,7 +34,7 @@ void log_message_mob(LogType type, Mob *who, const char *fmt, ...) {
 
 	va_list args;
 	va_start(args, fmt);
-	LogFile->writePVA(EQEMuLog::Debug, prefix_buffer, fmt, args);
+	LogFile->writePVA(EQEmuLog::Debug, prefix_buffer, fmt, args);
 	va_end(args);
 }
 
@@ -46,7 +46,7 @@ void log_message_mobVA(LogType type, Mob *who, const char *fmt, va_list args) {
 	snprintf(prefix_buffer, 255, "[%s] %s: ", log_type_info[type].name, who->GetName());
 	prefix_buffer[255] = '\0';
 
-	LogFile->writePVA(EQEMuLog::Debug, prefix_buffer, fmt, args);
+	LogFile->writePVA(EQEmuLog::Debug, prefix_buffer, fmt, args);
 }
 
 void log_hex_mob(LogType type, Mob *who, const char *data, uint32 length, uint8 padding) {

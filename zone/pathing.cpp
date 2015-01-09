@@ -61,19 +61,19 @@ PathManager* PathManager::LoadPathFile(const char* ZoneName)
 
 		if(Ret->loadPaths(PathFile))
 		{
-			LogFile->write(EQEMuLog::Status, "Path File %s loaded.", ZonePathFileName);
+			LogFile->write(EQEmuLog::Status, "Path File %s loaded.", ZonePathFileName);
 
 		}
 		else
 		{
-			LogFile->write(EQEMuLog::Error, "Path File %s failed to load.", ZonePathFileName);
+			LogFile->write(EQEmuLog::Error, "Path File %s failed to load.", ZonePathFileName);
 			safe_delete(Ret);
 		}
 		fclose(PathFile);
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Path File %s not found.", ZonePathFileName);
+		LogFile->write(EQEmuLog::Error, "Path File %s not found.", ZonePathFileName);
 	}
 
 	return Ret;
@@ -103,18 +103,18 @@ bool PathManager::loadPaths(FILE *PathFile)
 
 	if(strncmp(Magic, "EQEMUPATH", 9))
 	{
-		LogFile->write(EQEMuLog::Error, "Bad Magic String in .path file.");
+		LogFile->write(EQEmuLog::Error, "Bad Magic String in .path file.");
 		return false;
 	}
 
 	fread(&Head, sizeof(Head), 1, PathFile);
 
-	LogFile->write(EQEMuLog::Status, "Path File Header: Version %ld, PathNodes %ld",
+	LogFile->write(EQEmuLog::Status, "Path File Header: Version %ld, PathNodes %ld",
 				(long)Head.version, (long)Head.PathNodeCount);
 
 	if(Head.version != 2)
 	{
-		LogFile->write(EQEMuLog::Error, "Unsupported path file version.");
+		LogFile->write(EQEmuLog::Error, "Unsupported path file version.");
 		return false;
 	}
 
@@ -138,7 +138,7 @@ bool PathManager::loadPaths(FILE *PathFile)
 		{
 			if(PathNodes[i].Neighbours[j].id > MaxNodeID)
 			{
-				LogFile->write(EQEMuLog::Error, "Path Node %i, Neighbour %i (%i) out of range.", i, j, PathNodes[i].Neighbours[j].id);
+				LogFile->write(EQEmuLog::Error, "Path Node %i, Neighbour %i (%i) out of range.", i, j, PathNodes[i].Neighbours[j].id);
 
 				PathFileValid = false;
 			}
@@ -345,10 +345,10 @@ bool CheckLOSBetweenPoints(Map::Vertex start, Map::Vertex end) {
 	return true;
 }
 
-bool SortPathNodesByDistance(PathNodeSortStruct n1, PathNodeSortStruct n2)
+auto path_compare = [](const PathNodeSortStruct& a, const PathNodeSortStruct& b)
 {
-	return n1.Distance < n2.Distance;
-}
+	return a.Distance < b.Distance;
+};
 
 std::deque<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 {
@@ -382,7 +382,7 @@ std::deque<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 		}
 	}
 
-	std::sort(SortedByDistance.begin(), SortedByDistance.end(), SortPathNodesByDistance);
+	std::sort(SortedByDistance.begin(), SortedByDistance.end(), path_compare);
 
 	for(auto Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
 	{
@@ -420,7 +420,7 @@ std::deque<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 		}
 	}
 
-	std::sort(SortedByDistance.begin(), SortedByDistance.end(), SortPathNodesByDistance);
+	std::sort(SortedByDistance.begin(), SortedByDistance.end(), path_compare);
 
 	for(auto Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
 	{
@@ -573,8 +573,8 @@ void PathManager::SpawnPathNodes()
 		npc_type->texture = 1;
 		npc_type->light = 0;
 		npc_type->runspeed = 0;
-		npc_type->d_meele_texture1 = 1;
-		npc_type->d_meele_texture2 = 1;
+		npc_type->d_melee_texture1 = 1;
+		npc_type->d_melee_texture2 = 1;
 		npc_type->merchanttype = 1;
 		npc_type->bodytype = 1;
 
@@ -1120,7 +1120,7 @@ int PathManager::FindNearestPathNode(Map::Vertex Position)
 		}
 	}
 
-	std::sort(SortedByDistance.begin(), SortedByDistance.end(), SortPathNodesByDistance);
+	std::sort(SortedByDistance.begin(), SortedByDistance.end(), path_compare);
 
 	for(auto Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
 	{
@@ -1563,8 +1563,8 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 		npc_type->texture = 1;
 		npc_type->light = 0;
 		npc_type->runspeed = 0;
-		npc_type->d_meele_texture1 = 1;
-		npc_type->d_meele_texture2 = 1;
+		npc_type->d_melee_texture1 = 1;
+		npc_type->d_melee_texture2 = 1;
 		npc_type->merchanttype = 1;
 		npc_type->bodytype = 1;
 		npc_type->STR = 150;
@@ -1624,8 +1624,8 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 		npc_type->texture = 1;
 		npc_type->light = 0;
 		npc_type->runspeed = 0;
-		npc_type->d_meele_texture1 = 1;
-		npc_type->d_meele_texture2 = 1;
+		npc_type->d_melee_texture1 = 1;
+		npc_type->d_melee_texture2 = 1;
 		npc_type->merchanttype = 1;
 		npc_type->bodytype = 1;
 		npc_type->STR = 150;

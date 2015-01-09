@@ -825,7 +825,7 @@ int32 Client::acmod() {
 	return (65 + ((agility-300) / 21));
 	}
 #if EQDEBUG >= 11
-	LogFile->write(EQEMuLog::Error, "Error in Client::acmod(): Agility: %i, Level: %i",agility,level);
+	LogFile->write(EQEmuLog::Error, "Error in Client::acmod(): Agility: %i, Level: %i",agility,level);
 #endif
 	return 0;
 };
@@ -934,7 +934,7 @@ int32 Client::CalcMaxMana()
 			break;
 		}
 		default: {
-			LogFile->write(EQEMuLog::Debug, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+			LogFile->write(EQEmuLog::Debug, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
 			max_mana = 0;
 			break;
 		}
@@ -955,7 +955,7 @@ int32 Client::CalcMaxMana()
 	}
 
 #if EQDEBUG >= 11
-	LogFile->write(EQEMuLog::Debug, "Client::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
+	LogFile->write(EQEmuLog::Debug, "Client::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
 #endif
 	return max_mana;
 }
@@ -1045,14 +1045,14 @@ int32 Client::CalcBaseMana()
 			break;
 		}
 		default: {
-			LogFile->write(EQEMuLog::Debug, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+			LogFile->write(EQEmuLog::Debug, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
 			max_m = 0;
 			break;
 		}
 	}
 
 #if EQDEBUG >= 11
-	LogFile->write(EQEMuLog::Debug, "Client::CalcBaseMana() called for %s - returning %d", GetName(), max_m);
+	LogFile->write(EQEmuLog::Debug, "Client::CalcBaseMana() called for %s - returning %d", GetName(), max_m);
 #endif
 	return max_m;
 }

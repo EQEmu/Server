@@ -31,6 +31,12 @@ namespace SoD
 	static inline uint32 SoDToServerSlot(uint32 SoDSlot);
 	static inline uint32 SoDToServerCorpseSlot(uint32 SoDCorpse);
 
+	// server to client text link converter
+	static inline void ServerToSoDTextLink(std::string& sodTextLink, const std::string& serverTextLink);
+
+	// client to server text link converter
+	static inline void SoDToServerTextLink(std::string& serverTextLink, const std::string& sodTextLink);
+
 	void Register(EQStreamIdentifier &into)
 	{
 		//create our opcode manager if we havent already
@@ -294,6 +300,35 @@ namespace SoD
 		OUT(action);
 
 		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_ChannelMessage)
+	{
+		EQApplicationPacket *in = *p;
+		*p = nullptr;
+
+		ChannelMessage_Struct *emu = (ChannelMessage_Struct *)in->pBuffer;
+
+		unsigned char *__emu_buffer = in->pBuffer;
+
+		std::string old_message = emu->message;
+		std::string new_message;
+		ServerToSoDTextLink(new_message, old_message);
+
+		in->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
+
+		in->pBuffer = new unsigned char[in->size];
+
+		char *OutBuffer = (char *)in->pBuffer;
+
+		memcpy(OutBuffer, __emu_buffer, sizeof(ChannelMessage_Struct));
+
+		OutBuffer += sizeof(ChannelMessage_Struct);
+
+		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
+
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
 	}
 
 	ENCODE(OP_CharInventory)
@@ -1638,7 +1673,7 @@ namespace SoD
 		strn0cpy(general->player_name, raid_create->leader_name, 64);
 
 		dest->FastQueuePacket(&outapp_create);
-		delete[] __emu_buffer;
+		safe_delete(inapp);
 	}
 
 	ENCODE(OP_RaidUpdate)
@@ -1705,7 +1740,7 @@ namespace SoD
 			dest->FastQueuePacket(&outapp);
 		}
 
-		delete[] __emu_buffer;
+		safe_delete(inapp);
 	}
 
 	ENCODE(OP_ReadBook)
@@ -1963,6 +1998,44 @@ namespace SoD
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_SpecialMesg)
+	{
+		EQApplicationPacket *in = *p;
+		*p = nullptr;
+
+		SpecialMesg_Struct *emu = (SpecialMesg_Struct *)in->pBuffer;
+
+		unsigned char *__emu_buffer = in->pBuffer;
+
+		std::string old_message = &emu->message[strlen(emu->sayer)];
+		std::string new_message;
+		ServerToSoDTextLink(new_message, old_message);
+
+		//in->size = 3 + 4 + 4 + strlen(emu->sayer) + 1 + 12 + new_message.length() + 1;
+		in->size = 25 + strlen(emu->sayer) + new_message.length();
+		in->pBuffer = new unsigned char[in->size];
+
+		char *OutBuffer = (char *)in->pBuffer;
+
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->header[0]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->header[1]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->header[2]);
+
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->msg_type);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->target_spawn_id);
+
+		VARSTRUCT_ENCODE_STRING(OutBuffer, emu->sayer);
+
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);
+
+		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
+
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
+	}
+
 	ENCODE(OP_Stun)
 	{
 		ENCODE_LENGTH_EXACT(Stun_Struct);
@@ -2058,9 +2131,9 @@ namespace SoD
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->entityid);
 			VARSTRUCT_ENCODE_TYPE(float, Buffer, emu->distance);
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->level);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->NPC);
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->is_npc);
 			VARSTRUCT_ENCODE_STRING(Buffer, emu->name);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->GroupMember);
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->is_merc);
 		}
 
 		delete[] __emu_buffer;
@@ -2729,6 +2802,25 @@ namespace SoD
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_ChannelMessage)
+	{
+		unsigned char *__eq_buffer = __packet->pBuffer;
+
+		std::string old_message = (char *)&__eq_buffer[sizeof(ChannelMessage_Struct)];
+		std::string new_message;
+		SoDToServerTextLink(new_message, old_message);
+
+		__packet->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
+		__packet->pBuffer = new unsigned char[__packet->size];
+
+		ChannelMessage_Struct *emu = (ChannelMessage_Struct *)__packet->pBuffer;
+
+		memcpy(emu, __eq_buffer, sizeof(ChannelMessage_Struct));
+		strcpy(emu->message, new_message.c_str());
+
+		delete[] __eq_buffer;
+	}
+
 	DECODE(OP_CharacterCreate)
 	{
 		DECODE_LENGTH_EXACT(structs::CharCreate_Struct);
@@ -3003,6 +3095,89 @@ namespace SoD
 		emu->from_slot = SoDToServerSlot(eq->from_slot);
 		emu->to_slot = SoDToServerSlot(eq->to_slot);
 		IN(number_in_stack);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_PetCommands)
+	{
+		DECODE_LENGTH_EXACT(structs::PetCommand_Struct);
+		SETUP_DIRECT_DECODE(PetCommand_Struct, structs::PetCommand_Struct);
+
+		switch (eq->command)
+		{
+		case 0x04:
+			emu->command = 0x00;	// /pet health
+			break;
+		case 0x10:
+			emu->command = 0x01;	// /pet leader
+			break;
+		case 0x07:
+			emu->command = 0x02;	// /pet attack or Pet Window
+			break;
+		case 0x03:	// Case Guessed
+			emu->command = 0x03;	// /pet qattack
+		case 0x08:
+			emu->command = 0x04;	// /pet follow or Pet Window
+			break;
+		case 0x05:
+			emu->command = 0x05;	// /pet guard or Pet Window
+			break;
+		case 0x09:
+			emu->command = 0x07;	// /pet sit or Pet Window
+			break;
+		case 0x0a:
+			emu->command = 0x08;	// /pet stand or Pet Window
+			break;
+		case 0x06:
+			emu->command = 0x1e;	// /pet guard me
+			break;
+		case 0x0f:	// Case Made Up
+			emu->command = 0x09;	// /pet stop
+			break;
+		case 0x0b:
+			emu->command = 0x0d;	// /pet taunt or Pet Window
+			break;
+		case 0x0e:
+			emu->command = 0x0e;	// /pet notaunt or Pet Window
+			break;
+		case 0x0c:
+			emu->command = 0x0f;	// /pet hold
+			break;
+		case 0x1b:
+			emu->command = 0x10;	// /pet hold on
+			break;
+		case 0x1c:
+			emu->command = 0x11;	// /pet hold off
+			break;
+		case 0x11:
+			emu->command = 0x12;	// Slumber?
+			break;
+		case 0x12:
+			emu->command = 0x15;	// /pet no cast
+			break;
+		case 0x0d:	// Case Made Up
+			emu->command = 0x16;	// Pet Window No Cast
+			break;
+		case 0x13:
+			emu->command = 0x18;	// /pet focus
+			break;
+		case 0x19:
+			emu->command = 0x19;	// /pet focus on
+			break;
+		case 0x1a:
+			emu->command = 0x1a;	// /pet focus off
+			break;
+		case 0x01:
+			emu->command = 0x1c;	// /pet back off
+			break;
+		case 0x02:
+			emu->command = 0x1d;	// /pet get lost
+			break;
+		default:
+			emu->command = eq->command;
+		}
+		OUT(unknown);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -3682,6 +3857,82 @@ namespace SoD
 	{
 		//uint32 ServerCorpse;
 		return (SoDCorpse - 1);
+	}
+
+	static inline void ServerToSoDTextLink(std::string& sodTextLink, const std::string& serverTextLink)
+	{
+		const char delimiter = 0x12;
+
+		if ((consts::TEXT_LINK_BODY_LENGTH == EmuConstants::TEXT_LINK_BODY_LENGTH) || (serverTextLink.find(delimiter) == std::string::npos)) {
+			sodTextLink = serverTextLink;
+			return;
+		}
+
+		auto segments = SplitString(serverTextLink, delimiter);
+
+		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
+			if (segment_iter & 1) {
+				std::string new_segment;
+
+				// Idx:  0 1     6     11    16    21    26    31    36 37   41 43    48       (Source)
+				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX XXXXX XXXXXXXX (56)
+				// SoF:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX       X  XXXX  X XXXXX XXXXXXXX (50)
+				// Diff:                                       ^^^^^         ^
+
+				new_segment.append(segments[segment_iter].substr(0, 31).c_str());
+				new_segment.append(segments[segment_iter].substr(36, 5).c_str());
+
+				if (segments[segment_iter].substr(41, 1) == "0")
+					new_segment.append(segments[segment_iter].substr(42, 1).c_str());
+				else
+					new_segment.append("F");
+
+				new_segment.append(segments[segment_iter].substr(43).c_str());
+
+				sodTextLink.push_back(delimiter);
+				sodTextLink.append(new_segment.c_str());
+				sodTextLink.push_back(delimiter);
+			}
+			else {
+				sodTextLink.append(segments[segment_iter].c_str());
+			}
+		}
+	}
+
+	static inline void SoDToServerTextLink(std::string& serverTextLink, const std::string& sodTextLink)
+	{
+		const char delimiter = 0x12;
+
+		if ((EmuConstants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) || (sodTextLink.find(delimiter) == std::string::npos)) {
+			serverTextLink = sodTextLink;
+			return;
+		}
+
+		auto segments = SplitString(sodTextLink, delimiter);
+
+		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
+			if (segment_iter & 1) {
+				std::string new_segment;
+
+				// Idx:  0 1     6     11    16    21    26          31 32    36 37    42       (Source)
+				// SoF:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX       X  XXXX  X  XXXXX XXXXXXXX (50)
+				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX  XXXXX XXXXXXXX (56)
+				// Diff:                                       ^^^^^         ^
+
+				new_segment.append(segments[segment_iter].substr(0, 31).c_str());
+				new_segment.append("00000");
+				new_segment.append(segments[segment_iter].substr(31, 5).c_str());
+				new_segment.append("0");
+				new_segment.append(segments[segment_iter].substr(36).c_str());
+
+				serverTextLink.push_back(delimiter);
+				serverTextLink.append(new_segment.c_str());
+				serverTextLink.push_back(delimiter);
+			}
+			else {
+				serverTextLink.append(segments[segment_iter].c_str());
+			}
+		}
 	}
 }
 // end namespace SoD

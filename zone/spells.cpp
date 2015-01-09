@@ -257,7 +257,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 			if ((itm->GetItem()->Click.Type == ET_EquipClick) && !(itm->GetItem()->Classes & bitmask)) {
 				if (CastToClient()->GetClientVersion() < EQClientSoF) {
 					// They are casting a spell from an item that requires equipping but shouldn't let them equip it
-					LogFile->write(EQEMuLog::Error, "HACKER: %s (account: %s) attempted to click an equip-only effect on item %s (id: %d) which they shouldn't be able to equip!",
+					LogFile->write(EQEmuLog::Error, "HACKER: %s (account: %s) attempted to click an equip-only effect on item %s (id: %d) which they shouldn't be able to equip!",
 						CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
 					database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking equip-only item with an invalid class");
 				}
@@ -269,12 +269,20 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 			if ((itm->GetItem()->Click.Type == ET_ClickEffect2) && !(itm->GetItem()->Classes & bitmask)) {
 				if (CastToClient()->GetClientVersion() < EQClientSoF) {
 					// They are casting a spell from an item that they don't meet the race/class requirements to cast
-					LogFile->write(EQEMuLog::Error, "HACKER: %s (account: %s) attempted to click a race/class restricted effect on item %s (id: %d) which they shouldn't be able to click!",
+					LogFile->write(EQEmuLog::Error, "HACKER: %s (account: %s) attempted to click a race/class restricted effect on item %s (id: %d) which they shouldn't be able to click!",
 						CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
 					database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking race/class restricted item with an invalid class");
 				}
 				else {
-					Message_StringID(13, CANNOT_USE_ITEM);
+					if (CastToClient()->GetClientVersion() >= EQClientRoF)
+					{
+						// Line 181 in eqstr_us.txt was changed in RoF+
+						Message(15, "Your race, class, or deity cannot use this item.");
+					}
+					else
+					{
+						Message_StringID(13, CANNOT_USE_ITEM);
+					}
 				}
 				return(false);
 			}
@@ -282,7 +290,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		if( itm && (itm->GetItem()->Click.Type == ET_EquipClick) && !(item_slot <= MainAmmo || item_slot == MainPowerSource) ){
 			if (CastToClient()->GetClientVersion() < EQClientSoF) {
 				// They are attempting to cast a must equip clicky without having it equipped
-				LogFile->write(EQEMuLog::Error, "HACKER: %s (account: %s) attempted to click an equip-only effect on item %s (id: %d) without equiping it!", CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
+				LogFile->write(EQEmuLog::Error, "HACKER: %s (account: %s) attempted to click an equip-only effect on item %s (id: %d) without equiping it!", CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
 				database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking equip-only item without equiping it");
 			}
 			else {
@@ -1195,22 +1203,29 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 		uint32 recastdelay = 0;
 		uint32 recasttype = 0;
 
-		for (int r = 0; r < EmuConstants::ITEM_COMMON_SIZE; r++) {
-			const ItemInst* aug_i = inst->GetAugment(r);
-
-			if(!aug_i)
-				continue;
-			const Item_Struct* aug = aug_i->GetItem();
-			if(!aug)
-				continue;
-
-			if ( aug->Click.Effect == spell_id )
-			{
-				recastdelay = aug_i->GetItem()->RecastDelay;
-				recasttype = aug_i->GetItem()->RecastType;
-				fromaug = true;
+		while (true) {
+			if (inst == nullptr)
 				break;
+
+			for (int r = AUG_BEGIN; r < EmuConstants::ITEM_COMMON_SIZE; r++) {
+				const ItemInst* aug_i = inst->GetAugment(r);
+
+				if (!aug_i)
+					continue;
+				const Item_Struct* aug = aug_i->GetItem();
+				if (!aug)
+					continue;
+
+				if (aug->Click.Effect == spell_id)
+				{
+					recastdelay = aug_i->GetItem()->RecastDelay;
+					recasttype = aug_i->GetItem()->RecastType;
+					fromaug = true;
+					break;
+				}
 			}
+
+			break;
 		}
 
 		//Test the aug recast delay
@@ -2657,7 +2672,7 @@ int CalcBuffDuration_formula(int level, int formula, int duration)
 			return duration ? duration : 3600;
 
 		default:
-			LogFile->write(EQEMuLog::Debug, "CalcBuffDuration_formula: unknown formula %d", formula);
+			LogFile->write(EQEmuLog::Debug, "CalcBuffDuration_formula: unknown formula %d", formula);
 			return 0;
 	}
 }
@@ -3649,11 +3664,11 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 								spelltar->AddToHateList(this, aggro);
 					}
 					else{
-						int32 newhate = spelltar->GetHateAmount(this) + aggro;
+						uint32 newhate = spelltar->GetHateAmount(this) + aggro;
 						if (newhate < 1) {
-							spelltar->SetHate(this,1);
+							spelltar->SetHateAmountOnEnt(this,1);
 						} else {
-							spelltar->SetHate(this,newhate);
+							spelltar->SetHateAmountOnEnt(this,newhate);
 						}
 					}
 				}
@@ -3681,9 +3696,9 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 			spelltar->AddToHateList(this, aggro_amount);		else{
 			int32 newhate = spelltar->GetHateAmount(this) + aggro_amount;
 			if (newhate < 1) {
-				spelltar->SetHate(this,1);
+				spelltar->SetHateAmountOnEnt(this,1);
 			} else {
-				spelltar->SetHate(this,newhate);
+				spelltar->SetHateAmountOnEnt(this,newhate);
 			}
 		}
 	}
@@ -3896,6 +3911,8 @@ void Mob::BuffFadeDetrimental() {
 				BuffFadeBySlot(j, false);
 		}
 	}
+	//we tell BuffFadeBySlot not to recalc, so we can do it only once when were done
+	CalcBonuses();
 }
 
 void Mob::BuffFadeDetrimentalByCaster(Mob *caster)
@@ -3916,6 +3933,8 @@ void Mob::BuffFadeDetrimentalByCaster(Mob *caster)
 			}
 		}
 	}
+	//we tell BuffFadeBySlot not to recalc, so we can do it only once when were done
+	CalcBonuses();
 }
 
 void Mob::BuffFadeBySitModifier()
@@ -4195,6 +4214,10 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 
 	//Get resist modifier and adjust it based on focus 2 resist about eq to 1% resist chance
 	int resist_modifier = (use_resist_override) ? resist_override : spells[spell_id].ResistDiff;
+
+	if(caster->GetSpecialAbility(CASTING_RESIST_DIFF))
+		resist_modifier += caster->GetSpecialAbilityParam(CASTING_RESIST_DIFF, 0);
+
 	int focus_resist = caster->GetFocusEffect(focusResistRate, spell_id);
 	resist_modifier -= 2 * focus_resist;
 
@@ -4939,7 +4962,7 @@ bool Client::SpellGlobalCheck(uint16 spell_ID, uint32 char_ID) {
                                     "WHERE spellid = %i", spell_ID);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error while querying Spell ID %i spell_globals table query '%s': %s", spell_ID, query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error while querying Spell ID %i spell_globals table query '%s': %s", spell_ID, query.c_str(), results.ErrorMessage().c_str());
 		return false; // Query failed, so prevent spell from scribing just in case
     }
 
@@ -4958,12 +4981,12 @@ bool Client::SpellGlobalCheck(uint16 spell_ID, uint32 char_ID) {
                         char_ID, spell_Global_Name.c_str());
     results = database.QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Spell ID %i query of spell_globals with Name: '%s' Value: '%i' failed", spell_ID, spell_Global_Name.c_str(), spell_Global_Value);
+        LogFile->write(EQEmuLog::Error, "Spell ID %i query of spell_globals with Name: '%s' Value: '%i' failed", spell_ID, spell_Global_Name.c_str(), spell_Global_Value);
         return false;
     }
 
     if (results.RowCount() != 1) {
-        LogFile->write(EQEMuLog::Error, "Char ID: %i does not have the Qglobal Name: '%s' for Spell ID %i", char_ID, spell_Global_Name.c_str(), spell_ID);
+        LogFile->write(EQEmuLog::Error, "Char ID: %i does not have the Qglobal Name: '%s' for Spell ID %i", char_ID, spell_Global_Name.c_str(), spell_ID);
         return false;
     }
 
@@ -4977,7 +5000,7 @@ bool Client::SpellGlobalCheck(uint16 spell_ID, uint32 char_ID) {
         return true; // Check if the qglobal value is greater than the require spellglobal value
 
     // If no matching result found in qglobals, don't scribe this spell
-    LogFile->write(EQEMuLog::Error, "Char ID: %i Spell_globals Name: '%s' Value: '%i' did not match QGlobal Value: '%i' for Spell ID %i", char_ID, spell_Global_Name.c_str(), spell_Global_Value, global_Value, spell_ID);
+    LogFile->write(EQEmuLog::Error, "Char ID: %i Spell_globals Name: '%s' Value: '%i' did not match QGlobal Value: '%i' for Spell ID %i", char_ID, spell_Global_Name.c_str(), spell_Global_Value, global_Value, spell_ID);
     return false;
 }
 
@@ -5016,7 +5039,7 @@ bool Mob::FindType(uint16 type, bool bOffensive, uint16 threshold) {
 											spells[buffs[i].spellid].base[j],
 											spells[buffs[i].spellid].max[j],
 											buffs[i].casterlevel, buffs[i].spellid);
-						LogFile->write(EQEMuLog::Normal,
+						LogFile->write(EQEmuLog::Normal,
 								"FindType: type = %d; value = %d; threshold = %d",
 								type, value, threshold);
 						if (value < threshold)

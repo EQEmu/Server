@@ -85,7 +85,7 @@ void Trade::AddEntity(uint16 trade_slot_id, uint32 stack_size) {
 
 	if (!owner || !owner->IsClient()) {
 		// This should never happen
-		LogFile->write(EQEMuLog::Debug, "Programming error: NPC's should not call Trade::AddEntity()");
+		LogFile->write(EQEmuLog::Debug, "Programming error: NPC's should not call Trade::AddEntity()");
 		return;
 	}
 
@@ -159,6 +159,9 @@ Mob* Trade::With()
 // Private Method: Send item data for trade item to other person involved in trade
 void Trade::SendItemData(const ItemInst* inst, int16 dest_slot_id)
 {
+	if (inst == nullptr)
+		return;
+	
 	// @merth: This needs to be redone with new item classes
 	Mob* mob = With();
 	if (!mob->IsClient())
@@ -292,7 +295,7 @@ void Trade::LogTrade()
 void Trade::DumpTrade()
 {
 	Mob* with = With();
-	LogFile->write(EQEMuLog::Debug, "Dumping trade data: '%s' in TradeState %i with '%s'",
+	LogFile->write(EQEmuLog::Debug, "Dumping trade data: '%s' in TradeState %i with '%s'",
 		this->owner->GetName(), state, ((with==nullptr)?"(null)":with->GetName()));
 
 	if (!owner->IsClient())
@@ -303,7 +306,7 @@ void Trade::DumpTrade()
 		const ItemInst* inst = trader->GetInv().GetItem(i);
 
 		if (inst) {
-			LogFile->write(EQEMuLog::Debug, "Item %i (Charges=%i, Slot=%i, IsBag=%s)",
+			LogFile->write(EQEmuLog::Debug, "Item %i (Charges=%i, Slot=%i, IsBag=%s)",
 				inst->GetItem()->ID, inst->GetCharges(),
 				i, ((inst->IsType(ItemClassContainer)) ? "True" : "False"));
 
@@ -311,7 +314,7 @@ void Trade::DumpTrade()
 				for (uint8 j = SUB_BEGIN; j < EmuConstants::ITEM_CONTAINER_SIZE; j++) {
 					inst = trader->GetInv().GetItem(i, j);
 					if (inst) {
-						LogFile->write(EQEMuLog::Debug, "\tBagItem %i (Charges=%i, Slot=%i)",
+						LogFile->write(EQEmuLog::Debug, "\tBagItem %i (Charges=%i, Slot=%i)",
 							inst->GetItem()->ID, inst->GetCharges(),
 							Inventory::CalcSlotId(i, j));
 					}
@@ -320,7 +323,7 @@ void Trade::DumpTrade()
 		}
 	}
 
-	LogFile->write(EQEMuLog::Debug, "\tpp:%i, gp:%i, sp:%i, cp:%i", pp, gp, sp, cp);
+	LogFile->write(EQEmuLog::Debug, "\tpp:%i, gp:%i, sp:%i, cp:%i", pp, gp, sp, cp);
 }
 #endif
 
@@ -1535,7 +1538,7 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs,Client* Trader,const EQApplicat
 	if((tbs->Price * outtbs->Quantity) <= 0) {
 		Message(13, "Internal error. Aborting trade. Please report this to the ServerOP. Error code is 1");
 		Trader->Message(13, "Internal error. Aborting trade. Please report this to the ServerOP. Error code is 1");
-		LogFile->write(EQEMuLog::Error, "Bazaar: Zero price transaction between %s and %s aborted."
+		LogFile->write(EQEmuLog::Error, "Bazaar: Zero price transaction between %s and %s aborted."
 						"Item: %s, Charges: %i, TBS: Qty %i, Price: %i",
 						GetName(), Trader->GetName(),
 						BuyItem->GetItem()->Name, BuyItem->GetCharges(), tbs->Quantity, tbs->Price);

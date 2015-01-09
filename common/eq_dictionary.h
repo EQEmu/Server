@@ -149,6 +149,8 @@ public:
 	static const uint32 BANDOLIER_SIZE = Titanium::consts::BANDOLIER_SIZE;		// size = number of equipment slots in bandolier instance
 	static const uint32 POTION_BELT_SIZE = Titanium::consts::POTION_BELT_SIZE;
 
+	static const size_t TEXT_LINK_BODY_LENGTH = 56;
+
 	// legacy-related functions
 	//static int ServerToPerlSlot(int slot);	// encode
 	//static int PerlToServerSlot(int slot);	// decode

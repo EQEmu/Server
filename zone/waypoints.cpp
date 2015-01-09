@@ -116,7 +116,7 @@ void NPC::ResumeWandering()
 		}
 		else
 		{
-			LogFile->write(EQEMuLog::Error, "NPC not paused - can't resume wandering: %lu", (unsigned long)GetNPCTypeID());
+			LogFile->write(EQEmuLog::Error, "NPC not paused - can't resume wandering: %lu", (unsigned long)GetNPCTypeID());
 			return;
 		}
 
@@ -131,7 +131,7 @@ void NPC::ResumeWandering()
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "NPC not on grid - can't resume wandering: %lu", (unsigned long)GetNPCTypeID());
+		LogFile->write(EQEmuLog::Error, "NPC not on grid - can't resume wandering: %lu", (unsigned long)GetNPCTypeID());
 	}
 	return;
 }
@@ -154,7 +154,7 @@ void NPC::PauseWandering(int pausetime)
 			AIwalking_timer->Start(pausetime*1000); // set the timer
 		}
 	} else {
-		LogFile->write(EQEMuLog::Error, "NPC not on grid - can't pause wandering: %lu", (unsigned long)GetNPCTypeID());
+		LogFile->write(EQEmuLog::Error, "NPC not on grid - can't pause wandering: %lu", (unsigned long)GetNPCTypeID());
 	}
 	return;
 }
@@ -382,7 +382,9 @@ void NPC::GetClosestWaypoint(std::list<wplist> &wp_list, int count, const xyz_lo
 		w_dist.index = i;
 		distances.push_back(w_dist);
 	}
-	distances.sort(wp_distance_pred);
+	distances.sort([](const wp_distance& a, const wp_distance& b) {
+		return a.dist < b.dist;
+	});
 
 	std::list<wp_distance>::iterator iter = distances.begin();
 	for(int i = 0; i < count; ++i)
@@ -678,7 +680,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		{
 			Map::Vertex dest(m_Position.m_X, m_Position.m_Y, m_Position.m_Z);
 
-			float newz = zone->zonemap->FindBestZ(dest, nullptr); + 2.0f;
+			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
 			mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.m_X,m_Position.m_Y,m_Position.m_Z);
 
@@ -852,7 +854,7 @@ void NPC::AssignWaypoints(int32 grid) {
 	std::string query = StringFormat("SELECT `type`, `type2` FROM `grid` WHERE `id` = %i AND `zoneid` = %i", grid, zone->GetZoneID());
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "MySQL Error while trying to assign grid %u to mob %s: %s", grid, name, results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "MySQL Error while trying to assign grid %u to mob %s: %s", grid, name, results.ErrorMessage().c_str());
         return;
 	}
 
@@ -873,7 +875,7 @@ void NPC::AssignWaypoints(int32 grid) {
                         "ORDER BY `number`", grid, zone->GetZoneID());
     results = database.QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "MySQL Error while trying to assign waypoints from grid %u to mob %s: %s", grid, name, results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "MySQL Error while trying to assign waypoints from grid %u to mob %s: %s", grid, name, results.ErrorMessage().c_str());
         return;
     }
 
@@ -988,7 +990,7 @@ int	ZoneDatabase::GetHighestGrid(uint32 zoneid) {
 	std::string query = StringFormat("SELECT COALESCE(MAX(id), 0) FROM grid WHERE zoneid = %i", zoneid);
 	auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in GetHighestGrid query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in GetHighestGrid query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
 
@@ -1005,7 +1007,7 @@ uint8 ZoneDatabase::GetGridType2(uint32 grid, uint16 zoneid) {
 	std::string query = StringFormat("SELECT type2 FROM grid WHERE id = %i AND zoneid = %i", grid, zoneid);
 	auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in GetGridType2 query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in GetGridType2 query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
 
@@ -1026,7 +1028,7 @@ bool ZoneDatabase::GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* 
                                     "WHERE gridid = %i AND number = %i AND zoneid = %i", grid, num, zoneid);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in GetWaypoints query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in GetWaypoints query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return false;
     }
 
@@ -1054,7 +1056,7 @@ void ZoneDatabase::AssignGrid(Client *client, const xy_location& location, uint3
                                     zone->GetShortName(), (int)location.m_X, (int)location.m_Y);
     auto results = QueryDatabase(query);
 	if(!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error querying spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error querying spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -1068,7 +1070,7 @@ void ZoneDatabase::AssignGrid(Client *client, const xy_location& location, uint3
                             zone->GetShortName(), location.m_X, _GASSIGN_TOLERANCE, location.m_Y, _GASSIGN_TOLERANCE);
         results = QueryDatabase(query);
 		if (!results.Success()) {
-			LogFile->write(EQEMuLog::Error, "Error querying fuzzy spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+			LogFile->write(EQEmuLog::Error, "Error querying fuzzy spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 			return;
 		}
 
@@ -1097,7 +1099,7 @@ void ZoneDatabase::AssignGrid(Client *client, const xy_location& location, uint3
 	results = QueryDatabase(query);
 	if (!results.Success())
 	{
-		LogFile->write(EQEMuLog::Error, "Error updating spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error updating spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return;
     }
 
@@ -1135,7 +1137,7 @@ void ZoneDatabase::ModifyGrid(Client *client, bool remove, uint32 id, uint8 type
                                             "VALUES (%i, %i, %i, %i)", id, zoneid, type, type2);
         auto results = QueryDatabase(query);
         if (!results.Success()) {
-            LogFile->write(EQEMuLog::Error, "Error creating grid entry '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+            LogFile->write(EQEmuLog::Error, "Error creating grid entry '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
             return;
         }
 
@@ -1148,14 +1150,14 @@ void ZoneDatabase::ModifyGrid(Client *client, bool remove, uint32 id, uint8 type
     std::string query = StringFormat("DELETE FROM grid where id=%i", id);
     auto results = QueryDatabase(query);
     if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Error deleting grid '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error deleting grid '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 	else if(client)
         client->LogSQL(query.c_str());
 
     query = StringFormat("DELETE FROM grid_entries WHERE zoneid = %i AND gridid = %i", zoneid, id);
     results = QueryDatabase(query);
     if(!results.Success())
-        LogFile->write(EQEMuLog::Error, "Error deleting grid entries '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error deleting grid entries '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
     else if(client)
         client->LogSQL(query.c_str());
 
@@ -1171,7 +1173,7 @@ void ZoneDatabase::AddWP(Client *client, uint32 gridid, uint32 wpnum, const xyz_
                                     gridid, zoneid, wpnum, position.m_X, position.m_Y, position.m_Z, pause, position.m_Heading);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error adding waypoint '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error adding waypoint '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -1197,7 +1199,7 @@ void ZoneDatabase::DeleteWaypoint(Client *client, uint32 grid_num, uint32 wp_num
                                     grid_num, zoneid, wp_num);
     auto results = QueryDatabase(query);
 	if(!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error deleting waypoint '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error deleting waypoint '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -1224,7 +1226,7 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *client, uint32 spawn2id, const xyz_he
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		// Query error
-		LogFile->write(EQEMuLog::Error, "Error setting pathgrid '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error setting pathgrid '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
 
@@ -1245,14 +1247,14 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *client, uint32 spawn2id, const xyz_he
 							grid_num, zoneid, type1, type2);
 		results = QueryDatabase(query);
 		if(!results.Success())
-			LogFile->write(EQEMuLog::Error, "Error adding grid '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+			LogFile->write(EQEmuLog::Error, "Error adding grid '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		else if(client)
 			client->LogSQL(query.c_str());
 
 		query = StringFormat("UPDATE spawn2 SET pathgrid = '%i' WHERE id = '%i'", grid_num, spawn2id);
 		results = QueryDatabase(query);
 		if(!results.Success())
-			LogFile->write(EQEMuLog::Error, "Error updating spawn2 pathing '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+			LogFile->write(EQEmuLog::Error, "Error updating spawn2 pathing '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		else if(client)
 			client->LogSQL(query.c_str());
 	}
@@ -1264,7 +1266,7 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *client, uint32 spawn2id, const xyz_he
 
 	results = QueryDatabase(query);
 	if(!results.Success()) { // Query error
-		LogFile->write(EQEMuLog::Error, "Error getting next waypoint id '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error getting next waypoint id '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
 
@@ -1279,7 +1281,7 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *client, uint32 spawn2id, const xyz_he
 						grid_num, zoneid, next_wp_num, position.m_X, position.m_Y, position.m_Z, pause, position.m_Heading);
 	results = QueryDatabase(query);
 	if(!results.Success())
-		LogFile->write(EQEMuLog::Error, "Error adding grid entry '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error adding grid entry '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 	else if(client)
 		client->LogSQL(query.c_str());
 
@@ -1291,7 +1293,7 @@ uint32 ZoneDatabase::GetFreeGrid(uint16 zoneid) {
 	std::string query = StringFormat("SELECT max(id) FROM grid WHERE zoneid = %i", zoneid);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in GetFreeGrid query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in GetFreeGrid query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
 	}
 
@@ -1311,7 +1313,7 @@ int ZoneDatabase::GetHighestWaypoint(uint32 zoneid, uint32 gridid) {
                                     "WHERE zoneid = %i AND gridid = %i", zoneid, gridid);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in GetHighestWaypoint query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in GetHighestWaypoint query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
 	}
 

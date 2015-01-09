@@ -243,8 +243,8 @@ public:
 
 	inline int32	GetNPCFactionID()	const { return npc_faction_id; }
 	inline int32			GetPrimaryFaction()	const { return primary_faction; }
-	int32	GetNPCHate(Mob* in_ent) {return hate_list.GetEntHate(in_ent);}
-	bool	IsOnHatelist(Mob*p) { return hate_list.IsOnHateList(p);}
+	int32	GetNPCHate(Mob* in_ent) {return hate_list.GetEntHateAmount(in_ent);}
+	bool	IsOnHatelist(Mob*p) { return hate_list.IsEntOnHateList(p);}
 
 	void	SetNPCFactionID(int32 in) { npc_faction_id = in; database.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction); }
 
@@ -260,6 +260,7 @@ public:
 	void	SetPetSpellID(uint16 amt) {pet_spell_id = amt;}
 	uint32	GetMaxDamage(uint8 tlevel);
 	void	SetTaunting(bool tog) {taunting = tog;}
+	bool	IsTaunting() const { return taunting; }
 	void	PickPocket(Client* thief);
 	void	StartSwarmTimer(uint32 duration) { swarm_timer.Start(duration); }
 	void	AddLootDrop(const Item_Struct*dbitem, ItemList* itemlistconst, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange = false);
@@ -397,6 +398,9 @@ public:
 	void	mod_npc_killed(Mob* oos);
 	void	AISpellsList(Client *c);
 
+	uint32	GetHeroForgeModel() const { return herosforgemodel; }
+	void	SetHeroForgeModel(uint32 model) { herosforgemodel = model; }
+
 	bool IsRaidTarget() const { return raid_target; };
 
 protected:
@@ -485,8 +489,10 @@ protected:
 	uint16	skills[HIGHEST_SKILL+1];
 
 	uint32	equipment[EmuConstants::EQUIPMENT_SIZE];	//this is an array of item IDs
-	uint16	d_meele_texture1;			//this is an item Material value
-	uint16	d_meele_texture2;			//this is an item Material value (offhand)
+
+	uint32	herosforgemodel;			//this is the Hero Forge Armor Model (i.e 63 or 84 or 203)
+	uint16	d_melee_texture1;			//this is an item Material value
+	uint16	d_melee_texture2;			//this is an item Material value (offhand)
 	const char*	ammo_idfile;			//this determines projectile graphic "IT###" (see item field 'idfile')
 	uint8	prim_melee_type;			//Sets the Primary Weapon attack message and animation
 	uint8	sec_melee_type;				//Sets the Secondary Weapon attack message and animation
