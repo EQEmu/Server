@@ -111,7 +111,7 @@ bool LoginServer::Process() {
 				uint32 id = database.GetAccountIDFromLSID(utwr->lsaccountid);
 				int16 status = database.CheckStatus(id);
 
-				ServerPacket* outpack = new ServerPacket;
+				auto outpack = new ServerPacket;
 				outpack->opcode = ServerOP_UsertoWorldResp;
 				outpack->size = sizeof(UsertoWorldResponse_Struct);
 				outpack->pBuffer = new uchar[outpack->size];
@@ -255,7 +255,7 @@ bool LoginServer::Connect() {
 void LoginServer::SendInfo() {
 	const WorldConfig *Config=WorldConfig::get();
 
-	ServerPacket* pack = new ServerPacket;
+	auto pack = new ServerPacket;
 	pack->opcode = ServerOP_LSInfo;
 	pack->size = sizeof(ServerLSInfo_Struct);
 	pack->pBuffer = new uchar[pack->size];
@@ -275,7 +275,7 @@ void LoginServer::SendNewInfo() {
 	uint16 port;
 	const WorldConfig *Config=WorldConfig::get();
 
-	ServerPacket* pack = new ServerPacket;
+	auto pack = new ServerPacket;
 	pack->opcode = ServerOP_NewLSInfo;
 	pack->size = sizeof(ServerNewLSInfo_Struct);
 	pack->pBuffer = new uchar[pack->size];
@@ -301,7 +301,7 @@ void LoginServer::SendNewInfo() {
 
 void LoginServer::SendStatus() {
 	statusupdate_timer.Start();
-	ServerPacket* pack = new ServerPacket;
+	auto pack = new ServerPacket;
 	pack->opcode = ServerOP_LSStatus;
 	pack->size = sizeof(ServerLSStatus_Struct);
 	pack->pBuffer = new uchar[pack->size];
