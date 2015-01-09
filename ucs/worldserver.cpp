@@ -62,7 +62,7 @@ void WorldServer::Process()
 	if (!Connected())
 		return;
 
-	ServerPacket *pack = 0;
+	ServerPacket *pack = nullptr;
 
 	while((pack = tcpc.PopPacket()))
 	{
