@@ -321,7 +321,7 @@ void Database::SendHeaders(Client *client) {
 	sprintf(buffer, "%i", results.RowCount());
 	headerCountPacketLength += (strlen(buffer) + 1);
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MailHeaderCount, headerCountPacketLength);
+	auto outapp = new EQApplicationPacket(OP_MailHeaderCount, headerCountPacketLength);
 
 	char *packetBuffer = (char *)outapp->pBuffer;
 
@@ -402,7 +402,7 @@ void Database::SendBody(Client *client, int messageNumber) {
 
 	int packetLength = 12 + strlen(row[0]) + strlen(row[1]) + strlen(row[2]);
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MailSendBody,packetLength);
+	auto outapp = new EQApplicationPacket(OP_MailSendBody, packetLength);
 
 	char *packetBuffer = (char *)outapp->pBuffer;
 
@@ -449,8 +449,8 @@ bool Database::SendMail(std::string recipient, std::string from, std::string sub
 	if(characterID <= 0)
         return false;
 
-	char *escSubject = new char[subject.length() * 2 + 1];
-	char *escBody = new char[body.length() * 2 + 1];
+	auto escSubject = new char[subject.length() * 2 + 1];
+	auto escBody = new char[body.length() * 2 + 1];
 
 	DoEscapeString(escSubject, subject.c_str(), subject.length());
 	DoEscapeString(escBody, body.c_str(), body.length());
