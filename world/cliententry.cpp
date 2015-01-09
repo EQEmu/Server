@@ -121,7 +121,7 @@ void ClientListEntry::SetOnline(int8 iOnline) {
 }
 void ClientListEntry::LSUpdate(ZoneServer* iZS){
 	if(WorldConfig::get()->UpdateStats){
-		ServerPacket* pack = new ServerPacket;
+		auto pack = new ServerPacket;
 		pack->opcode = ServerOP_LSZoneInfo;
 		pack->size = sizeof(ZoneInfo_Struct);
 		pack->pBuffer = new uchar[pack->size];
@@ -135,7 +135,7 @@ void ClientListEntry::LSUpdate(ZoneServer* iZS){
 }
 void ClientListEntry::LSZoneChange(ZoneToZone_Struct* ztz){
 	if(WorldConfig::get()->UpdateStats){
-		ServerPacket* pack = new ServerPacket;
+		auto pack = new ServerPacket;
 		pack->opcode = ServerOP_LSPlayerZoneChange;
 		pack->size = sizeof(ServerLSPlayerZoneChange_Struct);
 		pack->pBuffer = new uchar[pack->size];
