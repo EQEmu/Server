@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/08/2015 ==
+Trevius: Added some extra checks and clean-up related to Groups and Mercenaries. 
+
 == 01/07/2015 ==
 Uleat: Excluded text link body from message scrambling in Client::GarbleMessage()
 Trevius: Mercenaries now load directly from tables only.  The vwMercNpcTypes view is no longer required and can be deleted.
