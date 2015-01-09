@@ -246,16 +246,16 @@ ZoneServer* ZSList::FindByInstanceID(uint32 InstanceID)
 }
 
 bool ZSList::SetLockedZone(uint16 iZoneID, bool iLock) {
-	for (int i=0; i<MaxLockedZones; i++) {
+	for (auto &zone : pLockedZones) {
 		if (iLock) {
-			if (pLockedZones[i] == 0) {
-				pLockedZones[i] = iZoneID;
+			if (zone == 0) {
+				zone = iZoneID;
 				return true;
 			}
 		}
 		else {
-			if (pLockedZones[i] == iZoneID) {
-				pLockedZones[i] = 0;
+			if (zone == iZoneID) {
+				zone = 0;
 				return true;
 			}
 		}
@@ -264,8 +264,8 @@ bool ZSList::SetLockedZone(uint16 iZoneID, bool iLock) {
 }
 
 bool ZSList::IsZoneLocked(uint16 iZoneID) {
-	for (int i=0; i<MaxLockedZones; i++) {
-		if (pLockedZones[i] == iZoneID)
+	for (auto &zone : pLockedZones) {
+		if (zone == iZoneID)
 			return true;
 	}
 	return false;
@@ -273,9 +273,9 @@ bool ZSList::IsZoneLocked(uint16 iZoneID) {
 
 void ZSList::ListLockedZones(const char* to, WorldTCPConnection* connection) {
 	int x = 0;
-	for (int i=0; i<MaxLockedZones; i++) {
-		if (pLockedZones[i]) {
-			connection->SendEmoteMessageRaw(to, 0, 0, 0, database.GetZoneName(pLockedZones[i], true));
+	for (auto &zone : pLockedZones) {
+		if (zone) {
+			connection->SendEmoteMessageRaw(to, 0, 0, 0, database.GetZoneName(zone, true));
 			x++;
 		}
 	}
