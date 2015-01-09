@@ -618,7 +618,7 @@ void Clientlist::Process() {
 			continue;
 		}
 
-		EQApplicationPacket *app = 0;
+		EQApplicationPacket *app = nullptr;
 
 		bool KeyValid = true;
 
