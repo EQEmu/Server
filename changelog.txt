@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/09/2015 ==
+Uleat: Added text link translators for OP_FormattedMessage
+
 == 01/08/2015 ==
 Trevius: Added some extra checks and clean-up related to Groups and Mercenaries. 
 
