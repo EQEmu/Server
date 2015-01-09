@@ -178,8 +178,7 @@ void EQWHTTPHandler::SendPage(const std::string &file) {
 	}
 #endif
 
-
-	char *buffer = new char[READ_BUFFER_LEN+1];
+	auto buffer = new char[READ_BUFFER_LEN + 1];
 	size_t len;
 	std::string to_process;
 	while((len = fread(buffer, 1, READ_BUFFER_LEN, f)) > 0) {
@@ -274,7 +273,7 @@ EQWHTTPServer::EQWHTTPServer()
 }
 
 void EQWHTTPServer::CreateNewConnection(uint32 ID, SOCKET in_socket, uint32 irIP, uint16 irPort) {
-	EQWHTTPHandler *conn = new EQWHTTPHandler(ID, in_socket, irIP, irPort);
+	auto conn = new EQWHTTPHandler(ID, in_socket, irIP, irPort);
 	AddConnection(conn);
 }
 
