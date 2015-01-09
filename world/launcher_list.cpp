@@ -130,7 +130,7 @@ LauncherLink *LauncherList::FindByZone(const char *short_name) {
 }
 
 void LauncherList::Add(EmuTCPConnection *conn) {
-	LauncherLink *it = new LauncherLink(nextID++, conn);
+	auto it = new LauncherLink(nextID++, conn);
 	_log(WORLD__LAUNCH, "Adding pending launcher %d", it->GetID());
 	m_pendingLaunchers.push_back(it);
 }
