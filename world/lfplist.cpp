@@ -30,11 +30,11 @@ extern ZSList zoneserver_list;
 GroupLFP::GroupLFP(uint32 inLeaderID) {
 
 	LeaderID = inLeaderID;
-	for(unsigned int i=0; i<MAX_GROUP_MEMBERS; i++) {
-		Members[i].Name[0] = '\0';
-		Members[i].Class = 0;
-		Members[i].Level = 0;
-		Members[i].Zone = 0;
+	for (auto &member : Members) {
+		member.Name[0] = '\0';
+		member.Class = 0;
+		member.Level = 0;
+		member.Zone = 0;
 	}
 	FromLevel = 1;
 	ToLevel = 100;
