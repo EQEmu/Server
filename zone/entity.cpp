@@ -2251,44 +2251,30 @@ bool EntityList::RemoveCorpse(uint16 delete_id)
 
 bool EntityList::RemoveGroup(uint32 delete_id)
 {
-	std::list<Group *>::iterator iterator;
-
-	iterator = group_list.begin();
-
-	while(iterator != group_list.end())
-	{
-		if((*iterator)->GetID() == delete_id) {
-			group_list.remove(*iterator);
-			delete *iterator;
+	auto it = std::find_if(group_list.begin(), group_list.end(),
+			[delete_id](const Group *a) { return a->GetID() == delete_id; });
+	if (it == group_list.end()) {
 #if EQDEBUG >= 5
-	CheckGroupList (__FILE__, __LINE__);
+		CheckGroupList (__FILE__, __LINE__);
 #endif
-			return true;
-		}
-		++iterator;
+		return false;
 	}
-#if EQDEBUG >= 5
-	CheckGroupList (__FILE__, __LINE__);
-#endif
-	return false;
+	auto group = *it;
+	group_list.erase(it);
+	delete group;
+	return true;
 }
 
 bool EntityList::RemoveRaid(uint32 delete_id)
 {
-	std::list<Raid *>::iterator iterator;
-
-	iterator = raid_list.begin();
-
-	while(iterator != raid_list.end())
-	{
-		if((*iterator)->GetID() == delete_id) {
-			raid_list.remove(*iterator);
-			delete *iterator;
-			return true;
-		}
-		++iterator;
-	}
-	return false;
+	auto it = std::find_if(raid_list.begin(), raid_list.end(),
+			[delete_id](const Raid *a) { return a->GetID() == delete_id; });
+	if (it == raid_list.end())
+		return false;
+	auto raid = *it;
+	raid_list.erase(it);
+	delete raid;
+	return true;
 }
 
 void EntityList::Clear()
