@@ -80,7 +80,7 @@ void ZSList::Process() {
 
 	if(shutdowntimer && shutdowntimer->Check()){
 		_log(WORLD__ZONELIST, "Shutdown timer has expired. Telling all zones to shut down and exiting. (fake sigint)");
-		ServerPacket* pack2 = new ServerPacket;
+		auto pack2 = new ServerPacket;
 		pack2->opcode = ServerOP_ShutdownAll;
 		pack2->size=0;
 		SendPacket(pack2);
@@ -399,7 +399,7 @@ void ZSList::SendChannelMessage(const char* from, const char* to, uint8 chan_num
 void ZSList::SendChannelMessageRaw(const char* from, const char* to, uint8 chan_num, uint8 language, const char* message) {
 	if (!message)
 		return;
-	ServerPacket* pack = new ServerPacket;
+	auto pack = new ServerPacket;
 
 	pack->opcode = ServerOP_ChannelMessage;
 	pack->size = sizeof(ServerChannelMessage_Struct)+strlen(message)+1;
@@ -453,7 +453,7 @@ void ZSList::SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to_mins
 void ZSList::SendEmoteMessageRaw(const char* to, uint32 to_guilddbid, int16 to_minstatus, uint32 type, const char* message) {
 	if (!message)
 		return;
-	ServerPacket* pack = new ServerPacket;
+	auto pack = new ServerPacket;
 
 	pack->opcode = ServerOP_EmoteMessage;
 	pack->size = sizeof(ServerEmoteMessage_Struct)+strlen(message)+1;
@@ -500,7 +500,7 @@ void ZSList::SendEmoteMessageRaw(const char* to, uint32 to_guilddbid, int16 to_m
 }
 
 void ZSList::SendTimeSync() {
-	ServerPacket* pack = new ServerPacket(ServerOP_SyncWorldTime, sizeof(eqTimeOfDay));
+	auto pack = new ServerPacket(ServerOP_SyncWorldTime, sizeof(eqTimeOfDay));
 	eqTimeOfDay* tod = (eqTimeOfDay*) pack->pBuffer;
 	tod->start_eqtime=worldclock.getStartEQTime();
 	tod->start_realtime=worldclock.getStartRealTime();
@@ -554,7 +554,7 @@ void ZSList::RebootZone(const char* ip1,uint16 port,const char* ip2, uint32 skip
 	}
 	if (x == 0)
 		return;
-	ZoneServer** tmp = new ZoneServer*[x];
+	auto tmp = new ZoneServer *[x];
 	uint32 y = 0;
 	iterator.Reset();
 	while(iterator.MoreElements()) {
@@ -569,7 +569,7 @@ void ZSList::RebootZone(const char* ip1,uint16 port,const char* ip2, uint32 skip
 	}
 	uint32 z = emu_random.Int(0, y-1);
 
-	ServerPacket* pack = new ServerPacket(ServerOP_ZoneReboot, sizeof(ServerZoneReboot_Struct));
+	auto pack = new ServerPacket(ServerOP_ZoneReboot, sizeof(ServerZoneReboot_Struct));
 	ServerZoneReboot_Struct* s = (ServerZoneReboot_Struct*) pack->pBuffer;
 //	strcpy(s->ip1,ip1);
 	strcpy(s->ip2,ip2);
@@ -734,7 +734,7 @@ void ZSList::WorldShutDown(uint32 time, uint32 interval)
 	}
 	else {
 		SendEmoteMessage(0,0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down, everyone log out now.");
-		ServerPacket* pack = new ServerPacket;
+		auto pack = new ServerPacket;
 		pack->opcode = ServerOP_ShutdownAll;
 		pack->size=0;
 		SendPacket(pack);
