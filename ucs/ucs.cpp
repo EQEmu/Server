@@ -49,8 +49,7 @@ std::string WorldShortName;
 
 const ucsconfig *Config;
 
-WorldServer *worldserver = 0;
-
+WorldServer *worldserver = nullptr;
 
 void CatchSignal(int sig_num) {
 
