@@ -386,11 +386,8 @@ void EntityList::GroupProcess()
 		return;
 	}
 
-	auto it = group_list.begin();
-	while (it != group_list.end()) {
-		(*it)->Process();
-		++it;
-	}
+	for (auto &group : group_list)
+		group->Process();
 
 #if EQDEBUG >= 5
 	CheckGroupList (__FILE__, __LINE__);
@@ -399,11 +396,8 @@ void EntityList::GroupProcess()
 
 void EntityList::QueueToGroupsForNPCHealthAA(Mob *sender, const EQApplicationPacket *app)
 {
-	auto it = group_list.begin();
-	while (it != group_list.end()) {
-		(*it)->QueueHPPacketsForNPCHealthAA(sender, app);
-		++it;
-	}
+	for (auto &group : group_list)
+		group->QueueHPPacketsForNPCHealthAA(sender, app);
 }
 
 void EntityList::RaidProcess()
@@ -416,11 +410,8 @@ void EntityList::RaidProcess()
 		return;
 	}
 
-	auto it = raid_list.begin();
-	while (it != raid_list.end()) {
-		(*it)->Process();
-		++it;
-	}
+	for (auto &raid : raid_list)
+		raid->Process();
 }
 
 void EntityList::DoorProcess()
@@ -3131,21 +3122,18 @@ void EntityList::AddProximity(NPC *proximity_for)
 
 	proximity_list.push_back(proximity_for);
 
-	proximity_for->proximity = new NPCProximity;
+	proximity_for->proximity = new NPCProximity; // deleted in NPC::~NPC
 }
 
 bool EntityList::RemoveProximity(uint16 delete_npc_id)
 {
-	auto iter = proximity_list.begin();
+	auto it = std::find_if(proximity_list.begin(), proximity_list.end(),
+			[delete_npc_id](const NPC *a) { return a->GetID() == delete_npc_id; });
+	if (it == proximity_list.end())
+		return false;
 
-	while (iter != proximity_list.end()) {
-		if ((*iter)->GetID() == delete_npc_id) {
-			proximity_list.erase(iter);
-			return true;
-		}
-		++iter;
-	}
-	return false;
+	proximity_list.erase(it);
+	return true;
 }
 
 void EntityList::RemoveAllLocalities()
@@ -3348,14 +3336,12 @@ void EntityList::AddArea(int id, int type, float min_x, float max_x, float min_y
 
 void EntityList::RemoveArea(int id)
 {
-	auto iter = area_list.begin();
-	while(iter != area_list.end()) {
-		if((*iter).id == id) {
-			area_list.erase(iter);
-			return;
-		}
-		++iter;
-	}
+	auto it = std::find_if(area_list.begin(), area_list.end(),
+			[id](const Area &a) { return a.id == id; });
+	if (it == area_list.end())
+		return;
+
+	area_list.erase(it);
 }
 
 void EntityList::ClearAreas()
