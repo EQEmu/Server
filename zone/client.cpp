@@ -339,7 +339,7 @@ Client::~Client() {
 		ToggleBuyerMode(false);
 
 	if(conn_state != ClientConnectFinished) {
-		LogFile->write(EQEMuLog::Debug, "Client '%s' was destroyed before reaching the connected state:", GetName());
+		LogFile->write(EQEmuLog::Debug, "Client '%s' was destroyed before reaching the connected state:", GetName());
 		ReportConnectingState();
 	}
 
@@ -437,31 +437,31 @@ void Client::SendLogoutPackets() {
 void Client::ReportConnectingState() {
 	switch(conn_state) {
 	case NoPacketsReceived:		//havent gotten anything
-		LogFile->write(EQEMuLog::Debug, "Client has not sent us an initial zone entry packet.");
+		LogFile->write(EQEmuLog::Debug, "Client has not sent us an initial zone entry packet.");
 		break;
 	case ReceivedZoneEntry:		//got the first packet, loading up PP
-		LogFile->write(EQEMuLog::Debug, "Client sent initial zone packet, but we never got their player info from the database.");
+		LogFile->write(EQEmuLog::Debug, "Client sent initial zone packet, but we never got their player info from the database.");
 		break;
 	case PlayerProfileLoaded:	//our DB work is done, sending it
-		LogFile->write(EQEMuLog::Debug, "We were sending the player profile, tributes, tasks, spawns, time and weather, but never finished.");
+		LogFile->write(EQEmuLog::Debug, "We were sending the player profile, tributes, tasks, spawns, time and weather, but never finished.");
 		break;
 	case ZoneInfoSent:		//includes PP, tributes, tasks, spawns, time and weather
-		LogFile->write(EQEMuLog::Debug, "We successfully sent player info and spawns, waiting for client to request new zone.");
+		LogFile->write(EQEmuLog::Debug, "We successfully sent player info and spawns, waiting for client to request new zone.");
 		break;
 	case NewZoneRequested:	//received and sent new zone request
-		LogFile->write(EQEMuLog::Debug, "We received client's new zone request, waiting for client spawn request.");
+		LogFile->write(EQEmuLog::Debug, "We received client's new zone request, waiting for client spawn request.");
 		break;
 	case ClientSpawnRequested:	//client sent ReqClientSpawn
-		LogFile->write(EQEMuLog::Debug, "We received the client spawn request, and were sending objects, doors, zone points and some other stuff, but never finished.");
+		LogFile->write(EQEmuLog::Debug, "We received the client spawn request, and were sending objects, doors, zone points and some other stuff, but never finished.");
 		break;
 	case ZoneContentsSent:		//objects, doors, zone points
-		LogFile->write(EQEMuLog::Debug, "The rest of the zone contents were successfully sent, waiting for client ready notification.");
+		LogFile->write(EQEmuLog::Debug, "The rest of the zone contents were successfully sent, waiting for client ready notification.");
 		break;
 	case ClientReadyReceived:	//client told us its ready, send them a bunch of crap like guild MOTD, etc
-		LogFile->write(EQEMuLog::Debug, "We received client ready notification, but never finished Client::CompleteConnect");
+		LogFile->write(EQEmuLog::Debug, "We received client ready notification, but never finished Client::CompleteConnect");
 		break;
 	case ClientConnectFinished:	//client finally moved to finished state, were done here
-		LogFile->write(EQEMuLog::Debug, "Client is successfully connected.");
+		LogFile->write(EQEmuLog::Debug, "Client is successfully connected.");
 		break;
 	};
 }
@@ -650,7 +650,7 @@ bool Client::SendAllPackets() {
 			eqs->FastQueuePacket((EQApplicationPacket **)&cp->app, cp->ack_req);
 		iterator.RemoveCurrent();
 #if EQDEBUG >= 6
-		LogFile->write(EQEMuLog::Normal, "Transmitting a packet");
+		LogFile->write(EQEmuLog::Normal, "Transmitting a packet");
 #endif
 	}
 	return true;
@@ -701,7 +701,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 
 
 	#if EQDEBUG >= 11
-		LogFile->write(EQEMuLog::Debug,"Client::ChannelMessageReceived() Channel:%i message:'%s'", chan_num, message);
+		LogFile->write(EQEmuLog::Debug,"Client::ChannelMessageReceived() Channel:%i message:'%s'", chan_num, message);
 	#endif
 
 	if (targetname == nullptr) {
@@ -1917,7 +1917,7 @@ void Client::ReadBook(BookRequest_Struct *book) {
 
 	if (booktxt2[0] != '\0') {
 #if EQDEBUG >= 6
-		LogFile->write(EQEMuLog::Normal,"Client::ReadBook() textfile:%s Text:%s", txtfile, booktxt2.c_str());
+		LogFile->write(EQEmuLog::Normal,"Client::ReadBook() textfile:%s Text:%s", txtfile, booktxt2.c_str());
 #endif
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ReadBook, length + sizeof(BookText_Struct));
 
@@ -2111,7 +2111,7 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 
 	SaveCurrency();
 
-	LogFile->write(EQEMuLog::Debug, "Client::AddMoneyToPP() %s should have: plat:%i gold:%i silver:%i copper:%i", GetName(), m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
+	LogFile->write(EQEmuLog::Debug, "Client::AddMoneyToPP() %s should have: plat:%i gold:%i silver:%i copper:%i", GetName(), m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
 }
 
 void Client::EVENT_ITEM_ScriptStopReturn(){
@@ -2151,7 +2151,7 @@ void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 plat
 	SaveCurrency();
 
 #if (EQDEBUG>=5)
-		LogFile->write(EQEMuLog::Debug, "Client::AddMoneyToPP() %s should have: plat:%i gold:%i silver:%i copper:%i",
+		LogFile->write(EQEmuLog::Debug, "Client::AddMoneyToPP() %s should have: plat:%i gold:%i silver:%i copper:%i",
 			GetName(), m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
 #endif
 }
@@ -2370,7 +2370,7 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(SkillUseTypes skillid, uint16
 
 				Save();
 
-				LogFile->write(EQEMuLog::Normal, "Reset %s's caster specialization skills to 1. "
+				LogFile->write(EQEmuLog::Normal, "Reset %s's caster specialization skills to 1. "
 								"Too many specializations skills were above 50.", GetCleanName());
 			}
 
@@ -4550,14 +4550,14 @@ void Client::HandleLDoNOpen(NPC *target)
 	{
 		if(target->GetClass() != LDON_TREASURE)
 		{
-			LogFile->write(EQEMuLog::Debug, "%s tried to open %s but %s was not a treasure chest.",
+			LogFile->write(EQEmuLog::Debug, "%s tried to open %s but %s was not a treasure chest.",
 				GetName(), target->GetName(), target->GetName());
 			return;
 		}
 
 		if(DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
 		{
-			LogFile->write(EQEMuLog::Debug, "%s tried to open %s but %s was out of range",
+			LogFile->write(EQEmuLog::Debug, "%s tried to open %s but %s was out of range",
 				GetName(), target->GetName(), target->GetName());
 			Message(13, "Treasure chest out of range.");
 			return;
@@ -5300,7 +5300,7 @@ void Client::SendRewards()
                                     "ORDER BY reward_id", AccountID());
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in Client::SendRewards(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in Client::SendRewards(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return;
     }
 
@@ -5368,7 +5368,7 @@ bool Client::TryReward(uint32 claim_id) {
                                     AccountID(), claim_id);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return false;
     }
 
@@ -5395,7 +5395,7 @@ bool Client::TryReward(uint32 claim_id) {
                             AccountID(), claim_id);
         auto results = database.QueryDatabase(query);
 		if(!results.Success())
-			LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+			LogFile->write(EQEmuLog::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 	}
 	else {
         query = StringFormat("UPDATE account_rewards SET amount = (amount-1) "
@@ -5403,7 +5403,7 @@ bool Client::TryReward(uint32 claim_id) {
                             AccountID(), claim_id);
         auto results = database.QueryDatabase(query);
 		if(!results.Success())
-			LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+			LogFile->write(EQEmuLog::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 	}
 
 	InternalVeteranReward ivr = (*iter);
@@ -6217,7 +6217,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	PetRecord record;
 	if(!database.GetPetEntry(spells[spell_id].teleport_zone, &record))
 	{
-		LogFile->write(EQEMuLog::Error, "Unknown doppelganger spell id: %d, check pets table", spell_id);
+		LogFile->write(EQEmuLog::Error, "Unknown doppelganger spell id: %d, check pets table", spell_id);
 		Message(13, "Unable to find data for pet %s", spells[spell_id].teleport_zone);
 		return;
 	}
@@ -6231,7 +6231,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 
 	const NPCType *npc_type = database.GetNPCType(pet.npc_id);
 	if(npc_type == nullptr) {
-		LogFile->write(EQEMuLog::Error, "Unknown npc type for doppelganger spell id: %d", spell_id);
+		LogFile->write(EQEmuLog::Error, "Unknown npc type for doppelganger spell id: %d", spell_id);
 		Message(0,"Unable to find pet!");
 		return;
 	}
@@ -8155,7 +8155,7 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
            entity_list.MessageClose_StringID(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
 
 #if EQDEBUG >= 5
-       LogFile->write(EQEMuLog::Debug, "Eating from slot:%i", (int)slot);
+       LogFile->write(EQEmuLog::Debug, "Eating from slot:%i", (int)slot);
 #endif
    }
    else
@@ -8172,7 +8172,7 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
             entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
 
 #if EQDEBUG >= 5
-        LogFile->write(EQEMuLog::Debug, "Drinking from slot:%i", (int)slot);
+        LogFile->write(EQEmuLog::Debug, "Drinking from slot:%i", (int)slot);
 #endif
    }
 }

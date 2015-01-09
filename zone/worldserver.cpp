@@ -1384,7 +1384,7 @@ void WorldServer::Process() {
 			if(NewCorpse)
 				NewCorpse->Spawn();
 			else
-				LogFile->write(EQEMuLog::Error,"Unable to load player corpse id %u for zone %s.", s->player_corpse_id, zone->GetShortName());
+				LogFile->write(EQEmuLog::Error,"Unable to load player corpse id %u for zone %s.", s->player_corpse_id, zone->GetShortName());
 
 			break;
 		}

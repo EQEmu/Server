@@ -35,6 +35,6 @@ void log_message(LogType type, const char *fmt, ...) {
 void log_messageVA(LogType type, const char *fmt, va_list args) {
 	std::string prefix_buffer = StringFormat("[%s] ", log_type_info[type].name);
 	
-	LogFile->writePVA(EQEMuLog::Debug, prefix_buffer.c_str(), fmt, args);
+	LogFile->writePVA(EQEmuLog::Debug, prefix_buffer.c_str(), fmt, args);
 }
 

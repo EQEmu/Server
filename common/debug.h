@@ -74,10 +74,10 @@
 #include <stdarg.h>
 
 
-class EQEMuLog {
+class EQEmuLog {
 public:
-	EQEMuLog();
-	~EQEMuLog();
+	EQEmuLog();
+	~EQEmuLog();
 
 	enum LogIDs {
 		Status = 0,	 /* This must stay the first entry in this list */
@@ -128,7 +128,7 @@ private:
 	msgCallbackPva logCallbackPva[MaxLogID];
 };
 
-extern EQEMuLog* LogFile;
+extern EQEmuLog* LogFile;
 
 #ifdef _EQDEBUG
 class PerformanceMonitor {

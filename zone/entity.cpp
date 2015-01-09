@@ -371,7 +371,7 @@ void EntityList::CheckGroupList (const char *fname, const int fline)
 	{
 		if (*it == nullptr)
 		{
-			LogFile->write(EQEMuLog::Error, "nullptr group, %s:%i", fname, fline);
+			LogFile->write(EQEmuLog::Error, "nullptr group, %s:%i", fname, fline);
 		}
 	}
 }
@@ -529,12 +529,12 @@ void EntityList::MobProcess()
 				zone->StartShutdownTimer();
 				Group *g = GetGroupByMob(mob);
 				if(g) {
-					LogFile->write(EQEMuLog::Error, "About to delete a client still in a group.");
+					LogFile->write(EQEmuLog::Error, "About to delete a client still in a group.");
 					g->DelMember(mob);
 				}
 				Raid *r = entity_list.GetRaidByClient(mob->CastToClient());
 				if(r) {
-					LogFile->write(EQEMuLog::Error, "About to delete a client still in a raid.");
+					LogFile->write(EQEmuLog::Error, "About to delete a client still in a raid.");
 					r->MemberZoned(mob->CastToClient());
 				}
 				entity_list.RemoveClient(id);
@@ -566,7 +566,7 @@ void EntityList::AddGroup(Group *group)
 
 	uint32 gid = worldserver.NextGroupID();
 	if (gid == 0) {
-		LogFile->write(EQEMuLog::Error,
+		LogFile->write(EQEmuLog::Error,
 				"Unable to get new group ID from world server. group is going to be broken.");
 		return;
 	}
@@ -595,7 +595,7 @@ void EntityList::AddRaid(Raid *raid)
 
 	uint32 gid = worldserver.NextGroupID();
 	if (gid == 0) {
-		LogFile->write(EQEMuLog::Error,
+		LogFile->write(EQEmuLog::Error,
 				"Unable to get new group ID from world server. group is going to be broken.");
 		return;
 	}
@@ -2530,7 +2530,7 @@ char *EntityList::MakeNameUnique(char *name)
 			return name;
 		}
 	}
-	LogFile->write(EQEMuLog::Error, "Fatal error in EntityList::MakeNameUnique: Unable to find unique name for '%s'", name);
+	LogFile->write(EQEmuLog::Error, "Fatal error in EntityList::MakeNameUnique: Unable to find unique name for '%s'", name);
 	char tmp[64] = "!";
 	strn0cpy(&tmp[1], name, sizeof(tmp) - 1);
 	strcpy(name, tmp);

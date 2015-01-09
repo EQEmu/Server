@@ -43,7 +43,7 @@ void TimeoutManager::CheckTimeouts() {
 		Timeoutable *it = *cur;
 		if(it->next_check.Check()) {
 #ifdef TIMEOUT_DEBUG
-			LogFile->write(EQEMuLog::Debug, "Checking timeout on 0x%x\n", it);
+			LogFile->write(EQEmuLog::Debug, "Checking timeout on 0x%x\n", it);
 #endif
 			it->CheckTimeout();
 		}
@@ -58,13 +58,13 @@ void TimeoutManager::AddMember(Timeoutable *who) {
 	DeleteMember(who);	//just in case... prolly not needed.
 	members.push_back(who);
 #ifdef TIMEOUT_DEBUG
-	LogFile->write(EQEMuLog::Debug, "Adding timeoutable 0x%x\n", who);
+	LogFile->write(EQEmuLog::Debug, "Adding timeoutable 0x%x\n", who);
 #endif
 }
 
 void TimeoutManager::DeleteMember(Timeoutable *who) {
 #ifdef TIMEOUT_DEBUG
-	LogFile->write(EQEMuLog::Debug, "Removing timeoutable 0x%x\n", who);
+	LogFile->write(EQEmuLog::Debug, "Removing timeoutable 0x%x\n", who);
 #endif
 	std::vector<Timeoutable *>::iterator cur,end;
 	cur = members.begin();

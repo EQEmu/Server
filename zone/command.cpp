@@ -445,14 +445,14 @@ int command_init(void) {
 		{
 			cur->second->access = itr->second;
 #if EQDEBUG >=5
-			LogFile->write(EQEMuLog::Debug, "command_init(): - Command '%s' set to access level %d." , cur->first.c_str(), itr->second);
+			LogFile->write(EQEmuLog::Debug, "command_init(): - Command '%s' set to access level %d." , cur->first.c_str(), itr->second);
 #endif
 		}
 		else
 		{
 #ifdef COMMANDS_WARNINGS
 			if(cur->second->access == 0)
-				LogFile->write(EQEMuLog::Status, "command_init(): Warning: Command '%s' defaulting to access level 0!" , cur->first.c_str());
+				LogFile->write(EQEmuLog::Status, "command_init(): Warning: Command '%s' defaulting to access level 0!" , cur->first.c_str());
 #endif
 		}
 	}
@@ -497,7 +497,7 @@ int command_add(const char *command_string, const char *desc, int access, CmdFun
 	std::string cstr(command_string);
 
 	if(commandlist.count(cstr) != 0) {
-		LogFile->write(EQEMuLog::Error, "command_add() - Command '%s' is a duplicate - check command.cpp." , command_string);
+		LogFile->write(EQEmuLog::Error, "command_add() - Command '%s' is a duplicate - check command.cpp." , command_string);
 		return(-1);
 	}
 
@@ -571,12 +571,12 @@ int command_realdispatch(Client *c, const char *message)
 
 #ifdef COMMANDS_LOGGING
 	if(cur->access >= COMMANDS_LOGGING_MIN_STATUS) {
-		LogFile->write(EQEMuLog::Commands, "%s (%s) used command: %s (target=%s)", c->GetName(), c->AccountName(), message, c->GetTarget()?c->GetTarget()->GetName():"NONE");
+		LogFile->write(EQEmuLog::Commands, "%s (%s) used command: %s (target=%s)", c->GetName(), c->AccountName(), message, c->GetTarget()?c->GetTarget()->GetName():"NONE");
 	}
 #endif
 
 	if(cur->function == nullptr) {
-		LogFile->write(EQEMuLog::Error, "Command '%s' has a null function\n", cstr.c_str());
+		LogFile->write(EQEmuLog::Error, "Command '%s' has a null function\n", cstr.c_str());
 		return(-1);
 	} else {
 		//dispatch C++ command
@@ -1348,7 +1348,7 @@ void command_viewpetition(Client *c, const Seperator *sep)
     if (!results.Success())
         return;
 
-    LogFile->write(EQEMuLog::Normal,"View petition request from %s, petition number: %i", c->GetName(), atoi(sep->argplus[1]) );
+    LogFile->write(EQEmuLog::Normal,"View petition request from %s, petition number: %i", c->GetName(), atoi(sep->argplus[1]) );
 
     if (results.RowCount() == 0) {
         c->Message(13,"There was an error in your request: ID not found! Please check the Id and try again.");
@@ -1373,7 +1373,7 @@ void command_petitioninfo(Client *c, const Seperator *sep)
     if (!results.Success())
         return;
 
-    LogFile->write(EQEMuLog::Normal,"Petition information request from %s, petition number:", c->GetName(), atoi(sep->argplus[1]) );
+    LogFile->write(EQEmuLog::Normal,"Petition information request from %s, petition number:", c->GetName(), atoi(sep->argplus[1]) );
 
     if (results.RowCount() == 0) {
 		c->Message(13,"There was an error in your request: ID not found! Please check the Id and try again.");
@@ -1399,7 +1399,7 @@ void command_delpetition(Client *c, const Seperator *sep)
 	if (!results.Success())
         return;
 
-    LogFile->write(EQEMuLog::Normal,"Delete petition request from %s, petition number:", c->GetName(), atoi(sep->argplus[1]) );
+    LogFile->write(EQEmuLog::Normal,"Delete petition request from %s, petition number:", c->GetName(), atoi(sep->argplus[1]) );
 
 }
 
@@ -1622,7 +1622,7 @@ void command_permaclass(Client *c, const Seperator *sep)
 		c->Message(0,"Target is not a client.");
 	else {
 		c->Message(0, "Setting %s's class...Sending to char select.", t->GetName());
-		LogFile->write(EQEMuLog::Normal,"Class change request from %s for %s, requested class:%i", c->GetName(), t->GetName(), atoi(sep->arg[1]) );
+		LogFile->write(EQEmuLog::Normal,"Class change request from %s for %s, requested class:%i", c->GetName(), t->GetName(), atoi(sep->arg[1]) );
 		t->SetBaseClass(atoi(sep->arg[1]));
 		t->Save();
 		t->Kick();
@@ -1644,7 +1644,7 @@ void command_permarace(Client *c, const Seperator *sep)
 		c->Message(0,"Target is not a client.");
 	else {
 		c->Message(0, "Setting %s's race - zone to take effect",t->GetName());
-		LogFile->write(EQEMuLog::Normal,"Permanant race change request from %s for %s, requested race:%i", c->GetName(), t->GetName(), atoi(sep->arg[1]) );
+		LogFile->write(EQEmuLog::Normal,"Permanant race change request from %s for %s, requested race:%i", c->GetName(), t->GetName(), atoi(sep->arg[1]) );
 		uint32 tmp = Mob::GetDefaultGender(atoi(sep->arg[1]), t->GetBaseGender());
 		t->SetBaseRace(atoi(sep->arg[1]));
 		t->SetBaseGender(tmp);
@@ -1668,7 +1668,7 @@ void command_permagender(Client *c, const Seperator *sep)
 		c->Message(0,"Target is not a client.");
 	else {
 		c->Message(0, "Setting %s's gender - zone to take effect",t->GetName());
-		LogFile->write(EQEMuLog::Normal,"Permanant gender change request from %s for %s, requested gender:%i", c->GetName(), t->GetName(), atoi(sep->arg[1]) );
+		LogFile->write(EQEmuLog::Normal,"Permanant gender change request from %s for %s, requested gender:%i", c->GetName(), t->GetName(), atoi(sep->arg[1]) );
 		t->SetBaseGender(atoi(sep->arg[1]));
 		t->Save();
 		t->SendIllusionPacket(atoi(sep->arg[1]));
@@ -2010,7 +2010,7 @@ void command_dbspawn2(Client *c, const Seperator *sep)
 {
 
 	if (sep->IsNumber(1) && sep->IsNumber(2) && sep->IsNumber(3)) {
-		LogFile->write(EQEMuLog::Normal,"Spawning database spawn");
+		LogFile->write(EQEmuLog::Normal,"Spawning database spawn");
 		uint16 cond = 0;
 		int16 cond_min = 0;
 		if(sep->IsNumber(4)) {
@@ -2330,7 +2330,7 @@ void command_setlanguage(Client *c, const Seperator *sep)
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Normal,"Set language request from %s, target:%s lang_id:%i value:%i", c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
+		LogFile->write(EQEmuLog::Normal,"Set language request from %s, target:%s lang_id:%i value:%i", c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
 		uint8 langid = (uint8)atoi(sep->arg[1]);
 		uint8 value = (uint8)atoi(sep->arg[2]);
 		c->GetTarget()->CastToClient()->SetLanguageSkill( langid, value );
@@ -2355,7 +2355,7 @@ void command_setskill(Client *c, const Seperator *sep)
 		c->Message(0, "       x = 0 to %d", HIGHEST_CAN_SET_SKILL);
 	}
 	else {
-		LogFile->write(EQEMuLog::Normal,"Set skill request from %s, target:%s skill_id:%i value:%i", c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
+		LogFile->write(EQEmuLog::Normal,"Set skill request from %s, target:%s skill_id:%i value:%i", c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
 		int skill_num = atoi(sep->arg[1]);
 		uint16 skill_value = atoi(sep->arg[2]);
 		if(skill_num < HIGHEST_SKILL)
@@ -2375,7 +2375,7 @@ void command_setskillall(Client *c, const Seperator *sep)
 	}
 	else {
 		if (c->Admin() >= commandSetSkillsOther || c->GetTarget()==c || c->GetTarget()==0) {
-			LogFile->write(EQEMuLog::Normal,"Set ALL skill request from %s, target:%s", c->GetName(), c->GetTarget()->GetName());
+			LogFile->write(EQEmuLog::Normal,"Set ALL skill request from %s, target:%s", c->GetName(), c->GetTarget()->GetName());
 			uint16 level = atoi(sep->arg[1]);
 			for(SkillUseTypes skill_num=Skill1HBlunt;skill_num <= HIGHEST_SKILL;skill_num=(SkillUseTypes)(skill_num+1)) {
 				c->GetTarget()->CastToClient()->SetSkill(skill_num, level);
@@ -2465,7 +2465,7 @@ void command_spawn(Client *c, const Seperator *sep)
 		}
 	}
 	#if EQDEBUG >= 11
-		LogFile->write(EQEMuLog::Debug,"#spawn Spawning:");
+		LogFile->write(EQEmuLog::Debug,"#spawn Spawning:");
 	#endif
 
 	NPC* npc = NPC::SpawnNPC(sep->argplus[1], c->GetX(), c->GetY(), c->GetZ(), c->GetHeading(), c);
@@ -3170,7 +3170,7 @@ void command_listpetition(Client *c, const Seperator *sep)
 	if (!results.Success())
         return;
 
-    LogFile->write(EQEMuLog::Normal,"Petition list requested by %s", c->GetName());
+    LogFile->write(EQEmuLog::Normal,"Petition list requested by %s", c->GetName());
 
     if (results.RowCount() == 0)
         return;
@@ -3827,7 +3827,7 @@ void command_lastname(Client *c, const Seperator *sep)
 
 	if(c->GetTarget() && c->GetTarget()->IsClient())
 		t=c->GetTarget()->CastToClient();
-	LogFile->write(EQEMuLog::Normal,"#lastname request from %s for %s", c->GetName(), t->GetName());
+	LogFile->write(EQEmuLog::Normal,"#lastname request from %s for %s", c->GetName(), t->GetName());
 
 	if(strlen(sep->arg[1]) <= 70)
 		t->ChangeLastName(sep->arg[1]);
@@ -4450,7 +4450,7 @@ void command_time(Client *c, const Seperator *sep)
 			);
 		c->Message(13, "It is now %s.", timeMessage);
 #if EQDEBUG >= 11
-		LogFile->write(EQEMuLog::Debug,"Recieved timeMessage:%s", timeMessage);
+		LogFile->write(EQEmuLog::Debug,"Recieved timeMessage:%s", timeMessage);
 #endif
 	}
 }
@@ -4925,7 +4925,7 @@ void command_manaburn(Client *c, const Seperator *sep)
 						target->Damage(c, nukedmg, 2751, SkillAbjuration/*hackish*/);
 						c->Message(4,"You unleash an enormous blast of magical energies.");
 					}
-					LogFile->write(EQEMuLog::Normal,"Manaburn request from %s, damage: %d", c->GetName(), nukedmg);
+					LogFile->write(EQEmuLog::Normal,"Manaburn request from %s, damage: %d", c->GetName(), nukedmg);
 				}
 			}
 			else
@@ -5277,7 +5277,7 @@ void command_scribespells(Client *c, const Seperator *sep)
 	t->Message(0, "Scribing spells to spellbook.");
 	if(t != c)
 		c->Message(0, "Scribing spells for %s.", t->GetName());
-	LogFile->write(EQEMuLog::Normal, "Scribe spells request for %s from %s, levels: %u -> %u", t->GetName(), c->GetName(), min_level, max_level);
+	LogFile->write(EQEmuLog::Normal, "Scribe spells request for %s from %s, levels: %u -> %u", t->GetName(), c->GetName(), min_level, max_level);
 
 	for(curspell = 0, book_slot = t->GetNextAvailableSpellBookSlot(), count = 0; curspell < SPDAT_RECORDS && book_slot < MAX_PP_SPELLBOOK; curspell++, book_slot = t->GetNextAvailableSpellBookSlot(book_slot))
 	{
@@ -5334,7 +5334,7 @@ void command_scribespell(Client *c, const Seperator *sep) {
 		if(t != c)
 			c->Message(0, "Scribing spell: %s (%i) for %s.", spells[spell_id].name, spell_id, t->GetName());
 
-		LogFile->write(EQEMuLog::Normal, "Scribe spell: %s (%i) request for %s from %s.", spells[spell_id].name, spell_id, t->GetName(), c->GetName());
+		LogFile->write(EQEmuLog::Normal, "Scribe spell: %s (%i) request for %s from %s.", spells[spell_id].name, spell_id, t->GetName(), c->GetName());
 
 		if (spells[spell_id].classes[WARRIOR] != 0 && spells[spell_id].skill != 52 && spells[spell_id].classes[t->GetPP().class_ - 1] > 0 && !IsDiscipline(spell_id)) {
 			book_slot = t->GetNextAvailableSpellBookSlot();
@@ -5381,7 +5381,7 @@ void command_unscribespell(Client *c, const Seperator *sep) {
 			if(t != c)
 				c->Message(0, "Unscribing spell: %s (%i) for %s.", spells[spell_id].name, spell_id, t->GetName());
 
-			LogFile->write(EQEMuLog::Normal, "Unscribe spell: %s (%i) request for %s from %s.", spells[spell_id].name, spell_id, t->GetName(), c->GetName());
+			LogFile->write(EQEmuLog::Normal, "Unscribe spell: %s (%i) request for %s from %s.", spells[spell_id].name, spell_id, t->GetName(), c->GetName());
 		}
 		else {
 			t->Message(13, "Unable to unscribe spell: %s (%i) from your spellbook. This spell is not scribed.", spells[spell_id].name, spell_id);
@@ -6809,15 +6809,15 @@ void command_logs(Client *c, const Seperator *sep)
 	}
 
 	if(!strcasecmp(sep->arg[1], "status" ) )
-		client_logs.subscribe(EQEMuLog::Status, t);
+		client_logs.subscribe(EQEmuLog::Status, t);
 	else if(!strcasecmp(sep->arg[1], "normal" ) )
-		client_logs.subscribe(EQEMuLog::Normal, t);
+		client_logs.subscribe(EQEmuLog::Normal, t);
 	else if(!strcasecmp(sep->arg[1], "error" ) )
-		client_logs.subscribe(EQEMuLog::Error, t);
+		client_logs.subscribe(EQEmuLog::Error, t);
 	else if(!strcasecmp(sep->arg[1], "debug" ) )
-		client_logs.subscribe(EQEMuLog::Debug, t);
+		client_logs.subscribe(EQEmuLog::Debug, t);
 	else if(!strcasecmp(sep->arg[1], "quest" ) )
-		client_logs.subscribe(EQEMuLog::Quest, t);
+		client_logs.subscribe(EQEmuLog::Quest, t);
 	else if(!strcasecmp(sep->arg[1], "all" ) )
 		client_logs.subscribeAll(t);
 	else {
@@ -6841,15 +6841,15 @@ void command_nologs(Client *c, const Seperator *sep)
 	}
 
 	if(!strcasecmp(sep->arg[1], "status" ) )
-		client_logs.unsubscribe(EQEMuLog::Status, t);
+		client_logs.unsubscribe(EQEmuLog::Status, t);
 	else if(!strcasecmp(sep->arg[1], "normal" ) )
-		client_logs.unsubscribe(EQEMuLog::Normal, t);
+		client_logs.unsubscribe(EQEmuLog::Normal, t);
 	else if(!strcasecmp(sep->arg[1], "error" ) )
-		client_logs.unsubscribe(EQEMuLog::Error, t);
+		client_logs.unsubscribe(EQEmuLog::Error, t);
 	else if(!strcasecmp(sep->arg[1], "debug" ) )
-		client_logs.unsubscribe(EQEMuLog::Debug, t);
+		client_logs.unsubscribe(EQEmuLog::Debug, t);
 	else if(!strcasecmp(sep->arg[1], "quest" ) )
-		client_logs.unsubscribe(EQEMuLog::Quest, t);
+		client_logs.unsubscribe(EQEmuLog::Quest, t);
 	else if(!strcasecmp(sep->arg[1], "all" ) )
 		client_logs.unsubscribeAll(t);
 	else {
@@ -8140,7 +8140,7 @@ void command_traindisc(Client *c, const Seperator *sep)
 	t->Message(0, "Training disciplines");
 	if(t != c)
 		c->Message(0, "Training disciplines for %s.", t->GetName());
-	LogFile->write(EQEMuLog::Normal, "Train disciplines request for %s from %s, levels: %u -> %u", t->GetName(), c->GetName(), min_level, max_level);
+	LogFile->write(EQEmuLog::Normal, "Train disciplines request for %s from %s, levels: %u -> %u", t->GetName(), c->GetName(), min_level, max_level);
 
 	for(curspell = 0, count = 0; curspell < SPDAT_RECORDS; curspell++)
 	{

@@ -1083,7 +1083,7 @@ bool Group::LearnMembers() {
         return false;
 
     if (results.RowCount() == 0) {
-        LogFile->write(EQEMuLog::Error, "Error getting group members for group %lu: %s", (unsigned long)GetID(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error getting group members for group %lu: %s", (unsigned long)GetID(), results.ErrorMessage().c_str());
 			return false;
     }
 
@@ -1112,7 +1112,7 @@ void Group::VerifyGroup() {
 	for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
 		if (membername[i][0] == '\0') {
 #if EQDEBUG >= 7
-LogFile->write(EQEMuLog::Debug, "Group %lu: Verify %d: Empty.\n", (unsigned long)GetID(), i);
+LogFile->write(EQEmuLog::Debug, "Group %lu: Verify %d: Empty.\n", (unsigned long)GetID(), i);
 #endif
 			members[i] = nullptr;
 			continue;
@@ -1123,7 +1123,7 @@ LogFile->write(EQEMuLog::Debug, "Group %lu: Verify %d: Empty.\n", (unsigned long
 		Mob *them = entity_list.GetMob(membername[i]);
 		if(them == nullptr && members[i] != nullptr) {	//they arnt here anymore....
 #if EQDEBUG >= 6
-		LogFile->write(EQEMuLog::Debug, "Member of group %lu named '%s' has disappeared!!", (unsigned long)GetID(), membername[i]);
+		LogFile->write(EQEmuLog::Debug, "Member of group %lu named '%s' has disappeared!!", (unsigned long)GetID(), membername[i]);
 #endif
 			membername[i][0] = '\0';
 			members[i] = nullptr;
@@ -1132,13 +1132,13 @@ LogFile->write(EQEMuLog::Debug, "Group %lu: Verify %d: Empty.\n", (unsigned long
 
 		if(them != nullptr && members[i] != them) {	//our pointer is out of date... not so good.
 #if EQDEBUG >= 5
-		LogFile->write(EQEMuLog::Debug, "Member of group %lu named '%s' had an out of date pointer!!", (unsigned long)GetID(), membername[i]);
+		LogFile->write(EQEmuLog::Debug, "Member of group %lu named '%s' had an out of date pointer!!", (unsigned long)GetID(), membername[i]);
 #endif
 			members[i] = them;
 			continue;
 		}
 #if EQDEBUG >= 8
-		LogFile->write(EQEMuLog::Debug, "Member of group %lu named '%s' is valid.", (unsigned long)GetID(), membername[i]);
+		LogFile->write(EQEmuLog::Debug, "Member of group %lu named '%s' is valid.", (unsigned long)GetID(), membername[i]);
 #endif
 	}
 }
@@ -1473,7 +1473,7 @@ void Group::DelegateMainTank(const char *NewMainTankName, uint8 toggle)
                                         MainTankName.c_str(), GetID());
         auto results = database.QueryDatabase(query);
 		if (!results.Success())
-			LogFile->write(EQEMuLog::Error, "Unable to set group main tank: %s\n", results.ErrorMessage().c_str());
+			LogFile->write(EQEmuLog::Error, "Unable to set group main tank: %s\n", results.ErrorMessage().c_str());
 	}
 }
 
@@ -1519,7 +1519,7 @@ void Group::DelegateMainAssist(const char *NewMainAssistName, uint8 toggle)
                                         MainAssistName.c_str(), GetID());
         auto results = database.QueryDatabase(query);
 		if (!results.Success())
-			LogFile->write(EQEMuLog::Error, "Unable to set group main assist: %s\n", results.ErrorMessage().c_str());
+			LogFile->write(EQEmuLog::Error, "Unable to set group main assist: %s\n", results.ErrorMessage().c_str());
 
 	}
 }
@@ -1566,7 +1566,7 @@ void Group::DelegatePuller(const char *NewPullerName, uint8 toggle)
                                         PullerName.c_str(), GetID());
         auto results = database.QueryDatabase(query);
 		if (!results.Success())
-			LogFile->write(EQEMuLog::Error, "Unable to set group main puller: %s\n", results.ErrorMessage().c_str());
+			LogFile->write(EQEmuLog::Error, "Unable to set group main puller: %s\n", results.ErrorMessage().c_str());
 
 	}
 
@@ -1717,7 +1717,7 @@ void Group::UnDelegateMainTank(const char *OldMainTankName, uint8 toggle)
 		std::string query = StringFormat("UPDATE group_leaders SET maintank = '' WHERE gid = %i LIMIT 1", GetID());
 		auto results = database.QueryDatabase(query);
 		if (!results.Success())
-			LogFile->write(EQEMuLog::Error, "Unable to clear group main tank: %s\n", results.ErrorMessage().c_str());
+			LogFile->write(EQEmuLog::Error, "Unable to clear group main tank: %s\n", results.ErrorMessage().c_str());
 
 		if(!toggle) {
 			for(uint32 i = 0; i < MAX_GROUP_MEMBERS; ++i) {
@@ -1766,7 +1766,7 @@ void Group::UnDelegateMainAssist(const char *OldMainAssistName, uint8 toggle)
 		std::string query = StringFormat("UPDATE group_leaders SET assist = '' WHERE gid = %i LIMIT 1", GetID());
         auto results = database.QueryDatabase(query);
 		if (!results.Success())
-			LogFile->write(EQEMuLog::Error, "Unable to clear group main assist: %s\n", results.ErrorMessage().c_str());
+			LogFile->write(EQEmuLog::Error, "Unable to clear group main assist: %s\n", results.ErrorMessage().c_str());
 
 		if(!toggle)
 		{
@@ -1794,7 +1794,7 @@ void Group::UnDelegatePuller(const char *OldPullerName, uint8 toggle)
 		std::string query = StringFormat("UPDATE group_leaders SET puller = '' WHERE gid = %i LIMIT 1", GetID());
         auto results = database.QueryDatabase(query);
 		if (!results.Success())
-			LogFile->write(EQEMuLog::Error, "Unable to clear group main puller: %s\n", results.ErrorMessage().c_str());
+			LogFile->write(EQEmuLog::Error, "Unable to clear group main puller: %s\n", results.ErrorMessage().c_str());
 
 		if(!toggle) {
 			for(uint32 i = 0; i < MAX_GROUP_MEMBERS; ++i) {
@@ -1877,7 +1877,7 @@ void Group::SetGroupMentor(int percent, char *name)
 			mentoree_name.c_str(), mentor_percent, GetID());
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Unable to set group mentor: %s\n", results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Unable to set group mentor: %s\n", results.ErrorMessage().c_str());
 }
 
 void Group::ClearGroupMentor()
@@ -1888,7 +1888,7 @@ void Group::ClearGroupMentor()
 	std::string query = StringFormat("UPDATE group_leaders SET mentoree = '', mentor_percent = 0 WHERE gid = %i LIMIT 1", GetID());
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Unable to clear group mentor: %s\n", results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Unable to clear group mentor: %s\n", results.ErrorMessage().c_str());
 }
 
 void Group::NotifyAssistTarget(Client *c)
@@ -1958,7 +1958,7 @@ void Group::DelegateMarkNPC(const char *NewNPCMarkerName)
                                     NewNPCMarkerName, GetID());
     auto results = database.QueryDatabase(query);
 	if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Unable to set group mark npc: %s\n", results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Unable to set group mark npc: %s\n", results.ErrorMessage().c_str());
 }
 
 void Group::NotifyMarkNPC(Client *c)
@@ -2039,7 +2039,7 @@ void Group::UnDelegateMarkNPC(const char *OldNPCMarkerName)
 	std::string query = StringFormat("UPDATE group_leaders SET marknpc = '' WHERE gid = %i LIMIT 1", GetID());
     auto results = database.QueryDatabase(query);
 	if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Unable to clear group marknpc: %s\n", results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Unable to clear group marknpc: %s\n", results.ErrorMessage().c_str());
 
 }
 
@@ -2056,7 +2056,7 @@ void Group::SaveGroupLeaderAA()
 	safe_delete_array(queryBuffer);
     auto results = database.QueryDatabase(query);
 	if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Unable to store LeadershipAA: %s\n", results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Unable to store LeadershipAA: %s\n", results.ErrorMessage().c_str());
 
 }
 

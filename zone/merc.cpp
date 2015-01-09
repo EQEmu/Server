@@ -884,7 +884,7 @@ int32 Merc::CalcMaxMana()
 		break;
 			  }
 	default: {
-		LogFile->write(EQEMuLog::Debug, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+		LogFile->write(EQEmuLog::Debug, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
 		max_mana = 0;
 		break;
 			 }
@@ -905,7 +905,7 @@ int32 Merc::CalcMaxMana()
 	}
 
 #if EQDEBUG >= 11
-	LogFile->write(EQEMuLog::Debug, "Merc::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
+	LogFile->write(EQEmuLog::Debug, "Merc::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
 #endif
 	return max_mana;
 }
@@ -4450,7 +4450,7 @@ bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, boo
 {
 	if (!other) {
 		SetTarget(nullptr);
-		LogFile->write(EQEMuLog::Error, "A null Mob object was passed to Merc::Attack() for evaluation!");
+		LogFile->write(EQEmuLog::Error, "A null Mob object was passed to Merc::Attack() for evaluation!");
 		return false;
 	}
 
@@ -5985,7 +5985,7 @@ void NPC::LoadMercTypes() {
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
 	{
-		LogFile->write(EQEMuLog::Error, "Error in NPC::LoadMercTypes()");
+		LogFile->write(EQEmuLog::Error, "Error in NPC::LoadMercTypes()");
 		return;
 	}
 
@@ -6018,7 +6018,7 @@ void NPC::LoadMercs() {
 
 	if (!results.Success())
 	{
-		LogFile->write(EQEMuLog::Error, "Error in NPC::LoadMercTypes()");
+		LogFile->write(EQEmuLog::Error, "Error in NPC::LoadMercTypes()");
 		return;
 	}
 

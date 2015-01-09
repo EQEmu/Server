@@ -32,22 +32,22 @@ int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformClientImport);
 	set_exception_handler();
 
-	LogFile->write(EQEMuLog::Status, "Client Files Import Utility");
+	LogFile->write(EQEmuLog::Status, "Client Files Import Utility");
 	if(!EQEmuConfig::LoadConfig()) {
-		LogFile->write(EQEMuLog::Error, "Unable to load configuration file.");
+		LogFile->write(EQEmuLog::Error, "Unable to load configuration file.");
 		return 1;
 	}
 
 	const EQEmuConfig *config = EQEmuConfig::get();
 	if(!load_log_settings(config->LogSettingsFile.c_str())) {
-		LogFile->write(EQEMuLog::Error, "Warning: unable to read %s.", config->LogSettingsFile.c_str());
+		LogFile->write(EQEmuLog::Error, "Warning: unable to read %s.", config->LogSettingsFile.c_str());
 	}
 
 	SharedDatabase database;
-	LogFile->write(EQEMuLog::Status, "Connecting to database...");
+	LogFile->write(EQEmuLog::Status, "Connecting to database...");
 	if(!database.Connect(config->DatabaseHost.c_str(), config->DatabaseUsername.c_str(),
 		config->DatabasePassword.c_str(), config->DatabaseDB.c_str(), config->DatabasePort)) {
-		LogFile->write(EQEMuLog::Error, "Unable to connect to the database, cannot continue without a "
+		LogFile->write(EQEmuLog::Error, "Unable to connect to the database, cannot continue without a "
 			"database connection");
 		return 1;
 	}
@@ -64,7 +64,7 @@ int GetSpellColumns(SharedDatabase *db) {
 	const std::string query = "DESCRIBE spells_new";
 	auto results = db->QueryDatabase(query);
 	if(!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in GetSpellColumns query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in GetSpellColumns query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
 
@@ -72,10 +72,10 @@ int GetSpellColumns(SharedDatabase *db) {
 }
 
 void ImportSpells(SharedDatabase *db) {
-	LogFile->write(EQEMuLog::Status, "Importing Spells...");
+	LogFile->write(EQEmuLog::Status, "Importing Spells...");
 	FILE *f = fopen("import/spells_us.txt", "r");
 	if(!f) {
-		LogFile->write(EQEMuLog::Error, "Unable to open import/spells_us.txt to read, skipping.");
+		LogFile->write(EQEmuLog::Error, "Unable to open import/spells_us.txt to read, skipping.");
 		return;
 	}
 
@@ -138,23 +138,23 @@ void ImportSpells(SharedDatabase *db) {
 
 		spells_imported++;
 		if(spells_imported % 1000 == 0) {
-			LogFile->write(EQEMuLog::Status, "%d spells imported.", spells_imported);
+			LogFile->write(EQEmuLog::Status, "%d spells imported.", spells_imported);
 		}
 	}
 
 	if(spells_imported % 1000 != 0) {
-		LogFile->write(EQEMuLog::Status, "%d spells imported.", spells_imported);
+		LogFile->write(EQEmuLog::Status, "%d spells imported.", spells_imported);
 	}
 
 	fclose(f);
 }
 
 void ImportSkillCaps(SharedDatabase *db) {
-	LogFile->write(EQEMuLog::Status, "Importing Skill Caps...");
+	LogFile->write(EQEmuLog::Status, "Importing Skill Caps...");
 
 	FILE *f = fopen("import/SkillCaps.txt", "r");
 	if(!f) {
-		LogFile->write(EQEMuLog::Error, "Unable to open import/SkillCaps.txt to read, skipping.");
+		LogFile->write(EQEmuLog::Error, "Unable to open import/SkillCaps.txt to read, skipping.");
 		return;
 	}
 
@@ -186,11 +186,11 @@ void ImportSkillCaps(SharedDatabase *db) {
 }
 
 void ImportBaseData(SharedDatabase *db) {
-	LogFile->write(EQEMuLog::Status, "Importing Base Data...");
+	LogFile->write(EQEmuLog::Status, "Importing Base Data...");
 
 	FILE *f = fopen("import/BaseData.txt", "r");
 	if(!f) {
-		LogFile->write(EQEMuLog::Error, "Unable to open import/BaseData.txt to read, skipping.");
+		LogFile->write(EQEmuLog::Error, "Unable to open import/BaseData.txt to read, skipping.");
 		return;
 	}
 

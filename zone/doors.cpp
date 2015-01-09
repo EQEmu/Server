@@ -302,7 +302,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 					sender->CheckIncreaseSkill(SkillPickLock, nullptr, 1);
 
 #if EQDEBUG>=5
-					LogFile->write(EQEMuLog::Debug, "Client has lockpicks: skill=%f", modskill);
+					LogFile->write(EQEmuLog::Debug, "Client has lockpicks: skill=%f", modskill);
 #endif
 
 					if(GetLockpick() <= modskill)
@@ -559,13 +559,13 @@ void Doors::ToggleState(Mob *sender)
 }
 
 void Doors::DumpDoor(){
-	LogFile->write(EQEMuLog::Debug,
+	LogFile->write(EQEmuLog::Debug,
 		"db_id:%i door_id:%i zone_name:%s door_name:%s pos_x:%f pos_y:%f pos_z:%f heading:%f",
 		db_id, door_id, zone_name, door_name, pos_x, pos_y, pos_z, heading);
-	LogFile->write(EQEMuLog::Debug,
+	LogFile->write(EQEmuLog::Debug,
 		"opentype:%i guild_id:%i lockpick:%i keyitem:%i nokeyring:%i trigger_door:%i trigger_type:%i door_param:%i open:%s",
 		opentype, guild_id, lockpick, keyitem, nokeyring, trigger_door, trigger_type, door_param, (isopen) ? "open":"closed");
-	LogFile->write(EQEMuLog::Debug,
+	LogFile->write(EQEmuLog::Debug,
 		"dest_zone:%s dest_x:%f dest_y:%f dest_z:%f dest_heading:%f",
 		dest_zone, dest_x, dest_y, dest_z, dest_heading);
 }
@@ -644,7 +644,7 @@ int32 ZoneDatabase::GetDoorsDBCountPlusOne(const char *zone_name, int16 version)
 }
 
 bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name, int16 version) {
-	LogFile->write(EQEMuLog::Status, "Loading Doors from database...");
+	LogFile->write(EQEmuLog::Status, "Loading Doors from database...");
 
 
 //	Door tmpDoor;

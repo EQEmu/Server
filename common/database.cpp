@@ -84,12 +84,12 @@ bool Database::Connect(const char* host, const char* user, const char* passwd, c
 	uint32 errnum= 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	if (!Open(host, user, passwd, database, port, &errnum, errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Failed to connect to database: Error: %s", errbuf);
+		LogFile->write(EQEmuLog::Error, "Failed to connect to database: Error: %s", errbuf);
 
 		return false; 
 	}
 	else {
-		LogFile->write(EQEMuLog::Status, "Using database '%s' at %s:%d",database,host,port);
+		LogFile->write(EQEmuLog::Status, "Using database '%s' at %s:%d",database,host,port);
 		return true;
 	}
 }
@@ -706,7 +706,7 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 	charid = GetCharacterID(pp->name);
 
 	if(!charid) {
-		LogFile->write(EQEMuLog::Error, "StoreCharacter: no character id");
+		LogFile->write(EQEmuLog::Error, "StoreCharacter: no character id");
 		return false;
 	}
 
@@ -736,10 +736,10 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 			auto results = QueryDatabase(invquery); 
 
 			if (!results.RowsAffected())
-				LogFile->write(EQEMuLog::Error, "StoreCharacter inventory failed. Query '%s' %s", invquery.c_str(), results.ErrorMessage().c_str());
+				LogFile->write(EQEmuLog::Error, "StoreCharacter inventory failed. Query '%s' %s", invquery.c_str(), results.ErrorMessage().c_str());
 #if EQDEBUG >= 9
 			else
-				LogFile->write(EQEMuLog::Debug, "StoreCharacter inventory succeeded. Query '%s'", invquery.c_str());
+				LogFile->write(EQEmuLog::Debug, "StoreCharacter inventory succeeded. Query '%s'", invquery.c_str());
 #endif
 		}
 
@@ -805,7 +805,7 @@ uint32 Database::GetAccountIDByChar(uint32 char_id) {
 	std::string query = StringFormat("SELECT `account_id` FROM `character_data` WHERE `id` = %i LIMIT 1", char_id); 
 	auto results = QueryDatabase(query); 
 	if (!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error in GetAccountIDByChar query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error in GetAccountIDByChar query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
 
@@ -3162,28 +3162,28 @@ void Database::SetLFP(uint32 CharID, bool LFP) {
 	std::string query = StringFormat("UPDATE `character_data` SET `lfp` = %i WHERE `id` = %i",LFP, CharID);
 	auto results = QueryDatabase(query); 
 	if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Error updating LFP for character %i : %s", CharID, results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error updating LFP for character %i : %s", CharID, results.ErrorMessage().c_str());
 }
 
 void Database::SetLoginFlags(uint32 CharID, bool LFP, bool LFG, uint8 firstlogon) { 
 	std::string query = StringFormat("update `character_data` SET `lfp` = %i, `lfg` = %i, `firstlogon` = %i WHERE `id` = %i",LFP, LFG, firstlogon, CharID);
 	auto results = QueryDatabase(query); 
 	if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Error updating LFP for character %i : %s", CharID, results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error updating LFP for character %i : %s", CharID, results.ErrorMessage().c_str());
 }
 
 void Database::SetLFG(uint32 CharID, bool LFG) { 
 	std::string query = StringFormat("update `character_data` SET `lfg` = %i WHERE `id` = %i",LFG, CharID);
 	auto results = QueryDatabase(query); 
 	if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Error updating LFP for character %i : %s", CharID, results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error updating LFP for character %i : %s", CharID, results.ErrorMessage().c_str());
 }
 
 void Database::SetFirstLogon(uint32 CharID, uint8 firstlogon) { 
 	std::string query = StringFormat( "UPDATE `character_data` SET `firstlogon` = %i WHERE `id` = %i",firstlogon, CharID);
 	auto results = QueryDatabase(query); 
 	if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Error updating firstlogon for character %i : %s", CharID, results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error updating firstlogon for character %i : %s", CharID, results.ErrorMessage().c_str());
 }
 
 void Database::AddReport(std::string who, std::string against, std::string lines) { 
@@ -3195,7 +3195,7 @@ void Database::AddReport(std::string who, std::string against, std::string lines
 	safe_delete_array(escape_str);
 
 	if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Error adding a report for %s: %s", who.c_str(), results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error adding a report for %s: %s", who.c_str(), results.ErrorMessage().c_str());
 }
 
 void Database::SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ismerc) {
@@ -3206,7 +3206,7 @@ void Database::SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ism
 		auto results = QueryDatabase(query);
 
 		if (!results.Success())
-			LogFile->write(EQEMuLog::Error, "Error deleting character from group id: %s", results.ErrorMessage().c_str());
+			LogFile->write(EQEmuLog::Error, "Error deleting character from group id: %s", results.ErrorMessage().c_str());
 
 		return;
 	}
@@ -3216,7 +3216,7 @@ void Database::SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ism
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Error adding character to group id: %s", results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error adding character to group id: %s", results.ErrorMessage().c_str());
 }
 
 void Database::ClearAllGroups(void)
@@ -3255,13 +3255,13 @@ uint32 Database::GetGroupID(const char* name){
 
 	if (!results.Success())
 	{
-		LogFile->write(EQEMuLog::Error, "Error getting group id: %s", results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error getting group id: %s", results.ErrorMessage().c_str());
 		return 0;
 	}
 
 	if (results.RowCount() == 0)
 	{
-		LogFile->write(EQEMuLog::Debug, "Character not in a group: %s", name);
+		LogFile->write(EQEmuLog::Debug, "Character not in a group: %s", name);
 		return 0;
 	}
 
@@ -3308,7 +3308,7 @@ void Database::SetGroupLeaderName(uint32 gid, const char* name) {
 	result = QueryDatabase(query);
 
 	if(!result.Success()) {
-		LogFile->write(EQEMuLog::Debug, "Error in Database::SetGroupLeaderName: %s", result.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Debug, "Error in Database::SetGroupLeaderName: %s", result.ErrorMessage().c_str());
 	}
 }
 
@@ -4048,7 +4048,7 @@ void Database::GetCharactersInInstance(uint16 instance_id, std::list<uint32> &ch
 
 	if (!results.Success())
 	{
-		LogFile->write(EQEMuLog::Error, "Error in GetCharactersInInstace query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error in GetCharactersInInstace query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 

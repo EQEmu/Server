@@ -86,7 +86,7 @@ bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct
                                     zoneid, instance_id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in SaveZoneCFG query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in SaveZoneCFG query %s: %s", query.c_str(), results.ErrorMessage().c_str());
         return false;
 	}
 
@@ -112,7 +112,7 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
                                     "FROM zone WHERE zoneidnumber = %i AND version = %i", zoneid, instance_id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in GetZoneCFG query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in GetZoneCFG query %s: %s", query.c_str(), results.ErrorMessage().c_str());
         strcpy(*map_filename, "default");
 		return false;
     }
@@ -201,7 +201,7 @@ void ZoneDatabase::UpdateSpawn2Timeleft(uint32 id, uint16 instance_id, uint32 ti
                                         "AND instance_id = %lu",(unsigned long)id, (unsigned long)instance_id);
         auto results = QueryDatabase(query);
         if (!results.Success())
-			LogFile->write(EQEMuLog::Error, "Error in UpdateTimeLeft query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+			LogFile->write(EQEmuLog::Error, "Error in UpdateTimeLeft query %s: %s", query.c_str(), results.ErrorMessage().c_str());
 
 		return;
 	}
@@ -212,7 +212,7 @@ void ZoneDatabase::UpdateSpawn2Timeleft(uint32 id, uint16 instance_id, uint32 ti
                                     (unsigned long)timeleft, (unsigned long)instance_id);
     auto results = QueryDatabase(query);
     if (!results.Success())
-        LogFile->write(EQEMuLog::Error, "Error in UpdateTimeLeft query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in UpdateTimeLeft query %s: %s", query.c_str(), results.ErrorMessage().c_str());
 
 	return;
 }
@@ -225,7 +225,7 @@ uint32 ZoneDatabase::GetSpawnTimeLeft(uint32 id, uint16 instance_id)
                                     (unsigned long)id, (unsigned long)zone->GetInstanceID());
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in GetSpawnTimeLeft query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in GetSpawnTimeLeft query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
     }
 
@@ -255,7 +255,7 @@ void ZoneDatabase::UpdateSpawn2Status(uint32 id, uint8 new_status)
 	std::string query = StringFormat("UPDATE spawn2 SET enabled = %i WHERE id = %lu", new_status, (unsigned long)id);
 	auto results = QueryDatabase(query);
 	if(!results.Success())
-		LogFile->write(EQEMuLog::Error, "Error in UpdateSpawn2Status query %s: %s", query.c_str(), results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error in UpdateSpawn2Status query %s: %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
@@ -426,7 +426,7 @@ void ZoneDatabase::GetEventLogs(const char* name,char* target,uint32 account_id,
 void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
 {
 	if (!container) {
-		LogFile->write(EQEMuLog::Error, "Programming error: LoadWorldContainer passed nullptr pointer");
+		LogFile->write(EQEmuLog::Error, "Programming error: LoadWorldContainer passed nullptr pointer");
 		return;
 	}
 
@@ -434,7 +434,7 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
                                     "FROM object_contents WHERE parentid = %i", parentid);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in DB::LoadWorldContainer: %s", results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in DB::LoadWorldContainer: %s", results.ErrorMessage().c_str());
         return;
     }
 
@@ -499,7 +499,7 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const It
 										augslot[0], augslot[1], augslot[2], augslot[3], augslot[4], augslot[5]);
         auto results = QueryDatabase(query);
         if (!results.Success())
-            LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::SaveWorldContainer: %s", results.ErrorMessage().c_str());
+            LogFile->write(EQEmuLog::Error, "Error in ZoneDatabase::SaveWorldContainer: %s", results.ErrorMessage().c_str());
 
     }
 
@@ -511,7 +511,7 @@ void ZoneDatabase::DeleteWorldContainer(uint32 parent_id, uint32 zone_id)
 	std::string query = StringFormat("DELETE FROM object_contents WHERE parentid = %i AND zoneid = %i", parent_id, zone_id);
     auto results = QueryDatabase(query);
 	if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::DeleteWorldContainer: %s", results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error in ZoneDatabase::DeleteWorldContainer: %s", results.ErrorMessage().c_str());
 
 }
 
@@ -1219,7 +1219,7 @@ bool ZoneDatabase::LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Str
 
 bool ZoneDatabase::SaveCharacterLanguage(uint32 character_id, uint32 lang_id, uint32 value){
 	std::string query = StringFormat("REPLACE INTO `character_languages` (id, lang_id, value) VALUES (%u, %u, %u)", character_id, lang_id, value); QueryDatabase(query);
-	LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterLanguage for character ID: %i, lang_id:%u value:%u done", character_id, lang_id, value);
+	LogFile->write(EQEmuLog::Debug, "ZoneDatabase::SaveCharacterLanguage for character ID: %i, lang_id:%u value:%u done", character_id, lang_id, value);
 	return true;
 }
 
@@ -1231,10 +1231,10 @@ bool ZoneDatabase::SaveCharacterBindPoint(uint32 character_id, uint32 zone_id, u
 	/* Save Home Bind Point */
 	std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
 		" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)", character_id, zone_id, instance_id, x, y, z, heading, is_home);
-	LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterBindPoint for character ID: %i zone_id: %u instance_id: %u x: %f y: %f z: %f heading: %f ishome: %u", character_id, zone_id, instance_id, x, y, z, heading, is_home);
+	LogFile->write(EQEmuLog::Debug, "ZoneDatabase::SaveCharacterBindPoint for character ID: %i zone_id: %u instance_id: %u x: %f y: %f z: %f heading: %f ishome: %u", character_id, zone_id, instance_id, x, y, z, heading, is_home);
 	auto results = QueryDatabase(query); 
 	if (!results.RowsAffected()) {
-		LogFile->write(EQEMuLog::Debug, "ERROR Bind Home Save: %s. %s", results.ErrorMessage().c_str(), query.c_str());
+		LogFile->write(EQEmuLog::Debug, "ERROR Bind Home Save: %s. %s", results.ErrorMessage().c_str(), query.c_str());
 	}
 	return true;
 }
@@ -1245,20 +1245,20 @@ bool ZoneDatabase::SaveCharacterMaterialColor(uint32 character_id, uint32 slot_i
 	uint8 blue = (color & 0x000000FF); 
 
 	std::string query = StringFormat("REPLACE INTO `character_material` (id, slot, red, green, blue, color, use_tint) VALUES (%u, %u, %u, %u, %u, %u, 255)", character_id, slot_id, red, green, blue, color); auto results = QueryDatabase(query);
-	LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterMaterialColor for character ID: %i, slot_id: %u color: %u done", character_id, slot_id, color);
+	LogFile->write(EQEmuLog::Debug, "ZoneDatabase::SaveCharacterMaterialColor for character ID: %i, slot_id: %u color: %u done", character_id, slot_id, color);
 	return true;
 }
 
 bool ZoneDatabase::SaveCharacterSkill(uint32 character_id, uint32 skill_id, uint32 value){
 	std::string query = StringFormat("REPLACE INTO `character_skills` (id, skill_id, value) VALUES (%u, %u, %u)", character_id, skill_id, value); auto results = QueryDatabase(query);
-	LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterSkill for character ID: %i, skill_id:%u value:%u done", character_id, skill_id, value);
+	LogFile->write(EQEmuLog::Debug, "ZoneDatabase::SaveCharacterSkill for character ID: %i, skill_id:%u value:%u done", character_id, skill_id, value);
 	return true;
 }
 
 bool ZoneDatabase::SaveCharacterDisc(uint32 character_id, uint32 slot_id, uint32 disc_id){
 	std::string query = StringFormat("REPLACE INTO `character_disciplines` (id, slot_id, disc_id) VALUES (%u, %u, %u)", character_id, slot_id, disc_id); 
 	auto results = QueryDatabase(query);
-	LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterDisc for character ID: %i, slot:%u disc_id:%u done", character_id, slot_id, disc_id);
+	LogFile->write(EQEmuLog::Debug, "ZoneDatabase::SaveCharacterDisc for character ID: %i, slot:%u disc_id:%u done", character_id, slot_id, disc_id);
 	return true; 
 }
 
@@ -1270,7 +1270,7 @@ bool ZoneDatabase::SaveCharacterTribute(uint32 character_id, PlayerProfile_Struc
 		if (pp->tributes[i].tribute > 0 && pp->tributes[i].tribute != TRIBUTE_NONE){
 			std::string query = StringFormat("REPLACE INTO `character_tribute` (id, tier, tribute) VALUES (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute); 
 			QueryDatabase(query);
-			LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterTribute for character ID: %i, tier:%u tribute:%u done", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
+			LogFile->write(EQEmuLog::Debug, "ZoneDatabase::SaveCharacterTribute for character ID: %i, tier:%u tribute:%u done", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
 		}
 	} 
 	return true;
@@ -1281,7 +1281,7 @@ bool ZoneDatabase::SaveCharacterBandolier(uint32 character_id, uint8 bandolier_i
 	DoEscapeString(bandolier_name_esc, bandolier_name, strlen(bandolier_name));
 	std::string query = StringFormat("REPLACE INTO `character_bandolier` (id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name) VALUES (%u, %u, %u, %u, %u,'%s')", character_id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name_esc); 
 	auto results = QueryDatabase(query);
-	LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterBandolier for character ID: %i, bandolier_id: %u, bandolier_slot: %u item_id: %u, icon:%u band_name:%s  done", character_id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name);
+	LogFile->write(EQEmuLog::Debug, "ZoneDatabase::SaveCharacterBandolier for character ID: %i, bandolier_id: %u, bandolier_slot: %u item_id: %u, icon:%u band_name:%s  done", character_id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name);
 	if (!results.RowsAffected()){ std::cout << "ERROR Bandolier Save: " << results.ErrorMessage() << "\n\n" << query << "\n" << std::endl; }
 	return true;
 }
@@ -1596,7 +1596,7 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 		m_epp->expended_aa
 	);
 	auto results = database.QueryDatabase(query);
-	LogFile->write(EQEMuLog::Debug, "ZoneDatabase::SaveCharacterData %i, done... Took %f seconds", character_id, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
+	LogFile->write(EQEmuLog::Debug, "ZoneDatabase::SaveCharacterData %i, done... Took %f seconds", character_id, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 	return true;
 }
 
@@ -1637,7 +1637,7 @@ bool ZoneDatabase::SaveCharacterCurrency(uint32 character_id, PlayerProfile_Stru
 		pp->currentEbonCrystals,
 		pp->careerEbonCrystals);
 	auto results = database.QueryDatabase(query); 
-	LogFile->write(EQEMuLog::Debug, "Saving Currency for character ID: %i, done", character_id); 
+	LogFile->write(EQEmuLog::Debug, "Saving Currency for character ID: %i, done", character_id); 
 	return true;
 }
 
@@ -1646,7 +1646,7 @@ bool ZoneDatabase::SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 cur
 		" VALUES (%u, %u, %u)",
 		character_id, aa_id, current_level);
 	auto results = QueryDatabase(rquery);
-	LogFile->write(EQEMuLog::Debug, "Saving AA for character ID: %u, aa_id: %u current_level: %u", character_id, aa_id, current_level);
+	LogFile->write(EQEmuLog::Debug, "Saving AA for character ID: %u, aa_id: %u current_level: %u", character_id, aa_id, current_level);
 	return true;
 }
 
@@ -2341,7 +2341,7 @@ void ZoneDatabase::SaveMercBuffs(Merc *merc) {
     std::string query = StringFormat("DELETE FROM merc_buffs WHERE MercId = %u", merc->GetMercID());
     auto results = database.QueryDatabase(query);
     if(!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error While Deleting Merc Buffs before save: %s", results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error While Deleting Merc Buffs before save: %s", results.ErrorMessage().c_str());
         return;
     }
 
@@ -2367,7 +2367,7 @@ void ZoneDatabase::SaveMercBuffs(Merc *merc) {
                             buffs[buffCount].caston_z, buffs[buffCount].ExtraDIChance);
         results = database.QueryDatabase(query);
         if(!results.Success()) {
-            LogFile->write(EQEMuLog::Error, "Error Saving Merc Buffs: %s", results.ErrorMessage().c_str());
+            LogFile->write(EQEmuLog::Error, "Error Saving Merc Buffs: %s", results.ErrorMessage().c_str());
             break;
         }
 	}
@@ -2386,7 +2386,7 @@ void ZoneDatabase::LoadMercBuffs(Merc *merc) {
                                     merc->GetMercID());
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error Loading Merc Buffs: %s", results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error Loading Merc Buffs: %s", results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -2431,7 +2431,7 @@ void ZoneDatabase::LoadMercBuffs(Merc *merc) {
 	query = StringFormat("DELETE FROM merc_buffs WHERE MercId = %u", merc->GetMercID());
     results = database.QueryDatabase(query);
     if(!results.Success())
-        LogFile->write(EQEMuLog::Error, "Error Loading Merc Buffs: %s", results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error Loading Merc Buffs: %s", results.ErrorMessage().c_str());
 
 }
 
@@ -2447,14 +2447,14 @@ bool ZoneDatabase::DeleteMerc(uint32 merc_id) {
 	auto results = database.QueryDatabase(query);
 	if(!results.Success())
 	{
-		LogFile->write(EQEMuLog::Error, "Error Deleting Merc Buffs: %s", results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error Deleting Merc Buffs: %s", results.ErrorMessage().c_str());
 	}
 
 	query = StringFormat("DELETE FROM mercs WHERE MercID = '%u'", merc_id);
 	results = database.QueryDatabase(query);
 	if(!results.Success())
 	{
-		LogFile->write(EQEMuLog::Error, "Error Deleting Merc: %s", results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error Deleting Merc: %s", results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -2472,7 +2472,7 @@ void ZoneDatabase::LoadMercEquipment(Merc *merc) {
                                     merc->GetLevel(), merc->GetLevel());
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error Loading Merc Inventory: %s", results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error Loading Merc Inventory: %s", results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -2646,7 +2646,7 @@ uint8 ZoneDatabase::GroupCount(uint32 groupid) {
 	std::string query = StringFormat("SELECT count(charid) FROM group_id WHERE groupid = %d", groupid);
 	auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::GroupCount query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in ZoneDatabase::GroupCount query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
 
@@ -2665,7 +2665,7 @@ uint8 ZoneDatabase::RaidGroupCount(uint32 raidid, uint32 groupid) {
     auto results = QueryDatabase(query);
 
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::RaidGroupCount query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in ZoneDatabase::RaidGroupCount query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
 
@@ -2696,7 +2696,7 @@ int32 ZoneDatabase::GetBlockedSpellsCount(uint32 zoneid)
 
 bool ZoneDatabase::LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked* into, uint32 zoneid)
 {
-	LogFile->write(EQEMuLog::Status, "Loading Blocked Spells from database...");
+	LogFile->write(EQEmuLog::Status, "Loading Blocked Spells from database...");
 
 	std::string query = StringFormat("SELECT id, spellid, type, x, y, z, x_diff, y_diff, z_diff, message "
                                     "FROM blocked_spells WHERE zoneid = %d ORDER BY id ASC", zoneid);
@@ -2825,7 +2825,7 @@ void ZoneDatabase::LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32
                                     "WHERE char_id = '%u'", char_id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in LoadAltCurrencyValues query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in LoadAltCurrencyValues query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return;
     }
 
@@ -2866,7 +2866,7 @@ void ZoneDatabase::SaveBuffs(Client *client) {
                             buffs[index].ExtraDIChance);
         auto results = QueryDatabase(query);
         if (!results.Success())
-            LogFile->write(EQEMuLog::Error, "Error in SaveBuffs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+            LogFile->write(EQEmuLog::Error, "Error in SaveBuffs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 
 	}
 }
@@ -2885,7 +2885,7 @@ void ZoneDatabase::LoadBuffs(Client *client) {
                                     "FROM `character_buffs` WHERE `character_id` = '%u'", client->CharacterID());
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in LoadBuffs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in LoadBuffs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
     }
 
@@ -3059,7 +3059,7 @@ void ZoneDatabase::LoadPetInfo(Client *client) {
                                     "WHERE `char_id` = %u", client->CharacterID());
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -3087,7 +3087,7 @@ void ZoneDatabase::LoadPetInfo(Client *client) {
                         "WHERE `char_id` = %u", client->CharacterID());
     results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
     }
 
@@ -3128,7 +3128,7 @@ void ZoneDatabase::LoadPetInfo(Client *client) {
                         "WHERE `char_id`=%u",client->CharacterID());
     results = database.QueryDatabase(query);
     if (!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -3860,7 +3860,7 @@ Corpse* ZoneDatabase::SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_z
 			NewCorpse->SetDecayTimer(RuleI(Character, CorpseDecayTimeMS));
 			NewCorpse->Spawn();
 			if (!UnburyCharacterCorpse(NewCorpse->GetCorpseDBID(), dest_zone_id, dest_instance_id, dest_x, dest_y, dest_z, dest_heading))
-				LogFile->write(EQEMuLog::Error, "Unable to unbury a summoned player corpse for character id %u.", char_id);
+				LogFile->write(EQEmuLog::Error, "Unable to unbury a summoned player corpse for character id %u.", char_id);
 		}
 	}
 
@@ -3903,7 +3903,7 @@ bool ZoneDatabase::SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zone_id
 			++CorpseCount;
 		}
 		else{
-			LogFile->write(EQEMuLog::Error, "Unable to construct a player corpse for character id %u.", char_id);
+			LogFile->write(EQEmuLog::Error, "Unable to construct a player corpse for character id %u.", char_id);
 		}
 	}
 

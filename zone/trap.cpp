@@ -270,7 +270,7 @@ bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
                                     "FROM traps WHERE zone='%s' AND version=%u", zonename, version);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in LoadTraps query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        LogFile->write(EQEmuLog::Error, "Error in LoadTraps query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
     }
 
