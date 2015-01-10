@@ -455,6 +455,34 @@ namespace Titanium
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_Emote)
+	{
+		EQApplicationPacket *in = *p;
+		*p = nullptr;
+
+		Emote_Struct *emu = (Emote_Struct *)in->pBuffer;
+
+		unsigned char *__emu_buffer = in->pBuffer;
+
+		std::string old_message = emu->message;
+		std::string new_message;
+		ServerToTitaniumTextLink(new_message, old_message);
+
+		//if (new_message.length() > 512) // length restricted in packet building function due vari-length name size (no nullterm)
+		//	new_message = new_message.substr(0, 512);
+
+		in->size = new_message.length() + 5;
+		in->pBuffer = new unsigned char[in->size];
+
+		char *OutBuffer = (char *)in->pBuffer;
+
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->unknown01);
+		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
+
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
+	}
+
 	ENCODE(OP_FormattedMessage)
 	{
 		EQApplicationPacket *in = *p;
@@ -1569,6 +1597,27 @@ namespace Titanium
 		IN(number_in_stack);
 
 		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_Emote)
+	{
+		unsigned char *__eq_buffer = __packet->pBuffer;
+
+		std::string old_message = (char *)&__eq_buffer[4]; // unknown01 offset
+		std::string new_message;
+		TitaniumToServerTextLink(new_message, old_message);
+
+		__packet->size = sizeof(Emote_Struct);
+		__packet->pBuffer = new unsigned char[__packet->size];
+
+		char *InBuffer = (char *)__packet->pBuffer;
+
+		memcpy(InBuffer, __eq_buffer, 4);
+		InBuffer += 4;
+		strcpy(InBuffer, new_message.substr(0, 1023).c_str());
+		InBuffer[1023] = '\0';
+
+		delete[] __eq_buffer;
 	}
 
 	DECODE(OP_FaceChange)
