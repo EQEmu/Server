@@ -29,8 +29,6 @@
 
 std::ofstream zone_general_log;
 
-static const char* TypeNames[EQEmuLogSys::MaxLogID] = { "Status", "Normal", "Error", "Debug", "Quest", "Command", "Crash"};
-
 #ifdef _WINDOWS
 #include <conio.h>
 #include <iostream>
@@ -59,6 +57,26 @@ namespace Console {
 	};
 }
 
+static const char* TypeNames[EQEmuLogSys::MaxLogID] = { 
+		"Status", 
+		"Normal", 
+		"Error", 
+		"Debug", 
+		"Quest", 
+		"Command", 
+		"Crash" 
+};
+static Console::Color LogColors[EQEmuLogSys::MaxLogID] = {
+		Console::Color::Yellow, 		   // "Status", 
+		Console::Color::LightRed,		   // "Normal", 
+		Console::Color::LightGreen,		   // "Error", 
+		Console::Color::Yellow,			   // "Debug", 
+		Console::Color::LightCyan,		   // "Quest", 
+		Console::Color::LightMagenta,	   // "Command", 
+		Console::Color::LightRed		   // "Crash" 
+};
+
+
 EQEmuLogSys::EQEmuLogSys(){
 }
 
@@ -74,13 +92,24 @@ void EQEmuLogSys::StartZoneLogs(const std::string log_name)
 
 void EQEmuLogSys::WriteZoneLog(uint16 log_type, const std::string message)
 {
+	if (log_type > EQEmuLogSys::MaxLogID){
+		return;
+	}
+
 	auto t = std::time(nullptr);
 	auto tm = *std::localtime(&t);
 	EQEmuLogSys::ConsoleMessage(log_type, message);
-	zone_general_log << std::put_time(&tm, "[%d-%m-%Y :: %H:%M:%S] ") << message << std::endl;
+
+	if (zone_general_log){
+		zone_general_log << std::put_time(&tm, "[%d-%m-%Y :: %H:%M:%S] ") << message << std::endl;
+	}
 }
 
-void EQEmuLogSys::ConsoleMessage(uint16 log_type, const std::string message){
+void EQEmuLogSys::ConsoleMessage(uint16 log_type, const std::string message)
+{
+	if (log_type > EQEmuLogSys::MaxLogID){
+		return;
+	}
 #ifdef _WINDOWS
 	HANDLE  console_handle;
 	console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -92,15 +121,10 @@ void EQEmuLogSys::ConsoleMessage(uint16 log_type, const std::string message){
 	wcscpy(info.FaceName, L"Lucida Console");
 	SetCurrentConsoleFontEx(console_handle, NULL, &info);
 
-	if (log_type == EQEmuLogSys::LogType::Status){ SetConsoleTextAttribute(console_handle, Console::Color::Yellow); }
-	if (log_type == EQEmuLogSys::LogType::Error){ SetConsoleTextAttribute(console_handle, Console::Color::LightRed); }
-	if (log_type == EQEmuLogSys::LogType::Normal){ SetConsoleTextAttribute(console_handle, Console::Color::LightGreen); }
-	if (log_type == EQEmuLogSys::LogType::Debug){ SetConsoleTextAttribute(console_handle, Console::Color::Yellow); }
-	if (log_type == EQEmuLogSys::LogType::Quest){ SetConsoleTextAttribute(console_handle, Console::Color::LightCyan); }
-	if (log_type == EQEmuLogSys::LogType::Commands){ SetConsoleTextAttribute(console_handle, Console::Color::LightMagenta); }
-	if (log_type == EQEmuLogSys::LogType::Crash){ SetConsoleTextAttribute(console_handle, Console::Color::LightRed); }
+	SetConsoleTextAttribute(console_handle, LogColors[log_type]);
+
 #endif
-	std::cout << "[" << TypeNames[log_type] << "] " << message << std::endl;
+	std::cout << "[(N)" << TypeNames[log_type] << "] " << message << std::endl;
 #ifdef _WINDOWS
 	/* Always set back to white*/
 	SetConsoleTextAttribute(console_handle, Console::Color::White);
