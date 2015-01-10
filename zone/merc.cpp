@@ -4451,7 +4451,7 @@ bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, boo
 {
 	if (!other) {
 		SetTarget(nullptr);
-		LogFile->write(EQEmuLog::Error, "A null Mob object was passed to Merc::Attack() for evaluation!");
+		logger.Log(EQEmuLogSys::Error,"A null Mob object was passed to Merc::Attack() for evaluation!");
 		return false;
 	}
 
@@ -5986,7 +5986,7 @@ void NPC::LoadMercTypes() {
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
 	{
-		LogFile->write(EQEmuLog::Error, "Error in NPC::LoadMercTypes()");
+		logger.Log(EQEmuLogSys::Error,"Error in NPC::LoadMercTypes()");
 		return;
 	}
 
@@ -6019,7 +6019,7 @@ void NPC::LoadMercs() {
 
 	if (!results.Success())
 	{
-		LogFile->write(EQEmuLog::Error, "Error in NPC::LoadMercTypes()");
+		logger.Log(EQEmuLogSys::Error,"Error in NPC::LoadMercTypes()");
 		return;
 	}
 

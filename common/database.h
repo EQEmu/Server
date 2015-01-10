@@ -22,6 +22,7 @@
 #define INVALID_ID				0xFFFFFFFF
 
 #include "debug.h"
+#include "eqemu_logsys.h"
 #include "types.h"
 #include "dbcore.h"
 #include "linked_list.h"

@@ -213,7 +213,7 @@ void ZoneDatabase::DeletePetitionFromDB(Petition* wpet) {
     std::string query = StringFormat("DELETE FROM petitions WHERE petid = %i", wpet->GetID());
     auto results = QueryDatabase(query);
 	if (!results.Success())
-		LogFile->write(EQEmuLog::Error, "Error in DeletePetitionFromDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		logger.Log(EQEmuLogSys::Error,"Error in DeletePetitionFromDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
@@ -227,7 +227,7 @@ void ZoneDatabase::UpdatePetitionToDB(Petition* wpet) {
                                     wpet->CheckedOut() ? 1: 0, wpet->GetID());
     auto results = QueryDatabase(query);
 	if (!results.Success())
-		LogFile->write(EQEmuLog::Error, "Error in UpdatePetitionToDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		logger.Log(EQEmuLogSys::Error,"Error in UpdatePetitionToDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
@@ -254,7 +254,7 @@ void ZoneDatabase::InsertPetitionToDB(Petition* wpet)
     safe_delete_array(petitiontext);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "Error in InsertPetitionToDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		logger.Log(EQEmuLogSys::Error,"Error in InsertPetitionToDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -273,7 +273,7 @@ void ZoneDatabase::RefreshPetitionsFromDB()
                         "FROM petitions ORDER BY petid";
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "Error in RefreshPetitionsFromDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		logger.Log(EQEmuLogSys::Error,"Error in RefreshPetitionsFromDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 

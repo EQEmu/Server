@@ -66,14 +66,14 @@ PathManager* PathManager::LoadPathFile(const char* ZoneName)
 		}
 		else
 		{
-			LogFile->write(EQEmuLog::Error, "Path File %s failed to load.", ZonePathFileName);
+			logger.Log(EQEmuLogSys::Error,"Path File %s failed to load.", ZonePathFileName);
 			safe_delete(Ret);
 		}
 		fclose(PathFile);
 	}
 	else
 	{
-		LogFile->write(EQEmuLog::Error, "Path File %s not found.", ZonePathFileName);
+		logger.Log(EQEmuLogSys::Error,"Path File %s not found.", ZonePathFileName);
 	}
 
 	return Ret;
@@ -103,7 +103,7 @@ bool PathManager::loadPaths(FILE *PathFile)
 
 	if(strncmp(Magic, "EQEMUPATH", 9))
 	{
-		LogFile->write(EQEmuLog::Error, "Bad Magic String in .path file.");
+		logger.Log(EQEmuLogSys::Error,"Bad Magic String in .path file.");
 		return false;
 	}
 
@@ -114,7 +114,7 @@ bool PathManager::loadPaths(FILE *PathFile)
 
 	if(Head.version != 2)
 	{
-		LogFile->write(EQEmuLog::Error, "Unsupported path file version.");
+		logger.Log(EQEmuLogSys::Error,"Unsupported path file version.");
 		return false;
 	}
 
@@ -138,7 +138,7 @@ bool PathManager::loadPaths(FILE *PathFile)
 		{
 			if(PathNodes[i].Neighbours[j].id > MaxNodeID)
 			{
-				LogFile->write(EQEmuLog::Error, "Path Node %i, Neighbour %i (%i) out of range.", i, j, PathNodes[i].Neighbours[j].id);
+				logger.Log(EQEmuLogSys::Error,"Path Node %i, Neighbour %i (%i) out of range.", i, j, PathNodes[i].Neighbours[j].id);
 
 				PathFileValid = false;
 			}

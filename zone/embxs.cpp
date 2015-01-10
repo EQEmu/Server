@@ -18,6 +18,7 @@
 #ifdef EMBPERL 
 
 #include "../common/debug.h"
+#include "../common/eqemu_logsys.h"
 #include "masterentity.h"
 #include "command.h"
 
@@ -63,7 +64,7 @@ EXTERN_C XS(boot_qc)
 	file[255] = '\0';
 
 	if(items != 1)
-		LogFile->write(EQEmuLog::Error, "boot_qc does not take any arguments.");
+		logger.Log(EQEmuLogSys::Error,"boot_qc does not take any arguments.");
 	
 	char buf[128];	//shouldent have any function names longer than this.
 	
