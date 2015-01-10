@@ -1101,8 +1101,14 @@ void Mob::ProjectileAttack()
 
 			if (target){
 
-				if (IsNPC())
-					CastToNPC()->DoRangedAttackDmg(target, false, ProjectileAtk[i].wpn_dmg,0, static_cast<SkillUseTypes>(ProjectileAtk[i].skill));
+				if (IsNPC()){
+					if (ProjectileAtk[i].skill == SkillConjuration){
+						if (IsValidSpell(ProjectileAtk[i].wpn_dmg))
+							SpellOnTarget(ProjectileAtk[i].wpn_dmg, target, false, true, spells[ProjectileAtk[i].wpn_dmg].ResistDiff, true);
+					}
+					else
+						CastToNPC()->DoRangedAttackDmg(target, false, ProjectileAtk[i].wpn_dmg,0, static_cast<SkillUseTypes>(ProjectileAtk[i].skill));
+				}
 	
 				else
 				{
