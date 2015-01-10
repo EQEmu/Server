@@ -2464,7 +2464,7 @@ void command_spawn(Client *c, const Seperator *sep)
 		}
 	}
 	#if EQDEBUG >= 11
-		LogFile->write(EQEmuLog::Debug,"#spawn Spawning:");
+		logger.LogDebug(EQEmuLogSys::General,"#spawn Spawning:");
 	#endif
 
 	NPC* npc = NPC::SpawnNPC(sep->argplus[1], c->GetX(), c->GetY(), c->GetZ(), c->GetHeading(), c);
@@ -4449,7 +4449,7 @@ void command_time(Client *c, const Seperator *sep)
 			);
 		c->Message(13, "It is now %s.", timeMessage);
 #if EQDEBUG >= 11
-		LogFile->write(EQEmuLog::Debug,"Recieved timeMessage:%s", timeMessage);
+		logger.LogDebug(EQEmuLogSys::General,"Recieved timeMessage:%s", timeMessage);
 #endif
 	}
 }

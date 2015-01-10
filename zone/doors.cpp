@@ -17,6 +17,7 @@
 */
 
 #include "../common/debug.h"
+#include "../common/eqemu_logsys.h"
 #include "../common/string_util.h"
 
 #include "client.h"
@@ -302,7 +303,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 					sender->CheckIncreaseSkill(SkillPickLock, nullptr, 1);
 
 #if EQDEBUG>=5
-					LogFile->write(EQEmuLog::Debug, "Client has lockpicks: skill=%f", modskill);
+					logger.LogDebug(EQEmuLogSys::General, "Client has lockpicks: skill=%f", modskill);
 #endif
 
 					if(GetLockpick() <= modskill)
@@ -559,13 +560,13 @@ void Doors::ToggleState(Mob *sender)
 }
 
 void Doors::DumpDoor(){
-	LogFile->write(EQEmuLog::Debug,
+	logger.LogDebug(EQEmuLogSys::General,
 		"db_id:%i door_id:%i zone_name:%s door_name:%s pos_x:%f pos_y:%f pos_z:%f heading:%f",
 		db_id, door_id, zone_name, door_name, pos_x, pos_y, pos_z, heading);
-	LogFile->write(EQEmuLog::Debug,
+	logger.LogDebug(EQEmuLogSys::General,
 		"opentype:%i guild_id:%i lockpick:%i keyitem:%i nokeyring:%i trigger_door:%i trigger_type:%i door_param:%i open:%s",
 		opentype, guild_id, lockpick, keyitem, nokeyring, trigger_door, trigger_type, door_param, (isopen) ? "open":"closed");
-	LogFile->write(EQEmuLog::Debug,
+	logger.LogDebug(EQEmuLogSys::General,
 		"dest_zone:%s dest_x:%f dest_y:%f dest_z:%f dest_heading:%f",
 		dest_zone, dest_x, dest_y, dest_z, dest_heading);
 }

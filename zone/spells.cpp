@@ -69,6 +69,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/bodytypes.h"
 #include "../common/classes.h"
 #include "../common/debug.h"
+#include "../common/eqemu_logsys.h"
 #include "../common/item.h"
 #include "../common/rulesys.h"
 #include "../common/skills.h"
@@ -2672,7 +2673,7 @@ int CalcBuffDuration_formula(int level, int formula, int duration)
 			return duration ? duration : 3600;
 
 		default:
-			LogFile->write(EQEmuLog::Debug, "CalcBuffDuration_formula: unknown formula %d", formula);
+			logger.LogDebug(EQEmuLogSys::General, "CalcBuffDuration_formula: unknown formula %d", formula);
 			return 0;
 	}
 }

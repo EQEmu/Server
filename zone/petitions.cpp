@@ -16,6 +16,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
+#include "../common/eqemu_logsys.h"
 #include <string.h>
 #ifdef _WINDOWS
 #include <process.h>
@@ -258,7 +259,7 @@ void ZoneDatabase::InsertPetitionToDB(Petition* wpet)
 	}
 
 #if EQDEBUG >= 5
-		LogFile->write(EQEmuLog::Debug, "New petition created");
+		logger.LogDebug(EQEmuLogSys::General, "New petition created");
 #endif
 
 }

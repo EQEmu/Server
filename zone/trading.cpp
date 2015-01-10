@@ -17,6 +17,7 @@
 */
 
 #include "../common/debug.h"
+#include "../common/eqemu_logsys.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
 
@@ -85,7 +86,7 @@ void Trade::AddEntity(uint16 trade_slot_id, uint32 stack_size) {
 
 	if (!owner || !owner->IsClient()) {
 		// This should never happen
-		LogFile->write(EQEmuLog::Debug, "Programming error: NPC's should not call Trade::AddEntity()");
+		logger.LogDebug(EQEmuLogSys::General, "Programming error: NPC's should not call Trade::AddEntity()");
 		return;
 	}
 
@@ -295,7 +296,7 @@ void Trade::LogTrade()
 void Trade::DumpTrade()
 {
 	Mob* with = With();
-	LogFile->write(EQEmuLog::Debug, "Dumping trade data: '%s' in TradeState %i with '%s'",
+	logger.LogDebug(EQEmuLogSys::General, "Dumping trade data: '%s' in TradeState %i with '%s'",
 		this->owner->GetName(), state, ((with==nullptr)?"(null)":with->GetName()));
 
 	if (!owner->IsClient())
@@ -306,7 +307,7 @@ void Trade::DumpTrade()
 		const ItemInst* inst = trader->GetInv().GetItem(i);
 
 		if (inst) {
-			LogFile->write(EQEmuLog::Debug, "Item %i (Charges=%i, Slot=%i, IsBag=%s)",
+			logger.LogDebug(EQEmuLogSys::General, "Item %i (Charges=%i, Slot=%i, IsBag=%s)",
 				inst->GetItem()->ID, inst->GetCharges(),
 				i, ((inst->IsType(ItemClassContainer)) ? "True" : "False"));
 
@@ -314,7 +315,7 @@ void Trade::DumpTrade()
 				for (uint8 j = SUB_BEGIN; j < EmuConstants::ITEM_CONTAINER_SIZE; j++) {
 					inst = trader->GetInv().GetItem(i, j);
 					if (inst) {
-						LogFile->write(EQEmuLog::Debug, "\tBagItem %i (Charges=%i, Slot=%i)",
+						logger.LogDebug(EQEmuLogSys::General, "\tBagItem %i (Charges=%i, Slot=%i)",
 							inst->GetItem()->ID, inst->GetCharges(),
 							Inventory::CalcSlotId(i, j));
 					}
@@ -323,7 +324,7 @@ void Trade::DumpTrade()
 		}
 	}
 
-	LogFile->write(EQEmuLog::Debug, "\tpp:%i, gp:%i, sp:%i, cp:%i", pp, gp, sp, cp);
+	logger.LogDebug(EQEmuLogSys::General, "\tpp:%i, gp:%i, sp:%i, cp:%i", pp, gp, sp, cp);
 }
 #endif
 

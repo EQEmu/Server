@@ -8550,7 +8550,7 @@ int32 Bot::CalcMaxMana() {
 		}
 		default:
 		{
-			LogFile->write(EQEmuLog::Debug, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+			logger.LogDebug(EQEmuLogSys::General, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
 			max_mana = 0;
 			break;
 		}

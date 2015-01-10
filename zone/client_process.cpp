@@ -18,6 +18,8 @@
 	client_process.cpp:
 	Handles client login sequence and packets sent from client to zone
 */
+
+#include "../common/eqemu_logsys.h"
 #include "../common/debug.h"
 #include <iostream>
 #include <stdio.h>
@@ -1035,7 +1037,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 		// Account for merchant lists with gaps.
 		if (ml.slot >= i) {
 			if (ml.slot > i)
-				LogFile->write(EQEmuLog::Debug, "(WARNING) Merchantlist contains gap at slot %d. Merchant: %d, NPC: %d", i, merchant_id, npcid);
+				logger.LogDebug(EQEmuLogSys::General, "(WARNING) Merchantlist contains gap at slot %d. Merchant: %d, NPC: %d", i, merchant_id, npcid);
 			i = ml.slot + 1;
 		}
 	}

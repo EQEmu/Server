@@ -6,6 +6,7 @@
 #include "groups.h"
 #include "mob.h"
 
+#include "../common/eqemu_logsys.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/eq_constants.h"
 #include "../common/skills.h"
@@ -884,7 +885,7 @@ int32 Merc::CalcMaxMana()
 		break;
 			  }
 	default: {
-		LogFile->write(EQEmuLog::Debug, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+		logger.LogDebug(EQEmuLogSys::General, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
 		max_mana = 0;
 		break;
 			 }
@@ -905,7 +906,7 @@ int32 Merc::CalcMaxMana()
 	}
 
 #if EQDEBUG >= 11
-	LogFile->write(EQEmuLog::Debug, "Merc::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
+	logger.LogDebug(EQEmuLogSys::General, "Merc::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
 #endif
 	return max_mana;
 }
