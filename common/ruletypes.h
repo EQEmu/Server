@@ -599,6 +599,7 @@ RULE_CATEGORY_END()
 RULE_CATEGORY(Logging)
 RULE_BOOL(Logging, ConsoleLogCommands, false)  /* Turns on or off console logs */
 RULE_BOOL(Logging, LogFileCommands, false)
+RULE_INT(Logging, DebugLogLevel, 0) /* Sets Debug Level, -1 = OFF, 0 = Low Level, 1 = Info, 2 = Extreme */
 RULE_CATEGORY_END()
 
 
@@ -607,4 +608,3 @@ RULE_CATEGORY_END()
 #undef RULE_REAL
 #undef RULE_BOOL
 #undef RULE_CATEGORY_END
-

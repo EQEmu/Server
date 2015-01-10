@@ -91,10 +91,15 @@ void EQEmuLogSys::StartZoneLogs(const std::string log_name)
 }
 
 void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...){
+	if (RuleI(Logging, DebugLogLevel) < debug_level){ 
+		return; 
+	}
+
 	va_list args;
 	va_start(args, message);
 	std::string output_message = vStringFormat(message.c_str(), args);
 	va_end(args);
+
 	EQEmuLogSys::Log(EQEmuLogSys::LogType::Debug, output_message);
 }
 
