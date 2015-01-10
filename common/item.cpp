@@ -1108,6 +1108,7 @@ int16 Inventory::_PutItem(int16 slot_id, ItemInst* inst)
 	}
 
 	int16 result = INVALID_INDEX;
+	int16 parentSlot = INVALID_INDEX;
 
 	if (slot_id == MainCursor) {
 		// Replace current item on cursor, if exists
@@ -1142,16 +1143,17 @@ int16 Inventory::_PutItem(int16 slot_id, ItemInst* inst)
 	else
 	{
 		// Slot must be within a bag
-		ItemInst* baginst = GetItem(Inventory::CalcSlotId(slot_id)); // Get parent bag
+		parentSlot = Inventory::CalcSlotId(slot_id);
+		ItemInst* baginst = GetItem(parentSlot); // Get parent bag
 		if (baginst && baginst->IsType(ItemClassContainer))
 		{
 			baginst->_PutItem(Inventory::CalcBagIdx(slot_id), inst);
 			result = slot_id;
 		}
 	}
-
+	
 	if (result == INVALID_INDEX) {
-		LogFile->write(EQEmuLog::Error, "Inventory::_PutItem: Invalid slot_id specified (%i)", slot_id);
+		LogFile->write(EQEmuLog::Error, "Inventory::_PutItem: Invalid slot_id specified (%i) with parent slot id (%i)", slot_id, parentSlot);
 		Inventory::MarkDirty(inst); // Slot not found, clean up
 	}
 
