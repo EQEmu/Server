@@ -165,7 +165,7 @@ bool EQEmuLog::write(LogIDs id, const char *fmt, ...)
 	va_list argptr, tmpargptr;
 	va_start(argptr, fmt);
 
-	backport_log_sys.WriteZoneLog(id, vStringFormat(fmt, argptr).c_str());
+	backport_log_sys.Log(id, vStringFormat(fmt, argptr).c_str());
 
 	if (logCallbackFmt[id]) {
 		msgCallbackFmt p = logCallbackFmt[id];

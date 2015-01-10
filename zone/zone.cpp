@@ -154,11 +154,6 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 
 	log_sys.StartZoneLogs(StringFormat("%s_ver-%u_instid-%u_port-%u", zone->GetShortName(), zone->GetInstanceVersion(), zone->GetInstanceID(), ZoneConfig::get()->ZonePort));
 
-	clock_t t = std::clock(); /* Function timer start */
-	uint64 i = 0;
-	
-	log_sys.WriteZoneLog(1, "This is some serious shit");
-
 	return true;
 }
 

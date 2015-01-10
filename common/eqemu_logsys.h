@@ -41,7 +41,7 @@ public:
 	};
 
 	void StartZoneLogs(const std::string log_name);
-	void WriteZoneLog(uint16 log_type, const std::string message);
+	void Log(uint16 log_type, const std::string message);
 	void CloseZoneLogs();
 	void ConsoleMessage(uint16 log_type, const std::string message);
 
@@ -51,5 +51,7 @@ private:
 };
 
 extern EQEmuLogSys log_sys;
+
+
 
 #endif
