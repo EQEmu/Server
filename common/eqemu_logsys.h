@@ -40,17 +40,25 @@ public:
 		MaxLogID	 /* Max, used in functions to get the max log ID */
 	};
 
-	void StartZoneLogs(const std::string log_name);
-	void Log(uint16 log_type, const std::string message);
+	enum DebugLevel {
+		General = 0,	/* 0 - Low-Level general debugging, useful info on single line */
+		Moderate,		/* 1 - Informational based, used in functions, when particular things load */
+		Detail,			/* 2 - Use this for extreme detail in logging, usually in extreme debugging in the stack or interprocess communication */
+	};
+	
 	void CloseZoneLogs();
 	void ConsoleMessage(uint16 log_type, const std::string message);
+	void LogDebug(DebugLevel debug_level, std::string message, ...);
+	void Log(uint16 log_type, const std::string message, ...);
+	void StartZoneLogs(const std::string log_name);
+
 
 private:
 	bool zone_general_init = false;
 
 };
 
-extern EQEmuLogSys log_sys;
+extern EQEmuLogSys logger;
 
 
 

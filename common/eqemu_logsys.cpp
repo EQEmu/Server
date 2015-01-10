@@ -90,21 +90,35 @@ void EQEmuLogSys::StartZoneLogs(const std::string log_name)
 	process_log.open(StringFormat("logs/zone/%s.txt", log_name.c_str()), std::ios_base::app | std::ios_base::out);
 }
 
-void EQEmuLogSys::Log(uint16 log_type, const std::string message)
+void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...){
+	va_list args;
+	va_start(args, message);
+	std::string output_message = vStringFormat(message.c_str(), args);
+	va_end(args);
+	EQEmuLogSys::Log(EQEmuLogSys::LogType::Debug, output_message);
+}
+
+void EQEmuLogSys::Log(uint16 log_type, const std::string message, ...)
 {
 	if (log_type > EQEmuLogSys::MaxLogID){
 		return;
 	}
+	if (!RuleB(Logging, LogFileCommands) && log_type == EQEmuLogSys::LogType::Commands){ return; }
+
+	va_list args;
+	va_start(args, message);
+	std::string output_message = vStringFormat(message.c_str(), args);
+	va_end(args);
 
 	auto t = std::time(nullptr);
 	auto tm = *std::localtime(&t);
 	EQEmuLogSys::ConsoleMessage(log_type, message);
 
 	if (process_log){
-		process_log << std::put_time(&tm, "[%d-%m-%Y :: %H:%M:%S] ") << StringFormat("[%s] ", TypeNames[log_type]).c_str() << message << std::endl;
+		process_log << std::put_time(&tm, "[%d-%m-%Y :: %H:%M:%S] ") << StringFormat("[%s] ", TypeNames[log_type]).c_str() << output_message << std::endl;
 	}
 	else{
-		std::cout << "[DEBUG] " << " :: There currently is no log file open for this process " << std::endl;
+		std::cout << "[DEBUG] " << ":: There currently is no log file open for this process " << std::endl;
 	}
 }
 
@@ -113,23 +127,21 @@ void EQEmuLogSys::ConsoleMessage(uint16 log_type, const std::string message)
 	if (log_type > EQEmuLogSys::MaxLogID){
 		return;
 	}
+	if (!RuleB(Logging, ConsoleLogCommands) && log_type == EQEmuLogSys::LogType::Commands){ return; }
 
 #ifdef _WINDOWS
 	HANDLE  console_handle;
-	console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
-
+	console_handle = GetStdHandle(STD_OUTPUT_HANDLE); 
 	CONSOLE_FONT_INFOEX info = { 0 };
 	info.cbSize = sizeof(info);
 	info.dwFontSize.Y = 12; // leave X as zero
 	info.FontWeight = FW_NORMAL;
 	wcscpy(info.FaceName, L"Lucida Console");
-	SetCurrentConsoleFontEx(console_handle, NULL, &info);
-
-	SetConsoleTextAttribute(console_handle, LogColors[log_type]);
-
+	SetCurrentConsoleFontEx(console_handle, NULL, &info); 
+	SetConsoleTextAttribute(console_handle, LogColors[log_type]); 
 #endif
 
-	std::cout << "[(N)" << TypeNames[log_type] << "] " << message << std::endl;
+	std::cout << "[N::" << TypeNames[log_type] << "] " << message << std::endl;
 
 #ifdef _WINDOWS
 	/* Always set back to white*/

@@ -152,7 +152,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 
 	/* Set Logging */
 
-	log_sys.StartZoneLogs(StringFormat("%s_ver-%u_instid-%u_port-%u", zone->GetShortName(), zone->GetInstanceVersion(), zone->GetInstanceID(), ZoneConfig::get()->ZonePort));
+	logger.StartZoneLogs(StringFormat("%s_ver-%u_instid-%u_port-%u", zone->GetShortName(), zone->GetInstanceVersion(), zone->GetInstanceID(), ZoneConfig::get()->ZonePort));
 
 	return true;
 }
@@ -720,7 +720,7 @@ void Zone::Shutdown(bool quite)
 	parse->ReloadQuests(true);
 	UpdateWindowTitle();
 
-	log_sys.CloseZoneLogs();
+	logger.CloseZoneLogs();
 }
 
 void Zone::LoadZoneDoors(const char* zone, int16 version)
