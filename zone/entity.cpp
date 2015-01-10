@@ -4668,3 +4668,10 @@ Mob *EntityList::GetTargetForVirus(Mob *spreader, int range)
 	return TargetsInRange[zone->random.Int(0, TargetsInRange.size() - 1)];
 }
 
+void EntityList::StopMobAI()
+{
+	for (auto &mob : mob_list) {
+		mob.second->AI_Stop();
+		mob.second->AI_ShutDown();
+	}
+}

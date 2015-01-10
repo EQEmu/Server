@@ -3261,7 +3261,8 @@ uint32 Database::GetGroupID(const char* name){
 
 	if (results.RowCount() == 0)
 	{
-		LogFile->write(EQEmuLog::Debug, "Character not in a group: %s", name);
+		// Commenting this out until logging levels can prevent this from going to console
+		//LogFile->write(EQEmuLog::Debug, "Character not in a group: %s", name);
 		return 0;
 	}
 
