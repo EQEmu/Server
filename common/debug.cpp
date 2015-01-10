@@ -372,9 +372,7 @@ bool EQEmuLog::writeNTS(LogIDs id, bool dofile, const char *fmt, ...)
 bool EQEmuLog::Dump(LogIDs id, uint8* data, uint32 size, uint32 cols, uint32 skip)
 {
 	if (!logFileValid) {
-		#if EQDEBUG >= 10
-		std::cerr << "Error: Dump() from null pointer" << std::endl;
-		#endif
+		logger.LogDebug(EQEmuLogSys::Detail, "Error: Dump() from null pointer");
 		return false;
 	}
 	if (size == 0) {

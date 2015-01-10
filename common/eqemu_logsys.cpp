@@ -68,9 +68,9 @@ static const char* TypeNames[EQEmuLogSys::MaxLogID] = {
 };
 static Console::Color LogColors[EQEmuLogSys::MaxLogID] = {
 		Console::Color::Yellow, 		   // "Status", 
-		Console::Color::Yellow,		   // "Normal", 
+		Console::Color::Yellow,			   // "Normal", 
 		Console::Color::LightRed,		   // "Error", 
-		Console::Color::LightGreen,			 // "Debug", 
+		Console::Color::LightGreen,		   // "Debug", 
 		Console::Color::LightCyan,		   // "Quest", 
 		Console::Color::LightMagenta,	   // "Command", 
 		Console::Color::LightRed		   // "Crash" 
@@ -91,9 +91,7 @@ void EQEmuLogSys::StartZoneLogs(const std::string log_name)
 }
 
 void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...){
-	if (RuleI(Logging, DebugLogLevel) < debug_level){ 
-		return; 
-	}
+	if (RuleI(Logging, DebugLogLevel) < debug_level){ return;  }
 
 	va_list args;
 	va_start(args, message);
