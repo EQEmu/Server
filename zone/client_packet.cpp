@@ -9153,7 +9153,7 @@ void Client::Handle_OP_LoadSpellSet(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Logout(const EQApplicationPacket *app)
 {
-	logger.LogDebug(EQEmuLogSys:EQEmuLogSys::Detail, "%s sent a logout packet.", GetName());
+	logger.LogDebug(EQEmuLogSys::Detail, "%s sent a logout packet.", GetName());
 
 	SendLogoutPackets();
 

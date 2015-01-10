@@ -651,7 +651,7 @@ bool Client::SendAllPackets() {
 			eqs->FastQueuePacket((EQApplicationPacket **)&cp->app, cp->ack_req);
 		iterator.RemoveCurrent();
 #if EQDEBUG >= 6
-		LogFile->write(EQEmuLog::Normal, "Transmitting a packet");
+		logger.Log(EQEmuLogSys::Normal, "Transmitting a packet");
 #endif
 	}
 	return true;
@@ -1918,7 +1918,7 @@ void Client::ReadBook(BookRequest_Struct *book) {
 
 	if (booktxt2[0] != '\0') {
 #if EQDEBUG >= 6
-		LogFile->write(EQEmuLog::Normal,"Client::ReadBook() textfile:%s Text:%s", txtfile, booktxt2.c_str());
+		logger.Log(EQEmuLogSys::Normal, "Client::ReadBook() textfile:%s Text:%s", txtfile, booktxt2.c_str());
 #endif
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ReadBook, length + sizeof(BookText_Struct));
 
@@ -2371,7 +2371,7 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(SkillUseTypes skillid, uint16
 
 				Save();
 
-				LogFile->write(EQEmuLog::Normal, "Reset %s's caster specialization skills to 1. "
+				logger.Log(EQEmuLogSys::Normal, "Reset %s's caster specialization skills to 1. "
 								"Too many specializations skills were above 50.", GetCleanName());
 			}
 
