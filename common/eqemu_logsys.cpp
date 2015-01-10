@@ -27,7 +27,7 @@
 #include <iomanip>
 #include <direct.h>
 
-std::ofstream zone_general_log;
+std::ofstream process_log;
 
 #ifdef _WINDOWS
 #include <conio.h>
@@ -68,9 +68,9 @@ static const char* TypeNames[EQEmuLogSys::MaxLogID] = {
 };
 static Console::Color LogColors[EQEmuLogSys::MaxLogID] = {
 		Console::Color::Yellow, 		   // "Status", 
-		Console::Color::LightRed,		   // "Normal", 
-		Console::Color::LightGreen,		   // "Error", 
-		Console::Color::Yellow,			   // "Debug", 
+		Console::Color::Yellow,		   // "Normal", 
+		Console::Color::LightRed,		   // "Error", 
+		Console::Color::LightGreen,			 // "Debug", 
 		Console::Color::LightCyan,		   // "Quest", 
 		Console::Color::LightMagenta,	   // "Command", 
 		Console::Color::LightRed		   // "Crash" 
@@ -87,10 +87,10 @@ void EQEmuLogSys::StartZoneLogs(const std::string log_name)
 {
 	_mkdir("logs/zone");
 	std::cout << "Starting Zone Logs..." << std::endl;
-	zone_general_log.open(StringFormat("logs/zone/%s.txt", log_name.c_str()), std::ios_base::app | std::ios_base::out);
+	process_log.open(StringFormat("logs/zone/%s.txt", log_name.c_str()), std::ios_base::app | std::ios_base::out);
 }
 
-void EQEmuLogSys::WriteZoneLog(uint16 log_type, const std::string message)
+void EQEmuLogSys::Log(uint16 log_type, const std::string message)
 {
 	if (log_type > EQEmuLogSys::MaxLogID){
 		return;
@@ -100,8 +100,11 @@ void EQEmuLogSys::WriteZoneLog(uint16 log_type, const std::string message)
 	auto tm = *std::localtime(&t);
 	EQEmuLogSys::ConsoleMessage(log_type, message);
 
-	if (zone_general_log){
-		zone_general_log << std::put_time(&tm, "[%d-%m-%Y :: %H:%M:%S] ") << message << std::endl;
+	if (process_log){
+		process_log << std::put_time(&tm, "[%d-%m-%Y :: %H:%M:%S] ") << StringFormat("[%s] ", TypeNames[log_type]).c_str() << message << std::endl;
+	}
+	else{
+		std::cout << "[DEBUG] " << " :: There currently is no log file open for this process " << std::endl;
 	}
 }
 
@@ -110,6 +113,7 @@ void EQEmuLogSys::ConsoleMessage(uint16 log_type, const std::string message)
 	if (log_type > EQEmuLogSys::MaxLogID){
 		return;
 	}
+
 #ifdef _WINDOWS
 	HANDLE  console_handle;
 	console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -124,7 +128,9 @@ void EQEmuLogSys::ConsoleMessage(uint16 log_type, const std::string message)
 	SetConsoleTextAttribute(console_handle, LogColors[log_type]);
 
 #endif
+
 	std::cout << "[(N)" << TypeNames[log_type] << "] " << message << std::endl;
+
 #ifdef _WINDOWS
 	/* Always set back to white*/
 	SetConsoleTextAttribute(console_handle, Console::Color::White);
@@ -133,5 +139,5 @@ void EQEmuLogSys::ConsoleMessage(uint16 log_type, const std::string message)
 
 void EQEmuLogSys::CloseZoneLogs(){
 	std::cout << "Closing down zone logs..." << std::endl;
-	zone_general_log.close();
+	process_log.close();
 }
