@@ -50,6 +50,7 @@
 #include "../common/rulesys.h"
 #include "../common/serverinfo.h"
 #include "../common/string_util.h"
+#include "../common/eqemu_logsys.h"
 
 #include "client_logs.h"
 #include "command.h"
@@ -444,9 +445,7 @@ int command_init(void) {
 		if ((itr=command_settings.find(cur->first))!=command_settings.end())
 		{
 			cur->second->access = itr->second;
-#if EQDEBUG >=5
-			LogFile->write(EQEmuLog::Debug, "command_init(): - Command '%s' set to access level %d." , cur->first.c_str(), itr->second);
-#endif
+			logger.Log(EQEmuLogSys::Commands, "command_init(): - Command '%s' set to access level %d.", cur->first.c_str(), itr->second);
 		}
 		else
 		{

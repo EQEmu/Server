@@ -596,6 +596,12 @@ RULE_CATEGORY( Client )
 RULE_BOOL( Client, UseLiveFactionMessage, false) // Allows players to see faction adjustments like Live
 RULE_CATEGORY_END()
 
+RULE_CATEGORY(Logging)
+RULE_BOOL(Logging, ConsoleLogCommands, false)  /* Turns on or off console logs */
+RULE_BOOL(Logging, LogFileCommands, false)
+RULE_CATEGORY_END()
+
+
 #undef RULE_CATEGORY
 #undef RULE_INT
 #undef RULE_REAL
