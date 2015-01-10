@@ -74,7 +74,7 @@ bool TaskManager::LoadTaskSets() {
                                     MAXTASKSETS, MAXTASKS);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        logger.Log(EQEmuLogSys::Error,"[TASKS]Error in TaskManager::LoadTaskSets: %s", results.ErrorMessage().c_str());
+        logger.Log(EQEmuLogSys::Error, "[TASKS]Error in TaskManager::LoadTaskSets: %s", results.ErrorMessage().c_str());
 		return false;
     }
 
@@ -146,7 +146,7 @@ bool TaskManager::LoadTasks(int singleTask) {
 
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        logger.Log(EQEmuLogSys::Error,ERR_MYSQLERROR, results.ErrorMessage().c_str());
+        logger.Log(EQEmuLogSys::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
 		return false;
     }
 
@@ -155,7 +155,7 @@ bool TaskManager::LoadTasks(int singleTask) {
 
         if((taskID <= 0) || (taskID >= MAXTASKS)) {
             // This shouldn't happen, as the SELECT is bounded by MAXTASKS
-			logger.Log(EQEmuLogSys::Error,"[TASKS]Task ID %i out of range while loading tasks from database", taskID);
+			logger.Log(EQEmuLogSys::Error, "[TASKS]Task ID %i out of range while loading tasks from database", taskID);
 			continue;
         }
 
@@ -203,7 +203,7 @@ bool TaskManager::LoadTasks(int singleTask) {
                             "ORDER BY taskid, activityid ASC", singleTask, MAXACTIVITIESPERTASK);
     results = database.QueryDatabase(query);
     if (!results.Success()) {
-        logger.Log(EQEmuLogSys::Error,ERR_MYSQLERROR, results.ErrorMessage().c_str());
+        logger.Log(EQEmuLogSys::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
 		return false;
     }
 
@@ -215,13 +215,13 @@ bool TaskManager::LoadTasks(int singleTask) {
 
         if((taskID <= 0) || (taskID >= MAXTASKS) || (activityID < 0) || (activityID >= MAXACTIVITIESPERTASK)) {
             // This shouldn't happen, as the SELECT is bounded by MAXTASKS
-            logger.Log(EQEmuLogSys::Error,"[TASKS]Task or Activity ID (%i, %i) out of range while loading "
+            logger.Log(EQEmuLogSys::Error, "[TASKS]Task or Activity ID (%i, %i) out of range while loading "
                                             "activities from database", taskID, activityID);
             continue;
         }
 
         if(Tasks[taskID]==nullptr) {
-            logger.Log(EQEmuLogSys::Error,"[TASKS]Activity for non-existent task (%i, %i) while loading activities from database", taskID, activityID);
+            logger.Log(EQEmuLogSys::Error, "[TASKS]Activity for non-existent task (%i, %i) while loading activities from database", taskID, activityID);
             continue;
         }
 
@@ -238,7 +238,7 @@ bool TaskManager::LoadTasks(int singleTask) {
         // ERR_NOTASK errors.
         // Change to (activityID != (Tasks[taskID]->ActivityCount + 1)) to index from 1
         if(activityID != Tasks[taskID]->ActivityCount) {
-            logger.Log(EQEmuLogSys::Error,"[TASKS]Activities for Task %i are not sequential starting at 0. Not loading task.", taskID, activityID);
+            logger.Log(EQEmuLogSys::Error, "[TASKS]Activities for Task %i are not sequential starting at 0. Not loading task.", taskID, activityID);
             Tasks[taskID] = nullptr;
             continue;
         }
@@ -323,7 +323,7 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state) {
                                                 characterID, taskID, task, state->ActiveTasks[task].AcceptedTime);
                 auto results = database.QueryDatabase(query);
 				if(!results.Success())
-					logger.Log(EQEmuLogSys::Error,ERR_MYSQLERROR, results.ErrorMessage().c_str());
+					logger.Log(EQEmuLogSys::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
 				else
 					state->ActiveTasks[task].Updated = false;
 
@@ -362,7 +362,7 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state) {
             auto results = database.QueryDatabase(query);
 
             if(!results.Success()) {
-                logger.Log(EQEmuLogSys::Error,ERR_MYSQLERROR, results.ErrorMessage().c_str());
+                logger.Log(EQEmuLogSys::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
                 continue;
             }
 
@@ -396,7 +396,7 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state) {
         std::string query = StringFormat(completedTaskQuery, characterID, state->CompletedTasks[i].CompletedTime, taskID, -1);
         auto results = database.QueryDatabase(query);
         if(!results.Success()) {
-            logger.Log(EQEmuLogSys::Error,ERR_MYSQLERROR, results.ErrorMessage().c_str());
+            logger.Log(EQEmuLogSys::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
             continue;
         }
 
@@ -413,7 +413,7 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state) {
             query = StringFormat(completedTaskQuery, characterID, state->CompletedTasks[i].CompletedTime, taskID, j);
             results = database.QueryDatabase(query);
             if(!results.Success())
-                logger.Log(EQEmuLogSys::Error,ERR_MYSQLERROR, results.ErrorMessage().c_str());
+                logger.Log(EQEmuLogSys::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
 
         }
 
@@ -466,7 +466,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
                                     "WHERE `charid` = %i ORDER BY acceptedtime", characterID);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        logger.Log(EQEmuLogSys::Error,"[TASKS]Error in TaskManager::LoadClientState load Tasks: %s", results.ErrorMessage().c_str());
+        logger.Log(EQEmuLogSys::Error, "[TASKS]Error in TaskManager::LoadClientState load Tasks: %s", results.ErrorMessage().c_str());
 		return false;
     }
 
@@ -475,17 +475,17 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
         int slot = atoi(row[1]);
 
         if((taskID<0) || (taskID>=MAXTASKS)) {
-            logger.Log(EQEmuLogSys::Error,"[TASKS]Task ID %i out of range while loading character tasks from database", taskID);
+            logger.Log(EQEmuLogSys::Error, "[TASKS]Task ID %i out of range while loading character tasks from database", taskID);
             continue;
         }
 
         if((slot<0) || (slot>=MAXACTIVETASKS)) {
-            logger.Log(EQEmuLogSys::Error,"[TASKS] Slot %i out of range while loading character tasks from database", slot);
+            logger.Log(EQEmuLogSys::Error, "[TASKS] Slot %i out of range while loading character tasks from database", slot);
             continue;
         }
 
         if(state->ActiveTasks[slot].TaskID != TASKSLOTEMPTY) {
-            logger.Log(EQEmuLogSys::Error,"[TASKS] Slot %i for Task %is is already occupied.", slot, taskID);
+            logger.Log(EQEmuLogSys::Error, "[TASKS] Slot %i for Task %is is already occupied.", slot, taskID);
             continue;
         }
 
@@ -513,20 +513,20 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
                         "ORDER BY `taskid` ASC, `activityid` ASC", characterID);
     results = database.QueryDatabase(query);
     if (!results.Success()){
-		logger.Log(EQEmuLogSys::Error,"[TASKS]Error in TaskManager::LoadClientState load Activities: %s", results.ErrorMessage().c_str());
+		logger.Log(EQEmuLogSys::Error, "[TASKS]Error in TaskManager::LoadClientState load Activities: %s", results.ErrorMessage().c_str());
 		return false;
 	}
 
     for (auto row = results.begin(); row != results.end(); ++row) {
         int taskID = atoi(row[0]);
         if((taskID<0) || (taskID>=MAXTASKS)) {
-            logger.Log(EQEmuLogSys::Error,"[TASKS]Task ID %i out of range while loading character activities from database", taskID);
+            logger.Log(EQEmuLogSys::Error, "[TASKS]Task ID %i out of range while loading character activities from database", taskID);
             continue;
         }
 
         int activityID = atoi(row[1]);
         if((activityID<0) || (activityID>=MAXACTIVITIESPERTASK)) {
-            logger.Log(EQEmuLogSys::Error,"[TASKS]Activity ID %i out of range while loading character activities from database", activityID);
+            logger.Log(EQEmuLogSys::Error, "[TASKS]Activity ID %i out of range while loading character activities from database", activityID);
             continue;
         }
 
@@ -540,7 +540,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
             }
 
         if(activeTaskIndex == -1) {
-            logger.Log(EQEmuLogSys::Error,"[TASKS]Activity %i found for task %i which client does not have.", activityID, taskID);
+            logger.Log(EQEmuLogSys::Error, "[TASKS]Activity %i found for task %i which client does not have.", activityID, taskID);
             continue;
         }
 
@@ -566,7 +566,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 							characterID);
         results = database.QueryDatabase(query);
         if (!results.Success()) {
-            logger.Log(EQEmuLogSys::Error,"[TASKS]Error in TaskManager::LoadClientState load completed tasks: %s", results.ErrorMessage().c_str());
+            logger.Log(EQEmuLogSys::Error, "[TASKS]Error in TaskManager::LoadClientState load completed tasks: %s", results.ErrorMessage().c_str());
 			return false;
         }
 
@@ -582,7 +582,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 
             int taskID = atoi(row[0]);
             if((taskID <= 0) || (taskID >=MAXTASKS)) {
-                logger.Log(EQEmuLogSys::Error,"[TASKS]Task ID %i out of range while loading completed tasks from database", taskID);
+                logger.Log(EQEmuLogSys::Error, "[TASKS]Task ID %i out of range while loading completed tasks from database", taskID);
                 continue;
             }
 
@@ -592,7 +592,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
             // completed.
             int activityID = atoi(row[1]);
             if((activityID<-1) || (activityID>=MAXACTIVITIESPERTASK)) {
-                logger.Log(EQEmuLogSys::Error,"[TASKS]Activity ID %i out of range while loading completed tasks from database", activityID);
+                logger.Log(EQEmuLogSys::Error, "[TASKS]Activity ID %i out of range while loading completed tasks from database", activityID);
                 continue;
             }
 
@@ -634,7 +634,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
                         characterID, MAXTASKS);
     results = database.QueryDatabase(query);
     if (!results.Success())
-        logger.Log(EQEmuLogSys::Error,"[TASKS]Error in TaskManager::LoadClientState load enabled tasks: %s", results.ErrorMessage().c_str());
+        logger.Log(EQEmuLogSys::Error, "[TASKS]Error in TaskManager::LoadClientState load enabled tasks: %s", results.ErrorMessage().c_str());
     else
         for (auto row = results.begin(); row != results.end(); ++row) {
 			int taskID = atoi(row[0]);
@@ -652,7 +652,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 			c->Message(13, "Active Task Slot %i, references a task (%i), that does not exist. "
 						"Removing from memory. Contact a GM to resolve this.",i, taskID);
 
-			logger.Log(EQEmuLogSys::Error,"[TASKS]Character %i has task %i which does not exist.", characterID, taskID);
+			logger.Log(EQEmuLogSys::Error, "[TASKS]Character %i has task %i which does not exist.", characterID, taskID);
 			state->ActiveTasks[i].TaskID=TASKSLOTEMPTY;
 			continue;
 
@@ -664,7 +664,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 							"Removing from memory. Contact a GM to resolve this.",
 							taskID, Tasks[taskID]->Title);
 
-				logger.Log(EQEmuLogSys::Error,"[TASKS]Fatal error in character %i task state. Activity %i for "
+				logger.Log(EQEmuLogSys::Error, "[TASKS]Fatal error in character %i task state. Activity %i for "
 						"Task %i either missing from client state or from task.", characterID, j, taskID);
 				state->ActiveTasks[i].TaskID=TASKSLOTEMPTY;
 				break;
@@ -725,7 +725,7 @@ void ClientTaskState::EnableTask(int characterID, int taskCount, int *tasks) {
 	_log(TASKS__UPDATE, "Executing query %s", query.c_str());
     auto results = database.QueryDatabase(query);
 	if(!results.Success())
-		logger.Log(EQEmuLogSys::Error,"[TASKS]Error in ClientTaskState::EnableTask %s %s", query.c_str(), results.ErrorMessage().c_str());
+		logger.Log(EQEmuLogSys::Error, "[TASKS]Error in ClientTaskState::EnableTask %s %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
@@ -774,7 +774,7 @@ void ClientTaskState::DisableTask(int charID, int taskCount, int *taskList) {
 	_log(TASKS__UPDATE, "Executing query %s", query.c_str());
     auto results = database.QueryDatabase(query);
 	if(!results.Success())
-		logger.Log(EQEmuLogSys::Error,"[TASKS]Error in ClientTaskState::DisableTask %s %s", query.c_str(), results.ErrorMessage().c_str());
+		logger.Log(EQEmuLogSys::Error, "[TASKS]Error in ClientTaskState::DisableTask %s %s", query.c_str(), results.ErrorMessage().c_str());
 }
 
 bool ClientTaskState::IsTaskEnabled(int TaskID) {
@@ -1280,7 +1280,7 @@ static void DeleteCompletedTaskFromDatabase(int charID, int taskID) {
     const std::string query = StringFormat("DELETE FROM completed_tasks WHERE charid=%i AND taskid = %i", charID, taskID);
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		logger.Log(EQEmuLogSys::Error,"[TASKS]Error in CientTaskState::CancelTask %s, %s", query.c_str(), results.ErrorMessage().c_str());
+		logger.Log(EQEmuLogSys::Error, "[TASKS]Error in CientTaskState::CancelTask %s, %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -2938,7 +2938,7 @@ void ClientTaskState::RemoveTask(Client *c, int sequenceNumber) {
                                     characterID, ActiveTasks[sequenceNumber].TaskID);
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		logger.Log(EQEmuLogSys::Error,"[TASKS]Error in CientTaskState::CancelTask %s", results.ErrorMessage().c_str());
+		logger.Log(EQEmuLogSys::Error, "[TASKS]Error in CientTaskState::CancelTask %s", results.ErrorMessage().c_str());
 		return;
 	}
     _log(TASKS__UPDATE, "CancelTask: %s", query.c_str());
@@ -2947,7 +2947,7 @@ void ClientTaskState::RemoveTask(Client *c, int sequenceNumber) {
                         characterID, ActiveTasks[sequenceNumber].TaskID);
 	results = database.QueryDatabase(query);
 	if(!results.Success())
-		logger.Log(EQEmuLogSys::Error,"[TASKS]Error in CientTaskState::CancelTask %s", results.ErrorMessage().c_str());
+		logger.Log(EQEmuLogSys::Error, "[TASKS]Error in CientTaskState::CancelTask %s", results.ErrorMessage().c_str());
 
 	_log(TASKS__UPDATE, "CancelTask: %s", query.c_str());
 
@@ -3088,7 +3088,7 @@ bool TaskGoalListManager::LoadLists() {
                         "ORDER BY `listid`";
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        logger.Log(EQEmuLogSys::Error,ERR_MYSQLERROR, query.c_str(), results.ErrorMessage().c_str());
+        logger.Log(EQEmuLogSys::Error, ERR_MYSQLERROR, query.c_str(), results.ErrorMessage().c_str());
 		return false;
     }
 
@@ -3122,7 +3122,7 @@ bool TaskGoalListManager::LoadLists() {
 							listID, size);
         results = database.QueryDatabase(query);
         if (!results.Success()) {
-            logger.Log(EQEmuLogSys::Error,ERR_MYSQLERROR, query.c_str(), results.ErrorMessage().c_str());
+            logger.Log(EQEmuLogSys::Error, ERR_MYSQLERROR, query.c_str(), results.ErrorMessage().c_str());
 			TaskGoalLists[listIndex].Size = 0;
 			continue;
         }
@@ -3259,7 +3259,7 @@ bool TaskProximityManager::LoadProximities(int zoneID) {
                                     "ORDER BY `zoneid` ASC", zoneID);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        logger.Log(EQEmuLogSys::Error,"Error in TaskProximityManager::LoadProximities %s %s", query.c_str(), results.ErrorMessage().c_str());
+        logger.Log(EQEmuLogSys::Error, "Error in TaskProximityManager::LoadProximities %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
     }
 

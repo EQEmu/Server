@@ -1772,7 +1772,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					}
 					else {
 						Message_StringID(4, TARGET_NOT_FOUND);
-						logger.Log(EQEmuLogSys::Error,"%s attempted to cast spell id %u with spell effect SE_SummonCorpse, but could not cast target into a Client object.", GetCleanName(), spell_id);
+						logger.Log(EQEmuLogSys::Error, "%s attempted to cast spell id %u with spell effect SE_SummonCorpse, but could not cast target into a Client object.", GetCleanName(), spell_id);
 					}
 				}
 

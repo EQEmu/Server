@@ -59,7 +59,7 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
                                     "LIMIT %i", ZoneID, skill, FORAGE_ITEM_LIMIT);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        logger.Log(EQEmuLogSys::Error,"Error in Forage query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        logger.Log(EQEmuLogSys::Error, "Error in Forage query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
 
@@ -70,7 +70,7 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 
         item[index] = atoi(row[0]);
         chance[index] = atoi(row[1]) + chancepool;
-        logger.Log(EQEmuLogSys::Error,"Possible Forage: %d with a %d chance", item[index], chance[index]);
+        logger.Log(EQEmuLogSys::Error, "Possible Forage: %d with a %d chance", item[index], chance[index]);
         chancepool = chance[index];
     }
 
@@ -389,7 +389,7 @@ void Client::ForageItem(bool guarantee) {
 		const Item_Struct* food_item = database.GetItem(foragedfood);
 
 		if(!food_item) {
-			logger.Log(EQEmuLogSys::Error,"nullptr returned from database.GetItem in ClientForageItem");
+			logger.Log(EQEmuLogSys::Error, "nullptr returned from database.GetItem in ClientForageItem");
 			return;
 		}
 

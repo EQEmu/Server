@@ -2641,7 +2641,7 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 			std::string insert_query = StringFormat("INSERT INTO `saylink` (`phrase`) VALUES ('%s')", escaped_string);
 			results = database.QueryDatabase(insert_query);
 			if (!results.Success()) {
-				logger.Log(EQEmuLogSys::Error,"Error in saylink phrase queries", results.ErrorMessage().c_str());
+				logger.Log(EQEmuLogSys::Error, "Error in saylink phrase queries", results.ErrorMessage().c_str());
 			} else {
 				results = database.QueryDatabase(query);
 				if (results.Success()) {
@@ -2649,7 +2649,7 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 						for(auto row = results.begin(); row != results.end(); ++row)
 							sayid = atoi(row[0]);
 				} else {
-					logger.Log(EQEmuLogSys::Error,"Error in saylink phrase queries", results.ErrorMessage().c_str());
+					logger.Log(EQEmuLogSys::Error, "Error in saylink phrase queries", results.ErrorMessage().c_str());
 				}
 			}
 		}

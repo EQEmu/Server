@@ -371,7 +371,7 @@ void EntityList::CheckGroupList (const char *fname, const int fline)
 	{
 		if (*it == nullptr)
 		{
-			logger.Log(EQEmuLogSys::Error,"nullptr group, %s:%i", fname, fline);
+			logger.Log(EQEmuLogSys::Error, "nullptr group, %s:%i", fname, fline);
 		}
 	}
 }
@@ -520,12 +520,12 @@ void EntityList::MobProcess()
 				zone->StartShutdownTimer();
 				Group *g = GetGroupByMob(mob);
 				if(g) {
-					logger.Log(EQEmuLogSys::Error,"About to delete a client still in a group.");
+					logger.Log(EQEmuLogSys::Error, "About to delete a client still in a group.");
 					g->DelMember(mob);
 				}
 				Raid *r = entity_list.GetRaidByClient(mob->CastToClient());
 				if(r) {
-					logger.Log(EQEmuLogSys::Error,"About to delete a client still in a raid.");
+					logger.Log(EQEmuLogSys::Error, "About to delete a client still in a raid.");
 					r->MemberZoned(mob->CastToClient());
 				}
 				entity_list.RemoveClient(id);
@@ -2509,7 +2509,7 @@ char *EntityList::MakeNameUnique(char *name)
 			return name;
 		}
 	}
-	logger.Log(EQEmuLogSys::Error,"Fatal error in EntityList::MakeNameUnique: Unable to find unique name for '%s'", name);
+	logger.Log(EQEmuLogSys::Error, "Fatal error in EntityList::MakeNameUnique: Unable to find unique name for '%s'", name);
 	char tmp[64] = "!";
 	strn0cpy(&tmp[1], name, sizeof(tmp) - 1);
 	strcpy(name, tmp);

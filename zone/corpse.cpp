@@ -875,7 +875,7 @@ bool Corpse::Process() {
 				logger.LogDebug(EQEmuLogSys::General, "Tagged %s player corpse has burried.", this->GetName());
 			}
 			else {
-				logger.Log(EQEmuLogSys::Error,"Unable to bury %s player corpse.", this->GetName());
+				logger.Log(EQEmuLogSys::Error, "Unable to bury %s player corpse.", this->GetName());
 				return true;
 			}
 		}
