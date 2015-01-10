@@ -35,6 +35,7 @@
 #include "../common/rulesys.h"
 #include "../common/seperator.h"
 #include "../common/string_util.h"
+#include "../common/eqemu_logsys.h"
 
 #include "client_logs.h"
 #include "guild_mgr.h"
@@ -52,11 +53,17 @@
 #include "zone.h"
 #include "zone_config.h"
 
+#include <time.h>
+#include <ctime>
+#include <iostream>
+
 #ifdef _WINDOWS
 #define snprintf	_snprintf
 #define strncasecmp	_strnicmp
 #define strcasecmp	_stricmp
 #endif
+
+
 
 extern bool staticzone;
 extern NetConnection net;
@@ -124,7 +131,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 			zone->tradevar = 0;
 			zone->lootvar = 0;
 		}
-	}
+	}	
 
 	ZoneLoaded = true;
 
@@ -132,7 +139,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	if(iInstanceID != 0)
 	{
 		ServerPacket *pack = new ServerPacket(ServerOP_AdventureZoneData, sizeof(uint16));
-		*((uint16*)pack->pBuffer) = iInstanceID;
+		*((uint16*)pack->pBuffer) = iInstanceID; 
 		worldserver.SendPacket(pack);
 		delete pack;
 	}
@@ -142,6 +149,15 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	parse->Init();
 	UpdateWindowTitle();
 	zone->GetTimeSync();
+
+	/* Set Logging */
+
+	log_sys.StartZoneLogs(StringFormat("%s_ver-%u_instid-%u_port-%u", zone->GetShortName(), zone->GetInstanceVersion(), zone->GetInstanceID(), ZoneConfig::get()->ZonePort));
+
+	clock_t t = std::clock(); /* Function timer start */
+	uint64 i = 0;
+	
+	log_sys.WriteZoneLog(1, "This is some serious shit");
 
 	return true;
 }
@@ -708,6 +724,8 @@ void Zone::Shutdown(bool quite)
 	entity_list.ClearAreas();
 	parse->ReloadQuests(true);
 	UpdateWindowTitle();
+
+	log_sys.CloseZoneLogs();
 }
 
 void Zone::LoadZoneDoors(const char* zone, int16 version)

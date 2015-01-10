@@ -44,6 +44,10 @@ namespace ConsoleColor {
 #include "debug.h"
 #include "misc_functions.h"
 #include "platform.h"
+#include "eqemu_logsys.h"
+#include "string_util.h"
+
+EQEmuLogSys backport_log_sys;
 
 #ifndef va_copy
 	#define va_copy(d,s) ((d) = (s))
@@ -145,6 +149,7 @@ bool EQEmuLog::write(LogIDs id, const char *fmt, ...)
 	if (id >= MaxLogID) {
 		return false;
 	}
+		
 	bool dofile = false;
 	if (pLogStatus[id] & 1) {
 		dofile = open(id);
@@ -156,81 +161,16 @@ bool EQEmuLog::write(LogIDs id, const char *fmt, ...)
 	if (!logFileValid) {
 		return false;    //check again for threading race reasons (to avoid two mutexes)
 	}
-	time_t aclock;
-	struct tm *newtime;
-	time( &aclock ); /* Get time in seconds */
-	newtime = localtime( &aclock ); /* Convert time to struct */
-	if (dofile)
-	#ifndef NO_PIDLOG
-		fprintf(fp[id], "[%02d.%02d. - %02d:%02d:%02d] ", newtime->tm_mon + 1, newtime->tm_mday, newtime->tm_hour, newtime->tm_min, newtime->tm_sec);
-	#else
-		fprintf(fp[id], "%04i [%02d.%02d. - %02d:%02d:%02d] ", getpid(), newtime->tm_mon + 1, newtime->tm_mday, newtime->tm_hour, newtime->tm_min, newtime->tm_sec);
-	#endif
+
 	va_list argptr, tmpargptr;
 	va_start(argptr, fmt);
-	if (dofile) {
-		va_copy(tmpargptr, argptr);
-		vfprintf( fp[id], fmt, tmpargptr );
-	}
+
+	backport_log_sys.WriteZoneLog(id, vStringFormat(fmt, argptr).c_str());
+
 	if (logCallbackFmt[id]) {
 		msgCallbackFmt p = logCallbackFmt[id];
 		va_copy(tmpargptr, argptr);
 		p(id, fmt, tmpargptr );
-	}
-	if (pLogStatus[id] & 2) {
-		if (pLogStatus[id] & 8) {
-			fprintf(stderr, "[%s] ", LogNames[id]);
-			vfprintf( stderr, fmt, argptr );
-		} 
-		/* This is what's outputted to console */
-		else {
-
-#ifdef _WINDOWS
-			HANDLE  console_handle;
-			console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
-
-			CONSOLE_FONT_INFOEX info = { 0 };
-			info.cbSize = sizeof(info);
-			info.dwFontSize.Y = 12; // leave X as zero
-			info.FontWeight = FW_NORMAL;
-			wcscpy(info.FaceName, L"Lucida Console");
-			SetCurrentConsoleFontEx(console_handle, NULL, &info);
-
-			if (id == EQEmuLog::LogIDs::Status){	SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::Yellow); }
-			if (id == EQEmuLog::LogIDs::Error){		SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightRed); }
-			if (id == EQEmuLog::LogIDs::Normal){	SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightGreen); }
-			if (id == EQEmuLog::LogIDs::Debug){		SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::Yellow); }
-			if (id == EQEmuLog::LogIDs::Quest){		SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightCyan); } 
-			if (id == EQEmuLog::LogIDs::Commands){	SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightMagenta); }
-			if (id == EQEmuLog::LogIDs::Crash){		SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightRed); } 
-#endif
-
-			fprintf(stdout, "[%s] ", LogNames[id]);
-			vfprintf( stdout, fmt, argptr );
-
-#ifdef _WINDOWS
-			/* Always set back to white*/
-			SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::White);
-#endif
-		}
-	}
-	va_end(argptr);
-	if (dofile) {
-		fprintf(fp[id], "\n");
-	}
-
-	/* Print Lind Endings */
-	if (pLogStatus[id] & 2) {
-		if (pLogStatus[id] & 8) {
-			fprintf(stderr, "\n");
-			fflush(stderr);
-		} else {
-			fprintf(stdout, "\n");
-			fflush(stdout);
-		}
-	}
-	if (dofile) {
-		fflush(fp[id]);
 	}
 	return true;
 }
