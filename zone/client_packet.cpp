@@ -13855,8 +13855,7 @@ void Client::Handle_OP_VetClaimRequest(const EQApplicationPacket *app)
 {
 	if (app->size < sizeof(VeteranClaimRequest))
 	{
-		LogFile->write(EQEmuLog::Debug, "OP_VetClaimRequest size lower than expected: got %u expected at least %u",
-			app->size, sizeof(VeteranClaimRequest));
+		LogFile->write(EQEmuLog::Debug, "OP_VetClaimRequest size lower than expected: got %u expected at least %u", app->size, sizeof(VeteranClaimRequest));
 		DumpPacket(app);
 		return;
 	}
