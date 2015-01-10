@@ -144,7 +144,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 		delete pack;
 	}
 
-	LogFile->write(EQEmuLog::Normal, "---- Zone server %s, listening on port:%i ----", zonename, ZoneConfig::get()->ZonePort);
+	logger.Log(EQEmuLogSys::Normal, "---- Zone server %s, listening on port:%i ----", zonename, ZoneConfig::get()->ZonePort);
 	logger.Log(EQEmuLogSys::Status, "Zone Bootup: %s (%i: %i)", zonename, iZoneID, iInstanceID);
 	parse->Init();
 	UpdateWindowTitle();
@@ -711,7 +711,7 @@ void Zone::Shutdown(bool quite)
 	petition_list.ClearPetitions();
 	zone->GotCurTime(false);
 	if (!quite)
-		LogFile->write(EQEmuLog::Normal, "Zone shutdown: going to sleep");
+		logger.Log(EQEmuLogSys::Normal, "Zone shutdown: going to sleep");
 	ZoneLoaded = false;
 
 	zone->ResetAuth();
