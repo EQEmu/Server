@@ -337,7 +337,7 @@ uint32 BaseGuildManager::_GetFreeGuildID() {
 
 		if (!results.Success())
 		{
-			LogFile->write(EQEmuLog::Error, "Error in _GetFreeGuildID query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+			logger.Log(EQEmuLogSys::Error, "Error in _GetFreeGuildID query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 			continue;
 		}
 

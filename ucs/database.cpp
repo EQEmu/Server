@@ -19,6 +19,7 @@
 
 
 #include "../common/debug.h"
+#include "../common/eqemu_logsys.h"
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -73,14 +74,14 @@ bool Database::Connect(const char* host, const char* user, const char* passwd, c
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	if (!Open(host, user, passwd, database, port, &errnum, errbuf))
 	{
-		LogFile->write(EQEmuLog::Error, "Failed to connect to database: Error: %s", errbuf);
+		logger.Log(EQEmuLogSys::Error, "Failed to connect to database: Error: %s", errbuf);
 		HandleMysqlError(errnum);
 
 		return false;
 	}
 	else
 	{
-		LogFile->write(EQEmuLog::Status, "Using database '%s' at %s:%d",database,host,port);
+		logger.Log(EQEmuLogSys::Status, "Using database '%s' at %s:%d",database,host,port);
 		return true;
 	}
 }

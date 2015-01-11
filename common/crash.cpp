@@ -1,4 +1,5 @@
 #include "debug.h"
+#include "eqemu_logsys.h"
 #include "crash.h"
 
 #if defined(_WINDOWS) && defined(CRASH_LOGGING)
@@ -24,7 +25,7 @@ public:
 			}
 		}
 
-		LogFile->write(EQEmuLog::Crash, buffer);
+		logger.Log(EQEmuLogSys::Crash, buffer);
 		StackWalker::OnOutput(szText);
 	}
 };
@@ -34,67 +35,67 @@ LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS *ExceptionInfo)
 	switch(ExceptionInfo->ExceptionRecord->ExceptionCode)
 	{
 		case EXCEPTION_ACCESS_VIOLATION:
-			LogFile->write(EQEmuLog::Crash, "EXCEPTION_ACCESS_VIOLATION");
+			logger.Log(EQEmuLogSys::Crash, "EXCEPTION_ACCESS_VIOLATION");
 			break;
 		case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
-			LogFile->write(EQEmuLog::Crash, "EXCEPTION_ARRAY_BOUNDS_EXCEEDED");
+			logger.Log(EQEmuLogSys::Crash, "EXCEPTION_ARRAY_BOUNDS_EXCEEDED");
 			break;
 		case EXCEPTION_BREAKPOINT:
-			LogFile->write(EQEmuLog::Crash, "EXCEPTION_BREAKPOINT");
+			logger.Log(EQEmuLogSys::Crash, "EXCEPTION_BREAKPOINT");
 			break;
 		case EXCEPTION_DATATYPE_MISALIGNMENT:
-			LogFile->write(EQEmuLog::Crash, "EXCEPTION_DATATYPE_MISALIGNMENT");
+			logger.Log(EQEmuLogSys::Crash, "EXCEPTION_DATATYPE_MISALIGNMENT");
 			break;
 		case EXCEPTION_FLT_DENORMAL_OPERAND:
-			LogFile->write(EQEmuLog::Crash, "EXCEPTION_FLT_DENORMAL_OPERAND");
+			logger.Log(EQEmuLogSys::Crash, "EXCEPTION_FLT_DENORMAL_OPERAND");
 			break;
 		case EXCEPTION_FLT_DIVIDE_BY_ZERO:
-			LogFile->write(EQEmuLog::Crash, "EXCEPTION_FLT_DIVIDE_BY_ZERO");
+			logger.Log(EQEmuLogSys::Crash, "EXCEPTION_FLT_DIVIDE_BY_ZERO");
 			break;
 		case EXCEPTION_FLT_INEXACT_RESULT:
-			LogFile->write(EQEmuLog::Crash, "EXCEPTION_FLT_INEXACT_RESULT");
+			logger.Log(EQEmuLogSys::Crash, "EXCEPTION_FLT_INEXACT_RESULT");
 			break;
 		case EXCEPTION_FLT_INVALID_OPERATION:
-			LogFile->write(EQEmuLog::Crash, "EXCEPTION_FLT_INVALID_OPERATION");
+			logger.Log(EQEmuLogSys::Crash, "EXCEPTION_FLT_INVALID_OPERATION");
 			break;
 		case EXCEPTION_FLT_OVERFLOW:
-			LogFile->write(EQEmuLog::Crash, "EXCEPTION_FLT_OVERFLOW");
+			logger.Log(EQEmuLogSys::Crash, "EXCEPTION_FLT_OVERFLOW");
 			break;
 		case EXCEPTION_FLT_STACK_CHECK:
-			LogFile->write(EQEmuLog::Crash, "EXCEPTION_FLT_STACK_CHECK");
+			logger.Log(EQEmuLogSys::Crash, "EXCEPTION_FLT_STACK_CHECK");
 			break;
 		case EXCEPTION_FLT_UNDERFLOW:
-			LogFile->write(EQEmuLog::Crash, "EXCEPTION_FLT_UNDERFLOW");
+			logger.Log(EQEmuLogSys::Crash, "EXCEPTION_FLT_UNDERFLOW");
 			break;
 		case EXCEPTION_ILLEGAL_INSTRUCTION:
-			LogFile->write(EQEmuLog::Crash, "EXCEPTION_ILLEGAL_INSTRUCTION");
+			logger.Log(EQEmuLogSys::Crash, "EXCEPTION_ILLEGAL_INSTRUCTION");
 			break;
 		case EXCEPTION_IN_PAGE_ERROR:
-			LogFile->write(EQEmuLog::Crash, "EXCEPTION_IN_PAGE_ERROR");
+			logger.Log(EQEmuLogSys::Crash, "EXCEPTION_IN_PAGE_ERROR");
 			break;
 		case EXCEPTION_INT_DIVIDE_BY_ZERO:
-			LogFile->write(EQEmuLog::Crash, "EXCEPTION_INT_DIVIDE_BY_ZERO");
+			logger.Log(EQEmuLogSys::Crash, "EXCEPTION_INT_DIVIDE_BY_ZERO");
 			break;
 		case EXCEPTION_INT_OVERFLOW:
-			LogFile->write(EQEmuLog::Crash, "EXCEPTION_INT_OVERFLOW");
+			logger.Log(EQEmuLogSys::Crash, "EXCEPTION_INT_OVERFLOW");
 			break;
 		case EXCEPTION_INVALID_DISPOSITION:
-			LogFile->write(EQEmuLog::Crash, "EXCEPTION_INVALID_DISPOSITION");
+			logger.Log(EQEmuLogSys::Crash, "EXCEPTION_INVALID_DISPOSITION");
 			break;
 		case EXCEPTION_NONCONTINUABLE_EXCEPTION:
-			LogFile->write(EQEmuLog::Crash, "EXCEPTION_NONCONTINUABLE_EXCEPTION");
+			logger.Log(EQEmuLogSys::Crash, "EXCEPTION_NONCONTINUABLE_EXCEPTION");
 			break;
 		case EXCEPTION_PRIV_INSTRUCTION:
-			LogFile->write(EQEmuLog::Crash, "EXCEPTION_PRIV_INSTRUCTION");
+			logger.Log(EQEmuLogSys::Crash, "EXCEPTION_PRIV_INSTRUCTION");
 			break;
 		case EXCEPTION_SINGLE_STEP:
-			LogFile->write(EQEmuLog::Crash, "EXCEPTION_SINGLE_STEP");
+			logger.Log(EQEmuLogSys::Crash, "EXCEPTION_SINGLE_STEP");
 			break;
 		case EXCEPTION_STACK_OVERFLOW:
-			LogFile->write(EQEmuLog::Crash, "EXCEPTION_STACK_OVERFLOW");
+			logger.Log(EQEmuLogSys::Crash, "EXCEPTION_STACK_OVERFLOW");
 			break;
 		default:
-			LogFile->write(EQEmuLog::Crash, "Unknown Exception");
+			logger.Log(EQEmuLogSys::Crash, "Unknown Exception");
 			break;
 	}
 

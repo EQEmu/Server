@@ -17,6 +17,7 @@
 */
 
 #include "debug.h"
+#include "eqemu_logsys.h"
 #include "eq_packet.h"
 #include "eq_stream.h"
 #include "op_codes.h"
@@ -987,7 +988,7 @@ EQRawApplicationPacket *p=nullptr;
 			EmuOpcode emu_op = (*OpMgr)->EQToEmu(p->opcode);
 #if EQDEBUG >= 4
 			if(emu_op == OP_Unknown) {
-				LogFile->write(EQEmuLog::Debug, "Unable to convert EQ opcode 0x%.4x to an Application opcode.", p->opcode);
+				logger.Log(EQEmuLogSys::Debug, "Unable to convert EQ opcode 0x%.4x to an Application opcode.", p->opcode);
 			}
 #endif
 			p->SetOpcode(emu_op);

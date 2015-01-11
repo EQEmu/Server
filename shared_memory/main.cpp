@@ -39,22 +39,22 @@ int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformSharedMemory);
 	set_exception_handler();
 
-	LogFile->write(EQEmuLog::Status, "Shared Memory Loader Program");
+	logger.Log(EQEmuLogSys::Status, "Shared Memory Loader Program");
 	if(!EQEmuConfig::LoadConfig()) {
-		LogFile->write(EQEmuLog::Error, "Unable to load configuration file.");
+		logger.Log(EQEmuLogSys::Error, "Unable to load configuration file.");
 		return 1;
 	}
 
 	const EQEmuConfig *config = EQEmuConfig::get();
 	if(!load_log_settings(config->LogSettingsFile.c_str())) {
-		LogFile->write(EQEmuLog::Error, "Warning: unable to read %s.", config->LogSettingsFile.c_str());
+		logger.Log(EQEmuLogSys::Error, "Warning: unable to read %s.", config->LogSettingsFile.c_str());
 	}
 
 	SharedDatabase database;
-	LogFile->write(EQEmuLog::Status, "Connecting to database...");
+	logger.Log(EQEmuLogSys::Status, "Connecting to database...");
 	if(!database.Connect(config->DatabaseHost.c_str(), config->DatabaseUsername.c_str(),
 		config->DatabasePassword.c_str(), config->DatabaseDB.c_str(), config->DatabasePort)) {
-		LogFile->write(EQEmuLog::Error, "Unable to connect to the database, cannot continue without a "
+		logger.Log(EQEmuLogSys::Error, "Unable to connect to the database, cannot continue without a "
 			"database connection");
 		return 1;
 	}
@@ -113,61 +113,61 @@ int main(int argc, char **argv) {
 	}
 
 	if(load_all || load_items) {
-		LogFile->write(EQEmuLog::Status, "Loading items...");
+		logger.Log(EQEmuLogSys::Status, "Loading items...");
 		try {
 			LoadItems(&database);
 		} catch(std::exception &ex) {
-			LogFile->write(EQEmuLog::Error, "%s", ex.what());
+			logger.Log(EQEmuLogSys::Error, "%s", ex.what());
 			return 1;
 		}
 	}
 
 	if(load_all || load_factions) {
-		LogFile->write(EQEmuLog::Status, "Loading factions...");
+		logger.Log(EQEmuLogSys::Status, "Loading factions...");
 		try {
 			LoadFactions(&database);
 		} catch(std::exception &ex) {
-			LogFile->write(EQEmuLog::Error, "%s", ex.what());
+			logger.Log(EQEmuLogSys::Error, "%s", ex.what());
 			return 1;
 		}
 	}
 
 	if(load_all || load_loot) {
-		LogFile->write(EQEmuLog::Status, "Loading loot...");
+		logger.Log(EQEmuLogSys::Status, "Loading loot...");
 		try {
 			LoadLoot(&database);
 		} catch(std::exception &ex) {
-			LogFile->write(EQEmuLog::Error, "%s", ex.what());
+			logger.Log(EQEmuLogSys::Error, "%s", ex.what());
 			return 1;
 		}
 	}
 
 	if(load_all || load_skill_caps) {
-		LogFile->write(EQEmuLog::Status, "Loading skill caps...");
+		logger.Log(EQEmuLogSys::Status, "Loading skill caps...");
 		try {
 			LoadSkillCaps(&database);
 		} catch(std::exception &ex) {
-			LogFile->write(EQEmuLog::Error, "%s", ex.what());
+			logger.Log(EQEmuLogSys::Error, "%s", ex.what());
 			return 1;
 		}
 	}
 
 	if(load_all || load_spells) {
-		LogFile->write(EQEmuLog::Status, "Loading spells...");
+		logger.Log(EQEmuLogSys::Status, "Loading spells...");
 		try {
 			LoadSpells(&database);
 		} catch(std::exception &ex) {
-			LogFile->write(EQEmuLog::Error, "%s", ex.what());
+			logger.Log(EQEmuLogSys::Error, "%s", ex.what());
 			return 1;
 		}
 	}
 
 	if(load_all || load_bd) {
-		LogFile->write(EQEmuLog::Status, "Loading base data...");
+		logger.Log(EQEmuLogSys::Status, "Loading base data...");
 		try {
 			LoadBaseData(&database);
 		} catch(std::exception &ex) {
-			LogFile->write(EQEmuLog::Error, "%s", ex.what());
+			logger.Log(EQEmuLogSys::Error, "%s", ex.what());
 			return 1;
 		}
 	}

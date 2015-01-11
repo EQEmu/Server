@@ -18,6 +18,7 @@
 
 #include <fstream>
 #include "../common/debug.h"
+#include "../common/eqemu_logsys.h"
 #include "../common/eqtime.h"
 #include "../common/eq_packet_structs.h"
 #include <memory.h>
@@ -140,7 +141,7 @@ bool EQTime::saveFile(const char *filename)
 	of.open(filename);
 	if(!of)
 	{
-		LogFile->write(EQEmuLog::Error, "EQTime::saveFile failed: Unable to open file '%s'", filename);
+		logger.Log(EQEmuLogSys::Error, "EQTime::saveFile failed: Unable to open file '%s'", filename);
 		return false;
 	}
 	//Enable for debugging
@@ -164,14 +165,14 @@ bool EQTime::loadFile(const char *filename)
 	in.open(filename);
 	if(!in)
 	{
-		LogFile->write(EQEmuLog::Error, "Could not load EQTime file %s", filename);
+		logger.Log(EQEmuLogSys::Error, "Could not load EQTime file %s", filename);
 		return false;
 	}
 	in >> version;
 	in.ignore(80, '\n');
 	if(version != EQT_VERSION)
 	{
-		LogFile->write(EQEmuLog::Error, "'%s' is NOT a valid EQTime file. File version is %i, EQTime version is %i", filename, version, EQT_VERSION);
+		logger.Log(EQEmuLogSys::Error, "'%s' is NOT a valid EQTime file. File version is %i, EQTime version is %i", filename, version, EQT_VERSION);
 		return false;
 	}
 	//in >> eqTime.start_eqtime.day;

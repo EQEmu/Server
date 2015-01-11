@@ -37,22 +37,22 @@ int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformClientExport);
 	set_exception_handler();
 
-	LogFile->write(EQEmuLog::Status, "Client Files Export Utility");
+	logger.Log(EQEmuLogSys::Status, "Client Files Export Utility");
 	if(!EQEmuConfig::LoadConfig()) {
-		LogFile->write(EQEmuLog::Error, "Unable to load configuration file.");
+		logger.Log(EQEmuLogSys::Error, "Unable to load configuration file.");
 		return 1;
 	}
 
 	const EQEmuConfig *config = EQEmuConfig::get();
 	if(!load_log_settings(config->LogSettingsFile.c_str())) {
-		LogFile->write(EQEmuLog::Error, "Warning: unable to read %s.", config->LogSettingsFile.c_str());
+		logger.Log(EQEmuLogSys::Error, "Warning: unable to read %s.", config->LogSettingsFile.c_str());
 	}
 
 	SharedDatabase database;
-	LogFile->write(EQEmuLog::Status, "Connecting to database...");
+	logger.Log(EQEmuLogSys::Status, "Connecting to database...");
 	if(!database.Connect(config->DatabaseHost.c_str(), config->DatabaseUsername.c_str(),
 		config->DatabasePassword.c_str(), config->DatabaseDB.c_str(), config->DatabasePort)) {
-		LogFile->write(EQEmuLog::Error, "Unable to connect to the database, cannot continue without a "
+		logger.Log(EQEmuLogSys::Error, "Unable to connect to the database, cannot continue without a "
 			"database connection");
 		return 1;
 	}
@@ -65,11 +65,11 @@ int main(int argc, char **argv) {
 }
 
 void ExportSpells(SharedDatabase *db) {
-	LogFile->write(EQEmuLog::Status, "Exporting Spells...");
+	logger.Log(EQEmuLogSys::Status, "Exporting Spells...");
 
 	FILE *f = fopen("export/spells_us.txt", "w");
 	if(!f) {
-		LogFile->write(EQEmuLog::Error, "Unable to open export/spells_us.txt to write, skipping.");
+		logger.Log(EQEmuLogSys::Error, "Unable to open export/spells_us.txt to write, skipping.");
 		return;
 	}
 
@@ -93,7 +93,7 @@ void ExportSpells(SharedDatabase *db) {
 			fprintf(f, "%s\n", line.c_str());
 		}
 	} else {
-		LogFile->write(EQEmuLog::Error, "Error in ExportSpells query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
+		logger.Log(EQEmuLogSys::Error, "Error in ExportSpells query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
 	}
 
 	fclose(f);
@@ -107,7 +107,7 @@ bool SkillUsable(SharedDatabase *db, int skill_id, int class_id) {
                                     class_id, skill_id);
 	auto results = db->QueryDatabase(query);
 	if(!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error in skill_usable query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
+        logger.Log(EQEmuLogSys::Error, "Error in skill_usable query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
         return false;
     }
 
@@ -127,7 +127,7 @@ int GetSkill(SharedDatabase *db, int skill_id, int class_id, int level) {
                                     class_id, skill_id, level);
     auto results = db->QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error in get_skill query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
+        logger.Log(EQEmuLogSys::Error, "Error in get_skill query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
 
@@ -139,11 +139,11 @@ int GetSkill(SharedDatabase *db, int skill_id, int class_id, int level) {
 }
 
 void ExportSkillCaps(SharedDatabase *db) {
-	LogFile->write(EQEmuLog::Status, "Exporting Skill Caps...");
+	logger.Log(EQEmuLogSys::Status, "Exporting Skill Caps...");
 
 	FILE *f = fopen("export/SkillCaps.txt", "w");
 	if(!f) {
-		LogFile->write(EQEmuLog::Error, "Unable to open export/SkillCaps.txt to write, skipping.");
+		logger.Log(EQEmuLogSys::Error, "Unable to open export/SkillCaps.txt to write, skipping.");
 		return;
 	}
 
@@ -168,11 +168,11 @@ void ExportSkillCaps(SharedDatabase *db) {
 }
 
 void ExportBaseData(SharedDatabase *db) {
-	LogFile->write(EQEmuLog::Status, "Exporting Base Data...");
+	logger.Log(EQEmuLogSys::Status, "Exporting Base Data...");
 
 	FILE *f = fopen("export/BaseData.txt", "w");
 	if(!f) {
-		LogFile->write(EQEmuLog::Error, "Unable to open export/BaseData.txt to write, skipping.");
+		logger.Log(EQEmuLogSys::Error, "Unable to open export/BaseData.txt to write, skipping.");
 		return;
 	}
 
@@ -194,7 +194,7 @@ void ExportBaseData(SharedDatabase *db) {
 			fprintf(f, "%s\n", line.c_str());
 		}
 	} else {
-		LogFile->write(EQEmuLog::Error, "Error in ExportBaseData query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
+		logger.Log(EQEmuLogSys::Error, "Error in ExportBaseData query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
 	}
 
 	fclose(f);
