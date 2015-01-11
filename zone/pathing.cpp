@@ -206,10 +206,10 @@ Map::Vertex PathManager::GetPathNodeCoordinates(int NodeNumber, bool BestZ)
 }
 
 std::deque<int> PathManager::FindRoute(int startID, int endID)
-{
+{ 
 	_log(PATHING__DEBUG, "FindRoute from node %i to %i", startID, endID);
 
-	memset(ClosedListFlag, 0, sizeof(int) * Head.PathNodeCount);
+	memset(ClosedListFlag, 0, sizeof(int) * Head.PathNodeCount); 
 
 	std::deque<AStarNode> OpenList, ClosedList;
 

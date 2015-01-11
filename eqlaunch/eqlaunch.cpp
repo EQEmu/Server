@@ -17,6 +17,7 @@
 */
 
 #include "../common/debug.h"
+#include "../common/eqemu_logsys.h"
 #include "../common/proc_launcher.h"
 #include "../common/eqemu_config.h"
 #include "../common/servertalk.h"
@@ -29,6 +30,8 @@
 #include <set>
 #include <signal.h>
 #include <time.h>
+
+EQEmuLogSys logger;
 
 bool RunLoops = false;
 

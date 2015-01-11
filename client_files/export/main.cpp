@@ -17,6 +17,8 @@
 */
 
 #include <stdio.h>
+
+#include "../../common/eqemu_logsys.h"
 #include "../../common/debug.h"
 #include "../../common/shareddb.h"
 #include "../../common/eqemu_config.h"
@@ -24,6 +26,8 @@
 #include "../../common/crash.h"
 #include "../../common/rulesys.h"
 #include "../../common/string_util.h"
+
+EQEmuLogSys logger;
 
 void ExportSpells(SharedDatabase *db);
 void ExportSkillCaps(SharedDatabase *db);

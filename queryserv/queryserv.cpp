@@ -18,6 +18,7 @@
 */
 
 #include "../common/debug.h"
+#include "../common/eqemu_logsys.h"
 #include "../common/opcodemgr.h"
 #include "../common/eq_stream_factory.h"
 #include "../common/rulesys.h"
@@ -39,6 +40,7 @@ LFGuildManager lfguildmanager;
 std::string WorldShortName;
 const queryservconfig *Config;
 WorldServer *worldserver = 0;
+EQEmuLogSys logger;
 
 void CatchSignal(int sig_num) { 
 	RunLoops = false; 

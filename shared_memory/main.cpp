@@ -17,6 +17,8 @@
 */
 
 #include <stdio.h>
+
+#include "../common/eqemu_logsys.h"
 #include "../common/debug.h"
 #include "../common/shareddb.h"
 #include "../common/eqemu_config.h"
@@ -30,6 +32,8 @@
 #include "skill_caps.h"
 #include "spells.h"
 #include "base_data.h"
+
+EQEmuLogSys logger;
 
 int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformSharedMemory);

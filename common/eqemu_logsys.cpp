@@ -90,8 +90,9 @@ void EQEmuLogSys::StartZoneLogs(const std::string log_name)
 	process_log.open(StringFormat("logs/zone/%s.txt", log_name.c_str()), std::ios_base::app | std::ios_base::out);
 }
 
-void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...){
-	if (RuleI(Logging, DebugLogLevel) < debug_level){ return;  }
+void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...)
+{
+	if (RuleI(Logging, DebugLogLevel) < debug_level){ return; }
 
 	va_list args;
 	va_start(args, message);
@@ -103,7 +104,7 @@ void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...){
 
 void EQEmuLogSys::Log(uint16 log_type, const std::string message, ...)
 {
-	if (log_type > EQEmuLogSys::MaxLogID){
+	if (log_type > EQEmuLogSys::MaxLogID){ 
 		return;
 	}
 	if (!RuleB(Logging, LogFileCommands) && log_type == EQEmuLogSys::LogType::Commands){ return; }
@@ -152,7 +153,8 @@ void EQEmuLogSys::ConsoleMessage(uint16 log_type, const std::string message)
 #endif
 }
 
-void EQEmuLogSys::CloseZoneLogs(){
+void EQEmuLogSys::CloseZoneLogs()
+{
 	std::cout << "Closing down zone logs..." << std::endl;
 	process_log.close();
 }

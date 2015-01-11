@@ -34,7 +34,7 @@ public:
 		Error,		 /* Error Logs */
 		Debug,		 /* Debug Logs */
 		Quest,		 /* Quest Logs */
-		Commands,	 /* Issued Comamnds */
+		Commands,	 /* Issued Commands */
 		Crash,		 /* Crash Logs */
 		Save,		 /* Client Saves */
 		MaxLogID	 /* Max, used in functions to get the max log ID */
@@ -59,7 +59,6 @@ private:
 };
 
 extern EQEmuLogSys logger;
-
 
 
 #endif

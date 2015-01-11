@@ -25,6 +25,7 @@
 #include <signal.h>
 
 #include "../common/debug.h"
+#include "../common/eqemu_logsys.h"
 #include "../common/queue.h"
 #include "../common/timer.h"
 #include "../common/eq_stream_factory.h"
@@ -103,7 +104,7 @@ volatile bool RunLoops = true;
 uint32 numclients = 0;
 uint32 numzones = 0;
 bool holdzones = false;
-
+EQEmuLogSys logger;
 
 extern ConsoleList console_list;
 
