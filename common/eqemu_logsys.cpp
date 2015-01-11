@@ -90,6 +90,10 @@ void EQEmuLogSys::StartZoneLogs(const std::string log_name)
 	process_log.open(StringFormat("logs/zone/%s.txt", log_name.c_str()), std::ios_base::app | std::ios_base::out);
 }
 
+void EQEmuLogSys::LogDebugType(DebugLevel debug_level, uint16 log_type, std::string message, ...){
+
+}
+
 void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...)
 {
 	if (RuleI(Logging, DebugLogLevel) < debug_level){ return; }
@@ -116,7 +120,7 @@ void EQEmuLogSys::Log(uint16 log_type, const std::string message, ...)
 
 	auto t = std::time(nullptr);
 	auto tm = *std::localtime(&t);
-	EQEmuLogSys::ConsoleMessage(log_type, message);
+	EQEmuLogSys::ConsoleMessage(log_type, output_message);
 
 	if (process_log){
 		process_log << std::put_time(&tm, "[%d-%m-%Y :: %H:%M:%S] ") << StringFormat("[%s] ", TypeNames[log_type]).c_str() << output_message << std::endl;
