@@ -150,7 +150,7 @@ int main(int argc, char** argv) {
 
 	_log(ZONE__INIT, "Loading server configuration..");
 	if (!ZoneConfig::LoadConfig()) {
-		_log(ZONE__INIT_ERR, "Loading server configuration failed.");
+		logger.Log(EQEmuLogSys::Error, "Loading server configuration failed.");
 		return 1;
 	}
 	const ZoneConfig *Config=ZoneConfig::get();
@@ -169,7 +169,7 @@ int main(int argc, char** argv) {
 		Config->DatabasePassword.c_str(),
 		Config->DatabaseDB.c_str(),
 		Config->DatabasePort)) {
-		_log(ZONE__INIT_ERR, "Cannot continue without a database connection.");
+		logger.Log(EQEmuLogSys::Error, "Cannot continue without a database connection.");
 		return 1;
 	}
 	guild_mgr.SetDatabase(&database);
@@ -192,16 +192,16 @@ int main(int argc, char** argv) {
 	* Setup nice signal handlers
 	*/
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		_log(ZONE__INIT_ERR, "Could not set signal handler");
+		logger.Log(EQEmuLogSys::Error, "Could not set signal handler");
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		_log(ZONE__INIT_ERR, "Could not set signal handler");
+		logger.Log(EQEmuLogSys::Error, "Could not set signal handler");
 		return 1;
 	}
 	#ifndef WIN32
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)	{
-		_log(ZONE__INIT_ERR, "Could not set signal handler");
+		logger.Log(EQEmuLogSys::Error, "Could not set signal handler");
 		return 1;
 	}
 	#endif
@@ -220,25 +220,25 @@ int main(int argc, char** argv) {
 	database.LoadZoneNames();
 	_log(ZONE__INIT, "Loading items");
 	if (!database.LoadItems()) {
-		_log(ZONE__INIT_ERR, "Loading items FAILED!");
-		_log(ZONE__INIT, "Failed. But ignoring error and going on...");
+		logger.Log(EQEmuLogSys::Error, "Loading items FAILED!");
+		logger.Log(EQEmuLogSys::Error, "Failed. But ignoring error and going on...");
 	}
 
 	_log(ZONE__INIT, "Loading npc faction lists");
 	if (!database.LoadNPCFactionLists()) {
-		_log(ZONE__INIT_ERR, "Loading npcs faction lists FAILED!");
+		logger.Log(EQEmuLogSys::Error, "Loading npcs faction lists FAILED!");
 		CheckEQEMuErrorAndPause();
 		return 1;
 	}
 	_log(ZONE__INIT, "Loading loot tables");
 	if (!database.LoadLoot()) {
-		_log(ZONE__INIT_ERR, "Loading loot FAILED!");
+		logger.Log(EQEmuLogSys::Error, "Loading loot FAILED!");
 		CheckEQEMuErrorAndPause();
 		return 1;
 	}
 	_log(ZONE__INIT, "Loading skill caps");
 	if (!database.LoadSkillCaps()) {
-		_log(ZONE__INIT_ERR, "Loading skill caps FAILED!");
+		logger.Log(EQEmuLogSys::Error, "Loading skill caps FAILED!");
 		CheckEQEMuErrorAndPause();
 		return 1;
 	}
@@ -249,7 +249,7 @@ int main(int argc, char** argv) {
 
 	_log(ZONE__INIT, "Loading base data");
 	if (!database.LoadBaseData()) {
-		_log(ZONE__INIT_ERR, "Loading base data FAILED!");
+		logger.Log(EQEmuLogSys::Error, "Loading base data FAILED!");
 		CheckEQEMuErrorAndPause();
 		return 1;
 	}
@@ -269,7 +269,7 @@ int main(int argc, char** argv) {
 	_log(ZONE__INIT, "Loading commands");
 	int retval=command_init();
 	if(retval<0)
-		_log(ZONE__INIT_ERR, "Command loading FAILED");
+		logger.Log(EQEmuLogSys::Error, "Command loading FAILED");
 	else
 		_log(ZONE__INIT, "%d commands loaded", retval);
 
@@ -279,7 +279,7 @@ int main(int argc, char** argv) {
 		if (database.GetVariable("RuleSet", tmp, sizeof(tmp)-1)) {
 			_log(ZONE__INIT, "Loading rule set '%s'", tmp);
 			if(!RuleManager::Instance()->LoadRules(&database, tmp)) {
-				_log(ZONE__INIT_ERR, "Failed to load ruleset '%s', falling back to defaults.", tmp);
+				logger.Log(EQEmuLogSys::Error, "Failed to load ruleset '%s', falling back to defaults.", tmp);
 			}
 		} else {
 			if(!RuleManager::Instance()->LoadRules(&database, "default")) {
@@ -318,7 +318,7 @@ int main(int argc, char** argv) {
 	LogFile->SetAllCallbacks(ClientLogs::EQEmuIO_pva);
 #endif
 	if (!worldserver.Connect()) {
-		_log(ZONE__INIT_ERR, "worldserver.Connect() FAILED!");
+		logger.Log(EQEmuLogSys::Error, "worldserver.Connect() FAILED!");
 	}
 
 	Timer InterserverTimer(INTERSERVER_TIMER); // does MySQL pings and auto-reconnect
@@ -331,7 +331,7 @@ int main(int argc, char** argv) {
 	if (!strlen(zone_name) || !strcmp(zone_name,".")) {
 		_log(ZONE__INIT, "Entering sleep mode");
 	} else if (!Zone::Bootup(database.GetZoneID(zone_name), 0, true)) { //todo: go above and fix this to allow cmd line instance
-		_log(ZONE__INIT_ERR, "Zone bootup FAILED!");
+		logger.Log(EQEmuLogSys::Error, "Zone bootup FAILED!");
 		zone = 0;
 	}
 
@@ -368,7 +368,7 @@ int main(int argc, char** argv) {
 			// log_sys.StartZoneLogs(StringFormat("%s_ver-%u_instid-%u_port-%u", zone->GetShortName(), zone->GetInstanceVersion(), zone->GetInstanceID(), ZoneConfig::get()->ZonePort));
 
 			if (!eqsf.Open(Config->ZonePort)) {
-				_log(ZONE__INIT_ERR, "Failed to open port %d",Config->ZonePort);
+				logger.Log(EQEmuLogSys::Error, "Failed to open port %d",Config->ZonePort);
 				ZoneConfig::SetZonePort(0);
 				worldserver.Disconnect();
 				worldwasconnected = false;

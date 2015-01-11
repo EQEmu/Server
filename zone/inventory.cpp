@@ -2594,7 +2594,7 @@ void Client::SetBandolier(const EQApplicationPacket *app) {
 						if(MoveItemToInventory(InvItem))
 							database.SaveInventory(character_id, 0, WeaponSlot);
 						else
-							_log(INVENTORY__BANDOLIER, "Char: %s, ERROR returning %s to inventory", GetName(),
+							logger.Log(EQEmuLogSys::Error, "Char: %s, ERROR returning %s to inventory", GetName(),
 								InvItem->GetItem()->Name);
 						safe_delete(InvItem);
 					}
@@ -2629,7 +2629,7 @@ void Client::SetBandolier(const EQApplicationPacket *app) {
 				if(InvItem) {
 					// If there was already an item in that weapon slot that we replaced, find a place to put it
 					if(!MoveItemToInventory(InvItem))
-						_log(INVENTORY__BANDOLIER, "Char: %s, ERROR returning %s to inventory", GetName(),
+						logger.Log(EQEmuLogSys::Error, "Char: %s, ERROR returning %s to inventory", GetName(),
 							InvItem->GetItem()->Name);
 					safe_delete(InvItem);
 				}
@@ -2646,7 +2646,7 @@ void Client::SetBandolier(const EQApplicationPacket *app) {
 				if(MoveItemToInventory(InvItem))
 					database.SaveInventory(character_id, 0, WeaponSlot);
 				else
-					_log(INVENTORY__BANDOLIER, "Char: %s, ERROR returning %s to inventory", GetName(),
+					logger.Log(EQEmuLogSys::Error, "Char: %s, ERROR returning %s to inventory", GetName(),
 						InvItem->GetItem()->Name);
 				safe_delete(InvItem);
 			}
@@ -2865,7 +2865,7 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 	}
 
 	if (log) {
-		_log(INVENTORY__ERROR, "Target interrogate inventory flag: %s", (GetInterrogateInvState() ? "TRUE" : "FALSE"));
+		logger.Log(EQEmuLogSys::Error, "Target interrogate inventory flag: %s", (GetInterrogateInvState() ? "TRUE" : "FALSE"));
 		logger.LogDebug(EQEmuLogSys::Detail, "[CLIENT] Client::InterrogateInventory() -- End");
 	}
 	if (!silent) {
@@ -2910,7 +2910,7 @@ void Client::InterrogateInventory_(bool errorcheck, Client* requester, int16 hea
 		else { e = ""; }
 
 		if (log)
-			_log(INVENTORY__ERROR, "Head: %i, Depth: %i, Instance: %s, Parent: %s%s",
+			logger.Log(EQEmuLogSys::Error, "Head: %i, Depth: %i, Instance: %s, Parent: %s%s",
 			head, depth, i.c_str(), p.c_str(), e.c_str());
 		if (!silent)
 			requester->Message(1, "%i:%i - inst: %s - parent: %s%s",

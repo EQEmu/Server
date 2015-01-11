@@ -2515,7 +2515,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 					Quantity = i;
 					break;
 				}
-				_log(TRADING__BARTER, "Unexpected error while moving item from seller to buyer.");
+				logger.Log(EQEmuLogSys::Error, "Unexpected error while moving item from seller to buyer.");
 				Message(13, "Internal error while processing transaction.");
 				return;
 			}
@@ -2523,7 +2523,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 			ItemInst* ItemToTransfer = m_inv.PopItem(SellerSlot);
 
 			if(!ItemToTransfer || !Buyer->MoveItemToInventory(ItemToTransfer, true)) {
-				_log(TRADING__BARTER, "Unexpected error while moving item from seller to buyer.");
+				logger.Log(EQEmuLogSys::Error, "Unexpected error while moving item from seller to buyer.");
 				Message(13, "Internal error while processing transaction.");
 
 				if(ItemToTransfer)
@@ -2561,7 +2561,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 			int16 SellerSlot = m_inv.HasItem(ItemID, 1, invWhereWorn|invWherePersonal|invWhereCursor);
 
 			if (SellerSlot == INVALID_INDEX) {
-				_log(TRADING__BARTER, "Unexpected error while moving item from seller to buyer.");
+				logger.Log(EQEmuLogSys::Error, "Unexpected error while moving item from seller to buyer.");
 				Message(13, "Internal error while processing transaction.");
 				return;
 			}
@@ -2569,7 +2569,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 			ItemInst* ItemToTransfer = m_inv.PopItem(SellerSlot);
 
 			if(!ItemToTransfer) {
-				_log(TRADING__BARTER, "Unexpected error while moving item from seller to buyer.");
+				logger.Log(EQEmuLogSys::Error, "Unexpected error while moving item from seller to buyer.");
 				Message(13, "Internal error while processing transaction.");
 				return;
 			}
@@ -2581,7 +2581,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 				QuantityMoved += ItemToTransfer->GetCharges();
 
 				if(!Buyer->MoveItemToInventory(ItemToTransfer, true)) {
-					_log(TRADING__BARTER, "Unexpected error while moving item from seller to buyer.");
+					logger.Log(EQEmuLogSys::Error, "Unexpected error while moving item from seller to buyer.");
 					Message(13, "Internal error while processing transaction.");
 					safe_delete(ItemToTransfer);
 					return;
@@ -2616,7 +2616,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 				ItemToTransfer->SetCharges(QuantityToRemoveFromStack);
 
 				if(!Buyer->MoveItemToInventory(ItemToTransfer, true)) {
-					_log(TRADING__BARTER, "Unexpected error while moving item from seller to buyer.");
+					logger.Log(EQEmuLogSys::Error, "Unexpected error while moving item from seller to buyer.");
 					Message(13, "Internal error while processing transaction.");
 					safe_delete(ItemToTransfer);
 					return;

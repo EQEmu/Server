@@ -6893,7 +6893,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 	{
 		if ((Action != GuildBankDeposit) && (Action != GuildBankViewItem) && (Action != GuildBankWithdraw))
 		{
-			_log(GUILDS__BANK_ERROR, "Suspected hacking attempt on guild bank from %s", GetName());
+			logger.Log(EQEmuLogSys::Error, "Suspected hacking attempt on guild bank from %s", GetName());
 
 			GuildBankAck();
 
@@ -7054,7 +7054,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 
 		if (!IsGuildBanker() && !GuildBanks->AllowedToWithdraw(GuildID(), gbwis->Area, gbwis->SlotID, GetName()))
 		{
-			_log(GUILDS__BANK_ERROR, "Suspected attempted hack on the guild bank from %s", GetName());
+			logger.Log(EQEmuLogSys::Error, "Suspected attempted hack on the guild bank from %s", GetName());
 
 			GuildBankAck();
 
@@ -7125,7 +7125,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 	{
 		Message(13, "Unexpected GuildBank action.");
 
-		_log(GUILDS__BANK_ERROR, "Received unexpected guild bank action code %i from %s", Action, GetName());
+		logger.Log(EQEmuLogSys::Error, "Received unexpected guild bank action code %i from %s", Action, GetName());
 	}
 	}
 }

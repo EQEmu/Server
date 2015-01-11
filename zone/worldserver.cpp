@@ -394,7 +394,7 @@ void WorldServer::Process() {
 				}
 			}
 			else
-				_log(ZONE__WORLD_ERR, "WhoAllReturnStruct: Could not get return struct!");
+				logger.Log(EQEmuLogSys::Error, "WhoAllReturnStruct: Could not get return struct!");
 			break;
 		}
 		case ServerOP_EmoteMessage: {
@@ -2064,7 +2064,7 @@ uint32 WorldServer::NextGroupID() {
 	if(cur_groupid >= last_groupid) {
 		//this is an error... This means that 50 groups were created before
 		//1 packet could make the zone->world->zone trip... so let it error.
-		_log(ZONE__WORLD_ERR, "Ran out of group IDs before the server sent us more.");
+		logger.Log(EQEmuLogSys::Error, "Ran out of group IDs before the server sent us more.");
 		return(0);
 	}
 	if(cur_groupid > (last_groupid - /*50*/995)) {

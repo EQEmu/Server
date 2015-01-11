@@ -8296,11 +8296,11 @@ std::string Client::TextLink::GenerateLink()
 	if ((m_Link.length() == 0) || (m_Link.length() > 250)) {
 		m_Error = true;
 		m_Link = "<LINKER ERROR>";
-		_log(CHANNELS__ERROR, "TextLink::GenerateLink() failed to generate a useable text link (LinkType: %i, Lengths: {link: %u, body: %u, text: %u})",
+		logger.Log(EQEmuLogSys::Error, "TextLink::GenerateLink() failed to generate a useable text link (LinkType: %i, Lengths: {link: %u, body: %u, text: %u})",
 			m_LinkType, m_Link.length(), m_LinkBody.length(), m_LinkText.length());
 #if EQDEBUG >= 5
-		_log(CHANNELS__ERROR, ">> LinkBody: %s", m_LinkBody.c_str());
-		_log(CHANNELS__ERROR, ">> LinkText: %s", m_LinkText.c_str());
+		logger.Log(EQEmuLogSys::Error, ">> LinkBody: %s", m_LinkBody.c_str());
+		logger.Log(EQEmuLogSys::Error, ">> LinkText: %s", m_LinkText.c_str());
 #endif
 	}
 
