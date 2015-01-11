@@ -25,7 +25,7 @@
 #include <fstream> 
 #include <string>
 #include <iomanip>
-
+#include <time.h>
 
 std::ofstream process_log;
 
@@ -35,6 +35,8 @@ std::ofstream process_log;
 #include <iostream>
 #include <dos.h>
 #include <windows.h>
+#else
+#include <sys/stat.h>
 #endif
 
 namespace Console {
@@ -65,7 +67,18 @@ static const char* TypeNames[EQEmuLogSys::MaxLogID] = {
 		"Debug", 
 		"Quest", 
 		"Command", 
-		"Crash" 
+		"Crash",
+		"Save",
+		"UCS",
+		"Query Server",
+		"Socket Server",
+		"Spawns",
+		"AI",
+		"Pathing",
+		"Quests",
+		"Spells",
+		"Zone",
+
 };
 static Console::Color LogColors[EQEmuLogSys::MaxLogID] = {
 		Console::Color::Yellow, 		   // "Status", 
@@ -86,7 +99,7 @@ EQEmuLogSys::~EQEmuLogSys(){
 
 void EQEmuLogSys::StartZoneLogs(const std::string log_name)
 {
-	_mkdir("logs/zone");
+	EQEmuLogSys::MakeDirectory("logs/zone");
 	std::cout << "Starting Zone Logs..." << std::endl;
 	process_log.open(StringFormat("logs/zone/%s.txt", log_name.c_str()), std::ios_base::app | std::ios_base::out);
 }
@@ -115,6 +128,22 @@ void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...)
 	EQEmuLogSys::Log(EQEmuLogSys::LogType::Debug, output_message); 
 }
 
+void EQEmuLogSys::SetCurrentTimeStamp(char* time_stamp){
+	time_t raw_time;
+	struct tm * time_info;
+	time(&raw_time);
+	time_info = localtime(&raw_time);
+	strftime(time_stamp, 80, "[%d-%m-%Y :: %H:%M:%S]", time_info);
+}
+
+void EQEmuLogSys::MakeDirectory(std::string directory_name){
+#ifdef _WINDOWS
+	_mkdir(directory_name.c_str());
+#else
+	mkdir(directory_name.c_str());
+#endif
+}
+
 void EQEmuLogSys::Log(uint16 log_type, const std::string message, ...)
 {
 	if (log_type > EQEmuLogSys::MaxLogID){ 
@@ -122,26 +151,34 @@ void EQEmuLogSys::Log(uint16 log_type, const std::string message, ...)
 	}
 	if (!RuleB(Logging, LogFileCommands) && log_type == EQEmuLogSys::LogType::Commands){ return; }
 
+	if (!RuleB(Logging, EnableFileLogging)){
+		return;
+	}
+
 	va_list args;
 	va_start(args, message);
 	std::string output_message = vStringFormat(message.c_str(), args);
 	va_end(args);
 
-	auto t = std::time(nullptr);
-	auto tm = *std::localtime(&t);
 	EQEmuLogSys::ConsoleMessage(log_type, output_message);
 
+	char time_stamp[80];
+	EQEmuLogSys::SetCurrentTimeStamp(time_stamp);
+
 	if (process_log){
-		process_log << std::put_time(&tm, "[%d-%m-%Y :: %H:%M:%S] ") << StringFormat("[%s] ", TypeNames[log_type]).c_str() << output_message << std::endl;
+		process_log << time_stamp << " " << StringFormat("[%s] ", TypeNames[log_type]).c_str() << output_message << std::endl;
 	}
 	else{
-		std::cout << "[DEBUG] " << ":: There currently is no log file open for this process " << std::endl;
+		std::cout << "[DEBUG] " << ":: There currently is no log file open for this process " << "\n";
 	}
 }
 
 void EQEmuLogSys::ConsoleMessage(uint16 log_type, const std::string message)
 {
 	if (log_type > EQEmuLogSys::MaxLogID){
+		return;
+	}
+	if (!RuleB(Logging, EnableConsoleLogging)){
 		return;
 	}
 	if (!RuleB(Logging, ConsoleLogCommands) && log_type == EQEmuLogSys::LogType::Commands){ return; }
@@ -155,10 +192,15 @@ void EQEmuLogSys::ConsoleMessage(uint16 log_type, const std::string message)
 	info.FontWeight = FW_NORMAL;
 	wcscpy(info.FaceName, L"Lucida Console");
 	SetCurrentConsoleFontEx(console_handle, NULL, &info); 
-	SetConsoleTextAttribute(console_handle, LogColors[log_type]); 
+	if (LogColors[log_type]){
+		SetConsoleTextAttribute(console_handle, LogColors[log_type]);
+	}
+	else{
+		SetConsoleTextAttribute(console_handle, Console::Color::White);
+	}
 #endif
 
-	std::cout << "[N::" << TypeNames[log_type] << "] " << message << std::endl;
+	std::cout << "[N::" << TypeNames[log_type] << "] " << message << "\n";
 
 #ifdef _WINDOWS
 	/* Always set back to white*/

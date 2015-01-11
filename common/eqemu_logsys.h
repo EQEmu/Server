@@ -45,12 +45,14 @@ public:
 		Moderate,		/* 1 - Informational based, used in functions, when particular things load */
 		Detail,			/* 2 - Use this for extreme detail in logging, usually in extreme debugging in the stack or interprocess communication */
 	};
-	
+
 	void CloseZoneLogs();
 	void ConsoleMessage(uint16 log_type, const std::string message);
+	void Log(uint16 log_type, const std::string message, ...);
 	void LogDebug(DebugLevel debug_level, std::string message, ...);
 	void LogDebugType(DebugLevel debug_level, uint16 log_type, std::string message, ...);
-	void Log(uint16 log_type, const std::string message, ...);
+	void MakeDirectory(std::string directory_name);
+	void SetCurrentTimeStamp(char* time_stamp);
 	void StartZoneLogs(const std::string log_name);
 
 
