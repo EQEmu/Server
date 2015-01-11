@@ -318,7 +318,7 @@ int main(int argc, char** argv) {
 	LogFile->SetAllCallbacks(ClientLogs::EQEmuIO_pva);
 #endif
 	if (!worldserver.Connect()) {
-		logger.Log(EQEmuLogSys::Error, "worldserver.Connect() FAILED!");
+		logger.Log(EQEmuLogSys::Error, "Worldserver Connection Failed :: worldserver.Connect()");
 	}
 
 	Timer InterserverTimer(INTERSERVER_TIMER); // does MySQL pings and auto-reconnect
@@ -331,7 +331,7 @@ int main(int argc, char** argv) {
 	if (!strlen(zone_name) || !strcmp(zone_name,".")) {
 		_log(ZONE__INIT, "Entering sleep mode");
 	} else if (!Zone::Bootup(database.GetZoneID(zone_name), 0, true)) { //todo: go above and fix this to allow cmd line instance
-		logger.Log(EQEmuLogSys::Error, "Zone bootup FAILED!");
+		logger.Log(EQEmuLogSys::Error, "Zone Bootup failed :: Zone::Bootup");
 		zone = 0;
 	}
 
