@@ -1247,6 +1247,10 @@ public:
 
 	bool InterrogateInventory(Client* requester, bool log, bool silent, bool allowtrip, bool& error, bool autolog = true);
 
+	//Command #Tune functions
+	virtual int32 Tune_GetMeleeMitDmg(Mob* GM, Mob *attacker, int32 damage, int32 minhit, float mit_rating, float atk_rating);
+	int32 GetMeleeDamage(Mob* other, bool GetMinDamage = false);
+
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);
