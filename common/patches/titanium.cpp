@@ -476,7 +476,7 @@ namespace Titanium
 
 		char *OutBuffer = (char *)in->pBuffer;
 
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->unknown01);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->type);
 		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
 
 		delete[] __emu_buffer;
@@ -2045,78 +2045,66 @@ namespace Titanium
 
 	static inline void ServerToTitaniumTextLink(std::string& titaniumTextLink, const std::string& serverTextLink)
 	{
-		const char delimiter = 0x12;
-
-		if ((consts::TEXT_LINK_BODY_LENGTH == EmuConstants::TEXT_LINK_BODY_LENGTH) || (serverTextLink.find(delimiter) == std::string::npos)) {
+		if ((consts::TEXT_LINK_BODY_LENGTH == EmuConstants::TEXT_LINK_BODY_LENGTH) || (serverTextLink.find('\x12') == std::string::npos)) {
 			titaniumTextLink = serverTextLink;
 			return;
 		}
 
-		auto segments = SplitString(serverTextLink, delimiter);
+		auto segments = SplitString(serverTextLink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
-				std::string new_segment;
-
 				// Idx:  0 1     6     11    16    21    26    31    36 37   41 43    48       (Source)
 				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX XXXXX XXXXXXXX (56)
 				// 6.2:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX       X  XXXX  X       XXXXXXXX (45)
 				// Diff:                                       ^^^^^         ^  ^^^^^
 
-				new_segment.append(segments[segment_iter].substr(0, 31).c_str());
-				new_segment.append(segments[segment_iter].substr(36, 5).c_str());
+				titaniumTextLink.push_back('\x12');
+				titaniumTextLink.append(segments[segment_iter].substr(0, 31));
+				titaniumTextLink.append(segments[segment_iter].substr(36, 5));
 
-				if (segments[segment_iter].substr(41, 1) == "0")
-					new_segment.append(segments[segment_iter].substr(42, 1).c_str());
+				if (segments[segment_iter][41] == '0')
+					titaniumTextLink.push_back(segments[segment_iter][42]);
 				else
-					new_segment.append("F");
+					titaniumTextLink.push_back('F');
 
-				new_segment.append(segments[segment_iter].substr(48).c_str());
-
-				titaniumTextLink.push_back(delimiter);
-				titaniumTextLink.append(new_segment.c_str());
-				titaniumTextLink.push_back(delimiter);
+				titaniumTextLink.append(segments[segment_iter].substr(48));
+				titaniumTextLink.push_back('\x12');
 			}
 			else {
-				titaniumTextLink.append(segments[segment_iter].c_str());
+				titaniumTextLink.append(segments[segment_iter]);
 			}
 		}
 	}
 
 	static inline void TitaniumToServerTextLink(std::string& serverTextLink, const std::string& titaniumTextLink)
 	{
-		const char delimiter = 0x12;
-
-		if ((EmuConstants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) || (titaniumTextLink.find(delimiter) == std::string::npos)) {
+		if ((EmuConstants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) || (titaniumTextLink.find('\x12') == std::string::npos)) {
 			serverTextLink = titaniumTextLink;
 			return;
 		}
 
-		auto segments = SplitString(titaniumTextLink, delimiter);
+		auto segments = SplitString(titaniumTextLink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
-				std::string new_segment;
-
 				// Idx:  0 1     6     11    16    21    26          31 32    36       37       (Source)
 				// 6.2:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX       X  XXXX  X        XXXXXXXX (45)
 				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX  XXXXX XXXXXXXX (56)
 				// Diff:                                       ^^^^^         ^   ^^^^^
 
-				new_segment.append(segments[segment_iter].substr(0, 31).c_str());
-				new_segment.append("00000");
-				new_segment.append(segments[segment_iter].substr(31, 5).c_str());
-				new_segment.append("0");
-				new_segment.append(segments[segment_iter].substr(36, 1).c_str());
-				new_segment.append("00000");
-				new_segment.append(segments[segment_iter].substr(37).c_str());
-
-				serverTextLink.push_back(delimiter);
-				serverTextLink.append(new_segment.c_str());
-				serverTextLink.push_back(delimiter);
+				serverTextLink.push_back('\x12');
+				serverTextLink.append(segments[segment_iter].substr(0, 31));
+				serverTextLink.append("00000");
+				serverTextLink.append(segments[segment_iter].substr(31, 5));
+				serverTextLink.push_back('0');
+				serverTextLink.push_back(segments[segment_iter][36]);
+				serverTextLink.append("00000");
+				serverTextLink.append(segments[segment_iter].substr(37));
+				serverTextLink.push_back('\x12');
 			}
 			else {
-				serverTextLink.append(segments[segment_iter].c_str());
+				serverTextLink.append(segments[segment_iter]);
 			}
 		}
 	}

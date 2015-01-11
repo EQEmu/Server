@@ -5465,13 +5465,13 @@ void Client::Handle_OP_Emote(const EQApplicationPacket *app)
 		in->message[512] = '\0';
 		len_msg = 512;
 	}
-	uint32 len_packet = sizeof(in->unknown01) + len_name
+	uint32 len_packet = sizeof(in->type) + len_name
 		+ len_msg + 1;
 
 	// Construct outgoing packet
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Emote, len_packet);
 	Emote_Struct* out = (Emote_Struct*)outapp->pBuffer;
-	out->unknown01 = in->unknown01;
+	out->type = in->type;
 	memcpy(out->message, name, len_name);
 	memcpy(&out->message[len_name], in->message, len_msg);
 

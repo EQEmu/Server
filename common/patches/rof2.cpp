@@ -917,7 +917,7 @@ namespace RoF2
 
 		char *OutBuffer = (char *)in->pBuffer;
 
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->unknown01);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->type);
 		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
 
 		delete[] __emu_buffer;
@@ -5845,64 +5845,52 @@ namespace RoF2
 
 	static inline void ServerToRoF2TextLink(std::string& rof2TextLink, const std::string& serverTextLink)
 	{
-		const char delimiter = 0x12;
-
-		if ((consts::TEXT_LINK_BODY_LENGTH == EmuConstants::TEXT_LINK_BODY_LENGTH) || (serverTextLink.find(delimiter) == std::string::npos)) {
+		if ((consts::TEXT_LINK_BODY_LENGTH == EmuConstants::TEXT_LINK_BODY_LENGTH) || (serverTextLink.find('\x12') == std::string::npos)) {
 			rof2TextLink = serverTextLink;
 			return;
 		}
 
-		auto segments = SplitString(serverTextLink, delimiter);
+		auto segments = SplitString(serverTextLink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
-				std::string new_segment;
-
 				// Idx:  0 1     6     11    16    21    26    31    36 37   41 43    48       (Source)
 				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX XXXXX XXXXXXXX (56)
 				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX XXXXX XXXXXXXX (56)
 				// Diff:
 
-				new_segment.append(segments[segment_iter]);
-
-				rof2TextLink.push_back(delimiter);
-				rof2TextLink.append(new_segment.c_str());
-				rof2TextLink.push_back(delimiter);
+				rof2TextLink.push_back('\x12');
+				rof2TextLink.append(segments[segment_iter]);
+				rof2TextLink.push_back('\x12');
 			}
 			else {
-				rof2TextLink.append(segments[segment_iter].c_str());
+				rof2TextLink.append(segments[segment_iter]);
 			}
 		}
 	}
 
 	static inline void RoF2ToServerTextLink(std::string& serverTextLink, const std::string& rof2TextLink)
 	{
-		const char delimiter = 0x12;
-
-		if ((EmuConstants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) || (rof2TextLink.find(delimiter) == std::string::npos)) {
+		if ((EmuConstants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) || (rof2TextLink.find('\x12') == std::string::npos)) {
 			serverTextLink = rof2TextLink;
 			return;
 		}
 
-		auto segments = SplitString(rof2TextLink, delimiter);
+		auto segments = SplitString(rof2TextLink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
-				std::string new_segment;
-
 				// Idx:  0 1     6     11    16    21    26    31    36 37   41 43    48       (Source)
 				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX XXXXX XXXXXXXX (56)
 				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX XXXXX XXXXXXXX (56)
 				// Diff:
 
-				new_segment.append(segments[segment_iter]);
-
-				serverTextLink.push_back(delimiter);
-				serverTextLink.append(new_segment.c_str());
-				serverTextLink.push_back(delimiter);
+				serverTextLink.push_back('\x12');
+				serverTextLink.append(segments[segment_iter]);
+				serverTextLink.push_back('\x12');
 			}
 			else {
-				serverTextLink.append(segments[segment_iter].c_str());
+				serverTextLink.append(segments[segment_iter]);
 			}
 		}
 	}

@@ -620,7 +620,7 @@ namespace SoD
 
 		char *OutBuffer = (char *)in->pBuffer;
 
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->unknown01);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->type);
 		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
 
 		delete[] __emu_buffer;
@@ -3964,76 +3964,64 @@ namespace SoD
 
 	static inline void ServerToSoDTextLink(std::string& sodTextLink, const std::string& serverTextLink)
 	{
-		const char delimiter = 0x12;
-
-		if ((consts::TEXT_LINK_BODY_LENGTH == EmuConstants::TEXT_LINK_BODY_LENGTH) || (serverTextLink.find(delimiter) == std::string::npos)) {
+		if ((consts::TEXT_LINK_BODY_LENGTH == EmuConstants::TEXT_LINK_BODY_LENGTH) || (serverTextLink.find('\x12') == std::string::npos)) {
 			sodTextLink = serverTextLink;
 			return;
 		}
 
-		auto segments = SplitString(serverTextLink, delimiter);
+		auto segments = SplitString(serverTextLink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
-				std::string new_segment;
-
 				// Idx:  0 1     6     11    16    21    26    31    36 37   41 43    48       (Source)
 				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX XXXXX XXXXXXXX (56)
 				// SoF:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX       X  XXXX  X XXXXX XXXXXXXX (50)
 				// Diff:                                       ^^^^^         ^
 
-				new_segment.append(segments[segment_iter].substr(0, 31).c_str());
-				new_segment.append(segments[segment_iter].substr(36, 5).c_str());
+				sodTextLink.push_back('\x12');
+				sodTextLink.append(segments[segment_iter].substr(0, 31));
+				sodTextLink.append(segments[segment_iter].substr(36, 5));
 
-				if (segments[segment_iter].substr(41, 1) == "0")
-					new_segment.append(segments[segment_iter].substr(42, 1).c_str());
+				if (segments[segment_iter][41] == '0')
+					sodTextLink.push_back(segments[segment_iter][42]);
 				else
-					new_segment.append("F");
+					sodTextLink.push_back('F');
 
-				new_segment.append(segments[segment_iter].substr(43).c_str());
-
-				sodTextLink.push_back(delimiter);
-				sodTextLink.append(new_segment.c_str());
-				sodTextLink.push_back(delimiter);
+				sodTextLink.append(segments[segment_iter].substr(43));
+				sodTextLink.push_back('\x12');
 			}
 			else {
-				sodTextLink.append(segments[segment_iter].c_str());
+				sodTextLink.append(segments[segment_iter]);
 			}
 		}
 	}
 
 	static inline void SoDToServerTextLink(std::string& serverTextLink, const std::string& sodTextLink)
 	{
-		const char delimiter = 0x12;
-
-		if ((EmuConstants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) || (sodTextLink.find(delimiter) == std::string::npos)) {
+		if ((EmuConstants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) || (sodTextLink.find('\x12') == std::string::npos)) {
 			serverTextLink = sodTextLink;
 			return;
 		}
 
-		auto segments = SplitString(sodTextLink, delimiter);
+		auto segments = SplitString(sodTextLink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
-				std::string new_segment;
-
 				// Idx:  0 1     6     11    16    21    26          31 32    36 37    42       (Source)
 				// SoF:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX       X  XXXX  X  XXXXX XXXXXXXX (50)
 				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX  XXXXX XXXXXXXX (56)
 				// Diff:                                       ^^^^^         ^
 
-				new_segment.append(segments[segment_iter].substr(0, 31).c_str());
-				new_segment.append("00000");
-				new_segment.append(segments[segment_iter].substr(31, 5).c_str());
-				new_segment.append("0");
-				new_segment.append(segments[segment_iter].substr(36).c_str());
-
-				serverTextLink.push_back(delimiter);
-				serverTextLink.append(new_segment.c_str());
-				serverTextLink.push_back(delimiter);
+				serverTextLink.push_back('\x12');
+				serverTextLink.append(segments[segment_iter].substr(0, 31));
+				serverTextLink.append("00000");
+				serverTextLink.append(segments[segment_iter].substr(31, 5));
+				serverTextLink.push_back('0');
+				serverTextLink.append(segments[segment_iter].substr(36));
+				serverTextLink.push_back('\x12');
 			}
 			else {
-				serverTextLink.append(segments[segment_iter].c_str());
+				serverTextLink.append(segments[segment_iter]);
 			}
 		}
 	}
