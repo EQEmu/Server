@@ -386,11 +386,8 @@ void WorldServer::Process() {
 					}
 				}
 				else {
-					#ifdef _EQDEBUG
-					logger.LogDebug(EQEmuLogSys::Detail, "[CLIENT] 
-						"id=%i, playerineqstring=%i, playersinzonestring=%i. Dumping WhoAllReturnStruct:",
+					logger.LogDebug(EQEmuLogSys::Detail, "[CLIENT] id=%i, playerineqstring=%i, playersinzonestring=%i. Dumping WhoAllReturnStruct:",
 						wars->id, wars->playerineqstring, wars->playersinzonestring);
-					#endif
 				}
 			}
 			else

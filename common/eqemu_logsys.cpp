@@ -69,6 +69,7 @@ static const char* TypeNames[EQEmuLogSys::MaxLogID] = {
 		"Command", 
 		"Crash",
 		"Save",
+		/*
 		"UCS",
 		"Query Server",
 		"Socket Server",
@@ -78,8 +79,11 @@ static const char* TypeNames[EQEmuLogSys::MaxLogID] = {
 		"Quests",
 		"Spells",
 		"Zone",
-
+		"Tasks",
+		"Trading",
+		*/
 };
+
 static Console::Color LogColors[EQEmuLogSys::MaxLogID] = {
 		Console::Color::Yellow, 		   // "Status", 
 		Console::Color::Yellow,			   // "Normal", 
