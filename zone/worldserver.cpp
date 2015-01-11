@@ -387,7 +387,7 @@ void WorldServer::Process() {
 				}
 				else {
 					#ifdef _EQDEBUG
-					_log(ZONE__WORLD, "Error: WhoAllReturnStruct did not point to a valid client! "
+					logger.LogDebug(EQEmuLogSys::Detail, "[CLIENT] 
 						"id=%i, playerineqstring=%i, playersinzonestring=%i. Dumping WhoAllReturnStruct:",
 						wars->id, wars->playerineqstring, wars->playersinzonestring);
 					#endif

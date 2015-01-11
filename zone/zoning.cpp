@@ -854,23 +854,23 @@ bool Client::CanBeInZone() {
 	char flag_needed[128];
 	if(!database.GetSafePoints(zone->GetShortName(), zone->GetInstanceVersion(), &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_needed)) {
 		//this should not happen...
-		_log(CLIENT__ERROR, "Unable to query zone info for ourself '%s'", zone->GetShortName());
+		logger.LogDebug(EQEmuLogSys::Detail, "[CLIENT] Unable to query zone info for ourself '%s'", zone->GetShortName());
 		return(false);
 	}
 
 	if(GetLevel() < minlevel) {
-		_log(CLIENT__ERROR, "Character does not meet min level requirement (%d < %d)!", GetLevel(), minlevel);
+		logger.LogDebug(EQEmuLogSys::Detail, "[CLIENT] Character does not meet min level requirement (%d < %d)!", GetLevel(), minlevel);
 		return(false);
 	}
 	if(Admin() < minstatus) {
-		_log(CLIENT__ERROR, "Character does not meet min status requirement (%d < %d)!", Admin(), minstatus);
+		logger.LogDebug(EQEmuLogSys::Detail, "[CLIENT] Character does not meet min status requirement (%d < %d)!", Admin(), minstatus);
 		return(false);
 	}
 
 	if(flag_needed[0] != '\0') {
 		//the flag needed string is not empty, meaning a flag is required.
 		if(Admin() < minStatusToIgnoreZoneFlags && !HasZoneFlag(zone->GetZoneID())) {
-			_log(CLIENT__ERROR, "Character does not have the flag to be in this zone (%s)!", flag_needed);
+			logger.LogDebug(EQEmuLogSys::Detail, "[CLIENT] Character does not have the flag to be in this zone (%s)!", flag_needed);
 			return(false);
 		}
 	}
