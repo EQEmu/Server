@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <sstream>
 #include <algorithm>
+#include <ctime>
 
 #ifdef _WINDOWS
 #define strcasecmp _stricmp
@@ -428,7 +429,8 @@ int command_init(void) {
 		command_add("open_shop", nullptr, 100, command_merchantopenshop) ||
 		command_add("merchant_close_shop", "Closes a merchant shop", 100, command_merchantcloseshop) ||
 		command_add("close_shop", nullptr, 100, command_merchantcloseshop) ||
-		command_add("shownumhits", "Shows buffs numhits for yourself.", 0, command_shownumhits)
+		command_add("shownumhits", "Shows buffs numhits for yourself.", 0, command_shownumhits) || 
+		command_add("logtest", "Performs log performance testing.", 250, command_logtest)
 		)
 	{
 		command_deinit();
@@ -10664,4 +10666,14 @@ void command_shownumhits(Client *c, const Seperator *sep)
 {
 	c->ShowNumHits();
 	return;
+}
+
+void command_logtest(Client *c, const Seperator *sep){
+	clock_t t = std::clock(); /* Function timer start */
+	if (sep->IsNumber(1)){
+		uint32 i = 0;
+		for (i = 0; i < atoi(sep->arg[1]); i++){
+			logger.LogDebug(EQEmuLogSys::General, "[%u] Test... Took %f seconds", i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
+		}
+	}
 }
