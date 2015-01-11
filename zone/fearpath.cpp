@@ -167,11 +167,11 @@ void Mob::CalculateNewFearpoint()
 			fear_walkto_z = Loc.z;
 			curfp = true;
 
-			mlog(PATHING__DEBUG, "Feared to node %i (%8.3f, %8.3f, %8.3f)", Node, Loc.x, Loc.y, Loc.z);
+			logger.LogDebug(EQEmuLogSys::Detail, "Feared to node %i (%8.3f, %8.3f, %8.3f)", Node, Loc.x, Loc.y, Loc.z);
 			return;
 		}
 
-		mlog(PATHING__DEBUG, "No path found to selected node. Falling through to old fear point selection.");
+		logger.LogDebug(EQEmuLogSys::Detail, "No path found to selected node. Falling through to old fear point selection.");
 	}
 
 	int loop = 0;

@@ -673,7 +673,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 	if(To == From)
 		return To;
 
-	mlog(PATHING__DEBUG, "UpdatePath. From(%8.3f, %8.3f, %8.3f) To(%8.3f, %8.3f, %8.3f)", From.x, From.y, From.z, To.x, To.y, To.z);
+	logger.LogDebug(EQEmuLogSys::Detail, "UpdatePath. From(%8.3f, %8.3f, %8.3f) To(%8.3f, %8.3f, %8.3f)", From.x, From.y, From.z, To.x, To.y, To.z);
 
 	if(From == PathingLastPosition)
 	{
@@ -681,7 +681,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 		if((PathingLoopCount > 5) && !IsRooted())
 		{
-			mlog(PATHING__DEBUG, "appears to be stuck. Teleporting them to next position.", GetName());
+			logger.LogDebug(EQEmuLogSys::Detail, "appears to be stuck. Teleporting them to next position.", GetName());
 
 			if(Route.size() == 0)
 			{
@@ -721,7 +721,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 		// If we are already pathing, and the destination is the same as before ...
 		if(SameDestination)
 		{
-			mlog(PATHING__DEBUG, "  Still pathing to the same destination.");
+			logger.LogDebug(EQEmuLogSys::Detail, "  Still pathing to the same destination.");
 
 			// Get the coordinates of the first path node we are going to.
 			NextNode = Route.front();
@@ -732,7 +732,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 			// We have reached the path node.
 			if(NodeLoc == From)
 			{
-				mlog(PATHING__DEBUG, "  Arrived at node %i", NextNode);
+				logger.LogDebug(EQEmuLogSys::Detail, "  Arrived at node %i", NextNode);
 
 				NodeReached = true;
 
@@ -746,17 +746,17 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 				// target, and we may run past the target if we don't check LOS at this point.
 				int RouteSize = Route.size();
 
-				mlog(PATHING__DEBUG, "Route size is %i", RouteSize);
+				logger.LogDebug(EQEmuLogSys::Detail, "Route size is %i", RouteSize);
 
 				if((RouteSize == 2)
 					|| ((PathingTraversedNodes >= RuleI(Pathing, MinNodesTraversedForLOSCheck))
 					&& (RouteSize <= RuleI(Pathing, MinNodesLeftForLOSCheck))
 					&& PathingLOSCheckTimer->Check()))
 				{
-					mlog(PATHING__DEBUG, "  Checking distance to target.");
+					logger.LogDebug(EQEmuLogSys::Detail, "  Checking distance to target.");
 					float Distance = VertexDistanceNoRoot(From, To);
 
-					mlog(PATHING__DEBUG, "  Distance between From and To (NoRoot) is %8.3f", Distance);
+					logger.LogDebug(EQEmuLogSys::Detail, "  Distance between From and To (NoRoot) is %8.3f", Distance);
 
 					if((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort))
 						&& (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
@@ -765,18 +765,18 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 							PathingLOSState = HaveLOS;
 						else
 							PathingLOSState = NoLOS;
-						mlog(PATHING__DEBUG, "  LOS stats is %s", (PathingLOSState == HaveLOS) ? "HaveLOS" : "NoLOS");
+						logger.LogDebug(EQEmuLogSys::Detail, "NoLOS");
 
 						if((PathingLOSState == HaveLOS) && zone->pathing->NoHazards(From, To))
 						{
-							mlog(PATHING__DEBUG, "  No hazards. Running directly to target.");
+							logger.LogDebug(EQEmuLogSys::Detail, "  No hazards. Running directly to target.");
 							Route.clear();
 
 							return To;
 						}
 						else
 						{
-							mlog(PATHING__DEBUG, "  Continuing on node path.");
+							logger.LogDebug(EQEmuLogSys::Detail, "  Continuing on node path.");
 						}
 					}
 					else
@@ -802,7 +802,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 						if(Route.size() == 0)
 						{
-							mlog(PATHING__DEBUG, "Missing node after teleport.");
+							logger.LogDebug(EQEmuLogSys::Detail, "Missing node after teleport.");
 							return To;
 						}
 
@@ -812,7 +812,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 						Teleport(NodeLoc);
 
-						mlog(PATHING__DEBUG, "  TELEPORTED to %8.3f, %8.3f, %8.3f\n", NodeLoc.x, NodeLoc.y, NodeLoc.z);
+						logger.LogDebug(EQEmuLogSys::Detail, "  TELEPORTED to %8.3f, %8.3f, %8.3f\n", NodeLoc.x, NodeLoc.y, NodeLoc.z);
 
 						Route.pop_front();
 
@@ -823,7 +823,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 					}
 					zone->pathing->OpenDoors(PathingLastNodeVisited, NextNode, this);
 
-					mlog(PATHING__DEBUG, "  Now moving to node %i", NextNode);
+					logger.LogDebug(EQEmuLogSys::Detail, "  Now moving to node %i", NextNode);
 
 					return zone->pathing->GetPathNodeCoordinates(NextNode);
 				}
@@ -831,7 +831,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 				{
 					// we have run all the nodes, all that is left is the direct path from the last node
 					// to the destination
-					mlog(PATHING__DEBUG, "  Reached end of node path, running direct to target.");
+					logger.LogDebug(EQEmuLogSys::Detail, "  Reached end of node path, running direct to target.");
 
 					return To;
 				}
@@ -845,11 +845,11 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 				&& (RouteSize <= RuleI(Pathing, MinNodesLeftForLOSCheck))
 				&& PathingLOSCheckTimer->Check())
 			{
-				mlog(PATHING__DEBUG, "  Checking distance to target.");
+				logger.LogDebug(EQEmuLogSys::Detail, "  Checking distance to target.");
 
 				float Distance = VertexDistanceNoRoot(From, To);
 
-				mlog(PATHING__DEBUG, "  Distance between From and To (NoRoot) is %8.3f", Distance);
+				logger.LogDebug(EQEmuLogSys::Detail, "  Distance between From and To (NoRoot) is %8.3f", Distance);
 
 				if((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort))
 					&& (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
@@ -858,18 +858,18 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 						PathingLOSState = HaveLOS;
 					else
 						PathingLOSState = NoLOS;
-					mlog(PATHING__DEBUG, "  LOS stats is %s", (PathingLOSState == HaveLOS) ? "HaveLOS" : "NoLOS");
+					logger.LogDebug(EQEmuLogSys::Detail, "NoLOS");
 
 					if((PathingLOSState == HaveLOS) && zone->pathing->NoHazards(From, To))
 					{
-						mlog(PATHING__DEBUG, "  No hazards. Running directly to target.");
+						logger.LogDebug(EQEmuLogSys::Detail, "  No hazards. Running directly to target.");
 						Route.clear();
 
 						return To;
 					}
 					else
 					{
-						mlog(PATHING__DEBUG, "  Continuing on node path.");
+						logger.LogDebug(EQEmuLogSys::Detail, "  Continuing on node path.");
 					}
 				}
 				else
@@ -881,7 +881,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 		{
 			// We get here if we were already pathing, but our destination has now changed.
 			//
-			mlog(PATHING__DEBUG, "  Target has changed position.");
+			logger.LogDebug(EQEmuLogSys::Detail, "  Target has changed position.");
 			// Update our record of where we are going to.
 			PathingDestination = To;
 			// Check if we now have LOS etc to the new destination.
@@ -892,23 +892,23 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 				if((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort))
 					&& (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
 				{
-					mlog(PATHING__DEBUG, "  Checking for short LOS at distance %8.3f.", Distance);
+					logger.LogDebug(EQEmuLogSys::Detail, "  Checking for short LOS at distance %8.3f.", Distance);
 					if(!zone->zonemap->LineIntersectsZone(HeadPosition, To, 1.0f, nullptr))
 						PathingLOSState = HaveLOS;
 					else
 						PathingLOSState = NoLOS;
 
-					mlog(PATHING__DEBUG, "  LOS stats is %s", (PathingLOSState == HaveLOS) ? "HaveLOS" : "NoLOS");
+					logger.LogDebug(EQEmuLogSys::Detail, "NoLOS");
 
 					if((PathingLOSState == HaveLOS) && zone->pathing->NoHazards(From, To))
 					{
-						mlog(PATHING__DEBUG, "  No hazards. Running directly to target.");
+						logger.LogDebug(EQEmuLogSys::Detail, "  No hazards. Running directly to target.");
 						Route.clear();
 						return To;
 					}
 					else
 					{
-						mlog(PATHING__DEBUG, "  Continuing on node path.");
+						logger.LogDebug(EQEmuLogSys::Detail, "  Continuing on node path.");
 					}
 				}
 			}
@@ -919,19 +919,19 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 			{
 				if(!PathingRouteUpdateTimerShort->Check())
 				{
-					mlog(PATHING__DEBUG, "Short route update timer not yet expired.");
+					logger.LogDebug(EQEmuLogSys::Detail, "Short route update timer not yet expired.");
 					return zone->pathing->GetPathNodeCoordinates(Route.front());
 				}
-				mlog(PATHING__DEBUG, "Short route update timer expired.");
+				logger.LogDebug(EQEmuLogSys::Detail, "Short route update timer expired.");
 			}
 			else
 			{
 				if(!PathingRouteUpdateTimerLong->Check())
 				{
-					mlog(PATHING__DEBUG, "Long route update timer not yet expired.");
+					logger.LogDebug(EQEmuLogSys::Detail, "Long route update timer not yet expired.");
 					return zone->pathing->GetPathNodeCoordinates(Route.front());
 				}
-				mlog(PATHING__DEBUG, "Long route update timer expired.");
+				logger.LogDebug(EQEmuLogSys::Detail, "Long route update timer expired.");
 			}
 
 			// We are already pathing, destination changed, no LOS. Find the nearest node to our destination.
@@ -940,7 +940,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 			// Destination unreachable via pathing, return direct route.
 			if(DestinationPathNode == -1)
 			{
-				mlog(PATHING__DEBUG, "  Unable to find path node for new destination. Running straight to target.");
+				logger.LogDebug(EQEmuLogSys::Detail, "  Unable to find path node for new destination. Running straight to target.");
 				Route.clear();
 				return To;
 			}
@@ -948,7 +948,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 			// one, we will carry on on our path.
 			if(DestinationPathNode == Route.back())
 			{
-				mlog(PATHING__DEBUG, "  Same destination Node (%i). Continue with current path.", DestinationPathNode);
+				logger.LogDebug(EQEmuLogSys::Detail, "  Same destination Node (%i). Continue with current path.", DestinationPathNode);
 
 				NodeLoc = zone->pathing->GetPathNodeCoordinates(Route.front());
 
@@ -956,7 +956,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 				// Check if we have reached a path node.
 				if(NodeLoc == From)
 				{
-					mlog(PATHING__DEBUG, "  Arrived at node %i, moving to next one.\n", Route.front());
+					logger.LogDebug(EQEmuLogSys::Detail, "  Arrived at node %i, moving to next one.\n", Route.front());
 
 					NodeReached = true;
 
@@ -979,7 +979,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 							if(Route.size() == 0)
 							{
-								mlog(PATHING__DEBUG, "Missing node after teleport.");
+								logger.LogDebug(EQEmuLogSys::Detail, "Missing node after teleport.");
 								return To;
 							}
 
@@ -989,7 +989,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 							Teleport(NodeLoc);
 
-							mlog(PATHING__DEBUG, "  TELEPORTED to %8.3f, %8.3f, %8.3f\n", NodeLoc.x, NodeLoc.y, NodeLoc.z);
+							logger.LogDebug(EQEmuLogSys::Detail, "  TELEPORTED to %8.3f, %8.3f, %8.3f\n", NodeLoc.x, NodeLoc.y, NodeLoc.z);
 
 							Route.pop_front();
 
@@ -999,7 +999,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 							NextNode = Route.front();
 						}
 						// Return the coords of our next path node on the route.
-						mlog(PATHING__DEBUG, "  Now moving to node %i", NextNode);
+						logger.LogDebug(EQEmuLogSys::Detail, "  Now moving to node %i", NextNode);
 
 						zone->pathing->OpenDoors(PathingLastNodeVisited, NextNode, this);
 
@@ -1007,7 +1007,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 					}
 					else
 					{
-						mlog(PATHING__DEBUG, "  Reached end of path grid. Running direct to target.");
+						logger.LogDebug(EQEmuLogSys::Detail, "  Reached end of path grid. Running direct to target.");
 						return To;
 					}
 				}
@@ -1015,7 +1015,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 			}
 			else
 			{
-				mlog(PATHING__DEBUG, "  Target moved. End node is different. Clearing route.");
+				logger.LogDebug(EQEmuLogSys::Detail, "  Target moved. End node is different. Clearing route.");
 
 				Route.clear();
 				// We will now fall through to get a new route.
@@ -1025,11 +1025,11 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 
 	}
-	mlog(PATHING__DEBUG, "  Our route list is empty.");
+	logger.LogDebug(EQEmuLogSys::Detail, "  Our route list is empty.");
 
 	if((SameDestination) && !PathingLOSCheckTimer->Check())
 	{
-		mlog(PATHING__DEBUG, "  Destination same as before, LOS check timer not reached. Returning To.");
+		logger.LogDebug(EQEmuLogSys::Detail, "  Destination same as before, LOS check timer not reached. Returning To.");
 		return To;
 	}
 
@@ -1044,22 +1044,22 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 	if((Distance <= RuleR(Pathing, MinDistanceForLOSCheckLong))
 		&& (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
 	{
-		mlog(PATHING__DEBUG, "  Checking for long LOS at distance %8.3f.", Distance);
+		logger.LogDebug(EQEmuLogSys::Detail, "  Checking for long LOS at distance %8.3f.", Distance);
 
 		if(!zone->zonemap->LineIntersectsZone(HeadPosition, To, 1.0f, nullptr))
 			PathingLOSState = HaveLOS;
 		else
 			PathingLOSState = NoLOS;
 
-		mlog(PATHING__DEBUG, "  LOS stats is %s", (PathingLOSState == HaveLOS) ? "HaveLOS" : "NoLOS");
+		logger.LogDebug(EQEmuLogSys::Detail, "NoLOS");
 
 		if((PathingLOSState == HaveLOS) && zone->pathing->NoHazards(From, To))
 		{
-			mlog(PATHING__DEBUG, "Target is reachable. Running directly there.");
+			logger.LogDebug(EQEmuLogSys::Detail, "Target is reachable. Running directly there.");
 			return To;
 		}
 	}
-	mlog(PATHING__DEBUG, "  Calculating new route to target.");
+	logger.LogDebug(EQEmuLogSys::Detail, "  Calculating new route to target.");
 
 	Route = zone->pathing->FindRoute(From, To);
 
@@ -1067,14 +1067,14 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 	if(Route.size() == 0)
 	{
-		mlog(PATHING__DEBUG, "  No route available, running direct.");
+		logger.LogDebug(EQEmuLogSys::Detail, "  No route available, running direct.");
 
 		return To;
 	}
 
 	if(SameDestination && (Route.front() == PathingLastNodeVisited))
 	{
-		mlog(PATHING__DEBUG, "  Probable loop detected. Same destination and Route.front() == PathingLastNodeVisited.");
+		logger.LogDebug(EQEmuLogSys::Detail, "  Probable loop detected. Same destination and Route.front() == PathingLastNodeVisited.");
 
 		Route.clear();
 
@@ -1082,7 +1082,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 	}
 	NodeLoc = zone->pathing->GetPathNodeCoordinates(Route.front());
 
-	mlog(PATHING__DEBUG, "  New route determined, heading for node %i", Route.front());
+	logger.LogDebug(EQEmuLogSys::Detail, "  New route determined, heading for node %i", Route.front());
 
 	PathingLoopCount = 0;
 
