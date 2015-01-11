@@ -25,11 +25,12 @@
 #include <fstream> 
 #include <string>
 #include <iomanip>
-#include <direct.h>
+
 
 std::ofstream process_log;
 
 #ifdef _WINDOWS
+#include <direct.h>
 #include <conio.h>
 #include <iostream>
 #include <dos.h>
@@ -90,8 +91,16 @@ void EQEmuLogSys::StartZoneLogs(const std::string log_name)
 	process_log.open(StringFormat("logs/zone/%s.txt", log_name.c_str()), std::ios_base::app | std::ios_base::out);
 }
 
-void EQEmuLogSys::LogDebugType(DebugLevel debug_level, uint16 log_type, std::string message, ...){
+void EQEmuLogSys::LogDebugType(DebugLevel debug_level, uint16 log_type, std::string message, ...)
+{
+	if (RuleI(Logging, DebugLogLevel) < debug_level){ return; }
 
+	va_list args;
+	va_start(args, message);
+	std::string output_message = vStringFormat(message.c_str(), args);
+	va_end(args);
+
+	EQEmuLogSys::Log(EQEmuLogSys::LogType::Debug, output_message);
 }
 
 void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...)
@@ -103,7 +112,7 @@ void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...)
 	std::string output_message = vStringFormat(message.c_str(), args);
 	va_end(args);
 
-	EQEmuLogSys::Log(EQEmuLogSys::LogType::Debug, output_message);
+	EQEmuLogSys::Log(EQEmuLogSys::LogType::Debug, output_message); 
 }
 
 void EQEmuLogSys::Log(uint16 log_type, const std::string message, ...)
