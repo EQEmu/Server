@@ -207,7 +207,7 @@ Map::Vertex PathManager::GetPathNodeCoordinates(int NodeNumber, bool BestZ)
 
 std::deque<int> PathManager::FindRoute(int startID, int endID)
 { 
-	_log(PATHING__DEBUG, "FindRoute from node %i to %i", startID, endID);
+	logger.LogDebug(EQEmuLogSys::Detail, "FindRoute from node %i to %i", startID, endID);
 
 	memset(ClosedListFlag, 0, sizeof(int) * Head.PathNodeCount); 
 
@@ -330,7 +330,7 @@ std::deque<int> PathManager::FindRoute(int startID, int endID)
 		}
 
 	}
-	_log(PATHING__DEBUG, "Unable to find a route.");
+	logger.LogDebug(EQEmuLogSys::Detail, "Unable to find a route.");
 	return Route;
 
 }
@@ -352,7 +352,7 @@ auto path_compare = [](const PathNodeSortStruct& a, const PathNodeSortStruct& b)
 
 std::deque<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 {
-	_log(PATHING__DEBUG, "FindRoute(%8.3f, %8.3f, %8.3f, %8.3f, %8.3f, %8.3f)", Start.x, Start.y, Start.z, End.x, End.y, End.z);
+	logger.LogDebug(EQEmuLogSys::Detail, "FindRoute(%8.3f, %8.3f, %8.3f, %8.3f, %8.3f, %8.3f)", Start.x, Start.y, Start.z, End.x, End.y, End.z);
 
 	std::deque<int> noderoute;
 
@@ -386,7 +386,7 @@ std::deque<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 
 	for(auto Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
 	{
-		_log(PATHING__DEBUG, "Checking Reachability of Node %i from Start Position.", PathNodes[(*Iterator).id].id);
+		logger.LogDebug(EQEmuLogSys::Detail, "Checking Reachability of Node %i from Start Position.", PathNodes[(*Iterator).id].id);
 
 		if(!zone->zonemap->LineIntersectsZone(Start, PathNodes[(*Iterator).id].v, 1.0f, nullptr))
 		{
@@ -396,11 +396,11 @@ std::deque<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 	}
 
 	if(ClosestPathNodeToStart <0 ) {
-		_log(PATHING__DEBUG, "No LOS to any starting Path Node within range.");
+		logger.LogDebug(EQEmuLogSys::Detail, "No LOS to any starting Path Node within range.");
 		return noderoute;
 	}
 
-	_log(PATHING__DEBUG, "Closest Path Node To Start: %2d", ClosestPathNodeToStart);
+	logger.LogDebug(EQEmuLogSys::Detail, "Closest Path Node To Start: %2d", ClosestPathNodeToStart);
 
 	// Find the nearest PathNode the end point has LOS to
 
@@ -424,8 +424,8 @@ std::deque<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 
 	for(auto Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
 	{
-		_log(PATHING__DEBUG, "Checking Reachability of Node %i from End Position.", PathNodes[(*Iterator).id].id);
-		_log(PATHING__DEBUG, " (%8.3f, %8.3f, %8.3f) to (%8.3f, %8.3f, %8.3f)",
+		logger.LogDebug(EQEmuLogSys::Detail, "Checking Reachability of Node %i from End Position.", PathNodes[(*Iterator).id].id);
+		logger.LogDebug(EQEmuLogSys::Detail, " (%8.3f, %8.3f, %8.3f) to (%8.3f, %8.3f, %8.3f)",
 			End.x, End.y, End.z,
 			PathNodes[(*Iterator).id].v.x, PathNodes[(*Iterator).id].v.y, PathNodes[(*Iterator).id].v.z);
 
@@ -437,11 +437,11 @@ std::deque<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 	}
 
 	if(ClosestPathNodeToEnd < 0) {
-		_log(PATHING__DEBUG, "No LOS to any end Path Node within range.");
+		logger.LogDebug(EQEmuLogSys::Detail, "No LOS to any end Path Node within range.");
 		return noderoute;
 	}
 
-	_log(PATHING__DEBUG, "Closest Path Node To End: %2d", ClosestPathNodeToEnd);
+	logger.LogDebug(EQEmuLogSys::Detail, "Closest Path Node To End: %2d", ClosestPathNodeToEnd);
 
 	if(ClosestPathNodeToStart == ClosestPathNodeToEnd)
 	{
@@ -1124,7 +1124,7 @@ int PathManager::FindNearestPathNode(Map::Vertex Position)
 
 	for(auto Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
 	{
-		_log(PATHING__DEBUG, "Checking Reachability of Node %i from Start Position.", PathNodes[(*Iterator).id].id);
+		logger.LogDebug(EQEmuLogSys::Detail, "Checking Reachability of Node %i from Start Position.", PathNodes[(*Iterator).id].id);
 
 		if(!zone->zonemap->LineIntersectsZone(Position, PathNodes[(*Iterator).id].v, 1.0f, nullptr))
 		{
@@ -1134,7 +1134,7 @@ int PathManager::FindNearestPathNode(Map::Vertex Position)
 	}
 
 	if(ClosestPathNodeToStart <0 ) {
-		_log(PATHING__DEBUG, "No LOS to any starting Path Node within range.");
+		logger.LogDebug(EQEmuLogSys::Detail, "No LOS to any starting Path Node within range.");
 		return -1;
 	}
 	return ClosestPathNodeToStart;
@@ -1150,14 +1150,14 @@ bool PathManager::NoHazards(Map::Vertex From, Map::Vertex To)
 
 	if(ABS(NewZ - From.z) > RuleR(Pathing, ZDiffThreshold))
 	{
-		_log(PATHING__DEBUG, "  HAZARD DETECTED moving from %8.3f, %8.3f, %8.3f to %8.3f, %8.3f, %8.3f. Z Change is %8.3f",
+		logger.LogDebug(EQEmuLogSys::Detail, "  HAZARD DETECTED moving from %8.3f, %8.3f, %8.3f to %8.3f, %8.3f, %8.3f. Z Change is %8.3f",
 			From.x, From.y, From.z, MidPoint.x, MidPoint.y, MidPoint.z, NewZ - From.z);
 
 		return false;
 	}
 	else
 	{
-		_log(PATHING__DEBUG, "No HAZARD DETECTED moving from %8.3f, %8.3f, %8.3f to %8.3f, %8.3f, %8.3f. Z Change is %8.3f",
+		logger.LogDebug(EQEmuLogSys::Detail, "No HAZARD DETECTED moving from %8.3f, %8.3f, %8.3f to %8.3f, %8.3f, %8.3f. Z Change is %8.3f",
 			From.x, From.y, From.z, MidPoint.x, MidPoint.y, MidPoint.z, NewZ - From.z);
 	}
 
@@ -1189,7 +1189,7 @@ bool PathManager::NoHazardsAccurate(Map::Vertex From, Map::Vertex To)
 		float NewZ = zone->zonemap->FindBestZ(TestPoint, nullptr);
 		if (ABS(NewZ - last_z) > 5.0f)
 		{
-			_log(PATHING__DEBUG, "  HAZARD DETECTED moving from %8.3f, %8.3f, %8.3f to %8.3f, %8.3f, %8.3f. Best Z %8.3f, Z Change is %8.3f",
+			logger.LogDebug(EQEmuLogSys::Detail, "  HAZARD DETECTED moving from %8.3f, %8.3f, %8.3f to %8.3f, %8.3f, %8.3f. Best Z %8.3f, Z Change is %8.3f",
 				From.x, From.y, From.z, TestPoint.x, TestPoint.y, TestPoint.z, NewZ, NewZ - From.z);
 			return false;
 		}
@@ -1215,30 +1215,30 @@ bool PathManager::NoHazardsAccurate(Map::Vertex From, Map::Vertex To)
 				}
 				if (best_z2 == -999990)
 				{
-					_log(PATHING__DEBUG, "  HAZARD DETECTED, really deep water/lava!");
+					logger.LogDebug(EQEmuLogSys::Detail, "  HAZARD DETECTED, really deep water/lava!");
 					return false;
 				}
 				else
 				{
 					if (ABS(NewZ - best_z2) > RuleR(Pathing, ZDiffThreshold))
 					{
-						_log(PATHING__DEBUG, "  HAZARD DETECTED, water is fairly deep at %8.3f units deep", ABS(NewZ - best_z2));
+						logger.LogDebug(EQEmuLogSys::Detail, "  HAZARD DETECTED, water is fairly deep at %8.3f units deep", ABS(NewZ - best_z2));
 						return false;
 					}
 					else
 					{
-						_log(PATHING__DEBUG, "  HAZARD NOT DETECTED, water is shallow at %8.3f units deep", ABS(NewZ - best_z2));
+						logger.LogDebug(EQEmuLogSys::Detail, "  HAZARD NOT DETECTED, water is shallow at %8.3f units deep", ABS(NewZ - best_z2));
 					}
 				}
 			}
 			else
 			{
-				_log(PATHING__DEBUG, "Hazard point not in water or lava!");
+				logger.LogDebug(EQEmuLogSys::Detail, "Hazard point not in water or lava!");
 			}
 		}
 		else
 		{
-			_log(PATHING__DEBUG, "No water map loaded for hazards!");
+			logger.LogDebug(EQEmuLogSys::Detail, "No water map loaded for hazards!");
 		}
 
 		curx += stepx;
@@ -1290,7 +1290,7 @@ void PathManager::OpenDoors(int Node1, int Node2, Mob *ForWho)
 
 			if(d && !d->IsDoorOpen() )
 			{
-				_log(PATHING__DEBUG, "Opening door %i for %s", PathNodes[Node1].Neighbours[i].DoorID, ForWho->GetName());
+				logger.LogDebug(EQEmuLogSys::Detail, "Opening door %i for %s", PathNodes[Node1].Neighbours[i].DoorID, ForWho->GetName());
 
 				d->ForceOpen(ForWho);
 			}
