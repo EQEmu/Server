@@ -3251,6 +3251,12 @@ namespace RoF
 		// Set the Write pointer as we don't know what has been done with the packet before we get it.
 		in->SetReadPosition(0);
 		// Copy the header
+		//
+		// Server header struct is { uint32; uint32; uint32; uint32; uint8; }
+		// Yet, we're writing 5 uint32's... that's 17 vs 20 bytes...
+		// 3 Bytes difference..but, we only increase packet size by 1 byte..something wrong here? -U
+		// (Tying to add text link translators and can't figure out if '+1' size is a new RoF field or something else)
+		//
 		for (int i = 0; i < 5; ++i)
 			outapp->WriteUInt32(in->ReadUInt32());
 

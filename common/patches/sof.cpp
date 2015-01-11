@@ -1776,6 +1776,49 @@ namespace SoF
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_TaskDescription)
+	{
+		EQApplicationPacket *in = *p;
+		*p = nullptr;
+
+		unsigned char *__emu_buffer = in->pBuffer;
+
+		char *InBuffer = (char *)in->pBuffer;
+		char *block_start = InBuffer;
+
+		InBuffer += sizeof(TaskDescriptionHeader_Struct);
+		uint32 title_size = strlen(InBuffer) + 1;
+		InBuffer += title_size;
+		InBuffer += sizeof(TaskDescriptionData1_Struct);
+		uint32 description_size = strlen(InBuffer) + 1;
+		InBuffer += description_size;
+		InBuffer += sizeof(TaskDescriptionData2_Struct);
+
+		std::string old_message = InBuffer; // start 'Reward' as string
+		std::string new_message;
+		ServerToSoFTextLink(new_message, old_message);
+
+		in->size = sizeof(TaskDescriptionHeader_Struct)+sizeof(TaskDescriptionData1_Struct)+
+			sizeof(TaskDescriptionData2_Struct)+sizeof(TaskDescriptionTrailer_Struct)+
+			title_size + description_size + new_message.length() + 1;
+
+		in->pBuffer = new unsigned char[in->size];
+
+		char *OutBuffer = (char *)in->pBuffer;
+
+		memcpy(OutBuffer, (char *)__emu_buffer, (InBuffer - block_start));
+		OutBuffer += (InBuffer - block_start);
+
+		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
+
+		InBuffer += strlen(InBuffer) + 1;
+
+		memcpy(OutBuffer, InBuffer, sizeof(TaskDescriptionTrailer_Struct));
+
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
+	}
+
 	ENCODE(OP_Track)
 	{
 		EQApplicationPacket *in = *p;
