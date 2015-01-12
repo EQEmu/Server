@@ -96,6 +96,7 @@ static Console::Color LogColors[EQEmuLogSys::MaxLogID] = {
 
 
 EQEmuLogSys::EQEmuLogSys(){
+	std::cout << "I AM CONSTRUCTING!!!! LUL " << std::endl;
 }
 
 EQEmuLogSys::~EQEmuLogSys(){

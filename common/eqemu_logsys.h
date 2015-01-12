@@ -55,7 +55,6 @@ public:
 	void SetCurrentTimeStamp(char* time_stamp);
 	void StartZoneLogs(const std::string log_name);
 
-
 private:
 	bool zone_general_init = false;
 

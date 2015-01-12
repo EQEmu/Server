@@ -97,14 +97,13 @@ LoginServerList loginserverlist;
 EQWHTTPServer http_server;
 UCSConnection UCSLink;
 QueryServConnection QSLink;
-LauncherList launcher_list;
+LauncherList launcher_list; 
 AdventureManager adventure_manager;
 EQEmu::Random emu_random;
 volatile bool RunLoops = true;
 uint32 numclients = 0;
 uint32 numzones = 0;
 bool holdzones = false;
-EQEmuLogSys logger;
 
 extern ConsoleList console_list;
 

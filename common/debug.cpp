@@ -41,13 +41,12 @@ namespace ConsoleColor {
 
 #endif
 
+#include "eqemu_logsys.h"
 #include "debug.h"
 #include "misc_functions.h"
 #include "platform.h"
 #include "eqemu_logsys.h"
 #include "string_util.h"
-
-EQEmuLogSys backport_log_sys;
 
 #ifndef va_copy
 	#define va_copy(d,s) ((d) = (s))
@@ -165,7 +164,7 @@ bool EQEmuLog::write(LogIDs id, const char *fmt, ...)
 	va_list argptr, tmpargptr;
 	va_start(argptr, fmt);
 
-	backport_log_sys.Log(id, vStringFormat(fmt, argptr).c_str());
+	logger.Log(id, vStringFormat(fmt, argptr).c_str());
 
 	if (logCallbackFmt[id]) {
 		msgCallbackFmt p = logCallbackFmt[id];
