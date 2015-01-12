@@ -3338,7 +3338,7 @@ namespace SoF
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
-				if (segments[segment_iter].length() != EmuConstants::TEXT_LINK_BODY_LENGTH) {
+				if (segments[segment_iter].length() <= EmuConstants::TEXT_LINK_BODY_LENGTH) {
 					sofTextLink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
@@ -3378,7 +3378,7 @@ namespace SoF
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
-				if (segments[segment_iter].length() != consts::TEXT_LINK_BODY_LENGTH) {
+				if (segments[segment_iter].length() <= consts::TEXT_LINK_BODY_LENGTH) {
 					serverTextLink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
