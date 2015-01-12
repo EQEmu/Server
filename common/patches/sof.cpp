@@ -633,7 +633,6 @@ namespace SoF
 
 		unsigned char *__emu_buffer = in->pBuffer;
 
-		uint32 old_message_size = in->size - sizeof(FormattedMessage_Struct);
 		std::string old_message_array[9];
 
 		char *old_message_ptr = (char *)__emu_buffer + sizeof(FormattedMessage_Struct);
@@ -641,6 +640,7 @@ namespace SoF
 		for (int i = 0; i < 9; ++i) {
 			old_message_array[i] = old_message_ptr;
 			old_message_ptr += old_message_array[i].length() + 1;
+			if (old_message_array[i].length() == 0) { break; }
 		}
 
 		uint32 new_message_size = 0;
@@ -649,9 +649,10 @@ namespace SoF
 		for (int i = 0; i < 9; ++i) {
 			ServerToSoFTextLink(new_message_array[i], old_message_array[i]);
 			new_message_size += (new_message_array[i].length() + 1);
+			if (new_message_array[i].length() == 0) { break; }
 		}
 
-		in->size = sizeof(FormattedMessage_Struct) + new_message_size + 1;
+		in->size = sizeof(FormattedMessage_Struct) + new_message_size;
 		in->pBuffer = new unsigned char[in->size];
 
 		char *OutBuffer = (char *)in->pBuffer;
@@ -660,9 +661,10 @@ namespace SoF
 		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->string_id);
 		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->type);
 
-		for (int i = 0; i < 9; ++i) { VARSTRUCT_ENCODE_STRING(OutBuffer, new_message_array[i].c_str()); }
-
-		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, 0);
+		for (int i = 0; i < 9; ++i) {
+			VARSTRUCT_ENCODE_STRING(OutBuffer, new_message_array[i].c_str());
+			if (new_message_array[i].length() == 0) { break; }
+		}
 
 		delete[] __emu_buffer;
 		dest->FastQueuePacket(&in, ack_req);
