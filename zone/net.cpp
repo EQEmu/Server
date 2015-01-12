@@ -17,6 +17,7 @@
 */
 
 #define DONT_SHARED_OPCODES
+#define PLATFORM_ZONE 1
 
 #include "../common/debug.h"
 #include "../common/features.h"
@@ -42,7 +43,6 @@
 #include "../common/memory_mapped_file.h"
 #include "../common/eqemu_exception.h"
 #include "../common/spdat.h"
-
 #include "../common/eqemu_logsys.h"
 
 #include "zone_config.h"
@@ -114,6 +114,7 @@ extern void MapOpcodes();
 
 int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformZone);
+	logger.LoadLogSettings();
 	set_exception_handler();
 
 	const char *zone_name;

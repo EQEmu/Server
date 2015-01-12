@@ -37,6 +37,7 @@ EQEmuLogSys logger;
 
 int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformSharedMemory);
+	logger.LoadLogSettings();
 	set_exception_handler();
 
 	logger.Log(EQEmuLogSys::Status, "Shared Memory Loader Program");

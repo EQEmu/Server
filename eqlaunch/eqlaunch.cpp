@@ -39,6 +39,7 @@ void CatchSignal(int sig_num);
 
 int main(int argc, char *argv[]) {
 	RegisterExecutablePlatform(ExePlatformLaunch);
+	logger.LoadLogSettings();
 	set_exception_handler();
 
 	std::string launcher_name;
