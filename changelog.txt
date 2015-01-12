@@ -3,6 +3,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 == 01/12/2015 ==
 Uleat: Fix for OP_FormattedMessage text link server crashes
 Uleat: Added text link translators for OP_TaskDescription (RoF+ -- all clients current)
+Uleat: Fix for load_bots.sql using '\\' as a delimiter (Changed to '$$')
 
 == 01/11/2015 ==
 Uleat: Added text link translators for OP_TaskDescription (Ti thru UF..RoF+ in-work)
