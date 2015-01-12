@@ -240,17 +240,17 @@ sub Exit{ }
 #::: Returns Tab Delimited MySQL Result from Command Line
 sub GetMySQLResult{
 	my $run_query = $_[0];
-	if($OS eq "Windows"){ return `"$path" --user $user --password="$pass" $db -N -B -e "$run_query"`; }
+	if($OS eq "Windows"){ return `"$path" --host $host --user $user --password="$pass" $db -N -B -e "$run_query"`; }
 	if($OS eq "Linux"){ 
 		$run_query =~s/`//g;
-		return `$path --user="$user" --password="$pass" $db -N -B -e "$run_query"`; 
+		return `$path --user="$user" --host $host --password="$pass" $db -N -B -e "$run_query"`; 
 	}
 }
 
 sub GetMySQLResultFromFile{
 	my $update_file = $_[0];
-	if($OS eq "Windows"){ return `"$path" --user $user --password="$pass" --force $db < $update_file`;  }
-	if($OS eq "Linux"){ return `"$path" --user $user --password="$pass" --force $db < $update_file`;  }
+	if($OS eq "Windows"){ return `"$path" --host $host --user $user --password="$pass" --force $db < $update_file`;  }
+	if($OS eq "Linux"){ return `"$path" --host $host --user $user --password="$pass" --force $db < $update_file`;  }
 }
 
 #::: Gets Remote File based on URL (1st Arg), and saves to destination file (2nd Arg)
