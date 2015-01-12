@@ -10742,9 +10742,9 @@ void command_tune(Client *c, const Seperator *sep)
 			info_level = 1;
 		
 		if(!strcasecmp(sep->arg[2], "A"))
-			c->Tune_FindATKByPctMitigation(c, attacker, pct_mitigation, interval, max_loop,ac_override,info_level);
+			c->Tune_FindATKByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop,ac_override,info_level);
 		else if(!strcasecmp(sep->arg[2], "B"))
-			c->Tune_FindATKByPctMitigation(attacker,c, pct_mitigation, interval, max_loop,ac_override,info_level);
+			c->Tune_FindATKByPctMitigation(attacker,defender, pct_mitigation, interval, max_loop,ac_override,info_level);
 		else {
 			c->Message(0, "#Tune - Error no category selcted. [#Tune help]");
 			c->Message(0, "Usage #tune FindATK [A/B] [pct mitigation] [interval][loop_max][AC Overwride][Info Level] ");
@@ -10777,9 +10777,9 @@ void command_tune(Client *c, const Seperator *sep)
 			info_level = 1;
 				
 		if(!strcasecmp(sep->arg[2], "A"))
-			c->Tune_FindACByPctMitigation(c, attacker, pct_mitigation, interval, max_loop,atk_override,info_level);
+			c->Tune_FindACByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop,atk_override,info_level);
 		else if(!strcasecmp(sep->arg[2], "B"))
-			c->Tune_FindACByPctMitigation(attacker, c, pct_mitigation, interval, max_loop,atk_override,info_level);
+			c->Tune_FindACByPctMitigation(attacker, defender, pct_mitigation, interval, max_loop,atk_override,info_level);
 		else {
 			c->Message(0, "#Tune - Error no category selcted. [#Tune help]");
 			c->Message(0, "Usage #tune FindAC [A/B] [pct mitigation] [interval][loop_max][ATK Overwride][Info Level] ");
@@ -10819,9 +10819,9 @@ void command_tune(Client *c, const Seperator *sep)
 		}
 		
 		if(!strcasecmp(sep->arg[2], "A"))
-			c->Tune_FindAccuaryByHitChance(c, attacker, hit_chance, interval, max_loop,avoid_override,info_level);
+			c->Tune_FindAccuaryByHitChance(defender, attacker, hit_chance, interval, max_loop,avoid_override,info_level);
 		else if(!strcasecmp(sep->arg[2], "B"))
-			c->Tune_FindAccuaryByHitChance(attacker, c, hit_chance, interval, max_loop,avoid_override,info_level);
+			c->Tune_FindAccuaryByHitChance(attacker, defender, hit_chance, interval, max_loop,avoid_override,info_level);
 		else {
 			c->Message(0, "#Tune - Error no category selcted. [#Tune help]");
 			c->Message(0, "Usage #tune FindAcccuracy [A/B] [hit chance] [interval][loop_max][Avoidance Overwride][Info Level]");
@@ -10861,9 +10861,9 @@ void command_tune(Client *c, const Seperator *sep)
 		}
 		
 		if(!strcasecmp(sep->arg[2], "A"))
-			c->Tune_FindAvoidanceByHitChance(c, attacker, hit_chance, interval, max_loop,acc_override, info_level);
+			c->Tune_FindAvoidanceByHitChance(defender, attacker, hit_chance, interval, max_loop,acc_override, info_level);
 		else if(!strcasecmp(sep->arg[2], "B"))
-			c->Tune_FindAvoidanceByHitChance(attacker, c, hit_chance, interval, max_loop,acc_override, info_level);
+			c->Tune_FindAvoidanceByHitChance(attacker, defender, hit_chance, interval, max_loop,acc_override, info_level);
 		else {
 			c->Message(0, "#Tune - Error no category selcted. [#Tune help]");
 			c->Message(0, "Usage #tune FindAvoidance [A/B] [hit chance] [interval][loop_max][Accuracy Overwride][Info Level]");
