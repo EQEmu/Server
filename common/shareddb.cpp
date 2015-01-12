@@ -1979,7 +1979,7 @@ void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMes
 	std::string query = StringFormat("SELECT `inspect_message` FROM `character_inspect_messages` WHERE `id` = %u LIMIT 1", character_id);
 	auto results = QueryDatabase(query); 
 	auto row = results.begin();
-	memcpy(message, "", sizeof(InspectMessage_Struct));
+	memset(message, '\0', sizeof(InspectMessage_Struct));
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		memcpy(message, row[0], sizeof(InspectMessage_Struct));
 	}
