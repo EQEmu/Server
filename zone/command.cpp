@@ -10279,7 +10279,6 @@ void command_camerashake(Client *c, const Seperator *sep)
 		if(sep->arg[1][0] && sep->arg[2][0])
 		{
 			ServerPacket *pack = new ServerPacket(ServerOP_CameraShake, sizeof(ServerCameraShake_Struct));
-			memset(pack->pBuffer, 0, sizeof(pack->pBuffer));
 			ServerCameraShake_Struct* scss = (ServerCameraShake_Struct*) pack->pBuffer;
 			scss->duration = atoi(sep->arg[1]);
 			scss->intensity = atoi(sep->arg[2]);
