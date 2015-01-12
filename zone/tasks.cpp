@@ -2756,7 +2756,7 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 				+ sizeof(TaskDescriptionData1_Struct) + strlen(Tasks[TaskID]->Description) + 1
 				+ sizeof(TaskDescriptionData2_Struct) + 1 + sizeof(TaskDescriptionTrailer_Struct);
 
-	std::string RewardText;
+	std::string reward_text;
 	int ItemID = NOT_USED;
 
 	// If there is an item make the Reward text into a link to the item (only the first item if a list
@@ -2784,17 +2784,17 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 				linker.SetProxyText(Tasks[TaskID]->Reward);
 
 			auto reward_link = linker.GenerateLink();
-			RewardText += reward_link.c_str();
+			reward_text.append(reward_link);
 		}
 		else {
-			RewardText += Tasks[TaskID]->Reward;
+			reward_text.append(Tasks[TaskID]->Reward);
 		}
 
 	}
 	else {
-		RewardText += Tasks[TaskID]->Reward;
+		reward_text.append(Tasks[TaskID]->Reward);
 	}
-	PacketLength += strlen(RewardText.c_str()) + 1;
+	PacketLength += reward_text.length() + 1;
 
 	char *Ptr;
 	TaskDescriptionHeader_Struct* tdh;
@@ -2850,7 +2850,7 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 	tdd2->unknown3 = 0x0000;
 	Ptr = (char *) tdd2 + sizeof(TaskDescriptionData2_Struct);
 
-	sprintf(Ptr, "%s", RewardText.c_str());
+	sprintf(Ptr, "%s", reward_text.c_str());
 	Ptr = Ptr + strlen(Ptr) + 1;
 
 	tdt = (TaskDescriptionTrailer_Struct*)Ptr;

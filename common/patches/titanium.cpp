@@ -1258,7 +1258,7 @@ namespace Titanium
 
 		char *OutBuffer = (char *)in->pBuffer;
 
-		memcpy(OutBuffer, (char *)__emu_buffer, (InBuffer - block_start));
+		memcpy(OutBuffer, block_start, (InBuffer - block_start));
 		OutBuffer += (InBuffer - block_start);
 
 		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());

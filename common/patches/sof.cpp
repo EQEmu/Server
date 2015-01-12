@@ -1800,15 +1800,15 @@ namespace SoF
 		std::string new_message;
 		ServerToSoFTextLink(new_message, old_message);
 
-		in->size = sizeof(TaskDescriptionHeader_Struct)+sizeof(TaskDescriptionData1_Struct)+
-			sizeof(TaskDescriptionData2_Struct)+sizeof(TaskDescriptionTrailer_Struct)+
+		in->size = sizeof(TaskDescriptionHeader_Struct) + sizeof(TaskDescriptionData1_Struct)+
+			sizeof(TaskDescriptionData2_Struct) + sizeof(TaskDescriptionTrailer_Struct)+
 			title_size + description_size + new_message.length() + 1;
 
 		in->pBuffer = new unsigned char[in->size];
 
 		char *OutBuffer = (char *)in->pBuffer;
 
-		memcpy(OutBuffer, (char *)__emu_buffer, (InBuffer - block_start));
+		memcpy(OutBuffer, block_start, (InBuffer - block_start));
 		OutBuffer += (InBuffer - block_start);
 
 		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
