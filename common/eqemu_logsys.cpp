@@ -115,6 +115,7 @@ void EQEmuLogSys::LoadLogSettings()
 {
 	log_platform = GetExecutablePlatformInt();
 	std::cout << "PLATFORM " << log_platform << std::endl;
+	/* Write defaults */
 	for (int i = 0; i < EQEmuLogSys::LogCategory::MaxCategoryID; i++){
 		log_settings[i].log_to_console = 1;
 		log_settings[i].log_to_file = 1;
@@ -124,11 +125,13 @@ void EQEmuLogSys::LoadLogSettings()
 	log_settings_loaded = true;
 }
 
-void EQEmuLogSys::StartZoneLogs(const std::string log_name)
+void EQEmuLogSys::StartLogs(const std::string log_name)
 {
-	EQEmuLogSys::MakeDirectory("logs/zone");
-	std::cout << "Starting Zone Logs..." << std::endl;
-	process_log.open(StringFormat("logs/zone/%s.txt", log_name.c_str()), std::ios_base::app | std::ios_base::out);
+	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
+		std::cout << "Starting Zone Logs..." << std::endl;
+		EQEmuLogSys::MakeDirectory("logs/zone"); 
+		process_log.open(StringFormat("logs/zone/%s.txt", log_name.c_str()), std::ios_base::app | std::ios_base::out);
+	}
 }
 
 void EQEmuLogSys::LogDebugType(DebugLevel debug_level, uint16 log_type, std::string message, ...)
@@ -173,9 +176,7 @@ void EQEmuLogSys::MakeDirectory(std::string directory_name){
 
 void EQEmuLogSys::Log(uint16 log_type, const std::string message, ...)
 {
-	if (!log_settings_loaded){
-		EQEmuLogSys::LoadLogSettings();
-	}
+
 	if (log_type > EQEmuLogSys::MaxLogID){ 
 		return;
 	}
@@ -240,6 +241,8 @@ void EQEmuLogSys::ConsoleMessage(uint16 log_type, const std::string message)
 
 void EQEmuLogSys::CloseZoneLogs()
 {
-	std::cout << "Closing down zone logs..." << std::endl;
-	process_log.close();
+	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
+		std::cout << "Closing down zone logs..." << std::endl;
+		process_log.close();
+	}
 }

@@ -76,7 +76,7 @@ public:
 	void LogDebugType(DebugLevel debug_level, uint16 log_type, std::string message, ...);
 	void MakeDirectory(std::string directory_name);
 	void SetCurrentTimeStamp(char* time_stamp);
-	void StartZoneLogs(const std::string log_name);
+	void StartLogs(const std::string log_name);
 	void LoadLogSettings();
 
 	struct LogSettings{
