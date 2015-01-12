@@ -20,6 +20,7 @@
 #include "eqemu_logsys.h"
 #include "string_util.h"
 #include "rulesys.h"
+#include "platform.h"
 
 #include <iostream>
 #include <fstream> 
@@ -61,43 +62,66 @@ namespace Console {
 }
 
 static const char* TypeNames[EQEmuLogSys::MaxLogID] = { 
-		"Status", 
-		"Normal", 
-		"Error", 
-		"Debug", 
-		"Quest", 
-		"Command", 
-		"Crash",
-		"Save",
+	"Status",
+	"Normal",
+	"Error",
+	"Debug",
+	"Quest",
+	"Command",
+	"Crash",
+	"Save",
 };
 
+/* If you add to this, make sure you update LogCategory in eqemu_logsys.h */
 static const char* LogCategoryName[EQEmuLogSys::LogCategory::MaxCategoryID] = {
+	"Zone",
+	"World",
+	"UCS",
+	"QueryServer",
+	"WebInterface",
+	"AA",
+	"Doors",
+	"Guild",
+	"Inventory",
 	"Netcode",
-	"Guilds",
+	"Object",
 	"Rules",
+	"Skills",
+	"Spawns",
+	"Spells",
+	"Tasks",
+	"Trading",
+	"Tribute",
 };
 
 static Console::Color LogColors[EQEmuLogSys::MaxLogID] = {
-		Console::Color::Yellow, 		   // "Status", 
-		Console::Color::Yellow,			   // "Normal", 
-		Console::Color::LightRed,		   // "Error", 
-		Console::Color::LightGreen,		   // "Debug", 
-		Console::Color::LightCyan,		   // "Quest", 
-		Console::Color::LightMagenta,	   // "Command", 
-		Console::Color::LightRed		   // "Crash" 
+	Console::Color::Yellow, 		   // "Status", 
+	Console::Color::Yellow,			   // "Normal", 
+	Console::Color::LightRed,		   // "Error", 
+	Console::Color::LightGreen,		   // "Debug", 
+	Console::Color::LightCyan,		   // "Quest", 
+	Console::Color::LightMagenta,	   // "Command", 
+	Console::Color::LightRed		   // "Crash" 
 };
 
 
 EQEmuLogSys::EQEmuLogSys(){
-	// LogSettings log_settings;
-	for (int i = 0; i < EQEmuLogSys::LogCategory::MaxCategoryID; i++){
-		log_settings[i].log_to_console = 1;
-		std::cout << "Setting log settings for " << i << " " << LogCategoryName[i] << " " << std::endl;
-	}
-	std::cout << "I AM CONSTRUCTING!!!! LUL " << std::endl;
 }
 
 EQEmuLogSys::~EQEmuLogSys(){
+}
+
+void EQEmuLogSys::LoadLogSettings()
+{
+	log_platform = GetExecutablePlatformInt();
+	std::cout << "PLATFORM " << log_platform << std::endl;
+	for (int i = 0; i < EQEmuLogSys::LogCategory::MaxCategoryID; i++){
+		log_settings[i].log_to_console = 1;
+		log_settings[i].log_to_file = 1;
+		log_settings[i].log_to_gmsay = 1;
+		std::cout << "Setting log settings for " << i << " " << LogCategoryName[i] << " " << std::endl;
+	}
+	log_settings_loaded = true;
 }
 
 void EQEmuLogSys::StartZoneLogs(const std::string log_name)
@@ -149,6 +173,9 @@ void EQEmuLogSys::MakeDirectory(std::string directory_name){
 
 void EQEmuLogSys::Log(uint16 log_type, const std::string message, ...)
 {
+	if (!log_settings_loaded){
+		EQEmuLogSys::LoadLogSettings();
+	}
 	if (log_type > EQEmuLogSys::MaxLogID){ 
 		return;
 	}

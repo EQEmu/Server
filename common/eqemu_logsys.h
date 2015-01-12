@@ -46,10 +46,26 @@ public:
 		Detail,			/* 2 - Use this for extreme detail in logging, usually in extreme debugging in the stack or interprocess communication */
 	};
 
+	/* If you add to this, make sure you update LogCategoryName in eqemu_logsys.cpp */
 	enum LogCategory {
-		Netcode = 0,
-		Guilds,
+		Zone_Server = 0,
+		World_Server,
+		UCS_Server,
+		QS_Server,
+		WebInterface_Server,
+		AA,
+		Doors,
+		Guild,
+		Inventory,
+		Netcode,
+		Object,
 		Rules,
+		Skills,
+		Spawns,
+		Spells,
+		Tasks,
+		Trading,
+		Tribute,
 		MaxCategoryID	/* Don't Remove this*/
 	};
 
@@ -61,6 +77,7 @@ public:
 	void MakeDirectory(std::string directory_name);
 	void SetCurrentTimeStamp(char* time_stamp);
 	void StartZoneLogs(const std::string log_name);
+	void LoadLogSettings();
 
 	struct LogSettings{
 		uint8 log_to_file;
@@ -69,6 +86,8 @@ public:
 	};
 
 	LogSettings log_settings[EQEmuLogSys::LogCategory::MaxCategoryID];
+	bool log_settings_loaded = false;
+	int log_platform = 0;
 
 private:
 	bool zone_general_init = false;
