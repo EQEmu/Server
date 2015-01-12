@@ -69,19 +69,12 @@ static const char* TypeNames[EQEmuLogSys::MaxLogID] = {
 		"Command", 
 		"Crash",
 		"Save",
-		/*
-		"UCS",
-		"Query Server",
-		"Socket Server",
-		"Spawns",
-		"AI",
-		"Pathing",
-		"Quests",
-		"Spells",
-		"Zone",
-		"Tasks",
-		"Trading",
-		*/
+};
+
+static const char* LogCategoryName[EQEmuLogSys::LogCategory::MaxCategoryID] = {
+	"Netcode",
+	"Guilds",
+	"Rules",
 };
 
 static Console::Color LogColors[EQEmuLogSys::MaxLogID] = {
@@ -96,6 +89,11 @@ static Console::Color LogColors[EQEmuLogSys::MaxLogID] = {
 
 
 EQEmuLogSys::EQEmuLogSys(){
+	// LogSettings log_settings;
+	for (int i = 0; i < EQEmuLogSys::LogCategory::MaxCategoryID; i++){
+		log_settings[i].log_to_console = 1;
+		std::cout << "Setting log settings for " << i << " " << LogCategoryName[i] << " " << std::endl;
+	}
 	std::cout << "I AM CONSTRUCTING!!!! LUL " << std::endl;
 }
 

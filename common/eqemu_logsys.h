@@ -46,6 +46,13 @@ public:
 		Detail,			/* 2 - Use this for extreme detail in logging, usually in extreme debugging in the stack or interprocess communication */
 	};
 
+	enum LogCategory {
+		Netcode = 0,
+		Guilds,
+		Rules,
+		MaxCategoryID	/* Don't Remove this*/
+	};
+
 	void CloseZoneLogs();
 	void ConsoleMessage(uint16 log_type, const std::string message);
 	void Log(uint16 log_type, const std::string message, ...);
@@ -54,6 +61,14 @@ public:
 	void MakeDirectory(std::string directory_name);
 	void SetCurrentTimeStamp(char* time_stamp);
 	void StartZoneLogs(const std::string log_name);
+
+	struct LogSettings{
+		uint8 log_to_file;
+		uint8 log_to_console;
+		uint8 log_to_gmsay;
+	};
+
+	LogSettings log_settings[EQEmuLogSys::LogCategory::MaxCategoryID];
 
 private:
 	bool zone_general_init = false;
