@@ -115,7 +115,7 @@ bool TaskManager::LoadSingleTask(int TaskID) {
 void TaskManager::ReloadGoalLists() {
 
 	if(!GoalListManager.LoadLists())
-		_log(TASKS__GLOBALLOAD,"TaskManager::LoadTasks LoadLists failed");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tasks,"TaskManager::LoadTasks LoadLists failed");
 }
 
 bool TaskManager::LoadTasks(int singleTask) {
@@ -126,10 +126,10 @@ bool TaskManager::LoadTasks(int singleTask) {
     std::string query;
 	if(singleTask == 0) {
 		if(!GoalListManager.LoadLists())
-			_log(TASKS__GLOBALLOAD,"TaskManager::LoadTasks LoadLists failed");
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tasks,"TaskManager::LoadTasks LoadLists failed");
 
 		if(!LoadTaskSets())
-			_log(TASKS__GLOBALLOAD,"TaskManager::LoadTasks LoadTaskSets failed");
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tasks,"TaskManager::LoadTasks LoadTaskSets failed");
 
 		query = StringFormat("SELECT `id`, `duration`, `title`, `description`, `reward`, "
                             "`rewardid`, `cashreward`, `xpreward`, `rewardmethod`, "
@@ -306,7 +306,7 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state) {
 
 	int characterID = c->CharacterID();
 
-	_log(TASKS__CLIENTSAVE,"TaskManager::SaveClientState for character ID %d", characterID);
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tasks,"TaskManager::SaveClientState for character ID %d", characterID);
 
 	if(state->ActiveTaskCount > 0) {
 		for(int task=0; task<MAXACTIVETASKS; task++) {
