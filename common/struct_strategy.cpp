@@ -1,5 +1,6 @@
 
 #include "debug.h"
+#include "eqemu_logsys.h"
 #include "struct_strategy.h"
 #include "logsys.h"
 #include "eq_stream.h"
@@ -38,13 +39,13 @@ void StructStrategy::ErrorEncoder(EQApplicationPacket **in_p, EQStream *dest, bo
 	EQApplicationPacket *p = *in_p;
 	*in_p = nullptr;
 
-	_log(NET__STRUCTS, "Error encoding opcode %s: no encoder provided. Dropping.", OpcodeManager::EmuToName(p->GetOpcode()));
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Error encoding opcode %s: no encoder provided. Dropping.", OpcodeManager::EmuToName(p->GetOpcode()));
 
 	delete p;
 }
 
 void StructStrategy::ErrorDecoder(EQApplicationPacket *p) {
-	_log(NET__STRUCTS, "Error decoding opcode %s: no decoder provided. Invalidating.", OpcodeManager::EmuToName(p->GetOpcode()));
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Error decoding opcode %s: no decoder provided. Invalidating.", OpcodeManager::EmuToName(p->GetOpcode()));
 	p->SetOpcode(OP_Unknown);
 }
 

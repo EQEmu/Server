@@ -200,7 +200,7 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 				// In case we did queue one before as well.
 				EQProtocolPacket *qp=RemoveQueue(seq);
 				if (qp) {
-					_log(NET__NET_TRACE, "OP_Packet: Removing older queued packet with sequence %d", seq);
+					logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[NET_TRACE] OP_Packet: Removing older queued packet with sequence %d", seq);
 					delete qp;
 				}
 
@@ -250,7 +250,7 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 				// In case we did queue one before as well.
 				EQProtocolPacket *qp=RemoveQueue(seq);
 				if (qp) {
-					_log(NET__NET_TRACE, "OP_Fragment: Removing older queued packet with sequence %d", seq);
+					logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[NET_TRACE] OP_Fragment: Removing older queued packet with sequence %d", seq);
 					delete qp;
 				}
 				SetNextAckToSend(seq);
@@ -960,7 +960,7 @@ EQRawApplicationPacket *p=nullptr;
 			EmuOpcode emu_op = (*OpMgr)->EQToEmu(p->opcode);
 #if EQDEBUG >= 4
 			if(emu_op == OP_Unknown) {
-				_log(NET__ERROR, "Unable to convert EQ opcode 0x%.4x to an Application opcode.", p->opcode);
+				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Unable to convert EQ opcode 0x%.4x to an Application opcode.", p->opcode);
 			}
 #endif
 			p->SetOpcode(emu_op);
@@ -1426,19 +1426,19 @@ EQStream::MatchState EQStream::CheckSignature(const Signature *sig) {
 		} else if(p->opcode == sig->first_eq_opcode) {
 			//opcode matches, check length..
 			if(p->size == sig->first_length) {
-				_log(NET__IDENT_TRACE, "%s:%d: First opcode matched 0x%x and length matched %d", long2ip(GetRemoteIP()).c_str(), ntohs(GetRemotePort()), sig->first_eq_opcode, p->size);
+				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENT_TRACE] %s:%d: First opcode matched 0x%x and length matched %d", long2ip(GetRemoteIP()).c_str(), ntohs(GetRemotePort()), sig->first_eq_opcode, p->size);
 				res = MatchSuccessful;
 			} else if(sig->first_length == 0) {
-				_log(NET__IDENT_TRACE, "%s:%d: First opcode matched 0x%x and length (%d) is ignored", long2ip(GetRemoteIP()).c_str(), ntohs(GetRemotePort()), sig->first_eq_opcode, p->size);
+				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENT_TRACE] %s:%d: First opcode matched 0x%x and length (%d) is ignored", long2ip(GetRemoteIP()).c_str(), ntohs(GetRemotePort()), sig->first_eq_opcode, p->size);
 				res = MatchSuccessful;
 			} else {
 				//opcode matched but length did not.
-				_log(NET__IDENT_TRACE, "%s:%d: First opcode matched 0x%x, but length %d did not match expected %d", long2ip(GetRemoteIP()).c_str(), ntohs(GetRemotePort()), sig->first_eq_opcode, p->size, sig->first_length);
+				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENT_TRACE] %s:%d: First opcode matched 0x%x, but length %d did not match expected %d", long2ip(GetRemoteIP()).c_str(), ntohs(GetRemotePort()), sig->first_eq_opcode, p->size, sig->first_length);
 				res = MatchFailed;
 			}
 		} else {
 			//first opcode did not match..
-			_log(NET__IDENT_TRACE, "%s:%d: First opcode 0x%x did not match expected 0x%x", long2ip(GetRemoteIP()).c_str(), ntohs(GetRemotePort()), p->opcode, sig->first_eq_opcode);
+			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENT_TRACE] %s:%d: First opcode 0x%x did not match expected 0x%x", long2ip(GetRemoteIP()).c_str(), ntohs(GetRemotePort()), p->opcode, sig->first_eq_opcode);
 			res = MatchFailed;
 		}
 	}
