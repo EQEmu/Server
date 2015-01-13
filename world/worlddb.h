@@ -28,9 +28,7 @@ struct CharacterSelect_Struct;
 
 class WorldDatabase : public SharedDatabase {
 public:
-	bool GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc);
-	bool GetStartZoneSoF(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc);
-
+	bool GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc, bool isTitanium);
 	void GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*, uint32 ClientVersion);
 	int MoveCharacterToBind(int CharID, uint8 bindnum = 0);
 
@@ -40,8 +38,9 @@ public:
 
 	bool LoadCharacterCreateAllocations();
 	bool LoadCharacterCreateCombos();
-protected:
-
+private:
+	void SetTitaniumDefaultStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc);
+	void SetSoFDefaultStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc);
 };
 
 extern WorldDatabase database;
