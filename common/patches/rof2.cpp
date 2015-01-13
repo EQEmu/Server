@@ -958,7 +958,7 @@ namespace RoF2
 		std::string new_message_array[9];
 
 		for (int i = 0; i < 9; ++i) {
-			if (new_message_array[i].length() == 0) { break; }
+			if (old_message_array[i].length() == 0) { break; }
 			ServerToRoF2TextLink(new_message_array[i], old_message_array[i]);
 			new_message_size += new_message_array[i].length() + 1;
 		}
