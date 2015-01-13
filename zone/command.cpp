@@ -4602,10 +4602,10 @@ void command_guild(Client *c, const Seperator *sep)
 			}
 
 			if(guild_id == GUILD_NONE) {
-				_log(GUILDS__ACTIONS, "%s: Removing %s (%d) from guild with GM command.", c->GetName(),
+				logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Removing %s (%d) from guild with GM command.", c->GetName(),
 					sep->arg[2], charid);
 			} else {
-				_log(GUILDS__ACTIONS, "%s: Putting %s (%d) into guild %s (%d) with GM command.", c->GetName(),
+				logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Putting %s (%d) into guild %s (%d) with GM command.", c->GetName(),
 					sep->arg[2], charid,
 					guild_mgr.GetGuildName(guild_id), guild_id);
 			}
@@ -4654,7 +4654,7 @@ void command_guild(Client *c, const Seperator *sep)
 				return;
 			}
 
-			_log(GUILDS__ACTIONS, "%s: Setting %s (%d)'s guild rank to %d with GM command.", c->GetName(),
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Setting %s (%d)'s guild rank to %d with GM command.", c->GetName(),
 				sep->arg[2], charid, rank);
 
 			if(!guild_mgr.SetGuildRank(charid, rank))
@@ -4696,7 +4696,7 @@ void command_guild(Client *c, const Seperator *sep)
 
 				uint32 id = guild_mgr.CreateGuild(sep->argplus[3], leader);
 
-				_log(GUILDS__ACTIONS, "%s: Creating guild %s with leader %d with GM command. It was given id %lu.", c->GetName(),
+				logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Creating guild %s with leader %d with GM command. It was given id %lu.", c->GetName(),
 					sep->argplus[3], leader, (unsigned long)id);
 
 				if (id == GUILD_NONE)
@@ -4735,7 +4735,7 @@ void command_guild(Client *c, const Seperator *sep)
 				}
 			}
 
-			_log(GUILDS__ACTIONS, "%s: Deleting guild %s (%d) with GM command.", c->GetName(),
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Deleting guild %s (%d) with GM command.", c->GetName(),
 				guild_mgr.GetGuildName(id), id);
 
 			if (!guild_mgr.DeleteGuild(id))
@@ -4769,7 +4769,7 @@ void command_guild(Client *c, const Seperator *sep)
 				}
 			}
 
-			_log(GUILDS__ACTIONS, "%s: Renaming guild %s (%d) to '%s' with GM command.", c->GetName(),
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Renaming guild %s (%d) to '%s' with GM command.", c->GetName(),
 				guild_mgr.GetGuildName(id), id, sep->argplus[3]);
 
 			if (!guild_mgr.RenameGuild(id, sep->argplus[3]))
@@ -4820,7 +4820,7 @@ void command_guild(Client *c, const Seperator *sep)
 					}
 				}
 
-				_log(GUILDS__ACTIONS, "%s: Setting leader of guild %s (%d) to %d with GM command.", c->GetName(),
+				logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Setting leader of guild %s (%d) to %d with GM command.", c->GetName(),
 					guild_mgr.GetGuildName(id), id, leader);
 
 				if(!guild_mgr.SetGuildLeader(id, leader))

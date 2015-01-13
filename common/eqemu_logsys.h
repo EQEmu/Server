@@ -57,7 +57,7 @@ public:
 		WebInterface_Server,
 		AA,
 		Doors,
-		Guild,
+		Guilds,
 		Inventory,
 		Netcode,
 		Object,

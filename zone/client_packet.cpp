@@ -7196,7 +7196,7 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 
 	uint32 NewGuildID = guild_mgr.CreateGuild(GuildName, CharacterID());
 
-	_log(GUILDS__ACTIONS, "%s: Creating guild %s with leader %d via UF+ GUI. It was given id %lu.", GetName(),
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Creating guild %s with leader %d via UF+ GUI. It was given id %lu.", GetName(),
 		GuildName, CharacterID(), (unsigned long)NewGuildID);
 
 	if (NewGuildID == GUILD_NONE)
