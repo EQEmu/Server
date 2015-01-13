@@ -678,7 +678,7 @@ void WorldServer::Process() {
 					//pendingrezexp is the amount of XP on the corpse. Setting it to a value >= 0
 					//also serves to inform Client::OPRezzAnswer to expect a packet.
 					client->SetPendingRezzData(srs->exp, srs->dbid, srs->rez.spellid, srs->rez.corpse_name);
-							_log(SPELLS__REZ, "OP_RezzRequest in zone %s for %s, spellid:%i",
+							logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "OP_RezzRequest in zone %s for %s, spellid:%i",
 							zone->GetShortName(), client->GetName(), srs->rez.spellid);
 					EQApplicationPacket* outapp = new EQApplicationPacket(OP_RezzRequest,
 												sizeof(Resurrect_Struct));
@@ -694,10 +694,10 @@ void WorldServer::Process() {
 				// to the zone that the corpse is in.
 				Corpse* corpse = entity_list.GetCorpseByName(srs->rez.corpse_name);
 				if (corpse && corpse->IsCorpse()) {
-					_log(SPELLS__REZ, "OP_RezzComplete received in zone %s for corpse %s",
+					logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "OP_RezzComplete received in zone %s for corpse %s",
 								zone->GetShortName(), srs->rez.corpse_name);
 
-					_log(SPELLS__REZ, "Found corpse. Marking corpse as rezzed.");
+					logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Found corpse. Marking corpse as rezzed.");
 					// I don't know why Rezzed is not set to true in CompleteRezz().
 					corpse->IsRezzed(true);
 					corpse->CompleteResurrection();
@@ -1974,7 +1974,7 @@ bool WorldServer::SendVoiceMacro(Client* From, uint32 Type, char* Target, uint32
 
 bool WorldServer::RezzPlayer(EQApplicationPacket* rpack, uint32 rezzexp, uint32 dbid, uint16 opcode)
 {
-	_log(SPELLS__REZ, "WorldServer::RezzPlayer rezzexp is %i (0 is normal for RezzComplete", rezzexp);
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "WorldServer::RezzPlayer rezzexp is %i (0 is normal for RezzComplete", rezzexp);
 	ServerPacket* pack = new ServerPacket(ServerOP_RezzPlayer, sizeof(RezzPlayer_Struct));
 	RezzPlayer_Struct* sem = (RezzPlayer_Struct*) pack->pBuffer;
 	sem->rezzopcode = opcode;
@@ -1983,9 +1983,9 @@ bool WorldServer::RezzPlayer(EQApplicationPacket* rpack, uint32 rezzexp, uint32 
 	sem->dbid = dbid;
 	bool ret = SendPacket(pack);
 	if (ret)
-		_log(SPELLS__REZ, "Sending player rezz packet to world spellid:%i", sem->rez.spellid);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Sending player rezz packet to world spellid:%i", sem->rez.spellid);
 	else
-		_log(SPELLS__REZ, "NOT Sending player rezz packet to world");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "NOT Sending player rezz packet to world");
 
 	safe_delete(pack);
 	return ret;

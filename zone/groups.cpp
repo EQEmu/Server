@@ -768,7 +768,7 @@ void Group::CastGroupSpell(Mob* caster, uint16 spell_id) {
 					caster->SpellOnTarget(spell_id, members[z]->GetPet());
 #endif
 			} else
-				_log(SPELLS__CASTING, "Group spell: %s is out of range %f at distance %f from %s", members[z]->GetName(), range, distance, caster->GetName());
+				logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Group spell: %s is out of range %f at distance %f from %s", members[z]->GetName(), range, distance, caster->GetName());
 		}
 	}
 
@@ -807,7 +807,7 @@ void Group::GroupBardPulse(Mob* caster, uint16 spell_id) {
 					members[z]->GetPet()->BardPulse(spell_id, caster);
 #endif
 			} else
-				_log(SPELLS__BARDS, "Group bard pulse: %s is out of range %f at distance %f from %s", members[z]->GetName(), range, distance, caster->GetName());
+				logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Group bard pulse: %s is out of range %f at distance %f from %s", members[z]->GetName(), range, distance, caster->GetName());
 		}
 	}
 }

@@ -11714,7 +11714,7 @@ void Client::Handle_OP_RezzAnswer(const EQApplicationPacket *app)
 
 	const Resurrect_Struct* ra = (const Resurrect_Struct*)app->pBuffer;
 
-	_log(SPELLS__REZ, "Received OP_RezzAnswer from client. Pendingrezzexp is %i, action is %s",
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Received OP_RezzAnswer from client. Pendingrezzexp is %i, action is %s",
 		PendingRezzXP, ra->action ? "ACCEPT" : "DECLINE");
 
 	_pkt(SPELLS__REZ, app);

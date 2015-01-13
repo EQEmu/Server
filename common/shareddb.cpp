@@ -1482,7 +1482,7 @@ int SharedDatabase::GetMaxSpellID() {
 	std::string query = "SELECT MAX(id) FROM spells_new";
 	auto results = QueryDatabase(query);
     if (!results.Success()) {
-        _log(SPELLS__LOAD_ERR, "Error in GetMaxSpellID query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
+        logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Error in GetMaxSpellID query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
         return -1;
     }
 
@@ -1497,12 +1497,12 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 	const std::string query = "SELECT * FROM spells_new ORDER BY id ASC";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        _log(SPELLS__LOAD_ERR, "Error in LoadSpells query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
+        logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Error in LoadSpells query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
         return;
     }
 
     if(results.ColumnCount() <= SPELL_LOAD_FIELD_COUNT) {
-		_log(SPELLS__LOAD_ERR, "Fatal error loading spells: Spell field count < SPELL_LOAD_FIELD_COUNT(%u)", SPELL_LOAD_FIELD_COUNT);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Fatal error loading spells: Spell field count < SPELL_LOAD_FIELD_COUNT(%u)", SPELL_LOAD_FIELD_COUNT);
 		return;
     }
 
@@ -1512,7 +1512,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
     for (auto row = results.begin(); row != results.end(); ++row) {
         tempid = atoi(row[0]);
         if(tempid >= max_spells) {
-            _log(SPELLS__LOAD_ERR, "Non fatal error: spell.id >= max_spells, ignoring.");
+            logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Non fatal error: spell.id >= max_spells, ignoring.");
             continue;
         }
 
