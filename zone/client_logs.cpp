@@ -21,6 +21,7 @@
 #ifdef CLIENT_LOGS
 #include "client_logs.h"
 #include "client.h"
+#include "entity.h"
 #include <stdarg.h>
 
 ClientLogs client_logs;
@@ -132,6 +133,10 @@ void ClientLogs::EQEmuIO_pva(EQEmuLog::LogIDs id, const char *prefix, const char
 	vsnprintf(buf, MAX_CLIENT_LOG_MESSAGE_LENGTH-plen, fmt, ap);
 	_buffer[MAX_CLIENT_LOG_MESSAGE_LENGTH] = '\0';
 	client_logs.msg(id, _buffer);
+}
+
+void ClientLogs::ClientMessage(uint16 log_type, std::string& message){
+	entity_list.MessageStatus(0, 80, 7, "%s", message.c_str());
 }
 
 #endif //CLIENT_LOGS

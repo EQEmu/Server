@@ -46,6 +46,7 @@ public:
 	void clear();	//unsubscribes everybody
 
 	void msg(EQEmuLog::LogIDs id, const char *buf);
+	static void ClientMessage(uint16 log_type, std::string& message);
 
 protected:
 

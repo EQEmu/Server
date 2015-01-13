@@ -21,6 +21,9 @@
 
 #include <iostream>
 #include <fstream> 
+#include <stdio.h>
+#include <functional>
+
 #include "types.h"
 
 class EQEmuLogSys {
@@ -89,9 +92,11 @@ public:
 	bool log_settings_loaded = false;
 	int log_platform = 0;
 
+	void OnLogHookCallBack(std::function<void(uint16 log_type, std::string&)> f) { on_log_gmsay_hook = f; }
+
 private:
 	bool zone_general_init = false;
-
+	std::function<void(uint16 log_type, std::string&)> on_log_gmsay_hook;
 };
 
 extern EQEmuLogSys logger;

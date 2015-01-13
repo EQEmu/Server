@@ -45,6 +45,7 @@
 #include "../common/spdat.h"
 #include "../common/eqemu_logsys.h"
 
+#include "client_logs.h"
 #include "zone_config.h"
 #include "masterentity.h"
 #include "worldserver.h"
@@ -115,6 +116,7 @@ extern void MapOpcodes();
 int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformZone);
 	logger.LoadLogSettings();
+	logger.OnLog(&ClientLogs::ClientMessage);
 	set_exception_handler();
 
 	const char *zone_name;

@@ -106,6 +106,7 @@ static Console::Color LogColors[EQEmuLogSys::MaxLogID] = {
 
 
 EQEmuLogSys::EQEmuLogSys(){
+	on_log_gmsay_hook = [](uint16 log_type, std::string&) {};
 }
 
 EQEmuLogSys::~EQEmuLogSys(){
@@ -154,7 +155,6 @@ void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...)
 	va_start(args, message);
 	std::string output_message = vStringFormat(message.c_str(), args);
 	va_end(args);
-
 	EQEmuLogSys::Log(EQEmuLogSys::LogType::Debug, output_message); 
 }
 
@@ -190,6 +190,10 @@ void EQEmuLogSys::Log(uint16 log_type, const std::string message, ...)
 	va_start(args, message);
 	std::string output_message = vStringFormat(message.c_str(), args);
 	va_end(args);
+
+	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
+		on_log_gmsay_hook(output_message);
+	}
 
 	EQEmuLogSys::ConsoleMessage(log_type, output_message);
 
