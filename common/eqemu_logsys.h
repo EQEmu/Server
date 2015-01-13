@@ -74,7 +74,7 @@ public:
 	};
 
 	void CloseZoneLogs();
-	void ConsoleMessage(uint16 log_type, uint16 log_category, const std::string message);
+	void ConsoleMessage(uint16 log_type, const std::string message);
 	void LoadLogSettings();
 	void Log(uint16 log_type, const std::string message, ...);
 	void LogDebug(DebugLevel debug_level, std::string message, ...);
@@ -99,6 +99,9 @@ private:
 	bool zone_general_init = false;
 	std::function<void(uint16 log_type, std::string&)> on_log_gmsay_hook;
 
+	void ProcessGMSay(uint16 log_type, std::string message);
+	void ProcessLogWrite(uint16 log_type, std::string message);
+	std::string FormatDebugCategoryMessageString(uint16 log_category, std::string in_message);
 };
 
 extern EQEmuLogSys logger;

@@ -136,6 +136,14 @@ void EQEmuLogSys::StartLogs(const std::string log_name)
 	}
 }
 
+std::string EQEmuLogSys::FormatDebugCategoryMessageString(uint16 log_category, std::string in_message){
+	std::string category_string = "";
+	if (log_category > 0 && LogCategoryName[log_category]){ 
+		category_string = StringFormat("[%s] ", LogCategoryName[log_category]);
+	}
+	return StringFormat("%s%s", category_string.c_str(), in_message.c_str()); 
+}
+
 void EQEmuLogSys::LogDebugType(DebugLevel debug_level, uint16 log_category, std::string message, ...)
 {
 	if (RuleI(Logging, DebugLogLevel) < debug_level){ return; }
@@ -145,19 +153,29 @@ void EQEmuLogSys::LogDebugType(DebugLevel debug_level, uint16 log_category, std:
 	std::string output_message = vStringFormat(message.c_str(), args);
 	va_end(args);
 
-	
-	std::string category_string = "";
-	if (log_category > 0 && LogCategoryName[log_category]){
-		category_string = StringFormat("[%s]", LogCategoryName[log_category]);
-	}
+	std::string output_debug_message = EQEmuLogSys::FormatDebugCategoryMessageString(log_category, output_message);
 
-	std::string output_debug_message = StringFormat("%s %s", category_string.c_str(), output_message.c_str());
+	EQEmuLogSys::ProcessGMSay(EQEmuLogSys::Debug, output_debug_message);
+	EQEmuLogSys::ConsoleMessage(EQEmuLogSys::Debug, output_debug_message);
+	EQEmuLogSys::ProcessLogWrite(EQEmuLogSys::Debug, output_debug_message);
+}
 
+void EQEmuLogSys::ProcessGMSay(uint16 log_type, std::string message){
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
-		on_log_gmsay_hook(EQEmuLogSys::LogType::Debug, output_debug_message);
+		on_log_gmsay_hook(log_type, message);
 	}
+}
 
-	EQEmuLogSys::ConsoleMessage(EQEmuLogSys::Debug, log_category, output_message);
+void EQEmuLogSys::ProcessLogWrite(uint16 log_type, std::string message){
+	char time_stamp[80];
+	EQEmuLogSys::SetCurrentTimeStamp(time_stamp);
+
+	if (process_log){
+		process_log << time_stamp << " " << StringFormat("[%s] ", TypeNames[log_type]).c_str() << message << std::endl;
+	}
+	else{
+		// std::cout << "[DEBUG] " << ":: There currently is no log file open for this process " << "\n";
+	}
 }
 
 void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...)
@@ -169,7 +187,9 @@ void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...)
 	std::string output_message = vStringFormat(message.c_str(), args);
 	va_end(args);
 
-	EQEmuLogSys::Log(EQEmuLogSys::LogType::Debug, output_message); 
+	EQEmuLogSys::ProcessGMSay(EQEmuLogSys::Debug, output_message);
+	EQEmuLogSys::ConsoleMessage(EQEmuLogSys::Debug, output_message);
+	EQEmuLogSys::ProcessLogWrite(EQEmuLogSys::Debug, output_message);
 }
 
 void EQEmuLogSys::SetCurrentTimeStamp(char* time_stamp){
@@ -205,24 +225,12 @@ void EQEmuLogSys::Log(uint16 log_type, const std::string message, ...)
 	std::string output_message = vStringFormat(message.c_str(), args);
 	va_end(args);
 
-	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
-		on_log_gmsay_hook(log_type, output_message);
-	}
-
-	EQEmuLogSys::ConsoleMessage(log_type, 0, output_message);
-
-	char time_stamp[80];
-	EQEmuLogSys::SetCurrentTimeStamp(time_stamp);
-
-	if (process_log){
-		process_log << time_stamp << " " << StringFormat("[%s] ", TypeNames[log_type]).c_str() << output_message << std::endl;
-	}
-	else{
-		// std::cout << "[DEBUG] " << ":: There currently is no log file open for this process " << "\n";
-	}
+	EQEmuLogSys::ProcessGMSay(log_type, output_message);
+	EQEmuLogSys::ConsoleMessage(log_type, output_message);
+	EQEmuLogSys::ProcessLogWrite(log_type, output_message);
 }
 
-void EQEmuLogSys::ConsoleMessage(uint16 log_type, uint16 log_category, const std::string message)
+void EQEmuLogSys::ConsoleMessage(uint16 log_type, const std::string message)
 {
 	if (log_type > EQEmuLogSys::MaxLogID){
 		return;
@@ -231,11 +239,6 @@ void EQEmuLogSys::ConsoleMessage(uint16 log_type, uint16 log_category, const std
 		return;
 	}
 	if (!RuleB(Logging, ConsoleLogCommands) && log_type == EQEmuLogSys::LogType::Commands){ return; }
-
-	std::string category = "";
-	if (log_category > 0 && LogCategoryName[log_category]){
-		category = StringFormat("[%s] ", LogCategoryName[log_category]);
-	}
 
 #ifdef _WINDOWS
 	HANDLE  console_handle;
@@ -254,7 +257,7 @@ void EQEmuLogSys::ConsoleMessage(uint16 log_type, uint16 log_category, const std
 	}
 #endif
 
-	std::cout << "[N::" << TypeNames[log_type] << "] " << category << message << "\n";
+	std::cout << "[N::" << TypeNames[log_type] << "] " << message << "\n";
 
 #ifdef _WINDOWS
 	/* Always set back to white*/
