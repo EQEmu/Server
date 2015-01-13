@@ -91,6 +91,7 @@ static const char* LogCategoryName[EQEmuLogSys::LogCategory::MaxCategoryID] = {
 	"Spells",
 	"Tasks",
 	"Trading",
+	"Tradeskills",
 	"Tribute",
 };
 

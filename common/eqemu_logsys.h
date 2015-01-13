@@ -68,6 +68,7 @@ public:
 		Spells,
 		Tasks,
 		Trading,
+		Tradeskills,
 		Tribute,
 		MaxCategoryID	/* Don't Remove this*/
 	};
