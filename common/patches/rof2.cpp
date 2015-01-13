@@ -943,26 +943,27 @@ namespace RoF2
 
 		unsigned char *__emu_buffer = in->pBuffer;
 
+		char *old_message_ptr = (char *)in->pBuffer;
+		old_message_ptr += sizeof(FormattedMessage_Struct);
+
 		std::string old_message_array[9];
 
-		char *old_message_ptr = (char *)__emu_buffer + sizeof(FormattedMessage_Struct);
-
 		for (int i = 0; i < 9; ++i) {
+			if (*old_message_ptr == 0) { break; }
 			old_message_array[i] = old_message_ptr;
 			old_message_ptr += old_message_array[i].length() + 1;
-			if (old_message_array[i].length() == 0) { break; }
 		}
 
 		uint32 new_message_size = 0;
 		std::string new_message_array[9];
 
 		for (int i = 0; i < 9; ++i) {
+			if (old_message_array[i].length() == 0) { break; }
 			ServerToRoF2TextLink(new_message_array[i], old_message_array[i]);
-			new_message_size += (new_message_array[i].length() + 1);
-			if (new_message_array[i].length() == 0) { break; }
+			new_message_size += new_message_array[i].length() + 1;
 		}
 
-		in->size = sizeof(FormattedMessage_Struct) + new_message_size;
+		in->size = sizeof(FormattedMessage_Struct) + new_message_size + 1;
 		in->pBuffer = new unsigned char[in->size];
 
 		char *OutBuffer = (char *)in->pBuffer;
@@ -972,9 +973,11 @@ namespace RoF2
 		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->type);
 
 		for (int i = 0; i < 9; ++i) {
-			VARSTRUCT_ENCODE_STRING(OutBuffer, new_message_array[i].c_str());
 			if (new_message_array[i].length() == 0) { break; }
+			VARSTRUCT_ENCODE_STRING(OutBuffer, new_message_array[i].c_str());
 		}
+
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, 0);
 
 		delete[] __emu_buffer;
 		dest->FastQueuePacket(&in, ack_req);
@@ -3315,6 +3318,51 @@ namespace RoF2
 		EQApplicationPacket *in = *p;
 		*p = nullptr;
 
+		unsigned char *__emu_buffer = in->pBuffer;
+
+		char *InBuffer = (char *)in->pBuffer;
+		char *block_start = InBuffer;
+
+		InBuffer += sizeof(TaskDescriptionHeader_Struct);
+		uint32 title_size = strlen(InBuffer) + 1;
+		InBuffer += title_size;
+
+		TaskDescriptionData1_Struct *emu_tdd1 = (TaskDescriptionData1_Struct *)InBuffer;
+		emu_tdd1->StartTime = (time(nullptr) - emu_tdd1->StartTime); // RoF2 has elapsed time here rather than start time
+
+		InBuffer += sizeof(TaskDescriptionData1_Struct);
+		uint32 description_size = strlen(InBuffer) + 1;
+		InBuffer += description_size;
+		InBuffer += sizeof(TaskDescriptionData2_Struct);
+
+		std::string old_message = InBuffer; // start 'Reward' as string
+		std::string new_message;
+		ServerToRoF2TextLink(new_message, old_message);
+
+		in->size = sizeof(TaskDescriptionHeader_Struct) + sizeof(TaskDescriptionData1_Struct)+
+			sizeof(TaskDescriptionData2_Struct) + sizeof(TaskDescriptionTrailer_Struct)+
+			title_size + description_size + new_message.length() + 1;
+
+		in->pBuffer = new unsigned char[in->size];
+
+		char *OutBuffer = (char *)in->pBuffer;
+
+		memcpy(OutBuffer, block_start, (InBuffer - block_start));
+		OutBuffer += (InBuffer - block_start);
+
+		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
+
+		InBuffer += strlen(InBuffer) + 1;
+
+		memcpy(OutBuffer, InBuffer, sizeof(TaskDescriptionTrailer_Struct));
+
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
+
+#if 0 // original code
+		EQApplicationPacket *in = *p;
+		*p = nullptr;
+
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_TaskDescription, in->size + 1);
 		// Set the Write pointer as we don't know what has been done with the packet before we get it.
 		in->SetReadPosition(0);
@@ -3338,6 +3386,7 @@ namespace RoF2
 
 		delete in;
 		dest->FastQueuePacket(&outapp, ack_req);
+#endif
 	}
 
 	ENCODE(OP_TaskHistoryReply)

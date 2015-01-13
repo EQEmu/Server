@@ -6568,33 +6568,32 @@ bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id, float speed){
 
 	DoAnim(anim, 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells); //Override the default projectile animation.
 	return true;
-}			
+}
 
-void Mob::ResourceTap(int32 damage, uint16 spellid){
+void Mob::ResourceTap(int32 damage, uint16 spellid)
+{
 	//'this' = caster
 	if (!IsValidSpell(spellid))
 		return;
 
-	for (int i = 0; i <= EFFECT_COUNT; i++)
-	{
-		if (spells[spellid].effectid[i] == SE_ResourceTap){
-		
-			damage += (damage * spells[spellid].base[i])/100;
+	for (int i = 0; i < EFFECT_COUNT; i++) {
+		if (spells[spellid].effectid[i] == SE_ResourceTap) {
+			damage += (damage * spells[spellid].base[i]) / 100;
 
 			if (spells[spellid].max[i] && (damage > spells[spellid].max[i]))
 				damage = spells[spellid].max[i];
 
-			if (spells[spellid].base2[i] == 0){ //HP Tap
+			if (spells[spellid].base2[i] == 0) { // HP Tap
 				if (damage > 0)
 					HealDamage(damage);
 				else
-					Damage(this, -damage,0, SkillEvocation,false);
+					Damage(this, -damage, 0, SkillEvocation, false);
 			}
 
-			if (spells[spellid].base2[i] == 1)  //Mana Tap
+			if (spells[spellid].base2[i] == 1) // Mana Tap
 				SetMana(GetMana() + damage);
 
-			if (spells[spellid].base2[i] == 2 && IsClient())  //Endurance Tap
+			if (spells[spellid].base2[i] == 2 && IsClient()) // Endurance Tap
 				CastToClient()->SetEndurance(CastToClient()->GetEndurance() + damage);
 		}
 	}

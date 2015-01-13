@@ -790,26 +790,27 @@ namespace Underfoot
 
 		unsigned char *__emu_buffer = in->pBuffer;
 
+		char *old_message_ptr = (char *)in->pBuffer;
+		old_message_ptr += sizeof(FormattedMessage_Struct);
+
 		std::string old_message_array[9];
 
-		char *old_message_ptr = (char *)__emu_buffer + sizeof(FormattedMessage_Struct);
-
 		for (int i = 0; i < 9; ++i) {
+			if (*old_message_ptr == 0) { break; }
 			old_message_array[i] = old_message_ptr;
 			old_message_ptr += old_message_array[i].length() + 1;
-			if (old_message_array[i].length() == 0) { break; }
 		}
 
 		uint32 new_message_size = 0;
 		std::string new_message_array[9];
 
 		for (int i = 0; i < 9; ++i) {
+			if (old_message_array[i].length() == 0) { break; }
 			ServerToUnderfootTextLink(new_message_array[i], old_message_array[i]);
-			new_message_size += (new_message_array[i].length() + 1);
-			if (new_message_array[i].length() == 0) { break; }
+			new_message_size += new_message_array[i].length() + 1;
 		}
 
-		in->size = sizeof(FormattedMessage_Struct) + new_message_size;
+		in->size = sizeof(FormattedMessage_Struct) + new_message_size + 1;
 		in->pBuffer = new unsigned char[in->size];
 
 		char *OutBuffer = (char *)in->pBuffer;
@@ -819,9 +820,11 @@ namespace Underfoot
 		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->type);
 
 		for (int i = 0; i < 9; ++i) {
-			VARSTRUCT_ENCODE_STRING(OutBuffer, new_message_array[i].c_str());
 			if (new_message_array[i].length() == 0) { break; }
+			VARSTRUCT_ENCODE_STRING(OutBuffer, new_message_array[i].c_str());
 		}
+
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, 0);
 
 		delete[] __emu_buffer;
 		dest->FastQueuePacket(&in, ack_req);
@@ -2467,15 +2470,15 @@ namespace Underfoot
 		std::string new_message;
 		ServerToUnderfootTextLink(new_message, old_message);
 
-		in->size = sizeof(TaskDescriptionHeader_Struct)+sizeof(TaskDescriptionData1_Struct)+
-			sizeof(TaskDescriptionData2_Struct)+sizeof(TaskDescriptionTrailer_Struct)+
+		in->size = sizeof(TaskDescriptionHeader_Struct) + sizeof(TaskDescriptionData1_Struct)+
+			sizeof(TaskDescriptionData2_Struct) + sizeof(TaskDescriptionTrailer_Struct)+
 			title_size + description_size + new_message.length() + 1;
 
 		in->pBuffer = new unsigned char[in->size];
 
 		char *OutBuffer = (char *)in->pBuffer;
 
-		memcpy(OutBuffer, (char *)__emu_buffer, (InBuffer - block_start));
+		memcpy(OutBuffer, block_start, (InBuffer - block_start));
 		OutBuffer += (InBuffer - block_start);
 
 		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
