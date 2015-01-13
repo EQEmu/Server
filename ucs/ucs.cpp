@@ -78,11 +78,11 @@ int main() {
 
 	Timer InterserverTimer(INTERSERVER_TIMER); // does auto-reconnect
 
-	_log(UCS__INIT, "Starting EQEmu Universal Chat Server.");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Starting EQEmu Universal Chat Server.");
 
 	if (!ucsconfig::LoadConfig()) {
 
-		_log(UCS__INIT, "Loading server configuration failed.");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Loading server configuration failed.");
 
 		return 1;
 	}
@@ -90,13 +90,13 @@ int main() {
 	Config = ucsconfig::get();
 
 	if(!load_log_settings(Config->LogSettingsFile.c_str()))
-		_log(UCS__INIT, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
 	else
-		_log(UCS__INIT, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
 
 	WorldShortName = Config->ShortName;
 
-	_log(UCS__INIT, "Connecting to MySQL...");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Connecting to MySQL...");
 
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),
@@ -113,13 +113,13 @@ int main() {
 	if (database.GetVariable("RuleSet", tmp, sizeof(tmp)-1)) {
 		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Loading rule set '%s'", tmp);
 		if(!RuleManager::Instance()->LoadRules(&database, tmp)) {
-			_log(UCS__ERROR, "Failed to load ruleset '%s', falling back to defaults.", tmp);
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Failed to load ruleset '%s', falling back to defaults.", tmp);
 		}
 	} else {
 		if(!RuleManager::Instance()->LoadRules(&database, "default")) {
-			_log(UCS__INIT, "No rule set configured, using default rules");
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "No rule set configured, using default rules");
 		} else {
-			_log(UCS__INIT, "Loaded default rule set 'default'", tmp);
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Loaded default rule set 'default'", tmp);
 		}
 	}
 
@@ -127,7 +127,7 @@ int main() {
 
 	if(Config->ChatPort != Config->MailPort)
 	{
-		_log(UCS__ERROR, "MailPort and CharPort must be the same in eqemu_config.xml for UCS.");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "MailPort and CharPort must be the same in eqemu_config.xml for UCS.");
 		exit(1);
 	}
 
@@ -138,11 +138,11 @@ int main() {
 	database.LoadChatChannels();
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		_log(UCS__ERROR, "Could not set signal handler");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Could not set signal handler");
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		_log(UCS__ERROR, "Could not set signal handler");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Could not set signal handler");
 		return 1;
 	}
 

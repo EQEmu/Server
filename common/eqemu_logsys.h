@@ -59,6 +59,7 @@ public:
 		Doors,
 		Guilds,
 		Inventory,
+		Launcher,
 		Netcode,
 		Object,
 		Rules,

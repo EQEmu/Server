@@ -82,6 +82,7 @@ static const char* LogCategoryName[EQEmuLogSys::LogCategory::MaxCategoryID] = {
 	"Doors",
 	"Guild",
 	"Inventory",
+	"Launcher",
 	"Netcode",
 	"Object",
 	"Rules",
