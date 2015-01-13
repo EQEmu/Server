@@ -2242,13 +2242,13 @@ bool Client::CheckIncreaseSkill(SkillUseTypes skillid, Mob *against_who, int cha
 		if(zone->random.Real(0, 99) < Chance)
 		{
 			SetSkill(skillid, GetRawSkill(skillid) + 1);
-			_log(SKILLS__GAIN, "Skill %d at value %d successfully gain with %.4f%%chance (mod %d)", skillid, skillval, Chance, chancemodi);
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Skills, "Skill %d at value %d successfully gain with %.4f%%chance (mod %d)", skillid, skillval, Chance, chancemodi);
 			return true;
 		} else {
-			_log(SKILLS__GAIN, "Skill %d at value %d failed to gain with %.4f%%chance (mod %d)", skillid, skillval, Chance, chancemodi);
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Skills, "Skill %d at value %d failed to gain with %.4f%%chance (mod %d)", skillid, skillval, Chance, chancemodi);
 		}
 	} else {
-		_log(SKILLS__GAIN, "Skill %d at value %d cannot increase due to maxmum %d", skillid, skillval, maxskill);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Skills, "Skill %d at value %d cannot increase due to maxmum %d", skillid, skillval, maxskill);
 	}
 	return false;
 }
@@ -2269,10 +2269,10 @@ void Client::CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill) {
 
 		if(zone->random.Real(0,100) < Chance) {	// if they make the roll
 			IncreaseLanguageSkill(langid);	// increase the language skill by 1
-			_log(SKILLS__GAIN, "Language %d at value %d successfully gain with %.4f%%chance", langid, LangSkill, Chance);
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Skills, "Language %d at value %d successfully gain with %.4f%%chance", langid, LangSkill, Chance);
 		}
 		else
-			_log(SKILLS__GAIN, "Language %d at value %d failed to gain with %.4f%%chance", langid, LangSkill, Chance);
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Skills, "Language %d at value %d failed to gain with %.4f%%chance", langid, LangSkill, Chance);
 	}
 }
 
