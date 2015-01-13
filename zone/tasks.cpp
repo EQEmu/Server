@@ -2262,7 +2262,7 @@ void Client::SendTaskComplete(int TaskIndex) {
 	// I suspect this is the type field to indicate this is a quest task, as opposed to other types.
 	tcs->unknown04 = 0x00000002;
 
-	_log("[TASKS]SendTasksComplete");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tasks, "SendTasksComplete");
 	DumpPacket(outapp); fflush(stdout);
 
 	QueuePacket(outapp);
