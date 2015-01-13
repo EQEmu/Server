@@ -65,16 +65,16 @@ int main() {
 		</qsdatabase>
 	*/
 
-	_log(QUERYSERV__INIT, "Starting EQEmu QueryServ.");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Starting EQEmu QueryServ.");
 	if (!queryservconfig::LoadConfig()) {
-		_log(QUERYSERV__INIT, "Loading server configuration failed.");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Loading server configuration failed.");
 		return 1;
 	}
 
 	Config = queryservconfig::get(); 
 	WorldShortName = Config->ShortName; 
 
-	_log(QUERYSERV__INIT, "Connecting to MySQL...");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Connecting to MySQL...");
 	
 	/* MySQL Connection */
 	if (!database.Connect(
@@ -89,16 +89,16 @@ int main() {
 
 	/* Initialize Logging */
 	if (!load_log_settings(Config->LogSettingsFile.c_str()))
-		_log(QUERYSERV__INIT, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
 	else
-		_log(QUERYSERV__INIT, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		_log(QUERYSERV__ERROR, "Could not set signal handler");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Could not set signal handler");
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		_log(QUERYSERV__ERROR, "Could not set signal handler");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Could not set signal handler");
 		return 1;
 	}
 
