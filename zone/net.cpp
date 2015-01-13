@@ -294,7 +294,7 @@ int main(int argc, char** argv) {
 	}
 
 	if(RuleB(TaskSystem, EnableTaskSystem)) {
-		_log(ZONE__INIT, "Loading Tasks");
+		logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[INIT] Loading Tasks");
 		taskmanager = new TaskManager;
 		taskmanager->LoadTasks();
 	}

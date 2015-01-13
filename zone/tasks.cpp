@@ -83,7 +83,7 @@ bool TaskManager::LoadTaskSets() {
         int taskID = atoi(row[1]);
 
         TaskSets[taskSet].push_back(taskID);
-        _log(TASKS__GLOBALLOAD, "Adding TaskID %4i to TaskSet %4i", taskID, taskSet);
+        logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] Adding TaskID %4i to TaskSet %4i", taskID, taskSet);
     }
 
 	return true;
@@ -91,7 +91,7 @@ bool TaskManager::LoadTaskSets() {
 
 bool TaskManager::LoadSingleTask(int TaskID) {
 
-	_log(TASKS__GLOBALLOAD, "TaskManager::LoadSingleTask(%i)", TaskID);
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] TaskManager::LoadSingleTask(%i)", TaskID);
 
 	if((TaskID <= 0) || (TaskID >= MAXTASKS)) return false;
 
@@ -121,7 +121,7 @@ void TaskManager::ReloadGoalLists() {
 bool TaskManager::LoadTasks(int singleTask) {
 
 	// If TaskID !=0, then just load the task specified.
-	_log(TASKS__GLOBALLOAD, "TaskManager::LoadTasks Called");
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] TaskManager::LoadTasks Called");
 
     std::string query;
 	if(singleTask == 0) {
@@ -179,11 +179,11 @@ bool TaskManager::LoadTasks(int singleTask) {
 		Tasks[taskID]->SequenceMode = ActivitiesSequential;
 		Tasks[taskID]->LastStep = 0;
 
-		_log(TASKS__GLOBALLOAD,"TaskID: %5i, Duration: %8i, StartZone: %3i Reward: %s MinLevel %i MaxLevel %i Repeatable: %s",
+		logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] TaskID: %5i, Duration: %8i, StartZone: %3i Reward: %s MinLevel %i MaxLevel %i Repeatable: %s",
 					taskID, Tasks[taskID]->Duration, Tasks[taskID]->StartZone, Tasks[taskID]->Reward,
 					Tasks[taskID]->MinLevel, Tasks[taskID]->MaxLevel,
 					Tasks[taskID]->Repeatable ? "Yes" : "No");
-		_log(TASKS__GLOBALLOAD,"Title:         %s ", Tasks[taskID]->Title);
+		logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] Title: %s", Tasks[taskID]->Title);
     }
 
 
@@ -273,7 +273,7 @@ bool TaskManager::LoadTasks(int singleTask) {
         Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].ZoneID = atoi(row[11]);
         Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Optional = atoi(row[12]);
 
-        _log(TASKS__GLOBALLOAD, "Activity Slot %2i: ID %i for Task %5i. Type: %3i, GoalID: %8i, "
+        logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] Activity Slot %2i: ID %i for Task %5i. Type: %3i, GoalID: %8i, "
                                 "GoalMethod: %i, GoalCount: %3i, ZoneID:%3i",
                                 Tasks[taskID]->ActivityCount, activityID, taskID,
                                 Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Type,
@@ -282,9 +282,9 @@ bool TaskManager::LoadTasks(int singleTask) {
                                 Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].GoalCount,
                                 Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].ZoneID);
 
-        _log(TASKS__GLOBALLOAD, "          Text1: %s", Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text1);
-        _log(TASKS__GLOBALLOAD, "          Text2: %s", Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text2);
-        _log(TASKS__GLOBALLOAD, "          Text3: %s", Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text3);
+		logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] Text1: %s", Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text1);
+		logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] Text2: %s", Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text2);
+		logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] Text3: %s", Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text3);
 
         Tasks[taskID]->ActivityCount++;
 	}
@@ -316,7 +316,7 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state) {
 
 			if(state->ActiveTasks[task].Updated) {
 
-				_log(TASKS__CLIENTSAVE, "TaskManager::SaveClientState for character ID %d, Updating TaskIndex %i TaskID %i", characterID, task, taskID);
+				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[CLIENTSAVE] TaskManager::SaveClientState for character ID %d, Updating TaskIndex %i TaskID %i", characterID, task, taskID);
 
                 std::string query = StringFormat("REPLACE INTO character_tasks (charid, taskid, slot, acceptedtime) "
                                                 "VALUES (%i, %i, %i, %i)",
@@ -338,7 +338,7 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state) {
 				if(!state->ActiveTasks[task].Activity[activityIndex].Updated)
                     continue;
 
-                _log(TASKS__CLIENTSAVE, "TaskManager::SaveClientSate for character ID %d, Updating Activity %i, %i",
+                logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[CLIENTSAVE] TaskManager::SaveClientSate for character ID %d, Updating Activity %i, %i",
                                         characterID, task, activityIndex);
 
                 if(updatedActivityCount==0)
@@ -358,7 +358,7 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state) {
 			if(updatedActivityCount == 0)
                 continue;
 
-            _log(TASKS__CLIENTSAVE, "Executing query %s", query.c_str());
+            logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[CLIENTSAVE] Executing query %s", query.c_str());
             auto results = database.QueryDatabase(query);
 
             if(!results.Success()) {
@@ -383,7 +383,7 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state) {
 
 	for(unsigned int i=state->LastCompletedTaskLoaded; i<state->CompletedTasks.size(); i++) {
 
-        _log(TASKS__CLIENTSAVE, "TaskManager::SaveClientState Saving Completed Task at slot %i", i);
+        logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[CLIENTSAVE] TaskManager::SaveClientState Saving Completed Task at slot %i", i);
         int taskID = state->CompletedTasks[i].TaskID;
 
         if((taskID <= 0) || (taskID >= MAXTASKS) || (Tasks[taskID] == nullptr))
@@ -459,7 +459,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 
 	state->ActiveTaskCount = 0;
 
-	_log(TASKS__CLIENTLOAD, "TaskManager::LoadClientState for character ID %d", characterID);
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[CLIENTLOAD] TaskManager::LoadClientState for character ID %d", characterID);
 
     std::string query = StringFormat("SELECT `taskid`, `slot`, `acceptedtime` "
                                     "FROM `character_tasks` "
@@ -501,11 +501,11 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 
         ++state->ActiveTaskCount;
 
-        _log(TASKS__CLIENTLOAD, "TaskManager::LoadClientState. Char: %i Task ID %i, Accepted Time: %8X", characterID, taskID, acceptedtime);
+        logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[CLIENTLOAD] TaskManager::LoadClientState. Char: %i Task ID %i, Accepted Time: %8X", characterID, taskID, acceptedtime);
 	}
 
 	// Load Activities
-	_log(TASKS__CLIENTLOAD, "LoadClientState. Loading activities for character ID %d", characterID);
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[CLIENTLOAD] LoadClientState. Loading activities for character ID %d", characterID);
 
     query = StringFormat("SELECT `taskid`, `activityid`, `donecount`, `completed` "
                         "FROM `character_activities` "
@@ -555,7 +555,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 
         state->ActiveTasks[activeTaskIndex].Activity[activityID].Updated = false;
 
-        _log(TASKS__CLIENTLOAD, "TaskManager::LoadClientState. Char: %i Task ID %i, ActivityID: %i, DoneCount: %i, Completed: %i", characterID, taskID, activityID, doneCount, completed);
+        logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[CLIENTLOAD] TaskManager::LoadClientState. Char: %i Task ID %i, ActivityID: %i, DoneCount: %i, Completed: %i", characterID, taskID, activityID, doneCount, completed);
 
     }
 
@@ -639,7 +639,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
         for (auto row = results.begin(); row != results.end(); ++row) {
 			int taskID = atoi(row[0]);
 			state->EnabledTasks.push_back(taskID);
-			_log(TASKS__CLIENTLOAD, "Adding TaskID %i to enabled tasks", taskID);
+			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[CLIENTLOAD] Adding TaskID %i to enabled tasks", taskID);
 		}
 
 	// Check that there is an entry in the client task state for every activity in each task
@@ -676,7 +676,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 		if(state->ActiveTasks[i].TaskID != TASKSLOTEMPTY)
 			state->UnlockActivities(characterID, i);
 
-	_log(TASKS__CLIENTLOAD, "LoadClientState for Character ID %d DONE!", characterID);
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[CLIENTLOAD] LoadClientState for Character ID %d DONE!", characterID);
 	return true;
 }
 
@@ -710,9 +710,9 @@ void ClientTaskState::EnableTask(int characterID, int taskCount, int *tasks) {
 		}
 	}
 
-	_log(TASKS__UPDATE, "New enabled task list ");
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] New enabled task list ");
 	for(unsigned int i=0; i<EnabledTasks.size(); i++)
-		_log(TASKS__UPDATE, "%i ", EnabledTasks[i]);
+		logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] %i", EnabledTasks[i]);
 
 	if(tasksEnabled.size() == 0 )
         return;
@@ -722,7 +722,7 @@ void ClientTaskState::EnableTask(int characterID, int taskCount, int *tasks) {
 		queryStream << ( i ? ", " : "" ) <<  StringFormat("(%i, %i)", characterID, tasksEnabled[i]);
 
     std::string query = queryStream.str();
-	_log(TASKS__UPDATE, "Executing query %s", query.c_str());
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Executing query %s", query.c_str());
     auto results = database.QueryDatabase(query);
 	if(!results.Success())
 		logger.Log(EQEmuLogSys::Error, "[TASKS]Error in ClientTaskState::EnableTask %s %s", query.c_str(), results.ErrorMessage().c_str());
@@ -757,9 +757,9 @@ void ClientTaskState::DisableTask(int charID, int taskCount, int *taskList) {
 		}
 	}
 
-	_log(TASKS__UPDATE, "New enabled task list ");
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] New enabled task list ");
 	for(unsigned int i=0; i<EnabledTasks.size(); i++)
-		_log(TASKS__UPDATE, "%i ", EnabledTasks[i]);
+		logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] %i", EnabledTasks[i]);
 
 	if(tasksDisabled.size() == 0)
         return;
@@ -771,7 +771,7 @@ void ClientTaskState::DisableTask(int charID, int taskCount, int *taskList) {
 
 	queryStream << ")";
 	std::string query = queryStream.str();
-	_log(TASKS__UPDATE, "Executing query %s", query.c_str());
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Executing query %s", query.c_str());
     auto results = database.QueryDatabase(query);
 	if(!results.Success())
 		logger.Log(EQEmuLogSys::Error, "[TASKS]Error in ClientTaskState::DisableTask %s %s", query.c_str(), results.ErrorMessage().c_str());
@@ -908,7 +908,7 @@ void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, i
 	int TaskListIndex = 0;
 	int PlayerLevel = c->GetLevel();
 
-	_log(TASKS__UPDATE, "TaskSetSelector called for taskset %i. EnableTaskSize is %i", TaskSetID,
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] TaskSetSelector called for taskset %i. EnableTaskSize is %i", TaskSetID,
 				state->EnabledTasks.size());
 	if((TaskSetID<=0) || (TaskSetID>=MAXTASKSETS)) return;
 
@@ -918,7 +918,7 @@ void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, i
 
 		if(TaskSets[TaskSetID][0] == 0) {
 
-			_log(TASKS__UPDATE, "TaskSets[%i][0] == 0. All Tasks in Set enabled.", TaskSetID);
+			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] TaskSets[%i][0] == 0. All Tasks in Set enabled.", TaskSetID);
 			std::vector<int>::iterator Iterator = TaskSets[TaskSetID].begin();
 
 			while((Iterator != TaskSets[TaskSetID].end()) && (TaskListIndex < MAXCHOOSERENTRIES)) {
@@ -941,7 +941,7 @@ void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, i
 	while((EnabledTaskIndex < state->EnabledTasks.size()) && (TaskSetIndex < TaskSets[TaskSetID].size()) &&
 			(TaskListIndex < MAXCHOOSERENTRIES)) {
 
-		_log(TASKS__UPDATE, "Comparing EnabledTasks[%i] (%i) with TaskSets[%i][%i] (%i)",
+		logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Comparing EnabledTasks[%i] (%i) with TaskSets[%i][%i] (%i)",
 				EnabledTaskIndex, state->EnabledTasks[EnabledTaskIndex], TaskSetID, TaskSetIndex,
 				TaskSets[TaskSetID][TaskSetIndex]);
 
@@ -981,7 +981,7 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 		return;
 	}
 	// Titanium OpCode: 0x5e7c
-	_log(TASKS__UPDATE, "TaskSelector for %i Tasks", TaskCount);
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] TaskSelector for %i Tasks", TaskCount);
 	char *Ptr;
 	int PlayerLevel = c->GetLevel();
 
@@ -1106,7 +1106,7 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 
 void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *TaskList) {
 
-	_log(TASKS__UPDATE, "TaskSelector for %i Tasks", TaskCount);
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] TaskSelector for %i Tasks", TaskCount);
 
 	int PlayerLevel = c->GetLevel();
 
@@ -1275,7 +1275,7 @@ int ClientTaskState::GetActiveTaskID(int index) {
 
 static void DeleteCompletedTaskFromDatabase(int charID, int taskID) {
 
-    _log(TASKS__UPDATE, "DeleteCompletedTasksFromDatabase. CharID = %i, TaskID = %i", charID, taskID);
+    logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] DeleteCompletedTasksFromDatabase. CharID = %i, TaskID = %i", charID, taskID);
 
     const std::string query = StringFormat("DELETE FROM completed_tasks WHERE charid=%i AND taskid = %i", charID, taskID);
     auto results = database.QueryDatabase(query);
@@ -1284,7 +1284,7 @@ static void DeleteCompletedTaskFromDatabase(int charID, int taskID) {
 		return;
 	}
 
-	_log(TASKS__UPDATE, "Delete query %s", query.c_str());
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Delete query %s", query.c_str());
 }
 
 bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
@@ -1298,7 +1298,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 	// On loading the client state, all activities that are not completed, are
 	// marked as hidden. For Sequential (non-stepped) mode, we mark the first
 	// activity as active if not complete.
-	_log(TASKS__UPDATE, "CharID: %i Task: %i Sequence mode is %i",
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] CharID: %i Task: %i Sequence mode is %i",
 				CharID, ActiveTasks[TaskIndex].TaskID, Task->SequenceMode);
 	if(Task->SequenceMode == ActivitiesSequential) {
 
@@ -1320,7 +1320,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 		}
 		if(AllActivitiesComplete && RuleB(TaskSystem, RecordCompletedTasks)) {
 			if(RuleB(TasksSystem, KeepOneRecordPerCompletedTask)) {
-				_log(TASKS__UPDATE, "KeepOneRecord enabled");
+				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] KeepOneRecord enabled");
 				std::vector<CompletedTaskInformation>::iterator Iterator = CompletedTasks.begin();
 				int ErasedElements = 0;
 				while(Iterator != CompletedTasks.end()) {
@@ -1332,7 +1332,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 					else
 						++Iterator;
 				}
-				_log(TASKS__UPDATE, "Erased Element count is %i", ErasedElements);
+				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Erased Element count is %i", ErasedElements);
 				if(ErasedElements) {
 					LastCompletedTaskLoaded -= ErasedElements;
 					DeleteCompletedTaskFromDatabase(CharID, ActiveTasks[TaskIndex].TaskID);
@@ -1349,7 +1349,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 
 			CompletedTasks.push_back(cti);
 		}
-		_log(TASKS__UPDATE, "Returning sequential task, AllActivitiesComplete is %i", AllActivitiesComplete);
+		logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Returning sequential task, AllActivitiesComplete is %i", AllActivitiesComplete);
 		return AllActivitiesComplete;
 	}
 
@@ -1358,7 +1358,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 
 	bool CurrentStepComplete = true;
 
-	_log(TASKS__UPDATE, "Current Step is %i, Last Step is %i", ActiveTasks[TaskIndex].CurrentStep, Task->LastStep);
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Current Step is %i, Last Step is %i", ActiveTasks[TaskIndex].CurrentStep, Task->LastStep);
 	// If CurrentStep is -1, this is the first call to this method since loading the
 	// client state. Unlock all activities with a step number of 0
 	if(ActiveTasks[TaskIndex].CurrentStep == -1) {
@@ -1393,7 +1393,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 			// If we are only keeping one completed record per task, and the player has done
 			// the same task again, erase the previous completed entry for this task.
 			if(RuleB(TasksSystem, KeepOneRecordPerCompletedTask)) {
-				_log(TASKS__UPDATE, "KeepOneRecord enabled");
+				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] KeepOneRecord enabled");
 				std::vector<CompletedTaskInformation>::iterator Iterator = CompletedTasks.begin();
 				int ErasedElements = 0;
 				while(Iterator != CompletedTasks.end()) {
@@ -1405,7 +1405,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 					else
 						++Iterator;
 				}
-				_log(TASKS__UPDATE, "Erased Element count is %i", ErasedElements);
+				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Erased Element count is %i", ErasedElements);
 				if(ErasedElements) {
 					LastCompletedTaskLoaded -= ErasedElements;
 					DeleteCompletedTaskFromDatabase(CharID, ActiveTasks[TaskIndex].TaskID);
@@ -1455,7 +1455,7 @@ bool ClientTaskState::UpdateTasksByNPC(Client *c, int ActivityType, int NPCTypeI
 
 	int Ret = false;
 
-	_log(TASKS__UPDATE, "ClientTaskState::UpdateTasks for NPCTypeID: %d", NPCTypeID);
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] ClientTaskState::UpdateTasks for NPCTypeID: %d", NPCTypeID);
 
 	// If the client has no tasks, there is nothing further to check.
 
@@ -1477,7 +1477,7 @@ bool ClientTaskState::UpdateTasksByNPC(Client *c, int ActivityType, int NPCTypeI
 			if(Task->Activity[j].Type != ActivityType) continue;
 			// Is there a zone restriction on the activity ?
 			if((Task->Activity[j].ZoneID >0) && (Task->Activity[j].ZoneID != (int)zone->GetZoneID())) {
-				_log(TASKS__UPDATE, "Char: %s Task: %i, Activity %i, Activity type %i for NPC %i failed zone check",
+				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Char: %s Task: %i, Activity %i, Activity type %i for NPC %i failed zone check",
 							c->GetName(), ActiveTasks[i].TaskID, j, ActivityType, NPCTypeID);
 				continue;
 			}
@@ -1498,7 +1498,7 @@ bool ClientTaskState::UpdateTasksByNPC(Client *c, int ActivityType, int NPCTypeI
 					continue;
 			}
 			// We found an active task to kill this type of NPC, so increment the done count
-			_log(TASKS__UPDATE, "Calling increment done count ByNPC");
+			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Calling increment done count ByNPC");
 			IncrementDoneCount(c, Task, i, j);
 			Ret = true;
 		}
@@ -1577,7 +1577,7 @@ void ClientTaskState::UpdateTasksForItem(Client *c, ActivityType Type, int ItemI
 
 	// If the client has no tasks, there is nothing further to check.
 
-	_log(TASKS__UPDATE, "ClientTaskState::UpdateTasksForItem(%d,%d)", Type, ItemID);
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] ClientTaskState::UpdateTasksForItem(%d,%d)", Type, ItemID);
 
 	if(ActiveTaskCount == 0) return;
 
@@ -1597,7 +1597,7 @@ void ClientTaskState::UpdateTasksForItem(Client *c, ActivityType Type, int ItemI
 			if(Task->Activity[j].Type != (int)Type) continue;
 			// Is there a zone restriction on the activity ?
 			if((Task->Activity[j].ZoneID >0) && (Task->Activity[j].ZoneID != (int)zone->GetZoneID())) {
-				_log(TASKS__UPDATE, "Char: %s Activity type %i for Item %i failed zone check",
+				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Char: %s Activity type %i for Item %i failed zone check",
 							c->GetName(), Type, ItemID);
 				continue;
 			}
@@ -1618,7 +1618,7 @@ void ClientTaskState::UpdateTasksForItem(Client *c, ActivityType Type, int ItemI
 					continue;
 			}
 			// We found an active task related to this item, so increment the done count
-			_log(TASKS__UPDATE, "Calling increment done count ForItem");
+			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Calling increment done count ForItem");
 			IncrementDoneCount(c, Task, i, j, Count);
 		}
 	}
@@ -1630,7 +1630,7 @@ void ClientTaskState::UpdateTasksOnExplore(Client *c, int ExploreID) {
 
 	// If the client has no tasks, there is nothing further to check.
 
-	_log(TASKS__UPDATE, "ClientTaskState::UpdateTasksOnExplore(%i)", ExploreID);
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] ClientTaskState::UpdateTasksOnExplore(%i)", ExploreID);
 	if(ActiveTaskCount == 0) return;
 
 	for(int i=0; i<MAXACTIVETASKS; i++) {
@@ -1648,7 +1648,7 @@ void ClientTaskState::UpdateTasksOnExplore(Client *c, int ExploreID) {
 			// We are only interested in explore activities
 			if(Task->Activity[j].Type != ActivityExplore) continue;
 			if((Task->Activity[j].ZoneID >0) && (Task->Activity[j].ZoneID != (int)zone->GetZoneID())) {
-				_log(TASKS__UPDATE, "Char: %s Explore exploreid %i failed zone check",
+				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Char: %s Explore exploreid %i failed zone check",
 							c->GetName(), ExploreID);
 				continue;
 			}
@@ -1670,7 +1670,7 @@ void ClientTaskState::UpdateTasksOnExplore(Client *c, int ExploreID) {
 			}
 			// We found an active task to explore this area, so set done count to goal count
 			// (Only a goal count of 1 makes sense for explore activities?)
-			_log(TASKS__UPDATE, "Increment on explore");
+			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Increment on explore");
 			IncrementDoneCount(c, Task, i, j,
 						Task->Activity[j].GoalCount - ActiveTasks[i].Activity[j].DoneCount);
 
@@ -1684,7 +1684,7 @@ bool ClientTaskState::UpdateTasksOnDeliver(Client *c, uint32 *Items, int Cash, i
 
 	bool Ret = false;
 
-	_log(TASKS__UPDATE, "ClientTaskState::UpdateTasksForOnDeliver(%d)", NPCTypeID);
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] ClientTaskState::UpdateTasksForOnDeliver(%d)", NPCTypeID);
 
 	if(ActiveTaskCount == 0) return false;
 
@@ -1705,7 +1705,7 @@ bool ClientTaskState::UpdateTasksOnDeliver(Client *c, uint32 *Items, int Cash, i
 				(Task->Activity[j].Type != ActivityGiveCash)) continue;
 			// Is there a zone restriction on the activity ?
 			if((Task->Activity[j].ZoneID >0) && (Task->Activity[j].ZoneID != (int)zone->GetZoneID())) {
-				_log(TASKS__UPDATE, "Char: %s Deliver activity failed zone check (current zone %i, need zone %i",
+				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Char: %s Deliver activity failed zone check (current zone %i, need zone %i",
 					c->GetName(), zone->GetZoneID(), Task->Activity[j].ZoneID);
 				continue;
 			}
@@ -1714,7 +1714,7 @@ bool ClientTaskState::UpdateTasksOnDeliver(Client *c, uint32 *Items, int Cash, i
 			// Is the activity related to these items ?
 			//
 			if((Task->Activity[j].Type == ActivityGiveCash) && Cash) {
-				_log(TASKS__UPDATE, "Increment on GiveCash");
+				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Increment on GiveCash");
 				IncrementDoneCount(c, Task, i, j, Cash);
 				Ret = true;
 			}
@@ -1738,7 +1738,7 @@ bool ClientTaskState::UpdateTasksOnDeliver(Client *c, uint32 *Items, int Cash, i
 							continue;
 					}
 					// We found an active task related to this item, so increment the done count
-					_log(TASKS__UPDATE, "Increment on GiveItem");
+					logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Increment on GiveItem");
 					IncrementDoneCount(c, Task, i, j, 1);
 					Ret = true;
 				}
@@ -1753,7 +1753,7 @@ void ClientTaskState::UpdateTasksOnTouch(Client *c, int ZoneID) {
 
 	// If the client has no tasks, there is nothing further to check.
 
-	_log(TASKS__UPDATE, "ClientTaskState::UpdateTasksOnTouch(%i)", ZoneID);
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] ClientTaskState::UpdateTasksOnTouch(%i)", ZoneID);
 	if(ActiveTaskCount == 0) return;
 
 	for(int i=0; i<MAXACTIVETASKS; i++) {
@@ -1772,13 +1772,13 @@ void ClientTaskState::UpdateTasksOnTouch(Client *c, int ZoneID) {
 			if(Task->Activity[j].Type != ActivityTouch) continue;
 			if(Task->Activity[j].GoalMethod != METHODSINGLEID) continue;
 			if(Task->Activity[j].ZoneID != ZoneID) {
-				_log(TASKS__UPDATE, "Char: %s Touch activity failed zone check",
+				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Char: %s Touch activity failed zone check",
 							c->GetName());
 				continue;
 			}
 			// We found an active task to zone into this zone, so set done count to goal count
 			// (Only a goal count of 1 makes sense for touch activities?)
-			_log(TASKS__UPDATE, "Increment on Touch");
+			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Increment on Touch");
 			IncrementDoneCount(c, Task, i, j,
 						Task->Activity[j].GoalCount - ActiveTasks[i].Activity[j].DoneCount);
 		}
@@ -1788,7 +1788,7 @@ void ClientTaskState::UpdateTasksOnTouch(Client *c, int ZoneID) {
 }
 void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int TaskIndex, int ActivityID, int Count, bool ignore_quest_update) {
 
-	_log(TASKS__UPDATE, "IncrementDoneCount");
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] IncrementDoneCount");
 
 	ActiveTasks[TaskIndex].Activity[ActivityID].DoneCount += Count;
 
@@ -1805,7 +1805,7 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int T
 	ActiveTasks[TaskIndex].Activity[ActivityID].Updated=true;
 	// Have we reached the goal count for this activity ?
 	if(ActiveTasks[TaskIndex].Activity[ActivityID].DoneCount >= Task->Activity[ActivityID].GoalCount) {
-		_log(TASKS__UPDATE, "Done (%i) = Goal (%i) for Activity %i",
+		logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Done (%i) = Goal (%i) for Activity %i",
 				ActiveTasks[TaskIndex].Activity[ActivityID].DoneCount,
 				Task->Activity[ActivityID].GoalCount,
 				ActivityID);
@@ -1814,7 +1814,7 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int T
 		ActiveTasks[TaskIndex].Activity[ActivityID].State = ActivityCompleted;
 		// Unlock subsequent activities for this task
 		bool TaskComplete = UnlockActivities(c->CharacterID(), TaskIndex);
-		_log(TASKS__UPDATE, "TaskCompleted is %i", TaskComplete);
+		logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] TaskCompleted is %i", TaskComplete);
 		// and by the 'Task Stage Completed' message
 		c->SendTaskActivityComplete(ActiveTasks[TaskIndex].TaskID, ActivityID, TaskIndex);
 		// Send the updated task/activity list to the client
@@ -1991,7 +1991,7 @@ bool ClientTaskState::IsTaskActive(int TaskID) {
 
 void ClientTaskState::FailTask(Client *c, int TaskID) {
 
-	_log(TASKS__UPDATE, "FailTask %i, ActiveTaskCount is %i", TaskID, ActiveTaskCount);
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] FailTask %i, ActiveTaskCount is %i", TaskID, ActiveTaskCount);
 	if(ActiveTaskCount == 0) return;
 
 	for(int i=0; i<MAXACTIVETASKS; i++) {
@@ -2009,7 +2009,7 @@ void ClientTaskState::FailTask(Client *c, int TaskID) {
 
 bool ClientTaskState::IsTaskActivityActive(int TaskID, int ActivityID) {
 
-	_log(TASKS__UPDATE, "ClientTaskState IsTaskActivityActive(%i, %i).", TaskID, ActivityID);
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] ClientTaskState IsTaskActivityActive(%i, %i).", TaskID, ActivityID);
 	// Quick sanity check
 	if(ActivityID<0) return false;
 	if(ActiveTaskCount == 0) return false;
@@ -2034,7 +2034,7 @@ bool ClientTaskState::IsTaskActivityActive(int TaskID, int ActivityID) {
 	// The ActivityID is out of range
 	if(ActivityID >= Task->ActivityCount) return false;
 
-	_log(TASKS__UPDATE, "ClientTaskState IsTaskActivityActive(%i, %i). State is %i ", TaskID, ActivityID,
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] ClientTaskState IsTaskActivityActive(%i, %i). State is %i ", TaskID, ActivityID,
 			ActiveTasks[ActiveTaskIndex].Activity[ActivityID].State);
 
 
@@ -2045,7 +2045,7 @@ bool ClientTaskState::IsTaskActivityActive(int TaskID, int ActivityID) {
 void ClientTaskState::UpdateTaskActivity(Client *c, int TaskID, int ActivityID, int Count, bool ignore_quest_update /*= false*/)
 {
 
-	_log(TASKS__UPDATE, "ClientTaskState UpdateTaskActivity(%i, %i, %i).", TaskID, ActivityID, Count);
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] ClientTaskState UpdateTaskActivity(%i, %i, %i).", TaskID, ActivityID, Count);
 
 	// Quick sanity check
 	if((ActivityID<0) || (ActiveTaskCount==0)) return;
@@ -2072,14 +2072,14 @@ void ClientTaskState::UpdateTaskActivity(Client *c, int TaskID, int ActivityID, 
 
 	// The Activity is not currently active
 	if(ActiveTasks[ActiveTaskIndex].Activity[ActivityID].State != ActivityActive) return;
-	_log(TASKS__UPDATE, "Increment done count on UpdateTaskActivity");
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Increment done count on UpdateTaskActivity");
 	IncrementDoneCount(c, Task, ActiveTaskIndex, ActivityID, Count, ignore_quest_update);
 
 }
 
 void ClientTaskState::ResetTaskActivity(Client *c, int TaskID, int ActivityID) {
 
-	_log(TASKS__UPDATE, "ClientTaskState UpdateTaskActivity(%i, %i, 0).", TaskID, ActivityID);
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] ClientTaskState UpdateTaskActivity(%i, %i, 0).", TaskID, ActivityID);
 
 	// Quick sanity check
 	if((ActivityID<0) || (ActiveTaskCount==0)) return;
@@ -2107,7 +2107,7 @@ void ClientTaskState::ResetTaskActivity(Client *c, int TaskID, int ActivityID) {
 	// The Activity is not currently active
 	if(ActiveTasks[ActiveTaskIndex].Activity[ActivityID].State != ActivityActive) return;
 
-	_log(TASKS__UPDATE, "ResetTaskActivityCount");
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] ResetTaskActivityCount");
 
 	ActiveTasks[ActiveTaskIndex].Activity[ActivityID].DoneCount = 0;
 
@@ -2173,7 +2173,7 @@ int ClientTaskState::IsTaskCompleted(int TaskID) {
 	if(!(RuleB(TaskSystem, RecordCompletedTasks))) return -1;
 
 	for(unsigned int i=0; i<CompletedTasks.size(); i++) {
-		_log(TASKS__UPDATE, "Comparing completed task %i with %i", CompletedTasks[i].TaskID, TaskID);
+		logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Comparing completed task %i with %i", CompletedTasks[i].TaskID, TaskID);
 		if(CompletedTasks[i].TaskID == TaskID) return 1;
 	}
 
@@ -2275,7 +2275,7 @@ void Client::SendTaskComplete(int TaskIndex) {
 
 void ClientTaskState::SendTaskHistory(Client *c, int TaskIndex) {
 
-	_log(TASKS__UPDATE, "Task History Requested for Completed Task Index %i", TaskIndex);
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Task History Requested for Completed Task Index %i", TaskIndex);
 
 	// We only sent the most recent 50 completed tasks, so we need to offset the Index the client sent to us.
 
@@ -2406,7 +2406,7 @@ void Client::SendTaskFailed(int TaskID, int TaskIndex) {
 	//tac->unknown5 = 0x00000001;
 	tac->unknown5 = 0; // 0 for task complete or failed.
 
-	_log(TASKS__UPDATE, "TaskFailed");
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] TaskFailed");
 	_pkt(TASKS__PACKETS, outapp);
 
 	QueuePacket(outapp);
@@ -2428,7 +2428,7 @@ void TaskManager::SendCompletedTasksToClient(Client *c, ClientTaskState *State) 
 	if(State->CompletedTasks.size() > 50)
 		FirstTaskToSend = State->CompletedTasks.size() - 50;
 
-	_log(TASKS__UPDATE, "Completed Task Count: %i, First Task to send is %i, Last is %i",
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] Completed Task Count: %i, First Task to send is %i, Last is %i",
 				State->CompletedTasks.size(), FirstTaskToSend, LastTaskToSend);
 	/*
 	for(iterator=State->CompletedTasks.begin(); iterator!=State->CompletedTasks.end(); iterator++) {
@@ -2689,12 +2689,12 @@ void TaskManager::SendActiveTasksToClient(Client *c, bool TaskComplete) {
 		int StartTime = c->GetTaskStartTime(TaskIndex);
 
 		SendActiveTaskDescription(c, TaskID, TaskIndex, StartTime, Tasks[TaskID]->Duration, false);
-		_log(TASKS__UPDATE, "SendActiveTasksToClient: Task %i, Activities: %i", TaskID, GetActivityCount(TaskID));
+		logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] SendActiveTasksToClient: Task %i, Activities: %i", TaskID, GetActivityCount(TaskID));
 
 		int Sequence = 0;
 		for(int Activity=0; Activity<GetActivityCount(TaskID); Activity++) {
 			if(c->GetTaskActivityState(TaskIndex, Activity) != ActivityHidden) {
-				_log(TASKS__UPDATE, "  Long: %i, %i, %i Complete=%i", TaskID, Activity, TaskIndex, TaskComplete);
+				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE]   Long: %i, %i, %i Complete=%i", TaskID, Activity, TaskIndex, TaskComplete);
 				if(Activity==GetActivityCount(TaskID)-1)
 					SendTaskActivityLong(c, TaskID, Activity, TaskIndex,
 								Tasks[TaskID]->Activity[Activity].Optional,
@@ -2704,7 +2704,7 @@ void TaskManager::SendActiveTasksToClient(Client *c, bool TaskComplete) {
 								Tasks[TaskID]->Activity[Activity].Optional, 0);
 			}
 			else {
-				_log(TASKS__UPDATE, "  Short: %i, %i, %i", TaskID, Activity, TaskIndex);
+				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE]   Short: %i, %i, %i", TaskID, Activity, TaskIndex);
 				SendTaskActivityShort(c, TaskID, Activity, TaskIndex);
 			}
 			Sequence++;
@@ -2725,13 +2725,13 @@ void TaskManager::SendSingleActiveTaskToClient(Client *c, int TaskIndex, bool Ta
 
 	int StartTime = c->GetTaskStartTime(TaskIndex);
 	SendActiveTaskDescription(c, TaskID, TaskIndex, StartTime, Tasks[TaskID]->Duration, BringUpTaskJournal);
-	_log(TASKS__UPDATE, "SendSingleActiveTasksToClient: Task %i, Activities: %i", TaskID, GetActivityCount(TaskID));
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] SendSingleActiveTasksToClient: Task %i, Activities: %i", TaskID, GetActivityCount(TaskID));
 
 	int Sequence = 0;
 
 	for(int Activity=0; Activity<GetActivityCount(TaskID); Activity++) {
 		if(c->GetTaskActivityState(TaskIndex, Activity) != ActivityHidden) {
-			_log(TASKS__UPDATE, "  Long: %i, %i, %i Complete=%i", TaskID, Activity, TaskIndex, TaskComplete);
+			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE]   Long: %i, %i, %i Complete=%i", TaskID, Activity, TaskIndex, TaskComplete);
 			if(Activity==GetActivityCount(TaskID)-1)
 				SendTaskActivityLong(c, TaskID, Activity, TaskIndex,
 							Tasks[TaskID]->Activity[Activity].Optional, TaskComplete);
@@ -2740,7 +2740,7 @@ void TaskManager::SendSingleActiveTaskToClient(Client *c, int TaskIndex, bool Ta
 							Tasks[TaskID]->Activity[Activity].Optional, 0);
 		}
 		else {
-			_log(TASKS__UPDATE, "  Short: %i, %i, %i", TaskID, Activity, TaskIndex);
+			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE]   Short: %i, %i, %i", TaskID, Activity, TaskIndex);
 			SendTaskActivityShort(c, TaskID, Activity, TaskIndex);
 		}
 		Sequence++;
@@ -2919,7 +2919,7 @@ void ClientTaskState::CancelTask(Client *c, int SequenceNumber, bool RemoveFromD
 	cts->SequenceNumber = SequenceNumber;
 	cts->unknown4 = 0x00000002;
 
-	_log(TASKS__UPDATE, "CancelTask");
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] CancelTask");
 	_pkt(TASKS__PACKETS, outapp);
 
 	c->QueuePacket(outapp);
@@ -2932,24 +2932,24 @@ void ClientTaskState::CancelTask(Client *c, int SequenceNumber, bool RemoveFromD
 void ClientTaskState::RemoveTask(Client *c, int sequenceNumber) {
 
 	int characterID = c->CharacterID();
-    _log(TASKS__UPDATE, "ClientTaskState Cancel Task %i ", sequenceNumber);
+    logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] ClientTaskState Cancel Task %i ", sequenceNumber);
 
     std::string query = StringFormat("DELETE FROM character_activities WHERE charid=%i AND taskid = %i",
                                     characterID, ActiveTasks[sequenceNumber].TaskID);
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		logger.Log(EQEmuLogSys::Error, "[TASKS]Error in CientTaskState::CancelTask %s", results.ErrorMessage().c_str());
+		logger.Log(EQEmuLogSys::Error, "[TASKS] Error in CientTaskState::CancelTask %s", results.ErrorMessage().c_str());
 		return;
 	}
-    _log(TASKS__UPDATE, "CancelTask: %s", query.c_str());
+    logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] CancelTask: %s", query.c_str());
 
     query = StringFormat("DELETE FROM character_tasks WHERE charid=%i AND taskid = %i",
                         characterID, ActiveTasks[sequenceNumber].TaskID);
 	results = database.QueryDatabase(query);
 	if(!results.Success())
-		logger.Log(EQEmuLogSys::Error, "[TASKS]Error in CientTaskState::CancelTask %s", results.ErrorMessage().c_str());
+		logger.Log(EQEmuLogSys::Error, "[TASKS] Error in CientTaskState::CancelTask %s", results.ErrorMessage().c_str());
 
-	_log(TASKS__UPDATE, "CancelTask: %s", query.c_str());
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] CancelTask: %s", query.c_str());
 
 	ActiveTasks[sequenceNumber].TaskID = TASKSLOTEMPTY;
 	ActiveTaskCount--;
@@ -2990,7 +2990,7 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID) {
 	//
 	int FreeSlot = -1;
 	for(int i=0; i<MAXACTIVETASKS; i++) {
-		_log(TASKS__UPDATE, "ClientTaskState Looking for free slot in slot %i, found TaskID of %i ",
+		logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] ClientTaskState Looking for free slot in slot %i, found TaskID of %i",
 				i, ActiveTasks[i].TaskID);
 		if(ActiveTasks[i].TaskID == 0) {
 			FreeSlot = i;
@@ -3045,11 +3045,11 @@ void ClientTaskState::ProcessTaskProximities(Client *c, float X, float Y, float 
 
 	if((LastX==X) && (LastY==Y) && (LastZ==Z)) return;
 
-	_log(TASKS__PROXIMITY, "Checking proximities for Position %8.3f, %8.3f, %8.3f\n", X, Y, Z);
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[PROXIMITY] Checking proximities for Position %8.3f, %8.3f, %8.3f\n", X, Y, Z);
 	int ExploreID = taskmanager->ProximityManager.CheckProximities(X, Y, Z);
 
 	if(ExploreID>0) {
-		_log(TASKS__PROXIMITY, "Position %8.3f, %8.3f, %8.3f is within proximity %i\n", X, Y, Z, ExploreID);
+		logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[PROXIMITY] Position %8.3f, %8.3f, %8.3f is within proximity %i\n", X, Y, Z, ExploreID);
 		UpdateTasksOnExplore(c, ExploreID);
 	}
 }
@@ -3073,7 +3073,7 @@ TaskGoalListManager::~TaskGoalListManager() {
 
 bool TaskGoalListManager::LoadLists() {
 
-	_log(TASKS__GLOBALLOAD, "TaskGoalListManager::LoadLists Called");
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] TaskGoalListManager::LoadLists Called");
 
 	for(int i=0; i< NumberOfLists; i++)
 		safe_delete_array(TaskGoalLists[i].GoalItemEntries);
@@ -3093,7 +3093,7 @@ bool TaskGoalListManager::LoadLists() {
     }
 
     NumberOfLists = results.RowCount();
-    _log(TASKS__GLOBALLOAD, "Database returned a count of %i lists", NumberOfLists);
+    logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] Database returned a count of %i lists", NumberOfLists);
 
     TaskGoalLists = new TaskGoalList_Struct[NumberOfLists];
 
@@ -3207,7 +3207,7 @@ std::vector<int> TaskGoalListManager::GetListContents(int ListID) {
 
 bool TaskGoalListManager::IsInList(int ListID, int Entry) {
 
-	_log(TASKS__UPDATE, "TaskGoalListManager::IsInList(%i, %i)", ListID, Entry);
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] TaskGoalListManager::IsInList(%i, %i)", ListID, Entry);
 
 	int ListIndex = GetListByID(ListID);
 
@@ -3227,7 +3227,7 @@ bool TaskGoalListManager::IsInList(int ListID, int Entry) {
 		else if(Entry < TaskGoalLists[ListIndex].GoalItemEntries[MiddleEntry])
 			LastEntry = MiddleEntry - 1;
 		else {
-			_log(TASKS__UPDATE, "TaskGoalListManager::IsInList(%i, %i) returning true", ListIndex, Entry);
+			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] TaskGoalListManager::IsInList(%i, %i) returning true", ListIndex, Entry);
 			return true;
 		}
 
@@ -3250,7 +3250,7 @@ TaskProximityManager::~TaskProximityManager() {
 bool TaskProximityManager::LoadProximities(int zoneID) {
 	TaskProximity proximity;
 
-	_log(TASKS__GLOBALLOAD, "TaskProximityManager::LoadProximities Called for zone %i", zoneID);
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] TaskProximityManager::LoadProximities Called for zone %i", zoneID);
 	TaskProximities.clear();
 
     std::string query = StringFormat("SELECT `exploreid`, `minx`, `maxx`, "
@@ -3285,7 +3285,7 @@ int TaskProximityManager::CheckProximities(float X, float Y, float Z) {
 
 		TaskProximity* P = &TaskProximities[i];
 
-		_log(TASKS__PROXIMITY, "Checking %8.3f, %8.3f, %8.3f against %8.3f, %8.3f, %8.3f, %8.3f, %8.3f, %8.3f",
+		logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[PROXIMITY] Checking %8.3f, %8.3f, %8.3f against %8.3f, %8.3f, %8.3f, %8.3f, %8.3f, %8.3f",
 				X, Y, Z, P->MinX, P->MaxX, P->MinY, P->MaxY, P->MinZ, P->MaxZ);
 
 		if(X < P->MinX || X > P->MaxX || Y < P->MinY || Y > P->MaxY ||

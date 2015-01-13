@@ -2074,7 +2074,7 @@ bool QuestManager::istaskenabled(int taskid) {
 
 void QuestManager::tasksetselector(int tasksetid) {
 	QuestManagerCurrentQuestVars();
-	_log(TASKS__UPDATE, "TaskSetSelector called for task set %i", tasksetid);
+	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] TaskSetSelector called for task set %i", tasksetid);
 	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && owner && taskmanager)
 		initiator->TaskSetSelector(owner, tasksetid);
 }
