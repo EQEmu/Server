@@ -9814,7 +9814,7 @@ void Client::Handle_OP_OpenContainer(const EQApplicationPacket *app)
 
 void Client::Handle_OP_OpenGuildTributeMaster(const EQApplicationPacket *app)
 {
-	_log(TRIBUTE__IN, "Received OP_OpenGuildTributeMaster of length %d", app->size);
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_OpenGuildTributeMaster of length %d", app->size);
 	_pkt(TRIBUTE__IN, app);
 
 	if (app->size != sizeof(StartTribute_Struct))
@@ -9846,7 +9846,7 @@ void Client::Handle_OP_OpenInventory(const EQApplicationPacket *app)
 
 void Client::Handle_OP_OpenTributeMaster(const EQApplicationPacket *app)
 {
-	_log(TRIBUTE__IN, "Received OP_OpenTributeMaster of length %d", app->size);
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_OpenTributeMaster of length %d", app->size);
 	_pkt(TRIBUTE__IN, app);
 
 	if (app->size != sizeof(StartTribute_Struct))
@@ -11782,7 +11782,7 @@ void Client::Handle_OP_SaveOnZoneReq(const EQApplicationPacket *app)
 
 void Client::Handle_OP_SelectTribute(const EQApplicationPacket *app)
 {
-	_log(TRIBUTE__IN, "Received OP_SelectTribute of length %d", app->size);
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_SelectTribute of length %d", app->size);
 	_pkt(TRIBUTE__IN, app);
 
 	//we should enforce being near a real tribute master to change this
@@ -13757,7 +13757,7 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 
 void Client::Handle_OP_TributeItem(const EQApplicationPacket *app)
 {
-	_log(TRIBUTE__IN, "Received OP_TributeItem of length %d", app->size);
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_TributeItem of length %d", app->size);
 	_pkt(TRIBUTE__IN, app);
 
 	//player donates an item...
@@ -13776,7 +13776,7 @@ void Client::Handle_OP_TributeItem(const EQApplicationPacket *app)
 
 		t->tribute_points = TributeItem(t->slot, t->quantity);
 
-		_log(TRIBUTE__OUT, "Sending tribute item reply with %d points", t->tribute_points);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Sending tribute item reply with %d points", t->tribute_points);
 		_pkt(TRIBUTE__OUT, app);
 
 		QueuePacket(app);
@@ -13786,7 +13786,7 @@ void Client::Handle_OP_TributeItem(const EQApplicationPacket *app)
 
 void Client::Handle_OP_TributeMoney(const EQApplicationPacket *app)
 {
-	_log(TRIBUTE__IN, "Received OP_TributeMoney of length %d", app->size);
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_TributeMoney of length %d", app->size);
 	_pkt(TRIBUTE__IN, app);
 
 	//player donates money
@@ -13805,7 +13805,7 @@ void Client::Handle_OP_TributeMoney(const EQApplicationPacket *app)
 
 		t->tribute_points = TributeMoney(t->platinum);
 
-		_log(TRIBUTE__OUT, "Sending tribute money reply with %d points", t->tribute_points);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Sending tribute money reply with %d points", t->tribute_points);
 		_pkt(TRIBUTE__OUT, app);
 
 		QueuePacket(app);
@@ -13815,7 +13815,7 @@ void Client::Handle_OP_TributeMoney(const EQApplicationPacket *app)
 
 void Client::Handle_OP_TributeNPC(const EQApplicationPacket *app)
 {
-	_log(TRIBUTE__IN, "Received OP_TributeNPC of length %d", app->size);
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_TributeNPC of length %d", app->size);
 	_pkt(TRIBUTE__IN, app);
 
 	return;
@@ -13823,7 +13823,7 @@ void Client::Handle_OP_TributeNPC(const EQApplicationPacket *app)
 
 void Client::Handle_OP_TributeToggle(const EQApplicationPacket *app)
 {
-	_log(TRIBUTE__IN, "Received OP_TributeToggle of length %d", app->size);
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_TributeToggle of length %d", app->size);
 	_pkt(TRIBUTE__IN, app);
 
 	if (app->size != sizeof(uint32))
@@ -13837,7 +13837,7 @@ void Client::Handle_OP_TributeToggle(const EQApplicationPacket *app)
 
 void Client::Handle_OP_TributeUpdate(const EQApplicationPacket *app)
 {
-	_log(TRIBUTE__IN, "Received OP_TributeUpdate of length %d", app->size);
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_TributeUpdate of length %d", app->size);
 	_pkt(TRIBUTE__IN, app);
 
 	//sent when the client changes their tribute settings...
