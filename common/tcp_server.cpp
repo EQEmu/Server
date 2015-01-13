@@ -67,7 +67,7 @@ ThreadReturnType BaseTCPServer::TCPServerLoop(void* tmp) {
 	BaseTCPServer* tcps = (BaseTCPServer*) tmp;
 
 #ifndef WIN32
-	_log(COMMON__THREADS, "Starting TCPServerLoop with thread ID %d", pthread_self());
+	logger.LogDebug(EQEmuLogSys::Detail,  "Starting TCPServerLoop with thread ID %d", pthread_self());
 #endif
 
 	tcps->MLoopRunning.lock();
@@ -78,7 +78,7 @@ ThreadReturnType BaseTCPServer::TCPServerLoop(void* tmp) {
 	tcps->MLoopRunning.unlock();
 
 #ifndef WIN32
-	_log(COMMON__THREADS, "Ending TCPServerLoop with thread ID %d", pthread_self());
+	logger.LogDebug(EQEmuLogSys::Detail,  "Ending TCPServerLoop with thread ID %d", pthread_self());
 #endif
 
 	THREAD_RETURN(nullptr);

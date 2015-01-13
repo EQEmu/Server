@@ -899,7 +899,7 @@ ThreadReturnType TCPConnection::TCPConnectionLoop(void* tmp) {
 	}
 	TCPConnection* tcpc = (TCPConnection*) tmp;
 #ifndef WIN32
-	_log(COMMON__THREADS, "Starting TCPConnectionLoop with thread ID %d", pthread_self());
+	logger.LogDebug(EQEmuLogSys::Detail,  "Starting TCPConnectionLoop with thread ID %d", pthread_self());
 #endif
 	tcpc->MLoopRunning.lock();
 	while (tcpc->RunLoop()) {
@@ -926,7 +926,7 @@ ThreadReturnType TCPConnection::TCPConnectionLoop(void* tmp) {
 	tcpc->MLoopRunning.unlock();
 
 #ifndef WIN32
-	_log(COMMON__THREADS, "Ending TCPConnectionLoop with thread ID %d", pthread_self());
+	logger.LogDebug(EQEmuLogSys::Detail,  "Ending TCPConnectionLoop with thread ID %d", pthread_self());
 #endif
 
 	THREAD_RETURN(nullptr);

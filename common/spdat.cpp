@@ -72,6 +72,7 @@
 
 #include "../common/logsys.h"
 #include "../common/logtypes.h"
+#include "../common/eqemu_logsys.h" 
 
 #include "classes.h"
 #include "spdat.h"
