@@ -77,9 +77,9 @@ void Client::CalcBonuses()
 
 	CalcSpellBonuses(&spellbonuses);
 
-	_log(AA__BONUSES, "Calculating AA Bonuses for %s.", this->GetCleanName());
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Calculating AA Bonuses for %s.", this->GetCleanName());
 	CalcAABonuses(&aabonuses);	//we're not quite ready for this
-	_log(AA__BONUSES, "Finished calculating AA Bonuses for %s.", this->GetCleanName());
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Finished calculating AA Bonuses for %s.", this->GetCleanName());
 
 	RecalcWeight();
 
@@ -638,7 +638,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 		if (effect == SE_Blank || (effect == SE_CHA && base1 == 0) || effect == SE_StackingCommand_Block || effect == SE_StackingCommand_Overwrite)
 			continue;
 
-		_log(AA__BONUSES, "Applying Effect %d from AA %u in slot %d (base1: %d, base2: %d) on %s", effect, aaid, slot, base1, base2, this->GetCleanName());
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Applying Effect %d from AA %u in slot %d (base1: %d, base2: %d) on %s", effect, aaid, slot, base1, base2, this->GetCleanName());
 			
 		uint8 focus = IsFocusEffect(0, 0, true,effect);
 		if (focus)
