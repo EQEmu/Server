@@ -2814,7 +2814,7 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 		return;
 
 	int i = 0, argcount = 0, length = 0;
-	char *bufptr;
+	char *bufptr = nullptr;
 	const char *message_arg[9] = {0};
 
 	if(type==MT_Emote)
@@ -2839,8 +2839,7 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 	for(; message_arg[argcount]; ++argcount)
 		length += strlen(message_arg[argcount]) + 1;
 
-	if (length == 0)
-		length = 1;
+	length += 1;
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, sizeof(FormattedMessage_Struct) + length);
 	FormattedMessage_Struct *fm = (FormattedMessage_Struct *)outapp->pBuffer;
@@ -2853,8 +2852,7 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 		bufptr += strlen(message_arg[i]) + 1;
 	}
 
-	if (argcount == 0)
-		bufptr = '\0';
+	bufptr = '\0';
 
 	if(distance>0)
 		entity_list.QueueCloseClients(this,outapp,false,distance);
@@ -2930,7 +2928,7 @@ void Client::FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType fil
 		return;
 
 	int i = 0, argcount = 0, length = 0;
-	char *bufptr;
+	char *bufptr = nullptr;
 	const char *message_arg[9] = {0};
 
 	if (type == MT_Emote)
@@ -2954,8 +2952,7 @@ void Client::FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType fil
 	for (; message_arg[argcount]; ++argcount)
 		length += strlen(message_arg[argcount]) + 1;
 
-	if (length == 0)
-		length = 1;
+	length += 1;
 
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_FormattedMessage, sizeof(FormattedMessage_Struct) + length);
 	FormattedMessage_Struct *fm = (FormattedMessage_Struct *)outapp->pBuffer;
@@ -2967,8 +2964,7 @@ void Client::FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType fil
 		bufptr += strlen(message_arg[i]) + 1;
 	}
 
-	if (argcount == 0)
-		bufptr = '\0';
+	bufptr = '\0';
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
