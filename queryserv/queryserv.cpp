@@ -83,7 +83,7 @@ int main() {
 		Config->QSDatabasePassword.c_str(),
 		Config->QSDatabaseDB.c_str(),
 		Config->QSDatabasePort)) {
-		_log(WORLD__INIT_ERR, "Cannot continue without a database connection.");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Cannot continue without a database connection.");
 		return 1;
 	}
 

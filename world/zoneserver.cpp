@@ -209,7 +209,7 @@ bool ZoneServer::Process() {
 			}
 			else
 			{
-				_log(WORLD__ZONE,"**WARNING** You have not configured a world shared key in your config file. You should add a <key>STRING</key> element to your <world> element to prevent unauthroized zone access.");
+				logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"**WARNING** You have not configured a world shared key in your config file. You should add a <key>STRING</key> element to your <world> element to prevent unauthroized zone access.");
 				authenticated = true;
 			}
 		}
@@ -708,20 +708,20 @@ bool ZoneServer::Process() {
 
 					/* Zone was already running*/
 					if(ingress_server) {
-						_log(WORLD__ZONE,"Found a zone already booted for %s\n", ztz->name);
+						logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Found a zone already booted for %s\n", ztz->name);
 						ztz->response = 1;
 					}
 					/* Boot the Zone*/
 					else {
 						int server_id;
 						if ((server_id = zoneserver_list.TriggerBootup(ztz->requested_zone_id, ztz->requested_instance_id))){
-							_log(WORLD__ZONE,"Successfully booted a zone for %s\n", ztz->name);
+							logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Successfully booted a zone for %s\n", ztz->name);
 							// bootup successful, ready to rock
 							ztz->response = 1;
 							ingress_server = zoneserver_list.FindByID(server_id);
 						}
 						else {
-							_log(WORLD__ZONE_ERR,"FAILED to boot a zone for %s\n", ztz->name);
+							logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"FAILED to boot a zone for %s\n", ztz->name);
 							// bootup failed, send back error code 0
 							ztz->response = 0;
 						}

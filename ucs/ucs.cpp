@@ -104,14 +104,14 @@ int main() {
 		Config->DatabasePassword.c_str(),
 		Config->DatabaseDB.c_str(),
 		Config->DatabasePort)) {
-		_log(WORLD__INIT_ERR, "Cannot continue without a database connection.");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Cannot continue without a database connection.");
 		return 1;
 	}
 
 	char tmp[64];
 
 	if (database.GetVariable("RuleSet", tmp, sizeof(tmp)-1)) {
-		_log(WORLD__INIT, "Loading rule set '%s'", tmp);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Loading rule set '%s'", tmp);
 		if(!RuleManager::Instance()->LoadRules(&database, tmp)) {
 			_log(UCS__ERROR, "Failed to load ruleset '%s', falling back to defaults.", tmp);
 		}

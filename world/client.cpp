@@ -1519,7 +1519,7 @@ bool CheckCharCreateInfoSoF(CharCreate_Struct *cc)
 	if (!cc)
 		return false;
 
-	_log(WORLD__CLIENT, "Validating char creation info...");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Validating char creation info...");
 
 	RaceClassCombos class_combo;
 	bool found = false;
@@ -1536,7 +1536,7 @@ bool CheckCharCreateInfoSoF(CharCreate_Struct *cc)
 	}
 
 	if (!found) {
-		_log(WORLD__CLIENT_ERR, "Could not find class/race/deity/start_zone combination");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Could not find class/race/deity/start_zone combination");
 		return false;
 	}
 
@@ -1553,7 +1553,7 @@ bool CheckCharCreateInfoSoF(CharCreate_Struct *cc)
 	}
 
 	if (!found) {
-		_log(WORLD__CLIENT_ERR, "Could not find starting stats for selected character combo, cannot verify stats");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Could not find starting stats for selected character combo, cannot verify stats");
 		return false;
 	}
 
@@ -1566,37 +1566,37 @@ bool CheckCharCreateInfoSoF(CharCreate_Struct *cc)
 		allocation.DefaultPointAllocation[6];
 
 	if (cc->STR > allocation.BaseStats[0] + max_stats || cc->STR < allocation.BaseStats[0]) {
-		_log(WORLD__CLIENT_ERR, "Strength out of range");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Strength out of range");
 		return false;
 	}
 
 	if (cc->DEX > allocation.BaseStats[1] + max_stats || cc->DEX < allocation.BaseStats[1]) {
-		_log(WORLD__CLIENT_ERR, "Dexterity out of range");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Dexterity out of range");
 		return false;
 	}
 
 	if (cc->AGI > allocation.BaseStats[2] + max_stats || cc->AGI < allocation.BaseStats[2]) {
-		_log(WORLD__CLIENT_ERR, "Agility out of range");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Agility out of range");
 		return false;
 	}
 
 	if (cc->STA > allocation.BaseStats[3] + max_stats || cc->STA < allocation.BaseStats[3]) {
-		_log(WORLD__CLIENT_ERR, "Stamina out of range");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Stamina out of range");
 		return false;
 	}
 
 	if (cc->INT > allocation.BaseStats[4] + max_stats || cc->INT < allocation.BaseStats[4]) {
-		_log(WORLD__CLIENT_ERR, "Intelligence out of range");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Intelligence out of range");
 		return false;
 	}
 
 	if (cc->WIS > allocation.BaseStats[5] + max_stats || cc->WIS < allocation.BaseStats[5]) {
-		_log(WORLD__CLIENT_ERR, "Wisdom out of range");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Wisdom out of range");
 		return false;
 	}
 
 	if (cc->CHA > allocation.BaseStats[6] + max_stats || cc->CHA < allocation.BaseStats[6]) {
-		_log(WORLD__CLIENT_ERR, "Charisma out of range");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Charisma out of range");
 		return false;
 	}
 
@@ -1609,7 +1609,7 @@ bool CheckCharCreateInfoSoF(CharCreate_Struct *cc)
 	current_stats += cc->WIS - allocation.BaseStats[5];
 	current_stats += cc->CHA - allocation.BaseStats[6];
 	if (current_stats > max_stats) {
-		_log(WORLD__CLIENT_ERR, "Current Stats > Maximum Stats");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Current Stats > Maximum Stats");
 		return false;
 	}
 
@@ -1690,7 +1690,7 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 	if (!cc)
 		return false;
 
-	_log(WORLD__CLIENT,"Validating char creation info...");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Validating char creation info...");
 
 	classtemp = cc->class_ - 1;
 	racetemp = cc->race - 1;
@@ -1703,16 +1703,16 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 	// if out of range looking it up in the table would crash stuff
 	// so we return from these
 	if (classtemp >= PLAYER_CLASS_COUNT) {
-		_log(WORLD__CLIENT_ERR,"  class is out of range");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  class is out of range");
 		return false;
 	}
 	if (racetemp >= _TABLE_RACES) {
-		_log(WORLD__CLIENT_ERR,"  race is out of range");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  race is out of range");
 		return false;
 	}
 
 	if (!ClassRaceLookupTable[classtemp][racetemp]) { //Lookup table better than a bunch of ifs?
-		_log(WORLD__CLIENT_ERR,"  invalid race/class combination");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  invalid race/class combination");
 		// we return from this one, since if it's an invalid combination our table
 		// doesn't have meaningful values for the stats
 		return false;
@@ -1740,43 +1740,43 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 	// that are messed up not just the first hit
 
 	if (bTOTAL + stat_points != cTOTAL) {
-		_log(WORLD__CLIENT_ERR,"  stat points total doesn't match expected value: expecting %d got %d", bTOTAL + stat_points, cTOTAL);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat points total doesn't match expected value: expecting %d got %d", bTOTAL + stat_points, cTOTAL);
 		Charerrors++;
 	}
 
 	if (cc->STR > bSTR + stat_points || cc->STR < bSTR) {
-		_log(WORLD__CLIENT_ERR,"  stat STR is out of range");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat STR is out of range");
 		Charerrors++;
 	}
 	if (cc->STA > bSTA + stat_points || cc->STA < bSTA) {
-		_log(WORLD__CLIENT_ERR,"  stat STA is out of range");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat STA is out of range");
 		Charerrors++;
 	}
 	if (cc->AGI > bAGI + stat_points || cc->AGI < bAGI) {
-		_log(WORLD__CLIENT_ERR,"  stat AGI is out of range");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat AGI is out of range");
 		Charerrors++;
 	}
 	if (cc->DEX > bDEX + stat_points || cc->DEX < bDEX) {
-		_log(WORLD__CLIENT_ERR,"  stat DEX is out of range");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat DEX is out of range");
 		Charerrors++;
 	}
 	if (cc->WIS > bWIS + stat_points || cc->WIS < bWIS) {
-		_log(WORLD__CLIENT_ERR,"  stat WIS is out of range");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat WIS is out of range");
 		Charerrors++;
 	}
 	if (cc->INT > bINT + stat_points || cc->INT < bINT) {
-		_log(WORLD__CLIENT_ERR,"  stat INT is out of range");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat INT is out of range");
 		Charerrors++;
 	}
 	if (cc->CHA > bCHA + stat_points || cc->CHA < bCHA) {
-		_log(WORLD__CLIENT_ERR,"  stat CHA is out of range");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat CHA is out of range");
 		Charerrors++;
 	}
 
 	/*TODO: Check for deity/class/race.. it'd be nice, but probably of any real use to hack(faction, deity based items are all I can think of)
 	I am NOT writing those tables - kathgar*/
 
-	_log(WORLD__CLIENT,"Found %d errors in character creation request", Charerrors);
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Found %d errors in character creation request", Charerrors);
 
 	return Charerrors == 0;
 }

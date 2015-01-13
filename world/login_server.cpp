@@ -96,7 +96,7 @@ bool LoginServer::Process() {
 	ServerPacket *pack = 0;
 	while((pack = tcpc->PopPacket()))
 	{
-		_log(WORLD__LS_TRACE,"Recevied ServerPacket from LS OpCode 0x04x",pack->opcode);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Recevied ServerPacket from LS OpCode 0x04x",pack->opcode);
 		_hex(WORLD__LS_TRACE,pack->pBuffer,pack->size);
 
 		switch(pack->opcode) {
@@ -160,12 +160,12 @@ bool LoginServer::Process() {
 			case ServerOP_LSFatalError: {
 	#ifndef IGNORE_LS_FATAL_ERROR
 				WorldConfig::DisableLoginserver();
-				_log(WORLD__LS_ERR, "Login server responded with FatalError. Disabling reconnect.");
+				logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Login server responded with FatalError. Disabling reconnect.");
 	#else
-			_log(WORLD__LS_ERR, "Login server responded with FatalError.");
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Login server responded with FatalError.");
 	#endif
 				if (pack->size > 1) {
-					_log(WORLD__LS_ERR, "     %s",pack->pBuffer);
+					logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "     %s",pack->pBuffer);
 				}
 				break;
 			}
@@ -177,18 +177,18 @@ bool LoginServer::Process() {
 			case ServerOP_LSRemoteAddr: {
 				if (!Config->WorldAddress.length()) {
 					WorldConfig::SetWorldAddress((char *)pack->pBuffer);
-					_log(WORLD__LS, "Loginserver provided %s as world address",pack->pBuffer);
+					logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Loginserver provided %s as world address",pack->pBuffer);
 				}
 				break;
 			}
 			case ServerOP_LSAccountUpdate: {
-				_log(WORLD__LS, "Received ServerOP_LSAccountUpdate packet from loginserver");
+				logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Received ServerOP_LSAccountUpdate packet from loginserver");
 				CanAccountUpdate = true;
 				break;
 			}
 			default:
 			{
-				_log(WORLD__LS_ERR, "Unknown LSOpCode: 0x%04x size=%d",(int)pack->opcode,pack->size);
+				logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Unknown LSOpCode: 0x%04x size=%d",(int)pack->opcode,pack->size);
 	DumpPacket(pack->pBuffer, pack->size);
 				break;
 			}
@@ -202,10 +202,10 @@ bool LoginServer::Process() {
 bool LoginServer::InitLoginServer() {
 	if(Connected() == false) {
 		if(ConnectReady()) {
-			_log(WORLD__LS, "Connecting to login server: %s:%d",LoginServerAddress,LoginServerPort);
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Connecting to login server: %s:%d",LoginServerAddress,LoginServerPort);
 			Connect();
 		} else {
-			_log(WORLD__LS_ERR, "Not connected but not ready to connect, this is bad: %s:%d",
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Not connected but not ready to connect, this is bad: %s:%d",
 				LoginServerAddress,LoginServerPort);
 		}
 	}
@@ -216,29 +216,29 @@ bool LoginServer::Connect() {
 	char tmp[25];
 	if(database.GetVariable("loginType",tmp,sizeof(tmp)) && strcasecmp(tmp,"MinILogin") == 0){
 		minilogin = true;
-		_log(WORLD__LS, "Setting World to MiniLogin Server type");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Setting World to MiniLogin Server type");
 	}
 	else
 		minilogin = false;
 
 	if (minilogin && WorldConfig::get()->WorldAddress.length()==0) {
-		_log(WORLD__LS_ERR, "**** For minilogin to work, you need to set the <address> element in the <world> section.");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "**** For minilogin to work, you need to set the <address> element in the <world> section.");
 		return false;
 	}
 
 	char errbuf[TCPConnection_ErrorBufferSize];
 	if ((LoginServerIP = ResolveIP(LoginServerAddress, errbuf)) == 0) {
-		_log(WORLD__LS_ERR, "Unable to resolve '%s' to an IP.",LoginServerAddress);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Unable to resolve '%s' to an IP.",LoginServerAddress);
 		return false;
 	}
 
 	if (LoginServerIP == 0 || LoginServerPort == 0) {
-		_log(WORLD__LS_ERR, "Connect info incomplete, cannot connect: %s:%d",LoginServerAddress,LoginServerPort);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Connect info incomplete, cannot connect: %s:%d",LoginServerAddress,LoginServerPort);
 		return false;
 	}
 
 	if (tcpc->ConnectIP(LoginServerIP, LoginServerPort, errbuf)) {
-		_log(WORLD__LS, "Connected to Loginserver: %s:%d",LoginServerAddress,LoginServerPort);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Connected to Loginserver: %s:%d",LoginServerAddress,LoginServerPort);
 		if (minilogin)
 			SendInfo();
 		else
@@ -248,7 +248,7 @@ bool LoginServer::Connect() {
 		return true;
 	}
 	else {
-		_log(WORLD__LS_ERR, "Could not connect to login server: %s:%d %s",LoginServerAddress,LoginServerPort,errbuf);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Could not connect to login server: %s:%d %s",LoginServerAddress,LoginServerPort,errbuf);
 		return false;
 	}
 }
@@ -324,7 +324,7 @@ void LoginServer::SendStatus() {
 void LoginServer::SendAccountUpdate(ServerPacket* pack) {
 	ServerLSAccountUpdate_Struct* s = (ServerLSAccountUpdate_Struct *) pack->pBuffer;
 	if(CanUpdate()) {
-		_log(WORLD__LS, "Sending ServerOP_LSAccountUpdate packet to loginserver: %s:%d",LoginServerAddress,LoginServerPort);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Sending ServerOP_LSAccountUpdate packet to loginserver: %s:%d",LoginServerAddress,LoginServerPort);
 		strn0cpy(s->worldaccount, LoginAccount, 30);
 		strn0cpy(s->worldpassword, LoginPassword, 30);
 		SendPacket(pack);

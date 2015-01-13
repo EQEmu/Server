@@ -65,7 +65,7 @@ EQWParser::EQWParser() {
 	my_perl = perl_alloc();
 	_empty_sv = newSV(0);
 	if(!my_perl)
-		_log(WORLD__PERL_ERR, "Error: perl_alloc failed!");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Error: perl_alloc failed!");
 	else
 		DoInit();
 }
@@ -182,10 +182,10 @@ void EQWParser::DoInit() {
 
 
 #ifdef EMBPERL_PLUGIN
-	_log(WORLD__PERL, "Loading worldui perl plugins.");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Loading worldui perl plugins.");
 	std::string err;
 	if(!eval_file("world", "worldui.pl", err)) {
-		_log(WORLD__PERL_ERR, "Warning - world.pl: %s", err.c_str());
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Warning - world.pl: %s", err.c_str());
 	}
 
 	eval_pv(
