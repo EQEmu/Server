@@ -39,7 +39,6 @@ public:
 		Quest,		 /* Quest Logs */
 		Commands,	 /* Issued Commands */
 		Crash,		 /* Crash Logs */
-		Save,		 /* Client Saves */
 		MaxLogID	 /* Max, used in functions to get the max log ID */
 	};
 
@@ -74,13 +73,13 @@ public:
 
 	void CloseZoneLogs();
 	void ConsoleMessage(uint16 log_type, const std::string message);
+	void LoadLogSettings();
 	void Log(uint16 log_type, const std::string message, ...);
 	void LogDebug(DebugLevel debug_level, std::string message, ...);
 	void LogDebugType(DebugLevel debug_level, uint16 log_type, std::string message, ...);
 	void MakeDirectory(std::string directory_name);
 	void SetCurrentTimeStamp(char* time_stamp);
 	void StartLogs(const std::string log_name);
-	void LoadLogSettings();
 
 	struct LogSettings{
 		uint8 log_to_file;
@@ -92,7 +91,7 @@ public:
 	bool log_settings_loaded = false;
 	int log_platform = 0;
 
-	void OnLogHookCallBack(std::function<void(uint16 log_type, std::string&)> f) { on_log_gmsay_hook = f; }
+	void OnLogHookCallBackZone(std::function<void(uint16 log_type, std::string&)> f) { on_log_gmsay_hook = f; }
 
 private:
 	bool zone_general_init = false;
