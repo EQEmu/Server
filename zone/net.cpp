@@ -151,7 +151,7 @@ int main(int argc, char** argv) {
 
 	
 
-	_log(ZONE__INIT, "Loading server configuration..");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading server configuration..");
 	if (!ZoneConfig::LoadConfig()) {
 		logger.Log(EQEmuLogSys::Error, "Loading server configuration failed.");
 		return 1;
@@ -159,13 +159,13 @@ int main(int argc, char** argv) {
 	const ZoneConfig *Config=ZoneConfig::get();
 
 	if(!load_log_settings(Config->LogSettingsFile.c_str()))
-		_log(ZONE__INIT, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
 	else
-		_log(ZONE__INIT, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
 
 	worldserver.SetPassword(Config->SharedKey.c_str());
 
-	_log(ZONE__INIT, "Connecting to MySQL...");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Connecting to MySQL...");
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),
 		Config->DatabaseUsername.c_str(),
@@ -189,7 +189,7 @@ int main(int argc, char** argv) {
 	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-	_log(ZONE__INIT, "CURRENT_VERSION: %s", CURRENT_VERSION);
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "CURRENT_VERSION: %s", CURRENT_VERSION);
 
 	/*
 	* Setup nice signal handlers
@@ -211,84 +211,84 @@ int main(int argc, char** argv) {
 
 	const char *log_ini_file = "./log.ini";
 	if(!load_log_settings(log_ini_file))
-		_log(ZONE__INIT, "Warning: Unable to read %s", log_ini_file);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Warning: Unable to read %s", log_ini_file);
 	else
-		_log(ZONE__INIT, "Log settings loaded from %s", log_ini_file);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Log settings loaded from %s", log_ini_file);
 
-	_log(ZONE__INIT, "Mapping Incoming Opcodes");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Mapping Incoming Opcodes");
 	MapOpcodes();
-	_log(ZONE__INIT, "Loading Variables");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading Variables");
 	database.LoadVariables();
-	_log(ZONE__INIT, "Loading zone names");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading zone names");
 	database.LoadZoneNames();
-	_log(ZONE__INIT, "Loading items");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading items");
 	if (!database.LoadItems()) {
 		logger.Log(EQEmuLogSys::Error, "Loading items FAILED!");
 		logger.Log(EQEmuLogSys::Error, "Failed. But ignoring error and going on...");
 	}
 
-	_log(ZONE__INIT, "Loading npc faction lists");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading npc faction lists");
 	if (!database.LoadNPCFactionLists()) {
 		logger.Log(EQEmuLogSys::Error, "Loading npcs faction lists FAILED!");
 		CheckEQEMuErrorAndPause();
 		return 1;
 	}
-	_log(ZONE__INIT, "Loading loot tables");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading loot tables");
 	if (!database.LoadLoot()) {
 		logger.Log(EQEmuLogSys::Error, "Loading loot FAILED!");
 		CheckEQEMuErrorAndPause();
 		return 1;
 	}
-	_log(ZONE__INIT, "Loading skill caps");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading skill caps");
 	if (!database.LoadSkillCaps()) {
 		logger.Log(EQEmuLogSys::Error, "Loading skill caps FAILED!");
 		CheckEQEMuErrorAndPause();
 		return 1;
 	}
 
-	_log(ZONE__INIT, "Loading spells");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading spells");
 	EQEmu::MemoryMappedFile *mmf = nullptr;
 	LoadSpells(&mmf);
 
-	_log(ZONE__INIT, "Loading base data");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading base data");
 	if (!database.LoadBaseData()) {
 		logger.Log(EQEmuLogSys::Error, "Loading base data FAILED!");
 		CheckEQEMuErrorAndPause();
 		return 1;
 	}
 
-	_log(ZONE__INIT, "Loading guilds");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading guilds");
 	guild_mgr.LoadGuilds();
-	_log(ZONE__INIT, "Loading factions");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading factions");
 	database.LoadFactionData();
-	_log(ZONE__INIT, "Loading titles");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading titles");
 	title_manager.LoadTitles();
-	_log(ZONE__INIT, "Loading AA effects");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading AA effects");
 	database.LoadAAEffects();
-	_log(ZONE__INIT, "Loading tributes");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading tributes");
 	database.LoadTributes();
-	_log(ZONE__INIT, "Loading corpse timers");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading corpse timers");
 	database.GetDecayTimes(npcCorpseDecayTimes);
-	_log(ZONE__INIT, "Loading commands");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading commands");
 	int retval=command_init();
 	if(retval<0)
 		logger.Log(EQEmuLogSys::Error, "Command loading FAILED");
 	else
-		_log(ZONE__INIT, "%d commands loaded", retval);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "%d commands loaded", retval);
 
 	//rules:
 	{
 		char tmp[64];
 		if (database.GetVariable("RuleSet", tmp, sizeof(tmp)-1)) {
-			_log(ZONE__INIT, "Loading rule set '%s'", tmp);
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading rule set '%s'", tmp);
 			if(!RuleManager::Instance()->LoadRules(&database, tmp)) {
 				logger.Log(EQEmuLogSys::Error, "Failed to load ruleset '%s', falling back to defaults.", tmp);
 			}
 		} else {
 			if(!RuleManager::Instance()->LoadRules(&database, "default")) {
-				_log(ZONE__INIT, "No rule set configured, using default rules");
+				logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "No rule set configured, using default rules");
 			} else {
-				_log(ZONE__INIT, "Loaded default rule set 'default'", tmp);
+				logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loaded default rule set 'default'", tmp);
 			}
 		}
 	}
@@ -311,7 +311,7 @@ int main(int argc, char** argv) {
 #endif
 
 	//now we have our parser, load the quests
-	_log(ZONE__INIT, "Loading quests");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading quests");
 	parse->ReloadQuests();
 
 
@@ -332,7 +332,7 @@ int main(int argc, char** argv) {
 #endif
 #endif
 	if (!strlen(zone_name) || !strcmp(zone_name,".")) {
-		_log(ZONE__INIT, "Entering sleep mode");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Entering sleep mode");
 	} else if (!Zone::Bootup(database.GetZoneID(zone_name), 0, true)) { //todo: go above and fix this to allow cmd line instance
 		logger.Log(EQEmuLogSys::Error, "Zone Bootup failed :: Zone::Bootup");
 		zone = 0;
@@ -365,7 +365,7 @@ int main(int argc, char** argv) {
 		worldserver.Process();
 
 		if (!eqsf.IsOpen() && Config->ZonePort!=0) {
-			_log(ZONE__INIT, "Starting EQ Network server on port %d",Config->ZonePort);
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Starting EQ Network server on port %d",Config->ZonePort);
 
 			// log_sys.CloseZoneLogs();
 			// log_sys.StartZoneLogs(StringFormat("%s_ver-%u_instid-%u_port-%u", zone->GetShortName(), zone->GetInstanceVersion(), zone->GetInstanceID(), ZoneConfig::get()->ZonePort));
@@ -522,13 +522,13 @@ int main(int argc, char** argv) {
 	command_deinit();
 	safe_delete(parse);
 	CheckEQEMuErrorAndPause();
-	_log(ZONE__INIT, "Proper zone shutdown complete.");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Proper zone shutdown complete.");
 	return 0;
 }
 
 void CatchSignal(int sig_num) {
 #ifdef _WINDOWS
-	_log(ZONE__INIT, "Recieved signal: %i", sig_num);
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Recieved signal: %i", sig_num);
 #endif
 	RunLoops = false;
 }
@@ -539,7 +539,7 @@ void Shutdown()
 	RunLoops = false;
 	worldserver.Disconnect();
 	//	safe_delete(worldserver);
-	_log(ZONE__INIT, "Shutting down...");
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Shutting down...");
 }
 
 uint32 NetConnection::GetIP()

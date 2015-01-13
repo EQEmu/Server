@@ -140,7 +140,7 @@ void WorldServer::Process() {
 
 	ServerPacket *pack = 0;
 	while((pack = tcpc.PopPacket())) {
-		_log(ZONE__WORLD_TRACE,"Got 0x%04x from world:",pack->opcode);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server,"Got 0x%04x from world:",pack->opcode);
 		_hex(ZONE__WORLD_TRACE,pack->pBuffer,pack->size);
 		switch(pack->opcode) {
 		case 0: {
@@ -155,7 +155,7 @@ void WorldServer::Process() {
 			if (pack->size != sizeof(ServerConnectInfo))
 				break;
 			ServerConnectInfo* sci = (ServerConnectInfo*) pack->pBuffer;
-			_log(ZONE__WORLD,"World indicated port %d for this zone.",sci->port);
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server,"World indicated port %d for this zone.",sci->port);
 			ZoneConfig::SetZonePort(sci->port);
 			break;
 		}
