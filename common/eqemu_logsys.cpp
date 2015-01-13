@@ -136,7 +136,7 @@ void EQEmuLogSys::StartLogs(const std::string log_name)
 	}
 }
 
-void EQEmuLogSys::LogDebugType(DebugLevel debug_level, uint16 log_type, std::string message, ...)
+void EQEmuLogSys::LogDebugType(DebugLevel debug_level, uint16 log_category, std::string message, ...)
 {
 	if (RuleI(Logging, DebugLogLevel) < debug_level){ return; }
 
@@ -145,7 +145,19 @@ void EQEmuLogSys::LogDebugType(DebugLevel debug_level, uint16 log_type, std::str
 	std::string output_message = vStringFormat(message.c_str(), args);
 	va_end(args);
 
-	EQEmuLogSys::Log(EQEmuLogSys::LogType::Debug, output_message);
+	
+	std::string category_string = "";
+	if (log_category > 0 && LogCategoryName[log_category]){
+		category_string = StringFormat("[%s]", LogCategoryName[log_category]);
+	}
+
+	std::string output_debug_message = StringFormat("%s %s", category_string.c_str(), output_message.c_str());
+
+	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
+		on_log_gmsay_hook(EQEmuLogSys::LogType::Debug, output_debug_message);
+	}
+
+	EQEmuLogSys::ConsoleMessage(EQEmuLogSys::Debug, log_category, output_message);
 }
 
 void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...)
@@ -197,7 +209,7 @@ void EQEmuLogSys::Log(uint16 log_type, const std::string message, ...)
 		on_log_gmsay_hook(log_type, output_message);
 	}
 
-	EQEmuLogSys::ConsoleMessage(log_type, output_message);
+	EQEmuLogSys::ConsoleMessage(log_type, 0, output_message);
 
 	char time_stamp[80];
 	EQEmuLogSys::SetCurrentTimeStamp(time_stamp);
@@ -206,11 +218,11 @@ void EQEmuLogSys::Log(uint16 log_type, const std::string message, ...)
 		process_log << time_stamp << " " << StringFormat("[%s] ", TypeNames[log_type]).c_str() << output_message << std::endl;
 	}
 	else{
-		std::cout << "[DEBUG] " << ":: There currently is no log file open for this process " << "\n";
+		// std::cout << "[DEBUG] " << ":: There currently is no log file open for this process " << "\n";
 	}
 }
 
-void EQEmuLogSys::ConsoleMessage(uint16 log_type, const std::string message)
+void EQEmuLogSys::ConsoleMessage(uint16 log_type, uint16 log_category, const std::string message)
 {
 	if (log_type > EQEmuLogSys::MaxLogID){
 		return;
@@ -219,6 +231,11 @@ void EQEmuLogSys::ConsoleMessage(uint16 log_type, const std::string message)
 		return;
 	}
 	if (!RuleB(Logging, ConsoleLogCommands) && log_type == EQEmuLogSys::LogType::Commands){ return; }
+
+	std::string category = "";
+	if (log_category > 0 && LogCategoryName[log_category]){
+		category = StringFormat("[%s] ", LogCategoryName[log_category]);
+	}
 
 #ifdef _WINDOWS
 	HANDLE  console_handle;
@@ -237,7 +254,7 @@ void EQEmuLogSys::ConsoleMessage(uint16 log_type, const std::string message)
 	}
 #endif
 
-	std::cout << "[N::" << TypeNames[log_type] << "] " << message << "\n";
+	std::cout << "[N::" << TypeNames[log_type] << "] " << category << message << "\n";
 
 #ifdef _WINDOWS
 	/* Always set back to white*/

@@ -74,11 +74,11 @@ public:
 	};
 
 	void CloseZoneLogs();
-	void ConsoleMessage(uint16 log_type, const std::string message);
+	void ConsoleMessage(uint16 log_type, uint16 log_category, const std::string message);
 	void LoadLogSettings();
 	void Log(uint16 log_type, const std::string message, ...);
 	void LogDebug(DebugLevel debug_level, std::string message, ...);
-	void LogDebugType(DebugLevel debug_level, uint16 log_type, std::string message, ...);
+	void LogDebugType(DebugLevel debug_level, uint16 log_category, std::string message, ...);
 	void MakeDirectory(std::string directory_name);
 	void SetCurrentTimeStamp(char* time_stamp);
 	void StartLogs(const std::string log_name);
@@ -98,6 +98,7 @@ public:
 private:
 	bool zone_general_init = false;
 	std::function<void(uint16 log_type, std::string&)> on_log_gmsay_hook;
+
 };
 
 extern EQEmuLogSys logger;

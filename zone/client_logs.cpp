@@ -17,6 +17,7 @@
 */
 #include "../common/debug.h"
 #include "../common/features.h"
+#include "../common/eqemu_logsys.h"
 
 #ifdef CLIENT_LOGS
 #include "client_logs.h"
@@ -135,8 +136,18 @@ void ClientLogs::EQEmuIO_pva(EQEmuLog::LogIDs id, const char *prefix, const char
 	client_logs.msg(id, _buffer);
 }
 
+static uint32 gmsay_log_message_colors[EQEmuLogSys::MaxLogID] = {
+	15, // "Status", - Yellow
+	15,	// "Normal", - Yellow
+	3,	// "Error", - Red
+	14,	// "Debug", - Light Green
+	4,	// "Quest", 
+	5,	// "Command", 
+	3	// "Crash" 
+};
+
 void ClientLogs::ClientMessage(uint16 log_type, std::string& message){
-	entity_list.MessageStatus(0, 80, 7, "%s", message.c_str());
+	entity_list.MessageStatus(0, 80, gmsay_log_message_colors[log_type], "%s", message.c_str());
 }
 
 #endif //CLIENT_LOGS
