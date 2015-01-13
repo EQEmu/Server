@@ -132,7 +132,7 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 	}
 
 	if (!Session && p->opcode!=OP_SessionRequest && p->opcode!=OP_SessionResponse) {
-		_log(NET__DEBUG, _L "Session not initialized, packet ignored" __L);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, _L "Session not initialized, packet ignored" __L);
 		_raw(NET__DEBUG, 0xFFFF, p);
 		return;
 	}
@@ -184,7 +184,7 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 			uint16 seq=ntohs(*(uint16 *)(p->pBuffer));
 			SeqOrder check=CompareSequence(NextInSeq,seq);
 			if (check == SeqFuture) {
-					_log(NET__DEBUG, _L "Future OP_Packet: Expecting Seq=%d, but got Seq=%d" __L, NextInSeq, seq);
+					logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, _L "Future OP_Packet: Expecting Seq=%d, but got Seq=%d" __L, NextInSeq, seq);
 					_raw(NET__DEBUG, seq, p);
 
 					PacketQueue[seq]=p->Copy();
@@ -193,7 +193,7 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 				//SendOutOfOrderAck(seq);
 
 			} else if (check == SeqPast) {
-				_log(NET__DEBUG, _L "Duplicate OP_Packet: Expecting Seq=%d, but got Seq=%d" __L, NextInSeq, seq);
+				logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, _L "Duplicate OP_Packet: Expecting Seq=%d, but got Seq=%d" __L, NextInSeq, seq);
 				_raw(NET__DEBUG, seq, p);
 				SendOutOfOrderAck(seq); //we already got this packet but it was out of order
 			} else {
@@ -234,7 +234,7 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 			uint16 seq=ntohs(*(uint16 *)(p->pBuffer));
 			SeqOrder check=CompareSequence(NextInSeq,seq);
 			if (check == SeqFuture) {
-				_log(NET__DEBUG, _L "Future OP_Fragment: Expecting Seq=%d, but got Seq=%d" __L, NextInSeq, seq);
+				logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, _L "Future OP_Fragment: Expecting Seq=%d, but got Seq=%d" __L, NextInSeq, seq);
 				_raw(NET__DEBUG, seq, p);
 
 				PacketQueue[seq]=p->Copy();
@@ -243,7 +243,7 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 				//SendOutOfOrderAck(seq);
 
 			} else if (check == SeqPast) {
-				_log(NET__DEBUG, _L "Duplicate OP_Fragment: Expecting Seq=%d, but got Seq=%d" __L, NextInSeq, seq);
+				logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, _L "Duplicate OP_Fragment: Expecting Seq=%d, but got Seq=%d" __L, NextInSeq, seq);
 				_raw(NET__DEBUG, seq, p);
 				SendOutOfOrderAck(seq);
 			} else {
@@ -535,7 +535,7 @@ void EQStream::FastQueuePacket(EQApplicationPacket **p, bool ack_req)
 		return;
 
 	if(OpMgr == nullptr || *OpMgr == nullptr) {
-		_log(NET__DEBUG, _L "Packet enqueued into a stream with no opcode manager, dropping." __L);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, _L "Packet enqueued into a stream with no opcode manager, dropping." __L);
 		delete pack;
 		return;
 	}
@@ -841,7 +841,7 @@ void EQStream::Write(int eq_fd)
 	if(SeqEmpty && NonSeqEmpty) {
 		//no more data to send
 		if(CheckState(CLOSING)) {
-			_log(NET__DEBUG, _L "All outgoing data flushed, closing stream." __L );
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, _L "All outgoing data flushed, closing stream." __L );
 			//we are waiting for the queues to empty, now we can do our disconnect.
 			//this packet will not actually go out until the next call to Write().
 			_SendDisconnect();
@@ -1113,7 +1113,7 @@ uint32 newlength=0;
 		delete p;
 		ProcessQueue();
 	} else {
-		_log(NET__DEBUG, _L "Incoming packet failed checksum" __L);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, _L "Incoming packet failed checksum" __L);
 		_hex(NET__NET_CREATE_HEX, buffer, length);
 	}
 }
@@ -1214,7 +1214,7 @@ void EQStream::ProcessQueue()
 
 	EQProtocolPacket *qp=nullptr;
 	while((qp=RemoveQueue(NextInSeq))!=nullptr) {
-		_log(NET__DEBUG, _L "Processing Queued Packet: Seq=%d" __L, NextInSeq);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, _L "Processing Queued Packet: Seq=%d" __L, NextInSeq);
 		ProcessPacket(qp);
 		delete qp;
 		_log(NET__APP_TRACE, _L "OP_Packet Queue size=%d" __L, PacketQueue.size());
@@ -1327,22 +1327,22 @@ void EQStream::CheckTimeout(uint32 now, uint32 timeout) {
 		switch(orig_state) {
 		case CLOSING:
 			//if we time out in the closing state, they are not acking us, just give up
-			_log(NET__DEBUG, _L "Timeout expired in closing state. Moving to closed state." __L);
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, _L "Timeout expired in closing state. Moving to closed state." __L);
 			_SendDisconnect();
 			SetState(CLOSED);
 			break;
 		case DISCONNECTING:
 			//we timed out waiting for them to send us the disconnect reply, just give up.
-			_log(NET__DEBUG, _L "Timeout expired in disconnecting state. Moving to closed state." __L);
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, _L "Timeout expired in disconnecting state. Moving to closed state." __L);
 			SetState(CLOSED);
 			break;
 		case CLOSED:
-			_log(NET__DEBUG, _L "Timeout expired in closed state??" __L);
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, _L "Timeout expired in closed state??" __L);
 			break;
 		case ESTABLISHED:
 			//we timed out during normal operation. Try to be nice about it.
 			//we will almost certainly time out again waiting for the disconnect reply, but oh well.
-			_log(NET__DEBUG, _L "Timeout expired in established state. Closing connection." __L);
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, _L "Timeout expired in established state. Closing connection." __L);
 			_SendDisconnect();
 			SetState(DISCONNECTING);
 			break;
@@ -1393,12 +1393,12 @@ void EQStream::AdjustRates(uint32 average_delta)
 void EQStream::Close() {
 	if(HasOutgoingData()) {
 		//there is pending data, wait for it to go out.
-		_log(NET__DEBUG, _L "Stream requested to Close(), but there is pending data, waiting for it." __L);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, _L "Stream requested to Close(), but there is pending data, waiting for it." __L);
 		SetState(CLOSING);
 	} else {
 		//otherwise, we are done, we can drop immediately.
 		_SendDisconnect();
-		_log(NET__DEBUG, _L "Stream closing immediate due to Close()" __L);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, _L "Stream closing immediate due to Close()" __L);
 		SetState(DISCONNECTING);
 	}
 }
