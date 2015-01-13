@@ -1129,7 +1129,7 @@ uint8 Client::WithCustomer(uint16 NewCustomer){
 	Client* c = entity_list.GetClientByID(CustomerID);
 
 	if(!c) {
-		_log(TRADING__CLIENT, "Previous customer has gone away.");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Previous customer has gone away.");
 		CustomerID = NewCustomer;
 		return 1;
 	}

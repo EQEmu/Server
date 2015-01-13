@@ -523,14 +523,14 @@ Trader_Struct* ZoneDatabase::LoadTraderItem(uint32 char_id)
 	std::string query = StringFormat("SELECT * FROM trader WHERE char_id = %i ORDER BY slot_id LIMIT 80", char_id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		_log(TRADING__CLIENT, "Failed to load trader information!\n");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Failed to load trader information!\n");
 		return loadti;
 	}
 
 	loadti->Code = BazaarTrader_ShowItems;
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		if (atoi(row[5]) >= 80 || atoi(row[4]) < 0) {
-			_log(TRADING__CLIENT, "Bad Slot number when trying to load trader information!\n");
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Bad Slot number when trying to load trader information!\n");
 			continue;
 		}
 
@@ -548,13 +548,13 @@ TraderCharges_Struct* ZoneDatabase::LoadTraderItemWithCharges(uint32 char_id)
 	std::string query = StringFormat("SELECT * FROM trader WHERE char_id=%i ORDER BY slot_id LIMIT 80", char_id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		_log(TRADING__CLIENT, "Failed to load trader information!\n");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Failed to load trader information!\n");
 		return loadti;
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		if (atoi(row[5]) >= 80 || atoi(row[5]) < 0) {
-			_log(TRADING__CLIENT, "Bad Slot number when trying to load trader information!\n");
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Bad Slot number when trying to load trader information!\n");
 			continue;
 		}
 
@@ -574,7 +574,7 @@ ItemInst* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNumber) {
         return nullptr;
 
 	if (results.RowCount() == 0) {
-        _log(TRADING__CLIENT, "Bad result from query\n"); fflush(stdout);
+        logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Bad result from query\n"); fflush(stdout);
         return nullptr;
     }
 
@@ -587,7 +587,7 @@ ItemInst* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNumber) {
     const Item_Struct *item = database.GetItem(ItemID);
 
 	if(!item) {
-		_log(TRADING__CLIENT, "Unable to create item\n");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Unable to create item\n");
 		fflush(stdout);
 		return nullptr;
 	}
@@ -597,7 +597,7 @@ ItemInst* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNumber) {
 
     ItemInst* inst = database.CreateItem(item);
 	if(!inst) {
-		_log(TRADING__CLIENT, "Unable to create item instance\n");
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Unable to create item instance\n");
 		fflush(stdout);
 		return nullptr;
 	}
@@ -624,7 +624,7 @@ void ZoneDatabase::SaveTraderItem(uint32 CharID, uint32 ItemID, uint32 SerialNum
 }
 
 void ZoneDatabase::UpdateTraderItemCharges(int CharID, uint32 SerialNumber, int32 Charges) { 
-	_log(TRADING__CLIENT, "ZoneDatabase::UpdateTraderItemCharges(%i, %i, %i)", CharID, SerialNumber, Charges);
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "ZoneDatabase::UpdateTraderItemCharges(%i, %i, %i)", CharID, SerialNumber, Charges);
 
 	std::string query = StringFormat("UPDATE trader SET charges = %i WHERE char_id = %i AND serialnumber = %i",
                                     Charges, CharID, SerialNumber);
@@ -637,7 +637,7 @@ void ZoneDatabase::UpdateTraderItemCharges(int CharID, uint32 SerialNumber, int3
 
 void ZoneDatabase::UpdateTraderItemPrice(int CharID, uint32 ItemID, uint32 Charges, uint32 NewPrice) {
 
-	_log(TRADING__CLIENT, "ZoneDatabase::UpdateTraderPrice(%i, %i, %i, %i)", CharID, ItemID, Charges, NewPrice);
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "ZoneDatabase::UpdateTraderPrice(%i, %i, %i, %i)", CharID, ItemID, Charges, NewPrice);
 
 	const Item_Struct *item = database.GetItem(ItemID);
 
@@ -645,7 +645,7 @@ void ZoneDatabase::UpdateTraderItemPrice(int CharID, uint32 ItemID, uint32 Charg
 		return;
 
 	if(NewPrice == 0) {
-		_log(TRADING__CLIENT, "Removing Trader items from the DB for CharID %i, ItemID %i", CharID, ItemID);
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Removing Trader items from the DB for CharID %i, ItemID %i", CharID, ItemID);
 
         std::string query = StringFormat("DELETE FROM trader WHERE char_id = %i AND item_id = %i",CharID, ItemID);
         auto results = QueryDatabase(query);
