@@ -596,18 +596,6 @@ RULE_CATEGORY( Client )
 RULE_BOOL( Client, UseLiveFactionMessage, false) // Allows players to see faction adjustments like Live
 RULE_CATEGORY_END()
 
-RULE_CATEGORY(Logging)
-RULE_BOOL(Logging, ConsoleLogCommands, false)  /* Turns on or off console logs */
-RULE_BOOL(Logging, LogFileCommands, false)
-
-RULE_INT(Logging, DebugLogLevel, 0) /* Sets Debug Level, -1 = OFF, 0 = Low Level, 1 = Info, 2 = Extreme */
-
-RULE_BOOL(Logging, EnableConsoleLogging, true)  /* Turns on or off ALL logging to console */
-RULE_BOOL(Logging, EnableFileLogging, true)	/* Turns on or off ALL forms of file logging */
-
-RULE_CATEGORY_END()
-
-
 #undef RULE_CATEGORY
 #undef RULE_INT
 #undef RULE_REAL

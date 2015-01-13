@@ -19,7 +19,6 @@
 
 #include "eqemu_logsys.h"
 #include "string_util.h"
-#include "rulesys.h"
 #include "platform.h"
 
 #include <iostream>
@@ -146,7 +145,6 @@ std::string EQEmuLogSys::FormatDebugCategoryMessageString(uint16 log_category, s
 
 void EQEmuLogSys::LogDebugType(DebugLevel debug_level, uint16 log_category, std::string message, ...)
 {
-	if (RuleI(Logging, DebugLogLevel) < debug_level){ return; }
 
 	va_list args;
 	va_start(args, message);
@@ -180,8 +178,6 @@ void EQEmuLogSys::ProcessLogWrite(uint16 log_type, std::string message){
 
 void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...)
 {
-	if (RuleI(Logging, DebugLogLevel) < debug_level){ return; }
-
 	va_list args;
 	va_start(args, message);
 	std::string output_message = vStringFormat(message.c_str(), args);
@@ -210,13 +206,7 @@ void EQEmuLogSys::MakeDirectory(std::string directory_name){
 
 void EQEmuLogSys::Log(uint16 log_type, const std::string message, ...)
 {
-
 	if (log_type > EQEmuLogSys::MaxLogID){ 
-		return;
-	}
-	if (!RuleB(Logging, LogFileCommands) && log_type == EQEmuLogSys::LogType::Commands){ return; }
-
-	if (!RuleB(Logging, EnableFileLogging)){
 		return;
 	}
 
@@ -235,10 +225,6 @@ void EQEmuLogSys::ConsoleMessage(uint16 log_type, const std::string message)
 	if (log_type > EQEmuLogSys::MaxLogID){
 		return;
 	}
-	if (!RuleB(Logging, EnableConsoleLogging)){
-		return;
-	}
-	if (!RuleB(Logging, ConsoleLogCommands) && log_type == EQEmuLogSys::LogType::Commands){ return; }
 
 #ifdef _WINDOWS
 	HANDLE  console_handle;
