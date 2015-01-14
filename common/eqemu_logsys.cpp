@@ -18,8 +18,8 @@
 
 
 #include "eqemu_logsys.h"
-#include "string_util.h"
 #include "platform.h"
+#include "string_util.h"
 
 #include <iostream>
 #include <fstream> 
@@ -126,15 +126,6 @@ void EQEmuLogSys::LoadLogSettings()
 	log_settings_loaded = true;
 }
 
-void EQEmuLogSys::StartLogs(const std::string log_name)
-{
-	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
-		std::cout << "Starting Zone Logs..." << std::endl;
-		EQEmuLogSys::MakeDirectory("logs/zone"); 
-		process_log.open(StringFormat("logs/zone/%s.txt", log_name.c_str()), std::ios_base::app | std::ios_base::out);
-	}
-}
-
 std::string EQEmuLogSys::FormatDebugCategoryMessageString(uint16 log_category, std::string in_message){
 	std::string category_string = "";
 	if (log_category > 0 && LogCategoryName[log_category]){ 
@@ -143,20 +134,7 @@ std::string EQEmuLogSys::FormatDebugCategoryMessageString(uint16 log_category, s
 	return StringFormat("%s%s", category_string.c_str(), in_message.c_str()); 
 }
 
-void EQEmuLogSys::LogDebugType(DebugLevel debug_level, uint16 log_category, std::string message, ...)
-{
 
-	va_list args;
-	va_start(args, message);
-	std::string output_message = vStringFormat(message.c_str(), args);
-	va_end(args);
-
-	std::string output_debug_message = EQEmuLogSys::FormatDebugCategoryMessageString(log_category, output_message);
-
-	EQEmuLogSys::ProcessGMSay(EQEmuLogSys::Debug, output_debug_message);
-	EQEmuLogSys::ConsoleMessage(EQEmuLogSys::Debug, output_debug_message);
-	EQEmuLogSys::ProcessLogWrite(EQEmuLogSys::Debug, output_debug_message);
-}
 
 void EQEmuLogSys::ProcessGMSay(uint16 log_type, std::string message){
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
@@ -176,6 +154,51 @@ void EQEmuLogSys::ProcessLogWrite(uint16 log_type, std::string message){
 	}
 }
 
+void EQEmuLogSys::ProcessConsoleMessage(uint16 log_type, const std::string message)
+{
+	if (log_type > EQEmuLogSys::MaxLogID){
+		return;
+	}
+
+	#ifdef _WINDOWS
+		HANDLE  console_handle;
+		console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+		CONSOLE_FONT_INFOEX info = { 0 };
+		info.cbSize = sizeof(info);
+		info.dwFontSize.Y = 12; // leave X as zero
+		info.FontWeight = FW_NORMAL;
+		wcscpy(info.FaceName, L"Lucida Console");
+		SetCurrentConsoleFontEx(console_handle, NULL, &info);
+		if (LogColors[log_type]){
+			SetConsoleTextAttribute(console_handle, LogColors[log_type]);
+		}
+		else{
+			SetConsoleTextAttribute(console_handle, Console::Color::White);
+		}
+	#endif
+
+	std::cout << "[N::" << TypeNames[log_type] << "] " << message << "\n";
+
+	#ifdef _WINDOWS
+		/* Always set back to white*/
+		SetConsoleTextAttribute(console_handle, Console::Color::White);
+	#endif
+}
+
+void EQEmuLogSys::LogDebugType(DebugLevel debug_level, uint16 log_category, std::string message, ...)
+{
+	va_list args;
+	va_start(args, message);
+	std::string output_message = vStringFormat(message.c_str(), args);
+	va_end(args);
+
+	std::string output_debug_message = EQEmuLogSys::FormatDebugCategoryMessageString(log_category, output_message);
+
+	EQEmuLogSys::ProcessConsoleMessage(EQEmuLogSys::Debug, output_debug_message);
+	EQEmuLogSys::ProcessGMSay(EQEmuLogSys::Debug, output_debug_message);
+	EQEmuLogSys::ProcessLogWrite(EQEmuLogSys::Debug, output_debug_message);
+}
+
 void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...)
 {
 	va_list args;
@@ -183,9 +206,25 @@ void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...)
 	std::string output_message = vStringFormat(message.c_str(), args);
 	va_end(args);
 
+	EQEmuLogSys::ProcessConsoleMessage(EQEmuLogSys::Debug, output_message);
 	EQEmuLogSys::ProcessGMSay(EQEmuLogSys::Debug, output_message);
-	EQEmuLogSys::ConsoleMessage(EQEmuLogSys::Debug, output_message);
 	EQEmuLogSys::ProcessLogWrite(EQEmuLogSys::Debug, output_message);
+}
+
+void EQEmuLogSys::Log(uint16 log_type, const std::string message, ...)
+{
+	if (log_type > EQEmuLogSys::MaxLogID){
+		return;
+	}
+
+	va_list args;
+	va_start(args, message);
+	std::string output_message = vStringFormat(message.c_str(), args);
+	va_end(args);
+
+	EQEmuLogSys::ProcessConsoleMessage(log_type, output_message);
+	EQEmuLogSys::ProcessGMSay(log_type, output_message);
+	EQEmuLogSys::ProcessLogWrite(log_type, output_message);
 }
 
 void EQEmuLogSys::SetCurrentTimeStamp(char* time_stamp){
@@ -204,57 +243,19 @@ void EQEmuLogSys::MakeDirectory(std::string directory_name){
 #endif
 }
 
-void EQEmuLogSys::Log(uint16 log_type, const std::string message, ...)
-{
-	if (log_type > EQEmuLogSys::MaxLogID){ 
-		return;
-	}
-
-	va_list args;
-	va_start(args, message);
-	std::string output_message = vStringFormat(message.c_str(), args);
-	va_end(args);
-
-	EQEmuLogSys::ProcessGMSay(log_type, output_message);
-	EQEmuLogSys::ConsoleMessage(log_type, output_message);
-	EQEmuLogSys::ProcessLogWrite(log_type, output_message);
-}
-
-void EQEmuLogSys::ConsoleMessage(uint16 log_type, const std::string message)
-{
-	if (log_type > EQEmuLogSys::MaxLogID){
-		return;
-	}
-
-#ifdef _WINDOWS
-	HANDLE  console_handle;
-	console_handle = GetStdHandle(STD_OUTPUT_HANDLE); 
-	CONSOLE_FONT_INFOEX info = { 0 };
-	info.cbSize = sizeof(info);
-	info.dwFontSize.Y = 12; // leave X as zero
-	info.FontWeight = FW_NORMAL;
-	wcscpy(info.FaceName, L"Lucida Console");
-	SetCurrentConsoleFontEx(console_handle, NULL, &info); 
-	if (LogColors[log_type]){
-		SetConsoleTextAttribute(console_handle, LogColors[log_type]);
-	}
-	else{
-		SetConsoleTextAttribute(console_handle, Console::Color::White);
-	}
-#endif
-
-	std::cout << "[N::" << TypeNames[log_type] << "] " << message << "\n";
-
-#ifdef _WINDOWS
-	/* Always set back to white*/
-	SetConsoleTextAttribute(console_handle, Console::Color::White);
-#endif
-}
-
-void EQEmuLogSys::CloseZoneLogs()
+void EQEmuLogSys::CloseFileLogs()
 {
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
 		std::cout << "Closing down zone logs..." << std::endl;
 		process_log.close();
+	}
+}
+
+void EQEmuLogSys::StartFileLogs(const std::string log_name)
+{
+	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
+		std::cout << "Starting Zone Logs..." << std::endl;
+		EQEmuLogSys::MakeDirectory("logs/zone");
+		process_log.open(StringFormat("logs/zone/%s.txt", log_name.c_str()), std::ios_base::app | std::ios_base::out);
 	}
 }

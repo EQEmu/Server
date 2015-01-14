@@ -73,15 +73,15 @@ public:
 		MaxCategoryID	/* Don't Remove this*/
 	};
 
-	void CloseZoneLogs();
-	void ConsoleMessage(uint16 log_type, const std::string message);
+	void CloseFileLogs();
+	
 	void LoadLogSettings();
 	void Log(uint16 log_type, const std::string message, ...);
 	void LogDebug(DebugLevel debug_level, std::string message, ...);
 	void LogDebugType(DebugLevel debug_level, uint16 log_category, std::string message, ...);
 	void MakeDirectory(std::string directory_name);
 	void SetCurrentTimeStamp(char* time_stamp);
-	void StartLogs(const std::string log_name);
+	void StartFileLogs(const std::string log_name);
 
 	struct LogSettings{
 		uint8 log_to_file;
@@ -99,9 +99,11 @@ private:
 	bool zone_general_init = false;
 	std::function<void(uint16 log_type, std::string&)> on_log_gmsay_hook;
 
+	std::string FormatDebugCategoryMessageString(uint16 log_category, std::string in_message);
+
+	void ProcessConsoleMessage(uint16 log_type, const std::string message);
 	void ProcessGMSay(uint16 log_type, std::string message);
 	void ProcessLogWrite(uint16 log_type, std::string message);
-	std::string FormatDebugCategoryMessageString(uint16 log_category, std::string in_message);
 };
 
 extern EQEmuLogSys logger;
