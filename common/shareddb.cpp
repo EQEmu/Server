@@ -108,6 +108,7 @@ bool SharedDatabase::SaveCursor(uint32 char_id, std::list<ItemInst*>::const_iter
 
     int i = 8000;
     for(auto it = start; it != end; ++it, i++) {
+		if (i > 8999) { break; } // shouldn't be anything in the queue that indexes this high
         ItemInst *inst = *it;
         if (!SaveInventory(char_id,inst,(i == 8000) ? MainCursor : i))
             return false;

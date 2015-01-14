@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/13/2015 ==
+Uleat: Placed an upper limit on the cursor queue save loop.
+
 == 01/12/2015 ==
 Uleat: Fix for OP_FormattedMessage text link server crashes
 Uleat: Added text link translators for OP_TaskDescription (RoF+ -- all clients current)
