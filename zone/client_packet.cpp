@@ -7489,7 +7489,7 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 
 			uint32 guildrank = gj->response;
 
-			if (GetClientVersion() == EQClientRoF)
+			if (GetClientVersion() >= EQClientRoF)
 			{
 				if (gj->response == 8)
 				{
@@ -7668,7 +7668,10 @@ void Client::Handle_OP_GuildPromote(const EQApplicationPacket *app)
 		uint8 rank = gci.rank + 1;
 
 		if (rank > GUILD_OFFICER)
+		{
+			Message(0, "You cannot promote someone to be guild leader. You must use /guildleader.");
 			return;
+		}
 
 
 		mlog(GUILDS__ACTIONS, "Promoting %s (%d) from rank %s (%d) to %s (%d) in %s (%d)",
