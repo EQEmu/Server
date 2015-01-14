@@ -6654,7 +6654,7 @@ void command_npcedit(Client *c, const Seperator *sep)
                                         "SET luclin_haircolor = %i, luclin_beardcolor = %i, "
                                         "luclin_hairstyle = %i, luclin_beard = %i, "
                                         "face = %i, drakkin_heritage = %i, "
-                                        "drakkin_tattoo = %i, drakkin_details = %i, "
+                                        "drakkin_tattoo = %i, drakkin_details = %i "
                                         "WHERE id = %i",
                                         target->GetHairColor(), target->GetBeardColor(),
                                         target->GetHairStyle(), target->GetBeard(),
