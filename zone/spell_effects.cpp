@@ -3471,14 +3471,16 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 			{
 				effect_value = CalcSpellEffectValue(spell_id, i, caster_level, caster, ticsremaining);
 				//Handle client cast DOTs here.
-				if (caster && effect_value < 0 && IsDetrimentalSpell(spell_id)){
+				if (caster && effect_value < 0){
 					
-					if (caster->IsClient()){
-						if (!caster->CastToClient()->GetFeigned())
+					if (IsDetrimentalSpell(spell_id)){
+						if (caster->IsClient()){
+							if (!caster->CastToClient()->GetFeigned())
+								AddToHateList(caster, -effect_value);
+						}
+						else if (!IsClient()) //Allow NPC's to generate hate if casted on other NPC's.
 							AddToHateList(caster, -effect_value);
 					}
-					else if (!IsClient()) //Allow NPC's to generate hate if casted on other NPC's.
-						AddToHateList(caster, -effect_value);
 
 					effect_value = caster->GetActDoTDamage(spell_id, effect_value, this);
 
