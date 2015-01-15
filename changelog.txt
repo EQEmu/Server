@@ -1,5 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/13/2015 ==
+Uleat: Placed an upper limit on the cursor queue save loop.
+Trevius: (RoF2) Guild invites now add new members as members instead of recruits, and /guild chat works properly.
+Trevius: (RoF2) Guild Promote is now functional.
+
 == 01/12/2015 ==
 Uleat: Fix for OP_FormattedMessage text link server crashes
 Uleat: Added text link translators for OP_TaskDescription (RoF+ -- all clients current)

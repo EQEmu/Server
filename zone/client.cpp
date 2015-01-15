@@ -2852,7 +2852,8 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 		bufptr += strlen(message_arg[i]) + 1;
 	}
 
-	bufptr = '\0';
+	// since we're moving the pointer the 0 offset is correct
+	bufptr[0] = '\0';
 
 	if(distance>0)
 		entity_list.QueueCloseClients(this,outapp,false,distance);
@@ -2964,7 +2965,8 @@ void Client::FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType fil
 		bufptr += strlen(message_arg[i]) + 1;
 	}
 
-	bufptr = '\0';
+	// since we're moving the pointer the 0 offset is correct
+	bufptr[0] = '\0';
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
