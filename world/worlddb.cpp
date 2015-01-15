@@ -282,8 +282,6 @@ int WorldDatabase::MoveCharacterToBind(int CharID, uint8 bindnum) {
 	return zone_id;
 }
 
-
-
 bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc,bool isTitanium)
 {
 	// SoF doesn't send the player_choice field in character creation, it now sends the real zoneID instead.
@@ -298,8 +296,7 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 
 	in_pp->x = in_pp->y = in_pp->z = in_pp->heading = in_pp->zone_id = 0;
 	in_pp->binds[0].x = in_pp->binds[0].y = in_pp->binds[0].z = in_pp->binds[0].zoneId = in_pp->binds[0].instance_id = 0;
-
-	//this is wrong. if start_zone is set we should use that id
+	// see if we have an entry for start_zone. We can support both titanium & SOF+ by having two entries per class/race/deity combo with different zone_ids
 	std::string query = StringFormat("SELECT x, y, z, heading, start_zone, bind_id FROM start_zones WHERE zone_id = %i "
 		"AND player_class = %i AND player_deity = %i AND player_race = %i",
 		in_cc->start_zone, in_cc->class_, in_cc->deity, in_cc->race);
@@ -335,8 +332,9 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 	return true;
 }
 void WorldDatabase::SetSoFDefaultStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc){
-	if (in_cc->start_zone == RuleI(World, TutorialZoneID))
+	if (in_cc->start_zone == RuleI(World, TutorialZoneID)) {
 		in_pp->zone_id = in_cc->start_zone;
+	} 
 	else {
 		in_pp->x = in_pp->binds[0].x = -51;
 		in_pp->y = in_pp->binds[0].y = -20;
@@ -344,94 +342,95 @@ void WorldDatabase::SetSoFDefaultStartZone(PlayerProfile_Struct* in_pp, CharCrea
 		in_pp->zone_id = in_pp->binds[0].zoneId = 394; // Crescent Reach.
 	}
 }
+
 void WorldDatabase::SetTitaniumDefaultStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc)
 {
 	switch (in_cc->start_zone)
 	{
-	case 0:
-	{
-		in_pp->zone_id = 24;	// erudnext
-		in_pp->binds[0].zoneId = 38;	// tox
-		break;
-	}
-	case 1:
-	{
-		in_pp->zone_id = 2;	// qeynos2
-		in_pp->binds[0].zoneId = 2;	// qeynos2
-		break;
-	}
-	case 2:
-	{
-		in_pp->zone_id = 29;	// halas
-		in_pp->binds[0].zoneId = 30;	// everfrost
-		break;
-	}
-	case 3:
-	{
-		in_pp->zone_id = 19;	// rivervale
-		in_pp->binds[0].zoneId = 20;	// kithicor
-		break;
-	}
-	case 4:
-	{
-		in_pp->zone_id = 9;	// freportw
-		in_pp->binds[0].zoneId = 9;	// freportw
-		break;
-	}
-	case 5:
-	{
-		in_pp->zone_id = 40;	// neriaka
-		in_pp->binds[0].zoneId = 25;	// nektulos
-		break;
-	}
-	case 6:
-	{
-		in_pp->zone_id = 52;	// gukta
-		in_pp->binds[0].zoneId = 46;	// innothule
-		break;
-	}
-	case 7:
-	{
-		in_pp->zone_id = 49;	// oggok
-		in_pp->binds[0].zoneId = 47;	// feerrott
-		break;
-	}
-	case 8:
-	{
-		in_pp->zone_id = 60;	// kaladima
-		in_pp->binds[0].zoneId = 68;	// butcher
-		break;
-	}
-	case 9:
-	{
-		in_pp->zone_id = 54;	// gfaydark
-		in_pp->binds[0].zoneId = 54;	// gfaydark
-		break;
-	}
-	case 10:
-	{
-		in_pp->zone_id = 61;	// felwithea
-		in_pp->binds[0].zoneId = 54;	// gfaydark
-		break;
-	}
-	case 11:
-	{
-		in_pp->zone_id = 55;	// akanon
-		in_pp->binds[0].zoneId = 56;	// steamfont
-		break;
-	}
-	case 12:
-	{
-		in_pp->zone_id = 82;	// cabwest
-		in_pp->binds[0].zoneId = 78;	// fieldofbone
-		break;
-	}
-	case 13:
-	{
-		in_pp->zone_id = 155;	// sharvahl
-		in_pp->binds[0].zoneId = 155;	// sharvahl
-		break;
-	}
+		case 0:
+		{
+			in_pp->zone_id = 24;	// erudnext
+			in_pp->binds[0].zoneId = 38;	// tox
+			break;
+		}
+		case 1:
+		{
+			in_pp->zone_id = 2;	// qeynos2
+			in_pp->binds[0].zoneId = 2;	// qeynos2
+			break;
+		}
+		case 2:
+		{
+			in_pp->zone_id = 29;	// halas
+			in_pp->binds[0].zoneId = 30;	// everfrost
+			break;
+		}
+		case 3:
+		{
+			in_pp->zone_id = 19;	// rivervale
+			in_pp->binds[0].zoneId = 20;	// kithicor
+			break;
+		}
+		case 4:
+		{
+			in_pp->zone_id = 9;	// freportw
+			in_pp->binds[0].zoneId = 9;	// freportw
+			break;
+		}
+		case 5:
+		{
+			in_pp->zone_id = 40;	// neriaka
+			in_pp->binds[0].zoneId = 25;	// nektulos
+			break;
+		}
+		case 6:
+		{
+			in_pp->zone_id = 52;	// gukta
+			in_pp->binds[0].zoneId = 46;	// innothule
+			break;
+		}
+		case 7:
+		{
+			in_pp->zone_id = 49;	// oggok
+			in_pp->binds[0].zoneId = 47;	// feerrott
+			break;
+		}
+		case 8:
+		{
+			in_pp->zone_id = 60;	// kaladima
+			in_pp->binds[0].zoneId = 68;	// butcher
+			break;
+		}
+		case 9:
+		{
+			in_pp->zone_id = 54;	// gfaydark
+			in_pp->binds[0].zoneId = 54;	// gfaydark
+			break;
+		}
+		case 10:
+		{
+			in_pp->zone_id = 61;	// felwithea
+			in_pp->binds[0].zoneId = 54;	// gfaydark
+			break;
+		}
+		case 11:
+		{
+			in_pp->zone_id = 55;	// akanon
+			in_pp->binds[0].zoneId = 56;	// steamfont
+			break;
+		}
+		case 12:
+		{
+			in_pp->zone_id = 82;	// cabwest
+			in_pp->binds[0].zoneId = 78;	// fieldofbone
+			break;
+		}
+		case 13:
+		{
+			in_pp->zone_id = 155;	// sharvahl
+			in_pp->binds[0].zoneId = 155;	// sharvahl
+			break;
+		}
 	}
 }
 void WorldDatabase::GetLauncherList(std::vector<std::string> &rl) {
