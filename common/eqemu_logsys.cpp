@@ -230,7 +230,7 @@ void EQEmuLogSys::MakeDirectory(std::string directory_name){
 #ifdef _WINDOWS
 	_mkdir(directory_name.c_str());
 #else
-	mkdir(directory_name.c_str());
+	mkdir(directory_name.c_str(), 0755);
 #endif
 }
 
