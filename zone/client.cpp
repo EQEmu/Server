@@ -700,10 +700,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	char message[4096];
 	strn0cpy(message, orig_message, sizeof(message));
 
-
-	#if EQDEBUG >= 11
-		logger.LogDebug(EQEmuLogSys::General,"Client::ChannelMessageReceived() Channel:%i message:'%s'", chan_num, message);
-	#endif
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Client::ChannelMessageReceived() Channel:%i message:'%s'", chan_num, message);
 
 	if (targetname == nullptr) {
 		targetname = (!GetTarget()) ? "" : GetTarget()->GetName();

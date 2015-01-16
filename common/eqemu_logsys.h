@@ -76,7 +76,6 @@ public:
 	};
 
 	void CloseFileLogs();
-	
 	void LoadLogSettingsDefaults();
 	void Log(uint16 log_type, const std::string message, ...);
 	void LogDebug(DebugLevel debug_level, std::string message, ...);
