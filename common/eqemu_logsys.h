@@ -73,6 +73,7 @@ public:
 		TCP_Connection,
 		Client_Server_Packet,
 		Aggro,
+		Attack,
 		MaxCategoryID	/* Don't Remove this*/
 	};
 
@@ -136,6 +137,7 @@ static const char* LogCategoryName[EQEmuLogSys::LogCategory::MaxCategoryID] = {
 	"TCP_Connection",
 	"Client_Server_Packet",
 	"Aggro",
+	"Attack",
 };
 
 #endif
