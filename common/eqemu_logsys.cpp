@@ -128,6 +128,10 @@ void EQEmuLogSys::ProcessGMSay(uint16 log_type, uint16 log_category, std::string
 
 void EQEmuLogSys::ProcessLogWrite(uint16 log_type, uint16 log_category, std::string message)
 {
+	/* Check if category enabled for process */
+	if (log_settings[log_category].log_to_file)
+		return;
+
 	char time_stamp[80];
 	EQEmuLogSys::SetCurrentTimeStamp(time_stamp);
 
