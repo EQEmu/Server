@@ -175,7 +175,7 @@ int main(int argc, char** argv) {
 
 	/* Register Log System and Settings */
 	logger.LoadLogSettingsDefaults();
-	logger.OnLogHookCallBackZone(&ClientLogs::ClientMessage);
+	logger.OnLogHookCallBackZone(&Zone::GMSayHookCallBackProcess);
 	database.LoadLogSysSettings(logger.log_settings);
 
 	guild_mgr.SetDatabase(&database);

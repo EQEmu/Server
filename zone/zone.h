@@ -67,6 +67,16 @@ struct item_tick_struct {
     std::string qglobal;
 };
 
+static uint32 gmsay_log_message_colors[EQEmuLogSys::MaxLogID] = {
+	15, // "Status", - Yellow
+	15,	// "Normal", - Yellow
+	3,	// "Error", - Red
+	14,	// "Debug", - Light Green
+	4,	// "Quest", 
+	5,	// "Command", 
+	3	// "Crash" 
+};
+
 class Client;
 class Map;
 class Mob;
@@ -260,6 +270,8 @@ public:
 
 	// random object that provides random values for the zone
 	EQEmu::Random random;
+
+	void GMSayHookCallBackProcess(uint16 log_type, std::string& message){ entity_list.MessageStatus(0, 80, gmsay_log_message_colors[log_type], "%s", message.c_str()); }
 
 	//MODDING HOOKS
 	void mod_init();

@@ -105,19 +105,7 @@ void ClientLogs::msg(EQEmuLog::LogIDs id, const char *buf) {
 	}
 }
 
-static uint32 gmsay_log_message_colors[EQEmuLogSys::MaxLogID] = {
-	15, // "Status", - Yellow
-	15,	// "Normal", - Yellow
-	3,	// "Error", - Red
-	14,	// "Debug", - Light Green
-	4,	// "Quest", 
-	5,	// "Command", 
-	3	// "Crash" 
-};
 
-void ClientLogs::ClientMessage(uint16 log_type, std::string& message){
-	entity_list.MessageStatus(0, 80, gmsay_log_message_colors[log_type], "%s", message.c_str());
-}
 
 #endif //CLIENT_LOGS
 
