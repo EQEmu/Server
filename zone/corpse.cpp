@@ -363,9 +363,10 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 		// solar: TODO soulbound items need not be added to corpse, but they need
 		// to go into the regular slots on the player, out of bags
 
-		// worn + inventory + cursor
+		// possessions
+		// TODO: accomodate soul-bound items
 		std::list<uint32> removed_list;
-		bool cursor = false;
+		//bool cursor = false;
 		for(i = MAIN_BEGIN; i < EmuConstants::MAP_POSSESSIONS_SIZE; i++) {
 			if(i == MainAmmo && client->GetClientVersion() >= EQClientSoF) {
 				item = client->GetInv().GetItem(MainPowerSource);
@@ -383,14 +384,18 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 			}
 		}
 
+#if 0
+		// This will either be re-enabled or deleted at some point. The client doesn't appear
+		// to like to have items deleted from it's buffer..or, I just haven't figure out how -U
+		// (Besides, the 'corpse' slots equal the size of MapPossessions..not MapPossessions + MapCorpse)
+
 		// cursor queue // (change to first client that supports 'death hover' mode, if not SoF.)
 		if (!RuleB(Character, RespawnFromHover) || client->GetClientVersion() < EQClientSoF) {
 
 			// bumped starting assignment to 8001 because any in-memory 'slot 8000' item was moved above as 'slot 30'
 			// this was mainly for client profile state reflection..should match db player inventory entries now.
-
-			iter_queue it;
-			for (it = client->GetInv().cursor_begin(), i = 8001; it != client->GetInv().cursor_end(); ++it, i++) {
+			i = 8001;
+			for (auto it = client->GetInv().cursor_begin(); it != client->GetInv().cursor_end(); ++it, i++) {
 				item = *it;
 				if ((item && (!client->IsBecomeNPC())) || (item && client->IsBecomeNPC() && !item->GetItem()->NoRent)) {
 					std::list<uint32> slot_list = MoveItemToCorpse(client, item, i);
@@ -399,6 +404,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 				}
 			}
 		}
+#endif
 
 		database.TransactionBegin();
 		if (removed_list.size() != 0) {
@@ -421,6 +427,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 			database.QueryDatabase(ss.str().c_str());
 		}
 
+#if 0
 		if (cursor) { // all cursor items should be on corpse (client < SoF or RespawnFromHover = false)
 			while (!client->GetInv().CursorEmpty())
 				client->DeleteItemInInventory(MainCursor, 0, false, false);
@@ -430,8 +437,13 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 			std::list<ItemInst*>::const_iterator finish = client->GetInv().cursor_end();
 			database.SaveCursor(client->CharacterID(), start, finish);
 		}
+#endif
 
-		client->CalcBonuses(); // will only affect offline profile viewing of dead characters..unneeded overhead
+		auto start = client->GetInv().cursor_begin();
+		auto finish = client->GetInv().cursor_end();
+		database.SaveCursor(client->CharacterID(), start, finish);
+
+		client->CalcBonuses();
 		client->Save();
 
 		IsRezzed(false);

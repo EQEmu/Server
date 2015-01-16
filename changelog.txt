@@ -1,5 +1,15 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/15/2015 ==
+Uleat: Attempted fix for elusive inventory bug:
+  - Removed 'iter_queue' typedef and converted lcast to explicit or auto defines
+  - Reworked several functions that manipulate the cursor queue
+  - Found/corrected one occurrence of post-processing iterator incrementing in an ItemInstQueue handler
+  - Added many scope declarations in code that handles inventory manipulation (loose macros are bad...)
+Uleat: Added Item_Struct pointer checks to ItemInst methods that did not have them
+Uleat: Changed IsEquippable(race,class) to use bit-wise 'and' (&) over '(x%2)==1' in conditional check.
+Uleat: Changed DyeArmor() assignment of 'armor_color' to use bit-wise 'or' and bit-shifting (|,<<) over multiplication and addition (*,+).
+
 == 01/13/2015 ==
 Uleat: Placed an upper limit on the cursor queue save loop.
 Trevius: (RoF2) Guild invites now add new members as members instead of recruits, and /guild chat works properly.
