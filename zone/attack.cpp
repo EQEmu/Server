@@ -329,9 +329,9 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 	//I dont know the best way to handle a garunteed hit discipline being used
 	//agains a garunteed riposte (for example) discipline... for now, garunteed hit wins
 
-	#if EQDEBUG>=11
-		logger.LogDebug(EQEmuLogSys::General, "3 FINAL calculated chance to hit is: %5.2f", chancetohit);
-	#endif
+
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "3 FINAL calculated chance to hit is: %5.2f", chancetohit);
+
 
 	//
 	// Did we hit?
