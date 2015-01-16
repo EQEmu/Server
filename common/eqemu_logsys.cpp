@@ -136,7 +136,8 @@ std::string EQEmuLogSys::FormatDebugCategoryMessageString(uint16 log_category, s
 
 
 
-void EQEmuLogSys::ProcessGMSay(uint16 log_type, std::string message){
+void EQEmuLogSys::ProcessGMSay(uint16 log_type, uint16 log_category, std::string message)
+{
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
 		// on_log_gmsay_hook(log_type, message);
 	}
@@ -195,7 +196,7 @@ void EQEmuLogSys::LogDebugType(DebugLevel debug_level, uint16 log_category, std:
 	std::string output_debug_message = EQEmuLogSys::FormatDebugCategoryMessageString(log_category, output_message);
 
 	EQEmuLogSys::ProcessConsoleMessage(EQEmuLogSys::Debug, output_debug_message);
-	EQEmuLogSys::ProcessGMSay(EQEmuLogSys::Debug, output_debug_message);
+	EQEmuLogSys::ProcessGMSay(EQEmuLogSys::Debug, 0, output_debug_message);
 	EQEmuLogSys::ProcessLogWrite(EQEmuLogSys::Debug, output_debug_message);
 }
 
@@ -207,7 +208,7 @@ void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...)
 	va_end(args);
 
 	EQEmuLogSys::ProcessConsoleMessage(EQEmuLogSys::Debug, output_message);
-	EQEmuLogSys::ProcessGMSay(EQEmuLogSys::Debug, output_message);
+	EQEmuLogSys::ProcessGMSay(EQEmuLogSys::Debug, 0, output_message);
 	EQEmuLogSys::ProcessLogWrite(EQEmuLogSys::Debug, output_message);
 }
 
@@ -223,7 +224,7 @@ void EQEmuLogSys::Log(uint16 log_type, const std::string message, ...)
 	va_end(args);
 
 	EQEmuLogSys::ProcessConsoleMessage(log_type, output_message);
-	EQEmuLogSys::ProcessGMSay(log_type, output_message);
+	EQEmuLogSys::ProcessGMSay(log_type, 0, output_message);
 	EQEmuLogSys::ProcessLogWrite(log_type, output_message);
 }
 
