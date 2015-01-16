@@ -182,12 +182,6 @@ int main(int argc, char** argv) {
 	guild_mgr.SetDatabase(&database);
 	GuildBanks = nullptr;
 
-	logger.LogDebug(EQEmuLogSys::General,	"Test, Debug Log Level 0");
-	logger.LogDebug(EQEmuLogSys::Moderate,	"Test, Debug Log Level 1");
-	logger.LogDebug(EQEmuLogSys::Detail,	"Test, Debug Log Level 2");
-
-	logger.LogDebug(EQEmuLogSys::General, "This is a crazy test message, database is '%s' and port is %u", Config->DatabaseDB.c_str(), Config->DatabasePort);
-
 #ifdef _EQDEBUG
 	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
