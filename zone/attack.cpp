@@ -187,9 +187,8 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 	if(attacker->IsNPC() && !attacker->IsPet())
 		chancetohit += RuleR(Combat, NPCBonusHitChance);
 
-#if ATTACK_DEBUG>=11
-		logger.LogDebug(EQEmuLogSys::General, "CheckHitChance(%s) attacked by %s", defender->GetName(), attacker->GetName());
-#endif
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "CheckHitChance(%s) attacked by %s", defender->GetName(), attacker->GetName());
+
 	mlog(COMBAT__TOHIT,"CheckHitChance(%s) attacked by %s", defender->GetName(), attacker->GetName());
 
 	bool pvpmode = false;
