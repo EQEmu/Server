@@ -145,6 +145,10 @@ void EQEmuLogSys::ProcessLogWrite(uint16 log_type, uint16 log_category, std::str
 
 void EQEmuLogSys::ProcessConsoleMessage(uint16 log_type, uint16 log_category, const std::string message)
 {
+	/* Check if category enabled for process */
+	if (log_settings[log_category].log_to_console)
+		return;
+
 	if (log_type > EQEmuLogSys::MaxLogID){
 		return;
 	}
