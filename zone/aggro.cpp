@@ -342,19 +342,18 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	{
 		//FatherNiwtit: make sure we can see them. last since it is very expensive
 		if(CheckLosFN(mob)) {
-			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Check aggro for %s target %s.", GetName(), mob->GetName());
-			
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Check aggro for %s target %s.", GetName(), mob->GetName()); 
 			return( mod_will_aggro(mob, this) );
 		}
 	}
-#if EQDEBUG >= 6
-	printf("Is In zone?:%d\n", mob->InZone());
-	printf("Dist^2: %f\n", dist2);
-	printf("Range^2: %f\n", iAggroRange2);
-	printf("Faction: %d\n", fv);
-	printf("Int: %d\n", GetINT());
-	printf("Con: %d\n", GetLevelCon(mob->GetLevel()));
-#endif
+
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Is In zone?:%d\n", mob->InZone());
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Dist^2: %f\n", dist2);
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Range^2: %f\n", iAggroRange2);
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Faction: %d\n", fv);
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Int: %d\n", GetINT());
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Con: %d\n", GetLevelCon(mob->GetLevel()));
+
 	return(false);
 }
 
