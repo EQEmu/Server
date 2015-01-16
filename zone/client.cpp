@@ -650,9 +650,7 @@ bool Client::SendAllPackets() {
 		if(eqs)
 			eqs->FastQueuePacket((EQApplicationPacket **)&cp->app, cp->ack_req);
 		iterator.RemoveCurrent();
-#if EQDEBUG >= 6
-		logger.Log(EQEmuLogSys::Normal, "Transmitting a packet");
-#endif
+		logger.LogDebugType(EQEmuLogSys::Moderate, EQEmuLogSys::Client_Server_Packet, "Transmitting a packet");
 	}
 	return true;
 }
