@@ -2028,9 +2028,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	if (IsEngaged())
 	{
 		zone->DelAggroMob();
-#if EQDEBUG >= 11
-		logger.LogDebug(EQEmuLogSys::General,"NPC::Death() Mobs currently Aggro %i", zone->MobsAggroCount());
-#endif
+		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "%s Mobs currently Aggro %i", __FUNCTION__, zone->MobsAggroCount());
 	}
 	SetHP(0);
 	SetPet(0);
