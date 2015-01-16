@@ -87,7 +87,6 @@ void command_chat(Client *c, const Seperator *sep);
 void command_showpetspell(Client *c, const Seperator *sep);
 void command_ipc(Client *c, const Seperator *sep);
 void command_npcloot(Client *c, const Seperator *sep);
-void command_log(Client *c, const Seperator *sep);
 void command_gm(Client *c, const Seperator *sep);
 void command_summon(Client *c, const Seperator *sep);
 void command_zone(Client *c, const Seperator *sep);

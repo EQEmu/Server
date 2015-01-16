@@ -164,7 +164,6 @@ int command_init(void) {
 		command_add("getvariable","[varname] - Get the value of a variable from the database",200,command_getvariable) ||
 		command_add("chat","[channel num] [message] - Send a channel message to all zones",200,command_chat) ||
 		command_add("npcloot","[show/money/add/remove] [itemid/all/money: pp gp sp cp] - Manipulate the loot an NPC is carrying",80,command_npcloot) ||
-		command_add("log","- Search character event log",80,command_log) ||
 		command_add("gm","- Turn player target's or your GM flag on or off",80,command_gm) ||
 		command_add("summon","[charname] - Summons your player/npc/corpse target, or charname if specified",80,command_summon) ||
 		command_add("zone","[zonename] [x] [y] [z] - Go to specified zone (coords optional)",50,command_zone) ||
@@ -967,59 +966,6 @@ void command_npcloot(Client *c, const Seperator *sep)
 	}
 	else
 		c->Message(0, "Usage: #npcloot [show/money/add/remove] [itemid/all/money: pp gp sp cp]");
-}
-
-void command_log(Client *c, const Seperator *sep)
-{
-	if(strlen(sep->arg[4]) == 0 || strlen(sep->arg[1]) == 0 || strlen(sep->arg[2]) == 0 || (strlen(sep->arg[3]) == 0 && atoi(sep->arg[3]) == 0))
-	{
-		c->Message(0,"#log <type> <byaccountid/bycharname> <querytype> <details> <target/none> <timestamp>");
-		c->Message(0,"(Req.) Types: 1) Command, 2) Merchant Buying, 3) Merchant Selling, 4) Loot, 5) Money Loot 6) Trade");
-		c->Message(0,"(Req.) byaccountid/bycharname: choose either byaccountid or bycharname and then set querytype to effect it");
-		c->Message(0,"(Req.) Details are information about the event, for example, partially an items name, or item id.");
-		c->Message(0,"Timestamp allows you to set a date to when the event occured: YYYYMMDDHHMMSS (Year,Month,Day,Hour,Minute,Second). It can be a partial timestamp.");
-		c->Message(0,"Note: when specifying a target, spaces in EQEMu use '_'");
-		return;
-		// help
-	}
-	CharacterEventLog_Struct* cel = new CharacterEventLog_Struct;
-	memset(cel,0,sizeof(CharacterEventLog_Struct));
-	if(strcasecmp(sep->arg[2], "byaccountid") == 0)
-		database.GetEventLogs("",sep->arg[5],atoi(sep->arg[3]),atoi(sep->arg[1]),sep->arg[4],sep->arg[6],cel);
-	else if(strcasecmp(sep->arg[2], "bycharname") == 0)
-		database.GetEventLogs(sep->arg[3],sep->arg[5],0,atoi(sep->arg[1]),sep->arg[4],sep->arg[6],cel);
-	else
-	{
-		c->Message(0,"Incorrect query type, use either byaccountid or bycharname");
-		safe_delete(cel);
-		return;
-	}
-	if(cel->count != 0)
-	{
-		uint32 count = 0;
-		bool cont = true;
-		while(cont)
-		{
-			if(count >= cel->count)
-				cont = false;
-			else if(cel->eld[count].id != 0)
-			{
-				c->Message(0,"ID: %i AccountName: %s AccountID: %i Status: %i CharacterName: %s TargetName: %s",cel->eld[count].id,cel->eld[count].accountname,cel->eld[count].account_id,cel->eld[count].status,cel->eld[count].charactername,cel->eld[count].targetname);
-
-				c->Message(0,"LogType: %s Timestamp: %s LogDetails: %s",cel->eld[count].descriptiontype,cel->eld[count].timestamp,cel->eld[count].details);
-			}
-			else
-				cont = false;
-			count++;
-			if(count > 20)
-			{
-				c->Message(0,"Please refine search.");
-				cont = false;
-			}
-		}
-	}
-	c->Message(0,"End of Query");
-	safe_delete(cel);
 }
 
 void command_gm(Client *c, const Seperator *sep)
