@@ -138,7 +138,7 @@ std::string EQEmuLogSys::FormatDebugCategoryMessageString(uint16 log_category, s
 
 void EQEmuLogSys::ProcessGMSay(uint16 log_type, std::string message){
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
-		on_log_gmsay_hook(log_type, message);
+		// on_log_gmsay_hook(log_type, message);
 	}
 }
 
