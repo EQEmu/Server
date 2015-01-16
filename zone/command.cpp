@@ -347,7 +347,6 @@ int command_init(void) {
 #endif
 
 		command_add("opcode","- opcode management",250,command_opcode) ||
-		command_add("logs","[status|normal|error|debug|quest|all] - Subscribe to a log type",250,command_logs) ||
 		command_add("ban","[name] [reason]- Ban by character name",150,command_ban) ||
 		command_add("suspend","[name] [days] [reason] - Suspend by character name and for specificed number of days",150,command_suspend) ||
 		command_add("ipban","[IP address] - Ban IP by character name",200,command_ipban) ||
@@ -6744,38 +6743,6 @@ void command_logsql(Client *c, const Seperator *sep) {
 	} else {
 		c->Message(0, "Usage: #logsql (file name)");
 	}
-}
-
-void command_logs(Client *c, const Seperator *sep)
-{
-#ifdef CLIENT_LOGS
-	Client *t = c;
-	if(c->GetTarget() && c->GetTarget()->IsClient()) {
-		t = c->GetTarget()->CastToClient();
-	}
-
-	if(!strcasecmp(sep->arg[1], "status" ) )
-		client_logs.subscribe(EQEmuLog::Status, t);
-	else if(!strcasecmp(sep->arg[1], "normal" ) )
-		client_logs.subscribe(EQEmuLog::Normal, t);
-	else if(!strcasecmp(sep->arg[1], "error" ) )
-		client_logs.subscribe(EQEmuLog::Error, t);
-	else if(!strcasecmp(sep->arg[1], "debug" ) )
-		client_logs.subscribe(EQEmuLog::Debug, t);
-	else if(!strcasecmp(sep->arg[1], "quest" ) )
-		client_logs.subscribe(EQEmuLog::Quest, t);
-	else if(!strcasecmp(sep->arg[1], "all" ) )
-		client_logs.subscribeAll(t);
-	else {
-		c->Message(0, "Usage: #logs [status|normal|error|debug|quest|all]");
-		return;
-	}
-	if(c != t)
-		c->Message(0, "%s have been subscribed to %s logs.", t->GetName(), sep->arg[1]);
-	t->Message(0, "You have been subscribed to %s logs.", sep->arg[1]);
-#else
-	c->Message(0, "Client logs are disabled in this server's build.");
-#endif
 }
 
 void command_qglobal(Client *c, const Seperator *sep) {
