@@ -160,7 +160,7 @@ void WorldServer::Process() {
 			break;
 		}
 		case ServerOP_ZAAuthFailed: {
-			std::cout << "World server responded 'Not Authorized', disabling reconnect" << std::endl;
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "World server responded 'Not Authorized', disabling reconnect");
 			pTryReconnect = false;
 			Disconnect();
 			break;
