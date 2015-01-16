@@ -178,8 +178,8 @@ int main(int argc, char** argv) {
 	logger.OnLogHookCallBackZone(&Zone::GMSayHookCallBackProcess);
 	database.LoadLogSysSettings(logger.log_settings);
 
+	/* Guilds */
 	guild_mgr.SetDatabase(&database);
-
 	GuildBanks = nullptr;
 
 	logger.LogDebug(EQEmuLogSys::General,	"Test, Debug Log Level 0");
@@ -220,10 +220,13 @@ int main(int argc, char** argv) {
 
 	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Mapping Incoming Opcodes");
 	MapOpcodes();
+	
 	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading Variables");
 	database.LoadVariables();
+	
 	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading zone names");
 	database.LoadZoneNames();
+	
 	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading items");
 	if (!database.LoadItems()) {
 		logger.Log(EQEmuLogSys::Error, "Loading items FAILED!");
@@ -262,16 +265,22 @@ int main(int argc, char** argv) {
 
 	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading guilds");
 	guild_mgr.LoadGuilds();
+	
 	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading factions");
 	database.LoadFactionData();
+	
 	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading titles");
 	title_manager.LoadTitles();
+	
 	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading AA effects");
 	database.LoadAAEffects();
+	
 	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading tributes");
 	database.LoadTributes();
+	
 	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading corpse timers");
 	database.GetDecayTimes(npcCorpseDecayTimes);
+	
 	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading commands");
 	int retval=command_init();
 	if(retval<0)
