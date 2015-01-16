@@ -101,8 +101,8 @@ private:
 
 	std::string FormatDebugCategoryMessageString(uint16 log_category, std::string in_message);
 
-	void ProcessConsoleMessage(uint16 log_type, const std::string message);
-	void ProcessGMSay(uint16 log_type, std::string message);
+	void ProcessConsoleMessage(uint16 log_type, uint16 log_category, const std::string message);
+	void ProcessGMSay(uint16 log_type, uint16 log_category, std::string message);
 	void ProcessLogWrite(uint16 log_type, std::string message);
 };
 
