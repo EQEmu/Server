@@ -748,7 +748,7 @@ void WorldServer::Process() {
 		}
 		case ServerOP_SyncWorldTime: {
 			if(zone!=0) {
-				std::cout << "Received Message SyncWorldTime" << std::endl;
+				logger.LogDebugType(EQEmuLogSys::Moderate, EQEmuLogSys::Zone_Server, __FUNCTION__ "Received Message SyncWorldTime");
 				eqTimeOfDay* newtime = (eqTimeOfDay*) pack->pBuffer;
 				zone->zone_time.setEQTimeOfDay(newtime->start_eqtime, newtime->start_realtime);
 				EQApplicationPacket* outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));

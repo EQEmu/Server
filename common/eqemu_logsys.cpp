@@ -109,8 +109,6 @@ std::string EQEmuLogSys::FormatDebugCategoryMessageString(uint16 log_category, s
 	return StringFormat("%s%s", category_string.c_str(), in_message.c_str()); 
 }
 
-
-
 void EQEmuLogSys::ProcessGMSay(uint16 log_type, uint16 log_category, std::string message)
 {
 	/* Check if category enabled for process */
