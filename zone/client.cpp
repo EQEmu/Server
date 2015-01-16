@@ -1511,9 +1511,7 @@ void Client::UpdateAdmin(bool iFromDB) {
 
 	if(m_pp.gm)
 	{
-#if EQDEBUG >= 5
-		printf("%s is a GM\n", GetName());
-#endif
+		logger.LogDebugType(EQEmuLogSys::Moderate, EQEmuLogSys::Zone_Server, __FUNCTION__ "%s is a GM");
 // no need for this, having it set in pp you already start as gm
 // and it's also set in your spawn packet so other people see it too
 //		SendAppearancePacket(AT_GM, 1, false);
