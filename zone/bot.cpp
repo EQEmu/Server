@@ -8420,7 +8420,7 @@ void Bot::ProcessBotOwnerRefDelete(Mob* botOwner) {
 			std::list<Bot*> BotList = entity_list.GetBotsByBotOwnerCharacterID(botOwner->CastToClient()->CharacterID());
 
 			if(!BotList.empty()) {
-				for(std::list<Bot*>::iterator botListItr = BotList.begin(); botListItr != BotList.end(); botListItr++) {
+				for(std::list<Bot*>::iterator botListItr = BotList.begin(); botListItr != BotList.end(); ++botListItr) {
 					Bot* tempBot = *botListItr;
 
 					if(tempBot) {
