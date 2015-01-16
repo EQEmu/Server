@@ -1,4 +1,5 @@
 #include "debug.h"
+#include "eqemu_logsys.h"
 #include "eq_stream_factory.h"
 
 #ifdef _WINDOWS
