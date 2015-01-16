@@ -271,7 +271,7 @@ public:
 	// random object that provides random values for the zone
 	EQEmu::Random random;
 
-	void GMSayHookCallBackProcess(uint16 log_type, std::string& message){ entity_list.MessageStatus(0, 80, gmsay_log_message_colors[log_type], "%s", message.c_str()); }
+	static void GMSayHookCallBackProcess(uint16 log_type, std::string& message){ entity_list.MessageStatus(0, 80, gmsay_log_message_colors[log_type], "%s", message.c_str()); }
 
 	//MODDING HOOKS
 	void mod_init();

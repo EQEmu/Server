@@ -64,7 +64,7 @@
 //check length of packet before decoding. Call before setup.
 #define ENCODE_LENGTH_EXACT(struct_) \
 	if((*p)->size != sizeof(struct_)) { \
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, "Wrong size on outbound %s (" #struct_ "): Got %d, expected %d", opcodes->EmuToName((*p)->GetOpcode()), (*p)->size, sizeof(struct_)); \
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, "Wrong size on outbound %s (" #struct_ "): Got %d, expected %d", opcodes->EmuToName((*p)->GetOpcode()), (*p)->size, sizeof(struct_)); \
 		_hex(NET__STRUCT_HEX, (*p)->pBuffer, (*p)->size); \
 		delete *p; \
 		*p = nullptr; \
@@ -72,7 +72,7 @@
 	}
 #define ENCODE_LENGTH_ATLEAST(struct_) \
 	if((*p)->size < sizeof(struct_)) { \
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, "Wrong size on outbound %s (" #struct_ "): Got %d, expected at least %d", opcodes->EmuToName((*p)->GetOpcode()), (*p)->size, sizeof(struct_)); \
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, "Wrong size on outbound %s (" #struct_ "): Got %d, expected at least %d", opcodes->EmuToName((*p)->GetOpcode()), (*p)->size, sizeof(struct_)); \
 		_hex(NET__STRUCT_HEX, (*p)->pBuffer, (*p)->size); \
 		delete *p; \
 		*p = nullptr; \
@@ -127,14 +127,14 @@
 #define DECODE_LENGTH_EXACT(struct_) \
 	if(__packet->size != sizeof(struct_)) { \
 		__packet->SetOpcode(OP_Unknown); /* invalidate the packet */ \
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, "Wrong size on incoming %s (" #struct_ "): Got %d, expected %d", opcodes->EmuToName(__packet->GetOpcode()), __packet->size, sizeof(struct_)); \
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, "Wrong size on incoming %s (" #struct_ "): Got %d, expected %d", opcodes->EmuToName(__packet->GetOpcode()), __packet->size, sizeof(struct_)); \
 		_hex(NET__STRUCT_HEX, __packet->pBuffer, __packet->size); \
 		return; \
 	}
 #define DECODE_LENGTH_ATLEAST(struct_) \
 	if(__packet->size < sizeof(struct_)) { \
 		__packet->SetOpcode(OP_Unknown); /* invalidate the packet */ \
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, "Wrong size on incoming %s (" #struct_ "): Got %d, expected at least %d", opcodes->EmuToName(__packet->GetOpcode()), __packet->size, sizeof(struct_)); \
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, "Wrong size on incoming %s (" #struct_ "): Got %d, expected at least %d", opcodes->EmuToName(__packet->GetOpcode()), __packet->size, sizeof(struct_)); \
 		_hex(NET__STRUCT_HEX, __packet->pBuffer, __packet->size); \
 		return; \
 	}
