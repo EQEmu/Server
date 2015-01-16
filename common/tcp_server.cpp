@@ -1,5 +1,6 @@
 #include "debug.h"
 #include "tcp_server.h"
+#include "../common/eqemu_logsys.h"
 
 #include <stdio.h>
 #include <cstdlib>
