@@ -35,9 +35,6 @@ class Client;
 
 class ClientLogs {
 public:
-	static void EQEmuIO_buf(EQEmuLog::LogIDs id, const char *buf, uint8 size, uint32 count);
-	static void EQEmuIO_fmt(EQEmuLog::LogIDs id, const char *fmt, va_list ap);
-	static void EQEmuIO_pva(EQEmuLog::LogIDs id, const char *prefix, const char *fmt, va_list ap);
 
 	void subscribe(EQEmuLog::LogIDs id, Client *c);
 	void unsubscribe(EQEmuLog::LogIDs id, Client *c);

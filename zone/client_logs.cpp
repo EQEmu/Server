@@ -105,37 +105,6 @@ void ClientLogs::msg(EQEmuLog::LogIDs id, const char *buf) {
 	}
 }
 
-void ClientLogs::EQEmuIO_buf(EQEmuLog::LogIDs id, const char *buf, uint8 size, uint32 count) {
-	if(size != 1)
-		return;	//cannot print multibyte data
-	if(buf[0] == '\n' || buf[0] == '\r')
-		return;	//skip new lines...
-	if(count > MAX_CLIENT_LOG_MESSAGE_LENGTH)
-		count = MAX_CLIENT_LOG_MESSAGE_LENGTH;
-	memcpy(_buffer, buf, count);
-	_buffer[count] = '\0';
-	client_logs.msg(id, _buffer);
-}
-
-void ClientLogs::EQEmuIO_fmt(EQEmuLog::LogIDs id, const char *fmt, va_list ap) {
-	if(fmt[0] == '\n' || fmt[0] == '\r')
-		return;	//skip new lines...
-	vsnprintf(_buffer, MAX_CLIENT_LOG_MESSAGE_LENGTH, fmt, ap);
-	_buffer[MAX_CLIENT_LOG_MESSAGE_LENGTH] = '\0';
-	client_logs.msg(id, _buffer);
-}
-
-void ClientLogs::EQEmuIO_pva(EQEmuLog::LogIDs id, const char *prefix, const char *fmt, va_list ap) {
-	if(fmt[0] == '\n' || fmt[0] == '\r')
-		return;	//skip new lines...
-	char *buf = _buffer;
-	int plen = snprintf(buf, MAX_CLIENT_LOG_MESSAGE_LENGTH, "%s", prefix);
-	buf += plen;
-	vsnprintf(buf, MAX_CLIENT_LOG_MESSAGE_LENGTH-plen, fmt, ap);
-	_buffer[MAX_CLIENT_LOG_MESSAGE_LENGTH] = '\0';
-	client_logs.msg(id, _buffer);
-}
-
 static uint32 gmsay_log_message_colors[EQEmuLogSys::MaxLogID] = {
 	15, // "Status", - Yellow
 	15,	// "Normal", - Yellow
