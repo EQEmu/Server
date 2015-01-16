@@ -7332,12 +7332,10 @@ int32 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 
 			break;
 		}
-#if EQDEBUG >= 6
 		//this spits up a lot of garbage when calculating spell focuses
 		//since they have all kinds of extra effects on them.
 		default:
-			logger.Log(EQEmuLogSys::Normal, "CalcFocusEffect: unknown effectid %d", focus_spell.effectid[i]);
-#endif
+			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Spells, "CalcFocusEffect: unknown effectid %d", focus_spell.effectid[i]);
 		}
 	}
 	//Check for spell skill limits.
