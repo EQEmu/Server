@@ -70,6 +70,7 @@ public:
 		Trading,
 		Tradeskills,
 		Tribute,
+		TCP_Connection,
 		MaxCategoryID	/* Don't Remove this*/
 	};
 
@@ -130,6 +131,7 @@ static const char* LogCategoryName[EQEmuLogSys::LogCategory::MaxCategoryID] = {
 	"Trading",
 	"Tradeskills",
 	"Tribute",
+	"TCP_Connection"
 };
 
 #endif

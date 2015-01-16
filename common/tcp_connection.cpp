@@ -900,7 +900,7 @@ ThreadReturnType TCPConnection::TCPConnectionLoop(void* tmp) {
 	}
 	TCPConnection* tcpc = (TCPConnection*) tmp;
 #ifndef WIN32
-	logger.LogDebug(EQEmuLogSys::Detail,  "Starting TCPConnectionLoop with thread ID %d", pthread_self());
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::TCP_Connection, __FUNCTION__ " Starting TCPConnectionLoop with thread ID %d", pthread_self());
 #endif
 	tcpc->MLoopRunning.lock();
 	while (tcpc->RunLoop()) {
