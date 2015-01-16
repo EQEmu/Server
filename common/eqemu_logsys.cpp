@@ -92,13 +92,11 @@ EQEmuLogSys::~EQEmuLogSys(){
 void EQEmuLogSys::LoadLogSettingsDefaults()
 {
 	log_platform = GetExecutablePlatformInt();
-	std::cout << "PLATFORM " << log_platform << std::endl;
 	/* Write defaults */
 	for (int i = 0; i < EQEmuLogSys::LogCategory::MaxCategoryID; i++){
-		log_settings[i].log_to_console = 1;
-		log_settings[i].log_to_file = 1;
-		log_settings[i].log_to_gmsay = 1;
-		// std::cout << "Setting log settings for " << i << " " << LogCategoryName[i] << " " << std::endl;
+		log_settings[i].log_to_console = 0;
+		log_settings[i].log_to_file = 0;
+		log_settings[i].log_to_gmsay = 0;
 	}
 	log_settings_loaded = true;
 }
@@ -115,6 +113,10 @@ std::string EQEmuLogSys::FormatDebugCategoryMessageString(uint16 log_category, s
 
 void EQEmuLogSys::ProcessGMSay(uint16 log_type, uint16 log_category, std::string message)
 {
+	/* Check if category enabled for process */
+	if (log_settings[log_category].log_to_gmsay)
+		return;
+
 	/* Enabling Netcode based GMSay output creates a feedback loop that ultimately ends in a crash */
 	if (log_category == EQEmuLogSys::LogCategory::Netcode)
 		return;
