@@ -927,7 +927,7 @@ ThreadReturnType TCPConnection::TCPConnectionLoop(void* tmp) {
 	tcpc->MLoopRunning.unlock();
 
 #ifndef WIN32
-	logger.LogDebug(EQEmuLogSys::Detail,  "Ending TCPConnectionLoop with thread ID %d", pthread_self());
+	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::TCP_Connection, __FUNCTION__ "Ending TCPConnectionLoop with thread ID %d", pthread_self());
 #endif
 
 	THREAD_RETURN(nullptr);
