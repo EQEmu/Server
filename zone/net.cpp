@@ -317,12 +317,6 @@ int main(int argc, char** argv) {
 	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading quests");
 	parse->ReloadQuests();
 
-
-#ifdef CLIENT_LOGS
-	LogFile->SetAllCallbacks(ClientLogs::EQEmuIO_buf);
-	LogFile->SetAllCallbacks(ClientLogs::EQEmuIO_fmt);
-	LogFile->SetAllCallbacks(ClientLogs::EQEmuIO_pva);
-#endif
 	if (!worldserver.Connect()) {
 		logger.Log(EQEmuLogSys::Error, "Worldserver Connection Failed :: worldserver.Connect()");
 	}
