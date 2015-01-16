@@ -138,8 +138,12 @@ std::string EQEmuLogSys::FormatDebugCategoryMessageString(uint16 log_category, s
 
 void EQEmuLogSys::ProcessGMSay(uint16 log_type, uint16 log_category, std::string message)
 {
+	/* Enabling Netcode based GMSay output creates a feedback loop that ultimately ends in a crash */
+	if (log_category == EQEmuLogSys::LogCategory::Netcode)
+		return;
+
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
-		// on_log_gmsay_hook(log_type, message);
+		on_log_gmsay_hook(log_type, message);
 	}
 }
 
@@ -196,9 +200,9 @@ void EQEmuLogSys::LogDebugType(DebugLevel debug_level, uint16 log_category, std:
 
 	std::string output_debug_message = EQEmuLogSys::FormatDebugCategoryMessageString(log_category, output_message);
 
-	EQEmuLogSys::ProcessConsoleMessage(EQEmuLogSys::Debug, 0, output_debug_message);
-	EQEmuLogSys::ProcessGMSay(EQEmuLogSys::Debug, 0, output_debug_message);
-	EQEmuLogSys::ProcessLogWrite(EQEmuLogSys::Debug, 0, output_debug_message);
+	EQEmuLogSys::ProcessConsoleMessage(EQEmuLogSys::Debug, log_category, output_debug_message);
+	EQEmuLogSys::ProcessGMSay(EQEmuLogSys::Debug, log_category, output_debug_message);
+	EQEmuLogSys::ProcessLogWrite(EQEmuLogSys::Debug, log_category, output_debug_message);
 }
 
 void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...)
