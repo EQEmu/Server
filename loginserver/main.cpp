@@ -22,6 +22,7 @@
 #include "../common/timer.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
+#include "../common/eqemu_logsys.h"
 #include "login_server.h"
 #include <time.h>
 #include <stdlib.h>
@@ -30,6 +31,7 @@
 
 TimeoutManager timeout_manager;
 LoginServer server;
+EQEmuLogSys logger;
 ErrorLog *server_log;
 bool run_server = true;
 
