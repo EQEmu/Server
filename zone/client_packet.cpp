@@ -3573,7 +3573,7 @@ void Client::Handle_OP_Barter(const EQApplicationPacket *app)
 
 	default:
 		Message(13, "Unrecognised Barter action.");
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Unrecognised Barter Action %i", Action);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Unrecognised Barter Action %i", Action);
 
 	}
 }
@@ -3636,7 +3636,7 @@ void Client::Handle_OP_BazaarSearch(const EQApplicationPacket *app)
 		return;
 	}
 	else {
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Malformed BazaarSearch_Struct packe, Action %it received, ignoring...");
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Malformed BazaarSearch_Struct packe, Action %it received, ignoring...");
 		logger.Log(EQEmuLogSys::Error, "Malformed BazaarSearch_Struct packet received, ignoring...\n");
 	}
 
@@ -7196,7 +7196,7 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 
 	uint32 NewGuildID = guild_mgr.CreateGuild(GuildName, CharacterID());
 
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Creating guild %s with leader %d via UF+ GUI. It was given id %lu.", GetName(),
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Creating guild %s with leader %d via UF+ GUI. It was given id %lu.", GetName(),
 		GuildName, CharacterID(), (unsigned long)NewGuildID);
 
 	if (NewGuildID == GUILD_NONE)
@@ -9814,7 +9814,7 @@ void Client::Handle_OP_OpenContainer(const EQApplicationPacket *app)
 
 void Client::Handle_OP_OpenGuildTributeMaster(const EQApplicationPacket *app)
 {
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_OpenGuildTributeMaster of length %d", app->size);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_OpenGuildTributeMaster of length %d", app->size);
 	_pkt(TRIBUTE__IN, app);
 
 	if (app->size != sizeof(StartTribute_Struct))
@@ -9846,7 +9846,7 @@ void Client::Handle_OP_OpenInventory(const EQApplicationPacket *app)
 
 void Client::Handle_OP_OpenTributeMaster(const EQApplicationPacket *app)
 {
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_OpenTributeMaster of length %d", app->size);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_OpenTributeMaster of length %d", app->size);
 	_pkt(TRIBUTE__IN, app);
 
 	if (app->size != sizeof(StartTribute_Struct))
@@ -11714,7 +11714,7 @@ void Client::Handle_OP_RezzAnswer(const EQApplicationPacket *app)
 
 	const Resurrect_Struct* ra = (const Resurrect_Struct*)app->pBuffer;
 
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Received OP_RezzAnswer from client. Pendingrezzexp is %i, action is %s",
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Received OP_RezzAnswer from client. Pendingrezzexp is %i, action is %s",
 		PendingRezzXP, ra->action ? "ACCEPT" : "DECLINE");
 
 	_pkt(SPELLS__REZ, app);
@@ -11782,7 +11782,7 @@ void Client::Handle_OP_SaveOnZoneReq(const EQApplicationPacket *app)
 
 void Client::Handle_OP_SelectTribute(const EQApplicationPacket *app)
 {
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_SelectTribute of length %d", app->size);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_SelectTribute of length %d", app->size);
 	_pkt(TRIBUTE__IN, app);
 
 	//we should enforce being near a real tribute master to change this
@@ -13435,7 +13435,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 			if (c)
 				c->WithCustomer(0);
 			else
-				logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Client::Handle_OP_TraderBuy: Null Client Pointer");
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Client::Handle_OP_TraderBuy: Null Client Pointer");
 
 			break;
 		}
@@ -13444,7 +13444,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 			break;
 		}
 		default: {
-			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Unhandled action code in OP_Trader ShowItems_Struct");
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Unhandled action code in OP_Trader ShowItems_Struct");
 			break;
 		}
 		}
@@ -13530,7 +13530,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 			}
 		}
 		else {
-			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Client::Handle_OP_Trader: Unknown TraderStruct code of: %i\n",
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Client::Handle_OP_Trader: Unknown TraderStruct code of: %i\n",
 				ints->Code);
 
 			logger.Log(EQEmuLogSys::Error, "Unknown TraderStruct code of: %i\n", ints->Code);
@@ -13542,7 +13542,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 		HandleTraderPriceUpdate(app);
 	}
 	else {
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Unknown size for OP_Trader: %i\n", app->size);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Unknown size for OP_Trader: %i\n", app->size);
 		logger.Log(EQEmuLogSys::Error, "Unknown size for OP_Trader: %i\n", app->size);
 		DumpPacket(app);
 		return;
@@ -13568,11 +13568,11 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 			BuyTraderItem(tbs, Trader, app);
 		}
 		else {
-			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Client::Handle_OP_TraderBuy: Null Client Pointer");
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Client::Handle_OP_TraderBuy: Null Client Pointer");
 		}
 	}
 	else {
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Client::Handle_OP_TraderBuy: Struct size mismatch");
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Client::Handle_OP_TraderBuy: Struct size mismatch");
 
 	}
 	return;
@@ -13646,7 +13646,7 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 
 	if (app->size != sizeof(TraderClick_Struct)) {
 
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Client::Handle_OP_TraderShop: Returning due to struct size mismatch");
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Client::Handle_OP_TraderShop: Returning due to struct size mismatch");
 
 		return;
 	}
@@ -13660,7 +13660,7 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 	if (Customer)
 		outtcs->Approval = Customer->WithCustomer(GetID());
 	else {
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Client::Handle_OP_TraderShop: entity_list.GetClientByID(tcs->traderid)"
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Client::Handle_OP_TraderShop: entity_list.GetClientByID(tcs->traderid)"
 			" returned a nullptr pointer");
 		return;
 	}
@@ -13757,7 +13757,7 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 
 void Client::Handle_OP_TributeItem(const EQApplicationPacket *app)
 {
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_TributeItem of length %d", app->size);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_TributeItem of length %d", app->size);
 	_pkt(TRIBUTE__IN, app);
 
 	//player donates an item...
@@ -13776,7 +13776,7 @@ void Client::Handle_OP_TributeItem(const EQApplicationPacket *app)
 
 		t->tribute_points = TributeItem(t->slot, t->quantity);
 
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Sending tribute item reply with %d points", t->tribute_points);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Sending tribute item reply with %d points", t->tribute_points);
 		_pkt(TRIBUTE__OUT, app);
 
 		QueuePacket(app);
@@ -13786,7 +13786,7 @@ void Client::Handle_OP_TributeItem(const EQApplicationPacket *app)
 
 void Client::Handle_OP_TributeMoney(const EQApplicationPacket *app)
 {
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_TributeMoney of length %d", app->size);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_TributeMoney of length %d", app->size);
 	_pkt(TRIBUTE__IN, app);
 
 	//player donates money
@@ -13805,7 +13805,7 @@ void Client::Handle_OP_TributeMoney(const EQApplicationPacket *app)
 
 		t->tribute_points = TributeMoney(t->platinum);
 
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Sending tribute money reply with %d points", t->tribute_points);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Sending tribute money reply with %d points", t->tribute_points);
 		_pkt(TRIBUTE__OUT, app);
 
 		QueuePacket(app);
@@ -13815,7 +13815,7 @@ void Client::Handle_OP_TributeMoney(const EQApplicationPacket *app)
 
 void Client::Handle_OP_TributeNPC(const EQApplicationPacket *app)
 {
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_TributeNPC of length %d", app->size);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_TributeNPC of length %d", app->size);
 	_pkt(TRIBUTE__IN, app);
 
 	return;
@@ -13823,7 +13823,7 @@ void Client::Handle_OP_TributeNPC(const EQApplicationPacket *app)
 
 void Client::Handle_OP_TributeToggle(const EQApplicationPacket *app)
 {
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_TributeToggle of length %d", app->size);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_TributeToggle of length %d", app->size);
 	_pkt(TRIBUTE__IN, app);
 
 	if (app->size != sizeof(uint32))
@@ -13837,7 +13837,7 @@ void Client::Handle_OP_TributeToggle(const EQApplicationPacket *app)
 
 void Client::Handle_OP_TributeUpdate(const EQApplicationPacket *app)
 {
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_TributeUpdate of length %d", app->size);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Tribute, "Received OP_TributeUpdate of length %d", app->size);
 	_pkt(TRIBUTE__IN, app);
 
 	//sent when the client changes their tribute settings...

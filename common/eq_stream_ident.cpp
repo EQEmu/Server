@@ -46,7 +46,7 @@ void EQStreamIdentifier::Process() {
 		//first see if this stream has expired
 		if(r->expire.Check(false)) {
 			//this stream has failed to match any pattern in our timeframe.
-			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Unable to identify stream from %s:%d before timeout.", long2ip(r->stream->GetRemoteIP()).c_str(), ntohs(r->stream->GetRemotePort()));
+			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Unable to identify stream from %s:%d before timeout.", long2ip(r->stream->GetRemoteIP()).c_str(), ntohs(r->stream->GetRemotePort()));
 			r->stream->ReleaseFromUse();
 			delete r;
 			cur = m_streams.erase(cur);
@@ -62,23 +62,23 @@ void EQStreamIdentifier::Process() {
 		}
 		if(r->stream->GetState() != ESTABLISHED) {
 			//the stream closed before it was identified.
-			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Unable to identify stream from %s:%d before it closed.", long2ip(r->stream->GetRemoteIP()).c_str(), ntohs(r->stream->GetRemotePort()));
+			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Unable to identify stream from %s:%d before it closed.", long2ip(r->stream->GetRemoteIP()).c_str(), ntohs(r->stream->GetRemotePort()));
 			switch(r->stream->GetState())
 			{
 			case ESTABLISHED:
-				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Stream state was Established");
+				logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Stream state was Established");
 				break;
 			case CLOSING:
-				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Stream state was Closing");
+				logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Stream state was Closing");
 				break;
 			case DISCONNECTING:
-				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Stream state was Disconnecting");
+				logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Stream state was Disconnecting");
 				break;
 			case CLOSED:
-				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Stream state was Closed");
+				logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Stream state was Closed");
 				break;
 			default:
-				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Stream state was Unestablished or unknown");
+				logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Stream state was Unestablished or unknown");
 				break;
 			}
 			r->stream->ReleaseFromUse();
@@ -109,7 +109,7 @@ void EQStreamIdentifier::Process() {
 			case EQStream::MatchSuccessful: {
 				//yay, a match.
 
-				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Identified stream %s:%d with signature %s", long2ip(r->stream->GetRemoteIP()).c_str(), ntohs(r->stream->GetRemotePort()), p->name.c_str());
+				logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Identified stream %s:%d with signature %s", long2ip(r->stream->GetRemoteIP()).c_str(), ntohs(r->stream->GetRemotePort()), p->name.c_str());
 
 				// before we assign the eqstream to an interface, let the stream recognize it is in use and the session should not be reset any further
 				r->stream->SetActive(true);
@@ -123,7 +123,7 @@ void EQStreamIdentifier::Process() {
 			}
 			case EQStream::MatchFailed:
 				//do nothing...
-				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENT_TRACE] %s:%d: Tried patch %s, and it did not match.", long2ip(r->stream->GetRemoteIP()).c_str(), ntohs(r->stream->GetRemotePort()), p->name.c_str());
+				logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENT_TRACE] %s:%d: Tried patch %s, and it did not match.", long2ip(r->stream->GetRemoteIP()).c_str(), ntohs(r->stream->GetRemotePort()), p->name.c_str());
 				break;
 			}
 		}
@@ -131,7 +131,7 @@ void EQStreamIdentifier::Process() {
 		//if we checked all patches and did not find a match.
 		if(all_ready && !found_one) {
 			//the stream cannot be identified.
-			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Unable to identify stream from %s:%d, no match found.", long2ip(r->stream->GetRemoteIP()).c_str(), ntohs(r->stream->GetRemotePort()));
+			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Unable to identify stream from %s:%d, no match found.", long2ip(r->stream->GetRemoteIP()).c_str(), ntohs(r->stream->GetRemotePort()));
 			r->stream->ReleaseFromUse();
 		}
 

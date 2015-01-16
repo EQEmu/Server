@@ -1564,7 +1564,7 @@ void Bot::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 		if (effect == SE_Blank || (effect == SE_CHA && base1 == 0) || effect == SE_StackingCommand_Block || effect == SE_StackingCommand_Overwrite)
 			continue;
 
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Applying Effect %d from AA %u in slot %d (base1: %d, base2: %d) on %s", effect, aaid, slot, base1, base2, this->GetCleanName());
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Applying Effect %d from AA %u in slot %d (base1: %d, base2: %d) on %s", effect, aaid, slot, base1, base2, this->GetCleanName());
 
 		uint8 focus = IsFocusEffect(0, 0, true,effect);
 		if (focus)
@@ -7335,7 +7335,7 @@ int32 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 		//this spits up a lot of garbage when calculating spell focuses
 		//since they have all kinds of extra effects on them.
 		default:
-			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Spells, "CalcFocusEffect: unknown effectid %d", focus_spell.effectid[i]);
+			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Spells, "CalcFocusEffect: unknown effectid %d", focus_spell.effectid[i]);
 		}
 	}
 	//Check for spell skill limits.

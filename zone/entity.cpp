@@ -3397,7 +3397,7 @@ void EntityList::ReloadAllClientsTaskState(int TaskID)
 			// If we have been passed a TaskID, only reload the client state if they have
 			// that Task active.
 			if ((!TaskID) || (TaskID && client->IsTaskActive(TaskID))) {
-				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[CLIENTLOAD] Reloading Task State For Client %s", client->GetName());
+				logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[CLIENTLOAD] Reloading Task State For Client %s", client->GetName());
 				client->RemoveClientTaskState();
 				client->LoadClientTaskState();
 				taskmanager->SendActiveTasksToClient(client);

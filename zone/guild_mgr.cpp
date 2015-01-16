@@ -32,7 +32,7 @@ extern WorldServer worldserver;
 extern volatile bool ZoneLoaded;
 
 void ZoneGuildManager::SendGuildRefresh(uint32 guild_id, bool name, bool motd, bool rank, bool relation) {
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending guild refresh for %d to world, changes: name=%d, motd=%d, rank=d, relation=%d", guild_id, name, motd, rank, relation);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending guild refresh for %d to world, changes: name=%d, motd=%d, rank=d, relation=%d", guild_id, name, motd, rank, relation);
 	ServerPacket* pack = new ServerPacket(ServerOP_RefreshGuild, sizeof(ServerGuildRefresh_Struct));
 	ServerGuildRefresh_Struct *s = (ServerGuildRefresh_Struct *) pack->pBuffer;
 	s->guild_id = guild_id;
@@ -46,7 +46,7 @@ void ZoneGuildManager::SendGuildRefresh(uint32 guild_id, bool name, bool motd, b
 
 void ZoneGuildManager::SendCharRefresh(uint32 old_guild_id, uint32 guild_id, uint32 charid) {
 	if(guild_id == 0) {
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Guild lookup for char %d when sending char refresh.", charid);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Guild lookup for char %d when sending char refresh.", charid);
 
 		CharGuildInfo gci;
 		if(!GetCharInfo(charid, gci)) {
@@ -56,7 +56,7 @@ void ZoneGuildManager::SendCharRefresh(uint32 old_guild_id, uint32 guild_id, uin
 		}
 	}
 
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending char refresh for %d from guild %d to world", charid, guild_id);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending char refresh for %d from guild %d to world", charid, guild_id);
 
 	ServerPacket* pack = new ServerPacket(ServerOP_GuildCharRefresh, sizeof(ServerGuildCharRefresh_Struct));
 	ServerGuildCharRefresh_Struct *s = (ServerGuildCharRefresh_Struct *) pack->pBuffer;
@@ -89,7 +89,7 @@ void ZoneGuildManager::SendRankUpdate(uint32 CharID)
 }
 
 void ZoneGuildManager::SendGuildDelete(uint32 guild_id) {
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending guild delete for guild %d to world", guild_id);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending guild delete for guild %d to world", guild_id);
 	ServerPacket* pack = new ServerPacket(ServerOP_DeleteGuild, sizeof(ServerGuildID_Struct));
 	ServerGuildID_Struct *s = (ServerGuildID_Struct *) pack->pBuffer;
 	s->guild_id = guild_id;
@@ -266,7 +266,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 		}
 		ServerGuildRefresh_Struct *s = (ServerGuildRefresh_Struct *) pack->pBuffer;
 
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Received guild refresh from world for %d, changes: name=%d, motd=%d, rank=%d, relation=%d", s->guild_id, s->name_change, s->motd_change, s->rank_change, s->relation_change);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Received guild refresh from world for %d, changes: name=%d, motd=%d, rank=%d, relation=%d", s->guild_id, s->name_change, s->motd_change, s->rank_change, s->relation_change);
 
 		//reload all the guild details from the database.
 		RefreshGuild(s->guild_id);
@@ -300,7 +300,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 		}
 		ServerGuildCharRefresh_Struct *s = (ServerGuildCharRefresh_Struct *) pack->pBuffer;
 
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Received guild member refresh from world for char %d from guild %d", s->char_id, s->guild_id);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Received guild member refresh from world for char %d from guild %d", s->char_id, s->guild_id);
 
 		Client *c = entity_list.GetClientByCharID(s->char_id);
 
@@ -369,7 +369,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 		}
 		ServerGuildID_Struct *s = (ServerGuildID_Struct *) pack->pBuffer;
 
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Received guild delete from world for guild %d", s->guild_id);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Received guild delete from world for guild %d", s->guild_id);
 
 		//clear all the guild tags.
 		entity_list.RefreshAllGuildInfo(s->guild_id);
@@ -417,10 +417,10 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 
 			if (!c || !c->IsInAGuild())
 			{
-				logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Guilds,"Invalid Client or not in guild. ID=%i", FromID);
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds,"Invalid Client or not in guild. ID=%i", FromID);
 				break;
 			}
-			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Guilds,"Processing ServerOP_OnlineGuildMembersResponse");
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds,"Processing ServerOP_OnlineGuildMembersResponse");
 			EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildMemberUpdate, sizeof(GuildMemberUpdate_Struct));
 			GuildMemberUpdate_Struct *gmus = (GuildMemberUpdate_Struct*)outapp->pBuffer;
 			char Name[64];
@@ -433,7 +433,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 				VARSTRUCT_DECODE_STRING(Name, Buffer);
 				strn0cpy(gmus->MemberName, Name, sizeof(gmus->MemberName));
 				gmus->ZoneID = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
-				logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Guilds,"Sending OP_GuildMemberUpdate to %i. Name=%s ZoneID=%i",FromID,Name,gmus->ZoneID);
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds,"Sending OP_GuildMemberUpdate to %i. Name=%s ZoneID=%i",FromID,Name,gmus->ZoneID);
 				c->QueuePacket(outapp);
 			}
 			safe_delete(outapp);

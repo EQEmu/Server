@@ -176,7 +176,7 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 log_type, uint16 log_category, co
 	#endif
 }
 
-void EQEmuLogSys::LogDebugType(DebugLevel debug_level, uint16 log_category, std::string message, ...)
+void EQEmuLogSys::DebugCategory(DebugLevel debug_level, uint16 log_category, std::string message, ...)
 {
 	va_list args;
 	va_start(args, message);

@@ -3832,7 +3832,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 
 void Corpse::CastRezz(uint16 spellid, Mob* Caster)
 {
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Corpse::CastRezz spellid %i, Rezzed() is %i, rezzexp is %i", spellid,IsRezzed(),rez_experience);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Corpse::CastRezz spellid %i, Rezzed() is %i, rezzexp is %i", spellid,IsRezzed(),rez_experience);
 
 	if(IsRezzed()){
 		if(Caster && Caster->IsClient())

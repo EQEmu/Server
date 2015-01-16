@@ -2479,7 +2479,7 @@ void Client::CreateBandolier(const EQApplicationPacket *app) {
 
 	BandolierCreate_Struct *bs = (BandolierCreate_Struct*)app->pBuffer;
 
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Char: %s Creating Bandolier Set %i, Set Name: %s", GetName(), bs->number, bs->name);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Char: %s Creating Bandolier Set %i, Set Name: %s", GetName(), bs->number, bs->name);
 	strcpy(m_pp.bandoliers[bs->number].name, bs->name);
 
 	const ItemInst* InvItem = nullptr; 
@@ -2491,13 +2491,13 @@ void Client::CreateBandolier(const EQApplicationPacket *app) {
 		InvItem = GetInv()[WeaponSlot];
 		if(InvItem) {
 			BaseItem = InvItem->GetItem();
-			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Char: %s adding item %s to slot %i", GetName(),BaseItem->Name, WeaponSlot);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Char: %s adding item %s to slot %i", GetName(),BaseItem->Name, WeaponSlot);
 			m_pp.bandoliers[bs->number].items[BandolierSlot].item_id = BaseItem->ID;
 			m_pp.bandoliers[bs->number].items[BandolierSlot].icon = BaseItem->Icon;
 			database.SaveCharacterBandolier(this->CharacterID(), bs->number, BandolierSlot, m_pp.bandoliers[bs->number].items[BandolierSlot].item_id, m_pp.bandoliers[bs->number].items[BandolierSlot].icon, bs->name);
 		}
 		else {
-			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Char: %s no item in slot %i", GetName(), WeaponSlot);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Char: %s no item in slot %i", GetName(), WeaponSlot);
 			m_pp.bandoliers[bs->number].items[BandolierSlot].item_id = 0;
 			m_pp.bandoliers[bs->number].items[BandolierSlot].icon = 0;
 		}
@@ -2506,7 +2506,7 @@ void Client::CreateBandolier(const EQApplicationPacket *app) {
 
 void Client::RemoveBandolier(const EQApplicationPacket *app) {
 	BandolierDelete_Struct *bds = (BandolierDelete_Struct*)app->pBuffer;
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Char: %s removing set", GetName(), bds->number);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Char: %s removing set", GetName(), bds->number);
 	memset(m_pp.bandoliers[bds->number].name, 0, 32);
 	for(int i = bandolierMainHand; i <= bandolierAmmo; i++) {
 		m_pp.bandoliers[bds->number].items[i].item_id = 0;
@@ -2521,7 +2521,7 @@ void Client::SetBandolier(const EQApplicationPacket *app) {
 	// any items currently in the weapon slots to inventory.
 
 	BandolierSet_Struct *bss = (BandolierSet_Struct*)app->pBuffer;
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Char: %s activating set %i", GetName(), bss->number);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Char: %s activating set %i", GetName(), bss->number);
 	int16 slot;
 	int16 WeaponSlot;
 	ItemInst *BandolierItems[4]; // Temporary holding area for the weapons we pull out of their inventory
@@ -2585,11 +2585,11 @@ void Client::SetBandolier(const EQApplicationPacket *app) {
 			else { // The player doesn't have the required weapon with them.
 				BandolierItems[BandolierSlot] = 0;
 				if (slot == INVALID_INDEX) {
-					logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Character does not have required bandolier item for slot %i", WeaponSlot);
+					logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Character does not have required bandolier item for slot %i", WeaponSlot);
 					ItemInst *InvItem = m_inv.PopItem(WeaponSlot);
 					if(InvItem) {
 						// If there was an item in that weapon slot, put it in the inventory
-						logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "returning item %s in weapon slot %i to inventory",
+						logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "returning item %s in weapon slot %i to inventory",
 										InvItem->GetItem()->Name, WeaponSlot);
 						if(MoveItemToInventory(InvItem))
 							database.SaveInventory(character_id, 0, WeaponSlot);
@@ -2640,7 +2640,7 @@ void Client::SetBandolier(const EQApplicationPacket *app) {
 			// put it in the player's inventory.
 			ItemInst *InvItem = m_inv.PopItem(WeaponSlot);
 			if(InvItem) {
-				logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Bandolier has no item for slot %i, returning item %s to inventory",
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Bandolier has no item for slot %i, returning item %s to inventory",
 								WeaponSlot, InvItem->GetItem()->Name);
 				// If there was an item in that weapon slot, put it in the inventory
 				if(MoveItemToInventory(InvItem))
@@ -2677,7 +2677,7 @@ bool Client::MoveItemToInventory(ItemInst *ItemToReturn, bool UpdateClient) {
 
 	if(!ItemToReturn) return false;
 
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Inventory,"Char: %s Returning %s to inventory", GetName(), ItemToReturn->GetItem()->Name);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Inventory,"Char: %s Returning %s to inventory", GetName(), ItemToReturn->GetItem()->Name);
 
 	uint32 ItemID = ItemToReturn->GetItem()->ID;
 
@@ -2761,7 +2761,7 @@ bool Client::MoveItemToInventory(ItemInst *ItemToReturn, bool UpdateClient) {
 
 			database.SaveInventory(character_id, m_inv.GetItem(i), i);
 
-			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Char: %s Storing in main inventory slot %i", GetName(), i);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Char: %s Storing in main inventory slot %i", GetName(), i);
 
 			return true;
 		}
@@ -2784,7 +2784,7 @@ bool Client::MoveItemToInventory(ItemInst *ItemToReturn, bool UpdateClient) {
 
 					database.SaveInventory(character_id, m_inv.GetItem(BaseSlotID + BagSlot), BaseSlotID + BagSlot);
 
-					logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Char: %s Storing in bag slot %i", GetName(), BaseSlotID + BagSlot);
+					logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Char: %s Storing in bag slot %i", GetName(), BaseSlotID + BagSlot);
 
 					return true;
 				}
@@ -2794,7 +2794,7 @@ bool Client::MoveItemToInventory(ItemInst *ItemToReturn, bool UpdateClient) {
 
 	// Store on the cursor
 	//
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Char: %s No space, putting on the cursor", GetName());
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Char: %s No space, putting on the cursor", GetName());
 
 	PushItemOnCursor(*ItemToReturn, UpdateClient);
 

@@ -901,7 +901,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	//handle caps
 	if(spec->nofail) {
 		chance = 100;	//cannot fail.
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tradeskills, "...This combine cannot fail.");
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Tradeskills, "...This combine cannot fail.");
 	} else if(over_trivial >= 0) {
 		// At reaching trivial the chance goes to 95% going up an additional
 		// percent for every 40 skillpoints above the trivial.
@@ -921,8 +921,8 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		chance = 95;
 	}
 
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tradeskills, "...Current skill: %d , Trivial: %d , Success chance: %f percent", user_skill , spec->trivial , chance);
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tradeskills, "...Bonusstat: %d , INT: %d , WIS: %d , DEX: %d , STR: %d", bonusstat , GetINT() , GetWIS() , GetDEX() , GetSTR());
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Tradeskills, "...Current skill: %d , Trivial: %d , Success chance: %f percent", user_skill , spec->trivial , chance);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Tradeskills, "...Bonusstat: %d , INT: %d , WIS: %d , DEX: %d , STR: %d", bonusstat , GetINT() , GetWIS() , GetDEX() , GetSTR());
 
 	float res = zone->random.Real(0, 99);
 	int aa_chance = 0;
@@ -1066,7 +1066,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 
 		Message_StringID(4, TRADESKILL_SUCCEED, spec->name.c_str());
 
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tradeskills, "Tradeskill success");
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Tradeskills, "Tradeskill success");
 
 		itr = spec->onsuccess.begin();
 		while(itr != spec->onsuccess.end() && !spec->quest) {
@@ -1098,7 +1098,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 
 		Message_StringID(MT_Emote,TRADESKILL_FAILED);
 
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tradeskills, "Tradeskill failed");
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Tradeskills, "Tradeskill failed");
 			if (this->GetGroup())
 		{
 			entity_list.MessageGroup(this,true,MT_Skills,"%s was unsuccessful in %s tradeskill attempt.",GetName(),this->GetGender() == 0 ? "his" : this->GetGender() == 1 ? "her" : "its");
@@ -1177,9 +1177,9 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 			NotifyNewTitlesAvailable();
 	}
 
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tradeskills, "...skillup_modifier: %f , success_modifier: %d , stat modifier: %d", skillup_modifier , success_modifier , stat_modifier);
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tradeskills, "...Stage1 chance was: %f percent", chance_stage1);
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Tradeskills, "...Stage2 chance was: %f percent. 0 percent means stage1 failed", chance_stage2);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Tradeskills, "...skillup_modifier: %f , success_modifier: %d , stat modifier: %d", skillup_modifier , success_modifier , stat_modifier);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Tradeskills, "...Stage1 chance was: %f percent", chance_stage1);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Tradeskills, "...Stage2 chance was: %f percent. 0 percent means stage1 failed", chance_stage2);
 }
 
 bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint32 some_id,

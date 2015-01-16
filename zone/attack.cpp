@@ -57,7 +57,7 @@ bool Mob::AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* w
 	if (weapon && weapon->IsType(ItemClassCommon)) {
 		const Item_Struct* item = weapon->GetItem();
 
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "Weapon skill : %i", item->ItemType);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "Weapon skill : %i", item->ItemType);
 
 		switch (item->ItemType)
 		{
@@ -187,7 +187,7 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 	if(attacker->IsNPC() && !attacker->IsPet())
 		chancetohit += RuleR(Combat, NPCBonusHitChance);
 
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "CheckHitChance(%s) attacked by %s", defender->GetName(), attacker->GetName());
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "CheckHitChance(%s) attacked by %s", defender->GetName(), attacker->GetName());
 
 	bool pvpmode = false;
 	if(IsClient() && other->IsClient())
@@ -208,7 +208,7 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 
 	//Calculate the level difference
 
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "Chance to hit before level diff calc %.2f", chancetohit);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "Chance to hit before level diff calc %.2f", chancetohit);
 
 	double level_difference = attacker_level - defender_level;
 	double range = defender->GetLevel();
@@ -236,32 +236,32 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 		chancetohit += (RuleR(Combat,HitBonusPerLevel) * level_difference);
 	}
 
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "Chance to hit after level diff calc %.2f", chancetohit);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "Chance to hit after level diff calc %.2f", chancetohit);
 
 	chancetohit -= ((float)defender->GetAGI() * RuleR(Combat, AgiHitFactor));
 
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "Chance to hit after Agility calc %.2f", chancetohit);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "Chance to hit after Agility calc %.2f", chancetohit);
 
 	if(attacker->IsClient())
 	{
 		chancetohit -= (RuleR(Combat,WeaponSkillFalloff) * (attacker->CastToClient()->MaxSkill(skillinuse) - attacker->GetSkill(skillinuse)));
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "Chance to hit after agil calc %.2f", "Chance to hit after weapon falloff calc (attack) %.2f", chancetohit);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "Chance to hit after agil calc %.2f", "Chance to hit after weapon falloff calc (attack) %.2f", chancetohit);
 	}
 
 	if(defender->IsClient())
 	{
 		chancetohit += (RuleR(Combat,WeaponSkillFalloff) * (defender->CastToClient()->MaxSkill(SkillDefense) - defender->GetSkill(SkillDefense)));
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "Chance to hit after weapon falloff calc (defense) %.2f", chancetohit);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "Chance to hit after weapon falloff calc (defense) %.2f", chancetohit);
 	}
 
 	//I dont think this is 100% correct, but at least it does something...
 	if(attacker->spellbonuses.MeleeSkillCheckSkill == skillinuse || attacker->spellbonuses.MeleeSkillCheckSkill == 255) {
 		chancetohit += attacker->spellbonuses.MeleeSkillCheck;
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "Applied spell melee skill bonus %d, yeilding %.2f", attacker->spellbonuses.MeleeSkillCheck, chancetohit);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "Applied spell melee skill bonus %d, yeilding %.2f", attacker->spellbonuses.MeleeSkillCheck, chancetohit);
 	}
 	if(attacker->itembonuses.MeleeSkillCheckSkill == skillinuse || attacker->itembonuses.MeleeSkillCheckSkill == 255) {
 		chancetohit += attacker->itembonuses.MeleeSkillCheck;
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "Applied item melee skill bonus %d, yeilding %.2f", attacker->spellbonuses.MeleeSkillCheck, chancetohit);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "Applied item melee skill bonus %d, yeilding %.2f", attacker->spellbonuses.MeleeSkillCheck, chancetohit);
 	}
 
 	//Avoidance Bonuses on defender decreases baseline hit chance by percent.
@@ -308,7 +308,7 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 
 	//Calculate final chance to hit
 	chancetohit += ((chancetohit * (hitBonus - avoidanceBonus)) / 100.0f);
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "Chance to hit %.2f after accuracy calc %.2f and avoidance calc %.2f", chancetohit, hitBonus, avoidanceBonus);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "Chance to hit %.2f after accuracy calc %.2f and avoidance calc %.2f", chancetohit, hitBonus, avoidanceBonus);
 
 	chancetohit = mod_hit_chance(chancetohit, skillinuse, attacker);
 
@@ -327,7 +327,7 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 	//agains a garunteed riposte (for example) discipline... for now, garunteed hit wins
 
 
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "3 FINAL calculated chance to hit is: %5.2f", chancetohit);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "3 FINAL calculated chance to hit is: %5.2f", chancetohit);
 
 
 	//
@@ -336,7 +336,7 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 
 	float tohit_roll = zone->random.Real(0, 100);
 
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "Final hit chance: %.2f%%. Hit roll %.2f", chancetohit, tohit_roll);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "Final hit chance: %.2f%%. Hit roll %.2f", chancetohit, tohit_roll);
 
 	return(tohit_roll <= chancetohit);
 }
@@ -2028,7 +2028,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	if (IsEngaged())
 	{
 		zone->DelAggroMob();
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "%s Mobs currently Aggro %i", __FUNCTION__, zone->MobsAggroCount());
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "%s Mobs currently Aggro %i", __FUNCTION__, zone->MobsAggroCount());
 	}
 	SetHP(0);
 	SetPet(0);

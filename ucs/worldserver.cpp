@@ -52,7 +52,7 @@ WorldServer::~WorldServer()
 
 void WorldServer::OnConnected()
 {
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Connected to World.");
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Connected to World.");
 	WorldConnection::OnConnected();
 }
 
@@ -67,7 +67,7 @@ void WorldServer::Process()
 
 	while((pack = tcpc.PopPacket()))
 	{
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Received Opcode: %4X", pack->opcode);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Received Opcode: %4X", pack->opcode);
 
 		switch(pack->opcode)
 		{
@@ -88,7 +88,7 @@ void WorldServer::Process()
 
 				std::string Message = Buffer;
 
-				logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Player: %s, Sent Message: %s", From, Message.c_str());
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Player: %s, Sent Message: %s", From, Message.c_str());
 
 				Client *c = CL->FindCharacter(From);
 
@@ -99,7 +99,7 @@ void WorldServer::Process()
 
 				if(!c)
 				{
-					logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Client not found.");
+					logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Client not found.");
 					break;
 				}
 

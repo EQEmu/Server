@@ -65,16 +65,16 @@ int main() {
 		</qsdatabase>
 	*/
 
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Starting EQEmu QueryServ.");
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Starting EQEmu QueryServ.");
 	if (!queryservconfig::LoadConfig()) {
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Loading server configuration failed.");
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Loading server configuration failed.");
 		return 1;
 	}
 
 	Config = queryservconfig::get(); 
 	WorldShortName = Config->ShortName; 
 
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Connecting to MySQL...");
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Connecting to MySQL...");
 	
 	/* MySQL Connection */
 	if (!database.Connect(
@@ -83,22 +83,22 @@ int main() {
 		Config->QSDatabasePassword.c_str(),
 		Config->QSDatabaseDB.c_str(),
 		Config->QSDatabasePort)) {
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Cannot continue without a database connection.");
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Cannot continue without a database connection.");
 		return 1;
 	}
 
 	/* Initialize Logging */
 	if (!load_log_settings(Config->LogSettingsFile.c_str()))
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
 	else
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Could not set signal handler");
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Could not set signal handler");
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Could not set signal handler");
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Could not set signal handler");
 		return 1;
 	}
 

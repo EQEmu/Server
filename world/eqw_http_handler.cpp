@@ -139,11 +139,11 @@ bool EQWHTTPHandler::CheckAuth() const {
 	int16 status = 0;
 	uint32 acctid = database.CheckLogin(m_username.c_str(), m_password.c_str(), &status);
 	if(acctid == 0) {
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Login autentication failed for %s with '%s'", m_username.c_str(), m_password.c_str());
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Login autentication failed for %s with '%s'", m_username.c_str(), m_password.c_str());
 		return(false);
 	}
 	if(status < httpLoginStatus) {
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Login of %s failed: status too low.", m_username.c_str());
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Login of %s failed: status too low.", m_username.c_str());
 		return(false);
 	}
 
@@ -278,29 +278,29 @@ void EQWHTTPServer::CreateNewConnection(uint32 ID, SOCKET in_socket, uint32 irIP
 }
 
 void EQWHTTPServer::Stop() {
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Requesting that HTTP Service stop.");
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Requesting that HTTP Service stop.");
 	m_running = false;
 	Close();
 }
 
 bool EQWHTTPServer::Start(uint16 port, const char *mime_file) {
 	if(m_running) {
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "HTTP Service is already running on port %d", m_port);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "HTTP Service is already running on port %d", m_port);
 		return(false);
 	}
 
 	//load up our nice mime types
 	if(!EQWHTTPHandler::LoadMimeTypes(mime_file)) {
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Failed to load mime types from '%s'", mime_file);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Failed to load mime types from '%s'", mime_file);
 		return(false);
 	} else {
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Loaded mime types from %s", mime_file);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Loaded mime types from %s", mime_file);
 	}
 
 	//fire up the server thread
 	char errbuf[TCPServer_ErrorBufferSize];
 	if(!Open(port, errbuf)) {
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Unable to bind to port %d for HTTP service: %s", port, errbuf);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Unable to bind to port %d for HTTP service: %s", port, errbuf);
 		return(false);
 	}
 

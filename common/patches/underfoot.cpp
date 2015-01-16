@@ -50,7 +50,7 @@ namespace Underfoot
 			//TODO: figure out how to support shared memory with multiple patches...
 			opcodes = new RegularOpcodeManager();
 			if (!opcodes->LoadOpcodes(opfile.c_str())) {
-				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[OPCODES] Error loading opcodes file %s. Not registering patch %s.", opfile.c_str(), name);
+				logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[OPCODES] Error loading opcodes file %s. Not registering patch %s.", opfile.c_str(), name);
 				return;
 			}
 		}
@@ -76,7 +76,7 @@ namespace Underfoot
 
 
 
-		logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Registered patch %s", name);
+		logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Registered patch %s", name);
 	}
 
 	void Reload()
@@ -91,10 +91,10 @@ namespace Underfoot
 			opfile += name;
 			opfile += ".conf";
 			if (!opcodes->ReloadOpcodes(opfile.c_str())) {
-				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[OPCODES] Error reloading opcodes file %s for patch %s.", opfile.c_str(), name);
+				logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[OPCODES] Error reloading opcodes file %s for patch %s.", opfile.c_str(), name);
 				return;
 			}
-			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[OPCODES] Reloaded opcodes for patch %s", name);
+			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[OPCODES] Reloaded opcodes for patch %s", name);
 		}
 	}
 
@@ -307,7 +307,7 @@ namespace Underfoot
 
 		if (EntryCount == 0 || (in->size % sizeof(BazaarSearchResults_Struct)) != 0)
 		{
-			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(BazaarSearchResults_Struct));
+			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(BazaarSearchResults_Struct));
 			delete in;
 			return;
 		}
@@ -494,7 +494,7 @@ namespace Underfoot
 
 		if (ItemCount == 0 || (in->size % sizeof(InternalSerializedItem_Struct)) != 0) {
 
-			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d",
+			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d",
 				opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(InternalSerializedItem_Struct));
 
 			delete in;
@@ -526,7 +526,7 @@ namespace Underfoot
 				safe_delete_array(Serialized);
 			}
 			else {
-				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
+				logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
 			}
 		}
 
@@ -1190,7 +1190,7 @@ namespace Underfoot
 		char *serialized = SerializeItem((ItemInst *)int_struct->inst, int_struct->slot_id, &length, 0);
 
 		if (!serialized) {
-			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Serialization failed on item slot %d.", int_struct->slot_id);
+			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Serialization failed on item slot %d.", int_struct->slot_id);
 			delete in;
 			return;
 		}
@@ -2374,7 +2374,7 @@ namespace Underfoot
 
 		if (EntryCount == 0 || ((in->size % sizeof(Track_Struct))) != 0)
 		{
-			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Track_Struct));
+			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Track_Struct));
 			delete in;
 			return;
 		}
@@ -2624,7 +2624,7 @@ namespace Underfoot
 		//determine and verify length
 		int entrycount = in->size / sizeof(Spawn_Struct);
 		if (entrycount == 0 || (in->size % sizeof(Spawn_Struct)) != 0) {
-			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Spawn_Struct));
+			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Spawn_Struct));
 			delete in;
 			return;
 		}
@@ -3406,7 +3406,7 @@ namespace Underfoot
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Moved item from %u to %u", eq->from_slot, eq->to_slot);
+		logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Moved item from %u to %u", eq->from_slot, eq->to_slot);
 
 		emu->from_slot = UnderfootToServerSlot(eq->from_slot);
 		emu->to_slot = UnderfootToServerSlot(eq->to_slot);

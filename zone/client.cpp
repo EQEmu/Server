@@ -650,7 +650,7 @@ bool Client::SendAllPackets() {
 		if(eqs)
 			eqs->FastQueuePacket((EQApplicationPacket **)&cp->app, cp->ack_req);
 		iterator.RemoveCurrent();
-		logger.LogDebugType(EQEmuLogSys::Moderate, EQEmuLogSys::Client_Server_Packet, "Transmitting a packet");
+		logger.DebugCategory(EQEmuLogSys::Moderate, EQEmuLogSys::Client_Server_Packet, "Transmitting a packet");
 	}
 	return true;
 }
@@ -698,7 +698,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	char message[4096];
 	strn0cpy(message, orig_message, sizeof(message));
 
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Client::ChannelMessageReceived() Channel:%i message:'%s'", chan_num, message);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Client::ChannelMessageReceived() Channel:%i message:'%s'", chan_num, message);
 
 	if (targetname == nullptr) {
 		targetname = (!GetTarget()) ? "" : GetTarget()->GetName();
@@ -1506,7 +1506,7 @@ void Client::UpdateAdmin(bool iFromDB) {
 
 	if(m_pp.gm)
 	{
-		logger.LogDebugType(EQEmuLogSys::Moderate, EQEmuLogSys::Zone_Server, __FUNCTION__ " - %s is a GM", GetName());
+		logger.DebugCategory(EQEmuLogSys::Moderate, EQEmuLogSys::Zone_Server, __FUNCTION__ " - %s is a GM", GetName());
 // no need for this, having it set in pp you already start as gm
 // and it's also set in your spawn packet so other people see it too
 //		SendAppearancePacket(AT_GM, 1, false);
@@ -2235,13 +2235,13 @@ bool Client::CheckIncreaseSkill(SkillUseTypes skillid, Mob *against_who, int cha
 		if(zone->random.Real(0, 99) < Chance)
 		{
 			SetSkill(skillid, GetRawSkill(skillid) + 1);
-			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Skills, "Skill %d at value %d successfully gain with %.4f%%chance (mod %d)", skillid, skillval, Chance, chancemodi);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Skills, "Skill %d at value %d successfully gain with %.4f%%chance (mod %d)", skillid, skillval, Chance, chancemodi);
 			return true;
 		} else {
-			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Skills, "Skill %d at value %d failed to gain with %.4f%%chance (mod %d)", skillid, skillval, Chance, chancemodi);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Skills, "Skill %d at value %d failed to gain with %.4f%%chance (mod %d)", skillid, skillval, Chance, chancemodi);
 		}
 	} else {
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Skills, "Skill %d at value %d cannot increase due to maxmum %d", skillid, skillval, maxskill);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Skills, "Skill %d at value %d cannot increase due to maxmum %d", skillid, skillval, maxskill);
 	}
 	return false;
 }
@@ -2262,10 +2262,10 @@ void Client::CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill) {
 
 		if(zone->random.Real(0,100) < Chance) {	// if they make the roll
 			IncreaseLanguageSkill(langid);	// increase the language skill by 1
-			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Skills, "Language %d at value %d successfully gain with %.4f%%chance", langid, LangSkill, Chance);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Skills, "Language %d at value %d successfully gain with %.4f%%chance", langid, LangSkill, Chance);
 		}
 		else
-			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Skills, "Language %d at value %d failed to gain with %.4f%%chance", langid, LangSkill, Chance);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Skills, "Language %d at value %d failed to gain with %.4f%%chance", langid, LangSkill, Chance);
 	}
 }
 

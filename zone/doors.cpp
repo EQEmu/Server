@@ -145,9 +145,9 @@ bool Doors::Process()
 void Doors::HandleClick(Client* sender, uint8 trigger)
 {
 	//door debugging info dump
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Doors, "%s clicked door %s (dbid %d, eqid %d) at (%.4f,%.4f,%.4f @%.4f)", sender->GetName(), door_name, db_id, door_id, pos_x, pos_y, pos_z, heading);
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Doors, "  incline %d, opentype %d, lockpick %d, key %d, nokeyring %d, trigger %d type %d, param %d", incline, opentype, lockpick, keyitem, nokeyring, trigger_door, trigger_type, door_param);
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Doors, "  size %d, invert %d, dest: %s (%.4f,%.4f,%.4f @%.4f)", size, invert_state, dest_zone, dest_x, dest_y, dest_z, dest_heading);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Doors, "%s clicked door %s (dbid %d, eqid %d) at (%.4f,%.4f,%.4f @%.4f)", sender->GetName(), door_name, db_id, door_id, pos_x, pos_y, pos_z, heading);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Doors, "  incline %d, opentype %d, lockpick %d, key %d, nokeyring %d, trigger %d type %d, param %d", incline, opentype, lockpick, keyitem, nokeyring, trigger_door, trigger_type, door_param);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Doors, "  size %d, invert %d, dest: %s (%.4f,%.4f,%.4f @%.4f)", size, invert_state, dest_zone, dest_x, dest_y, dest_z, dest_heading);
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_MoveDoor, sizeof(MoveDoor_Struct));
 	MoveDoor_Struct* md = (MoveDoor_Struct*)outapp->pBuffer;

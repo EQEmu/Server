@@ -107,7 +107,7 @@ bool RuleManager::ListRules(const char *catname, std::vector<const char *> &into
 	if(catname != nullptr) {
 		cat = FindCategory(catname);
 		if(cat == InvalidCategory) {
-			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Unable to find category '%s'", catname);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Unable to find category '%s'", catname);
 			return(false);
 		}
 	}
@@ -168,18 +168,18 @@ bool RuleManager::SetRule(const char *rule_name, const char *rule_value, Databas
 	switch(type) {
 	case IntRule:
 		m_RuleIntValues [index] = atoi(rule_value);
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Set rule %s to value %d", rule_name, m_RuleIntValues[index]);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Set rule %s to value %d", rule_name, m_RuleIntValues[index]);
 		break;
 	case RealRule:
 		m_RuleRealValues[index] = atof(rule_value);
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Set rule %s to value %.13f", rule_name, m_RuleRealValues[index]);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Set rule %s to value %.13f", rule_name, m_RuleRealValues[index]);
 		break;
 	case BoolRule:
 		uint32 val = 0;
 		if(!strcasecmp(rule_value, "on") || !strcasecmp(rule_value, "true") || !strcasecmp(rule_value, "yes") || !strcasecmp(rule_value, "enabled") || !strcmp(rule_value, "1"))
 			val = 1;
 		m_RuleBoolValues[index] = val;
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Set rule %s to value %s", rule_name, m_RuleBoolValues[index] == 1 ?"true":"false");
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Set rule %s to value %s", rule_name, m_RuleBoolValues[index] == 1 ?"true":"false");
 		break;
 	}
 
@@ -190,7 +190,7 @@ bool RuleManager::SetRule(const char *rule_name, const char *rule_value, Databas
 }
 
 void RuleManager::ResetRules() {
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Resetting running rules to default values");
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Resetting running rules to default values");
 	#define RULE_INT(cat, rule, default_value) \
 		m_RuleIntValues[ Int__##rule ] = default_value;
 	#define RULE_REAL(cat, rule, default_value) \
@@ -214,7 +214,7 @@ bool RuleManager::_FindRule(const char *rule_name, RuleType &type_into, uint16 &
 			return(true);
 		}
 	}
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Unable to find rule '%s'", rule_name);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Unable to find rule '%s'", rule_name);
 	return(false);
 }
 
@@ -241,14 +241,14 @@ void RuleManager::SaveRules(Database *db, const char *ruleset) {
 
 			m_activeRuleset = _FindOrCreateRuleset(db, ruleset);
 			if(m_activeRuleset == -1) {
-				logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Unable to find or create rule set %s", ruleset);
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Unable to find or create rule set %s", ruleset);
 				return;
 			}
 			m_activeName = ruleset;
 		}
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Saving running rules into rule set %s (%d)", ruleset, m_activeRuleset);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Saving running rules into rule set %s (%d)", ruleset, m_activeRuleset);
 	} else {
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Saving running rules into running rule set %s", m_activeName.c_str(), m_activeRuleset);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Saving running rules into running rule set %s", m_activeName.c_str(), m_activeRuleset);
 	}
 
 	int r;
@@ -269,11 +269,11 @@ bool RuleManager::LoadRules(Database *db, const char *ruleset) {
 
 	int rsid = GetRulesetID(db, ruleset);
 	if(rsid < 0) {
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Failed to find ruleset '%s' for load operation. Canceling.", ruleset);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Failed to find ruleset '%s' for load operation. Canceling.", ruleset);
 		return(false);
 	}
 
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Loading rule set '%s' (%d)", ruleset, rsid);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Loading rule set '%s' (%d)", ruleset, rsid);
 
 	m_activeRuleset = rsid;
 	m_activeName = ruleset;
@@ -288,7 +288,7 @@ bool RuleManager::LoadRules(Database *db, const char *ruleset) {
 
     for(auto row = results.begin(); row != results.end(); ++row)
         if(!SetRule(row[0], row[1], nullptr, false))
-            logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Unable to interpret rule record for %s", row[0]);
+            logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Unable to interpret rule record for %s", row[0]);
 
 	return true;
 }
@@ -314,7 +314,7 @@ void RuleManager::_SaveRule(Database *db, RuleType type, uint16 index) {
                                     m_activeRuleset, _GetRuleName(type, index), vstr);
     auto results = db->QueryDatabase(query);
 	if (!results.Success())
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Fauled to set rule in the database: %s: %s", query.c_str(), results.ErrorMessage().c_str());
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Fauled to set rule in the database: %s: %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
@@ -356,7 +356,7 @@ int RuleManager::_FindOrCreateRuleset(Database *db, const char *ruleset) {
 	auto results = db->QueryDatabase(query);
 	if (!results.Success())
 	{
-		logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Fauled to create rule set in the database: %s: %s", query.c_str(), results.ErrorMessage().c_str());
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Rules, "Fauled to create rule set in the database: %s: %s", query.c_str(), results.ErrorMessage().c_str());
 		return -1;
 	}
 

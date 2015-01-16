@@ -1896,7 +1896,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 	if (effectmod > effectmodcap)
 		effectmod = effectmodcap;
 
-	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "%s::GetInstrumentMod() spell=%d mod=%d modcap=%d\n",
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "%s::GetInstrumentMod() spell=%d mod=%d modcap=%d\n",
 			GetName(), spell_id, effectmod, effectmodcap);
 
 	return effectmod;
