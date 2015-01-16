@@ -259,7 +259,6 @@ void command_undyeme(Client *c, const Seperator *sep);
 void command_hp(Client *c, const Seperator *sep);
 void command_ginfo(Client *c, const Seperator *sep);
 void command_logs(Client *c, const Seperator *sep);
-void command_nologs(Client *c, const Seperator *sep);
 void command_logsql(Client *c, const Seperator *sep);
 void command_qglobal(Client *c, const Seperator *sep);
 void command_path(Client *c, const Seperator *sep);
