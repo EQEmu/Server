@@ -143,7 +143,8 @@ void EQEmuLogSys::ProcessGMSay(uint16 log_type, uint16 log_category, std::string
 	}
 }
 
-void EQEmuLogSys::ProcessLogWrite(uint16 log_type, std::string message){
+void EQEmuLogSys::ProcessLogWrite(uint16 log_type, uint16 log_category, std::string message)
+{
 	char time_stamp[80];
 	EQEmuLogSys::SetCurrentTimeStamp(time_stamp);
 
@@ -197,7 +198,7 @@ void EQEmuLogSys::LogDebugType(DebugLevel debug_level, uint16 log_category, std:
 
 	EQEmuLogSys::ProcessConsoleMessage(EQEmuLogSys::Debug, 0, output_debug_message);
 	EQEmuLogSys::ProcessGMSay(EQEmuLogSys::Debug, 0, output_debug_message);
-	EQEmuLogSys::ProcessLogWrite(EQEmuLogSys::Debug, output_debug_message);
+	EQEmuLogSys::ProcessLogWrite(EQEmuLogSys::Debug, 0, output_debug_message);
 }
 
 void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...)
@@ -209,7 +210,7 @@ void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...)
 
 	EQEmuLogSys::ProcessConsoleMessage(EQEmuLogSys::Debug, 0, output_message);
 	EQEmuLogSys::ProcessGMSay(EQEmuLogSys::Debug, 0, output_message);
-	EQEmuLogSys::ProcessLogWrite(EQEmuLogSys::Debug, output_message);
+	EQEmuLogSys::ProcessLogWrite(EQEmuLogSys::Debug, 0, output_message);
 }
 
 void EQEmuLogSys::Log(uint16 log_type, const std::string message, ...)
@@ -225,7 +226,7 @@ void EQEmuLogSys::Log(uint16 log_type, const std::string message, ...)
 
 	EQEmuLogSys::ProcessConsoleMessage(log_type, 0, output_message);
 	EQEmuLogSys::ProcessGMSay(log_type, 0, output_message);
-	EQEmuLogSys::ProcessLogWrite(log_type, output_message);
+	EQEmuLogSys::ProcessLogWrite(log_type, 0, output_message);
 }
 
 void EQEmuLogSys::SetCurrentTimeStamp(char* time_stamp){
