@@ -342,11 +342,8 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	{
 		//FatherNiwtit: make sure we can see them. last since it is very expensive
 		if(CheckLosFN(mob)) {
-
-			// Aggro
-			#if EQDEBUG>=6
-				logger.LogDebug(EQEmuLogSys::General, "Check aggro for %s target %s.", GetName(), mob->GetName());
-			#endif
+			logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Check aggro for %s target %s.", GetName(), mob->GetName());
+			
 			return( mod_will_aggro(mob, this) );
 		}
 	}
