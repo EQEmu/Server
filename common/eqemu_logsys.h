@@ -50,7 +50,7 @@ public:
 
 	/* If you add to this, make sure you update LogCategoryName */
 	enum LogCategory {
-		Zone_Server = 0,
+		Zone_Server = 1,
 		World_Server,
 		UCS_Server,
 		QS_Server,

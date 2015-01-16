@@ -1,3 +1,6 @@
+
+SET FOREIGN_KEY_CHECKS=0;
+
 -- ----------------------------
 -- Table structure for logsys_categories
 -- ----------------------------
@@ -14,23 +17,23 @@ CREATE TABLE `logsys_categories` (
 -- ----------------------------
 -- Records of logsys_categories
 -- ----------------------------
-INSERT INTO `logsys_categories` VALUES ('0', 'Zone_Server', '0', '0', '0');
-INSERT INTO `logsys_categories` VALUES ('1', 'World_Server', '0', '0', '0');
-INSERT INTO `logsys_categories` VALUES ('2', 'UCS_Server', '0', '0', '0');
-INSERT INTO `logsys_categories` VALUES ('3', 'QS_Server', '0', '0', '0');
-INSERT INTO `logsys_categories` VALUES ('4', 'WebInterface_Server', '0', '0', '0');
-INSERT INTO `logsys_categories` VALUES ('5', 'AA', '0', '0', '0');
-INSERT INTO `logsys_categories` VALUES ('6', 'Doors', '0', '0', '0');
-INSERT INTO `logsys_categories` VALUES ('7', 'Guilds', '0', '0', '0');
-INSERT INTO `logsys_categories` VALUES ('8', 'Inventory', '0', '0', '0');
-INSERT INTO `logsys_categories` VALUES ('9', 'Launcher', '0', '0', '0');
-INSERT INTO `logsys_categories` VALUES ('10', 'Netcode - Does not log to gmsay for loop reasons', '0', '0', '0');
-INSERT INTO `logsys_categories` VALUES ('11', 'Object', '0', '0', '0');
-INSERT INTO `logsys_categories` VALUES ('12', 'Rules', '0', '0', '0');
-INSERT INTO `logsys_categories` VALUES ('13', 'Skills', '0', '0', '0');
-INSERT INTO `logsys_categories` VALUES ('14', 'Spawns', '0', '0', '0');
-INSERT INTO `logsys_categories` VALUES ('15', 'Spells', '0', '0', '0');
-INSERT INTO `logsys_categories` VALUES ('16', 'Tasks', '0', '0', '0');
-INSERT INTO `logsys_categories` VALUES ('17', 'Trading', '0', '0', '0');
-INSERT INTO `logsys_categories` VALUES ('18', 'Tradeskills', '0', '0', '0');
-INSERT INTO `logsys_categories` VALUES ('19', 'Tribute', '0', '0', '0');
+INSERT INTO `logsys_categories` VALUES ('1', 'Zone_Server', '1', '0', '1');
+INSERT INTO `logsys_categories` VALUES ('2', 'World_Server', '0', '0', '1');
+INSERT INTO `logsys_categories` VALUES ('3', 'UCS_Server', '0', '0', '1');
+INSERT INTO `logsys_categories` VALUES ('4', 'QS_Server', '0', '0', '1');
+INSERT INTO `logsys_categories` VALUES ('5', 'WebInterface_Server', '0', '0', '1');
+INSERT INTO `logsys_categories` VALUES ('6', 'AA', '0', '0', '1');
+INSERT INTO `logsys_categories` VALUES ('7', 'Doors', '0', '0', '1');
+INSERT INTO `logsys_categories` VALUES ('8', 'Guilds', '0', '0', '1');
+INSERT INTO `logsys_categories` VALUES ('9', 'Inventory', '0', '0', '1');
+INSERT INTO `logsys_categories` VALUES ('10', 'Launcher', '0', '0', '1');
+INSERT INTO `logsys_categories` VALUES ('11', 'Netcode - Does not log to gmsay for loop reasons', '0', '0', '1');
+INSERT INTO `logsys_categories` VALUES ('12', 'Object', '0', '0', '1');
+INSERT INTO `logsys_categories` VALUES ('13', 'Rules', '0', '0', '1');
+INSERT INTO `logsys_categories` VALUES ('14', 'Skills', '0', '0', '1');
+INSERT INTO `logsys_categories` VALUES ('15', 'Spawns', '0', '0', '1');
+INSERT INTO `logsys_categories` VALUES ('16', 'Spells', '0', '0', '1');
+INSERT INTO `logsys_categories` VALUES ('17', 'Tasks', '0', '0', '1');
+INSERT INTO `logsys_categories` VALUES ('18', 'Trading', '0', '0', '1');
+INSERT INTO `logsys_categories` VALUES ('19', 'Tradeskills', '0', '0', '1');
+INSERT INTO `logsys_categories` VALUES ('20', 'Tribute', '0', '0', '1');
