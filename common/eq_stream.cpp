@@ -985,11 +985,10 @@ EQRawApplicationPacket *p=nullptr;
 	if(p) {
 		if(OpMgr != nullptr && *OpMgr != nullptr) {
 			EmuOpcode emu_op = (*OpMgr)->EQToEmu(p->opcode);
-#if EQDEBUG >= 4
 			if(emu_op == OP_Unknown) {
-				logger.Log(EQEmuLogSys::Debug, "Unable to convert EQ opcode 0x%.4x to an Application opcode.", p->opcode);
+				logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "Unable to convert EQ opcode 0x%.4x to an Application opcode.", p->opcode);
 			}
-#endif
+
 			p->SetOpcode(emu_op);
 		}
 	}
