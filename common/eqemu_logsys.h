@@ -48,7 +48,7 @@ public:
 		Detail,			/* 2 - Use this for extreme detail in logging, usually in extreme debugging in the stack or interprocess communication */
 	};
 
-	/* If you add to this, make sure you update LogCategoryName in eqemu_logsys.cpp */
+	/* If you add to this, make sure you update LogCategoryName */
 	enum LogCategory {
 		Zone_Server = 0,
 		World_Server,
@@ -108,5 +108,28 @@ private:
 
 extern EQEmuLogSys logger;
 
+/* If you add to this, make sure you update LogCategory */
+static const char* LogCategoryName[EQEmuLogSys::LogCategory::MaxCategoryID] = {
+	"Zone",
+	"World",
+	"UCS",
+	"QueryServer",
+	"WebInterface",
+	"AA",
+	"Doors",
+	"Guild",
+	"Inventory",
+	"Launcher",
+	"Netcode",
+	"Object",
+	"Rules",
+	"Skills",
+	"Spawns",
+	"Spells",
+	"Tasks",
+	"Trading",
+	"Tradeskills",
+	"Tribute",
+};
 
 #endif

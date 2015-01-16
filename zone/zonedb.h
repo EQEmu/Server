@@ -4,6 +4,7 @@
 #include "../common/shareddb.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/faction.h"
+#include "../common/eqemu_logsys.h"
 
 class Client;
 class Corpse;

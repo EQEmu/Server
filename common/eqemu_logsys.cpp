@@ -20,6 +20,7 @@
 #include "eqemu_logsys.h"
 #include "platform.h"
 #include "string_util.h"
+#include "database.h"
 
 #include <iostream>
 #include <fstream> 
@@ -70,30 +71,6 @@ static const char* TypeNames[EQEmuLogSys::MaxLogID] = {
 	"Crash",
 };
 
-/* If you add to this, make sure you update LogCategory in eqemu_logsys.h */
-static const char* LogCategoryName[EQEmuLogSys::LogCategory::MaxCategoryID] = {
-	"Zone",
-	"World",
-	"UCS",
-	"QueryServer",
-	"WebInterface",
-	"AA",
-	"Doors",
-	"Guild",
-	"Inventory",
-	"Launcher",
-	"Netcode",
-	"Object",
-	"Rules",
-	"Skills",
-	"Spawns",
-	"Spells",
-	"Tasks",
-	"Trading",
-	"Tradeskills",
-	"Tribute",
-};
-
 static Console::Color LogColors[EQEmuLogSys::MaxLogID] = {
 	Console::Color::Yellow, 		   // "Status", 
 	Console::Color::Yellow,			   // "Normal", 
@@ -121,7 +98,7 @@ void EQEmuLogSys::LoadLogSettings()
 		log_settings[i].log_to_console = 1;
 		log_settings[i].log_to_file = 1;
 		log_settings[i].log_to_gmsay = 1;
-		std::cout << "Setting log settings for " << i << " " << LogCategoryName[i] << " " << std::endl;
+		// std::cout << "Setting log settings for " << i << " " << LogCategoryName[i] << " " << std::endl;
 	}
 	log_settings_loaded = true;
 }

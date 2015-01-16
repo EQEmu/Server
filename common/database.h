@@ -645,6 +645,9 @@ public:
 	void	SetLoginFlags(uint32 CharID, bool LFP, bool LFG, uint8 firstlogon);
 	void	AddReport(std::string who, std::string against, std::string lines);
 
+	/* EQEmuLogSys */
+	void	LoadLogSysSettings(EQEmuLogSys::LogSettings* log_settings);
+
 private:
 	void DBInitVars();
 

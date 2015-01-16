@@ -4257,3 +4257,28 @@ uint32 Database::GetGuildIDByCharID(uint32 char_id)
 	auto row = results.begin();
 	return atoi(row[0]);
 }
+
+void Database::LoadLogSysSettings(EQEmuLogSys::LogSettings* log_settings){
+	std::string query = 
+		"SELECT "
+		"log_category_id, "
+		"log_category_description, "
+		"log_to_console, "
+		"log_to_file, "
+		"log_to_gmsay "
+		"FROM "
+		"logsys_categories "
+		"ORDER BY log_category_id";
+	auto results = QueryDatabase(query);
+	int log_category = 0;
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		log_category = atoi(row[0]);
+		log_settings[log_category].log_to_console = atoi(row[2]);
+		log_settings[log_category].log_to_file = atoi(row[3]);
+		log_settings[log_category].log_to_gmsay = atoi(row[4]);
+		std::cout << "Setting log settings for " << log_category << " " << LogCategoryName[log_category] << " " << std::endl;
+		std::cout << "--- log_to_console = " << atoi(row[2]) << std::endl;
+		std::cout << "--- log_to_file = " << atoi(row[3]) << std::endl;
+		std::cout << "--- log_to_gmsay = " << atoi(row[4]) << std::endl;
+	}
+}
