@@ -114,7 +114,7 @@ std::string EQEmuLogSys::FormatDebugCategoryMessageString(uint16 log_category, s
 void EQEmuLogSys::ProcessGMSay(uint16 log_type, uint16 log_category, std::string message)
 {
 	/* Check if category enabled for process */
-	if (log_settings[log_category].log_to_gmsay)
+	if (log_settings[log_category].log_to_gmsay == 0)
 		return;
 
 	/* Enabling Netcode based GMSay output creates a feedback loop that ultimately ends in a crash */
@@ -129,7 +129,7 @@ void EQEmuLogSys::ProcessGMSay(uint16 log_type, uint16 log_category, std::string
 void EQEmuLogSys::ProcessLogWrite(uint16 log_type, uint16 log_category, std::string message)
 {
 	/* Check if category enabled for process */
-	if (log_settings[log_category].log_to_file)
+	if (log_settings[log_category].log_to_file == 0)
 		return;
 
 	char time_stamp[80];
@@ -146,7 +146,7 @@ void EQEmuLogSys::ProcessLogWrite(uint16 log_type, uint16 log_category, std::str
 void EQEmuLogSys::ProcessConsoleMessage(uint16 log_type, uint16 log_category, const std::string message)
 {
 	/* Check if category enabled for process */
-	if (log_settings[log_category].log_to_console)
+	if (log_settings[log_category].log_to_console == 0)
 		return;
 
 	if (log_type > EQEmuLogSys::MaxLogID){
