@@ -4276,9 +4276,9 @@ void Database::LoadLogSysSettings(EQEmuLogSys::LogSettings* log_settings){
 		log_settings[log_category].log_to_console = atoi(row[2]);
 		log_settings[log_category].log_to_file = atoi(row[3]);
 		log_settings[log_category].log_to_gmsay = atoi(row[4]);
-		std::cout << "Setting log settings for " << log_category << " " << LogCategoryName[log_category] << " " << std::endl;
-		std::cout << "--- log_to_console = " << atoi(row[2]) << std::endl;
-		std::cout << "--- log_to_file = " << atoi(row[3]) << std::endl;
-		std::cout << "--- log_to_gmsay = " << atoi(row[4]) << std::endl;
+		// std::cout << "Setting log settings for " << log_category << " " << LogCategoryName[log_category] << " " << std::endl;
+		// std::cout << "--- log_to_console = " << atoi(row[2]) << std::endl;
+		// std::cout << "--- log_to_file = " << atoi(row[3]) << std::endl;
+		// std::cout << "--- log_to_gmsay = " << atoi(row[4]) << std::endl;
 	}
 }
