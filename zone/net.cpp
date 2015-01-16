@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
 	}
 
 	/* Register Log System and Settings */
-	logger.LoadLogSettings();
+	logger.LoadLogSettingsDefaults();
 	logger.OnLogHookCallBackZone(&ClientLogs::ClientMessage);
 	database.LoadLogSysSettings(logger.log_settings);
 

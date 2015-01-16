@@ -35,7 +35,7 @@ void ExportBaseData(SharedDatabase *db);
 
 int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformClientExport);
-	logger.LoadLogSettings();
+	logger.LoadLogSettingsDefaults();
 	set_exception_handler();
 
 	logger.Log(EQEmuLogSys::Status, "Client Files Export Utility");

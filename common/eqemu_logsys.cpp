@@ -89,7 +89,7 @@ EQEmuLogSys::EQEmuLogSys(){
 EQEmuLogSys::~EQEmuLogSys(){
 }
 
-void EQEmuLogSys::LoadLogSettings()
+void EQEmuLogSys::LoadLogSettingsDefaults()
 {
 	log_platform = GetExecutablePlatformInt();
 	std::cout << "PLATFORM " << log_platform << std::endl;
