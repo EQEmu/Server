@@ -111,6 +111,7 @@ extern EQEmuLogSys logger;
 
 /* If you add to this, make sure you update LogCategory */
 static const char* LogCategoryName[EQEmuLogSys::LogCategory::MaxCategoryID] = {
+	"",
 	"Zone",
 	"World",
 	"UCS",
