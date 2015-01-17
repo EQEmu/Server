@@ -93,7 +93,6 @@ public:
 
 	bool write(LogIDs id, const char *fmt, ...);
 	bool writePVA(LogIDs id, const char *prefix, const char *fmt, va_list args);
-	bool Dump(LogIDs id, uint8* data, uint32 size, uint32 cols=16, uint32 skip=0);
 private:
 	bool open(LogIDs id);
 	bool writeNTS(LogIDs id, bool dofile, const char *fmt, ...); // no error checking, assumes is open, no locking, no timestamp, no newline
