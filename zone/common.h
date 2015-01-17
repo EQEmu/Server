@@ -158,18 +158,18 @@ enum TradeState {
 	TradeCompleting
 };
 
-enum { //Numhits type
-	NUMHIT_IncomingHitAttempts = 1,			//Attempted incoming melee attacks (hit or miss) on YOU.
-	NUMHIT_OutgoingHitAttempts = 2,			//Attempted outgoing melee attacks (hit or miss) on YOUR TARGET.
-	NUMHIT_IncomingSpells = 3,				//Incoming detrimental spells
-	NUMHIT_OutgoingSpells = 4,				//Outgoing deterimental spells
-	NUMHIT_OutgoingHitSuccess = 5,			//Successful outgoing melee attack HIT on YOUR TARGET.
-	NUMHIT_IncomingHitSuccess = 6,			//Successful incoming melee attack HIT on YOU.
-	NUMHIT_MatchingSpells = 7,				//Any casted spell matching/triggering a focus effect.
-	NUMHIT_IncomingDamage = 8,				//Successful incoming spell or melee dmg attack on YOU
-	NUMHIT_ReflectSpell = 9,				//Incoming Reflected spells.
-	NUMHIT_DefensiveSpellProcs = 10,		//Defensive buff procs
-	NUMHIT_OffensiveSpellProcs = 11			//Offensive buff procs
+enum class NumHit {		  // Numhits type
+	IncomingHitAttempts = 1,  // Attempted incoming melee attacks (hit or miss) on YOU.
+	OutgoingHitAttempts = 2,  // Attempted outgoing melee attacks (hit or miss) on YOUR TARGET.
+	IncomingSpells = 3,       // Incoming detrimental spells
+	OutgoingSpells = 4,       // Outgoing detrimental spells
+	OutgoingHitSuccess = 5,   // Successful outgoing melee attack HIT on YOUR TARGET.
+	IncomingHitSuccess = 6,   // Successful incoming melee attack HIT on YOU.
+	MatchingSpells = 7,       // Any casted spell matching/triggering a focus effect.
+	IncomingDamage = 8,       // Successful incoming spell or melee dmg attack on YOU
+	ReflectSpell = 9,	 // Incoming Reflected spells.
+	DefensiveSpellProcs = 10, // Defensive buff procs
+	OffensiveSpellProcs = 11  // Offensive buff procs
 };
 
 //this is our internal representation of the BUFF struct, can put whatever we want in it

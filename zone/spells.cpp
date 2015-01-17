@@ -1268,7 +1268,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 	}
 
 	if(IsClient()) {
-		CheckNumHitsRemaining(NUMHIT_MatchingSpells);
+		CheckNumHitsRemaining(NumHit::MatchingSpells);
 		TrySympatheticProc(target, spell_id);
 	}
 
@@ -3573,7 +3573,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 			if(IsEffectInSpell(buffs[b].spellid, SE_BlockNextSpellFocus)) {
 				focus = CalcFocusEffect(focusBlockNextSpell, buffs[b].spellid, spell_id);
 				if(focus) {
-					CheckNumHitsRemaining(NUMHIT_MatchingSpells,b);
+					CheckNumHitsRemaining(NumHit::MatchingSpells, b);
 					Message_StringID(MT_SpellFailure, SPELL_WOULDNT_HOLD);
 					safe_delete(action_packet);
 					return false;
@@ -3622,7 +3622,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		}
 		if(reflect_chance) {
 			Message_StringID(MT_Spells, SPELL_REFLECT, GetCleanName(), spelltar->GetCleanName());
-			CheckNumHitsRemaining(NUMHIT_ReflectSpell);
+			CheckNumHitsRemaining(NumHit::ReflectSpell);
 			SpellOnTarget(spell_id, this, true, use_resist_adjust, resist_adjust);
 			safe_delete(action_packet);
 			return false;
@@ -3673,8 +3673,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 					}
 				}
 
-				spelltar->CheckNumHitsRemaining(NUMHIT_IncomingSpells);
-				CheckNumHitsRemaining(NUMHIT_OutgoingSpells);
+				spelltar->CheckNumHitsRemaining(NumHit::IncomingSpells);
+				CheckNumHitsRemaining(NumHit::OutgoingSpells);
 
 				safe_delete(action_packet);
 				return false;
@@ -3732,10 +3732,10 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		
 	if (IsDetrimentalSpell(spell_id)) {
 
-		CheckNumHitsRemaining(NUMHIT_OutgoingSpells);
+		CheckNumHitsRemaining(NumHit::OutgoingSpells);
 
 		if (spelltar)
-			spelltar->CheckNumHitsRemaining(NUMHIT_IncomingSpells);
+			spelltar->CheckNumHitsRemaining(NumHit::IncomingSpells);
 	}
 
 	// send the action packet again now that the spell is successful

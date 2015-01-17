@@ -3383,7 +3383,7 @@ void Mob::TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger)
 
 		if(IsValidSpell(trigger_spell_id) && GetTarget()){
 			SpellFinished(trigger_spell_id, GetTarget(),10, 0, -1, spells[trigger_spell_id].ResistDiff);
-			CheckNumHitsRemaining(NUMHIT_MatchingSpells,-1, focus_spell);
+			CheckNumHitsRemaining(NumHit::MatchingSpells, -1, focus_spell);
 		}
 	}
 }
@@ -3615,7 +3615,7 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 		value += tmp_focus;
 
 		if (tmp_buffslot >= 0)
-			CheckNumHitsRemaining(NUMHIT_MatchingSpells, tmp_buffslot);
+			CheckNumHitsRemaining(NumHit::MatchingSpells, tmp_buffslot);
 	}
 	return value;
 }
@@ -3720,7 +3720,7 @@ void Mob::TrySympatheticProc(Mob *target, uint32 spell_id)
 					SpellFinished(focus_trigger, target, 10, 0, -1, spells[focus_trigger].ResistDiff);
 			}
 
-			CheckNumHitsRemaining(NUMHIT_MatchingSpells, -1, focus_spell);
+			CheckNumHitsRemaining(NumHit::MatchingSpells, -1, focus_spell);
 		}
 }
 

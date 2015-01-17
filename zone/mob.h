@@ -282,7 +282,7 @@ public:
 	int16 GetBuffSlotFromType(uint16 type);
 	uint16 GetSpellIDFromSlot(uint8 slot);
 	int CountDispellableBuffs();
-	void CheckNumHitsRemaining(uint8 type, int32 buff_slot=-1, uint16 spell_id=SPELL_UNKNOWN);
+	void CheckNumHitsRemaining(NumHit type, int32 buff_slot = -1, uint16 spell_id = SPELL_UNKNOWN);
 	bool HasNumhits() const { return has_numhits; }
 	inline void Numhits(bool val) { has_numhits = val; }
 	bool HasMGB() const { return has_MGB; }
