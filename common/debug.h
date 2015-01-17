@@ -102,8 +102,6 @@ public:
 	void SetCallback(LogIDs id, msgCallbackFmt proc);
 	void SetCallback(LogIDs id, msgCallbackBuf proc);
 	void SetCallback(LogIDs id, msgCallbackPva proc);
-
-	bool writebuf(LogIDs id, const char *buf, uint8 size, uint32 count);
 	bool write(LogIDs id, const char *fmt, ...);
 	bool writePVA(LogIDs id, const char *prefix, const char *fmt, va_list args);
 	bool Dump(LogIDs id, uint8* data, uint32 size, uint32 cols=16, uint32 skip=0);
