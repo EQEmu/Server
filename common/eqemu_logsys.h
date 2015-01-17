@@ -77,6 +77,7 @@ public:
 		Quests,
 		AI,
 		Combat,
+		Pathing,
 		MaxCategoryID	/* Don't Remove this*/
 	};
 
@@ -144,7 +145,8 @@ static const char* LogCategoryName[EQEmuLogSys::LogCategory::MaxCategoryID] = {
 	"Attack",
 	"Quests",
 	"AI",
-	"Combat"
+	"Combat",
+	"Pathing"
 };
 
 #endif
