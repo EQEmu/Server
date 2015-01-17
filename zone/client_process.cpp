@@ -836,7 +836,7 @@ void Client::BulkSendInventoryItems() {
 		if(inst) {
 			bool is_arrow = (inst->GetItem()->ItemType == ItemTypeArrow) ? true : false;
 			int16 free_slot_id = m_inv.FindFreeSlot(inst->IsType(ItemClassContainer), true, inst->GetItem()->Size, is_arrow);
-			mlog(INVENTORY__ERROR, "Incomplete Trade Transaction: Moving %s from slot %i to %i", inst->GetItem()->Name, slot_id, free_slot_id);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Incomplete Trade Transaction: Moving %s from slot %i to %i", inst->GetItem()->Name, slot_id, free_slot_id);
 			PutItemInInventory(free_slot_id, *inst, false);
 			database.SaveInventory(character_id, nullptr, slot_id);
 			safe_delete(inst);
