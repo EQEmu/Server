@@ -5119,7 +5119,6 @@ void Client::Handle_OP_Death(const EQApplicationPacket *app)
 
 	//I think this attack_skill value is really a value from SkillDamageTypes...
 	if (ds->attack_skill > HIGHEST_SKILL) {
-		mlog(CLIENT__ERROR, "Invalid skill in OP_Death: %d");
 		return;
 	}
 
