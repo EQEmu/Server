@@ -123,9 +123,6 @@ private:
 */
 	uint8	pLogStatus[MaxLogID];
 
-	msgCallbackFmt logCallbackFmt[MaxLogID];
-	msgCallbackBuf logCallbackBuf[MaxLogID];
-	msgCallbackPva logCallbackPva[MaxLogID];
 };
 
 extern EQEmuLog* LogFile;
