@@ -71,22 +71,6 @@ extern void log_hex(LogType type, const void *data, unsigned long length, unsign
 extern void log_packet(LogType type, const BasePacket *p);
 extern void log_raw_packet(LogType type, uint16 seq, const BasePacket *p);
 
-#ifdef DISABLE_LOGSYS
-	//completely disabled, this is the best I can come up with since we have no variadic macros
-	inline void zlog(LogType, const char *, ...) {}
-#else	//!DISABLE_LOGSYS
-		#ifdef WORLD
-			class ZoneServer;
-			extern void log_message_zone(LogType type, ZoneServer *who, const char *fmt, ...);
-			#define zlog( type, format, ...) \
-				do { \
-					if(log_type_info[ type ].enabled) { \
-						log_message_zone(type, this, format, ##__VA_ARGS__); \
-					} \
-				} while(false)
-		#endif
-#endif	//!DISABLE_LOGSYS
-
 #ifndef DISABLE_LOGSYS
 /* these are macros which do not use ..., and work for anybody */
 	#define _hex( type, data, len) \
