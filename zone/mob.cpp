@@ -4536,7 +4536,7 @@ void Mob::MeleeLifeTap(int32 damage) {
 	if(lifetap_amt && damage > 0){
 
 		lifetap_amt = damage * lifetap_amt / 100;
-		mlog(COMBAT__DAMAGE, "Melee lifetap healing for %d damage.", damage);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Melee lifetap healing for %d damage.", damage);
 
 		if (lifetap_amt > 0)
 			HealDamage(lifetap_amt); //Heal self for modified damage amount.

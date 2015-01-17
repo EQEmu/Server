@@ -711,7 +711,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						stun_resist += aabonuses.StunResist;
 
 					if (stun_resist <= 0 || zone->random.Int(0,99) >= stun_resist) {
-						mlog(COMBAT__HITS, "Stunned. We had %d percent resist chance.", stun_resist);
+						logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Stunned. We had %d percent resist chance.", stun_resist);
 
 						if (caster->IsClient())
 							effect_value += effect_value*caster->GetFocusEffect(focusFcStunTimeMod, spell_id)/100;
@@ -721,7 +721,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						if (IsClient())
 							Message_StringID(MT_Stun, SHAKE_OFF_STUN);
 
-						mlog(COMBAT__HITS, "Stun Resisted. We had %d percent resist chance.", stun_resist);
+						logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Stun Resisted. We had %d percent resist chance.", stun_resist);
 					}
 				}
 				break;
