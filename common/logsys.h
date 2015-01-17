@@ -156,14 +156,6 @@ extern void log_raw_packet(LogType type, uint16 seq, const BasePacket *p);
 				log_hex_mob(type, this, data, len); \
 			} \
 		} while(false)
-	extern void log_packet_mob(LogType type, Mob *who, const BasePacket *p);
-	#define mpkt( type, packet) \
-		do { \
-		if(1) \
-			if(log_type_info[ type ].enabled) { \
-				log_packet_mob(type, this, packet); \
-			} \
-		} while(false)
 #endif
 
 extern void log_enable(LogType t);
