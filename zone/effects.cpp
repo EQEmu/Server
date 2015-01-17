@@ -724,7 +724,7 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 			dist_targ = ComparativeDistance(curmob->GetPosition(), caster->GetTargetRingLocation());
 		}
 		else if (center) {
-			dist_targ = center->DistNoRoot(*curmob);
+			dist_targ = ComparativeDistance(static_cast<xyz_location>(curmob->GetPosition()), static_cast<xyz_location>(center->GetPosition()));
 		}
 
 		if (dist_targ > dist2)	//make sure they are in range
