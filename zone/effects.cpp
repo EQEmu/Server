@@ -26,6 +26,7 @@
 #include "string_ids.h"
 #include "worldserver.h"
 #include "zonedb.h"
+#include "position.h"
 
 float Mob::GetActSpellRange(uint16 spell_id, float range, bool IsBard)
 {
@@ -720,7 +721,7 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 			continue;
 
 		if (spells[spell_id].targettype == ST_Ring) {
-			dist_targ = curmob->DistNoRoot(caster->GetTargetRingX(), caster->GetTargetRingY(), caster->GetTargetRingZ());
+			dist_targ = ComparativeDistance(curmob->GetPosition(), caster->GetTargetRingLocation());
 		}
 		else if (center) {
 			dist_targ = center->DistNoRoot(*curmob);
