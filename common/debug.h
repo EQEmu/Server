@@ -91,17 +91,6 @@ public:
 		MaxLogID	 /* Max, used in functions to get the max log ID */
 	};
 
-	//these are callbacks called for each
-	typedef void (* msgCallbackBuf)(LogIDs id, const char *buf, uint8 size, uint32 count);
-	typedef void (* msgCallbackFmt)(LogIDs id, const char *fmt, va_list ap);
-	typedef void (* msgCallbackPva)(LogIDs id, const char *prefix, const char *fmt, va_list ap);
-
-	void SetAllCallbacks(msgCallbackFmt proc);
-	void SetAllCallbacks(msgCallbackBuf proc);
-	void SetAllCallbacks(msgCallbackPva proc);
-	void SetCallback(LogIDs id, msgCallbackFmt proc);
-	void SetCallback(LogIDs id, msgCallbackBuf proc);
-	void SetCallback(LogIDs id, msgCallbackPva proc);
 	bool write(LogIDs id, const char *fmt, ...);
 	bool writePVA(LogIDs id, const char *prefix, const char *fmt, va_list args);
 	bool Dump(LogIDs id, uint8* data, uint32 size, uint32 cols=16, uint32 skip=0);
