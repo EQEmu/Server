@@ -73,32 +73,9 @@ extern void log_raw_packet(LogType type, uint16 seq, const BasePacket *p);
 
 #ifdef DISABLE_LOGSYS
 	//completely disabled, this is the best I can come up with since we have no variadic macros
-	inline void _log(LogType, const char *, ...) {}//i feel dirty for putting this ifdef here, but I dont wanna have to include a header in all zone files to get it
-	inline void mlog(LogType, const char *, ...) {}
 	inline void clog(LogType, const char *, ...) {}
 	inline void zlog(LogType, const char *, ...) {}
 #else	//!DISABLE_LOGSYS
-
-		//we have variadic macros, hooray!
-		//the do-while construct is needed to allow a ; at the end of log(); lines when used
-		//in conditional statements without {}'s
-		#define _log( type, format, ...) \
-			do { \
-				if(log_type_info[ type ].enabled) { \
-					log_message(type, format, ##__VA_ARGS__); \
-				} \
-			} while(false)
-		#ifdef ZONE
-			class Mob;
-			extern void log_message_mob(LogType type, Mob *who, const char *fmt, ...);
-			#define mlog( type, format, ...) \
-				do { \
-				if(IsLoggingEnabled()) \
-					if(log_type_info[ type ].enabled) { \
-						log_message_mob(type, this, format, ##__VA_ARGS__); \
-					} \
-				} while(false)
-		#endif
 		#ifdef WORLD
 			class Client;
 			extern void log_message_client(LogType type, Client *who, const char *fmt, ...);
