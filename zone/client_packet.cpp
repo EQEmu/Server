@@ -5832,7 +5832,7 @@ void Client::Handle_OP_FriendsWho(const EQApplicationPacket *app)
 
 void Client::Handle_OP_GetGuildMOTD(const EQApplicationPacket *app)
 {
-	mlog(GUILDS__IN_PACKETS, "Received OP_GetGuildMOTD");
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Received OP_GetGuildMOTD");
 
 	SendGuildMOTD(true);
 
@@ -5845,7 +5845,7 @@ void Client::Handle_OP_GetGuildMOTD(const EQApplicationPacket *app)
 
 void Client::Handle_OP_GetGuildsList(const EQApplicationPacket *app)
 {
-	mlog(GUILDS__IN_PACKETS, "Received OP_GetGuildsList");
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Received OP_GetGuildsList");
 
 	SendGuildList();
 }
@@ -7214,12 +7214,12 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 
 void Client::Handle_OP_GuildDelete(const EQApplicationPacket *app)
 {
-	mlog(GUILDS__IN_PACKETS, "Received OP_GuildDelete");
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Received OP_GuildDelete");
 
 	if (!IsInAGuild() || !guild_mgr.IsGuildLeader(GuildID(), CharacterID()))
 		Message(0, "You are not a guild leader or not in a guild.");
 	else {
-		mlog(GUILDS__ACTIONS, "Deleting guild %s (%d)", guild_mgr.GetGuildName(GuildID()), GuildID());
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Deleting guild %s (%d)", guild_mgr.GetGuildName(GuildID()), GuildID());
 		if (!guild_mgr.DeleteGuild(GuildID()))
 			Message(0, "Guild delete failed.");
 		else {
@@ -7230,10 +7230,10 @@ void Client::Handle_OP_GuildDelete(const EQApplicationPacket *app)
 
 void Client::Handle_OP_GuildDemote(const EQApplicationPacket *app)
 {
-	mlog(GUILDS__IN_PACKETS, "Received OP_GuildDemote");
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Received OP_GuildDemote");
 
 	if (app->size != sizeof(GuildDemoteStruct)) {
-		mlog(GUILDS__ERROR, "Error: app size of %i != size of GuildDemoteStruct of %i\n", app->size, sizeof(GuildDemoteStruct));
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Error: app size of %i != size of GuildDemoteStruct of %i\n", app->size, sizeof(GuildDemoteStruct));
 		return;
 	}
 
@@ -7263,7 +7263,7 @@ void Client::Handle_OP_GuildDemote(const EQApplicationPacket *app)
 		uint8 rank = gci.rank - 1;
 
 
-		mlog(GUILDS__ACTIONS, "Demoting %s (%d) from rank %s (%d) to %s (%d) in %s (%d)",
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Demoting %s (%d) from rank %s (%d) to %s (%d) in %s (%d)",
 			demote->target, gci.char_id,
 			guild_mgr.GetRankName(GuildID(), gci.rank), gci.rank,
 			guild_mgr.GetRankName(GuildID(), rank), rank,
@@ -7281,7 +7281,7 @@ void Client::Handle_OP_GuildDemote(const EQApplicationPacket *app)
 
 void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 {
-	mlog(GUILDS__IN_PACKETS, "Received OP_GuildInvite");
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Received OP_GuildInvite");
 
 	if (app->size != sizeof(GuildCommand_Struct)) {
 		std::cout << "Wrong size: OP_GuildInvite, size=" << app->size << ", expected " << sizeof(GuildCommand_Struct) << std::endl;
@@ -7322,7 +7322,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 					//we could send this to the member and prompt them to see if they want to
 					//be demoted (I guess), but I dont see a point in that.
 
-					mlog(GUILDS__ACTIONS, "%s (%d) is demoting %s (%d) to rank %d in guild %s (%d)",
+					logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s (%d) is demoting %s (%d) to rank %d in guild %s (%d)",
 						GetName(), CharacterID(),
 						client->GetName(), client->CharacterID(),
 						gc->officer,
@@ -7341,7 +7341,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 						return;
 					}
 
-					mlog(GUILDS__ACTIONS, "%s (%d) is asking to promote %s (%d) to rank %d in guild %s (%d)",
+					logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s (%d) is asking to promote %s (%d) to rank %d in guild %s (%d)",
 						GetName(), CharacterID(),
 						client->GetName(), client->CharacterID(),
 						gc->officer,
@@ -7353,7 +7353,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 					if (gc->guildeqid == 0)
 						gc->guildeqid = GuildID();
 
-					mlog(GUILDS__OUT_PACKETS, "Sending OP_GuildInvite for promotion to %s, length %d", client->GetName(), app->size);
+					logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending OP_GuildInvite for promotion to %s, length %d", client->GetName(), app->size);
 					client->QueuePacket(app);
 
 				}
@@ -7376,7 +7376,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 					return;
 				}
 
-				mlog(GUILDS__ACTIONS, "Inviting %s (%d) into guild %s (%d)",
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Inviting %s (%d) into guild %s (%d)",
 					client->GetName(), client->CharacterID(),
 					guild_mgr.GetGuildName(GuildID()), GuildID());
 
@@ -7386,7 +7386,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 				if (gc->guildeqid == 0)
 					gc->guildeqid = GuildID();
 
-				mlog(GUILDS__OUT_PACKETS, "Sending OP_GuildInvite for invite to %s, length %d", client->GetName(), app->size);
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending OP_GuildInvite for invite to %s, length %d", client->GetName(), app->size);
 				client->SetPendingGuildInvitation(true);
 				client->QueuePacket(app);
 
@@ -7409,7 +7409,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 
 void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 {
-	mlog(GUILDS__IN_PACKETS, "Received OP_GuildInviteAccept");
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Received OP_GuildInviteAccept");
 
 	SetPendingGuildInvitation(false);
 
@@ -7445,7 +7445,7 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 	else if (!worldserver.Connected())
 		Message(0, "Error: World server disconnected");
 	else {
-		mlog(GUILDS__ACTIONS, "Guild Invite Accept: guild %d, response %d, inviter %s, person %s",
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Guild Invite Accept: guild %d, response %d, inviter %s, person %s",
 			gj->guildeqid, gj->response, gj->inviter, gj->newmember);
 
 		//we dont really care a lot about what this packet means, as long as
@@ -7459,7 +7459,7 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 		if (gj->guildeqid == GuildID()) {
 			//only need to change rank.
 
-			mlog(GUILDS__ACTIONS, "Changing guild rank of %s (%d) to rank %d in guild %s (%d)",
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Changing guild rank of %s (%d) to rank %d in guild %s (%d)",
 				GetName(), CharacterID(),
 				gj->response,
 				guild_mgr.GetGuildName(GuildID()), GuildID());
@@ -7471,7 +7471,7 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 		}
 		else {
 
-			mlog(GUILDS__ACTIONS, "Adding %s (%d) to guild %s (%d) at rank %d",
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Adding %s (%d) to guild %s (%d) at rank %d",
 				GetName(), CharacterID(),
 				guild_mgr.GetGuildName(gj->guildeqid), gj->guildeqid,
 				gj->response);
@@ -7500,10 +7500,10 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 
 void Client::Handle_OP_GuildLeader(const EQApplicationPacket *app)
 {
-	mlog(GUILDS__IN_PACKETS, "Received OP_GuildLeader");
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Received OP_GuildLeader");
 
 	if (app->size < 2) {
-		mlog(GUILDS__ERROR, "Invalid length %d on OP_GuildLeader", app->size);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Invalid length %d on OP_GuildLeader", app->size);
 		return;
 	}
 
@@ -7522,7 +7522,7 @@ void Client::Handle_OP_GuildLeader(const EQApplicationPacket *app)
 		Client* newleader = entity_list.GetClientByName(gml->target);
 		if (newleader) {
 
-			mlog(GUILDS__ACTIONS, "Transfering leadership of %s (%d) to %s (%d)",
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Transfering leadership of %s (%d) to %s (%d)",
 				guild_mgr.GetGuildName(GuildID()), GuildID(),
 				newleader->GetName(), newleader->CharacterID());
 
@@ -7543,9 +7543,9 @@ void Client::Handle_OP_GuildLeader(const EQApplicationPacket *app)
 void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket *app)
 {
 
-	mlog(GUILDS__IN_PACKETS, "Got OP_GuildManageBanker of len %d", app->size);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Got OP_GuildManageBanker of len %d", app->size);
 	if (app->size != sizeof(GuildManageBanker_Struct)) {
-		mlog(GUILDS__ERROR, "Error: app size of %i != size of OP_GuildManageBanker of %i\n", app->size, sizeof(GuildManageBanker_Struct));
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Error: app size of %i != size of OP_GuildManageBanker of %i\n", app->size, sizeof(GuildManageBanker_Struct));
 		return;
 	}
 	GuildManageBanker_Struct* gmb = (GuildManageBanker_Struct*)app->pBuffer;
@@ -7620,16 +7620,16 @@ void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket *app)
 
 void Client::Handle_OP_GuildPeace(const EQApplicationPacket *app)
 {
-	mlog(GUILDS__IN_PACKETS, "Got OP_GuildPeace of len %d", app->size);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Got OP_GuildPeace of len %d", app->size);
 	return;
 }
 
 void Client::Handle_OP_GuildPromote(const EQApplicationPacket *app)
 {
-	mlog(GUILDS__IN_PACKETS, "Received OP_GuildPromote");
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Received OP_GuildPromote");
 
 	if (app->size != sizeof(GuildPromoteStruct)) {
-		mlog(GUILDS__ERROR, "Error: app size of %i != size of GuildDemoteStruct of %i\n", app->size, sizeof(GuildPromoteStruct));
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Error: app size of %i != size of GuildDemoteStruct of %i\n", app->size, sizeof(GuildPromoteStruct));
 		return;
 	}
 
@@ -7658,7 +7658,7 @@ void Client::Handle_OP_GuildPromote(const EQApplicationPacket *app)
 			return;
 
 
-		mlog(GUILDS__ACTIONS, "Promoting %s (%d) from rank %s (%d) to %s (%d) in %s (%d)",
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Promoting %s (%d) from rank %s (%d) to %s (%d) in %s (%d)",
 			promote->target, gci.char_id,
 			guild_mgr.GetRankName(GuildID(), gci.rank), gci.rank,
 			guild_mgr.GetRankName(GuildID(), rank), rank,
@@ -7675,7 +7675,7 @@ void Client::Handle_OP_GuildPromote(const EQApplicationPacket *app)
 
 void Client::Handle_OP_GuildPublicNote(const EQApplicationPacket *app)
 {
-	mlog(GUILDS__IN_PACKETS, "Received OP_GuildPublicNote");
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Received OP_GuildPublicNote");
 
 	if (app->size < sizeof(GuildUpdate_PublicNote)) {
 		// client calls for a motd on login even if they arent in a guild
@@ -7694,7 +7694,7 @@ void Client::Handle_OP_GuildPublicNote(const EQApplicationPacket *app)
 		return;
 	}
 
-	mlog(GUILDS__ACTIONS, "Setting public note on %s (%d) in guild %s (%d) to: %s",
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Setting public note on %s (%d) in guild %s (%d) to: %s",
 		gpn->target, gci.char_id,
 		guild_mgr.GetGuildName(GuildID()), GuildID(),
 		gpn->note);
@@ -7711,7 +7711,7 @@ void Client::Handle_OP_GuildPublicNote(const EQApplicationPacket *app)
 
 void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 {
-	mlog(GUILDS__IN_PACKETS, "Received OP_GuildRemove");
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Received OP_GuildRemove");
 
 	if (app->size != sizeof(GuildCommand_Struct)) {
 		std::cout << "Wrong size: OP_GuildRemove, size=" << app->size << ", expected " << sizeof(GuildCommand_Struct) << std::endl;
@@ -7741,7 +7741,7 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 			}
 			char_id = client->CharacterID();
 
-			mlog(GUILDS__ACTIONS, "Removing %s (%d) from guild %s (%d)",
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Removing %s (%d) from guild %s (%d)",
 				client->GetName(), client->CharacterID(),
 				guild_mgr.GetGuildName(GuildID()), GuildID());
 		}
@@ -7757,7 +7757,7 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 			}
 			char_id = gci.char_id;
 
-			mlog(GUILDS__ACTIONS, "Removing remote/offline %s (%d) into guild %s (%d)",
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Removing remote/offline %s (%d) into guild %s (%d)",
 				gci.char_name.c_str(), gci.char_id,
 				guild_mgr.GetGuildName(GuildID()), GuildID());
 		}
@@ -7867,7 +7867,7 @@ void Client::Handle_OP_GuildUpdateURLAndChannel(const EQApplicationPacket *app)
 
 void Client::Handle_OP_GuildWar(const EQApplicationPacket *app)
 {
-	mlog(GUILDS__IN_PACKETS, "Got OP_GuildWar of len %d", app->size);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Got OP_GuildWar of len %d", app->size);
 	return;
 }
 
@@ -11848,7 +11848,7 @@ void Client::Handle_OP_SenseTraps(const EQApplicationPacket *app)
 
 void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket *app)
 {
-	mlog(GUILDS__IN_PACKETS, "Received OP_SetGuildMOTD");
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Received OP_SetGuildMOTD");
 
 	if (app->size != sizeof(GuildMOTD_Struct)) {
 		// client calls for a motd on login even if they arent in a guild
@@ -11866,7 +11866,7 @@ void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket *app)
 
 	GuildMOTD_Struct* gmotd = (GuildMOTD_Struct*)app->pBuffer;
 
-	mlog(GUILDS__ACTIONS, "Setting MOTD for %s (%d) to: %s - %s",
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Setting MOTD for %s (%d) to: %s - %s",
 		guild_mgr.GetGuildName(GuildID()), GuildID(), GetName(), gmotd->motd);
 
 	if (!guild_mgr.SetGuildMOTD(GuildID(), gmotd->motd, GetName())) {
