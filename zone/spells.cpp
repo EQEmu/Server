@@ -1391,7 +1391,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		&& (IsGrouped() // still self only if not grouped
 		|| IsRaidGrouped())
 		&& (HasProjectIllusion())){
-			mlog(AA__MESSAGE, "Project Illusion overwrote target caster: %s spell id: %d was ON", GetName(), spell_id);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Project Illusion overwrote target caster: %s spell id: %d was ON", GetName(), spell_id);
 			targetType = ST_GroupClientAndPet;
 	}
 
@@ -2067,11 +2067,11 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			if(IsPlayerIllusionSpell(spell_id)
 			&& IsClient()
 			&& (HasProjectIllusion())){
-				mlog(AA__MESSAGE, "Effect Project Illusion for %s on spell id: %d was ON", GetName(), spell_id);
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Effect Project Illusion for %s on spell id: %d was ON", GetName(), spell_id);
 				SetProjectIllusion(false);
 			}
 			else{
-				mlog(AA__MESSAGE, "Effect Project Illusion for %s on spell id: %d was OFF", GetName(), spell_id);
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Effect Project Illusion for %s on spell id: %d was OFF", GetName(), spell_id);
 			}
 			break;
 		}

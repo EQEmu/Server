@@ -951,7 +951,7 @@ void Client::SendAAStats() {
 
 void Client::BuyAA(AA_Action* action)
 {
-	mlog(AA__MESSAGE, "Starting to buy AA %d", action->ability);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Starting to buy AA %d", action->ability);
 
 	//find the AA information from the database
 	SendAA_Struct* aa2 = zone->FindAA(action->ability);
@@ -963,7 +963,7 @@ void Client::BuyAA(AA_Action* action)
 			a = action->ability - i;
 			if(a <= 0)
 				break;
-			mlog(AA__MESSAGE, "Could not find AA %d, trying potential parent %d", action->ability, a);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Could not find AA %d, trying potential parent %d", action->ability, a);
 			aa2 = zone->FindAA(a);
 			if(aa2 != nullptr)
 				break;
@@ -980,7 +980,7 @@ void Client::BuyAA(AA_Action* action)
 
 	uint32 cur_level = GetAA(aa2->id);
 	if((aa2->id + cur_level) != action->ability) { //got invalid AA
-		mlog(AA__ERROR, "Unable to find or match AA %d (found %d + lvl %d)", action->ability, aa2->id, cur_level);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Unable to find or match AA %d (found %d + lvl %d)", action->ability, aa2->id, cur_level);
 		return;
 	}
 
@@ -1011,7 +1011,7 @@ void Client::BuyAA(AA_Action* action)
 	if (m_pp.aapoints >= real_cost && cur_level < aa2->max_level) {
 		SetAA(aa2->id, cur_level + 1);
 
-		mlog(AA__MESSAGE, "Set AA %d to level %d", aa2->id, cur_level + 1);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Set AA %d to level %d", aa2->id, cur_level + 1);
 
 		m_pp.aapoints -= real_cost;
 

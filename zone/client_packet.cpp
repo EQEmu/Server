@@ -1898,7 +1898,7 @@ void Client::Handle_0x0193(const EQApplicationPacket *app)
 
 void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 {
-	mlog(AA__IN, "Received OP_AAAction");
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Received OP_AAAction");
 
 	if (app->size != sizeof(AA_Action)){
 		printf("Error! OP_AAAction size didnt match!\n");
@@ -1907,7 +1907,7 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 	AA_Action* action = (AA_Action*)app->pBuffer;
 
 	if (action->action == aaActionActivate) {//AA Hotkey
-		mlog(AA__MESSAGE, "Activating AA %d", action->ability);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Activating AA %d", action->ability);
 		ActivateAA((aaID)action->ability);
 	}
 	else if (action->action == aaActionBuy) {
