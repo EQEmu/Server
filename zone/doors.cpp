@@ -64,7 +64,7 @@ Doors::Doors(const Door* door) :
 
 	close_timer.Disable();
 
-	strn0cpy(dest_zone,door->dest_zone,32);
+	strn0cpy(dest_zone,door->dest_zone,16);
 	dest_instance_id = door->dest_instance_id;
 
 	is_ldon_door = door->is_ldon_door;
