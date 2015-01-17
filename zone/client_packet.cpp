@@ -400,7 +400,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	if(is_log_enabled(CLIENT__NET_IN_TRACE)) {
 		char buffer[64];
 		app->build_header_dump(buffer);
-		mlog(CLIENT__NET_IN_TRACE, "Dispatch opcode: %s", buffer);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Client_Server_Packet, "Dispatch opcode: %s", buffer);
 	}
 
 	EmuOpcode opcode = app->GetOpcode();
@@ -459,11 +459,10 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 0, &args);
 
 
-			char buffer[64];
-			app->build_header_dump(buffer);
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Client_Server_Packet, "Unhandled incoming opcode: %s", buffer);
-
-			if (logger.log_settings[EQEmuLogSys::Client_Server_Packet].log_to_console == 1){
+			char buffer[64]; 
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Client_Server_Packet, "Unhandled incoming opcode: %s", buffer); 
+			if (logger.log_settings[EQEmuLogSys::Client_Server_Packet].log_to_console > 0){
+				app->build_header_dump(buffer);
 				if (app->size < 1000)
 					DumpPacket(app, app->size);
 				else{
