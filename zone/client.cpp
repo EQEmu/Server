@@ -40,6 +40,7 @@ extern volatile bool RunLoops;
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
 #include "../common/data_verification.h"
+#include "position.h"
 #include "net.h"
 #include "worldserver.h"
 #include "zonedb.h"
@@ -3178,7 +3179,7 @@ void Client::Insight(uint32 t_id)
 		Message(0,"This ability can only be used on NPCs.");
 		return;
 	}
-	if (Dist(*who) > 200)
+	if (Distance(static_cast<xyz_location>(m_Position), static_cast<xyz_location>(who->GetPosition())) > 200)
 	{
 		Message(0,"You must get closer to your target!");
 		return;
