@@ -2302,16 +2302,6 @@ float Mob::DistNoRoot(const Mob &other) const {
 			+ (zDiff * zDiff) );
 }
 
-float Mob::DistNoRoot(float x, float y, float z) const {
-	float xDiff = x - m_Position.m_X;
-	float yDiff = y - m_Position.m_Y;
-	float zDiff = z - m_Position.m_Z;
-
-	return ( (xDiff * xDiff)
-			+ (yDiff * yDiff)
-			+ (zDiff * zDiff) );
-}
-
 float Mob::DistNoRootNoZ(float x, float y) const {
 	float xDiff = x - m_Position.m_X;
 	float yDiff = y - m_Position.m_Y;
