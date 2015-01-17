@@ -458,7 +458,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		bool qs_log = false;
 
 		if(other) {
-			mlog(TRADING__CLIENT, "Finishing trade with client %s", other->GetName());
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Finishing trade with client %s", other->GetName());
 
 			this->AddMoneyToPP(other->trade->cp, other->trade->sp, other->trade->gp, other->trade->pp, true);
 
@@ -491,7 +491,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				const ItemInst* inst = m_inv[trade_slot];
 
 				if (inst && inst->IsType(ItemClassContainer)) {
-					mlog(TRADING__CLIENT, "Giving container %s (%d) in slot %d to %s", inst->GetItem()->Name, inst->GetItem()->ID, trade_slot, other->GetName());
+					logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Giving container %s (%d) in slot %d to %s", inst->GetItem()->Name, inst->GetItem()->ID, trade_slot, other->GetName());
 
 					// TODO: need to check bag items/augments for no drop..everything for attuned...
 					if (inst->GetItem()->NoDrop != 0 || Admin() >= RuleI(Character, MinStatusForNoDropExemptions) || RuleI(World, FVNoDropFlag) == 1 || other == this) {
@@ -499,7 +499,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 
 						if (free_slot != INVALID_INDEX) {
 							if (other->PutItemInInventory(free_slot, *inst, true)) {
-								mlog(TRADING__CLIENT, "Container %s (%d) successfully transferred, deleting from trade slot.", inst->GetItem()->Name, inst->GetItem()->ID);
+								logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Container %s (%d) successfully transferred, deleting from trade slot.", inst->GetItem()->Name, inst->GetItem()->ID);
 								if (qs_log) {
 									QSTradeItems_Struct* detail = new QSTradeItems_Struct;
 
@@ -552,17 +552,17 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 								}
 							}
 							else {
-								mlog(TRADING__ERROR, "Transfer of container %s (%d) to %s failed, returning to giver.", inst->GetItem()->Name, inst->GetItem()->ID, other->GetName());
+								logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Transfer of container %s (%d) to %s failed, returning to giver.", inst->GetItem()->Name, inst->GetItem()->ID, other->GetName());
 								PushItemOnCursor(*inst, true);
 							}
 						}
 						else {
-							mlog(TRADING__ERROR, "%s's inventory is full, returning container %s (%d) to giver.", other->GetName(), inst->GetItem()->Name, inst->GetItem()->ID);
+							logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "%s's inventory is full, returning container %s (%d) to giver.", other->GetName(), inst->GetItem()->Name, inst->GetItem()->ID);
 							PushItemOnCursor(*inst, true);
 						}
 					}
 					else {
-						mlog(TRADING__ERROR, "Container %s (%d) is NoDrop, returning to giver.", inst->GetItem()->Name, inst->GetItem()->ID);
+						logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Container %s (%d) is NoDrop, returning to giver.", inst->GetItem()->Name, inst->GetItem()->ID);
 						PushItemOnCursor(*inst, true);
 					}
 
@@ -606,10 +606,10 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 							inst->SetCharges(0);
 						}
 
-						mlog(TRADING__CLIENT, "Transferring partial stack %s (%d) in slot %d to %s", inst->GetItem()->Name, inst->GetItem()->ID, trade_slot, other->GetName());
+						logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Transferring partial stack %s (%d) in slot %d to %s", inst->GetItem()->Name, inst->GetItem()->ID, trade_slot, other->GetName());
 
 						if (other->PutItemInInventory(partial_slot, *partial_inst, true)) {
-							mlog(TRADING__CLIENT, "Partial stack %s (%d) successfully transferred, deleting %i charges from trade slot.",
+							logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Partial stack %s (%d) successfully transferred, deleting %i charges from trade slot.",
 								inst->GetItem()->Name, inst->GetItem()->ID, (old_charges - inst->GetCharges()));
 							if (qs_log) {
 								QSTradeItems_Struct* detail = new QSTradeItems_Struct;
@@ -635,7 +635,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 							}
 						}
 						else {
-							mlog(TRADING__ERROR, "Transfer of partial stack %s (%d) to %s failed, returning %i charges to trade slot.",
+							logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Transfer of partial stack %s (%d) to %s failed, returning %i charges to trade slot.",
 								inst->GetItem()->Name, inst->GetItem()->ID, other->GetName(), (old_charges - inst->GetCharges()));
 
 							inst->SetCharges(old_charges);
@@ -710,7 +710,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				const ItemInst* inst = m_inv[trade_slot];
 
 				if (inst) {
-					mlog(TRADING__CLIENT, "Giving item %s (%d) in slot %d to %s", inst->GetItem()->Name, inst->GetItem()->ID, trade_slot, other->GetName());
+					logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Giving item %s (%d) in slot %d to %s", inst->GetItem()->Name, inst->GetItem()->ID, trade_slot, other->GetName());
 
 					// TODO: need to check bag items/augments for no drop..everything for attuned...
 					if (inst->GetItem()->NoDrop != 0 || Admin() >= RuleI(Character, MinStatusForNoDropExemptions) || RuleI(World, FVNoDropFlag) == 1 || other == this) {
@@ -718,7 +718,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 
 						if (free_slot != INVALID_INDEX) {
 							if (other->PutItemInInventory(free_slot, *inst, true)) {
-								mlog(TRADING__CLIENT, "Item %s (%d) successfully transferred, deleting from trade slot.", inst->GetItem()->Name, inst->GetItem()->ID);
+								logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Item %s (%d) successfully transferred, deleting from trade slot.", inst->GetItem()->Name, inst->GetItem()->ID);
 								if (qs_log) {
 									QSTradeItems_Struct* detail = new QSTradeItems_Struct;
 
@@ -772,17 +772,17 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 								}
 							}
 							else {
-								mlog(TRADING__ERROR, "Transfer of Item %s (%d) to %s failed, returning to giver.", inst->GetItem()->Name, inst->GetItem()->ID, other->GetName());
+								logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Transfer of Item %s (%d) to %s failed, returning to giver.", inst->GetItem()->Name, inst->GetItem()->ID, other->GetName());
 								PushItemOnCursor(*inst, true);
 							}
 						}
 						else {
-							mlog(TRADING__ERROR, "%s's inventory is full, returning item %s (%d) to giver.", other->GetName(), inst->GetItem()->Name, inst->GetItem()->ID);
+							logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "%s's inventory is full, returning item %s (%d) to giver.", other->GetName(), inst->GetItem()->Name, inst->GetItem()->ID);
 							PushItemOnCursor(*inst, true);
 						}
 					}
 					else {
-						mlog(TRADING__ERROR, "Item %s (%d) is NoDrop, returning to giver.", inst->GetItem()->Name, inst->GetItem()->ID);
+						logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Item %s (%d) is NoDrop, returning to giver.", inst->GetItem()->Name, inst->GetItem()->ID);
 						PushItemOnCursor(*inst, true);
 					}
 

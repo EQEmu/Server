@@ -799,7 +799,7 @@ void Client::OnDisconnect(bool hard_disconnect) {
 	Mob *Other = trade->With(); 
 	if(Other)
 	{
-		mlog(TRADING__CLIENT, "Client disconnected during a trade. Returning their items."); 
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Client disconnected during a trade. Returning their items."); 
 		FinishTrade(this);
 
 		if(Other->IsClient())
