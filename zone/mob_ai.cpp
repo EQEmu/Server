@@ -1692,11 +1692,11 @@ void NPC::AI_DoMovement() {
 				else {
 					movetimercompleted=false;
 
-					mlog(QUESTS__PATHING, "We are departing waypoint %d.", cur_wp);
+					logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Pathing, "We are departing waypoint %d.", cur_wp);
 
 					//if we were under quest control (with no grid), we are done now..
 					if(cur_wp == -2) {
-						mlog(QUESTS__PATHING, "Non-grid quest mob has reached its quest ordered waypoint. Leaving pathing mode.");
+						logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Pathing, "Non-grid quest mob has reached its quest ordered waypoint. Leaving pathing mode.");
 						roamer = false;
 						cur_wp = 0;
 					}
@@ -1773,7 +1773,7 @@ void NPC::AI_DoMovement() {
 			if (movetimercompleted==true)
 			{ // time to pause has ended
 				SetGrid( 0 - GetGrid()); // revert to AI control
-				mlog(QUESTS__PATHING, "Quest pathing is finished. Resuming on grid %d", GetGrid());
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Pathing, "Quest pathing is finished. Resuming on grid %d", GetGrid());
 
 				if(GetAppearance() != eaStanding)
 					SetAppearance(eaStanding, false);

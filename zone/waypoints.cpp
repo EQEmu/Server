@@ -88,7 +88,7 @@ void NPC::StopWandering()
 	roamer=false;
 	CastToNPC()->SetGrid(0);
 	SendPosition();
-	mlog(QUESTS__PATHING, "Stop Wandering requested.");
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Pathing, "Stop Wandering requested.");
 	return;
 }
 
@@ -107,11 +107,11 @@ void NPC::ResumeWandering()
 				cur_wp=save_wp;
 				UpdateWaypoint(cur_wp);	// have him head to last destination from here
 			}
-			mlog(QUESTS__PATHING, "Resume Wandering requested. Grid %d, wp %d", GetGrid(), cur_wp);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Pathing, "Resume Wandering requested. Grid %d, wp %d", GetGrid(), cur_wp);
 		}
 		else if (AIwalking_timer->Enabled())
 		{	// we are at a waypoint paused normally
-			mlog(QUESTS__PATHING, "Resume Wandering on timed pause. Grid %d, wp %d", GetGrid(), cur_wp);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Pathing, "Resume Wandering on timed pause. Grid %d, wp %d", GetGrid(), cur_wp);
 			AIwalking_timer->Trigger();	// disable timer to end pause now
 		}
 		else
@@ -143,7 +143,7 @@ void NPC::PauseWandering(int pausetime)
 	if (GetGrid() != 0)
 	{
 		DistractedFromGrid = true;
-		mlog(QUESTS__PATHING, "Paused Wandering requested. Grid %d. Resuming in %d ms (0=not until told)", GetGrid(), pausetime);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Pathing, "Paused Wandering requested. Grid %d. Resuming in %d ms (0=not until told)", GetGrid(), pausetime);
 		SendPosition();
 		if (pausetime<1)
 		{	// negative grid number stops him dead in his tracks until ResumeWandering()
