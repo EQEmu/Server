@@ -309,7 +309,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		sprintf(temp, "%d", spell_id);
 		parse->EventNPC(EVENT_CAST_BEGIN, CastToNPC(), nullptr, temp, 0);
 	}
-	
+
 	//To prevent NPC ghosting when spells are cast from scripts
 	if (IsNPC() && IsMoving() && cast_time > 0)
 		SendPosition();
@@ -362,7 +362,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	casting_spell_type = type;
 
 	SaveSpellLoc();
-	mlog(SPELLS__CASTING, "Casting %d Started at (%.3f,%.3f,%.3f)", spell_id, spell_x, spell_y, spell_z);
+	mlog(SPELLS__CASTING, "Casting %d Started at (%.3f,%.3f,%.3f)", spell_id, m_SpellLocation.m_X, m_SpellLocation.m_Y, m_SpellLocation.m_Z);
 
 	// if this spell doesn't require a target, or if it's an optional target
 	// and a target wasn't provided, then it's us; unless TGB is on and this
@@ -533,8 +533,8 @@ bool Mob::DoCastingChecks()
 		return false;
 	}
 
-	if (zone->IsSpellBlocked(spell_id, GetX(), GetY(), GetZ())) {
-		const char *msg = zone->GetSpellBlockedMessage(spell_id, GetX(), GetY(), GetZ());
+	if (zone->IsSpellBlocked(spell_id, GetPosition())) {
+		const char *msg = zone->GetSpellBlockedMessage(spell_id, GetPosition());
 		if (msg) {
 			Message(13, msg);
 			return false;
@@ -1626,7 +1626,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			{
 				if(!spell_target)
 					return false;
-				
+
 				ae_center = spell_target;
 				CastAction = AETarget;
 			}
@@ -1645,7 +1645,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			{
 				if(!spell_target)
 					return false;
-				
+
 				ae_center = spell_target;
 				CastAction = AETarget;
 			}
@@ -1918,8 +1918,8 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 
 	if(IsClient() && !CastToClient()->GetGM()){
 
-		if(zone->IsSpellBlocked(spell_id, GetX(), GetY(), GetZ())){
-			const char *msg = zone->GetSpellBlockedMessage(spell_id, GetX(), GetY(), GetZ());
+		if(zone->IsSpellBlocked(spell_id, GetPosition())){
+			const char *msg = zone->GetSpellBlockedMessage(spell_id, GetPosition());
 			if(msg){
 				Message(13, msg);
 				return false;
@@ -2097,7 +2097,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			} else {
 				// regular PB AE or targeted AE spell - spell_target is null if PB
 				if(spell_target)	// this must be an AETarget spell
-				{	
+				{
 					bool cast_on_target = true;
 					if (spells[spell_id].targettype == ST_TargetAENoPlayersPets && spell_target->IsPetOwnerClient())
 						cast_on_target = false;
@@ -2206,7 +2206,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			ConeDirectional(spell_id, resist_adjust);
 			break;
 		}
- 
+
 		case Beam:
 		{
 			BeamDirectional(spell_id, resist_adjust);
@@ -3729,7 +3729,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 
 	if (IsValidSpell(spells[spell_id].RecourseLink))
 		SpellFinished(spells[spell_id].RecourseLink, this, 10, 0, -1, spells[spells[spell_id].RecourseLink].ResistDiff);
-		
+
 	if (IsDetrimentalSpell(spell_id)) {
 
 		CheckNumHitsRemaining(NumHit::OutgoingSpells);
@@ -3856,9 +3856,9 @@ void Corpse::CastRezz(uint16 spellid, Mob* Caster)
 	rezz->zone_id = zone->GetZoneID();
 	rezz->instance_id = zone->GetInstanceID();
 	rezz->spellid = spellid;
-	rezz->x = this->x_pos;
-	rezz->y = this->y_pos;
-	rezz->z = this->z_pos;
+	rezz->x = this->m_Position.m_X;
+	rezz->y = this->m_Position.m_Y;
+	rezz->z = this->m_Position.m_Z;
 	rezz->unknown000 = 0x00000000;
 	rezz->unknown020 = 0x00000000;
 	rezz->unknown088 = 0x00000000;
@@ -4522,7 +4522,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 			if(partial_modifier <= 0)
 			{
 				return 100;
-			} 
+			}
 			else if(partial_modifier >= 100)
 			{
 				return 0;
@@ -4840,7 +4840,7 @@ void Client::UnmemSpell(int slot, bool update_client)
 	m_pp.mem_spells[slot] = 0xFFFFFFFF;
 
 	database.DeleteCharacterMemorizedSpell(this->CharacterID(), m_pp.mem_spells[slot], slot);
-	
+
 	if(update_client)
 	{
 		MemorizeSpell(slot, m_pp.mem_spells[slot], memSpellForget);
@@ -4884,8 +4884,8 @@ void Client::UnscribeSpell(int slot, bool update_client)
 
 	mlog(CLIENT__SPELLS, "Spell %d erased from spell book slot %d", m_pp.spell_book[slot], slot);
 	m_pp.spell_book[slot] = 0xFFFFFFFF;
-	
-	database.DeleteCharacterSpell(this->CharacterID(), m_pp.spell_book[slot], slot); 
+
+	database.DeleteCharacterSpell(this->CharacterID(), m_pp.spell_book[slot], slot);
 	if(update_client)
 	{
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_DeleteSpell, sizeof(DeleteSpell_Struct));
@@ -4913,7 +4913,7 @@ void Client::UntrainDisc(int slot, bool update_client)
 	if(slot >= MAX_PP_DISCIPLINES || slot < 0)
 		return;
 
-	mlog(CLIENT__SPELLS, "Discipline %d untrained from slot %d", m_pp.disciplines.values[slot], slot); 
+	mlog(CLIENT__SPELLS, "Discipline %d untrained from slot %d", m_pp.disciplines.values[slot], slot);
 	m_pp.disciplines.values[slot] = 0;
 	database.DeleteCharacterDisc(this->CharacterID(), slot);
 
@@ -5462,27 +5462,27 @@ void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
 
 	if (IsBeneficialSpell(spell_id) && IsClient())
 		beneficial_targets = true;
-	
+
 	std::list<Mob*> targets_in_range;
 	std::list<Mob*>::iterator iter;
 
 	entity_list.GetTargetsForConeArea(this, spells[spell_id].min_range, spells[spell_id].range, spells[spell_id].range / 2, targets_in_range);
 	iter = targets_in_range.begin();
-	
+
 	float dX = 0;
 	float dY = 0;
 	float dZ = 0;
-	
+
 	CalcDestFromHeading(GetHeading(), spells[spell_id].range, 5, GetX(), GetY(), dX, dY, dZ);
 	dZ = GetZ();
-	
+
 	//FIND SLOPE: Put it into the form y = mx + b
 	float m = (dY - GetY()) / (dX - GetX());
 	float b = (GetY() * dX - dY * GetX()) / (dX - GetX());
- 
+
 	while(iter != targets_in_range.end())
 	{
-		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerClient())) 
+		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerClient()))
 			|| (*iter)->BehindMob(this, (*iter)->GetX(),(*iter)->GetY())){
 		    ++iter;
 			continue;
@@ -5490,7 +5490,7 @@ void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
 
 		//# shortest distance from line to target point
 		float d = abs( (*iter)->GetY() - m * (*iter)->GetX() - b) / sqrt(m * m + 1);
-					
+
 		if (d <= spells[spell_id].aoerange)
 		{
 			if(CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
@@ -5537,7 +5537,7 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 		}
 
 		float heading_to_target = (CalculateHeadingToTarget((*iter)->GetX(), (*iter)->GetY()) * 360.0f / 256.0f);
-	
+
 		while(heading_to_target < 0.0f)
 			heading_to_target += 360.0f;
 

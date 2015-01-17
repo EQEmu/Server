@@ -70,13 +70,13 @@ void Corpse::SendLootReqErrorPacket(Client* client, uint8 response) {
 	safe_delete(outapp);
 }
 
-Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std::string in_charname, float in_x, float in_y, float in_z, float in_heading, std::string time_of_death, bool rezzed, bool was_at_graveyard){
+Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std::string in_charname, const xyz_heading& position, std::string time_of_death, bool rezzed, bool was_at_graveyard) {
 	uint32 item_count = database.GetCharacterCorpseItemCount(in_dbid);
 	char *buffer = new char[sizeof(PlayerCorpse_Struct) + (item_count * sizeof(player_lootitem::ServerLootItem_Struct))];
 	PlayerCorpse_Struct *pcs = (PlayerCorpse_Struct*)buffer;
 	database.LoadCharacterCorpseData(in_dbid, pcs);
 
-	/* Load Items */ 
+	/* Load Items */
 	ItemList itemlist;
 	ServerLootItem_Struct* tmp = 0;
 	for (unsigned int i = 0; i < pcs->itemcount; i++) {
@@ -95,10 +95,7 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 		pcs->silver,		   // uint32 in_silver
 		pcs->gold,			   // uint32 in_gold
 		pcs->plat,			   // uint32 in_plat
-		in_x,				   // float in_x
-		in_y,				   // float in_y
-		in_z,				   // float in_z
-		in_heading,			   // float in_heading
+		position,
 		pcs->size,			   // float in_size
 		pcs->gender,		   // uint8 in_gender
 		pcs->race,			   // uint16 in_race
@@ -110,9 +107,9 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 		pcs->exp,			   // uint32 in_rezexp
 		was_at_graveyard	   // bool wasAtGraveyard
 	);
-	if (pcs->locked){
+
+	if (pcs->locked)
 		pc->Lock();
-	}
 
 	/* Load Item Tints */
 	pc->item_tint[0].color = pcs->item_tint[0].color;
@@ -123,7 +120,7 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 	pc->item_tint[5].color = pcs->item_tint[5].color;
 	pc->item_tint[6].color = pcs->item_tint[6].color;
 	pc->item_tint[7].color = pcs->item_tint[7].color;
-	pc->item_tint[8].color = pcs->item_tint[8].color; 
+	pc->item_tint[8].color = pcs->item_tint[8].color;
 
 	/* Load Physical Appearance */
 	pc->haircolor = pcs->haircolor;
@@ -145,57 +142,12 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 }
 
 Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NPCType** in_npctypedata, uint32 in_decaytime)
-	: Mob("Unnamed_Corpse",		// const char* in_name,
-	"",							// const char* in_lastname,
-	0,							// int32		in_cur_hp,
-	0,							// int32		in_max_hp,
-	in_npc->GetGender(),		// uint8		in_gender,
-	in_npc->GetRace(),			// uint16		in_race,
-	in_npc->GetClass(),			// uint8		in_class,
-	BT_Humanoid,				// bodyType	in_bodytype,
-	in_npc->GetDeity(),			// uint8		in_deity,
-	in_npc->GetLevel(),			// uint8		in_level,
-	in_npc->GetNPCTypeID(),		// uint32		in_npctype_id,
-	in_npc->GetSize(),			// float		in_size,
-	0,							// float		in_runspeed,
-	in_npc->GetHeading(),		// float		in_heading,
-	in_npc->GetX(),				// float		in_x_pos,
-	in_npc->GetY(),				// float		in_y_pos,
-	in_npc->GetZ(),				// float		in_z_pos, 
-	0,							// uint8		in_light,
-	in_npc->GetTexture(),		// uint8		in_texture,
-	in_npc->GetHelmTexture(),	// uint8		in_helmtexture,
-	0,							// uint16		in_ac,
-	0,							// uint16		in_atk,
-	0,							// uint16		in_str,
-	0,							// uint16		in_sta,
-	0,							// uint16		in_dex,
-	0,							// uint16		in_agi,
-	0,							// uint16		in_int,
-	0,							// uint16		in_wis,
-	0,							// uint16		in_cha,
-	0,							// uint8		in_haircolor,
-	0,							// uint8		in_beardcolor,
-	0,							// uint8		in_eyecolor1, // the eyecolors always seem to be the same, maybe left and right eye?
-	0,							// uint8		in_eyecolor2,
-	0,							// uint8		in_hairstyle,
-	0,							// uint8		in_luclinface,
-	0,							// uint8		in_beard,
-	0,							// uint32		in_drakkin_heritage,
-	0,							// uint32		in_drakkin_tattoo,
-	0,							// uint32		in_drakkin_details,
-	0,							// uint32		in_armor_tint[_MaterialCount], 
-	0xff,						// uint8		in_aa_title,
-	0,							// uint8		in_see_invis, // see through invis/ivu
-	0,							// uint8		in_see_invis_undead,
-	0,							// uint8		in_see_hide,
-	0,							// uint8		in_see_improved_hide,
-	0,							// int32		in_hp_regen,
-	0,							// int32		in_mana_regen,
-	0,							// uint8		in_qglobal,
-	0,							// uint8		in_maxlevel,
-	0							// uint32		in_scalerate
-),									  
+// vesuvias - appearence fix
+: Mob("Unnamed_Corpse","",0,0,in_npc->GetGender(),in_npc->GetRace(),in_npc->GetClass(),BT_Humanoid,//bodytype added
+	in_npc->GetDeity(),in_npc->GetLevel(),in_npc->GetNPCTypeID(),in_npc->GetSize(),0,
+	in_npc->GetPosition(), 0, in_npc->GetTexture(),in_npc->GetHelmTexture(),
+	0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,0,0xff,0,0,0,0,0,0,0,0,0),
 	corpse_decay_timer(in_decaytime),
 	corpse_rez_timer(0),
 	corpse_delay_timer(RuleI(NPC, CorpseUnlockTimer)),
@@ -224,7 +176,7 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 	player_corpse_depop = false;
 	strcpy(corpse_name, in_npc->GetName());
 	strcpy(name, in_npc->GetName());
-	
+
 	for(int count = 0; count < 100; count++) {
 		if ((level >= npcCorpseDecayTimes[count].minlvl) && (level <= npcCorpseDecayTimes[count].maxlvl)) {
 			corpse_decay_timer.SetTimer(npcCorpseDecayTimes[count].seconds*1000);
@@ -235,7 +187,7 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 		corpse_decay_timer.SetTimer(RuleI(NPC,EmptyNPCCorpseDecayTimeMS)+1000);
 	}
 
-	
+
 	if(in_npc->HasPrivateCorpse()) {
 		corpse_delay_timer.SetTimer(corpse_decay_timer.GetRemainingTime() + 1000);
 	}
@@ -260,10 +212,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	0,								  // uint32		in_npctype_id,
 	client->GetSize(),				  // float		in_size,
 	0,								  // float		in_runspeed,
-	client->GetHeading(),			  // float		in_heading,
-	client->GetX(),					  // float		in_x_pos,
-	client->GetY(),					  // float		in_y_pos,
-	client->GetZ(),					  // float		in_z_pos,
+	client->GetPosition(),
 	0,								  // uint8		in_light,
 	client->GetTexture(),			  // uint8		in_texture,
 	client->GetHelmTexture(),		  // uint8		in_helmtexture,
@@ -297,15 +246,15 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	0,								  // uint8		in_qglobal,
 	0,								  // uint8		in_maxlevel,
 	0								  // uint32		in_scalerate
-	),									
+	),
 	corpse_decay_timer(RuleI(Character, CorpseDecayTimeMS)),
 	corpse_rez_timer(RuleI(Character, CorpseResTimeMS)),
 	corpse_delay_timer(RuleI(NPC, CorpseUnlockTimer)),
 	corpse_graveyard_timer(RuleI(Zone, GraveyardTimeMS)),
-	loot_cooldown_timer(10) 
+	loot_cooldown_timer(10)
 {
 	int i;
-	
+
 	PlayerProfile_Struct *pp = &client->GetPP();
 	ItemInst *item;
 
@@ -335,7 +284,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	platinum		= 0;
 
 	strcpy(corpse_name, pp->name);
-	strcpy(name, pp->name); 
+	strcpy(name, pp->name);
 
 	/* become_npc was not being initialized which led to some pretty funky things with newly created corpses */
 	become_npc = false;
@@ -343,8 +292,8 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	SetPlayerKillItemID(0);
 
 	/* Check Rule to see if we can leave corpses */
-	if(!RuleB(Character, LeaveNakedCorpses) || 
-		RuleB(Character, LeaveCorpses) && 
+	if(!RuleB(Character, LeaveNakedCorpses) ||
+		RuleB(Character, LeaveCorpses) &&
 		GetLevel() >= RuleI(Character, DeathItemLossLevel)) {
 		// cash
 		// Let's not move the cash when 'RespawnFromHover = true' && 'client->GetClientVersion() < EQClientSoF' since the client doesn't.
@@ -485,59 +434,55 @@ std::list<uint32> Corpse::MoveItemToCorpse(Client *client, ItemInst *item, int16
 	return returnlist;
 }
 
-/* Called from Database Load */
-
-Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, ItemList* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, float in_x, float in_y, float in_z, float in_heading, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture,uint32 in_rezexp, bool wasAtGraveyard)
-	: Mob("Unnamed_Corpse", // const char* in_name,
-	"",						// const char* in_lastname,
-	0,						// int32		in_cur_hp,
-	0,						// int32		in_max_hp,
-	in_gender,				// uint8		in_gender,
-	in_race,				// uint16		in_race,
-	in_class,				// uint8		in_class,
-	BT_Humanoid,			// bodyType	in_bodytype,
-	in_deity,				// uint8		in_deity,
-	in_level,				// uint8		in_level,
-	0,						// uint32		in_npctype_id,
-	in_size,				// float		in_size,
-	0,						// float		in_runspeed,
-	in_heading,				// float		in_heading,
-	in_x,					// float		in_x_pos,
-	in_y,					// float		in_y_pos,
-	in_z,					// float		in_z_pos, 
-	0,						// uint8		in_light,
-	in_texture,				// uint8		in_texture,
-	in_helmtexture,			// uint8		in_helmtexture,
-	0,						// uint16		in_ac,
-	0,						// uint16		in_atk,
-	0,						// uint16		in_str,
-	0,						// uint16		in_sta,
-	0,						// uint16		in_dex,
-	0,						// uint16		in_agi,
-	0,						// uint16		in_int,
-	0,						// uint16		in_wis,
-	0,						// uint16		in_cha,
-	0,						// uint8		in_haircolor,
-	0,						// uint8		in_beardcolor,
-	0,						// uint8		in_eyecolor1, // the eyecolors always seem to be the same, maybe left and right eye?
-	0,						// uint8		in_eyecolor2,
-	0,						// uint8		in_hairstyle,
-	0,						// uint8		in_luclinface,
-	0,						// uint8		in_beard,
-	0,						// uint32		in_drakkin_heritage,
-	0,						// uint32		in_drakkin_tattoo,
-	0,						// uint32		in_drakkin_details,
-	0,						// uint32		in_armor_tint[_MaterialCount], 
-	0xff,					// uint8		in_aa_title,
-	0,						// uint8		in_see_invis, // see through invis/ivu
-	0,						// uint8		in_see_invis_undead,
-	0,						// uint8		in_see_hide,
-	0,						// uint8		in_see_improved_hide,
-	0,						// int32		in_hp_regen,
-	0,						// int32		in_mana_regen,
-	0,						// uint8		in_qglobal,
-	0,						// uint8		in_maxlevel,
-	0),						// uint32		in_scalerate
+// To be called from LoadFromDBData
+Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, ItemList* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, const xyz_heading& position, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture,uint32 in_rezexp, bool wasAtGraveyard)
+: Mob("Unnamed_Corpse",
+"",
+0,
+0,
+in_gender,
+in_race,
+in_class,
+BT_Humanoid,
+in_deity,
+in_level,
+0,
+in_size,
+0,
+position,
+0,
+in_texture,
+in_helmtexture,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0xff,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0),
 	corpse_decay_timer(RuleI(Character, CorpseDecayTimeMS)),
 	corpse_rez_timer(RuleI(Character, CorpseResTimeMS)),
 	corpse_delay_timer(RuleI(NPC, CorpseUnlockTimer)),
@@ -547,9 +492,8 @@ Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, ItemLi
 
 	LoadPlayerCorpseDecayTime(in_dbid);
 
-	if (!zone->HasGraveyard() || wasAtGraveyard){
+	if (!zone->HasGraveyard() || wasAtGraveyard)
 		corpse_graveyard_timer.Disable();
-	}
 
 	memset(item_tint, 0, sizeof(item_tint));
 
@@ -652,18 +596,18 @@ bool Corpse::Save() {
 	ItemList::iterator cur, end;
 	cur = itemlist.begin();
 	end = itemlist.end();
-	for (; cur != end; ++cur) { 
+	for (; cur != end; ++cur) {
 		ServerLootItem_Struct* item = *cur;
 		memcpy((char*)&dbpc->items[x++], (char*)item, sizeof(ServerLootItem_Struct));
 	}
 
 	/* Create New Corpse*/
 	if (corpse_db_id == 0) {
-		corpse_db_id = database.SaveCharacterCorpse(char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), dbpc, x_pos, y_pos, z_pos, heading);
+		corpse_db_id = database.SaveCharacterCorpse(char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), dbpc, m_Position);
 	}
 	/* Update Corpse Data */
 	else{
-		corpse_db_id = database.UpdateCharacterCorpse(corpse_db_id, char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), dbpc, x_pos, y_pos, z_pos, heading, IsRezzed());
+		corpse_db_id = database.UpdateCharacterCorpse(corpse_db_id, char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), dbpc, m_Position, IsRezzed());
 	}
 
 	safe_delete_array(dbpc);
@@ -673,16 +617,15 @@ bool Corpse::Save() {
 
 void Corpse::Delete() {
 	if (IsPlayerCorpse() && corpse_db_id != 0)
-		database.DeleteCharacterCorpse(corpse_db_id); 
-	
+		database.DeleteCharacterCorpse(corpse_db_id);
+
 	corpse_db_id = 0;
 	player_corpse_depop = true;
 }
 
 void Corpse::Bury() {
-	if (IsPlayerCorpse() && corpse_db_id != 0){
+	if (IsPlayerCorpse() && corpse_db_id != 0)
 		database.BuryCharacterCorpse(corpse_db_id);
-	}
 	corpse_db_id = 0;
 	player_corpse_depop = true;
 }
@@ -707,7 +650,7 @@ void Corpse::AddItem(uint32 itemnum, uint16 charges, int16 slot, uint32 aug1, ui
 	is_corpse_changed = true;
 
 	ServerLootItem_Struct* item = new ServerLootItem_Struct;
-	
+
 	memset(item, 0, sizeof(ServerLootItem_Struct));
 	item->item_id = itemnum;
 	item->charges = charges;
@@ -782,7 +725,7 @@ void Corpse::RemoveItem(uint16 lootslot) {
 }
 
 void Corpse::RemoveItem(ServerLootItem_Struct* item_data){
-	uint8 material; 
+	uint8 material;
 	ItemList::iterator cur,end;
 	cur = itemlist.begin();
 	end = itemlist.end();
@@ -827,14 +770,12 @@ bool Corpse::IsEmpty() const {
 }
 
 bool Corpse::Process() {
-	if (player_corpse_depop){
+	if (player_corpse_depop)
 		return false;
-	}
 
 	if (corpse_delay_timer.Check()) {
-		for (int i = 0; i < MAX_LOOTERS; i++){
+		for (int i = 0; i < MAX_LOOTERS; i++)
 			allowed_looters[i] = 0;
-		}
 		corpse_delay_timer.Disable();
 		return true;
 	}
@@ -844,8 +785,7 @@ bool Corpse::Process() {
 			Save();
 			player_corpse_depop = true;
 			database.SendCharacterCorpseToGraveyard(corpse_db_id, zone->graveyard_zoneid(),
-				(zone->GetZoneID() == zone->graveyard_zoneid()) ? zone->GetInstanceID() : 0, zone->graveyard_x(),
-				zone->graveyard_y(), zone->graveyard_z(), zone->graveyard_heading());
+				(zone->GetZoneID() == zone->graveyard_zoneid()) ? zone->GetInstanceID() : 0, zone->GetGraveyardPoint());
 			corpse_graveyard_timer.Disable();
 			ServerPacket* pack = new ServerPacket(ServerOP_SpawnPlayerCorpse, sizeof(SpawnPlayerCorpse_Struct));
 			SpawnPlayerCorpse_Struct* spc = (SpawnPlayerCorpse_Struct*)pack->pBuffer;
@@ -911,15 +851,11 @@ bool Corpse::CanPlayerLoot(int charid) {
 			looters++;
 		}
 
-		if (allowed_looters[i] == charid){
+		if (allowed_looters[i] == charid)
 			return true;
-		}
 	}
 	/* If we have no looters, obviously client can loot */
-	if (looters == 0){
-		return true;
-	}
-	return false;
+	return looters == 0;
 }
 
 void Corpse::AllowPlayerLoot(Mob *them, uint8 slot) {
@@ -952,21 +888,20 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		return;
 	}
 
-	if(being_looted_by == 0) { 
-		being_looted_by = 0xFFFFFFFF; 
-	}
+	if(being_looted_by == 0)
+		being_looted_by = 0xFFFFFFFF;
 
 	if(this->being_looted_by != 0xFFFFFFFF) {
 		// lets double check....
 		Entity* looter = entity_list.GetID(this->being_looted_by);
-		if(looter == 0) { 
-			this->being_looted_by = 0xFFFFFFFF; 
-		}
+		if(looter == 0)
+			this->being_looted_by = 0xFFFFFFFF;
 	}
 
 	uint8 Loot_Request_Type = 1;
 	bool loot_coin = false;
-	if(database.GetVariable("LootCoin", tmp, 9)) { loot_coin = (atoi(tmp) == 1); }
+	if(database.GetVariable("LootCoin", tmp, 9))
+		loot_coin = (atoi(tmp) == 1);
 
 	if (this->being_looted_by != 0xFFFFFFFF && this->being_looted_by != client->GetID()) {
 		SendLootReqErrorPacket(client, 0);
@@ -1004,7 +939,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		d->unknown2		= 0xef;
 
 		/* Dont take the coin off if it's a gm peeking at the corpse */
-		if(Loot_Request_Type == 2 || (Loot_Request_Type >= 3 && loot_coin)) { 
+		if(Loot_Request_Type == 2 || (Loot_Request_Type >= 3 && loot_coin)) {
 			if(!IsPlayerCorpse() && client->IsGrouped() && client->AutoSplitEnabled() && client->GetGroup()) {
 				d->copper		= 0;
 				d->silver		= 0;
@@ -1022,7 +957,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 			}
 
 			RemoveCash();
-			Save(); 
+			Save();
 		}
 
 		outapp->priority = 6;
@@ -1251,7 +1186,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 			/* Delete needs to be before RemoveItem because its deletes the pointer for item_data/bag_item_data */
 			database.DeleteItemOffCharacterCorpse(this->corpse_db_id, item_data->equip_slot, item_data->item_id);
 			/* Delete Item Instance */
-			RemoveItem(item_data->lootslot);  
+			RemoveItem(item_data->lootslot);
 		}
 
 		/* Remove Bag Contents */
@@ -1259,9 +1194,9 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 			for (int i = SUB_BEGIN; i < EmuConstants::ITEM_CONTAINER_SIZE; i++) {
 				if (bag_item_data[i]) {
 					/* Delete needs to be before RemoveItem because its deletes the pointer for item_data/bag_item_data */
-					database.DeleteItemOffCharacterCorpse(this->corpse_db_id, bag_item_data[i]->equip_slot, bag_item_data[i]->item_id); 
+					database.DeleteItemOffCharacterCorpse(this->corpse_db_id, bag_item_data[i]->equip_slot, bag_item_data[i]->item_id);
 					/* Delete Item Instance */
-					RemoveItem(bag_item_data[i]); 
+					RemoveItem(bag_item_data[i]);
 				}
 			}
 		}
@@ -1333,7 +1268,7 @@ void Corpse::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.NPC = 2;
 }
 
-void Corpse::QueryLoot(Client* to) { 
+void Corpse::QueryLoot(Client* to) {
 	int x = 0, y = 0; // x = visible items, y = total items
 	to->Message(0, "Coin: %ip, %ig, %is, %ic", platinum, gold, silver, copper);
 

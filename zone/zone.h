@@ -100,14 +100,9 @@ public:
 
 	inline Timer* GetInstanceTimer() { return Instance_Timer; }
 
-	inline const float&	safe_x()		{ return psafe_x; }
-	inline const float&	safe_y()		{ return psafe_y; }
-	inline const float&	safe_z()		{ return psafe_z; }
+    inline xyz_location GetSafePoint() { return m_SafePoint; }
 	inline const uint32& graveyard_zoneid()	{ return pgraveyard_zoneid; }
-	inline const float& graveyard_x()	{ return pgraveyard_x; }
-	inline const float& graveyard_y()	{ return pgraveyard_y; }
-	inline const float& graveyard_z()	{ return pgraveyard_z; }
-	inline const float& graveyard_heading() { return pgraveyard_heading; }
+	inline xyz_heading GetGraveyardPoint() { return m_Graveyard; }
 	inline const uint32& graveyard_id()	{ return pgraveyard_id; }
 
 	inline const uint32& GetMaxClients() { return pMaxClients; }
@@ -123,8 +118,8 @@ public:
 	void	ReloadStaticData();
 
 	uint32	CountSpawn2();
-	ZonePoint* GetClosestZonePoint(float x, float y, float z, const char* to_name, Client *client, float max_distance = 40000.0f);
-	ZonePoint* GetClosestZonePoint(float x, float y, float z, uint32	to, Client *client, float max_distance = 40000.0f);
+	ZonePoint* GetClosestZonePoint(const xyz_location& location, const char* to_name, Client *client, float max_distance = 40000.0f);
+	ZonePoint* GetClosestZonePoint(const xyz_location& location, uint32	to, Client *client, float max_distance = 40000.0f);
 	ZonePoint* GetClosestZonePointWithoutZone(float x, float y, float z, Client *client, float max_distance = 40000.0f);
 	SpawnGroupList spawn_group_list;
 
@@ -232,12 +227,12 @@ public:
 	uint8 lootvar;
 
 	bool	HasGraveyard();
-	void	SetGraveyard(uint32 zoneid, uint32 x, uint32 y, uint32 z, uint32 heading);
+	void	SetGraveyard(uint32 zoneid, const xyz_heading& graveyardPosition);
 
 	void		LoadBlockedSpells(uint32 zoneid);
 	void		ClearBlockedSpells();
-	bool		IsSpellBlocked(uint32 spell_id, float nx, float ny, float nz);
-	const char *GetSpellBlockedMessage(uint32 spell_id, float nx, float ny, float nz);
+	bool		IsSpellBlocked(uint32 spell_id, const xyz_location& location);
+	const char *GetSpellBlockedMessage(uint32 spell_id, const xyz_location& location);
 	int			GetTotalBlockedSpells() { return totalBS; }
 	inline bool HasMap() { return zonemap != nullptr; }
 	inline bool HasWaterMap() { return watermap != nullptr; }
@@ -275,7 +270,7 @@ private:
 	char*	long_name;
 	char*	map_name;
 	bool pvpzone;
-	float	psafe_x, psafe_y, psafe_z;
+	xyz_location m_SafePoint;
 	uint32	pMaxClients;
 	bool	can_bind;
 	bool	is_city;
@@ -286,7 +281,7 @@ private:
 	uint8	zone_type;
 	bool	allow_mercs;
 	uint32	pgraveyard_id, pgraveyard_zoneid;
-	float	pgraveyard_x, pgraveyard_y, pgraveyard_z, pgraveyard_heading;
+	xyz_heading m_Graveyard;
 	int		default_ruleset;
 
 	int	totalBS;

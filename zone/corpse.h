@@ -37,22 +37,19 @@ class Corpse : public Mob {
 	public:
 
 	static void SendEndLootErrorPacket(Client* client);
-	static void SendLootReqErrorPacket(Client* client, uint8 response = 2);  
-	
+	static void SendLootReqErrorPacket(Client* client, uint8 response = 2);
+
 	Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NPCType** in_npctypedata, uint32 in_decaytime = 600000);
 	Corpse(Client* client, int32 in_rezexp);
-	Corpse(uint32 in_corpseid, uint32 in_charid, const char* in_charname, ItemList* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, float in_x, float in_y, float in_z, float in_heading, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture, uint32 in_rezexp, bool wasAtGraveyard = false);
-	
-	~Corpse(); 
-	static Corpse* LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std::string in_charname, float in_x, float in_y, float in_z, float in_heading, std::string time_of_death, bool rezzed, bool was_at_graveyard);
+	Corpse(uint32 in_corpseid, uint32 in_charid, const char* in_charname, ItemList* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, const xyz_heading& position, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture, uint32 in_rezexp, bool wasAtGraveyard = false);
+
+	~Corpse();
+	static Corpse* LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std::string in_charname, const xyz_heading& position, std::string time_of_death, bool rezzed, bool was_at_graveyard);
 
 	/* Corpse: General */
 	virtual bool	Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill) { return true; }
 	virtual void	Damage(Mob* from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false) { return; }
-	virtual bool	Attack(Mob* other, int Hand = MainPrimary, bool FromRiposte = false,
-		bool			IsStrikethrough = true, bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) {
-		return false;
-	}
+	virtual bool	Attack(Mob* other, int Hand = MainPrimary, bool FromRiposte = false, bool			IsStrikethrough = true, bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) { return false; }
 	virtual bool	HasRaid()			{ return false; }
 	virtual bool	HasGroup()			{ return false; }
 	virtual Raid*	GetRaid()			{ return 0; }
@@ -73,7 +70,7 @@ class Corpse : public Mob {
 	uint32			GetDecayTime()				{ if (!corpse_decay_timer.Enabled()) return 0xFFFFFFFF; else return corpse_decay_timer.GetRemainingTime(); }
 	uint32			GetRezTime()				{ if (!corpse_rez_timer.Enabled()) return 0; else return corpse_rez_timer.GetRemainingTime(); }
 	void			SetDecayTimer(uint32 decay_time);
-	
+
 	void			Delete();
 	void			Bury();
 	void			CalcCorpseName();
@@ -81,9 +78,9 @@ class Corpse : public Mob {
 
 	/* Corpse: Items */
 	uint32					GetWornItem(int16 equipSlot) const;
-	ServerLootItem_Struct*	GetItem(uint16 lootslot, ServerLootItem_Struct** bag_item_data = 0); 
+	ServerLootItem_Struct*	GetItem(uint16 lootslot, ServerLootItem_Struct** bag_item_data = 0);
 	void	SetPlayerKillItemID(int32 pk_item_id) { player_kill_item = pk_item_id; }
-	int32	GetPlayerKillItem() { return player_kill_item; } 
+	int32	GetPlayerKillItem() { return player_kill_item; }
 	void	RemoveItem(uint16 lootslot);
 	void	RemoveItem(ServerLootItem_Struct* item_data);
 	void	AddItem(uint32 itemnum, uint16 charges, int16 slot = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
@@ -123,10 +120,10 @@ class Corpse : public Mob {
 	bool Summon(Client* client, bool spell, bool CheckDistance);
 	void Spawn();
 
-	char		corpse_name[64]; 
+	char		corpse_name[64];
 	uint32		GetEquipment(uint8 material_slot) const;
 	uint32		GetEquipmentColor(uint8 material_slot) const;
-	inline int	GetRezExp() { return rez_experience; } 
+	inline int	GetRezExp() { return rez_experience; }
 
 protected:
 	std::list<uint32> MoveItemToCorpse(Client *client, ItemInst *item, int16 equipslot);
@@ -139,7 +136,7 @@ private:
 	uint32		corpse_db_id; /* Corpse Database ID (Player Corpse) */
 	uint32		char_id; /* Character ID */
 	ItemList	itemlist; /* Internal Item list used for corpses */
-	uint32		copper; 
+	uint32		copper;
 	uint32		silver;
 	uint32		gold;
 	uint32		platinum;
@@ -152,7 +149,7 @@ private:
 	int			allowed_looters[MAX_LOOTERS]; /* People allowed to loot the corpse, character id */
 	Timer		corpse_decay_timer; /* The amount of time in millseconds in which a corpse will take to decay (Depop/Poof) */
 	Timer		corpse_rez_timer; /* The amount of time in millseconds in which a corpse can be rezzed */
-	Timer		corpse_delay_timer; 
+	Timer		corpse_delay_timer;
 	Timer		corpse_graveyard_timer;
 	Timer		loot_cooldown_timer; /* Delay between loot actions on the corpse entity */
 	Color_Struct item_tint[9];

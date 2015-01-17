@@ -308,8 +308,9 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center)
 				continue;
 			}
 
+            auto hateEntryPosition = xyz_location(cur->entity_on_hatelist->GetX(), cur->entity_on_hatelist->GetY(), cur->entity_on_hatelist->GetZ());
 			if (center->IsNPC() && center->CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
-				if (!zone->watermap->InLiquid(cur->entity_on_hatelist->GetX(), cur->entity_on_hatelist->GetY(), cur->entity_on_hatelist->GetZ())) {
+				if (!zone->watermap->InLiquid(hateEntryPosition)) {
 					skipped_count++;
 					++iterator;
 					continue;
@@ -434,7 +435,7 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center)
 		{
 			struct_HateList *cur = (*iterator);
 			if (center->IsNPC() && center->CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
-				if (!zone->watermap->InLiquid(cur->entity_on_hatelist->GetX(), cur->entity_on_hatelist->GetY(), cur->entity_on_hatelist->GetZ())) {
+				if (!zone->watermap->InLiquid(cur->entity_on_hatelist->GetPosition())) {
 					skipped_count++;
 					++iterator;
 					continue;

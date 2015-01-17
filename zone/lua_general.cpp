@@ -124,7 +124,7 @@ void register_event(std::string package_name, std::string name, int evt, luabind
 	e.encounter_name = name;
 	e.lua_reference = func;
 	e.event_id = static_cast<QuestEventID>(evt);
-	
+
 	auto liter = lua_encounter_events_registered.find(package_name);
 	if(liter == lua_encounter_events_registered.end()) {
 		std::list<lua_registered_event> elist;
@@ -201,7 +201,7 @@ void unregister_player_event(int evt) {
 void register_item_event(std::string name, int evt, int item_id, luabind::adl::object func) {
 	std::string package_name = "item_";
 	package_name += std::to_string(static_cast<long long>(item_id));
-	
+
 	if(luabind::type(func) == LUA_TFUNCTION) {
 		register_event(package_name, name, evt, func);
 	}
@@ -251,13 +251,13 @@ void unregister_spell_event(int evt, int spell_id) {
 }
 
 Lua_Mob lua_spawn2(int npc_type, int grid, int unused, double x, double y, double z, double heading) {
-	return Lua_Mob(quest_manager.spawn2(npc_type, grid, unused,
-		static_cast<float>(x), static_cast<float>(y), static_cast<float>(z), static_cast<float>(heading)));
+    auto position = xyz_heading(x, y, z, heading);
+	return Lua_Mob(quest_manager.spawn2(npc_type, grid, unused, position));
 }
 
 Lua_Mob lua_unique_spawn(int npc_type, int grid, int unused, double x, double y, double z, double heading = 0.0) {
-	return Lua_Mob(quest_manager.unique_spawn(npc_type, grid, unused,
-		static_cast<float>(x), static_cast<float>(y), static_cast<float>(z), static_cast<float>(heading)));
+    auto position = xyz_heading(x,y,z,heading);
+	return Lua_Mob(quest_manager.unique_spawn(npc_type, grid, unused, position));
 }
 
 Lua_Mob lua_spawn_from_spawn2(uint32 spawn2_id) {
@@ -421,15 +421,15 @@ void lua_pause(int duration) {
 }
 
 void lua_move_to(float x, float y, float z) {
-	quest_manager.moveto(x, y, z, 0, false);
+	quest_manager.moveto(xyz_heading(x, y, z, 0.0f), false);
 }
 
 void lua_move_to(float x, float y, float z, float h) {
-	quest_manager.moveto(x, y, z, h, false);
+	quest_manager.moveto(xyz_heading(x, y, z, h), false);
 }
 
 void lua_move_to(float x, float y, float z, float h, bool save_guard_spot) {
-	quest_manager.moveto(x, y, z, h, save_guard_spot);
+	quest_manager.moveto(xyz_heading(x, y, z, h), save_guard_spot);
 }
 
 void lua_path_resume() {
@@ -485,11 +485,11 @@ void lua_toggle_spawn_event(int event_id, bool enable, bool strict, bool reset) 
 }
 
 void lua_summon_burried_player_corpse(uint32 char_id, float x, float y, float z, float h) {
-	quest_manager.summonburriedplayercorpse(char_id, x, y, z, h);
+	quest_manager.summonburriedplayercorpse(char_id, xyz_heading(x, y, z, h));
 }
 
 void lua_summon_all_player_corpses(uint32 char_id, float x, float y, float z, float h) {
-	quest_manager.summonallplayercorpses(char_id, x, y, z, h);
+	quest_manager.summonallplayercorpses(char_id, xyz_heading(x, y, z, h));
 }
 
 int lua_get_player_burried_corpse_count(uint32 char_id) {
@@ -685,23 +685,23 @@ int lua_get_level(int type) {
 }
 
 void lua_create_ground_object(uint32 item_id, float x, float y, float z, float h) {
-	quest_manager.CreateGroundObject(item_id, x, y, z, h);
+	quest_manager.CreateGroundObject(item_id, xyz_heading(x, y, z, h));
 }
 
 void lua_create_ground_object(uint32 item_id, float x, float y, float z, float h, uint32 decay_time) {
-	quest_manager.CreateGroundObject(item_id, x, y, z, h, decay_time);
+	quest_manager.CreateGroundObject(item_id, xyz_heading(x, y, z, h), decay_time);
 }
 
 void lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h) {
-	quest_manager.CreateGroundObjectFromModel(model, x, y, z, h);
+	quest_manager.CreateGroundObjectFromModel(model, xyz_heading(x, y, z, h));
 }
 
 void lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h, int type) {
-	quest_manager.CreateGroundObjectFromModel(model, x, y, z, h, type);
+	quest_manager.CreateGroundObjectFromModel(model, xyz_heading(x, y, z, h), type);
 }
 
 void lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h, int type, uint32 decay_time) {
-	quest_manager.CreateGroundObjectFromModel(model, x, y, z, h, type, decay_time);
+	quest_manager.CreateGroundObjectFromModel(model, xyz_heading(x, y, z, h), type, decay_time);
 }
 
 void lua_create_door(const char *model, float x, float y, float z, float h, int open_type, int size) {
@@ -1036,7 +1036,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		int condition_min_value = 0;
 		bool enabled = true;
 		int animation = 0;
-		
+
 		auto cur = table["spawn2_id"];
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
@@ -1284,7 +1284,7 @@ void lua_create_npc(luabind::adl::object table, float x, float y, float z, float
 	if(luabind::type(table) != LUA_TTABLE) {
 		return;
 	}
-	
+
 	NPCType* npc_type = new NPCType;
 	memset(npc_type, 0, sizeof(NPCType));
 
@@ -1391,7 +1391,7 @@ void lua_create_npc(luabind::adl::object table, float x, float y, float z, float
 	LuaCreateNPCParse(raid_target, bool, false);
 	LuaCreateNPCParse(probability, uint8, 0);
 
-	NPC* npc = new NPC(npc_type, nullptr, x, y, z, heading, FlyMode3);
+	NPC* npc = new NPC(npc_type, nullptr, xyz_heading(x, y, z, heading), FlyMode3);
 	npc->GiveNPCTypeData(npc_type);
 	entity_list.AddNPC(npc);
 }

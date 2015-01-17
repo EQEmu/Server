@@ -20,7 +20,7 @@
 extern volatile bool ZoneLoaded;
 
 Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
-: NPC(d, 0, x, y, z, heading, 0, false), endupkeep_timer(1000), rest_timer(1), confidence_timer(6000), check_target_timer(2000)
+: NPC(d, nullptr, xyz_heading(x, y, z, heading), 0, false), endupkeep_timer(1000), rest_timer(1), confidence_timer(6000), check_target_timer(2000)
 {
 	base_hp = d->max_hp;
 	base_mana = d->Mana;
@@ -4722,11 +4722,11 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 	if(merc_template)
 	{
 		//TODO: Maybe add a way of updating client merc stats in a seperate function? like, for example, on leveling up.
-		const NPCType* npc_type_to_copy = database.GetMercType(merc_template->MercNPCID, merc_template->RaceID, c->GetLevel()); 
+		const NPCType* npc_type_to_copy = database.GetMercType(merc_template->MercNPCID, merc_template->RaceID, c->GetLevel());
 		if(npc_type_to_copy != nullptr)
 		{
 			//This is actually a very terrible method of assigning stats, and should be changed at some point. See the comment in merc's deconstructor.
-			NPCType* npc_type = new NPCType; 
+			NPCType* npc_type = new NPCType;
 			memset(npc_type, 0, sizeof(NPCType));
 			memcpy(npc_type, npc_type_to_copy, sizeof(NPCType));
 			if(c && !updateFromDB)
@@ -4919,7 +4919,7 @@ bool Merc::Spawn(Client *owner) {
 	entity_list.AddMerc(this, true, true);
 
 	SendPosition();
-	
+
 	if (MERC_DEBUG > 0)
 		owner->Message(7, "Mercenary Debug: Spawn.");
 
@@ -4945,7 +4945,7 @@ void Client::SendMercResponsePackets(uint32 ResponseType)
 		break;
 	case 3: //Mercenary failed to spawn!
 		SendMercMerchantResponsePacket(3);
-		break; 
+		break;
 	case 4: //Mercenaries are not allowed in raids!
 		SendMercMerchantResponsePacket(4);
 		break;
@@ -5109,7 +5109,7 @@ void Client::UpdateMercTimer()
 			{
 				SendMercResponsePackets(16);
 			}
-			
+
 			if (MERC_DEBUG > 0)
 				Message(7, "Mercenary Debug: UpdateMercTimer Complete.");
 
@@ -5132,7 +5132,7 @@ bool Client::CheckCanHireMerc(Mob* merchant, uint32 template_id) {
 	MercTemplate* mercTemplate = zone->GetMercTemplate(template_id);
 
 	//check for suspended merc
-	if(GetMercInfo().mercid != 0 && GetMercInfo().IsSuspended) {           
+	if(GetMercInfo().mercid != 0 && GetMercInfo().IsSuspended) {
 		SendMercResponsePackets(6);
 		return false;
 	}
@@ -5163,7 +5163,7 @@ bool Client::CheckCanHireMerc(Mob* merchant, uint32 template_id) {
 			return false;
 		}
 	}
-	
+
 	if (MERC_DEBUG > 0)
 		Message(7, "Mercenary Debug: CheckCanHireMerc True.");
 
@@ -5237,7 +5237,7 @@ bool Client::CheckCanSpawnMerc(uint32 template_id) {
 		SendMercResponsePackets(9);
 		return false;
 	}
-	
+
 	if (MERC_DEBUG > 0)
 		Message(7, "Mercenary Debug: CheckCanSpawnMerc True.");
 
@@ -5260,7 +5260,7 @@ bool Client::CheckCanUnsuspendMerc() {
 		Message(0, "You must wait %i seconds before unsuspending your mercenary.", GetPTimers().GetRemainingTime(pTimerMercSuspend));
 		return false;
 	}
-	
+
 	if (MERC_DEBUG > 0)
 		Message(7, "Mercenary Debug: CheckCanUnsuspendMerc True.");
 
@@ -5413,7 +5413,7 @@ void Client::SendMercTimer(Merc* merc) {
 
 }
 
-void Client::SpawnMerc(Merc* merc, bool setMaxStats) { 
+void Client::SpawnMerc(Merc* merc, bool setMaxStats) {
 
 	if (!merc || !CheckCanSpawnMerc(merc->GetMercTemplateID()))
 	{
@@ -5454,12 +5454,12 @@ bool Merc::Suspend() {
 	mercOwner->GetMercTimer()->Disable();
 	mercOwner->SendMercSuspendResponsePacket(mercOwner->GetMercInfo().SuspendedTime);
 	mercOwner->SendMercTimer(this);
-	
+
 	Depop();
 
 	// Start the timer to send the packet that refreshes the Unsuspend Button
 	mercOwner->GetPTimers().Start(pTimerMercSuspend, RuleI(Mercs, SuspendIntervalS));
-	
+
 	if (MERC_DEBUG > 0)
 		mercOwner->Message(7, "Mercenary Debug: Suspend Complete.");
 
@@ -5556,7 +5556,7 @@ bool Client::DismissMerc(uint32 MercID) {
 		if (MERC_DEBUG > 0)
 			Message(7, "Mercenary Debug: Dismiss Successful.");
 	}
-	
+
 	if (GetMerc())
 	{
 		GetMerc()->Depop();
@@ -5724,7 +5724,7 @@ bool Merc::MercJoinClientGroup() {
 				if(MERC_DEBUG > 0)
 					mercOwner->Message(7, "Mercenary Debug: Mercenary disbanded new group.");
 			}
-			
+
 		}
 		else if (AddMercToGroup(this, mercOwner->GetGroup()))
 		{

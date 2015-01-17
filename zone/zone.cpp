@@ -97,7 +97,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	}
 	zone->zonemap = Map::LoadMapFile(zone->map_name);
 	zone->watermap = WaterMap::LoadWaterMapfile(zone->map_name);
-	zone->pathing = PathManager::LoadPathFile(zone->map_name); 
+	zone->pathing = PathManager::LoadPathFile(zone->map_name);
 
 	char tmp[10];
 	if (database.GetVariable("loglevel",tmp, 9)) {
@@ -482,14 +482,14 @@ void Zone::GetMerchantDataForZoneLoad() {
 		"WHERE nt.merchant_id = ml.merchantid AND nt.id = se.npcid					   "
 		"AND se.spawngroupid = s2.spawngroupid AND s2.zone = '%s' AND s2.version = %i  "
 		"ORDER BY ml.slot															   ", GetShortName(), GetInstanceVersion());
-	auto results = database.QueryDatabase(query); 
+	auto results = database.QueryDatabase(query);
 	std::map<uint32, std::list<MerchantList> >::iterator cur;
 	uint32 npcid = 0;
 	if (results.RowCount() == 0) {
 		LogFile->write(EQEmuLog::Debug, "No Merchant Data found for %s.", GetShortName());
 		return;
 	}
-	for (auto row = results.begin(); row != results.end(); ++row) { 
+	for (auto row = results.begin(); row != results.end(); ++row) {
 		MerchantList ml;
 		ml.id = atoul(row[0]);
 		if (npcid != ml.id) {
@@ -736,7 +736,9 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	clientauth_timer(AUTHENTICATION_TIMEOUT * 1000),
 	spawn2_timer(1000),
 	qglobal_purge_timer(30000),
-	hotzone_timer(120000)
+	hotzone_timer(120000),
+	m_SafePoint(0.0f,0.0f,0.0f),
+	m_Graveyard(0.0f,0.0f,0.0f,0.0f)
 {
 	zoneid = in_zoneid;
 	instanceid = in_instanceid;
@@ -762,28 +764,20 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	memset(file_name, 0, sizeof(file_name));
 	long_name = 0;
 	aggroedmobs =0;
-
-	psafe_x = 0;
-	psafe_y = 0;
-	psafe_z = 0;
 	pgraveyard_id = 0;
 	pgraveyard_zoneid = 0;
-	pgraveyard_x = 0;
-	pgraveyard_y = 0;
-	pgraveyard_z = 0;
-	pgraveyard_heading = 0;
 	pMaxClients = 0;
 	pQueuedMerchantsWorkID = 0;
 	pvpzone = false;
 	if(database.GetServerType() == 1)
 		pvpzone = true;
-	database.GetZoneLongName(short_name, &long_name, file_name, &psafe_x, &psafe_y, &psafe_z, &pgraveyard_id, &pMaxClients);
+	database.GetZoneLongName(short_name, &long_name, file_name, &m_SafePoint.m_X, &m_SafePoint.m_Y, &m_SafePoint.m_Z, &pgraveyard_id, &pMaxClients);
 	if(graveyard_id() > 0)
 	{
 		LogFile->write(EQEmuLog::Debug, "Graveyard ID is %i.", graveyard_id());
-		bool GraveYardLoaded = database.GetZoneGraveyard(graveyard_id(), &pgraveyard_zoneid, &pgraveyard_x, &pgraveyard_y, &pgraveyard_z, &pgraveyard_heading);
+		bool GraveYardLoaded = database.GetZoneGraveyard(graveyard_id(), &pgraveyard_zoneid, &m_Graveyard.m_X, &m_Graveyard.m_Y, &m_Graveyard.m_Z, &m_Graveyard.m_Heading);
 		if(GraveYardLoaded)
-			LogFile->write(EQEmuLog::Debug, "Loaded a graveyard for zone %s: graveyard zoneid is %u x is %f y is %f z is %f heading is %f.", short_name, graveyard_zoneid(), graveyard_x(), graveyard_y(), graveyard_z(), graveyard_heading());
+			LogFile->write(EQEmuLog::Debug, "Loaded a graveyard for zone %s: graveyard zoneid is %u at %s.", short_name, graveyard_zoneid(), to_string(m_Graveyard).c_str());
 		else
 			LogFile->write(EQEmuLog::Error, "Unable to load the graveyard id %i for zone %s.", graveyard_id(), short_name);
 	}
@@ -1520,7 +1514,7 @@ void Zone::SetTime(uint8 hour, uint8 minute)
 	}
 }
 
-ZonePoint* Zone::GetClosestZonePoint(float x, float y, float z, uint32 to, Client* client, float max_distance) {
+ZonePoint* Zone::GetClosestZonePoint(const xyz_location& location, uint32 to, Client* client, float max_distance) {
 	LinkedListIterator<ZonePoint*> iterator(zone_point_list);
 	ZonePoint* closest_zp = 0;
 	float closest_dist = FLT_MAX;
@@ -1538,14 +1532,10 @@ ZonePoint* Zone::GetClosestZonePoint(float x, float y, float z, uint32 to, Clien
 
 		if (zp->target_zone_id == to)
 		{
-			float delta_x = zp->x - x;
-			float delta_y = zp->y - y;
-			if(zp->x == 999999 || zp->x == -999999)
-				delta_x = 0;
-			if(zp->y == 999999 || zp->y == -999999)
-				delta_y = 0;
+            auto dist = Distance(xy_location(zp->x,zp->y), location);
+			if ((zp->x == 999999 || zp->x == -999999) && (zp->y == 999999 || zp->y == -999999))
+				dist = 0;
 
-			float dist = sqrt(delta_x * delta_x + delta_y * delta_y);
 			if (dist < closest_dist)
 			{
 				closest_zp = zp;
@@ -1558,24 +1548,24 @@ ZonePoint* Zone::GetClosestZonePoint(float x, float y, float z, uint32 to, Clien
 	if(closest_dist > 400.0f && closest_dist < max_distance2)
 	{
 		if(client)
-			client->CheatDetected(MQZoneUnknownDest, x, y, z); // Someone is trying to use /zone
+			client->CheatDetected(MQZoneUnknownDest, location.m_X, location.m_Y, location.m_Z); // Someone is trying to use /zone
 		LogFile->write(EQEmuLog::Status, "WARNING: Closest zone point for zone id %d is %f, you might need to update your zone_points table if you dont arrive at the right spot.", to, closest_dist);
-		LogFile->write(EQEmuLog::Status, "<Real Zone Points>. %f x %f y %f z ", x, y, z);
+		LogFile->write(EQEmuLog::Status, "<Real Zone Points>. %s", to_string(location).c_str());
 	}
 
 	if(closest_dist > max_distance2)
 		closest_zp = nullptr;
 
 	if(!closest_zp)
-		closest_zp = GetClosestZonePointWithoutZone(x, y, z, client);
+		closest_zp = GetClosestZonePointWithoutZone(location.m_X, location.m_Y, location.m_Z, client);
 
 	return closest_zp;
 }
 
-ZonePoint* Zone::GetClosestZonePoint(float x, float y, float z, const char* to_name, Client* client, float max_distance) {
+ZonePoint* Zone::GetClosestZonePoint(const xyz_location& location, const char* to_name, Client* client, float max_distance) {
 	if(to_name == nullptr)
-		return GetClosestZonePointWithoutZone(x,y,z, client, max_distance);
-	return GetClosestZonePoint(x, y, z, database.GetZoneID(to_name), client, max_distance);
+		return GetClosestZonePointWithoutZone(location.m_X, location.m_Y, location.m_Z, client, max_distance);
+	return GetClosestZonePoint(location, database.GetZoneID(to_name), client, max_distance);
 }
 
 ZonePoint* Zone::GetClosestZonePointWithoutZone(float x, float y, float z, Client* client, float max_distance) {
@@ -1823,12 +1813,9 @@ bool Zone::HasGraveyard() {
 	return Result;
 }
 
-void Zone::SetGraveyard(uint32 zoneid, uint32 x, uint32 y, uint32 z, uint32 heading) {
+void Zone::SetGraveyard(uint32 zoneid, const xyz_heading& graveyardPosition) {
 	pgraveyard_zoneid = zoneid;
-	pgraveyard_x = x;
-	pgraveyard_y = y;
-	pgraveyard_z = z;
-	pgraveyard_heading = heading;
+	m_Graveyard = graveyardPosition;
 }
 
 void Zone::LoadBlockedSpells(uint32 zoneid)
@@ -1855,7 +1842,7 @@ void Zone::ClearBlockedSpells()
 	}
 }
 
-bool Zone::IsSpellBlocked(uint32 spell_id, float nx, float ny, float nz)
+bool Zone::IsSpellBlocked(uint32 spell_id, const xyz_location& location)
 {
 	if (blocked_spells)
 	{
@@ -1905,12 +1892,8 @@ bool Zone::IsSpellBlocked(uint32 spell_id, float nx, float ny, float nz)
 					}
 					case 2:
 					{
-						if ((( nx >= (blocked_spells[x].x-blocked_spells[x].xdiff)) && (nx <= (blocked_spells[x].x+blocked_spells[x].xdiff))) &&
-							(( ny >= (blocked_spells[x].y-blocked_spells[x].ydiff)) && (ny <= (blocked_spells[x].y+blocked_spells[x].ydiff))) &&
-							(( nz >= (blocked_spells[x].z-blocked_spells[x].zdiff)) && (nz <= (blocked_spells[x].z+blocked_spells[x].zdiff))))
-						{
+						if (!IsWithinAxisAlignedBox(location, blocked_spells[x].m_Location - blocked_spells[x].m_Difference, blocked_spells[x].m_Location + blocked_spells[x].m_Difference))
 							return true;
-						}
 						break;
 					}
 					default:
@@ -1925,7 +1908,7 @@ bool Zone::IsSpellBlocked(uint32 spell_id, float nx, float ny, float nz)
 	return false;
 }
 
-const char* Zone::GetSpellBlockedMessage(uint32 spell_id, float nx, float ny, float nz)
+const char* Zone::GetSpellBlockedMessage(uint32 spell_id, const xyz_location& location)
 {
 	if(blocked_spells)
 	{
@@ -1943,12 +1926,8 @@ const char* Zone::GetSpellBlockedMessage(uint32 spell_id, float nx, float ny, fl
 				}
 				case 2:
 				{
-					if((( nx > (blocked_spells[x].x-blocked_spells[x].xdiff)) && (nx < (blocked_spells[x].x+blocked_spells[x].xdiff))) &&
-						(( ny > (blocked_spells[x].y-blocked_spells[x].ydiff)) && (ny < (blocked_spells[x].y+blocked_spells[x].ydiff))) &&
-						(( nz > (blocked_spells[x].z-blocked_spells[x].zdiff)) && (nz < (blocked_spells[x].z+blocked_spells[x].zdiff))))
-					{
+					if(!IsWithinAxisAlignedBox(location, blocked_spells[x].m_Location - blocked_spells[x].m_Difference, blocked_spells[x].m_Location + blocked_spells[x].m_Difference))
 						return blocked_spells[x].message;
-					}
 					break;
 				}
 				default:
@@ -2185,7 +2164,7 @@ void Zone::DoAdventureActions()
 			const NPCType* tmp = database.GetNPCType(ds->data_id);
 			if(tmp)
 			{
-				NPC* npc = new NPC(tmp, 0, ds->assa_x, ds->assa_y, ds->assa_z, ds->assa_h, FlyMode3);
+				NPC* npc = new NPC(tmp, nullptr, xyz_heading(ds->assa_x, ds->assa_y, ds->assa_z, ds->assa_h), FlyMode3);
 				npc->AddLootTable();
 				entity_list.AddNPC(npc);
 				npc->Shout("Rarrrgh!");

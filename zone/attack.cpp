@@ -2471,7 +2471,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 	}
 
 	if(IsNPC() && CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
-		if(!zone->watermap->InLiquid(other->GetX(), other->GetY(), other->GetZ())) {
+		if(!zone->watermap->InLiquid(other->GetPosition())) {
 			return;
 		}
 	}

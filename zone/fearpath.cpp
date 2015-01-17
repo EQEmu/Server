@@ -162,9 +162,7 @@ void Mob::CalculateNewFearpoint()
 
 		if(Route.size() > 0)
 		{
-			fear_walkto_x = Loc.x;
-			fear_walkto_y = Loc.y;
-			fear_walkto_z = Loc.z;
+            m_FearWalkTarget = xyz_location(Loc.x, Loc.y, Loc.z);
 			curfp = true;
 
 			mlog(PATHING__DEBUG, "Feared to node %i (%8.3f, %8.3f, %8.3f)", Node, Loc.x, Loc.y, Loc.z);
@@ -194,14 +192,8 @@ void Mob::CalculateNewFearpoint()
 		}
 	}
 	if (curfp)
-	{
-		fear_walkto_x = ranx;
-		fear_walkto_y = rany;
-		fear_walkto_z = ranz;
-	}
+        m_FearWalkTarget = xyz_location(ranx, rany, ranz);
 	else //Break fear
-	{
 		BuffFadeByEffect(SE_Fear);
-	}
 }
 

@@ -631,7 +631,7 @@ double Lua_Mob::ResistSpell(int resist_type, int spell_id, Lua_Mob caster, bool 
 	return self->ResistSpell(resist_type, spell_id, caster, use_resist_override, resist_override);
 }
 
-double Lua_Mob::ResistSpell(int resist_type, int spell_id, Lua_Mob caster, bool use_resist_override, int resist_override, 
+double Lua_Mob::ResistSpell(int resist_type, int spell_id, Lua_Mob caster, bool use_resist_override, int resist_override,
 	bool charisma_check) {
 	Lua_Safe_Call_Real();
 	return self->ResistSpell(resist_type, spell_id, caster, use_resist_override, resist_override, charisma_check);
@@ -674,22 +674,22 @@ double Lua_Mob::GetHeading() {
 
 double Lua_Mob::GetWaypointX() {
 	Lua_Safe_Call_Real();
-	return self->GetCWPX();
+	return self->GetCurrentWayPoint().m_X;
 }
 
 double Lua_Mob::GetWaypointY() {
 	Lua_Safe_Call_Real();
-	return self->GetCWPY();
+	return self->GetCurrentWayPoint().m_Y;
 }
 
 double Lua_Mob::GetWaypointZ() {
 	Lua_Safe_Call_Real();
-	return self->GetCWPZ();
+	return self->GetCurrentWayPoint().m_Z;
 }
 
 double Lua_Mob::GetWaypointH() {
 	Lua_Safe_Call_Real();
-	return self->GetCWPH();
+	return self->GetCurrentWayPoint().m_Heading;
 }
 
 double Lua_Mob::GetWaypointPause() {
@@ -777,19 +777,19 @@ bool Lua_Mob::CastSpell(int spell_id, int target_id, int slot, int cast_time, in
 	return self->CastSpell(spell_id, target_id, slot, cast_time, mana_cost, nullptr, static_cast<uint32>(item_slot));
 }
 
-bool Lua_Mob::CastSpell(int spell_id, int target_id, int slot, int cast_time, int mana_cost, int item_slot, int timer, 
+bool Lua_Mob::CastSpell(int spell_id, int target_id, int slot, int cast_time, int mana_cost, int item_slot, int timer,
 	int timer_duration) {
 	Lua_Safe_Call_Bool();
-	return self->CastSpell(spell_id, target_id, slot, cast_time, mana_cost, nullptr, static_cast<uint32>(item_slot), 
+	return self->CastSpell(spell_id, target_id, slot, cast_time, mana_cost, nullptr, static_cast<uint32>(item_slot),
 		static_cast<uint32>(timer), static_cast<uint32>(timer_duration));
 }
 
-bool Lua_Mob::CastSpell(int spell_id, int target_id, int slot, int cast_time, int mana_cost, int item_slot, int timer, 
+bool Lua_Mob::CastSpell(int spell_id, int target_id, int slot, int cast_time, int mana_cost, int item_slot, int timer,
 	int timer_duration, int resist_adjust) {
 	Lua_Safe_Call_Bool();
 	int16 res = resist_adjust;
 
-	return self->CastSpell(spell_id, target_id, slot, cast_time, mana_cost, nullptr, static_cast<uint32>(item_slot), 
+	return self->CastSpell(spell_id, target_id, slot, cast_time, mana_cost, nullptr, static_cast<uint32>(item_slot),
 		static_cast<uint32>(timer), static_cast<uint32>(timer_duration), 0, &res);
 }
 
@@ -841,7 +841,7 @@ Lua_Mob Lua_Mob::GetOwner() {
 Lua_HateList Lua_Mob::GetHateList() {
 	Lua_Safe_Call_Class(Lua_HateList);
 	Lua_HateList ret;
-	
+
 	auto h_list = self->GetHateList();
 	auto iter = h_list.begin();
 	while(iter != h_list.end()) {
@@ -1222,7 +1222,7 @@ bool Lua_Mob::EntityVariableExists(const char *name) {
 
 void Lua_Mob::Signal(uint32 id) {
 	Lua_Safe_Call_Void();
-	
+
 	if(self->IsClient()) {
 		self->CastToClient()->Signal(id);
 	} else if(self->IsNPC()) {
@@ -1255,7 +1255,7 @@ void Lua_Mob::DoSpecialAttackDamage(Lua_Mob other, int skill, int max_damage, in
 	self->DoSpecialAttackDamage(other, static_cast<SkillUseTypes>(skill), max_damage, min_damage, hate_override, reuse_time);
 }
 
-void Lua_Mob::DoSpecialAttackDamage(Lua_Mob other, int skill, int max_damage, int min_damage, int hate_override, int reuse_time, 
+void Lua_Mob::DoSpecialAttackDamage(Lua_Mob other, int skill, int max_damage, int min_damage, int hate_override, int reuse_time,
 									bool hit_chance) {
 	Lua_Safe_Call_Void();
 	self->DoSpecialAttackDamage(other, static_cast<SkillUseTypes>(skill), max_damage, min_damage, hate_override, reuse_time, hit_chance);
@@ -1286,7 +1286,7 @@ void Lua_Mob::DoThrowingAttackDmg(Lua_Mob other, Lua_ItemInst range_weapon, Lua_
 	self->DoThrowingAttackDmg(other, range_weapon, item, weapon_damage, chance_mod);
 }
 
-void Lua_Mob::DoThrowingAttackDmg(Lua_Mob other, Lua_ItemInst range_weapon, Lua_Item item, int weapon_damage, int chance_mod, 
+void Lua_Mob::DoThrowingAttackDmg(Lua_Mob other, Lua_ItemInst range_weapon, Lua_Item item, int weapon_damage, int chance_mod,
 								  int focus) {
 	Lua_Safe_Call_Void();
 	self->DoThrowingAttackDmg(other, range_weapon, item, weapon_damage, chance_mod, focus);
@@ -1337,7 +1337,7 @@ void Lua_Mob::DoArcheryAttackDmg(Lua_Mob other, Lua_ItemInst range_weapon, Lua_I
 	self->DoArcheryAttackDmg(other, range_weapon, ammo, weapon_damage, chance_mod);
 }
 
-void Lua_Mob::DoArcheryAttackDmg(Lua_Mob other, Lua_ItemInst range_weapon, Lua_ItemInst ammo, int weapon_damage, int chance_mod, 
+void Lua_Mob::DoArcheryAttackDmg(Lua_Mob other, Lua_ItemInst range_weapon, Lua_ItemInst ammo, int weapon_damage, int chance_mod,
 								 int focus) {
 	Lua_Safe_Call_Void();
 	self->DoArcheryAttackDmg(other, range_weapon, ammo, weapon_damage, chance_mod, focus);
@@ -1395,7 +1395,7 @@ void Lua_Mob::ProjectileAnimation(Lua_Mob to, int item_id, bool is_arrow, double
 
 void Lua_Mob::ProjectileAnimation(Lua_Mob to, int item_id, bool is_arrow, double speed, double angle, double tilt, double arc) {
 	Lua_Safe_Call_Void();
-	self->ProjectileAnimation(to, item_id, is_arrow, static_cast<float>(speed), static_cast<float>(angle), static_cast<float>(tilt), 
+	self->ProjectileAnimation(to, item_id, is_arrow, static_cast<float>(speed), static_cast<float>(angle), static_cast<float>(tilt),
 		static_cast<float>(arc));
 }
 
@@ -1635,7 +1635,7 @@ void Lua_Mob::SendSpellEffect(uint32 effect_id, uint32 duration, uint32 finish_d
 	self->SendSpellEffect(effect_id, duration, finish_delay, zone_wide, unk020, perm_effect);
 }
 
-void Lua_Mob::SendSpellEffect(uint32 effect_id, uint32 duration, uint32 finish_delay, bool zone_wide, uint32 unk020, bool perm_effect, 
+void Lua_Mob::SendSpellEffect(uint32 effect_id, uint32 duration, uint32 finish_delay, bool zone_wide, uint32 unk020, bool perm_effect,
 							  Lua_Client c) {
 	Lua_Safe_Call_Void();
 	self->SendSpellEffect(effect_id, duration, finish_delay, zone_wide, unk020, perm_effect, c);

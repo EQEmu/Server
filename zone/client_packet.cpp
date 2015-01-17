@@ -1455,9 +1455,10 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	strcpy(lastname, m_pp.last_name);
 	/* If PP is set to weird coordinates */
 	if ((m_pp.x == -1 && m_pp.y == -1 && m_pp.z == -1) || (m_pp.x == -2 && m_pp.y == -2 && m_pp.z == -2)) {
-		m_pp.x = zone->safe_x();
-		m_pp.y = zone->safe_y();
-		m_pp.z = zone->safe_z();
+        auto safePoint = zone->GetSafePoint();
+		m_pp.x = safePoint.m_X;
+		m_pp.y = safePoint.m_Y;
+		m_pp.z = safePoint.m_Z;
 	}
 	/* If too far below ground, then fix */
 	// float ground_z = GetGroundZ(m_pp.x, m_pp.y, m_pp.z);
@@ -1467,10 +1468,10 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	/* Set Mob variables for spawn */
 	class_ = m_pp.class_;
 	level = m_pp.level;
-	x_pos = m_pp.x;
-	y_pos = m_pp.y;
-	z_pos = m_pp.z;
-	heading = m_pp.heading;
+	m_Position.m_X = m_pp.x;
+	m_Position.m_Y = m_pp.y;
+	m_Position.m_Z = m_pp.z;
+	m_Position.m_Heading = m_pp.heading;
 	race = m_pp.race;
 	base_race = m_pp.race;
 	gender = m_pp.gender;
@@ -3240,13 +3241,8 @@ void Client::Handle_OP_AutoAttack(const EQApplicationPacket *app)
 		ranged_timer.Disable();
 		attack_dw_timer.Disable();
 
-		aa_los_me.x = 0;
-		aa_los_me.y = 0;
-		aa_los_me.z = 0;
-		aa_los_me_heading = 0;
-		aa_los_them.x = 0;
-		aa_los_them.y = 0;
-		aa_los_them.z = 0;
+        m_AutoAttackPosition = xyz_heading::Origin();
+        m_AutoAttackTargetLocation = xyz_location::Origin();
 		aa_los_them_mob = nullptr;
 	}
 	else if (app->pBuffer[0] == 1)
@@ -3260,25 +3256,15 @@ void Client::Handle_OP_AutoAttack(const EQApplicationPacket *app)
 		if (GetTarget())
 		{
 			aa_los_them_mob = GetTarget();
-			aa_los_me.x = GetX();
-			aa_los_me.y = GetY();
-			aa_los_me.z = GetZ();
-			aa_los_me_heading = GetHeading();
-			aa_los_them.x = aa_los_them_mob->GetX();
-			aa_los_them.y = aa_los_them_mob->GetY();
-			aa_los_them.z = aa_los_them_mob->GetZ();
+			m_AutoAttackPosition = GetPosition();
+			m_AutoAttackTargetLocation = aa_los_them_mob->GetPosition();
 			los_status = CheckLosFN(aa_los_them_mob);
 			los_status_facing = IsFacingMob(aa_los_them_mob);
 		}
 		else
 		{
-			aa_los_me.x = GetX();
-			aa_los_me.y = GetY();
-			aa_los_me.z = GetZ();
-			aa_los_me_heading = GetHeading();
-			aa_los_them.x = 0;
-			aa_los_them.y = 0;
-			aa_los_them.z = 0;
+			m_AutoAttackPosition = GetPosition();
+			m_AutoAttackTargetLocation = xyz_location::Origin();
 			aa_los_them_mob = nullptr;
 			los_status = false;
 			los_status_facing = false;
@@ -4000,9 +3986,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 
 	CastSpell_Struct* castspell = (CastSpell_Struct*)app->pBuffer;
 
-	targetring_x = castspell->x_pos;
-	targetring_y = castspell->y_pos;
-	targetring_z = castspell->z_pos;
+    m_TargetRing = xyz_location(castspell->x_pos, castspell->y_pos, castspell->z_pos);
 
 #ifdef _EQDEBUG
 	LogFile->write(EQEmuLog::Debug, "cs_unknown2: %u %i", (uint8)castspell->cs_unknown[0], castspell->cs_unknown[0]);
@@ -4034,9 +4018,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			return;
 		}
 
-		targetring_x = castspell->x_pos;
-		targetring_y = castspell->y_pos;
-		targetring_z = castspell->z_pos;
+        m_TargetRing = xyz_location(castspell->x_pos, castspell->y_pos, castspell->z_pos);
 
 		CastSpell(spell_to_cast, castspell->target_id, castspell->slot);
 	}
@@ -4380,7 +4362,8 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			}
 
 			// set the boat's position deltas
-			boat->SetDeltas(ppu->delta_x, ppu->delta_y, ppu->delta_z, ppu->delta_heading);
+			auto boatDelta = xyz_heading(ppu->delta_x, ppu->delta_y, ppu->delta_z, ppu->delta_heading);
+			boat->SetDelta(boatDelta);
 			// send an update to everyone nearby except the client controlling the boat
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 			PlayerPositionUpdateServer_Struct* ppus = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
@@ -4396,9 +4379,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 
 	float dist = 0;
 	float tmp;
-	tmp = x_pos - ppu->x_pos;
+	tmp = m_Position.m_X - ppu->x_pos;
 	dist += tmp*tmp;
-	tmp = y_pos - ppu->y_pos;
+	tmp = m_Position.m_Y - ppu->y_pos;
 	dist += tmp*tmp;
 	dist = sqrt(dist);
 
@@ -4541,51 +4524,41 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	float rewind_x_diff = 0;
 	float rewind_y_diff = 0;
 
-	rewind_x_diff = ppu->x_pos - rewind_x;
+	rewind_x_diff = ppu->x_pos - m_RewindLocation.m_X;
 	rewind_x_diff *= rewind_x_diff;
-	rewind_y_diff = ppu->y_pos - rewind_y;
+	rewind_y_diff = ppu->y_pos - m_RewindLocation.m_Y;
 	rewind_y_diff *= rewind_y_diff;
 
 	//We only need to store updated values if the player has moved.
 	//If the player has moved more than units for x or y, then we'll store
 	//his pre-PPU x and y for /rewind, in case he gets stuck.
-	if ((rewind_x_diff > 750) || (rewind_y_diff > 750)) {
-		rewind_x = x_pos;
-		rewind_y = y_pos;
-		rewind_z = z_pos;
-	}
+	if ((rewind_x_diff > 750) || (rewind_y_diff > 750))
+        m_RewindLocation = m_Position;
 
 	//If the PPU was a large jump, such as a cross zone gate or Call of Hero,
 	//just update rewind coords to the new ppu coords. This will prevent exploitation.
 
-	if ((rewind_x_diff > 5000) || (rewind_y_diff > 5000)) {
-		rewind_x = ppu->x_pos;
-		rewind_y = ppu->y_pos;
-		rewind_z = ppu->z_pos;
-	}
+	if ((rewind_x_diff > 5000) || (rewind_y_diff > 5000))
+        m_RewindLocation = xyz_location(ppu->x_pos, ppu->y_pos, ppu->z_pos);
 
 	if(proximity_timer.Check()) {
-		entity_list.ProcessMove(this, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+		entity_list.ProcessMove(this, xyz_location(ppu->x_pos, ppu->y_pos, ppu->z_pos));
 		if(RuleB(TaskSystem, EnableTaskSystem) && RuleB(TaskSystem,EnableTaskProximity))
 			ProcessTaskProximities(ppu->x_pos, ppu->y_pos, ppu->z_pos);
-		proximity_x = ppu->x_pos;
-		proximity_y = ppu->y_pos;
-		proximity_z = ppu->z_pos;
+
+		m_Proximity = xyz_location(ppu->x_pos, ppu->y_pos, ppu->z_pos);
 	}
 
 	// Update internal state
-	delta_x			= ppu->delta_x;
-	delta_y			= ppu->delta_y;
-	delta_z			= ppu->delta_z;
-	delta_heading	= ppu->delta_heading;
+	m_Delta = xyz_heading(ppu->delta_x, ppu->delta_y, ppu->delta_z, ppu->delta_heading);
 
-	if(IsTracking() && ((x_pos!=ppu->x_pos) || (y_pos!=ppu->y_pos))){
+	if(IsTracking() && ((m_Position.m_X!=ppu->x_pos) || (m_Position.m_Y!=ppu->y_pos))){
 		if(zone->random.Real(0, 100) < 70)//should be good
 			CheckIncreaseSkill(SkillTracking, nullptr, -20);
 	}
 
 	// Break Hide if moving without sneaking and set rewind timer if moved
-	if(ppu->y_pos != y_pos || ppu->x_pos != x_pos){
+	if(ppu->y_pos != m_Position.m_Y || ppu->x_pos != m_Position.m_X){
 		if((hidden || improved_hidden) && !sneaking){
 			hidden = false;
 			improved_hidden = false;
@@ -4605,13 +4578,14 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	// Outgoing client packet
 	float tmpheading = EQ19toFloat(ppu->heading);
 
-	if (!FCMP(ppu->y_pos, y_pos) || !FCMP(ppu->x_pos, x_pos) || !FCMP(tmpheading, heading) || ppu->animation != animation)
+	if (!FCMP(ppu->y_pos, m_Position.m_Y) || !FCMP(ppu->x_pos, m_Position.m_X) || !FCMP(tmpheading, m_Position.m_Heading) || ppu->animation != animation)
 	{
-		x_pos			= ppu->x_pos;
-		y_pos			= ppu->y_pos;
-		z_pos			= ppu->z_pos;
-		animation		= ppu->animation;
-		heading			= tmpheading;
+		m_Position.m_X = ppu->x_pos;
+		m_Position.m_Y = ppu->y_pos;
+		m_Position.m_Z = ppu->z_pos;
+		m_Position.m_Heading = tmpheading;
+		animation = ppu->animation;
+
 
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 		PlayerPositionUpdateServer_Struct* ppu = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
@@ -4623,13 +4597,8 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 		safe_delete(outapp);
 	}
 
-	if(zone->watermap)
-	{
-		if(zone->watermap->InLiquid(x_pos, y_pos, z_pos))
-		{
-			CheckIncreaseSkill(SkillSwimming, nullptr, -17);
-		}
-	}
+	if(zone->watermap && zone->watermap->InLiquid(m_Position))
+        CheckIncreaseSkill(SkillSwimming, nullptr, -17);
 
 	return;
 }
@@ -6623,7 +6592,7 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 
 	GroupGeneric_Struct* gf = (GroupGeneric_Struct*)app->pBuffer;
 	Mob* inviter = entity_list.GetClientByName(gf->name1);
-	
+
 	// Inviter and Invitee are in the same zone
 	if (inviter != nullptr && inviter->IsClient())
 	{
@@ -6638,7 +6607,7 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 	{
 		// Inviter is in another zone - Remove merc from group now if any
 		LeaveGroup();
-		
+
 		ServerPacket* pack = new ServerPacket(ServerOP_GroupFollow, sizeof(ServerGroupFollow_Struct));
 		ServerGroupFollow_Struct *sgfs = (ServerGroupFollow_Struct *)pack->pBuffer;
 		sgfs->CharacterID = CharacterID();
@@ -8029,7 +7998,7 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app)
 	InspectResponse_Struct* insr = (InspectResponse_Struct*)outapp->pBuffer;
 	Mob* tmp = entity_list.GetMob(insr->TargetID);
 	const Item_Struct* item = nullptr;
-	
+
 	int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 	for (int16 L = EmuConstants::EQUIPMENT_BEGIN; L <= MainWaist; L++) {
 		const ItemInst* inst = GetInv().GetItem(L);
@@ -11706,7 +11675,7 @@ void Client::Handle_OP_Rewind(const EQApplicationPacket *app)
 		Message_StringID(MT_System, REWIND_WAIT);
 	}
 	else {
-		CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), rewind_x, rewind_y, rewind_z, 0, 2, Rewind);
+		CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), m_RewindLocation.m_X, m_RewindLocation.m_Y, m_RewindLocation.m_Z, 0, 2, Rewind);
 		rewind_timer.Start(30000, true);
 	}
 }
@@ -11830,29 +11799,29 @@ void Client::Handle_OP_SenseTraps(const EQApplicationPacket *app)
 		int uskill = GetSkill(SkillSenseTraps);
 		if ((zone->random.Int(0, 99) + uskill) >= (zone->random.Int(0, 99) + trap->skill*0.75))
 		{
-			float xdif = trap->x - GetX();
-			float ydif = trap->y - GetY();
-			if (xdif == 0 && ydif == 0)
+			auto diff = trap->m_Position - GetPosition();
+
+			if (diff.m_X == 0 && diff.m_Y == 0)
 				Message(MT_Skills, "You sense a trap right under your feet!");
-			else if (xdif > 10 && ydif > 10)
+			else if (diff.m_X > 10 && diff.m_Y > 10)
 				Message(MT_Skills, "You sense a trap to the NorthWest.");
-			else if (xdif < -10 && ydif > 10)
+			else if (diff.m_X < -10 && diff.m_Y > 10)
 				Message(MT_Skills, "You sense a trap to the NorthEast.");
-			else if (ydif > 10)
+			else if (diff.m_Y > 10)
 				Message(MT_Skills, "You sense a trap to the North.");
-			else if (xdif > 10 && ydif < -10)
+			else if (diff.m_X > 10 && diff.m_Y < -10)
 				Message(MT_Skills, "You sense a trap to the SouthWest.");
-			else if (xdif < -10 && ydif < -10)
+			else if (diff.m_X < -10 && diff.m_Y < -10)
 				Message(MT_Skills, "You sense a trap to the SouthEast.");
-			else if (ydif < -10)
+			else if (diff.m_Y < -10)
 				Message(MT_Skills, "You sense a trap to the South.");
-			else if (xdif > 10)
+			else if (diff.m_X > 10)
 				Message(MT_Skills, "You sense a trap to the West.");
 			else
 				Message(MT_Skills, "You sense a trap to the East.");
 			trap->detected = true;
 
-			float angle = CalculateHeadingToTarget(trap->x, trap->y);
+			float angle = CalculateHeadingToTarget(trap->m_Position.m_X, trap->m_Position.m_Y);
 
 			if (angle < 0)
 				angle = (256 + angle);
@@ -12930,9 +12899,9 @@ void Client::Handle_OP_SwapSpell(const EQApplicationPacket *app)
 	m_pp.spell_book[swapspell->from_slot] = m_pp.spell_book[swapspell->to_slot];
 	m_pp.spell_book[swapspell->to_slot] = swapspelltemp;
 
-	/* Save Spell Swaps */ 
+	/* Save Spell Swaps */
 	if (!database.SaveCharacterSpell(this->CharacterID(), m_pp.spell_book[swapspell->from_slot], swapspell->from_slot)){
-		database.DeleteCharacterSpell(this->CharacterID(), m_pp.spell_book[swapspell->from_slot], swapspell->from_slot); 
+		database.DeleteCharacterSpell(this->CharacterID(), m_pp.spell_book[swapspell->from_slot], swapspell->from_slot);
 	}
 	if (!database.SaveCharacterSpell(this->CharacterID(), swapspelltemp, swapspell->to_slot)){
 		database.DeleteCharacterSpell(this->CharacterID(), swapspelltemp, swapspell->to_slot);
@@ -13718,7 +13687,7 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 	}
 	Translocate_Struct *its = (Translocate_Struct*)app->pBuffer;
 
-	if (!PendingTranslocate) 
+	if (!PendingTranslocate)
 		return;
 
 	if ((RuleI(Spells, TranslocateTimeLimit) > 0) && (time(nullptr) > (TranslocateTime + RuleI(Spells, TranslocateTimeLimit)))) {
@@ -13739,7 +13708,7 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 			// to the bind coords it has from the PlayerProfile, but with the X and Y reversed. I suspect they are
 			// reversed in the pp, and since spells like Gate are handled serverside, this has not mattered before.
 			if (((SpellID == 1422) || (SpellID == 1334) || (SpellID == 3243)) &&
-				(zone->GetZoneID() == PendingTranslocateData.zone_id && 
+				(zone->GetZoneID() == PendingTranslocateData.zone_id &&
 				zone->GetInstanceID() == PendingTranslocateData.instance_id))
 			{
 				PendingTranslocate = false;
@@ -13750,7 +13719,7 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 			////Was sending the packet back to initiate client zone...
 			////but that could be abusable, so lets go through proper channels
 			MovePC(PendingTranslocateData.zone_id, PendingTranslocateData.instance_id,
-				   PendingTranslocateData.x, PendingTranslocateData.y, 
+				   PendingTranslocateData.x, PendingTranslocateData.y,
 				   PendingTranslocateData.z, PendingTranslocateData.heading, 0, ZoneSolicited);
 		}
 	}
