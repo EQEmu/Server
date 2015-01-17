@@ -9,6 +9,7 @@ SET(common_sources
 	crc32.cpp
 	database.cpp
 	dbcore.cpp
+	debug.cpp
 	emu_opcodes.cpp
 	emu_tcp_connection.cpp
 	emu_tcp_server.cpp
@@ -106,6 +107,7 @@ SET(common_headers
 	data_verification.h
 	database.h
 	dbcore.h
+	debug.h
 	deity.h
 	emu_opcodes.h
 	emu_oplist.h
