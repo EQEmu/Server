@@ -9076,7 +9076,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_t
 
 	if(zone && !zone->IsSpellBlocked(spell_id, GetX(), GetY(), GetZ())) {
 
-		mlog(SPELLS__CASTING, "CastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item slot %d",
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "CastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item slot %d",
 			spells[spell_id].name, spell_id, target_id, slot, cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);
 
 		if(casting_spell_id == spell_id)
@@ -9084,7 +9084,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_t
 
 		if(GetClass() != BARD) {
 			if(!IsValidSpell(spell_id) || casting_spell_id || delaytimer || spellend_timer.Enabled() || IsStunned() || IsFeared() || IsMezzed() || (IsSilenced() && !IsDiscipline(spell_id)) || (IsAmnesiad() && IsDiscipline(spell_id))) {
-				mlog(SPELLS__CASTING_ERR, "Spell casting canceled: not able to cast now. Valid? %d, casting %d, waiting? %d, spellend? %d, stunned? %d, feared? %d, mezed? %d, silenced? %d",
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell casting canceled: not able to cast now. Valid? %d, casting %d, waiting? %d, spellend? %d, stunned? %d, feared? %d, mezed? %d, silenced? %d",
 					IsValidSpell(spell_id), casting_spell_id, delaytimer, spellend_timer.Enabled(), IsStunned(), IsFeared(), IsMezzed(), IsSilenced() );
 				if(IsSilenced() && !IsDiscipline(spell_id))
 					Message_StringID(13, SILENCED_STRING);
@@ -9105,7 +9105,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_t
 
 		//cannot cast under deivne aura
 		if(DivineAura()) {
-			mlog(SPELLS__CASTING_ERR, "Spell casting canceled: cannot cast while Divine Aura is in effect.");
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell casting canceled: cannot cast while Divine Aura is in effect.");
 			InterruptSpell(173, 0x121, false);
 			return(false);
 		}
@@ -9119,7 +9119,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_t
 			InterruptSpell(fizzle_msg, 0x121, spell_id);
 
 			uint32 use_mana = ((spells[spell_id].mana) / 4);
-			mlog(SPELLS__CASTING_ERR, "Spell casting canceled: fizzled. %d mana has been consumed", use_mana);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell casting canceled: fizzled. %d mana has been consumed", use_mana);
 
 			// fizzle 1/4 the mana away
 			SetMana(GetMana() - use_mana);
@@ -9127,7 +9127,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_t
 		}
 
 		if (HasActiveSong()) {
-			mlog(SPELLS__BARDS, "Casting a new spell/song while singing a song. Killing old song %d.", bardsong);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting a new spell/song while singing a song. Killing old song %d.", bardsong);
 			//Note: this does NOT tell the client
 			//_StopSong();
 			bardsong = 0;
@@ -9256,7 +9256,7 @@ bool Bot::IsImmuneToSpell(uint16 spell_id, Mob *caster) {
 			if(caster->IsBot()) {
 				if(spells[spell_id].targettype == ST_Undead) {
 					if((GetBodyType() != BT_SummonedUndead) && (GetBodyType() != BT_Undead) && (GetBodyType() != BT_Vampire)) {
-							mlog(SPELLS__RESISTS, "Bot's target is not an undead.");
+							logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bot's target is not an undead.");
 							return true;
 					}
 				}
@@ -9266,13 +9266,13 @@ bool Bot::IsImmuneToSpell(uint16 spell_id, Mob *caster) {
 						&& (GetBodyType() != BT_Summoned2)
 						&& (GetBodyType() != BT_Summoned3)
 						) {
-							mlog(SPELLS__RESISTS, "Bot's target is not a summoned creature.");
+							logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bot's target is not a summoned creature.");
 							return true;
 					}
 				}
 			}
 
-			mlog(SPELLS__RESISTS, "No bot immunities to spell %d found.", spell_id);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "No bot immunities to spell %d found.", spell_id);
 		}
 	}
 

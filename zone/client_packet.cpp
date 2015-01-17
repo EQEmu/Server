@@ -2970,7 +2970,7 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 
 	if (!IsPoison)
 	{
-		mlog(SPELLS__CASTING_ERR, "Item used to cast spell effect from a poison item was missing from inventory slot %d "
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Item used to cast spell effect from a poison item was missing from inventory slot %d "
 			"after casting, or is not a poison!", ApplyPoisonData->inventorySlot);
 
 		Message(0, "Error: item not found for inventory slot #%i or is not a poison", ApplyPoisonData->inventorySlot);
@@ -3865,7 +3865,7 @@ void Client::Handle_OP_Buff(const EQApplicationPacket *app)
 
 	SpellBuffFade_Struct* sbf = (SpellBuffFade_Struct*)app->pBuffer;
 	uint32 spid = sbf->spellid;
-	mlog(SPELLS__BUFFS, "Client requested that buff with spell id %d be canceled.", spid);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Client requested that buff with spell id %d be canceled.", spid);
 
 	//something about IsDetrimentalSpell() crashes this portion of code..
 	//tbh we shouldn't use it anyway since this is a simple red vs blue buff check and
