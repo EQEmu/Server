@@ -3207,7 +3207,7 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 {
 	int i, ret, firstfree = -2;
 
-	mlog(AI__BUFFS, "Checking if buff %d cast at level %d can stack on me.%s", spellid, caster_level, iFailIfOverwrite?" failing if we would overwrite something":"");
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Checking if buff %d cast at level %d can stack on me.%s", spellid, caster_level, iFailIfOverwrite?" failing if we would overwrite something":"");
 
 	int buff_count = GetMaxTotalSlots();
 	for (i=0; i < buff_count; i++)
@@ -3231,19 +3231,19 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 		if(ret == 1) {
 			// should overwrite current slot
 			if(iFailIfOverwrite) {
-				mlog(AI__BUFFS, "Buff %d would overwrite %d in slot %d, reporting stack failure", spellid, curbuf.spellid, i);
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Buff %d would overwrite %d in slot %d, reporting stack failure", spellid, curbuf.spellid, i);
 				return(-1);
 			}
 			if(firstfree == -2)
 				firstfree = i;
 		}
 		if(ret == -1) {
-			mlog(AI__BUFFS, "Buff %d would conflict with %d in slot %d, reporting stack failure", spellid, curbuf.spellid, i);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Buff %d would conflict with %d in slot %d, reporting stack failure", spellid, curbuf.spellid, i);
 			return -1;	// stop the spell, can't stack it
 		}
 	}
 
-	mlog(AI__BUFFS, "Reporting that buff %d could successfully be placed into slot %d", spellid, firstfree);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Reporting that buff %d could successfully be placed into slot %d", spellid, firstfree);
 
 	return firstfree;
 }

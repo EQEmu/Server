@@ -1647,7 +1647,7 @@ void Merc::AI_Process() {
 			if (AImovement_timer->Check())
 			{
 				if(!IsRooted()) {
-					mlog(AI__WAYPOINTS, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
+					logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
 					CalculateNewPosition2(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), GetRunspeed());
 					return;
 				}
@@ -1766,7 +1766,7 @@ bool Merc::AI_EngagedCastCheck() {
 	{
 		AIautocastspell_timer->Disable();       //prevent the timer from going off AGAIN while we are casting.
 
-		mlog(AI__SPELLS, "Engaged autocast check triggered (MERCS).");
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Engaged autocast check triggered (MERCS).");
 
 		int8 mercClass = GetClass();
 

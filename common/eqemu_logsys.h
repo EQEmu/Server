@@ -75,6 +75,7 @@ public:
 		Aggro,
 		Attack,
 		Quests,
+		AI,
 		MaxCategoryID	/* Don't Remove this*/
 	};
 
@@ -140,7 +141,8 @@ static const char* LogCategoryName[EQEmuLogSys::LogCategory::MaxCategoryID] = {
 	"Client_Server_Packet",
 	"Aggro",
 	"Attack",
-	"Quests"
+	"Quests",
+	"AI"
 };
 
 #endif

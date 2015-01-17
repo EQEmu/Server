@@ -166,7 +166,7 @@ void NPC::MoveTo(float mtx, float mty, float mtz, float mth, bool saveguardspot)
 		if (GetGrid() < 0)
 		{	// currently stopped by a quest command
 			SetGrid( 0 - GetGrid());	// get him moving again
-			mlog(AI__WAYPOINTS, "MoveTo during quest wandering. Canceling quest wandering and going back to grid %d when MoveTo is done.", GetGrid());
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "MoveTo during quest wandering. Canceling quest wandering and going back to grid %d when MoveTo is done.", GetGrid());
 		}
 		AIwalking_timer->Disable();	// disable timer in case he is paused at a wp
 		if (cur_wp>=0)
@@ -174,14 +174,14 @@ void NPC::MoveTo(float mtx, float mty, float mtz, float mth, bool saveguardspot)
 			save_wp=cur_wp;	// save the current waypoint
 			cur_wp=-1;		// flag this move as quest controlled
 		}
-		mlog(AI__WAYPOINTS, "MoveTo (%.3f, %.3f, %.3f), pausing regular grid wandering. Grid %d, save_wp %d", mtx, mty, mtz, -GetGrid(), save_wp);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "MoveTo (%.3f, %.3f, %.3f), pausing regular grid wandering. Grid %d, save_wp %d", mtx, mty, mtz, -GetGrid(), save_wp);
 	}
 	else
 	{	// not on a grid
 		roamer=true;
 		save_wp=0;
 		cur_wp=-2;		// flag as quest controlled w/no grid
-		mlog(AI__WAYPOINTS, "MoveTo (%.3f, %.3f, %.3f) without a grid.", mtx, mty, mtz);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "MoveTo (%.3f, %.3f, %.3f) without a grid.", mtx, mty, mtz);
 	}
 	if (saveguardspot)
 	{
@@ -196,7 +196,7 @@ void NPC::MoveTo(float mtx, float mty, float mtz, float mth, bool saveguardspot)
 		if(guard_heading == -1)
 			guard_heading = this->CalculateHeadingToTarget(mtx, mty);
 
-		mlog(AI__WAYPOINTS, "Setting guard position to (%.3f, %.3f, %.3f)", guard_x, guard_y, guard_z);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Setting guard position to (%.3f, %.3f, %.3f)", guard_x, guard_y, guard_z);
 	}
 
 	cur_wp_x = mtx;
@@ -212,7 +212,7 @@ void NPC::MoveTo(float mtx, float mty, float mtz, float mth, bool saveguardspot)
 void NPC::UpdateWaypoint(int wp_index)
 {
 	if(wp_index >= static_cast<int>(Waypoints.size())) {
-		mlog(AI__WAYPOINTS, "Update to waypoint %d failed. Not found.", wp_index);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Update to waypoint %d failed. Not found.", wp_index);
 		return;
 	}
 	std::vector<wplist>::iterator cur;
@@ -224,7 +224,7 @@ void NPC::UpdateWaypoint(int wp_index)
 	cur_wp_z = cur->z;
 	cur_wp_pause = cur->pause;
 	cur_wp_heading = cur->heading;
-	mlog(AI__WAYPOINTS, "Next waypoint %d: (%.3f, %.3f, %.3f, %.3f)", wp_index, cur_wp_x, cur_wp_y, cur_wp_z, cur_wp_heading);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Next waypoint %d: (%.3f, %.3f, %.3f, %.3f)", wp_index, cur_wp_x, cur_wp_y, cur_wp_z, cur_wp_heading);
 
 	//fix up pathing Z
 	if(zone->HasMap() && RuleB(Map, FixPathingZAtWaypoints))
@@ -430,7 +430,7 @@ void NPC::SetWaypointPause()
 
 void NPC::SaveGuardSpot(bool iClearGuardSpot) {
 	if (iClearGuardSpot) {
-		mlog(AI__WAYPOINTS, "Clearing guard order.");
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Clearing guard order.");
 		guard_x = 0;
 		guard_y = 0;
 		guard_z = 0;
@@ -443,14 +443,14 @@ void NPC::SaveGuardSpot(bool iClearGuardSpot) {
 		guard_heading = heading;
 		if(guard_heading == 0)
 			guard_heading = 0.0001;		//hack to make IsGuarding simpler
-		mlog(AI__WAYPOINTS, "Setting guard position to (%.3f, %.3f, %.3f)", guard_x, guard_y, guard_z);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Setting guard position to (%.3f, %.3f, %.3f)", guard_x, guard_y, guard_z);
 	}
 }
 
 void NPC::NextGuardPosition() {
 	if (!CalculateNewPosition2(guard_x, guard_y, guard_z, GetMovespeed())) {
 		SetHeading(guard_heading);
-		mlog(AI__WAYPOINTS, "Unable to move to next guard position. Probably rooted.");
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Unable to move to next guard position. Probably rooted.");
 	}
 	else if((x_pos == guard_x) && (y_pos == guard_y) && (z_pos == guard_z))
 	{
@@ -516,15 +516,15 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	if ((x_pos-x == 0) && (y_pos-y == 0)) {//spawn is at target coords
 		if(z_pos-z != 0) {
 			z_pos = z;
-			mlog(AI__WAYPOINTS, "Calc Position2 (%.3f, %.3f, %.3f): Jumping pure Z.", x, y, z);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Calc Position2 (%.3f, %.3f, %.3f): Jumping pure Z.", x, y, z);
 			return true;
 		}
-		mlog(AI__WAYPOINTS, "Calc Position2 (%.3f, %.3f, %.3f) inWater=%d: We are there.", x, y, z, inWater);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Calc Position2 (%.3f, %.3f, %.3f) inWater=%d: We are there.", x, y, z, inWater);
 		return false;
 	}
 	else if ((ABS(x_pos - x) < 0.1) && (ABS(y_pos - y) < 0.1))
 	{
-		mlog(AI__WAYPOINTS, "Calc Position2 (%.3f, %.3f, %.3f): X/Y difference <0.1, Jumping to target.", x, y, z);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Calc Position2 (%.3f, %.3f, %.3f): X/Y difference <0.1, Jumping to target.", x, y, z);
 
 		if(IsNPC()) {
 			entity_list.ProcessMove(CastToNPC(), x, y, z);
@@ -550,7 +550,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		y_pos = new_y;
 		z_pos = new_z;
 
-		mlog(AI__WAYPOINTS, "Calculating new position2 to (%.3f, %.3f, %.3f), old vector (%.3f, %.3f, %.3f)", x, y, z, tar_vx, tar_vy, tar_vz);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Calculating new position2 to (%.3f, %.3f, %.3f), old vector (%.3f, %.3f, %.3f)", x, y, z, tar_vx, tar_vy, tar_vz);
 
 		uint8 NPCFlyMode = 0;
 
@@ -569,7 +569,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 
 				float newz = zone->zonemap->FindBestZ(dest, nullptr) + 2.0f;
 
-				mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
 
 				if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
 				{
@@ -612,7 +612,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	//pRunAnimSpeed = (int8)(speed*NPC_RUNANIM_RATIO);
 	//speed *= NPC_SPEED_MULTIPLIER;
 
-	mlog(AI__WAYPOINTS, "Calculating new position2 to (%.3f, %.3f, %.3f), new vector (%.3f, %.3f, %.3f) rate %.3f, RAS %d", x, y, z, tar_vx, tar_vy, tar_vz, speed, pRunAnimSpeed);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Calculating new position2 to (%.3f, %.3f, %.3f), new vector (%.3f, %.3f, %.3f) rate %.3f, RAS %d", x, y, z, tar_vx, tar_vy, tar_vz, speed, pRunAnimSpeed);
 
 	// --------------------------------------------------------------------------
 	// 2: get unit vector
@@ -647,7 +647,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 			z_pos = new_z;
 			tar_ndx=22-numsteps;
 			heading = CalculateHeadingToTarget(x, y);
-			mlog(AI__WAYPOINTS, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", x_pos, y_pos, z_pos, numsteps);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", x_pos, y_pos, z_pos, numsteps);
 		}
 		else
 		{
@@ -659,7 +659,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 			y_pos = y;
 			z_pos = z;
 
-			mlog(AI__WAYPOINTS, "Only a single step to get there... jumping.");
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Only a single step to get there... jumping.");
 
 		}
 	}
@@ -678,7 +678,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		y_pos = new_y;
 		z_pos = new_z;
 		heading = CalculateHeadingToTarget(x, y);
-		mlog(AI__WAYPOINTS, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", x_pos, y_pos, z_pos, numsteps);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", x_pos, y_pos, z_pos, numsteps);
 	}
 
 	uint8 NPCFlyMode = 0;
@@ -698,7 +698,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-			mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
 
 			if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
 			{
@@ -759,7 +759,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 			moved=false;
 		}
 		SetRunAnimSpeed(0);
-		mlog(AI__WAYPOINTS, "Rooted while calculating new position to (%.3f, %.3f, %.3f)", x, y, z);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Rooted while calculating new position to (%.3f, %.3f, %.3f)", x, y, z);
 		return true;
 	}
 
@@ -773,7 +773,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 	pRunAnimSpeed = (uint8)(speed*NPC_RUNANIM_RATIO);
 	speed *= NPC_SPEED_MULTIPLIER;
 
-	mlog(AI__WAYPOINTS, "Calculating new position to (%.3f, %.3f, %.3f) vector (%.3f, %.3f, %.3f) rate %.3f RAS %d", x, y, z, tar_vx, tar_vy, tar_vz, speed, pRunAnimSpeed);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Calculating new position to (%.3f, %.3f, %.3f) vector (%.3f, %.3f, %.3f) rate %.3f RAS %d", x, y, z, tar_vx, tar_vy, tar_vz, speed, pRunAnimSpeed);
 
 	// --------------------------------------------------------------------------
 	// 2: get unit vector
@@ -790,7 +790,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 		x_pos = x;
 		y_pos = y;
 		z_pos = z;
-		mlog(AI__WAYPOINTS, "Close enough, jumping to waypoint");
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Close enough, jumping to waypoint");
 	}
 	else {
 		float new_x = x_pos + tar_vx*tar_vector;
@@ -803,7 +803,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 		x_pos = new_x;
 		y_pos = new_y;
 		z_pos = new_z;
-		mlog(AI__WAYPOINTS, "Next position (%.3f, %.3f, %.3f)", x_pos, y_pos, z_pos);
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Next position (%.3f, %.3f, %.3f)", x_pos, y_pos, z_pos);
 	}
 
 	uint8 NPCFlyMode = 0;
@@ -823,7 +823,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr) + 2.0f;
 
-			mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
 
 			if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
 			{
@@ -951,7 +951,7 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 	x_pos = new_x;
 	y_pos = new_y;
 	z_pos = new_z;
-	mlog(AI__WAYPOINTS, "Sent To (%.3f, %.3f, %.3f)", new_x, new_y, new_z);
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Sent To (%.3f, %.3f, %.3f)", new_x, new_y, new_z);
 
 	if(flymode == FlyMode1)
 		return;
@@ -967,7 +967,7 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-			mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
 
 			if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaSendTo)) // Sanity check.
 				z_pos = newz + 1;
@@ -998,7 +998,7 @@ void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-			mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
 
 			if( (newz > -2000) && ABS(newz-dest.z) < RuleR(Map, FixPathingZMaxDeltaSendTo)) // Sanity check.
 				z_pos = newz + 1;

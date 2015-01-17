@@ -3362,7 +3362,7 @@ void Bot::AI_Process() {
 				else if(!IsRooted()) {
 					if(GetTarget() && GetTarget()->GetHateTop() && GetTarget()->GetHateTop() != this)
 					{
-						mlog(AI__WAYPOINTS, "Returning to location prior to being summoned.");
+						logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Returning to location prior to being summoned.");
 						CalculateNewPosition2(GetPreSummonX(), GetPreSummonY(), GetPreSummonZ(), GetRunspeed());
 						SetHeading(CalculateHeadingToTarget(GetPreSummonX(), GetPreSummonY()));
 						return;
@@ -3689,7 +3689,7 @@ void Bot::AI_Process() {
 
 			if (AImovement_timer->Check()) {
 				if(!IsRooted()) {
-					mlog(AI__WAYPOINTS, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
+					logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
 					CalculateNewPosition2(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), GetRunspeed());
 					return;
 				}
@@ -3972,7 +3972,7 @@ void Bot::PetAIProcess() {
 				{
 					botPet->SetRunAnimSpeed(0);
 					if(!botPet->IsRooted()) {
-						mlog(AI__WAYPOINTS, "Pursuing %s while engaged.", botPet->GetTarget()->GetCleanName());
+						logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Pursuing %s while engaged.", botPet->GetTarget()->GetCleanName());
 						botPet->CalculateNewPosition2(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ(), botPet->GetOwner()->GetRunspeed());
 						return;
 					}
