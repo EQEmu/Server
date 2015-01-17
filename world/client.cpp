@@ -1270,12 +1270,9 @@ void Client::SendGuildList() {
 	//ask the guild manager to build us a nice guild list packet
 	outapp->pBuffer = guild_mgr.MakeGuildList("", outapp->size);
 	if(outapp->pBuffer == nullptr) {
-		clog(GUILDS__ERROR, "Unable to make guild list!");
 		return;
 	}
 
-	clog(GUILDS__OUT_PACKETS, "Sending OP_GuildsList of length %d", outapp->size);
-//	_pkt(GUILDS__OUT_PACKET_TRACE, outapp);
 
 	eqs->FastQueuePacket((EQApplicationPacket **)&outapp);
 }

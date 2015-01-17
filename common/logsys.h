@@ -73,19 +73,9 @@ extern void log_raw_packet(LogType type, uint16 seq, const BasePacket *p);
 
 #ifdef DISABLE_LOGSYS
 	//completely disabled, this is the best I can come up with since we have no variadic macros
-	inline void clog(LogType, const char *, ...) {}
 	inline void zlog(LogType, const char *, ...) {}
 #else	//!DISABLE_LOGSYS
 		#ifdef WORLD
-			class Client;
-			extern void log_message_client(LogType type, Client *who, const char *fmt, ...);
-			#define clog( type, format, ...) \
-				do { \
-					if(log_type_info[ type ].enabled) { \
-						log_message_client(type, this, format, ##__VA_ARGS__); \
-					} \
-				} while(false)
-
 			class ZoneServer;
 			extern void log_message_zone(LogType type, ZoneServer *who, const char *fmt, ...);
 			#define zlog( type, format, ...) \
