@@ -269,7 +269,6 @@ void command_aggrozone(Client *c, const Seperator *sep);
 void command_reloadstatic(Client *c, const Seperator *sep);
 void command_flags(Client *c, const Seperator *sep);
 void command_flagedit(Client *c, const Seperator *sep);
-void command_mlog(Client *c, const Seperator *sep);
 void command_serverrules(Client *c, const Seperator *sep);
 void command_acceptrules(Client *c, const Seperator *sep);
 void command_guildcreate(Client *c, const Seperator *sep);
