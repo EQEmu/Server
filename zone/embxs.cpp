@@ -98,6 +98,8 @@ XS(XS_EQEmuIO_PRINT)
 		for(i = 0; *cur != '\0'; i++, cur++) {
 			if(*cur == '\n') {
 				LogFile->writebuf(EQEmuLog::Quest, str + pos, 1, len);
+				//logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Quests, str);
+				//std::cout << str << "LOLOL\n";
 				len = 0;
 				pos = i+1;
 			} else {
@@ -106,6 +108,7 @@ XS(XS_EQEmuIO_PRINT)
 		}
 		if(len > 0) {
 			LogFile->writebuf(EQEmuLog::Quest, str + pos, 1, len);
+			// logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Quest, str);
 		}
  	}
  	

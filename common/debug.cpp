@@ -226,7 +226,7 @@ bool EQEmuLog::writePVA(LogIDs id, const char *prefix, const char *fmt, va_list 
 			if (id == EQEmuLog::LogIDs::Crash){ SetConsoleTextAttribute(console_handle, ConsoleColor::Colors::LightRed); }
 #endif
 
-			fprintf(stdout, "[%s] %s", LogNames[id], prefix);
+			fprintf(stdout, "[%s]  %s", LogNames[id], prefix);
 			vfprintf(stdout, fmt, argptr);
 
 #ifdef _WINDOWS
