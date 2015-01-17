@@ -294,6 +294,7 @@ public:
 	inline virtual uint32 GetNimbusEffect2() const { return nimbus_effect2; }
 	inline virtual uint32 GetNimbusEffect3() const { return nimbus_effect3; }
 	void RemoveNimbusEffect(int effectid);
+	inline const xyz_location& GetTargetRingLocation() const { return m_TargetRing; }
 	inline float GetTargetRingX() const { return m_TargetRing.m_X; }
 	inline float GetTargetRingY() const { return m_TargetRing.m_Y; }
 	inline float GetTargetRingZ() const { return m_TargetRing.m_Z; }
