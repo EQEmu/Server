@@ -57,7 +57,6 @@ void Client::SendGuildMOTD(bool GetGuildMOTDReply) {
 	}
 
 	mlog(GUILDS__OUT_PACKETS, "Sending OP_GuildMOTD of length %d", outapp->size);
-	mpkt(GUILDS__OUT_PACKET_TRACE, outapp);
 
 	FastQueuePacket(&outapp);
 }
@@ -177,7 +176,6 @@ void Client::SendGuildList() {
 	}
 
 	mlog(GUILDS__OUT_PACKETS, "Sending OP_ZoneGuildList of length %d", outapp->size);
-//	mpkt(GUILDS__OUT_PACKET_TRACE, outapp);
 
 	FastQueuePacket(&outapp);
 }
@@ -195,7 +193,6 @@ void Client::SendGuildMembers() {
 	data = nullptr;
 
 	mlog(GUILDS__OUT_PACKETS, "Sending OP_GuildMemberList of length %d", outapp->size);
-	mpkt(GUILDS__OUT_PACKET_TRACE, outapp);
 
 	FastQueuePacket(&outapp);
 
@@ -339,7 +336,6 @@ void Client::SendGuildJoin(GuildJoin_Struct* gj){
 	outgj->zoneid = gj->zoneid;
 
 	mlog(GUILDS__OUT_PACKETS, "Sending OP_GuildManageAdd for join of length %d", outapp->size);
-	mpkt(GUILDS__OUT_PACKET_TRACE, outapp);
 
 	FastQueuePacket(&outapp);
 
