@@ -92,6 +92,9 @@ XS(XS_EQEmuIO_PRINT)
 		char *str = SvPV_nolen(ST(r));
 		char *cur = str;
 		
+		/* Strip newlines from log message 'str' */
+		*std::remove(str, str + strlen(str), '\n') = '\0';
+
 		int i;
 		int pos = 0;
 		int len = 0;
