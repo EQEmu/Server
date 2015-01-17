@@ -464,7 +464,7 @@ int Mob::MonkSpecialAttack(Mob* other, uint8 unchecked_type)
 			break;
 		}
 		default:
-			mlog(CLIENT__ERROR, "Invalid special attack type %d attempted", unchecked_type);
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Attack, "Invalid special attack type %d attempted", unchecked_type);
 			return(1000); /* nice long delay for them, the caller depends on this! */
 	}
 
