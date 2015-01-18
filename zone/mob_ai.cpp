@@ -622,7 +622,7 @@ void Client::AI_SpellCast()
 	if(!targ)
 		return;
 
-	float dist = DistNoRootNoZ(*targ);
+	float dist = ComparativeDistanceNoZ(m_Position, targ->GetPosition());
 
 	std::vector<uint32> valid_spells;
 	std::vector<uint32> slots;
