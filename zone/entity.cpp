@@ -1584,7 +1584,7 @@ Corpse *EntityList::GetCorpseByOwnerWithinRange(Client *client, Mob *center, int
 	auto it = corpse_list.begin();
 	while (it != corpse_list.end()) {
 		if (it->second->IsPlayerCorpse())
-			if (center->DistNoRootNoZ(*it->second) < range &&
+			if (ComparativeDistanceNoZ(center->GetPosition(), it->second->GetPosition()) < range &&
 					strcasecmp(it->second->GetOwnerName(), client->GetName()) == 0)
 				return it->second;
 		++it;
