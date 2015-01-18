@@ -1119,7 +1119,7 @@ void EntityList::ChannelMessage(Mob *from, uint8 chan_num, uint8 language,
 			filter = FilterAuctions;
 		//
 		// Only say is limited in range
-		if (chan_num != 8 || client->Dist(*from) < 200)
+		if (chan_num != 8 || Distance(client->GetPosition(), from->GetPosition()) < 200)
 			if (filter == FilterNone || client->GetFilter(filter) != FilterHide)
 				client->ChannelMessageSend(from->GetName(), 0, chan_num, language, lang_skill, buffer);
 		++it;
