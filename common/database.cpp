@@ -739,7 +739,7 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 				Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "StoreCharacter inventory failed. Query '%s' %s", invquery.c_str(), results.ErrorMessage().c_str());
 #if EQDEBUG >= 9
 			else
-				Log.Log(EQEmuLogSys::Debug, "StoreCharacter inventory succeeded. Query '%s'", invquery.c_str());
+				Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None,, "StoreCharacter inventory succeeded. Query '%s'", invquery.c_str());
 #endif
 		}
 
@@ -3262,7 +3262,7 @@ uint32 Database::GetGroupID(const char* name){
 	if (results.RowCount() == 0)
 	{
 		// Commenting this out until logging levels can prevent this from going to console
-		//Log.Log(EQEmuLogSys::Debug, "Character not in a group: %s", name);
+		//Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None,, "Character not in a group: %s", name);
 		return 0;
 	}
 
@@ -3309,7 +3309,7 @@ void Database::SetGroupLeaderName(uint32 gid, const char* name) {
 	result = QueryDatabase(query);
 
 	if(!result.Success()) {
-		Log.Log(EQEmuLogSys::Debug, "Error in Database::SetGroupLeaderName: %s", result.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None,, "Error in Database::SetGroupLeaderName: %s", result.ErrorMessage().c_str());
 	}
 }
 
