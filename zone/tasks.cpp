@@ -1097,7 +1097,6 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 		Ptr = Ptr + strlen(Ptr) + 1;
 	}
 
-	_pkt(TASKS__PACKETS, outapp);
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -1197,7 +1196,6 @@ void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *T
 		outapp->WriteString("Text3 Test");
 		outapp->WriteString(StartZone);		// Zone number in ascii
 	}
-	_pkt(TASKS__PACKETS, outapp);
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2346,7 +2344,6 @@ void ClientTaskState::SendTaskHistory(Client *c, int TaskIndex) {
 		}
 	}
 
-	_pkt(TASKS__PACKETS, outapp);
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2375,7 +2372,6 @@ void Client::SendTaskActivityComplete(int TaskID, int ActivityID, int TaskIndex,
 	//tac->unknown5 = 0x00000001;
 	tac->unknown5 = TaskIncomplete;
 
-	_pkt(TASKS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2407,7 +2403,6 @@ void Client::SendTaskFailed(int TaskID, int TaskIndex) {
 	tac->unknown5 = 0; // 0 for task complete or failed.
 
 	Log.Out(Logs::General, Logs::Tasks, "[UPDATE] TaskFailed");
-	_pkt(TASKS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2464,7 +2459,6 @@ void TaskManager::SendCompletedTasksToClient(Client *c, ClientTaskState *State) 
 		buf = buf + 4;
 	}
 
-	_pkt(TASKS__PACKETS, outapp);
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2506,7 +2500,6 @@ void TaskManager::SendTaskActivityShort(Client *c, int TaskID, int ActivityID, i
 	tass->ActivityType = 0xffffffff;
 	tass->unknown4 = 0x00000000;
 
-	_pkt(TASKS__PACKETS, outapp);
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2594,7 +2587,6 @@ void TaskManager::SendTaskActivityLong(Client *c, int TaskID, int ActivityID, in
 
 	tat->unknown1 = 0x00000001;
 
-	_pkt(TASKS__PACKETS, outapp);
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2673,7 +2665,6 @@ void TaskManager::SendTaskActivityNew(Client *c, int TaskID, int ActivityID, int
 
 	outapp->WriteString(itoa(Tasks[TaskID]->Activity[ActivityID].ZoneID));
 
-	_pkt(TASKS__PACKETS, outapp);
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2856,7 +2847,6 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 	tdt = (TaskDescriptionTrailer_Struct*)Ptr;
 	tdt->Points = 0x00000000; // Points Count
 
-	_pkt(TASKS__PACKETS, outapp);
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2920,7 +2910,6 @@ void ClientTaskState::CancelTask(Client *c, int SequenceNumber, bool RemoveFromD
 	cts->unknown4 = 0x00000002;
 
 	Log.Out(Logs::General, Logs::Tasks, "[UPDATE] CancelTask");
-	_pkt(TASKS__PACKETS, outapp);
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);

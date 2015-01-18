@@ -1002,7 +1002,6 @@ void Client::Trader_ShowItems(){
 	outints->Code = BazaarTrader_ShowItems;
 
 	QueuePacket(outapp);
-	_pkt(TRADING__PACKETS, outapp);
 	safe_delete(outapp);
 	safe_delete(TraderItems);
 }
@@ -1026,7 +1025,6 @@ void Client::SendTraderPacket(Client* Trader, uint32 Unknown72)
 
 	QueuePacket(outapp);
 
-	_pkt(TRADING__PACKETS, outapp);
 
 	safe_delete(outapp);
 }
@@ -1059,7 +1057,6 @@ void Client::Trader_StartTrader() {
 
 	QueuePacket(outapp);
 
-	_pkt(TRADING__PACKETS, outapp);
 
 	safe_delete(outapp);
 
@@ -1077,7 +1074,6 @@ void Client::Trader_StartTrader() {
 
 	entity_list.QueueClients(this, outapp, false);
 
-	_pkt(TRADING__PACKETS, outapp);
 
 	safe_delete(outapp);
 }
@@ -1129,7 +1125,6 @@ void Client::Trader_EndTrader() {
 
 	entity_list.QueueClients(this, outapp, false);
 
-	_pkt(TRADING__PACKETS, outapp);
 
 	safe_delete(outapp);
 
@@ -1143,7 +1138,6 @@ void Client::Trader_EndTrader() {
 
 	QueuePacket(outapp);
 
-	_pkt(TRADING__PACKETS, outapp);
 
 	safe_delete(outapp);
 
@@ -1325,7 +1319,6 @@ void Client::NukeTraderItem(uint16 Slot,int16 Charges,uint16 Quantity,Client* Cu
 		tdis->ItemID = SerialNumber;
 		tdis->Unknown012 = 0;
 
-		_pkt(TRADING__PACKETS, outapp);
 
 		Customer->QueuePacket(outapp);
 		safe_delete(outapp);
@@ -1355,7 +1348,6 @@ void Client::NukeTraderItem(uint16 Slot,int16 Charges,uint16 Quantity,Client* Cu
 		Quantity = 1;
 
 	for(int i = 0; i < Quantity; i++) {
-		_pkt(TRADING__PACKETS, outapp2);
 
 		this->QueuePacket(outapp2);
 	}
@@ -1609,7 +1601,6 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs,Client* Trader,const EQApplicat
 
 	Trader->QueuePacket(outapp2);
 
-	_pkt(TRADING__PACKETS, outapp2);
 
 	if(RuleB(Bazaar, AuditTrail))
 		BazaarAuditTrail(Trader->GetName(), GetName(), BuyItem->GetItem()->Name, outtbs->Quantity, outtbs->Price, 0);
@@ -1618,7 +1609,6 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs,Client* Trader,const EQApplicat
 
 	Trader->QueuePacket(outapp);
 
-	_pkt(TRADING__PACKETS, outapp);
 
 	safe_delete(outapp);
 	safe_delete(outapp2);
@@ -1858,7 +1848,6 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 		brds->Unknown012 = 0xFFFFFFFF;
 		brds->Unknown016 = 0xFFFFFFFF;
 		this->QueuePacket(outapp2);
-		_pkt(TRADING__PACKETS,outapp2);
 		safe_delete(outapp2);
 		return;
 	}
@@ -1926,7 +1915,6 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 
 	this->QueuePacket(outapp);
 
-	_pkt(TRADING__PACKETS,outapp);
 
 	safe_delete(outapp);
 	safe_delete_array(buffer);
@@ -1943,7 +1931,6 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 
 	this->QueuePacket(outapp2);
 
-	_pkt(TRADING__PACKETS,outapp2);
 	safe_delete(outapp2);
 }
 
@@ -2021,7 +2008,6 @@ static void UpdateTraderCustomerPriceChanged(uint32 CustomerID, TraderCharges_St
 				Log.Out(Logs::Detail, Logs::Trading, "Telling customer to remove item %i with %i charges and S/N %i",
 								ItemID, Charges, gis->SerialNumber[i]);
 
-				_pkt(TRADING__PACKETS, outapp);
 
 				Customer->QueuePacket(outapp);
 			}
@@ -2346,7 +2332,6 @@ void Client::SendBuyerResults(char* searchString, uint32 searchID) {
 		VARSTRUCT_ENCODE_TYPE(uint32, buf, 0);				// Flag for + Items , probably ItemCount
 		VARSTRUCT_ENCODE_STRING(buf, buyer->GetName());		// Seller Name
 
-		_pkt(TRADING__BARTER, outapp);
 
 		QueuePacket(outapp);
 		safe_delete(outapp);
@@ -2429,7 +2414,6 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 		VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);
 		VARSTRUCT_ENCODE_STRING(Buf, Buyer->GetName());
 
-		_pkt(TRADING__BARTER, outapp);
 		QueuePacket(outapp);
     }
 }
@@ -2679,7 +2663,6 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 
 	sprintf(Buf, "%s", ItemName); Buf += 64;
 
-	_pkt(TRADING__BARTER, outapp);
 	QueuePacket(outapp);
 
 	// This next packet goes to the Buyer and produces the 'You've bought <Qty> <Item> from <Seller> for <money>'
@@ -2742,7 +2725,6 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 
 	VARSTRUCT_ENCODE_STRING(Buf, Buyer->GetName());
 
-	_pkt(TRADING__BARTER, outapp3);
 	QueuePacket(outapp3);
 	safe_delete(outapp3);
 
@@ -2774,7 +2756,6 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 	VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);
 	VARSTRUCT_ENCODE_STRING(Buf, Buyer->GetName());
 
-	_pkt(TRADING__BARTER, outapp4);
 	Buyer->QueuePacket(outapp4);
 	safe_delete(outapp4);
 
@@ -2820,7 +2801,6 @@ void Client::ToggleBuyerMode(bool TurnOn) {
 
 	entity_list.QueueClients(this, outapp, false);
 
-	_pkt(TRADING__BARTER, outapp);
 	safe_delete(outapp);
 
 	Buyer = TurnOn;
@@ -2899,7 +2879,6 @@ void Client::UpdateBuyLine(const EQApplicationPacket *app) {
 		VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);
 		VARSTRUCT_ENCODE_STRING(Buf, GetName());
 
-		_pkt(TRADING__BARTER, outapp);
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}
@@ -2954,7 +2933,6 @@ void Client::BuyerItemSearch(const EQApplicationPacket *app) {
 	bisr->Action = Barter_BuyerSearch;
 	bisr->ResultCount = Count;
 
-	_pkt(TRADING__BARTER, outapp);
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }

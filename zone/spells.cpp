@@ -3865,7 +3865,6 @@ void Corpse::CastRezz(uint16 spellid, Mob* Caster)
 	rezz->unknown088 = 0x00000000;
 	// We send this to world, because it needs to go to the player who may not be in this zone.
 	worldserver.RezzPlayer(outapp, rez_experience, corpse_db_id, OP_RezzRequest);
-	_pkt(SPELLS__REZ, outapp);
 	safe_delete(outapp);
 }
 

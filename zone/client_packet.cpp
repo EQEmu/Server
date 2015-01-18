@@ -3436,7 +3436,6 @@ void Client::Handle_OP_Barter(const EQApplicationPacket *app)
 	//
 	uint32 Action = VARSTRUCT_DECODE_TYPE(uint32, Buf);
 
-	_pkt(TRADING__BARTER, app);
 
 	switch (Action)
 	{
@@ -3606,7 +3605,6 @@ void Client::Handle_OP_BazaarInspect(const EQApplicationPacket *app)
 
 void Client::Handle_OP_BazaarSearch(const EQApplicationPacket *app)
 {
-	_pkt(TRADING__PACKETS, app);
 
 	if (app->size == sizeof(BazaarSearch_Struct)) {
 
@@ -9798,7 +9796,6 @@ void Client::Handle_OP_OpenContainer(const EQApplicationPacket *app)
 void Client::Handle_OP_OpenGuildTributeMaster(const EQApplicationPacket *app)
 {
 	Log.Out(Logs::Detail, Logs::Tribute, "Received OP_OpenGuildTributeMaster of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
 
 	if (app->size != sizeof(StartTribute_Struct))
 		printf("Error in OP_OpenGuildTributeMaster. Expected size of: %zu, but got: %i\n", sizeof(StartTribute_Struct), app->size);
@@ -9830,7 +9827,6 @@ void Client::Handle_OP_OpenInventory(const EQApplicationPacket *app)
 void Client::Handle_OP_OpenTributeMaster(const EQApplicationPacket *app)
 {
 	Log.Out(Logs::Detail, Logs::Tribute, "Received OP_OpenTributeMaster of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
 
 	if (app->size != sizeof(StartTribute_Struct))
 		printf("Error in OP_OpenTributeMaster. Expected size of: %zu, but got: %i\n", sizeof(StartTribute_Struct), app->size);
@@ -11700,7 +11696,6 @@ void Client::Handle_OP_RezzAnswer(const EQApplicationPacket *app)
 	Log.Out(Logs::Detail, Logs::Spells, "Received OP_RezzAnswer from client. Pendingrezzexp is %i, action is %s",
 		PendingRezzXP, ra->action ? "ACCEPT" : "DECLINE");
 
-	_pkt(SPELLS__REZ, app);
 
 	OPRezzAnswer(ra->action, ra->spellid, ra->zone_id, ra->instance_id, ra->x, ra->y, ra->z);
 
@@ -11766,7 +11761,6 @@ void Client::Handle_OP_SaveOnZoneReq(const EQApplicationPacket *app)
 void Client::Handle_OP_SelectTribute(const EQApplicationPacket *app)
 {
 	Log.Out(Logs::Detail, Logs::Tribute, "Received OP_SelectTribute of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
 
 	//we should enforce being near a real tribute master to change this
 	//but im not sure how I wanna do that right now.
@@ -13391,7 +13385,6 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 	// SoF sends 1 or more unhandled OP_Trader packets of size 96 when a trade has completed.
 	// I don't know what they are for (yet), but it doesn't seem to matter that we ignore them.
 
-	_pkt(TRADING__PACKETS, app);
 
 	uint32 max_items = 80;
 
@@ -13498,7 +13491,6 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 				TraderStatus_Struct* tss = (TraderStatus_Struct*)outapp->pBuffer;
 				tss->Code = BazaarTrader_StartTraderMode2;
 				QueuePacket(outapp);
-				_pkt(TRADING__PACKETS, outapp);
 				safe_delete(outapp);
 			}
 		}
@@ -13539,7 +13531,6 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 	//
 	// Client has elected to buy an item from a Trader
 	//
-	_pkt(TRADING__PACKETS, app);
 
 	if (app->size == sizeof(TraderBuy_Struct)){
 
@@ -13622,7 +13613,6 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 	// This is when a potential purchaser right clicks on this client who is in Trader mode to
 	// browse their goods.
 	//
-	_pkt(TRADING__PACKETS, app);
 
 	TraderClick_Struct* tcs = (TraderClick_Struct*)app->pBuffer;
 
@@ -13653,7 +13643,6 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 
 	QueuePacket(outapp);
 
-	_pkt(TRADING__PACKETS, outapp);
 
 	if (outtcs->Approval) {
 		this->BulkSendTraderInventory(Customer->CharacterID());
@@ -13740,7 +13729,6 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 void Client::Handle_OP_TributeItem(const EQApplicationPacket *app)
 {
 	Log.Out(Logs::Detail, Logs::Tribute, "Received OP_TributeItem of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
 
 	//player donates an item...
 	if (app->size != sizeof(TributeItem_Struct))
@@ -13759,7 +13747,6 @@ void Client::Handle_OP_TributeItem(const EQApplicationPacket *app)
 		t->tribute_points = TributeItem(t->slot, t->quantity);
 
 		Log.Out(Logs::Detail, Logs::Tribute, "Sending tribute item reply with %d points", t->tribute_points);
-		_pkt(TRIBUTE__OUT, app);
 
 		QueuePacket(app);
 	}
@@ -13769,7 +13756,6 @@ void Client::Handle_OP_TributeItem(const EQApplicationPacket *app)
 void Client::Handle_OP_TributeMoney(const EQApplicationPacket *app)
 {
 	Log.Out(Logs::Detail, Logs::Tribute, "Received OP_TributeMoney of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
 
 	//player donates money
 	if (app->size != sizeof(TributeMoney_Struct))
@@ -13788,7 +13774,6 @@ void Client::Handle_OP_TributeMoney(const EQApplicationPacket *app)
 		t->tribute_points = TributeMoney(t->platinum);
 
 		Log.Out(Logs::Detail, Logs::Tribute, "Sending tribute money reply with %d points", t->tribute_points);
-		_pkt(TRIBUTE__OUT, app);
 
 		QueuePacket(app);
 	}
@@ -13798,7 +13783,6 @@ void Client::Handle_OP_TributeMoney(const EQApplicationPacket *app)
 void Client::Handle_OP_TributeNPC(const EQApplicationPacket *app)
 {
 	Log.Out(Logs::Detail, Logs::Tribute, "Received OP_TributeNPC of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
 
 	return;
 }
@@ -13806,7 +13790,6 @@ void Client::Handle_OP_TributeNPC(const EQApplicationPacket *app)
 void Client::Handle_OP_TributeToggle(const EQApplicationPacket *app)
 {
 	Log.Out(Logs::Detail, Logs::Tribute, "Received OP_TributeToggle of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
 
 	if (app->size != sizeof(uint32))
 		Log.Out(Logs::General, Logs::Error, "Invalid size on OP_TributeToggle packet");
@@ -13820,7 +13803,6 @@ void Client::Handle_OP_TributeToggle(const EQApplicationPacket *app)
 void Client::Handle_OP_TributeUpdate(const EQApplicationPacket *app)
 {
 	Log.Out(Logs::Detail, Logs::Tribute, "Received OP_TributeUpdate of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
 
 	//sent when the client changes their tribute settings...
 	if (app->size != sizeof(TributeInfo_Struct))

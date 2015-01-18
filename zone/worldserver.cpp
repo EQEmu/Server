@@ -684,7 +684,6 @@ void WorldServer::Process() {
 												sizeof(Resurrect_Struct));
 					memcpy(outapp->pBuffer, &srs->rez, sizeof(Resurrect_Struct));
 					client->QueuePacket(outapp);
-					_pkt(SPELLS__REZ, outapp);
 					safe_delete(outapp);
 					break;
 				}

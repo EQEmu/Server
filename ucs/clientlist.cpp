@@ -323,7 +323,6 @@ static void ProcessMailTo(Client *c, std::string MailMessage) {
 			VARSTRUCT_ENCODE_TYPE(uint16, PacketBuffer, 0x3237);
 			VARSTRUCT_ENCODE_TYPE(uint8, PacketBuffer, 0x0);
 
-			_pkt(UCS__PACKETS, outapp);
 
 			c->QueuePacket(outapp);
 
@@ -344,7 +343,6 @@ static void ProcessMailTo(Client *c, std::string MailMessage) {
 		VARSTRUCT_ENCODE_STRING(PacketBuffer, "test"); // Doesn't matter what we send in this text field.
 		VARSTRUCT_ENCODE_STRING(PacketBuffer, "1");
 
-		_pkt(UCS__PACKETS, outapp);
 
 		c->QueuePacket(outapp);
 
@@ -421,7 +419,6 @@ static void ProcessCommandBuddy(Client *c, std::string Buddy) {
 		database.RemoveFriendOrIgnore(c->GetCharID(), 1, Buddy.substr(1));
 	}
 
-	_pkt(UCS__PACKETS, outapp);
 	c->QueuePacket(outapp);
 
 	safe_delete(outapp);
@@ -465,7 +462,6 @@ static void ProcessCommandIgnore(Client *c, std::string Ignoree) {
 
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, Ignoree.c_str());
 
-	_pkt(UCS__PACKETS, outapp);
 	c->QueuePacket(outapp);
 
 	safe_delete(outapp);
@@ -626,7 +622,6 @@ void Clientlist::Process() {
 		while( KeyValid && !(*Iterator)->GetForceDisconnect() &&
 				(app = (EQApplicationPacket *)(*Iterator)->ClientStream->PopPacket())) {
 
-			_pkt(UCS__PACKETS, app);
 
 			EmuOpcode opcode = app->GetOpcode();
 
@@ -943,7 +938,6 @@ void Client::SendMailBoxes() {
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, s.c_str());
 	VARSTRUCT_ENCODE_TYPE(uint8, PacketBuffer, 0);
 
-	_pkt(UCS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 
@@ -1087,7 +1081,6 @@ void Client::JoinChannels(std::string ChannelNameList) {
 
 	sprintf(PacketBuffer, "%s", JoinedChannelsList.c_str());
 
-	_pkt(UCS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 
@@ -1104,7 +1097,6 @@ void Client::JoinChannels(std::string ChannelNameList) {
 	VARSTRUCT_ENCODE_TYPE(uint8, PacketBuffer, 0x00);
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, ChannelMessage.c_str());
 
-	_pkt(UCS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 
@@ -1174,7 +1166,6 @@ void Client::LeaveChannels(std::string ChannelNameList) {
 
 	sprintf(PacketBuffer, "%s", JoinedChannelsList.c_str());
 
-	_pkt(UCS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 
@@ -1191,7 +1182,6 @@ void Client::LeaveChannels(std::string ChannelNameList) {
 	VARSTRUCT_ENCODE_TYPE(uint8, PacketBuffer, 0x00);
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, ChannelMessage.c_str());
 
-	_pkt(UCS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 
@@ -1275,7 +1265,6 @@ void Client::SendChannelList() {
 	VARSTRUCT_ENCODE_TYPE(uint8, PacketBuffer, 0x00);
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, ChannelMessage.c_str());
 
-	_pkt(UCS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 
@@ -1516,7 +1505,6 @@ void Client::SendChannelMessage(std::string ChannelName, std::string Message, Cl
 	if(UnderfootOrLater)
 		VARSTRUCT_ENCODE_STRING(PacketBuffer, "SPAM:0:");
 
-	_pkt(UCS__PACKETS, outapp);
 	QueuePacket(outapp);
 
 	safe_delete(outapp);
@@ -1554,7 +1542,6 @@ void Client::AnnounceJoin(ChatChannel *Channel, Client *c) {
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, Channel->GetName().c_str());
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, c->GetName().c_str());
 
-	_pkt(UCS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 
@@ -1574,7 +1561,6 @@ void Client::AnnounceLeave(ChatChannel *Channel, Client *c) {
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, Channel->GetName().c_str());
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, c->GetName().c_str());
 
-	_pkt(UCS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 
@@ -1599,7 +1585,6 @@ void Client::GeneralChannelMessage(std::string Message) {
 	VARSTRUCT_ENCODE_TYPE(uint8, PacketBuffer, 0x00);
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, Message.c_str());
 
-	_pkt(UCS__PACKETS, outapp);
 	QueuePacket(outapp);
 
 	safe_delete(outapp);
@@ -2290,7 +2275,6 @@ void Client::SendNotification(int MailBoxNumber, std::string Subject, std::strin
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, From.c_str());
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, Subject.c_str());
 
-	_pkt(UCS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 
@@ -2311,7 +2295,6 @@ void Client::ChangeMailBox(int NewMailBox) {
 
 	VARSTRUCT_ENCODE_INTSTRING(buf, NewMailBox);
 
-	_pkt(UCS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 
@@ -2340,7 +2323,6 @@ void Client::SendFriends() {
 
 		VARSTRUCT_ENCODE_STRING(PacketBuffer, (*Iterator).c_str());
 
-		_pkt(UCS__PACKETS, outapp);
 
 		QueuePacket(outapp);
 
@@ -2363,7 +2345,6 @@ void Client::SendFriends() {
 
 		VARSTRUCT_ENCODE_STRING(PacketBuffer, Ignoree.c_str());
 
-		_pkt(UCS__PACKETS, outapp);
 
 		QueuePacket(outapp);
 

@@ -916,7 +916,6 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 	EmuOpcode opcode = app->GetOpcode();
 
 	Log.Out(Logs::Detail, Logs::World_Server,"Recevied EQApplicationPacket");
-	_pkt(WORLD__CLIENT_TRACE,app);
 
 	if (!eqs->CheckState(ESTABLISHED)) {
 		Log.Out(Logs::Detail, Logs::World_Server,"Client disconnected (net inactive on send)");
@@ -1006,7 +1005,6 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		default:
 		{
 			Log.Out(Logs::Detail, Logs::World_Server,"Received unknown EQApplicationPacket");
-			_pkt(WORLD__CLIENT_ERR,app);
 			return true;
 		}
 	}
@@ -1257,7 +1255,6 @@ bool Client::GenPassKey(char* key) {
 
 void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req) {
 	Log.Out(Logs::Detail, Logs::World_Server, "Sending EQApplicationPacket OpCode 0x%04x",app->GetOpcode());
-	_pkt(WORLD__CLIENT_TRACE, app);
 
 	ack_req = true;	// It's broke right now, dont delete this line till fix it. =P
 	eqs->QueuePacket(app, ack_req);

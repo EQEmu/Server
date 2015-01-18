@@ -331,7 +331,6 @@ void Database::SendHeaders(Client *client) {
 	VARSTRUCT_ENCODE_INTSTRING(packetBuffer, unknownField3);
 	VARSTRUCT_ENCODE_INTSTRING(packetBuffer, results.RowCount());
 
-	_pkt(UCS__PACKETS, outapp);
 
 	client->QueuePacket(outapp);
 
@@ -369,7 +368,6 @@ void Database::SendHeaders(Client *client) {
 		VARSTRUCT_ENCODE_STRING(packetBuffer, row[2]);
 		VARSTRUCT_ENCODE_STRING(packetBuffer, row[3]);
 
-		_pkt(UCS__PACKETS, outapp);
 
 		client->QueuePacket(outapp);
 
@@ -419,7 +417,6 @@ void Database::SendBody(Client *client, int messageNumber) {
 	packetBuffer--; // Overwrite the null terminator
 	VARSTRUCT_ENCODE_TYPE(uint8, packetBuffer, 0x0a);
 
-	_pkt(UCS__PACKETS, outapp);
 
 	client->QueuePacket(outapp);
 
