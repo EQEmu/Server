@@ -15811,7 +15811,7 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 
 	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
 	curMob = it->second;
-		if (curMob && curMob->DistNoZ(*client)<=Distance) {
+		if (curMob && DistanceNoZ(curMob->GetPosition(), client->GetPosition()) <= Distance) {
 			if(curMob->IsTrackable()) {
 				Mob* cur_entity = curMob;
 				int Extras = (cur_entity->IsBot() || cur_entity->IsPet() || cur_entity->IsFamiliar() || cur_entity->IsClient());
