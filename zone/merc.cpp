@@ -2457,7 +2457,7 @@ void Merc::CheckHateList() {
 										if(!hate_list.IsEntOnHateList(npc)) {
 											float range = g->HasRole(groupMember, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
 											range *= range;
-											if(npc->DistNoRootNoZ(*this) < range) {
+											if(ComparativeDistanceNoZ(m_Position, npc->GetPosition()) < range) {
 												hate_list.AddEntToHateList(npc, 1);
 											}
 										}
