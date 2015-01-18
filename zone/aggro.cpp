@@ -878,7 +878,7 @@ bool Mob::CombatRange(Mob* other)
 	if (size_mod > 10000)
 		size_mod = size_mod / 7;
 
-	float _DistNoRoot = DistNoRoot(*other);
+	float _DistNoRoot = ComparativeDistance(m_Position, other->GetPosition());
 
 	if (GetSpecialAbility(NPC_CHASE_DISTANCE)){
 		
