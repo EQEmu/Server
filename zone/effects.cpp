@@ -838,7 +838,7 @@ void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool aff
 			continue;
 		if (curmob == caster && !affect_caster)	//watch for caster too
 			continue;
-		if (center->DistNoRoot(*curmob) > dist2)	//make sure they are in range
+		if (ComparativeDistance(center->GetPosition(), curmob->GetPosition()) > dist2)	//make sure they are in range
 			continue;
 		if (isnpc && curmob->IsNPC()) {	//check npc->npc casting
 			FACTION_VALUE f = curmob->GetReverseFactionCon(caster);
