@@ -1576,7 +1576,7 @@ void Mob::SendIllusionPacket(uint16 in_race, uint8 in_gender, uint8 in_texture, 
 
 	entity_list.QueueClients(this, outapp);
 	safe_delete(outapp);
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Illusion: Race = %i, Gender = %i, Texture = %i, HelmTexture = %i, HairColor = %i, BeardColor = %i, EyeColor1 = %i, EyeColor2 = %i, HairStyle = %i, Face = %i, DrakkinHeritage = %i, DrakkinTattoo = %i, DrakkinDetails = %i, Size = %f",
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Illusion: Race = %i, Gender = %i, Texture = %i, HelmTexture = %i, HairColor = %i, BeardColor = %i, EyeColor1 = %i, EyeColor2 = %i, HairStyle = %i, Face = %i, DrakkinHeritage = %i, DrakkinTattoo = %i, DrakkinDetails = %i, Size = %f",
 		race, gender, texture, helmtexture, haircolor, beardcolor, eyecolor1, eyecolor2, hairstyle, luclinface, drakkin_heritage, drakkin_tattoo, drakkin_details, size);
 }
 
@@ -3043,7 +3043,7 @@ void Mob::ExecWeaponProc(const ItemInst *inst, uint16 spell_id, Mob *on) {
 	if(!IsValidSpell(spell_id)) { // Check for a valid spell otherwise it will crash through the function
 		if(IsClient()){
 			Message(0, "Invalid spell proc %u", spell_id);
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Player %s, Weapon Procced invalid spell %u", this->GetName(), spell_id);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Player %s, Weapon Procced invalid spell %u", this->GetName(), spell_id);
 		}
 		return;
 	}
@@ -4536,7 +4536,7 @@ void Mob::MeleeLifeTap(int32 damage) {
 	if(lifetap_amt && damage > 0){
 
 		lifetap_amt = damage * lifetap_amt / 100;
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Melee lifetap healing for %d damage.", damage);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Melee lifetap healing for %d damage.", damage);
 
 		if (lifetap_amt > 0)
 			HealDamage(lifetap_amt); //Heal self for modified damage amount.

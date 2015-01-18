@@ -371,7 +371,7 @@ void EntityList::CheckGroupList (const char *fname, const int fline)
 	{
 		if (*it == nullptr)
 		{
-			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "nullptr group, %s:%i", fname, fline);
+			Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "nullptr group, %s:%i", fname, fline);
 		}
 	}
 }
@@ -520,12 +520,12 @@ void EntityList::MobProcess()
 				zone->StartShutdownTimer();
 				Group *g = GetGroupByMob(mob);
 				if(g) {
-					Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "About to delete a client still in a group.");
+					Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "About to delete a client still in a group.");
 					g->DelMember(mob);
 				}
 				Raid *r = entity_list.GetRaidByClient(mob->CastToClient());
 				if(r) {
-					Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "About to delete a client still in a raid.");
+					Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "About to delete a client still in a raid.");
 					r->MemberZoned(mob->CastToClient());
 				}
 				entity_list.RemoveClient(id);
@@ -557,7 +557,7 @@ void EntityList::AddGroup(Group *group)
 
 	uint32 gid = worldserver.NextGroupID();
 	if (gid == 0) {
-		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, 
+		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, 
 				"Unable to get new group ID from world server. group is going to be broken.");
 		return;
 	}
@@ -586,7 +586,7 @@ void EntityList::AddRaid(Raid *raid)
 
 	uint32 gid = worldserver.NextGroupID();
 	if (gid == 0) {
-		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, 
+		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, 
 				"Unable to get new group ID from world server. group is going to be broken.");
 		return;
 	}
@@ -2509,7 +2509,7 @@ char *EntityList::MakeNameUnique(char *name)
 			return name;
 		}
 	}
-	Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Fatal error in EntityList::MakeNameUnique: Unable to find unique name for '%s'", name);
+	Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Fatal error in EntityList::MakeNameUnique: Unable to find unique name for '%s'", name);
 	char tmp[64] = "!";
 	strn0cpy(&tmp[1], name, sizeof(tmp) - 1);
 	strcpy(name, tmp);
@@ -3397,7 +3397,7 @@ void EntityList::ReloadAllClientsTaskState(int TaskID)
 			// If we have been passed a TaskID, only reload the client state if they have
 			// that Task active.
 			if ((!TaskID) || (TaskID && client->IsTaskActive(TaskID))) {
-				Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[CLIENTLOAD] Reloading Task State For Client %s", client->GetName());
+				Log.Out(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[CLIENTLOAD] Reloading Task State For Client %s", client->GetName());
 				client->RemoveClientTaskState();
 				client->LoadClientTaskState();
 				taskmanager->SendActiveTasksToClient(client);

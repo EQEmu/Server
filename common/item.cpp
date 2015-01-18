@@ -1153,7 +1153,7 @@ int16 Inventory::_PutItem(int16 slot_id, ItemInst* inst)
 	}
 	
 	if (result == INVALID_INDEX) {
-		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Inventory::_PutItem: Invalid slot_id specified (%i) with parent slot id (%i)", slot_id, parentSlot);
+		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Inventory::_PutItem: Invalid slot_id specified (%i) with parent slot id (%i)", slot_id, parentSlot);
 		Inventory::MarkDirty(inst); // Slot not found, clean up
 	}
 

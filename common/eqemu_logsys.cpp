@@ -91,7 +91,7 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	log_settings_loaded = true;
 }
 
-std::string EQEmuLogSys::FormatDoLogMessageString(uint16 log_category, std::string in_message){
+std::string EQEmuLogSys::FormatOutMessageString(uint16 log_category, std::string in_message){
 	std::string category_string = "";
 	if (log_category > 0 && LogCategoryName[log_category]){ 
 		category_string = StringFormat("[%s] ", LogCategoryName[log_category]);
@@ -162,14 +162,14 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 log_category, const std::string m
 	#endif
 }
 
-void EQEmuLogSys::DoLog(DebugLevel debug_level, uint16 log_category, std::string message, ...)
+void EQEmuLogSys::Out(DebugLevel debug_level, uint16 log_category, std::string message, ...)
 {
 	va_list args;
 	va_start(args, message);
 	std::string output_message = vStringFormat(message.c_str(), args);
 	va_end(args);
 
-	std::string output_debug_message = EQEmuLogSys::FormatDoLogMessageString(log_category, output_message);
+	std::string output_debug_message = EQEmuLogSys::FormatOutMessageString(log_category, output_message);
 
 	EQEmuLogSys::ProcessConsoleMessage(log_category, output_debug_message);
 	EQEmuLogSys::ProcessGMSay(log_category, output_debug_message);

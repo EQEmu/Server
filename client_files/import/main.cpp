@@ -36,22 +36,22 @@ int main(int argc, char **argv) {
 	Log.LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Status, "Client Files Import Utility");
+	Log.Out(EQEmuLogSys::General, EQEmuLogSys::Status, "Client Files Import Utility");
 	if(!EQEmuConfig::LoadConfig()) {
-		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to load configuration file.");
+		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to load configuration file.");
 		return 1;
 	}
 
 	const EQEmuConfig *config = EQEmuConfig::get();
 	if(!load_log_settings(config->LogSettingsFile.c_str())) {
-		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Warning: unable to read %s.", config->LogSettingsFile.c_str());
+		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Warning: unable to read %s.", config->LogSettingsFile.c_str());
 	}
 
 	SharedDatabase database;
-	Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Status, "Connecting to database...");
+	Log.Out(EQEmuLogSys::General, EQEmuLogSys::Status, "Connecting to database...");
 	if(!database.Connect(config->DatabaseHost.c_str(), config->DatabaseUsername.c_str(),
 		config->DatabasePassword.c_str(), config->DatabaseDB.c_str(), config->DatabasePort)) {
-		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to connect to the database, cannot continue without a "
+		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to connect to the database, cannot continue without a "
 			"database connection");
 		return 1;
 	}
@@ -68,7 +68,7 @@ int GetSpellColumns(SharedDatabase *db) {
 	const std::string query = "DESCRIBE spells_new";
 	auto results = db->QueryDatabase(query);
 	if(!results.Success()) {
-        Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in GetSpellColumns query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
+        Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in GetSpellColumns query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
 
@@ -76,10 +76,10 @@ int GetSpellColumns(SharedDatabase *db) {
 }
 
 void ImportSpells(SharedDatabase *db) {
-	Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Status, "Importing Spells...");
+	Log.Out(EQEmuLogSys::General, EQEmuLogSys::Status, "Importing Spells...");
 	FILE *f = fopen("import/spells_us.txt", "r");
 	if(!f) {
-		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to open import/spells_us.txt to read, skipping.");
+		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to open import/spells_us.txt to read, skipping.");
 		return;
 	}
 
@@ -142,23 +142,23 @@ void ImportSpells(SharedDatabase *db) {
 
 		spells_imported++;
 		if(spells_imported % 1000 == 0) {
-			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Status, "%d spells imported.", spells_imported);
+			Log.Out(EQEmuLogSys::General, EQEmuLogSys::Status, "%d spells imported.", spells_imported);
 		}
 	}
 
 	if(spells_imported % 1000 != 0) {
-		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Status, "%d spells imported.", spells_imported);
+		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Status, "%d spells imported.", spells_imported);
 	}
 
 	fclose(f);
 }
 
 void ImportSkillCaps(SharedDatabase *db) {
-	Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Status, "Importing Skill Caps...");
+	Log.Out(EQEmuLogSys::General, EQEmuLogSys::Status, "Importing Skill Caps...");
 
 	FILE *f = fopen("import/SkillCaps.txt", "r");
 	if(!f) {
-		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to open import/SkillCaps.txt to read, skipping.");
+		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to open import/SkillCaps.txt to read, skipping.");
 		return;
 	}
 
@@ -190,11 +190,11 @@ void ImportSkillCaps(SharedDatabase *db) {
 }
 
 void ImportBaseData(SharedDatabase *db) {
-	Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Status, "Importing Base Data...");
+	Log.Out(EQEmuLogSys::General, EQEmuLogSys::Status, "Importing Base Data...");
 
 	FILE *f = fopen("import/BaseData.txt", "r");
 	if(!f) {
-		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to open import/BaseData.txt to read, skipping.");
+		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to open import/BaseData.txt to read, skipping.");
 		return;
 	}
 

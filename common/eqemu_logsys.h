@@ -82,7 +82,7 @@ public:
 
 	void CloseFileLogs();
 	void LoadLogSettingsDefaults();
-	void DoLog(DebugLevel debug_level, uint16 log_category, std::string message, ...);
+	void Out(DebugLevel debug_level, uint16 log_category, std::string message, ...);
 	void MakeDirectory(std::string directory_name);
 	void SetCurrentTimeStamp(char* time_stamp);
 	void StartFileLogs(const std::string log_name);
@@ -103,7 +103,7 @@ private:
 	bool zone_general_init = false;
 	std::function<void(uint16 log_category, std::string&)> on_log_gmsay_hook;
 
-	std::string FormatDoLogMessageString(uint16 log_category, std::string in_message);
+	std::string FormatOutMessageString(uint16 log_category, std::string in_message);
 
 	void ProcessConsoleMessage(uint16 log_category, const std::string message);
 	void ProcessGMSay(uint16 log_category, std::string message);

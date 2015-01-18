@@ -140,7 +140,7 @@ void WorldServer::Process() {
 
 	ServerPacket *pack = 0;
 	while((pack = tcpc.PopPacket())) {
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Got 0x%04x from world:", pack->opcode);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Got 0x%04x from world:", pack->opcode);
 		_hex(ZONE__WORLD_TRACE,pack->pBuffer,pack->size);
 		switch(pack->opcode) {
 		case 0: {
@@ -155,12 +155,12 @@ void WorldServer::Process() {
 			if (pack->size != sizeof(ServerConnectInfo))
 				break;
 			ServerConnectInfo* sci = (ServerConnectInfo*) pack->pBuffer;
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "World assigned Port: %d for this zone.", sci->port);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "World assigned Port: %d for this zone.", sci->port);
 			ZoneConfig::SetZonePort(sci->port);
 			break;
 		}
 		case ServerOP_ZAAuthFailed: {
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "World server responded 'Not Authorized', disabling reconnect");
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "World server responded 'Not Authorized', disabling reconnect");
 			pTryReconnect = false;
 			Disconnect();
 			break;
@@ -386,12 +386,12 @@ void WorldServer::Process() {
 					}
 				}
 				else {
-					Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::None, "[CLIENT] id=%i, playerineqstring=%i, playersinzonestring=%i. Dumping WhoAllReturnStruct:",
+					Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::None, "[CLIENT] id=%i, playerineqstring=%i, playersinzonestring=%i. Dumping WhoAllReturnStruct:",
 						wars->id, wars->playerineqstring, wars->playersinzonestring);
 				}
 			}
 			else
-				Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "WhoAllReturnStruct: Could not get return struct!");
+				Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "WhoAllReturnStruct: Could not get return struct!");
 			break;
 		}
 		case ServerOP_EmoteMessage: {
@@ -678,7 +678,7 @@ void WorldServer::Process() {
 					//pendingrezexp is the amount of XP on the corpse. Setting it to a value >= 0
 					//also serves to inform Client::OPRezzAnswer to expect a packet.
 					client->SetPendingRezzData(srs->exp, srs->dbid, srs->rez.spellid, srs->rez.corpse_name);
-							Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "OP_RezzRequest in zone %s for %s, spellid:%i",
+							Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "OP_RezzRequest in zone %s for %s, spellid:%i",
 							zone->GetShortName(), client->GetName(), srs->rez.spellid);
 					EQApplicationPacket* outapp = new EQApplicationPacket(OP_RezzRequest,
 												sizeof(Resurrect_Struct));
@@ -694,10 +694,10 @@ void WorldServer::Process() {
 				// to the zone that the corpse is in.
 				Corpse* corpse = entity_list.GetCorpseByName(srs->rez.corpse_name);
 				if (corpse && corpse->IsCorpse()) {
-					Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "OP_RezzComplete received in zone %s for corpse %s",
+					Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "OP_RezzComplete received in zone %s for corpse %s",
 								zone->GetShortName(), srs->rez.corpse_name);
 
-					Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Found corpse. Marking corpse as rezzed.");
+					Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Found corpse. Marking corpse as rezzed.");
 					// I don't know why Rezzed is not set to true in CompleteRezz().
 					corpse->IsRezzed(true);
 					corpse->CompleteResurrection();
@@ -748,7 +748,7 @@ void WorldServer::Process() {
 		}
 		case ServerOP_SyncWorldTime: {
 			if(zone!=0) {
-				Log.DoLog(EQEmuLogSys::Moderate, EQEmuLogSys::Zone_Server, __FUNCTION__ "Received Message SyncWorldTime");
+				Log.Out(EQEmuLogSys::Moderate, EQEmuLogSys::Zone_Server, __FUNCTION__ "Received Message SyncWorldTime");
 				eqTimeOfDay* newtime = (eqTimeOfDay*) pack->pBuffer;
 				zone->zone_time.setEQTimeOfDay(newtime->start_eqtime, newtime->start_realtime);
 				EQApplicationPacket* outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
@@ -1381,7 +1381,7 @@ void WorldServer::Process() {
 			if(NewCorpse)
 				NewCorpse->Spawn();
 			else
-				Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to load player corpse id %u for zone %s.", s->player_corpse_id, zone->GetShortName());
+				Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to load player corpse id %u for zone %s.", s->player_corpse_id, zone->GetShortName());
 
 			break;
 		}
@@ -1974,7 +1974,7 @@ bool WorldServer::SendVoiceMacro(Client* From, uint32 Type, char* Target, uint32
 
 bool WorldServer::RezzPlayer(EQApplicationPacket* rpack, uint32 rezzexp, uint32 dbid, uint16 opcode)
 {
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "WorldServer::RezzPlayer rezzexp is %i (0 is normal for RezzComplete", rezzexp);
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "WorldServer::RezzPlayer rezzexp is %i (0 is normal for RezzComplete", rezzexp);
 	ServerPacket* pack = new ServerPacket(ServerOP_RezzPlayer, sizeof(RezzPlayer_Struct));
 	RezzPlayer_Struct* sem = (RezzPlayer_Struct*) pack->pBuffer;
 	sem->rezzopcode = opcode;
@@ -1983,9 +1983,9 @@ bool WorldServer::RezzPlayer(EQApplicationPacket* rpack, uint32 rezzexp, uint32 
 	sem->dbid = dbid;
 	bool ret = SendPacket(pack);
 	if (ret)
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Sending player rezz packet to world spellid:%i", sem->rez.spellid);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Sending player rezz packet to world spellid:%i", sem->rez.spellid);
 	else
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "NOT Sending player rezz packet to world");
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "NOT Sending player rezz packet to world");
 
 	safe_delete(pack);
 	return ret;
@@ -2005,14 +2005,14 @@ void WorldServer::HandleReloadTasks(ServerPacket *pack)
 {
 	ReloadTasks_Struct* rts = (ReloadTasks_Struct*) pack->pBuffer;
 
-	Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] Zone received ServerOP_ReloadTasks from World, Command %i", rts->Command);
+	Log.Out(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] Zone received ServerOP_ReloadTasks from World, Command %i", rts->Command);
 
 	switch(rts->Command) {
 		case RELOADTASKS:
 			entity_list.SaveAllClientsTaskState();
 
 			if(rts->Parameter == 0) {
-				Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] Reload ALL tasks");
+				Log.Out(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] Reload ALL tasks");
 				safe_delete(taskmanager);
 				taskmanager = new TaskManager;
 				taskmanager->LoadTasks();
@@ -2021,7 +2021,7 @@ void WorldServer::HandleReloadTasks(ServerPacket *pack)
 				entity_list.ReloadAllClientsTaskState();
 			}
 			else {
-				Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] Reload only task %i", rts->Parameter);
+				Log.Out(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] Reload only task %i", rts->Parameter);
 				taskmanager->LoadTasks(rts->Parameter);
 				entity_list.ReloadAllClientsTaskState(rts->Parameter);
 			}
@@ -2030,23 +2030,23 @@ void WorldServer::HandleReloadTasks(ServerPacket *pack)
 
 		case RELOADTASKPROXIMITIES:
 			if(zone) {
-				Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] Reload task proximities");
+				Log.Out(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] Reload task proximities");
 				taskmanager->LoadProximities(zone->GetZoneID());
 			}
 			break;
 
 		case RELOADTASKGOALLISTS:
-			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] Reload task goal lists");
+			Log.Out(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] Reload task goal lists");
 			taskmanager->ReloadGoalLists();
 			break;
 
 		case RELOADTASKSETS:
-			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] Reload task sets");
+			Log.Out(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] Reload task sets");
 			taskmanager->LoadTaskSets();
 			break;
 
 		default:
-			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] Unhandled ServerOP_ReloadTasks command %i", rts->Command);
+			Log.Out(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[GLOBALLOAD] Unhandled ServerOP_ReloadTasks command %i", rts->Command);
 
 	}
 
@@ -2061,7 +2061,7 @@ uint32 WorldServer::NextGroupID() {
 	if(cur_groupid >= last_groupid) {
 		//this is an error... This means that 50 groups were created before
 		//1 packet could make the zone->world->zone trip... so let it error.
-		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Ran out of group IDs before the server sent us more.");
+		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Ran out of group IDs before the server sent us more.");
 		return(0);
 	}
 	if(cur_groupid > (last_groupid - /*50*/995)) {

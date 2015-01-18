@@ -147,7 +147,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot,
 	uint32 timer, uint32 timer_duration, uint32 type, int16 *resist_adjust)
 {
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "CastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item slot %d",
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "CastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item slot %d",
 		spells[spell_id].name, spell_id, target_id, slot, cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);
 
 	if(casting_spell_id == spell_id)
@@ -166,7 +166,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		(IsAmnesiad() && IsDiscipline(spell_id))
 	)
 	{
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell casting canceled: not able to cast now. Valid? %d, casting %d, waiting? %d, spellend? %d, stunned? %d, feared? %d, mezed? %d, silenced? %d, amnesiad? %d",
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell casting canceled: not able to cast now. Valid? %d, casting %d, waiting? %d, spellend? %d, stunned? %d, feared? %d, mezed? %d, silenced? %d, amnesiad? %d",
 			IsValidSpell(spell_id), casting_spell_id, delaytimer, spellend_timer.Enabled(), IsStunned(), IsFeared(), IsMezzed(), IsSilenced(), IsAmnesiad() );
 		if(IsSilenced() && !IsDiscipline(spell_id))
 			Message_StringID(13, SILENCED_STRING);
@@ -204,7 +204,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 
 	//cannot cast under divine aura
 	if(DivineAura()) {
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell casting canceled: cannot cast while Divine Aura is in effect.");
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell casting canceled: cannot cast while Divine Aura is in effect.");
 		InterruptSpell(173, 0x121, false);
 		return(false);
 	}
@@ -234,7 +234,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		InterruptSpell(fizzle_msg, 0x121, spell_id);
 
 		uint32 use_mana = ((spells[spell_id].mana) / 4);
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell casting canceled: fizzled. %d mana has been consumed", use_mana);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell casting canceled: fizzled. %d mana has been consumed", use_mana);
 
 		// fizzle 1/4 the mana away
 		SetMana(GetMana() - use_mana);
@@ -243,7 +243,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	}
 
 	if (HasActiveSong() && IsBardSong(spell_id)) {
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting a new song while singing a song. Killing old song %d.", bardsong);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting a new song while singing a song. Killing old song %d.", bardsong);
 		//Note: this does NOT tell the client
 		_StopSong();
 	}
@@ -258,7 +258,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 			if ((itm->GetItem()->Click.Type == ET_EquipClick) && !(itm->GetItem()->Classes & bitmask)) {
 				if (CastToClient()->GetClientVersion() < EQClientSoF) {
 					// They are casting a spell from an item that requires equipping but shouldn't let them equip it
-					Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "HACKER: %s (account: %s) attempted to click an equip-only effect on item %s (id: %d) which they shouldn't be able to equip!",
+					Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "HACKER: %s (account: %s) attempted to click an equip-only effect on item %s (id: %d) which they shouldn't be able to equip!",
 						CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
 					database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking equip-only item with an invalid class");
 				}
@@ -270,7 +270,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 			if ((itm->GetItem()->Click.Type == ET_ClickEffect2) && !(itm->GetItem()->Classes & bitmask)) {
 				if (CastToClient()->GetClientVersion() < EQClientSoF) {
 					// They are casting a spell from an item that they don't meet the race/class requirements to cast
-					Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "HACKER: %s (account: %s) attempted to click a race/class restricted effect on item %s (id: %d) which they shouldn't be able to click!",
+					Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "HACKER: %s (account: %s) attempted to click a race/class restricted effect on item %s (id: %d) which they shouldn't be able to click!",
 						CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
 					database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking race/class restricted item with an invalid class");
 				}
@@ -291,7 +291,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		if( itm && (itm->GetItem()->Click.Type == ET_EquipClick) && !(item_slot <= MainAmmo || item_slot == MainPowerSource) ){
 			if (CastToClient()->GetClientVersion() < EQClientSoF) {
 				// They are attempting to cast a must equip clicky without having it equipped
-				Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "HACKER: %s (account: %s) attempted to click an equip-only effect on item %s (id: %d) without equiping it!", CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
+				Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "HACKER: %s (account: %s) attempted to click an equip-only effect on item %s (id: %d) without equiping it!", CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
 				database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking equip-only item without equiping it");
 			}
 			else {
@@ -349,7 +349,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 
 	const SPDat_Spell_Struct &spell = spells[spell_id];
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "DoCastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item %d",
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "DoCastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item %d",
 		spell.name, spell_id, target_id, slot, cast_time, mana_cost, item_slot==0xFFFFFFFF?999:item_slot);
 
 	casting_spell_id = spell_id;
@@ -363,7 +363,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	casting_spell_type = type;
 
 	SaveSpellLoc();
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting %d Started at (%.3f,%.3f,%.3f)", spell_id, spell_x, spell_y, spell_z);
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting %d Started at (%.3f,%.3f,%.3f)", spell_id, spell_x, spell_y, spell_z);
 
 	// if this spell doesn't require a target, or if it's an optional target
 	// and a target wasn't provided, then it's us; unless TGB is on and this
@@ -375,7 +375,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		spell.targettype == ST_Beam ||
 		spell.targettype == ST_TargetOptional) && target_id == 0)
 	{
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d auto-targeted the caster. Group? %d, target type %d", spell_id, IsGroupSpell(spell_id), spell.targettype);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d auto-targeted the caster. Group? %d, target type %d", spell_id, IsGroupSpell(spell_id), spell.targettype);
 		target_id = GetID();
 	}
 
@@ -392,7 +392,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 
 	// we checked for spells not requiring targets above
 	if(target_id == 0) {
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell Error: no target. spell=%d\n", GetName(), spell_id);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell Error: no target. spell=%d\n", GetName(), spell_id);
 		if(IsClient()) {
 			//clients produce messages... npcs should not for this case
 			Message_StringID(13, SPELL_NEED_TAR);
@@ -430,7 +430,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 			{
 				mana_cost = 0;
 			} else {
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell Error not enough mana spell=%d mymana=%d cost=%d\n", GetName(), spell_id, my_curmana, mana_cost);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell Error not enough mana spell=%d mymana=%d cost=%d\n", GetName(), spell_id, my_curmana, mana_cost);
 				if(IsClient()) {
 					//clients produce messages... npcs should not for this case
 					Message_StringID(13, INSUFFICIENT_MANA);
@@ -451,7 +451,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 
 	casting_spell_resist_adjust = resist_adjust;
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Casting time %d (orig %d), mana cost %d",
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Casting time %d (orig %d), mana cost %d",
 			spell_id, cast_time, orgcasttime, mana_cost);
 
 	// cast time is 0, just finish it right now and be done with it
@@ -517,7 +517,7 @@ bool Mob::DoCastingChecks()
 	if (RuleB(Spells, BuffLevelRestrictions)) {
 		// casting_spell_targetid is guaranteed to be what we went, check for ST_Self for now should work though
 		if (spell_target && spells[spell_id].targettype != ST_Self && !spell_target->CheckSpellLevelRestriction(spell_id)) {
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d failed: recipient did not meet the level restrictions", spell_id);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d failed: recipient did not meet the level restrictions", spell_id);
 			if (!IsBardSong(spell_id))
 				Message_StringID(MT_SpellFailure, SPELL_TOO_POWERFUL);
 			return false;
@@ -756,7 +756,7 @@ bool Client::CheckFizzle(uint16 spell_id)
 
 	float fizzle_roll = zone->random.Real(0, 100);
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Check Fizzle %s  spell %d  fizzlechance: %0.2f%%   diff: %0.2f  roll: %0.2f", GetName(), spell_id, fizzlechance, diff, fizzle_roll);
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Check Fizzle %s  spell %d  fizzlechance: %0.2f%%   diff: %0.2f  roll: %0.2f", GetName(), spell_id, fizzlechance, diff, fizzle_roll);
 
 	if(fizzle_roll > fizzlechance)
 		return(true);
@@ -816,7 +816,7 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 
 	ZeroCastingVars();	// resets all the state keeping stuff
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d has been interrupted.", spellid);
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d has been interrupted.", spellid);
 
 	if(!spellid)
 		return;
@@ -893,7 +893,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 		if(!CastToClient()->GetPTimers().Expired(&database, pTimerSpellStart + spell_id, false)) {
 			//should we issue a message or send them a spell gem packet?
 			Message_StringID(13, SPELL_RECAST);
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting of %d canceled: spell reuse timer not expired", spell_id);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting of %d canceled: spell reuse timer not expired", spell_id);
 			InterruptSpell();
 			return;
 		}
@@ -907,7 +907,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 		{
 			if(!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + itm->GetItem()->RecastType), false)) {
 				Message_StringID(13, SPELL_RECAST);
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting of %d canceled: item spell reuse timer not expired", spell_id);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting of %d canceled: item spell reuse timer not expired", spell_id);
 				InterruptSpell();
 				return;
 			}
@@ -916,7 +916,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 
 	if(!IsValidSpell(spell_id))
 	{
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting of %d canceled: invalid spell id", spell_id);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting of %d canceled: invalid spell id", spell_id);
 		InterruptSpell();
 		return;
 	}
@@ -927,7 +927,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 	{
 		if(delaytimer)
 		{
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting of %d canceled: recast too quickly", spell_id);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting of %d canceled: recast too quickly", spell_id);
 			Message(13, "You are unable to focus.");
 			InterruptSpell();
 			return;
@@ -937,7 +937,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 	// make sure they aren't somehow casting 2 timed spells at once
 	if (casting_spell_id != spell_id)
 	{
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting of %d canceled: already casting", spell_id);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting of %d canceled: already casting", spell_id);
 		Message_StringID(13,ALREADY_CASTING);
 		InterruptSpell();
 		return;
@@ -952,7 +952,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 	{
 		if (IsBardSong(spell_id)) {
 			if(spells[spell_id].buffduration == 0xFFFF || spells[spell_id].recast_time != 0) {
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard song %d not applying bard logic because duration or recast is wrong: dur=%d, recast=%d", spells[spell_id].buffduration, spells[spell_id].recast_time);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard song %d not applying bard logic because duration or recast is wrong: dur=%d, recast=%d", spells[spell_id].buffduration, spells[spell_id].recast_time);
 			} else {
 				bardsong = spell_id;
 				bardsong_slot = slot;
@@ -962,7 +962,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 				else
 					bardsong_target_id = spell_target->GetID();
 				bardsong_timer.Start(6000);
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard song %d started: slot %d, target id %d", bardsong, bardsong_slot, bardsong_target_id);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard song %d started: slot %d, target id %d", bardsong, bardsong_slot, bardsong_target_id);
 				bard_song_mode = true;
 			}
 		}
@@ -1041,10 +1041,10 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 				}
 			}
 
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Checking Interruption: spell x: %f  spell y: %f  cur x: %f  cur y: %f channelchance %f channeling skill %d\n", GetSpellX(), GetSpellY(), GetX(), GetY(), channelchance, GetSkill(SkillChanneling));
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Checking Interruption: spell x: %f  spell y: %f  cur x: %f  cur y: %f channelchance %f channeling skill %d\n", GetSpellX(), GetSpellY(), GetX(), GetY(), channelchance, GetSkill(SkillChanneling));
 
 			if(!spells[spell_id].uninterruptable && zone->random.Real(0, 100) > channelchance) {
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting of %d canceled: interrupted.", spell_id);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting of %d canceled: interrupted.", spell_id);
 				InterruptSpell();
 				return;
 			}
@@ -1060,10 +1060,10 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 	if(IsClient()) {
 		int reg_focus = CastToClient()->GetFocusEffect(focusReagentCost,spell_id);//Client only
 		if(zone->random.Roll(reg_focus)) {
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Reagent focus item prevented reagent consumption (%d chance)", spell_id, reg_focus);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Reagent focus item prevented reagent consumption (%d chance)", spell_id, reg_focus);
 		} else {
 			if(reg_focus > 0)
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Reagent focus item failed to prevent reagent consumption (%d chance)", spell_id, reg_focus);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Reagent focus item failed to prevent reagent consumption (%d chance)", spell_id, reg_focus);
 			Client *c = this->CastToClient();
 			int component, component_count, inv_slot_id;
 			bool missingreags = false;
@@ -1116,11 +1116,11 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 							break;
 
 						default:	// some non-instrument component. Let it go, but record it in the log
-							Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Something odd happened: Song %d required component %s", spell_id, component);
+							Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Something odd happened: Song %d required component %s", spell_id, component);
 					}
 
 					if(!HasInstrument) {	// if the instrument is missing, log it and interrupt the song
-						Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Song %d: Canceled. Missing required instrument %s", spell_id, component);
+						Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Song %d: Canceled. Missing required instrument %s", spell_id, component);
 						if(c->GetGM())
 							c->Message(0, "Your GM status allows you to finish casting even though you're missing a required instrument.");
 						else {
@@ -1143,12 +1143,12 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 						const Item_Struct *item = database.GetItem(component);
 						if(item) {
 							c->Message_StringID(13, MISSING_SPELL_COMP_ITEM, item->Name);
-							Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Canceled. Missing required reagent %s (%d)", spell_id, item->Name, component);
+							Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Canceled. Missing required reagent %s (%d)", spell_id, item->Name, component);
 						}
 						else {
 							char TempItemName[64];
 							strcpy((char*)&TempItemName, "UNKNOWN");
-							Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Canceled. Missing required reagent %s (%d)", spell_id, TempItemName, component);
+							Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Canceled. Missing required reagent %s (%d)", spell_id, TempItemName, component);
 						}
 					}
 				} // end bard/not bard ifs
@@ -1169,7 +1169,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 					if (component == -1)
 						continue;
 					component_count = spells[spell_id].component_counts[t_count];
-					Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Consuming %d of spell component item id %d", spell_id, component, component_count);
+					Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Consuming %d of spell component item id %d", spell_id, component, component_count);
 					// Components found, Deleting
 					// now we go looking for and deleting the items one by one
 					for(int s = 0; s < component_count; s++)
@@ -1234,7 +1234,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 		{
 			if(!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + recasttype), false)) {
 				Message_StringID(13, SPELL_RECAST);
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting of %d canceled: item spell reuse timer not expired", spell_id);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting of %d canceled: item spell reuse timer not expired", spell_id);
 				InterruptSpell();
 				return;
 			}
@@ -1253,15 +1253,15 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 			if(fromaug) { charges = -1; } //Don't destroy the parent item
 
 			if(charges > -1) {	// charged item, expend a charge
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Consuming a charge from item %s (%d) which had %d/%d charges.", spell_id, inst->GetItem()->Name, inst->GetItem()->ID, inst->GetCharges(), inst->GetItem()->MaxCharges);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Consuming a charge from item %s (%d) which had %d/%d charges.", spell_id, inst->GetItem()->Name, inst->GetItem()->ID, inst->GetCharges(), inst->GetItem()->MaxCharges);
 				DeleteChargeFromSlot = inventory_slot;
 			} else {
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Cast from unlimited charge item %s (%d) (%d charges)", spell_id, inst->GetItem()->Name, inst->GetItem()->ID, inst->GetItem()->MaxCharges);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Cast from unlimited charge item %s (%d) (%d charges)", spell_id, inst->GetItem()->Name, inst->GetItem()->ID, inst->GetItem()->MaxCharges);
 			}
 		}
 		else
 		{
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Item used to cast spell %d was missing from inventory slot %d after casting!", spell_id, inventory_slot);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Item used to cast spell %d was missing from inventory slot %d after casting!", spell_id, inventory_slot);
 			Message(13, "Casting Error: Active casting item not found in inventory slot %i", inventory_slot);
 			InterruptSpell();
 			return;
@@ -1280,7 +1280,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 	// we're done casting, now try to apply the spell
 	if( !SpellFinished(spell_id, spell_target, slot, mana_used, inventory_slot, resist_adjust) )
 	{
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting of %d canceled: SpellFinished returned false.", spell_id);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting of %d canceled: SpellFinished returned false.", spell_id);
 		InterruptSpell();
 		return;
 	}
@@ -1309,7 +1309,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 			this->CastToClient()->CheckSongSkillIncrease(spell_id);
 			this->CastToClient()->MemorizeSpell(slot, spell_id, memSpellSpellbar);
 		}
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard song %d should be started", spell_id);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard song %d should be started", spell_id);
 	}
 	else
 	{
@@ -1344,7 +1344,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 	delaytimer = true;
 	spellend_timer.Start(400,true);
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell casting of %d is finished.", spell_id);
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell casting of %d is finished.", spell_id);
 
 }
 
@@ -1391,7 +1391,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		&& (IsGrouped() // still self only if not grouped
 		|| IsRaidGrouped())
 		&& (HasProjectIllusion())){
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Project Illusion overwrote target caster: %s spell id: %d was ON", GetName(), spell_id);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Project Illusion overwrote target caster: %s spell id: %d was ON", GetName(), spell_id);
 			targetType = ST_GroupClientAndPet;
 	}
 
@@ -1474,7 +1474,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			)
 			{
 				//invalid target
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target of body type %d (undead)", spell_id, spell_target->GetBodyType());
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target of body type %d (undead)", spell_id, spell_target->GetBodyType());
 				Message_StringID(13,SPELL_NEED_TAR);
 				return false;
 			}
@@ -1487,7 +1487,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			if(!spell_target || (body_type != BT_Summoned && body_type != BT_Summoned2 && body_type != BT_Summoned3))
 			{
 				//invalid target
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target of body type %d (summoned)", spell_id, body_type);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target of body type %d (summoned)", spell_id, body_type);
 				Message_StringID(13,SPELL_NEED_TAR);
 				return false;
 			}
@@ -1501,7 +1501,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			if(!spell_target || (spell_target != GetPet()) ||
 				(body_type != BT_Summoned && body_type != BT_Summoned2 && body_type != BT_Summoned3 && body_type != BT_Animal))
 			{
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target of body type %d (summoned pet)",
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target of body type %d (summoned pet)",
 							spell_id, body_type);
 
 				Message_StringID(13, SPELL_NEED_TAR);
@@ -1526,7 +1526,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			if(!spell_target || mob_body != target_bt)
 			{
 				//invalid target
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target of body type %d (want body Type %d)", spell_id, spell_target->GetBodyType(), target_bt);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target of body type %d (want body Type %d)", spell_id, spell_target->GetBodyType(), target_bt);
 				if(!spell_target)
 					Message_StringID(13,SPELL_NEED_TAR);
 				else
@@ -1544,7 +1544,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			{
 				if(!spell_target)
 				{
-					Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target (ldon object)", spell_id);
+					Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target (ldon object)", spell_id);
 					Message_StringID(13,SPELL_NEED_TAR);
 					return false;
 				}
@@ -1552,14 +1552,14 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 				{
 					if(!spell_target->IsNPC())
 					{
-						Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target (normal)", spell_id);
+						Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target (normal)", spell_id);
 						Message_StringID(13,SPELL_NEED_TAR);
 						return false;
 					}
 
 					if(spell_target->GetClass() != LDON_TREASURE)
 					{
-						Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target (normal)", spell_id);
+						Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target (normal)", spell_id);
 						Message_StringID(13,SPELL_NEED_TAR);
 						return false;
 					}
@@ -1568,7 +1568,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 
 			if(!spell_target)
 			{
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target (normal)", spell_id);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target (normal)", spell_id);
 				Message_StringID(13,SPELL_NEED_TAR);
 				return false;	// can't cast these unless we have a target
 			}
@@ -1580,7 +1580,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		{
 			if(!spell_target || !spell_target->IsPlayerCorpse())
 			{
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target (corpse)", spell_id);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target (corpse)", spell_id);
 				uint32 message = ONLY_ON_CORPSES;
 				if(!spell_target) message = SPELL_NEED_TAR;
 				else if(!spell_target->IsCorpse()) message = ONLY_ON_CORPSES;
@@ -1596,7 +1596,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			spell_target = GetPet();
 			if(!spell_target)
 			{
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target (no pet)", spell_id);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target (no pet)", spell_id);
 				Message_StringID(13,NO_PET);
 				return false;	// can't cast these unless we have a target
 			}
@@ -1666,7 +1666,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		{
 			if(!spell_target)
 			{
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target (AOE)", spell_id);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target (AOE)", spell_id);
 				Message_StringID(13,SPELL_NEED_TAR);
 				return false;
 			}
@@ -1703,7 +1703,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		{
 			if(!spell_target)
 			{
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target (Group Required: Single Target)", spell_id);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: invalid target (Group Required: Single Target)", spell_id);
 				Message_StringID(13,SPELL_NEED_TAR);
 				return false;
 			}
@@ -1800,14 +1800,14 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 
 					if(group_id_caster == 0 || group_id_target == 0)
 					{
-						Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: Attempted to cast a Single Target Group spell on a ungrouped member.", spell_id);
+						Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: Attempted to cast a Single Target Group spell on a ungrouped member.", spell_id);
 						Message_StringID(13, TARGET_GROUP_MEMBER);
 						return false;
 					}
 
 					if(group_id_caster != group_id_target)
 					{
-						Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: Attempted to cast a Single Target Group spell on a ungrouped member.", spell_id);
+						Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d canceled: Attempted to cast a Single Target Group spell on a ungrouped member.", spell_id);
 						Message_StringID(13, TARGET_GROUP_MEMBER);
 						return false;
 					}
@@ -1878,7 +1878,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 
 		default:
 		{
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "I dont know Target Type: %d   Spell: (%d) %s", spells[spell_id].targettype, spell_id, spells[spell_id].name);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "I dont know Target Type: %d   Spell: (%d) %s", spells[spell_id].targettype, spell_id, spells[spell_id].name);
 			Message(0, "I dont know Target Type: %d   Spell: (%d) %s", spells[spell_id].targettype, spell_id, spells[spell_id].name);
 			CastAction = CastActUnknown;
 			break;
@@ -1957,7 +1957,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	if(!DetermineSpellTargets(spell_id, spell_target, ae_center, CastAction))
 		return(false);
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: target type %d, target %s, AE center %s", spell_id, CastAction, spell_target?spell_target->GetName():"NONE", ae_center?ae_center->GetName():"NONE");
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: target type %d, target %s, AE center %s", spell_id, CastAction, spell_target?spell_target->GetName():"NONE", ae_center?ae_center->GetName():"NONE");
 
 	// if a spell has the AEDuration flag, it becomes an AE on target
 	// spell that's recast every 2500 msec for AEDuration msec. There are
@@ -1968,7 +1968,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		Mob *beacon_loc = spell_target ? spell_target : this;
 		Beacon *beacon = new Beacon(beacon_loc, spells[spell_id].AEDuration);
 		entity_list.AddBeacon(beacon);
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: AE duration beacon created, entity id %d", spell_id, beacon->GetName());
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: AE duration beacon created, entity id %d", spell_id, beacon->GetName());
 		spell_target = nullptr;
 		ae_center = beacon;
 		CastAction = AECaster;
@@ -1977,7 +1977,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	// check line of sight to target if it's a detrimental spell
 	if(!spells[spell_id].npc_no_los && spell_target && IsDetrimentalSpell(spell_id) && !CheckLosFN(spell_target) && !IsHarmonySpell(spell_id) && spells[spell_id].targettype != ST_TargetOptional)
 	{
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: cannot see target %s", spell_target->GetName());
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: cannot see target %s", spell_target->GetName());
 		Message_StringID(13,CANT_SEE_TARGET);
 		return false;
 	}
@@ -2008,13 +2008,13 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		float min_range2 = spells[spell_id].min_range * spells[spell_id].min_range;
 		if(dist2 > range2) {
 			//target is out of range.
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Spell target is out of range (squared: %f > %f)", spell_id, dist2, range2);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Spell target is out of range (squared: %f > %f)", spell_id, dist2, range2);
 			Message_StringID(13, TARGET_OUT_OF_RANGE);
 			return(false);
 		}
 		else if (dist2 < min_range2){
 			//target is too close range.
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Spell target is too close (squared: %f < %f)", spell_id, dist2, min_range2);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Spell target is too close (squared: %f < %f)", spell_id, dist2, min_range2);
 			Message_StringID(13, TARGET_TOO_CLOSE);
 			return(false);
 		}
@@ -2043,7 +2043,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 #endif //BOTS
 
 			if(spell_target == nullptr) {
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Targeted spell, but we have no target", spell_id);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Targeted spell, but we have no target", spell_id);
 				return(false);
 			}
 			if (isproc) {
@@ -2067,11 +2067,11 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			if(IsPlayerIllusionSpell(spell_id)
 			&& IsClient()
 			&& (HasProjectIllusion())){
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Effect Project Illusion for %s on spell id: %d was ON", GetName(), spell_id);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Effect Project Illusion for %s on spell id: %d was ON", GetName(), spell_id);
 				SetProjectIllusion(false);
 			}
 			else{
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Effect Project Illusion for %s on spell id: %d was OFF", GetName(), spell_id);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Effect Project Illusion for %s on spell id: %d was OFF", GetName(), spell_id);
 			}
 			break;
 		}
@@ -2235,7 +2235,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	// CastSpell already reduced the cost for it if we're a client with focus
 	if(slot != USE_ITEM_SPELL_SLOT && slot != POTION_BELT_SPELL_SLOT && slot != TARGET_RING_SPELL_SLOT && mana_used > 0)
 	{
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: consuming %d mana", spell_id, mana_used);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: consuming %d mana", spell_id, mana_used);
 		if (!DoHPToManaCovert(mana_used))
 			SetMana(GetMana() - mana_used);
 			TryTriggerOnValueAmount(false, true);
@@ -2247,7 +2247,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		if(spell_id == casting_spell_id && casting_spell_timer != 0xFFFFFFFF)
 		{
 			CastToClient()->GetPTimers().Start(casting_spell_timer, casting_spell_timer_duration);
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Setting custom reuse timer %d to %d", spell_id, casting_spell_timer, casting_spell_timer_duration);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Setting custom reuse timer %d to %d", spell_id, casting_spell_timer, casting_spell_timer_duration);
 		}
 		else if(spells[spell_id].recast_time > 1000 && !spells[spell_id].IsDisciplineBuff) {
 			int recast = spells[spell_id].recast_time/1000;
@@ -2263,7 +2263,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			if(reduction)
 				recast -= reduction;
 
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Setting long reuse timer to %d s (orig %d)", spell_id, recast, spells[spell_id].recast_time);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Setting long reuse timer to %d s (orig %d)", spell_id, recast, spells[spell_id].recast_time);
 			CastToClient()->GetPTimers().Start(pTimerSpellStart + spell_id, recast);
 		}
 	}
@@ -2301,7 +2301,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 	if(slot == USE_ITEM_SPELL_SLOT) {
 		//bard songs should never come from items...
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse %d: Supposidly cast from an item. Killing song.", spell_id);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse %d: Supposidly cast from an item. Killing song.", spell_id);
 		return(false);
 	}
 
@@ -2309,12 +2309,12 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 	Mob *ae_center = nullptr;
 	CastAction_type CastAction;
 	if(!DetermineSpellTargets(spell_id, spell_target, ae_center, CastAction)) {
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse %d: was unable to determine target. Stopping.", spell_id);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse %d: was unable to determine target. Stopping.", spell_id);
 		return(false);
 	}
 
 	if(ae_center != nullptr && ae_center->IsBeacon()) {
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse %d: Unsupported Beacon NPC AE spell", spell_id);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse %d: Unsupported Beacon NPC AE spell", spell_id);
 		return(false);
 	}
 
@@ -2323,18 +2323,18 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 	if(mana_used > 0) {
 		if(mana_used > GetMana()) {
 			//ran out of mana... this calls StopSong() for us
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Ran out of mana while singing song %d", spell_id);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Ran out of mana while singing song %d", spell_id);
 			return(false);
 		}
 
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse %d: consuming %d mana (have %d)", spell_id, mana_used, GetMana());
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse %d: consuming %d mana (have %d)", spell_id, mana_used, GetMana());
 		SetMana(GetMana() - mana_used);
 	}
 
 	// check line of sight to target if it's a detrimental spell
 	if(spell_target && IsDetrimentalSpell(spell_id) && !CheckLosFN(spell_target))
 	{
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse %d: cannot see target %s", spell_target->GetName());
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse %d: cannot see target %s", spell_target->GetName());
 		Message_StringID(13, CANT_SEE_TARGET);
 		return(false);
 	}
@@ -2349,7 +2349,7 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 		float range2 = range * range;
 		if(dist2 > range2) {
 			//target is out of range.
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse %d: Spell target is out of range (squared: %f > %f)", spell_id, dist2, range2);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse %d: Spell target is out of range (squared: %f > %f)", spell_id, dist2, range2);
 			Message_StringID(13, TARGET_OUT_OF_RANGE);
 			return(false);
 		}
@@ -2365,10 +2365,10 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 		case SingleTarget:
 		{
 			if(spell_target == nullptr) {
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse %d: Targeted spell, but we have no target", spell_id);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse %d: Targeted spell, but we have no target", spell_id);
 				return(false);
 			}
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse: Targeted. spell %d, target %s", spell_id, spell_target->GetName());
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse: Targeted. spell %d, target %s", spell_id, spell_target->GetName());
 			spell_target->BardPulse(spell_id, this);
 			break;
 		}
@@ -2386,7 +2386,7 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 		{
 			// we can't cast an AE spell without something to center it on
 			if(ae_center == nullptr) {
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse %d: AE Targeted spell, but we have no target", spell_id);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse %d: AE Targeted spell, but we have no target", spell_id);
 				return(false);
 			}
 
@@ -2394,9 +2394,9 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 			if(spell_target) {	// this must be an AETarget spell
 				// affect the target too
 				spell_target->BardPulse(spell_id, this);
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse: spell %d, AE target %s", spell_id, spell_target->GetName());
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse: spell %d, AE target %s", spell_id, spell_target->GetName());
 			} else {
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse: spell %d, AE with no target", spell_id);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse: spell %d, AE with no target", spell_id);
 			}
 			bool affect_caster = !IsNPC();	//NPC AE spells do not affect the NPC caster
 			entity_list.AEBardPulse(this, ae_center, spell_id, affect_caster);
@@ -2406,13 +2406,13 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 		case GroupSpell:
 		{
 			if(spell_target->IsGrouped()) {
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse: spell %d, Group targeting group of %s", spell_id, spell_target->GetName());
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse: spell %d, Group targeting group of %s", spell_id, spell_target->GetName());
 				Group *target_group = entity_list.GetGroupByMob(spell_target);
 				if(target_group)
 					target_group->GroupBardPulse(this, spell_id);
 			}
 			else if(spell_target->IsRaidGrouped() && spell_target->IsClient()) {
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse: spell %d, Raid group targeting raid group of %s", spell_id, spell_target->GetName());
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse: spell %d, Raid group targeting raid group of %s", spell_id, spell_target->GetName());
 				Raid *r = entity_list.GetRaidByClient(spell_target->CastToClient());
 				if(r){
 					uint32 gid = r->GetGroup(spell_target->GetName());
@@ -2429,7 +2429,7 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 				}
 			}
 			else {
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse: spell %d, Group target without group. Affecting caster.", spell_id);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse: spell %d, Group target without group. Affecting caster.", spell_id);
 				BardPulse(spell_id, this);
 #ifdef GROUP_BUFF_PETS
 				if (GetPet() && HasPetAffinity() && !GetPet()->IsCharmed())
@@ -2455,13 +2455,13 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 		if(buffs[buffs_i].spellid != spell_id)
 			continue;
 		if(buffs[buffs_i].casterid != caster->GetID()) {
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Pulse for %d: found buff from caster %d and we are pulsing for %d... are there two bards playing the same song???", spell_id, buffs[buffs_i].casterid, caster->GetID());
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Pulse for %d: found buff from caster %d and we are pulsing for %d... are there two bards playing the same song???", spell_id, buffs[buffs_i].casterid, caster->GetID());
 			return;
 		}
 		//extend the spell if it will expire before the next pulse
 		if(buffs[buffs_i].ticsremaining <= 3) {
 			buffs[buffs_i].ticsremaining += 3;
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse %d: extending duration in slot %d to %d tics", spell_id, buffs_i, buffs[buffs_i].ticsremaining);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse %d: extending duration in slot %d to %d tics", spell_id, buffs_i, buffs[buffs_i].ticsremaining);
 		}
 
 		//should we send this buff update to the client... seems like it would
@@ -2559,7 +2559,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 		//we are done...
 		return;
 	}
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse %d: Buff not found, reapplying spell.", spell_id);
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bard Song Pulse %d: Buff not found, reapplying spell.", spell_id);
 	//this spell is not affecting this mob, apply it.
 	caster->SpellOnTarget(spell_id, this);
 }
@@ -2601,7 +2601,7 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 
 	res = mod_buff_duration(res, caster, target, spell_id);
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Casting level %d, formula %d, base_duration %d: result %d",
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d: Casting level %d, formula %d, base_duration %d: result %d",
 		spell_id, castlevel, formula, duration, res);
 
 	return(res);
@@ -2673,7 +2673,7 @@ int CalcBuffDuration_formula(int level, int formula, int duration)
 			return duration ? duration : 3600;
 
 		default:
-			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::None, "CalcBuffDuration_formula: unknown formula %d", formula);
+			Log.Out(EQEmuLogSys::General, EQEmuLogSys::None, "CalcBuffDuration_formula: unknown formula %d", formula);
 			return 0;
 	}
 }
@@ -2695,15 +2695,15 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 	int blocked_effect, blocked_below_value, blocked_slot;
 	int overwrite_effect, overwrite_below_value, overwrite_slot;
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Check Stacking on old %s (%d) @ lvl %d (by %s) vs. new %s (%d) @ lvl %d (by %s)", sp1.name, spellid1, caster_level1, (caster1==nullptr)?"Nobody":caster1->GetName(), sp2.name, spellid2, caster_level2, (caster2==nullptr)?"Nobody":caster2->GetName());
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Check Stacking on old %s (%d) @ lvl %d (by %s) vs. new %s (%d) @ lvl %d (by %s)", sp1.name, spellid1, caster_level1, (caster1==nullptr)?"Nobody":caster1->GetName(), sp2.name, spellid2, caster_level2, (caster2==nullptr)?"Nobody":caster2->GetName());
 
 	// Same Spells and dot exemption is set to 1 or spell is Manaburn
 	if (spellid1 == spellid2) {
 		if (sp1.dot_stacking_exempt == 1 && caster1 != caster2) { // same caster can refresh
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Blocking spell due to dot stacking exemption.");
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Blocking spell due to dot stacking exemption.");
 			return -1;
 		} else if (spellid1 == 2751) {
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Blocking spell because manaburn does not stack with itself.");
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Blocking spell because manaburn does not stack with itself.");
 			return -1;
 		}
 	}
@@ -2735,7 +2735,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 	{
 		if(!IsDetrimentalSpell(spellid1) && !IsDetrimentalSpell(spellid2))
 		{
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "%s and %s are beneficial, and one is a bard song, no action needs to be taken", sp1.name, sp2.name);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "%s and %s are beneficial, and one is a bard song, no action needs to be taken", sp1.name, sp2.name);
 			return (0);
 		}
 	}
@@ -2804,16 +2804,16 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 				{
 					sp1_value = CalcSpellEffectValue(spellid1, overwrite_slot, caster_level1);
 
-					Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "%s (%d) overwrites existing spell if effect %d on slot %d is below %d. Old spell has value %d on that slot/effect. %s.",
+					Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "%s (%d) overwrites existing spell if effect %d on slot %d is below %d. Old spell has value %d on that slot/effect. %s.",
 						sp2.name, spellid2, overwrite_effect, overwrite_slot, overwrite_below_value, sp1_value, (sp1_value < overwrite_below_value)?"Overwriting":"Not overwriting");
 
 					if(sp1_value < overwrite_below_value)
 					{
-						Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Overwrite spell because sp1_value < overwrite_below_value");
+						Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Overwrite spell because sp1_value < overwrite_below_value");
 						return 1;			// overwrite spell if its value is less
 					}
 				} else {
-					Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "%s (%d) overwrites existing spell if effect %d on slot %d is below %d, but we do not have that effect on that slot. Ignored.",
+					Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "%s (%d) overwrites existing spell if effect %d on slot %d is below %d, but we do not have that effect on that slot. Ignored.",
 						sp2.name, spellid2, overwrite_effect, overwrite_slot, overwrite_below_value);
 
 				}
@@ -2827,22 +2827,22 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 				{
 					sp2_value = CalcSpellEffectValue(spellid2, blocked_slot, caster_level2);
 
-					Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "%s (%d) blocks effect %d on slot %d below %d. New spell has value %d on that slot/effect. %s.",
+					Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "%s (%d) blocks effect %d on slot %d below %d. New spell has value %d on that slot/effect. %s.",
 						sp1.name, spellid1, blocked_effect, blocked_slot, blocked_below_value, sp2_value, (sp2_value < blocked_below_value)?"Blocked":"Not blocked");
 
 					if (sp2_value < blocked_below_value)
 					{
-						Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Blocking spell because sp2_Value < blocked_below_value");
+						Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Blocking spell because sp2_Value < blocked_below_value");
 						return -1;		//blocked
 					}
 				} else {
-					Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "%s (%d) blocks effect %d on slot %d below %d, but we do not have that effect on that slot. Ignored.",
+					Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "%s (%d) blocks effect %d on slot %d below %d, but we do not have that effect on that slot. Ignored.",
 						sp1.name, spellid1, blocked_effect, blocked_slot, blocked_below_value);
 				}
 			}
 		}
 	} else {
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "%s (%d) and %s (%d) appear to be in the same line, skipping Stacking Overwrite/Blocking checks",
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "%s (%d) and %s (%d) appear to be in the same line, skipping Stacking Overwrite/Blocking checks",
 				sp1.name, spellid1, sp2.name, spellid2);
 	}
 
@@ -2905,13 +2905,13 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		*/
 		if(IsNPC() && caster1 && caster2 && caster1 != caster2) {
 			if(effect1 == SE_CurrentHP && sp1_detrimental && sp2_detrimental) {
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Both casters exist and are not the same, the effect is a detrimental dot, moving on");
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Both casters exist and are not the same, the effect is a detrimental dot, moving on");
 				continue;
 			}
 		}
 
 		if(effect1 == SE_CompleteHeal){ //SE_CompleteHeal never stacks or overwrites ever, always block.
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Blocking spell because complete heal never stacks or overwries");
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Blocking spell because complete heal never stacks or overwries");
 			return (-1);
 		}
 
@@ -2923,7 +2923,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		*/
 		if(sp_det_mismatch)
 		{
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "The effects are the same but the spell types are not, passing the effect");
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "The effects are the same but the spell types are not, passing the effect");
 			continue;
 		}
 
@@ -2932,7 +2932,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		and the effect is a dot we can go ahead and stack it
 		*/
 		if(effect1 == SE_CurrentHP && spellid1 != spellid2 && sp1_detrimental && sp2_detrimental) {
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "The spells are not the same and it is a detrimental dot, passing");
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "The spells are not the same and it is a detrimental dot, passing");
 			continue;
 		}
 
@@ -2958,7 +2958,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 			sp2_value = 0 - sp2_value;
 
 		if(sp2_value < sp1_value) {
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %s (value %d) is not as good as %s (value %d). Rejecting %s.",
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %s (value %d) is not as good as %s (value %d). Rejecting %s.",
 				sp2.name, sp2_value, sp1.name, sp1_value, sp2.name);
 			return -1;	// can't stack
 		}
@@ -2967,7 +2967,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		//we dont return here... a better value on this one effect dosent mean they are
 		//all better...
 
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %s (value %d) is not as good as %s (value %d). We will overwrite %s if there are no other conflicts.",
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %s (value %d) is not as good as %s (value %d). We will overwrite %s if there are no other conflicts.",
 			sp1.name, sp1_value, sp2.name, sp2_value, sp1.name);
 		will_overwrite = true;
 	}
@@ -2976,15 +2976,15 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 	//so now we see if this new spell is any better, or if its not related at all
 	if(will_overwrite) {
 		if (values_equal && effect_match && !IsGroupSpell(spellid2) && IsGroupSpell(spellid1)) {
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "%s (%d) appears to be the single target version of %s (%d), rejecting",
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "%s (%d) appears to be the single target version of %s (%d), rejecting",
 					sp2.name, spellid2, sp1.name, spellid1);
 			return -1;
 		}
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Stacking code decided that %s should overwrite %s.", sp2.name, sp1.name);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Stacking code decided that %s should overwrite %s.", sp2.name, sp1.name);
 		return(1);
 	}
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Stacking code decided that %s is not affected by %s.", sp2.name, sp1.name);
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Stacking code decided that %s is not affected by %s.", sp2.name, sp1.name);
 	return 0;
 }
 
@@ -3043,11 +3043,11 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	}
 
 	if (duration == 0) {
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Buff %d failed to add because its duration came back as 0.", spell_id);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Buff %d failed to add because its duration came back as 0.", spell_id);
 		return -2;	// no duration? this isn't a buff
 	}
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Trying to add buff %d cast by %s (cast level %d) with duration %d",
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Trying to add buff %d cast by %s (cast level %d) with duration %d",
 		spell_id, caster?caster->GetName():"UNKNOWN", caster_level, duration);
 
 	// first we loop through everything checking that the spell
@@ -3077,12 +3077,12 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 			ret = CheckStackConflict(curbuf.spellid, curbuf.casterlevel, spell_id,
 					caster_level, entity_list.GetMobID(curbuf.casterid), caster, buffslot);
 			if (ret == -1) {	// stop the spell
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Adding buff %d failed: stacking prevented by spell %d in slot %d with caster level %d",
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Adding buff %d failed: stacking prevented by spell %d in slot %d with caster level %d",
 						spell_id, curbuf.spellid, buffslot, curbuf.casterlevel);
 				return -1;
 			}
 			if (ret == 1) {	// set a flag to indicate that there will be overwriting
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Adding buff %d will overwrite spell %d in slot %d with caster level %d",
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Adding buff %d will overwrite spell %d in slot %d with caster level %d",
 						spell_id, curbuf.spellid, buffslot, curbuf.casterlevel);
 				// If this is the first buff it would override, use its slot
 				if (!will_overwrite)
@@ -3106,7 +3106,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 			for (buffslot = 0; buffslot < buff_count; buffslot++) {
 				const Buffs_Struct &curbuf = buffs[buffslot];
 				if (IsBeneficialSpell(curbuf.spellid)) {
-					Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "No slot for detrimental buff %d, so we are overwriting a beneficial buff %d in slot %d",
+					Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "No slot for detrimental buff %d, so we are overwriting a beneficial buff %d in slot %d",
 							spell_id, curbuf.spellid, buffslot);
 					BuffFadeBySlot(buffslot, false);
 					emptyslot = buffslot;
@@ -3114,11 +3114,11 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 				}
 			}
 			if(emptyslot == -1) {
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Unable to find a buff slot for detrimental buff %d", spell_id);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Unable to find a buff slot for detrimental buff %d", spell_id);
 				return -1;
 			}
 		} else {
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Unable to find a buff slot for beneficial buff %d", spell_id);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Unable to find a buff slot for beneficial buff %d", spell_id);
 			return -1;
 		}
 	}
@@ -3169,7 +3169,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 			buffs[emptyslot].UpdateClient = true;
 	}
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Buff %d added to slot %d with caster level %d", spell_id, emptyslot, caster_level);
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Buff %d added to slot %d with caster level %d", spell_id, emptyslot, caster_level);
 	if (IsPet() && GetOwner() && GetOwner()->IsClient())
 		SendPetBuffsToClient();
 
@@ -3207,7 +3207,7 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 {
 	int i, ret, firstfree = -2;
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Checking if buff %d cast at level %d can stack on me.%s", spellid, caster_level, iFailIfOverwrite?" failing if we would overwrite something":"");
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Checking if buff %d cast at level %d can stack on me.%s", spellid, caster_level, iFailIfOverwrite?" failing if we would overwrite something":"");
 
 	int buff_count = GetMaxTotalSlots();
 	for (i=0; i < buff_count; i++)
@@ -3231,19 +3231,19 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 		if(ret == 1) {
 			// should overwrite current slot
 			if(iFailIfOverwrite) {
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Buff %d would overwrite %d in slot %d, reporting stack failure", spellid, curbuf.spellid, i);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Buff %d would overwrite %d in slot %d, reporting stack failure", spellid, curbuf.spellid, i);
 				return(-1);
 			}
 			if(firstfree == -2)
 				firstfree = i;
 		}
 		if(ret == -1) {
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Buff %d would conflict with %d in slot %d, reporting stack failure", spellid, curbuf.spellid, i);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Buff %d would conflict with %d in slot %d, reporting stack failure", spellid, curbuf.spellid, i);
 			return -1;	// stop the spell, can't stack it
 		}
 	}
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Reporting that buff %d could successfully be placed into slot %d", spellid, firstfree);
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Reporting that buff %d could successfully be placed into slot %d", spellid, firstfree);
 
 	return firstfree;
 }
@@ -3270,7 +3270,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	// well we can't cast a spell on target without a target
 	if(!spelltar)
 	{
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Unable to apply spell %d without a target", spell_id);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Unable to apply spell %d without a target", spell_id);
 		Message(13, "SOT: You must have a target for this spell.");
 		return false;
 	}
@@ -3298,7 +3298,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 
 	uint16 caster_level = GetCasterLevel(spell_id);
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting spell %d on %s with effective caster level %d", spell_id, spelltar->GetName(), caster_level);
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting spell %d on %s with effective caster level %d", spell_id, spelltar->GetName(), caster_level);
 
 	// Actual cast action - this causes the caster animation and the particles
 	// around the target
@@ -3378,7 +3378,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	if (RuleB(Spells, EnableBlockedBuffs)) {
 		// We return true here since the caster's client should act like normal
 		if (spelltar->IsBlockedBuff(spell_id)) {
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %i not applied to %s as it is a Blocked Buff.",
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %i not applied to %s as it is a Blocked Buff.",
 					spell_id, spelltar->GetName());
 			safe_delete(action_packet);
 			return true;
@@ -3386,7 +3386,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 
 		if (spelltar->IsPet() && spelltar->GetOwner() &&
 				spelltar->GetOwner()->IsBlockedPetBuff(spell_id)) {
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %i not applied to %s (%s's pet) as it is a Pet Blocked Buff.",
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %i not applied to %s (%s's pet) as it is a Pet Blocked Buff.",
 					spell_id, spelltar->GetName(), spelltar->GetOwner()->GetName());
 			safe_delete(action_packet);
 			return true;
@@ -3395,7 +3395,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 
 	// invuln mobs can't be affected by any spells, good or bad
 	if(spelltar->GetInvul() || spelltar->DivineAura()) {
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting spell %d on %s aborted: they are invulnerable.", spell_id, spelltar->GetName());
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting spell %d on %s aborted: they are invulnerable.", spell_id, spelltar->GetName());
 		safe_delete(action_packet);
 		return false;
 	}
@@ -3406,17 +3406,17 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		if (RuleB(Pets, UnTargetableSwarmPet)) {
 			if (spelltar->IsNPC()) {
 				if (!spelltar->CastToNPC()->GetSwarmOwner()) {
-					Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting spell %d on %s aborted: they are untargetable", spell_id, spelltar->GetName());
+					Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting spell %d on %s aborted: they are untargetable", spell_id, spelltar->GetName());
 					safe_delete(action_packet);
 					return(false);
 				}
 			} else {
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting spell %d on %s aborted: they are untargetable", spell_id, spelltar->GetName());
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting spell %d on %s aborted: they are untargetable", spell_id, spelltar->GetName());
 				safe_delete(action_packet);
 				return(false);
 			}
 		} else {
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting spell %d on %s aborted: they are untargetable", spell_id, spelltar->GetName());
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting spell %d on %s aborted: they are untargetable", spell_id, spelltar->GetName());
 			safe_delete(action_packet);
 			return(false);
 		}
@@ -3525,9 +3525,9 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 				{
 					if(spells[spell_id].targettype == ST_AEBard) {
 						//if it was a beneficial AE bard song don't spam the window that it would not hold
-						Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Beneficial ae bard song %d can't take hold %s -> %s, IBA? %d", spell_id, GetName(), spelltar->GetName(), IsBeneficialAllowed(spelltar));
+						Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Beneficial ae bard song %d can't take hold %s -> %s, IBA? %d", spell_id, GetName(), spelltar->GetName(), IsBeneficialAllowed(spelltar));
 					} else {
-						Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Beneficial spell %d can't take hold %s -> %s, IBA? %d", spell_id, GetName(), spelltar->GetName(), IsBeneficialAllowed(spelltar));
+						Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Beneficial spell %d can't take hold %s -> %s, IBA? %d", spell_id, GetName(), spelltar->GetName(), IsBeneficialAllowed(spelltar));
 						Message_StringID(MT_SpellFailure, SPELL_NO_HOLD);
 					}
 					safe_delete(action_packet);
@@ -3537,7 +3537,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		}
 		else if	( !IsAttackAllowed(spelltar, true) && !IsResurrectionEffects(spell_id)) // Detrimental spells - PVP check
 		{
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Detrimental spell %d can't take hold %s -> %s", spell_id, GetName(), spelltar->GetName());
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Detrimental spell %d can't take hold %s -> %s", spell_id, GetName(), spelltar->GetName());
 			spelltar->Message_StringID(MT_SpellFailure, YOU_ARE_PROTECTED, GetCleanName());
 			safe_delete(action_packet);
 			return false;
@@ -3551,7 +3551,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	if(spelltar->IsImmuneToSpell(spell_id, this))
 	{
 		//the above call does the message to the client if needed
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d can't take hold due to immunity %s -> %s", spell_id, GetName(), spelltar->GetName());
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d can't take hold due to immunity %s -> %s", spell_id, GetName(), spelltar->GetName());
 		safe_delete(action_packet);
 		return false;
 	}
@@ -3644,7 +3644,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		{
 			if(spell_effectiveness == 0 || !IsPartialCapableSpell(spell_id) )
 			{
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d was completely resisted by %s", spell_id, spelltar->GetName());
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d was completely resisted by %s", spell_id, spelltar->GetName());
 
 				if (spells[spell_id].resisttype == RESIST_PHYSICAL){
 					Message_StringID(MT_SpellFailure, PHYSICAL_RESIST_FAIL,spells[spell_id].name);
@@ -3692,7 +3692,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 
 	if (spelltar->IsAIControlled() && IsDetrimentalSpell(spell_id) && !IsHarmonySpell(spell_id)) {
 		int32 aggro_amount = CheckAggroAmount(spell_id, isproc);
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d cast on %s generated %d hate", spell_id, spelltar->GetName(), aggro_amount);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d cast on %s generated %d hate", spell_id, spelltar->GetName(), aggro_amount);
 		if(aggro_amount > 0)
 			spelltar->AddToHateList(this, aggro_amount);		else{
 			int32 newhate = spelltar->GetHateAmount(this) + aggro_amount;
@@ -3709,7 +3709,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	// make sure spelltar is high enough level for the buff
 	if(RuleB(Spells, BuffLevelRestrictions) && !spelltar->CheckSpellLevelRestriction(spell_id))
 	{
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d failed: recipient did not meet the level restrictions", spell_id);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d failed: recipient did not meet the level restrictions", spell_id);
 		if(!IsBardSong(spell_id))
 			Message_StringID(MT_SpellFailure, SPELL_TOO_POWERFUL);
 		safe_delete(action_packet);
@@ -3721,7 +3721,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	{
 		// if SpellEffect returned false there's a problem applying the
 		// spell. It's most likely a buff that can't stack.
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d could not apply its effects %s -> %s\n", spell_id, GetName(), spelltar->GetName());
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d could not apply its effects %s -> %s\n", spell_id, GetName(), spelltar->GetName());
 		if(casting_spell_type != 1) // AA is handled differently
 			Message_StringID(MT_SpellFailure, SPELL_NO_HOLD);
 		safe_delete(action_packet);
@@ -3825,14 +3825,14 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	safe_delete(action_packet);
 	safe_delete(message_packet);
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Cast of %d by %s on %s complete successfully.", spell_id, GetName(), spelltar->GetName());
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Cast of %d by %s on %s complete successfully.", spell_id, GetName(), spelltar->GetName());
 
 	return true;
 }
 
 void Corpse::CastRezz(uint16 spellid, Mob* Caster)
 {
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Corpse::CastRezz spellid %i, Rezzed() is %i, rezzexp is %i", spellid,IsRezzed(),rez_experience);
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Corpse::CastRezz spellid %i, Rezzed() is %i, rezzexp is %i", spellid,IsRezzed(),rez_experience);
 
 	if(IsRezzed()){
 		if(Caster && Caster->IsClient())
@@ -4005,7 +4005,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	//this spell like 10 times, this could easily be consolidated
 	//into one loop through with a switch statement.
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Checking to see if we are immune to spell %d cast by %s", spell_id, caster->GetName());
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Checking to see if we are immune to spell %d cast by %s", spell_id, caster->GetName());
 
 	if(!IsValidSpell(spell_id))
 		return true;
@@ -4016,7 +4016,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	if(IsMezSpell(spell_id))
 	{
 		if(GetSpecialAbility(UNMEZABLE)) {
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "We are immune to Mez spells.");
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "We are immune to Mez spells.");
 			caster->Message_StringID(MT_Shout, CANNOT_MEZ);
 			int32 aggro = caster->CheckAggroAmount(spell_id);
 			if(aggro > 0) {
@@ -4034,7 +4034,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		if((GetLevel() > spells[spell_id].max[effect_index]) &&
 			(!caster->IsNPC() || (caster->IsNPC() && !RuleB(Spells, NPCIgnoreBaseImmunity))))
 		{
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Our level (%d) is higher than the limit of this Mez spell (%d)", GetLevel(), spells[spell_id].max[effect_index]);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Our level (%d) is higher than the limit of this Mez spell (%d)", GetLevel(), spells[spell_id].max[effect_index]);
 			caster->Message_StringID(MT_Shout, CANNOT_MEZ_WITH_SPELL);
 			return true;
 		}
@@ -4043,7 +4043,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	// slow and haste spells
 	if(GetSpecialAbility(UNSLOWABLE) && IsEffectInSpell(spell_id, SE_AttackSpeed))
 	{
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "We are immune to Slow spells.");
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "We are immune to Slow spells.");
 		caster->Message_StringID(MT_Shout, IMMUNE_ATKSPEED);
 		int32 aggro = caster->CheckAggroAmount(spell_id);
 		if(aggro > 0) {
@@ -4059,7 +4059,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	{
 		effect_index = GetSpellEffectIndex(spell_id, SE_Fear);
 		if(GetSpecialAbility(UNFEARABLE)) {
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "We are immune to Fear spells.");
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "We are immune to Fear spells.");
 			caster->Message_StringID(MT_Shout, IMMUNE_FEAR);
 			int32 aggro = caster->CheckAggroAmount(spell_id);
 			if(aggro > 0) {
@@ -4070,13 +4070,13 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 			return true;
 		} else if(IsClient() && caster->IsClient() && (caster->CastToClient()->GetGM() == false))
 		{
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Clients cannot fear eachother!");
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Clients cannot fear eachother!");
 			caster->Message_StringID(MT_Shout, IMMUNE_FEAR);
 			return true;
 		}
 		else if(GetLevel() > spells[spell_id].max[effect_index] && spells[spell_id].max[effect_index] != 0)
 		{
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Level is %d, cannot be feared by this spell.", GetLevel());
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Level is %d, cannot be feared by this spell.", GetLevel());
 			caster->Message_StringID(MT_Shout, FEAR_TOO_HIGH);
 			int32 aggro = caster->CheckAggroAmount(spell_id);
 			if (aggro > 0) {
@@ -4090,7 +4090,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		else if (IsClient() && CastToClient()->CheckAAEffect(aaEffectWarcry))
 		{
 			Message(13, "Your are immune to fear.");
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Clients has WarCry effect, immune to fear!");
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Clients has WarCry effect, immune to fear!");
 			caster->Message_StringID(MT_Shout, IMMUNE_FEAR);
 			return true;
 		}
@@ -4100,7 +4100,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	{
 		if(GetSpecialAbility(UNCHARMABLE))
 		{
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "We are immune to Charm spells.");
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "We are immune to Charm spells.");
 			caster->Message_StringID(MT_Shout, CANNOT_CHARM);
 			int32 aggro = caster->CheckAggroAmount(spell_id);
 			if(aggro > 0) {
@@ -4113,7 +4113,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 
 		if(this == caster)
 		{
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "You are immune to your own charms.");
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "You are immune to your own charms.");
 			caster->Message(MT_Shout, "You cannot charm yourself.");
 			return true;
 		}
@@ -4126,7 +4126,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 			assert(effect_index >= 0);
 			if(GetLevel() > spells[spell_id].max[effect_index] && spells[spell_id].max[effect_index] != 0)
 			{
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Our level (%d) is higher than the limit of this Charm spell (%d)", GetLevel(), spells[spell_id].max[effect_index]);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Our level (%d) is higher than the limit of this Charm spell (%d)", GetLevel(), spells[spell_id].max[effect_index]);
 				caster->Message_StringID(MT_Shout, CANNOT_CHARM_YET);
 				return true;
 			}
@@ -4140,7 +4140,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	)
 	{
 		if(GetSpecialAbility(UNSNAREABLE)) {
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "We are immune to Snare spells.");
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "We are immune to Snare spells.");
 			caster->Message_StringID(MT_Shout, IMMUNE_MOVEMENT);
 			int32 aggro = caster->CheckAggroAmount(spell_id);
 			if(aggro > 0) {
@@ -4156,7 +4156,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	{
 		if(this == caster)
 		{
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "You cannot lifetap yourself.");
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "You cannot lifetap yourself.");
 			caster->Message_StringID(MT_Shout, CANT_DRAIN_SELF);
 			return true;
 		}
@@ -4166,13 +4166,13 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	{
 		if(this == caster)
 		{
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "You cannot sacrifice yourself.");
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "You cannot sacrifice yourself.");
 			caster->Message_StringID(MT_Shout, CANNOT_SAC_SELF);
 			return true;
 		}
 	}
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "No immunities to spell %d found.", spell_id);
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "No immunities to spell %d found.", spell_id);
 
 	return false;
 }
@@ -4209,7 +4209,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 
 	if(GetSpecialAbility(IMMUNE_MAGIC))
 	{
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "We are immune to magic, so we fully resist the spell %d", spell_id);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "We are immune to magic, so we fully resist the spell %d", spell_id);
 		return(0);
 	}
 
@@ -4230,7 +4230,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		int fear_resist_bonuses = CalcFearResistChance();
 		if(zone->random.Roll(fear_resist_bonuses))
 		{
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Resisted spell in fear resistance, had %d chance to resist", fear_resist_bonuses);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Resisted spell in fear resistance, had %d chance to resist", fear_resist_bonuses);
 			return 0;
 		}
 	}
@@ -4248,7 +4248,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		int resist_bonuses = CalcResistChanceBonus();
 		if(resist_bonuses && zone->random.Roll(resist_bonuses))
 		{
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Resisted spell in sanctification, had %d chance to resist", resist_bonuses);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Resisted spell in sanctification, had %d chance to resist", resist_bonuses);
 			return 0;
 		}
 	}
@@ -4256,7 +4256,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	//Get the resist chance for the target
 	if(resist_type == RESIST_NONE)
 	{
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell was unresistable");
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell was unresistable");
 		return 100;
 	}
 
@@ -4822,7 +4822,7 @@ void Client::MemSpell(uint16 spell_id, int slot, bool update_client)
 	}
 
 	m_pp.mem_spells[slot] = spell_id;
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d memorized into slot %d", spell_id, slot);
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d memorized into slot %d", spell_id, slot);
 
 	database.SaveCharacterMemorizedSpell(this->CharacterID(), m_pp.mem_spells[slot], slot);
 
@@ -4837,7 +4837,7 @@ void Client::UnmemSpell(int slot, bool update_client)
 	if(slot > MAX_PP_MEMSPELL || slot < 0)
 		return;
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d forgotten from slot %d", m_pp.mem_spells[slot], slot);
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d forgotten from slot %d", m_pp.mem_spells[slot], slot);
 	m_pp.mem_spells[slot] = 0xFFFFFFFF;
 
 	database.DeleteCharacterMemorizedSpell(this->CharacterID(), m_pp.mem_spells[slot], slot);
@@ -4870,7 +4870,7 @@ void Client::ScribeSpell(uint16 spell_id, int slot, bool update_client)
 
 	m_pp.spell_book[slot] = spell_id;
 	database.SaveCharacterSpell(this->CharacterID(), spell_id, slot);
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d scribed into spell book slot %d", spell_id, slot);
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d scribed into spell book slot %d", spell_id, slot);
 
 	if(update_client)
 	{
@@ -4883,7 +4883,7 @@ void Client::UnscribeSpell(int slot, bool update_client)
 	if(slot >= MAX_PP_SPELLBOOK || slot < 0)
 		return;
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d erased from spell book slot %d", m_pp.spell_book[slot], slot);
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell %d erased from spell book slot %d", m_pp.spell_book[slot], slot);
 	m_pp.spell_book[slot] = 0xFFFFFFFF;
 	
 	database.DeleteCharacterSpell(this->CharacterID(), m_pp.spell_book[slot], slot); 
@@ -4914,7 +4914,7 @@ void Client::UntrainDisc(int slot, bool update_client)
 	if(slot >= MAX_PP_DISCIPLINES || slot < 0)
 		return;
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Discipline %d untrained from slot %d", m_pp.disciplines.values[slot], slot); 
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Discipline %d untrained from slot %d", m_pp.disciplines.values[slot], slot); 
 	m_pp.disciplines.values[slot] = 0;
 	database.DeleteCharacterDisc(this->CharacterID(), slot);
 
@@ -4963,7 +4963,7 @@ bool Client::SpellGlobalCheck(uint16 spell_ID, uint32 char_ID) {
                                     "WHERE spellid = %i", spell_ID);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error while querying Spell ID %i spell_globals table query '%s': %s", spell_ID, query.c_str(), results.ErrorMessage().c_str());
+        Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Error while querying Spell ID %i spell_globals table query '%s': %s", spell_ID, query.c_str(), results.ErrorMessage().c_str());
 		return false; // Query failed, so prevent spell from scribing just in case
     }
 
@@ -4982,12 +4982,12 @@ bool Client::SpellGlobalCheck(uint16 spell_ID, uint32 char_ID) {
                         char_ID, spell_Global_Name.c_str());
     results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Spell ID %i query of spell_globals with Name: '%s' Value: '%i' failed", spell_ID, spell_Global_Name.c_str(), spell_Global_Value);
+        Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Spell ID %i query of spell_globals with Name: '%s' Value: '%i' failed", spell_ID, spell_Global_Name.c_str(), spell_Global_Value);
         return false;
     }
 
     if (results.RowCount() != 1) {
-        Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Char ID: %i does not have the Qglobal Name: '%s' for Spell ID %i", char_ID, spell_Global_Name.c_str(), spell_ID);
+        Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Char ID: %i does not have the Qglobal Name: '%s' for Spell ID %i", char_ID, spell_Global_Name.c_str(), spell_ID);
         return false;
     }
 
@@ -5001,7 +5001,7 @@ bool Client::SpellGlobalCheck(uint16 spell_ID, uint32 char_ID) {
         return true; // Check if the qglobal value is greater than the require spellglobal value
 
     // If no matching result found in qglobals, don't scribe this spell
-    Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Char ID: %i Spell_globals Name: '%s' Value: '%i' did not match QGlobal Value: '%i' for Spell ID %i", char_ID, spell_Global_Name.c_str(), spell_Global_Value, global_Value, spell_ID);
+    Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Char ID: %i Spell_globals Name: '%s' Value: '%i' did not match QGlobal Value: '%i' for Spell ID %i", char_ID, spell_Global_Name.c_str(), spell_Global_Value, global_Value, spell_ID);
     return false;
 }
 
@@ -5040,7 +5040,7 @@ bool Mob::FindType(uint16 type, bool bOffensive, uint16 threshold) {
 											spells[buffs[i].spellid].base[j],
 											spells[buffs[i].spellid].max[j],
 											buffs[i].casterlevel, buffs[i].spellid);
-						Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Normal, 
+						Log.Out(EQEmuLogSys::General, EQEmuLogSys::Normal, 
 								"FindType: type = %d; value = %d; threshold = %d",
 								type, value, threshold);
 						if (value < threshold)
@@ -5089,23 +5089,23 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 b
 				PermaProcs[i].spellID = spell_id;
 				PermaProcs[i].chance = iChance;
 				PermaProcs[i].base_spellID = base_spell_id;
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Added permanent proc spell %d with chance %d to slot %d", spell_id, iChance, i);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Added permanent proc spell %d with chance %d to slot %d", spell_id, iChance, i);
 
 				return true;
 			}
 		}
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Too many perma procs for %s", GetName());
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Too many perma procs for %s", GetName());
 	} else {
 		for (i = 0; i < MAX_PROCS; i++) {
 			if (SpellProcs[i].spellID == SPELL_UNKNOWN) {
 				SpellProcs[i].spellID = spell_id;
 				SpellProcs[i].chance = iChance;
 				SpellProcs[i].base_spellID = base_spell_id;;
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Added spell-granted proc spell %d with chance %d to slot %d", spell_id, iChance, i);
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Added spell-granted proc spell %d with chance %d to slot %d", spell_id, iChance, i);
 				return true;
 			}
 		}
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Too many procs for %s", GetName());
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Too many procs for %s", GetName());
 	}
 	return false;
 }
@@ -5116,7 +5116,7 @@ bool Mob::RemoveProcFromWeapon(uint16 spell_id, bool bAll) {
 			SpellProcs[i].spellID = SPELL_UNKNOWN;
 			SpellProcs[i].chance = 0;
 			SpellProcs[i].base_spellID = SPELL_UNKNOWN;
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Removed proc %d from slot %d", spell_id, i);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Removed proc %d from slot %d", spell_id, i);
 		}
 	}
 	return true;
@@ -5133,7 +5133,7 @@ bool Mob::AddDefensiveProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id
 			DefensiveProcs[i].spellID = spell_id;
 			DefensiveProcs[i].chance = iChance;
 			DefensiveProcs[i].base_spellID = base_spell_id;
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Added spell-granted defensive proc spell %d with chance %d to slot %d", spell_id, iChance, i);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Added spell-granted defensive proc spell %d with chance %d to slot %d", spell_id, iChance, i);
 			return true;
 		}
 	}
@@ -5148,7 +5148,7 @@ bool Mob::RemoveDefensiveProc(uint16 spell_id, bool bAll)
 			DefensiveProcs[i].spellID = SPELL_UNKNOWN;
 			DefensiveProcs[i].chance = 0;
 			DefensiveProcs[i].base_spellID = SPELL_UNKNOWN;
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Removed defensive proc %d from slot %d", spell_id, i);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Removed defensive proc %d from slot %d", spell_id, i);
 		}
 	}
 	return true;
@@ -5165,7 +5165,7 @@ bool Mob::AddRangedProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id)
 			RangedProcs[i].spellID = spell_id;
 			RangedProcs[i].chance = iChance;
 			RangedProcs[i].base_spellID = base_spell_id;
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Added spell-granted ranged proc spell %d with chance %d to slot %d", spell_id, iChance, i);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Added spell-granted ranged proc spell %d with chance %d to slot %d", spell_id, iChance, i);
 			return true;
 		}
 	}
@@ -5180,7 +5180,7 @@ bool Mob::RemoveRangedProc(uint16 spell_id, bool bAll)
 			RangedProcs[i].spellID = SPELL_UNKNOWN;
 			RangedProcs[i].chance = 0;
 			RangedProcs[i].base_spellID = SPELL_UNKNOWN;;
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Removed ranged proc %d from slot %d", spell_id, i);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Removed ranged proc %d from slot %d", spell_id, i);
 		}
 	}
 	return true;
@@ -5211,7 +5211,7 @@ bool Mob::UseBardSpellLogic(uint16 spell_id, int slot)
 int Mob::GetCasterLevel(uint16 spell_id) {
 	int level = GetLevel();
 	level += itembonuses.effective_casting_level + spellbonuses.effective_casting_level + aabonuses.effective_casting_level;
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Determined effective casting level %d+%d+%d=%d", GetLevel(), spellbonuses.effective_casting_level, itembonuses.effective_casting_level, level);
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Determined effective casting level %d+%d+%d=%d", GetLevel(), spellbonuses.effective_casting_level, itembonuses.effective_casting_level, level);
 	return(level);
 }
 

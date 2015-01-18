@@ -78,11 +78,11 @@ int main() {
 
 	Timer InterserverTimer(INTERSERVER_TIMER); // does auto-reconnect
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Starting EQEmu Universal Chat Server.");
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Starting EQEmu Universal Chat Server.");
 
 	if (!ucsconfig::LoadConfig()) {
 
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Loading server configuration failed.");
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Loading server configuration failed.");
 
 		return 1;
 	}
@@ -90,13 +90,13 @@ int main() {
 	Config = ucsconfig::get();
 
 	if(!load_log_settings(Config->LogSettingsFile.c_str()))
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
 	else
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
 
 	WorldShortName = Config->ShortName;
 
-	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Connecting to MySQL...");
+	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Connecting to MySQL...");
 
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),
@@ -104,22 +104,22 @@ int main() {
 		Config->DatabasePassword.c_str(),
 		Config->DatabaseDB.c_str(),
 		Config->DatabasePort)) {
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Cannot continue without a database connection.");
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Cannot continue without a database connection.");
 		return 1;
 	}
 
 	char tmp[64];
 
 	if (database.GetVariable("RuleSet", tmp, sizeof(tmp)-1)) {
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Loading rule set '%s'", tmp);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Loading rule set '%s'", tmp);
 		if(!RuleManager::Instance()->LoadRules(&database, tmp)) {
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Failed to load ruleset '%s', falling back to defaults.", tmp);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Failed to load ruleset '%s', falling back to defaults.", tmp);
 		}
 	} else {
 		if(!RuleManager::Instance()->LoadRules(&database, "default")) {
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "No rule set configured, using default rules");
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "No rule set configured, using default rules");
 		} else {
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Loaded default rule set 'default'", tmp);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Loaded default rule set 'default'", tmp);
 		}
 	}
 
@@ -127,7 +127,7 @@ int main() {
 
 	if(Config->ChatPort != Config->MailPort)
 	{
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "MailPort and CharPort must be the same in eqemu_config.xml for UCS.");
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "MailPort and CharPort must be the same in eqemu_config.xml for UCS.");
 		exit(1);
 	}
 
@@ -138,11 +138,11 @@ int main() {
 	database.LoadChatChannels();
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Could not set signal handler");
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Could not set signal handler");
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Could not set signal handler");
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Could not set signal handler");
 		return 1;
 	}
 

@@ -40,7 +40,7 @@ bool LFGuildManager::LoadDatabase()
                         "`aacount`, `timezone`, `timeposted` FROM `lfguild`";
     auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Failed to load LFGuild info from database. %s %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Failed to load LFGuild info from database. %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -242,7 +242,7 @@ void LFGuildManager::TogglePlayer(uint32 FromZoneID, uint32 FromInstanceID, char
     std::string query = StringFormat("DELETE FROM `lfguild` WHERE `type` = 0 AND `name` = '%s'", From);
     auto results = database.QueryDatabase(query);
 	if(!results.Success())
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Error removing player from LFGuild table, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Error removing player from LFGuild table, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
 	uint32 Now = time(nullptr);
 
@@ -257,7 +257,7 @@ void LFGuildManager::TogglePlayer(uint32 FromZoneID, uint32 FromInstanceID, char
                             From, Comments, Level, Class, AAPoints, TimeZone, Now);
         auto results = database.QueryDatabase(query);
 		if(!results.Success())
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Error inserting player into LFGuild table, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Error inserting player into LFGuild table, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
 	}
 
 	ServerPacket *pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(From) + strlen(Comments) + 30);
@@ -288,7 +288,7 @@ void LFGuildManager::ToggleGuild(uint32 FromZoneID, uint32 FromInstanceID, char 
     std::string query = StringFormat("DELETE FROM `lfguild` WHERE `type` = 1 AND `name` = '%s'", GuildName);
     auto results = database.QueryDatabase(query);
 	if(!results.Success())
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Error removing guild from LFGuild table, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Error removing guild from LFGuild table, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
 	uint32 Now = time(nullptr);
 
@@ -305,7 +305,7 @@ void LFGuildManager::ToggleGuild(uint32 FromZoneID, uint32 FromInstanceID, char 
                             Classes, AACount, TimeZone, Now);
 		auto results = database.QueryDatabase(query);
 		if(!results.Success())
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Error inserting guild into LFGuild table, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Error inserting guild into LFGuild table, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
 	}
 
@@ -335,7 +335,7 @@ void LFGuildManager::ExpireEntries()
         std::string query = StringFormat("DELETE from `lfguild` WHERE `type` = 0 AND `name` = '%s'", (*it).Name.c_str());
         auto results = database.QueryDatabase(query);
         if(!results.Success())
-            Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Error expiring player LFGuild entry, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
+            Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Error expiring player LFGuild entry, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
         it = Players.erase(it);
     }
@@ -348,7 +348,7 @@ void LFGuildManager::ExpireEntries()
         std::string query = StringFormat("DELETE from `lfguild` WHERE `type` = 1 AND `name` = '%s'", (*it2).Name.c_str());
         auto results = database.QueryDatabase(query);
         if(!results.Success())
-            Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Error removing guild LFGuild entry, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
+            Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Error removing guild LFGuild entry, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
         it2 = Guilds.erase(it2);
 	}

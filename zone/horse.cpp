@@ -73,12 +73,12 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id) {
 	std::string query = StringFormat("SELECT race, gender, texture, mountspeed FROM horses WHERE filename = '%s'", fileName);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-        Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in Mount query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in Mount query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return nullptr;
 	}
 
 	if (results.RowCount() != 1) {
-        Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "No Database entry for mount: %s, check the horses table", fileName);
+        Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "No Database entry for mount: %s, check the horses table", fileName);
         return nullptr;
 	}
 
@@ -121,7 +121,7 @@ void Client::SummonHorse(uint16 spell_id) {
 		return;
 	}
 	if(!Horse::IsHorseSpell(spell_id)) {
-		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "%s tried to summon an unknown horse, spell id %d", GetName(), spell_id);
+		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "%s tried to summon an unknown horse, spell id %d", GetName(), spell_id);
 		return;
 	}
 

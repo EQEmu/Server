@@ -56,7 +56,7 @@ void ClientList::Process() {
 		if (!iterator.GetData()->Process()) {
 			struct in_addr in;
 			in.s_addr = iterator.GetData()->GetIP();
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Removing client from %s:%d", inet_ntoa(in), iterator.GetData()->GetPort());
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Removing client from %s:%d", inet_ntoa(in), iterator.GetData()->GetPort());
 //the client destructor should take care of this.
 //			iterator.GetData()->Free();
 			iterator.RemoveCurrent();
@@ -447,7 +447,7 @@ void ClientList::SendOnlineGuildMembers(uint32 FromID, uint32 GuildID)
 
 	if(!from)
 	{
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Invalid client. FromID=%i GuildID=%i", FromID, GuildID);
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Invalid client. FromID=%i GuildID=%i", FromID, GuildID);
 		return;
 	}
 
@@ -751,7 +751,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	safe_delete(output);
 	}
 	catch(...){
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Unknown error in world's SendWhoAll (probably mem error), ignoring...");
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Unknown error in world's SendWhoAll (probably mem error), ignoring...");
 		return;
 	}
 }
@@ -895,7 +895,7 @@ void ClientList::SendFriendsWho(ServerFriendsWho_Struct *FriendsWho, WorldTCPCon
 		safe_delete(pack2);
 	}
 	catch(...){
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Unknown error in world's SendFriendsWho (probably mem error), ignoring...");
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Unknown error in world's SendFriendsWho (probably mem error), ignoring...");
 		return;
 	}
 }
@@ -1130,7 +1130,7 @@ Client* ClientList::FindByAccountID(uint32 account_id) {
 
 	iterator.Reset();
 	while(iterator.MoreElements()) {
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "ClientList[0x%08x]::FindByAccountID(%p) iterator.GetData()[%p]", this, account_id, iterator.GetData());
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "ClientList[0x%08x]::FindByAccountID(%p) iterator.GetData()[%p]", this, account_id, iterator.GetData());
 		if (iterator.GetData()->GetAccountID() == account_id) {
 			Client* tmp = iterator.GetData();
 			return tmp;
@@ -1145,7 +1145,7 @@ Client* ClientList::FindByName(char* charname) {
 
 	iterator.Reset();
 	while(iterator.MoreElements()) {
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "ClientList[0x%08x]::FindByName(\"%s\") iterator.GetData()[%p]", this, charname, iterator.GetData());
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "ClientList[0x%08x]::FindByName(\"%s\") iterator.GetData()[%p]", this, charname, iterator.GetData());
 		if (iterator.GetData()->GetCharName() == charname) {
 			Client* tmp = iterator.GetData();
 			return tmp;

@@ -799,7 +799,7 @@ void Client::OnDisconnect(bool hard_disconnect) {
 	Mob *Other = trade->With(); 
 	if(Other)
 	{
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Client disconnected during a trade. Returning their items."); 
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Client disconnected during a trade. Returning their items."); 
 		FinishTrade(this);
 
 		if(Other->IsClient())
@@ -836,7 +836,7 @@ void Client::BulkSendInventoryItems() {
 		if(inst) {
 			bool is_arrow = (inst->GetItem()->ItemType == ItemTypeArrow) ? true : false;
 			int16 free_slot_id = m_inv.FindFreeSlot(inst->IsType(ItemClassContainer), true, inst->GetItem()->Size, is_arrow);
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Incomplete Trade Transaction: Moving %s from slot %i to %i", inst->GetItem()->Name, slot_id, free_slot_id);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Inventory, "Incomplete Trade Transaction: Moving %s from slot %i to %i", inst->GetItem()->Name, slot_id, free_slot_id);
 			PutItemInInventory(free_slot_id, *inst, false);
 			database.SaveInventory(character_id, nullptr, slot_id);
 			safe_delete(inst);
@@ -1037,7 +1037,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 		// Account for merchant lists with gaps.
 		if (ml.slot >= i) {
 			if (ml.slot > i)
-				Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::None, "(WARNING) Merchantlist contains gap at slot %d. Merchant: %d, NPC: %d", i, merchant_id, npcid);
+				Log.Out(EQEmuLogSys::General, EQEmuLogSys::None, "(WARNING) Merchantlist contains gap at slot %d. Merchant: %d, NPC: %d", i, merchant_id, npcid);
 			i = ml.slot + 1;
 		}
 	}
@@ -1129,7 +1129,7 @@ uint8 Client::WithCustomer(uint16 NewCustomer){
 	Client* c = entity_list.GetClientByID(CustomerID);
 
 	if(!c) {
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Previous customer has gone away.");
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Trading, "Previous customer has gone away.");
 		CustomerID = NewCustomer;
 		return 1;
 	}
@@ -1141,7 +1141,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 {
 	if(PendingRezzXP < 0) {
 		// pendingrezexp is set to -1 if we are not expecting an OP_RezzAnswer
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Unexpected OP_RezzAnswer. Ignoring it.");
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Unexpected OP_RezzAnswer. Ignoring it.");
 		Message(13, "You have already been resurrected.\n");
 		return;
 	}
@@ -1151,7 +1151,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 		// Mark the corpse as rezzed in the database, just in case the corpse has buried, or the zone the
 		// corpse is in has shutdown since the rez spell was cast.
 		database.MarkCorpseAsRezzed(PendingRezzDBID);
-		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Player %s got a %i Rezz, spellid %i in zone%i, instance id %i",
+		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Player %s got a %i Rezz, spellid %i in zone%i, instance id %i",
 				this->name, (uint16)spells[SpellID].base[0],
 				SpellID, ZoneID, InstanceID);
 
@@ -1201,7 +1201,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 {
 	if(app->size != sizeof(MemorizeSpell_Struct))
 	{
-		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Wrong size on OP_MemorizeSpell. Got: %i, Expected: %i", app->size, sizeof(MemorizeSpell_Struct));
+		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Wrong size on OP_MemorizeSpell. Got: %i, Expected: %i", app->size, sizeof(MemorizeSpell_Struct));
 		DumpPacket(app);
 		return;
 	}
@@ -1723,12 +1723,12 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		SkillUseTypes skill = (SkillUseTypes) gmskill->skill_id;
 
 		if(!CanHaveSkill(skill)) {
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Skills, "Tried to train skill %d, which is not allowed.", skill);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Skills, "Tried to train skill %d, which is not allowed.", skill);
 			return;
 		}
 
 		if(MaxSkill(skill) == 0) {
-			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Skills, "Tried to train skill %d, but training is not allowed at this level.", skill);
+			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Skills, "Tried to train skill %d, but training is not allowed at this level.", skill);
 			return;
 		}
 
@@ -2122,7 +2122,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		{
 			if (PendingRezzXP < 0 || PendingRezzSpellID == 0)
 			{
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Unexpected Rezz from hover request.");
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Unexpected Rezz from hover request.");
 				return;
 			}
 			SetHP(GetMaxHP() / 5);
@@ -2155,10 +2155,10 @@ void Client::HandleRespawnFromHover(uint32 Option)
 
 			if (corpse && corpse->IsCorpse())
 			{
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Hover Rez in zone %s for corpse %s",
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Hover Rez in zone %s for corpse %s",
 						zone->GetShortName(), PendingRezzCorpseName.c_str());
 
-				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Found corpse. Marking corpse as rezzed.");
+				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Found corpse. Marking corpse as rezzed.");
 
 				corpse->IsRezzed(true);
 				corpse->CompleteResurrection();

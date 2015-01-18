@@ -39,13 +39,13 @@ void StructStrategy::ErrorEncoder(EQApplicationPacket **in_p, EQStream *dest, bo
 	EQApplicationPacket *p = *in_p;
 	*in_p = nullptr;
 
-	Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Error encoding opcode %s: no encoder provided. Dropping.", OpcodeManager::EmuToName(p->GetOpcode()));
+	Log.Out(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Error encoding opcode %s: no encoder provided. Dropping.", OpcodeManager::EmuToName(p->GetOpcode()));
 
 	delete p;
 }
 
 void StructStrategy::ErrorDecoder(EQApplicationPacket *p) {
-	Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Error decoding opcode %s: no decoder provided. Invalidating.", OpcodeManager::EmuToName(p->GetOpcode()));
+	Log.Out(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Error decoding opcode %s: no decoder provided. Invalidating.", OpcodeManager::EmuToName(p->GetOpcode()));
 	p->SetOpcode(OP_Unknown);
 }
 
