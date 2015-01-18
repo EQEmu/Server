@@ -1253,7 +1253,7 @@ void Group::BalanceHP(int32 penalty, float range, Mob* caster, int32 limit)
 	for(gi = 0; gi < MAX_GROUP_MEMBERS; gi++)
 	{
 		if(members[gi]){
-			distance = caster->DistNoRoot(*members[gi]);
+			distance = ComparativeDistance(caster->GetPosition(), members[gi]->GetPosition());
 			if(distance <= range2){
 				if((members[gi]->GetMaxHP() - dmgtaken) < 1){ //this way the ability will never kill someone
 					members[gi]->SetHP(1);					//but it will come darn close
