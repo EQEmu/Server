@@ -222,3 +222,33 @@ bool IsWithinAxisAlignedBox(const xy_location &position, const xy_location &mini
 
     return xcheck && ycheck;
 }
+
+/**
+* Gives the heading directly 180 degrees from the
+* current heading.
+* Takes the EQfloat from the xyz_heading and returns
+* an EQFloat.
+*/
+float GetReciprocalHeading(const xyz_heading& point1) {
+    return GetReciprocalHeading(point1.m_Heading);
+}
+
+/**
+* Gives the heading directly 180 degrees from the
+* current heading.
+* Takes an EQfloat and returns an EQFloat.
+*/
+float GetReciprocalHeading(const float heading) {
+    float result = 0;
+
+    // Convert to radians
+    float h = (heading / 256.0f) * 6.283184f;
+
+    // Calculate the reciprocal heading in radians
+    result = h + 3.141592f;
+
+    // Convert back to eq heading from radians
+    result = (result / 6.283184f) * 256.0f;
+
+    return result;
+}
