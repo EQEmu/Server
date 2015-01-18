@@ -511,7 +511,6 @@ public:
 	void ShowStats(Client* client);
 	void ShowBuffs(Client* client);
 	void ShowBuffList(Client* client);
-	float Dist(const Mob &) const;
 	float DistNoZ(const Mob &) const;
 	float DistNoRoot(const Mob &) const;
 	float DistNoRootNoZ(float x, float y) const;
