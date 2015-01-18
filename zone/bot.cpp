@@ -3505,7 +3505,7 @@ void Bot::AI_Process() {
 			if(IsBotCasterCombatRange(GetTarget()))
 				atCombatRange = true;
 		}
-		else if(DistNoRoot(*GetTarget()) <= meleeDistance) {
+		else if(ComparativeDistance(m_Position, GetTarget()->GetPosition())  <= meleeDistance) {
 			atCombatRange = true;
 		}
 
