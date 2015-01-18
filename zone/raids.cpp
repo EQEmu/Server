@@ -581,7 +581,7 @@ void Raid::BalanceHP(int32 penalty, uint32 gid, float range, Mob* caster, int32 
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				distance = caster->DistNoRoot(*members[gi].member);
+				distance = ComparativeDistance(caster->GetPosition(), members[gi].member->GetPosition());
 				if(distance <= range2){
 
 					dmgtaken_tmp = members[gi].member->GetMaxHP() - members[gi].member->GetHP();
