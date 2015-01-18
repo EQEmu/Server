@@ -3865,7 +3865,7 @@ void Bot::PetAIProcess() {
 						return;
 					}
 				}
-				else if(botPet->DistNoRootNoZ(*botPet->GetTarget()) < botPet->GetTarget()->GetSize()) {
+				else if(ComparativeDistanceNoZ(botPet->GetPosition(), botPet->GetTarget()->GetPosition()) < botPet->GetTarget()->GetSize()) {
 					// Let's try to adjust our melee range so we don't appear to be bunched up
 					bool isBehindMob = false;
 					bool moveBehindMob = false;
