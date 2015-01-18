@@ -660,7 +660,7 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, float range, Mob* caster, int3
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				distance = caster->DistNoRoot(*members[gi].member);
+				distance = ComparativeDistance(caster->GetPosition(), members[gi].member->GetPosition());
 				if(distance <= range2){
 					if((members[gi].member->GetMaxMana() - manataken) < 1){
 						members[gi].member->SetMana(1);
