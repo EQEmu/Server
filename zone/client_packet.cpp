@@ -13743,7 +13743,7 @@ void Client::Handle_OP_TributeItem(const EQApplicationPacket *app)
 		Mob* tribmast = entity_list.GetMob(t->tribute_master_id);
 		if (!tribmast || !tribmast->IsNPC() || tribmast->GetClass() != TRIBUTE_MASTER)
 			return;
-		if (DistNoRoot(*tribmast) > USE_NPC_RANGE2)
+		if (ComparativeDistance(m_Position, tribmast->GetPosition()) > USE_NPC_RANGE2)
 			return;
 
 		t->tribute_points = TributeItem(t->slot, t->quantity);
