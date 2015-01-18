@@ -28,9 +28,9 @@
 
 namespace Logs{
 	enum DebugLevel {
-		General = 0,	/* 0 - Low-Level general debugging, useful info on single line */
-		Moderate,		/* 1 - Informational based, used in functions, when particular things load */
-		Detail,			/* 2 - Use this for extreme detail in logging, usually in extreme debugging in the stack or interprocess communication */
+		General = 1,	/* 1 - Low-Level general debugging, useful info on single line */
+		Moderate,		/* 2 - Informational based, used in functions, when particular things load */
+		Detail,			/* 3 - Use this for extreme detail in logging, usually in extreme debugging in the stack or interprocess communication */
 	};
 
 	/*
