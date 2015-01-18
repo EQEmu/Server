@@ -17,6 +17,7 @@
 
 #include "../common/debug.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/opcodemgr.h"
 #include <iomanip>
 #include <iostream>
 #include <math.h>
@@ -459,7 +460,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 0, &args);
 
 			char buffer[64]; 
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Client_Server_Packet, "Unhandled incoming opcode: 0x%04x", app->GetOpcode()); 
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Client_Server_Packet, "Unhandled incoming opcode: %s - 0x%04x", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode());
 			if (logger.log_settings[EQEmuLogSys::Client_Server_Packet].log_to_console > 0){
 				app->build_header_dump(buffer);
 				if (app->size < 1000)
