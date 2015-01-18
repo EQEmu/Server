@@ -9414,7 +9414,7 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 		int mercTypeCount = 0;
 		int mercCount = 0;
 
-		if (DistNoRoot(*tar) > USE_NPC_RANGE2)
+		if (ComparativeDistance(m_Position, tar->GetPosition()) > USE_NPC_RANGE2)
 			return;
 
 		if (tar->GetClass() != MERCERNARY_MASTER) {
