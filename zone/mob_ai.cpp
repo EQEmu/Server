@@ -1129,7 +1129,7 @@ void Mob::AI_Process() {
 			float tether_range = static_cast<float>(GetSpecialAbilityParam(TETHER, 0));
 			tether_range = tether_range > 0.0f ? tether_range * tether_range : pAggroRange * pAggroRange;
 
-			if(DistNoRootNoZ(npcSpawnPoint.m_X, npcSpawnPoint.m_Y) > tether_range) {
+			if(ComparativeDistanceNoZ(m_Position, npcSpawnPoint) > tether_range) {
 				GMMove(npcSpawnPoint.m_X, npcSpawnPoint.m_Y, npcSpawnPoint.m_Z, npcSpawnPoint.m_Heading);
 			}
 		} else if(GetSpecialAbility(LEASH)) {
