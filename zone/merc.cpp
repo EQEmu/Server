@@ -4098,7 +4098,7 @@ bool Merc::CheckAETaunt() {
 
 		for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 			NPC* npc = *itr;
-			float dist = npc->DistNoRootNoZ(*this);
+			float dist = ComparativeDistanceNoZ(m_Position, npc->GetPosition());
 			int range = GetActSpellRange(mercSpell.spellid, spells[mercSpell.spellid].range);
 			range *= range;
 
