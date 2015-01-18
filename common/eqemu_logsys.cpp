@@ -190,18 +190,6 @@ void EQEmuLogSys::DebugCategory(DebugLevel debug_level, uint16 log_category, std
 	EQEmuLogSys::ProcessLogWrite(EQEmuLogSys::Debug, log_category, output_debug_message);
 }
 
-// void EQEmuLogSys::LogDebug(DebugLevel debug_level, std::string message, ...)
-// {
-// 	va_list args;
-// 	va_start(args, message);
-// 	std::string output_message = vStringFormat(message.c_str(), args);
-// 	va_end(args);
-// 
-// 	EQEmuLogSys::ProcessConsoleMessage(EQEmuLogSys::Debug, 0, output_message);
-// 	EQEmuLogSys::ProcessGMSay(EQEmuLogSys::Debug, 0, output_message);
-// 	EQEmuLogSys::ProcessLogWrite(EQEmuLogSys::Debug, 0, output_message);
-// }
-
 void EQEmuLogSys::Log(uint16 log_type, const std::string message, ...)
 {
 	if (log_type > EQEmuLogSys::MaxLogID){
