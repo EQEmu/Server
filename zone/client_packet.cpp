@@ -13006,7 +13006,7 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 
 	// For /target, send reject or success packet
 	if (app->GetOpcode() == OP_TargetCommand) {
-		if (GetTarget() && !GetTarget()->CastToMob()->IsInvisible(this) && (DistNoRoot(*GetTarget()) <= TARGETING_RANGE*TARGETING_RANGE || GetGM())) {
+		if (GetTarget() && !GetTarget()->CastToMob()->IsInvisible(this) && (ComparativeDistance(m_Position, GetTarget()->GetPosition())  <= TARGETING_RANGE*TARGETING_RANGE || GetGM())) {
 			if (GetTarget()->GetBodyType() == BT_NoTarget2 || GetTarget()->GetBodyType() == BT_Special
 				|| GetTarget()->GetBodyType() == BT_NoTarget)
 			{
