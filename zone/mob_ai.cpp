@@ -1547,7 +1547,7 @@ void Mob::AI_Process() {
 				if (!follow) SetFollowID(0);
 				else
 				{
-					float dist2 = DistNoRoot(*follow);
+					float dist2 = ComparativeDistance(m_Position, follow->GetPosition());
 					int followdist = GetFollowDistance();
 
 					if (dist2 >= followdist)	// Default follow distance is 100
