@@ -560,13 +560,13 @@ void Doors::ToggleState(Mob *sender)
 }
 
 void Doors::DumpDoor(){
-	logger.LogDebug(EQEmuLogSys::General,
+	logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None,
 		"db_id:%i door_id:%i zone_name:%s door_name:%s pos_x:%f pos_y:%f pos_z:%f heading:%f",
 		db_id, door_id, zone_name, door_name, pos_x, pos_y, pos_z, heading);
-	logger.LogDebug(EQEmuLogSys::General,
+	logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None,
 		"opentype:%i guild_id:%i lockpick:%i keyitem:%i nokeyring:%i trigger_door:%i trigger_type:%i door_param:%i open:%s",
 		opentype, guild_id, lockpick, keyitem, nokeyring, trigger_door, trigger_type, door_param, (isopen) ? "open":"closed");
-	logger.LogDebug(EQEmuLogSys::General,
+	logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None,
 		"dest_zone:%s dest_x:%f dest_y:%f dest_z:%f dest_heading:%f",
 		dest_zone, dest_x, dest_y, dest_z, dest_heading);
 }
