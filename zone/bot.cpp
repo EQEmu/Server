@@ -3533,7 +3533,7 @@ void Bot::AI_Process() {
 						return;
 					}
 				}
-				else if(!IsMoving() && GetClass() != ROGUE && (DistNoRootNoZ(*GetTarget()) < GetTarget()->GetSize())) {
+				else if(!IsMoving() && GetClass() != ROGUE && (ComparativeDistanceNoZ(m_Position, GetTarget()->GetPosition()) < GetTarget()->GetSize())) {
 					// If we are not a rogue trying to backstab, let's try to adjust our melee range so we don't appear to be bunched up
 					float newX = 0;
 					float newY = 0;
