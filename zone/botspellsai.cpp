@@ -1755,7 +1755,7 @@ Mob* Bot::GetFirstIncomingMobToMez(Bot* botCaster, BotSpell botSpell) {
 		for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 			NPC* npc = *itr;
 
-			if(npc->DistNoRootNoZ(*botCaster) <= botCaster->GetActSpellRange(botSpell.SpellId, spells[botSpell.SpellId].range)) {
+			if(ComparativeDistanceNoZ(npc->GetPosition(), botCaster->GetPosition()) <= botCaster->GetActSpellRange(botSpell.SpellId, spells[botSpell.SpellId].range)) {
 				if(!npc->IsMezzed()) {
 					if(botCaster->HasGroup()) {
 						Group* g = botCaster->GetGroup();
