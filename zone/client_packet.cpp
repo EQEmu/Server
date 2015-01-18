@@ -2296,7 +2296,7 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 		return;
 	}
 
-	if (DistNoRoot(*vendor) > USE_NPC_RANGE2)
+	if (ComparativeDistance(m_Position, vendor->GetPosition())  > USE_NPC_RANGE2)
 	{
 		Message(13, "Vendor is out of range.");
 		return;
