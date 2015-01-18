@@ -1812,7 +1812,7 @@ void NPC::AI_DoMovement() {
 				ClearFeignMemory();
 				moved=false;
 				SetMoving(false);
-				if (GetTarget() == nullptr || DistNoRoot(*GetTarget()) >= 5*5 )
+				if (GetTarget() == nullptr || ComparativeDistance(m_Position, GetTarget()->GetPosition()) >= 5*5 )
 				{
 					SetHeading(m_GuardPoint.m_Heading);
 				} else {
