@@ -1937,7 +1937,7 @@ void EntityList::FilteredMessageClose_StringID(Mob *sender, bool skipsender,
 
 	for (auto it = client_list.begin(); it != client_list.end(); ++it) {
 		c = it->second;
-		if (c && c->DistNoRoot(*sender) <= dist2 && (!skipsender || c != sender))
+		if (c && ComparativeDistance(c->GetPosition(), sender->GetPosition()) <= dist2 && (!skipsender || c != sender))
 			c->FilteredMessage_StringID(sender, type, filter, string_id,
 					message1, message2, message3, message4, message5,
 					message6, message7, message8, message9);
