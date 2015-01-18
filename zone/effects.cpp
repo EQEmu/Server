@@ -796,7 +796,7 @@ void EntityList::MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool a
 			continue;
 		if (curmob == caster && !affect_caster)	//watch for caster too
 			continue;
-		if (center->DistNoRoot(*curmob) > dist2)	//make sure they are in range
+		if (ComparativeDistance(center->GetPosition(), curmob->GetPosition()) > dist2)	//make sure they are in range
 			continue;
 
 		//Only npcs mgb should hit are client pets...
