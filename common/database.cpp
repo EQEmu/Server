@@ -3309,7 +3309,7 @@ void Database::SetGroupLeaderName(uint32 gid, const char* name) {
 	result = QueryDatabase(query);
 
 	if(!result.Success()) {
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None,, "Error in Database::SetGroupLeaderName: %s", result.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Error in Database::SetGroupLeaderName: %s", result.ErrorMessage().c_str());
 	}
 }
 
