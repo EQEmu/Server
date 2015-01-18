@@ -3666,7 +3666,7 @@ void EntityList::QuestJournalledSayClose(Mob *sender, Client *QuestInitiator,
 	// Use the old method for all other nearby clients
 	for (auto it = client_list.begin(); it != client_list.end(); ++it) {
 		c = it->second;
-		if(c && (c != QuestInitiator) && c->DistNoRoot(*sender) <= dist2)
+		if(c && (c != QuestInitiator) && ComparativeDistance(c->GetPosition(), sender->GetPosition()) <= dist2)
 			c->Message_StringID(10, GENERIC_SAY, mobname, message);
 	}
 }
