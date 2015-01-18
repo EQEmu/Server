@@ -2770,7 +2770,7 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app)
 
 	NPC* tar = entity_list.GetNPCByID(sell->merchant_entity_id);
 	if (tar) {
-		if (DistNoRoot(*tar) > USE_NPC_RANGE2)
+		if (ComparativeDistance(m_Position, tar->GetPosition()) > USE_NPC_RANGE2)
 			return;
 
 		if (tar->GetClass() != ALT_CURRENCY_MERCHANT) {
