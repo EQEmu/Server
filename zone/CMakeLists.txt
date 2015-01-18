@@ -116,7 +116,6 @@ SET(zone_sources
 	waypoints.cpp
 	worldserver.cpp
 	zone.cpp
-	zone_logsys.cpp
 	zone_config.cpp
 	zonedb.cpp
 	zoning.cpp
