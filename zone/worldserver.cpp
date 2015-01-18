@@ -141,7 +141,7 @@ void WorldServer::Process() {
 	ServerPacket *pack = 0;
 	while((pack = tcpc.PopPacket())) {
 		Log.Out(Logs::Detail, Logs::Zone_Server, "Got 0x%04x from world:", pack->opcode);
-		_hex(ZONE__WORLD_TRACE,pack->pBuffer,pack->size);
+		Log.Hex(Logs::Netcode, pack->pBuffer, pack->size);
 		switch(pack->opcode) {
 		case 0: {
 			break;

@@ -177,7 +177,7 @@ bool ZoneServer::Process() {
 	}
 	ServerPacket *pack = 0;
 	while((pack = tcpc->PopPacket())) {
-		_hex(WORLD__ZONE_TRACE,pack->pBuffer,pack->size);
+		Log.Hex(Logs::Netcode, pack->pBuffer, pack->size);
 		if (!authenticated) {
 			if (WorldConfig::get()->SharedKey.length() > 0) {
 				if (pack->opcode == ServerOP_ZAAuth && pack->size == 16) {

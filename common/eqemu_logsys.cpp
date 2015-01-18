@@ -24,6 +24,7 @@
 #include "database.h"
 #include "misc.h"
 
+
 #include <iostream>
 #include <fstream> 
 #include <string>
@@ -173,7 +174,7 @@ void EQEmuLogSys::Hex(uint16 log_category, const void *data, unsigned long lengt
 		// log_message(type, "%s", buffer);	//%s is to prevent % escapes in the ascii
 	}
 }
-
+/*
 void EQEmuLogSys::Raw(uint16 log_category, uint16 seq, const BasePacket *p) {
 	return;
 	char buffer[196];
@@ -181,7 +182,7 @@ void EQEmuLogSys::Raw(uint16 log_category, uint16 seq, const BasePacket *p) {
 	//log_message(type,buffer);
 	EQEmuLogSys::Hex(log_category, (const char *)p->pBuffer, p->size);
 }
-
+*/
 void EQEmuLogSys::Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...)
 {
 	va_list args;

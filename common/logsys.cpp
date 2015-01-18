@@ -46,7 +46,16 @@ const LogTypeStatus *log_type_info = real_log_type_info;
 
 
 
-z
+void log_hex(LogType type, const void *data, unsigned long length, unsigned char padding) {
+	if(!is_log_enabled(type))
+		return;
+	char buffer[80];
+	uint32 offset;
+	for(offset=0;offset<length;offset+=16) {
+		build_hex_line((const char *)data,length,offset,buffer,padding);
+		// log_message(type, "%s", buffer);	//%s is to prevent % escapes in the ascii
+	}
+}
 
 void log_packet(LogType type, const BasePacket *p) {
 	if(!is_log_enabled(type))
