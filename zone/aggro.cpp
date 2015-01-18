@@ -150,7 +150,8 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 		return;
 	}
 
-	float dist2 = mob->DistNoRoot(*this);
+	float dist2 = ComparativeDistance(mob->GetPosition(), m_Position);
+
 	float iAggroRange2 = iAggroRange*iAggroRange;
 	if( dist2 > iAggroRange2 ) {
 		towho->Message(0, "...%s is out of range. %.3f > %.3f ", mob->GetName(),
