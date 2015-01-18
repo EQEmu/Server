@@ -110,11 +110,11 @@ void EQEmuLogSys::ProcessGMSay(uint16 log_category, std::string message)
 		return;
 
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
-		on_log_gmsay_hook(log_type, message);
+		on_log_gmsay_hook(log_category, message);
 	}
 }
 
-void EQEmuLogSys::ProcessLogWrite(uint16 log_type, uint16 log_category, std::string message)
+void EQEmuLogSys::ProcessLogWrite(uint16 log_category, std::string message)
 {
 	/* Check if category enabled for process */
 	if (log_settings[log_category].log_to_file == 0)
@@ -177,7 +177,7 @@ void EQEmuLogSys::DebugCategory(DebugLevel debug_level, uint16 log_category, std
 
 	EQEmuLogSys::ProcessConsoleMessage(EQEmuLogSys::Debug, log_category, output_debug_message);
 	EQEmuLogSys::ProcessGMSay(log_category, output_debug_message);
-	EQEmuLogSys::ProcessLogWrite(EQEmuLogSys::Debug, log_category, output_debug_message);
+	EQEmuLogSys::ProcessLogWrite(log_category, output_debug_message);
 }
 
 void EQEmuLogSys::SetCurrentTimeStamp(char* time_stamp){
