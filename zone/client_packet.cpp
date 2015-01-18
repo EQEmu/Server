@@ -398,7 +398,7 @@ void ClearMappedOpcode(EmuOpcode op)
 // client methods
 int Client::HandlePacket(const EQApplicationPacket *app)
 {
-	if(is_log_enabled(CLIENT__NET_IN_TRACE)) {
+	if(Log.log_settings[Logs::LogCategory::Netcode].log_to_console > 0) {
 		char buffer[64];
 		app->build_header_dump(buffer);
 		Log.Out(Logs::Detail, Logs::Client_Server_Packet, "Dispatch opcode: %s", buffer);
