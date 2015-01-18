@@ -2991,7 +2991,8 @@ void EntityList::MessageGroup(Mob *sender, bool skipclose, uint32 type, const ch
 
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
-		if (it->second != sender && (it->second->Dist(*sender) <= dist2 || it->second->GetGroup() == sender->CastToClient()->GetGroup())) {
+		if (it->second != sender &&
+				(Distance(it->second->GetPosition(), sender->GetPosition()) <= dist2 || it->second->GetGroup() == sender->CastToClient()->GetGroup())) {
 			it->second->Message(type, buffer);
 		}
 		++it;
