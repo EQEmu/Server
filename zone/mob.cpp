@@ -2274,13 +2274,6 @@ bool Mob::CanThisClassBlock(void) const
 	}
 }
 
-float Mob::DistNoRootNoZ(const Mob &other) const {
-	float xDiff = other.m_Position.m_X - m_Position.m_X;
-	float yDiff = other.m_Position.m_Y - m_Position.m_Y;
-
-	return ( (xDiff * xDiff) + (yDiff * yDiff) );
-}
-
 float Mob::GetReciprocalHeading(Mob* target) {
 	float Result = 0;
 
