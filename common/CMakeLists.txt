@@ -32,7 +32,6 @@ SET(common_sources
 	guilds.cpp
 	ipc_mutex.cpp
 	item.cpp
-	logsys.cpp
 	md5.cpp
 	memory_mapped_file.cpp
 	misc.cpp
@@ -145,7 +144,6 @@ SET(common_headers
 	item_struct.h
 	languages.h
 	linked_list.h
-	logsys.h
 	logtypes.h
 	loottable.h
 	mail_oplist.h
