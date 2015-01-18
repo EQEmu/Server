@@ -444,7 +444,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 //			&& !mob->IsCorpse()
 //			&& mob->IsAIControlled()
 			&& mob->GetPrimaryFaction() != 0
-			&& mob->DistNoRoot(*sender) <= r
+			&& ComparativeDistance(mob->GetPosition(), sender->GetPosition()) <= r
 			&& !mob->IsEngaged()
 			&& ((!mob->IsPet()) || (mob->IsPet() && mob->GetOwner() && !mob->GetOwner()->IsClient()))
 				// If we're a pet we don't react to any calls for help if our owner is a client
