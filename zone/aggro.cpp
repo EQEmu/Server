@@ -88,7 +88,7 @@ void EntityList::DescribeAggro(Client *towho, NPC *from_who, float d, bool verbo
 		if (mob->IsClient())	//also ensures that mob != around
 			continue;
 
-		if (mob->DistNoRoot(*from_who) > d2)
+		if (ComparativeDistance(mob->GetPosition(), from_who->GetPosition()) > d2)
 			continue;
 
 		if (engaged) {
