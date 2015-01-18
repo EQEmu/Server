@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 	Log.LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	Log.Log(EQEmuLogSys::Status, "Client Files Import Utility");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Client Files Import Utility");
 	if(!EQEmuConfig::LoadConfig()) {
 		Log.Log(EQEmuLogSys::Error, "Unable to load configuration file.");
 		return 1;
@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
 	}
 
 	SharedDatabase database;
-	Log.Log(EQEmuLogSys::Status, "Connecting to database...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Connecting to database...");
 	if(!database.Connect(config->DatabaseHost.c_str(), config->DatabaseUsername.c_str(),
 		config->DatabasePassword.c_str(), config->DatabaseDB.c_str(), config->DatabasePort)) {
 		Log.Log(EQEmuLogSys::Error, "Unable to connect to the database, cannot continue without a "
@@ -76,7 +76,7 @@ int GetSpellColumns(SharedDatabase *db) {
 }
 
 void ImportSpells(SharedDatabase *db) {
-	Log.Log(EQEmuLogSys::Status, "Importing Spells...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Importing Spells...");
 	FILE *f = fopen("import/spells_us.txt", "r");
 	if(!f) {
 		Log.Log(EQEmuLogSys::Error, "Unable to open import/spells_us.txt to read, skipping.");
@@ -142,19 +142,19 @@ void ImportSpells(SharedDatabase *db) {
 
 		spells_imported++;
 		if(spells_imported % 1000 == 0) {
-			Log.Log(EQEmuLogSys::Status, "%d spells imported.", spells_imported);
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "%d spells imported.", spells_imported);
 		}
 	}
 
 	if(spells_imported % 1000 != 0) {
-		Log.Log(EQEmuLogSys::Status, "%d spells imported.", spells_imported);
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "%d spells imported.", spells_imported);
 	}
 
 	fclose(f);
 }
 
 void ImportSkillCaps(SharedDatabase *db) {
-	Log.Log(EQEmuLogSys::Status, "Importing Skill Caps...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Importing Skill Caps...");
 
 	FILE *f = fopen("import/SkillCaps.txt", "r");
 	if(!f) {
@@ -190,7 +190,7 @@ void ImportSkillCaps(SharedDatabase *db) {
 }
 
 void ImportBaseData(SharedDatabase *db) {
-	Log.Log(EQEmuLogSys::Status, "Importing Base Data...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Importing Base Data...");
 
 	FILE *f = fopen("import/BaseData.txt", "r");
 	if(!f) {

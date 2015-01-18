@@ -1429,7 +1429,7 @@ SendAA_Struct* Zone::FindAA(uint32 id) {
 }
 
 void Zone::LoadAAs() {
-	Log.Log(EQEmuLogSys::Status, "Loading AA information...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading AA information...");
 	totalAAs = database.CountAAs();
 	if(totalAAs == 0) {
 		Log.Log(EQEmuLogSys::Error, "Failed to load AAs!");
@@ -1447,9 +1447,9 @@ void Zone::LoadAAs() {
 	}
 
 	//load AA Effects into aa_effects
-	Log.Log(EQEmuLogSys::Status, "Loading AA Effects...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading AA Effects...");
 	if (database.LoadAAEffects2())
-		Log.Log(EQEmuLogSys::Status, "Loaded %d AA Effects.", aa_effects.size());
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loaded %d AA Effects.", aa_effects.size());
 	else
 		Log.Log(EQEmuLogSys::Error, "Failed to load AA Effects!");
 }

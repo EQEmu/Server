@@ -302,7 +302,7 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 		return false;
 	}
 
-	Log.Log(EQEmuLogSys::Status, "Start zone query: %s\n", query.c_str());
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Start zone query: %s\n", query.c_str());
 
     if (results.RowCount() == 0) {
         printf("No start_zones entry in database, using defaults\n");
@@ -395,7 +395,7 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 		}
     }
     else {
-		Log.Log(EQEmuLogSys::Status, "Found starting location in start_zones");
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Found starting location in start_zones");
 		auto row = results.begin();
 		in_pp->x = atof(row[0]);
 		in_pp->y = atof(row[1]);
@@ -434,11 +434,11 @@ bool WorldDatabase::GetStartZoneSoF(PlayerProfile_Struct* in_pp, CharCreate_Stru
                                     in_cc->start_zone, in_cc->class_, in_cc->deity, in_cc->race);
     auto results = QueryDatabase(query);
 	if(!results.Success()) {
-		Log.Log(EQEmuLogSys::Status, "SoF Start zone query failed: %s : %s\n", query.c_str(), results.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "SoF Start zone query failed: %s : %s\n", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
-	Log.Log(EQEmuLogSys::Status, "SoF Start zone query: %s\n", query.c_str());
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "SoF Start zone query: %s\n", query.c_str());
 
     if (results.RowCount() == 0) {
         printf("No start_zones entry in database, using defaults\n");
@@ -453,7 +453,7 @@ bool WorldDatabase::GetStartZoneSoF(PlayerProfile_Struct* in_pp, CharCreate_Stru
 		}
     }
     else {
-		Log.Log(EQEmuLogSys::Status, "Found starting location in start_zones");
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Found starting location in start_zones");
 		auto row = results.begin();
 		in_pp->x = atof(row[0]);
 		in_pp->y = atof(row[1]);

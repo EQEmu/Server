@@ -90,7 +90,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 		return false;
 	}
 
-	Log.Log(EQEmuLogSys::Status, "Booting %s (%d:%d)", zonename, iZoneID, iInstanceID);
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Booting %s (%d:%d)", zonename, iZoneID, iInstanceID);
 
 	numclients = 0;
 	zone = new Zone(iZoneID, iInstanceID, zonename);
@@ -117,13 +117,13 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 					log_levels[i]=0; //set to zero on a bogue char
 			}
 			zone->loglevelvar = log_levels[0];
-			Log.Log(EQEmuLogSys::Status, "General logging level: %i", zone->loglevelvar);
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "General logging level: %i", zone->loglevelvar);
 			zone->merchantvar = log_levels[1];
-			Log.Log(EQEmuLogSys::Status, "Merchant logging level: %i", zone->merchantvar);
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Merchant logging level: %i", zone->merchantvar);
 			zone->tradevar = log_levels[2];
-			Log.Log(EQEmuLogSys::Status, "Trade logging level: %i", zone->tradevar);
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Trade logging level: %i", zone->tradevar);
 			zone->lootvar = log_levels[3];
-			Log.Log(EQEmuLogSys::Status, "Loot logging level: %i", zone->lootvar);
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loot logging level: %i", zone->lootvar);
 		}
 		else {
 			zone->loglevelvar = uint8(atoi(tmp)); //continue supporting only command logging (for now)
@@ -145,7 +145,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	}
 
 	Log.Log(EQEmuLogSys::Normal, "---- Zone server %s, listening on port:%i ----", zonename, ZoneConfig::get()->ZonePort);
-	Log.Log(EQEmuLogSys::Status, "Zone Bootup: %s (%i: %i)", zonename, iZoneID, iInstanceID);
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Zone Bootup: %s (%i: %i)", zonename, iZoneID, iInstanceID);
 	parse->Init();
 	UpdateWindowTitle();
 	zone->GetTimeSync();
@@ -171,7 +171,7 @@ bool Zone::LoadZoneObjects() {
 		return false;
     }
 
-    Log.Log(EQEmuLogSys::Status, "Loading Objects from DB...");
+    Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading Objects from DB...");
     for (auto row = results.begin(); row != results.end(); ++row) {
         if (atoi(row[9]) == 0)
         {
@@ -288,7 +288,7 @@ bool Zone::LoadGroundSpawns() {
 
 	memset(&groundspawn, 0, sizeof(groundspawn));
 	int gsindex=0;
-	Log.Log(EQEmuLogSys::Status, "Loading Ground Spawns from DB...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading Ground Spawns from DB...");
 	database.LoadGroundSpawns(zoneid, GetInstanceVersion(), &groundspawn);
 	uint32 ix=0;
 	char* name=0;
@@ -402,7 +402,7 @@ uint32 Zone::GetTempMerchantQuantity(uint32 NPCID, uint32 Slot) {
 }
 
 void Zone::LoadTempMerchantData() {
-	Log.Log(EQEmuLogSys::Status, "Loading Temporary Merchant Lists...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading Temporary Merchant Lists...");
 	std::string query = StringFormat(
 		"SELECT								   "
 		"DISTINCT ml.npcid,					   "
@@ -474,7 +474,7 @@ void Zone::LoadNewMerchantData(uint32 merchantid) {
 }
 
 void Zone::GetMerchantDataForZoneLoad() {
-	Log.Log(EQEmuLogSys::Status, "Loading Merchant Lists...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading Merchant Lists...");
 	std::string query = StringFormat(												   
 		"SELECT																		   "
 		"DISTINCT ml.merchantid,													   "
@@ -707,7 +707,7 @@ void Zone::Shutdown(bool quite)
 	}
 	zone->ldon_trap_entry_list.clear();
 
-	Log.Log(EQEmuLogSys::Status, "Zone Shutdown: %s (%i)", zone->GetShortName(), zone->GetZoneID());
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Zone Shutdown: %s (%i)", zone->GetShortName(), zone->GetZoneID());
 	petition_list.ClearPetitions();
 	zone->GotCurTime(false);
 	if (!quite)
@@ -725,12 +725,12 @@ void Zone::Shutdown(bool quite)
 
 void Zone::LoadZoneDoors(const char* zone, int16 version)
 {
-	Log.Log(EQEmuLogSys::Status, "Loading doors for %s ...", zone);
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading doors for %s ...", zone);
 
 	uint32 maxid;
 	int32 count = database.GetDoorsCount(&maxid, zone, version);
 	if(count < 1) {
-		Log.Log(EQEmuLogSys::Status, "... No doors loaded.");
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "... No doors loaded.");
 		return;
 	}
 
@@ -899,53 +899,53 @@ Zone::~Zone() {
 bool Zone::Init(bool iStaticZone) {
 	SetStaticZone(iStaticZone);
 
-	Log.Log(EQEmuLogSys::Status, "Loading spawn conditions...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading spawn conditions...");
 	if(!spawn_conditions.LoadSpawnConditions(short_name, instanceid)) {
 		Log.Log(EQEmuLogSys::Error, "Loading spawn conditions failed, continuing without them.");
 	}
 
-	Log.Log(EQEmuLogSys::Status, "Loading static zone points...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading static zone points...");
 	if (!database.LoadStaticZonePoints(&zone_point_list, short_name, GetInstanceVersion())) {
 		Log.Log(EQEmuLogSys::Error, "Loading static zone points failed.");
 		return false;
 	}
 
-	Log.Log(EQEmuLogSys::Status, "Loading spawn groups...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading spawn groups...");
 	if (!database.LoadSpawnGroups(short_name, GetInstanceVersion(), &spawn_group_list)) {
 		Log.Log(EQEmuLogSys::Error, "Loading spawn groups failed.");
 		return false;
 	}
 
-	Log.Log(EQEmuLogSys::Status, "Loading spawn2 points...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading spawn2 points...");
 	if (!database.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion()))
 	{
 		Log.Log(EQEmuLogSys::Error, "Loading spawn2 points failed.");
 		return false;
 	}
 
-	Log.Log(EQEmuLogSys::Status, "Loading player corpses...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading player corpses...");
 	if (!database.LoadCharacterCorpses(zoneid, instanceid)) {
 		Log.Log(EQEmuLogSys::Error, "Loading player corpses failed.");
 		return false;
 	}
 
-	Log.Log(EQEmuLogSys::Status, "Loading traps...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading traps...");
 	if (!database.LoadTraps(short_name, GetInstanceVersion()))
 	{
 		Log.Log(EQEmuLogSys::Error, "Loading traps failed.");
 		return false;
 	}
 
-	Log.Log(EQEmuLogSys::Status, "Loading adventure flavor text...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading adventure flavor text...");
 	LoadAdventureFlavor();
 
-	Log.Log(EQEmuLogSys::Status, "Loading ground spawns...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading ground spawns...");
 	if (!LoadGroundSpawns())
 	{
 		Log.Log(EQEmuLogSys::Error, "Loading ground spawns failed. continuing.");
 	}
 
-	Log.Log(EQEmuLogSys::Status, "Loading World Objects from DB...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading World Objects from DB...");
 	if (!LoadZoneObjects())
 	{
 		Log.Log(EQEmuLogSys::Error, "Loading World Objects failed. continuing.");
@@ -1005,10 +1005,10 @@ bool Zone::Init(bool iStaticZone) {
 		}
 	}
 
-	Log.Log(EQEmuLogSys::Status, "Loading timezone data...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading timezone data...");
 	zone->zone_time.setEQTimeZone(database.GetZoneTZ(zoneid, GetInstanceVersion()));
 
-	Log.Log(EQEmuLogSys::Status, "Init Finished: ZoneID = %d, Time Offset = %d", zoneid, zone->zone_time.getEQTimeZone());
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Init Finished: ZoneID = %d, Time Offset = %d", zoneid, zone->zone_time.getEQTimeZone());
 
 	LoadTickItems();
 
@@ -1019,29 +1019,29 @@ bool Zone::Init(bool iStaticZone) {
 }
 
 void Zone::ReloadStaticData() {
-	Log.Log(EQEmuLogSys::Status, "Reloading Zone Static Data...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Reloading Zone Static Data...");
 
-	Log.Log(EQEmuLogSys::Status, "Reloading static zone points...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Reloading static zone points...");
 	zone_point_list.Clear();
 	if (!database.LoadStaticZonePoints(&zone_point_list, GetShortName(), GetInstanceVersion())) {
 		Log.Log(EQEmuLogSys::Error, "Loading static zone points failed.");
 	}
 
-	Log.Log(EQEmuLogSys::Status, "Reloading traps...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Reloading traps...");
 	entity_list.RemoveAllTraps();
 	if (!database.LoadTraps(GetShortName(), GetInstanceVersion()))
 	{
 		Log.Log(EQEmuLogSys::Error, "Reloading traps failed.");
 	}
 
-	Log.Log(EQEmuLogSys::Status, "Reloading ground spawns...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Reloading ground spawns...");
 	if (!LoadGroundSpawns())
 	{
 		Log.Log(EQEmuLogSys::Error, "Reloading ground spawns failed. continuing.");
 	}
 
 	entity_list.RemoveAllObjects();
-	Log.Log(EQEmuLogSys::Status, "Reloading World Objects from DB...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Reloading World Objects from DB...");
 	if (!LoadZoneObjects())
 	{
 		Log.Log(EQEmuLogSys::Error, "Reloading World Objects failed. continuing.");
@@ -1060,7 +1060,7 @@ void Zone::ReloadStaticData() {
 	if (!LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion(), true)) // try loading the zone name...
 		LoadZoneCFG(zone->GetFileName(), zone->GetInstanceVersion()); // if that fails, try the file name, then load defaults
 
-	Log.Log(EQEmuLogSys::Status, "Zone Static Data Reloaded.");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Zone Static Data Reloaded.");
 }
 
 bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id, bool DontLoadDefault)
@@ -1098,7 +1098,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id, bool DontLoadDe
 	strcpy(newzone_data.zone_long_name, GetLongName());
 	strcpy(newzone_data.zone_short_name2, GetShortName());
 
-	Log.Log(EQEmuLogSys::Status, "Successfully loaded Zone Config.");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Successfully loaded Zone Config.");
 	return true;
 }
 
@@ -1580,8 +1580,8 @@ ZonePoint* Zone::GetClosestZonePoint(float x, float y, float z, uint32 to, Clien
 	{
 		if(client)
 			client->CheatDetected(MQZoneUnknownDest, x, y, z); // Someone is trying to use /zone
-		Log.Log(EQEmuLogSys::Status, "WARNING: Closest zone point for zone id %d is %f, you might need to update your zone_points table if you dont arrive at the right spot.", to, closest_dist);
-		Log.Log(EQEmuLogSys::Status, "<Real Zone Points>. %f x %f y %f z ", x, y, z);
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "WARNING: Closest zone point for zone id %d is %f, you might need to update your zone_points table if you dont arrive at the right spot.", to, closest_dist);
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "<Real Zone Points>. %f x %f y %f z ", x, y, z);
 	}
 
 	if(closest_dist > max_distance2)

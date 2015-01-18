@@ -449,7 +449,7 @@ int command_init(void) {
 		{
 #ifdef COMMANDS_WARNINGS
 			if(cur->second->access == 0)
-				Log.Log(EQEmuLogSys::Status, "command_init(): Warning: Command '%s' defaulting to access level 0!" , cur->first.c_str());
+				Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "command_init(): Warning: Command '%s' defaulting to access level 0!" , cur->first.c_str());
 #endif
 		}
 	}

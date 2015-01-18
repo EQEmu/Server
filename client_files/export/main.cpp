@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
 	Log.LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	Log.Log(EQEmuLogSys::Status, "Client Files Export Utility");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Client Files Export Utility");
 	if(!EQEmuConfig::LoadConfig()) {
 		Log.Log(EQEmuLogSys::Error, "Unable to load configuration file.");
 		return 1;
@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
 	}
 
 	SharedDatabase database;
-	Log.Log(EQEmuLogSys::Status, "Connecting to database...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Connecting to database...");
 	if(!database.Connect(config->DatabaseHost.c_str(), config->DatabaseUsername.c_str(),
 		config->DatabasePassword.c_str(), config->DatabaseDB.c_str(), config->DatabasePort)) {
 		Log.Log(EQEmuLogSys::Error, "Unable to connect to the database, cannot continue without a "
@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
 }
 
 void ExportSpells(SharedDatabase *db) {
-	Log.Log(EQEmuLogSys::Status, "Exporting Spells...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Exporting Spells...");
 
 	FILE *f = fopen("export/spells_us.txt", "w");
 	if(!f) {
@@ -140,7 +140,7 @@ int GetSkill(SharedDatabase *db, int skill_id, int class_id, int level) {
 }
 
 void ExportSkillCaps(SharedDatabase *db) {
-	Log.Log(EQEmuLogSys::Status, "Exporting Skill Caps...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Exporting Skill Caps...");
 
 	FILE *f = fopen("export/SkillCaps.txt", "w");
 	if(!f) {
@@ -169,7 +169,7 @@ void ExportSkillCaps(SharedDatabase *db) {
 }
 
 void ExportBaseData(SharedDatabase *db) {
-	Log.Log(EQEmuLogSys::Status, "Exporting Base Data...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Exporting Base Data...");
 
 	FILE *f = fopen("export/BaseData.txt", "w");
 	if(!f) {

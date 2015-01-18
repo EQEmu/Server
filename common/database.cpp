@@ -89,7 +89,7 @@ bool Database::Connect(const char* host, const char* user, const char* passwd, c
 		return false; 
 	}
 	else {
-		Log.Log(EQEmuLogSys::Status, "Using database '%s' at %s:%d",database,host,port);
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Using database '%s' at %s:%d",database,host,port);
 		return true;
 	}
 }

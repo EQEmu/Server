@@ -645,7 +645,7 @@ int32 ZoneDatabase::GetDoorsDBCountPlusOne(const char *zone_name, int16 version)
 }
 
 bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name, int16 version) {
-	Log.Log(EQEmuLogSys::Status, "Loading Doors from database...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading Doors from database...");
 
 
 //	Door tmpDoor;

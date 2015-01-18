@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
 	Log.LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	Log.Log(EQEmuLogSys::Status, "Shared Memory Loader Program");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Shared Memory Loader Program");
 	if(!EQEmuConfig::LoadConfig()) {
 		Log.Log(EQEmuLogSys::Error, "Unable to load configuration file.");
 		return 1;
@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
 	}
 
 	SharedDatabase database;
-	Log.Log(EQEmuLogSys::Status, "Connecting to database...");
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Connecting to database...");
 	if(!database.Connect(config->DatabaseHost.c_str(), config->DatabaseUsername.c_str(),
 		config->DatabasePassword.c_str(), config->DatabaseDB.c_str(), config->DatabasePort)) {
 		Log.Log(EQEmuLogSys::Error, "Unable to connect to the database, cannot continue without a "
@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
 	}
 
 	if(load_all || load_items) {
-		Log.Log(EQEmuLogSys::Status, "Loading items...");
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading items...");
 		try {
 			LoadItems(&database);
 		} catch(std::exception &ex) {
@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
 	}
 
 	if(load_all || load_factions) {
-		Log.Log(EQEmuLogSys::Status, "Loading factions...");
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading factions...");
 		try {
 			LoadFactions(&database);
 		} catch(std::exception &ex) {
@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
 	}
 
 	if(load_all || load_loot) {
-		Log.Log(EQEmuLogSys::Status, "Loading loot...");
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading loot...");
 		try {
 			LoadLoot(&database);
 		} catch(std::exception &ex) {
@@ -144,7 +144,7 @@ int main(int argc, char **argv) {
 	}
 
 	if(load_all || load_skill_caps) {
-		Log.Log(EQEmuLogSys::Status, "Loading skill caps...");
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading skill caps...");
 		try {
 			LoadSkillCaps(&database);
 		} catch(std::exception &ex) {
@@ -154,7 +154,7 @@ int main(int argc, char **argv) {
 	}
 
 	if(load_all || load_spells) {
-		Log.Log(EQEmuLogSys::Status, "Loading spells...");
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading spells...");
 		try {
 			LoadSpells(&database);
 		} catch(std::exception &ex) {
@@ -164,7 +164,7 @@ int main(int argc, char **argv) {
 	}
 
 	if(load_all || load_bd) {
-		Log.Log(EQEmuLogSys::Status, "Loading base data...");
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading base data...");
 		try {
 			LoadBaseData(&database);
 		} catch(std::exception &ex) {

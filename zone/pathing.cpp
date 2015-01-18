@@ -61,7 +61,7 @@ PathManager* PathManager::LoadPathFile(const char* ZoneName)
 
 		if(Ret->loadPaths(PathFile))
 		{
-			Log.Log(EQEmuLogSys::Status, "Path File %s loaded.", ZonePathFileName);
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Path File %s loaded.", ZonePathFileName);
 
 		}
 		else
@@ -109,7 +109,7 @@ bool PathManager::loadPaths(FILE *PathFile)
 
 	fread(&Head, sizeof(Head), 1, PathFile);
 
-	Log.Log(EQEmuLogSys::Status, "Path File Header: Version %ld, PathNodes %ld",
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Path File Header: Version %ld, PathNodes %ld",
 				(long)Head.version, (long)Head.PathNodeCount);
 
 	if(Head.version != 2)
