@@ -10387,7 +10387,7 @@ bool Bot::IsArcheryRange(Mob *target) {
 
 		range *= range;
 
-		float targetDistance = DistNoRootNoZ(*target);
+		float targetDistance = ComparativeDistanceNoZ(m_Position, target->GetPosition());
 
 		float minRuleDistance = RuleI(Combat, MinRangedAttackDist) * RuleI(Combat, MinRangedAttackDist);
 
