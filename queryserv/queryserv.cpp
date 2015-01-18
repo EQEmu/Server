@@ -65,16 +65,16 @@ int main() {
 		</qsdatabase>
 	*/
 
-	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Starting EQEmu QueryServ.");
+	Log.Out(Logs::Detail, Logs::QS_Server, "Starting EQEmu QueryServ.");
 	if (!queryservconfig::LoadConfig()) {
-		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Loading server configuration failed.");
+		Log.Out(Logs::Detail, Logs::QS_Server, "Loading server configuration failed.");
 		return 1;
 	}
 
 	Config = queryservconfig::get(); 
 	WorldShortName = Config->ShortName; 
 
-	Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Connecting to MySQL...");
+	Log.Out(Logs::Detail, Logs::QS_Server, "Connecting to MySQL...");
 	
 	/* MySQL Connection */
 	if (!database.Connect(
@@ -83,22 +83,22 @@ int main() {
 		Config->QSDatabasePassword.c_str(),
 		Config->QSDatabaseDB.c_str(),
 		Config->QSDatabasePort)) {
-		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Cannot continue without a database connection.");
+		Log.Out(Logs::Detail, Logs::World_Server, "Cannot continue without a database connection.");
 		return 1;
 	}
 
 	/* Initialize Logging */
 	if (!load_log_settings(Config->LogSettingsFile.c_str()))
-		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
+		Log.Out(Logs::Detail, Logs::QS_Server, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
 	else
-		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
+		Log.Out(Logs::Detail, Logs::QS_Server, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Could not set signal handler");
+		Log.Out(Logs::Detail, Logs::QS_Server, "Could not set signal handler");
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Could not set signal handler");
+		Log.Out(Logs::Detail, Logs::QS_Server, "Could not set signal handler");
 		return 1;
 	}
 

@@ -64,7 +64,7 @@ EXTERN_C XS(boot_qc)
 	file[255] = '\0';
 
 	if(items != 1)
-		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "boot_qc does not take any arguments.");
+		Log.Out(Logs::General, Logs::Error, "boot_qc does not take any arguments.");
 	
 	char buf[128];	//shouldent have any function names longer than this.
 	
@@ -100,7 +100,7 @@ XS(XS_EQEmuIO_PRINT)
 		int len = 0;
 		for(i = 0; *cur != '\0'; i++, cur++) {
 			if(*cur == '\n') {
-				Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Quests, str);
+				Log.Out(Logs::Detail, Logs::Quests, str);
 				len = 0;
 				pos = i+1;
 			} else {
@@ -108,7 +108,7 @@ XS(XS_EQEmuIO_PRINT)
 			}
 		}
 		if(len > 0) {
-			Log.Out(EQEmuLogSys::Detail, EQEmuLogSys::Quests, str);
+			Log.Out(Logs::Detail, Logs::Quests, str);
 		}
  	}
  	

@@ -40,22 +40,22 @@ int main(int argc, char **argv) {
 	Log.LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	Log.Out(EQEmuLogSys::General, EQEmuLogSys::Status, "Shared Memory Loader Program");
+	Log.Out(Logs::General, Logs::Status, "Shared Memory Loader Program");
 	if(!EQEmuConfig::LoadConfig()) {
-		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to load configuration file.");
+		Log.Out(Logs::General, Logs::Error, "Unable to load configuration file.");
 		return 1;
 	}
 
 	const EQEmuConfig *config = EQEmuConfig::get();
 	if(!load_log_settings(config->LogSettingsFile.c_str())) {
-		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Warning: unable to read %s.", config->LogSettingsFile.c_str());
+		Log.Out(Logs::General, Logs::Error, "Warning: unable to read %s.", config->LogSettingsFile.c_str());
 	}
 
 	SharedDatabase database;
-	Log.Out(EQEmuLogSys::General, EQEmuLogSys::Status, "Connecting to database...");
+	Log.Out(Logs::General, Logs::Status, "Connecting to database...");
 	if(!database.Connect(config->DatabaseHost.c_str(), config->DatabaseUsername.c_str(),
 		config->DatabasePassword.c_str(), config->DatabaseDB.c_str(), config->DatabasePort)) {
-		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to connect to the database, cannot continue without a "
+		Log.Out(Logs::General, Logs::Error, "Unable to connect to the database, cannot continue without a "
 			"database connection");
 		return 1;
 	}
@@ -114,61 +114,61 @@ int main(int argc, char **argv) {
 	}
 
 	if(load_all || load_items) {
-		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading items...");
+		Log.Out(Logs::General, Logs::Status, "Loading items...");
 		try {
 			LoadItems(&database);
 		} catch(std::exception &ex) {
-			Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
+			Log.Out(Logs::General, Logs::Error, "%s", ex.what());
 			return 1;
 		}
 	}
 
 	if(load_all || load_factions) {
-		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading factions...");
+		Log.Out(Logs::General, Logs::Status, "Loading factions...");
 		try {
 			LoadFactions(&database);
 		} catch(std::exception &ex) {
-			Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
+			Log.Out(Logs::General, Logs::Error, "%s", ex.what());
 			return 1;
 		}
 	}
 
 	if(load_all || load_loot) {
-		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading loot...");
+		Log.Out(Logs::General, Logs::Status, "Loading loot...");
 		try {
 			LoadLoot(&database);
 		} catch(std::exception &ex) {
-			Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
+			Log.Out(Logs::General, Logs::Error, "%s", ex.what());
 			return 1;
 		}
 	}
 
 	if(load_all || load_skill_caps) {
-		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading skill caps...");
+		Log.Out(Logs::General, Logs::Status, "Loading skill caps...");
 		try {
 			LoadSkillCaps(&database);
 		} catch(std::exception &ex) {
-			Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
+			Log.Out(Logs::General, Logs::Error, "%s", ex.what());
 			return 1;
 		}
 	}
 
 	if(load_all || load_spells) {
-		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading spells...");
+		Log.Out(Logs::General, Logs::Status, "Loading spells...");
 		try {
 			LoadSpells(&database);
 		} catch(std::exception &ex) {
-			Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
+			Log.Out(Logs::General, Logs::Error, "%s", ex.what());
 			return 1;
 		}
 	}
 
 	if(load_all || load_bd) {
-		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading base data...");
+		Log.Out(Logs::General, Logs::Status, "Loading base data...");
 		try {
 			LoadBaseData(&database);
 		} catch(std::exception &ex) {
-			Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
+			Log.Out(Logs::General, Logs::Error, "%s", ex.what());
 			return 1;
 		}
 	}

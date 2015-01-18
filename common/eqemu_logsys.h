@@ -26,21 +26,18 @@
 
 #include "types.h"
 
-class EQEmuLogSys {
-public:
-	EQEmuLogSys();
-	~EQEmuLogSys();
-
+namespace Logs{
 	enum DebugLevel {
 		General = 0,	/* 0 - Low-Level general debugging, useful info on single line */
 		Moderate,		/* 1 - Informational based, used in functions, when particular things load */
 		Detail,			/* 2 - Use this for extreme detail in logging, usually in extreme debugging in the stack or interprocess communication */
 	};
 
-	/* 
-		If you add to this, make sure you update LogCategoryName 
+	/*
+		If you add to this, make sure you update LogCategoryName
 		NOTE: Only add to the bottom of the enum because that is the type ID assignment
 	*/
+
 	enum LogCategory {
 		None = 0,
 		AA,
@@ -80,9 +77,55 @@ public:
 		MaxCategoryID	/* Don't Remove this*/
 	};
 
+	/* If you add to this, make sure you update LogCategory */
+	static const char* LogCategoryName[LogCategory::MaxCategoryID] = {
+		"",
+		"AA",
+		"AI",
+		"Aggro",
+		"Attack",
+		"Client_Server_Packet",
+		"Combat",
+		"Commands",
+		"Crash",
+		"Debug",
+		"Doors",
+		"Error",
+		"Guilds",
+		"Inventory",
+		"Launcher",
+		"Netcode",
+		"Normal",
+		"Object",
+		"Pathing",
+		"QS_Server",
+		"Quests",
+		"Rules",
+		"Skills",
+		"Spawns",
+		"Spells",
+		"Status",
+		"TCP_Connection",
+		"Tasks",
+		"Tradeskills",
+		"Trading",
+		"Tribute",
+		"UCS_Server",
+		"WebInterface_Server",
+		"World_Server",
+		"Zone_Server",
+	};
+
+}
+
+class EQEmuLogSys {
+public:
+	EQEmuLogSys();
+	~EQEmuLogSys();
+
 	void CloseFileLogs();
 	void LoadLogSettingsDefaults();
-	void Out(DebugLevel debug_level, uint16 log_category, std::string message, ...);
+	void Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...);
 	void MakeDirectory(std::string directory_name);
 	void SetCurrentTimeStamp(char* time_stamp);
 	void StartFileLogs(const std::string log_name);
@@ -93,7 +136,7 @@ public:
 		uint8 log_to_gmsay;
 	};
 
-	LogSettings log_settings[EQEmuLogSys::LogCategory::MaxCategoryID];
+	LogSettings log_settings[Logs::LogCategory::MaxCategoryID];
 	bool log_settings_loaded = false;
 	int log_platform = 0;
 
@@ -111,44 +154,5 @@ private:
 };
 
 extern EQEmuLogSys Log;
-
-/* If you add to this, make sure you update LogCategory */
-static const char* LogCategoryName[EQEmuLogSys::LogCategory::MaxCategoryID] = {
-	"",
-	"AA",
-	"AI",
-	"Aggro",
-	"Attack",
-	"Client_Server_Packet",
-	"Combat",
-	"Commands",
-	"Crash",
-	"Debug",
-	"Doors",
-	"Error",
-	"Guilds",
-	"Inventory",
-	"Launcher",
-	"Netcode",
-	"Normal",
-	"Object",
-	"Pathing",
-	"QS_Server",
-	"Quests",
-	"Rules",
-	"Skills",
-	"Spawns",
-	"Spells",
-	"Status",
-	"TCP_Connection",
-	"Tasks",
-	"Tradeskills",
-	"Trading",
-	"Tribute",
-	"UCS_Server",
-	"WebInterface_Server",
-	"World_Server",
-	"Zone_Server",
-};
 
 #endif

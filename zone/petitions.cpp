@@ -213,7 +213,7 @@ void ZoneDatabase::DeletePetitionFromDB(Petition* wpet) {
     std::string query = StringFormat("DELETE FROM petitions WHERE petid = %i", wpet->GetID());
     auto results = QueryDatabase(query);
 	if (!results.Success())
-		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in DeletePetitionFromDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.Out(Logs::General, Logs::Error, "Error in DeletePetitionFromDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
@@ -227,7 +227,7 @@ void ZoneDatabase::UpdatePetitionToDB(Petition* wpet) {
                                     wpet->CheckedOut() ? 1: 0, wpet->GetID());
     auto results = QueryDatabase(query);
 	if (!results.Success())
-		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in UpdatePetitionToDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.Out(Logs::General, Logs::Error, "Error in UpdatePetitionToDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
@@ -254,12 +254,12 @@ void ZoneDatabase::InsertPetitionToDB(Petition* wpet)
     safe_delete_array(petitiontext);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in InsertPetitionToDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.Out(Logs::General, Logs::Error, "Error in InsertPetitionToDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
 #if EQDEBUG >= 5
-		Log.Out(EQEmuLogSys::General, EQEmuLogSys::None, "New petition created");
+		Log.Out(Logs::General, Logs::None, "New petition created");
 #endif
 
 }
@@ -273,7 +273,7 @@ void ZoneDatabase::RefreshPetitionsFromDB()
                         "FROM petitions ORDER BY petid";
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in RefreshPetitionsFromDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.Out(Logs::General, Logs::Error, "Error in RefreshPetitionsFromDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 

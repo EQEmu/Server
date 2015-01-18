@@ -83,7 +83,7 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 {
 	log_platform = GetExecutablePlatformInt();
 	/* Write defaults */
-	for (int i = 0; i < EQEmuLogSys::LogCategory::MaxCategoryID; i++){
+	for (int i = 0; i < Logs::LogCategory::MaxCategoryID; i++){
 		log_settings[i].log_to_console = 0;
 		log_settings[i].log_to_file = 0;
 		log_settings[i].log_to_gmsay = 0;
@@ -93,8 +93,8 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 
 std::string EQEmuLogSys::FormatOutMessageString(uint16 log_category, std::string in_message){
 	std::string category_string = "";
-	if (log_category > 0 && LogCategoryName[log_category]){ 
-		category_string = StringFormat("[%s] ", LogCategoryName[log_category]);
+	if (log_category > 0 && Logs::LogCategoryName[log_category]){
+		category_string = StringFormat("[%s] ", Logs::LogCategoryName[log_category]);
 	}
 	return StringFormat("%s%s", category_string.c_str(), in_message.c_str()); 
 }
@@ -106,7 +106,7 @@ void EQEmuLogSys::ProcessGMSay(uint16 log_category, std::string message)
 		return;
 
 	/* Enabling Netcode based GMSay output creates a feedback loop that ultimately ends in a crash */
-	if (log_category == EQEmuLogSys::LogCategory::Netcode)
+	if (log_category == Logs::LogCategory::Netcode)
 		return;
 
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
@@ -124,7 +124,7 @@ void EQEmuLogSys::ProcessLogWrite(uint16 log_category, std::string message)
 	EQEmuLogSys::SetCurrentTimeStamp(time_stamp);
 
 	if (process_log){
-		process_log << time_stamp << " " << StringFormat("[%s] ", LogCategoryName[log_category]).c_str() << message << std::endl;
+		process_log << time_stamp << " " << StringFormat("[%s] ", Logs::LogCategoryName[log_category]).c_str() << message << std::endl;
 	}
 	else{
 		// std::cout << "[DEBUG] " << ":: There currently is no log file open for this process " << "\n";
@@ -154,7 +154,7 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 log_category, const std::string m
 		//}
 	#endif
 
-		std::cout << "[" << LogCategoryName[log_category] << "] " << message << "\n";
+	std::cout << message << "\n";
 
 	#ifdef _WINDOWS
 		/* Always set back to white*/
@@ -162,7 +162,7 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 log_category, const std::string m
 	#endif
 }
 
-void EQEmuLogSys::Out(DebugLevel debug_level, uint16 log_category, std::string message, ...)
+void EQEmuLogSys::Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...)
 {
 	va_list args;
 	va_start(args, message);

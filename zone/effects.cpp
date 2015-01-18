@@ -461,7 +461,7 @@ bool Client::TrainDiscipline(uint32 itemid) {
 	const Item_Struct *item = database.GetItem(itemid);
 	if(item == nullptr) {
 		Message(13, "Unable to find the tome you turned in!");
-		Log.Out(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to find turned in tome id %lu\n", (unsigned long)itemid);
+		Log.Out(Logs::General, Logs::Error, "Unable to find turned in tome id %lu\n", (unsigned long)itemid);
 		return(false);
 	}
 
