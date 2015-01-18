@@ -158,7 +158,7 @@ bool EQEmuLog::write(LogIDs id, const char *fmt, ...)
 	va_list argptr, tmpargptr;
 	va_start(argptr, fmt);
 
-	Log.Log(id, vStringFormat(fmt, argptr).c_str());
+	// Log.Log(id, vStringFormat(fmt, argptr).c_str());
 
 	return true;
 }

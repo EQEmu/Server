@@ -190,22 +190,6 @@ void EQEmuLogSys::DebugCategory(DebugLevel debug_level, uint16 log_category, std
 	EQEmuLogSys::ProcessLogWrite(EQEmuLogSys::Debug, log_category, output_debug_message);
 }
 
-void EQEmuLogSys::Log(uint16 log_type, const std::string message, ...)
-{
-	if (log_type > EQEmuLogSys::MaxLogID){
-		return;
-	}
-
-	va_list args;
-	va_start(args, message);
-	std::string output_message = vStringFormat(message.c_str(), args);
-	va_end(args);
-
-	EQEmuLogSys::ProcessConsoleMessage(log_type, 0, output_message);
-	EQEmuLogSys::ProcessGMSay(log_type, 0, output_message);
-	EQEmuLogSys::ProcessLogWrite(log_type, 0, output_message);
-}
-
 void EQEmuLogSys::SetCurrentTimeStamp(char* time_stamp){
 	time_t raw_time;
 	struct tm * time_info;

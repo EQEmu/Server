@@ -31,17 +31,6 @@ public:
 	EQEmuLogSys();
 	~EQEmuLogSys();
 
-	enum LogType {
-		Status = 0,	 /* This must stay the first entry in this list */
-		Normal,		 /* Normal Logs */
-		Error,		 /* Error Logs */
-		Debug,		 /* Debug Logs */
-		Quest,		 /* Quest Logs */
-		Commands,	 /* Issued Commands */
-		Crash,		 /* Crash Logs */
-		MaxLogID	 /* Max, used in functions to get the max log ID */
-	};
-
 	enum DebugLevel {
 		General = 0,	/* 0 - Low-Level general debugging, useful info on single line */
 		Moderate,		/* 1 - Informational based, used in functions, when particular things load */
