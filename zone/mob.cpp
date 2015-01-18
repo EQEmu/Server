@@ -2274,16 +2274,6 @@ bool Mob::CanThisClassBlock(void) const
 	}
 }
 
-float Mob::DistNoRoot(const Mob &other) const {
-	float xDiff = other.m_Position.m_X - m_Position.m_X;
-	float yDiff = other.m_Position.m_Y - m_Position.m_Y;
-	float zDiff = other.m_Position.m_Z - m_Position.m_Z;
-
-	return ( (xDiff * xDiff)
-			+ (yDiff * yDiff)
-			+ (zDiff * zDiff) );
-}
-
 float Mob::DistNoRootNoZ(float x, float y) const {
 	float xDiff = x - m_Position.m_X;
 	float yDiff = y - m_Position.m_Y;
