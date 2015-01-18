@@ -674,7 +674,7 @@ void EntityList::AETaunt(Client* taunter, float range)
 			zdiff *= -1;
 		if (zdiff < 10
 				&& taunter->IsAttackAllowed(them)
-				&& taunter->DistNoRootNoZ(*them) <= range) {
+				&& ComparativeDistanceNoZ(taunter->GetPosition(), them->GetPosition()) <= range) {
 			if (taunter->CheckLosFN(them)) {
 				taunter->Taunt(them, true);
 			}
