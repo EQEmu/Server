@@ -10183,7 +10183,7 @@ void command_distance(Client *c, const Seperator *sep) {
 	if(c && c->GetTarget()) {
 		Mob* target = c->GetTarget();
 
-		c->Message(0, "Your target, %s, is %1.1f units from you.", c->GetTarget()->GetName(), c->Dist(*target));
+		c->Message(0, "Your target, %s, is %1.1f units from you.", c->GetTarget()->GetName(), Distance(c->GetPosition(), target->GetPosition()));
 	}
 }
 
