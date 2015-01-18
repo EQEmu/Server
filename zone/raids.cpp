@@ -791,7 +791,7 @@ void Raid::GroupBardPulse(Mob* caster, uint16 spellid, uint32 gid){
 		else if(members[z].member != nullptr)
 		{
 			if(members[z].GroupNumber == gid){
-				distance = caster->DistNoRoot(*members[z].member);
+				distance = ComparativeDistance(caster->GetPosition(), members[z].member->GetPosition());
 				if(distance <= range2) {
 					members[z].member->BardPulse(spellid, caster);
 #ifdef GROUP_BUFF_PETS
