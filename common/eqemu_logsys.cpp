@@ -168,7 +168,7 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 log_type, uint16 log_category, co
 		}
 	#endif
 
-	std::cout << "[N::" << TypeNames[log_type] << "] " << message << "\n";
+	std::cout << "[" << TypeNames[log_type] << "] " << message << "\n";
 
 	#ifdef _WINDOWS
 		/* Always set back to white*/
