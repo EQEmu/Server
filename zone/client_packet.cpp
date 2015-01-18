@@ -13097,7 +13097,7 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 			{
 				if (GetBindSightTarget()->DistNoRoot(*GetTarget()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
 				{
-					if (DistNoRoot(*GetTarget()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
+					if (ComparativeDistance(m_Position, GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
 					{
 						char *hacker_str = nullptr;
 						MakeAnyLenString(&hacker_str, "%s attempting to target something beyond the clip plane of %.2f units,"
