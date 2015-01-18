@@ -40,22 +40,22 @@ int main(int argc, char **argv) {
 	Log.LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Shared Memory Loader Program");
+	Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Status, "Shared Memory Loader Program");
 	if(!EQEmuConfig::LoadConfig()) {
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to load configuration file.");
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to load configuration file.");
 		return 1;
 	}
 
 	const EQEmuConfig *config = EQEmuConfig::get();
 	if(!load_log_settings(config->LogSettingsFile.c_str())) {
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Warning: unable to read %s.", config->LogSettingsFile.c_str());
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Warning: unable to read %s.", config->LogSettingsFile.c_str());
 	}
 
 	SharedDatabase database;
-	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Connecting to database...");
+	Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Status, "Connecting to database...");
 	if(!database.Connect(config->DatabaseHost.c_str(), config->DatabaseUsername.c_str(),
 		config->DatabasePassword.c_str(), config->DatabaseDB.c_str(), config->DatabasePort)) {
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to connect to the database, cannot continue without a "
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to connect to the database, cannot continue without a "
 			"database connection");
 		return 1;
 	}
@@ -114,61 +114,61 @@ int main(int argc, char **argv) {
 	}
 
 	if(load_all || load_items) {
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading items...");
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading items...");
 		try {
 			LoadItems(&database);
 		} catch(std::exception &ex) {
-			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
+			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
 			return 1;
 		}
 	}
 
 	if(load_all || load_factions) {
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading factions...");
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading factions...");
 		try {
 			LoadFactions(&database);
 		} catch(std::exception &ex) {
-			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
+			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
 			return 1;
 		}
 	}
 
 	if(load_all || load_loot) {
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading loot...");
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading loot...");
 		try {
 			LoadLoot(&database);
 		} catch(std::exception &ex) {
-			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
+			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
 			return 1;
 		}
 	}
 
 	if(load_all || load_skill_caps) {
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading skill caps...");
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading skill caps...");
 		try {
 			LoadSkillCaps(&database);
 		} catch(std::exception &ex) {
-			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
+			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
 			return 1;
 		}
 	}
 
 	if(load_all || load_spells) {
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading spells...");
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading spells...");
 		try {
 			LoadSpells(&database);
 		} catch(std::exception &ex) {
-			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
+			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
 			return 1;
 		}
 	}
 
 	if(load_all || load_bd) {
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading base data...");
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Status, "Loading base data...");
 		try {
 			LoadBaseData(&database);
 		} catch(std::exception &ex) {
-			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
+			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
 			return 1;
 		}
 	}

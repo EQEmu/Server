@@ -826,7 +826,7 @@ int32 Client::acmod() {
 	return (65 + ((agility-300) / 21));
 	}
 #if EQDEBUG >= 11
-	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in Client::acmod(): Agility: %i, Level: %i",agility,level);
+	Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in Client::acmod(): Agility: %i, Level: %i",agility,level);
 #endif
 	return 0;
 };
@@ -935,7 +935,7 @@ int32 Client::CalcMaxMana()
 			break;
 		}
 		default: {
-			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
 			max_mana = 0;
 			break;
 		}
@@ -956,7 +956,7 @@ int32 Client::CalcMaxMana()
 	}
 
 #if EQDEBUG >= 11
-	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Client::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
+	Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::None, "Client::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
 #endif
 	return max_mana;
 }
@@ -1046,14 +1046,14 @@ int32 Client::CalcBaseMana()
 			break;
 		}
 		default: {
-			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
 			max_m = 0;
 			break;
 		}
 	}
 
 #if EQDEBUG >= 11
-	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Client::CalcBaseMana() called for %s - returning %d", GetName(), max_m);
+	Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::None, "Client::CalcBaseMana() called for %s - returning %d", GetName(), max_m);
 #endif
 	return max_m;
 }
@@ -1896,7 +1896,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 	if (effectmod > effectmodcap)
 		effectmod = effectmodcap;
 
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "%s::GetInstrumentMod() spell=%d mod=%d modcap=%d\n",
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "%s::GetInstrumentMod() spell=%d mod=%d modcap=%d\n",
 			GetName(), spell_id, effectmod, effectmodcap);
 
 	return effectmod;

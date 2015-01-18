@@ -342,17 +342,17 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	{
 		//FatherNiwtit: make sure we can see them. last since it is very expensive
 		if(CheckLosFN(mob)) {
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Check aggro for %s target %s.", GetName(), mob->GetName()); 
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Check aggro for %s target %s.", GetName(), mob->GetName()); 
 			return( mod_will_aggro(mob, this) );
 		}
 	}
 
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Is In zone?:%d\n", mob->InZone());
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Dist^2: %f\n", dist2);
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Range^2: %f\n", iAggroRange2);
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Faction: %d\n", fv);
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Int: %d\n", GetINT());
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Con: %d\n", GetLevelCon(mob->GetLevel()));
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Is In zone?:%d\n", mob->InZone());
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Dist^2: %f\n", dist2);
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Range^2: %f\n", iAggroRange2);
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Faction: %d\n", fv);
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Int: %d\n", GetINT());
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Aggro, "Con: %d\n", GetLevelCon(mob->GetLevel()));
 
 	return(false);
 }
@@ -466,7 +466,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 					//Father Nitwit: make sure we can see them.
 					if(mob->CheckLosFN(sender)) {
 #if (EQDEBUG>=5)
-						Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "AIYellForHelp(\"%s\",\"%s\") %s attacking %s Dist %f Z %f",
+						Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::None, "AIYellForHelp(\"%s\",\"%s\") %s attacking %s Dist %f Z %f",
 						sender->GetName(), attacker->GetName(), mob->GetName(), attacker->GetName(), mob->DistNoRoot(*sender), fabs(sender->GetZ()+mob->GetZ()));
 #endif
 						mob->AddToHateList(attacker, 1, 0, false);
@@ -693,7 +693,7 @@ type', in which case, the answer is yes.
 	}
 	while( reverse++ == 0 );
 
-	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Mob::IsAttackAllowed: don't have a rule for this - %s vs %s\n", this->GetName(), target->GetName());
+	Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::None, "Mob::IsAttackAllowed: don't have a rule for this - %s vs %s\n", this->GetName(), target->GetName());
 	return false;
 }
 
@@ -833,7 +833,7 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 	}
 	while( reverse++ == 0 );
 
-	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Mob::IsBeneficialAllowed: don't have a rule for this - %s to %s\n", this->GetName(), target->GetName());
+	Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::None, "Mob::IsBeneficialAllowed: don't have a rule for this - %s to %s\n", this->GetName(), target->GetName());
 	return false;
 }
 
@@ -945,7 +945,7 @@ bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
 	oloc.z = posZ + (mobSize==0.0?LOS_DEFAULT_HEIGHT:mobSize)/2 * SEE_POSITION;
 
 #if LOSDEBUG>=5
-	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "LOS from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) sizes: (%.2f, %.2f)", myloc.x, myloc.y, myloc.z, oloc.x, oloc.y, oloc.z, GetSize(), mobSize);
+	Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::None, "LOS from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) sizes: (%.2f, %.2f)", myloc.x, myloc.y, myloc.z, oloc.x, oloc.y, oloc.z, GetSize(), mobSize);
 #endif
 	return zone->zonemap->CheckLoS(myloc, oloc);
 }

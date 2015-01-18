@@ -79,7 +79,7 @@ void ZSList::KillAll() {
 void ZSList::Process() {
 
 	if(shutdowntimer && shutdowntimer->Check()){
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Shutdown timer has expired. Telling all zones to shut down and exiting. (fake sigint)");
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Shutdown timer has expired. Telling all zones to shut down and exiting. (fake sigint)");
 		auto pack2 = new ServerPacket;
 		pack2->opcode = ServerOP_ShutdownAll;
 		pack2->size=0;
@@ -99,10 +99,10 @@ void ZSList::Process() {
 			ZoneServer* zs = iterator.GetData();
 			struct in_addr in;
 			in.s_addr = zs->GetIP();
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Removing zoneserver #%d at %s:%d",zs->GetID(),zs->GetCAddress(),zs->GetCPort());
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Removing zoneserver #%d at %s:%d",zs->GetID(),zs->GetCAddress(),zs->GetCPort());
 			zs->LSShutDownUpdate(zs->GetZoneID());
 			if (holdzones){
-				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Hold Zones mode is ON - rebooting lost zone");
+				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Hold Zones mode is ON - rebooting lost zone");
 				if(!zs->IsStaticZone())
 					RebootZone(inet_ntoa(in),zs->GetCPort(),zs->GetCAddress(),zs->GetID());
 				else
@@ -576,7 +576,7 @@ void ZSList::RebootZone(const char* ip1,uint16 port,const char* ip2, uint32 skip
 	s->port = port;
 	s->zoneid = zoneid;
 	if(zoneid != 0)
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Rebooting static zone with the ID of: %i",zoneid);
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Rebooting static zone with the ID of: %i",zoneid);
 	tmp[z]->SendPacket(pack);
 	delete pack;
 	safe_delete_array(tmp);

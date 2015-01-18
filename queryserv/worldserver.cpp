@@ -53,7 +53,7 @@ WorldServer::~WorldServer()
 
 void WorldServer::OnConnected()
 {
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Connected to World.");
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Connected to World.");
 	WorldConnection::OnConnected();
 }
 
@@ -66,7 +66,7 @@ void WorldServer::Process()
 	ServerPacket *pack = 0; 
 	while((pack = tcpc.PopPacket()))
 	{
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Received Opcode: %4X", pack->opcode); 
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Received Opcode: %4X", pack->opcode); 
 		switch(pack->opcode) {
 			case 0: {
 				break;
@@ -148,7 +148,7 @@ void WorldServer::Process()
 						break;
 					}
 					default:
-						Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Received unhandled ServerOP_QueryServGeneric", Type);
+						Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Received unhandled ServerOP_QueryServGeneric", Type);
 						break;
 				}
 				break;

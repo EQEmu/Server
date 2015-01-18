@@ -72,7 +72,7 @@ void ZoneLaunch::Start() {
 	//spec is consumed, even on failure
 	m_ref = ProcLauncher::get()->Launch(spec);
 	if(m_ref == ProcLauncher::ProcError) {
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Failure to launch '%s %s %s'. ", m_config->ZoneExe.c_str(), m_zone.c_str(), m_launcherName);
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Failure to launch '%s %s %s'. ", m_config->ZoneExe.c_str(), m_zone.c_str(), m_launcherName);
 		m_timer.Start(m_config->RestartWait);
 		return;
 	}
@@ -84,17 +84,17 @@ void ZoneLaunch::Start() {
 
 	SendStatus();
 
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Zone %s has been started.", m_zone.c_str());
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Zone %s has been started.", m_zone.c_str());
 }
 
 void ZoneLaunch::Restart() {
 	switch(m_state) {
 	case StateRestartPending:
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Restart of zone %s requested when a restart is already pending.", m_zone.c_str());
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Restart of zone %s requested when a restart is already pending.", m_zone.c_str());
 		break;
 	case StateStartPending:
 		//we havent started yet, do nothing
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Restart of %s before it has started. Ignoring.", m_zone.c_str());
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Restart of %s before it has started. Ignoring.", m_zone.c_str());
 		break;
 	case StateStarted:
 		//process is running along, kill it off..
@@ -102,20 +102,20 @@ void ZoneLaunch::Restart() {
 			break;	//we have no proc ref... cannot stop..
 		if(!ProcLauncher::get()->Terminate(m_ref, true)) {
 			//failed to terminate the process, its not likely that it will work if we try again, so give up.
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Failed to terminate zone %s. Giving up and moving to stopped.", m_zone.c_str());
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Failed to terminate zone %s. Giving up and moving to stopped.", m_zone.c_str());
 			m_state = StateStopped;
 			break;
 		}
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Termination signal sent to zone %s.", m_zone.c_str());
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Termination signal sent to zone %s.", m_zone.c_str());
 		m_timer.Start(m_config->TerminateWait);
 		m_state = StateRestartPending;
 		break;
 	case StateStopPending:
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Restart of zone %s requested when a stop is pending. Ignoring.", m_zone.c_str());
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Restart of zone %s requested when a stop is pending. Ignoring.", m_zone.c_str());
 		break;
 	case StateStopped:
 		//process is already stopped... nothing to do..
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Restart requested when zone %s is already stopped.", m_zone.c_str());
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Restart requested when zone %s is already stopped.", m_zone.c_str());
 		break;
 	}
 }
@@ -124,7 +124,7 @@ void ZoneLaunch::Stop(bool graceful) {
 	switch(m_state) {
 	case StateStartPending:
 		//we havent started yet, transition directly to stopped.
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Stopping zone %s before it has started.", m_zone.c_str());
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Stopping zone %s before it has started.", m_zone.c_str());
 		m_state = StateStopped;
 		break;
 	case StateStarted:
@@ -134,17 +134,17 @@ void ZoneLaunch::Stop(bool graceful) {
 			break;	//we have no proc ref... cannot stop..
 		if(!ProcLauncher::get()->Terminate(m_ref, graceful)) {
 			//failed to terminate the process, its not likely that it will work if we try again, so give up.
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Failed to terminate zone %s. Giving up and moving to stopped.", m_zone.c_str());
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Failed to terminate zone %s. Giving up and moving to stopped.", m_zone.c_str());
 			m_state = StateStopped;
 			break;
 		}
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Termination signal sent to zone %s.", m_zone.c_str());
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Termination signal sent to zone %s.", m_zone.c_str());
 		m_timer.Start(m_config->TerminateWait);
 		m_state = StateStopPending;
 		break;
 	case StateStopped:
 		//process is already stopped... nothing to do..
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Stop requested when zone %s is already stopped.", m_zone.c_str());
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Stop requested when zone %s is already stopped.", m_zone.c_str());
 		break;
 	}
 }
@@ -164,17 +164,17 @@ bool ZoneLaunch::Process() {
 			m_timer.Disable();
 
 			//actually start up the program
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Starting zone %s", m_zone.c_str());
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Starting zone %s", m_zone.c_str());
 			Start();
 
 			//now update the shared timer to reflect the proper start interval.
 			if(s_running == 1) {
 				//we are the first zone started. wait that interval.
-				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Waiting %d milliseconds before booting the second zone.", m_config->InitialBootWait);
+				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Waiting %d milliseconds before booting the second zone.", m_config->InitialBootWait);
 				s_startTimer.Start(m_config->InitialBootWait);
 			} else {
 				//just some follow on zone, use that interval.
-				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Waiting %d milliseconds before booting the next zone.", m_config->ZoneBootInterval);
+				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Waiting %d milliseconds before booting the next zone.", m_config->ZoneBootInterval);
 				s_startTimer.Start(m_config->ZoneBootInterval);
 			}
 
@@ -187,7 +187,7 @@ bool ZoneLaunch::Process() {
 		//waiting for notification that our child has died..
 		if(m_timer.Check()) {
 			//we have timed out, try to kill the child again
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Zone %s refused to die, killing again.", m_zone.c_str());
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Zone %s refused to die, killing again.", m_zone.c_str());
 			Restart();
 		}
 		break;
@@ -197,12 +197,12 @@ bool ZoneLaunch::Process() {
 			//we have timed out, try to kill the child again
 			m_killFails++;
 			if(m_killFails > 5) {	//should get this number from somewhere..
-				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Zone %s refused to die, giving up and acting like its dead.", m_zone.c_str());
+				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Zone %s refused to die, giving up and acting like its dead.", m_zone.c_str());
 				m_state = StateStopped;
 				s_running--;
 				SendStatus();
 			} else {
-				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Zone %s refused to die, killing again.", m_zone.c_str());
+				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Zone %s refused to die, killing again.", m_zone.c_str());
 				Stop(false);
 			}
 		}
@@ -221,29 +221,29 @@ void ZoneLaunch::OnTerminate(const ProcLauncher::ProcRef &ref, const ProcLaunche
 
 	switch(m_state) {
 	case StateStartPending:
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Zone %s has gone down before we started it..?? Restart timer started.", m_zone.c_str());
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Zone %s has gone down before we started it..?? Restart timer started.", m_zone.c_str());
 		m_state = StateStartPending;
 		m_timer.Start(m_config->RestartWait);
 		break;
 	case StateStarted:
 		//something happened to our happy process...
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Zone %s has gone down. Restart timer started.", m_zone.c_str());
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Zone %s has gone down. Restart timer started.", m_zone.c_str());
 		m_state = StateStartPending;
 		m_timer.Start(m_config->RestartWait);
 		break;
 	case StateRestartPending:
 		//it finally died, start it on up again
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Zone %s has terminated. Transitioning to starting state.", m_zone.c_str());
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Zone %s has terminated. Transitioning to starting state.", m_zone.c_str());
 		m_state = StateStartPending;
 		break;
 	case StateStopPending:
 		//it finally died, transition to close.
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Zone %s has terminated. Transitioning to stopped state.", m_zone.c_str());
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Zone %s has terminated. Transitioning to stopped state.", m_zone.c_str());
 		m_state = StateStopped;
 		break;
 	case StateStopped:
 		//we already thought it was stopped... dont care...
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Notified of zone %s terminating when we thought it was stopped.", m_zone.c_str());
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Notified of zone %s terminating when we thought it was stopped.", m_zone.c_str());
 		break;
 	}
 

@@ -47,13 +47,13 @@ int main(int argc, char *argv[]) {
 		launcher_name = argv[1];
 	}
 	if(launcher_name.length() < 1) {
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "You must specfify a launcher name as the first argument to this program.");
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "You must specfify a launcher name as the first argument to this program.");
 		return 1;
 	}
 
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Loading server configuration..");
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Loading server configuration..");
 	if (!EQEmuConfig::LoadConfig()) {
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Loading server configuration failed.");
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Loading server configuration failed.");
 		return 1;
 	}
 	const EQEmuConfig *Config = EQEmuConfig::get();
@@ -62,16 +62,16 @@ int main(int argc, char *argv[]) {
 	* Setup nice signal handlers
 	*/
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Could not set signal handler");
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Could not set signal handler");
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Could not set signal handler");
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Could not set signal handler");
 		return 1;
 	}
 	#ifndef WIN32
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)	{
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Could not set signal handler");
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Could not set signal handler");
 		return 1;
 	}
 
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
 	std::map<std::string, ZoneLaunch *> zones;
 	WorldServer world(zones, launcher_name.c_str(), Config);
 	if (!world.Connect()) {
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "worldserver.Connect() FAILED! Will retry.");
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "worldserver.Connect() FAILED! Will retry.");
 	}
 
 	std::map<std::string, ZoneLaunch *>::iterator zone, zend;
@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
 
 	Timer InterserverTimer(INTERSERVER_TIMER); // does auto-reconnect
 
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Starting main loop...");
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Starting main loop...");
 
 //	zones["test"] = new ZoneLaunch(&world, "./zone", "dynamic_1");
 
@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) {
 
 
 void CatchSignal(int sig_num) {
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Caught signal %d", sig_num);
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Caught signal %d", sig_num);
 	RunLoops = false;
 }
 

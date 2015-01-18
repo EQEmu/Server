@@ -56,7 +56,7 @@ void Client::SendGuildMOTD(bool GetGuildMOTDReply) {
 
 	}
 
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending OP_GuildMOTD of length %d", outapp->size);
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending OP_GuildMOTD of length %d", outapp->size);
 
 	FastQueuePacket(&outapp);
 }
@@ -144,10 +144,10 @@ void Client::SendGuildSpawnAppearance() {
 	if (!IsInAGuild()) {
 		// clear guildtag
 		SendAppearancePacket(AT_GuildID, GUILD_NONE);
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending spawn appearance for no guild tag.");
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending spawn appearance for no guild tag.");
 	} else {
 		uint8 rank = guild_mgr.GetDisplayedRank(GuildID(), GuildRank(), CharacterID());
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending spawn appearance for guild %d at rank %d", GuildID(), rank);
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending spawn appearance for guild %d at rank %d", GuildID(), rank);
 		SendAppearancePacket(AT_GuildID, GuildID());
 		if(GetClientVersion() >= EQClientRoF)
 		{
@@ -171,11 +171,11 @@ void Client::SendGuildList() {
 	//ask the guild manager to build us a nice guild list packet
 	outapp->pBuffer = guild_mgr.MakeGuildList(/*GetName()*/"", outapp->size);
 	if(outapp->pBuffer == nullptr) {
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Unable to make guild list!");
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Unable to make guild list!");
 		return;
 	}
 
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending OP_ZoneGuildList of length %d", outapp->size);
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending OP_ZoneGuildList of length %d", outapp->size);
 
 	FastQueuePacket(&outapp);
 }
@@ -192,7 +192,7 @@ void Client::SendGuildMembers() {
 	outapp->pBuffer = data;
 	data = nullptr;
 
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending OP_GuildMemberList of length %d", outapp->size);
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending OP_GuildMemberList of length %d", outapp->size);
 
 	FastQueuePacket(&outapp);
 
@@ -223,7 +223,7 @@ void Client::RefreshGuildInfo()
 
 	CharGuildInfo info;
 	if(!guild_mgr.GetCharInfo(CharacterID(), info)) {
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Unable to obtain guild char info for %s (%d)", GetName(), CharacterID());
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Unable to obtain guild char info for %s (%d)", GetName(), CharacterID());
 		return;
 	}
 
@@ -335,7 +335,7 @@ void Client::SendGuildJoin(GuildJoin_Struct* gj){
 	outgj->rank = gj->rank;
 	outgj->zoneid = gj->zoneid;
 
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending OP_GuildManageAdd for join of length %d", outapp->size);
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending OP_GuildManageAdd for join of length %d", outapp->size);
 
 	FastQueuePacket(&outapp);
 
@@ -409,7 +409,7 @@ bool ZoneDatabase::CheckGuildDoor(uint8 doorid, uint16 guild_id, const char* zon
                                     doorid-128, zone);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in CheckGuildDoor query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in CheckGuildDoor query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -429,7 +429,7 @@ bool ZoneDatabase::SetGuildDoor(uint8 doorid,uint16 guild_id, const char* zone) 
                                         guild_id, doorid, zone);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in SetGuildDoor query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in SetGuildDoor query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 

@@ -42,7 +42,7 @@ ChatChannel::ChatChannel(std::string inName, std::string inOwner, std::string in
 
 	Moderated = false;
 
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "New ChatChannel created: Name: [%s], Owner: [%s], Password: [%s], MinStatus: %i",
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "New ChatChannel created: Name: [%s], Owner: [%s], Password: [%s], MinStatus: %i",
 					Name.c_str(), Owner.c_str(), Password.c_str(), MinimumStatus);
 
 }
@@ -149,7 +149,7 @@ void ChatChannelList::SendAllChannels(Client *c) {
 
 void ChatChannelList::RemoveChannel(ChatChannel *Channel) {
 
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "RemoveChannel(%s)", Channel->GetName().c_str());
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "RemoveChannel(%s)", Channel->GetName().c_str());
 
 	LinkedListIterator<ChatChannel*> iterator(ChatChannels);
 
@@ -170,7 +170,7 @@ void ChatChannelList::RemoveChannel(ChatChannel *Channel) {
 
 void ChatChannelList::RemoveAllChannels() {
 
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "RemoveAllChannels");
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "RemoveAllChannels");
 
 	LinkedListIterator<ChatChannel*> iterator(ChatChannels);
 
@@ -228,7 +228,7 @@ void ChatChannel::AddClient(Client *c) {
 
 	if(IsClientInChannel(c)) {
 
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Client %s already in channel %s", c->GetName().c_str(), GetName().c_str());
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Client %s already in channel %s", c->GetName().c_str(), GetName().c_str());
 
 		return;
 	}
@@ -237,7 +237,7 @@ void ChatChannel::AddClient(Client *c) {
 
 	int AccountStatus = c->GetAccountStatus();
 
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Adding %s to channel %s", c->GetName().c_str(), Name.c_str());
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Adding %s to channel %s", c->GetName().c_str(), Name.c_str());
 
 	LinkedListIterator<Client*> iterator(ClientsInChannel);
 
@@ -262,7 +262,7 @@ bool ChatChannel::RemoveClient(Client *c) {
 
 	if(!c) return false;
 
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "RemoveClient %s from channel %s", c->GetName().c_str(), GetName().c_str());
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "RemoveClient %s from channel %s", c->GetName().c_str(), GetName().c_str());
 
 	bool HideMe = c->GetHideMe();
 
@@ -299,7 +299,7 @@ bool ChatChannel::RemoveClient(Client *c) {
 		if((Password.length() == 0) || (RuleI(Channels, DeleteTimer) == 0))
 			return false;
 
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Starting delete timer for empty password protected channel %s", Name.c_str());
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Starting delete timer for empty password protected channel %s", Name.c_str());
 
 		DeleteTimer.Start(RuleI(Channels, DeleteTimer) * 60000);
 	}
@@ -397,7 +397,7 @@ void ChatChannel::SendMessageToChannel(std::string Message, Client* Sender) {
 
 		if(ChannelClient)
 		{
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Sending message to %s from %s",
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Sending message to %s from %s",
 					ChannelClient->GetName().c_str(), Sender->GetName().c_str());
 			ChannelClient->SendChannelMessage(Name, Message, Sender);
 		}
@@ -479,7 +479,7 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client
 		return nullptr;
 	}
 
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "AddClient to channel [%s] with password [%s]", NormalisedName.c_str(), Password.c_str());
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "AddClient to channel [%s] with password [%s]", NormalisedName.c_str(), Password.c_str());
 
 	ChatChannel *RequiredChannel = FindChannel(NormalisedName);
 
@@ -555,7 +555,7 @@ void ChatChannelList::Process() {
 
 		if(CurrentChannel && CurrentChannel->ReadyToDelete()) {
 
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Empty temporary password protected channel %s being destroyed.",
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Empty temporary password protected channel %s being destroyed.",
 				CurrentChannel->GetName().c_str());
 
 			RemoveChannel(CurrentChannel);
@@ -572,7 +572,7 @@ void ChatChannel::AddInvitee(std::string Invitee) {
 
 		Invitees.push_back(Invitee);
 
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Added %s as invitee to channel %s", Invitee.c_str(), Name.c_str());
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Added %s as invitee to channel %s", Invitee.c_str(), Name.c_str());
 	}
 
 }
@@ -587,7 +587,7 @@ void ChatChannel::RemoveInvitee(std::string Invitee) {
 
 			Invitees.erase(Iterator);
 
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Removed %s as invitee to channel %s", Invitee.c_str(), Name.c_str());
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Removed %s as invitee to channel %s", Invitee.c_str(), Name.c_str());
 
 			return;
 		}
@@ -613,7 +613,7 @@ void ChatChannel::AddModerator(std::string Moderator) {
 
 		Moderators.push_back(Moderator);
 
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Added %s as moderator to channel %s", Moderator.c_str(), Name.c_str());
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Added %s as moderator to channel %s", Moderator.c_str(), Name.c_str());
 	}
 
 }
@@ -628,7 +628,7 @@ void ChatChannel::RemoveModerator(std::string Moderator) {
 
 			Moderators.erase(Iterator);
 
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Removed %s as moderator to channel %s", Moderator.c_str(), Name.c_str());
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Removed %s as moderator to channel %s", Moderator.c_str(), Name.c_str());
 
 			return;
 		}
@@ -654,7 +654,7 @@ void ChatChannel::AddVoice(std::string inVoiced) {
 
 		Voiced.push_back(inVoiced);
 
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Added %s as voiced to channel %s", inVoiced.c_str(), Name.c_str());
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Added %s as voiced to channel %s", inVoiced.c_str(), Name.c_str());
 	}
 
 }
@@ -669,7 +669,7 @@ void ChatChannel::RemoveVoice(std::string inVoiced) {
 
 			Voiced.erase(Iterator);
 
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Removed %s as voiced to channel %s", inVoiced.c_str(), Name.c_str());
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Removed %s as voiced to channel %s", inVoiced.c_str(), Name.c_str());
 
 			return;
 		}

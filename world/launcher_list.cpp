@@ -60,7 +60,7 @@ void LauncherList::Process() {
 //printf("ProcP %d: %p\n", l->GetID(), l);
 		if(!l->Process()) {
 			//launcher has died before it identified itself.
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Removing pending launcher %d", l->GetID());
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Removing pending launcher %d", l->GetID());
 			cur = m_pendingLaunchers.erase(cur);
 			delete l;
 		} else if(l->HasName()) {
@@ -72,10 +72,10 @@ void LauncherList::Process() {
 			std::map<std::string, LauncherLink *>::iterator res;
 			res = m_launchers.find(name);
 			if(res != m_launchers.end()) {
-				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Ghosting launcher %s", name.c_str());
+				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Ghosting launcher %s", name.c_str());
 				delete res->second;
 			}
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Removing pending launcher %d. Adding %s to active list.", l->GetID(), name.c_str());
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Removing pending launcher %d. Adding %s to active list.", l->GetID(), name.c_str());
 			//put the launcher in the list.
 			m_launchers[name] = l;
 		} else {
@@ -91,7 +91,7 @@ void LauncherList::Process() {
 //printf("Proc %s(%d): %p\n", l->GetName(), l->GetID(), l);
 		if(!l->Process()) {
 			//launcher has died before it identified itself.
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Removing launcher %s (%d)", l->GetName(), l->GetID());
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Removing launcher %s (%d)", l->GetName(), l->GetID());
 			curl = m_launchers.erase(curl);
 			delete l;
 		} else {
@@ -131,7 +131,7 @@ LauncherLink *LauncherList::FindByZone(const char *short_name) {
 
 void LauncherList::Add(EmuTCPConnection *conn) {
 	auto it = new LauncherLink(nextID++, conn);
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Adding pending launcher %d", it->GetID());
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Adding pending launcher %d", it->GetID());
 	m_pendingLaunchers.push_back(it);
 }
 

@@ -74,14 +74,14 @@ void WorldServer::Process() {
 			break;
 		}
 		case ServerOP_ZAAuthFailed: {
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "World server responded 'Not Authorized', disabling reconnect");
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "World server responded 'Not Authorized', disabling reconnect");
 			pTryReconnect = false;
 			Disconnect();
 			break;
 		}
 		case ServerOP_LauncherZoneRequest: {
 			if(pack->size != sizeof(LauncherZoneRequest)) {
-				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Invalid size of LauncherZoneRequest: %d", pack->size);
+				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Invalid size of LauncherZoneRequest: %d", pack->size);
 				break;
 			}
 			const LauncherZoneRequest *lzr = (const LauncherZoneRequest *) pack->pBuffer;
@@ -90,9 +90,9 @@ void WorldServer::Process() {
 			switch(ZoneRequestCommands(lzr->command)) {
 			case ZR_Start: {
 				if(m_zones.find(lzr->short_name) != m_zones.end()) {
-					Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "World told us to start zone %s, but it is already running.", lzr->short_name);
+					Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "World told us to start zone %s, but it is already running.", lzr->short_name);
 				} else {
-					Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "World told us to start zone %s.", lzr->short_name);
+					Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "World told us to start zone %s.", lzr->short_name);
 					ZoneLaunch *l = new ZoneLaunch(this, m_name, lzr->short_name, m_config);
 					m_zones[lzr->short_name] = l;
 				}
@@ -101,9 +101,9 @@ void WorldServer::Process() {
 			case ZR_Restart: {
 				std::map<std::string, ZoneLaunch *>::iterator res = m_zones.find(lzr->short_name);
 				if(res == m_zones.end()) {
-					Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "World told us to restart zone %s, but it is not running.", lzr->short_name);
+					Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "World told us to restart zone %s, but it is not running.", lzr->short_name);
 				} else {
-					Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "World told us to restart zone %s.", lzr->short_name);
+					Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "World told us to restart zone %s.", lzr->short_name);
 					res->second->Restart();
 				}
 				break;
@@ -111,9 +111,9 @@ void WorldServer::Process() {
 			case ZR_Stop: {
 				std::map<std::string, ZoneLaunch *>::iterator res = m_zones.find(lzr->short_name);
 				if(res == m_zones.end()) {
-					Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "World told us to stop zone %s, but it is not running.", lzr->short_name);
+					Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "World told us to stop zone %s, but it is not running.", lzr->short_name);
 				} else {
-					Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "World told us to stop zone %s.", lzr->short_name);
+					Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "World told us to stop zone %s.", lzr->short_name);
 					res->second->Stop();
 				}
 				break;
@@ -127,7 +127,7 @@ void WorldServer::Process() {
 		}
 
 		default: {
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Unknown opcode 0x%x from World of len %d", pack->opcode, pack->size);
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Launcher, "Unknown opcode 0x%x from World of len %d", pack->opcode, pack->size);
 			break;
 		}
 		}

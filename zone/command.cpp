@@ -443,13 +443,13 @@ int command_init(void) {
 		if ((itr=command_settings.find(cur->first))!=command_settings.end())
 		{
 			cur->second->access = itr->second;
-			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Commands, "command_init(): - Command '%s' set to access level %d.", cur->first.c_str(), itr->second);
+			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Commands, "command_init(): - Command '%s' set to access level %d.", cur->first.c_str(), itr->second);
 		}
 		else
 		{
 #ifdef COMMANDS_WARNINGS
 			if(cur->second->access == 0)
-				Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "command_init(): Warning: Command '%s' defaulting to access level 0!" , cur->first.c_str());
+				Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Status, "command_init(): Warning: Command '%s' defaulting to access level 0!" , cur->first.c_str());
 #endif
 		}
 	}
@@ -494,7 +494,7 @@ int command_add(const char *command_string, const char *desc, int access, CmdFun
 	std::string cstr(command_string);
 
 	if(commandlist.count(cstr) != 0) {
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "command_add() - Command '%s' is a duplicate - check command.cpp." , command_string);
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "command_add() - Command '%s' is a duplicate - check command.cpp." , command_string);
 		return(-1);
 	}
 
@@ -568,12 +568,12 @@ int command_realdispatch(Client *c, const char *message)
 
 #ifdef COMMANDS_LOGGING
 	if(cur->access >= COMMANDS_LOGGING_MIN_STATUS) {
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Commands, "%s (%s) used command: %s (target=%s)", c->GetName(), c->AccountName(), message, c->GetTarget()?c->GetTarget()->GetName():"NONE");
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Commands, "%s (%s) used command: %s (target=%s)", c->GetName(), c->AccountName(), message, c->GetTarget()?c->GetTarget()->GetName():"NONE");
 	}
 #endif
 
 	if(cur->function == nullptr) {
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Command '%s' has a null function\n", cstr.c_str());
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Command '%s' has a null function\n", cstr.c_str());
 		return(-1);
 	} else {
 		//dispatch C++ command
@@ -1292,7 +1292,7 @@ void command_viewpetition(Client *c, const Seperator *sep)
     if (!results.Success())
         return;
 
-    Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Normal, "View petition request from %s, petition number: %i", c->GetName(), atoi(sep->argplus[1]) );
+    Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Normal, "View petition request from %s, petition number: %i", c->GetName(), atoi(sep->argplus[1]) );
 
     if (results.RowCount() == 0) {
         c->Message(13,"There was an error in your request: ID not found! Please check the Id and try again.");
@@ -1317,7 +1317,7 @@ void command_petitioninfo(Client *c, const Seperator *sep)
     if (!results.Success())
         return;
 
-    Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Normal, "Petition information request from %s, petition number:", c->GetName(), atoi(sep->argplus[1]) );
+    Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Normal, "Petition information request from %s, petition number:", c->GetName(), atoi(sep->argplus[1]) );
 
     if (results.RowCount() == 0) {
 		c->Message(13,"There was an error in your request: ID not found! Please check the Id and try again.");
@@ -1343,7 +1343,7 @@ void command_delpetition(Client *c, const Seperator *sep)
 	if (!results.Success())
         return;
 
-    Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Normal, "Delete petition request from %s, petition number:", c->GetName(), atoi(sep->argplus[1]) );
+    Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Normal, "Delete petition request from %s, petition number:", c->GetName(), atoi(sep->argplus[1]) );
 
 }
 
@@ -1566,7 +1566,7 @@ void command_permaclass(Client *c, const Seperator *sep)
 		c->Message(0,"Target is not a client.");
 	else {
 		c->Message(0, "Setting %s's class...Sending to char select.", t->GetName());
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Normal, "Class change request from %s for %s, requested class:%i", c->GetName(), t->GetName(), atoi(sep->arg[1]) );
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Normal, "Class change request from %s for %s, requested class:%i", c->GetName(), t->GetName(), atoi(sep->arg[1]) );
 		t->SetBaseClass(atoi(sep->arg[1]));
 		t->Save();
 		t->Kick();
@@ -1588,7 +1588,7 @@ void command_permarace(Client *c, const Seperator *sep)
 		c->Message(0,"Target is not a client.");
 	else {
 		c->Message(0, "Setting %s's race - zone to take effect",t->GetName());
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Normal, "Permanant race change request from %s for %s, requested race:%i", c->GetName(), t->GetName(), atoi(sep->arg[1]) );
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Normal, "Permanant race change request from %s for %s, requested race:%i", c->GetName(), t->GetName(), atoi(sep->arg[1]) );
 		uint32 tmp = Mob::GetDefaultGender(atoi(sep->arg[1]), t->GetBaseGender());
 		t->SetBaseRace(atoi(sep->arg[1]));
 		t->SetBaseGender(tmp);
@@ -1612,7 +1612,7 @@ void command_permagender(Client *c, const Seperator *sep)
 		c->Message(0,"Target is not a client.");
 	else {
 		c->Message(0, "Setting %s's gender - zone to take effect",t->GetName());
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Normal, "Permanant gender change request from %s for %s, requested gender:%i", c->GetName(), t->GetName(), atoi(sep->arg[1]) );
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Normal, "Permanant gender change request from %s for %s, requested gender:%i", c->GetName(), t->GetName(), atoi(sep->arg[1]) );
 		t->SetBaseGender(atoi(sep->arg[1]));
 		t->Save();
 		t->SendIllusionPacket(atoi(sep->arg[1]));
@@ -1954,7 +1954,7 @@ void command_dbspawn2(Client *c, const Seperator *sep)
 {
 
 	if (sep->IsNumber(1) && sep->IsNumber(2) && sep->IsNumber(3)) {
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Normal, "Spawning database spawn");
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Normal, "Spawning database spawn");
 		uint16 cond = 0;
 		int16 cond_min = 0;
 		if(sep->IsNumber(4)) {
@@ -2274,7 +2274,7 @@ void command_setlanguage(Client *c, const Seperator *sep)
 	}
 	else
 	{
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Normal, "Set language request from %s, target:%s lang_id:%i value:%i", c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Normal, "Set language request from %s, target:%s lang_id:%i value:%i", c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
 		uint8 langid = (uint8)atoi(sep->arg[1]);
 		uint8 value = (uint8)atoi(sep->arg[2]);
 		c->GetTarget()->CastToClient()->SetLanguageSkill( langid, value );
@@ -2299,7 +2299,7 @@ void command_setskill(Client *c, const Seperator *sep)
 		c->Message(0, "       x = 0 to %d", HIGHEST_CAN_SET_SKILL);
 	}
 	else {
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Normal, "Set skill request from %s, target:%s skill_id:%i value:%i", c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Normal, "Set skill request from %s, target:%s skill_id:%i value:%i", c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
 		int skill_num = atoi(sep->arg[1]);
 		uint16 skill_value = atoi(sep->arg[2]);
 		if(skill_num < HIGHEST_SKILL)
@@ -2319,7 +2319,7 @@ void command_setskillall(Client *c, const Seperator *sep)
 	}
 	else {
 		if (c->Admin() >= commandSetSkillsOther || c->GetTarget()==c || c->GetTarget()==0) {
-			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Normal, "Set ALL skill request from %s, target:%s", c->GetName(), c->GetTarget()->GetName());
+			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Normal, "Set ALL skill request from %s, target:%s", c->GetName(), c->GetTarget()->GetName());
 			uint16 level = atoi(sep->arg[1]);
 			for(SkillUseTypes skill_num=Skill1HBlunt;skill_num <= HIGHEST_SKILL;skill_num=(SkillUseTypes)(skill_num+1)) {
 				c->GetTarget()->CastToClient()->SetSkill(skill_num, level);
@@ -3114,7 +3114,7 @@ void command_listpetition(Client *c, const Seperator *sep)
 	if (!results.Success())
         return;
 
-    Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Normal, "Petition list requested by %s", c->GetName());
+    Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Normal, "Petition list requested by %s", c->GetName());
 
     if (results.RowCount() == 0)
         return;
@@ -3771,7 +3771,7 @@ void command_lastname(Client *c, const Seperator *sep)
 
 	if(c->GetTarget() && c->GetTarget()->IsClient())
 		t=c->GetTarget()->CastToClient();
-	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Normal, "#lastname request from %s for %s", c->GetName(), t->GetName());
+	Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Normal, "#lastname request from %s for %s", c->GetName(), t->GetName());
 
 	if(strlen(sep->arg[1]) <= 70)
 		t->ChangeLastName(sep->arg[1]);
@@ -4545,10 +4545,10 @@ void command_guild(Client *c, const Seperator *sep)
 			}
 
 			if(guild_id == GUILD_NONE) {
-				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Removing %s (%d) from guild with GM command.", c->GetName(),
+				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Removing %s (%d) from guild with GM command.", c->GetName(),
 					sep->arg[2], charid);
 			} else {
-				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Putting %s (%d) into guild %s (%d) with GM command.", c->GetName(),
+				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Putting %s (%d) into guild %s (%d) with GM command.", c->GetName(),
 					sep->arg[2], charid,
 					guild_mgr.GetGuildName(guild_id), guild_id);
 			}
@@ -4597,7 +4597,7 @@ void command_guild(Client *c, const Seperator *sep)
 				return;
 			}
 
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Setting %s (%d)'s guild rank to %d with GM command.", c->GetName(),
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Setting %s (%d)'s guild rank to %d with GM command.", c->GetName(),
 				sep->arg[2], charid, rank);
 
 			if(!guild_mgr.SetGuildRank(charid, rank))
@@ -4639,7 +4639,7 @@ void command_guild(Client *c, const Seperator *sep)
 
 				uint32 id = guild_mgr.CreateGuild(sep->argplus[3], leader);
 
-				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Creating guild %s with leader %d with GM command. It was given id %lu.", c->GetName(),
+				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Creating guild %s with leader %d with GM command. It was given id %lu.", c->GetName(),
 					sep->argplus[3], leader, (unsigned long)id);
 
 				if (id == GUILD_NONE)
@@ -4678,7 +4678,7 @@ void command_guild(Client *c, const Seperator *sep)
 				}
 			}
 
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Deleting guild %s (%d) with GM command.", c->GetName(),
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Deleting guild %s (%d) with GM command.", c->GetName(),
 				guild_mgr.GetGuildName(id), id);
 
 			if (!guild_mgr.DeleteGuild(id))
@@ -4712,7 +4712,7 @@ void command_guild(Client *c, const Seperator *sep)
 				}
 			}
 
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Renaming guild %s (%d) to '%s' with GM command.", c->GetName(),
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Renaming guild %s (%d) to '%s' with GM command.", c->GetName(),
 				guild_mgr.GetGuildName(id), id, sep->argplus[3]);
 
 			if (!guild_mgr.RenameGuild(id, sep->argplus[3]))
@@ -4763,7 +4763,7 @@ void command_guild(Client *c, const Seperator *sep)
 					}
 				}
 
-				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Setting leader of guild %s (%d) to %d with GM command.", c->GetName(),
+				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "%s: Setting leader of guild %s (%d) to %d with GM command.", c->GetName(),
 					guild_mgr.GetGuildName(id), id, leader);
 
 				if(!guild_mgr.SetGuildLeader(id, leader))
@@ -4869,7 +4869,7 @@ void command_manaburn(Client *c, const Seperator *sep)
 						target->Damage(c, nukedmg, 2751, SkillAbjuration/*hackish*/);
 						c->Message(4,"You unleash an enormous blast of magical energies.");
 					}
-					Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Normal, "Manaburn request from %s, damage: %d", c->GetName(), nukedmg);
+					Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Normal, "Manaburn request from %s, damage: %d", c->GetName(), nukedmg);
 				}
 			}
 			else
@@ -5221,7 +5221,7 @@ void command_scribespells(Client *c, const Seperator *sep)
 	t->Message(0, "Scribing spells to spellbook.");
 	if(t != c)
 		c->Message(0, "Scribing spells for %s.", t->GetName());
-	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Normal, "Scribe spells request for %s from %s, levels: %u -> %u", t->GetName(), c->GetName(), min_level, max_level);
+	Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Normal, "Scribe spells request for %s from %s, levels: %u -> %u", t->GetName(), c->GetName(), min_level, max_level);
 
 	for(curspell = 0, book_slot = t->GetNextAvailableSpellBookSlot(), count = 0; curspell < SPDAT_RECORDS && book_slot < MAX_PP_SPELLBOOK; curspell++, book_slot = t->GetNextAvailableSpellBookSlot(book_slot))
 	{
@@ -5278,7 +5278,7 @@ void command_scribespell(Client *c, const Seperator *sep) {
 		if(t != c)
 			c->Message(0, "Scribing spell: %s (%i) for %s.", spells[spell_id].name, spell_id, t->GetName());
 
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Normal, "Scribe spell: %s (%i) request for %s from %s.", spells[spell_id].name, spell_id, t->GetName(), c->GetName());
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Normal, "Scribe spell: %s (%i) request for %s from %s.", spells[spell_id].name, spell_id, t->GetName(), c->GetName());
 
 		if (spells[spell_id].classes[WARRIOR] != 0 && spells[spell_id].skill != 52 && spells[spell_id].classes[t->GetPP().class_ - 1] > 0 && !IsDiscipline(spell_id)) {
 			book_slot = t->GetNextAvailableSpellBookSlot();
@@ -5325,7 +5325,7 @@ void command_unscribespell(Client *c, const Seperator *sep) {
 			if(t != c)
 				c->Message(0, "Unscribing spell: %s (%i) for %s.", spells[spell_id].name, spell_id, t->GetName());
 
-			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Normal, "Unscribe spell: %s (%i) request for %s from %s.", spells[spell_id].name, spell_id, t->GetName(), c->GetName());
+			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Normal, "Unscribe spell: %s (%i) request for %s from %s.", spells[spell_id].name, spell_id, t->GetName(), c->GetName());
 		}
 		else {
 			t->Message(13, "Unable to unscribe spell: %s (%i) from your spellbook. This spell is not scribed.", spells[spell_id].name, spell_id);
@@ -7862,7 +7862,7 @@ void command_traindisc(Client *c, const Seperator *sep)
 	t->Message(0, "Training disciplines");
 	if(t != c)
 		c->Message(0, "Training disciplines for %s.", t->GetName());
-	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Normal, "Train disciplines request for %s from %s, levels: %u -> %u", t->GetName(), c->GetName(), min_level, max_level);
+	Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Normal, "Train disciplines request for %s from %s, levels: %u -> %u", t->GetName(), c->GetName(), min_level, max_level);
 
 	for(curspell = 0, count = 0; curspell < SPDAT_RECORDS; curspell++)
 	{
@@ -10394,7 +10394,7 @@ void command_logtest(Client *c, const Seperator *sep){
 	if (sep->IsNumber(1)){
 		uint32 i = 0;
 		for (i = 0; i < atoi(sep->arg[1]); i++){
-			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "[%u] Test... Took %f seconds", i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
+			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::None, "[%u] Test... Took %f seconds", i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 		}
 	}
 }

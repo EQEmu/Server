@@ -88,7 +88,7 @@ void NPC::StopWandering()
 	roamer=false;
 	CastToNPC()->SetGrid(0);
 	SendPosition();
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Pathing, "Stop Wandering requested.");
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Pathing, "Stop Wandering requested.");
 	return;
 }
 
@@ -107,16 +107,16 @@ void NPC::ResumeWandering()
 				cur_wp=save_wp;
 				UpdateWaypoint(cur_wp);	// have him head to last destination from here
 			}
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Pathing, "Resume Wandering requested. Grid %d, wp %d", GetGrid(), cur_wp);
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Pathing, "Resume Wandering requested. Grid %d, wp %d", GetGrid(), cur_wp);
 		}
 		else if (AIwalking_timer->Enabled())
 		{	// we are at a waypoint paused normally
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Pathing, "Resume Wandering on timed pause. Grid %d, wp %d", GetGrid(), cur_wp);
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Pathing, "Resume Wandering on timed pause. Grid %d, wp %d", GetGrid(), cur_wp);
 			AIwalking_timer->Trigger();	// disable timer to end pause now
 		}
 		else
 		{
-			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "NPC not paused - can't resume wandering: %lu", (unsigned long)GetNPCTypeID());
+			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "NPC not paused - can't resume wandering: %lu", (unsigned long)GetNPCTypeID());
 			return;
 		}
 
@@ -131,7 +131,7 @@ void NPC::ResumeWandering()
 	}
 	else
 	{
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "NPC not on grid - can't resume wandering: %lu", (unsigned long)GetNPCTypeID());
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "NPC not on grid - can't resume wandering: %lu", (unsigned long)GetNPCTypeID());
 	}
 	return;
 }
@@ -143,7 +143,7 @@ void NPC::PauseWandering(int pausetime)
 	if (GetGrid() != 0)
 	{
 		DistractedFromGrid = true;
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Pathing, "Paused Wandering requested. Grid %d. Resuming in %d ms (0=not until told)", GetGrid(), pausetime);
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::Pathing, "Paused Wandering requested. Grid %d. Resuming in %d ms (0=not until told)", GetGrid(), pausetime);
 		SendPosition();
 		if (pausetime<1)
 		{	// negative grid number stops him dead in his tracks until ResumeWandering()
@@ -154,7 +154,7 @@ void NPC::PauseWandering(int pausetime)
 			AIwalking_timer->Start(pausetime*1000); // set the timer
 		}
 	} else {
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "NPC not on grid - can't pause wandering: %lu", (unsigned long)GetNPCTypeID());
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "NPC not on grid - can't pause wandering: %lu", (unsigned long)GetNPCTypeID());
 	}
 	return;
 }
@@ -166,7 +166,7 @@ void NPC::MoveTo(float mtx, float mty, float mtz, float mth, bool saveguardspot)
 		if (GetGrid() < 0)
 		{	// currently stopped by a quest command
 			SetGrid( 0 - GetGrid());	// get him moving again
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "MoveTo during quest wandering. Canceling quest wandering and going back to grid %d when MoveTo is done.", GetGrid());
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "MoveTo during quest wandering. Canceling quest wandering and going back to grid %d when MoveTo is done.", GetGrid());
 		}
 		AIwalking_timer->Disable();	// disable timer in case he is paused at a wp
 		if (cur_wp>=0)
@@ -174,14 +174,14 @@ void NPC::MoveTo(float mtx, float mty, float mtz, float mth, bool saveguardspot)
 			save_wp=cur_wp;	// save the current waypoint
 			cur_wp=-1;		// flag this move as quest controlled
 		}
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "MoveTo (%.3f, %.3f, %.3f), pausing regular grid wandering. Grid %d, save_wp %d", mtx, mty, mtz, -GetGrid(), save_wp);
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "MoveTo (%.3f, %.3f, %.3f), pausing regular grid wandering. Grid %d, save_wp %d", mtx, mty, mtz, -GetGrid(), save_wp);
 	}
 	else
 	{	// not on a grid
 		roamer=true;
 		save_wp=0;
 		cur_wp=-2;		// flag as quest controlled w/no grid
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "MoveTo (%.3f, %.3f, %.3f) without a grid.", mtx, mty, mtz);
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "MoveTo (%.3f, %.3f, %.3f) without a grid.", mtx, mty, mtz);
 	}
 	if (saveguardspot)
 	{
@@ -196,7 +196,7 @@ void NPC::MoveTo(float mtx, float mty, float mtz, float mth, bool saveguardspot)
 		if(guard_heading == -1)
 			guard_heading = this->CalculateHeadingToTarget(mtx, mty);
 
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Setting guard position to (%.3f, %.3f, %.3f)", guard_x, guard_y, guard_z);
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Setting guard position to (%.3f, %.3f, %.3f)", guard_x, guard_y, guard_z);
 	}
 
 	cur_wp_x = mtx;
@@ -212,7 +212,7 @@ void NPC::MoveTo(float mtx, float mty, float mtz, float mth, bool saveguardspot)
 void NPC::UpdateWaypoint(int wp_index)
 {
 	if(wp_index >= static_cast<int>(Waypoints.size())) {
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Update to waypoint %d failed. Not found.", wp_index);
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Update to waypoint %d failed. Not found.", wp_index);
 		return;
 	}
 	std::vector<wplist>::iterator cur;
@@ -224,7 +224,7 @@ void NPC::UpdateWaypoint(int wp_index)
 	cur_wp_z = cur->z;
 	cur_wp_pause = cur->pause;
 	cur_wp_heading = cur->heading;
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Next waypoint %d: (%.3f, %.3f, %.3f, %.3f)", wp_index, cur_wp_x, cur_wp_y, cur_wp_z, cur_wp_heading);
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Next waypoint %d: (%.3f, %.3f, %.3f, %.3f)", wp_index, cur_wp_x, cur_wp_y, cur_wp_z, cur_wp_heading);
 
 	//fix up pathing Z
 	if(zone->HasMap() && RuleB(Map, FixPathingZAtWaypoints))
@@ -430,7 +430,7 @@ void NPC::SetWaypointPause()
 
 void NPC::SaveGuardSpot(bool iClearGuardSpot) {
 	if (iClearGuardSpot) {
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Clearing guard order.");
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Clearing guard order.");
 		guard_x = 0;
 		guard_y = 0;
 		guard_z = 0;
@@ -443,14 +443,14 @@ void NPC::SaveGuardSpot(bool iClearGuardSpot) {
 		guard_heading = heading;
 		if(guard_heading == 0)
 			guard_heading = 0.0001;		//hack to make IsGuarding simpler
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Setting guard position to (%.3f, %.3f, %.3f)", guard_x, guard_y, guard_z);
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Setting guard position to (%.3f, %.3f, %.3f)", guard_x, guard_y, guard_z);
 	}
 }
 
 void NPC::NextGuardPosition() {
 	if (!CalculateNewPosition2(guard_x, guard_y, guard_z, GetMovespeed())) {
 		SetHeading(guard_heading);
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Unable to move to next guard position. Probably rooted.");
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Unable to move to next guard position. Probably rooted.");
 	}
 	else if((x_pos == guard_x) && (y_pos == guard_y) && (z_pos == guard_z))
 	{
@@ -516,15 +516,15 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	if ((x_pos-x == 0) && (y_pos-y == 0)) {//spawn is at target coords
 		if(z_pos-z != 0) {
 			z_pos = z;
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Calc Position2 (%.3f, %.3f, %.3f): Jumping pure Z.", x, y, z);
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Calc Position2 (%.3f, %.3f, %.3f): Jumping pure Z.", x, y, z);
 			return true;
 		}
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Calc Position2 (%.3f, %.3f, %.3f) inWater=%d: We are there.", x, y, z, inWater);
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Calc Position2 (%.3f, %.3f, %.3f) inWater=%d: We are there.", x, y, z, inWater);
 		return false;
 	}
 	else if ((ABS(x_pos - x) < 0.1) && (ABS(y_pos - y) < 0.1))
 	{
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Calc Position2 (%.3f, %.3f, %.3f): X/Y difference <0.1, Jumping to target.", x, y, z);
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Calc Position2 (%.3f, %.3f, %.3f): X/Y difference <0.1, Jumping to target.", x, y, z);
 
 		if(IsNPC()) {
 			entity_list.ProcessMove(CastToNPC(), x, y, z);
@@ -550,7 +550,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		y_pos = new_y;
 		z_pos = new_z;
 
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Calculating new position2 to (%.3f, %.3f, %.3f), old vector (%.3f, %.3f, %.3f)", x, y, z, tar_vx, tar_vy, tar_vz);
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Calculating new position2 to (%.3f, %.3f, %.3f), old vector (%.3f, %.3f, %.3f)", x, y, z, tar_vx, tar_vy, tar_vz);
 
 		uint8 NPCFlyMode = 0;
 
@@ -569,7 +569,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 
 				float newz = zone->zonemap->FindBestZ(dest, nullptr) + 2.0f;
 
-				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
+				Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
 
 				if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
 				{
@@ -612,7 +612,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	//pRunAnimSpeed = (int8)(speed*NPC_RUNANIM_RATIO);
 	//speed *= NPC_SPEED_MULTIPLIER;
 
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Calculating new position2 to (%.3f, %.3f, %.3f), new vector (%.3f, %.3f, %.3f) rate %.3f, RAS %d", x, y, z, tar_vx, tar_vy, tar_vz, speed, pRunAnimSpeed);
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Calculating new position2 to (%.3f, %.3f, %.3f), new vector (%.3f, %.3f, %.3f) rate %.3f, RAS %d", x, y, z, tar_vx, tar_vy, tar_vz, speed, pRunAnimSpeed);
 
 	// --------------------------------------------------------------------------
 	// 2: get unit vector
@@ -647,7 +647,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 			z_pos = new_z;
 			tar_ndx=22-numsteps;
 			heading = CalculateHeadingToTarget(x, y);
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", x_pos, y_pos, z_pos, numsteps);
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", x_pos, y_pos, z_pos, numsteps);
 		}
 		else
 		{
@@ -659,7 +659,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 			y_pos = y;
 			z_pos = z;
 
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Only a single step to get there... jumping.");
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Only a single step to get there... jumping.");
 
 		}
 	}
@@ -678,7 +678,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		y_pos = new_y;
 		z_pos = new_z;
 		heading = CalculateHeadingToTarget(x, y);
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", x_pos, y_pos, z_pos, numsteps);
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", x_pos, y_pos, z_pos, numsteps);
 	}
 
 	uint8 NPCFlyMode = 0;
@@ -698,7 +698,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
 
 			if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
 			{
@@ -759,7 +759,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 			moved=false;
 		}
 		SetRunAnimSpeed(0);
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Rooted while calculating new position to (%.3f, %.3f, %.3f)", x, y, z);
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Rooted while calculating new position to (%.3f, %.3f, %.3f)", x, y, z);
 		return true;
 	}
 
@@ -773,7 +773,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 	pRunAnimSpeed = (uint8)(speed*NPC_RUNANIM_RATIO);
 	speed *= NPC_SPEED_MULTIPLIER;
 
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Calculating new position to (%.3f, %.3f, %.3f) vector (%.3f, %.3f, %.3f) rate %.3f RAS %d", x, y, z, tar_vx, tar_vy, tar_vz, speed, pRunAnimSpeed);
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Calculating new position to (%.3f, %.3f, %.3f) vector (%.3f, %.3f, %.3f) rate %.3f RAS %d", x, y, z, tar_vx, tar_vy, tar_vz, speed, pRunAnimSpeed);
 
 	// --------------------------------------------------------------------------
 	// 2: get unit vector
@@ -790,7 +790,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 		x_pos = x;
 		y_pos = y;
 		z_pos = z;
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Close enough, jumping to waypoint");
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Close enough, jumping to waypoint");
 	}
 	else {
 		float new_x = x_pos + tar_vx*tar_vector;
@@ -803,7 +803,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 		x_pos = new_x;
 		y_pos = new_y;
 		z_pos = new_z;
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Next position (%.3f, %.3f, %.3f)", x_pos, y_pos, z_pos);
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Next position (%.3f, %.3f, %.3f)", x_pos, y_pos, z_pos);
 	}
 
 	uint8 NPCFlyMode = 0;
@@ -823,7 +823,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr) + 2.0f;
 
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
 
 			if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
 			{
@@ -876,7 +876,7 @@ void NPC::AssignWaypoints(int32 grid) {
 	std::string query = StringFormat("SELECT `type`, `type2` FROM `grid` WHERE `id` = %i AND `zoneid` = %i", grid, zone->GetZoneID());
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-        Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "MySQL Error while trying to assign grid %u to mob %s: %s", grid, name, results.ErrorMessage().c_str());
+        Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "MySQL Error while trying to assign grid %u to mob %s: %s", grid, name, results.ErrorMessage().c_str());
         return;
 	}
 
@@ -897,7 +897,7 @@ void NPC::AssignWaypoints(int32 grid) {
                         "ORDER BY `number`", grid, zone->GetZoneID());
     results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "MySQL Error while trying to assign waypoints from grid %u to mob %s: %s", grid, name, results.ErrorMessage().c_str());
+        Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "MySQL Error while trying to assign waypoints from grid %u to mob %s: %s", grid, name, results.ErrorMessage().c_str());
         return;
     }
 
@@ -951,7 +951,7 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 	x_pos = new_x;
 	y_pos = new_y;
 	z_pos = new_z;
-	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Sent To (%.3f, %.3f, %.3f)", new_x, new_y, new_z);
+	Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Sent To (%.3f, %.3f, %.3f)", new_x, new_y, new_z);
 
 	if(flymode == FlyMode1)
 		return;
@@ -967,7 +967,7 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
 
 			if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaSendTo)) // Sanity check.
 				z_pos = newz + 1;
@@ -998,7 +998,7 @@ void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
+			Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
 
 			if( (newz > -2000) && ABS(newz-dest.z) < RuleR(Map, FixPathingZMaxDeltaSendTo)) // Sanity check.
 				z_pos = newz + 1;
@@ -1011,7 +1011,7 @@ int	ZoneDatabase::GetHighestGrid(uint32 zoneid) {
 	std::string query = StringFormat("SELECT COALESCE(MAX(id), 0) FROM grid WHERE zoneid = %i", zoneid);
 	auto results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in GetHighestGrid query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in GetHighestGrid query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
 
@@ -1028,7 +1028,7 @@ uint8 ZoneDatabase::GetGridType2(uint32 grid, uint16 zoneid) {
 	std::string query = StringFormat("SELECT type2 FROM grid WHERE id = %i AND zoneid = %i", grid, zoneid);
 	auto results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in GetGridType2 query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in GetGridType2 query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
 
@@ -1049,7 +1049,7 @@ bool ZoneDatabase::GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* 
                                     "WHERE gridid = %i AND number = %i AND zoneid = %i", grid, num, zoneid);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in GetWaypoints query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in GetWaypoints query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return false;
     }
 
@@ -1078,7 +1078,7 @@ void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
                                     zone->GetShortName(), (int)x, (int)y);
     auto results = QueryDatabase(query);
 	if(!results.Success()) {
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error querying spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error querying spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -1092,7 +1092,7 @@ void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
                             zone->GetShortName(), x, _GASSIGN_TOLERANCE, y, _GASSIGN_TOLERANCE);
         results = QueryDatabase(query);
 		if (!results.Success()) {
-			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error querying fuzzy spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error querying fuzzy spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 			return;
 		}
 
@@ -1122,7 +1122,7 @@ void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
 	results = QueryDatabase(query);
 	if (!results.Success())
 	{
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error updating spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error updating spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return;
     }
 
@@ -1160,7 +1160,7 @@ void ZoneDatabase::ModifyGrid(Client *client, bool remove, uint32 id, uint8 type
                                             "VALUES (%i, %i, %i, %i)", id, zoneid, type, type2);
         auto results = QueryDatabase(query);
         if (!results.Success()) {
-            Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error creating grid entry '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+            Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error creating grid entry '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
             return;
         }
 
@@ -1173,14 +1173,14 @@ void ZoneDatabase::ModifyGrid(Client *client, bool remove, uint32 id, uint8 type
     std::string query = StringFormat("DELETE FROM grid where id=%i", id);
     auto results = QueryDatabase(query);
     if (!results.Success())
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error deleting grid '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error deleting grid '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 	else if(client)
         client->LogSQL(query.c_str());
 
     query = StringFormat("DELETE FROM grid_entries WHERE zoneid = %i AND gridid = %i", zoneid, id);
     results = QueryDatabase(query);
     if(!results.Success())
-        Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error deleting grid entries '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+        Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error deleting grid entries '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
     else if(client)
         client->LogSQL(query.c_str());
 
@@ -1196,7 +1196,7 @@ void ZoneDatabase::AddWP(Client *client, uint32 gridid, uint32 wpnum, float xpos
                                     gridid, zoneid, wpnum, xpos, ypos, zpos, pause, heading);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error adding waypoint '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error adding waypoint '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -1222,7 +1222,7 @@ void ZoneDatabase::DeleteWaypoint(Client *client, uint32 grid_num, uint32 wp_num
                                     grid_num, zoneid, wp_num);
     auto results = QueryDatabase(query);
 	if(!results.Success()) {
-        Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error deleting waypoint '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+        Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error deleting waypoint '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -1249,7 +1249,7 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *client, uint32 spawn2id, float xpos, 
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		// Query error
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error setting pathgrid '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error setting pathgrid '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
 
@@ -1270,14 +1270,14 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *client, uint32 spawn2id, float xpos, 
 							grid_num, zoneid, type1, type2);
 		results = QueryDatabase(query);
 		if(!results.Success())
-			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error adding grid '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error adding grid '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		else if(client)
 			client->LogSQL(query.c_str());
 
 		query = StringFormat("UPDATE spawn2 SET pathgrid = '%i' WHERE id = '%i'", grid_num, spawn2id);
 		results = QueryDatabase(query);
 		if(!results.Success())
-			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error updating spawn2 pathing '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+			Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error updating spawn2 pathing '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		else if(client)
 			client->LogSQL(query.c_str());
 	}
@@ -1289,7 +1289,7 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *client, uint32 spawn2id, float xpos, 
 
 	results = QueryDatabase(query);
 	if(!results.Success()) { // Query error
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error getting next waypoint id '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error getting next waypoint id '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
 
@@ -1304,7 +1304,7 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *client, uint32 spawn2id, float xpos, 
 						grid_num, zoneid, next_wp_num, xpos, ypos, zpos, pause, heading);
 	results = QueryDatabase(query);
 	if(!results.Success())
-		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error adding grid entry '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
+		Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error adding grid entry '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 	else if(client)
 		client->LogSQL(query.c_str());
 
@@ -1316,7 +1316,7 @@ uint32 ZoneDatabase::GetFreeGrid(uint16 zoneid) {
 	std::string query = StringFormat("SELECT max(id) FROM grid WHERE zoneid = %i", zoneid);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in GetFreeGrid query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in GetFreeGrid query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
 	}
 
@@ -1336,7 +1336,7 @@ int ZoneDatabase::GetHighestWaypoint(uint32 zoneid, uint32 gridid) {
                                     "WHERE zoneid = %i AND gridid = %i", zoneid, gridid);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in GetHighestWaypoint query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+        Log.DoLog(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in GetHighestWaypoint query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
 	}
 

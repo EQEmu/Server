@@ -950,7 +950,7 @@ bool Bot::AI_PursueCastCheck() {
 
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Bot Engaged (pursuing) autocast check triggered. Trying to cast offensive spells.");
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Bot Engaged (pursuing) autocast check triggered. Trying to cast offensive spells.");
 
 		if(!AICastSpell(GetTarget(), 100, SpellType_Snare)) {
 			if(!AICastSpell(GetTarget(), 100, SpellType_Lifetap)) {
@@ -1055,7 +1055,7 @@ bool Bot::AI_EngagedCastCheck() {
 		BotStanceType botStance = GetBotStance();
 		bool mayGetAggro = HasOrMayGetAggro();
 
-		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Engaged autocast check triggered (BOTS). Trying to cast healing spells then maybe offensive spells.");
+		Log.DoLog(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Engaged autocast check triggered (BOTS). Trying to cast healing spells then maybe offensive spells.");
 
 		if(botClass == CLERIC) {
 			if(!AICastSpell(GetTarget(), GetChanceToCastBySpellType(SpellType_Escape), SpellType_Escape)) {
