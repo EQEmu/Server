@@ -458,9 +458,8 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 			args.push_back(const_cast<EQApplicationPacket*>(app));
 			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 0, &args);
 
-
 			char buffer[64]; 
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Client_Server_Packet, "Unhandled incoming opcode: %s", buffer); 
+			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Client_Server_Packet, "Unhandled incoming opcode: 0x%04x", app->GetOpcode()); 
 			if (logger.log_settings[EQEmuLogSys::Client_Server_Packet].log_to_console > 0){
 				app->build_header_dump(buffer);
 				if (app->size < 1000)
