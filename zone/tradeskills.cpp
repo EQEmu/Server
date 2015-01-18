@@ -1482,7 +1482,7 @@ void Client::LearnRecipe(uint32 recipeID)
 	}
 
 	if (results.RowCount() != 1) {
-		Log.Log(EQEmuLogSys::Normal, "Client::LearnRecipe - RecipeID: %d had %d occurences.", recipeID, results.RowCount());
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Normal, "Client::LearnRecipe - RecipeID: %d had %d occurences.", recipeID, results.RowCount());
 		return;
 	}
 

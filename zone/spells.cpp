@@ -5040,7 +5040,7 @@ bool Mob::FindType(uint16 type, bool bOffensive, uint16 threshold) {
 											spells[buffs[i].spellid].base[j],
 											spells[buffs[i].spellid].max[j],
 											buffs[i].casterlevel, buffs[i].spellid);
-						Log.Log(EQEmuLogSys::Normal, 
+						Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Normal, 
 								"FindType: type = %d; value = %d; threshold = %d",
 								type, value, threshold);
 						if (value < threshold)
