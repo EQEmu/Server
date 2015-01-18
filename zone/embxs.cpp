@@ -108,7 +108,7 @@ XS(XS_EQEmuIO_PRINT)
 			}
 		}
 		if(len > 0) {
-			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Quest, str);
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Quests, str);
 		}
  	}
  	
