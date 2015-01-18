@@ -2273,7 +2273,7 @@ bool Mob::CanThisClassBlock(void) const
 		return(CastToClient()->HasSkill(SkillBlock));
 	}
 }
-
+/*
 float Mob::GetReciprocalHeading(Mob* target) {
 	float Result = 0;
 
@@ -2290,7 +2290,7 @@ float Mob::GetReciprocalHeading(Mob* target) {
 
 	return Result;
 }
-
+*/
 bool Mob::PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, float &z_dest, bool lookForAftArc) {
 	bool Result = false;
 
@@ -2298,7 +2298,7 @@ bool Mob::PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, fl
 		float look_heading = 0;
 
 		if(lookForAftArc)
-			look_heading = GetReciprocalHeading(target);
+			look_heading = GetReciprocalHeading(target->GetPosition());
 		else
 			look_heading = target->GetHeading();
 
