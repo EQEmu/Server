@@ -423,7 +423,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
         const Item_Struct* item = GetItem(item_id);
 
         if (!item) {
-            Log.Log(EQEmuLogSys::Error,
+            Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error,
 					"Warning: %s %i has an invalid item_id %i in inventory slot %i",
 					((is_charid==true) ? "charid" : "acctid"), id, item_id, slot_id);
             continue;
@@ -521,7 +521,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
         const Item_Struct* item = GetItem(item_id);
 
         if (!item) {
-            Log.Log(EQEmuLogSys::Error,"Warning: charid %i has an invalid item_id %i in inventory slot %i", char_id, item_id, slot_id);
+            Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error,"Warning: charid %i has an invalid item_id %i in inventory slot %i", char_id, item_id, slot_id);
             continue;
         }
 
