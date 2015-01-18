@@ -33,7 +33,6 @@ SET(common_sources
 	ipc_mutex.cpp
 	item.cpp
 	logsys.cpp
-	logsys_eqemu.cpp
 	md5.cpp
 	memory_mapped_file.cpp
 	misc.cpp
