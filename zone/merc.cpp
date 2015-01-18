@@ -5150,7 +5150,7 @@ bool Client::CheckCanHireMerc(Mob* merchant, uint32 template_id) {
 	}
 
 	//check for merchant too far away
-	if(DistNoRoot(*merchant) > USE_NPC_RANGE2) {
+	if(ComparativeDistance(m_Position, merchant->GetPosition()) > USE_NPC_RANGE2) {
 		SendMercResponsePackets(18);
 		return false;
 	}
