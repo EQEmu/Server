@@ -471,7 +471,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 					if(mob->CheckLosFN(sender)) {
 #if (EQDEBUG>=5)
 						LogFile->write(EQEmuLog::Debug, "AIYellForHelp(\"%s\",\"%s\") %s attacking %s Dist %f Z %f",
-						sender->GetName(), attacker->GetName(), mob->GetName(), attacker->GetName(), mob->DistNoRoot(*sender), fabs(sender->GetZ()+mob->GetZ()));
+						sender->GetName(), attacker->GetName(), mob->GetName(), attacker->GetName(), ComparativeDistance(mob->GetPosition(), sender->GetPosition()), fabs(sender->GetZ()+mob->GetZ()));
 #endif
 						mob->AddToHateList(attacker, 1, 0, false);
 					}
