@@ -4908,7 +4908,7 @@ void command_manaburn(Client *c, const Seperator *sep)
 		c->Message(0, "#Manaburn needs a target.");
 	else {
 		int cur_level=c->GetAA(MANA_BURN);//ManaBurn ID
-		if (c->DistNoRootNoZ(*target) > 200)
+		if (ComparativeDistance(c->GetPosition(), target->GetPosition()) > 200)
 			c->Message(0,"You are too far away from your target.");
 		else {
 			if(cur_level == 1) {
