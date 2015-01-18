@@ -56,7 +56,7 @@ void handle_npc_event_trade(QuestInterface *parse, lua_State* L, NPC* npc, Mob *
 	if(extra_pointers) {
 		size_t sz = extra_pointers->size();
 		for(size_t i = 0; i < sz; ++i) {
-			std::string prefix = "item" + std::to_string(static_cast<long long>(i + 1));
+			std::string prefix = "item" + std::to_string(i + 1);
 			ItemInst *inst = EQEmu::any_cast<ItemInst*>(extra_pointers->at(i));
 
 			Lua_ItemInst l_inst = inst;

@@ -1143,7 +1143,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 					ItemInst *inst = EQEmu::any_cast<ItemInst*>(extra_pointers->at(i));
 
 					std::string var_name = "item";
-					var_name += std::to_string(static_cast<long long>(i + 1));
+					var_name += std::to_string(i + 1);
 
 					if(inst) {
 						ExportVar(package_name.c_str(), var_name.c_str(), inst->GetItem()->ID);
