@@ -1136,7 +1136,7 @@ void Mob::AI_Process() {
 			float leash_range = static_cast<float>(GetSpecialAbilityParam(LEASH, 0));
 			leash_range = leash_range > 0.0f ? leash_range * leash_range : pAggroRange * pAggroRange;
 
-			if(DistNoRootNoZ(npcSpawnPoint.m_X, npcSpawnPoint.m_Y) > leash_range) {
+			if(ComparativeDistanceNoZ(m_Position, npcSpawnPoint) > leash_range) {
 				GMMove(npcSpawnPoint.m_X, npcSpawnPoint.m_Y, npcSpawnPoint.m_Z, npcSpawnPoint.m_Heading);
 				SetHP(GetMaxHP());
 				BuffFadeAll();
