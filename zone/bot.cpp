@@ -10411,7 +10411,7 @@ bool Bot::IsBotCasterCombatRange(Mob *target) {
 		// half the max so the bot doesn't always stop at max range to allow combat movement
 		range *= .5;
 
-		float targetDistance = DistNoRootNoZ(*target);
+		float targetDistance = ComparativeDistanceNoZ(m_Position, target->GetPosition());
 
 		if(targetDistance > range)
 			result = false;
