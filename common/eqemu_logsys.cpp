@@ -61,25 +61,15 @@ namespace Console {
 	};
 }
 
-static const char* TypeNames[EQEmuLogSys::MaxLogID] = { 
-	"Status",
-	"Normal",
-	"Error",
-	"Debug",
-	"Quest",
-	"Command",
-	"Crash",
-};
-
-static Console::Color LogColors[EQEmuLogSys::MaxLogID] = {
-	Console::Color::Yellow, 		   // "Status", 
-	Console::Color::Yellow,			   // "Normal", 
-	Console::Color::LightRed,		   // "Error", 
-	Console::Color::LightGreen,		   // "Debug", 
-	Console::Color::LightCyan,		   // "Quest", 
-	Console::Color::LightMagenta,	   // "Command", 
-	Console::Color::LightRed		   // "Crash" 
-};
+// static Console::Color LogColors[MaxCategoryID] = {
+// 	Console::Color::Yellow, 		   // "Status", 
+// 	Console::Color::Yellow,			   // "Normal", 
+// 	Console::Color::LightRed,		   // "Error", 
+// 	Console::Color::LightGreen,		   // "Debug", 
+// 	Console::Color::LightCyan,		   // "Quest", 
+// 	Console::Color::LightMagenta,	   // "Command", 
+// 	Console::Color::LightRed		   // "Crash" 
+// };
 
 
 EQEmuLogSys::EQEmuLogSys(){
@@ -109,7 +99,7 @@ std::string EQEmuLogSys::FormatDebugCategoryMessageString(uint16 log_category, s
 	return StringFormat("%s%s", category_string.c_str(), in_message.c_str()); 
 }
 
-void EQEmuLogSys::ProcessGMSay(uint16 log_type, uint16 log_category, std::string message)
+void EQEmuLogSys::ProcessGMSay(uint16 log_category, std::string message)
 {
 	/* Check if category enabled for process */
 	if (log_settings[log_category].log_to_gmsay == 0)
@@ -186,7 +176,7 @@ void EQEmuLogSys::DebugCategory(DebugLevel debug_level, uint16 log_category, std
 	std::string output_debug_message = EQEmuLogSys::FormatDebugCategoryMessageString(log_category, output_message);
 
 	EQEmuLogSys::ProcessConsoleMessage(EQEmuLogSys::Debug, log_category, output_debug_message);
-	EQEmuLogSys::ProcessGMSay(EQEmuLogSys::Debug, log_category, output_debug_message);
+	EQEmuLogSys::ProcessGMSay(log_category, output_debug_message);
 	EQEmuLogSys::ProcessLogWrite(EQEmuLogSys::Debug, log_category, output_debug_message);
 }
 
