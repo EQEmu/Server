@@ -2540,7 +2540,7 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 			}
 
 			else {
-				if (!GetFeigned() && (bindmob->DistNoRoot(*this) <= 400)) {
+				if (!GetFeigned() && (ComparativeDistance(bindmob->GetPosition(), m_Position)  <= 400)) {
 					// send bindmob bind done
 					if(!bindmob->IsAIControlled() && bindmob != this ) {
 
