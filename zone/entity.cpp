@@ -1119,7 +1119,7 @@ void EntityList::ChannelMessage(Mob *from, uint8 chan_num, uint8 language,
 			filter = FilterAuctions;
 		//
 		// Only say is limited in range
-		if (chan_num != 8 || client->Dist(*from) < 200)
+		if (chan_num != 8 || Distance(client->GetPosition(), from->GetPosition()) < 200)
 			if (filter == FilterNone || client->GetFilter(filter) != FilterHide)
 				client->ChannelMessageSend(from->GetName(), 0, chan_num, language, lang_skill, buffer);
 		++it;
@@ -1442,7 +1442,7 @@ void EntityList::QueueCloseClients(Mob *sender, const EQApplicationPacket *app,
 				|| (filter2 == FilterShowGroupOnly && (sender == ent ||
 					(ent->GetGroup() && ent->GetGroup()->IsGroupMember(sender))))
 				|| (filter2 == FilterShowSelfOnly && ent == sender))
-			&& (ent->DistNoRoot(*sender) <= dist2)) {
+			&& (ComparativeDistance(ent->GetPosition(), sender->GetPosition()) <= dist2)) {
 				ent->QueuePacket(app, ackreq, Client::CLIENT_CONNECTED);
 			}
 		}
@@ -1558,7 +1558,7 @@ Client *EntityList::GetRandomClient(const xyz_location& location, float Distance
 
 
 	for (auto it = client_list.begin();it != client_list.end(); ++it)
-		if ((it->second != ExcludeClient) && (it->second->DistNoRoot(location.m_X, location.m_Y, location.m_Z) <= Distance))
+		if ((it->second != ExcludeClient) && (ComparativeDistance(static_cast<xyz_location>(it->second->GetPosition()), location) <= Distance))
 			ClientsInRange.push_back(it->second);
 
 	if (ClientsInRange.empty())
@@ -1584,7 +1584,7 @@ Corpse *EntityList::GetCorpseByOwnerWithinRange(Client *client, Mob *center, int
 	auto it = corpse_list.begin();
 	while (it != corpse_list.end()) {
 		if (it->second->IsPlayerCorpse())
-			if (center->DistNoRootNoZ(*it->second) < range &&
+			if (ComparativeDistanceNoZ(center->GetPosition(), it->second->GetPosition()) < range &&
 					strcasecmp(it->second->GetOwnerName(), client->GetName()) == 0)
 				return it->second;
 		++it;
@@ -1921,7 +1921,7 @@ void EntityList::MessageClose_StringID(Mob *sender, bool skipsender, float dist,
 
 	for (auto it = client_list.begin(); it != client_list.end(); ++it) {
 		c = it->second;
-		if(c && c->DistNoRoot(*sender) <= dist2 && (!skipsender || c != sender))
+		if(c && ComparativeDistance(c->GetPosition(), sender->GetPosition()) <= dist2 && (!skipsender || c != sender))
 			c->Message_StringID(type, string_id, message1, message2, message3, message4, message5, message6, message7, message8, message9);
 	}
 }
@@ -1937,7 +1937,7 @@ void EntityList::FilteredMessageClose_StringID(Mob *sender, bool skipsender,
 
 	for (auto it = client_list.begin(); it != client_list.end(); ++it) {
 		c = it->second;
-		if (c && c->DistNoRoot(*sender) <= dist2 && (!skipsender || c != sender))
+		if (c && ComparativeDistance(c->GetPosition(), sender->GetPosition()) <= dist2 && (!skipsender || c != sender))
 			c->FilteredMessage_StringID(sender, type, filter, string_id,
 					message1, message2, message3, message4, message5,
 					message6, message7, message8, message9);
@@ -1985,7 +1985,7 @@ void EntityList::MessageClose(Mob* sender, bool skipsender, float dist, uint32 t
 
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
-		if (it->second->DistNoRoot(*sender) <= dist2 && (!skipsender || it->second != sender))
+		if (ComparativeDistance(it->second->GetPosition(), sender->GetPosition()) <= dist2 && (!skipsender || it->second != sender))
 			it->second->Message(type, buffer);
 		++it;
 	}
@@ -2460,7 +2460,7 @@ void EntityList::SendPositionUpdates(Client *client, uint32 cLastUpdate,
 			//bool Grouped = client->HasGroup() && mob->IsClient() && (client->GetGroup() == mob->CastToClient()->GetGroup());
 
 			//if (range == 0 || (iterator.GetData() == alwayssend) || Grouped || (mob->DistNoRootNoZ(*client) <= range)) {
-			if (range == 0 || (it->second == alwayssend) || mob->IsClient() || (mob->DistNoRoot(*client) <= range)) {
+			if (range == 0 || (it->second == alwayssend) || mob->IsClient() || (ComparativeDistance(mob->GetPosition(), client->GetPosition()) <= range)) {
 				mob->MakeSpawnUpdate(ppu);
 			}
 			if(mob && mob->IsClient() && mob->GetID()>0) {
@@ -2942,7 +2942,7 @@ bool EntityList::MakeTrackPacket(Client *client)
 				it->second->IsInvisible(client))
 			continue;
 
-		MobDistance = it->second->DistNoZ(*client);
+		MobDistance = DistanceNoZ(it->second->GetPosition(), client->GetPosition());
 		if (MobDistance > distance)
 			continue;
 
@@ -2991,7 +2991,8 @@ void EntityList::MessageGroup(Mob *sender, bool skipclose, uint32 type, const ch
 
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
-		if (it->second != sender && (it->second->Dist(*sender) <= dist2 || it->second->GetGroup() == sender->CastToClient()->GetGroup())) {
+		if (it->second != sender &&
+				(Distance(it->second->GetPosition(), sender->GetPosition()) <= dist2 || it->second->GetGroup() == sender->CastToClient()->GetGroup())) {
 			it->second->Message(type, buffer);
 		}
 		++it;
@@ -3545,7 +3546,7 @@ void EntityList::RadialSetLogging(Mob *around, bool enabled, bool clients,
 				continue;
 		}
 
-		if (around->DistNoRoot(*mob) > range2)
+		if (ComparativeDistance(around->GetPosition(), mob->GetPosition()) > range2)
 			continue;
 
 		if (enabled)
@@ -3665,7 +3666,7 @@ void EntityList::QuestJournalledSayClose(Mob *sender, Client *QuestInitiator,
 	// Use the old method for all other nearby clients
 	for (auto it = client_list.begin(); it != client_list.end(); ++it) {
 		c = it->second;
-		if(c && (c != QuestInitiator) && c->DistNoRoot(*sender) <= dist2)
+		if(c && (c != QuestInitiator) && ComparativeDistance(c->GetPosition(), sender->GetPosition()) <= dist2)
 			c->Message_StringID(10, GENERIC_SAY, mobname, message);
 	}
 }
@@ -3867,7 +3868,7 @@ Mob *EntityList::GetTargetForMez(Mob *caster)
 				continue;
 			}
 
-			if (caster->DistNoRoot(*d) > 22250) { //only pick targets within 150 range
+			if (ComparativeDistance(caster->GetPosition(), d->GetPosition()) > 22250) { //only pick targets within 150 range
 				++it;
 				continue;
 			}

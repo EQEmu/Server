@@ -2030,7 +2030,7 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 		return;
 
 	//you have to be somewhat close to them to be properly using them
-	if (DistNoRoot(*tmp) > USE_NPC_RANGE2)
+	if (ComparativeDistance(m_Position, tmp->GetPosition()) > USE_NPC_RANGE2)
 		return;
 
 	merchantid = tmp->CastToNPC()->MerchantType;
@@ -2205,7 +2205,7 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
 		return;
 
 	//you have to be somewhat close to them to be properly using them
-	if (DistNoRoot(*tmp) > USE_NPC_RANGE2)
+	if (ComparativeDistance(m_Position, tmp->GetPosition()) > USE_NPC_RANGE2)
 		return;
 
 	merchantid = tmp->CastToNPC()->MerchantType;
@@ -2296,7 +2296,7 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 		return;
 	}
 
-	if (DistNoRoot(*vendor) > USE_NPC_RANGE2)
+	if (ComparativeDistance(m_Position, vendor->GetPosition())  > USE_NPC_RANGE2)
 	{
 		Message(13, "Vendor is out of range.");
 		return;
@@ -2554,7 +2554,7 @@ void Client::Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket *app
 
 	NPC* tar = entity_list.GetNPCByID(*((uint32*)app->pBuffer));
 	if (tar) {
-		if (DistNoRoot(*tar) > USE_NPC_RANGE2)
+		if (ComparativeDistance(m_Position, tar->GetPosition())  > USE_NPC_RANGE2)
 			return;
 
 		if (tar->GetClass() != ALT_CURRENCY_MERCHANT) {
@@ -2633,7 +2633,7 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 	AltCurrencyPurchaseItem_Struct *purchase = (AltCurrencyPurchaseItem_Struct*)app->pBuffer;
 	NPC* tar = entity_list.GetNPCByID(purchase->merchant_entity_id);
 	if (tar) {
-		if (DistNoRoot(*tar) > USE_NPC_RANGE2)
+		if (ComparativeDistance(m_Position, tar->GetPosition())> USE_NPC_RANGE2)
 			return;
 
 		if (tar->GetClass() != ALT_CURRENCY_MERCHANT) {
@@ -2770,7 +2770,7 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app)
 
 	NPC* tar = entity_list.GetNPCByID(sell->merchant_entity_id);
 	if (tar) {
-		if (DistNoRoot(*tar) > USE_NPC_RANGE2)
+		if (ComparativeDistance(m_Position, tar->GetPosition()) > USE_NPC_RANGE2)
 			return;
 
 		if (tar->GetClass() != ALT_CURRENCY_MERCHANT) {
@@ -2867,7 +2867,7 @@ void Client::Handle_OP_AltCurrencySellSelection(const EQApplicationPacket *app)
 	AltCurrencySelectItem_Struct *select = (AltCurrencySelectItem_Struct*)app->pBuffer;
 	NPC* tar = entity_list.GetNPCByID(select->merchant_entity_id);
 	if (tar) {
-		if (DistNoRoot(*tar) > USE_NPC_RANGE2)
+		if (ComparativeDistance(m_Position, tar->GetPosition()) > USE_NPC_RANGE2)
 			return;
 
 		if (tar->GetClass() != ALT_CURRENCY_MERCHANT) {
@@ -3025,7 +3025,7 @@ void Client::Handle_OP_Assist(const EQApplicationPacket *app)
 		if (assistee->GetTarget()) {
 			Mob *new_target = assistee->GetTarget();
 			if (new_target && (GetGM() ||
-				Dist(*assistee) <= TARGETING_RANGE)) {
+				Distance(m_Position, assistee->GetPosition()) <= TARGETING_RANGE)) {
 				SetAssistExemption(true);
 				eid->entity_id = new_target->GetID();
 			}
@@ -8707,7 +8707,7 @@ void Client::Handle_OP_LDoNDisarmTraps(const EQApplicationPacket *app)
 	{
 		if (HasSkill(SkillDisarmTraps))
 		{
-			if (DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
+			if (ComparativeDistanceNoZ(m_Position, target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				Message(13, "%s is too far away.", target->GetCleanName());
 				return;
@@ -8740,7 +8740,7 @@ void Client::Handle_OP_LDoNPickLock(const EQApplicationPacket *app)
 	{
 		if (HasSkill(SkillPickLock))
 		{
-			if (DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
+			if (ComparativeDistanceNoZ(m_Position, target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				Message(13, "%s is too far away.", target->GetCleanName());
 				return;
@@ -8759,7 +8759,7 @@ void Client::Handle_OP_LDoNSenseTraps(const EQApplicationPacket *app)
 	{
 		if (HasSkill(SkillSenseTraps))
 		{
-			if (DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
+			if (ComparativeDistanceNoZ(m_Position, target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				Message(13, "%s is too far away.", target->GetCleanName());
 				return;
@@ -9182,7 +9182,7 @@ void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 	{
 		SetLooting(ent->GetID()); //store the entity we are looting
 		Corpse *ent_corpse = ent->CastToCorpse();
-		if (DistNoRootNoZ(ent_corpse->GetX(), ent_corpse->GetY()) > 625)
+		if (ComparativeDistanceNoZ(m_Position, ent_corpse->GetPosition())  > 625)
 		{
 			Message(13, "Corpse too far away.");
 			Corpse::SendLootReqErrorPacket(this);
@@ -9414,7 +9414,7 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 		int mercTypeCount = 0;
 		int mercCount = 0;
 
-		if (DistNoRoot(*tar) > USE_NPC_RANGE2)
+		if (ComparativeDistance(m_Position, tar->GetPosition()) > USE_NPC_RANGE2)
 			return;
 
 		if (tar->GetClass() != MERCERNARY_MASTER) {
@@ -9796,7 +9796,7 @@ void Client::Handle_OP_OpenGuildTributeMaster(const EQApplicationPacket *app)
 		StartTribute_Struct* st = (StartTribute_Struct*)app->pBuffer;
 		Mob* tribmast = entity_list.GetMob(st->tribute_master_id);
 		if (tribmast && tribmast->IsNPC() && tribmast->GetClass() == GUILD_TRIBUTE_MASTER
-			&& DistNoRoot(*tribmast) <= USE_NPC_RANGE2) {
+			&& ComparativeDistance(m_Position, tribmast->GetPosition()) <= USE_NPC_RANGE2) {
 			st->response = 1;
 			QueuePacket(app);
 			tribute_master_id = st->tribute_master_id;
@@ -9828,7 +9828,7 @@ void Client::Handle_OP_OpenTributeMaster(const EQApplicationPacket *app)
 		StartTribute_Struct* st = (StartTribute_Struct*)app->pBuffer;
 		Mob* tribmast = entity_list.GetMob(st->tribute_master_id);
 		if (tribmast && tribmast->IsNPC() && tribmast->GetClass() == TRIBUTE_MASTER
-			&& DistNoRoot(*tribmast) <= USE_NPC_RANGE2) {
+			&& ComparativeDistance(m_Position, tribmast->GetPosition()) <= USE_NPC_RANGE2) {
 			st->response = 1;
 			QueuePacket(app);
 			tribute_master_id = st->tribute_master_id;
@@ -9923,7 +9923,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		}
 
 		if ((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 2) || mypet->GetPetType() != petAnimation) {
-			if (GetTarget() != this && mypet->DistNoRootNoZ(*GetTarget()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
+			if (GetTarget() != this && ComparativeDistanceNoZ(mypet->GetPosition(), GetTarget()->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
 				if (mypet->IsHeld()) {
 					if (!mypet->IsFocused()) {
 						mypet->SetHeld(false); //break the hold and guard if we explicitly tell the pet to attack.
@@ -9958,7 +9958,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		}
 
 		if ((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 2) || mypet->GetPetType() != petAnimation) {
-			if (GetTarget() != this && mypet->DistNoRootNoZ(*GetTarget()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
+			if (GetTarget() != this && ComparativeDistanceNoZ(mypet->GetPosition(), GetTarget()->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
 				zone->AddAggroMob();
 				mypet->AddToHateList(GetTarget(), 1);
 				Message_StringID(MT_PetResponse, PET_ATTACKING, mypet->GetCleanName(), GetTarget()->GetCleanName());
@@ -12102,7 +12102,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	if (mp->quantity < 1) return;
 
 	//you have to be somewhat close to them to be properly using them
-	if (DistNoRoot(*tmp) > USE_NPC_RANGE2)
+	if (ComparativeDistance(m_Position, tmp->GetPosition()) > USE_NPC_RANGE2)
 		return;
 
 	merchantid = tmp->CastToNPC()->MerchantType;
@@ -12351,7 +12351,7 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		return;
 
 	//you have to be somewhat close to them to be properly using them
-	if (DistNoRoot(*vendor) > USE_NPC_RANGE2)
+	if (ComparativeDistance(m_Position, vendor->GetPosition()) > USE_NPC_RANGE2)
 		return;
 
 	uint32 price = 0;
@@ -12510,7 +12510,7 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 		return;
 
 	//you have to be somewhat close to them to be properly using them
-	if (DistNoRoot(*tmp) > USE_NPC_RANGE2)
+	if (ComparativeDistance(m_Position, tmp->GetPosition()) > USE_NPC_RANGE2)
 		return;
 
 	merchantid = tmp->CastToNPC()->MerchantType;
@@ -13006,7 +13006,7 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 
 	// For /target, send reject or success packet
 	if (app->GetOpcode() == OP_TargetCommand) {
-		if (GetTarget() && !GetTarget()->CastToMob()->IsInvisible(this) && (DistNoRoot(*GetTarget()) <= TARGETING_RANGE*TARGETING_RANGE || GetGM())) {
+		if (GetTarget() && !GetTarget()->CastToMob()->IsInvisible(this) && (ComparativeDistance(m_Position, GetTarget()->GetPosition())  <= TARGETING_RANGE*TARGETING_RANGE || GetGM())) {
 			if (GetTarget()->GetBodyType() == BT_NoTarget2 || GetTarget()->GetBodyType() == BT_Special
 				|| GetTarget()->GetBodyType() == BT_NoTarget)
 			{
@@ -13095,9 +13095,9 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 			}
 			else if (GetBindSightTarget())
 			{
-				if (GetBindSightTarget()->DistNoRoot(*GetTarget()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
+				if (ComparativeDistance(GetBindSightTarget()->GetPosition(), GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
 				{
-					if (DistNoRoot(*GetTarget()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
+					if (ComparativeDistance(m_Position, GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
 					{
 						char *hacker_str = nullptr;
 						MakeAnyLenString(&hacker_str, "%s attempting to target something beyond the clip plane of %.2f units,"
@@ -13111,7 +13111,7 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 					}
 				}
 			}
-			else if (DistNoRoot(*GetTarget()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
+			else if (ComparativeDistance(m_Position, GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
 			{
 				char *hacker_str = nullptr;
 				MakeAnyLenString(&hacker_str, "%s attempting to target something beyond the clip plane of %.2f units,"
@@ -13743,7 +13743,7 @@ void Client::Handle_OP_TributeItem(const EQApplicationPacket *app)
 		Mob* tribmast = entity_list.GetMob(t->tribute_master_id);
 		if (!tribmast || !tribmast->IsNPC() || tribmast->GetClass() != TRIBUTE_MASTER)
 			return;
-		if (DistNoRoot(*tribmast) > USE_NPC_RANGE2)
+		if (ComparativeDistance(m_Position, tribmast->GetPosition()) > USE_NPC_RANGE2)
 			return;
 
 		t->tribute_points = TributeItem(t->slot, t->quantity);
@@ -13772,7 +13772,7 @@ void Client::Handle_OP_TributeMoney(const EQApplicationPacket *app)
 		Mob* tribmast = entity_list.GetMob(t->tribute_master_id);
 		if (!tribmast || !tribmast->IsNPC() || tribmast->GetClass() != TRIBUTE_MASTER)
 			return;
-		if (DistNoRoot(*tribmast) > USE_NPC_RANGE2)
+		if (ComparativeDistance(m_Position, tribmast->GetPosition()) > USE_NPC_RANGE2)
 			return;
 
 		t->tribute_points = TributeMoney(t->platinum);

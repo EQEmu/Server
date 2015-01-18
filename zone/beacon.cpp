@@ -35,7 +35,7 @@ class Zone;
 #include "../common/races.h"
 #include "beacon.h"
 #include "entity.h"
-#include "mob.h" 
+#include "mob.h"
 
 
 #ifdef BOTS
@@ -68,19 +68,12 @@ Beacon::Beacon(Mob *at_mob, int lifetime)
 	caster_id = 0;
 
 	if(lifetime)
-	{
 		remove_timer.Start();
-	}
-#ifdef SOLAR
-	entity_list.Message(0, 0, "Beacon being created at %0.2f %0.2f %0.2f heading %0.2f lifetime %d", GetX(), GetY(), GetZ(), GetHeading(), lifetime);
-#endif
 }
 
 Beacon::~Beacon()
 {
-#ifdef SOLAR
-	entity_list.Message(0, 0, "Beacon %d being removed at %0.2f %0.2f %0.2f heading %0.2f", GetID(), GetX(), GetY(), GetZ(), GetHeading());
-#endif
+
 }
 
 bool Beacon::Process()

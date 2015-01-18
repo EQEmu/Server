@@ -489,7 +489,7 @@ void Raid::CastGroupSpell(Mob* caster, uint16 spellid, uint32 gid)
 		else if(members[x].member != nullptr)
 		{
 			if(members[x].GroupNumber == gid){
-				distance = caster->DistNoRoot(*members[x].member);
+				distance = ComparativeDistance(caster->GetPosition(), members[x].member->GetPosition());
 				if(distance <= range2){
 					caster->SpellOnTarget(spellid, members[x].member);
 #ifdef GROUP_BUFF_PETS
@@ -537,7 +537,7 @@ void Raid::HealGroup(uint32 heal_amt, Mob* caster, uint32 gid, float range)
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				distance = caster->DistNoRoot(*members[gi].member);
+				distance = ComparativeDistance(caster->GetPosition(), members[gi].member->GetPosition());
 				if(distance <= range2){
 					numMem += 1;
 				}
@@ -551,7 +551,7 @@ void Raid::HealGroup(uint32 heal_amt, Mob* caster, uint32 gid, float range)
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				distance = caster->DistNoRoot(*members[gi].member);
+				distance = ComparativeDistance(caster->GetPosition(), members[gi].member->GetPosition());
 				if(distance <= range2){
 					members[gi].member->SetHP(members[gi].member->GetHP() + heal_amt);
 					members[gi].member->SendHPUpdate();
@@ -581,7 +581,7 @@ void Raid::BalanceHP(int32 penalty, uint32 gid, float range, Mob* caster, int32 
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				distance = caster->DistNoRoot(*members[gi].member);
+				distance = ComparativeDistance(caster->GetPosition(), members[gi].member->GetPosition());
 				if(distance <= range2){
 
 					dmgtaken_tmp = members[gi].member->GetMaxHP() - members[gi].member->GetHP();
@@ -602,7 +602,7 @@ void Raid::BalanceHP(int32 penalty, uint32 gid, float range, Mob* caster, int32 
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				distance = caster->DistNoRoot(*members[gi].member);
+				distance = ComparativeDistance(caster->GetPosition(), members[gi].member->GetPosition());
 				if(distance <= range2){
 					if((members[gi].member->GetMaxHP() - dmgtaken) < 1){//this way the ability will never kill someone
 						members[gi].member->SetHP(1);					//but it will come darn close
@@ -637,7 +637,7 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, float range, Mob* caster, int3
 			if(members[gi].GroupNumber == gid)
 			{
 				if (members[gi].member->GetMaxMana() > 0) {
-					distance = caster->DistNoRoot(*members[gi].member);
+					distance = ComparativeDistance(caster->GetPosition(), members[gi].member->GetPosition());
 					if(distance <= range2){
 
 						manataken_tmp = members[gi].member->GetMaxMana() - members[gi].member->GetMana();
@@ -660,7 +660,7 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, float range, Mob* caster, int3
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				distance = caster->DistNoRoot(*members[gi].member);
+				distance = ComparativeDistance(caster->GetPosition(), members[gi].member->GetPosition());
 				if(distance <= range2){
 					if((members[gi].member->GetMaxMana() - manataken) < 1){
 						members[gi].member->SetMana(1);
@@ -791,7 +791,7 @@ void Raid::GroupBardPulse(Mob* caster, uint16 spellid, uint32 gid){
 		else if(members[z].member != nullptr)
 		{
 			if(members[z].GroupNumber == gid){
-				distance = caster->DistNoRoot(*members[z].member);
+				distance = ComparativeDistance(caster->GetPosition(), members[z].member->GetPosition());
 				if(distance <= range2) {
 					members[z].member->BardPulse(spellid, caster);
 #ifdef GROUP_BUFF_PETS

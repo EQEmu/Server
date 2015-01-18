@@ -149,10 +149,24 @@ float ComparativeDistance(const xyz_location& point1, const xyz_location& point2
 }
 
 /**
+* Produces the non square root'ed distance between the two points.
+*/
+float ComparativeDistance(const xyz_heading& point1, const xyz_heading& point2) {
+    ComparativeDistance(static_cast<xyz_location>(point1), static_cast<xyz_location>(point2));
+}
+
+/**
 * Produces the distance between the two points.
 */
 float Distance(const xyz_location& point1, const xyz_location& point2) {
     return sqrt(ComparativeDistance(point1, point2));
+}
+
+/**
+* Produces the distance between the two points.
+*/
+float Distance(const xyz_heading& point1, const xyz_heading& point2) {
+    Distance(static_cast<xyz_location>(point1), static_cast<xyz_location>(point2));
 }
 
 /**
@@ -163,9 +177,23 @@ float DistanceNoZ(const xyz_location& point1, const xyz_location& point2) {
 }
 
 /**
+* Produces the distance between the two points within the XY plane.
+*/
+float DistanceNoZ(const xyz_heading& point1, const xyz_heading& point2) {
+    return Distance(static_cast<xy_location>(point1),static_cast<xy_location>(point2));
+}
+
+/**
 * Produces the non square root'ed distance between the two points within the XY plane.
 */
 float ComparativeDistanceNoZ(const xyz_location& point1, const xyz_location& point2) {
+    return ComparativeDistance(static_cast<xy_location>(point1),static_cast<xy_location>(point2));
+}
+
+/**
+* Produces the non square root'ed distance between the two points within the XY plane.
+*/
+float ComparativeDistanceNoZ(const xyz_heading& point1, const xyz_heading& point2) {
     return ComparativeDistance(static_cast<xy_location>(point1),static_cast<xy_location>(point2));
 }
 
@@ -196,4 +224,34 @@ bool IsWithinAxisAlignedBox(const xy_location &position, const xy_location &mini
     bool ycheck = position.m_Y >= actualMinimum.m_Y && position.m_Y <= actualMaximum.m_Y;
 
     return xcheck && ycheck;
+}
+
+/**
+* Gives the heading directly 180 degrees from the
+* current heading.
+* Takes the EQfloat from the xyz_heading and returns
+* an EQFloat.
+*/
+float GetReciprocalHeading(const xyz_heading& point1) {
+    return GetReciprocalHeading(point1.m_Heading);
+}
+
+/**
+* Gives the heading directly 180 degrees from the
+* current heading.
+* Takes an EQfloat and returns an EQFloat.
+*/
+float GetReciprocalHeading(const float heading) {
+    float result = 0;
+
+    // Convert to radians
+    float h = (heading / 256.0f) * 6.283184f;
+
+    // Calculate the reciprocal heading in radians
+    result = h + 3.141592f;
+
+    // Convert back to eq heading from radians
+    result = (result / 6.283184f) * 256.0f;
+
+    return result;
 }

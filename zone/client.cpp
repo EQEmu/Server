@@ -40,6 +40,7 @@ extern volatile bool RunLoops;
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
 #include "../common/data_verification.h"
+#include "position.h"
 #include "net.h"
 #include "worldserver.h"
 #include "zonedb.h"
@@ -993,7 +994,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				CheckEmoteHail(GetTarget(), message);
 
 
-				if(DistNoRootNoZ(*GetTarget()) <= 200) {
+				if(ComparativeDistanceNoZ(m_Position, GetTarget()->GetPosition()) <= 200) {
 					NPC *tar = GetTarget()->CastToNPC();
 					parse->EventNPC(EVENT_SAY, tar->CastToNPC(), this, message, language);
 
@@ -1005,7 +1006,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				}
 			}
 			else {
-				if (DistNoRootNoZ(*GetTarget()) <= 200) {
+				if (ComparativeDistanceNoZ(m_Position, GetTarget()->GetPosition()) <= 200) {
 					parse->EventNPC(EVENT_AGGRO_SAY, GetTarget()->CastToNPC(), this, message, language);
 				}
 			}
@@ -2539,7 +2540,7 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 			}
 
 			else {
-				if (!GetFeigned() && (bindmob->DistNoRoot(*this) <= 400)) {
+				if (!GetFeigned() && (ComparativeDistance(bindmob->GetPosition(), m_Position)  <= 400)) {
 					// send bindmob bind done
 					if(!bindmob->IsAIControlled() && bindmob != this ) {
 
@@ -3178,7 +3179,7 @@ void Client::Insight(uint32 t_id)
 		Message(0,"This ability can only be used on NPCs.");
 		return;
 	}
-	if (Dist(*who) > 200)
+	if (Distance(static_cast<xyz_location>(m_Position), static_cast<xyz_location>(who->GetPosition())) > 200)
 	{
 		Message(0,"You must get closer to your target!");
 		return;
@@ -4552,7 +4553,7 @@ void Client::HandleLDoNOpen(NPC *target)
 			return;
 		}
 
-		if(DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
+		if(ComparativeDistanceNoZ(m_Position, target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 		{
 			LogFile->write(EQEmuLog::Debug, "%s tried to open %s but %s was out of range",
 				GetName(), target->GetName(), target->GetName());
@@ -6186,7 +6187,7 @@ void Client::DragCorpses()
 		Mob *corpse = entity_list.GetMob(It->second);
 
 		if (corpse && corpse->IsPlayerCorpse() &&
-				(DistNoRootNoZ(*corpse) <= RuleR(Character, DragCorpseDistance)))
+				(ComparativeDistanceNoZ(m_Position, corpse->GetPosition()) <= RuleR(Character, DragCorpseDistance)))
 			continue;
 
 		if (!corpse || !corpse->IsPlayerCorpse() ||

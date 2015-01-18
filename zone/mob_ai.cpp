@@ -67,7 +67,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 		dist2 = 0; //DistNoRoot(*this);	//WTF was up with this...
 	}
 	else
-		dist2 = DistNoRoot(*tar);
+		dist2 = ComparativeDistance(m_Position, tar->GetPosition());
 
 	bool checked_los = false;	//we do not check LOS until we are absolutely sure we need to, and we only do it once.
 
@@ -401,7 +401,7 @@ bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float 
 		if (t1 > iRange
 			|| t2 > iRange
 			|| t3 > iRange
-			|| mob->DistNoRoot(*caster) > iRange2
+			|| ComparativeDistance(mob->GetPosition(), caster->GetPosition()) > iRange2
 				//this call should seem backwards:
 			|| !mob->CheckLosFN(caster)
 			|| mob->GetReverseFactionCon(caster) >= FACTION_KINDLY
@@ -622,7 +622,7 @@ void Client::AI_SpellCast()
 	if(!targ)
 		return;
 
-	float dist = DistNoRootNoZ(*targ);
+	float dist = ComparativeDistanceNoZ(m_Position, targ->GetPosition());
 
 	std::vector<uint32> valid_spells;
 	std::vector<uint32> slots;
@@ -997,7 +997,7 @@ void Client::AI_Process()
 			if(owner == nullptr)
 				return;
 
-			float dist = DistNoRoot(*owner);
+			float dist = ComparativeDistance(m_Position, owner->GetPosition());
 			if (dist >= 100)
 			{
 				float speed = dist >= 225 ? GetRunspeed() : GetWalkspeed();
@@ -1129,14 +1129,14 @@ void Mob::AI_Process() {
 			float tether_range = static_cast<float>(GetSpecialAbilityParam(TETHER, 0));
 			tether_range = tether_range > 0.0f ? tether_range * tether_range : pAggroRange * pAggroRange;
 
-			if(DistNoRootNoZ(npcSpawnPoint.m_X, npcSpawnPoint.m_Y) > tether_range) {
+			if(ComparativeDistanceNoZ(m_Position, npcSpawnPoint) > tether_range) {
 				GMMove(npcSpawnPoint.m_X, npcSpawnPoint.m_Y, npcSpawnPoint.m_Z, npcSpawnPoint.m_Heading);
 			}
 		} else if(GetSpecialAbility(LEASH)) {
 			float leash_range = static_cast<float>(GetSpecialAbilityParam(LEASH, 0));
 			leash_range = leash_range > 0.0f ? leash_range * leash_range : pAggroRange * pAggroRange;
 
-			if(DistNoRootNoZ(npcSpawnPoint.m_X, npcSpawnPoint.m_Y) > leash_range) {
+			if(ComparativeDistanceNoZ(m_Position, npcSpawnPoint) > leash_range) {
 				GMMove(npcSpawnPoint.m_X, npcSpawnPoint.m_Y, npcSpawnPoint.m_Z, npcSpawnPoint.m_Heading);
 				SetHP(GetMaxHP());
 				BuffFadeAll();
@@ -1492,7 +1492,7 @@ void Mob::AI_Process() {
 						//if(owner->IsClient())
 						//	printf("Pet start pos: (%f, %f, %f)\n", GetX(), GetY(), GetZ());
 
-						float dist = DistNoRoot(*owner);
+						float dist = ComparativeDistance(m_Position, owner->GetPosition());
 						if (dist >= 400)
 						{
 							float speed = GetWalkspeed();
@@ -1547,7 +1547,7 @@ void Mob::AI_Process() {
 				if (!follow) SetFollowID(0);
 				else
 				{
-					float dist2 = DistNoRoot(*follow);
+					float dist2 = ComparativeDistance(m_Position, follow->GetPosition());
 					int followdist = GetFollowDistance();
 
 					if (dist2 >= followdist)	// Default follow distance is 100
@@ -1812,7 +1812,7 @@ void NPC::AI_DoMovement() {
 				ClearFeignMemory();
 				moved=false;
 				SetMoving(false);
-				if (GetTarget() == nullptr || DistNoRoot(*GetTarget()) >= 5*5 )
+				if (GetTarget() == nullptr || ComparativeDistance(m_Position, GetTarget()->GetPosition()) >= 5*5 )
 				{
 					SetHeading(m_GuardPoint.m_Heading);
 				} else {

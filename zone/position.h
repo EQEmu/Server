@@ -94,4 +94,12 @@ float Distance(const xyz_location& point1, const xyz_location& point2);
 float DistanceNoZ(const xyz_location& point1, const xyz_location& point2);
 float ComparativeDistanceNoZ(const xyz_location& point1, const xyz_location& point2);
 
+float ComparativeDistance(const xyz_heading& point1, const xyz_heading& point2);
+float Distance(const xyz_heading& point1, const xyz_heading& point2);
+float DistanceNoZ(const xyz_heading& point1, const xyz_heading& point2);
+float ComparativeDistanceNoZ(const xyz_heading& point1, const xyz_heading& point2);
+
+float GetReciprocalHeading(const xyz_heading& point1);
+float GetReciprocalHeading(const float heading);
+
 #endif

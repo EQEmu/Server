@@ -1318,7 +1318,7 @@ bool Merc::IsMercCasterCombatRange(Mob *target) {
 		// half the max so the merc doesn't always stop at max range to allow combat movement
 		range *= .5;
 
-		float targetDistance = DistNoRootNoZ(*target);
+		float targetDistance = ComparativeDistanceNoZ(m_Position, target->GetPosition());
 
 		if(targetDistance > range)
 			result = false;
@@ -1480,7 +1480,7 @@ void Merc::AI_Process() {
 			if(IsMercCasterCombatRange(GetTarget()))
 				atCombatRange = true;
 		}
-		else if(DistNoRoot(*GetTarget()) <= meleeDistance) {
+		else if(ComparativeDistance(m_Position, GetTarget()->GetPosition()) <= meleeDistance) {
 			atCombatRange = true;
 		}
 
@@ -1513,7 +1513,7 @@ void Merc::AI_Process() {
 						return;
 					}
 				}
-				else if(!IsMoving() && GetClass() != ROGUE && (DistNoRootNoZ(*GetTarget()) < GetTarget()->GetSize()))
+				else if(!IsMoving() && GetClass() != ROGUE && (ComparativeDistanceNoZ(m_Position, GetTarget()->GetPosition()) < GetTarget()->GetSize()))
 				{
 					// If we are not a rogue trying to backstab, let's try to adjust our melee range so we don't appear to be bunched up
 					float newX = 0;
@@ -1701,7 +1701,7 @@ void Merc::AI_Process() {
 
 				if(follow)
 				{
-					float dist = DistNoRoot(*follow);
+					float dist = ComparativeDistance(m_Position, follow->GetPosition());
 					float speed = GetRunspeed();
 
 					if(dist < GetFollowDistance() + 1000)
@@ -1938,7 +1938,7 @@ bool Merc::AIDoSpellCast(uint16 spellid, Mob* tar, int32 mana_cost, uint32* oDon
 	if (mercSpell.type & SpellType_Escape) {
 		dist2 = 0;
 	} else
-		dist2 = DistNoRoot(*tar);
+		dist2 = ComparativeDistance(m_Position, tar->GetPosition());
 
 	if (((((spells[spellid].targettype==ST_GroupTeleport && mercSpell.type==SpellType_Heal)
 		|| spells[spellid].targettype==ST_AECaster
@@ -2435,7 +2435,7 @@ void Merc::CheckHateList() {
 				if(MercOwner && MercOwner->GetTarget() && MercOwner->GetTarget()->IsNPC() && (MercOwner->GetTarget()->GetHateAmount(MercOwner) || MercOwner->CastToClient()->AutoAttackEnabled()) && IsAttackAllowed(MercOwner->GetTarget())) {
 					float range = g->HasRole(MercOwner, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
 					range = range * range;
-					if(MercOwner->GetTarget()->DistNoRootNoZ(*this) < range) {
+					if(ComparativeDistanceNoZ(m_Position, MercOwner->GetTarget()->GetPosition()) < range) {
 						AddToHateList(MercOwner->GetTarget(), 1);
 					}
 				}
@@ -2445,7 +2445,7 @@ void Merc::CheckHateList() {
 
 					for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 						NPC* npc = *itr;
-						float dist = npc->DistNoRootNoZ(*this);
+						float dist = ComparativeDistanceNoZ(m_Position, npc->GetPosition());
 						int radius = RuleI(Mercs, AggroRadius);
 						radius *= radius;
 						if(dist <= radius) {
@@ -2457,7 +2457,7 @@ void Merc::CheckHateList() {
 										if(!hate_list.IsEntOnHateList(npc)) {
 											float range = g->HasRole(groupMember, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
 											range *= range;
-											if(npc->DistNoRootNoZ(*this) < range) {
+											if(ComparativeDistanceNoZ(m_Position, npc->GetPosition()) < range) {
 												hate_list.AddEntToHateList(npc, 1);
 											}
 										}
@@ -2499,7 +2499,7 @@ bool Merc::CheckAENuke(Merc* caster, Mob* tar, uint16 spell_id, uint8 &numTarget
 	for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 		NPC* npc = *itr;
 
-		if(npc->DistNoRootNoZ(*tar) <= spells[spell_id].aoerange * spells[spell_id].aoerange) {
+		if(ComparativeDistanceNoZ(npc->GetPosition(), tar->GetPosition()) <= spells[spell_id].aoerange * spells[spell_id].aoerange) {
 			if(!npc->IsMezzed()) {
 				numTargets++;
 			}
@@ -4098,7 +4098,7 @@ bool Merc::CheckAETaunt() {
 
 		for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 			NPC* npc = *itr;
-			float dist = npc->DistNoRootNoZ(*this);
+			float dist = ComparativeDistanceNoZ(m_Position, npc->GetPosition());
 			int range = GetActSpellRange(mercSpell.spellid, spells[mercSpell.spellid].range);
 			range *= range;
 
@@ -4201,7 +4201,7 @@ bool Merc::CheckConfidence() {
 
 		AggroRange = AggroRange * AggroRange;
 
-		if(mob->DistNoRoot(*this) > AggroRange) continue;
+		if(ComparativeDistance(m_Position, mob->GetPosition()) > AggroRange) continue;
 
 		CurrentCon = this->GetLevelCon(mob->GetLevel());
 		switch(CurrentCon) {
@@ -5150,7 +5150,7 @@ bool Client::CheckCanHireMerc(Mob* merchant, uint32 template_id) {
 	}
 
 	//check for merchant too far away
-	if(DistNoRoot(*merchant) > USE_NPC_RANGE2) {
+	if(ComparativeDistance(m_Position, merchant->GetPosition()) > USE_NPC_RANGE2) {
 		SendMercResponsePackets(18);
 		return false;
 	}

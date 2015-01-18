@@ -294,6 +294,7 @@ public:
 	inline virtual uint32 GetNimbusEffect2() const { return nimbus_effect2; }
 	inline virtual uint32 GetNimbusEffect3() const { return nimbus_effect3; }
 	void RemoveNimbusEffect(int effectid);
+	inline const xyz_location& GetTargetRingLocation() const { return m_TargetRing; }
 	inline float GetTargetRingX() const { return m_TargetRing.m_X; }
 	inline float GetTargetRingY() const { return m_TargetRing.m_Y; }
 	inline float GetTargetRingZ() const { return m_TargetRing.m_Z; }
@@ -510,13 +511,6 @@ public:
 	void ShowStats(Client* client);
 	void ShowBuffs(Client* client);
 	void ShowBuffList(Client* client);
-	float Dist(const Mob &) const;
-	float DistNoZ(const Mob &) const;
-	float DistNoRoot(const Mob &) const;
-	float DistNoRoot(float x, float y, float z) const;
-	float DistNoRootNoZ(float x, float y) const;
-	float DistNoRootNoZ(const Mob &) const;
-	static float GetReciprocalHeading(Mob* target);
 	bool PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, float &z_dest,
 		bool lookForAftArc = true);
 

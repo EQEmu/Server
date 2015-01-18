@@ -158,7 +158,7 @@ Mob* HateList::GetClosestEntOnHateList(Mob *hater) {
 
 	auto iterator = list.begin();
 	while (iterator != list.end()) {
-		this_distance = (*iterator)->entity_on_hatelist->DistNoRootNoZ(*hater);
+		this_distance = ComparativeDistanceNoZ((*iterator)->entity_on_hatelist->GetPosition(), hater->GetPosition());
 		if ((*iterator)->entity_on_hatelist != nullptr && this_distance <= close_distance) {
 			close_distance = this_distance;
 			close_entity = (*iterator)->entity_on_hatelist;
@@ -592,7 +592,7 @@ void HateList::SpellCast(Mob *caster, uint32 spell_id, float range, Mob* ae_cent
 		struct_HateList *h = (*iterator);
 		if (range > 0)
 		{
-			dist_targ = center->DistNoRoot(*h->entity_on_hatelist);
+			dist_targ = ComparativeDistance(center->GetPosition(), h->entity_on_hatelist->GetPosition());
 			if (dist_targ <= range && dist_targ >= min_range2)
 			{
 				id_list.push_back(h->entity_on_hatelist->GetID());
