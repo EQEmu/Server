@@ -48,45 +48,52 @@ public:
 		Detail,			/* 2 - Use this for extreme detail in logging, usually in extreme debugging in the stack or interprocess communication */
 	};
 
-	/* If you add to this, make sure you update LogCategoryName */
+	/* 
+		If you add to this, make sure you update LogCategoryName 
+		NOTE: Only add to the bottom of the enum because that is the type ID assignment
+	*/
 	enum LogCategory {
 		None = 0,
-		Zone_Server = 1,
-		World_Server,
-		UCS_Server,
-		QS_Server,
-		WebInterface_Server,
 		AA,
+		AI,
+		Aggro,
+		Attack,
+		Client_Server_Packet,
+		Combat,
+		Commands,
+		Crash,
+		Debug,
 		Doors,
+		Error,
 		Guilds,
 		Inventory,
 		Launcher,
 		Netcode,
+		Normal,
 		Object,
+		Pathing,
+		QS_Server,
+		Quests,
 		Rules,
 		Skills,
 		Spawns,
 		Spells,
-		Tasks,
-		Trading,
-		Tradeskills,
-		Tribute,
+		Status,
 		TCP_Connection,
-		Client_Server_Packet,
-		Aggro,
-		Attack,
-		Quests,
-		AI,
-		Combat,
-		Pathing,
+		Tasks,
+		Tradeskills,
+		Trading,
+		Tribute,
+		UCS_Server,
+		WebInterface_Server,
+		World_Server,
+		Zone_Server,
 		MaxCategoryID	/* Don't Remove this*/
 	};
 
 	void CloseFileLogs();
 	void LoadLogSettingsDefaults();
 	void Log(uint16 log_type, const std::string message, ...);
-	//void LogDebug(DebugLevel debug_level, std::string message, ...);
-	//void DebugCategory(DebugLevel debug_level, uint16 log_category, std::string message, ...);
 	void DebugCategory(DebugLevel debug_level, uint16 log_category, std::string message, ...);
 	void MakeDirectory(std::string directory_name);
 	void SetCurrentTimeStamp(char* time_stamp);
@@ -120,34 +127,40 @@ extern EQEmuLogSys Log;
 /* If you add to this, make sure you update LogCategory */
 static const char* LogCategoryName[EQEmuLogSys::LogCategory::MaxCategoryID] = {
 	"",
-	"Zone",
-	"World",
-	"UCS",
-	"QueryServer",
-	"WebInterface",
 	"AA",
+	"AI",
+	"Aggro",
+	"Attack",
+	"Client_Server_Packet",
+	"Combat",
+	"Commands",
+	"Crash",
+	"Debug",
 	"Doors",
-	"Guild",
+	"Error",
+	"Guilds",
 	"Inventory",
 	"Launcher",
 	"Netcode",
+	"Normal",
 	"Object",
+	"Pathing",
+	"QS_Server",
+	"Quests",
 	"Rules",
 	"Skills",
 	"Spawns",
 	"Spells",
-	"Tasks",
-	"Trading",
-	"Tradeskills",
-	"Tribute",
+	"Status",
 	"TCP_Connection",
-	"Client_Server_Packet",
-	"Aggro",
-	"Attack",
-	"Quests",
-	"AI",
-	"Combat",
-	"Pathing"
+	"Tasks",
+	"Tradeskills",
+	"Trading",
+	"Tribute",
+	"UCS_Server",
+	"WebInterface_Server",
+	"World_Server",
+	"Zone_Server",
 };
 
 #endif
