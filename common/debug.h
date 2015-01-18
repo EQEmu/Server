@@ -91,11 +91,8 @@ public:
 		MaxLogID	 /* Max, used in functions to get the max log ID */
 	};
 
-	bool write(LogIDs id, const char *fmt, ...);
-	bool writePVA(LogIDs id, const char *prefix, const char *fmt, va_list args);
+
 private:
-	bool open(LogIDs id);
-	bool writeNTS(LogIDs id, bool dofile, const char *fmt, ...); // no error checking, assumes is open, no locking, no timestamp, no newline
 
 	Mutex	MOpen;
 	Mutex	MLog[MaxLogID];
