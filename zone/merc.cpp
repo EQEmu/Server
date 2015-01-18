@@ -4201,7 +4201,7 @@ bool Merc::CheckConfidence() {
 
 		AggroRange = AggroRange * AggroRange;
 
-		if(mob->DistNoRoot(*this) > AggroRange) continue;
+		if(ComparativeDistance(m_Position, mob->GetPosition()) > AggroRange) continue;
 
 		CurrentCon = this->GetLevelCon(mob->GetLevel());
 		switch(CurrentCon) {
