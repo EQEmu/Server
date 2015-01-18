@@ -994,7 +994,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				CheckEmoteHail(GetTarget(), message);
 
 
-				if(DistNoRootNoZ(*GetTarget()) <= 200) {
+				if(ComparativeDistanceNoZ(m_Position, GetTarget()->GetPosition()) <= 200) {
 					NPC *tar = GetTarget()->CastToNPC();
 					parse->EventNPC(EVENT_SAY, tar->CastToNPC(), this, message, language);
 
