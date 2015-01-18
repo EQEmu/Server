@@ -898,7 +898,7 @@ bool Bot::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 	if (AIspells[i].type & SpellType_Escape) {
 		dist2 = 0;
 	} else
-		dist2 = DistNoRoot(*tar);
+		dist2 = ComparativeDistance(m_Position, tar->GetPosition());
 
 	if (((((spells[AIspells[i].spellid].targettype==ST_GroupTeleport && AIspells[i].type==2)
 				|| spells[AIspells[i].spellid].targettype==ST_AECaster
