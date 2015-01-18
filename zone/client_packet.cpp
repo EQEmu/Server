@@ -9958,7 +9958,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		}
 
 		if ((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 2) || mypet->GetPetType() != petAnimation) {
-			if (GetTarget() != this && mypet->DistNoRootNoZ(*GetTarget()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
+			if (GetTarget() != this && ComparativeDistanceNoZ(mypet->GetPosition(), GetTarget()->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
 				zone->AddAggroMob();
 				mypet->AddToHateList(GetTarget(), 1);
 				Message_StringID(MT_PetResponse, PET_ATTACKING, mypet->GetCleanName(), GetTarget()->GetCleanName());
