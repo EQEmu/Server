@@ -296,7 +296,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		return(false);
 	}
 
-	float dist2 = mob->DistNoRoot(*this);
+	float dist2 = ComparativeDistance(mob->GetPosition(), m_Position);
 	float iAggroRange2 = iAggroRange*iAggroRange;
 
 	if( dist2 > iAggroRange2 ) {
