@@ -1197,7 +1197,7 @@ void Group::HealGroup(uint32 heal_amt, Mob* caster, float range)
 	for(; gi < MAX_GROUP_MEMBERS; gi++)
 	{
 		if(members[gi]){
-			distance = caster->DistNoRoot(*members[gi]);
+			distance = ComparativeDistance(caster->GetPosition(), members[gi]->GetPosition());
 			if(distance <= range2){
 				numMem += 1;
 			}
