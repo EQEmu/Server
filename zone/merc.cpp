@@ -1701,7 +1701,7 @@ void Merc::AI_Process() {
 
 				if(follow)
 				{
-					float dist = DistNoRoot(*follow);
+					float dist = ComparativeDistance(m_Position, follow->GetPosition());
 					float speed = GetRunspeed();
 
 					if(dist < GetFollowDistance() + 1000)
