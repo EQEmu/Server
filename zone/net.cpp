@@ -155,11 +155,6 @@ int main(int argc, char** argv) {
 	}
 	const ZoneConfig *Config=ZoneConfig::get();
 
-	if(!load_log_settings(Config->LogSettingsFile.c_str()))
-		Log.Out(Logs::Detail, Logs::Zone_Server, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
-	else
-		Log.Out(Logs::Detail, Logs::Zone_Server, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
-
 	worldserver.SetPassword(Config->SharedKey.c_str());
 
 	Log.Out(Logs::Detail, Logs::Zone_Server, "Connecting to MySQL...");
@@ -207,10 +202,6 @@ int main(int argc, char** argv) {
 	#endif
 
 	const char *log_ini_file = "./log.ini";
-	if(!load_log_settings(log_ini_file))
-		Log.Out(Logs::Detail, Logs::Zone_Server, "Warning: Unable to read %s", log_ini_file);
-	else
-		Log.Out(Logs::Detail, Logs::Zone_Server, "Log settings loaded from %s", log_ini_file);
 
 	Log.Out(Logs::Detail, Logs::Zone_Server, "Mapping Incoming Opcodes");
 	MapOpcodes();

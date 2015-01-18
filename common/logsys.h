@@ -65,8 +65,6 @@ extern const LogTypeStatus *log_type_info;
 // For log_packet, et all.
 class BasePacket;
 
-extern void log_message(LogType type, const char *fmt, ...);
-extern void log_messageVA(LogType type, const char *fmt, va_list args);
 extern void log_hex(LogType type, const void *data, unsigned long length, unsigned char padding=4);
 extern void log_packet(LogType type, const BasePacket *p);
 extern void log_raw_packet(LogType type, uint16 seq, const BasePacket *p);
@@ -116,7 +114,7 @@ extern void log_toggle(LogType t);
 #define is_log_enabled( type ) \
 	log_type_info[ type ].enabled
 
-extern bool load_log_settings(const char *filename);
+// extern bool load_log_settings(const char *filename);
 
 #endif /*LOGSYS_H_*/
 

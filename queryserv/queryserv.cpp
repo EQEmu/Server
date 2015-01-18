@@ -87,12 +87,6 @@ int main() {
 		return 1;
 	}
 
-	/* Initialize Logging */
-	if (!load_log_settings(Config->LogSettingsFile.c_str()))
-		Log.Out(Logs::Detail, Logs::QS_Server, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
-	else
-		Log.Out(Logs::Detail, Logs::QS_Server, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
-
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
 		Log.Out(Logs::Detail, Logs::QS_Server, "Could not set signal handler");
 		return 1;

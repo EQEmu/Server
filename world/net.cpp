@@ -133,12 +133,6 @@ int main(int argc, char** argv) {
 	}
 	const WorldConfig *Config=WorldConfig::get();
 
-	if(!load_log_settings(Config->LogSettingsFile.c_str()))
-		Log.Out(Logs::Detail, Logs::World_Server, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
-	else
-		Log.Out(Logs::Detail, Logs::World_Server, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
-
-
 	Log.Out(Logs::Detail, Logs::World_Server, "CURRENT_VERSION: %s", CURRENT_VERSION);
 
 	#ifdef _DEBUG

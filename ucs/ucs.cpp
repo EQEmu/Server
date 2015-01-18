@@ -89,11 +89,6 @@ int main() {
 
 	Config = ucsconfig::get();
 
-	if(!load_log_settings(Config->LogSettingsFile.c_str()))
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
-	else
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
-
 	WorldShortName = Config->ShortName;
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "Connecting to MySQL...");

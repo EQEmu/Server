@@ -43,9 +43,6 @@ int main(int argc, char **argv) {
 	}
 
 	const EQEmuConfig *config = EQEmuConfig::get();
-	if(!load_log_settings(config->LogSettingsFile.c_str())) {
-		Log.Out(Logs::General, Logs::Error, "Warning: unable to read %s.", config->LogSettingsFile.c_str());
-	}
 
 	SharedDatabase database;
 	Log.Out(Logs::General, Logs::Status, "Connecting to database...");

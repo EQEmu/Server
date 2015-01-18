@@ -16,6 +16,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
+/*
+
 #include "debug.h"
 #include "eq_packet.h"
 #include "logsys.h"
@@ -37,8 +39,9 @@ const char *log_category_names[NUMBER_OF_LOG_CATEGORIES] = {
 static LogTypeStatus real_log_type_info[NUMBER_OF_LOG_TYPES+1] =
 {
 	#include "logtypes.h"
-	{ false, NUMBER_OF_LOG_CATEGORIES, "BAD TYPE" }	/* dummy trailing record */
+	{ false, NUMBER_OF_LOG_CATEGORIES, "BAD TYPE" }	/* dummy trailing record 
 };
+
 const LogTypeStatus *log_type_info = real_log_type_info;
 
 
@@ -50,7 +53,7 @@ void log_hex(LogType type, const void *data, unsigned long length, unsigned char
 	uint32 offset;
 	for(offset=0;offset<length;offset+=16) {
 		build_hex_line((const char *)data,length,offset,buffer,padding);
-		log_message(type, "%s", buffer);	//%s is to prevent % escapes in the ascii
+		// log_message(type, "%s", buffer);	//%s is to prevent % escapes in the ascii
 	}
 }
 
@@ -59,7 +62,7 @@ void log_packet(LogType type, const BasePacket *p) {
 		return;
 	char buffer[80];
 	p->build_header_dump(buffer);
-	log_message(type,"%s", buffer);
+	//log_message(type,"%s", buffer);
 	log_hex(type,(const char *)p->pBuffer,p->size);
 }
 
@@ -68,7 +71,7 @@ void log_raw_packet(LogType type, uint16 seq, const BasePacket *p) {
 		return;
 	char buffer[196];
 	p->build_raw_header_dump(buffer, seq);
-	log_message(type,buffer);
+	//log_message(type,buffer);
 	log_hex(type,(const char *)p->pBuffer,p->size);
 }
 
@@ -156,3 +159,5 @@ bool load_log_settings(const char *filename) {
 	return(true);
 }
 
+
+*/
