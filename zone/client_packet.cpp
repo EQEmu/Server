@@ -3025,7 +3025,7 @@ void Client::Handle_OP_Assist(const EQApplicationPacket *app)
 		if (assistee->GetTarget()) {
 			Mob *new_target = assistee->GetTarget();
 			if (new_target && (GetGM() ||
-				Distance(static_cast<xyz_location>(m_Position), static_cast<xyz_location>(assistee->GetPosition())) <= TARGETING_RANGE)) {
+				Distance(m_Position, assistee->GetPosition()) <= TARGETING_RANGE)) {
 				SetAssistExemption(true);
 				eid->entity_id = new_target->GetID();
 			}
