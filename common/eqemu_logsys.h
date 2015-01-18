@@ -101,11 +101,11 @@ public:
 
 private:
 	bool zone_general_init = false;
-	std::function<void(uint16 log_type, std::string&)> on_log_gmsay_hook;
+	std::function<void(uint16 log_category, std::string&)> on_log_gmsay_hook;
 
 	std::string FormatDebugCategoryMessageString(uint16 log_category, std::string in_message);
 
-	void ProcessConsoleMessage(uint16 log_type, uint16 log_category, const std::string message);
+	void ProcessConsoleMessage(uint16 log_category, const std::string message);
 	void ProcessGMSay(uint16 log_category, std::string message);
 	void ProcessLogWrite(uint16 log_category, std::string message);
 };

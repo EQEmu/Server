@@ -124,22 +124,18 @@ void EQEmuLogSys::ProcessLogWrite(uint16 log_category, std::string message)
 	EQEmuLogSys::SetCurrentTimeStamp(time_stamp);
 
 	if (process_log){
-		process_log << time_stamp << " " << StringFormat("[%s] ", TypeNames[log_type]).c_str() << message << std::endl;
+		process_log << time_stamp << " " << StringFormat("[%s] ", LogCategoryName[log_category]).c_str() << message << std::endl;
 	}
 	else{
 		// std::cout << "[DEBUG] " << ":: There currently is no log file open for this process " << "\n";
 	}
 }
 
-void EQEmuLogSys::ProcessConsoleMessage(uint16 log_type, uint16 log_category, const std::string message)
+void EQEmuLogSys::ProcessConsoleMessage(uint16 log_category, const std::string message)
 {
 	/* Check if category enabled for process */
 	if (log_settings[log_category].log_to_console == 0)
 		return;
-
-	if (log_type > EQEmuLogSys::MaxLogID){
-		return;
-	}
 
 	#ifdef _WINDOWS
 		HANDLE  console_handle;
@@ -150,15 +146,15 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 log_type, uint16 log_category, co
 		info.FontWeight = FW_NORMAL;
 		wcscpy(info.FaceName, L"Lucida Console");
 		SetCurrentConsoleFontEx(console_handle, NULL, &info);
-		if (LogColors[log_type]){
-			SetConsoleTextAttribute(console_handle, LogColors[log_type]);
-		}
-		else{
+		//if (LogColors[log_type]){
+		//	SetConsoleTextAttribute(console_handle, LogColors[log_type]);
+		//}
+		//else{
 			SetConsoleTextAttribute(console_handle, Console::Color::White);
-		}
+		//}
 	#endif
 
-	std::cout << "[" << TypeNames[log_type] << "] " << message << "\n";
+		std::cout << "[" << LogCategoryName[log_category] << "] " << message << "\n";
 
 	#ifdef _WINDOWS
 		/* Always set back to white*/
@@ -175,7 +171,7 @@ void EQEmuLogSys::DebugCategory(DebugLevel debug_level, uint16 log_category, std
 
 	std::string output_debug_message = EQEmuLogSys::FormatDebugCategoryMessageString(log_category, output_message);
 
-	EQEmuLogSys::ProcessConsoleMessage(EQEmuLogSys::Debug, log_category, output_debug_message);
+	EQEmuLogSys::ProcessConsoleMessage(log_category, output_debug_message);
 	EQEmuLogSys::ProcessGMSay(log_category, output_debug_message);
 	EQEmuLogSys::ProcessLogWrite(log_category, output_debug_message);
 }
