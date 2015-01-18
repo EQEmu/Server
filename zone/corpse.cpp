@@ -1328,7 +1328,7 @@ bool Corpse::Summon(Client* client, bool spell, bool CheckDistance) {
 				client->Message(13, "That corpse is locked by a GM.");
 				return false;
 			}
-			if (!CheckDistance || (DistNoRootNoZ(*client) <= dist2)) {
+			if (!CheckDistance || (ComparativeDistanceNoZ(m_Position, client->GetPosition()) <= dist2)) {
 				GMMove(client->GetX(), client->GetY(), client->GetZ());
 				is_corpse_changed = true;
 			}
