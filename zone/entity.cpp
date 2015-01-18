@@ -2942,7 +2942,7 @@ bool EntityList::MakeTrackPacket(Client *client)
 				it->second->IsInvisible(client))
 			continue;
 
-		MobDistance = it->second->DistNoZ(*client);
+		MobDistance = DistanceNoZ(it->second->GetPosition(), client->GetPosition());
 		if (MobDistance > distance)
 			continue;
 
