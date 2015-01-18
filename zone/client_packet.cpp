@@ -9796,7 +9796,7 @@ void Client::Handle_OP_OpenGuildTributeMaster(const EQApplicationPacket *app)
 		StartTribute_Struct* st = (StartTribute_Struct*)app->pBuffer;
 		Mob* tribmast = entity_list.GetMob(st->tribute_master_id);
 		if (tribmast && tribmast->IsNPC() && tribmast->GetClass() == GUILD_TRIBUTE_MASTER
-			&& DistNoRoot(*tribmast) <= USE_NPC_RANGE2) {
+			&& ComparativeDistance(m_Position, tribmast->GetPosition()) <= USE_NPC_RANGE2) {
 			st->response = 1;
 			QueuePacket(app);
 			tribute_master_id = st->tribute_master_id;
