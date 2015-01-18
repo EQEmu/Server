@@ -2554,7 +2554,7 @@ void Client::Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket *app
 
 	NPC* tar = entity_list.GetNPCByID(*((uint32*)app->pBuffer));
 	if (tar) {
-		if (DistNoRoot(*tar) > USE_NPC_RANGE2)
+		if (ComparativeDistance(m_Position, tar->GetPosition())  > USE_NPC_RANGE2)
 			return;
 
 		if (tar->GetClass() != ALT_CURRENCY_MERCHANT) {
@@ -2633,7 +2633,7 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 	AltCurrencyPurchaseItem_Struct *purchase = (AltCurrencyPurchaseItem_Struct*)app->pBuffer;
 	NPC* tar = entity_list.GetNPCByID(purchase->merchant_entity_id);
 	if (tar) {
-		if (DistNoRoot(*tar) > USE_NPC_RANGE2)
+		if (ComparativeDistance(m_Position, tar->GetPosition())> USE_NPC_RANGE2)
 			return;
 
 		if (tar->GetClass() != ALT_CURRENCY_MERCHANT) {
