@@ -443,7 +443,7 @@ int command_init(void) {
 		if ((itr=command_settings.find(cur->first))!=command_settings.end())
 		{
 			cur->second->access = itr->second;
-			Log.Log(EQEmuLogSys::Commands, "command_init(): - Command '%s' set to access level %d.", cur->first.c_str(), itr->second);
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Commands, "command_init(): - Command '%s' set to access level %d.", cur->first.c_str(), itr->second);
 		}
 		else
 		{
@@ -568,7 +568,7 @@ int command_realdispatch(Client *c, const char *message)
 
 #ifdef COMMANDS_LOGGING
 	if(cur->access >= COMMANDS_LOGGING_MIN_STATUS) {
-		Log.Log(EQEmuLogSys::Commands, "%s (%s) used command: %s (target=%s)", c->GetName(), c->AccountName(), message, c->GetTarget()?c->GetTarget()->GetName():"NONE");
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Commands, "%s (%s) used command: %s (target=%s)", c->GetName(), c->AccountName(), message, c->GetTarget()?c->GetTarget()->GetName():"NONE");
 	}
 #endif
 
