@@ -4003,7 +4003,7 @@ void Bot::PetAIProcess() {
 			switch(pStandingPetOrder) {
 				case SPO_Follow:
 					{
-						float dist = botPet->DistNoRoot(*botPet->GetTarget());
+						float dist = ComparativeDistance(botPet->GetPosition(), botPet->GetTarget()->GetPosition());
 						botPet->SetRunAnimSpeed(0);
 						if(dist > 184) {
 							botPet->CalculateNewPosition2(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ(), botPet->GetTarget()->GetRunspeed());
