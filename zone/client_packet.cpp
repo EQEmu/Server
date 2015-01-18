@@ -8707,7 +8707,7 @@ void Client::Handle_OP_LDoNDisarmTraps(const EQApplicationPacket *app)
 	{
 		if (HasSkill(SkillDisarmTraps))
 		{
-			if (DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
+			if (ComparativeDistanceNoZ(m_Position, target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				Message(13, "%s is too far away.", target->GetCleanName());
 				return;
