@@ -26,13 +26,13 @@ ThreadReturnType EQStreamFactoryReaderLoop(void *eqfs)
 EQStreamFactory *fs=(EQStreamFactory *)eqfs;
 
 #ifndef WIN32
-	logger.LogDebug(EQEmuLogSys::Detail,  "Starting EQStreamFactoryReaderLoop with thread ID %d", pthread_self());
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::None,  "Starting EQStreamFactoryReaderLoop with thread ID %d", pthread_self());
 #endif
 
 	fs->ReaderLoop();
 
 #ifndef WIN32
-	logger.LogDebug(EQEmuLogSys::Detail,  "Ending EQStreamFactoryReaderLoop with thread ID %d", pthread_self());
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::None,  "Ending EQStreamFactoryReaderLoop with thread ID %d", pthread_self());
 #endif
 
 	THREAD_RETURN(nullptr);
@@ -43,13 +43,13 @@ ThreadReturnType EQStreamFactoryWriterLoop(void *eqfs)
 	EQStreamFactory *fs=(EQStreamFactory *)eqfs;
 
 #ifndef WIN32
-	logger.LogDebug(EQEmuLogSys::Detail,  "Starting EQStreamFactoryWriterLoop with thread ID %d", pthread_self());
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::None,  "Starting EQStreamFactoryWriterLoop with thread ID %d", pthread_self());
 #endif
 
 	fs->WriterLoop();
 
 #ifndef WIN32
-	logger.LogDebug(EQEmuLogSys::Detail,  "Ending EQStreamFactoryWriterLoop with thread ID %d", pthread_self());
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::None,  "Ending EQStreamFactoryWriterLoop with thread ID %d", pthread_self());
 #endif
 
 	THREAD_RETURN(nullptr);

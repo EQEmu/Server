@@ -343,7 +343,7 @@ int main(int argc, char** argv) {
 	RegisterAllPatches(stream_identifier);
 
 #ifndef WIN32
-	logger.LogDebug(EQEmuLogSys::Detail,  "Main thread running with thread id %d", pthread_self());
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::None,  "Main thread running with thread id %d", pthread_self());
 #endif
 
 	Timer quest_timers(100);

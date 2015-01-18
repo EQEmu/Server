@@ -1271,15 +1271,15 @@ XS(XS_Client_MovePC)
 		}
 		else {
 			if (THIS->IsMerc())
-				logger.LogDebug(EQEmuLogSys::Detail, "[CLIENT] Perl(XS_Client_MovePC) attempted to process a type Merc reference");
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::None, "[CLIENT] Perl(XS_Client_MovePC) attempted to process a type Merc reference");
 			else if (THIS->IsNPC())
-				logger.LogDebug(EQEmuLogSys::Detail, "[CLIENT] Perl(XS_Client_MovePC) attempted to process a type NPC reference");
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::None, "[CLIENT] Perl(XS_Client_MovePC) attempted to process a type NPC reference");
 		#ifdef BOTS
 			else if (THIS->IsBot())
-				logger.LogDebug(EQEmuLogSys::Detail, "[CLIENT] Perl(XS_Client_MovePC) attempted to process a type Bot reference");
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::None, "[CLIENT] Perl(XS_Client_MovePC) attempted to process a type Bot reference");
 		#endif	 
 			else
-				logger.LogDebug(EQEmuLogSys::Detail, "[CLIENT] Perl(XS_Client_MovePC) attempted to process an Unknown type reference");
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::None, "[CLIENT] Perl(XS_Client_MovePC) attempted to process an Unknown type reference");
 
 			Perl_croak(aTHX_ "THIS is not of type Client");
 		}
@@ -1317,15 +1317,15 @@ XS(XS_Client_MovePCInstance)
 		}
 		else {
 			if (THIS->IsMerc())
-				logger.LogDebug(EQEmuLogSys::Detail, "[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process a type Merc reference");
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::None, "[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process a type Merc reference");
 			else if (THIS->IsNPC())
-				logger.LogDebug(EQEmuLogSys::Detail, "[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process a type NPC reference");
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::None, "[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process a type NPC reference");
 		#ifdef BOTS
 			else if (THIS->IsBot())
-				logger.LogDebug(EQEmuLogSys::Detail, "[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process a type Bot reference");
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::None, "[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process a type Bot reference");
 		#endif
 			else
-				logger.LogDebug(EQEmuLogSys::Detail, "[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process an Unknown type reference");
+				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::None, "[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process an Unknown type reference");
 
 			Perl_croak(aTHX_ "THIS is not of type Client"); 
 

@@ -785,7 +785,6 @@ bool ZoneServer::Process() {
 			}
 			case ServerOP_RequestOnlineGuildMembers: {
 				ServerRequestOnlineGuildMembers_Struct *srogms = (ServerRequestOnlineGuildMembers_Struct*) pack->pBuffer;
-				zlog(GUILDS__IN_PACKETS, "ServerOP_RequestOnlineGuildMembers Recieved. FromID=%i GuildID=%i", srogms->FromID, srogms->GuildID);
 				client_list.SendOnlineGuildMembers(srogms->FromID, srogms->GuildID);
 				break;
 			}

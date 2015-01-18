@@ -2866,7 +2866,7 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 
 	if (log) {
 		logger.Log(EQEmuLogSys::Error, "Target interrogate inventory flag: %s", (GetInterrogateInvState() ? "TRUE" : "FALSE"));
-		logger.LogDebug(EQEmuLogSys::Detail, "[CLIENT] Client::InterrogateInventory() -- End");
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::None, "[CLIENT] Client::InterrogateInventory() -- End");
 	}
 	if (!silent) {
 		requester->Message(1, "Target interrogation flag: %s", (GetInterrogateInvState() ? "TRUE" : "FALSE"));
@@ -2881,7 +2881,7 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 void Client::InterrogateInventory_(bool errorcheck, Client* requester, int16 head, int16 index, const ItemInst* inst, const ItemInst* parent, bool log, bool silent, bool &error, int depth)
 {
 	if (depth >= 10) {
-		logger.LogDebug(EQEmuLogSys::Detail, "[CLIENT] Client::InterrogateInventory_() - Recursion count has exceeded the maximum allowable (You have a REALLY BIG PROBLEM!!)");
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::None, "[CLIENT] Client::InterrogateInventory_() - Recursion count has exceeded the maximum allowable (You have a REALLY BIG PROBLEM!!)");
 		return;
 	}
 

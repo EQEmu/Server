@@ -759,7 +759,7 @@ void Client::CompleteConnect()
 
 	//enforce some rules..
 	if (!CanBeInZone()) {
-		logger.LogDebug(EQEmuLogSys::Detail, "[CLIENT] Kicking char from zone, not allowed here");
+		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::None, "[CLIENT] Kicking char from zone, not allowed here");
 		GoToSafeCoords(database.GetZoneID("arena"), 0);
 		return;
 	}
@@ -9136,7 +9136,7 @@ void Client::Handle_OP_LoadSpellSet(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Logout(const EQApplicationPacket *app)
 {
-	logger.LogDebug(EQEmuLogSys::Detail, "%s sent a logout packet.", GetName());
+	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::None, "%s sent a logout packet.", GetName());
 
 	SendLogoutPackets();
 
