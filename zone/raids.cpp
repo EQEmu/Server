@@ -602,7 +602,7 @@ void Raid::BalanceHP(int32 penalty, uint32 gid, float range, Mob* caster, int32 
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				distance = caster->DistNoRoot(*members[gi].member);
+				distance = ComparativeDistance(caster->GetPosition(), members[gi].member->GetPosition());
 				if(distance <= range2){
 					if((members[gi].member->GetMaxHP() - dmgtaken) < 1){//this way the ability will never kill someone
 						members[gi].member->SetHP(1);					//but it will come darn close
