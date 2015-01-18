@@ -2499,7 +2499,7 @@ bool Merc::CheckAENuke(Merc* caster, Mob* tar, uint16 spell_id, uint8 &numTarget
 	for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 		NPC* npc = *itr;
 
-		if(npc->DistNoRootNoZ(*tar) <= spells[spell_id].aoerange * spells[spell_id].aoerange) {
+		if(ComparativeDistanceNoZ(npc->GetPosition(), tar->GetPosition()) <= spells[spell_id].aoerange * spells[spell_id].aoerange) {
 			if(!npc->IsMezzed()) {
 				numTargets++;
 			}
