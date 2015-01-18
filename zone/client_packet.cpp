@@ -9182,7 +9182,7 @@ void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 	{
 		SetLooting(ent->GetID()); //store the entity we are looting
 		Corpse *ent_corpse = ent->CastToCorpse();
-		if (DistNoRootNoZ(ent_corpse->GetX(), ent_corpse->GetY()) > 625)
+		if (ComparativeDistanceNoZ(m_Position, ent_corpse->GetPosition())  > 625)
 		{
 			Message(13, "Corpse too far away.");
 			Corpse::SendLootReqErrorPacket(this);
