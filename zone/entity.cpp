@@ -1558,7 +1558,7 @@ Client *EntityList::GetRandomClient(const xyz_location& location, float Distance
 
 
 	for (auto it = client_list.begin();it != client_list.end(); ++it)
-		if ((it->second != ExcludeClient) && (ComparativeDistance(it->second->GetPosition(), location) <= Distance))
+		if ((it->second != ExcludeClient) && (ComparativeDistance(static_cast<xyz_location>(it->second->GetPosition()), location) <= Distance))
 			ClientsInRange.push_back(it->second);
 
 	if (ClientsInRange.empty())
