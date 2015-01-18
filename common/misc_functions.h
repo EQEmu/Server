@@ -40,7 +40,7 @@
 #define VERIFY_PACKET_LENGTH(OPCode, Packet, StructName) \
 	if(Packet->size != sizeof(StructName)) \
 	{ \
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, "Size mismatch in " #OPCode " expected %i got %i", sizeof(StructName), Packet->size); \
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Netcode, "Size mismatch in " #OPCode " expected %i got %i", sizeof(StructName), Packet->size); \
 		DumpPacket(Packet); \
 		return; \
 	}

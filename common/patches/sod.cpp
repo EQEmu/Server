@@ -50,7 +50,7 @@ namespace SoD
 			//TODO: figure out how to support shared memory with multiple patches...
 			opcodes = new RegularOpcodeManager();
 			if (!opcodes->LoadOpcodes(opfile.c_str())) {
-				logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[OPCODES] Error loading opcodes file %s. Not registering patch %s.", opfile.c_str(), name);
+				Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[OPCODES] Error loading opcodes file %s. Not registering patch %s.", opfile.c_str(), name);
 				return;
 			}
 		}
@@ -76,7 +76,7 @@ namespace SoD
 
 
 
-		logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Registered patch %s", name);
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[IDENTIFY] Registered patch %s", name);
 	}
 
 	void Reload()
@@ -91,10 +91,10 @@ namespace SoD
 			opfile += name;
 			opfile += ".conf";
 			if (!opcodes->ReloadOpcodes(opfile.c_str())) {
-				logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[OPCODES] Error reloading opcodes file %s for patch %s.", opfile.c_str(), name);
+				Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[OPCODES] Error reloading opcodes file %s for patch %s.", opfile.c_str(), name);
 				return;
 			}
-			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[OPCODES] Reloaded opcodes for patch %s", name);
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[OPCODES] Reloaded opcodes for patch %s", name);
 		}
 	}
 
@@ -247,7 +247,7 @@ namespace SoD
 
 		if (EntryCount == 0 || (in->size % sizeof(BazaarSearchResults_Struct)) != 0)
 		{
-			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(BazaarSearchResults_Struct));
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(BazaarSearchResults_Struct));
 			delete in;
 			return;
 		}
@@ -359,7 +359,7 @@ namespace SoD
 
 		if (ItemCount == 0 || (in->size % sizeof(InternalSerializedItem_Struct)) != 0) {
 
-			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d",
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d",
 				opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(InternalSerializedItem_Struct));
 
 			delete in;
@@ -391,13 +391,13 @@ namespace SoD
 
 			}
 			else {
-				logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
+				Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
 			}
 		}
 
 		delete[] __emu_buffer;
 
-		//logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Sending inventory to client");
+		//Log.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Sending inventory to client");
 		//_hex(NET__ERROR, in->pBuffer, in->size);
 
 		dest->FastQueuePacket(&in, ack_req);
@@ -683,16 +683,16 @@ namespace SoD
 
 	ENCODE(OP_GroupUpdate)
 	{
-		//logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] OP_GroupUpdate");
+		//Log.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] OP_GroupUpdate");
 		EQApplicationPacket *in = *p;
 		GroupJoin_Struct *gjs = (GroupJoin_Struct*)in->pBuffer;
 
-		//logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Received outgoing OP_GroupUpdate with action code %i", gjs->action);
+		//Log.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Received outgoing OP_GroupUpdate with action code %i", gjs->action);
 		if ((gjs->action == groupActLeave) || (gjs->action == groupActDisband))
 		{
 			if ((gjs->action == groupActDisband) || !strcmp(gjs->yourname, gjs->membername))
 			{
-				//logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Group Leave, yourname = %s, membername = %s", gjs->yourname, gjs->membername);
+				//Log.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Group Leave, yourname = %s, membername = %s", gjs->yourname, gjs->membername);
 
 				EQApplicationPacket *outapp = new EQApplicationPacket(OP_GroupDisbandYou, sizeof(structs::GroupGeneric_Struct));
 
@@ -710,7 +710,7 @@ namespace SoD
 				return;
 			}
 			//if(gjs->action == groupActLeave)
-			//	logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Group Leave, yourname = %s, membername = %s", gjs->yourname, gjs->membername);
+			//	Log.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Group Leave, yourname = %s, membername = %s", gjs->yourname, gjs->membername);
 
 			EQApplicationPacket *outapp = new EQApplicationPacket(OP_GroupDisbandOther, sizeof(structs::GroupGeneric_Struct));
 
@@ -727,19 +727,19 @@ namespace SoD
 		if (in->size == sizeof(GroupUpdate2_Struct))
 		{
 			// Group Update2
-			//logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Struct is GroupUpdate2");
+			//Log.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Struct is GroupUpdate2");
 
 			unsigned char *__emu_buffer = in->pBuffer;
 			GroupUpdate2_Struct *gu2 = (GroupUpdate2_Struct*)__emu_buffer;
 
-			//logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Yourname is %s", gu2->yourname);
+			//Log.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Yourname is %s", gu2->yourname);
 
 			int MemberCount = 1;
 			int PacketLength = 8 + strlen(gu2->leadersname) + 1 + 22 + strlen(gu2->yourname) + 1;
 
 			for (int i = 0; i < 5; ++i)
 			{
-				//logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Membername[%i] is %s", i,  gu2->membername[i]);
+				//Log.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Membername[%i] is %s", i,  gu2->membername[i]);
 				if (gu2->membername[i][0] != '\0')
 				{
 					PacketLength += (22 + strlen(gu2->membername[i]) + 1);
@@ -747,7 +747,7 @@ namespace SoD
 				}
 			}
 
-			//logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Leadername is %s", gu2->leadersname);
+			//Log.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Leadername is %s", gu2->leadersname);
 
 			EQApplicationPacket *outapp = new EQApplicationPacket(OP_GroupUpdateB, PacketLength);
 			char *Buffer = (char *)outapp->pBuffer;
@@ -807,7 +807,7 @@ namespace SoD
 			return;
 		}
 
-		//logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Generic GroupUpdate, yourname = %s, membername = %s", gjs->yourname, gjs->membername);
+		//Log.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Generic GroupUpdate, yourname = %s, membername = %s", gjs->yourname, gjs->membername);
 		ENCODE_LENGTH_EXACT(GroupJoin_Struct);
 		SETUP_DIRECT_ENCODE(GroupJoin_Struct, structs::GroupJoin_Struct);
 
@@ -967,7 +967,7 @@ namespace SoD
 		char *serialized = SerializeItem((ItemInst *)int_struct->inst, int_struct->slot_id, &length, 0);
 
 		if (!serialized) {
-			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Serialization failed on item slot %d.", int_struct->slot_id);
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Serialization failed on item slot %d.", int_struct->slot_id);
 			delete in;
 			return;
 		}
@@ -2108,7 +2108,7 @@ namespace SoD
 
 		if (EntryCount == 0 || ((in->size % sizeof(Track_Struct))) != 0)
 		{
-			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Track_Struct));
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Track_Struct));
 			delete in;
 			return;
 		}
@@ -2363,16 +2363,16 @@ namespace SoD
 		//determine and verify length
 		int entrycount = in->size / sizeof(Spawn_Struct);
 		if (entrycount == 0 || (in->size % sizeof(Spawn_Struct)) != 0) {
-			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Spawn_Struct));
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Spawn_Struct));
 			delete in;
 			return;
 		}
 
-		//logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Spawn name is [%s]", emu->name);
+		//Log.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Spawn name is [%s]", emu->name);
 
 		emu = (Spawn_Struct *)__emu_buffer;
 
-		//logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Spawn packet size is %i, entries = %i", in->size, entrycount);
+		//Log.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[STRUCTS] Spawn packet size is %i, entries = %i", in->size, entrycount);
 
 		char *Buffer = (char *)in->pBuffer;
 
@@ -2963,7 +2963,7 @@ namespace SoD
 	DECODE(OP_GroupDisband)
 	{
 		//EQApplicationPacket *in = __packet;
-		//logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Received incoming OP_Disband");
+		//Log.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Received incoming OP_Disband");
 		//_hex(NET__ERROR, in->pBuffer, in->size);
 		DECODE_LENGTH_EXACT(structs::GroupGeneric_Struct);
 		SETUP_DIRECT_DECODE(GroupGeneric_Struct, structs::GroupGeneric_Struct);
@@ -2977,7 +2977,7 @@ namespace SoD
 	DECODE(OP_GroupFollow)
 	{
 		//EQApplicationPacket *in = __packet;
-		//logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Received incoming OP_GroupFollow");
+		//Log.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Received incoming OP_GroupFollow");
 		//_hex(NET__ERROR, in->pBuffer, in->size);
 		DECODE_LENGTH_EXACT(structs::GroupFollow_Struct);
 		SETUP_DIRECT_DECODE(GroupGeneric_Struct, structs::GroupFollow_Struct);
@@ -2991,7 +2991,7 @@ namespace SoD
 	DECODE(OP_GroupFollow2)
 	{
 		//EQApplicationPacket *in = __packet;
-		//logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Received incoming OP_GroupFollow2");
+		//Log.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Received incoming OP_GroupFollow2");
 		//_hex(NET__ERROR, in->pBuffer, in->size);
 		DECODE_LENGTH_EXACT(structs::GroupFollow_Struct);
 		SETUP_DIRECT_DECODE(GroupGeneric_Struct, structs::GroupFollow_Struct);
@@ -3005,7 +3005,7 @@ namespace SoD
 	DECODE(OP_GroupInvite)
 	{
 		//EQApplicationPacket *in = __packet;
-		//logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Received incoming OP_GroupInvite");
+		//Log.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Received incoming OP_GroupInvite");
 		//_hex(NET__ERROR, in->pBuffer, in->size);
 		DECODE_LENGTH_EXACT(structs::GroupInvite_Struct);
 		SETUP_DIRECT_DECODE(GroupGeneric_Struct, structs::GroupInvite_Struct);
@@ -3018,7 +3018,7 @@ namespace SoD
 
 	DECODE(OP_GroupInvite2)
 	{
-		//logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Received incoming OP_GroupInvite2. Forwarding");
+		//Log.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Received incoming OP_GroupInvite2. Forwarding");
 		DECODE_FORWARD(OP_GroupInvite);
 	}
 
@@ -3091,7 +3091,7 @@ namespace SoD
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Moved item from %u to %u", eq->from_slot, eq->to_slot);
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Moved item from %u to %u", eq->from_slot, eq->to_slot);
 
 		emu->from_slot = SoDToServerSlot(eq->from_slot);
 		emu->to_slot = SoDToServerSlot(eq->to_slot);
@@ -3384,7 +3384,7 @@ namespace SoD
 		std::stringstream ss(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
 
 		const Item_Struct *item = inst->GetUnscaledItem();
-		//logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Serialize called for: %s", item->Name);
+		//Log.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[ERROR] Serialize called for: %s", item->Name);
 		SoD::structs::ItemSerializationHeader hdr;
 		hdr.stacksize = stackable ? charges : 1;
 		hdr.unknown004 = 0;

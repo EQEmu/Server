@@ -134,7 +134,7 @@ bool LoginServerList::SendPacket(ServerPacket* pack) {
 bool LoginServerList::SendAccountUpdate(ServerPacket* pack) {
 	LinkedListIterator<LoginServer*> iterator(list);
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Requested to send ServerOP_LSAccountUpdate packet to all loginservers");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Requested to send ServerOP_LSAccountUpdate packet to all loginservers");
 	iterator.Reset();
 	while(iterator.MoreElements()){
 		if(iterator.GetData()->CanUpdate()) {

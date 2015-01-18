@@ -25,7 +25,7 @@
 #include "../../common/rulesys.h"
 #include "../../common/string_util.h"
 
-EQEmuLogSys logger;
+EQEmuLogSys Log;
 
 void ImportSpells(SharedDatabase *db);
 void ImportSkillCaps(SharedDatabase *db);
@@ -33,25 +33,25 @@ void ImportBaseData(SharedDatabase *db);
 
 int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformClientImport);
-	logger.LoadLogSettingsDefaults();
+	Log.LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	logger.Log(EQEmuLogSys::Status, "Client Files Import Utility");
+	Log.Log(EQEmuLogSys::Status, "Client Files Import Utility");
 	if(!EQEmuConfig::LoadConfig()) {
-		logger.Log(EQEmuLogSys::Error, "Unable to load configuration file.");
+		Log.Log(EQEmuLogSys::Error, "Unable to load configuration file.");
 		return 1;
 	}
 
 	const EQEmuConfig *config = EQEmuConfig::get();
 	if(!load_log_settings(config->LogSettingsFile.c_str())) {
-		logger.Log(EQEmuLogSys::Error, "Warning: unable to read %s.", config->LogSettingsFile.c_str());
+		Log.Log(EQEmuLogSys::Error, "Warning: unable to read %s.", config->LogSettingsFile.c_str());
 	}
 
 	SharedDatabase database;
-	logger.Log(EQEmuLogSys::Status, "Connecting to database...");
+	Log.Log(EQEmuLogSys::Status, "Connecting to database...");
 	if(!database.Connect(config->DatabaseHost.c_str(), config->DatabaseUsername.c_str(),
 		config->DatabasePassword.c_str(), config->DatabaseDB.c_str(), config->DatabasePort)) {
-		logger.Log(EQEmuLogSys::Error, "Unable to connect to the database, cannot continue without a "
+		Log.Log(EQEmuLogSys::Error, "Unable to connect to the database, cannot continue without a "
 			"database connection");
 		return 1;
 	}
@@ -68,7 +68,7 @@ int GetSpellColumns(SharedDatabase *db) {
 	const std::string query = "DESCRIBE spells_new";
 	auto results = db->QueryDatabase(query);
 	if(!results.Success()) {
-        logger.Log(EQEmuLogSys::Error, "Error in GetSpellColumns query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
+        Log.Log(EQEmuLogSys::Error, "Error in GetSpellColumns query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
 
@@ -76,10 +76,10 @@ int GetSpellColumns(SharedDatabase *db) {
 }
 
 void ImportSpells(SharedDatabase *db) {
-	logger.Log(EQEmuLogSys::Status, "Importing Spells...");
+	Log.Log(EQEmuLogSys::Status, "Importing Spells...");
 	FILE *f = fopen("import/spells_us.txt", "r");
 	if(!f) {
-		logger.Log(EQEmuLogSys::Error, "Unable to open import/spells_us.txt to read, skipping.");
+		Log.Log(EQEmuLogSys::Error, "Unable to open import/spells_us.txt to read, skipping.");
 		return;
 	}
 
@@ -142,23 +142,23 @@ void ImportSpells(SharedDatabase *db) {
 
 		spells_imported++;
 		if(spells_imported % 1000 == 0) {
-			logger.Log(EQEmuLogSys::Status, "%d spells imported.", spells_imported);
+			Log.Log(EQEmuLogSys::Status, "%d spells imported.", spells_imported);
 		}
 	}
 
 	if(spells_imported % 1000 != 0) {
-		logger.Log(EQEmuLogSys::Status, "%d spells imported.", spells_imported);
+		Log.Log(EQEmuLogSys::Status, "%d spells imported.", spells_imported);
 	}
 
 	fclose(f);
 }
 
 void ImportSkillCaps(SharedDatabase *db) {
-	logger.Log(EQEmuLogSys::Status, "Importing Skill Caps...");
+	Log.Log(EQEmuLogSys::Status, "Importing Skill Caps...");
 
 	FILE *f = fopen("import/SkillCaps.txt", "r");
 	if(!f) {
-		logger.Log(EQEmuLogSys::Error, "Unable to open import/SkillCaps.txt to read, skipping.");
+		Log.Log(EQEmuLogSys::Error, "Unable to open import/SkillCaps.txt to read, skipping.");
 		return;
 	}
 
@@ -190,11 +190,11 @@ void ImportSkillCaps(SharedDatabase *db) {
 }
 
 void ImportBaseData(SharedDatabase *db) {
-	logger.Log(EQEmuLogSys::Status, "Importing Base Data...");
+	Log.Log(EQEmuLogSys::Status, "Importing Base Data...");
 
 	FILE *f = fopen("import/BaseData.txt", "r");
 	if(!f) {
-		logger.Log(EQEmuLogSys::Error, "Unable to open import/BaseData.txt to read, skipping.");
+		Log.Log(EQEmuLogSys::Error, "Unable to open import/BaseData.txt to read, skipping.");
 		return;
 	}
 

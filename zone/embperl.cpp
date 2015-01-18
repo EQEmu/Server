@@ -140,12 +140,12 @@ void Embperl::DoInit() {
 	catch(const char *err)
 	{
 		//remember... lasterr() is no good if we crap out here, in construction
-		logger.Log(EQEmuLogSys::Quest, "perl error: %s", err);
+		Log.Log(EQEmuLogSys::Quest, "perl error: %s", err);
 		throw "failed to install eval_file hook";
 	}
 
 #ifdef EMBPERL_IO_CAPTURE
-	logger.Log(EQEmuLogSys::Quest, "Tying perl output to eqemu logs");
+	Log.Log(EQEmuLogSys::Quest, "Tying perl output to eqemu logs");
 	//make a tieable class to capture IO and pass it into EQEMuLog
 	eval_pv(
 		"package EQEmuIO; "
@@ -170,14 +170,14 @@ void Embperl::DoInit() {
 		,FALSE
 	);
 
-	logger.Log(EQEmuLogSys::Quest, "Loading perlemb plugins.");
+	Log.Log(EQEmuLogSys::Quest, "Loading perlemb plugins.");
 	try
 	{
 		eval_pv("main::eval_file('plugin', 'plugin.pl');", FALSE);
 	}
 	catch(const char *err)
 	{
-		logger.Log(EQEmuLogSys::Quest, "Warning - plugin.pl: %s", err);
+		Log.Log(EQEmuLogSys::Quest, "Warning - plugin.pl: %s", err);
 	}
 	try
 	{
@@ -195,7 +195,7 @@ void Embperl::DoInit() {
 	}
 	catch(const char *err)
 	{
-		logger.Log(EQEmuLogSys::Quest, "Perl warning: %s", err);
+		Log.Log(EQEmuLogSys::Quest, "Perl warning: %s", err);
 	}
 #endif //EMBPERL_PLUGIN
 	in_use = false;

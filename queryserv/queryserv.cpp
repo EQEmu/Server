@@ -40,7 +40,7 @@ LFGuildManager lfguildmanager;
 std::string WorldShortName;
 const queryservconfig *Config;
 WorldServer *worldserver = 0;
-EQEmuLogSys logger;
+EQEmuLogSys Log;
 
 void CatchSignal(int sig_num) { 
 	RunLoops = false; 
@@ -50,7 +50,7 @@ void CatchSignal(int sig_num) {
 
 int main() {
 	RegisterExecutablePlatform(ExePlatformQueryServ);
-	logger.LoadLogSettingsDefaults();
+	Log.LoadLogSettingsDefaults();
 	set_exception_handler(); 
 	Timer LFGuildExpireTimer(60000);  
 	Timer InterserverTimer(INTERSERVER_TIMER); // does auto-reconnect
@@ -65,16 +65,16 @@ int main() {
 		</qsdatabase>
 	*/
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Starting EQEmu QueryServ.");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Starting EQEmu QueryServ.");
 	if (!queryservconfig::LoadConfig()) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Loading server configuration failed.");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Loading server configuration failed.");
 		return 1;
 	}
 
 	Config = queryservconfig::get(); 
 	WorldShortName = Config->ShortName; 
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Connecting to MySQL...");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Connecting to MySQL...");
 	
 	/* MySQL Connection */
 	if (!database.Connect(
@@ -83,22 +83,22 @@ int main() {
 		Config->QSDatabasePassword.c_str(),
 		Config->QSDatabaseDB.c_str(),
 		Config->QSDatabasePort)) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Cannot continue without a database connection.");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Cannot continue without a database connection.");
 		return 1;
 	}
 
 	/* Initialize Logging */
 	if (!load_log_settings(Config->LogSettingsFile.c_str()))
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
 	else
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Could not set signal handler");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Could not set signal handler");
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Could not set signal handler");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::QS_Server, "Could not set signal handler");
 		return 1;
 	}
 

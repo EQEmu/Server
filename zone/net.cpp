@@ -104,7 +104,7 @@ TitleManager title_manager;
 QueryServ *QServ = 0;
 TaskManager *taskmanager = 0;
 QuestParserCollection *parse = 0;
-EQEmuLogSys logger;
+EQEmuLogSys Log;
 
 const SPDat_Spell_Struct* spells;
 void LoadSpells(EQEmu::MemoryMappedFile **mmf);
@@ -148,35 +148,35 @@ int main(int argc, char** argv) {
 		worldserver.SetLauncherName("NONE");
 	}
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading server configuration..");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading server configuration..");
 	if (!ZoneConfig::LoadConfig()) {
-		logger.Log(EQEmuLogSys::Error, "Loading server configuration failed.");
+		Log.Log(EQEmuLogSys::Error, "Loading server configuration failed.");
 		return 1;
 	}
 	const ZoneConfig *Config=ZoneConfig::get();
 
 	if(!load_log_settings(Config->LogSettingsFile.c_str()))
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
 	else
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
 
 	worldserver.SetPassword(Config->SharedKey.c_str());
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Connecting to MySQL...");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Connecting to MySQL...");
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),
 		Config->DatabaseUsername.c_str(),
 		Config->DatabasePassword.c_str(),
 		Config->DatabaseDB.c_str(),
 		Config->DatabasePort)) {
-		logger.Log(EQEmuLogSys::Error, "Cannot continue without a database connection.");
+		Log.Log(EQEmuLogSys::Error, "Cannot continue without a database connection.");
 		return 1;
 	}
 
 	/* Register Log System and Settings */
-	logger.LoadLogSettingsDefaults();
-	logger.OnLogHookCallBackZone(&Zone::GMSayHookCallBackProcess);
-	database.LoadLogSysSettings(logger.log_settings);
+	Log.LoadLogSettingsDefaults();
+	Log.OnLogHookCallBackZone(&Zone::GMSayHookCallBackProcess);
+	database.LoadLogSysSettings(Log.log_settings);
 
 	/* Guilds */
 	guild_mgr.SetDatabase(&database);
@@ -186,121 +186,121 @@ int main(int argc, char** argv) {
 	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "CURRENT_VERSION: %s", CURRENT_VERSION);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "CURRENT_VERSION: %s", CURRENT_VERSION);
 
 	/*
 	* Setup nice signal handlers
 	*/
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		logger.Log(EQEmuLogSys::Error, "Could not set signal handler");
+		Log.Log(EQEmuLogSys::Error, "Could not set signal handler");
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		logger.Log(EQEmuLogSys::Error, "Could not set signal handler");
+		Log.Log(EQEmuLogSys::Error, "Could not set signal handler");
 		return 1;
 	}
 	#ifndef WIN32
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)	{
-		logger.Log(EQEmuLogSys::Error, "Could not set signal handler");
+		Log.Log(EQEmuLogSys::Error, "Could not set signal handler");
 		return 1;
 	}
 	#endif
 
 	const char *log_ini_file = "./log.ini";
 	if(!load_log_settings(log_ini_file))
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Warning: Unable to read %s", log_ini_file);
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Warning: Unable to read %s", log_ini_file);
 	else
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Log settings loaded from %s", log_ini_file);
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Log settings loaded from %s", log_ini_file);
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Mapping Incoming Opcodes");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Mapping Incoming Opcodes");
 	MapOpcodes();
 	
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading Variables");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading Variables");
 	database.LoadVariables();
 	
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading zone names");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading zone names");
 	database.LoadZoneNames();
 	
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading items");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading items");
 	if (!database.LoadItems()) {
-		logger.Log(EQEmuLogSys::Error, "Loading items FAILED!");
-		logger.Log(EQEmuLogSys::Error, "Failed. But ignoring error and going on...");
+		Log.Log(EQEmuLogSys::Error, "Loading items FAILED!");
+		Log.Log(EQEmuLogSys::Error, "Failed. But ignoring error and going on...");
 	}
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading npc faction lists");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading npc faction lists");
 	if (!database.LoadNPCFactionLists()) {
-		logger.Log(EQEmuLogSys::Error, "Loading npcs faction lists FAILED!");
+		Log.Log(EQEmuLogSys::Error, "Loading npcs faction lists FAILED!");
 		CheckEQEMuErrorAndPause();
 		return 1;
 	}
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading loot tables");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading loot tables");
 	if (!database.LoadLoot()) {
-		logger.Log(EQEmuLogSys::Error, "Loading loot FAILED!");
+		Log.Log(EQEmuLogSys::Error, "Loading loot FAILED!");
 		CheckEQEMuErrorAndPause();
 		return 1;
 	}
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading skill caps");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading skill caps");
 	if (!database.LoadSkillCaps()) {
-		logger.Log(EQEmuLogSys::Error, "Loading skill caps FAILED!");
+		Log.Log(EQEmuLogSys::Error, "Loading skill caps FAILED!");
 		CheckEQEMuErrorAndPause();
 		return 1;
 	}
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading spells");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading spells");
 	EQEmu::MemoryMappedFile *mmf = nullptr;
 	LoadSpells(&mmf);
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading base data");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading base data");
 	if (!database.LoadBaseData()) {
-		logger.Log(EQEmuLogSys::Error, "Loading base data FAILED!");
+		Log.Log(EQEmuLogSys::Error, "Loading base data FAILED!");
 		CheckEQEMuErrorAndPause();
 		return 1;
 	}
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading guilds");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading guilds");
 	guild_mgr.LoadGuilds();
 	
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading factions");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading factions");
 	database.LoadFactionData();
 	
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading titles");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading titles");
 	title_manager.LoadTitles();
 	
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading AA effects");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading AA effects");
 	database.LoadAAEffects();
 	
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading tributes");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading tributes");
 	database.LoadTributes();
 	
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading corpse timers");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading corpse timers");
 	database.GetDecayTimes(npcCorpseDecayTimes);
 	
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading commands");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading commands");
 	int retval=command_init();
 	if(retval<0)
-		logger.Log(EQEmuLogSys::Error, "Command loading FAILED");
+		Log.Log(EQEmuLogSys::Error, "Command loading FAILED");
 	else
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "%d commands loaded", retval);
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "%d commands loaded", retval);
 
 	//rules:
 	{
 		char tmp[64];
 		if (database.GetVariable("RuleSet", tmp, sizeof(tmp)-1)) {
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading rule set '%s'", tmp);
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading rule set '%s'", tmp);
 			if(!RuleManager::Instance()->LoadRules(&database, tmp)) {
-				logger.Log(EQEmuLogSys::Error, "Failed to load ruleset '%s', falling back to defaults.", tmp);
+				Log.Log(EQEmuLogSys::Error, "Failed to load ruleset '%s', falling back to defaults.", tmp);
 			}
 		} else {
 			if(!RuleManager::Instance()->LoadRules(&database, "default")) {
-				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "No rule set configured, using default rules");
+				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "No rule set configured, using default rules");
 			} else {
-				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loaded default rule set 'default'", tmp);
+				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loaded default rule set 'default'", tmp);
 			}
 		}
 	}
 
 	if(RuleB(TaskSystem, EnableTaskSystem)) {
-		logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[INIT] Loading Tasks");
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[INIT] Loading Tasks");
 		taskmanager = new TaskManager;
 		taskmanager->LoadTasks();
 	}
@@ -317,11 +317,11 @@ int main(int argc, char** argv) {
 #endif
 
 	//now we have our parser, load the quests
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading quests");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Loading quests");
 	parse->ReloadQuests();
 
 	if (!worldserver.Connect()) {
-		logger.Log(EQEmuLogSys::Error, "Worldserver Connection Failed :: worldserver.Connect()");
+		Log.Log(EQEmuLogSys::Error, "Worldserver Connection Failed :: worldserver.Connect()");
 	}
 
 	Timer InterserverTimer(INTERSERVER_TIMER); // does MySQL pings and auto-reconnect
@@ -332,9 +332,9 @@ int main(int argc, char** argv) {
 #endif
 #endif
 	if (!strlen(zone_name) || !strcmp(zone_name,".")) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Entering sleep mode");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Entering sleep mode");
 	} else if (!Zone::Bootup(database.GetZoneID(zone_name), 0, true)) { //todo: go above and fix this to allow cmd line instance
-		logger.Log(EQEmuLogSys::Error, "Zone Bootup failed :: Zone::Bootup");
+		Log.Log(EQEmuLogSys::Error, "Zone Bootup failed :: Zone::Bootup");
 		zone = 0;
 	}
 
@@ -343,7 +343,7 @@ int main(int argc, char** argv) {
 	RegisterAllPatches(stream_identifier);
 
 #ifndef WIN32
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::None,  "Main thread running with thread id %d", pthread_self());
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::None,  "Main thread running with thread id %d", pthread_self());
 #endif
 
 	Timer quest_timers(100);
@@ -365,13 +365,13 @@ int main(int argc, char** argv) {
 		worldserver.Process();
 
 		if (!eqsf.IsOpen() && Config->ZonePort!=0) {
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Starting EQ Network server on port %d",Config->ZonePort);
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Starting EQ Network server on port %d",Config->ZonePort);
 
 			// log_sys.CloseZoneLogs();
 			// log_sys.StartZoneLogs(StringFormat("%s_ver-%u_instid-%u_port-%u", zone->GetShortName(), zone->GetInstanceVersion(), zone->GetInstanceID(), ZoneConfig::get()->ZonePort));
 
 			if (!eqsf.Open(Config->ZonePort)) {
-				logger.Log(EQEmuLogSys::Error, "Failed to open port %d",Config->ZonePort);
+				Log.Log(EQEmuLogSys::Error, "Failed to open port %d",Config->ZonePort);
 				ZoneConfig::SetZonePort(0);
 				worldserver.Disconnect();
 				worldwasconnected = false;
@@ -385,7 +385,7 @@ int main(int argc, char** argv) {
 			//structures and opcodes for that patch.
 			struct in_addr	in;
 			in.s_addr = eqss->GetRemoteIP();
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "New connection from %s:%d", inet_ntoa(in),ntohs(eqss->GetRemotePort()));
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "New connection from %s:%d", inet_ntoa(in),ntohs(eqss->GetRemotePort()));
 			stream_identifier.AddStream(eqss);	//takes the stream
 		}
 
@@ -397,7 +397,7 @@ int main(int argc, char** argv) {
 			//now that we know what patch they are running, start up their client object
 			struct in_addr	in;
 			in.s_addr = eqsi->GetRemoteIP();
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "New client from %s:%d", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "New client from %s:%d", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
 			Client* client = new Client(eqsi);
 			entity_list.AddClient(client);
 		}
@@ -522,13 +522,13 @@ int main(int argc, char** argv) {
 	command_deinit();
 	safe_delete(parse);
 	CheckEQEMuErrorAndPause();
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Proper zone shutdown complete.");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Proper zone shutdown complete.");
 	return 0;
 }
 
 void CatchSignal(int sig_num) {
 #ifdef _WINDOWS
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Recieved signal: %i", sig_num);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Recieved signal: %i", sig_num);
 #endif
 	RunLoops = false;
 }
@@ -539,7 +539,7 @@ void Shutdown()
 	RunLoops = false;
 	worldserver.Disconnect();
 	//	safe_delete(worldserver);
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Shutting down...");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Zone_Server, "Shutting down...");
 }
 
 uint32 NetConnection::GetIP()
@@ -628,7 +628,7 @@ void LoadSpells(EQEmu::MemoryMappedFile **mmf) {
 		spells = reinterpret_cast<SPDat_Spell_Struct*>((*mmf)->Get());
 		mutex.Unlock();
 	} catch(std::exception &ex) {
-		logger.Log(EQEmuLogSys::Error, "Error loading spells: %s", ex.what());
+		Log.Log(EQEmuLogSys::Error, "Error loading spells: %s", ex.what());
 		return;
 	}
 

@@ -74,14 +74,14 @@ bool Database::Connect(const char* host, const char* user, const char* passwd, c
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	if (!Open(host, user, passwd, database, port, &errnum, errbuf))
 	{
-		logger.Log(EQEmuLogSys::Error, "Failed to connect to database: Error: %s", errbuf);
+		Log.Log(EQEmuLogSys::Error, "Failed to connect to database: Error: %s", errbuf);
 		HandleMysqlError(errnum);
 
 		return false;
 	}
 	else
 	{
-		logger.Log(EQEmuLogSys::Status, "Using database '%s' at %s:%d",database,host,port);
+		Log.Log(EQEmuLogSys::Status, "Using database '%s' at %s:%d",database,host,port);
 		return true;
 	}
 }
@@ -110,15 +110,15 @@ void Database::GetAccountStatus(Client *client) {
                                     client->GetAccountID());
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Unable to get account status for character %s, error %s", client->GetName().c_str(), results.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Unable to get account status for character %s, error %s", client->GetName().c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "GetAccountStatus Query: %s", query.c_str());
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "GetAccountStatus Query: %s", query.c_str());
 
 	if(results.RowCount() != 1)
 	{
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Error in GetAccountStatus");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Error in GetAccountStatus");
 		return;
 	}
 
@@ -129,13 +129,13 @@ void Database::GetAccountStatus(Client *client) {
 	client->SetKarma(atoi(row[2]));
 	client->SetRevoked((atoi(row[3])==1?true:false));
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Set account status to %i, hideme to %i and karma to %i for %s", client->GetAccountStatus(), client->GetHideMe(), client->GetKarma(), client->GetName().c_str());
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Set account status to %i, hideme to %i and karma to %i for %s", client->GetAccountStatus(), client->GetHideMe(), client->GetKarma(), client->GetName().c_str());
 
 }
 
 int Database::FindAccount(const char *characterName, Client *client) {
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "FindAccount for character %s", characterName);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "FindAccount for character %s", characterName);
 
 
 	client->ClearCharacters();
@@ -144,12 +144,12 @@ int Database::FindAccount(const char *characterName, Client *client) {
                                     characterName);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "FindAccount query failed: %s", query.c_str());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "FindAccount query failed: %s", query.c_str());
 		return -1;
 	}
 
 	if (results.RowCount() != 1) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Bad result from query");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Bad result from query");
 		return -1;
 	}
 
@@ -158,7 +158,7 @@ int Database::FindAccount(const char *characterName, Client *client) {
 
 	int accountID = atoi(row[1]);
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Account ID for %s is %i", characterName, accountID);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Account ID for %s is %i", characterName, accountID);
 
     query = StringFormat("SELECT `id`, `name`, `level` FROM `character_data` "
                         "WHERE `account_id` = %i AND `name` != '%s'",
@@ -179,7 +179,7 @@ bool Database::VerifyMailKey(std::string characterName, int IPAddress, std::stri
                                     characterName.c_str());
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Error retrieving mailkey from database: %s", results.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Error retrieving mailkey from database: %s", results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -195,7 +195,7 @@ bool Database::VerifyMailKey(std::string characterName, int IPAddress, std::stri
 	else
 		sprintf(combinedKey, "%s", MailKey.c_str());
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "DB key is [%s], Client key is [%s]", row[0], combinedKey);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "DB key is [%s], Client key is [%s]", row[0], combinedKey);
 
 	return !strcmp(row[0], combinedKey);
 }
@@ -206,14 +206,14 @@ int Database::FindCharacter(const char *characterName) {
     std::string query = StringFormat("SELECT `id` FROM `character_data` WHERE `name`='%s' LIMIT 1", safeCharName);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "FindCharacter failed. %s %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "FindCharacter failed. %s %s", query.c_str(), results.ErrorMessage().c_str());
 		safe_delete(safeCharName);
 		return -1;
 	}
     safe_delete(safeCharName);
 
 	if (results.RowCount() != 1) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Bad result from FindCharacter query for character %s", characterName);
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Bad result from FindCharacter query for character %s", characterName);
 		return -1;
 	}
 
@@ -229,7 +229,7 @@ bool Database::GetVariable(const char* varname, char* varvalue, uint16 varvalue_
 	std::string query = StringFormat("SELECT `value` FROM `variables` WHERE `varname` = '%s'", varname);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Unable to get message count from database. %s %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Unable to get message count from database. %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -245,12 +245,12 @@ bool Database::GetVariable(const char* varname, char* varvalue, uint16 varvalue_
 
 bool Database::LoadChatChannels() {
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Loading chat channels from the database.");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Loading chat channels from the database.");
 
 	const std::string query = "SELECT `name`, `owner`, `password`, `minstatus` FROM `chatchannels`";
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Failed to load channels. %s %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Failed to load channels. %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -267,25 +267,25 @@ bool Database::LoadChatChannels() {
 
 void Database::SetChannelPassword(std::string channelName, std::string password) {
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Database::SetChannelPassword(%s, %s)", channelName.c_str(), password.c_str());
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Database::SetChannelPassword(%s, %s)", channelName.c_str(), password.c_str());
 
 	std::string query = StringFormat("UPDATE `chatchannels` SET `password` = '%s' WHERE `name` = '%s'",
                                     password.c_str(), channelName.c_str());
     auto results = QueryDatabase(query);
 	if(!results.Success())
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Error updating password in database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Error updating password in database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
 void Database::SetChannelOwner(std::string channelName, std::string owner) {
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Database::SetChannelOwner(%s, %s)", channelName.c_str(), owner.c_str());
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Database::SetChannelOwner(%s, %s)", channelName.c_str(), owner.c_str());
 
 	std::string query = StringFormat("UPDATE `chatchannels` SET `owner` = '%s' WHERE `name` = '%s'",
                                     owner.c_str(), channelName.c_str());
     auto results = QueryDatabase(query);
 	if(!results.Success())
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Error updating Owner in database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Error updating Owner in database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
@@ -295,7 +295,7 @@ void Database::SendHeaders(Client *client) {
 	int unknownField3 = 1;
 	int characterID = FindCharacter(client->MailBoxName().c_str());
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Sendheaders for %s, CharID is %i", client->MailBoxName().c_str(), characterID);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Sendheaders for %s, CharID is %i", client->MailBoxName().c_str(), characterID);
 
 	if(characterID <= 0)
 		return;
@@ -382,7 +382,7 @@ void Database::SendBody(Client *client, int messageNumber) {
 
 	int characterID = FindCharacter(client->MailBoxName().c_str());
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "SendBody: MsgID %i, to %s, CharID is %i", messageNumber, client->MailBoxName().c_str(), characterID);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "SendBody: MsgID %i, to %s, CharID is %i", messageNumber, client->MailBoxName().c_str(), characterID);
 
 	if(characterID <= 0)
 		return;
@@ -399,7 +399,7 @@ void Database::SendBody(Client *client, int messageNumber) {
 
 	auto row = results.begin();
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Message: %i  body (%i bytes)", messageNumber, strlen(row[1]));
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Message: %i  body (%i bytes)", messageNumber, strlen(row[1]));
 
 	int packetLength = 12 + strlen(row[0]) + strlen(row[1]) + strlen(row[2]);
 
@@ -445,7 +445,7 @@ bool Database::SendMail(std::string recipient, std::string from, std::string sub
 
 	characterID = FindCharacter(characterName.c_str());
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "SendMail: CharacterID for recipient %s is %i", characterName.c_str(), characterID);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "SendMail: CharacterID for recipient %s is %i", characterName.c_str(), characterID);
 
 	if(characterID <= 0)
         return false;
@@ -467,11 +467,11 @@ bool Database::SendMail(std::string recipient, std::string from, std::string sub
     safe_delete_array(escBody);
     auto results = QueryDatabase(query);
 	if(!results.Success()) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "SendMail: Query %s failed with error %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "SendMail: Query %s failed with error %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "MessageID %i generated, from %s, to %s", results.LastInsertedID(), from.c_str(), recipient.c_str());
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "MessageID %i generated, from %s, to %s", results.LastInsertedID(), from.c_str(), recipient.c_str());
 
 
 	Client *client = CL->IsCharacterOnline(characterName);
@@ -488,7 +488,7 @@ bool Database::SendMail(std::string recipient, std::string from, std::string sub
 
 void Database::SetMessageStatus(int messageNumber, int status) {
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "SetMessageStatus %i %i", messageNumber, status);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "SetMessageStatus %i %i", messageNumber, status);
 
 	if(status == 0) {
         std::string query = StringFormat("DELETE FROM `mail` WHERE `msgid` = %i", messageNumber);
@@ -499,24 +499,24 @@ void Database::SetMessageStatus(int messageNumber, int status) {
     std::string query = StringFormat("UPDATE `mail` SET `status` = %i WHERE `msgid`=%i", status, messageNumber);
     auto results = QueryDatabase(query);
 	if (!results.Success())
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Error updating status %s, %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Error updating status %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
 void Database::ExpireMail() {
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Expiring mail...");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Expiring mail...");
 
 	std::string query = "SELECT COUNT(*) FROM `mail`";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Unable to get message count from database. %s %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Unable to get message count from database. %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
 	auto row = results.begin();
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "There are %s messages in the database.", row[0]);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "There are %s messages in the database.", row[0]);
 
 	// Expire Trash
 	if(RuleI(Mail, ExpireTrash) >= 0) {
@@ -524,9 +524,9 @@ void Database::ExpireMail() {
                             time(nullptr) - RuleI(Mail, ExpireTrash));
         results = QueryDatabase(query);
 		if(results.Success())
-            logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Expired %i trash messages.", results.RowsAffected());
+            Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Expired %i trash messages.", results.RowsAffected());
 		else
-            logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Error expiring trash messages, %s %s", query.c_str(), results.ErrorMessage().c_str());
+            Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Error expiring trash messages, %s %s", query.c_str(), results.ErrorMessage().c_str());
 
 	}
 
@@ -536,9 +536,9 @@ void Database::ExpireMail() {
                             time(nullptr) - RuleI(Mail, ExpireRead));
         results = QueryDatabase(query);
 		if(results.Success())
-            logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Expired %i read messages.", results.RowsAffected());
+            Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Expired %i read messages.", results.RowsAffected());
 		else
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Error expiring read messages, %s %s", query.c_str(), results.ErrorMessage().c_str());
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Error expiring read messages, %s %s", query.c_str(), results.ErrorMessage().c_str());
 	}
 
 	// Expire Unread
@@ -547,9 +547,9 @@ void Database::ExpireMail() {
                             time(nullptr) - RuleI(Mail, ExpireUnread));
         results = QueryDatabase(query);
 		if(results.Success())
-            logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Expired %i unread messages.", results.RowsAffected());
+            Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Expired %i unread messages.", results.RowsAffected());
 		else
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Error expiring unread messages, %s %s", query.c_str(), results.ErrorMessage().c_str());
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Error expiring unread messages, %s %s", query.c_str(), results.ErrorMessage().c_str());
 	}
 }
 
@@ -560,9 +560,9 @@ void Database::AddFriendOrIgnore(int charID, int type, std::string name) {
                                     charID, type, CapitaliseName(name).c_str());
     auto results = QueryDatabase(query);
 	if(!results.Success())
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Error adding friend/ignore, query was %s : %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Error adding friend/ignore, query was %s : %s", query.c_str(), results.ErrorMessage().c_str());
 	else
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Wrote Friend/Ignore entry for charid %i, type %i, name %s to database.", charID, type, name.c_str());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Wrote Friend/Ignore entry for charid %i, type %i, name %s to database.", charID, type, name.c_str());
 
 }
 
@@ -573,9 +573,9 @@ void Database::RemoveFriendOrIgnore(int charID, int type, std::string name) {
                                     charID, type, CapitaliseName(name).c_str());
     auto results = QueryDatabase(query);
 	if(!results.Success())
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Error removing friend/ignore, query was %s", query.c_str());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Error removing friend/ignore, query was %s", query.c_str());
 	else
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Removed Friend/Ignore entry for charid %i, type %i, name %s from database.", charID, type, name.c_str());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Removed Friend/Ignore entry for charid %i, type %i, name %s from database.", charID, type, name.c_str());
 
 }
 
@@ -584,7 +584,7 @@ void Database::GetFriendsAndIgnore(int charID, std::vector<std::string> &friends
 	std::string query = StringFormat("select `type`, `name` FROM `friends` WHERE `charid`=%i", charID);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "GetFriendsAndIgnore query error %s, %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "GetFriendsAndIgnore query error %s, %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -595,12 +595,12 @@ void Database::GetFriendsAndIgnore(int charID, std::vector<std::string> &friends
 		if(atoi(row[0]) == 0)
 		{
 			ignorees.push_back(name);
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Added Ignoree from DB %s", name.c_str());
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Added Ignoree from DB %s", name.c_str());
 			continue;
 		}
 
         friends.push_back(name);
-        logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Added Friend from DB %s", name.c_str());
+        Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::UCS_Server, "Added Friend from DB %s", name.c_str());
 	}
 
 }

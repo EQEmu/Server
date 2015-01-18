@@ -44,7 +44,7 @@ bool WorldConnection::SendPacket(ServerPacket* pack) {
 
 void WorldConnection::OnConnected() {
 	const EQEmuConfig *Config=EQEmuConfig::get();
-	logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[WORLD] Connected to World: %s:%d", Config->WorldIP.c_str(), Config->WorldTCPPort);
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[WORLD] Connected to World: %s:%d", Config->WorldIP.c_str(), Config->WorldTCPPort);
 
 	ServerPacket* pack = new ServerPacket(ServerOP_ZAAuth, 16);
 	MD5::Generate((const uchar*) m_password.c_str(), m_password.length(), pack->pBuffer);
@@ -76,7 +76,7 @@ bool WorldConnection::Connect() {
 	if (tcpc.Connect(Config->WorldIP.c_str(), Config->WorldTCPPort, errbuf)) {
 		return true;
 	} else {
-		logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[WORLD] WorldConnection connect: Connecting to the server %s:%d failed: %s", Config->WorldIP.c_str(), Config->WorldTCPPort, errbuf);
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[WORLD] WorldConnection connect: Connecting to the server %s:%d failed: %s", Config->WorldIP.c_str(), Config->WorldTCPPort, errbuf);
 	}
 	return false;
 }

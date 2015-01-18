@@ -75,11 +75,11 @@ EQW::EQW() {
 
 void EQW::AppendOutput(const char *str) {
 	m_outputBuffer += str;
-//	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Append %d chars, yeilding result of length %d", strlen(str), m_outputBuffer.length());
+//	Log.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Append %d chars, yeilding result of length %d", strlen(str), m_outputBuffer.length());
 }
 
 const std::string &EQW::GetOutput() const {
-//	logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Getting, length %d", m_outputBuffer.length());
+//	Log.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Getting, length %d", m_outputBuffer.length());
 	return(m_outputBuffer);
 }
 
@@ -269,7 +269,7 @@ void EQW::LSReconnect() {
 		pthread_create(&thread, nullptr, &AutoInitLoginServer, nullptr);
 	#endif
 	RunLoops = true;
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Login Server Reconnect manually restarted by Web Tool");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Login Server Reconnect manually restarted by Web Tool");
 }
 
 /*EQLConfig * EQW::FindLauncher(Const_char *zone_ref) {

@@ -136,7 +136,7 @@ void Client::SendEnterWorld(std::string name)
 			eqs->Close();
 			return;
 		} else {
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Telling client to continue session.");
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Telling client to continue session.");
 		}
 	}
 
@@ -378,7 +378,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 
 	if (strlen(password) <= 1) {
 		// TODO: Find out how to tell the client wrong username/password
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Login without a password");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Login without a password");
 		return false;
 	}
 
@@ -408,31 +408,31 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 	if ((cle = zoneserver_list.CheckAuth(inet_ntoa(tmpip), password)))
 #else
 	if (loginserverlist.Connected() == false && !pZoning) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Error: Login server login while not connected to login server.");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Error: Login server login while not connected to login server.");
 		return false;
 	}
 	if (((cle = client_list.CheckAuth(name, password)) || (cle = client_list.CheckAuth(id, password))))
 #endif
 	{
 		if (cle->AccountID() == 0 || (!minilogin && cle->LSID()==0)) {
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"ID is 0. Is this server connected to minilogin?");
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"ID is 0. Is this server connected to minilogin?");
 			if(!minilogin)
-				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"If so you forget the minilogin variable...");
+				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"If so you forget the minilogin variable...");
 			else
-				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Could not find a minilogin account, verify ip address logging into minilogin is the same that is in your account table.");
+				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Could not find a minilogin account, verify ip address logging into minilogin is the same that is in your account table.");
 			return false;
 		}
 
 		cle->SetOnline();
 
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Logged in. Mode=%s",pZoning ? "(Zoning)" : "(CharSel)");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Logged in. Mode=%s",pZoning ? "(Zoning)" : "(CharSel)");
 
 		if(minilogin){
 			WorldConfig::DisableStats();
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"MiniLogin Account #%d",cle->AccountID());
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"MiniLogin Account #%d",cle->AccountID());
 		}
 		else {
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"LS Account #%d",cle->LSID());
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"LS Account #%d",cle->LSID());
 		}
 
 		const WorldConfig *Config=WorldConfig::get();
@@ -465,7 +465,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 	}
 	else {
 		// TODO: Find out how to tell the client wrong username/password
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Bad/Expired session key '%s'",name);
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Bad/Expired session key '%s'",name);
 		return false;
 	}
 
@@ -479,7 +479,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app)
 {
 	if (GetAccountID() == 0) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Name approval request with no logged in account");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Name approval request with no logged in account");
 		return false;
 	}
 
@@ -487,7 +487,7 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app)
 	uchar race = app->pBuffer[64];
 	uchar clas = app->pBuffer[68];
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Name approval request. Name=%s, race=%s, class=%s", char_name, GetRaceName(race), GetEQClassName(clas));
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Name approval request. Name=%s, race=%s, class=%s", char_name, GetRaceName(race), GetEQClassName(clas));
 
 	EQApplicationPacket *outapp;
 	outapp = new EQApplicationPacket;
@@ -648,11 +648,11 @@ bool Client::HandleCharacterCreateRequestPacket(const EQApplicationPacket *app) 
 
 bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
 	if (GetAccountID() == 0) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Account ID not set; unable to create character.");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Account ID not set; unable to create character.");
 		return false;
 	}
 	else if (app->size != sizeof(CharCreate_Struct)) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Wrong size on OP_CharacterCreate. Got: %d, Expected: %d",app->size,sizeof(CharCreate_Struct));
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Wrong size on OP_CharacterCreate. Got: %d, Expected: %d",app->size,sizeof(CharCreate_Struct));
 		DumpPacket(app);
 		// the previous behavior was essentially returning true here
 		// but that seems a bit odd to me.
@@ -679,14 +679,14 @@ bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
 
 bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) { 
 	if (GetAccountID() == 0) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Enter world with no logged in account");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Enter world with no logged in account");
 		eqs->Close();
 		return true;
 	}
 
 	if(GetAdmin() < 0)
 	{
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Account banned or suspended.");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Account banned or suspended.");
 		eqs->Close();
 		return true;
 	}
@@ -702,14 +702,14 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	uint32 tmpaccid = 0;
 	charid = database.GetCharacterInfo(char_name, &tmpaccid, &zoneID, &instanceID);
 	if (charid == 0 || tmpaccid != GetAccountID()) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Could not get CharInfo for '%s'",char_name);
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Could not get CharInfo for '%s'",char_name);
 		eqs->Close();
 		return true;
 	}
 
 	// Make sure this account owns this character
 	if (tmpaccid != GetAccountID()) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"This account does not own the character named '%s'",char_name);
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"This account does not own the character named '%s'",char_name);
 		eqs->Close();
 		return true;
 	}
@@ -737,7 +737,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 			zoneID = database.MoveCharacterToBind(charid,4);
 		}
 		else {
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"'%s' is trying to go home before they're able...",char_name);
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"'%s' is trying to go home before they're able...",char_name);
 			database.SetHackerFlag(GetAccountName(), char_name, "MQGoHome: player tried to go home before they were able.");
 			eqs->Close();
 			return true;
@@ -770,7 +770,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		}
 		else
 		{
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"'%s' is trying to go to tutorial but are not allowed...",char_name);
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"'%s' is trying to go to tutorial but are not allowed...",char_name);
 			database.SetHackerFlag(GetAccountName(), char_name, "MQTutorial: player tried to enter the tutorial without having tutorial enabled for this character.");
 			eqs->Close();
 			return true;
@@ -780,7 +780,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	if (zoneID == 0 || !database.GetZoneName(zoneID)) {
 		// This is to save people in an invalid zone, once it's removed from the DB
 		database.MoveCharacterToZone(charid, "arena");
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Zone not found in database zone_id=%i, moveing char to arena character:%s", zoneID, char_name);
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Zone not found in database zone_id=%i, moveing char to arena character:%s", zoneID, char_name);
 	}
 
 	if(instanceID > 0)
@@ -894,7 +894,7 @@ bool Client::HandleDeleteCharacterPacket(const EQApplicationPacket *app) {
 
 	uint32 char_acct_id = database.GetAccountIDByChar((char*)app->pBuffer);
 	if(char_acct_id == GetAccountID()) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Delete character: %s",app->pBuffer);
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Delete character: %s",app->pBuffer);
 		database.DeleteCharacter((char *)app->pBuffer);
 		SendCharInfo();
 	}
@@ -915,25 +915,25 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 
 	EmuOpcode opcode = app->GetOpcode();
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Recevied EQApplicationPacket");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Recevied EQApplicationPacket");
 	_pkt(WORLD__CLIENT_TRACE,app);
 
 	if (!eqs->CheckState(ESTABLISHED)) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Client disconnected (net inactive on send)");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Client disconnected (net inactive on send)");
 		return false;
 	}
 
 	// Voidd: Anti-GM Account hack, Checks source ip against valid GM Account IP Addresses
 	if (RuleB(World, GMAccountIPList) && this->GetAdmin() >= (RuleI(World, MinGMAntiHackStatus))) {
 		if(!database.CheckGMIPs(long2ip(this->GetIP()).c_str(), this->GetAccountID())) {
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"GM Account not permited from source address %s and accountid %i", long2ip(this->GetIP()).c_str(), this->GetAccountID());
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"GM Account not permited from source address %s and accountid %i", long2ip(this->GetIP()).c_str(), this->GetAccountID());
 			eqs->Close();
 		}
 	}
 
 	if (GetAccountID() == 0 && opcode != OP_SendLoginInfo) {
 		// Got a packet other than OP_SendLoginInfo when not logged in
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Expecting OP_SendLoginInfo, got %s", OpcodeNames[opcode]);
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Expecting OP_SendLoginInfo, got %s", OpcodeNames[opcode]);
 		return false;
 	}
 	else if (opcode == OP_AckPacket) {
@@ -1005,7 +1005,7 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		}
 		default:
 		{
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Received unknown EQApplicationPacket");
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Received unknown EQApplicationPacket");
 			_pkt(WORLD__CLIENT_ERR,app);
 			return true;
 		}
@@ -1024,7 +1024,7 @@ bool Client::Process() {
 	to.sin_addr.s_addr = ip;
 
 	if (autobootup_timeout.Check()) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Zone bootup timer expired, bootup failed or too slow.");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Zone bootup timer expired, bootup failed or too slow.");
 		ZoneUnavail();
 	}
 	if(connect.Check()){
@@ -1058,7 +1058,7 @@ bool Client::Process() {
 			loginserverlist.SendPacket(pack);
 			safe_delete(pack);
 		}
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Client disconnected (not active in process)");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Client disconnected (not active in process)");
 		return false;
 	}
 
@@ -1107,17 +1107,17 @@ void Client::EnterWorld(bool TryBootup) {
 	}
 	else {
 		if (TryBootup) {
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Attempting autobootup of %s (%d:%d)",zone_name,zoneID,instanceID);
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Attempting autobootup of %s (%d:%d)",zone_name,zoneID,instanceID);
 			autobootup_timeout.Start();
 			pwaitingforbootup = zoneserver_list.TriggerBootup(zoneID, instanceID);
 			if (pwaitingforbootup == 0) {
-				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"No zoneserver available to boot up.");
+				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"No zoneserver available to boot up.");
 				ZoneUnavail();
 			}
 			return;
 		}
 		else {
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Requested zone %s is no running.",zone_name);
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Requested zone %s is no running.",zone_name);
 			ZoneUnavail();
 			return;
 		}
@@ -1126,12 +1126,12 @@ void Client::EnterWorld(bool TryBootup) {
 
 	cle->SetChar(charid, char_name);
 	database.UpdateLiveChar(char_name, GetAccountID());
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"%s %s (%d:%d)",seencharsel ? "Entering zone" : "Zoning to",zone_name,zoneID,instanceID);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"%s %s (%d:%d)",seencharsel ? "Entering zone" : "Zoning to",zone_name,zoneID,instanceID);
 //	database.SetAuthentication(account_id, char_name, zone_name, ip);
 
 	if (seencharsel) {
 		if (GetAdmin() < 80 && zoneserver_list.IsZoneLocked(zoneID)) {
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Enter world failed. Zone is locked.");
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Enter world failed. Zone is locked.");
 			ZoneUnavail();
 			return;
 		}
@@ -1169,9 +1169,9 @@ void Client::Clearance(int8 response)
 	{
 		if (zs == 0)
 		{
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Unable to find zoneserver in Client::Clearance!!");
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Unable to find zoneserver in Client::Clearance!!");
 		} else {
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Invalid response %d in Client::Clearance", response);
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Invalid response %d in Client::Clearance", response);
 		}
 
 		ZoneUnavail();
@@ -1181,20 +1181,20 @@ void Client::Clearance(int8 response)
 	EQApplicationPacket* outapp;
 
 	if (zs->GetCAddress() == nullptr) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Unable to do zs->GetCAddress() in Client::Clearance!!");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Unable to do zs->GetCAddress() in Client::Clearance!!");
 		ZoneUnavail();
 		return;
 	}
 
 	if (zoneID == 0) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "zoneID is nullptr in Client::Clearance!!");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "zoneID is nullptr in Client::Clearance!!");
 		ZoneUnavail();
 		return;
 	}
 
 	const char* zonename = database.GetZoneName(zoneID);
 	if (zonename == 0) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "zonename is nullptr in Client::Clearance!!");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "zonename is nullptr in Client::Clearance!!");
 		ZoneUnavail();
 		return;
 	}
@@ -1225,7 +1225,7 @@ void Client::Clearance(int8 response)
 	}
 	strcpy(zsi->ip, zs_addr);
 	zsi->port =zs->GetCPort();
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Sending client to zone %s (%d:%d) at %s:%d",zonename,zoneID,instanceID,zsi->ip,zsi->port);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Sending client to zone %s (%d:%d) at %s:%d",zonename,zoneID,instanceID,zsi->ip,zsi->port);
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
@@ -1256,7 +1256,7 @@ bool Client::GenPassKey(char* key) {
 }
 
 void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req) {
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Sending EQApplicationPacket OpCode 0x%04x",app->GetOpcode());
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Sending EQApplicationPacket OpCode 0x%04x",app->GetOpcode());
 	_pkt(WORLD__CLIENT_TRACE, app);
 
 	ack_req = true;	// It's broke right now, dont delete this line till fix it. =P
@@ -1355,27 +1355,27 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 
 	in.s_addr = GetIP();
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Character creation request from %s LS#%d (%s:%d) : ", GetCLE()->LSName(), GetCLE()->LSID(), inet_ntoa(in), GetPort());
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Name: %s", name);
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Race: %d  Class: %d  Gender: %d  Deity: %d  Start zone: %d  Tutorial: %s",
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Character creation request from %s LS#%d (%s:%d) : ", GetCLE()->LSName(), GetCLE()->LSID(), inet_ntoa(in), GetPort());
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Name: %s", name);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Race: %d  Class: %d  Gender: %d  Deity: %d  Start zone: %d  Tutorial: %s",
 		cc->race, cc->class_, cc->gender, cc->deity, cc->start_zone, cc->tutorial ? "true" : "false");
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "STR  STA  AGI  DEX  WIS  INT  CHA    Total");
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "%3d  %3d  %3d  %3d  %3d  %3d  %3d     %3d",
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "STR  STA  AGI  DEX  WIS  INT  CHA    Total");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "%3d  %3d  %3d  %3d  %3d  %3d  %3d     %3d",
 		cc->STR, cc->STA, cc->AGI, cc->DEX, cc->WIS, cc->INT, cc->CHA,
 		stats_sum);
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Face: %d  Eye colors: %d %d", cc->face, cc->eyecolor1, cc->eyecolor2);
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Hairstyle: %d  Haircolor: %d", cc->hairstyle, cc->haircolor);
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Beard: %d  Beardcolor: %d", cc->beard, cc->beardcolor);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Face: %d  Eye colors: %d %d", cc->face, cc->eyecolor1, cc->eyecolor2);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Hairstyle: %d  Haircolor: %d", cc->hairstyle, cc->haircolor);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Beard: %d  Beardcolor: %d", cc->beard, cc->beardcolor);
 
 	/* Validate the char creation struct */
 	if (ClientVersionBit & BIT_SoFAndLater) {
 		if (!CheckCharCreateInfoSoF(cc)) {
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"CheckCharCreateInfo did not validate the request (bad race/class/stats)");
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"CheckCharCreateInfo did not validate the request (bad race/class/stats)");
 			return false;
 		}
 	} else {
 		if (!CheckCharCreateInfoTitanium(cc)) {
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"CheckCharCreateInfo did not validate the request (bad race/class/stats)");
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"CheckCharCreateInfo did not validate the request (bad race/class/stats)");
 			return false;
 		}
 	}
@@ -1437,21 +1437,21 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 
 	/* If it is an SoF Client and the SoF Start Zone rule is set, send new chars there */
 	if (ClientVersionBit & BIT_SoFAndLater && RuleI(World, SoFStartZoneID) > 0) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Found 'SoFStartZoneID' rule setting: %i", RuleI(World, SoFStartZoneID));
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Found 'SoFStartZoneID' rule setting: %i", RuleI(World, SoFStartZoneID));
 		pp.zone_id = RuleI(World, SoFStartZoneID);
 		if (pp.zone_id)
 			database.GetSafePoints(pp.zone_id, 0, &pp.x, &pp.y, &pp.z);
 		else
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Error getting zone id for Zone ID %i", RuleI(World, SoFStartZoneID));
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Error getting zone id for Zone ID %i", RuleI(World, SoFStartZoneID));
 	} else {
 		/* if there's a startzone variable put them in there */
 		if (database.GetVariable("startzone", startzone, 50)) {
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Found 'startzone' variable setting: %s", startzone);
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Found 'startzone' variable setting: %s", startzone);
 			pp.zone_id = database.GetZoneID(startzone);
 			if (pp.zone_id)
 				database.GetSafePoints(pp.zone_id, 0, &pp.x, &pp.y, &pp.z);
 			else
-				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Error getting zone id for '%s'", startzone);
+				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Error getting zone id for '%s'", startzone);
 		} else {	/* otherwise use normal starting zone logic */
 			bool ValidStartZone = false;
 			if (ClientVersionBit & BIT_TitaniumAndEarlier)
@@ -1490,11 +1490,11 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	pp.binds[0].z = pp.z;
 	pp.binds[0].heading = pp.heading;
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Current location: %s (%d)  %0.2f, %0.2f, %0.2f, %0.2f",
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Current location: %s (%d)  %0.2f, %0.2f, %0.2f, %0.2f",
 		database.GetZoneName(pp.zone_id), pp.zone_id, pp.x, pp.y, pp.z, pp.heading);
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Bind location: %s (%d) %0.2f, %0.2f, %0.2f",
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Bind location: %s (%d) %0.2f, %0.2f, %0.2f",
 		database.GetZoneName(pp.binds[0].zoneId), pp.binds[0].zoneId,  pp.binds[0].x, pp.binds[0].y, pp.binds[0].z);
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Home location: %s (%d) %0.2f, %0.2f, %0.2f",
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Home location: %s (%d) %0.2f, %0.2f, %0.2f",
 		database.GetZoneName(pp.binds[4].zoneId), pp.binds[4].zoneId,  pp.binds[4].x, pp.binds[4].y, pp.binds[4].z);
 
 	/* Starting Items inventory */
@@ -1503,10 +1503,10 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	// now we give the pp and the inv we made to StoreCharacter
 	// to see if we can store it
 	if (!database.StoreCharacter(GetAccountID(), &pp, &inv)) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Character creation failed: %s", pp.name);
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Character creation failed: %s", pp.name);
 		return false;
 	}
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Character creation successful: %s", pp.name);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Character creation successful: %s", pp.name);
 	return true;
 }
 
@@ -1516,7 +1516,7 @@ bool CheckCharCreateInfoSoF(CharCreate_Struct *cc)
 	if (!cc)
 		return false;
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Validating char creation info...");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Validating char creation info...");
 
 	RaceClassCombos class_combo;
 	bool found = false;
@@ -1533,7 +1533,7 @@ bool CheckCharCreateInfoSoF(CharCreate_Struct *cc)
 	}
 
 	if (!found) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Could not find class/race/deity/start_zone combination");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Could not find class/race/deity/start_zone combination");
 		return false;
 	}
 
@@ -1550,7 +1550,7 @@ bool CheckCharCreateInfoSoF(CharCreate_Struct *cc)
 	}
 
 	if (!found) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Could not find starting stats for selected character combo, cannot verify stats");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Could not find starting stats for selected character combo, cannot verify stats");
 		return false;
 	}
 
@@ -1563,37 +1563,37 @@ bool CheckCharCreateInfoSoF(CharCreate_Struct *cc)
 		allocation.DefaultPointAllocation[6];
 
 	if (cc->STR > allocation.BaseStats[0] + max_stats || cc->STR < allocation.BaseStats[0]) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Strength out of range");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Strength out of range");
 		return false;
 	}
 
 	if (cc->DEX > allocation.BaseStats[1] + max_stats || cc->DEX < allocation.BaseStats[1]) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Dexterity out of range");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Dexterity out of range");
 		return false;
 	}
 
 	if (cc->AGI > allocation.BaseStats[2] + max_stats || cc->AGI < allocation.BaseStats[2]) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Agility out of range");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Agility out of range");
 		return false;
 	}
 
 	if (cc->STA > allocation.BaseStats[3] + max_stats || cc->STA < allocation.BaseStats[3]) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Stamina out of range");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Stamina out of range");
 		return false;
 	}
 
 	if (cc->INT > allocation.BaseStats[4] + max_stats || cc->INT < allocation.BaseStats[4]) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Intelligence out of range");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Intelligence out of range");
 		return false;
 	}
 
 	if (cc->WIS > allocation.BaseStats[5] + max_stats || cc->WIS < allocation.BaseStats[5]) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Wisdom out of range");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Wisdom out of range");
 		return false;
 	}
 
 	if (cc->CHA > allocation.BaseStats[6] + max_stats || cc->CHA < allocation.BaseStats[6]) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Charisma out of range");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Charisma out of range");
 		return false;
 	}
 
@@ -1606,7 +1606,7 @@ bool CheckCharCreateInfoSoF(CharCreate_Struct *cc)
 	current_stats += cc->WIS - allocation.BaseStats[5];
 	current_stats += cc->CHA - allocation.BaseStats[6];
 	if (current_stats > max_stats) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Current Stats > Maximum Stats");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server, "Current Stats > Maximum Stats");
 		return false;
 	}
 
@@ -1687,7 +1687,7 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 	if (!cc)
 		return false;
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Validating char creation info...");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Validating char creation info...");
 
 	classtemp = cc->class_ - 1;
 	racetemp = cc->race - 1;
@@ -1700,16 +1700,16 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 	// if out of range looking it up in the table would crash stuff
 	// so we return from these
 	if (classtemp >= PLAYER_CLASS_COUNT) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  class is out of range");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  class is out of range");
 		return false;
 	}
 	if (racetemp >= _TABLE_RACES) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  race is out of range");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  race is out of range");
 		return false;
 	}
 
 	if (!ClassRaceLookupTable[classtemp][racetemp]) { //Lookup table better than a bunch of ifs?
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  invalid race/class combination");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  invalid race/class combination");
 		// we return from this one, since if it's an invalid combination our table
 		// doesn't have meaningful values for the stats
 		return false;
@@ -1737,43 +1737,43 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 	// that are messed up not just the first hit
 
 	if (bTOTAL + stat_points != cTOTAL) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat points total doesn't match expected value: expecting %d got %d", bTOTAL + stat_points, cTOTAL);
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat points total doesn't match expected value: expecting %d got %d", bTOTAL + stat_points, cTOTAL);
 		Charerrors++;
 	}
 
 	if (cc->STR > bSTR + stat_points || cc->STR < bSTR) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat STR is out of range");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat STR is out of range");
 		Charerrors++;
 	}
 	if (cc->STA > bSTA + stat_points || cc->STA < bSTA) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat STA is out of range");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat STA is out of range");
 		Charerrors++;
 	}
 	if (cc->AGI > bAGI + stat_points || cc->AGI < bAGI) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat AGI is out of range");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat AGI is out of range");
 		Charerrors++;
 	}
 	if (cc->DEX > bDEX + stat_points || cc->DEX < bDEX) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat DEX is out of range");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat DEX is out of range");
 		Charerrors++;
 	}
 	if (cc->WIS > bWIS + stat_points || cc->WIS < bWIS) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat WIS is out of range");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat WIS is out of range");
 		Charerrors++;
 	}
 	if (cc->INT > bINT + stat_points || cc->INT < bINT) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat INT is out of range");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat INT is out of range");
 		Charerrors++;
 	}
 	if (cc->CHA > bCHA + stat_points || cc->CHA < bCHA) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat CHA is out of range");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"  stat CHA is out of range");
 		Charerrors++;
 	}
 
 	/*TODO: Check for deity/class/race.. it'd be nice, but probably of any real use to hack(faction, deity based items are all I can think of)
 	I am NOT writing those tables - kathgar*/
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Found %d errors in character creation request", Charerrors);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::World_Server,"Found %d errors in character creation request", Charerrors);
 
 	return Charerrors == 0;
 }

@@ -842,7 +842,7 @@ bool Corpse::Process() {
 			spc->zone_id = zone->graveyard_zoneid();
 			worldserver.SendPacket(pack);
 			safe_delete(pack);
-			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Moved %s player corpse to the designated graveyard in zone %s.", this->GetName(), database.GetZoneName(zone->graveyard_zoneid()));
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Moved %s player corpse to the designated graveyard in zone %s.", this->GetName(), database.GetZoneName(zone->graveyard_zoneid()));
 			corpse_db_id = 0;
 		}
 
@@ -872,10 +872,10 @@ bool Corpse::Process() {
 				Save();
 				player_corpse_depop = true;
 				corpse_db_id = 0;
-				logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Tagged %s player corpse has burried.", this->GetName());
+				Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Tagged %s player corpse has burried.", this->GetName());
 			}
 			else {
-				logger.Log(EQEmuLogSys::Error, "Unable to bury %s player corpse.", this->GetName());
+				Log.Log(EQEmuLogSys::Error, "Unable to bury %s player corpse.", this->GetName());
 				return true;
 			}
 		}
@@ -1083,7 +1083,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 				for(; cur != end; ++cur) {
 					ServerLootItem_Struct* item_data = *cur;
 					item = database.GetItem(item_data->item_id);
-					logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Corpse Looting: %s was not sent to client loot window (corpse_dbid: %i, charname: %s(%s))", item->Name, GetCorpseDBID(), client->GetName(), client->GetGM() ? "GM" : "Owner");
+					Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Corpse Looting: %s was not sent to client loot window (corpse_dbid: %i, charname: %s(%s))", item->Name, GetCorpseDBID(), client->GetName(), client->GetGM() ? "GM" : "Owner");
 					client->Message(0, "Inaccessable Corpse Item: %s", item->Name);
 				}
 			}

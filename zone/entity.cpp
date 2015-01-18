@@ -371,7 +371,7 @@ void EntityList::CheckGroupList (const char *fname, const int fline)
 	{
 		if (*it == nullptr)
 		{
-			logger.Log(EQEmuLogSys::Error, "nullptr group, %s:%i", fname, fline);
+			Log.Log(EQEmuLogSys::Error, "nullptr group, %s:%i", fname, fline);
 		}
 	}
 }
@@ -520,12 +520,12 @@ void EntityList::MobProcess()
 				zone->StartShutdownTimer();
 				Group *g = GetGroupByMob(mob);
 				if(g) {
-					logger.Log(EQEmuLogSys::Error, "About to delete a client still in a group.");
+					Log.Log(EQEmuLogSys::Error, "About to delete a client still in a group.");
 					g->DelMember(mob);
 				}
 				Raid *r = entity_list.GetRaidByClient(mob->CastToClient());
 				if(r) {
-					logger.Log(EQEmuLogSys::Error, "About to delete a client still in a raid.");
+					Log.Log(EQEmuLogSys::Error, "About to delete a client still in a raid.");
 					r->MemberZoned(mob->CastToClient());
 				}
 				entity_list.RemoveClient(id);
@@ -557,7 +557,7 @@ void EntityList::AddGroup(Group *group)
 
 	uint32 gid = worldserver.NextGroupID();
 	if (gid == 0) {
-		logger.Log(EQEmuLogSys::Error, 
+		Log.Log(EQEmuLogSys::Error, 
 				"Unable to get new group ID from world server. group is going to be broken.");
 		return;
 	}
@@ -586,7 +586,7 @@ void EntityList::AddRaid(Raid *raid)
 
 	uint32 gid = worldserver.NextGroupID();
 	if (gid == 0) {
-		logger.Log(EQEmuLogSys::Error, 
+		Log.Log(EQEmuLogSys::Error, 
 				"Unable to get new group ID from world server. group is going to be broken.");
 		return;
 	}
@@ -2509,7 +2509,7 @@ char *EntityList::MakeNameUnique(char *name)
 			return name;
 		}
 	}
-	logger.Log(EQEmuLogSys::Error, "Fatal error in EntityList::MakeNameUnique: Unable to find unique name for '%s'", name);
+	Log.Log(EQEmuLogSys::Error, "Fatal error in EntityList::MakeNameUnique: Unable to find unique name for '%s'", name);
 	char tmp[64] = "!";
 	strn0cpy(&tmp[1], name, sizeof(tmp) - 1);
 	strcpy(name, tmp);
@@ -3397,7 +3397,7 @@ void EntityList::ReloadAllClientsTaskState(int TaskID)
 			// If we have been passed a TaskID, only reload the client state if they have
 			// that Task active.
 			if ((!TaskID) || (TaskID && client->IsTaskActive(TaskID))) {
-				logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[CLIENTLOAD] Reloading Task State For Client %s", client->GetName());
+				Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[CLIENTLOAD] Reloading Task State For Client %s", client->GetName());
 				client->RemoveClientTaskState();
 				client->LoadClientTaskState();
 				taskmanager->SendActiveTasksToClient(client);

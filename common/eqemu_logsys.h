@@ -115,7 +115,7 @@ private:
 	void ProcessLogWrite(uint16 log_type, uint16 log_category, std::string message);
 };
 
-extern EQEmuLogSys logger;
+extern EQEmuLogSys Log;
 
 /* If you add to this, make sure you update LogCategory */
 static const char* LogCategoryName[EQEmuLogSys::LogCategory::MaxCategoryID] = {

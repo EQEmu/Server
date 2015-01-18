@@ -154,7 +154,7 @@ void QuestManager::echo(int colour, const char *str) {
 void QuestManager::say(const char *str) {
 	QuestManagerCurrentQuestVars();
 	if (!owner) {
-		logger.Log(EQEmuLogSys::Quest, "QuestManager::say called with nullptr owner. Probably syntax error in quest file.");
+		Log.Log(EQEmuLogSys::Quest, "QuestManager::say called with nullptr owner. Probably syntax error in quest file.");
 		return;
 	}
 	else {
@@ -170,7 +170,7 @@ void QuestManager::say(const char *str) {
 void QuestManager::say(const char *str, uint8 language) {
 	QuestManagerCurrentQuestVars();
 	if (!owner) {
-		logger.Log(EQEmuLogSys::Quest, "QuestManager::say called with nullptr owner. Probably syntax error in quest file.");
+		Log.Log(EQEmuLogSys::Quest, "QuestManager::say called with nullptr owner. Probably syntax error in quest file.");
 		return;
 	}
 	else {
@@ -548,7 +548,7 @@ void QuestManager::stopalltimers(Mob *mob) {
 void QuestManager::emote(const char *str) {
 	QuestManagerCurrentQuestVars();
 	if (!owner) {
-		logger.Log(EQEmuLogSys::Quest, "QuestManager::emote called with nullptr owner. Probably syntax error in quest file.");
+		Log.Log(EQEmuLogSys::Quest, "QuestManager::emote called with nullptr owner. Probably syntax error in quest file.");
 		return;
 	}
 	else {
@@ -559,7 +559,7 @@ void QuestManager::emote(const char *str) {
 void QuestManager::shout(const char *str) {
 	QuestManagerCurrentQuestVars();
 	if (!owner) {
-		logger.Log(EQEmuLogSys::Quest, "QuestManager::shout called with nullptr owner. Probably syntax error in quest file.");
+		Log.Log(EQEmuLogSys::Quest, "QuestManager::shout called with nullptr owner. Probably syntax error in quest file.");
 		return;
 	}
 	else {
@@ -570,7 +570,7 @@ void QuestManager::shout(const char *str) {
 void QuestManager::shout2(const char *str) {
 	QuestManagerCurrentQuestVars();
 	if (!owner) {
-		logger.Log(EQEmuLogSys::Quest, "QuestManager::shout2 called with nullptr owner. Probably syntax error in quest file.");
+		Log.Log(EQEmuLogSys::Quest, "QuestManager::shout2 called with nullptr owner. Probably syntax error in quest file.");
 		return;
 	}
 	else {
@@ -589,7 +589,7 @@ void QuestManager::gmsay(const char *str, uint32 color, bool send_to_world, uint
 void QuestManager::depop(int npc_type) {
 	QuestManagerCurrentQuestVars();
 	if (!owner || !owner->IsNPC()) {
-		logger.Log(EQEmuLogSys::Quest, "QuestManager::depop called with nullptr owner or non-NPC owner. Probably syntax error in quest file.");
+		Log.Log(EQEmuLogSys::Quest, "QuestManager::depop called with nullptr owner or non-NPC owner. Probably syntax error in quest file.");
 		return;
 	}
 	else {
@@ -619,7 +619,7 @@ void QuestManager::depop(int npc_type) {
 void QuestManager::depop_withtimer(int npc_type) {
 	QuestManagerCurrentQuestVars();
 	if (!owner || !owner->IsNPC()) {
-		logger.Log(EQEmuLogSys::Quest, "QuestManager::depop_withtimer called with nullptr owner or non-NPC owner. Probably syntax error in quest file.");
+		Log.Log(EQEmuLogSys::Quest, "QuestManager::depop_withtimer called with nullptr owner or non-NPC owner. Probably syntax error in quest file.");
 		return;
 	}
 	else {
@@ -646,7 +646,7 @@ void QuestManager::depopall(int npc_type) {
 		entity_list.DepopAll(npc_type);
 	}
 	else {
-		logger.Log(EQEmuLogSys::Quest, "QuestManager::depopall called with nullptr owner, non-NPC owner, or invalid NPC Type ID. Probably syntax error in quest file.");
+		Log.Log(EQEmuLogSys::Quest, "QuestManager::depopall called with nullptr owner, non-NPC owner, or invalid NPC Type ID. Probably syntax error in quest file.");
 	}
 }
 
@@ -655,7 +655,7 @@ void QuestManager::depopzone(bool StartSpawnTimer) {
 		zone->Depop(StartSpawnTimer);
 	}
 	else {
-		logger.Log(EQEmuLogSys::Quest, "QuestManager::depopzone called with nullptr zone. Probably syntax error in quest file.");
+		Log.Log(EQEmuLogSys::Quest, "QuestManager::depopzone called with nullptr zone. Probably syntax error in quest file.");
 	}
 }
 
@@ -664,7 +664,7 @@ void QuestManager::repopzone() {
 		zone->Repop();
 	}
 	else {
-		logger.Log(EQEmuLogSys::Quest, "QuestManager::repopzone called with nullptr zone. Probably syntax error in quest file.");
+		Log.Log(EQEmuLogSys::Quest, "QuestManager::repopzone called with nullptr zone. Probably syntax error in quest file.");
 	}
 }
 
@@ -1652,7 +1652,7 @@ void QuestManager::showgrid(int grid) {
                                     "ORDER BY `number`", grid, zone->GetZoneID());
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        logger.Log(EQEmuLogSys::Quest, "Error loading grid %d for showgrid(): %s", grid, results.ErrorMessage().c_str());
+        Log.Log(EQEmuLogSys::Quest, "Error loading grid %d for showgrid(): %s", grid, results.ErrorMessage().c_str());
 		return;
     }
 
@@ -2074,7 +2074,7 @@ bool QuestManager::istaskenabled(int taskid) {
 
 void QuestManager::tasksetselector(int tasksetid) {
 	QuestManagerCurrentQuestVars();
-	logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] TaskSetSelector called for task set %i", tasksetid);
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Tasks, "[UPDATE] TaskSetSelector called for task set %i", tasksetid);
 	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && owner && taskmanager)
 		initiator->TaskSetSelector(owner, tasksetid);
 }
@@ -2641,7 +2641,7 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 			std::string insert_query = StringFormat("INSERT INTO `saylink` (`phrase`) VALUES ('%s')", escaped_string);
 			results = database.QueryDatabase(insert_query);
 			if (!results.Success()) {
-				logger.Log(EQEmuLogSys::Error, "Error in saylink phrase queries", results.ErrorMessage().c_str());
+				Log.Log(EQEmuLogSys::Error, "Error in saylink phrase queries", results.ErrorMessage().c_str());
 			} else {
 				results = database.QueryDatabase(query);
 				if (results.Success()) {
@@ -2649,7 +2649,7 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 						for(auto row = results.begin(); row != results.end(); ++row)
 							sayid = atoi(row[0]);
 				} else {
-					logger.Log(EQEmuLogSys::Error, "Error in saylink phrase queries", results.ErrorMessage().c_str());
+					Log.Log(EQEmuLogSys::Error, "Error in saylink phrase queries", results.ErrorMessage().c_str());
 				}
 			}
 		}
@@ -2809,7 +2809,7 @@ void QuestManager::voicetell(const char *str, int macronum, int racenum, int gen
 			safe_delete(outapp);
 		}
 		else
-			logger.Log(EQEmuLogSys::Quest, "QuestManager::voicetell from %s. Client %s not found.", owner->GetName(), str);
+			Log.Log(EQEmuLogSys::Quest, "QuestManager::voicetell from %s. Client %s not found.", owner->GetName(), str);
 	}
 }
 

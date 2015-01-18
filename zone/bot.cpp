@@ -1225,7 +1225,7 @@ int32 Bot::acmod()
 		return (65 + ((agility-300) / 21));
 	}
 #if EQDEBUG >= 11
-	logger.Log(EQEmuLogSys::Error, "Error in Bot::acmod(): Agility: %i, Level: %i",agility,level);
+	Log.Log(EQEmuLogSys::Error, "Error in Bot::acmod(): Agility: %i, Level: %i",agility,level);
 #endif
 	return 0;
 }
@@ -1462,7 +1462,7 @@ void Bot::LoadAAs() {
     auto results = database.QueryDatabase(query);
 
 	if(!results.Success()) {
-		logger.Log(EQEmuLogSys::Error, "Error in Bot::LoadAAs()");
+		Log.Log(EQEmuLogSys::Error, "Error in Bot::LoadAAs()");
 		return;
 	}
 
@@ -1564,7 +1564,7 @@ void Bot::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 		if (effect == SE_Blank || (effect == SE_CHA && base1 == 0) || effect == SE_StackingCommand_Block || effect == SE_StackingCommand_Overwrite)
 			continue;
 
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Applying Effect %d from AA %u in slot %d (base1: %d, base2: %d) on %s", effect, aaid, slot, base1, base2, this->GetCleanName());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AA, "Applying Effect %d from AA %u in slot %d (base1: %d, base2: %d) on %s", effect, aaid, slot, base1, base2, this->GetCleanName());
 
 		uint8 focus = IsFocusEffect(0, 0, true,effect);
 		if (focus)
@@ -2774,7 +2774,7 @@ void Bot::LoadStance() {
 	std::string query = StringFormat("SELECT StanceID FROM botstances WHERE BotID = %u;", GetBotID());
 	auto results = database.QueryDatabase(query);
 	if(!results.Success() || results.RowCount() == 0) {
-		logger.Log(EQEmuLogSys::Error, "Error in Bot::LoadStance()");
+		Log.Log(EQEmuLogSys::Error, "Error in Bot::LoadStance()");
 		SetDefaultBotStance();
 		return;
 	}
@@ -2792,7 +2792,7 @@ void Bot::SaveStance() {
                                     "VALUES(%u, %u);", GetBotID(), GetBotStance());
     auto results = database.QueryDatabase(query);
     if(!results.Success())
-        logger.Log(EQEmuLogSys::Error, "Error in Bot::SaveStance()");
+        Log.Log(EQEmuLogSys::Error, "Error in Bot::SaveStance()");
 
 }
 
@@ -2807,7 +2807,7 @@ void Bot::LoadTimers() {
                                     GetBotID(), DisciplineReuseStart-1, DisciplineReuseStart-1, GetClass(), GetLevel());
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		logger.Log(EQEmuLogSys::Error, "Error in Bot::LoadTimers()");
+		Log.Log(EQEmuLogSys::Error, "Error in Bot::LoadTimers()");
 		return;
 	}
 
@@ -2847,7 +2847,7 @@ void Bot::SaveTimers() {
 	}
 
 	if(hadError)
-		logger.Log(EQEmuLogSys::Error, "Error in Bot::SaveTimers()");
+		Log.Log(EQEmuLogSys::Error, "Error in Bot::SaveTimers()");
 
 }
 
@@ -2979,7 +2979,7 @@ void Bot::BotRangedAttack(Mob* other) {
 	//make sure the attack and ranged timers are up
 	//if the ranged timer is disabled, then they have no ranged weapon and shouldent be attacking anyhow
 	if((attack_timer.Enabled() && !attack_timer.Check(false)) || (ranged_timer.Enabled() && !ranged_timer.Check())) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Bot Archery attack canceled. Timer not up. Attack %d, ranged %d", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Bot Archery attack canceled. Timer not up. Attack %d, ranged %d", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
 		Message(0, "Error: Timer not up. Attack %d, ranged %d", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
 		return;
 	}
@@ -2997,7 +2997,7 @@ void Bot::BotRangedAttack(Mob* other) {
 	if(!RangeWeapon || !Ammo)
 		return;
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Shooting %s with bow %s (%d) and arrow %s (%d)", other->GetCleanName(), RangeWeapon->Name, RangeWeapon->ID, Ammo->Name, Ammo->ID);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Shooting %s with bow %s (%d) and arrow %s (%d)", other->GetCleanName(), RangeWeapon->Name, RangeWeapon->ID, Ammo->Name, Ammo->ID);
 
 	if(!IsAttackAllowed(other) ||
 		IsCasting() ||
@@ -3015,19 +3015,19 @@ void Bot::BotRangedAttack(Mob* other) {
 
 	//break invis when you attack
 	if(invisible) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Removing invisibility due to melee attack.");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Removing invisibility due to melee attack.");
 		BuffFadeByEffect(SE_Invisibility);
 		BuffFadeByEffect(SE_Invisibility2);
 		invisible = false;
 	}
 	if(invisible_undead) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Removing invisibility vs. undead due to melee attack.");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Removing invisibility vs. undead due to melee attack.");
 		BuffFadeByEffect(SE_InvisVsUndead);
 		BuffFadeByEffect(SE_InvisVsUndead2);
 		invisible_undead = false;
 	}
 	if(invisible_animals){
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Removing invisibility vs. animals due to melee attack.");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Removing invisibility vs. animals due to melee attack.");
 		BuffFadeByEffect(SE_InvisVsAnimals);
 		invisible_animals = false;
 	}
@@ -3362,7 +3362,7 @@ void Bot::AI_Process() {
 				else if(!IsRooted()) {
 					if(GetTarget() && GetTarget()->GetHateTop() && GetTarget()->GetHateTop() != this)
 					{
-						logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Returning to location prior to being summoned.");
+						Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Returning to location prior to being summoned.");
 						CalculateNewPosition2(GetPreSummonX(), GetPreSummonY(), GetPreSummonZ(), GetRunspeed());
 						SetHeading(CalculateHeadingToTarget(GetPreSummonX(), GetPreSummonY()));
 						return;
@@ -3689,7 +3689,7 @@ void Bot::AI_Process() {
 
 			if (AImovement_timer->Check()) {
 				if(!IsRooted()) {
-					logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
+					Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
 					CalculateNewPosition2(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), GetRunspeed());
 					return;
 				}
@@ -3972,7 +3972,7 @@ void Bot::PetAIProcess() {
 				{
 					botPet->SetRunAnimSpeed(0);
 					if(!botPet->IsRooted()) {
-						logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Pursuing %s while engaged.", botPet->GetTarget()->GetCleanName());
+						Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::AI, "Pursuing %s while engaged.", botPet->GetTarget()->GetCleanName());
 						botPet->CalculateNewPosition2(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ(), botPet->GetOwner()->GetRunspeed());
 						return;
 					}
@@ -4211,7 +4211,7 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
 
         ItemInst* inst = database.CreateItem(item_id, charges, aug[0], aug[1], aug[2], aug[3], aug[4]);
         if (!inst) {
-            logger.Log(EQEmuLogSys::Error, "Warning: botid %i has an invalid item_id %i in inventory slot %i", this->GetBotID(), item_id, slot_id);
+            Log.Log(EQEmuLogSys::Error, "Warning: botid %i has an invalid item_id %i in inventory slot %i", this->GetBotID(), item_id, slot_id);
             continue;
         }
 
@@ -4235,7 +4235,7 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
 
         // Save ptr to item in inventory
         if (put_slot_id == INVALID_INDEX)
-            logger.Log(EQEmuLogSys::Error, "Warning: Invalid slot_id for item in inventory: botid=%i, item_id=%i, slot_id=%i",this->GetBotID(), item_id, slot_id);
+            Log.Log(EQEmuLogSys::Error, "Warning: Invalid slot_id for item in inventory: botid=%i, item_id=%i, slot_id=%i",this->GetBotID(), item_id, slot_id);
 
     }
 
@@ -5959,7 +5959,7 @@ void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, SkillUseTypes attack_
 
 	//handle EVENT_ATTACK. Resets after we have not been attacked for 12 seconds
 	if(attacked_timer.Check()) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Triggering EVENT_ATTACK due to attack by %s", from->GetName());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Triggering EVENT_ATTACK due to attack by %s", from->GetName());
 		parse->EventNPC(EVENT_ATTACK, this, from, "", 0);
 	}
 
@@ -5972,7 +5972,7 @@ void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, SkillUseTypes attack_
 	// if spell is lifetap add hp to the caster
 	if (spell_id != SPELL_UNKNOWN && IsLifetapSpell(spell_id)) {
 		int healed = GetActSpellHealing(spell_id, damage);
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Applying lifetap heal of %d to %s", healed, GetCleanName());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Applying lifetap heal of %d to %s", healed, GetCleanName());
 		HealDamage(healed);
 		entity_list.MessageClose(this, true, 300, MT_Spells, "%s beams a smile at %s", GetCleanName(), from->GetCleanName() );
 	}
@@ -6017,14 +6017,14 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 {
 	if (!other) {
 		SetTarget(nullptr);
-		logger.Log(EQEmuLogSys::Error, "A null Mob object was passed to Bot::Attack for evaluation!");
+		Log.Log(EQEmuLogSys::Error, "A null Mob object was passed to Bot::Attack for evaluation!");
 		return false;
 	}
 
 	if(!GetTarget() || GetTarget() != other)
 		SetTarget(other);
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Attacking %s with hand %d %s", other?other->GetCleanName():"(nullptr)", Hand, FromRiposte?"(this is a riposte)":"");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Attacking %s with hand %d %s", other?other->GetCleanName():"(nullptr)", Hand, FromRiposte?"(this is a riposte)":"");
 
 	if ((IsCasting() && (GetClass() != BARD) && !IsFromSpell) ||
 		other == nullptr ||
@@ -6036,13 +6036,13 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 			entity_list.MessageClose(this, 1, 200, 10, "%s says, '%s is not a legal target master.'", this->GetCleanName(), this->GetTarget()->GetCleanName());
 		if(other) {
 			RemoveFromHateList(other);
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "I am not allowed to attack %s", other->GetCleanName());
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "I am not allowed to attack %s", other->GetCleanName());
 		}
 		return false;
 	}
 
 	if(DivineAura()) {//cant attack while invulnerable
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Attack canceled, Divine Aura is in effect.");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Attack canceled, Divine Aura is in effect.");
 		return false;
 	}
 
@@ -6068,19 +6068,19 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 
 	if(weapon != nullptr) {
 		if (!weapon->IsWeapon()) {
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Attack canceled, Item %s (%d) is not a weapon.", weapon->GetItem()->Name, weapon->GetID());
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Attack canceled, Item %s (%d) is not a weapon.", weapon->GetItem()->Name, weapon->GetID());
 			return(false);
 		}
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Attacking with weapon: %s (%d)", weapon->GetItem()->Name, weapon->GetID());
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Attacking with weapon: %s (%d)", weapon->GetItem()->Name, weapon->GetID());
 	} else {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Attacking without a weapon.");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Attacking without a weapon.");
 	}
 
 	// calculate attack_skill and skillinuse depending on hand and weapon
 	// also send Packet to near clients
 	SkillUseTypes skillinuse;
 	AttackAnimation(skillinuse, Hand, weapon);
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Attacking with %s in slot %d using skill %d", weapon?weapon->GetItem()->Name:"Fist", Hand, skillinuse);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Attacking with %s in slot %d using skill %d", weapon?weapon->GetItem()->Name:"Fist", Hand, skillinuse);
 
 	/// Now figure out damage
 	int damage = 0;
@@ -6098,7 +6098,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		if(berserk && (GetClass() == BERSERKER)){
 			int bonus = 3 + GetLevel()/10;		//unverified
 			weapon_damage = weapon_damage * (100+bonus) / 100;
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Berserker damage bonus increases DMG to %d", weapon_damage);
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Berserker damage bonus increases DMG to %d", weapon_damage);
 		}
 
 		//try a finishing blow.. if successful end the attack
@@ -6163,7 +6163,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		else
 			damage = zone->random.Int(min_hit, max_hit);
 
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Damage calculated to %d (min %d, max %d, str %d, skill %d, DMG %d, lv %d)",
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Damage calculated to %d (min %d, max %d, str %d, skill %d, DMG %d, lv %d)",
 			damage, min_hit, max_hit, GetSTR(), GetSkill(skillinuse), weapon_damage, GetLevel());
 
 		if(opts) {
@@ -6175,7 +6175,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 
 		//check to see if we hit..
 		if(!other->CheckHitChance(other, skillinuse, Hand)) {
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Attack missed. Damage set to 0.");
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Attack missed. Damage set to 0.");
 			damage = 0;
 			other->AddToHateList(this, 0);
 		} else {	//we hit, try to avoid it
@@ -6185,13 +6185,13 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 				ApplyMeleeDamageBonus(skillinuse, damage);
 				damage += (itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse);
 				TryCriticalHit(other, skillinuse, damage, opts);
-				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Generating hate %d towards %s", hate, GetCleanName());
+				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Generating hate %d towards %s", hate, GetCleanName());
 				// now add done damage to the hate list
 				//other->AddToHateList(this, hate);
 			}
 			else
 				other->AddToHateList(this, 0);
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Final damage after all reductions: %d", damage);
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Final damage after all reductions: %d", damage);
 		}
 
 		//riposte
@@ -6253,19 +6253,19 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 
 	//break invis when you attack
 	if(invisible) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Removing invisibility due to melee attack.");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Removing invisibility due to melee attack.");
 		BuffFadeByEffect(SE_Invisibility);
 		BuffFadeByEffect(SE_Invisibility2);
 		invisible = false;
 	}
 	if(invisible_undead) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Removing invisibility vs. undead due to melee attack.");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Removing invisibility vs. undead due to melee attack.");
 		BuffFadeByEffect(SE_InvisVsUndead);
 		BuffFadeByEffect(SE_InvisVsUndead2);
 		invisible_undead = false;
 	}
 	if(invisible_animals){
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Removing invisibility vs. animals due to melee attack.");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Removing invisibility vs. animals due to melee attack.");
 		BuffFadeByEffect(SE_InvisVsAnimals);
 		invisible_animals = false;
 	}
@@ -7028,7 +7028,7 @@ int32 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 						return 0;
 					break;
 				default:
-					logger.Log(EQEmuLogSys::Normal, "CalcFocusEffect: unknown limit spelltype %d", focus_spell.base[i]);
+					Log.Log(EQEmuLogSys::Normal, "CalcFocusEffect: unknown limit spelltype %d", focus_spell.base[i]);
 			}
 			break;
 
@@ -7335,7 +7335,7 @@ int32 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 		//this spits up a lot of garbage when calculating spell focuses
 		//since they have all kinds of extra effects on them.
 		default:
-			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Spells, "CalcFocusEffect: unknown effectid %d", focus_spell.effectid[i]);
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Spells, "CalcFocusEffect: unknown effectid %d", focus_spell.effectid[i]);
 		}
 	}
 	//Check for spell skill limits.
@@ -7378,7 +7378,7 @@ float Bot::GetProcChances(float ProcBonus, uint16 hand) {
 		ProcChance += ProcChance*ProcBonus / 100.0f;
 	}
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Proc chance %.2f (%.2f from bonuses)", ProcChance, ProcBonus);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Proc chance %.2f (%.2f from bonuses)", ProcChance, ProcBonus);
 	return ProcChance;
 }
 
@@ -7414,7 +7414,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	/////////////////////////////////////////////////////////
 	if (IsEnraged() && !other->BehindMob(this, other->GetX(), other->GetY())) {
 		damage = -3;
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "I am enraged, riposting frontal attack.");
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "I am enraged, riposting frontal attack.");
 	}
 
 	/////////////////////////////////////////////////////////
@@ -7556,7 +7556,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		}
 	}
 
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Final damage after all avoidances: %d", damage);
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Final damage after all avoidances: %d", damage);
 
 	if (damage < 0)
 		return true;
@@ -7609,14 +7609,14 @@ bool Bot::TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse)
 		uint16 levelreq = aabonuses.FinishingBlowLvl[0];
 
 		if(defender->GetLevel() <= levelreq && (chance >= zone->random.Int(0, 1000))){
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Landed a finishing blow: levelreq at %d, other level %d", levelreq , defender->GetLevel());
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Landed a finishing blow: levelreq at %d, other level %d", levelreq , defender->GetLevel());
 			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FINISHING_BLOW, GetName());
 			defender->Damage(this, damage, SPELL_UNKNOWN, skillinuse);
 			return true;
 		}
 		else
 		{
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "FAILED a finishing blow: levelreq at %d, other level %d", levelreq , defender->GetLevel());
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "FAILED a finishing blow: levelreq at %d, other level %d", levelreq , defender->GetLevel());
 			return false;
 		}
 	}
@@ -7624,7 +7624,7 @@ bool Bot::TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse)
 }
 
 void Bot::DoRiposte(Mob* defender) {
-	logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Preforming a riposte");
+	Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Preforming a riposte");
 
 	if (!defender)
 		return;
@@ -7637,7 +7637,7 @@ void Bot::DoRiposte(Mob* defender) {
 							defender->GetItemBonuses().GiveDoubleRiposte[0];
 
 	if(DoubleRipChance && (DoubleRipChance >= zone->random.Int(0, 100))) {
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Preforming a double riposte (%d percent chance)", DoubleRipChance);
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Preforming a double riposte (%d percent chance)", DoubleRipChance);
 
 		defender->Attack(this, MainPrimary, true);
 	}
@@ -8207,7 +8207,7 @@ bool Bot::TryHeadShot(Mob* defender, SkillUseTypes skillInUse) {
 			float AttackerChance = 0.20f + ((float)(rangerLevel - 51) * 0.005f);
 			float DefenderChance = (float)zone->random.Real(0.00f, 1.00f);
 			if(AttackerChance > DefenderChance) {
-				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Landed a headshot: Attacker chance was %f and Defender chance was %f.", AttackerChance, DefenderChance);
+				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "Landed a headshot: Attacker chance was %f and Defender chance was %f.", AttackerChance, DefenderChance);
 				// WildcardX: At the time I wrote this, there wasnt a string id for something like HEADSHOT_BLOW
 				//entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FINISHING_BLOW, GetName());
 				entity_list.MessageClose(this, false, 200, MT_CritMelee, "%s has scored a leathal HEADSHOT!", GetName());
@@ -8215,7 +8215,7 @@ bool Bot::TryHeadShot(Mob* defender, SkillUseTypes skillInUse) {
 				Result = true;
 			}
 			else {
-				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "FAILED a headshot: Attacker chance was %f and Defender chance was %f.", AttackerChance, DefenderChance);
+				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Combat, "FAILED a headshot: Attacker chance was %f and Defender chance was %f.", AttackerChance, DefenderChance);
 			}
 		}
 	}
@@ -8441,11 +8441,11 @@ void Bot::ProcessGuildInvite(Client* guildOfficer, Bot* botToGuild) {
 				return;
 			}
 
-			// logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Inviting %s (%d) into guild %s (%d)", botToGuild->GetName(), botToGuild->GetBotID(), guild_mgr.GetGuildName(client->GuildID()), client->GuildID());
+			// Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Inviting %s (%d) into guild %s (%d)", botToGuild->GetName(), botToGuild->GetBotID(), guild_mgr.GetGuildName(client->GuildID()), client->GuildID());
 
 			SetBotGuildMembership(botToGuild->GetBotID(), guildOfficer->GuildID(), GUILD_MEMBER);
 
-			//logger.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending char refresh for BOT %s from guild %d to world", botToGuild->GetName(), guildOfficer->GuildID();
+			//Log.LogDebugType(EQEmuLogSys::Detail, EQEmuLogSys::Guilds, "Sending char refresh for BOT %s from guild %d to world", botToGuild->GetName(), guildOfficer->GuildID();
 
 			ServerPacket* pack = new ServerPacket(ServerOP_GuildCharRefresh, sizeof(ServerGuildCharRefresh_Struct));
 			ServerGuildCharRefresh_Struct *s = (ServerGuildCharRefresh_Struct *) pack->pBuffer;
@@ -8548,7 +8548,7 @@ int32 Bot::CalcMaxMana() {
 		}
 		default:
 		{
-			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
 			max_mana = 0;
 			break;
 		}
@@ -9076,7 +9076,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_t
 
 	if(zone && !zone->IsSpellBlocked(spell_id, GetX(), GetY(), GetZ())) {
 
-		logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "CastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item slot %d",
+		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "CastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item slot %d",
 			spells[spell_id].name, spell_id, target_id, slot, cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);
 
 		if(casting_spell_id == spell_id)
@@ -9084,7 +9084,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_t
 
 		if(GetClass() != BARD) {
 			if(!IsValidSpell(spell_id) || casting_spell_id || delaytimer || spellend_timer.Enabled() || IsStunned() || IsFeared() || IsMezzed() || (IsSilenced() && !IsDiscipline(spell_id)) || (IsAmnesiad() && IsDiscipline(spell_id))) {
-				logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell casting canceled: not able to cast now. Valid? %d, casting %d, waiting? %d, spellend? %d, stunned? %d, feared? %d, mezed? %d, silenced? %d",
+				Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell casting canceled: not able to cast now. Valid? %d, casting %d, waiting? %d, spellend? %d, stunned? %d, feared? %d, mezed? %d, silenced? %d",
 					IsValidSpell(spell_id), casting_spell_id, delaytimer, spellend_timer.Enabled(), IsStunned(), IsFeared(), IsMezzed(), IsSilenced() );
 				if(IsSilenced() && !IsDiscipline(spell_id))
 					Message_StringID(13, SILENCED_STRING);
@@ -9105,7 +9105,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_t
 
 		//cannot cast under deivne aura
 		if(DivineAura()) {
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell casting canceled: cannot cast while Divine Aura is in effect.");
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell casting canceled: cannot cast while Divine Aura is in effect.");
 			InterruptSpell(173, 0x121, false);
 			return(false);
 		}
@@ -9119,7 +9119,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_t
 			InterruptSpell(fizzle_msg, 0x121, spell_id);
 
 			uint32 use_mana = ((spells[spell_id].mana) / 4);
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell casting canceled: fizzled. %d mana has been consumed", use_mana);
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Spell casting canceled: fizzled. %d mana has been consumed", use_mana);
 
 			// fizzle 1/4 the mana away
 			SetMana(GetMana() - use_mana);
@@ -9127,7 +9127,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_t
 		}
 
 		if (HasActiveSong()) {
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting a new spell/song while singing a song. Killing old song %d.", bardsong);
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Casting a new spell/song while singing a song. Killing old song %d.", bardsong);
 			//Note: this does NOT tell the client
 			//_StopSong();
 			bardsong = 0;
@@ -9256,7 +9256,7 @@ bool Bot::IsImmuneToSpell(uint16 spell_id, Mob *caster) {
 			if(caster->IsBot()) {
 				if(spells[spell_id].targettype == ST_Undead) {
 					if((GetBodyType() != BT_SummonedUndead) && (GetBodyType() != BT_Undead) && (GetBodyType() != BT_Vampire)) {
-							logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bot's target is not an undead.");
+							Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bot's target is not an undead.");
 							return true;
 					}
 				}
@@ -9266,13 +9266,13 @@ bool Bot::IsImmuneToSpell(uint16 spell_id, Mob *caster) {
 						&& (GetBodyType() != BT_Summoned2)
 						&& (GetBodyType() != BT_Summoned3)
 						) {
-							logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bot's target is not a summoned creature.");
+							Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "Bot's target is not a summoned creature.");
 							return true;
 					}
 				}
 			}
 
-			logger.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "No bot immunities to spell %d found.", spell_id);
+			Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::Spells, "No bot immunities to spell %d found.", spell_id);
 		}
 	}
 
@@ -15454,7 +15454,7 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 		// according to Rogean, Live NPCs will just cast through walls/floors, no problem..
 		//
 		// This check was put in to address an idle-mob CPU issue
-		logger.Log(EQEmuLogSys::Error, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
+		Log.Log(EQEmuLogSys::Error, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
 		return(false);
 	}
 
