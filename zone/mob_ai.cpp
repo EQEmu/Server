@@ -67,7 +67,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 		dist2 = 0; //DistNoRoot(*this);	//WTF was up with this...
 	}
 	else
-		dist2 = DistNoRoot(*tar);
+		dist2 = ComparativeDistance(m_Position, tar->GetPosition());
 
 	bool checked_los = false;	//we do not check LOS until we are absolutely sure we need to, and we only do it once.
 
