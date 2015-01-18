@@ -3546,7 +3546,7 @@ void EntityList::RadialSetLogging(Mob *around, bool enabled, bool clients,
 				continue;
 		}
 
-		if (around->DistNoRoot(*mob) > range2)
+		if (ComparativeDistance(around->GetPosition(), mob->GetPosition()) > range2)
 			continue;
 
 		if (enabled)
