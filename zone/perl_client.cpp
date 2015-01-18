@@ -5963,7 +5963,7 @@ XS(XS_Client_SilentMessage)
                         Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
                 if(THIS->GetTarget() != NULL){
                         if(THIS->GetTarget()->IsNPC()){
-                                if (THIS->DistNoRootNoZ(*THIS->GetTarget()) <= 200) {
+                                if (ComparativeDistanceNoZ(THIS->GetPosition(), THIS->GetTarget()->GetPosition()) <= 200) {
                                                 if(THIS->GetTarget()->CastToNPC()->IsMoving() && !THIS->GetTarget()->CastToNPC()->IsOnHatelist(THIS->GetTarget()))
                                                         THIS->GetTarget()->CastToNPC()->PauseWandering(RuleI(NPC, SayPauseTimeInSec));
                                         THIS->ChannelMessageReceived(8, 0, 100, SvPV_nolen(ST(1)));
