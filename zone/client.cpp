@@ -4553,7 +4553,7 @@ void Client::HandleLDoNOpen(NPC *target)
 			return;
 		}
 
-		if(DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
+		if(ComparativeDistanceNoZ(m_Position, target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 		{
 			LogFile->write(EQEmuLog::Debug, "%s tried to open %s but %s was out of range",
 				GetName(), target->GetName(), target->GetName());
