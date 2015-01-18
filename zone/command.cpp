@@ -426,6 +426,7 @@ int command_init(void) {
 		command_add("merchant_close_shop", "Closes a merchant shop", 100, command_merchantcloseshop) ||
 		command_add("close_shop", nullptr, 100, command_merchantcloseshop) ||
 		command_add("shownumhits", "Shows buffs numhits for yourself.", 0, command_shownumhits) || 
+		command_add("crashtest", "- Crash the zoneserver", 255, command_crashtest) ||
 		command_add("logtest", "Performs log performance testing.", 250, command_logtest)
 		)
 	{
@@ -10397,4 +10398,11 @@ void command_logtest(Client *c, const Seperator *sep){
 			Log.Out(Logs::General, Logs::None, "[%u] Test... Took %f seconds", i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 		}
 	}
+}
+
+void command_crashtest(Client *c, const Seperator *sep)
+{
+	c->Message(0, "Alright, now we get an GPF ;) ");
+	char* gpf = 0;
+	memcpy(gpf, "Ready to crash", 30);
 }
