@@ -145,7 +145,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 				drop_chance = zone->random.Real(0.0, 100.0);
 
 #if EQDEBUG>=11
-			logger.LogDebug(EQEmuLogSys::General, "Drop chance for npc: %s, this chance:%f, drop roll:%f", npc->GetName(), thischance, drop_chance);
+			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Drop chance for npc: %s, this chance:%f, drop roll:%f", npc->GetName(), thischance, drop_chance);
 #endif
 			if (thischance == 100.0 || drop_chance < thischance)
 			{
@@ -187,7 +187,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 
 	ServerLootItem_Struct* item = new ServerLootItem_Struct;
 #if EQDEBUG>=11
-		logger.LogDebug(EQEmuLogSys::General, "Adding drop to npc: %s, Item: %i", GetName(), item2->ID);
+		logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Adding drop to npc: %s, Item: %i", GetName(), item2->ID);
 #endif
 
 	EQApplicationPacket* outapp = nullptr;

@@ -935,7 +935,7 @@ int32 Client::CalcMaxMana()
 			break;
 		}
 		default: {
-			logger.LogDebug(EQEmuLogSys::General, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
 			max_mana = 0;
 			break;
 		}
@@ -956,7 +956,7 @@ int32 Client::CalcMaxMana()
 	}
 
 #if EQDEBUG >= 11
-	logger.LogDebug(EQEmuLogSys::General, "Client::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
+	logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Client::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
 #endif
 	return max_mana;
 }
@@ -1046,14 +1046,14 @@ int32 Client::CalcBaseMana()
 			break;
 		}
 		default: {
-			logger.LogDebug(EQEmuLogSys::General, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
 			max_m = 0;
 			break;
 		}
 	}
 
 #if EQDEBUG >= 11
-	logger.LogDebug(EQEmuLogSys::General, "Client::CalcBaseMana() called for %s - returning %d", GetName(), max_m);
+	logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Client::CalcBaseMana() called for %s - returning %d", GetName(), max_m);
 #endif
 	return max_m;
 }

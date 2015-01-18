@@ -303,7 +303,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 					sender->CheckIncreaseSkill(SkillPickLock, nullptr, 1);
 
 #if EQDEBUG>=5
-					logger.LogDebug(EQEmuLogSys::General, "Client has lockpicks: skill=%f", modskill);
+					logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Client has lockpicks: skill=%f", modskill);
 #endif
 
 					if(GetLockpick() <= modskill)

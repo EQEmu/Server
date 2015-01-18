@@ -885,7 +885,7 @@ int32 Merc::CalcMaxMana()
 		break;
 			  }
 	default: {
-		logger.LogDebug(EQEmuLogSys::General, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+		logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
 		max_mana = 0;
 		break;
 			 }
@@ -906,7 +906,7 @@ int32 Merc::CalcMaxMana()
 	}
 
 #if EQDEBUG >= 11
-	logger.LogDebug(EQEmuLogSys::General, "Merc::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
+	logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Merc::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
 #endif
 	return max_mana;
 }

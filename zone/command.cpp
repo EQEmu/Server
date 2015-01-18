@@ -10394,7 +10394,7 @@ void command_logtest(Client *c, const Seperator *sep){
 	if (sep->IsNumber(1)){
 		uint32 i = 0;
 		for (i = 0; i < atoi(sep->arg[1]); i++){
-			logger.LogDebug(EQEmuLogSys::General, "[%u] Test... Took %f seconds", i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
+			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "[%u] Test... Took %f seconds", i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 		}
 	}
 }

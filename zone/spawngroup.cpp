@@ -51,7 +51,7 @@ SpawnGroup::SpawnGroup( uint32 in_id, char* name, int in_group_spawn_limit, floa
 
 uint32 SpawnGroup::GetNPCType() {
 #if EQDEBUG >= 10
-	logger.LogDebug(EQEmuLogSys::General, "SpawnGroup[%08x]::GetNPCType()", (uint32) this);
+	logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "SpawnGroup[%08x]::GetNPCType()", (uint32) this);
 #endif
 	int npcType = 0;
 	int totalchance = 0;

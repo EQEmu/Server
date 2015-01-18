@@ -2673,7 +2673,7 @@ int CalcBuffDuration_formula(int level, int formula, int duration)
 			return duration ? duration : 3600;
 
 		default:
-			logger.LogDebug(EQEmuLogSys::General, "CalcBuffDuration_formula: unknown formula %d", formula);
+			logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "CalcBuffDuration_formula: unknown formula %d", formula);
 			return 0;
 	}
 }

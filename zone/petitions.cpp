@@ -259,7 +259,7 @@ void ZoneDatabase::InsertPetitionToDB(Petition* wpet)
 	}
 
 #if EQDEBUG >= 5
-		logger.LogDebug(EQEmuLogSys::General, "New petition created");
+		logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "New petition created");
 #endif
 
 }

@@ -476,7 +476,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 					if(!target_zone) {
 #ifdef SPELL_EFFECT_SPAM
-						logger.LogDebug(EQEmuLogSys::General, "Succor/Evacuation Spell In Same Zone.");
+						logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Succor/Evacuation Spell In Same Zone.");
 #endif
 							if(IsClient())
 								CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x, y, z, heading, 0, EvacToSafeCoords);
@@ -485,7 +485,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					}
 					else {
 #ifdef SPELL_EFFECT_SPAM
-						logger.LogDebug(EQEmuLogSys::General, "Succor/Evacuation Spell To Another Zone.");
+						logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Succor/Evacuation Spell To Another Zone.");
 #endif
 						if(IsClient())
 							CastToClient()->MovePC(target_zone, x, y, z, heading);
@@ -3326,7 +3326,7 @@ snare has both of them negative, yet their range should work the same:
 				result = ubase * (caster_level * (formula - 2000) + 1);
 			}
 			else
-				logger.LogDebug(EQEmuLogSys::General, "Unknown spell effect value forumula %d", formula);
+				logger.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::None, "Unknown spell effect value forumula %d", formula);
 		}
 	}
 
