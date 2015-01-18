@@ -1601,7 +1601,7 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 		return;
 
 	//you have to be somewhat close to a trainer to be properly using them
-	if(DistNoRoot(*pTrainer) > USE_NPC_RANGE2)
+	if(ComparativeDistance(m_Position,pTrainer->GetPosition()) > USE_NPC_RANGE2)
 		return;
 
 	// if this for-loop acts up again (crashes linux), try enabling the before and after #pragmas
