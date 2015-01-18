@@ -1219,7 +1219,7 @@ void NPC::RangedAttack(Mob* other)
 			min_range = static_cast<float>(sa_min_range);
 
 		max_range *= max_range;
-		if(DistNoRoot(*other) > max_range) 
+		if(ComparativeDistance(m_Position, other->GetPosition()) > max_range)
 			return;
 		else if(DistNoRoot(*other) < (min_range * min_range))
 			return;
