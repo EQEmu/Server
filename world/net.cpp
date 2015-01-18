@@ -34,7 +34,7 @@
 #include "../common/version.h"
 #include "../common/eqtime.h"
 #include "../common/timeoutmgr.h"
-#include "../common/eqemu_error.h"
+
 #include "../common/opcodemgr.h"
 #include "../common/guilds.h"
 #include "../common/eq_stream_ident.h"
@@ -498,7 +498,6 @@ int main(int argc, char** argv) {
 	Log.Out(Logs::Detail, Logs::World_Server,"Signaling HTTP service to stop...");
 	http_server.Stop();
 
-	CheckEQEMuErrorAndPause();
 	return 0;
 }
 

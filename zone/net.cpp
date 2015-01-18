@@ -28,7 +28,7 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/mutex.h"
 #include "../common/version.h"
-#include "../common/eqemu_error.h"
+
 #include "../common/packet_dump_file.h"
 #include "../common/opcodemgr.h"
 #include "../common/guilds.h"
@@ -221,19 +221,16 @@ int main(int argc, char** argv) {
 	Log.Out(Logs::Detail, Logs::Zone_Server, "Loading npc faction lists");
 	if (!database.LoadNPCFactionLists()) {
 		Log.Out(Logs::General, Logs::Error, "Loading npcs faction lists FAILED!");
-		CheckEQEMuErrorAndPause();
 		return 1;
 	}
 	Log.Out(Logs::Detail, Logs::Zone_Server, "Loading loot tables");
 	if (!database.LoadLoot()) {
 		Log.Out(Logs::General, Logs::Error, "Loading loot FAILED!");
-		CheckEQEMuErrorAndPause();
 		return 1;
 	}
 	Log.Out(Logs::Detail, Logs::Zone_Server, "Loading skill caps");
 	if (!database.LoadSkillCaps()) {
 		Log.Out(Logs::General, Logs::Error, "Loading skill caps FAILED!");
-		CheckEQEMuErrorAndPause();
 		return 1;
 	}
 
@@ -244,7 +241,6 @@ int main(int argc, char** argv) {
 	Log.Out(Logs::Detail, Logs::Zone_Server, "Loading base data");
 	if (!database.LoadBaseData()) {
 		Log.Out(Logs::General, Logs::Error, "Loading base data FAILED!");
-		CheckEQEMuErrorAndPause();
 		return 1;
 	}
 
@@ -512,7 +508,6 @@ int main(int argc, char** argv) {
 	safe_delete(taskmanager);
 	command_deinit();
 	safe_delete(parse);
-	CheckEQEMuErrorAndPause();
 	Log.Out(Logs::Detail, Logs::Zone_Server, "Proper zone shutdown complete.");
 	return 0;
 }
