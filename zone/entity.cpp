@@ -3868,7 +3868,7 @@ Mob *EntityList::GetTargetForMez(Mob *caster)
 				continue;
 			}
 
-			if (caster->DistNoRoot(*d) > 22250) { //only pick targets within 150 range
+			if (ComparativeDistance(caster->GetPosition(), d->GetPosition()) > 22250) { //only pick targets within 150 range
 				++it;
 				continue;
 			}
