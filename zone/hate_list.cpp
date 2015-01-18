@@ -158,7 +158,7 @@ Mob* HateList::GetClosestEntOnHateList(Mob *hater) {
 
 	auto iterator = list.begin();
 	while (iterator != list.end()) {
-		this_distance = (*iterator)->entity_on_hatelist->DistNoRootNoZ(*hater);
+		this_distance = ComparativeDistanceNoZ((*iterator)->entity_on_hatelist->GetPosition(), hater->GetPosition());
 		if ((*iterator)->entity_on_hatelist != nullptr && this_distance <= close_distance) {
 			close_distance = this_distance;
 			close_entity = (*iterator)->entity_on_hatelist;
