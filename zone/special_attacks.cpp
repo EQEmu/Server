@@ -1408,7 +1408,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 	float range = item->Range + GetRangeDistTargetSizeMod(other);
 	mlog(COMBAT__RANGED, "Calculated bow range to be %.1f", range);
 	range *= range;
-	float dist = DistNoRoot(*other);
+	float dist = ComparativeDistance(m_Position, other->GetPosition());
 	if(dist > range) {
 		mlog(COMBAT__RANGED, "Throwing attack out of range... client should catch this. (%f > %f).\n", dist, range);
 		Message_StringID(13,TARGET_OUT_OF_RANGE);//Client enforces range and sends the message, this is a backup just incase.
