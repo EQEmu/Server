@@ -129,6 +129,8 @@ public:
 	void MakeDirectory(std::string directory_name);
 	void SetCurrentTimeStamp(char* time_stamp);
 	void StartFileLogs(const std::string log_name);
+	void Hex(uint16 log_category, const void *data, unsigned long length, unsigned char padding);
+	void Raw(uint16 log_category, uint16 seq, const BasePacket *p);
 
 	struct LogSettings{
 		uint8 log_to_file;

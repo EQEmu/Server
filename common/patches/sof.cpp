@@ -378,7 +378,7 @@ namespace SoF
 		delete[] __emu_buffer;
 
 		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Sending inventory to client");
-		//_hex(NET__ERROR, in->pBuffer, in->size);
+		//Log.Hex(Logs::Netcode, in->pBuffer, in->size);
 
 		dest->FastQueuePacket(&in, ack_req);
 	}
@@ -2097,7 +2097,7 @@ namespace SoF
 		delete[] __emu_buffer;
 
 		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Sending zone spawns");
-		//_hex(NET__ERROR, in->pBuffer, in->size);
+		//Log.Hex(Logs::Netcode, in->pBuffer, in->size);
 
 		dest->FastQueuePacket(&in, ack_req);
 	}

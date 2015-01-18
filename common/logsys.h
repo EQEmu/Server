@@ -36,6 +36,7 @@
 * this is very C-ish, not C++ish, but thats how I felt like writting it
 */
 
+/*
 #include <stdarg.h>
 #include "types.h"
 
@@ -70,7 +71,6 @@ extern void log_packet(LogType type, const BasePacket *p);
 extern void log_raw_packet(LogType type, uint16 seq, const BasePacket *p);
 
 #ifndef DISABLE_LOGSYS
-/* these are macros which do not use ..., and work for anybody */
 	#define _hex( type, data, len) \
 		do { \
 			if(log_type_info[ type ].enabled) { \
@@ -83,7 +83,7 @@ extern void log_raw_packet(LogType type, uint16 seq, const BasePacket *p);
 				log_packet(type, packet); \
 			} \
 		} while(false)
-	#define _raw( type, seq, packet) \
+	#define // _raw( type, seq, packet) \
 		do { \
 			if(log_type_info[ type ].enabled) { \
 				log_raw_packet(type, seq, packet); \
@@ -93,7 +93,7 @@ extern void log_raw_packet(LogType type, uint16 seq, const BasePacket *p);
 #else
 		#define _hex( type, data, len) {}
 		#define _pkt( type, packet) {}
-		#define _raw( type, seq, packet) {}
+		#define // _raw( type, seq, packet) {}
 #endif //!DISABLE_LOGSYS
 #ifdef ZONE
 	class Mob;
@@ -113,6 +113,8 @@ extern void log_toggle(LogType t);
 
 #define is_log_enabled( type ) \
 	log_type_info[ type ].enabled
+
+*/
 
 // extern bool load_log_settings(const char *filename);
 

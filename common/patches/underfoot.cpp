@@ -533,7 +533,7 @@ namespace Underfoot
 		delete[] __emu_buffer;
 
 		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Sending inventory to client");
-		//_hex(NET__ERROR, in->pBuffer, in->size);
+		//Log.Hex(Logs::Netcode, in->pBuffer, in->size);
 
 		dest->FastQueuePacket(&in, ack_req);
 	}
@@ -874,7 +874,7 @@ namespace Underfoot
 			structs::GroupGeneric_Struct *ggs = (structs::GroupGeneric_Struct*)outapp->pBuffer;
 			memcpy(ggs->name1, gjs->yourname, sizeof(ggs->name1));
 			memcpy(ggs->name2, gjs->membername, sizeof(ggs->name2));
-			//_hex(NET__ERROR, outapp->pBuffer, outapp->size);
+			//Log.Hex(Logs::Netcode, outapp->pBuffer, outapp->size);
 			dest->FastQueuePacket(&outapp);
 
 			delete in;
@@ -950,7 +950,7 @@ namespace Underfoot
 				VARSTRUCT_ENCODE_TYPE(uint16, Buffer, 0);
 			}
 
-			//_hex(NET__ERROR, outapp->pBuffer, outapp->size);
+			//Log.Hex(Logs::Netcode, outapp->pBuffer, outapp->size);
 			dest->FastQueuePacket(&outapp);
 
 			outapp = new EQApplicationPacket(OP_GroupLeadershipAAUpdate, sizeof(GroupLeadershipAAUpdate_Struct));
@@ -976,7 +976,7 @@ namespace Underfoot
 		GLAAus->NPCMarkerID = emu->NPCMarkerID;
 
 		memcpy(&GLAAus->LeaderAAs, &emu->leader_aas, sizeof(GLAAus->LeaderAAs));
-		//_hex(NET__ERROR, __packet->pBuffer, __packet->size);
+		//Log.Hex(Logs::Netcode, __packet->pBuffer, __packet->size);
 
 		FINISH_ENCODE();
 
@@ -2554,7 +2554,7 @@ namespace Underfoot
 			VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, x);
 		}
 
-		//_hex(NET__ERROR, outapp->pBuffer, outapp->size);
+		//Log.Hex(Logs::Netcode, outapp->pBuffer, outapp->size);
 		dest->FastQueuePacket(&outapp);
 		delete in;
 	}
@@ -3277,7 +3277,7 @@ namespace Underfoot
 	{
 		//EQApplicationPacket *in = __packet;
 		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Received incoming OP_Disband");
-		//_hex(NET__ERROR, in->pBuffer, in->size);
+		//Log.Hex(Logs::Netcode, in->pBuffer, in->size);
 		DECODE_LENGTH_EXACT(structs::GroupGeneric_Struct);
 		SETUP_DIRECT_DECODE(GroupGeneric_Struct, structs::GroupGeneric_Struct);
 
@@ -3291,7 +3291,7 @@ namespace Underfoot
 	{
 		//EQApplicationPacket *in = __packet;
 		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Received incoming OP_GroupFollow");
-		//_hex(NET__ERROR, in->pBuffer, in->size);
+		//Log.Hex(Logs::Netcode, in->pBuffer, in->size);
 		DECODE_LENGTH_EXACT(structs::GroupFollow_Struct);
 		SETUP_DIRECT_DECODE(GroupGeneric_Struct, structs::GroupFollow_Struct);
 
@@ -3305,7 +3305,7 @@ namespace Underfoot
 	{
 		//EQApplicationPacket *in = __packet;
 		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Received incoming OP_GroupFollow2");
-		//_hex(NET__ERROR, in->pBuffer, in->size);
+		//Log.Hex(Logs::Netcode, in->pBuffer, in->size);
 		DECODE_LENGTH_EXACT(structs::GroupFollow_Struct);
 		SETUP_DIRECT_DECODE(GroupGeneric_Struct, structs::GroupFollow_Struct);
 
@@ -3319,7 +3319,7 @@ namespace Underfoot
 	{
 		//EQApplicationPacket *in = __packet;
 		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Received incoming OP_GroupInvite");
-		//_hex(NET__ERROR, in->pBuffer, in->size);
+		//Log.Hex(Logs::Netcode, in->pBuffer, in->size);
 		DECODE_LENGTH_EXACT(structs::GroupInvite_Struct);
 		SETUP_DIRECT_DECODE(GroupGeneric_Struct, structs::GroupInvite_Struct);
 
