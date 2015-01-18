@@ -261,7 +261,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 	switch(pack->opcode) {
 	case ServerOP_RefreshGuild: {
 		if(pack->size != sizeof(ServerGuildRefresh_Struct)) {
-			Log.Log(EQEmuLogSys::Error, "Received ServerOP_RefreshGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildRefresh_Struct));
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Received ServerOP_RefreshGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildRefresh_Struct));
 			return;
 		}
 		ServerGuildRefresh_Struct *s = (ServerGuildRefresh_Struct *) pack->pBuffer;
@@ -295,7 +295,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 
 	case ServerOP_GuildCharRefresh: {
 		if(pack->size != sizeof(ServerGuildCharRefresh_Struct)) {
-			Log.Log(EQEmuLogSys::Error, "Received ServerOP_RefreshGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildCharRefresh_Struct));
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Received ServerOP_RefreshGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildCharRefresh_Struct));
 			return;
 		}
 		ServerGuildCharRefresh_Struct *s = (ServerGuildCharRefresh_Struct *) pack->pBuffer;
@@ -338,7 +338,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 		{
 			if(pack->size != sizeof(ServerGuildRankUpdate_Struct))
 			{
-				Log.Log(EQEmuLogSys::Error, "Received ServerOP_RankUpdate of incorrect size %d, expected %d",
+				Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Received ServerOP_RankUpdate of incorrect size %d, expected %d",
 					pack->size, sizeof(ServerGuildRankUpdate_Struct));
 
 				return;
@@ -364,7 +364,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 
 	case ServerOP_DeleteGuild: {
 		if(pack->size != sizeof(ServerGuildID_Struct)) {
-			Log.Log(EQEmuLogSys::Error, "Received ServerOP_DeleteGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildID_Struct));
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Received ServerOP_DeleteGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildID_Struct));
 			return;
 		}
 		ServerGuildID_Struct *s = (ServerGuildID_Struct *) pack->pBuffer;
@@ -603,7 +603,7 @@ bool GuildBankManager::Load(uint32 guildID)
                                     "FROM `guild_bank` WHERE `guildid` = %i", guildID);
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-        Log.Log(EQEmuLogSys::Error, "Error Loading guild bank: %s, %s", query.c_str(), results.ErrorMessage().c_str());
+        Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error Loading guild bank: %s, %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -684,7 +684,7 @@ void GuildBankManager::SendGuildBank(Client *c)
 
 	if(Iterator == Banks.end())
 	{
-		Log.Log(EQEmuLogSys::Error, "Unable to find guild bank for guild ID %i", c->GuildID());
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to find guild bank for guild ID %i", c->GuildID());
 
 		return;
 	}
@@ -800,7 +800,7 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
 
 	if(Iterator == Banks.end())
 	{
-		Log.Log(EQEmuLogSys::Error, "Unable to find guild bank for guild ID %i", GuildID);
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to find guild bank for guild ID %i", GuildID);
 
 		return false;
 	}
@@ -846,7 +846,7 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
 
 	if(Slot < 0)
 	{
-		Log.Log(EQEmuLogSys::Error, "No space to add item to the guild bank.");
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "No space to add item to the guild bank.");
 
 		return false;
 	}
@@ -857,7 +857,7 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
                                     GuildID, Area, Slot, ItemID, QtyOrCharges, Donator, Permissions, WhoFor);
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		Log.Log(EQEmuLogSys::Error, "Insert Error: %s : %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Insert Error: %s : %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -922,7 +922,7 @@ int GuildBankManager::Promote(uint32 guildID, int slotID)
                                     "LIMIT 1", mainSlot, guildID, slotID);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-		Log.Log(EQEmuLogSys::Error, "error promoting item: %s : %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "error promoting item: %s : %s", query.c_str(), results.ErrorMessage().c_str());
 		return -1;
 	}
 
@@ -974,7 +974,7 @@ void GuildBankManager::SetPermissions(uint32 guildID, uint16 slotID, uint32 perm
     auto results = database.QueryDatabase(query);
 	if(!results.Success())
 	{
-		Log.Log(EQEmuLogSys::Error, "error changing permissions: %s : %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "error changing permissions: %s : %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -1124,7 +1124,7 @@ bool GuildBankManager::DeleteItem(uint32 guildID, uint16 area, uint16 slotID, ui
                                         guildID, area, slotID);
         auto results = database.QueryDatabase(query);
 		if(!results.Success()) {
-			Log.Log(EQEmuLogSys::Error, "Delete item failed. %s : %s", query.c_str(), results.ErrorMessage().c_str());
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Delete item failed. %s : %s", query.c_str(), results.ErrorMessage().c_str());
 			return false;
 		}
 
@@ -1136,7 +1136,7 @@ bool GuildBankManager::DeleteItem(uint32 guildID, uint16 area, uint16 slotID, ui
                                         BankArea[slotID].Quantity - quantity, guildID, area, slotID);
         auto results = database.QueryDatabase(query);
 		if(!results.Success()) {
-			Log.Log(EQEmuLogSys::Error, "Update item failed. %s : %s", query.c_str(), results.ErrorMessage().c_str());
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Update item failed. %s : %s", query.c_str(), results.ErrorMessage().c_str());
 			return false;
 		}
 
@@ -1299,7 +1299,7 @@ void GuildBankManager::UpdateItemQuantity(uint32 guildID, uint16 area, uint16 sl
                                     quantity, guildID, area, slotID);
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		Log.Log(EQEmuLogSys::Error, "Update item quantity failed. %s : %s", query.c_str(), results.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Update item quantity failed. %s : %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 

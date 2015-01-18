@@ -533,7 +533,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	if(inst == nullptr) {
 		Message(13, "An unknown server error has occurred and your item was not created.");
 		// this goes to logfile since this is a major error
-		Log.Log(EQEmuLogSys::Error, "Player %s on account %s encountered an unknown item creation error.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u, Aug6: %u)\n",
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Player %s on account %s encountered an unknown item creation error.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u, Aug6: %u)\n",
 			GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
 
 		return false;
@@ -1443,7 +1443,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	//verify shared bank transactions in the database
 	if(src_inst && src_slot_id >= EmuConstants::SHARED_BANK_BEGIN && src_slot_id <= EmuConstants::SHARED_BANK_BAGS_END) {
 		if(!database.VerifyInventory(account_id, src_slot_id, src_inst)) {
-			Log.Log(EQEmuLogSys::Error, "Player %s on account %s was found exploiting the shared bank.\n", GetName(), account_name);
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Player %s on account %s was found exploiting the shared bank.\n", GetName(), account_name);
 			DeleteItemInInventory(dst_slot_id,0,true);
 			return(false);
 		}
@@ -1458,7 +1458,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	}
 	if(dst_inst && dst_slot_id >= EmuConstants::SHARED_BANK_BEGIN && dst_slot_id <= EmuConstants::SHARED_BANK_BAGS_END) {
 		if(!database.VerifyInventory(account_id, dst_slot_id, dst_inst)) {
-			Log.Log(EQEmuLogSys::Error, "Player %s on account %s was found exploting the shared bank.\n", GetName(), account_name);
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Player %s on account %s was found exploting the shared bank.\n", GetName(), account_name);
 			DeleteItemInInventory(src_slot_id,0,true);
 			return(false);
 		}
@@ -2594,7 +2594,7 @@ void Client::SetBandolier(const EQApplicationPacket *app) {
 						if(MoveItemToInventory(InvItem))
 							database.SaveInventory(character_id, 0, WeaponSlot);
 						else
-							Log.Log(EQEmuLogSys::Error, "Char: %s, ERROR returning %s to inventory", GetName(),
+							Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Char: %s, ERROR returning %s to inventory", GetName(),
 								InvItem->GetItem()->Name);
 						safe_delete(InvItem);
 					}
@@ -2629,7 +2629,7 @@ void Client::SetBandolier(const EQApplicationPacket *app) {
 				if(InvItem) {
 					// If there was already an item in that weapon slot that we replaced, find a place to put it
 					if(!MoveItemToInventory(InvItem))
-						Log.Log(EQEmuLogSys::Error, "Char: %s, ERROR returning %s to inventory", GetName(),
+						Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Char: %s, ERROR returning %s to inventory", GetName(),
 							InvItem->GetItem()->Name);
 					safe_delete(InvItem);
 				}
@@ -2646,7 +2646,7 @@ void Client::SetBandolier(const EQApplicationPacket *app) {
 				if(MoveItemToInventory(InvItem))
 					database.SaveInventory(character_id, 0, WeaponSlot);
 				else
-					Log.Log(EQEmuLogSys::Error, "Char: %s, ERROR returning %s to inventory", GetName(),
+					Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Char: %s, ERROR returning %s to inventory", GetName(),
 						InvItem->GetItem()->Name);
 				safe_delete(InvItem);
 			}
@@ -2865,7 +2865,7 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 	}
 
 	if (log) {
-		Log.Log(EQEmuLogSys::Error, "Target interrogate inventory flag: %s", (GetInterrogateInvState() ? "TRUE" : "FALSE"));
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Target interrogate inventory flag: %s", (GetInterrogateInvState() ? "TRUE" : "FALSE"));
 		Log.DebugCategory(EQEmuLogSys::Detail, EQEmuLogSys::None, "[CLIENT] Client::InterrogateInventory() -- End");
 	}
 	if (!silent) {
@@ -2910,7 +2910,7 @@ void Client::InterrogateInventory_(bool errorcheck, Client* requester, int16 hea
 		else { e = ""; }
 
 		if (log)
-			Log.Log(EQEmuLogSys::Error, "Head: %i, Depth: %i, Instance: %s, Parent: %s%s",
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Head: %i, Depth: %i, Instance: %s, Parent: %s%s",
 			head, depth, i.c_str(), p.c_str(), e.c_str());
 		if (!silent)
 			requester->Message(1, "%i:%i - inst: %s - parent: %s%s",

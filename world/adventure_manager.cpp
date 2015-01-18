@@ -652,7 +652,7 @@ bool AdventureManager::LoadAdventureTemplates()
 		"graveyard_radius FROM adventure_template";
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log.Log(EQEmuLogSys::Error, "Error in AdventureManager:::LoadAdventures: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+        Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in AdventureManager:::LoadAdventures: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return false;
     }
 
@@ -702,7 +702,7 @@ bool AdventureManager::LoadAdventureEntries()
     auto results = database.QueryDatabase(query);
     if (!results.Success())
 	{
-		Log.Log(EQEmuLogSys::Error, "Error in AdventureManager:::LoadAdventureEntries: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in AdventureManager:::LoadAdventureEntries: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -1079,7 +1079,7 @@ void AdventureManager::LoadLeaderboardInfo()
 		"AS adv_stats LEFT JOIN `character_data` AS ch ON adv_stats.player_id = ch.id;";
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-        Log.Log(EQEmuLogSys::Error, "Error in AdventureManager:::GetLeaderboardInfo: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+        Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in AdventureManager:::GetLeaderboardInfo: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 

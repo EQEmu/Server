@@ -42,20 +42,20 @@ int main(int argc, char **argv) {
 
 	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Shared Memory Loader Program");
 	if(!EQEmuConfig::LoadConfig()) {
-		Log.Log(EQEmuLogSys::Error, "Unable to load configuration file.");
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to load configuration file.");
 		return 1;
 	}
 
 	const EQEmuConfig *config = EQEmuConfig::get();
 	if(!load_log_settings(config->LogSettingsFile.c_str())) {
-		Log.Log(EQEmuLogSys::Error, "Warning: unable to read %s.", config->LogSettingsFile.c_str());
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Warning: unable to read %s.", config->LogSettingsFile.c_str());
 	}
 
 	SharedDatabase database;
 	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Status, "Connecting to database...");
 	if(!database.Connect(config->DatabaseHost.c_str(), config->DatabaseUsername.c_str(),
 		config->DatabasePassword.c_str(), config->DatabaseDB.c_str(), config->DatabasePort)) {
-		Log.Log(EQEmuLogSys::Error, "Unable to connect to the database, cannot continue without a "
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to connect to the database, cannot continue without a "
 			"database connection");
 		return 1;
 	}
@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
 		try {
 			LoadItems(&database);
 		} catch(std::exception &ex) {
-			Log.Log(EQEmuLogSys::Error, "%s", ex.what());
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
 			return 1;
 		}
 	}
@@ -128,7 +128,7 @@ int main(int argc, char **argv) {
 		try {
 			LoadFactions(&database);
 		} catch(std::exception &ex) {
-			Log.Log(EQEmuLogSys::Error, "%s", ex.what());
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
 			return 1;
 		}
 	}
@@ -138,7 +138,7 @@ int main(int argc, char **argv) {
 		try {
 			LoadLoot(&database);
 		} catch(std::exception &ex) {
-			Log.Log(EQEmuLogSys::Error, "%s", ex.what());
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
 			return 1;
 		}
 	}
@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
 		try {
 			LoadSkillCaps(&database);
 		} catch(std::exception &ex) {
-			Log.Log(EQEmuLogSys::Error, "%s", ex.what());
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
 			return 1;
 		}
 	}
@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
 		try {
 			LoadSpells(&database);
 		} catch(std::exception &ex) {
-			Log.Log(EQEmuLogSys::Error, "%s", ex.what());
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
 			return 1;
 		}
 	}
@@ -168,7 +168,7 @@ int main(int argc, char **argv) {
 		try {
 			LoadBaseData(&database);
 		} catch(std::exception &ex) {
-			Log.Log(EQEmuLogSys::Error, "%s", ex.what());
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "%s", ex.what());
 			return 1;
 		}
 	}

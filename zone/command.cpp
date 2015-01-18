@@ -494,7 +494,7 @@ int command_add(const char *command_string, const char *desc, int access, CmdFun
 	std::string cstr(command_string);
 
 	if(commandlist.count(cstr) != 0) {
-		Log.Log(EQEmuLogSys::Error, "command_add() - Command '%s' is a duplicate - check command.cpp." , command_string);
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "command_add() - Command '%s' is a duplicate - check command.cpp." , command_string);
 		return(-1);
 	}
 
@@ -573,7 +573,7 @@ int command_realdispatch(Client *c, const char *message)
 #endif
 
 	if(cur->function == nullptr) {
-		Log.Log(EQEmuLogSys::Error, "Command '%s' has a null function\n", cstr.c_str());
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Command '%s' has a null function\n", cstr.c_str());
 		return(-1);
 	} else {
 		//dispatch C++ command

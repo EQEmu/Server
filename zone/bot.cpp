@@ -1225,7 +1225,7 @@ int32 Bot::acmod()
 		return (65 + ((agility-300) / 21));
 	}
 #if EQDEBUG >= 11
-	Log.Log(EQEmuLogSys::Error, "Error in Bot::acmod(): Agility: %i, Level: %i",agility,level);
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in Bot::acmod(): Agility: %i, Level: %i",agility,level);
 #endif
 	return 0;
 }
@@ -1462,7 +1462,7 @@ void Bot::LoadAAs() {
     auto results = database.QueryDatabase(query);
 
 	if(!results.Success()) {
-		Log.Log(EQEmuLogSys::Error, "Error in Bot::LoadAAs()");
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in Bot::LoadAAs()");
 		return;
 	}
 
@@ -2774,7 +2774,7 @@ void Bot::LoadStance() {
 	std::string query = StringFormat("SELECT StanceID FROM botstances WHERE BotID = %u;", GetBotID());
 	auto results = database.QueryDatabase(query);
 	if(!results.Success() || results.RowCount() == 0) {
-		Log.Log(EQEmuLogSys::Error, "Error in Bot::LoadStance()");
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in Bot::LoadStance()");
 		SetDefaultBotStance();
 		return;
 	}
@@ -2792,7 +2792,7 @@ void Bot::SaveStance() {
                                     "VALUES(%u, %u);", GetBotID(), GetBotStance());
     auto results = database.QueryDatabase(query);
     if(!results.Success())
-        Log.Log(EQEmuLogSys::Error, "Error in Bot::SaveStance()");
+        Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in Bot::SaveStance()");
 
 }
 
@@ -2807,7 +2807,7 @@ void Bot::LoadTimers() {
                                     GetBotID(), DisciplineReuseStart-1, DisciplineReuseStart-1, GetClass(), GetLevel());
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		Log.Log(EQEmuLogSys::Error, "Error in Bot::LoadTimers()");
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in Bot::LoadTimers()");
 		return;
 	}
 
@@ -2847,7 +2847,7 @@ void Bot::SaveTimers() {
 	}
 
 	if(hadError)
-		Log.Log(EQEmuLogSys::Error, "Error in Bot::SaveTimers()");
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in Bot::SaveTimers()");
 
 }
 
@@ -4211,7 +4211,7 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
 
         ItemInst* inst = database.CreateItem(item_id, charges, aug[0], aug[1], aug[2], aug[3], aug[4]);
         if (!inst) {
-            Log.Log(EQEmuLogSys::Error, "Warning: botid %i has an invalid item_id %i in inventory slot %i", this->GetBotID(), item_id, slot_id);
+            Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Warning: botid %i has an invalid item_id %i in inventory slot %i", this->GetBotID(), item_id, slot_id);
             continue;
         }
 
@@ -4235,7 +4235,7 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
 
         // Save ptr to item in inventory
         if (put_slot_id == INVALID_INDEX)
-            Log.Log(EQEmuLogSys::Error, "Warning: Invalid slot_id for item in inventory: botid=%i, item_id=%i, slot_id=%i",this->GetBotID(), item_id, slot_id);
+            Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Warning: Invalid slot_id for item in inventory: botid=%i, item_id=%i, slot_id=%i",this->GetBotID(), item_id, slot_id);
 
     }
 
@@ -6017,7 +6017,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 {
 	if (!other) {
 		SetTarget(nullptr);
-		Log.Log(EQEmuLogSys::Error, "A null Mob object was passed to Bot::Attack for evaluation!");
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "A null Mob object was passed to Bot::Attack for evaluation!");
 		return false;
 	}
 
@@ -15454,7 +15454,7 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 		// according to Rogean, Live NPCs will just cast through walls/floors, no problem..
 		//
 		// This check was put in to address an idle-mob CPU issue
-		Log.Log(EQEmuLogSys::Error, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
 		return(false);
 	}
 

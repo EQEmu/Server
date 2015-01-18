@@ -64,7 +64,7 @@ EXTERN_C XS(boot_qc)
 	file[255] = '\0';
 
 	if(items != 1)
-		Log.Log(EQEmuLogSys::Error, "boot_qc does not take any arguments.");
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "boot_qc does not take any arguments.");
 	
 	char buf[128];	//shouldent have any function names longer than this.
 	

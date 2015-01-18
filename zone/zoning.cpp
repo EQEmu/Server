@@ -97,7 +97,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 
 				CheatDetected(MQZone, zc->x, zc->y, zc->z);
 				Message(13, "Invalid unsolicited zone request.");
-				Log.Log(EQEmuLogSys::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%d'.", GetName(), target_zone_id);
+				Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%d'.", GetName(), target_zone_id);
 				SendZoneCancel(zc);
 				return;
 			}
@@ -129,7 +129,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 			//if we didnt get a zone point, or its to a different zone,
 			//then we assume this is invalid.
 			if(!zone_point || zone_point->target_zone_id != target_zone_id) {
-				Log.Log(EQEmuLogSys::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%d'.", GetName(), target_zone_id);
+				Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%d'.", GetName(), target_zone_id);
 				CheatDetected(MQGate, zc->x, zc->y, zc->z);
 				SendZoneCancel(zc);
 				return;
@@ -160,7 +160,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	if(target_zone_name == nullptr) {
 		//invalid zone...
 		Message(13, "Invalid target zone ID.");
-		Log.Log(EQEmuLogSys::Error, "Zoning %s: Unable to get zone name for zone id '%d'.", GetName(), target_zone_id);
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Zoning %s: Unable to get zone name for zone id '%d'.", GetName(), target_zone_id);
 		SendZoneCancel(zc);
 		return;
 	}
@@ -173,7 +173,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	if(!database.GetSafePoints(target_zone_name, database.GetInstanceVersion(target_instance_id), &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_needed)) {
 		//invalid zone...
 		Message(13, "Invalid target zone while getting safe points.");
-		Log.Log(EQEmuLogSys::Error, "Zoning %s: Unable to get safe coordinates for zone '%s'.", GetName(), target_zone_name);
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Zoning %s: Unable to get safe coordinates for zone '%s'.", GetName(), target_zone_name);
 		SendZoneCancel(zc);
 		return;
 	}
@@ -253,7 +253,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 
 		//could not find a valid reason for them to be zoning, stop it.
 		CheatDetected(MQZoneUnknownDest, 0.0, 0.0, 0.0);
-		Log.Log(EQEmuLogSys::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%s'. Not near a zone point.", GetName(), target_zone_name);
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%s'. Not near a zone point.", GetName(), target_zone_name);
 		SendZoneCancel(zc);
 		return;
 	default:
@@ -288,7 +288,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		//we have successfully zoned
 		DoZoneSuccess(zc, target_zone_id, target_instance_id, dest_x, dest_y, dest_z, dest_h, ignorerestrictions);
 	} else {
-		Log.Log(EQEmuLogSys::Error, "Zoning %s: Rules prevent this char from zoning into '%s'", GetName(), target_zone_name);
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Zoning %s: Rules prevent this char from zoning into '%s'", GetName(), target_zone_name);
 		SendZoneError(zc, myerror);
 	}
 }
@@ -312,7 +312,7 @@ void Client::SendZoneCancel(ZoneChange_Struct *zc) {
 
 void Client::SendZoneError(ZoneChange_Struct *zc, int8 err)
 {
-	Log.Log(EQEmuLogSys::Error, "Zone %i is not available because target wasn't found or character insufficent level", zc->zoneID);
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Zone %i is not available because target wasn't found or character insufficent level", zc->zoneID);
 
 	SetPortExemption(true);
 
@@ -472,7 +472,7 @@ void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, 
 			ZonePC(zoneID, instance_id, x, y, z, heading, ignorerestrictions, zm);
 			break;
 		default:
-			Log.Log(EQEmuLogSys::Error, "Client::ProcessMovePC received a reguest to perform an unsupported client zone operation.");
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Client::ProcessMovePC received a reguest to perform an unsupported client zone operation.");
 			break;
 	}
 }
@@ -550,7 +550,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			SetHeading(heading);
 			break;
 		default:
-			Log.Log(EQEmuLogSys::Error, "Client::ZonePC() received a reguest to perform an unsupported client zone operation.");
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Client::ZonePC() received a reguest to perform an unsupported client zone operation.");
 			ReadyToZone = false;
 			break;
 	}
@@ -768,7 +768,7 @@ void Client::SetZoneFlag(uint32 zone_id) {
 	std::string query = StringFormat("INSERT INTO zone_flags (charID,zoneID) VALUES(%d,%d)", CharacterID(), zone_id);
 	auto results = database.QueryDatabase(query);
 	if(!results.Success())
-		Log.Log(EQEmuLogSys::Error, "MySQL Error while trying to set zone flag for %s: %s", GetName(), results.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "MySQL Error while trying to set zone flag for %s: %s", GetName(), results.ErrorMessage().c_str());
 }
 
 void Client::ClearZoneFlag(uint32 zone_id) {
@@ -781,7 +781,7 @@ void Client::ClearZoneFlag(uint32 zone_id) {
 	std::string query = StringFormat("DELETE FROM zone_flags WHERE charID=%d AND zoneID=%d", CharacterID(), zone_id);
 	auto results = database.QueryDatabase(query);
 	if(!results.Success())
-		Log.Log(EQEmuLogSys::Error, "MySQL Error while trying to clear zone flag for %s: %s", GetName(), results.ErrorMessage().c_str());
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "MySQL Error while trying to clear zone flag for %s: %s", GetName(), results.ErrorMessage().c_str());
 
 }
 
@@ -791,7 +791,7 @@ void Client::LoadZoneFlags() {
 	std::string query = StringFormat("SELECT zoneID from zone_flags WHERE charID=%d", CharacterID());
 	auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log.Log(EQEmuLogSys::Error, "MySQL Error while trying to load zone flags for %s: %s", GetName(), results.ErrorMessage().c_str());
+        Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "MySQL Error while trying to load zone flags for %s: %s", GetName(), results.ErrorMessage().c_str());
         return;
     }
 

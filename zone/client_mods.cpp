@@ -826,7 +826,7 @@ int32 Client::acmod() {
 	return (65 + ((agility-300) / 21));
 	}
 #if EQDEBUG >= 11
-	Log.Log(EQEmuLogSys::Error, "Error in Client::acmod(): Agility: %i, Level: %i",agility,level);
+	Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in Client::acmod(): Agility: %i, Level: %i",agility,level);
 #endif
 	return 0;
 };

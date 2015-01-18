@@ -69,7 +69,7 @@ bool Database::Connect(const char* host, const char* user, const char* passwd, c
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	if (!Open(host, user, passwd, database, port, &errnum, errbuf))
 	{
-		Log.Log(EQEmuLogSys::Error, "Failed to connect to database: Error: %s", errbuf);
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Failed to connect to database: Error: %s", errbuf);
 		HandleMysqlError(errnum);
 
 		return false;

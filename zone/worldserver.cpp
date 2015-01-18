@@ -391,7 +391,7 @@ void WorldServer::Process() {
 				}
 			}
 			else
-				Log.Log(EQEmuLogSys::Error, "WhoAllReturnStruct: Could not get return struct!");
+				Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "WhoAllReturnStruct: Could not get return struct!");
 			break;
 		}
 		case ServerOP_EmoteMessage: {
@@ -1381,7 +1381,7 @@ void WorldServer::Process() {
 			if(NewCorpse)
 				NewCorpse->Spawn();
 			else
-				Log.Log(EQEmuLogSys::Error, "Unable to load player corpse id %u for zone %s.", s->player_corpse_id, zone->GetShortName());
+				Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Unable to load player corpse id %u for zone %s.", s->player_corpse_id, zone->GetShortName());
 
 			break;
 		}
@@ -2061,7 +2061,7 @@ uint32 WorldServer::NextGroupID() {
 	if(cur_groupid >= last_groupid) {
 		//this is an error... This means that 50 groups were created before
 		//1 packet could make the zone->world->zone trip... so let it error.
-		Log.Log(EQEmuLogSys::Error, "Ran out of group IDs before the server sent us more.");
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Ran out of group IDs before the server sent us more.");
 		return(0);
 	}
 	if(cur_groupid > (last_groupid - /*50*/995)) {

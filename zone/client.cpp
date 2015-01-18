@@ -5294,7 +5294,7 @@ void Client::SendRewards()
                                     "ORDER BY reward_id", AccountID());
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log.Log(EQEmuLogSys::Error, "Error in Client::SendRewards(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+        Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in Client::SendRewards(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return;
     }
 
@@ -5362,7 +5362,7 @@ bool Client::TryReward(uint32 claim_id) {
                                     AccountID(), claim_id);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log.Log(EQEmuLogSys::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+        Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return false;
     }
 
@@ -5389,7 +5389,7 @@ bool Client::TryReward(uint32 claim_id) {
                             AccountID(), claim_id);
         auto results = database.QueryDatabase(query);
 		if(!results.Success())
-			Log.Log(EQEmuLogSys::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 	}
 	else {
         query = StringFormat("UPDATE account_rewards SET amount = (amount-1) "
@@ -5397,7 +5397,7 @@ bool Client::TryReward(uint32 claim_id) {
                             AccountID(), claim_id);
         auto results = database.QueryDatabase(query);
 		if(!results.Success())
-			Log.Log(EQEmuLogSys::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+			Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 	}
 
 	InternalVeteranReward ivr = (*iter);
@@ -6211,7 +6211,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	PetRecord record;
 	if(!database.GetPetEntry(spells[spell_id].teleport_zone, &record))
 	{
-		Log.Log(EQEmuLogSys::Error, "Unknown doppelganger spell id: %d, check pets table", spell_id);
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Unknown doppelganger spell id: %d, check pets table", spell_id);
 		Message(13, "Unable to find data for pet %s", spells[spell_id].teleport_zone);
 		return;
 	}
@@ -6225,7 +6225,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 
 	const NPCType *npc_type = database.GetNPCType(pet.npc_id);
 	if(npc_type == nullptr) {
-		Log.Log(EQEmuLogSys::Error, "Unknown npc type for doppelganger spell id: %d", spell_id);
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "Unknown npc type for doppelganger spell id: %d", spell_id);
 		Message(0,"Unable to find pet!");
 		return;
 	}
@@ -8289,11 +8289,11 @@ std::string Client::TextLink::GenerateLink()
 	if ((m_Link.length() == 0) || (m_Link.length() > 250)) {
 		m_Error = true;
 		m_Link = "<LINKER ERROR>";
-		Log.Log(EQEmuLogSys::Error, "TextLink::GenerateLink() failed to generate a useable text link (LinkType: %i, Lengths: {link: %u, body: %u, text: %u})",
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, "TextLink::GenerateLink() failed to generate a useable text link (LinkType: %i, Lengths: {link: %u, body: %u, text: %u})",
 			m_LinkType, m_Link.length(), m_LinkBody.length(), m_LinkText.length());
 #if EQDEBUG >= 5
-		Log.Log(EQEmuLogSys::Error, ">> LinkBody: %s", m_LinkBody.c_str());
-		Log.Log(EQEmuLogSys::Error, ">> LinkText: %s", m_LinkText.c_str());
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, ">> LinkBody: %s", m_LinkBody.c_str());
+		Log.DebugCategory(EQEmuLogSys::General, EQEmuLogSys::Error, ">> LinkText: %s", m_LinkText.c_str());
 #endif
 	}
 
