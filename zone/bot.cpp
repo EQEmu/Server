@@ -3354,7 +3354,7 @@ void Bot::AI_Process() {
 	if(GetHasBeenSummoned()) {
 		if(IsBotCaster() || IsBotArcher()) {
 			if (AImovement_timer->Check()) {
-				if(!GetTarget() || (IsBotCaster() && !IsBotCasterCombatRange(GetTarget())) || (IsBotArcher() && IsArcheryRange(GetTarget())) || (DistNoRootNoZ(m_PreSummonLocation.m_X, m_PreSummonLocation.m_Y) < 10)) {
+				if(!GetTarget() || (IsBotCaster() && !IsBotCasterCombatRange(GetTarget())) || (IsBotArcher() && IsArcheryRange(GetTarget())) || (ComparativeDistanceNoZ(static_cast<xyz_location>(m_Position), m_PreSummonLocation) < 10)) {
 					if(GetTarget())
 						FaceTarget(GetTarget());
 					SetHasBeenSummoned(false);
