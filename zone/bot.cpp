@@ -3732,7 +3732,7 @@ void Bot::AI_Process() {
 				Mob* follow = entity_list.GetMob(GetFollowID());
 
 				if(follow) {
-					float dist = DistNoRoot(*follow);
+					float dist = ComparativeDistance(m_Position, follow->GetPosition());
 					float speed = follow->GetRunspeed();
 
 					if(dist < GetFollowDistance() + 1000)
