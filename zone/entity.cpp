@@ -1985,7 +1985,7 @@ void EntityList::MessageClose(Mob* sender, bool skipsender, float dist, uint32 t
 
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
-		if (it->second->DistNoRoot(*sender) <= dist2 && (!skipsender || it->second != sender))
+		if (ComparativeDistance(it->second->GetPosition(), sender->GetPosition()) <= dist2 && (!skipsender || it->second != sender))
 			it->second->Message(type, buffer);
 		++it;
 	}
@@ -2460,7 +2460,7 @@ void EntityList::SendPositionUpdates(Client *client, uint32 cLastUpdate,
 			//bool Grouped = client->HasGroup() && mob->IsClient() && (client->GetGroup() == mob->CastToClient()->GetGroup());
 
 			//if (range == 0 || (iterator.GetData() == alwayssend) || Grouped || (mob->DistNoRootNoZ(*client) <= range)) {
-			if (range == 0 || (it->second == alwayssend) || mob->IsClient() || (mob->DistNoRoot(*client) <= range)) {
+			if (range == 0 || (it->second == alwayssend) || mob->IsClient() || (ComparativeDistance(mob->GetPosition(), client->GetPosition()) <= range)) {
 				mob->MakeSpawnUpdate(ppu);
 			}
 			if(mob && mob->IsClient() && mob->GetID()>0) {
