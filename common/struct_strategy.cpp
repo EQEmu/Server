@@ -2,7 +2,7 @@
 #include "debug.h"
 #include "eqemu_logsys.h"
 #include "struct_strategy.h"
-#include "logsys.h"
+
 #include "eq_stream.h"
 #include <map>
 

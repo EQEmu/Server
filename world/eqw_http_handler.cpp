@@ -21,7 +21,7 @@
 #include "eqw_parser.h"
 #include "eqw.h"
 #include "http_request.h"
-#include "../common/logsys.h"
+
 #include "worlddb.h"
 #include "console.h"
 

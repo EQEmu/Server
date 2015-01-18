@@ -18,7 +18,7 @@
 
 #include "../common/debug.h"
 #include "../common/eqemu_logsys.h"
-#include "../common/logsys.h"
+
 #include "../common/string_util.h"
 #include "quest_parser_collection.h"
 #include "worldserver.h"

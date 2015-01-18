@@ -2,7 +2,7 @@
 #include "../eqemu_logsys.h"
 #include "titanium.h"
 #include "../opcodemgr.h"
-#include "../logsys.h"
+
 #include "../eq_stream_ident.h"
 #include "../crc32.h"
 #include "../races.h"

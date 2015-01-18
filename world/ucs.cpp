@@ -2,7 +2,7 @@
 #include "../common/eqemu_logsys.h"
 #include "ucs.h"
 #include "world_config.h"
-#include "../common/logsys.h"
+
 #include "../common/logtypes.h"
 #include "../common/md5.h"
 #include "../common/emu_tcp_connection.h"

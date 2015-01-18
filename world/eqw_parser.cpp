@@ -24,7 +24,7 @@
 #include "eqw_parser.h"
 #include "eqw.h"
 #include "../common/eqdb.h"
-#include "../common/logsys.h"
+
 #include "worlddb.h"
 
 #ifndef GvCV_set

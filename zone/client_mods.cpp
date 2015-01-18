@@ -18,7 +18,7 @@
 
 #include "../common/debug.h"
 #include "../common/eqemu_logsys.h"
-#include "../common/logsys.h"
+
 #include "../common/rulesys.h"
 #include "../common/spdat.h"
 

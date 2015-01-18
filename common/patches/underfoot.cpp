@@ -2,7 +2,7 @@
 #include "../eqemu_logsys.h"
 #include "underfoot.h"
 #include "../opcodemgr.h"
-#include "../logsys.h"
+
 #include "../eq_stream_ident.h"
 #include "../crc32.h"
 

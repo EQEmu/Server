@@ -67,7 +67,7 @@
 	#include <winsock2.h>
 #endif
 
-#include "logsys.h"
+
 
 #include "../common/mutex.h"
 #include <stdio.h>

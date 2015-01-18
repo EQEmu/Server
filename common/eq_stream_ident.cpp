@@ -2,7 +2,7 @@
 #include "eqemu_logsys.h"
 #include "eq_stream_ident.h"
 #include "eq_stream_proxy.h"
-#include "logsys.h"
+
 
 EQStreamIdentifier::~EQStreamIdentifier() {
 	while(!m_identified.empty()) {

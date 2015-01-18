@@ -20,7 +20,7 @@
 #include "../common/debug.h"
 #include "launcher_list.h"
 #include "launcher_link.h"
-#include "../common/logsys.h"
+
 #include "eql_config.h"
 
 LauncherList::LauncherList()

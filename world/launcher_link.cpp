@@ -20,7 +20,7 @@
 #include "launcher_link.h"
 #include "launcher_list.h"
 #include "world_config.h"
-#include "../common/logsys.h"
+
 #include "../common/md5.h"
 #include "../common/packet_dump.h"
 #include "../common/servertalk.h"
