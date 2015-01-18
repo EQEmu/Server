@@ -10305,7 +10305,7 @@ void command_disarmtrap(Client *c, const Seperator *sep)
 	{
 		if(c->HasSkill(SkillDisarmTraps))
 		{
-			if(c->DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
+			if(ComparativeDistanceNoZ(c->GetPosition(), target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				c->Message(13, "%s is too far away.", target->GetCleanName());
 				return;
