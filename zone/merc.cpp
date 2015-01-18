@@ -1938,7 +1938,7 @@ bool Merc::AIDoSpellCast(uint16 spellid, Mob* tar, int32 mana_cost, uint32* oDon
 	if (mercSpell.type & SpellType_Escape) {
 		dist2 = 0;
 	} else
-		dist2 = DistNoRoot(*tar);
+		dist2 = ComparativeDistance(m_Position, tar->GetPosition());
 
 	if (((((spells[spellid].targettype==ST_GroupTeleport && mercSpell.type==SpellType_Heal)
 		|| spells[spellid].targettype==ST_AECaster
