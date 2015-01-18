@@ -489,7 +489,7 @@ void Raid::CastGroupSpell(Mob* caster, uint16 spellid, uint32 gid)
 		else if(members[x].member != nullptr)
 		{
 			if(members[x].GroupNumber == gid){
-				distance = caster->DistNoRoot(*members[x].member);
+				distance = ComparativeDistance(caster->GetPosition(), members[x].member->GetPosition());
 				if(distance <= range2){
 					caster->SpellOnTarget(spellid, members[x].member);
 #ifdef GROUP_BUFF_PETS
