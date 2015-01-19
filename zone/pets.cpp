@@ -655,7 +655,6 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
         std::string  query = StringFormat("SELECT nested_set FROM pets_equipmentset WHERE set_id = '%s'", curset);
 		auto results = QueryDatabase(query);
 		if (!results.Success()) {
-            Log.Out(Logs::General, Logs::Error, "Error in GetBasePetItems query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 			return false;
         }
 
