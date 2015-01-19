@@ -252,7 +252,6 @@ void ZoneDatabase::InsertPetitionToDB(Petition* wpet)
     safe_delete_array(petitiontext);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Error in InsertPetitionToDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
