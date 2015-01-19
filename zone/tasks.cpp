@@ -1276,7 +1276,6 @@ static void DeleteCompletedTaskFromDatabase(int charID, int taskID) {
     const std::string query = StringFormat("DELETE FROM completed_tasks WHERE charid=%i AND taskid = %i", charID, taskID);
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "[TASKS]Error in CientTaskState::CancelTask %s, %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
