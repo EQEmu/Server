@@ -65,7 +65,6 @@ int GetSpellColumns(SharedDatabase *db) {
 	const std::string query = "DESCRIBE spells_new";
 	auto results = db->QueryDatabase(query);
 	if(!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in GetSpellColumns query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
 
