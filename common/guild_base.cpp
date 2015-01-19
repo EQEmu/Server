@@ -687,7 +687,6 @@ bool BaseGuildManager::DBSetGuildURL(uint32 GuildID, const char* URL)
 
 	if (!results.Success())
 	{
-		Log.Out(Logs::Detail, Logs::Guilds, "Error setting URL for guild %d '%s': %s", GuildID, query.c_str(), results.ErrorMessage().c_str());
 		safe_delete_array(esc);
 		return(false);
 	}
