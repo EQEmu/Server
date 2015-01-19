@@ -1801,7 +1801,6 @@ bool ZoneDatabase::LoadAAEffects() {
                             "redux_aa, redux_rate, redux_aa2, redux_rate2 FROM aa_actions";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in LoadAAEffects query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
     }
 
