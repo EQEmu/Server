@@ -5741,14 +5741,14 @@ void Client::GuildBankAck()
 	FastQueuePacket(&outapp);
 }
 
-void Client::GuildBankDepositAck(bool Fail)
+void Client::GuildBankDepositAck(bool Fail, int8 action)
 {
 
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildBank, sizeof(GuildBankDepositAck_Struct));
 
 	GuildBankDepositAck_Struct *gbdas = (GuildBankDepositAck_Struct*) outapp->pBuffer;
 
-	gbdas->Action = GuildBankDeposit;
+	gbdas->Action = action;
 
 	gbdas->Fail = Fail ? 1 : 0;
 

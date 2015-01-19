@@ -6843,13 +6843,28 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 	char *Buffer = (char *)app->pBuffer;
 
 	uint32 Action = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
+	uint32 sentAction = Action;
+
+	if (GetClientVersion() >= EQClientRoF)
+	{
+		Action += 1;
+		/*
+		// Need to find all of the action types for RoF and switch case here
+		switch(Action)
+		{
+		case 4:
+			Action = 5;
+			break;
+		}
+		*/
+	}
 
 	if (!IsInAGuild())
 	{
 		Message(13, "You must be in a Guild to use the Guild Bank.");
 
 		if (Action == GuildBankDeposit)
-			GuildBankDepositAck(true);
+			GuildBankDepositAck(true, sentAction);
 		else
 			GuildBankAck();
 
@@ -6876,7 +6891,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 		{
 			Message_StringID(13, GUILD_BANK_FULL);
 
-			GuildBankDepositAck(true);
+			GuildBankDepositAck(true, sentAction);
 
 			return;
 		}
@@ -6925,7 +6940,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 		{
 			Message_StringID(13, GUILD_BANK_FULL);
 
-			GuildBankDepositAck(true);
+			GuildBankDepositAck(true, sentAction);
 
 			return;
 		}
@@ -6938,7 +6953,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 		{
 			Message(13, "No Item on the cursor.");
 
-			GuildBankDepositAck(true);
+			GuildBankDepositAck(true, sentAction);
 
 			return;
 		}
@@ -6969,14 +6984,14 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 		if (!Allowed)
 		{
 			Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
-			GuildBankDepositAck(true);
+			GuildBankDepositAck(true, sentAction);
 
 			return;
 		}
 
 		if (GuildBanks->AddItem(GuildID(), GuildBankDepositArea, CursorItem->ID, CursorItemInst->GetCharges(), GetName(), GuildBankBankerOnly, ""))
 		{
-			GuildBankDepositAck(false);
+			GuildBankDepositAck(false, sentAction);
 
 			DeleteItemInInventory(MainCursor, 0, false);
 		}

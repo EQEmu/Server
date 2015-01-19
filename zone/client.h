@@ -1097,7 +1097,7 @@ public:
 	QGlobalCache *GetQGlobals() { return qGlobals; }
 	QGlobalCache *CreateQGlobals() { qGlobals = new QGlobalCache(); return qGlobals; }
 	void GuildBankAck();
-	void GuildBankDepositAck(bool Fail);
+	void GuildBankDepositAck(bool Fail, int8 action);
 	inline bool IsGuildBanker() { return GuildBanker; }
 	void ClearGuildBank();
 	void SendGroupCreatePacket();

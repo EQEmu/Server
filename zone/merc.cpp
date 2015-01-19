@@ -1336,7 +1336,7 @@ void Merc::AI_Process() {
 	if(IsCasting())
 		return;
 
-	// A bot wont start its AI if not grouped
+	// A merc wont start its AI if not grouped
 	if(!HasGroup()) {
 		return;
 	}
@@ -5474,7 +5474,7 @@ bool Client::MercOnlyOrNoGroup() {
 	}
 	if (GetMerc())
 	{
-		if (GetMerc()->HasGroup() && GetMerc()->GetGroup() == GetGroup())
+		if (GetMerc()->GetGroup() == GetGroup())
 		{
 			if (GetGroup()->GroupCount() < 3)
 			{
