@@ -1982,7 +1982,6 @@ SendAA_Struct* ZoneDatabase::GetAASkillVars(uint32 skill_id)
                         "FROM altadv_vars a WHERE skill_id=%i", skill_id);
     results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in GetAASkillVars '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return nullptr;
     }
 
