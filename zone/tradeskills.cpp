@@ -1317,7 +1317,6 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
                         recipe_id);
 	results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in tradeskill verify query: '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return GetTradeRecipe(recipe_id, c_type, some_id, char_id, spec);
     }
 
