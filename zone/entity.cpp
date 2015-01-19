@@ -515,7 +515,7 @@ void EntityList::MobProcess()
 #ifdef _WINDOWS
 				struct in_addr in;
 				in.s_addr = mob->CastToClient()->GetIP();
-				std::cout << "Dropping client: Process=false, ip=" << inet_ntoa(in) << ", port=" << mob->CastToClient()->GetPort() << std::endl;
+				Log.Out(Logs::General, Logs::Zone_Server, "Dropping client: Process=false, ip=%s port=%u", inet_ntoa(in), mob->CastToClient()->GetPort());
 #endif
 				zone->StartShutdownTimer();
 				Group *g = GetGroupByMob(mob);
