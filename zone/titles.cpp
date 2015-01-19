@@ -40,7 +40,6 @@ bool TitleManager::LoadTitles()
                         "`status`, `item_id`, `prefix`, `suffix`, `title_set` FROM titles";
     auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Unable to load titles: %s : %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
