@@ -1044,7 +1044,6 @@ uint32 ZoneDatabase::CreateNewNPCCommand(const char* zone, uint32 zone_version,C
                         spawn->GetHeading(), spawngroupid);
     results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "NPCSpawnDB Error: %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
