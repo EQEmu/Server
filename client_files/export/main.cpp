@@ -123,7 +123,6 @@ int GetSkill(SharedDatabase *db, int skill_id, int class_id, int level) {
                                     class_id, skill_id, level);
     auto results = db->QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in get_skill query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
 
