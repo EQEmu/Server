@@ -1020,7 +1020,6 @@ uint32 ZoneDatabase::CreateNewNPCCommand(const char* zone, uint32 zone_version,C
                                         spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28);
         auto results = QueryDatabase(query);
 		if (!results.Success()) {
-			Log.Out(Logs::General, Logs::Error, "NPCSpawnDB Error: %s %s", query.c_str(), results.ErrorMessage().c_str());
 			return false;
 		}
 		npc_type_id = results.LastInsertedID();
