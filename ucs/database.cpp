@@ -270,7 +270,6 @@ void Database::SetChannelPassword(std::string channelName, std::string password)
                                     password.c_str(), channelName.c_str());
     auto results = QueryDatabase(query);
 	if(!results.Success())
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Error updating password in database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
