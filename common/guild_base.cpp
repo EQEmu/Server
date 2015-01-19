@@ -608,7 +608,6 @@ bool BaseGuildManager::DBSetGuildLeader(uint32 guild_id, uint32 leader) {
 
 	if (!results.Success())
 	{
-		Log.Out(Logs::Detail, Logs::Guilds, "Error changing leader on guild %d '%s': %s", guild_id, query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
