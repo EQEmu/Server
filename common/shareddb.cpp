@@ -795,7 +795,6 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		"updated FROM items ORDER BY id";
 	auto results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "LoadItems '%s', %s", query.c_str(), results.ErrorMessage().c_str());
         return;
     }
 
