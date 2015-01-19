@@ -4962,7 +4962,6 @@ bool Client::SpellGlobalCheck(uint16 spell_ID, uint32 char_ID) {
                                     "WHERE spellid = %i", spell_ID);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error while querying Spell ID %i spell_globals table query '%s': %s", spell_ID, query.c_str(), results.ErrorMessage().c_str());
 		return false; // Query failed, so prevent spell from scribing just in case
     }
 
