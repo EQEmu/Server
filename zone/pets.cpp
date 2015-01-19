@@ -669,8 +669,7 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 
         query = StringFormat("SELECT slot, item_id FROM pets_equipmentset_entries WHERE set_id='%s'", curset);
         results = QueryDatabase(query);
-        if (!results.Success())
-        else {
+        if (results.Success()){
             for (row = results.begin(); row != results.end(); ++row)
             {
                 slot = atoi(row[0]);

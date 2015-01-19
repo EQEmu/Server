@@ -223,8 +223,6 @@ void ZoneDatabase::UpdatePetitionToDB(Petition* wpet) {
                                     wpet->GetCheckouts(), wpet->GetUnavails(),
                                     wpet->CheckedOut() ? 1: 0, wpet->GetID());
     auto results = QueryDatabase(query);
-	if (!results.Success())
-
 }
 
 void ZoneDatabase::InsertPetitionToDB(Petition* wpet)

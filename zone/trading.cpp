@@ -1476,9 +1476,7 @@ static void BazaarAuditTrail(const char *seller, const char *buyer, const char *
                                     "(`time`, `seller`, `buyer`, `itemname`, `quantity`, `totalcost`, `trantype`) "
                                     "VALUES (NOW(), '%s', '%s', '%s', %i, %i, %i)",
                                     seller, buyer, itemName, quantity, totalCost, tranType);
-    auto results = database.QueryDatabase(query);
-	if(!results.Success())
-
+	database.QueryDatabase(query);
 }
 
 
