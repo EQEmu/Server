@@ -1166,7 +1166,6 @@ void ZoneDatabase::ModifyGrid(Client *client, bool remove, uint32 id, uint8 type
     std::string query = StringFormat("DELETE FROM grid where id=%i", id);
     auto results = QueryDatabase(query);
     if (!results.Success())
-		Log.Out(Logs::General, Logs::Error, "Error deleting grid '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 	else if(client)
         client->LogSQL(query.c_str());
 
