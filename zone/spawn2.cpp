@@ -681,7 +681,6 @@ void SpawnConditionManager::UpdateDBCondition(const char* zone_name, uint32 inst
                                     cond_id, value, zone_name, instance_id);
     auto results = database.QueryDatabase(query);
 	if(!results.Success())
-		Log.Out(Logs::General, Logs::Error, "Unable to update spawn condition '%s': %s\n", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
