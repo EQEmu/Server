@@ -1908,7 +1908,6 @@ uint32 ZoneDatabase::CountAAEffects() {
 	const std::string query = "SELECT count(id) FROM aa_effects";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in ZoneDatabase::CountAALevels query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
 	}
 
