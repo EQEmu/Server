@@ -404,7 +404,6 @@ void Adventure::MoveCorpsesToGraveyard()
                             x, y, z, GetInstanceID());
 		auto results = database.QueryDatabase(query);
 		if(!results.Success())
-			Log.Out(Logs::General, Logs::Error, "Error in AdventureManager:::MoveCorpsesToGraveyard: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 	}
 
     auto c_iter = charid_list.begin();
