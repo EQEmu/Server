@@ -2,10 +2,7 @@
 #include <cmath>
 #include "position.h"
 #include "../common/string_util.h"
-
-#ifdef _MSC_VER
-	#include <algorithm>
-#endif
+#include <algorithm>
 
 xy_location::xy_location(float x, float y) :
     m_X(x),
