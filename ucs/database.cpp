@@ -546,7 +546,6 @@ void Database::AddFriendOrIgnore(int charID, int type, std::string name) {
                                     charID, type, CapitaliseName(name).c_str());
     auto results = QueryDatabase(query);
 	if(!results.Success())
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Error adding friend/ignore, query was %s : %s", query.c_str(), results.ErrorMessage().c_str());
 	else
 		Log.Out(Logs::Detail, Logs::UCS_Server, "Wrote Friend/Ignore entry for charid %i, type %i, name %s to database.", charID, type, name.c_str());
 
