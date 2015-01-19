@@ -4047,7 +4047,6 @@ void Database::GetCharactersInInstance(uint16 instance_id, std::list<uint32> &ch
 
 	if (!results.Success())
 	{
-		Log.Out(Logs::General, Logs::Error, "Error in GetCharactersInInstace query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
