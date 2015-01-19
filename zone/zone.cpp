@@ -2143,7 +2143,6 @@ void Zone::LoadAdventureFlavor()
 	const std::string query = "SELECT id, text FROM adventure_template_entry_flavor";
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in Zone::LoadAdventureFlavor: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
