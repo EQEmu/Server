@@ -675,7 +675,6 @@ void Client::TradeskillSearchResults(const std::string query, unsigned long objt
 
     auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Error in TradeskillSearchResults query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
