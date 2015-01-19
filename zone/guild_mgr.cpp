@@ -920,7 +920,6 @@ int GuildBankManager::Promote(uint32 guildID, int slotID)
                                     "LIMIT 1", mainSlot, guildID, slotID);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "error promoting item: %s : %s", query.c_str(), results.ErrorMessage().c_str());
 		return -1;
 	}
 
