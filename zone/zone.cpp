@@ -2010,7 +2010,6 @@ void Zone::LoadLDoNTrapEntries()
 	const std::string query = "SELECT id, trap_id FROM ldon_trap_entries";
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in Zone::LoadLDoNTrapEntries: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return;
     }
 
