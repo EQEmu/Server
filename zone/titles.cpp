@@ -359,7 +359,6 @@ bool Client::CheckTitle(int titleSet) {
                                     titleSet, CharacterID());
     auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in CheckTitle query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return false;
 	}
 
