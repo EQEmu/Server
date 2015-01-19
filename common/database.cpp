@@ -3488,7 +3488,7 @@ uint32 Database::GetRaidID(const char* name){
 
 	if (row == results.end())
 	{
-		std::cout << "Unable to get raid id, char not found!" << std::endl;
+		Log.Out(Logs::General, Logs::Error, "Unable to get raid id, char not found!");
 		return 0;
 	}
 
