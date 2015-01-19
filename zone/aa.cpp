@@ -1946,7 +1946,6 @@ void ZoneDatabase::LoadAAs(SendAA_Struct **load){
     query = "SELECT skill_id, level, cost from aa_required_level_cost order by skill_id";
     results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in ZoneDatabase::LoadAAs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return;
     }
 
