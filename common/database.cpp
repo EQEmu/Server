@@ -736,7 +736,6 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 			auto results = QueryDatabase(invquery); 
 
 			if (!results.RowsAffected())
-				Log.Out(Logs::General, Logs::Error, "StoreCharacter inventory failed. Query '%s' %s", invquery.c_str(), results.ErrorMessage().c_str());
 #if EQDEBUG >= 9
 			else
 				Log.Out(Logs::General, Logs::None,, "StoreCharacter inventory succeeded. Query '%s'", invquery.c_str());
