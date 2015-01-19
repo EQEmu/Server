@@ -73,7 +73,6 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id) {
 	std::string query = StringFormat("SELECT race, gender, texture, mountspeed FROM horses WHERE filename = '%s'", fileName);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in Mount query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return nullptr;
 	}
 
