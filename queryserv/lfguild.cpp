@@ -301,7 +301,6 @@ void LFGuildManager::ToggleGuild(uint32 FromZoneID, uint32 FromInstanceID, char 
                             Classes, AACount, TimeZone, Now);
 		auto results = database.QueryDatabase(query);
 		if(!results.Success())
-			Log.Out(Logs::Detail, Logs::QS_Server, "Error inserting guild into LFGuild table, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
 	}
 
