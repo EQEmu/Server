@@ -262,7 +262,6 @@ void TitleManager::CreateNewPlayerTitle(Client *client, const char *title)
     safe_delete_array(escTitle);
     results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Error adding title: %s %s", query.c_str(), results.ErrorMessage().c_str());
         return;
     }
 
