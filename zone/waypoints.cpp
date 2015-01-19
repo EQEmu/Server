@@ -1275,7 +1275,6 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *client, uint32 spawn2id, float xpos, 
 
 	results = QueryDatabase(query);
 	if(!results.Success()) { // Query error
-		Log.Out(Logs::General, Logs::Error, "Error getting next waypoint id '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
 
