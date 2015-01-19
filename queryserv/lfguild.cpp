@@ -255,7 +255,6 @@ void LFGuildManager::TogglePlayer(uint32 FromZoneID, uint32 FromInstanceID, char
                             From, Comments, Level, Class, AAPoints, TimeZone, Now);
         auto results = database.QueryDatabase(query);
 		if(!results.Success())
-			Log.Out(Logs::Detail, Logs::QS_Server, "Error inserting player into LFGuild table, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
 	}
 
 	ServerPacket *pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(From) + strlen(Comments) + 30);
