@@ -74,6 +74,7 @@ namespace Logs{
 		WebInterface_Server,
 		World_Server,
 		Zone_Server,
+		MySQLError,
 		MaxCategoryID	/* Don't Remove this*/
 	};
 
@@ -114,6 +115,7 @@ namespace Logs{
 		"WebInterface Server",
 		"World Server",
 		"Zone Server",
+		"MySQL Error",
 	}; 
 }
 

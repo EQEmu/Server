@@ -3,6 +3,7 @@
 #endif
 
 #include "../common/misc_functions.h"
+#include "../common/eqemu_logsys.h"
 
 #include "dbcore.h"
 
@@ -115,11 +116,7 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
 
 		/* Implement Logging at the Root */
 		if (mysql_errno(&mysql) > 0 && strlen(query) > 0){
-			std::cout << "\n[MYSQL ERR] " << mysql_errno(&mysql) << ": " << mysql_error(&mysql) << " [Query]: \n" << query << "\n" << std::endl;
-			/* Write to log file */
-			std::ofstream log("eqemu_query_error_log.txt", std::ios_base::app | std::ios_base::out);
-			log << "[MYSQL ERR] " << mysql_error(&mysql) << "\n" << query << "\n";
-			log.close();
+			Log.Out(Logs::General, Logs::MySQLError, "%i: %s \n %s", mysql_errno(&mysql), mysql_error(&mysql), query);
 		}
 
 		return MySQLRequestResult(nullptr, 0, 0, 0, 0, mysql_errno(&mysql),errorBuffer);
