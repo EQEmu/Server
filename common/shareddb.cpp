@@ -1642,7 +1642,6 @@ int SharedDatabase::GetMaxBaseDataLevel() {
 	const std::string query = "SELECT MAX(level) FROM base_data";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in GetMaxBaseDataLevel query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
 		return -1;
 	}
 
