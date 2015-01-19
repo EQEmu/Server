@@ -670,7 +670,6 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
         query = StringFormat("SELECT slot, item_id FROM pets_equipmentset_entries WHERE set_id='%s'", curset);
         results = QueryDatabase(query);
         if (!results.Success())
-            Log.Out(Logs::General, Logs::Error, "Error in GetBasePetItems query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         else {
             for (row = results.begin(); row != results.end(); ++row)
             {
