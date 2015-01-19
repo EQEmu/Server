@@ -1086,7 +1086,6 @@ void SharedDatabase::GetFactionListInfo(uint32 &list_count, uint32 &max_lists) {
 	const std::string query = "SELECT COUNT(*), MAX(id) FROM npc_faction";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error getting npc faction info from database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
         return;
 	}
 
