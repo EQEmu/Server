@@ -16,31 +16,6 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-// Debug Levels
-#ifndef EQDEBUG
-#define EQDEBUG 1
-#else
-////// File/Console options
-// 0 <= Quiet mode Errors to file Status and Normal ignored
-// 1 >= Status and Normal to console, Errors to file
-// 2 >= Status, Normal, and Error to console and logfile
-// 3 >= Lite debug
-// 4 >= Medium debug
-// 5 >= Debug release (Anything higher is not recommended for regular use)
-// 6 == (Reserved for special builds) Login opcode debug All packets dumped
-// 7 == (Reserved for special builds) Chat Opcode debug All packets dumped
-// 8 == (Reserved for special builds) World opcode debug All packets dumped
-// 9 == (Reserved for special builds) Zone Opcode debug All packets dumped
-// 10 >= More than you ever wanted to know
-//
-/////
-// Add more below to reserve for file's functions ect.
-/////
-// Any setup code based on defines should go here
-//
-#endif
-
-
 #if defined(_DEBUG) && defined(WIN32)
 	#ifndef _CRTDBG_MAP_ALLOC
 		#include <stdlib.h>
@@ -80,7 +55,5 @@ public:
 	~EQEmuLog();
 private:
 };
-
-extern EQEmuLog* LogFile;
 
 #endif

@@ -54,10 +54,6 @@ namespace ConsoleColor {
 	#define va_copy(d,s) ((d) = (s))
 #endif
 
-static volatile bool logFileValid = false;
-static EQEmuLog realLogFile;
-EQEmuLog *LogFile = &realLogFile;
-
 EQEmuLog::EQEmuLog()
 {
 }
