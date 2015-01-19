@@ -846,7 +846,6 @@ bool BaseGuildManager::DBSetPublicNote(uint32 charid, const char* note) {
 
 	if (!results.Success())
 	{
-		Log.Out(Logs::Detail, Logs::Guilds, "Error setting public note for char %d '%s': %s", charid, query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
