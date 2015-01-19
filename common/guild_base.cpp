@@ -651,7 +651,6 @@ bool BaseGuildManager::DBSetGuildMOTD(uint32 guild_id, const char* motd, const c
 
 	if (!results.Success())
 	{
-		Log.Out(Logs::Detail, Logs::Guilds, "Error setting MOTD for guild %d '%s': %s", guild_id, query.c_str(), results.ErrorMessage().c_str());
 		safe_delete_array(esc);
 		safe_delete_array(esc_set);
 		return false;
