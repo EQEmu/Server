@@ -268,7 +268,6 @@ bool SharedDatabase::DeleteInventorySlot(uint32 char_id, int16 slot_id) {
 	std::string query = StringFormat("DELETE FROM inventory WHERE charid = %i AND slotid = %i", char_id, slot_id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "DeleteInventorySlot query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return false;
     }
 
