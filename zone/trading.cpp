@@ -2264,7 +2264,6 @@ void Client::SendBuyerResults(char* searchString, uint32 searchID) {
 	safe_delete_array(escSearchString);
 	auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::Detail, Logs::None, "[CLIENT] Failed to retrieve Barter Search!! %s %s\n", query.c_str(), results.ErrorMessage().c_str());
         return;
     }
 
