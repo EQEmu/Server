@@ -385,7 +385,6 @@ bool RuleManager::ListRulesets(Database *db, std::map<int, std::string> &into) {
     auto results = db->QueryDatabase(query);
 	if (results.Success())
 	{
-		Log.Out(Logs::General, Logs::Error, "Error in ListRulesets query %s: %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
