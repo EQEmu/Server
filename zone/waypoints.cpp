@@ -1319,7 +1319,6 @@ int ZoneDatabase::GetHighestWaypoint(uint32 zoneid, uint32 gridid) {
                                     "WHERE zoneid = %i AND gridid = %i", zoneid, gridid);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in GetHighestWaypoint query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
 	}
 
