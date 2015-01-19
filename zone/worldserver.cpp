@@ -131,7 +131,7 @@ void WorldServer::OnConnected() {
 	SendPacket(pack);
 	safe_delete(pack);
 }
-
+/* Zone Process Packets from World */
 void WorldServer::Process() {
 	WorldConnection::Process();
 

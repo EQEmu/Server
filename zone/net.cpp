@@ -348,15 +348,10 @@ int main(int argc, char** argv) {
 		//Advance the timer to our current point in time
 		Timer::SetCurrentTime();
 
-		//process stuff from world
 		worldserver.Process();
 
 		if (!eqsf.IsOpen() && Config->ZonePort!=0) {
 			Log.Out(Logs::Detail, Logs::Zone_Server, "Starting EQ Network server on port %d",Config->ZonePort);
-
-			// log_sys.CloseZoneLogs();
-			// log_sys.StartZoneLogs(StringFormat("%s_ver-%u_instid-%u_port-%u", zone->GetShortName(), zone->GetInstanceVersion(), zone->GetInstanceID(), ZoneConfig::get()->ZonePort));
-
 			if (!eqsf.Open(Config->ZonePort)) {
 				Log.Out(Logs::General, Logs::Error, "Failed to open port %d",Config->ZonePort);
 				ZoneConfig::SetZonePort(0);
@@ -429,10 +424,8 @@ int main(int argc, char** argv) {
 				if(net.raid_timer.Enabled() && net.raid_timer.Check())
 					entity_list.RaidProcess();
 
-				entity_list.Process();
-
-				entity_list.MobProcess();
-
+				entity_list.Process(); 
+				entity_list.MobProcess(); 
 				entity_list.BeaconProcess();
 
 				if (zone) {
@@ -462,7 +455,7 @@ int main(int argc, char** argv) {
 		}
 #endif
 #endif
-		}	//end extra profiler block
+		}	//end extra profiler block 
 		Sleep(ZoneTimerResolution);
 	}
 
@@ -504,8 +497,7 @@ void Shutdown()
 {
 	Zone::Shutdown(true);
 	RunLoops = false;
-	worldserver.Disconnect();
-	//	safe_delete(worldserver);
+	worldserver.Disconnect(); 
 	Log.Out(Logs::Detail, Logs::Zone_Server, "Shutting down...");
 }
 
