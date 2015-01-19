@@ -53,7 +53,7 @@
 #include "../common/string_util.h"
 #include "../common/eqemu_logsys.h"
 
-#include "client_logs.h"
+
 #include "command.h"
 #include "guild_mgr.h"
 #include "map.h"
