@@ -1787,7 +1787,6 @@ void SharedDatabase::GetLootDropInfo(uint32 &loot_drop_count, uint32 &max_loot_d
 	const std::string query = "SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM lootdrop_entries) FROM lootdrop";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error getting loot table info from database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
         return;
     }
 
