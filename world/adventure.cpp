@@ -386,7 +386,6 @@ void Adventure::MoveCorpsesToGraveyard()
 	std::string query = StringFormat("SELECT id, charid FROM character_corpses WHERE instanceid=%d", GetInstanceID());
 	auto results = database.QueryDatabase(query);
 	if(!results.Success())
-        Log.Out(Logs::General, Logs::Error, "Error in AdventureManager:::MoveCorpsesToGraveyard: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 
 	for(auto row = results.begin(); row != results.end(); ++row) {
         dbid_list.push_back(atoi(row[0]));
