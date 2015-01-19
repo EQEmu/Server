@@ -1077,7 +1077,6 @@ void AdventureManager::LoadLeaderboardInfo()
 		"AS adv_stats LEFT JOIN `character_data` AS ch ON adv_stats.player_id = ch.id;";
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in AdventureManager:::GetLeaderboardInfo: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
