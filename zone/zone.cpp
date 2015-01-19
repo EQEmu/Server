@@ -2096,7 +2096,6 @@ void Zone::LoadAlternateCurrencies()
     const std::string query = "SELECT id, item_id FROM alternate_currency";
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in Zone::LoadAlternateCurrencies: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return;
     }
 
