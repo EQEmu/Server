@@ -490,7 +490,6 @@ void Database::SetMessageStatus(int messageNumber, int status) {
     std::string query = StringFormat("UPDATE `mail` SET `status` = %i WHERE `msgid`=%i", status, messageNumber);
     auto results = QueryDatabase(query);
 	if (!results.Success())
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Error updating status %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
