@@ -603,7 +603,6 @@ bool GuildBankManager::Load(uint32 guildID)
                                     "FROM `guild_bank` WHERE `guildid` = %i", guildID);
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error Loading guild bank: %s, %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
