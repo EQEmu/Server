@@ -721,7 +721,6 @@ bool BaseGuildManager::DBSetGuildChannel(uint32 GuildID, const char* Channel)
 
 	if (!results.Success())
 	{
-		Log.Out(Logs::Detail, Logs::Guilds, "Error setting Channel for guild %d '%s': %s", GuildID, query.c_str(), results.ErrorMessage().c_str());
 		safe_delete_array(esc);
 		return(false);
 	}
