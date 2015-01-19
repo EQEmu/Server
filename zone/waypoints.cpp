@@ -1154,7 +1154,6 @@ void ZoneDatabase::ModifyGrid(Client *client, bool remove, uint32 id, uint8 type
                                             "VALUES (%i, %i, %i, %i)", id, zoneid, type, type2);
         auto results = QueryDatabase(query);
         if (!results.Success()) {
-            Log.Out(Logs::General, Logs::Error, "Error creating grid entry '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
             return;
         }
 
