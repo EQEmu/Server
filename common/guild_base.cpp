@@ -862,7 +862,6 @@ bool BaseGuildManager::QueryWithLogging(std::string query, const char *errmsg) {
 
 	if (!results.Success())
 	{
-		Log.Out(Logs::Detail, Logs::Guilds, "Error %s: '%s': %s", errmsg, query.c_str(), results.ErrorMessage().c_str());
 		return(false);
 	}
 
