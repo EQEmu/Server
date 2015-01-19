@@ -1457,8 +1457,7 @@ void ZoneDatabase::UpdateRecipeMadecount(uint32 recipe_id, uint32 char_id, uint3
                                     "SET recipe_id = %u, char_id = %u, madecount = %u "
                                     "ON DUPLICATE KEY UPDATE madecount = %u;",
                                     recipe_id, char_id, madeCount, madeCount);
-    auto results = QueryDatabase(query);
-	if (!results.Success())
+    QueryDatabase(query);
 }
 
 void Client::LearnRecipe(uint32 recipeID)

@@ -508,8 +508,6 @@ void Database::ExpireMail() {
         results = QueryDatabase(query);
 		if(results.Success())
             Log.Out(Logs::Detail, Logs::UCS_Server, "Expired %i trash messages.", results.RowsAffected());
-		else
-
 	}
 
 	// Expire Read
@@ -519,7 +517,6 @@ void Database::ExpireMail() {
         results = QueryDatabase(query);
 		if(results.Success())
             Log.Out(Logs::Detail, Logs::UCS_Server, "Expired %i read messages.", results.RowsAffected());
-		else
 	}
 
 	// Expire Unread
@@ -529,7 +526,6 @@ void Database::ExpireMail() {
         results = QueryDatabase(query);
 		if(results.Success())
             Log.Out(Logs::Detail, Logs::UCS_Server, "Expired %i unread messages.", results.RowsAffected());
-		else
 	}
 }
 
@@ -539,8 +535,7 @@ void Database::AddFriendOrIgnore(int charID, int type, std::string name) {
                                     "VALUES('%i', %i, '%s')",
                                     charID, type, CapitaliseName(name).c_str());
     auto results = QueryDatabase(query);
-	if(!results.Success())
-	else
+	if(results.Success())
 		Log.Out(Logs::Detail, Logs::UCS_Server, "Wrote Friend/Ignore entry for charid %i, type %i, name %s to database.", charID, type, name.c_str());
 
 }

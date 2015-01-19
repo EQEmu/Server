@@ -668,9 +668,7 @@ void SpawnConditionManager::UpdateDBEvent(SpawnEvent &event) {
                                     event.next.day, event.next.month,
                                     event.next.year, event.enabled? 1: 0,
                                     event.strict? 1: 0, event.id);
-	auto results = database.QueryDatabase(query);
-	if(!results.Success())
-
+	database.QueryDatabase(query);
 }
 
 void SpawnConditionManager::UpdateDBCondition(const char* zone_name, uint32 instance_id, uint16 cond_id, int16 value) {
@@ -679,9 +677,7 @@ void SpawnConditionManager::UpdateDBCondition(const char* zone_name, uint32 inst
                                     "(id, value, zone, instance_id) "
                                     "VALUES( %u, %u, '%s', %u)",
                                     cond_id, value, zone_name, instance_id);
-    auto results = database.QueryDatabase(query);
-	if(!results.Success())
-
+    database.QueryDatabase(query);
 }
 
 bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, std::string &zone_name) {

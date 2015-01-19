@@ -402,8 +402,7 @@ void Adventure::MoveCorpsesToGraveyard()
                             "x = %f, y = %f, z = %f WHERE instanceid = %d",
                             GetTemplate()->graveyard_zone_id,
                             x, y, z, GetInstanceID());
-		auto results = database.QueryDatabase(query);
-		if(!results.Success())
+		database.QueryDatabase(query);
 	}
 
     auto c_iter = charid_list.begin();

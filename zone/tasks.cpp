@@ -723,9 +723,7 @@ void ClientTaskState::EnableTask(int characterID, int taskCount, int *tasks) {
 
     std::string query = queryStream.str();
 	Log.Out(Logs::General, Logs::Tasks, "[UPDATE] Executing query %s", query.c_str());
-    auto results = database.QueryDatabase(query);
-	if(!results.Success())
-
+    database.QueryDatabase(query);
 }
 
 void ClientTaskState::DisableTask(int charID, int taskCount, int *taskList) {
