@@ -228,7 +228,6 @@ bool Database::GetVariable(const char* varname, char* varvalue, uint16 varvalue_
 	std::string query = StringFormat("SELECT `value` FROM `variables` WHERE `varname` = '%s'", varname);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Unable to get message count from database. %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
