@@ -1011,7 +1011,6 @@ int	ZoneDatabase::GetHighestGrid(uint32 zoneid) {
 	std::string query = StringFormat("SELECT COALESCE(MAX(id), 0) FROM grid WHERE zoneid = %i", zoneid);
 	auto results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in GetHighestGrid query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
 
