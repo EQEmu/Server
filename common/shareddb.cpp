@@ -1812,7 +1812,6 @@ void SharedDatabase::LoadLootTables(void *data, uint32 size) {
                             "ON loottable.id = loottable_entries.loottable_id ORDER BY id";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error getting loot table info from database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
         return;
     }
 
