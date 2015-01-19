@@ -232,7 +232,6 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id) {
 	auto results = m_db->QueryDatabase(query);
 
 	if (!results.Success())
-		Log.Out(Logs::Detail, Logs::Guilds, "Error clearing old guild record when storing %d '%s': %s", guild_id, query.c_str(), results.ErrorMessage().c_str());
 
 	//clear out old `guild_ranks` entries
 	query = StringFormat("DELETE FROM guild_ranks WHERE guild_id=%lu", (unsigned long)guild_id);
