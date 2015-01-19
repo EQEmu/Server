@@ -327,7 +327,6 @@ int RuleManager::GetRulesetID(Database *db, const char *rulesetname) {
     safe_delete_array(rst);
     auto results = db->QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in LoadRules query %s: %s", query.c_str(), results.ErrorMessage().c_str());
         return -1;
     }
 
