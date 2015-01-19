@@ -30,7 +30,7 @@
 #include "../common/unix.h"
 #endif
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/features.h"
 #include "../common/rulesys.h"
 #include "../common/seperator.h"

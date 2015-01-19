@@ -42,7 +42,7 @@
 #define strcasecmp _stricmp
 #endif
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/eq_packet.h"
 #include "../common/features.h"
 #include "../common/guilds.h"

@@ -1,4 +1,4 @@
-#include "../common/debug.h"
+#include "../common/global_define.h"
 
 #include "client.h"
 #include "doors.h"

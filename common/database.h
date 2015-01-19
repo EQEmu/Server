@@ -21,7 +21,7 @@
 #define AUTHENTICATION_TIMEOUT	60
 #define INVALID_ID				0xFFFFFFFF
 
-#include "debug.h"
+#include "global_define.h"
 #include "eqemu_logsys.h"
 #include "types.h"
 #include "dbcore.h"

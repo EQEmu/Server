@@ -1,4 +1,4 @@
-#include "debug.h"
+#include "global_define.h"
 #include "tcp_server.h"
 #include "../common/eqemu_logsys.h"
 

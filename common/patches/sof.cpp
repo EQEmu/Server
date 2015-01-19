@@ -1,4 +1,4 @@
-#include "../debug.h"
+#include "../global_define.h"
 #include "../eqemu_logsys.h"
 #include "sof.h"
 #include "../opcodemgr.h"

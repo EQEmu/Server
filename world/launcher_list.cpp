@@ -17,7 +17,7 @@
 */
 
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "launcher_list.h"
 #include "launcher_link.h"
 

@@ -1,7 +1,7 @@
 #ifndef ADVENTURE_TEMPLATE_H
 #define ADVENTURE_TEMPLATE_H
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/types.h"
 
 #pragma pack(1)

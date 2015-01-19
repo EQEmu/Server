@@ -19,7 +19,7 @@
 #include "../common/eqemu_logsys.h"
 #include "../common/bodytypes.h"
 #include "../common/classes.h"
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/item.h"
 #include "../common/rulesys.h"
 #include "../common/skills.h"

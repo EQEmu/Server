@@ -1,5 +1,5 @@
 
-#include "debug.h"
+#include "global_define.h"
 #include "eqemu_logsys.h"
 #include "struct_strategy.h"
 

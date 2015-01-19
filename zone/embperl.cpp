@@ -10,7 +10,7 @@ Eglin
 
 #ifdef EMBPERL
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include <cstdio>
 #include <cstdarg>

@@ -17,7 +17,7 @@
 */
 
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/md5.h"
 #include "../common/packet_dump.h"

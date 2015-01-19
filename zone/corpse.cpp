@@ -28,7 +28,7 @@ Child of the Mob class.
     #define strcasecmp	_stricmp
 #endif
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"

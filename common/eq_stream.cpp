@@ -16,7 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "debug.h"
+#include "global_define.h"
 #include "eqemu_logsys.h"
 #include "eq_packet.h"
 #include "eq_stream.h"

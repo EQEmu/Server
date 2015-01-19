@@ -17,7 +17,7 @@
 */
 
 #include "classes.h"
-#include "debug.h"
+#include "global_define.h"
 #include "item.h"
 #include "races.h"
 #include "rulesys.h"

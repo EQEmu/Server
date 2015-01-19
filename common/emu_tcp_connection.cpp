@@ -23,7 +23,7 @@ crap into its own subclass of this object, it will clean things up
 tremendously.
 */
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 
 #include <iostream>
 #include <string.h>

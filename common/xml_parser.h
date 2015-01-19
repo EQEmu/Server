@@ -18,7 +18,7 @@
 #ifndef XMLParser_H
 #define XMLParser_H
 
-#include "debug.h"
+#include "global_define.h"
 #include "tinyxml/tinyxml.h"
 #include "../common/types.h"
 

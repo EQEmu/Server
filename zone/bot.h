@@ -12,7 +12,7 @@
 #include "zonedb.h"
 #include "string_ids.h"
 #include "../common/misc_functions.h"
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "guild_mgr.h"
 #include "worldserver.h"
 

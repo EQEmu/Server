@@ -19,7 +19,7 @@
 #include <stdio.h>
 
 #include "../common/eqemu_logsys.h"
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/shareddb.h"
 #include "../common/eqemu_config.h"
 #include "../common/platform.h"

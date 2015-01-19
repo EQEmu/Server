@@ -23,7 +23,7 @@
 #define AUTHENTICATION_TIMEOUT	60
 #define INVALID_ID				0xFFFFFFFF
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/types.h"
 #include "../common/dbcore.h"
 #include "../common/linked_list.h"

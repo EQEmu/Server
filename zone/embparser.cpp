@@ -18,7 +18,7 @@
 
 #ifdef EMBPERL
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/seperator.h"
 #include "../common/misc_functions.h"
 #include "../common/string_util.h"

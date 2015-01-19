@@ -1,4 +1,4 @@
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include "queryserv.h"
 #include "world_config.h"

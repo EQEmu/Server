@@ -17,7 +17,7 @@
 */
 
 #include "crc16.h"
-#include "debug.h"
+#include "global_define.h"
 #include "eq_packet.h"
 #include "misc.h"
 #include "op_codes.h"

@@ -17,7 +17,7 @@
 */
 
 #include "../common/eqemu_logsys.h"
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "wguild_mgr.h"
 #include "../common/servertalk.h"
 #include "clientlist.h"

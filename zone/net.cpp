@@ -19,7 +19,7 @@
 #define DONT_SHARED_OPCODES
 #define PLATFORM_ZONE 1
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/features.h"
 #include "../common/queue.h"
 #include "../common/timer.h"

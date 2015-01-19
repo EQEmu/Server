@@ -103,7 +103,6 @@ SET(common_headers
 	data_verification.h
 	database.h
 	dbcore.h
-	debug.h
 	deity.h
 	emu_opcodes.h
 	emu_oplist.h
@@ -133,6 +132,7 @@ SET(common_headers
 	features.h
 	fixed_memory_hash_set.h
 	fixed_memory_variable_hash_set.h
+	global_define.h
 	guild_base.h
 	guilds.h
 	ipc_mutex.h

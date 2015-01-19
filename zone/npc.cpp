@@ -18,7 +18,7 @@
 
 #include "../common/bodytypes.h"
 #include "../common/classes.h"
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/misc_functions.h"
 #include "../common/rulesys.h"
 #include "../common/seperator.h"
