@@ -500,7 +500,6 @@ void Database::ExpireMail() {
 	std::string query = "SELECT COUNT(*) FROM `mail`";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Unable to get message count from database. %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
