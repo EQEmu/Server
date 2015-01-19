@@ -711,7 +711,6 @@ void SharedDatabase::GetItemsCount(int32 &item_count, uint32 &max_id) {
 	const std::string query = "SELECT MAX(id), count(*) FROM items";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in GetItemsCount '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
         return;
 	}
 
