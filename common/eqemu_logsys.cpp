@@ -64,17 +64,6 @@ namespace Console {
 	};
 }
 
-// static Console::Color LogColors[MaxCategoryID] = {
-// 	Console::Color::Yellow, 		   // "Status", 
-// 	Console::Color::Yellow,			   // "Normal", 
-// 	Console::Color::LightRed,		   // "Error", 
-// 	Console::Color::LightGreen,		   // "Debug", 
-// 	Console::Color::LightCyan,		   // "Quest", 
-// 	Console::Color::LightMagenta,	   // "Command", 
-// 	Console::Color::LightRed		   // "Crash" 
-// };
-
-
 EQEmuLogSys::EQEmuLogSys(){
 	on_log_gmsay_hook = [](uint16 log_type, std::string&) {};
 }
@@ -131,6 +120,27 @@ void EQEmuLogSys::ProcessLogWrite(uint16 log_category, std::string message)
 	}
 	else{
 		// std::cout << "[DEBUG] " << ":: There currently is no log file open for this process " << "\n";
+	}
+}
+
+uint16 EQEmuLogSys::GetConsoleColorFromCategory(uint16 log_category){
+	switch (log_category) {
+		case Logs::Status:
+			return Console::Color::Yellow;
+		case Logs::Normal:
+			return Console::Color::Yellow;
+		case Logs::Error:
+			return Console::Color::LightRed;
+		case Logs::Debug:
+			return Console::Color::LightGreen;
+		case Logs::Quests:
+			return Console::Color::LightCyan;
+		case Logs::Commands:
+			return Console::Color::LightMagenta;
+		case Logs::Crash:	
+			return Console::Color::LightRed;
+		default:
+			return Console::Color::White;
 	}
 }
 

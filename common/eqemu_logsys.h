@@ -129,6 +129,7 @@ public:
 	void Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...);
 	void SetCurrentTimeStamp(char* time_stamp);
 	void StartFileLogs(const std::string log_name);
+	uint16 GetConsoleColorFromCategory(uint16 log_category);
 
 	struct LogSettings{
 		uint8 log_to_file;
