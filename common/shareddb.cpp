@@ -124,7 +124,6 @@ bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const Ite
                                     account_id, slot_id);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Error runing inventory verification query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		//returning true is less harmful in the face of a query error
 		return true;
 	}
