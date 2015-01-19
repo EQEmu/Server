@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 
+#include "../common/types.h"
 #include "../common/emu_opcodes.h"
 
 class Client;
