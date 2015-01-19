@@ -3243,7 +3243,6 @@ bool TaskProximityManager::LoadProximities(int zoneID) {
                                     "ORDER BY `zoneid` ASC", zoneID);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in TaskProximityManager::LoadProximities %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
     }
 
