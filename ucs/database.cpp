@@ -459,7 +459,6 @@ bool Database::SendMail(std::string recipient, std::string from, std::string sub
     safe_delete_array(escBody);
     auto results = QueryDatabase(query);
 	if(!results.Success()) {
-		Log.Out(Logs::Detail, Logs::UCS_Server, "SendMail: Query %s failed with error %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
