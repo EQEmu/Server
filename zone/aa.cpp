@@ -1892,7 +1892,6 @@ uint32 ZoneDatabase::CountAAs(){
 	const std::string query = "SELECT count(title_sid) FROM altadv_vars";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in ZoneDatabase::CountAAs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
 	}
 
