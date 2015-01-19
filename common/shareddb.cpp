@@ -1687,7 +1687,6 @@ void SharedDatabase::LoadBaseData(void *data, int max_level) {
 	const std::string query = "SELECT * FROM base_data ORDER BY level, class ASC";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in LoadBaseData query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
         return;
 	}
 
