@@ -1070,7 +1070,6 @@ uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(const char* zone, uint32 zone_ve
                                     zone, spawn->GetName(), Timer::GetCurrentTime());
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "CreateNewNPCSpawnGroupCommand Error: %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
     last_insert_id = results.LastInsertedID();
