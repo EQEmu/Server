@@ -330,7 +330,6 @@ void LFGuildManager::ExpireEntries()
         std::string query = StringFormat("DELETE from `lfguild` WHERE `type` = 0 AND `name` = '%s'", (*it).Name.c_str());
         auto results = database.QueryDatabase(query);
         if(!results.Success())
-            Log.Out(Logs::Detail, Logs::QS_Server, "Error expiring player LFGuild entry, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
         it = Players.erase(it);
     }
