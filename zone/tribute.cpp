@@ -406,7 +406,6 @@ bool ZoneDatabase::LoadTributes() {
 	const std::string query2 = "SELECT tribute_id, level, cost, item_id FROM tribute_levels ORDER BY tribute_id, level";
 	results = QueryDatabase(query2);
 	if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in LoadTributes level query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
