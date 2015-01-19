@@ -1460,7 +1460,6 @@ bool ZoneDatabase::LoadAAEffects2() {
 	const std::string query = "SELECT aaid, slot, effectid, base1, base2 FROM aa_effects ORDER BY aaid ASC, slot ASC";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in ZoneDatabase::LoadAAEffects2 query: '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
