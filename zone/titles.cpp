@@ -376,8 +376,6 @@ void Client::RemoveTitle(int titleSet) {
 	std::string query = StringFormat("DELETE FROM player_titlesets "
                                     "WHERE `title_set` = %i AND `char_id` = %i",
                                     titleSet, CharacterID());
-    auto results = database.QueryDatabase(query);
-	if (!results.Success())
-
+   database.QueryDatabase(query);
 }
 
