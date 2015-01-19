@@ -97,7 +97,6 @@ bool LoginServer::Process() {
 	while((pack = tcpc->PopPacket()))
 	{
 		Log.Out(Logs::Detail, Logs::World_Server,"Recevied ServerPacket from LS OpCode 0x04x",pack->opcode);
-		Log.Hex(Logs::Netcode, pack->pBuffer, pack->size);
 
 		switch(pack->opcode) {
 			case 0:
