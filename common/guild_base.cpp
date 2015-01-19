@@ -231,13 +231,9 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id) {
 	//clear out old `guilds` entry
 	auto results = m_db->QueryDatabase(query);
 
-	if (!results.Success())
-
 	//clear out old `guild_ranks` entries
 	query = StringFormat("DELETE FROM guild_ranks WHERE guild_id=%lu", (unsigned long)guild_id);
 	results = m_db->QueryDatabase(query);
-
-	if (!results.Success())
 
 	//escape our strings.
 	char *name_esc = new char[info->name.length()*2+1];

@@ -312,7 +312,6 @@ void RuleManager::_SaveRule(Database *db, RuleType type, uint16 index) {
                                     " VALUES(%d, '%s', '%s')",
                                     m_activeRuleset, _GetRuleName(type, index), vstr);
     auto results = db->QueryDatabase(query);
-	if (!results.Success())
 
 }
 

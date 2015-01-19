@@ -240,7 +240,6 @@ void LFGuildManager::TogglePlayer(uint32 FromZoneID, uint32 FromInstanceID, char
 
     std::string query = StringFormat("DELETE FROM `lfguild` WHERE `type` = 0 AND `name` = '%s'", From);
     auto results = database.QueryDatabase(query);
-	if(!results.Success())
 
 	uint32 Now = time(nullptr);
 
@@ -254,7 +253,6 @@ void LFGuildManager::TogglePlayer(uint32 FromZoneID, uint32 FromInstanceID, char
                             "VALUES (0, '%s', '%s', %u, 0, %u, %u, %u, %u)",
                             From, Comments, Level, Class, AAPoints, TimeZone, Now);
         auto results = database.QueryDatabase(query);
-		if(!results.Success())
 	}
 
 	ServerPacket *pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(From) + strlen(Comments) + 30);
@@ -284,7 +282,6 @@ void LFGuildManager::ToggleGuild(uint32 FromZoneID, uint32 FromInstanceID, char 
 
     std::string query = StringFormat("DELETE FROM `lfguild` WHERE `type` = 1 AND `name` = '%s'", GuildName);
     auto results = database.QueryDatabase(query);
-	if(!results.Success())
 
 	uint32 Now = time(nullptr);
 
@@ -300,7 +297,6 @@ void LFGuildManager::ToggleGuild(uint32 FromZoneID, uint32 FromInstanceID, char 
                             GuildName, Comments, FromLevel, ToLevel,
                             Classes, AACount, TimeZone, Now);
 		auto results = database.QueryDatabase(query);
-		if(!results.Success())
 
 	}
 

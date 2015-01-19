@@ -268,9 +268,7 @@ void Database::SetChannelPassword(std::string channelName, std::string password)
 
 	std::string query = StringFormat("UPDATE `chatchannels` SET `password` = '%s' WHERE `name` = '%s'",
                                     password.c_str(), channelName.c_str());
-    auto results = QueryDatabase(query);
-	if(!results.Success())
-
+    QueryDatabase(query);
 }
 
 void Database::SetChannelOwner(std::string channelName, std::string owner) {
@@ -279,9 +277,7 @@ void Database::SetChannelOwner(std::string channelName, std::string owner) {
 
 	std::string query = StringFormat("UPDATE `chatchannels` SET `owner` = '%s' WHERE `name` = '%s'",
                                     owner.c_str(), channelName.c_str());
-    auto results = QueryDatabase(query);
-	if(!results.Success())
-
+    QueryDatabase(query);
 }
 
 void Database::SendHeaders(Client *client) {
@@ -488,9 +484,7 @@ void Database::SetMessageStatus(int messageNumber, int status) {
     }
 
     std::string query = StringFormat("UPDATE `mail` SET `status` = %i WHERE `msgid`=%i", status, messageNumber);
-    auto results = QueryDatabase(query);
-	if (!results.Success())
-
+    QueryDatabase(query);
 }
 
 void Database::ExpireMail() {

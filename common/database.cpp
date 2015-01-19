@@ -734,12 +734,6 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 				charid, i, newinv->GetItem()->ID, newinv->GetCharges(), newinv->GetColor()); 
 			
 			auto results = QueryDatabase(invquery); 
-
-			if (!results.RowsAffected())
-#if EQDEBUG >= 9
-			else
-				Log.Out(Logs::General, Logs::None,, "StoreCharacter inventory succeeded. Query '%s'", invquery.c_str());
-#endif
 		}
 
 		if (i == MainCursor) { 
