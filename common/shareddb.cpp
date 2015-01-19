@@ -485,7 +485,6 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
                                     "FROM inventory WHERE charid = %i ORDER BY slotid", char_id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-    		Log.Out(Logs::General, Logs::Error, "GetInventory query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
             Log.Out(Logs::General, Logs::Error, "If you got an error related to the 'instnodrop' field, run the following SQL Queries:\nalter table inventory add instnodrop tinyint(1) unsigned default 0 not null;\n");
         return false;
     }
