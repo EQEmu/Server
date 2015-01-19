@@ -451,7 +451,6 @@ void Zone::LoadNewMerchantData(uint32 merchantid) {
                                      "classes_required, probability FROM merchantlist WHERE merchantid=%d ORDER BY slot", merchantid);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in LoadNewMerchantData query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
         return;
     }
 
