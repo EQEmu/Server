@@ -1120,7 +1120,6 @@ void SharedDatabase::LoadNPCFactionLists(void *data, uint32 size, uint32 list_co
                             "ON npc_faction.id = npc_faction_entries.npc_faction_id ORDER BY npc_faction.id;";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Error getting npc faction info from database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
     }
 
