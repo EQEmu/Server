@@ -5383,7 +5383,6 @@ bool Client::TryReward(uint32 claim_id) {
                             AccountID(), claim_id);
         auto results = database.QueryDatabase(query);
 		if(!results.Success())
-			Log.Out(Logs::General, Logs::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 	}
 	else {
         query = StringFormat("UPDATE account_rewards SET amount = (amount-1) "
