@@ -1223,7 +1223,6 @@ uint32 BaseGuildManager::DoesAccountContainAGuildLeader(uint32 AccountID)
     auto results = m_db->QueryDatabase(query);
 	if (!results.Success())
 	{
-		Log.Out(Logs::Detail, Logs::Guilds, "Error executing query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
 
