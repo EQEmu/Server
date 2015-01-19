@@ -281,7 +281,6 @@ void Database::SetChannelOwner(std::string channelName, std::string owner) {
                                     owner.c_str(), channelName.c_str());
     auto results = QueryDatabase(query);
 	if(!results.Success())
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Error updating Owner in database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
