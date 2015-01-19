@@ -569,7 +569,6 @@ void Database::GetFriendsAndIgnore(int charID, std::vector<std::string> &friends
 	std::string query = StringFormat("select `type`, `name` FROM `friends` WHERE `charid`=%i", charID);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::Detail, Logs::UCS_Server, "GetFriendsAndIgnore query error %s, %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
