@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "debug.h"
+#include "types.h"
 #include "proc_launcher.h"
 #ifdef _WINDOWS
 	#include <windows.h>

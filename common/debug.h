@@ -38,9 +38,9 @@
 	#include <winsock2.h>
 #endif
 
-#include "../common/mutex.h"
-#include <stdio.h>
-#include <stdarg.h>
+
+
+
 
 
 #endif

@@ -19,6 +19,7 @@
 #define EQ_CONSTANTS_H
 
 #include "skills.h"
+#include "types.h"
 
 /*
 **	Item attributes
