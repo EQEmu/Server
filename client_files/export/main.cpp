@@ -104,7 +104,6 @@ bool SkillUsable(SharedDatabase *db, int skill_id, int class_id) {
                                     class_id, skill_id);
 	auto results = db->QueryDatabase(query);
 	if(!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in skill_usable query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
         return false;
     }
 
