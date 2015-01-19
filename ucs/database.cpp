@@ -248,7 +248,6 @@ bool Database::LoadChatChannels() {
 	const std::string query = "SELECT `name`, `owner`, `password`, `minstatus` FROM `chatchannels`";
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Failed to load channels. %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
