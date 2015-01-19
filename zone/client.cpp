@@ -5290,7 +5290,6 @@ void Client::SendRewards()
                                     "ORDER BY reward_id", AccountID());
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in Client::SendRewards(): %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return;
     }
 
