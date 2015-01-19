@@ -294,7 +294,6 @@ bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id) {
 	std::string query = StringFormat("DELETE FROM sharedbank WHERE acctid=%i AND slotid=%i", account_id, slot_id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "DeleteSharedBankSlot query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return false;
     }
 
