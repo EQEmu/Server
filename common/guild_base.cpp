@@ -811,7 +811,6 @@ bool BaseGuildManager::GetAltFlag(uint32 CharID)
     auto results = m_db->QueryDatabase(query);
 	if(!results.Success())
 	{
-		Log.Out(Logs::Detail, Logs::Guilds, "Error retrieving alt flag '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
