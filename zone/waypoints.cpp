@@ -1117,7 +1117,6 @@ void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
 	results = QueryDatabase(query);
 	if (!results.Success())
 	{
-		Log.Out(Logs::General, Logs::Error, "Error updating spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return;
     }
 
