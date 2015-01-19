@@ -419,7 +419,6 @@ void Zone::LoadTempMerchantData() {
 		"ORDER BY ml.slot					   ", GetShortName(), GetInstanceVersion());
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Error in LoadTempMerchantData query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 	std::map<uint32, std::list<TempMerchantList> >::iterator cur;
