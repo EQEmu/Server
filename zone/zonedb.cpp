@@ -2856,7 +2856,6 @@ void ZoneDatabase::SaveBuffs(Client *client) {
                             buffs[index].ExtraDIChance);
         auto results = QueryDatabase(query);
         if (!results.Success())
-            Log.Out(Logs::General, Logs::Error, "Error in SaveBuffs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 
 	}
 }
