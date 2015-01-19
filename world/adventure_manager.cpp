@@ -652,7 +652,6 @@ bool AdventureManager::LoadAdventureTemplates()
 		"graveyard_radius FROM adventure_template";
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in AdventureManager:::LoadAdventures: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return false;
     }
 
