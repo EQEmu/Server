@@ -378,7 +378,6 @@ void Client::RemoveTitle(int titleSet) {
                                     titleSet, CharacterID());
     auto results = database.QueryDatabase(query);
 	if (!results.Success())
-		Log.Out(Logs::General, Logs::Error, "Error in RemoveTitle query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
