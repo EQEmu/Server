@@ -256,7 +256,6 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, 
 		}
 
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "UpdateSharedBankSlot query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return false;
     }
 
