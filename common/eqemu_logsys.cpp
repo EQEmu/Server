@@ -159,12 +159,7 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 log_category, const std::string m
 		info.FontWeight = FW_NORMAL;
 		wcscpy(info.FaceName, L"Lucida Console");
 		SetCurrentConsoleFontEx(console_handle, NULL, &info);
-		//if (LogColors[log_type]){
-		//	SetConsoleTextAttribute(console_handle, LogColors[log_type]);
-		//}
-		//else{
-			SetConsoleTextAttribute(console_handle, Console::Color::White);
-		//}
+		SetConsoleTextAttribute(console_handle, EQEmuLogSys::GetConsoleColorFromCategory(log_category));
 	#endif
 
 	std::cout << message << "\n";
