@@ -342,7 +342,6 @@ void LFGuildManager::ExpireEntries()
         std::string query = StringFormat("DELETE from `lfguild` WHERE `type` = 1 AND `name` = '%s'", (*it2).Name.c_str());
         auto results = database.QueryDatabase(query);
         if(!results.Success())
-            Log.Out(Logs::Detail, Logs::QS_Server, "Error removing guild LFGuild entry, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
         it2 = Guilds.erase(it2);
 	}
