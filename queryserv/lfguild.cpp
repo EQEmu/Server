@@ -241,7 +241,6 @@ void LFGuildManager::TogglePlayer(uint32 FromZoneID, uint32 FromInstanceID, char
     std::string query = StringFormat("DELETE FROM `lfguild` WHERE `type` = 0 AND `name` = '%s'", From);
     auto results = database.QueryDatabase(query);
 	if(!results.Success())
-		Log.Out(Logs::Detail, Logs::QS_Server, "Error removing player from LFGuild table, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
 	uint32 Now = time(nullptr);
 
