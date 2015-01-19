@@ -767,7 +767,7 @@ void WorldServer::Process() {
 						eqTime.minute,
 						(eqTime.hour >= 13) ? "pm" : "am"
 						);
-					std::cout << "Time Broadcast Packet: " << timeMessage << std::endl;
+					Log.Out(Logs::General, Logs::Zone_Server, "Time Broadcast Packet: %s", timeMessage);
 					zone->GotCurTime(true);
 				//}
 				//Test
