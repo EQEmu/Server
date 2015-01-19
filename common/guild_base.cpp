@@ -287,7 +287,6 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id) {
 
 		if (!results.Success())
 		{
-			Log.Out(Logs::Detail, Logs::Guilds, "Error inserting new guild rank record when storing %d for %d. Giving up. '%s': %s", rank, guild_id, query.c_str(), results.ErrorMessage().c_str());
 			safe_delete_array(title_esc);
 			return false;
 		}
