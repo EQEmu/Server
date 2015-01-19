@@ -1825,7 +1825,6 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
                                     searchValues.c_str(), searchCriteria.c_str(), RuleI(Bazaar, MaxSearchResults));
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::Detail, Logs::None, "[CLIENT] Failed to retrieve Bazaar Search!! %s %s\n", query.c_str(), results.ErrorMessage().c_str());
 		return;
     }
 
