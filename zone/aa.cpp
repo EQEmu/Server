@@ -1940,7 +1940,6 @@ void ZoneDatabase::LoadAAs(SendAA_Struct **load){
 			load[index]->seq = index+1;
 		}
 	} else {
-		Log.Out(Logs::General, Logs::Error, "Error in ZoneDatabase::LoadAAs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 	}
 
 	AARequiredLevelAndCost.clear();
