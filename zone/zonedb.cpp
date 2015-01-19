@@ -3114,7 +3114,6 @@ void ZoneDatabase::LoadPetInfo(Client *client) {
                         "WHERE `char_id`=%u",client->CharacterID());
     results = database.QueryDatabase(query);
     if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
