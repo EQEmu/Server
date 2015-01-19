@@ -455,25 +455,6 @@ int main(int argc, char** argv) {
 				worldserver.AsyncConnect();
 		}
 
-#if defined(_EQDEBUG) && defined(DEBUG_PC)
-		QueryPerformanceCounter(&tmp3);
-		mainloop_time += tmp3.QuadPart - tmp2.QuadPart;
-		if (!--tmp0) {
-			tmp0 = 200;
-			printf("Elapsed Tics  : %9.0f (%1.4f sec)\n", (double)mainloop_time, ((double)mainloop_time/tmp.QuadPart));
-			printf("NPCAI Tics    : %9.0f (%1.2f%%)\n", (double)npcai_time, ((double)npcai_time/mainloop_time)*100);
-			printf("FindSpell Tics: %9.0f (%1.2f%%)\n", (double)findspell_time, ((double)findspell_time/mainloop_time)*100);
-			printf("AtkAllowd Tics: %9.0f (%1.2f%%)\n", (double)IsAttackAllowed_time, ((double)IsAttackAllowed_time/mainloop_time)*100);
-			printf("ClientPro Tics: %9.0f (%1.2f%%)\n", (double)clientprocess_time, ((double)clientprocess_time/mainloop_time)*100);
-			printf("ClientAtk Tics: %9.0f (%1.2f%%)\n", (double)clientattack_time, ((double)clientattack_time/mainloop_time)*100);
-			mainloop_time = 0;
-			npcai_time = 0;
-			findspell_time = 0;
-			IsAttackAllowed_time = 0;
-			clientprocess_time = 0;
-			clientattack_time = 0;
-		}
-#endif
 #ifdef EQPROFILE
 #ifdef PROFILE_DUMP_TIME
 		if(profile_dump_timer.Check()) {

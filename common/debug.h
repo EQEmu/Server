@@ -110,20 +110,4 @@ private:
 
 extern EQEmuLog* LogFile;
 
-#ifdef _EQDEBUG
-class PerformanceMonitor {
-public:
-	PerformanceMonitor(int64* ip) {
-		p = ip;
-		QueryPerformanceCounter(&tmp);
-	}
-	~PerformanceMonitor() {
-		LARGE_INTEGER tmp2;
-		QueryPerformanceCounter(&tmp2);
-		*p += tmp2.QuadPart - tmp.QuadPart;
-	}
-	LARGE_INTEGER tmp;
-	int64* p;
-};
-#endif
 #endif

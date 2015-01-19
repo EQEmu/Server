@@ -118,9 +118,6 @@ void EQEmuLogSys::ProcessLogWrite(uint16 log_category, std::string message)
 	if (process_log){
 		process_log << time_stamp << " " << StringFormat("[%s] ", Logs::LogCategoryName[log_category]).c_str() << message << std::endl;
 	}
-	else{
-		// std::cout << "[DEBUG] " << ":: There currently is no log file open for this process " << "\n";
-	}
 }
 
 uint16 EQEmuLogSys::GetConsoleColorFromCategory(uint16 log_category){
@@ -140,7 +137,7 @@ uint16 EQEmuLogSys::GetConsoleColorFromCategory(uint16 log_category){
 		case Logs::Crash:	
 			return Console::Color::LightRed;
 		default:
-			return Console::Color::White;
+			return Console::Color::Yellow;
 	}
 }
 
