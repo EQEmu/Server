@@ -1496,7 +1496,6 @@ void Client::LearnRecipe(uint32 recipeID)
                         recipeID, CharacterID());
     results = database.QueryDatabase(query);
     if (!results.Success())
-        Log.Out(Logs::General, Logs::Error, "Error in LearnRecipe query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
