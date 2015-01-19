@@ -2051,7 +2051,6 @@ void Zone::LoadVeteranRewards()
                             "ORDER by claim_id, reward_slot";
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in Zone::LoadVeteranRewards: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
         return;
     }
 
