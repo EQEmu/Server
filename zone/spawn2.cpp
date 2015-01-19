@@ -421,7 +421,6 @@ bool ZoneDatabase::CreateSpawn2(Client *client, uint32 spawngroup, const char* z
                                     respawn, variance, condition, cond_value);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in CreateSpawn2 query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
     }
 
