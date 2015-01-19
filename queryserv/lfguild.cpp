@@ -285,7 +285,6 @@ void LFGuildManager::ToggleGuild(uint32 FromZoneID, uint32 FromInstanceID, char 
     std::string query = StringFormat("DELETE FROM `lfguild` WHERE `type` = 1 AND `name` = '%s'", GuildName);
     auto results = database.QueryDatabase(query);
 	if(!results.Success())
-		Log.Out(Logs::Detail, Logs::QS_Server, "Error removing guild from LFGuild table, query was %s, %s", query.c_str(), results.ErrorMessage().c_str());
 
 	uint32 Now = time(nullptr);
 
