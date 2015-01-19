@@ -329,7 +329,6 @@ uint32 BaseGuildManager::_GetFreeGuildID() {
 
 		if (!results.Success())
 		{
-			Log.Out(Logs::General, Logs::Error, "Error in _GetFreeGuildID query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 			continue;
 		}
 
