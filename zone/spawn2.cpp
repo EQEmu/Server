@@ -364,7 +364,6 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
                                     zone_name, version);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in PopulateZoneLists query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
     }
 
