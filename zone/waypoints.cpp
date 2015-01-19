@@ -1047,7 +1047,6 @@ bool ZoneDatabase::GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* 
                                     "WHERE gridid = %i AND number = %i AND zoneid = %i", grid, num, zoneid);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in GetWaypoints query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return false;
     }
 
