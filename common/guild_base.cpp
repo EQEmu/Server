@@ -254,7 +254,6 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id) {
 
 	if (!results.Success())
 	{
-		Log.Out(Logs::Detail, Logs::Guilds, "Error inserting new guild record when storing %d. Giving up. '%s': %s", guild_id, query.c_str(), results.ErrorMessage().c_str());
 		safe_delete_array(name_esc);
 		safe_delete_array(motd_esc);
 		safe_delete_array(motd_set_esc);
