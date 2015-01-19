@@ -536,7 +536,6 @@ void Database::ExpireMail() {
 		if(results.Success())
             Log.Out(Logs::Detail, Logs::UCS_Server, "Expired %i unread messages.", results.RowsAffected());
 		else
-			Log.Out(Logs::Detail, Logs::UCS_Server, "Error expiring unread messages, %s %s", query.c_str(), results.ErrorMessage().c_str());
 	}
 }
 
