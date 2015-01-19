@@ -313,7 +313,6 @@ void RuleManager::_SaveRule(Database *db, RuleType type, uint16 index) {
                                     m_activeRuleset, _GetRuleName(type, index), vstr);
     auto results = db->QueryDatabase(query);
 	if (!results.Success())
-		Log.Out(Logs::Detail, Logs::Rules, "Fauled to set rule in the database: %s: %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
