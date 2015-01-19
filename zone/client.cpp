@@ -349,10 +349,6 @@ Client::~Client() {
 		m_tradeskill_object = nullptr;
 	}
 
-#ifdef CLIENT_LOGS
-	client_logs.unsubscribeAll(this);
-#endif
-
 	ChangeSQLLog(nullptr);
 	if(IsDueling() && GetDuelTarget() != 0) {
 		Entity* entity = entity_list.GetID(GetDuelTarget());

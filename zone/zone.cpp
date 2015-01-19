@@ -888,9 +888,6 @@ Zone::~Zone() {
 		}
 		safe_delete_array(aas);
 	}
-#ifdef CLIENT_LOGS
-	client_logs.clear();
-#endif
 
 	safe_delete(GuildBanks);
 }
