@@ -226,7 +226,6 @@ void ZoneDatabase::UpdatePetitionToDB(Petition* wpet) {
                                     wpet->CheckedOut() ? 1: 0, wpet->GetID());
     auto results = QueryDatabase(query);
 	if (!results.Success())
-		Log.Out(Logs::General, Logs::Error, "Error in UpdatePetitionToDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
