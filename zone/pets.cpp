@@ -456,7 +456,6 @@ bool ZoneDatabase::GetPoweredPetEntry(const char *pet_type, int16 petpower, PetR
                             pet_type, petpower);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in GetPoweredPetEntry query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return false;
     }
 
