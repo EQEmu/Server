@@ -1300,7 +1300,6 @@ uint32 ZoneDatabase::GetFreeGrid(uint16 zoneid) {
 	std::string query = StringFormat("SELECT max(id) FROM grid WHERE zoneid = %i", zoneid);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in GetFreeGrid query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
 	}
 
