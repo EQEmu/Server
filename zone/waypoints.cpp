@@ -1088,7 +1088,6 @@ void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
                             zone->GetShortName(), x, _GASSIGN_TOLERANCE, y, _GASSIGN_TOLERANCE);
         results = QueryDatabase(query);
 		if (!results.Success()) {
-			Log.Out(Logs::General, Logs::Error, "Error querying fuzzy spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 			return;
 		}
 
