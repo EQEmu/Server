@@ -91,7 +91,6 @@ void ExportSpells(SharedDatabase *db) {
 			fprintf(f, "%s\n", line.c_str());
 		}
 	} else {
-		Log.Out(Logs::General, Logs::Error, "Error in ExportSpells query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
 	}
 
 	fclose(f);
