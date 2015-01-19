@@ -40,7 +40,6 @@ bool LFGuildManager::LoadDatabase()
                         "`aacount`, `timezone`, `timeposted` FROM `lfguild`";
     auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::Detail, Logs::QS_Server, "Failed to load LFGuild info from database. %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
