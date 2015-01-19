@@ -693,7 +693,6 @@ bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, std:
                                     "FROM spawn_events WHERE id = %d", event_id);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Error in LoadDBEvent query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
