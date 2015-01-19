@@ -1478,7 +1478,6 @@ static void BazaarAuditTrail(const char *seller, const char *buyer, const char *
                                     seller, buyer, itemName, quantity, totalCost, tranType);
     auto results = database.QueryDatabase(query);
 	if(!results.Success())
-		Log.Out(Logs::Detail, Logs::None, "[CLIENT] Audit write error: %s : %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
