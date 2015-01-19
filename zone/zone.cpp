@@ -1990,7 +1990,6 @@ void Zone::LoadLDoNTraps()
 	const std::string query = "SELECT id, type, spell_id, skill, locked FROM ldon_trap_templates";
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in Zone::LoadLDoNTraps: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return;
     }
 
