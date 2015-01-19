@@ -26,10 +26,6 @@
 #ifndef EQDEBUG_H
 #define EQDEBUG_H
 
-#ifndef _WINDOWS
-	#define DebugBreak()			if(0) {}
-#endif
-
 #define _WINSOCKAPI_	//stupid windows, trying to fix the winsock2 vs. winsock issues
 #if defined(WIN32) && ( defined(PACKETCOLLECTOR) || defined(COLLECTOR) )
 	// Packet Collector on win32 requires winsock.h due to latest pcap.h
@@ -42,18 +38,9 @@
 	#include <winsock2.h>
 #endif
 
-
-
 #include "../common/mutex.h"
 #include <stdio.h>
 #include <stdarg.h>
 
-
-class EQEmuLog {
-public:
-	EQEmuLog();
-	~EQEmuLog();
-private:
-};
 
 #endif
