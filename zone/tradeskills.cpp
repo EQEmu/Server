@@ -467,7 +467,6 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
                                     rac->recipe_id);
     auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in HandleAutoCombine query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
