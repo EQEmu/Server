@@ -1449,7 +1449,6 @@ void SharedDatabase::LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpe
                                     "AND `spellid` <= %i", iMaxSpellID);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in LoadDamageShieldTypes: %s %s", query.c_str(), results.ErrorMessage().c_str());
         return;
     }
 
