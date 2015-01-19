@@ -353,7 +353,6 @@ int RuleManager::_FindOrCreateRuleset(Database *db, const char *ruleset) {
 	auto results = db->QueryDatabase(query);
 	if (!results.Success())
 	{
-		Log.Out(Logs::Detail, Logs::Rules, "Fauled to create rule set in the database: %s: %s", query.c_str(), results.ErrorMessage().c_str());
 		return -1;
 	}
 
