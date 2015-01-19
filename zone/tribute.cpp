@@ -390,7 +390,6 @@ bool ZoneDatabase::LoadTributes() {
 	const std::string query = "SELECT id, name, descr, unknown, isguild FROM tributes";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in LoadTributes first query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
