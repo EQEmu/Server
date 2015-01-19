@@ -725,7 +725,6 @@ void ClientTaskState::EnableTask(int characterID, int taskCount, int *tasks) {
 	Log.Out(Logs::General, Logs::Tasks, "[UPDATE] Executing query %s", query.c_str());
     auto results = database.QueryDatabase(query);
 	if(!results.Success())
-		Log.Out(Logs::General, Logs::Error, "[TASKS]Error in ClientTaskState::EnableTask %s %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
