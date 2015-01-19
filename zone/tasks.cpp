@@ -3107,7 +3107,6 @@ bool TaskGoalListManager::LoadLists() {
 							listID, size);
         results = database.QueryDatabase(query);
         if (!results.Success()) {
-            Log.Out(Logs::General, Logs::Error, ERR_MYSQLERROR, query.c_str(), results.ErrorMessage().c_str());
 			TaskGoalLists[listIndex].Size = 0;
 			continue;
         }
