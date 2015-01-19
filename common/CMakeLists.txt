@@ -142,7 +142,6 @@ SET(common_headers
 	item_struct.h
 	languages.h
 	linked_list.h
-	logtypes.h
 	loottable.h
 	mail_oplist.h
 	md5.h

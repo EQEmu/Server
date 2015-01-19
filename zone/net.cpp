@@ -114,12 +114,9 @@ void Shutdown();
 extern void MapOpcodes();
 
 int main(int argc, char** argv) {
-	RegisterExecutablePlatform(ExePlatformZone);
-
-	set_exception_handler();
-
-	const char *zone_name;
-
+	RegisterExecutablePlatform(ExePlatformZone); 
+	set_exception_handler(); 
+	const char *zone_name; 
 	QServ = new QueryServ;
 
 	if(argc == 3) {
