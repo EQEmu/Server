@@ -1459,7 +1459,6 @@ void ZoneDatabase::UpdateRecipeMadecount(uint32 recipe_id, uint32 char_id, uint3
                                     recipe_id, char_id, madeCount, madeCount);
     auto results = QueryDatabase(query);
 	if (!results.Success())
-		Log.Out(Logs::General, Logs::Error, "Error in UpdateRecipeMadecount query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 }
 
 void Client::LearnRecipe(uint32 recipeID)
