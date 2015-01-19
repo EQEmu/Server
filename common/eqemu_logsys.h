@@ -114,8 +114,7 @@ namespace Logs{
 		"WebInterface Server",
 		"World Server",
 		"Zone Server",
-	};
-
+	}; 
 }
 
 class EQEmuLogSys {
@@ -129,7 +128,6 @@ public:
 	void Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...);
 	void SetCurrentTimeStamp(char* time_stamp);
 	void StartFileLogs(const std::string log_name);
-	uint16 GetConsoleColorFromCategory(uint16 log_category);
 
 	struct LogSettings{
 		uint8 log_to_file;
@@ -145,9 +143,11 @@ public:
 
 private:
 	bool zone_general_init = false;
+	
 	std::function<void(uint16 log_category, std::string&)> on_log_gmsay_hook;
-
 	std::string FormatOutMessageString(uint16 log_category, std::string in_message);
+	
+	uint16 GetConsoleColorFromCategory(uint16 log_category);
 
 	void ProcessConsoleMessage(uint16 log_category, const std::string message);
 	void ProcessGMSay(uint16 log_category, std::string message);
