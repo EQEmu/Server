@@ -756,7 +756,6 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
                         zone_name, instance_id);
     results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in LoadSpawnConditions query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		spawn_conditions.clear();
 		return false;
     }
