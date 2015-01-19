@@ -201,8 +201,6 @@ int main(int argc, char** argv) {
 	}
 	#endif
 
-	const char *log_ini_file = "./log.ini";
-
 	Log.Out(Logs::Detail, Logs::Zone_Server, "Mapping Incoming Opcodes");
 	MapOpcodes();
 	
