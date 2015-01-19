@@ -280,7 +280,6 @@ bool SharedDatabase::DeleteInventorySlot(uint32 char_id, int16 slot_id) {
                         char_id, base_slot_id, (base_slot_id+10));
     results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "DeleteInventorySlot, bags query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return false;
     }
 
