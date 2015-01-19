@@ -164,15 +164,7 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 log_category, const std::string m
 		SetConsoleTextAttribute(console_handle, Console::Color::White);
 	#endif
 }
-/*
-void EQEmuLogSys::Raw(uint16 log_category, uint16 seq, const BasePacket *p) {
-	return;
-	char buffer[196];
-	p->build_raw_header_dump(buffer, seq);
-	//log_message(type,buffer);
-	EQEmuLogSys::Hex(log_category, (const char *)p->pBuffer, p->size);
-}
-*/
+
 void EQEmuLogSys::Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...)
 {
 	va_list args;
