@@ -1212,7 +1212,6 @@ void ZoneDatabase::DeleteWaypoint(Client *client, uint32 grid_num, uint32 wp_num
                                     grid_num, zoneid, wp_num);
     auto results = QueryDatabase(query);
 	if(!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error deleting waypoint '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
