@@ -2874,7 +2874,6 @@ void ZoneDatabase::LoadBuffs(Client *client) {
                                     "FROM `character_buffs` WHERE `character_id` = '%u'", client->CharacterID());
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in LoadBuffs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
     }
 
