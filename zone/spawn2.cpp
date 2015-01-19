@@ -670,7 +670,6 @@ void SpawnConditionManager::UpdateDBEvent(SpawnEvent &event) {
                                     event.strict? 1: 0, event.id);
 	auto results = database.QueryDatabase(query);
 	if(!results.Success())
-		Log.Out(Logs::General, Logs::Error, "Unable to update spawn event '%s': %s\n", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
