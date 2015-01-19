@@ -754,7 +754,6 @@ bool BaseGuildManager::DBSetGuild(uint32 charid, uint32 guild_id, uint8 rank) {
         auto results = m_db->QueryDatabase(query);
         if (!results.Success())
 		{
-			Log.Out(Logs::Detail, Logs::Guilds, "Error removing char %d from guild '%s': %s", charid, guild_id, query.c_str(), results.ErrorMessage().c_str());
 			return false;
 		}
     }
