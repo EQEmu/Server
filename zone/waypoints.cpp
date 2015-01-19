@@ -1187,7 +1187,6 @@ void ZoneDatabase::AddWP(Client *client, uint32 gridid, uint32 wpnum, float xpos
                                     gridid, zoneid, wpnum, xpos, ypos, zpos, pause, heading);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Error adding waypoint '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
