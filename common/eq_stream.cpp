@@ -102,7 +102,6 @@ EQRawApplicationPacket *EQStream::MakeApplicationPacket(const unsigned char *buf
 {
 	EQRawApplicationPacket *ap=nullptr;
 	Log.Out(Logs::Detail, Logs::Netcode, _L "Creating new application packet, length %d" __L, len);
-	Log.Hex(Logs::Netcode, buf, len);
 	ap = new EQRawApplicationPacket(buf, len);
 	return ap;
 }
