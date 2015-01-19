@@ -294,7 +294,6 @@ void TitleManager::CreateNewPlayerSuffix(Client *client, const char *suffix)
     safe_delete_array(escSuffix);
     results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Error adding title suffix: %s %s", query.c_str(), results.ErrorMessage().c_str());
         return;
     }
 
