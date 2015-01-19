@@ -2893,8 +2893,6 @@ namespace RoF2
 			}
 		}
 
-		Log.Hex(Logs::Netcode, eq, sizeof(structs::SendAA_Struct) + emu->total_abilities*sizeof(structs::AA_Ability));
-
 		FINISH_ENCODE();
 	}
 

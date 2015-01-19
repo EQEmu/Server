@@ -2809,8 +2809,6 @@ namespace RoF
 			}
 		}
 
-		Log.Hex(Logs::Netcode, eq, sizeof(structs::SendAA_Struct) + emu->total_abilities*sizeof(structs::AA_Ability));
-
 		FINISH_ENCODE();
 	}
 
@@ -4502,8 +4500,6 @@ namespace RoF
 		emu->from_slot = RoFToServerSlot(eq->from_slot);
 		emu->to_slot = RoFToServerSlot(eq->to_slot);
 		IN(number_in_stack);
-
-		Log.Hex(Logs::Netcode, eq, sizeof(structs::MoveItem_Struct));
 
 		FINISH_DIRECT_DECODE();
 	}

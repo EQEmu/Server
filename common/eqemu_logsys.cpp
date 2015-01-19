@@ -164,16 +164,6 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 log_category, const std::string m
 		SetConsoleTextAttribute(console_handle, Console::Color::White);
 	#endif
 }
-
-void EQEmuLogSys::Hex(uint16 log_category, const void *data, unsigned long length, unsigned char padding) {
-	return; 
-	char buffer[80];
-	uint32 offset;
-	for (offset = 0; offset < length; offset += 16) {
-		build_hex_line((const char *)data, length, offset, buffer, padding);
-		// log_message(type, "%s", buffer);	//%s is to prevent % escapes in the ascii
-	}
-}
 /*
 void EQEmuLogSys::Raw(uint16 log_category, uint16 seq, const BasePacket *p) {
 	return;
