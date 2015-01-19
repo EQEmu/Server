@@ -65,7 +65,6 @@
 #define ENCODE_LENGTH_EXACT(struct_) \
 	if((*p)->size != sizeof(struct_)) { \
 		Log.Out(Logs::Detail, Logs::Netcode, "Wrong size on outbound %s (" #struct_ "): Got %d, expected %d", opcodes->EmuToName((*p)->GetOpcode()), (*p)->size, sizeof(struct_)); \
-		Log.Hex(Logs::Netcode, (*p)->pBuffer, (*p)->size); \
 		delete *p; \
 		*p = nullptr; \
 		return; \
@@ -73,7 +72,6 @@
 #define ENCODE_LENGTH_ATLEAST(struct_) \
 	if((*p)->size < sizeof(struct_)) { \
 		Log.Out(Logs::Detail, Logs::Netcode, "Wrong size on outbound %s (" #struct_ "): Got %d, expected at least %d", opcodes->EmuToName((*p)->GetOpcode()), (*p)->size, sizeof(struct_)); \
-		Log.Hex(Logs::Netcode, (*p)->pBuffer, (*p)->size); \
 		delete *p; \
 		*p = nullptr; \
 		return; \
@@ -128,14 +126,12 @@
 	if(__packet->size != sizeof(struct_)) { \
 		__packet->SetOpcode(OP_Unknown); /* invalidate the packet */ \
 		Log.Out(Logs::Detail, Logs::Netcode, "Wrong size on incoming %s (" #struct_ "): Got %d, expected %d", opcodes->EmuToName(__packet->GetOpcode()), __packet->size, sizeof(struct_)); \
-		Log.Hex(Logs::Netcode, __packet->pBuffer, __packet->size); \
 		return; \
 	}
 #define DECODE_LENGTH_ATLEAST(struct_) \
 	if(__packet->size < sizeof(struct_)) { \
 		__packet->SetOpcode(OP_Unknown); /* invalidate the packet */ \
 		Log.Out(Logs::Detail, Logs::Netcode, "Wrong size on incoming %s (" #struct_ "): Got %d, expected at least %d", opcodes->EmuToName(__packet->GetOpcode()), __packet->size, sizeof(struct_)); \
-		Log.Hex(Logs::Netcode, __packet->pBuffer, __packet->size); \
 		return; \
 	}
 

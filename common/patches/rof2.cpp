@@ -4568,13 +4568,10 @@ namespace RoF2
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Moved item from %u to %u", eq->from_slot.MainSlot, eq->to_slot.MainSlot);
 		Log.Out(Logs::General, Logs::Netcode, "[ERROR] MoveItem SlotType from %i to %i, MainSlot from %i to %i, SubSlot from %i to %i, AugSlot from %i to %i, Unknown01 from %i to %i, Number %u", eq->from_slot.SlotType, eq->to_slot.SlotType, eq->from_slot.MainSlot, eq->to_slot.MainSlot, eq->from_slot.SubSlot, eq->to_slot.SubSlot, eq->from_slot.AugSlot, eq->to_slot.AugSlot, eq->from_slot.Unknown01, eq->to_slot.Unknown01, eq->number_in_stack);
 		emu->from_slot = RoF2ToServerSlot(eq->from_slot);
 		emu->to_slot = RoF2ToServerSlot(eq->to_slot);
 		IN(number_in_stack);
-
-		Log.Hex(Logs::Netcode, eq, sizeof(structs::MoveItem_Struct));
 
 		FINISH_DIRECT_DECODE();
 	}
