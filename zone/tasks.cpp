@@ -773,7 +773,6 @@ void ClientTaskState::DisableTask(int charID, int taskCount, int *taskList) {
 	Log.Out(Logs::General, Logs::Tasks, "[UPDATE] Executing query %s", query.c_str());
     auto results = database.QueryDatabase(query);
 	if(!results.Success())
-		Log.Out(Logs::General, Logs::Error, "[TASKS]Error in ClientTaskState::DisableTask %s %s", query.c_str(), results.ErrorMessage().c_str());
 }
 
 bool ClientTaskState::IsTaskEnabled(int TaskID) {
