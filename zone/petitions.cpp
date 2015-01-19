@@ -213,7 +213,6 @@ void ZoneDatabase::DeletePetitionFromDB(Petition* wpet) {
     std::string query = StringFormat("DELETE FROM petitions WHERE petid = %i", wpet->GetID());
     auto results = QueryDatabase(query);
 	if (!results.Success())
-		Log.Out(Logs::General, Logs::Error, "Error in DeletePetitionFromDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 
 }
 
