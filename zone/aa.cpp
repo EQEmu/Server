@@ -1839,7 +1839,6 @@ uint8 ZoneDatabase::GetTotalAALevels(uint32 skill_id) {
 	std::string query = StringFormat("SELECT count(slot) FROM aa_effects WHERE aaid = %i", skill_id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in GetTotalAALevels '%s: %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
 
