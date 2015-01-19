@@ -213,7 +213,6 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, i
 		}
 
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "UpdateInventorySlot query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return false;
     }
 
