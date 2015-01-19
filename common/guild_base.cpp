@@ -238,7 +238,6 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id) {
 	results = m_db->QueryDatabase(query);
 
 	if (!results.Success())
-		Log.Out(Logs::Detail, Logs::Guilds, "Error clearing old guild_ranks records when storing %d '%s': %s", guild_id, query.c_str(), results.ErrorMessage().c_str());
 
 	//escape our strings.
 	char *name_esc = new char[info->name.length()*2+1];
