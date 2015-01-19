@@ -670,7 +670,7 @@ bool Client::Process() {
 
 	if (client_state != CLIENT_LINKDEAD && !eqs->CheckState(ESTABLISHED)) {
 		OnDisconnect(true);
-		std::cout << "Client linkdead: " << name << std::endl;
+		Log.Out(Logs::General, Logs::Zone_Server, "Client linkdead: %s", name);
 
 		if (GetGM()) {
 			if (GetMerc())
