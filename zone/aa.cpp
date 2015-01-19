@@ -1963,7 +1963,6 @@ SendAA_Struct* ZoneDatabase::GetAASkillVars(uint32 skill_id)
 	std::string query = "SET @row = 0"; //initialize "row" variable in database for next query
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Error in GetAASkillVars '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return nullptr;
     }
 
