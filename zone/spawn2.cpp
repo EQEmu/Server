@@ -395,7 +395,6 @@ Spawn2* ZoneDatabase::LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2
     }
 
     if (results.RowCount() != 1) {
-        Log.Out(Logs::General, Logs::Error, "Error in LoadSpawn2 query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return nullptr;
     }
 
