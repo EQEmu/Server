@@ -1555,7 +1555,6 @@ bool ZoneDatabase::DisableRecipe(uint32 recipe_id)
                                     "WHERE id = %u;", recipe_id);
     auto results = QueryDatabase(query);
 	if (!results.Success())
-		Log.Out(Logs::General, Logs::Error, "Error in DisableRecipe query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 
 	return results.RowsAffected() > 0;
 }
