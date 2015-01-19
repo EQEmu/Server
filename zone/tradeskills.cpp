@@ -728,7 +728,6 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
                                     recipe_id);
     auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Error in SendTradeskillDetails query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
