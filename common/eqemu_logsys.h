@@ -125,11 +125,10 @@ public:
 
 	void CloseFileLogs();
 	void LoadLogSettingsDefaults();
-	void Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...);
 	void MakeDirectory(std::string directory_name);
+	void Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...);
 	void SetCurrentTimeStamp(char* time_stamp);
 	void StartFileLogs(const std::string log_name);
-	void Hex(uint16 log_category, const void *data, unsigned long length, unsigned char padding = 4);
 
 	struct LogSettings{
 		uint8 log_to_file;
