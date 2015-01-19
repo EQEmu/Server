@@ -1120,7 +1120,6 @@ bool GuildBankManager::DeleteItem(uint32 guildID, uint16 area, uint16 slotID, ui
                                         guildID, area, slotID);
         auto results = database.QueryDatabase(query);
 		if(!results.Success()) {
-			Log.Out(Logs::General, Logs::Error, "Delete item failed. %s : %s", query.c_str(), results.ErrorMessage().c_str());
 			return false;
 		}
 
