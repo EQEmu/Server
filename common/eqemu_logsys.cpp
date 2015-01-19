@@ -126,6 +126,7 @@ uint16 EQEmuLogSys::GetConsoleColorFromCategory(uint16 log_category){
 			return Console::Color::Yellow;
 		case Logs::Normal:
 			return Console::Color::Yellow;
+		case Logs::MySQLError:
 		case Logs::Error:
 			return Console::Color::LightRed;
 		case Logs::Debug:
