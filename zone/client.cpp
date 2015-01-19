@@ -5382,14 +5382,12 @@ bool Client::TryReward(uint32 claim_id) {
                             "WHERE account_id = %i AND reward_id = %i",
                             AccountID(), claim_id);
         auto results = database.QueryDatabase(query);
-		if(!results.Success())
 	}
 	else {
         query = StringFormat("UPDATE account_rewards SET amount = (amount-1) "
                             "WHERE account_id = %i AND reward_id = %i",
                             AccountID(), claim_id);
         auto results = database.QueryDatabase(query);
-		if(!results.Success())
 	}
 
 	InternalVeteranReward ivr = (*iter);

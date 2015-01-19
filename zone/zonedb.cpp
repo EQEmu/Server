@@ -2852,9 +2852,7 @@ void ZoneDatabase::SaveBuffs(Client *client) {
                             buffs[index].magic_rune, buffs[index].persistant_buff, buffs[index].dot_rune,
                             buffs[index].caston_x, buffs[index].caston_y, buffs[index].caston_z,
                             buffs[index].ExtraDIChance);
-        auto results = QueryDatabase(query);
-        if (!results.Success())
-
+       QueryDatabase(query);
 	}
 }
 
