@@ -856,7 +856,6 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
                                     GuildID, Area, Slot, ItemID, QtyOrCharges, Donator, Permissions, WhoFor);
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Insert Error: %s : %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
