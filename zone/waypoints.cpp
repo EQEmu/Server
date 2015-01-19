@@ -1264,7 +1264,6 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *client, uint32 spawn2id, float xpos, 
 		query = StringFormat("UPDATE spawn2 SET pathgrid = '%i' WHERE id = '%i'", grid_num, spawn2id);
 		results = QueryDatabase(query);
 		if(!results.Success())
-			Log.Out(Logs::General, Logs::Error, "Error updating spawn2 pathing '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		else if(client)
 			client->LogSQL(query.c_str());
 	}
