@@ -206,7 +206,6 @@ int Database::FindCharacter(const char *characterName) {
     std::string query = StringFormat("SELECT `id` FROM `character_data` WHERE `name`='%s' LIMIT 1", safeCharName);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::Detail, Logs::UCS_Server, "FindCharacter failed. %s %s", query.c_str(), results.ErrorMessage().c_str());
 		safe_delete(safeCharName);
 		return -1;
 	}
