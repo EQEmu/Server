@@ -58,28 +58,10 @@ static volatile bool logFileValid = false;
 static EQEmuLog realLogFile;
 EQEmuLog *LogFile = &realLogFile;
 
-static const char* FileNames[EQEmuLog::MaxLogID] = { "logs/eqemu", "logs/eqemu", "logs/eqemu_error", "logs/eqemu_debug", "logs/eqemu_quest", "logs/eqemu_commands", "logs/crash" };
-static const char* LogNames[EQEmuLog::MaxLogID] = { "Status", "Normal", "Error", "Debug", "Quest", "Command", "Crash" };
-
 EQEmuLog::EQEmuLog()
 {
-	pLogStatus[EQEmuLog::LogIDs::Status] = LOG_LEVEL_STATUS;
-	pLogStatus[EQEmuLog::LogIDs::Normal] = LOG_LEVEL_NORMAL;
-	pLogStatus[EQEmuLog::LogIDs::Error] = LOG_LEVEL_ERROR;
-	pLogStatus[EQEmuLog::LogIDs::Debug] = LOG_LEVEL_DEBUG;
-	pLogStatus[EQEmuLog::LogIDs::Quest] = LOG_LEVEL_QUEST;
-	pLogStatus[EQEmuLog::LogIDs::Commands] = LOG_LEVEL_COMMANDS;
-	pLogStatus[EQEmuLog::LogIDs::Crash] = LOG_LEVEL_CRASH;
-	logFileValid = true;
 }
 
 EQEmuLog::~EQEmuLog()
 {
-	logFileValid = false;
-	for (int i = 0; i < MaxLogID; i++) {
-		LockMutex lock(&MLog[i]);	//to prevent termination race
-		if (fp[i]) {
-			fclose(fp[i]);
-		}
-	}
 }

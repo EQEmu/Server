@@ -78,34 +78,7 @@ class EQEmuLog {
 public:
 	EQEmuLog();
 	~EQEmuLog();
-
-	enum LogIDs {
-		Status = 0,	 /* This must stay the first entry in this list */
-		Normal,		 /* Normal Logs */
-		Error,		 /* Error Logs */
-		Debug,		 /* Debug Logs */
-		Quest,		 /* Quest Logs */
-		Commands,	 /* Issued Comamnds */
-		Crash,		 /* Crash Logs */
-		Save,		 /* Client Saves */
-		MaxLogID	 /* Max, used in functions to get the max log ID */
-	};
-
-
 private:
-
-	Mutex	MOpen;
-	Mutex	MLog[MaxLogID];
-	FILE*	fp[MaxLogID];
-
-/* LogStatus: bitwise variable
-	1 = output to file
-	2 = output to stdout
-	4 = fopen error, dont retry
-	8 = use stderr instead (2 must be set)
-*/
-	uint8	pLogStatus[MaxLogID];
-
 };
 
 extern EQEmuLog* LogFile;
