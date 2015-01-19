@@ -1293,7 +1293,6 @@ void GuildBankManager::UpdateItemQuantity(uint32 guildID, uint16 area, uint16 sl
                                     quantity, guildID, area, slotID);
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Update item quantity failed. %s : %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
