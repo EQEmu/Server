@@ -701,7 +701,6 @@ bool AdventureManager::LoadAdventureEntries()
     auto results = database.QueryDatabase(query);
     if (!results.Success())
 	{
-		Log.Out(Logs::General, Logs::Error, "Error in AdventureManager:::LoadAdventureEntries: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
