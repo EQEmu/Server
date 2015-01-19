@@ -1238,7 +1238,6 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *client, uint32 spawn2id, float xpos, 
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		// Query error
-		Log.Out(Logs::General, Logs::Error, "Error setting pathgrid '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
 
