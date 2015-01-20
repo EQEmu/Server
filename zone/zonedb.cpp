@@ -271,7 +271,6 @@ bool ZoneDatabase::logevents(const char* accountname,uint32 accountid,uint8 stat
 	safe_delete_array(targetarr);
 	auto results = QueryDatabase(query);
 	if (!results.Success())	{
-		std::cerr << "Error in logevents" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 

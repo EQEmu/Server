@@ -162,7 +162,6 @@ bool Database::CheckBannedIPs(const char* loginIP)
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in CheckBannedIPs query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return true;
 	}
 

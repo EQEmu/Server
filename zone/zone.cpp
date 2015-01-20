@@ -1643,7 +1643,6 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,
                                     "ORDER BY number", zonename, version);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        std::cerr << "Error1 in LoadStaticZonePoints query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 

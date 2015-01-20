@@ -117,7 +117,6 @@ void EQLConfig::DeleteLauncher() {
     std::string query = StringFormat("DELETE FROM launcher WHERE name = '%s'", namebuf);
     auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Error in DeleteLauncher 1st query: %s", results.ErrorMessage().c_str());
 		return;
 	}
 
