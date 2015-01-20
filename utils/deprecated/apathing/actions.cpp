@@ -274,7 +274,6 @@ void break_long_lines(list<PathGraph*> &db_paths) {
 			if(len2 < cutlen2)
 				continue;
 			
-//printf("Cut (%.3f,%.3f,%.3f) -> (%.3f,%.3f,%.3f) d2=%.3f\n", e->from->x, e->from->y, e->from->z, e->to->x, e->to->y, e->to->z, len2);			
 
 			float len = sqrt(len2);
 			v1.x = (e->to->x - e->from->x)/len;
