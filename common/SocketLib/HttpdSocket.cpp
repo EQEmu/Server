@@ -194,7 +194,6 @@ void HttpdSocket::OnHeaderComplete()
 
 void HttpdSocket::OnData(const char *p,size_t l)
 {
-//printf("Got %d bytes: %.*s\n", l, l, p);
 	if (m_file)
 	{
 		m_file -> fwrite(p,1,l);
