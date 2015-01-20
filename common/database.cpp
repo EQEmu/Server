@@ -2732,7 +2732,6 @@ uint8 Database::GetPEQZone(uint32 zoneID, uint32 version){
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in GetPEQZone query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
 
