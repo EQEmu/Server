@@ -3156,10 +3156,7 @@ void Database::SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ism
 
 	/* Add to the Group */
 	query = StringFormat("REPLACE INTO  `group_id` SET `charid` = %i, `groupid` = %i, `name` = '%s', `ismerc` = '%i'", charid, id, name, ismerc);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-		Log.Out(Logs::General, Logs::Error, "Error adding character to group id: %s", results.ErrorMessage().c_str());
+	QueryDatabase(query);
 }
 
 void Database::ClearAllGroups(void)
