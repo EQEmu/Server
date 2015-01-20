@@ -1983,6 +1983,5 @@ void SharedDatabase::SetBotInspectMessage(uint32 botid, const InspectMessage_Str
 	std::string query = StringFormat("UPDATE bots SET BotInspectMessage = '%s' WHERE BotID = %i", msg.c_str(), botid);
     auto results = QueryDatabase(query);
     if (!results.Success())
-		std::cerr << "Error in SetBotInspectMessage query '" << query << "' " << results.ErrorMessage() << std::endl;
 
 }
