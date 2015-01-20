@@ -187,7 +187,6 @@ FRAG_CONSTRUCTOR(Data22) {
   long Frag36Ref;
   if(data->flags==0x181) {
 	  Frag36Ref = *((long *) (data6area+20));
-	  //printf("Frag 36 reference?: %ld\n", *((long *) (data6area+20)));
   }
 
 
