@@ -2489,8 +2489,7 @@ void ZoneDatabase::SaveMerchantTemp(uint32 npcid, uint32 slot, uint32 item, uint
 
 	std::string query = StringFormat("REPLACE INTO merchantlist_temp (npcid, slot, itemid, charges) "
                                     "VALUES(%d, %d, %d, %d)", npcid, slot, item, charges);
-    auto results = QueryDatabase(query);
-	if (!results.Success())
+    QueryDatabase(query);
 }
 
 void ZoneDatabase::DeleteMerchantTemp(uint32 npcid, uint32 slot){
