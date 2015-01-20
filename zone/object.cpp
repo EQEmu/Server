@@ -86,7 +86,6 @@ Object::Object(const ItemInst* inst, char* name,float max_x,float min_x,float ma
 	// Set as much struct data as we can
 	memset(&m_data, 0, sizeof(Object_Struct));
 	m_data.heading = heading;
-	//printf("Spawning object %s at %f,%f,%f\n",name,m_data.x,m_data.y,m_data.z);
 	m_data.z = z;
 	m_data.zone_id = zone->GetZoneID();
 	respawn_timer.Disable();
