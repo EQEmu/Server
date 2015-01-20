@@ -313,7 +313,6 @@ Timer DecayTimer(20);
 		MStreams.unlock();
 		if (!stream_count) {
 			WriterWork.Wait();
-			//std::cout << "Awake from condition, must have a stream now" << std::endl;
 		}
 	}
 }
