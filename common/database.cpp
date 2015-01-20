@@ -277,7 +277,6 @@ bool Database::SetLocalPassword(uint32 accid, const char* password) {
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
-		std::cerr << "Error in SetLocalPassword query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
