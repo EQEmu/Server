@@ -34,7 +34,6 @@ FRAG_CONSTRUCTOR(Data03) {
     memcpy(tex->filenames[i], buf, fnlen);
     decode((uchar *) tex->filenames[i], fnlen);
 
-    //printf("fnlen is %d, %s\n", fnlen, tex->filenames[i]);
     // Derision: Not sure why this check is here, but need to check fnlen is >=18
     if(fnlen>=18) {
       if(tex->filenames[i][fnlen - 8] == '.')
