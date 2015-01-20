@@ -1380,7 +1380,6 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 			}
 			/* Continue of PP Size does not match (Usually a created character never logged in) */
 			else {
-				// printf("%s ID: %i profile mismatch, not converting. PP %u - Profile Length %u \n", row2[2] ? row2[2] : "Unknown", character_id, sizeof(PlayerProfile_Struct), lengths);
 				std::cout << (row2[2] ? row2[2] : "Unknown") << " ID: " << character_id << " size mismatch. Expected Size: " << sizeof(Convert::PlayerProfile_Struct) << " Seen: " << lengths << std::endl;
 				continue;
 			}
@@ -2182,7 +2181,6 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 					c_type = "Legacy";
 				}
 				if (in_datasize != esize2 && in_datasize != esize1) {
-					// std::cout << "[Error] in Corpse Size - OLD SIZE: " << esize1 << " SOF SIZE: " << esize2 << " db_blob_datasize: " << in_datasize << std::endl;
 					is_sof = false;
 					c_type = "NULL";
 					continue;
