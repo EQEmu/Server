@@ -142,6 +142,7 @@ public:
 	LogSettings log_settings[Logs::LogCategory::MaxCategoryID];
 
 	bool log_settings_loaded = false;
+	bool file_logs_enabled = false;
 
 	int log_platform = 0;
 
