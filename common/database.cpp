@@ -304,11 +304,11 @@ bool Database::ReserveName(uint32 account_id, char* name) {
 */
 bool Database::DeleteCharacter(char *name) {
 	uint32 charid = 0;
-	printf("Database::DeleteCharacter name : %s \n", name);
 	if(!name ||	!strlen(name)) {
-		std::cerr << "DeleteCharacter: request to delete without a name (empty char slot)" << std::endl;
+		Log.Out(Logs::General, Logs::World_Server, "DeleteCharacter: request to delete without a name (empty char slot)");
 		return false;
 	}
+	Log.Out(Logs::General, Logs::World_Server, "Database::DeleteCharacter name : '%s'", name);
 
 	/* Get id from character_data before deleting record so we can clean up the rest of the tables */
 	std::string query = StringFormat("SELECT `id` from `character_data` WHERE `name` = '%s'", name);
