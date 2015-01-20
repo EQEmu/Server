@@ -82,8 +82,9 @@ EQEmuLogSys::~EQEmuLogSys(){
 
 void EQEmuLogSys::LoadLogSettingsDefaults()
 {
+	/* Get Executable platform currently running this code (Zone/World/etc) */
 	log_platform = GetExecutablePlatformInt();
-	/* Write defaults */
+	/* Zero out Array */
 	for (int i = 0; i < Logs::LogCategory::MaxCategoryID; i++){
 		log_settings[i].log_to_console = 0;
 		log_settings[i].log_to_file = 0;
@@ -96,8 +97,6 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	log_settings[Logs::UCS_Server].log_to_console = 1;
 	log_settings[Logs::Crash].log_to_console = 1;
 	log_settings[Logs::MySQLError].log_to_console = 1;
-
-	log_settings_loaded = true;
 }
 
 std::string EQEmuLogSys::FormatOutMessageString(uint16 log_category, std::string in_message){

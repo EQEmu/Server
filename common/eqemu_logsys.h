@@ -141,10 +141,11 @@ public:
 
 	LogSettings log_settings[Logs::LogCategory::MaxCategoryID];
 
-	bool log_settings_loaded = false;
-	bool file_logs_enabled = false;
+	bool file_logs_enabled = false; /* Set when log settings are loaded to determine if keeping a file open is necessary */
 
-	int log_platform = 0;
+	int log_platform = 0; /* Sets Executable platform (Zone/World/UCS) etc. */
+
+	std::string process_file_name; /* File name used in writing logs */
 
 	uint16 GetGMSayColorFromCategory(uint16 log_category);
 

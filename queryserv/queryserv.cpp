@@ -77,15 +77,15 @@ int main() {
 	Log.Out(Logs::General, Logs::QS_Server, "Connecting to MySQL...");
 	
 	/* MySQL Connection */
-	if (!database.Connect(
-		Config->QSDatabaseHost.c_str(),
-		Config->QSDatabaseUsername.c_str(),
-		Config->QSDatabasePassword.c_str(),
-		Config->QSDatabaseDB.c_str(),
-		Config->QSDatabasePort)) {
-		Log.Out(Logs::General, Logs::QS_Server, "Cannot continue without a database connection.");
-		return 1;
-	}
+	// if (!database.Connect(
+	// 	Config->QSDatabaseHost.c_str(),
+	// 	Config->QSDatabaseUsername.c_str(),
+	// 	Config->QSDatabasePassword.c_str(),
+	// 	Config->QSDatabaseDB.c_str(),
+	// 	Config->QSDatabasePort)) {
+	// 	Log.Out(Logs::General, Logs::QS_Server, "Cannot continue without a database connection.");
+	// 	return 1;
+	// }
 
 	/* Register Log System and Settings */
 	database.LoadLogSysSettings(Log.log_settings);
