@@ -317,7 +317,6 @@ int32 SharedDatabase::GetSharedPlatinum(uint32 account_id)
 	std::string query = StringFormat("SELECT sharedplat FROM account WHERE id = '%i'", account_id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        std::cerr << "Error in GetSharedPlatinum query '" << query << "' " << results.ErrorMessage().c_str() << std::endl;
 		return false;
     }
 
