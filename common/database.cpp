@@ -2802,7 +2802,6 @@ bool Database::CheckNameFilter(const char* name, bool surname)
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in CheckNameFilter query '" << query << "' " << results.ErrorMessage() << std::endl;
 		// false through to true? shouldn't it be falls through to false?
 		return true;
 	}
