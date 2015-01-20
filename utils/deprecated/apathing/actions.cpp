@@ -1944,7 +1944,6 @@ int nn = 0;
 			printf("ERROR: a node has more than %d links, number will be truncated!", PATH_LINK_OFFSET_NONE-1);
 		}
 		curn->link_count = ecount;
-//printf("Used up to slot %d of %d in links\n", eoffset, head.link_count);
 	}
 	
 	//write vertexBlock
