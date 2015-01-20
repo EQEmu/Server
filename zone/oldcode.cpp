@@ -1617,7 +1617,6 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 			else if (caster->IsClient() && !(caster->CastToClient()->IsBecomeNPC())) {
 				// Client
 				if (caster->IsAttackAllowed(mob) && spells[spell_id].targettype != ST_AEBard){
-					//printf("Client Spell casted on %s\n", mob->GetName());
 					caster->SpellOnTarget(spell_id, mob);
 				}
 				else if(spells[spell_id].targettype == ST_GroupTeleport && mob->IsClient() && mob->isgrouped && caster->isgrouped && entity_list.GetGroupByMob(caster))
