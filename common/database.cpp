@@ -4199,7 +4199,6 @@ uint32 Database::GetGuildIDByCharID(uint32 char_id)
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in GetGuildIDByChar query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
 
