@@ -2731,9 +2731,7 @@ uint32 ZoneDatabase::GetKarma(uint32 acct_id)
 void ZoneDatabase::UpdateKarma(uint32 acct_id, uint32 amount)
 {
 	std::string query = StringFormat("UPDATE account SET karma = %i WHERE id = %i", amount, acct_id);
-    auto results = QueryDatabase(query);
-    if (!results.Success())
-
+    QueryDatabase(query);
 }
 
 void ZoneDatabase::ListAllInstances(Client* client, uint32 charid)
