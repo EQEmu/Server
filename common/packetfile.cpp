@@ -373,7 +373,6 @@ void NewPacketFileReader::CloseFile() {
 	if(in != NULL) {
 		fclose(in);
 		in = NULL;
-		//printf("Closed packet file.\n");
 	}
 }
 
