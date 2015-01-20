@@ -318,7 +318,6 @@ printf("%d tris start at %d (0x%x)\n", zm->poly_count, (buffer-ter_orig), (buffe
 		}
 		zm->polys[j] = new Polygon;
 
-		//printf("    v1=%d, v2=%d, v3=%d, g=%d, unk=%d\n", ttri->v1, ttri->v2, ttri->v3, ttri->group, ttri->unk);
 
 		if(ttri->v1 >= zm->vert_count && errored < 10) {
 			printf("Tri %d/%d (s %d) @0x%x: invalid v1: %d >= %d\n", i, zm->poly_count, skipped, (buffer-ter_orig), ttri->v1, zm->vert_count);
