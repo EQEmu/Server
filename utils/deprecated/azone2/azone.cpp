@@ -451,7 +451,6 @@ void QTNode::fillBlocks(nodeHeader *heads, unsigned long *flist, unsigned long &
 		head->flags |= nodeFinal;
 		head->faces.count = faces.size();
 		head->faces.offset = findex;
-//printf("	Final node with %u faces, list offset %lu.\n", head->faces.count, head->faces.offset);
 		unsigned long r;
 		for(r = 0; r < head->faces.count; r++) {
 			flist[findex] = faces[r].index;
