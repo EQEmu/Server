@@ -3188,14 +3188,11 @@ void Database::ClearGroup(uint32 gid) {
 	QueryDatabase(query);
 }
 
-uint32 Database::GetGroupID(const char* name){
-
+uint32 Database::GetGroupID(const char* name){ 
 	std::string query = StringFormat("SELECT groupid from group_id where name='%s'", name);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
-	{
-		Log.Out(Logs::General, Logs::Error, "Error getting group id: %s", results.ErrorMessage().c_str());
+	if (!results.Success()) {
 		return 0;
 	}
 
