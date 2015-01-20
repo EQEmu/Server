@@ -273,7 +273,6 @@ bool EQLConfig::SetDynamicCount(int count) {
     std::string query = StringFormat("UPDATE launcher SET dynamics=%d WHERE name='%s'", count, namebuf);
     auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Error in SetDynamicCount query: %s", results.ErrorMessage().c_str());
 		return false;
 	}
 
