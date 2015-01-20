@@ -3074,8 +3074,7 @@ bool Database::UpdateLiveChar(char* charname,uint32 lsaccount_id) {
 	std::string query = StringFormat("UPDATE account SET charname='%s' WHERE id=%i;",charname, lsaccount_id);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
-	{
+	if (!results.Success()){
 		return false;
 	}
 
