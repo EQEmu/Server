@@ -1798,7 +1798,6 @@ void ZoneDatabase::AddLootDropToNPC(uint32 lootdrop_id, ItemList* itemlist) {
 		}
 		else
 		{
-			//printf("Adding item2: %i",item->item_id);
 			//cout << "Adding item to Mob" << endl;
 			ServerLootItem_Struct* item = new ServerLootItem_Struct;
 			item->item_id = dbitem->ItemNumber;
