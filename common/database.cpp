@@ -2827,7 +2827,6 @@ bool Database::AddToNameFilter(const char* name) {
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in AddToNameFilter query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
