@@ -178,7 +178,6 @@ const char *PFSLoader::FindExtension(const char *ext) {
   int elen = strlen(ext);
   
   for(i = 0; i < this->count; ++i) {
-//printf("Look for %s: got %s\n", ext, this->filenames[i]);
     int flen = strlen(this->filenames[i]);
 	if(flen <= elen)
 		continue;
