@@ -202,6 +202,10 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 debug_level, uint16 log_category,
 	if (log_settings[log_category].log_to_console == 0)
 		return;
 
+	/* Make sure the message inbound is at a debug level we're set at */
+	if (log_settings[log_category].log_to_console < debug_level)
+		return;
+
 	#ifdef _WINDOWS
 		HANDLE  console_handle;
 		console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
