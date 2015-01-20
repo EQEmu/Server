@@ -87,7 +87,6 @@ void LauncherList::Process() {
 	curl = m_launchers.begin();
 	while(curl != m_launchers.end()) {
 		LauncherLink *l = curl->second;
-//printf("Proc %s(%d): %p\n", l->GetName(), l->GetID(), l);
 		if(!l->Process()) {
 			//launcher has died before it identified itself.
 			Log.Out(Logs::Detail, Logs::World_Server, "Removing launcher %s (%d)", l->GetName(), l->GetID());
