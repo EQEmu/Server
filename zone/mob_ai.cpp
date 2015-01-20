@@ -2771,7 +2771,6 @@ uint32 ZoneDatabase::GetMaxNPCSpellsID() {
 	std::string query = "SELECT max(id) from npc_spells";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        std::cerr << "Error in GetMaxNPCSpellsID query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
 
