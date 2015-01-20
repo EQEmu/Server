@@ -334,7 +334,6 @@ void ZoneDatabase::UpdateBug(PetitionBug_Struct* bug){
     safe_delete_array(bugtext);
     auto results = QueryDatabase(query);
 	if (!results.Success())
-		std::cerr << "Error in UpdateBug '" << query << "' " << results.ErrorMessage() << std::endl;
 
 }
 
