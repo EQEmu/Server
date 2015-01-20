@@ -10392,9 +10392,20 @@ void command_logtest(Client *c, const Seperator *sep){
 	clock_t t = std::clock(); /* Function timer start */
 	if (sep->IsNumber(1)){
 		uint32 i = 0;
-		for (i = 0; i < atoi(sep->arg[1]); i++){
-			Log.Out(Logs::General, Logs::None, "[%u] Test... Took %f seconds", i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
+		std::ofstream log_test;
+		for (i = 0; i < atoi(sep->arg[1]); i++){ 
+			log_test.open("logs/log_test.txt", std::ios_base::app | std::ios_base::out);
+			log_test << "this is a test\n";
+			log_test.close();
 		}
+		Log.Out(Logs::General, Logs::Zone_Server, "[%u] Test #1... Took %f seconds", i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
+		t = std::clock();
+		log_test.open("logs/log_test.txt", std::ios_base::app | std::ios_base::out);
+		for (i = 0; i < atoi(sep->arg[1]); i++){
+			log_test << "this is a test\n";
+		}
+		log_test.close();
+		Log.Out(Logs::General, Logs::Zone_Server, "[%u] Test #2... Took %f seconds", i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 	}
 }
 
