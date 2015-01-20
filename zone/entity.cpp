@@ -237,7 +237,6 @@ const Trap *Entity::CastToTrap() const
 {
 #ifdef DEBUG
 	if (!IsTrap()) {
-		//std::cout << "CastToTrap error" << std::endl;
 		return 0;
 	}
 #endif
