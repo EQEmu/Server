@@ -101,7 +101,9 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	log_settings[Logs::Crash].log_to_console = 1;
 	log_settings[Logs::MySQLError].log_to_console = 1;
 
-	/* Declare process file names for log writing */
+	/*	Declare process file names for log writing 
+		If there is no process_file_name declared, no log file will be written, simply
+	*/
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformWorld){ 
 		process_file_name = "world";  
 	}
@@ -111,7 +113,15 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
 		process_file_name = "zone";
 	}
-
+	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformUCS){
+		process_file_name = "ucs";
+	}
+	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformLogin){
+		process_file_name = "login";
+	}
+	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformLogin){
+		process_file_name = "launcher";
+	}
 }
 
 std::string EQEmuLogSys::FormatOutMessageString(uint16 log_category, std::string in_message){
@@ -305,16 +315,28 @@ void EQEmuLogSys::CloseFileLogs()
 void EQEmuLogSys::StartFileLogs(const std::string log_name)
 {
 	EQEmuLogSys::CloseFileLogs();
+
+	/* When loading settings, we must have been given a reason in category based logging to output to a file in order to even create or open one... */
+	if (file_logs_enabled == false)
+		return;
+
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
 		if (log_name != "")
 			process_file_name = log_name;
+
+		if (process_file_name == ""){
+			return;
+		}
 
 		std::cout << "Starting Zone Logs..." << std::endl;
 		EQEmuLogSys::MakeDirectory("logs/zone");
 		process_log.open(StringFormat("logs/zone/%s_%i.txt", process_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
 	}
 	else{
-		std::cout << "Starting Process Log..." << std::endl;
+		if (process_file_name == ""){
+			return;
+		}
+		std::cout << "Starting Process Log (" << process_file_name << ")..." << std::endl;
 		process_log.open(StringFormat("logs/%s_%i.txt", process_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
 	}
 }
