@@ -1966,7 +1966,6 @@ void SharedDatabase::GetBotInspectMessage(uint32 botid, InspectMessage_Struct* m
 	std::string query = StringFormat("SELECT BotInspectMessage FROM bots WHERE BotID = %i", botid);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        std::cerr << "Error in GetBotInspectMessage query '" << query << "' " << results.ErrorMessage() << std::endl;
         return;
 	}
 
