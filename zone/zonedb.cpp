@@ -3219,7 +3219,6 @@ bool ZoneDatabase::SetCharacterFactionLevel(uint32 char_id, int32 faction_id, in
                                     char_id, faction_id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        std::cerr << "Error in SetCharacterFactionLevel query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
     }
 
