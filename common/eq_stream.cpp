@@ -331,7 +331,6 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 				}
 			}
 #endif
-			//std::cout << "Got OP_SessionRequest" << std::endl;
 			sessionAttempts++;
 			// we set established below, so statistics will not be reset for session attempts/stream active.
 			init(GetState()!=ESTABLISHED);

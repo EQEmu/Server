@@ -145,7 +145,6 @@ bool EQTime::saveFile(const char *filename)
 		return false;
 	}
 	//Enable for debugging
-	//std::cout << "SAVE: day=" << (long)eqTime.start_eqtime.day << ";hour=" << (long)eqTime.start_eqtime.hour << ";min=" << (long)eqTime.start_eqtime.minute << ";mon=" << (long)eqTime.start_eqtime.month << ";yr=" << eqTime.start_eqtime.year << ";timet=" << eqTime.start_realtime << std::endl;
 	of << EQT_VERSION << std::endl;
 	of << (long)eqTime.start_eqtime.day << std::endl;
 	of << (long)eqTime.start_eqtime.hour << std::endl;
