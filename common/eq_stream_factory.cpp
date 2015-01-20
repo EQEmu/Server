@@ -126,7 +126,6 @@ EQStream *s=nullptr;
 		s->PutInUse();
 	}
 	MNewStreams.unlock();
-	//std::cout << "Pop(): Unlocking MNewStreams" << std::endl;
 
 	return s;
 }
