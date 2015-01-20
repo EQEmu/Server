@@ -169,6 +169,7 @@ int main(int argc, char** argv) {
 	/* Register Log System and Settings */
 	Log.OnLogHookCallBackZone(&Zone::GMSayHookCallBackProcess);
 	database.LoadLogSysSettings(Log.log_settings); 
+	Log.StartFileLogs("");
 
 	/* Guilds */
 	guild_mgr.SetDatabase(&database);
