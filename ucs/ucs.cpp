@@ -99,14 +99,14 @@ int main() {
 		Config->DatabasePassword.c_str(),
 		Config->DatabaseDB.c_str(),
 		Config->DatabasePort)) {
-		Log.Out(Logs::General, Logs::World_Server, "Cannot continue without a database connection.");
+		Log.Out(Logs::General, Logs::UCS_Server, "Cannot continue without a database connection.");
 		return 1;
 	}
 
 	char tmp[64];
 
 	if (database.GetVariable("RuleSet", tmp, sizeof(tmp)-1)) {
-		Log.Out(Logs::General, Logs::World_Server, "Loading rule set '%s'", tmp);
+		Log.Out(Logs::General, Logs::UCS_Server, "Loading rule set '%s'", tmp);
 		if(!RuleManager::Instance()->LoadRules(&database, tmp)) {
 			Log.Out(Logs::General, Logs::UCS_Server, "Failed to load ruleset '%s', falling back to defaults.", tmp);
 		}
