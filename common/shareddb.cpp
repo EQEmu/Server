@@ -1294,7 +1294,6 @@ bool SharedDatabase::GetCommandSettings(std::map<std::string,uint8> &commands) {
 	const std::string query = "SELECT command, access FROM commands";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        std::cerr << "Error in GetCommands query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
