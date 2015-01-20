@@ -2259,10 +2259,10 @@ void Client::CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill) {
 
 		if(zone->random.Real(0,100) < Chance) {	// if they make the roll
 			IncreaseLanguageSkill(langid);	// increase the language skill by 1
-			_log(SKILLS__GAIN, "Language %d at value %d successfully gain with %.4f%%chance", langid, LangSkill, Chance);
+			_log(SKILLS__GAIN, "Language %d at value %d successfully gain with %d%%chance", langid, LangSkill, Chance);
 		}
 		else
-			_log(SKILLS__GAIN, "Language %d at value %d failed to gain with %.4f%%chance", langid, LangSkill, Chance);
+			_log(SKILLS__GAIN, "Language %d at value %d failed to gain with %d%%chance", langid, LangSkill, Chance);
 	}
 }
 
