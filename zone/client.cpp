@@ -7773,7 +7773,6 @@ void Client::SetAccountFlag(std::string flag, std::string val) {
                                     account_id, flag.c_str(), val.c_str());
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		std::cerr << "Error in SetAccountFlags query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return;
 	}
 
