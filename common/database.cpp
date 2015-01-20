@@ -834,7 +834,6 @@ void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
-		std::cerr << "Error in GetAccountName query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return;
 	}
 
