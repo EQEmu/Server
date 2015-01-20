@@ -2813,7 +2813,6 @@ DBnpcspellseffects_Struct* ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEff
     std::string query = StringFormat("SELECT id, parent_list FROM npc_spells_effects WHERE id=%d", iDBSpellsEffectsID);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        std::cerr << "Error in AddNPCSpells query1 '" << query << "' " << results.ErrorMessage() << std::endl;
         return nullptr;
     }
 
