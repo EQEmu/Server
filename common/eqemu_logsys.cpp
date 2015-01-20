@@ -123,12 +123,12 @@ void EQEmuLogSys::ProcessLogWrite(uint16 log_category, std::string message)
 uint16 EQEmuLogSys::GetConsoleColorFromCategory(uint16 log_category){
 	switch (log_category) {
 		case Logs::Status:
-			return Console::Color::Yellow;
 		case Logs::Normal:
 			return Console::Color::Yellow;
 		case Logs::MySQLError:
 		case Logs::Error:
 			return Console::Color::LightRed;
+		case Logs::MySQLQuery:
 		case Logs::Debug:
 			return Console::Color::LightGreen;
 		case Logs::Quests:

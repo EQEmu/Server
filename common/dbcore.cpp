@@ -126,6 +126,8 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
 
 	MySQLRequestResult requestResult(res, (uint32)mysql_affected_rows(&mysql), rowCount, (uint32)mysql_field_count(&mysql), (uint32)mysql_insert_id(&mysql));
 
+	Log.Out(Logs::General, Logs::MySQLQuery, "%s", query);
+
 #if DEBUG_MYSQL_QUERIES >= 1
 	if (requestResult.Success())
 	{
