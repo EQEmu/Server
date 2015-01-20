@@ -57,7 +57,6 @@ void LauncherList::Process() {
 	cur = m_pendingLaunchers.begin();
 	while(cur != m_pendingLaunchers.end()) {
 		LauncherLink *l = *cur;
-//printf("ProcP %d: %p\n", l->GetID(), l);
 		if(!l->Process()) {
 			//launcher has died before it identified itself.
 			Log.Out(Logs::Detail, Logs::World_Server, "Removing pending launcher %d", l->GetID());
