@@ -151,7 +151,6 @@ int line_count = 0;
     var = (char *) buffer;
 	line_count++;
 
-    // printf("%s %s\n", val, var);
 
     if(strlen(var) == 0 || strlen(val) == 0) {
       ++buffer;
