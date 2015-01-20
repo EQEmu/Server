@@ -2553,7 +2553,6 @@ uint32 Database::GetMiniLoginAccount(char* ip){
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in GetMiniLoginAccount query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
 
