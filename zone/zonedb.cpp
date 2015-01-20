@@ -1270,7 +1270,6 @@ bool ZoneDatabase::SaveCharacterBandolier(uint32 character_id, uint8 bandolier_i
 	std::string query = StringFormat("REPLACE INTO `character_bandolier` (id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name) VALUES (%u, %u, %u, %u, %u,'%s')", character_id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name_esc); 
 	auto results = QueryDatabase(query);
 	Log.Out(Logs::General, Logs::None, "ZoneDatabase::SaveCharacterBandolier for character ID: %i, bandolier_id: %u, bandolier_slot: %u item_id: %u, icon:%u band_name:%s  done", character_id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name);
-	if (!results.RowsAffected()){ std::cout << "ERROR Bandolier Save: " << results.ErrorMessage() << "\n\n" << query << "\n" << std::endl; }
 	return true;
 }
 
