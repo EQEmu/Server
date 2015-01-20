@@ -962,7 +962,6 @@ run an algorithm to remove redundancy:
 RESTART_GRID_CLEAN:
 	cur = big->nodes.begin();
 	end = big->nodes.end();
-//printf("Starting clean at pos %d with %d nodes\n", cur_pos, big->nodes.size());
 	for(r = 0; r < cur_pos; r++)
 		cur++;
 	for(; cur != end; cur++, cur_pos++, stat++) {
