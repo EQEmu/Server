@@ -3117,9 +3117,7 @@ void Database::SetLoginFlags(uint32 CharID, bool LFP, bool LFG, uint8 firstlogon
 
 void Database::SetLFG(uint32 CharID, bool LFG) { 
 	std::string query = StringFormat("update `character_data` SET `lfg` = %i WHERE `id` = %i",LFG, CharID);
-	auto results = QueryDatabase(query); 
-	if (!results.Success())
-		Log.Out(Logs::General, Logs::Error, "Error updating LFP for character %i : %s", CharID, results.ErrorMessage().c_str());
+	QueryDatabase(query); 
 }
 
 void Database::SetFirstLogon(uint32 CharID, uint8 firstlogon) { 
