@@ -213,7 +213,6 @@ bool EQLConfig::ChangeStaticZone(Const_char *short_name, uint16 port) {
                                     "launcher = '%s' AND zone = '%s'",port, namebuf, zonebuf);
     auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Error in ChangeStaticZone query: %s", results.ErrorMessage().c_str());
 		return false;
 	}
 
