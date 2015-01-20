@@ -6275,9 +6275,9 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 		summon_count = MAX_SWARM_PETS;
 
 	static const xy_location swarmPetLocations[MAX_SWARM_PETS] = {
-        {5, 5}, {-5, 5}, {5, -5}, {-5, -5},
-		{10, 10}, {-10, 10}, {10, -10}, {-10, -10},
-        {8, 8}, {-8, 8}, {8, -8}, {-8, -8}
+        xy_location(5, 5), xy_location(-5, 5), xy_location(5, -5), xy_location(-5, -5),
+		xy_location(10, 10), xy_location(-10, 10), xy_location(10, -10), xy_location(-10, -10),
+        xy_location(8, 8), xy_location(-8, 8), xy_location(8, -8), xy_location(-8, -8)
     };
 
 	while(summon_count > 0) {
