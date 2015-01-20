@@ -1057,7 +1057,6 @@ std::string SharedDatabase::GetBook(const char *txtfile)
 	std::string query = StringFormat("SELECT txtfile FROM books WHERE name = '%s'", txtfile2);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		std::cerr << "Error in GetBook query '" << query << "' " << results.ErrorMessage() << std::endl;
 		txtout.assign(" ",1);
 		return txtout;
 	}
