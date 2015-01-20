@@ -2493,11 +2493,8 @@ void ZoneDatabase::SaveMerchantTemp(uint32 npcid, uint32 slot, uint32 item, uint
 }
 
 void ZoneDatabase::DeleteMerchantTemp(uint32 npcid, uint32 slot){
-
 	std::string query = StringFormat("DELETE FROM merchantlist_temp WHERE npcid=%d AND slot=%d", npcid, slot);
-	auto results = QueryDatabase(query);
-	if (!results.Success())
-
+	QueryDatabase(query);
 }
 
 bool ZoneDatabase::UpdateZoneSafeCoords(const char* zonename, float x=0, float y=0, float z=0) {
