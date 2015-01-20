@@ -1978,10 +1978,7 @@ void SharedDatabase::GetBotInspectMessage(uint32 botid, InspectMessage_Struct* m
 }
 
 void SharedDatabase::SetBotInspectMessage(uint32 botid, const InspectMessage_Struct* message) {
-
 	std::string msg = EscapeString(message->text);
 	std::string query = StringFormat("UPDATE bots SET BotInspectMessage = '%s' WHERE BotID = %i", msg.c_str(), botid);
-    auto results = QueryDatabase(query);
-    if (!results.Success())
-
+    QueryDatabase(query);
 }
