@@ -1926,7 +1926,6 @@ int nn = 0;
 				curl = &linkBlock[eoffset];
 				curl->dest_node = e->to->node_id;
 				curl->reach = e->normal_reach;
-//printf("\tLinkFrom %d: dest %d, reach %d\n", eoffset, curl->dest_node, curl->reach);
 				from_edges[e] = ecount;
 				ecount++;
 				eoffset++;
