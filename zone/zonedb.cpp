@@ -2676,7 +2676,6 @@ bool ZoneDatabase::LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked
                                     "FROM blocked_spells WHERE zoneid = %d ORDER BY id ASC", zoneid);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        std::cerr << "Error in LoadBlockedSpells query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
     }
 
