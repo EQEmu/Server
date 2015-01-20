@@ -97,7 +97,6 @@ void repair_a_high_waypoint(Map *map, PathNode *it) {
 		}
 	} else {
 		z_no_map_count++;
-		//printf("Missed: (%.3f, %.3f, %.3f)\n", it->x, it->y, it->z);
 	}
 }
 
