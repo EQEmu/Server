@@ -1172,7 +1172,7 @@ uint32 Client::CalcCurrentWeight() {
 	*/
 
 	// SoD+ client has no weight for coin
-	if (EQLimits::CoinHasWeight(ClientVersion))
+	if (EQLimits::CoinHasWeight(GetClientVersion()))
 		Total += (m_pp.platinum + m_pp.gold + m_pp.silver + m_pp.copper) / 4;
 
 	float Packrat = (float)spellbonuses.Packrat + (float)aabonuses.Packrat + (float)itembonuses.Packrat;

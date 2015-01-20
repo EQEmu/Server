@@ -1309,12 +1309,12 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	conn_state = ReceivedZoneEntry;
 
-	ClientVersion = Connection()->GetClientVersion();
-	if (ClientVersion != ClientVersion::Unknown)
-		ClientVersionBit = 1 << (static_cast<unsigned int>(ClientVersion) - 1);
+	SetClientVersion(Connection()->GetClientVersion());
+	if (m_ClientVersion != ClientVersion::Unknown)
+		ClientVersionBit = 1 << (static_cast<unsigned int>(m_ClientVersion) - 1);
 
-	bool siv = m_inv.SetInventoryVersion(ClientVersion);
-	LogFile->write(EQEmuLog::Debug, "%s inventory version to %s(%i)", (siv ? "Succeeded in setting" : "Failed to set"), ClientVersionName(ClientVersion), ClientVersion);
+	bool siv = m_inv.SetInventoryVersion(m_ClientVersion);
+	LogFile->write(EQEmuLog::Debug, "%s inventory version to %s(%i)", (siv ? "Succeeded in setting" : "Failed to set"), ClientVersionName(m_ClientVersion), m_ClientVersion);
 
 	/* Antighost code
 		tmp var is so the search doesnt find this object
