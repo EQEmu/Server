@@ -196,7 +196,6 @@ int PFSLoader::GetFile(char *name, uchar **buf, int *len) {
   Lower(name);
 
   for(i = 0; i < this->count; ++i) {
-//printf("Look for %s: got %s\n", name, this->filenames[i]);
     if(!strcmp(this->filenames[i], name)) {
       fseek(this->fp, this->files[i], SEEK_SET);
       fread(&s3d_dir, sizeof(struct_directory), 1, this->fp);
