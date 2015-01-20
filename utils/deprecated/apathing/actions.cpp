@@ -1609,7 +1609,6 @@ void count_crossing_lines(list<PathEdge *> &edges, PathGraph *out, PathGraph *ex
 		
 		
 		if(count >= CROSS_REDUCE_COUNT) {
-//printf("Edge crosses %d edges.\n", count);
 			out->edges.push_back(e);
 			cross_edge_count++;
 			cross_list[e] = hits;
