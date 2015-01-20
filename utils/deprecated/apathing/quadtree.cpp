@@ -94,7 +94,6 @@ void QTNode::fillBlocks(PathTree_Struct *heads, PathPointRef *flist, unsigned lo
 	curs = nodes.begin();
 	end = nodes.end();
 	for(; curs != end; curs++) {
-//printf("Got to node index %d (0x%x)\n", findex, *curs);
 		PathNode *cur = *curs;
 		flist[findex] = cur->node_id;
 		findex++;
