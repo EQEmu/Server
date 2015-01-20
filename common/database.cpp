@@ -767,7 +767,6 @@ uint32 Database::GetAccountIDByChar(const char* charname, uint32* oCharID) {
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in GetAccountIDByChar query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
 
