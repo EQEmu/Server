@@ -18,12 +18,10 @@
 
 
 #include "eqemu_logsys.h"
-// #include "base_packet.h"
 #include "platform.h"
 #include "string_util.h"
 #include "database.h"
 #include "misc.h"
-
 
 #include <iostream>
 #include <fstream> 
@@ -34,13 +32,22 @@
 std::ofstream process_log;
 
 #ifdef _WINDOWS
-#include <direct.h>
-#include <conio.h>
-#include <iostream>
-#include <dos.h>
-#include <windows.h>
+	#include <direct.h>
+	#include <conio.h>
+	#include <iostream>
+	#include <dos.h>
+	#include <windows.h>
 #else
-#include <sys/stat.h>
+	#include <sys/stat.h>
+	#define RESET   "\033[0m"
+	#define BLACK   "\033[30m"      /* Black */
+	#define RED     "\033[31m"      /* Red */
+	#define GREEN   "\033[32m"      /* Green */
+	#define YELLOW  "\033[33m"      /* Yellow */
+	#define BLUE    "\033[34m"      /* Blue */
+	#define MAGENTA "\033[35m"      /* Magenta */
+	#define CYAN    "\033[36m"      /* Cyan */
+	#define WHITE   "\033[37m"      /* White */
 #endif
 
 namespace Console {
