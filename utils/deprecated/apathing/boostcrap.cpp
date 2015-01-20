@@ -456,7 +456,6 @@ void calc_path_lengths(Map *map, MyGraph &vg, PathGraph *big, map<PathEdge *, Ed
 		
 		int longest = longest_dists[n->node_id];
 		//n->longest_path = longest;
-//printf("Node %d's longest path is %d\n", n->node_id, longest);
 		
 		if(longest < shortest) {
 			shortest = longest;
