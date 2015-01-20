@@ -2568,13 +2568,7 @@ bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
-	{
-		std::cerr << "If it errors, run the following querys:\n";
-		std::cerr << "ALTER TABLE `zone` CHANGE `minium_level` `min_level` TINYINT(3)  UNSIGNED DEFAULT \"0\" NOT NULL;\n";
-		std::cerr << "ALTER TABLE `zone` CHANGE `minium_status` `min_status` TINYINT(3)  UNSIGNED DEFAULT \"0\" NOT NULL;\n";
-		std::cerr << "ALTER TABLE `zone` ADD flag_needed VARCHAR(128) NOT NULL DEFAULT '';\n";
 		return false;
-	}
 
 	if (results.RowCount() == 0)
 		return false;
