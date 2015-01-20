@@ -66,16 +66,16 @@ int main() {
 		</qsdatabase>
 	*/
 
-	Log.Out(Logs::Detail, Logs::QS_Server, "Starting EQEmu QueryServ.");
+	Log.Out(Logs::General, Logs::QS_Server, "Starting EQEmu QueryServ.");
 	if (!queryservconfig::LoadConfig()) {
-		Log.Out(Logs::Detail, Logs::QS_Server, "Loading server configuration failed.");
+		Log.Out(Logs::General, Logs::QS_Server, "Loading server configuration failed.");
 		return 1;
 	}
 
 	Config = queryservconfig::get(); 
 	WorldShortName = Config->ShortName; 
 
-	Log.Out(Logs::Detail, Logs::QS_Server, "Connecting to MySQL...");
+	Log.Out(Logs::General, Logs::QS_Server, "Connecting to MySQL...");
 	
 	/* MySQL Connection */
 	if (!qs_database.Connect(
@@ -84,7 +84,7 @@ int main() {
 		Config->QSDatabasePassword.c_str(),
 		Config->QSDatabaseDB.c_str(),
 		Config->QSDatabasePort)) {
-		Log.Out(Logs::Detail, Logs::World_Server, "Cannot continue without a database connection.");
+		Log.Out(Logs::General, Logs::QS_Server, "Cannot continue without a database connection.");
 		return 1;
 	}
 
@@ -93,11 +93,11 @@ int main() {
 	database.LoadLogSysSettings(Log.log_settings);
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		Log.Out(Logs::Detail, Logs::QS_Server, "Could not set signal handler");
+		Log.Out(Logs::General, Logs::QS_Server, "Could not set signal handler");
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		Log.Out(Logs::Detail, Logs::QS_Server, "Could not set signal handler");
+		Log.Out(Logs::General, Logs::QS_Server, "Could not set signal handler");
 		return 1;
 	}
 
