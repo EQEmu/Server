@@ -332,7 +332,6 @@ bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add) {
 	std::string query = StringFormat("UPDATE account SET sharedplat = sharedplat + %i WHERE id = %i", amount_to_add, account_id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		std::cerr << "Error in SetSharedPlatinum query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
