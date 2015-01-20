@@ -1809,7 +1809,6 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 						rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->spell_book[i]);
 					}
 				}
-				// std::cout << rquery << "\n";
 				if (rquery != ""){ results = QueryDatabase(rquery); }
 				/* Run Max Memmed Spell Convert */
 				first_entry = 0; rquery = "";
