@@ -198,7 +198,6 @@ RESTART_WP_REDUCE:
 				//we are removing the second one
 				wp_reduce_count++;
 				
-				//printf("trail = 0x%x(0x%x) (%.3f, %.3f, %.3f)\n",
 				//	*trail, second, (*trail)->x, (*trail)->y, (*trail)->z);
 				//trail = cur2;
 				
