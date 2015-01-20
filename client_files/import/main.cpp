@@ -54,6 +54,7 @@ int main(int argc, char **argv) {
 	}
 
 	database.LoadLogSysSettings(Log.log_settings);
+	Log.StartFileLogs();
 
 	ImportSpells(&database);
 	ImportSkillCaps(&database);

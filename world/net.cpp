@@ -185,6 +185,7 @@ int main(int argc, char** argv) {
 
 	/* Register Log System and Settings */
 	database.LoadLogSysSettings(Log.log_settings);
+	Log.StartFileLogs();
 
 	if (argc >= 2) {
 		char tmp[2];

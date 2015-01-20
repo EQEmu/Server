@@ -131,7 +131,7 @@ public:
 	void MakeDirectory(std::string directory_name);
 	void Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...);
 	void SetCurrentTimeStamp(char* time_stamp);
-	void StartFileLogs(const std::string log_name);
+	void StartFileLogs(const std::string log_name = "");
 
 	struct LogSettings{
 		uint8 log_to_file;

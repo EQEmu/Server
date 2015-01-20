@@ -58,8 +58,8 @@ int main(int argc, char **argv) {
 	}
 
 	/* Register Log System and Settings */
-	Log.LoadLogSettingsDefaults();
 	database.LoadLogSysSettings(Log.log_settings);
+	Log.StartFileLogs();
 
 	bool load_all = true;
 	bool load_items = false;
