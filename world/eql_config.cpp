@@ -73,7 +73,6 @@ EQLConfig *EQLConfig::CreateLauncher(const char *name, uint8 dynamic_count) {
     std::string query = StringFormat("INSERT INTO launcher (name, dynamics) VALUES('%s', %d)", namebuf, dynamic_count);
     auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Error in CreateLauncher query: %s", results.ErrorMessage().c_str());
 		return nullptr;
 	}
 

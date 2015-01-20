@@ -137,7 +137,6 @@ uint32 Database::CheckLogin(const char* name, const char* password, int16* oStat
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in CheckLogin query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
 

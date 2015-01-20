@@ -46,7 +46,6 @@ bool SharedDatabase::SetHideMe(uint32 account_id, uint8 hideme)
 	std::string query = StringFormat("UPDATE account SET hideme = %i WHERE id = %i", hideme, account_id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		std::cerr << "Error in SetGMSpeed query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
