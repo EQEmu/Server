@@ -10130,7 +10130,6 @@ void command_mysql(Client *c, const Seperator *sep)
         std::replace(query.begin(), query.end(), '#', '%');
         auto results = database.QueryDatabase(query);
         if (!results.Success()) {
-            c->Message(0, "Invalid query: '%s', '%s'", sep->arg[2], results.ErrorMessage().c_str());
             return;
         }
 

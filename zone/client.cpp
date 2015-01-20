@@ -3853,7 +3853,6 @@ void Client::KeyRingAdd(uint32 item_id)
     std::string query = StringFormat("INSERT INTO keyring(char_id, item_id) VALUES(%i, %i)", character_id, item_id);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        std::cerr << "Error in Doors::HandleClick query '" << query << "' " << results.ErrorMessage() << std::endl;
         return;
     }
 
