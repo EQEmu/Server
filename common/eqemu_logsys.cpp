@@ -89,6 +89,12 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 		log_settings[i].log_to_file = 0;
 		log_settings[i].log_to_gmsay = 0;
 	}
+
+	log_settings[Logs::World_Server].log_to_console = 1;
+	log_settings[Logs::Zone_Server].log_to_console = 1;
+	log_settings[Logs::QS_Server].log_to_console = 1;
+	log_settings[Logs::UCS_Server].log_to_console = 1;
+
 	log_settings_loaded = true;
 }
 
