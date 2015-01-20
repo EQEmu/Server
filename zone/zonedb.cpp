@@ -2540,7 +2540,6 @@ uint32 ZoneDatabase::GetZoneTZ(uint32 zoneid, uint32 version) {
                                     zoneid, version);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        std::cerr << "Error in GetZoneTZ query '" << query << "' " << results.ErrorMessage() << std::endl;
         return 0;
     }
 
