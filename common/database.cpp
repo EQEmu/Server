@@ -249,12 +249,10 @@ uint32 Database::CreateAccount(const char* name, const char* password, int16 sta
 
 bool Database::DeleteAccount(const char* name) {
 	std::string query = StringFormat("DELETE FROM account WHERE name='%s';",name); 
-	std::cout << "Account Attempting to be deleted:" << name << std::endl;
+	Log.Out(Logs::General, Logs::World_Server, "Account Attempting to be deleted:'%s'", name);
 
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-	{
+	auto results = QueryDatabase(query); 
+	if (!results.Success()) {
 		return false;
 	}
 
