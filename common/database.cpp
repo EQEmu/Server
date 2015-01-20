@@ -2969,7 +2969,6 @@ bool Database::SetHackerFlag(const char* accountname, const char* charactername,
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
-		std::cerr << "Error in SetHackerFlag query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
