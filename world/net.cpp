@@ -113,6 +113,7 @@ void CatchSignal(int sig_num);
 
 int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformWorld);
+	Log.LoadLogSettingsDefaults();
 	set_exception_handler();
 
 	/* Database Version Check */
@@ -183,7 +184,6 @@ int main(int argc, char** argv) {
 	guild_mgr.SetDatabase(&database);
 
 	/* Register Log System and Settings */
-	Log.LoadLogSettingsDefaults();
 	database.LoadLogSysSettings(Log.log_settings);
 
 	if (argc >= 2) {

@@ -115,6 +115,7 @@ extern void MapOpcodes();
 
 int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformZone); 
+	Log.LoadLogSettingsDefaults();
 	set_exception_handler(); 
 	const char *zone_name; 
 	QServ = new QueryServ;
@@ -166,7 +167,6 @@ int main(int argc, char** argv) {
 	}
 
 	/* Register Log System and Settings */
-	Log.LoadLogSettingsDefaults();
 	Log.OnLogHookCallBackZone(&Zone::GMSayHookCallBackProcess);
 	database.LoadLogSysSettings(Log.log_settings); 
 

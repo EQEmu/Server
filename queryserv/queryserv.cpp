@@ -52,6 +52,7 @@ void CatchSignal(int sig_num) {
 
 int main() {
 	RegisterExecutablePlatform(ExePlatformQueryServ);
+	Log.LoadLogSettingsDefaults();
 	set_exception_handler(); 
 	Timer LFGuildExpireTimer(60000);  
 	Timer InterserverTimer(INTERSERVER_TIMER); // does auto-reconnect
@@ -89,7 +90,6 @@ int main() {
 	}
 
 	/* Register Log System and Settings */
-	Log.LoadLogSettingsDefaults();
 	database.LoadLogSysSettings(Log.log_settings);
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{

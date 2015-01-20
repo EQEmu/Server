@@ -53,6 +53,8 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
+	database.LoadLogSysSettings(Log.log_settings);
+
 	ImportSpells(&database);
 	ImportSkillCaps(&database);
 	ImportBaseData(&database);
