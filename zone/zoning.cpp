@@ -555,7 +555,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			if (entity == 0)
 			{
 				Message(13, "Error: OP_EndLootRequest: Corpse not found (ent = 0)");
-				if (GetClientVersion() >= EQClientSoD)
+				if (GetClientVersion() >= ClientVersion::SoD)
 					Corpse::SendEndLootErrorPacket(this);
 				else
 					Corpse::SendLootReqErrorPacket(this);

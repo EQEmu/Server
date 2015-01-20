@@ -55,7 +55,7 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 				x++;
 			}
 
-			if (GetClientVersion() >= EQClientSoF)
+			if (GetClientVersion() >= ClientVersion::SoF)
 				DeleteItemInInventory(MainPowerSource, 0, true);
 			else
 				DeleteItemInInventory(MainPowerSource, 0, false);	// Prevents Titanium crash
@@ -683,7 +683,7 @@ void Client::SendCursorBuffer() {
 	// Temporary work-around for the RoF+ Client Buffer
 	// Instead of dealing with client moving items in cursor buffer,
 	// we can just send the next item in the cursor buffer to the cursor.
-	if (GetClientVersion() >= EQClientRoF)
+	if (GetClientVersion() >= ClientVersion::RoF)
 	{
 		if (!GetInv().CursorEmpty())
 		{
@@ -937,7 +937,7 @@ bool Client::AutoPutLootInInventory(ItemInst& inst, bool try_worn, bool try_curs
 		for (int16 i = EmuConstants::EQUIPMENT_BEGIN; i < MainPowerSource; i++) { // originally (i < 22)
 			if (i == EmuConstants::GENERAL_BEGIN) {
 				// added power source check for SoF+ clients
-				if (this->GetClientVersion() >= EQClientSoF)
+				if (this->GetClientVersion() >= ClientVersion::SoF)
 					i = MainPowerSource;
 				else
 					break;
@@ -2083,7 +2083,7 @@ void Client::RemoveNoRent(bool client_update)
 		auto inst = m_inv[MainPowerSource];
 		if (inst && !inst->GetItem()->NoRent) {
 			mlog(INVENTORY__SLOTS, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, MainPowerSource);
-			DeleteItemInInventory(MainPowerSource, 0, (GetClientVersion() >= EQClientSoF) ? client_update : false); // Ti slot non-existent
+			DeleteItemInInventory(MainPowerSource, 0, (GetClientVersion() >= ClientVersion::SoF) ? client_update : false); // Ti slot non-existent
 		}
 	}
 
@@ -2301,7 +2301,7 @@ void Client::MoveSlotNotAllowed(bool client_update)
 		bool is_arrow = (inst->GetItem()->ItemType == ItemTypeArrow) ? true : false;
 		int16 free_slot_id = m_inv.FindFreeSlot(inst->IsType(ItemClassContainer), true, inst->GetItem()->Size, is_arrow);
 		mlog(INVENTORY__ERROR, "Slot Assignment Error: Moving %s from slot %i to %i", inst->GetItem()->Name, MainPowerSource, free_slot_id);
-		PutItemInInventory(free_slot_id, *inst, (GetClientVersion() >= EQClientSoF) ? client_update : false);
+		PutItemInInventory(free_slot_id, *inst, (GetClientVersion() >= ClientVersion::SoF) ? client_update : false);
 		database.SaveInventory(character_id, nullptr, MainPowerSource);
 		safe_delete(inst);
 	}

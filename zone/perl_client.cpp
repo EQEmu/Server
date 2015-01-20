@@ -3899,7 +3899,7 @@ XS(XS_Client_GetClientVersion)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetClientVersion();
+		RETVAL = static_cast<unsigned int>(THIS->GetClientVersion());
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);

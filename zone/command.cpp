@@ -2632,7 +2632,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 	}
 
-	if ((scopeWhere & peekWorn) && (targetClient->GetClientVersion() >= EQClientSoF)) {
+	if ((scopeWhere & peekWorn) && (targetClient->GetClientVersion() >= ClientVersion::SoF)) {
 		inst_main = targetClient->GetInv().GetItem(MainPowerSource);
 		item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
 		linker.SetItemInst(inst_main);

@@ -1758,12 +1758,15 @@ luabind::scope lua_register_client_version() {
 	return luabind::class_<ClientVersions>("ClientVersion")
 		.enum_("constants")
 		[
-			luabind::value("Unknown", static_cast<int>(EQClientUnknown)),
-			luabind::value("Titanium", static_cast<int>(EQClientTitanium)),
-			luabind::value("SoF", static_cast<int>(EQClientSoF)),
-			luabind::value("SoD", static_cast<int>(EQClientSoD)),
-			luabind::value("Underfoot", static_cast<int>(EQClientUnderfoot)),
-			luabind::value("RoF", static_cast<int>(EQClientRoF))
+			luabind::value("Unknown", static_cast<int>(ClientVersion::Unknown)),
+			luabind::value("Titanium", static_cast<int>(ClientVersion::Tit)), // deprecated
+			luabind::value("Tit", static_cast<int>(ClientVersion::Tit)),
+			luabind::value("SoF", static_cast<int>(ClientVersion::SoF)),
+			luabind::value("SoD", static_cast<int>(ClientVersion::SoD)),
+			luabind::value("Underfoot", static_cast<int>(ClientVersion::Und)), // deprecated
+			luabind::value("Und", static_cast<int>(ClientVersion::Und)),
+			luabind::value("RoF", static_cast<int>(ClientVersion::RoF)),
+			luabind::value("RoF2", static_cast<int>(ClientVersion::RoF2))
 		];
 }
 

@@ -834,7 +834,7 @@ void Lua_Client::SetAATitle(const char *title) {
 
 int Lua_Client::GetClientVersion() {
 	Lua_Safe_Call_Int();
-	return self->GetClientVersion();
+	return static_cast<unsigned int>(self->GetClientVersion());
 }
 
 uint32 Lua_Client::GetClientVersionBit() {

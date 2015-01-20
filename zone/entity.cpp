@@ -4378,7 +4378,7 @@ void EntityList::UpdateFindableNPCState(NPC *n, bool Remove)
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
 		Client *c = it->second;
-		if (c && (c->GetClientVersion() >= EQClientSoD))
+		if (c && (c->GetClientVersion() >= ClientVersion::SoD))
 			c->QueuePacket(outapp);
 
 		++it;

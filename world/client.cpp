@@ -89,7 +89,8 @@ Client::Client(EQStreamInterface* ieqs)
 	ClientVersionBit = 0;
 	numclients++;
 
-	ClientVersionBit = 1 << (eqs->ClientVersion() - 1);
+	if (eqs->GetClientVersion() != ClientVersion::Unknown)
+		ClientVersionBit = 1 << (static_cast<unsigned int>(eqs->GetClientVersion()) - 1);
 }
 
 Client::~Client() {

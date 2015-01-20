@@ -124,7 +124,7 @@ bool Client::Process() {
 				HandleRespawnFromHover(0);
 		}
 
-		if(IsTracking() && (GetClientVersion() >= EQClientSoD) && TrackingTimer.Check())
+		if(IsTracking() && (GetClientVersion() >= ClientVersion::SoD) && TrackingTimer.Check())
 			DoTracking();
 
 		if(hpupdate_timer.Check())
@@ -871,7 +871,7 @@ void Client::BulkSendInventoryItems() {
 	}
 
 	// Power Source
-	if(GetClientVersion() >= EQClientSoF) {
+	if(GetClientVersion() >= ClientVersion::SoF) {
 		const ItemInst* inst = m_inv[MainPowerSource];
 		if(inst) {
 			std::string packet = inst->Serialize(MainPowerSource);
@@ -1792,7 +1792,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		}
 	}
 
-	if(GetClientVersion() >= EQClientSoF) {
+	if(GetClientVersion() >= ClientVersion::SoF) {
 		// The following packet decreases the skill points left in the Training Window and
 		// produces the 'You have increased your skill / learned the basics of' message.
 		//

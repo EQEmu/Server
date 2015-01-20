@@ -298,7 +298,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 		// cash
 		// Let's not move the cash when 'RespawnFromHover = true' && 'client->GetClientVersion() < EQClientSoF' since the client doesn't.
 		// (change to first client that supports 'death hover' mode, if not SoF.)
-		if (!RuleB(Character, RespawnFromHover) || client->GetClientVersion() < EQClientSoF) {
+		if (!RuleB(Character, RespawnFromHover) || client->GetClientVersion() < ClientVersion::SoF) {
 			SetCash(pp->copper, pp->silver, pp->gold, pp->platinum);
 			pp->copper = 0;
 			pp->silver = 0;
@@ -317,7 +317,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 		std::list<uint32> removed_list;
 		//bool cursor = false;
 		for(i = MAIN_BEGIN; i < EmuConstants::MAP_POSSESSIONS_SIZE; i++) {
-			if(i == MainAmmo && client->GetClientVersion() >= EQClientSoF) {
+			if(i == MainAmmo && client->GetClientVersion() >= ClientVersion::SoF) {
 				item = client->GetInv().GetItem(MainPowerSource);
 				if((item && (!client->IsBecomeNPC())) || (item && client->IsBecomeNPC() && !item->GetItem()->NoRent)) {
 					std::list<uint32> slot_list = MoveItemToCorpse(client, item, MainPowerSource);
@@ -1041,7 +1041,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 
 	// This is required for the 'Loot All' feature to work for SoD clients. I expect it is to tell the client that the
 	// server has now sent all the items on the corpse.
-	if(client->GetClientVersion() >= EQClientSoD) { SendLootReqErrorPacket(client, 6); }
+	if(client->GetClientVersion() >= ClientVersion::SoD) { SendLootReqErrorPacket(client, 6); }
 }
 
 void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {

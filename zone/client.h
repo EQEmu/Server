@@ -1019,7 +1019,7 @@ public:
 	inline int ActiveTasksInSet(int TaskSet) { return (taskstate ? taskstate->ActiveTasksInSet(TaskSet) :0); }
 	inline int CompletedTasksInSet(int TaskSet) { return (taskstate ? taskstate->CompletedTasksInSet(TaskSet) :0); }
 
-	inline const EQClientVersion GetClientVersion() const { return ClientVersion; }
+	inline const ClientVersion GetClientVersion() const { return ClientVersion; }
 	inline const uint32 GetClientVersionBit() const { return ClientVersionBit; }
 
 	/** Adventure Stuff **/
@@ -1506,7 +1506,7 @@ private:
 	Timer *GlobalChatLimiterTimer; //60 seconds
 	uint32 AttemptedMessages;
 
-	EQClientVersion ClientVersion;
+	ClientVersion ClientVersion;
 	uint32 ClientVersionBit;
 
 	int XPRate;

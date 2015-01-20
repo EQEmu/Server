@@ -975,7 +975,7 @@ void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, i
 
 void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *TaskList) {
 
-	if (c->GetClientVersion() >= EQClientRoF)
+	if (c->GetClientVersion() >= ClientVersion::RoF)
 	{
 		SendTaskSelectorNew(c, mob, TaskCount, TaskList);
 		return;
@@ -2516,7 +2516,7 @@ void TaskManager::SendTaskActivityShort(Client *c, int TaskID, int ActivityID, i
 
 void TaskManager::SendTaskActivityLong(Client *c, int TaskID, int ActivityID, int ClientTaskIndex, bool Optional, bool TaskComplete) {
 
-	if (c->GetClientVersion() >= EQClientRoF)
+	if (c->GetClientVersion() >= ClientVersion::RoF)
 	{
 		SendTaskActivityNew(c, TaskID, ActivityID, ClientTaskIndex, Optional, TaskComplete);
 		return;

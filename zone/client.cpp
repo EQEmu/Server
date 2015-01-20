@@ -246,7 +246,7 @@ Client::Client(EQStreamInterface* ieqs)
 	GlobalChatLimiterTimer = new Timer(RuleI(Chat, IntervalDurationMS));
 	AttemptedMessages = 0;
 	TotalKarma = 0;
-	ClientVersion = EQClientUnknown;
+	ClientVersion = ClientVersion::Unknown;
 	ClientVersionBit = 0;
 	AggroCount = 0;
 	RestRegenHP = 0;
@@ -1440,7 +1440,7 @@ void Client::UpdateWho(uint8 remove) {
 	else if (m_pp.anon >= 2)
 		scl->anon = 2;
 
-	scl->ClientVersion = GetClientVersion();
+	scl->ClientVersion = static_cast<unsigned int>(GetClientVersion());
 	scl->tellsoff = tellsoff;
 	scl->guild_id = guild_id;
 	scl->LFG = LFG;
@@ -1698,7 +1698,7 @@ void Client::SendManaUpdatePacket() {
 	if (!Connected() || IsCasting())
 		return;
 
-	if (GetClientVersion() >= EQClientSoD) {
+	if (GetClientVersion() >= ClientVersion::SoD) {
 		SendManaUpdate();
 		SendEnduranceUpdate();
 	}
@@ -1734,7 +1734,7 @@ void Client::SendManaUpdatePacket() {
 
 
 			for(int i = 0; i < MAX_GROUP_MEMBERS; ++i)
-				if(g->members[i] && g->members[i]->IsClient() && (g->members[i] != this) && (g->members[i]->CastToClient()->GetClientVersion() >= EQClientSoD))
+				if(g->members[i] && g->members[i]->IsClient() && (g->members[i] != this) && (g->members[i]->CastToClient()->GetClientVersion() >= ClientVersion::SoD))
 				{
 					g->members[i]->CastToClient()->QueuePacket(outapp);
 					g->members[i]->CastToClient()->QueuePacket(outapp2);
@@ -1914,7 +1914,7 @@ void Client::ReadBook(BookRequest_Struct *book) {
 
 		BookText_Struct *out = (BookText_Struct *) outapp->pBuffer;
 		out->window = book->window;
-		if(GetClientVersion() >= EQClientSoF)
+		if(GetClientVersion() >= ClientVersion::SoF)
 		{
 			const ItemInst *inst = m_inv[book->invslot];
 			if(inst)
@@ -4065,7 +4065,7 @@ bool Client::GroupFollow(Client* inviter) {
 			group->UpdateGroupAAs();
 
 			//Invite the inviter into the group first.....dont ask
-			if (inviter->GetClientVersion() < EQClientSoD)
+			if (inviter->GetClientVersion() < ClientVersion::SoD)
 			{
 				EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
 				GroupJoin_Struct* outgj = (GroupJoin_Struct*)outapp->pBuffer;
@@ -4111,13 +4111,13 @@ bool Client::GroupFollow(Client* inviter) {
 			return false;
 		}
 
-		if (GetClientVersion() >= EQClientSoD)
+		if (GetClientVersion() >= ClientVersion::SoD)
 		{
 			SendGroupJoinAcknowledge();
 		}
 
 		// Temporary hack for SoD, as things seem to work quite differently
-		if (inviter->IsClient() && inviter->GetClientVersion() >= EQClientSoD)
+		if (inviter->IsClient() && inviter->GetClientVersion() >= ClientVersion::SoD)
 		{
 			database.RefreshGroupFromDB(inviter);
 		}
@@ -4351,7 +4351,7 @@ void Client::IncrementAggroCount() {
 	if (AggroCount == 1)
 		SavedRaidRestTimer = rest_timer.GetRemainingTime();
 
-	if(GetClientVersion() >= EQClientSoF) {
+	if(GetClientVersion() >= ClientVersion::SoF) {
 
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_RestState, 1);
 		char *Buffer = (char *)outapp->pBuffer;
@@ -4396,7 +4396,7 @@ void Client::DecrementAggroCount() {
 
 	rest_timer.Start(time_until_rest);
 
-	if(GetClientVersion() >= EQClientSoF) {
+	if(GetClientVersion() >= ClientVersion::SoF) {
 
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_RestState, 5);
 		char *Buffer = (char *)outapp->pBuffer;
@@ -6805,7 +6805,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	if(use_window) {
 		if(final_stats.size() < 4096)
 		{
-			uint32 Buttons = (client->GetClientVersion() < EQClientSoD) ? 0 : 1;
+			uint32 Buttons = (client->GetClientVersion() < ClientVersion::SoD) ? 0 : 1;
 			client->SendWindow(0, POPUPID_UPDATE_SHOWSTATSWINDOW, Buttons, "Cancel", "Update", 0, 1, this, "", "%s", final_stats.c_str());
 			goto Extra_Info;
 		}
@@ -6841,7 +6841,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 }
 
 void Client::SendAltCurrencies() {
-	if(GetClientVersion() >= EQClientSoF) {
+	if(GetClientVersion() >= ClientVersion::SoF) {
 		uint32 count = zone->AlternateCurrencies.size();
 		if(count == 0) {
 			return;
@@ -7332,7 +7332,7 @@ void Client::SendMercPersonalInfo()
 
 	if(mercData)
 	{
-		if (GetClientVersion() >= EQClientRoF)
+		if (GetClientVersion() >= ClientVersion::RoF)
 		{
 			if (mercCount > 0)
 			{

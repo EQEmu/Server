@@ -155,7 +155,7 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 	}
 
 	//Power Source Slot
-	if (GetClientVersion() >= EQClientSoF)
+	if (GetClientVersion() >= ClientVersion::SoF)
 	{
 		const ItemInst* inst = m_inv[MainPowerSource];
 		if(inst)
@@ -3086,7 +3086,7 @@ void Client::CalcItemScale() {
 		changed = true;
 
 	//Power Source Slot
-	if (GetClientVersion() >= EQClientSoF)
+	if (GetClientVersion() >= ClientVersion::SoF)
 	{
 		if(CalcItemScale(MainPowerSource, MainPowerSource))
 			changed = true;
@@ -3180,7 +3180,7 @@ void Client::DoItemEnterZone() {
 		changed = true;
 
 	//Power Source Slot
-	if (GetClientVersion() >= EQClientSoF)
+	if (GetClientVersion() >= ClientVersion::SoF)
 	{
 		if(DoItemEnterZone(MainPowerSource, MainPowerSource))
 			changed = true;

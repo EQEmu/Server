@@ -43,7 +43,7 @@ int32 Client::GetMaxStat() const {
 	if (level < 61) {
 		base = 255;
 	}
-	else if (GetClientVersion() >= EQClientSoF) {
+	else if (GetClientVersion() >= ClientVersion::SoF) {
 		base = 255 + 5 * (level - 60);
 	}
 	else if (level < 71) {
@@ -367,7 +367,7 @@ uint32 Mob::GetClassLevelFactor(){
 
 int32 Client::CalcBaseHP()
 {
-	if(GetClientVersion() >= EQClientSoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+	if(GetClientVersion() >= ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 		int stats = GetSTA();
 		if(stats > 255) {
 			stats = (stats - 255) / 2;
@@ -973,7 +973,7 @@ int32 Client::CalcBaseMana()
 		case 'I':
 			WisInt = GetINT();
 
-			if (GetClientVersion() >= EQClientSoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+			if (GetClientVersion() >= ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 
 				if (WisInt > 100) {
 					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
@@ -1008,7 +1008,7 @@ int32 Client::CalcBaseMana()
 		case 'W':
 			WisInt = GetWIS();
 
-			if (GetClientVersion() >= EQClientSoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+			if (GetClientVersion() >= ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 
 				if (WisInt > 100) {
 					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
@@ -1925,7 +1925,7 @@ int32 Client::CalcBaseEndurance()
 {
 	int32 base_end = 0;
 
-	if(GetClientVersion() >= EQClientSoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+	if(GetClientVersion() >= ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 		double heroic_stats = (GetHeroicSTR() + GetHeroicSTA() + GetHeroicDEX() + GetHeroicAGI()) / 4.0f;
 		double stats = (GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4.0f;
 

@@ -393,7 +393,7 @@ void Group::SendHPPacketsTo(Mob *member)
 			{
 				members[i]->CreateHPPacket(&hpapp);
 				member->CastToClient()->QueuePacket(&hpapp, false);
-				if(member->CastToClient()->GetClientVersion() >= EQClientSoD)
+				if(member->CastToClient()->GetClientVersion() >= ClientVersion::SoD)
 				{
 					outapp.SetOpcode(OP_MobManaUpdate);
 					MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp.pBuffer;
@@ -424,7 +424,7 @@ void Group::SendHPPacketsFrom(Mob *member)
 		if(members[i] && members[i] != member && members[i]->IsClient())
 		{
 			members[i]->CastToClient()->QueuePacket(&hp_app);
-			if(members[i]->CastToClient()->GetClientVersion() >= EQClientSoD)
+			if(members[i]->CastToClient()->GetClientVersion() >= ClientVersion::SoD)
 			{
 				outapp.SetOpcode(OP_MobManaUpdate);
 				MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp.pBuffer;
@@ -564,7 +564,7 @@ bool Group::DelMemberOOZ(const char *Name) {
 				if(GroupCount() < 3)
 				{
 					UnDelegateMarkNPC(NPCMarkerName.c_str());
-					if(GetLeader() && GetLeader()->IsClient() && GetLeader()->CastToClient()->GetClientVersion() < EQClientSoD) {
+					if(GetLeader() && GetLeader()->IsClient() && GetLeader()->CastToClient()->GetClientVersion() < ClientVersion::SoD) {
 							UnDelegateMainAssist(MainAssistName.c_str());
 					}
 					ClearAllNPCMarks();
@@ -722,7 +722,7 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 	if(GroupCount() < 3)
 	{
 		UnDelegateMarkNPC(NPCMarkerName.c_str());
-		if(GetLeader() && GetLeader()->IsClient() && GetLeader()->CastToClient()->GetClientVersion() < EQClientSoD) {
+		if(GetLeader() && GetLeader()->IsClient() && GetLeader()->CastToClient()->GetClientVersion() < ClientVersion::SoD) {
 			UnDelegateMainAssist(MainAssistName.c_str());
 		}
 		ClearAllNPCMarks();
@@ -1567,7 +1567,7 @@ void Group::NotifyMainTank(Client *c, uint8 toggle)
 	if(!MainTankName.size())
 		return;
 
-	if(c->GetClientVersion() < EQClientSoD)
+	if(c->GetClientVersion() < ClientVersion::SoD)
 	{
 		if(toggle)
 			c->Message(0, "%s is now Main Tank.", MainTankName.c_str());
@@ -1607,7 +1607,7 @@ void Group::NotifyMainAssist(Client *c, uint8 toggle)
 	if(!MainAssistName.size())
 		return;
 
-	if(c->GetClientVersion() < EQClientSoD)
+	if(c->GetClientVersion() < ClientVersion::SoD)
 	{
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_DelegateAbility, sizeof(DelegateAbility_Struct));
 
@@ -1662,7 +1662,7 @@ void Group::NotifyPuller(Client *c, uint8 toggle)
 	if(!PullerName.size())
 		return;
 
-	if(c->GetClientVersion() < EQClientSoD)
+	if(c->GetClientVersion() < ClientVersion::SoD)
 	{
 		if(toggle)
 			c->Message(0, "%s is now Puller.", PullerName.c_str());
@@ -2228,7 +2228,7 @@ void Group::ChangeLeader(Mob* newleader)
 	for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++) {
 		if (members[i] && members[i]->IsClient())
 		{
-			if(members[i]->CastToClient()->GetClientVersion() >= EQClientSoD)
+			if(members[i]->CastToClient()->GetClientVersion() >= ClientVersion::SoD)
 				members[i]->CastToClient()->SendGroupLeaderChangePacket(newleader->GetName());
 
 			members[i]->CastToClient()->QueuePacket(outapp);

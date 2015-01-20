@@ -17,59 +17,58 @@ static const uint32 BIT_RoFAndLater			= 0xFFFFFFE0;
 static const uint32 BIT_RoF2AndLater		= 0xFFFFFFC0;
 static const uint32 BIT_AllClients			= 0xFFFFFFFF;
 
-typedef enum
+enum class ClientVersion
 {
-	EQClientUnknown = 0,
-	EQClient62,				// Build: 'Aug  4 2005 15:40:59'
-	EQClientTitanium,		// Build: 'Oct 31 2005 10:33:37'
-	EQClientSoF,			// Build: 'Sep  7 2007 09:11:49'
-	EQClientSoD,			// Build: 'Dec 19 2008 15:22:49'
-	EQClientUnderfoot,		// Build: 'Jun  8 2010 16:44:32'
-	EQClientRoF,			// Build: 'Dec 10 2012 17:35:44'
-	EQClientRoF2,			// Build: 'May 10 2013 23:30:08'
+	Unknown = 0,
+	Client62,	// Build: 'Aug  4 2005 15:40:59'
+	Tit,		// Build: 'Oct 31 2005 10:33:37'
+	SoF,		// Build: 'Sep  7 2007 09:11:49'
+	SoD,		// Build: 'Dec 19 2008 15:22:49'
+	Und,		// Build: 'Jun  8 2010 16:44:32'
+	RoF,		// Build: 'Dec 10 2012 17:35:44'
+	RoF2,		// Build: 'May 10 2013 23:30:08'
 
-	_EQClientCount,			// place new clients before this point (preferably, in release/attribute order)
+	MobNPC,
+	MobMerc,
+	MobBot,
+	MobPet,
+};
 
-	// Values below are not implemented, as yet...
+#define CLIENT_VERSION_COUNT 12
+#define LAST_PC_CLIENT ClientVersion::RoF2
+#define LAST_NPC_CLIENT ClientVersion::MobPet
 
-	EmuNPC = _EQClientCount,
-	EmuMerc,
-	EmuBot,
-	EmuPet,
 
-	_EmuClientCount			// array size for EQLimits
-} EQClientVersion;
-
-static const char* EQClientVersionName(EQClientVersion version)
+static const char* ClientVersionName(ClientVersion version)
 {
 	switch (version)
 	{
-	case EQClientUnknown:
-		return "EQClientUnknown";
-	case EQClient62:
-		return "EQClient62";
-	case EQClientTitanium:
-		return "EQClientTitanium";
-	case EQClientSoF:
-		return "EQClientSoF";
-	case EQClientSoD:
-		return "EQClientSoD";
-	case EQClientUnderfoot:
-		return "EQClientUnderfoot";
-	case EQClientRoF:
-		return "EQClientRoF";
-	case EQClientRoF2:
-		return "EQClientRoF2";
-	case EmuNPC:
-		return "EmuNPC";
-	case EmuMerc:
-		return "EmuMerc";
-	case EmuBot:
-		return "EmuBot";
-	case EmuPet:
-		return "EmuPet";
+	case ClientVersion::Unknown:
+		return "ClientVersion::Unknown";
+	case ClientVersion::Client62:
+		return "ClientVersion::Client62";
+	case ClientVersion::Tit:
+		return "ClientVersion::Tit";
+	case ClientVersion::SoF:
+		return "ClientVersion::SoF";
+	case ClientVersion::SoD:
+		return "ClientVersion::SoD";
+	case ClientVersion::Und:
+		return "ClientVersion::Und";
+	case ClientVersion::RoF:
+		return "ClientVersion::RoF";
+	case ClientVersion::RoF2:
+		return "ClientVersion::RoF2";
+	case ClientVersion::MobNPC:
+		return "ClientVersion::MobNPC";
+	case ClientVersion::MobMerc:
+		return "ClientVersion::MobMerc";
+	case ClientVersion::MobBot:
+		return "ClientVersion::MobBot";
+	case ClientVersion::MobPet:
+		return "ClientVersion::MobPet";
 	default:
-		return "ERROR: Invalid EQClientVersion";
+		return "<ERROR> Invalid ClientVersion";
 	};
 }
 
