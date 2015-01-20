@@ -105,22 +105,22 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 		If there is no process_file_name declared, no log file will be written, simply
 	*/
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformWorld){ 
-		process_file_name = "world";  
+		platform_file_name = "world";  
 	}
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformQueryServ){ 
-		process_file_name = "query_server"; 
+		platform_file_name = "query_server"; 
 	}
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
-		process_file_name = "zone";
+		platform_file_name = "zone";
 	}
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformUCS){
-		process_file_name = "ucs";
+		platform_file_name = "ucs";
 	}
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformLogin){
-		process_file_name = "login";
+		platform_file_name = "login";
 	}
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformLogin){
-		process_file_name = "launcher";
+		platform_file_name = "launcher";
 	}
 }
 
@@ -158,7 +158,7 @@ void EQEmuLogSys::ProcessLogWrite(uint16 debug_level, uint16 log_category, std::
 		char time_stamp[80];
 		EQEmuLogSys::SetCurrentTimeStamp(time_stamp);
 		std::ofstream crash_log;
-		crash_log.open(StringFormat("logs/crash_%s_%i.txt", process_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
+		crash_log.open(StringFormat("logs/crash_%s_%i.txt", platform_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
 		crash_log << time_stamp << " " << message << "\n";
 		crash_log.close();
 	}
@@ -322,21 +322,21 @@ void EQEmuLogSys::StartFileLogs(const std::string log_name)
 
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
 		if (log_name != "")
-			process_file_name = log_name;
+			platform_file_name = log_name;
 
-		if (process_file_name == ""){
+		if (platform_file_name == ""){
 			return;
 		}
 
 		std::cout << "Starting Zone Logs..." << std::endl;
 		EQEmuLogSys::MakeDirectory("logs/zone");
-		process_log.open(StringFormat("logs/zone/%s_%i.txt", process_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
+		process_log.open(StringFormat("logs/zone/%s_%i.txt", platform_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
 	}
 	else{
-		if (process_file_name == ""){
+		if (platform_file_name == ""){
 			return;
 		}
-		std::cout << "Starting Process Log (" << process_file_name << ")..." << std::endl;
-		process_log.open(StringFormat("logs/%s_%i.txt", process_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
+		std::cout << "Starting Process Log (" << platform_file_name << ")..." << std::endl;
+		process_log.open(StringFormat("logs/%s_%i.txt", platform_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
 	}
 }
