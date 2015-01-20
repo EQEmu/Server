@@ -2410,7 +2410,6 @@ bool Database::LoadVariables() {
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in LoadVariables query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
