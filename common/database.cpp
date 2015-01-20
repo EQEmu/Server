@@ -265,7 +265,6 @@ bool Database::DeleteAccount(const char* name) {
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in DeleteAccount query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
