@@ -297,7 +297,6 @@ void color_disjoint_graphs(
 		if(n->color != 0)
 			continue;	//allready visited
 
-//printf("New Color at: (%.3f,%.3f,%.3f)\n", n->x, n->y, n->z);
 
 		cc = 1;
 		djc = 0;
