@@ -94,6 +94,8 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	log_settings[Logs::Zone_Server].log_to_console = 1;
 	log_settings[Logs::QS_Server].log_to_console = 1;
 	log_settings[Logs::UCS_Server].log_to_console = 1;
+	log_settings[Logs::Crash].log_to_console = 1;
+	log_settings[Logs::MySQLError].log_to_console = 1;
 
 	log_settings_loaded = true;
 }
