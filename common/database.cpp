@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2015 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -58,15 +58,7 @@ extern Client client;
 #	define _ISNAN_(a) std::isnan(a)
 #endif
 
-/*
-Establish a connection to a mysql database with the supplied parameters
-
-	Added a very simple .ini file parser - Bounce
-
-	Modify to use for win32 & linux - misanthropicfiend
-*/
-Database::Database ()
-{
+Database::Database () {
 	DBInitVars();
 }
 
@@ -84,12 +76,11 @@ bool Database::Connect(const char* host, const char* user, const char* passwd, c
 	uint32 errnum= 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	if (!Open(host, user, passwd, database, port, &errnum, errbuf)) {
-		Log.Out(Logs::General, Logs::Error, "Failed to connect to database: Error: %s", errbuf);
-
+		Log.Out(Logs::General, Logs::Error, "Failed to connect to database: Error: %s", errbuf); 
 		return false; 
 	}
 	else {
-		Log.Out(Logs::General, Logs::Status, "Using database '%s' at %s:%d",database,host,port);
+		Log.Out(Logs::General, Logs::Status, "Using database '%s' at %s:%d", database, host,port);
 		return true;
 	}
 }
@@ -241,7 +232,7 @@ uint32 Database::CreateAccount(const char* name, const char* password, int16 sta
 	else
 		query = StringFormat("INSERT INTO account SET name='%s', status=%i, lsaccount_id=%i, time_creation=UNIX_TIMESTAMP();",name, status, lsaccount_id);
 
-	std::cerr << "Account Attempting to be created:" << name << " " << (int16) status << std::endl; 
+	Log.Out(Logs::General, Logs::World_Server, "Account Attempting to be created: '%s' status: %i", name, status);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
@@ -2723,8 +2714,7 @@ uint8 Database::GetPEQZone(uint32 zoneID, uint32 version){
 	std::string query = StringFormat("SELECT peqzone from zone where zoneidnumber='%i' AND (version=%i OR version=0) ORDER BY version DESC", zoneID, version);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
-	{
+	if (!results.Success()) {
 		return 0;
 	}
 
@@ -2834,8 +2824,7 @@ uint32 Database::GetAccountIDFromLSID(uint32 iLSID, char* oAccountName, int16* o
 	std::string query = StringFormat("SELECT id, name, status FROM account WHERE lsaccount_id=%i", iLSID);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
-	{
+	if (!results.Success()) {
 		return 0;
 	}
 
@@ -2859,8 +2848,7 @@ void Database::GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus) {
 	std::string query = StringFormat("SELECT name, status FROM account WHERE id=%i", id);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
-	{
+	if (!results.Success()){
 		return;
 	}
 
