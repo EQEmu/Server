@@ -3028,11 +3028,11 @@ void ClientTaskState::ProcessTaskProximities(Client *c, float X, float Y, float 
 
 	if((LastX==X) && (LastY==Y) && (LastZ==Z)) return;
 
-	Log.Out(Logs::General, Logs::Tasks, "[PROXIMITY] Checking proximities for Position %8.3f, %8.3f, %8.3f\n", X, Y, Z);
+	Log.Out(Logs::General, Logs::Tasks, "[PROXIMITY] Checking proximities for Position %8.3f, %8.3f, %8.3f", X, Y, Z);
 	int ExploreID = taskmanager->ProximityManager.CheckProximities(X, Y, Z);
 
 	if(ExploreID>0) {
-		Log.Out(Logs::General, Logs::Tasks, "[PROXIMITY] Position %8.3f, %8.3f, %8.3f is within proximity %i\n", X, Y, Z, ExploreID);
+		Log.Out(Logs::General, Logs::Tasks, "[PROXIMITY] Position %8.3f, %8.3f, %8.3f is within proximity %i", X, Y, Z, ExploreID);
 		UpdateTasksOnExplore(c, ExploreID);
 	}
 }

@@ -134,7 +134,7 @@ void EQEmuLogSys::ProcessLogWrite(uint16 debug_level, uint16 log_category, std::
 	EQEmuLogSys::SetCurrentTimeStamp(time_stamp);
 
 	if (process_log){
-		process_log << time_stamp << " " << StringFormat("[%s] ", Logs::LogCategoryName[log_category]).c_str() << message << std::endl;
+		process_log << time_stamp << " " << message << std::endl;
 	}
 }
 

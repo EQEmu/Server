@@ -100,7 +100,7 @@ XS(XS_EQEmuIO_PRINT)
 		int len = 0;
 		for(i = 0; *cur != '\0'; i++, cur++) {
 			if(*cur == '\n') {
-				Log.Out(Logs::Detail, Logs::Quests, str);
+				Log.Out(Logs::General, Logs::Quests, str);
 				len = 0;
 				pos = i+1;
 			} else {
@@ -108,7 +108,7 @@ XS(XS_EQEmuIO_PRINT)
 			}
 		}
 		if(len > 0) {
-			Log.Out(Logs::Detail, Logs::Quests, str);
+			Log.Out(Logs::General, Logs::Quests, str);
 		}
  	}
  	

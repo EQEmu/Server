@@ -140,7 +140,9 @@ public:
 	};
 
 	LogSettings log_settings[Logs::LogCategory::MaxCategoryID];
+
 	bool log_settings_loaded = false;
+
 	int log_platform = 0;
 
 	uint16 GetGMSayColorFromCategory(uint16 log_category);
@@ -152,9 +154,9 @@ private:
 	
 	std::function<void(uint16 log_category, std::string&)> on_log_gmsay_hook;
 	std::string FormatOutMessageString(uint16 log_category, std::string in_message);
+	std::string GetLinuxConsoleColorFromCategory(uint16 log_category);
 	
 	uint16 GetWindowsConsoleColorFromCategory(uint16 log_category);
-	std::string GetLinuxConsoleColorFromCategory(uint16 log_category);
 
 	void ProcessConsoleMessage(uint16 debug_level, uint16 log_category, const std::string message);
 	void ProcessGMSay(uint16 debug_level, uint16 log_category, std::string message);
