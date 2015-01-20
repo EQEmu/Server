@@ -228,9 +228,9 @@ void EQEmuLogSys::Out(Logs::DebugLevel debug_level, uint16 log_category, std::st
 
 	std::string output_debug_message = EQEmuLogSys::FormatOutMessageString(log_category, output_message);
 
-	EQEmuLogSys::ProcessConsoleMessage(0, log_category, output_debug_message);
-	EQEmuLogSys::ProcessGMSay(0, log_category, output_debug_message);
-	EQEmuLogSys::ProcessLogWrite(0, log_category, output_debug_message);
+	EQEmuLogSys::ProcessConsoleMessage(debug_level, log_category, output_debug_message);
+	EQEmuLogSys::ProcessGMSay(debug_level, log_category, output_debug_message);
+	EQEmuLogSys::ProcessLogWrite(debug_level, log_category, output_debug_message);
 }
 
 void EQEmuLogSys::SetCurrentTimeStamp(char* time_stamp){
