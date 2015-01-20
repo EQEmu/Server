@@ -106,7 +106,6 @@ struct sockaddr_in address;
 		fcntl(sock, F_SETFL, O_NONBLOCK);
 	#endif
 	//moved these because on windows the output was delayed and causing the console window to look bad
-	//std::cout << "Starting factory Reader" << std::endl;
 	//std::cout << "Starting factory Writer" << std::endl;
 	#ifdef _WINDOWS
 		_beginthread(EQStreamFactoryReaderLoop,0, this);
