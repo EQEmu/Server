@@ -141,7 +141,6 @@ size_t MemFile::fwrite(const char *ptr, size_t size, size_t nmemb)
 	size_t sz = size * nmemb;
 	if (p + sz < BLOCKSIZE)
 	{
-//printf("Write @ %d(%d). %d bytes.\n", m_write_ptr, p, sz);
 		memcpy(m_current_write -> data + p, ptr, sz);
 		m_write_ptr += sz;
 	}
