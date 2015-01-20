@@ -654,7 +654,6 @@ bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name
                                     "ORDER BY doorid asc", zone_name, version);
 	auto results = QueryDatabase(query);
 	if (!results.Success()){
-		std::cerr << "Error in DBLoadDoors query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
