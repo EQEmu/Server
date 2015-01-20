@@ -2940,7 +2940,6 @@ bool Database::MoveCharacterToZone(const char* charname, const char* zonename, u
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
-		std::cerr << "Error in MoveCharacterToZone(name) query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
