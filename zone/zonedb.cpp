@@ -2786,7 +2786,6 @@ void ZoneDatabase::InsertDoor(uint32 ddoordbid, uint16 ddoorid, const char* ddoo
                                     dlockpick, dkeyitem, ddoor_param, dinvert, dincline, dsize);
     auto results = QueryDatabase(query);
     if (!results.Success())
-		std::cerr << "Error in InsertDoor" << query << "' " << results.ErrorMessage() << std::endl;
 }
 
 void ZoneDatabase::LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32> &currency) {
