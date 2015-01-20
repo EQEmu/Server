@@ -1753,7 +1753,6 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        std::cerr << "Error loading NPCs from database. Bad query: " << results.ErrorMessage() << std::endl;
         return nullptr;
     }
 
