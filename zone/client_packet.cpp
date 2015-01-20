@@ -6193,7 +6193,6 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 	safe_delete_array(escSearchString);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Message(0, "Query failed: %s.", results.ErrorMessage().c_str());
 		return;
 	}
 

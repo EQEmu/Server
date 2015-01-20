@@ -3833,7 +3833,6 @@ void Client::KeyRingLoad()
                                     "WHERE char_id = '%i' ORDER BY item_id", character_id);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        std::cerr << "Error in Client::KeyRingLoad query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return;
     }
 
