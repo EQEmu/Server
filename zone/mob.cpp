@@ -1795,7 +1795,6 @@ bool Mob::IsPlayerRace(uint16 in_race) {
 
 
 uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
-//std::cout << "Gender in: " << (int)in_gender << std::endl; // undefined cout [CODEBUG]
 	if (Mob::IsPlayerRace(in_race) || in_race == 15 || in_race == 50 || in_race == 57 || in_race == 70 || in_race == 98 || in_race == 118) {
 		if (in_gender >= 2) {
 			// Male default for PC Races
