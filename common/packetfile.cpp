@@ -332,7 +332,6 @@ NewPacketFileReader::~NewPacketFileReader() {
 bool NewPacketFileReader::OpenFile(const char *name) {
 	CloseFile();
 
-	//printf("Opening packet file: %s\n", name);
 
 	in = fopen(name, "rb");
 	if(in == NULL) {
