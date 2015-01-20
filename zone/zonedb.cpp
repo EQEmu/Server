@@ -3006,7 +3006,6 @@ void ZoneDatabase::RemoveTempFactions(Client *client) {
                                     client->CharacterID());
 	auto results = QueryDatabase(query);
 	if (!results.Success())
-		std::cerr << "Error in RemoveTempFactions query '" << query << "' " << results.ErrorMessage() << std::endl;
 
 }
 
