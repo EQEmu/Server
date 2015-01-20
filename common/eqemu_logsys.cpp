@@ -110,6 +110,7 @@ void EQEmuLogSys::ProcessGMSay(uint16 log_category, std::string message)
 	if (log_category == Logs::LogCategory::Netcode)
 		return;
 
+	/* Check to see if the process that actually ran this is zone */
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
 		on_log_gmsay_hook(log_category, message);
 	}
@@ -153,23 +154,23 @@ uint16 EQEmuLogSys::GetWindowsConsoleColorFromCategory(uint16 log_category){
 
 std::string EQEmuLogSys::GetLinuxConsoleColorFromCategory(uint16 log_category){
 	switch (log_category) {
-	case Logs::Status:
-	case Logs::Normal:
-		return LC_YELLOW;
-	case Logs::MySQLError:
-	case Logs::Error:
-		return LC_RED;
-	case Logs::MySQLQuery:
-	case Logs::Debug:
-		return LC_GREEN;
-	case Logs::Quests:
-		return LC_CYAN;
-	case Logs::Commands:
-		return LC_MAGENTA;
-	case Logs::Crash:
-		return LC_RED;
-	default:
-		return LC_YELLOW;
+		case Logs::Status:
+		case Logs::Normal:
+			return LC_YELLOW;
+		case Logs::MySQLError:
+		case Logs::Error:
+			return LC_RED;
+		case Logs::MySQLQuery:
+		case Logs::Debug:
+			return LC_GREEN;
+		case Logs::Quests:
+			return LC_CYAN;
+		case Logs::Commands:
+			return LC_MAGENTA;
+		case Logs::Crash:
+			return LC_RED;
+		default:
+			return LC_YELLOW;
 	}
 }
 
