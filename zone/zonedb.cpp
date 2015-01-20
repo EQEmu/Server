@@ -2015,7 +2015,6 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        std::cerr << "Error loading Mercenaries from database. Bad query: " << results.ErrorMessage() << std::endl;
         return nullptr;
     }
 
