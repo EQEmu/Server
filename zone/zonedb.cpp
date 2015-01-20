@@ -3250,7 +3250,6 @@ bool ZoneDatabase::LoadFactionData()
 	std::string query = "SELECT MAX(id) FROM faction_list";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		std::cerr << "Error in LoadFactionData '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
