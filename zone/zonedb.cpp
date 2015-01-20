@@ -330,9 +330,7 @@ void ZoneDatabase::UpdateBug(PetitionBug_Struct* bug){
                                     "VALUES('%s', '%s', '%s', %i)",
                                     "Petition", bug->name, bugtext, 25);
     safe_delete_array(bugtext);
-    auto results = QueryDatabase(query);
-	if (!results.Success())
-
+    QueryDatabase(query);
 }
 
 bool ZoneDatabase::SetSpecialAttkFlag(uint8 id, const char* flag) {
