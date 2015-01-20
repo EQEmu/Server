@@ -2643,7 +2643,6 @@ uint32 Database::GetZoneGraveyardID(uint32 zone_id, uint32 version) {
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in GetZoneGraveyardID query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
 
