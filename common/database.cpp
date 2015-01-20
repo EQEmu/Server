@@ -806,7 +806,6 @@ uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* 
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
-		std::cerr << "Error in GetAccountIDByAcc query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
 
