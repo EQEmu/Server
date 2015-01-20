@@ -3103,9 +3103,7 @@ bool Database::GetLiveChar(uint32 account_id, char* cname) {
 
 void Database::SetLFP(uint32 CharID, bool LFP) { 
 	std::string query = StringFormat("UPDATE `character_data` SET `lfp` = %i WHERE `id` = %i",LFP, CharID);
-	auto results = QueryDatabase(query); 
-	if (!results.Success())
-		Log.Out(Logs::General, Logs::Error, "Error updating LFP for character %i : %s", CharID, results.ErrorMessage().c_str());
+	QueryDatabase(query); 
 }
 
 void Database::SetLoginFlags(uint32 CharID, bool LFP, bool LFG, uint8 firstlogon) { 
