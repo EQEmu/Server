@@ -2299,3 +2299,4 @@ void Zone::UpdateHotzone()
 
     is_hotzone = atoi(row[0]) == 0 ? false: true;
 }
+

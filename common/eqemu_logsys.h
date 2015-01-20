@@ -143,6 +143,8 @@ public:
 	bool log_settings_loaded = false;
 	int log_platform = 0;
 
+	uint16 GetGMSayColorFromCategory(uint16 log_category);
+
 	void OnLogHookCallBackZone(std::function<void(uint16 log_type, std::string&)> f) { on_log_gmsay_hook = f; }
 
 private:

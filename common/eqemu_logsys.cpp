@@ -142,6 +142,28 @@ uint16 EQEmuLogSys::GetConsoleColorFromCategory(uint16 log_category){
 	}
 }
 
+uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category){
+	switch (log_category) {
+		case Logs::Status:
+		case Logs::Normal:
+			return 15; /* Yellow */
+		case Logs::MySQLError:
+		case Logs::Error:
+			return 13; /* Red */
+		case Logs::MySQLQuery:
+		case Logs::Debug:
+			return 14; /* Light Green */
+		case Logs::Quests:
+			return 258; /* Light Cyan */ 
+		case Logs::Commands:
+			return 5; /* Light Purple */
+		case Logs::Crash:
+			return 13; /* Red */
+		default:
+			return 15; /* Yellow */
+	}
+}
+
 void EQEmuLogSys::ProcessConsoleMessage(uint16 log_category, const std::string message)
 {
 	/* Check if category enabled for process */
