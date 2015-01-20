@@ -3134,11 +3134,8 @@ void Database::AddReport(std::string who, std::string against, std::string lines
 	DoEscapeString(escape_str, lines.c_str(), lines.size());
 
 	std::string query = StringFormat("INSERT INTO reports (name, reported, reported_text) VALUES('%s', '%s', '%s')", who.c_str(), against.c_str(), escape_str);
-	auto results = QueryDatabase(query);
+	QueryDatabase(query);
 	safe_delete_array(escape_str);
-
-	if (!results.Success())
-		Log.Out(Logs::General, Logs::Error, "Error adding a report for %s: %s", who.c_str(), results.ErrorMessage().c_str());
 }
 
 void Database::SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ismerc) {
