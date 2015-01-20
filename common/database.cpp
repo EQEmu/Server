@@ -2868,7 +2868,6 @@ void Database::GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus) {
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in GetAccountFromID query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return;
 	}
 
