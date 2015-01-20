@@ -2659,7 +2659,6 @@ bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zon
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()){
-		std::cerr << "Error in GetZoneGraveyard query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
