@@ -1702,7 +1702,6 @@ void Client::SendManaUpdatePacket() {
 		SendEnduranceUpdate();
 	}
 
-	//std::cout << "Sending mana update: " << (cur_mana - last_reported_mana) << std::endl;
 	if (last_reported_mana != cur_mana || last_reported_endur != cur_end) {
 
 
