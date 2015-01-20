@@ -122,6 +122,10 @@ void EQEmuLogSys::ProcessLogWrite(uint16 debug_level, uint16 log_category, std::
 	if (log_settings[log_category].log_to_file == 0)
 		return;
 
+	/* Make sure the message inbound is at a debug level we're set at */
+	if (log_settings[log_category].log_to_file < debug_level)
+		return;
+
 	char time_stamp[80];
 	EQEmuLogSys::SetCurrentTimeStamp(time_stamp);
 
