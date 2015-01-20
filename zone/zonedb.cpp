@@ -2495,7 +2495,6 @@ void ZoneDatabase::SaveMerchantTemp(uint32 npcid, uint32 slot, uint32 item, uint
                                     "VALUES(%d, %d, %d, %d)", npcid, slot, item, charges);
     auto results = QueryDatabase(query);
 	if (!results.Success())
-		std::cerr << "Error in SaveMerchantTemp query '" << query << "' " << results.ErrorMessage() << std::endl;
 }
 
 void ZoneDatabase::DeleteMerchantTemp(uint32 npcid, uint32 slot){
