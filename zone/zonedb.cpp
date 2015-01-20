@@ -2741,7 +2741,6 @@ void ZoneDatabase::UpdateKarma(uint32 acct_id, uint32 amount)
 	std::string query = StringFormat("UPDATE account SET karma = %i WHERE id = %i", amount, acct_id);
     auto results = QueryDatabase(query);
     if (!results.Success())
-        std::cerr << "Error in UpdateKarma query '" << query << "' " << results.ErrorMessage().c_str() << std::endl;
 
 }
 
