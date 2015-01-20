@@ -4926,7 +4926,6 @@ bool Merc::Spawn(Client *owner) {
 
 	//UpdateMercAppearance();
 
-	//printf("Spawned Merc with ID %i\n", npc->GetID()); fflush(stdout);
 
 	return true;
 }
