@@ -2882,11 +2882,8 @@ void Database::GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus) {
 }
 
 void Database::ClearMerchantTemp(){
-
 	std::string query("delete from merchantlist_temp");
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
+	QueryDatabase(query);
 }
 
 bool Database::UpdateName(const char* oldname, const char* newname) { 
