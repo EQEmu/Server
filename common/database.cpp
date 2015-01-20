@@ -3124,9 +3124,7 @@ void Database::SetLFG(uint32 CharID, bool LFG) {
 
 void Database::SetFirstLogon(uint32 CharID, uint8 firstlogon) { 
 	std::string query = StringFormat( "UPDATE `character_data` SET `firstlogon` = %i WHERE `id` = %i",firstlogon, CharID);
-	auto results = QueryDatabase(query); 
-	if (!results.Success())
-		Log.Out(Logs::General, Logs::Error, "Error updating firstlogon for character %i : %s", CharID, results.ErrorMessage().c_str());
+	QueryDatabase(query); 
 }
 
 void Database::AddReport(std::string who, std::string against, std::string lines) { 
