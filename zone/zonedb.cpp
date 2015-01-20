@@ -2586,7 +2586,6 @@ void ZoneDatabase::RefreshGroupFromDB(Client *client){
 	auto results = QueryDatabase(query);
 	if (!results.Success())
 	{
-		printf("Error in group update query: %s\n", results.ErrorMessage().c_str());
 	}
 	else
 	{
