@@ -3185,10 +3185,7 @@ void Database::ClearGroup(uint32 gid) {
 
 	//clear a specific group
 	std::string query = StringFormat("delete from group_id where groupid = %lu", (unsigned long)gid);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-		std::cout << "Unable to clear groups: " << results.ErrorMessage() << std::endl;
+	QueryDatabase(query);
 }
 
 uint32 Database::GetGroupID(const char* name){
