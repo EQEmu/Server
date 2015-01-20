@@ -265,8 +265,8 @@ void EQEmuLogSys::CloseFileLogs()
 {
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
 		std::cout << "Closing down zone logs..." << std::endl;
-		process_log.close();
 	}
+	process_log.close();
 }
 
 void EQEmuLogSys::StartFileLogs(const std::string log_name)
@@ -275,5 +275,8 @@ void EQEmuLogSys::StartFileLogs(const std::string log_name)
 		std::cout << "Starting Zone Logs..." << std::endl;
 		EQEmuLogSys::MakeDirectory("logs/zone");
 		process_log.open(StringFormat("logs/zone/%s.txt", log_name.c_str()), std::ios_base::app | std::ios_base::out);
+	}
+	else{
+
 	}
 }

@@ -17,6 +17,7 @@
 
 */
 
+#include "../common/database.h"
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/opcodemgr.h"
@@ -36,6 +37,7 @@ volatile bool RunLoops = true;
 
 TimeoutManager timeout_manager;
 Database database;
+QSDatabase qs_database;
 LFGuildManager lfguildmanager;
 std::string WorldShortName;
 const queryservconfig *Config;
@@ -50,7 +52,6 @@ void CatchSignal(int sig_num) {
 
 int main() {
 	RegisterExecutablePlatform(ExePlatformQueryServ);
-	Log.LoadLogSettingsDefaults();
 	set_exception_handler(); 
 	Timer LFGuildExpireTimer(60000);  
 	Timer InterserverTimer(INTERSERVER_TIMER); // does auto-reconnect
@@ -77,7 +78,7 @@ int main() {
 	Log.Out(Logs::Detail, Logs::QS_Server, "Connecting to MySQL...");
 	
 	/* MySQL Connection */
-	if (!database.Connect(
+	if (!qs_database.Connect(
 		Config->QSDatabaseHost.c_str(),
 		Config->QSDatabaseUsername.c_str(),
 		Config->QSDatabasePassword.c_str(),
@@ -86,6 +87,9 @@ int main() {
 		Log.Out(Logs::Detail, Logs::World_Server, "Cannot continue without a database connection.");
 		return 1;
 	}
+
+	Log.LoadLogSettingsDefaults();
+	database.LoadLogSysSettings(Log.log_settings);
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
 		Log.Out(Logs::Detail, Logs::QS_Server, "Could not set signal handler");

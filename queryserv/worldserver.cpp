@@ -38,7 +38,7 @@
 
 extern WorldServer worldserver;
 extern const queryservconfig *Config;
-extern Database database;
+extern QSDatabase qs_database;
 extern LFGuildManager lfguildmanager;
 
 WorldServer::WorldServer()
@@ -78,42 +78,42 @@ void WorldServer::Process()
 				Server_Speech_Struct *SSS = (Server_Speech_Struct*)pack->pBuffer; 
 				std::string tmp1 = SSS->from;
 				std::string tmp2 = SSS->to; 
-				database.AddSpeech(tmp1.c_str(), tmp2.c_str(), SSS->message, SSS->minstatus, SSS->guilddbid, SSS->type);
+				qs_database.AddSpeech(tmp1.c_str(), tmp2.c_str(), SSS->message, SSS->minstatus, SSS->guilddbid, SSS->type);
 				break;
 			}
 			case ServerOP_QSPlayerLogTrades: {
 				QSPlayerLogTrade_Struct *QS = (QSPlayerLogTrade_Struct*)pack->pBuffer;
-				database.LogPlayerTrade(QS, QS->_detail_count);
+				qs_database.LogPlayerTrade(QS, QS->_detail_count);
 				break;
 			}
 			case ServerOP_QSPlayerLogHandins: {
 				QSPlayerLogHandin_Struct *QS = (QSPlayerLogHandin_Struct*)pack->pBuffer;
-				database.LogPlayerHandin(QS, QS->_detail_count);
+				qs_database.LogPlayerHandin(QS, QS->_detail_count);
 				break;
 			}
 			case ServerOP_QSPlayerLogNPCKills: {
 				QSPlayerLogNPCKill_Struct *QS = (QSPlayerLogNPCKill_Struct*)pack->pBuffer;
 				uint32 Members = pack->size - sizeof(QSPlayerLogNPCKill_Struct);
 				if (Members > 0) Members = Members / sizeof(QSPlayerLogNPCKillsPlayers_Struct);
-				database.LogPlayerNPCKill(QS, Members);
+				qs_database.LogPlayerNPCKill(QS, Members);
 				break;
 			}
 			case ServerOP_QSPlayerLogDeletes: {
 				QSPlayerLogDelete_Struct *QS = (QSPlayerLogDelete_Struct*)pack->pBuffer;
 				uint32 Items = QS->char_count;
-				database.LogPlayerDelete(QS, Items);
+				qs_database.LogPlayerDelete(QS, Items);
 				break;
 			}
 			case ServerOP_QSPlayerLogMoves: {
 				QSPlayerLogMove_Struct *QS = (QSPlayerLogMove_Struct*)pack->pBuffer;
 				uint32 Items = QS->char_count;
-				database.LogPlayerMove(QS, Items);
+				qs_database.LogPlayerMove(QS, Items);
 				break;
 			}
 			case ServerOP_QSPlayerLogMerchantTransactions: {
 				QSMerchantLogTransaction_Struct *QS = (QSMerchantLogTransaction_Struct*)pack->pBuffer;
 				uint32 Items = QS->char_count + QS->merchant_count;
-				database.LogMerchantTransaction(QS, Items);
+				qs_database.LogMerchantTransaction(QS, Items);
 				break; 
 			}
 			case ServerOP_QueryServGeneric: {
@@ -155,7 +155,7 @@ void WorldServer::Process()
 			}
 			case ServerOP_QSSendQuery: {
 				/* Process all packets here */
-				database.GeneralQueryReceive(pack);  
+				qs_database.GeneralQueryReceive(pack);  
 				break;
 			}
 		}
