@@ -2922,7 +2922,6 @@ uint8 Database::GetServerType() {
 	std::string query("SELECT `value` FROM `variables` WHERE `varname` = 'ServerType' LIMIT 1");
 	auto results = QueryDatabase(query); 
 	if (!results.Success()) {
-		std::cerr << "Error in GetServerType query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
 
