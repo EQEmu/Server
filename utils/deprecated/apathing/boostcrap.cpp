@@ -474,7 +474,6 @@ printf("The tree's root is %d\n", shortest_node);
 			n->longest_path = 0;
 		else
 			n->longest_path = root_dists[n->node_id];
-//printf("Node %d's distance from root is %d\n", n->node_id, root_dists[n->node_id]);
 	}
 	
 	
