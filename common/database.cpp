@@ -201,8 +201,7 @@ bool Database::AddGMIP(char* ip_address, char* name) {
 
 void Database::LoginIP(uint32 AccountID, const char* LoginIP) {
 	std::string query = StringFormat("INSERT INTO account_ip SET accid=%i, ip='%s' ON DUPLICATE KEY UPDATE count=count+1, lastused=now()", AccountID, LoginIP); 
-	auto results = QueryDatabase(query); 
-	if (!results.Success())
+	QueryDatabase(query); 
 }
 
 int16 Database::CheckStatus(uint32 account_id) {
