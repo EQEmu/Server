@@ -2604,7 +2604,6 @@ bool Database::GetZoneLongName(const char* short_name, char** long_name, char* f
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
-		std::cerr << "Error in GetZoneLongName query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
