@@ -2843,7 +2843,6 @@ uint32 Database::GetAccountIDFromLSID(uint32 iLSID, char* oAccountName, int16* o
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in GetAccountIDFromLSID query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
 
