@@ -110,6 +110,10 @@ void EQEmuLogSys::ProcessGMSay(uint16 debug_level, uint16 log_category, std::str
 	if (log_category == Logs::LogCategory::Netcode)
 		return;
 
+	/* Make sure the message inbound is at a debug level we're set at */
+	if (log_settings[log_category].log_to_gmsay < debug_level)
+		return;
+
 	/* Check to see if the process that actually ran this is zone */
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
 		on_log_gmsay_hook(log_category, message);
