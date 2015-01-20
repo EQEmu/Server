@@ -251,7 +251,6 @@ uint32 Database::CreateAccount(const char* name, const char* password, int16 sta
 
 	if (results.LastInsertedID() == 0)
 	{
-		std::cerr << "Error in CreateAccount query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
 
