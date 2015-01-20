@@ -3086,7 +3086,6 @@ bool Database::UpdateLiveChar(char* charname,uint32 lsaccount_id) {
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in UpdateLiveChar query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
