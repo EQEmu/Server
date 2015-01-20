@@ -2688,7 +2688,6 @@ bool Database::LoadZoneNames() {
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in LoadZoneNames query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
