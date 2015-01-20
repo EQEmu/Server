@@ -2478,7 +2478,6 @@ uint8 ZoneDatabase::GetGridType(uint32 grid, uint32 zoneid ) {
 	std::string query = StringFormat("SELECT type FROM grid WHERE id = %i AND zoneid = %i", grid, zoneid);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        std::cerr << "Error in GetGridType query '" << query << "' " << results.ErrorMessage() << std::endl;
         return 0;
 	}
 
