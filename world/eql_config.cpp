@@ -170,7 +170,6 @@ bool EQLConfig::BootStaticZone(Const_char *short_name, uint16 port) {
                                     "VALUES('%s', '%s', %d)", namebuf, zonebuf, port);
     auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Error in BootStaticZone query: %s", results.ErrorMessage().c_str());
 		return false;
 	}
 
