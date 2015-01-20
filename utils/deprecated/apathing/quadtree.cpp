@@ -280,7 +280,6 @@ void QTNode::buildVertexes() {
 }
 
 bool QTNode::IsInNode(const QTNode *n, const PathNode *o) {
-//printf("IIN: (%.3f,%.3f) in (%.3f -> %.3f, %.3f -> %.3f)\n", o->x, o->y, n->minx, n->maxx, n->miny, n->maxy);
 	if(		o->x >= n->minx && o->x < n->maxx
 		&&	o->y >= n->miny && o->y < n->maxy )
 		return(true);
