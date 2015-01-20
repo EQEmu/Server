@@ -578,3 +578,34 @@ void Database::GetFriendsAndIgnore(int charID, std::vector<std::string> &friends
 
 }
 
+void Database::LoadLogSysSettings(EQEmuLogSys::LogSettings* log_settings){
+	std::string query =
+		"SELECT "
+		"log_category_id, "
+		"log_category_description, "
+		"log_to_console, "
+		"log_to_file, "
+		"log_to_gmsay "
+		"FROM "
+		"logsys_categories "
+		"ORDER BY log_category_id";
+	auto results = QueryDatabase(query);
+
+	int log_category = 0;
+	Log.file_logs_enabled = false;
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		log_category = atoi(row[0]);
+		log_settings[log_category].log_to_console = atoi(row[2]);
+		log_settings[log_category].log_to_file = atoi(row[3]);
+		log_settings[log_category].log_to_gmsay = atoi(row[4]);
+
+		/*
+		This determines whether or not the process needs to actually file log anything.
+		If we go through this whole loop and nothing is set to any debug level, there is no point to create a file or keep anything open
+		*/
+		if (log_settings[log_category].log_to_file > 0){
+			Log.file_logs_enabled = true;
+		}
+	}
+}

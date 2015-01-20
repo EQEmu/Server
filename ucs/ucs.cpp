@@ -33,25 +33,21 @@
 #include <list>
 #include <signal.h>
 
-volatile bool RunLoops = true;
-
-uint32 MailMessagesSent = 0;
-uint32 ChatMessagesSent = 0;
-
-TimeoutManager timeout_manager;
-
-Clientlist *CL;
-
 ChatChannelList *ChannelList;
-
+Clientlist *CL;
+EQEmuLogSys Log;
+TimeoutManager timeout_manager;
 Database database;
-
-std::string WorldShortName;
+WorldServer *worldserver = nullptr;
 
 const ucsconfig *Config;
 
-WorldServer *worldserver = nullptr;
-EQEmuLogSys Log;
+std::string WorldShortName;
+
+uint32 ChatMessagesSent = 0;
+uint32 MailMessagesSent = 0;
+
+volatile bool RunLoops = true;
 
 void CatchSignal(int sig_num) {
 
@@ -80,10 +76,8 @@ int main() {
 
 	Log.Out(Logs::General, Logs::UCS_Server, "Starting EQEmu Universal Chat Server.");
 
-	if (!ucsconfig::LoadConfig()) {
-
-		Log.Out(Logs::General, Logs::UCS_Server, "Loading server configuration failed.");
-
+	if (!ucsconfig::LoadConfig()) { 
+		Log.Out(Logs::General, Logs::UCS_Server, "Loading server configuration failed."); 
 		return 1;
 	}
 
@@ -102,6 +96,9 @@ int main() {
 		Log.Out(Logs::General, Logs::UCS_Server, "Cannot continue without a database connection.");
 		return 1;
 	}
+
+	/* Register Log System and Settings */
+	database.LoadLogSysSettings(Log.log_settings);
 
 	char tmp[64];
 
