@@ -165,7 +165,6 @@ int line_count = 0;
       mlist[j].basetex = new char[val_len + 1];
       memcpy(mlist[j].basetex, val, val_len + 1);
       ++mat_count;
-      // printf("%i: Basetex: %s\n", j + 1, mlist[j].basetex);
       ++j;
     }
     else if(val[0] != 'e' && val[1] != '_' && ((var[0] != 'e' && var[1] != '_') || !strcmp(val, "e_fShininess0"))) {
