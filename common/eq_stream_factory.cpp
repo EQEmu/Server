@@ -135,7 +135,6 @@ void EQStreamFactory::Push(EQStream *s)
 	MNewStreams.lock();
 	NewStreams.push(s);
 	MNewStreams.unlock();
-	//std::cout << "Push(): Unlocking MNewStreams" << std::endl;
 }
 
 void EQStreamFactory::ReaderLoop()
