@@ -110,10 +110,6 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
 		char *errorBuffer = new char[MYSQL_ERRMSG_SIZE];
 		snprintf(errorBuffer, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
 
-#ifdef _EQDEBUG
-		std::cout << "DB Query Error #" << mysql_errno(&mysql) << ": " << mysql_error(&mysql) << std::endl;
-#endif
-
 		/* Implement Logging at the Root */
 		if (mysql_errno(&mysql) > 0 && strlen(query) > 0){
 			Log.Out(Logs::General, Logs::MySQLError, "%i: %s \n %s", mysql_errno(&mysql), mysql_error(&mysql), query);

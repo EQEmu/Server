@@ -113,7 +113,6 @@ void CatchSignal(int sig_num);
 
 int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformWorld);
-	Log.LoadLogSettingsDefaults();
 	set_exception_handler();
 
 	/* Database Version Check */
@@ -182,6 +181,9 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	guild_mgr.SetDatabase(&database);
+
+	Log.LoadLogSettingsDefaults(); 
+	database.LoadLogSysSettings(Log.log_settings);
 
 	if (argc >= 2) {
 		char tmp[2];
@@ -446,21 +448,13 @@ int main(int argc, char** argv) {
 
 		//check for timeouts in other threads
 		timeout_manager.CheckTimeouts();
-
 		loginserverlist.Process();
-
 		console_list.Process();
-
 		zoneserver_list.Process();
-
 		launcher_list.Process();
-
 		UCSLink.Process();
-
 		QSLink.Process();
-
-		LFPGroupList.Process();
-
+		LFPGroupList.Process(); 
 		adventure_manager.Process();
 
 		if (InterserverTimer.Check()) {
