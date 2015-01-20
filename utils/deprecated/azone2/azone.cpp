@@ -447,7 +447,6 @@ void QTNode::fillBlocks(nodeHeader *heads, unsigned long *flist, unsigned long &
 	head->miny = miny;
 	head->maxy = maxy;
 	head->flags = 0;
-//printf("Node %u: (%.2f -> %.2f, %.2f -> %.2f)\n", hindex-1, head->minx, head->maxx, head->miny, head->maxy);
 	if(final) {
 		head->flags |= nodeFinal;
 		head->faces.count = faces.size();
