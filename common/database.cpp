@@ -2570,7 +2570,6 @@ bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in GetSafePoint query '" << query << "' " << results.ErrorMessage() << std::endl;
 		std::cerr << "If it errors, run the following querys:\n";
 		std::cerr << "ALTER TABLE `zone` CHANGE `minium_level` `min_level` TINYINT(3)  UNSIGNED DEFAULT \"0\" NOT NULL;\n";
 		std::cerr << "ALTER TABLE `zone` CHANGE `minium_status` `min_status` TINYINT(3)  UNSIGNED DEFAULT \"0\" NOT NULL;\n";
