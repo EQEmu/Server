@@ -7759,7 +7759,6 @@ void Client::LoadAccountFlags()
                                     account_id);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        std::cerr << "Error in LoadAccountFlags query '" << query << "' " << results.ErrorMessage() << std::endl;
         return;
     }
 
