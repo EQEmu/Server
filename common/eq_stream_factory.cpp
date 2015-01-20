@@ -132,7 +132,6 @@ EQStream *s=nullptr;
 
 void EQStreamFactory::Push(EQStream *s)
 {
-	//std::cout << "Push():Locking MNewStreams" << std::endl;
 	MNewStreams.lock();
 	NewStreams.push(s);
 	MNewStreams.unlock();
