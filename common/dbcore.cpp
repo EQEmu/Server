@@ -126,22 +126,7 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
 
 	MySQLRequestResult requestResult(res, (uint32)mysql_affected_rows(&mysql), rowCount, (uint32)mysql_field_count(&mysql), (uint32)mysql_insert_id(&mysql));
 
-	Log.Out(Logs::General, Logs::MySQLQuery, "(%u rows returned) %s", rowCount, query);
-
-#if DEBUG_MYSQL_QUERIES >= 1
-	if (requestResult.Success())
-	{
-		std::cout << "query successful";
-		if (requestResult.Result())
-			std::cout << ", " << (int) mysql_num_rows(requestResult.Result()) << " rows returned";
-
-		std::cout << ", " << requestResult.RowCount() << " rows affected";
-		std::cout<< std::endl;
-	}
-	else {
-		std::cout << "QUERY: query FAILED" << std::endl;
-	}
-#endif
+	Log.Out(Logs::General, Logs::MySQLQuery, "%s (%u rows returned)", query, rowCount, requestResult.RowCount());
 
 	return requestResult;
 }
