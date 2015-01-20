@@ -177,7 +177,6 @@ int line_count = 0;
         memcpy(mlist[j].name, val, val_len + 1);
         continue;
       }
-      // printf("Named: %s\n", mlist[j].name);
     }
 
     buffer += var_len + 1;
