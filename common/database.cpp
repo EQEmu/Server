@@ -854,7 +854,6 @@ void Database::GetCharName(uint32 char_id, char* name) {
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
-		std::cerr << "Error in GetCharName query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return; 
 	}
 
