@@ -90,7 +90,6 @@ void QTNode::fillBlocks(PathTree_Struct *heads, PathPointRef *flist, unsigned lo
 	//rearranged to give all QT nodes a node list
 	head->nodelist.count = nodes.size();
 	head->nodelist.offset = findex;
-//printf("	Final node with %u nodes, list offset %lu.\n", head->nodes.count, head->nodes.offset);
 	list<PathNode *>::iterator curs,end;
 	curs = nodes.begin();
 	end = nodes.end();
