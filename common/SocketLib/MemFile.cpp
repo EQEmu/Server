@@ -110,7 +110,6 @@ size_t MemFile::fread(char *ptr, size_t size, size_t nmemb)
 	size_t sz = size * nmemb;
 	if (p + sz < BLOCKSIZE)
 	{
-//printf("Read @ %d(%d). %d bytes. (%c)\n", m_read_ptr, p, sz, *(m_current_read -> data + p));
 		memcpy(ptr, m_current_read -> data + p, sz);
 		m_read_ptr += sz;
 	}
