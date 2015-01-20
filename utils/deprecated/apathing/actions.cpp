@@ -985,7 +985,6 @@ RESTART_GRID_CLEAN:
 			if(n->Dist2(f) > ce2) {
 				continue;
 			}
-//printf("Distbbb %f, ce2 %f, (%f,%f), (%f,%f)\n", n->Dist2(f), ce2, n->x, n->y, f->x, f->y);
 			
 #ifdef COMBINE_CHECK_ALL_LOS
 			//we should merge these. Now we wanna check to make sure combining
