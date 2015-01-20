@@ -990,7 +990,6 @@ RESTART_GRID_CLEAN:
 			//we should merge these. Now we wanna check to make sure combining
 			//them will not cause the old node's edges to become invalid.
 			
-//printf("Checking combine LOS on %d, with %d edges.\n", r, big->edges.size());
 			badlos = false;
 			
 			if(node_edges.count(f) == 1) {
