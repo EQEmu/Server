@@ -100,7 +100,7 @@ std::string EQEmuLogSys::FormatOutMessageString(uint16 log_category, std::string
 	return StringFormat("%s%s", category_string.c_str(), in_message.c_str()); 
 }
 
-void EQEmuLogSys::ProcessGMSay(uint16 log_category, std::string message)
+void EQEmuLogSys::ProcessGMSay(uint16 debug_level, uint16 log_category, std::string message)
 {
 	/* Check if category enabled for process */
 	if (log_settings[log_category].log_to_gmsay == 0)
@@ -229,7 +229,7 @@ void EQEmuLogSys::Out(Logs::DebugLevel debug_level, uint16 log_category, std::st
 	std::string output_debug_message = EQEmuLogSys::FormatOutMessageString(log_category, output_message);
 
 	EQEmuLogSys::ProcessConsoleMessage(0, log_category, output_debug_message);
-	EQEmuLogSys::ProcessGMSay(log_category, output_debug_message);
+	EQEmuLogSys::ProcessGMSay(0, log_category, output_debug_message);
 	EQEmuLogSys::ProcessLogWrite(0, log_category, output_debug_message);
 }
 
