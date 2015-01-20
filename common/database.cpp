@@ -246,7 +246,6 @@ uint32 Database::CreateAccount(const char* name, const char* password, int16 sta
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
-		std::cerr << "Error in CreateAccount query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
 
