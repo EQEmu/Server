@@ -293,7 +293,6 @@ void break_long_lines(list<PathGraph*> &db_paths) {
 				ee = new PathEdge(last_node, n);
 				last_node = n;
 				
-//printf("    (%.3f,%.3f,%.3f) -> (%.3f,%.3f,%.3f) d2=%.3f\n", ee->from->x, ee->from->y, ee->from->z, ee->to->x, ee->to->y, ee->to->z, e->from->Dist2(e->to));			
 				g->edges.push_back(ee);
 				g->nodes.push_back(n);
 				
