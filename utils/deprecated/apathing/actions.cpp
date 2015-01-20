@@ -1914,7 +1914,6 @@ int nn = 0;
 		curn->z = n->z;
 		curn->link_offset = eoffset;
 		curn->distance = n->longest_path;
-//printf("Node %d: (%.2f,%.2f,%.2f) LO %d, D %d\n", nn, curn->x, curn->y, curn->z, curn->link_offset, curn->distance);
 		
 		int ecount = 0;
 		cur4 = big->edges.begin();
