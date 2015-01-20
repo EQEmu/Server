@@ -1608,7 +1608,6 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 								iterator.Advance();
 								continue;
 					}
-					//printf("IPC mgb/aebard spell casted on %s\n", mob->GetName());
 				caster->SpellOnTarget(spell_id, mob);
 				}
 				else {
