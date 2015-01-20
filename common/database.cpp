@@ -175,7 +175,6 @@ bool Database::AddBannedIP(char* bannedIP, const char* notes) {
 	std::string query = StringFormat("INSERT into Banned_IPs SET ip_address='%s', notes='%s'", bannedIP, notes); 
 	auto results = QueryDatabase(query); 
 	if (!results.Success()) {
-		std::cerr << "Error in Database::AddBannedIP query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	} 
 	return true;

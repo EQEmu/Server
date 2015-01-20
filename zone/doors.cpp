@@ -604,7 +604,6 @@ int32 ZoneDatabase::GetDoorsCountPlusOne(const char *zone_name, int16 version) {
                                     "WHERE zone = '%s' AND version = %u", zone_name, version);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        std::cerr << "Error in GetDoorsCountPlusOne query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return -1;
     }
 
