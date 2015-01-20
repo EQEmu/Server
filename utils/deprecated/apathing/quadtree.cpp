@@ -86,7 +86,6 @@ void QTNode::fillBlocks(PathTree_Struct *heads, PathPointRef *flist, unsigned lo
 	head->miny = miny;
 	head->maxy = maxy;
 	head->flags = 0;
-//printf("Node %u: (%.2f -> %.2f, %.2f -> %.2f)\n", hindex-1, head->minx, head->maxx, head->miny, head->maxy);
 
 	//rearranged to give all QT nodes a node list
 	head->nodelist.count = nodes.size();
