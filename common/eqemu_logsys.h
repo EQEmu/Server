@@ -156,9 +156,9 @@ private:
 	uint16 GetWindowsConsoleColorFromCategory(uint16 log_category);
 	std::string GetLinuxConsoleColorFromCategory(uint16 log_category);
 
-	void ProcessConsoleMessage(uint16 log_category, const std::string message);
-	void ProcessGMSay(uint16 log_category, std::string message);
-	void ProcessLogWrite(uint16 log_category, std::string message);
+	void ProcessConsoleMessage(uint16 debug_level, uint16 log_category, const std::string message);
+	void ProcessGMSay(uint16 debug_level, uint16 log_category, std::string message);
+	void ProcessLogWrite(uint16 debug_level, uint16 log_category, std::string message);
 };
 
 extern EQEmuLogSys Log;
