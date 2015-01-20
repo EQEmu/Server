@@ -153,7 +153,8 @@ private:
 	std::function<void(uint16 log_category, std::string&)> on_log_gmsay_hook;
 	std::string FormatOutMessageString(uint16 log_category, std::string in_message);
 	
-	uint16 GetConsoleColorFromCategory(uint16 log_category);
+	uint16 GetWindowsConsoleColorFromCategory(uint16 log_category);
+	std::string GetLinuxConsoleColorFromCategory(uint16 log_category);
 
 	void ProcessConsoleMessage(uint16 log_category, const std::string message);
 	void ProcessGMSay(uint16 log_category, std::string message);

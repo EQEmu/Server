@@ -39,16 +39,18 @@ std::ofstream process_log;
 	#include <windows.h>
 #else
 	#include <sys/stat.h>
-	#define RESET   "\033[0m"
-	#define BLACK   "\033[30m"      /* Black */
-	#define RED     "\033[31m"      /* Red */
-	#define GREEN   "\033[32m"      /* Green */
-	#define YELLOW  "\033[33m"      /* Yellow */
-	#define BLUE    "\033[34m"      /* Blue */
-	#define MAGENTA "\033[35m"      /* Magenta */
-	#define CYAN    "\033[36m"      /* Cyan */
-	#define WHITE   "\033[37m"      /* White */
 #endif
+
+/* Linux ANSI console color defines */
+#define LC_RESET   "\033[0m"
+#define LC_BLACK   "\033[30m"      /* Black */
+#define LC_RED     "\033[31m"      /* Red */
+#define LC_GREEN   "\033[32m"      /* Green */
+#define LC_YELLOW  "\033[33m"      /* Yellow */
+#define LC_BLUE    "\033[34m"      /* Blue */
+#define LC_MAGENTA "\033[35m"      /* Magenta */
+#define LC_CYAN    "\033[36m"      /* Cyan */
+#define LC_WHITE   "\033[37m"      /* White */
 
 namespace Console {
 	enum Color {
@@ -127,7 +129,7 @@ void EQEmuLogSys::ProcessLogWrite(uint16 log_category, std::string message)
 	}
 }
 
-uint16 EQEmuLogSys::GetConsoleColorFromCategory(uint16 log_category){
+uint16 EQEmuLogSys::GetWindowsConsoleColorFromCategory(uint16 log_category){
 	switch (log_category) {
 		case Logs::Status:
 		case Logs::Normal:
@@ -146,6 +148,28 @@ uint16 EQEmuLogSys::GetConsoleColorFromCategory(uint16 log_category){
 			return Console::Color::LightRed;
 		default:
 			return Console::Color::Yellow;
+	}
+}
+
+std::string EQEmuLogSys::GetLinuxConsoleColorFromCategory(uint16 log_category){
+	switch (log_category) {
+	case Logs::Status:
+	case Logs::Normal:
+		return LC_YELLOW;
+	case Logs::MySQLError:
+	case Logs::Error:
+		return LC_RED;
+	case Logs::MySQLQuery:
+	case Logs::Debug:
+		return LC_GREEN;
+	case Logs::Quests:
+		return LC_CYAN;
+	case Logs::Commands:
+		return LC_MAGENTA;
+	case Logs::Crash:
+		return LC_RED;
+	default:
+		return LC_YELLOW;
 	}
 }
 
@@ -186,14 +210,11 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 log_category, const std::string m
 		info.FontWeight = FW_NORMAL;
 		wcscpy(info.FaceName, L"Lucida Console");
 		SetCurrentConsoleFontEx(console_handle, NULL, &info);
-		SetConsoleTextAttribute(console_handle, EQEmuLogSys::GetConsoleColorFromCategory(log_category));
-	#endif
-
-	std::cout << message << "\n";
-
-	#ifdef _WINDOWS
-		/* Always set back to white*/
+		SetConsoleTextAttribute(console_handle, EQEmuLogSys::GetWindowsConsoleColorFromCategory(log_category));
+		std::cout << message << "\n";
 		SetConsoleTextAttribute(console_handle, Console::Color::White);
+	#else
+		std::cout << EQEmuLogSys::GetLinuxConsoleColorFromCategory(log_category) << message << LC_RESET << std::endl;
 	#endif
 }
 
