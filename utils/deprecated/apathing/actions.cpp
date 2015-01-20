@@ -1904,7 +1904,6 @@ bool write_path_file(QTNode *_root, PathGraph *big, const char *file, vector< ve
 	end = big->nodes.end();
 int nn = 0;
 	for(; cur != end; cur++, curn++, nn++) {
-//printf("Filling node %d/%d n=0x%x, lb=0x%x, curl=0x%x/0x%x\n", nn, index, *cur, linkBlock, curl, &linkBlock[eoffset]);
 		n = *cur;
 		if(n == NULL) {
 			printf("Got NULL node building quadtree, WTF.");
