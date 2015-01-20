@@ -17,7 +17,6 @@
 
 */
 
-#include "../common/database.h"
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/opcodemgr.h"
@@ -37,7 +36,6 @@ volatile bool RunLoops = true;
 
 TimeoutManager timeout_manager;
 Database database;
-QSDatabase qs_database;
 LFGuildManager lfguildmanager;
 std::string WorldShortName;
 const queryservconfig *Config;
@@ -79,7 +77,7 @@ int main() {
 	Log.Out(Logs::General, Logs::QS_Server, "Connecting to MySQL...");
 	
 	/* MySQL Connection */
-	if (!qs_database.Connect(
+	if (!database.Connect(
 		Config->QSDatabaseHost.c_str(),
 		Config->QSDatabaseUsername.c_str(),
 		Config->QSDatabasePassword.c_str(),
