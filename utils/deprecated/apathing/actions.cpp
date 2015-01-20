@@ -983,7 +983,6 @@ RESTART_GRID_CLEAN:
 			if(n == f)
 				continue;
 			if(n->Dist2(f) > ce2) {
-//printf("Dist %f, ce2 %f\n", n->Dist2(f), ce2);
 				continue;
 			}
 //printf("Distbbb %f, ce2 %f, (%f,%f), (%f,%f)\n", n->Dist2(f), ce2, n->x, n->y, f->x, f->y);
