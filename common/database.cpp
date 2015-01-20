@@ -3166,10 +3166,6 @@ void Database::ClearAllGroups(void)
 {
 	std::string query("DELETE FROM `group_id`");
 	QueryDatabase(query);
-
-	if (!results.Success())
-		std::cout << "Unable to clear groups: " << results.ErrorMessage() << std::endl;
-
 	return;
 }
 
