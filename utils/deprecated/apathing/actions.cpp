@@ -1837,7 +1837,6 @@ QTNode *build_quadtree(Map *map, PathGraph *big) {
 		end = _root->nodes.end();
 //int findex = 0;
 		for(; curs != end; curs++) {
-//printf("Started With node index %d (0x%x)\n", findex++, *curs);
 }
 		
 	_root->divideYourself(0);
