@@ -57,6 +57,10 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
+	/* Register Log System and Settings */
+	Log.LoadLogSettingsDefaults();
+	database.LoadLogSysSettings(Log.log_settings);
+
 	bool load_all = true;
 	bool load_items = false;
 	bool load_factions = false;
