@@ -2888,7 +2888,6 @@ void Database::ClearMerchantTemp(){
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
-		std::cerr << "Error in ClearMerchantTemp query '" << query << "' " << results.ErrorMessage() << std::endl;
 }
 
 bool Database::UpdateName(const char* oldname, const char* newname) { 
