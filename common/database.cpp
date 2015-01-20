@@ -211,7 +211,6 @@ int16 Database::CheckStatus(uint32 account_id) {
 
 	auto results = QueryDatabase(query); 
 	if (!results.Success()) {
-		std::cerr << "Error in CheckStatus query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
 
