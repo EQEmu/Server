@@ -1592,7 +1592,6 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 					caster->SpellOnTarget(spell_id, mob);
 				}
 				else if (mob->IsAIControlled() && spells[spell_id].targettype == ST_AEBard) {
-					//printf("NPC mgb/aebard spell casted on %s\n", mob->GetName());
 					caster->SpellOnTarget(spell_id, mob);
 				}
 				else {
