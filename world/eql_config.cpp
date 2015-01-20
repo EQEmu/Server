@@ -123,7 +123,6 @@ void EQLConfig::DeleteLauncher() {
     query = StringFormat("DELETE FROM launcher_zones WHERE launcher = '%s'", namebuf);
     results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Error in DeleteLauncher 2nd query: %s", results.ErrorMessage().c_str());
 		return;
 	}
 }
