@@ -316,9 +316,7 @@ void ZoneDatabase::UpdateBug(BugStruct* bug) {
     safe_delete_array(bugtext);
 	safe_delete_array(uitext);
 	safe_delete_array(targettext);
-	auto results = QueryDatabase(query);
-	if (!results.Success())
-
+	QueryDatabase(query);
 }
 
 void ZoneDatabase::UpdateBug(PetitionBug_Struct* bug){
