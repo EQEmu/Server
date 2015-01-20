@@ -1595,7 +1595,6 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 					caster->SpellOnTarget(spell_id, mob);
 				}
 				else {
-					//printf("NPC AE, fall thru. spell_id:%i, Target type:%x\n", spell_id, spells[spell_id].targettype);
 				}
 			}
 		#ifdef IPC
