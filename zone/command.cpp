@@ -7384,7 +7384,6 @@ void command_flagedit(Client *c, const Seperator *sep) {
                             "FROM zone WHERE flag_needed != ''";
         auto results = database.QueryDatabase(query);
 		if (!results.Success()) {
-            c->Message(13, "Unable to query zone flags: %s", results.ErrorMessage().c_str());
             return;
         }
 
