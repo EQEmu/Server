@@ -2774,8 +2774,7 @@ void ZoneDatabase::InsertDoor(uint32 ddoordbid, uint16 ddoorid, const char* ddoo
                                     ddoordbid, ddoorid, zone->GetShortName(), zone->GetInstanceVersion(),
                                     ddoor_name, dxpos, dypos, dzpos, dheading, dopentype, dguildid,
                                     dlockpick, dkeyitem, ddoor_param, dinvert, dincline, dsize);
-    auto results = QueryDatabase(query);
-    if (!results.Success())
+    QueryDatabase(query);
 }
 
 void ZoneDatabase::LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32> &currency) {
