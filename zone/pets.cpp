@@ -372,7 +372,6 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
         auto results = database.QueryDatabase(query);
 		if (!results.Success()) {
             // if the database query failed
-			Log.Out(Logs::General, Logs::Error, "Error querying database for monster summoning pet in zone %s (%s)", zone->GetShortName(), results.ErrorMessage().c_str());
 		}
 
         if (results.RowCount() != 0) {

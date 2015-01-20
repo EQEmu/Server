@@ -114,7 +114,6 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
                                     ZoneID, skill);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        std::cerr << "Error in Fishing query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
     }
 

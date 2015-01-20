@@ -578,7 +578,6 @@ int32 ZoneDatabase::GetDoorsCount(uint32* oMaxID, const char *zone_name, int16 v
                                     zone_name, version);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        std::cerr << "Error in GetDoorsCount query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return -1;
     }
 
