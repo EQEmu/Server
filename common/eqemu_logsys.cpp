@@ -28,6 +28,7 @@
 #include <string>
 #include <iomanip>
 #include <time.h>
+#include <process.h>
 
 std::ofstream process_log;
 
@@ -84,6 +85,7 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 {
 	/* Get Executable platform currently running this code (Zone/World/etc) */
 	log_platform = GetExecutablePlatformInt();
+
 	/* Zero out Array */
 	for (int i = 0; i < Logs::LogCategory::MaxCategoryID; i++){
 		log_settings[i].log_to_console = 0;
@@ -91,12 +93,18 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 		log_settings[i].log_to_gmsay = 0;
 	}
 
+	/* Set Defaults */
 	log_settings[Logs::World_Server].log_to_console = 1;
 	log_settings[Logs::Zone_Server].log_to_console = 1;
 	log_settings[Logs::QS_Server].log_to_console = 1;
 	log_settings[Logs::UCS_Server].log_to_console = 1;
 	log_settings[Logs::Crash].log_to_console = 1;
 	log_settings[Logs::MySQLError].log_to_console = 1;
+
+	/* Declare process file names for log writing */
+	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformWorld){ process_file_name = "world";  }
+	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformQueryServ){ process_file_name = "query_server"; }
+	
 }
 
 std::string EQEmuLogSys::FormatOutMessageString(uint16 log_category, std::string in_message){
@@ -129,6 +137,15 @@ void EQEmuLogSys::ProcessGMSay(uint16 debug_level, uint16 log_category, std::str
 
 void EQEmuLogSys::ProcessLogWrite(uint16 debug_level, uint16 log_category, std::string message)
 {
+	if (log_category == Logs::Crash){
+		char time_stamp[80];
+		EQEmuLogSys::SetCurrentTimeStamp(time_stamp);
+		std::ofstream crash_log;
+		crash_log.open(StringFormat("logs/crash_%s_%i.txt", process_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
+		crash_log << time_stamp << " " << message << "\n";
+		crash_log.close();
+	}
+
 	/* Check if category enabled for process */
 	if (log_settings[log_category].log_to_file == 0)
 		return;
@@ -249,7 +266,7 @@ void EQEmuLogSys::Out(Logs::DebugLevel debug_level, uint16 log_category, std::st
 
 	EQEmuLogSys::ProcessConsoleMessage(debug_level, log_category, output_debug_message);
 	EQEmuLogSys::ProcessGMSay(debug_level, log_category, output_debug_message);
-	EQEmuLogSys::ProcessLogWrite(debug_level, log_category, output_debug_message);
+	EQEmuLogSys::ProcessLogWrite(debug_level, log_category, output_message);
 }
 
 void EQEmuLogSys::SetCurrentTimeStamp(char* time_stamp){
