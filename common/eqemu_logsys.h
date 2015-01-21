@@ -145,7 +145,7 @@ public:
 
 	int log_platform = 0; /* Sets Executable platform (Zone/World/UCS) etc. */
 
-	std::string process_file_name; /* File name used in writing logs */
+	std::string platform_file_name; /* File name used in writing logs */ 
 
 	uint16 GetGMSayColorFromCategory(uint16 log_category);
 
