@@ -113,7 +113,6 @@ Merc *Entity::CastToMerc()
 #ifdef _EQDEBUG
 	if (!IsMerc()) {
 		std::cout << "CastToMerc error" << std::endl;
-		DebugBreak();
 		return 0;
 	}
 #endif
