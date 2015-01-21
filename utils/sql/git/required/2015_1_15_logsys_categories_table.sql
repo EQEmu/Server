@@ -1,3 +1,17 @@
+/*
+Navicat MySQL Data Transfer
+
+Source Server         : localhost
+Source Server Version : 50505
+Source Host           : localhost:3306
+Source Database       : ez
+
+Target Server Type    : MYSQL
+Target Server Version : 50505
+File Encoding         : 65001
+
+Date: 2015-01-20 20:00:17
+*/
 
 SET FOREIGN_KEY_CHECKS=0;
 
@@ -17,23 +31,39 @@ CREATE TABLE `logsys_categories` (
 -- ----------------------------
 -- Records of logsys_categories
 -- ----------------------------
-INSERT INTO `logsys_categories` VALUES ('1', 'Zone_Server', '1', '0', '1');
-INSERT INTO `logsys_categories` VALUES ('2', 'World_Server', '0', '0', '1');
-INSERT INTO `logsys_categories` VALUES ('3', 'UCS_Server', '0', '0', '1');
-INSERT INTO `logsys_categories` VALUES ('4', 'QS_Server', '0', '0', '1');
-INSERT INTO `logsys_categories` VALUES ('5', 'WebInterface_Server', '0', '0', '1');
-INSERT INTO `logsys_categories` VALUES ('6', 'AA', '0', '0', '1');
-INSERT INTO `logsys_categories` VALUES ('7', 'Doors', '0', '0', '1');
-INSERT INTO `logsys_categories` VALUES ('8', 'Guilds', '0', '0', '1');
-INSERT INTO `logsys_categories` VALUES ('9', 'Inventory', '0', '0', '1');
-INSERT INTO `logsys_categories` VALUES ('10', 'Launcher', '0', '0', '1');
-INSERT INTO `logsys_categories` VALUES ('11', 'Netcode - Does not log to gmsay for loop reasons', '0', '0', '1');
-INSERT INTO `logsys_categories` VALUES ('12', 'Object', '0', '0', '1');
-INSERT INTO `logsys_categories` VALUES ('13', 'Rules', '0', '0', '1');
-INSERT INTO `logsys_categories` VALUES ('14', 'Skills', '0', '0', '1');
-INSERT INTO `logsys_categories` VALUES ('15', 'Spawns', '0', '0', '1');
-INSERT INTO `logsys_categories` VALUES ('16', 'Spells', '0', '0', '1');
-INSERT INTO `logsys_categories` VALUES ('17', 'Tasks', '0', '0', '1');
-INSERT INTO `logsys_categories` VALUES ('18', 'Trading', '0', '0', '1');
-INSERT INTO `logsys_categories` VALUES ('19', 'Tradeskills', '0', '0', '1');
-INSERT INTO `logsys_categories` VALUES ('20', 'Tribute', '0', '0', '1');
+INSERT INTO `logsys_categories` VALUES ('1', 'AA', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('2', 'AI', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('3', 'Aggro', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('4', 'Attack', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('5', 'Client_Server_Packet', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('6', 'Combat', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('7', 'Commands', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('8', 'Crash', '1', '1', '1');
+INSERT INTO `logsys_categories` VALUES ('9', 'Debug', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('10', 'Doors', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('11', 'Error', '1', '1', '1');
+INSERT INTO `logsys_categories` VALUES ('12', 'Guilds', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('13', 'Inventory', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('14', 'Launcher', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('15', 'Netcode', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('16', 'Normal', '1', '1', '1');
+INSERT INTO `logsys_categories` VALUES ('17', 'Object', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('18', 'Pathing', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('19', 'QS_Server', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('20', 'Quests', '1', '1', '1');
+INSERT INTO `logsys_categories` VALUES ('21', 'Rules', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('22', 'Skills', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('23', 'Spawns', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('24', 'Spells', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('25', 'Status', '1', '1', '1');
+INSERT INTO `logsys_categories` VALUES ('26', 'TCP_Connection', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('27', 'Tasks', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('28', 'Tradeskills', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('29', 'Trading', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('30', 'Tribute', '0', '1', '0');
+INSERT INTO `logsys_categories` VALUES ('31', 'UCS_Server', '1', '1', '1');
+INSERT INTO `logsys_categories` VALUES ('32', 'WebInterface_Server', '1', '1', '1');
+INSERT INTO `logsys_categories` VALUES ('33', 'World_Server', '1', '1', '1');
+INSERT INTO `logsys_categories` VALUES ('34', 'Zone Server', '1', '1', '1');
+INSERT INTO `logsys_categories` VALUES ('35', 'MySQL Error', '1', '1', '1');
+INSERT INTO `logsys_categories` VALUES ('36', 'MySQL Queries', '0', '1', '0');
