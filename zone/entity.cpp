@@ -268,7 +268,6 @@ Bot *Entity::CastToBot()
 #ifdef _EQDEBUG
 	if (!IsBot()) {
 		std::cout << "CastToBot error" << std::endl;
-		DebugBreak();
 		return 0;
 	}
 #endif
