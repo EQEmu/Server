@@ -792,6 +792,11 @@ bool ZoneServer::Process() {
 				client_list.SendClientVersionSummary(srcvss->Name);
 				break;
 			}
+			case ServerOP_ReloadLogs: {
+				zoneserver_list.SendPacket(pack);
+				database.LoadLogSysSettings(Log.log_settings);
+				break;
+			}
 			case ServerOP_ReloadRules: {
 				zoneserver_list.SendPacket(pack);
 				RuleManager::Instance()->LoadRules(&database, "default");

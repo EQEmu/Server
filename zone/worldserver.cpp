@@ -1748,6 +1748,10 @@ void WorldServer::Process() {
 			RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset());
 			break;
 		}
+		case ServerOP_ReloadLogs: {
+			database.LoadLogSysSettings(Log.log_settings);
+			break;
+		}
 		case ServerOP_CameraShake:
 		{
 			if(zone)

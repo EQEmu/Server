@@ -10421,8 +10421,11 @@ void command_logs(Client *c, const Seperator *sep){
 	int logs_set = 0;
 	if (sep->argnum > 0) {
 		/* #logs reload_all */
-		if(strcasecmp(sep->arg[1], "reload_all") == 0){
-			c->Message(0, "Yes this is working");
+		if (strcasecmp(sep->arg[1], "reload_all") == 0){
+			ServerPacket *pack = new ServerPacket(ServerOP_ReloadLogs, 0);
+			worldserver.SendPacket(pack);
+			c->Message(13, "Successfully sent the packet to world to reload log settings from the database for all zones");
+			safe_delete(pack);
 		}
 		/* #logs list_settings */
 		if (strcasecmp(sep->arg[1], "list_settings") == 0 || (strcasecmp(sep->arg[1], "set") == 0 && strcasecmp(sep->arg[3], "") == 0)){
