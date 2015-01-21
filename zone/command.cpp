@@ -10424,33 +10424,33 @@ void command_logs(Client *c, const Seperator *sep){
 			c->Message(0, "Yes this is working");
 		}
 		if (strcasecmp(sep->arg[1], "set") == 0){
-			if (strcasecmp(sep->arg[4], "log_to_console") == 0){
-				Log.log_settings[atoi(sep->arg[2])].log_to_console = atoi(sep->arg[3]);
+			if (strcasecmp(sep->arg[2], "console") == 0){
+				Log.log_settings[atoi(sep->arg[3])].log_to_console = atoi(sep->arg[4]);
 				logs_set = 1;
 			}
-			else if (strcasecmp(sep->arg[4], "log_to_file") == 0){ 
-				Log.log_settings[atoi(sep->arg[2])].log_to_file = atoi(sep->arg[3]);
+			else if (strcasecmp(sep->arg[2], "file") == 0){ 
+				Log.log_settings[atoi(sep->arg[3])].log_to_file = atoi(sep->arg[4]);
 				logs_set = 1;
 			}
-			else if (strcasecmp(sep->arg[4], "log_to_gmsay") == 0){
-				Log.log_settings[atoi(sep->arg[2])].log_to_gmsay = atoi(sep->arg[3]);
+			else if (strcasecmp(sep->arg[2], "gmsay") == 0){
+				Log.log_settings[atoi(sep->arg[3])].log_to_gmsay = atoi(sep->arg[4]);
 				logs_set = 1;
 			}
 			else{
-				c->Message(0, "--- #logs set <category_id> <debug_level> <output_type> - Sets in memory the log settings, if you want settings to be permanent, edit your 'logsys_categories' table");
-				c->Message(0, "--- #logs set 20 1 log_to_gmsay - Would output Quest errors to gmsay");
+				c->Message(0, "--- #logs set [console|file|gmsay] <category_id> <debug_level (1-3)> - Sets log settings during the lifetime of the zone");
+				c->Message(0, "--- #logs set gmsay 20 1 - Would output Quest errors to gmsay");
 			}
-			if (logs_set == 1){
+			if (logs_set == 1){ 
 				c->Message(15, "Your Log Settings have been applied");
-				c->Message(15, "%s :: Debug Level: %i - Category: %s", sep->arg[4], atoi(sep->arg[3]), Logs::LogCategoryName[atoi(sep->arg[2])]);
+				c->Message(15, "Output Method: %s :: Debug Level: %i - Category: %s", sep->arg[2], atoi(sep->arg[4]), Logs::LogCategoryName[atoi(sep->arg[3])]);
 			}
 		}
 		if (strcasecmp(sep->arg[1], "list_settings") == 0){
-			c->Message(0, "[Category ID | log_to_console | log_to_file | log_to_gmsay | Category Description]");
+			c->Message(0, "[Category ID | console | file | gmsay | Category Description]");
 			int redisplay_columns = 0;
 			for (int i = 0; i < Logs::LogCategory::MaxCategoryID; i++){
 				if (redisplay_columns == 10){
-					c->Message(0, "[Category ID | log_to_console | log_to_file | log_to_gmsay | Category Description]");
+					c->Message(0, "[Category ID | console | file | gmsay | Category Description]");
 					redisplay_columns = 0;
 				}
 				c->Message(0, StringFormat("--- %i | %u | %u | %u | %s", i, Log.log_settings[i].log_to_console, Log.log_settings[i].log_to_file, Log.log_settings[i].log_to_gmsay, Logs::LogCategoryName[i]).c_str());
@@ -10462,6 +10462,6 @@ void command_logs(Client *c, const Seperator *sep){
 		c->Message(0, "#logs usage:");
 		c->Message(0, "--- #logs reload_all - Reloads all rules defined in database in world and all zone processes");
 		c->Message(0, "--- #logs list_settings - Shows current log settings and categories");
-		c->Message(0, "--- #logs set <category_id> <debug_level> <output_type> - Sets in memory the log settings, if you want settings to be permanent, edit your 'logsys_categories' table");
+		c->Message(0, "--- #logs set [console|file|gmsay] <category_id> <debug_level (1-3)> - Sets log settings during the lifetime of the zone");
 	}
 }
