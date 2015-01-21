@@ -10418,9 +10418,32 @@ void command_crashtest(Client *c, const Seperator *sep)
 }
 
 void command_logs(Client *c, const Seperator *sep){
+	int logs_set = 0;
 	if (sep->argnum > 0) {
 		if(strcasecmp(sep->arg[1], "reload_all") == 0){
 			c->Message(0, "Yes this is working");
+		}
+		if (strcasecmp(sep->arg[1], "set") == 0){
+			if (strcasecmp(sep->arg[4], "log_to_console") == 0){
+				Log.log_settings[atoi(sep->arg[2])].log_to_console = atoi(sep->arg[3]);
+				logs_set = 1;
+			}
+			else if (strcasecmp(sep->arg[4], "log_to_file") == 0){ 
+				Log.log_settings[atoi(sep->arg[2])].log_to_file = atoi(sep->arg[3]);
+				logs_set = 1;
+			}
+			else if (strcasecmp(sep->arg[4], "log_to_gmsay") == 0){
+				Log.log_settings[atoi(sep->arg[2])].log_to_gmsay = atoi(sep->arg[3]);
+				logs_set = 1;
+			}
+			else{
+				c->Message(0, "--- #logs set <category_id> <debug_level> <output_type> - Sets in memory the log settings, if you want settings to be permanent, edit your 'logsys_categories' table");
+				c->Message(0, "--- #logs set 20 1 log_to_gmsay - Would output Quest errors to gmsay");
+			}
+			if (logs_set == 1){
+				c->Message(15, "Your Log Settings have been applied");
+				c->Message(15, "%s :: Debug Level: %i - Category: %s", sep->arg[4], atoi(sep->arg[3]), Logs::LogCategoryName[atoi(sep->arg[2])]);
+			}
 		}
 		if (strcasecmp(sep->arg[1], "list_settings") == 0){
 			c->Message(0, "[Category ID | log_to_console | log_to_file | log_to_gmsay | Category Description]");
