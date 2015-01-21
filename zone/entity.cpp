@@ -156,7 +156,6 @@ Object *Entity::CastToObject()
 #ifdef _EQDEBUG
 	if(!IsGroup()) {
 		std::cout << "CastToGroup error" << std::endl;
-		DebugBreak();
 		return 0;
 	}
 #endif
