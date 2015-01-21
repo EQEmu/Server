@@ -80,7 +80,6 @@ Client *Entity::CastToClient()
 #ifdef _EQDEBUG
 	if (!IsClient()) {
 		std::cout << "CastToClient error (not client?)" << std::endl;
-		DebugBreak();
 		return 0;
 	}
 #endif
