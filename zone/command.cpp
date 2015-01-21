@@ -426,6 +426,7 @@ int command_init(void) {
 		command_add("merchant_close_shop", "Closes a merchant shop", 100, command_merchantcloseshop) ||
 		command_add("close_shop", nullptr, 100, command_merchantcloseshop) ||
 		command_add("tune", "Calculate ideal statical values related to combat.", 100, command_tune) ||
+		command_add("shownumhits", "Shows buffs numhits for yourself.", 0, command_shownumhits) ||
 		command_add("crashtest", "- Crash the zoneserver", 255, command_crashtest) ||
 		command_add("logtest", "Performs log performance testing.", 250, command_logtest) ||
 		command_add("logs", "Manage anything to do with logs", 250, command_logs)
