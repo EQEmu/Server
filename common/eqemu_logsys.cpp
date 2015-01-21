@@ -28,7 +28,6 @@
 #include <string>
 #include <iomanip>
 #include <time.h>
-#include <process.h>
 
 std::ofstream process_log;
 
@@ -38,7 +37,9 @@ std::ofstream process_log;
 	#include <iostream>
 	#include <dos.h>
 	#include <windows.h>
+	#include <process.h>
 #else
+	#include <unistd.h>
 	#include <sys/stat.h>
 #endif
 
