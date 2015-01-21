@@ -1502,7 +1502,7 @@ void Client::UpdateAdmin(bool iFromDB) {
 
 	if(m_pp.gm)
 	{
-		Log.Out(Logs::Moderate, Logs::Zone_Server, __FUNCTION__ " - %s is a GM", GetName());
+		Log.Out(Logs::Moderate, Logs::Zone_Server, "%s - %s is a GM", __FUNCTION__ , GetName());
 // no need for this, having it set in pp you already start as gm
 // and it's also set in your spawn packet so other people see it too
 //		SendAppearancePacket(AT_GM, 1, false);
