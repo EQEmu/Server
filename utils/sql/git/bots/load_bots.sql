@@ -194,7 +194,7 @@ CREATE TABLE `botguildmembers` (
 	PRIMARY KEY  (`char_id`)
 ) ENGINE=InnoDB;
 
-DELIMITER \\
+DELIMITER $$
 
 CREATE FUNCTION `GetMobType` (mobname VARCHAR(64)) RETURNS CHAR(1)
 BEGIN
@@ -209,7 +209,7 @@ BEGIN
 	END IF;
 	
 	RETURN Result;
-END\\
+END$$
 
 DELIMITER ;
 

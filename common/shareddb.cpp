@@ -105,9 +105,12 @@ bool SharedDatabase::SaveCursor(uint32 char_id, std::list<ItemInst*>::const_iter
 
     int i = 8000;
     for(auto it = start; it != end; ++it, i++) {
+		if (i > 8999) { break; } // shouldn't be anything in the queue that indexes this high
         ItemInst *inst = *it;
-        if (!SaveInventory(char_id,inst,(i == 8000) ? MainCursor : i))
-            return false;
+		int16 use_slot = (i == 8000) ? MainCursor : i;
+		if (!SaveInventory(char_id, inst, use_slot)) {
+			return false;
+		}
     }
 
 	return true;
@@ -166,8 +169,9 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 		else
             return UpdateSharedBankSlot(char_id, inst, slot_id);
 	}
-	else if (!inst) // All other inventory
-        return DeleteInventorySlot(char_id, slot_id);
+	else if (!inst) { // All other inventory
+		return DeleteInventorySlot(char_id, slot_id);
+	}
 
     return UpdateInventorySlot(char_id, inst, slot_id);
 }
@@ -176,11 +180,12 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, i
 	// need to check 'inst' argument for valid pointer
 
 	uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
-    if (inst->IsType(ItemClassCommon))
-		for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
-			ItemInst *auginst=inst->GetItem(i);
-			augslot[i]=(auginst && auginst->GetItem()) ? auginst->GetItem()->ID : NO_ITEM;
+	if (inst->IsType(ItemClassCommon)) {
+		for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+			ItemInst *auginst = inst->GetItem(i);
+			augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : NO_ITEM;
 		}
+	}
 
     uint16 charges = 0;
 	if(inst->GetCharges() >= 0)
@@ -220,11 +225,12 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, 
 	// need to check 'inst' argument for valid pointer
 
 	uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
-    if (inst->IsType(ItemClassCommon))
-		for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
-			ItemInst *auginst=inst->GetItem(i);
-			augslot[i]=(auginst && auginst->GetItem()) ? auginst->GetItem()->ID : NO_ITEM;
+	if (inst->IsType(ItemClassCommon)) {
+		for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+			ItemInst *auginst = inst->GetItem(i);
+			augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : NO_ITEM;
 		}
+	}
 
 // Update/Insert item
     uint32 account_id = GetAccountIDByChar(char_id);
@@ -246,11 +252,12 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, 
     auto results = QueryDatabase(query);
 
     // Save bag contents, if slot supports bag contents
-	if (inst->IsType(ItemClassContainer) && Inventory::SupportsContainers(slot_id))
+	if (inst->IsType(ItemClassContainer) && Inventory::SupportsContainers(slot_id)) {
 		for (uint8 idx = SUB_BEGIN; idx < EmuConstants::ITEM_CONTAINER_SIZE; idx++) {
 			const ItemInst* baginst = inst->GetItem(idx);
 			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
 		}
+	}
 
     if (!results.Success()) {
         return false;
@@ -422,9 +429,8 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
         ItemInst* inst = CreateBaseItem(item, charges);
         if (inst && item->ItemClass == ItemClassCommon) {
             for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
-                if (aug[i]) {
-							inst->PutAugment(this, i, aug[i]);
-                }
+                if (aug[i])
+					inst->PutAugment(this, i, aug[i]);
             }
         }
 
@@ -562,10 +568,12 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
 		else
             inst->SetCharges(charges);
 
-        if (item->ItemClass == ItemClassCommon)
-            for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++)
-                if (aug[i])
-                    inst->PutAugment(this, i, aug[i]);
+		if (item->ItemClass == ItemClassCommon) {
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+				if (aug[i])
+					inst->PutAugment(this, i, aug[i]);
+			}
+		}
 
         if (slot_id >= 8000 && slot_id <= 8999)
 		{
@@ -676,10 +684,12 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
 
         inst->SetCharges(charges);
 
-        if (item->ItemClass == ItemClassCommon)
-            for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++)
-                if (aug[i])
-                    inst->PutAugment(this, i, aug[i]);
+		if (item->ItemClass == ItemClassCommon) {
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+				if (aug[i])
+					inst->PutAugment(this, i, aug[i]);
+			}
+		}
 
         if (slot_id>=8000 && slot_id <= 8999)
             put_slot_id = inv->PushCursor(*inst);
@@ -1950,7 +1960,7 @@ void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMes
 	std::string query = StringFormat("SELECT `inspect_message` FROM `character_inspect_messages` WHERE `id` = %u LIMIT 1", character_id);
 	auto results = QueryDatabase(query); 
 	auto row = results.begin();
-	memcpy(message, "", sizeof(InspectMessage_Struct));
+	memset(message, '\0', sizeof(InspectMessage_Struct));
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		memcpy(message, row[0], sizeof(InspectMessage_Struct));
 	}

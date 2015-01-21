@@ -1838,12 +1838,11 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (loaditems) { /* Dont load if a length error occurs */
 		BulkSendInventoryItems();
 		/* Send stuff on the cursor which isnt sent in bulk */
-		iter_queue it;
-		for (it = m_inv.cursor_begin(); it != m_inv.cursor_end(); ++it) {
+		for (auto iter = m_inv.cursor_begin(); iter != m_inv.cursor_end(); ++iter) {
 			/* First item cursor is sent in bulk inventory packet */
-			if (it == m_inv.cursor_begin())
+			if (iter == m_inv.cursor_begin())
 				continue;
-			const ItemInst *inst = *it;
+			const ItemInst *inst = *iter;
 			SendItemPacket(MainCursor, inst, ItemPacketSummonItem);
 		}
 	}
@@ -5462,13 +5461,13 @@ void Client::Handle_OP_Emote(const EQApplicationPacket *app)
 		in->message[512] = '\0';
 		len_msg = 512;
 	}
-	uint32 len_packet = sizeof(in->unknown01) + len_name
+	uint32 len_packet = sizeof(in->type) + len_name
 		+ len_msg + 1;
 
 	// Construct outgoing packet
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Emote, len_packet);
 	Emote_Struct* out = (Emote_Struct*)outapp->pBuffer;
-	out->unknown01 = in->unknown01;
+	out->type = in->type;
 	memcpy(out->message, name, len_name);
 	memcpy(&out->message[len_name], in->message, len_msg);
 
@@ -7477,7 +7476,7 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 
 			uint32 guildrank = gj->response;
 
-			if (GetClientVersion() == EQClientRoF)
+			if (GetClientVersion() >= EQClientRoF)
 			{
 				if (gj->response == 8)
 				{
@@ -7652,7 +7651,10 @@ void Client::Handle_OP_GuildPromote(const EQApplicationPacket *app)
 		uint8 rank = gci.rank + 1;
 
 		if (rank > GUILD_OFFICER)
+		{
+			Message(0, "You cannot promote someone to be guild leader. You must use /guildleader.");
 			return;
+		}
 
 
 		Log.Out(Logs::Detail, Logs::Guilds, "Promoting %s (%d) from rank %s (%d) to %s (%d) in %s (%d)",

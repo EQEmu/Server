@@ -2388,7 +2388,7 @@ struct AugmentItem_Struct {
 
 // OP_Emote
 struct Emote_Struct {
-/*0000*/	uint32 unknown01;
+/*0000*/	uint32 type;			// 0 - custom, 0xffffffff - command (/dance, /flip, etc...)
 /*0004*/	char message[1024];
 /*1028*/
 };

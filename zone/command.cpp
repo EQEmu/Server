@@ -425,7 +425,7 @@ int command_init(void) {
 		command_add("open_shop", nullptr, 100, command_merchantopenshop) ||
 		command_add("merchant_close_shop", "Closes a merchant shop", 100, command_merchantcloseshop) ||
 		command_add("close_shop", nullptr, 100, command_merchantcloseshop) ||
-		command_add("shownumhits", "Shows buffs numhits for yourself.", 0, command_shownumhits) || 
+		command_add("tune", "Calculate ideal statical values related to combat.", 100, command_tune)
 		command_add("crashtest", "- Crash the zoneserver", 255, command_crashtest) ||
 		command_add("logtest", "Performs log performance testing.", 250, command_logtest) ||
 		command_add("logs", "Manage anything to do with logs", 250, command_logs)
@@ -2628,7 +2628,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		}
 		else {
 			int cursorDepth = 0;
-			for (iter_queue it = targetClient->GetInv().cursor_begin(); (it != targetClient->GetInv().cursor_end()); ++it, ++cursorDepth) {
+			for (auto it = targetClient->GetInv().cursor_begin(); (it != targetClient->GetInv().cursor_end()); ++it, ++cursorDepth) {
 				inst_main = *it;
 				item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
 				linker.SetItemInst(inst_main);
@@ -6599,7 +6599,7 @@ void command_npcedit(Client *c, const Seperator *sep)
                                         "SET luclin_haircolor = %i, luclin_beardcolor = %i, "
                                         "luclin_hairstyle = %i, luclin_beard = %i, "
                                         "face = %i, drakkin_heritage = %i, "
-                                        "drakkin_tattoo = %i, drakkin_details = %i, "
+                                        "drakkin_tattoo = %i, drakkin_details = %i "
                                         "WHERE id = %i",
                                         target->GetHairColor(), target->GetBeardColor(),
                                         target->GetHairStyle(), target->GetBeard(),
@@ -10001,7 +10001,6 @@ void command_camerashake(Client *c, const Seperator *sep)
 		if(sep->arg[1][0] && sep->arg[2][0])
 		{
 			ServerPacket *pack = new ServerPacket(ServerOP_CameraShake, sizeof(ServerCameraShake_Struct));
-			memset(pack->pBuffer, 0, sizeof(pack->pBuffer));
 			ServerCameraShake_Struct* scss = (ServerCameraShake_Struct*) pack->pBuffer;
 			scss->duration = atoi(sep->arg[1]);
 			scss->intensity = atoi(sep->arg[2]);
@@ -10386,6 +10385,215 @@ void command_merchantcloseshop(Client *c, const Seperator *sep)
 void command_shownumhits(Client *c, const Seperator *sep)
 {
 	c->ShowNumHits();
+	return;
+}
+
+void command_tune(Client *c, const Seperator *sep)
+{
+	//Work in progress - Kayen
+
+	if(sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help")) {
+		c->Message(0, "Syntax: #tune [subcommand].");
+		c->Message(0, "-- Tune System Commands --");
+		c->Message(0, "-- Usage: Returning recommended combat statistical values based on a desired outcome.");
+		c->Message(0, "-- Note: If targeted mob does not have a target (ie not engaged in combat), YOU will be considered the target.");
+		c->Message(0, "-- Warning: The calculations done in this process are intense and can potentially cause zone crashes depending on parameters set, use with caution!");
+		c->Message(0, "-- Below are OPTIONAL parameters.");
+		c->Message(0, "-- Note: [interval] Determines how fast the stat being checked increases/decreases till it finds the best result. Default [ATK/AC 50][Acc/Avoid 10] ");
+		c->Message(0, "-- Note: [loop_max] Determines how many iterations are done to increases/decreases the stat till it finds the best result. Default [ATK/AC 100][Acc/Avoid 1000]");
+		c->Message(0, "-- Note: [Stat Override] Will override that stat on mob being checkd with the specified value. Default=0");
+		c->Message(0, "-- Note: [Info Level] How much statistical detail is displayed[0 - 3]. Default=0 ");
+		c->Message(0, "-- Note: Results are only approximations usually accurate to +/- 2 intervals.");
+
+		c->Message(0, "... ");
+		c->Message(0, "...### Category A ### Target = ATTACKER ### YOU or Target's Target = DEFENDER ###");
+		c->Message(0, "...### Category B ### Target = DEFENDER ### YOU or Target's Target = ATTACKER ###");
+		c->Message(0, "... ");
+		c->Message(0, "...#Returns recommended ATK adjustment +/- on ATTACKER that will result in an average mitigation pct on DEFENDER. ");
+		c->Message(0, "...tune FindATK [A/B] [pct mitigation] [interval][loop_max][AC Overwride][Info Level]");
+		c->Message(0, "... ");
+		c->Message(0, "...#Returns recommended AC adjustment +/- on DEFENDER for an average mitigation pct from ATTACKER. ");
+		c->Message(0, "...tune FindAC [A/B] [pct mitigation] [interval][loop_max][ATK Overwride][Info Level] ");
+		c->Message(0, "... ");
+		c->Message(0, "...#Returns recommended Accuracy adjustment +/- on ATTACKER that will result in a hit chance pct on DEFENDER. ");
+		c->Message(0, "...tune FindAccuracy [A/B] [hit chance] [interval][loop_max][Avoidance Overwride][Info Level]");
+		c->Message(0, "... ");
+		c->Message(0, "...#Returns recommended Avoidance adjustment +/- on DEFENDER for in a hit chance pct from ATTACKER. ");
+		c->Message(0, "...tune FindAvoidance [A/B] [pct mitigation] [interval][loop_max][Accuracy Overwride][Info Level] ");
+
+		return;
+	}
+	//Default is category A for attacker/defender settings, which then are swapped under category B.
+	Mob* defender = c;
+	Mob* attacker = c->GetTarget();
+
+	if (!attacker)
+	{
+		c->Message(0, "#Tune - Error no target selected. [#Tune help]");
+		return;
+	}
+
+	Mob* ttarget = attacker->GetTarget();
+
+	if (ttarget)
+		defender = ttarget;
+
+	if(!strcasecmp(sep->arg[1], "FindATK"))
+	{
+		float pct_mitigation = atof(sep->arg[3]);
+		int interval = atoi(sep->arg[4]);
+		int max_loop = atoi(sep->arg[5]);
+		int ac_override = atoi(sep->arg[6]);
+		int info_level = atoi(sep->arg[7]);
+
+		if (!pct_mitigation)
+		{
+			c->Message(13, "#Tune - Error must enter the desired percent mitigation on defender. Ie. Defender to mitigate on average 20 pct of max damage.");
+			return;
+		}
+
+		if (!interval)
+			interval = 50;
+		if (!max_loop)
+			max_loop = 100;
+		if(!ac_override)
+			ac_override = 0;
+		if (!info_level)
+			info_level = 1;
+		
+		if(!strcasecmp(sep->arg[2], "A"))
+			c->Tune_FindATKByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop,ac_override,info_level);
+		else if(!strcasecmp(sep->arg[2], "B"))
+			c->Tune_FindATKByPctMitigation(attacker,defender, pct_mitigation, interval, max_loop,ac_override,info_level);
+		else {
+			c->Message(0, "#Tune - Error no category selcted. [#Tune help]");
+			c->Message(0, "Usage #tune FindATK [A/B] [pct mitigation] [interval][loop_max][AC Overwride][Info Level] ");
+			c->Message(0, "Example #tune FindATK A 60");
+		}
+		return;
+	}
+
+	if(!strcasecmp(sep->arg[1], "FindAC"))
+	{
+		float pct_mitigation = atof(sep->arg[3]);
+		int interval = atoi(sep->arg[4]);
+		int max_loop = atoi(sep->arg[5]);
+		int atk_override = atoi(sep->arg[6]);
+		int info_level = atoi(sep->arg[7]);
+
+		if (!pct_mitigation)
+		{
+			c->Message(13, "#Tune - Error must enter the desired percent mitigation on defender. Ie. Defender to mitigate on average 20 pct of max damage.");
+			return;
+		}
+
+		if (!interval)
+			interval = 50;
+		if (!max_loop)
+			max_loop = 100;
+		if(!atk_override)
+			atk_override = 0;
+		if (!info_level)
+			info_level = 1;
+				
+		if(!strcasecmp(sep->arg[2], "A"))
+			c->Tune_FindACByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop,atk_override,info_level);
+		else if(!strcasecmp(sep->arg[2], "B"))
+			c->Tune_FindACByPctMitigation(attacker, defender, pct_mitigation, interval, max_loop,atk_override,info_level);
+		else {
+			c->Message(0, "#Tune - Error no category selcted. [#Tune help]");
+			c->Message(0, "Usage #tune FindAC [A/B] [pct mitigation] [interval][loop_max][ATK Overwride][Info Level] ");
+			c->Message(0, "Example #tune FindAC A 60");
+		}
+
+		return;
+	}
+
+	if(!strcasecmp(sep->arg[1], "FindAccuracy"))
+	{
+		float hit_chance = atof(sep->arg[3]);
+		int interval = atoi(sep->arg[4]);
+		int max_loop = atoi(sep->arg[5]);
+		int avoid_override = atoi(sep->arg[6]);
+		int info_level = atoi(sep->arg[7]);
+
+		if (!hit_chance)
+		{
+			c->Message(10, "#Tune - Error must enter the desired percent mitigation on defender. Ie. Defender to mitigate on average 20 pct of max damage.");
+			return;
+		}
+
+		if (!interval)
+			interval = 10;
+		if (!max_loop)
+			max_loop = 1000;
+		if(!avoid_override)
+			avoid_override = 0;
+		if (!info_level)
+			info_level = 1;
+
+		if (hit_chance > RuleR(Combat,MaxChancetoHit) || hit_chance < RuleR(Combat,MinChancetoHit))
+		{
+			c->Message(10, "#Tune - Error hit chance out of bounds. [Max %.2f Min .2f]", RuleR(Combat,MaxChancetoHit),RuleR(Combat,MinChancetoHit));
+			return;
+		}
+		
+		if(!strcasecmp(sep->arg[2], "A"))
+			c->Tune_FindAccuaryByHitChance(defender, attacker, hit_chance, interval, max_loop,avoid_override,info_level);
+		else if(!strcasecmp(sep->arg[2], "B"))
+			c->Tune_FindAccuaryByHitChance(attacker, defender, hit_chance, interval, max_loop,avoid_override,info_level);
+		else {
+			c->Message(0, "#Tune - Error no category selcted. [#Tune help]");
+			c->Message(0, "Usage #tune FindAcccuracy [A/B] [hit chance] [interval][loop_max][Avoidance Overwride][Info Level]");
+			c->Message(0, "Exampled #tune FindAccuracy B 30");
+		}
+
+		return;
+	}
+
+	if(!strcasecmp(sep->arg[1], "FindAvoidance"))
+	{
+		float hit_chance = atof(sep->arg[3]);
+		int interval = atoi(sep->arg[4]);
+		int max_loop = atoi(sep->arg[5]);
+		int acc_override = atoi(sep->arg[6]);
+		int info_level = atoi(sep->arg[7]);
+
+		if (!hit_chance)
+		{
+			c->Message(0, "#Tune - Error must enter the desired hit chance on defender. Ie. Defender to have hit chance of 40 pct.");
+			return;
+		}
+
+		if (!interval)
+			interval = 10;
+		if (!max_loop)
+			max_loop = 1000;
+		if(!acc_override)
+			acc_override = 0;
+		if (!info_level)
+			info_level = 1;
+
+		if (hit_chance > RuleR(Combat,MaxChancetoHit) || hit_chance < RuleR(Combat,MinChancetoHit))
+		{
+			c->Message(10, "#Tune - Error hit chance out of bounds. [Max %.2f Min .2f]", RuleR(Combat,MaxChancetoHit),RuleR(Combat,MinChancetoHit));
+			return;
+		}
+		
+		if(!strcasecmp(sep->arg[2], "A"))
+			c->Tune_FindAvoidanceByHitChance(defender, attacker, hit_chance, interval, max_loop,acc_override, info_level);
+		else if(!strcasecmp(sep->arg[2], "B"))
+			c->Tune_FindAvoidanceByHitChance(attacker, defender, hit_chance, interval, max_loop,acc_override, info_level);
+		else {
+			c->Message(0, "#Tune - Error no category selcted. [#Tune help]");
+			c->Message(0, "Usage #tune FindAvoidance [A/B] [hit chance] [interval][loop_max][Accuracy Overwride][Info Level]");
+			c->Message(0, "Exampled #tune FindAvoidance B 30");
+		}
+
+		return;
+	}
+
+
 	return;
 }
 

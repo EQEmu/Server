@@ -2802,8 +2802,8 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 	if (GetFilter(FilterDamageShields) == FilterHide && type == MT_DS)
 		return;
 
-	int i, argcount, length;
-	char *bufptr;
+	int i = 0, argcount = 0, length = 0;
+	char *bufptr = nullptr;
 	const char *message_arg[9] = {0};
 
 	if(type==MT_Emote)
@@ -2815,7 +2815,6 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 		return;
 	}
 
-	i = 0;
 	message_arg[i++] = message1;
 	message_arg[i++] = message2;
 	message_arg[i++] = message3;
@@ -2826,10 +2825,12 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 	message_arg[i++] = message8;
 	message_arg[i++] = message9;
 
-	for(argcount = length = 0; message_arg[argcount]; argcount++)
+	for(; message_arg[argcount]; ++argcount)
 		length += strlen(message_arg[argcount]) + 1;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, length+13);
+	length += 1;
+
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, sizeof(FormattedMessage_Struct) + length);
 	FormattedMessage_Struct *fm = (FormattedMessage_Struct *)outapp->pBuffer;
 	fm->string_id = string_id;
 	fm->type = type;
@@ -2840,6 +2841,8 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 		bufptr += strlen(message_arg[i]) + 1;
 	}
 
+	// since we're moving the pointer the 0 offset is correct
+	bufptr[0] = '\0';
 
 	if(distance>0)
 		entity_list.QueueCloseClients(this,outapp,false,distance);
@@ -2914,8 +2917,8 @@ void Client::FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType fil
 	if (!FilteredMessageCheck(sender, filter))
 		return;
 
-	int i, argcount, length;
-	char *bufptr;
+	int i = 0, argcount = 0, length = 0;
+	char *bufptr = nullptr;
 	const char *message_arg[9] = {0};
 
 	if (type == MT_Emote)
@@ -2926,7 +2929,6 @@ void Client::FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType fil
 		return;
 	}
 
-	i = 0;
 	message_arg[i++] = message1;
 	message_arg[i++] = message2;
 	message_arg[i++] = message3;
@@ -2937,10 +2939,12 @@ void Client::FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType fil
 	message_arg[i++] = message8;
 	message_arg[i++] = message9;
 
-	for (argcount = length = 0; message_arg[argcount]; argcount++)
+	for (; message_arg[argcount]; ++argcount)
 		length += strlen(message_arg[argcount]) + 1;
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_FormattedMessage, length+13);
+	length += 1;
+
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_FormattedMessage, sizeof(FormattedMessage_Struct) + length);
 	FormattedMessage_Struct *fm = (FormattedMessage_Struct *)outapp->pBuffer;
 	fm->string_id = string_id;
 	fm->type = type;
@@ -2949,6 +2953,9 @@ void Client::FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType fil
 		strcpy(bufptr, message_arg[i]);
 		bufptr += strlen(message_arg[i]) + 1;
 	}
+
+	// since we're moving the pointer the 0 offset is correct
+	bufptr[0] = '\0';
 
 	QueuePacket(outapp);
 	safe_delete(outapp);

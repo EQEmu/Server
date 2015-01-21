@@ -3472,14 +3472,16 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 			{
 				effect_value = CalcSpellEffectValue(spell_id, i, caster_level, caster, ticsremaining);
 				//Handle client cast DOTs here.
-				if (caster && effect_value < 0 && IsDetrimentalSpell(spell_id)){
+				if (caster && effect_value < 0){
 					
-					if (caster->IsClient()){
-						if (!caster->CastToClient()->GetFeigned())
+					if (IsDetrimentalSpell(spell_id)){
+						if (caster->IsClient()){
+							if (!caster->CastToClient()->GetFeigned())
+								AddToHateList(caster, -effect_value);
+						}
+						else if (!IsClient()) //Allow NPC's to generate hate if casted on other NPC's.
 							AddToHateList(caster, -effect_value);
 					}
-					else if (!IsClient()) //Allow NPC's to generate hate if casted on other NPC's.
-						AddToHateList(caster, -effect_value);
 
 					effect_value = caster->GetActDoTDamage(spell_id, effect_value, this);
 
@@ -6569,33 +6571,32 @@ bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id, float speed){
 
 	DoAnim(anim, 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells); //Override the default projectile animation.
 	return true;
-}			
+}
 
-void Mob::ResourceTap(int32 damage, uint16 spellid){
+void Mob::ResourceTap(int32 damage, uint16 spellid)
+{
 	//'this' = caster
 	if (!IsValidSpell(spellid))
 		return;
 
-	for (int i = 0; i <= EFFECT_COUNT; i++)
-	{
-		if (spells[spellid].effectid[i] == SE_ResourceTap){
-		
-			damage += (damage * spells[spellid].base[i])/100;
+	for (int i = 0; i < EFFECT_COUNT; i++) {
+		if (spells[spellid].effectid[i] == SE_ResourceTap) {
+			damage += (damage * spells[spellid].base[i]) / 100;
 
 			if (spells[spellid].max[i] && (damage > spells[spellid].max[i]))
 				damage = spells[spellid].max[i];
 
-			if (spells[spellid].base2[i] == 0){ //HP Tap
+			if (spells[spellid].base2[i] == 0) { // HP Tap
 				if (damage > 0)
 					HealDamage(damage);
 				else
-					Damage(this, -damage,0, SkillEvocation,false);
+					Damage(this, -damage, 0, SkillEvocation, false);
 			}
 
-			if (spells[spellid].base2[i] == 1)  //Mana Tap
+			if (spells[spellid].base2[i] == 1) // Mana Tap
 				SetMana(GetMana() + damage);
 
-			if (spells[spellid].base2[i] == 2 && IsClient())  //Endurance Tap
+			if (spells[spellid].base2[i] == 2 && IsClient()) // Endurance Tap
 				CastToClient()->SetEndurance(CastToClient()->GetEndurance() + damage);
 		}
 	}

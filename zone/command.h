@@ -322,6 +322,7 @@ void command_npctype_cache(Client *c, const Seperator *sep);
 void command_merchantopenshop(Client *c, const Seperator *sep);
 void command_merchantcloseshop(Client *c, const Seperator *sep);
 void command_shownumhits(Client *c, const Seperator *sep);
+void command_tune(Client *c, const Seperator *sep);
 void command_logtest(Client *c, const Seperator *sep);
 void command_logs(Client *c, const Seperator *sep);
 

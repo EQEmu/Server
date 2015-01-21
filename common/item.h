@@ -34,7 +34,6 @@ class EvolveInfo;			// Stores information about an evolving item family
 #include <map>
 
 // Helper typedefs
-typedef std::list<ItemInst*>::const_iterator				iter_queue;
 typedef std::map<int16, ItemInst*>::const_iterator			iter_inst;
 typedef std::map<uint8, ItemInst*>::const_iterator			iter_contents;
 
@@ -87,15 +86,17 @@ public:
 	// Public Methods
 	/////////////////////////
 
-	inline iter_queue begin()	{ return m_list.begin(); }
-	inline iter_queue end()		{ return m_list.end(); }
+	inline std::list<ItemInst*>::const_iterator begin() { return m_list.begin(); }
+	inline std::list<ItemInst*>::const_iterator end() { return m_list.end(); }
+
+	inline int size() { return static_cast<int>(m_list.size()); } // TODO: change to size_t
+	inline bool empty() { return m_list.empty(); }
 
 	void push(ItemInst* inst);
 	void push_front(ItemInst* inst);
 	ItemInst* pop();
 	ItemInst* pop_back();
 	ItemInst* peek_front() const;
-	inline int size()		{ return static_cast<int>(m_list.size()); }
 
 protected:
 	/////////////////////////
@@ -103,7 +104,6 @@ protected:
 	/////////////////////////
 
 	std::list<ItemInst*> m_list;
-
 };
 
 // ########################################
@@ -140,9 +140,11 @@ public:
 	ItemInst* GetItem(int16 slot_id) const;
 	ItemInst* GetItem(int16 slot_id, uint8 bagidx) const;
 
-	inline iter_queue cursor_begin()	{ return m_cursor.begin(); }
-	inline iter_queue cursor_end()		{ return m_cursor.end(); }
-	inline bool CursorEmpty()			{ return (m_cursor.size() == 0); }
+	inline std::list<ItemInst*>::const_iterator cursor_begin() { return m_cursor.begin(); }
+	inline std::list<ItemInst*>::const_iterator cursor_end() { return m_cursor.end(); }
+
+	inline int CursorSize() { return m_cursor.size(); }
+	inline bool CursorEmpty() { return m_cursor.empty(); }
 
 	// Retrieve a read-only item from inventory
 	inline const ItemInst* operator[](int16 slot_id) const { return GetItem(slot_id); }
@@ -291,15 +293,15 @@ public:
 	bool IsEquipable(int16 slot_id) const;
 
 	//
-	// Augements
+	// Augments
 	//
-	inline bool IsAugmentable() const { return m_item->AugSlotType[0] != 0 || m_item->AugSlotType[1] != 0 || m_item->AugSlotType[2] != 0 || m_item->AugSlotType[3] != 0 || m_item->AugSlotType[4] != 0 || m_item->AugSlotType[5] != 0; }
+	bool IsAugmentable() const;
 	bool AvailableWearSlot(uint32 aug_wear_slots) const;
 	int8 AvailableAugmentSlot(int32 augtype) const;
 	bool IsAugmentSlotAvailable(int32 augtype, uint8 slot) const;
-	inline int32 GetAugmentType() const { return m_item->AugType; }
+	inline int32 GetAugmentType() const { return ((m_item) ? m_item->AugType : NO_ITEM); }
 
-	inline bool IsExpendable() const { return ((m_item->Click.Type == ET_Expendable ) || (m_item->ItemType == ItemTypePotion)); }
+	inline bool IsExpendable() const { return ((m_item) ? ((m_item->Click.Type == ET_Expendable ) || (m_item->ItemType == ItemTypePotion)) : false); }
 
 	//
 	// Contents
@@ -337,8 +339,8 @@ public:
 	bool IsAmmo() const;
 
 	// Accessors
-	const uint32 GetID() const { return m_item->ID; }
-	const uint32 GetItemScriptID() const { return m_item->ScriptFileID; }
+	const uint32 GetID() const { return ((m_item) ? m_item->ID : NO_ITEM); }
+	const uint32 GetItemScriptID() const { return ((m_item) ? m_item->ScriptFileID : NO_ITEM); }
 	const Item_Struct* GetItem() const;
 	const Item_Struct* GetUnscaledItem() const;
 
@@ -351,18 +353,18 @@ public:
 	void SetColor(uint32 color)				{ m_color = color; }
 	uint32 GetColor() const					{ return m_color; }
 
-	uint32 GetMerchantSlot() const				{ return m_merchantslot; }
+	uint32 GetMerchantSlot() const			{ return m_merchantslot; }
 	void SetMerchantSlot(uint32 slot)		{ m_merchantslot = slot; }
 
-	int32 GetMerchantCount() const				{ return m_merchantcount; }
+	int32 GetMerchantCount() const			{ return m_merchantcount; }
 	void SetMerchantCount(int32 count)		{ m_merchantcount = count; }
 
 	int16 GetCurrentSlot() const			{ return m_currentslot; }
 	void SetCurrentSlot(int16 curr_slot)	{ m_currentslot = curr_slot; }
 
 	// Is this item already attuned?
-	bool IsAttuned() const { return m_attuned; }
-	void SetAttuned(bool flag) { m_attuned=flag; }
+	bool IsAttuned() const					{ return m_attuned; }
+	void SetAttuned(bool flag)				{ m_attuned=flag; }
 
 	std::string GetCustomDataString() const;
 	std::string GetCustomData(std::string identifier);
