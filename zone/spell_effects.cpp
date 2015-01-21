@@ -3409,7 +3409,7 @@ void Mob::BuffProcess()
 				{
 					CastToClient()->SendBuffDurationPacket(buffs[buffs_i]);
 					// Hack to get UF to play nicer, RoF seems fine without it
-					if (CastToClient()->GetClientVersion() == EQClientUnderfoot && buffs[buffs_i].numhits > 0)
+					if (CastToClient()->GetClientVersion() == ClientVersion::Und && buffs[buffs_i].numhits > 0)
 						CastToClient()->SendBuffNumHitPacket(buffs[buffs_i], buffs_i);
 					buffs[buffs_i].UpdateClient = false;
 				}
@@ -5646,7 +5646,7 @@ int16 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
 	return realTotal + realTotal2;
 }
 
-void Mob::CheckNumHitsRemaining(uint8 type, int32 buff_slot, uint16 spell_id)
+void Mob::CheckNumHitsRemaining(NumHit type, int32 buff_slot, uint16 spell_id)
 {
 	/*
 	Field 175 = numhits type
@@ -5673,7 +5673,7 @@ void Mob::CheckNumHitsRemaining(uint8 type, int32 buff_slot, uint16 spell_id)
 	if (IsValidSpell(spell_id)) {
 		for (int d = 0; d < buff_max; d++) {
 			if (buffs[d].spellid == spell_id && buffs[d].numhits > 0 &&
-					spells[buffs[d].spellid].numhitstype == type) {
+			    spells[buffs[d].spellid].numhitstype == static_cast<int>(type)) {
 				if (--buffs[d].numhits == 0) {
 					CastOnNumHitFade(buffs[d].spellid);
 					if (!TryFadeEffect(d))
@@ -5683,7 +5683,7 @@ void Mob::CheckNumHitsRemaining(uint8 type, int32 buff_slot, uint16 spell_id)
 				}
 			}
 		}
-	} else if (type == NUMHIT_MatchingSpells) {
+	} else if (type == NumHit::MatchingSpells) {
 		if (buff_slot >= 0) {
 			if (--buffs[buff_slot].numhits == 0) {
 				CastOnNumHitFade(buffs[buff_slot].spellid);
@@ -5712,7 +5712,7 @@ void Mob::CheckNumHitsRemaining(uint8 type, int32 buff_slot, uint16 spell_id)
 	} else {
 		for (int d = 0; d < buff_max; d++) {
 			if (IsValidSpell(buffs[d].spellid) && buffs[d].numhits > 0 &&
-					spells[buffs[d].spellid].numhitstype == type) {
+			    spells[buffs[d].spellid].numhitstype == static_cast<int>(type)) {
 				if (--buffs[d].numhits == 0) {
 					CastOnNumHitFade(buffs[d].spellid);
 					if (!TryFadeEffect(d))
@@ -5976,7 +5976,7 @@ int32 Mob::GetFcDamageAmtIncoming(Mob *caster, uint32 spell_id, bool use_skill, 
 					}
 					if ((!limit_exists) || (limit_exists && skill_found)){
 						dmg += temp_dmg;
-						CheckNumHitsRemaining(NUMHIT_MatchingSpells,i);
+						CheckNumHitsRemaining(NumHit::MatchingSpells, i);
 					}
 				}
 
@@ -5984,7 +5984,7 @@ int32 Mob::GetFcDamageAmtIncoming(Mob *caster, uint32 spell_id, bool use_skill, 
 					int32 focus = caster->CalcFocusEffect(focusFcDamageAmtIncoming, buffs[i].spellid, spell_id);
 					if(focus){
 						dmg += focus;
-						CheckNumHitsRemaining(NUMHIT_MatchingSpells,i);
+						CheckNumHitsRemaining(NumHit::MatchingSpells, i);
 					}
 				}
 			}
@@ -6036,7 +6036,7 @@ int32 Mob::GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spel
 			value = tmp_focus;
 
 			if (tmp_buffslot >= 0)
-				CheckNumHitsRemaining(NUMHIT_MatchingSpells, tmp_buffslot);
+				CheckNumHitsRemaining(NumHit::MatchingSpells, tmp_buffslot);
 		}
 
 	

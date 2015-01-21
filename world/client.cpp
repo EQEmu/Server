@@ -89,7 +89,8 @@ Client::Client(EQStreamInterface* ieqs)
 	ClientVersionBit = 0;
 	numclients++;
 
-	ClientVersionBit = 1 << (eqs->ClientVersion() - 1);
+	if (eqs->GetClientVersion() != ClientVersion::Unknown)
+		ClientVersionBit = 1 << (static_cast<unsigned int>(eqs->GetClientVersion()) - 1);
 }
 
 Client::~Client() {
@@ -1433,32 +1434,26 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	pp.pvp = database.GetServerType() == 1 ? 1 : 0;
 
 	/* If it is an SoF Client and the SoF Start Zone rule is set, send new chars there */
-	if (ClientVersionBit & BIT_SoFAndLater && RuleI(World, SoFStartZoneID) > 0) {
+	if (ClientVersionBit & BIT_SoFAndLater) {
 		Log.Out(Logs::Detail, Logs::World_Server,"Found 'SoFStartZoneID' rule setting: %i", RuleI(World, SoFStartZoneID));
-		pp.zone_id = RuleI(World, SoFStartZoneID);
-		if (pp.zone_id)
-			database.GetSafePoints(pp.zone_id, 0, &pp.x, &pp.y, &pp.z);
-		else
-			Log.Out(Logs::Detail, Logs::World_Server,"Error getting zone id for Zone ID %i", RuleI(World, SoFStartZoneID));
-	} else {
-		/* if there's a startzone variable put them in there */
-		if (database.GetVariable("startzone", startzone, 50)) {
-			Log.Out(Logs::Detail, Logs::World_Server,"Found 'startzone' variable setting: %s", startzone);
-			pp.zone_id = database.GetZoneID(startzone);
-			if (pp.zone_id)
-				database.GetSafePoints(pp.zone_id, 0, &pp.x, &pp.y, &pp.z);
-			else
-				Log.Out(Logs::Detail, Logs::World_Server,"Error getting zone id for '%s'", startzone);
-		} else {	/* otherwise use normal starting zone logic */
-			bool ValidStartZone = false;
-			if (ClientVersionBit & BIT_TitaniumAndEarlier)
-				ValidStartZone = database.GetStartZone(&pp, cc);
-			else
-				ValidStartZone = database.GetStartZoneSoF(&pp, cc);
-
-			if (!ValidStartZone)
-				return false;
+		if (RuleI(World, SoFStartZoneID) > 0) {
+			pp.zone_id = RuleI(World, SoFStartZoneID);
+			cc->start_zone = pp.zone_id;
 		}
+	}
+	else {
+		clog(WORLD__CLIENT, "Found 'TitaniumStartZoneID' rule setting: %i", RuleI(World, TitaniumStartZoneID));
+		if (RuleI(World, TitaniumStartZoneID) > 0) { 	/* if there's a startzone variable put them in there */
+		
+			pp.zone_id = RuleI(World, TitaniumStartZoneID);
+			cc->start_zone = pp.zone_id;
+		}
+	} 	
+	/* use normal starting zone logic to either get defaults, or if startzone was set, load that from the db table.*/
+	bool ValidStartZone = database.GetStartZone(&pp, cc, ClientVersionBit & BIT_TitaniumAndEarlier);
+
+	if (!ValidStartZone){
+		return false;
 	}
 
 	/* just in case  */

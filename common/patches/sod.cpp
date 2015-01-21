@@ -113,9 +113,9 @@ namespace SoD
 		return(r);
 	}
 
-	const EQClientVersion Strategy::ClientVersion() const
+	const ClientVersion Strategy::GetClientVersion() const
 	{
-		return EQClientSoD;
+		return ClientVersion::SoD;
 	}
 
 #include "ss_define.h"

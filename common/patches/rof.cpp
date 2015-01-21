@@ -115,9 +115,9 @@ namespace RoF
 		return(r);
 	}
 
-	const EQClientVersion Strategy::ClientVersion() const
+	const ClientVersion Strategy::GetClientVersion() const
 	{
-		return EQClientRoF;
+		return ClientVersion::RoF;
 	}
 
 #include "ss_define.h"

@@ -126,7 +126,7 @@ bool Client::Process() {
 				HandleRespawnFromHover(0);
 		}
 
-		if(IsTracking() && (GetClientVersion() >= EQClientSoD) && TrackingTimer.Check())
+		if(IsTracking() && (GetClientVersion() >= ClientVersion::SoD) && TrackingTimer.Check())
 			DoTracking();
 
 		if(hpupdate_timer.Check())
@@ -176,7 +176,7 @@ bool Client::Process() {
 				GetMerc()->Save();
 				GetMerc()->Depop();
 			}
-			
+
 			Raid *myraid = entity_list.GetRaidByClient(this);
 			if (myraid)
 			{
@@ -342,41 +342,31 @@ bool Client::Process() {
 			if(aa_los_them_mob)
 			{
 				if(auto_attack_target != aa_los_them_mob ||
-					aa_los_me.x != GetX() ||
-					aa_los_me.y != GetY() ||
-					aa_los_me.z != GetZ() ||
-					aa_los_them.x != aa_los_them_mob->GetX() ||
-					aa_los_them.y != aa_los_them_mob->GetY() ||
-					aa_los_them.z != aa_los_them_mob->GetZ())
+					m_AutoAttackPosition.m_X != GetX() ||
+					m_AutoAttackPosition.m_Y != GetY() ||
+					m_AutoAttackPosition.m_Z != GetZ() ||
+					m_AutoAttackTargetLocation.m_X != aa_los_them_mob->GetX() ||
+					m_AutoAttackTargetLocation.m_Y != aa_los_them_mob->GetY() ||
+					m_AutoAttackTargetLocation.m_Z != aa_los_them_mob->GetZ())
 				{
 					aa_los_them_mob = auto_attack_target;
-					aa_los_me.x = GetX();
-					aa_los_me.y = GetY();
-					aa_los_me.z = GetZ();
-					aa_los_them.x = aa_los_them_mob->GetX();
-					aa_los_them.y = aa_los_them_mob->GetY();
-					aa_los_them.z = aa_los_them_mob->GetZ();
+					m_AutoAttackPosition = GetPosition();
+					m_AutoAttackTargetLocation = aa_los_them_mob->GetPosition();
 					los_status = CheckLosFN(auto_attack_target);
-					aa_los_me_heading = GetHeading();
 					los_status_facing = IsFacingMob(aa_los_them_mob);
 				}
 				// If only our heading changes, we can skip the CheckLosFN call
 				// but above we still need to update los_status_facing
-				if (aa_los_me_heading != GetHeading()) {
-					aa_los_me_heading = GetHeading();
+				if (m_AutoAttackPosition.m_Heading != GetHeading()) {
+					m_AutoAttackPosition.m_Heading = GetHeading();
 					los_status_facing = IsFacingMob(aa_los_them_mob);
 				}
 			}
 			else
 			{
 				aa_los_them_mob = auto_attack_target;
-				aa_los_me.x = GetX();
-				aa_los_me.y = GetY();
-				aa_los_me.z = GetZ();
-				aa_los_me_heading = GetHeading();
-				aa_los_them.x = aa_los_them_mob->GetX();
-				aa_los_them.y = aa_los_them_mob->GetY();
-				aa_los_them.z = aa_los_them_mob->GetZ();
+				m_AutoAttackPosition = GetPosition();
+				m_AutoAttackTargetLocation = aa_los_them_mob->GetPosition();
 				los_status = CheckLosFN(auto_attack_target);
 				los_status_facing = IsFacingMob(aa_los_them_mob);
 			}
@@ -531,9 +521,7 @@ bool Client::Process() {
 				else
 				{
 					animation = 0;
-					delta_x = 0;
-					delta_y = 0;
-					delta_z = 0;
+					m_Delta = xyz_heading(0.0f, 0.0f, 0.0f, m_Delta.m_Heading);
 					SendPosUpdate(2);
 				}
 			}
@@ -787,16 +775,16 @@ void Client::OnDisconnect(bool hard_disconnect) {
 		if (MyRaid)
 			MyRaid->MemberZoned(this);
 
-		parse->EventPlayer(EVENT_DISCONNECT, this, "", 0); 
+		parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
 
 		/* QS: PlayerLogConnectDisconnect */
 		if (RuleB(QueryServ, PlayerLogConnectDisconnect)){
 			std::string event_desc = StringFormat("Disconnect :: in zoneid:%i instid:%i", this->GetZoneID(), this->GetInstanceID());
 			QServ->PlayerLogEvent(Player_Log_Connect_State, this->CharacterID(), event_desc);
-		} 
+		}
 	}
 
-	Mob *Other = trade->With(); 
+	Mob *Other = trade->With();
 	if(Other)
 	{
 		Log.Out(Logs::Detail, Logs::Trading, "Client disconnected during a trade. Returning their items."); 
@@ -806,13 +794,13 @@ void Client::OnDisconnect(bool hard_disconnect) {
 			Other->CastToClient()->FinishTrade(Other);
 
 		/* Reset both sides of the trade */
-		trade->Reset(); 
+		trade->Reset();
 		Other->trade->Reset();
 	}
 
 	database.SetFirstLogon(CharacterID(), 0); //We change firstlogon status regardless of if a player logs out to zone or not, because we only want to trigger it on their first login from world.
 
-	/* Remove ourself from all proximities */ 
+	/* Remove ourself from all proximities */
 	ClearAllProximities();
 
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_LogoutReply);
@@ -885,7 +873,7 @@ void Client::BulkSendInventoryItems() {
 	}
 
 	// Power Source
-	if(GetClientVersion() >= EQClientSoF) {
+	if(GetClientVersion() >= ClientVersion::SoF) {
 		const ItemInst* inst = m_inv[MainPowerSource];
 		if(inst) {
 			std::string packet = inst->Serialize(MainPowerSource);
@@ -1557,7 +1545,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 				if (from_bucket == &m_pp.platinum_shared)
 					amount_to_add = 0 - amount_to_take;
 
-				database.SetSharedPlatinum(AccountID(),amount_to_add); 
+				database.SetSharedPlatinum(AccountID(),amount_to_add);
 			}
 		}
 		else{
@@ -1615,7 +1603,7 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 		return;
 
 	//you have to be somewhat close to a trainer to be properly using them
-	if(DistNoRoot(*pTrainer) > USE_NPC_RANGE2)
+	if(ComparativeDistance(m_Position,pTrainer->GetPosition()) > USE_NPC_RANGE2)
 		return;
 
 	// if this for-loop acts up again (crashes linux), try enabling the before and after #pragmas
@@ -1663,7 +1651,7 @@ void Client::OPGMEndTraining(const EQApplicationPacket *app)
 		return;
 
 	//you have to be somewhat close to a trainer to be properly using them
-	if(DistNoRoot(*pTrainer) > USE_NPC_RANGE2)
+	if(ComparativeDistance(m_Position, pTrainer->GetPosition()) > USE_NPC_RANGE2)
 		return;
 
 	// goodbye message
@@ -1692,7 +1680,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		return;
 
 	//you have to be somewhat close to a trainer to be properly using them
-	if(DistNoRoot(*pTrainer) > USE_NPC_RANGE2)
+	if(ComparativeDistance(m_Position, pTrainer->GetPosition()) > USE_NPC_RANGE2)
 		return;
 
 	if (gmskill->skillbank == 0x01)
@@ -1743,7 +1731,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			}
 
 			SetSkill(skill, t_level);
-		} else { 
+		} else {
 			switch(skill) {
 			case SkillBrewing:
 			case SkillMakePoison:
@@ -1806,7 +1794,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		}
 	}
 
-	if(GetClientVersion() >= EQClientSoF) {
+	if(GetClientVersion() >= ClientVersion::SoF) {
 		// The following packet decreases the skill points left in the Training Window and
 		// produces the 'You have increased your skill / learned the basics of' message.
 		//
@@ -1945,7 +1933,7 @@ void Client::DoEnduranceUpkeep() {
 
 	int upkeep_sum = 0;
 	int cost_redux = spellbonuses.EnduranceReduction + itembonuses.EnduranceReduction + aabonuses.EnduranceReduction;
-	
+
 	bool has_effect = false;
 	uint32 buffs_i;
 	uint32 buff_count = GetMaxTotalSlots();
@@ -2131,9 +2119,9 @@ void Client::HandleRespawnFromHover(uint32 Option)
 
 			if (corpse)
 			{
-				x_pos = corpse->GetX();
-				y_pos = corpse->GetY();
-				z_pos = corpse->GetZ();
+				m_Position.m_X = corpse->GetX();
+				m_Position.m_Y = corpse->GetY();
+				m_Position.m_Z = corpse->GetZ();
 			}
 
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + 10);
@@ -2186,10 +2174,10 @@ void Client::HandleRespawnFromHover(uint32 Option)
 			SetMana(GetMaxMana());
 			SetEndurance(GetMaxEndurance());
 
-			x_pos = chosen->x;
-			y_pos = chosen->y;
-			z_pos = chosen->z;
-			heading = chosen->heading;
+			m_Position.m_X = chosen->x;
+			m_Position.m_Y = chosen->y;
+			m_Position.m_Z = chosen->z;
+			m_Position.m_Heading = chosen->heading;
 
 			ClearHover();
 			entity_list.RefreshClientXTargets(this);
@@ -2199,7 +2187,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		//After they've respawned into the same zone, trigger EVENT_RESPAWN
 		parse->EventPlayer(EVENT_RESPAWN, this, static_cast<std::string>(itoa(Option)), is_rez ? 1 : 0);
 
-		//Pop Rez option from the respawn options list; 
+		//Pop Rez option from the respawn options list;
 		//easiest way to make sure it stays at the end and
 		//doesn't disrupt adding/removing scripted options
 		respawn_options.pop_back();

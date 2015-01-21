@@ -394,7 +394,7 @@ void Group::SendHPPacketsTo(Mob *member)
 			{
 				members[i]->CreateHPPacket(&hpapp);
 				member->CastToClient()->QueuePacket(&hpapp, false);
-				if(member->CastToClient()->GetClientVersion() >= EQClientSoD)
+				if(member->CastToClient()->GetClientVersion() >= ClientVersion::SoD)
 				{
 					outapp.SetOpcode(OP_MobManaUpdate);
 					MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp.pBuffer;
@@ -425,7 +425,7 @@ void Group::SendHPPacketsFrom(Mob *member)
 		if(members[i] && members[i] != member && members[i]->IsClient())
 		{
 			members[i]->CastToClient()->QueuePacket(&hp_app);
-			if(members[i]->CastToClient()->GetClientVersion() >= EQClientSoD)
+			if(members[i]->CastToClient()->GetClientVersion() >= ClientVersion::SoD)
 			{
 				outapp.SetOpcode(OP_MobManaUpdate);
 				MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp.pBuffer;
@@ -565,7 +565,7 @@ bool Group::DelMemberOOZ(const char *Name) {
 				if(GroupCount() < 3)
 				{
 					UnDelegateMarkNPC(NPCMarkerName.c_str());
-					if(GetLeader() && GetLeader()->IsClient() && GetLeader()->CastToClient()->GetClientVersion() < EQClientSoD) {
+					if(GetLeader() && GetLeader()->IsClient() && GetLeader()->CastToClient()->GetClientVersion() < ClientVersion::SoD) {
 							UnDelegateMainAssist(MainAssistName.c_str());
 					}
 					ClearAllNPCMarks();
@@ -723,7 +723,7 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 	if(GroupCount() < 3)
 	{
 		UnDelegateMarkNPC(NPCMarkerName.c_str());
-		if(GetLeader() && GetLeader()->IsClient() && GetLeader()->CastToClient()->GetClientVersion() < EQClientSoD) {
+		if(GetLeader() && GetLeader()->IsClient() && GetLeader()->CastToClient()->GetClientVersion() < ClientVersion::SoD) {
 			UnDelegateMainAssist(MainAssistName.c_str());
 		}
 		ClearAllNPCMarks();
@@ -759,7 +759,7 @@ void Group::CastGroupSpell(Mob* caster, uint16 spell_id) {
 		}
 		else if(members[z] != nullptr)
 		{
-			distance = caster->DistNoRoot(*members[z]);
+			distance = ComparativeDistance(caster->GetPosition(), members[z]->GetPosition());
 			if(distance <= range2 && distance >= min_range2) {
 				members[z]->CalcSpellPowerDistanceMod(spell_id, distance);
 				caster->SpellOnTarget(spell_id, members[z]);
@@ -799,7 +799,7 @@ void Group::GroupBardPulse(Mob* caster, uint16 spell_id) {
 		}
 		else if(members[z] != nullptr)
 		{
-			distance = caster->DistNoRoot(*members[z]);
+			distance = ComparativeDistance(caster->GetPosition(), members[z]->GetPosition());
 			if(distance <= range2) {
 				members[z]->BardPulse(spell_id, caster);
 #ifdef GROUP_BUFF_PETS
@@ -1198,7 +1198,7 @@ void Group::HealGroup(uint32 heal_amt, Mob* caster, float range)
 	for(; gi < MAX_GROUP_MEMBERS; gi++)
 	{
 		if(members[gi]){
-			distance = caster->DistNoRoot(*members[gi]);
+			distance = ComparativeDistance(caster->GetPosition(), members[gi]->GetPosition());
 			if(distance <= range2){
 				numMem += 1;
 			}
@@ -1209,7 +1209,7 @@ void Group::HealGroup(uint32 heal_amt, Mob* caster, float range)
 	for(gi = 0; gi < MAX_GROUP_MEMBERS; gi++)
 	{
 		if(members[gi]){
-			distance = caster->DistNoRoot(*members[gi]);
+			distance = ComparativeDistance(caster->GetPosition(), members[gi]->GetPosition());
 			if(distance <= range2){
 				members[gi]->HealDamage(heal_amt, caster);
 				members[gi]->SendHPUpdate();
@@ -1236,7 +1236,7 @@ void Group::BalanceHP(int32 penalty, float range, Mob* caster, int32 limit)
 	for(; gi < MAX_GROUP_MEMBERS; gi++)
 	{
 		if(members[gi]){
-			distance = caster->DistNoRoot(*members[gi]);
+			distance = ComparativeDistance(caster->GetPosition(), members[gi]->GetPosition());
 			if(distance <= range2){
 
 				dmgtaken_tmp = members[gi]->GetMaxHP() - members[gi]->GetHP();
@@ -1254,7 +1254,7 @@ void Group::BalanceHP(int32 penalty, float range, Mob* caster, int32 limit)
 	for(gi = 0; gi < MAX_GROUP_MEMBERS; gi++)
 	{
 		if(members[gi]){
-			distance = caster->DistNoRoot(*members[gi]);
+			distance = ComparativeDistance(caster->GetPosition(), members[gi]->GetPosition());
 			if(distance <= range2){
 				if((members[gi]->GetMaxHP() - dmgtaken) < 1){ //this way the ability will never kill someone
 					members[gi]->SetHP(1);					//but it will come darn close
@@ -1285,7 +1285,7 @@ void Group::BalanceMana(int32 penalty, float range, Mob* caster, int32 limit)
 	for(; gi < MAX_GROUP_MEMBERS; gi++)
 	{
 		if(members[gi] && (members[gi]->GetMaxMana() > 0)){
-			distance = caster->DistNoRoot(*members[gi]);
+			distance = ComparativeDistance(caster->GetPosition(), members[gi]->GetPosition());
 			if(distance <= range2){
 
 				manataken_tmp = members[gi]->GetMaxMana() - members[gi]->GetMana();
@@ -1307,7 +1307,7 @@ void Group::BalanceMana(int32 penalty, float range, Mob* caster, int32 limit)
 	for(gi = 0; gi < MAX_GROUP_MEMBERS; gi++)
 	{
 		if(members[gi]){
-			distance = caster->DistNoRoot(*members[gi]);
+			distance = ComparativeDistance(caster->GetPosition(), members[gi]->GetPosition());
 			if(distance <= range2){
 				if((members[gi]->GetMaxMana() - manataken) < 1){
 					members[gi]->SetMana(1);
@@ -1568,7 +1568,7 @@ void Group::NotifyMainTank(Client *c, uint8 toggle)
 	if(!MainTankName.size())
 		return;
 
-	if(c->GetClientVersion() < EQClientSoD)
+	if(c->GetClientVersion() < ClientVersion::SoD)
 	{
 		if(toggle)
 			c->Message(0, "%s is now Main Tank.", MainTankName.c_str());
@@ -1608,7 +1608,7 @@ void Group::NotifyMainAssist(Client *c, uint8 toggle)
 	if(!MainAssistName.size())
 		return;
 
-	if(c->GetClientVersion() < EQClientSoD)
+	if(c->GetClientVersion() < ClientVersion::SoD)
 	{
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_DelegateAbility, sizeof(DelegateAbility_Struct));
 
@@ -1663,7 +1663,7 @@ void Group::NotifyPuller(Client *c, uint8 toggle)
 	if(!PullerName.size())
 		return;
 
-	if(c->GetClientVersion() < EQClientSoD)
+	if(c->GetClientVersion() < ClientVersion::SoD)
 	{
 		if(toggle)
 			c->Message(0, "%s is now Puller.", PullerName.c_str());
@@ -2229,7 +2229,7 @@ void Group::ChangeLeader(Mob* newleader)
 	for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++) {
 		if (members[i] && members[i]->IsClient())
 		{
-			if(members[i]->CastToClient()->GetClientVersion() >= EQClientSoD)
+			if(members[i]->CastToClient()->GetClientVersion() >= ClientVersion::SoD)
 				members[i]->CastToClient()->SendGroupLeaderChangePacket(newleader->GetName());
 
 			members[i]->CastToClient()->QueuePacket(outapp);

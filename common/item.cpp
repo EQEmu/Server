@@ -1259,7 +1259,7 @@ int16 Inventory::_HasItemByUse(std::map<int16, ItemInst*>& bucket, uint8 use, ui
 
 		if (!inst->IsType(ItemClassContainer)) { continue; }
 
-		for (auto bag_iter = bucket.begin(); bag_iter != bucket.end(); ++bag_iter) {
+		for (auto bag_iter = inst->_begin(); bag_iter != inst->_end(); ++bag_iter) {
 			auto bag_inst = bag_iter->second;
 			if (bag_inst == nullptr) { continue; }
 
@@ -1710,9 +1710,17 @@ void ItemInst::ClearByFlags(byFlagSetting is_nodrop, byFlagSetting is_norent)
 	end = m_contents.end();
 	for (; cur != end;) {
 		ItemInst* inst = cur->second;
-		if (inst == nullptr)
+		if (inst == nullptr) {
+			cur = m_contents.erase(cur);
 			continue;
+		}
+
 		const Item_Struct* item = inst->GetItem();
+		if (item == nullptr) {
+			cur = m_contents.erase(cur);
+			continue;
+		}
+
 		del = cur;
 		++cur;
 
@@ -1723,6 +1731,7 @@ void ItemInst::ClearByFlags(byFlagSetting is_nodrop, byFlagSetting is_norent)
 				m_contents.erase(del->first);
 				continue;
 			}
+			// no 'break;' deletes 'byFlagNotSet' type - can't add at the moment because it really *breaks* the process somewhere
 		case byFlagNotSet:
 			if (item->NoDrop != 0) {
 				safe_delete(inst);
@@ -1740,6 +1749,7 @@ void ItemInst::ClearByFlags(byFlagSetting is_nodrop, byFlagSetting is_norent)
 				m_contents.erase(del->first);
 				continue;
 			}
+			// no 'break;' deletes 'byFlagNotSet' type - can't add at the moment because it really *breaks* the process somewhere
 		case byFlagNotSet:
 			if (item->NoRent != 0) {
 				safe_delete(inst);

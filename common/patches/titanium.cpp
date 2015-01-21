@@ -111,9 +111,9 @@ namespace Titanium
 		return(r);
 	}
 
-	const EQClientVersion Strategy::ClientVersion() const
+	const ClientVersion Strategy::GetClientVersion() const
 	{
-		return EQClientTitanium;
+		return ClientVersion::Tit;
 	}
 
 #include "ss_define.h"

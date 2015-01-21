@@ -235,7 +235,7 @@ int LuaParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data,
 		return 0;
 	}
 
-	std::string package_name = "npc_" + std::to_string(static_cast<long long>(npc->GetNPCTypeID()));
+	std::string package_name = "npc_" + std::to_string(npc->GetNPCTypeID());
 	return _EventNPC(package_name, evt, npc, init, data, extra_data, extra_pointers);
 }
 
@@ -425,7 +425,7 @@ int LuaParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *
 	}
 	
 	std::string package_name = "item_";
-	package_name += std::to_string(static_cast<long long>(item->GetID()));
+	package_name += std::to_string(item->GetID());
 	return _EventItem(package_name, evt, client, item, mob, data, extra_data, extra_pointers);
 }
 
@@ -499,12 +499,12 @@ int LuaParser::EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spe
 		return 0;
 	}
 
-	std::string package_name = "spell_" + std::to_string(static_cast<long long>(spell_id));
+	std::string package_name = "spell_" + std::to_string(spell_id);
 
 	if(!SpellHasQuestSub(spell_id, evt)) {
 		return 0;
 	}
-	
+
 	return _EventSpell(package_name, evt, npc, client, spell_id, extra_data, extra_pointers);
 }
 
@@ -646,7 +646,7 @@ bool LuaParser::HasQuestSub(uint32 npc_id, QuestEventID evt) {
 		return false;
 	}
 
-	std::string package_name = "npc_" + std::to_string(static_cast<long long>(npc_id));
+	std::string package_name = "npc_" + std::to_string(npc_id);
 
 	const char *subname = LuaEvents[evt];
 	return HasFunction(subname, package_name);
@@ -688,7 +688,7 @@ bool LuaParser::SpellHasQuestSub(uint32 spell_id, QuestEventID evt) {
 		return false;
 	}
 
-	std::string package_name = "spell_" + std::to_string(static_cast<long long>(spell_id));
+	std::string package_name = "spell_" + std::to_string(spell_id);
 
 	const char *subname = LuaEvents[evt];
 	return HasFunction(subname, package_name);
@@ -704,7 +704,7 @@ bool LuaParser::ItemHasQuestSub(ItemInst *itm, QuestEventID evt) {
 	}
 
 	std::string package_name = "item_";
-	package_name += std::to_string(static_cast<long long>(itm->GetID()));
+	package_name += std::to_string(itm->GetID());
 
 	const char *subname = LuaEvents[evt];
 	return HasFunction(subname, package_name);
@@ -723,7 +723,7 @@ bool LuaParser::EncounterHasQuestSub(std::string encounter_name, QuestEventID ev
 }
 
 void LuaParser::LoadNPCScript(std::string filename, int npc_id) {
-	std::string package_name = "npc_" + std::to_string(static_cast<long long>(npc_id));
+	std::string package_name = "npc_" + std::to_string(npc_id);
 
 	LoadScript(filename, package_name);
 }
@@ -744,13 +744,13 @@ void LuaParser::LoadItemScript(std::string filename, ItemInst *item) {
 	if (item == nullptr)
 		return;
 	std::string package_name = "item_";
-	package_name += std::to_string(static_cast<long long>(item->GetID()));
+	package_name += std::to_string(item->GetID());
 
 	LoadScript(filename, package_name);
 }
 
 void LuaParser::LoadSpellScript(std::string filename, uint32 spell_id) {
-	std::string package_name = "spell_" + std::to_string(static_cast<long long>(spell_id));
+	std::string package_name = "spell_" + std::to_string(spell_id);
 
 	LoadScript(filename, package_name);
 }
@@ -1011,8 +1011,8 @@ int LuaParser::DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::stri
 	if(!npc)
 		return 0;
 
-	std::string package_name = "npc_" + std::to_string(static_cast<long long>(npc->GetNPCTypeID()));
-    int ret = 0;
+	std::string package_name = "npc_" + std::to_string(npc->GetNPCTypeID());
+	int ret = 0;
 
 	auto iter = lua_encounter_events_registered.find(package_name);
 	if(iter != lua_encounter_events_registered.end()) {
@@ -1085,11 +1085,11 @@ int LuaParser::DispatchEventItem(QuestEventID evt, Client *client, ItemInst *ite
 
 	if(!item)
 		return 0;
-	
+
 	std::string package_name = "item_";
-	package_name += std::to_string(static_cast<long long>(item->GetID()));
-    int ret = 0;
-	
+	package_name += std::to_string(item->GetID());
+	int ret = 0;
+
 	auto iter = lua_encounter_events_registered.find(package_name);
 	if(iter != lua_encounter_events_registered.end()) {
 		auto riter = iter->second.begin();
@@ -1129,7 +1129,7 @@ int LuaParser::DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, ui
 		return 0;
 	}
 
-	std::string package_name = "spell_" + std::to_string(static_cast<long long>(spell_id));
+	std::string package_name = "spell_" + std::to_string(spell_id);
 
     int ret = 0;
 	auto iter = lua_encounter_events_registered.find(package_name);

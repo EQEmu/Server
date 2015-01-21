@@ -41,6 +41,7 @@ extern volatile bool RunLoops;
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
 #include "../common/data_verification.h"
+#include "position.h"
 #include "net.h"
 #include "worldserver.h"
 #include "zonedb.h"
@@ -76,10 +77,7 @@ Client::Client(EQStreamInterface* ieqs)
 	0,	// npctypeid
 	0,	// size
 	0.7,	// runspeed
-	0,	// heading
-	0,	// x
-	0,	// y
-	0,	// z
+	xyz_heading::Origin(),
 	0,	// light
 	0xFF,	// texture
 	0xFF,	// helmtexture
@@ -145,7 +143,11 @@ Client::Client(EQStreamInterface* ieqs)
 	RespawnFromHoverTimer(0),
 	merc_timer(RuleI(Mercs, UpkeepIntervalMS)),
 	ItemTickTimer(10000),
-	ItemQuestTimer(500)
+	ItemQuestTimer(500),
+	m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
+	m_ZoneSummonLocation(-2.0f,-2.0f,-2.0f),
+	m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
+	m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f)
 {
 	for(int cf=0; cf < _FilterCount; cf++)
 		ClientFilters[cf] = FilterShow;
@@ -191,16 +193,10 @@ Client::Client(EQStreamInterface* ieqs)
 	auto_attack = false;
 	auto_fire = false;
 	linkdead_timer.Disable();
-	zonesummon_x = -2;
-	zonesummon_y = -2;
-	zonesummon_z = -2;
 	zonesummon_id = 0;
 	zonesummon_ignorerestrictions = 0;
 	zoning = false;
 	zone_mode = ZoneUnsolicited;
-	proximity_x = FLT_MAX;	//arbitrary large number
-	proximity_y = FLT_MAX;
-	proximity_z = FLT_MAX;
 	casting_spell_id = 0;
 	npcflag = false;
 	npclevel = 0;
@@ -251,7 +247,7 @@ Client::Client(EQStreamInterface* ieqs)
 	GlobalChatLimiterTimer = new Timer(RuleI(Chat, IntervalDurationMS));
 	AttemptedMessages = 0;
 	TotalKarma = 0;
-	ClientVersion = EQClientUnknown;
+	m_ClientVersion = ClientVersion::Unknown;
 	ClientVersionBit = 0;
 	AggroCount = 0;
 	RestRegenHP = 0;
@@ -269,13 +265,6 @@ Client::Client(EQStreamInterface* ieqs)
 	m_AssistExemption = 0;
 	m_CheatDetectMoved = false;
 	CanUseReport = true;
-	aa_los_me.x = 0;
-	aa_los_me.y = 0;
-	aa_los_me.z = 0;
-	aa_los_me_heading = 0;
-	aa_los_them.x = 0;
-	aa_los_them.y = 0;
-	aa_los_them.z = 0;
 	aa_los_them_mob = nullptr;
 	los_status = false;
 	los_status_facing = false;
@@ -382,9 +371,9 @@ Client::~Client() {
 	{
 		m_pp.zone_id = m_pp.binds[0].zoneId;
 		m_pp.zoneInstance = m_pp.binds[0].instance_id;
-		x_pos = m_pp.binds[0].x;
-		y_pos = m_pp.binds[0].y;
-		z_pos = m_pp.binds[0].z;
+		m_Position.m_X = m_pp.binds[0].x;
+		m_Position.m_Y = m_pp.binds[0].y;
+		m_Position.m_Z = m_pp.binds[0].z;
 	}
 
 	// we save right now, because the client might be zoning and the world
@@ -508,11 +497,11 @@ bool Client::Save(uint8 iCommitNow) {
 		return false;
 
 	/* Wrote current basics to PP for saves */
-	m_pp.x = x_pos;
-	m_pp.y = y_pos;
-	m_pp.z = z_pos;
+	m_pp.x = m_Position.m_X;
+	m_pp.y = m_Position.m_Y;
+	m_pp.z = m_Position.m_Z;
 	m_pp.guildrank = guildrank;
-	m_pp.heading = heading;
+	m_pp.heading = m_Position.m_Heading;
 
 	/* Mana and HP */
 	if (GetHP() <= 0) {
@@ -529,8 +518,10 @@ bool Client::Save(uint8 iCommitNow) {
 	database.SaveCharacterCurrency(CharacterID(), &m_pp);
 
 	/* Save Current Bind Points */
-	database.SaveCharacterBindPoint(CharacterID(), m_pp.binds[0].zoneId, m_pp.binds[0].instance_id, m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, 0, 0); /* Regular bind */
-	database.SaveCharacterBindPoint(CharacterID(), m_pp.binds[4].zoneId, m_pp.binds[4].instance_id, m_pp.binds[4].x, m_pp.binds[4].y, m_pp.binds[4].z, 0, 1); /* Home Bind */
+	auto regularBindPosition = xyz_heading(m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, 0.0f);
+	auto homeBindPosition = xyz_heading(m_pp.binds[4].x, m_pp.binds[4].y, m_pp.binds[4].z, 0.0f);
+	database.SaveCharacterBindPoint(CharacterID(), m_pp.binds[0].zoneId, m_pp.binds[0].instance_id, regularBindPosition, 0); /* Regular bind */
+	database.SaveCharacterBindPoint(CharacterID(), m_pp.binds[4].zoneId, m_pp.binds[4].instance_id, homeBindPosition, 1); /* Home Bind */
 
 	/* Save Character Buffs */
 	database.SaveBuffs(this);
@@ -995,7 +986,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				CheckEmoteHail(GetTarget(), message);
 
 
-				if(DistNoRootNoZ(*GetTarget()) <= 200) {
+				if(ComparativeDistanceNoZ(m_Position, GetTarget()->GetPosition()) <= 200) {
 					NPC *tar = GetTarget()->CastToNPC();
 					parse->EventNPC(EVENT_SAY, tar->CastToNPC(), this, message, language);
 
@@ -1007,7 +998,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				}
 			}
 			else {
-				if (DistNoRootNoZ(*GetTarget()) <= 200) {
+				if (ComparativeDistanceNoZ(m_Position, GetTarget()->GetPosition()) <= 200) {
 					parse->EventNPC(EVENT_AGGRO_SAY, GetTarget()->CastToNPC(), this, message, language);
 				}
 			}
@@ -1441,7 +1432,7 @@ void Client::UpdateWho(uint8 remove) {
 	else if (m_pp.anon >= 2)
 		scl->anon = 2;
 
-	scl->ClientVersion = GetClientVersion();
+	scl->ClientVersion = static_cast<unsigned int>(GetClientVersion());
 	scl->tellsoff = tellsoff;
 	scl->guild_id = guild_id;
 	scl->LFG = LFG;
@@ -1697,7 +1688,7 @@ void Client::SendManaUpdatePacket() {
 	if (!Connected() || IsCasting())
 		return;
 
-	if (GetClientVersion() >= EQClientSoD) {
+	if (GetClientVersion() >= ClientVersion::SoD) {
 		SendManaUpdate();
 		SendEnduranceUpdate();
 	}
@@ -1732,7 +1723,7 @@ void Client::SendManaUpdatePacket() {
 
 
 			for(int i = 0; i < MAX_GROUP_MEMBERS; ++i)
-				if(g->members[i] && g->members[i]->IsClient() && (g->members[i] != this) && (g->members[i]->CastToClient()->GetClientVersion() >= EQClientSoD))
+				if(g->members[i] && g->members[i]->IsClient() && (g->members[i] != this) && (g->members[i]->CastToClient()->GetClientVersion() >= ClientVersion::SoD))
 				{
 					g->members[i]->CastToClient()->QueuePacket(outapp);
 					g->members[i]->CastToClient()->QueuePacket(outapp2);
@@ -1912,7 +1903,7 @@ void Client::ReadBook(BookRequest_Struct *book) {
 
 		BookText_Struct *out = (BookText_Struct *) outapp->pBuffer;
 		out->window = book->window;
-		if(GetClientVersion() >= EQClientSoF)
+		if(GetClientVersion() >= ClientVersion::SoF)
 		{
 			const ItemInst *inst = m_inv[book->invslot];
 			if(inst)
@@ -2538,7 +2529,7 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 			}
 
 			else {
-				if (!GetFeigned() && (bindmob->DistNoRoot(*this) <= 400)) {
+				if (!GetFeigned() && (ComparativeDistance(bindmob->GetPosition(), m_Position)  <= 400)) {
 					// send bindmob bind done
 					if(!bindmob->IsAIControlled() && bindmob != this ) {
 
@@ -3177,7 +3168,7 @@ void Client::Insight(uint32 t_id)
 		Message(0,"This ability can only be used on NPCs.");
 		return;
 	}
-	if (Dist(*who) > 200)
+	if (Distance(static_cast<xyz_location>(m_Position), static_cast<xyz_location>(who->GetPosition())) > 200)
 	{
 		Message(0,"You must get closer to your target!");
 		return;
@@ -3672,7 +3663,7 @@ void Client::Sacrifice(Client *caster)
 
 void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
 
-	if(!Caster || PendingTranslocate) 
+	if(!Caster || PendingTranslocate)
 		return;
 
 	const SPDat_Spell_Struct &Spell = spells[SpellID];
@@ -4060,7 +4051,7 @@ bool Client::GroupFollow(Client* inviter) {
 			group->UpdateGroupAAs();
 
 			//Invite the inviter into the group first.....dont ask
-			if (inviter->GetClientVersion() < EQClientSoD)
+			if (inviter->GetClientVersion() < ClientVersion::SoD)
 			{
 				EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
 				GroupJoin_Struct* outgj = (GroupJoin_Struct*)outapp->pBuffer;
@@ -4106,13 +4097,13 @@ bool Client::GroupFollow(Client* inviter) {
 			return false;
 		}
 
-		if (GetClientVersion() >= EQClientSoD)
+		if (GetClientVersion() >= ClientVersion::SoD)
 		{
 			SendGroupJoinAcknowledge();
 		}
 
 		// Temporary hack for SoD, as things seem to work quite differently
-		if (inviter->IsClient() && inviter->GetClientVersion() >= EQClientSoD)
+		if (inviter->IsClient() && inviter->GetClientVersion() >= ClientVersion::SoD)
 		{
 			database.RefreshGroupFromDB(inviter);
 		}
@@ -4122,7 +4113,7 @@ bool Client::GroupFollow(Client* inviter) {
 		{
 			GetMerc()->MercJoinClientGroup();
 		}
-		
+
 		if (inviter->IsLFP())
 		{
 			// If the player who invited us to a group is LFP, have them update world now that we have joined their group.
@@ -4346,7 +4337,7 @@ void Client::IncrementAggroCount() {
 	if (AggroCount == 1)
 		SavedRaidRestTimer = rest_timer.GetRemainingTime();
 
-	if(GetClientVersion() >= EQClientSoF) {
+	if(GetClientVersion() >= ClientVersion::SoF) {
 
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_RestState, 1);
 		char *Buffer = (char *)outapp->pBuffer;
@@ -4391,7 +4382,7 @@ void Client::DecrementAggroCount() {
 
 	rest_timer.Start(time_until_rest);
 
-	if(GetClientVersion() >= EQClientSoF) {
+	if(GetClientVersion() >= ClientVersion::SoF) {
 
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_RestState, 5);
 		char *Buffer = (char *)outapp->pBuffer;
@@ -4548,7 +4539,7 @@ void Client::HandleLDoNOpen(NPC *target)
 			return;
 		}
 
-		if(DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
+		if(ComparativeDistanceNoZ(m_Position, target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 		{
 			Log.Out(Logs::General, Logs::None, "%s tried to open %s but %s was out of range",
 				GetName(), target->GetName(), target->GetName());
@@ -4786,8 +4777,7 @@ void Client::SummonAndRezzAllCorpses()
 
 	entity_list.RemoveAllCorpsesByCharID(CharacterID());
 
-	int CorpseCount = database.SummonAllCharacterCorpses(CharacterID(), zone->GetZoneID(), zone->GetInstanceID(),
-								GetX(), GetY(), GetZ(), GetHeading());
+	int CorpseCount = database.SummonAllCharacterCorpses(CharacterID(), zone->GetZoneID(), zone->GetInstanceID(), GetPosition());
 	if(CorpseCount <= 0)
 	{
 		Message(clientMessageYellow, "You have no corpses to summnon.");
@@ -4802,13 +4792,11 @@ void Client::SummonAndRezzAllCorpses()
 	Message(clientMessageYellow, "All your corpses have been summoned to your feet and have received a 100% resurrection.");
 }
 
-void Client::SummonAllCorpses(float dest_x, float dest_y, float dest_z, float dest_heading)
+void Client::SummonAllCorpses(const xyz_heading& position)
 {
-
-	if(dest_x == 0 && dest_y == 0 && dest_z == 0 && dest_heading == 0)
-	{
-		dest_x = GetX(); dest_y = GetY(); dest_z = GetZ(); dest_heading = GetHeading();
-	}
+    auto summonLocation = position;
+	if(position.isOrigin() && position.m_Heading == 0.0f)
+        summonLocation = GetPosition();
 
 	ServerPacket *Pack = new ServerPacket(ServerOP_DepopAllPlayersCorpses, sizeof(ServerDepopAllPlayersCorpses_Struct));
 
@@ -4824,12 +4812,7 @@ void Client::SummonAllCorpses(float dest_x, float dest_y, float dest_z, float de
 
 	entity_list.RemoveAllCorpsesByCharID(CharacterID());
 
-	int CorpseCount = database.SummonAllCharacterCorpses(CharacterID(), zone->GetZoneID(), zone->GetInstanceID(),
-								dest_x, dest_y, dest_z, dest_heading);
-	if(CorpseCount <= 0)
-	{
-		return;
-	}
+	database.SummonAllCharacterCorpses(CharacterID(), zone->GetZoneID(), zone->GetInstanceID(), summonLocation);
 }
 
 void Client::DepopAllCorpses()
@@ -5738,14 +5721,14 @@ void Client::GuildBankAck()
 	FastQueuePacket(&outapp);
 }
 
-void Client::GuildBankDepositAck(bool Fail)
+void Client::GuildBankDepositAck(bool Fail, int8 action)
 {
 
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildBank, sizeof(GuildBankDepositAck_Struct));
 
 	GuildBankDepositAck_Struct *gbdas = (GuildBankDepositAck_Struct*) outapp->pBuffer;
 
-	gbdas->Action = GuildBankDeposit;
+	gbdas->Action = action;
 
 	gbdas->Fail = Fail ? 1 : 0;
 
@@ -6184,7 +6167,7 @@ void Client::DragCorpses()
 		Mob *corpse = entity_list.GetMob(It->second);
 
 		if (corpse && corpse->IsPlayerCorpse() &&
-				(DistNoRootNoZ(*corpse) <= RuleR(Character, DragCorpseDistance)))
+				(ComparativeDistanceNoZ(m_Position, corpse->GetPosition()) <= RuleR(Character, DragCorpseDistance)))
 			continue;
 
 		if (!corpse || !corpse->IsPlayerCorpse() ||
@@ -6271,8 +6254,11 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	if(summon_count > MAX_SWARM_PETS)
 		summon_count = MAX_SWARM_PETS;
 
-	static const float swarm_pet_x[MAX_SWARM_PETS] = { 5, -5, 5, -5, 10, -10, 10, -10, 8, -8, 8, -8 };
-	static const float swarm_pet_y[MAX_SWARM_PETS] = { 5, 5, -5, -5, 10, 10, -10, -10, 8, 8, -8, -8 };
+	static const xy_location swarmPetLocations[MAX_SWARM_PETS] = {
+        xy_location(5, 5), xy_location(-5, 5), xy_location(5, -5), xy_location(-5, -5),
+		xy_location(10, 10), xy_location(-10, 10), xy_location(10, -10), xy_location(-10, -10),
+        xy_location(8, 8), xy_location(-8, 8), xy_location(8, -8), xy_location(-8, -8)
+    };
 
 	while(summon_count > 0) {
 		NPCType *npc_dup = nullptr;
@@ -6284,8 +6270,8 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 		NPC* npca = new NPC(
 				(npc_dup!=nullptr)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
 				0,
-				GetX()+swarm_pet_x[summon_count], GetY()+swarm_pet_y[summon_count],
-				GetZ(), GetHeading(), FlyMode3);
+				GetPosition()+swarmPetLocations[summon_count],
+				FlyMode3);
 
 		if(!npca->GetSwarmInfo()){
 			AA_SwarmPetInfo* nSI = new AA_SwarmPetInfo;
@@ -6799,7 +6785,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	if(use_window) {
 		if(final_stats.size() < 4096)
 		{
-			uint32 Buttons = (client->GetClientVersion() < EQClientSoD) ? 0 : 1;
+			uint32 Buttons = (client->GetClientVersion() < ClientVersion::SoD) ? 0 : 1;
 			client->SendWindow(0, POPUPID_UPDATE_SHOWSTATSWINDOW, Buttons, "Cancel", "Update", 0, 1, this, "", "%s", final_stats.c_str());
 			goto Extra_Info;
 		}
@@ -6835,7 +6821,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 }
 
 void Client::SendAltCurrencies() {
-	if(GetClientVersion() >= EQClientSoF) {
+	if(GetClientVersion() >= ClientVersion::SoF) {
 		uint32 count = zone->AlternateCurrencies.size();
 		if(count == 0) {
 			return;
@@ -7313,7 +7299,7 @@ void Client::SendMercPersonalInfo()
 	uint32 altCurrentType = 19; //TODO: Implement alternate currency purchases involving mercs!
 
 	MercTemplate *mercData = &zone->merc_templates[GetMercInfo().MercTemplateID];
-	
+
 	int stancecount = 0;
 	stancecount += zone->merc_stance_list[GetMercInfo().MercTemplateID].size();
 	if(stancecount > MAX_MERC_STANCES || mercCount > MAX_MERC || mercTypeCount > MAX_MERC_GRADES)
@@ -7326,7 +7312,7 @@ void Client::SendMercPersonalInfo()
 
 	if(mercData)
 	{
-		if (GetClientVersion() >= EQClientRoF)
+		if (GetClientVersion() >= ClientVersion::RoF)
 		{
 			if (mercCount > 0)
 			{
@@ -7415,7 +7401,7 @@ void Client::SendMercPersonalInfo()
 		}
 		if (MERC_DEBUG > 0)
 			Message(7, "Mercenary Debug: SendMercPersonalInfo Send Successful");
-			
+
 		SendMercMerchantResponsePacket(0);
 	}
 	else

@@ -21,7 +21,7 @@
 extern volatile bool ZoneLoaded;
 
 Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
-: NPC(d, 0, x, y, z, heading, 0, false), endupkeep_timer(1000), rest_timer(1), confidence_timer(6000), check_target_timer(2000)
+: NPC(d, nullptr, xyz_heading(x, y, z, heading), 0, false), endupkeep_timer(1000), rest_timer(1), confidence_timer(6000), check_target_timer(2000)
 {
 	base_hp = d->max_hp;
 	base_mana = d->Mana;
@@ -42,7 +42,7 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 	_baseFR = d->FR;
 	_basePR = d->PR;
 	_baseCorrup = d->Corrup;
-	_OwnerClientVersion = EQClientTitanium;
+	_OwnerClientVersion = static_cast<unsigned int>(ClientVersion::Tit);
 	RestRegenHP = 0;
 	RestRegenMana = 0;
 	RestRegenEndurance = 0;
@@ -1009,7 +1009,7 @@ int32 Merc::CalcBaseEndurance()
 	int32 sta_end = 0;
 	int Stats = 0;
 
-	if(GetClientVersion() >= EQClientSoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+	if(GetClientVersion() >= static_cast<unsigned int>(ClientVersion::SoD) && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 		int HeroicStats = 0;
 
 		Stats = ((GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4);
@@ -1319,7 +1319,7 @@ bool Merc::IsMercCasterCombatRange(Mob *target) {
 		// half the max so the merc doesn't always stop at max range to allow combat movement
 		range *= .5;
 
-		float targetDistance = DistNoRootNoZ(*target);
+		float targetDistance = ComparativeDistanceNoZ(m_Position, target->GetPosition());
 
 		if(targetDistance > range)
 			result = false;
@@ -1337,7 +1337,7 @@ void Merc::AI_Process() {
 	if(IsCasting())
 		return;
 
-	// A bot wont start its AI if not grouped
+	// A merc wont start its AI if not grouped
 	if(!HasGroup()) {
 		return;
 	}
@@ -1481,7 +1481,7 @@ void Merc::AI_Process() {
 			if(IsMercCasterCombatRange(GetTarget()))
 				atCombatRange = true;
 		}
-		else if(DistNoRoot(*GetTarget()) <= meleeDistance) {
+		else if(ComparativeDistance(m_Position, GetTarget()->GetPosition()) <= meleeDistance) {
 			atCombatRange = true;
 		}
 
@@ -1514,7 +1514,7 @@ void Merc::AI_Process() {
 						return;
 					}
 				}
-				else if(!IsMoving() && GetClass() != ROGUE && (DistNoRootNoZ(*GetTarget()) < GetTarget()->GetSize()))
+				else if(!IsMoving() && GetClass() != ROGUE && (ComparativeDistanceNoZ(m_Position, GetTarget()->GetPosition()) < GetTarget()->GetSize()))
 				{
 					// If we are not a rogue trying to backstab, let's try to adjust our melee range so we don't appear to be bunched up
 					float newX = 0;
@@ -1702,7 +1702,7 @@ void Merc::AI_Process() {
 
 				if(follow)
 				{
-					float dist = DistNoRoot(*follow);
+					float dist = ComparativeDistance(m_Position, follow->GetPosition());
 					float speed = GetRunspeed();
 
 					if(dist < GetFollowDistance() + 1000)
@@ -1939,7 +1939,7 @@ bool Merc::AIDoSpellCast(uint16 spellid, Mob* tar, int32 mana_cost, uint32* oDon
 	if (mercSpell.type & SpellType_Escape) {
 		dist2 = 0;
 	} else
-		dist2 = DistNoRoot(*tar);
+		dist2 = ComparativeDistance(m_Position, tar->GetPosition());
 
 	if (((((spells[spellid].targettype==ST_GroupTeleport && mercSpell.type==SpellType_Heal)
 		|| spells[spellid].targettype==ST_AECaster
@@ -2436,7 +2436,7 @@ void Merc::CheckHateList() {
 				if(MercOwner && MercOwner->GetTarget() && MercOwner->GetTarget()->IsNPC() && (MercOwner->GetTarget()->GetHateAmount(MercOwner) || MercOwner->CastToClient()->AutoAttackEnabled()) && IsAttackAllowed(MercOwner->GetTarget())) {
 					float range = g->HasRole(MercOwner, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
 					range = range * range;
-					if(MercOwner->GetTarget()->DistNoRootNoZ(*this) < range) {
+					if(ComparativeDistanceNoZ(m_Position, MercOwner->GetTarget()->GetPosition()) < range) {
 						AddToHateList(MercOwner->GetTarget(), 1);
 					}
 				}
@@ -2446,7 +2446,7 @@ void Merc::CheckHateList() {
 
 					for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 						NPC* npc = *itr;
-						float dist = npc->DistNoRootNoZ(*this);
+						float dist = ComparativeDistanceNoZ(m_Position, npc->GetPosition());
 						int radius = RuleI(Mercs, AggroRadius);
 						radius *= radius;
 						if(dist <= radius) {
@@ -2458,7 +2458,7 @@ void Merc::CheckHateList() {
 										if(!hate_list.IsEntOnHateList(npc)) {
 											float range = g->HasRole(groupMember, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
 											range *= range;
-											if(npc->DistNoRootNoZ(*this) < range) {
+											if(ComparativeDistanceNoZ(m_Position, npc->GetPosition()) < range) {
 												hate_list.AddEntToHateList(npc, 1);
 											}
 										}
@@ -2500,7 +2500,7 @@ bool Merc::CheckAENuke(Merc* caster, Mob* tar, uint16 spell_id, uint8 &numTarget
 	for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 		NPC* npc = *itr;
 
-		if(npc->DistNoRootNoZ(*tar) <= spells[spell_id].aoerange * spells[spell_id].aoerange) {
+		if(ComparativeDistanceNoZ(npc->GetPosition(), tar->GetPosition()) <= spells[spell_id].aoerange * spells[spell_id].aoerange) {
 			if(!npc->IsMezzed()) {
 				numTargets++;
 			}
@@ -4099,7 +4099,7 @@ bool Merc::CheckAETaunt() {
 
 		for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 			NPC* npc = *itr;
-			float dist = npc->DistNoRootNoZ(*this);
+			float dist = ComparativeDistanceNoZ(m_Position, npc->GetPosition());
 			int range = GetActSpellRange(mercSpell.spellid, spells[mercSpell.spellid].range);
 			range *= range;
 
@@ -4202,7 +4202,7 @@ bool Merc::CheckConfidence() {
 
 		AggroRange = AggroRange * AggroRange;
 
-		if(mob->DistNoRoot(*this) > AggroRange) continue;
+		if(ComparativeDistance(m_Position, mob->GetPosition()) > AggroRange) continue;
 
 		CurrentCon = this->GetLevelCon(mob->GetLevel());
 		switch(CurrentCon) {
@@ -4723,11 +4723,11 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 	if(merc_template)
 	{
 		//TODO: Maybe add a way of updating client merc stats in a seperate function? like, for example, on leveling up.
-		const NPCType* npc_type_to_copy = database.GetMercType(merc_template->MercNPCID, merc_template->RaceID, c->GetLevel()); 
+		const NPCType* npc_type_to_copy = database.GetMercType(merc_template->MercNPCID, merc_template->RaceID, c->GetLevel());
 		if(npc_type_to_copy != nullptr)
 		{
 			//This is actually a very terrible method of assigning stats, and should be changed at some point. See the comment in merc's deconstructor.
-			NPCType* npc_type = new NPCType; 
+			NPCType* npc_type = new NPCType;
 			memset(npc_type, 0, sizeof(NPCType));
 			memcpy(npc_type, npc_type_to_copy, sizeof(NPCType));
 			if(c && !updateFromDB)
@@ -4920,7 +4920,7 @@ bool Merc::Spawn(Client *owner) {
 	entity_list.AddMerc(this, true, true);
 
 	SendPosition();
-	
+
 	if (MERC_DEBUG > 0)
 		owner->Message(7, "Mercenary Debug: Spawn.");
 
@@ -4945,7 +4945,7 @@ void Client::SendMercResponsePackets(uint32 ResponseType)
 		break;
 	case 3: //Mercenary failed to spawn!
 		SendMercMerchantResponsePacket(3);
-		break; 
+		break;
 	case 4: //Mercenaries are not allowed in raids!
 		SendMercMerchantResponsePacket(4);
 		break;
@@ -4956,109 +4956,109 @@ void Client::SendMercResponsePackets(uint32 ResponseType)
 		SendMercMerchantResponsePacket(6);
 		break;
 	case 7: //You must dismiss your suspended mercenary before purchasing a new one!
-		if (GetClientVersion() < EQClientRoF)
+		if (GetClientVersion() < ClientVersion::RoF)
 			SendMercMerchantResponsePacket(7);
 		else
 			//You have the maximum number of mercenaries.  You must dismiss one before purchasing a new one!
 			SendMercMerchantResponsePacket(6);
 		break;
 	case 8: //You can not purchase a mercenary because your group is full!
-		if (GetClientVersion() < EQClientRoF)
+		if (GetClientVersion() < ClientVersion::RoF)
 			SendMercMerchantResponsePacket(8);
 		else
 			SendMercMerchantResponsePacket(7);
 		break;
 	case 9: //You can not purchase a mercenary because you are in combat!
-		if (GetClientVersion() < EQClientRoF)
+		if (GetClientVersion() < ClientVersion::RoF)
 			//Mercenary failed to spawn!
 			SendMercMerchantResponsePacket(3);
 		else
 			SendMercMerchantResponsePacket(8);
 		break;
 	case 10: //You have recently dismissed a mercenary and must wait a few more seconds before you can purchase a new one!
-		if (GetClientVersion() < EQClientRoF)
+		if (GetClientVersion() < ClientVersion::RoF)
 			//Mercenary failed to spawn!
 			SendMercMerchantResponsePacket(3);
 		else
 			SendMercMerchantResponsePacket(9);
 		break;
 	case 11: //An error occurred created your mercenary!
-		if (GetClientVersion() < EQClientRoF)
+		if (GetClientVersion() < ClientVersion::RoF)
 			SendMercMerchantResponsePacket(9);
 		else
 			SendMercMerchantResponsePacket(10);
 		break;
 	case 12: //Upkeep Charge Message
-		if (GetClientVersion() < EQClientRoF)
+		if (GetClientVersion() < ClientVersion::RoF)
 			SendMercMerchantResponsePacket(10);
 		else
 			SendMercMerchantResponsePacket(11);
 		break;
 	case 13: // ???
-		if (GetClientVersion() < EQClientRoF)
+		if (GetClientVersion() < ClientVersion::RoF)
 			SendMercMerchantResponsePacket(11);
 		else
 			SendMercMerchantResponsePacket(12);
 		break;
 	case 14: //You ran out of funds to pay for your mercenary!
-		if (GetClientVersion() < EQClientRoF)
+		if (GetClientVersion() < ClientVersion::RoF)
 			SendMercMerchantResponsePacket(12);
 		else
 			SendMercMerchantResponsePacket(13);
 		break;
 	case 15: // ???
-		if (GetClientVersion() < EQClientRoF)
+		if (GetClientVersion() < ClientVersion::RoF)
 			SendMercMerchantResponsePacket(13);
 		else
 			SendMercMerchantResponsePacket(14);
 		break;
 	case 16: //Your mercenary is about to be suspended due to insufficient funds!
-		if (GetClientVersion() < EQClientRoF)
+		if (GetClientVersion() < ClientVersion::RoF)
 			SendMercMerchantResponsePacket(14);
 		else
 			SendMercMerchantResponsePacket(15);
 		break;
 	case 17: //There is no mercenary liaison nearby!
-		if (GetClientVersion() < EQClientRoF)
+		if (GetClientVersion() < ClientVersion::RoF)
 			SendMercMerchantResponsePacket(15);
 		else
 			SendMercMerchantResponsePacket(16);
 		break;
 	case 18: //You are too far from the liaison!
-		if (GetClientVersion() < EQClientRoF)
+		if (GetClientVersion() < ClientVersion::RoF)
 			SendMercMerchantResponsePacket(16);
 		else
 			SendMercMerchantResponsePacket(17);
 		break;
 	case 19: //You do not meet the requirements for that mercenary!
-		if (GetClientVersion() < EQClientRoF)
+		if (GetClientVersion() < ClientVersion::RoF)
 			SendMercMerchantResponsePacket(17);
 		else
 			SendMercMerchantResponsePacket(18);
 		break;
 	case 20: //You are unable to interact with the liaison!
-		if (GetClientVersion() < EQClientRoF)
+		if (GetClientVersion() < ClientVersion::RoF)
 			//You are too far from the liaison!
 			SendMercMerchantResponsePacket(16);
 		else
 			SendMercMerchantResponsePacket(19);
 		break;
 	case 21: //You do not have a high enough membership level to purchase this mercenary!
-		if (GetClientVersion() < EQClientRoF)
+		if (GetClientVersion() < ClientVersion::RoF)
 			//You do not meet the requirements for that mercenary!
 			SendMercMerchantResponsePacket(17);
 		else
 			SendMercMerchantResponsePacket(20);
 		break;
 	case 22: //Your purchase has failed because this mercenary requires a Gold membership!
-		if (GetClientVersion() < EQClientRoF)
+		if (GetClientVersion() < ClientVersion::RoF)
 			//You do not meet the requirements for that mercenary!
 			SendMercMerchantResponsePacket(17);
 		else
 			SendMercMerchantResponsePacket(21);
 		break;
 	case 23: //Your purchase has failed because this mercenary requires at least a Silver membership!
-		if (GetClientVersion() < EQClientRoF)
+		if (GetClientVersion() < ClientVersion::RoF)
 			//You do not meet the requirements for that mercenary!
 			SendMercMerchantResponsePacket(17);
 		else
@@ -5109,7 +5109,7 @@ void Client::UpdateMercTimer()
 			{
 				SendMercResponsePackets(16);
 			}
-			
+
 			if (MERC_DEBUG > 0)
 				Message(7, "Mercenary Debug: UpdateMercTimer Complete.");
 
@@ -5132,7 +5132,7 @@ bool Client::CheckCanHireMerc(Mob* merchant, uint32 template_id) {
 	MercTemplate* mercTemplate = zone->GetMercTemplate(template_id);
 
 	//check for suspended merc
-	if(GetMercInfo().mercid != 0 && GetMercInfo().IsSuspended) {           
+	if(GetMercInfo().mercid != 0 && GetMercInfo().IsSuspended) {
 		SendMercResponsePackets(6);
 		return false;
 	}
@@ -5150,7 +5150,7 @@ bool Client::CheckCanHireMerc(Mob* merchant, uint32 template_id) {
 	}
 
 	//check for merchant too far away
-	if(DistNoRoot(*merchant) > USE_NPC_RANGE2) {
+	if(ComparativeDistance(m_Position, merchant->GetPosition()) > USE_NPC_RANGE2) {
 		SendMercResponsePackets(18);
 		return false;
 	}
@@ -5163,7 +5163,7 @@ bool Client::CheckCanHireMerc(Mob* merchant, uint32 template_id) {
 			return false;
 		}
 	}
-	
+
 	if (MERC_DEBUG > 0)
 		Message(7, "Mercenary Debug: CheckCanHireMerc True.");
 
@@ -5211,7 +5211,7 @@ bool Client::CheckCanSpawnMerc(uint32 template_id) {
 	}
 
 	// Check client version
-	if(GetClientVersion() < mercTemplate->ClientVersion)
+	if(static_cast<unsigned int>(GetClientVersion()) < mercTemplate->ClientVersion)
 	{
 		SendMercResponsePackets(3);
 		return false;
@@ -5237,7 +5237,7 @@ bool Client::CheckCanSpawnMerc(uint32 template_id) {
 		SendMercResponsePackets(9);
 		return false;
 	}
-	
+
 	if (MERC_DEBUG > 0)
 		Message(7, "Mercenary Debug: CheckCanSpawnMerc True.");
 
@@ -5260,7 +5260,7 @@ bool Client::CheckCanUnsuspendMerc() {
 		Message(0, "You must wait %i seconds before unsuspending your mercenary.", GetPTimers().GetRemainingTime(pTimerMercSuspend));
 		return false;
 	}
-	
+
 	if (MERC_DEBUG > 0)
 		Message(7, "Mercenary Debug: CheckCanUnsuspendMerc True.");
 
@@ -5413,7 +5413,7 @@ void Client::SendMercTimer(Merc* merc) {
 
 }
 
-void Client::SpawnMerc(Merc* merc, bool setMaxStats) { 
+void Client::SpawnMerc(Merc* merc, bool setMaxStats) {
 
 	if (!merc || !CheckCanSpawnMerc(merc->GetMercTemplateID()))
 	{
@@ -5454,12 +5454,12 @@ bool Merc::Suspend() {
 	mercOwner->GetMercTimer()->Disable();
 	mercOwner->SendMercSuspendResponsePacket(mercOwner->GetMercInfo().SuspendedTime);
 	mercOwner->SendMercTimer(this);
-	
+
 	Depop();
 
 	// Start the timer to send the packet that refreshes the Unsuspend Button
 	mercOwner->GetPTimers().Start(pTimerMercSuspend, RuleI(Mercs, SuspendIntervalS));
-	
+
 	if (MERC_DEBUG > 0)
 		mercOwner->Message(7, "Mercenary Debug: Suspend Complete.");
 
@@ -5474,7 +5474,7 @@ bool Client::MercOnlyOrNoGroup() {
 	}
 	if (GetMerc())
 	{
-		if (GetMerc()->HasGroup() && GetMerc()->GetGroup() == GetGroup())
+		if (GetMerc()->GetGroup() == GetGroup())
 		{
 			if (GetGroup()->GroupCount() < 3)
 			{
@@ -5556,7 +5556,7 @@ bool Client::DismissMerc(uint32 MercID) {
 		if (MERC_DEBUG > 0)
 			Message(7, "Mercenary Debug: Dismiss Successful.");
 	}
-	
+
 	if (GetMerc())
 	{
 		GetMerc()->Depop();
@@ -5724,7 +5724,7 @@ bool Merc::MercJoinClientGroup() {
 				if(MERC_DEBUG > 0)
 					mercOwner->Message(7, "Mercenary Debug: Mercenary disbanded new group.");
 			}
-			
+
 		}
 		else if (AddMercToGroup(this, mercOwner->GetGroup()))
 		{
@@ -5904,7 +5904,7 @@ void Client::UpdateMercLevel() {
 
 void Client::SendMercMerchantResponsePacket(int32 response_type) {
 	// This response packet brings up the Mercenary Manager window
-	if(GetClientVersion() >= EQClientSoD)
+	if(GetClientVersion() >= ClientVersion::SoD)
 	{
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryHire, sizeof(MercenaryMerchantResponse_Struct));
 		MercenaryMerchantResponse_Struct* mmr = (MercenaryMerchantResponse_Struct*)outapp->pBuffer;

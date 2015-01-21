@@ -52,12 +52,10 @@ CREATE TABLE traps (
 Trap::Trap() :
 	Entity(),
 	respawn_timer(600000),
-	chkarea_timer(500)
+	chkarea_timer(500),
+	m_Position(xyz_location::Origin())
 {
 	trap_id = 0;
-	x = 0;
-	y = 0;
-	z = 0;
 	maxzdiff = 0;
 	radius = 0;
 	effect = 0;
@@ -146,7 +144,9 @@ void Trap::Trigger(Mob* trigger)
 			{
 				if ((tmp = database.GetNPCType(effectvalue)))
 				{
-					NPC* new_npc = new NPC(tmp, 0, x-5+zone->random.Int(0, 10), y-5+zone->random.Int(0, 10), z-5+zone->random.Int(0, 10), zone->random.Int(0, 249), FlyMode3);
+                    auto randomOffset = xyz_heading(zone->random.Int(-5, 5),zone->random.Int(-5, 5),zone->random.Int(-5, 5), zone->random.Int(0, 249));
+                    auto spawnPosition = randomOffset + m_Position;
+					NPC* new_npc = new NPC(tmp, nullptr, spawnPosition, FlyMode3);
 					new_npc->AddLootTable();
 					entity_list.AddNPC(new_npc);
 					new_npc->AddToHateList(trigger,1);
@@ -167,7 +167,9 @@ void Trap::Trigger(Mob* trigger)
 			{
 				if ((tmp = database.GetNPCType(effectvalue)))
 				{
-					NPC* new_npc = new NPC(tmp, 0, x-2+zone->random.Int(0, 5), y-2+zone->random.Int(0, 5), z-2+zone->random.Int(0, 5), zone->random.Int(0, 249), FlyMode3);
+                    auto randomOffset = xyz_heading(zone->random.Int(-2, 2), zone->random.Int(-2, 2), zone->random.Int(-2, 2), zone->random.Int(0, 249));
+					auto spawnPosition = randomOffset + m_Position;
+					NPC* new_npc = new NPC(tmp, nullptr, spawnPosition, FlyMode3);
 					new_npc->AddLootTable();
 					entity_list.AddNPC(new_npc);
 					new_npc->AddToHateList(trigger,1);
@@ -210,55 +212,47 @@ Trap* EntityList::FindNearbyTrap(Mob* searcher, float max_dist) {
 
 	float max_dist2 = max_dist*max_dist;
 	Trap *cur;
-	auto it = trap_list.begin();
-	while (it != trap_list.end()) {
-		cur = it->second;
-		if(!cur->disarmed) {
-			float curdist = 0;
-			float tmp = searcher->GetX() - cur->x;
-			curdist += tmp*tmp;
-			tmp = searcher->GetY() - cur->y;
-			curdist += tmp*tmp;
-			tmp = searcher->GetZ() - cur->z;
-			curdist += tmp*tmp;
 
-			if (curdist < max_dist2 && curdist < dist)
-			{
-				dist = curdist;
-				current_trap = cur;
-			}
-		}
-		++it;
+	for (auto it = trap_list.begin(); it != trap_list.end(); ++it) {
+		cur = it->second;
+		if(cur->disarmed)
+            continue;
+
+        auto diff = searcher->GetPosition() - cur->m_Position;
+        float curdist = diff.m_X * diff.m_X + diff.m_Y * diff.m_Y + diff.m_Z * diff.m_Z;
+
+        if (curdist < max_dist2 && curdist < dist)
+        {
+            dist = curdist;
+            current_trap = cur;
+        }
 	}
+
 	return current_trap;
 }
 
 Mob* EntityList::GetTrapTrigger(Trap* trap) {
 	Mob* savemob = 0;
 
-	float xdiff, ydiff, zdiff;
-
 	float maxdist = trap->radius * trap->radius;
 
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
+	for (auto it = client_list.begin(); it != client_list.end(); ++it) {
 		Client* cur = it->second;
-		zdiff = cur->GetZ() - trap->z;
-		if(zdiff < 0)
-			zdiff = 0 - zdiff;
 
-		xdiff = cur->GetX() - trap->x;
-		ydiff = cur->GetY() - trap->y;
-		if ((xdiff*xdiff + ydiff*ydiff) <= maxdist
-			&& zdiff < trap->maxzdiff)
+        auto diff = cur->GetPosition() - trap->m_Position;
+		diff.ABS_XYZ();
+
+		if ((diff.m_X*diff.m_X + diff.m_Y*diff.m_Y) <= maxdist
+			&& diff.m_Z < trap->maxzdiff)
 		{
 			if (zone->random.Roll(trap->chance))
 				return(cur);
 			else
 				savemob = cur;
 		}
-		++it;
+
 	}
+
 	return savemob;
 }
 
@@ -276,9 +270,7 @@ bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
     for (auto row = results.begin(); row != results.end(); ++row) {
         Trap* trap = new Trap();
         trap->trap_id = atoi(row[0]);
-        trap->x = atof(row[1]);
-        trap->y = atof(row[2]);
-        trap->z = atof(row[3]);
+        trap->m_Position = xyz_location(atof(row[1]), atof(row[2]), atof(row[3]));
         trap->effect = atoi(row[4]);
         trap->effectvalue = atoi(row[5]);
         trap->effectvalue2 = atoi(row[6]);
@@ -319,7 +311,7 @@ void Trap::CreateHiddenTrigger()
 	make_npc->trackable = 0;
 	make_npc->level = level;
 	strcpy(make_npc->special_abilities, "19,1^20,1^24,1^25,1");
-	NPC* npca = new NPC(make_npc, 0, x, y, z, 0, FlyMode3);
+	NPC* npca = new NPC(make_npc, nullptr, xyz_heading(m_Position, 0.0f), FlyMode3);
 	npca->GiveNPCTypeData(make_npc);
 	entity_list.AddNPC(npca);
 

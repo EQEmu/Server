@@ -23,7 +23,7 @@ namespace SoD {
 	protected:
 
 		virtual std::string Describe() const;
-		virtual const EQClientVersion ClientVersion() const;
+		virtual const ClientVersion GetClientVersion() const;
 
 		//magic macro to declare our opcode processors
 		#include "ss_declare.h"

@@ -27,7 +27,7 @@ public:
 	virtual void RemoveData();
 	virtual bool CheckState(EQStreamState state);
 	virtual std::string Describe() const;
-	virtual const EQClientVersion ClientVersion() const;
+	virtual const ClientVersion GetClientVersion() const;
 
 	virtual const uint32 GetBytesSent() const;
 	virtual const uint32 GetBytesRecieved() const;

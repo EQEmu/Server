@@ -35,7 +35,7 @@ class Zone;
 #include "../common/races.h"
 #include "beacon.h"
 #include "entity.h"
-#include "mob.h" 
+#include "mob.h"
 
 
 #ifdef BOTS
@@ -53,7 +53,7 @@ extern Zone* zone;
 Beacon::Beacon(Mob *at_mob, int lifetime)
 :Mob
 (
-	nullptr, nullptr, 0, 0, 0, INVISIBLE_MAN, 0, BT_NoTarget, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, 0, 0, 0, INVISIBLE_MAN, 0, BT_NoTarget, 0, 0, 0, 0, 0, at_mob->GetPosition(), 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 ),
 		remove_timer(lifetime),
@@ -67,26 +67,13 @@ Beacon::Beacon(Mob *at_mob, int lifetime)
 	spell_iterations = 0;
 	caster_id = 0;
 
-	// copy location
-	x_pos = at_mob->GetX();
-	y_pos = at_mob->GetY();
-	z_pos = at_mob->GetZ();
-	heading = at_mob->GetHeading();
-
 	if(lifetime)
-	{
 		remove_timer.Start();
-	}
-#ifdef SOLAR
-	entity_list.Message(0, 0, "Beacon being created at %0.2f %0.2f %0.2f heading %0.2f lifetime %d", GetX(), GetY(), GetZ(), GetHeading(), lifetime);
-#endif
 }
 
 Beacon::~Beacon()
 {
-#ifdef SOLAR
-	entity_list.Message(0, 0, "Beacon %d being removed at %0.2f %0.2f %0.2f heading %0.2f", GetID(), GetX(), GetY(), GetZ(), GetHeading());
-#endif
+
 }
 
 bool Beacon::Process()

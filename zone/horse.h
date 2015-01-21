@@ -29,7 +29,7 @@ struct NewSpawn_Struct;
 
 class Horse : public NPC {
 public:
-	Horse(Client *owner, uint16 spell_id, float x, float y, float z, float heading);
+	Horse(Client *owner, uint16 spell_id, const xyz_heading& position);
 
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 

@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/20/2015 ==
+Uleat: Fix for Inventory::_HasItemByUse(bucket) using the parent container when searching for bag container items.
+
+== 01/19/2015 ==
+Uleat: Changed 'enum EQClientVersion' to 'enum class ClientVersion.' Other light modifications were made to accommodate this namespace. Added 'RoF2' to the lua client version enumeration.
+
 == 01/15/2015 ==
 Uleat: Attempted fix for elusive inventory bug:
   - Removed 'iter_queue' typedef and converted lcast to explicit or auto defines

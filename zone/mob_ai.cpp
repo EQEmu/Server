@@ -67,7 +67,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 		dist2 = 0; //DistNoRoot(*this);	//WTF was up with this...
 	}
 	else
-		dist2 = DistNoRoot(*tar);
+		dist2 = ComparativeDistance(m_Position, tar->GetPosition());
 
 	bool checked_los = false;	//we do not check LOS until we are absolutely sure we need to, and we only do it once.
 
@@ -401,7 +401,7 @@ bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float 
 		if (t1 > iRange
 			|| t2 > iRange
 			|| t3 > iRange
-			|| mob->DistNoRoot(*caster) > iRange2
+			|| ComparativeDistance(mob->GetPosition(), caster->GetPosition()) > iRange2
 				//this call should seem backwards:
 			|| !mob->CheckLosFN(caster)
 			|| mob->GetReverseFactionCon(caster) >= FACTION_KINDLY
@@ -493,10 +493,7 @@ void Mob::AI_Start(uint32 iMoveDelay) {
 		pAssistRange = 70;
 	hate_list.WipeHateList();
 
-	delta_heading = 0;
-	delta_x = 0;
-	delta_y = 0;
-	delta_z = 0;
+	m_Delta = xyz_heading::Origin();
 	pRunAnimSpeed = 0;
 	pLastChange = Timer::GetCurrentTime();
 }
@@ -625,7 +622,7 @@ void Client::AI_SpellCast()
 	if(!targ)
 		return;
 
-	float dist = DistNoRootNoZ(*targ);
+	float dist = ComparativeDistanceNoZ(m_Position, targ->GetPosition());
 
 	std::vector<uint32> valid_spells;
 	std::vector<uint32> slots;
@@ -787,17 +784,17 @@ void Client::AI_Process()
 				if(AImovement_timer->Check()) {
 					animation = GetRunspeed() * 21;
 					// Check if we have reached the last fear point
-					if((ABS(GetX()-fear_walkto_x) < 0.1) && (ABS(GetY()-fear_walkto_y) <0.1)) {
+					if((ABS(GetX()-m_FearWalkTarget.m_X) < 0.1) && (ABS(GetY()-m_FearWalkTarget.m_Y) <0.1)) {
 						// Calculate a new point to run to
 						CalculateNewFearpoint();
 					}
 					if(!RuleB(Pathing, Fear) || !zone->pathing)
-						CalculateNewPosition2(fear_walkto_x, fear_walkto_y, fear_walkto_z, GetFearSpeed(), true);
+						CalculateNewPosition2(m_FearWalkTarget.m_X, m_FearWalkTarget.m_Y, m_FearWalkTarget.m_Z, GetFearSpeed(), true);
 					else
 					{
 						bool WaypointChanged, NodeReached;
 
-						Map::Vertex Goal = UpdatePath(fear_walkto_x, fear_walkto_y, fear_walkto_z,
+						Map::Vertex Goal = UpdatePath(m_FearWalkTarget.m_X, m_FearWalkTarget.m_Y, m_FearWalkTarget.m_Z,
 									GetFearSpeed(), WaypointChanged, NodeReached);
 
 						if(WaypointChanged)
@@ -1000,7 +997,7 @@ void Client::AI_Process()
 			if(owner == nullptr)
 				return;
 
-			float dist = DistNoRoot(*owner);
+			float dist = ComparativeDistance(m_Position, owner->GetPosition());
 			if (dist >= 100)
 			{
 				float speed = dist >= 225 ? GetRunspeed() : GetWalkspeed();
@@ -1055,17 +1052,17 @@ void Mob::AI_Process() {
 			} else {
 				if(AImovement_timer->Check()) {
 					// Check if we have reached the last fear point
-					if((ABS(GetX()-fear_walkto_x) < 0.1) && (ABS(GetY()-fear_walkto_y) <0.1)) {
+					if((ABS(GetX()-m_FearWalkTarget.m_X) < 0.1) && (ABS(GetY()-m_FearWalkTarget.m_Y) <0.1)) {
 						// Calculate a new point to run to
 						CalculateNewFearpoint();
 					}
 					if(!RuleB(Pathing, Fear) || !zone->pathing)
-						CalculateNewPosition2(fear_walkto_x, fear_walkto_y, fear_walkto_z, GetFearSpeed(), true);
+						CalculateNewPosition2(m_FearWalkTarget.m_X, m_FearWalkTarget.m_Y, m_FearWalkTarget.m_Z, GetFearSpeed(), true);
 					else
 					{
 						bool WaypointChanged, NodeReached;
 
-						Map::Vertex Goal = UpdatePath(fear_walkto_x, fear_walkto_y, fear_walkto_z,
+						Map::Vertex Goal = UpdatePath(m_FearWalkTarget.m_X, m_FearWalkTarget.m_Y, m_FearWalkTarget.m_Z,
 									GetFearSpeed(), WaypointChanged, NodeReached);
 
 						if(WaypointChanged)
@@ -1127,19 +1124,20 @@ void Mob::AI_Process() {
 		if(DivineAura())
 			return;
 
+        auto npcSpawnPoint = CastToNPC()->GetSpawnPoint();
 		if(GetSpecialAbility(TETHER)) {
 			float tether_range = static_cast<float>(GetSpecialAbilityParam(TETHER, 0));
 			tether_range = tether_range > 0.0f ? tether_range * tether_range : pAggroRange * pAggroRange;
 
-			if(DistNoRootNoZ(CastToNPC()->GetSpawnPointX(), CastToNPC()->GetSpawnPointY()) > tether_range) {
-				GMMove(CastToNPC()->GetSpawnPointX(), CastToNPC()->GetSpawnPointY(), CastToNPC()->GetSpawnPointZ(), CastToNPC()->GetSpawnPointH());
+			if(ComparativeDistanceNoZ(m_Position, npcSpawnPoint) > tether_range) {
+				GMMove(npcSpawnPoint.m_X, npcSpawnPoint.m_Y, npcSpawnPoint.m_Z, npcSpawnPoint.m_Heading);
 			}
 		} else if(GetSpecialAbility(LEASH)) {
 			float leash_range = static_cast<float>(GetSpecialAbilityParam(LEASH, 0));
 			leash_range = leash_range > 0.0f ? leash_range * leash_range : pAggroRange * pAggroRange;
 
-			if(DistNoRootNoZ(CastToNPC()->GetSpawnPointX(), CastToNPC()->GetSpawnPointY()) > leash_range) {
-				GMMove(CastToNPC()->GetSpawnPointX(), CastToNPC()->GetSpawnPointY(), CastToNPC()->GetSpawnPointZ(), CastToNPC()->GetSpawnPointH());
+			if(ComparativeDistanceNoZ(m_Position, npcSpawnPoint) > leash_range) {
+				GMMove(npcSpawnPoint.m_X, npcSpawnPoint.m_Y, npcSpawnPoint.m_Z, npcSpawnPoint.m_Heading);
 				SetHP(GetMaxHP());
 				BuffFadeAll();
 				WipeHateList();
@@ -1373,7 +1371,8 @@ void Mob::AI_Process() {
 			//we cannot reach our target...
 			//underwater stuff only works with water maps in the zone!
 			if(IsNPC() && CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
-				if(!zone->watermap->InLiquid(target->GetX(), target->GetY(), target->GetZ())) {
+                auto targetPosition = xyz_location(target->GetX(), target->GetY(), target->GetZ());
+				if(!zone->watermap->InLiquid(targetPosition)) {
 					Mob *tar = hate_list.GetEntWithMostHateOnList(this);
 					if(tar == target) {
 						WipeHateList();
@@ -1493,7 +1492,7 @@ void Mob::AI_Process() {
 						//if(owner->IsClient())
 						//	printf("Pet start pos: (%f, %f, %f)\n", GetX(), GetY(), GetZ());
 
-						float dist = DistNoRoot(*owner);
+						float dist = ComparativeDistance(m_Position, owner->GetPosition());
 						if (dist >= 400)
 						{
 							float speed = GetWalkspeed();
@@ -1548,7 +1547,7 @@ void Mob::AI_Process() {
 				if (!follow) SetFollowID(0);
 				else
 				{
-					float dist2 = DistNoRoot(*follow);
+					float dist2 = ComparativeDistance(m_Position, follow->GetPosition());
 					int followdist = GetFollowDistance();
 
 					if (dist2 >= followdist)	// Default follow distance is 100
@@ -1725,15 +1724,15 @@ void NPC::AI_DoMovement() {
 			}	// endif (movetimercompleted==true)
 			else if (!(AIwalking_timer->Enabled()))
 			{	// currently moving
-				if (cur_wp_x == GetX() && cur_wp_y == GetY())
+				if (m_CurrentWayPoint.m_X == GetX() && m_CurrentWayPoint.m_Y == GetY())
 				{	// are we there yet? then stop
 					Log.Out(Logs::Detail, Logs::AI, "We have reached waypoint %d (%.3f,%.3f,%.3f) on grid %d", cur_wp, GetX(), GetY(), GetZ(), GetGrid());
 					SetWaypointPause();
 					if(GetAppearance() != eaStanding)
 						SetAppearance(eaStanding, false);
 					SetMoving(false);
-					if (cur_wp_heading >= 0.0) {
-						SetHeading(cur_wp_heading);
+					if (m_CurrentWayPoint.m_Heading >= 0.0) {
+						SetHeading(m_CurrentWayPoint.m_Heading);
 					}
 					SendPosition();
 
@@ -1749,12 +1748,12 @@ void NPC::AI_DoMovement() {
 				else
 				{	// not at waypoint yet, so keep moving
 					if(!RuleB(Pathing, AggroReturnToGrid) || !zone->pathing || (DistractedFromGrid == 0))
-						CalculateNewPosition2(cur_wp_x, cur_wp_y, cur_wp_z, walksp, true);
+						CalculateNewPosition2(m_CurrentWayPoint.m_X, m_CurrentWayPoint.m_Y, m_CurrentWayPoint.m_Z, walksp, true);
 					else
 					{
 						bool WaypointChanged;
 						bool NodeReached;
-						Map::Vertex Goal = UpdatePath(cur_wp_x, cur_wp_y, cur_wp_z, walksp, WaypointChanged, NodeReached);
+						Map::Vertex Goal = UpdatePath(m_CurrentWayPoint.m_X, m_CurrentWayPoint.m_Y, m_CurrentWayPoint.m_Z, walksp, WaypointChanged, NodeReached);
 						if(WaypointChanged)
 							tar_ndx = 20;
 
@@ -1787,13 +1786,13 @@ void NPC::AI_DoMovement() {
 	{
 		bool CP2Moved;
 		if(!RuleB(Pathing, Guard) || !zone->pathing)
-			CP2Moved = CalculateNewPosition2(guard_x, guard_y, guard_z, walksp);
+			CP2Moved = CalculateNewPosition2(m_GuardPoint.m_X, m_GuardPoint.m_Y, m_GuardPoint.m_Z, walksp);
 		else
 		{
-			if(!((x_pos == guard_x) && (y_pos == guard_y) && (z_pos == guard_z)))
+			if(!((m_Position.m_X == m_GuardPoint.m_X) && (m_Position.m_Y == m_GuardPoint.m_Y) && (m_Position.m_Z == m_GuardPoint.m_Z)))
 			{
 				bool WaypointChanged, NodeReached;
-				Map::Vertex Goal = UpdatePath(guard_x, guard_y, guard_z, walksp, WaypointChanged, NodeReached);
+				Map::Vertex Goal = UpdatePath(m_GuardPoint.m_X, m_GuardPoint.m_Y, m_GuardPoint.m_Z, walksp, WaypointChanged, NodeReached);
 				if(WaypointChanged)
 					tar_ndx = 20;
 
@@ -1809,13 +1808,13 @@ void NPC::AI_DoMovement() {
 		if (!CP2Moved)
 		{
 			if(moved) {
-				Log.Out(Logs::Detail, Logs::AI, "Reached guard point (%.3f,%.3f,%.3f)", guard_x, guard_y, guard_z);
+				Log.Out(Logs::Detail, Logs::AI, "Reached guard point (%.3f,%.3f,%.3f)", m_GuardPoint.m_X, m_GuardPoint.m_Y, m_GuardPoint.m_Z);
 				ClearFeignMemory();
 				moved=false;
 				SetMoving(false);
-				if (GetTarget() == nullptr || DistNoRoot(*GetTarget()) >= 5*5 )
+				if (GetTarget() == nullptr || ComparativeDistance(m_Position, GetTarget()->GetPosition()) >= 5*5 )
 				{
-					SetHeading(guard_heading);
+					SetHeading(m_GuardPoint.m_Heading);
 				} else {
 					FaceTarget(GetTarget());
 				}

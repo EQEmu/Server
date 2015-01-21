@@ -49,11 +49,7 @@ Mob::Mob(const char* in_name,
 		uint32		in_npctype_id,
 		float		in_size,
 		float		in_runspeed,
-		float		in_heading,
-		float		in_x_pos,
-		float		in_y_pos,
-		float		in_z_pos,
-
+		const xyz_heading& position,
 		uint8		in_light,
 		uint8		in_texture,
 		uint8		in_helmtexture,
@@ -102,29 +98,21 @@ Mob::Mob(const char* in_name,
 		bardsong_timer(6000),
 		gravity_timer(1000),
 		viral_timer(0),
-		flee_timer(FLEE_CHECK_TIMER)
-
+		m_FearWalkTarget(-999999.0f,-999999.0f,-999999.0f),
+		m_TargetLocation(xyz_location::Origin()),
+		m_TargetV(xyz_location::Origin()),
+		flee_timer(FLEE_CHECK_TIMER),
+		m_Position(position)
 {
 	targeted = 0;
 	tar_ndx=0;
 	tar_vector=0;
-	tar_vx=0;
-	tar_vy=0;
-	tar_vz=0;
-	tarx=0;
-	tary=0;
-	tarz=0;
-	fear_walkto_x = -999999;
-	fear_walkto_y = -999999;
-	fear_walkto_z = -999999;
 	curfp = false;
 
 	AI_Init();
 	SetMoving(false);
 	moved=false;
-	rewind_x = 0;		//Stored x_pos for /rewind
-	rewind_y = 0;		//Stored y_pos for /rewind
-	rewind_z = 0;		//Stored z_pos for /rewind
+	m_RewindLocation = xyz_location::Origin();
 	move_tic_count = 0;
 
 	_egnode = nullptr;
@@ -161,10 +149,6 @@ Mob::Mob(const char* in_name,
 	if (runspeed < 0 || runspeed > 20)
 		runspeed = 1.25f;
 
-	heading		= in_heading;
-	x_pos		= in_x_pos;
-	y_pos		= in_y_pos;
-	z_pos		= in_z_pos;
 	light		= in_light;
 	texture		= in_texture;
 	helmtexture	= in_helmtexture;
@@ -259,10 +243,7 @@ Mob::Mob(const char* in_name,
 		}
 	}
 
-	delta_heading = 0;
-	delta_x = 0;
-	delta_y = 0;
-	delta_z = 0;
+	m_Delta = xyz_heading::Origin();
 	animation = 0;
 
 	logging_enabled = false;
@@ -335,17 +316,12 @@ Mob::Mob(const char* in_name,
 	wandertype=0;
 	pausetype=0;
 	cur_wp = 0;
-	cur_wp_x = 0;
-	cur_wp_y = 0;
-	cur_wp_z = 0;
+	m_CurrentWayPoint = xyz_heading::Origin();
 	cur_wp_pause = 0;
 	patrol=0;
 	follow=0;
 	follow_dist = 100;	// Default Distance for Follow
 	flee_mode = false;
-	fear_walkto_x = -999999;
-	fear_walkto_y = -999999;
-	fear_walkto_z = -999999;
 	curfp = false;
 	flee_timer.Start();
 
@@ -387,9 +363,7 @@ Mob::Mob(const char* in_name,
 	nimbus_effect3 = 0;
 	m_targetable = true;
 
-	targetring_x = 0.0f;
-	targetring_y = 0.0f; 
-	targetring_z = 0.0f;
+    m_TargetRing = xyz_location::Origin();
 
 	flymode = FlyMode3;
 	// Pathing
@@ -908,10 +882,10 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
 	}
 
-	ns->spawn.heading	= FloatToEQ19(heading);
-	ns->spawn.x			= FloatToEQ19(x_pos);//((int32)x_pos)<<3;
-	ns->spawn.y			= FloatToEQ19(y_pos);//((int32)y_pos)<<3;
-	ns->spawn.z			= FloatToEQ19(z_pos);//((int32)z_pos)<<3;
+	ns->spawn.heading	= FloatToEQ19(m_Position.m_Heading);
+	ns->spawn.x			= FloatToEQ19(m_Position.m_X);//((int32)x_pos)<<3;
+	ns->spawn.y			= FloatToEQ19(m_Position.m_Y);//((int32)y_pos)<<3;
+	ns->spawn.z			= FloatToEQ19(m_Position.m_Z);//((int32)z_pos)<<3;
 	ns->spawn.spawnId	= GetID();
 	ns->spawn.curHp	= static_cast<uint8>(GetHPRatio());
 	ns->spawn.max_hp	= 100;		//this field needs a better name
@@ -966,13 +940,9 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	// 3 - Mobs in water do not sink. A value of 3 in this field appears to be the default setting for all mobs
 	// (in water or not) according to 6.2 era packet collects.
 	if(IsClient())
-	{
 		ns->spawn.flymode = FindType(SE_Levitate) ? 2 : 0;
-	}
 	else
-	{
 		ns->spawn.flymode = flymode;
-	}
 
 	ns->spawn.lastName[0] = '\0';
 
@@ -1240,13 +1210,13 @@ void Mob::SendPosUpdate(uint8 iSendToSelf) {
 void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu){
 	memset(spu,0xff,sizeof(PlayerPositionUpdateServer_Struct));
 	spu->spawn_id	= GetID();
-	spu->x_pos		= FloatToEQ19(x_pos);
-	spu->y_pos		= FloatToEQ19(y_pos);
-	spu->z_pos		= FloatToEQ19(z_pos);
+	spu->x_pos		= FloatToEQ19(m_Position.m_X);
+	spu->y_pos		= FloatToEQ19(m_Position.m_Y);
+	spu->z_pos		= FloatToEQ19(m_Position.m_Z);
 	spu->delta_x	= NewFloatToEQ13(0);
 	spu->delta_y	= NewFloatToEQ13(0);
 	spu->delta_z	= NewFloatToEQ13(0);
-	spu->heading	= FloatToEQ19(heading);
+	spu->heading	= FloatToEQ19(m_Position.m_Heading);
 	spu->animation	= 0;
 	spu->delta_heading = NewFloatToEQ13(0);
 	spu->padding0002	=0;
@@ -1259,13 +1229,13 @@ void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu){
 // this is for SendPosUpdate()
 void Mob::MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu) {
 	spu->spawn_id	= GetID();
-	spu->x_pos		= FloatToEQ19(x_pos);
-	spu->y_pos		= FloatToEQ19(y_pos);
-	spu->z_pos		= FloatToEQ19(z_pos);
-	spu->delta_x	= NewFloatToEQ13(delta_x);
-	spu->delta_y	= NewFloatToEQ13(delta_y);
-	spu->delta_z	= NewFloatToEQ13(delta_z);
-	spu->heading	= FloatToEQ19(heading);
+	spu->x_pos		= FloatToEQ19(m_Position.m_X);
+	spu->y_pos		= FloatToEQ19(m_Position.m_Y);
+	spu->z_pos		= FloatToEQ19(m_Position.m_Z);
+	spu->delta_x	= NewFloatToEQ13(m_Delta.m_X);
+	spu->delta_y	= NewFloatToEQ13(m_Delta.m_Y);
+	spu->delta_z	= NewFloatToEQ13(m_Delta.m_Z);
+	spu->heading	= FloatToEQ19(m_Position.m_Heading);
 	spu->padding0002	=0;
 	spu->padding0006	=7;
 	spu->padding0014	=0x7f;
@@ -1274,7 +1244,7 @@ void Mob::MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu) {
 		spu->animation = animation;
 	else
 		spu->animation	= pRunAnimSpeed;//animation;
-	spu->delta_heading = NewFloatToEQ13(static_cast<float>(delta_heading));
+	spu->delta_heading = NewFloatToEQ13(m_Delta.m_Heading);
 }
 
 void Mob::ShowStats(Client* client)
@@ -1390,11 +1360,11 @@ void Mob::GMMove(float x, float y, float z, float heading, bool SendUpdate) {
 		entity_list.ProcessMove(CastToNPC(), x, y, z);
 	}
 
-	x_pos = x;
-	y_pos = y;
-	z_pos = z;
-	if (heading != 0.01)
-		this->heading = heading;
+	m_Position.m_X = x;
+	m_Position.m_Y = y;
+	m_Position.m_Z = z;
+	if (m_Position.m_Heading != 0.01)
+		this->m_Position.m_Heading = heading;
 	if(IsNPC())
 		CastToNPC()->SaveGuardSpot(true);
 	if(SendUpdate)
@@ -1554,7 +1524,6 @@ void Mob::SendIllusionPacket(uint16 in_race, uint8 in_gender, uint8 in_texture, 
 	}
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Illusion, sizeof(Illusion_Struct));
-	memset(outapp->pBuffer, 0, sizeof(outapp->pBuffer));
 	Illusion_Struct* is = (Illusion_Struct*) outapp->pBuffer;
 	is->spawnid = GetID();
 	strcpy(is->charname, GetCleanName());
@@ -1919,7 +1888,6 @@ void Mob::SendTargetable(bool on, Client *specific_target) {
 void Mob::QuestReward(Client *c, uint32 silver, uint32 gold, uint32 platinum) {
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Sound, sizeof(QuestReward_Struct));
-	memset(outapp->pBuffer, 0, sizeof(outapp->pBuffer));
 	QuestReward_Struct* qr = (QuestReward_Struct*) outapp->pBuffer;
 
 	qr->from_mob = GetID();		// Entity ID for the from mob name
@@ -1939,7 +1907,6 @@ void Mob::CameraEffect(uint32 duration, uint32 intensity, Client *c, bool global
 	if(global == true)
 	{
 		ServerPacket* pack = new ServerPacket(ServerOP_CameraShake, sizeof(ServerCameraShake_Struct));
-		memset(pack->pBuffer, 0, sizeof(pack->pBuffer));
 		ServerCameraShake_Struct* scss = (ServerCameraShake_Struct*) pack->pBuffer;
 		scss->duration = duration;
 		scss->intensity = intensity;
@@ -1949,7 +1916,6 @@ void Mob::CameraEffect(uint32 duration, uint32 intensity, Client *c, bool global
 	}
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CameraEffect, sizeof(Camera_Struct));
-	memset(outapp->pBuffer, 0, sizeof(outapp->pBuffer));
 	Camera_Struct* cs = (Camera_Struct*) outapp->pBuffer;
 	cs->duration = duration;	// Duration in milliseconds
 	cs->intensity = ((intensity * 6710886) + 1023410176);	// Intensity ranges from 1023410176 to 1090519040, so simplify it from 0 to 10.
@@ -1965,7 +1931,6 @@ void Mob::CameraEffect(uint32 duration, uint32 intensity, Client *c, bool global
 void Mob::SendSpellEffect(uint32 effectid, uint32 duration, uint32 finish_delay, bool zone_wide, uint32 unk020, bool perm_effect, Client *c) {
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpellEffect, sizeof(SpellEffect_Struct));
-	memset(outapp->pBuffer, 0, sizeof(outapp->pBuffer));
 	SpellEffect_Struct* se = (SpellEffect_Struct*) outapp->pBuffer;
 	se->EffectID = effectid;	// ID of the Particle Effect
 	se->EntityID = GetID();
@@ -2017,7 +1982,6 @@ void Mob::TempName(const char *newname)
 
 	// Send the new name to all clients
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_MobRename, sizeof(MobRename_Struct));
-	memset(outapp->pBuffer, 0, sizeof(outapp->pBuffer));
 	MobRename_Struct* mr = (MobRename_Struct*) outapp->pBuffer;
 	strn0cpy(mr->old_name, old_name, 64);
 	strn0cpy(mr->old_name_again, old_name, 64);
@@ -2302,59 +2266,7 @@ bool Mob::CanThisClassBlock(void) const
 		return(CastToClient()->HasSkill(SkillBlock));
 	}
 }
-
-float Mob::Dist(const Mob &other) const {
-	float xDiff = other.x_pos - x_pos;
-	float yDiff = other.y_pos - y_pos;
-	float zDiff = other.z_pos - z_pos;
-
-	return sqrtf( (xDiff * xDiff)
-				+ (yDiff * yDiff)
-				+ (zDiff * zDiff) );
-}
-
-float Mob::DistNoZ(const Mob &other) const {
-	float xDiff = other.x_pos - x_pos;
-	float yDiff = other.y_pos - y_pos;
-
-	return sqrtf( (xDiff * xDiff)
-				+ (yDiff * yDiff) );
-}
-
-float Mob::DistNoRoot(const Mob &other) const {
-	float xDiff = other.x_pos - x_pos;
-	float yDiff = other.y_pos - y_pos;
-	float zDiff = other.z_pos - z_pos;
-
-	return ( (xDiff * xDiff)
-			+ (yDiff * yDiff)
-			+ (zDiff * zDiff) );
-}
-
-float Mob::DistNoRoot(float x, float y, float z) const {
-	float xDiff = x - x_pos;
-	float yDiff = y - y_pos;
-	float zDiff = z - z_pos;
-
-	return ( (xDiff * xDiff)
-			+ (yDiff * yDiff)
-			+ (zDiff * zDiff) );
-}
-
-float Mob::DistNoRootNoZ(float x, float y) const {
-	float xDiff = x - x_pos;
-	float yDiff = y - y_pos;
-
-	return ( (xDiff * xDiff) + (yDiff * yDiff) );
-}
-
-float Mob::DistNoRootNoZ(const Mob &other) const {
-	float xDiff = other.x_pos - x_pos;
-	float yDiff = other.y_pos - y_pos;
-
-	return ( (xDiff * xDiff) + (yDiff * yDiff) );
-}
-
+/*
 float Mob::GetReciprocalHeading(Mob* target) {
 	float Result = 0;
 
@@ -2371,7 +2283,7 @@ float Mob::GetReciprocalHeading(Mob* target) {
 
 	return Result;
 }
-
+*/
 bool Mob::PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, float &z_dest, bool lookForAftArc) {
 	bool Result = false;
 
@@ -2379,7 +2291,7 @@ bool Mob::PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, fl
 		float look_heading = 0;
 
 		if(lookForAftArc)
-			look_heading = GetReciprocalHeading(target);
+			look_heading = GetReciprocalHeading(target->GetPosition());
 		else
 			look_heading = target->GetHeading();
 
@@ -2495,20 +2407,18 @@ bool Mob::HateSummon() {
 			entity_list.MessageClose(this, true, 500, MT_Say, "%s says,'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName() );
 
 			if (target->IsClient()) {
-				target->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x_pos, y_pos, z_pos, target->GetHeading(), 0, SummonPC);
+				target->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), m_Position.m_X, m_Position.m_Y, m_Position.m_Z, target->GetHeading(), 0, SummonPC);
 			}
 			else {
 #ifdef BOTS
 				if(target && target->IsBot()) {
 					// set pre summoning info to return to (to get out of melee range for caster)
 					target->CastToBot()->SetHasBeenSummoned(true);
-					target->CastToBot()->SetPreSummonX(target->GetX());
-					target->CastToBot()->SetPreSummonY(target->GetY());
-					target->CastToBot()->SetPreSummonZ(target->GetZ());
+					target->CastToBot()->SetPreSummonLocation(target->GetPosition());
 
 				}
 #endif //BOTS
-				target->GMMove(x_pos, y_pos, z_pos, target->GetHeading());
+				target->GMMove(m_Position.m_X, m_Position.m_Y, m_Position.m_Z, target->GetHeading());
 			}
 
 			return true;
@@ -2686,7 +2596,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 	int32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 	const Item_Struct *item;
 	item = database.GetItem(GetEquipment(material_slot));
-	
+
 	if (item != 0)
 	{
 		// For primary and secondary we need the model, not the material
@@ -2797,14 +2707,10 @@ uint32 Mob::GetEquipmentColor(uint8 material_slot) const
 	{
 		return armor_tint[material_slot];
 	}
-	else
-	{
-		item = database.GetItem(GetEquipment(material_slot));
-		if (item != 0)
-		{
-			return item->Color;
-		}
-	}
+
+	item = database.GetItem(GetEquipment(material_slot));
+	if (item != 0)
+		return item->Color;
 
 	return 0;
 }
@@ -2926,20 +2832,16 @@ void Mob::SetNextIncHPEvent( int inchpevent )
 	nextinchpevent = inchpevent;
 }
 //warp for quest function,from sandy
-void Mob::Warp( float x, float y, float z )
+void Mob::Warp(const xyz_location& location)
 {
-	if(IsNPC()) {
-		entity_list.ProcessMove(CastToNPC(), x, y, z);
-	}
+	if(IsNPC())
+		entity_list.ProcessMove(CastToNPC(), location.m_X, location.m_Y, location.m_Z);
 
-	x_pos = x;
-	y_pos = y;
-	z_pos = z;
+	m_Position = location;
 
 	Mob* target = GetTarget();
-	if (target) {
+	if (target)
 		FaceTarget( target );
-	}
 
 	SendPosition();
 }
@@ -3024,7 +2926,7 @@ int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
 	}
 
 	casttime = (casttime*(100 - cast_reducer)/100);
-	return(casttime);
+	return casttime;
 }
 
 void Mob::ExecWeaponProc(const ItemInst *inst, uint16 spell_id, Mob *on) {
@@ -3059,7 +2961,8 @@ void Mob::ExecWeaponProc(const ItemInst *inst, uint16 spell_id, Mob *on) {
 	bool twinproc = false;
 	int32 twinproc_chance = 0;
 
-	twinproc_chance = GetFocusEffect(focusTwincast, spell_id);
+	if(IsClient())
+		twinproc_chance = CastToClient()->GetFocusEffect(focusTwincast, spell_id);
 
 	if(twinproc_chance && zone->random.Roll(twinproc_chance))
 		twinproc = true;
@@ -3151,9 +3054,9 @@ float Mob::FindGroundZ(float new_x, float new_y, float z_offset)
 	if (zone->zonemap != nullptr)
 	{
 		Map::Vertex me;
-		me.x = new_x;
-		me.y = new_y;
-		me.z = z_pos+z_offset;
+		me.x = m_Position.m_X;
+		me.y = m_Position.m_Y;
+		me.z = m_Position.m_Z + z_offset;
 		Map::Vertex hit;
 		float best_z = zone->zonemap->FindBestZ(me, &hit);
 		if (best_z != -999999)
@@ -3171,9 +3074,9 @@ float Mob::GetGroundZ(float new_x, float new_y, float z_offset)
 	if (zone->zonemap != 0)
 	{
 		Map::Vertex me;
-		me.x = new_x;
-		me.y = new_y;
-		me.z = z_pos+z_offset;
+		me.x = m_Position.m_X;
+		me.y = m_Position.m_Y;
+		me.z = m_Position.m_Z+z_offset;
 		Map::Vertex hit;
 		float best_z = zone->zonemap->FindBestZ(me, &hit);
 		if (best_z != -999999)
@@ -3268,11 +3171,8 @@ void Mob::TriggerDefensiveProcs(const ItemInst* weapon, Mob *on, uint16 hand, in
 	}
 }
 
-void Mob::SetDeltas(float dx, float dy, float dz, float dh) {
-	delta_x = dx;
-	delta_y = dy;
-	delta_z = dz;
-	delta_heading = static_cast<int>(dh);
+void Mob::SetDelta(const xyz_heading& delta) {
+	m_Delta = delta;
 }
 
 void Mob::SetEntityVariable(const char *id, const char *m_var)
@@ -3381,7 +3281,7 @@ void Mob::TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger)
 
 		if(IsValidSpell(trigger_spell_id) && GetTarget()){
 			SpellFinished(trigger_spell_id, GetTarget(),10, 0, -1, spells[trigger_spell_id].ResistDiff);
-			CheckNumHitsRemaining(NUMHIT_MatchingSpells,-1, focus_spell);
+			CheckNumHitsRemaining(NumHit::MatchingSpells, -1, focus_spell);
 		}
 	}
 }
@@ -3613,7 +3513,7 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 		value += tmp_focus;
 
 		if (tmp_buffslot >= 0)
-			CheckNumHitsRemaining(NUMHIT_MatchingSpells, tmp_buffslot);
+			CheckNumHitsRemaining(NumHit::MatchingSpells, tmp_buffslot);
 	}
 	return value;
 }
@@ -3718,7 +3618,7 @@ void Mob::TrySympatheticProc(Mob *target, uint32 spell_id)
 					SpellFinished(focus_trigger, target, 10, 0, -1, spells[focus_trigger].ResistDiff);
 			}
 
-			CheckNumHitsRemaining(NUMHIT_MatchingSpells, -1, focus_spell);
+			CheckNumHitsRemaining(NumHit::MatchingSpells, -1, focus_spell);
 		}
 }
 

@@ -769,7 +769,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 	float range = RangeItem->Range + AmmoItem->Range + GetRangeDistTargetSizeMod(GetTarget());
 	Log.Out(Logs::Detail, Logs::Combat, "Calculated bow range to be %.1f", range);
 	range *= range;
-	float dist = DistNoRoot(*other);
+	float dist = ComparativeDistance(m_Position, other->GetPosition());
 	if(dist > range) {
 		Log.Out(Logs::Detail, Logs::Combat, "Ranged attack out of range... client should catch this. (%f > %f).\n", dist, range);
 		Message_StringID(13,TARGET_OUT_OF_RANGE);//Client enforces range and sends the message, this is a backup just incase.
@@ -1219,9 +1219,9 @@ void NPC::RangedAttack(Mob* other)
 			min_range = static_cast<float>(sa_min_range);
 
 		max_range *= max_range;
-		if(DistNoRoot(*other) > max_range) 
+		if(ComparativeDistance(m_Position, other->GetPosition()) > max_range)
 			return;
-		else if(DistNoRoot(*other) < (min_range * min_range))
+		else if(ComparativeDistance(m_Position, other->GetPosition()) < (min_range * min_range))
 			return;
 
 		if(!other || !IsAttackAllowed(other) ||
@@ -1408,7 +1408,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 	float range = item->Range + GetRangeDistTargetSizeMod(other);
 	Log.Out(Logs::Detail, Logs::Combat, "Calculated bow range to be %.1f", range);
 	range *= range;
-	float dist = DistNoRoot(*other);
+	float dist = ComparativeDistance(m_Position, other->GetPosition());
 	if(dist > range) {
 		Log.Out(Logs::Detail, Logs::Combat, "Throwing attack out of range... client should catch this. (%f > %f).\n", dist, range);
 		Message_StringID(13,TARGET_OUT_OF_RANGE);//Client enforces range and sends the message, this is a backup just incase.

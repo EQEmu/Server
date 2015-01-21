@@ -113,9 +113,9 @@ namespace Underfoot
 		return(r);
 	}
 
-	const EQClientVersion Strategy::ClientVersion() const
+	const ClientVersion Strategy::GetClientVersion() const
 	{
-		return EQClientUnderfoot;
+		return ClientVersion::Und;
 	}
 
 #include "ss_define.h"

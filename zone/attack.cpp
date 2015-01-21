@@ -2462,7 +2462,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 	}
 
 	if(IsNPC() && CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
-		if(!zone->watermap->InLiquid(other->GetX(), other->GetY(), other->GetZ())) {
+		if(!zone->watermap->InLiquid(other->GetPosition())) {
 			return;
 		}
 	}
@@ -3339,7 +3339,7 @@ int32 Mob::ReduceAllDamage(int32 damage)
 		}
 	}
 
-	CheckNumHitsRemaining(NUMHIT_IncomingDamage);
+	CheckNumHitsRemaining(NumHit::IncomingDamage);
 
 	return(damage);
 }
@@ -3455,10 +3455,10 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 	}
 
 	if (spell_id == SPELL_UNKNOWN && skill_used) {
-		CheckNumHitsRemaining(NUMHIT_IncomingHitAttempts);
+		CheckNumHitsRemaining(NumHit::IncomingHitAttempts);
 
 		if (attacker)
-			attacker->CheckNumHitsRemaining(NUMHIT_OutgoingHitAttempts);
+			attacker->CheckNumHitsRemaining(NumHit::OutgoingHitAttempts);
 	}
 
 	if(attacker){
@@ -3535,7 +3535,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		}
 
 		if (skill_used)
-			CheckNumHitsRemaining(NUMHIT_IncomingHitSuccess);
+			CheckNumHitsRemaining(NumHit::IncomingHitSuccess);
 
 		if(IsClient() && CastToClient()->sneaking){
 			CastToClient()->sneaking = false;
@@ -3908,7 +3908,8 @@ void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand) {
 					float chance = ProcChance * (static_cast<float>(DefensiveProcs[i].chance)/100.0f);
 					if (zone->random.Roll(chance)) {
 						ExecWeaponProc(nullptr, DefensiveProcs[i].spellID, on);
-						CheckNumHitsRemaining(NUMHIT_DefensiveSpellProcs,0,DefensiveProcs[i].base_spellID);
+						CheckNumHitsRemaining(NumHit::DefensiveSpellProcs, 0,
+								      DefensiveProcs[i].base_spellID);
 					}
 				}
 			}
@@ -4084,7 +4085,8 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 							"Spell proc %d procing spell %d (%.2f percent chance)",
 							i, SpellProcs[i].spellID, chance);
 					ExecWeaponProc(nullptr, SpellProcs[i].spellID, on);
-					CheckNumHitsRemaining(NUMHIT_OffensiveSpellProcs, 0, SpellProcs[i].base_spellID);
+					CheckNumHitsRemaining(NumHit::OffensiveSpellProcs, 0,
+							      SpellProcs[i].base_spellID);
 				} else {
 					Log.Out(Logs::Detail, Logs::Combat,
 							"Spell proc %d failed to proc %d (%.2f percent chance)",
@@ -4100,7 +4102,8 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 							"Ranged proc %d procing spell %d (%.2f percent chance)",
 							i, RangedProcs[i].spellID, chance);
 					ExecWeaponProc(nullptr, RangedProcs[i].spellID, on);
-					CheckNumHitsRemaining(NUMHIT_OffensiveSpellProcs, 0, RangedProcs[i].base_spellID);
+					CheckNumHitsRemaining(NumHit::OffensiveSpellProcs, 0,
+							      RangedProcs[i].base_spellID);
 				} else {
 					Log.Out(Logs::Detail, Logs::Combat,
 							"Ranged proc %d failed to proc %d (%.2f percent chance)",
@@ -4517,7 +4520,8 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 							float final_chance = chance * (ProcMod / 100.0f);
 							if (zone->random.Roll(final_chance)) {
 								ExecWeaponProc(nullptr, proc_spell_id, on);
-								CheckNumHitsRemaining(NUMHIT_OffensiveSpellProcs,0, base_spell_id);
+								CheckNumHitsRemaining(NumHit::OffensiveSpellProcs, 0,
+										      base_spell_id);
 								CanProc = false;
 								break;
 							}
@@ -4763,7 +4767,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, int32 &damage, SkillUseTypes s
 	ApplyMeleeDamageBonus(skillInUse, damage);
 	damage += (damage * defender->GetSkillDmgTaken(skillInUse) / 100) + (GetSkillDmgAmt(skillInUse) + defender->GetFcDamageAmtIncoming(this, 0, true, skillInUse));
 	TryCriticalHit(defender, skillInUse, damage);
-	CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
+	CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 }
 
 void Mob::CommonBreakInvisible()

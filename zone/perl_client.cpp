@@ -1072,7 +1072,7 @@ XS(XS_Client_SetBindPoint)
 			new_z = (float)SvNV(ST(5));
 		}
 
-		THIS->SetBindPoint(to_zone, to_instance, new_x, new_y, new_z);
+		THIS->SetBindPoint(to_zone, to_instance, xyz_location(new_x, new_y, new_z));
 	}
 	XSRETURN_EMPTY;
 }
@@ -1277,7 +1277,7 @@ XS(XS_Client_MovePC)
 		#ifdef BOTS
 			else if (THIS->IsBot())
 				Log.Out(Logs::Detail, Logs::None, "[CLIENT] Perl(XS_Client_MovePC) attempted to process a type Bot reference");
-		#endif	 
+		#endif
 			else
 				Log.Out(Logs::Detail, Logs::None, "[CLIENT] Perl(XS_Client_MovePC) attempted to process an Unknown type reference");
 
@@ -1327,7 +1327,7 @@ XS(XS_Client_MovePCInstance)
 			else
 				Log.Out(Logs::Detail, Logs::None, "[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process an Unknown type reference");
 
-			Perl_croak(aTHX_ "THIS is not of type Client"); 
+			Perl_croak(aTHX_ "THIS is not of type Client");
 
 			Perl_croak(aTHX_ "THIS is not of type Client");
 		}
@@ -3899,7 +3899,7 @@ XS(XS_Client_GetClientVersion)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetClientVersion();
+		RETVAL = static_cast<unsigned int>(THIS->GetClientVersion());
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -5094,7 +5094,7 @@ XS(XS_Client_GetTaskActivityDoneCount)
 		Perl_croak(aTHX_ "Usage: Client::GetTaskActivityDoneCount(THIS, TaskID, ActivityID)");
 	{
 		Client *	THIS;
-		int		RETVAL; 
+		int		RETVAL;
 		int		TaskID = (int)SvIV(ST(1));
 		int		ActivityID = (int)SvIV(ST(2));
 		dXSTARG;
@@ -5108,7 +5108,7 @@ XS(XS_Client_GetTaskActivityDoneCount)
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		
+
 		RETVAL = THIS->GetTaskActivityDoneCountFromTaskID(TaskID, ActivityID);
 		XSprePUSH; PUSHi((IV)RETVAL);
 	}
@@ -5952,7 +5952,7 @@ XS(XS_Client_SilentMessage)
         {
                 Client *                THIS;
                 dXSTARG;
- 
+
                 if (sv_derived_from(ST(0), "Client")) {
                         IV tmp = SvIV((SV*)SvRV(ST(0)));
                         THIS = INT2PTR(Client *,tmp);
@@ -5963,7 +5963,7 @@ XS(XS_Client_SilentMessage)
                         Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
                 if(THIS->GetTarget() != NULL){
                         if(THIS->GetTarget()->IsNPC()){
-                                if (THIS->DistNoRootNoZ(*THIS->GetTarget()) <= 200) {
+                                if (ComparativeDistanceNoZ(THIS->GetPosition(), THIS->GetTarget()->GetPosition()) <= 200) {
                                                 if(THIS->GetTarget()->CastToNPC()->IsMoving() && !THIS->GetTarget()->CastToNPC()->IsOnHatelist(THIS->GetTarget()))
                                                         THIS->GetTarget()->CastToNPC()->PauseWandering(RuleI(NPC, SayPauseTimeInSec));
                                         THIS->ChannelMessageReceived(8, 0, 100, SvPV_nolen(ST(1)));
@@ -6351,7 +6351,7 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "SendMarqueeMessage"), XS_Client_SendMarqueeMessage, file, "$$$$$$$");
 		newXSproto(strcpy(buf, "SendColoredText"), XS_Client_SendColoredText, file, "$$$");
 		newXSproto(strcpy(buf, "SendSpellAnim"), XS_Client_SendSpellAnim, file, "$$$");
-		
+
 		XSRETURN_YES;
 }
 

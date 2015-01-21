@@ -64,10 +64,10 @@ struct AISpells_Struct {
 };
 
 struct AISpellsEffects_Struct {
-	uint16	spelleffectid;		
-	int32	base;		
-	int32	limit;	
-	int32	max;	
+	uint16	spelleffectid;
+	int32	base;
+	int32	limit;
+	int32	max;
 };
 
 struct AISpellsVar_Struct {
@@ -83,7 +83,7 @@ struct AISpellsVar_Struct {
 	uint32  idle_no_sp_recast_min;
 	uint32  idle_no_sp_recast_max;
 	uint8	idle_beneficial_chance;
-}; 
+};
 
 class AA_SwarmPetInfo;
 class Client;
@@ -95,10 +95,10 @@ struct Item_Struct;
 class NPC : public Mob
 {
 public:
-	static NPC* SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z, float in_heading = 0, Client* client = 0);
+	static NPC* SpawnNPC(const char* spawncommand, const xyz_heading& position, Client* client = nullptr);
 	static int8 GetAILevel(bool iForceReRead = false);
 
-	NPC(const NPCType* data, Spawn2* respawn, float x, float y, float z, float heading, int iflymode, bool IsCorpse = false);
+	NPC(const NPCType* data, Spawn2* respawn, const xyz_heading& position, int iflymode, bool IsCorpse = false);
 
 	virtual ~NPC();
 
@@ -162,7 +162,7 @@ public:
 	FACTION_VALUE CheckNPCFactionAlly(int32 other_faction);
 	virtual FACTION_VALUE GetReverseFactionCon(Mob* iOther);
 
-	void	GoToBind(uint8 bindnum = 0)	{ GMMove(org_x, org_y, org_z, org_heading); }
+	void	GoToBind(uint8 bindnum = 0)	{ GMMove(m_SpawnPoint.m_X, m_SpawnPoint.m_Y, m_SpawnPoint.m_Z, m_SpawnPoint.m_Heading); }
 	void	Gate();
 
 	void	GetPetState(SpellBuff_Struct *buffs, uint32 *items, char *name);
@@ -210,14 +210,8 @@ public:
 	uint32 GetSp2() const { return spawn_group; }
 	uint32 GetSpawnPointID() const;
 
-	float GetSpawnPointX()	const { return org_x; }
-	float GetSpawnPointY()	const { return org_y; }
-	float GetSpawnPointZ()	const { return org_z; }
-	float GetSpawnPointH()	const { return org_heading; }
-	float GetGuardPointX()	const { return guard_x; }
-	float GetGuardPointY()	const { return guard_y; }
-	float GetGuardPointZ()	const { return guard_z; }
-	float GetGuardPointH()	const { return guard_heading; }
+	xyz_heading const GetSpawnPoint() const { return m_SpawnPoint; }
+	xyz_heading const GetGuardPoint() const { return m_GuardPoint; }
 	EmuAppearance GetGuardPointAnim() const { return guard_anim; }
 	void SaveGuardPointAnim(EmuAppearance anim) { guard_anim = anim; }
 
@@ -254,7 +248,7 @@ public:
 
 	void	SetNPCFactionID(int32 in) { npc_faction_id = in; database.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction); }
 
-	float	org_x, org_y, org_z, org_heading;
+    xyz_heading m_SpawnPoint;
 
 	uint32	GetMaxDMG() const {return max_dmg;}
 	uint32	GetMinDMG() const {return min_dmg;}
@@ -288,15 +282,15 @@ public:
 	void				StopWandering();
 	void				ResumeWandering();
 	void				PauseWandering(int pausetime);
-	void				MoveTo(float mtx, float mty, float mtz, float mth, bool saveguardspot);
-	void				GetClosestWaypoint(std::list<wplist> &wp_list, int count, float m_x, float m_y, float m_z);
+	void				MoveTo(const xyz_heading& position, bool saveguardspot);
+	void				GetClosestWaypoint(std::list<wplist> &wp_list, int count, const xyz_location& location);
 
 	uint32				GetEquipment(uint8 material_slot) const;	// returns item id
 	int32				GetEquipmentMaterial(uint8 material_slot) const;
 
 	void				NextGuardPosition();
 	void				SaveGuardSpot(bool iClearGuardSpot = false);
-	inline bool			IsGuarding() const { return(guard_heading != 0); }
+	inline bool			IsGuarding() const { return(m_GuardPoint.m_Heading != 0); }
 	void				SaveGuardSpotCharm();
 	void				RestoreGuardSpotCharm();
 	void				AI_SetRoambox(float iDist, float iRoamDist, uint32 iDelay = 2500, uint32 iMinDelay = 2500);
@@ -387,7 +381,7 @@ public:
 
 	inline void SetHealScale(float amt)		{ healscale = amt; }
 	inline float GetHealScale()					{ return healscale; }
-	
+
 	inline void SetSpellFocusDMG(int32 NewSpellFocusDMG) {SpellFocusDMG = NewSpellFocusDMG;}
 	inline int32 GetSpellFocusDMG() const { return SpellFocusDMG;}
 
@@ -408,7 +402,7 @@ public:
 	void	SetHeroForgeModel(uint32 model) { herosforgemodel = model; }
 
 	bool IsRaidTarget() const { return raid_target; };
-	
+
 protected:
 
 	const NPCType*	NPCTypedata;
@@ -450,7 +444,6 @@ protected:
 	AISpellsVar_Struct AISpellVar;
 	int16 GetFocusEffect(focusType type, uint16 spell_id);
 	
-	
 	uint32	npc_spells_effects_id;
 	std::vector<AISpellsEffects_Struct> AIspellsEffects;
 	bool HasAISpellEffects;
@@ -480,8 +473,8 @@ protected:
 	void _ClearWaypints();
 	int max_wp;
 	int save_wp;
-	float guard_x, guard_y, guard_z, guard_heading;
-	float guard_x_saved, guard_y_saved, guard_z_saved, guard_heading_saved;
+	xyz_heading m_GuardPoint;
+	xyz_heading m_GuardPointSaved;
 	EmuAppearance guard_anim;
 	float roambox_max_x;
 	float roambox_max_y;
@@ -519,7 +512,7 @@ protected:
 	//mercenary stuff
 	std::list<MercType> mercTypeList;
 	std::list<MercData> mercDataList;
-	
+
 	bool raid_target;
 	uint8	probability;
 

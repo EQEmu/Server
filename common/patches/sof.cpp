@@ -113,9 +113,9 @@ namespace SoF
 		return(r);
 	}
 
-	const EQClientVersion Strategy::ClientVersion() const
+	const ClientVersion Strategy::GetClientVersion() const
 	{
-		return EQClientSoF;
+		return ClientVersion::SoF;
 	}
 
 #include "ss_define.h"

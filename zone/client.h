@@ -398,10 +398,10 @@ public:
 
 	inline const char* GetLastName() const { return lastname; }
 
-	inline float ProximityX() const { return(proximity_x); }
-	inline float ProximityY() const { return(proximity_y); }
-	inline float ProximityZ() const { return(proximity_z); }
-	inline void ClearAllProximities() { entity_list.ProcessMove(this, FLT_MAX, FLT_MAX, FLT_MAX); proximity_x = FLT_MAX; proximity_y = FLT_MAX; proximity_z = FLT_MAX; }
+	inline float ProximityX() const { return m_Proximity.m_X; }
+	inline float ProximityY() const { return m_Proximity.m_Y; }
+	inline float ProximityZ() const { return m_Proximity.m_Z; }
+	inline void ClearAllProximities() { entity_list.ProcessMove(this, xyz_location(FLT_MAX, FLT_MAX, FLT_MAX)); m_Proximity = xyz_location(FLT_MAX,FLT_MAX,FLT_MAX); }
 
 	/*
 			Begin client modifiers
@@ -580,7 +580,7 @@ public:
 	void GoToBind(uint8 bindnum = 0);
 	void GoToSafeCoords(uint16 zone_id, uint16 instance_id);
 	void Gate();
-	void SetBindPoint(int to_zone = -1, int to_instance = 0, float new_x = 0.0f, float new_y = 0.0f, float new_z = 0.0f);
+	void SetBindPoint(int to_zone = -1, int to_instance = 0, const xyz_location& location = xyz_location::Origin());
 	void SetStartZone(uint32 zoneid, float x = 0.0f, float y =0.0f, float z = 0.0f);
 	uint32 GetStartZone(void);
 	void MovePC(const char* zonename, float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
@@ -1019,8 +1019,9 @@ public:
 	inline int ActiveTasksInSet(int TaskSet) { return (taskstate ? taskstate->ActiveTasksInSet(TaskSet) :0); }
 	inline int CompletedTasksInSet(int TaskSet) { return (taskstate ? taskstate->CompletedTasksInSet(TaskSet) :0); }
 
-	inline const EQClientVersion GetClientVersion() const { return ClientVersion; }
+	inline const ClientVersion GetClientVersion() const { return m_ClientVersion; }
 	inline const uint32 GetClientVersionBit() const { return ClientVersionBit; }
+	inline void SetClientVersion(ClientVersion in) { m_ClientVersion = in; }
 
 	/** Adventure Stuff **/
 	void SendAdventureError(const char *error);
@@ -1078,7 +1079,7 @@ public:
 	void DoItemEnterZone();
 	bool DoItemEnterZone(uint32 slot_x, uint32 slot_y); // behavior change: 'slot_y' is now [RANGE]_END and not [RANGE]_END + 1
 	void SummonAndRezzAllCorpses();
-	void SummonAllCorpses(float dest_x, float dest_y, float dest_z, float dest_heading);
+	void SummonAllCorpses(const xyz_heading& position);
 	void DepopAllCorpses();
 	void DepopPlayerCorpse(uint32 dbid);
 	void BuryPlayerCorpses();
@@ -1097,7 +1098,7 @@ public:
 	QGlobalCache *GetQGlobals() { return qGlobals; }
 	QGlobalCache *CreateQGlobals() { qGlobals = new QGlobalCache(); return qGlobals; }
 	void GuildBankAck();
-	void GuildBankDepositAck(bool Fail);
+	void GuildBankDepositAck(bool Fail, int8 action);
 	inline bool IsGuildBanker() { return GuildBanker; }
 	void ClearGuildBank();
 	void SendGroupCreatePacket();
@@ -1267,11 +1268,10 @@ protected:
 
 	Mob* bind_sight_target;
 
-	Map::Vertex aa_los_me;
-	Map::Vertex aa_los_them;
+	xyz_heading m_AutoAttackPosition;
+	xyz_location m_AutoAttackTargetLocation;
 	Mob *aa_los_them_mob;
 	bool los_status;
-	float aa_los_me_heading;
 	bool los_status_facing;
 	QGlobalCache *qGlobals;
 
@@ -1424,9 +1424,8 @@ private:
 	void DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instance_id, float dest_x, float dest_y, float dest_z, float dest_h, int8 ignore_r);
 	void ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z, float heading, uint8 ignorerestrictions, ZoneMode zm);
 	void ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
-	float zonesummon_x;
-	float zonesummon_y;
-	float zonesummon_z;
+
+	xyz_location m_ZoneSummonLocation;
 	uint16 zonesummon_id;
 	uint8 zonesummon_ignorerestrictions;
 	ZoneMode zone_mode;
@@ -1465,10 +1464,7 @@ private:
 	Timer RespawnFromHoverTimer;
 	Timer merc_timer;
 
-	float proximity_x;
-	float proximity_y;
-	float proximity_z;
-
+    xyz_location m_Proximity;
 
 	void BulkSendInventoryItems();
 
@@ -1511,7 +1507,7 @@ private:
 	Timer *GlobalChatLimiterTimer; //60 seconds
 	uint32 AttemptedMessages;
 
-	EQClientVersion ClientVersion;
+	ClientVersion m_ClientVersion;
 	uint32 ClientVersionBit;
 
 	int XPRate;

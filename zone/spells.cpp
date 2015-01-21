@@ -256,7 +256,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		bitmask = bitmask << (CastToClient()->GetClass() - 1);
 		if( itm && itm->GetItem()->Classes != 65535 ) {
 			if ((itm->GetItem()->Click.Type == ET_EquipClick) && !(itm->GetItem()->Classes & bitmask)) {
-				if (CastToClient()->GetClientVersion() < EQClientSoF) {
+				if (CastToClient()->GetClientVersion() < ClientVersion::SoF) {
 					// They are casting a spell from an item that requires equipping but shouldn't let them equip it
 					Log.Out(Logs::General, Logs::Error, "HACKER: %s (account: %s) attempted to click an equip-only effect on item %s (id: %d) which they shouldn't be able to equip!",
 						CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
@@ -268,14 +268,14 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 				return(false);
 			}
 			if ((itm->GetItem()->Click.Type == ET_ClickEffect2) && !(itm->GetItem()->Classes & bitmask)) {
-				if (CastToClient()->GetClientVersion() < EQClientSoF) {
+				if (CastToClient()->GetClientVersion() < ClientVersion::SoF) {
 					// They are casting a spell from an item that they don't meet the race/class requirements to cast
 					Log.Out(Logs::General, Logs::Error, "HACKER: %s (account: %s) attempted to click a race/class restricted effect on item %s (id: %d) which they shouldn't be able to click!",
 						CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
 					database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking race/class restricted item with an invalid class");
 				}
 				else {
-					if (CastToClient()->GetClientVersion() >= EQClientRoF)
+					if (CastToClient()->GetClientVersion() >= ClientVersion::RoF)
 					{
 						// Line 181 in eqstr_us.txt was changed in RoF+
 						Message(15, "Your race, class, or deity cannot use this item.");
@@ -289,7 +289,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 			}
 		}
 		if( itm && (itm->GetItem()->Click.Type == ET_EquipClick) && !(item_slot <= MainAmmo || item_slot == MainPowerSource) ){
-			if (CastToClient()->GetClientVersion() < EQClientSoF) {
+			if (CastToClient()->GetClientVersion() < ClientVersion::SoF) {
 				// They are attempting to cast a must equip clicky without having it equipped
 				Log.Out(Logs::General, Logs::Error, "HACKER: %s (account: %s) attempted to click an equip-only effect on item %s (id: %d) without equiping it!", CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
 				database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking equip-only item without equiping it");
@@ -310,7 +310,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		sprintf(temp, "%d", spell_id);
 		parse->EventNPC(EVENT_CAST_BEGIN, CastToNPC(), nullptr, temp, 0);
 	}
-	
+
 	//To prevent NPC ghosting when spells are cast from scripts
 	if (IsNPC() && IsMoving() && cast_time > 0)
 		SendPosition();
@@ -363,7 +363,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	casting_spell_type = type;
 
 	SaveSpellLoc();
-	Log.Out(Logs::Detail, Logs::Spells, "Casting %d Started at (%.3f,%.3f,%.3f)", spell_id, spell_x, spell_y, spell_z);
+	Log.Out(Logs::Detail, Logs::Spells, "Casting %d Started at (%.3f,%.3f,%.3f)", spell_id, m_SpellLocation.m_X, m_SpellLocation.m_Y, m_SpellLocation.m_Z);
 
 	// if this spell doesn't require a target, or if it's an optional target
 	// and a target wasn't provided, then it's us; unless TGB is on and this
@@ -534,8 +534,8 @@ bool Mob::DoCastingChecks()
 		return false;
 	}
 
-	if (zone->IsSpellBlocked(spell_id, GetX(), GetY(), GetZ())) {
-		const char *msg = zone->GetSpellBlockedMessage(spell_id, GetX(), GetY(), GetZ());
+	if (zone->IsSpellBlocked(spell_id, GetPosition())) {
+		const char *msg = zone->GetSpellBlockedMessage(spell_id, GetPosition());
 		if (msg) {
 			Message(13, msg);
 			return false;
@@ -1269,7 +1269,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 	}
 
 	if(IsClient()) {
-		CheckNumHitsRemaining(NUMHIT_MatchingSpells);
+		CheckNumHitsRemaining(NumHit::MatchingSpells);
 		TrySympatheticProc(target, spell_id);
 	}
 
@@ -1627,7 +1627,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			{
 				if(!spell_target)
 					return false;
-				
+
 				ae_center = spell_target;
 				CastAction = AETarget;
 			}
@@ -1646,7 +1646,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			{
 				if(!spell_target)
 					return false;
-				
+
 				ae_center = spell_target;
 				CastAction = AETarget;
 			}
@@ -1919,8 +1919,8 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 
 	if(IsClient() && !CastToClient()->GetGM()){
 
-		if(zone->IsSpellBlocked(spell_id, GetX(), GetY(), GetZ())){
-			const char *msg = zone->GetSpellBlockedMessage(spell_id, GetX(), GetY(), GetZ());
+		if(zone->IsSpellBlocked(spell_id, GetPosition())){
+			const char *msg = zone->GetSpellBlockedMessage(spell_id, GetPosition());
 			if(msg){
 				Message(13, msg);
 				return false;
@@ -2003,7 +2003,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	}
 	if(spell_target != nullptr && spell_target != this) {
 		//casting a spell on somebody but ourself, make sure they are in range
-		float dist2 = DistNoRoot(*spell_target);
+		float dist2 = ComparativeDistance(m_Position, spell_target->GetPosition());
 		float range2 = range * range;
 		float min_range2 = spells[spell_id].min_range * spells[spell_id].min_range;
 		if(dist2 > range2) {
@@ -2098,7 +2098,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			} else {
 				// regular PB AE or targeted AE spell - spell_target is null if PB
 				if(spell_target)	// this must be an AETarget spell
-				{	
+				{
 					bool cast_on_target = true;
 					if (spells[spell_id].targettype == ST_TargetAENoPlayersPets && spell_target->IsPetOwnerClient())
 						cast_on_target = false;
@@ -2207,7 +2207,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			ConeDirectional(spell_id, resist_adjust);
 			break;
 		}
- 
+
 		case Beam:
 		{
 			BeamDirectional(spell_id, resist_adjust);
@@ -2345,7 +2345,7 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 	range = GetActSpellRange(spell_id, spells[spell_id].range, true);
 	if(spell_target != nullptr && spell_target != this) {
 		//casting a spell on somebody but ourself, make sure they are in range
-		float dist2 = DistNoRoot(*spell_target);
+		float dist2 = ComparativeDistance(m_Position, spell_target->GetPosition());
 		float range2 = range * range;
 		if(dist2 > range2) {
 			//target is out of range.
@@ -3574,7 +3574,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 			if(IsEffectInSpell(buffs[b].spellid, SE_BlockNextSpellFocus)) {
 				focus = CalcFocusEffect(focusBlockNextSpell, buffs[b].spellid, spell_id);
 				if(focus) {
-					CheckNumHitsRemaining(NUMHIT_MatchingSpells,b);
+					CheckNumHitsRemaining(NumHit::MatchingSpells, b);
 					Message_StringID(MT_SpellFailure, SPELL_WOULDNT_HOLD);
 					safe_delete(action_packet);
 					return false;
@@ -3623,7 +3623,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		}
 		if(reflect_chance) {
 			Message_StringID(MT_Spells, SPELL_REFLECT, GetCleanName(), spelltar->GetCleanName());
-			CheckNumHitsRemaining(NUMHIT_ReflectSpell);
+			CheckNumHitsRemaining(NumHit::ReflectSpell);
 			SpellOnTarget(spell_id, this, true, use_resist_adjust, resist_adjust);
 			safe_delete(action_packet);
 			return false;
@@ -3674,8 +3674,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 					}
 				}
 
-				spelltar->CheckNumHitsRemaining(NUMHIT_IncomingSpells);
-				CheckNumHitsRemaining(NUMHIT_OutgoingSpells);
+				spelltar->CheckNumHitsRemaining(NumHit::IncomingSpells);
+				CheckNumHitsRemaining(NumHit::OutgoingSpells);
 
 				safe_delete(action_packet);
 				return false;
@@ -3730,13 +3730,13 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 
 	if (IsValidSpell(spells[spell_id].RecourseLink))
 		SpellFinished(spells[spell_id].RecourseLink, this, 10, 0, -1, spells[spells[spell_id].RecourseLink].ResistDiff);
-		
+
 	if (IsDetrimentalSpell(spell_id)) {
 
-		CheckNumHitsRemaining(NUMHIT_OutgoingSpells);
+		CheckNumHitsRemaining(NumHit::OutgoingSpells);
 
 		if (spelltar)
-			spelltar->CheckNumHitsRemaining(NUMHIT_IncomingSpells);
+			spelltar->CheckNumHitsRemaining(NumHit::IncomingSpells);
 	}
 
 	// send the action packet again now that the spell is successful
@@ -3857,9 +3857,9 @@ void Corpse::CastRezz(uint16 spellid, Mob* Caster)
 	rezz->zone_id = zone->GetZoneID();
 	rezz->instance_id = zone->GetInstanceID();
 	rezz->spellid = spellid;
-	rezz->x = this->x_pos;
-	rezz->y = this->y_pos;
-	rezz->z = this->z_pos;
+	rezz->x = this->m_Position.m_X;
+	rezz->y = this->m_Position.m_Y;
+	rezz->z = this->m_Position.m_Z;
 	rezz->unknown000 = 0x00000000;
 	rezz->unknown020 = 0x00000000;
 	rezz->unknown088 = 0x00000000;
@@ -4522,7 +4522,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 			if(partial_modifier <= 0)
 			{
 				return 100;
-			} 
+			}
 			else if(partial_modifier >= 100)
 			{
 				return 0;
@@ -4840,7 +4840,7 @@ void Client::UnmemSpell(int slot, bool update_client)
 	m_pp.mem_spells[slot] = 0xFFFFFFFF;
 
 	database.DeleteCharacterMemorizedSpell(this->CharacterID(), m_pp.mem_spells[slot], slot);
-	
+
 	if(update_client)
 	{
 		MemorizeSpell(slot, m_pp.mem_spells[slot], memSpellForget);
@@ -4884,8 +4884,8 @@ void Client::UnscribeSpell(int slot, bool update_client)
 
 	Log.Out(Logs::Detail, Logs::Spells, "Spell %d erased from spell book slot %d", m_pp.spell_book[slot], slot);
 	m_pp.spell_book[slot] = 0xFFFFFFFF;
-	
-	database.DeleteCharacterSpell(this->CharacterID(), m_pp.spell_book[slot], slot); 
+
+	database.DeleteCharacterSpell(this->CharacterID(), m_pp.spell_book[slot], slot);
 	if(update_client)
 	{
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_DeleteSpell, sizeof(DeleteSpell_Struct));
@@ -4913,7 +4913,7 @@ void Client::UntrainDisc(int slot, bool update_client)
 	if(slot >= MAX_PP_DISCIPLINES || slot < 0)
 		return;
 
-	Log.Out(Logs::Detail, Logs::Spells, "Discipline %d untrained from slot %d", m_pp.disciplines.values[slot], slot); 
+	Log.Out(Logs::Detail, Logs::Spells, "Discipline %d untrained from slot %d", m_pp.disciplines.values[slot], slot);
 	m_pp.disciplines.values[slot] = 0;
 	database.DeleteCharacterDisc(this->CharacterID(), slot);
 
@@ -5250,7 +5250,7 @@ void Client::SendBuffDurationPacket(Buffs_Struct &buff)
 void Client::SendBuffNumHitPacket(Buffs_Struct &buff, int slot)
 {
 	// UF+ use this packet
-	if (GetClientVersion() < EQClientUnderfoot)
+	if (GetClientVersion() < ClientVersion::Und)
 		return;
 	EQApplicationPacket *outapp;
 	outapp = new EQApplicationPacket(OP_BuffCreate, sizeof(BuffIcon_Struct) + sizeof(BuffIconEntry_Struct));
@@ -5461,27 +5461,27 @@ void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
 
 	if (IsBeneficialSpell(spell_id) && IsClient())
 		beneficial_targets = true;
-	
+
 	std::list<Mob*> targets_in_range;
 	std::list<Mob*>::iterator iter;
 
 	entity_list.GetTargetsForConeArea(this, spells[spell_id].min_range, spells[spell_id].range, spells[spell_id].range / 2, targets_in_range);
 	iter = targets_in_range.begin();
-	
+
 	float dX = 0;
 	float dY = 0;
 	float dZ = 0;
-	
+
 	CalcDestFromHeading(GetHeading(), spells[spell_id].range, 5, GetX(), GetY(), dX, dY, dZ);
 	dZ = GetZ();
-	
+
 	//FIND SLOPE: Put it into the form y = mx + b
 	float m = (dY - GetY()) / (dX - GetX());
 	float b = (GetY() * dX - dY * GetX()) / (dX - GetX());
- 
+
 	while(iter != targets_in_range.end())
 	{
-		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerClient())) 
+		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerClient()))
 			|| (*iter)->BehindMob(this, (*iter)->GetX(),(*iter)->GetY())){
 		    ++iter;
 			continue;
@@ -5489,7 +5489,7 @@ void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
 
 		//# shortest distance from line to target point
 		float d = abs( (*iter)->GetY() - m * (*iter)->GetX() - b) / sqrt(m * m + 1);
-					
+
 		if (d <= spells[spell_id].aoerange)
 		{
 			if(CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
@@ -5536,7 +5536,7 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 		}
 
 		float heading_to_target = (CalculateHeadingToTarget((*iter)->GetX(), (*iter)->GetY()) * 360.0f / 256.0f);
-	
+
 		while(heading_to_target < 0.0f)
 			heading_to_target += 360.0f;
 

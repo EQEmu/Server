@@ -429,7 +429,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 into walls or objects (+10), this sometimes creates the "ghost" effect. I changed to +2 (as close as I
 could get while it still looked good). I also noticed this can happen if an NPC is spawned on the same spot of another or in a related bad spot.*/
 Pet::Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 power)
-: NPC(type_data, 0, owner->GetX()+2, owner->GetY()+2, owner->GetZ(), owner->GetHeading(), FlyMode3)
+: NPC(type_data, 0, owner->GetPosition() + xy_location(2, 2), FlyMode3)
 {
 	GiveNPCTypeData(type_data);
 	typeofpet = type;

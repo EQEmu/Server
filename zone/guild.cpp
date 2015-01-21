@@ -63,7 +63,7 @@ void Client::SendGuildMOTD(bool GetGuildMOTDReply) {
 
 void Client::SendGuildURL()
 {
-	if(GetClientVersion() < EQClientSoF)
+	if(GetClientVersion() < ClientVersion::SoF)
 		return;
 
 	if(IsInAGuild())
@@ -84,7 +84,7 @@ void Client::SendGuildURL()
 
 void Client::SendGuildChannel()
 {
-	if(GetClientVersion() < EQClientSoF)
+	if(GetClientVersion() < ClientVersion::SoF)
 		return;
 
 	if(IsInAGuild())
@@ -106,7 +106,7 @@ void Client::SendGuildChannel()
 
 void Client::SendGuildRanks()
 {
-	if(GetClientVersion() < EQClientRoF)
+	if(GetClientVersion() < ClientVersion::RoF)
 		return;
 
 	int permissions = 30 + 1; //Static number of permissions in all EQ clients as of May 2014
@@ -149,7 +149,7 @@ void Client::SendGuildSpawnAppearance() {
 		uint8 rank = guild_mgr.GetDisplayedRank(GuildID(), GuildRank(), CharacterID());
 		Log.Out(Logs::Detail, Logs::Guilds, "Sending spawn appearance for guild %d at rank %d", GuildID(), rank);
 		SendAppearancePacket(AT_GuildID, GuildID());
-		if(GetClientVersion() >= EQClientRoF)
+		if(GetClientVersion() >= ClientVersion::RoF)
 		{
 			switch (rank) {
 				case 0: { rank = 5; break; }	// GUILD_MEMBER	0
