@@ -428,7 +428,7 @@ int command_init(void) {
 		command_add("shownumhits", "Shows buffs numhits for yourself.", 0, command_shownumhits) || 
 		command_add("crashtest", "- Crash the zoneserver", 255, command_crashtest) ||
 		command_add("logtest", "Performs log performance testing.", 250, command_logtest) ||
-		command_add("log", "Manage anything to do with logs", 250, command_log)
+		command_add("logs", "Manage anything to do with logs", 250, command_logs)
 		)
 	{
 		command_deinit();
@@ -10417,7 +10417,7 @@ void command_crashtest(Client *c, const Seperator *sep)
 	memcpy(gpf, "Ready to crash", 30);
 }
 
-void command_log(Client *c, const Seperator *sep){
+void command_logs(Client *c, const Seperator *sep){
 	if (sep->argnum > 0) {
 		if(strcasecmp(sep->arg[1], "reload_all") == 0){
 			c->Message(0, "Yes this is working");
@@ -10436,8 +10436,9 @@ void command_log(Client *c, const Seperator *sep){
 		}
 	}
 	else {
-		c->Message(0, "#log usage:");
-		c->Message(0, "--- #log reload_all - Reloads all rules defined in database in world and all zone processes");
-		c->Message(0, "--- #log list_settings - Shows current log settings and categories");
+		c->Message(0, "#logs usage:");
+		c->Message(0, "--- #logs reload_all - Reloads all rules defined in database in world and all zone processes");
+		c->Message(0, "--- #logs list_settings - Shows current log settings and categories");
+		c->Message(0, "--- #logs set <category_id> <debug_level> <output_type> - Sets in memory the log settings, if you want settings to be permanent, edit your 'logsys_categories' table");
 	}
 }
