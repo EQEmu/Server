@@ -75,7 +75,6 @@ Client *Entity::CastToClient()
 {
 	if (this == 0x00) {
 		std::cout << "CastToClient error (nullptr)" << std::endl;
-		DebugBreak();
 		return 0;
 	}
 #ifdef _EQDEBUG
