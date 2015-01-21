@@ -91,7 +91,6 @@ NPC *Entity::CastToNPC()
 #ifdef _EQDEBUG
 	if (!IsNPC()) {
 		std::cout << "CastToNPC error" << std::endl;
-		DebugBreak();
 		return 0;
 	}
 #endif
