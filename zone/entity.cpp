@@ -146,7 +146,6 @@ Object *Entity::CastToObject()
 #ifdef _EQDEBUG
 	if (!IsObject()) {
 		std::cout << "CastToObject error" << std::endl;
-		DebugBreak();
 		return 0;
 	}
 #endif
