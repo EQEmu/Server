@@ -2188,7 +2188,7 @@ void Client::RemoveDuplicateLore(bool client_update)
 		auto inst = m_inv.PopItem(MainPowerSource);
 		if (inst) {
 			if (CheckLoreConflict(inst->GetItem())) {
-				Log.Out(Logs::Detail, Logs::Inventory, "Lore Duplication Error: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
+				Log.Out(Logs::Detail, Logs::Inventory, "Lore Duplication Error: Deleting %s from slot %i", inst->GetItem()->Name, MainPowerSource);
 				database.SaveInventory(character_id, nullptr, MainPowerSource);
 			}
 			else {
@@ -2301,7 +2301,7 @@ void Client::MoveSlotNotAllowed(bool client_update)
 		auto inst = m_inv.PopItem(MainPowerSource);
 		bool is_arrow = (inst->GetItem()->ItemType == ItemTypeArrow) ? true : false;
 		int16 free_slot_id = m_inv.FindFreeSlot(inst->IsType(ItemClassContainer), true, inst->GetItem()->Size, is_arrow);
-		Log.Out(Logs::Detail, Logs::Inventory, "Slot Assignment Error: Moving %s from slot %i to %i", inst->GetItem()->Name, slot_id, free_slot_id);
+		Log.Out(Logs::Detail, Logs::Inventory, "Slot Assignment Error: Moving %s from slot %i to %i", inst->GetItem()->Name, MainPowerSource, free_slot_id);
 		PutItemInInventory(free_slot_id, *inst, (GetClientVersion() >= EQClientSoF) ? client_update : false);
 		database.SaveInventory(character_id, nullptr, MainPowerSource);
 		safe_delete(inst);
@@ -2552,13 +2552,13 @@ void Client::SetBandolier(const EQApplicationPacket *app) {
 						// If there was an item in that weapon slot, put it in the inventory
 						Log.Out(Logs::Detail, Logs::Inventory, "returning item %s in weapon slot %i to inventory",
 						InvItem->GetItem()->Name, WeaponSlot);
-						_log(INVENTORY__BANDOLIER, "returning item %s in weapon slot %i to inventory", InvItem->GetItem()->Name, WeaponSlot);
+						Log.Out(Logs::Detail, Logs::Inventory, "returning item %s in weapon slot %i to inventory", InvItem->GetItem()->Name, WeaponSlot);
 						if (MoveItemToInventory(InvItem)) {
 							database.SaveInventory(character_id, 0, WeaponSlot);
-							Log.Out(Logs::General, Logs::Error, "Char: %s, ERROR returning %s to inventory", GetName(),
+							Log.Out(Logs::General, Logs::Error, "returning item %s in weapon slot %i to inventory", InvItem->GetItem()->Name, WeaponSlot);
 						}
 						else {
-							_log(INVENTORY__BANDOLIER, "Char: %s, ERROR returning %s to inventory", GetName(), InvItem->GetItem()->Name);
+							Log.Out(Logs::General, Logs::Error, "Char: %s, ERROR returning %s to inventory", GetName(), InvItem->GetItem()->Name);
 						}
 						safe_delete(InvItem);
 					}
@@ -2826,7 +2826,7 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 		log = true;
 
 	if (log) {
-		_Log.Out(Logs::General, Logs::Error, "Client::InterrogateInventory() called for %s by %s with an error state of %s", GetName(), requester->GetName(), (error ? "TRUE" : "FALSE"));
+		Log.Out(Logs::General, Logs::Error, "Client::InterrogateInventory() called for %s by %s with an error state of %s", GetName(), requester->GetName(), (error ? "TRUE" : "FALSE"));
 	}
 	if (!silent) {
 		requester->Message(1, "--- Inventory Interrogation Report for %s (requested by: %s, error state: %s) ---", GetName(), requester->GetName(), (error ? "TRUE" : "FALSE"));
