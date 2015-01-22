@@ -4159,7 +4159,7 @@ uint32 Database::GetGuildIDByCharID(uint32 char_id)
 	return atoi(row[0]);
 }
 
-void Database::LoadLogSysSettings(EQEmuLogSys::LogSettings* log_settings){
+void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings){
 	std::string query = 
 		"SELECT "
 		"log_category_id, "

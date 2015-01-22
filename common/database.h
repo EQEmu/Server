@@ -646,7 +646,7 @@ public:
 	void	AddReport(std::string who, std::string against, std::string lines);
 
 	/* EQEmuLogSys */
-	void	LoadLogSysSettings(EQEmuLogSys::LogSettings* log_settings);
+	void	LoadLogSettings(EQEmuLogSys::LogSettings* log_settings);
 
 private:
 	void DBInitVars();

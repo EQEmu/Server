@@ -52,7 +52,7 @@ public:
 	void LogMerchantTransaction(QSMerchantLogTransaction_Struct* QS, uint32 Items);
 	void GeneralQueryReceive(ServerPacket *pack);
 
-	void LoadLogSysSettings(EQEmuLogSys::LogSettings* log_settings);
+	void LoadLogSettings(EQEmuLogSys::LogSettings* log_settings);
 
 protected:
 	void HandleMysqlError(uint32 errnum);

@@ -184,7 +184,7 @@ int main(int argc, char** argv) {
 	guild_mgr.SetDatabase(&database);
 
 	/* Register Log System and Settings */
-	database.LoadLogSysSettings(Log.log_settings);
+	database.LoadLogSettings(Log.log_settings);
 	Log.StartFileLogs();
 
 	if (argc >= 2) {
