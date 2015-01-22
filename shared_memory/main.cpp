@@ -174,5 +174,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	Log.CloseFileLogs();
+
 	return 0;
 }
