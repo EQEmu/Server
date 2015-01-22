@@ -125,8 +125,8 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
         rowCount = (uint32)mysql_num_rows(res);
 
 	MySQLRequestResult requestResult(res, (uint32)mysql_affected_rows(&mysql), rowCount, (uint32)mysql_field_count(&mysql), (uint32)mysql_insert_id(&mysql));
-
-	Log.Out(Logs::General, Logs::MySQLQuery, "%s (%u rows returned)", query, rowCount, requestResult.RowCount());
+	
+	Log.Out(Logs::General, Logs::MySQLQuery, "%s (%u rows returned, %f seconds)", query, rowCount);
 
 	return requestResult;
 }
