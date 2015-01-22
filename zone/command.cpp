@@ -10673,8 +10673,8 @@ void command_logs(Client *c, const Seperator *sep){
 	}
 	else {
 		c->Message(0, "#logs usage:");
-		c->Message(0, "--- #logs reload_all - Reloads all rules defined in database in world and all zone processes");
-		c->Message(0, "--- #logs list_settings - Shows current log settings and categories");
+		c->Message(0, "--- #logs reload_all - Reload all settings in world and all zone processes with what is defined in the database");
+		c->Message(0, "--- #logs list_settings - Shows current log settings and categories loaded into the current process' memory");
 		c->Message(0, "--- #logs set [console|file|gmsay] <category_id> <debug_level (1-3)> - Sets log settings during the lifetime of the zone");
 	}
 }
