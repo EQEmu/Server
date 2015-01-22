@@ -63,6 +63,8 @@ int main(int argc, char **argv) {
 	ExportSkillCaps(&database);
 	ExportBaseData(&database);
 
+	Log.CloseFileLogs();
+
 	return 0;
 }
 
