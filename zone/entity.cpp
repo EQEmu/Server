@@ -3509,32 +3509,6 @@ bool EntityList::LimitCheckName(const char *npc_name)
 	return true;
 }
 
-void EntityList::RadialSetLogging(Mob *around, bool enabled, bool clients,
-		bool non_clients, float range)
-{
-	float range2 = range * range;
-
-	auto it = mob_list.begin();
-	while (it != mob_list.end()) {
-		Mob *mob = it->second;
-
-		++it;
-
-		if (mob->IsClient()) {
-			if (!clients)
-				continue;
-		} else {
-			if (!non_clients)
-				continue;
-		}
-
-		if (ComparativeDistance(around->GetPosition(), mob->GetPosition()) > range2)
-			continue;
-
-	
-	}
-}
-
 void EntityList::UpdateHoTT(Mob *target)
 {
 	auto it = client_list.begin();

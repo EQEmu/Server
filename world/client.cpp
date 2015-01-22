@@ -1442,7 +1442,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 		}
 	}
 	else {
-		clog(WORLD__CLIENT, "Found 'TitaniumStartZoneID' rule setting: %i", RuleI(World, TitaniumStartZoneID));
+		Log.Out(Logs::General, Logs::World_Server, "Found 'TitaniumStartZoneID' rule setting: %i", RuleI(World, TitaniumStartZoneID));
 		if (RuleI(World, TitaniumStartZoneID) > 0) { 	/* if there's a startzone variable put them in there */
 		
 			pp.zone_id = RuleI(World, TitaniumStartZoneID);
