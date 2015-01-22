@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/22/2015 ==
+Akkadius: Massive Log System overhaul, see: http://wiki.eqemulator.org/p?Logging_System_Overhaul&frm=Main
+	
 == 01/21/2015 ==
 Uleat: Added `light` field to npctypes load query (all six clients tested positive for functionality.)
 Note: This only affects 'innate' light. Equipment (other) light is still in-work.
