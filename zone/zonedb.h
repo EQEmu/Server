@@ -5,6 +5,7 @@
 #include "../common/eq_packet_structs.h"
 #include "position.h"
 #include "../common/faction.h"
+#include "../common/eqemu_logsys.h"
 
 class Client;
 class Corpse;

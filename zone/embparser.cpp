@@ -18,7 +18,7 @@
 
 #ifdef EMBPERL
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/seperator.h"
 #include "../common/misc_functions.h"
 #include "../common/string_util.h"
@@ -140,7 +140,7 @@ void PerlembParser::ReloadQuests() {
 			perl = nullptr;
 		}
 
-		LogFile->write(EQEmuLog::Status, "Error re-initializing perlembed: %s", e.what());
+		Log.Out(Logs::General, Logs::Status, "Error re-initializing perlembed: %s", e.what());
 		throw e.what();
 	}
 

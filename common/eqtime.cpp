@@ -17,7 +17,8 @@
 */
 
 #include <fstream>
-#include "../common/debug.h"
+#include "../common/global_define.h"
+#include "../common/eqemu_logsys.h"
 #include "../common/eqtime.h"
 #include "../common/eq_packet_structs.h"
 #include <memory.h>
@@ -140,11 +141,10 @@ bool EQTime::saveFile(const char *filename)
 	of.open(filename);
 	if(!of)
 	{
-		LogFile->write(EQEmuLog::Error, "EQTime::saveFile failed: Unable to open file '%s'", filename);
+		Log.Out(Logs::General, Logs::Error, "EQTime::saveFile failed: Unable to open file '%s'", filename);
 		return false;
 	}
 	//Enable for debugging
-	//std::cout << "SAVE: day=" << (long)eqTime.start_eqtime.day << ";hour=" << (long)eqTime.start_eqtime.hour << ";min=" << (long)eqTime.start_eqtime.minute << ";mon=" << (long)eqTime.start_eqtime.month << ";yr=" << eqTime.start_eqtime.year << ";timet=" << eqTime.start_realtime << std::endl;
 	of << EQT_VERSION << std::endl;
 	of << (long)eqTime.start_eqtime.day << std::endl;
 	of << (long)eqTime.start_eqtime.hour << std::endl;
@@ -164,14 +164,14 @@ bool EQTime::loadFile(const char *filename)
 	in.open(filename);
 	if(!in)
 	{
-		LogFile->write(EQEmuLog::Error, "Could not load EQTime file %s", filename);
+		Log.Out(Logs::General, Logs::Error, "Could not load EQTime file %s", filename);
 		return false;
 	}
 	in >> version;
 	in.ignore(80, '\n');
 	if(version != EQT_VERSION)
 	{
-		LogFile->write(EQEmuLog::Error, "'%s' is NOT a valid EQTime file. File version is %i, EQTime version is %i", filename, version, EQT_VERSION);
+		Log.Out(Logs::General, Logs::Error, "'%s' is NOT a valid EQTime file. File version is %i, EQTime version is %i", filename, version, EQT_VERSION);
 		return false;
 	}
 	//in >> eqTime.start_eqtime.day;
@@ -194,7 +194,6 @@ bool EQTime::loadFile(const char *filename)
 	in.ignore(80, '\n');
 	in >> eqTime.start_realtime;
 	//Enable for debugging...
-	//std::cout << "LOAD: day=" << (long)eqTime.start_eqtime.day << ";hour=" << (long)eqTime.start_eqtime.hour << ";min=" << (long)eqTime.start_eqtime.minute << ";mon=" << (long)eqTime.start_eqtime.month << ";yr=" << eqTime.start_eqtime.year << ";timet=" << eqTime.start_realtime << std::endl;
 	in.close();
 	return true;
 }

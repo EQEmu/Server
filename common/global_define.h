@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2015 EQEMu Development Team (http://eqemu.org)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -16,25 +16,26 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "debug.h"
-#include "logsys.h"
-#include "string_util.h"
+#if defined(_DEBUG) && defined(WIN32)
+	#ifndef _CRTDBG_MAP_ALLOC
+		#include <stdlib.h>
+		#include <crtdbg.h>
+	#endif
+#endif
 
-#include <stdarg.h>
-#include <stdio.h>
+#ifndef EQDEBUG_H
+#define EQDEBUG_H
 
-#include <string>
+#define _WINSOCKAPI_	//stupid windows, trying to fix the winsock2 vs. winsock issues
+#if defined(WIN32) && ( defined(PACKETCOLLECTOR) || defined(COLLECTOR) )
+	// Packet Collector on win32 requires winsock.h due to latest pcap.h
+	// winsock.h must come before windows.h
+	#include <winsock.h>
+#endif
 
-void log_message(LogType type, const char *fmt, ...) {
-	va_list args;
-	va_start(args, fmt);
-	log_messageVA(type, fmt, args);
-	va_end(args);
-}
+#ifdef _WINDOWS
+	#include <windows.h>
+	#include <winsock2.h>
+#endif
 
-void log_messageVA(LogType type, const char *fmt, va_list args) {
-	std::string prefix_buffer = StringFormat("[%s] ", log_type_info[type].name);
-	
-	LogFile->writePVA(EQEmuLog::Debug, prefix_buffer.c_str(), fmt, args);
-}
-
+#endif

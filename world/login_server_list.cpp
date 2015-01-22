@@ -15,7 +15,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include <iostream>
 #include <string.h>
 #include <stdio.h>
@@ -134,7 +134,7 @@ bool LoginServerList::SendPacket(ServerPacket* pack) {
 bool LoginServerList::SendAccountUpdate(ServerPacket* pack) {
 	LinkedListIterator<LoginServer*> iterator(list);
 
-	_log(WORLD__LS, "Requested to send ServerOP_LSAccountUpdate packet to all loginservers");
+	Log.Out(Logs::Detail, Logs::World_Server, "Requested to send ServerOP_LSAccountUpdate packet to all loginservers");
 	iterator.Reset();
 	while(iterator.MoreElements()){
 		if(iterator.GetData()->CanUpdate()) {

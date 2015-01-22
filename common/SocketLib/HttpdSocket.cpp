@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifdef _WIN32
 #pragma warning(disable:4786)
 #endif
-#include "../debug.h"
+#include "../global_define.h"
 #include "Utility.h"
 #include "HttpdCookies.h"
 #include "HttpdForm.h"
@@ -194,7 +194,6 @@ void HttpdSocket::OnHeaderComplete()
 
 void HttpdSocket::OnData(const char *p,size_t l)
 {
-//printf("Got %d bytes: %.*s\n", l, l, p);
 	if (m_file)
 	{
 		m_file -> fwrite(p,1,l);

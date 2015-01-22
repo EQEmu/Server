@@ -98,7 +98,6 @@ string GetToken(uchar *&Buffer, int &Position)
 		++Position;
 	}
 	++Position;
-	//printf("Returning %s\n", Token.c_str());
 	return Token;
 }
 

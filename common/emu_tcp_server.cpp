@@ -1,4 +1,4 @@
-#include "debug.h"
+#include "global_define.h"
 #include "emu_tcp_server.h"
 #include "emu_tcp_connection.h"
 

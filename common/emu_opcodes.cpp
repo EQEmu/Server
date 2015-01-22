@@ -16,7 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 04111-1307 USA
 */
 
-#include "debug.h"
+#include "global_define.h"
 #include "emu_opcodes.h"
 
 const char *OpcodeNames[_maxEmuOpcode+1] = {

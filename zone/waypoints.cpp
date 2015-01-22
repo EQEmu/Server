@@ -15,7 +15,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #ifdef _EQDEBUG
 #include <iostream>
 #endif
@@ -88,7 +88,7 @@ void NPC::StopWandering()
 	roamer=false;
 	CastToNPC()->SetGrid(0);
 	SendPosition();
-	mlog(QUESTS__PATHING, "Stop Wandering requested.");
+	Log.Out(Logs::Detail, Logs::Pathing, "Stop Wandering requested.");
 	return;
 }
 
@@ -107,16 +107,16 @@ void NPC::ResumeWandering()
 				cur_wp=save_wp;
 				UpdateWaypoint(cur_wp);	// have him head to last destination from here
 			}
-			mlog(QUESTS__PATHING, "Resume Wandering requested. Grid %d, wp %d", GetGrid(), cur_wp);
+			Log.Out(Logs::Detail, Logs::Pathing, "Resume Wandering requested. Grid %d, wp %d", GetGrid(), cur_wp);
 		}
 		else if (AIwalking_timer->Enabled())
 		{	// we are at a waypoint paused normally
-			mlog(QUESTS__PATHING, "Resume Wandering on timed pause. Grid %d, wp %d", GetGrid(), cur_wp);
+			Log.Out(Logs::Detail, Logs::Pathing, "Resume Wandering on timed pause. Grid %d, wp %d", GetGrid(), cur_wp);
 			AIwalking_timer->Trigger();	// disable timer to end pause now
 		}
 		else
 		{
-			LogFile->write(EQEmuLog::Error, "NPC not paused - can't resume wandering: %lu", (unsigned long)GetNPCTypeID());
+			Log.Out(Logs::General, Logs::Error, "NPC not paused - can't resume wandering: %lu", (unsigned long)GetNPCTypeID());
 			return;
 		}
 
@@ -131,7 +131,7 @@ void NPC::ResumeWandering()
 	}
 	else
 	{
-		LogFile->write(EQEmuLog::Error, "NPC not on grid - can't resume wandering: %lu", (unsigned long)GetNPCTypeID());
+		Log.Out(Logs::General, Logs::Error, "NPC not on grid - can't resume wandering: %lu", (unsigned long)GetNPCTypeID());
 	}
 	return;
 }
@@ -143,7 +143,7 @@ void NPC::PauseWandering(int pausetime)
 	if (GetGrid() != 0)
 	{
 		DistractedFromGrid = true;
-		mlog(QUESTS__PATHING, "Paused Wandering requested. Grid %d. Resuming in %d ms (0=not until told)", GetGrid(), pausetime);
+		Log.Out(Logs::Detail, Logs::Pathing, "Paused Wandering requested. Grid %d. Resuming in %d ms (0=not until told)", GetGrid(), pausetime);
 		SendPosition();
 		if (pausetime<1)
 		{	// negative grid number stops him dead in his tracks until ResumeWandering()
@@ -154,7 +154,7 @@ void NPC::PauseWandering(int pausetime)
 			AIwalking_timer->Start(pausetime*1000); // set the timer
 		}
 	} else {
-		LogFile->write(EQEmuLog::Error, "NPC not on grid - can't pause wandering: %lu", (unsigned long)GetNPCTypeID());
+		Log.Out(Logs::General, Logs::Error, "NPC not on grid - can't pause wandering: %lu", (unsigned long)GetNPCTypeID());
 	}
 	return;
 }
@@ -166,7 +166,7 @@ void NPC::MoveTo(const xyz_heading& position, bool saveguardspot)
 		if (GetGrid() < 0)
 		{	// currently stopped by a quest command
 			SetGrid( 0 - GetGrid());	// get him moving again
-			mlog(AI__WAYPOINTS, "MoveTo during quest wandering. Canceling quest wandering and going back to grid %d when MoveTo is done.", GetGrid());
+			Log.Out(Logs::Detail, Logs::AI, "MoveTo during quest wandering. Canceling quest wandering and going back to grid %d when MoveTo is done.", GetGrid());
 		}
 		AIwalking_timer->Disable();	// disable timer in case he is paused at a wp
 		if (cur_wp>=0)
@@ -174,14 +174,14 @@ void NPC::MoveTo(const xyz_heading& position, bool saveguardspot)
 			save_wp=cur_wp;	// save the current waypoint
 			cur_wp=-1;		// flag this move as quest controlled
 		}
-		mlog(AI__WAYPOINTS, "MoveTo %s, pausing regular grid wandering. Grid %d, save_wp %d",to_string(static_cast<xyz_location>(position)).c_str(), -GetGrid(), save_wp);
+		Log.Out(Logs::Detail, Logs::AI, "MoveTo %s, pausing regular grid wandering. Grid %d, save_wp %d",to_string(static_cast<xyz_location>(position)).c_str(), -GetGrid(), save_wp);
 	}
 	else
 	{	// not on a grid
 		roamer=true;
 		save_wp=0;
 		cur_wp=-2;		// flag as quest controlled w/no grid
-		mlog(AI__WAYPOINTS, "MoveTo %s without a grid.", to_string(static_cast<xyz_location>(position)).c_str());
+		Log.Out(Logs::Detail, Logs::AI, "MoveTo %s without a grid.", to_string(static_cast<xyz_location>(position)).c_str());
 	}
 	if (saveguardspot)
 	{
@@ -193,7 +193,7 @@ void NPC::MoveTo(const xyz_heading& position, bool saveguardspot)
 		if(m_GuardPoint.m_Heading  == -1)
 			m_GuardPoint.m_Heading  = this->CalculateHeadingToTarget(position.m_X, position.m_Y);
 
-		mlog(AI__WAYPOINTS, "Setting guard position to %s", to_string(static_cast<xyz_location>(m_GuardPoint)).c_str());
+		Log.Out(Logs::Detail, Logs::AI, "Setting guard position to %s", to_string(static_cast<xyz_location>(m_GuardPoint)).c_str());
 	}
 
     m_CurrentWayPoint = position;
@@ -206,7 +206,7 @@ void NPC::MoveTo(const xyz_heading& position, bool saveguardspot)
 void NPC::UpdateWaypoint(int wp_index)
 {
 	if(wp_index >= static_cast<int>(Waypoints.size())) {
-		mlog(AI__WAYPOINTS, "Update to waypoint %d failed. Not found.", wp_index);
+		Log.Out(Logs::Detail, Logs::AI, "Update to waypoint %d failed. Not found.", wp_index);
 		return;
 	}
 	std::vector<wplist>::iterator cur;
@@ -215,7 +215,7 @@ void NPC::UpdateWaypoint(int wp_index)
 
     m_CurrentWayPoint = xyz_heading(cur->x, cur->y, cur->z, cur->heading);
 	cur_wp_pause = cur->pause;
-	mlog(AI__WAYPOINTS, "Next waypoint %d: (%.3f, %.3f, %.3f, %.3f)", wp_index, m_CurrentWayPoint.m_X, m_CurrentWayPoint.m_Y, m_CurrentWayPoint.m_Z, m_CurrentWayPoint.m_Heading);
+	Log.Out(Logs::Detail, Logs::AI, "Next waypoint %d: (%.3f, %.3f, %.3f, %.3f)", wp_index, m_CurrentWayPoint.m_X, m_CurrentWayPoint.m_Y, m_CurrentWayPoint.m_Z, m_CurrentWayPoint.m_Heading);
 
 	//fix up pathing Z
 	if(zone->HasMap() && RuleB(Map, FixPathingZAtWaypoints))
@@ -421,7 +421,7 @@ void NPC::SetWaypointPause()
 
 void NPC::SaveGuardSpot(bool iClearGuardSpot) {
 	if (iClearGuardSpot) {
-		mlog(AI__WAYPOINTS, "Clearing guard order.");
+		Log.Out(Logs::Detail, Logs::AI, "Clearing guard order.");
 		m_GuardPoint = xyz_heading(0, 0, 0, 0);
 	}
 	else {
@@ -429,14 +429,14 @@ void NPC::SaveGuardSpot(bool iClearGuardSpot) {
 
 		if(m_GuardPoint.m_Heading == 0)
 			m_GuardPoint.m_Heading = 0.0001;		//hack to make IsGuarding simpler
-		mlog(AI__WAYPOINTS, "Setting guard position to %s", to_string(static_cast<xyz_location>(m_GuardPoint)).c_str());
+		Log.Out(Logs::Detail, Logs::AI, "Setting guard position to %s", to_string(static_cast<xyz_location>(m_GuardPoint)).c_str());
 	}
 }
 
 void NPC::NextGuardPosition() {
 	if (!CalculateNewPosition2(m_GuardPoint.m_X, m_GuardPoint.m_Y, m_GuardPoint.m_Z, GetMovespeed())) {
 		SetHeading(m_GuardPoint.m_Heading);
-		mlog(AI__WAYPOINTS, "Unable to move to next guard position. Probably rooted.");
+		Log.Out(Logs::Detail, Logs::AI, "Unable to move to next guard position. Probably rooted.");
 	}
 	else if((m_Position.m_X == m_GuardPoint.m_X) && (m_Position.m_Y == m_GuardPoint.m_Y) && (m_Position.m_Z == m_GuardPoint.m_Z))
 	{
@@ -502,15 +502,15 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	if ((m_Position.m_X-x == 0) && (m_Position.m_Y-y == 0)) {//spawn is at target coords
 		if(m_Position.m_Z-z != 0) {
 			m_Position.m_Z = z;
-			mlog(AI__WAYPOINTS, "Calc Position2 (%.3f, %.3f, %.3f): Jumping pure Z.", x, y, z);
+			Log.Out(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f): Jumping pure Z.", x, y, z);
 			return true;
 		}
-		mlog(AI__WAYPOINTS, "Calc Position2 (%.3f, %.3f, %.3f) inWater=%d: We are there.", x, y, z, inWater);
+		Log.Out(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f) inWater=%d: We are there.", x, y, z, inWater);
 		return false;
 	}
 	else if ((ABS(m_Position.m_X - x) < 0.1) && (ABS(m_Position.m_Y - y) < 0.1))
 	{
-		mlog(AI__WAYPOINTS, "Calc Position2 (%.3f, %.3f, %.3f): X/Y difference <0.1, Jumping to target.", x, y, z);
+		Log.Out(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f): X/Y difference <0.1, Jumping to target.", x, y, z);
 
 		if(IsNPC()) {
 			entity_list.ProcessMove(CastToNPC(), x, y, z);
@@ -536,7 +536,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		m_Position.m_Y = new_y;
 		m_Position.m_Z = new_z;
 
-		mlog(AI__WAYPOINTS, "Calculating new position2 to (%.3f, %.3f, %.3f), old vector (%.3f, %.3f, %.3f)", x, y, z, m_TargetV.m_X, m_TargetV.m_Y, m_TargetV.m_Z);
+		Log.Out(Logs::Detail, Logs::AI, "Calculating new position2 to (%.3f, %.3f, %.3f), old vector (%.3f, %.3f, %.3f)", x, y, z, m_TargetV.m_X, m_TargetV.m_Y, m_TargetV.m_Z);
 
 		uint8 NPCFlyMode = 0;
 
@@ -555,7 +555,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 
 				float newz = zone->zonemap->FindBestZ(dest, nullptr) + 2.0f;
 
-				mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.m_X,m_Position.m_Y,m_Position.m_Z);
+				Log.Out(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.m_X,m_Position.m_Y,m_Position.m_Z);
 
 				if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
 				{
@@ -596,7 +596,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	//pRunAnimSpeed = (int8)(speed*NPC_RUNANIM_RATIO);
 	//speed *= NPC_SPEED_MULTIPLIER;
 
-	mlog(AI__WAYPOINTS, "Calculating new position2 to (%.3f, %.3f, %.3f), new vector (%.3f, %.3f, %.3f) rate %.3f, RAS %d", x, y, z, m_TargetV.m_X, m_TargetV.m_Y, m_TargetV.m_Z, speed, pRunAnimSpeed);
+	Log.Out(Logs::Detail, Logs::AI, "Calculating new position2 to (%.3f, %.3f, %.3f), new vector (%.3f, %.3f, %.3f) rate %.3f, RAS %d", x, y, z, m_TargetV.m_X, m_TargetV.m_Y, m_TargetV.m_Z, speed, pRunAnimSpeed);
 
 	// --------------------------------------------------------------------------
 	// 2: get unit vector
@@ -631,7 +631,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 			m_Position.m_Z = new_z;
 			m_Position.m_Heading = CalculateHeadingToTarget(x, y);
 			tar_ndx=22-numsteps;
-			mlog(AI__WAYPOINTS, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", m_Position.m_X, m_Position.m_Y, m_Position.m_Z, numsteps);
+			Log.Out(Logs::Detail, Logs::AI, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", m_Position.m_X, m_Position.m_Y, m_Position.m_Z, numsteps);
 		}
 		else
 		{
@@ -643,7 +643,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 			m_Position.m_Y = y;
 			m_Position.m_Z = z;
 
-			mlog(AI__WAYPOINTS, "Only a single step to get there... jumping.");
+			Log.Out(Logs::Detail, Logs::AI, "Only a single step to get there... jumping.");
 
 		}
 	}
@@ -662,7 +662,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		m_Position.m_Y = new_y;
 		m_Position.m_Z = new_z;
 		m_Position.m_Heading = CalculateHeadingToTarget(x, y);
-		mlog(AI__WAYPOINTS, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", m_Position.m_X, m_Position.m_Y, m_Position.m_Z, numsteps);
+		Log.Out(Logs::Detail, Logs::AI, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", m_Position.m_X, m_Position.m_Y, m_Position.m_Z, numsteps);
 	}
 
 	uint8 NPCFlyMode = 0;
@@ -682,7 +682,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-			mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.m_X,m_Position.m_Y,m_Position.m_Z);
+			Log.Out(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.m_X,m_Position.m_Y,m_Position.m_Z);
 
 			if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
 			{
@@ -740,7 +740,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 			moved=false;
 		}
 		SetRunAnimSpeed(0);
-		mlog(AI__WAYPOINTS, "Rooted while calculating new position to (%.3f, %.3f, %.3f)", x, y, z);
+		Log.Out(Logs::Detail, Logs::AI, "Rooted while calculating new position to (%.3f, %.3f, %.3f)", x, y, z);
 		return true;
 	}
 
@@ -754,7 +754,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 	pRunAnimSpeed = (uint8)(speed*NPC_RUNANIM_RATIO);
 	speed *= NPC_SPEED_MULTIPLIER;
 
-	mlog(AI__WAYPOINTS, "Calculating new position to (%.3f, %.3f, %.3f) vector (%.3f, %.3f, %.3f) rate %.3f RAS %d", x, y, z, m_TargetV.m_X, m_TargetV.m_Y, m_TargetV.m_Z, speed, pRunAnimSpeed);
+	Log.Out(Logs::Detail, Logs::AI, "Calculating new position to (%.3f, %.3f, %.3f) vector (%.3f, %.3f, %.3f) rate %.3f RAS %d", x, y, z, m_TargetV.m_X, m_TargetV.m_Y, m_TargetV.m_Z, speed, pRunAnimSpeed);
 
 	// --------------------------------------------------------------------------
 	// 2: get unit vector
@@ -771,7 +771,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 		m_Position.m_X = x;
 		m_Position.m_Y = y;
 		m_Position.m_Z = z;
-		mlog(AI__WAYPOINTS, "Close enough, jumping to waypoint");
+		Log.Out(Logs::Detail, Logs::AI, "Close enough, jumping to waypoint");
 	}
 	else {
 		float new_x = m_Position.m_X + m_TargetV.m_X*tar_vector;
@@ -784,7 +784,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 		m_Position.m_X = new_x;
 		m_Position.m_Y = new_y;
 		m_Position.m_Z = new_z;
-		mlog(AI__WAYPOINTS, "Next position (%.3f, %.3f, %.3f)", m_Position.m_X, m_Position.m_Y, m_Position.m_Z);
+		Log.Out(Logs::Detail, Logs::AI, "Next position (%.3f, %.3f, %.3f)", m_Position.m_X, m_Position.m_Y, m_Position.m_Z);
 	}
 
 	uint8 NPCFlyMode = 0;
@@ -804,7 +804,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr) + 2.0f;
 
-			mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.m_X,m_Position.m_Y,m_Position.m_Z);
+			Log.Out(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.m_X,m_Position.m_Y,m_Position.m_Z);
 
 			if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
 			{
@@ -854,7 +854,7 @@ void NPC::AssignWaypoints(int32 grid) {
 	std::string query = StringFormat("SELECT `type`, `type2` FROM `grid` WHERE `id` = %i AND `zoneid` = %i", grid, zone->GetZoneID());
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "MySQL Error while trying to assign grid %u to mob %s: %s", grid, name, results.ErrorMessage().c_str());
+        Log.Out(Logs::General, Logs::Error, "MySQL Error while trying to assign grid %u to mob %s: %s", grid, name, results.ErrorMessage().c_str());
         return;
 	}
 
@@ -875,7 +875,7 @@ void NPC::AssignWaypoints(int32 grid) {
                         "ORDER BY `number`", grid, zone->GetZoneID());
     results = database.QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "MySQL Error while trying to assign waypoints from grid %u to mob %s: %s", grid, name, results.ErrorMessage().c_str());
+        Log.Out(Logs::General, Logs::Error, "MySQL Error while trying to assign waypoints from grid %u to mob %s: %s", grid, name, results.ErrorMessage().c_str());
         return;
     }
 
@@ -930,7 +930,7 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 	m_Position.m_X = new_x;
 	m_Position.m_Y = new_y;
 	m_Position.m_Z = new_z;
-	mlog(AI__WAYPOINTS, "Sent To (%.3f, %.3f, %.3f)", new_x, new_y, new_z);
+	Log.Out(Logs::Detail, Logs::AI, "Sent To (%.3f, %.3f, %.3f)", new_x, new_y, new_z);
 
 	if(flymode == FlyMode1)
 		return;
@@ -946,7 +946,7 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-			mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.m_X,m_Position.m_Y,m_Position.m_Z);
+			Log.Out(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.m_X,m_Position.m_Y,m_Position.m_Z);
 
 			if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaSendTo)) // Sanity check.
 				m_Position.m_Z = newz + 1;
@@ -977,7 +977,7 @@ void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-			mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.m_X,m_Position.m_Y,m_Position.m_Z);
+			Log.Out(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.m_X,m_Position.m_Y,m_Position.m_Z);
 
 			if( (newz > -2000) && ABS(newz-dest.z) < RuleR(Map, FixPathingZMaxDeltaSendTo)) // Sanity check.
 				m_Position.m_Z = newz + 1;
@@ -990,7 +990,6 @@ int	ZoneDatabase::GetHighestGrid(uint32 zoneid) {
 	std::string query = StringFormat("SELECT COALESCE(MAX(id), 0) FROM grid WHERE zoneid = %i", zoneid);
 	auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error in GetHighestGrid query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
 
@@ -1007,7 +1006,6 @@ uint8 ZoneDatabase::GetGridType2(uint32 grid, uint16 zoneid) {
 	std::string query = StringFormat("SELECT type2 FROM grid WHERE id = %i AND zoneid = %i", grid, zoneid);
 	auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error in GetGridType2 query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
 
@@ -1028,7 +1026,6 @@ bool ZoneDatabase::GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* 
                                     "WHERE gridid = %i AND number = %i AND zoneid = %i", grid, num, zoneid);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error in GetWaypoints query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return false;
     }
 
@@ -1056,7 +1053,6 @@ void ZoneDatabase::AssignGrid(Client *client, const xy_location& location, uint3
                                     zone->GetShortName(), (int)location.m_X, (int)location.m_Y);
     auto results = QueryDatabase(query);
 	if(!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "Error querying spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -1070,7 +1066,6 @@ void ZoneDatabase::AssignGrid(Client *client, const xy_location& location, uint3
                             zone->GetShortName(), location.m_X, _GASSIGN_TOLERANCE, location.m_Y, _GASSIGN_TOLERANCE);
         results = QueryDatabase(query);
 		if (!results.Success()) {
-			LogFile->write(EQEmuLog::Error, "Error querying fuzzy spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 			return;
 		}
 
@@ -1099,7 +1094,6 @@ void ZoneDatabase::AssignGrid(Client *client, const xy_location& location, uint3
 	results = QueryDatabase(query);
 	if (!results.Success())
 	{
-		LogFile->write(EQEmuLog::Error, "Error updating spawn2 '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return;
     }
 
@@ -1137,7 +1131,6 @@ void ZoneDatabase::ModifyGrid(Client *client, bool remove, uint32 id, uint8 type
                                             "VALUES (%i, %i, %i, %i)", id, zoneid, type, type2);
         auto results = QueryDatabase(query);
         if (!results.Success()) {
-            LogFile->write(EQEmuLog::Error, "Error creating grid entry '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
             return;
         }
 
@@ -1149,17 +1142,9 @@ void ZoneDatabase::ModifyGrid(Client *client, bool remove, uint32 id, uint8 type
 
     std::string query = StringFormat("DELETE FROM grid where id=%i", id);
     auto results = QueryDatabase(query);
-    if (!results.Success())
-		LogFile->write(EQEmuLog::Error, "Error deleting grid '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
-	else if(client)
-        client->LogSQL(query.c_str());
 
     query = StringFormat("DELETE FROM grid_entries WHERE zoneid = %i AND gridid = %i", zoneid, id);
     results = QueryDatabase(query);
-    if(!results.Success())
-        LogFile->write(EQEmuLog::Error, "Error deleting grid entries '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
-    else if(client)
-        client->LogSQL(query.c_str());
 
 }
 
@@ -1173,7 +1158,6 @@ void ZoneDatabase::AddWP(Client *client, uint32 gridid, uint32 wpnum, const xyz_
                                     gridid, zoneid, wpnum, position.m_X, position.m_Y, position.m_Z, pause, position.m_Heading);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "Error adding waypoint '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -1199,7 +1183,6 @@ void ZoneDatabase::DeleteWaypoint(Client *client, uint32 grid_num, uint32 wp_num
                                     grid_num, zoneid, wp_num);
     auto results = QueryDatabase(query);
 	if(!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error deleting waypoint '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -1226,7 +1209,6 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *client, uint32 spawn2id, const xyz_he
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		// Query error
-		LogFile->write(EQEmuLog::Error, "Error setting pathgrid '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
 
@@ -1245,18 +1227,11 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *client, uint32 spawn2id, const xyz_he
 
 		query = StringFormat("INSERT INTO grid SET id = '%i', zoneid = %i, type ='%i', type2 = '%i'",
 							grid_num, zoneid, type1, type2);
-		results = QueryDatabase(query);
-		if(!results.Success())
-			LogFile->write(EQEmuLog::Error, "Error adding grid '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
-		else if(client)
-			client->LogSQL(query.c_str());
+		QueryDatabase(query);
 
 		query = StringFormat("UPDATE spawn2 SET pathgrid = '%i' WHERE id = '%i'", grid_num, spawn2id);
-		results = QueryDatabase(query);
-		if(!results.Success())
-			LogFile->write(EQEmuLog::Error, "Error updating spawn2 pathing '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
-		else if(client)
-			client->LogSQL(query.c_str());
+		QueryDatabase(query);
+
 	}
 	else	// NPC had a grid assigned to it
 		createdNewGrid = false;
@@ -1266,7 +1241,6 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *client, uint32 spawn2id, const xyz_he
 
 	results = QueryDatabase(query);
 	if(!results.Success()) { // Query error
-		LogFile->write(EQEmuLog::Error, "Error getting next waypoint id '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
 
@@ -1280,10 +1254,6 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *client, uint32 spawn2id, const xyz_he
 						"VALUES (%i, %i, %i, %f, %f, %f, %i, %f)",
 						grid_num, zoneid, next_wp_num, position.m_X, position.m_Y, position.m_Z, pause, position.m_Heading);
 	results = QueryDatabase(query);
-	if(!results.Success())
-		LogFile->write(EQEmuLog::Error, "Error adding grid entry '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
-	else if(client)
-		client->LogSQL(query.c_str());
 
 	return createdNewGrid? grid_num: 0;
 }
@@ -1293,7 +1263,6 @@ uint32 ZoneDatabase::GetFreeGrid(uint16 zoneid) {
 	std::string query = StringFormat("SELECT max(id) FROM grid WHERE zoneid = %i", zoneid);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error in GetFreeGrid query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
 	}
 
@@ -1313,7 +1282,6 @@ int ZoneDatabase::GetHighestWaypoint(uint32 zoneid, uint32 gridid) {
                                     "WHERE zoneid = %i AND gridid = %i", zoneid, gridid);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error in GetHighestWaypoint query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
 	}
 

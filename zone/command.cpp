@@ -36,12 +36,13 @@
 #include <stdlib.h>
 #include <sstream>
 #include <algorithm>
+#include <ctime>
 
 #ifdef _WINDOWS
 #define strcasecmp _stricmp
 #endif
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/eq_packet.h"
 #include "../common/features.h"
 #include "../common/guilds.h"
@@ -50,8 +51,9 @@
 #include "../common/rulesys.h"
 #include "../common/serverinfo.h"
 #include "../common/string_util.h"
+#include "../common/eqemu_logsys.h"
 
-#include "client_logs.h"
+
 #include "command.h"
 #include "guild_mgr.h"
 #include "map.h"
@@ -162,7 +164,6 @@ int command_init(void) {
 		command_add("getvariable","[varname] - Get the value of a variable from the database",200,command_getvariable) ||
 		command_add("chat","[channel num] [message] - Send a channel message to all zones",200,command_chat) ||
 		command_add("npcloot","[show/money/add/remove] [itemid/all/money: pp gp sp cp] - Manipulate the loot an NPC is carrying",80,command_npcloot) ||
-		command_add("log","- Search character event log",80,command_log) ||
 		command_add("gm","- Turn player target's or your GM flag on or off",80,command_gm) ||
 		command_add("summon","[charname] - Summons your player/npc/corpse target, or charname if specified",80,command_summon) ||
 		command_add("zone","[zonename] [x] [y] [z] - Go to specified zone (coords optional)",50,command_zone) ||
@@ -346,8 +347,6 @@ int command_init(void) {
 #endif
 
 		command_add("opcode","- opcode management",250,command_opcode) ||
-		command_add("logs","[status|normal|error|debug|quest|all] - Subscribe to a log type",250,command_logs) ||
-		command_add("nologs","[status|normal|error|debug|quest|all] - Unsubscribe to a log type",250,command_nologs) ||
 		command_add("ban","[name] [reason]- Ban by character name",150,command_ban) ||
 		command_add("suspend","[name] [days] [reason] - Suspend by character name and for specificed number of days",150,command_suspend) ||
 		command_add("ipban","[IP address] - Ban IP by character name",200,command_ipban) ||
@@ -367,7 +366,6 @@ int command_init(void) {
 		command_add("path","- view and edit pathing",200,command_path) ||
 		command_add("flags","- displays the flags of you or your target",0,command_flags) ||
 		command_add("flagedit","- Edit zone flags on your target",100,command_flagedit) ||
-		command_add("mlog","- Manage log settings",250,command_mlog) ||
 		command_add("aggro","(range) [-v] - Display aggro information for all mobs 'range' distance from your target. -v is verbose faction info.",80,command_aggro) ||
 		command_add("hatelist"," - Display hate list for target.", 80,command_hatelist) ||
 		command_add("aggrozone","[aggro] - Aggro every mob in the zone with X aggro. Default is 0. Not recommend if you're not invulnerable.",100,command_aggrozone) ||
@@ -427,8 +425,11 @@ int command_init(void) {
 		command_add("open_shop", nullptr, 100, command_merchantopenshop) ||
 		command_add("merchant_close_shop", "Closes a merchant shop", 100, command_merchantcloseshop) ||
 		command_add("close_shop", nullptr, 100, command_merchantcloseshop) ||
+		command_add("tune", "Calculate ideal statical values related to combat.", 100, command_tune) ||
 		command_add("shownumhits", "Shows buffs numhits for yourself.", 0, command_shownumhits) ||
-		command_add("tune", "Calculate ideal statical values related to combat.", 100, command_tune)
+		command_add("crashtest", "- Crash the zoneserver", 255, command_crashtest) ||
+		command_add("logtest", "Performs log performance testing.", 250, command_logtest) ||
+		command_add("logs", "Manage anything to do with logs", 250, command_logs)
 		)
 	{
 		command_deinit();
@@ -445,15 +446,13 @@ int command_init(void) {
 		if ((itr=command_settings.find(cur->first))!=command_settings.end())
 		{
 			cur->second->access = itr->second;
-#if EQDEBUG >=5
-			LogFile->write(EQEmuLog::Debug, "command_init(): - Command '%s' set to access level %d." , cur->first.c_str(), itr->second);
-#endif
+			Log.Out(Logs::General, Logs::Commands, "command_init(): - Command '%s' set to access level %d.", cur->first.c_str(), itr->second);
 		}
 		else
 		{
 #ifdef COMMANDS_WARNINGS
 			if(cur->second->access == 0)
-				LogFile->write(EQEmuLog::Status, "command_init(): Warning: Command '%s' defaulting to access level 0!" , cur->first.c_str());
+				Log.Out(Logs::General, Logs::Status, "command_init(): Warning: Command '%s' defaulting to access level 0!" , cur->first.c_str());
 #endif
 		}
 	}
@@ -498,7 +497,7 @@ int command_add(const char *command_string, const char *desc, int access, CmdFun
 	std::string cstr(command_string);
 
 	if(commandlist.count(cstr) != 0) {
-		LogFile->write(EQEmuLog::Error, "command_add() - Command '%s' is a duplicate - check command.cpp." , command_string);
+		Log.Out(Logs::General, Logs::Error, "command_add() - Command '%s' is a duplicate - check command.cpp." , command_string);
 		return(-1);
 	}
 
@@ -572,12 +571,12 @@ int command_realdispatch(Client *c, const char *message)
 
 #ifdef COMMANDS_LOGGING
 	if(cur->access >= COMMANDS_LOGGING_MIN_STATUS) {
-		LogFile->write(EQEmuLog::Commands, "%s (%s) used command: %s (target=%s)", c->GetName(), c->AccountName(), message, c->GetTarget()?c->GetTarget()->GetName():"NONE");
+		Log.Out(Logs::General, Logs::Commands, "%s (%s) used command: %s (target=%s)", c->GetName(), c->AccountName(), message, c->GetTarget()?c->GetTarget()->GetName():"NONE");
 	}
 #endif
 
 	if(cur->function == nullptr) {
-		LogFile->write(EQEmuLog::Error, "Command '%s' has a null function\n", cstr.c_str());
+		Log.Out(Logs::General, Logs::Error, "Command '%s' has a null function\n", cstr.c_str());
 		return(-1);
 	} else {
 		//dispatch C++ command
@@ -969,59 +968,6 @@ void command_npcloot(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #npcloot [show/money/add/remove] [itemid/all/money: pp gp sp cp]");
 }
 
-void command_log(Client *c, const Seperator *sep)
-{
-	if(strlen(sep->arg[4]) == 0 || strlen(sep->arg[1]) == 0 || strlen(sep->arg[2]) == 0 || (strlen(sep->arg[3]) == 0 && atoi(sep->arg[3]) == 0))
-	{
-		c->Message(0,"#log <type> <byaccountid/bycharname> <querytype> <details> <target/none> <timestamp>");
-		c->Message(0,"(Req.) Types: 1) Command, 2) Merchant Buying, 3) Merchant Selling, 4) Loot, 5) Money Loot 6) Trade");
-		c->Message(0,"(Req.) byaccountid/bycharname: choose either byaccountid or bycharname and then set querytype to effect it");
-		c->Message(0,"(Req.) Details are information about the event, for example, partially an items name, or item id.");
-		c->Message(0,"Timestamp allows you to set a date to when the event occured: YYYYMMDDHHMMSS (Year,Month,Day,Hour,Minute,Second). It can be a partial timestamp.");
-		c->Message(0,"Note: when specifying a target, spaces in EQEMu use '_'");
-		return;
-		// help
-	}
-	CharacterEventLog_Struct* cel = new CharacterEventLog_Struct;
-	memset(cel,0,sizeof(CharacterEventLog_Struct));
-	if(strcasecmp(sep->arg[2], "byaccountid") == 0)
-		database.GetEventLogs("",sep->arg[5],atoi(sep->arg[3]),atoi(sep->arg[1]),sep->arg[4],sep->arg[6],cel);
-	else if(strcasecmp(sep->arg[2], "bycharname") == 0)
-		database.GetEventLogs(sep->arg[3],sep->arg[5],0,atoi(sep->arg[1]),sep->arg[4],sep->arg[6],cel);
-	else
-	{
-		c->Message(0,"Incorrect query type, use either byaccountid or bycharname");
-		safe_delete(cel);
-		return;
-	}
-	if(cel->count != 0)
-	{
-		uint32 count = 0;
-		bool cont = true;
-		while(cont)
-		{
-			if(count >= cel->count)
-				cont = false;
-			else if(cel->eld[count].id != 0)
-			{
-				c->Message(0,"ID: %i AccountName: %s AccountID: %i Status: %i CharacterName: %s TargetName: %s",cel->eld[count].id,cel->eld[count].accountname,cel->eld[count].account_id,cel->eld[count].status,cel->eld[count].charactername,cel->eld[count].targetname);
-
-				c->Message(0,"LogType: %s Timestamp: %s LogDetails: %s",cel->eld[count].descriptiontype,cel->eld[count].timestamp,cel->eld[count].details);
-			}
-			else
-				cont = false;
-			count++;
-			if(count > 20)
-			{
-				c->Message(0,"Please refine search.");
-				cont = false;
-			}
-		}
-	}
-	c->Message(0,"End of Query");
-	safe_delete(cel);
-}
-
 void command_gm(Client *c, const Seperator *sep)
 {
 	bool state=atobool(sep->arg[1]);
@@ -1349,7 +1295,7 @@ void command_viewpetition(Client *c, const Seperator *sep)
     if (!results.Success())
         return;
 
-    LogFile->write(EQEmuLog::Normal,"View petition request from %s, petition number: %i", c->GetName(), atoi(sep->argplus[1]) );
+    Log.Out(Logs::General, Logs::Normal, "View petition request from %s, petition number: %i", c->GetName(), atoi(sep->argplus[1]) );
 
     if (results.RowCount() == 0) {
         c->Message(13,"There was an error in your request: ID not found! Please check the Id and try again.");
@@ -1374,7 +1320,7 @@ void command_petitioninfo(Client *c, const Seperator *sep)
     if (!results.Success())
         return;
 
-    LogFile->write(EQEmuLog::Normal,"Petition information request from %s, petition number:", c->GetName(), atoi(sep->argplus[1]) );
+    Log.Out(Logs::General, Logs::Normal, "Petition information request from %s, petition number:", c->GetName(), atoi(sep->argplus[1]) );
 
     if (results.RowCount() == 0) {
 		c->Message(13,"There was an error in your request: ID not found! Please check the Id and try again.");
@@ -1400,7 +1346,7 @@ void command_delpetition(Client *c, const Seperator *sep)
 	if (!results.Success())
         return;
 
-    LogFile->write(EQEmuLog::Normal,"Delete petition request from %s, petition number:", c->GetName(), atoi(sep->argplus[1]) );
+    Log.Out(Logs::General, Logs::Normal, "Delete petition request from %s, petition number:", c->GetName(), atoi(sep->argplus[1]) );
 
 }
 
@@ -1623,7 +1569,7 @@ void command_permaclass(Client *c, const Seperator *sep)
 		c->Message(0,"Target is not a client.");
 	else {
 		c->Message(0, "Setting %s's class...Sending to char select.", t->GetName());
-		LogFile->write(EQEmuLog::Normal,"Class change request from %s for %s, requested class:%i", c->GetName(), t->GetName(), atoi(sep->arg[1]) );
+		Log.Out(Logs::General, Logs::Normal, "Class change request from %s for %s, requested class:%i", c->GetName(), t->GetName(), atoi(sep->arg[1]) );
 		t->SetBaseClass(atoi(sep->arg[1]));
 		t->Save();
 		t->Kick();
@@ -1645,7 +1591,7 @@ void command_permarace(Client *c, const Seperator *sep)
 		c->Message(0,"Target is not a client.");
 	else {
 		c->Message(0, "Setting %s's race - zone to take effect",t->GetName());
-		LogFile->write(EQEmuLog::Normal,"Permanant race change request from %s for %s, requested race:%i", c->GetName(), t->GetName(), atoi(sep->arg[1]) );
+		Log.Out(Logs::General, Logs::Normal, "Permanant race change request from %s for %s, requested race:%i", c->GetName(), t->GetName(), atoi(sep->arg[1]) );
 		uint32 tmp = Mob::GetDefaultGender(atoi(sep->arg[1]), t->GetBaseGender());
 		t->SetBaseRace(atoi(sep->arg[1]));
 		t->SetBaseGender(tmp);
@@ -1669,7 +1615,7 @@ void command_permagender(Client *c, const Seperator *sep)
 		c->Message(0,"Target is not a client.");
 	else {
 		c->Message(0, "Setting %s's gender - zone to take effect",t->GetName());
-		LogFile->write(EQEmuLog::Normal,"Permanant gender change request from %s for %s, requested gender:%i", c->GetName(), t->GetName(), atoi(sep->arg[1]) );
+		Log.Out(Logs::General, Logs::Normal, "Permanant gender change request from %s for %s, requested gender:%i", c->GetName(), t->GetName(), atoi(sep->arg[1]) );
 		t->SetBaseGender(atoi(sep->arg[1]));
 		t->Save();
 		t->SendIllusionPacket(atoi(sep->arg[1]));
@@ -2004,7 +1950,7 @@ void command_dbspawn2(Client *c, const Seperator *sep)
 {
 
 	if (sep->IsNumber(1) && sep->IsNumber(2) && sep->IsNumber(3)) {
-		LogFile->write(EQEmuLog::Normal,"Spawning database spawn");
+		Log.Out(Logs::General, Logs::Normal, "Spawning database spawn");
 		uint16 cond = 0;
 		int16 cond_min = 0;
 		if(sep->IsNumber(4)) {
@@ -2326,7 +2272,7 @@ void command_setlanguage(Client *c, const Seperator *sep)
 	}
 	else
 	{
-		LogFile->write(EQEmuLog::Normal,"Set language request from %s, target:%s lang_id:%i value:%i", c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
+		Log.Out(Logs::General, Logs::Normal, "Set language request from %s, target:%s lang_id:%i value:%i", c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
 		uint8 langid = (uint8)atoi(sep->arg[1]);
 		uint8 value = (uint8)atoi(sep->arg[2]);
 		c->GetTarget()->CastToClient()->SetLanguageSkill( langid, value );
@@ -2351,7 +2297,7 @@ void command_setskill(Client *c, const Seperator *sep)
 		c->Message(0, "       x = 0 to %d", HIGHEST_CAN_SET_SKILL);
 	}
 	else {
-		LogFile->write(EQEmuLog::Normal,"Set skill request from %s, target:%s skill_id:%i value:%i", c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
+		Log.Out(Logs::General, Logs::Normal, "Set skill request from %s, target:%s skill_id:%i value:%i", c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
 		int skill_num = atoi(sep->arg[1]);
 		uint16 skill_value = atoi(sep->arg[2]);
 		if(skill_num < HIGHEST_SKILL)
@@ -2371,7 +2317,7 @@ void command_setskillall(Client *c, const Seperator *sep)
 	}
 	else {
 		if (c->Admin() >= commandSetSkillsOther || c->GetTarget()==c || c->GetTarget()==0) {
-			LogFile->write(EQEmuLog::Normal,"Set ALL skill request from %s, target:%s", c->GetName(), c->GetTarget()->GetName());
+			Log.Out(Logs::General, Logs::Normal, "Set ALL skill request from %s, target:%s", c->GetName(), c->GetTarget()->GetName());
 			uint16 level = atoi(sep->arg[1]);
 			for(SkillUseTypes skill_num=Skill1HBlunt;skill_num <= HIGHEST_SKILL;skill_num=(SkillUseTypes)(skill_num+1)) {
 				c->GetTarget()->CastToClient()->SetSkill(skill_num, level);
@@ -2461,7 +2407,7 @@ void command_spawn(Client *c, const Seperator *sep)
 		}
 	}
 	#if EQDEBUG >= 11
-		LogFile->write(EQEmuLog::Debug,"#spawn Spawning:");
+		Log.LogDebug(Logs::General,"#spawn Spawning:");
 	#endif
 
 	NPC* npc = NPC::SpawnNPC(sep->argplus[1], c->GetPosition(), c);
@@ -3166,7 +3112,7 @@ void command_listpetition(Client *c, const Seperator *sep)
 	if (!results.Success())
         return;
 
-    LogFile->write(EQEmuLog::Normal,"Petition list requested by %s", c->GetName());
+    Log.Out(Logs::General, Logs::Normal, "Petition list requested by %s", c->GetName());
 
     if (results.RowCount() == 0)
         return;
@@ -3823,7 +3769,7 @@ void command_lastname(Client *c, const Seperator *sep)
 
 	if(c->GetTarget() && c->GetTarget()->IsClient())
 		t=c->GetTarget()->CastToClient();
-	LogFile->write(EQEmuLog::Normal,"#lastname request from %s for %s", c->GetName(), t->GetName());
+	Log.Out(Logs::General, Logs::Normal, "#lastname request from %s for %s", c->GetName(), t->GetName());
 
 	if(strlen(sep->arg[1]) <= 70)
 		t->ChangeLastName(sep->arg[1]);
@@ -4446,7 +4392,7 @@ void command_time(Client *c, const Seperator *sep)
 			);
 		c->Message(13, "It is now %s.", timeMessage);
 #if EQDEBUG >= 11
-		LogFile->write(EQEmuLog::Debug,"Recieved timeMessage:%s", timeMessage);
+		Log.LogDebug(Logs::General,"Recieved timeMessage:%s", timeMessage);
 #endif
 	}
 }
@@ -4597,10 +4543,10 @@ void command_guild(Client *c, const Seperator *sep)
 			}
 
 			if(guild_id == GUILD_NONE) {
-				_log(GUILDS__ACTIONS, "%s: Removing %s (%d) from guild with GM command.", c->GetName(),
+				Log.Out(Logs::Detail, Logs::Guilds, "%s: Removing %s (%d) from guild with GM command.", c->GetName(),
 					sep->arg[2], charid);
 			} else {
-				_log(GUILDS__ACTIONS, "%s: Putting %s (%d) into guild %s (%d) with GM command.", c->GetName(),
+				Log.Out(Logs::Detail, Logs::Guilds, "%s: Putting %s (%d) into guild %s (%d) with GM command.", c->GetName(),
 					sep->arg[2], charid,
 					guild_mgr.GetGuildName(guild_id), guild_id);
 			}
@@ -4649,7 +4595,7 @@ void command_guild(Client *c, const Seperator *sep)
 				return;
 			}
 
-			_log(GUILDS__ACTIONS, "%s: Setting %s (%d)'s guild rank to %d with GM command.", c->GetName(),
+			Log.Out(Logs::Detail, Logs::Guilds, "%s: Setting %s (%d)'s guild rank to %d with GM command.", c->GetName(),
 				sep->arg[2], charid, rank);
 
 			if(!guild_mgr.SetGuildRank(charid, rank))
@@ -4691,7 +4637,7 @@ void command_guild(Client *c, const Seperator *sep)
 
 				uint32 id = guild_mgr.CreateGuild(sep->argplus[3], leader);
 
-				_log(GUILDS__ACTIONS, "%s: Creating guild %s with leader %d with GM command. It was given id %lu.", c->GetName(),
+				Log.Out(Logs::Detail, Logs::Guilds, "%s: Creating guild %s with leader %d with GM command. It was given id %lu.", c->GetName(),
 					sep->argplus[3], leader, (unsigned long)id);
 
 				if (id == GUILD_NONE)
@@ -4730,7 +4676,7 @@ void command_guild(Client *c, const Seperator *sep)
 				}
 			}
 
-			_log(GUILDS__ACTIONS, "%s: Deleting guild %s (%d) with GM command.", c->GetName(),
+			Log.Out(Logs::Detail, Logs::Guilds, "%s: Deleting guild %s (%d) with GM command.", c->GetName(),
 				guild_mgr.GetGuildName(id), id);
 
 			if (!guild_mgr.DeleteGuild(id))
@@ -4764,7 +4710,7 @@ void command_guild(Client *c, const Seperator *sep)
 				}
 			}
 
-			_log(GUILDS__ACTIONS, "%s: Renaming guild %s (%d) to '%s' with GM command.", c->GetName(),
+			Log.Out(Logs::Detail, Logs::Guilds, "%s: Renaming guild %s (%d) to '%s' with GM command.", c->GetName(),
 				guild_mgr.GetGuildName(id), id, sep->argplus[3]);
 
 			if (!guild_mgr.RenameGuild(id, sep->argplus[3]))
@@ -4815,7 +4761,7 @@ void command_guild(Client *c, const Seperator *sep)
 					}
 				}
 
-				_log(GUILDS__ACTIONS, "%s: Setting leader of guild %s (%d) to %d with GM command.", c->GetName(),
+				Log.Out(Logs::Detail, Logs::Guilds, "%s: Setting leader of guild %s (%d) to %d with GM command.", c->GetName(),
 					guild_mgr.GetGuildName(id), id, leader);
 
 				if(!guild_mgr.SetGuildLeader(id, leader))
@@ -4921,7 +4867,7 @@ void command_manaburn(Client *c, const Seperator *sep)
 						target->Damage(c, nukedmg, 2751, SkillAbjuration/*hackish*/);
 						c->Message(4,"You unleash an enormous blast of magical energies.");
 					}
-					LogFile->write(EQEmuLog::Normal,"Manaburn request from %s, damage: %d", c->GetName(), nukedmg);
+					Log.Out(Logs::General, Logs::Normal, "Manaburn request from %s, damage: %d", c->GetName(), nukedmg);
 				}
 			}
 			else
@@ -5273,7 +5219,7 @@ void command_scribespells(Client *c, const Seperator *sep)
 	t->Message(0, "Scribing spells to spellbook.");
 	if(t != c)
 		c->Message(0, "Scribing spells for %s.", t->GetName());
-	LogFile->write(EQEmuLog::Normal, "Scribe spells request for %s from %s, levels: %u -> %u", t->GetName(), c->GetName(), min_level, max_level);
+	Log.Out(Logs::General, Logs::Normal, "Scribe spells request for %s from %s, levels: %u -> %u", t->GetName(), c->GetName(), min_level, max_level);
 
 	for(curspell = 0, book_slot = t->GetNextAvailableSpellBookSlot(), count = 0; curspell < SPDAT_RECORDS && book_slot < MAX_PP_SPELLBOOK; curspell++, book_slot = t->GetNextAvailableSpellBookSlot(book_slot))
 	{
@@ -5330,7 +5276,7 @@ void command_scribespell(Client *c, const Seperator *sep) {
 		if(t != c)
 			c->Message(0, "Scribing spell: %s (%i) for %s.", spells[spell_id].name, spell_id, t->GetName());
 
-		LogFile->write(EQEmuLog::Normal, "Scribe spell: %s (%i) request for %s from %s.", spells[spell_id].name, spell_id, t->GetName(), c->GetName());
+		Log.Out(Logs::General, Logs::Normal, "Scribe spell: %s (%i) request for %s from %s.", spells[spell_id].name, spell_id, t->GetName(), c->GetName());
 
 		if (spells[spell_id].classes[WARRIOR] != 0 && spells[spell_id].skill != 52 && spells[spell_id].classes[t->GetPP().class_ - 1] > 0 && !IsDiscipline(spell_id)) {
 			book_slot = t->GetNextAvailableSpellBookSlot();
@@ -5377,7 +5323,7 @@ void command_unscribespell(Client *c, const Seperator *sep) {
 			if(t != c)
 				c->Message(0, "Unscribing spell: %s (%i) for %s.", spells[spell_id].name, spell_id, t->GetName());
 
-			LogFile->write(EQEmuLog::Normal, "Unscribe spell: %s (%i) request for %s from %s.", spells[spell_id].name, spell_id, t->GetName(), c->GetName());
+			Log.Out(Logs::General, Logs::Normal, "Unscribe spell: %s (%i) request for %s from %s.", spells[spell_id].name, spell_id, t->GetName(), c->GetName());
 		}
 		else {
 			t->Message(13, "Unable to unscribe spell: %s (%i) from your spellbook. This spell is not scribed.", spells[spell_id].name, spell_id);
@@ -6797,69 +6743,6 @@ void command_logsql(Client *c, const Seperator *sep) {
 	}
 }
 
-void command_logs(Client *c, const Seperator *sep)
-{
-#ifdef CLIENT_LOGS
-	Client *t = c;
-	if(c->GetTarget() && c->GetTarget()->IsClient()) {
-		t = c->GetTarget()->CastToClient();
-	}
-
-	if(!strcasecmp(sep->arg[1], "status" ) )
-		client_logs.subscribe(EQEmuLog::Status, t);
-	else if(!strcasecmp(sep->arg[1], "normal" ) )
-		client_logs.subscribe(EQEmuLog::Normal, t);
-	else if(!strcasecmp(sep->arg[1], "error" ) )
-		client_logs.subscribe(EQEmuLog::Error, t);
-	else if(!strcasecmp(sep->arg[1], "debug" ) )
-		client_logs.subscribe(EQEmuLog::Debug, t);
-	else if(!strcasecmp(sep->arg[1], "quest" ) )
-		client_logs.subscribe(EQEmuLog::Quest, t);
-	else if(!strcasecmp(sep->arg[1], "all" ) )
-		client_logs.subscribeAll(t);
-	else {
-		c->Message(0, "Usage: #logs [status|normal|error|debug|quest|all]");
-		return;
-	}
-	if(c != t)
-		c->Message(0, "%s have been subscribed to %s logs.", t->GetName(), sep->arg[1]);
-	t->Message(0, "You have been subscribed to %s logs.", sep->arg[1]);
-#else
-	c->Message(0, "Client logs are disabled in this server's build.");
-#endif
-}
-
-void command_nologs(Client *c, const Seperator *sep)
-{
-#ifdef CLIENT_LOGS
-	Client *t = c;
-	if(c->GetTarget() && c->GetTarget()->IsClient()) {
-		t = c;
-	}
-
-	if(!strcasecmp(sep->arg[1], "status" ) )
-		client_logs.unsubscribe(EQEmuLog::Status, t);
-	else if(!strcasecmp(sep->arg[1], "normal" ) )
-		client_logs.unsubscribe(EQEmuLog::Normal, t);
-	else if(!strcasecmp(sep->arg[1], "error" ) )
-		client_logs.unsubscribe(EQEmuLog::Error, t);
-	else if(!strcasecmp(sep->arg[1], "debug" ) )
-		client_logs.unsubscribe(EQEmuLog::Debug, t);
-	else if(!strcasecmp(sep->arg[1], "quest" ) )
-		client_logs.unsubscribe(EQEmuLog::Quest, t);
-	else if(!strcasecmp(sep->arg[1], "all" ) )
-		client_logs.unsubscribeAll(t);
-	else {
-		c->Message(0, "Usage: #logs [status|normal|error|debug|quest|all]");
-		return;
-	}
-
-	c->Message(0, "You have been unsubscribed from %s logs.", sep->arg[1]);
-#else
-	c->Message(0, "Client logs are disabled in this server's build.");
-#endif
-}
-
 void command_qglobal(Client *c, const Seperator *sep) {
 	//In-game switch for qglobal column
 	if(sep->arg[1][0] == 0) {
@@ -7501,7 +7384,6 @@ void command_flagedit(Client *c, const Seperator *sep) {
                             "FROM zone WHERE flag_needed != ''";
         auto results = database.QueryDatabase(query);
 		if (!results.Success()) {
-            c->Message(13, "Unable to query zone flags: %s", results.ErrorMessage().c_str());
             return;
         }
 
@@ -7559,165 +7441,6 @@ void command_flagedit(Client *c, const Seperator *sep) {
 	}
 
     c->Message(15, "Invalid action specified. use '#flagedit help' for help");
-}
-
-void command_mlog(Client *c, const Seperator *sep) {
-	//super-command for managing log settings
-	if(sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help")) {
-		c->Message(0, "Syntax: #mlog [subcommand].");
-		c->Message(0, "-- Mob Logging Togglers --");
-		c->Message(0, "...target [on|off] - Set logging enabled for your target");
-		c->Message(0, "...all [on|off] - Set logging enabled for all mobs and clients (prolly a bad idea)");
-		c->Message(0, "...mobs [on|off] - Set logging enabled for all mobs");
-		c->Message(0, "...clients [on|off] - Set logging enabled for all clients");
-		c->Message(0, "...radius [on|off] [radius] - Set logging enable for all mobs and clients within `radius`");
-		c->Message(0, "-------------");
-		c->Message(0, "-- Log Settings --");
-		c->Message(0, "...list [category] - List all log types in specified category, or all categories if none specified.");
-		c->Message(0, "...setcat [category] [on|off] - Enable/Disable all types in a specified category");
-		c->Message(0, "...set [type] [on|off] - Enable/Disable the specified log type");
-		c->Message(0, "...load [filename] - Load log type settings from the file `filename`");
-		return;
-	}
-	bool onoff;
-	std::string on("on");
-	std::string off("off");
-
-	if(!strcasecmp(sep->arg[1], "target")) {
-		if(on == sep->arg[2]) onoff = true;
-		else if(off == sep->arg[2]) onoff = false;
-		else { c->Message(13, "Invalid argument. Expected on/off."); return; }
-
-		Mob *tgt = c->GetTarget();
-		if(tgt == nullptr) {
-			c->Message(13, "You must have a target for this command.");
-			return;
-		}
-
-		if(onoff)
-			tgt->EnableLogging();
-		else
-			tgt->DisableLogging();
-
-		c->Message(0, "Logging has been enabled on %s", tgt->GetName());
-	} else if(!strcasecmp(sep->arg[1], "all")) {
-		if(on == sep->arg[2]) onoff = true;
-		else if(off == sep->arg[2]) onoff = false;
-		else { c->Message(13, "Invalid argument '%s'. Expected on/off.", sep->arg[2]); return; }
-
-		entity_list.RadialSetLogging(c, onoff, true, true);
-
-		c->Message(0, "Logging has been enabled for all entities");
-	} else if(!strcasecmp(sep->arg[1], "mobs")) {
-		if(on == sep->arg[2]) onoff = true;
-		else if(off == sep->arg[2]) onoff = false;
-		else { c->Message(13, "Invalid argument '%s'. Expected on/off.", sep->arg[2]); return; }
-
-		entity_list.RadialSetLogging(c, onoff, false, true);
-
-		c->Message(0, "Logging has been enabled for all mobs");
-	} else if(!strcasecmp(sep->arg[1], "clients")) {
-		if(on == sep->arg[2]) onoff = true;
-		else if(off == sep->arg[2]) onoff = false;
-		else { c->Message(13, "Invalid argument '%s'. Expected on/off.", sep->arg[2]); return; }
-
-		entity_list.RadialSetLogging(c, onoff, true, false);
-
-		c->Message(0, "Logging has been enabled for all clients");
-	} else if(!strcasecmp(sep->arg[1], "radius")) {
-		if(on == sep->arg[2]) onoff = true;
-		else if(off == sep->arg[2]) onoff = false;
-		else { c->Message(13, "Invalid argument '%s'. Expected on/off.", sep->arg[2]); return; }
-
-		float radius = atof(sep->arg[3]);
-		if(radius <= 0) {
-			c->Message(13, "Invalid radius %f", radius);
-			return;
-		}
-
-		entity_list.RadialSetLogging(c, onoff, false, true, radius);
-
-		c->Message(0, "Logging has been enabled for all entities within %f", radius);
-	} else if(!strcasecmp(sep->arg[1], "list")) {
-		int r;
-		if(sep->arg[2][0] == '\0') {
-			c->Message(0, "Listing all log categories:");
-			for(r = 0; r < NUMBER_OF_LOG_CATEGORIES; r++) {
-				c->Message(0, "Category %d: %s", r, log_category_names[r]);
-			}
-		} else {
-			//first we have to find the category ID.
-			for(r = 0; r < NUMBER_OF_LOG_CATEGORIES; r++) {
-				if(!strcasecmp(log_category_names[r], sep->arg[2]))
-					break;
-			}
-			if(r == NUMBER_OF_LOG_CATEGORIES) {
-				c->Message(13, "Unable to find category '%s'", sep->arg[2]);
-				return;
-			}
-			int logcat = r;
-			c->Message(0, "Types for category %d: %s", logcat, log_category_names[logcat]);
-			for(r = 0; r < NUMBER_OF_LOG_TYPES; r++) {
-				if(log_type_info[r].category != logcat)
-					continue;
-				c->Message(0, "...%d: %s (%s)", r, log_type_info[r].name, is_log_enabled(LogType(r))?"enabled":"disabled");
-			}
-		}
-	} else if(!strcasecmp(sep->arg[1], "setcat")) {
-		if(on == sep->arg[3]) onoff = true;
-		else if(off == sep->arg[3]) onoff = false;
-		else { c->Message(13, "Invalid argument %s. Expected on/off.", sep->arg[3]); return; }
-
-		int r;
-		//first we have to find the category ID.
-		for(r = 0; r < NUMBER_OF_LOG_CATEGORIES; r++) {
-			if(!strcasecmp(log_category_names[r], sep->arg[2]))
-				break;
-		}
-		if(r == NUMBER_OF_LOG_CATEGORIES) {
-			c->Message(13, "Unable to find category '%s'", sep->arg[2]);
-			return;
-		}
-
-		LogCategory logcat = LogCategory(r);
-		for(r = 0; r < NUMBER_OF_LOG_TYPES; r++) {
-			if(log_type_info[r].category != logcat)
-				continue;
-
-			if(onoff) {
-				log_enable(LogType(r));
-				c->Message(0, "Log type %s (%d) has been enabled", log_type_info[r].name, r);
-			} else {
-				log_disable(LogType(r));
-				c->Message(0, "Log type %s (%d) has been disabled", log_type_info[r].name, r);
-			}
-		}
-	} else if(!strcasecmp(sep->arg[1], "set")) {
-		if(on == sep->arg[3]) onoff = true;
-		else if(off == sep->arg[3]) onoff = false;
-		else { c->Message(13, "Invalid argument %s. Expected on/off.", sep->arg[3]); return; }
-
-		//first we have to find the category ID.
-		int r;
-		for(r = 0; r < NUMBER_OF_LOG_TYPES; r++) {
-			if(!strcasecmp(log_type_info[r].name, sep->arg[2]))
-				break;
-		}
-		if(r == NUMBER_OF_LOG_TYPES) {
-			c->Message(13, "Unable to find log type %s", sep->arg[2]);
-			return;
-		}
-
-		if(onoff) {
-			log_enable(LogType(r));
-			c->Message(0, "Log type %s (%d) has been enabled", log_type_info[r].name, r);
-		} else {
-			log_disable(LogType(r));
-			c->Message(0, "Log type %s (%d) has been disabled", log_type_info[r].name, r);
-		}
-	} else {
-		c->Message(15, "Invalid action specified. use '#mlog help' for help");
-	}
 }
 
 void command_serverrules(Client *c, const Seperator *sep)
@@ -8139,7 +7862,7 @@ void command_traindisc(Client *c, const Seperator *sep)
 	t->Message(0, "Training disciplines");
 	if(t != c)
 		c->Message(0, "Training disciplines for %s.", t->GetName());
-	LogFile->write(EQEmuLog::Normal, "Train disciplines request for %s from %s, levels: %u -> %u", t->GetName(), c->GetName(), min_level, max_level);
+	Log.Out(Logs::General, Logs::Normal, "Train disciplines request for %s from %s, levels: %u -> %u", t->GetName(), c->GetName(), min_level, max_level);
 
 	for(curspell = 0, count = 0; curspell < SPDAT_RECORDS; curspell++)
 	{
@@ -10406,7 +10129,6 @@ void command_mysql(Client *c, const Seperator *sep)
         std::replace(query.begin(), query.end(), '#', '%');
         auto results = database.QueryDatabase(query);
         if (!results.Success()) {
-            c->Message(0, "Invalid query: '%s', '%s'", sep->arg[2], results.ErrorMessage().c_str());
             return;
         }
 
@@ -10872,4 +10594,87 @@ void command_tune(Client *c, const Seperator *sep)
 
 
 	return;
+}
+
+void command_logtest(Client *c, const Seperator *sep){
+	clock_t t = std::clock(); /* Function timer start */
+	if (sep->IsNumber(1)){
+		uint32 i = 0;
+		std::ofstream log_test;
+		for (i = 0; i < atoi(sep->arg[1]); i++){ 
+			log_test.open("logs/log_test.txt", std::ios_base::app | std::ios_base::out);
+			log_test << "this is a test\n";
+			log_test.close();
+		}
+		Log.Out(Logs::General, Logs::Zone_Server, "[%u] Test #1... Took %f seconds", i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
+		t = std::clock();
+		log_test.open("logs/log_test.txt", std::ios_base::app | std::ios_base::out);
+		for (i = 0; i < atoi(sep->arg[1]); i++){
+			log_test << "this is a test\n";
+		}
+		log_test.close();
+		Log.Out(Logs::General, Logs::Zone_Server, "[%u] Test #2... Took %f seconds", i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
+	}
+}
+
+void command_crashtest(Client *c, const Seperator *sep)
+{
+	c->Message(0, "Alright, now we get an GPF ;) ");
+	char* gpf = 0;
+	memcpy(gpf, "Ready to crash", 30);
+}
+
+void command_logs(Client *c, const Seperator *sep){
+	int logs_set = 0;
+	if (sep->argnum > 0) {
+		/* #logs reload_all */
+		if (strcasecmp(sep->arg[1], "reload_all") == 0){
+			ServerPacket *pack = new ServerPacket(ServerOP_ReloadLogs, 0);
+			worldserver.SendPacket(pack);
+			c->Message(13, "Successfully sent the packet to world to reload log settings from the database for all zones");
+			safe_delete(pack);
+		}
+		/* #logs list_settings */
+		if (strcasecmp(sep->arg[1], "list_settings") == 0 || (strcasecmp(sep->arg[1], "set") == 0 && strcasecmp(sep->arg[3], "") == 0)){
+			c->Message(0, "[Category ID | console | file | gmsay | Category Description]");
+			int redisplay_columns = 0;
+			for (int i = 0; i < Logs::LogCategory::MaxCategoryID; i++){
+				if (redisplay_columns == 10){
+					c->Message(0, "[Category ID | console | file | gmsay | Category Description]");
+					redisplay_columns = 0;
+				}
+				c->Message(0, StringFormat("--- %i | %u | %u | %u | %s", i, Log.log_settings[i].log_to_console, Log.log_settings[i].log_to_file, Log.log_settings[i].log_to_gmsay, Logs::LogCategoryName[i]).c_str());
+				redisplay_columns++;
+			}
+		}
+		/* #logs set */
+		if (strcasecmp(sep->arg[1], "set") == 0){
+			if (strcasecmp(sep->arg[2], "console") == 0){
+				Log.log_settings[atoi(sep->arg[3])].log_to_console = atoi(sep->arg[4]);
+				logs_set = 1;
+			}
+			else if (strcasecmp(sep->arg[2], "file") == 0){
+				Log.log_settings[atoi(sep->arg[3])].log_to_file = atoi(sep->arg[4]);
+				logs_set = 1;
+			}
+			else if (strcasecmp(sep->arg[2], "gmsay") == 0){
+				Log.log_settings[atoi(sep->arg[3])].log_to_gmsay = atoi(sep->arg[4]);
+				logs_set = 1;
+			}
+			else{
+				c->Message(0, "--- #logs set [console|file|gmsay] <category_id> <debug_level (1-3)> - Sets log settings during the lifetime of the zone");
+				c->Message(0, "--- #logs set gmsay 20 1 - Would output Quest errors to gmsay");
+			}
+			if (logs_set == 1){
+				c->Message(15, "Your Log Settings have been applied");
+				c->Message(15, "Output Method: %s :: Debug Level: %i - Category: %s", sep->arg[2], atoi(sep->arg[4]), Logs::LogCategoryName[atoi(sep->arg[3])]);
+			}
+		}
+	}
+	else {
+		c->Message(0, "#logs usage:");
+		c->Message(0, "--- #logs reload_all - Reloads all rules defined in database in world and all zone processes");
+		c->Message(0, "--- #logs list_settings - Shows current log settings and categories");
+		c->Message(0, "--- #logs set [console|file|gmsay] <category_id> <debug_level (1-3)> - Sets log settings during the lifetime of the zone");
+	}
 }

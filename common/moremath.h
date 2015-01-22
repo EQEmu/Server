@@ -18,6 +18,8 @@
 #ifndef MOREMATH_H
 #define MOREMATH_H
 
+#include "types.h"
+
 signed char sign(signed int tmp);
 signed char sign(double tmp);
 uint32 pow32(uint32 base, uint32 exponet);

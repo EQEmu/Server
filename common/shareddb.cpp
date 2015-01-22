@@ -46,7 +46,6 @@ bool SharedDatabase::SetHideMe(uint32 account_id, uint8 hideme)
 	std::string query = StringFormat("UPDATE account SET hideme = %i WHERE id = %i", hideme, account_id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		std::cerr << "Error in SetGMSpeed query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
@@ -58,7 +57,6 @@ uint8 SharedDatabase::GetGMSpeed(uint32 account_id)
 	std::string query = StringFormat("SELECT gmspeed FROM account WHERE id = '%i'", account_id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		std::cerr << "Error in GetGMSpeed query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
 
@@ -75,7 +73,6 @@ bool SharedDatabase::SetGMSpeed(uint32 account_id, uint8 gmspeed)
 	std::string query = StringFormat("UPDATE account SET gmspeed = %i WHERE id = %i", gmspeed, account_id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		std::cerr << "Error in SetGMSpeed query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
@@ -127,7 +124,6 @@ bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const Ite
                                     account_id, slot_id);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "Error runing inventory verification query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		//returning true is less harmful in the face of a query error
 		return true;
 	}
@@ -219,7 +215,6 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, i
 		}
 
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "UpdateInventorySlot query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return false;
     }
 
@@ -265,7 +260,6 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, 
 	}
 
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "UpdateSharedBankSlot query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return false;
     }
 
@@ -278,7 +272,6 @@ bool SharedDatabase::DeleteInventorySlot(uint32 char_id, int16 slot_id) {
 	std::string query = StringFormat("DELETE FROM inventory WHERE charid = %i AND slotid = %i", char_id, slot_id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "DeleteInventorySlot query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return false;
     }
 
@@ -291,7 +284,6 @@ bool SharedDatabase::DeleteInventorySlot(uint32 char_id, int16 slot_id) {
                         char_id, base_slot_id, (base_slot_id+10));
     results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "DeleteInventorySlot, bags query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return false;
     }
 
@@ -306,7 +298,6 @@ bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id) {
 	std::string query = StringFormat("DELETE FROM sharedbank WHERE acctid=%i AND slotid=%i", account_id, slot_id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "DeleteSharedBankSlot query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return false;
     }
 
@@ -320,7 +311,6 @@ bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id) {
                         account_id, base_slot_id, (base_slot_id+10));
     results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "DeleteSharedBankSlot, bags query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
         return false;
     }
 
@@ -334,7 +324,6 @@ int32 SharedDatabase::GetSharedPlatinum(uint32 account_id)
 	std::string query = StringFormat("SELECT sharedplat FROM account WHERE id = '%i'", account_id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        std::cerr << "Error in GetSharedPlatinum query '" << query << "' " << results.ErrorMessage().c_str() << std::endl;
 		return false;
     }
 
@@ -350,7 +339,6 @@ bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add) {
 	std::string query = StringFormat("UPDATE account SET sharedplat = sharedplat + %i WHERE id = %i", amount_to_add, account_id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		std::cerr << "Error in SetSharedPlatinum query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
@@ -410,7 +398,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
                             "FROM sharedbank WHERE acctid=%i", id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Database::GetSharedBank(uint32 account_id): %s", results.ErrorMessage().c_str());
+        Log.Out(Logs::General, Logs::Error, "Database::GetSharedBank(uint32 account_id): %s", results.ErrorMessage().c_str());
         return false;
     }
 
@@ -430,7 +418,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
         const Item_Struct* item = GetItem(item_id);
 
         if (!item) {
-            LogFile->write(EQEmuLog::Error,
+            Log.Out(Logs::General, Logs::Error,
 					"Warning: %s %i has an invalid item_id %i in inventory slot %i",
 					((is_charid==true) ? "charid" : "acctid"), id, item_id, slot_id);
             continue;
@@ -479,7 +467,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
         if (put_slot_id != INVALID_INDEX)
             continue;
 
-        LogFile->write(EQEmuLog::Error, "Warning: Invalid slot_id for item in shared bank inventory: %s=%i, item_id=%i, slot_id=%i",
+        Log.Out(Logs::General, Logs::Error, "Warning: Invalid slot_id for item in shared bank inventory: %s=%i, item_id=%i, slot_id=%i",
                                             ((is_charid==true)? "charid": "acctid"), id, item_id, slot_id);
 
         if (is_charid)
@@ -498,8 +486,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
                                     "FROM inventory WHERE charid = %i ORDER BY slotid", char_id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-    		LogFile->write(EQEmuLog::Error, "GetInventory query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
-            LogFile->write(EQEmuLog::Error, "If you got an error related to the 'instnodrop' field, run the following SQL Queries:\nalter table inventory add instnodrop tinyint(1) unsigned default 0 not null;\n");
+            Log.Out(Logs::General, Logs::Error, "If you got an error related to the 'instnodrop' field, run the following SQL Queries:\nalter table inventory add instnodrop tinyint(1) unsigned default 0 not null;\n");
         return false;
     }
 
@@ -527,7 +514,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
         const Item_Struct* item = GetItem(item_id);
 
         if (!item) {
-            LogFile->write(EQEmuLog::Error,"Warning: charid %i has an invalid item_id %i in inventory slot %i", char_id, item_id, slot_id);
+            Log.Out(Logs::General, Logs::Error,"Warning: charid %i has an invalid item_id %i in inventory slot %i", char_id, item_id, slot_id);
             continue;
         }
 
@@ -595,7 +582,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
         else if (slot_id >= 3111 && slot_id <= 3179)
 		{
             // Admins: please report any occurrences of this error
-            LogFile->write(EQEmuLog::Error, "Warning: Defunct location for item in inventory: charid=%i, item_id=%i, slot_id=%i .. pushing to cursor...", char_id, item_id, slot_id);
+            Log.Out(Logs::General, Logs::Error, "Warning: Defunct location for item in inventory: charid=%i, item_id=%i, slot_id=%i .. pushing to cursor...", char_id, item_id, slot_id);
             put_slot_id = inv->PushCursor(*inst);
 		}
 		else
@@ -607,7 +594,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
 
         // Save ptr to item in inventory
         if (put_slot_id == INVALID_INDEX) {
-            LogFile->write(EQEmuLog::Error, "Warning: Invalid slot_id for item in inventory: charid=%i, item_id=%i, slot_id=%i",char_id, item_id, slot_id);
+            Log.Out(Logs::General, Logs::Error, "Warning: Invalid slot_id for item in inventory: charid=%i, item_id=%i, slot_id=%i",char_id, item_id, slot_id);
         }
     }
 
@@ -625,8 +612,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
                                     name, account_id);
     auto results = QueryDatabase(query);
     if (!results.Success()){
-		LogFile->write(EQEmuLog::Error, "GetInventory query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
-		LogFile->write(EQEmuLog::Error, "If you got an error related to the 'instnodrop' field, run the following SQL Queries:\nalter table inventory add instnodrop tinyint(1) unsigned default 0 not null;\n");
+		Log.Out(Logs::General, Logs::Error, "If you got an error related to the 'instnodrop' field, run the following SQL Queries:\nalter table inventory add instnodrop tinyint(1) unsigned default 0 not null;\n");
         return false;
 	}
 
@@ -714,7 +700,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
 
         // Save ptr to item in inventory
         if (put_slot_id == INVALID_INDEX)
-            LogFile->write(EQEmuLog::Error, "Warning: Invalid slot_id for item in inventory: name=%s, acctid=%i, item_id=%i, slot_id=%i", name, account_id, item_id, slot_id);
+            Log.Out(Logs::General, Logs::Error, "Warning: Invalid slot_id for item in inventory: name=%s, acctid=%i, item_id=%i, slot_id=%i", name, account_id, item_id, slot_id);
 
     }
 
@@ -730,7 +716,6 @@ void SharedDatabase::GetItemsCount(int32 &item_count, uint32 &max_id) {
 	const std::string query = "SELECT MAX(id), count(*) FROM items";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error in GetItemsCount '%s': '%s'", query.c_str(), results.ErrorMessage().c_str());
         return;
 	}
 
@@ -770,7 +755,7 @@ bool SharedDatabase::LoadItems() {
 		items_hash = new EQEmu::FixedMemoryHashSet<Item_Struct>(reinterpret_cast<uint8*>(items_mmf->Get()), size);
 		mutex.Unlock();
 	} catch(std::exception& ex) {
-		LogFile->write(EQEmuLog::Error, "Error Loading Items: %s", ex.what());
+		Log.Out(Logs::General, Logs::Error, "Error Loading Items: %s", ex.what());
 		return false;
 	}
 
@@ -815,7 +800,6 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		"updated FROM items ORDER BY id";
 	auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "LoadItems '%s', %s", query.c_str(), results.ErrorMessage().c_str());
         return;
     }
 
@@ -1028,7 +1012,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
         try {
             hash.insert(item.ID, item);
         } catch(std::exception &ex) {
-            LogFile->write(EQEmuLog::Error, "Database::LoadItems: %s", ex.what());
+            Log.Out(Logs::General, Logs::Error, "Database::LoadItems: %s", ex.what());
             break;
         }
     }
@@ -1083,13 +1067,12 @@ std::string SharedDatabase::GetBook(const char *txtfile)
 	std::string query = StringFormat("SELECT txtfile FROM books WHERE name = '%s'", txtfile2);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		std::cerr << "Error in GetBook query '" << query << "' " << results.ErrorMessage() << std::endl;
 		txtout.assign(" ",1);
 		return txtout;
 	}
 
     if (results.RowCount() == 0) {
-        LogFile->write(EQEmuLog::Error, "No book to send, (%s)", txtfile);
+        Log.Out(Logs::General, Logs::Error, "No book to send, (%s)", txtfile);
         txtout.assign(" ",1);
         return txtout;
     }
@@ -1107,7 +1090,6 @@ void SharedDatabase::GetFactionListInfo(uint32 &list_count, uint32 &max_lists) {
 	const std::string query = "SELECT COUNT(*), MAX(id) FROM npc_faction";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error getting npc faction info from database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
         return;
 	}
 
@@ -1142,7 +1124,6 @@ void SharedDatabase::LoadNPCFactionLists(void *data, uint32 size, uint32 list_co
                             "ON npc_faction.id = npc_faction_entries.npc_faction_id ORDER BY npc_faction.id;";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "Error getting npc faction info from database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
     }
 
@@ -1208,7 +1189,7 @@ bool SharedDatabase::LoadNPCFactionLists() {
 		faction_hash = new EQEmu::FixedMemoryHashSet<NPCFactionList>(reinterpret_cast<uint8*>(faction_mmf->Get()), size);
 		mutex.Unlock();
 	} catch(std::exception& ex) {
-		LogFile->write(EQEmuLog::Error, "Error Loading npc factions: %s", ex.what());
+		Log.Out(Logs::General, Logs::Error, "Error Loading npc factions: %s", ex.what());
 		return false;
 	}
 
@@ -1226,8 +1207,8 @@ ItemInst* SharedDatabase::CreateItem(uint32 item_id, int16 charges, uint32 aug1,
 		inst = CreateBaseItem(item, charges);
 
 		if (inst == nullptr) {
-			LogFile->write(EQEmuLog::Error, "Error: valid item data returned a null reference for ItemInst creation in SharedDatabase::CreateItem()");
-			LogFile->write(EQEmuLog::Error, "Item Data = ID: %u, Name: %s, Charges: %i", item->ID, item->Name, charges);
+			Log.Out(Logs::General, Logs::Error, "Error: valid item data returned a null reference for ItemInst creation in SharedDatabase::CreateItem()");
+			Log.Out(Logs::General, Logs::Error, "Item Data = ID: %u, Name: %s, Charges: %i", item->ID, item->Name, charges);
 			return nullptr;
 		}
 
@@ -1252,8 +1233,8 @@ ItemInst* SharedDatabase::CreateItem(const Item_Struct* item, int16 charges, uin
 		inst = CreateBaseItem(item, charges);
 
 		if (inst == nullptr) {
-			LogFile->write(EQEmuLog::Error, "Error: valid item data returned a null reference for ItemInst creation in SharedDatabase::CreateItem()");
-			LogFile->write(EQEmuLog::Error, "Item Data = ID: %u, Name: %s, Charges: %i", item->ID, item->Name, charges);
+			Log.Out(Logs::General, Logs::Error, "Error: valid item data returned a null reference for ItemInst creation in SharedDatabase::CreateItem()");
+			Log.Out(Logs::General, Logs::Error, "Item Data = ID: %u, Name: %s, Charges: %i", item->ID, item->Name, charges);
 			return nullptr;
 		}
 
@@ -1283,8 +1264,8 @@ ItemInst* SharedDatabase::CreateBaseItem(const Item_Struct* item, int16 charges)
 		inst = new ItemInst(item, charges);
 
 		if (inst == nullptr) {
-			LogFile->write(EQEmuLog::Error, "Error: valid item data returned a null reference for ItemInst creation in SharedDatabase::CreateBaseItem()");
-			LogFile->write(EQEmuLog::Error, "Item Data = ID: %u, Name: %s, Charges: %i", item->ID, item->Name, charges);
+			Log.Out(Logs::General, Logs::Error, "Error: valid item data returned a null reference for ItemInst creation in SharedDatabase::CreateBaseItem()");
+			Log.Out(Logs::General, Logs::Error, "Item Data = ID: %u, Name: %s, Charges: %i", item->ID, item->Name, charges);
 			return nullptr;
 		}
 
@@ -1323,7 +1304,6 @@ bool SharedDatabase::GetCommandSettings(std::map<std::string,uint8> &commands) {
 	const std::string query = "SELECT command, access FROM commands";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        std::cerr << "Error in GetCommands query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
 
@@ -1354,7 +1334,7 @@ bool SharedDatabase::LoadSkillCaps() {
 
 		mutex.Unlock();
 	} catch(std::exception &ex) {
-		LogFile->write(EQEmuLog::Error, "Error loading skill caps: %s", ex.what());
+		Log.Out(Logs::General, Logs::Error, "Error loading skill caps: %s", ex.what());
 		return false;
 	}
 
@@ -1370,7 +1350,7 @@ void SharedDatabase::LoadSkillCaps(void *data) {
 	const std::string query = "SELECT skillID, class, level, cap FROM skill_caps ORDER BY skillID, class, level";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error loading skill caps from database: %s", results.ErrorMessage().c_str());
+        Log.Out(Logs::General, Logs::Error, "Error loading skill caps from database: %s", results.ErrorMessage().c_str());
         return;
 	}
 
@@ -1472,7 +1452,6 @@ void SharedDatabase::LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpe
                                     "AND `spellid` <= %i", iMaxSpellID);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error in LoadDamageShieldTypes: %s %s", query.c_str(), results.ErrorMessage().c_str());
         return;
     }
 
@@ -1492,7 +1471,6 @@ int SharedDatabase::GetMaxSpellID() {
 	std::string query = "SELECT MAX(id) FROM spells_new";
 	auto results = QueryDatabase(query);
     if (!results.Success()) {
-        _log(SPELLS__LOAD_ERR, "Error in GetMaxSpellID query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
         return -1;
     }
 
@@ -1507,12 +1485,11 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 	const std::string query = "SELECT * FROM spells_new ORDER BY id ASC";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        _log(SPELLS__LOAD_ERR, "Error in LoadSpells query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
         return;
     }
 
     if(results.ColumnCount() <= SPELL_LOAD_FIELD_COUNT) {
-		_log(SPELLS__LOAD_ERR, "Fatal error loading spells: Spell field count < SPELL_LOAD_FIELD_COUNT(%u)", SPELL_LOAD_FIELD_COUNT);
+		Log.Out(Logs::Detail, Logs::Spells, "Fatal error loading spells: Spell field count < SPELL_LOAD_FIELD_COUNT(%u)", SPELL_LOAD_FIELD_COUNT);
 		return;
     }
 
@@ -1522,7 +1499,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
     for (auto row = results.begin(); row != results.end(); ++row) {
         tempid = atoi(row[0]);
         if(tempid >= max_spells) {
-            _log(SPELLS__LOAD_ERR, "Non fatal error: spell.id >= max_spells, ignoring.");
+            Log.Out(Logs::Detail, Logs::Spells, "Non fatal error: spell.id >= max_spells, ignoring.");
             continue;
         }
 
@@ -1668,7 +1645,6 @@ int SharedDatabase::GetMaxBaseDataLevel() {
 	const std::string query = "SELECT MAX(level) FROM base_data";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error in GetMaxBaseDataLevel query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
 		return -1;
 	}
 
@@ -1701,7 +1677,7 @@ bool SharedDatabase::LoadBaseData() {
 
 		mutex.Unlock();
 	} catch(std::exception& ex) {
-		LogFile->write(EQEmuLog::Error, "Error Loading Base Data: %s", ex.what());
+		Log.Out(Logs::General, Logs::Error, "Error Loading Base Data: %s", ex.what());
 		return false;
 	}
 
@@ -1714,7 +1690,6 @@ void SharedDatabase::LoadBaseData(void *data, int max_level) {
 	const std::string query = "SELECT * FROM base_data ORDER BY level, class ASC";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error in LoadBaseData query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
         return;
 	}
 
@@ -1726,22 +1701,22 @@ void SharedDatabase::LoadBaseData(void *data, int max_level) {
         cl = atoi(row[1]);
 
         if(lvl <= 0) {
-            LogFile->write(EQEmuLog::Error, "Non fatal error: base_data.level <= 0, ignoring.");
+            Log.Out(Logs::General, Logs::Error, "Non fatal error: base_data.level <= 0, ignoring.");
             continue;
         }
 
         if(lvl >= max_level) {
-            LogFile->write(EQEmuLog::Error, "Non fatal error: base_data.level >= max_level, ignoring.");
+            Log.Out(Logs::General, Logs::Error, "Non fatal error: base_data.level >= max_level, ignoring.");
             continue;
         }
 
         if(cl <= 0) {
-            LogFile->write(EQEmuLog::Error, "Non fatal error: base_data.cl <= 0, ignoring.");
+            Log.Out(Logs::General, Logs::Error, "Non fatal error: base_data.cl <= 0, ignoring.");
             continue;
         }
 
         if(cl > 16) {
-            LogFile->write(EQEmuLog::Error, "Non fatal error: base_data.class > 16, ignoring.");
+            Log.Out(Logs::General, Logs::Error, "Non fatal error: base_data.class > 16, ignoring.");
             continue;
         }
 
@@ -1794,7 +1769,6 @@ void SharedDatabase::GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot
 	const std::string query = "SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM loottable_entries) FROM loottable";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error getting loot table info from database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
         return;
     }
 
@@ -1816,7 +1790,6 @@ void SharedDatabase::GetLootDropInfo(uint32 &loot_drop_count, uint32 &max_loot_d
 	const std::string query = "SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM lootdrop_entries) FROM lootdrop";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error getting loot table info from database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
         return;
     }
 
@@ -1842,7 +1815,6 @@ void SharedDatabase::LoadLootTables(void *data, uint32 size) {
                             "ON loottable.id = loottable_entries.loottable_id ORDER BY id";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error getting loot table info from database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
         return;
     }
 
@@ -1896,7 +1868,6 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
                             "ON lootdrop.id = lootdrop_entries.lootdrop_id ORDER BY lootdrop_id";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error getting loot drop info from database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
     }
 
     uint32 current_id = 0;
@@ -1950,7 +1921,7 @@ bool SharedDatabase::LoadLoot() {
 			loot_drop_mmf->Size());
 		mutex.Unlock();
 	} catch(std::exception &ex) {
-		LogFile->write(EQEmuLog::Error, "Error loading loot: %s", ex.what());
+		Log.Out(Logs::General, Logs::Error, "Error loading loot: %s", ex.what());
 		return false;
 	}
 
@@ -1966,7 +1937,7 @@ const LootTable_Struct* SharedDatabase::GetLootTable(uint32 loottable_id) {
 			return &loot_table_hash->at(loottable_id);
 		}
 	} catch(std::exception &ex) {
-		LogFile->write(EQEmuLog::Error, "Could not get loot table: %s", ex.what());
+		Log.Out(Logs::General, Logs::Error, "Could not get loot table: %s", ex.what());
 	}
 	return nullptr;
 }
@@ -1980,7 +1951,7 @@ const LootDrop_Struct* SharedDatabase::GetLootDrop(uint32 lootdrop_id) {
 			return &loot_drop_hash->at(lootdrop_id);
 		}
 	} catch(std::exception &ex) {
-		LogFile->write(EQEmuLog::Error, "Could not get loot drop: %s", ex.what());
+		Log.Out(Logs::General, Logs::Error, "Could not get loot drop: %s", ex.what());
 	}
 	return nullptr;
 }
@@ -2005,7 +1976,6 @@ void SharedDatabase::GetBotInspectMessage(uint32 botid, InspectMessage_Struct* m
 	std::string query = StringFormat("SELECT BotInspectMessage FROM bots WHERE BotID = %i", botid);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        std::cerr << "Error in GetBotInspectMessage query '" << query << "' " << results.ErrorMessage() << std::endl;
         return;
 	}
 
@@ -2018,11 +1988,7 @@ void SharedDatabase::GetBotInspectMessage(uint32 botid, InspectMessage_Struct* m
 }
 
 void SharedDatabase::SetBotInspectMessage(uint32 botid, const InspectMessage_Struct* message) {
-
 	std::string msg = EscapeString(message->text);
 	std::string query = StringFormat("UPDATE bots SET BotInspectMessage = '%s' WHERE BotID = %i", msg.c_str(), botid);
-    auto results = QueryDatabase(query);
-    if (!results.Success())
-		std::cerr << "Error in SetBotInspectMessage query '" << query << "' " << results.ErrorMessage() << std::endl;
-
+    QueryDatabase(query);
 }

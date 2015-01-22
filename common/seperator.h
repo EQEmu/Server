@@ -23,8 +23,9 @@
 #ifndef SEPERATOR_H
 #define SEPERATOR_H
 
-#include <string.h>
+#include "types.h"
 #include <stdlib.h>
+#include <string.h>
 
 class Seperator
 {

@@ -180,16 +180,17 @@
 #define ServerOP_CZSignalClientByName 0x4007
 #define ServerOP_CZMessagePlayer 0x4008
 #define ServerOP_ReloadWorld 0x4009
-
-#define ServerOP_QSPlayerLogTrades					0x4010
-#define ServerOP_QSPlayerLogHandins					0x4011
-#define ServerOP_QSPlayerLogNPCKills				0x4012
-#define ServerOP_QSPlayerLogDeletes					0x4013
-#define ServerOP_QSPlayerLogMoves					0x4014
-#define ServerOP_QSPlayerLogMerchantTransactions	0x4015
-#define ServerOP_QSSendQuery						0x4016
-#define ServerOP_CZSignalNPC						0x4017
-#define ServerOP_CZSetEntityVariableByNPCTypeID		0x4018
+#define ServerOP_ReloadLogs 0x4010
+/* Query Server OP Codes */
+#define ServerOP_QSPlayerLogTrades					0x5010
+#define ServerOP_QSPlayerLogHandins					0x5011
+#define ServerOP_QSPlayerLogNPCKills				0x5012
+#define ServerOP_QSPlayerLogDeletes					0x5013
+#define ServerOP_QSPlayerLogMoves					0x5014
+#define ServerOP_QSPlayerLogMerchantTransactions	0x5015
+#define ServerOP_QSSendQuery						0x5016
+#define ServerOP_CZSignalNPC						0x5017
+#define ServerOP_CZSetEntityVariableByNPCTypeID		0x5018
 
 /* Query Serv Generic Packet Flag/Type Enumeration */
 enum { QSG_LFGuild = 0 }; 

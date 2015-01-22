@@ -165,11 +165,11 @@ void Mob::CalculateNewFearpoint()
             m_FearWalkTarget = xyz_location(Loc.x, Loc.y, Loc.z);
 			curfp = true;
 
-			mlog(PATHING__DEBUG, "Feared to node %i (%8.3f, %8.3f, %8.3f)", Node, Loc.x, Loc.y, Loc.z);
+			Log.Out(Logs::Detail, Logs::None, "Feared to node %i (%8.3f, %8.3f, %8.3f)", Node, Loc.x, Loc.y, Loc.z);
 			return;
 		}
 
-		mlog(PATHING__DEBUG, "No path found to selected node. Falling through to old fear point selection.");
+		Log.Out(Logs::Detail, Logs::None, "No path found to selected node. Falling through to old fear point selection.");
 	}
 
 	int loop = 0;

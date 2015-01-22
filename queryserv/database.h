@@ -23,7 +23,8 @@
 #define AUTHENTICATION_TIMEOUT	60
 #define INVALID_ID				0xFFFFFFFF
 
-#include "../common/debug.h"
+#include "../common/eqemu_logsys.h"
+#include "../common/global_define.h"
 #include "../common/types.h"
 #include "../common/dbcore.h"
 #include "../common/linked_list.h"
@@ -50,6 +51,9 @@ public:
 	void LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 Items);
 	void LogMerchantTransaction(QSMerchantLogTransaction_Struct* QS, uint32 Items);
 	void GeneralQueryReceive(ServerPacket *pack);
+
+	void LoadLogSettings(EQEmuLogSys::LogSettings* log_settings);
+
 protected:
 	void HandleMysqlError(uint32 errnum);
 private:

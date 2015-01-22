@@ -2,7 +2,7 @@
 	// VS6 doesn't like the length of STL generated names: disabling
 	#pragma warning(disable:4786)
 #endif
-#include "debug.h"
+#include "global_define.h"
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
