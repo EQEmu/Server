@@ -305,9 +305,6 @@ void EQEmuLogSys::MakeDirectory(std::string directory_name){
 
 void EQEmuLogSys::CloseFileLogs()
 {
-	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
-		//std::cout << "Closing down zone logs..." << std::endl;
-	}
 	if (process_log.is_open()){
 		process_log.close();
 	}
