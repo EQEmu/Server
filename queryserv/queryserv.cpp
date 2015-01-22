@@ -120,6 +120,7 @@ int main() {
 		timeout_manager.CheckTimeouts(); 
 		Sleep(100);
 	}
+	Log.CloseFileLogs();
 }
 
 void UpdateWindowTitle(char* iNewTitle) {
