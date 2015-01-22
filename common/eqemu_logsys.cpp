@@ -248,7 +248,7 @@ uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category){
 	}
 }
 
-void EQEmuLogSys::ProcessConsoleMessage(uint16 debug_level, uint16 log_category, const std::string message)
+void EQEmuLogSys::ProcessConsoleMessage(uint16 debug_level, uint16 log_category, std::string message)
 {
 	/* Check if category enabled for process */
 	if (log_settings[log_category].log_to_console == 0)
@@ -312,7 +312,7 @@ void EQEmuLogSys::CloseFileLogs()
 	}
 }
 
-void EQEmuLogSys::StartFileLogs(const std::string log_name)
+void EQEmuLogSys::StartFileLogs(std::string log_name)
 {
 	EQEmuLogSys::CloseFileLogs();
 
