@@ -177,6 +177,8 @@ int main(int argc, char *argv[]) {
 		delete zone->second;
 	}
 
+	Log.CloseFileLogs();
+
 	return 0;
 }
 
