@@ -160,8 +160,9 @@ void EQEmuLogSys::ProcessLogWrite(uint16 debug_level, uint16 log_category, std::
 	if (log_category == Logs::Crash){
 		char time_stamp[80];
 		EQEmuLogSys::SetCurrentTimeStamp(time_stamp);
-		std::ofstream crash_log;
-		crash_log.open(StringFormat("logs/crash_%s_%i.txt", platform_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
+		std::ofstream crash_log; 
+		EQEmuLogSys::MakeDirectory("logs/crashes");
+		crash_log.open(StringFormat("logs/crashes/crash_%s_%i.txt", platform_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
 		crash_log << time_stamp << " " << message << "\n";
 		crash_log.close();
 	}
