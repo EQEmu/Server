@@ -77,6 +77,8 @@ namespace Console {
 
 EQEmuLogSys::EQEmuLogSys(){
 	on_log_gmsay_hook = [](uint16 log_type, std::string&) {};
+	bool file_logs_enabled = false; 
+	int log_platform = 0;
 }
 
 EQEmuLogSys::~EQEmuLogSys(){

@@ -141,9 +141,9 @@ public:
 
 	LogSettings log_settings[Logs::LogCategory::MaxCategoryID];
 
-	bool file_logs_enabled = false; /* Set when log settings are loaded to determine if keeping a file open is necessary */
+	bool file_logs_enabled; /* Set when log settings are loaded to determine if keeping a file open is necessary */
 
-	int log_platform = 0; /* Sets Executable platform (Zone/World/UCS) etc. */
+	int log_platform; /* Sets Executable platform (Zone/World/UCS) etc. */
 
 	std::string platform_file_name; /* File name used in writing logs */ 
 
@@ -152,7 +152,6 @@ public:
 	void OnLogHookCallBackZone(std::function<void(uint16 log_type, std::string&)> f) { on_log_gmsay_hook = f; }
 
 private:
-	bool zone_general_init = false;
 	
 	std::function<void(uint16 log_category, std::string&)> on_log_gmsay_hook;
 	std::string FormatOutMessageString(uint16 log_category, std::string in_message);
