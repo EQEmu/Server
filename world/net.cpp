@@ -482,16 +482,16 @@ int main(int argc, char** argv) {
 		}
 		Sleep(20);
 	}
-	Log.Out(Logs::Detail, Logs::World_Server,"World main loop completed.");
-	Log.Out(Logs::Detail, Logs::World_Server,"Shutting down console connections (if any).");
+	Log.Out(Logs::Detail, Logs::World_Server, "World main loop completed.");
+	Log.Out(Logs::Detail, Logs::World_Server, "Shutting down console connections (if any).");
 	console_list.KillAll();
-	Log.Out(Logs::Detail, Logs::World_Server,"Shutting down zone connections (if any).");
+	Log.Out(Logs::Detail, Logs::World_Server, "Shutting down zone connections (if any).");
 	zoneserver_list.KillAll();
-	Log.Out(Logs::Detail, Logs::World_Server,"Zone (TCP) listener stopped.");
+	Log.Out(Logs::Detail, Logs::World_Server, "Zone (TCP) listener stopped.");
 	tcps.Close();
-	Log.Out(Logs::Detail, Logs::World_Server,"Client (UDP) listener stopped.");
+	Log.Out(Logs::Detail, Logs::World_Server, "Client (UDP) listener stopped.");
 	eqsf.Close();
-	Log.Out(Logs::Detail, Logs::World_Server,"Signaling HTTP service to stop...");
+	Log.Out(Logs::Detail, Logs::World_Server, "Signaling HTTP service to stop...");
 	http_server.Stop();
 	Log.CloseFileLogs();
 
