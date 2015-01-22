@@ -60,6 +60,8 @@ int main(int argc, char **argv) {
 	ImportSkillCaps(&database);
 	ImportBaseData(&database);
 
+	Log.CloseFileLogs();
+	
 	return 0;
 }
 
