@@ -162,7 +162,7 @@ void EQEmuLogSys::ProcessLogWrite(uint16 debug_level, uint16 log_category, std::
 		EQEmuLogSys::SetCurrentTimeStamp(time_stamp);
 		std::ofstream crash_log; 
 		EQEmuLogSys::MakeDirectory("logs/crashes");
-		crash_log.open(StringFormat("logs/crashes/crash_%s_%i.txt", platform_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
+		crash_log.open(StringFormat("logs/crashes/crash_%s_%i.log", platform_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
 		crash_log << time_stamp << " " << message << "\n";
 		crash_log.close();
 	}
@@ -329,9 +329,9 @@ void EQEmuLogSys::StartFileLogs(std::string log_name)
 			return;
 		}
 
-		EQEmuLogSys::Out(Logs::General, Logs::Status, "Starting File Log 'logs/%s_%i.txt'", platform_file_name.c_str(), getpid());
+		EQEmuLogSys::Out(Logs::General, Logs::Status, "Starting File Log 'logs/%s_%i.log'", platform_file_name.c_str(), getpid());
 		EQEmuLogSys::MakeDirectory("logs/zone");
-		process_log.open(StringFormat("logs/zone/%s_%i.txt", platform_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
+		process_log.open(StringFormat("logs/zone/%s_%i.log", platform_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
 	}
 	else{
 		if (platform_file_name == ""){
