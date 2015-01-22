@@ -493,6 +493,7 @@ int main(int argc, char** argv) {
 	eqsf.Close();
 	Log.Out(Logs::Detail, Logs::World_Server,"Signaling HTTP service to stop...");
 	http_server.Stop();
+	Log.CloseFileLogs();
 
 	return 0;
 }
