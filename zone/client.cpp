@@ -2221,10 +2221,10 @@ bool Client::CheckIncreaseSkill(SkillUseTypes skillid, Mob *against_who, int cha
 		if(zone->random.Real(0, 99) < Chance)
 		{
 			SetSkill(skillid, GetRawSkill(skillid) + 1);
-			Log.Out(Logs::Detail, Logs::Skills, "Skill %d at value %d successfully gain with %.4f%%chance (mod %d)", skillid, skillval, Chance, chancemodi);
+			Log.Out(Logs::Detail, Logs::Skills, "Skill %d at value %d successfully gain with %d%%chance (mod %d)", skillid, skillval, Chance, chancemodi);
 			return true;
 		} else {
-			Log.Out(Logs::Detail, Logs::Skills, "Skill %d at value %d failed to gain with %.4f%%chance (mod %d)", skillid, skillval, Chance, chancemodi);
+			Log.Out(Logs::Detail, Logs::Skills, "Skill %d at value %d failed to gain with %d%%chance (mod %d)", skillid, skillval, Chance, chancemodi);
 		}
 	} else {
 		Log.Out(Logs::Detail, Logs::Skills, "Skill %d at value %d cannot increase due to maxmum %d", skillid, skillval, maxskill);
