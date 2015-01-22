@@ -1735,11 +1735,11 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
                         "npc_types.adventure_template_id, npc_types.trap_template, npc_types.attack_speed, "
                         "npc_types.STR, npc_types.STA, npc_types.DEX, npc_types.AGI, npc_types._INT, "
                         "npc_types.WIS, npc_types.CHA, npc_types.MR, npc_types.CR, npc_types.DR, "
-                        "npc_types.FR, npc_types.PR, npc_types.Corrup, npc_types.PhR,"
-                        "npc_types.mindmg, npc_types.maxdmg, npc_types.attack_count, npc_types.special_abilities,"
-                        "npc_types.npc_spells_id, npc_types.npc_spells_effects_id, npc_types.d_melee_texture1,"
-                        "npc_types.d_melee_texture2, npc_types.ammo_idfile, npc_types.prim_melee_type,"
-                        "npc_types.sec_melee_type, npc_types.ranged_type, npc_types.runspeed, npc_types.findable,"
+                        "npc_types.FR, npc_types.PR, npc_types.Corrup, npc_types.PhR, "
+                        "npc_types.mindmg, npc_types.maxdmg, npc_types.attack_count, npc_types.special_abilities, "
+                        "npc_types.npc_spells_id, npc_types.npc_spells_effects_id, npc_types.d_melee_texture1, "
+                        "npc_types.d_melee_texture2, npc_types.ammo_idfile, npc_types.prim_melee_type, "
+                        "npc_types.sec_melee_type, npc_types.ranged_type, npc_types.runspeed, npc_types.findable, "
                         "npc_types.trackable, npc_types.hp_regen_rate, npc_types.mana_regen_rate, "
                         "npc_types.aggroradius, npc_types.assistradius, npc_types.bodytype, npc_types.npc_faction_id, "
                         "npc_types.face, npc_types.luclin_hairstyle, npc_types.luclin_haircolor, "
@@ -1752,8 +1752,8 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
                         "npc_types.see_hide, npc_types.see_improved_hide, npc_types.ATK, npc_types.Accuracy, "
                         "npc_types.Avoidance, npc_types.slow_mitigation, npc_types.maxlevel, npc_types.scalerate, "
                         "npc_types.private_corpse, npc_types.unique_spawn_by_name, npc_types.underwater, "
-                        "npc_types.emoteid, npc_types.spellscale, npc_types.healscale, npc_types.no_target_hotkey,"
-                        "npc_types.raid_target, npc_types.attack_delay FROM npc_types WHERE id = %d", id);
+                        "npc_types.emoteid, npc_types.spellscale, npc_types.healscale, npc_types.no_target_hotkey, "
+                        "npc_types.raid_target, npc_types.attack_delay, npc_types.light FROM npc_types WHERE id = %d", id);
 
     auto results = QueryDatabase(query);
     if (!results.Success()) {
@@ -1920,6 +1920,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 		tmpNPCType->no_target_hotkey = atoi(row[88]) == 1 ? true: false;
 		tmpNPCType->raid_target = atoi(row[89]) == 0 ? false: true;
 		tmpNPCType->attack_delay = atoi(row[90]);
+		tmpNPCType->light = atoi(row[91]);
 
 		// If NPC with duplicate NPC id already in table,
 		// free item we attempted to add.
