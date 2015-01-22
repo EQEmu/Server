@@ -12,6 +12,7 @@
 #include <iostream>
 #include <mysqld_error.h>
 #include <string.h>
+#include <ctime>
 
 #ifdef _WINDOWS
 	#define snprintf	_snprintf
@@ -66,6 +67,8 @@ MySQLRequestResult DBcore::QueryDatabase(std::string query, bool retryOnFailureO
 MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, bool retryOnFailureOnce)
 {
 	LockMutex lock(&MDatabase);
+
+	clock_t t = clock();
 
 	// Reconnect if we are not connected before hand.
 	if (pStatus != Connected)
@@ -126,7 +129,8 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
 
 	MySQLRequestResult requestResult(res, (uint32)mysql_affected_rows(&mysql), rowCount, (uint32)mysql_field_count(&mysql), (uint32)mysql_insert_id(&mysql));
 	
-	Log.Out(Logs::General, Logs::MySQLQuery, "%s (%u rows returned, %f seconds)", query, rowCount);
+	t = clock() - t;
+	Log.Out(Logs::General, Logs::MySQLQuery, "%s (%u rows returned, took %f)", query, rowCount, ((float)t) / CLOCKS_PER_SEC);
 
 	return requestResult;
 }
@@ -200,9 +204,3 @@ bool DBcore::Open(uint32* errnum, char* errbuf) {
 		return false;
 	}
 }
-
-
-
-
-
-
