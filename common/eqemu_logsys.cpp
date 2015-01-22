@@ -326,7 +326,7 @@ void EQEmuLogSys::StartFileLogs(const std::string log_name)
 			return;
 		}
 
-		std::cout << "Starting Zone Logs..." << std::endl;
+		EQEmuLogSys::Out(Logs::General, Logs::Status, "Starting File Log 'logs/%s_%i.txt'", platform_file_name.c_str(), getpid());
 		EQEmuLogSys::MakeDirectory("logs/zone");
 		process_log.open(StringFormat("logs/zone/%s_%i.txt", platform_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
 	}
@@ -334,7 +334,7 @@ void EQEmuLogSys::StartFileLogs(const std::string log_name)
 		if (platform_file_name == ""){
 			return;
 		}
-		std::cout << "Starting Process Log (" << platform_file_name << ")..." << std::endl;
+		EQEmuLogSys::Out(Logs::General, Logs::Status, "Starting File Log 'logs/%s_%i.txt'", platform_file_name.c_str(), getpid());
 		process_log.open(StringFormat("logs/%s_%i.txt", platform_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
 	}
 }
