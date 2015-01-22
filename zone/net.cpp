@@ -146,7 +146,7 @@ int main(int argc, char** argv) {
 		worldserver.SetLauncherName("NONE");
 	}
 
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Loading server configuration..");
+	Log.Out(Logs::General, Logs::Zone_Server, "Loading server configuration..");
 	if (!ZoneConfig::LoadConfig()) {
 		Log.Out(Logs::General, Logs::Error, "Loading server configuration failed.");
 		return 1;
@@ -155,7 +155,7 @@ int main(int argc, char** argv) {
 
 	worldserver.SetPassword(Config->SharedKey.c_str());
 
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Connecting to MySQL...");
+	Log.Out(Logs::General, Logs::Zone_Server, "Connecting to MySQL...");
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),
 		Config->DatabaseUsername.c_str(),
@@ -179,7 +179,7 @@ int main(int argc, char** argv) {
 	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-	Log.Out(Logs::Detail, Logs::Zone_Server, "CURRENT_VERSION: %s", CURRENT_VERSION);
+	Log.Out(Logs::General, Logs::Zone_Server, "CURRENT_VERSION: %s", CURRENT_VERSION);
 
 	/*
 	* Setup nice signal handlers
@@ -199,85 +199,85 @@ int main(int argc, char** argv) {
 	}
 	#endif
 
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Mapping Incoming Opcodes");
+	Log.Out(Logs::General, Logs::Zone_Server, "Mapping Incoming Opcodes");
 	MapOpcodes();
 	
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Loading Variables");
+	Log.Out(Logs::General, Logs::Zone_Server, "Loading Variables");
 	database.LoadVariables();
 	
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Loading zone names");
+	Log.Out(Logs::General, Logs::Zone_Server, "Loading zone names");
 	database.LoadZoneNames();
 	
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Loading items");
+	Log.Out(Logs::General, Logs::Zone_Server, "Loading items");
 	if (!database.LoadItems()) {
 		Log.Out(Logs::General, Logs::Error, "Loading items FAILED!");
 		Log.Out(Logs::General, Logs::Error, "Failed. But ignoring error and going on...");
 	}
 
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Loading npc faction lists");
+	Log.Out(Logs::General, Logs::Zone_Server, "Loading npc faction lists");
 	if (!database.LoadNPCFactionLists()) {
 		Log.Out(Logs::General, Logs::Error, "Loading npcs faction lists FAILED!");
 		return 1;
 	}
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Loading loot tables");
+	Log.Out(Logs::General, Logs::Zone_Server, "Loading loot tables");
 	if (!database.LoadLoot()) {
 		Log.Out(Logs::General, Logs::Error, "Loading loot FAILED!");
 		return 1;
 	}
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Loading skill caps");
+	Log.Out(Logs::General, Logs::Zone_Server, "Loading skill caps");
 	if (!database.LoadSkillCaps()) {
 		Log.Out(Logs::General, Logs::Error, "Loading skill caps FAILED!");
 		return 1;
 	}
 
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Loading spells");
+	Log.Out(Logs::General, Logs::Zone_Server, "Loading spells");
 	EQEmu::MemoryMappedFile *mmf = nullptr;
 	LoadSpells(&mmf);
 
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Loading base data");
+	Log.Out(Logs::General, Logs::Zone_Server, "Loading base data");
 	if (!database.LoadBaseData()) {
 		Log.Out(Logs::General, Logs::Error, "Loading base data FAILED!");
 		return 1;
 	}
 
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Loading guilds");
+	Log.Out(Logs::General, Logs::Zone_Server, "Loading guilds");
 	guild_mgr.LoadGuilds();
 	
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Loading factions");
+	Log.Out(Logs::General, Logs::Zone_Server, "Loading factions");
 	database.LoadFactionData();
 	
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Loading titles");
+	Log.Out(Logs::General, Logs::Zone_Server, "Loading titles");
 	title_manager.LoadTitles();
 	
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Loading AA effects");
+	Log.Out(Logs::General, Logs::Zone_Server, "Loading AA effects");
 	database.LoadAAEffects();
 	
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Loading tributes");
+	Log.Out(Logs::General, Logs::Zone_Server, "Loading tributes");
 	database.LoadTributes();
 	
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Loading corpse timers");
+	Log.Out(Logs::General, Logs::Zone_Server, "Loading corpse timers");
 	database.GetDecayTimes(npcCorpseDecayTimes);
 	
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Loading commands");
+	Log.Out(Logs::General, Logs::Zone_Server, "Loading commands");
 	int retval=command_init();
 	if(retval<0)
 		Log.Out(Logs::General, Logs::Error, "Command loading FAILED");
 	else
-		Log.Out(Logs::Detail, Logs::Zone_Server, "%d commands loaded", retval);
+		Log.Out(Logs::General, Logs::Zone_Server, "%d commands loaded", retval);
 
 	//rules:
 	{
 		char tmp[64];
 		if (database.GetVariable("RuleSet", tmp, sizeof(tmp)-1)) {
-			Log.Out(Logs::Detail, Logs::Zone_Server, "Loading rule set '%s'", tmp);
+			Log.Out(Logs::General, Logs::Zone_Server, "Loading rule set '%s'", tmp);
 			if(!RuleManager::Instance()->LoadRules(&database, tmp)) {
 				Log.Out(Logs::General, Logs::Error, "Failed to load ruleset '%s', falling back to defaults.", tmp);
 			}
 		} else {
 			if(!RuleManager::Instance()->LoadRules(&database, "default")) {
-				Log.Out(Logs::Detail, Logs::Zone_Server, "No rule set configured, using default rules");
+				Log.Out(Logs::General, Logs::Zone_Server, "No rule set configured, using default rules");
 			} else {
-				Log.Out(Logs::Detail, Logs::Zone_Server, "Loaded default rule set 'default'", tmp);
+				Log.Out(Logs::General, Logs::Zone_Server, "Loaded default rule set 'default'", tmp);
 			}
 		}
 	}
@@ -300,7 +300,7 @@ int main(int argc, char** argv) {
 #endif
 
 	//now we have our parser, load the quests
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Loading quests");
+	Log.Out(Logs::General, Logs::Zone_Server, "Loading quests");
 	parse->ReloadQuests();
 
 	if (!worldserver.Connect()) {
@@ -315,7 +315,7 @@ int main(int argc, char** argv) {
 #endif
 #endif
 	if (!strlen(zone_name) || !strcmp(zone_name,".")) {
-		Log.Out(Logs::Detail, Logs::Zone_Server, "Entering sleep mode");
+		Log.Out(Logs::General, Logs::Zone_Server, "Entering sleep mode");
 	} else if (!Zone::Bootup(database.GetZoneID(zone_name), 0, true)) { //todo: go above and fix this to allow cmd line instance
 		Log.Out(Logs::General, Logs::Error, "Zone Bootup failed :: Zone::Bootup");
 		zone = 0;
@@ -347,7 +347,7 @@ int main(int argc, char** argv) {
 		worldserver.Process();
 
 		if (!eqsf.IsOpen() && Config->ZonePort!=0) {
-			Log.Out(Logs::Detail, Logs::Zone_Server, "Starting EQ Network server on port %d",Config->ZonePort);
+			Log.Out(Logs::General, Logs::Zone_Server, "Starting EQ Network server on port %d",Config->ZonePort);
 			if (!eqsf.Open(Config->ZonePort)) {
 				Log.Out(Logs::General, Logs::Error, "Failed to open port %d",Config->ZonePort);
 				ZoneConfig::SetZonePort(0);
@@ -478,14 +478,14 @@ int main(int argc, char** argv) {
 	safe_delete(taskmanager);
 	command_deinit();
 	safe_delete(parse);
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Proper zone shutdown complete.");
+	Log.Out(Logs::General, Logs::Zone_Server, "Proper zone shutdown complete.");
 	Log.CloseFileLogs();
 	return 0;
 }
 
 void CatchSignal(int sig_num) {
 #ifdef _WINDOWS
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Recieved signal: %i", sig_num);
+	Log.Out(Logs::General, Logs::Zone_Server, "Recieved signal: %i", sig_num);
 #endif
 	RunLoops = false;
 }
@@ -495,7 +495,7 @@ void Shutdown()
 	Zone::Shutdown(true);
 	RunLoops = false;
 	worldserver.Disconnect(); 
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Shutting down...");
+	Log.Out(Logs::General, Logs::Zone_Server, "Shutting down...");
 	Log.CloseFileLogs();
 }
 
