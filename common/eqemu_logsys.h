@@ -20,7 +20,7 @@
 #define EQEMU_LOGSYS_H
 
 #include <iostream>
-#include <fstream> 
+#include <fstream>
 #include <stdio.h>
 #include <functional>
 
@@ -118,7 +118,7 @@ namespace Logs{
 		"Zone Server",
 		"MySQL Error",
 		"MySQL Query",
-	}; 
+	};
 }
 
 class EQEmuLogSys {
@@ -128,23 +128,23 @@ public:
 
 	void CloseFileLogs(); /* Close File Logs wherever necessary, either at zone shutdown or entire process shutdown for everything else. This should be handled on deconstructor but to be safe we use it anyways. */
 	void LoadLogSettingsDefaults(); /* Initializes log_settings and sets some defaults if DB is not present */
-	void MakeDirectory(std::string directory_name); /* Platform independent way of performing a MakeDirectory based on name */
-	/* 
+	void MakeDirectory(const std::string &directory_name); /* Platform independent way of performing a MakeDirectory based on name */
+	/*
 		The one and only Logging function that uses a debug level as a parameter, as well as a log_category
 		log_category - defined in Logs::LogCategory::[]
 		log_category name resolution works by passing the enum int ID to Logs::LogCategoryName[category_id]
 
 		Example: EQEmuLogSys::Out(Logs::General, Logs::Guilds, "This guild has no leader present");
-			- This would pipe the same category and debug level to all output formats, but the internal memory reference of log_settings would 
+			- This would pipe the same category and debug level to all output formats, but the internal memory reference of log_settings would
 				be checked against to see if that piped output is set to actually process it for the category and debug level
 	*/
-	void Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...); 
+	void Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...);
 	void SetCurrentTimeStamp(char* time_stamp); /* Used in file logs to prepend a timestamp entry for logs */
-	void StartFileLogs(std::string log_name = ""); /* Used to declare the processes file log and to keep it open for later use */
+	void StartFileLogs(const std::string &log_name = ""); /* Used to declare the processes file log and to keep it open for later use */
 
-	/* 
+	/*
 		LogSettings Struct
-		
+
 		This struct is the master reference for all settings for each category, and for each output
 
 		log_to_file[category_id] = [1-3] - Sets debug level for category to output to file
@@ -162,29 +162,28 @@ public:
 		These are loaded via DB and have defaults loaded in LoadLogSettingsDefaults.
 		Database loaded via Database::LoadLogSettings(log_settings)
 	*/
-	LogSettings log_settings[Logs::LogCategory::MaxCategoryID]; 
+	LogSettings log_settings[Logs::LogCategory::MaxCategoryID];
 
 	bool file_logs_enabled; /* Set when log settings are loaded to determine if keeping a file open is necessary */
 
 	int log_platform; /* Sets Executable platform (Zone/World/UCS) etc. */
 
-	std::string platform_file_name; /* File name used in writing logs */ 
+	std::string platform_file_name; /* File name used in writing logs */
 
 	uint16 GetGMSayColorFromCategory(uint16 log_category); /* GMSay Client Message colors mapped by category */
 
-	void OnLogHookCallBackZone(std::function<void(uint16 log_type, std::string&)> f) { on_log_gmsay_hook = f; }
+	void OnLogHookCallBackZone(std::function<void(uint16 log_type, const std::string&)> f) { on_log_gmsay_hook = f; }
 
 private:
-	
-	std::function<void(uint16 log_category, std::string&)> on_log_gmsay_hook; /* Callback pointer to zone process for hooking logs to zone using GMSay */
-	std::string FormatOutMessageString(uint16 log_category, std::string in_message); /* Formats log messages like '[Category] This is a log message' */
+	std::function<void(uint16 log_category, const std::string&)> on_log_gmsay_hook; /* Callback pointer to zone process for hooking logs to zone using GMSay */
+	std::string FormatOutMessageString(uint16 log_category, const std::string &in_message); /* Formats log messages like '[Category] This is a log message' */
 	std::string GetLinuxConsoleColorFromCategory(uint16 log_category); /* Linux console color messages mapped by category */
-	
+
 	uint16 GetWindowsConsoleColorFromCategory(uint16 log_category); /* Windows console color messages mapped by category */
 
-	void ProcessConsoleMessage(uint16 debug_level, uint16 log_category, std::string message); /* ProcessConsoleMessage called via Log.Out */
-	void ProcessGMSay(uint16 debug_level, uint16 log_category, std::string message); /* ProcessGMSay called via Log.Out */
-	void ProcessLogWrite(uint16 debug_level, uint16 log_category, std::string message); /* ProcessLogWrite called via Log.Out */
+	void ProcessConsoleMessage(uint16 debug_level, uint16 log_category, const std::string &message); /* ProcessConsoleMessage called via Log.Out */
+	void ProcessGMSay(uint16 debug_level, uint16 log_category, const std::string &message); /* ProcessGMSay called via Log.Out */
+	void ProcessLogWrite(uint16 debug_level, uint16 log_category, const std::string &message); /* ProcessLogWrite called via Log.Out */
 };
 
 extern EQEmuLogSys Log;
