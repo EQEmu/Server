@@ -18,7 +18,7 @@
 
 #include "../common/bodytypes.h"
 #include "../common/classes.h"
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/misc_functions.h"
 #include "../common/rulesys.h"
 #include "../common/seperator.h"
@@ -439,7 +439,6 @@ void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot) {
 			return;
 		}
 		else if (item->item_id == item_id && item->equip_slot == slot && quantity >= 1) {
-			//std::cout<<"NPC::RemoveItem"<<" equipSlot:"<<iterator.GetData()->equipSlot<<" quantity:"<< quantity<<std::endl; // iterator undefined [CODEBUG]
 			if (item->charges <= quantity)
 				itemlist.erase(cur);
 			else
@@ -496,7 +495,7 @@ void NPC::QueryLoot(Client* to)
 	for(ItemList::iterator cur = itemlist.begin(); cur != itemlist.end(); ++cur, ++x) {
 		const Item_Struct* item = database.GetItem((*cur)->item_id);
 		if (item == nullptr) {
-			LogFile->write(EQEmuLog::Error, "Database error, invalid item");
+			Log.Out(Logs::General, Logs::Error, "Database error, invalid item");
 			continue;
 		}
 
@@ -992,7 +991,6 @@ uint32 ZoneDatabase::CreateNewNPCCommand(const char* zone, uint32 zone_version,C
                                         spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28);
         auto results = QueryDatabase(query);
 		if (!results.Success()) {
-			LogFile->write(EQEmuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), results.ErrorMessage().c_str());
 			return false;
 		}
 		npc_type_id = results.LastInsertedID();
@@ -1009,7 +1007,6 @@ uint32 ZoneDatabase::CreateNewNPCCommand(const char* zone, uint32 zone_version,C
                                         spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28);
         auto results = QueryDatabase(query);
 		if (!results.Success()) {
-			LogFile->write(EQEmuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), results.ErrorMessage().c_str());
 			return false;
 		}
 		npc_type_id = results.LastInsertedID();
@@ -1021,7 +1018,6 @@ uint32 ZoneDatabase::CreateNewNPCCommand(const char* zone, uint32 zone_version,C
 	query = StringFormat("INSERT INTO spawngroup (id, name) VALUES(%i, '%s-%s')", 0, zone, spawn->GetName());
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
     uint32 spawngroupid = results.LastInsertedID();
@@ -1035,7 +1031,6 @@ uint32 ZoneDatabase::CreateNewNPCCommand(const char* zone, uint32 zone_version,C
                         spawn->GetHeading(), spawngroupid);
     results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -1046,7 +1041,6 @@ uint32 ZoneDatabase::CreateNewNPCCommand(const char* zone, uint32 zone_version,C
                         spawngroupid, npc_type_id, 100);
     results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -1063,7 +1057,6 @@ uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(const char* zone, uint32 zone_ve
                                     zone, spawn->GetName(), Timer::GetCurrentTime());
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "CreateNewNPCSpawnGroupCommand Error: %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
     last_insert_id = results.LastInsertedID();
@@ -1086,7 +1079,6 @@ uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(const char* zone, uint32 zone_ve
                         spawn->GetHeading(), last_insert_id);
     results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "CreateNewNPCSpawnGroupCommand Error: %s %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
     spawnid = results.LastInsertedID();
@@ -1098,7 +1090,6 @@ uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(const char* zone, uint32 zone_ve
                         last_insert_id, spawn->GetNPCTypeID(), 100);
     results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "CreateNewNPCSpawnGroupCommand Error: %s %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
 
@@ -1660,7 +1651,7 @@ void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool rem
 	{
 		if(database.SetSpecialAttkFlag(this->GetNPCTypeID(), orig_parse))
 		{
-			LogFile->write(EQEmuLog::Normal, "NPCTypeID: %i flagged to '%s' for Special Attacks.\n",this->GetNPCTypeID(),orig_parse);
+			Log.Out(Logs::General, Logs::Normal, "NPCTypeID: %i flagged to '%s' for Special Attacks.\n",this->GetNPCTypeID(),orig_parse);
 		}
 	}
 }

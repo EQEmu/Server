@@ -17,7 +17,8 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 */
 
 #include "../common/classes.h"
-#include "../common/debug.h"
+#include "../common/global_define.h"
+#include "../common/eqemu_logsys.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/races.h"
 #include "../common/spdat.h"
@@ -444,7 +445,7 @@ void Client::HandleAAAction(aaID activate) {
 			break;
 
 		default:
-			LogFile->write(EQEmuLog::Error, "Unknown AA nonspell action type %d", caa->action);
+			Log.Out(Logs::General, Logs::Error, "Unknown AA nonspell action type %d", caa->action);
 			return;
 	}
 
@@ -500,7 +501,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	PetRecord record;
 	if(!database.GetPetEntry(spells[spell_id].teleport_zone, &record))
 	{
-		LogFile->write(EQEmuLog::Error, "Unknown swarm pet spell id: %d, check pets table", spell_id);
+		Log.Out(Logs::General, Logs::Error, "Unknown swarm pet spell id: %d, check pets table", spell_id);
 		Message(13, "Unable to find data for pet %s", spells[spell_id].teleport_zone);
 		return;
 	}
@@ -527,7 +528,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	const NPCType *npc_type = database.GetNPCType(pet.npc_id);
 	if(npc_type == nullptr) {
 		//log write
-		LogFile->write(EQEmuLog::Error, "Unknown npc type for swarm pet spell id: %d", spell_id);
+		Log.Out(Logs::General, Logs::Error, "Unknown npc type for swarm pet spell id: %d", spell_id);
 		Message(0,"Unable to find pet!");
 		return;
 	}
@@ -624,7 +625,7 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 	const NPCType *npc_type = database.GetNPCType(typesid);
 	if(npc_type == nullptr) {
 		//log write
-		LogFile->write(EQEmuLog::Error, "Unknown npc type for swarm pet type id: %d", typesid);
+		Log.Out(Logs::General, Logs::Error, "Unknown npc type for swarm pet type id: %d", typesid);
 		Message(0,"Unable to find pet!");
 		return;
 	}
@@ -949,7 +950,7 @@ void Client::SendAAStats() {
 
 void Client::BuyAA(AA_Action* action)
 {
-	mlog(AA__MESSAGE, "Starting to buy AA %d", action->ability);
+	Log.Out(Logs::Detail, Logs::AA, "Starting to buy AA %d", action->ability);
 
 	//find the AA information from the database
 	SendAA_Struct* aa2 = zone->FindAA(action->ability);
@@ -961,7 +962,7 @@ void Client::BuyAA(AA_Action* action)
 			a = action->ability - i;
 			if(a <= 0)
 				break;
-			mlog(AA__MESSAGE, "Could not find AA %d, trying potential parent %d", action->ability, a);
+			Log.Out(Logs::Detail, Logs::AA, "Could not find AA %d, trying potential parent %d", action->ability, a);
 			aa2 = zone->FindAA(a);
 			if(aa2 != nullptr)
 				break;
@@ -978,7 +979,7 @@ void Client::BuyAA(AA_Action* action)
 
 	uint32 cur_level = GetAA(aa2->id);
 	if((aa2->id + cur_level) != action->ability) { //got invalid AA
-		mlog(AA__ERROR, "Unable to find or match AA %d (found %d + lvl %d)", action->ability, aa2->id, cur_level);
+		Log.Out(Logs::Detail, Logs::AA, "Unable to find or match AA %d (found %d + lvl %d)", action->ability, aa2->id, cur_level);
 		return;
 	}
 
@@ -1009,7 +1010,7 @@ void Client::BuyAA(AA_Action* action)
 	if (m_pp.aapoints >= real_cost && cur_level < aa2->max_level) {
 		SetAA(aa2->id, cur_level + 1);
 
-		mlog(AA__MESSAGE, "Set AA %d to level %d", aa2->id, cur_level + 1);
+		Log.Out(Logs::Detail, Logs::AA, "Set AA %d to level %d", aa2->id, cur_level + 1);
 
 		m_pp.aapoints -= real_cost;
 
@@ -1427,10 +1428,10 @@ SendAA_Struct* Zone::FindAA(uint32 id) {
 }
 
 void Zone::LoadAAs() {
-	LogFile->write(EQEmuLog::Status, "Loading AA information...");
+	Log.Out(Logs::General, Logs::Status, "Loading AA information...");
 	totalAAs = database.CountAAs();
 	if(totalAAs == 0) {
-		LogFile->write(EQEmuLog::Error, "Failed to load AAs!");
+		Log.Out(Logs::General, Logs::Error, "Failed to load AAs!");
 		aas = nullptr;
 		return;
 	}
@@ -1445,11 +1446,11 @@ void Zone::LoadAAs() {
 	}
 
 	//load AA Effects into aa_effects
-	LogFile->write(EQEmuLog::Status, "Loading AA Effects...");
+	Log.Out(Logs::General, Logs::Status, "Loading AA Effects...");
 	if (database.LoadAAEffects2())
-		LogFile->write(EQEmuLog::Status, "Loaded %d AA Effects.", aa_effects.size());
+		Log.Out(Logs::General, Logs::Status, "Loaded %d AA Effects.", aa_effects.size());
 	else
-		LogFile->write(EQEmuLog::Error, "Failed to load AA Effects!");
+		Log.Out(Logs::General, Logs::Error, "Failed to load AA Effects!");
 }
 
 bool ZoneDatabase::LoadAAEffects2() {
@@ -1458,12 +1459,10 @@ bool ZoneDatabase::LoadAAEffects2() {
 	const std::string query = "SELECT aaid, slot, effectid, base1, base2 FROM aa_effects ORDER BY aaid ASC, slot ASC";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "Error in ZoneDatabase::LoadAAEffects2 query: '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
 	if (!results.RowCount()) { //no results
-		LogFile->write(EQEmuLog::Error, "Error loading AA Effects, none found in the database.");
 		return false;
 	}
 
@@ -1800,7 +1799,6 @@ bool ZoneDatabase::LoadAAEffects() {
 							"redux_aa, redux_rate, redux_aa2, redux_rate2 FROM aa_actions";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "Error in LoadAAEffects query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -1837,11 +1835,10 @@ bool ZoneDatabase::LoadAAEffects() {
 uint8 ZoneDatabase::GetTotalAALevels(uint32 skill_id) {
 
 	std::string query = StringFormat("SELECT count(slot) FROM aa_effects WHERE aaid = %i", skill_id);
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "Error in GetTotalAALevels '%s: %s", query.c_str(), results.ErrorMessage().c_str());
-		return 0;
-	}
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        return 0;
+    }
 
 	if (results.RowCount() != 1)
 		return 0;
@@ -1893,8 +1890,7 @@ uint32 ZoneDatabase::CountAAs(){
 	const std::string query = "SELECT count(title_sid) FROM altadv_vars";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "Error in ZoneDatabase::CountAAs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
-		return 0;
+        return 0;
 	}
 
 	if (results.RowCount() != 1)
@@ -1910,8 +1906,7 @@ uint32 ZoneDatabase::CountAAEffects() {
 	const std::string query = "SELECT count(id) FROM aa_effects";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "Error in ZoneDatabase::CountAALevels query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
-		return 0;
+        return 0;
 	}
 
 	if (results.RowCount() != 1)
@@ -1943,14 +1938,12 @@ void ZoneDatabase::LoadAAs(SendAA_Struct **load){
 			load[index]->seq = index+1;
 		}
 	} else {
-		LogFile->write(EQEmuLog::Error, "Error in ZoneDatabase::LoadAAs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 	}
 
 	AARequiredLevelAndCost.clear();
 	query = "SELECT skill_id, level, cost from aa_required_level_cost order by skill_id";
 	results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "Error in ZoneDatabase::LoadAAs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -1960,7 +1953,6 @@ void ZoneDatabase::LoadAAs(SendAA_Struct **load){
 		aalcs.Cost = atoi(row[2]);
 		AARequiredLevelAndCost[atoi(row[0])] = aalcs;
 	}
-
 }
 
 SendAA_Struct* ZoneDatabase::GetAASkillVars(uint32 skill_id)
@@ -1968,7 +1960,6 @@ SendAA_Struct* ZoneDatabase::GetAASkillVars(uint32 skill_id)
 	std::string query = "SET @row = 0"; //initialize "row" variable in database for next query
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "Error in GetAASkillVars '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return nullptr;
 	}
 
@@ -1988,7 +1979,6 @@ SendAA_Struct* ZoneDatabase::GetAASkillVars(uint32 skill_id)
 						"FROM altadv_vars a WHERE skill_id=%i", skill_id);
 	results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "Error in GetAASkillVars '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return nullptr;
 	}
 

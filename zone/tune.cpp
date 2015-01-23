@@ -20,7 +20,7 @@
 //#define TUNE_DEBUG 20
 #endif
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/eq_constants.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/rulesys.h"

@@ -1,6 +1,8 @@
 #ifndef CLIENTVERSIONS_H
 #define CLIENTVERSIONS_H
 
+#include "types.h"
+
 static const uint32 BIT_Client62	= 1;
 static const uint32 BIT_Titanium	= 2;
 static const uint32 BIT_SoF			= 4;

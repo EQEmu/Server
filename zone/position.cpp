@@ -5,7 +5,6 @@
 #include <cmath>
 #include "../common/string_util.h"
 
-
 std::string to_string(const glm::vec4 &position) {
     return StringFormat("(%.3f, %.3f, %.3f, %.3f)", position.x,position.y,position.z,position.w);
 }
@@ -114,7 +113,7 @@ bool IsWithinAxisAlignedBox(const glm::vec3 &position, const glm::vec3 &minimum,
     bool ycheck = position.y >= actualMinimum.y && position.y <= actualMaximum.y;
     bool zcheck = position.z >= actualMinimum.z && position.z <= actualMaximum.z;
 
-    return xcheck && ycheck && zcheck;
+	return xcheck && ycheck && zcheck;
 }
 
 /**
@@ -128,7 +127,7 @@ bool IsWithinAxisAlignedBox(const glm::vec2 &position, const glm::vec2 &minimum,
     bool xcheck = position.x >= actualMinimum.x && position.x <= actualMaximum.x;
     bool ycheck = position.y >= actualMinimum.y && position.y <= actualMaximum.y;
 
-    return xcheck && ycheck;
+	return xcheck && ycheck;
 }
 
 /**
@@ -146,17 +145,18 @@ float GetReciprocalHeading(const glm::vec4& point1) {
 * current heading.
 * Takes an EQfloat and returns an EQFloat.
 */
-float GetReciprocalHeading(const float heading) {
-    float result = 0;
+float GetReciprocalHeading(const float heading)
+{
+	float result = 0;
 
-    // Convert to radians
-    float h = (heading / 256.0f) * 6.283184f;
+	// Convert to radians
+	float h = (heading / 256.0f) * 6.283184f;
 
-    // Calculate the reciprocal heading in radians
-    result = h + 3.141592f;
+	// Calculate the reciprocal heading in radians
+	result = h + 3.141592f;
 
-    // Convert back to eq heading from radians
-    result = (result / 6.283184f) * 256.0f;
+	// Convert back to eq heading from radians
+	result = (result / 6.283184f) * 256.0f;
 
-    return result;
+	return result;
 }

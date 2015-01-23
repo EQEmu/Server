@@ -1,4 +1,4 @@
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/servertalk.h"
 #include "../common/extprofile.h"
 #include "../common/rulesys.h"
@@ -386,7 +386,6 @@ void Adventure::MoveCorpsesToGraveyard()
 	std::string query = StringFormat("SELECT id, charid FROM character_corpses WHERE instanceid=%d", GetInstanceID());
 	auto results = database.QueryDatabase(query);
 	if(!results.Success())
-        LogFile->write(EQEmuLog::Error, "Error in AdventureManager:::MoveCorpsesToGraveyard: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 
 	for(auto row = results.begin(); row != results.end(); ++row) {
         dbid_list.push_back(atoi(row[0]));
@@ -403,9 +402,7 @@ void Adventure::MoveCorpsesToGraveyard()
                             "x = %f, y = %f, z = %f WHERE instanceid = %d",
                             GetTemplate()->graveyard_zone_id,
                             x, y, z, GetInstanceID());
-		auto results = database.QueryDatabase(query);
-		if(!results.Success())
-			LogFile->write(EQEmuLog::Error, "Error in AdventureManager:::MoveCorpsesToGraveyard: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+		database.QueryDatabase(query);
 	}
 
     auto c_iter = charid_list.begin();

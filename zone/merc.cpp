@@ -6,6 +6,7 @@
 #include "groups.h"
 #include "mob.h"
 
+#include "../common/eqemu_logsys.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/eq_constants.h"
 #include "../common/skills.h"
@@ -884,7 +885,7 @@ int32 Merc::CalcMaxMana()
 		break;
 			  }
 	default: {
-		LogFile->write(EQEmuLog::Debug, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+		Log.Out(Logs::General, Logs::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
 		max_mana = 0;
 		break;
 			 }
@@ -905,7 +906,7 @@ int32 Merc::CalcMaxMana()
 	}
 
 #if EQDEBUG >= 11
-	LogFile->write(EQEmuLog::Debug, "Merc::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
+	Log.Out(Logs::General, Logs::None, "Merc::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
 #endif
 	return max_mana;
 }
@@ -1646,7 +1647,7 @@ void Merc::AI_Process() {
 			if (AImovement_timer->Check())
 			{
 				if(!IsRooted()) {
-					mlog(AI__WAYPOINTS, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
+					Log.Out(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
 					CalculateNewPosition2(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), GetRunspeed());
 					return;
 				}
@@ -1765,7 +1766,7 @@ bool Merc::AI_EngagedCastCheck() {
 	{
 		AIautocastspell_timer->Disable();       //prevent the timer from going off AGAIN while we are casting.
 
-		mlog(AI__SPELLS, "Engaged autocast check triggered (MERCS).");
+		Log.Out(Logs::Detail, Logs::AI, "Engaged autocast check triggered (MERCS).");
 
 		int8 mercClass = GetClass();
 
@@ -1872,7 +1873,7 @@ bool EntityList::Merc_AICheckCloseBeneficialSpells(Merc* caster, uint8 iChance, 
 		// according to Rogean, Live NPCs will just cast through walls/floors, no problem..
 		//
 		// This check was put in to address an idle-mob CPU issue
-		_log(AI__ERROR, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
+		Log.Out(Logs::General, Logs::Error, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
 		return(false);
 	}
 
@@ -2868,9 +2869,7 @@ bool Merc::CheckStance(int16 stance) {
 
 	//checks of current stance matches stances listed as valid for spell in database
 	//stance = 0 for all stances, stance # for only that stance & -stance# for all but that stance
-	if(stance == 0
-		|| (stance > 0 && stance == GetStance())
-		|| (stance < 0 && abs(stance) != GetStance())) {
+	if (stance == 0 || (stance > 0 && stance == GetStance()) || (stance < 0 && std::abs(stance) != GetStance())) {
 			return true;
 	}
 
@@ -4450,7 +4449,7 @@ bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, boo
 {
 	if (!other) {
 		SetTarget(nullptr);
-		LogFile->write(EQEmuLog::Error, "A null Mob object was passed to Merc::Attack() for evaluation!");
+		Log.Out(Logs::General, Logs::Error, "A null Mob object was passed to Merc::Attack() for evaluation!");
 		return false;
 	}
 
@@ -4925,7 +4924,6 @@ bool Merc::Spawn(Client *owner) {
 
 	//UpdateMercAppearance();
 
-	//printf("Spawned Merc with ID %i\n", npc->GetID()); fflush(stdout);
 
 	return true;
 }
@@ -5985,7 +5983,7 @@ void NPC::LoadMercTypes() {
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
 	{
-		LogFile->write(EQEmuLog::Error, "Error in NPC::LoadMercTypes()");
+		Log.Out(Logs::General, Logs::Error, "Error in NPC::LoadMercTypes()");
 		return;
 	}
 
@@ -6018,7 +6016,7 @@ void NPC::LoadMercs() {
 
 	if (!results.Success())
 	{
-		LogFile->write(EQEmuLog::Error, "Error in NPC::LoadMercTypes()");
+		Log.Out(Logs::General, Logs::Error, "Error in NPC::LoadMercTypes()");
 		return;
 	}
 

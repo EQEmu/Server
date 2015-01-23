@@ -56,8 +56,7 @@ void Client::SendGuildMOTD(bool GetGuildMOTDReply) {
 
 	}
 
-	mlog(GUILDS__OUT_PACKETS, "Sending OP_GuildMOTD of length %d", outapp->size);
-	mpkt(GUILDS__OUT_PACKET_TRACE, outapp);
+	Log.Out(Logs::Detail, Logs::Guilds, "Sending OP_GuildMOTD of length %d", outapp->size);
 
 	FastQueuePacket(&outapp);
 }
@@ -145,10 +144,10 @@ void Client::SendGuildSpawnAppearance() {
 	if (!IsInAGuild()) {
 		// clear guildtag
 		SendAppearancePacket(AT_GuildID, GUILD_NONE);
-		mlog(GUILDS__OUT_PACKETS, "Sending spawn appearance for no guild tag.");
+		Log.Out(Logs::Detail, Logs::Guilds, "Sending spawn appearance for no guild tag.");
 	} else {
 		uint8 rank = guild_mgr.GetDisplayedRank(GuildID(), GuildRank(), CharacterID());
-		mlog(GUILDS__OUT_PACKETS, "Sending spawn appearance for guild %d at rank %d", GuildID(), rank);
+		Log.Out(Logs::Detail, Logs::Guilds, "Sending spawn appearance for guild %d at rank %d", GuildID(), rank);
 		SendAppearancePacket(AT_GuildID, GuildID());
 		if(GetClientVersion() >= ClientVersion::RoF)
 		{
@@ -172,12 +171,11 @@ void Client::SendGuildList() {
 	//ask the guild manager to build us a nice guild list packet
 	outapp->pBuffer = guild_mgr.MakeGuildList(/*GetName()*/"", outapp->size);
 	if(outapp->pBuffer == nullptr) {
-		mlog(GUILDS__ERROR, "Unable to make guild list!");
+		Log.Out(Logs::Detail, Logs::Guilds, "Unable to make guild list!");
 		return;
 	}
 
-	mlog(GUILDS__OUT_PACKETS, "Sending OP_ZoneGuildList of length %d", outapp->size);
-//	mpkt(GUILDS__OUT_PACKET_TRACE, outapp);
+	Log.Out(Logs::Detail, Logs::Guilds, "Sending OP_ZoneGuildList of length %d", outapp->size);
 
 	FastQueuePacket(&outapp);
 }
@@ -194,8 +192,7 @@ void Client::SendGuildMembers() {
 	outapp->pBuffer = data;
 	data = nullptr;
 
-	mlog(GUILDS__OUT_PACKETS, "Sending OP_GuildMemberList of length %d", outapp->size);
-	mpkt(GUILDS__OUT_PACKET_TRACE, outapp);
+	Log.Out(Logs::Detail, Logs::Guilds, "Sending OP_GuildMemberList of length %d", outapp->size);
 
 	FastQueuePacket(&outapp);
 
@@ -226,7 +223,7 @@ void Client::RefreshGuildInfo()
 
 	CharGuildInfo info;
 	if(!guild_mgr.GetCharInfo(CharacterID(), info)) {
-		mlog(GUILDS__ERROR, "Unable to obtain guild char info for %s (%d)", GetName(), CharacterID());
+		Log.Out(Logs::Detail, Logs::Guilds, "Unable to obtain guild char info for %s (%d)", GetName(), CharacterID());
 		return;
 	}
 
@@ -338,8 +335,7 @@ void Client::SendGuildJoin(GuildJoin_Struct* gj){
 	outgj->rank = gj->rank;
 	outgj->zoneid = gj->zoneid;
 
-	mlog(GUILDS__OUT_PACKETS, "Sending OP_GuildManageAdd for join of length %d", outapp->size);
-	mpkt(GUILDS__OUT_PACKET_TRACE, outapp);
+	Log.Out(Logs::Detail, Logs::Guilds, "Sending OP_GuildManageAdd for join of length %d", outapp->size);
 
 	FastQueuePacket(&outapp);
 
@@ -413,7 +409,6 @@ bool ZoneDatabase::CheckGuildDoor(uint8 doorid, uint16 guild_id, const char* zon
                                     doorid-128, zone);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "Error in CheckGuildDoor query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -433,7 +428,6 @@ bool ZoneDatabase::SetGuildDoor(uint8 doorid,uint16 guild_id, const char* zone) 
                                         guild_id, doorid, zone);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "Error in SetGuildDoor query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 

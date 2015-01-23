@@ -16,7 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/features.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
@@ -43,7 +43,6 @@ extern Zone *zone;
 #else
 	#define MobAI_DEBUG_Spells	-1
 #endif
-#define ABS(x) ((x)<0?-(x):(x))
 
 //NOTE: do NOT pass in beneficial and detrimental spell types into the same call here!
 bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
@@ -355,7 +354,7 @@ bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float 
 		// according to Rogean, Live NPCs will just cast through walls/floors, no problem..
 		//
 		// This check was put in to address an idle-mob CPU issue
-		_log(AI__ERROR, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
+		Log.Out(Logs::General, Logs::Error, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
 		return(false);
 	}
 
@@ -784,7 +783,8 @@ void Client::AI_Process()
 				if(AImovement_timer->Check()) {
 					animation = GetRunspeed() * 21;
 					// Check if we have reached the last fear point
-					if((ABS(GetX()-m_FearWalkTarget.x) < 0.1) && (ABS(GetY()-m_FearWalkTarget.y) <0.1)) {
+					if ((std::abs(GetX() - m_FearWalkTarget.x) < 0.1) &&
+					    (std::abs(GetY() - m_FearWalkTarget.y) < 0.1)) {
 						// Calculate a new point to run to
 						CalculateNewFearpoint();
 					}
@@ -1052,7 +1052,8 @@ void Mob::AI_Process() {
 			} else {
 				if(AImovement_timer->Check()) {
 					// Check if we have reached the last fear point
-					if((ABS(GetX()-m_FearWalkTarget.x) < 0.1) && (ABS(GetY()-m_FearWalkTarget.y) <0.1)) {
+					if ((std::abs(GetX() - m_FearWalkTarget.x) < 0.1) &&
+					    (std::abs(GetY() - m_FearWalkTarget.y) < 0.1)) {
 						// Calculate a new point to run to
 						CalculateNewFearpoint();
 					}
@@ -1403,7 +1404,7 @@ void Mob::AI_Process() {
 				else if (AImovement_timer->Check())
 				{
 					if(!IsRooted()) {
-						mlog(AI__WAYPOINTS, "Pursuing %s while engaged.", target->GetName());
+						Log.Out(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", target->GetName());
 						if(!RuleB(Pathing, Aggro) || !zone->pathing)
 							CalculateNewPosition2(target->GetX(), target->GetY(), target->GetZ(), GetRunspeed());
 						else
@@ -1638,7 +1639,7 @@ void NPC::AI_DoMovement() {
 				roambox_movingto_y = zone->random.Real(roambox_min_y+1,roambox_max_y-1);
 		}
 
-		mlog(AI__WAYPOINTS, "Roam Box: d=%.3f (%.3f->%.3f,%.3f->%.3f): Go To (%.3f,%.3f)",
+		Log.Out(Logs::Detail, Logs::AI, "Roam Box: d=%.3f (%.3f->%.3f,%.3f->%.3f): Go To (%.3f,%.3f)",
 			roambox_distance, roambox_min_x, roambox_max_x, roambox_min_y, roambox_max_y, roambox_movingto_x, roambox_movingto_y);
 		if (!CalculateNewPosition2(roambox_movingto_x, roambox_movingto_y, GetZ(), walksp, true))
 		{
@@ -1691,11 +1692,11 @@ void NPC::AI_DoMovement() {
 				else {
 					movetimercompleted=false;
 
-					mlog(QUESTS__PATHING, "We are departing waypoint %d.", cur_wp);
+					Log.Out(Logs::Detail, Logs::Pathing, "We are departing waypoint %d.", cur_wp);
 
 					//if we were under quest control (with no grid), we are done now..
 					if(cur_wp == -2) {
-						mlog(QUESTS__PATHING, "Non-grid quest mob has reached its quest ordered waypoint. Leaving pathing mode.");
+						Log.Out(Logs::Detail, Logs::Pathing, "Non-grid quest mob has reached its quest ordered waypoint. Leaving pathing mode.");
 						roamer = false;
 						cur_wp = 0;
 					}
@@ -1726,7 +1727,7 @@ void NPC::AI_DoMovement() {
 			{	// currently moving
 				if (m_CurrentWayPoint.x == GetX() && m_CurrentWayPoint.y == GetY())
 				{	// are we there yet? then stop
-					mlog(AI__WAYPOINTS, "We have reached waypoint %d (%.3f,%.3f,%.3f) on grid %d", cur_wp, GetX(), GetY(), GetZ(), GetGrid());
+					Log.Out(Logs::Detail, Logs::AI, "We have reached waypoint %d (%.3f,%.3f,%.3f) on grid %d", cur_wp, GetX(), GetY(), GetZ(), GetGrid());
 					SetWaypointPause();
 					if(GetAppearance() != eaStanding)
 						SetAppearance(eaStanding, false);
@@ -1772,7 +1773,7 @@ void NPC::AI_DoMovement() {
 			if (movetimercompleted==true)
 			{ // time to pause has ended
 				SetGrid( 0 - GetGrid()); // revert to AI control
-				mlog(QUESTS__PATHING, "Quest pathing is finished. Resuming on grid %d", GetGrid());
+				Log.Out(Logs::Detail, Logs::Pathing, "Quest pathing is finished. Resuming on grid %d", GetGrid());
 
 				if(GetAppearance() != eaStanding)
 					SetAppearance(eaStanding, false);
@@ -1808,7 +1809,7 @@ void NPC::AI_DoMovement() {
 		if (!CP2Moved)
 		{
 			if(moved) {
-				mlog(AI__WAYPOINTS, "Reached guard point (%.3f,%.3f,%.3f)", m_GuardPoint.x, m_GuardPoint.y, m_GuardPoint.z);
+				Log.Out(Logs::Detail, Logs::AI, "Reached guard point (%.3f,%.3f,%.3f)", m_GuardPoint.x, m_GuardPoint.y, m_GuardPoint.z);
 				ClearFeignMemory();
 				moved=false;
 				SetMoving(false);
@@ -1933,7 +1934,7 @@ bool NPC::AI_EngagedCastCheck() {
 	if (AIautocastspell_timer->Check(false)) {
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
-		mlog(AI__SPELLS, "Engaged autocast check triggered. Trying to cast healing spells then maybe offensive spells.");
+		Log.Out(Logs::Detail, Logs::AI, "Engaged autocast check triggered. Trying to cast healing spells then maybe offensive spells.");
 
 		// try casting a heal or gate
 		if (!AICastSpell(this, AISpellVar.engaged_beneficial_self_chance, SpellType_Heal | SpellType_Escape | SpellType_InCombatBuff)) {
@@ -1956,7 +1957,7 @@ bool NPC::AI_PursueCastCheck() {
 	if (AIautocastspell_timer->Check(false)) {
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
-		mlog(AI__SPELLS, "Engaged (pursuing) autocast check triggered. Trying to cast offensive spells.");
+		Log.Out(Logs::Detail, Logs::AI, "Engaged (pursuing) autocast check triggered. Trying to cast offensive spells.");
 		if(!AICastSpell(GetTarget(), AISpellVar.pursue_detrimental_chance, SpellType_Root | SpellType_Nuke | SpellType_Lifetap | SpellType_Snare | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff)) {
 			//no spell cast, try again soon.
 			AIautocastspell_timer->Start(RandomTimer(AISpellVar.pursue_no_sp_recast_min, AISpellVar.pursue_no_sp_recast_max), false);
@@ -2679,7 +2680,6 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
                                         "idle_b_chance FROM npc_spells WHERE id=%d", iDBSpellsID);
         auto results = QueryDatabase(query);
         if (!results.Success()) {
-            std::cerr << "Error in AddNPCSpells query1 '" << query << "' " << results.ErrorMessage() << std::endl;
 			return nullptr;
         }
 
@@ -2715,7 +2715,6 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
 
         if (!results.Success())
         {
-            std::cerr << "Error in AddNPCSpells query1 '" << query << "' " << results.ErrorMessage() << std::endl;
 			return nullptr;
         }
 
@@ -2772,7 +2771,6 @@ uint32 ZoneDatabase::GetMaxNPCSpellsID() {
 	std::string query = "SELECT max(id) from npc_spells";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        std::cerr << "Error in GetMaxNPCSpellsID query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
 
@@ -2787,15 +2785,16 @@ uint32 ZoneDatabase::GetMaxNPCSpellsID() {
     return atoi(row[0]);
 }
 
-DBnpcspellseffects_Struct* ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEffectsID) {
+DBnpcspellseffects_Struct *ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEffectsID)
+{
 	if (iDBSpellsEffectsID == 0)
 		return nullptr;
 
 	if (!npc_spellseffects_cache) {
 		npc_spellseffects_maxid = GetMaxNPCSpellsEffectsID();
-		npc_spellseffects_cache = new DBnpcspellseffects_Struct*[npc_spellseffects_maxid+1];
-		npc_spellseffects_loadtried = new bool[npc_spellseffects_maxid+1];
-		for (uint32 i=0; i<=npc_spellseffects_maxid; i++) {
+		npc_spellseffects_cache = new DBnpcspellseffects_Struct *[npc_spellseffects_maxid + 1];
+		npc_spellseffects_loadtried = new bool[npc_spellseffects_maxid + 1];
+		for (uint32 i = 0; i <= npc_spellseffects_maxid; i++) {
 			npc_spellseffects_cache[i] = 0;
 			npc_spellseffects_loadtried[i] = false;
 		}
@@ -2804,54 +2803,55 @@ DBnpcspellseffects_Struct* ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEff
 	if (iDBSpellsEffectsID > npc_spellseffects_maxid)
 		return nullptr;
 
-	if (npc_spellseffects_cache[iDBSpellsEffectsID])  // it's in the cache, easy =)
+	if (npc_spellseffects_cache[iDBSpellsEffectsID]) // it's in the cache, easy =)
 		return npc_spellseffects_cache[iDBSpellsEffectsID];
 
 	if (npc_spellseffects_loadtried[iDBSpellsEffectsID])
-        return nullptr;
+		return nullptr;
 
-    npc_spellseffects_loadtried[iDBSpellsEffectsID] = true;
+	npc_spellseffects_loadtried[iDBSpellsEffectsID] = true;
 
-    std::string query = StringFormat("SELECT id, parent_list FROM npc_spells_effects WHERE id=%d", iDBSpellsEffectsID);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        std::cerr << "Error in AddNPCSpells query1 '" << query << "' " << results.ErrorMessage() << std::endl;
-        return nullptr;
-    }
+	std::string query =
+	    StringFormat("SELECT id, parent_list FROM npc_spells_effects WHERE id=%d", iDBSpellsEffectsID);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		return nullptr;
+	}
 
-    if (results.RowCount() != 1)
-        return nullptr;
+	if (results.RowCount() != 1)
+		return nullptr;
 
-    auto row = results.begin();
-    uint32 tmpparent_list = atoi(row[1]);
+	auto row = results.begin();
+	uint32 tmpparent_list = atoi(row[1]);
 
-    query = StringFormat("SELECT spell_effect_id, minlevel, "
-                        "maxlevel,se_base, se_limit, se_max "
-                        "FROM npc_spells_effects_entries "
-                        "WHERE npc_spells_effects_id = %d ORDER BY minlevel", iDBSpellsEffectsID);
-    results = QueryDatabase(query);
-    if (!results.Success())
-        return nullptr;
+	query = StringFormat("SELECT spell_effect_id, minlevel, "
+			     "maxlevel,se_base, se_limit, se_max "
+			     "FROM npc_spells_effects_entries "
+			     "WHERE npc_spells_effects_id = %d ORDER BY minlevel",
+			     iDBSpellsEffectsID);
+	results = QueryDatabase(query);
+	if (!results.Success())
+		return nullptr;
 
-    uint32 tmpSize = sizeof(DBnpcspellseffects_Struct) + (sizeof(DBnpcspellseffects_entries_Struct) * results.RowCount());
-    npc_spellseffects_cache[iDBSpellsEffectsID] = (DBnpcspellseffects_Struct*) new uchar[tmpSize];
-    memset(npc_spellseffects_cache[iDBSpellsEffectsID], 0, tmpSize);
-    npc_spellseffects_cache[iDBSpellsEffectsID]->parent_list = tmpparent_list;
-    npc_spellseffects_cache[iDBSpellsEffectsID]->numentries = results.RowCount();
+	uint32 tmpSize =
+	    sizeof(DBnpcspellseffects_Struct) + (sizeof(DBnpcspellseffects_entries_Struct) * results.RowCount());
+	npc_spellseffects_cache[iDBSpellsEffectsID] = (DBnpcspellseffects_Struct *)new uchar[tmpSize];
+	memset(npc_spellseffects_cache[iDBSpellsEffectsID], 0, tmpSize);
+	npc_spellseffects_cache[iDBSpellsEffectsID]->parent_list = tmpparent_list;
+	npc_spellseffects_cache[iDBSpellsEffectsID]->numentries = results.RowCount();
 
-    int entryIndex = 0;
-    for (row = results.begin(); row != results.end(); ++row, ++entryIndex)
-    {
-        int spell_effect_id = atoi(row[0]);
-        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].spelleffectid =  spell_effect_id;
-        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].minlevel = atoi(row[1]);
-        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].maxlevel = atoi(row[2]);
-        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].base = atoi(row[3]);
-        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].limit = atoi(row[4]);
-        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].max = atoi(row[5]);
-    }
+	int entryIndex = 0;
+	for (row = results.begin(); row != results.end(); ++row, ++entryIndex) {
+		int spell_effect_id = atoi(row[0]);
+		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].spelleffectid = spell_effect_id;
+		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].minlevel = atoi(row[1]);
+		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].maxlevel = atoi(row[2]);
+		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].base = atoi(row[3]);
+		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].limit = atoi(row[4]);
+		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].max = atoi(row[5]);
+	}
 
-    return npc_spellseffects_cache[iDBSpellsEffectsID];
+	return npc_spellseffects_cache[iDBSpellsEffectsID];
 }
 
 uint32 ZoneDatabase::GetMaxNPCSpellsEffectsID() {
@@ -2859,7 +2859,6 @@ uint32 ZoneDatabase::GetMaxNPCSpellsEffectsID() {
 	std::string query = "SELECT max(id) FROM npc_spells_effects";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        std::cerr << "Error in GetMaxNPCSpellsEffectsID query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
 

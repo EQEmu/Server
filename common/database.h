@@ -21,7 +21,8 @@
 #define AUTHENTICATION_TIMEOUT	60
 #define INVALID_ID				0xFFFFFFFF
 
-#include "debug.h"
+#include "global_define.h"
+#include "eqemu_logsys.h"
 #include "types.h"
 #include "dbcore.h"
 #include "linked_list.h"
@@ -643,6 +644,9 @@ public:
 	void	SetFirstLogon(uint32 CharID, uint8 firstlogon);
 	void	SetLoginFlags(uint32 CharID, bool LFP, bool LFG, uint8 firstlogon);
 	void	AddReport(std::string who, std::string against, std::string lines);
+
+	/* EQEmuLogSys */
+	void	LoadLogSettings(EQEmuLogSys::LogSettings* log_settings);
 
 private:
 	void DBInitVars();

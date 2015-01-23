@@ -17,7 +17,7 @@
 */
 
 #include "classes.h"
-#include "debug.h"
+#include "global_define.h"
 #include "item.h"
 #include "races.h"
 #include "rulesys.h"
@@ -1145,7 +1145,7 @@ int16 Inventory::_PutItem(int16 slot_id, ItemInst* inst)
 	}
 	
 	if (result == INVALID_INDEX) {
-		LogFile->write(EQEmuLog::Error, "Inventory::_PutItem: Invalid slot_id specified (%i) with parent slot id (%i)", slot_id, parentSlot);
+		Log.Out(Logs::General, Logs::Error, "Inventory::_PutItem: Invalid slot_id specified (%i) with parent slot id (%i)", slot_id, parentSlot);
 		Inventory::MarkDirty(inst); // Slot not found, clean up
 	}
 

@@ -97,7 +97,6 @@ void repair_a_high_waypoint(Map *map, PathNode *it) {
 		}
 	} else {
 		z_no_map_count++;
-		//printf("Missed: (%.3f, %.3f, %.3f)\n", it->x, it->y, it->z);
 	}
 }
 
@@ -199,8 +198,6 @@ RESTART_WP_REDUCE:
 				//we are removing the second one
 				wp_reduce_count++;
 				
-				//printf("pos=%d/%d\n", pos, g->nodes.size());
-				//printf("trail = 0x%x(0x%x) (%.3f, %.3f, %.3f)\n",
 				//	*trail, second, (*trail)->x, (*trail)->y, (*trail)->z);
 				//trail = cur2;
 				
@@ -277,7 +274,6 @@ void break_long_lines(list<PathGraph*> &db_paths) {
 			if(len2 < cutlen2)
 				continue;
 			
-//printf("Cut (%.3f,%.3f,%.3f) -> (%.3f,%.3f,%.3f) d2=%.3f\n", e->from->x, e->from->y, e->from->z, e->to->x, e->to->y, e->to->z, len2);			
 
 			float len = sqrt(len2);
 			v1.x = (e->to->x - e->from->x)/len;
@@ -297,7 +293,6 @@ void break_long_lines(list<PathGraph*> &db_paths) {
 				ee = new PathEdge(last_node, n);
 				last_node = n;
 				
-//printf("    (%.3f,%.3f,%.3f) -> (%.3f,%.3f,%.3f) d2=%.3f\n", ee->from->x, ee->from->y, ee->from->z, ee->to->x, ee->to->y, ee->to->z, e->from->Dist2(e->to));			
 				g->edges.push_back(ee);
 				g->nodes.push_back(n);
 				
@@ -967,7 +962,6 @@ run an algorithm to remove redundancy:
 RESTART_GRID_CLEAN:
 	cur = big->nodes.begin();
 	end = big->nodes.end();
-//printf("Starting clean at pos %d with %d nodes\n", cur_pos, big->nodes.size());
 	for(r = 0; r < cur_pos; r++)
 		cur++;
 	for(; cur != end; cur++, cur_pos++, stat++) {
@@ -989,16 +983,13 @@ RESTART_GRID_CLEAN:
 			if(n == f)
 				continue;
 			if(n->Dist2(f) > ce2) {
-//printf("Dist %f, ce2 %f\n", n->Dist2(f), ce2);
 				continue;
 			}
-//printf("Distbbb %f, ce2 %f, (%f,%f), (%f,%f)\n", n->Dist2(f), ce2, n->x, n->y, f->x, f->y);
 			
 #ifdef COMBINE_CHECK_ALL_LOS
 			//we should merge these. Now we wanna check to make sure combining
 			//them will not cause the old node's edges to become invalid.
 			
-//printf("Checking combine LOS on %d, with %d edges.\n", r, big->edges.size());
 			badlos = false;
 			
 			if(node_edges.count(f) == 1) {
@@ -1618,7 +1609,6 @@ void count_crossing_lines(list<PathEdge *> &edges, PathGraph *out, PathGraph *ex
 		
 		
 		if(count >= CROSS_REDUCE_COUNT) {
-//printf("Edge crosses %d edges.\n", count);
 			out->edges.push_back(e);
 			cross_edge_count++;
 			cross_list[e] = hits;
@@ -1847,7 +1837,6 @@ QTNode *build_quadtree(Map *map, PathGraph *big) {
 		end = _root->nodes.end();
 //int findex = 0;
 		for(; curs != end; curs++) {
-//printf("Started With node index %d (0x%x)\n", findex++, *curs);
 }
 		
 	_root->divideYourself(0);
@@ -1915,7 +1904,6 @@ bool write_path_file(QTNode *_root, PathGraph *big, const char *file, vector< ve
 	end = big->nodes.end();
 int nn = 0;
 	for(; cur != end; cur++, curn++, nn++) {
-//printf("Filling node %d/%d n=0x%x, lb=0x%x, curl=0x%x/0x%x\n", nn, index, *cur, linkBlock, curl, &linkBlock[eoffset]);
 		n = *cur;
 		if(n == NULL) {
 			printf("Got NULL node building quadtree, WTF.");
@@ -1926,7 +1914,6 @@ int nn = 0;
 		curn->z = n->z;
 		curn->link_offset = eoffset;
 		curn->distance = n->longest_path;
-//printf("Node %d: (%.2f,%.2f,%.2f) LO %d, D %d\n", nn, curn->x, curn->y, curn->z, curn->link_offset, curn->distance);
 		
 		int ecount = 0;
 		cur4 = big->edges.begin();
@@ -1939,7 +1926,6 @@ int nn = 0;
 				curl = &linkBlock[eoffset];
 				curl->dest_node = e->to->node_id;
 				curl->reach = e->normal_reach;
-//printf("\tLinkFrom %d: dest %d, reach %d\n", eoffset, curl->dest_node, curl->reach);
 				from_edges[e] = ecount;
 				ecount++;
 				eoffset++;
@@ -1948,7 +1934,6 @@ int nn = 0;
 				curl = &linkBlock[eoffset];
 				curl->dest_node = e->from->node_id;
 				curl->reach = e->reverse_reach;
-//printf("\tLinkTo %d: dest %d, reach %d\n", eoffset, curl->dest_node, curl->reach);
 				to_edges[e] = ecount;
 				ecount++;
 				eoffset++;
@@ -1959,7 +1944,6 @@ int nn = 0;
 			printf("ERROR: a node has more than %d links, number will be truncated!", PATH_LINK_OFFSET_NONE-1);
 		}
 		curn->link_count = ecount;
-//printf("Used up to slot %d of %d in links\n", eoffset, head.link_count);
 	}
 	
 	//write vertexBlock

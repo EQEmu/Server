@@ -30,6 +30,12 @@ MySQLRequestRow& MySQLRequestRow::operator=(MySQLRequestRow& moveItem)
 	return *this;
 }
 
+
+MySQLRequestRow MySQLRequestRow::operator*()
+{
+	return *this;
+}
+
 MySQLRequestRow::MySQLRequestRow(MYSQL_RES *result)
 	: m_Result(result)
 {

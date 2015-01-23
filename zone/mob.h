@@ -528,12 +528,6 @@ public:
 	bool HasProcs() const;
 	bool IsCombatProc(uint16 spell_id);
 
-	//Logging
-	bool IsLoggingEnabled() const { return(logging_enabled); }
-	void EnableLogging() { logging_enabled = true; }
-	void DisableLogging() { logging_enabled = false; }
-
-
 	//More stuff to sort:
 	virtual bool IsRaidTarget() const { return false; };
 	virtual bool IsAttackAllowed(Mob *target, bool isSpellAttack = false);

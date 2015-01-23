@@ -3,6 +3,7 @@
 #endif
 
 #include "../common/misc_functions.h"
+#include "../common/eqemu_logsys.h"
 
 #include "dbcore.h"
 
@@ -101,25 +102,15 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
 
 			snprintf(errorBuffer, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
 
-			std::cout << "DB Query Error #" << mysql_errno(&mysql) << ": " << mysql_error(&mysql) << std::endl;
-
 			return MySQLRequestResult(nullptr, 0, 0, 0, 0, (uint32)mysql_errno(&mysql), errorBuffer);
 		}
 
 		char *errorBuffer = new char[MYSQL_ERRMSG_SIZE];
 		snprintf(errorBuffer, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
 
-#ifdef _EQDEBUG
-		std::cout << "DB Query Error #" << mysql_errno(&mysql) << ": " << mysql_error(&mysql) << std::endl;
-#endif
-
 		/* Implement Logging at the Root */
 		if (mysql_errno(&mysql) > 0 && strlen(query) > 0){
-			std::cout << "\n[MYSQL ERR] " << mysql_errno(&mysql) << ": " << mysql_error(&mysql) << " [Query]: \n" << query << "\n" << std::endl;
-			/* Write to log file */
-			std::ofstream log("eqemu_query_error_log.txt", std::ios_base::app | std::ios_base::out);
-			log << "[MYSQL ERR] " << mysql_error(&mysql) << "\n" << query << "\n";
-			log.close();
+			Log.Out(Logs::General, Logs::MySQLError, "%i: %s \n %s", mysql_errno(&mysql), mysql_error(&mysql), query);
 		}
 
 		return MySQLRequestResult(nullptr, 0, 0, 0, 0, mysql_errno(&mysql),errorBuffer);
@@ -135,20 +126,7 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
 
 	MySQLRequestResult requestResult(res, (uint32)mysql_affected_rows(&mysql), rowCount, (uint32)mysql_field_count(&mysql), (uint32)mysql_insert_id(&mysql));
 
-#if DEBUG_MYSQL_QUERIES >= 1
-	if (requestResult.Success())
-	{
-		std::cout << "query successful";
-		if (requestResult.Result())
-			std::cout << ", " << (int) mysql_num_rows(requestResult.Result()) << " rows returned";
-
-		std::cout << ", " << requestResult.RowCount() << " rows affected";
-		std::cout<< std::endl;
-	}
-	else {
-		std::cout << "QUERY: query FAILED" << std::endl;
-	}
-#endif
+	Log.Out(Logs::General, Logs::MySQLQuery, "%s (%u rows returned)", query, rowCount, requestResult.RowCount());
 
 	return requestResult;
 }

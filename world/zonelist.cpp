@@ -15,7 +15,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "zonelist.h"
 #include "zoneserver.h"
 #include "world_tcp_connection.h"
@@ -79,7 +79,7 @@ void ZSList::KillAll() {
 void ZSList::Process() {
 
 	if(shutdowntimer && shutdowntimer->Check()){
-		_log(WORLD__ZONELIST, "Shutdown timer has expired. Telling all zones to shut down and exiting. (fake sigint)");
+		Log.Out(Logs::Detail, Logs::World_Server, "Shutdown timer has expired. Telling all zones to shut down and exiting. (fake sigint)");
 		auto pack2 = new ServerPacket;
 		pack2->opcode = ServerOP_ShutdownAll;
 		pack2->size=0;
@@ -99,10 +99,10 @@ void ZSList::Process() {
 			ZoneServer* zs = iterator.GetData();
 			struct in_addr in;
 			in.s_addr = zs->GetIP();
-			_log(WORLD__ZONELIST,"Removing zoneserver #%d at %s:%d",zs->GetID(),zs->GetCAddress(),zs->GetCPort());
+			Log.Out(Logs::Detail, Logs::World_Server,"Removing zoneserver #%d at %s:%d",zs->GetID(),zs->GetCAddress(),zs->GetCPort());
 			zs->LSShutDownUpdate(zs->GetZoneID());
 			if (holdzones){
-				_log(WORLD__ZONELIST,"Hold Zones mode is ON - rebooting lost zone");
+				Log.Out(Logs::Detail, Logs::World_Server,"Hold Zones mode is ON - rebooting lost zone");
 				if(!zs->IsStaticZone())
 					RebootZone(inet_ntoa(in),zs->GetCPort(),zs->GetCAddress(),zs->GetID());
 				else
@@ -576,7 +576,7 @@ void ZSList::RebootZone(const char* ip1,uint16 port,const char* ip2, uint32 skip
 	s->port = port;
 	s->zoneid = zoneid;
 	if(zoneid != 0)
-		_log(WORLD__ZONELIST,"Rebooting static zone with the ID of: %i",zoneid);
+		Log.Out(Logs::Detail, Logs::World_Server,"Rebooting static zone with the ID of: %i",zoneid);
 	tmp[z]->SendPacket(pack);
 	delete pack;
 	safe_delete_array(tmp);

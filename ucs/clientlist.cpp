@@ -17,8 +17,9 @@
 
 */
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/string_util.h"
+#include "../common/eqemu_logsys.h"
 
 #include "clientlist.h"
 #include "database.h"
@@ -235,7 +236,7 @@ std::vector<std::string> ParseRecipients(std::string RecipientString) {
 
 static void ProcessMailTo(Client *c, std::string MailMessage) {
 
-	_log(UCS__TRACE, "MAILTO: From %s, %s", c->MailBoxName().c_str(), MailMessage.c_str());
+	Log.Out(Logs::Detail, Logs::UCS_Server, "MAILTO: From %s, %s", c->MailBoxName().c_str(), MailMessage.c_str());
 
 	std::vector<std::string> Recipients;
 
@@ -304,7 +305,7 @@ static void ProcessMailTo(Client *c, std::string MailMessage) {
 
 		if (!database.SendMail(Recipient, c->MailBoxName(), Subject, Body, RecipientsString)) {
 
-			_log(UCS__ERROR, "Failed in SendMail(%s, %s, %s, %s)", Recipient.c_str(),
+			Log.Out(Logs::Detail, Logs::UCS_Server, "Failed in SendMail(%s, %s, %s, %s)", Recipient.c_str(),
 			     c->MailBoxName().c_str(), Subject.c_str(), RecipientsString.c_str());
 
 			int PacketLength = 10 + Recipient.length() + Subject.length();
@@ -322,7 +323,6 @@ static void ProcessMailTo(Client *c, std::string MailMessage) {
 			VARSTRUCT_ENCODE_TYPE(uint16, PacketBuffer, 0x3237);
 			VARSTRUCT_ENCODE_TYPE(uint8, PacketBuffer, 0x0);
 
-			_pkt(UCS__PACKETS, outapp);
 
 			c->QueuePacket(outapp);
 
@@ -343,7 +343,6 @@ static void ProcessMailTo(Client *c, std::string MailMessage) {
 		VARSTRUCT_ENCODE_STRING(PacketBuffer, "test"); // Doesn't matter what we send in this text field.
 		VARSTRUCT_ENCODE_STRING(PacketBuffer, "1");
 
-		_pkt(UCS__PACKETS, outapp);
 
 		c->QueuePacket(outapp);
 
@@ -399,7 +398,7 @@ static void ProcessSetMessageStatus(std::string SetMessageCommand) {
 
 static void ProcessCommandBuddy(Client *c, std::string Buddy) {
 
-	_log(UCS__TRACE, "Received buddy command with parameters %s", Buddy.c_str());
+	Log.Out(Logs::Detail, Logs::UCS_Server, "Received buddy command with parameters %s", Buddy.c_str());
 	c->GeneralChannelMessage("Buddy list modified");
 
 	uint8 SubAction = 1;
@@ -420,7 +419,6 @@ static void ProcessCommandBuddy(Client *c, std::string Buddy) {
 		database.RemoveFriendOrIgnore(c->GetCharID(), 1, Buddy.substr(1));
 	}
 
-	_pkt(UCS__PACKETS, outapp);
 	c->QueuePacket(outapp);
 
 	safe_delete(outapp);
@@ -429,7 +427,7 @@ static void ProcessCommandBuddy(Client *c, std::string Buddy) {
 
 static void ProcessCommandIgnore(Client *c, std::string Ignoree) {
 
-	_log(UCS__TRACE, "Received ignore command with parameters %s", Ignoree.c_str());
+	Log.Out(Logs::Detail, Logs::UCS_Server, "Received ignore command with parameters %s", Ignoree.c_str());
 	c->GeneralChannelMessage("Ignore list modified");
 
 	uint8 SubAction = 0;
@@ -464,7 +462,6 @@ static void ProcessCommandIgnore(Client *c, std::string Ignoree) {
 
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, Ignoree.c_str());
 
-	_pkt(UCS__PACKETS, outapp);
 	c->QueuePacket(outapp);
 
 	safe_delete(outapp);
@@ -480,9 +477,9 @@ Clientlist::Clientlist(int ChatPort) {
 		exit(1);
 
 	if (chatsf->Open())
-		_log(UCS__INIT,"Client (UDP) Chat listener started on port %i.", ChatPort);
+		Log.Out(Logs::Detail, Logs::UCS_Server,"Client (UDP) Chat listener started on port %i.", ChatPort);
 	else {
-		_log(UCS__ERROR,"Failed to start client (UDP) listener (port %-4i)", ChatPort);
+		Log.Out(Logs::Detail, Logs::UCS_Server,"Failed to start client (UDP) listener (port %-4i)", ChatPort);
 
 		exit(1);
 	}
@@ -559,13 +556,13 @@ void Clientlist::CheckForStaleConnections(Client *c) {
 		if(((*Iterator) != c) && ((c->GetName() == (*Iterator)->GetName())
 				&& (c->GetConnectionType() == (*Iterator)->GetConnectionType()))) {
 
-			_log(UCS__CLIENT, "Removing old connection for %s", c->GetName().c_str());
+			Log.Out(Logs::Detail, Logs::UCS_Server, "Removing old connection for %s", c->GetName().c_str());
 
 			struct in_addr in;
 
 			in.s_addr = (*Iterator)->ClientStream->GetRemoteIP();
 
-			_log(UCS__CLIENT, "Client connection from %s:%d closed.", inet_ntoa(in),
+			Log.Out(Logs::Detail, Logs::UCS_Server, "Client connection from %s:%d closed.", inet_ntoa(in),
 									ntohs((*Iterator)->ClientStream->GetRemotePort()));
 
 			safe_delete((*Iterator));
@@ -585,7 +582,7 @@ void Clientlist::Process() {
 
 		in.s_addr = eqs->GetRemoteIP();
 
-		_log(UCS__CLIENT, "New Client UDP connection from %s:%d", inet_ntoa(in), ntohs(eqs->GetRemotePort()));
+		Log.Out(Logs::Detail, Logs::UCS_Server, "New Client UDP connection from %s:%d", inet_ntoa(in), ntohs(eqs->GetRemotePort()));
 
 		eqs->SetOpcodeManager(&ChatOpMgr);
 
@@ -605,7 +602,7 @@ void Clientlist::Process() {
 
 			in.s_addr = (*Iterator)->ClientStream->GetRemoteIP();
 
-			_log(UCS__CLIENT, "Client connection from %s:%d closed.", inet_ntoa(in),
+			Log.Out(Logs::Detail, Logs::UCS_Server, "Client connection from %s:%d closed.", inet_ntoa(in),
 										ntohs((*Iterator)->ClientStream->GetRemotePort()));
 
 			safe_delete((*Iterator));
@@ -625,7 +622,6 @@ void Clientlist::Process() {
 		while( KeyValid && !(*Iterator)->GetForceDisconnect() &&
 				(app = (EQApplicationPacket *)(*Iterator)->ClientStream->PopPacket())) {
 
-			_pkt(UCS__PACKETS, app);
 
 			EmuOpcode opcode = app->GetOpcode();
 
@@ -645,7 +641,7 @@ void Clientlist::Process() {
 
 					if(strlen(PacketBuffer) != 9)
 					{
-						_log(UCS__ERROR, "Mail key is the wrong size. Version of world incompatible with UCS.");
+						Log.Out(Logs::Detail, Logs::UCS_Server, "Mail key is the wrong size. Version of world incompatible with UCS.");
 						KeyValid = false;
 						break;
 					}
@@ -666,11 +662,11 @@ void Clientlist::Process() {
 					else
 						CharacterName = MailBoxString.substr(LastPeriod + 1);
 
-					_log(UCS__TRACE, "Received login for user %s with key %s", MailBox, Key);
+					Log.Out(Logs::Detail, Logs::UCS_Server, "Received login for user %s with key %s", MailBox, Key);
 
 					if(!database.VerifyMailKey(CharacterName, (*Iterator)->ClientStream->GetRemoteIP(), Key)) {
 
-						_log(UCS__ERROR, "Chat Key for %s does not match, closing connection.", MailBox);
+						Log.Out(Logs::Detail, Logs::UCS_Server, "Chat Key for %s does not match, closing connection.", MailBox);
 
 						KeyValid = false;
 
@@ -702,7 +698,7 @@ void Clientlist::Process() {
 
 				default: {
 
-					_log(UCS__ERROR, "Unhandled chat opcode %8X", opcode);
+					Log.Out(Logs::Detail, Logs::UCS_Server, "Unhandled chat opcode %8X", opcode);
 					break;
 				}
 			}
@@ -715,7 +711,7 @@ void Clientlist::Process() {
 
 			in.s_addr = (*Iterator)->ClientStream->GetRemoteIP();
 
-			_log(UCS__TRACE, "Force disconnecting client: %s:%d, KeyValid=%i, GetForceDisconnect()=%i",
+			Log.Out(Logs::Detail, Logs::UCS_Server, "Force disconnecting client: %s:%d, KeyValid=%i, GetForceDisconnect()=%i",
 						inet_ntoa(in), ntohs((*Iterator)->ClientStream->GetRemotePort()),
 						KeyValid, (*Iterator)->GetForceDisconnect());
 
@@ -859,7 +855,7 @@ void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString)
 			break;
 
 		case CommandSetMessageStatus:
-			_log(UCS__TRACE, "Set Message Status, Params: %s", Parameters.c_str());
+			Log.Out(Logs::Detail, Logs::UCS_Server, "Set Message Status, Params: %s", Parameters.c_str());
 			ProcessSetMessageStatus(Parameters);
 			break;
 
@@ -884,7 +880,7 @@ void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString)
 
 		default:
 			c->SendHelp();
-			_log(UCS__ERROR, "Unhandled OP_Mail command: %s", CommandString.c_str());
+			Log.Out(Logs::Detail, Logs::UCS_Server, "Unhandled OP_Mail command: %s", CommandString.c_str());
 	}
 }
 
@@ -895,7 +891,7 @@ void Clientlist::CloseAllConnections() {
 
 	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); ++Iterator) {
 
-		_log(UCS__TRACE, "Removing client %s", (*Iterator)->GetName().c_str());
+		Log.Out(Logs::Detail, Logs::UCS_Server, "Removing client %s", (*Iterator)->GetName().c_str());
 
 		(*Iterator)->CloseConnection();
 	}
@@ -904,7 +900,7 @@ void Clientlist::CloseAllConnections() {
 void Client::AddCharacter(int CharID, const char *CharacterName, int Level) {
 
 	if(!CharacterName) return;
-	_log(UCS__TRACE, "Adding character %s with ID %i for %s", CharacterName, CharID, GetName().c_str());
+	Log.Out(Logs::Detail, Logs::UCS_Server, "Adding character %s with ID %i for %s", CharacterName, CharID, GetName().c_str());
 	CharacterEntry NewCharacter;
 	NewCharacter.CharID = CharID;
 	NewCharacter.Name = CharacterName;
@@ -942,7 +938,6 @@ void Client::SendMailBoxes() {
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, s.c_str());
 	VARSTRUCT_ENCODE_TYPE(uint8, PacketBuffer, 0);
 
-	_pkt(UCS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 
@@ -970,7 +965,7 @@ void Client::AddToChannelList(ChatChannel *JoinedChannel) {
 	for(int i = 0; i < MAX_JOINED_CHANNELS; i++)
 		if(JoinedChannels[i] == nullptr) {
 			JoinedChannels[i] = JoinedChannel;
-			_log(UCS__TRACE, "Added Channel %s to slot %i for %s", JoinedChannel->GetName().c_str(), i + 1, GetName().c_str());
+			Log.Out(Logs::Detail, Logs::UCS_Server, "Added Channel %s to slot %i for %s", JoinedChannel->GetName().c_str(), i + 1, GetName().c_str());
 			return;
 		}
 }
@@ -1011,7 +1006,7 @@ void Client::JoinChannels(std::string ChannelNameList) {
 		}
 	}
 
-	_log(UCS__TRACE, "Client: %s joining channels %s", GetName().c_str(), ChannelNameList.c_str());
+	Log.Out(Logs::Detail, Logs::UCS_Server, "Client: %s joining channels %s", GetName().c_str(), ChannelNameList.c_str());
 
 	int NumberOfChannels = ChannelCount();
 
@@ -1086,7 +1081,6 @@ void Client::JoinChannels(std::string ChannelNameList) {
 
 	sprintf(PacketBuffer, "%s", JoinedChannelsList.c_str());
 
-	_pkt(UCS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 
@@ -1103,7 +1097,6 @@ void Client::JoinChannels(std::string ChannelNameList) {
 	VARSTRUCT_ENCODE_TYPE(uint8, PacketBuffer, 0x00);
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, ChannelMessage.c_str());
 
-	_pkt(UCS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 
@@ -1112,7 +1105,7 @@ void Client::JoinChannels(std::string ChannelNameList) {
 
 void Client::LeaveChannels(std::string ChannelNameList) {
 
-	_log(UCS__TRACE, "Client: %s leaving channels %s", GetName().c_str(), ChannelNameList.c_str());
+	Log.Out(Logs::Detail, Logs::UCS_Server, "Client: %s leaving channels %s", GetName().c_str(), ChannelNameList.c_str());
 
 	std::string::size_type CurrentPos = 0;
 
@@ -1173,7 +1166,6 @@ void Client::LeaveChannels(std::string ChannelNameList) {
 
 	sprintf(PacketBuffer, "%s", JoinedChannelsList.c_str());
 
-	_pkt(UCS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 
@@ -1190,7 +1182,6 @@ void Client::LeaveChannels(std::string ChannelNameList) {
 	VARSTRUCT_ENCODE_TYPE(uint8, PacketBuffer, 0x00);
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, ChannelMessage.c_str());
 
-	_pkt(UCS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 
@@ -1274,7 +1265,6 @@ void Client::SendChannelList() {
 	VARSTRUCT_ENCODE_TYPE(uint8, PacketBuffer, 0x00);
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, ChannelMessage.c_str());
 
-	_pkt(UCS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 
@@ -1291,7 +1281,7 @@ void Client::SendChannelMessage(std::string Message)
 
 	std::string ChannelName = Message.substr(1, MessageStart-1);
 
-	_log(UCS__TRACE, "%s tells %s, [%s]", GetName().c_str(), ChannelName.c_str(), Message.substr(MessageStart + 1).c_str());
+	Log.Out(Logs::Detail, Logs::UCS_Server, "%s tells %s, [%s]", GetName().c_str(), ChannelName.c_str(), Message.substr(MessageStart + 1).c_str());
 
 	ChatChannel *RequiredChannel = ChannelList->FindChannel(ChannelName);
 
@@ -1434,7 +1424,7 @@ void Client::SendChannelMessageByNumber(std::string Message) {
 		}
 	}
 
-	_log(UCS__TRACE, "%s tells %s, [%s]", GetName().c_str(), RequiredChannel->GetName().c_str(),
+	Log.Out(Logs::Detail, Logs::UCS_Server, "%s tells %s, [%s]", GetName().c_str(), RequiredChannel->GetName().c_str(),
 							Message.substr(MessageStart + 1).c_str());
 
 	if(RuleB(Chat, EnableAntiSpam))
@@ -1515,7 +1505,6 @@ void Client::SendChannelMessage(std::string ChannelName, std::string Message, Cl
 	if(UnderfootOrLater)
 		VARSTRUCT_ENCODE_STRING(PacketBuffer, "SPAM:0:");
 
-	_pkt(UCS__PACKETS, outapp);
 	QueuePacket(outapp);
 
 	safe_delete(outapp);
@@ -1553,7 +1542,6 @@ void Client::AnnounceJoin(ChatChannel *Channel, Client *c) {
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, Channel->GetName().c_str());
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, c->GetName().c_str());
 
-	_pkt(UCS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 
@@ -1573,7 +1561,6 @@ void Client::AnnounceLeave(ChatChannel *Channel, Client *c) {
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, Channel->GetName().c_str());
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, c->GetName().c_str());
 
-	_pkt(UCS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 
@@ -1598,7 +1585,6 @@ void Client::GeneralChannelMessage(std::string Message) {
 	VARSTRUCT_ENCODE_TYPE(uint8, PacketBuffer, 0x00);
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, Message.c_str());
 
-	_pkt(UCS__PACKETS, outapp);
 	QueuePacket(outapp);
 
 	safe_delete(outapp);
@@ -1646,7 +1632,7 @@ void Client::SetChannelPassword(std::string ChannelPassword) {
 	else
 		Message = "Password change on channel " + ChannelName;
 
-	_log(UCS__TRACE, "Set password of channel [%s] to [%s] by %s", ChannelName.c_str(), Password.c_str(), GetName().c_str());
+	Log.Out(Logs::Detail, Logs::UCS_Server, "Set password of channel [%s] to [%s] by %s", ChannelName.c_str(), Password.c_str(), GetName().c_str());
 
 	ChatChannel *RequiredChannel = ChannelList->FindChannel(ChannelName);
 
@@ -1701,7 +1687,7 @@ void Client::SetChannelOwner(std::string CommandString) {
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
 
-	_log(UCS__TRACE, "Set owner of channel [%s] to [%s]", ChannelName.c_str(), NewOwner.c_str());
+	Log.Out(Logs::Detail, Logs::UCS_Server, "Set owner of channel [%s] to [%s]", ChannelName.c_str(), NewOwner.c_str());
 
 	ChatChannel *RequiredChannel = ChannelList->FindChannel(ChannelName);
 
@@ -1789,7 +1775,7 @@ void Client::ChannelInvite(std::string CommandString) {
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
 
-	_log(UCS__TRACE, "[%s] invites [%s] to channel [%s]", GetName().c_str(), Invitee.c_str(), ChannelName.c_str());
+	Log.Out(Logs::Detail, Logs::UCS_Server, "[%s] invites [%s] to channel [%s]", GetName().c_str(), Invitee.c_str(), ChannelName.c_str());
 
 	Client *RequiredClient = CL->FindCharacter(Invitee);
 
@@ -1917,7 +1903,7 @@ void Client::ChannelGrantModerator(std::string CommandString) {
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
 
-	_log(UCS__TRACE, "[%s] gives [%s] moderator rights to channel [%s]", GetName().c_str(), Moderator.c_str(), ChannelName.c_str());
+	Log.Out(Logs::Detail, Logs::UCS_Server, "[%s] gives [%s] moderator rights to channel [%s]", GetName().c_str(), Moderator.c_str(), ChannelName.c_str());
 
 	Client *RequiredClient = CL->FindCharacter(Moderator);
 
@@ -1998,7 +1984,7 @@ void Client::ChannelGrantVoice(std::string CommandString) {
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
 
-	_log(UCS__TRACE, "[%s] gives [%s] voice to channel [%s]", GetName().c_str(), Voicee.c_str(), ChannelName.c_str());
+	Log.Out(Logs::Detail, Logs::UCS_Server, "[%s] gives [%s] voice to channel [%s]", GetName().c_str(), Voicee.c_str(), ChannelName.c_str());
 
 	Client *RequiredClient = CL->FindCharacter(Voicee);
 
@@ -2086,7 +2072,7 @@ void Client::ChannelKick(std::string CommandString) {
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
 
-	_log(UCS__TRACE, "[%s] kicks [%s] from channel [%s]", GetName().c_str(), Kickee.c_str(), ChannelName.c_str());
+	Log.Out(Logs::Detail, Logs::UCS_Server, "[%s] kicks [%s] from channel [%s]", GetName().c_str(), Kickee.c_str(), ChannelName.c_str());
 
 	Client *RequiredClient = CL->FindCharacter(Kickee);
 
@@ -2195,32 +2181,32 @@ void Client::SetConnectionType(char c) {
 		case 'S':
 		{
 			TypeOfConnection = ConnectionTypeCombined;
-			_log(UCS__TRACE, "Connection type is Combined (SoF/SoD)");
+			Log.Out(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (SoF/SoD)");
 			break;
 		}
 		case 'U':
 		{
 			TypeOfConnection = ConnectionTypeCombined;
 			UnderfootOrLater = true;
-			_log(UCS__TRACE, "Connection type is Combined (Underfoot+)");
+			Log.Out(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (Underfoot+)");
 			break;
 		}
 		case 'M':
 		{
 			TypeOfConnection = ConnectionTypeMail;
-			_log(UCS__TRACE, "Connection type is Mail (6.2 or Titanium client)");
+			Log.Out(Logs::Detail, Logs::UCS_Server, "Connection type is Mail (6.2 or Titanium client)");
 			break;
 		}
 		case 'C':
 		{
 			TypeOfConnection = ConnectionTypeChat;
-			_log(UCS__TRACE, "Connection type is Chat (6.2 or Titanium client)");
+			Log.Out(Logs::Detail, Logs::UCS_Server, "Connection type is Chat (6.2 or Titanium client)");
 			break;
 		}
 		default:
 		{
 			TypeOfConnection = ConnectionTypeUnknown;
-			_log(UCS__TRACE, "Connection type is unknown.");
+			Log.Out(Logs::Detail, Logs::UCS_Server, "Connection type is unknown.");
 		}
 	}
 }
@@ -2289,7 +2275,6 @@ void Client::SendNotification(int MailBoxNumber, std::string Subject, std::strin
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, From.c_str());
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, Subject.c_str());
 
-	_pkt(UCS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 
@@ -2298,11 +2283,11 @@ void Client::SendNotification(int MailBoxNumber, std::string Subject, std::strin
 
 void Client::ChangeMailBox(int NewMailBox) {
 
-	_log(UCS__TRACE, "%s Change to mailbox %i", MailBoxName().c_str(), NewMailBox);
+	Log.Out(Logs::Detail, Logs::UCS_Server, "%s Change to mailbox %i", MailBoxName().c_str(), NewMailBox);
 
 	SetMailBox(NewMailBox);
 
-	_log(UCS__TRACE, "New mailbox is %s", MailBoxName().c_str());
+	Log.Out(Logs::Detail, Logs::UCS_Server, "New mailbox is %s", MailBoxName().c_str());
 
 	auto outapp = new EQApplicationPacket(OP_MailboxChange, 2);
 
@@ -2310,7 +2295,6 @@ void Client::ChangeMailBox(int NewMailBox) {
 
 	VARSTRUCT_ENCODE_INTSTRING(buf, NewMailBox);
 
-	_pkt(UCS__PACKETS, outapp);
 
 	QueuePacket(outapp);
 
@@ -2339,7 +2323,6 @@ void Client::SendFriends() {
 
 		VARSTRUCT_ENCODE_STRING(PacketBuffer, (*Iterator).c_str());
 
-		_pkt(UCS__PACKETS, outapp);
 
 		QueuePacket(outapp);
 
@@ -2362,7 +2345,6 @@ void Client::SendFriends() {
 
 		VARSTRUCT_ENCODE_STRING(PacketBuffer, Ignoree.c_str());
 
-		_pkt(UCS__PACKETS, outapp);
 
 		QueuePacket(outapp);
 
@@ -2376,13 +2358,13 @@ std::string Client::MailBoxName() {
 
 	if((Characters.size() == 0) || (CurrentMailBox > (Characters.size() - 1)))
 	{
-		_log(UCS__ERROR, "MailBoxName() called with CurrentMailBox set to %i and Characters.size() is %i",
+		Log.Out(Logs::Detail, Logs::UCS_Server, "MailBoxName() called with CurrentMailBox set to %i and Characters.size() is %i",
 				CurrentMailBox, Characters.size());
 
 		return "";
 	}
 
-	_log(UCS__TRACE, "MailBoxName() called with CurrentMailBox set to %i and Characters.size() is %i",
+	Log.Out(Logs::Detail, Logs::UCS_Server, "MailBoxName() called with CurrentMailBox set to %i and Characters.size() is %i",
 			CurrentMailBox, Characters.size());
 
 	return Characters[CurrentMailBox].Name;

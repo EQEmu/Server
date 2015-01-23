@@ -151,7 +151,6 @@ int line_count = 0;
     var = (char *) buffer;
 	line_count++;
 
-    // printf("%s %s\n", val, var);
 
     if(strlen(var) == 0 || strlen(val) == 0) {
       ++buffer;
@@ -166,7 +165,6 @@ int line_count = 0;
       mlist[j].basetex = new char[val_len + 1];
       memcpy(mlist[j].basetex, val, val_len + 1);
       ++mat_count;
-      // printf("%i: Basetex: %s\n", j + 1, mlist[j].basetex);
       ++j;
     }
     else if(val[0] != 'e' && val[1] != '_' && ((var[0] != 'e' && var[1] != '_') || !strcmp(val, "e_fShininess0"))) {
@@ -179,7 +177,6 @@ int line_count = 0;
         memcpy(mlist[j].name, val, val_len + 1);
         continue;
       }
-      // printf("Named: %s\n", mlist[j].name);
     }
 
     buffer += var_len + 1;
@@ -321,7 +318,6 @@ printf("%d tris start at %d (0x%x)\n", zm->poly_count, (buffer-ter_orig), (buffe
 		}
 		zm->polys[j] = new Polygon;
 
-		//printf("    v1=%d, v2=%d, v3=%d, g=%d, unk=%d\n", ttri->v1, ttri->v2, ttri->v3, ttri->group, ttri->unk);
 
 		if(ttri->v1 >= zm->vert_count && errored < 10) {
 			printf("Tri %d/%d (s %d) @0x%x: invalid v1: %d >= %d\n", i, zm->poly_count, skipped, (buffer-ter_orig), ttri->v1, zm->vert_count);

@@ -21,7 +21,7 @@
 #ifdef EMBPERL
 #ifdef EMBPERL_XS
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/misc_functions.h"
 
 #include "embparser.h"
@@ -3506,7 +3506,7 @@ EXTERN_C XS(boot_quest)
 	file[255] = '\0';
 
 	if(items != 1)
-		LogFile->write(EQEmuLog::Error, "boot_quest does not take any arguments.");
+		Log.Out(Logs::General, Logs::Error, "boot_quest does not take any arguments.");
 
 	char buf[128];	//shouldent have any function names longer than this.
 

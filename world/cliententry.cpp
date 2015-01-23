@@ -15,7 +15,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "cliententry.h"
 #include "clientlist.h"
 #include "login_server.h"
@@ -267,7 +267,7 @@ bool ClientListEntry::CheckAuth(uint32 iLSID, const char* iKey) {
 			int16 tmpStatus = WorldConfig::get()->DefaultStatus;
 			paccountid = database.CreateAccount(plsname, 0, tmpStatus, LSID());
 			if (!paccountid) {
-				_log(WORLD__CLIENTLIST_ERR,"Error adding local account for LS login: '%s', duplicate name?" ,plsname);
+				Log.Out(Logs::Detail, Logs::World_Server,"Error adding local account for LS login: '%s', duplicate name?" ,plsname);
 				return false;
 			}
 			strn0cpy(paccountname, plsname, sizeof(paccountname));

@@ -18,7 +18,7 @@
 
 #ifdef EMBPERL
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "eqw.h"
 #include "eqw_parser.h"
 #include "world_config.h"
@@ -75,11 +75,11 @@ EQW::EQW() {
 
 void EQW::AppendOutput(const char *str) {
 	m_outputBuffer += str;
-//	_log(WORLD__EQW, "Append %d chars, yeilding result of length %d", strlen(str), m_outputBuffer.length());
+//	Log.LogDebugType(Logs::Detail, Logs::World_Server, "Append %d chars, yeilding result of length %d", strlen(str), m_outputBuffer.length());
 }
 
 const std::string &EQW::GetOutput() const {
-//	_log(WORLD__EQW, "Getting, length %d", m_outputBuffer.length());
+//	Log.LogDebugType(Logs::Detail, Logs::World_Server, "Getting, length %d", m_outputBuffer.length());
 	return(m_outputBuffer);
 }
 
@@ -269,7 +269,7 @@ void EQW::LSReconnect() {
 		pthread_create(&thread, nullptr, &AutoInitLoginServer, nullptr);
 	#endif
 	RunLoops = true;
-	_log(WORLD__CONSOLE,"Login Server Reconnect manually restarted by Web Tool");
+	Log.Out(Logs::Detail, Logs::World_Server,"Login Server Reconnect manually restarted by Web Tool");
 }
 
 /*EQLConfig * EQW::FindLauncher(Const_char *zone_ref) {

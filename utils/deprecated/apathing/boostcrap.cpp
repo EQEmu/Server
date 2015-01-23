@@ -297,7 +297,6 @@ void color_disjoint_graphs(
 		if(n->color != 0)
 			continue;	//allready visited
 
-//printf("New Color at: (%.3f,%.3f,%.3f)\n", n->x, n->y, n->z);
 
 		cc = 1;
 		djc = 0;
@@ -457,7 +456,6 @@ void calc_path_lengths(Map *map, MyGraph &vg, PathGraph *big, map<PathEdge *, Ed
 		
 		int longest = longest_dists[n->node_id];
 		//n->longest_path = longest;
-//printf("Node %d's longest path is %d\n", n->node_id, longest);
 		
 		if(longest < shortest) {
 			shortest = longest;
@@ -476,7 +474,6 @@ printf("The tree's root is %d\n", shortest_node);
 			n->longest_path = 0;
 		else
 			n->longest_path = root_dists[n->node_id];
-//printf("Node %d's distance from root is %d\n", n->node_id, root_dists[n->node_id]);
 	}
 	
 	

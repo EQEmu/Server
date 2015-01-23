@@ -16,7 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/spdat.h"
 #include "../common/string_util.h"
 #include "../common/types.h"
@@ -243,7 +243,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	PetRecord record;
 	if(!database.GetPoweredPetEntry(pettype, act_power, &record)) {
 		Message(13, "Unable to find data for pet %s", pettype);
-		LogFile->write(EQEmuLog::Error, "Unable to find data for pet %s, check pets table.", pettype);
+		Log.Out(Logs::General, Logs::Error, "Unable to find data for pet %s, check pets table.", pettype);
 		return;
 	}
 
@@ -251,7 +251,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	const NPCType *base = database.GetNPCType(record.npc_type);
 	if(base == nullptr) {
 		Message(13, "Unable to load NPC data for pet %s", pettype);
-		LogFile->write(EQEmuLog::Error, "Unable to load NPC data for pet %s (NPC ID %d), check pets and npc_types tables.", pettype, record.npc_type);
+		Log.Out(Logs::General, Logs::Error, "Unable to load NPC data for pet %s (NPC ID %d), check pets and npc_types tables.", pettype, record.npc_type);
 		return;
 	}
 
@@ -371,8 +371,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 									"ORDER BY RAND() LIMIT 1", zone->GetShortName());
 		auto results = database.QueryDatabase(query);
 		if (!results.Success()) {
-			// if the database query failed
-			LogFile->write(EQEmuLog::Error, "Error querying database for monster summoning pet in zone %s (%s)", zone->GetShortName(), results.ErrorMessage().c_str());
+			return;
 		}
 
 		if (results.RowCount() != 0) {
@@ -395,7 +394,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 			npc_type->helmtexture = monster->helmtexture;
 			npc_type->herosforgemodel = monster->herosforgemodel;
 		} else
-			LogFile->write(EQEmuLog::Error, "Error loading NPC data for monster summoning pet (NPC ID %d)", monsterid);
+			Log.Out(Logs::General, Logs::Error, "Error loading NPC data for monster summoning pet (NPC ID %d)", monsterid);
 
 	}
 
@@ -454,9 +453,9 @@ bool ZoneDatabase::GetPoweredPetEntry(const char *pet_type, int16 petpower, PetR
 		query = StringFormat("SELECT npcID, temp, petpower, petcontrol, petnaming, monsterflag, equipmentset "
 							"FROM pets WHERE type='%s' AND petpower<=%d ORDER BY petpower DESC LIMIT 1",
 							pet_type, petpower);
+
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "Error in GetPoweredPetEntry query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -656,13 +655,12 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 		std::string  query = StringFormat("SELECT nested_set FROM pets_equipmentset WHERE set_id = '%s'", curset);
 		auto results = QueryDatabase(query);
 		if (!results.Success()) {
-			LogFile->write(EQEmuLog::Error, "Error in GetBasePetItems query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 			return false;
 		}
 
 		if (results.RowCount() != 1) {
 			// invalid set reference, it doesn't exist
-			LogFile->write(EQEmuLog::Error, "Error in GetBasePetItems equipment set '%d' does not exist", curset);
+			Log.Out(Logs::General, Logs::Error, "Error in GetBasePetItems equipment set '%d' does not exist", curset);
 			return false;
 		}
 
@@ -671,9 +669,7 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 
 		query = StringFormat("SELECT slot, item_id FROM pets_equipmentset_entries WHERE set_id='%s'", curset);
 		results = QueryDatabase(query);
-		if (!results.Success())
-			LogFile->write(EQEmuLog::Error, "Error in GetBasePetItems query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
-		else {
+		if (results.Success()) {
 			for (row = results.begin(); row != results.end(); ++row)
 			{
 				slot = atoi(row[0]);

@@ -1,4 +1,4 @@
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/misc_functions.h"
 
 #include "map.h"
