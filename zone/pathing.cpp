@@ -17,7 +17,6 @@
 #endif
 
 //#define PATHDEBUG 
-#define ABS(x) ((x)<0?-(x):(x))
 
 extern Zone *zone;
 
@@ -371,10 +370,9 @@ std::deque<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 
 	for(uint32 i = 0 ; i < Head.PathNodeCount; ++i)
 	{
-		if((ABS(Start.x - PathNodes[i].v.x) <= CandidateNodeRangeXY) &&
-			(ABS(Start.y - PathNodes[i].v.y) <= CandidateNodeRangeXY) &&
-			(ABS(Start.z - PathNodes[i].v.z) <= CandidateNodeRangeZ))
-		{
+		if ((std::abs(Start.x - PathNodes[i].v.x) <= CandidateNodeRangeXY) &&
+		    (std::abs(Start.y - PathNodes[i].v.y) <= CandidateNodeRangeXY) &&
+		    (std::abs(Start.z - PathNodes[i].v.z) <= CandidateNodeRangeZ)) {
 			TempNode.id = i;
 			TempNode.Distance = VertexDistanceNoRoot(Start, PathNodes[i].v);
 			SortedByDistance.push_back(TempNode);
@@ -410,10 +408,9 @@ std::deque<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 
 	for(uint32 i = 0 ; i < Head.PathNodeCount; ++i)
 	{
-		if((ABS(End.x - PathNodes[i].v.x) <= CandidateNodeRangeXY) &&
-			(ABS(End.y - PathNodes[i].v.y) <= CandidateNodeRangeXY) &&
-			(ABS(End.z - PathNodes[i].v.z) <= CandidateNodeRangeZ))
-		{
+		if ((std::abs(End.x - PathNodes[i].v.x) <= CandidateNodeRangeXY) &&
+		    (std::abs(End.y - PathNodes[i].v.y) <= CandidateNodeRangeXY) &&
+		    (std::abs(End.z - PathNodes[i].v.z) <= CandidateNodeRangeZ)) {
 			TempNode.id = i;
 			TempNode.Distance = VertexDistanceNoRoot(End, PathNodes[i].v);
 			SortedByDistance.push_back(TempNode);
@@ -758,9 +755,8 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 					Log.Out(Logs::Detail, Logs::None, "  Distance between From and To (NoRoot) is %8.3f", Distance);
 
-					if((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort))
-						&& (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
-					{
+					if ((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort)) &&
+					    (std::abs(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold))) {
 						if(!zone->zonemap->LineIntersectsZone(HeadPosition, To, 1.0f, nullptr))
 							PathingLOSState = HaveLOS;
 						else
@@ -851,9 +847,8 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 				Log.Out(Logs::Detail, Logs::None, "  Distance between From and To (NoRoot) is %8.3f", Distance);
 
-				if((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort))
-					&& (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
-				{
+				if ((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort)) &&
+				    (std::abs(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold))) {
 					if(!zone->zonemap->LineIntersectsZone(HeadPosition, To, 1.0f, nullptr))
 						PathingLOSState = HaveLOS;
 					else
@@ -889,9 +884,8 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 			{
 				float Distance = VertexDistanceNoRoot(From, To);
 
-				if((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort))
-					&& (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
-				{
+				if ((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort)) &&
+				    (std::abs(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold))) {
 					Log.Out(Logs::Detail, Logs::None, "  Checking for short LOS at distance %8.3f.", Distance);
 					if(!zone->zonemap->LineIntersectsZone(HeadPosition, To, 1.0f, nullptr))
 						PathingLOSState = HaveLOS;
@@ -1041,9 +1035,8 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 	float Distance = VertexDistanceNoRoot(From, To);
 
-	if((Distance <= RuleR(Pathing, MinDistanceForLOSCheckLong))
-		&& (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
-	{
+	if ((Distance <= RuleR(Pathing, MinDistanceForLOSCheckLong)) &&
+	    (std::abs(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold))) {
 		Log.Out(Logs::Detail, Logs::None, "  Checking for long LOS at distance %8.3f.", Distance);
 
 		if(!zone->zonemap->LineIntersectsZone(HeadPosition, To, 1.0f, nullptr))
@@ -1109,10 +1102,9 @@ int PathManager::FindNearestPathNode(Map::Vertex Position)
 
 	for(uint32 i = 0 ; i < Head.PathNodeCount; ++i)
 	{
-		if((ABS(Position.x - PathNodes[i].v.x) <= CandidateNodeRangeXY) &&
-			(ABS(Position.y - PathNodes[i].v.y) <= CandidateNodeRangeXY) &&
-			(ABS(Position.z - PathNodes[i].v.z) <= CandidateNodeRangeZ))
-		{
+		if ((std::abs(Position.x - PathNodes[i].v.x) <= CandidateNodeRangeXY) &&
+		    (std::abs(Position.y - PathNodes[i].v.y) <= CandidateNodeRangeXY) &&
+		    (std::abs(Position.z - PathNodes[i].v.z) <= CandidateNodeRangeZ)) {
 			TempNode.id = i;
 			TempNode.Distance = VertexDistanceNoRoot(Position, PathNodes[i].v);
 			SortedByDistance.push_back(TempNode);
@@ -1148,8 +1140,7 @@ bool PathManager::NoHazards(Map::Vertex From, Map::Vertex To)
 
 	float NewZ = zone->zonemap->FindBestZ(MidPoint, nullptr);
 
-	if(ABS(NewZ - From.z) > RuleR(Pathing, ZDiffThreshold))
-	{
+	if (std::abs(NewZ - From.z) > RuleR(Pathing, ZDiffThreshold)) {
 		Log.Out(Logs::Detail, Logs::None, "  HAZARD DETECTED moving from %8.3f, %8.3f, %8.3f to %8.3f, %8.3f, %8.3f. Z Change is %8.3f",
 			From.x, From.y, From.z, MidPoint.x, MidPoint.y, MidPoint.z, NewZ - From.z);
 
@@ -1187,8 +1178,7 @@ bool PathManager::NoHazardsAccurate(Map::Vertex From, Map::Vertex To)
 
 		Map::Vertex TestPoint(curx, cury, curz);
 		float NewZ = zone->zonemap->FindBestZ(TestPoint, nullptr);
-		if (ABS(NewZ - last_z) > 5.0f)
-		{
+		if (std::abs(NewZ - last_z) > 5.0f) {
 			Log.Out(Logs::Detail, Logs::None, "  HAZARD DETECTED moving from %8.3f, %8.3f, %8.3f to %8.3f, %8.3f, %8.3f. Best Z %8.3f, Z Change is %8.3f",
 				From.x, From.y, From.z, TestPoint.x, TestPoint.y, TestPoint.z, NewZ, NewZ - From.z);
 			return false;
@@ -1222,14 +1212,17 @@ bool PathManager::NoHazardsAccurate(Map::Vertex From, Map::Vertex To)
 				}
 				else
 				{
-					if (ABS(NewZ - best_z2) > RuleR(Pathing, ZDiffThreshold))
-					{
-						Log.Out(Logs::Detail, Logs::None, "  HAZARD DETECTED, water is fairly deep at %8.3f units deep", ABS(NewZ - best_z2));
+					if (std::abs(NewZ - best_z2) > RuleR(Pathing, ZDiffThreshold)) {
+						Log.Out(Logs::Detail, Logs::None,
+							"  HAZARD DETECTED, water is fairly deep at %8.3f units deep",
+							std::abs(NewZ - best_z2));
 						return false;
 					}
 					else
 					{
-						Log.Out(Logs::Detail, Logs::None, "  HAZARD NOT DETECTED, water is shallow at %8.3f units deep", ABS(NewZ - best_z2));
+						Log.Out(Logs::Detail, Logs::None,
+							"  HAZARD NOT DETECTED, water is shallow at %8.3f units deep",
+							std::abs(NewZ - best_z2));
 					}
 				}
 			}
@@ -1251,9 +1244,12 @@ bool PathManager::NoHazardsAccurate(Map::Vertex From, Map::Vertex To)
 		cur.y = cury;
 		cur.z = curz;
 
-		if (ABS(curx - To.x) < step_size) cur.x = To.x;
-		if (ABS(cury - To.y) < step_size) cur.y = To.y;
-		if (ABS(curz - To.z) < step_size) cur.z = To.z;
+		if (std::abs(curx - To.x) < step_size)
+			cur.x = To.x;
+		if (std::abs(cury - To.y) < step_size)
+			cur.y = To.y;
+		if (std::abs(curz - To.z) < step_size)
+			cur.z = To.z;
 
 	} while (cur.x != To.x || cur.y != To.y || cur.z != To.z);
 	return true;

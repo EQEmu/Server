@@ -1024,8 +1024,8 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 			// it gets squarely harder to regain concentration
 			if(GetX() != GetSpellX() || GetY() != GetSpellY())
 			{
-				d_x = fabs(fabs(GetX()) - fabs(GetSpellX()));
-				d_y = fabs(fabs(GetY()) - fabs(GetSpellY()));
+				d_x = std::abs(std::abs(GetX()) - std::abs(GetSpellX()));
+				d_y = std::abs(std::abs(GetY()) - std::abs(GetSpellY()));
 				if(d_x < 5 && d_y < 5)
 				{
 					//avoid the square root...
@@ -5488,7 +5488,7 @@ void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
 		}
 
 		//# shortest distance from line to target point
-		float d = abs( (*iter)->GetY() - m * (*iter)->GetX() - b) / sqrt(m * m + 1);
+		float d = std::abs((*iter)->GetY() - m * (*iter)->GetX() - b) / sqrt(m * m + 1);
 
 		if (d <= spells[spell_id].aoerange)
 		{

@@ -39,12 +39,6 @@ struct wp_distance
 	int index;
 };
 
-static inline float ABS(float x) {
-	if(x < 0)
-		return(-x);
-	return(x);
-}
-
 void NPC::AI_SetRoambox(float iDist, float iRoamDist, uint32 iDelay, uint32 iMinDelay) {
 	AI_SetRoambox(iDist, GetX()+iRoamDist, GetX()-iRoamDist, GetY()+iRoamDist, GetY()-iRoamDist, iDelay, iMinDelay);
 }
@@ -228,7 +222,7 @@ void NPC::UpdateWaypoint(int wp_index)
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-			if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaWaypoint))
+			if ((newz > -2000) && std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaWaypoint))
 				m_CurrentWayPoint.m_Z = newz + 1;
 		}
 	}
@@ -507,9 +501,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		}
 		Log.Out(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f) inWater=%d: We are there.", x, y, z, inWater);
 		return false;
-	}
-	else if ((ABS(m_Position.m_X - x) < 0.1) && (ABS(m_Position.m_Y - y) < 0.1))
-	{
+	} else if ((std::abs(m_Position.m_X - x) < 0.1) && (std::abs(m_Position.m_Y - y) < 0.1)) {
 		Log.Out(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f): X/Y difference <0.1, Jumping to target.", x, y, z);
 
 		if(IsNPC()) {
@@ -557,11 +549,13 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 
 				Log.Out(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.m_X,m_Position.m_Y,m_Position.m_Z);
 
-				if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
+				if ((newz > -2000) &&
+				    std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
 				{
-					if((ABS(x - m_Position.m_X) < 0.5) && (ABS(y - m_Position.m_Y) < 0.5))
-					{
-						if(ABS(z-m_Position.m_Z) <= RuleR(Map, FixPathingZMaxDeltaMoving))
+					if ((std::abs(x - m_Position.m_X) < 0.5) &&
+					    (std::abs(y - m_Position.m_Y) < 0.5)) {
+						if (std::abs(z - m_Position.m_Z) <=
+						    RuleR(Map, FixPathingZMaxDeltaMoving))
 							m_Position.m_Z = z;
 						else
 							m_Position.m_Z = newz + 1;
@@ -684,11 +678,11 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 
 			Log.Out(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.m_X,m_Position.m_Y,m_Position.m_Z);
 
-			if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
+			if ((newz > -2000) &&
+			    std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
 			{
-				if(ABS(x - m_Position.m_X) < 0.5 && ABS(y - m_Position.m_Y) < 0.5)
-				{
-					if(ABS(z - m_Position.m_Z) <= RuleR(Map, FixPathingZMaxDeltaMoving))
+				if (std::abs(x - m_Position.m_X) < 0.5 && std::abs(y - m_Position.m_Y) < 0.5) {
+					if (std::abs(z - m_Position.m_Z) <= RuleR(Map, FixPathingZMaxDeltaMoving))
 						m_Position.m_Z = z;
 					else
 						m_Position.m_Z = newz + 1;
@@ -806,11 +800,11 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 
 			Log.Out(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.m_X,m_Position.m_Y,m_Position.m_Z);
 
-			if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
+			if ((newz > -2000) &&
+			    std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
 			{
-				if(ABS(x - m_Position.m_X) < 0.5 && ABS(y - m_Position.m_Y) < 0.5)
-				{
-					if(ABS(z - m_Position.m_Z) <= RuleR(Map, FixPathingZMaxDeltaMoving))
+				if (std::abs(x - m_Position.m_X) < 0.5 && std::abs(y - m_Position.m_Y) < 0.5) {
+					if (std::abs(z - m_Position.m_Z) <= RuleR(Map, FixPathingZMaxDeltaMoving))
 						m_Position.m_Z = z;
 					else
 						m_Position.m_Z = newz + 1;
@@ -837,89 +831,90 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 	return true;
 }
 
-void NPC::AssignWaypoints(int32 grid) {
-	if(grid == 0)
-		return;		//grid ID 0 not supported
+void NPC::AssignWaypoints(int32 grid)
+{
+	if (grid == 0)
+		return; // grid ID 0 not supported
 
-	if(grid < 0) {
+	if (grid < 0) {
 		// Allow setting negative grid values for pausing pathing
 		this->CastToNPC()->SetGrid(grid);
 		return;
 	}
 
 	Waypoints.clear();
-    roamer = false;
+	roamer = false;
 
 	// Retrieve the wander and pause types for this grid
-	std::string query = StringFormat("SELECT `type`, `type2` FROM `grid` WHERE `id` = %i AND `zoneid` = %i", grid, zone->GetZoneID());
+	std::string query = StringFormat("SELECT `type`, `type2` FROM `grid` WHERE `id` = %i AND `zoneid` = %i", grid,
+					 zone->GetZoneID());
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "MySQL Error while trying to assign grid %u to mob %s: %s", grid, name, results.ErrorMessage().c_str());
-        return;
+		Log.Out(Logs::General, Logs::Error, "MySQL Error while trying to assign grid %u to mob %s: %s", grid,
+			name, results.ErrorMessage().c_str());
+		return;
 	}
 
 	if (results.RowCount() == 0)
-        return;
+		return;
 
 	auto row = results.begin();
 
-    wandertype = atoi(row[0]);
-    pausetype = atoi(row[1]);
+	wandertype = atoi(row[0]);
+	pausetype = atoi(row[1]);
 
+	this->CastToNPC()->SetGrid(grid); // Assign grid number
 
-    this->CastToNPC()->SetGrid(grid);	// Assign grid number
+	// Retrieve all waypoints for this grid
+	query = StringFormat("SELECT `x`,`y`,`z`,`pause`,`heading` "
+			     "FROM grid_entries WHERE `gridid` = %i AND `zoneid` = %i "
+			     "ORDER BY `number`",
+			     grid, zone->GetZoneID());
+	results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		Log.Out(Logs::General, Logs::Error,
+			"MySQL Error while trying to assign waypoints from grid %u to mob %s: %s", grid, name,
+			results.ErrorMessage().c_str());
+		return;
+	}
 
-    // Retrieve all waypoints for this grid
-    query = StringFormat("SELECT `x`,`y`,`z`,`pause`,`heading` "
-                        "FROM grid_entries WHERE `gridid` = %i AND `zoneid` = %i "
-                        "ORDER BY `number`", grid, zone->GetZoneID());
-    results = database.QueryDatabase(query);
-    if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "MySQL Error while trying to assign waypoints from grid %u to mob %s: %s", grid, name, results.ErrorMessage().c_str());
-        return;
-    }
+	roamer = true;
+	max_wp = 0; // Initialize it; will increment it for each waypoint successfully added to the list
 
-    roamer = true;
-    max_wp = 0;	// Initialize it; will increment it for each waypoint successfully added to the list
+	for (auto row = results.begin(); row != results.end(); ++row, ++max_wp) {
+		wplist newwp;
+		newwp.index = max_wp;
+		newwp.x = atof(row[0]);
+		newwp.y = atof(row[1]);
+		newwp.z = atof(row[2]);
 
-    for (auto row = results.begin(); row != results.end(); ++row, ++max_wp)
-    {
-        wplist newwp;
-        newwp.index = max_wp;
-        newwp.x = atof(row[0]);
-        newwp.y = atof(row[1]);
-        newwp.z = atof(row[2]);
+		if (zone->HasMap() && RuleB(Map, FixPathingZWhenLoading)) {
+			auto positon = xyz_location(newwp.x, newwp.y, newwp.z);
+			if (!RuleB(Watermap, CheckWaypointsInWaterWhenLoading) || !zone->HasWaterMap() ||
+			    (zone->HasWaterMap() && !zone->watermap->InWater(positon))) {
+				Map::Vertex dest(newwp.x, newwp.y, newwp.z);
 
-        if(zone->HasMap() && RuleB(Map, FixPathingZWhenLoading) )
-        {
-            auto positon = xyz_location(newwp.x,newwp.y,newwp.z);
-            if(!RuleB(Watermap, CheckWaypointsInWaterWhenLoading) || !zone->HasWaterMap() ||
-                (zone->HasWaterMap() && !zone->watermap->InWater(positon)))
-            {
-                Map::Vertex dest(newwp.x, newwp.y, newwp.z);
+				float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-                float newz = zone->zonemap->FindBestZ(dest, nullptr);
+				if ((newz > -2000) && std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaLoading))
+					newwp.z = newz + 1;
+			}
+		}
 
-                if( (newz > -2000) && ABS(newz-dest.z) < RuleR(Map, FixPathingZMaxDeltaLoading))
-                    newwp.z = newz + 1;
-            }
-        }
+		newwp.pause = atoi(row[3]);
+		newwp.heading = atof(row[4]);
+		Waypoints.push_back(newwp);
+	}
 
-        newwp.pause = atoi(row[3]);
-        newwp.heading = atof(row[4]);
-        Waypoints.push_back(newwp);
-    }
-
-	if(Waypoints.size() < 2) {
+	if (Waypoints.size() < 2) {
 		roamer = false;
 	}
 
-    UpdateWaypoint(0);
-    SetWaypointPause();
+	UpdateWaypoint(0);
+	SetWaypointPause();
 
-    if (wandertype == 1 || wandertype == 2 || wandertype == 5)
-        CalculateNewWaypoint();
-
+	if (wandertype == 1 || wandertype == 2 || wandertype == 5)
+		CalculateNewWaypoint();
 }
 
 void Mob::SendTo(float new_x, float new_y, float new_z) {
@@ -948,7 +943,8 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 
 			Log.Out(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.m_X,m_Position.m_Y,m_Position.m_Z);
 
-			if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaSendTo)) // Sanity check.
+			if ((newz > -2000) &&
+			    std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaSendTo)) // Sanity check.
 				m_Position.m_Z = newz + 1;
 		}
 	}
@@ -979,7 +975,8 @@ void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 
 			Log.Out(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.m_X,m_Position.m_Y,m_Position.m_Z);
 
-			if( (newz > -2000) && ABS(newz-dest.z) < RuleR(Map, FixPathingZMaxDeltaSendTo)) // Sanity check.
+			if ((newz > -2000) &&
+			    std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaSendTo)) // Sanity check.
 				m_Position.m_Z = newz + 1;
 		}
 	}
@@ -1050,21 +1047,22 @@ void ZoneDatabase::AssignGrid(Client *client, const xy_location& location, uint3
 	// looks like most of the stuff in spawn2 is straight integers
 	// so let's try that first
 	std::string query = StringFormat("SELECT id, x, y FROM spawn2 WHERE zone = '%s' AND x = %i AND y = %i",
-                                    zone->GetShortName(), (int)location.m_X, (int)location.m_Y);
-    auto results = QueryDatabase(query);
-	if(!results.Success()) {
+					 zone->GetShortName(), (int)location.m_X, (int)location.m_Y);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
 		return;
 	}
 
 // how much it's allowed to be off by
-#define _GASSIGN_TOLERANCE	1.0
-	if (results.RowCount() == 0)	// try a fuzzy match if that didn't find it
+#define _GASSIGN_TOLERANCE 1.0
+	if (results.RowCount() == 0) // try a fuzzy match if that didn't find it
 	{
-        query = StringFormat("SELECT id,x,y FROM spawn2 WHERE zone='%s' AND "
-                            "ABS( ABS(x) - ABS(%f) ) < %f AND "
-                            "ABS( ABS(y) - ABS(%f) ) < %f",
-                            zone->GetShortName(), location.m_X, _GASSIGN_TOLERANCE, location.m_Y, _GASSIGN_TOLERANCE);
-        results = QueryDatabase(query);
+		query = StringFormat("SELECT id,x,y FROM spawn2 WHERE zone='%s' AND "
+				     "ABS( ABS(x) - ABS(%f) ) < %f AND "
+				     "ABS( ABS(y) - ABS(%f) ) < %f",
+				     zone->GetShortName(), location.m_X, _GASSIGN_TOLERANCE, location.m_Y,
+				     _GASSIGN_TOLERANCE);
+		results = QueryDatabase(query);
 		if (!results.Success()) {
 			return;
 		}
@@ -1073,47 +1071,43 @@ void ZoneDatabase::AssignGrid(Client *client, const xy_location& location, uint3
 		matches = results.RowCount();
 	}
 
-    if (matches == 0)
-	{
-        client->Message(0, "ERROR: Unable to assign grid - can't find it in spawn2");
-        return;
-    }
+	if (matches == 0) {
+		client->Message(0, "ERROR: Unable to assign grid - can't find it in spawn2");
+		return;
+	}
 
-    if(matches > 1)
-	{
+	if (matches > 1) {
 		client->Message(0, "ERROR: Unable to assign grid - multiple spawn2 rows match");
 		return;
 	}
 
-    auto row = results.begin();
+	auto row = results.begin();
 
-    spawn2id = atoi(row[0]);
-    xy_location dbLocation = xy_location(atof(row[1]), atof(row[2]));
+	spawn2id = atoi(row[0]);
+	xy_location dbLocation = xy_location(atof(row[1]), atof(row[2]));
 
 	query = StringFormat("UPDATE spawn2 SET pathgrid = %d WHERE id = %d", grid, spawn2id);
 	results = QueryDatabase(query);
-	if (!results.Success())
-	{
+	if (!results.Success()) {
 		return;
-    }
+	}
 
-    if (results.RowsAffected() != 1)
-	{
-        client->Message(0, "ERROR: found spawn2 id %d but the update query failed", spawn2id);
-        return;
-    }
+	if (results.RowsAffected() != 1) {
+		client->Message(0, "ERROR: found spawn2 id %d but the update query failed", spawn2id);
+		return;
+	}
 
-    if(client)
-        client->LogSQL(query.c_str());
+	if (client)
+		client->LogSQL(query.c_str());
 
-	if (!fuzzy)
-	{
-        client->Message(0, "Grid assign: spawn2 id = %d updated - exact match", spawn2id);
-        return;
-    }
+	if (!fuzzy) {
+		client->Message(0, "Grid assign: spawn2 id = %d updated - exact match", spawn2id);
+		return;
+	}
 
-    float difference = sqrtf(pow(fabs(location.m_X - dbLocation.m_X) , 2) + pow(fabs(location.m_Y - dbLocation.m_Y), 2));
-    client->Message(0, "Grid assign: spawn2 id = %d updated - fuzzy match: deviation %f", spawn2id, difference);
+	float difference =
+	    sqrtf(pow(std::abs(location.m_X - dbLocation.m_X), 2) + pow(std::abs(location.m_Y - dbLocation.m_Y), 2));
+	client->Message(0, "Grid assign: spawn2 id = %d updated - fuzzy match: deviation %f", spawn2id, difference);
 }
 
 /******************

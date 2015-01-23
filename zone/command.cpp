@@ -10242,7 +10242,9 @@ void command_zopp(Client *c, const Seperator *sep)
 
 		ItemInst* FakeItemInst = database.CreateItem(FakeItem, charges);
 		c->SendItemPacket(slotid, FakeItemInst, packettype);
-		c->Message(0, "Sending zephyr op packet to client - [%s] %s (%u) with %i %s to slot %i.", packettype==ItemPacketTrade?"Trade":"Summon", FakeItem->Name, itemid, charges, abs(charges==1)?"charge":"charges", slotid);
+		c->Message(0, "Sending zephyr op packet to client - [%s] %s (%u) with %i %s to slot %i.",
+			   packettype == ItemPacketTrade ? "Trade" : "Summon", FakeItem->Name, itemid, charges,
+			   std::abs(charges == 1) ? "charge" : "charges", slotid);
 		safe_delete(FakeItemInst);
 	}
 }

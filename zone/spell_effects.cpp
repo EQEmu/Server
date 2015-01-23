@@ -369,8 +369,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						snprintf(effect_desc, _EDLEN, "Current Mana: %+i", effect_value);
 #endif
 						SetMana(GetMana() + effect_value);
-						caster->SetMana(caster->GetMana() + abs(effect_value));
-						
+						caster->SetMana(caster->GetMana() + std::abs(effect_value));
+
 						if (effect_value < 0)
 							TryTriggerOnValueAmount(false, true);
 #ifdef SPELL_EFFECT_SPAM
@@ -3211,7 +3211,7 @@ snare has both of them negative, yet their range should work the same:
 			break;
 		}
 		case 123:	// added 2/6/04
-			result = zone->random.Int(ubase, abs(max));
+			result = zone->random.Int(ubase, std::abs(max));
 			break;
 
 		case 124:	// check sign

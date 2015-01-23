@@ -22,14 +22,11 @@
 #include <stdio.h>
 
 // for windows compile
-#ifdef _WINDOWS
-	#define abs64 _abs64
-#else
+#ifndef _WINDOWS
 	#include <stdarg.h>
 	#include <sys/socket.h>
 	#include <netinet/in.h>
 	#include "../common/unix.h"
-	#define abs64 abs
 #endif
 
 extern volatile bool RunLoops;
@@ -1967,7 +1964,7 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 		copperpp -= copper;
 		if(copperpp <= 0)
 		{
-			copper = abs64(copperpp);
+			copper = std::abs(copperpp);
 			m_pp.copper = 0;
 		}
 		else
@@ -1981,7 +1978,7 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 		silver -= copper;
 		if(silver <= 0)
 		{
-			copper = abs64(silver);
+			copper = std::abs(silver);
 			m_pp.silver = 0;
 		}
 		else
@@ -1998,7 +1995,7 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 
 		if(gold <= 0)
 		{
-			copper = abs64(gold);
+			copper = std::abs(gold);
 			m_pp.gold = 0;
 		}
 		else

@@ -20,64 +20,74 @@
 
 #include <string>
 
-class xy_location {
+class xy_location
+{
 public:
-    float m_X;
-    float m_Y;
+	float m_X;
+	float m_Y;
 
-    xy_location(float x = 0.0f, float y = 0.0f);
+	xy_location(float x = 0.0f, float y = 0.0f);
 
-    xy_location operator -(const xy_location& rhs) const;
-    xy_location operator +(const xy_location& rhs) const;
+	xy_location operator-(const xy_location &rhs) const;
+	xy_location operator+(const xy_location &rhs) const;
 };
 
-class xyz_location {
+class xyz_location
+{
 public:
-    float m_X;
-    float m_Y;
-    float m_Z;
+	float m_X;
+	float m_Y;
+	float m_Z;
 
-    static const xyz_location& Origin() {static xyz_location origin; return origin;}
+	static const xyz_location &Origin()
+	{
+		static xyz_location origin;
+		return origin;
+	}
 
-    xyz_location(float x = 0.0f, float y = 0.0f, float z = 0.0f);
-    xyz_location(double x, double y, double z);
+	xyz_location(float x = 0.0f, float y = 0.0f, float z = 0.0f);
+	xyz_location(double x, double y, double z);
 
-    operator xy_location() const;
+	operator xy_location() const;
 
-    xyz_location operator -(const xyz_location& rhs) const;
-    xyz_location operator +(const xyz_location& rhs) const;
+	xyz_location operator-(const xyz_location &rhs) const;
+	xyz_location operator+(const xyz_location &rhs) const;
 
-    void ABS_XYZ();
-    bool isOrigin() const { return m_X == 0 && m_Y == 0 && m_Z == 0;}
-
+	void ABS_XYZ();
+	bool isOrigin() const { return m_X == 0 && m_Y == 0 && m_Z == 0; }
 };
 
-class xyz_heading {
+class xyz_heading
+{
 public:
-    float m_X;
-    float m_Y;
-    float m_Z;
+	float m_X;
+	float m_Y;
+	float m_Z;
 
-    float m_Heading;
+	float m_Heading;
 
-    static const xyz_heading& Origin() {static xyz_heading origin; return origin;}
+	static const xyz_heading &Origin()
+	{
+		static xyz_heading origin;
+		return origin;
+	}
 
-    xyz_heading(float x = 0.0f, float y = 0.0f, float z = 0.0f, float heading = 0.0f);
-    xyz_heading(const xyz_heading& locationDir);
-    xyz_heading(const xyz_location& locationDir, float heading = 0.0f);
-    explicit xyz_heading(const xy_location& locationDir, float z, float heading);
-    explicit xyz_heading(const xy_location locationDir, float z, float heading);
+	xyz_heading(float x = 0.0f, float y = 0.0f, float z = 0.0f, float heading = 0.0f);
+	xyz_heading(const xyz_heading &locationDir);
+	xyz_heading(const xyz_location &locationDir, float heading = 0.0f);
+	explicit xyz_heading(const xy_location &locationDir, float z, float heading);
+	explicit xyz_heading(const xy_location locationDir, float z, float heading);
 
-    operator xyz_location() const;
-    operator xy_location() const;
+	operator xyz_location() const;
+	operator xy_location() const;
 
-    const xyz_heading operator +(const xyz_location& rhs) const;
-    const xyz_heading operator +(const xy_location& rhs) const;
+	const xyz_heading operator+(const xyz_location &rhs) const;
+	const xyz_heading operator+(const xy_location &rhs) const;
 
-    const xyz_heading operator -(const xyz_location& rhs) const;
+	const xyz_heading operator-(const xyz_location &rhs) const;
 
-    void ABS_XYZ();
-    bool isOrigin() const { return m_X == 0.0f && m_Y == 0.0f && m_Z == 0.0f;}
+	void ABS_XYZ();
+	bool isOrigin() const { return m_X == 0.0f && m_Y == 0.0f && m_Z == 0.0f; }
 };
 
 std::string to_string(const xyz_heading &position);
@@ -87,19 +97,19 @@ std::string to_string(const xy_location &position);
 bool IsWithinAxisAlignedBox(const xyz_location &position, const xyz_location &minimum, const xyz_location &maximum);
 bool IsWithinAxisAlignedBox(const xy_location &position, const xy_location &minimum, const xy_location &maximum);
 
-float ComparativeDistance(const xy_location& point1, const xy_location& point2);
-float Distance(const xy_location& point1, const xy_location& point2);
-float ComparativeDistance(const xyz_location& point1, const xyz_location& point2);
-float Distance(const xyz_location& point1, const xyz_location& point2);
-float DistanceNoZ(const xyz_location& point1, const xyz_location& point2);
-float ComparativeDistanceNoZ(const xyz_location& point1, const xyz_location& point2);
+float ComparativeDistance(const xy_location &point1, const xy_location &point2);
+float Distance(const xy_location &point1, const xy_location &point2);
+float ComparativeDistance(const xyz_location &point1, const xyz_location &point2);
+float Distance(const xyz_location &point1, const xyz_location &point2);
+float DistanceNoZ(const xyz_location &point1, const xyz_location &point2);
+float ComparativeDistanceNoZ(const xyz_location &point1, const xyz_location &point2);
 
-float ComparativeDistance(const xyz_heading& point1, const xyz_heading& point2);
-float Distance(const xyz_heading& point1, const xyz_heading& point2);
-float DistanceNoZ(const xyz_heading& point1, const xyz_heading& point2);
-float ComparativeDistanceNoZ(const xyz_heading& point1, const xyz_heading& point2);
+float ComparativeDistance(const xyz_heading &point1, const xyz_heading &point2);
+float Distance(const xyz_heading &point1, const xyz_heading &point2);
+float DistanceNoZ(const xyz_heading &point1, const xyz_heading &point2);
+float ComparativeDistanceNoZ(const xyz_heading &point1, const xyz_heading &point2);
 
-float GetReciprocalHeading(const xyz_heading& point1);
+float GetReciprocalHeading(const xyz_heading &point1);
 float GetReciprocalHeading(const float heading);
 
 #endif

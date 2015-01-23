@@ -2869,9 +2869,7 @@ bool Merc::CheckStance(int16 stance) {
 
 	//checks of current stance matches stances listed as valid for spell in database
 	//stance = 0 for all stances, stance # for only that stance & -stance# for all but that stance
-	if(stance == 0
-		|| (stance > 0 && stance == GetStance())
-		|| (stance < 0 && abs(stance) != GetStance())) {
+	if (stance == 0 || (stance > 0 && stance == GetStance()) || (stance < 0 && std::abs(stance) != GetStance())) {
 			return true;
 	}
 

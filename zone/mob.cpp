@@ -3126,8 +3126,8 @@ int Mob::GetSnaredAmount()
 			{
 				int val = CalcSpellEffectValue_formula(spells[buffs[i].spellid].formula[j], spells[buffs[i].spellid].base[j], spells[buffs[i].spellid].max[j], buffs[i].casterlevel, buffs[i].spellid);
 				//int effect = CalcSpellEffectValue(buffs[i].spellid, spells[buffs[i].spellid].effectid[j], buffs[i].casterlevel);
-				if (val < 0 && abs(val) > worst_snare)
-					worst_snare = abs(val);
+				if (val < 0 && std::abs(val) > worst_snare)
+					worst_snare = std::abs(val);
 			}
 		}
 	}
@@ -4493,7 +4493,8 @@ void Mob::DoGravityEffect()
 					if(value > 0)
 						away = 1;
 
-					amount = fabs(value) / (100.0f); // to bring the values in line, arbitarily picked
+					amount = std::abs(value) /
+						 (100.0f); // to bring the values in line, arbitarily picked
 
 					x_vector = cur_x - caster_x;
 					y_vector = cur_y - caster_y;
@@ -4512,7 +4513,7 @@ void Mob::DoGravityEffect()
 		}
 	}
 
-	if((fabs(my_x - cur_x) > 0.01) || (fabs(my_y - cur_y) > 0.01)) {
+	if ((std::abs(my_x - cur_x) > 0.01) || (std::abs(my_y - cur_y) > 0.01)) {
 		float new_ground = GetGroundZ(cur_x, cur_y);
 		// If we cant get LoS on our new spot then keep checking up to 5 units up.
 		if(!CheckLosFN(cur_x, cur_y, new_ground, GetSize())) {
@@ -5172,7 +5173,7 @@ bool Mob::IsFacingMob(Mob *other)
 	if (angle < 40.0 && heading > 472.0)
 		angle = heading;
 
-	if (fabs(angle - heading) <= 80.0)
+	if (std::abs(angle - heading) <= 80.0)
 		return true;
 
 	return false;
@@ -5186,8 +5187,8 @@ float Mob::HeadingAngleToMob(Mob *other)
 	float this_x = GetX();
 	float this_y = GetY();
 
-	float y_diff = fabs(this_y - mob_y);
-	float x_diff = fabs(this_x - mob_x);
+	float y_diff = std::abs(this_y - mob_y);
+	float x_diff = std::abs(this_x - mob_x);
 	if (y_diff < 0.0000009999999974752427)
 		y_diff = 0.0000009999999974752427;
 

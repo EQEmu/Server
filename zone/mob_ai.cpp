@@ -43,7 +43,6 @@ extern Zone *zone;
 #else
 	#define MobAI_DEBUG_Spells	-1
 #endif
-#define ABS(x) ((x)<0?-(x):(x))
 
 //NOTE: do NOT pass in beneficial and detrimental spell types into the same call here!
 bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
@@ -784,7 +783,8 @@ void Client::AI_Process()
 				if(AImovement_timer->Check()) {
 					animation = GetRunspeed() * 21;
 					// Check if we have reached the last fear point
-					if((ABS(GetX()-m_FearWalkTarget.m_X) < 0.1) && (ABS(GetY()-m_FearWalkTarget.m_Y) <0.1)) {
+					if ((std::abs(GetX() - m_FearWalkTarget.m_X) < 0.1) &&
+					    (std::abs(GetY() - m_FearWalkTarget.m_Y) < 0.1)) {
 						// Calculate a new point to run to
 						CalculateNewFearpoint();
 					}
@@ -1052,7 +1052,8 @@ void Mob::AI_Process() {
 			} else {
 				if(AImovement_timer->Check()) {
 					// Check if we have reached the last fear point
-					if((ABS(GetX()-m_FearWalkTarget.m_X) < 0.1) && (ABS(GetY()-m_FearWalkTarget.m_Y) <0.1)) {
+					if ((std::abs(GetX() - m_FearWalkTarget.m_X) < 0.1) &&
+					    (std::abs(GetY() - m_FearWalkTarget.m_Y) < 0.1)) {
 						// Calculate a new point to run to
 						CalculateNewFearpoint();
 					}
@@ -2784,15 +2785,16 @@ uint32 ZoneDatabase::GetMaxNPCSpellsID() {
     return atoi(row[0]);
 }
 
-DBnpcspellseffects_Struct* ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEffectsID) {
+DBnpcspellseffects_Struct *ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEffectsID)
+{
 	if (iDBSpellsEffectsID == 0)
 		return nullptr;
 
 	if (!npc_spellseffects_cache) {
 		npc_spellseffects_maxid = GetMaxNPCSpellsEffectsID();
-		npc_spellseffects_cache = new DBnpcspellseffects_Struct*[npc_spellseffects_maxid+1];
-		npc_spellseffects_loadtried = new bool[npc_spellseffects_maxid+1];
-		for (uint32 i=0; i<=npc_spellseffects_maxid; i++) {
+		npc_spellseffects_cache = new DBnpcspellseffects_Struct *[npc_spellseffects_maxid + 1];
+		npc_spellseffects_loadtried = new bool[npc_spellseffects_maxid + 1];
+		for (uint32 i = 0; i <= npc_spellseffects_maxid; i++) {
 			npc_spellseffects_cache[i] = 0;
 			npc_spellseffects_loadtried[i] = false;
 		}
@@ -2801,53 +2803,55 @@ DBnpcspellseffects_Struct* ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEff
 	if (iDBSpellsEffectsID > npc_spellseffects_maxid)
 		return nullptr;
 
-	if (npc_spellseffects_cache[iDBSpellsEffectsID])  // it's in the cache, easy =)
+	if (npc_spellseffects_cache[iDBSpellsEffectsID]) // it's in the cache, easy =)
 		return npc_spellseffects_cache[iDBSpellsEffectsID];
 
 	if (npc_spellseffects_loadtried[iDBSpellsEffectsID])
-        return nullptr;
+		return nullptr;
 
-    npc_spellseffects_loadtried[iDBSpellsEffectsID] = true;
+	npc_spellseffects_loadtried[iDBSpellsEffectsID] = true;
 
-    std::string query = StringFormat("SELECT id, parent_list FROM npc_spells_effects WHERE id=%d", iDBSpellsEffectsID);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        return nullptr;
-    }
+	std::string query =
+	    StringFormat("SELECT id, parent_list FROM npc_spells_effects WHERE id=%d", iDBSpellsEffectsID);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		return nullptr;
+	}
 
-    if (results.RowCount() != 1)
-        return nullptr;
+	if (results.RowCount() != 1)
+		return nullptr;
 
-    auto row = results.begin();
-    uint32 tmpparent_list = atoi(row[1]);
+	auto row = results.begin();
+	uint32 tmpparent_list = atoi(row[1]);
 
-    query = StringFormat("SELECT spell_effect_id, minlevel, "
-                        "maxlevel,se_base, se_limit, se_max "
-                        "FROM npc_spells_effects_entries "
-                        "WHERE npc_spells_effects_id = %d ORDER BY minlevel", iDBSpellsEffectsID);
-    results = QueryDatabase(query);
-    if (!results.Success())
-        return nullptr;
+	query = StringFormat("SELECT spell_effect_id, minlevel, "
+			     "maxlevel,se_base, se_limit, se_max "
+			     "FROM npc_spells_effects_entries "
+			     "WHERE npc_spells_effects_id = %d ORDER BY minlevel",
+			     iDBSpellsEffectsID);
+	results = QueryDatabase(query);
+	if (!results.Success())
+		return nullptr;
 
-    uint32 tmpSize = sizeof(DBnpcspellseffects_Struct) + (sizeof(DBnpcspellseffects_entries_Struct) * results.RowCount());
-    npc_spellseffects_cache[iDBSpellsEffectsID] = (DBnpcspellseffects_Struct*) new uchar[tmpSize];
-    memset(npc_spellseffects_cache[iDBSpellsEffectsID], 0, tmpSize);
-    npc_spellseffects_cache[iDBSpellsEffectsID]->parent_list = tmpparent_list;
-    npc_spellseffects_cache[iDBSpellsEffectsID]->numentries = results.RowCount();
+	uint32 tmpSize =
+	    sizeof(DBnpcspellseffects_Struct) + (sizeof(DBnpcspellseffects_entries_Struct) * results.RowCount());
+	npc_spellseffects_cache[iDBSpellsEffectsID] = (DBnpcspellseffects_Struct *)new uchar[tmpSize];
+	memset(npc_spellseffects_cache[iDBSpellsEffectsID], 0, tmpSize);
+	npc_spellseffects_cache[iDBSpellsEffectsID]->parent_list = tmpparent_list;
+	npc_spellseffects_cache[iDBSpellsEffectsID]->numentries = results.RowCount();
 
-    int entryIndex = 0;
-    for (row = results.begin(); row != results.end(); ++row, ++entryIndex)
-    {
-        int spell_effect_id = atoi(row[0]);
-        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].spelleffectid =  spell_effect_id;
-        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].minlevel = atoi(row[1]);
-        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].maxlevel = atoi(row[2]);
-        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].base = atoi(row[3]);
-        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].limit = atoi(row[4]);
-        npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].max = atoi(row[5]);
-    }
+	int entryIndex = 0;
+	for (row = results.begin(); row != results.end(); ++row, ++entryIndex) {
+		int spell_effect_id = atoi(row[0]);
+		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].spelleffectid = spell_effect_id;
+		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].minlevel = atoi(row[1]);
+		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].maxlevel = atoi(row[2]);
+		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].base = atoi(row[3]);
+		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].limit = atoi(row[4]);
+		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].max = atoi(row[5]);
+	}
 
-    return npc_spellseffects_cache[iDBSpellsEffectsID];
+	return npc_spellseffects_cache[iDBSpellsEffectsID];
 }
 
 uint32 ZoneDatabase::GetMaxNPCSpellsEffectsID() {
