@@ -1977,7 +1977,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	// check line of sight to target if it's a detrimental spell
 	if(!spells[spell_id].npc_no_los && spell_target && IsDetrimentalSpell(spell_id) && !CheckLosFN(spell_target) && !IsHarmonySpell(spell_id) && spells[spell_id].targettype != ST_TargetOptional)
 	{
-		Log.Out(Logs::Detail, Logs::Spells, "Spell %d: cannot see target %s", spell_target->GetName());
+		Log.Out(Logs::Detail, Logs::Spells, "Spell %d: cannot see target %s", spell_id, spell_target->GetName());
 		Message_StringID(13,CANT_SEE_TARGET);
 		return false;
 	}
