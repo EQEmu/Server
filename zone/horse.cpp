@@ -28,7 +28,7 @@
 std::map<uint16, const NPCType *> Horse::horse_types;
 LinkedList<NPCType *> horses_auto_delete;
 
-Horse::Horse(Client *_owner, uint16 spell_id, const xyz_heading& position)
+Horse::Horse(Client *_owner, uint16 spell_id, const glm::vec4& position)
  : NPC(GetHorseType(spell_id), nullptr, position, FlyMode3)
 {
 	//give the horse its proper name.

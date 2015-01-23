@@ -57,8 +57,8 @@ public:
 	void me(const char *str);
 	void summonitem(uint32 itemid, int16 charges = -1);
 	void write(const char *file, const char *str);
-	Mob* spawn2(int npc_type, int grid, int unused, const xyz_heading& position);
-	Mob* unique_spawn(int npc_type, int grid, int unused, const xyz_heading& position);
+	Mob* spawn2(int npc_type, int grid, int unused, const glm::vec4& position);
+	Mob* unique_spawn(int npc_type, int grid, int unused, const glm::vec4& position);
 	Mob* spawn_from_spawn2(uint32 spawn2_id);
 	void enable_spawn2(uint32 spawn2_id);
 	void disable_spawn2(uint32 spawn2_id);
@@ -132,11 +132,11 @@ public:
 	void targlobal(const char *varname, const char *value, const char *duration, int npcid, int charid, int zoneid);
 	void delglobal(const char *varname);
 	void ding();
-	void rebind(int zoneid, const xyz_location& location);
+	void rebind(int zoneid, const glm::vec3& location);
 	void start(int wp);
 	void stop();
 	void pause(int duration);
-	void moveto(const xyz_heading& position, bool saveguardspot);
+	void moveto(const glm::vec4& position, bool saveguardspot);
 	void resume();
 	void addldonpoints(int32 points, uint32 theme);
 	void addldonwin(int32 wins, uint32 theme);
@@ -157,8 +157,8 @@ public:
 	void set_zone_flag(int zone_id);
 	void clear_zone_flag(int zone_id);
 	void sethp(int hpperc);
-	bool summonburriedplayercorpse(uint32 char_id, const xyz_heading& position);
-	bool summonallplayercorpses(uint32 char_id, const xyz_heading& position);
+	bool summonburriedplayercorpse(uint32 char_id, const glm::vec4& position);
+	bool summonallplayercorpses(uint32 char_id, const glm::vec4& position);
 	uint32 getplayerburriedcorpsecount(uint32 char_id);
 	bool buryplayercorpse(uint32 char_id);
 	void forcedooropen(uint32 doorid, bool altmode);
@@ -208,8 +208,8 @@ public:
     void enabletitle(int titleset);
    	bool checktitle(int titlecheck);
    	void removetitle(int titlecheck);
-	uint16 CreateGroundObject(uint32 itemid, const xyz_heading& position, uint32 decay_time = 300000);
-	uint16 CreateGroundObjectFromModel(const char* model, const xyz_heading& position, uint8 type = 0x00, uint32 decay_time = 0);
+	uint16 CreateGroundObject(uint32 itemid, const glm::vec4& position, uint32 decay_time = 300000);
+	uint16 CreateGroundObjectFromModel(const char* model, const glm::vec4& position, uint8 type = 0x00, uint32 decay_time = 0);
 	void ModifyNPCStat(const char *identifier, const char *newValue);
 	void UpdateSpawnTimer(uint32 id, uint32 newTime);
 	void MerchantSetItem(uint32 NPCid, uint32 itemid, uint32 quantity = 0);
@@ -224,7 +224,7 @@ public:
 	//void RemoveGroupFromInstance(uint16 instance_id);	//potentially useful but not implmented at this time.
 	//void RemoveRaidFromInstance(uint16 instance_id);	//potentially useful but not implmented at this time.
 	void RemoveAllFromInstance(uint16 instance_id);
-	void MovePCInstance(int zone_id, int instance_id, const xyz_heading& position);
+	void MovePCInstance(int zone_id, int instance_id, const glm::vec4& position);
 	void FlagInstanceByGroupLeader(uint32 zone, int16 version);
 	void FlagInstanceByRaidLeader(uint32 zone, int16 version);
 	const char* varlink(char* perltext, int item_id);

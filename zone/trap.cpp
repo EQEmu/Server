@@ -53,7 +53,7 @@ Trap::Trap() :
 	Entity(),
 	respawn_timer(600000),
 	chkarea_timer(500),
-	m_Position(xyz_location::Origin())
+	m_Position(glm::vec3())
 {
 	trap_id = 0;
 	maxzdiff = 0;
@@ -144,8 +144,8 @@ void Trap::Trigger(Mob* trigger)
 			{
 				if ((tmp = database.GetNPCType(effectvalue)))
 				{
-                    auto randomOffset = xyz_heading(zone->random.Int(-5, 5),zone->random.Int(-5, 5),zone->random.Int(-5, 5), zone->random.Int(0, 249));
-                    auto spawnPosition = randomOffset + m_Position;
+					auto randomOffset = glm::vec4(zone->random.Int(-5, 5),zone->random.Int(-5, 5),zone->random.Int(-5, 5), zone->random.Int(0, 249));
+					auto spawnPosition = randomOffset + glm::vec4(m_Position, 0.0f);
 					NPC* new_npc = new NPC(tmp, nullptr, spawnPosition, FlyMode3);
 					new_npc->AddLootTable();
 					entity_list.AddNPC(new_npc);
@@ -167,8 +167,8 @@ void Trap::Trigger(Mob* trigger)
 			{
 				if ((tmp = database.GetNPCType(effectvalue)))
 				{
-                    auto randomOffset = xyz_heading(zone->random.Int(-2, 2), zone->random.Int(-2, 2), zone->random.Int(-2, 2), zone->random.Int(0, 249));
-					auto spawnPosition = randomOffset + m_Position;
+					auto randomOffset = glm::vec4(zone->random.Int(-2, 2), zone->random.Int(-2, 2), zone->random.Int(-2, 2), zone->random.Int(0, 249));
+					auto spawnPosition = randomOffset + glm::vec4(m_Position, 0.0f);
 					NPC* new_npc = new NPC(tmp, nullptr, spawnPosition, FlyMode3);
 					new_npc->AddLootTable();
 					entity_list.AddNPC(new_npc);
@@ -216,16 +216,16 @@ Trap* EntityList::FindNearbyTrap(Mob* searcher, float max_dist) {
 	for (auto it = trap_list.begin(); it != trap_list.end(); ++it) {
 		cur = it->second;
 		if(cur->disarmed)
-            continue;
+			continue;
 
-        auto diff = searcher->GetPosition() - cur->m_Position;
-        float curdist = diff.m_X * diff.m_X + diff.m_Y * diff.m_Y + diff.m_Z * diff.m_Z;
+		auto diff = glm::vec3(searcher->GetPosition()) - cur->m_Position;
+		float curdist = diff.x * diff.x + diff.y * diff.y + diff.z * diff.z;
 
-        if (curdist < max_dist2 && curdist < dist)
-        {
-            dist = curdist;
-            current_trap = cur;
-        }
+		if (curdist < max_dist2 && curdist < dist)
+		{
+			dist = curdist;
+			current_trap = cur;
+		}
 	}
 
 	return current_trap;
@@ -239,11 +239,11 @@ Mob* EntityList::GetTrapTrigger(Trap* trap) {
 	for (auto it = client_list.begin(); it != client_list.end(); ++it) {
 		Client* cur = it->second;
 
-        auto diff = cur->GetPosition() - trap->m_Position;
-		diff.ABS_XYZ();
+		auto diff = glm::vec3(cur->GetPosition()) - trap->m_Position;
+		diff.z = std::abs(diff.z);
 
-		if ((diff.m_X*diff.m_X + diff.m_Y*diff.m_Y) <= maxdist
-			&& diff.m_Z < trap->maxzdiff)
+		if ((diff.x*diff.x + diff.y*diff.y) <= maxdist
+			&& diff.z < trap->maxzdiff)
 		{
 			if (zone->random.Roll(trap->chance))
 				return(cur);
@@ -259,33 +259,33 @@ Mob* EntityList::GetTrapTrigger(Trap* trap) {
 //todo: rewrite this to not need direct access to trap members.
 bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
 
-    std::string query = StringFormat("SELECT id, x, y, z, effect, effectvalue, effectvalue2, skill, "
-                                    "maxzdiff, radius, chance, message, respawn_time, respawn_var, level "
-                                    "FROM traps WHERE zone='%s' AND version=%u", zonename, version);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error in LoadTraps query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+	std::string query = StringFormat("SELECT id, x, y, z, effect, effectvalue, effectvalue2, skill, "
+									"maxzdiff, radius, chance, message, respawn_time, respawn_var, level "
+									"FROM traps WHERE zone='%s' AND version=%u", zonename, version);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEmuLog::Error, "Error in LoadTraps query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
-    }
+	}
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        Trap* trap = new Trap();
-        trap->trap_id = atoi(row[0]);
-        trap->m_Position = xyz_location(atof(row[1]), atof(row[2]), atof(row[3]));
-        trap->effect = atoi(row[4]);
-        trap->effectvalue = atoi(row[5]);
-        trap->effectvalue2 = atoi(row[6]);
-        trap->skill = atoi(row[7]);
-        trap->maxzdiff = atof(row[8]);
-        trap->radius = atof(row[9]);
-        trap->chance = atoi(row[10]);
-        trap->message = row[11];
-        trap->respawn_time = atoi(row[12]);
-        trap->respawn_var = atoi(row[13]);
-        trap->level = atoi(row[14]);
-        entity_list.AddTrap(trap);
-        trap->CreateHiddenTrigger();
-    }
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		Trap* trap = new Trap();
+		trap->trap_id = atoi(row[0]);
+		trap->m_Position = glm::vec3(atof(row[1]), atof(row[2]), atof(row[3]));
+		trap->effect = atoi(row[4]);
+		trap->effectvalue = atoi(row[5]);
+		trap->effectvalue2 = atoi(row[6]);
+		trap->skill = atoi(row[7]);
+		trap->maxzdiff = atof(row[8]);
+		trap->radius = atof(row[9]);
+		trap->chance = atoi(row[10]);
+		trap->message = row[11];
+		trap->respawn_time = atoi(row[12]);
+		trap->respawn_var = atoi(row[13]);
+		trap->level = atoi(row[14]);
+		entity_list.AddTrap(trap);
+		trap->CreateHiddenTrigger();
+	}
 
 	return true;
 }
@@ -312,7 +312,7 @@ void Trap::CreateHiddenTrigger()
 	make_npc->trackable = 0;
 	make_npc->level = level;
 	strcpy(make_npc->special_abilities, "19,1^20,1^24,1^25,1");
-	NPC* npca = new NPC(make_npc, nullptr, xyz_heading(m_Position, 0.0f), FlyMode3);
+	NPC* npca = new NPC(make_npc, nullptr, glm::vec4(m_Position, 0.0f), FlyMode3);
 	npca->GiveNPCTypeData(make_npc);
 	entity_list.AddNPC(npca);
 

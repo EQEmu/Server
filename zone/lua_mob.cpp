@@ -674,22 +674,22 @@ double Lua_Mob::GetHeading() {
 
 double Lua_Mob::GetWaypointX() {
 	Lua_Safe_Call_Real();
-	return self->GetCurrentWayPoint().m_X;
+	return self->GetCurrentWayPoint().x;
 }
 
 double Lua_Mob::GetWaypointY() {
 	Lua_Safe_Call_Real();
-	return self->GetCurrentWayPoint().m_Y;
+	return self->GetCurrentWayPoint().y;
 }
 
 double Lua_Mob::GetWaypointZ() {
 	Lua_Safe_Call_Real();
-	return self->GetCurrentWayPoint().m_Z;
+	return self->GetCurrentWayPoint().z;
 }
 
 double Lua_Mob::GetWaypointH() {
 	Lua_Safe_Call_Real();
-	return self->GetCurrentWayPoint().m_Heading;
+	return self->GetCurrentWayPoint().w;
 }
 
 double Lua_Mob::GetWaypointPause() {

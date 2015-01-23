@@ -56,7 +56,7 @@ extern Zone* zone;
 extern volatile bool ZoneLoaded;
 extern EntityList entity_list;
 
-NPC::NPC(const NPCType* d, Spawn2* in_respawn, const xyz_heading& position, int iflymode, bool IsCorpse)
+NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int iflymode, bool IsCorpse)
 : Mob(d->name,
 		d->lastname,
 		d->max_hp,
@@ -662,8 +662,8 @@ bool NPC::Process()
 			DoGravityEffect();
 	}
 
-	if(reface_timer->Check() && !IsEngaged() && (m_GuardPoint.m_X == GetX() && m_GuardPoint.m_Y == GetY() && m_GuardPoint.m_Z == GetZ())) {
-		SetHeading(m_GuardPoint.m_Heading);
+	if(reface_timer->Check() && !IsEngaged() && (m_GuardPoint.x == GetX() && m_GuardPoint.y == GetY() && m_GuardPoint.z == GetZ())) {
+		SetHeading(m_GuardPoint.w);
 		SendPosition();
 		reface_timer->Disable();
 	}
@@ -768,7 +768,7 @@ bool NPC::DatabaseCastAccepted(int spell_id) {
 	return false;
 }
 
-NPC* NPC::SpawnNPC(const char* spawncommand, const xyz_heading& position, Client* client) {
+NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* client) {
 	if(spawncommand == 0 || spawncommand[0] == 0) {
 		return 0;
 	}

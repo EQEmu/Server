@@ -546,11 +546,11 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	if(summon_count > MAX_SWARM_PETS)
 		summon_count = MAX_SWARM_PETS;
 
-	static const xy_location swarmPetLocations[MAX_SWARM_PETS] = {
-        xy_location(5, 5), xy_location(-5, 5), xy_location(5, -5), xy_location(-5, -5),
-		xy_location(10, 10), xy_location(-10, 10), xy_location(10, -10), xy_location(-10, -10),
-        xy_location(8, 8), xy_location(-8, 8), xy_location(8, -8), xy_location(-8, -8)
-    };
+	static const glm::vec2 swarmPetLocations[MAX_SWARM_PETS] = {
+		glm::vec2(5, 5), glm::vec2(-5, 5), glm::vec2(5, -5), glm::vec2(-5, -5),
+		glm::vec2(10, 10), glm::vec2(-10, 10), glm::vec2(10, -10), glm::vec2(-10, -10),
+		glm::vec2(8, 8), glm::vec2(-8, 8), glm::vec2(8, -8), glm::vec2(-8, -8)
+	};
 
 	while(summon_count > 0) {
 		int pet_duration = pet.duration;
@@ -568,7 +568,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		NPC* npca = new NPC(
 				(npc_dup!=nullptr)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
 				0,
-				GetPosition() + swarmPetLocations[summon_count],
+				GetPosition() + glm::vec4(swarmPetLocations[summon_count], 0.0f, 0.0f),
 				FlyMode3);
 
 		if (followme)
@@ -643,11 +643,11 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 	if(summon_count > MAX_SWARM_PETS)
 		summon_count = MAX_SWARM_PETS;
 
-	static const xy_location swarmPetLocations[MAX_SWARM_PETS] = {
-        xy_location(5, 5), xy_location(-5, 5), xy_location(5, -5), xy_location(-5, -5),
-		xy_location(10, 10), xy_location(-10, 10), xy_location(10, -10), xy_location(-10, -10),
-        xy_location(8, 8), xy_location(-8, 8), xy_location(8, -8), xy_location(-8, -8)
-    };;
+	static const glm::vec2 swarmPetLocations[MAX_SWARM_PETS] = {
+		glm::vec2(5, 5), glm::vec2(-5, 5), glm::vec2(5, -5), glm::vec2(-5, -5),
+		glm::vec2(10, 10), glm::vec2(-10, 10), glm::vec2(10, -10), glm::vec2(-10, -10),
+		glm::vec2(8, 8), glm::vec2(-8, 8), glm::vec2(8, -8), glm::vec2(-8, -8)
+	};;
 
 	while(summon_count > 0) {
 		int pet_duration = pet.duration;
@@ -665,7 +665,7 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 		NPC* npca = new NPC(
 				(npc_dup!=nullptr)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
 				0,
-				GetPosition()+swarmPetLocations[summon_count],
+				GetPosition() + glm::vec4(swarmPetLocations[summon_count], 0.0f, 0.0f),
 				FlyMode3);
 
 		if (followme)
@@ -1458,26 +1458,26 @@ bool ZoneDatabase::LoadAAEffects2() {
 	const std::string query = "SELECT aaid, slot, effectid, base1, base2 FROM aa_effects ORDER BY aaid ASC, slot ASC";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error in ZoneDatabase::LoadAAEffects2 query: '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		LogFile->write(EQEmuLog::Error, "Error in ZoneDatabase::LoadAAEffects2 query: '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
 	if (!results.RowCount()) { //no results
-        LogFile->write(EQEmuLog::Error, "Error loading AA Effects, none found in the database.");
-        return false;
+		LogFile->write(EQEmuLog::Error, "Error loading AA Effects, none found in the database.");
+		return false;
 	}
 
-    for(auto row = results.begin(); row != results.end(); ++row) {
-        int aaid = atoi(row[0]);
-        int slot = atoi(row[1]);
-        int effectid = atoi(row[2]);
-        int base1 = atoi(row[3]);
-        int base2 = atoi(row[4]);
-        aa_effects[aaid][slot].skill_id = effectid;
-        aa_effects[aaid][slot].base1 = base1;
-        aa_effects[aaid][slot].base2 = base2;
-        aa_effects[aaid][slot].slot = slot;	//not really needed, but we'll populate it just in case
-    }
+	for(auto row = results.begin(); row != results.end(); ++row) {
+		int aaid = atoi(row[0]);
+		int slot = atoi(row[1]);
+		int effectid = atoi(row[2]);
+		int base1 = atoi(row[3]);
+		int base2 = atoi(row[4]);
+		aa_effects[aaid][slot].skill_id = effectid;
+		aa_effects[aaid][slot].base1 = base1;
+		aa_effects[aaid][slot].base2 = base2;
+		aa_effects[aaid][slot].slot = slot;	//not really needed, but we'll populate it just in case
+	}
 
 	return true;
 }
@@ -1796,34 +1796,34 @@ bool ZoneDatabase::LoadAAEffects() {
 	memset(AA_Actions, 0, sizeof(AA_Actions));	//I hope the compiler is smart about this size...
 
 	const std::string query = "SELECT aaid, rank, reuse_time, spell_id, target, "
-                            "nonspell_action, nonspell_mana, nonspell_duration, "
-                            "redux_aa, redux_rate, redux_aa2, redux_rate2 FROM aa_actions";
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error in LoadAAEffects query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+							"nonspell_action, nonspell_mana, nonspell_duration, "
+							"redux_aa, redux_rate, redux_aa2, redux_rate2 FROM aa_actions";
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEmuLog::Error, "Error in LoadAAEffects query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
-    }
+	}
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto row = results.begin(); row != results.end(); ++row) {
 
-        int aaid = atoi(row[0]);
-        int rank = atoi(row[1]);
-        if(aaid < 0 || aaid >= aaHighestID || rank < 0 || rank >= MAX_AA_ACTION_RANKS)
-            continue;
-        AA_DBAction *caction = &AA_Actions[aaid][rank];
+		int aaid = atoi(row[0]);
+		int rank = atoi(row[1]);
+		if(aaid < 0 || aaid >= aaHighestID || rank < 0 || rank >= MAX_AA_ACTION_RANKS)
+			continue;
+		AA_DBAction *caction = &AA_Actions[aaid][rank];
 
-        caction->reuse_time = atoi(row[2]);
-        caction->spell_id = atoi(row[3]);
-        caction->target = (aaTargetType) atoi(row[4]);
-        caction->action = (aaNonspellAction) atoi(row[5]);
-        caction->mana_cost = atoi(row[6]);
-        caction->duration = atoi(row[7]);
-        caction->redux_aa = (aaID) atoi(row[8]);
-        caction->redux_rate = atoi(row[9]);
-        caction->redux_aa2 = (aaID) atoi(row[10]);
-        caction->redux_rate2 = atoi(row[11]);
+		caction->reuse_time = atoi(row[2]);
+		caction->spell_id = atoi(row[3]);
+		caction->target = (aaTargetType) atoi(row[4]);
+		caction->action = (aaNonspellAction) atoi(row[5]);
+		caction->mana_cost = atoi(row[6]);
+		caction->duration = atoi(row[7]);
+		caction->redux_aa = (aaID) atoi(row[8]);
+		caction->redux_rate = atoi(row[9]);
+		caction->redux_aa2 = (aaID) atoi(row[10]);
+		caction->redux_rate2 = atoi(row[11]);
 
-    }
+	}
 
 	return true;
 }
@@ -1837,16 +1837,16 @@ bool ZoneDatabase::LoadAAEffects() {
 uint8 ZoneDatabase::GetTotalAALevels(uint32 skill_id) {
 
 	std::string query = StringFormat("SELECT count(slot) FROM aa_effects WHERE aaid = %i", skill_id);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error in GetTotalAALevels '%s: %s", query.c_str(), results.ErrorMessage().c_str());
-        return 0;
-    }
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEmuLog::Error, "Error in GetTotalAALevels '%s: %s", query.c_str(), results.ErrorMessage().c_str());
+		return 0;
+	}
 
-    if (results.RowCount() != 1)
-        return 0;
+	if (results.RowCount() != 1)
+		return 0;
 
-    auto row = results.begin();
+	auto row = results.begin();
 
 	return atoi(row[0]);
 }
@@ -1893,14 +1893,14 @@ uint32 ZoneDatabase::CountAAs(){
 	const std::string query = "SELECT count(title_sid) FROM altadv_vars";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error in ZoneDatabase::CountAAs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
-        return 0;
+		LogFile->write(EQEmuLog::Error, "Error in ZoneDatabase::CountAAs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return 0;
 	}
 
 	if (results.RowCount() != 1)
-        return 0;
+		return 0;
 
-    auto row = results.begin();
+	auto row = results.begin();
 
 	return atoi(row[0]);;
 }
@@ -1910,14 +1910,14 @@ uint32 ZoneDatabase::CountAAEffects() {
 	const std::string query = "SELECT count(id) FROM aa_effects";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error in ZoneDatabase::CountAALevels query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
-        return 0;
+		LogFile->write(EQEmuLog::Error, "Error in ZoneDatabase::CountAALevels query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return 0;
 	}
 
 	if (results.RowCount() != 1)
-        return 0;
+		return 0;
 
-    auto row = results.begin();
+	auto row = results.begin();
 
 	return atoi(row[0]);
 }
@@ -1947,59 +1947,59 @@ void ZoneDatabase::LoadAAs(SendAA_Struct **load){
 	}
 
 	AARequiredLevelAndCost.clear();
-    query = "SELECT skill_id, level, cost from aa_required_level_cost order by skill_id";
-    results = QueryDatabase(query);
-    if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error in ZoneDatabase::LoadAAs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
-        return;
-    }
+	query = "SELECT skill_id, level, cost from aa_required_level_cost order by skill_id";
+	results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEmuLog::Error, "Error in ZoneDatabase::LoadAAs query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return;
+	}
 
-    AALevelCost_Struct aalcs;
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        aalcs.Level = atoi(row[1]);
-        aalcs.Cost = atoi(row[2]);
-        AARequiredLevelAndCost[atoi(row[0])] = aalcs;
-    }
+	AALevelCost_Struct aalcs;
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		aalcs.Level = atoi(row[1]);
+		aalcs.Cost = atoi(row[2]);
+		AARequiredLevelAndCost[atoi(row[0])] = aalcs;
+	}
 
 }
 
 SendAA_Struct* ZoneDatabase::GetAASkillVars(uint32 skill_id)
 {
 	std::string query = "SET @row = 0"; //initialize "row" variable in database for next query
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error in GetAASkillVars '%s': %s", query.c_str(), results.ErrorMessage().c_str());
-        return nullptr;
-    }
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEmuLog::Error, "Error in GetAASkillVars '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return nullptr;
+	}
 
-    query = StringFormat("SELECT a.cost, a.max_level, a.hotkey_sid, a.hotkey_sid2, a.title_sid, a.desc_sid, a.type, "
-                        "COALESCE("	//So we can return 0 if it's null.
-                        "("	// this is our derived table that has the row #
-                            // that we can SELECT from, because the client is stupid.
-                        "SELECT p.prereq_index_num "
-                        "FROM (SELECT a2.skill_id, @row := @row + 1 AS prereq_index_num "
+	query = StringFormat("SELECT a.cost, a.max_level, a.hotkey_sid, a.hotkey_sid2, a.title_sid, a.desc_sid, a.type, "
+						"COALESCE("	//So we can return 0 if it's null.
+						"("	// this is our derived table that has the row #
+							// that we can SELECT from, because the client is stupid.
+						"SELECT p.prereq_index_num "
+						"FROM (SELECT a2.skill_id, @row := @row + 1 AS prereq_index_num "
 						"FROM altadv_vars a2) AS p "
-                        "WHERE p.skill_id = a.prereq_skill), 0) "
-                        "AS prereq_skill_index, a.prereq_minpoints, a.spell_type, a.spell_refresh, a.classes, "
-                        "a.berserker, a.spellid, a.class_type, a.name, a.cost_inc, a.aa_expansion, a.special_category, "
-                        "a.sof_type, a.sof_cost_inc, a.sof_max_level, a.sof_next_skill, "
-                        "a.clientver, "	// Client Version 0 = None, 1 = All, 2 = Titanium/6.2, 4 = SoF 5 = SOD 6 = UF
-                        "a.account_time_required, a.sof_current_level, a.sof_next_id, a.level_inc "
-                        "FROM altadv_vars a WHERE skill_id=%i", skill_id);
-    results = QueryDatabase(query);
-    if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "Error in GetAASkillVars '%s': %s", query.c_str(), results.ErrorMessage().c_str());
-        return nullptr;
-    }
+						"WHERE p.skill_id = a.prereq_skill), 0) "
+						"AS prereq_skill_index, a.prereq_minpoints, a.spell_type, a.spell_refresh, a.classes, "
+						"a.berserker, a.spellid, a.class_type, a.name, a.cost_inc, a.aa_expansion, a.special_category, "
+						"a.sof_type, a.sof_cost_inc, a.sof_max_level, a.sof_next_skill, "
+						"a.clientver, "	// Client Version 0 = None, 1 = All, 2 = Titanium/6.2, 4 = SoF 5 = SOD 6 = UF
+						"a.account_time_required, a.sof_current_level, a.sof_next_id, a.level_inc "
+						"FROM altadv_vars a WHERE skill_id=%i", skill_id);
+	results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogFile->write(EQEmuLog::Error, "Error in GetAASkillVars '%s': %s", query.c_str(), results.ErrorMessage().c_str());
+		return nullptr;
+	}
 
-    if (results.RowCount() != 1)
-        return nullptr;
+	if (results.RowCount() != 1)
+		return nullptr;
 
-    int total_abilities = GetTotalAALevels(skill_id);	//eventually we'll want to use zone->GetTotalAALevels(skill_id) since it should save queries to the DB
+	int total_abilities = GetTotalAALevels(skill_id);	//eventually we'll want to use zone->GetTotalAALevels(skill_id) since it should save queries to the DB
 	int totalsize = total_abilities * sizeof(AA_Ability) + sizeof(SendAA_Struct);
 
-    SendAA_Struct* sendaa = nullptr;
-    uchar* buffer;
+	SendAA_Struct* sendaa = nullptr;
+	uchar* buffer;
 
 	buffer = new uchar[totalsize];
 	memset(buffer,0,totalsize);
@@ -2010,7 +2010,7 @@ SendAA_Struct* ZoneDatabase::GetAASkillVars(uint32 skill_id)
 	//ATOI IS NOT UNSIGNED LONG-SAFE!!!
 
 	sendaa->cost = atoul(row[0]);
-    sendaa->cost2 = sendaa->cost;
+	sendaa->cost2 = sendaa->cost;
 	sendaa->max_level = atoul(row[1]);
 	sendaa->hotkey_sid = atoul(row[2]);
 	sendaa->id = skill_id;

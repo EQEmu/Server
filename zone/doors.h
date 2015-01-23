@@ -17,7 +17,7 @@ class Doors : public Entity
 {
 public:
 	Doors(const Door* door);
-	Doors(const char *dmodel, const xyz_heading& position, uint8 dopentype = 58, uint16 dsize = 100);
+	Doors(const char *dmodel, const glm::vec4& position, uint8 dopentype = 58, uint16 dsize = 100);
 	~Doors();
 	bool	IsDoor() const { return true; }
 	void	HandleClick(Client* sender, uint8 trigger);
@@ -29,7 +29,7 @@ public:
 	char*	GetDoorName() { return door_name; }
 	uint32	GetDoorParam() { return door_param; }
 	int		GetInvertState() { return invert_state; }
-	const xyz_heading GetPosition() const{ return m_Position; }
+	const glm::vec4 GetPosition() const{ return m_Position; }
 	int		GetIncline() { return incline; }
 	bool	triggered;
 	void	SetOpenState(bool st) { isopen = st; }
@@ -51,7 +51,7 @@ public:
 	void	SetEntityID(uint32 entity) { entity_id = entity; }
 
 	void	DumpDoor();
-	const xyz_heading GetDestination() const { return m_Destination; }
+	const glm::vec4 GetDestination() const { return m_Destination; }
 
 	uint8	IsLDoNDoor() { return is_ldon_door; }
 	uint32	GetClientVersionMask() { return client_version_mask; }
@@ -61,7 +61,7 @@ public:
 	void	ForceClose(Mob *sender, bool alt_mode=false);
 	void	ToggleState(Mob *sender);
 
-	void	SetPosition(const xyz_heading& position);
+	void	SetPosition(const glm::vec4& position);
 	void	SetLocation(float x, float y, float z);
 	void	SetIncline(int in);
 	void	SetDoorName(const char* name);
@@ -75,7 +75,7 @@ private:
 	uint8	door_id;
 	char	zone_name[32];
 	char	door_name[32];
-	xyz_heading m_Position;
+	glm::vec4 m_Position;
 	int		incline;
 	uint8	opentype;
 	uint32	guild_id;
@@ -94,7 +94,7 @@ private:
 
 	char	dest_zone[16];
 	int		dest_instance_id;
-	xyz_heading m_Destination;
+	glm::vec4 m_Destination;
 
 	uint8	is_ldon_door;
 	uint32	client_version_mask;

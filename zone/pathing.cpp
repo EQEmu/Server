@@ -21,7 +21,7 @@
 
 extern Zone *zone;
 
-float VertexDistance(Map::Vertex a, Map::Vertex b)
+float VectorDistance(glm::vec3 a, glm::vec3 b)
 {
 	float xdist = a.x - b.x;
 	float ydist = a.y - b.y;
@@ -29,7 +29,7 @@ float VertexDistance(Map::Vertex a, Map::Vertex b)
 	return sqrtf(xdist * xdist + ydist * ydist + zdist * zdist);
 }
 
-float VertexDistanceNoRoot(Map::Vertex a, Map::Vertex b)
+float VectorDistanceNoRoot(glm::vec3 a, glm::vec3 b)
 {
 	float xdist = a.x - b.x;
 	float ydist = a.y - b.y;
@@ -187,9 +187,9 @@ void PathManager::PrintPathing()
 	}
 }
 
-Map::Vertex PathManager::GetPathNodeCoordinates(int NodeNumber, bool BestZ)
+glm::vec3 PathManager::GetPathNodeCoordinates(int NodeNumber, bool BestZ)
 {
-	Map::Vertex Result;
+	glm::vec3 Result;
 
 	if(NodeNumber < Head.PathNodeCount)
 	{
@@ -283,7 +283,7 @@ std::deque<int> PathManager::FindRoute(int startID, int endID)
 			AStarEntry.Teleport = PathNodes[CurrentNode.PathNodeID].Neighbours[i].Teleport;
 
 			// HCost is the estimated cost to get from this node to the end.
-			AStarEntry.HCost = VertexDistance(PathNodes[PathNodes[CurrentNode.PathNodeID].Neighbours[i].id].v,
+			AStarEntry.HCost = VectorDistance(PathNodes[PathNodes[CurrentNode.PathNodeID].Neighbours[i].id].v,
 											PathNodes[endID].v);
 
 			AStarEntry.GCost = CurrentNode.GCost + PathNodes[CurrentNode.PathNodeID].Neighbours[i].distance;
@@ -335,9 +335,9 @@ std::deque<int> PathManager::FindRoute(int startID, int endID)
 
 }
 
-bool CheckLOSBetweenPoints(Map::Vertex start, Map::Vertex end) {
+bool CheckLOSBetweenPoints(glm::vec3 start, glm::vec3 end) {
 
-	Map::Vertex hit;
+	glm::vec3 hit;
 
 	if((zone->zonemap) && (zone->zonemap->LineIntersectsZone(start, end, 1, &hit)))
 		return false;
@@ -350,7 +350,7 @@ auto path_compare = [](const PathNodeSortStruct& a, const PathNodeSortStruct& b)
 	return a.Distance < b.Distance;
 };
 
-std::deque<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
+std::deque<int> PathManager::FindRoute(glm::vec3 Start, glm::vec3 End)
 {
 	_log(PATHING__DEBUG, "FindRoute(%8.3f, %8.3f, %8.3f, %8.3f, %8.3f, %8.3f)", Start.x, Start.y, Start.z, End.x, End.y, End.z);
 
@@ -376,7 +376,7 @@ std::deque<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 			(ABS(Start.z - PathNodes[i].v.z) <= CandidateNodeRangeZ))
 		{
 			TempNode.id = i;
-			TempNode.Distance = VertexDistanceNoRoot(Start, PathNodes[i].v);
+			TempNode.Distance = VectorDistanceNoRoot(Start, PathNodes[i].v);
 			SortedByDistance.push_back(TempNode);
 
 		}
@@ -415,7 +415,7 @@ std::deque<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 			(ABS(End.z - PathNodes[i].v.z) <= CandidateNodeRangeZ))
 		{
 			TempNode.id = i;
-			TempNode.Distance = VertexDistanceNoRoot(End, PathNodes[i].v);
+			TempNode.Distance = VectorDistanceNoRoot(End, PathNodes[i].v);
 			SortedByDistance.push_back(TempNode);
 		}
 	}
@@ -587,7 +587,7 @@ void PathManager::SpawnPathNodes()
 		npc_type->CHA = 150;
 
 		npc_type->findable = 1;
-        auto position = xyz_heading(PathNodes[i].v.x, PathNodes[i].v.y, PathNodes[i].v.z, 0.0f);
+        auto position = glm::vec4(PathNodes[i].v.x, PathNodes[i].v.y, PathNodes[i].v.z, 0.0f);
 		NPC* npc = new NPC(npc_type, nullptr, position, FlyMode1);
 		npc->GiveNPCTypeData(npc_type);
 
@@ -652,19 +652,19 @@ void PathManager::SimpleMeshTest()
 	fflush(stdout);
 }
 
-Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChanged, bool &NodeReached)
+glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChanged, bool &NodeReached)
 {
 	WaypointChanged = false;
 
 	NodeReached = false;
 
-	Map::Vertex NodeLoc;
+	glm::vec3 NodeLoc;
 
-	Map::Vertex From(GetX(), GetY(), GetZ());
+	glm::vec3 From(GetX(), GetY(), GetZ());
 
-	Map::Vertex HeadPosition(From.x, From.y, From.z + (GetSize() < 6.0 ? 6 : GetSize()) * HEAD_POSITION);
+	glm::vec3 HeadPosition(From.x, From.y, From.z + (GetSize() < 6.0 ? 6 : GetSize()) * HEAD_POSITION);
 
-	Map::Vertex To(ToX, ToY, ToZ);
+	glm::vec3 To(ToX, ToY, ToZ);
 
 	bool SameDestination = (To == PathingDestination);
 
@@ -754,7 +754,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 					&& PathingLOSCheckTimer->Check()))
 				{
 					mlog(PATHING__DEBUG, "  Checking distance to target.");
-					float Distance = VertexDistanceNoRoot(From, To);
+					float Distance = VectorDistanceNoRoot(From, To);
 
 					mlog(PATHING__DEBUG, "  Distance between From and To (NoRoot) is %8.3f", Distance);
 
@@ -847,7 +847,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 			{
 				mlog(PATHING__DEBUG, "  Checking distance to target.");
 
-				float Distance = VertexDistanceNoRoot(From, To);
+				float Distance = VectorDistanceNoRoot(From, To);
 
 				mlog(PATHING__DEBUG, "  Distance between From and To (NoRoot) is %8.3f", Distance);
 
@@ -887,7 +887,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 			// Check if we now have LOS etc to the new destination.
 			if(PathingLOSCheckTimer->Check())
 			{
-				float Distance = VertexDistanceNoRoot(From, To);
+				float Distance = VectorDistanceNoRoot(From, To);
 
 				if((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort))
 					&& (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
@@ -1039,7 +1039,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 	WaypointChanged = true;
 
-	float Distance = VertexDistanceNoRoot(From, To);
+	float Distance = VectorDistanceNoRoot(From, To);
 
 	if((Distance <= RuleR(Pathing, MinDistanceForLOSCheckLong))
 		&& (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
@@ -1090,7 +1090,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 }
 
-int PathManager::FindNearestPathNode(Map::Vertex Position)
+int PathManager::FindNearestPathNode(glm::vec3 Position)
 {
 
 	// Find the nearest PathNode we have LOS to.
@@ -1114,7 +1114,7 @@ int PathManager::FindNearestPathNode(Map::Vertex Position)
 			(ABS(Position.z - PathNodes[i].v.z) <= CandidateNodeRangeZ))
 		{
 			TempNode.id = i;
-			TempNode.Distance = VertexDistanceNoRoot(Position, PathNodes[i].v);
+			TempNode.Distance = VectorDistanceNoRoot(Position, PathNodes[i].v);
 			SortedByDistance.push_back(TempNode);
 
 		}
@@ -1140,11 +1140,11 @@ int PathManager::FindNearestPathNode(Map::Vertex Position)
 	return ClosestPathNodeToStart;
 }
 
-bool PathManager::NoHazards(Map::Vertex From, Map::Vertex To)
+bool PathManager::NoHazards(glm::vec3 From, glm::vec3 To)
 {
 	// Test the Z coordinate at the mid point.
 	//
-	Map::Vertex MidPoint((From.x + To.x) / 2, (From.y + To.y) / 2, From.z);
+	glm::vec3 MidPoint((From.x + To.x) / 2, (From.y + To.y) / 2, From.z);
 
 	float NewZ = zone->zonemap->FindBestZ(MidPoint, nullptr);
 
@@ -1164,10 +1164,10 @@ bool PathManager::NoHazards(Map::Vertex From, Map::Vertex To)
 	return true;
 }
 
-bool PathManager::NoHazardsAccurate(Map::Vertex From, Map::Vertex To)
+bool PathManager::NoHazardsAccurate(glm::vec3 From, glm::vec3 To)
 {
 	float stepx, stepy, stepz, curx, cury, curz;
-	Map::Vertex cur = From;
+	glm::vec3 cur = From;
 	float last_z = From.z;
 	float step_size = 1.0;
 
@@ -1185,7 +1185,7 @@ bool PathManager::NoHazardsAccurate(Map::Vertex From, Map::Vertex To)
 		stepy = (stepy / factor)*step_size;
 		stepz = (stepz / factor)*step_size;
 
-		Map::Vertex TestPoint(curx, cury, curz);
+		glm::vec3 TestPoint(curx, cury, curz);
 		float NewZ = zone->zonemap->FindBestZ(TestPoint, nullptr);
 		if (ABS(NewZ - last_z) > 5.0f)
 		{
@@ -1197,18 +1197,18 @@ bool PathManager::NoHazardsAccurate(Map::Vertex From, Map::Vertex To)
 
 		if (zone->watermap)
 		{
-            auto from = xyz_location(From.x, From.y, From.z);
-            auto to = xyz_location(To.x, To.y, To.z);
+            auto from = glm::vec3(From.x, From.y, From.z);
+            auto to = glm::vec3(To.x, To.y, To.z);
 			if (zone->watermap->InLiquid(from) || zone->watermap->InLiquid(to))
 			{
 				break;
 			}
-            auto testPointNewZ = xyz_location(TestPoint.x, TestPoint.y, NewZ);
+            auto testPointNewZ = glm::vec3(TestPoint.x, TestPoint.y, NewZ);
 			if (zone->watermap->InLiquid(testPointNewZ))
 			{
-				Map::Vertex TestPointWater(TestPoint.x, TestPoint.y, NewZ - 0.5f);
-				Map::Vertex TestPointWaterDest = TestPointWater;
-				Map::Vertex hit;
+				glm::vec3 TestPointWater(TestPoint.x, TestPoint.y, NewZ - 0.5f);
+				glm::vec3 TestPointWaterDest = TestPointWater;
+				glm::vec3 hit;
 				TestPointWaterDest.z -= 500;
 				float best_z2 = -999990;
 				if (zone->zonemap->LineIntersectsZone(TestPointWater, TestPointWaterDest, 1.0f, &hit))
@@ -1576,7 +1576,7 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 		npc_type->CHA = 150;
 		npc_type->findable = 1;
 
-        auto position = xyz_heading(new_node.v.x, new_node.v.y, new_node.v.z, 0.0f);
+        auto position = glm::vec4(new_node.v.x, new_node.v.y, new_node.v.z, 0.0f);
 		NPC* npc = new NPC(npc_type, nullptr, position, FlyMode1);
 		npc->GiveNPCTypeData(npc_type);
 		entity_list.AddNPC(npc, true, true);
@@ -1637,7 +1637,7 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 		npc_type->CHA = 150;
 		npc_type->findable = 1;
 
-        auto position = xyz_heading(new_node.v.x, new_node.v.y, new_node.v.z, 0.0f);
+        auto position = glm::vec4(new_node.v.x, new_node.v.y, new_node.v.z, 0.0f);
 		NPC* npc = new NPC(npc_type, nullptr, position, FlyMode1);
 		npc->GiveNPCTypeData(npc_type);
 		entity_list.AddNPC(npc, true, true);
@@ -1797,7 +1797,7 @@ void PathManager::ConnectNodeToNode(int32 Node1, int32 Node2, int32 teleport, in
 				a->Neighbours[a_i].id = b->id;
 				a->Neighbours[a_i].DoorID = doorid;
 				a->Neighbours[a_i].Teleport = teleport;
-				a->Neighbours[a_i].distance = VertexDistance(a->v, b->v);
+				a->Neighbours[a_i].distance = VectorDistance(a->v, b->v);
 				break;
 			}
 		}
@@ -1812,7 +1812,7 @@ void PathManager::ConnectNodeToNode(int32 Node1, int32 Node2, int32 teleport, in
 				b->Neighbours[b_i].id = a->id;
 				b->Neighbours[b_i].DoorID = doorid;
 				b->Neighbours[b_i].Teleport = teleport;
-				b->Neighbours[b_i].distance = VertexDistance(a->v, b->v);
+				b->Neighbours[b_i].distance = VectorDistance(a->v, b->v);
 				break;
 			}
 		}
@@ -1882,7 +1882,7 @@ void PathManager::ConnectNode(int32 Node1, int32 Node2, int32 teleport, int32 do
 				a->Neighbours[a_i].id = b->id;
 				a->Neighbours[a_i].DoorID = doorid;
 				a->Neighbours[a_i].Teleport = teleport;
-				a->Neighbours[a_i].distance = VertexDistance(a->v, b->v);
+				a->Neighbours[a_i].distance = VectorDistance(a->v, b->v);
 				break;
 			}
 		}
@@ -1998,7 +1998,7 @@ void PathManager::MoveNode(Client *c)
 
 	if(zone->zonemap)
 	{
-		Map::Vertex loc(c->GetX(), c->GetY(), c->GetZ());
+		glm::vec3 loc(c->GetX(), c->GetY(), c->GetZ());
 		Node->bestz = zone->zonemap->FindBestZ(loc, nullptr);
 	}
 	else
@@ -2069,14 +2069,14 @@ bool PathManager::NodesConnected(PathNode *a, PathNode *b)
 	return false;
 }
 
-bool PathManager::CheckLosFN(Map::Vertex a, Map::Vertex b)
+bool PathManager::CheckLosFN(glm::vec3 a, glm::vec3 b)
 {
 	if(zone->zonemap)
 	{
-		Map::Vertex hit;
+		glm::vec3 hit;
 
-		Map::Vertex myloc;
-		Map::Vertex oloc;
+		glm::vec3 myloc;
+		glm::vec3 oloc;
 
 		myloc.x = a.x;
 		myloc.y = a.y;
@@ -2119,7 +2119,7 @@ void PathManager::ProcessNodesAndSave(std::string filename)
 
 				if(!NodesConnected(&PathNodes[x], &PathNodes[y]))
 				{
-					if(VertexDistance(PathNodes[x].v, PathNodes[y].v) <= 200)
+					if(VectorDistance(PathNodes[x].v, PathNodes[y].v) <= 200)
 					{
 						if(CheckLosFN(PathNodes[x].v, PathNodes[y].v))
 						{

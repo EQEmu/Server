@@ -88,7 +88,7 @@ void EntityList::DescribeAggro(Client *towho, NPC *from_who, float d, bool verbo
 		if (mob->IsClient())	//also ensures that mob != around
 			continue;
 
-		if (ComparativeDistance(mob->GetPosition(), from_who->GetPosition()) > d2)
+		if (DistanceSquared(mob->GetPosition(), from_who->GetPosition()) > d2)
 			continue;
 
 		if (engaged) {
@@ -150,7 +150,7 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 		return;
 	}
 
-	float dist2 = ComparativeDistance(mob->GetPosition(), m_Position);
+	float dist2 = DistanceSquared(mob->GetPosition(), m_Position);
 
 	float iAggroRange2 = iAggroRange*iAggroRange;
 	if( dist2 > iAggroRange2 ) {
@@ -296,7 +296,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		return(false);
 	}
 
-	float dist2 = ComparativeDistance(mob->GetPosition(), m_Position);
+	float dist2 = DistanceSquared(mob->GetPosition(), m_Position);
 	float iAggroRange2 = iAggroRange*iAggroRange;
 
 	if( dist2 > iAggroRange2 ) {
@@ -414,7 +414,7 @@ int EntityList::GetHatedCount(Mob *attacker, Mob *exclude)
 
 		AggroRange *= AggroRange;
 
-		if (ComparativeDistance(mob->GetPosition(), attacker->GetPosition()) > AggroRange)
+		if (DistanceSquared(mob->GetPosition(), attacker->GetPosition()) > AggroRange)
 			continue;
 
 		Count++;
@@ -444,7 +444,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 //			&& !mob->IsCorpse()
 //			&& mob->IsAIControlled()
 			&& mob->GetPrimaryFaction() != 0
-			&& ComparativeDistance(mob->GetPosition(), sender->GetPosition()) <= r
+			&& DistanceSquared(mob->GetPosition(), sender->GetPosition()) <= r
 			&& !mob->IsEngaged()
 			&& ((!mob->IsPet()) || (mob->IsPet() && mob->GetOwner() && !mob->GetOwner()->IsClient()))
 				// If we're a pet we don't react to any calls for help if our owner is a client
@@ -471,7 +471,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 					if(mob->CheckLosFN(sender)) {
 #if (EQDEBUG>=5)
 						LogFile->write(EQEmuLog::Debug, "AIYellForHelp(\"%s\",\"%s\") %s attacking %s Dist %f Z %f",
-						sender->GetName(), attacker->GetName(), mob->GetName(), attacker->GetName(), ComparativeDistance(mob->GetPosition(), sender->GetPosition()), fabs(sender->GetZ()+mob->GetZ()));
+						sender->GetName(), attacker->GetName(), mob->GetName(), attacker->GetName(), DistanceSquared(mob->GetPosition(), sender->GetPosition()), fabs(sender->GetZ()+mob->GetZ()));
 #endif
 						mob->AddToHateList(attacker, 1, 0, false);
 					}
@@ -878,7 +878,7 @@ bool Mob::CombatRange(Mob* other)
 	if (size_mod > 10000)
 		size_mod = size_mod / 7;
 
-	float _DistNoRoot = ComparativeDistance(m_Position, other->GetPosition());
+	float _DistNoRoot = DistanceSquared(m_Position, other->GetPosition());
 
 	if (GetSpecialAbility(NPC_CHASE_DISTANCE)){
 		
@@ -935,8 +935,8 @@ bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
 #endif
 	}
 
-	Map::Vertex myloc;
-	Map::Vertex oloc;
+	glm::vec3 myloc;
+	glm::vec3 oloc;
 
 #define LOS_DEFAULT_HEIGHT 6.0f
 

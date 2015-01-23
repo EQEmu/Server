@@ -1454,9 +1454,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	/* If PP is set to weird coordinates */
 	if ((m_pp.x == -1 && m_pp.y == -1 && m_pp.z == -1) || (m_pp.x == -2 && m_pp.y == -2 && m_pp.z == -2)) {
         auto safePoint = zone->GetSafePoint();
-		m_pp.x = safePoint.m_X;
-		m_pp.y = safePoint.m_Y;
-		m_pp.z = safePoint.m_Z;
+		m_pp.x = safePoint.x;
+		m_pp.y = safePoint.y;
+		m_pp.z = safePoint.z;
 	}
 	/* If too far below ground, then fix */
 	// float ground_z = GetGroundZ(m_pp.x, m_pp.y, m_pp.z);
@@ -1466,10 +1466,10 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	/* Set Mob variables for spawn */
 	class_ = m_pp.class_;
 	level = m_pp.level;
-	m_Position.m_X = m_pp.x;
-	m_Position.m_Y = m_pp.y;
-	m_Position.m_Z = m_pp.z;
-	m_Position.m_Heading = m_pp.heading;
+	m_Position.x = m_pp.x;
+	m_Position.y = m_pp.y;
+	m_Position.z = m_pp.z;
+	m_Position.w = m_pp.heading;
 	race = m_pp.race;
 	base_race = m_pp.race;
 	gender = m_pp.gender;
@@ -2028,7 +2028,7 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 		return;
 
 	//you have to be somewhat close to them to be properly using them
-	if (ComparativeDistance(m_Position, tmp->GetPosition()) > USE_NPC_RANGE2)
+	if (DistanceSquared(m_Position, tmp->GetPosition()) > USE_NPC_RANGE2)
 		return;
 
 	merchantid = tmp->CastToNPC()->MerchantType;
@@ -2203,7 +2203,7 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
 		return;
 
 	//you have to be somewhat close to them to be properly using them
-	if (ComparativeDistance(m_Position, tmp->GetPosition()) > USE_NPC_RANGE2)
+	if (DistanceSquared(m_Position, tmp->GetPosition()) > USE_NPC_RANGE2)
 		return;
 
 	merchantid = tmp->CastToNPC()->MerchantType;
@@ -2294,7 +2294,7 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 		return;
 	}
 
-	if (ComparativeDistance(m_Position, vendor->GetPosition())  > USE_NPC_RANGE2)
+	if (DistanceSquared(m_Position, vendor->GetPosition())  > USE_NPC_RANGE2)
 	{
 		Message(13, "Vendor is out of range.");
 		return;
@@ -2552,7 +2552,7 @@ void Client::Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket *app
 
 	NPC* tar = entity_list.GetNPCByID(*((uint32*)app->pBuffer));
 	if (tar) {
-		if (ComparativeDistance(m_Position, tar->GetPosition())  > USE_NPC_RANGE2)
+		if (DistanceSquared(m_Position, tar->GetPosition())  > USE_NPC_RANGE2)
 			return;
 
 		if (tar->GetClass() != ALT_CURRENCY_MERCHANT) {
@@ -2631,7 +2631,7 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 	AltCurrencyPurchaseItem_Struct *purchase = (AltCurrencyPurchaseItem_Struct*)app->pBuffer;
 	NPC* tar = entity_list.GetNPCByID(purchase->merchant_entity_id);
 	if (tar) {
-		if (ComparativeDistance(m_Position, tar->GetPosition())> USE_NPC_RANGE2)
+		if (DistanceSquared(m_Position, tar->GetPosition())> USE_NPC_RANGE2)
 			return;
 
 		if (tar->GetClass() != ALT_CURRENCY_MERCHANT) {
@@ -2768,7 +2768,7 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app)
 
 	NPC* tar = entity_list.GetNPCByID(sell->merchant_entity_id);
 	if (tar) {
-		if (ComparativeDistance(m_Position, tar->GetPosition()) > USE_NPC_RANGE2)
+		if (DistanceSquared(m_Position, tar->GetPosition()) > USE_NPC_RANGE2)
 			return;
 
 		if (tar->GetClass() != ALT_CURRENCY_MERCHANT) {
@@ -2865,7 +2865,7 @@ void Client::Handle_OP_AltCurrencySellSelection(const EQApplicationPacket *app)
 	AltCurrencySelectItem_Struct *select = (AltCurrencySelectItem_Struct*)app->pBuffer;
 	NPC* tar = entity_list.GetNPCByID(select->merchant_entity_id);
 	if (tar) {
-		if (ComparativeDistance(m_Position, tar->GetPosition()) > USE_NPC_RANGE2)
+		if (DistanceSquared(m_Position, tar->GetPosition()) > USE_NPC_RANGE2)
 			return;
 
 		if (tar->GetClass() != ALT_CURRENCY_MERCHANT) {
@@ -3239,8 +3239,8 @@ void Client::Handle_OP_AutoAttack(const EQApplicationPacket *app)
 		ranged_timer.Disable();
 		attack_dw_timer.Disable();
 
-        m_AutoAttackPosition = xyz_heading::Origin();
-        m_AutoAttackTargetLocation = xyz_location::Origin();
+        m_AutoAttackPosition = glm::vec4();
+        m_AutoAttackTargetLocation = glm::vec3();
 		aa_los_them_mob = nullptr;
 	}
 	else if (app->pBuffer[0] == 1)
@@ -3255,14 +3255,14 @@ void Client::Handle_OP_AutoAttack(const EQApplicationPacket *app)
 		{
 			aa_los_them_mob = GetTarget();
 			m_AutoAttackPosition = GetPosition();
-			m_AutoAttackTargetLocation = aa_los_them_mob->GetPosition();
+			m_AutoAttackTargetLocation = glm::vec3(aa_los_them_mob->GetPosition());
 			los_status = CheckLosFN(aa_los_them_mob);
 			los_status_facing = IsFacingMob(aa_los_them_mob);
 		}
 		else
 		{
 			m_AutoAttackPosition = GetPosition();
-			m_AutoAttackTargetLocation = xyz_location::Origin();
+			m_AutoAttackTargetLocation = glm::vec3();
 			aa_los_them_mob = nullptr;
 			los_status = false;
 			los_status_facing = false;
@@ -3984,7 +3984,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 
 	CastSpell_Struct* castspell = (CastSpell_Struct*)app->pBuffer;
 
-    m_TargetRing = xyz_location(castspell->x_pos, castspell->y_pos, castspell->z_pos);
+    m_TargetRing = glm::vec3(castspell->x_pos, castspell->y_pos, castspell->z_pos);
 
 #ifdef _EQDEBUG
 	LogFile->write(EQEmuLog::Debug, "cs_unknown2: %u %i", (uint8)castspell->cs_unknown[0], castspell->cs_unknown[0]);
@@ -4016,7 +4016,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			return;
 		}
 
-        m_TargetRing = xyz_location(castspell->x_pos, castspell->y_pos, castspell->z_pos);
+        m_TargetRing = glm::vec3(castspell->x_pos, castspell->y_pos, castspell->z_pos);
 
 		CastSpell(spell_to_cast, castspell->target_id, castspell->slot);
 	}
@@ -4360,7 +4360,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			}
 
 			// set the boat's position deltas
-			auto boatDelta = xyz_heading(ppu->delta_x, ppu->delta_y, ppu->delta_z, ppu->delta_heading);
+			auto boatDelta = glm::vec4(ppu->delta_x, ppu->delta_y, ppu->delta_z, ppu->delta_heading);
 			boat->SetDelta(boatDelta);
 			// send an update to everyone nearby except the client controlling the boat
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
@@ -4377,9 +4377,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 
 	float dist = 0;
 	float tmp;
-	tmp = m_Position.m_X - ppu->x_pos;
+	tmp = m_Position.x - ppu->x_pos;
 	dist += tmp*tmp;
-	tmp = m_Position.m_Y - ppu->y_pos;
+	tmp = m_Position.y - ppu->y_pos;
 	dist += tmp*tmp;
 	dist = sqrt(dist);
 
@@ -4522,41 +4522,41 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	float rewind_x_diff = 0;
 	float rewind_y_diff = 0;
 
-	rewind_x_diff = ppu->x_pos - m_RewindLocation.m_X;
+	rewind_x_diff = ppu->x_pos - m_RewindLocation.x;
 	rewind_x_diff *= rewind_x_diff;
-	rewind_y_diff = ppu->y_pos - m_RewindLocation.m_Y;
+	rewind_y_diff = ppu->y_pos - m_RewindLocation.y;
 	rewind_y_diff *= rewind_y_diff;
 
 	//We only need to store updated values if the player has moved.
 	//If the player has moved more than units for x or y, then we'll store
 	//his pre-PPU x and y for /rewind, in case he gets stuck.
 	if ((rewind_x_diff > 750) || (rewind_y_diff > 750))
-        m_RewindLocation = m_Position;
+		m_RewindLocation = glm::vec3(m_Position);
 
 	//If the PPU was a large jump, such as a cross zone gate or Call of Hero,
 	//just update rewind coords to the new ppu coords. This will prevent exploitation.
 
 	if ((rewind_x_diff > 5000) || (rewind_y_diff > 5000))
-        m_RewindLocation = xyz_location(ppu->x_pos, ppu->y_pos, ppu->z_pos);
+        m_RewindLocation = glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos);
 
 	if(proximity_timer.Check()) {
-		entity_list.ProcessMove(this, xyz_location(ppu->x_pos, ppu->y_pos, ppu->z_pos));
+		entity_list.ProcessMove(this, glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos));
 		if(RuleB(TaskSystem, EnableTaskSystem) && RuleB(TaskSystem,EnableTaskProximity))
 			ProcessTaskProximities(ppu->x_pos, ppu->y_pos, ppu->z_pos);
 
-		m_Proximity = xyz_location(ppu->x_pos, ppu->y_pos, ppu->z_pos);
+		m_Proximity = glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos);
 	}
 
 	// Update internal state
-	m_Delta = xyz_heading(ppu->delta_x, ppu->delta_y, ppu->delta_z, ppu->delta_heading);
+	m_Delta = glm::vec4(ppu->delta_x, ppu->delta_y, ppu->delta_z, ppu->delta_heading);
 
-	if(IsTracking() && ((m_Position.m_X!=ppu->x_pos) || (m_Position.m_Y!=ppu->y_pos))){
+	if(IsTracking() && ((m_Position.x!=ppu->x_pos) || (m_Position.y!=ppu->y_pos))){
 		if(zone->random.Real(0, 100) < 70)//should be good
 			CheckIncreaseSkill(SkillTracking, nullptr, -20);
 	}
 
 	// Break Hide if moving without sneaking and set rewind timer if moved
-	if(ppu->y_pos != m_Position.m_Y || ppu->x_pos != m_Position.m_X){
+	if(ppu->y_pos != m_Position.y || ppu->x_pos != m_Position.x){
 		if((hidden || improved_hidden) && !sneaking){
 			hidden = false;
 			improved_hidden = false;
@@ -4576,12 +4576,12 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	// Outgoing client packet
 	float tmpheading = EQ19toFloat(ppu->heading);
 
-	if (!FCMP(ppu->y_pos, m_Position.m_Y) || !FCMP(ppu->x_pos, m_Position.m_X) || !FCMP(tmpheading, m_Position.m_Heading) || ppu->animation != animation)
+	if (!FCMP(ppu->y_pos, m_Position.y) || !FCMP(ppu->x_pos, m_Position.x) || !FCMP(tmpheading, m_Position.w) || ppu->animation != animation)
 	{
-		m_Position.m_X = ppu->x_pos;
-		m_Position.m_Y = ppu->y_pos;
-		m_Position.m_Z = ppu->z_pos;
-		m_Position.m_Heading = tmpheading;
+		m_Position.x = ppu->x_pos;
+		m_Position.y = ppu->y_pos;
+		m_Position.z = ppu->z_pos;
+		m_Position.w = tmpheading;
 		animation = ppu->animation;
 
 
@@ -4595,7 +4595,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 		safe_delete(outapp);
 	}
 
-	if(zone->watermap && zone->watermap->InLiquid(m_Position))
+	if(zone->watermap && zone->watermap->InLiquid(glm::vec3(m_Position)))
         CheckIncreaseSkill(SkillSwimming, nullptr, -17);
 
 	return;
@@ -5668,8 +5668,8 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 		}
 		else
 		{
-			Map::Vertex Start(GetX(), GetY(), GetZ() + (GetSize() < 6.0 ? 6 : GetSize()) * HEAD_POSITION);
-			Map::Vertex End(target->GetX(), target->GetY(), target->GetZ() + (target->GetSize() < 6.0 ? 6 : target->GetSize()) * HEAD_POSITION);
+			glm::vec3 Start(GetX(), GetY(), GetZ() + (GetSize() < 6.0 ? 6 : GetSize()) * HEAD_POSITION);
+			glm::vec3 End(target->GetX(), target->GetY(), target->GetZ() + (target->GetSize() < 6.0 ? 6 : target->GetSize()) * HEAD_POSITION);
 
 			if (!zone->zonemap->LineIntersectsZone(Start, End, 1.0f, nullptr) && zone->pathing->NoHazards(Start, End))
 			{
@@ -5712,7 +5712,7 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 
 				bool LeadsToTeleporter = false;
 
-				Map::Vertex v = zone->pathing->GetPathNodeCoordinates(pathlist.back());
+				glm::vec3 v = zone->pathing->GetPathNodeCoordinates(pathlist.back());
 
 				p.x = v.x;
 				p.y = v.y;
@@ -5732,7 +5732,7 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 						break;
 					}
 
-					Map::Vertex v = zone->pathing->GetPathNodeCoordinates((*Iterator), false);
+					glm::vec3 v = zone->pathing->GetPathNodeCoordinates((*Iterator), false);
 					p.x = v.x;
 					p.y = v.y;
 					p.z = v.z;
@@ -8720,7 +8720,7 @@ void Client::Handle_OP_LDoNDisarmTraps(const EQApplicationPacket *app)
 	{
 		if (HasSkill(SkillDisarmTraps))
 		{
-			if (ComparativeDistanceNoZ(m_Position, target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
+			if (DistanceSquaredNoZ(m_Position, target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				Message(13, "%s is too far away.", target->GetCleanName());
 				return;
@@ -8753,7 +8753,7 @@ void Client::Handle_OP_LDoNPickLock(const EQApplicationPacket *app)
 	{
 		if (HasSkill(SkillPickLock))
 		{
-			if (ComparativeDistanceNoZ(m_Position, target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
+			if (DistanceSquaredNoZ(m_Position, target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				Message(13, "%s is too far away.", target->GetCleanName());
 				return;
@@ -8772,7 +8772,7 @@ void Client::Handle_OP_LDoNSenseTraps(const EQApplicationPacket *app)
 	{
 		if (HasSkill(SkillSenseTraps))
 		{
-			if (ComparativeDistanceNoZ(m_Position, target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
+			if (DistanceSquaredNoZ(m_Position, target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				Message(13, "%s is too far away.", target->GetCleanName());
 				return;
@@ -9195,7 +9195,7 @@ void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 	{
 		SetLooting(ent->GetID()); //store the entity we are looting
 		Corpse *ent_corpse = ent->CastToCorpse();
-		if (ComparativeDistanceNoZ(m_Position, ent_corpse->GetPosition())  > 625)
+		if (DistanceSquaredNoZ(m_Position, ent_corpse->GetPosition())  > 625)
 		{
 			Message(13, "Corpse too far away.");
 			Corpse::SendLootReqErrorPacket(this);
@@ -9427,7 +9427,7 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 		int mercTypeCount = 0;
 		int mercCount = 0;
 
-		if (ComparativeDistance(m_Position, tar->GetPosition()) > USE_NPC_RANGE2)
+		if (DistanceSquared(m_Position, tar->GetPosition()) > USE_NPC_RANGE2)
 			return;
 
 		if (tar->GetClass() != MERCERNARY_MASTER) {
@@ -9809,7 +9809,7 @@ void Client::Handle_OP_OpenGuildTributeMaster(const EQApplicationPacket *app)
 		StartTribute_Struct* st = (StartTribute_Struct*)app->pBuffer;
 		Mob* tribmast = entity_list.GetMob(st->tribute_master_id);
 		if (tribmast && tribmast->IsNPC() && tribmast->GetClass() == GUILD_TRIBUTE_MASTER
-			&& ComparativeDistance(m_Position, tribmast->GetPosition()) <= USE_NPC_RANGE2) {
+			&& DistanceSquared(m_Position, tribmast->GetPosition()) <= USE_NPC_RANGE2) {
 			st->response = 1;
 			QueuePacket(app);
 			tribute_master_id = st->tribute_master_id;
@@ -9841,7 +9841,7 @@ void Client::Handle_OP_OpenTributeMaster(const EQApplicationPacket *app)
 		StartTribute_Struct* st = (StartTribute_Struct*)app->pBuffer;
 		Mob* tribmast = entity_list.GetMob(st->tribute_master_id);
 		if (tribmast && tribmast->IsNPC() && tribmast->GetClass() == TRIBUTE_MASTER
-			&& ComparativeDistance(m_Position, tribmast->GetPosition()) <= USE_NPC_RANGE2) {
+			&& DistanceSquared(m_Position, tribmast->GetPosition()) <= USE_NPC_RANGE2) {
 			st->response = 1;
 			QueuePacket(app);
 			tribute_master_id = st->tribute_master_id;
@@ -9936,7 +9936,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		}
 
 		if ((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 2) || mypet->GetPetType() != petAnimation) {
-			if (GetTarget() != this && ComparativeDistanceNoZ(mypet->GetPosition(), GetTarget()->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
+			if (GetTarget() != this && DistanceSquaredNoZ(mypet->GetPosition(), GetTarget()->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
 				if (mypet->IsHeld()) {
 					if (!mypet->IsFocused()) {
 						mypet->SetHeld(false); //break the hold and guard if we explicitly tell the pet to attack.
@@ -9971,7 +9971,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		}
 
 		if ((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 2) || mypet->GetPetType() != petAnimation) {
-			if (GetTarget() != this && ComparativeDistanceNoZ(mypet->GetPosition(), GetTarget()->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
+			if (GetTarget() != this && DistanceSquaredNoZ(mypet->GetPosition(), GetTarget()->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
 				zone->AddAggroMob();
 				mypet->AddToHateList(GetTarget(), 1);
 				Message_StringID(MT_PetResponse, PET_ATTACKING, mypet->GetCleanName(), GetTarget()->GetCleanName());
@@ -11688,7 +11688,7 @@ void Client::Handle_OP_Rewind(const EQApplicationPacket *app)
 		Message_StringID(MT_System, REWIND_WAIT);
 	}
 	else {
-		CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), m_RewindLocation.m_X, m_RewindLocation.m_Y, m_RewindLocation.m_Z, 0, 2, Rewind);
+		CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), m_RewindLocation.x, m_RewindLocation.y, m_RewindLocation.z, 0, 2, Rewind);
 		rewind_timer.Start(30000, true);
 	}
 }
@@ -11812,29 +11812,29 @@ void Client::Handle_OP_SenseTraps(const EQApplicationPacket *app)
 		int uskill = GetSkill(SkillSenseTraps);
 		if ((zone->random.Int(0, 99) + uskill) >= (zone->random.Int(0, 99) + trap->skill*0.75))
 		{
-			auto diff = trap->m_Position - GetPosition();
+			auto diff = trap->m_Position - glm::vec3(GetPosition());
 
-			if (diff.m_X == 0 && diff.m_Y == 0)
+			if (diff.x == 0 && diff.y == 0)
 				Message(MT_Skills, "You sense a trap right under your feet!");
-			else if (diff.m_X > 10 && diff.m_Y > 10)
+			else if (diff.x > 10 && diff.y > 10)
 				Message(MT_Skills, "You sense a trap to the NorthWest.");
-			else if (diff.m_X < -10 && diff.m_Y > 10)
+			else if (diff.x < -10 && diff.y > 10)
 				Message(MT_Skills, "You sense a trap to the NorthEast.");
-			else if (diff.m_Y > 10)
+			else if (diff.y > 10)
 				Message(MT_Skills, "You sense a trap to the North.");
-			else if (diff.m_X > 10 && diff.m_Y < -10)
+			else if (diff.x > 10 && diff.y < -10)
 				Message(MT_Skills, "You sense a trap to the SouthWest.");
-			else if (diff.m_X < -10 && diff.m_Y < -10)
+			else if (diff.x < -10 && diff.y < -10)
 				Message(MT_Skills, "You sense a trap to the SouthEast.");
-			else if (diff.m_Y < -10)
+			else if (diff.y < -10)
 				Message(MT_Skills, "You sense a trap to the South.");
-			else if (diff.m_X > 10)
+			else if (diff.x > 10)
 				Message(MT_Skills, "You sense a trap to the West.");
 			else
 				Message(MT_Skills, "You sense a trap to the East.");
 			trap->detected = true;
 
-			float angle = CalculateHeadingToTarget(trap->m_Position.m_X, trap->m_Position.m_Y);
+			float angle = CalculateHeadingToTarget(trap->m_Position.x, trap->m_Position.y);
 
 			if (angle < 0)
 				angle = (256 + angle);
@@ -12115,7 +12115,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	if (mp->quantity < 1) return;
 
 	//you have to be somewhat close to them to be properly using them
-	if (ComparativeDistance(m_Position, tmp->GetPosition()) > USE_NPC_RANGE2)
+	if (DistanceSquared(m_Position, tmp->GetPosition()) > USE_NPC_RANGE2)
 		return;
 
 	merchantid = tmp->CastToNPC()->MerchantType;
@@ -12364,7 +12364,7 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		return;
 
 	//you have to be somewhat close to them to be properly using them
-	if (ComparativeDistance(m_Position, vendor->GetPosition()) > USE_NPC_RANGE2)
+	if (DistanceSquared(m_Position, vendor->GetPosition()) > USE_NPC_RANGE2)
 		return;
 
 	uint32 price = 0;
@@ -12523,7 +12523,7 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 		return;
 
 	//you have to be somewhat close to them to be properly using them
-	if (ComparativeDistance(m_Position, tmp->GetPosition()) > USE_NPC_RANGE2)
+	if (DistanceSquared(m_Position, tmp->GetPosition()) > USE_NPC_RANGE2)
 		return;
 
 	merchantid = tmp->CastToNPC()->MerchantType;
@@ -13019,7 +13019,7 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 
 	// For /target, send reject or success packet
 	if (app->GetOpcode() == OP_TargetCommand) {
-		if (GetTarget() && !GetTarget()->CastToMob()->IsInvisible(this) && (ComparativeDistance(m_Position, GetTarget()->GetPosition())  <= TARGETING_RANGE*TARGETING_RANGE || GetGM())) {
+		if (GetTarget() && !GetTarget()->CastToMob()->IsInvisible(this) && (DistanceSquared(m_Position, GetTarget()->GetPosition())  <= TARGETING_RANGE*TARGETING_RANGE || GetGM())) {
 			if (GetTarget()->GetBodyType() == BT_NoTarget2 || GetTarget()->GetBodyType() == BT_Special
 				|| GetTarget()->GetBodyType() == BT_NoTarget)
 			{
@@ -13108,9 +13108,9 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 			}
 			else if (GetBindSightTarget())
 			{
-				if (ComparativeDistance(GetBindSightTarget()->GetPosition(), GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
+				if (DistanceSquared(GetBindSightTarget()->GetPosition(), GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
 				{
-					if (ComparativeDistance(m_Position, GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
+					if (DistanceSquared(m_Position, GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
 					{
 						char *hacker_str = nullptr;
 						MakeAnyLenString(&hacker_str, "%s attempting to target something beyond the clip plane of %.2f units,"
@@ -13124,7 +13124,7 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 					}
 				}
 			}
-			else if (ComparativeDistance(m_Position, GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
+			else if (DistanceSquared(m_Position, GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
 			{
 				char *hacker_str = nullptr;
 				MakeAnyLenString(&hacker_str, "%s attempting to target something beyond the clip plane of %.2f units,"
@@ -13756,7 +13756,7 @@ void Client::Handle_OP_TributeItem(const EQApplicationPacket *app)
 		Mob* tribmast = entity_list.GetMob(t->tribute_master_id);
 		if (!tribmast || !tribmast->IsNPC() || tribmast->GetClass() != TRIBUTE_MASTER)
 			return;
-		if (ComparativeDistance(m_Position, tribmast->GetPosition()) > USE_NPC_RANGE2)
+		if (DistanceSquared(m_Position, tribmast->GetPosition()) > USE_NPC_RANGE2)
 			return;
 
 		t->tribute_points = TributeItem(t->slot, t->quantity);
@@ -13785,7 +13785,7 @@ void Client::Handle_OP_TributeMoney(const EQApplicationPacket *app)
 		Mob* tribmast = entity_list.GetMob(t->tribute_master_id);
 		if (!tribmast || !tribmast->IsNPC() || tribmast->GetClass() != TRIBUTE_MASTER)
 			return;
-		if (ComparativeDistance(m_Position, tribmast->GetPosition()) > USE_NPC_RANGE2)
+		if (DistanceSquared(m_Position, tribmast->GetPosition()) > USE_NPC_RANGE2)
 			return;
 
 		t->tribute_points = TributeMoney(t->platinum);
