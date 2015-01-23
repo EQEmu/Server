@@ -12,6 +12,10 @@
 /// The above copyright notice and this permission notice shall be included in
 /// all copies or substantial portions of the Software.
 /// 
+/// Restrictions:
+///		By making use of the Software for military purposes, you choose to make
+///		a Bunny unhappy.
+/// 
 /// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 /// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 /// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,20 +25,17 @@
 /// THE SOFTWARE.
 ///
 /// @ref core
-/// @file glm/core/hint.hpp
-/// @date 2008-08-14 / 2011-06-15
+/// @file glm/detail/type_tvec4_avx.inl
+/// @date 2014-12-01 / 2014-12-01
 /// @author Christophe Riccio
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef glm_core_type
-#define glm_core_type
-
-namespace glm
+namespace glm{
+namespace detail
 {
-	// Use dont_care, nicest and fastest to optimize implementations.
-	class dont_care {};
-	class nicest {};
-	class fastest {};
-}//namespace glm
 
-#endif//glm_core_type
+}//namespace detail
+
+	
+
+}//namespace glm

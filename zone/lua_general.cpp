@@ -251,12 +251,12 @@ void unregister_spell_event(int evt, int spell_id) {
 }
 
 Lua_Mob lua_spawn2(int npc_type, int grid, int unused, double x, double y, double z, double heading) {
-    auto position = xyz_heading(x, y, z, heading);
+	auto position = xyz_heading(x, y, z, heading);
 	return Lua_Mob(quest_manager.spawn2(npc_type, grid, unused, position));
 }
 
 Lua_Mob lua_unique_spawn(int npc_type, int grid, int unused, double x, double y, double z, double heading = 0.0) {
-    auto position = xyz_heading(x,y,z,heading);
+	auto position = xyz_heading(x, y, z, heading);
 	return Lua_Mob(quest_manager.unique_spawn(npc_type, grid, unused, position));
 }
 

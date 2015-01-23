@@ -20,6 +20,10 @@
 
 #include <string>
 
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+
 class xy_location {
 public:
     float m_X;
