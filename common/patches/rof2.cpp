@@ -620,8 +620,8 @@ namespace RoF2
 			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d",
 				opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(InternalSerializedItem_Struct));
 
+			delete[] __emu_buffer;
 			delete in;
-
 			return;
 		}
 
@@ -1216,6 +1216,7 @@ namespace RoF2
 			memcpy(&GLAAus->LeaderAAs, &gu2->leader_aas, sizeof(GLAAus->LeaderAAs));
 
 			dest->FastQueuePacket(&outapp);
+			delete[] __emu_buffer;
 			delete in;
 
 			return;
@@ -1238,6 +1239,7 @@ namespace RoF2
 		FINISH_ENCODE();
 
 		dest->FastQueuePacket(&outapp);
+		delete in;
 	}
 
 	ENCODE(OP_GuildMemberList)
@@ -1530,6 +1532,7 @@ namespace RoF2
 
 		if (!serialized) {
 			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d.", int_struct->slot_id);
+			delete[] __emu_buffer;
 			delete in;
 			return;
 		}
@@ -1686,6 +1689,7 @@ namespace RoF2
 		}
 
 		dest->FastQueuePacket(&outapp, ack_req);
+		delete[] __emu_buffer;
 		delete in;
 	}
 
@@ -1765,6 +1769,7 @@ namespace RoF2
 		}
 
 		dest->FastQueuePacket(&outapp, ack_req);
+		delete[] __emu_buffer;
 		delete in;
 	}
 
@@ -2731,6 +2736,8 @@ namespace RoF2
 		//Log.Hex(Logs::Netcode, outapp->pBuffer, outapp->size);
 
 		dest->FastQueuePacket(&outapp, ack_req);
+		delete[] NewBuffer;
+		delete[] __emu_buffer;
 		delete in;
 		return;
 	}
@@ -2750,6 +2757,7 @@ namespace RoF2
 		strn0cpy(general->player_name, raid_create->leader_name, 64);
 
 		dest->FastQueuePacket(&outapp_create);
+		delete[] __emu_buffer;
 		safe_delete(inapp);
 	}
 
@@ -2817,6 +2825,7 @@ namespace RoF2
 			dest->FastQueuePacket(&outapp);
 		}
 
+		delete[] __emu_buffer;
 		safe_delete(inapp);
 	}
 
@@ -3201,6 +3210,7 @@ namespace RoF2
 		if (sas->type != AT_Size)
 		{
 			dest->FastQueuePacket(&in, ack_req);
+			delete[] emu_buffer;
 			return;
 		}
 
@@ -3214,6 +3224,7 @@ namespace RoF2
 		css->Unknown12 = 1.0f;
 
 		dest->FastQueuePacket(&outapp, ack_req);
+		delete[] emu_buffer;
 		delete in;
 	}
 
@@ -3519,6 +3530,7 @@ namespace RoF2
 		if (EntryCount == 0 || ((in->size % sizeof(Track_Struct))) != 0)
 		{
 			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Track_Struct));
+			delete[] __emu_buffer; 
 			delete in;
 			return;
 		}
@@ -3686,6 +3698,7 @@ namespace RoF2
 		}
 
 		dest->FastQueuePacket(&outapp_create);
+		delete[] __emu_buffer;
 		delete inapp;
 	}
 
@@ -3853,6 +3866,7 @@ namespace RoF2
 		int entrycount = in->size / sizeof(Spawn_Struct);
 		if (entrycount == 0 || (in->size % sizeof(Spawn_Struct)) != 0) {
 			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Spawn_Struct));
+			delete[] __emu_buffer;
 			delete in;
 			return;
 		}
@@ -4110,7 +4124,7 @@ namespace RoF2
 			//Log.Hex(Logs::Netcode, outapp->pBuffer, outapp->size);
 			dest->FastQueuePacket(&outapp, ack_req);
 		}
-
+		delete[] __emu_buffer;
 		delete in;
 	}
 
