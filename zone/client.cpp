@@ -546,7 +546,7 @@ bool Client::Save(uint8 iCommitNow) {
 
 	m_pp.lastlogin = time(nullptr);
 
-	if (GetPet() && !GetPet()->IsFamiliar() && GetPet()->CastToNPC()->GetPetSpellID() && !dead) {
+	if (GetPet() && GetPet()->CastToNPC()->GetPetSpellID() && !dead) {
 		NPC *pet = GetPet()->CastToNPC();
 		m_petinfo.SpellID = pet->CastToNPC()->GetPetSpellID();
 		m_petinfo.HP = pet->GetHP();
