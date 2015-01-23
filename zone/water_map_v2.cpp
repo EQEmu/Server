@@ -10,7 +10,7 @@ WaterRegionType WaterMapV2::ReturnRegionType(const glm::vec3& location) const {
 	size_t sz = regions.size();
 	for(size_t i = 0; i < sz; ++i) {
 		auto const &region = regions[i];
-		if (region.second.ContainsPoint(glm::vec3(location.x, location.y, location.z))) {
+		if (region.second.ContainsPoint(glm::vec3(location.y, location.x, location.z))) {
 			return region.first;
 		}
 	}

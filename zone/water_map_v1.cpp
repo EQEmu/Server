@@ -11,7 +11,7 @@ WaterMapV1::~WaterMapV1() {
 }
 
 WaterRegionType WaterMapV1::ReturnRegionType(const glm::vec3& location) const {
-	return BSPReturnRegionType(1, location);
+	return BSPReturnRegionType(1, glm::vec3(location.y, location.x, location.z));
 }
 
 bool WaterMapV1::InWater(const glm::vec3& location) const {
