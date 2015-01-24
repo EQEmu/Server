@@ -7989,7 +7989,6 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
             return;
         }
 
-        c->LogSQL(query.c_str());
         c->Message(0, "NPC %i added to group %i with %i chance!", atoi(sep->arg[3]), atoi(sep->arg[2]), atoi(sep->arg[4]) );
 
         return;
