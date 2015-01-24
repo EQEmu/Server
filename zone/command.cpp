@@ -2402,9 +2402,6 @@ void command_spawn(Client *c, const Seperator *sep)
 				return;
 		}
 	}
-	#if EQDEBUG >= 11
-		Log.LogDebug(Logs::General,"#spawn Spawning:");
-	#endif
 
 	NPC* npc = NPC::SpawnNPC(sep->argplus[1], c->GetPosition(), c);
 	if (!npc) {
@@ -4403,7 +4400,7 @@ void command_guild(Client *c, const Seperator *sep)
 		c->Message(0, "  #guild delete guildID");
 		c->Message(0, "  #guild rename guildID newname");
 		c->Message(0, "  #guild set charname guildID    (0=no guild)");
-		c->Message(0, "  #guild setrank charname rank")
+		c->Message(0, "  #guild setrank charname rank");
 		c->Message(0, "  #guild setleader guildID {guildleader charname or CharID}");
 	}
 	else if (strcasecmp(sep->arg[1], "status") == 0 || strcasecmp(sep->arg[1], "stat") == 0) {
