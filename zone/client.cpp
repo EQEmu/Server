@@ -335,7 +335,6 @@ Client::~Client() {
 		m_tradeskill_object = nullptr;
 	}
 
-	ChangeSQLLog(nullptr);
 	if(IsDueling() && GetDuelTarget() != 0) {
 		Entity* entity = entity_list.GetID(GetDuelTarget());
 		if(entity != nullptr && entity->IsClient()) {
