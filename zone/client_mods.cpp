@@ -935,7 +935,7 @@ int32 Client::CalcMaxMana()
 			break;
 		}
 		default: {
-			Log.Out(Logs::General, Logs::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+			Log.Out(Logs::Detail, Logs::Spells, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
 			max_mana = 0;
 			break;
 		}
@@ -955,9 +955,7 @@ int32 Client::CalcMaxMana()
 			cur_mana = curMana_cap;
 	}
 
-#if EQDEBUG >= 11
-	Log.Out(Logs::General, Logs::None, "Client::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
-#endif
+	Log.Out(Logs::Detail, Logs::Spells, "Client::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
 	return max_mana;
 }
 
