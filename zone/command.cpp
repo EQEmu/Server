@@ -4397,30 +4397,14 @@ void command_guild(Client *c, const Seperator *sep)
 	Mob *target=c->GetTarget();
 
 	if (strcasecmp(sep->arg[1], "help") == 0) {
-		/*
-		c->Message(0, "Guild commands:");
-		c->Message(0, "  #guild status [name] - shows guild and rank of target");
-		c->Message(0, "  #guild info guildnum - shows info/current structure");
-		c->Message(0, "  #guild invite [charname]");
-		c->Message(0, "  #guild remove [charname]");
-		c->Message(0, "  #guild promote rank [charname]");
-		c->Message(0, "  #guild demote rank [charname]");
-		c->Message(0, "  /guildmotd [newmotd] (use 'none' to clear)");
-		c->Message(0, "  #guild edit rank title newtitle");
-		c->Message(0, "  #guild edit rank permission 0/1");
-		c->Message(0, "  #guild leader newleader (they must be rank0)");
-		*/
-			c->Message(0, "GM Guild commands:");
-			c->Message(0, "  #guild list - lists all guilds on the server");
-			c->Message(0, "  #guild create {guildleader charname or CharID} guildname");
-			c->Message(0, "  #guild delete guildID");
-			c->Message(0, "  #guild rename guildID newname");
-			c->Message(0, "  #guild set charname guildID    (0=no guild)");
-			c->Message(0, "  #guild setrank charname rank");
-			//c->Message(0, "  #guild gmedit guilddbid rank title newtitle");
-			//c->Message(0, "  #guild gmedit guilddbid rank permission 0/1");
-			c->Message(0, "  #guild setleader guildID {guildleader charname or CharID}");
-			//c->Message(0, "  #guild setdoor guildEQID");
+		c->Message(0, "GM Guild commands:");
+		c->Message(0, "  #guild list - lists all guilds on the server");
+		c->Message(0, "  #guild create {guildleader charname or CharID} guildname");
+		c->Message(0, "  #guild delete guildID");
+		c->Message(0, "  #guild rename guildID newname");
+		c->Message(0, "  #guild set charname guildID    (0=no guild)");
+		c->Message(0, "  #guild setrank charname rank")
+		c->Message(0, "  #guild setleader guildID {guildleader charname or CharID}");
 	}
 	else if (strcasecmp(sep->arg[1], "status") == 0 || strcasecmp(sep->arg[1], "stat") == 0) {
 		Client* client = 0;
