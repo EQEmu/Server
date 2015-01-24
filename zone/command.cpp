@@ -360,7 +360,6 @@ int command_init(void) {
 		command_add("timers","- Display persistent timers for target",200,command_timers) ||
 		command_add("hp","- Refresh your HP bar from the server.",0,command_hp) ||
 		command_add("pf","- Display additional mob coordinate and wandering data",0,command_pf) ||
-		command_add("logsql","- enable SQL logging",200,command_logsql) ||
 		command_add("bestz","- Ask map for a good Z coord for your x,y coords.",0,command_bestz) ||
 		command_add("ginfo","- get group info on target.",20,command_ginfo) ||
 		command_add("path","- view and edit pathing",200,command_path) ||
@@ -6730,16 +6729,6 @@ void command_opcode(Client *c, const Seperator *sep) {
 	if(!strcasecmp(sep->arg[1], "reload" )) {
 		ReloadAllPatches();
 		c->Message(0, "Opcodes for all patches have been reloaded");
-	}
-}
-
-void command_logsql(Client *c, const Seperator *sep) {
-	if(!strcasecmp(sep->arg[1], "off" )) {
-		c->ChangeSQLLog(nullptr);
-	} else if(sep->arg[1][0] != '\0') {
-		c->ChangeSQLLog(sep->argplus[1]);
-	} else {
-		c->Message(0, "Usage: #logsql (file name)");
 	}
 }
 
