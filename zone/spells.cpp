@@ -1116,11 +1116,11 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 							break;
 
 						default:	// some non-instrument component. Let it go, but record it in the log
-							Log.Out(Logs::Detail, Logs::Spells, "Something odd happened: Song %d required component %s", spell_id, component);
+							Log.Out(Logs::Detail, Logs::Spells, "Something odd happened: Song %d required component %d", spell_id, component);
 					}
 
 					if(!HasInstrument) {	// if the instrument is missing, log it and interrupt the song
-						Log.Out(Logs::Detail, Logs::Spells, "Song %d: Canceled. Missing required instrument %s", spell_id, component);
+						Log.Out(Logs::Detail, Logs::Spells, "Song %d: Canceled. Missing required instrument %d", spell_id, component);
 						if(c->GetGM())
 							c->Message(0, "Your GM status allows you to finish casting even though you're missing a required instrument.");
 						else {
