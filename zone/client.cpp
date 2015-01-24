@@ -3504,17 +3504,6 @@ void Client::ChangeSQLLog(const char *file) {
 	}
 }
 
-void Client::LogSQL(const char *fmt, ...) {
-	if(SQL_log == nullptr)
-		return;
-
-	va_list argptr;
-	va_start(argptr, fmt);
-	vfprintf(SQL_log, fmt, argptr );
-	fputc('\n', SQL_log);
-	va_end(argptr);
-}
-
 void Client::GetGroupAAs(GroupLeadershipAA_Struct *into) const {
 	memcpy(into, &m_pp.leader_abilities.group, sizeof(GroupLeadershipAA_Struct));
 }
