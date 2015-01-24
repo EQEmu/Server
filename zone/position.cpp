@@ -1,223 +1,117 @@
+#include "position.h"
+
+#include <algorithm>
 #include <string>
 #include <cmath>
-#include "position.h"
 #include "../common/string_util.h"
-#include <algorithm>
 
-xy_location::xy_location(float x, float y) : m_X(x), m_Y(y)
-{
+std::string to_string(const glm::vec4 &position) {
+	return StringFormat("(%.3f, %.3f, %.3f, %.3f)", position.x,position.y,position.z,position.w);
 }
 
-xy_location xy_location::operator-(const xy_location &rhs) const
-{
-	xy_location minus(m_X - rhs.m_X, m_Y - rhs.m_Y);
-	return minus;
+std::string to_string(const glm::vec3 &position){
+	return StringFormat("(%.3f, %.3f, %.3f)", position.x,position.y,position.z);
 }
 
-xy_location xy_location::operator+(const xy_location &rhs) const
-{
-	xy_location addition(m_X + rhs.m_X, m_Y + rhs.m_Y);
-	return addition;
+std::string to_string(const glm::vec2 &position){
+	return StringFormat("(%.3f, %.3f)", position.x,position.y);
 }
 
-xyz_heading::xyz_heading(float x, float y, float z, float heading) : m_X(x), m_Y(y), m_Z(z), m_Heading(heading)
-{
+bool IsOrigin(const glm::vec2 &position) {
+	return glm::dot(position, position) == 0;
 }
 
-xyz_heading::xyz_heading(const xyz_heading &locationDir)
-    : m_X(locationDir.m_X), m_Y(locationDir.m_Y), m_Z(locationDir.m_Z), m_Heading(locationDir.m_Heading)
-{
+bool IsOrigin(const glm::vec3 &position) {
+	return glm::dot(position, position) == 0;
 }
 
-xyz_heading::xyz_heading(const xyz_location &locationDir, float heading)
-    : m_X(locationDir.m_X), m_Y(locationDir.m_Y), m_Z(locationDir.m_Z), m_Heading(heading)
-{
-}
-
-xyz_heading::xyz_heading(const xy_location &locationDir, float z, float heading)
-    : m_X(locationDir.m_X), m_Y(locationDir.m_Y), m_Z(z), m_Heading(heading)
-{
-}
-
-xyz_heading::xyz_heading(const xy_location locationDir, float z, float heading)
-    : m_X(locationDir.m_X), m_Y(locationDir.m_Y), m_Z(z), m_Heading(heading)
-{
-}
-
-xyz_heading::operator xyz_location() const
-{
-	return xyz_location(m_X, m_Y, m_Z);
-}
-
-xyz_heading::operator xy_location() const
-{
-	return xy_location(m_X, m_Y);
-}
-
-const xyz_heading xyz_heading::operator+(const xyz_location &rhs) const
-{
-	return xyz_heading(m_X + rhs.m_X, m_Y + rhs.m_Y, m_Z + rhs.m_Z, m_Heading);
-}
-
-const xyz_heading xyz_heading::operator+(const xy_location &rhs) const
-{
-	return xyz_heading(m_X + rhs.m_X, m_Y + rhs.m_Y, m_Z, m_Heading);
-}
-
-const xyz_heading xyz_heading::operator-(const xyz_location &rhs) const
-{
-	return xyz_heading(m_X - rhs.m_X, m_Y - rhs.m_Y, m_Z - rhs.m_Z, m_Heading);
-}
-
-void xyz_heading::ABS_XYZ(void)
-{
-	m_X = std::abs(m_X);
-	m_Y = std::abs(m_Y);
-	m_Z = std::abs(m_Z);
-}
-
-xyz_location::xyz_location(float x, float y, float z) : m_X(x), m_Y(y), m_Z(z)
-{
-}
-
-xyz_location::xyz_location(double x, double y, double z)
-    : m_X(static_cast<float>(x)), m_Y(static_cast<float>(y)), m_Z(static_cast<float>(z))
-{
-}
-
-xyz_location::operator xy_location() const
-{
-	return xy_location(m_X, m_Y);
-}
-
-xyz_location xyz_location::operator-(const xyz_location &rhs) const
-{
-	return xyz_location(m_X - rhs.m_X, m_Y - rhs.m_Y, m_Z - rhs.m_Z);
-}
-
-xyz_location xyz_location::operator+(const xyz_location &rhs) const
-{
-	return xyz_location(m_X + rhs.m_X, m_Y + rhs.m_Y, m_Z + rhs.m_Z);
-}
-
-void xyz_location::ABS_XYZ(void)
-{
-	m_X = std::abs(m_X);
-	m_Y = std::abs(m_Y);
-	m_Z = std::abs(m_Z);
-}
-
-std::string to_string(const xyz_heading &position)
-{
-	return StringFormat("(%.3f, %.3f, %.3f, %.3f)", position.m_X, position.m_Y, position.m_Z, position.m_Heading);
-}
-
-std::string to_string(const xyz_location &position)
-{
-	return StringFormat("(%.3f, %.3f, %.3f)", position.m_X, position.m_Y, position.m_Z);
-}
-
-std::string to_string(const xy_location &position)
-{
-	return StringFormat("(%.3f, %.3f)", position.m_X, position.m_Y);
+bool IsOrigin(const glm::vec4 &position) {
+	return IsOrigin(glm::vec3(position));
 }
 
 /**
 * Produces the non square root'ed distance between the two points within the XY plane.
 */
-float ComparativeDistance(const xy_location &point1, const xy_location &point2)
-{
+float DistanceSquared(const glm::vec2& point1, const glm::vec2& point2) {
 	auto diff = point1 - point2;
-	return diff.m_X * diff.m_X + diff.m_Y * diff.m_Y;
+	return glm::dot(diff, diff);
 }
 
 /**
 * Produces the distance between the two points on the XY plane.
 */
-float Distance(const xy_location &point1, const xy_location &point2)
-{
-	return sqrt(ComparativeDistance(point1, point2));
+float Distance(const glm::vec2& point1, const glm::vec2& point2) {
+	return std::sqrt(DistanceSquared(point1, point2));
 }
 
 /**
 * Produces the non square root'ed distance between the two points.
 */
-float ComparativeDistance(const xyz_location &point1, const xyz_location &point2)
-{
+float DistanceSquared(const glm::vec3& point1, const glm::vec3& point2) {
 	auto diff = point1 - point2;
-	return diff.m_X * diff.m_X + diff.m_Y * diff.m_Y + diff.m_Z * diff.m_Z;
+	return glm::dot(diff, diff);
 }
 
 /**
 * Produces the non square root'ed distance between the two points.
 */
-float ComparativeDistance(const xyz_heading &point1, const xyz_heading &point2)
-{
-	return ComparativeDistance(static_cast<xyz_location>(point1), static_cast<xyz_location>(point2));
+float DistanceSquared(const glm::vec4& point1, const glm::vec4& point2) {
+	return DistanceSquared(static_cast<glm::vec3>(point1), static_cast<glm::vec3>(point2));
 }
 
 /**
 * Produces the distance between the two points.
 */
-float Distance(const xyz_location &point1, const xyz_location &point2)
-{
-	return sqrt(ComparativeDistance(point1, point2));
+float Distance(const glm::vec3& point1, const glm::vec3& point2) {
+	return std::sqrt(DistanceSquared(point1, point2));
 }
 
 /**
 * Produces the distance between the two points.
 */
-float Distance(const xyz_heading &point1, const xyz_heading &point2)
-{
-	return Distance(static_cast<xyz_location>(point1), static_cast<xyz_location>(point2));
+float Distance(const glm::vec4& point1, const glm::vec4& point2) {
+	return Distance(static_cast<glm::vec3>(point1), static_cast<glm::vec3>(point2));
 }
 
 /**
 * Produces the distance between the two points within the XY plane.
 */
-float DistanceNoZ(const xyz_location &point1, const xyz_location &point2)
-{
-	return Distance(static_cast<xy_location>(point1), static_cast<xy_location>(point2));
+float DistanceNoZ(const glm::vec3& point1, const glm::vec3& point2) {
+	return Distance(static_cast<glm::vec2>(point1),static_cast<glm::vec2>(point2));
 }
 
 /**
 * Produces the distance between the two points within the XY plane.
 */
-float DistanceNoZ(const xyz_heading &point1, const xyz_heading &point2)
-{
-	return Distance(static_cast<xy_location>(point1), static_cast<xy_location>(point2));
+float DistanceNoZ(const glm::vec4& point1, const glm::vec4& point2) {
+	return Distance(static_cast<glm::vec2>(point1),static_cast<glm::vec2>(point2));
 }
 
 /**
 * Produces the non square root'ed distance between the two points within the XY plane.
 */
-float ComparativeDistanceNoZ(const xyz_location &point1, const xyz_location &point2)
-{
-	return ComparativeDistance(static_cast<xy_location>(point1), static_cast<xy_location>(point2));
+float DistanceSquaredNoZ(const glm::vec3& point1, const glm::vec3& point2) {
+	return DistanceSquared(static_cast<glm::vec2>(point1),static_cast<glm::vec2>(point2));
 }
 
 /**
 * Produces the non square root'ed distance between the two points within the XY plane.
 */
-float ComparativeDistanceNoZ(const xyz_heading &point1, const xyz_heading &point2)
-{
-	return ComparativeDistance(static_cast<xy_location>(point1), static_cast<xy_location>(point2));
+float DistanceSquaredNoZ(const glm::vec4& point1, const glm::vec4& point2) {
+	return DistanceSquared(static_cast<glm::vec2>(point1),static_cast<glm::vec2>(point2));
 }
 
 /**
 * Determines if 'position' is within (inclusive) the axis aligned
 * box (3 dimensional) formed from the points minimum and maximum.
 */
-bool IsWithinAxisAlignedBox(const xyz_location &position, const xyz_location &minimum, const xyz_location &maximum)
-{
-	auto actualMinimum = xyz_location(std::min(minimum.m_X, maximum.m_X), std::min(minimum.m_Y, maximum.m_Y),
-					  std::min(minimum.m_Z, maximum.m_Z));
-	auto actualMaximum = xyz_location(std::max(minimum.m_X, maximum.m_X), std::max(minimum.m_Y, maximum.m_Y),
-					  std::max(minimum.m_Z, maximum.m_Z));
+bool IsWithinAxisAlignedBox(const glm::vec3 &position, const glm::vec3 &minimum, const glm::vec3 &maximum) {
+	auto actualMinimum = glm::vec3(std::min(minimum.x, maximum.x), std::min(minimum.y, maximum.y),std::min(minimum.z, maximum.z));
+	auto actualMaximum = glm::vec3(std::max(minimum.x, maximum.x), std::max(minimum.y, maximum.y),std::max(minimum.z, maximum.z));
 
-	bool xcheck = position.m_X >= actualMinimum.m_X && position.m_X <= actualMaximum.m_X;
-	bool ycheck = position.m_Y >= actualMinimum.m_Y && position.m_Y <= actualMaximum.m_Y;
-	bool zcheck = position.m_Z >= actualMinimum.m_Z && position.m_Z <= actualMaximum.m_Z;
+	bool xcheck = position.x >= actualMinimum.x && position.x <= actualMaximum.x;
+	bool ycheck = position.y >= actualMinimum.y && position.y <= actualMaximum.y;
+	bool zcheck = position.z >= actualMinimum.z && position.z <= actualMaximum.z;
 
 	return xcheck && ycheck && zcheck;
 }
@@ -226,13 +120,12 @@ bool IsWithinAxisAlignedBox(const xyz_location &position, const xyz_location &mi
 * Determines if 'position' is within (inclusive) the axis aligned
 * box (2 dimensional) formed from the points minimum and maximum.
 */
-bool IsWithinAxisAlignedBox(const xy_location &position, const xy_location &minimum, const xy_location &maximum)
-{
-	auto actualMinimum = xy_location(std::min(minimum.m_X, maximum.m_X), std::min(minimum.m_Y, maximum.m_Y));
-	auto actualMaximum = xy_location(std::max(minimum.m_X, maximum.m_X), std::max(minimum.m_Y, maximum.m_Y));
+bool IsWithinAxisAlignedBox(const glm::vec2 &position, const glm::vec2 &minimum, const glm::vec2 &maximum) {
+	auto actualMinimum = glm::vec2(std::min(minimum.x, maximum.x), std::min(minimum.y, maximum.y));
+	auto actualMaximum = glm::vec2(std::max(minimum.x, maximum.x), std::max(minimum.y, maximum.y));
 
-	bool xcheck = position.m_X >= actualMinimum.m_X && position.m_X <= actualMaximum.m_X;
-	bool ycheck = position.m_Y >= actualMinimum.m_Y && position.m_Y <= actualMaximum.m_Y;
+	bool xcheck = position.x >= actualMinimum.x && position.x <= actualMaximum.x;
+	bool ycheck = position.y >= actualMinimum.y && position.y <= actualMaximum.y;
 
 	return xcheck && ycheck;
 }
@@ -240,12 +133,11 @@ bool IsWithinAxisAlignedBox(const xy_location &position, const xy_location &mini
 /**
 * Gives the heading directly 180 degrees from the
 * current heading.
-* Takes the EQfloat from the xyz_heading and returns
+* Takes the EQfloat from the glm::vec4 and returns
 * an EQFloat.
 */
-float GetReciprocalHeading(const xyz_heading &point1)
-{
-	return GetReciprocalHeading(point1.m_Heading);
+float GetReciprocalHeading(const glm::vec4& point1) {
+	return GetReciprocalHeading(point1.w);
 }
 
 /**

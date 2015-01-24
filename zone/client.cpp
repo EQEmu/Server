@@ -74,7 +74,7 @@ Client::Client(EQStreamInterface* ieqs)
 	0,	// npctypeid
 	0,	// size
 	0.7,	// runspeed
-	xyz_heading::Origin(),
+	glm::vec4(),
 	0,	// light
 	0xFF,	// texture
 	0xFF,	// helmtexture
@@ -367,9 +367,9 @@ Client::~Client() {
 	{
 		m_pp.zone_id = m_pp.binds[0].zoneId;
 		m_pp.zoneInstance = m_pp.binds[0].instance_id;
-		m_Position.m_X = m_pp.binds[0].x;
-		m_Position.m_Y = m_pp.binds[0].y;
-		m_Position.m_Z = m_pp.binds[0].z;
+		m_Position.x = m_pp.binds[0].x;
+		m_Position.y = m_pp.binds[0].y;
+		m_Position.z = m_pp.binds[0].z;
 	}
 
 	// we save right now, because the client might be zoning and the world
@@ -493,11 +493,11 @@ bool Client::Save(uint8 iCommitNow) {
 		return false;
 
 	/* Wrote current basics to PP for saves */
-	m_pp.x = m_Position.m_X;
-	m_pp.y = m_Position.m_Y;
-	m_pp.z = m_Position.m_Z;
+	m_pp.x = m_Position.x;
+	m_pp.y = m_Position.y;
+	m_pp.z = m_Position.z;
 	m_pp.guildrank = guildrank;
-	m_pp.heading = m_Position.m_Heading;
+	m_pp.heading = m_Position.w;
 
 	/* Mana and HP */
 	if (GetHP() <= 0) {
@@ -514,8 +514,8 @@ bool Client::Save(uint8 iCommitNow) {
 	database.SaveCharacterCurrency(CharacterID(), &m_pp);
 
 	/* Save Current Bind Points */
-	auto regularBindPosition = xyz_heading(m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, 0.0f);
-	auto homeBindPosition = xyz_heading(m_pp.binds[4].x, m_pp.binds[4].y, m_pp.binds[4].z, 0.0f);
+	auto regularBindPosition = glm::vec4(m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, 0.0f);
+	auto homeBindPosition = glm::vec4(m_pp.binds[4].x, m_pp.binds[4].y, m_pp.binds[4].z, 0.0f);
 	database.SaveCharacterBindPoint(CharacterID(), m_pp.binds[0].zoneId, m_pp.binds[0].instance_id, regularBindPosition, 0); /* Regular bind */
 	database.SaveCharacterBindPoint(CharacterID(), m_pp.binds[4].zoneId, m_pp.binds[4].instance_id, homeBindPosition, 1); /* Home Bind */
 
@@ -982,7 +982,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				CheckEmoteHail(GetTarget(), message);
 
 
-				if(ComparativeDistanceNoZ(m_Position, GetTarget()->GetPosition()) <= 200) {
+				if(DistanceSquaredNoZ(m_Position, GetTarget()->GetPosition()) <= 200) {
 					NPC *tar = GetTarget()->CastToNPC();
 					parse->EventNPC(EVENT_SAY, tar->CastToNPC(), this, message, language);
 
@@ -994,7 +994,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				}
 			}
 			else {
-				if (ComparativeDistanceNoZ(m_Position, GetTarget()->GetPosition()) <= 200) {
+				if (DistanceSquaredNoZ(m_Position, GetTarget()->GetPosition()) <= 200) {
 					parse->EventNPC(EVENT_AGGRO_SAY, GetTarget()->CastToNPC(), this, message, language);
 				}
 			}
@@ -2525,7 +2525,7 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 			}
 
 			else {
-				if (!GetFeigned() && (ComparativeDistance(bindmob->GetPosition(), m_Position)  <= 400)) {
+				if (!GetFeigned() && (DistanceSquared(bindmob->GetPosition(), m_Position)  <= 400)) {
 					// send bindmob bind done
 					if(!bindmob->IsAIControlled() && bindmob != this ) {
 
@@ -3164,7 +3164,7 @@ void Client::Insight(uint32 t_id)
 		Message(0,"This ability can only be used on NPCs.");
 		return;
 	}
-	if (Distance(static_cast<xyz_location>(m_Position), static_cast<xyz_location>(who->GetPosition())) > 200)
+	if (Distance(static_cast<glm::vec3>(m_Position), static_cast<glm::vec3>(who->GetPosition())) > 200)
 	{
 		Message(0,"You must get closer to your target!");
 		return;
@@ -3793,35 +3793,35 @@ void Client::SendWindow(uint32 PopupID, uint32 NegativeID, uint32 Buttons, const
 void Client::KeyRingLoad()
 {
 	std::string query = StringFormat("SELECT item_id FROM keyring "
-                                    "WHERE char_id = '%i' ORDER BY item_id", character_id);
-    auto results = database.QueryDatabase(query);
-    if (!results.Success()) {
+									"WHERE char_id = '%i' ORDER BY item_id", character_id);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
 		return;
-    }
+	}
 
-    for (auto row = results.begin(); row != results.end(); ++row)
-        keyring.push_back(atoi(row[0]));
+	for (auto row = results.begin(); row != results.end(); ++row)
+		keyring.push_back(atoi(row[0]));
 
 }
 
 void Client::KeyRingAdd(uint32 item_id)
 {
 	if(0==item_id)
-        return;
+		return;
 
 	bool found = KeyRingCheck(item_id);
 	if (found)
-        return;
+		return;
 
-    std::string query = StringFormat("INSERT INTO keyring(char_id, item_id) VALUES(%i, %i)", character_id, item_id);
-    auto results = database.QueryDatabase(query);
-    if (!results.Success()) {
-        return;
-    }
+	std::string query = StringFormat("INSERT INTO keyring(char_id, item_id) VALUES(%i, %i)", character_id, item_id);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return;
+	}
 
-    Message(4,"Added to keyring.");
+	Message(4,"Added to keyring.");
 
-    keyring.push_back(item_id);
+	keyring.push_back(item_id);
 }
 
 bool Client::KeyRingCheck(uint32 item_id)
@@ -3853,14 +3853,14 @@ void Client::KeyRingList()
 bool Client::IsDiscovered(uint32 itemid) {
 
 	std::string query = StringFormat("SELECT count(*) FROM discovered_items WHERE item_id = '%lu'", itemid);
-    auto results = database.QueryDatabase(query);
-    if (!results.Success()) {
-        return false;
-    }
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
 
 	auto row = results.begin();
-    if (!atoi(row[0]))
-        return false;
+	if (!atoi(row[0]))
+		return false;
 
 	return true;
 }
@@ -3868,9 +3868,9 @@ bool Client::IsDiscovered(uint32 itemid) {
 void Client::DiscoverItem(uint32 itemid) {
 
 	std::string query = StringFormat("INSERT INTO discovered_items "
-                                    "SET item_id = %lu, char_name = '%s', "
-                                    "discovered_date = UNIX_TIMESTAMP(), account_status = %i",
-                                    itemid, GetName(), Admin());
+									"SET item_id = %lu, char_name = '%s', "
+									"discovered_date = UNIX_TIMESTAMP(), account_status = %i",
+									itemid, GetName(), Admin());
 	auto results = database.QueryDatabase(query);
 
 	parse->EventPlayer(EVENT_DISCOVER_ITEM, this, "", itemid);
@@ -4504,7 +4504,7 @@ void Client::HandleLDoNOpen(NPC *target)
 			return;
 		}
 
-		if(ComparativeDistanceNoZ(m_Position, target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
+		if(DistanceSquaredNoZ(m_Position, target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 		{
 			Log.Out(Logs::General, Logs::None, "%s tried to open %s but %s was out of range",
 				GetName(), target->GetName(), target->GetName());
@@ -4757,11 +4757,11 @@ void Client::SummonAndRezzAllCorpses()
 	Message(clientMessageYellow, "All your corpses have been summoned to your feet and have received a 100% resurrection.");
 }
 
-void Client::SummonAllCorpses(const xyz_heading& position)
+void Client::SummonAllCorpses(const glm::vec4& position)
 {
-    auto summonLocation = position;
-	if(position.isOrigin() && position.m_Heading == 0.0f)
-        summonLocation = GetPosition();
+	auto summonLocation = position;
+	if(IsOrigin(position) && position.w == 0.0f)
+		summonLocation = GetPosition();
 
 	ServerPacket *Pack = new ServerPacket(ServerOP_DepopAllPlayersCorpses, sizeof(ServerDepopAllPlayersCorpses_Struct));
 
@@ -5236,49 +5236,49 @@ void Client::SendRewards()
 {
 	std::vector<ClientReward> rewards;
 	std::string query = StringFormat("SELECT reward_id, amount "
-                                    "FROM account_rewards "
-                                    "WHERE account_id = %i "
-                                    "ORDER BY reward_id", AccountID());
-    auto results = database.QueryDatabase(query);
-    if (!results.Success()) {
+									"FROM account_rewards "
+									"WHERE account_id = %i "
+									"ORDER BY reward_id", AccountID());
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
 		return;
-    }
+	}
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        ClientReward cr;
-        cr.id = atoi(row[0]);
-        cr.amount = atoi(row[1]);
-        rewards.push_back(cr);
-    }
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		ClientReward cr;
+		cr.id = atoi(row[0]);
+		cr.amount = atoi(row[1]);
+		rewards.push_back(cr);
+	}
 
 	if(rewards.size() == 0)
-        return;
+		return;
 
 	EQApplicationPacket *vetapp = new EQApplicationPacket(OP_VetRewardsAvaliable, (sizeof(InternalVeteranReward) * rewards.size()));
-    uchar *data = vetapp->pBuffer;
-    for(int i = 0; i < rewards.size(); ++i) {
-        InternalVeteranReward *ivr = (InternalVeteranReward*)data;
-        ivr->claim_id = rewards[i].id;
-        ivr->number_available = rewards[i].amount;
-        auto iter = zone->VeteranRewards.begin();
-        for (;iter != zone->VeteranRewards.end(); ++iter)
-            if((*iter).claim_id == rewards[i].id)
-                break;
+	uchar *data = vetapp->pBuffer;
+	for(int i = 0; i < rewards.size(); ++i) {
+		InternalVeteranReward *ivr = (InternalVeteranReward*)data;
+		ivr->claim_id = rewards[i].id;
+		ivr->number_available = rewards[i].amount;
+		auto iter = zone->VeteranRewards.begin();
+		for (;iter != zone->VeteranRewards.end(); ++iter)
+			if((*iter).claim_id == rewards[i].id)
+				break;
 
-        if(iter != zone->VeteranRewards.end()) {
-            InternalVeteranReward ivro = (*iter);
-            ivr->claim_count = ivro.claim_count;
-            for(int x = 0; x < ivro.claim_count; ++x) {
-                ivr->items[x].item_id = ivro.items[x].item_id;
-                ivr->items[x].charges = ivro.items[x].charges;
-                strcpy(ivr->items[x].item_name, ivro.items[x].item_name);
-            }
-        }
+		if(iter != zone->VeteranRewards.end()) {
+			InternalVeteranReward ivro = (*iter);
+			ivr->claim_count = ivro.claim_count;
+			for(int x = 0; x < ivro.claim_count; ++x) {
+				ivr->items[x].item_id = ivro.items[x].item_id;
+				ivr->items[x].charges = ivro.items[x].charges;
+				strcpy(ivr->items[x].item_name, ivro.items[x].item_name);
+			}
+		}
 
-        data += sizeof(InternalVeteranReward);
-    }
+		data += sizeof(InternalVeteranReward);
+	}
 
-    FastQueuePacket(&vetapp);
+	FastQueuePacket(&vetapp);
 }
 
 bool Client::TryReward(uint32 claim_id) {
@@ -5304,19 +5304,19 @@ bool Client::TryReward(uint32 claim_id) {
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	std::string query = StringFormat("SELECT amount FROM account_rewards "
-                                    "WHERE account_id = %i AND reward_id = %i",
-                                    AccountID(), claim_id);
-    auto results = database.QueryDatabase(query);
-    if (!results.Success()) {
+									"WHERE account_id = %i AND reward_id = %i",
+									AccountID(), claim_id);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
 		return false;
-    }
+	}
 
-    if (results.RowCount() == 0)
-        return false;
+	if (results.RowCount() == 0)
+		return false;
 
-    auto row = results.begin();
+	auto row = results.begin();
 
-    uint32 amt = atoi(row[0]);
+	uint32 amt = atoi(row[0]);
 	if(amt == 0)
 		return false;
 
@@ -5329,46 +5329,46 @@ bool Client::TryReward(uint32 claim_id) {
 		return false;
 
 	if(amt == 1) {
-        query = StringFormat("DELETE FROM account_rewards "
-                            "WHERE account_id = %i AND reward_id = %i",
-                            AccountID(), claim_id);
-        auto results = database.QueryDatabase(query);
+		query = StringFormat("DELETE FROM account_rewards "
+							"WHERE account_id = %i AND reward_id = %i",
+							AccountID(), claim_id);
+		auto results = database.QueryDatabase(query);
 	}
 	else {
-        query = StringFormat("UPDATE account_rewards SET amount = (amount-1) "
-                            "WHERE account_id = %i AND reward_id = %i",
-                            AccountID(), claim_id);
-        auto results = database.QueryDatabase(query);
+		query = StringFormat("UPDATE account_rewards SET amount = (amount-1) "
+							"WHERE account_id = %i AND reward_id = %i",
+							AccountID(), claim_id);
+		auto results = database.QueryDatabase(query);
 	}
 
 	InternalVeteranReward ivr = (*iter);
 	ItemInst *claim = database.CreateItem(ivr.items[0].item_id, ivr.items[0].charges);
 	if(!claim) {
-        Save();
-        return true;
+		Save();
+		return true;
 	}
 
-    bool lore_conflict = CheckLoreConflict(claim->GetItem());
+	bool lore_conflict = CheckLoreConflict(claim->GetItem());
 
-    for(int y = 1; y < 8; y++)
-        if(ivr.items[y].item_id && claim->GetItem()->ItemClass == 1) {
-            ItemInst *item_temp = database.CreateItem(ivr.items[y].item_id, ivr.items[y].charges);
-            if(item_temp) {
-                if(CheckLoreConflict(item_temp->GetItem())) {
-                    lore_conflict = true;
-                    DuplicateLoreMessage(ivr.items[y].item_id);
-                }
-                claim->PutItem(y-1, *item_temp);
-            }
-        }
+	for(int y = 1; y < 8; y++)
+		if(ivr.items[y].item_id && claim->GetItem()->ItemClass == 1) {
+			ItemInst *item_temp = database.CreateItem(ivr.items[y].item_id, ivr.items[y].charges);
+			if(item_temp) {
+				if(CheckLoreConflict(item_temp->GetItem())) {
+					lore_conflict = true;
+					DuplicateLoreMessage(ivr.items[y].item_id);
+				}
+				claim->PutItem(y-1, *item_temp);
+			}
+		}
 
-    if(lore_conflict) {
-        safe_delete(claim);
-        return true;
-    }
+	if(lore_conflict) {
+		safe_delete(claim);
+		return true;
+	}
 
-    PutItemInInventory(free_slot, *claim);
-    SendItemPacket(free_slot, claim, ItemPacketTrade);
+	PutItemInInventory(free_slot, *claim);
+	SendItemPacket(free_slot, claim, ItemPacketTrade);
 
 	Save();
 	return true;
@@ -6132,7 +6132,7 @@ void Client::DragCorpses()
 		Mob *corpse = entity_list.GetMob(It->second);
 
 		if (corpse && corpse->IsPlayerCorpse() &&
-				(ComparativeDistanceNoZ(m_Position, corpse->GetPosition()) <= RuleR(Character, DragCorpseDistance)))
+				(DistanceSquaredNoZ(m_Position, corpse->GetPosition()) <= RuleR(Character, DragCorpseDistance)))
 			continue;
 
 		if (!corpse || !corpse->IsPlayerCorpse() ||
@@ -6219,11 +6219,11 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	if(summon_count > MAX_SWARM_PETS)
 		summon_count = MAX_SWARM_PETS;
 
-	static const xy_location swarmPetLocations[MAX_SWARM_PETS] = {
-        xy_location(5, 5), xy_location(-5, 5), xy_location(5, -5), xy_location(-5, -5),
-		xy_location(10, 10), xy_location(-10, 10), xy_location(10, -10), xy_location(-10, -10),
-        xy_location(8, 8), xy_location(-8, 8), xy_location(8, -8), xy_location(-8, -8)
-    };
+	static const glm::vec2 swarmPetLocations[MAX_SWARM_PETS] = {
+		glm::vec2(5, 5), glm::vec2(-5, 5), glm::vec2(5, -5), glm::vec2(-5, -5),
+		glm::vec2(10, 10), glm::vec2(-10, 10), glm::vec2(10, -10), glm::vec2(-10, -10),
+		glm::vec2(8, 8), glm::vec2(-8, 8), glm::vec2(8, -8), glm::vec2(-8, -8)
+	};
 
 	while(summon_count > 0) {
 		NPCType *npc_dup = nullptr;
@@ -6235,7 +6235,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 		NPC* npca = new NPC(
 				(npc_dup!=nullptr)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
 				0,
-				GetPosition()+swarmPetLocations[summon_count],
+				GetPosition() + glm::vec4(swarmPetLocations[summon_count], 0.0f, 0.0f),
 				FlyMode3);
 
 		if(!npca->GetSwarmInfo()){
@@ -7713,23 +7713,23 @@ void Client::LoadAccountFlags()
 
 	accountflags.clear();
 	std::string query = StringFormat("SELECT p_flag, p_value "
-                                    "FROM account_flags WHERE p_accid = '%d'",
-                                    account_id);
-    auto results = database.QueryDatabase(query);
-    if (!results.Success()) {
-        return;
-    }
+									"FROM account_flags WHERE p_accid = '%d'",
+									account_id);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return;
+	}
 
-    for (auto row = results.begin(); row != results.end(); ++row)
-        accountflags[row[0]] = row[1];
+	for (auto row = results.begin(); row != results.end(); ++row)
+		accountflags[row[0]] = row[1];
 }
 
 void Client::SetAccountFlag(std::string flag, std::string val) {
 
-    std::string query = StringFormat("REPLACE INTO account_flags (p_accid, p_flag, p_value) "
-                                    "VALUES( '%d', '%s', '%s')",
-                                    account_id, flag.c_str(), val.c_str());
-    auto results = database.QueryDatabase(query);
+	std::string query = StringFormat("REPLACE INTO account_flags (p_accid, p_flag, p_value) "
+									"VALUES( '%d', '%s', '%s')",
+									account_id, flag.c_str(), val.c_str());
+	auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
 		return;
 	}
@@ -8068,7 +8068,7 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
 {
    if(!item) { return; }
 
-    uint32 cons_mod = 180;
+	uint32 cons_mod = 180;
 
 	int32 metabolism_bonus = spellbonuses.Metabolism + itembonuses.Metabolism + aabonuses.Metabolism;
 
@@ -8079,16 +8079,16 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
 
    if(type == ItemTypeFood)
    {
-       int hchange = item->CastTime * cons_mod;
-       hchange = mod_food_value(item, hchange);
+	   int hchange = item->CastTime * cons_mod;
+	   hchange = mod_food_value(item, hchange);
 
-       if(hchange < 0) { return; }
+	   if(hchange < 0) { return; }
 
-       m_pp.hunger_level += hchange;
-       DeleteItemInInventory(slot, 1, false);
+	   m_pp.hunger_level += hchange;
+	   DeleteItemInInventory(slot, 1, false);
 
-       if(!auto_consume) //no message if the client consumed for us
-           entity_list.MessageClose_StringID(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
+	   if(!auto_consume) //no message if the client consumed for us
+		   entity_list.MessageClose_StringID(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
 
 #if EQDEBUG >= 5
        Log.Out(Logs::General, Logs::None, "Eating from slot:%i", (int)slot);
@@ -8096,16 +8096,16 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
    }
    else
    {
-       int tchange = item->CastTime * cons_mod;
-       tchange = mod_drink_value(item, tchange);
+	   int tchange = item->CastTime * cons_mod;
+	   tchange = mod_drink_value(item, tchange);
 
-       if(tchange < 0) { return; }
+	   if(tchange < 0) { return; }
 
-        m_pp.thirst_level += tchange;
-        DeleteItemInInventory(slot, 1, false);
+		m_pp.thirst_level += tchange;
+		DeleteItemInInventory(slot, 1, false);
 
-        if(!auto_consume) //no message if the client consumed for us
-            entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
+		if(!auto_consume) //no message if the client consumed for us
+			entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
 
 #if EQDEBUG >= 5
         Log.Out(Logs::General, Logs::None, "Drinking from slot:%i", (int)slot);
@@ -8146,15 +8146,15 @@ void Client::PlayMP3(const char* fname)
 void Client::ExpeditionSay(const char *str, int ExpID) {
 
 	std::string query = StringFormat("SELECT `player_name` FROM `cust_inst_players` "
-                                    "WHERE `inst_id` = %i", ExpID);
-    auto results = database.QueryDatabase(query);
+									"WHERE `inst_id` = %i", ExpID);
+	auto results = database.QueryDatabase(query);
 	if (!results.Success())
 		return;
 
 	if(results.RowCount() == 0) {
-        this->Message(14, "You say to the expedition, '%s'", str);
-        return;
-    }
+		this->Message(14, "You say to the expedition, '%s'", str);
+		return;
+	}
 
 	for(auto row = results.begin(); row != results.end(); ++row) {
 		const char* charName = row[0];
@@ -8262,8 +8262,8 @@ void Client::TextLink::generate_body()
 	
 	RoF2: "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%02X" "%05X" "%08X" (56)
 	RoF:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X"  "%05X" "%08X" (55)
-	SoF:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"        "%1X" "%04X" "%1X"  "%05X" "%08X" (50)
-	6.2:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"        "%1X" "%04X" "%1X"         "%08X" (45)
+	SoF:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"		"%1X" "%04X" "%1X"  "%05X" "%08X" (50)
+	6.2:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"		"%1X" "%04X" "%1X"		 "%08X" (45)
 	*/
 
 	memset(&m_LinkBodyStruct, 0, sizeof(TextLinkBody_Struct));

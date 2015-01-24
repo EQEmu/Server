@@ -218,7 +218,7 @@ bool Spawn2::Process() {
 			database.UpdateSpawn2Timeleft(spawn2_id, zone->GetInstanceID(), 0);
 
 		currentnpcid = npcid;
-		NPC* npc = new NPC(tmp, this, xyz_heading(x, y, z, heading), FlyMode3);
+		NPC* npc = new NPC(tmp, this, glm::vec4(x, y, z, heading), FlyMode3);
 
 		npc->mod_prespawn(this);
 
@@ -411,13 +411,13 @@ Spawn2* ZoneDatabase::LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2
 	return newSpawn;
 }
 
-bool ZoneDatabase::CreateSpawn2(Client *client, uint32 spawngroup, const char* zone, const xyz_heading& position, uint32 respawn, uint32 variance, uint16 condition, int16 cond_value)
+bool ZoneDatabase::CreateSpawn2(Client *client, uint32 spawngroup, const char* zone, const glm::vec4& position, uint32 respawn, uint32 variance, uint16 condition, int16 cond_value)
 {
 
 	std::string query = StringFormat("INSERT INTO spawn2 (spawngroupID, zone, x, y, z, heading, "
                                     "respawntime, variance, _condition, cond_value) "
                                     "VALUES (%i, '%s', %f, %f, %f, %f, %i, %i, %u, %i)",
-                                    spawngroup, zone, position.m_X, position.m_Y, position.m_Z, position.m_Heading,
+                                    spawngroup, zone, position.x, position.y, position.z, position.w,
                                     respawn, variance, condition, cond_value);
     auto results = QueryDatabase(query);
     if (!results.Success()) {

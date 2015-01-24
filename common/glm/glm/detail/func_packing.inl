@@ -12,6 +12,10 @@
 /// The above copyright notice and this permission notice shall be included in
 /// all copies or substantial portions of the Software.
 /// 
+/// Restrictions:
+///		By making use of the Software for military purposes, you choose to make
+///		a Bunny unhappy.
+/// 
 /// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 /// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 /// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,7 +25,7 @@
 /// THE SOFTWARE.
 ///
 /// @ref core
-/// @file glm/core/func_packing.inl
+/// @file glm/detail/func_packing.inl
 /// @date 2010-03-17 / 2011-06-15
 /// @author Christophe Riccio
 ///////////////////////////////////////////////////////////////////////////////////
@@ -35,7 +39,9 @@ namespace glm
 	GLM_FUNC_QUALIFIER uint packUnorm2x16(vec2 const & v)
 	{
 		u16vec2 Topack(round(clamp(v, 0.0f, 1.0f) * 65535.0f));
-		return reinterpret_cast<uint&>(Topack);
+		// return reinterpret_cast<uint&>(Topack);
+    uint* ptr(reinterpret_cast<uint*>(&Topack));
+    return *ptr;
 	}
 
 	GLM_FUNC_QUALIFIER vec2 unpackUnorm2x16(uint const & p)
@@ -47,7 +53,9 @@ namespace glm
 	GLM_FUNC_QUALIFIER uint packSnorm2x16(vec2 const & v)
 	{
 		i16vec2 Topack(round(clamp(v ,-1.0f, 1.0f) * 32767.0f));
-		return reinterpret_cast<uint32&>(Topack);
+		// return reinterpret_cast<uint32&>(Topack);
+    uint* ptr(reinterpret_cast<uint*>(&Topack));
+    return *ptr;
 	}
 
 	GLM_FUNC_QUALIFIER vec2 unpackSnorm2x16(uint const & p)

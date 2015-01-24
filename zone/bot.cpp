@@ -9,7 +9,7 @@
 extern volatile bool ZoneLoaded;
 
 // This constructor is used during the bot create command
-Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, xyz_heading::Origin(), 0, false), rest_timer(1) {
+Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm::vec4(), 0, false), rest_timer(1) {
 	if(botOwner) {
 		this->SetBotOwner(botOwner);
 		this->_botOwnerCharacterID = botOwner->CharacterID();
@@ -99,7 +99,7 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, xyz
 }
 
 // This constructor is used when the bot is loaded out of the database
-Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType npcTypeData) : NPC(&npcTypeData, nullptr, xyz_heading::Origin(), 0, false), rest_timer(1) {
+Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType npcTypeData) : NPC(&npcTypeData, nullptr, glm::vec4(), 0, false), rest_timer(1) {
 	this->_botOwnerCharacterID = botOwnerCharacterID;
 
 	if(this->_botOwnerCharacterID > 0) {
@@ -3354,7 +3354,7 @@ void Bot::AI_Process() {
 	if(GetHasBeenSummoned()) {
 		if(IsBotCaster() || IsBotArcher()) {
 			if (AImovement_timer->Check()) {
-				if(!GetTarget() || (IsBotCaster() && !IsBotCasterCombatRange(GetTarget())) || (IsBotArcher() && IsArcheryRange(GetTarget())) || (ComparativeDistanceNoZ(static_cast<xyz_location>(m_Position), m_PreSummonLocation) < 10)) {
+				if(!GetTarget() || (IsBotCaster() && !IsBotCasterCombatRange(GetTarget())) || (IsBotArcher() && IsArcheryRange(GetTarget())) || (DistanceSquaredNoZ(static_cast<glm::vec3>(m_Position), m_PreSummonLocation) < 10)) {
 					if(GetTarget())
 						FaceTarget(GetTarget());
 					SetHasBeenSummoned(false);
@@ -3363,8 +3363,8 @@ void Bot::AI_Process() {
 					if(GetTarget() && GetTarget()->GetHateTop() && GetTarget()->GetHateTop() != this)
 					{
 						Log.Out(Logs::Detail, Logs::AI, "Returning to location prior to being summoned.");
-						CalculateNewPosition2(m_PreSummonLocation.m_X, m_PreSummonLocation.m_Y, m_PreSummonLocation.m_Z, GetRunspeed());
-						SetHeading(CalculateHeadingToTarget(m_PreSummonLocation.m_X, m_PreSummonLocation.m_Y));
+						CalculateNewPosition2(m_PreSummonLocation.x, m_PreSummonLocation.y, m_PreSummonLocation.z, GetRunspeed());
+						SetHeading(CalculateHeadingToTarget(m_PreSummonLocation.x, m_PreSummonLocation.y));
 						return;
 					}
 				}
@@ -3505,7 +3505,7 @@ void Bot::AI_Process() {
 			if(IsBotCasterCombatRange(GetTarget()))
 				atCombatRange = true;
 		}
-		else if(ComparativeDistance(m_Position, GetTarget()->GetPosition())  <= meleeDistance) {
+		else if(DistanceSquared(m_Position, GetTarget()->GetPosition())  <= meleeDistance) {
 			atCombatRange = true;
 		}
 
@@ -3533,7 +3533,7 @@ void Bot::AI_Process() {
 						return;
 					}
 				}
-				else if(!IsMoving() && GetClass() != ROGUE && (ComparativeDistanceNoZ(m_Position, GetTarget()->GetPosition()) < GetTarget()->GetSize())) {
+				else if(!IsMoving() && GetClass() != ROGUE && (DistanceSquaredNoZ(m_Position, GetTarget()->GetPosition()) < GetTarget()->GetSize())) {
 					// If we are not a rogue trying to backstab, let's try to adjust our melee range so we don't appear to be bunched up
 					float newX = 0;
 					float newY = 0;
@@ -3732,7 +3732,7 @@ void Bot::AI_Process() {
 				Mob* follow = entity_list.GetMob(GetFollowID());
 
 				if(follow) {
-					float dist = ComparativeDistance(m_Position, follow->GetPosition());
+					float dist = DistanceSquared(m_Position, follow->GetPosition());
 					float speed = follow->GetRunspeed();
 
 					if(dist < GetFollowDistance() + 1000)
@@ -3865,7 +3865,7 @@ void Bot::PetAIProcess() {
 						return;
 					}
 				}
-				else if(ComparativeDistanceNoZ(botPet->GetPosition(), botPet->GetTarget()->GetPosition()) < botPet->GetTarget()->GetSize()) {
+				else if(DistanceSquaredNoZ(botPet->GetPosition(), botPet->GetTarget()->GetPosition()) < botPet->GetTarget()->GetSize()) {
 					// Let's try to adjust our melee range so we don't appear to be bunched up
 					bool isBehindMob = false;
 					bool moveBehindMob = false;
@@ -4003,7 +4003,7 @@ void Bot::PetAIProcess() {
 			switch(pStandingPetOrder) {
 				case SPO_Follow:
 					{
-						float dist = ComparativeDistance(botPet->GetPosition(), botPet->GetTarget()->GetPosition());
+						float dist = DistanceSquared(botPet->GetPosition(), botPet->GetTarget()->GetPosition());
 						botPet->SetRunAnimSpeed(0);
 						if(dist > 184) {
 							botPet->CalculateNewPosition2(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ(), botPet->GetTarget()->GetRunspeed());
@@ -4105,9 +4105,9 @@ void Bot::Spawn(Client* botCharacterOwner, std::string* errorMessage) {
 			this->GetBotOwner()->CastToClient()->Message(13, "%s save failed!", this->GetCleanName());
 
 		// Spawn the bot at the bow owner's loc
-		this->m_Position.m_X = botCharacterOwner->GetX();
-		this->m_Position.m_Y = botCharacterOwner->GetY();
-		this->m_Position.m_Z = botCharacterOwner->GetZ();
+		this->m_Position.x = botCharacterOwner->GetX();
+		this->m_Position.y = botCharacterOwner->GetY();
+		this->m_Position.z = botCharacterOwner->GetZ();
 
 		// Make the bot look at the bot owner
 		FaceTarget(botCharacterOwner);
@@ -9074,7 +9074,7 @@ void Bot::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot, int16 *resist_adjust) {
 	bool Result = false;
 
-	if(zone && !zone->IsSpellBlocked(spell_id, GetPosition())) {
+	if(zone && !zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
 
 		Log.Out(Logs::Detail, Logs::Spells, "CastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item slot %d",
 			spells[spell_id].name, spell_id, target_id, slot, cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);
@@ -10385,7 +10385,7 @@ bool Bot::IsArcheryRange(Mob *target) {
 
 		range *= range;
 
-		float targetDistance = ComparativeDistanceNoZ(m_Position, target->GetPosition());
+		float targetDistance = DistanceSquaredNoZ(m_Position, target->GetPosition());
 
 		float minRuleDistance = RuleI(Combat, MinRangedAttackDist) * RuleI(Combat, MinRangedAttackDist);
 
@@ -10409,7 +10409,7 @@ bool Bot::IsBotCasterCombatRange(Mob *target) {
 		// half the max so the bot doesn't always stop at max range to allow combat movement
 		range *= .5;
 
-		float targetDistance = ComparativeDistanceNoZ(m_Position, target->GetPosition());
+		float targetDistance = DistanceSquaredNoZ(m_Position, target->GetPosition());
 
 		if(targetDistance > range)
 			result = false;
@@ -10661,12 +10661,12 @@ void Bot::BotGroupSummon(Group* group, Client* client) {
 				if(botMember->GetBotOwnerCharacterID() == client->CharacterID()) {
 					botMember->SetTarget(botMember->GetBotOwner());
 					botMember->WipeHateList();
-					botMember->Warp(botMember->GetBotOwner()->GetPosition());
+					botMember->Warp(glm::vec3(botMember->GetBotOwner()->GetPosition()));
 
 					if(botMember->HasPet() && botMember->GetPet()) {
 						botMember->GetPet()->SetTarget(botMember);
 						botMember->GetPet()->WipeHateList();
-						botMember->GetPet()->Warp(botMember->GetBotOwner()->GetPosition());
+						botMember->GetPet()->Warp(glm::vec3(botMember->GetBotOwner()->GetPosition()));
 					}
 				}
 			}
@@ -11675,7 +11675,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				else
 				{
 					b->SetTarget(c->CastToMob());
-					b->Warp(c->GetPosition());
+					b->Warp(glm::vec3(c->GetPosition()));
 				}
 			}
 		}
@@ -15745,11 +15745,10 @@ void EntityList::BotPickLock(Bot* rogue)
             continue;
 
         auto diff = rogue->GetPosition() - cdoor->GetPosition();
-        diff.ABS_XYZ();
 
-		float curdist = diff.m_X * diff.m_X + diff.m_Y * diff.m_Y;
+		float curdist = diff.x * diff.x + diff.y * diff.y;
 
-        if((diff.m_Z * diff.m_Z >= 10) || (curdist > 130))
+        if((diff.z * diff.z >= 10) || (curdist > 130))
             continue;
 
         // All rogue items with lock pick bonuses are hands or primary
@@ -16159,7 +16158,7 @@ bool Bot::HasOrMayGetAggro() {
 void Bot::SetHasBeenSummoned(bool wasSummoned) {
 	_hasBeenSummoned = wasSummoned;
 	if(!wasSummoned)
-        m_PreSummonLocation = xyz_location::Origin();
+        m_PreSummonLocation = glm::vec3();
 
 }
 

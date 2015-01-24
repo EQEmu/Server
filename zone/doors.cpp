@@ -72,10 +72,10 @@ Doors::Doors(const Door* door) :
 	client_version_mask = door->client_version_mask;
 }
 
-Doors::Doors(const char *dmodel, const xyz_heading& position, uint8 dopentype, uint16 dsize) :
+Doors::Doors(const char *dmodel, const glm::vec4& position, uint8 dopentype, uint16 dsize) :
     close_timer(5000),
     m_Position(position),
-    m_Destination(xyz_heading::Origin())
+    m_Destination(glm::vec4())
 {
 	db_id = database.GetDoorsCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion());
 	door_id = database.GetDoorsDBCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion());
@@ -411,7 +411,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 			{
 				sender->KeyRingAdd(playerkey);
 			}
-			sender->MovePC(zone->GetZoneID(), zone->GetInstanceID(), m_Destination.m_X, m_Destination.m_Y, m_Destination.m_Z, m_Destination.m_Heading);
+			sender->MovePC(zone->GetZoneID(), zone->GetInstanceID(), m_Destination.x, m_Destination.y, m_Destination.z, m_Destination.w);
 		}
 		else if (( !IsDoorOpen() || opentype == 58 ) && (keyneeded && ((keyneeded == playerkey) || sender->GetGM())))
 		{
@@ -421,22 +421,22 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 			}
 			if(database.GetZoneID(dest_zone) == zone->GetZoneID())
 			{
-				sender->MovePC(zone->GetZoneID(), zone->GetInstanceID(), m_Destination.m_X, m_Destination.m_Y, m_Destination.m_Z, m_Destination.m_Heading);
+				sender->MovePC(zone->GetZoneID(), zone->GetInstanceID(), m_Destination.x, m_Destination.y, m_Destination.z, m_Destination.w);
 			}
 			else
 			{
-				sender->MovePC(database.GetZoneID(dest_zone), dest_instance_id, m_Destination.m_X, m_Destination.m_Y, m_Destination.m_Z, m_Destination.m_Heading);
+				sender->MovePC(database.GetZoneID(dest_zone), dest_instance_id, m_Destination.x, m_Destination.y, m_Destination.z, m_Destination.w);
 			}
 		}
 		if (( !IsDoorOpen() || opentype == 58 ) && (!keyneeded))
 		{
 			if(database.GetZoneID(dest_zone) == zone->GetZoneID())
 			{
-				sender->MovePC(zone->GetZoneID(), zone->GetInstanceID(), m_Destination.m_X, m_Destination.m_Y, m_Destination.m_Z, m_Destination.m_Heading);
+				sender->MovePC(zone->GetZoneID(), zone->GetInstanceID(), m_Destination.x, m_Destination.y, m_Destination.z, m_Destination.w);
 			}
 			else
 			{
-				sender->MovePC(database.GetZoneID(dest_zone), dest_instance_id, m_Destination.m_X, m_Destination.m_Y, m_Destination.m_Z, m_Destination.m_Heading);
+				sender->MovePC(database.GetZoneID(dest_zone), dest_instance_id, m_Destination.x, m_Destination.y, m_Destination.z, m_Destination.w);
 			}
 		}
 	}
@@ -694,11 +694,11 @@ bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name
 void Doors::SetLocation(float x, float y, float z)
 {
 	entity_list.DespawnAllDoors();
-    m_Position = xyz_location(x, y, z);
+    m_Position = glm::vec4(x, y, z, m_Position.w);
 	entity_list.RespawnAllDoors();
 }
 
-void Doors::SetPosition(const xyz_heading& position) {
+void Doors::SetPosition(const glm::vec4& position) {
 	entity_list.DespawnAllDoors();
 	m_Position = position;
 	entity_list.RespawnAllDoors();

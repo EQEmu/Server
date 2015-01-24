@@ -361,27 +361,27 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 
 		// get a random npc id from the spawngroups assigned to this zone
 		auto query = StringFormat("SELECT npcID "
-                                    "FROM (spawnentry INNER JOIN spawn2 ON spawn2.spawngroupID = spawnentry.spawngroupID) "
-                                    "INNER JOIN npc_types ON npc_types.id = spawnentry.npcID "
-                                    "WHERE spawn2.zone = '%s' AND npc_types.bodytype NOT IN (11, 33, 66, 67) "
-                                    "AND npc_types.race NOT IN (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 44, "
-                                    "55, 67, 71, 72, 73, 77, 78, 81, 90, 92, 93, 94, 106, 112, 114, 127, 128, "
-                                    "130, 139, 141, 183, 236, 237, 238, 239, 254, 266, 329, 330, 378, 379, "
-                                    "380, 381, 382, 383, 404, 522) "
-                                    "ORDER BY RAND() LIMIT 1", zone->GetShortName());
-        auto results = database.QueryDatabase(query);
+									"FROM (spawnentry INNER JOIN spawn2 ON spawn2.spawngroupID = spawnentry.spawngroupID) "
+									"INNER JOIN npc_types ON npc_types.id = spawnentry.npcID "
+									"WHERE spawn2.zone = '%s' AND npc_types.bodytype NOT IN (11, 33, 66, 67) "
+									"AND npc_types.race NOT IN (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 44, "
+									"55, 67, 71, 72, 73, 77, 78, 81, 90, 92, 93, 94, 106, 112, 114, 127, 128, "
+									"130, 139, 141, 183, 236, 237, 238, 239, 254, 266, 329, 330, 378, 379, "
+									"380, 381, 382, 383, 404, 522) "
+									"ORDER BY RAND() LIMIT 1", zone->GetShortName());
+		auto results = database.QueryDatabase(query);
 		if (!results.Success()) {
-            // if the database query failed
+			return;
 		}
 
-        if (results.RowCount() != 0) {
-            auto row = results.begin();
-            monsterid = atoi(row[0]);
-        }
+		if (results.RowCount() != 0) {
+			auto row = results.begin();
+			monsterid = atoi(row[0]);
+		}
 
-        // since we don't have any monsters, just make it look like an earth pet for now
-        if (monsterid == 0)
-            monsterid = 567;
+		// since we don't have any monsters, just make it look like an earth pet for now
+		if (monsterid == 0)
+			monsterid = 567;
 
 		// give the summoned pet the attributes of the monster we found
 		const NPCType* monster = database.GetNPCType(monsterid);
@@ -429,7 +429,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 into walls or objects (+10), this sometimes creates the "ghost" effect. I changed to +2 (as close as I
 could get while it still looked good). I also noticed this can happen if an NPC is spawned on the same spot of another or in a related bad spot.*/
 Pet::Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 power)
-: NPC(type_data, 0, owner->GetPosition() + xy_location(2, 2), FlyMode3)
+: NPC(type_data, 0, owner->GetPosition() + glm::vec4(2.0f, 2.0f, 0.0f, 0.0f), FlyMode3)
 {
 	GiveNPCTypeData(type_data);
 	typeofpet = type;
@@ -448,30 +448,31 @@ bool ZoneDatabase::GetPoweredPetEntry(const char *pet_type, int16 petpower, PetR
 
 	if (petpower <= 0)
 		query = StringFormat("SELECT npcID, temp, petpower, petcontrol, petnaming, monsterflag, equipmentset "
-                            "FROM pets WHERE type='%s' AND petpower<=0", pet_type);
+							"FROM pets WHERE type='%s' AND petpower<=0", pet_type);
 	else
 		query = StringFormat("SELECT npcID, temp, petpower, petcontrol, petnaming, monsterflag, equipmentset "
-                            "FROM pets WHERE type='%s' AND petpower<=%d ORDER BY petpower DESC LIMIT 1",
-                            pet_type, petpower);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        return false;
-    }
+							"FROM pets WHERE type='%s' AND petpower<=%d ORDER BY petpower DESC LIMIT 1",
+							pet_type, petpower);
 
-    if (results.RowCount() != 1)
-        return false;
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
 
-    auto row = results.begin();
+	if (results.RowCount() != 1)
+		return false;
 
-    into->npc_type = atoi(row[0]);
-    into->temporary = atoi(row[1]);
-    into->petpower = atoi(row[2]);
-    into->petcontrol = atoi(row[3]);
-    into->petnaming = atoi(row[4]);
-    into->monsterflag = atoi(row[5]);
-    into->equipmentset = atoi(row[6]);
+	auto row = results.begin();
 
-    return true;
+	into->npc_type = atoi(row[0]);
+	into->temporary = atoi(row[1]);
+	into->petpower = atoi(row[2]);
+	into->petcontrol = atoi(row[3]);
+	into->petnaming = atoi(row[4]);
+	into->monsterflag = atoi(row[5]);
+	into->equipmentset = atoi(row[6]);
+
+	return true;
 }
 
 Mob* Mob::GetPet() {
@@ -651,38 +652,38 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 	// all of the result rows. Check if we have something in the slot
 	// already. If no, add the item id to the equipment array.
 	while (curset >= 0 && depth < 5) {
-        std::string  query = StringFormat("SELECT nested_set FROM pets_equipmentset WHERE set_id = '%s'", curset);
+		std::string  query = StringFormat("SELECT nested_set FROM pets_equipmentset WHERE set_id = '%s'", curset);
 		auto results = QueryDatabase(query);
 		if (!results.Success()) {
 			return false;
-        }
+		}
 
-        if (results.RowCount() != 1) {
-            // invalid set reference, it doesn't exist
-            Log.Out(Logs::General, Logs::Error, "Error in GetBasePetItems equipment set '%d' does not exist", curset);
-            return false;
-        }
+		if (results.RowCount() != 1) {
+			// invalid set reference, it doesn't exist
+			Log.Out(Logs::General, Logs::Error, "Error in GetBasePetItems equipment set '%d' does not exist", curset);
+			return false;
+		}
 
-        auto row = results.begin();
-        nextset = atoi(row[0]);
+		auto row = results.begin();
+		nextset = atoi(row[0]);
 
-        query = StringFormat("SELECT slot, item_id FROM pets_equipmentset_entries WHERE set_id='%s'", curset);
-        results = QueryDatabase(query);
-        if (results.Success()){
-            for (row = results.begin(); row != results.end(); ++row)
-            {
-                slot = atoi(row[0]);
+		query = StringFormat("SELECT slot, item_id FROM pets_equipmentset_entries WHERE set_id='%s'", curset);
+		results = QueryDatabase(query);
+		if (results.Success()) {
+			for (row = results.begin(); row != results.end(); ++row)
+			{
+				slot = atoi(row[0]);
 
-                if (slot >= EmuConstants::EQUIPMENT_SIZE)
-                    continue;
+				if (slot >= EmuConstants::EQUIPMENT_SIZE)
+					continue;
 
-                if (items[slot] == 0)
-                    items[slot] = atoi(row[1]);
-            }
-        }
+				if (items[slot] == 0)
+					items[slot] = atoi(row[1]);
+			}
+		}
 
-        curset = nextset;
-        depth++;
+		curset = nextset;
+		depth++;
 	}
 
 	return true;

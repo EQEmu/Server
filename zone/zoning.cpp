@@ -125,7 +125,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 				return;
 			}
 
-			zone_point = zone->GetClosestZonePoint(GetPosition(), target_zone_id, this, ZONEPOINT_ZONE_RANGE);
+			zone_point = zone->GetClosestZonePoint(glm::vec3(GetPosition()), target_zone_id, this, ZONEPOINT_ZONE_RANGE);
 			//if we didnt get a zone point, or its to a different zone,
 			//then we assume this is invalid.
 			if(!zone_point || zone_point->target_zone_id != target_zone_id) {
@@ -199,9 +199,9 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		dest_z = safe_z;
 		break;
 	case GMSummon:
-		dest_x = m_ZoneSummonLocation.m_X;
-		dest_y = m_ZoneSummonLocation.m_Y;
-		dest_z = m_ZoneSummonLocation.m_Z;
+		dest_x = m_ZoneSummonLocation.x;
+		dest_y = m_ZoneSummonLocation.y;
+		dest_z = m_ZoneSummonLocation.z;
 		ignorerestrictions = 1;
 		break;
 	case GateToBindPoint:
@@ -217,9 +217,9 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		break;
 	case ZoneSolicited: //we told the client to zone somewhere, so we know where they are going.
 		//recycle zonesummon variables
-		dest_x = m_ZoneSummonLocation.m_X;
-		dest_y = m_ZoneSummonLocation.m_Y;
-		dest_z = m_ZoneSummonLocation.m_Z;
+		dest_x = m_ZoneSummonLocation.x;
+		dest_y = m_ZoneSummonLocation.y;
+		dest_z = m_ZoneSummonLocation.z;
 		break;
 	case ZoneUnsolicited: //client came up with this on its own.
 		//client requested a zoning... what are the cases when this could happen?
@@ -351,10 +351,10 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 
 	//set the player's coordinates in the new zone so they have them
 	//when they zone into it
-	m_Position.m_X = dest_x; //these coordinates will now be saved when ~client is called
-	m_Position.m_Y = dest_y;
-	m_Position.m_Z = dest_z;
-	m_Position.m_Heading = dest_h; // Cripp: fix for zone heading
+	m_Position.x = dest_x; //these coordinates will now be saved when ~client is called
+	m_Position.y = dest_y;
+	m_Position.z = dest_z;
+	m_Position.w = dest_h; // Cripp: fix for zone heading
 	m_pp.heading = dest_h;
 	m_pp.zone_id = zone_id;
 	m_pp.zoneInstance = instance_id;
@@ -395,7 +395,7 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 
 	//reset to unsolicited.
 	zone_mode = ZoneUnsolicited;
-	m_ZoneSummonLocation = xyz_location::Origin();
+	m_ZoneSummonLocation = glm::vec3();
 	zonesummon_id = 0;
 	zonesummon_ignorerestrictions = 0;
 }
@@ -492,53 +492,59 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 		return;
 	}
 	iZoneNameLength = strlen(pZoneName);
-    xyz_heading safePoint;
+	glm::vec3 safePoint;
 
 	switch(zm) {
 		case EvacToSafeCoords:
 		case ZoneToSafeCoords:
-            safePoint = zone->GetSafePoint();
-			x = safePoint.m_X;
-			y = safePoint.m_Y;
-			z = safePoint.m_Z;
+			safePoint = zone->GetSafePoint();
+			x = safePoint.x;
+			y = safePoint.y;
+			z = safePoint.z;
 			SetHeading(heading);
 			break;
 		case GMSummon:
-            m_ZoneSummonLocation = m_Position = xyz_heading(x,y,z,heading);
+			m_Position = glm::vec4(x, y, z, heading);
+			m_ZoneSummonLocation = glm::vec3(m_Position);
 			SetHeading(heading);
 
 			zonesummon_id = zoneID;
 			zonesummon_ignorerestrictions = 1;
 			break;
 		case ZoneSolicited:
-			m_ZoneSummonLocation = xyz_location(x,y,z);
+			m_ZoneSummonLocation = glm::vec3(x,y,z);
 			SetHeading(heading);
 
 			zonesummon_id = zoneID;
 			zonesummon_ignorerestrictions = ignorerestrictions;
 			break;
 		case GateToBindPoint:
-			x = m_Position.m_X = m_pp.binds[0].x;
-			y = m_Position.m_Y = m_pp.binds[0].y;
-			z = m_Position.m_Z = m_pp.binds[0].z;
+			x = m_Position.x = m_pp.binds[0].x;
+			y = m_Position.y = m_pp.binds[0].y;
+			z = m_Position.z = m_pp.binds[0].z;
 			heading = m_pp.binds[0].heading;
 			break;
 		case ZoneToBindPoint:
-			x = m_Position.m_X = m_pp.binds[0].x;
-			y = m_Position.m_Y = m_pp.binds[0].y;
-			z = m_Position.m_Z = m_pp.binds[0].z;
+			x = m_Position.x = m_pp.binds[0].x;
+			y = m_Position.y = m_pp.binds[0].y;
+			z = m_Position.z = m_pp.binds[0].z;
 			heading = m_pp.binds[0].heading;
 
 			zonesummon_ignorerestrictions = 1;
-			Log.Out(Logs::General, Logs::None, "Player %s has died and will be zoned to bind point in zone: %s at LOC x=%f, y=%f, z=%f, heading=%f", GetName(), pZoneName, m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, m_pp.binds[0].heading);
+			Log.Out(Logs::General, Logs::None, "Player %s has died and will be zoned to bind point in zone: %s at LOC x=%f, y=%f, z=%f, heading=%f", 
+					GetName(), pZoneName, m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, m_pp.binds[0].heading);
 			break;
 		case SummonPC:
-            m_ZoneSummonLocation = m_Position = xyz_location(x, y, z);
+			m_ZoneSummonLocation = glm::vec3(x, y, z);
+			m_Position = glm::vec4(m_ZoneSummonLocation, 0.0f);
 			SetHeading(heading);
 			break;
 		case Rewind:
-			Log.Out(Logs::General, Logs::None, "%s has requested a /rewind from %f, %f, %f, to %f, %f, %f in %s", GetName(), m_Position.m_X, m_Position.m_Y, m_Position.m_Z, m_RewindLocation.m_X, m_RewindLocation.m_Y, m_RewindLocation.m_Z, zone->GetShortName());
-			m_ZoneSummonLocation = m_Position = xyz_location(x, y, z);
+			Log.Out(Logs::General, Logs::None, "%s has requested a /rewind from %f, %f, %f, to %f, %f, %f in %s", GetName(), 
+					m_Position.x, m_Position.y, m_Position.z, 
+					m_RewindLocation.x, m_RewindLocation.y, m_RewindLocation.z, zone->GetShortName());
+			m_ZoneSummonLocation = glm::vec3(x, y, z);
+			m_Position = glm::vec4(m_ZoneSummonLocation, 0.0f);
 			SetHeading(heading);
 			break;
 		default:
@@ -648,8 +654,8 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 		else {
 			if(zoneID == GetZoneID()) {
 				//properly handle proximities
-				entity_list.ProcessMove(this, m_Position);
-				m_Proximity = m_Position;
+				entity_list.ProcessMove(this, glm::vec3(m_Position));
+				m_Proximity = glm::vec3(m_Position);
 
 				//send out updates to people in zone.
 				SendPosition();
@@ -678,7 +684,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 		{
 			if(zm != EvacToSafeCoords && zm != ZoneToSafeCoords && zm != ZoneToBindPoint)
 			{
-                m_ZoneSummonLocation = xyz_location::Origin();
+				m_ZoneSummonLocation = glm::vec3();
 				zonesummon_id = 0;
 				zonesummon_ignorerestrictions = 0;
 				zone_mode = ZoneUnsolicited;
@@ -711,22 +717,22 @@ void NPC::Gate() {
 	Mob::Gate();
 }
 
-void Client::SetBindPoint(int to_zone, int to_instance, const xyz_location& location) {
+void Client::SetBindPoint(int to_zone, int to_instance, const glm::vec3& location) {
 	if (to_zone == -1) {
 		m_pp.binds[0].zoneId = zone->GetZoneID();
 		m_pp.binds[0].instance_id = (zone->GetInstanceID() != 0 && zone->IsInstancePersistent()) ? zone->GetInstanceID() : 0;
-		m_pp.binds[0].x = m_Position.m_X;
-		m_pp.binds[0].y = m_Position.m_Y;
-		m_pp.binds[0].z = m_Position.m_Z;
+		m_pp.binds[0].x = m_Position.x;
+		m_pp.binds[0].y = m_Position.y;
+		m_pp.binds[0].z = m_Position.z;
 	}
 	else {
 		m_pp.binds[0].zoneId = to_zone;
 		m_pp.binds[0].instance_id = to_instance;
-		m_pp.binds[0].x = location.m_X;
-		m_pp.binds[0].y = location.m_Y;
-		m_pp.binds[0].z = location.m_Z;
+		m_pp.binds[0].x = location.x;
+		m_pp.binds[0].y = location.y;
+		m_pp.binds[0].z = location.z;
 	}
-	auto regularBindPoint = xyz_heading(m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, 0.0f);
+	auto regularBindPoint = glm::vec4(m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, 0.0f);
 	database.SaveCharacterBindPoint(this->CharacterID(), m_pp.binds[0].zoneId, m_pp.binds[0].instance_id, regularBindPoint, 0);
 }
 
@@ -779,12 +785,12 @@ void Client::LoadZoneFlags() {
 	// Retrieve all waypoints for this grid
 	std::string query = StringFormat("SELECT zoneID from zone_flags WHERE charID=%d", CharacterID());
 	auto results = database.QueryDatabase(query);
-    if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "MySQL Error while trying to load zone flags for %s: %s", GetName(), results.ErrorMessage().c_str());
-        return;
-    }
+	if (!results.Success()) {
+		Log.Out(Logs::General, Logs::Error, "MySQL Error while trying to load zone flags for %s: %s", GetName(), results.ErrorMessage().c_str());
+		return;
+	}
 
-    for(auto row = results.begin(); row != results.end(); ++row)
+	for(auto row = results.begin(); row != results.end(); ++row)
 		zone_flags.insert(atoi(row[0]));
 }
 

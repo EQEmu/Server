@@ -363,7 +363,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	casting_spell_type = type;
 
 	SaveSpellLoc();
-	Log.Out(Logs::Detail, Logs::Spells, "Casting %d Started at (%.3f,%.3f,%.3f)", spell_id, m_SpellLocation.m_X, m_SpellLocation.m_Y, m_SpellLocation.m_Z);
+	Log.Out(Logs::Detail, Logs::Spells, "Casting %d Started at (%.3f,%.3f,%.3f)", spell_id, m_SpellLocation.x, m_SpellLocation.y, m_SpellLocation.z);
 
 	// if this spell doesn't require a target, or if it's an optional target
 	// and a target wasn't provided, then it's us; unless TGB is on and this
@@ -534,8 +534,8 @@ bool Mob::DoCastingChecks()
 		return false;
 	}
 
-	if (zone->IsSpellBlocked(spell_id, GetPosition())) {
-		const char *msg = zone->GetSpellBlockedMessage(spell_id, GetPosition());
+	if(zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
+		const char *msg = zone->GetSpellBlockedMessage(spell_id, glm::vec3(GetPosition()));
 		if (msg) {
 			Message(13, msg);
 			return false;
@@ -1919,8 +1919,8 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 
 	if(IsClient() && !CastToClient()->GetGM()){
 
-		if(zone->IsSpellBlocked(spell_id, GetPosition())){
-			const char *msg = zone->GetSpellBlockedMessage(spell_id, GetPosition());
+		if(zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))){
+			const char *msg = zone->GetSpellBlockedMessage(spell_id, glm::vec3(GetPosition()));
 			if(msg){
 				Message(13, msg);
 				return false;
@@ -2003,7 +2003,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	}
 	if(spell_target != nullptr && spell_target != this) {
 		//casting a spell on somebody but ourself, make sure they are in range
-		float dist2 = ComparativeDistance(m_Position, spell_target->GetPosition());
+		float dist2 = DistanceSquared(m_Position, spell_target->GetPosition());
 		float range2 = range * range;
 		float min_range2 = spells[spell_id].min_range * spells[spell_id].min_range;
 		if(dist2 > range2) {
@@ -2345,7 +2345,7 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 	range = GetActSpellRange(spell_id, spells[spell_id].range, true);
 	if(spell_target != nullptr && spell_target != this) {
 		//casting a spell on somebody but ourself, make sure they are in range
-		float dist2 = ComparativeDistance(m_Position, spell_target->GetPosition());
+		float dist2 = DistanceSquared(m_Position, spell_target->GetPosition());
 		float range2 = range * range;
 		if(dist2 > range2) {
 			//target is out of range.
@@ -3857,9 +3857,9 @@ void Corpse::CastRezz(uint16 spellid, Mob* Caster)
 	rezz->zone_id = zone->GetZoneID();
 	rezz->instance_id = zone->GetInstanceID();
 	rezz->spellid = spellid;
-	rezz->x = this->m_Position.m_X;
-	rezz->y = this->m_Position.m_Y;
-	rezz->z = this->m_Position.m_Z;
+	rezz->x = this->m_Position.x;
+	rezz->y = this->m_Position.y;
+	rezz->z = this->m_Position.z;
 	rezz->unknown000 = 0x00000000;
 	rezz->unknown020 = 0x00000000;
 	rezz->unknown088 = 0x00000000;

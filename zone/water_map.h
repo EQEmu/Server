@@ -26,11 +26,11 @@ public:
 	virtual ~WaterMap() { }
 
 	static WaterMap* LoadWaterMapfile(std::string zone_name);
-	virtual WaterRegionType ReturnRegionType(const xyz_location& location) const { return RegionTypeNormal; }
-	virtual bool InWater(const xyz_location& location) const { return false; }
-	virtual bool InVWater(const xyz_location& location) const { return false; }
-	virtual bool InLava(const xyz_location& location) const { return false; }
-	virtual bool InLiquid(const xyz_location& location) const { return false; }
+	virtual WaterRegionType ReturnRegionType(const glm::vec3& location) const = 0;
+	virtual bool InWater(const glm::vec3& location) const = 0;
+	virtual bool InVWater(const glm::vec3& location) const = 0;
+	virtual bool InLava(const glm::vec3& location) const = 0;
+	virtual bool InLiquid(const glm::vec3& location) const = 0;
 
 protected:
 	virtual bool Load(FILE *fp) { return false; }

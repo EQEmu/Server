@@ -1215,14 +1215,14 @@ bool ZoneDatabase::SaveCharacterLanguage(uint32 character_id, uint32 lang_id, ui
 	return true;
 }
 
-bool ZoneDatabase::SaveCharacterBindPoint(uint32 character_id, uint32 zone_id, uint32 instance_id, const xyz_heading& position, uint8 is_home){
+bool ZoneDatabase::SaveCharacterBindPoint(uint32 character_id, uint32 zone_id, uint32 instance_id, const glm::vec4& position, uint8 is_home){
 	if (zone_id <= 0) {
 		return false;
 	}
 
 	/* Save Home Bind Point */
 	std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
-		" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)", character_id, zone_id, instance_id, position.m_X, position.m_Y, position.m_Z, position.m_Heading, is_home);
+		" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)", character_id, zone_id, instance_id, position.x, position.y, position.z, position.w, is_home);
 	Log.Out(Logs::General, Logs::None, "ZoneDatabase::SaveCharacterBindPoint for character ID: %i zone_id: %u instance_id: %u position: %s ishome: %u", character_id, zone_id, instance_id, to_string(position).c_str(), is_home);
 	auto results = QueryDatabase(query);
 	if (!results.RowsAffected()) {
@@ -2502,11 +2502,11 @@ void ZoneDatabase::DeleteMerchantTemp(uint32 npcid, uint32 slot){
 	QueryDatabase(query);
 }
 
-bool ZoneDatabase::UpdateZoneSafeCoords(const char* zonename, const xyz_location& location) {
+bool ZoneDatabase::UpdateZoneSafeCoords(const char* zonename, const glm::vec3& location) {
 
 	std::string query = StringFormat("UPDATE zone SET safe_x='%f', safe_y='%f', safe_z='%f' "
                                     "WHERE short_name='%s';",
-                                    location.m_X, location.m_Y, location.m_Z, zonename);
+                                    location.x, location.y, location.z, zonename);
 	auto results = QueryDatabase(query);
 	if (!results.Success() || results.RowsAffected() == 0)
 		return false;
@@ -2690,8 +2690,8 @@ bool ZoneDatabase::LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked
         memset(&into[index], 0, sizeof(ZoneSpellsBlocked));
         into[index].spellid = atoi(row[1]);
         into[index].type = atoi(row[2]);
-        into[index].m_Location = xyz_location(atof(row[3]), atof(row[4]), atof(row[5]));
-        into[index].m_Difference = xyz_location(atof(row[6]), atof(row[7]), atof(row[8]));
+        into[index].m_Location = glm::vec3(atof(row[3]), atof(row[4]), atof(row[5]));
+        into[index].m_Difference = glm::vec3(atof(row[6]), atof(row[7]), atof(row[8]));
         strn0cpy(into[index].message, row[9], 255);
     }
 
@@ -2766,7 +2766,7 @@ void ZoneDatabase::QGlobalPurge()
 	database.QueryDatabase(query);
 }
 
-void ZoneDatabase::InsertDoor(uint32 ddoordbid, uint16 ddoorid, const char* ddoor_name, const xyz_heading& position, uint8 dopentype, uint16 dguildid, uint32 dlockpick, uint32 dkeyitem, uint8 ddoor_param, uint8 dinvert, int dincline, uint16 dsize){
+void ZoneDatabase::InsertDoor(uint32 ddoordbid, uint16 ddoorid, const char* ddoor_name, const glm::vec4& position, uint8 dopentype, uint16 dguildid, uint32 dlockpick, uint32 dkeyitem, uint8 ddoor_param, uint8 dinvert, int dincline, uint16 dsize){
 
 	std::string query = StringFormat("REPLACE INTO doors (id, doorid, zone, version, name, "
                                     "pos_x, pos_y, pos_z, heading, opentype, guild, lockpick, "
@@ -2774,7 +2774,7 @@ void ZoneDatabase::InsertDoor(uint32 ddoordbid, uint16 ddoorid, const char* ddoo
                                     "VALUES('%i', '%i', '%s', '%i', '%s', '%f', '%f', "
                                     "'%f', '%f', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i')",
                                     ddoordbid, ddoorid, zone->GetShortName(), zone->GetInstanceVersion(),
-                                    ddoor_name, position.m_X, position.m_Y, position.m_Z, position.m_Heading,
+                                    ddoor_name, position.x, position.y, position.z, position.w,
                                     dopentype, dguildid, dlockpick, dkeyitem, ddoor_param, dinvert, dincline, dsize);
     QueryDatabase(query);
 }
@@ -3344,23 +3344,23 @@ uint32 ZoneDatabase::AddGraveyardIDToZone(uint32 zone_id, uint32 graveyard_id) {
 	return zone_id;
 }
 
-uint32 ZoneDatabase::CreateGraveyardRecord(uint32 graveyard_zone_id, const xyz_heading& position) {
+uint32 ZoneDatabase::CreateGraveyardRecord(uint32 graveyard_zone_id, const glm::vec4& position) {
 	std::string query = StringFormat("INSERT INTO `graveyard` "
                                     "SET `zone_id` = %u, `x` = %1.1f, `y` = %1.1f, `z` = %1.1f, `heading` = %1.1f",
-                                    graveyard_zone_id, position.m_X, position.m_Y, position.m_Z, position.m_Heading);
+                                    graveyard_zone_id, position.x, position.y, position.z, position.w);
 	auto results = QueryDatabase(query);
 	if (results.Success())
 		return results.LastInsertedID();
 
 	return 0;
 }
-uint32 ZoneDatabase::SendCharacterCorpseToGraveyard(uint32 dbid, uint32 zone_id, uint16 instance_id, const xyz_heading& position) {
+uint32 ZoneDatabase::SendCharacterCorpseToGraveyard(uint32 dbid, uint32 zone_id, uint16 instance_id, const glm::vec4& position) {
 	std::string query = StringFormat("UPDATE `character_corpses` "
                                     "SET `zone_id` = %u, `instance_id` = 0, "
                                     "`x` = %1.1f, `y` = %1.1f, `z` = %1.1f, `heading` = %1.1f, "
                                     "`was_at_graveyard` = 1 "
                                     "WHERE `id` = %d",
-                                    zone_id, position.m_X, position.m_Y, position.m_Z, position.m_Heading, dbid);
+                                    zone_id, position.x, position.y, position.z, position.w, dbid);
 	QueryDatabase(query);
 	return dbid;
 }
@@ -3375,7 +3375,7 @@ uint32 ZoneDatabase::GetCharacterCorpseDecayTimer(uint32 corpse_db_id){
 	return 0;
 }
 
-uint32 ZoneDatabase::UpdateCharacterCorpse(uint32 db_id, uint32 char_id, const char* char_name, uint32 zone_id, uint16 instance_id, PlayerCorpse_Struct* dbpc, const xyz_heading& position, bool is_rezzed) {
+uint32 ZoneDatabase::UpdateCharacterCorpse(uint32 db_id, uint32 char_id, const char* char_name, uint32 zone_id, uint16 instance_id, PlayerCorpse_Struct* dbpc, const glm::vec4& position, bool is_rezzed) {
 	std::string query = StringFormat("UPDATE `character_corpses` "
                                     "SET `charname` = '%s', `zone_id` = %u, `instance_id` = %u, `charid` = %d, "
                                     "`x` = %1.1f,`y` =	%1.1f,`z` =	%1.1f, `heading` = %1.1f, "
@@ -3390,7 +3390,7 @@ uint32 ZoneDatabase::UpdateCharacterCorpse(uint32 db_id, uint32 char_id, const c
                                     "`wc_7` = %u, `wc_8` = %u, `wc_9` = %u "
                                     "WHERE `id` = %u",
                                     EscapeString(char_name).c_str(), zone_id, instance_id, char_id,
-                                    position.m_X, position.m_Y, position.m_Z, position.m_Heading,
+                                    position.x, position.y, position.z, position.w,
                                     dbpc->locked, dbpc->exp, dbpc->size, dbpc->level, dbpc->race,
                                     dbpc->gender, dbpc->class_, dbpc->deity, dbpc->texture,
                                     dbpc->helmtexture, dbpc->copper, dbpc->silver, dbpc->gold,
@@ -3411,7 +3411,7 @@ void ZoneDatabase::MarkCorpseAsRezzed(uint32 db_id) {
 	auto results = QueryDatabase(query);
 }
 
-uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const xyz_heading& position) {
+uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const glm::vec4& position) {
 	/* Dump Basic Corpse Data */
 	std::string query = StringFormat("INSERT INTO `character_corpses` "
                                     "SET `charname` = '%s', `zone_id` =	%u, `instance_id` =	%u, `charid` = %d,"
@@ -3427,7 +3427,7 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
                                     "`wc_3` = %u, `wc_4` = %u, `wc_5` = %u, `wc_6` = %u,"
                                     "`wc_7` = %u,`wc_8` = %u,`wc_9`	= %u",
                                     EscapeString(charname).c_str(), zoneid, instanceid, charid,
-                                    position.m_X, position.m_Y, position.m_Z, position.m_Heading,
+                                    position.x, position.y, position.z, position.w,
                                     dbpc->locked, dbpc->exp, dbpc->size, dbpc->level, dbpc->race,
                                     dbpc->gender, dbpc->class_, dbpc->deity, dbpc->texture,
                                     dbpc->helmtexture, dbpc->copper, dbpc->silver, dbpc->gold,
@@ -3656,7 +3656,7 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 	return true;
 }
 
-Corpse* ZoneDatabase::SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_zone_id, uint16 dest_instance_id, const xyz_heading& position) {
+Corpse* ZoneDatabase::SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_zone_id, uint16 dest_instance_id, const glm::vec4& position) {
 	Corpse* corpse = nullptr;
 	std::string query = StringFormat("SELECT `id`, `charname`, `time_of_death`, `is_rezzed` "
                                     "FROM `character_corpses` "
@@ -3688,13 +3688,13 @@ Corpse* ZoneDatabase::SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_z
 	return corpse;
 }
 
-bool ZoneDatabase::SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zone_id, uint16 dest_instance_id, const xyz_heading& position) {
+bool ZoneDatabase::SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zone_id, uint16 dest_instance_id, const glm::vec4& position) {
 	Corpse* corpse = nullptr;
 	int CorpseCount = 0;
 
 	std::string query = StringFormat(
 		"UPDATE character_corpses SET zone_id = %i, instance_id = %i, x = %f, y = %f, z = %f, heading = %f, is_buried = 0, was_at_graveyard = 0 WHERE charid = %i",
-		dest_zone_id, dest_instance_id, position.m_X, position.m_Y, position.m_Z, position.m_Heading, char_id
+		dest_zone_id, dest_instance_id, position.x, position.y, position.z, position.w, char_id
 	);
 	auto results = QueryDatabase(query);
 
@@ -3728,14 +3728,14 @@ bool ZoneDatabase::SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zone_id
 	return (CorpseCount > 0);
 }
 
-bool ZoneDatabase::UnburyCharacterCorpse(uint32 db_id, uint32 new_zone_id, uint16 new_instance_id, const xyz_heading& position) {
+bool ZoneDatabase::UnburyCharacterCorpse(uint32 db_id, uint32 new_zone_id, uint16 new_instance_id, const glm::vec4& position) {
 	std::string query = StringFormat("UPDATE `character_corpses` "
                                     "SET `is_buried` = 0, `zone_id` = %u, `instance_id` = %u, "
                                     "`x` = %f, `y` = %f, `z` = %f, `heading` = %f, "
                                     "`time_of_death` = Now(), `was_at_graveyard` = 0 "
                                     "WHERE `id` = %u",
                                     new_zone_id, new_instance_id,
-                                    position.m_X, position.m_Y, position.m_Z, position.m_Heading, db_id);
+                                    position.x, position.y, position.z, position.w, db_id);
 	auto results = QueryDatabase(query);
 	if (results.Success() && results.RowsAffected() != 0)
 		return true;
@@ -3751,7 +3751,7 @@ Corpse* ZoneDatabase::LoadCharacterCorpse(uint32 player_corpse_id) {
 	);
 	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
-        auto position = xyz_heading(atof(row[3]), atof(row[4]), atof(row[5]), atof(row[6]));
+        auto position = glm::vec4(atof(row[3]), atof(row[4]), atof(row[5]), atof(row[6]));
 		NewCorpse = Corpse::LoadCharacterCorpseEntity(
 				atoul(row[0]), 		 // id					  uint32 in_dbid
 				atoul(row[1]),		 // charid				  uint32 in_charid
@@ -3777,7 +3777,7 @@ bool ZoneDatabase::LoadCharacterCorpses(uint32 zone_id, uint16 instance_id) {
 
 	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
-        auto position = xyz_heading(atof(row[3]), atof(row[4]), atof(row[5]), atof(row[6]));
+        auto position = glm::vec4(atof(row[3]), atof(row[4]), atof(row[5]), atof(row[6]));
 		entity_list.AddCorpse(
 			 Corpse::LoadCharacterCorpseEntity(
 				atoul(row[0]), 		  // id					  uint32 in_dbid

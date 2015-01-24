@@ -829,10 +829,10 @@ bool EntityList::MakeDoorSpawnPacket(EQApplicationPacket *app, Client *client)
 			memset(&nd, 0, sizeof(nd));
 			memcpy(nd.name, door->GetDoorName(), 32);
 			auto position = door->GetPosition();
-			nd.xPos = position.m_X;
-			nd.yPos = position.m_Y;
-			nd.zPos = position.m_Z;
-			nd.heading = position.m_Heading;
+			nd.xPos = position.x;
+			nd.yPos = position.y;
+			nd.zPos = position.z;
+			nd.heading = position.w;
 			nd.incline = door->GetIncline();
 			nd.size = door->GetSize();
 			nd.doorId = door->GetDoorID();
@@ -1424,7 +1424,7 @@ void EntityList::QueueCloseClients(Mob *sender, const EQApplicationPacket *app,
 				|| (filter2 == FilterShowGroupOnly && (sender == ent ||
 					(ent->GetGroup() && ent->GetGroup()->IsGroupMember(sender))))
 				|| (filter2 == FilterShowSelfOnly && ent == sender))
-			&& (ComparativeDistance(ent->GetPosition(), sender->GetPosition()) <= dist2)) {
+			&& (DistanceSquared(ent->GetPosition(), sender->GetPosition()) <= dist2)) {
 				ent->QueuePacket(app, ackreq, Client::CLIENT_CONNECTED);
 			}
 		}
@@ -1534,13 +1534,13 @@ Client *EntityList::GetClientByWID(uint32 iWID)
 	return nullptr;
 }
 
-Client *EntityList::GetRandomClient(const xyz_location& location, float Distance, Client *ExcludeClient)
+Client *EntityList::GetRandomClient(const glm::vec3& location, float Distance, Client *ExcludeClient)
 {
 	std::vector<Client *> ClientsInRange;
 
 
 	for (auto it = client_list.begin();it != client_list.end(); ++it)
-		if ((it->second != ExcludeClient) && (ComparativeDistance(static_cast<xyz_location>(it->second->GetPosition()), location) <= Distance))
+		if ((it->second != ExcludeClient) && (DistanceSquared(static_cast<glm::vec3>(it->second->GetPosition()), location) <= Distance))
 			ClientsInRange.push_back(it->second);
 
 	if (ClientsInRange.empty())
@@ -1566,7 +1566,7 @@ Corpse *EntityList::GetCorpseByOwnerWithinRange(Client *client, Mob *center, int
 	auto it = corpse_list.begin();
 	while (it != corpse_list.end()) {
 		if (it->second->IsPlayerCorpse())
-			if (ComparativeDistanceNoZ(center->GetPosition(), it->second->GetPosition()) < range &&
+			if (DistanceSquaredNoZ(center->GetPosition(), it->second->GetPosition()) < range &&
 					strcasecmp(it->second->GetOwnerName(), client->GetName()) == 0)
 				return it->second;
 		++it;
@@ -1903,7 +1903,7 @@ void EntityList::MessageClose_StringID(Mob *sender, bool skipsender, float dist,
 
 	for (auto it = client_list.begin(); it != client_list.end(); ++it) {
 		c = it->second;
-		if(c && ComparativeDistance(c->GetPosition(), sender->GetPosition()) <= dist2 && (!skipsender || c != sender))
+		if(c && DistanceSquared(c->GetPosition(), sender->GetPosition()) <= dist2 && (!skipsender || c != sender))
 			c->Message_StringID(type, string_id, message1, message2, message3, message4, message5, message6, message7, message8, message9);
 	}
 }
@@ -1919,7 +1919,7 @@ void EntityList::FilteredMessageClose_StringID(Mob *sender, bool skipsender,
 
 	for (auto it = client_list.begin(); it != client_list.end(); ++it) {
 		c = it->second;
-		if (c && ComparativeDistance(c->GetPosition(), sender->GetPosition()) <= dist2 && (!skipsender || c != sender))
+		if (c && DistanceSquared(c->GetPosition(), sender->GetPosition()) <= dist2 && (!skipsender || c != sender))
 			c->FilteredMessage_StringID(sender, type, filter, string_id,
 					message1, message2, message3, message4, message5,
 					message6, message7, message8, message9);
@@ -1967,7 +1967,7 @@ void EntityList::MessageClose(Mob* sender, bool skipsender, float dist, uint32 t
 
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
-		if (ComparativeDistance(it->second->GetPosition(), sender->GetPosition()) <= dist2 && (!skipsender || it->second != sender))
+		if (DistanceSquared(it->second->GetPosition(), sender->GetPosition()) <= dist2 && (!skipsender || it->second != sender))
 			it->second->Message(type, buffer);
 		++it;
 	}
@@ -2442,7 +2442,7 @@ void EntityList::SendPositionUpdates(Client *client, uint32 cLastUpdate,
 			//bool Grouped = client->HasGroup() && mob->IsClient() && (client->GetGroup() == mob->CastToClient()->GetGroup());
 
 			//if (range == 0 || (iterator.GetData() == alwayssend) || Grouped || (mob->DistNoRootNoZ(*client) <= range)) {
-			if (range == 0 || (it->second == alwayssend) || mob->IsClient() || (ComparativeDistance(mob->GetPosition(), client->GetPosition()) <= range)) {
+			if (range == 0 || (it->second == alwayssend) || mob->IsClient() || (DistanceSquared(mob->GetPosition(), client->GetPosition()) <= range)) {
 				mob->MakeSpawnUpdate(ppu);
 			}
 			if(mob && mob->IsClient() && mob->GetID()>0) {
@@ -2601,8 +2601,8 @@ void EntityList::FindPathsToAllNPCs()
 
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
-		Map::Vertex Node0 = zone->pathing->GetPathNodeCoordinates(0, false);
-		Map::Vertex Dest(it->second->GetX(), it->second->GetY(), it->second->GetZ());
+		glm::vec3 Node0 = zone->pathing->GetPathNodeCoordinates(0, false);
+		glm::vec3 Dest(it->second->GetX(), it->second->GetY(), it->second->GetZ());
 		std::deque<int> Route = zone->pathing->FindRoute(Node0, Dest);
 		if (Route.size() == 0)
 			printf("Unable to find a route to %s\n", it->second->GetName());
@@ -3051,14 +3051,13 @@ void EntityList::OpenDoorsNear(NPC *who)
 	for (auto it = door_list.begin();it != door_list.end(); ++it) {
 		Doors *cdoor = it->second;
 		if (!cdoor || cdoor->IsDoorOpen())
-            continue;
+			continue;
 
 		auto diff = who->GetPosition() - cdoor->GetPosition();
-        diff.ABS_XYZ();
 
-		float curdist = diff.m_X * diff.m_X + diff.m_Y * diff.m_Y;
+		float curdist = diff.x * diff.x + diff.y * diff.y;
 
-		if (diff.m_Z * diff.m_Z < 10 && curdist <= 100)
+		if (diff.z * diff.z < 10 && curdist <= 100)
 			cdoor->NPCOpen(who);
 	}
 }
@@ -3070,20 +3069,20 @@ void EntityList::SendAlarm(Trap *trap, Mob *currenttarget, uint8 kos)
 	for (auto it = npc_list.begin();it != npc_list.end(); ++it) {
 		NPC *cur = it->second;
 
-		auto diff = cur->GetPosition() - trap->m_Position;
-		float curdist = diff.m_X * diff.m_X + diff.m_Y * diff.m_Y + diff.m_Z * diff.m_Z;
+		auto diff = glm::vec3(cur->GetPosition()) - trap->m_Position;
+		float curdist = diff.x * diff.x + diff.y * diff.y + diff.z * diff.z;
 
 		if (cur->GetOwner() || cur->IsEngaged() || curdist > preSquareDistance )
 			continue;
 
 		if (kos) {
-            uint8 factioncon = currenttarget->GetReverseFactionCon(cur);
+			uint8 factioncon = currenttarget->GetReverseFactionCon(cur);
 			if (factioncon == FACTION_THREATENLY || factioncon == FACTION_SCOWLS) {
 				cur->AddToHateList(currenttarget,1);
 			}
-        }
-        else
-            cur->AddToHateList(currenttarget,1);
+		}
+		else
+			cur->AddToHateList(currenttarget,1);
 	}
 }
 
@@ -3120,7 +3119,7 @@ struct quest_proximity_event {
 	int area_type;
 };
 
-void EntityList::ProcessMove(Client *c, const xyz_location& location)
+void EntityList::ProcessMove(Client *c, const glm::vec3& location)
 {
 	float last_x = c->ProximityX();
 	float last_y = c->ProximityY();
@@ -3142,9 +3141,9 @@ void EntityList::ProcessMove(Client *c, const xyz_location& location)
 				last_z < l->min_z || last_z > l->max_z) {
 			old_in = false;
 		}
-		if (location.m_X < l->min_x || location.m_X > l->max_x ||
-				location.m_Y < l->min_y || location.m_Y > l->max_y ||
-				location.m_Z < l->min_z || location.m_Z > l->max_z) {
+		if (location.x < l->min_x || location.x > l->max_x ||
+				location.y < l->min_y || location.y > l->max_y ||
+				location.z < l->min_z || location.z > l->max_z) {
 			new_in = false;
 		}
 
@@ -3177,9 +3176,9 @@ void EntityList::ProcessMove(Client *c, const xyz_location& location)
 			old_in = false;
 		}
 
-		if (location.m_X < a.min_x || location.m_X > a.max_x ||
-				location.m_Y < a.min_y || location.m_Y > a.max_y ||
-				location.m_Z < a.min_z || location.m_Z > a.max_z ) {
+		if (location.x < a.min_x || location.x > a.max_x ||
+				location.y < a.min_y || location.y > a.max_y ||
+				location.z < a.min_z || location.z > a.max_z ) {
 			new_in = false;
 		}
 
@@ -3583,9 +3582,9 @@ bool Entity::CheckCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z,
 	if (zone->zonemap == nullptr)
 		return true;
 
-	Map::Vertex myloc;
-	Map::Vertex oloc;
-	Map::Vertex hit;
+	glm::vec3 myloc;
+	glm::vec3 oloc;
+	glm::vec3 hit;
 
 	myloc.x = cur_x;
 	myloc.y = cur_y;
@@ -3619,7 +3618,7 @@ void EntityList::QuestJournalledSayClose(Mob *sender, Client *QuestInitiator,
 	// Use the old method for all other nearby clients
 	for (auto it = client_list.begin(); it != client_list.end(); ++it) {
 		c = it->second;
-		if(c && (c != QuestInitiator) && ComparativeDistance(c->GetPosition(), sender->GetPosition()) <= dist2)
+		if(c && (c != QuestInitiator) && DistanceSquared(c->GetPosition(), sender->GetPosition()) <= dist2)
 			c->Message_StringID(10, GENERIC_SAY, mobname, message);
 	}
 }
@@ -3744,46 +3743,46 @@ void EntityList::GroupMessage(uint32 gid, const char *from, const char *message)
 	}
 }
 
-uint16 EntityList::CreateGroundObject(uint32 itemid, const xyz_heading& position, uint32 decay_time)
+uint16 EntityList::CreateGroundObject(uint32 itemid, const glm::vec4& position, uint32 decay_time)
 {
 	const Item_Struct *is = database.GetItem(itemid);
 	if (!is)
-        return 0;
+		return 0;
 
-    ItemInst *i = new ItemInst(is, is->MaxCharges);
-    if (!i)
-        return 0;
+	ItemInst *i = new ItemInst(is, is->MaxCharges);
+	if (!i)
+		return 0;
 
-    Object *object = new Object(i, position.m_X, position.m_Y, position.m_Z, position.m_Heading,decay_time);
-    entity_list.AddObject(object, true);
+	Object *object = new Object(i, position.x, position.y, position.z, position.w,decay_time);
+	entity_list.AddObject(object, true);
 
-    safe_delete(i);
-    if (!object)
-        return 0;
+	safe_delete(i);
+	if (!object)
+		return 0;
 
-    return object->GetID();
+	return object->GetID();
 }
 
-uint16 EntityList::CreateGroundObjectFromModel(const char *model, const xyz_heading& position, uint8 type, uint32 decay_time)
+uint16 EntityList::CreateGroundObjectFromModel(const char *model, const glm::vec4& position, uint8 type, uint32 decay_time)
 {
 	if (!model)
-        return 0;
+		return 0;
 
-    Object *object = new Object(model, position.m_X, position.m_Y, position.m_Z, position.m_Heading, type);
-    entity_list.AddObject(object, true);
+	Object *object = new Object(model, position.x, position.y, position.z, position.w, type);
+	entity_list.AddObject(object, true);
 
-    if (!object)
-        return 0;
+	if (!object)
+		return 0;
 
-    return object->GetID();
+	return object->GetID();
 }
 
-uint16 EntityList::CreateDoor(const char *model, const xyz_heading& position, uint8 opentype, uint16 size)
+uint16 EntityList::CreateDoor(const char *model, const glm::vec4& position, uint8 opentype, uint16 size)
 {
 	if (!model)
-        return 0; // fell through everything, this is bad/incomplete from perl
+		return 0; // fell through everything, this is bad/incomplete from perl
 
-    Doors *door = new Doors(model, position, opentype, size);
+	Doors *door = new Doors(model, position, opentype, size);
 	RemoveAllDoors();
 	zone->LoadZoneDoors(zone->GetShortName(), zone->GetInstanceVersion());
 	entity_list.AddDoor(door);
@@ -3821,7 +3820,7 @@ Mob *EntityList::GetTargetForMez(Mob *caster)
 				continue;
 			}
 
-			if (ComparativeDistance(caster->GetPosition(), d->GetPosition()) > 22250) { //only pick targets within 150 range
+			if (DistanceSquared(caster->GetPosition(), d->GetPosition()) > 22250) { //only pick targets within 150 range
 				++it;
 				continue;
 			}

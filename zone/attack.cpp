@@ -2462,7 +2462,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 	}
 
 	if(IsNPC() && CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
-		if(!zone->watermap->InLiquid(other->GetPosition())) {
+		if(!zone->watermap->InLiquid(glm::vec3(other->GetPosition()))) {
 			return;
 		}
 	}
@@ -3908,8 +3908,8 @@ void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand) {
 					float chance = ProcChance * (static_cast<float>(DefensiveProcs[i].chance)/100.0f);
 					if (zone->random.Roll(chance)) {
 						ExecWeaponProc(nullptr, DefensiveProcs[i].spellID, on);
-						CheckNumHitsRemaining(NumHit::DefensiveSpellProcs, 0,
-								      DefensiveProcs[i].base_spellID);
+						CheckNumHitsRemaining(NumHit::DefensiveSpellProcs, 0, 
+											  DefensiveProcs[i].base_spellID);
 					}
 				}
 			}
@@ -4086,7 +4086,7 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 							i, SpellProcs[i].spellID, chance);
 					ExecWeaponProc(nullptr, SpellProcs[i].spellID, on);
 					CheckNumHitsRemaining(NumHit::OffensiveSpellProcs, 0,
-							      SpellProcs[i].base_spellID);
+								  SpellProcs[i].base_spellID);
 				} else {
 					Log.Out(Logs::Detail, Logs::Combat,
 							"Spell proc %d failed to proc %d (%.2f percent chance)",
@@ -4103,7 +4103,7 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 							i, RangedProcs[i].spellID, chance);
 					ExecWeaponProc(nullptr, RangedProcs[i].spellID, on);
 					CheckNumHitsRemaining(NumHit::OffensiveSpellProcs, 0,
-							      RangedProcs[i].base_spellID);
+								  RangedProcs[i].base_spellID);
 				} else {
 					Log.Out(Logs::Detail, Logs::Combat,
 							"Ranged proc %d failed to proc %d (%.2f percent chance)",
@@ -4521,7 +4521,7 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 							if (zone->random.Roll(final_chance)) {
 								ExecWeaponProc(nullptr, proc_spell_id, on);
 								CheckNumHitsRemaining(NumHit::OffensiveSpellProcs, 0,
-										      base_spell_id);
+											  base_spell_id);
 								CanProc = false;
 								break;
 							}
@@ -4815,20 +4815,20 @@ void Mob::CommonBreakInvisible()
 
 /* Dev quotes:
  * Old formula
- *     Final delay = (Original Delay / (haste mod *.01f)) + ((Hundred Hands / 100) * Original Delay)
+ *	 Final delay = (Original Delay / (haste mod *.01f)) + ((Hundred Hands / 100) * Original Delay)
  * New formula
- *     Final delay = (Original Delay / (haste mod *.01f)) + ((Hundred Hands / 1000) * (Original Delay / (haste mod *.01f))
- * Base Delay      20              25              30              37
- * Haste           2.25            2.25            2.25            2.25
- * HHE (old)      -17             -17             -17             -17
- * Final Delay     5.488888889     6.861111111     8.233333333     10.15444444
+ *	 Final delay = (Original Delay / (haste mod *.01f)) + ((Hundred Hands / 1000) * (Original Delay / (haste mod *.01f))
+ * Base Delay	  20			  25			  30			  37
+ * Haste		   2.25			2.25			2.25			2.25
+ * HHE (old)	  -17			 -17			 -17			 -17
+ * Final Delay	 5.488888889	 6.861111111	 8.233333333	 10.15444444
  *
- * Base Delay      20              25              30              37
- * Haste           2.25            2.25            2.25            2.25
- * HHE (new)      -383            -383            -383            -383
- * Final Delay     5.484444444     6.855555556     8.226666667     10.14622222
+ * Base Delay	  20			  25			  30			  37
+ * Haste		   2.25			2.25			2.25			2.25
+ * HHE (new)	  -383			-383			-383			-383
+ * Final Delay	 5.484444444	 6.855555556	 8.226666667	 10.14622222
  *
- * Difference     -0.004444444   -0.005555556   -0.006666667   -0.008222222
+ * Difference	 -0.004444444   -0.005555556   -0.006666667   -0.008222222
  *
  * These times are in 10th of a second
  */

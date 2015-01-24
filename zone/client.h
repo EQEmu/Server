@@ -398,10 +398,10 @@ public:
 
 	inline const char* GetLastName() const { return lastname; }
 
-	inline float ProximityX() const { return m_Proximity.m_X; }
-	inline float ProximityY() const { return m_Proximity.m_Y; }
-	inline float ProximityZ() const { return m_Proximity.m_Z; }
-	inline void ClearAllProximities() { entity_list.ProcessMove(this, xyz_location(FLT_MAX, FLT_MAX, FLT_MAX)); m_Proximity = xyz_location(FLT_MAX,FLT_MAX,FLT_MAX); }
+	inline float ProximityX() const { return m_Proximity.x; }
+	inline float ProximityY() const { return m_Proximity.y; }
+	inline float ProximityZ() const { return m_Proximity.z; }
+	inline void ClearAllProximities() { entity_list.ProcessMove(this, glm::vec3(FLT_MAX, FLT_MAX, FLT_MAX)); m_Proximity = glm::vec3(FLT_MAX,FLT_MAX,FLT_MAX); }
 
 	/*
 			Begin client modifiers
@@ -580,7 +580,7 @@ public:
 	void GoToBind(uint8 bindnum = 0);
 	void GoToSafeCoords(uint16 zone_id, uint16 instance_id);
 	void Gate();
-	void SetBindPoint(int to_zone = -1, int to_instance = 0, const xyz_location& location = xyz_location::Origin());
+	void SetBindPoint(int to_zone = -1, int to_instance = 0, const glm::vec3& location = glm::vec3());
 	void SetStartZone(uint32 zoneid, float x = 0.0f, float y =0.0f, float z = 0.0f);
 	uint32 GetStartZone(void);
 	void MovePC(const char* zonename, float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
@@ -1077,7 +1077,7 @@ public:
 	void DoItemEnterZone();
 	bool DoItemEnterZone(uint32 slot_x, uint32 slot_y); // behavior change: 'slot_y' is now [RANGE]_END and not [RANGE]_END + 1
 	void SummonAndRezzAllCorpses();
-	void SummonAllCorpses(const xyz_heading& position);
+	void SummonAllCorpses(const glm::vec4& position);
 	void DepopAllCorpses();
 	void DepopPlayerCorpse(uint32 dbid);
 	void BuryPlayerCorpses();
@@ -1266,8 +1266,8 @@ protected:
 
 	Mob* bind_sight_target;
 
-	xyz_heading m_AutoAttackPosition;
-	xyz_location m_AutoAttackTargetLocation;
+	glm::vec4 m_AutoAttackPosition;
+	glm::vec3 m_AutoAttackTargetLocation;
 	Mob *aa_los_them_mob;
 	bool los_status;
 	bool los_status_facing;
@@ -1423,7 +1423,7 @@ private:
 	void ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z, float heading, uint8 ignorerestrictions, ZoneMode zm);
 	void ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
 
-	xyz_location m_ZoneSummonLocation;
+	glm::vec3 m_ZoneSummonLocation;
 	uint16 zonesummon_id;
 	uint8 zonesummon_ignorerestrictions;
 	ZoneMode zone_mode;
@@ -1462,7 +1462,7 @@ private:
 	Timer RespawnFromHoverTimer;
 	Timer merc_timer;
 
-    xyz_location m_Proximity;
+    glm::vec3 m_Proximity;
 
 	void BulkSendInventoryItems();
 

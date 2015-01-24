@@ -19,97 +19,35 @@
 #define POSITION_H
 
 #include <string>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+#include <glm/geometric.hpp>
 
-class xy_location
-{
-public:
-	float m_X;
-	float m_Y;
+std::string to_string(const glm::vec4 &position);
+std::string to_string(const glm::vec3 &position);
+std::string to_string(const glm::vec2 &position);
 
-	xy_location(float x = 0.0f, float y = 0.0f);
+bool IsWithinAxisAlignedBox(const glm::vec3 &position, const glm::vec3 &minimum, const glm::vec3 &maximum);
+bool IsWithinAxisAlignedBox(const glm::vec2 &position, const glm::vec2 &minimum, const glm::vec2 &maximum);
 
-	xy_location operator-(const xy_location &rhs) const;
-	xy_location operator+(const xy_location &rhs) const;
-};
+bool IsOrigin(const glm::vec2 &position);
+bool IsOrigin(const glm::vec3 &position);
+bool IsOrigin(const glm::vec4 &position);
 
-class xyz_location
-{
-public:
-	float m_X;
-	float m_Y;
-	float m_Z;
+float DistanceSquared(const glm::vec2& point1, const glm::vec2& point2);
+float Distance(const glm::vec2& point1, const glm::vec2& point2);
+float DistanceSquared(const glm::vec3& point1, const glm::vec3& point2);
+float Distance(const glm::vec3& point1, const glm::vec3& point2);
+float DistanceNoZ(const glm::vec3& point1, const glm::vec3& point2);
+float DistanceSquaredNoZ(const glm::vec3& point1, const glm::vec3& point2);
 
-	static const xyz_location &Origin()
-	{
-		static xyz_location origin;
-		return origin;
-	}
+float DistanceSquared(const glm::vec4& point1, const glm::vec4& point2);
+float Distance(const glm::vec4& point1, const glm::vec4& point2);
+float DistanceNoZ(const glm::vec4& point1, const glm::vec4& point2);
+float DistanceSquaredNoZ(const glm::vec4& point1, const glm::vec4& point2);
 
-	xyz_location(float x = 0.0f, float y = 0.0f, float z = 0.0f);
-	xyz_location(double x, double y, double z);
-
-	operator xy_location() const;
-
-	xyz_location operator-(const xyz_location &rhs) const;
-	xyz_location operator+(const xyz_location &rhs) const;
-
-	void ABS_XYZ();
-	bool isOrigin() const { return m_X == 0 && m_Y == 0 && m_Z == 0; }
-};
-
-class xyz_heading
-{
-public:
-	float m_X;
-	float m_Y;
-	float m_Z;
-
-	float m_Heading;
-
-	static const xyz_heading &Origin()
-	{
-		static xyz_heading origin;
-		return origin;
-	}
-
-	xyz_heading(float x = 0.0f, float y = 0.0f, float z = 0.0f, float heading = 0.0f);
-	xyz_heading(const xyz_heading &locationDir);
-	xyz_heading(const xyz_location &locationDir, float heading = 0.0f);
-	explicit xyz_heading(const xy_location &locationDir, float z, float heading);
-	explicit xyz_heading(const xy_location locationDir, float z, float heading);
-
-	operator xyz_location() const;
-	operator xy_location() const;
-
-	const xyz_heading operator+(const xyz_location &rhs) const;
-	const xyz_heading operator+(const xy_location &rhs) const;
-
-	const xyz_heading operator-(const xyz_location &rhs) const;
-
-	void ABS_XYZ();
-	bool isOrigin() const { return m_X == 0.0f && m_Y == 0.0f && m_Z == 0.0f; }
-};
-
-std::string to_string(const xyz_heading &position);
-std::string to_string(const xyz_location &position);
-std::string to_string(const xy_location &position);
-
-bool IsWithinAxisAlignedBox(const xyz_location &position, const xyz_location &minimum, const xyz_location &maximum);
-bool IsWithinAxisAlignedBox(const xy_location &position, const xy_location &minimum, const xy_location &maximum);
-
-float ComparativeDistance(const xy_location &point1, const xy_location &point2);
-float Distance(const xy_location &point1, const xy_location &point2);
-float ComparativeDistance(const xyz_location &point1, const xyz_location &point2);
-float Distance(const xyz_location &point1, const xyz_location &point2);
-float DistanceNoZ(const xyz_location &point1, const xyz_location &point2);
-float ComparativeDistanceNoZ(const xyz_location &point1, const xyz_location &point2);
-
-float ComparativeDistance(const xyz_heading &point1, const xyz_heading &point2);
-float Distance(const xyz_heading &point1, const xyz_heading &point2);
-float DistanceNoZ(const xyz_heading &point1, const xyz_heading &point2);
-float ComparativeDistanceNoZ(const xyz_heading &point1, const xyz_heading &point2);
-
-float GetReciprocalHeading(const xyz_heading &point1);
+float GetReciprocalHeading(const glm::vec4& point1);
 float GetReciprocalHeading(const float heading);
 
 #endif
