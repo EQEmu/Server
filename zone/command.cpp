@@ -7252,7 +7252,6 @@ void command_flagedit(Client *c, const Seperator *sep) {
 			return;
 		}
 
-        c->LogSQL(query.c_str());
         c->Message(15, "Success! Zone %s now requires a flag, named %s", database.GetZoneName(zoneid), flag_name);
         return;
 	}
