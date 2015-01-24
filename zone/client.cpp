@@ -3484,26 +3484,6 @@ void Client::Insight(uint32 t_id)
 	Message(0,"Your target is a level %i %s. It appears %s and %s for its level. It seems %s",who->GetLevel(),GetEQClassName(who->GetClass(),1),dmg,hitpoints,resists);
 }
 
-void Client::ChangeSQLLog(const char *file) {
-	if(SQL_log != nullptr) {
-		fclose(SQL_log);
-		SQL_log = nullptr;
-	}
-	if(file != nullptr) {
-		if(strstr(file, "..") != nullptr) {
-			Message(13, ".. is forbibben in SQL log file names.");
-			return;
-		}
-		char buf[512];
-		snprintf(buf, 511, "%s%s", SQL_LOG_PATH, file);
-		buf[511] = '\0';
-		SQL_log = fopen(buf, "a");
-		if(SQL_log == nullptr) {
-			Message(13, "Unable to open SQL log file: %s\n", strerror(errno));
-		}
-	}
-}
-
 void Client::GetGroupAAs(GroupLeadershipAA_Struct *into) const {
 	memcpy(into, &m_pp.leader_abilities.group, sizeof(GroupLeadershipAA_Struct));
 }
