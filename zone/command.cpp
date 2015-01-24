@@ -6609,7 +6609,6 @@ void command_npcedit(Client *c, const Seperator *sep)
         c->Message(15, "NPCID %u is now version %i.", npcTypeID, atoi(sep->arg[2]));
 		std::string query = StringFormat("UPDATE npc_types SET version = %i WHERE id = %i", atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
-		c->LogSQL(query.c_str());
 		return;
 	}
 	
