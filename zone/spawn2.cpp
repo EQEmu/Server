@@ -428,7 +428,6 @@ bool ZoneDatabase::CreateSpawn2(Client *client, uint32 spawngroup, const char* z
         return false;
 
     if(client)
-        client->LogSQL(query.c_str());
 
     return true;
 }

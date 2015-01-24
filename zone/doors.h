@@ -29,7 +29,7 @@ public:
 	char*	GetDoorName() { return door_name; }
 	uint32	GetDoorParam() { return door_param; }
 	int		GetInvertState() { return invert_state; }
-	const glm::vec4 GetPosition() const{ return m_Position; }
+	const glm::vec4& GetPosition() const{ return m_Position; }
 	int		GetIncline() { return incline; }
 	bool	triggered;
 	void	SetOpenState(bool st) { isopen = st; }

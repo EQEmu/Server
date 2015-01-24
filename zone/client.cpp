@@ -335,7 +335,6 @@ Client::~Client() {
 		m_tradeskill_object = nullptr;
 	}
 
-	ChangeSQLLog(nullptr);
 	if(IsDueling() && GetDuelTarget() != 0) {
 		Entity* entity = entity_list.GetID(GetDuelTarget());
 		if(entity != nullptr && entity->IsClient()) {
@@ -3482,37 +3481,6 @@ void Client::Insight(uint32 t_id)
 	strcat(resists," to disease.");
 
 	Message(0,"Your target is a level %i %s. It appears %s and %s for its level. It seems %s",who->GetLevel(),GetEQClassName(who->GetClass(),1),dmg,hitpoints,resists);
-}
-
-void Client::ChangeSQLLog(const char *file) {
-	if(SQL_log != nullptr) {
-		fclose(SQL_log);
-		SQL_log = nullptr;
-	}
-	if(file != nullptr) {
-		if(strstr(file, "..") != nullptr) {
-			Message(13, ".. is forbibben in SQL log file names.");
-			return;
-		}
-		char buf[512];
-		snprintf(buf, 511, "%s%s", SQL_LOG_PATH, file);
-		buf[511] = '\0';
-		SQL_log = fopen(buf, "a");
-		if(SQL_log == nullptr) {
-			Message(13, "Unable to open SQL log file: %s\n", strerror(errno));
-		}
-	}
-}
-
-void Client::LogSQL(const char *fmt, ...) {
-	if(SQL_log == nullptr)
-		return;
-
-	va_list argptr;
-	va_start(argptr, fmt);
-	vfprintf(SQL_log, fmt, argptr );
-	fputc('\n', SQL_log);
-	va_end(argptr);
 }
 
 void Client::GetGroupAAs(GroupLeadershipAA_Struct *into) const {
@@ -8265,10 +8233,8 @@ std::string Client::TextLink::GenerateLink()
 		m_Link = "<LINKER ERROR>";
 		Log.Out(Logs::General, Logs::Error, "TextLink::GenerateLink() failed to generate a useable text link (LinkType: %i, Lengths: {link: %u, body: %u, text: %u})",
 			m_LinkType, m_Link.length(), m_LinkBody.length(), m_LinkText.length());
-#if EQDEBUG >= 5
 		Log.Out(Logs::General, Logs::Error, ">> LinkBody: %s", m_LinkBody.c_str());
 		Log.Out(Logs::General, Logs::Error, ">> LinkText: %s", m_LinkText.c_str());
-#endif
 	}
 
 	return m_Link;

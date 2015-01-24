@@ -258,15 +258,15 @@ public:
 
 	LinkedList<NPC_Emote_Struct*> NPCEmoteList;
 
-    void    LoadTickItems();
-    uint32  GetSpawnKillCount(uint32 in_spawnid);
-    void    UpdateHotzone();
+	void    LoadTickItems();
+	uint32  GetSpawnKillCount(uint32 in_spawnid);
+	void    UpdateHotzone();
 	std::unordered_map<int, item_tick_struct> tick_items;
 
 	// random object that provides random values for the zone
 	EQEmu::Random random;
 
-	static void GMSayHookCallBackProcess(uint16 log_category, std::string& message){ entity_list.MessageStatus(0, 80, Log.GetGMSayColorFromCategory(log_category), "%s", message.c_str()); }
+	static void GMSayHookCallBackProcess(uint16 log_category, const std::string& message){ entity_list.MessageStatus(0, 80, Log.GetGMSayColorFromCategory(log_category), "%s", message.c_str()); }
 
 	//MODDING HOOKS
 	void mod_init();

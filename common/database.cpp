@@ -292,8 +292,17 @@ bool Database::SetAccountStatus(const char* name, int16 status) {
 
 /* This initially creates the character during character create */
 bool Database::ReserveName(uint32 account_id, char* name) {
-	std::string query = StringFormat("INSERT INTO `character_data` SET `account_id` = %i, `name` = '%s'", account_id, name); 
+	std::string query = StringFormat("SELECT `account_id`, `name` FROM `character_data` WHERE `name` = '%s'", name);
 	auto results = QueryDatabase(query);
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		if (row[0] && atoi(row[0]) > 0){
+			Log.Out(Logs::General, Logs::World_Server, "Account: %i tried to request name: %s, but it is already taken...", account_id, name);
+			return false;
+		}
+	}
+
+	query = StringFormat("INSERT INTO `character_data` SET `account_id` = %i, `name` = '%s'", account_id, name); 
+	results = QueryDatabase(query);
 	if (!results.Success() || results.ErrorMessage() != ""){ return false; } 
 	return true;
 }
@@ -3847,10 +3856,8 @@ void Database::PurgeExpiredInstances()
 
 bool Database::AddClientToInstance(uint16 instance_id, uint32 char_id)
 {
-	std::string query = StringFormat("INSERT INTO instance_list_player(id, charid) values(%lu, %lu)", 
-		(unsigned long)instance_id, (unsigned long)char_id);
-	auto results = QueryDatabase(query);
-
+	std::string query = StringFormat("REPLACE INTO instance_list_player(id, charid) VALUES (%lu, %lu)", (unsigned long)instance_id, (unsigned long)char_id);
+	auto results = QueryDatabase(query); 
 	return results.Success();
 }
 

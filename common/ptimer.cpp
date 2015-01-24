@@ -134,9 +134,7 @@ bool PersistentTimer::Load(Database *db) {
                                     (unsigned long)_char_id, _type);
     auto results = db->QueryDatabase(query);
 	if (!results.Success()) {
-#if EQDEBUG > 5
 		Log.Out(Logs::General, Logs::Error, "Error in PersistentTimer::Load, error: %s", results.ErrorMessage().c_str());
-#endif
 		return false;
 	}
 

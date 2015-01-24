@@ -292,11 +292,11 @@ void Trade::LogTrade()
 	}
 }
 
-#if (EQDEBUG >= 9)
+
 void Trade::DumpTrade()
 {
 	Mob* with = With();
-	Log.Out(Logs::General, Logs::None, "Dumping trade data: '%s' in TradeState %i with '%s'",
+	Log.Out(Logs::Detail, Logs::Trading, "Dumping trade data: '%s' in TradeState %i with '%s'",
 		this->owner->GetName(), state, ((with==nullptr)?"(null)":with->GetName()));
 
 	if (!owner->IsClient())
@@ -307,7 +307,7 @@ void Trade::DumpTrade()
 		const ItemInst* inst = trader->GetInv().GetItem(i);
 
 		if (inst) {
-			Log.Out(Logs::General, Logs::None, "Item %i (Charges=%i, Slot=%i, IsBag=%s)",
+			Log.Out(Logs::Detail, Logs::Trading, "Item %i (Charges=%i, Slot=%i, IsBag=%s)",
 				inst->GetItem()->ID, inst->GetCharges(),
 				i, ((inst->IsType(ItemClassContainer)) ? "True" : "False"));
 
@@ -315,7 +315,7 @@ void Trade::DumpTrade()
 				for (uint8 j = SUB_BEGIN; j < EmuConstants::ITEM_CONTAINER_SIZE; j++) {
 					inst = trader->GetInv().GetItem(i, j);
 					if (inst) {
-						Log.Out(Logs::General, Logs::None, "\tBagItem %i (Charges=%i, Slot=%i)",
+						Log.Out(Logs::Detail, Logs::Trading, "\tBagItem %i (Charges=%i, Slot=%i)",
 							inst->GetItem()->ID, inst->GetCharges(),
 							Inventory::CalcSlotId(i, j));
 					}
@@ -324,9 +324,9 @@ void Trade::DumpTrade()
 		}
 	}
 
-	Log.Out(Logs::General, Logs::None, "\tpp:%i, gp:%i, sp:%i, cp:%i", pp, gp, sp, cp);
+	Log.Out(Logs::Detail, Logs::Trading, "\tpp:%i, gp:%i, sp:%i, cp:%i", pp, gp, sp, cp);
 }
-#endif
+
 
 void Client::ResetTrade() {
 	AddMoneyToPP(trade->cp, trade->sp, trade->gp, trade->pp, true);
@@ -588,7 +588,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 							break;
 
 						if (partial_inst->GetID() != inst->GetID()) {
-							Log.Out(Logs::Detail, Logs::None, "[CLIENT] Client::ResetTrade() - an incompatible location reference was returned by Inventory::FindFreeSlotForTradeItem()");
+							Log.Out(Logs::Detail, Logs::Trading, "[CLIENT] Client::ResetTrade() - an incompatible location reference was returned by Inventory::FindFreeSlotForTradeItem()");
 							break;
 						}
 

@@ -399,7 +399,7 @@ public:
 		((static_cast<float>(cur_mana) / max_mana) * 100); }
 	virtual int32 CalcMaxMana();
 	uint32 GetNPCTypeID() const { return npctype_id; }
-	inline const glm::vec4 GetPosition() const { return m_Position; }
+	inline const glm::vec4& GetPosition() const { return m_Position; }
 	inline const float GetX() const { return m_Position.x; }
 	inline const float GetY() const { return m_Position.y; }
 	inline const float GetZ() const { return m_Position.z; }

@@ -24,10 +24,11 @@
 #include "misc.h"
 
 #include <iostream>
-#include <fstream> 
+#include <fstream>
 #include <string>
 #include <iomanip>
 #include <time.h>
+#include <sys/stat.h>
 
 std::ofstream process_log;
 
@@ -75,13 +76,15 @@ namespace Console {
 	};
 }
 
-EQEmuLogSys::EQEmuLogSys(){
-	on_log_gmsay_hook = [](uint16 log_type, std::string&) {};
-	bool file_logs_enabled = false; 
+EQEmuLogSys::EQEmuLogSys()
+{
+	on_log_gmsay_hook = [](uint16 log_type, const std::string&) {};
+	bool file_logs_enabled = false;
 	int log_platform = 0;
 }
 
-EQEmuLogSys::~EQEmuLogSys(){
+EQEmuLogSys::~EQEmuLogSys()
+{
 }
 
 void EQEmuLogSys::LoadLogSettingsDefaults()
@@ -90,11 +93,7 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	log_platform = GetExecutablePlatformInt();
 
 	/* Zero out Array */
-	for (int i = 0; i < Logs::LogCategory::MaxCategoryID; i++){
-		log_settings[i].log_to_console = 0;
-		log_settings[i].log_to_file = 0;
-		log_settings[i].log_to_gmsay = 0;
-	}
+	memset(log_settings, 0, sizeof(LogSettings) * Logs::LogCategory::MaxCategoryID);
 
 	/* Set Defaults */
 	log_settings[Logs::World_Server].log_to_console = Logs::General;
@@ -104,38 +103,32 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	log_settings[Logs::Crash].log_to_console = Logs::General;
 	log_settings[Logs::MySQLError].log_to_console = Logs::General;
 
-	/*	Declare process file names for log writing 
+	/*	Declare process file names for log writing
 		If there is no process_file_name declared, no log file will be written, simply
 	*/
-	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformWorld){ 
-		platform_file_name = "world";  
-	}
-	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformQueryServ){ 
-		platform_file_name = "query_server"; 
-	}
-	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
+	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformWorld)
+		platform_file_name = "world";
+	else if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformQueryServ)
+		platform_file_name = "query_server";
+	else if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone)
 		platform_file_name = "zone";
-	}
-	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformUCS){
+	else if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformUCS)
 		platform_file_name = "ucs";
-	}
-	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformLogin){
+	else if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformLogin)
 		platform_file_name = "login";
-	}
-	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformLogin){
+	else if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformLogin)
 		platform_file_name = "launcher";
-	}
 }
 
-std::string EQEmuLogSys::FormatOutMessageString(uint16 log_category, std::string in_message){
-	std::string category_string = "";
-	if (log_category > 0 && Logs::LogCategoryName[log_category]){
+std::string EQEmuLogSys::FormatOutMessageString(uint16 log_category, const std::string &in_message)
+{
+	std::string category_string;
+	if (log_category > 0 && Logs::LogCategoryName[log_category])
 		category_string = StringFormat("[%s] ", Logs::LogCategoryName[log_category]);
-	}
-	return StringFormat("%s%s", category_string.c_str(), in_message.c_str()); 
+	return StringFormat("%s%s", category_string.c_str(), in_message.c_str());
 }
 
-void EQEmuLogSys::ProcessGMSay(uint16 debug_level, uint16 log_category, std::string message)
+void EQEmuLogSys::ProcessGMSay(uint16 debug_level, uint16 log_category, const std::string &message)
 {
 	/* Check if category enabled for process */
 	if (log_settings[log_category].log_to_gmsay == 0)
@@ -150,17 +143,16 @@ void EQEmuLogSys::ProcessGMSay(uint16 debug_level, uint16 log_category, std::str
 		return;
 
 	/* Check to see if the process that actually ran this is zone */
-	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
+	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone)
 		on_log_gmsay_hook(log_category, message);
-	}
 }
 
-void EQEmuLogSys::ProcessLogWrite(uint16 debug_level, uint16 log_category, std::string message)
+void EQEmuLogSys::ProcessLogWrite(uint16 debug_level, uint16 log_category, const std::string &message)
 {
-	if (log_category == Logs::Crash){
+	if (log_category == Logs::Crash) {
 		char time_stamp[80];
 		EQEmuLogSys::SetCurrentTimeStamp(time_stamp);
-		std::ofstream crash_log; 
+		std::ofstream crash_log;
 		EQEmuLogSys::MakeDirectory("logs/crashes");
 		crash_log.open(StringFormat("logs/crashes/crash_%s_%i.log", platform_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
 		crash_log << time_stamp << " " << message << "\n";
@@ -178,9 +170,8 @@ void EQEmuLogSys::ProcessLogWrite(uint16 debug_level, uint16 log_category, std::
 	char time_stamp[80];
 	EQEmuLogSys::SetCurrentTimeStamp(time_stamp);
 
-	if (process_log){
+	if (process_log)
 		process_log << time_stamp << " " << message << std::endl;
-	}
 }
 
 uint16 EQEmuLogSys::GetWindowsConsoleColorFromCategory(uint16 log_category){
@@ -198,7 +189,7 @@ uint16 EQEmuLogSys::GetWindowsConsoleColorFromCategory(uint16 log_category){
 			return Console::Color::LightCyan;
 		case Logs::Commands:
 			return Console::Color::LightMagenta;
-		case Logs::Crash:	
+		case Logs::Crash:
 			return Console::Color::LightRed;
 		default:
 			return Console::Color::Yellow;
@@ -239,7 +230,7 @@ uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category){
 		case Logs::Debug:
 			return 14; /* Light Green */
 		case Logs::Quests:
-			return 258; /* Light Cyan */ 
+			return 258; /* Light Cyan */
 		case Logs::Commands:
 			return 5; /* Light Purple */
 		case Logs::Crash:
@@ -249,7 +240,7 @@ uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category){
 	}
 }
 
-void EQEmuLogSys::ProcessConsoleMessage(uint16 debug_level, uint16 log_category, std::string message)
+void EQEmuLogSys::ProcessConsoleMessage(uint16 debug_level, uint16 log_category, const std::string &message)
 {
 	/* Check if category enabled for process */
 	if (log_settings[log_category].log_to_console == 0)
@@ -290,7 +281,8 @@ void EQEmuLogSys::Out(Logs::DebugLevel debug_level, uint16 log_category, std::st
 	EQEmuLogSys::ProcessLogWrite(debug_level, log_category, output_message);
 }
 
-void EQEmuLogSys::SetCurrentTimeStamp(char* time_stamp){
+void EQEmuLogSys::SetCurrentTimeStamp(char* time_stamp)
+{
 	time_t raw_time;
 	struct tm * time_info;
 	time(&raw_time);
@@ -298,10 +290,17 @@ void EQEmuLogSys::SetCurrentTimeStamp(char* time_stamp){
 	strftime(time_stamp, 80, "[%m-%d-%Y :: %H:%M:%S]", time_info);
 }
 
-void EQEmuLogSys::MakeDirectory(std::string directory_name){
+void EQEmuLogSys::MakeDirectory(const std::string &directory_name)
+{
 #ifdef _WINDOWS
+	struct _stat st;
+	if (_stat(directory_name.c_str(), &st) == 0) // exists
+		return;
 	_mkdir(directory_name.c_str());
 #else
+	struct stat st;
+	if (stat(directory_name.c_str(), &st) == 0) // exists
+		return;
 	mkdir(directory_name.c_str(), 0755);
 #endif
 }
@@ -313,7 +312,7 @@ void EQEmuLogSys::CloseFileLogs()
 	}
 }
 
-void EQEmuLogSys::StartFileLogs(std::string log_name)
+void EQEmuLogSys::StartFileLogs(const std::string &log_name)
 {
 	EQEmuLogSys::CloseFileLogs();
 
@@ -321,23 +320,21 @@ void EQEmuLogSys::StartFileLogs(std::string log_name)
 	if (file_logs_enabled == false)
 		return;
 
-	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone){
-		if (log_name != "")
+	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone) {
+		if (!log_name.empty())
 			platform_file_name = log_name;
 
-		if (platform_file_name == ""){
+		if (platform_file_name.empty())
 			return;
-		}
 
 		EQEmuLogSys::Out(Logs::General, Logs::Status, "Starting File Log 'logs/%s_%i.log'", platform_file_name.c_str(), getpid());
 		EQEmuLogSys::MakeDirectory("logs/zone");
 		process_log.open(StringFormat("logs/zone/%s_%i.log", platform_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
-	}
-	else{
-		if (platform_file_name == ""){
+	} else {
+		if (platform_file_name.empty())
 			return;
-		}
-		EQEmuLogSys::Out(Logs::General, Logs::Status, "Starting File Log 'logs/%s_%i.txt'", platform_file_name.c_str(), getpid());
-		process_log.open(StringFormat("logs/%s_%i.txt", platform_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
+
+		EQEmuLogSys::Out(Logs::General, Logs::Status, "Starting File Log 'logs/%s_%i.log'", platform_file_name.c_str(), getpid());
+		process_log.open(StringFormat("logs/%s_%i.log", platform_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
 	}
 }
