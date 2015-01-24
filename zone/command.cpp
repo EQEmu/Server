@@ -442,17 +442,14 @@ int command_init(void) {
 	std::map<std::string,uint8>::iterator itr;
 	database.GetCommandSettings(command_settings);
 	for(; cur != end; ++cur) {
-		if ((itr=command_settings.find(cur->first))!=command_settings.end())
-		{
+		if ((itr=command_settings.find(cur->first))!=command_settings.end()) {
 			cur->second->access = itr->second;
 			Log.Out(Logs::General, Logs::Commands, "command_init(): - Command '%s' set to access level %d.", cur->first.c_str(), itr->second);
 		}
 		else
 		{
-#ifdef COMMANDS_WARNINGS
 			if(cur->second->access == 0)
-				Log.Out(Logs::General, Logs::Status, "command_init(): Warning: Command '%s' defaulting to access level 0!" , cur->first.c_str());
-#endif
+				Log.Out(Logs::General, Logs::Error, "command_init(): Warning: Command '%s' defaulting to access level 0!" , cur->first.c_str());
 		}
 	}
 
