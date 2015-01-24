@@ -3847,10 +3847,8 @@ void Database::PurgeExpiredInstances()
 
 bool Database::AddClientToInstance(uint16 instance_id, uint32 char_id)
 {
-	std::string query = StringFormat("INSERT INTO instance_list_player(id, charid) values(%lu, %lu)", 
-		(unsigned long)instance_id, (unsigned long)char_id);
-	auto results = QueryDatabase(query);
-
+	std::string query = StringFormat("REPLACE INTO instance_list_player(id, charid) VALUES (%lu, %lu)", (unsigned long)instance_id, (unsigned long)char_id);
+	auto results = QueryDatabase(query); 
 	return results.Success();
 }
 
