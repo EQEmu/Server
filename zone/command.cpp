@@ -8166,7 +8166,6 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
             return;
         }
 
-        c->LogSQL(query.c_str());
         c->Message(0, "Version change to %i was successful from SpawnGroupID %i", version, c->GetTarget()->CastToNPC()->GetSp2());
         c->GetTarget()->Depop(false);
 
