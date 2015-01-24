@@ -405,7 +405,7 @@ void Console::ProcessCommand(const char* command) {
 				state = CONSOLE_STATE_CLOSED;
 				return;
 			}
-			paccountid = database.CheckLogin(paccountname,command);
+			paccountid = database.CheckLogin(paccountname ,command);
 			if (paccountid == 0) {
 				SendMessage(1, 0);
 				SendMessage(2, "Login failed.");
@@ -431,7 +431,7 @@ void Console::ProcessCommand(const char* command) {
 			break;
 		}
 		case CONSOLE_STATE_CONNECTED: {
-			Log.Out(Logs::Detail, Logs::World_Server,"TCP command: %s: \"%s\"",paccountname,command);
+			Log.Out(Logs::Detail, Logs::World_Server,"TCP command: %s: \"%s\"",paccountname ,command);
 			Seperator sep(command);
 			if (strcasecmp(sep.arg[0], "help") == 0 || strcmp(sep.arg[0], "?") == 0) {
 				SendMessage(1, "  whoami");
