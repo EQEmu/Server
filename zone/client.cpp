@@ -8233,10 +8233,8 @@ std::string Client::TextLink::GenerateLink()
 		m_Link = "<LINKER ERROR>";
 		Log.Out(Logs::General, Logs::Error, "TextLink::GenerateLink() failed to generate a useable text link (LinkType: %i, Lengths: {link: %u, body: %u, text: %u})",
 			m_LinkType, m_Link.length(), m_LinkBody.length(), m_LinkText.length());
-#if EQDEBUG >= 5
 		Log.Out(Logs::General, Logs::Error, ">> LinkBody: %s", m_LinkBody.c_str());
 		Log.Out(Logs::General, Logs::Error, ">> LinkText: %s", m_LinkText.c_str());
-#endif
 	}
 
 	return m_Link;
