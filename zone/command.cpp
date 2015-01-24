@@ -5804,9 +5804,7 @@ void command_revoke(Client *c, const Seperator *sep)
         return;
     }
 
-#if EQDEBUG >= 6
-    c->Message(0, "Couldn't find %s in this zone, passing request to worldserver.",  sep->arg[1]);
-#endif
+	c->Message(13, "#revoke: Couldn't find %s in this zone, passing request to worldserver.", sep->arg[1]);
 
     ServerPacket * outapp = new ServerPacket (ServerOP_Revoke,sizeof(RevokeStruct));
     RevokeStruct* revoke = (RevokeStruct*)outapp->pBuffer;
