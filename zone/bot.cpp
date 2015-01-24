@@ -9074,7 +9074,7 @@ void Bot::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot, int16 *resist_adjust) {
 	bool Result = false;
 
-	if(zone && !zone->IsSpellBlocked(spell_id, GetPosition())) {
+	if(zone && !zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
 
 		Log.Out(Logs::Detail, Logs::Spells, "CastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item slot %d",
 			spells[spell_id].name, spell_id, target_id, slot, cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);
@@ -10661,12 +10661,12 @@ void Bot::BotGroupSummon(Group* group, Client* client) {
 				if(botMember->GetBotOwnerCharacterID() == client->CharacterID()) {
 					botMember->SetTarget(botMember->GetBotOwner());
 					botMember->WipeHateList();
-					botMember->Warp(botMember->GetBotOwner()->GetPosition());
+					botMember->Warp(glm::vec3(botMember->GetBotOwner()->GetPosition()));
 
 					if(botMember->HasPet() && botMember->GetPet()) {
 						botMember->GetPet()->SetTarget(botMember);
 						botMember->GetPet()->WipeHateList();
-						botMember->GetPet()->Warp(botMember->GetBotOwner()->GetPosition());
+						botMember->GetPet()->Warp(glm::vec3(botMember->GetBotOwner()->GetPosition()));
 					}
 				}
 			}
@@ -11675,7 +11675,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				else
 				{
 					b->SetTarget(c->CastToMob());
-					b->Warp(c->GetPosition());
+					b->Warp(glm::vec3(c->GetPosition()));
 				}
 			}
 		}
@@ -15745,7 +15745,6 @@ void EntityList::BotPickLock(Bot* rogue)
             continue;
 
         auto diff = rogue->GetPosition() - cdoor->GetPosition();
-        diff.ABS_XYZ();
 
 		float curdist = diff.x * diff.x + diff.y * diff.y;
 
