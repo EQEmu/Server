@@ -825,9 +825,9 @@ int32 Client::acmod() {
 		//seems about 21 agil per extra AC pt over 300...
 	return (65 + ((agility-300) / 21));
 	}
-#if EQDEBUG >= 11
-	Log.Out(Logs::General, Logs::Error, "Error in Client::acmod(): Agility: %i, Level: %i",agility,level);
-#endif
+
+	Log.Out(Logs::Detail, Logs::Error, "Error in Client::acmod(): Agility: %i, Level: %i", agility, level);
+
 	return 0;
 };
 
