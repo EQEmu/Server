@@ -1057,8 +1057,6 @@ uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(const char* zone, uint32 zone_ve
 	}
     last_insert_id = results.LastInsertedID();
 
-    if(client)
-
     uint32 respawntime = 0;
     uint32 spawnid = 0;
     if (respawnTime)

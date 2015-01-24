@@ -1153,7 +1153,6 @@ void ZoneDatabase::AddWP(Client *client, uint32 gridid, uint32 wpnum, const xyz_
 		return;
 	}
 
-    if(client)
 }
 
 
@@ -1177,7 +1176,6 @@ void ZoneDatabase::DeleteWaypoint(Client *client, uint32 grid_num, uint32 wp_num
 		return;
 	}
 
-	if(client)
 }
 
 
