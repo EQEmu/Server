@@ -560,10 +560,8 @@ public:
 	// Audit trade
 	void LogTrade();
 
-	// Debug only method
-	#if (EQDEBUG >= 9)
-		void DumpTrade();
-	#endif
+	void DumpTrade();
+
 
 public:
 	// Object state

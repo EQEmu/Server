@@ -588,7 +588,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 							break;
 
 						if (partial_inst->GetID() != inst->GetID()) {
-							Log.Out(Logs::Detail, Logs::None, "[CLIENT] Client::ResetTrade() - an incompatible location reference was returned by Inventory::FindFreeSlotForTradeItem()");
+							Log.Out(Logs::Detail, Logs::Trading, "[CLIENT] Client::ResetTrade() - an incompatible location reference was returned by Inventory::FindFreeSlotForTradeItem()");
 							break;
 						}
 
