@@ -258,7 +258,6 @@ void command_undye(Client *c, const Seperator *sep);
 void command_undyeme(Client *c, const Seperator *sep);
 void command_hp(Client *c, const Seperator *sep);
 void command_ginfo(Client *c, const Seperator *sep);
-void command_logsql(Client *c, const Seperator *sep);
 void command_qglobal(Client *c, const Seperator *sep);
 void command_path(Client *c, const Seperator *sep);
 void command_ginfo(Client *c, const Seperator *sep);
@@ -325,7 +324,7 @@ void command_shownumhits(Client *c, const Seperator *sep);
 void command_tune(Client *c, const Seperator *sep);
 void command_logtest(Client *c, const Seperator *sep);
 void command_logs(Client *c, const Seperator *sep);
-
+ 
 #ifdef EQPROFILE
 void command_profiledump(Client *c, const Seperator *sep);
 void command_profilereset(Client *c, const Seperator *sep);

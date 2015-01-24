@@ -1098,7 +1098,6 @@ void ZoneDatabase::AssignGrid(Client *client, const xy_location& location, uint3
 	}
 
 	if (client)
-		client->LogSQL(query.c_str());
 
 	if (!fuzzy) {
 		client->Message(0, "Grid assign: spawn2 id = %d updated - exact match", spawn2id);
@@ -1129,7 +1128,6 @@ void ZoneDatabase::ModifyGrid(Client *client, bool remove, uint32 id, uint8 type
         }
 
         if(client)
-			client->LogSQL(query.c_str());
 
 		return;
 	}
@@ -1156,7 +1154,6 @@ void ZoneDatabase::AddWP(Client *client, uint32 gridid, uint32 wpnum, const xyz_
 	}
 
     if(client)
-        client->LogSQL(query.c_str());
 }
 
 
@@ -1181,7 +1178,6 @@ void ZoneDatabase::DeleteWaypoint(Client *client, uint32 grid_num, uint32 wp_num
 	}
 
 	if(client)
-        client->LogSQL(query.c_str());
 }
 
 
