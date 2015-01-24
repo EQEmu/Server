@@ -4792,7 +4792,7 @@ void Client::SummonAndRezzAllCorpses()
 void Client::SummonAllCorpses(const glm::vec4& position)
 {
 	auto summonLocation = position;
-	if(IsOrigin(position) && position.w == 0.0f)
+	if(IsOrigin(position) == 0 && position.w == 0.0f)
 		summonLocation = GetPosition();
 
 	ServerPacket *Pack = new ServerPacket(ServerOP_DepopAllPlayersCorpses, sizeof(ServerDepopAllPlayersCorpses_Struct));

@@ -22,6 +22,7 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
+#include <glm/geometric.hpp>
 
 std::string to_string(const glm::vec4 &position);
 std::string to_string(const glm::vec3 &position);
