@@ -3556,11 +3556,7 @@ void Database::SetRaidGroupLeaderInfo(uint32 gid, uint32 rid)
 void Database::ClearAllRaidLeaders(void)
 {
 	std::string query("DELETE from raid_leaders");
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-		std::cout << "Unable to clear raid leaders: " << results.ErrorMessage() << std::endl;
-
+	QueryDatabase(query);
 	return;
 }
 
