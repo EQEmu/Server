@@ -4131,9 +4131,24 @@ void Database::UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win)
 
 bool Database::GetAdventureStats(uint32 char_id, AdventureStats_Struct *as)
 {
-
-	std::string query = StringFormat("SELECT `guk_wins`, `mir_wins`, `mmc_wins`, `ruj_wins`, `tak_wins`, `guk_losses`, "
-		"`mir_losses`, `mmc_losses`, `ruj_losses`, `tak_losses` FROM `adventure_stats` WHERE player_id=%u", char_id);
+	std::string query = StringFormat(
+		"SELECT "
+		"`guk_wins`, "
+		"`mir_wins`, "
+		"`mmc_wins`, "
+		"`ruj_wins`, "
+		"`tak_wins`, "
+		"`guk_losses`, "
+		"`mir_losses`, "
+		"`mmc_losses`, "
+		"`ruj_losses`, "
+		"`tak_losses` "
+		"FROM "
+		"`adventure_stats` "
+		"WHERE "
+		"player_id = %u ", 
+		char_id
+	);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
