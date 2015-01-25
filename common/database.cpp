@@ -3549,9 +3549,6 @@ void Database::SetRaidGroupLeaderInfo(uint32 gid, uint32 rid)
 			(unsigned long)gid, (unsigned long)rid);
 	results = QueryDatabase(query);
 
-	if (!results.Success())
-		std::cout << "Unable to set raid/group leader: " << results.ErrorMessage() << std::endl;
-
 	return;
 }
 
