@@ -1470,6 +1470,26 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	(dst_slot_id >= EmuConstants::SHARED_BANK_BEGIN && dst_slot_id <= EmuConstants::SHARED_BANK_BAGS_END))
 	&& GetInv().CheckNoDrop(src_slot_id)
 	&& RuleI(World, FVNoDropFlag) == 0 || RuleI(Character, MinStatusForNoDropExemptions) < Admin() && RuleI(World, FVNoDropFlag) == 2) {
+		auto ndh_inst = m_inv[src_slot_id];
+		std::string ndh_item_data;
+		if (ndh_inst == nullptr) {
+			ndh_item_data.append("[nullptr on ItemInst*]");
+		}
+		else {
+			auto ndh_item = ndh_inst->GetItem();
+			if (ndh_item == nullptr) {
+				ndh_item_data.append("[nullptr on Item_Struct*]");
+			}
+			else {
+				ndh_item_data.append(StringFormat("name=%s", ndh_item->Name));
+				ndh_item_data.append(StringFormat(", id=%u", ndh_item->ID));
+				ndh_item_data.append(StringFormat(", nodrop=%s(%u)", (ndh_item->NoDrop == 0 ? "true" : "false"), ndh_item->NoDrop));
+			}
+		}
+		Log.Out(Logs::General, Logs::Error, "WorldKick() of Player %s(id:%u, acct:%u) due to 'NoDrop Hack' detection >> SlotID:%i, ItemData:'%s'",
+			GetName(), CharacterID(), AccountID(), src_slot_id, ndh_item_data.c_str());
+		ndh_inst = nullptr;
+
 		DeleteItemInInventory(src_slot_id);
 		WorldKick();
 		return false;
