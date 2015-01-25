@@ -3385,21 +3385,18 @@ void Database::ClearRaidDetails(uint32 rid) {
 
 // returns 0 on error or no raid for that character, or
 // the raid id that the character is a member of.
-uint32 Database::GetRaidID(const char* name){
-
-	std::string query = StringFormat("SELECT raidid from raid_members where name='%s'", name);
+uint32 Database::GetRaidID(const char* name)
+{ 
+	std::string query = StringFormat("SELECT `raidid` FROM `raid_members` WHERE `name` = '%s'", name);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
-	{
-		std::cout << "Unable to get raid id: " << results.ErrorMessage() << std::endl;
+	if (!results.Success()) {
 		return 0;
 	}
 
 	auto row = results.begin();
 
-	if (row == results.end())
-	{
+	if (row == results.end()) {
 		Log.Out(Logs::General, Logs::Error, "Unable to get raid id, char not found!");
 		return 0;
 	}
