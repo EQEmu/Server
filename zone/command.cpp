@@ -10482,10 +10482,10 @@ void command_logtest(Client *c, const Seperator *sep){
 		t = std::clock();
 		log_test.open("logs/log_test.txt",  std::ios_base::app | std::ios_base::out);
 		for (i = 0; i < atoi(sep->arg[1]); i++){
-			log_test << "this is a test\n";
+			Log.Out(Logs::General, Logs::Zone_Server, "[%u] Test #2... Took %f seconds", i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 		}
 		log_test.close();
-		Log.Out(Logs::General, Logs::Zone_Server, "[%u] Test #2... Took %f seconds",  i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
+		
 	}
 }
 
