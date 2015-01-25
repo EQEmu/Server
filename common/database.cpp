@@ -3861,7 +3861,15 @@ bool Database::RemoveClientsFromInstance(uint16 instance_id)
 }
 
 bool Database::CheckInstanceExists(uint16 instance_id) {
-	std::string query = StringFormat("SELECT `id` FROM `instance_list` WHERE `id` = %u", instance_id);
+	std::string query = StringFormat(
+		"SELECT "
+		"`id`  "
+		"FROM  "
+		"`instance_list`  "
+		"WHERE  "
+		"`id` = %u", 
+		instance_id
+	);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
