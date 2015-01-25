@@ -198,7 +198,7 @@ int command_init(void) {
 		command_add("depopzone", "- Depop the zone", 100, command_depopzone) ||
 		command_add("details", "- Change the details of your target (Drakkin Only)", 80, command_details) ||
 		command_add("disablerecipe",  "[recipe_id] - Disables a recipe using the recipe id.",  80, command_disablerecipe) ||
-		command_add("disarmtrap",  "Analog for ldon disarm trap for the newer clients since we still don't have it working.",  0, command_disarmtrap) ||
+		command_add("disarmtrap",  "Analog for ldon disarm trap for the newer clients since we still don't have it working.", 80, command_disarmtrap) ||
 		command_add("distance", "- Reports the distance between you and your target.",  80, command_distance) ||
 		command_add("doanim", "[animnum] [type] - Send an EmoteAnim for you or your target", 50, command_doanim) ||
 		command_add("emote", "['name'/'world'/'zone'] [type] [message] - Send an emote message", 80, command_emote) ||
@@ -252,7 +252,7 @@ int command_init(void) {
 		command_add("hp", "- Refresh your HP bar from the server.", 0, command_hp) ||
 		command_add("incstat", "- Increases or Decreases a client's stats permanently.", 200, command_incstat) ||
 		command_add("instance", "- Modify Instances", 200, command_instance) ||
-		command_add("interrogateinv", "- use [help] argument for available options", 0, command_interrogateinv) ||
+		command_add("interrogateinv", "- use [help] argument for available options", 80, command_interrogateinv) ||
 		command_add("interrupt", "[message id] [color] - Interrupt your casting. Arguments are optional.", 50, command_interrupt) ||
 		command_add("invul", nullptr,0, command_invul) ||
 		command_add("invulnerable", "[on/off] - Turn player target's or your invulnerable flag on or off", 80, command_invul) ||
@@ -450,7 +450,7 @@ int command_init(void) {
 		else
 		{
 			if(cur->second->access == 0)
-				Log.Out(Logs::General, Logs::Error, "command_init(): Warning: Command '%s' defaulting to access level 0!" , cur->first.c_str());
+				Log.Out(Logs::General, Logs::Commands, "command_init(): Warning: Command '%s' defaulting to access level 0!" , cur->first.c_str());
 		}
 	}
 
