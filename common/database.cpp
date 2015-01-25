@@ -3925,7 +3925,7 @@ uint16 Database::GetInstanceID(const char* zone, uint32 character_id, int16 vers
 	return atoi(row[0]);
 }
 
-uint16 Database::GetInstanceID(uint32 zone, uint32 charid, int16 version)
+uint16 Database::GetInstanceID(uint32 zone, uint32 character_id, int16 version)
 {
 	if(!zone)
 		return 0;
@@ -3944,7 +3944,7 @@ uint16 Database::GetInstanceID(uint32 zone, uint32 charid, int16 version)
 		"LIMIT 1; ", 
 		zone, 
 		version, 
-		charid
+		character_id
 	);
 	auto results = QueryDatabase(query);
 
@@ -3961,15 +3961,13 @@ uint16 Database::GetInstanceID(uint32 zone, uint32 charid, int16 version)
 
 void Database::GetCharactersInInstance(uint16 instance_id, std::list<uint32> &charid_list) {
 
-	std::string query = StringFormat("SELECT charid FROM instance_list_player WHERE id=%u", instance_id);
+	std::string query = StringFormat("SELECT `charid` FROM `instance_list_playe`r WHERE `id` = %u", instance_id);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
-	{
 		return;
-	}
 
-	for(auto row=results.begin();row != results.end();++row)
+	for (auto row = results.begin(); row != results.end(); ++row)
 		charid_list.push_back(atoi(row[0]));
 }
 
