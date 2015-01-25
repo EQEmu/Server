@@ -7676,7 +7676,7 @@ bool Client::UpdatePersonalFaction(int32 char_id, int32 npc_value, int32 faction
 		database.SetCharacterFactionLevel(char_id, faction_id, *current_value, temp, factionvalues);
 	}
 
-return change;
+return (repair || change);
 }
 
 // returns the character's faction level, adjusted for racial, class, and deity modifiers
