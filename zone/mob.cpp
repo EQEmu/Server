@@ -149,7 +149,9 @@ Mob::Mob(const char* in_name,
 	if (runspeed < 0 || runspeed > 20)
 		runspeed = 1.25f;
 
-	light		= in_light;
+	active_light = innate_light = in_light;
+	spell_light = equip_light = NOT_USED;
+
 	texture		= in_texture;
 	helmtexture	= in_helmtexture;
 	haircolor	= in_haircolor;
@@ -898,7 +900,10 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.deity		= deity;
 	ns->spawn.animation	= 0;
 	ns->spawn.findable	= findable?1:0;
-	ns->spawn.light		= light;
+
+	UpdateActiveLightValue();
+	ns->spawn.light		= active_light;
+
 	ns->spawn.showhelm = (helmtexture && helmtexture != 0xFF) ? 1 : 0;
 
 	ns->spawn.invis		= (invisible || hidden) ? 1 : 0;	// TODO: load this before spawning players
@@ -2022,6 +2027,39 @@ void Mob::SetAppearance(EmuAppearance app, bool iIgnoreSelf) {
 		if (this->IsClient() && this->IsAIControlled())
 			SendAppearancePacket(AT_Anim, ANIM_FREEZE, false, false);
 	}
+}
+
+bool Mob::UpdateActiveLightValue()
+{
+	/*	This is old information...
+		0 - "None"
+		1 - "Candle"
+		2 - "Torch"
+		3 - "Tiny Glowing Skull"
+		4 - "Small Lantern"
+		5 - "Stein of Moggok"
+		6 - "Large Lantern"
+		7 - "Flameless Lantern"
+		8 - "Globe of Stars"
+		9 - "Light Globe"
+		10 - "Lightstone"
+		11 - "Greater Lightstone"
+		12 - "Fire Beatle Eye"
+		13 - "Coldlight"
+		14 - "Unknown"
+		15 - "Unknown"
+	*/
+	
+	uint8 old_light = (active_light & 0x0F);
+	active_light = (innate_light & 0x0F);
+
+	if (equip_light > active_light) { active_light = equip_light; } // limiter in property handler
+	if (spell_light > active_light) { active_light = spell_light; } // limiter in property handler
+
+	if (active_light != old_light)
+		return true;
+
+	return false;
 }
 
 void Mob::ChangeSize(float in_size = 0, bool bNoRestriction) {

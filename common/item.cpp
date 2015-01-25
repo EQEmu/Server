@@ -990,6 +990,35 @@ int Inventory::GetSlotByItemInst(ItemInst *inst) {
 	return INVALID_INDEX;
 }
 
+uint8 Inventory::FindHighestLightValue()
+{
+	uint8 light_value = NOT_USED;
+
+	// NOTE: The client does not recognize augment light sources, applied or otherwise, and should not be parsed
+	for (auto iter = m_worn.begin(); iter != m_worn.end(); ++iter) {
+		if ((iter->first < EmuConstants::EQUIPMENT_BEGIN || iter->first > EmuConstants::EQUIPMENT_END) && iter->first != MainPowerSource) { continue; }
+		auto inst = iter->second;
+		if (inst == nullptr) { continue; }
+		auto item = inst->GetItem();
+		if (item == nullptr) { continue; }
+		if (item->Light & 0xF0) { continue; }
+		if (item->Light > light_value) { light_value = item->Light; }
+	}
+
+	for (auto iter = m_inv.begin(); iter != m_inv.end(); ++iter) {
+		if (iter->first < EmuConstants::GENERAL_BEGIN || iter->first > EmuConstants::GENERAL_END) { continue; }
+		auto inst = iter->second;
+		if (inst == nullptr) { continue; }
+		auto item = inst->GetItem();
+		if (item == nullptr) { continue; }
+		if (item->ItemType != ItemTypeMisc && item->ItemType != ItemTypeLight) { continue; }
+		if (item->Light & 0xF0) { continue; }
+		if (item->Light > light_value) { light_value = item->Light; }
+	}
+
+	return light_value;
+}
+
 void Inventory::dumpEntireInventory() {
 
 	dumpWornItems();

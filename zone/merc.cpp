@@ -69,6 +69,8 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 	size = d->size;
 	CalcBonuses();
 
+	// Class should use npc constructor to set light properties
+
 	SetHP(GetMaxHP());
 	SetMana(GetMaxMana());
 	SetEndurance(GetMaxEndurance());
@@ -1199,6 +1201,9 @@ void Merc::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.flymode = 0;
 		ns->spawn.NPC = 1;                                      // 0=player,1=npc,2=pc corpse,3=npc corpse
 		ns->spawn.IsMercenary = 1;
+
+		UpdateActiveLightValue();
+		ns->spawn.light = active_light;
 
 		/*
 		// Wear Slots are not setup for Mercs yet
@@ -4899,10 +4904,35 @@ void Merc::UpdateMercAppearance() {
 				this->SendWearChange(materialFromSlot);
 		}
 	}
+
+	if (UpdateActiveLightValue())
+		SendAppearancePacket(AT_Light, GetActiveLightValue());
+}
+
+void Merc::UpdateEquipLightValue()
+{
+	equip_light = NOT_USED;
+
+	for (int index = MAIN_BEGIN; index < EmuConstants::EQUIPMENT_SIZE; ++index) {
+		if (equipment[index] == NOT_USED) { continue; }
+		auto item = database.GetItem(equipment[index]);
+		if (item == nullptr) { continue; }
+		if (item->Light & 0xF0) { continue; }
+		if (item->Light > equip_light) { equip_light = item->Light; }
+	}
+
+	for (auto iter = itemlist.begin(); iter != itemlist.end(); ++iter) {
+		auto item = database.GetItem((*iter)->item_id);
+		if (item == nullptr) { continue; }
+		if (item->ItemType != ItemTypeMisc && item->ItemType != ItemTypeLight) { continue; }
+		if (item->Light & 0xF0) { continue; }
+		if (item->Light > equip_light) { equip_light = item->Light; }
+	}
 }
 
 void Merc::AddItem(uint8 slot, uint32 item_id) {
 	equipment[slot] = item_id;
+	UpdateEquipLightValue();
 }
 
 bool Merc::Spawn(Client *owner) {

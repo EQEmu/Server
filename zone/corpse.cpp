@@ -137,6 +137,10 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 	pc->IsRezzed(rezzed);
 	pc->become_npc = false;
 
+	pc->spell_light = pc->innate_light = NOT_USED;
+	pc->UpdateEquipLightValue();
+	//pc->UpdateActiveLightValue();
+
 	safe_delete_array(pcs);
 
 	return pc;
@@ -146,7 +150,7 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 // vesuvias - appearence fix
 : Mob("Unnamed_Corpse","",0,0,in_npc->GetGender(),in_npc->GetRace(),in_npc->GetClass(),BT_Humanoid,//bodytype added
 	in_npc->GetDeity(),in_npc->GetLevel(),in_npc->GetNPCTypeID(),in_npc->GetSize(),0,
-	in_npc->GetPosition(), 0, in_npc->GetTexture(),in_npc->GetHelmTexture(),
+	in_npc->GetPosition(), in_npc->GetInnateLightValue(), in_npc->GetTexture(),in_npc->GetHelmTexture(),
 	0,0,0,0,0,0,0,0,0,
 	0,0,0,0,0,0,0,0,0,0,0,0xff,0,0,0,0,0,0,0,0,0),
 	corpse_decay_timer(in_decaytime),
@@ -197,6 +201,10 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 		allowed_looters[i] = 0;
 	}
 	this->rez_experience = 0;
+
+	UpdateEquipLightValue();
+	spell_light = NOT_USED;
+	UpdateActiveLightValue();
 }
 
 Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
@@ -214,7 +222,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	client->GetSize(),				  // float		in_size,
 	0,								  // float		in_runspeed,
 	client->GetPosition(),
-	0,								  // uint8		in_light,
+	0,								  // uint8		in_light, - verified for client innate_light value
 	client->GetTexture(),			  // uint8		in_texture,
 	client->GetHelmTexture(),		  // uint8		in_helmtexture,
 	0,								  // uint16		in_ac,
@@ -403,6 +411,10 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 		return;
 	} //end "not leaving naked corpses"
 
+	UpdateEquipLightValue();
+	spell_light = NOT_USED;
+	UpdateActiveLightValue();
+
 	IsRezzed(false);
 	Save();
 }
@@ -451,7 +463,7 @@ in_level,
 in_size,
 0,
 position,
-0,
+0, // verified for client innate_light value
 in_texture,
 in_helmtexture,
 0,
@@ -522,6 +534,10 @@ in_helmtexture,
 		allowed_looters[i] = 0;
 	}
 	SetPlayerKillItemID(0);
+
+	UpdateEquipLightValue();
+	spell_light = NOT_USED;
+	UpdateActiveLightValue();
 }
 
 Corpse::~Corpse() {
@@ -664,6 +680,8 @@ void Corpse::AddItem(uint32 itemnum, uint16 charges, int16 slot, uint32 aug1, ui
 	item->aug_6=aug6;
 	item->attuned=attuned;
 	itemlist.push_back(item);
+
+	UpdateEquipLightValue();
 }
 
 ServerLootItem_Struct* Corpse::GetItem(uint16 lootslot, ServerLootItem_Struct** bag_item_data) {
@@ -725,25 +743,25 @@ void Corpse::RemoveItem(uint16 lootslot) {
 	}
 }
 
-void Corpse::RemoveItem(ServerLootItem_Struct* item_data){
-	uint8 material;
-	ItemList::iterator cur,end;
-	cur = itemlist.begin();
-	end = itemlist.end();
-	for(; cur != end; ++cur) {
-		ServerLootItem_Struct* sitem = *cur;
-		if (sitem == item_data) {
-			is_corpse_changed = true;
-			itemlist.erase(cur);
+void Corpse::RemoveItem(ServerLootItem_Struct* item_data)
+{
+	for (auto iter = itemlist.begin(); iter != itemlist.end(); ++iter) {
+		auto sitem = *iter;
+		if (sitem != item_data) { continue; }
 
-			material = Inventory::CalcMaterialFromSlot(sitem->equip_slot);
-			if(material != _MaterialInvalid)
-				SendWearChange(material);
+		is_corpse_changed = true;
+		itemlist.erase(iter);
 
-			safe_delete(sitem);
+		uint8 material = Inventory::CalcMaterialFromSlot(sitem->equip_slot); // autos to unsigned char
+		if (material != _MaterialInvalid)
+			SendWearChange(material);
 
-			return;
-		}
+		UpdateEquipLightValue();
+		if (UpdateActiveLightValue())
+			SendAppearancePacket(AT_Light, GetActiveLightValue());
+
+		safe_delete(sitem);
+		return;
 	}
 }
 
@@ -767,7 +785,7 @@ bool Corpse::IsEmpty() const {
 	if (copper != 0 || silver != 0 || gold != 0 || platinum != 0)
 		return false;
 
-	return(itemlist.size() == 0);
+	return itemlist.empty();
 }
 
 bool Corpse::Process() {
@@ -1267,6 +1285,9 @@ void Corpse::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.NPC = 3;
 	else
 		ns->spawn.NPC = 2;
+
+	UpdateActiveLightValue();
+	ns->spawn.light = active_light;
 }
 
 void Corpse::QueryLoot(Client* to) {
@@ -1411,6 +1432,20 @@ uint32 Corpse::GetEquipmentColor(uint8 material_slot) const {
 	}
 
 	return 0;
+}
+
+void Corpse::UpdateEquipLightValue()
+{
+	equip_light = NOT_USED;
+
+	for (auto iter = itemlist.begin(); iter != itemlist.end(); ++iter) {
+		if (((*iter)->equip_slot < EmuConstants::EQUIPMENT_BEGIN || (*iter)->equip_slot > EmuConstants::GENERAL_END) && (*iter)->equip_slot != MainPowerSource) { continue; }
+		auto item = database.GetItem((*iter)->item_id);
+		if (item == nullptr) { continue; }
+		if (item->ItemType != ItemTypeMisc && item->ItemType != ItemTypeLight) { continue; }
+		if (item->Light & 0xF0) { continue; }
+		if (item->Light > equip_light) { equip_light = item->Light; }
+	}
 }
 
 void Corpse::AddLooter(Mob* who) {

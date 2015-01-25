@@ -140,6 +140,7 @@ public:
 	void UpdateMercInfo(Client *c);
 	void UpdateMercStats(Client *c);
 	void UpdateMercAppearance();
+	virtual void UpdateEquipLightValue();
 	void AddItem(uint8 slot, uint32 item_id);
 	static const char *GetRandomName();
 	bool Spawn(Client *owner);

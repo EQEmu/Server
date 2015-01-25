@@ -731,12 +731,21 @@ void Client::CompleteConnect()
 	entity_list.SendUntargetable(this);
 
 	int x;
-	for (x = 0; x < 8; x++)
+	for (x = 0; x < 8; x++) {
 		SendWearChange(x);
+	}
+	// added due to wear change above
+	UpdateActiveLightValue();
+	SendAppearancePacket(AT_Light, GetActiveLightValue());
+
 	Mob *pet = GetPet();
 	if (pet != nullptr) {
-		for (x = 0; x < 8; x++)
+		for (x = 0; x < 8; x++) {
 			pet->SendWearChange(x);
+		}
+		// added due to wear change above
+		pet->UpdateActiveLightValue();
+		pet->SendAppearancePacket(AT_Light, pet->GetActiveLightValue());
 	}
 
 	entity_list.SendTraders(this);

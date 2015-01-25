@@ -1920,7 +1920,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 		tmpNPCType->no_target_hotkey = atoi(row[88]) == 1 ? true: false;
 		tmpNPCType->raid_target = atoi(row[89]) == 0 ? false: true;
 		tmpNPCType->attack_delay = atoi(row[90]);
-		tmpNPCType->light = atoi(row[91]);
+		tmpNPCType->light = (atoi(row[91]) & 0x0F);
 
 		// If NPC with duplicate NPC id already in table,
 		// free item we attempted to add.

@@ -417,6 +417,8 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 			}
 	}
 
+	npc->UpdateEquipLightValue();
+
 	// finally, override size if one was provided
 	if (in_size > 0.0f)
 		npc->size = in_size;
@@ -437,6 +439,8 @@ Pet::Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 po
 	SetOwnerID(owner->GetID());
 	SetPetSpellID(spell_id);
 	taunting = true;
+
+	// Class should use npc constructor to set light properties
 }
 
 bool ZoneDatabase::GetPetEntry(const char *pet_type, PetRecord *into) {

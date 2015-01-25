@@ -96,6 +96,8 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	}
 
 	strcpy(this->name, this->GetCleanName());
+
+	active_light = spell_light = equip_light = innate_light = NOT_USED;
 }
 
 // This constructor is used when the bot is loaded out of the database
@@ -211,6 +213,8 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	if(cur_mana > max_mana)
 		cur_mana = max_mana;
 	cur_end = max_end;
+
+	active_light = spell_light = equip_light = innate_light = NOT_USED;
 }
 
 Bot::~Bot() {
@@ -379,6 +383,8 @@ NPCType Bot::FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::str
 	BotNPCType.hp_regen = 1;
 	BotNPCType.mana_regen = 1;
 	BotNPCType.maxlevel = botLevel;
+
+	BotNPCType.light = NOT_USED; // due to the way that bots are coded..this is sent post-spawn
 
 	return BotNPCType;
 }
@@ -4115,6 +4121,9 @@ void Bot::Spawn(Client* botCharacterOwner, std::string* errorMessage) {
 		// Level the bot to the same level as the bot owner
 		//this->SetLevel(botCharacterOwner->GetLevel());
 
+		UpdateEquipLightValue();
+		UpdateActiveLightValue();
+
 		entity_list.AddBot(this, true, true);
 
 		// Load pet
@@ -4178,6 +4187,7 @@ void Bot::RemoveBotItemBySlot(uint32 slotID, std::string *errorMessage) {
         *errorMessage = std::string(results.ErrorMessage());
 
     m_inv.DeleteItem(slotID);
+	UpdateEquipLightValue();
 }
 
 // Retrieves all the inventory records from the database for this bot.
@@ -4239,6 +4249,7 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
 
     }
 
+	UpdateEquipLightValue();
 }
 
 // Returns the inventory record for this bot from the database for the specified equipment slot.
@@ -4363,6 +4374,9 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.flymode = 0;
 		ns->spawn.size = 0;
 		ns->spawn.NPC = 0;					// 0=player,1=npc,2=pc corpse,3=npc corpse
+
+		UpdateActiveLightValue();
+		ns->spawn.light = active_light;
 
 		ns->spawn.helm = helmtexture; //0xFF;
 		ns->spawn.equip_chest2 = texture; //0xFF;
@@ -5073,6 +5087,10 @@ void Bot::BotAddEquipItem(int slot, uint32 id) {
 			equipment[slot] = id; // npc has more than just material slots. Valid material should mean valid inventory index
 			SendWearChange(materialFromSlot);
 		}
+
+		UpdateEquipLightValue();
+		if (UpdateActiveLightValue())
+			SendAppearancePacket(AT_Light, GetActiveLightValue());
 	}
 }
 
@@ -5087,6 +5105,10 @@ void Bot::BotRemoveEquipItem(int slot) {
 			if(materialFromSlot == MaterialChest)
 				SendWearChange(MaterialArms);
 		}
+
+		UpdateEquipLightValue();
+		if (UpdateActiveLightValue())
+			SendAppearancePacket(AT_Light, GetActiveLightValue());
 	}
 }
 
@@ -8384,6 +8406,8 @@ void Bot::EquipBot(std::string* errorMessage) {
 				return;
 		}
 	}
+
+	UpdateEquipLightValue();
 }
 
 //// This method is meant to be called by zone or client methods to clean up objects when a client camps, goes LD, zones out or something like that.

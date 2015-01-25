@@ -651,6 +651,15 @@ public:
 	bool IsDestructibleObject() { return destructibleobject; }
 	void SetDestructibleObject(bool in) { destructibleobject = in; }
 
+	inline uint8 GetInnateLightValue() { return innate_light; }
+	inline uint8 GetEquipLightValue() { return equip_light; }
+	inline uint8 GetSpellLightValue() { return spell_light; }
+	virtual void UpdateEquipLightValue() { equip_light = NOT_USED; }
+	inline void SetSpellLightValue(uint8 light_value) { spell_light = (light_value & 0x0F); }
+
+	inline uint8 GetActiveLightValue() { return active_light; }
+	bool UpdateActiveLightValue(); // returns true if change, false if no change
+
 	Mob* GetPet();
 	void SetPet(Mob* newpet);
 	virtual Mob* GetOwner();
@@ -1058,7 +1067,10 @@ protected:
 
 	glm::vec4 m_Delta;
 
-	uint8 light;
+	uint8 innate_light;	// defined by db field `npc_types`.`light` - where appropriate
+	uint8 equip_light;	// highest value of equipped/carried light-producing items
+	uint8 spell_light;	// set value of any light-producing spell (can be modded to mimic equip_light behavior)
+	uint8 active_light;	// highest value of all light sources
 
 	float fixedZ;
 	EmuAppearance _appearance;

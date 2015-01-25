@@ -71,7 +71,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 		d->size,
 		d->runspeed,
 		position,
-		d->light,
+		d->light, // innate_light
 		d->texture,
 		d->helmtexture,
 		d->AC,
@@ -352,6 +352,9 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 	InitializeBuffSlots();
 	CalcBonuses();
 	raid_target = d->raid_target;
+
+	active_light = d->light;
+	spell_light = equip_light = NOT_USED;
 }
 
 NPC::~NPC()
@@ -436,13 +439,19 @@ void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot) {
 		ServerLootItem_Struct* item = *cur;
 		if (item->item_id == item_id && slot <= 0 && quantity <= 0) {
 			itemlist.erase(cur);
+			UpdateEquipLightValue();
+			if (UpdateActiveLightValue()) { SendAppearancePacket(AT_Light, GetActiveLightValue()); }
 			return;
 		}
 		else if (item->item_id == item_id && item->equip_slot == slot && quantity >= 1) {
-			if (item->charges <= quantity)
+			if (item->charges <= quantity) {
 				itemlist.erase(cur);
-			else
+				UpdateEquipLightValue();
+				if (UpdateActiveLightValue()) { SendAppearancePacket(AT_Light, GetActiveLightValue()); }
+			}
+			else {
 				item->charges -= quantity;
+			}
 			return;
 		}
 	}
@@ -474,6 +483,9 @@ void NPC::CheckMinMaxLevel(Mob *them)
 		++cur;
 	}
 
+	UpdateEquipLightValue();
+	if (UpdateActiveLightValue())
+		SendAppearancePacket(AT_Light, GetActiveLightValue());
 }
 
 void NPC::ClearItemList() {
@@ -485,6 +497,10 @@ void NPC::ClearItemList() {
 		safe_delete(item);
 	}
 	itemlist.clear();
+
+	UpdateEquipLightValue();
+	if (UpdateActiveLightValue())
+		SendAppearancePacket(AT_Light, GetActiveLightValue());
 }
 
 void NPC::QueryLoot(Client* to)
@@ -702,6 +718,27 @@ uint32 NPC::CountLoot() {
 	return(itemlist.size());
 }
 
+void NPC::UpdateEquipLightValue()
+{
+	equip_light = NOT_USED;
+	
+	for (int index = MAIN_BEGIN; index < EmuConstants::EQUIPMENT_SIZE; ++index) {
+		if (equipment[index] == NOT_USED) { continue; }
+		auto item = database.GetItem(equipment[index]);
+		if (item == nullptr) { continue; }
+		if (item->Light & 0xF0) { continue; }
+		if (item->Light > equip_light) { equip_light = item->Light; }
+	}
+
+	for (auto iter = itemlist.begin(); iter != itemlist.end(); ++iter) {
+		auto item = database.GetItem((*iter)->item_id);
+		if (item == nullptr) { continue; }
+		if (item->ItemType != ItemTypeMisc && item->ItemType != ItemTypeLight) { continue; }
+		if (item->Light & 0xF0) { continue; }
+		if (item->Light > equip_light) { equip_light = item->Light; }
+	}
+}
+
 void NPC::Depop(bool StartSpawnTimer) {
 	uint16 emoteid = this->GetEmoteID();
 	if(emoteid != 0)
@@ -906,7 +943,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 		npc_type->npc_id = 0;
 		npc_type->loottable_id = 0;
 		npc_type->texture = atoi(sep.arg[3]);
-		npc_type->light = 0;
+		npc_type->light = 0; // spawncommand needs update
 		npc_type->runspeed = 1.25;
 		npc_type->d_melee_texture1 = atoi(sep.arg[7]);
 		npc_type->d_melee_texture2 = atoi(sep.arg[8]);
@@ -1804,6 +1841,8 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	Mob::FillSpawnStruct(ns, ForWho);
 	PetOnSpawn(ns);
 	ns->spawn.is_npc = 1;
+	UpdateActiveLightValue();
+	ns->spawn.light = GetActiveLightValue();
 }
 
 void NPC::PetOnSpawn(NewSpawn_Struct* ns)

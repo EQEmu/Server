@@ -4383,7 +4383,7 @@ void command_time(Client *c, const Seperator *sep)
 			zone->zone_time.getEQTimeZoneHr(),
 			zone->zone_time.getEQTimeZoneMin()
 			);
-		c->Message(13, "It is now %s.",  timeMessage);
+		c->Message(13, "It is now %s.", timeMessage);
 		Log.Out(Logs::General, Logs::Zone_Server, "Current Time is: %s", timeMessage);
 	}
 }

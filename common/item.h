@@ -207,6 +207,8 @@ public:
 
 	int GetSlotByItemInst(ItemInst *inst);
 
+	uint8 FindHighestLightValue();
+
 	void dumpEntireInventory();
 	void dumpWornItems();
 	void dumpInventory();
