@@ -187,6 +187,7 @@ int main(int argc, char** argv) {
 	database.LoadLogSettings(Log.log_settings);
 	Log.StartFileLogs();
 
+	bool ignore_db = false;
 	if (argc >= 2) {
 		char tmp[2];
 		if (strcasecmp(argv[1], "help") == 0 || strcasecmp(argv[1], "?") == 0 || strcasecmp(argv[1], "/?") == 0 || strcasecmp(argv[1], "-?") == 0 || strcasecmp(argv[1], "-h") == 0 || strcasecmp(argv[1], "-help") == 0) {
@@ -271,6 +272,9 @@ int main(int argc, char** argv) {
 			std::cout << "Usage: world startzone zoneshortname" << std::endl;
 			return 0;
 		}
+		else if(strcasecmp(argv[1], "ignore_db") == 0) {
+			ignore_db = true;
+		}
 		else {
 			std::cerr << "Error, unknown command line option" << std::endl;
 			return 1;
@@ -284,8 +288,10 @@ int main(int argc, char** argv) {
 		Log.Out(Logs::General, Logs::World_Server, "HTTP world service disabled.");
 	}
 
-	Log.Out(Logs::General, Logs::World_Server, "Checking Database Conversions..");
-	database.CheckDatabaseConversions(); 
+	if(!ignore_db) {
+		Log.Out(Logs::General, Logs::World_Server, "Checking Database Conversions..");
+		database.CheckDatabaseConversions();
+	}
 	Log.Out(Logs::General, Logs::World_Server, "Loading variables..");
 	database.LoadVariables();
 	Log.Out(Logs::General, Logs::World_Server, "Loading zones..");
