@@ -3991,22 +3991,22 @@ void Database::AssignGroupToInstance(uint32 group_id, uint32 instance_id)
 	}
 }
 
-void Database::AssignRaidToInstance(uint32 rid, uint32 instance_id)
+void Database::AssignRaidToInstance(uint32 raid_id, uint32 instance_id)
 {
 	
 	uint32 zone_id = ZoneIDFromInstanceID(instance_id);
 	uint16 version = VersionFromInstanceID(instance_id);
 
-	std::string query = StringFormat("SELECT charid FROM raid_members WHERE raidid=%u", rid);
+	std::string query = StringFormat("SELECT `charid` FROM `raid_members` WHERE `raidid` = %u", raid_id);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		return;
 
-	for (auto row=results.begin();row!=results.end();++row)
+	for (auto row = results.begin(); row != results.end(); ++row)
 	{
 		uint32 charid = atoi(row[0]);
-		if(GetInstanceID(zone_id, charid, version) == 0)
+		if (GetInstanceID(zone_id, charid, version) == 0)
 			AddClientToInstance(instance_id, charid);
 	}
 }
