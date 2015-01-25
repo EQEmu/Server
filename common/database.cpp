@@ -3971,22 +3971,22 @@ void Database::GetCharactersInInstance(uint16 instance_id, std::list<uint32> &ch
 		charid_list.push_back(atoi(row[0]));
 }
 
-void Database::AssignGroupToInstance(uint32 gid, uint32 instance_id)
+void Database::AssignGroupToInstance(uint32 group_id, uint32 instance_id)
 {
 	
 	uint32 zone_id = ZoneIDFromInstanceID(instance_id);
 	uint16 version = VersionFromInstanceID(instance_id);
 
-	std::string query = StringFormat("SELECT charid FROM group_id WHERE groupid=%u", gid);
+	std::string query = StringFormat("SELECT `charid` FROM `group_id` WHERE `groupid` = %u", group_id);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		return;
 
-	for (auto row=results.begin();row != results.end();++row)
+	for (auto row = results.begin(); row != results.end(); ++row)
 	{
 		uint32 charid = atoi(row[0]);
-		if(GetInstanceID(zone_id, charid, version) == 0)
+		if (GetInstanceID(zone_id, charid, version) == 0)
 			AddClientToInstance(instance_id, charid);
 	}
 }
