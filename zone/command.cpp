@@ -252,7 +252,7 @@ int command_init(void) {
 		command_add("hp", "- Refresh your HP bar from the server.", 0, command_hp) ||
 		command_add("incstat", "- Increases or Decreases a client's stats permanently.", 200, command_incstat) ||
 		command_add("instance", "- Modify Instances", 200, command_instance) ||
-		command_add("interrogateinv", "- use [help] argument for available options", 80, command_interrogateinv) ||
+		command_add("interrogateinv", "- use [help] argument for available options", 0, command_interrogateinv) ||
 		command_add("interrupt", "[message id] [color] - Interrupt your casting. Arguments are optional.", 50, command_interrupt) ||
 		command_add("invul", nullptr,0, command_invul) ||
 		command_add("invulnerable", "[on/off] - Turn player target's or your invulnerable flag on or off", 80, command_invul) ||
@@ -566,11 +566,9 @@ int command_realdispatch(Client *c, const char *message)
 		QServ->PlayerLogEvent(Player_Log_Issued_Commands, c->CharacterID(), event_desc);
 	}
 
-#ifdef COMMANDS_LOGGING
 	if(cur->access >= COMMANDS_LOGGING_MIN_STATUS) {
 		Log.Out(Logs::General, Logs::Commands, "%s (%s) used command: %s (target=%s)",  c->GetName(), c->AccountName(), message, c->GetTarget()?c->GetTarget()->GetName():"NONE");
 	}
-#endif
 
 	if(cur->function == nullptr) {
 		Log.Out(Logs::General, Logs::Error, "Command '%s' has a null function\n",  cstr.c_str());
