@@ -3861,7 +3861,7 @@ bool Database::RemoveClientsFromInstance(uint16 instance_id)
 }
 
 bool Database::CheckInstanceExists(uint16 instance_id) {
-	std::string query = StringFormat("SELECT * FROM instance_list where id=%u", instance_id);
+	std::string query = StringFormat("SELECT `id` FROM `instance_list` WHERE `id` = %u", instance_id);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
@@ -4175,16 +4175,13 @@ bool Database::GetAdventureStats(uint32 char_id, AdventureStats_Struct *as)
 	return true;
 }
 
-uint32 Database::GetGuildIDByCharID(uint32 char_id) 
+uint32 Database::GetGuildIDByCharID(uint32 character_id) 
 {
-
-	std::string query = StringFormat("SELECT guild_id FROM guild_members WHERE char_id='%i'", char_id);
+	std::string query = StringFormat("SELECT guild_id FROM guild_members WHERE char_id='%i'", character_id);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
-	{
 		return 0;
-	}
 
 	if (results.RowCount() == 0)
 		return 0;
@@ -4193,7 +4190,8 @@ uint32 Database::GetGuildIDByCharID(uint32 char_id)
 	return atoi(row[0]);
 }
 
-void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings){
+void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings)
+{
 	std::string query = 
 		"SELECT "
 		"log_category_id, "
