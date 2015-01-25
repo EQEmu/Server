@@ -3394,8 +3394,7 @@ uint32 Database::GetRaidID(const char* name)
 		return 0;
 	}
 
-	auto row = results.begin();
-
+	auto row = results.begin(); 
 	if (row == results.end()) {
 		return 0;
 	}
@@ -3406,7 +3405,7 @@ uint32 Database::GetRaidID(const char* name)
 	return 0;
 }
 
-const char* Database::GetRaidLeaderName(uint32 rid)
+const char* Database::GetRaidLeaderName(uint32 raid_id)
 {
 	// Would be a good idea to fix this to be a passed in variable and
 	// make the caller responsible. static local variables like this are
@@ -3415,20 +3414,17 @@ const char* Database::GetRaidLeaderName(uint32 rid)
 	// but may not be fully supported in some compilers.
 	static char name[128];
 	
-	std::string query = StringFormat("SELECT name FROM raid_members WHERE raidid=%u AND israidleader=1",rid);
+	std::string query = StringFormat("SELECT `name` FROM `raid_members` WHERE `raidid` = %u AND `israidleader` = 1", raid_id);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
-	{
-		std::cout << "Unable to get raid id: " << results.ErrorMessage() << std::endl;
+	if (!results.Success()) {
+		Log.Out(Logs::General, Logs::Debug, "Unable to get Raid Leader Name for Raid ID: %u", raid_id);
 		return "UNKNOWN";
 	}
 
 	auto row = results.begin();
 
-	if (row == results.end())
-	{
-		std::cout << "Unable to get raid id, char not found!" << std::endl;
+	if (row == results.end()) {
 		return "UNKNOWN";
 	}
 
