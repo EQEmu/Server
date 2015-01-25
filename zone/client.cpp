@@ -7564,73 +7564,30 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 	int32 faction_id[MAX_NPC_FACTIONS] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	int32 npc_value[MAX_NPC_FACTIONS] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	uint8 temp[MAX_NPC_FACTIONS] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	int32 mod;
-	int32 tmpValue;
 	int32 current_value;
-	FactionMods fm;
 	bool change = false;
-	bool repair = false;
 
 	// Get the npc faction list
 	if (!database.GetNPCFactionList(npc_id, faction_id, npc_value, temp))
 		return;
 	for (int i = 0; i < MAX_NPC_FACTIONS; i++)
 	{
+		int32 faction_before_hit;
+		int32 faction_to_use_for_messaging;
+
 		if (faction_id[i] <= 0)
 			continue;
 
-		// Get the faction modifiers
-		if (database.GetFactionData(&fm, char_class, char_race, char_deity, faction_id[i]))
-		{
-			// Get the characters current value with that faction
-			current_value = GetCharacterFactionLevel(faction_id[i]);
+		// Get the characters current value with that faction
+		current_value = GetCharacterFactionLevel(faction_id[i]);
+		faction_before_hit = current_value;
 
-			if (this->itembonuses.HeroicCHA)
+		change = UpdatePersonalFaction(char_id, npc_value[i], faction_id[i], &current_value, temp[i]);
+
+		if (change)
 			{
-				int faction_mod = itembonuses.HeroicCHA / 5;
-				// If our result isn't truncated, then just do that
-				if (npc_value[i] * faction_mod / 100 != 0)
-					npc_value[i] += npc_value[i] * faction_mod / 100;
-				// If our result is truncated, then double a mob's value every once and a while to equal what they would have got
-				else
-				{
-					if (zone->random.Int(0, 100) < faction_mod)
-						npc_value[i] *= 2;
-				}
+				SendFactionMessage(npc_value[i], faction_id[i], faction_before_hit, current_value, temp[i]);
 			}
-			// Set flag when to update db
-			if (current_value > MAX_PERSONAL_FACTION)
-			{
-				current_value = MAX_PERSONAL_FACTION;
-				repair = true;
-			}
-			else if (current_value < MIN_PERSONAL_FACTION)
-			{
-				current_value = MIN_PERSONAL_FACTION;
-				repair = true;
-			}
-			else if ((m_pp.gm != 1) && (npc_value[i] != 0) && ((current_value != MAX_PERSONAL_FACTION) || (current_value != MIN_PERSONAL_FACTION)))
-				change = true;
-
-			current_value += npc_value[i];
-
-			if (current_value > MAX_PERSONAL_FACTION)
-				current_value = MAX_PERSONAL_FACTION;
-			else if (current_value < MIN_PERSONAL_FACTION)
-				current_value = MIN_PERSONAL_FACTION;
-
-			if (change || repair)
-			{
-				database.SetCharacterFactionLevel(char_id, faction_id[i], current_value, temp[i], factionvalues);
-
-				if (change)
-				{
-					mod = fm.base + fm.class_mod + fm.race_mod + fm.deity_mod;
-					tmpValue = current_value + mod + npc_value[i];
-					SendFactionMessage(npc_value[i], faction_id[i], tmpValue, temp[i]);
-				}
-			}
-		}
 	}
 	return;
 }
@@ -7638,15 +7595,24 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 void Client::SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class, uint8 char_race, uint8 char_deity, int32 value, uint8 temp)
 {
 	int32 current_value;
+	bool  change=false;
+
 	//Get the npc faction list
 	if(faction_id > 0 && value != 0) {
-		//Get the faction modifiers
-		current_value = GetCharacterFactionLevel(faction_id) + value;
-		if(!(database.SetCharacterFactionLevel(char_id, faction_id, current_value, temp, factionvalues)))
-			return;
+		int32 faction_before_hit;
 
-		SendFactionMessage(value, faction_id, current_value, temp);
+		//Get the faction modifiers
+		current_value = GetCharacterFactionLevel(faction_id);
+		faction_before_hit = current_value;
+
+		change = UpdatePersonalFaction(char_id, value, faction_id, &current_value, temp);
+
+		if (change)
+		{
+			SendFactionMessage(value, faction_id, faction_before_hit, current_value, temp);
+		}
 	}
+
 	return;
 }
 
@@ -7659,6 +7625,58 @@ int32 Client::GetCharacterFactionLevel(int32 faction_id)
 	if (res == factionvalues.end())
 		return 0;
 	return res->second;
+}
+
+// Common code to set faction level.
+// Applies HeroicCHA is it applies
+// Checks for bottom out and max faction and old faction db entries
+// Updates the faction if we are not minned, maxed or we need to repair
+
+bool Client::UpdatePersonalFaction(int32 char_id, int32 npc_value, int32 faction_id, int32 *current_value, int32 temp)
+{
+	bool repair = false;
+	bool change = false;
+
+	if (this->itembonuses.HeroicCHA)
+	{
+		int faction_mod = itembonuses.HeroicCHA / 5;
+		// If our result isn't truncated, then just do that
+		if (npc_value * faction_mod / 100 != 0)
+			npc_value += npc_value * faction_mod / 100;
+		// If our result is truncated, then double a mob's value every once and a while to equal what they would have got
+		else
+		{
+			if (zone->random.Int(0, 100) < faction_mod)
+				npc_value *= 2;
+		}
+	}
+	// Set flag when to update db
+	if (*current_value > MAX_PERSONAL_FACTION)
+	{
+		*current_value = MAX_PERSONAL_FACTION;
+		repair = true;
+	}
+	else if (*current_value < MIN_PERSONAL_FACTION)
+	{
+		*current_value = MIN_PERSONAL_FACTION;
+		repair = true;
+	}
+	else if ((m_pp.gm != 1) && (npc_value != 0) && ((*current_value != MAX_PERSONAL_FACTION) || (*current_value != MIN_PERSONAL_FACTION)))
+		change = true;
+
+	*current_value += npc_value;
+
+	if (*current_value > MAX_PERSONAL_FACTION)
+		*current_value = MAX_PERSONAL_FACTION;
+	else if (*current_value < MIN_PERSONAL_FACTION)
+		*current_value = MIN_PERSONAL_FACTION;
+
+	if (change || repair)
+	{
+		database.SetCharacterFactionLevel(char_id, faction_id, *current_value, temp, factionvalues);
+	}
+
+return change;
 }
 
 // returns the character's faction level, adjusted for racial, class, and deity modifiers
@@ -7739,9 +7757,24 @@ void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 //o--------------------------------------------------------------
 //| Purpose: Send faction change message to client
 //o--------------------------------------------------------------
-void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 totalvalue, uint8 temp)
+void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 faction_before_hit, int32 totalvalue, uint8 temp)
 {
 	char name[50];
+	int32 faction_value;
+
+	// If we're dropping from MAX or raising from MIN, we should
+	// base the message on the new updated value so we don't show
+	// a min MAX message
+	//
+	// If we're changing any other place, we use the value before the
+	// hit.  For example, if we go from 1199 to 1200 which is the MAX
+	// we still want to say faction got better this time around.
+	
+	if ( (faction_before_hit == MAX_PERSONAL_FACTION) ||
+	     (faction_before_hit == MIN_PERSONAL_FACTION))
+		faction_value = totalvalue;
+	else
+		faction_value = faction_before_hit;
 
 	// default to Faction# if we couldn't get the name from the ID
 	if (database.GetFactionName(faction_id, name, sizeof(name)) == false)
@@ -7749,13 +7782,13 @@ void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 totalval
 
 	if (tmpvalue == 0 || temp == 1 || temp == 2)
 		return;
-	else if (totalvalue >= MAX_PERSONAL_FACTION)
+	else if (faction_value >= MAX_PERSONAL_FACTION)
 		Message_StringID(15, FACTION_BEST, name);
-	else if (totalvalue <= MIN_PERSONAL_FACTION)
+	else if (faction_value <= MIN_PERSONAL_FACTION)
 		Message_StringID(15, FACTION_WORST, name);
-	else if (tmpvalue > 0 && totalvalue < MAX_PERSONAL_FACTION && !RuleB(Client, UseLiveFactionMessage))
+	else if (tmpvalue > 0 && faction_value < MAX_PERSONAL_FACTION && !RuleB(Client, UseLiveFactionMessage))
 		Message_StringID(15, FACTION_BETTER, name);
-	else if (tmpvalue < 0 && totalvalue > MIN_PERSONAL_FACTION && !RuleB(Client, UseLiveFactionMessage))
+	else if (tmpvalue < 0 && faction_value > MIN_PERSONAL_FACTION && !RuleB(Client, UseLiveFactionMessage))
 		Message_StringID(15, FACTION_WORSE, name);
 	else if (RuleB(Client, UseLiveFactionMessage))
 		Message(15, "Your faction standing with %s has been adjusted by %i.", name, tmpvalue); //New Live faction message (14261)
