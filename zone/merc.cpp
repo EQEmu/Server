@@ -5299,7 +5299,8 @@ void Client::CheckMercSuspendTimer() {
 
 	if(GetMercInfo().SuspendedTime != 0)
 	{
-		if(time(nullptr) >= GetMercInfo().SuspendedTime)
+		//if(time(nullptr) >= GetMercInfo().SuspendedTime)
+		if (p_timers.Expired(&database, pTimerMercSuspend, false))
 		{
 			GetMercInfo().SuspendedTime = 0;
 			SendMercResponsePackets(0);
@@ -5399,11 +5400,9 @@ void Client::SpawnMercOnZone() {
 			}
 			// Send Mercenary Status/Timer packet
 			SendMercTimer(GetMerc());
-			//SendMercPersonalInfo();
-			CheckMercSuspendTimer();
 
 			if (MERC_DEBUG > 0)
-			Message(7, "Mercenary Debug: SpawnMercOnZone Suspended Merc.");
+				Message(7, "Mercenary Debug: SpawnMercOnZone Suspended Merc.");
 		}
 	}
 	else

@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/25/2015 ==
+Trevius: Fixed an issue where Mercenaries were causing several DB queries per second while suspended.
+
 == 01/24/2015 ==
 Uleat: Added equipment light source functionality to all mob derived classes (may still need tweaking...)
 Notes:

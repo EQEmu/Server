@@ -233,10 +233,7 @@ bool Client::Process() {
 
 		if(GetMercInfo().MercTemplateID != 0 && GetMercInfo().IsSuspended)
 		{
-			if(p_timers.Expired(&database, pTimerMercSuspend, false))
-			{
-				CheckMercSuspendTimer();
-			}
+			CheckMercSuspendTimer();
 		}
 
 		if(IsAIControlled())
