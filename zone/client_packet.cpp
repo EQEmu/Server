@@ -9314,8 +9314,7 @@ void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket *app)
 	uint32 merc_command = mc->MercCommand;	// Seen 0 (zone in with no merc or suspended), 1 (dismiss merc), 5 (normal state), 20 (unknown), 36 (zone in with merc)
 	int32 option = mc->Option;	// Seen -1 (zone in with no merc), 0 (setting to passive stance), 1 (normal or setting to balanced stance)
 
-	if (MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: Command %i, Option %i received.", merc_command, option);
+	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Command %i, Option %i received.", merc_command, option);
 
 	if (!RuleB(Mercs, AllowMercs))
 		return;
@@ -9349,8 +9348,7 @@ void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket *app)
 					merc->SetStance(mercTemplate->Stances[option]);
 					GetMercInfo().Stance = mercTemplate->Stances[option];
 
-					if (MERC_DEBUG > 0)
-						Message(7, "Mercenary Debug: Set Stance: %u", merc->GetStance());
+					Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Set Stance: %u", merc->GetStance());
 				}
 			}
 		}
@@ -9373,8 +9371,7 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 	uint32 merchant_id = mmsr->MercMerchantID;
 	uint32 altCurrentType = 19;
 
-	if (MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: Data Request for Merchant ID (%i)", merchant_id);
+	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Data Request for Merchant ID (%i)", merchant_id);
 
 	//client is requesting data about currently owned mercenary
 	if (merchant_id == 0) {
@@ -9382,14 +9379,12 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 		//send info about your current merc(s)
 		if (GetMercInfo().mercid)
 		{
-			if (MERC_DEBUG > 0)
-				Message(7, "Mercenary Debug: SendMercPersonalInfo Request");
+			Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: SendMercPersonalInfo Request");
 			SendMercPersonalInfo();
 		}
 		else
 		{
-			if (MERC_DEBUG > 0)
-				Message(7, "Mercenary Debug: SendMercPersonalInfo Not Sent - MercID (%i)", GetMercInfo().mercid);
+			Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: SendMercPersonalInfo Not Sent - MercID (%i)", GetMercInfo().mercid);
 		}
 	}
 
@@ -9502,8 +9497,7 @@ void Client::Handle_OP_MercenaryDataUpdateRequest(const EQApplicationPacket *app
 		return;
 	}
 
-	if (MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: Data Update Request Received.");
+	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Data Update Request Received.");
 
 	if (GetMercID())
 	{
@@ -9529,8 +9523,7 @@ void Client::Handle_OP_MercenaryDismiss(const EQApplicationPacket *app)
 		Command = VARSTRUCT_DECODE_TYPE(uint8, InBuffer);
 	}
 
-	if (MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: Dismiss Request ( %i ) Received.", Command);
+	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Dismiss Request ( %i ) Received.", Command);
 
 	// Handle the dismiss here...
 	DismissMerc(GetMercInfo().mercid);
@@ -9555,8 +9548,7 @@ void Client::Handle_OP_MercenaryHire(const EQApplicationPacket *app)
 	uint32 merc_unk1 = mmrq->MercUnk01;
 	uint32 merc_unk2 = mmrq->MercUnk02;
 
-	if (MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: Template ID (%i), Merchant ID (%i), Unknown1 (%i), Unknown2 (%i)", merc_template_id, merchant_id, merc_unk1, merc_unk2);
+	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Template ID (%i), Merchant ID (%i), Unknown1 (%i), Unknown2 (%i)", merc_template_id, merchant_id, merc_unk1, merc_unk2);
 
 	//HirePending = true;
 	SetHoTT(0);
@@ -9622,8 +9614,7 @@ void Client::Handle_OP_MercenarySuspendRequest(const EQApplicationPacket *app)
 	SuspendMercenary_Struct* sm = (SuspendMercenary_Struct*)app->pBuffer;
 	uint32 merc_suspend = sm->SuspendMerc;	// Seen 30 for suspending or unsuspending
 
-	if (MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: Suspend ( %i ) received.", merc_suspend);
+	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Suspend ( %i ) received.", merc_suspend);
 
 	if (!RuleB(Mercs, AllowMercs))
 		return;
@@ -9643,8 +9634,7 @@ void Client::Handle_OP_MercenaryTimerRequest(const EQApplicationPacket *app)
 		return;
 	}
 
-	if (MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: Timer Request received.");
+	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Timer Request received.");
 
 	if (!RuleB(Mercs, AllowMercs)) {
 		return;

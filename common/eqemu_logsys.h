@@ -76,6 +76,7 @@ namespace Logs{
 		Zone_Server,
 		MySQLError,
 		MySQLQuery,
+		Mercenaries,
 		MaxCategoryID	/* Don't Remove this*/
 	};
 
@@ -118,6 +119,7 @@ namespace Logs{
 		"Zone Server",
 		"MySQL Error",
 		"MySQL Query",
+		"Mercenaries",
 	};
 }
 

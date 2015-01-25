@@ -188,6 +188,7 @@ uint16 EQEmuLogSys::GetWindowsConsoleColorFromCategory(uint16 log_category){
 		case Logs::Quests:
 			return Console::Color::LightCyan;
 		case Logs::Commands:
+		case Logs::Mercenaries:
 			return Console::Color::LightMagenta;
 		case Logs::Crash:
 			return Console::Color::LightRed;
@@ -210,6 +211,7 @@ std::string EQEmuLogSys::GetLinuxConsoleColorFromCategory(uint16 log_category){
 		case Logs::Quests:
 			return LC_CYAN;
 		case Logs::Commands:
+		case Logs::Mercenaries:
 			return LC_MAGENTA;
 		case Logs::Crash:
 			return LC_RED;
@@ -232,6 +234,7 @@ uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category){
 		case Logs::Quests:
 			return 258; /* Light Cyan */
 		case Logs::Commands:
+		case Logs::Mercenaries:
 			return 5; /* Light Purple */
 		case Logs::Crash:
 			return 13; /* Red */

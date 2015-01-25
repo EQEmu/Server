@@ -7275,8 +7275,7 @@ void Client::SendMercPersonalInfo()
 	stancecount += zone->merc_stance_list[GetMercInfo().MercTemplateID].size();
 	if(stancecount > MAX_MERC_STANCES || mercCount > MAX_MERC || mercTypeCount > MAX_MERC_GRADES)
 	{
-		if (MERC_DEBUG > 0)
-			Message(7, "Mercenary Debug: SendMercPersonalInfo Cancelled: (%i) (%i) (%i)", stancecount, mercCount, mercTypeCount);
+		Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: SendMercPersonalInfo canceled: (%i) (%i) (%i)", stancecount, mercCount, mercTypeCount);
 		SendMercMerchantResponsePacket(0);
 		return;
 	}
@@ -7370,15 +7369,13 @@ void Client::SendMercPersonalInfo()
 				return;
 			}
 		}
-		if (MERC_DEBUG > 0)
-			Message(7, "Mercenary Debug: SendMercPersonalInfo Send Successful");
+		Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: SendMercPersonalInfo Send Successful");
 
 		SendMercMerchantResponsePacket(0);
 	}
 	else
 	{
-		if (MERC_DEBUG > 0)
-			Message(7, "Mercenary Debug: SendMercPersonalInfo Send Failed Due to no MercData for %i", GetMercInfo().MercTemplateID);
+		Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: SendMercPersonalInfo Send Failed Due to no MercData for %i", GetMercInfo().MercTemplateID);
 	}
 
 }

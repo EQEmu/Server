@@ -13,7 +13,6 @@ struct MercTemplate;
 struct NPCType;
 struct NewSpawn_Struct;
 
-#define MERC_DEBUG 0
 #define MAXMERCS 1
 #define TANK 1
 #define HEALER 2

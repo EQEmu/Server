@@ -2242,10 +2242,9 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 								case TANK:
 									//check for taunt
 									if(CheckAETaunt()) {
-										if(MERC_DEBUG > 0)
-											GetOwner()->Message(7, "AE Taunting");
 										//get AE taunt
 										selectedMercSpell = GetBestMercSpellForAETaunt(this);
+										Log.Out(Logs::General, Logs::Mercenaries, "AE Taunting");
 									}
 
 									if(selectedMercSpell.spellid == 0 && CheckTaunt()) {
@@ -4125,8 +4124,7 @@ bool Merc::CheckAETaunt() {
 		}
 
 		if(result >= 1) {
-			if(MERC_DEBUG > 0)
-				Message(7, "%s: Attempting AE Taunt", GetCleanName());
+			Log.Out(Logs::General, Logs::Mercenaries, "%s: Attempting AE Taunt", GetCleanName());
 			return true;
 		}
 	}
@@ -4691,15 +4689,6 @@ bool Merc::LoadMercSpells() {
 		AIautocastspell_timer->Trigger();
 	}
 
-	if(MERC_DEBUG > 0) {
-		/*GetMercOwner()->Message(7, "Mercenary Debug: Loaded %i spells for merc.", merc_spells.size());
-
-		GetMercOwner()->Message(7, "Mercenary Debug: Spell list for merc.");
-		for (int i = merc_spells.size() - 1; i >= 0; i--) {
-		GetMercOwner()->Message(7, "%i] Slot: %i, SpellID: %i, Type: %i, Stance: %i, Proc Chance: %i", i, merc_spells[i].slot, merc_spells[i].spellid, merc_spells[i].type, merc_spells[i].stance, merc_spells[i].proc_chance);
-		}*/
-	}
-
 	return true;
 }
 
@@ -4949,8 +4938,7 @@ bool Merc::Spawn(Client *owner) {
 
 	SendPosition();
 
-	if (MERC_DEBUG > 0)
-		owner->Message(7, "Mercenary Debug: Spawn.");
+	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Spawn.");
 
 	//UpdateMercAppearance();
 
@@ -5096,8 +5084,7 @@ void Client::SendMercResponsePackets(uint32 ResponseType)
 		SendMercMerchantResponsePacket(3);
 		break;
 	}
-	if (MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: SendMercResponsePackets %i.", ResponseType);
+	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: SendMercResponsePackets %i.", ResponseType);
 }
 
 void Client::UpdateMercTimer()
@@ -5138,8 +5125,7 @@ void Client::UpdateMercTimer()
 				SendMercResponsePackets(16);
 			}
 
-			if (MERC_DEBUG > 0)
-				Message(7, "Mercenary Debug: UpdateMercTimer Complete.");
+			Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: UpdateMercTimer Complete.");
 
 			// Normal upkeep charge message
 			//Message(7, "You have been charged a mercenary upkeep cost of %i plat, and %i gold and your mercenary upkeep cost timer has been reset to 15 minutes.", upkeep_plat, upkeep_gold, (int)(RuleI(Mercs, UpkeepIntervalMS) / 1000 / 60));
@@ -5192,8 +5178,7 @@ bool Client::CheckCanHireMerc(Mob* merchant, uint32 template_id) {
 		}
 	}
 
-	if (MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: CheckCanHireMerc True.");
+	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: CheckCanHireMerc True.");
 
 	return true;
 }
@@ -5266,8 +5251,7 @@ bool Client::CheckCanSpawnMerc(uint32 template_id) {
 		return false;
 	}
 
-	if (MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: CheckCanSpawnMerc True.");
+	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: CheckCanSpawnMerc True.");
 
 	return true;
 }
@@ -5289,8 +5273,7 @@ bool Client::CheckCanUnsuspendMerc() {
 		return false;
 	}
 
-	if (MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: CheckCanUnsuspendMerc True.");
+	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: CheckCanUnsuspendMerc True.");
 
 	return true;
 }
@@ -5305,8 +5288,7 @@ void Client::CheckMercSuspendTimer() {
 			GetMercInfo().SuspendedTime = 0;
 			SendMercResponsePackets(0);
 			SendMercSuspendResponsePacket(GetMercInfo().SuspendedTime);
-			if (MERC_DEBUG > 0)
-				Message(7, "Mercenary Debug: CheckMercSuspendTimer Ready.");
+			Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: CheckMercSuspendTimer Ready.");
 		}
 	}
 }
@@ -5319,8 +5301,7 @@ void Client::SuspendMercCommand() {
 		{
 			if(!CheckCanUnsuspendMerc())
 			{
-				if (MERC_DEBUG > 0)
-					Message(7, "Mercenary Debug: SuspendMercCommand Unable to Unsuspend.");
+				Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: SuspendMercCommand Unable to Unsuspend.");
 
 				return;
 			}
@@ -5330,15 +5311,13 @@ void Client::SuspendMercCommand() {
 			if(merc)
 			{
 				SpawnMerc(merc, true);
-				if (MERC_DEBUG > 0)
-					Message(7, "Mercenary Debug: SuspendMercCommand Successful Unsuspend.");
+				Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: SuspendMercCommand Successful Unsuspend.");
 			}
 			else
 			{
 				//merc failed to spawn
 				SendMercResponsePackets(3);
-				if (MERC_DEBUG > 0)
-					Message(7, "Mercenary Debug: SuspendMercCommand Failed to Spawn Merc.");
+				Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: SuspendMercCommand Failed to Spawn Merc.");
 			}
 		}
 		else
@@ -5348,8 +5327,7 @@ void Client::SuspendMercCommand() {
 			if(CurrentMerc && GetMercID())
 			{
 				CurrentMerc->Suspend();
-				if (MERC_DEBUG > 0)
-					Message(7, "Mercenary Debug: SuspendMercCommand Successful Suspend.");
+				Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: SuspendMercCommand Successful Suspend.");
 			}
 		}
 	}
@@ -5384,8 +5362,7 @@ void Client::SpawnMercOnZone() {
 			{
 				SpawnMerc(merc, false);
 			}
-			if (MERC_DEBUG > 0)
-				Message(7, "Mercenary Debug: SpawnMercOnZone Normal Merc.");
+			Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: SpawnMercOnZone Normal Merc.");
 		}
 		else
 		{
@@ -5401,8 +5378,7 @@ void Client::SpawnMercOnZone() {
 			// Send Mercenary Status/Timer packet
 			SendMercTimer(GetMerc());
 
-			if (MERC_DEBUG > 0)
-				Message(7, "Mercenary Debug: SpawnMercOnZone Suspended Merc.");
+			Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: SpawnMercOnZone Suspended Merc.");
 		}
 	}
 	else
@@ -5422,20 +5398,17 @@ void Client::SendMercTimer(Merc* merc) {
 	if (!merc)
 	{
 		SendMercTimerPacket(NO_MERC_ID, MERC_STATE_SUSPENDED, GetMercInfo().SuspendedTime, GetMercInfo().MercTimerRemaining, RuleI(Mercs, SuspendIntervalMS));
-		if (MERC_DEBUG > 0)
-			Message(7, "Mercenary Debug: SendMercTimer No Merc.");
+		Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: SendMercTimer No Merc.");
 	}
 	else if (merc->IsSuspended())
 	{
 		SendMercTimerPacket(NO_MERC_ID, MERC_STATE_SUSPENDED, GetMercInfo().SuspendedTime, GetMercInfo().MercTimerRemaining, RuleI(Mercs, SuspendIntervalMS));
-		if (MERC_DEBUG > 0)
-			Message(7, "Mercenary Debug: SendMercTimer Suspended Merc.");
+		Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: SendMercTimer Suspended Merc.");
 	}
 	else
 	{
 		SendMercTimerPacket(merc->GetID(), MERC_STATE_NORMAL, NOT_SUSPENDED_TIME, GetMercInfo().MercTimerRemaining, RuleI(Mercs, SuspendIntervalMS));
-		if (MERC_DEBUG > 0)
-			Message(7, "Mercenary Debug: SendMercTimer Normal Merc.");
+		Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: SendMercTimer Normal Merc.");
 	}
 
 }
@@ -5457,8 +5430,7 @@ void Client::SpawnMerc(Merc* merc, bool setMaxStats) {
 	merc->Unsuspend(setMaxStats);
 	merc->SetStance(GetMercInfo().Stance);
 
-	if (MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: SpawnMerc Success.");
+	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: SpawnMerc Success.");
 
 	return;
 
@@ -5487,8 +5459,7 @@ bool Merc::Suspend() {
 	// Start the timer to send the packet that refreshes the Unsuspend Button
 	mercOwner->GetPTimers().Start(pTimerMercSuspend, RuleI(Mercs, SuspendIntervalS));
 
-	if (MERC_DEBUG > 0)
-		mercOwner->Message(7, "Mercenary Debug: Suspend Complete.");
+	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Suspend Complete.");
 
 	return true;
 }
@@ -5574,14 +5545,12 @@ bool Client::DismissMerc(uint32 MercID) {
 	bool Dismissed = true;
 	if (!database.DeleteMerc(MercID))
 	{
-		if (MERC_DEBUG > 0)
-			Message(7, "Mercenary Debug: Dismiss Failed for MercID %i", MercID);
+		Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Dismiss Failed for MercID %i", MercID);
 		Dismissed = false;
 	}
 	else
 	{
-		if (MERC_DEBUG > 0)
-			Message(7, "Mercenary Debug: Dismiss Successful.");
+		Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Dismiss Successful.");
 	}
 
 	if (GetMerc())
@@ -5740,16 +5709,14 @@ bool Merc::MercJoinClientGroup() {
 				database.SetGroupID(this->GetName(), g->GetID(), mercOwner->CharacterID(), true);
 				database.RefreshGroupFromDB(mercOwner);
 				g->SaveGroupLeaderAA();
-				if(MERC_DEBUG > 0)
-					mercOwner->Message(7, "Mercenary Debug: Mercenary joined new group.");
+				Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Mercenary joined new group.");
 			}
 			else
 			{
 				g->DisbandGroup();
 				Suspend();
 
-				if(MERC_DEBUG > 0)
-					mercOwner->Message(7, "Mercenary Debug: Mercenary disbanded new group.");
+				Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Mercenary disbanded new group.");
 			}
 
 		}
@@ -5761,15 +5728,13 @@ bool Merc::MercJoinClientGroup() {
 			// Update members that are out of zone
 			GetGroup()->SendGroupJoinOOZ(this);
 
-			if(MERC_DEBUG > 0)
-				mercOwner->Message(7, "Mercenary Debug: Mercenary joined existing group.");
+			Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Mercenary joined existing group.");
 		}
 		else
 		{
 			Suspend();
 
-			if(MERC_DEBUG > 0)
-				mercOwner->Message(7, "Mercenary Debug: Mercenary failed to join the group - Suspending");
+			Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Mercenary failed to join the group - Suspending");
 		}
 	}
 
@@ -5820,8 +5785,7 @@ Merc* Client::GetMerc() {
 
 	if(GetMercID() == 0)
 	{
-		if (MERC_DEBUG > 0)
-			Message(7, "Mercenary Debug: GetMerc 0.");
+		Log.Out(Logs::Detail, Logs::Mercenaries, "Mercenary Debug: GetMerc 0.");
 		return (nullptr);
 	}
 
@@ -5829,16 +5793,14 @@ Merc* Client::GetMerc() {
 	if(tmp == nullptr)
 	{
 		SetMercID(0);
-		if (MERC_DEBUG > 0)
-			Message(7, "Mercenary Debug: GetMerc No Merc.");
+		Log.Out(Logs::Detail, Logs::Mercenaries, "Mercenary Debug: GetMerc No Merc.");
 		return (nullptr);
 	}
 
 	if(tmp->GetOwnerID() != GetID())
 	{
 		SetMercID(0);
-		if (MERC_DEBUG > 0)
-			Message(7, "Mercenary Debug: GetMerc Owner Mismatch.");
+		Log.Out(Logs::Detail, Logs::Mercenaries, "Mercenary Debug: GetMerc Owner Mismatch.");
 		return (nullptr);
 	}
 
@@ -5856,8 +5818,7 @@ uint8 Client::GetNumMercs() {
 			numMercs++;
 		}
 	}
-	if (MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: GetNumMercs %i.", numMercs);
+	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: GetNumMercs %i.", numMercs);
 
 	return numMercs;
 }
@@ -5898,8 +5859,7 @@ void Client::SetMerc(Merc* newmerc) {
 		GetMercInfo().Gender = 0;
 		GetMercInfo().State = 0;
 		memset(GetMercInfo().merc_name, 0, 64);
-		if (MERC_DEBUG > 0)
-			Message(7, "Mercenary Debug: SetMerc No Merc.");
+		Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: SetMerc No Merc.");
 	}
 	else
 	{
@@ -5916,8 +5876,7 @@ void Client::SetMerc(Merc* newmerc) {
 		GetMercInfo().Gender = newmerc->GetGender();
 		GetMercInfo().State = newmerc->IsSuspended() ? MERC_STATE_SUSPENDED : MERC_STATE_NORMAL;
 		snprintf(GetMercInfo().merc_name, 64, "%s", newmerc->GetName());
-		if (MERC_DEBUG > 0)
-			Message(7, "Mercenary Debug: SetMerc New Merc.");
+		Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: SetMerc New Merc.");
 	}
 }
 
@@ -5937,8 +5896,7 @@ void Client::SendMercMerchantResponsePacket(int32 response_type) {
 		MercenaryMerchantResponse_Struct* mmr = (MercenaryMerchantResponse_Struct*)outapp->pBuffer;
 		mmr->ResponseType = response_type;              // send specified response type
 		FastQueuePacket(&outapp);
-		if (MERC_DEBUG > 0)
-			Message(7, "Mercenary Debug: Sent SendMercMerchantResponsePacket %i.", response_type);
+		Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Sent SendMercMerchantResponsePacket %i.", response_type);
 	}
 }
 
@@ -5947,8 +5905,7 @@ void Client::SendMercenaryUnknownPacket(uint8 type) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryUnknown1, 1);
 	outapp->WriteUInt8(type);
 	FastQueuePacket(&outapp);
-	if (MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: Sent SendMercenaryUnknownPacket %i.", type);
+	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Sent SendMercenaryUnknownPacket %i.", type);
 
 }
 
@@ -5957,8 +5914,7 @@ void Client::SendMercenaryUnsuspendPacket(uint8 type) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryUnsuspendResponse, 1);
 	outapp->WriteUInt8(type);
 	FastQueuePacket(&outapp);
-	if (MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: Sent SendMercenaryUnsuspendPacket %i.", type);
+	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Sent SendMercenaryUnsuspendPacket %i.", type);
 
 }
 
@@ -5968,8 +5924,7 @@ void Client::SendMercSuspendResponsePacket(uint32 suspended_time) {
 	SuspendMercenaryResponse_Struct* smr = (SuspendMercenaryResponse_Struct*)outapp->pBuffer;
 	smr->SuspendTime = suspended_time;              // Seen 0 (not suspended) or c9 c2 64 4f (suspended on Sat Mar 17 11:58:49 2012) - Unix Timestamp
 	FastQueuePacket(&outapp);
-	if (MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: Sent SendMercSuspendResponsePacket %i.", suspended_time);
+	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Sent SendMercSuspendResponsePacket %i.", suspended_time);
 
 }
 
@@ -5984,8 +5939,7 @@ void Client::SendMercTimerPacket(int32 entity_id, int32 merc_state, int32 suspen
 	mss->UpdateInterval = update_interval; // Seen 900000 - 15 minutes in ms
 	mss->MercUnk01 = unk01; // Seen 180000 - 3 minutes in ms - Used for the unsuspend button refresh timer
 	FastQueuePacket(&outapp);
-	if (MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: Sent SendMercTimerPacket %i, %i, %i, %i, %i.", entity_id, merc_state, suspended_time, update_interval, unk01);
+	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Sent SendMercTimerPacket %i, %i, %i, %i, %i.", entity_id, merc_state, suspended_time, update_interval, unk01);
 
 }
 
@@ -5996,8 +5950,7 @@ void Client::SendMercAssignPacket(uint32 entityID, uint32 unk01, uint32 unk02) {
 	mas->MercUnk01 = unk01;
 	mas->MercUnk02 = unk02;
 	FastQueuePacket(&outapp);
-	if (MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: Sent SendMercAssignPacket %i, %i, %i.", entityID, unk01, unk02);
+	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Sent SendMercAssignPacket %i, %i, %i.", entityID, unk01, unk02);
 }
 
 void NPC::LoadMercTypes() {
