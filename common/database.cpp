@@ -3837,14 +3837,19 @@ void Database::PurgeExpiredInstances()
 
 bool Database::AddClientToInstance(uint16 instance_id, uint32 char_id)
 {
-	std::string query = StringFormat("REPLACE INTO instance_list_player(id, charid) VALUES (%lu, %lu)", (unsigned long)instance_id, (unsigned long)char_id);
+	std::string query = StringFormat(
+		"REPLACE INTO `instance_list_player` (id, charid) "
+		"VALUES "
+		"(%lu, %lu)", 
+		(unsigned long)instance_id, 
+		(unsigned long)char_id
+	);
 	auto results = QueryDatabase(query); 
 	return results.Success();
 }
 
 bool Database::RemoveClientFromInstance(uint16 instance_id, uint32 char_id)
 {
-	
 	std::string query = StringFormat("DELETE FROM instance_list_player WHERE id=%lu AND charid=%lu",
 		(unsigned long)instance_id, (unsigned long)char_id);
 	auto results = QueryDatabase(query);
