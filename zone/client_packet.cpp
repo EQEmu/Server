@@ -4021,7 +4021,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 		//discipline, using the item spell slot
 		if (castspell->inventoryslot == INVALID_INDEX) {
 			if (!UseDiscipline(castspell->spell_id, castspell->target_id)) {
-				Log.Out(Logs::General, Logs::None, "Unknown ability being used by %s, spell being cast is: %i\n", GetName(), castspell->spell_id);
+				Log.Out(Logs::General, Logs::Spells, "Unknown ability being used by %s, spell being cast is: %i\n", GetName(), castspell->spell_id);
 				InterruptSpell(castspell->spell_id);
 			}
 			return;
@@ -4099,7 +4099,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 	/* Discipline */
 	else if (castspell->slot == DISCIPLINE_SPELL_SLOT) {
 		if (!UseDiscipline(castspell->spell_id, castspell->target_id)) {
-			printf("Unknown ability being used by %s, spell being cast is: %i\n", GetName(), castspell->spell_id);
+			Log.Out(Logs::General, Logs::Spells, "Unknown ability being used by %s, spell being cast is: %i\n", GetName(), castspell->spell_id);
 			InterruptSpell(castspell->spell_id);
 			return;
 		}
