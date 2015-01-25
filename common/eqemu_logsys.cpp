@@ -269,6 +269,13 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 debug_level, uint16 log_category,
 
 void EQEmuLogSys::Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...)
 {
+	const bool log_to_console = log_settings[log_category].log_to_console > 0;
+	const bool log_to_file = log_settings[log_category].log_to_file > 0;
+	const bool log_to_gmsay = log_settings[log_category].log_to_gmsay > 0;
+	const bool nothing_to_log = !log_to_console && !log_to_file && !log_to_gmsay;
+
+	if (nothing_to_log) return;
+
 	va_list args;
 	va_start(args, message);
 	std::string output_message = vStringFormat(message.c_str(), args);
@@ -276,9 +283,9 @@ void EQEmuLogSys::Out(Logs::DebugLevel debug_level, uint16 log_category, std::st
 
 	std::string output_debug_message = EQEmuLogSys::FormatOutMessageString(log_category, output_message);
 
-	EQEmuLogSys::ProcessConsoleMessage(debug_level, log_category, output_debug_message);
-	EQEmuLogSys::ProcessGMSay(debug_level, log_category, output_debug_message);
-	EQEmuLogSys::ProcessLogWrite(debug_level, log_category, output_message);
+	if (log_to_console) EQEmuLogSys::ProcessConsoleMessage(debug_level, log_category, output_debug_message);
+	if (log_to_gmsay) EQEmuLogSys::ProcessGMSay(debug_level, log_category, output_debug_message);
+	if (log_to_file) EQEmuLogSys::ProcessLogWrite(debug_level, log_category, output_message);
 }
 
 void EQEmuLogSys::SetCurrentTimeStamp(char* time_stamp)

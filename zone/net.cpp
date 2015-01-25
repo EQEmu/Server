@@ -151,7 +151,7 @@ int main(int argc, char** argv) {
 		Log.Out(Logs::General, Logs::Error, "Loading server configuration failed.");
 		return 1;
 	}
-	const ZoneConfig *Config=ZoneConfig::get();
+	const ZoneConfig *Config = ZoneConfig::get();
 
 	worldserver.SetPassword(Config->SharedKey.c_str());
 
