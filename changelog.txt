@@ -7,6 +7,8 @@ Notes:
 	- Valid light source values are 0 thru 15 (values are bitmask checked and limited to 0x0F)
 	- Not all classes handle equipment light sources the same way due to their equipment/loot list configurations
 	- Spell (casting?) light sources may be implemented at some point..more information is needed
+	- Currently, loot list (general inventory) light sources are limited to ItemTypeMisc and ItemTypeLight to avoid issues with worn-specific light sources emitting
+	- Augment light sources are not recognized by the client and, therefore, not implemented in the server code
 
 == 01/22/2015 ==
 Akkadius: Massive Log System overhaul, see: http://wiki.eqemulator.org/p?Logging_System_Overhaul&frm=Main
