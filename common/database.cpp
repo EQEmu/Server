@@ -79,10 +79,11 @@ void Database::DBInitVars() {
 	varcache_max = 0;
 	varcache_lastupdate = 0;
 }
-/*
 
-Close the connection to the database
+/*
+	Close the connection to the database
 */
+
 Database::~Database()
 {
 	unsigned int x;
@@ -95,9 +96,9 @@ Database::~Database()
 }
 
 /*
-Check if there is an account with name "name" and password "password"
-Return the account id or zero if no account matches.
-Zero will also be returned if there is a database error.
+	Check if there is an account with name "name" and password "password"
+	Return the account id or zero if no account matches.
+	Zero will also be returned if there is a database error.
 */
 uint32 Database::CheckLogin(const char* name, const char* password, int16* oStatus) {
 

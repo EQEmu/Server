@@ -53,9 +53,9 @@ struct EventLogDetails_Struct {
 };
 
 struct CharacterEventLog_Struct {
-uint32	count;
-uint8	eventid;
-EventLogDetails_Struct eld[255];
+	uint32	count;
+	uint8	eventid;
+	EventLogDetails_Struct eld[255];
 };
 
 struct npcDecayTimes_Struct {
@@ -261,17 +261,11 @@ private:
 	VarCache_Struct**	varcache_array;
 	uint32				varcache_lastupdate;
 
-
-	/*
-	* Groups, utility methods.
-	*/
+	/* Groups, utility methods. */
 	void    ClearAllGroupLeaders();
 	void    ClearAllGroups();
 
-
-	/*
-	* Raid, utility methods.
-	*/
+	/* Raid, utility methods. */
 	void ClearAllRaids();
 	void ClearAllRaidDetails();
 	void ClearAllRaidLeaders();

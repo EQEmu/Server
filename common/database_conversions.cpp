@@ -458,11 +458,11 @@ bool Database::CheckDatabaseConversions() {
 	// }
 
 	/*
-	Automatic Database Upgrade Script
-	Script: db_update.pl V 1 - the number that world passes to the script will
-	force the script to check for a newer version to update itself with
-	db_update.pl ran_from_world - won't bring up a menu if your database versions match
-	db_update.pl - ran standalone will bring up a menu prompt
+		Automatic Database Upgrade Script
+		Script: db_update.pl V 1 - the number that world passes to the script will
+		force the script to check for a newer version to update itself with
+		db_update.pl ran_from_world - won't bring up a menu if your database versions match
+		db_update.pl - ran standalone will bring up a menu prompt
 	*/
 
 	/* Check for a new version of this script, the arg passed
