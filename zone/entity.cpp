@@ -79,7 +79,7 @@ Client *Entity::CastToClient()
 	}
 
 	if (!IsClient()) {
-		Log.Out(Logs::General, Logs::Error, "CastToClient error (not client)");
+		Log.Out(Logs::General, Logs::Error, "CastToClient error (not client)"); 
 		return 0;
 	}
 
@@ -88,12 +88,10 @@ Client *Entity::CastToClient()
 
 NPC *Entity::CastToNPC()
 {
-#ifdef _EQDEBUG
 	if (!IsNPC()) {
-		std::cout << "CastToNPC error" << std::endl;
+		Log.Out(Logs::General, Logs::Error, "CastToNPC error (Not NPC)");
 		return 0;
 	}
-#endif
 	return static_cast<NPC *>(this);
 }
 
