@@ -3397,7 +3397,6 @@ uint32 Database::GetRaidID(const char* name)
 	auto row = results.begin();
 
 	if (row == results.end()) {
-		Log.Out(Logs::General, Logs::Error, "Unable to get raid id, char not found!");
 		return 0;
 	}
 
