@@ -2543,18 +2543,15 @@ bool Database::SetVariable(const char* varname_in, const char* varvalue_in) {
 	return true;
 }
 
-uint32 Database::GetMiniLoginAccount(char* ip){
-
-	std::string query = StringFormat("SELECT id FROM account WHERE minilogin_ip='%s'", ip);
+uint32 Database::GetMiniLoginAccount(char* ip)
+{
+	std::string query = StringFormat("SELECT `id` FROM `account` WHERE `minilogin_ip` = '%s'", ip);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
-	{
 		return 0;
-	}
 
-	auto row = results.begin();
-
+	auto row = results.begin(); 
 	return atoi(row[0]);
 }
 
@@ -3809,8 +3806,7 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 
 //perhaps purge any expireds too
 bool Database::CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version, uint32 duration)
-{
-
+{ 
 	std::string query = StringFormat("INSERT INTO instance_list (id, zone, version, start_time, duration)"
 		" values(%lu, %lu, %lu, UNIX_TIMESTAMP(), %lu)", 
 		(unsigned long)instance_id, (unsigned long)zone_id, (unsigned long)version, (unsigned long)duration);
@@ -3820,8 +3816,7 @@ bool Database::CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version
 }
 
 void Database::PurgeExpiredInstances()
-{
-
+{ 
 	std::string query("SELECT id FROM instance_list where (start_time+duration) <= UNIX_TIMESTAMP() and never_expires = 0");
 	auto results = QueryDatabase(query);
 
@@ -4098,7 +4093,7 @@ bool Database::GlobalInstance(uint16 instance_id)
 
 void Database::UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win)
 {
-	
+
 	std::string field;
 
 	switch(theme)
