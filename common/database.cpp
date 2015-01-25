@@ -3567,12 +3567,8 @@ void Database::ClearRaidLeader(uint32 gid, uint32 rid)
 		return;
 	}
 
-	std::string query = StringFormat("DELETE from raid_leaders where gid = %lu and rid = %lu",
-			(unsigned long)gid, (unsigned long)rid);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-		std::cout << "Unable to clear raid leader: " << results.ErrorMessage() << std::endl;
+	std::string query = StringFormat("DELETE from raid_leaders where gid = %lu and rid = %lu", (unsigned long)gid, (unsigned long)rid);
+	QueryDatabase(query);
 }
 
 bool Database::VerifyInstanceAlive(uint16 instance_id, uint32 char_id)
