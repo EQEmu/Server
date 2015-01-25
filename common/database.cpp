@@ -3874,7 +3874,14 @@ bool Database::CheckInstanceExists(uint16 instance_id) {
 }
 
 void Database::BuryCorpsesInInstance(uint16 instance_id) {
-	std::string query = StringFormat("UPDATE `character_corpses` SET `is_buried` = 1, `instance_id`  =0 WHERE `instance_id` = %u", instance_id);
+	std::string query = StringFormat(
+		"UPDATE `character_corpses` "
+		"SET `is_buried` = 1, "
+		"`instance_id` = 0 "
+		"WHERE "
+		"`instance_id` = %u ", 
+		instance_id
+	);
 	auto results = QueryDatabase(query);
 }
 
