@@ -74,15 +74,15 @@ Entity::~Entity()
 Client *Entity::CastToClient()
 {
 	if (this == 0x00) {
-		std::cout << "CastToClient error (nullptr)" << std::endl;
+		Log.Out(Logs::General, Logs::Error, "CastToClient error (not client)");
 		return 0;
 	}
-#ifdef _EQDEBUG
+
 	if (!IsClient()) {
-		std::cout << "CastToClient error (not client?)" << std::endl;
+		Log.Out(Logs::General, Logs::Error, "CastToClient error (not client)");
 		return 0;
 	}
-#endif
+
 	return static_cast<Client *>(this);
 }
 
