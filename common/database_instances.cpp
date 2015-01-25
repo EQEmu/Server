@@ -26,6 +26,18 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <iomanip>
 #include <iostream>
 
+// Disgrace: for windows compile
+#ifdef _WINDOWS
+#include <windows.h>
+#define snprintf	_snprintf
+#define strncasecmp	_strnicmp
+#define strcasecmp	_stricmp
+#else
+#include "unix.h"
+#include <netinet/in.h>
+#include <sys/time.h>
+#endif
+
 bool Database::AddClientToInstance(uint16 instance_id, uint32 char_id)
 {
 	std::string query = StringFormat(
