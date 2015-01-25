@@ -9,6 +9,7 @@ SET(common_sources
 	crc32.cpp
 	database.cpp
 	database_conversions.cpp
+	database_instances.cpp
 	dbcore.cpp
 	emu_opcodes.cpp
 	emu_tcp_connection.cpp
