@@ -462,31 +462,31 @@ bool Database::CheckDatabaseConversions() {
 	CheckDatabaseConvertBotsPostPPDeblob();
 	CheckDatabaseConvertCorpseDeblob();
 
-	/* Fetch Automatic Database Upgrade Script */
-	if (!std::ifstream("db_update.pl")){
-		std::cout << "Pulling down automatic database upgrade script...\n" << std::endl;
+	/* Fetch Automatic Upgrade Script */
+	if (!std::ifstream("eqemu_update.pl")){
+		std::cout << "Pulling down automatic database upgrade script..." << std::endl;
 #ifdef _WIN32
-		system("perl -MLWP::UserAgent -e \"require LWP::UserAgent;  my $ua = LWP::UserAgent->new; $ua->timeout(10); $ua->env_proxy; my $response = $ua->get('https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/db_update.pl'); if ($response->is_success){ open(FILE, '> db_update.pl'); print FILE $response->decoded_content; close(FILE); }\"");
+		system("perl -MLWP::UserAgent -e \"require LWP::UserAgent;  my $ua = LWP::UserAgent->new; $ua->timeout(10); $ua->env_proxy; my $response = $ua->get('https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_update.pl'); if ($response->is_success){ open(FILE, '> eqemu_update.pl'); print FILE $response->decoded_content; close(FILE); }\"");
 #else
-		system("wget --no-check-certificate -O db_update.pl https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/db_update.pl");
+		system("wget --no-check-certificate -O eqemu_update.pl https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_update.pl");
 #endif
 	}
 
 	/*
-		Automatic Database Upgrade Script
-		Script: db_update.pl V 1 - the number that world passes to the script will
+		Automatic (Database) Upgrade Script
+		Script: eqemu_update.pl V 1 - the number that world passes to the script will
 		force the script to check for a newer version to update itself with
-		db_update.pl ran_from_world - won't bring up a menu if your database versions match
-		db_update.pl - ran standalone will bring up a menu prompt
+		eqemu_update.pl ran_from_world - won't bring up a menu if your database versions match
+		eqemu_update.pl - ran standalone will bring up a menu prompt
 	*/
 
 	/* Check for a new version of this script, the arg passed
 	would have to be higher than the copy they have downloaded
 	locally and they will re fetch */
-	system("perl db_update.pl V 2");
+	system("perl eqemu_update.pl V 2"); 
 
 	/* Run Automatic Database Upgrade Script */
-	system("perl db_update.pl ran_from_world");
+	system("perl eqemu_update.pl ran_from_world");
 
 	return true;
 }

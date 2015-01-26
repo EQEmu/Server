@@ -1,26 +1,31 @@
 #!/usr/bin/perl
 
 ###########################################################
-#::: Automatic Database Upgrade Script
+#::: Automatic (Database) Upgrade Script
 #::: Author: Akkadius
 #::: Purpose: To upgrade databases with ease and maintain versioning
 ###########################################################
 
 $menu_displayed = 0;
 
+use Config;
+$console_output .= "	Operating System is: $Config{osname}\n";
+if($Config{osname}=~/linux/i){ $OS = "Linux"; }
+if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
+
 #::: If current version is less than what world is reporting, then download a new one...
-$current_version = 2;
+$current_version = 1;
 
 if($ARGV[0] eq "V"){
 	if($ARGV[1] > $current_version){ 
-		print "db_update.pl Automatic Database Upgrade Needs updating...\n";
+		print "eqemu_update.pl Automatic Database Upgrade Needs updating...\n";
 		print "	Current version: " . $current_version . "\n"; 
-		print "	New version: " . $current_version . "\n";
-		GetRemoteFile("https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/db_update.pl", "db_update.pl");
+		print "	New version: " . $ARGV[1] . "\n";  
+		GetRemoteFile("https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_update.pl", "eqemu_update.pl");
 		exit;
 	}
 	else{
-		print "No update necessary \n";
+		print "[Upgrade Script] No script update necessary \n";
 	}
 	exit;
 }
@@ -47,14 +52,9 @@ while(<F>) {
 
 $console_output = 
 "============================================================
-           EQEmu: Automatic Database Upgrade Check         
+           EQEmu: Automatic Upgrade Check         
 ============================================================
 ";
-
-use Config;
-$console_output .= "	Operating System is: $Config{osname}\n";
-if($Config{osname}=~/linux/i){ $OS = "Linux"; }
-if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 
 if($OS eq "Windows"){
 	$has_mysql_path = `echo %PATH%`;
