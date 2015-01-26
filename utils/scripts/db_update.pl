@@ -9,7 +9,7 @@
 $menu_displayed = 0;
 
 #::: If current version is less than what world is reporting, then download a new one...
-$current_version = 1;
+$current_version = 2;
 
 if($ARGV[0] eq "V"){
 	if($ARGV[1] > $current_version){ 
