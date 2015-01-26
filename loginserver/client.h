@@ -18,7 +18,7 @@
 #ifndef EQEMU_CLIENT_H
 #define EQEMU_CLIENT_H
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/opcodemgr.h"
 #include "../common/eq_stream_type.h"
 #include "../common/eq_stream_factory.h"
@@ -30,13 +30,13 @@
 
 using namespace std;
 
-enum ClientVersion
+enum LSClientVersion
 {
 	cv_titanium,
 	cv_sod
 };
 
-enum ClientStatus
+enum LSClientStatus
 {
 	cs_not_sent_session_ready,
 	cs_waiting_for_login,
@@ -59,7 +59,7 @@ public:
 	/**
 	* Constructor, sets our connection to c and version to v
 	*/
-	Client(EQStream *c, ClientVersion v);
+	Client(EQStream *c, LSClientVersion v);
 
 	/**
 	* Destructor.
@@ -134,8 +134,8 @@ public:
 	EQEmu::Random random;
 private:
 	EQStream *connection;
-	ClientVersion version;
-	ClientStatus status;
+	LSClientVersion version;
+	LSClientStatus status;
 
 	string account_name;
 	unsigned int account_id;

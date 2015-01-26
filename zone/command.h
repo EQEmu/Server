@@ -87,7 +87,6 @@ void command_chat(Client *c, const Seperator *sep);
 void command_showpetspell(Client *c, const Seperator *sep);
 void command_ipc(Client *c, const Seperator *sep);
 void command_npcloot(Client *c, const Seperator *sep);
-void command_log(Client *c, const Seperator *sep);
 void command_gm(Client *c, const Seperator *sep);
 void command_summon(Client *c, const Seperator *sep);
 void command_zone(Client *c, const Seperator *sep);
@@ -259,9 +258,6 @@ void command_undye(Client *c, const Seperator *sep);
 void command_undyeme(Client *c, const Seperator *sep);
 void command_hp(Client *c, const Seperator *sep);
 void command_ginfo(Client *c, const Seperator *sep);
-void command_logs(Client *c, const Seperator *sep);
-void command_nologs(Client *c, const Seperator *sep);
-void command_logsql(Client *c, const Seperator *sep);
 void command_qglobal(Client *c, const Seperator *sep);
 void command_path(Client *c, const Seperator *sep);
 void command_ginfo(Client *c, const Seperator *sep);
@@ -272,7 +268,6 @@ void command_aggrozone(Client *c, const Seperator *sep);
 void command_reloadstatic(Client *c, const Seperator *sep);
 void command_flags(Client *c, const Seperator *sep);
 void command_flagedit(Client *c, const Seperator *sep);
-void command_mlog(Client *c, const Seperator *sep);
 void command_serverrules(Client *c, const Seperator *sep);
 void command_acceptrules(Client *c, const Seperator *sep);
 void command_guildcreate(Client *c, const Seperator *sep);
@@ -327,7 +322,10 @@ void command_merchantopenshop(Client *c, const Seperator *sep);
 void command_merchantcloseshop(Client *c, const Seperator *sep);
 void command_shownumhits(Client *c, const Seperator *sep);
 void command_tune(Client *c, const Seperator *sep);
-
+void command_logtest(Client *c, const Seperator *sep);
+void command_mysqltest(Client *c, const Seperator *sep);
+void command_logs(Client *c, const Seperator *sep);
+ 
 #ifdef EQPROFILE
 void command_profiledump(Client *c, const Seperator *sep);
 void command_profilereset(Client *c, const Seperator *sep);

@@ -6,30 +6,30 @@ WaterMapV2::WaterMapV2() {
 WaterMapV2::~WaterMapV2() {
 }
 
-WaterRegionType WaterMapV2::ReturnRegionType(const xyz_location& location) const {
+WaterRegionType WaterMapV2::ReturnRegionType(const glm::vec3& location) const {
 	size_t sz = regions.size();
 	for(size_t i = 0; i < sz; ++i) {
 		auto const &region = regions[i];
-		if (region.second.ContainsPoint(glm::vec3(location.m_X, location.m_Y, location.m_Z))) {
+		if (region.second.ContainsPoint(glm::vec3(location.y, location.x, location.z))) {
 			return region.first;
 		}
 	}
 	return RegionTypeNormal;
 }
 
-bool WaterMapV2::InWater(const xyz_location& location) const {
+bool WaterMapV2::InWater(const glm::vec3& location) const {
 	return ReturnRegionType(location) == RegionTypeWater;
 }
 
-bool WaterMapV2::InVWater(const xyz_location& location) const {
+bool WaterMapV2::InVWater(const glm::vec3& location) const {
 	return ReturnRegionType(location) == RegionTypeVWater;
 }
 
-bool WaterMapV2::InLava(const xyz_location& location) const {
+bool WaterMapV2::InLava(const glm::vec3& location) const {
 	return ReturnRegionType(location) == RegionTypeLava;
 }
 
-bool WaterMapV2::InLiquid(const xyz_location& location) const {
+bool WaterMapV2::InLiquid(const glm::vec3& location) const {
 	return InWater(location) || InLava(location);
 }
 

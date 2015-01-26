@@ -8,8 +8,9 @@ SET(common_sources
 	crc16.cpp
 	crc32.cpp
 	database.cpp
+	database_conversions.cpp
+	database_instances.cpp
 	dbcore.cpp
-	debug.cpp
 	emu_opcodes.cpp
 	emu_tcp_connection.cpp
 	emu_tcp_server.cpp
@@ -18,7 +19,7 @@ SET(common_sources
 	eqdb_res.cpp
 	eqemu_exception.cpp
 	eqemu_config.cpp
-	eqemu_error.cpp
+	eqemu_logsys.cpp
 	eq_packet.cpp
 	eq_stream.cpp
 	eq_stream_factory.cpp
@@ -31,13 +32,10 @@ SET(common_sources
 	guilds.cpp
 	ipc_mutex.cpp
 	item.cpp
-	logsys.cpp
-	logsys_eqemu.cpp
 	md5.cpp
 	memory_mapped_file.cpp
 	misc.cpp
 	misc_functions.cpp
-	moremath.cpp
 	mutex.cpp
 	mysql_request_result.cpp
 	mysql_request_row.cpp
@@ -97,7 +95,6 @@ SET(common_headers
 	base_packet.h
 	base_data.h
 	bodytypes.h
-	breakdowns.h
 	classes.h
 	condition.h
 	crash.h
@@ -106,7 +103,6 @@ SET(common_headers
 	data_verification.h
 	database.h
 	dbcore.h
-	debug.h
 	deity.h
 	emu_opcodes.h
 	emu_oplist.h
@@ -120,7 +116,7 @@ SET(common_headers
 	eqemu_exception.h
 	eqemu_config.h
 	eqemu_config_elements.h
-	eqemu_error.h
+	eqemu_logsys.h
 	eq_packet.h
 	eq_stream.h
 	eq_stream_factory.h
@@ -136,6 +132,7 @@ SET(common_headers
 	features.h
 	fixed_memory_hash_set.h
 	fixed_memory_variable_hash_set.h
+	global_define.h
 	guild_base.h
 	guilds.h
 	ipc_mutex.h
@@ -144,15 +141,12 @@ SET(common_headers
 	item_struct.h
 	languages.h
 	linked_list.h
-	logsys.h
-	logtypes.h
 	loottable.h
 	mail_oplist.h
 	md5.h
 	memory_mapped_file.h
 	misc.h
 	misc_functions.h
-	moremath.h
 	mutex.h
 	mysql_request_result.h
 	mysql_request_row.h

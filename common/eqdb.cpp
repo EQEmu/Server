@@ -15,7 +15,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "debug.h"
+#include "global_define.h"
 #include "eqdb.h"
 #include "database.h"
 #include <mysql.h>

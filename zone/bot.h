@@ -12,7 +12,7 @@
 #include "zonedb.h"
 #include "string_ids.h"
 #include "../common/misc_functions.h"
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "guild_mgr.h"
 #include "worldserver.h"
 
@@ -332,6 +332,7 @@ public:
 	void EquipBot(std::string* errorMessage);
 	bool CheckLoreConflict(const Item_Struct* item);
 	uint32 GetEquipmentColor(uint8 material_slot) const;
+	virtual void UpdateEquipLightValue() { equip_light = m_inv.FindHighestLightValue(); }
 
 	// Static Class Methods
 	static void SaveBotGroup(Group* botGroup, std::string botGroupName, std::string* errorMessage);
@@ -448,7 +449,7 @@ public:
 	uint32 GetAA(uint32 aa_id);
 	void ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon);
 	bool GetHasBeenSummoned() { return _hasBeenSummoned; }
-	const xyz_location GetPreSummonLocation() const { return m_PreSummonLocation; }
+	const glm::vec3 GetPreSummonLocation() const { return m_PreSummonLocation; }
 	bool GetGroupMessagesOn() { return _groupMessagesOn; }
 	bool GetInHealRotation() { return _isInHealRotation; }
 	bool GetHealRotationActive() { return (GetInHealRotation() && _isHealRotationActive); }
@@ -533,7 +534,7 @@ public:
 	void SetSpellRecastTimer(int timer_index, int32 recast_delay);
 	void SetDisciplineRecastTimer(int timer_index, int32 recast_delay);
 	void SetHasBeenSummoned(bool s);
-	void SetPreSummonLocation(const xyz_location& location) { m_PreSummonLocation = location; }
+	void SetPreSummonLocation(const glm::vec3& location) { m_PreSummonLocation = location; }
 	void SetGroupMessagesOn(bool groupMessagesOn) { _groupMessagesOn = groupMessagesOn; }
 	void SetInHealRotation( bool inRotation ) { _isInHealRotation = inRotation; }
 	void SetHealRotationActive( bool isActive ) { _isHealRotationActive = isActive; }
@@ -600,7 +601,7 @@ private:
 	int32	end_regen;
 	uint32 timers[MaxTimer];
 	bool _hasBeenSummoned;
-	xyz_location m_PreSummonLocation;
+	glm::vec3 m_PreSummonLocation;
 	uint8 _spellCastingChances[MaxStances][MaxSpellTypes];
 	bool _groupMessagesOn;
 	bool _isInHealRotation;

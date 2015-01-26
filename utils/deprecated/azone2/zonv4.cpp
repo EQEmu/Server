@@ -107,7 +107,6 @@ int Zonv4Loader::Open(char *base_path, char *zone_name, Archive *archive)
 	for(unsigned int i = 0; i < this->datloader.model_data.ModelNames.size(); ++i)
 	{
 		char tmp[200];
-		//printf("Opening %s.mod\n", this->datloader.model_data.ModelNames[i].c_str());
 		sprintf(tmp, "%s.mod", this->datloader.model_data.ModelNames[i].c_str());
 
 		char *str = tmp;

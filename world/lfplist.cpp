@@ -21,7 +21,7 @@
 #include "clientlist.h"
 #include "zoneserver.h"
 #include "zonelist.h"
-#include "../common/logsys.h"
+
 #include "../common/misc_functions.h"
 
 extern ClientList client_list;

@@ -117,11 +117,11 @@ public:
 	// Public Methods
 	///////////////////////////////
 
-	Inventory() { m_version = EQClientUnknown; m_versionset = false; }
+	Inventory() { m_version = ClientVersion::Unknown; m_versionset = false; }
 	~Inventory();
 
 	// Inventory v2 creep
-	bool SetInventoryVersion(EQClientVersion version) {
+	bool SetInventoryVersion(ClientVersion version) {
 		if (!m_versionset) {
 			m_version = version;
 			return (m_versionset = true);
@@ -131,7 +131,7 @@ public:
 		}
 	}
 
-	EQClientVersion GetInventoryVersion() { return m_version; }
+	ClientVersion GetInventoryVersion() { return m_version; }
 
 	static void CleanDirty();
 	static void MarkDirty(ItemInst *inst);
@@ -207,6 +207,8 @@ public:
 
 	int GetSlotByItemInst(ItemInst *inst);
 
+	uint8 FindHighestLightValue();
+
 	void dumpEntireInventory();
 	void dumpWornItems();
 	void dumpInventory();
@@ -252,7 +254,7 @@ protected:
 
 private:
 	// Active inventory version
-	EQClientVersion m_version;
+	ClientVersion m_version;
 	bool m_versionset;
 };
 

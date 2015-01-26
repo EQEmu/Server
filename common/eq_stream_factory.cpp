@@ -1,4 +1,5 @@
-#include "debug.h"
+#include "global_define.h"
+#include "eqemu_logsys.h"
 #include "eq_stream_factory.h"
 
 #ifdef _WINDOWS
@@ -25,13 +26,13 @@ ThreadReturnType EQStreamFactoryReaderLoop(void *eqfs)
 EQStreamFactory *fs=(EQStreamFactory *)eqfs;
 
 #ifndef WIN32
-	_log(COMMON__THREADS, "Starting EQStreamFactoryReaderLoop with thread ID %d", pthread_self());
+	Log.Out(Logs::Detail, Logs::None,  "Starting EQStreamFactoryReaderLoop with thread ID %d", pthread_self());
 #endif
 
 	fs->ReaderLoop();
 
 #ifndef WIN32
-	_log(COMMON__THREADS, "Ending EQStreamFactoryReaderLoop with thread ID %d", pthread_self());
+	Log.Out(Logs::Detail, Logs::None,  "Ending EQStreamFactoryReaderLoop with thread ID %d", pthread_self());
 #endif
 
 	THREAD_RETURN(nullptr);
@@ -42,13 +43,13 @@ ThreadReturnType EQStreamFactoryWriterLoop(void *eqfs)
 	EQStreamFactory *fs=(EQStreamFactory *)eqfs;
 
 #ifndef WIN32
-	_log(COMMON__THREADS, "Starting EQStreamFactoryWriterLoop with thread ID %d", pthread_self());
+	Log.Out(Logs::Detail, Logs::None,  "Starting EQStreamFactoryWriterLoop with thread ID %d", pthread_self());
 #endif
 
 	fs->WriterLoop();
 
 #ifndef WIN32
-	_log(COMMON__THREADS, "Ending EQStreamFactoryWriterLoop with thread ID %d", pthread_self());
+	Log.Out(Logs::Detail, Logs::None,  "Ending EQStreamFactoryWriterLoop with thread ID %d", pthread_self());
 #endif
 
 	THREAD_RETURN(nullptr);
@@ -105,8 +106,6 @@ struct sockaddr_in address;
 		fcntl(sock, F_SETFL, O_NONBLOCK);
 	#endif
 	//moved these because on windows the output was delayed and causing the console window to look bad
-	//std::cout << "Starting factory Reader" << std::endl;
-	//std::cout << "Starting factory Writer" << std::endl;
 	#ifdef _WINDOWS
 		_beginthread(EQStreamFactoryReaderLoop,0, this);
 		_beginthread(EQStreamFactoryWriterLoop,0, this);
@@ -120,7 +119,6 @@ struct sockaddr_in address;
 EQStream *EQStreamFactory::Pop()
 {
 EQStream *s=nullptr;
-	//std::cout << "Pop():Locking MNewStreams" << std::endl;
 	MNewStreams.lock();
 	if (NewStreams.size()) {
 		s=NewStreams.front();
@@ -128,18 +126,15 @@ EQStream *s=nullptr;
 		s->PutInUse();
 	}
 	MNewStreams.unlock();
-	//std::cout << "Pop(): Unlocking MNewStreams" << std::endl;
 
 	return s;
 }
 
 void EQStreamFactory::Push(EQStream *s)
 {
-	//std::cout << "Push():Locking MNewStreams" << std::endl;
 	MNewStreams.lock();
 	NewStreams.push(s);
 	MNewStreams.unlock();
-	//std::cout << "Push(): Unlocking MNewStreams" << std::endl;
 }
 
 void EQStreamFactory::ReaderLoop()
@@ -240,7 +235,6 @@ void EQStreamFactory::CheckTimeout()
 				//give it a little time for everybody to finish with it
 			} else {
 				//everybody is done, we can delete it now
-				//std::cout << "Removing connection" << std::endl;
 				std::map<std::pair<uint32, uint16>,EQStream *>::iterator temp=stream_itr;
 				++stream_itr;
 				//let whoever has the stream outside delete it
@@ -318,9 +312,7 @@ Timer DecayTimer(20);
 		stream_count=Streams.size();
 		MStreams.unlock();
 		if (!stream_count) {
-			//std::cout << "No streams, waiting on condition" << std::endl;
 			WriterWork.Wait();
-			//std::cout << "Awake from condition, must have a stream now" << std::endl;
 		}
 	}
 }

@@ -269,7 +269,7 @@ void Lua_NPC::PauseWandering(int pause_time) {
 
 void Lua_NPC::MoveTo(float x, float y, float z, float h, bool save) {
 	Lua_Safe_Call_Void();
-	auto position = xyz_heading(x, y, z, h);
+	auto position = glm::vec4(x, y, z, h);
 	self->MoveTo(position, save);
 }
 
@@ -315,37 +315,37 @@ int Lua_NPC::GetSpawnPointID() {
 
 float Lua_NPC::GetSpawnPointX() {
 	Lua_Safe_Call_Real();
-	return self->GetSpawnPoint().m_X;
+	return self->GetSpawnPoint().x;
 }
 
 float Lua_NPC::GetSpawnPointY() {
 	Lua_Safe_Call_Real();
-	return self->GetSpawnPoint().m_Y;
+	return self->GetSpawnPoint().y;
 }
 
 float Lua_NPC::GetSpawnPointZ() {
 	Lua_Safe_Call_Real();
-	return self->GetSpawnPoint().m_Z;
+	return self->GetSpawnPoint().z;
 }
 
 float Lua_NPC::GetSpawnPointH() {
 	Lua_Safe_Call_Real();
-	return self->GetSpawnPoint().m_Heading;
+	return self->GetSpawnPoint().w;
 }
 
 float Lua_NPC::GetGuardPointX() {
 	Lua_Safe_Call_Real();
-	return self->GetGuardPoint().m_X;
+	return self->GetGuardPoint().x;
 }
 
 float Lua_NPC::GetGuardPointY() {
 	Lua_Safe_Call_Real();
-	return self->GetGuardPoint().m_Y;
+	return self->GetGuardPoint().y;
 }
 
 float Lua_NPC::GetGuardPointZ() {
 	Lua_Safe_Call_Real();
-	return self->GetGuardPoint().m_Z;
+	return self->GetGuardPoint().z;
 }
 
 void Lua_NPC::SetPrimSkill(int skill_id) {

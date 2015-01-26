@@ -1589,22 +1589,18 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		#endif
 			// Npc
 				if (caster->IsAttackAllowed(mob) && spells[spell_id].targettype != ST_AEBard) {
-					//printf("NPC Spell casted on %s\n", mob->GetName());
 					caster->SpellOnTarget(spell_id, mob);
 				}
 				else if (mob->IsAIControlled() && spells[spell_id].targettype == ST_AEBard) {
-					//printf("NPC mgb/aebard spell casted on %s\n", mob->GetName());
 					caster->SpellOnTarget(spell_id, mob);
 				}
 				else {
-					//printf("NPC AE, fall thru. spell_id:%i, Target type:%x\n", spell_id, spells[spell_id].targettype);
 				}
 			}
 		#ifdef IPC
 			else if(caster->IsNPC() && caster->CastToNPC()->IsInteractive()) {
 				// Interactive npc
 				if (caster->IsAttackAllowed(mob) && spells[spell_id].targettype != ST_AEBard && spells[spell_id].targettype != ST_GroupTeleport) {
-					//printf("IPC Spell casted on %s\n", mob->GetName());
 					caster->SpellOnTarget(spell_id, mob);
 				}
 				else if (!mob->IsAIControlled() && (spells[spell_id].targettype == ST_AEBard||group) && mob->CastToClient()->GetPVP() == caster->CastToClient()->GetPVP()) {
@@ -1612,18 +1608,15 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 								iterator.Advance();
 								continue;
 					}
-					//printf("IPC mgb/aebard spell casted on %s\n", mob->GetName());
 				caster->SpellOnTarget(spell_id, mob);
 				}
 				else {
-					//printf("NPC AE, fall thru. spell_id:%i, Target type:%x\n", spell_id, spells[spell_id].targettype);
 				}
 			}
 		#endif
 			else if (caster->IsClient() && !(caster->CastToClient()->IsBecomeNPC())) {
 				// Client
 				if (caster->IsAttackAllowed(mob) && spells[spell_id].targettype != ST_AEBard){
-					//printf("Client Spell casted on %s\n", mob->GetName());
 					caster->SpellOnTarget(spell_id, mob);
 				}
 				else if(spells[spell_id].targettype == ST_GroupTeleport && mob->IsClient() && mob->isgrouped && caster->isgrouped && entity_list.GetGroupByMob(caster))
@@ -1805,7 +1798,6 @@ void ZoneDatabase::AddLootDropToNPC(uint32 lootdrop_id, ItemList* itemlist) {
 		}
 		else
 		{
-			//printf("Adding item2: %i",item->item_id);
 			//cout << "Adding item to Mob" << endl;
 			ServerLootItem_Struct* item = new ServerLootItem_Struct;
 			item->item_id = dbitem->ItemNumber;

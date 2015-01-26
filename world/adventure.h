@@ -1,7 +1,7 @@
 #ifndef ADVENTURE_H
 #define ADVENTURE_H
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/types.h"
 #include "../common/timer.h"
 #include "adventure_template.h"

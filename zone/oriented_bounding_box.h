@@ -1,7 +1,8 @@
 #ifndef EQEMU_ORIENTED_BOUNDNG_BOX_H
 #define EQEMU_ORIENTED_BOUNDNG_BOX_H
 
-#include <glm.hpp>
+#include <glm/vec3.hpp>
+#include <glm/mat4x4.hpp>
 
 class OrientedBoundingBox
 {

@@ -9,7 +9,6 @@ SET(zone_sources
 	bot.cpp
 	botspellsai.cpp
 	client.cpp
-	client_logs.cpp
 	client_mods.cpp
 	client_packet.cpp
 	client_process.cpp
@@ -118,7 +117,6 @@ SET(zone_sources
 	waypoints.cpp
 	worldserver.cpp
 	zone.cpp
-	zone_logsys.cpp
 	zone_config.cpp
 	zonedb.cpp
 	zoning.cpp
@@ -131,7 +129,6 @@ SET(zone_headers
 	bot.h
 	bot_structs.h
 	client.h
-	client_logs.h
 	client_packet.h
 	command.h
 	common.h

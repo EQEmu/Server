@@ -49,7 +49,7 @@ Mob::Mob(const char* in_name,
 		uint32		in_npctype_id,
 		float		in_size,
 		float		in_runspeed,
-		const xyz_heading& position,
+		const glm::vec4& position,
 		uint8		in_light,
 		uint8		in_texture,
 		uint8		in_helmtexture,
@@ -99,8 +99,8 @@ Mob::Mob(const char* in_name,
 		gravity_timer(1000),
 		viral_timer(0),
 		m_FearWalkTarget(-999999.0f,-999999.0f,-999999.0f),
-		m_TargetLocation(xyz_location::Origin()),
-		m_TargetV(xyz_location::Origin()),
+		m_TargetLocation(glm::vec3()),
+		m_TargetV(glm::vec3()),
 		flee_timer(FLEE_CHECK_TIMER),
 		m_Position(position)
 {
@@ -112,7 +112,7 @@ Mob::Mob(const char* in_name,
 	AI_Init();
 	SetMoving(false);
 	moved=false;
-	m_RewindLocation = xyz_location::Origin();
+	m_RewindLocation = glm::vec3();
 	move_tic_count = 0;
 
 	_egnode = nullptr;
@@ -149,7 +149,9 @@ Mob::Mob(const char* in_name,
 	if (runspeed < 0 || runspeed > 20)
 		runspeed = 1.25f;
 
-	light		= in_light;
+	active_light = innate_light = in_light;
+	spell_light = equip_light = NOT_USED;
+
 	texture		= in_texture;
 	helmtexture	= in_helmtexture;
 	haircolor	= in_haircolor;
@@ -243,7 +245,7 @@ Mob::Mob(const char* in_name,
 		}
 	}
 
-	m_Delta = xyz_heading::Origin();
+	m_Delta = glm::vec4();
 	animation = 0;
 
 	logging_enabled = false;
@@ -316,7 +318,7 @@ Mob::Mob(const char* in_name,
 	wandertype=0;
 	pausetype=0;
 	cur_wp = 0;
-	m_CurrentWayPoint = xyz_heading::Origin();
+	m_CurrentWayPoint = glm::vec4();
 	cur_wp_pause = 0;
 	patrol=0;
 	follow=0;
@@ -363,7 +365,7 @@ Mob::Mob(const char* in_name,
 	nimbus_effect3 = 0;
 	m_targetable = true;
 
-    m_TargetRing = xyz_location::Origin();
+    m_TargetRing = glm::vec3();
 
 	flymode = FlyMode3;
 	// Pathing
@@ -882,10 +884,10 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
 	}
 
-	ns->spawn.heading	= FloatToEQ19(m_Position.m_Heading);
-	ns->spawn.x			= FloatToEQ19(m_Position.m_X);//((int32)x_pos)<<3;
-	ns->spawn.y			= FloatToEQ19(m_Position.m_Y);//((int32)y_pos)<<3;
-	ns->spawn.z			= FloatToEQ19(m_Position.m_Z);//((int32)z_pos)<<3;
+	ns->spawn.heading	= FloatToEQ19(m_Position.w);
+	ns->spawn.x			= FloatToEQ19(m_Position.x);//((int32)x_pos)<<3;
+	ns->spawn.y			= FloatToEQ19(m_Position.y);//((int32)y_pos)<<3;
+	ns->spawn.z			= FloatToEQ19(m_Position.z);//((int32)z_pos)<<3;
 	ns->spawn.spawnId	= GetID();
 	ns->spawn.curHp	= static_cast<uint8>(GetHPRatio());
 	ns->spawn.max_hp	= 100;		//this field needs a better name
@@ -898,7 +900,10 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.deity		= deity;
 	ns->spawn.animation	= 0;
 	ns->spawn.findable	= findable?1:0;
-	ns->spawn.light		= light;
+
+	UpdateActiveLightValue();
+	ns->spawn.light		= active_light;
+
 	ns->spawn.showhelm = (helmtexture && helmtexture != 0xFF) ? 1 : 0;
 
 	ns->spawn.invis		= (invisible || hidden) ? 1 : 0;	// TODO: load this before spawning players
@@ -1210,13 +1215,13 @@ void Mob::SendPosUpdate(uint8 iSendToSelf) {
 void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu){
 	memset(spu,0xff,sizeof(PlayerPositionUpdateServer_Struct));
 	spu->spawn_id	= GetID();
-	spu->x_pos		= FloatToEQ19(m_Position.m_X);
-	spu->y_pos		= FloatToEQ19(m_Position.m_Y);
-	spu->z_pos		= FloatToEQ19(m_Position.m_Z);
+	spu->x_pos		= FloatToEQ19(m_Position.x);
+	spu->y_pos		= FloatToEQ19(m_Position.y);
+	spu->z_pos		= FloatToEQ19(m_Position.z);
 	spu->delta_x	= NewFloatToEQ13(0);
 	spu->delta_y	= NewFloatToEQ13(0);
 	spu->delta_z	= NewFloatToEQ13(0);
-	spu->heading	= FloatToEQ19(m_Position.m_Heading);
+	spu->heading	= FloatToEQ19(m_Position.w);
 	spu->animation	= 0;
 	spu->delta_heading = NewFloatToEQ13(0);
 	spu->padding0002	=0;
@@ -1229,13 +1234,13 @@ void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu){
 // this is for SendPosUpdate()
 void Mob::MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu) {
 	spu->spawn_id	= GetID();
-	spu->x_pos		= FloatToEQ19(m_Position.m_X);
-	spu->y_pos		= FloatToEQ19(m_Position.m_Y);
-	spu->z_pos		= FloatToEQ19(m_Position.m_Z);
-	spu->delta_x	= NewFloatToEQ13(m_Delta.m_X);
-	spu->delta_y	= NewFloatToEQ13(m_Delta.m_Y);
-	spu->delta_z	= NewFloatToEQ13(m_Delta.m_Z);
-	spu->heading	= FloatToEQ19(m_Position.m_Heading);
+	spu->x_pos		= FloatToEQ19(m_Position.x);
+	spu->y_pos		= FloatToEQ19(m_Position.y);
+	spu->z_pos		= FloatToEQ19(m_Position.z);
+	spu->delta_x	= NewFloatToEQ13(m_Delta.x);
+	spu->delta_y	= NewFloatToEQ13(m_Delta.y);
+	spu->delta_z	= NewFloatToEQ13(m_Delta.z);
+	spu->heading	= FloatToEQ19(m_Position.w);
 	spu->padding0002	=0;
 	spu->padding0006	=7;
 	spu->padding0014	=0x7f;
@@ -1244,7 +1249,7 @@ void Mob::MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu) {
 		spu->animation = animation;
 	else
 		spu->animation	= pRunAnimSpeed;//animation;
-	spu->delta_heading = NewFloatToEQ13(m_Delta.m_Heading);
+	spu->delta_heading = NewFloatToEQ13(m_Delta.w);
 }
 
 void Mob::ShowStats(Client* client)
@@ -1360,11 +1365,11 @@ void Mob::GMMove(float x, float y, float z, float heading, bool SendUpdate) {
 		entity_list.ProcessMove(CastToNPC(), x, y, z);
 	}
 
-	m_Position.m_X = x;
-	m_Position.m_Y = y;
-	m_Position.m_Z = z;
-	if (m_Position.m_Heading != 0.01)
-		this->m_Position.m_Heading = heading;
+	m_Position.x = x;
+	m_Position.y = y;
+	m_Position.z = z;
+	if (m_Position.w != 0.01)
+		this->m_Position.w = heading;
 	if(IsNPC())
 		CastToNPC()->SaveGuardSpot(true);
 	if(SendUpdate)
@@ -1545,7 +1550,7 @@ void Mob::SendIllusionPacket(uint16 in_race, uint8 in_gender, uint8 in_texture, 
 
 	entity_list.QueueClients(this, outapp);
 	safe_delete(outapp);
-	mlog(CLIENT__SPELLS, "Illusion: Race = %i, Gender = %i, Texture = %i, HelmTexture = %i, HairColor = %i, BeardColor = %i, EyeColor1 = %i, EyeColor2 = %i, HairStyle = %i, Face = %i, DrakkinHeritage = %i, DrakkinTattoo = %i, DrakkinDetails = %i, Size = %f",
+	Log.Out(Logs::Detail, Logs::Spells, "Illusion: Race = %i, Gender = %i, Texture = %i, HelmTexture = %i, HairColor = %i, BeardColor = %i, EyeColor1 = %i, EyeColor2 = %i, HairStyle = %i, Face = %i, DrakkinHeritage = %i, DrakkinTattoo = %i, DrakkinDetails = %i, Size = %f",
 		race, gender, texture, helmtexture, haircolor, beardcolor, eyecolor1, eyecolor2, hairstyle, luclinface, drakkin_heritage, drakkin_tattoo, drakkin_details, size);
 }
 
@@ -1764,7 +1769,6 @@ bool Mob::IsPlayerRace(uint16 in_race) {
 
 
 uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
-//std::cout << "Gender in: " << (int)in_gender << std::endl; // undefined cout [CODEBUG]
 	if (Mob::IsPlayerRace(in_race) || in_race == 15 || in_race == 50 || in_race == 57 || in_race == 70 || in_race == 98 || in_race == 118) {
 		if (in_gender >= 2) {
 			// Male default for PC Races
@@ -2023,6 +2027,39 @@ void Mob::SetAppearance(EmuAppearance app, bool iIgnoreSelf) {
 		if (this->IsClient() && this->IsAIControlled())
 			SendAppearancePacket(AT_Anim, ANIM_FREEZE, false, false);
 	}
+}
+
+bool Mob::UpdateActiveLightValue()
+{
+	/*	This is old information...
+		0 - "None"
+		1 - "Candle"
+		2 - "Torch"
+		3 - "Tiny Glowing Skull"
+		4 - "Small Lantern"
+		5 - "Stein of Moggok"
+		6 - "Large Lantern"
+		7 - "Flameless Lantern"
+		8 - "Globe of Stars"
+		9 - "Light Globe"
+		10 - "Lightstone"
+		11 - "Greater Lightstone"
+		12 - "Fire Beatle Eye"
+		13 - "Coldlight"
+		14 - "Unknown"
+		15 - "Unknown"
+	*/
+	
+	uint8 old_light = (active_light & 0x0F);
+	active_light = (innate_light & 0x0F);
+
+	if (equip_light > active_light) { active_light = equip_light; } // limiter in property handler
+	if (spell_light > active_light) { active_light = spell_light; } // limiter in property handler
+
+	if (active_light != old_light)
+		return true;
+
+	return false;
 }
 
 void Mob::ChangeSize(float in_size = 0, bool bNoRestriction) {
@@ -2408,18 +2445,18 @@ bool Mob::HateSummon() {
 			entity_list.MessageClose(this, true, 500, MT_Say, "%s says,'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName() );
 
 			if (target->IsClient()) {
-				target->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), m_Position.m_X, m_Position.m_Y, m_Position.m_Z, target->GetHeading(), 0, SummonPC);
+				target->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), m_Position.x, m_Position.y, m_Position.z, target->GetHeading(), 0, SummonPC);
 			}
 			else {
 #ifdef BOTS
 				if(target && target->IsBot()) {
 					// set pre summoning info to return to (to get out of melee range for caster)
 					target->CastToBot()->SetHasBeenSummoned(true);
-					target->CastToBot()->SetPreSummonLocation(target->GetPosition());
+					target->CastToBot()->SetPreSummonLocation(glm::vec3(target->GetPosition()));
 
 				}
 #endif //BOTS
-				target->GMMove(m_Position.m_X, m_Position.m_Y, m_Position.m_Z, target->GetHeading());
+				target->GMMove(m_Position.x, m_Position.y, m_Position.z, target->GetHeading());
 			}
 
 			return true;
@@ -2833,12 +2870,12 @@ void Mob::SetNextIncHPEvent( int inchpevent )
 	nextinchpevent = inchpevent;
 }
 //warp for quest function,from sandy
-void Mob::Warp(const xyz_location& location)
+void Mob::Warp(const glm::vec3& location)
 {
 	if(IsNPC())
-		entity_list.ProcessMove(CastToNPC(), location.m_X, location.m_Y, location.m_Z);
+		entity_list.ProcessMove(CastToNPC(), location.x, location.y, location.z);
 
-	m_Position = location;
+	m_Position = glm::vec4(location, m_Position.w);
 
 	Mob* target = GetTarget();
 	if (target)
@@ -2880,7 +2917,6 @@ int16 Mob::GetResist(uint8 type) const
 
 uint32 Mob::GetLevelHP(uint8 tlevel)
 {
-	//std::cout<<"Tlevel: "<<(int)tlevel<<std::endl; // cout undefined [CODEBUG]
 	int multiplier = 0;
 	if (tlevel < 10)
 	{
@@ -2945,7 +2981,7 @@ void Mob::ExecWeaponProc(const ItemInst *inst, uint16 spell_id, Mob *on) {
 	if(!IsValidSpell(spell_id)) { // Check for a valid spell otherwise it will crash through the function
 		if(IsClient()){
 			Message(0, "Invalid spell proc %u", spell_id);
-			mlog(CLIENT__SPELLS, "Player %s, Weapon Procced invalid spell %u", this->GetName(), spell_id);
+			Log.Out(Logs::Detail, Logs::Spells, "Player %s, Weapon Procced invalid spell %u", this->GetName(), spell_id);
 		}
 		return;
 	}
@@ -3055,11 +3091,11 @@ float Mob::FindGroundZ(float new_x, float new_y, float z_offset)
 	float ret = -999999;
 	if (zone->zonemap != nullptr)
 	{
-		Map::Vertex me;
-		me.x = m_Position.m_X;
-		me.y = m_Position.m_Y;
-		me.z = m_Position.m_Z + z_offset;
-		Map::Vertex hit;
+		glm::vec3 me;
+		me.x = m_Position.x;
+		me.y = m_Position.y;
+		me.z = m_Position.z + z_offset;
+		glm::vec3 hit;
 		float best_z = zone->zonemap->FindBestZ(me, &hit);
 		if (best_z != -999999)
 		{
@@ -3075,11 +3111,11 @@ float Mob::GetGroundZ(float new_x, float new_y, float z_offset)
 	float ret = -999999;
 	if (zone->zonemap != 0)
 	{
-		Map::Vertex me;
-		me.x = m_Position.m_X;
-		me.y = m_Position.m_Y;
-		me.z = m_Position.m_Z+z_offset;
-		Map::Vertex hit;
+		glm::vec3 me;
+		me.x = m_Position.x;
+		me.y = m_Position.y;
+		me.z = m_Position.z+z_offset;
+		glm::vec3 hit;
 		float best_z = zone->zonemap->FindBestZ(me, &hit);
 		if (best_z != -999999)
 		{
@@ -3128,8 +3164,8 @@ int Mob::GetSnaredAmount()
 			{
 				int val = CalcSpellEffectValue_formula(spells[buffs[i].spellid].formula[j], spells[buffs[i].spellid].base[j], spells[buffs[i].spellid].max[j], buffs[i].casterlevel, buffs[i].spellid);
 				//int effect = CalcSpellEffectValue(buffs[i].spellid, spells[buffs[i].spellid].effectid[j], buffs[i].casterlevel);
-				if (val < 0 && abs(val) > worst_snare)
-					worst_snare = abs(val);
+				if (val < 0 && std::abs(val) > worst_snare)
+					worst_snare = std::abs(val);
 			}
 		}
 	}
@@ -3173,7 +3209,7 @@ void Mob::TriggerDefensiveProcs(const ItemInst* weapon, Mob *on, uint16 hand, in
 	}
 }
 
-void Mob::SetDelta(const xyz_heading& delta) {
+void Mob::SetDelta(const glm::vec4& delta) {
 	m_Delta = delta;
 }
 
@@ -4436,7 +4472,7 @@ void Mob::MeleeLifeTap(int32 damage) {
 	if(lifetap_amt && damage > 0){
 
 		lifetap_amt = damage * lifetap_amt / 100;
-		mlog(COMBAT__DAMAGE, "Melee lifetap healing for %d damage.", damage);
+		Log.Out(Logs::Detail, Logs::Combat, "Melee lifetap healing for %d damage.", damage);
 
 		if (lifetap_amt > 0)
 			HealDamage(lifetap_amt); //Heal self for modified damage amount.
@@ -4495,7 +4531,8 @@ void Mob::DoGravityEffect()
 					if(value > 0)
 						away = 1;
 
-					amount = fabs(value) / (100.0f); // to bring the values in line, arbitarily picked
+					amount = std::abs(value) /
+						 (100.0f); // to bring the values in line, arbitarily picked
 
 					x_vector = cur_x - caster_x;
 					y_vector = cur_y - caster_y;
@@ -4514,7 +4551,7 @@ void Mob::DoGravityEffect()
 		}
 	}
 
-	if((fabs(my_x - cur_x) > 0.01) || (fabs(my_y - cur_y) > 0.01)) {
+	if ((std::abs(my_x - cur_x) > 0.01) || (std::abs(my_y - cur_y) > 0.01)) {
 		float new_ground = GetGroundZ(cur_x, cur_y);
 		// If we cant get LoS on our new spot then keep checking up to 5 units up.
 		if(!CheckLosFN(cur_x, cur_y, new_ground, GetSize())) {
@@ -5174,7 +5211,7 @@ bool Mob::IsFacingMob(Mob *other)
 	if (angle < 40.0 && heading > 472.0)
 		angle = heading;
 
-	if (fabs(angle - heading) <= 80.0)
+	if (std::abs(angle - heading) <= 80.0)
 		return true;
 
 	return false;
@@ -5188,8 +5225,8 @@ float Mob::HeadingAngleToMob(Mob *other)
 	float this_x = GetX();
 	float this_y = GetY();
 
-	float y_diff = fabs(this_y - mob_y);
-	float x_diff = fabs(this_x - mob_x);
+	float y_diff = std::abs(this_y - mob_y);
+	float x_diff = std::abs(this_x - mob_x);
 	if (y_diff < 0.0000009999999974752427)
 		y_diff = 0.0000009999999974752427;
 

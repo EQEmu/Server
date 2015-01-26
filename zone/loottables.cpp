@@ -16,7 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/loottable.h"
 #include "../common/misc_functions.h"
 
@@ -145,7 +145,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 				drop_chance = zone->random.Real(0.0, 100.0);
 
 #if EQDEBUG>=11
-			LogFile->write(EQEmuLog::Debug, "Drop chance for npc: %s, this chance:%f, drop roll:%f", npc->GetName(), thischance, drop_chance);
+			Log.Out(Logs::General, Logs::None, "Drop chance for npc: %s, this chance:%f, drop roll:%f", npc->GetName(), thischance, drop_chance);
 #endif
 			if (thischance == 100.0 || drop_chance < thischance)
 			{
@@ -174,6 +174,11 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 			}
 		}
 	} // We either ran out of items or reached our limit.
+
+	npc->UpdateEquipLightValue();
+	// no wearchange associated with this function..so, this should not be needed
+	//if (npc->UpdateActiveLightValue())
+	//	npc->SendAppearancePacket(AT_Light, npc->GetActiveLightValue());
 }
 
 //if itemlist is null, just send wear changes
@@ -187,7 +192,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 
 	ServerLootItem_Struct* item = new ServerLootItem_Struct;
 #if EQDEBUG>=11
-		LogFile->write(EQEmuLog::Debug, "Adding drop to npc: %s, Item: %i", GetName(), item2->ID);
+		Log.Out(Logs::General, Logs::None, "Adding drop to npc: %s, Item: %i", GetName(), item2->ID);
 #endif
 
 	EQApplicationPacket* outapp = nullptr;
@@ -359,6 +364,10 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		entity_list.QueueClients(this, outapp);
 		safe_delete(outapp);
 	}
+
+	UpdateEquipLightValue();
+	if (UpdateActiveLightValue())
+		SendAppearancePacket(AT_Light, GetActiveLightValue());
 }
 
 void NPC::AddItem(const Item_Struct* item, uint16 charges, bool equipitem) {

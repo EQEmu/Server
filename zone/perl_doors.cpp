@@ -27,7 +27,7 @@
 
 #include "../common/features.h"
 #ifdef EMBPERL_XS_CLASSES
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "embperl.h"
 
 #ifdef seed
@@ -138,7 +138,7 @@ XS(XS_Doors_GetX)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetPosition().m_X;
+		RETVAL = THIS->GetPosition().x;
 		XSprePUSH; PUSHn((double)RETVAL);
 	}
 	XSRETURN(1);
@@ -164,7 +164,7 @@ XS(XS_Doors_GetY)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetPosition().m_Y;
+		RETVAL = THIS->GetPosition().y;
 		XSprePUSH; PUSHn((double)RETVAL);
 	}
 	XSRETURN(1);
@@ -190,7 +190,7 @@ XS(XS_Doors_GetZ)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetPosition().m_Z;
+		RETVAL = THIS->GetPosition().z;
 		XSprePUSH; PUSHn((double)RETVAL);
 	}
 	XSRETURN(1);
@@ -216,7 +216,7 @@ XS(XS_Doors_GetHeading)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetPosition().m_Heading;
+		RETVAL = THIS->GetPosition().w;
 		XSprePUSH; PUSHn((double)RETVAL);
 	}
 	XSRETURN(1);
@@ -567,7 +567,7 @@ XS(XS_Doors_SetX)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
         auto position = THIS->GetPosition();
-        position.m_X = x;
+        position.x = x;
 		THIS->SetPosition(position);
 	}
 	XSRETURN_EMPTY;
@@ -593,7 +593,7 @@ XS(XS_Doors_SetY)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
         auto position = THIS->GetPosition();
-        position.m_Y = y;
+        position.y = y;
 		THIS->SetPosition(position);
 	}
 	XSRETURN_EMPTY;
@@ -619,7 +619,7 @@ XS(XS_Doors_SetZ)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		auto position = THIS->GetPosition();
-        position.m_Z = z;
+        position.z = z;
 		THIS->SetPosition(position);
 	}
 	XSRETURN_EMPTY;
@@ -645,7 +645,7 @@ XS(XS_Doors_SetHeading)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		auto position = THIS->GetPosition();
-        position.m_Heading = heading;
+        position.w = heading;
 		THIS->SetPosition(position);
 	}
 	XSRETURN_EMPTY;

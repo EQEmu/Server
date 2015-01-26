@@ -78,7 +78,7 @@ public:
 		uint32		in_npctype_id,
 		float		in_size,
 		float		in_runspeed,
-		const xyz_heading& position,
+		const glm::vec4& position,
 		uint8		in_light,
 		uint8		in_texture,
 		uint8		in_helmtexture,
@@ -294,10 +294,10 @@ public:
 	inline virtual uint32 GetNimbusEffect2() const { return nimbus_effect2; }
 	inline virtual uint32 GetNimbusEffect3() const { return nimbus_effect3; }
 	void RemoveNimbusEffect(int effectid);
-	inline const xyz_location& GetTargetRingLocation() const { return m_TargetRing; }
-	inline float GetTargetRingX() const { return m_TargetRing.m_X; }
-	inline float GetTargetRingY() const { return m_TargetRing.m_Y; }
-	inline float GetTargetRingZ() const { return m_TargetRing.m_Z; }
+	inline const glm::vec3& GetTargetRingLocation() const { return m_TargetRing; }
+	inline float GetTargetRingX() const { return m_TargetRing.x; }
+	inline float GetTargetRingY() const { return m_TargetRing.y; }
+	inline float GetTargetRingZ() const { return m_TargetRing.z; }
 	inline bool HasEndurUpkeep() const { return endur_upkeep; }
 	inline void SetEndurUpkeep(bool val) { endur_upkeep = val; }
 
@@ -399,19 +399,19 @@ public:
 		((static_cast<float>(cur_mana) / max_mana) * 100); }
 	virtual int32 CalcMaxMana();
 	uint32 GetNPCTypeID() const { return npctype_id; }
-	inline const xyz_heading GetPosition() const { return m_Position; }
-	inline const float GetX() const { return m_Position.m_X; }
-	inline const float GetY() const { return m_Position.m_Y; }
-	inline const float GetZ() const { return m_Position.m_Z; }
-	inline const float GetHeading() const { return m_Position.m_Heading; }
+	inline const glm::vec4& GetPosition() const { return m_Position; }
+	inline const float GetX() const { return m_Position.x; }
+	inline const float GetY() const { return m_Position.y; }
+	inline const float GetZ() const { return m_Position.z; }
+	inline const float GetHeading() const { return m_Position.w; }
 	inline const float GetSize() const { return size; }
 	inline const float GetBaseSize() const { return base_size; }
-	inline const float GetTarX() const { return m_TargetLocation.m_X; }
-	inline const float GetTarY() const { return m_TargetLocation.m_Y; }
-	inline const float GetTarZ() const { return m_TargetLocation.m_Z; }
-	inline const float GetTarVX() const { return m_TargetV.m_X; }
-	inline const float GetTarVY() const { return m_TargetV.m_Y; }
-	inline const float GetTarVZ() const { return m_TargetV.m_Z; }
+	inline const float GetTarX() const { return m_TargetLocation.x; }
+	inline const float GetTarY() const { return m_TargetLocation.y; }
+	inline const float GetTarZ() const { return m_TargetLocation.z; }
+	inline const float GetTarVX() const { return m_TargetV.x; }
+	inline const float GetTarVY() const { return m_TargetV.y; }
+	inline const float GetTarVZ() const { return m_TargetV.z; }
 	inline const float GetTarVector() const { return tar_vector; }
 	inline const uint8 GetTarNDX() const { return tar_ndx; }
 	bool IsBoat() const;
@@ -426,9 +426,9 @@ public:
 	virtual inline int32 GetPrimaryFaction() const { return 0; }
 
 	//Movement
-	void Warp(const xyz_location& location);
+	void Warp(const glm::vec3& location);
 	inline bool IsMoving() const { return moving; }
-	virtual void SetMoving(bool move) { moving = move; m_Delta = xyz_heading::Origin(); }
+	virtual void SetMoving(bool move) { moving = move; m_Delta = glm::vec4(); }
 	virtual void GoToBind(uint8 bindnum = 0) { }
 	virtual void Gate();
 	float GetWalkspeed() const { return(_GetMovementSpeed(-47)); }
@@ -438,15 +438,15 @@ public:
 	bool IsRunning() const { return m_is_running; }
 	void SetRunning(bool val) { m_is_running = val; }
 	virtual void GMMove(float x, float y, float z, float heading = 0.01, bool SendUpdate = true);
-	void SetDelta(const xyz_heading& delta);
+	void SetDelta(const glm::vec4& delta);
 	void SetTargetDestSteps(uint8 target_steps) { tar_ndx = target_steps; }
 	void SendPosUpdate(uint8 iSendToSelf = 0);
 	void MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct* spu);
 	void MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu);
 	void SendPosition();
 	void SetFlyMode(uint8 flymode);
-	inline void Teleport(Map::Vertex NewPosition) { m_Position.m_X = NewPosition.x; m_Position.m_Y = NewPosition.y;
-		m_Position.m_Z = NewPosition.z; };
+	inline void Teleport(glm::vec3 NewPosition) { m_Position.x = NewPosition.x; m_Position.y = NewPosition.y;
+		m_Position.z = NewPosition.z; };
 
 	//AI
 	static uint32 GetLevelCon(uint8 mylevel, uint8 iOtherLevel);
@@ -467,8 +467,8 @@ public:
 	bool IsEngaged() { return(!hate_list.IsHateListEmpty()); }
 	bool HateSummon();
 	void FaceTarget(Mob* MobToFace = 0);
-	void SetHeading(float iHeading) { if(m_Position.m_Heading != iHeading) { pLastChange = Timer::GetCurrentTime();
-		m_Position.m_Heading = iHeading; } }
+	void SetHeading(float iHeading) { if(m_Position.w != iHeading) { pLastChange = Timer::GetCurrentTime();
+		m_Position.w = iHeading; } }
 	void WipeHateList();
 	void AddFeignMemory(Client* attacker);
 	void RemoveFromFeignMemory(Client* attacker);
@@ -527,12 +527,6 @@ public:
 	bool RemoveProcFromWeapon(uint16 spell_id, bool bAll = false);
 	bool HasProcs() const;
 	bool IsCombatProc(uint16 spell_id);
-
-	//Logging
-	bool IsLoggingEnabled() const { return(logging_enabled); }
-	void EnableLogging() { logging_enabled = true; }
-	void DisableLogging() { logging_enabled = false; }
-
 
 	//More stuff to sort:
 	virtual bool IsRaidTarget() const { return false; };
@@ -656,6 +650,15 @@ public:
 	inline void SetRunAnimSpeed(int8 in) { if (pRunAnimSpeed != in) { pRunAnimSpeed = in; pLastChange = Timer::GetCurrentTime(); } }
 	bool IsDestructibleObject() { return destructibleobject; }
 	void SetDestructibleObject(bool in) { destructibleobject = in; }
+
+	inline uint8 GetInnateLightValue() { return innate_light; }
+	inline uint8 GetEquipLightValue() { return equip_light; }
+	inline uint8 GetSpellLightValue() { return spell_light; }
+	virtual void UpdateEquipLightValue() { equip_light = NOT_USED; }
+	inline void SetSpellLightValue(uint8 light_value) { spell_light = (light_value & 0x0F); }
+
+	inline uint8 GetActiveLightValue() { return active_light; }
+	bool UpdateActiveLightValue(); // returns true if change, false if no change
 
 	Mob* GetPet();
 	void SetPet(Mob* newpet);
@@ -814,10 +817,10 @@ public:
 	void				SetDontCureMeBefore(uint32 time) { pDontCureMeBefore = time; }
 
 	// calculate interruption of spell via movement of mob
-	void SaveSpellLoc() {m_SpellLocation = m_Position; }
-	inline float GetSpellX() const {return m_SpellLocation.m_X;}
-	inline float GetSpellY() const {return m_SpellLocation.m_Y;}
-	inline float GetSpellZ() const {return m_SpellLocation.m_Z;}
+	void SaveSpellLoc() { m_SpellLocation = glm::vec3(m_Position); }
+	inline float GetSpellX() const {return m_SpellLocation.x;}
+	inline float GetSpellY() const {return m_SpellLocation.y;}
+	inline float GetSpellZ() const {return m_SpellLocation.z;}
 	inline bool IsGrouped() const { return isgrouped; }
 	void SetGrouped(bool v);
 	inline bool IsRaidGrouped() const { return israidgrouped; }
@@ -869,7 +872,7 @@ public:
 	Shielders_Struct shielder[MAX_SHIELDERS];
 	Trade* trade;
 
-	inline xyz_heading GetCurrentWayPoint() const { return m_CurrentWayPoint; }
+	inline glm::vec4 GetCurrentWayPoint() const { return m_CurrentWayPoint; }
 	inline float GetCWPP() const { return(static_cast<float>(cur_wp_pause)); }
 	inline int GetCWP() const { return(cur_wp); }
 	void SetCurrentWP(uint16 waypoint) { cur_wp = waypoint; }
@@ -1013,7 +1016,7 @@ protected:
 	uint8 level;
 	uint8 orig_level;
 	uint32 npctype_id;
-	xyz_heading m_Position;
+	glm::vec4 m_Position;
 	uint16 animation;
 	float base_size;
 	float size;
@@ -1046,7 +1049,7 @@ protected:
 	virtual int16 GetFocusEffect(focusType type, uint16 spell_id) { return 0; }
 	void CalculateNewFearpoint();
 	float FindGroundZ(float new_x, float new_y, float z_offset=0.0);
-	Map::Vertex UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChange, bool &NodeReached);
+	glm::vec3 UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChange, bool &NodeReached);
 	void PrintRoute();
 
 	virtual float GetSympatheticProcChances(uint16 spell_id, int16 ProcRateMod, int32 ItemProcRate = 0);
@@ -1062,9 +1065,12 @@ protected:
 	char clean_name[64];
 	char lastname[64];
 
-	xyz_heading m_Delta;
+	glm::vec4 m_Delta;
 
-	uint8 light;
+	uint8 innate_light;	// defined by db field `npc_types`.`light` - where appropriate
+	uint8 equip_light;	// highest value of equipped/carried light-producing items
+	uint8 spell_light;	// set value of any light-producing spell (can be modded to mimic equip_light behavior)
+	uint8 active_light;	// highest value of all light sources
 
 	float fixedZ;
 	EmuAppearance _appearance;
@@ -1083,7 +1089,7 @@ protected:
 	//spell casting vars
 	Timer spellend_timer;
 	uint16 casting_spell_id;
-	xyz_location m_SpellLocation;
+	glm::vec3 m_SpellLocation;
 	int attacked_count;
 	bool delaytimer;
 	uint16 casting_spell_targetid;
@@ -1102,7 +1108,7 @@ protected:
 	bool ActiveProjectileATK;
 	tProjatk ProjectileAtk[MAX_SPELL_PROJECTILE];
 
-	xyz_location m_RewindLocation;
+	glm::vec3 m_RewindLocation;
 
 	Timer rewind_timer;
 
@@ -1199,18 +1205,18 @@ protected:
 	int pausetype;
 
 	int cur_wp;
-	xyz_heading m_CurrentWayPoint;
+	glm::vec4 m_CurrentWayPoint;
 	int cur_wp_pause;
 
 
 	int patrol;
-	xyz_location m_FearWalkTarget;
+	glm::vec3 m_FearWalkTarget;
 	bool curfp;
 
 	// Pathing
 	//
-	Map::Vertex PathingDestination;
-	Map::Vertex PathingLastPosition;
+	glm::vec3 PathingDestination;
+	glm::vec3 PathingLastPosition;
 	int PathingLoopCount;
 	int PathingLastNodeVisited;
 	std::deque<int> Route;
@@ -1239,13 +1245,13 @@ protected:
 	bool pet_owner_client; //Flags regular and pets as belonging to a client
 
 	EGNode *_egnode; //the EG node we are in
-	xyz_location m_TargetLocation;
+	glm::vec3 m_TargetLocation;
 	uint8 tar_ndx;
 	float tar_vector;
-	xyz_location m_TargetV;
+	glm::vec3 m_TargetV;
 	float test_vector;
 
-	xyz_location m_TargetRing;
+	glm::vec3 m_TargetRing;
 
 	uint32 m_spellHitsLeft[38]; // Used to track which spells will have their numhits incremented when spell finishes casting, 38 Buffslots
 	int flymode;

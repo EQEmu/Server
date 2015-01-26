@@ -302,18 +302,17 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 		in_cc->start_zone, in_cc->class_, in_cc->deity, in_cc->race);
     auto results = QueryDatabase(query);
 	if(!results.Success()) {
-		LogFile->write(EQEmuLog::Status, "SoF Start zone query failed: %s : %s\n", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
-	LogFile->write(EQEmuLog::Status, "SoF Start zone query: %s\n", query.c_str());
+	Log.Out(Logs::General, Logs::Status, "SoF Start zone query: %s\n", query.c_str());
 
     if (results.RowCount() == 0) {
         printf("No start_zones entry in database, using defaults\n");
 		isTitanium ? SetTitaniumDefaultStartZone(in_pp, in_cc) : SetSoFDefaultStartZone(in_pp, in_cc);
     }
     else {
-		LogFile->write(EQEmuLog::Status, "Found starting location in start_zones");
+		Log.Out(Logs::General, Logs::Status, "Found starting location in start_zones");
 		auto row = results.begin();
 		in_pp->x = atof(row[0]);
 		in_pp->y = atof(row[1]);
@@ -439,7 +438,7 @@ void WorldDatabase::GetLauncherList(std::vector<std::string> &rl) {
     const std::string query = "SELECT name FROM launcher";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "WorldDatabase::GetLauncherList: %s", results.ErrorMessage().c_str());
+        Log.Out(Logs::General, Logs::Error, "WorldDatabase::GetLauncherList: %s", results.ErrorMessage().c_str());
         return;
     }
 
@@ -461,7 +460,7 @@ void WorldDatabase::SetMailKey(int CharID, int IPAddress, int MailKey) {
                                     MailKeyString, CharID);
     auto results = QueryDatabase(query);
 	if (!results.Success())
-		LogFile->write(EQEmuLog::Error, "WorldDatabase::SetMailKey(%i, %s) : %s", CharID, MailKeyString, results.ErrorMessage().c_str());
+		Log.Out(Logs::General, Logs::Error, "WorldDatabase::SetMailKey(%i, %s) : %s", CharID, MailKeyString, results.ErrorMessage().c_str());
 
 }
 
@@ -470,7 +469,7 @@ bool WorldDatabase::GetCharacterLevel(const char *name, int &level)
 	std::string query = StringFormat("SELECT level FROM character_data WHERE name = '%s'", name);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "WorldDatabase::GetCharacterLevel: %s", results.ErrorMessage().c_str());
+        Log.Out(Logs::General, Logs::Error, "WorldDatabase::GetCharacterLevel: %s", results.ErrorMessage().c_str());
         return false;
 	}
 

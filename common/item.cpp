@@ -17,7 +17,7 @@
 */
 
 #include "classes.h"
-#include "debug.h"
+#include "global_define.h"
 #include "item.h"
 #include "races.h"
 #include "rulesys.h"
@@ -990,6 +990,35 @@ int Inventory::GetSlotByItemInst(ItemInst *inst) {
 	return INVALID_INDEX;
 }
 
+uint8 Inventory::FindHighestLightValue()
+{
+	uint8 light_value = NOT_USED;
+
+	// NOTE: The client does not recognize augment light sources, applied or otherwise, and should not be parsed
+	for (auto iter = m_worn.begin(); iter != m_worn.end(); ++iter) {
+		if ((iter->first < EmuConstants::EQUIPMENT_BEGIN || iter->first > EmuConstants::EQUIPMENT_END) && iter->first != MainPowerSource) { continue; }
+		auto inst = iter->second;
+		if (inst == nullptr) { continue; }
+		auto item = inst->GetItem();
+		if (item == nullptr) { continue; }
+		if (item->Light & 0xF0) { continue; }
+		if (item->Light > light_value) { light_value = item->Light; }
+	}
+
+	for (auto iter = m_inv.begin(); iter != m_inv.end(); ++iter) {
+		if (iter->first < EmuConstants::GENERAL_BEGIN || iter->first > EmuConstants::GENERAL_END) { continue; }
+		auto inst = iter->second;
+		if (inst == nullptr) { continue; }
+		auto item = inst->GetItem();
+		if (item == nullptr) { continue; }
+		if (item->ItemType != ItemTypeMisc && item->ItemType != ItemTypeLight) { continue; }
+		if (item->Light & 0xF0) { continue; }
+		if (item->Light > light_value) { light_value = item->Light; }
+	}
+
+	return light_value;
+}
+
 void Inventory::dumpEntireInventory() {
 
 	dumpWornItems();
@@ -1145,7 +1174,7 @@ int16 Inventory::_PutItem(int16 slot_id, ItemInst* inst)
 	}
 	
 	if (result == INVALID_INDEX) {
-		LogFile->write(EQEmuLog::Error, "Inventory::_PutItem: Invalid slot_id specified (%i) with parent slot id (%i)", slot_id, parentSlot);
+		Log.Out(Logs::General, Logs::Error, "Inventory::_PutItem: Invalid slot_id specified (%i) with parent slot id (%i)", slot_id, parentSlot);
 		Inventory::MarkDirty(inst); // Slot not found, clean up
 	}
 
@@ -1259,7 +1288,7 @@ int16 Inventory::_HasItemByUse(std::map<int16, ItemInst*>& bucket, uint8 use, ui
 
 		if (!inst->IsType(ItemClassContainer)) { continue; }
 
-		for (auto bag_iter = bucket.begin(); bag_iter != bucket.end(); ++bag_iter) {
+		for (auto bag_iter = inst->_begin(); bag_iter != inst->_end(); ++bag_iter) {
 			auto bag_inst = bag_iter->second;
 			if (bag_inst == nullptr) { continue; }
 

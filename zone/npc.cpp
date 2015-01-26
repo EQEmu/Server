@@ -18,7 +18,7 @@
 
 #include "../common/bodytypes.h"
 #include "../common/classes.h"
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/misc_functions.h"
 #include "../common/rulesys.h"
 #include "../common/seperator.h"
@@ -56,7 +56,7 @@ extern Zone* zone;
 extern volatile bool ZoneLoaded;
 extern EntityList entity_list;
 
-NPC::NPC(const NPCType* d, Spawn2* in_respawn, const xyz_heading& position, int iflymode, bool IsCorpse)
+NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int iflymode, bool IsCorpse)
 : Mob(d->name,
 		d->lastname,
 		d->max_hp,
@@ -71,7 +71,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const xyz_heading& position, int 
 		d->size,
 		d->runspeed,
 		position,
-		d->light,
+		d->light, // innate_light
 		d->texture,
 		d->helmtexture,
 		d->AC,
@@ -352,6 +352,9 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const xyz_heading& position, int 
 	InitializeBuffSlots();
 	CalcBonuses();
 	raid_target = d->raid_target;
+
+	active_light = d->light;
+	spell_light = equip_light = NOT_USED;
 }
 
 NPC::~NPC()
@@ -436,14 +439,19 @@ void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot) {
 		ServerLootItem_Struct* item = *cur;
 		if (item->item_id == item_id && slot <= 0 && quantity <= 0) {
 			itemlist.erase(cur);
+			UpdateEquipLightValue();
+			if (UpdateActiveLightValue()) { SendAppearancePacket(AT_Light, GetActiveLightValue()); }
 			return;
 		}
 		else if (item->item_id == item_id && item->equip_slot == slot && quantity >= 1) {
-			//std::cout<<"NPC::RemoveItem"<<" equipSlot:"<<iterator.GetData()->equipSlot<<" quantity:"<< quantity<<std::endl; // iterator undefined [CODEBUG]
-			if (item->charges <= quantity)
+			if (item->charges <= quantity) {
 				itemlist.erase(cur);
-			else
+				UpdateEquipLightValue();
+				if (UpdateActiveLightValue()) { SendAppearancePacket(AT_Light, GetActiveLightValue()); }
+			}
+			else {
 				item->charges -= quantity;
+			}
 			return;
 		}
 	}
@@ -475,6 +483,9 @@ void NPC::CheckMinMaxLevel(Mob *them)
 		++cur;
 	}
 
+	UpdateEquipLightValue();
+	if (UpdateActiveLightValue())
+		SendAppearancePacket(AT_Light, GetActiveLightValue());
 }
 
 void NPC::ClearItemList() {
@@ -486,6 +497,10 @@ void NPC::ClearItemList() {
 		safe_delete(item);
 	}
 	itemlist.clear();
+
+	UpdateEquipLightValue();
+	if (UpdateActiveLightValue())
+		SendAppearancePacket(AT_Light, GetActiveLightValue());
 }
 
 void NPC::QueryLoot(Client* to)
@@ -496,7 +511,7 @@ void NPC::QueryLoot(Client* to)
 	for(ItemList::iterator cur = itemlist.begin(); cur != itemlist.end(); ++cur, ++x) {
 		const Item_Struct* item = database.GetItem((*cur)->item_id);
 		if (item == nullptr) {
-			LogFile->write(EQEmuLog::Error, "Database error, invalid item");
+			Log.Out(Logs::General, Logs::Error, "Database error, invalid item");
 			continue;
 		}
 
@@ -662,8 +677,8 @@ bool NPC::Process()
 			DoGravityEffect();
 	}
 
-	if(reface_timer->Check() && !IsEngaged() && (m_GuardPoint.m_X == GetX() && m_GuardPoint.m_Y == GetY() && m_GuardPoint.m_Z == GetZ())) {
-		SetHeading(m_GuardPoint.m_Heading);
+	if(reface_timer->Check() && !IsEngaged() && (m_GuardPoint.x == GetX() && m_GuardPoint.y == GetY() && m_GuardPoint.z == GetZ())) {
+		SetHeading(m_GuardPoint.w);
 		SendPosition();
 		reface_timer->Disable();
 	}
@@ -701,6 +716,27 @@ bool NPC::Process()
 
 uint32 NPC::CountLoot() {
 	return(itemlist.size());
+}
+
+void NPC::UpdateEquipLightValue()
+{
+	equip_light = NOT_USED;
+	
+	for (int index = MAIN_BEGIN; index < EmuConstants::EQUIPMENT_SIZE; ++index) {
+		if (equipment[index] == NOT_USED) { continue; }
+		auto item = database.GetItem(equipment[index]);
+		if (item == nullptr) { continue; }
+		if (item->Light & 0xF0) { continue; }
+		if (item->Light > equip_light) { equip_light = item->Light; }
+	}
+
+	for (auto iter = itemlist.begin(); iter != itemlist.end(); ++iter) {
+		auto item = database.GetItem((*iter)->item_id);
+		if (item == nullptr) { continue; }
+		if (item->ItemType != ItemTypeMisc && item->ItemType != ItemTypeLight) { continue; }
+		if (item->Light & 0xF0) { continue; }
+		if (item->Light > equip_light) { equip_light = item->Light; }
+	}
 }
 
 void NPC::Depop(bool StartSpawnTimer) {
@@ -768,7 +804,7 @@ bool NPC::DatabaseCastAccepted(int spell_id) {
 	return false;
 }
 
-NPC* NPC::SpawnNPC(const char* spawncommand, const xyz_heading& position, Client* client) {
+NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* client) {
 	if(spawncommand == 0 || spawncommand[0] == 0) {
 		return 0;
 	}
@@ -907,7 +943,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const xyz_heading& position, Client
 		npc_type->npc_id = 0;
 		npc_type->loottable_id = 0;
 		npc_type->texture = atoi(sep.arg[3]);
-		npc_type->light = 0;
+		npc_type->light = 0; // spawncommand needs update
 		npc_type->runspeed = 1.25;
 		npc_type->d_melee_texture1 = atoi(sep.arg[7]);
 		npc_type->d_melee_texture2 = atoi(sep.arg[8]);
@@ -992,7 +1028,6 @@ uint32 ZoneDatabase::CreateNewNPCCommand(const char* zone, uint32 zone_version,C
                                         spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28);
         auto results = QueryDatabase(query);
 		if (!results.Success()) {
-			LogFile->write(EQEmuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), results.ErrorMessage().c_str());
 			return false;
 		}
 		npc_type_id = results.LastInsertedID();
@@ -1009,25 +1044,21 @@ uint32 ZoneDatabase::CreateNewNPCCommand(const char* zone, uint32 zone_version,C
                                         spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28);
         auto results = QueryDatabase(query);
 		if (!results.Success()) {
-			LogFile->write(EQEmuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), results.ErrorMessage().c_str());
 			return false;
 		}
 		npc_type_id = results.LastInsertedID();
 	}
 
 	if(client)
-        client->LogSQL(query.c_str());
 
 	query = StringFormat("INSERT INTO spawngroup (id, name) VALUES(%i, '%s-%s')", 0, zone, spawn->GetName());
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
     uint32 spawngroupid = results.LastInsertedID();
 
 	if(client)
-        client->LogSQL(query.c_str());
 
     query = StringFormat("INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) "
                         "VALUES('%s', %u, %f, %f, %f, %i, %f, %i)",
@@ -1035,23 +1066,19 @@ uint32 ZoneDatabase::CreateNewNPCCommand(const char* zone, uint32 zone_version,C
                         spawn->GetHeading(), spawngroupid);
     results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
 	if(client)
-        client->LogSQL(query.c_str());
 
     query = StringFormat("INSERT INTO spawnentry (spawngroupID, npcID, chance) VALUES(%i, %i, %i)",
                         spawngroupid, npc_type_id, 100);
     results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
 	if(client)
-        client->LogSQL(query.c_str());
 
 	return true;
 }
@@ -1063,13 +1090,9 @@ uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(const char* zone, uint32 zone_ve
                                     zone, spawn->GetName(), Timer::GetCurrentTime());
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "CreateNewNPCSpawnGroupCommand Error: %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
     last_insert_id = results.LastInsertedID();
-
-    if(client)
-        client->LogSQL(query.c_str());
 
     uint32 respawntime = 0;
     uint32 spawnid = 0;
@@ -1086,24 +1109,20 @@ uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(const char* zone, uint32 zone_ve
                         spawn->GetHeading(), last_insert_id);
     results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "CreateNewNPCSpawnGroupCommand Error: %s %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
     spawnid = results.LastInsertedID();
 
     if(client)
-        client->LogSQL(query.c_str());
 
     query = StringFormat("INSERT INTO spawnentry (spawngroupID, npcID, chance) VALUES(%i, %i, %i)",
                         last_insert_id, spawn->GetNPCTypeID(), 100);
     results = QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEmuLog::Error, "CreateNewNPCSpawnGroupCommand Error: %s %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
 
     if(client)
-        client->LogSQL(query.c_str());
 
     return spawnid;
 }
@@ -1119,7 +1138,6 @@ uint32 ZoneDatabase::UpdateNPCTypeAppearance(Client *client, NPC* spawn) {
                                     spawn->MerchantType, spawn->GetNPCTypeID());
     auto results = QueryDatabase(query);
     if (!results.Success() && client)
-            client->LogSQL(query.c_str());
 
     return results.Success() == true? 1: 0;
 }
@@ -1150,7 +1168,6 @@ uint32 ZoneDatabase::DeleteSpawnLeaveInNPCTypeTable(const char* zone, Client *cl
 		return 0;
 
 	if(client)
-        client->LogSQL(query.c_str());
 
     query = StringFormat("DELETE FROM spawngroup WHERE id = '%i'", spawngroupID);
     results = QueryDatabase(query);
@@ -1158,7 +1175,6 @@ uint32 ZoneDatabase::DeleteSpawnLeaveInNPCTypeTable(const char* zone, Client *cl
 		return 0;
 
 	if(client)
-        client->LogSQL(query.c_str());
 
     query = StringFormat("DELETE FROM spawnentry WHERE spawngroupID = '%i'", spawngroupID);
     results = QueryDatabase(query);
@@ -1166,7 +1182,6 @@ uint32 ZoneDatabase::DeleteSpawnLeaveInNPCTypeTable(const char* zone, Client *cl
 		return 0;
 
 	if(client)
-        client->LogSQL(query.c_str());
 
 	return 1;
 }
@@ -1200,7 +1215,6 @@ uint32 ZoneDatabase::DeleteSpawnRemoveFromNPCTypeTable(const char* zone, uint32 
 		return 0;
 
 	if(client)
-        client->LogSQL(query.c_str());
 
     query = StringFormat("DELETE FROM spawngroup WHERE id = '%i'", spawngroupID);
 	results = QueryDatabase(query);
@@ -1208,7 +1222,6 @@ uint32 ZoneDatabase::DeleteSpawnRemoveFromNPCTypeTable(const char* zone, uint32 
 		return 0;
 
 	if(client)
-        client->LogSQL(query.c_str());
 
     query = StringFormat("DELETE FROM spawnentry WHERE spawngroupID = '%i'", spawngroupID);
 	results = QueryDatabase(query);
@@ -1216,7 +1229,6 @@ uint32 ZoneDatabase::DeleteSpawnRemoveFromNPCTypeTable(const char* zone, uint32 
 		return 0;
 
 	if(client)
-        client->LogSQL(query.c_str());
 
     query = StringFormat("DELETE FROM npc_types WHERE id = '%i'", spawn->GetNPCTypeID());
 	results = QueryDatabase(query);
@@ -1224,7 +1236,6 @@ uint32 ZoneDatabase::DeleteSpawnRemoveFromNPCTypeTable(const char* zone, uint32 
 		return 0;
 
 	if(client)
-        client->LogSQL(query.c_str());
 
 	return 1;
 }
@@ -1241,7 +1252,6 @@ uint32  ZoneDatabase::AddSpawnFromSpawnGroup(const char* zone, uint32 zone_versi
 		return 0;
 
 	if(client)
-        client->LogSQL(query.c_str());
 
     return 1;
 }
@@ -1266,7 +1276,6 @@ uint32 ZoneDatabase::AddNPCTypes(const char* zone, uint32 zone_version, Client *
     npc_type_id = results.LastInsertedID();
 
 	if(client)
-        client->LogSQL(query.c_str());
 
 	if(client)
         client->Message(0, "%s npc_type ID %i created successfully!", numberlessName, npc_type_id);
@@ -1660,7 +1669,7 @@ void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool rem
 	{
 		if(database.SetSpecialAttkFlag(this->GetNPCTypeID(), orig_parse))
 		{
-			LogFile->write(EQEmuLog::Normal, "NPCTypeID: %i flagged to '%s' for Special Attacks.\n",this->GetNPCTypeID(),orig_parse);
+			Log.Out(Logs::General, Logs::Normal, "NPCTypeID: %i flagged to '%s' for Special Attacks.\n",this->GetNPCTypeID(),orig_parse);
 		}
 	}
 }
@@ -1832,6 +1841,8 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	Mob::FillSpawnStruct(ns, ForWho);
 	PetOnSpawn(ns);
 	ns->spawn.is_npc = 1;
+	UpdateActiveLightValue();
+	ns->spawn.light = GetActiveLightValue();
 }
 
 void NPC::PetOnSpawn(NewSpawn_Struct* ns)

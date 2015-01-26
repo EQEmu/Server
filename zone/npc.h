@@ -95,10 +95,10 @@ struct Item_Struct;
 class NPC : public Mob
 {
 public:
-	static NPC* SpawnNPC(const char* spawncommand, const xyz_heading& position, Client* client = nullptr);
+	static NPC* SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* client = nullptr);
 	static int8 GetAILevel(bool iForceReRead = false);
 
-	NPC(const NPCType* data, Spawn2* respawn, const xyz_heading& position, int iflymode, bool IsCorpse = false);
+	NPC(const NPCType* data, Spawn2* respawn, const glm::vec4& position, int iflymode, bool IsCorpse = false);
 
 	virtual ~NPC();
 
@@ -162,7 +162,7 @@ public:
 	FACTION_VALUE CheckNPCFactionAlly(int32 other_faction);
 	virtual FACTION_VALUE GetReverseFactionCon(Mob* iOther);
 
-	void	GoToBind(uint8 bindnum = 0)	{ GMMove(m_SpawnPoint.m_X, m_SpawnPoint.m_Y, m_SpawnPoint.m_Z, m_SpawnPoint.m_Heading); }
+	void	GoToBind(uint8 bindnum = 0)	{ GMMove(m_SpawnPoint.x, m_SpawnPoint.y, m_SpawnPoint.z, m_SpawnPoint.w); }
 	void	Gate();
 
 	void	GetPetState(SpellBuff_Struct *buffs, uint32 *items, char *name);
@@ -187,6 +187,7 @@ public:
 	void	QueryLoot(Client* to);
 	uint32	CountLoot();
 	inline uint32	GetLoottableID()	const { return loottable_id; }
+	virtual void UpdateEquipLightValue();
 
 	inline uint32	GetCopper()		const { return copper; }
 	inline uint32	GetSilver()		const { return silver; }
@@ -210,8 +211,8 @@ public:
 	uint32 GetSp2() const { return spawn_group; }
 	uint32 GetSpawnPointID() const;
 
-	xyz_heading const GetSpawnPoint() const { return m_SpawnPoint; }
-	xyz_heading const GetGuardPoint() const { return m_GuardPoint; }
+	glm::vec4 const GetSpawnPoint() const { return m_SpawnPoint; }
+	glm::vec4 const GetGuardPoint() const { return m_GuardPoint; }
 	EmuAppearance GetGuardPointAnim() const { return guard_anim; }
 	void SaveGuardPointAnim(EmuAppearance anim) { guard_anim = anim; }
 
@@ -248,7 +249,7 @@ public:
 
 	void	SetNPCFactionID(int32 in) { npc_faction_id = in; database.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction); }
 
-    xyz_heading m_SpawnPoint;
+    glm::vec4 m_SpawnPoint;
 
 	uint32	GetMaxDMG() const {return max_dmg;}
 	uint32	GetMinDMG() const {return min_dmg;}
@@ -282,15 +283,15 @@ public:
 	void				StopWandering();
 	void				ResumeWandering();
 	void				PauseWandering(int pausetime);
-	void				MoveTo(const xyz_heading& position, bool saveguardspot);
-	void				GetClosestWaypoint(std::list<wplist> &wp_list, int count, const xyz_location& location);
+	void				MoveTo(const glm::vec4& position, bool saveguardspot);
+	void				GetClosestWaypoint(std::list<wplist> &wp_list, int count, const glm::vec3& location);
 
 	uint32				GetEquipment(uint8 material_slot) const;	// returns item id
 	int32				GetEquipmentMaterial(uint8 material_slot) const;
 
 	void				NextGuardPosition();
 	void				SaveGuardSpot(bool iClearGuardSpot = false);
-	inline bool			IsGuarding() const { return(m_GuardPoint.m_Heading != 0); }
+	inline bool			IsGuarding() const { return(m_GuardPoint.w != 0); }
 	void				SaveGuardSpotCharm();
 	void				RestoreGuardSpotCharm();
 	void				AI_SetRoambox(float iDist, float iRoamDist, uint32 iDelay = 2500, uint32 iMinDelay = 2500);
@@ -473,8 +474,8 @@ protected:
 	void _ClearWaypints();
 	int max_wp;
 	int save_wp;
-	xyz_heading m_GuardPoint;
-	xyz_heading m_GuardPointSaved;
+	glm::vec4 m_GuardPoint;
+	glm::vec4 m_GuardPointSaved;
 	EmuAppearance guard_anim;
 	float roambox_max_x;
 	float roambox_max_y;

@@ -17,7 +17,7 @@
 */
 
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "misc_functions.h"
 #include <string.h>
 #include <time.h>

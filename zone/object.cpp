@@ -16,7 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/string_util.h"
 
 #include "client.h"
@@ -86,7 +86,6 @@ Object::Object(const ItemInst* inst, char* name,float max_x,float min_x,float ma
 	// Set as much struct data as we can
 	memset(&m_data, 0, sizeof(Object_Struct));
 	m_data.heading = heading;
-	//printf("Spawning object %s at %f,%f,%f\n",name,m_data.x,m_data.y,m_data.z);
 	m_data.z = z;
 	m_data.zone_id = zone->GetZoneID();
 	respawn_timer.Disable();
@@ -118,7 +117,7 @@ Object::Object(Client* client, const ItemInst* inst)
 	m_data.heading = client->GetHeading();
 	m_data.x = client->GetX();
 	m_data.y = client->GetY();
-	if (client->GetClientVersion() >= EQClientRoF2)
+	if (client->GetClientVersion() >= ClientVersion::RoF2)
 	{
 		// RoF2 places items at player's Z, which is 0.625 of their height.
 		m_data.z = client->GetZ() - (client->GetSize() * 0.625f);
@@ -336,7 +335,7 @@ const ItemInst* Object::GetItem(uint8 index) {
 void Object::PutItem(uint8 index, const ItemInst* inst)
 {
 	if (index > 9) {
-		LogFile->write(EQEmuLog::Error, "Object::PutItem: Invalid index specified (%i)", index);
+		Log.Out(Logs::General, Logs::Error, "Object::PutItem: Invalid index specified (%i)", index);
 		return;
 	}
 
@@ -598,7 +597,7 @@ uint32 ZoneDatabase::AddObject(uint32 type, uint32 icon, const Object_Struct& ob
     safe_delete_array(object_name);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "Unable to insert object: %s", results.ErrorMessage().c_str());
+		Log.Out(Logs::General, Logs::Error, "Unable to insert object: %s", results.ErrorMessage().c_str());
 		return 0;
 	}
 
@@ -635,7 +634,7 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
     safe_delete_array(object_name);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "Unable to update object: %s", results.ErrorMessage().c_str());
+		Log.Out(Logs::General, Logs::Error, "Unable to update object: %s", results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -654,7 +653,6 @@ Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Gro
                                     "LIMIT 50", zone_id, version);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        std::cerr << "Error in LoadGroundSpawns query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return gs;
 	}
 
@@ -680,7 +678,7 @@ void ZoneDatabase::DeleteObject(uint32 id)
 	std::string query = StringFormat("DELETE FROM object WHERE id = %i", id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEmuLog::Error, "Unable to delete object: %s", results.ErrorMessage().c_str());
+		Log.Out(Logs::General, Logs::Error, "Unable to delete object: %s", results.ErrorMessage().c_str());
 	}
 }
 

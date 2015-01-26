@@ -16,7 +16,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
+#include "../common/eqemu_logsys.h"
 #include "../common/faction.h"
 #include "../common/rulesys.h"
 #include "../common/spdat.h"
@@ -88,7 +89,7 @@ void EntityList::DescribeAggro(Client *towho, NPC *from_who, float d, bool verbo
 		if (mob->IsClient())	//also ensures that mob != around
 			continue;
 
-		if (ComparativeDistance(mob->GetPosition(), from_who->GetPosition()) > d2)
+		if (DistanceSquared(mob->GetPosition(), from_who->GetPosition()) > d2)
 			continue;
 
 		if (engaged) {
@@ -150,7 +151,7 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 		return;
 	}
 
-	float dist2 = ComparativeDistance(mob->GetPosition(), m_Position);
+	float dist2 = DistanceSquared(mob->GetPosition(), m_Position);
 
 	float iAggroRange2 = iAggroRange*iAggroRange;
 	if( dist2 > iAggroRange2 ) {
@@ -296,7 +297,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		return(false);
 	}
 
-	float dist2 = ComparativeDistance(mob->GetPosition(), m_Position);
+	float dist2 = DistanceSquared(mob->GetPosition(), m_Position);
 	float iAggroRange2 = iAggroRange*iAggroRange;
 
 	if( dist2 > iAggroRange2 ) {
@@ -342,22 +343,18 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	{
 		//FatherNiwtit: make sure we can see them. last since it is very expensive
 		if(CheckLosFN(mob)) {
-
-			// Aggro
-			#if EQDEBUG>=6
-				LogFile->write(EQEmuLog::Debug, "Check aggro for %s target %s.", GetName(), mob->GetName());
-			#endif
+			Log.Out(Logs::Detail, Logs::Aggro, "Check aggro for %s target %s.", GetName(), mob->GetName()); 
 			return( mod_will_aggro(mob, this) );
 		}
 	}
-#if EQDEBUG >= 6
-	printf("Is In zone?:%d\n", mob->InZone());
-	printf("Dist^2: %f\n", dist2);
-	printf("Range^2: %f\n", iAggroRange2);
-	printf("Faction: %d\n", fv);
-	printf("Int: %d\n", GetINT());
-	printf("Con: %d\n", GetLevelCon(mob->GetLevel()));
-#endif
+
+	Log.Out(Logs::Detail, Logs::Aggro, "Is In zone?:%d\n", mob->InZone());
+	Log.Out(Logs::Detail, Logs::Aggro, "Dist^2: %f\n", dist2);
+	Log.Out(Logs::Detail, Logs::Aggro, "Range^2: %f\n", iAggroRange2);
+	Log.Out(Logs::Detail, Logs::Aggro, "Faction: %d\n", fv);
+	Log.Out(Logs::Detail, Logs::Aggro, "Int: %d\n", GetINT());
+	Log.Out(Logs::Detail, Logs::Aggro, "Con: %d\n", GetLevelCon(mob->GetLevel()));
+
 	return(false);
 }
 
@@ -414,7 +411,7 @@ int EntityList::GetHatedCount(Mob *attacker, Mob *exclude)
 
 		AggroRange *= AggroRange;
 
-		if (ComparativeDistance(mob->GetPosition(), attacker->GetPosition()) > AggroRange)
+		if (DistanceSquared(mob->GetPosition(), attacker->GetPosition()) > AggroRange)
 			continue;
 
 		Count++;
@@ -444,7 +441,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 //			&& !mob->IsCorpse()
 //			&& mob->IsAIControlled()
 			&& mob->GetPrimaryFaction() != 0
-			&& ComparativeDistance(mob->GetPosition(), sender->GetPosition()) <= r
+			&& DistanceSquared(mob->GetPosition(), sender->GetPosition()) <= r
 			&& !mob->IsEngaged()
 			&& ((!mob->IsPet()) || (mob->IsPet() && mob->GetOwner() && !mob->GetOwner()->IsClient()))
 				// If we're a pet we don't react to any calls for help if our owner is a client
@@ -470,8 +467,10 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 					//Father Nitwit: make sure we can see them.
 					if(mob->CheckLosFN(sender)) {
 #if (EQDEBUG>=5)
-						LogFile->write(EQEmuLog::Debug, "AIYellForHelp(\"%s\",\"%s\") %s attacking %s Dist %f Z %f",
-						sender->GetName(), attacker->GetName(), mob->GetName(), attacker->GetName(), ComparativeDistance(mob->GetPosition(), sender->GetPosition()), fabs(sender->GetZ()+mob->GetZ()));
+						Log.Out(Logs::General, Logs::None, "AIYellForHelp(\"%s\",\"%s\") %s attacking %s Dist %f Z %f",
+							sender->GetName(), attacker->GetName(), mob->GetName(), 
+							attacker->GetName(), DistanceSquared(mob->GetPosition(), 
+							sender->GetPosition()), fabs(sender->GetZ()+mob->GetZ()));
 #endif
 						mob->AddToHateList(attacker, 1, 0, false);
 					}
@@ -697,7 +696,7 @@ type', in which case, the answer is yes.
 	}
 	while( reverse++ == 0 );
 
-	LogFile->write(EQEmuLog::Debug, "Mob::IsAttackAllowed: don't have a rule for this - %s vs %s\n", this->GetName(), target->GetName());
+	Log.Out(Logs::General, Logs::None, "Mob::IsAttackAllowed: don't have a rule for this - %s vs %s\n", this->GetName(), target->GetName());
 	return false;
 }
 
@@ -837,7 +836,7 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 	}
 	while( reverse++ == 0 );
 
-	LogFile->write(EQEmuLog::Debug, "Mob::IsBeneficialAllowed: don't have a rule for this - %s to %s\n", this->GetName(), target->GetName());
+	Log.Out(Logs::General, Logs::None, "Mob::IsBeneficialAllowed: don't have a rule for this - %s to %s\n", this->GetName(), target->GetName());
 	return false;
 }
 
@@ -878,7 +877,7 @@ bool Mob::CombatRange(Mob* other)
 	if (size_mod > 10000)
 		size_mod = size_mod / 7;
 
-	float _DistNoRoot = ComparativeDistance(m_Position, other->GetPosition());
+	float _DistNoRoot = DistanceSquared(m_Position, other->GetPosition());
 
 	if (GetSpecialAbility(NPC_CHASE_DISTANCE)){
 		
@@ -935,8 +934,8 @@ bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
 #endif
 	}
 
-	Map::Vertex myloc;
-	Map::Vertex oloc;
+	glm::vec3 myloc;
+	glm::vec3 oloc;
 
 #define LOS_DEFAULT_HEIGHT 6.0f
 
@@ -949,7 +948,7 @@ bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
 	oloc.z = posZ + (mobSize==0.0?LOS_DEFAULT_HEIGHT:mobSize)/2 * SEE_POSITION;
 
 #if LOSDEBUG>=5
-	LogFile->write(EQEmuLog::Debug, "LOS from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) sizes: (%.2f, %.2f)", myloc.x, myloc.y, myloc.z, oloc.x, oloc.y, oloc.z, GetSize(), mobSize);
+	Log.Out(Logs::General, Logs::None, "LOS from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) sizes: (%.2f, %.2f)", myloc.x, myloc.y, myloc.z, oloc.x, oloc.y, oloc.z, GetSize(), mobSize);
 #endif
 	return zone->zonemap->CheckLoS(myloc, oloc);
 }

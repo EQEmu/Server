@@ -10,24 +10,24 @@ WaterMapV1::~WaterMapV1() {
 	}
 }
 
-WaterRegionType WaterMapV1::ReturnRegionType(float y, float x, float z) const {
-	return BSPReturnRegionType(1, y, x, z);
+WaterRegionType WaterMapV1::ReturnRegionType(const glm::vec3& location) const {
+	return BSPReturnRegionType(1, glm::vec3(location.y, location.x, location.z));
 }
 
-bool WaterMapV1::InWater(float y, float x, float z) const {
-	return ReturnRegionType(y, x, z) == RegionTypeWater;
+bool WaterMapV1::InWater(const glm::vec3& location) const {
+	return ReturnRegionType(location) == RegionTypeWater;
 }
 
-bool WaterMapV1::InVWater(float y, float x, float z) const {
-	return ReturnRegionType(y, x, z) == RegionTypeVWater;
+bool WaterMapV1::InVWater(const glm::vec3& location) const {
+	return ReturnRegionType(location) == RegionTypeVWater;
 }
 
-bool WaterMapV1::InLava(float y, float x, float z) const {
-	return ReturnRegionType(y, x, z) == RegionTypeLava;
+bool WaterMapV1::InLava(const glm::vec3& location) const {
+	return ReturnRegionType(location) == RegionTypeLava;
 }
 
-bool WaterMapV1::InLiquid(float y, float x, float z) const {
-	return InWater(y, x, z) || InLava(y, x, z);
+bool WaterMapV1::InLiquid(const glm::vec3& location) const {
+	return InWater(location) || InLava(location);
 }
 
 bool WaterMapV1::Load(FILE *fp) {
@@ -48,7 +48,7 @@ bool WaterMapV1::Load(FILE *fp) {
 	return true;
 }
 
-WaterRegionType WaterMapV1::BSPReturnRegionType(int32 node_number, float y, float x, float z) const {
+WaterRegionType WaterMapV1::BSPReturnRegionType(int32 node_number, const glm::vec3& location) const {
 	float distance;
 
 	const ZBSP_Node *current_node = &BSP_Root[node_number - 1];
@@ -58,9 +58,9 @@ WaterRegionType WaterMapV1::BSPReturnRegionType(int32 node_number, float y, floa
 		return (WaterRegionType)current_node->special;
 	}
 
-	distance = (x * current_node->normal[0]) +
-		(y * current_node->normal[1]) +
-		(z * current_node->normal[2]) +
+	distance = (location.x * current_node->normal[0]) +
+		(location.y * current_node->normal[1]) +
+		(location.z * current_node->normal[2]) +
 		current_node->splitdistance;
 
 	if (distance == 0.0f) {
@@ -71,12 +71,12 @@ WaterRegionType WaterMapV1::BSPReturnRegionType(int32 node_number, float y, floa
 		if (current_node->left == 0) {
 			return(RegionTypeNormal);
 		}
-		return BSPReturnRegionType(current_node->left, y, x, z);
+		return BSPReturnRegionType(current_node->left, location);
 	}
 
 	if (current_node->right == 0) {
 		return(RegionTypeNormal);
 	}
 
-	return BSPReturnRegionType(current_node->right, y, x, z);
+	return BSPReturnRegionType(current_node->right, location);
 }

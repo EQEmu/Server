@@ -1,5 +1,5 @@
 
-#include "../debug.h"
+#include "../global_define.h"
 #include "patches.h"
 
 #include "titanium.h"

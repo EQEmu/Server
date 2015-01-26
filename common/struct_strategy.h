@@ -24,7 +24,7 @@ public:
 	void Decode(EQApplicationPacket *p) const;
 
 	virtual std::string Describe() const = 0;
-	virtual const EQClientVersion ClientVersion() const = 0;
+	virtual const ClientVersion GetClientVersion() const = 0;
 
 protected:
 	//some common coders:

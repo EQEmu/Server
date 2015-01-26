@@ -86,17 +86,14 @@ void QTNode::fillBlocks(PathTree_Struct *heads, PathPointRef *flist, unsigned lo
 	head->miny = miny;
 	head->maxy = maxy;
 	head->flags = 0;
-//printf("Node %u: (%.2f -> %.2f, %.2f -> %.2f)\n", hindex-1, head->minx, head->maxx, head->miny, head->maxy);
 
 	//rearranged to give all QT nodes a node list
 	head->nodelist.count = nodes.size();
 	head->nodelist.offset = findex;
-//printf("	Final node with %u nodes, list offset %lu.\n", head->nodes.count, head->nodes.offset);
 	list<PathNode *>::iterator curs,end;
 	curs = nodes.begin();
 	end = nodes.end();
 	for(; curs != end; curs++) {
-//printf("Got to node index %d (0x%x)\n", findex, *curs);
 		PathNode *cur = *curs;
 		flist[findex] = cur->node_id;
 		findex++;
@@ -283,7 +280,6 @@ void QTNode::buildVertexes() {
 }
 
 bool QTNode::IsInNode(const QTNode *n, const PathNode *o) {
-//printf("IIN: (%.3f,%.3f) in (%.3f -> %.3f, %.3f -> %.3f)\n", o->x, o->y, n->minx, n->maxx, n->miny, n->maxy);
 	if(		o->x >= n->minx && o->x < n->maxx
 		&&	o->y >= n->miny && o->y < n->maxy )
 		return(true);

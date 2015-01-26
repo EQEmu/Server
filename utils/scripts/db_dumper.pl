@@ -109,15 +109,15 @@ if($t_tables ne ""){
 	print "Performing table based backup...\n";
 	#::: Backup Database... 
 	print "Backing up Database " . $db . "... \n\n"; 
-	$cmd = 'mysqldump -u' . $user . ' --max_allowed_packet=512M --password="' . $pass . '" ' . $db . ' ' . $t_tables . ' > "' . $B_LOC[1] . '' . $file_app . '' . $target_file . '.sql"'; 
+	$cmd = 'mysqldump -u' . $user . ' --host ' . $host . ' --max_allowed_packet=512M --password="' . $pass . '" ' . $db . ' ' . $t_tables . ' > "' . $B_LOC[1] . '' . $file_app . '' . $target_file . '.sql"'; 
 	printcmd($cmd);
-	system($cmd);
+	system($cmd); 
 }
 else{ #::: Entire DB Backup
 	$target_file = '' . $db . ' ' . $date . ''; 
 	#::: Backup Database... 
 	print "Backing up Database " . $db . "... \n\n";  
-	$cmd = 'mysqldump -u' . $user . ' --max_allowed_packet=512M --password="' . $pass . '" ' . $db . ' > "' . $B_LOC[1] . '' . $file_app . '' . $target_file . '.sql"'; 
+	$cmd = 'mysqldump -u' . $user . ' --host ' . $host . ' --max_allowed_packet=512M --password="' . $pass . '" ' . $db . ' > "' . $B_LOC[1] . '' . $file_app . '' . $target_file . '.sql"'; 
 	printcmd($cmd);
 	system($cmd);
 }

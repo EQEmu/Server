@@ -242,17 +242,17 @@ void Lua_Client::SetBindPoint(int to_zone, int to_instance) {
 
 void Lua_Client::SetBindPoint(int to_zone, int to_instance, float new_x) {
 	Lua_Safe_Call_Void();
-	self->SetBindPoint(to_zone, to_instance, xyz_location(new_x,0.0f,0.0f));
+	self->SetBindPoint(to_zone, to_instance, glm::vec3(new_x,0.0f,0.0f));
 }
 
 void Lua_Client::SetBindPoint(int to_zone, int to_instance, float new_x, float new_y) {
 	Lua_Safe_Call_Void();
-	self->SetBindPoint(to_zone, to_instance, xyz_location(new_x, new_y, 0.0f));
+	self->SetBindPoint(to_zone, to_instance, glm::vec3(new_x, new_y, 0.0f));
 }
 
 void Lua_Client::SetBindPoint(int to_zone, int to_instance, float new_x, float new_y, float new_z) {
 	Lua_Safe_Call_Void();
-	self->SetBindPoint(to_zone, to_instance, xyz_location(new_x, new_y, new_z));
+	self->SetBindPoint(to_zone, to_instance, glm::vec3(new_x, new_y, new_z));
 }
 
 float Lua_Client::GetBindX() {
@@ -834,7 +834,7 @@ void Lua_Client::SetAATitle(const char *title) {
 
 int Lua_Client::GetClientVersion() {
 	Lua_Safe_Call_Int();
-	return self->GetClientVersion();
+	return static_cast<unsigned int>(self->GetClientVersion());
 }
 
 uint32 Lua_Client::GetClientVersionBit() {

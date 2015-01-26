@@ -1,5 +1,5 @@
 
-#include "debug.h"
+#include "global_define.h"
 #include "eq_stream_proxy.h"
 #include "eq_stream.h"
 #include "struct_strategy.h"
@@ -22,9 +22,9 @@ std::string EQStreamProxy::Describe() const {
 	return(m_structs->Describe());
 }
 
-const EQClientVersion EQStreamProxy::ClientVersion() const
+const ClientVersion EQStreamProxy::GetClientVersion() const
 {
-	return m_structs->ClientVersion();
+	return m_structs->GetClientVersion();
 }
 
 void EQStreamProxy::QueuePacket(const EQApplicationPacket *p, bool ack_req) {

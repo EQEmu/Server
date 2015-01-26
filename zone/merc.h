@@ -13,7 +13,6 @@ struct MercTemplate;
 struct NPCType;
 struct NewSpawn_Struct;
 
-#define MERC_DEBUG 0
 #define MAXMERCS 1
 #define TANK 1
 #define HEALER 2
@@ -140,6 +139,7 @@ public:
 	void UpdateMercInfo(Client *c);
 	void UpdateMercStats(Client *c);
 	void UpdateMercAppearance();
+	virtual void UpdateEquipLightValue();
 	void AddItem(uint8 slot, uint32 item_id);
 	static const char *GetRandomName();
 	bool Spawn(Client *owner);

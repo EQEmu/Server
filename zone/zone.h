@@ -67,6 +67,16 @@ struct item_tick_struct {
     std::string qglobal;
 };
 
+// static uint32 gmsay_log_message_colors[EQEmuLogSys::MaxLogID] = {
+// 	15, // "Status", - Yellow
+// 	15,	// "Normal", - Yellow
+// 	3,	// "Error", - Red
+// 	14,	// "Debug", - Light Green
+// 	4,	// "Quest", 
+// 	5,	// "Command", 
+// 	3	// "Crash" 
+// };
+
 class Client;
 class Map;
 class Mob;
@@ -100,9 +110,9 @@ public:
 
 	inline Timer* GetInstanceTimer() { return Instance_Timer; }
 
-    inline xyz_location GetSafePoint() { return m_SafePoint; }
+    inline glm::vec3 GetSafePoint() { return m_SafePoint; }
 	inline const uint32& graveyard_zoneid()	{ return pgraveyard_zoneid; }
-	inline xyz_heading GetGraveyardPoint() { return m_Graveyard; }
+	inline glm::vec4 GetGraveyardPoint() { return m_Graveyard; }
 	inline const uint32& graveyard_id()	{ return pgraveyard_id; }
 
 	inline const uint32& GetMaxClients() { return pMaxClients; }
@@ -118,8 +128,8 @@ public:
 	void	ReloadStaticData();
 
 	uint32	CountSpawn2();
-	ZonePoint* GetClosestZonePoint(const xyz_location& location, const char* to_name, Client *client, float max_distance = 40000.0f);
-	ZonePoint* GetClosestZonePoint(const xyz_location& location, uint32	to, Client *client, float max_distance = 40000.0f);
+	ZonePoint* GetClosestZonePoint(const glm::vec3& location, const char* to_name, Client *client, float max_distance = 40000.0f);
+	ZonePoint* GetClosestZonePoint(const glm::vec3& location, uint32	to, Client *client, float max_distance = 40000.0f);
 	ZonePoint* GetClosestZonePointWithoutZone(float x, float y, float z, Client *client, float max_distance = 40000.0f);
 	SpawnGroupList spawn_group_list;
 
@@ -227,12 +237,12 @@ public:
 	uint8 lootvar;
 
 	bool	HasGraveyard();
-	void	SetGraveyard(uint32 zoneid, const xyz_heading& graveyardPosition);
+	void	SetGraveyard(uint32 zoneid, const glm::vec4& graveyardPosition);
 
 	void		LoadBlockedSpells(uint32 zoneid);
 	void		ClearBlockedSpells();
-	bool		IsSpellBlocked(uint32 spell_id, const xyz_location& location);
-	const char *GetSpellBlockedMessage(uint32 spell_id, const xyz_location& location);
+	bool		IsSpellBlocked(uint32 spell_id, const glm::vec3& location);
+	const char *GetSpellBlockedMessage(uint32 spell_id, const glm::vec3& location);
 	int			GetTotalBlockedSpells() { return totalBS; }
 	inline bool HasMap() { return zonemap != nullptr; }
 	inline bool HasWaterMap() { return watermap != nullptr; }
@@ -248,13 +258,15 @@ public:
 
 	LinkedList<NPC_Emote_Struct*> NPCEmoteList;
 
-    void    LoadTickItems();
-    uint32  GetSpawnKillCount(uint32 in_spawnid);
-    void    UpdateHotzone();
+	void    LoadTickItems();
+	uint32  GetSpawnKillCount(uint32 in_spawnid);
+	void    UpdateHotzone();
 	std::unordered_map<int, item_tick_struct> tick_items;
 
 	// random object that provides random values for the zone
 	EQEmu::Random random;
+
+	static void GMSayHookCallBackProcess(uint16 log_category, const std::string& message){ entity_list.MessageStatus(0, 80, Log.GetGMSayColorFromCategory(log_category), "%s", message.c_str()); }
 
 	//MODDING HOOKS
 	void mod_init();
@@ -270,7 +282,7 @@ private:
 	char*	long_name;
 	char*	map_name;
 	bool pvpzone;
-	xyz_location m_SafePoint;
+	glm::vec3 m_SafePoint;
 	uint32	pMaxClients;
 	bool	can_bind;
 	bool	is_city;
@@ -281,7 +293,7 @@ private:
 	uint8	zone_type;
 	bool	allow_mercs;
 	uint32	pgraveyard_id, pgraveyard_zoneid;
-	xyz_heading m_Graveyard;
+	glm::vec4 m_Graveyard;
 	int		default_ruleset;
 
 	int	totalBS;

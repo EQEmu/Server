@@ -17,7 +17,7 @@
 */
 
 #include "base_data.h"
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/shareddb.h"
 #include "../common/ipc_mutex.h"
 #include "../common/memory_mapped_file.h"

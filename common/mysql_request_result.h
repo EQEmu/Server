@@ -48,7 +48,7 @@ public:
 	const std::string FieldName(int columnIndex);
 
 	MySQLRequestRow& begin() { return m_CurrentRow; }
-	MySQLRequestRow& end() { return m_OneBeyondRow;}
+	MySQLRequestRow& end() { return m_OneBeyondRow; }
 
 private:
 	void FreeInternals();

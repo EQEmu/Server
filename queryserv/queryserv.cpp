@@ -17,7 +17,8 @@
 
 */
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
+#include "../common/eqemu_logsys.h"
 #include "../common/opcodemgr.h"
 #include "../common/eq_stream_factory.h"
 #include "../common/rulesys.h"
@@ -39,6 +40,7 @@ LFGuildManager lfguildmanager;
 std::string WorldShortName;
 const queryservconfig *Config;
 WorldServer *worldserver = 0;
+EQEmuLogSys Log;
 
 void CatchSignal(int sig_num) { 
 	RunLoops = false; 
@@ -48,6 +50,7 @@ void CatchSignal(int sig_num) {
 
 int main() {
 	RegisterExecutablePlatform(ExePlatformQueryServ);
+	Log.LoadLogSettingsDefaults();
 	set_exception_handler(); 
 	Timer LFGuildExpireTimer(60000);  
 	Timer InterserverTimer(INTERSERVER_TIMER); // does auto-reconnect
@@ -62,16 +65,16 @@ int main() {
 		</qsdatabase>
 	*/
 
-	_log(QUERYSERV__INIT, "Starting EQEmu QueryServ.");
+	Log.Out(Logs::General, Logs::QS_Server, "Starting EQEmu QueryServ.");
 	if (!queryservconfig::LoadConfig()) {
-		_log(QUERYSERV__INIT, "Loading server configuration failed.");
+		Log.Out(Logs::General, Logs::QS_Server, "Loading server configuration failed.");
 		return 1;
 	}
 
 	Config = queryservconfig::get(); 
 	WorldShortName = Config->ShortName; 
 
-	_log(QUERYSERV__INIT, "Connecting to MySQL...");
+	Log.Out(Logs::General, Logs::QS_Server, "Connecting to MySQL...");
 	
 	/* MySQL Connection */
 	if (!database.Connect(
@@ -80,22 +83,20 @@ int main() {
 		Config->QSDatabasePassword.c_str(),
 		Config->QSDatabaseDB.c_str(),
 		Config->QSDatabasePort)) {
-		_log(WORLD__INIT_ERR, "Cannot continue without a database connection.");
+		Log.Out(Logs::General, Logs::QS_Server, "Cannot continue without a database connection.");
 		return 1;
 	}
 
-	/* Initialize Logging */
-	if (!load_log_settings(Config->LogSettingsFile.c_str()))
-		_log(QUERYSERV__INIT, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
-	else
-		_log(QUERYSERV__INIT, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
+	/* Register Log System and Settings */
+	database.LoadLogSettings(Log.log_settings);
+	Log.StartFileLogs();
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		_log(QUERYSERV__ERROR, "Could not set signal handler");
+		Log.Out(Logs::General, Logs::QS_Server, "Could not set signal handler");
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		_log(QUERYSERV__ERROR, "Could not set signal handler");
+		Log.Out(Logs::General, Logs::QS_Server, "Could not set signal handler");
 		return 1;
 	}
 
@@ -119,6 +120,7 @@ int main() {
 		timeout_manager.CheckTimeouts(); 
 		Sleep(100);
 	}
+	Log.CloseFileLogs();
 }
 
 void UpdateWindowTitle(char* iNewTitle) {

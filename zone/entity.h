@@ -155,7 +155,7 @@ public:
 	Client *GetClientByCharID(uint32 iCharID);
 	Client *GetClientByWID(uint32 iWID);
 	Client *GetClient(uint32 ip, uint16 port);
-	Client *GetRandomClient(const xyz_location& location, float Distance, Client *ExcludeClient = nullptr);
+	Client *GetRandomClient(const glm::vec3& location, float Distance, Client *ExcludeClient = nullptr);
 	Group *GetGroupByMob(Mob* mob);
 	Group *GetGroupByClient(Client* client);
 	Group *GetGroupByID(uint32 id);
@@ -203,7 +203,7 @@ public:
 	void	MobProcess();
 	void	TrapProcess();
 	void	BeaconProcess();
-	void	ProcessMove(Client *c, const xyz_location& location);
+	void	ProcessMove(Client *c, const glm::vec3& location);
 	void	ProcessMove(NPC *n, float x, float y, float z);
 	void	AddArea(int id, int type, float min_x, float max_x, float min_y, float max_y, float min_z, float max_z);
 	void	RemoveArea(int id);
@@ -321,8 +321,6 @@ public:
 	void	MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
 	void	AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
 
-	void	RadialSetLogging(Mob *around, bool enabled, bool clients, bool non_clients, float range = 0);
-
 	//trap stuff
 	Mob*	GetTrapTrigger(Trap* trap);
 	void	SendAlarm(Trap* trap, Mob* currenttarget, uint8 kos);
@@ -394,9 +392,9 @@ public:
 	void	SaveAllClientsTaskState();
 	void	ReloadAllClientsTaskState(int TaskID=0);
 
-	uint16	CreateGroundObject(uint32 itemid, const xyz_heading& position, uint32 decay_time = 300000);
-	uint16	CreateGroundObjectFromModel(const char *model, const xyz_heading& position, uint8 type = 0x00, uint32 decay_time = 0);
-	uint16	CreateDoor(const char *model, const xyz_heading& position, uint8 type = 0, uint16 size = 100);
+	uint16	CreateGroundObject(uint32 itemid, const glm::vec4& position, uint32 decay_time = 300000);
+	uint16	CreateGroundObjectFromModel(const char *model, const glm::vec4& position, uint8 type = 0x00, uint32 decay_time = 0);
+	uint16	CreateDoor(const char *model, const glm::vec4& position, uint8 type = 0, uint16 size = 100);
 	void	ZoneWho(Client *c, Who_All_Struct* Who);
 	void	UnMarkNPC(uint16 ID);
 
