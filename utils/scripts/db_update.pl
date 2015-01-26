@@ -6,9 +6,11 @@
 #::: Purpose: To upgrade databases with ease and maintain versioning
 ###########################################################
 
+$menu_displayed = 0;
 
 #::: If current version is less than what world is reporting, then download a new one...
 $current_version = 1;
+
 if($ARGV[0] eq "V"){
 	if($ARGV[1] > $current_version){ 
 		print "Retrieving latest database manifest...\n";
@@ -127,7 +129,7 @@ print "	Binary Database Version: (" . $bin_db_ver . ")\n";
 print "	Local Database Version: (" . $local_db_ver . ")\n\n";
 
 #::: If World ran this script, and our version is up to date, continue...
-if($bin_db_ver == $local_db_ver && $ARGV[0] eq "ran_from_world"){ 
+if($bin_db_ver <= $local_db_ver && $ARGV[0] eq "ran_from_world"){  
 	print "	Database up to Date: Continuing World Bootup...\n";
 	print "============================================================\n";
 	exit; 
@@ -167,6 +169,11 @@ sub ShowMenuPrompt {
 				next;
 			}
 			print MenuOptions(), '> ';
+			$menu_displayed++;
+			if($menu_displayed > 50){
+				print "Safety: Menu looping too many times, exiting...\n"; 
+				exit;
+			}
 		}
 
 		my $choice = <>;
@@ -188,7 +195,7 @@ sub ShowMenuPrompt {
 	}
 }
 
-sub MenuOptions { 
+sub MenuOptions {
 	if(@total_updates){ 
 		$option[3] = "Run pending REQUIRED updates... (" . scalar (@total_updates) . ")";
 	}
@@ -280,7 +287,7 @@ sub GetRemoteFile{
 	}
 	if($OS eq "Linux"){ 
 		#::: wget -O db_update/db_update_manifest.txt https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt
-		$wget = `wget --quiet -O $Dest_File $URL`;
+		$wget = `wget --no-check-certificate --quiet -O $Dest_File $URL`;
 		print "	URL:	" . $URL . "\n";
 		print "	Saved:	" . $Dest_File . " \n";
 		if($wget=~/unable to resolve/i){
