@@ -1033,75 +1033,20 @@ bool ZoneDatabase::GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* 
 	return true;
 }
 
-void ZoneDatabase::AssignGrid(Client *client, const glm::vec2& location, uint32 grid)
-{
-	int matches = 0, fuzzy = 0, spawn2id = 0;
-
-	// looks like most of the stuff in spawn2 is straight integers
-	// so let's try that first
-	std::string query = StringFormat("SELECT id, x, y FROM spawn2 WHERE zone = '%s' AND x = %i AND y = %i",
-									zone->GetShortName(), (int)location.x, (int)location.y);
+void ZoneDatabase::AssignGrid(Client *client, int grid, int spawn2id) {
+	std::string query = StringFormat("UPDATE spawn2 SET pathgrid = %d WHERE id = %d", grid, spawn2id);
 	auto results = QueryDatabase(query);
-	if(!results.Success()) {
+
+	if (!results.Success())
+		return;
+	
+	if (results.RowsAffected() != 1) {
 		return;
 	}
 
-// how much it's allowed to be off by
-#define _GASSIGN_TOLERANCE 1.0
-	if (results.RowCount() == 0) // try a fuzzy match if that didn't find it
-	{
-		query = StringFormat("SELECT id,x,y FROM spawn2 WHERE zone='%s' AND "
-							"ABS( ABS(x) - ABS(%f) ) < %f AND "
-							"ABS( ABS(y) - ABS(%f) ) < %f",
-							zone->GetShortName(), location.x, _GASSIGN_TOLERANCE, location.y, _GASSIGN_TOLERANCE);
-		results = QueryDatabase(query);
-		if (!results.Success()) {
-			return;
-		}
-
-		fuzzy = 1;
-		matches = results.RowCount();
-	}
-
-	if (matches == 0)
-	{
-		client->Message(0, "ERROR: Unable to assign grid - can't find it in spawn2");
-		return;
-	}
-
-	if(matches > 1)
-	{
-		client->Message(0, "ERROR: Unable to assign grid - multiple spawn2 rows match");
-		return;
-	}
-
-	auto row = results.begin();
-
-	spawn2id = atoi(row[0]);
-	glm::vec2 dbLocation = glm::vec2(atof(row[1]), atof(row[2]));
-
-	query = StringFormat("UPDATE spawn2 SET pathgrid = %d WHERE id = %d", grid, spawn2id);
-	results = QueryDatabase(query);
-	if (!results.Success()) {
-		return;
-	}
-
-	if (results.RowsAffected() != 1)
-	{
-		client->Message(0, "ERROR: found spawn2 id %d but the update query failed", spawn2id);
-		return;
-	}
-
-	if (!fuzzy)
-	{
-		client->Message(0, "Grid assign: spawn2 id = %d updated - exact match", spawn2id);
-		return;
-	}
-
-	float difference =
-		sqrtf(pow(std::abs(location.x - dbLocation.x), 2) + pow(std::abs(location.y - dbLocation.y), 2));
-	client->Message(0, "Grid assign: spawn2 id = %d updated - fuzzy match: deviation %f", spawn2id, difference);
+	client->Message(0, "Grid assign: spawn2 id = %d updated", spawn2id);
 }
+
 
 /******************
 * ModifyGrid - Either adds an empty grid, or removes a grid and all its waypoints, for a particular zone.
