@@ -13,7 +13,9 @@ $current_version = 2;
 
 if($ARGV[0] eq "V"){
 	if($ARGV[1] > $current_version){ 
-		print "Retrieving latest database manifest...\n";
+		print "db_update.pl Automatic Database Upgrade Needs updating...\n";
+		print "	Current version: " . $current_version . "\n"; 
+		print "	New version: " . $current_version . "\n";
 		GetRemoteFile("https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/db_update.pl", "db_update.pl");
 		exit;
 	}
