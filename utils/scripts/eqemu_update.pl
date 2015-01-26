@@ -14,7 +14,7 @@ if($Config{osname}=~/linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 
 #::: If current version is less than what world is reporting, then download a new one...
-$current_version = 1;
+$current_version = 2;
 
 if($ARGV[0] eq "V"){
 	if($ARGV[1] > $current_version){ 
