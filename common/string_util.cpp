@@ -44,26 +44,8 @@ const std::string vStringFormat(const char* format, va_list args)
 	int characters_used = vsnprintf(nullptr, 0, format, tmpargs);
 	va_end(tmpargs);
 
-	if (characters_used < 0) {
-		// Looks like we have an invalid format string.
-		// return empty string.
-		return "";
-	}
-	else if ((unsigned int)characters_used > output.capacity()) {
-		output.resize(characters_used + 1);
-		va_copy(tmpargs,args);
-		characters_used = vsnprintf(&output[0], output.capacity(), format, tmpargs);
-		va_end(tmpargs);
-		output.resize(characters_used);
-
-		if (characters_used < 0) {
-			// We shouldn't have a format error by this point, but I can't imagine what error we
-			// could have by this point. Still, return empty string;
-			return "";
-		}
-		return std::move(output);
-	} 
-	else {
+	// Looks like we have a valid format string.
+	if (characters_used > 0) {
 		output.resize(characters_used + 1);
 
 		va_copy(tmpargs,args);
@@ -72,13 +54,12 @@ const std::string vStringFormat(const char* format, va_list args)
 
 		output.resize(characters_used);
 
-		if (characters_used < 0) {
-			// We shouldn't have a format error by this point, but I can't imagine what error we
-			// could have by this point. Still, return empty string;
-			return "";
-		}
-		return std::move(output);
+		// We shouldn't have a format error by this point, but I can't imagine what error we
+		// could have by this point. Still, return empty string;
+		if (characters_used < 0)
+			output.clear();
 	}
+	return output;
 }
 
 const std::string StringFormat(const char* format, ...)
@@ -87,7 +68,7 @@ const std::string StringFormat(const char* format, ...)
 	va_start(args, format);
 	std::string output = vStringFormat(format,args);
 	va_end(args);
-	return std::move(output);
+	return output;
 }
 
 
