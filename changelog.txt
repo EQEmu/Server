@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/26/2015 ==
+Uleat: Changed Corpse::MoveItemToCorpse() to allow 'by address' passing of removed item slot list. Fixed a bug that would 'unattune' soulbound items inside of binds
+
 == 01/25/2015 ==
 Trevius: Fixed an issue where Mercenaries were causing several DB queries per second while suspended.
 Trevius: Added Logs::Mercenaries to the new Logging System.  Logging of Mercenary information is off by default with the required SQL.

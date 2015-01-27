@@ -320,52 +320,28 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 
 		// solar: TODO soulbound items need not be added to corpse, but they need
 		// to go into the regular slots on the player, out of bags
-
-		// possessions
-		// TODO: accomodate soul-bound items
 		std::list<uint32> removed_list;
-		//bool cursor = false;
-		for(i = MAIN_BEGIN; i < EmuConstants::MAP_POSSESSIONS_SIZE; i++) {
+		
+		for(i = MAIN_BEGIN; i < EmuConstants::MAP_POSSESSIONS_SIZE; ++i) {
 			if(i == MainAmmo && client->GetClientVersion() >= ClientVersion::SoF) {
 				item = client->GetInv().GetItem(MainPowerSource);
-				if((item && (!client->IsBecomeNPC())) || (item && client->IsBecomeNPC() && !item->GetItem()->NoRent)) {
-					std::list<uint32> slot_list = MoveItemToCorpse(client, item, MainPowerSource);
-					removed_list.merge(slot_list);
+				if (item != nullptr) {
+					if (!client->IsBecomeNPC() || (client->IsBecomeNPC() && !item->GetItem()->NoRent))
+						MoveItemToCorpse(client, item, MainPowerSource, removed_list);
 				}
-
 			}
 
 			item = client->GetInv().GetItem(i);
-			if((item && (!client->IsBecomeNPC())) || (item && client->IsBecomeNPC() && !item->GetItem()->NoRent)) {
-				std::list<uint32> slot_list = MoveItemToCorpse(client, item, i);
-				removed_list.merge(slot_list);
-			}
+			if (item == nullptr) { continue; }
+
+			if(!client->IsBecomeNPC() || (client->IsBecomeNPC() && !item->GetItem()->NoRent))
+				MoveItemToCorpse(client, item, i, removed_list);
 		}
-
-#if 0
-		// This will either be re-enabled or deleted at some point. The client doesn't appear
-		// to like to have items deleted from it's buffer..or, I just haven't figure out how -U
-		// (Besides, the 'corpse' slots equal the size of MapPossessions..not MapPossessions + MapCorpse)
-
-		// cursor queue // (change to first client that supports 'death hover' mode, if not SoF.)
-		if (!RuleB(Character, RespawnFromHover) || client->GetClientVersion() < EQClientSoF) {
-
-			// bumped starting assignment to 8001 because any in-memory 'slot 8000' item was moved above as 'slot 30'
-			// this was mainly for client profile state reflection..should match db player inventory entries now.
-			i = 8001;
-			for (auto it = client->GetInv().cursor_begin(); it != client->GetInv().cursor_end(); ++it, i++) {
-				item = *it;
-				if ((item && (!client->IsBecomeNPC())) || (item && client->IsBecomeNPC() && !item->GetItem()->NoRent)) {
-					std::list<uint32> slot_list = MoveItemToCorpse(client, item, i);
-					removed_list.merge(slot_list);
-					cursor = true;
-				}
-			}
-		}
-#endif
 
 		database.TransactionBegin();
-		if (removed_list.size() != 0) {
+
+		// I have an untested process that avoids this snarl up when all possessions inventory is removed..but this isn't broke -U
+		if (!removed_list.empty()) {
 			std::stringstream ss("");
 			ss << "DELETE FROM inventory WHERE charid=" << client->CharacterID();
 			ss << " AND (";
@@ -385,18 +361,6 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 			database.QueryDatabase(ss.str().c_str());
 		}
 
-#if 0
-		if (cursor) { // all cursor items should be on corpse (client < SoF or RespawnFromHover = false)
-			while (!client->GetInv().CursorEmpty())
-				client->DeleteItemInInventory(MainCursor, 0, false, false);
-		}
-		else { // only visible cursor made it to corpse (client >= Sof and RespawnFromHover = true)
-			std::list<ItemInst*>::const_iterator start = client->GetInv().cursor_begin();
-			std::list<ItemInst*>::const_iterator finish = client->GetInv().cursor_end();
-			database.SaveCursor(client->CharacterID(), start, finish);
-		}
-#endif
-
 		auto start = client->GetInv().cursor_begin();
 		auto finish = client->GetInv().cursor_end();
 		database.SaveCursor(client->CharacterID(), start, finish);
@@ -406,7 +370,12 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 
 		IsRezzed(false);
 		Save();
+
 		database.TransactionCommit();
+
+		UpdateEquipLightValue();
+		spell_light = NOT_USED;
+		UpdateActiveLightValue();
 
 		return;
 	} //end "not leaving naked corpses"
@@ -419,32 +388,49 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	Save();
 }
 
-std::list<uint32> Corpse::MoveItemToCorpse(Client *client, ItemInst *item, int16 equipslot)
+void Corpse::MoveItemToCorpse(Client *client, ItemInst *inst, int16 equipSlot, std::list<uint32> &removedList)
 {
-	int bagindex;
-	int16 interior_slot;
-	ItemInst *interior_item;
-	std::list<uint32> returnlist;
+	AddItem(
+		inst->GetItem()->ID,
+		inst->GetCharges(),
+		equipSlot,
+		inst->GetAugmentItemID(0),
+		inst->GetAugmentItemID(1),
+		inst->GetAugmentItemID(2),
+		inst->GetAugmentItemID(3),
+		inst->GetAugmentItemID(4),
+		inst->GetAugmentItemID(5),
+		inst->IsAttuned()
+		);
+	removedList.push_back(equipSlot);
 
-	AddItem(item->GetItem()->ID, item->GetCharges(), equipslot, item->GetAugmentItemID(0), item->GetAugmentItemID(1), item->GetAugmentItemID(2), item->GetAugmentItemID(3), item->GetAugmentItemID(4), item->GetAugmentItemID(5), item->IsAttuned());
-	returnlist.push_back(equipslot);
+	while (true) {
+		if (!inst->IsType(ItemClassContainer)) { break; }
+		if (equipSlot < EmuConstants::GENERAL_BEGIN || equipSlot > MainCursor) { break; }
 
-	// Qualified bag slot iterations. processing bag slots that don't exist is probably not a good idea.
-	if (item->IsType(ItemClassContainer) && ((equipslot >= EmuConstants::GENERAL_BEGIN && equipslot <= MainCursor))) {
-		for (bagindex = SUB_BEGIN; bagindex <= EmuConstants::ITEM_CONTAINER_SIZE; bagindex++) {
-			// For empty bags in cursor queue, slot was previously being resolved as SLOT_INVALID (-1)
-			interior_slot = Inventory::CalcSlotId(equipslot, bagindex);
-			interior_item = client->GetInv().GetItem(interior_slot);
+		for (auto sub_index = SUB_BEGIN; sub_index < EmuConstants::ITEM_CONTAINER_SIZE; ++sub_index) {
+			int16 real_bag_slot = Inventory::CalcSlotId(equipSlot, sub_index);
+			auto bag_inst = client->GetInv().GetItem(real_bag_slot);
+			if (bag_inst == nullptr) { continue; }
 
-			if (interior_item) {
-				AddItem(interior_item->GetItem()->ID, interior_item->GetCharges(), interior_slot, interior_item->GetAugmentItemID(0), interior_item->GetAugmentItemID(1), interior_item->GetAugmentItemID(2), interior_item->GetAugmentItemID(3), interior_item->GetAugmentItemID(4), interior_item->GetAugmentItemID(5), item->IsAttuned());
-				returnlist.push_back(Inventory::CalcSlotId(equipslot, bagindex));
-				client->DeleteItemInInventory(interior_slot, 0, true, false);
-			}
+			AddItem(
+				bag_inst->GetItem()->ID,
+				bag_inst->GetCharges(),
+				real_bag_slot,
+				bag_inst->GetAugmentItemID(0),
+				bag_inst->GetAugmentItemID(1),
+				bag_inst->GetAugmentItemID(2),
+				bag_inst->GetAugmentItemID(3),
+				bag_inst->GetAugmentItemID(4),
+				bag_inst->GetAugmentItemID(5),
+				bag_inst->IsAttuned()
+				);
+			removedList.push_back(real_bag_slot);
+			client->DeleteItemInInventory(real_bag_slot, 0, true, false);
 		}
+		break;
 	}
-	client->DeleteItemInInventory(equipslot, 0, true, false);
-	return returnlist;
+	client->DeleteItemInInventory(equipSlot, 0, true, false);
 }
 
 // To be called from LoadFromDBData

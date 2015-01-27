@@ -128,7 +128,7 @@ class Corpse : public Mob {
 	virtual void UpdateEquipLightValue();
 
 protected:
-	std::list<uint32> MoveItemToCorpse(Client *client, ItemInst *item, int16 equipslot);
+	void MoveItemToCorpse(Client *client, ItemInst *inst, int16 equipSlot, std::list<uint32> &removedList);
 
 private:
 	bool		is_player_corpse; /* Determines if Player Corpse or not */
