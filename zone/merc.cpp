@@ -4766,6 +4766,7 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 			npc_type->no_target_hotkey = 1;
 
 			Merc* merc = new Merc(npc_type, c->GetX(), c->GetY(), c->GetZ(), 0);
+			merc->GiveNPCTypeData(npc_type); // for clean up, works a bit like pets
 
 			if(merc)
 			{
