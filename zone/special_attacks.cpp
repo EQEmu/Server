@@ -999,7 +999,7 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const Ite
 		return;//Shouldn't reach this point, but just in case.
 
 	//Weapon Proc
-	if(!RangeWeapon && other && !other->HasDied())
+	if(RangeWeapon && other && !other->HasDied())
 		TryWeaponProc(RangeWeapon, other, MainRange);
 
 	//Ammo Proc

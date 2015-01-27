@@ -529,7 +529,7 @@ void Database::FlagInstanceByRaidLeader(uint32 zone, int16 version, uint32 chari
 
 void Database::GetCharactersInInstance(uint16 instance_id, std::list<uint32> &charid_list) {
 
-	std::string query = StringFormat("SELECT `charid` FROM `instance_list_playe`r WHERE `id` = %u", instance_id);
+	std::string query = StringFormat("SELECT `charid` FROM `instance_list_player` WHERE `id` = %u", instance_id);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())

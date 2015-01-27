@@ -323,6 +323,7 @@ void command_merchantcloseshop(Client *c, const Seperator *sep);
 void command_shownumhits(Client *c, const Seperator *sep);
 void command_tune(Client *c, const Seperator *sep);
 void command_logtest(Client *c, const Seperator *sep);
+void command_mysqltest(Client *c, const Seperator *sep);
 void command_logs(Client *c, const Seperator *sep);
  
 #ifdef EQPROFILE

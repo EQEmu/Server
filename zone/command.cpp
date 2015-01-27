@@ -282,6 +282,7 @@ int command_init(void) {
 		command_add("motd", "[new motd] - Set message of the day", 150, command_motd) ||
 		command_add("movechar", "[charname] [zonename] - Move charname to zonename", 50, command_movechar) ||
 		command_add("myskills", "- Show details about your current skill levels", 0, command_myskills) ||
+		command_add("mysqltest", "Akkadius MySQL Bench Test", 250, command_mysqltest) ||
 		command_add("mysql",  "Mysql CLI, see 'help' for options.",  250, command_mysql) ||
 		command_add("mystats", "- Show details about you or your pet", 50, command_mystats) ||
 		command_add("name", "[newname] - Rename your player target", 150, command_name) ||
@@ -428,7 +429,7 @@ int command_init(void) {
 		command_add("zsave", " - Saves zheader to the database", 80, command_zsave) ||
 		command_add("zsky", "[skytype] - Change zone sky type", 80, command_zsky) ||
 		command_add("zstats", "- Show info about zone header", 80, command_zstats) ||
-		command_add("zunderworld", "[zcoord] - Sets the underworld using zcoord", 80, command_zunderworld) ||
+		command_add("zunderworld", "[zcoord] - Sets the underworld using zcoord", 80, command_zunderworld) || 
 		command_add("zuwcoords", "[z coord] - Set underworld coord", 80, command_zuwcoords)
 		)
 	{
@@ -1778,10 +1779,12 @@ void command_itemtest(Client *c, const Seperator *sep)
 
 void command_gassign(Client *c, const Seperator *sep)
 {
-	if (sep->IsNumber(1) && c->GetTarget() && c->GetTarget()->IsNPC())
-		database.AssignGrid(c, glm::vec2(c->GetTarget()->CastToNPC()->m_SpawnPoint), atoi(sep->arg[1]));
+	if (sep->IsNumber(1) && c->GetTarget() && c->GetTarget()->IsNPC() && c->GetTarget()->CastToNPC()->GetSpawnPointID() > 0) {
+		int spawn2id = c->GetTarget()->CastToNPC()->GetSpawnPointID();
+		database.AssignGrid(c, atoi(sep->arg[1]), spawn2id);
+	}
 	else
-		c->Message(0,"Usage: #gassign [num] - must have an npc target!");
+		c->Message(0, "Usage: #gassign [num] - must have an npc target!");
 }
 
 void command_ai(Client *c, const Seperator *sep)
@@ -10540,4 +10543,18 @@ void command_logs(Client *c, const Seperator *sep){
 		c->Message(0, "--- #logs list_settings - Shows current log settings and categories loaded into the current process' memory");
 		c->Message(0, "--- #logs set [console|file|gmsay] <category_id> <debug_level (1-3)> - Sets log settings during the lifetime of the zone");
 	}
+}
+
+void command_mysqltest(Client *c, const Seperator *sep)
+{
+	clock_t t = std::clock(); /* Function timer start */
+	if (sep->IsNumber(1)){
+		uint32 i = 0;
+		t = std::clock();
+		for (i = 0; i < atoi(sep->arg[1]); i++){
+			std::string query = "SELECT * FROM `zone`";
+			auto results = database.QueryDatabase(query);
+		} 
+	}
+	Log.Out(Logs::General, Logs::Debug, "MySQL Test... Took %f seconds", ((float)(std::clock() - t)) / CLOCKS_PER_SEC); 
 }

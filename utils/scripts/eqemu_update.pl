@@ -1,22 +1,31 @@
 #!/usr/bin/perl
 
 ###########################################################
-#::: Automatic Database Upgrade Script
+#::: Automatic (Database) Upgrade Script
 #::: Author: Akkadius
 #::: Purpose: To upgrade databases with ease and maintain versioning
 ###########################################################
 
+$menu_displayed = 0;
+
+use Config;
+$console_output .= "	Operating System is: $Config{osname}\n";
+if($Config{osname}=~/linux/i){ $OS = "Linux"; }
+if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 
 #::: If current version is less than what world is reporting, then download a new one...
-$current_version = 1;
+$current_version = 2;
+
 if($ARGV[0] eq "V"){
 	if($ARGV[1] > $current_version){ 
-		print "Retrieving latest database manifest...\n";
-		GetRemoteFile("https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/db_update.pl", "db_update.pl");
+		print "eqemu_update.pl Automatic Database Upgrade Needs updating...\n";
+		print "	Current version: " . $current_version . "\n"; 
+		print "	New version: " . $ARGV[1] . "\n";  
+		GetRemoteFile("https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_update.pl", "eqemu_update.pl");
 		exit;
 	}
 	else{
-		print "No update necessary \n";
+		print "[Upgrade Script] No script update necessary \n";
 	}
 	exit;
 }
@@ -43,14 +52,9 @@ while(<F>) {
 
 $console_output = 
 "============================================================
-           EQEmu: Automatic Database Upgrade Check         
+           EQEmu: Automatic Upgrade Check         
 ============================================================
 ";
-
-use Config;
-$console_output .= "	Operating System is: $Config{osname}\n";
-if($Config{osname}=~/linux/i){ $OS = "Linux"; }
-if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 
 if($OS eq "Windows"){
 	$has_mysql_path = `echo %PATH%`;
@@ -127,7 +131,7 @@ print "	Binary Database Version: (" . $bin_db_ver . ")\n";
 print "	Local Database Version: (" . $local_db_ver . ")\n\n";
 
 #::: If World ran this script, and our version is up to date, continue...
-if($bin_db_ver == $local_db_ver && $ARGV[0] eq "ran_from_world"){ 
+if($bin_db_ver <= $local_db_ver && $ARGV[0] eq "ran_from_world"){  
 	print "	Database up to Date: Continuing World Bootup...\n";
 	print "============================================================\n";
 	exit; 
@@ -167,6 +171,11 @@ sub ShowMenuPrompt {
 				next;
 			}
 			print MenuOptions(), '> ';
+			$menu_displayed++;
+			if($menu_displayed > 50){
+				print "Safety: Menu looping too many times, exiting...\n"; 
+				exit;
+			}
 		}
 
 		my $choice = <>;
@@ -188,7 +197,7 @@ sub ShowMenuPrompt {
 	}
 }
 
-sub MenuOptions { 
+sub MenuOptions {
 	if(@total_updates){ 
 		$option[3] = "Run pending REQUIRED updates... (" . scalar (@total_updates) . ")";
 	}
@@ -280,7 +289,7 @@ sub GetRemoteFile{
 	}
 	if($OS eq "Linux"){ 
 		#::: wget -O db_update/db_update_manifest.txt https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt
-		$wget = `wget --quiet -O $Dest_File $URL`;
+		$wget = `wget --no-check-certificate --quiet -O $Dest_File $URL`;
 		print "	URL:	" . $URL . "\n";
 		print "	Saved:	" . $Dest_File . " \n";
 		if($wget=~/unable to resolve/i){
