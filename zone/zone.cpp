@@ -656,7 +656,7 @@ void Zone::LoadMercSpells(){
         merc_spells_list[classid].push_back(tempMercSpellEntry);
     }
 
-	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Loaded %i merc spells.", merc_spells_list[1].size() + merc_spells_list[2].size() + merc_spells_list[9].size() + merc_spells_list[12].size());
+	Log.Out(Logs::General, Logs::Mercenaries, "Loaded %i merc spells.", merc_spells_list[1].size() + merc_spells_list[2].size() + merc_spells_list[9].size() + merc_spells_list[12].size());
 
 }
 
