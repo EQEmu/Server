@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/27/2015 ==
+Trevius: Removed "Mercenary Debug:" from the Mercenary Log entries.
+Trevius: Resolved duplicate "You have no Mercenaries" messages when zoning without owning a Mercenary.
+Trevius: Mercenaries should now always be able to unsuspend if the timer is up.
+Trevius: More work on Mercenaries and Grouping to reduce bugs and redundant queries.
+
 == 01/26/2015 ==
 Uleat: Changed Corpse::MoveItemToCorpse() to allow 'by address' passing of removed item slot list. Fixed a bug that would 'unattune' soulbound items inside of binds
 
