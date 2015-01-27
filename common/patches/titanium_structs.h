@@ -1,5 +1,5 @@
-#ifndef Titanium_STRUCTS_H_
-#define Titanium_STRUCTS_H_
+#ifndef TITANIUM_STRUCTS_H_
+#define TITANIUM_STRUCTS_H_
 
 namespace Titanium {
 	namespace structs {
@@ -3332,4 +3332,4 @@ struct LFGuild_GuildToggle_Struct
 	};	//end namespace structs
 };	//end namespace Titanium
 
-#endif /*Titanium_STRUCTS_H_*/
+#endif /*TITANIUM_STRUCTS_H_*/

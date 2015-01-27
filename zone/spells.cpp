@@ -5248,7 +5248,7 @@ void Client::SendBuffDurationPacket(Buffs_Struct &buff)
 void Client::SendBuffNumHitPacket(Buffs_Struct &buff, int slot)
 {
 	// UF+ use this packet
-	if (GetClientVersion() < ClientVersion::Und)
+	if (GetClientVersion() < ClientVersion::UF)
 		return;
 	EQApplicationPacket *outapp;
 	outapp = new EQApplicationPacket(OP_BuffCreate, sizeof(BuffIcon_Struct) + sizeof(BuffIconEntry_Struct));

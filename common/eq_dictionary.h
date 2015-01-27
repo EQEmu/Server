@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "../common/patches/titanium_constants.h"
 #include "../common/patches/sof_constants.h"
 #include "../common/patches/sod_constants.h"
-#include "../common/patches/underfoot_constants.h"
+#include "../common/patches/uf_constants.h"
 #include "../common/patches/rof_constants.h"
 #include "../common/patches/rof2_constants.h"
 

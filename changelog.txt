@@ -1,7 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/27/2015 ==
+Uleat: Finished ClientVersion update to include patch file and namespace updates - don't forget to copy the renamed 'patch_UF.conf' into your eqemu directory.)
+
 == 01/26/2015 ==
-Uleat: Changed Corpse::MoveItemToCorpse() to allow 'by address' passing of removed item slot list. Fixed a bug that would 'unattune' soulbound items inside of binds
+Uleat: Changed Corpse::MoveItemToCorpse() to allow 'by address' passing of removed item slot list. Fixed a bug that kept soul-bound items inside of bags from attuning properly
 
 == 01/25/2015 ==
 Trevius: Fixed an issue where Mercenaries were causing several DB queries per second while suspended.
@@ -10,7 +13,7 @@ Trevius: Added Logs::Mercenaries to the new Logging System.  Logging of Mercenar
 == 01/24/2015 ==
 Uleat: Added equipment light source functionality to all mob derived classes (may still need tweaking...)
 Notes:
-	- In addition to equipment light sources, innate npc type light sources have already been activated
+	- In addition to equipment light sources, innate npc_type light sources have already been activated
 	- Valid light source values are 0 thru 15 (values are bitmask checked and limited to 0x0F)
 	- Not all classes handle equipment light sources the same way due to their equipment/loot list configurations
 	- Spell (casting?) light sources may be implemented at some point..more information is needed
@@ -21,7 +24,7 @@ Notes:
 Akkadius: Massive Log System overhaul, see: http://wiki.eqemulator.org/p?Logging_System_Overhaul&frm=Main
 	
 == 01/21/2015 ==
-Uleat: Added `light` field to npctypes load query (all six clients tested positive for functionality.)
+Uleat: Added `light` field to npc_types load query (all six clients tested positive for functionality.)
 Note: This only affects 'innate' light. Equipment (other) light is still in-work.
 Optional SQL: utils/sql/git/optional/2015_01_21_NPC_Types_Light_Field_Primer.sql
 

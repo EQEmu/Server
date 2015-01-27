@@ -25,12 +25,12 @@ namespace SoF
 	char* SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 depth);
 
 	// server to client inventory location converters
-	static inline uint32 ServerToSoFSlot(uint32 ServerSlot);
-	static inline uint32 ServerToSoFCorpseSlot(uint32 ServerCorpse);
+	static inline uint32 ServerToSoFSlot(uint32 serverSlot);
+	static inline uint32 ServerToSoFCorpseSlot(uint32 serverCorpseSlot);
 
 	// client to server inventory location converters
-	static inline uint32 SoFToServerSlot(uint32 SoFSlot);
-	static inline uint32 SoFToServerCorpseSlot(uint32 SoFCorpse);
+	static inline uint32 SoFToServerSlot(uint32 sofSlot);
+	static inline uint32 SoFToServerCorpseSlot(uint32 sofCorpseSlot);
 
 	// server to client text link converter
 	static inline void ServerToSoFTextLink(std::string& sofTextLink, const std::string& serverTextLink);
@@ -2580,7 +2580,7 @@ namespace SoF
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log.Out(Logs::General, Logs::Netcode, "[ERROR] Moved item from %u to %u", eq->from_slot, eq->to_slot);
+		Log.Out(Logs::General, Logs::Netcode, "[SoF] Moved item from %u to %u", eq->from_slot, eq->to_slot);
 
 		emu->from_slot = SoFToServerSlot(eq->from_slot);
 		emu->to_slot = SoFToServerSlot(eq->to_slot);
@@ -3281,56 +3281,56 @@ namespace SoF
 		return item_serial;
 	}
 
-	static inline uint32 ServerToSoFSlot(uint32 ServerSlot)
+	static inline uint32 ServerToSoFSlot(uint32 serverSlot)
 	{
 		uint32 SoFSlot = 0;
 
-		if (ServerSlot >= MainAmmo && ServerSlot <= 53) // Cursor/Ammo/Power Source and Normal Inventory Slots
-			SoFSlot = ServerSlot + 1;
-		else if (ServerSlot >= EmuConstants::GENERAL_BAGS_BEGIN && ServerSlot <= EmuConstants::CURSOR_BAG_END)
-			SoFSlot = ServerSlot + 11;
-		else if (ServerSlot >= EmuConstants::BANK_BAGS_BEGIN && ServerSlot <= EmuConstants::BANK_BAGS_END)
-			SoFSlot = ServerSlot + 1;
-		else if (ServerSlot >= EmuConstants::SHARED_BANK_BAGS_BEGIN && ServerSlot <= EmuConstants::SHARED_BANK_BAGS_END)
-			SoFSlot = ServerSlot + 1;
-		else if (ServerSlot == MainPowerSource)
+		if (serverSlot >= MainAmmo && serverSlot <= 53) // Cursor/Ammo/Power Source and Normal Inventory Slots
+			SoFSlot = serverSlot + 1;
+		else if (serverSlot >= EmuConstants::GENERAL_BAGS_BEGIN && serverSlot <= EmuConstants::CURSOR_BAG_END)
+			SoFSlot = serverSlot + 11;
+		else if (serverSlot >= EmuConstants::BANK_BAGS_BEGIN && serverSlot <= EmuConstants::BANK_BAGS_END)
+			SoFSlot = serverSlot + 1;
+		else if (serverSlot >= EmuConstants::SHARED_BANK_BAGS_BEGIN && serverSlot <= EmuConstants::SHARED_BANK_BAGS_END)
+			SoFSlot = serverSlot + 1;
+		else if (serverSlot == MainPowerSource)
 			SoFSlot = slots::MainPowerSource;
 		else
-			SoFSlot = ServerSlot;
+			SoFSlot = serverSlot;
 
 		return SoFSlot;
 	}
 
-	static inline uint32 ServerToSoFCorpseSlot(uint32 ServerCorpse)
+	static inline uint32 ServerToSoFCorpseSlot(uint32 serverCorpseSlot)
 	{
 		//uint32 SoFCorpse;
-		return (ServerCorpse + 1);
+		return (serverCorpseSlot + 1);
 	}
 
-	static inline uint32 SoFToServerSlot(uint32 SoFSlot)
+	static inline uint32 SoFToServerSlot(uint32 sofSlot)
 	{
 		uint32 ServerSlot = 0;
 
-		if (SoFSlot >= slots::MainAmmo && SoFSlot <= consts::CORPSE_END) // Cursor/Ammo/Power Source and Normal Inventory Slots
-			ServerSlot = SoFSlot - 1;
-		else if (SoFSlot >= consts::GENERAL_BAGS_BEGIN && SoFSlot <= consts::CURSOR_BAG_END)
-			ServerSlot = SoFSlot - 11;
-		else if (SoFSlot >= consts::BANK_BAGS_BEGIN && SoFSlot <= consts::BANK_BAGS_END)
-			ServerSlot = SoFSlot - 1;
-		else if (SoFSlot >= consts::SHARED_BANK_BAGS_BEGIN && SoFSlot <= consts::SHARED_BANK_BAGS_END)
-			ServerSlot = SoFSlot - 1;
-		else if (SoFSlot == slots::MainPowerSource)
+		if (sofSlot >= slots::MainAmmo && sofSlot <= consts::CORPSE_END) // Cursor/Ammo/Power Source and Normal Inventory Slots
+			ServerSlot = sofSlot - 1;
+		else if (sofSlot >= consts::GENERAL_BAGS_BEGIN && sofSlot <= consts::CURSOR_BAG_END)
+			ServerSlot = sofSlot - 11;
+		else if (sofSlot >= consts::BANK_BAGS_BEGIN && sofSlot <= consts::BANK_BAGS_END)
+			ServerSlot = sofSlot - 1;
+		else if (sofSlot >= consts::SHARED_BANK_BAGS_BEGIN && sofSlot <= consts::SHARED_BANK_BAGS_END)
+			ServerSlot = sofSlot - 1;
+		else if (sofSlot == slots::MainPowerSource)
 			ServerSlot = MainPowerSource;
 		else
-			ServerSlot = SoFSlot;
+			ServerSlot = sofSlot;
 
 		return ServerSlot;
 	}
 
-	static inline uint32 SoFToServerCorpseSlot(uint32 SoFCorpse)
+	static inline uint32 SoFToServerCorpseSlot(uint32 sofCorpseSlot)
 	{
 		//uint32 ServerCorpse;
-		return (SoFCorpse - 1);
+		return (sofCorpseSlot - 1);
 	}
 
 	static inline void ServerToSoFTextLink(std::string& sofTextLink, const std::string& serverTextLink)

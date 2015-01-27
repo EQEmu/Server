@@ -1,5 +1,5 @@
-#ifndef RoF2_STRUCTS_H_
-#define RoF2_STRUCTS_H_
+#ifndef ROF2_STRUCTS_H_
+#define ROF2_STRUCTS_H_
 
 namespace RoF2 {
 	namespace structs {
@@ -4881,4 +4881,4 @@ struct MercenaryMerchantResponse_Struct {
 	};	//end namespace structs
 };	//end namespace RoF2
 
-#endif /*RoF2_STRUCTS_H_*/
+#endif /*ROF2_STRUCTS_H_*/

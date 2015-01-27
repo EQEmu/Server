@@ -1,5 +1,5 @@
-#ifndef SoF_STRUCTS_H_
-#define SoF_STRUCTS_H_
+#ifndef SOF_STRUCTS_H_
+#define SOF_STRUCTS_H_
 
 namespace SoF {
 	namespace structs {
@@ -4118,4 +4118,4 @@ struct AltCurrencySellItem_Struct {
 	};	//end namespace structs
 };	//end namespace SoF
 
-#endif /*SoF_STRUCTS_H_*/
+#endif /*SOF_STRUCTS_H_*/

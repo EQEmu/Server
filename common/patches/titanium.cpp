@@ -23,12 +23,12 @@ namespace Titanium
 	char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint8 depth);
 
 	// server to client inventory location converters
-	static inline int16 ServerToTitaniumSlot(uint32 ServerSlot);
-	static inline int16 ServerToTitaniumCorpseSlot(uint32 ServerCorpse);
+	static inline int16 ServerToTitaniumSlot(uint32 serverSlot);
+	static inline int16 ServerToTitaniumCorpseSlot(uint32 serverCorpseSlot);
 
 	// client to server inventory location converters
-	static inline uint32 TitaniumToServerSlot(int16 TitaniumSlot);
-	static inline uint32 TitaniumToServerCorpseSlot(int16 TitaniumCorpse);
+	static inline uint32 TitaniumToServerSlot(int16 titaniumSlot);
+	static inline uint32 TitaniumToServerCorpseSlot(int16 titaniumCorpseSlot);
 
 	// server to client text link converter
 	static inline void ServerToTitaniumTextLink(std::string& titaniumTextLink, const std::string& serverTextLink);
@@ -113,7 +113,7 @@ namespace Titanium
 
 	const ClientVersion Strategy::GetClientVersion() const
 	{
-		return ClientVersion::Tit;
+		return ClientVersion::Titanium;
 	}
 
 #include "ss_define.h"
@@ -1774,7 +1774,7 @@ namespace Titanium
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log.Out(Logs::General, Logs::Netcode, "[ERROR] Moved item from %u to %u", eq->from_slot, eq->to_slot);
+		Log.Out(Logs::General, Logs::Netcode, "[Titanium] Moved item from %u to %u", eq->from_slot, eq->to_slot);
 
 		emu->from_slot = TitaniumToServerSlot(eq->from_slot);
 		emu->to_slot = TitaniumToServerSlot(eq->to_slot);
@@ -2062,34 +2062,34 @@ namespace Titanium
 		return serialization;
 	}
 
-	static inline int16 ServerToTitaniumSlot(uint32 ServerSlot)
+	static inline int16 ServerToTitaniumSlot(uint32 serverSlot)
 	{
 		//int16 TitaniumSlot;
-		if (ServerSlot == INVALID_INDEX)
+		if (serverSlot == INVALID_INDEX)
 			return INVALID_INDEX;
 
-		return ServerSlot; // deprecated
+		return serverSlot; // deprecated
 	}
 	
-	static inline int16 ServerToTitaniumCorpseSlot(uint32 ServerCorpse)
+	static inline int16 ServerToTitaniumCorpseSlot(uint32 serverCorpseSlot)
 	{
 		//int16 TitaniumCorpse;
-		return ServerCorpse;
+		return serverCorpseSlot;
 	}
 
-	static inline uint32 TitaniumToServerSlot(int16 TitaniumSlot)
+	static inline uint32 TitaniumToServerSlot(int16 titaniumSlot)
 	{
 		//uint32 ServerSlot;
-		if (TitaniumSlot == INVALID_INDEX)
+		if (titaniumSlot == INVALID_INDEX)
 			return INVALID_INDEX;
 
-		return TitaniumSlot; // deprecated
+		return titaniumSlot; // deprecated
 	}
 	
-	static inline uint32 TitaniumToServerCorpseSlot(int16 TitaniumCorpse)
+	static inline uint32 TitaniumToServerCorpseSlot(int16 titaniumCorpseSlot)
 	{
 		//uint32 ServerCorpse;
-		return TitaniumCorpse;
+		return titaniumCorpseSlot;
 	}
 
 	static inline void ServerToTitaniumTextLink(std::string& titaniumTextLink, const std::string& serverTextLink)

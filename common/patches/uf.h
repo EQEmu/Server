@@ -1,11 +1,11 @@
-#ifndef Underfoot_H_
-#define Underfoot_H_
+#ifndef UF_H_
+#define UF_H_
 
 #include "../struct_strategy.h"
 
 class EQStreamIdentifier;
 
-namespace Underfoot {
+namespace UF {
 
 	//these are the only public member of this namespace.
 	extern void Register(EQStreamIdentifier &into);
@@ -27,11 +27,9 @@ namespace Underfoot {
 
 		//magic macro to declare our opcode processors
 		#include "ss_declare.h"
-		#include "underfoot_ops.h"
+		#include "uf_ops.h"
 	};
 
 };
 
-
-
-#endif /*Underfoot_H_*/
+#endif /*UF_H_*/

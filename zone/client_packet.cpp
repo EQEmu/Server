@@ -848,7 +848,7 @@ void Client::CompleteConnect()
 	worldserver.SendPacket(pack);
 	delete pack;
 
-	if (IsClient() && CastToClient()->GetClientVersionBit() & BIT_UnderfootAndLater) {
+	if (IsClient() && CastToClient()->GetClientVersionBit() & BIT_UFAndLater) {
 		EQApplicationPacket *outapp = MakeBuffsPacket(false);
 		CastToClient()->FastQueuePacket(&outapp);
 	}
@@ -1864,7 +1864,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		safe_delete(outapp);
 	}
 
-	if (ClientVersionBit & BIT_UnderfootAndLater) {
+	if (ClientVersionBit & BIT_UFAndLater) {
 		outapp = new EQApplicationPacket(OP_XTargetResponse, 8);
 		outapp->WriteUInt32(GetMaxXTargets());
 		outapp->WriteUInt32(0);

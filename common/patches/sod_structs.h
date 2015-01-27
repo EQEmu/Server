@@ -1,5 +1,5 @@
-#ifndef SoD_STRUCTS_H_
-#define SoD_STRUCTS_H_
+#ifndef SOD_STRUCTS_H_
+#define SOD_STRUCTS_H_
 
 namespace SoD {
 	namespace structs {
@@ -4412,4 +4412,4 @@ struct MercenaryAssign_Struct {
 	};	//end namespace structs
 };	//end namespace SoD
 
-#endif /*SoD_STRUCTS_H_*/
+#endif /*SOD_STRUCTS_H_*/

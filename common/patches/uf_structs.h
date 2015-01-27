@@ -1,7 +1,7 @@
-#ifndef Underfoot_STRUCTS_H_
-#define Underfoot_STRUCTS_H_
+#ifndef UF_STRUCTS_H_
+#define UF_STRUCTS_H_
 
-namespace Underfoot {
+namespace UF {
 	namespace structs {
 
 
@@ -4531,6 +4531,6 @@ struct MercenaryAssign_Struct {
 };
 
 	};	//end namespace structs
-};	//end namespace Underfoot
+};	//end namespace UF
 
-#endif /*Underfoot_STRUCTS_H_*/
+#endif /*UF_STRUCTS_H_*/

@@ -845,7 +845,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 
 	char ConnectionType;
 
-	if(ClientVersionBit & BIT_UnderfootAndLater)
+	if(ClientVersionBit & BIT_UFAndLater)
 		ConnectionType = 'U';
 	else if(ClientVersionBit & BIT_SoFAndLater)
 		ConnectionType = 'S';

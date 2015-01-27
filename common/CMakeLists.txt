@@ -71,7 +71,7 @@ SET(common_sources
 	patches/rof.cpp
 	patches/rof2.cpp
 	patches/titanium.cpp
-	patches/underfoot.cpp
+	patches/uf.cpp
 	SocketLib/Base64.cpp
 	SocketLib/File.cpp
 	SocketLib/HttpdCookies.cpp
@@ -216,11 +216,11 @@ SET(common_headers
 	patches/titanium_itemfields.h
 	patches/titanium_ops.h
 	patches/titanium_structs.h
-	patches/underfoot.h
-	patches/underfoot_constants.h
-	patches/underfoot_itemfields.h
-	patches/underfoot_ops.h
-	patches/underfoot_structs.h
+	patches/uf.h
+	patches/uf_constants.h
+	patches/uf_itemfields.h
+	patches/uf_ops.h
+	patches/uf_structs.h
 	SocketLib/Base64.h
 	SocketLib/File.h
 	SocketLib/HttpdCookies.h
@@ -269,18 +269,18 @@ SOURCE_GROUP(Patches FILES
 	patches/titanium_ops.h
 	patches/titanium_constants.h
 	patches/titanium_structs.h
-	patches/underfoot.h
-	patches/underfoot_itemfields.h
-	patches/underfoot_ops.h
-	patches/underfoot_constants.h
-	patches/underfoot_structs.h
+	patches/uf.h
+	patches/uf_itemfields.h
+	patches/uf_ops.h
+	patches/uf_constants.h
+	patches/uf_structs.h
 	patches/patches.cpp
 	patches/sod.cpp
 	patches/sof.cpp
 	patches/rof.cpp
 	patches/rof2.cpp
 	patches/titanium.cpp
-	patches/underfoot.cpp
+	patches/uf.cpp
 )
 
 SOURCE_GROUP(SocketLib FILES
@@ -330,7 +330,7 @@ ADD_LIBRARY(common ${common_sources} ${common_headers})
 IF(UNIX)
 	ADD_DEFINITIONS(-fPIC)
 	SET_SOURCE_FILES_PROPERTIES("SocketLib/Mime.cpp" PROPERTY COMPILE_FLAGS -Wno-unused-result)
-	SET_SOURCE_FILES_PROPERTIES("patches/sod.cpp" "patches/sof.cpp" "patches/rof.cpp"  "patches/rof2.cpp" "patches/underfoot.cpp" PROPERTIES COMPILE_FLAGS -O0)
+	SET_SOURCE_FILES_PROPERTIES("patches/sod.cpp" "patches/sof.cpp" "patches/rof.cpp"  "patches/rof2.cpp" "patches/uf.cpp" PROPERTIES COMPILE_FLAGS -O0)
 ENDIF(UNIX)
 
 

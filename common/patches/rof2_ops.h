@@ -174,5 +174,6 @@ D(OP_WhoAllRequest)
 D(OP_ZoneChange)
 D(OP_ZoneEntry)
 // End RoF Encodes/Decodes
+
 #undef E
 #undef D

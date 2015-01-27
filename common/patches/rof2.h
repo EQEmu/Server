@@ -1,5 +1,5 @@
-#ifndef RoF2_H_
-#define RoF2_H_
+#ifndef ROF2_H_
+#define ROF2_H_
 
 #include "../struct_strategy.h"
 
@@ -32,6 +32,4 @@ namespace RoF2 {
 
 };
 
-
-
-#endif /*RoF2_H_*/
+#endif /*ROF2_H_*/

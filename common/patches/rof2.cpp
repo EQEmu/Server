@@ -25,14 +25,14 @@ namespace RoF2
 	char* SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 depth, ItemPacketType packet_type);
 
 	// server to client inventory location converters
-	static inline structs::ItemSlotStruct ServerToRoF2Slot(uint32 ServerSlot, ItemPacketType PacketType = ItemPacketInvalid);
-	static inline structs::MainInvItemSlotStruct ServerToRoF2MainInvSlot(uint32 ServerSlot);
-	static inline uint32 ServerToRoF2CorpseSlot(uint32 ServerCorpse);
+	static inline structs::ItemSlotStruct ServerToRoF2Slot(uint32 serverSlot, ItemPacketType PacketType = ItemPacketInvalid);
+	static inline structs::MainInvItemSlotStruct ServerToRoF2MainInvSlot(uint32 serverSlot);
+	static inline uint32 ServerToRoF2CorpseSlot(uint32 serverCorpseSlot);
 
 	// client to server inventory location converters
-	static inline uint32 RoF2ToServerSlot(structs::ItemSlotStruct RoF2Slot, ItemPacketType PacketType = ItemPacketInvalid);
-	static inline uint32 RoF2ToServerMainInvSlot(structs::MainInvItemSlotStruct RoF2Slot);
-	static inline uint32 RoF2ToServerCorpseSlot(uint32 RoF2Corpse);
+	static inline uint32 RoF2ToServerSlot(structs::ItemSlotStruct rof2Slot, ItemPacketType PacketType = ItemPacketInvalid);
+	static inline uint32 RoF2ToServerMainInvSlot(structs::MainInvItemSlotStruct rof2Slot);
+	static inline uint32 RoF2ToServerCorpseSlot(uint32 rof2CorpseSlot);
 
 	// server to client text link converter
 	static inline void ServerToRoF2TextLink(std::string& rof2TextLink, const std::string& serverTextLink);
@@ -4720,7 +4720,7 @@ namespace RoF2
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log.Out(Logs::General, Logs::Netcode, "[ERROR] MoveItem SlotType from %i to %i, MainSlot from %i to %i, SubSlot from %i to %i, AugSlot from %i to %i, Unknown01 from %i to %i, Number %u", eq->from_slot.SlotType, eq->to_slot.SlotType, eq->from_slot.MainSlot, eq->to_slot.MainSlot, eq->from_slot.SubSlot, eq->to_slot.SubSlot, eq->from_slot.AugSlot, eq->to_slot.AugSlot, eq->from_slot.Unknown01, eq->to_slot.Unknown01, eq->number_in_stack);
+		Log.Out(Logs::General, Logs::Netcode, "[RoF2] MoveItem SlotType from %i to %i, MainSlot from %i to %i, SubSlot from %i to %i, AugSlot from %i to %i, Unknown01 from %i to %i, Number %u", eq->from_slot.SlotType, eq->to_slot.SlotType, eq->from_slot.MainSlot, eq->to_slot.MainSlot, eq->from_slot.SubSlot, eq->to_slot.SubSlot, eq->from_slot.AugSlot, eq->to_slot.AugSlot, eq->from_slot.Unknown01, eq->to_slot.Unknown01, eq->number_in_stack);
 		emu->from_slot = RoF2ToServerSlot(eq->from_slot);
 		emu->to_slot = RoF2ToServerSlot(eq->to_slot);
 		IN(number_in_stack);
@@ -5589,7 +5589,7 @@ namespace RoF2
 		return item_serial;
 	}
 
-	static inline structs::ItemSlotStruct ServerToRoF2Slot(uint32 ServerSlot, ItemPacketType PacketType)
+	static inline structs::ItemSlotStruct ServerToRoF2Slot(uint32 serverSlot, ItemPacketType PacketType)
 	{
 		structs::ItemSlotStruct RoF2Slot;
 		RoF2Slot.SlotType = INVALID_INDEX;
@@ -5601,25 +5601,25 @@ namespace RoF2
 
 		uint32 TempSlot = 0;
 
-		if (ServerSlot < 56 || ServerSlot == MainPowerSource) { // Main Inventory and Cursor
+		if (serverSlot < 56 || serverSlot == MainPowerSource) { // Main Inventory and Cursor
 			if (PacketType == ItemPacketLoot)
 			{
 				RoF2Slot.SlotType = maps::MapCorpse;
-				RoF2Slot.MainSlot = ServerSlot - EmuConstants::CORPSE_BEGIN;
+				RoF2Slot.MainSlot = serverSlot - EmuConstants::CORPSE_BEGIN;
 			}
 			else
 			{
 				RoF2Slot.SlotType = maps::MapPossessions;
-				RoF2Slot.MainSlot = ServerSlot;
+				RoF2Slot.MainSlot = serverSlot;
 			}
 			
-			if (ServerSlot == MainPowerSource)
+			if (serverSlot == MainPowerSource)
 				RoF2Slot.MainSlot = slots::MainPowerSource;
 
-			else if (ServerSlot >= MainCursor && PacketType != ItemPacketLoot) // Cursor and Extended Corpse Inventory
+			else if (serverSlot >= MainCursor && PacketType != ItemPacketLoot) // Cursor and Extended Corpse Inventory
 				RoF2Slot.MainSlot += 3;
 
-			else if (ServerSlot >= MainAmmo) // (> 20)
+			else if (serverSlot >= MainAmmo) // (> 20)
 				RoF2Slot.MainSlot += 1;
 		}
 
@@ -5628,9 +5628,9 @@ namespace RoF2
 		RoF2Slot.MainSlot = ServerSlot - 31;
 		}*/
 
-		else if (ServerSlot >= EmuConstants::GENERAL_BAGS_BEGIN && ServerSlot <= EmuConstants::CURSOR_BAG_END) { // (> 250 && < 341)
+		else if (serverSlot >= EmuConstants::GENERAL_BAGS_BEGIN && serverSlot <= EmuConstants::CURSOR_BAG_END) { // (> 250 && < 341)
 			RoF2Slot.SlotType = maps::MapPossessions;
-			TempSlot = ServerSlot - 1;
+			TempSlot = serverSlot - 1;
 			RoF2Slot.MainSlot = int(TempSlot / EmuConstants::ITEM_CONTAINER_SIZE) - 2;
 			RoF2Slot.SubSlot = TempSlot - ((RoF2Slot.MainSlot + 2) * EmuConstants::ITEM_CONTAINER_SIZE);
 
@@ -5638,14 +5638,14 @@ namespace RoF2
 				RoF2Slot.MainSlot = slots::MainCursor;
 		}
 
-		else if (ServerSlot >= EmuConstants::TRIBUTE_BEGIN && ServerSlot <= EmuConstants::TRIBUTE_END) { // Tribute
+		else if (serverSlot >= EmuConstants::TRIBUTE_BEGIN && serverSlot <= EmuConstants::TRIBUTE_END) { // Tribute
 			RoF2Slot.SlotType = maps::MapTribute;
-			RoF2Slot.MainSlot = ServerSlot - EmuConstants::TRIBUTE_BEGIN;
+			RoF2Slot.MainSlot = serverSlot - EmuConstants::TRIBUTE_BEGIN;
 		}
 
-		else if (ServerSlot >= EmuConstants::BANK_BEGIN && ServerSlot <= EmuConstants::BANK_BAGS_END) {
+		else if (serverSlot >= EmuConstants::BANK_BEGIN && serverSlot <= EmuConstants::BANK_BAGS_END) {
 			RoF2Slot.SlotType = maps::MapBank;
-			TempSlot = ServerSlot - EmuConstants::BANK_BEGIN;
+			TempSlot = serverSlot - EmuConstants::BANK_BEGIN;
 			RoF2Slot.MainSlot = TempSlot;
 
 			if (TempSlot > 30) { // (> 30)
@@ -5654,9 +5654,9 @@ namespace RoF2
 			}
 		}
 
-		else if (ServerSlot >= EmuConstants::SHARED_BANK_BEGIN && ServerSlot <= EmuConstants::SHARED_BANK_BAGS_END) {
+		else if (serverSlot >= EmuConstants::SHARED_BANK_BEGIN && serverSlot <= EmuConstants::SHARED_BANK_BAGS_END) {
 			RoF2Slot.SlotType = maps::MapSharedBank;
-			TempSlot = ServerSlot - EmuConstants::SHARED_BANK_BEGIN;
+			TempSlot = serverSlot - EmuConstants::SHARED_BANK_BEGIN;
 			RoF2Slot.MainSlot = TempSlot;
 
 			if (TempSlot > 30) { // (> 30)
@@ -5665,9 +5665,9 @@ namespace RoF2
 			}
 		}
 
-		else if (ServerSlot >= EmuConstants::TRADE_BEGIN && ServerSlot <= EmuConstants::TRADE_BAGS_END) {
+		else if (serverSlot >= EmuConstants::TRADE_BEGIN && serverSlot <= EmuConstants::TRADE_BAGS_END) {
 			RoF2Slot.SlotType = maps::MapTrade;
-			TempSlot = ServerSlot - EmuConstants::TRADE_BEGIN;
+			TempSlot = serverSlot - EmuConstants::TRADE_BEGIN;
 			RoF2Slot.MainSlot = TempSlot;
 
 			if (TempSlot > 30) {
@@ -5689,18 +5689,18 @@ namespace RoF2
 			*/
 		}
 
-		else if (ServerSlot >= EmuConstants::WORLD_BEGIN && ServerSlot <= EmuConstants::WORLD_END) {
+		else if (serverSlot >= EmuConstants::WORLD_BEGIN && serverSlot <= EmuConstants::WORLD_END) {
 			RoF2Slot.SlotType = maps::MapWorld;
-			TempSlot = ServerSlot - EmuConstants::WORLD_BEGIN;
+			TempSlot = serverSlot - EmuConstants::WORLD_BEGIN;
 			RoF2Slot.MainSlot = TempSlot;
 		}
 
-		Log.Out(Logs::General, Logs::Netcode, "[ERROR] Convert Server Slot %i to RoF2 Slots: Type %i, Unk2 %i, Main %i, Sub %i, Aug %i, Unk1 %i", ServerSlot, RoF2Slot.SlotType, RoF2Slot.Unknown02, RoF2Slot.MainSlot, RoF2Slot.SubSlot, RoF2Slot.AugSlot, RoF2Slot.Unknown01);
+		Log.Out(Logs::General, Logs::Netcode, "[ERROR] Convert Server Slot %i to RoF2 Slots: Type %i, Unk2 %i, Main %i, Sub %i, Aug %i, Unk1 %i", serverSlot, RoF2Slot.SlotType, RoF2Slot.Unknown02, RoF2Slot.MainSlot, RoF2Slot.SubSlot, RoF2Slot.AugSlot, RoF2Slot.Unknown01);
 
 		return RoF2Slot;
 	}
 
-	static inline structs::MainInvItemSlotStruct ServerToRoF2MainInvSlot(uint32 ServerSlot)
+	static inline structs::MainInvItemSlotStruct ServerToRoF2MainInvSlot(uint32 serverSlot)
 	{
 		structs::MainInvItemSlotStruct RoF2Slot;
 		RoF2Slot.MainSlot = INVALID_INDEX;
@@ -5710,16 +5710,16 @@ namespace RoF2
 
 		uint32 TempSlot = 0;
 
-		if (ServerSlot < 56 || ServerSlot == MainPowerSource) { // (< 52)
-			RoF2Slot.MainSlot = ServerSlot;
+		if (serverSlot < 56 || serverSlot == MainPowerSource) { // (< 52)
+			RoF2Slot.MainSlot = serverSlot;
 
-			if (ServerSlot == MainPowerSource)
+			if (serverSlot == MainPowerSource)
 				RoF2Slot.MainSlot = slots::MainPowerSource;
 
-			else if (ServerSlot >= MainCursor) // Cursor and Extended Corpse Inventory
+			else if (serverSlot >= MainCursor) // Cursor and Extended Corpse Inventory
 				RoF2Slot.MainSlot += 3;
 
-			else if (ServerSlot >= MainAmmo) // Ammo and Personl Inventory
+			else if (serverSlot >= MainAmmo) // Ammo and Personl Inventory
 				RoF2Slot.MainSlot += 1;
 
 			/*else if (ServerSlot >= MainCursor) { // Cursor
@@ -5730,33 +5730,33 @@ namespace RoF2
 			}*/
 		}
 
-		else if (ServerSlot >= EmuConstants::GENERAL_BAGS_BEGIN && ServerSlot <= EmuConstants::CURSOR_BAG_END) {
-			TempSlot = ServerSlot - 1;
+		else if (serverSlot >= EmuConstants::GENERAL_BAGS_BEGIN && serverSlot <= EmuConstants::CURSOR_BAG_END) {
+			TempSlot = serverSlot - 1;
 			RoF2Slot.MainSlot = int(TempSlot / EmuConstants::ITEM_CONTAINER_SIZE) - 2;
 			RoF2Slot.SubSlot = TempSlot - ((RoF2Slot.MainSlot + 2) * EmuConstants::ITEM_CONTAINER_SIZE);
 		}
 
-		Log.Out(Logs::General, Logs::Netcode, "[ERROR] Convert Server Slot %i to RoF2 Slots: Main %i, Sub %i, Aug %i, Unk1 %i", ServerSlot, RoF2Slot.MainSlot, RoF2Slot.SubSlot, RoF2Slot.AugSlot, RoF2Slot.Unknown01);
+		Log.Out(Logs::General, Logs::Netcode, "[ERROR] Convert Server Slot %i to RoF2 Slots: Main %i, Sub %i, Aug %i, Unk1 %i", serverSlot, RoF2Slot.MainSlot, RoF2Slot.SubSlot, RoF2Slot.AugSlot, RoF2Slot.Unknown01);
 
 		return RoF2Slot;
 	}
 
-	static inline uint32 ServerToRoF2CorpseSlot(uint32 ServerCorpse)
+	static inline uint32 ServerToRoF2CorpseSlot(uint32 serverCorpseSlot)
 	{
-		return (ServerCorpse - EmuConstants::CORPSE_BEGIN + 1);
+		return (serverCorpseSlot - EmuConstants::CORPSE_BEGIN + 1);
 	}
 
-	static inline uint32 RoF2ToServerSlot(structs::ItemSlotStruct RoF2Slot, ItemPacketType PacketType)
+	static inline uint32 RoF2ToServerSlot(structs::ItemSlotStruct rof2Slot, ItemPacketType PacketType)
 	{
 		uint32 ServerSlot = INVALID_INDEX;
 		uint32 TempSlot = 0;
 
-		if (RoF2Slot.SlotType == maps::MapPossessions && RoF2Slot.MainSlot < 57) { // Worn/Personal Inventory and Cursor (< 51)
-			if (RoF2Slot.MainSlot == slots::MainPowerSource)
+		if (rof2Slot.SlotType == maps::MapPossessions && rof2Slot.MainSlot < 57) { // Worn/Personal Inventory and Cursor (< 51)
+			if (rof2Slot.MainSlot == slots::MainPowerSource)
 				TempSlot = MainPowerSource;
 
-			else if (RoF2Slot.MainSlot >= slots::MainCursor) // Cursor and Extended Corpse Inventory
-				TempSlot = RoF2Slot.MainSlot - 3;
+			else if (rof2Slot.MainSlot >= slots::MainCursor) // Cursor and Extended Corpse Inventory
+				TempSlot = rof2Slot.MainSlot - 3;
 
 			/*else if (RoF2Slot.MainSlot == slots::MainGeneral9 || RoF2Slot.MainSlot == slots::MainGeneral10) { // 9th and 10th RoF2 inventory/corpse slots
 			// Need to figure out what to do when we get these
@@ -5769,61 +5769,61 @@ namespace RoF2
 			// For now, it's probably best to leave as-is and let this work itself out in the inventory rework.
 			}*/
 
-			else if (RoF2Slot.MainSlot >= slots::MainAmmo) // Ammo and Main Inventory
-				TempSlot = RoF2Slot.MainSlot - 1;
+			else if (rof2Slot.MainSlot >= slots::MainAmmo) // Ammo and Main Inventory
+				TempSlot = rof2Slot.MainSlot - 1;
 
 			else // Worn Slots
-				TempSlot = RoF2Slot.MainSlot;
+				TempSlot = rof2Slot.MainSlot;
 
-			if (RoF2Slot.SubSlot >= SUB_BEGIN) // Bag Slots
-				TempSlot = ((TempSlot + 3) * EmuConstants::ITEM_CONTAINER_SIZE) + RoF2Slot.SubSlot + 1;
+			if (rof2Slot.SubSlot >= SUB_BEGIN) // Bag Slots
+				TempSlot = ((TempSlot + 3) * EmuConstants::ITEM_CONTAINER_SIZE) + rof2Slot.SubSlot + 1;
 
 			ServerSlot = TempSlot;
 		}
 
-		else if (RoF2Slot.SlotType == maps::MapBank) {
+		else if (rof2Slot.SlotType == maps::MapBank) {
 			TempSlot = EmuConstants::BANK_BEGIN;
 
-			if (RoF2Slot.SubSlot >= SUB_BEGIN)
-				TempSlot += ((RoF2Slot.MainSlot + 3) * EmuConstants::ITEM_CONTAINER_SIZE) + RoF2Slot.SubSlot + 1;
+			if (rof2Slot.SubSlot >= SUB_BEGIN)
+				TempSlot += ((rof2Slot.MainSlot + 3) * EmuConstants::ITEM_CONTAINER_SIZE) + rof2Slot.SubSlot + 1;
 
 			else
-				TempSlot += RoF2Slot.MainSlot;
+				TempSlot += rof2Slot.MainSlot;
 
 			ServerSlot = TempSlot;
 		}
 
-		else if (RoF2Slot.SlotType == maps::MapSharedBank) {
+		else if (rof2Slot.SlotType == maps::MapSharedBank) {
 			TempSlot = EmuConstants::SHARED_BANK_BEGIN;
 
-			if (RoF2Slot.SubSlot >= SUB_BEGIN)
-				TempSlot += ((RoF2Slot.MainSlot + 3) * EmuConstants::ITEM_CONTAINER_SIZE) + RoF2Slot.SubSlot + 1;
+			if (rof2Slot.SubSlot >= SUB_BEGIN)
+				TempSlot += ((rof2Slot.MainSlot + 3) * EmuConstants::ITEM_CONTAINER_SIZE) + rof2Slot.SubSlot + 1;
 
 			else
-				TempSlot += RoF2Slot.MainSlot;
+				TempSlot += rof2Slot.MainSlot;
 
 			ServerSlot = TempSlot;
 		}
 
-		else if (RoF2Slot.SlotType == maps::MapTrade) {
+		else if (rof2Slot.SlotType == maps::MapTrade) {
 			TempSlot = EmuConstants::TRADE_BEGIN;
 
-			if (RoF2Slot.SubSlot >= SUB_BEGIN)
-				TempSlot += ((RoF2Slot.MainSlot + 3) * EmuConstants::ITEM_CONTAINER_SIZE) + RoF2Slot.SubSlot + 1;
+			if (rof2Slot.SubSlot >= SUB_BEGIN)
+				TempSlot += ((rof2Slot.MainSlot + 3) * EmuConstants::ITEM_CONTAINER_SIZE) + rof2Slot.SubSlot + 1;
 			// OLD CODE:
 			//TempSlot += 100 + (RoF2Slot.MainSlot * EmuConstants::ITEM_CONTAINER_SIZE) + RoF2Slot.SubSlot;
 
 			else
-				TempSlot += RoF2Slot.MainSlot;
+				TempSlot += rof2Slot.MainSlot;
 
 			ServerSlot = TempSlot;
 		}
 
-		else if (RoF2Slot.SlotType == maps::MapWorld) {
+		else if (rof2Slot.SlotType == maps::MapWorld) {
 			TempSlot = EmuConstants::WORLD_BEGIN;
 
-			if (RoF2Slot.MainSlot >= SUB_BEGIN)
-				TempSlot += RoF2Slot.MainSlot;
+			if (rof2Slot.MainSlot >= SUB_BEGIN)
+				TempSlot += rof2Slot.MainSlot;
 
 			ServerSlot = TempSlot;
 		}
@@ -5837,30 +5837,30 @@ namespace RoF2
 		ServerSlot = TempSlot;
 		}*/
 
-		else if (RoF2Slot.SlotType == maps::MapGuildTribute) {
+		else if (rof2Slot.SlotType == maps::MapGuildTribute) {
 			ServerSlot = INVALID_INDEX;
 		}
 
-		else if (RoF2Slot.SlotType == maps::MapCorpse) {
-			ServerSlot = RoF2Slot.MainSlot + EmuConstants::CORPSE_BEGIN;
+		else if (rof2Slot.SlotType == maps::MapCorpse) {
+			ServerSlot = rof2Slot.MainSlot + EmuConstants::CORPSE_BEGIN;
 		}
 
-		Log.Out(Logs::General, Logs::Netcode, "[ERROR] Convert RoF2 Slots: Type %i, Unk2 %i, Main %i, Sub %i, Aug %i, Unk1 %i to Server Slot %i", RoF2Slot.SlotType, RoF2Slot.Unknown02, RoF2Slot.MainSlot, RoF2Slot.SubSlot, RoF2Slot.AugSlot, RoF2Slot.Unknown01, ServerSlot);
+		Log.Out(Logs::General, Logs::Netcode, "[ERROR] Convert RoF2 Slots: Type %i, Unk2 %i, Main %i, Sub %i, Aug %i, Unk1 %i to Server Slot %i", rof2Slot.SlotType, rof2Slot.Unknown02, rof2Slot.MainSlot, rof2Slot.SubSlot, rof2Slot.AugSlot, rof2Slot.Unknown01, ServerSlot);
 
 		return ServerSlot;
 	}
 
-	static inline uint32 RoF2ToServerMainInvSlot(structs::MainInvItemSlotStruct RoF2Slot)
+	static inline uint32 RoF2ToServerMainInvSlot(structs::MainInvItemSlotStruct rof2Slot)
 	{
 		uint32 ServerSlot = INVALID_INDEX;
 		uint32 TempSlot = 0;
 
-		if (RoF2Slot.MainSlot < 57) { // Worn/Personal Inventory and Cursor (< 33)
-			if (RoF2Slot.MainSlot == slots::MainPowerSource)
+		if (rof2Slot.MainSlot < 57) { // Worn/Personal Inventory and Cursor (< 33)
+			if (rof2Slot.MainSlot == slots::MainPowerSource)
 				TempSlot = MainPowerSource;
 
-			else if (RoF2Slot.MainSlot >= slots::MainCursor) // Cursor and Extended Corpse Inventory
-				TempSlot = RoF2Slot.MainSlot - 3;
+			else if (rof2Slot.MainSlot >= slots::MainCursor) // Cursor and Extended Corpse Inventory
+				TempSlot = rof2Slot.MainSlot - 3;
 
 			/*else if (RoF2Slot.MainSlot == slots::MainGeneral9 || RoF2Slot.MainSlot == slots::MainGeneral10) { // 9th and 10th RoF2 inventory slots
 			// Need to figure out what to do when we get these
@@ -5868,26 +5868,26 @@ namespace RoF2
 			// Same as above
 			}*/
 
-			else if (RoF2Slot.MainSlot >= slots::MainAmmo) // Main Inventory and Ammo Slots
-				TempSlot = RoF2Slot.MainSlot - 1;
+			else if (rof2Slot.MainSlot >= slots::MainAmmo) // Main Inventory and Ammo Slots
+				TempSlot = rof2Slot.MainSlot - 1;
 
 			else
-				TempSlot = RoF2Slot.MainSlot;
+				TempSlot = rof2Slot.MainSlot;
 
-			if (RoF2Slot.SubSlot >= SUB_BEGIN) // Bag Slots
-				TempSlot = ((TempSlot + 3) * EmuConstants::ITEM_CONTAINER_SIZE) + RoF2Slot.SubSlot + 1;
+			if (rof2Slot.SubSlot >= SUB_BEGIN) // Bag Slots
+				TempSlot = ((TempSlot + 3) * EmuConstants::ITEM_CONTAINER_SIZE) + rof2Slot.SubSlot + 1;
 
 			ServerSlot = TempSlot;
 		}
 
-		Log.Out(Logs::General, Logs::Netcode, "[ERROR] Convert RoF2 Slots: Main %i, Sub %i, Aug %i, Unk1 %i to Server Slot %i", RoF2Slot.MainSlot, RoF2Slot.SubSlot, RoF2Slot.AugSlot, RoF2Slot.Unknown01, ServerSlot);
+		Log.Out(Logs::General, Logs::Netcode, "[ERROR] Convert RoF2 Slots: Main %i, Sub %i, Aug %i, Unk1 %i to Server Slot %i", rof2Slot.MainSlot, rof2Slot.SubSlot, rof2Slot.AugSlot, rof2Slot.Unknown01, ServerSlot);
 
 		return ServerSlot;
 	}
 
-	static inline uint32 RoF2ToServerCorpseSlot(uint32 RoF2Corpse)
+	static inline uint32 RoF2ToServerCorpseSlot(uint32 rof2CorpseSlot)
 	{
-		return (RoF2Corpse + EmuConstants::CORPSE_BEGIN - 1); 
+		return (rof2CorpseSlot + EmuConstants::CORPSE_BEGIN - 1);
 	}
 
 	static inline void ServerToRoF2TextLink(std::string& rof2TextLink, const std::string& serverTextLink)
