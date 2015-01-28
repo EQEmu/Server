@@ -424,12 +424,12 @@ bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float 
 
 void Mob::AI_Init() {
 	pAIControlled = false;
-	AIthink_timer = 0;
-	AIwalking_timer = 0;
-	AImovement_timer = 0;
-	AItarget_check_timer = 0;
+	AIthink_timer = nullptr;
+	AIwalking_timer = nullptr;
+	AImovement_timer = nullptr;
+	AItarget_check_timer = nullptr;
 	AIfeignremember_timer = nullptr;
-	AIscanarea_timer = 0;
+	AIscanarea_timer = nullptr;
 	minLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMin);
 	maxLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMax);
 
@@ -444,7 +444,7 @@ void Mob::AI_Init() {
 void NPC::AI_Init() {
 	Mob::AI_Init();
 
-	AIautocastspell_timer = 0;
+	AIautocastspell_timer = nullptr;
 	casting_spell_AIindex = static_cast<uint8>(AIspells.size());
 
 	roambox_max_x = 0;
@@ -2657,7 +2657,7 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
 		npc_spells_cache = new DBnpcspells_Struct*[npc_spells_maxid+1];
 		npc_spells_loadtried = new bool[npc_spells_maxid+1];
 		for (uint32 i=0; i<=npc_spells_maxid; i++) {
-			npc_spells_cache[i] = 0;
+			npc_spells_cache[i] = nullptr;
 			npc_spells_loadtried[i] = false;
 		}
 	}
@@ -2795,7 +2795,7 @@ DBnpcspellseffects_Struct *ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEff
 		npc_spellseffects_cache = new DBnpcspellseffects_Struct *[npc_spellseffects_maxid + 1];
 		npc_spellseffects_loadtried = new bool[npc_spellseffects_maxid + 1];
 		for (uint32 i = 0; i <= npc_spellseffects_maxid; i++) {
-			npc_spellseffects_cache[i] = 0;
+			npc_spellseffects_cache[i] = nullptr;
 			npc_spellseffects_loadtried[i] = false;
 		}
 	}
