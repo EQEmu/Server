@@ -5,7 +5,7 @@
 #include "struct_strategy.h"
 
 
-EQStreamProxy::EQStreamProxy(EQStream *&stream, const StructStrategy *structs, OpcodeManager **opcodes)
+EQStreamProxy::EQStreamProxy(std::shared_ptr<EQStream> &stream, const StructStrategy *structs, OpcodeManager **opcodes)
 :	m_stream(stream),
 	m_structs(structs),
 	m_opcodes(opcodes)
@@ -15,7 +15,6 @@ EQStreamProxy::EQStreamProxy(EQStream *&stream, const StructStrategy *structs, O
 }
 
 EQStreamProxy::~EQStreamProxy() {
-	//delete m_stream;	//released by the stream factory.
 }
 
 std::string EQStreamProxy::Describe() const {
@@ -85,12 +84,6 @@ const uint32 EQStreamProxy::GetBytesRecvPerSecond() const
 
 void EQStreamProxy::ReleaseFromUse() {
 	m_stream->ReleaseFromUse();
-
-	//this is so ugly, but I cant think of a better way to deal with
-	//it right now...
-	if(!m_stream->IsInUse()) {
-		delete this;
-	}
 }
 
 void EQStreamProxy::RemoveData() {

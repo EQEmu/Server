@@ -102,6 +102,7 @@ Client::~Client() {
 	//let the stream factory know were done with this stream
 	eqs->Close();
 	eqs->ReleaseFromUse();
+	safe_delete(eqs);
 }
 
 void Client::SendLogServer()
