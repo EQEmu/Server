@@ -422,7 +422,8 @@ bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float 
 	return false;
 }
 
-void Mob::AI_Init() {
+void Mob::AI_Init()
+{
 	pAIControlled = false;
 	AIthink_timer = nullptr;
 	AIwalking_timer = nullptr;
@@ -441,9 +442,8 @@ void Mob::AI_Init() {
 	pDontCureMeBefore = 0;
 }
 
-void NPC::AI_Init() {
-	Mob::AI_Init();
-
+void NPC::AI_Init()
+{
 	AIautocastspell_timer = nullptr;
 	casting_spell_AIindex = static_cast<uint8>(AIspells.size());
 
@@ -458,8 +458,8 @@ void NPC::AI_Init() {
 	roambox_delay = 2500;
 }
 
-void Client::AI_Init() {
-	Mob::AI_Init();
+void Client::AI_Init()
+{
 	minLastFightingDelayMoving = CLIENT_LD_TIMEOUT;
 	maxLastFightingDelayMoving = CLIENT_LD_TIMEOUT;
 }

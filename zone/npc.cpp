@@ -250,8 +250,8 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 
 	npc_aggro = d->npc_aggro;
 
-	if(!IsMerc())
-		AI_Start();
+	AI_Init();
+	AI_Start();
 
 	d_melee_texture1 = d->d_melee_texture1;
 	d_melee_texture2 = d->d_melee_texture2;

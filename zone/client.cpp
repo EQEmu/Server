@@ -305,6 +305,8 @@ Client::Client(EQStreamInterface* ieqs)
 
 	active_light = innate_light;
 	spell_light = equip_light = NOT_USED;
+
+	AI_Init();
 }
 
 Client::~Client() {

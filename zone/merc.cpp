@@ -75,7 +75,6 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 	SetMana(GetMaxMana());
 	SetEndurance(GetMaxEndurance());
 
-	AI_Init();
 	AI_Start();
 }
 
@@ -1737,7 +1736,6 @@ void Merc::AI_Process() {
 }
 
 void Merc::AI_Start(int32 iMoveDelay) {
-	NPC::AI_Start(iMoveDelay);
 	if (!pAIControlled)
 		return;
 
