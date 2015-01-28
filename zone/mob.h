@@ -880,8 +880,8 @@ public:
 	virtual FACTION_VALUE GetReverseFactionCon(Mob* iOther) { return FACTION_INDIFFERENT; }
 
 	inline bool IsTrackable() const { return(trackable); }
-	const Timer* GetAIThinkTimer() { return AIthink_timer.get(); }
-	const Timer* GetAIMovementTimer() { return AImovement_timer.get(); }
+	Timer* GetAIThinkTimer() { return AIthink_timer.get(); }
+	Timer* GetAIMovementTimer() { return AImovement_timer.get(); }
 	Timer GetAttackTimer() { return attack_timer; }
 	Timer GetAttackDWTimer() { return attack_dw_timer; }
 	inline bool IsFindable() { return findable; }
