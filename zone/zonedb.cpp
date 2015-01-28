@@ -3413,38 +3413,40 @@ void ZoneDatabase::MarkCorpseAsRezzed(uint32 db_id) {
 
 uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const glm::vec4& position) {
 	/* Dump Basic Corpse Data */
-	std::string query = StringFormat("INSERT INTO `character_corpses` "
-                                    "SET `charname` = '%s', `zone_id` =	%u, `instance_id` =	%u, `charid` = %d,"
-                                    "`x` =	%1.1f, `y` = %1.1f, `z` = %1.1f, `heading` = %1.1f,"
-                                    "`time_of_death` = NOW(), `is_buried` =	0, `is_locked` = %d,"
-                                    "`exp` = %u, `size` = %f, `level` = %u, `race` = %u, `gender` = %u,"
-                                    "`class` = %u, `deity` = %u, `texture` = %u, `helm_texture` = %u,"
-                                    "`copper` = %u, `silver` = %u,`gold` = %u,`platinum` = %u,"
-                                    "`hair_color`  = %u, `beard_color` = %u, `eye_color_1` = %u,"
-                                    "`eye_color_2` = %u, `hair_style`  = %u, `face` = %u,"
-                                    "`beard` = %u, `drakkin_heritage` = %u, `drakkin_tattoo` = %u,"
-                                    "`drakkin_details` = %u, `wc_1` = %u, `wc_2` = %u,"
-                                    "`wc_3` = %u, `wc_4` = %u, `wc_5` = %u, `wc_6` = %u,"
-                                    "`wc_7` = %u,`wc_8` = %u,`wc_9`	= %u",
-                                    EscapeString(charname).c_str(), zoneid, instanceid, charid,
-                                    position.x, position.y, position.z, position.w,
-                                    dbpc->locked, dbpc->exp, dbpc->size, dbpc->level, dbpc->race,
-                                    dbpc->gender, dbpc->class_, dbpc->deity, dbpc->texture,
-                                    dbpc->helmtexture, dbpc->copper, dbpc->silver, dbpc->gold,
-                                    dbpc->plat, dbpc->haircolor, dbpc->beardcolor, dbpc->eyecolor1,
-                                    dbpc->eyecolor2, dbpc->hairstyle, dbpc->face, dbpc->beard,
-                                    dbpc->drakkin_heritage, dbpc->drakkin_tattoo, dbpc->drakkin_details,
-                                    dbpc->item_tint[0].color, dbpc->item_tint[1].color, dbpc->item_tint[2].color,
-                                    dbpc->item_tint[3].color, dbpc->item_tint[4].color, dbpc->item_tint[5].color,
-                                    dbpc->item_tint[6].color, dbpc->item_tint[7].color, dbpc->item_tint[8].color);
+	std::string query = StringFormat(
+		"INSERT INTO `character_corpses` "
+		"SET `charname` = '%s', `zone_id` =	%u, `instance_id` =	%u, `charid` = %d,"
+		"`x` =	%1.1f, `y` = %1.1f, `z` = %1.1f, `heading` = %1.1f,"
+		"`time_of_death` = NOW(), `is_buried` =	0, `is_locked` = %d,"
+		"`exp` = %u, `size` = %f, `level` = %u, `race` = %u, `gender` = %u,"
+		"`class` = %u, `deity` = %u, `texture` = %u, `helm_texture` = %u,"
+		"`copper` = %u, `silver` = %u,`gold` = %u,`platinum` = %u,"
+		"`hair_color`  = %u, `beard_color` = %u, `eye_color_1` = %u,"
+		"`eye_color_2` = %u, `hair_style`  = %u, `face` = %u,"
+		"`beard` = %u, `drakkin_heritage` = %u, `drakkin_tattoo` = %u,"
+		"`drakkin_details` = %u, `wc_1` = %u, `wc_2` = %u,"
+		"`wc_3` = %u, `wc_4` = %u, `wc_5` = %u, `wc_6` = %u,"
+		"`wc_7` = %u,`wc_8` = %u,`wc_9`	= %u",
+		EscapeString(charname).c_str(), zoneid, instanceid, charid,
+		position.x, position.y, position.z, position.w,
+		dbpc->locked, dbpc->exp, dbpc->size, dbpc->level, dbpc->race,
+		dbpc->gender, dbpc->class_, dbpc->deity, dbpc->texture,
+		dbpc->helmtexture, dbpc->copper, dbpc->silver, dbpc->gold,
+		dbpc->plat, dbpc->haircolor, dbpc->beardcolor, dbpc->eyecolor1,
+		dbpc->eyecolor2, dbpc->hairstyle, dbpc->face, dbpc->beard,
+		dbpc->drakkin_heritage, dbpc->drakkin_tattoo, dbpc->drakkin_details,
+		dbpc->item_tint[0].color, dbpc->item_tint[1].color, dbpc->item_tint[2].color,
+		dbpc->item_tint[3].color, dbpc->item_tint[4].color, dbpc->item_tint[5].color,
+		dbpc->item_tint[6].color, dbpc->item_tint[7].color, dbpc->item_tint[8].color);
 	auto results = QueryDatabase(query);
 	uint32 last_insert_id = results.LastInsertedID();
 
+	std::string corpse_items_query;
 	/* Dump Items from Inventory */
 	uint8 first_entry = 0;
 	for (unsigned int i = 0; i < dbpc->itemcount; i++) {
 		if (first_entry != 1){
-			query = StringFormat("REPLACE INTO `character_corpse_items` \n"
+			corpse_items_query = StringFormat("REPLACE INTO `character_corpse_items` \n"
 				" (corpse_id, equip_slot, item_id, charges, aug_1, aug_2, aug_3, aug_4, aug_5, aug_6, attuned) \n"
 				" VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
 				last_insert_id, 
@@ -3462,7 +3464,7 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 			first_entry = 1;
 		}
 		else{ 
-			query = query + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
+			corpse_items_query = corpse_items_query + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
 				last_insert_id,
 				dbpc->items[i].equip_slot,
 				dbpc->items[i].item_id,
@@ -3477,7 +3479,7 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 			);
 		}
 	}
-	auto sc_results = QueryDatabase(query);
+	QueryDatabase(corpse_items_query);
 	return last_insert_id;
 }
 
