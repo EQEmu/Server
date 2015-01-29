@@ -857,7 +857,7 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const Ite
 				if (IsClient()){
 
 					_RangeWeapon = CastToClient()->m_inv[MainRange];
-					if (_RangeWeapon && !_RangeWeapon->GetItem() && _RangeWeapon->GetItem()->ID == range_id)
+					if (_RangeWeapon && _RangeWeapon->GetItem() && _RangeWeapon->GetItem()->ID == range_id)
 						RangeWeapon = _RangeWeapon;					
 			
 					_Ammo = CastToClient()->m_inv[AmmoSlot];
@@ -996,7 +996,7 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const Ite
 	}
 
 	if (LaunchProjectile)
-		return;//Shouldn't reach this point, but just in case.
+		return;//Shouldn't reach this point durring initial launch phase, but just in case.
 
 	//Weapon Proc
 	if(RangeWeapon && other && !other->HasDied())
