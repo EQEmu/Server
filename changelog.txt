@@ -1,5 +1,18 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/28/2015 ==
+Akkadius: Added Logs::DebugQuest category per request from Trevius (Great idea)
+	- Exported quest::debug(log_message, [debug_level = 1)
+	- Example:
+		quest::debug("This is a test debug message, level 1 (default)");
+		quest::debug("This is a test debug message, level 1", 1);
+		quest::debug("This is a test debug message, level 2", 2);
+		quest::debug("This is a test debug message, level 3", 3);
+		
+		Result: http://i.imgur.com/6VoafGE.png
+	- Uses traditional logging system to output this category
+	- Required MySQL Source in Database version 9070
+
 == 01/27/2015 ==
 Trevius: Removed "Mercenary Debug:" from the Mercenary Log entries.
 Trevius: Resolved duplicate "You have no Mercenaries" messages when zoning without owning a Mercenary.

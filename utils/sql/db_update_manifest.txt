@@ -323,6 +323,7 @@
 9067|2015_01_21_npc_types_update.sql|SHOW COLUMNS FROM `npc_types` LIKE 'light'|empty|
 9068|2015_01_15_logsys_categories_table.sql|SHOW TABLES LIKE 'logsys_categories'|empty|
 9069|2015_01_25_logsys_Mercenaries_category.sql|SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Mercenaries'|empty|
+9070|2015_01_28_quest_debug_log_category.sql|SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Quest Debug'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not 
