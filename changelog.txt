@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/29/2015 ==
+Trevius: Added more information to Mercenary Logging.
+Trevius: Added potential fix for Mercenaries that fail to unsuspend.
+Trevius: Added a new "statscale" field to the merc_stats table that can be used to quickly balance Mercenary Stats based on Level.
+Trevius: The new "statscale" field now combines with the Mercs::ScaleRate rule value (default 100 percent for both).
+
 == 01/28/2015 ==
 Akkadius: Added Logs::DebugQuest category per request from Trevius (Great idea)
 	- Exported quest::debug(log_message, [debug_level = 1)

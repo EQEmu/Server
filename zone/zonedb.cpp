@@ -1996,6 +1996,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 		"m_stats.AC, "
 		"m_stats.ATK, "
 		"m_stats.Accuracy, "
+		"m_stats.statscale, "
 		"m_stats.spellscale, "
 		"m_stats.healscale "
 		"FROM merc_stats m_stats "
@@ -2119,9 +2120,9 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
         tmpNPCType->AC = atoi(row[40]);
         tmpNPCType->ATK = atoi(row[41]);
         tmpNPCType->accuracy_rating = atoi(row[42]);
-        tmpNPCType->scalerate = RuleI(Mercs, ScaleRate);
-        tmpNPCType->spellscale = atoi(row[43]);
-        tmpNPCType->healscale = atoi(row[44]);
+		tmpNPCType->scalerate = atoi(row[43]);
+        tmpNPCType->spellscale = atoi(row[44]);
+        tmpNPCType->healscale = atoi(row[45]);
 
         // If Merc with duplicate NPC id already in table,
         // free item we attempted to add.

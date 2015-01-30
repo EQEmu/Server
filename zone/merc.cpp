@@ -2242,7 +2242,7 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 									if(CheckAETaunt()) {
 										//get AE taunt
 										selectedMercSpell = GetBestMercSpellForAETaunt(this);
-										Log.Out(Logs::General, Logs::Mercenaries, "AE Taunting");
+										Log.Out(Logs::General, Logs::Mercenaries, "%s AE Taunting.", GetName());
 									}
 
 									if(selectedMercSpell.spellid == 0 && CheckTaunt()) {
@@ -4770,7 +4770,7 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 			{
 				merc->SetMercData( merc_template->MercTemplateID );
 				database.LoadMercEquipment(merc);
-				merc->UpdateMercStats(c);
+				merc->UpdateMercStats(c, true);
 
 				if(updateFromDB)
 				{
@@ -4808,6 +4808,7 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 				merc->LoadMercSpells();
 			}
 
+			Log.Out(Logs::General, Logs::Mercenaries, "LoadMerc Successful for %s (%s).", merc->GetName(), c->GetName());
 			return merc;
 		}
 	}
@@ -4836,48 +4837,181 @@ void Merc::UpdateMercInfo(Client *c) {
 	c->GetMercInfo().drakkinDetails = drakkin_details;
 }
 
-void Merc::UpdateMercStats(Client *c) {
-	if(c->GetMercInfo().MercTemplateID >0)
+void Merc::UpdateMercStats(Client *c, bool setmax) {
+	if(c->GetMercInfo().MercTemplateID > 0)
 	{
+		Log.Out(Logs::General, Logs::Mercenaries, "Updating Mercenary Stats for %s (%s).", GetName(), c->GetName());
 		const NPCType* npc_type = database.GetMercType( zone->GetMercTemplate(c->GetMercInfo().MercTemplateID)->MercNPCID, GetRace(), c->GetLevel());
 		if (npc_type)
 		{
-			max_hp = (npc_type->max_hp * npc_type->scalerate) / 100;
-			base_hp = (npc_type->max_hp * npc_type->scalerate) / 100;
-			max_mana = (npc_type->Mana * npc_type->scalerate) / 100;
-			base_mana = (npc_type->Mana * npc_type->scalerate) / 100;
-			hp_regen = (npc_type->hp_regen * npc_type->scalerate) / 100;
-			mana_regen = (npc_type->mana_regen * npc_type->scalerate) / 100;
+			max_hp = npc_type->max_hp;
+			base_hp = npc_type->max_hp;
+			max_mana = npc_type->Mana;
+			base_mana = npc_type->Mana;
+			max_end = npc_type->max_hp; // Hack since Endurance does not exist for NPCType yet
+			base_end = npc_type->max_hp; // Hack since Endurance does not exist for NPCType yet
+			hp_regen = npc_type->hp_regen;
+			mana_regen = npc_type->mana_regen;
+			max_dmg = npc_type->max_dmg;
+			min_dmg = npc_type->min_dmg;
+
+			_baseAC = npc_type->AC;
+			_baseATK = npc_type->ATK;
+			_baseSTR = npc_type->STR;
+			_baseSTA = npc_type->STA;
+			_baseDEX = npc_type->DEX;
+			_baseAGI = npc_type->AGI;
+			_baseWIS = npc_type->WIS;
+			_baseINT = npc_type->INT;
+			_baseCHA = npc_type->CHA;
+			_baseATK = npc_type->ATK;
+			_baseMR = npc_type->MR;
+			_baseFR = npc_type->FR;
+			_baseDR = npc_type->DR;
+			_basePR = npc_type->PR;
+			_baseCR = npc_type->CR;
+			_baseCorrup = npc_type->Corrup;
+			
+			uint32 scalepercent = (int)(npc_type->scalerate * RuleI(Mercs, ScaleRate) / 100);
+			
+			ScaleStats(scalepercent, setmax);
+
 			level = npc_type->level;
-			max_dmg = (npc_type->max_dmg * npc_type->scalerate) / 100;
-			min_dmg = (npc_type->min_dmg * npc_type->scalerate) / 100;
-			_baseSTR = (npc_type->STR * npc_type->scalerate) / 100;
-			_baseSTA = (npc_type->STA * npc_type->scalerate) / 100;
-			_baseDEX = (npc_type->DEX * npc_type->scalerate) / 100;
-			_baseAGI = (npc_type->AGI * npc_type->scalerate) / 100;
-			_baseWIS = (npc_type->WIS * npc_type->scalerate) / 100;
-			_baseINT = (npc_type->INT * npc_type->scalerate) / 100;
-			_baseCHA = (npc_type->CHA * npc_type->scalerate) / 100;
-			_baseATK = (npc_type->ATK * npc_type->scalerate) / 100;
-			_baseMR = (npc_type->MR * npc_type->scalerate) / 100;
-			_baseFR = (npc_type->FR * npc_type->scalerate) / 100;
-			_baseDR = (npc_type->DR * npc_type->scalerate) / 100;
-			_basePR = (npc_type->PR * npc_type->scalerate) / 100;
-			_baseCR = (npc_type->CR * npc_type->scalerate) / 100;
-			_baseCorrup = (npc_type->Corrup * npc_type->scalerate) / 100;
-			_baseAC = (npc_type->AC * npc_type->scalerate) / 100;
-			attack_speed = npc_type->attack_speed;
 			attack_count = npc_type->attack_count;
+			attack_speed = npc_type->attack_speed;
 			spellscale = npc_type->spellscale;
 			healscale = npc_type->healscale;
 
 			CalcBonuses();
-
-			CalcMaxEndurance();
 			CalcMaxHP();
 			CalcMaxMana();
+			CalcMaxEndurance();
 		}
 	}
+}
+
+void Merc::ScaleStats(int scalepercent, bool setmax) {
+
+	Log.Out(Logs::General, Logs::Mercenaries, "Scaling Mercenary Stats to %d Percent for %s.", scalepercent, GetName());
+
+	if (scalepercent <= 0)
+		return;
+
+	float scalerate = (float)scalepercent / 100.0f;
+
+	if ((int)((float)base_hp * scalerate) > 1)
+	{
+		max_hp = (int)((float)base_hp * scalerate);
+		base_hp = max_hp;
+		if (setmax)
+			cur_hp = max_hp;
+	}
+
+	if (base_mana)
+	{
+		max_mana = (int)((float)base_mana * scalerate);
+		base_mana = max_mana;
+		if (setmax)
+			cur_mana = max_mana;
+	}
+
+	if (base_end)
+	{
+		max_end = (int)((float)base_end * scalerate);
+		base_end = max_end;
+		if (setmax)
+			cur_end = max_end;
+	}
+
+	if (_baseAC)
+	{
+		AC = (int)((float)_baseAC * scalerate);
+		_baseAC = AC;
+	}
+
+	if (_baseATK)
+	{
+		ATK = (int)((float)_baseATK * scalerate);
+		_baseATK = ATK;
+	}
+
+	if (_baseSTR)
+	{
+		STR = (int)((float)_baseSTR * scalerate);
+		_baseSTR = STR;
+	}
+	if (_baseSTA)
+	{
+		STA = (int)((float)_baseSTA * scalerate);
+		_baseSTA = STA;
+	}
+	if (_baseAGI)
+	{
+		AGI = (int)((float)_baseAGI * scalerate);
+		_baseAGI = AGI;
+	}
+	if (_baseDEX)
+	{
+		DEX = (int)((float)_baseDEX * scalerate);
+		_baseDEX = DEX;
+	}
+	if (_baseINT)
+	{
+		INT = (int)((float)_baseINT * scalerate);
+		_baseINT = INT;
+	}
+	if (_baseWIS)
+	{
+		WIS = (int)((float)_baseWIS * scalerate);
+		_baseWIS = WIS;
+	}
+	if (_baseCHA)
+	{
+		CHA = (int)((float)_baseCHA * scalerate);
+		_baseCHA = CHA;
+	}
+
+	if (_baseMR)
+	{
+		MR = (int)((float)_baseMR * scalerate);
+		_baseMR = MR;
+	}
+	if (_baseCR)
+	{
+		CR = (int)((float)_baseCR * scalerate);
+		_baseCR = CR;
+	}
+	if (_baseDR)
+	{
+		DR = (int)((float)_baseDR * scalerate);
+		_baseDR = DR;
+	}
+	if (_baseFR)
+	{
+		FR = (int)((float)_baseFR * scalerate);
+		_baseFR = FR;
+	}
+	if (_basePR)
+	{
+		PR = (int)((float)_basePR * scalerate);
+		_basePR = PR;
+	}
+	if (_baseCorrup)
+	{
+		Corrup = (int)((float)_baseCorrup * scalerate);
+		_baseCorrup = Corrup;
+	}
+
+	if (max_dmg)
+	{
+		max_dmg = (int)((float)max_dmg * scalerate);
+	}
+	if (min_dmg)
+	{
+		min_dmg = (int)((float)min_dmg * scalerate);
+	}
+
+	return;
 }
 
 void Merc::UpdateMercAppearance() {
@@ -4937,7 +5071,7 @@ bool Merc::Spawn(Client *owner) {
 
 	SendPosition();
 
-	Log.Out(Logs::General, Logs::Mercenaries, "Spawn Mercenary.");
+	Log.Out(Logs::General, Logs::Mercenaries, "Spawn Mercenary %s.", GetName());
 
 	//UpdateMercAppearance();
 
@@ -5083,7 +5217,8 @@ void Client::SendMercResponsePackets(uint32 ResponseType)
 		SendMercMerchantResponsePacket(3);
 		break;
 	}
-	Log.Out(Logs::General, Logs::Mercenaries, "SendMercResponsePackets %i.", ResponseType);
+	Log.Out(Logs::General, Logs::Mercenaries, "SendMercResponsePackets %i for %s.", ResponseType, GetName());
+
 }
 
 void Client::UpdateMercTimer()
@@ -5124,7 +5259,7 @@ void Client::UpdateMercTimer()
 				SendMercResponsePackets(16);
 			}
 
-			Log.Out(Logs::General, Logs::Mercenaries, "UpdateMercTimer Complete.");
+			Log.Out(Logs::General, Logs::Mercenaries, "UpdateMercTimer Complete for %s.", GetName());
 
 			// Normal upkeep charge message
 			//Message(7, "You have been charged a mercenary upkeep cost of %i plat, and %i gold and your mercenary upkeep cost timer has been reset to 15 minutes.", upkeep_plat, upkeep_gold, (int)(RuleI(Mercs, UpkeepIntervalMS) / 1000 / 60));
@@ -5177,7 +5312,7 @@ bool Client::CheckCanHireMerc(Mob* merchant, uint32 template_id) {
 		}
 	}
 
-	Log.Out(Logs::General, Logs::Mercenaries, "CheckCanHireMerc True.");
+	Log.Out(Logs::General, Logs::Mercenaries, "CheckCanHireMerc True for %s.", GetName());
 
 	return true;
 }
@@ -5250,7 +5385,7 @@ bool Client::CheckCanSpawnMerc(uint32 template_id) {
 		return false;
 	}
 
-	Log.Out(Logs::General, Logs::Mercenaries, "CheckCanSpawnMerc True.");
+	Log.Out(Logs::General, Logs::Mercenaries, "CheckCanSpawnMerc True for %s.", GetName());
 
 	return true;
 }
@@ -5272,7 +5407,7 @@ bool Client::CheckCanUnsuspendMerc() {
 		return false;
 	}
 
-	Log.Out(Logs::General, Logs::Mercenaries, "CheckCanUnsuspendMerc True.");
+	Log.Out(Logs::General, Logs::Mercenaries, "CheckCanUnsuspendMerc True for %s.", GetName());
 
 	return true;
 }
@@ -5287,7 +5422,7 @@ void Client::CheckMercSuspendTimer() {
 			GetMercInfo().SuspendedTime = 0;
 			SendMercResponsePackets(0);
 			SendMercSuspendResponsePacket(GetMercInfo().SuspendedTime);
-			Log.Out(Logs::General, Logs::Mercenaries, "CheckMercSuspendTimer Ready.");
+			Log.Out(Logs::General, Logs::Mercenaries, "CheckMercSuspendTimer Ready for %s.", GetName());
 		}
 	}
 }
@@ -5300,7 +5435,7 @@ void Client::SuspendMercCommand() {
 		{
 			if(!CheckCanUnsuspendMerc())
 			{
-				Log.Out(Logs::General, Logs::Mercenaries, "SuspendMercCommand Unable to Unsuspend.");
+				Log.Out(Logs::General, Logs::Mercenaries, "SuspendMercCommand Unable to Unsuspend Merc for %s.", GetName());
 
 				return;
 			}
@@ -5310,13 +5445,13 @@ void Client::SuspendMercCommand() {
 			if(merc)
 			{
 				SpawnMerc(merc, true);
-				Log.Out(Logs::General, Logs::Mercenaries, "SuspendMercCommand Successful Unsuspend.");
+				Log.Out(Logs::General, Logs::Mercenaries, "SuspendMercCommand Successful Unsuspend for %s.", GetName());
 			}
 			else
 			{
 				//merc failed to spawn
 				SendMercResponsePackets(3);
-				Log.Out(Logs::General, Logs::Mercenaries, "SuspendMercCommand Failed to Spawn Merc.");
+				Log.Out(Logs::General, Logs::Mercenaries, "SuspendMercCommand Failed to Spawn Merc for %s.", GetName());
 			}
 		}
 		else
@@ -5326,10 +5461,11 @@ void Client::SuspendMercCommand() {
 			if(CurrentMerc && GetMercID())
 			{
 				CurrentMerc->Suspend();
-				Log.Out(Logs::General, Logs::Mercenaries, "SuspendMercCommand Successful Suspend.");
+				Log.Out(Logs::General, Logs::Mercenaries, "SuspendMercCommand Successful Suspend for %s.", GetName());
 			}
 			else
 			{
+				// Reset Merc Suspend State
 				GetMercInfo().IsSuspended = true;
 				//GetMercInfo().SuspendedTime = time(nullptr) + RuleI(Mercs, SuspendIntervalS);
 				//GetMercInfo().MercTimerRemaining = GetMercTimer()->GetRemainingTime();
@@ -5337,8 +5473,14 @@ void Client::SuspendMercCommand() {
 				GetMercTimer()->Disable();
 				SendMercSuspendResponsePacket(GetMercInfo().SuspendedTime);
 				SendMercTimer(nullptr);
+				Log.Out(Logs::General, Logs::Mercenaries, "SuspendMercCommand Failed to Get Merc to Suspend. Resetting Suspend State for %s.", GetName());
 			}
 		}
+	}
+	else
+	{
+		SpawnMercOnZone();
+		Log.Out(Logs::General, Logs::Mercenaries, "SuspendMercCommand Request Failed to Load Merc for %s.  Trying SpawnMercOnZone.", GetName());
 	}
 }
 
@@ -5371,7 +5513,7 @@ void Client::SpawnMercOnZone() {
 			{
 				SpawnMerc(merc, false);
 			}
-			Log.Out(Logs::General, Logs::Mercenaries, "SpawnMercOnZone Normal Merc.");
+			Log.Out(Logs::General, Logs::Mercenaries, "SpawnMercOnZone Normal Merc for %s.", GetName());
 		}
 		else
 		{
@@ -5387,7 +5529,7 @@ void Client::SpawnMercOnZone() {
 			// Send Mercenary Status/Timer packet
 			SendMercTimer(GetMerc());
 
-			Log.Out(Logs::General, Logs::Mercenaries, "SpawnMercOnZone Suspended Merc.");
+			Log.Out(Logs::General, Logs::Mercenaries, "SpawnMercOnZone Suspended Merc for %s.", GetName());
 		}
 	}
 	else
@@ -5395,6 +5537,7 @@ void Client::SpawnMercOnZone() {
 		// No Merc Hired
 		// RoF+ displays a message from the following packet, which seems useless
 		//SendClearMercInfo();
+		Log.Out(Logs::General, Logs::Mercenaries, "SpawnMercOnZone Failed to load Merc Info from the Database for %s.", GetName());
 	}
 }
 
@@ -5408,17 +5551,17 @@ void Client::SendMercTimer(Merc* merc) {
 	if (!merc)
 	{
 		SendMercTimerPacket(NO_MERC_ID, MERC_STATE_SUSPENDED, GetMercInfo().SuspendedTime, GetMercInfo().MercTimerRemaining, RuleI(Mercs, SuspendIntervalMS));
-		Log.Out(Logs::General, Logs::Mercenaries, "SendMercTimer No Merc.");
+		Log.Out(Logs::General, Logs::Mercenaries, "SendMercTimer No Merc for %s.", GetName());
 	}
 	else if (merc->IsSuspended())
 	{
 		SendMercTimerPacket(NO_MERC_ID, MERC_STATE_SUSPENDED, GetMercInfo().SuspendedTime, GetMercInfo().MercTimerRemaining, RuleI(Mercs, SuspendIntervalMS));
-		Log.Out(Logs::General, Logs::Mercenaries, "SendMercTimer Suspended Merc.");
+		Log.Out(Logs::General, Logs::Mercenaries, "SendMercTimer Suspended Merc for %s.", GetName());
 	}
 	else
 	{
 		SendMercTimerPacket(merc->GetID(), MERC_STATE_NORMAL, NOT_SUSPENDED_TIME, GetMercInfo().MercTimerRemaining, RuleI(Mercs, SuspendIntervalMS));
-		Log.Out(Logs::General, Logs::Mercenaries, "SendMercTimer Normal Merc.");
+		Log.Out(Logs::General, Logs::Mercenaries, "SendMercTimer Normal Merc for %s.", GetName());
 	}
 
 }
@@ -5440,7 +5583,7 @@ void Client::SpawnMerc(Merc* merc, bool setMaxStats) {
 	merc->Unsuspend(setMaxStats);
 	merc->SetStance(GetMercInfo().Stance);
 
-	Log.Out(Logs::General, Logs::Mercenaries, "SpawnMerc Success.");
+	Log.Out(Logs::General, Logs::Mercenaries, "SpawnMerc Success for %s.", GetName());
 
 	return;
 
@@ -5469,7 +5612,7 @@ bool Merc::Suspend() {
 	// Start the timer to send the packet that refreshes the Unsuspend Button
 	mercOwner->GetPTimers().Start(pTimerMercSuspend, RuleI(Mercs, SuspendIntervalS));
 
-	Log.Out(Logs::General, Logs::Mercenaries, "Suspend Complete.");
+	Log.Out(Logs::General, Logs::Mercenaries, "Suspend Complete for %s.", mercOwner->GetName());
 
 	return true;
 }
@@ -5555,12 +5698,12 @@ bool Client::DismissMerc(uint32 MercID) {
 	bool Dismissed = true;
 	if (!database.DeleteMerc(MercID))
 	{
-		Log.Out(Logs::General, Logs::Mercenaries, "Dismiss Failed for MercID %i", MercID);
+		Log.Out(Logs::General, Logs::Mercenaries, "Dismiss Failed Database Query for MercID: %i, Client: %s.", MercID, GetName());
 		Dismissed = false;
 	}
 	else
 	{
-		Log.Out(Logs::General, Logs::Mercenaries, "Dismiss Successful.");
+		Log.Out(Logs::General, Logs::Mercenaries, "Dismiss Successful for %s.", GetName());
 	}
 
 	if (GetMerc())
@@ -5717,13 +5860,13 @@ bool Merc::MercJoinClientGroup() {
 				database.SetGroupLeaderName(g->GetID(), mercOwner->GetName());
 				database.RefreshGroupFromDB(mercOwner);
 				g->SaveGroupLeaderAA();
-				Log.Out(Logs::General, Logs::Mercenaries, "Mercenary joined new group.");
+				Log.Out(Logs::General, Logs::Mercenaries, "Mercenary joined new group: %s (%s).", GetName(), mercOwner->GetName());
 			}
 			else
 			{
 				g->DisbandGroup();
 				Suspend();
-				Log.Out(Logs::General, Logs::Mercenaries, "Mercenary disbanded new group.");
+				Log.Out(Logs::General, Logs::Mercenaries, "Mercenary disbanded new group: %s (%s).", GetName(), mercOwner->GetName());
 			}
 
 		}
@@ -5733,12 +5876,12 @@ bool Merc::MercJoinClientGroup() {
 			database.RefreshGroupFromDB(mercOwner);
 			// Update members that are out of zone
 			GetGroup()->SendGroupJoinOOZ(this);
-			Log.Out(Logs::General, Logs::Mercenaries, "Mercenary joined existing group.");
+			Log.Out(Logs::General, Logs::Mercenaries, "Mercenary %s joined existing group with %s.", GetName(), mercOwner->GetName());
 		}
 		else
 		{
 			Suspend();
-			Log.Out(Logs::General, Logs::Mercenaries, "Mercenary failed to join the group - Suspending");
+			Log.Out(Logs::General, Logs::Mercenaries, "Mercenary failed to join the group - Suspending %s for (%s).", GetName(), mercOwner->GetName());
 		}
 	}
 
@@ -5789,7 +5932,7 @@ Merc* Client::GetMerc() {
 
 	if(GetMercID() == 0)
 	{
-		Log.Out(Logs::Detail, Logs::Mercenaries, "GetMerc 0.");
+		Log.Out(Logs::Detail, Logs::Mercenaries, "GetMerc - GetMercID: 0 for %s.", GetName());
 		return (nullptr);
 	}
 
@@ -5797,14 +5940,14 @@ Merc* Client::GetMerc() {
 	if(tmp == nullptr)
 	{
 		SetMercID(0);
-		Log.Out(Logs::Detail, Logs::Mercenaries, "GetMerc No Merc.");
+		Log.Out(Logs::Detail, Logs::Mercenaries, "GetMerc No Merc for %s.", GetName());
 		return (nullptr);
 	}
 
 	if(tmp->GetOwnerID() != GetID())
 	{
 		SetMercID(0);
-		Log.Out(Logs::Detail, Logs::Mercenaries, "GetMerc Owner Mismatch.");
+		Log.Out(Logs::Detail, Logs::Mercenaries, "GetMerc Owner Mismatch - OwnerID: %d, ClientID: %d, Client: %s.", tmp->GetOwnerID(), GetID(), GetName());
 		return (nullptr);
 	}
 
@@ -5822,7 +5965,7 @@ uint8 Client::GetNumMercs() {
 			numMercs++;
 		}
 	}
-	Log.Out(Logs::General, Logs::Mercenaries, "GetNumMercs %i.", numMercs);
+	Log.Out(Logs::General, Logs::Mercenaries, "GetNumMercs Number: %i for %s.", numMercs, GetName());
 
 	return numMercs;
 }
@@ -5863,7 +6006,7 @@ void Client::SetMerc(Merc* newmerc) {
 		GetMercInfo().Gender = 0;
 		GetMercInfo().State = 0;
 		memset(GetMercInfo().merc_name, 0, 64);
-		Log.Out(Logs::General, Logs::Mercenaries, "SetMerc No Merc.");
+		Log.Out(Logs::General, Logs::Mercenaries, "SetMerc No Merc for %s.", GetName());
 	}
 	else
 	{
@@ -5880,7 +6023,7 @@ void Client::SetMerc(Merc* newmerc) {
 		GetMercInfo().Gender = newmerc->GetGender();
 		GetMercInfo().State = newmerc->IsSuspended() ? MERC_STATE_SUSPENDED : MERC_STATE_NORMAL;
 		snprintf(GetMercInfo().merc_name, 64, "%s", newmerc->GetName());
-		Log.Out(Logs::General, Logs::Mercenaries, "SetMerc New Merc.");
+		Log.Out(Logs::General, Logs::Mercenaries, "SetMerc New Merc for %s.", GetName());
 	}
 }
 
@@ -5888,7 +6031,8 @@ void Client::UpdateMercLevel() {
 	Merc* merc = GetMerc();
 	if (merc)
 	{
-		merc->UpdateMercStats(this);
+		merc->UpdateMercStats(this, false);
+		merc->SendAppearancePacket(AT_WhoLevel, GetLevel(), true, true);
 	}
 }
 
@@ -5900,7 +6044,7 @@ void Client::SendMercMerchantResponsePacket(int32 response_type) {
 		MercenaryMerchantResponse_Struct* mmr = (MercenaryMerchantResponse_Struct*)outapp->pBuffer;
 		mmr->ResponseType = response_type;              // send specified response type
 		FastQueuePacket(&outapp);
-		Log.Out(Logs::Moderate, Logs::Mercenaries, "Sent SendMercMerchantResponsePacket %i.", response_type);
+		Log.Out(Logs::Moderate, Logs::Mercenaries, "Sent SendMercMerchantResponsePacket ResponseType: %i, Client: %s.", response_type, GetName());
 	}
 }
 
@@ -5909,7 +6053,7 @@ void Client::SendMercenaryUnknownPacket(uint8 type) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryUnknown1, 1);
 	outapp->WriteUInt8(type);
 	FastQueuePacket(&outapp);
-	Log.Out(Logs::Moderate, Logs::Mercenaries, "Sent SendMercenaryUnknownPacket %i.", type);
+	Log.Out(Logs::Moderate, Logs::Mercenaries, "Sent SendMercenaryUnknownPacket Type: %i, Client: %s.", type, GetName());
 
 }
 
@@ -5918,7 +6062,7 @@ void Client::SendMercenaryUnsuspendPacket(uint8 type) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryUnsuspendResponse, 1);
 	outapp->WriteUInt8(type);
 	FastQueuePacket(&outapp);
-	Log.Out(Logs::Moderate, Logs::Mercenaries, "Sent SendMercenaryUnsuspendPacket %i.", type);
+	Log.Out(Logs::Moderate, Logs::Mercenaries, "Sent SendMercenaryUnsuspendPacket Type: %i, Client: %s.", type, GetName());
 
 }
 
@@ -5928,7 +6072,7 @@ void Client::SendMercSuspendResponsePacket(uint32 suspended_time) {
 	SuspendMercenaryResponse_Struct* smr = (SuspendMercenaryResponse_Struct*)outapp->pBuffer;
 	smr->SuspendTime = suspended_time;              // Seen 0 (not suspended) or c9 c2 64 4f (suspended on Sat Mar 17 11:58:49 2012) - Unix Timestamp
 	FastQueuePacket(&outapp);
-	Log.Out(Logs::Moderate, Logs::Mercenaries, "Sent SendMercSuspendResponsePacket %i.", suspended_time);
+	Log.Out(Logs::Moderate, Logs::Mercenaries, "Sent SendMercSuspendResponsePacket Time: %i, Client: %s.", suspended_time, GetName());
 
 }
 
@@ -5943,7 +6087,7 @@ void Client::SendMercTimerPacket(int32 entity_id, int32 merc_state, int32 suspen
 	mss->UpdateInterval = update_interval; // Seen 900000 - 15 minutes in ms
 	mss->MercUnk01 = unk01; // Seen 180000 - 3 minutes in ms - Used for the unsuspend button refresh timer
 	FastQueuePacket(&outapp);
-	Log.Out(Logs::Moderate, Logs::Mercenaries, "Sent SendMercTimerPacket %i, %i, %i, %i, %i.", entity_id, merc_state, suspended_time, update_interval, unk01);
+	Log.Out(Logs::Moderate, Logs::Mercenaries, "Sent SendMercTimerPacket EndID: %i, State: %i, SuspendTime: %i, Interval: %i, Unk1: %i, Client: %s.", entity_id, merc_state, suspended_time, update_interval, unk01, GetName());
 
 }
 
@@ -5954,7 +6098,7 @@ void Client::SendMercAssignPacket(uint32 entityID, uint32 unk01, uint32 unk02) {
 	mas->MercUnk01 = unk01;
 	mas->MercUnk02 = unk02;
 	FastQueuePacket(&outapp);
-	Log.Out(Logs::Moderate, Logs::Mercenaries, "Sent SendMercAssignPacket %i, %i, %i.", entityID, unk01, unk02);
+	Log.Out(Logs::Moderate, Logs::Mercenaries, "Sent SendMercAssignPacket EndID: %i, Unk1: %i, Unk2: %i, Client: %s.", entityID, unk01, unk02, GetName());
 }
 
 void NPC::LoadMercTypes() {
