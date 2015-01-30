@@ -325,7 +325,7 @@
 9069|2015_01_25_logsys_Mercenaries_category.sql|SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Mercenaries'|empty|
 9070|2015_01_28_quest_debug_log_category.sql|SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Quest Debug'|empty|
 9071|2015_01_29_merc_stats_table_update.sql|SHOW COLUMNS FROM `merc_stats` LIKE 'statscale'|empty|
-9072|2015_01_30_attack_delay.sql|SHOW COLUMNS FROM `merc_stats` LIKE 'attack_delay'|empty|
+9072|2015_01_30_merc_attack_delay.sql|SHOW COLUMNS FROM `merc_stats` LIKE 'attack_delay'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not 
