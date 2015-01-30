@@ -4837,18 +4837,19 @@ void Merc::UpdateMercInfo(Client *c) {
 	c->GetMercInfo().drakkinDetails = drakkin_details;
 }
 
-void Merc::UpdateMercStats(Client *c, bool setmax) {
-	if(c->GetMercInfo().MercTemplateID > 0)
-	{
-		Log.Out(Logs::General, Logs::Mercenaries, "Updating Mercenary Stats for %s (%s).", GetName(), c->GetName());
-		const NPCType* npc_type = database.GetMercType( zone->GetMercTemplate(c->GetMercInfo().MercTemplateID)->MercNPCID, GetRace(), c->GetLevel());
-		if (npc_type)
-		{
+void Merc::UpdateMercStats(Client *c, bool setmax)
+{
+	if (c->GetMercInfo().MercTemplateID > 0) {
+		Log.Out(Logs::General, Logs::Mercenaries, "Updating Mercenary Stats for %s (%s).", GetName(),
+			c->GetName());
+		const NPCType *npc_type = database.GetMercType(
+		    zone->GetMercTemplate(c->GetMercInfo().MercTemplateID)->MercNPCID, GetRace(), c->GetLevel());
+		if (npc_type) {
 			max_hp = npc_type->max_hp;
 			base_hp = npc_type->max_hp;
 			max_mana = npc_type->Mana;
 			base_mana = npc_type->Mana;
-			max_end = npc_type->max_hp; // Hack since Endurance does not exist for NPCType yet
+			max_end = npc_type->max_hp;  // Hack since Endurance does not exist for NPCType yet
 			base_end = npc_type->max_hp; // Hack since Endurance does not exist for NPCType yet
 			hp_regen = npc_type->hp_regen;
 			mana_regen = npc_type->mana_regen;
@@ -4871,14 +4872,14 @@ void Merc::UpdateMercStats(Client *c, bool setmax) {
 			_basePR = npc_type->PR;
 			_baseCR = npc_type->CR;
 			_baseCorrup = npc_type->Corrup;
-			
+
 			uint32 scalepercent = (int)(npc_type->scalerate * RuleI(Mercs, ScaleRate) / 100);
-			
+
 			ScaleStats(scalepercent, setmax);
 
 			level = npc_type->level;
 			attack_count = npc_type->attack_count;
-			attack_speed = npc_type->attack_speed;
+			attack_delay = npc_type->attack_delay;
 			spellscale = npc_type->spellscale;
 			healscale = npc_type->healscale;
 
