@@ -578,7 +578,7 @@ public:
 	void WakeTheDead(uint16 spell_id, Mob *target, uint32 duration);
 	void Spin();
 	void Kill();
-	bool PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id);
+	bool PassCharismaCheck(Mob* caster, uint16 spell_id);
 	bool TryDeathSave();
 	bool TryDivineSave();
 	void DoBuffWearOffEffect(uint32 index);

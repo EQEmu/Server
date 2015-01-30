@@ -3659,7 +3659,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 						if(!IsHarmonySpell(spell_id))
 						spelltar->AddToHateList(this, aggro);
 						else
-							if(!PassCharismaCheck(this, spelltar, spell_id))
+							if(!spelltar->PassCharismaCheck(this, spell_id))
 								spelltar->AddToHateList(this, aggro);
 					}
 					else{
@@ -4388,7 +4388,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 			level_mod += (2 * level_diff);
 		}
 	}
-
+	
 	if (CharismaCheck)
 	{
 		/*
@@ -4402,7 +4402,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		*/
 		int16 charisma = caster->GetCHA();
 
-		if (IsFear && (spells[spell_id].targettype != 10)){
+		if (IsFear && (spells[spell_id].targettype != ST_Undead)){
 
 			if (charisma < 100)
 				resist_modifier -= 20;
@@ -4423,7 +4423,9 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 			else
 				resist_modifier += ((75 - charisma)/10) * 6; //Increase Resist Chance
 		}
+
 	}
+
 
 	//Lull spells DO NOT use regular resists on initial cast, instead they use a flat +15 modifier. Live parses confirm this.
 	//Regular resists are used when checking if mob will aggro off of a lull resist.
@@ -4452,9 +4454,8 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	//Minimum resist chance should be caclulated factoring in the RuleI(Spells, CharmBreakCheckChance)
 	if (CharmTick) {
 
-		int min_charmbreakchance = ((100/RuleI(Spells, CharmBreakCheckChance))/66 * 100)*2;
-
-		if (resist_chance < min_charmbreakchance)
+		float min_charmbreakchance = ((100.0f/static_cast<float>(RuleI(Spells, CharmBreakCheckChance)))/66.0f * 100.0f)*2.0f;
+		if (resist_chance < static_cast<int>(min_charmbreakchance))
 			resist_chance = min_charmbreakchance;
 	}
 
@@ -4462,9 +4463,9 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	//Minimum resist chance should be caclulated factoring in the RuleI(Spells, RootBreakCheckChance)
 	if (IsRoot) {
 
-		int min_rootbreakchance = ((100/RuleI(Spells, RootBreakCheckChance))/22 * 100)*2;
+		float min_rootbreakchance = ((100.0f/static_cast<float>(RuleI(Spells, RootBreakCheckChance)))/22.0f * 100.0f)*2.0f;
 
-		if (resist_chance < min_rootbreakchance)
+		if (resist_chance < static_cast<int>(min_rootbreakchance))
 			resist_chance = min_rootbreakchance;
 	}
 
