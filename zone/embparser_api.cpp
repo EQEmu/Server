@@ -23,6 +23,7 @@
 
 #include "../common/global_define.h"
 #include "../common/misc_functions.h"
+#include "../common/eqemu_logsys.h"
 
 #include "embparser.h"
 #include "embxs.h"
@@ -3493,6 +3494,37 @@ XS(XS__crosszonesignalnpcbynpctypeid)
 	XSRETURN_EMPTY;
 }
 
+XS(XS__debug);
+XS(XS__debug)
+{
+	dXSARGS;
+	if (items != 1 && items != 2){
+		Perl_croak(aTHX_ "Usage: debug(message, [debug_level])");
+	}
+	else{
+		std::string log_message = (std::string)SvPV_nolen(ST(0));
+		uint8 debug_level = 1;
+
+		if (items == 2)
+			debug_level = (uint8)SvIV(ST(1));
+
+		if (debug_level > Logs::Detail)
+			return;
+
+		if (debug_level == Logs::General){
+			Log.Out(Logs::General, Logs::QuestDebug, log_message);
+		}
+		else if (debug_level == Logs::Moderate){
+			Log.Out(Logs::Moderate, Logs::QuestDebug, log_message);
+		}
+		else if (debug_level == Logs::Detail){
+			Log.Out(Logs::Detail, Logs::QuestDebug, log_message);
+		}
+	}
+	XSRETURN_EMPTY;
+}
+
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -3579,6 +3611,7 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "crosszonesignalclientbycharid"), XS__crosszonesignalclientbycharid, file);
 		newXS(strcpy(buf, "crosszonesignalclientbyname"), XS__crosszonesignalclientbyname, file);
 		newXS(strcpy(buf, "crosszonesignalnpcbynpctypeid"), XS__crosszonesignalnpcbynpctypeid, file);
+		newXS(strcpy(buf, "debug"), XS__debug, file);
 		newXS(strcpy(buf, "delglobal"), XS__delglobal, file);
 		newXS(strcpy(buf, "depop"), XS__depop, file);
 		newXS(strcpy(buf, "depop_withtimer"), XS__depop_withtimer, file);

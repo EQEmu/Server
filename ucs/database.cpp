@@ -195,7 +195,7 @@ bool Database::VerifyMailKey(std::string characterName, int IPAddress, std::stri
 	else
 		sprintf(combinedKey, "%s", MailKey.c_str());
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "DB key is [%s], Client key is [%s]", row[0], combinedKey);
+	Log.Out(Logs::Detail, Logs::UCS_Server, "DB key is [%s], Client key is [%s]", (row[0] ? row[0] : ""), combinedKey);
 
 	return !strcmp(row[0], combinedKey);
 }

@@ -325,7 +325,7 @@ sub OpCodes_Fetch{
 		3 => ["Titanium", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_Titanium.conf"],
 		4 => ["Secrets of Faydwer", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_SoF.conf"],
 		5 => ["Seeds of Destruction", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_SoD.conf"],
-		6 => ["Underfoot", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_Underfoot.conf"],
+		6 => ["Underfoot", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_UF.conf"],
 		7 => ["Rain of Fear", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_RoF.conf"],
 		8 => ["Rain of Fear 2", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_RoF2.conf"],
 	);

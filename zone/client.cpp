@@ -305,6 +305,8 @@ Client::Client(EQStreamInterface* ieqs)
 
 	active_light = innate_light;
 	spell_light = equip_light = NOT_USED;
+
+	AI_Init();
 }
 
 Client::~Client() {
@@ -7276,7 +7278,7 @@ void Client::SendMercPersonalInfo()
 	stancecount += zone->merc_stance_list[GetMercInfo().MercTemplateID].size();
 	if(stancecount > MAX_MERC_STANCES || mercCount > MAX_MERC || mercTypeCount > MAX_MERC_GRADES)
 	{
-		Log.Out(Logs::General, Logs::Mercenaries, "SendMercPersonalInfo canceled: (%i) (%i) (%i)", stancecount, mercCount, mercTypeCount);
+		Log.Out(Logs::General, Logs::Mercenaries, "SendMercPersonalInfo canceled: (%i) (%i) (%i) for %s", stancecount, mercCount, mercTypeCount, GetName());
 		SendMercMerchantResponsePacket(0);
 		return;
 	}
@@ -7370,13 +7372,13 @@ void Client::SendMercPersonalInfo()
 				return;
 			}
 		}
-		Log.Out(Logs::General, Logs::Mercenaries, "SendMercPersonalInfo Send Successful");
+		Log.Out(Logs::General, Logs::Mercenaries, "SendMercPersonalInfo Send Successful for %s.", GetName());
 
 		SendMercMerchantResponsePacket(0);
 	}
 	else
 	{
-		Log.Out(Logs::General, Logs::Mercenaries, "SendMercPersonalInfo Send Failed Due to no MercData for %i", GetMercInfo().MercTemplateID);
+		Log.Out(Logs::General, Logs::Mercenaries, "SendMercPersonalInfo Send Failed Due to no MercData (%i) for %s", GetMercInfo().MercTemplateID, GetName());
 	}
 
 }

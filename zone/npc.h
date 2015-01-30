@@ -436,7 +436,7 @@ protected:
 
 	uint32	npc_spells_id;
 	uint8	casting_spell_AIindex;
-	Timer*	AIautocastspell_timer;
+	std::unique_ptr<Timer> AIautocastspell_timer;
 	uint32*	pDontCastBefore_casting_spell;
 	std::vector<AISpells_Struct> AIspells;
 	bool HasAISpell;
@@ -444,7 +444,7 @@ protected:
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 	AISpellsVar_Struct AISpellVar;
 	int16 GetFocusEffect(focusType type, uint16 spell_id);
-	
+
 	uint32	npc_spells_effects_id;
 	std::vector<AISpellsEffects_Struct> AIspellsEffects;
 	bool HasAISpellEffects;

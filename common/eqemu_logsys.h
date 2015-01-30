@@ -77,6 +77,7 @@ namespace Logs{
 		MySQLError,
 		MySQLQuery,
 		Mercenaries,
+		QuestDebug,
 		MaxCategoryID	/* Don't Remove this*/
 	};
 
@@ -120,6 +121,7 @@ namespace Logs{
 		"MySQL Error",
 		"MySQL Query",
 		"Mercenaries",
+		"Quest Debug",
 	};
 }
 
@@ -141,7 +143,7 @@ public:
 				be checked against to see if that piped output is set to actually process it for the category and debug level
 	*/
 	void Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...);
-	void SetCurrentTimeStamp(char* time_stamp); /* Used in file logs to prepend a timestamp entry for logs */
+	void SetCurrentTimeStamp(char* time_stamp); /* Used in file logs to prepend a timestamp entry for logs */ 
 	void StartFileLogs(const std::string &log_name = ""); /* Used to declare the processes file log and to keep it open for later use */
 
 	/*
