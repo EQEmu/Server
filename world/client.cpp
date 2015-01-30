@@ -1069,6 +1069,10 @@ void Client::EnterWorld(bool TryBootup) {
 	if (zoneID == 0)
 		return;
 
+	if(!cle) {
+		return;
+	}
+
 	ZoneServer* zs = nullptr;
 	if(instanceID > 0)
 	{
@@ -1127,7 +1131,6 @@ void Client::EnterWorld(bool TryBootup) {
 	cle->SetChar(charid, char_name);
 	database.UpdateLiveChar(char_name, GetAccountID());
 	Log.Out(Logs::Detail, Logs::World_Server,"%s %s (%d:%d)",seencharsel ? "Entering zone" : "Zoning to",zone_name,zoneID,instanceID);
-//	database.SetAuthentication(account_id, char_name, zone_name, ip);
 
 	if (seencharsel) {
 		if (GetAdmin() < 80 && zoneserver_list.IsZoneLocked(zoneID)) {
