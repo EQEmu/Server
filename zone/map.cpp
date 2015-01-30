@@ -413,9 +413,9 @@ bool Map::LoadV2(FILE *f) {
 		buf += sizeof(uint32);
 	}
 
-	std::map<std::string, std::shared_ptr<ModelEntry>> models;
+	std::map<std::string, std::unique_ptr<ModelEntry>> models;
 	for (uint32 i = 0; i < model_count; ++i) {
-		std::shared_ptr<ModelEntry> me(new ModelEntry);
+		std::unique_ptr<ModelEntry> me(new ModelEntry);
 		std::string name = buf;
 		buf += name.length() + 1;
 
@@ -456,7 +456,7 @@ bool Map::LoadV2(FILE *f) {
 			me->polys[j] = p;
 		}
 
-		models[name] = me;
+		models[name] = std::move(me);
 	}
 
 	for (uint32 i = 0; i < plac_count; ++i) {
@@ -487,7 +487,7 @@ bool Map::LoadV2(FILE *f) {
 		if (models.count(name) == 0)
 			continue;
 
-		auto model = models[name];
+		auto &model = models[name];
 		auto &mod_polys = model->polys;
 		auto &mod_verts = model->verts;
 		for (uint32 j = 0; j < mod_polys.size(); ++j) {
