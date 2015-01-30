@@ -109,7 +109,7 @@ public:
 
 	bool	AddBannedIP(char* bannedIP, const char* notes); //Lieka Edit: Add IP address to the Banned_IPs table.
 	bool	AddGMIP(char* ip_address, char* name);
-	bool	CheckBannedIPs(const char* loginIP); //Lieka Edit: Check incomming connection against banned IP table.
+	bool	CheckBannedIPs(const char* loginIP); //Lieka Edit: Check incoming connection against banned IP table.
 	bool	CheckGMIPs(const char* loginIP, uint32 account_id);
 	bool	CheckNameFilter(const char* name, bool surname = false);
 	bool	CheckUsedName(const char* name);

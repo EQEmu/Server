@@ -1086,7 +1086,7 @@ bool Zone::SaveZoneCFG() {
 	return database.SaveZoneCFG(GetZoneID(), GetInstanceVersion(), &newzone_data);
 }
 
-void Zone::AddAuth(ServerZoneIncommingClient_Struct* szic) {
+void Zone::AddAuth(ServerZoneIncomingClient_Struct* szic) {
 	ZoneClientAuth_Struct* zca = new ZoneClientAuth_Struct;
 	memset(zca, 0, sizeof(ZoneClientAuth_Struct));
 	zca->ip = szic->ip;
