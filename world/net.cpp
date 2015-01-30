@@ -394,7 +394,7 @@ int main(int argc, char** argv) {
 	Timer InterserverTimer(INTERSERVER_TIMER); // does MySQL pings and auto-reconnect
 	InterserverTimer.Trigger();
 	uint8 ReconnectCounter = 100;
-	EQStream* eqs;
+	std::shared_ptr<EQStream> eqs;
 	EmuTCPConnection* tcpc;
 	EQStreamInterface *eqsi;
 
@@ -411,6 +411,8 @@ int main(int argc, char** argv) {
 			Log.Out(Logs::General, Logs::World_Server, "New connection from %s:%d", inet_ntoa(in),ntohs(eqs->GetRemotePort()));
 			stream_identifier.AddStream(eqs);	//takes the stream
 		}
+
+		eqs = nullptr;
 
 		//give the stream identifier a chance to do its work....
 		stream_identifier.Process();

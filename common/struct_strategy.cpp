@@ -5,6 +5,7 @@
 
 #include "eq_stream.h"
 #include <map>
+#include <memory>
 
 
 //note: all encoders and decoders must be valid functions.
@@ -17,7 +18,7 @@ StructStrategy::StructStrategy() {
 	}
 }
 
-void StructStrategy::Encode(EQApplicationPacket **p, EQStream *dest, bool ack_req) const {
+void StructStrategy::Encode(EQApplicationPacket **p, std::shared_ptr<EQStream> dest, bool ack_req) const {
 	if((*p)->GetOpcodeBypass() != 0) {
 		PassEncoder(p, dest, ack_req);
 		return;
@@ -35,7 +36,7 @@ void StructStrategy::Decode(EQApplicationPacket *p) const {
 }
 
 
-void StructStrategy::ErrorEncoder(EQApplicationPacket **in_p, EQStream *dest, bool ack_req) {
+void StructStrategy::ErrorEncoder(EQApplicationPacket **in_p, std::shared_ptr<EQStream> dest, bool ack_req) {
 	EQApplicationPacket *p = *in_p;
 	*in_p = nullptr;
 
@@ -49,7 +50,7 @@ void StructStrategy::ErrorDecoder(EQApplicationPacket *p) {
 	p->SetOpcode(OP_Unknown);
 }
 
-void StructStrategy::PassEncoder(EQApplicationPacket **p, EQStream *dest, bool ack_req) {
+void StructStrategy::PassEncoder(EQApplicationPacket **p, std::shared_ptr<EQStream> dest, bool ack_req) {
 	dest->FastQueuePacket(p, ack_req);
 }
 

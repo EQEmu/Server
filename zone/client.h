@@ -64,6 +64,7 @@ struct Item_Struct;
 #include <float.h>
 #include <set>
 #include <algorithm>
+#include <memory>
 
 
 #define CLIENT_TIMEOUT 90000
@@ -201,7 +202,7 @@ struct ClientReward
 
 class ClientFactory {
 public:
-	Client *MakeClient(EQStream* ieqs);
+	Client *MakeClient(std::shared_ptr<EQStream> ieqs);
 };
 
 class Client : public Mob

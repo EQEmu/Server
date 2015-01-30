@@ -59,7 +59,7 @@ public:
 	/**
 	* Constructor, sets our connection to c and version to v
 	*/
-	Client(EQStream *c, LSClientVersion v);
+	Client(std::shared_ptr<EQStream> c, LSClientVersion v);
 
 	/**
 	* Destructor.
@@ -129,11 +129,11 @@ public:
 	/**
 	* Gets the connection for this client.
 	*/
-	EQStream *GetConnection() { return connection; }
+	std::shared_ptr<EQStream> GetConnection() { return connection; }
 
 	EQEmu::Random random;
 private:
-	EQStream *connection;
+	std::shared_ptr<EQStream> connection;
 	LSClientVersion version;
 	LSClientStatus status;
 

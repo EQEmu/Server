@@ -116,12 +116,12 @@ struct sockaddr_in address;
 	return true;
 }
 
-EQStream *EQStreamFactory::Pop()
+std::shared_ptr<EQStream> EQStreamFactory::Pop()
 {
-EQStream *s=nullptr;
+	std::shared_ptr<EQStream> s = nullptr;
 	MNewStreams.lock();
 	if (NewStreams.size()) {
-		s=NewStreams.front();
+		s = NewStreams.front();
 		NewStreams.pop();
 		s->PutInUse();
 	}
@@ -130,7 +130,7 @@ EQStream *s=nullptr;
 	return s;
 }
 
-void EQStreamFactory::Push(EQStream *s)
+void EQStreamFactory::Push(std::shared_ptr<EQStream> s)
 {
 	MNewStreams.lock();
 	NewStreams.push(s);
@@ -139,17 +139,16 @@ void EQStreamFactory::Push(EQStream *s)
 
 void EQStreamFactory::ReaderLoop()
 {
-fd_set readset;
-std::map<std::pair<uint32, uint16>,EQStream *>::iterator stream_itr;
-int num;
-int length;
-unsigned char buffer[2048];
-sockaddr_in from;
-int socklen=sizeof(sockaddr_in);
-timeval sleep_time;
-//time_t now;
+	fd_set readset;
+	std::map<std::pair<uint32, uint16>, std::shared_ptr<EQStream>>::iterator stream_itr;
+	int num;
+	int length;
+	unsigned char buffer[2048];
+	sockaddr_in from;
+	int socklen = sizeof(sockaddr_in);
+	timeval sleep_time;
+	ReaderRunning = true;
 
-	ReaderRunning=true;
 	while(sock!=-1) {
 		MReaderRunning.lock();
 		if (!ReaderRunning)
@@ -180,10 +179,10 @@ timeval sleep_time;
 				// What do we wanna do?
 			} else {
 				MStreams.lock();
-				stream_itr=Streams.find(std::make_pair(from.sin_addr.s_addr, from.sin_port));
+				stream_itr = Streams.find(std::make_pair(from.sin_addr.s_addr, from.sin_port));
 				if (stream_itr == Streams.end()) {
 					if (buffer[1]==OP_SessionRequest) {
-						EQStream *s = new EQStream(from);
+						std::shared_ptr<EQStream> s = std::make_shared<EQStream>(from);
 						s->SetStreamType(StreamType);
 						Streams[std::make_pair(from.sin_addr.s_addr, from.sin_port)]=s;
 						WriterWork.Signal();
@@ -194,13 +193,13 @@ timeval sleep_time;
 					}
 					MStreams.unlock();
 				} else {
-					EQStream *curstream = stream_itr->second;
+					std::shared_ptr<EQStream> curstream = stream_itr->second;
 					//dont bother processing incoming packets for closed connections
 					if(curstream->CheckClosed())
 						curstream = nullptr;
 					else
 						curstream->PutInUse();
-					MStreams.unlock();	//the in use flag prevents the stream from being deleted while we are using it.
+						//the in use flag prevents the stream from being deleted while we are using it.
 
 					if(curstream) {
 						curstream->AddBytesRecv(length);
@@ -208,6 +207,7 @@ timeval sleep_time;
 						curstream->SetLastPacketTime(Timer::GetCurrentTime());
 						curstream->ReleaseFromUse();
 					}
+					MStreams.unlock();
 				}
 			}
 		}
@@ -220,10 +220,10 @@ void EQStreamFactory::CheckTimeout()
 	MStreams.lock();
 
 	unsigned long now=Timer::GetCurrentTime();
-	std::map<std::pair<uint32, uint16>,EQStream *>::iterator stream_itr;
+	std::map<std::pair<uint32, uint16>, std::shared_ptr<EQStream>>::iterator stream_itr;
 
-	for(stream_itr=Streams.begin();stream_itr!=Streams.end();) {
-		EQStream *s = stream_itr->second;
+	for(stream_itr = Streams.begin(); stream_itr != Streams.end();) {
+		std::shared_ptr<EQStream> s = stream_itr->second;
 
 		s->CheckTimeout(now, stream_timeout);
 
@@ -235,10 +235,9 @@ void EQStreamFactory::CheckTimeout()
 				//give it a little time for everybody to finish with it
 			} else {
 				//everybody is done, we can delete it now
-				std::map<std::pair<uint32, uint16>,EQStream *>::iterator temp=stream_itr;
+				std::map<std::pair<uint32, uint16>, std::shared_ptr<EQStream>>::iterator temp = stream_itr;
 				++stream_itr;
-				//let whoever has the stream outside delete it
-				delete temp->second;
+				temp->second = nullptr;
 				Streams.erase(temp);
 				continue;
 			}
@@ -251,21 +250,17 @@ void EQStreamFactory::CheckTimeout()
 
 void EQStreamFactory::WriterLoop()
 {
-std::map<std::pair<uint32, uint16>,EQStream *>::iterator stream_itr;
-bool havework=true;
-std::vector<EQStream *> wants_write;
-std::vector<EQStream *>::iterator cur,end;
-bool decay=false;
-uint32 stream_count;
-
-Timer DecayTimer(20);
-
-	WriterRunning=true;
+	std::map<std::pair<uint32, uint16>, std::shared_ptr<EQStream>>::iterator stream_itr;
+	bool havework=true;
+	std::vector<std::shared_ptr<EQStream>> wants_write;
+	std::vector<std::shared_ptr<EQStream>>::iterator cur, end;
+	bool decay = false;
+	uint32 stream_count;
+	Timer DecayTimer(20);
+	WriterRunning = true;
 	DecayTimer.Enable();
+
 	while(sock!=-1) {
-		//if (!havework) {
-			//WriterWork.Wait();
-		//}
 		MWriterRunning.lock();
 		if (!WriterRunning)
 			break;
@@ -309,7 +304,7 @@ Timer DecayTimer(20);
 		Sleep(10);
 
 		MStreams.lock();
-		stream_count=Streams.size();
+		stream_count = Streams.size();
 		MStreams.unlock();
 		if (!stream_count) {
 			WriterWork.Wait();
