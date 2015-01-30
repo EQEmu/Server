@@ -1069,10 +1069,6 @@ void Client::EnterWorld(bool TryBootup) {
 	if (zoneID == 0)
 		return;
 
-	if(!cle) {
-		return;
-	}
-
 	ZoneServer* zs = nullptr;
 	if(instanceID > 0)
 	{
@@ -1107,7 +1103,7 @@ void Client::EnterWorld(bool TryBootup) {
 	const char *zone_name=database.GetZoneName(zoneID, true);
 	if (zs) {
 		// warn the world we're comming, so it knows not to shutdown
-		zs->IncommingClient(this);
+		zs->IncomingClient(this);
 	}
 	else {
 		if (TryBootup) {
@@ -1121,12 +1117,16 @@ void Client::EnterWorld(bool TryBootup) {
 			return;
 		}
 		else {
-			Log.Out(Logs::Detail, Logs::World_Server,"Requested zone %s is no running.",zone_name);
+			Log.Out(Logs::Detail, Logs::World_Server,"Requested zone %s is not running.",zone_name);
 			ZoneUnavail();
 			return;
 		}
 	}
 	pwaitingforbootup = 0;
+
+	if(!cle) {
+		return;
+	}
 
 	cle->SetChar(charid, char_name);
 	database.UpdateLiveChar(char_name, GetAccountID());

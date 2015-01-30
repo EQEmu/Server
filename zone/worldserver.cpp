@@ -473,7 +473,7 @@ void WorldServer::Process() {
 			if (ZoneLoaded) {
 				SetZone(zone->GetZoneID(), zone->GetInstanceID());
 				if (zst->zoneid == zone->GetZoneID()) {
-					// This packet also doubles as "incomming client" notification, lets not shut down before they get here
+					// This packet also doubles as "incoming client" notification, lets not shut down before they get here
 					zone->StartShutdownTimer(AUTHENTICATION_TIMEOUT * 1000);
 				}
 				else {
@@ -488,22 +488,19 @@ void WorldServer::Process() {
 			if (!(Zone::Bootup(zst->zoneid, zst->instanceid, zst->makestatic))) {
 				SendChannelMessage(0, 0, 10, 0, 0, "%s:%i Zone::Bootup failed: %s", net.GetZoneAddress(), net.GetZonePort(), database.GetZoneName(zst->zoneid));
 			}
-			// Moved annoucement to ZoneBootup()
-			//			else
-			//				SendEmoteMessage(0, 0, 15, "Zone bootup: %s", zone->GetLongName());
 			break;
 		}
 		case ServerOP_ZoneIncClient: {
-			if (pack->size != sizeof(ServerZoneIncommingClient_Struct)) {
-				std::cout << "Wrong size on ServerOP_ZoneIncClient. Got: " << pack->size << ", Expected: " << sizeof(ServerZoneIncommingClient_Struct) << std::endl;
+			if (pack->size != sizeof(ServerZoneIncomingClient_Struct)) {
+				std::cout << "Wrong size on ServerOP_ZoneIncClient. Got: " << pack->size << ", Expected: " << sizeof(ServerZoneIncomingClient_Struct) << std::endl;
 				break;
 			}
-			ServerZoneIncommingClient_Struct* szic = (ServerZoneIncommingClient_Struct*) pack->pBuffer;
+			ServerZoneIncomingClient_Struct* szic = (ServerZoneIncomingClient_Struct*) pack->pBuffer;
 			if (ZoneLoaded) {
 				SetZone(zone->GetZoneID(), zone->GetInstanceID());
 				if (szic->zoneid == zone->GetZoneID()) {
 					zone->AddAuth(szic);
-					// This packet also doubles as "incomming client" notification, lets not shut down before they get here
+					// This packet also doubles as "incoming client" notification, lets not shut down before they get here
 					zone->StartShutdownTimer(AUTHENTICATION_TIMEOUT * 1000);
 				}
 			}
