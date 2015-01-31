@@ -93,6 +93,8 @@ ClientListEntry::~ClientListEntry() {
 		Camp(); // updates zoneserver's numplayers
 		client_list.RemoveCLEReferances(this);
 	}
+	for (auto &elem : tell_queue)
+		safe_delete_array(elem);
 	tell_queue.clear();
 }
 
@@ -310,6 +312,7 @@ void ClientListEntry::ProcessTellQueue()
 		pack->Deflate();
 		Server()->SendPacket(pack);
 		safe_delete(pack);
+		safe_delete_array(*it);
 		it = tell_queue.erase(it);
 	}
 	return;
