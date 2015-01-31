@@ -318,7 +318,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 		// get their tints
 		memcpy(item_tint, &client->GetPP().item_tint, sizeof(item_tint));
 
-		// solar: TODO soulbound items need not be added to corpse, but they need
+		// TODO soulbound items need not be added to corpse, but they need
 		// to go into the regular slots on the player, out of bags
 		std::list<uint32> removed_list;
 		

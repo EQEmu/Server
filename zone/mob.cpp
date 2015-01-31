@@ -2792,7 +2792,7 @@ void Mob::Say(const char *format, ...)
 }
 
 //
-// solar: this is like the above, but the first parameter is a string id
+// this is like the above, but the first parameter is a string id
 //
 void Mob::Say_StringID(uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
 {

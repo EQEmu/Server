@@ -7406,7 +7406,7 @@ float Bot::GetProcChances(float ProcBonus, uint16 hand) {
 
 bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 {
-	/* solar: called when a mob is attacked, does the checks to see if it's a hit
+	/* called when a mob is attacked, does the checks to see if it's a hit
 	* and does other mitigation checks. 'this' is the mob being attacked.
 	*
 	* special return values:
@@ -7781,7 +7781,7 @@ void Bot::TryBackstab(Mob *other, int ReuseTime) {
 
 	if (bIsBehind || bCanFrontalBS){ // Bot is behind other OR can do Frontal Backstab
 
-		// solar - chance to assassinate
+		// chance to assassinate
 		int chance = 10 + (GetDEX()/10) + (itembonuses.HeroicDEX/10); //18.5% chance at 85 dex 40% chance at 300 dex
 		if(
 			level >= 60 && // bot is 60 or higher

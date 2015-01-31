@@ -256,7 +256,7 @@ bool atobool(const char* iBool) {
 	return false;
 }
 
-// solar: removes the crap and turns the underscores into spaces.
+// removes the crap and turns the underscores into spaces.
 char *CleanMobName(const char *in, char *out)
 {
 	unsigned i, j;

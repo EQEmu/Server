@@ -7,7 +7,7 @@
 #define	HIGHEST_RESIST 9 //Max resist type value
 #define MAX_SPELL_PROJECTILE 10 //Max amount of spell projectiles that can be active by a single mob.
 
-/* solar: macros for IsAttackAllowed, IsBeneficialAllowed */
+/* macros for IsAttackAllowed, IsBeneficialAllowed */
 #define _CLIENT(x) (x && x->IsClient() && !x->CastToClient()->IsBecomeNPC())
 #define _NPC(x) (x && x->IsNPC() && !x->CastToMob()->GetOwnerID())
 #define _BECOMENPC(x) (x && x->IsClient() && x->CastToClient()->IsBecomeNPC())

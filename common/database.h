@@ -107,9 +107,9 @@ public:
 
 	/* General Information Queries */
 
-	bool	AddBannedIP(char* bannedIP, const char* notes); //Lieka Edit: Add IP address to the Banned_IPs table.
+	bool	AddBannedIP(char* bannedIP, const char* notes); //Add IP address to the Banned_IPs table.
 	bool	AddGMIP(char* ip_address, char* name);
-	bool	CheckBannedIPs(const char* loginIP); //Lieka Edit: Check incoming connection against banned IP table.
+	bool	CheckBannedIPs(const char* loginIP); //Check incoming connection against banned IP table.
 	bool	CheckGMIPs(const char* loginIP, uint32 account_id);
 	bool	CheckNameFilter(const char* name, bool surname = false);
 	bool	CheckUsedName(const char* name);
@@ -118,7 +118,7 @@ public:
 	uint32	GetAccountIDByChar(uint32 char_id);
 	uint32	GetAccountIDByName(const char* accname, int16* status = 0, uint32* lsid = 0);
 	uint32	GetCharacterID(const char *name);
-	uint32	GetCharacterInfo(const char* iName, uint32* oAccID = 0, uint32* oZoneID = 0, uint32* oInstanceID = 0,float* oX = 0, float* oY = 0, float* oZ = 0);
+	uint32	GetCharacterInfo(const char* iName, uint32* oAccID = 0, uint32* oZoneID = 0, uint32* oInstanceID = 0, float* oX = 0, float* oY = 0, float* oZ = 0);
 	uint32	GetGuildIDByCharID(uint32 char_id);
 
 	void	GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID = 0);

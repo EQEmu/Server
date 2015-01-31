@@ -665,7 +665,7 @@ bool ZoneServer::Process() {
 			}
 			case ServerOP_ZoneToZoneRequest: {
 				//
-				// solar: ZoneChange is received by the zone the player is in, then the
+				// ZoneChange is received by the zone the player is in, then the
 				// zone sends a ZTZ which ends up here. This code then find the target
 				// (ingress point) and boots it if needed, then sends the ZTZ to it.
 				// The ingress server will decide wether the player can enter, then will

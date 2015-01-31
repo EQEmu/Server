@@ -1394,7 +1394,7 @@ struct Animation_Struct {
 /*04*/
 };
 
-// solar: this is what causes the caster to animate and the target to
+// this is what causes the caster to animate and the target to
 // get the particle effects around them when a spell is cast
 // also causes a buff icon
 struct Action_Struct
@@ -1445,7 +1445,7 @@ struct ActionAlt_Struct
 /*56*/
 };
 
-// solar: this is what prints the You have been struck. and the regular
+// this is what prints the You have been struck. and the regular
 // melee messages like You try to pierce, etc.  It's basically the melee
 // and spell damage message
 struct CombatDamage_Struct
@@ -1997,7 +1997,7 @@ struct RandomReq_Struct {
 	uint32 high;
 };
 
-/* solar: 9/23/03 reply to /random command; struct from Zaphod */
+/* 9/23/03 reply to /random command */
 struct RandomReply_Struct {
 /* 00 */	uint32 low;
 /* 04 */	uint32 high;

@@ -72,7 +72,7 @@ namespace Console {
 		LightRed = 12,
 		LightMagenta = 13,
 		Yellow = 14,
-		White = 15,
+		White = 15
 	};
 }
 
@@ -174,7 +174,7 @@ void EQEmuLogSys::ProcessLogWrite(uint16 debug_level, uint16 log_category, const
 		process_log << time_stamp << " " << message << std::endl;
 }
 
-uint16 EQEmuLogSys::GetWindowsConsoleColorFromCategory(uint16 log_category){
+uint16 EQEmuLogSys::GetWindowsConsoleColorFromCategory(uint16 log_category) {
 	switch (log_category) {
 		case Logs::Status:
 		case Logs::Normal:
@@ -197,7 +197,7 @@ uint16 EQEmuLogSys::GetWindowsConsoleColorFromCategory(uint16 log_category){
 	}
 }
 
-std::string EQEmuLogSys::GetLinuxConsoleColorFromCategory(uint16 log_category){
+std::string EQEmuLogSys::GetLinuxConsoleColorFromCategory(uint16 log_category) {
 	switch (log_category) {
 		case Logs::Status:
 		case Logs::Normal:
@@ -220,7 +220,7 @@ std::string EQEmuLogSys::GetLinuxConsoleColorFromCategory(uint16 log_category){
 	}
 }
 
-uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category){
+uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category) {
 	switch (log_category) {
 		case Logs::Status:
 		case Logs::Normal:
@@ -317,7 +317,7 @@ void EQEmuLogSys::MakeDirectory(const std::string &directory_name)
 
 void EQEmuLogSys::CloseFileLogs()
 {
-	if (process_log.is_open()){
+	if (process_log.is_open()) {
 		process_log.close();
 	}
 }
