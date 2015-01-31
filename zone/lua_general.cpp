@@ -1612,6 +1612,7 @@ luabind::scope lua_register_events() {
 			luabind::value("cast_on", static_cast<int>(EVENT_CAST_ON)),
 			luabind::value("task_accepted", static_cast<int>(EVENT_TASK_ACCEPTED)),
 			luabind::value("task_stage_complete", static_cast<int>(EVENT_TASK_STAGE_COMPLETE)),
+			luabind::value("environmental_damage", static_cast<int>(EVENT_ENVIRONMENTAL_DAMAGE)),
 			luabind::value("task_update", static_cast<int>(EVENT_TASK_UPDATE)),
 			luabind::value("task_complete", static_cast<int>(EVENT_TASK_COMPLETE)),
 			luabind::value("task_fail", static_cast<int>(EVENT_TASK_FAIL)),

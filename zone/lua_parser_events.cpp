@@ -246,6 +246,19 @@ void handle_player_say(QuestInterface *parse, lua_State* L, Client* client, std:
 	lua_setfield(L, -2, "language");
 }
 
+void handle_player_environmental_damage(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+	std::vector<EQEmu::Any> *extra_pointers){
+	Seperator sep(data.c_str());
+	lua_pushinteger(L, std::stoi(sep.arg[0]));
+	lua_setfield(L, -2, "env_damage");
+
+	lua_pushinteger(L, std::stoi(sep.arg[1]));
+	lua_setfield(L, -2, "env_damage_type");
+
+	lua_pushinteger(L, std::stoi(sep.arg[2]));
+	lua_setfield(L, -2, "env_final_damage");
+}
+
 void handle_player_death(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 						 std::vector<EQEmu::Any> *extra_pointers) {
 	Seperator sep(data.c_str());

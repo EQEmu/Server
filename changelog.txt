@@ -10,6 +10,7 @@ Akkadius: Implemented event type "EVENT_ENVIRONMENTAL_DAMAGE"
 		quest::debug("env_final_damage is " . $env_final_damage);
 	} 
 	Result: (Test falling in Velks): http://i.imgur.com/tPRL7yL.png
+	- Implemented LUA counterpart of this same implementation above
 
 == 01/29/2015 ==
 Trevius: Added more information to Mercenary Logging.
