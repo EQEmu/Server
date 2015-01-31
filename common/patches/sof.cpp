@@ -2872,7 +2872,7 @@ namespace SoF
 		hdr.scaled_value = inst->IsScaling() ? inst->GetExp() / 100 : 0;
 		hdr.instance_id = (merchant_slot == 0) ? inst->GetSerialNumber() : merchant_slot;
 		hdr.unknown028 = 0;
-		hdr.last_cast_time = ((item->RecastDelay > 1) ? 1212693140 : 0);
+		hdr.last_cast_time = inst->GetRecastTimestamp();
 		hdr.charges = (stackable ? (item->MaxCharges ? 1 : 0) : charges);
 		hdr.inst_nodrop = inst->IsAttuned() ? 1 : 0;
 		hdr.unknown044 = 0;

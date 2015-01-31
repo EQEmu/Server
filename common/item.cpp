@@ -1441,6 +1441,7 @@ ItemInst::ItemInst(const Item_Struct* item, int16 charges) {
 	m_ornamenticon = 0;
 	m_ornamentidfile = 0;
 	m_ornament_hero_model = 0;
+	m_recast_timestamp = 0;
 }
 
 ItemInst::ItemInst(SharedDatabase *db, uint32 item_id, int16 charges) {
@@ -1466,6 +1467,7 @@ ItemInst::ItemInst(SharedDatabase *db, uint32 item_id, int16 charges) {
 	m_ornamenticon = 0;
 	m_ornamentidfile = 0;
 	m_ornament_hero_model = 0;
+	m_recast_timestamp = 0;
 }
 
 ItemInst::ItemInst(ItemInstTypes use_type) {
@@ -1486,6 +1488,7 @@ ItemInst::ItemInst(ItemInstTypes use_type) {
 	m_ornamenticon = 0;
 	m_ornamentidfile = 0;
 	m_ornament_hero_model = 0;
+	m_recast_timestamp = 0;
 }
 
 // Make a copy of an ItemInst object
@@ -1539,6 +1542,7 @@ ItemInst::ItemInst(const ItemInst& copy)
 	m_ornamenticon = copy.m_ornamenticon;
 	m_ornamentidfile = copy.m_ornamentidfile;
 	m_ornament_hero_model = copy.m_ornament_hero_model;
+	m_recast_timestamp = copy.m_recast_timestamp;
 }
 
 // Clean up container contents

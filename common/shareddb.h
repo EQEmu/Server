@@ -11,6 +11,7 @@
 #include "fixed_memory_variable_hash_set.h"
 
 #include <list>
+#include <map>
 
 class EvolveInfo;
 class Inventory;
@@ -69,6 +70,8 @@ class SharedDatabase : public Database
 		bool	SetSharedPlatinum(uint32 account_id, int32 amount_to_add);
 		bool	GetInventory(uint32 char_id, Inventory* inv);
 		bool	GetInventory(uint32 account_id, char* name, Inventory* inv);
+		std::map<uint32, uint32> GetItemRecastTimestamps(uint32 char_id);
+		void	ClearOldRecastTimestamps(uint32 char_id);
 		bool	SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin);
 
 

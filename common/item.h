@@ -403,6 +403,8 @@ public:
 	void SetOrnamentationIDFile(uint32 ornament_idfile)			{ m_ornamentidfile = ornament_idfile; }
 	uint32 GetOrnamentHeroModel(int32 material_slot = -1) const;
 	void SetOrnamentHeroModel(uint32 ornament_hero_model)		{ m_ornament_hero_model = ornament_hero_model; }
+	uint32 GetRecastTimestamp() const							{ return m_recast_timestamp; }
+	void SetRecastTimestamp(uint32 in)							{ m_recast_timestamp = in; }
 
 	void Initialize(SharedDatabase *db = nullptr);
 	void ScaleItem();
@@ -450,6 +452,7 @@ protected:
 	uint32				m_ornamenticon;
 	uint32				m_ornamentidfile;
 	uint32				m_ornament_hero_model;
+	uint32				m_recast_timestamp;
 
 	//
 	// Items inside of this item (augs or contents);

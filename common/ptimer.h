@@ -79,6 +79,7 @@ public:
 	inline const uint32 GetTimerTime() const { return timer_time; }
 	inline const uint32 GetStartTime() const { return start_time; }
 	inline const pTimerType GetType() const { return _type; }
+	inline const uint32 GetReadyTimestamp() const { return start_time + timer_time; }
 
 	inline bool Enabled() { return enabled; }
 

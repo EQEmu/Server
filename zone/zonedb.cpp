@@ -2999,6 +2999,14 @@ void ZoneDatabase::RemoveTempFactions(Client *client) {
 	QueryDatabase(query);
 }
 
+void ZoneDatabase::UpdateItemRecastTimestamps(uint32 char_id, uint32 recast_type, uint32 timestamp)
+{
+	std::string query =
+	    StringFormat("REPLACE INTO character_item_recast (id, recast_type, timestamp) VALUES (%u, %u, %u)", char_id,
+			 recast_type, timestamp);
+	QueryDatabase(query);
+}
+
 void ZoneDatabase::LoadPetInfo(Client *client) {
 
 	// Load current pet and suspended pet

@@ -1242,6 +1242,8 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 			{
 				//Can we start the timer here?  I don't see why not.
 				CastToClient()->GetPTimers().Start((pTimerItemStart + recasttype), recastdelay);
+				database.UpdateItemRecastTimestamps(CastToClient()->CharacterID(), recasttype,
+								CastToClient()->GetPTimers().Get(pTimerItemStart + recasttype)->GetReadyTimestamp());
 			}
 		}
 
@@ -2270,11 +2272,15 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	{
 		ItemInst *itm = CastToClient()->GetInv().GetItem(inventory_slot);
 		if(itm && itm->GetItem()->RecastDelay > 0){
-			CastToClient()->GetPTimers().Start((pTimerItemStart + itm->GetItem()->RecastType), itm->GetItem()->RecastDelay);
+			auto recast_type = itm->GetItem()->RecastType;
+			CastToClient()->GetPTimers().Start((pTimerItemStart + recast_type), itm->GetItem()->RecastDelay);
+			database.UpdateItemRecastTimestamps(
+			    CastToClient()->CharacterID(), recast_type,
+			    CastToClient()->GetPTimers().Get(pTimerItemStart + recast_type)->GetReadyTimestamp());
 			EQApplicationPacket *outapp = new EQApplicationPacket(OP_ItemRecastDelay, sizeof(ItemRecastDelay_Struct));
 			ItemRecastDelay_Struct *ird = (ItemRecastDelay_Struct *)outapp->pBuffer;
 			ird->recast_delay = itm->GetItem()->RecastDelay;
-			ird->recast_type = itm->GetItem()->RecastType;
+			ird->recast_type = recast_type;
 			CastToClient()->QueuePacket(outapp);
 			safe_delete(outapp);
 		}
