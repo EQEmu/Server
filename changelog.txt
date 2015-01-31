@@ -11,6 +11,7 @@ Akkadius: Implemented event type "EVENT_ENVIRONMENTAL_DAMAGE"
 	} 
 	Result: (Test falling in Velks): http://i.imgur.com/tPRL7yL.png
 	- Implemented LUA counterpart of this same implementation above
+Akkadius (Bobaski): Add PoK New Merchant sql/git/optional/2015_01_30_poknowledge_spell_vendors.sql
 
 == 01/29/2015 ==
 Trevius: Added more information to Mercenary Logging.
