@@ -684,7 +684,7 @@ void EntityList::AETaunt(Client* taunter, float range)
 	}
 }
 
-// solar: causes caster to hit every mob within dist range of center with
+// causes caster to hit every mob within dist range of center with
 // spell_id.
 // NPC spells will only affect other NPCs with compatible faction
 void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster, int16 resist_adjust)
@@ -820,7 +820,7 @@ void EntityList::MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool a
 	}
 }
 
-// solar: causes caster to hit every mob within dist range of center with
+// causes caster to hit every mob within dist range of center with
 // a bard pulse of spell_id.
 // NPC spells will only affect other NPCs with compatible faction
 void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster)

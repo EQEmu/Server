@@ -987,298 +987,267 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 	}
 }
 
-uint32 ZoneDatabase::CreateNewNPCCommand(const char* zone, uint32 zone_version,Client *client, NPC* spawn, uint32 extra) {
+uint32 ZoneDatabase::CreateNewNPCCommand(const char *zone, uint32 zone_version, Client *client, NPC *spawn,
+					 uint32 extra)
+{
+	uint32 npc_type_id = 0;
 
-    uint32 npc_type_id = 0;
-
-	if (extra && client && client->GetZoneID())
-	{
+	if (extra && client && client->GetZoneID()) {
 		// Set an npc_type ID within the standard range for the current zone if possible (zone_id * 1000)
 		int starting_npc_id = client->GetZoneID() * 1000;
 
 		std::string query = StringFormat("SELECT MAX(id) FROM npc_types WHERE id >= %i AND id < %i",
-                                        starting_npc_id, starting_npc_id + 1000);
-        auto results = QueryDatabase(query);
+						 starting_npc_id, starting_npc_id + 1000);
+		auto results = QueryDatabase(query);
 		if (results.Success()) {
-            if (results.RowCount() != 0)
-			{
-                auto row = results.begin();
-                npc_type_id = atoi(row[0]) + 1;
-                // Prevent the npc_type id from exceeding the range for this zone
-                if (npc_type_id >= (starting_npc_id + 1000))
-                    npc_type_id = 0;
-            }
-            else // No npc_type IDs set in this range yet
-                npc_type_id = starting_npc_id;
-        }
-    }
+			if (results.RowCount() != 0) {
+				auto row = results.begin();
+				npc_type_id = atoi(row[0]) + 1;
+				// Prevent the npc_type id from exceeding the range for this zone
+				if (npc_type_id >= (starting_npc_id + 1000))
+					npc_type_id = 0;
+			} else // No npc_type IDs set in this range yet
+				npc_type_id = starting_npc_id;
+		}
+	}
 
 	char tmpstr[64];
 	EntityList::RemoveNumbers(strn0cpy(tmpstr, spawn->GetName(), sizeof(tmpstr)));
 	std::string query;
-	if (npc_type_id)
-	{
-        query = StringFormat("INSERT INTO npc_types (id, name, level, race, class, hp, gender, "
-                                        "texture, helmtexture, size, loottable_id, merchant_id, face, "
-                                        "runspeed, prim_melee_type, sec_melee_type) "
-                                        "VALUES(%i, \"%s\" , %i, %i, %i, %i, %i, %i, %i, %f, %i, %i, %i, %f, %i, %i)",
-                                        npc_type_id, tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(),
-                                        spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(),
-                                        spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(),
-                                        spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28);
-        auto results = QueryDatabase(query);
+	if (npc_type_id) {
+		query = StringFormat("INSERT INTO npc_types (id, name, level, race, class, hp, gender, "
+				     "texture, helmtexture, size, loottable_id, merchant_id, face, "
+				     "runspeed, prim_melee_type, sec_melee_type) "
+				     "VALUES(%i, \"%s\" , %i, %i, %i, %i, %i, %i, %i, %f, %i, %i, %i, %f, %i, %i)",
+				     npc_type_id, tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(),
+				     spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(),
+				     spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(),
+				     spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28);
+		auto results = QueryDatabase(query);
+		if (!results.Success()) {
+			return false;
+		}
+		npc_type_id = results.LastInsertedID();
+	} else {
+		query = StringFormat("INSERT INTO npc_types (name, level, race, class, hp, gender, "
+				     "texture, helmtexture, size, loottable_id, merchant_id, face, "
+				     "runspeed, prim_melee_type, sec_melee_type) "
+				     "VALUES(\"%s\", %i, %i, %i, %i, %i, %i, %i, %f, %i, %i, %i, %f, %i, %i)",
+				     tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(),
+				     spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(),
+				     spawn->GetLoottableID(), spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28);
+		auto results = QueryDatabase(query);
 		if (!results.Success()) {
 			return false;
 		}
 		npc_type_id = results.LastInsertedID();
 	}
-	else
-	{
-        query = StringFormat("INSERT INTO npc_types (name, level, race, class, hp, gender, "
-                                        "texture, helmtexture, size, loottable_id, merchant_id, face, "
-                                        "runspeed, prim_melee_type, sec_melee_type) "
-                                        "VALUES(\"%s\", %i, %i, %i, %i, %i, %i, %i, %f, %i, %i, %i, %f, %i, %i)",
-                                        tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(),
-                                        spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(),
-                                        spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(),
-                                        spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28);
-        auto results = QueryDatabase(query);
-		if (!results.Success()) {
-			return false;
-		}
-		npc_type_id = results.LastInsertedID();
-	}
-
-	if(client)
 
 	query = StringFormat("INSERT INTO spawngroup (id, name) VALUES(%i, '%s-%s')", 0, zone, spawn->GetName());
-    auto results = QueryDatabase(query);
+	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
 	}
-    uint32 spawngroupid = results.LastInsertedID();
+	uint32 spawngroupid = results.LastInsertedID();
 
-	if(client)
-
-    query = StringFormat("INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) "
-                        "VALUES('%s', %u, %f, %f, %f, %i, %f, %i)",
-                        zone, zone_version, spawn->GetX(), spawn->GetY(), spawn->GetZ(), 1200,
-                        spawn->GetHeading(), spawngroupid);
-    results = QueryDatabase(query);
-	if (!results.Success()) {
-		return false;
-	}
-
-	if(client)
-
-    query = StringFormat("INSERT INTO spawnentry (spawngroupID, npcID, chance) VALUES(%i, %i, %i)",
-                        spawngroupid, npc_type_id, 100);
-    results = QueryDatabase(query);
+	query = StringFormat("INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) "
+			     "VALUES('%s', %u, %f, %f, %f, %i, %f, %i)",
+			     zone, zone_version, spawn->GetX(), spawn->GetY(), spawn->GetZ(), 1200, spawn->GetHeading(),
+			     spawngroupid);
+	results = QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
 	}
 
-	if(client)
+	query = StringFormat("INSERT INTO spawnentry (spawngroupID, npcID, chance) VALUES(%i, %i, %i)", spawngroupid,
+			     npc_type_id, 100);
+	results = QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
 
 	return true;
 }
 
-uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(const char* zone, uint32 zone_version, Client *client, NPC* spawn, uint32 respawnTime) {
-    uint32 last_insert_id = 0;
+uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(const char *zone, uint32 zone_version, Client *client, NPC *spawn,
+						uint32 respawnTime)
+{
+	uint32 last_insert_id = 0;
 
-	std::string query = StringFormat("INSERT INTO spawngroup (name) VALUES('%s%s%i')",
-                                    zone, spawn->GetName(), Timer::GetCurrentTime());
-    auto results = QueryDatabase(query);
+	std::string query = StringFormat("INSERT INTO spawngroup (name) VALUES('%s%s%i')", zone, spawn->GetName(),
+					 Timer::GetCurrentTime());
+	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return 0;
 	}
-    last_insert_id = results.LastInsertedID();
+	last_insert_id = results.LastInsertedID();
 
-    uint32 respawntime = 0;
-    uint32 spawnid = 0;
-    if (respawnTime)
-        respawntime = respawnTime;
-    else if(spawn->respawn2 && spawn->respawn2->RespawnTimer() != 0)
-        respawntime = spawn->respawn2->RespawnTimer();
-    else
-        respawntime = 1200;
+	uint32 respawntime = 0;
+	uint32 spawnid = 0;
+	if (respawnTime)
+		respawntime = respawnTime;
+	else if (spawn->respawn2 && spawn->respawn2->RespawnTimer() != 0)
+		respawntime = spawn->respawn2->RespawnTimer();
+	else
+		respawntime = 1200;
 
-    query = StringFormat("INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) "
-                        "VALUES('%s', %u, %f, %f, %f, %i, %f, %i)",
-                        zone, zone_version, spawn->GetX(), spawn->GetY(), spawn->GetZ(), respawntime,
-                        spawn->GetHeading(), last_insert_id);
-    results = QueryDatabase(query);
-    if (!results.Success()) {
-        return 0;
-    }
-    spawnid = results.LastInsertedID();
+	query = StringFormat("INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) "
+			     "VALUES('%s', %u, %f, %f, %f, %i, %f, %i)",
+			     zone, zone_version, spawn->GetX(), spawn->GetY(), spawn->GetZ(), respawntime,
+			     spawn->GetHeading(), last_insert_id);
+	results = QueryDatabase(query);
+	if (!results.Success()) {
+		return 0;
+	}
+	spawnid = results.LastInsertedID();
 
-    if(client)
+	query = StringFormat("INSERT INTO spawnentry (spawngroupID, npcID, chance) VALUES(%i, %i, %i)", last_insert_id,
+			     spawn->GetNPCTypeID(), 100);
+	results = QueryDatabase(query);
+	if (!results.Success()) {
+		return 0;
+	}
 
-    query = StringFormat("INSERT INTO spawnentry (spawngroupID, npcID, chance) VALUES(%i, %i, %i)",
-                        last_insert_id, spawn->GetNPCTypeID(), 100);
-    results = QueryDatabase(query);
-    if (!results.Success()) {
-        return 0;
-    }
-
-    if(client)
-
-    return spawnid;
+	return spawnid;
 }
 
-uint32 ZoneDatabase::UpdateNPCTypeAppearance(Client *client, NPC* spawn) {
-
-	std::string query = StringFormat("UPDATE npc_types SET name = \"%s\", level = %i, race = %i, class = %i, "
-                                    "hp = %i, gender = %i, texture = %i, helmtexture = %i, size = %i, "
-                                    "loottable_id = %i, merchant_id = %i, face = %i, WHERE id = %i",
-                                    spawn->GetName(), spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(),
-                                    spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(),
-                                    spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(),
-                                    spawn->MerchantType, spawn->GetNPCTypeID());
-    auto results = QueryDatabase(query);
-    if (!results.Success() && client)
-
-    return results.Success() == true? 1: 0;
+uint32 ZoneDatabase::UpdateNPCTypeAppearance(Client *client, NPC *spawn)
+{
+	std::string query =
+	    StringFormat("UPDATE npc_types SET name = \"%s\", level = %i, race = %i, class = %i, "
+			 "hp = %i, gender = %i, texture = %i, helmtexture = %i, size = %i, "
+			 "loottable_id = %i, merchant_id = %i, face = %i, WHERE id = %i",
+			 spawn->GetName(), spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(),
+			 spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(),
+			 spawn->GetLoottableID(), spawn->MerchantType, spawn->GetNPCTypeID());
+	auto results = QueryDatabase(query);
+	return results.Success() == true ? 1 : 0;
 }
 
-uint32 ZoneDatabase::DeleteSpawnLeaveInNPCTypeTable(const char* zone, Client *client, NPC* spawn) {
+uint32 ZoneDatabase::DeleteSpawnLeaveInNPCTypeTable(const char *zone, Client *client, NPC *spawn)
+{
 	uint32 id = 0;
 	uint32 spawngroupID = 0;
 
 	std::string query = StringFormat("SELECT id, spawngroupID FROM spawn2 WHERE "
-                                    "zone='%s' AND spawngroupID=%i", zone, spawn->GetSp2());
-    auto results = QueryDatabase(query);
-    if (!results.Success())
+					 "zone='%s' AND spawngroupID=%i",
+					 zone, spawn->GetSp2());
+	auto results = QueryDatabase(query);
+	if (!results.Success())
 		return 0;
 
-    if (results.RowCount() == 0)
-        return 0;
+	if (results.RowCount() == 0)
+		return 0;
 
 	auto row = results.begin();
 	if (row[0])
-        id = atoi(row[0]);
+		id = atoi(row[0]);
 
 	if (row[1])
-        spawngroupID = atoi(row[1]);
+		spawngroupID = atoi(row[1]);
 
-    query = StringFormat("DELETE FROM spawn2 WHERE id = '%i'", id);
-    results = QueryDatabase(query);
+	query = StringFormat("DELETE FROM spawn2 WHERE id = '%i'", id);
+	results = QueryDatabase(query);
 	if (!results.Success())
 		return 0;
 
-	if(client)
-
-    query = StringFormat("DELETE FROM spawngroup WHERE id = '%i'", spawngroupID);
-    results = QueryDatabase(query);
+	query = StringFormat("DELETE FROM spawngroup WHERE id = '%i'", spawngroupID);
+	results = QueryDatabase(query);
 	if (!results.Success())
 		return 0;
 
-	if(client)
-
-    query = StringFormat("DELETE FROM spawnentry WHERE spawngroupID = '%i'", spawngroupID);
-    results = QueryDatabase(query);
+	query = StringFormat("DELETE FROM spawnentry WHERE spawngroupID = '%i'", spawngroupID);
+	results = QueryDatabase(query);
 	if (!results.Success())
 		return 0;
-
-	if(client)
 
 	return 1;
 }
 
-uint32 ZoneDatabase::DeleteSpawnRemoveFromNPCTypeTable(const char* zone, uint32 zone_version, Client *client, NPC* spawn) {
-
+uint32 ZoneDatabase::DeleteSpawnRemoveFromNPCTypeTable(const char *zone, uint32 zone_version, Client *client,
+						       NPC *spawn)
+{
 	uint32 id = 0;
 	uint32 spawngroupID = 0;
 
 	std::string query = StringFormat("SELECT id, spawngroupID FROM spawn2 WHERE zone = '%s' "
-                                    "AND version = %u AND spawngroupID = %i",
-                                    zone, zone_version, spawn->GetSp2());
-    auto results = QueryDatabase(query);
-    if (!results.Success())
+					 "AND version = %u AND spawngroupID = %i",
+					 zone, zone_version, spawn->GetSp2());
+	auto results = QueryDatabase(query);
+	if (!results.Success())
 		return 0;
 
-    if (results.RowCount() == 0)
-        return 0;
+	if (results.RowCount() == 0)
+		return 0;
 
 	auto row = results.begin();
 
 	if (row[0])
-        id = atoi(row[0]);
+		id = atoi(row[0]);
 
 	if (row[1])
-        spawngroupID = atoi(row[1]);
+		spawngroupID = atoi(row[1]);
 
-    query = StringFormat("DELETE FROM spawn2 WHERE id = '%i'", id);
-    results = QueryDatabase(query);
-	if (!results.Success())
-		return 0;
-
-	if(client)
-
-    query = StringFormat("DELETE FROM spawngroup WHERE id = '%i'", spawngroupID);
+	query = StringFormat("DELETE FROM spawn2 WHERE id = '%i'", id);
 	results = QueryDatabase(query);
 	if (!results.Success())
 		return 0;
 
-	if(client)
-
-    query = StringFormat("DELETE FROM spawnentry WHERE spawngroupID = '%i'", spawngroupID);
+	query = StringFormat("DELETE FROM spawngroup WHERE id = '%i'", spawngroupID);
 	results = QueryDatabase(query);
 	if (!results.Success())
 		return 0;
 
-	if(client)
-
-    query = StringFormat("DELETE FROM npc_types WHERE id = '%i'", spawn->GetNPCTypeID());
+	query = StringFormat("DELETE FROM spawnentry WHERE spawngroupID = '%i'", spawngroupID);
 	results = QueryDatabase(query);
 	if (!results.Success())
 		return 0;
 
-	if(client)
+	query = StringFormat("DELETE FROM npc_types WHERE id = '%i'", spawn->GetNPCTypeID());
+	results = QueryDatabase(query);
+	if (!results.Success())
+		return 0;
 
 	return 1;
 }
 
-uint32  ZoneDatabase::AddSpawnFromSpawnGroup(const char* zone, uint32 zone_version, Client *client, NPC* spawn, uint32 spawnGroupID) {
-
+uint32 ZoneDatabase::AddSpawnFromSpawnGroup(const char *zone, uint32 zone_version, Client *client, NPC *spawn,
+					    uint32 spawnGroupID)
+{
 	uint32 last_insert_id = 0;
-	std::string query = StringFormat("INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) "
-                                    "VALUES('%s', %u, %f, %f, %f, %i, %f, %i)",
-                                    zone, zone_version, client->GetX(), client->GetY(), client->GetZ(),
-                                    120, client->GetHeading(), spawnGroupID);
-    auto results = QueryDatabase(query);
-    if (!results.Success())
+	std::string query =
+	    StringFormat("INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) "
+			 "VALUES('%s', %u, %f, %f, %f, %i, %f, %i)",
+			 zone, zone_version, client->GetX(), client->GetY(), client->GetZ(), 120, client->GetHeading(),
+			 spawnGroupID);
+	auto results = QueryDatabase(query);
+	if (!results.Success())
 		return 0;
 
-	if(client)
-
-    return 1;
+	return 1;
 }
 
-uint32 ZoneDatabase::AddNPCTypes(const char* zone, uint32 zone_version, Client *client, NPC* spawn, uint32 spawnGroupID) {
-
-    uint32 npc_type_id;
+uint32 ZoneDatabase::AddNPCTypes(const char *zone, uint32 zone_version, Client *client, NPC *spawn, uint32 spawnGroupID)
+{
+	uint32 npc_type_id;
 	char numberlessName[64];
 
 	EntityList::RemoveNumbers(strn0cpy(numberlessName, spawn->GetName(), sizeof(numberlessName)));
-	std::string query = StringFormat("INSERT INTO npc_types (name, level, race, class, hp, gender, "
-                                    "texture, helmtexture, size, loottable_id, merchant_id, face, "
-                                    "runspeed, prim_melee_type, sec_melee_type) "
-                                    "VALUES(\"%s\", %i, %i, %i, %i, %i, %i, %i, %f, %i, %i, %i, %f, %i, %i)",
-                                    numberlessName, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(),
-                                    spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(),
-                                    spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(),
-                                    spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28);
-    auto results = QueryDatabase(query);
+	std::string query =
+	    StringFormat("INSERT INTO npc_types (name, level, race, class, hp, gender, "
+			 "texture, helmtexture, size, loottable_id, merchant_id, face, "
+			 "runspeed, prim_melee_type, sec_melee_type) "
+			 "VALUES(\"%s\", %i, %i, %i, %i, %i, %i, %i, %f, %i, %i, %i, %f, %i, %i)",
+			 numberlessName, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(),
+			 spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(),
+			 spawn->GetLoottableID(), spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28);
+	auto results = QueryDatabase(query);
 	if (!results.Success())
 		return 0;
-    npc_type_id = results.LastInsertedID();
+	npc_type_id = results.LastInsertedID();
 
-	if(client)
-
-	if(client)
-        client->Message(0, "%s npc_type ID %i created successfully!", numberlessName, npc_type_id);
+	if (client)
+		client->Message(0, "%s npc_type ID %i created successfully!", numberlessName, npc_type_id);
 
 	return 1;
 }

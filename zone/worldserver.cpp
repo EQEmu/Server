@@ -647,7 +647,7 @@ void WorldServer::Process() {
 		case ServerOP_Petition: {
 			std::cout << "Got Server Requested Petition List Refresh" << std::endl;
 			ServerPetitionUpdate_Struct* sus = (ServerPetitionUpdate_Struct*) pack->pBuffer;
-			// solar: this was typoed to = instead of ==, not that it acts any different now though..
+			// this was typoed to = instead of ==, not that it acts any different now though..
 			if (sus->status == 0) petition_list.ReadDatabase();
 			else if (sus->status == 1) petition_list.ReadDatabase(); // Until I fix this to be better....
 			break;

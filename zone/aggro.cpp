@@ -481,7 +481,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 }
 
 /*
-solar: returns false if attack should not be allowed
+returns false if attack should not be allowed
 I try to list every type of conflict that's possible here, so it's easy
 to see how the decision is made. Yea, it could be condensed and made
 faster, but I'm doing it this way to make it readable and easy to modify
@@ -550,7 +550,7 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 		}
 	}
 
-	// solar: the format here is a matrix of mob type vs mob type.
+	// the format here is a matrix of mob type vs mob type.
 	// redundant ones are omitted and the reverse is tried if it falls through.
 
 	// first figure out if we're pets. we always look at the master's flags.
@@ -701,7 +701,7 @@ type', in which case, the answer is yes.
 }
 
 
-// solar: this is to check if non detrimental things are allowed to be done
+// this is to check if non detrimental things are allowed to be done
 // to the target. clients cannot affect npcs and vice versa, and clients
 // cannot affect other clients that are not of the same pvp flag as them.
 // also goes for their pets
@@ -717,7 +717,7 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 	if (target->GetAllowBeneficial())
 		return true;
 
-	// solar: see IsAttackAllowed for notes
+	// see IsAttackAllowed for notes
 
 	// first figure out if we're pets. we always look at the master's flags.
 	// no need to compare pets to anything
