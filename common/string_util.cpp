@@ -71,7 +71,6 @@ const std::string StringFormat(const char* format, ...)
 	return output;
 }
 
-
 // normal strncpy doesnt put a null term on copied strings, this one does
 // ref: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/wcecrt/htm/_wcecrt_strncpy_wcsncpy.asp
 char* strn0cpy(char* dest, const char* source, uint32 size) {
@@ -408,3 +407,4 @@ bool isAlphaNumeric(const char *text)
 
 	return true;
 }
+

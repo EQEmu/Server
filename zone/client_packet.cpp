@@ -404,6 +404,9 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 		Log.Out(Logs::Detail, Logs::Client_Server_Packet, "Dispatch opcode: %s", buffer);
 	}
 
+	// std::cout << "[Client -> Server] " << StringFormat("[%s - 0x%04x] [Size: %u] \n %s", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size(), DumpPacketToString(app).c_str()) << std::endl;
+	Log.Out(Logs::General, Logs::Client_Server_Packet, "[%s - 0x%04x] [Size: %u] \n %s", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size(), DumpPacketToString(app).c_str());
+
 	EmuOpcode opcode = app->GetOpcode();
 	if (opcode == OP_AckPacket) {
 		return true;

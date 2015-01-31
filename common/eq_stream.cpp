@@ -23,6 +23,7 @@
 #include "op_codes.h"
 #include "crc16.h"
 #include "platform.h"
+#include "string_util.h"
 
 #include <string>
 #include <iomanip>
@@ -557,6 +558,9 @@ void EQStream::SendPacket(uint16 opcode, EQApplicationPacket *p)
 {
 	uint32 chunksize,used;
 	uint32 length;
+
+	// std::cout << "[Server -> Client] " << StringFormat("[%s - 0x%04x] [Size: %u]", OpcodeManager::EmuToName(p->GetOpcode()), p->GetOpcode(), p->Size()) << std::endl;
+	// DumpPacket(p);
 
 	// Convert the EQApplicationPacket to 1 or more EQProtocolPackets
 	if (p->size>(MaxLen-8)) { // proto-op(2), seq(2), app-op(2) ... data ... crc(2)

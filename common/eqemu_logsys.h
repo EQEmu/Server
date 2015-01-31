@@ -88,7 +88,7 @@ namespace Logs{
 		"AI",
 		"Aggro",
 		"Attack",
-		"Client Server Packet",
+		"Packet: [Client -> Server]",
 		"Combat",
 		"Commands",
 		"Crash",

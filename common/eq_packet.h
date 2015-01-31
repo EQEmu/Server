@@ -20,6 +20,7 @@
 
 #include "base_packet.h"
 #include "platform.h"
+#include <iostream>
 
 #ifdef STATIC_OPCODE
 	typedef unsigned short EmuOpcode;
@@ -146,6 +147,6 @@ protected:
 };
 
 extern void DumpPacket(const EQApplicationPacket* app, bool iShowInfo = false);
-
+extern std::string DumpPacketToString(const EQApplicationPacket* app, bool iShowInfo = false);
 
 #endif
