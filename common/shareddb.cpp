@@ -438,30 +438,29 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory *inv, bool is_charid)
 			}
 		}
 
-		if (!row[9])
-			continue;
+		if (row[9]) {
+			std::string data_str(row[9]);
+			std::string idAsString;
+			std::string value;
+			bool use_id = true;
 
-		std::string data_str(row[9]);
-		std::string idAsString;
-		std::string value;
-		bool use_id = true;
-
-		for (int i = 0; i < data_str.length(); ++i) {
-			if (data_str[i] == '^') {
-				if (!use_id) {
-					inst->SetCustomData(idAsString, value);
-					idAsString.clear();
-					value.clear();
+			for (int i = 0; i < data_str.length(); ++i) {
+				if (data_str[i] == '^') {
+					if (!use_id) {
+						inst->SetCustomData(idAsString, value);
+						idAsString.clear();
+						value.clear();
+					}
+					use_id = !use_id;
+					continue;
 				}
-				use_id = !use_id;
-				continue;
-			}
 
-			char v = data_str[i];
-			if (use_id)
-				idAsString.push_back(v);
-			else
-				value.push_back(v);
+				char v = data_str[i];
+				if (use_id)
+					idAsString.push_back(v);
+				else
+					value.push_back(v);
+			}
 		}
 
 		put_slot_id = inv->PutItem(slot_id, *inst);
