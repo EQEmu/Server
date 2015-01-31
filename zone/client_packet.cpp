@@ -5541,6 +5541,12 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 	}
 	else{
 		SetHP(GetHP() - (damage * RuleR(Character, EnvironmentDamageMulipliter)));
+
+		/* EVENT_ENVIRONMENTAL_DAMAGE */
+		int final_damage = (damage * RuleR(Character, EnvironmentDamageMulipliter));
+		char buf[24];
+		snprintf(buf, 23, "%u %u %i", ed->damage, ed->dmgtype, final_damage); 
+		parse->EventPlayer(EVENT_ENVIRONMENTAL_DAMAGE, this, buf, 0);
 	}
 
 	if (GetHP() <= 0) {

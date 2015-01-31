@@ -1,5 +1,16 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/30/2015 ==
+Akkadius: Implemented event type "EVENT_ENVIRONMENTAL_DAMAGE"
+	- This event triggers when taking any sort of environmental damage. Example use: 
+	sub EVENT_ENVIRONMENTAL_DAMAGE{
+		quest::debug("EVENT_ENVIRONMENTAL_DAMAGE");
+		quest::debug("env_damage is " . $env_damage);
+		quest::debug("env_damage_type is " . $env_damage_type);
+		quest::debug("env_final_damage is " . $env_final_damage);
+	} 
+	Result: (Test falling in Velks): http://i.imgur.com/tPRL7yL.png
+
 == 01/29/2015 ==
 Trevius: Added more information to Mercenary Logging.
 Trevius: Added potential fix for Mercenaries that fail to unsuspend.
