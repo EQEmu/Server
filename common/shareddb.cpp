@@ -382,96 +382,101 @@ bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, 
 
 
 // Retrieve shared bank inventory based on either account or character
-bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
+bool SharedDatabase::GetSharedBank(uint32 id, Inventory *inv, bool is_charid)
+{
 	std::string query;
 
 	if (is_charid)
 		query = StringFormat("SELECT sb.slotid, sb.itemid, sb.charges, "
-                            "sb.augslot1, sb.augslot2, sb.augslot3, "
-                            "sb.augslot4, sb.augslot5, sb.augslot6, sb.custom_data "
-                            "FROM sharedbank sb INNER JOIN character_data ch "
-                            "ON ch.account_id=sb.acctid WHERE ch.id = %i", id);
+				     "sb.augslot1, sb.augslot2, sb.augslot3, "
+				     "sb.augslot4, sb.augslot5, sb.augslot6, sb.custom_data "
+				     "FROM sharedbank sb INNER JOIN character_data ch "
+				     "ON ch.account_id=sb.acctid WHERE ch.id = %i",
+				     id);
 	else
 		query = StringFormat("SELECT slotid, itemid, charges, "
-                            "augslot1, augslot2, augslot3, "
-                            "augslot4, augslot5, augslot6, custom_data "
-                            "FROM sharedbank WHERE acctid=%i", id);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "Database::GetSharedBank(uint32 account_id): %s", results.ErrorMessage().c_str());
-        return false;
-    }
+				     "augslot1, augslot2, augslot3, "
+				     "augslot4, augslot5, augslot6, custom_data "
+				     "FROM sharedbank WHERE acctid=%i",
+				     id);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		Log.Out(Logs::General, Logs::Error, "Database::GetSharedBank(uint32 account_id): %s",
+			results.ErrorMessage().c_str());
+		return false;
+	}
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        int16 slot_id	= (int16)atoi(row[0]);
-		uint32 item_id	= (uint32)atoi(row[1]);
-		int8 charges	= (int8)atoi(row[2]);
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		int16 slot_id = (int16)atoi(row[0]);
+		uint32 item_id = (uint32)atoi(row[1]);
+		int8 charges = (int8)atoi(row[2]);
 
 		uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
 		aug[0] = (uint32)atoi(row[3]);
 		aug[1] = (uint32)atoi(row[4]);
-        aug[2] = (uint32)atoi(row[5]);
-        aug[3] = (uint32)atoi(row[6]);
-        aug[4] = (uint32)atoi(row[7]);
+		aug[2] = (uint32)atoi(row[5]);
+		aug[3] = (uint32)atoi(row[6]);
+		aug[4] = (uint32)atoi(row[7]);
 		aug[5] = (uint32)atoi(row[8]);
 
-        const Item_Struct* item = GetItem(item_id);
+		const Item_Struct *item = GetItem(item_id);
 
-        if (!item) {
-            Log.Out(Logs::General, Logs::Error,
-					"Warning: %s %i has an invalid item_id %i in inventory slot %i",
-					((is_charid==true) ? "charid" : "acctid"), id, item_id, slot_id);
-            continue;
-        }
+		if (!item) {
+			Log.Out(Logs::General, Logs::Error,
+				"Warning: %s %i has an invalid item_id %i in inventory slot %i",
+				((is_charid == true) ? "charid" : "acctid"), id, item_id, slot_id);
+			continue;
+		}
 
-        int16 put_slot_id = INVALID_INDEX;
+		int16 put_slot_id = INVALID_INDEX;
 
-        ItemInst* inst = CreateBaseItem(item, charges);
-        if (inst && item->ItemClass == ItemClassCommon) {
-            for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
-                if (aug[i])
+		ItemInst *inst = CreateBaseItem(item, charges);
+		if (inst && item->ItemClass == ItemClassCommon) {
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+				if (aug[i])
 					inst->PutAugment(this, i, aug[i]);
-            }
-        }
+			}
+		}
 
-        if(!row[9])
-            continue;
+		if (!row[9])
+			continue;
 
-        std::string data_str(row[9]);
-        std::string idAsString;
-        std::string value;
-        bool use_id = true;
+		std::string data_str(row[9]);
+		std::string idAsString;
+		std::string value;
+		bool use_id = true;
 
-        for(int i = 0; i < data_str.length(); ++i) {
-            if(data_str[i] == '^') {
-                if(!use_id) {
-                    inst->SetCustomData(idAsString, value);
-                    idAsString.clear();
-                    value.clear();
-                }
-                use_id = !use_id;
-                continue;
-            }
+		for (int i = 0; i < data_str.length(); ++i) {
+			if (data_str[i] == '^') {
+				if (!use_id) {
+					inst->SetCustomData(idAsString, value);
+					idAsString.clear();
+					value.clear();
+				}
+				use_id = !use_id;
+				continue;
+			}
 
-            char v = data_str[i];
-            if(use_id)
-                idAsString.push_back(v);
-            else
-                value.push_back(v);
-        }
+			char v = data_str[i];
+			if (use_id)
+				idAsString.push_back(v);
+			else
+				value.push_back(v);
+		}
 
-        put_slot_id = inv->PutItem(slot_id, *inst);
-        safe_delete(inst);
+		put_slot_id = inv->PutItem(slot_id, *inst);
+		safe_delete(inst);
 
-        // Save ptr to item in inventory
-        if (put_slot_id != INVALID_INDEX)
-            continue;
+		// Save ptr to item in inventory
+		if (put_slot_id != INVALID_INDEX)
+			continue;
 
-        Log.Out(Logs::General, Logs::Error, "Warning: Invalid slot_id for item in shared bank inventory: %s=%i, item_id=%i, slot_id=%i",
-                                            ((is_charid==true)? "charid": "acctid"), id, item_id, slot_id);
+		Log.Out(Logs::General, Logs::Error,
+			"Warning: Invalid slot_id for item in shared bank inventory: %s=%i, item_id=%i, slot_id=%i",
+			((is_charid == true) ? "charid" : "acctid"), id, item_id, slot_id);
 
-        if (is_charid)
-            SaveInventory(id, nullptr, slot_id);
+		if (is_charid)
+			SaveInventory(id, nullptr, slot_id);
 	}
 
 	return true;
