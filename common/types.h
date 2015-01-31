@@ -18,6 +18,7 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#include <eqp_profiler.h>
 #include <stdint.h>
 typedef uint8_t byte;
 typedef uint8_t uint8;

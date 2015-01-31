@@ -26,6 +26,7 @@ extern LoginServer server;
 
 Client::Client(std::shared_ptr<EQStream> c, LSClientVersion v)
 {
+	_eqp
 	connection = c;
 	version = v;
 	status = cs_not_sent_session_ready;
@@ -36,6 +37,7 @@ Client::Client(std::shared_ptr<EQStream> c, LSClientVersion v)
 
 bool Client::Process()
 {
+	_eqp
 	EQApplicationPacket *app = connection->PopPacket();
 	while(app)
 	{
@@ -114,6 +116,7 @@ bool Client::Process()
 
 void Client::Handle_SessionReady(const char* data, unsigned int size)
 {
+	_eqp
 	if(status != cs_not_sent_session_ready)
 	{
 		server_log->Log(log_network_error, "Session ready received again after already being received.");
@@ -175,6 +178,7 @@ void Client::Handle_SessionReady(const char* data, unsigned int size)
 
 void Client::Handle_Login(const char* data, unsigned int size)
 {
+	_eqp
 	if(status != cs_waiting_for_login)
 	{
 		server_log->Log(log_network_error, "Login received after already having logged in.");
@@ -329,6 +333,7 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 void Client::Handle_Play(const char* data)
 {
+	_eqp
 	if(status != cs_logged_in)
 	{
 		server_log->Log(log_client_error, "Client sent a play request when they either were not logged in, discarding.");
@@ -352,6 +357,7 @@ void Client::Handle_Play(const char* data)
 
 void Client::SendServerListPacket()
 {
+	_eqp
 	EQApplicationPacket *outapp = server.SM->CreateServerListPacket(this);
 
 	if(server.options.IsDumpOutPacketsOn())
@@ -365,6 +371,7 @@ void Client::SendServerListPacket()
 
 void Client::SendPlayResponse(EQApplicationPacket *outapp)
 {
+	_eqp
 	if(server.options.IsTraceOn())
 	{
 		server_log->Log(log_network_trace, "Sending play response for %s.", GetAccountName().c_str());
@@ -376,6 +383,7 @@ void Client::SendPlayResponse(EQApplicationPacket *outapp)
 
 void Client::GenerateKey()
 {
+	_eqp
 	key.clear();
 	int count = 0;
 	while(count < 10)

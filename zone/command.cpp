@@ -153,10 +153,6 @@ int command_init(void) {
 #ifdef PACKET_PROFILER
 	command_add("packetprofile",  "- Dump packet profile for target or self.",  250, command_packetprofile) ||
 #endif
-#ifdef EQPROFILE
-	command_add("profiledump",  "- Dump profiling info to logs",  250, command_profiledump) ||
-	command_add("profilereset",  "- Reset profiling info",  250, command_profilereset) ||
-#endif
 #ifdef BOTS
 	command_add("bot",  "- Type \"#bot help\" to the see the list of available commands for bots.",  0, command_bot) ||
 #endif
@@ -6608,16 +6604,6 @@ void command_packetprofile(Client *c, const Seperator *sep) {
 		t = c->GetTarget()->CastToClient();
 	}
 	c->DumpPacketProfile();
-}
-#endif
-
-#ifdef EQPROFILE
-void command_profiledump(Client *c, const Seperator *sep) {
-	DumpZoneProfile();
-}
-
-void command_profilereset(Client *c, const Seperator *sep) {
-	ResetZoneProfile();
 }
 #endif
 

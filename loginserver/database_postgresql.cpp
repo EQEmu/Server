@@ -30,6 +30,7 @@ extern LoginServer server;
 
 DatabasePostgreSQL::DatabasePostgreSQL(string user, string pass, string host, string port, string name)
 {
+	_eqp
 	db = nullptr;
 	db = PQsetdbLogin(host.c_str(), port.c_str(), nullptr, nullptr, name.c_str(), user.c_str(), pass.c_str());
 	if(!db)
@@ -47,6 +48,7 @@ DatabasePostgreSQL::DatabasePostgreSQL(string user, string pass, string host, st
 
 DatabasePostgreSQL::~DatabasePostgreSQL()
 {
+	_eqp
 	if(db)
 	{
 		PQfinish(db);
@@ -55,6 +57,7 @@ DatabasePostgreSQL::~DatabasePostgreSQL()
 
 bool DatabasePostgreSQL::GetLoginDataFromAccountName(string name, string &password, unsigned int &id)
 {
+	_eqp
 	if(!db)
 	{
 		return false;
@@ -103,6 +106,7 @@ bool DatabasePostgreSQL::GetLoginDataFromAccountName(string name, string &passwo
 bool DatabasePostgreSQL::GetWorldRegistration(string long_name, string short_name, unsigned int &id, string &desc, unsigned int &list_id,
 		unsigned int &trusted, string &list_desc, string &account, string &password)
 {
+	_eqp
 	if(!db)
 	{
 		return false;
@@ -160,6 +164,7 @@ bool DatabasePostgreSQL::GetWorldRegistration(string long_name, string short_nam
 
 void DatabasePostgreSQL::UpdateLSAccountData(unsigned int id, string ip_address)
 {
+	_eqp
 	if(!db)
 	{
 		return;
@@ -195,6 +200,7 @@ void DatabasePostgreSQL::UpdateLSAccountData(unsigned int id, string ip_address)
 
 void DatabasePostgreSQL::UpdateWorldRegistration(unsigned int id, string long_name, string ip_address)
 {
+	_eqp
 	if(!db)
 	{
 		return;

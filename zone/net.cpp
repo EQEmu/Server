@@ -308,12 +308,6 @@ int main(int argc, char** argv) {
 	}
 
 	Timer InterserverTimer(INTERSERVER_TIMER); // does MySQL pings and auto-reconnect
-#ifdef EQPROFILE
-#ifdef PROFILE_DUMP_TIME
-	Timer profile_dump_timer(PROFILE_DUMP_TIME*1000);
-	profile_dump_timer.Start();
-#endif
-#endif
 	if (!strlen(zone_name) || !strcmp(zone_name,".")) {
 		Log.Out(Logs::General, Logs::Zone_Server, "Entering sleep mode");
 	} else if (!Zone::Bootup(database.GetZoneID(zone_name), 0, true)) { //todo: go above and fix this to allow cmd line instance
@@ -444,13 +438,6 @@ int main(int argc, char** argv) {
 				worldserver.AsyncConnect();
 		}
 
-#ifdef EQPROFILE
-#ifdef PROFILE_DUMP_TIME
-		if(profile_dump_timer.Check()) {
-			DumpZoneProfile();
-		}
-#endif
-#endif
 		}	//end extra profiler block 
 		Sleep(ZoneTimerResolution);
 	}

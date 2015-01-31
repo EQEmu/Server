@@ -26,8 +26,10 @@
 #include "login_server.h"
 #include <time.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <string>
 #include <sstream>
+#include <fstream>
 
 TimeoutManager timeout_manager;
 LoginServer server;
@@ -37,6 +39,20 @@ bool run_server = true;
 
 void CatchSignal(int sig_num)
 {
+#ifdef EQPERF_ENABLED
+	char time_str[128];
+	time_t result = time(nullptr);
+	strftime(time_str, sizeof(time_str), "%Y_%m_%d__%H_%M_%S", localtime(&result));
+
+	std::string prof_name = "./profile/login_";
+	prof_name += time_str;
+	prof_name += ".log";
+
+	std::ofstream profile_out(prof_name, std::ofstream::out);
+	if(profile_out.good()) {
+		EQP::CPU::ST::GetProfiler().Dump(profile_out);
+	}
+#endif
 }
 
 int main()
@@ -47,13 +63,22 @@ int main()
 	//Create our error log, is of format login_<number>.log
 	time_t current_time = time(nullptr);
 	std::stringstream log_name(std::stringstream::in | std::stringstream::out);
-#ifdef WIN32
-	log_name << ".\\logs\\login_" << (unsigned int)current_time << ".log";
-#else
 	log_name << "./logs/login_" << (unsigned int)current_time << ".log";
-#endif
 	server_log = new ErrorLog(log_name.str().c_str());
 	server_log->Log(log_debug, "Logging System Init.");
+
+	if(signal(SIGINT, CatchSignal) == SIG_ERR)	{
+		server_log->Log(log_error, "Could not set signal handler");
+		return 1;
+	}
+	if(signal(SIGTERM, CatchSignal) == SIG_ERR)	{
+		server_log->Log(log_error, "Could not set signal handler");
+		return 1;
+	}
+	if(signal(SIGBREAK, CatchSignal) == SIG_ERR)	{
+		server_log->Log(log_error, "Could not set signal handler");
+		return 1;
+	}
 
 	//Create our subsystem and parse the ini file.
 	server.config = new Config();

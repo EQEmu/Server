@@ -27,6 +27,7 @@ extern ErrorLog *server_log;
 */
 std::string Config::GetVariable(std::string title, std::string parameter)
 {
+	_eqp
 	std::map<std::string, std::map<std::string, std::string> >::iterator iter = vars.find(title);
 	if(iter != vars.end())
 	{
@@ -46,6 +47,7 @@ std::string Config::GetVariable(std::string title, std::string parameter)
 */
 void Config::Parse(const char *file_name)
 {
+	_eqp
 	if(file_name == nullptr)
 	{
 		server_log->Log(log_error, "Config::Parse(), file_name passed was null.");
@@ -144,6 +146,7 @@ void Config::Parse(const char *file_name)
 */
 void Config::Tokenize(FILE *input, std::list<std::string> &tokens)
 {
+	_eqp
 	char c = fgetc(input);
 	std::string lexeme;
 

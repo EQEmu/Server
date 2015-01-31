@@ -24,6 +24,7 @@ extern ErrorLog *server_log;
 
 bool Encryption::LoadCrypto(std::string name)
 {
+	_eqp
 	if(!Load(name.c_str()))
 	{
 		server_log->Log(log_error, "Failed to load %s from the operating system.", name.c_str());
@@ -58,6 +59,7 @@ bool Encryption::LoadCrypto(std::string name)
 
 char *Encryption::DecryptUsernamePassword(const char* encrypted_buffer, unsigned int buffer_size, int mode)
 {
+	_eqp
 	if(decrypt_func)
 	{
 		return decrypt_func(encrypted_buffer, buffer_size, mode);
@@ -67,6 +69,7 @@ char *Encryption::DecryptUsernamePassword(const char* encrypted_buffer, unsigned
 
 char *Encryption::Encrypt(const char* buffer, unsigned int buffer_size, unsigned int &out_size)
 {
+	_eqp
 	if(encrypt_func)
 	{
 		return encrypt_func(buffer, buffer_size, out_size);
@@ -76,6 +79,7 @@ char *Encryption::Encrypt(const char* buffer, unsigned int buffer_size, unsigned
 
 void Encryption::DeleteHeap(char *buffer)
 {
+	_eqp
 	if(delete_func)
 	{
 		delete_func(buffer);
@@ -84,6 +88,7 @@ void Encryption::DeleteHeap(char *buffer)
 
 bool Encryption::Load(const char *name)
 {
+	_eqp
 	SetLastError(0);
 #ifdef UNICODE
 	int name_length = strlen(name);
@@ -111,6 +116,7 @@ bool Encryption::Load(const char *name)
 
 void Encryption::Unload()
 {
+	_eqp
 	if(h_dll)
 	{
 		FreeLibrary(h_dll);
@@ -120,6 +126,7 @@ void Encryption::Unload()
 
 bool Encryption::GetSym(const char *name, void **sym)
 {
+	_eqp
 	if(Loaded())
 	{
 		*sym = GetProcAddress(h_dll, name);
@@ -133,6 +140,7 @@ bool Encryption::GetSym(const char *name, void **sym)
 
 void *Encryption::GetSym(const char *name)
 {
+	_eqp
 	if(Loaded())
 	{
 		return GetProcAddress(h_dll, name);

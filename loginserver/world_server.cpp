@@ -25,6 +25,7 @@ extern LoginServer server;
 
 WorldServer::WorldServer(EmuTCPConnection *c)
 {
+	_eqp
 	connection = c;
 	zones_booted = 0;
 	players_online = 0;
@@ -39,6 +40,7 @@ WorldServer::WorldServer(EmuTCPConnection *c)
 
 WorldServer::~WorldServer()
 {
+	_eqp
 	if(connection)
 	{
 		connection->Free();
@@ -47,6 +49,7 @@ WorldServer::~WorldServer()
 
 void WorldServer::Reset()
 {
+	_eqp
 	zones_booted = 0;
 	players_online = 0;
 	status = 0;
@@ -59,6 +62,7 @@ void WorldServer::Reset()
 
 bool WorldServer::Process()
 {
+	_eqp
 	ServerPacket *app = nullptr;
 	while(app = connection->PopPacket())
 	{
@@ -237,6 +241,7 @@ bool WorldServer::Process()
 
 void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
 {
+	_eqp
 	if(logged_in)
 	{
 		server_log->Log(log_network_error, "WorldServer::Handle_NewLSInfo called but the login server was already marked as logged in, aborting.");
@@ -501,6 +506,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
 
 void WorldServer::Handle_LSStatus(ServerLSStatus_Struct *s)
 {
+	_eqp
 	players_online = s->num_players;
 	zones_booted = s->num_zones;
 	status = s->status;
@@ -508,6 +514,7 @@ void WorldServer::Handle_LSStatus(ServerLSStatus_Struct *s)
 
 void WorldServer::SendClientAuth(unsigned int ip, string account, string key, unsigned int account_id)
 {
+	_eqp
 	ServerPacket *outapp = new ServerPacket(ServerOP_LSClientAuth, sizeof(ServerLSClientAuth));
 	ServerLSClientAuth* slsca = (ServerLSClientAuth*)outapp->pBuffer;
 

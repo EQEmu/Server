@@ -158,7 +158,6 @@ SET(common_headers
 	packet_functions.h
 	platform.h
 	proc_launcher.h
-	profiler.h
 	ptimer.h
 	queue.h
 	races.h
