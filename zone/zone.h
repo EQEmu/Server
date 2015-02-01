@@ -257,7 +257,14 @@ public:
 	// random object that provides random values for the zone
 	EQEmu::Random random;
 
-	static void GMSayHookCallBackProcess(uint16 log_category, const std::string& message){
+	static void GMSayHookCallBackProcess(uint16 log_category, std::string message){
+		/* Cut messages down to 4000 max to prevent client crash */
+		if (!message.empty())
+			message = message.substr(0, 4000);
+
+		/* Replace Occurrences of % or MessageStatus will crash */
+		find_replace(message, std::string("%"), std::string("."));
+
 		if (message.find("\n") != std::string::npos){
 			auto message_split = SplitString(message, '\n');
 			entity_list.MessageStatus(0, 80, Log.GetGMSayColorFromCategory(log_category), "%s", message_split[0].c_str());
