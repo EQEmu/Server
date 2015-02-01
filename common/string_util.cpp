@@ -408,3 +408,10 @@ bool isAlphaNumeric(const char *text)
 	return true;
 }
 
+void find_replace(std::string& string_subject, std::string& search_string, std::string& replace_string) {
+	auto index = string_subject.find_first_of(search_string);
+	while (index != std::string::npos) {
+		string_subject.replace(index, index + 1, replace_string);
+		index = string_subject.find_first_of(search_string);
+	}
+}

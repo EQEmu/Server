@@ -56,4 +56,6 @@ std::vector<std::string> SplitString(const std::string &s, char delim);
 
 bool isAlphaNumeric(const char *text);
 
+void find_replace(std::string& string_subject, std::string& search_string, std::string& replace_string);
+
 #endif
