@@ -7516,7 +7516,6 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 	int32 npc_value[MAX_NPC_FACTIONS] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	uint8 temp[MAX_NPC_FACTIONS] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	int32 current_value;
-	bool change = false;
 
 	// Get the npc faction list
 	if (!database.GetNPCFactionList(npc_id, faction_id, npc_value, temp))
@@ -7552,20 +7551,19 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 		current_value = GetCharacterFactionLevel(faction_id[i]);
 		faction_before_hit = current_value;
 
-		change = UpdatePersonalFaction(char_id, npc_value[i], faction_id[i], &current_value, temp[i], this_faction_min, this_faction_max);
+		UpdatePersonalFaction(char_id, npc_value[i], faction_id[i], &current_value, temp[i], this_faction_min, this_faction_max);
 
-		if (change)
-			{
-				SendFactionMessage(npc_value[i], faction_id[i], faction_before_hit, current_value, temp[i], this_faction_min, this_faction_max);
-			}
+		//Message(14, "Min(%d) Max(%d) Before(%d), After(%d)\n", this_faction_min, this_faction_max, faction_before_hit, current_value);
+
+		SendFactionMessage(npc_value[i], faction_id[i], faction_before_hit, current_value, temp[i], this_faction_min, this_faction_max);
 	}
+
 	return;
 }
 
 void Client::SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class, uint8 char_race, uint8 char_deity, int32 value, uint8 temp)
 {
 	int32 current_value;
-	bool  change=false;
 
 	//Get the npc faction list
 	if(faction_id > 0 && value != 0) {
@@ -7596,12 +7594,11 @@ void Client::SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class
 		current_value = GetCharacterFactionLevel(faction_id);
 		faction_before_hit = current_value;
 
-		change = UpdatePersonalFaction(char_id, value, faction_id, &current_value, temp, this_faction_min, this_faction_max);
+		UpdatePersonalFaction(char_id, value, faction_id, &current_value, temp, this_faction_min, this_faction_max);
 
-		if (change)
-		{
-			SendFactionMessage(value, faction_id, faction_before_hit, current_value, temp, this_faction_min, this_faction_max);
-		}
+		//Message(14, "Min(%d) Max(%d) Before(%d), After(%d)\n", this_faction_min, this_faction_max, faction_before_hit, current_value);
+
+		SendFactionMessage(value, faction_id, faction_before_hit, current_value, temp, this_faction_min, this_faction_max);
 	}
 
 	return;
@@ -7623,10 +7620,11 @@ int32 Client::GetCharacterFactionLevel(int32 faction_id)
 // Checks for bottom out and max faction and old faction db entries
 // Updates the faction if we are not minned, maxed or we need to repair
 
-bool Client::UpdatePersonalFaction(int32 char_id, int32 npc_value, int32 faction_id, int32 *current_value, int32 temp, int32 this_faction_min, int32 this_faction_max)
+void Client::UpdatePersonalFaction(int32 char_id, int32 npc_value, int32 faction_id, int32 *current_value, int32 temp, int32 this_faction_min, int32 this_faction_max)
 {
 	bool repair = false;
 	bool change = false;
+	int32 faction_before_hit = *current_value - npc_value;
 
 	if (this->itembonuses.HeroicCHA)
 	{
@@ -7655,22 +7653,24 @@ bool Client::UpdatePersonalFaction(int32 char_id, int32 npc_value, int32 faction
 		*current_value = this_faction_min;
 		repair = true;
 	}
-	else if ((m_pp.gm != 1) && (npc_value != 0) && ((*current_value != this_faction_max) || (*current_value != this_faction_min)))
+	else if ((m_pp.gm != 1) && (npc_value != 0) &&
+		((npc_value > 0 && faction_before_hit != this_faction_max) ||
+		((npc_value < 0 && faction_before_hit != this_faction_min))))
 		change = true;
-
-	*current_value += npc_value;
-
-	if (*current_value > this_faction_max)
-		*current_value = this_faction_max;
-	else if (*current_value < this_faction_min)
-		*current_value = this_faction_min;
 
 	if (change || repair)
 	{
+		*current_value += npc_value;
+
+		if (*current_value > this_faction_max)
+			*current_value = this_faction_max;
+		else if (*current_value < this_faction_min)
+			*current_value = this_faction_min;
+
 		database.SetCharacterFactionLevel(char_id, faction_id, *current_value, temp, factionvalues);
 	}
 
-return (repair || change);
+return;
 }
 
 // returns the character's faction level, adjusted for racial, class, and deity modifiers
@@ -7756,16 +7756,16 @@ void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 faction_
 	char name[50];
 	int32 faction_value;
 
-	// If we're dropping from MAX or raising from MIN, we should
-	// base the message on the new updated value so we don't show
+	// If we're dropping from MAX or raising from MIN or repairing, 
+	// we should base the message on the new updated value so we don't show
 	// a min MAX message
 	//
 	// If we're changing any other place, we use the value before the
 	// hit.  For example, if we go from 1199 to 1200 which is the MAX
 	// we still want to say faction got better this time around.
 	
-	if ( (faction_before_hit == this_faction_max) ||
-	     (faction_before_hit == this_faction_min))
+	if ( (faction_before_hit >= this_faction_max) ||
+	     (faction_before_hit <= this_faction_min))
 		faction_value = totalvalue;
 	else
 		faction_value = faction_before_hit;
