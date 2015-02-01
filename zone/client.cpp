@@ -7522,19 +7522,38 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 	{
 		int32 faction_before_hit;
 		int32 faction_to_use_for_messaging;
+		FactionMods fm;
+		int32 this_faction_max;
+		int32 this_faction_min;
 
 		if (faction_id[i] <= 0)
 			continue;
+
+		// Find out starting faction for this faction
+		// It needs to be used to adj max and min personal
+		// The range is still the same, 1200-3000(4200), but adjusted for base
+		database.GetFactionData(&fm, GetClass(), GetRace(), GetDeity(), 
+			faction_id[i]);
+
+		// Adjust the amount you can go up or down so the resulting range
+		// is PERSONAL_MAX - PERSONAL_MIN
+		//
+		// Adjust these values for cases where starting faction is below
+		// min or above max by not allowing any earn in those directions.
+		this_faction_min = MIN_PERSONAL_FACTION - fm.base;
+		this_faction_min = std::min(0, this_faction_min);
+		this_faction_max = MAX_PERSONAL_FACTION - fm.base;
+		this_faction_max = std::max(0, this_faction_max);
 
 		// Get the characters current value with that faction
 		current_value = GetCharacterFactionLevel(faction_id[i]);
 		faction_before_hit = current_value;
 
-		change = UpdatePersonalFaction(char_id, npc_value[i], faction_id[i], &current_value, temp[i]);
+		change = UpdatePersonalFaction(char_id, npc_value[i], faction_id[i], &current_value, temp[i], this_faction_min, this_faction_max);
 
 		if (change)
 			{
-				SendFactionMessage(npc_value[i], faction_id[i], faction_before_hit, current_value, temp[i]);
+				SendFactionMessage(npc_value[i], faction_id[i], faction_before_hit, current_value, temp[i], this_faction_min, this_faction_max);
 			}
 	}
 	return;
@@ -7548,16 +7567,37 @@ void Client::SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class
 	//Get the npc faction list
 	if(faction_id > 0 && value != 0) {
 		int32 faction_before_hit;
+		FactionMods fm;
+		int32 this_faction_max;
+		int32 this_faction_min;
+
+		// Find out starting faction for this faction
+		// It needs to be used to adj max and min personal
+		// The range is still the same, 1200-3000(4200), but adjusted for base
+		database.GetFactionData(&fm, GetClass(), GetRace(), GetDeity(), 
+			faction_id);
+
+		// Adjust the amount you can go up or down so the resulting range
+		// is PERSONAL_MAX - PERSONAL_MIN
+		//
+		// Adjust these values for cases where starting faction is below
+		// min or above max by not allowing any earn/loss in those directions.
+		// At least one faction starts out way below min, so we don't want
+		// to allow loses in those cases, just massive gains.
+		this_faction_min = MIN_PERSONAL_FACTION - fm.base;
+		this_faction_min = std::min(0, this_faction_min);
+		this_faction_max = MAX_PERSONAL_FACTION - fm.base;
+		this_faction_max = std::max(0, this_faction_max);
 
 		//Get the faction modifiers
 		current_value = GetCharacterFactionLevel(faction_id);
 		faction_before_hit = current_value;
 
-		change = UpdatePersonalFaction(char_id, value, faction_id, &current_value, temp);
+		change = UpdatePersonalFaction(char_id, value, faction_id, &current_value, temp, this_faction_min, this_faction_max);
 
 		if (change)
 		{
-			SendFactionMessage(value, faction_id, faction_before_hit, current_value, temp);
+			SendFactionMessage(value, faction_id, faction_before_hit, current_value, temp, this_faction_min, this_faction_max);
 		}
 	}
 
@@ -7580,7 +7620,7 @@ int32 Client::GetCharacterFactionLevel(int32 faction_id)
 // Checks for bottom out and max faction and old faction db entries
 // Updates the faction if we are not minned, maxed or we need to repair
 
-bool Client::UpdatePersonalFaction(int32 char_id, int32 npc_value, int32 faction_id, int32 *current_value, int32 temp)
+bool Client::UpdatePersonalFaction(int32 char_id, int32 npc_value, int32 faction_id, int32 *current_value, int32 temp, int32 this_faction_min, int32 this_faction_max)
 {
 	bool repair = false;
 	bool change = false;
@@ -7598,26 +7638,29 @@ bool Client::UpdatePersonalFaction(int32 char_id, int32 npc_value, int32 faction
 				npc_value *= 2;
 		}
 	}
+
 	// Set flag when to update db
-	if (*current_value > MAX_PERSONAL_FACTION)
+	// Repair needed, as db changes could modify a base value for a faction
+	// and we need to auto correct when that happens.
+	if (*current_value > this_faction_max)
 	{
-		*current_value = MAX_PERSONAL_FACTION;
+		*current_value = this_faction_max;
 		repair = true;
 	}
-	else if (*current_value < MIN_PERSONAL_FACTION)
+	else if (*current_value < this_faction_min)
 	{
-		*current_value = MIN_PERSONAL_FACTION;
+		*current_value = this_faction_min;
 		repair = true;
 	}
-	else if ((m_pp.gm != 1) && (npc_value != 0) && ((*current_value != MAX_PERSONAL_FACTION) || (*current_value != MIN_PERSONAL_FACTION)))
+	else if ((m_pp.gm != 1) && (npc_value != 0) && ((*current_value != this_faction_max) || (*current_value != this_faction_min)))
 		change = true;
 
 	*current_value += npc_value;
 
-	if (*current_value > MAX_PERSONAL_FACTION)
-		*current_value = MAX_PERSONAL_FACTION;
-	else if (*current_value < MIN_PERSONAL_FACTION)
-		*current_value = MIN_PERSONAL_FACTION;
+	if (*current_value > this_faction_max)
+		*current_value = this_faction_max;
+	else if (*current_value < this_faction_min)
+		*current_value = this_faction_min;
 
 	if (change || repair)
 	{
@@ -7705,7 +7748,7 @@ void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 //o--------------------------------------------------------------
 //| Purpose: Send faction change message to client
 //o--------------------------------------------------------------
-void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 faction_before_hit, int32 totalvalue, uint8 temp)
+void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 faction_before_hit, int32 totalvalue, uint8 temp, int32 this_faction_min, int32 this_faction_max)
 {
 	char name[50];
 	int32 faction_value;
@@ -7718,8 +7761,8 @@ void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 faction_
 	// hit.  For example, if we go from 1199 to 1200 which is the MAX
 	// we still want to say faction got better this time around.
 	
-	if ( (faction_before_hit == MAX_PERSONAL_FACTION) ||
-	     (faction_before_hit == MIN_PERSONAL_FACTION))
+	if ( (faction_before_hit == this_faction_max) ||
+	     (faction_before_hit == this_faction_min))
 		faction_value = totalvalue;
 	else
 		faction_value = faction_before_hit;
@@ -7730,13 +7773,13 @@ void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 faction_
 
 	if (tmpvalue == 0 || temp == 1 || temp == 2)
 		return;
-	else if (faction_value >= MAX_PERSONAL_FACTION)
+	else if (faction_value >= this_faction_max)
 		Message_StringID(15, FACTION_BEST, name);
-	else if (faction_value <= MIN_PERSONAL_FACTION)
+	else if (faction_value <= this_faction_min)
 		Message_StringID(15, FACTION_WORST, name);
-	else if (tmpvalue > 0 && faction_value < MAX_PERSONAL_FACTION && !RuleB(Client, UseLiveFactionMessage))
+	else if (tmpvalue > 0 && faction_value < this_faction_max && !RuleB(Client, UseLiveFactionMessage))
 		Message_StringID(15, FACTION_BETTER, name);
-	else if (tmpvalue < 0 && faction_value > MIN_PERSONAL_FACTION && !RuleB(Client, UseLiveFactionMessage))
+	else if (tmpvalue < 0 && faction_value > this_faction_min && !RuleB(Client, UseLiveFactionMessage))
 		Message_StringID(15, FACTION_WORSE, name);
 	else if (RuleB(Client, UseLiveFactionMessage))
 		Message(15, "Your faction standing with %s has been adjusted by %i.", name, tmpvalue); //New Live faction message (14261)
