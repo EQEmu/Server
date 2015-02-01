@@ -19,8 +19,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-#ifndef SoF_CONSTANTS_H_
-#define SoF_CONSTANTS_H_
+#ifndef SOF_CONSTANTS_H_
+#define SOF_CONSTANTS_H_
 
 #include "../types.h"
 
@@ -189,7 +189,7 @@ namespace SoF {
 
 };	//end namespace SoF
 
-#endif /*SoF_CONSTANTS_H_*/
+#endif /*SOF_CONSTANTS_H_*/
 
 /*
 SoF Notes:

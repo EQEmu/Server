@@ -206,8 +206,14 @@ class EQStream : public EQStreamInterface {
 
 		void init(bool resetSession=true);
 	public:
-		EQStream() { init(); remote_ip = 0; remote_port = 0; State=UNESTABLISHED; StreamType=UnknownStream; compressed=true; encoded=false; app_opcode_size=2; bytes_sent=0; bytes_recv=0; create_time=Timer::GetTimeSeconds(); sessionAttempts = 0; streamactive=false; }
-		EQStream(sockaddr_in addr) { init(); remote_ip=addr.sin_addr.s_addr; remote_port=addr.sin_port; State=UNESTABLISHED; StreamType=UnknownStream; compressed=true; encoded=false; app_opcode_size=2; bytes_sent=0; bytes_recv=0; create_time=Timer::GetTimeSeconds(); }
+		EQStream() { init(); remote_ip = 0; remote_port = 0; State = UNESTABLISHED; 
+			StreamType = UnknownStream; compressed = true; encoded = false; app_opcode_size = 2; 
+			bytes_sent = 0; bytes_recv = 0; create_time = Timer::GetTimeSeconds(); sessionAttempts = 0; 
+			streamactive = false; }
+		EQStream(sockaddr_in addr) { init(); remote_ip = addr.sin_addr.s_addr; 
+			remote_port = addr.sin_port; State = UNESTABLISHED; StreamType = UnknownStream; 
+			compressed = true; encoded = false; app_opcode_size = 2; bytes_sent = 0; bytes_recv = 0; 
+			create_time = Timer::GetTimeSeconds(); }
 		virtual ~EQStream() { RemoveData(); SetState(CLOSED); }
 		void SetMaxLen(uint32 length) { MaxLen=length; }
 

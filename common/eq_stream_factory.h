@@ -2,6 +2,7 @@
 
 #define _EQSTREAMFACTORY_H
 
+#include <memory>
 #include <queue>
 #include <map>
 
@@ -26,10 +27,10 @@ class EQStreamFactory : private Timeoutable {
 
 		EQStreamType StreamType;
 
-		std::queue<EQStream *> NewStreams;
+		std::queue<std::shared_ptr<EQStream>> NewStreams;
 		Mutex MNewStreams;
 
-		std::map<std::pair<uint32, uint16>,EQStream *> Streams;
+		std::map<std::pair<uint32, uint16>, std::shared_ptr<EQStream>> Streams;
 		Mutex MStreams;
 
 		virtual void CheckTimeout();
@@ -42,8 +43,8 @@ class EQStreamFactory : private Timeoutable {
 		EQStreamFactory(EQStreamType type, uint32 timeout = 135000) : Timeoutable(5000), stream_timeout(timeout) { ReaderRunning=false; WriterRunning=false; StreamType=type; sock=-1; }
 		EQStreamFactory(EQStreamType type, int port, uint32 timeout = 135000);
 
-		EQStream *Pop();
-		void Push(EQStream *s);
+		std::shared_ptr<EQStream> Pop();
+		void Push(std::shared_ptr<EQStream> s);
 
 		bool Open();
 		bool Open(unsigned long port) { Port=port; return Open(); }

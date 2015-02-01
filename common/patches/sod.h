@@ -1,5 +1,5 @@
-#ifndef SoD_H_
-#define SoD_H_
+#ifndef SOD_H_
+#define SOD_H_
 
 #include "../struct_strategy.h"
 
@@ -32,6 +32,4 @@ namespace SoD {
 
 };
 
-
-
-#endif /*SoD_H_*/
+#endif /*SOD_H_*/

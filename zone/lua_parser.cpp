@@ -35,13 +35,14 @@
 #include "zone.h"
 #include "lua_parser.h"
 
-const char *LuaEvents[_LargestEventID] = {
+const char *LuaEvents[_LargestEventID] = { 
 	"event_say",
 	"event_trade",
 	"event_death",
 	"event_spawn",
 	"event_attack",
 	"event_combat",
+	"event_environmental_damage",
 	"event_aggro",
 	"event_slay",
 	"event_npc_slay",
@@ -164,6 +165,7 @@ LuaParser::LuaParser() {
 	NPCArgumentDispatch[EVENT_LEAVE_AREA] = handle_npc_area;
 
 	PlayerArgumentDispatch[EVENT_SAY] = handle_player_say;
+	PlayerArgumentDispatch[EVENT_ENVIRONMENTAL_DAMAGE] = handle_player_environmental_damage;
 	PlayerArgumentDispatch[EVENT_DEATH] = handle_player_death;
 	PlayerArgumentDispatch[EVENT_DEATH_COMPLETE] = handle_player_death;
 	PlayerArgumentDispatch[EVENT_TIMER] = handle_player_timer;

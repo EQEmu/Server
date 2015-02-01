@@ -1242,6 +1242,8 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 			{
 				//Can we start the timer here?  I don't see why not.
 				CastToClient()->GetPTimers().Start((pTimerItemStart + recasttype), recastdelay);
+				database.UpdateItemRecastTimestamps(CastToClient()->CharacterID(), recasttype,
+								CastToClient()->GetPTimers().Get(pTimerItemStart + recasttype)->GetReadyTimestamp());
 			}
 		}
 
@@ -2023,6 +2025,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	//
 	// Switch #2 - execute the spell
 	//
+
 	switch(CastAction)
 	{
 		default:
@@ -2146,6 +2149,15 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 				// caster if they're not using TGB
 				// NOTE: this will always hit the caster, plus the target's group so
 				// it can affect up to 7 people if the targeted group is not our own
+				
+				// Allow pets who cast group spells to affect the group.
+				if (spell_target->IsPetOwnerClient()){
+					Mob* owner =  spell_target->GetOwner();
+
+					if (owner)
+						spell_target = owner;
+				}
+					
 				if(spell_target->IsGrouped())
 				{
 					Group *target_group = entity_list.GetGroupByMob(spell_target);
@@ -2270,11 +2282,15 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	{
 		ItemInst *itm = CastToClient()->GetInv().GetItem(inventory_slot);
 		if(itm && itm->GetItem()->RecastDelay > 0){
-			CastToClient()->GetPTimers().Start((pTimerItemStart + itm->GetItem()->RecastType), itm->GetItem()->RecastDelay);
+			auto recast_type = itm->GetItem()->RecastType;
+			CastToClient()->GetPTimers().Start((pTimerItemStart + recast_type), itm->GetItem()->RecastDelay);
+			database.UpdateItemRecastTimestamps(
+			    CastToClient()->CharacterID(), recast_type,
+			    CastToClient()->GetPTimers().Get(pTimerItemStart + recast_type)->GetReadyTimestamp());
 			EQApplicationPacket *outapp = new EQApplicationPacket(OP_ItemRecastDelay, sizeof(ItemRecastDelay_Struct));
 			ItemRecastDelay_Struct *ird = (ItemRecastDelay_Struct *)outapp->pBuffer;
 			ird->recast_delay = itm->GetItem()->RecastDelay;
-			ird->recast_type = itm->GetItem()->RecastType;
+			ird->recast_type = recast_type;
 			CastToClient()->QueuePacket(outapp);
 			safe_delete(outapp);
 		}
@@ -3659,7 +3675,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 						if(!IsHarmonySpell(spell_id))
 						spelltar->AddToHateList(this, aggro);
 						else
-							if(!PassCharismaCheck(this, spelltar, spell_id))
+							if(!spelltar->PassCharismaCheck(this, spell_id))
 								spelltar->AddToHateList(this, aggro);
 					}
 					else{
@@ -4388,7 +4404,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 			level_mod += (2 * level_diff);
 		}
 	}
-
+	
 	if (CharismaCheck)
 	{
 		/*
@@ -4402,7 +4418,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		*/
 		int16 charisma = caster->GetCHA();
 
-		if (IsFear && (spells[spell_id].targettype != 10)){
+		if (IsFear && (spells[spell_id].targettype != ST_Undead)){
 
 			if (charisma < 100)
 				resist_modifier -= 20;
@@ -4423,7 +4439,9 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 			else
 				resist_modifier += ((75 - charisma)/10) * 6; //Increase Resist Chance
 		}
+
 	}
+
 
 	//Lull spells DO NOT use regular resists on initial cast, instead they use a flat +15 modifier. Live parses confirm this.
 	//Regular resists are used when checking if mob will aggro off of a lull resist.
@@ -4452,9 +4470,8 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	//Minimum resist chance should be caclulated factoring in the RuleI(Spells, CharmBreakCheckChance)
 	if (CharmTick) {
 
-		int min_charmbreakchance = ((100/RuleI(Spells, CharmBreakCheckChance))/66 * 100)*2;
-
-		if (resist_chance < min_charmbreakchance)
+		float min_charmbreakchance = ((100.0f/static_cast<float>(RuleI(Spells, CharmBreakCheckChance)))/66.0f * 100.0f)*2.0f;
+		if (resist_chance < static_cast<int>(min_charmbreakchance))
 			resist_chance = min_charmbreakchance;
 	}
 
@@ -4462,9 +4479,9 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	//Minimum resist chance should be caclulated factoring in the RuleI(Spells, RootBreakCheckChance)
 	if (IsRoot) {
 
-		int min_rootbreakchance = ((100/RuleI(Spells, RootBreakCheckChance))/22 * 100)*2;
+		float min_rootbreakchance = ((100.0f/static_cast<float>(RuleI(Spells, RootBreakCheckChance)))/22.0f * 100.0f)*2.0f;
 
-		if (resist_chance < min_rootbreakchance)
+		if (resist_chance < static_cast<int>(min_rootbreakchance))
 			resist_chance = min_rootbreakchance;
 	}
 
@@ -5248,7 +5265,7 @@ void Client::SendBuffDurationPacket(Buffs_Struct &buff)
 void Client::SendBuffNumHitPacket(Buffs_Struct &buff, int slot)
 {
 	// UF+ use this packet
-	if (GetClientVersion() < ClientVersion::Und)
+	if (GetClientVersion() < ClientVersion::UF)
 		return;
 	EQApplicationPacket *outapp;
 	outapp = new EQApplicationPacket(OP_BuffCreate, sizeof(BuffIcon_Struct) + sizeof(BuffIconEntry_Struct));

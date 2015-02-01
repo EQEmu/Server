@@ -32,7 +32,7 @@ extern std::vector<RaceClassAllocation> character_create_allocations;
 extern std::vector<RaceClassCombos> character_create_race_class_combos;
 
 
-// solar: the current stuff is at the bottom of this function
+// the current stuff is at the bottom of this function
 void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct* cs, uint32 ClientVersion) {
 	Inventory *inv;
 	uint8 has_home = 0;

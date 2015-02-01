@@ -665,7 +665,7 @@ bool ZoneServer::Process() {
 			}
 			case ServerOP_ZoneToZoneRequest: {
 				//
-				// solar: ZoneChange is received by the zone the player is in, then the
+				// ZoneChange is received by the zone the player is in, then the
 				// zone sends a ZTZ which ends up here. This code then find the target
 				// (ingress point) and boots it if needed, then sends the ZTZ to it.
 				// The ingress server will decide wether the player can enter, then will
@@ -1405,10 +1405,10 @@ void ZoneServer::TriggerBootup(uint32 iZoneID, uint32 iInstanceID, const char* a
 	LSBootUpdate(iZoneID, iInstanceID);
 }
 
-void ZoneServer::IncommingClient(Client* client) {
+void ZoneServer::IncomingClient(Client* client) {
 	BootingUp = true;
-	auto pack = new ServerPacket(ServerOP_ZoneIncClient, sizeof(ServerZoneIncommingClient_Struct));
-	ServerZoneIncommingClient_Struct* s = (ServerZoneIncommingClient_Struct*) pack->pBuffer;
+	auto pack = new ServerPacket(ServerOP_ZoneIncClient, sizeof(ServerZoneIncomingClient_Struct));
+	ServerZoneIncomingClient_Struct* s = (ServerZoneIncomingClient_Struct*) pack->pBuffer;
 	s->zoneid = GetZoneID();
 	s->instanceid = GetInstanceID();
 	s->wid = client->GetWID();

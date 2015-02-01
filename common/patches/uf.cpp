@@ -1,6 +1,6 @@
 #include "../global_define.h"
 #include "../eqemu_logsys.h"
-#include "underfoot.h"
+#include "uf.h"
 #include "../opcodemgr.h"
 
 #include "../eq_stream_ident.h"
@@ -10,33 +10,33 @@
 #include "../misc_functions.h"
 #include "../string_util.h"
 #include "../item.h"
-#include "underfoot_structs.h"
+#include "uf_structs.h"
 #include "../rulesys.h"
 
 #include <iostream>
 #include <sstream>
 
-namespace Underfoot
+namespace UF
 {
-	static const char *name = "Underfoot";
+	static const char *name = "UF";
 	static OpcodeManager *opcodes = nullptr;
 	static Strategy struct_strategy;
 
 	char* SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 depth);
 
 	// server to client inventory location converters
-	static inline uint32 ServerToUnderfootSlot(uint32 ServerSlot);
-	static inline uint32 ServerToUnderFootCorpseSlot(uint32 ServerCorpse);
+	static inline uint32 ServerToUFSlot(uint32 serverSlot);
+	static inline uint32 ServerToUFCorpseSlot(uint32 serverCorpseSlot);
 
 	// client to server inventory location converters
-	static inline uint32 UnderfootToServerSlot(uint32 UnderfootSlot);
-	static inline uint32 UnderfootToServerCorpseSlot(uint32 UnderfootCorpse);
+	static inline uint32 UFToServerSlot(uint32 ufSlot);
+	static inline uint32 UFToServerCorpseSlot(uint32 ufCorpseSlot);
 
 	// server to client text link converter
-	static inline void ServerToUnderfootTextLink(std::string& underfootTextLink, const std::string& serverTextLink);
+	static inline void ServerToUFTextLink(std::string& ufTextLink, const std::string& serverTextLink);
 
 	// client to server text link converter
-	static inline void UnderfootToServerTextLink(std::string& serverTextLink, const std::string& underfootTextLink);
+	static inline void UFToServerTextLink(std::string& serverTextLink, const std::string& ufTextLink);
 
 	void Register(EQStreamIdentifier &into)
 	{
@@ -102,7 +102,7 @@ namespace Underfoot
 	{
 		//all opcodes default to passthrough.
 #include "ss_register.h"
-#include "underfoot_ops.h"
+#include "uf_ops.h"
 	}
 
 	std::string Strategy::Describe() const
@@ -115,7 +115,7 @@ namespace Underfoot
 
 	const ClientVersion Strategy::GetClientVersion() const
 	{
-		return ClientVersion::Und;
+		return ClientVersion::UF;
 	}
 
 #include "ss_define.h"
@@ -164,7 +164,7 @@ namespace Underfoot
 
 		eq->unknown000 = 1;
 		OUT(npcid);
-		eq->slot = ServerToUnderfootSlot(emu->slot);
+		eq->slot = ServerToUFSlot(emu->slot);
 		OUT(charges);
 		OUT(sell_price);
 
@@ -215,7 +215,7 @@ namespace Underfoot
 		SETUP_DIRECT_ENCODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
 
 		OUT(merchant_entity_id);
-		eq->slot_id = ServerToUnderfootSlot(emu->slot_id);
+		eq->slot_id = ServerToUFSlot(emu->slot_id);
 		OUT(charges);
 		OUT(cost);
 
@@ -227,7 +227,7 @@ namespace Underfoot
 		ENCODE_LENGTH_EXACT(ApplyPoison_Struct);
 		SETUP_DIRECT_ENCODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
 
-		eq->inventorySlot = ServerToUnderfootSlot(emu->inventorySlot);
+		eq->inventorySlot = ServerToUFSlot(emu->inventorySlot);
 		OUT(success);
 
 		FINISH_ENCODE();
@@ -441,7 +441,7 @@ namespace Underfoot
 
 		std::string old_message = emu->message;
 		std::string new_message;
-		ServerToUnderfootTextLink(new_message, old_message);
+		ServerToUFTextLink(new_message, old_message);
 
 		//in->size = strlen(emu->sender) + 1 + strlen(emu->targetname) + 1 + strlen(emu->message) + 1 + 36;
 		in->size = strlen(emu->sender) + strlen(emu->targetname) + new_message.length() + 39;
@@ -593,8 +593,8 @@ namespace Underfoot
 		ENCODE_LENGTH_EXACT(DeleteItem_Struct);
 		SETUP_DIRECT_ENCODE(DeleteItem_Struct, structs::DeleteItem_Struct);
 
-		eq->from_slot = ServerToUnderfootSlot(emu->from_slot);
-		eq->to_slot = ServerToUnderfootSlot(emu->to_slot);
+		eq->from_slot = ServerToUFSlot(emu->from_slot);
+		eq->to_slot = ServerToUFSlot(emu->to_slot);
 		OUT(number_in_stack);
 
 		FINISH_ENCODE();
@@ -755,7 +755,7 @@ namespace Underfoot
 
 		std::string old_message = emu->message;
 		std::string new_message;
-		ServerToUnderfootTextLink(new_message, old_message);
+		ServerToUFTextLink(new_message, old_message);
 
 		//if (new_message.length() > 512) // length restricted in packet building function due vari-length name size (no nullterm)
 		//	new_message = new_message.substr(0, 512);
@@ -807,7 +807,7 @@ namespace Underfoot
 
 		for (int i = 0; i < 9; ++i) {
 			if (old_message_array[i].length() == 0) { break; }
-			ServerToUnderfootTextLink(new_message_array[i], old_message_array[i]);
+			ServerToUFTextLink(new_message_array[i], old_message_array[i]);
 			new_message_size += new_message_array[i].length() + 1;
 		}
 
@@ -1287,7 +1287,7 @@ namespace Underfoot
 		ENCODE_LENGTH_EXACT(ItemVerifyReply_Struct);
 		SETUP_DIRECT_ENCODE(ItemVerifyReply_Struct, structs::ItemVerifyReply_Struct);
 
-		eq->slot = ServerToUnderfootSlot(emu->slot);
+		eq->slot = ServerToUFSlot(emu->slot);
 		OUT(spell);
 		OUT(target);
 
@@ -1344,7 +1344,7 @@ namespace Underfoot
 
 		OUT(lootee);
 		OUT(looter);
-		eq->slot_id = ServerToUnderFootCorpseSlot(emu->slot_id);
+		eq->slot_id = ServerToUFCorpseSlot(emu->slot_id);
 		OUT(auto_loot);
 
 		FINISH_ENCODE();
@@ -1506,8 +1506,8 @@ namespace Underfoot
 		ENCODE_LENGTH_EXACT(MoveItem_Struct);
 		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		eq->from_slot = ServerToUnderfootSlot(emu->from_slot);
-		eq->to_slot = ServerToUnderfootSlot(emu->to_slot);
+		eq->from_slot = ServerToUFSlot(emu->from_slot);
+		eq->to_slot = ServerToUFSlot(emu->to_slot);
 		OUT(number_in_stack);
 
 		FINISH_ENCODE();
@@ -2093,7 +2093,7 @@ namespace Underfoot
 		else
 			eq->window = emu->window;
 		OUT(type);
-		eq->invslot = ServerToUnderfootSlot(emu->invslot);
+		eq->invslot = ServerToUFSlot(emu->invslot);
 		strn0cpy(eq->txtfile, emu->booktext, sizeof(eq->txtfile));
 
 		FINISH_ENCODE();
@@ -2290,7 +2290,7 @@ namespace Underfoot
 		SETUP_DIRECT_ENCODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Struct);
 
 		OUT(npcid);
-		eq->itemslot = ServerToUnderfootSlot(emu->itemslot);
+		eq->itemslot = ServerToUFSlot(emu->itemslot);
 		OUT(quantity);
 		OUT(price);
 
@@ -2399,7 +2399,7 @@ namespace Underfoot
 		std::string old_message = &emu->message[strlen(emu->sayer)];
 		std::string new_message;
 
-		ServerToUnderfootTextLink(new_message, old_message);
+		ServerToUFTextLink(new_message, old_message);
 
 		//in->size = 3 + 4 + 4 + strlen(emu->sayer) + 1 + 12 + new_message.length() + 1;
 		in->size = strlen(emu->sayer) + new_message.length() + 25;
@@ -2469,7 +2469,7 @@ namespace Underfoot
 
 		std::string old_message = InBuffer; // start 'Reward' as string
 		std::string new_message;
-		ServerToUnderfootTextLink(new_message, old_message);
+		ServerToUFTextLink(new_message, old_message);
 
 		in->size = sizeof(TaskDescriptionHeader_Struct) + sizeof(TaskDescriptionData1_Struct)+
 			sizeof(TaskDescriptionData2_Struct) + sizeof(TaskDescriptionTrailer_Struct)+
@@ -2570,7 +2570,7 @@ namespace Underfoot
 		ENCODE_LENGTH_EXACT(TributeItem_Struct);
 		SETUP_DIRECT_ENCODE(TributeItem_Struct, structs::TributeItem_Struct);
 
-		eq->slot = ServerToUnderfootSlot(emu->slot);
+		eq->slot = ServerToUFSlot(emu->slot);
 		OUT(quantity);
 		OUT(tribute_master_id);
 		OUT(tribute_points);
@@ -3060,7 +3060,7 @@ namespace Underfoot
 		SETUP_DIRECT_DECODE(Adventure_Sell_Struct, structs::Adventure_Sell_Struct);
 
 		IN(npcid);
-		emu->slot = UnderfootToServerSlot(eq->slot);
+		emu->slot = UFToServerSlot(eq->slot);
 		IN(charges);
 		IN(sell_price);
 
@@ -3073,7 +3073,7 @@ namespace Underfoot
 		SETUP_DIRECT_DECODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
 
 		IN(merchant_entity_id);
-		emu->slot_id = UnderfootToServerSlot(eq->slot_id);
+		emu->slot_id = UFToServerSlot(eq->slot_id);
 		IN(charges);
 		IN(cost);
 
@@ -3086,7 +3086,7 @@ namespace Underfoot
 		SETUP_DIRECT_DECODE(AltCurrencySelectItem_Struct, structs::AltCurrencySelectItem_Struct);
 
 		IN(merchant_entity_id);
-		emu->slot_id = UnderfootToServerSlot(eq->slot_id);
+		emu->slot_id = UFToServerSlot(eq->slot_id);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -3096,7 +3096,7 @@ namespace Underfoot
 		DECODE_LENGTH_EXACT(structs::ApplyPoison_Struct);
 		SETUP_DIRECT_DECODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
 
-		emu->inventorySlot = UnderfootToServerSlot(eq->inventorySlot);
+		emu->inventorySlot = UFToServerSlot(eq->inventorySlot);
 		IN(success);
 
 		FINISH_DIRECT_DECODE();
@@ -3118,7 +3118,7 @@ namespace Underfoot
 		DECODE_LENGTH_EXACT(structs::AugmentItem_Struct);
 		SETUP_DIRECT_DECODE(AugmentItem_Struct, structs::AugmentItem_Struct);
 
-		emu->container_slot = UnderfootToServerSlot(eq->container_slot);
+		emu->container_slot = UFToServerSlot(eq->container_slot);
 		emu->augment_slot = eq->augment_slot;
 
 		FINISH_DIRECT_DECODE();
@@ -3184,7 +3184,7 @@ namespace Underfoot
 			IN(slot);
 
 		IN(spell_id);
-		emu->inventoryslot = UnderfootToServerSlot(eq->inventoryslot);
+		emu->inventoryslot = UFToServerSlot(eq->inventoryslot);
 		IN(target_id);
 		IN(cs_unknown1);
 		IN(cs_unknown2);
@@ -3218,7 +3218,7 @@ namespace Underfoot
 
 		std::string old_message = InBuffer;
 		std::string new_message;
-		UnderfootToServerTextLink(new_message, old_message);
+		UFToServerTextLink(new_message, old_message);
 
 		//__packet->size = sizeof(ChannelMessage_Struct)+strlen(InBuffer) + 1;
 		__packet->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
@@ -3312,7 +3312,7 @@ namespace Underfoot
 		DECODE_LENGTH_EXACT(structs::Consume_Struct);
 		SETUP_DIRECT_DECODE(Consume_Struct, structs::Consume_Struct);
 
-		emu->slot = UnderfootToServerSlot(eq->slot);
+		emu->slot = UFToServerSlot(eq->slot);
 		IN(auto_consumed);
 		IN(type);
 
@@ -3339,8 +3339,8 @@ namespace Underfoot
 		DECODE_LENGTH_EXACT(structs::DeleteItem_Struct);
 		SETUP_DIRECT_DECODE(DeleteItem_Struct, structs::DeleteItem_Struct);
 
-		emu->from_slot = UnderfootToServerSlot(eq->from_slot);
-		emu->to_slot = UnderfootToServerSlot(eq->to_slot);
+		emu->from_slot = UFToServerSlot(eq->from_slot);
+		emu->to_slot = UFToServerSlot(eq->to_slot);
 		IN(number_in_stack);
 
 		FINISH_DIRECT_DECODE();
@@ -3352,7 +3352,7 @@ namespace Underfoot
 
 		std::string old_message = (char *)&__eq_buffer[4]; // unknown01 offset
 		std::string new_message;
-		UnderfootToServerTextLink(new_message, old_message);
+		UFToServerTextLink(new_message, old_message);
 
 		__packet->size = sizeof(Emote_Struct);
 		__packet->pBuffer = new unsigned char[__packet->size];
@@ -3519,7 +3519,7 @@ namespace Underfoot
 		DECODE_LENGTH_EXACT(structs::ItemVerifyRequest_Struct);
 		SETUP_DIRECT_DECODE(ItemVerifyRequest_Struct, structs::ItemVerifyRequest_Struct);
 
-		emu->slot = UnderfootToServerSlot(eq->slot);
+		emu->slot = UFToServerSlot(eq->slot);
 		IN(target);
 
 		FINISH_DIRECT_DECODE();
@@ -3546,7 +3546,7 @@ namespace Underfoot
 
 		IN(lootee);
 		IN(looter);
-		emu->slot_id = UnderfootToServerCorpseSlot(eq->slot_id);
+		emu->slot_id = UFToServerCorpseSlot(eq->slot_id);
 		IN(auto_loot);
 
 		FINISH_DIRECT_DECODE();
@@ -3557,10 +3557,10 @@ namespace Underfoot
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log.Out(Logs::General, Logs::Netcode, "[ERROR] Moved item from %u to %u", eq->from_slot, eq->to_slot);
+		Log.Out(Logs::General, Logs::Netcode, "[UF] Moved item from %u to %u", eq->from_slot, eq->to_slot);
 
-		emu->from_slot = UnderfootToServerSlot(eq->from_slot);
-		emu->to_slot = UnderfootToServerSlot(eq->to_slot);
+		emu->from_slot = UFToServerSlot(eq->from_slot);
+		emu->to_slot = UFToServerSlot(eq->to_slot);
 		IN(number_in_stack);
 
 		FINISH_DIRECT_DECODE();
@@ -3622,7 +3622,7 @@ namespace Underfoot
 		SETUP_DIRECT_DECODE(BookRequest_Struct, structs::BookRequest_Struct);
 
 		IN(type);
-		emu->invslot = UnderfootToServerSlot(eq->invslot);
+		emu->invslot = UFToServerSlot(eq->invslot);
 		emu->window = (uint8)eq->window;
 		strn0cpy(emu->txtfile, eq->txtfile, sizeof(emu->txtfile));
 
@@ -3672,7 +3672,7 @@ namespace Underfoot
 		SETUP_DIRECT_DECODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Struct);
 
 		IN(npcid);
-		emu->itemslot = UnderfootToServerSlot(eq->itemslot);
+		emu->itemslot = UFToServerSlot(eq->itemslot);
 		IN(quantity);
 		IN(price);
 
@@ -3700,7 +3700,7 @@ namespace Underfoot
 		DECODE_LENGTH_EXACT(structs::NewCombine_Struct);
 		SETUP_DIRECT_DECODE(NewCombine_Struct, structs::NewCombine_Struct);
 
-		emu->container_slot = UnderfootToServerSlot(eq->container_slot);
+		emu->container_slot = UFToServerSlot(eq->container_slot);
 		IN(guildtribute_slot);
 
 		FINISH_DIRECT_DECODE();
@@ -3711,7 +3711,7 @@ namespace Underfoot
 		DECODE_LENGTH_EXACT(structs::TributeItem_Struct);
 		SETUP_DIRECT_DECODE(TributeItem_Struct, structs::TributeItem_Struct);
 
-		emu->slot = UnderfootToServerSlot(eq->slot);
+		emu->slot = UFToServerSlot(eq->slot);
 		IN(quantity);
 		IN(tribute_master_id);
 		IN(tribute_points);
@@ -3781,11 +3781,11 @@ namespace Underfoot
 
 		const Item_Struct *item = inst->GetUnscaledItem();
 		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Serialize called for: %s", item->Name);
-		Underfoot::structs::ItemSerializationHeader hdr;
+		UF::structs::ItemSerializationHeader hdr;
 		hdr.stacksize = stackable ? charges : 1;
 		hdr.unknown004 = 0;
 
-		int32 slot_id = ServerToUnderfootSlot(slot_id_in);
+		int32 slot_id = ServerToUFSlot(slot_id_in);
 
 		hdr.slot = (merchant_slot == 0) ? slot_id : merchant_slot;
 		hdr.price = inst->GetPrice();
@@ -3793,17 +3793,17 @@ namespace Underfoot
 		hdr.scaled_value = inst->IsScaling() ? inst->GetExp() / 100 : 0;
 		hdr.instance_id = (merchant_slot == 0) ? inst->GetSerialNumber() : merchant_slot;
 		hdr.unknown028 = 0;
-		hdr.last_cast_time = ((item->RecastDelay > 1) ? 1212693140 : 0);
+		hdr.last_cast_time = inst->GetRecastTimestamp();
 		hdr.charges = (stackable ? (item->MaxCharges ? 1 : 0) : charges);
 		hdr.inst_nodrop = inst->IsAttuned() ? 1 : 0;
 		hdr.unknown044 = 0;
 		hdr.unknown048 = 0;
 		hdr.unknown052 = 0;
 		hdr.isEvolving = item->EvolvingLevel > 0 ? 1 : 0;
-		ss.write((const char*)&hdr, sizeof(Underfoot::structs::ItemSerializationHeader));
+		ss.write((const char*)&hdr, sizeof(UF::structs::ItemSerializationHeader));
 
 		if (item->EvolvingLevel > 0) {
-			Underfoot::structs::EvolvingItem evotop;
+			UF::structs::EvolvingItem evotop;
 			evotop.unknown001 = 0;
 			evotop.unknown002 = 0;
 			evotop.unknown003 = 0;
@@ -3812,7 +3812,7 @@ namespace Underfoot
 			evotop.progress = 95.512;
 			evotop.Activated = 1;
 			evotop.evomaxlevel = 7;
-			ss.write((const char*)&evotop, sizeof(Underfoot::structs::EvolvingItem));
+			ss.write((const char*)&evotop, sizeof(UF::structs::EvolvingItem));
 		}
 		//ORNAMENT IDFILE / ICON -
 		uint16 ornaIcon = 0;
@@ -3832,13 +3832,13 @@ namespace Underfoot
 			ss.write((const char*)&null_term, sizeof(uint8)); //no idfile
 		}
 
-		Underfoot::structs::ItemSerializationHeaderFinish hdrf;
+		UF::structs::ItemSerializationHeaderFinish hdrf;
 		hdrf.ornamentIcon = ornaIcon;
 		hdrf.unknown060 = 0; //This is Always 0.. or it breaks shit.. 
 		hdrf.unknown061 = 0; //possibly ornament / special ornament
 		hdrf.isCopied = 0; //Flag for item to be 'Copied'
 		hdrf.ItemClass = item->ItemClass;
-		ss.write((const char*)&hdrf, sizeof(Underfoot::structs::ItemSerializationHeaderFinish));
+		ss.write((const char*)&hdrf, sizeof(UF::structs::ItemSerializationHeaderFinish));
 
 		if (strlen(item->Name) > 0)
 		{
@@ -3870,8 +3870,8 @@ namespace Underfoot
 			ss.write((const char*)&null_term, sizeof(uint8));
 		}
 
-		Underfoot::structs::ItemBodyStruct ibs;
-		memset(&ibs, 0, sizeof(Underfoot::structs::ItemBodyStruct));
+		UF::structs::ItemBodyStruct ibs;
+		memset(&ibs, 0, sizeof(UF::structs::ItemBodyStruct));
 
 		ibs.id = item->ID;
 		ibs.weight = item->Weight;
@@ -3956,7 +3956,7 @@ namespace Underfoot
 		ibs.FactionAmt4 = item->FactionAmt4;
 		ibs.FactionMod4 = item->FactionMod4;
 
-		ss.write((const char*)&ibs, sizeof(Underfoot::structs::ItemBodyStruct));
+		ss.write((const char*)&ibs, sizeof(UF::structs::ItemBodyStruct));
 
 		//charm text
 		if (strlen(item->CharmFile) > 0)
@@ -3969,8 +3969,8 @@ namespace Underfoot
 			ss.write((const char*)&null_term, sizeof(uint8));
 		}
 
-		Underfoot::structs::ItemSecondaryBodyStruct isbs;
-		memset(&isbs, 0, sizeof(Underfoot::structs::ItemSecondaryBodyStruct));
+		UF::structs::ItemSecondaryBodyStruct isbs;
+		memset(&isbs, 0, sizeof(UF::structs::ItemSecondaryBodyStruct));
 
 		isbs.augtype = item->AugType;
 		isbs.augrestrict = item->AugRestrict;
@@ -3996,7 +3996,7 @@ namespace Underfoot
 		isbs.book = item->Book;
 		isbs.booktype = item->BookType;
 
-		ss.write((const char*)&isbs, sizeof(Underfoot::structs::ItemSecondaryBodyStruct));
+		ss.write((const char*)&isbs, sizeof(UF::structs::ItemSecondaryBodyStruct));
 
 		if (strlen(item->Filename) > 0)
 		{
@@ -4008,8 +4008,8 @@ namespace Underfoot
 			ss.write((const char*)&null_term, sizeof(uint8));
 		}
 
-		Underfoot::structs::ItemTertiaryBodyStruct itbs;
-		memset(&itbs, 0, sizeof(Underfoot::structs::ItemTertiaryBodyStruct));
+		UF::structs::ItemTertiaryBodyStruct itbs;
+		memset(&itbs, 0, sizeof(UF::structs::ItemTertiaryBodyStruct));
 
 		itbs.loregroup = item->LoreGroup;
 		itbs.artifact = item->ArtifactFlag;
@@ -4030,13 +4030,13 @@ namespace Underfoot
 		itbs.no_transfer = item->NoTransfer;
 		itbs.expendablearrow = item->ExpendableArrow;
 
-		ss.write((const char*)&itbs, sizeof(Underfoot::structs::ItemTertiaryBodyStruct));
+		ss.write((const char*)&itbs, sizeof(UF::structs::ItemTertiaryBodyStruct));
 
 		// Effect Structures Broken down to allow variable length strings for effect names
 		int32 effect_unknown = 0;
 
-		Underfoot::structs::ClickEffectStruct ices;
-		memset(&ices, 0, sizeof(Underfoot::structs::ClickEffectStruct));
+		UF::structs::ClickEffectStruct ices;
+		memset(&ices, 0, sizeof(UF::structs::ClickEffectStruct));
 
 		ices.effect = item->Click.Effect;
 		ices.level2 = item->Click.Level2;
@@ -4047,7 +4047,7 @@ namespace Underfoot
 		ices.recast = item->RecastDelay;
 		ices.recast_type = item->RecastType;
 
-		ss.write((const char*)&ices, sizeof(Underfoot::structs::ClickEffectStruct));
+		ss.write((const char*)&ices, sizeof(UF::structs::ClickEffectStruct));
 
 		if (strlen(item->ClickName) > 0)
 		{
@@ -4061,8 +4061,8 @@ namespace Underfoot
 
 		ss.write((const char*)&effect_unknown, sizeof(int32));	// clickunk7
 
-		Underfoot::structs::ProcEffectStruct ipes;
-		memset(&ipes, 0, sizeof(Underfoot::structs::ProcEffectStruct));
+		UF::structs::ProcEffectStruct ipes;
+		memset(&ipes, 0, sizeof(UF::structs::ProcEffectStruct));
 
 		ipes.effect = item->Proc.Effect;
 		ipes.level2 = item->Proc.Level2;
@@ -4070,7 +4070,7 @@ namespace Underfoot
 		ipes.level = item->Proc.Level;
 		ipes.procrate = item->ProcRate;
 
-		ss.write((const char*)&ipes, sizeof(Underfoot::structs::ProcEffectStruct));
+		ss.write((const char*)&ipes, sizeof(UF::structs::ProcEffectStruct));
 
 		if (strlen(item->ProcName) > 0)
 		{
@@ -4084,15 +4084,15 @@ namespace Underfoot
 
 		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown5
 
-		Underfoot::structs::WornEffectStruct iwes;
-		memset(&iwes, 0, sizeof(Underfoot::structs::WornEffectStruct));
+		UF::structs::WornEffectStruct iwes;
+		memset(&iwes, 0, sizeof(UF::structs::WornEffectStruct));
 
 		iwes.effect = item->Worn.Effect;
 		iwes.level2 = item->Worn.Level2;
 		iwes.type = item->Worn.Type;
 		iwes.level = item->Worn.Level;
 
-		ss.write((const char*)&iwes, sizeof(Underfoot::structs::WornEffectStruct));
+		ss.write((const char*)&iwes, sizeof(UF::structs::WornEffectStruct));
 
 		if (strlen(item->WornName) > 0)
 		{
@@ -4106,15 +4106,15 @@ namespace Underfoot
 
 		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
 
-		Underfoot::structs::WornEffectStruct ifes;
-		memset(&ifes, 0, sizeof(Underfoot::structs::WornEffectStruct));
+		UF::structs::WornEffectStruct ifes;
+		memset(&ifes, 0, sizeof(UF::structs::WornEffectStruct));
 
 		ifes.effect = item->Focus.Effect;
 		ifes.level2 = item->Focus.Level2;
 		ifes.type = item->Focus.Type;
 		ifes.level = item->Focus.Level;
 
-		ss.write((const char*)&ifes, sizeof(Underfoot::structs::WornEffectStruct));
+		ss.write((const char*)&ifes, sizeof(UF::structs::WornEffectStruct));
 
 		if (strlen(item->FocusName) > 0)
 		{
@@ -4128,15 +4128,15 @@ namespace Underfoot
 
 		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
 
-		Underfoot::structs::WornEffectStruct ises;
-		memset(&ises, 0, sizeof(Underfoot::structs::WornEffectStruct));
+		UF::structs::WornEffectStruct ises;
+		memset(&ises, 0, sizeof(UF::structs::WornEffectStruct));
 
 		ises.effect = item->Scroll.Effect;
 		ises.level2 = item->Scroll.Level2;
 		ises.type = item->Scroll.Type;
 		ises.level = item->Scroll.Level;
 
-		ss.write((const char*)&ises, sizeof(Underfoot::structs::WornEffectStruct));
+		ss.write((const char*)&ises, sizeof(UF::structs::WornEffectStruct));
 
 		if (strlen(item->ScrollName) > 0)
 		{
@@ -4151,8 +4151,8 @@ namespace Underfoot
 		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
 
 		// Bard Effect?
-		Underfoot::structs::WornEffectStruct ibes;
-		memset(&ibes, 0, sizeof(Underfoot::structs::WornEffectStruct));
+		UF::structs::WornEffectStruct ibes;
+		memset(&ibes, 0, sizeof(UF::structs::WornEffectStruct));
 
 		ibes.effect = item->Bard.Effect;
 		ibes.level2 = item->Bard.Level2;
@@ -4160,7 +4160,7 @@ namespace Underfoot
 		ibes.level = item->Bard.Level;
 		//ibes.unknown6 = 0xffffffff;
 
-		ss.write((const char*)&ibes, sizeof(Underfoot::structs::WornEffectStruct));
+		ss.write((const char*)&ibes, sizeof(UF::structs::WornEffectStruct));
 
 		/*
 		if(strlen(item->BardName) > 0)
@@ -4174,8 +4174,8 @@ namespace Underfoot
 		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
 		// End of Effects
 
-		Underfoot::structs::ItemQuaternaryBodyStruct iqbs;
-		memset(&iqbs, 0, sizeof(Underfoot::structs::ItemQuaternaryBodyStruct));
+		UF::structs::ItemQuaternaryBodyStruct iqbs;
+		memset(&iqbs, 0, sizeof(UF::structs::ItemQuaternaryBodyStruct));
 
 		iqbs.scriptfileid = item->ScriptFileID;
 		iqbs.quest_item = item->QuestItemFlag;
@@ -4240,7 +4240,7 @@ namespace Underfoot
 			}
 		}
 
-		ss.write((const char*)&iqbs, sizeof(Underfoot::structs::ItemQuaternaryBodyStruct));
+		ss.write((const char*)&iqbs, sizeof(UF::structs::ItemQuaternaryBodyStruct));
 
 		for (int x = 0; x < 10; ++x) {
 
@@ -4262,62 +4262,62 @@ namespace Underfoot
 		return item_serial;
 	}
 
-	static inline uint32 ServerToUnderfootSlot(uint32 ServerSlot)
+	static inline uint32 ServerToUFSlot(uint32 serverSlot)
 	{
 		uint32 UnderfootSlot = 0;
 
-		if (ServerSlot >= MainAmmo && ServerSlot <= 53) // Cursor/Ammo/Power Source and Normal Inventory Slots
-			UnderfootSlot = ServerSlot + 1;
-		else if (ServerSlot >= EmuConstants::GENERAL_BAGS_BEGIN && ServerSlot <= EmuConstants::CURSOR_BAG_END)
-			UnderfootSlot = ServerSlot + 11;
-		else if (ServerSlot >= EmuConstants::BANK_BAGS_BEGIN && ServerSlot <= EmuConstants::BANK_BAGS_END)
-			UnderfootSlot = ServerSlot + 1;
-		else if (ServerSlot >= EmuConstants::SHARED_BANK_BAGS_BEGIN && ServerSlot <= EmuConstants::SHARED_BANK_BAGS_END)
-			UnderfootSlot = ServerSlot + 1;
-		else if (ServerSlot == MainPowerSource)
+		if (serverSlot >= MainAmmo && serverSlot <= 53) // Cursor/Ammo/Power Source and Normal Inventory Slots
+			UnderfootSlot = serverSlot + 1;
+		else if (serverSlot >= EmuConstants::GENERAL_BAGS_BEGIN && serverSlot <= EmuConstants::CURSOR_BAG_END)
+			UnderfootSlot = serverSlot + 11;
+		else if (serverSlot >= EmuConstants::BANK_BAGS_BEGIN && serverSlot <= EmuConstants::BANK_BAGS_END)
+			UnderfootSlot = serverSlot + 1;
+		else if (serverSlot >= EmuConstants::SHARED_BANK_BAGS_BEGIN && serverSlot <= EmuConstants::SHARED_BANK_BAGS_END)
+			UnderfootSlot = serverSlot + 1;
+		else if (serverSlot == MainPowerSource)
 			UnderfootSlot = slots::MainPowerSource;
 		else
-			UnderfootSlot = ServerSlot;
+			UnderfootSlot = serverSlot;
 
 		return UnderfootSlot;
 	}
 
-	static inline uint32 ServerToUnderFootCorpseSlot(uint32 ServerCorpse)
+	static inline uint32 ServerToUFCorpseSlot(uint32 serverCorpseSlot)
 	{
 		//uint32 UnderfootCorpse;
-		return (ServerCorpse + 1);
+		return (serverCorpseSlot + 1);
 	}
 
-	static inline uint32 UnderfootToServerSlot(uint32 UnderfootSlot)
+	static inline uint32 UFToServerSlot(uint32 ufSlot)
 	{
 		uint32 ServerSlot = 0;
 
-		if (UnderfootSlot >= slots::MainAmmo && UnderfootSlot <= consts::CORPSE_END) // Cursor/Ammo/Power Source and Normal Inventory Slots
-			ServerSlot = UnderfootSlot - 1;
-		else if (UnderfootSlot >= consts::GENERAL_BAGS_BEGIN && UnderfootSlot <= consts::CURSOR_BAG_END)
-			ServerSlot = UnderfootSlot - 11;
-		else if (UnderfootSlot >= consts::BANK_BAGS_BEGIN && UnderfootSlot <= consts::BANK_BAGS_END)
-			ServerSlot = UnderfootSlot - 1;
-		else if (UnderfootSlot >= consts::SHARED_BANK_BAGS_BEGIN && UnderfootSlot <= consts::SHARED_BANK_BAGS_END)
-			ServerSlot = UnderfootSlot - 1;
-		else if (UnderfootSlot == slots::MainPowerSource)
+		if (ufSlot >= slots::MainAmmo && ufSlot <= consts::CORPSE_END) // Cursor/Ammo/Power Source and Normal Inventory Slots
+			ServerSlot = ufSlot - 1;
+		else if (ufSlot >= consts::GENERAL_BAGS_BEGIN && ufSlot <= consts::CURSOR_BAG_END)
+			ServerSlot = ufSlot - 11;
+		else if (ufSlot >= consts::BANK_BAGS_BEGIN && ufSlot <= consts::BANK_BAGS_END)
+			ServerSlot = ufSlot - 1;
+		else if (ufSlot >= consts::SHARED_BANK_BAGS_BEGIN && ufSlot <= consts::SHARED_BANK_BAGS_END)
+			ServerSlot = ufSlot - 1;
+		else if (ufSlot == slots::MainPowerSource)
 			ServerSlot = MainPowerSource;
 		else
-			ServerSlot = UnderfootSlot;
+			ServerSlot = ufSlot;
 
 		return ServerSlot;
 	}
 
-	static inline uint32 UnderfootToServerCorpseSlot(uint32 UnderfootCorpse)
+	static inline uint32 UFToServerCorpseSlot(uint32 ufCorpseSlot)
 	{
 		//uint32 ServerCorpse;
-		return (UnderfootCorpse - 1);
+		return (ufCorpseSlot - 1);
 	}
 
-	static inline void ServerToUnderfootTextLink(std::string& underfootTextLink, const std::string& serverTextLink)
+	static inline void ServerToUFTextLink(std::string& ufTextLink, const std::string& serverTextLink)
 	{
 		if ((consts::TEXT_LINK_BODY_LENGTH == EmuConstants::TEXT_LINK_BODY_LENGTH) || (serverTextLink.find('\x12') == std::string::npos)) {
-			underfootTextLink = serverTextLink;
+			ufTextLink = serverTextLink;
 			return;
 		}
 
@@ -4326,7 +4326,7 @@ namespace Underfoot
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
 				if (segments[segment_iter].length() <= EmuConstants::TEXT_LINK_BODY_LENGTH) {
-					underfootTextLink.append(segments[segment_iter]);
+					ufTextLink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
 				}
@@ -4336,32 +4336,32 @@ namespace Underfoot
 				// SoF:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX       X  XXXX  X XXXXX XXXXXXXX (50)
 				// Diff:                                       ^^^^^         ^
 
-				underfootTextLink.push_back('\x12');
-				underfootTextLink.append(segments[segment_iter].substr(0, 31));
-				underfootTextLink.append(segments[segment_iter].substr(36, 5));
+				ufTextLink.push_back('\x12');
+				ufTextLink.append(segments[segment_iter].substr(0, 31));
+				ufTextLink.append(segments[segment_iter].substr(36, 5));
 
 				if (segments[segment_iter][41] == '0')
-					underfootTextLink.push_back(segments[segment_iter][42]);
+					ufTextLink.push_back(segments[segment_iter][42]);
 				else
-					underfootTextLink.push_back('F');
+					ufTextLink.push_back('F');
 
-				underfootTextLink.append(segments[segment_iter].substr(43));
-				underfootTextLink.push_back('\x12');
+				ufTextLink.append(segments[segment_iter].substr(43));
+				ufTextLink.push_back('\x12');
 			}
 			else {
-				underfootTextLink.append(segments[segment_iter]);
+				ufTextLink.append(segments[segment_iter]);
 			}
 		}
 	}
 
-	static inline void UnderfootToServerTextLink(std::string& serverTextLink, const std::string& underfootTextLink)
+	static inline void UFToServerTextLink(std::string& serverTextLink, const std::string& ufTextLink)
 	{
-		if ((EmuConstants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) || (underfootTextLink.find('\x12') == std::string::npos)) {
-			serverTextLink = underfootTextLink;
+		if ((EmuConstants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) || (ufTextLink.find('\x12') == std::string::npos)) {
+			serverTextLink = ufTextLink;
 			return;
 		}
 
-		auto segments = SplitString(underfootTextLink, '\x12');
+		auto segments = SplitString(ufTextLink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
@@ -4390,4 +4390,4 @@ namespace Underfoot
 		}
 	}
 }
-// end namespace Underfoot
+// end namespace UF

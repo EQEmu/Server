@@ -103,5 +103,6 @@ D(OP_TradeSkillCombine)
 D(OP_TributeItem)
 D(OP_WearChange)
 D(OP_WhoAllRequest)
+
 #undef E
 #undef D

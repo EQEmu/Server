@@ -26,11 +26,11 @@ namespace SoD
 
 	// server to client inventory location converters
 	static inline uint32 ServerToSoDSlot(uint32 ServerSlot);
-	static inline uint32 ServerToSoDCorpseSlot(uint32 ServerCorpse);
+	static inline uint32 ServerToSoDCorpseSlot(uint32 serverCorpseSlot);
 
 	// client to server inventory location converters
-	static inline uint32 SoDToServerSlot(uint32 SoDSlot);
-	static inline uint32 SoDToServerCorpseSlot(uint32 SoDCorpse);
+	static inline uint32 SoDToServerSlot(uint32 sodSlot);
+	static inline uint32 SoDToServerCorpseSlot(uint32 sodCorpseSlot);
 
 	// server to client text link converter
 	static inline void ServerToSoDTextLink(std::string& sodTextLink, const std::string& serverTextLink);
@@ -3242,7 +3242,7 @@ namespace SoD
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log.Out(Logs::General, Logs::Netcode, "[ERROR] Moved item from %u to %u", eq->from_slot, eq->to_slot);
+		Log.Out(Logs::General, Logs::Netcode, "[SoD] Moved item from %u to %u", eq->from_slot, eq->to_slot);
 
 		emu->from_slot = SoDToServerSlot(eq->from_slot);
 		emu->to_slot = SoDToServerSlot(eq->to_slot);
@@ -3548,7 +3548,7 @@ namespace SoD
 		hdr.scaled_value = inst->IsScaling() ? inst->GetExp() / 100 : 0;
 		hdr.instance_id = (merchant_slot == 0) ? inst->GetSerialNumber() : merchant_slot;
 		hdr.unknown028 = 0;
-		hdr.last_cast_time = ((item->RecastDelay > 1) ? 1212693140 : 0);
+		hdr.last_cast_time = inst->GetRecastTimestamp();
 		hdr.charges = (stackable ? (item->MaxCharges ? 1 : 0) : charges);
 		hdr.inst_nodrop = inst->IsAttuned() ? 1 : 0;
 		hdr.unknown044 = 0;
@@ -3961,54 +3961,54 @@ namespace SoD
 		return item_serial;
 	}
 
-	static inline uint32 ServerToSoDSlot(uint32 ServerSlot)
+	static inline uint32 ServerToSoDSlot(uint32 serverSlot)
 	{
 		uint32 SoDSlot = 0;
 
-		if (ServerSlot >= MainAmmo && ServerSlot <= 53) // Cursor/Ammo/Power Source and Normal Inventory Slots
-			SoDSlot = ServerSlot + 1;
-		else if (ServerSlot >= EmuConstants::GENERAL_BAGS_BEGIN && ServerSlot <= EmuConstants::CURSOR_BAG_END)
-			SoDSlot = ServerSlot + 11;
-		else if (ServerSlot >= EmuConstants::BANK_BAGS_BEGIN && ServerSlot <= EmuConstants::BANK_BAGS_END)
-			SoDSlot = ServerSlot + 1;
-		else if (ServerSlot >= EmuConstants::SHARED_BANK_BAGS_BEGIN && ServerSlot <= EmuConstants::SHARED_BANK_BAGS_END)
-			SoDSlot = ServerSlot + 1;
-		else if (ServerSlot == MainPowerSource)
+		if (serverSlot >= MainAmmo && serverSlot <= 53) // Cursor/Ammo/Power Source and Normal Inventory Slots
+			SoDSlot = serverSlot + 1;
+		else if (serverSlot >= EmuConstants::GENERAL_BAGS_BEGIN && serverSlot <= EmuConstants::CURSOR_BAG_END)
+			SoDSlot = serverSlot + 11;
+		else if (serverSlot >= EmuConstants::BANK_BAGS_BEGIN && serverSlot <= EmuConstants::BANK_BAGS_END)
+			SoDSlot = serverSlot + 1;
+		else if (serverSlot >= EmuConstants::SHARED_BANK_BAGS_BEGIN && serverSlot <= EmuConstants::SHARED_BANK_BAGS_END)
+			SoDSlot = serverSlot + 1;
+		else if (serverSlot == MainPowerSource)
 			SoDSlot = slots::MainPowerSource;
 		else
-			SoDSlot = ServerSlot;
+			SoDSlot = serverSlot;
 		return SoDSlot;
 	}
 
-	static inline uint32 ServerToSoDCorpseSlot(uint32 ServerCorpse)
+	static inline uint32 ServerToSoDCorpseSlot(uint32 serverCorpseSlot)
 	{
 		//uint32 SoDCorpse;
-		return (ServerCorpse + 1);
+		return (serverCorpseSlot + 1);
 	}
 
-	static inline uint32 SoDToServerSlot(uint32 SoDSlot)
+	static inline uint32 SoDToServerSlot(uint32 sodSlot)
 	{
 		uint32 ServerSlot = 0;
 
-		if (SoDSlot >= slots::MainAmmo && SoDSlot <= consts::CORPSE_END) // Cursor/Ammo/Power Source and Normal Inventory Slots
-			ServerSlot = SoDSlot - 1;
-		else if (SoDSlot >= consts::GENERAL_BAGS_BEGIN && SoDSlot <= consts::CURSOR_BAG_END)
-			ServerSlot = SoDSlot - 11;
-		else if (SoDSlot >= consts::BANK_BAGS_BEGIN && SoDSlot <= consts::BANK_BAGS_END)
-			ServerSlot = SoDSlot - 1;
-		else if (SoDSlot >= consts::SHARED_BANK_BAGS_BEGIN && SoDSlot <= consts::SHARED_BANK_BAGS_END)
-			ServerSlot = SoDSlot - 1;
-		else if (SoDSlot == slots::MainPowerSource)
+		if (sodSlot >= slots::MainAmmo && sodSlot <= consts::CORPSE_END) // Cursor/Ammo/Power Source and Normal Inventory Slots
+			ServerSlot = sodSlot - 1;
+		else if (sodSlot >= consts::GENERAL_BAGS_BEGIN && sodSlot <= consts::CURSOR_BAG_END)
+			ServerSlot = sodSlot - 11;
+		else if (sodSlot >= consts::BANK_BAGS_BEGIN && sodSlot <= consts::BANK_BAGS_END)
+			ServerSlot = sodSlot - 1;
+		else if (sodSlot >= consts::SHARED_BANK_BAGS_BEGIN && sodSlot <= consts::SHARED_BANK_BAGS_END)
+			ServerSlot = sodSlot - 1;
+		else if (sodSlot == slots::MainPowerSource)
 			ServerSlot = MainPowerSource;
 		else
-			ServerSlot = SoDSlot;
+			ServerSlot = sodSlot;
 		return ServerSlot;
 	}
 
-	static inline uint32 SoDToServerCorpseSlot(uint32 SoDCorpse)
+	static inline uint32 SoDToServerCorpseSlot(uint32 sodCorpseSlot)
 	{
 		//uint32 ServerCorpse;
-		return (SoDCorpse - 1);
+		return (sodCorpseSlot - 1);
 	}
 
 	static inline void ServerToSoDTextLink(std::string& sodTextLink, const std::string& serverTextLink)

@@ -506,8 +506,7 @@ void Client::SetLevel(uint8 set_level, bool command)
 	SetMana(CalcMaxMana());
 	UpdateWho();
 
-	if(GetMerc())
-		UpdateMercLevel();
+	UpdateMercLevel();
 
 	Save();
 }

@@ -422,14 +422,15 @@ bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float 
 	return false;
 }
 
-void Mob::AI_Init() {
+void Mob::AI_Init()
+{
 	pAIControlled = false;
-	AIthink_timer = 0;
-	AIwalking_timer = 0;
-	AImovement_timer = 0;
-	AItarget_check_timer = 0;
-	AIfeignremember_timer = nullptr;
-	AIscanarea_timer = 0;
+	AIthink_timer.reset(nullptr);
+	AIwalking_timer.reset(nullptr);
+	AImovement_timer.reset(nullptr);
+	AItarget_check_timer.reset(nullptr);
+	AIfeignremember_timer.reset(nullptr);
+	AIscanarea_timer.reset(nullptr);
 	minLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMin);
 	maxLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMax);
 
@@ -441,10 +442,9 @@ void Mob::AI_Init() {
 	pDontCureMeBefore = 0;
 }
 
-void NPC::AI_Init() {
-	Mob::AI_Init();
-
-	AIautocastspell_timer = 0;
+void NPC::AI_Init()
+{
+	AIautocastspell_timer.reset(nullptr);
 	casting_spell_AIindex = static_cast<uint8>(AIspells.size());
 
 	roambox_max_x = 0;
@@ -458,8 +458,8 @@ void NPC::AI_Init() {
 	roambox_delay = 2500;
 }
 
-void Client::AI_Init() {
-	Mob::AI_Init();
+void Client::AI_Init()
+{
 	minLastFightingDelayMoving = CLIENT_LD_TIMEOUT;
 	maxLastFightingDelayMoving = CLIENT_LD_TIMEOUT;
 }
@@ -474,13 +474,13 @@ void Mob::AI_Start(uint32 iMoveDelay) {
 		pLastFightingDelayMoving = 0;
 
 	pAIControlled = true;
-	AIthink_timer = new Timer(AIthink_duration);
+	AIthink_timer = std::unique_ptr<Timer>(new Timer(AIthink_duration));
 	AIthink_timer->Trigger();
-	AIwalking_timer = new Timer(0);
-	AImovement_timer = new Timer(AImovement_duration);
-	AItarget_check_timer = new Timer(AItarget_check_duration);
-	AIfeignremember_timer = new Timer(AIfeignremember_delay);
-	AIscanarea_timer = new Timer(AIscanarea_delay);
+	AIwalking_timer = std::unique_ptr<Timer>(new Timer(0));
+	AImovement_timer = std::unique_ptr<Timer>(new Timer(AImovement_duration));
+	AItarget_check_timer = std::unique_ptr<Timer>(new Timer(AItarget_check_duration));
+	AIfeignremember_timer = std::unique_ptr<Timer>(new Timer(AIfeignremember_delay));
+	AIscanarea_timer = std::unique_ptr<Timer>(new Timer(AIscanarea_delay));
 #ifdef REVERSE_AGGRO
 	if(IsNPC() && !CastToNPC()->WillAggroNPCs())
 		AIscanarea_timer->Disable();
@@ -516,10 +516,10 @@ void NPC::AI_Start(uint32 iMoveDelay) {
 		return;
 
 	if (AIspells.size() == 0) {
-		AIautocastspell_timer = new Timer(1000);
+		AIautocastspell_timer = std::unique_ptr<Timer>(new Timer(1000));
 		AIautocastspell_timer->Disable();
 	} else {
-		AIautocastspell_timer = new Timer(750);
+		AIautocastspell_timer = std::unique_ptr<Timer>(new Timer(750));
 		AIautocastspell_timer->Start(RandomTimer(0, 15000), false);
 	}
 
@@ -540,19 +540,19 @@ void Mob::AI_Stop() {
 
 	pAIControlled = false;
 
-	safe_delete(AIthink_timer);
-	safe_delete(AIwalking_timer);
-	safe_delete(AImovement_timer);
-	safe_delete(AItarget_check_timer);
-	safe_delete(AIscanarea_timer);
-	safe_delete(AIfeignremember_timer);
+	AIthink_timer.reset(nullptr);
+	AIwalking_timer.reset(nullptr);
+	AImovement_timer.reset(nullptr);
+	AItarget_check_timer.reset(nullptr);
+	AIscanarea_timer.reset(nullptr);
+	AIfeignremember_timer.reset(nullptr);
 
 	hate_list.WipeHateList();
 }
 
 void NPC::AI_Stop() {
 	Waypoints.clear();
-	safe_delete(AIautocastspell_timer);
+	AIautocastspell_timer.reset(nullptr);
 }
 
 void Client::AI_Stop() {
@@ -2657,7 +2657,7 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
 		npc_spells_cache = new DBnpcspells_Struct*[npc_spells_maxid+1];
 		npc_spells_loadtried = new bool[npc_spells_maxid+1];
 		for (uint32 i=0; i<=npc_spells_maxid; i++) {
-			npc_spells_cache[i] = 0;
+			npc_spells_cache[i] = nullptr;
 			npc_spells_loadtried[i] = false;
 		}
 	}
@@ -2795,7 +2795,7 @@ DBnpcspellseffects_Struct *ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEff
 		npc_spellseffects_cache = new DBnpcspellseffects_Struct *[npc_spellseffects_maxid + 1];
 		npc_spellseffects_loadtried = new bool[npc_spellseffects_maxid + 1];
 		for (uint32 i = 0; i <= npc_spellseffects_maxid; i++) {
-			npc_spellseffects_cache[i] = 0;
+			npc_spellseffects_cache[i] = nullptr;
 			npc_spellseffects_loadtried[i] = false;
 		}
 	}

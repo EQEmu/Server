@@ -1991,7 +1991,7 @@ void Database::SetRaidGroupLeaderInfo(uint32 gid, uint32 rid)
 	if (results.RowsAffected() != 0)
 		return;
 
-	query = StringFormat("INSERT INTO raid_leaders(gid, rid, marknpc, leadershipaa, maintank, assist, puller, mentoree, mentor_percent) VALUES(%lu, %lu, '', '', '', '', '', '', 0)",
+	query = StringFormat("REPLACE INTO raid_leaders(gid, rid, marknpc, leadershipaa, maintank, assist, puller, mentoree, mentor_percent) VALUES(%lu, %lu, '', '', '', '', '', '', 0)",
 			(unsigned long)gid, (unsigned long)rid);
 	results = QueryDatabase(query);
 

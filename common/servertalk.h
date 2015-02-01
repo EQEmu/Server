@@ -51,7 +51,7 @@
 #define ServerOP_AcceptWorldEntrance 0x0024
 #define ServerOP_ZAAuth				0x0025
 #define ServerOP_ZAAuthFailed		0x0026
-#define ServerOP_ZoneIncClient		0x0027	// Incomming client
+#define ServerOP_ZoneIncClient		0x0027	// Incoming client
 #define ServerOP_ClientListKA		0x0028
 #define ServerOP_ChangeWID			0x0029
 #define ServerOP_IPLookup			0x002A
@@ -307,7 +307,7 @@ struct ServerZoneStateChange_struct {
 	bool makestatic;
 };
 
-struct ServerZoneIncommingClient_Struct {
+struct ServerZoneIncomingClient_Struct {
 	uint32	zoneid;		// in case the zone shut down, boot it back up
 	uint16	instanceid; // instance id if it exists for booting up
 	uint32	ip;			// client's IP address

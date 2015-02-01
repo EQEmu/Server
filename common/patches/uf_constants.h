@@ -19,12 +19,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-#ifndef Underfoot_CONSTANTS_H_
-#define Underfoot_CONSTANTS_H_
+#ifndef UF_CONSTANTS_H_
+#define UF_CONSTANTS_H_
 
 #include "../types.h"
 
-namespace Underfoot {
+namespace UF {
 	namespace maps {
 		typedef enum : int16 {
 			// this needs work to match actual client equivilents
@@ -187,12 +187,12 @@ namespace Underfoot {
 		static const bool COIN_HAS_WEIGHT = false;
 	}
 
-};	//end namespace Underfoot
+};	//end namespace UF
 
-#endif /*Underfoot_CONSTANTS_H_*/
+#endif /*UF_CONSTANTS_H_*/
 
 /*
-Underfoot Notes:
+UF Notes:
 	** Integer-based inventory **
 ok	Possessions: 0 - 31 (Corpse: 23 - 54 [Offset 23])
 ok		[Equipment: 0 - 22]

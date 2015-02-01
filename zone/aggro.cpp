@@ -481,7 +481,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 }
 
 /*
-solar: returns false if attack should not be allowed
+returns false if attack should not be allowed
 I try to list every type of conflict that's possible here, so it's easy
 to see how the decision is made. Yea, it could be condensed and made
 faster, but I'm doing it this way to make it readable and easy to modify
@@ -550,7 +550,7 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 		}
 	}
 
-	// solar: the format here is a matrix of mob type vs mob type.
+	// the format here is a matrix of mob type vs mob type.
 	// redundant ones are omitted and the reverse is tried if it falls through.
 
 	// first figure out if we're pets. we always look at the master's flags.
@@ -701,7 +701,7 @@ type', in which case, the answer is yes.
 }
 
 
-// solar: this is to check if non detrimental things are allowed to be done
+// this is to check if non detrimental things are allowed to be done
 // to the target. clients cannot affect npcs and vice versa, and clients
 // cannot affect other clients that are not of the same pvp flag as them.
 // also goes for their pets
@@ -717,7 +717,7 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 	if (target->GetAllowBeneficial())
 		return true;
 
-	// solar: see IsAttackAllowed for notes
+	// see IsAttackAllowed for notes
 
 	// first figure out if we're pets. we always look at the master's flags.
 	// no need to compare pets to anything
@@ -1233,7 +1233,7 @@ void Mob::ClearFeignMemory() {
 		AIfeignremember_timer->Disable();
 }
 
-bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
+bool Mob::PassCharismaCheck(Mob* caster, uint16 spell_id) {
 
 	/*
 	Charm formula is correct based on over 50 hours of personal live parsing - Kayen
@@ -1260,9 +1260,9 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 			return true;
 
 		if (RuleB(Spells, CharismaCharmDuration))
-			resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster,0,0,true,true);
+			resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster,false,0,true,true);
 		else
-			resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster, 0,0, false, true);
+			resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster, false,0, false, true);
 
 		//2: The mob makes a resistance check against the charm
 		if (resist_check == 100) 
@@ -1286,8 +1286,7 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 	{
 		// Assume this is a harmony/pacify spell
 		// If 'Lull' spell resists, do a second resist check with a charisma modifier AND regular resist checks. If resists agian you gain aggro.
-		resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster, true);
-
+		resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster, false,0,true);
 		if (resist_check == 100)
 			return true;
 	}

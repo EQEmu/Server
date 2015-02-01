@@ -109,7 +109,7 @@ private:
 	bool HandleDeleteCharacterPacket(const EQApplicationPacket *app);
 	bool HandleZoneChangePacket(const EQApplicationPacket *app);
 
-	EQStreamInterface* const eqs;
+	EQStreamInterface* eqs;
 };
 
 bool CheckCharCreateInfoSoF(CharCreate_Struct *cc);

@@ -19,7 +19,7 @@
 
 /*
 
-	solar:	General outline of spell casting process
+	General outline of spell casting process
 
 	1.
 		a)	Client clicks a spell bar gem, ability, or item. client_process.cpp

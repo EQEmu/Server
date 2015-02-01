@@ -343,7 +343,7 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 
 bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 {
-	/* solar: called when a mob is attacked, does the checks to see if it's a hit
+	/* called when a mob is attacked, does the checks to see if it's a hit
 	* and does other mitigation checks. 'this' is the mob being attacked.
 	*
 	* special return values:
@@ -1378,7 +1378,7 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes att
 	if(spell_id==0)
 		spell_id = SPELL_UNKNOWN;
 
-	// cut all PVP spell damage to 2/3 -solar
+	// cut all PVP spell damage to 2/3
 	// Blasting ourselfs is considered PvP
 	//Don't do PvP mitigation if the caster is damaging himself
 	if(other && other->IsClient() && (other != this) && damage > 0) {
@@ -2545,7 +2545,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 	}
 }
 
-// solar: this is called from Damage() when 'this' is attacked by 'other.
+// this is called from Damage() when 'this' is attacked by 'other.
 // 'this' is the one being attacked
 // 'other' is the attacker
 // a damage shield causes damage (or healing) to whoever attacks the wearer

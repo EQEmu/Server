@@ -19,8 +19,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-#ifndef Titanium_CONSTANTS_H_
-#define Titanium_CONSTANTS_H_
+#ifndef TITANIUM_CONSTANTS_H_
+#define TITANIUM_CONSTANTS_H_
 
 #include "../types.h"
 
@@ -188,7 +188,7 @@ namespace Titanium {
 
 };	//end namespace Titanium
 
-#endif /*Titanium_CONSTANTS_H_*/
+#endif /*TITANIUM_CONSTANTS_H_*/
 
 /*
 Titanium Notes:

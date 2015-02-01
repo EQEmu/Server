@@ -1,8 +1,6 @@
 DELIMITER $$
 
-use peqdb
-
-CREATE DEFINER=`eqemu`@`%` PROCEDURE `MyFaction`(charname text)
+CREATE PROCEDURE `MyFaction`(charname text)
 BEGIN
 declare class_mod text default "";
 declare race_mod text default "";
@@ -24,7 +22,9 @@ SELECT race_mod as R, class_mod as C, deity_mod as D, f.name as faction, f.id, v
 @race_bump := IFNULL((select m.mod from faction_list_mod m where faction_id = f.id && race_mod != "" && mod_name = race_mod),0) as race_bump,
 @deity_bump := IFNULL((select m.mod from faction_list_mod m where faction_id = f.id && race_mod != "" && mod_name = deity_mod),0) as deity_bump,
 v.current_value + f.base + @class_bump + @race_bump + @deity_bump as TOTAL
-FROM peqdb.faction_values v
+FROM faction_values v
 inner join faction_list f on f.id = v.faction_id
 where v.char_id = (select id from character_data where name=charname) ;
-END
+END $$
+
+DELIMITER ;

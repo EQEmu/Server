@@ -26,11 +26,11 @@
 
 #include "types.h"
 
-namespace Logs{
+namespace Logs {
 	enum DebugLevel {
 		General = 1,	/* 1 - Low-Level general debugging, useful info on single line */
 		Moderate,		/* 2 - Informational based, used in functions, when particular things load */
-		Detail,			/* 3 - Use this for extreme detail in logging, usually in extreme debugging in the stack or interprocess communication */
+		Detail			/* 3 - Use this for extreme detail in logging, usually in extreme debugging in the stack or interprocess communication */
 	};
 
 	/*
@@ -77,6 +77,7 @@ namespace Logs{
 		MySQLError,
 		MySQLQuery,
 		Mercenaries,
+		QuestDebug,
 		MaxCategoryID	/* Don't Remove this*/
 	};
 
@@ -120,6 +121,7 @@ namespace Logs{
 		"MySQL Error",
 		"MySQL Query",
 		"Mercenaries",
+		"Quest Debug"
 	};
 }
 
@@ -141,7 +143,7 @@ public:
 				be checked against to see if that piped output is set to actually process it for the category and debug level
 	*/
 	void Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...);
-	void SetCurrentTimeStamp(char* time_stamp); /* Used in file logs to prepend a timestamp entry for logs */
+	void SetCurrentTimeStamp(char* time_stamp); /* Used in file logs to prepend a timestamp entry for logs */ 
 	void StartFileLogs(const std::string &log_name = ""); /* Used to declare the processes file log and to keep it open for later use */
 
 	/*
@@ -154,7 +156,7 @@ public:
 		log_to_gmsay[category_id] = [1-3] - Sets debug level for category to output to gmsay
 	*/
 
-	struct LogSettings{
+	struct LogSettings {
 		uint8 log_to_file;
 		uint8 log_to_console;
 		uint8 log_to_gmsay;

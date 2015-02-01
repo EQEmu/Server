@@ -2792,7 +2792,7 @@ void Mob::Say(const char *format, ...)
 }
 
 //
-// solar: this is like the above, but the first parameter is a string id
+// this is like the above, but the first parameter is a string id
 //
 void Mob::Say_StringID(uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
 {
@@ -3092,8 +3092,8 @@ float Mob::FindGroundZ(float new_x, float new_y, float z_offset)
 	if (zone->zonemap != nullptr)
 	{
 		glm::vec3 me;
-		me.x = m_Position.x;
-		me.y = m_Position.y;
+		me.x = new_x;
+		me.y = new_y;
 		me.z = m_Position.z + z_offset;
 		glm::vec3 hit;
 		float best_z = zone->zonemap->FindBestZ(me, &hit);
@@ -3112,8 +3112,8 @@ float Mob::GetGroundZ(float new_x, float new_y, float z_offset)
 	if (zone->zonemap != 0)
 	{
 		glm::vec3 me;
-		me.x = m_Position.x;
-		me.y = m_Position.y;
+		me.x = new_x;
+		me.y = new_y;
 		me.z = m_Position.z+z_offset;
 		glm::vec3 hit;
 		float best_z = zone->zonemap->FindBestZ(me, &hit);

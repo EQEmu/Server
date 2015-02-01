@@ -492,7 +492,7 @@ uint16 EQLimits::InventoryMapSize(int16 indexMap, ClientVersion clientVersion) {
 /*Titanium*/	Titanium::consts::MAP_CORPSE_SIZE,
 /*SoF*/			SoF::consts::MAP_CORPSE_SIZE,
 /*SoD*/			SoD::consts::MAP_CORPSE_SIZE,
-/*Underfoot*/	Underfoot::consts::MAP_CORPSE_SIZE,
+/*Underfoot*/	UF::consts::MAP_CORPSE_SIZE,
 /*RoF*/			RoF::consts::MAP_CORPSE_SIZE,
 /*RoF2*/		RoF2::consts::MAP_CORPSE_SIZE,
 
@@ -522,7 +522,7 @@ uint16 EQLimits::InventoryMapSize(int16 indexMap, ClientVersion clientVersion) {
 /*Titanium*/	Titanium::consts::MAP_INSPECT_SIZE,
 /*SoF*/			SoF::consts::MAP_INSPECT_SIZE,
 /*SoD*/			SoD::consts::MAP_INSPECT_SIZE,
-/*Underfoot*/	Underfoot::consts::MAP_INSPECT_SIZE,
+/*Underfoot*/	UF::consts::MAP_INSPECT_SIZE,
 /*RoF*/			RoF::consts::MAP_INSPECT_SIZE,
 /*RoF2*/		RoF2::consts::MAP_INSPECT_SIZE,
 
@@ -800,7 +800,7 @@ bool EQLimits::AllowsEmptyBagInBag(ClientVersion clientVersion) {
 /*Titanium*/	Titanium::limits::ALLOWS_EMPTY_BAG_IN_BAG,
 /*SoF*/			SoF::limits::ALLOWS_EMPTY_BAG_IN_BAG,
 /*SoD*/			SoD::limits::ALLOWS_EMPTY_BAG_IN_BAG,
-/*Underfoot*/	Underfoot::limits::ALLOWS_EMPTY_BAG_IN_BAG,
+/*Underfoot*/	UF::limits::ALLOWS_EMPTY_BAG_IN_BAG,
 /*RoF*/			RoF::limits::ALLOWS_EMPTY_BAG_IN_BAG,
 /*RoF2*/		RoF2::limits::ALLOWS_EMPTY_BAG_IN_BAG,
 
@@ -821,7 +821,7 @@ bool EQLimits::AllowsClickCastFromBag(ClientVersion clientVersion) {
 /*Titanium*/	Titanium::limits::ALLOWS_CLICK_CAST_FROM_BAG,
 /*SoF*/			SoF::limits::ALLOWS_CLICK_CAST_FROM_BAG,
 /*SoD*/			SoD::limits::ALLOWS_CLICK_CAST_FROM_BAG,
-/*Underfoot*/	Underfoot::limits::ALLOWS_CLICK_CAST_FROM_BAG,
+/*Underfoot*/	UF::limits::ALLOWS_CLICK_CAST_FROM_BAG,
 /*RoF*/			RoF::limits::ALLOWS_CLICK_CAST_FROM_BAG,
 /*RoF2*/		RoF2::limits::ALLOWS_CLICK_CAST_FROM_BAG,
 
@@ -882,7 +882,7 @@ bool EQLimits::CoinHasWeight(ClientVersion clientVersion) {
 /*Titanium*/	Titanium::limits::COIN_HAS_WEIGHT,
 /*SoF*/			SoF::limits::COIN_HAS_WEIGHT,
 /*SoD*/			SoD::limits::COIN_HAS_WEIGHT,
-/*Underfoot*/	Underfoot::limits::COIN_HAS_WEIGHT,
+/*Underfoot*/	UF::limits::COIN_HAS_WEIGHT,
 /*RoF*/			RoF::limits::COIN_HAS_WEIGHT,
 /*RoF2*/		RoF::limits::COIN_HAS_WEIGHT,
 

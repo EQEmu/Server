@@ -2976,7 +2976,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
 				
-				//Non-Focused Effect to modify incomming spell damage by resist type.
+				//Non-Focused Effect to modify incoming spell damage by resist type.
 				case SE_FcSpellVulnerability: 
 					ModVulnerability(base2, effect_value);
 				break;

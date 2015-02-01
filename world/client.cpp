@@ -102,6 +102,7 @@ Client::~Client() {
 	//let the stream factory know were done with this stream
 	eqs->Close();
 	eqs->ReleaseFromUse();
+	safe_delete(eqs);
 }
 
 void Client::SendLogServer()
@@ -845,7 +846,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 
 	char ConnectionType;
 
-	if(ClientVersionBit & BIT_UnderfootAndLater)
+	if(ClientVersionBit & BIT_UFAndLater)
 		ConnectionType = 'U';
 	else if(ClientVersionBit & BIT_SoFAndLater)
 		ConnectionType = 'S';
@@ -1102,7 +1103,7 @@ void Client::EnterWorld(bool TryBootup) {
 	const char *zone_name=database.GetZoneName(zoneID, true);
 	if (zs) {
 		// warn the world we're comming, so it knows not to shutdown
-		zs->IncommingClient(this);
+		zs->IncomingClient(this);
 	}
 	else {
 		if (TryBootup) {
@@ -1116,17 +1117,20 @@ void Client::EnterWorld(bool TryBootup) {
 			return;
 		}
 		else {
-			Log.Out(Logs::Detail, Logs::World_Server,"Requested zone %s is no running.",zone_name);
+			Log.Out(Logs::Detail, Logs::World_Server,"Requested zone %s is not running.",zone_name);
 			ZoneUnavail();
 			return;
 		}
 	}
 	pwaitingforbootup = 0;
 
+	if(!cle) {
+		return;
+	}
+
 	cle->SetChar(charid, char_name);
 	database.UpdateLiveChar(char_name, GetAccountID());
 	Log.Out(Logs::Detail, Logs::World_Server,"%s %s (%d:%d)",seencharsel ? "Entering zone" : "Zoning to",zone_name,zoneID,instanceID);
-//	database.SetAuthentication(account_id, char_name, zone_name, ip);
 
 	if (seencharsel) {
 		if (GetAdmin() < 80 && zoneserver_list.IsZoneLocked(zoneID)) {
@@ -1612,7 +1616,7 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 	int Charerrors = 0;
 
 
-// solar: if this is increased you'll have to add a column to the classrace
+// if this is increased you'll have to add a column to the classrace
 // table below
 #define _TABLE_RACES 16
 
@@ -1674,7 +1678,7 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 	{ /*Enchanter*/       true,  false,    true,   false,  true,   true,   false,  false, false, false, false,   true,  false, false,  false,  true},
 	{ /*Beastlord*/       false, true,     false,  false,  false,  false,  false,  false, true,  true,  false,   false, true,  true,   false,  false},
 	{ /*Berserker*/       false, true,     false,  false,  false,  false,  false,  true,  true,  true,  false,   false, false, true,   false,  false}
-	};//Initial table by kathgar, editted by Wiz for accuracy, solar too
+	};
 
 	if (!cc)
 		return false;
@@ -1707,7 +1711,7 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 		return false;
 	}
 
-	// solar: add up the base values for this class/race
+	// add up the base values for this class/race
 	// this is what they start with, and they have stat_points more
 	// that can distributed
 	bSTR = BaseClass[classtemp][0] + BaseRace[racetemp][0];
@@ -1721,7 +1725,7 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 	bTOTAL = bSTR + bSTA + bAGI + bDEX + bWIS + bINT + bCHA;
 	cTOTAL = cc->STR + cc->STA + cc->AGI + cc->DEX + cc->WIS + cc->INT + cc->CHA;
 
-	// solar: the first check makes sure the total is exactly what was expected.
+	// the first check makes sure the total is exactly what was expected.
 	// this will catch all the stat cheating, but there's still the issue
 	// of reducing CHA or INT or something, to use for STR, so we check
 	// that none are lower than the base or higher than base + stat_points

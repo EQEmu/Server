@@ -25,6 +25,7 @@
 #include "position.h"
 #include <set>
 #include <vector>
+#include <memory>
 
 char* strn0cpy(char* dest, const char* source, uint32 size);
 
@@ -122,7 +123,7 @@ public:
 
 	//Attack
 	virtual void RogueBackstab(Mob* other, bool min_damage = false, int ReuseTime = 10);
-	virtual void RogueAssassinate(Mob* other); // solar
+	virtual void RogueAssassinate(Mob* other);
 	float MobAngle(Mob *other = 0, float ourx = 0.0f, float oury = 0.0f) const;
 	// greater than 90 is behind
 	inline bool BehindMob(Mob *other = 0, float ourx = 0.0f, float oury = 0.0f) const
@@ -577,7 +578,7 @@ public:
 	void WakeTheDead(uint16 spell_id, Mob *target, uint32 duration);
 	void Spin();
 	void Kill();
-	bool PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id);
+	bool PassCharismaCheck(Mob* caster, uint16 spell_id);
 	bool TryDeathSave();
 	bool TryDivineSave();
 	void DoBuffWearOffEffect(uint32 index);
@@ -879,8 +880,8 @@ public:
 	virtual FACTION_VALUE GetReverseFactionCon(Mob* iOther) { return FACTION_INDIFFERENT; }
 
 	inline bool IsTrackable() const { return(trackable); }
-	Timer* GetAIThinkTimer() { return AIthink_timer; }
-	Timer* GetAIMovementTimer() { return AImovement_timer; }
+	Timer* GetAIThinkTimer() { return AIthink_timer.get(); }
+	Timer* GetAIMovementTimer() { return AImovement_timer.get(); }
 	Timer GetAttackTimer() { return attack_timer; }
 	Timer GetAttackDWTimer() { return attack_dw_timer; }
 	inline bool IsFindable() { return findable; }
@@ -1170,14 +1171,14 @@ protected:
 	uint32 maxLastFightingDelayMoving;
 	float pAggroRange;
 	float pAssistRange;
-	Timer* AIthink_timer;
-	Timer* AImovement_timer;
-	Timer* AItarget_check_timer;
+	std::unique_ptr<Timer> AIthink_timer;
+	std::unique_ptr<Timer> AImovement_timer;
+	std::unique_ptr<Timer> AItarget_check_timer;
 	bool movetimercompleted;
 	bool permarooted;
-	Timer* AIscanarea_timer;
-	Timer* AIwalking_timer;
-	Timer* AIfeignremember_timer;
+	std::unique_ptr<Timer> AIscanarea_timer;
+	std::unique_ptr<Timer> AIwalking_timer;
+	std::unique_ptr<Timer> AIfeignremember_timer;
 	uint32 pLastFightingDelayMoving;
 	HateList hate_list;
 	std::set<uint32> feign_memory_list;

@@ -256,6 +256,7 @@ public:
 	void LoadPetInfo(Client *c);
 	void SavePetInfo(Client *c);
 	void RemoveTempFactions(Client *c);
+	void UpdateItemRecastTimestamps(uint32 char_id, uint32 recast_type, uint32 timestamp);
 
 	/* Character Data Loaders  */
 	bool	LoadCharacterFactionValues(uint32 character_id, faction_map & val_list);

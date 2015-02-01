@@ -19,8 +19,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-#ifndef RoF_CONSTANTS_H_
-#define RoF_CONSTANTS_H_
+#ifndef ROF_CONSTANTS_H_
+#define ROF_CONSTANTS_H_
 
 #include "../types.h"
 
@@ -192,7 +192,7 @@ namespace RoF {
 
 };	//end namespace RoF
 
-#endif /*RoF_CONSTANTS_H_*/
+#endif /*ROF_CONSTANTS_H_*/
 
 /*
 RoF Notes:

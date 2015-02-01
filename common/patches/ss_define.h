@@ -1,5 +1,5 @@
 
-#define ENCODE(x) void Strategy::Encode_##x(EQApplicationPacket **p, EQStream *dest, bool ack_req)
+#define ENCODE(x) void Strategy::Encode_##x(EQApplicationPacket **p, std::shared_ptr<EQStream> dest, bool ack_req)
 #define DECODE(x) void Strategy::Decode_##x(EQApplicationPacket *__packet)
 
 #define StructDist(in, f1, f2) (uint32(&in->f2)-uint32(&in->f1))

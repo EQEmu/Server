@@ -101,6 +101,7 @@ RULE_INT ( Character, FoodLossPerUpdate, 35) // How much food/water you lose per
 RULE_INT ( Character, BaseInstrumentSoftCap, 36) // Softcap for instrument mods, 36 commonly referred to as "3.6" as well.
 RULE_INT ( Character, BaseRunSpeedCap, 158) // Base Run Speed Cap, on live it's 158% which will give you a runspeed of 1.580 hard capped to 225.
 RULE_INT ( Character, OrnamentationAugmentType, 20) //Ornamentation Augment Type
+RULE_REAL(Character, EnvironmentDamageMulipliter, 1)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Mercs )

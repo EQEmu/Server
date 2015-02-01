@@ -413,15 +413,6 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 		std::cout << "Received 0x" << std::hex << std::setw(4) << std::setfill('0') << opcode << ", size=" << std::dec << app->size << std::endl;
 	#endif
 
-	#ifdef SOLAR
-		if(0 && opcode != OP_ClientUpdate)
-		{
-			Log.LogDebug(Logs::General,"HandlePacket() OPCODE debug enabled client %s", GetName());
-			std::cerr << "OPCODE: " << std::hex << std::setw(4) << std::setfill('0') << opcode << std::dec << ", size: " << app->size << std::endl;
-			DumpPacket(app);
-		}
-	#endif
-
 	switch(client_state) {
 	case CLIENT_CONNECTING: {
 		if(ConnectingOpcodes.count(opcode) != 1) {
@@ -848,7 +839,7 @@ void Client::CompleteConnect()
 	worldserver.SendPacket(pack);
 	delete pack;
 
-	if (IsClient() && CastToClient()->GetClientVersionBit() & BIT_UnderfootAndLater) {
+	if (IsClient() && CastToClient()->GetClientVersionBit() & BIT_UFAndLater) {
 		EQApplicationPacket *outapp = MakeBuffsPacket(false);
 		CastToClient()->FastQueuePacket(&outapp);
 	}
@@ -1169,7 +1160,6 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 
 	//No idea why live sends this if even were not in a guild
 	SendGuildMOTD();
-	SpawnMercOnZone();
 
 	return;
 }
@@ -1227,8 +1217,7 @@ void Client::Handle_Connect_OP_WearChange(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_WorldObjectsSent(const EQApplicationPacket *app)
 {
-	//This is a copy of SendExpZonein created for SoF due to packet order change
-	//This does not affect clients other than SoF
+	//This is a copy of SendExpZonein created for SoF+ due to packet order change
 
 	//////////////////////////////////////////////////////
 	// Spawn Appearance Packet
@@ -1295,7 +1284,10 @@ void Client::Handle_Connect_OP_WorldObjectsSent(const EQApplicationPacket *app)
 	//No idea why live sends this if even were not in a guild
 	SendGuildMOTD();
 
-	SpawnMercOnZone();
+	if (RuleB(Mercs, AllowMercs))
+	{
+		SpawnMercOnZone();
+	}
 
 	return;
 }
@@ -1400,6 +1392,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (RuleB(Character, SharedBankPlat))
 		m_pp.platinum_shared = database.GetSharedPlatinum(this->AccountID());
 
+	database.ClearOldRecastTimestamps(cid); /* Clear out our old recast timestamps to keep the DB clean */
 	loaditems = database.GetInventory(cid, &m_inv); /* Load Character Inventory */
 	database.LoadCharacterBandolier(cid, &m_pp); /* Load Character Bandolier */
 	database.LoadCharacterBindPoint(cid, &m_pp); /* Load Character Bind */
@@ -1864,7 +1857,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		safe_delete(outapp);
 	}
 
-	if (ClientVersionBit & BIT_UnderfootAndLater) {
+	if (ClientVersionBit & BIT_UFAndLater) {
 		outapp = new EQApplicationPacket(OP_XTargetResponse, 8);
 		outapp->WriteUInt32(GetMaxXTargets());
 		outapp->WriteUInt32(0);
@@ -5503,16 +5496,6 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 		return;
 	}
 	EnvDamage2_Struct* ed = (EnvDamage2_Struct*)app->pBuffer;
-	if (admin >= minStatusToAvoidFalling && GetGM()){
-		Message(13, "Your GM status protects you from %i points of type %i environmental damage.", ed->damage, ed->dmgtype);
-		SetHP(GetHP() - 1);//needed or else the client wont acknowledge
-		return;
-	}
-	else if (GetInvul()) {
-		Message(13, "Your invuln status protects you from %i points of type %i environmental damage.", ed->damage, ed->dmgtype);
-		SetHP(GetHP() - 1);//needed or else the client wont acknowledge
-		return;
-	}
 
 	int damage = ed->damage;
 
@@ -5534,15 +5517,32 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 	if (damage < 0)
 		damage = 31337;
 
-	else if (zone->GetZoneID() == 183 || zone->GetZoneID() == 184)
+	if (admin >= minStatusToAvoidFalling && GetGM()){
+		Message(13, "Your GM status protects you from %i points of type %i environmental damage.", ed->damage, ed->dmgtype);
+		SetHP(GetHP() - 1);//needed or else the client wont acknowledge
 		return;
-	else
-		SetHP(GetHP() - damage);
+	}
+	else if (GetInvul()) {
+		Message(13, "Your invuln status protects you from %i points of type %i environmental damage.", ed->damage, ed->dmgtype);
+		SetHP(GetHP() - 1);//needed or else the client wont acknowledge
+		return;
+	}
 
-	if (GetHP() <= 0)
-	{
-		mod_client_death_env();
+	else if (zone->GetZoneID() == 183 || zone->GetZoneID() == 184){
+		return;
+	}
+	else{
+		SetHP(GetHP() - (damage * RuleR(Character, EnvironmentDamageMulipliter)));
 
+		/* EVENT_ENVIRONMENTAL_DAMAGE */
+		int final_damage = (damage * RuleR(Character, EnvironmentDamageMulipliter));
+		char buf[24];
+		snprintf(buf, 23, "%u %u %i", ed->damage, ed->dmgtype, final_damage); 
+		parse->EventPlayer(EVENT_ENVIRONMENTAL_DAMAGE, this, buf, 0);
+	}
+
+	if (GetHP() <= 0) {
+		mod_client_death_env(); 
 		Death(0, 32000, SPELL_UNKNOWN, SkillHandtoHand);
 	}
 	SendHPUpdate();
@@ -9314,7 +9314,7 @@ void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket *app)
 	uint32 merc_command = mc->MercCommand;	// Seen 0 (zone in with no merc or suspended), 1 (dismiss merc), 5 (normal state), 20 (unknown), 36 (zone in with merc)
 	int32 option = mc->Option;	// Seen -1 (zone in with no merc), 0 (setting to passive stance), 1 (normal or setting to balanced stance)
 
-	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Command %i, Option %i received.", merc_command, option);
+	Log.Out(Logs::General, Logs::Mercenaries, "Command %i, Option %i received from %s.", merc_command, option, GetName());
 
 	if (!RuleB(Mercs, AllowMercs))
 		return;
@@ -9348,7 +9348,7 @@ void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket *app)
 					merc->SetStance(mercTemplate->Stances[option]);
 					GetMercInfo().Stance = mercTemplate->Stances[option];
 
-					Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Set Stance: %u", merc->GetStance());
+					Log.Out(Logs::General, Logs::Mercenaries, "Set Stance: %u for %s (%s)", merc->GetStance(), merc->GetName(), GetName());
 				}
 			}
 		}
@@ -9371,7 +9371,7 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 	uint32 merchant_id = mmsr->MercMerchantID;
 	uint32 altCurrentType = 19;
 
-	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Data Request for Merchant ID (%i)", merchant_id);
+	Log.Out(Logs::General, Logs::Mercenaries, "Data Request for Merchant ID (%i) for %s.", merchant_id, GetName());
 
 	//client is requesting data about currently owned mercenary
 	if (merchant_id == 0) {
@@ -9379,12 +9379,12 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 		//send info about your current merc(s)
 		if (GetMercInfo().mercid)
 		{
-			Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: SendMercPersonalInfo Request");
+			Log.Out(Logs::General, Logs::Mercenaries, "SendMercPersonalInfo Request for %s.", GetName());
 			SendMercPersonalInfo();
 		}
 		else
 		{
-			Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: SendMercPersonalInfo Not Sent - MercID (%i)", GetMercInfo().mercid);
+			Log.Out(Logs::General, Logs::Mercenaries, "SendMercPersonalInfo Not Sent - MercID (%i) for %s.", GetMercInfo().mercid, GetName());
 		}
 	}
 
@@ -9497,7 +9497,7 @@ void Client::Handle_OP_MercenaryDataUpdateRequest(const EQApplicationPacket *app
 		return;
 	}
 
-	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Data Update Request Received.");
+	Log.Out(Logs::General, Logs::Mercenaries, "Data Update Request Received for %s.", GetName());
 
 	if (GetMercID())
 	{
@@ -9523,7 +9523,7 @@ void Client::Handle_OP_MercenaryDismiss(const EQApplicationPacket *app)
 		Command = VARSTRUCT_DECODE_TYPE(uint8, InBuffer);
 	}
 
-	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Dismiss Request ( %i ) Received.", Command);
+	Log.Out(Logs::General, Logs::Mercenaries, "Dismiss Request ( %i ) Received for %s.", Command, GetName());
 
 	// Handle the dismiss here...
 	DismissMerc(GetMercInfo().mercid);
@@ -9548,7 +9548,7 @@ void Client::Handle_OP_MercenaryHire(const EQApplicationPacket *app)
 	uint32 merc_unk1 = mmrq->MercUnk01;
 	uint32 merc_unk2 = mmrq->MercUnk02;
 
-	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Template ID (%i), Merchant ID (%i), Unknown1 (%i), Unknown2 (%i)", merc_template_id, merchant_id, merc_unk1, merc_unk2);
+	Log.Out(Logs::General, Logs::Mercenaries, "Template ID (%i), Merchant ID (%i), Unknown1 (%i), Unknown2 (%i), Client: %s", merc_template_id, merchant_id, merc_unk1, merc_unk2, GetName());
 
 	//HirePending = true;
 	SetHoTT(0);
@@ -9614,7 +9614,7 @@ void Client::Handle_OP_MercenarySuspendRequest(const EQApplicationPacket *app)
 	SuspendMercenary_Struct* sm = (SuspendMercenary_Struct*)app->pBuffer;
 	uint32 merc_suspend = sm->SuspendMerc;	// Seen 30 for suspending or unsuspending
 
-	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Suspend ( %i ) received.", merc_suspend);
+	Log.Out(Logs::General, Logs::Mercenaries, "Suspend ( %i ) received for %s.", merc_suspend, GetName());
 
 	if (!RuleB(Mercs, AllowMercs))
 		return;
@@ -9634,7 +9634,7 @@ void Client::Handle_OP_MercenaryTimerRequest(const EQApplicationPacket *app)
 		return;
 	}
 
-	Log.Out(Logs::General, Logs::Mercenaries, "Mercenary Debug: Timer Request received.");
+	Log.Out(Logs::General, Logs::Mercenaries, "Timer Request received for %s.", GetName());
 
 	if (!RuleB(Mercs, AllowMercs)) {
 		return;

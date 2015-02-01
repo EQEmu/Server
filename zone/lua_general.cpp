@@ -1612,6 +1612,7 @@ luabind::scope lua_register_events() {
 			luabind::value("cast_on", static_cast<int>(EVENT_CAST_ON)),
 			luabind::value("task_accepted", static_cast<int>(EVENT_TASK_ACCEPTED)),
 			luabind::value("task_stage_complete", static_cast<int>(EVENT_TASK_STAGE_COMPLETE)),
+			luabind::value("environmental_damage", static_cast<int>(EVENT_ENVIRONMENTAL_DAMAGE)),
 			luabind::value("task_update", static_cast<int>(EVENT_TASK_UPDATE)),
 			luabind::value("task_complete", static_cast<int>(EVENT_TASK_COMPLETE)),
 			luabind::value("task_fail", static_cast<int>(EVENT_TASK_FAIL)),
@@ -1759,12 +1760,11 @@ luabind::scope lua_register_client_version() {
 		.enum_("constants")
 		[
 			luabind::value("Unknown", static_cast<int>(ClientVersion::Unknown)),
-			luabind::value("Titanium", static_cast<int>(ClientVersion::Tit)), // deprecated
-			luabind::value("Tit", static_cast<int>(ClientVersion::Tit)),
+			luabind::value("Titanium", static_cast<int>(ClientVersion::Titanium)),
 			luabind::value("SoF", static_cast<int>(ClientVersion::SoF)),
 			luabind::value("SoD", static_cast<int>(ClientVersion::SoD)),
-			luabind::value("Underfoot", static_cast<int>(ClientVersion::Und)), // deprecated
-			luabind::value("Und", static_cast<int>(ClientVersion::Und)),
+			luabind::value("Underfoot", static_cast<int>(ClientVersion::UF)), // deprecated
+			luabind::value("UF", static_cast<int>(ClientVersion::UF)),
 			luabind::value("RoF", static_cast<int>(ClientVersion::RoF)),
 			luabind::value("RoF2", static_cast<int>(ClientVersion::RoF2))
 		];

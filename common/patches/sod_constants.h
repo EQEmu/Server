@@ -19,8 +19,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-#ifndef SoD_CONSTANTS_H_
-#define SoD_CONSTANTS_H_
+#ifndef SOD_CONSTANTS_H_
+#define SOD_CONSTANTS_H_
 
 #include "../types.h"
 
@@ -189,7 +189,7 @@ namespace SoD {
 
 };	//end namespace SoD
 
-#endif /*SoD_CONSTANTS_H_*/
+#endif /*SOD_CONSTANTS_H_*/
 
 /*
 SoD Notes:

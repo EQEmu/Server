@@ -55,7 +55,7 @@
 
 #ifndef DEF_eConnectionType
 #define DEF_eConnectionType
-enum eConnectionType {Incomming, Outgoing};
+enum eConnectionType {Incoming, Outgoing};
 #endif
 
 

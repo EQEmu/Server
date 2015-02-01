@@ -1937,8 +1937,8 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 	return npc;
 }
 
-const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 clientlevel) {
-
+const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 clientlevel)
+{
 	//need to save based on merc_npc_type & client level
 	uint32 merc_type_id = id * 100 + clientlevel;
 
@@ -1963,7 +1963,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 		"0 AS gender, "
 		"m_armorinfo.texture, "
 		"m_armorinfo.helmtexture, "
-		"m_stats.attack_speed, "
+		"m_stats.attack_delay, "
 		"m_stats.STR, "
 		"m_stats.STA, "
 		"m_stats.DEX, "
@@ -1996,6 +1996,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 		"m_stats.AC, "
 		"m_stats.ATK, "
 		"m_stats.Accuracy, "
+		"m_stats.statscale, "
 		"m_stats.spellscale, "
 		"m_stats.healscale "
 		"FROM merc_stats m_stats "
@@ -2014,125 +2015,125 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 		"WHERE m_templates.merc_npc_type_id = %d AND m_stats.clientlevel = %d AND m_types.race_id = %d",
 		id, clientlevel, raceid); //dual primary keys. one is ID, one is level.
 
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        return nullptr;
-    }
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		return nullptr;
+	}
 
-    const NPCType *npc;
+	const NPCType *npc;
 
-    // Process each row returned.
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        NPCType *tmpNPCType;
-        tmpNPCType = new NPCType;
-        memset (tmpNPCType, 0, sizeof *tmpNPCType);
+	// Process each row returned.
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		NPCType *tmpNPCType;
+		tmpNPCType = new NPCType;
+		memset(tmpNPCType, 0, sizeof *tmpNPCType);
 
-        tmpNPCType->npc_id = atoi(row[0]);
+		tmpNPCType->npc_id = atoi(row[0]);
 
-        strn0cpy(tmpNPCType->name, row[1], 50);
+		strn0cpy(tmpNPCType->name, row[1], 50);
 
-        tmpNPCType->level = atoi(row[2]);
-        tmpNPCType->race = atoi(row[3]);
-        tmpNPCType->class_ = atoi(row[4]);
-        tmpNPCType->max_hp = atoi(row[5]);
-        tmpNPCType->cur_hp = tmpNPCType->max_hp;
-        tmpNPCType->Mana = atoi(row[6]);
-        tmpNPCType->gender = atoi(row[7]);
-        tmpNPCType->texture = atoi(row[8]);
-        tmpNPCType->helmtexture = atoi(row[9]);
-        tmpNPCType->attack_speed = atof(row[10]);
-        tmpNPCType->STR = atoi(row[11]);
-        tmpNPCType->STA = atoi(row[12]);
-        tmpNPCType->DEX = atoi(row[13]);
-        tmpNPCType->AGI = atoi(row[14]);
-        tmpNPCType->INT = atoi(row[15]);
-        tmpNPCType->WIS = atoi(row[16]);
-        tmpNPCType->CHA = atoi(row[17]);
-        tmpNPCType->MR = atoi(row[18]);
-        tmpNPCType->CR = atoi(row[19]);
-        tmpNPCType->DR = atoi(row[20]);
-        tmpNPCType->FR = atoi(row[21]);
-        tmpNPCType->PR = atoi(row[22]);
-        tmpNPCType->Corrup = atoi(row[23]);
-        tmpNPCType->min_dmg = atoi(row[24]);
-        tmpNPCType->max_dmg = atoi(row[25]);
-        tmpNPCType->attack_count = atoi(row[26]);
+		tmpNPCType->level = atoi(row[2]);
+		tmpNPCType->race = atoi(row[3]);
+		tmpNPCType->class_ = atoi(row[4]);
+		tmpNPCType->max_hp = atoi(row[5]);
+		tmpNPCType->cur_hp = tmpNPCType->max_hp;
+		tmpNPCType->Mana = atoi(row[6]);
+		tmpNPCType->gender = atoi(row[7]);
+		tmpNPCType->texture = atoi(row[8]);
+		tmpNPCType->helmtexture = atoi(row[9]);
+		tmpNPCType->attack_delay = atoi(row[10]);
+		tmpNPCType->STR = atoi(row[11]);
+		tmpNPCType->STA = atoi(row[12]);
+		tmpNPCType->DEX = atoi(row[13]);
+		tmpNPCType->AGI = atoi(row[14]);
+		tmpNPCType->INT = atoi(row[15]);
+		tmpNPCType->WIS = atoi(row[16]);
+		tmpNPCType->CHA = atoi(row[17]);
+		tmpNPCType->MR = atoi(row[18]);
+		tmpNPCType->CR = atoi(row[19]);
+		tmpNPCType->DR = atoi(row[20]);
+		tmpNPCType->FR = atoi(row[21]);
+		tmpNPCType->PR = atoi(row[22]);
+		tmpNPCType->Corrup = atoi(row[23]);
+		tmpNPCType->min_dmg = atoi(row[24]);
+		tmpNPCType->max_dmg = atoi(row[25]);
+		tmpNPCType->attack_count = atoi(row[26]);
 
 		if (row[27] != nullptr)
 			strn0cpy(tmpNPCType->special_abilities, row[27], 512);
 		else
 			tmpNPCType->special_abilities[0] = '\0';
 
-        tmpNPCType->d_melee_texture1 = atoi(row[28]);
-        tmpNPCType->d_melee_texture2 = atoi(row[29]);
-        tmpNPCType->prim_melee_type = atoi(row[30]);
-        tmpNPCType->sec_melee_type = atoi(row[31]);
-        tmpNPCType->runspeed= atof(row[32]);
+		tmpNPCType->d_melee_texture1 = atoi(row[28]);
+		tmpNPCType->d_melee_texture2 = atoi(row[29]);
+		tmpNPCType->prim_melee_type = atoi(row[30]);
+		tmpNPCType->sec_melee_type = atoi(row[31]);
+		tmpNPCType->runspeed = atof(row[32]);
 
-        tmpNPCType->hp_regen = atoi(row[33]);
-        tmpNPCType->mana_regen = atoi(row[34]);
+		tmpNPCType->hp_regen = atoi(row[33]);
+		tmpNPCType->mana_regen = atoi(row[34]);
 
-        tmpNPCType->aggroradius = RuleI(Mercs, AggroRadius);
+		tmpNPCType->aggroradius = RuleI(Mercs, AggroRadius);
 
-        if (row[35] && strlen(row[35]))
-            tmpNPCType->bodytype = (uint8)atoi(row[35]);
-        else
-            tmpNPCType->bodytype = 1;
+		if (row[35] && strlen(row[35]))
+			tmpNPCType->bodytype = (uint8)atoi(row[35]);
+		else
+			tmpNPCType->bodytype = 1;
 
-        uint32 armor_tint_id = atoi(row[36]);
-        tmpNPCType->armor_tint[0] = (atoi(row[37]) & 0xFF) << 16;
-        tmpNPCType->armor_tint[0] |= (atoi(row[38]) & 0xFF) << 8;
-        tmpNPCType->armor_tint[0] |= (atoi(row[39]) & 0xFF);
-        tmpNPCType->armor_tint[0] |= (tmpNPCType->armor_tint[0]) ? (0xFF << 24) : 0;
+		uint32 armor_tint_id = atoi(row[36]);
+		tmpNPCType->armor_tint[0] = (atoi(row[37]) & 0xFF) << 16;
+		tmpNPCType->armor_tint[0] |= (atoi(row[38]) & 0xFF) << 8;
+		tmpNPCType->armor_tint[0] |= (atoi(row[39]) & 0xFF);
+		tmpNPCType->armor_tint[0] |= (tmpNPCType->armor_tint[0]) ? (0xFF << 24) : 0;
 
-        if (armor_tint_id == 0)
-            for (int index = MaterialChest; index <= EmuConstants::MATERIAL_END; index++)
-                tmpNPCType->armor_tint[index] = tmpNPCType->armor_tint[0];
-        else if (tmpNPCType->armor_tint[0] == 0) {
-            std::string armorTint_query = StringFormat("SELECT red1h, grn1h, blu1h, "
-                                                    "red2c, grn2c, blu2c, "
-                                                    "red3a, grn3a, blu3a, "
-                                                    "red4b, grn4b, blu4b, "
-                                                    "red5g, grn5g, blu5g, "
-                                                    "red6l, grn6l, blu6l, "
-                                                    "red7f, grn7f, blu7f, "
-                                                    "red8x, grn8x, blu8x, "
-                                                    "red9x, grn9x, blu9x "
-                                                    "FROM npc_types_tint WHERE id = %d",
-                                                    armor_tint_id);
-            auto armorTint_results = QueryDatabase(armorTint_query);
-            if (!results.Success() || results.RowCount() == 0)
-                armor_tint_id = 0;
-            else {
-                auto armorTint_row = results.begin();
+		if (armor_tint_id == 0)
+			for (int index = MaterialChest; index <= EmuConstants::MATERIAL_END; index++)
+				tmpNPCType->armor_tint[index] = tmpNPCType->armor_tint[0];
+		else if (tmpNPCType->armor_tint[0] == 0) {
+			std::string armorTint_query = StringFormat("SELECT red1h, grn1h, blu1h, "
+								   "red2c, grn2c, blu2c, "
+								   "red3a, grn3a, blu3a, "
+								   "red4b, grn4b, blu4b, "
+								   "red5g, grn5g, blu5g, "
+								   "red6l, grn6l, blu6l, "
+								   "red7f, grn7f, blu7f, "
+								   "red8x, grn8x, blu8x, "
+								   "red9x, grn9x, blu9x "
+								   "FROM npc_types_tint WHERE id = %d",
+								   armor_tint_id);
+			auto armorTint_results = QueryDatabase(armorTint_query);
+			if (!results.Success() || results.RowCount() == 0)
+				armor_tint_id = 0;
+			else {
+				auto armorTint_row = results.begin();
 
-                for (int index = EmuConstants::MATERIAL_BEGIN; index <= EmuConstants::MATERIAL_END; index++) {
-                    tmpNPCType->armor_tint[index] = atoi(armorTint_row[index * 3]) << 16;
-                    tmpNPCType->armor_tint[index] |= atoi(armorTint_row[index * 3 + 1]) << 8;
-                    tmpNPCType->armor_tint[index] |= atoi(armorTint_row[index * 3 + 2]);
-                    tmpNPCType->armor_tint[index] |= (tmpNPCType->armor_tint[index]) ? (0xFF << 24) : 0;
-                }
-            }
-        } else
-            armor_tint_id = 0;
+				for (int index = EmuConstants::MATERIAL_BEGIN; index <= EmuConstants::MATERIAL_END; index++) {
+					tmpNPCType->armor_tint[index] = atoi(armorTint_row[index * 3]) << 16;
+					tmpNPCType->armor_tint[index] |= atoi(armorTint_row[index * 3 + 1]) << 8;
+					tmpNPCType->armor_tint[index] |= atoi(armorTint_row[index * 3 + 2]);
+					tmpNPCType->armor_tint[index] |= (tmpNPCType->armor_tint[index]) ? (0xFF << 24) : 0;
+				}
+			}
+		} else
+			armor_tint_id = 0;
 
-        tmpNPCType->AC = atoi(row[40]);
-        tmpNPCType->ATK = atoi(row[41]);
-        tmpNPCType->accuracy_rating = atoi(row[42]);
-        tmpNPCType->scalerate = RuleI(Mercs, ScaleRate);
-        tmpNPCType->spellscale = atoi(row[43]);
-        tmpNPCType->healscale = atoi(row[44]);
+		tmpNPCType->AC = atoi(row[40]);
+		tmpNPCType->ATK = atoi(row[41]);
+		tmpNPCType->accuracy_rating = atoi(row[42]);
+		tmpNPCType->scalerate = atoi(row[43]);
+		tmpNPCType->spellscale = atoi(row[44]);
+		tmpNPCType->healscale = atoi(row[45]);
 
-        // If Merc with duplicate NPC id already in table,
-        // free item we attempted to add.
+		// If Merc with duplicate NPC id already in table,
+		// free item we attempted to add.
 		if (zone->merctable.find(merc_type_id) != zone->merctable.end()) {
-            delete tmpNPCType;
-            return nullptr;
-        }
+			delete tmpNPCType;
+			return nullptr;
+		}
 
 		zone->merctable[merc_type_id] = tmpNPCType;
-        npc = tmpNPCType;
-    }
+		npc = tmpNPCType;
+	}
 
 	return npc;
 }
@@ -2998,6 +2999,14 @@ void ZoneDatabase::RemoveTempFactions(Client *client) {
 	QueryDatabase(query);
 }
 
+void ZoneDatabase::UpdateItemRecastTimestamps(uint32 char_id, uint32 recast_type, uint32 timestamp)
+{
+	std::string query =
+	    StringFormat("REPLACE INTO character_item_recast (id, recast_type, timestamp) VALUES (%u, %u, %u)", char_id,
+			 recast_type, timestamp);
+	QueryDatabase(query);
+}
+
 void ZoneDatabase::LoadPetInfo(Client *client) {
 
 	// Load current pet and suspended pet
@@ -3413,38 +3422,102 @@ void ZoneDatabase::MarkCorpseAsRezzed(uint32 db_id) {
 
 uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const glm::vec4& position) {
 	/* Dump Basic Corpse Data */
-	std::string query = StringFormat("INSERT INTO `character_corpses` "
-                                    "SET `charname` = '%s', `zone_id` =	%u, `instance_id` =	%u, `charid` = %d,"
-                                    "`x` =	%1.1f, `y` = %1.1f, `z` = %1.1f, `heading` = %1.1f,"
-                                    "`time_of_death` = NOW(), `is_buried` =	0, `is_locked` = %d,"
-                                    "`exp` = %u, `size` = %f, `level` = %u, `race` = %u, `gender` = %u,"
-                                    "`class` = %u, `deity` = %u, `texture` = %u, `helm_texture` = %u,"
-                                    "`copper` = %u, `silver` = %u,`gold` = %u,`platinum` = %u,"
-                                    "`hair_color`  = %u, `beard_color` = %u, `eye_color_1` = %u,"
-                                    "`eye_color_2` = %u, `hair_style`  = %u, `face` = %u,"
-                                    "`beard` = %u, `drakkin_heritage` = %u, `drakkin_tattoo` = %u,"
-                                    "`drakkin_details` = %u, `wc_1` = %u, `wc_2` = %u,"
-                                    "`wc_3` = %u, `wc_4` = %u, `wc_5` = %u, `wc_6` = %u,"
-                                    "`wc_7` = %u,`wc_8` = %u,`wc_9`	= %u",
-                                    EscapeString(charname).c_str(), zoneid, instanceid, charid,
-                                    position.x, position.y, position.z, position.w,
-                                    dbpc->locked, dbpc->exp, dbpc->size, dbpc->level, dbpc->race,
-                                    dbpc->gender, dbpc->class_, dbpc->deity, dbpc->texture,
-                                    dbpc->helmtexture, dbpc->copper, dbpc->silver, dbpc->gold,
-                                    dbpc->plat, dbpc->haircolor, dbpc->beardcolor, dbpc->eyecolor1,
-                                    dbpc->eyecolor2, dbpc->hairstyle, dbpc->face, dbpc->beard,
-                                    dbpc->drakkin_heritage, dbpc->drakkin_tattoo, dbpc->drakkin_details,
-                                    dbpc->item_tint[0].color, dbpc->item_tint[1].color, dbpc->item_tint[2].color,
-                                    dbpc->item_tint[3].color, dbpc->item_tint[4].color, dbpc->item_tint[5].color,
-                                    dbpc->item_tint[6].color, dbpc->item_tint[7].color, dbpc->item_tint[8].color);
+	std::string query = StringFormat(
+		"INSERT INTO `character_corpses` "
+		"SET `charname` = '%s',  "
+		"`zone_id` =	%u,  "
+		"`instance_id` =	%u,  "
+		"`charid` = %d, "
+		"`x` =	%1.1f,  "
+		"`y` = %1.1f,  "
+		"`z` = %1.1f,  "
+		"`heading` = %1.1f, "
+		"`time_of_death` = NOW(),  "
+		"`is_buried` =	0,  "
+		"`is_locked` = %d, "
+		"`exp` = %u,  "
+		"`size` = %f,  "
+		"`level` = %u,  "
+		"`race` = %u,  "
+		"`gender` = %u, "
+		"`class` = %u,  "
+		"`deity` = %u,  "
+		"`texture` = %u,  "
+		"`helm_texture` = %u, "
+		"`copper` = %u,  "
+		"`silver` = %u, "
+		"`gold` = %u, "
+		"`platinum` = %u, "
+		"`hair_color`  = %u, "
+		"`beard_color` = %u, "
+		"`eye_color_1` = %u, "
+		"`eye_color_2` = %u, "
+		"`hair_style`  = %u, "
+		"`face` = %u, "
+		"`beard` = %u, "
+		"`drakkin_heritage` = %u, "
+		"`drakkin_tattoo` = %u, "
+		"`drakkin_details` = %u, "
+		"`wc_1` = %u, "
+		"`wc_2` = %u, "
+		"`wc_3` = %u, "
+		"`wc_4` = %u, "
+		"`wc_5` = %u, "
+		"`wc_6` = %u, "
+		"`wc_7` = %u, "
+		"`wc_8` = %u, "
+		"`wc_9`	= %u ", 
+		EscapeString(charname).c_str(), 
+		zoneid,
+		instanceid,
+		charid,
+		position.x,
+		position.y,
+		position.z,
+		position.w,
+		dbpc->locked,
+		dbpc->exp,
+		dbpc->size,
+		dbpc->level,
+		dbpc->race,
+		dbpc->gender,
+		dbpc->class_,
+		dbpc->deity,
+		dbpc->texture,
+		dbpc->helmtexture,
+		dbpc->copper,
+		dbpc->silver,
+		dbpc->gold,
+		dbpc->plat,
+		dbpc->haircolor,
+		dbpc->beardcolor,
+		dbpc->eyecolor1,
+		dbpc->eyecolor2,
+		dbpc->hairstyle,
+		dbpc->face,
+		dbpc->beard,
+		dbpc->drakkin_heritage,
+		dbpc->drakkin_tattoo,
+		dbpc->drakkin_details,
+		dbpc->item_tint[0].color,
+		dbpc->item_tint[1].color,
+		dbpc->item_tint[2].color,
+		dbpc->item_tint[3].color,
+		dbpc->item_tint[4].color,
+		dbpc->item_tint[5].color,
+		dbpc->item_tint[6].color,
+		dbpc->item_tint[7].color,
+		dbpc->item_tint[8].color
+	);
 	auto results = QueryDatabase(query);
 	uint32 last_insert_id = results.LastInsertedID();
 
+	std::string corpse_items_query;
 	/* Dump Items from Inventory */
 	uint8 first_entry = 0;
 	for (unsigned int i = 0; i < dbpc->itemcount; i++) {
 		if (first_entry != 1){
-			query = StringFormat("REPLACE INTO `character_corpse_items` \n"
+			corpse_items_query = StringFormat("REPLACE INTO `character_corpse_items` \n"
 				" (corpse_id, equip_slot, item_id, charges, aug_1, aug_2, aug_3, aug_4, aug_5, aug_6, attuned) \n"
 				" VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
 				last_insert_id, 
@@ -3462,7 +3535,7 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 			first_entry = 1;
 		}
 		else{ 
-			query = query + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
+			corpse_items_query = corpse_items_query + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
 				last_insert_id,
 				dbpc->items[i].equip_slot,
 				dbpc->items[i].item_id,
@@ -3477,7 +3550,9 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 			);
 		}
 	}
-	auto sc_results = QueryDatabase(query);
+	if (!corpse_items_query.empty())
+		QueryDatabase(corpse_items_query);
+
 	return last_insert_id;
 }
 
