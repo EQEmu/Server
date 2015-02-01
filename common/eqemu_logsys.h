@@ -26,11 +26,11 @@
 
 #include "types.h"
 
-namespace Logs{
+namespace Logs {
 	enum DebugLevel {
 		General = 1,	/* 1 - Low-Level general debugging, useful info on single line */
 		Moderate,		/* 2 - Informational based, used in functions, when particular things load */
-		Detail,			/* 3 - Use this for extreme detail in logging, usually in extreme debugging in the stack or interprocess communication */
+		Detail			/* 3 - Use this for extreme detail in logging, usually in extreme debugging in the stack or interprocess communication */
 	};
 
 	/*
@@ -124,6 +124,7 @@ namespace Logs{
 		"MySQL Query",
 		"Mercenaries",
 		"Quest Debug",
+		"Quest Debug"
 		"Packet :: Server -> Client",
 		"Packet :: Client -> Server Unhandled",
 	};
@@ -160,7 +161,7 @@ public:
 		log_to_gmsay[category_id] = [1-3] - Sets debug level for category to output to gmsay
 	*/
 
-	struct LogSettings{
+	struct LogSettings {
 		uint8 log_to_file;
 		uint8 log_to_console;
 		uint8 log_to_gmsay;

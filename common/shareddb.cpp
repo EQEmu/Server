@@ -438,30 +438,29 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory *inv, bool is_charid)
 			}
 		}
 
-		if (!row[9])
-			continue;
+		if (row[9]) {
+			std::string data_str(row[9]);
+			std::string idAsString;
+			std::string value;
+			bool use_id = true;
 
-		std::string data_str(row[9]);
-		std::string idAsString;
-		std::string value;
-		bool use_id = true;
-
-		for (int i = 0; i < data_str.length(); ++i) {
-			if (data_str[i] == '^') {
-				if (!use_id) {
-					inst->SetCustomData(idAsString, value);
-					idAsString.clear();
-					value.clear();
+			for (int i = 0; i < data_str.length(); ++i) {
+				if (data_str[i] == '^') {
+					if (!use_id) {
+						inst->SetCustomData(idAsString, value);
+						idAsString.clear();
+						value.clear();
+					}
+					use_id = !use_id;
+					continue;
 				}
-				use_id = !use_id;
-				continue;
-			}
 
-			char v = data_str[i];
-			if (use_id)
-				idAsString.push_back(v);
-			else
-				value.push_back(v);
+				char v = data_str[i];
+				if (use_id)
+					idAsString.push_back(v);
+				else
+					value.push_back(v);
+			}
 		}
 
 		put_slot_id = inv->PutItem(slot_id, *inst);
@@ -498,6 +497,8 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
 						    "tinyint(1) unsigned default 0 not null;\n");
 		return false;
 	}
+
+	auto timestamps = GetItemRecastTimestamps(char_id);
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		int16 slot_id = atoi(row[0]);
@@ -582,6 +583,13 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
 			inst->SetCharges(1);
 		else
 			inst->SetCharges(charges);
+
+		if (item->RecastDelay) {
+			if (timestamps.count(item->RecastType))
+				inst->SetRecastTimestamp(timestamps.at(item->RecastType));
+			else
+				inst->SetRecastTimestamp(0);
+		}
 
 		if (item->ItemClass == ItemClassCommon) {
 			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
@@ -724,6 +732,39 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, Inventory *inv)
 
 	// Retrieve shared inventory
 	return GetSharedBank(account_id, inv, false);
+}
+
+std::map<uint32, uint32> SharedDatabase::GetItemRecastTimestamps(uint32 char_id)
+{
+	std::map<uint32, uint32> timers;
+	std::string query = StringFormat("SELECT recast_type,timestamp FROM character_item_recast WHERE id=%u", char_id);
+	auto results = QueryDatabase(query);
+	if (!results.Success() || results.RowCount() == 0)
+		return timers;
+
+	for (auto row = results.begin(); row != results.end(); ++row)
+		timers[atoul(row[0])] = atoul(row[1]);
+	return timers; // RVO or move assigned
+}
+
+uint32 SharedDatabase::GetItemRecastTimestamp(uint32 char_id, uint32 recast_type)
+{
+	std::string query = StringFormat("SELECT timestamp FROM character_item_recast WHERE id=%u AND recast_type=%u",
+					 char_id, recast_type);
+	auto results = QueryDatabase(query);
+	if (!results.Success() || results.RowCount() == 0)
+		return 0;
+
+	auto row = results.begin();
+	return static_cast<uint32>(atoul(row[0]));
+}
+
+void SharedDatabase::ClearOldRecastTimestamps(uint32 char_id)
+{
+	// This actually isn't strictly live-like. Live your recast timestamps are forever
+	std::string query =
+	    StringFormat("DELETE FROM character_item_recast WHERE id = %u and timestamp < UNIX_TIMESTAMP()", char_id);
+	QueryDatabase(query);
 }
 
 void SharedDatabase::GetItemsCount(int32 &item_count, uint32 &max_id)

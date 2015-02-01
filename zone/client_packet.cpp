@@ -416,15 +416,6 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 		std::cout << "Received 0x" << std::hex << std::setw(4) << std::setfill('0') << opcode << ", size=" << std::dec << app->size << std::endl;
 	#endif
 
-	#ifdef SOLAR
-		if(0 && opcode != OP_ClientUpdate)
-		{
-			Log.LogDebug(Logs::General,"HandlePacket() OPCODE debug enabled client %s", GetName());
-			std::cerr << "OPCODE: " << std::hex << std::setw(4) << std::setfill('0') << opcode << std::dec << ", size: " << app->size << std::endl;
-			DumpPacket(app);
-		}
-	#endif
-
 	switch(client_state) {
 	case CLIENT_CONNECTING: {
 		if(ConnectingOpcodes.count(opcode) != 1) {
@@ -1395,6 +1386,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (RuleB(Character, SharedBankPlat))
 		m_pp.platinum_shared = database.GetSharedPlatinum(this->AccountID());
 
+	database.ClearOldRecastTimestamps(cid); /* Clear out our old recast timestamps to keep the DB clean */
 	loaditems = database.GetInventory(cid, &m_inv); /* Load Character Inventory */
 	database.LoadCharacterBandolier(cid, &m_pp); /* Load Character Bandolier */
 	database.LoadCharacterBindPoint(cid, &m_pp); /* Load Character Bind */

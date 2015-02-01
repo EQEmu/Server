@@ -18,7 +18,7 @@
 
 /*
 
-solar: Beacon class, extends Mob. Used for AE rain spells to have a mob
+Beacon class, extends Mob. Used for AE rain spells to have a mob
 target to center around.
 
 */
@@ -48,7 +48,7 @@ class Zone;
 extern EntityList entity_list;
 extern Zone* zone;
 
-// solar: if lifetime is 0 this is a permanent beacon.. not sure if that'll be
+// if lifetime is 0 this is a permanent beacon.. not sure if that'll be
 // useful for anything
 Beacon::Beacon(Mob *at_mob, int lifetime)
 :Mob

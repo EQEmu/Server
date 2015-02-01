@@ -123,7 +123,7 @@ public:
 
 	//Attack
 	virtual void RogueBackstab(Mob* other, bool min_damage = false, int ReuseTime = 10);
-	virtual void RogueAssassinate(Mob* other); // solar
+	virtual void RogueAssassinate(Mob* other);
 	float MobAngle(Mob *other = 0, float ourx = 0.0f, float oury = 0.0f) const;
 	// greater than 90 is behind
 	inline bool BehindMob(Mob *other = 0, float ourx = 0.0f, float oury = 0.0f) const

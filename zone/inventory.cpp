@@ -879,7 +879,7 @@ void Client::PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootI
 
 	if(bag_item_data) { // bag contents
 		int16 interior_slot;
-		// solar: our bag went into slot_id, now let's pack the contents in
+		// our bag went into slot_id, now let's pack the contents in
 		for(int i = SUB_BEGIN; i < EmuConstants::ITEM_CONTAINER_SIZE; i++) {
 			if(bag_item_data[i] == nullptr)
 				continue;
@@ -993,7 +993,7 @@ bool Client::AutoPutLootInInventory(ItemInst& inst, bool try_worn, bool try_curs
 	return false;
 }
 
-// solar: helper function for AutoPutLootInInventory
+// helper function for AutoPutLootInInventory
 void Client::MoveItemCharges(ItemInst &from, int16 to_slot, uint8 type)
 {
 	ItemInst *tmp_inst = m_inv.GetItem(to_slot);

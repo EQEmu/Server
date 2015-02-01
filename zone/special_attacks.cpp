@@ -663,7 +663,7 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 	DoAnim(animPiercing);
 }
 
-// solar - assassinate [Kayen: No longer used for regular assassinate 6-29-14]
+// assassinate [No longer used for regular assassinate 6-29-14]
 void Mob::RogueAssassinate(Mob* other)
 {
 	//can you dodge, parry, etc.. an assassinate??

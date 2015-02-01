@@ -35,14 +35,13 @@
 #include "zone.h"
 #include "lua_parser.h"
 
-const char *LuaEvents[_LargestEventID] = { 
+const char *LuaEvents[_LargestEventID] = {
 	"event_say",
 	"event_trade",
 	"event_death",
 	"event_spawn",
 	"event_attack",
 	"event_combat",
-	"event_environmental_damage",
 	"event_aggro",
 	"event_slay",
 	"event_npc_slay",
@@ -68,6 +67,7 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_aggro_say",
 	"event_player_pickup",
 	"event_popup_response",
+	"event_environmental_damage",
 	"event_proximity_say",
 	"event_cast",
 	"event_cast_begin",

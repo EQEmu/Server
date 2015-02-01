@@ -318,7 +318,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 		// get their tints
 		memcpy(item_tint, &client->GetPP().item_tint, sizeof(item_tint));
 
-		// solar: TODO soulbound items need not be added to corpse, but they need
+		// TODO soulbound items need not be added to corpse, but they need
 		// to go into the regular slots on the player, out of bags
 		std::list<uint32> removed_list;
 		
@@ -965,6 +965,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 			Save();
 		}
 
+		auto timestamps = database.GetItemRecastTimestamps(client->CharacterID());
 		outapp->priority = 6;
 		client->QueuePacket(outapp);
 		safe_delete(outapp);
@@ -973,6 +974,8 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 			const Item_Struct* item = database.GetItem(pkitem);
 			ItemInst* inst = database.CreateItem(item, item->MaxCharges);
 			if(inst) {
+				if (item->RecastDelay)
+					inst->SetRecastTimestamp(timestamps.count(item->RecastType) ? timestamps.at(item->RecastType) : 0);
 				client->SendItemPacket(EmuConstants::CORPSE_BEGIN, inst, ItemPacketLoot);
 				safe_delete(inst);
 			}
@@ -1004,6 +1007,8 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 					if(client && item) {
 						ItemInst* inst = database.CreateItem(item, item_data->charges, item_data->aug_1, item_data->aug_2, item_data->aug_3, item_data->aug_4, item_data->aug_5, item_data->aug_6, item_data->attuned);
 						if(inst) {
+							if (item->RecastDelay)
+								inst->SetRecastTimestamp(timestamps.count(item->RecastType) ? timestamps.at(item->RecastType) : 0);
 							// MainGeneral1 is the corpse inventory start offset for Ti(EMu) - CORPSE_END = MainGeneral1 + MainCursor
 							client->SendItemPacket(i + EmuConstants::CORPSE_BEGIN, inst, ItemPacketLoot);
 							safe_delete(inst);
