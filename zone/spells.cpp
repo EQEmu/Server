@@ -2026,8 +2026,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	// Switch #2 - execute the spell
 	//
 
-	Shout("TEST %i %i", CastAction, spell_id);
-
 	switch(CastAction)
 	{
 		default:
