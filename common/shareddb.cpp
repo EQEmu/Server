@@ -747,6 +747,18 @@ std::map<uint32, uint32> SharedDatabase::GetItemRecastTimestamps(uint32 char_id)
 	return timers; // RVO or move assigned
 }
 
+uint32 SharedDatabase::GetItemRecastTimestamp(uint32 char_id, uint32 recast_type)
+{
+	std::string query = StringFormat("SELECT timestamp FROM character_item_recast WHERE id=%u AND recast_type=%u",
+					 char_id, recast_type);
+	auto results = QueryDatabase(query);
+	if (!results.Success() || results.RowCount() == 0)
+		return 0;
+
+	auto row = results.begin();
+	return static_cast<uint32>(atoul(row[0]));
+}
+
 void SharedDatabase::ClearOldRecastTimestamps(uint32 char_id)
 {
 	// This actually isn't strictly live-like. Live your recast timestamps are forever

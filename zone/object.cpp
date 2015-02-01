@@ -467,16 +467,21 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 		if (m_inst && sender) {
 			// if there is a lore conflict, delete the offending item from the server inventory
 			// the client updates itself and takes care of sending "duplicate lore item" messages
-			if(sender->CheckLoreConflict(m_inst->GetItem())) {
-				int16 loreslot = sender->GetInv().HasItem(m_inst->GetItem()->ID, 0, invWhereBank);
+			auto item = m_inst->GetItem();
+			if(sender->CheckLoreConflict(item)) {
+				int16 loreslot = sender->GetInv().HasItem(item->ID, 0, invWhereBank);
 				if (loreslot != INVALID_INDEX) // if the duplicate is in the bank, delete it.
 					sender->DeleteItemInInventory(loreslot);
 				else
 					cursordelete = true;	// otherwise, we delete the new one
 			}
 
+			if (item->RecastDelay)
+				m_inst->SetRecastTimestamp(
+				    database.GetItemRecastTimestamp(sender->CharacterID(), item->RecastType));
+
 			char buf[10];
-			snprintf(buf, 9, "%u", m_inst->GetItem()->ID);
+			snprintf(buf, 9, "%u", item->ID);
 			buf[9] = '\0';
 			std::vector<EQEmu::Any> args;
 			args.push_back(m_inst);

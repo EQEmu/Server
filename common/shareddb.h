@@ -71,6 +71,7 @@ class SharedDatabase : public Database
 		bool	GetInventory(uint32 char_id, Inventory* inv);
 		bool	GetInventory(uint32 account_id, char* name, Inventory* inv);
 		std::map<uint32, uint32> GetItemRecastTimestamps(uint32 char_id);
+		uint32	GetItemRecastTimestamp(uint32 char_id, uint32 recast_type);
 		void	ClearOldRecastTimestamps(uint32 char_id);
 		bool	SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin);
 
