@@ -1,5 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/01/2015 ==
+demonstar55: Add quest debugging to lua
+	eq.debug("Test debug level implicit 1")
+	eq.debug("Test debug level explicit 1", 1)
+	eq.debug("Test debug level explicit 2", 2)
+	eq.debug("Test debug level explicit 3", 3)
+
 == 01/31/2015 ==
 Trevius: Fixed FindGroundZ() and GetGroundZ() to once again utilize the X and Y arguments that are passed to them.
 
