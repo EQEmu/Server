@@ -605,7 +605,7 @@ void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings){
 		const bool log_to_console = log_settings[log_category].log_to_console > 0;
 		const bool log_to_file = log_settings[log_category].log_to_file > 0;
 		const bool log_to_gmsay = log_settings[log_category].log_to_gmsay > 0;
-		const bool is_category_enabled = !log_to_console && !log_to_file && !log_to_gmsay;
+		const bool is_category_enabled = log_to_console || log_to_file || log_to_gmsay;
 
 		if (is_category_enabled)
 			log_settings[log_category].is_category_enabled = 1;
