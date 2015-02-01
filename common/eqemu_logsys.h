@@ -79,6 +79,7 @@ namespace Logs{
 		Mercenaries,
 		QuestDebug,
 		Server_Client_Packet,
+		Client_Server_Packet_Unhandled,
 		MaxCategoryID	/* Don't Remove this*/
 	};
 
@@ -124,6 +125,7 @@ namespace Logs{
 		"Mercenaries",
 		"Quest Debug",
 		"Packet :: Server -> Client",
+		"Packet :: Client -> Server Unhandled",
 	};
 }
 

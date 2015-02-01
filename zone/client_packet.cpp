@@ -462,17 +462,8 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 			args.push_back(const_cast<EQApplicationPacket*>(app));
 			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 0, &args);
 
-			char buffer[64]; 
-			Log.Out(Logs::Detail, Logs::Client_Server_Packet, "Unhandled incoming opcode: %s - 0x%04x", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode());
-			if (Log.log_settings[Logs::Client_Server_Packet].log_to_console > 0){
-				app->build_header_dump(buffer);
-				if (app->size < 1000)
-					DumpPacket(app, app->size);
-				else{
-					std::cout << "Dump limited to 1000 characters:\n";
-					DumpPacket(app, 1000);
-				}
-			}
+			if (Log.log_settings[Logs::Client_Server_Packet_Unhandled].is_category_enabled == 1)
+				Log.Out(Logs::General, Logs::Client_Server_Packet_Unhandled, "Incoming OpCode :: [%s - 0x%04x] [Size: %u] \n%s", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size(), DumpPacketToString(app).c_str());
 
 			break;
 		}
