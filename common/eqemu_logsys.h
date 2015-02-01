@@ -160,6 +160,7 @@ public:
 		uint8 log_to_file;
 		uint8 log_to_console;
 		uint8 log_to_gmsay;
+		uint8 is_category_enabled; /* When any log output in a category > 0, set this to 1 as (Enabled) */
 	};
 
 	/* Internally used memory reference for all log settings per category.

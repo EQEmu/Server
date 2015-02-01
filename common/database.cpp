@@ -2154,6 +2154,16 @@ void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings)
 		log_settings[log_category].log_to_file = atoi(row[3]);
 		log_settings[log_category].log_to_gmsay = atoi(row[4]);
 
+		/* Determine if any output method is enabled for the category 
+			and set it to 1 so it can used to check if category is enabled */
+		const bool log_to_console = log_settings[log_category].log_to_console > 0;
+		const bool log_to_file = log_settings[log_category].log_to_file > 0;
+		const bool log_to_gmsay = log_settings[log_category].log_to_gmsay > 0;
+		const bool is_category_enabled = !log_to_console && !log_to_file && !log_to_gmsay;
+
+		if (is_category_enabled)
+			log_settings[log_category].is_category_enabled = 1;
+
 		/* 
 			This determines whether or not the process needs to actually file log anything.
 			If we go through this whole loop and nothing is set to any debug level, there is no point to create a file or keep anything open
