@@ -559,9 +559,13 @@ void EQStream::SendPacket(uint16 opcode, EQApplicationPacket *p)
 	uint32 chunksize,used;
 	uint32 length;
 
-	if (Log.log_settings[Logs::Server_Client_Packet].is_category_enabled == 1)
-		Log.Out(Logs::General, Logs::Server_Client_Packet, "[%s - 0x%04x] [Size: %u] \n %s", OpcodeManager::EmuToName(p->GetOpcode()), p->GetOpcode(), p->Size(), DumpPacketToString(p).c_str());
+	// DumpPacket(p);
 
+	if (Log.log_settings[Logs::Server_Client_Packet].is_category_enabled == 1){
+		if (p->GetOpcode() != OP_SpecialMesg){
+			Log.Out(Logs::General, Logs::Server_Client_Packet, "[%s - 0x%04x] [Size: %u] \n %s", OpcodeManager::EmuToName(p->GetOpcode()), p->GetOpcode(), p->Size(), DumpPacketToString(p).c_str());
+		}
+	}
 
 	// Convert the EQApplicationPacket to 1 or more EQProtocolPackets
 	if (p->size>(MaxLen-8)) { // proto-op(2), seq(2), app-op(2) ... data ... crc(2)
