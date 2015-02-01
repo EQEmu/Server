@@ -29,17 +29,13 @@ extern uint32 ChatMessagesSent;
 
 ChatChannel::ChatChannel(std::string inName, std::string inOwner, std::string inPassword, bool inPermanent, int inMinimumStatus) :
 	DeleteTimer(0) {
+	_eqp
 
 	Name = inName;
-
 	Owner = inOwner;
-
 	Password = inPassword;
-
 	Permanent = inPermanent;
-
 	MinimumStatus = inMinimumStatus;
-
 	Moderated = false;
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "New ChatChannel created: Name: [%s], Owner: [%s], Password: [%s], MinStatus: %i",
@@ -48,36 +44,30 @@ ChatChannel::ChatChannel(std::string inName, std::string inOwner, std::string in
 }
 
 ChatChannel::~ChatChannel() {
-
+	_eqp
 	LinkedListIterator<Client*> iterator(ClientsInChannel);
-
+	
 	iterator.Reset();
-
 	while(iterator.MoreElements())
 		iterator.RemoveCurrent(false);
 }
 
 ChatChannel* ChatChannelList::CreateChannel(std::string Name, std::string Owner, std::string Password, bool Permanent, int MinimumStatus) {
-
+	_eqp
 	ChatChannel *NewChannel = new ChatChannel(CapitaliseName(Name), Owner, Password, Permanent, MinimumStatus);
-
 	ChatChannels.Insert(NewChannel);
-
 	return NewChannel;
 }
 
 ChatChannel* ChatChannelList::FindChannel(std::string Name) {
-
+	_eqp
 	std::string NormalisedName = CapitaliseName(Name);
-
 	LinkedListIterator<ChatChannel*> iterator(ChatChannels);
 
 	iterator.Reset();
-
 	while(iterator.MoreElements()) {
 
 		ChatChannel *CurrentChannel = iterator.GetData();
-
 		if(CurrentChannel && (CurrentChannel->Name == NormalisedName))
 			return iterator.GetData();
 
@@ -88,8 +78,10 @@ ChatChannel* ChatChannelList::FindChannel(std::string Name) {
 }
 
 void ChatChannelList::SendAllChannels(Client *c) {
+	_eqp
 
-	if(!c) return;
+	if(!c) 
+		return;
 
 	if(!c->CanListAllChannels()) {
 		c->GeneralChannelMessage("You do not have permission to list all the channels.");
@@ -99,23 +91,16 @@ void ChatChannelList::SendAllChannels(Client *c) {
 	c->GeneralChannelMessage("All current channels:");
 
 	int ChannelsInLine = 0;
-
 	LinkedListIterator<ChatChannel*> iterator(ChatChannels);
-
 	iterator.Reset();
-
 	std::string Message;
-
 	char CountString[10];
 
 	while(iterator.MoreElements()) {
 
 		ChatChannel *CurrentChannel = iterator.GetData();
-
 		if(!CurrentChannel || (CurrentChannel->GetMinStatus() > c->GetAccountStatus())) {
-
 			iterator.Advance();
-
 			continue;
 		}
 
@@ -123,19 +108,13 @@ void ChatChannelList::SendAllChannels(Client *c) {
 			Message += ", ";
 
 		sprintf(CountString, "(%i)", CurrentChannel->MemberCount(c->GetAccountStatus()));
-
 		Message += CurrentChannel->GetName();
-
 		Message += CountString;
-
 		ChannelsInLine++;
 
 		if(ChannelsInLine == 6) {
-
 			c->GeneralChannelMessage(Message);
-
 			ChannelsInLine = 0;
-
 			Message.clear();
 		}
 
@@ -148,19 +127,14 @@ void ChatChannelList::SendAllChannels(Client *c) {
 }
 
 void ChatChannelList::RemoveChannel(ChatChannel *Channel) {
-
+	_eqp
 	Log.Out(Logs::Detail, Logs::UCS_Server, "RemoveChannel(%s)", Channel->GetName().c_str());
 
 	LinkedListIterator<ChatChannel*> iterator(ChatChannels);
-
 	iterator.Reset();
-
 	while(iterator.MoreElements()) {
-
 		if(iterator.GetData() == Channel) {
-
 			iterator.RemoveCurrent();
-
 			return;
 		}
 
@@ -169,11 +143,10 @@ void ChatChannelList::RemoveChannel(ChatChannel *Channel) {
 }
 
 void ChatChannelList::RemoveAllChannels() {
-
+	_eqp
 	Log.Out(Logs::Detail, Logs::UCS_Server, "RemoveAllChannels");
 
 	LinkedListIterator<ChatChannel*> iterator(ChatChannels);
-
 	iterator.Reset();
 
 	while(iterator.MoreElements())
@@ -181,17 +154,13 @@ void ChatChannelList::RemoveAllChannels() {
 }
 
 int ChatChannel::MemberCount(int Status) {
-
+	_eqp
 	int Count = 0;
-
 	LinkedListIterator<Client*> iterator(ClientsInChannel);
-
 	iterator.Reset();
-
+	
 	while(iterator.MoreElements()) {
-
 		Client *ChannelClient = iterator.GetData();
-
 		if(ChannelClient && (!ChannelClient->GetHideMe() || (ChannelClient->GetAccountStatus() < Status)))
 			Count++;
 
@@ -202,7 +171,7 @@ int ChatChannel::MemberCount(int Status) {
 }
 
 void ChatChannel::SetPassword(std::string inPassword) {
-
+	_eqp
 	Password = inPassword;
 
 	if(Permanent)
@@ -213,7 +182,7 @@ void ChatChannel::SetPassword(std::string inPassword) {
 }
 
 void ChatChannel::SetOwner(std::string inOwner) {
-
+	_eqp
 	Owner = inOwner;
 
 	if(Permanent)
@@ -221,68 +190,59 @@ void ChatChannel::SetOwner(std::string inOwner) {
 }
 
 void ChatChannel::AddClient(Client *c) {
+	_eqp
 
-	if(!c) return;
+	if(!c)
+		return;
 
 	DeleteTimer.Disable();
 
 	if(IsClientInChannel(c)) {
-
 		Log.Out(Logs::Detail, Logs::UCS_Server, "Client %s already in channel %s", c->GetName().c_str(), GetName().c_str());
-
 		return;
 	}
 
 	bool HideMe = c->GetHideMe();
-
 	int AccountStatus = c->GetAccountStatus();
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "Adding %s to channel %s", c->GetName().c_str(), Name.c_str());
 
 	LinkedListIterator<Client*> iterator(ClientsInChannel);
-
 	iterator.Reset();
 
 	while(iterator.MoreElements()) {
-
 		Client *CurrentClient = iterator.GetData();
-
+		
 		if(CurrentClient && CurrentClient->IsAnnounceOn())
 			if(!HideMe || (CurrentClient->GetAccountStatus() > AccountStatus))
 				CurrentClient->AnnounceJoin(this, c);
 
 		iterator.Advance();
 	}
-
 	ClientsInChannel.Insert(c);
-
 }
 
 bool ChatChannel::RemoveClient(Client *c) {
+	_eqp
 
-	if(!c) return false;
+	if(!c) 
+		return false;
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "RemoveClient %s from channel %s", c->GetName().c_str(), GetName().c_str());
 
 	bool HideMe = c->GetHideMe();
-
 	int AccountStatus = c->GetAccountStatus();
-
 	int PlayersInChannel = 0;
-
 	LinkedListIterator<Client*> iterator(ClientsInChannel);
-
 	iterator.Reset();
 
 	while(iterator.MoreElements()) {
-
 		Client *CurrentClient = iterator.GetData();
 
 		if(CurrentClient == c) {
 			iterator.RemoveCurrent(false);
 		}
 		else if(CurrentClient) {
-
 			PlayersInChannel++;
 
 			if(CurrentClient->IsAnnounceOn())
@@ -295,12 +255,10 @@ bool ChatChannel::RemoveClient(Client *c) {
 	}
 
 	if((PlayersInChannel == 0) && !Permanent) {
-
 		if((Password.length() == 0) || (RuleI(Channels, DeleteTimer) == 0))
 			return false;
 
 		Log.Out(Logs::Detail, Logs::UCS_Server, "Starting delete timer for empty password protected channel %s", Name.c_str());
-
 		DeleteTimer.Start(RuleI(Channels, DeleteTimer) * 60000);
 	}
 
@@ -308,46 +266,40 @@ bool ChatChannel::RemoveClient(Client *c) {
 }
 
 void ChatChannel::SendOPList(Client *c) {
+	_eqp
 
-	if(!c) return;
+	if(!c) 
+		return;
 
 	c->GeneralChannelMessage("Channel " + Name + " op-list: (Owner=" + Owner + ")");
-
 	std::list<std::string>::iterator Iterator;
 
 	for(Iterator = Moderators.begin(); Iterator != Moderators.end(); ++Iterator)
 		c->GeneralChannelMessage((*Iterator));
-
 }
 
 void ChatChannel::SendChannelMembers(Client *c) {
+	_eqp
 
-	if(!c) return;
+	if(!c) 
+		return;
 
 	char CountString[10];
-
 	sprintf(CountString, "(%i)", MemberCount(c->GetAccountStatus()));
-
 	std::string Message = "Channel " + GetName();
-
 	Message += CountString;
-
 	Message += " members:";
-
+	
 	c->GeneralChannelMessage(Message);
 
 	int AccountStatus = c->GetAccountStatus();
-
 	Message.clear();
-
 	int MembersInLine = 0;
 
 	LinkedListIterator<Client*> iterator(ClientsInChannel);
-
 	iterator.Reset();
 
 	while(iterator.MoreElements()) {
-
 		Client *ChannelClient = iterator.GetData();
 
 		// Don't list hidden characters with status higher or equal than the character requesting the list.
@@ -361,15 +313,11 @@ void ChatChannel::SendChannelMembers(Client *c) {
 			Message += ", ";
 
 		Message += ChannelClient->GetName();
-
 		MembersInLine++;
 
 		if(MembersInLine == 6) {
-
 			c->GeneralChannelMessage(Message);
-
 			MembersInLine = 0;
-
 			Message.clear();
 		}
 
@@ -378,23 +326,22 @@ void ChatChannel::SendChannelMembers(Client *c) {
 
 	if(MembersInLine > 0)
 		c->GeneralChannelMessage(Message);
-
 }
 
 void ChatChannel::SendMessageToChannel(std::string Message, Client* Sender) {
+	_eqp
 
-	if(!Sender) return;
+	if(!Sender) 
+		return;
 
 	ChatMessagesSent++;
 
 	LinkedListIterator<Client*> iterator(ClientsInChannel);
-
 	iterator.Reset();
 
 	while(iterator.MoreElements()) {
 
 		Client *ChannelClient = iterator.GetData();
-
 		if(ChannelClient)
 		{
 			Log.Out(Logs::Detail, Logs::UCS_Server, "Sending message to %s from %s",
@@ -407,19 +354,16 @@ void ChatChannel::SendMessageToChannel(std::string Message, Client* Sender) {
 }
 
 void ChatChannel::SetModerated(bool inModerated) {
+	_eqp
 
 	Moderated = inModerated;
-
 	LinkedListIterator<Client*> iterator(ClientsInChannel);
 
 	iterator.Reset();
-
 	while(iterator.MoreElements()) {
-
 		Client *ChannelClient = iterator.GetData();
 
 		if(ChannelClient) {
-
 			if(Moderated)
 				ChannelClient->GeneralChannelMessage("Channel " + Name + " is now moderated.");
 			else
@@ -428,18 +372,17 @@ void ChatChannel::SetModerated(bool inModerated) {
 
 		iterator.Advance();
 	}
-
 }
 bool ChatChannel::IsClientInChannel(Client *c) {
+	_eqp
 
-	if(!c) return false;
+	if(!c) 
+		return false;
 
 	LinkedListIterator<Client*> iterator(ClientsInChannel);
-
 	iterator.Reset();
 
 	while(iterator.MoreElements()) {
-
 		if(iterator.GetData() == c)
 			return true;
 
@@ -450,18 +393,18 @@ bool ChatChannel::IsClientInChannel(Client *c) {
 }
 
 ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client *c) {
+	_eqp
 
-	if(!c) return nullptr;
+	if(!c) 
+		return nullptr;
 
 	if((ChannelName.length() > 0) && (isdigit(ChannelName[0]))) {
-
 		c->GeneralChannelMessage("The channel name can not begin with a number.");
 
 		return nullptr;
 	}
 
 	std::string NormalisedName, Password;
-
 	std::string::size_type Colon = ChannelName.find_first_of(":");
 
 	if(Colon == std::string::npos)
@@ -473,9 +416,7 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client
 	}
 
 	if((NormalisedName.length() > 64) || (Password.length() > 64)) {
-
 		c->GeneralChannelMessage("The channel name or password cannot exceed 64 characters.");
-
 		return nullptr;
 	}
 
@@ -487,11 +428,8 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client
 		RequiredChannel = CreateChannel(NormalisedName, c->GetName(), Password, false, 0);
 
 	if(RequiredChannel->GetMinStatus() > c->GetAccountStatus()) {
-
 		std::string Message = "You do not have the required account status to join channel " + NormalisedName;
-
 		c->GeneralChannelMessage(Message);
-
 		return nullptr;
 	}
 
@@ -499,19 +437,14 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client
 		return nullptr;
 
 	if(RequiredChannel->IsInvitee(c->GetName())) {
-
 		RequiredChannel->AddClient(c);
-
 		RequiredChannel->RemoveInvitee(c->GetName());
-
 		return RequiredChannel;
 	}
 
 	if(RequiredChannel->CheckPassword(Password) || RequiredChannel->IsOwner(c->GetName()) || RequiredChannel->IsModerator(c->GetName()) ||
 			c->IsChannelAdmin()) {
-
 		RequiredChannel->AddClient(c);
-
 		return RequiredChannel;
 	}
 
@@ -521,8 +454,10 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client
 }
 
 ChatChannel *ChatChannelList::RemoveClientFromChannel(std::string inChannelName, Client *c) {
+	_eqp
 
-	if(!c) return nullptr;
+	if(!c)
+		return nullptr;
 
 	std::string ChannelName = inChannelName;
 
@@ -530,7 +465,6 @@ ChatChannel *ChatChannelList::RemoveClientFromChannel(std::string inChannelName,
 		ChannelName = c->ChannelSlotName(atoi(inChannelName.c_str()));
 
 	ChatChannel *RequiredChannel = FindChannel(ChannelName);
-
 	if(!RequiredChannel)
 		return nullptr;
 
@@ -544,62 +478,53 @@ ChatChannel *ChatChannelList::RemoveClientFromChannel(std::string inChannelName,
 }
 
 void ChatChannelList::Process() {
+	_eqp
 
 	LinkedListIterator<ChatChannel*> iterator(ChatChannels);
-
 	iterator.Reset();
 
 	while(iterator.MoreElements()) {
-
 		ChatChannel *CurrentChannel = iterator.GetData();
 
 		if(CurrentChannel && CurrentChannel->ReadyToDelete()) {
-
 			Log.Out(Logs::Detail, Logs::UCS_Server, "Empty temporary password protected channel %s being destroyed.",
 				CurrentChannel->GetName().c_str());
 
 			RemoveChannel(CurrentChannel);
 		}
-
 		iterator.Advance();
-
 	}
 }
 
 void ChatChannel::AddInvitee(std::string Invitee) {
+	_eqp
 
 	if(!IsInvitee(Invitee)) {
-
 		Invitees.push_back(Invitee);
-
 		Log.Out(Logs::Detail, Logs::UCS_Server, "Added %s as invitee to channel %s", Invitee.c_str(), Name.c_str());
 	}
 
 }
 
 void ChatChannel::RemoveInvitee(std::string Invitee) {
+	_eqp
 
 	std::list<std::string>::iterator Iterator;
-
 	for(Iterator = Invitees.begin(); Iterator != Invitees.end(); ++Iterator) {
 
 		if((*Iterator) == Invitee) {
-
 			Invitees.erase(Iterator);
-
 			Log.Out(Logs::Detail, Logs::UCS_Server, "Removed %s as invitee to channel %s", Invitee.c_str(), Name.c_str());
-
 			return;
 		}
 	}
 }
 
 bool ChatChannel::IsInvitee(std::string Invitee) {
+	_eqp
 
 	std::list<std::string>::iterator Iterator;
-
 	for(Iterator = Invitees.begin(); Iterator != Invitees.end(); ++Iterator) {
-
 		if((*Iterator) == Invitee)
 			return true;
 	}
@@ -608,80 +533,66 @@ bool ChatChannel::IsInvitee(std::string Invitee) {
 }
 
 void ChatChannel::AddModerator(std::string Moderator) {
+	_eqp
 
 	if(!IsModerator(Moderator)) {
-
 		Moderators.push_back(Moderator);
-
 		Log.Out(Logs::Detail, Logs::UCS_Server, "Added %s as moderator to channel %s", Moderator.c_str(), Name.c_str());
 	}
 
 }
 
 void ChatChannel::RemoveModerator(std::string Moderator) {
+	_eqp
 
 	std::list<std::string>::iterator Iterator;
-
 	for(Iterator = Moderators.begin(); Iterator != Moderators.end(); ++Iterator) {
-
 		if((*Iterator) == Moderator) {
-
 			Moderators.erase(Iterator);
-
 			Log.Out(Logs::Detail, Logs::UCS_Server, "Removed %s as moderator to channel %s", Moderator.c_str(), Name.c_str());
-
 			return;
 		}
 	}
 }
 
 bool ChatChannel::IsModerator(std::string Moderator) {
+	_eqp
 
 	std::list<std::string>::iterator Iterator;
-
 	for(Iterator = Moderators.begin(); Iterator != Moderators.end(); ++Iterator) {
-
 		if((*Iterator) == Moderator)
 			return true;
 	}
-
 	return false;
 }
 
 void ChatChannel::AddVoice(std::string inVoiced) {
+	_eqp
 
 	if(!HasVoice(inVoiced)) {
-
 		Voiced.push_back(inVoiced);
-
 		Log.Out(Logs::Detail, Logs::UCS_Server, "Added %s as voiced to channel %s", inVoiced.c_str(), Name.c_str());
 	}
-
 }
 
 void ChatChannel::RemoveVoice(std::string inVoiced) {
+	_eqp
 
 	std::list<std::string>::iterator Iterator;
-
 	for(Iterator = Voiced.begin(); Iterator != Voiced.end(); ++Iterator) {
-
 		if((*Iterator) == inVoiced) {
-
 			Voiced.erase(Iterator);
-
 			Log.Out(Logs::Detail, Logs::UCS_Server, "Removed %s as voiced to channel %s", inVoiced.c_str(), Name.c_str());
-
 			return;
 		}
 	}
 }
 
 bool ChatChannel::HasVoice(std::string inVoiced) {
+	_eqp
 
 	std::list<std::string>::iterator Iterator;
-
 	for(Iterator = Voiced.begin(); Iterator != Voiced.end(); ++Iterator) {
-
 		if((*Iterator) == inVoiced)
 			return true;
 	}
@@ -690,9 +601,9 @@ bool ChatChannel::HasVoice(std::string inVoiced) {
 }
 
 std::string CapitaliseName(std::string inString) {
+	_eqp
 
 	std::string NormalisedName = inString;
-
 	for(unsigned int i = 0; i < NormalisedName.length(); i++) {
 
 		if(i == 0)

@@ -55,6 +55,21 @@ void CatchSignal(int sig_num) {
 
 	if(worldserver)
 		worldserver->Disconnect();
+
+#ifdef EQPERF_ENABLED
+	char time_str[128];
+	time_t result = time(nullptr);
+	strftime(time_str, sizeof(time_str), "%Y_%m_%d__%H_%M_%S", localtime(&result));
+
+	std::string prof_name = "./profile/ucs_";
+	prof_name += time_str;
+	prof_name += ".log";
+
+	std::ofstream profile_out(prof_name, std::ofstream::out);
+	if(profile_out.good()) {
+		EQP::CPU::ST::GetProfiler().Dump(profile_out, 10);
+	}
+#endif
 }
 
 std::string GetMailPrefix() {
@@ -138,28 +153,33 @@ int main() {
 		Log.Out(Logs::General, Logs::UCS_Server, "Could not set signal handler");
 		return 1;
 	}
+	if(signal(SIGBREAK, CatchSignal) == SIG_ERR)	{
+		Log.Out(Logs::General, Logs::UCS_Server, "Could not set signal handler");
+		return 1;
+	}
 
 	worldserver = new WorldServer;
 
 	worldserver->Connect();
 
 	while(RunLoops) {
+		{
+			_eqpn("Main loop");
+			Timer::SetCurrentTime();
 
-		Timer::SetCurrentTime();
+			CL->Process();
 
-		CL->Process();
+			if(ChannelListProcessTimer.Check())
+				ChannelList->Process();
 
-		if(ChannelListProcessTimer.Check())
-			ChannelList->Process();
+			if (InterserverTimer.Check()) {
+				if (worldserver->TryReconnect() && (!worldserver->Connected()))
+					worldserver->AsyncConnect();
+			}
+			worldserver->Process();
 
-		if (InterserverTimer.Check()) {
-			if (worldserver->TryReconnect() && (!worldserver->Connected()))
-				worldserver->AsyncConnect();
+			timeout_manager.CheckTimeouts();
 		}
-		worldserver->Process();
-
-		timeout_manager.CheckTimeouts();
-
 		Sleep(100);
 	}
 
@@ -172,6 +192,7 @@ int main() {
 }
 
 void UpdateWindowTitle(char* iNewTitle) {
+	_eqp
 #ifdef _WINDOWS
 		char tmp[500];
 		if (iNewTitle) {

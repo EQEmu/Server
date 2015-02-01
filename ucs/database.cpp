@@ -55,6 +55,7 @@ extern uint32 MailMessagesSent;
 
 Database::Database ()
 {
+	_eqp
 	DBInitVars();
 }
 
@@ -64,12 +65,14 @@ Establish a connection to a mysql database with the supplied parameters
 
 Database::Database(const char* host, const char* user, const char* passwd, const char* database, uint32 port)
 {
+	_eqp
 	DBInitVars();
 	Connect(host, user, passwd, database, port);
 }
 
 bool Database::Connect(const char* host, const char* user, const char* passwd, const char* database, uint32 port)
 {
+	_eqp
 	uint32 errnum= 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	if (!Open(host, user, passwd, database, port, &errnum, errbuf))
@@ -87,12 +90,11 @@ bool Database::Connect(const char* host, const char* user, const char* passwd, c
 }
 
 void Database::DBInitVars() {
-
+	_eqp
 }
 
-
-
 void Database::HandleMysqlError(uint32 errnum) {
+	_eqp
 }
 
 /*
@@ -101,9 +103,11 @@ Close the connection to the database
 */
 Database::~Database()
 {
+	_eqp
 }
 
 void Database::GetAccountStatus(Client *client) {
+	_eqp
 
 	std::string query = StringFormat("SELECT `status`, `hideme`, `karma`, `revoked` "
                                     "FROM `account` WHERE `id` = '%i' LIMIT 1",
@@ -134,6 +138,7 @@ void Database::GetAccountStatus(Client *client) {
 }
 
 int Database::FindAccount(const char *characterName, Client *client) {
+	_eqp
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "FindAccount for character %s", characterName);
 
@@ -174,6 +179,7 @@ int Database::FindAccount(const char *characterName, Client *client) {
 }
 
 bool Database::VerifyMailKey(std::string characterName, int IPAddress, std::string MailKey) {
+	_eqp
 
 	std::string query = StringFormat("SELECT `mailkey` FROM `character_data` WHERE `name`='%s' LIMIT 1",
                                     characterName.c_str());
@@ -201,6 +207,7 @@ bool Database::VerifyMailKey(std::string characterName, int IPAddress, std::stri
 }
 
 int Database::FindCharacter(const char *characterName) {
+	_eqp
 
 	char *safeCharName = RemoveApostrophes(characterName);
     std::string query = StringFormat("SELECT `id` FROM `character_data` WHERE `name`='%s' LIMIT 1", safeCharName);
@@ -224,6 +231,7 @@ int Database::FindCharacter(const char *characterName) {
 }
 
 bool Database::GetVariable(const char* varname, char* varvalue, uint16 varvalue_len) {
+	_eqp
 
 	std::string query = StringFormat("SELECT `value` FROM `variables` WHERE `varname` = '%s'", varname);
     auto results = QueryDatabase(query);
@@ -242,6 +250,7 @@ bool Database::GetVariable(const char* varname, char* varvalue, uint16 varvalue_
 }
 
 bool Database::LoadChatChannels() {
+	_eqp
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "Loading chat channels from the database.");
 
@@ -263,6 +272,7 @@ bool Database::LoadChatChannels() {
 }
 
 void Database::SetChannelPassword(std::string channelName, std::string password) {
+	_eqp
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "Database::SetChannelPassword(%s, %s)", channelName.c_str(), password.c_str());
 
@@ -272,6 +282,7 @@ void Database::SetChannelPassword(std::string channelName, std::string password)
 }
 
 void Database::SetChannelOwner(std::string channelName, std::string owner) {
+	_eqp
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "Database::SetChannelOwner(%s, %s)", channelName.c_str(), owner.c_str());
 
@@ -281,6 +292,7 @@ void Database::SetChannelOwner(std::string channelName, std::string owner) {
 }
 
 void Database::SendHeaders(Client *client) {
+	_eqp
 
 	int unknownField2 = 25015275;
 	int unknownField3 = 1;
@@ -368,6 +380,7 @@ void Database::SendHeaders(Client *client) {
 }
 
 void Database::SendBody(Client *client, int messageNumber) {
+	_eqp
 
 	int characterID = FindCharacter(client->MailBoxName().c_str());
 
@@ -415,6 +428,7 @@ void Database::SendBody(Client *client, int messageNumber) {
 }
 
 bool Database::SendMail(std::string recipient, std::string from, std::string subject, std::string body, std::string recipientsString) {
+	_eqp
 
 	int characterID;
 	std::string characterName;
@@ -474,6 +488,7 @@ bool Database::SendMail(std::string recipient, std::string from, std::string sub
 }
 
 void Database::SetMessageStatus(int messageNumber, int status) {
+	_eqp
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "SetMessageStatus %i %i", messageNumber, status);
 
@@ -488,6 +503,7 @@ void Database::SetMessageStatus(int messageNumber, int status) {
 }
 
 void Database::ExpireMail() {
+	_eqp
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "Expiring mail...");
 
@@ -530,6 +546,7 @@ void Database::ExpireMail() {
 }
 
 void Database::AddFriendOrIgnore(int charID, int type, std::string name) {
+	_eqp
 
     std::string query = StringFormat("INSERT INTO `friends` (`charid`, `type`, `name`) "
                                     "VALUES('%i', %i, '%s')",
@@ -541,6 +558,7 @@ void Database::AddFriendOrIgnore(int charID, int type, std::string name) {
 }
 
 void Database::RemoveFriendOrIgnore(int charID, int type, std::string name) {
+	_eqp
 
 	std::string query = StringFormat("DELETE FROM `friends` WHERE `charid` = %i "
                                     "AND `type` = %i AND `name` = '%s'",
@@ -554,6 +572,7 @@ void Database::RemoveFriendOrIgnore(int charID, int type, std::string name) {
 }
 
 void Database::GetFriendsAndIgnore(int charID, std::vector<std::string> &friends, std::vector<std::string> &ignorees) {
+	_eqp
 
 	std::string query = StringFormat("select `type`, `name` FROM `friends` WHERE `charid`=%i", charID);
     auto results = QueryDatabase(query);
@@ -578,7 +597,9 @@ void Database::GetFriendsAndIgnore(int charID, std::vector<std::string> &friends
 
 }
 
-void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings){
+void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings) {
+	_eqp
+
 	std::string query =
 		"SELECT "
 		"log_category_id, "

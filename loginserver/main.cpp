@@ -275,9 +275,12 @@ int main()
 	Log.Out(Logs::General, Logs::Debug, "Server Started.");
 	while(run_server)
 	{
-		Timer::SetCurrentTime();
-		server.CM->Process();
-		server.SM->Process();
+		{
+			_eqpn("Main loop");
+			Timer::SetCurrentTime();
+			server.CM->Process();
+			server.SM->Process();
+		}
 		Sleep(100);
 	}
 

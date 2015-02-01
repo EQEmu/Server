@@ -43,8 +43,10 @@ extern uint32 ChatMessagesSent;
 extern uint32 MailMessagesSent;
 
 int LookupCommand(const char *ChatCommand) {
+	_eqp
 
-	if(!ChatCommand) return -1;
+	if(!ChatCommand) 
+		return -1;
 
 	for(int i = 0; i < CommandEndOfList; i++) {
 
@@ -56,6 +58,7 @@ int LookupCommand(const char *ChatCommand) {
 }
 
 void Client::SendUptime() {
+	_eqp
 
 	uint32 ms = Timer::GetCurrentTime();
 	uint32 d = ms / 86400000;
@@ -77,6 +80,7 @@ void Client::SendUptime() {
 }
 
 std::vector<std::string> ParseRecipients(std::string RecipientString) {
+	_eqp
 
 	// This method parses the Recipient List in the mailto command, which can look like this example:
 	//
@@ -235,6 +239,7 @@ std::vector<std::string> ParseRecipients(std::string RecipientString) {
 }
 
 static void ProcessMailTo(Client *c, std::string MailMessage) {
+	_eqp
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "MAILTO: From %s, %s", c->MailBoxName().c_str(), MailMessage.c_str());
 
@@ -351,9 +356,11 @@ static void ProcessMailTo(Client *c, std::string MailMessage) {
 }
 
 static void ProcessMailTo(Client *c, std::string from, std::string subject, std::string message) {
+	_eqp
 }
 
 static void ProcessSetMessageStatus(std::string SetMessageCommand) {
+	_eqp
 
 	int MessageNumber;
 
@@ -397,6 +404,7 @@ static void ProcessSetMessageStatus(std::string SetMessageCommand) {
 }
 
 static void ProcessCommandBuddy(Client *c, std::string Buddy) {
+	_eqp
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "Received buddy command with parameters %s", Buddy.c_str());
 	c->GeneralChannelMessage("Buddy list modified");
@@ -426,6 +434,7 @@ static void ProcessCommandBuddy(Client *c, std::string Buddy) {
 }
 
 static void ProcessCommandIgnore(Client *c, std::string Ignoree) {
+	_eqp
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "Received ignore command with parameters %s", Ignoree.c_str());
 	c->GeneralChannelMessage("Ignore list modified");
@@ -468,7 +477,8 @@ static void ProcessCommandIgnore(Client *c, std::string Ignoree) {
 
 }
 Clientlist::Clientlist(int ChatPort) {
-
+	_eqp
+	
 	chatsf = new EQStreamFactory(ChatStream, ChatPort, 45000);
 
 	ChatOpMgr = new RegularOpcodeManager;
@@ -486,6 +496,7 @@ Clientlist::Clientlist(int ChatPort) {
 }
 
 Client::Client(std::shared_ptr<EQStream> eqs) {
+	_eqp
 
 	ClientStream = eqs;
 
@@ -518,6 +529,7 @@ Client::Client(std::shared_ptr<EQStream> eqs) {
 }
 
 Client::~Client() {
+	_eqp
 
 	CloseConnection();
 
@@ -537,6 +549,7 @@ Client::~Client() {
 }
 
 void Client::CloseConnection() {
+	_eqp
 
 	ClientStream->RemoveData();
 
@@ -546,8 +559,10 @@ void Client::CloseConnection() {
 }
 
 void Clientlist::CheckForStaleConnections(Client *c) {
+	_eqp
 
-	if(!c) return;
+	if(!c) 
+		return;
 
 	std::list<Client*>::iterator Iterator;
 
@@ -573,6 +588,7 @@ void Clientlist::CheckForStaleConnections(Client *c) {
 }
 
 void Clientlist::Process() {
+	_eqp
 
 	std::shared_ptr<EQStream> eqs;
 
@@ -731,6 +747,7 @@ void Clientlist::Process() {
 
 void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString)
 {
+	_eqp
 
 	if(CommandString.length() == 0)
 		return;
@@ -885,7 +902,7 @@ void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString)
 }
 
 void Clientlist::CloseAllConnections() {
-
+	_eqp
 
 	std::list<Client*>::iterator Iterator;
 
@@ -898,8 +915,10 @@ void Clientlist::CloseAllConnections() {
 }
 
 void Client::AddCharacter(int CharID, const char *CharacterName, int Level) {
+	_eqp
 
-	if(!CharacterName) return;
+	if(!CharacterName) 
+		return;
 	Log.Out(Logs::Detail, Logs::UCS_Server, "Adding character %s with ID %i for %s", CharacterName, CharID, GetName().c_str());
 	CharacterEntry NewCharacter;
 	NewCharacter.CharID = CharID;
@@ -910,6 +929,7 @@ void Client::AddCharacter(int CharID, const char *CharacterName, int Level) {
 }
 
 void Client::SendMailBoxes() {
+	_eqp
 
 	int Count = Characters.size();
 
@@ -945,6 +965,7 @@ void Client::SendMailBoxes() {
 }
 
 Client *Clientlist::FindCharacter(std::string CharacterName) {
+	_eqp
 
 	std::list<Client*>::iterator Iterator;
 
@@ -959,8 +980,10 @@ Client *Clientlist::FindCharacter(std::string CharacterName) {
 }
 
 void Client::AddToChannelList(ChatChannel *JoinedChannel) {
+	_eqp
 
-	if(!JoinedChannel) return;
+	if(!JoinedChannel) 
+		return;
 
 	for(int i = 0; i < MAX_JOINED_CHANNELS; i++)
 		if(JoinedChannels[i] == nullptr) {
@@ -971,6 +994,7 @@ void Client::AddToChannelList(ChatChannel *JoinedChannel) {
 }
 
 void Client::RemoveFromChannelList(ChatChannel *JoinedChannel) {
+	_eqp
 
 	for(int i = 0; i < MAX_JOINED_CHANNELS; i++)
 		if(JoinedChannels[i] == JoinedChannel) {
@@ -987,6 +1011,7 @@ void Client::RemoveFromChannelList(ChatChannel *JoinedChannel) {
 }
 
 int Client::ChannelCount() {
+	_eqp
 
 	int NumberOfChannels = 0;
 
@@ -999,6 +1024,7 @@ int Client::ChannelCount() {
 }
 
 void Client::JoinChannels(std::string ChannelNameList) {
+	_eqp
 
 	for (auto &elem : ChannelNameList) {
 		if (elem == '%') {
@@ -1104,6 +1130,7 @@ void Client::JoinChannels(std::string ChannelNameList) {
 }
 
 void Client::LeaveChannels(std::string ChannelNameList) {
+	_eqp
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "Client: %s leaving channels %s", GetName().c_str(), ChannelNameList.c_str());
 
@@ -1189,6 +1216,7 @@ void Client::LeaveChannels(std::string ChannelNameList) {
 }
 
 void Client::LeaveAllChannels(bool SendUpdatedChannelList) {
+	_eqp
 
 	for (auto &elem : JoinedChannels) {
 
@@ -1206,6 +1234,7 @@ void Client::LeaveAllChannels(bool SendUpdatedChannelList) {
 
 
 void Client::ProcessChannelList(std::string Input) {
+	_eqp
 
 	if(Input.length() == 0) {
 
@@ -1230,6 +1259,7 @@ void Client::ProcessChannelList(std::string Input) {
 
 
 void Client::SendChannelList() {
+	_eqp
 
 	std::string ChannelMessage;
 
@@ -1273,6 +1303,7 @@ void Client::SendChannelList() {
 
 void Client::SendChannelMessage(std::string Message)
 {
+	_eqp
 
 	std::string::size_type MessageStart = Message.find_first_of(" ");
 
@@ -1372,6 +1403,7 @@ void Client::SendChannelMessage(std::string Message)
 }
 
 void Client::SendChannelMessageByNumber(std::string Message) {
+	_eqp
 
 	std::string::size_type MessageStart = Message.find_first_of(" ");
 
@@ -1484,8 +1516,10 @@ void Client::SendChannelMessageByNumber(std::string Message) {
 }
 
 void Client::SendChannelMessage(std::string ChannelName, std::string Message, Client *Sender) {
+	_eqp
 
-	if(!Sender) return;
+	if(!Sender)
+		return;
 
 	std::string FQSenderName = WorldShortName + "." + Sender->GetName();
 
@@ -1512,6 +1546,8 @@ void Client::SendChannelMessage(std::string ChannelName, std::string Message, Cl
 
 void Client::ToggleAnnounce(std::string State)
 {
+	_eqp
+
 	if(State == "")
 		Announce = !Announce;
 	else if(State == "on")
@@ -1530,8 +1566,10 @@ void Client::ToggleAnnounce(std::string State)
 }
 
 void Client::AnnounceJoin(ChatChannel *Channel, Client *c) {
+	_eqp
 
-	if(!Channel || !c) return;
+	if(!Channel || !c) 
+		return;
 
 	int PacketLength = Channel->GetName().length() + c->GetName().length() + 2;
 
@@ -1549,8 +1587,10 @@ void Client::AnnounceJoin(ChatChannel *Channel, Client *c) {
 }
 
 void Client::AnnounceLeave(ChatChannel *Channel, Client *c) {
+	_eqp
 
-	if(!Channel || !c) return;
+	if(!Channel || !c) 
+		return;
 
 	int PacketLength = Channel->GetName().length() + c->GetName().length() + 2;
 
@@ -1568,8 +1608,10 @@ void Client::AnnounceLeave(ChatChannel *Channel, Client *c) {
 }
 
 void Client::GeneralChannelMessage(const char *Characters) {
+	_eqp
 
-	if(!Characters) return;
+	if(!Characters) 
+		return;
 
 	std::string Message = Characters;
 
@@ -1578,6 +1620,7 @@ void Client::GeneralChannelMessage(const char *Characters) {
 }
 
 void Client::GeneralChannelMessage(std::string Message) {
+	_eqp
 
 	auto outapp = new EQApplicationPacket(OP_ChannelMessage, Message.length() + 3);
 	char *PacketBuffer = (char *)outapp->pBuffer;
@@ -1591,6 +1634,7 @@ void Client::GeneralChannelMessage(std::string Message) {
 }
 
 void Client::SetChannelPassword(std::string ChannelPassword) {
+	_eqp
 
 	std::string::size_type PasswordStart = ChannelPassword.find_first_not_of(" ");
 
@@ -1655,6 +1699,7 @@ void Client::SetChannelPassword(std::string ChannelPassword) {
 }
 
 void Client::SetChannelOwner(std::string CommandString) {
+	_eqp
 
 	std::string::size_type PlayerStart = CommandString.find_first_not_of(" ");
 
@@ -1718,6 +1763,7 @@ void Client::SetChannelOwner(std::string CommandString) {
 }
 
 void Client::OPList(std::string CommandString) {
+	_eqp
 
 	std::string::size_type ChannelStart = CommandString.find_first_not_of(" ");
 
@@ -1743,6 +1789,7 @@ void Client::OPList(std::string CommandString) {
 }
 
 void Client::ChannelInvite(std::string CommandString) {
+	_eqp
 
 	std::string::size_type PlayerStart = CommandString.find_first_not_of(" ");
 
@@ -1829,6 +1876,7 @@ void Client::ChannelInvite(std::string CommandString) {
 }
 
 void Client::ChannelModerate(std::string CommandString) {
+	_eqp
 
 	std::string::size_type ChannelStart = CommandString.find_first_not_of(" ");
 
@@ -1871,6 +1919,7 @@ void Client::ChannelModerate(std::string CommandString) {
 }
 
 void Client::ChannelGrantModerator(std::string CommandString) {
+	_eqp
 
 	std::string::size_type PlayerStart = CommandString.find_first_not_of(" ");
 
@@ -1954,6 +2003,7 @@ void Client::ChannelGrantModerator(std::string CommandString) {
 }
 
 void Client::ChannelGrantVoice(std::string CommandString) {
+	_eqp
 
 	std::string::size_type PlayerStart = CommandString.find_first_not_of(" ");
 
@@ -2041,6 +2091,7 @@ void Client::ChannelGrantVoice(std::string CommandString) {
 }
 
 void Client::ChannelKick(std::string CommandString) {
+	_eqp
 
 	std::string::size_type PlayerStart = CommandString.find_first_not_of(" ");
 
@@ -2131,6 +2182,7 @@ void Client::ChannelKick(std::string CommandString) {
 }
 
 void Client::ToggleInvites() {
+	_eqp
 
 	AllowInvites = !AllowInvites;
 
@@ -2142,6 +2194,7 @@ void Client::ToggleInvites() {
 }
 
 std::string Client::ChannelSlotName(int SlotNumber) {
+	_eqp
 
 	if((SlotNumber < 1 ) || (SlotNumber > MAX_JOINED_CHANNELS))
 		return "";
@@ -2154,6 +2207,7 @@ std::string Client::ChannelSlotName(int SlotNumber) {
 }
 
 void Client::SendHelp() {
+	_eqp
 
 	GeneralChannelMessage("Chat Channel Commands:");
 
@@ -2164,6 +2218,8 @@ void Client::SendHelp() {
 
 void Client::AccountUpdate()
 {
+	_eqp
+
 	if(AccountGrabUpdateTimer)
 	{
 		if(AccountGrabUpdateTimer->Check(false))
@@ -2175,6 +2231,7 @@ void Client::AccountUpdate()
 }
 
 void Client::SetConnectionType(char c) {
+	_eqp
 
 	switch(c)
 	{
@@ -2212,6 +2269,7 @@ void Client::SetConnectionType(char c) {
 }
 
 Client *Clientlist::IsCharacterOnline(std::string CharacterName) {
+	_eqp
 
 	// This method is used to determine if the character we are a sending an email to is connected to the mailserver,
 	// so we can send them a new email notification.
@@ -2240,6 +2298,7 @@ Client *Clientlist::IsCharacterOnline(std::string CharacterName) {
 }
 
 int Client::GetMailBoxNumber(std::string CharacterName) {
+	_eqp
 
 	for(unsigned int i = 0; i < Characters.size(); i++)
 		if(Characters[i].Name == CharacterName)
@@ -2249,6 +2308,7 @@ int Client::GetMailBoxNumber(std::string CharacterName) {
 }
 
 void Client::SendNotification(int MailBoxNumber, std::string Subject, std::string From, int MessageID) {
+	_eqp
 
 	char TimeStamp[100];
 
@@ -2282,6 +2342,7 @@ void Client::SendNotification(int MailBoxNumber, std::string Subject, std::strin
 }
 
 void Client::ChangeMailBox(int NewMailBox) {
+	_eqp
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "%s Change to mailbox %i", MailBoxName().c_str(), NewMailBox);
 
@@ -2302,6 +2363,7 @@ void Client::ChangeMailBox(int NewMailBox) {
 }
 
 void Client::SendFriends() {
+	_eqp
 
 	std::vector<std::string> Friends, Ignorees;
 
@@ -2355,6 +2417,7 @@ void Client::SendFriends() {
 }
 
 std::string Client::MailBoxName() {
+	_eqp
 
 	if((Characters.size() == 0) || (CurrentMailBox > (Characters.size() - 1)))
 	{
@@ -2372,6 +2435,7 @@ std::string Client::MailBoxName() {
 }
 
 int Client::GetCharID() {
+	_eqp
 
 	if(Characters.size() == 0)
 		return 0;

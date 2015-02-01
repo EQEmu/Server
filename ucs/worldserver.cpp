@@ -43,21 +43,25 @@ void ProcessMailTo(Client *c, std::string from, std::string subject, std::string
 WorldServer::WorldServer()
 : WorldConnection(EmuTCPConnection::packetModeUCS, Config->SharedKey.c_str())
 {
+	_eqp
 	pTryReconnect = true;
 }
 
 WorldServer::~WorldServer()
 {
+	_eqp
 }
 
 void WorldServer::OnConnected()
 {
+	_eqp
 	Log.Out(Logs::Detail, Logs::UCS_Server, "Connected to World.");
 	WorldConnection::OnConnected();
 }
 
 void WorldServer::Process()
 {
+	_eqp
 	WorldConnection::Process();
 
 	if (!Connected())

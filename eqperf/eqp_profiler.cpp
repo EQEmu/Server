@@ -6,9 +6,6 @@
 #include <algorithm>
 #include "../common/uuid.h"
 
-EQP::CPU::ST::Profiler st_profiler;
-EQP::CPU::MT::Profiler mt_profiler;
-
 struct EQP::CPU::MT::Profiler::impl
 {
 	std::mutex lock_;
@@ -17,10 +14,12 @@ struct EQP::CPU::MT::Profiler::impl
 };
 
 EQP::CPU::ST::Profiler &EQP::CPU::ST::GetProfiler() {
+	static EQP::CPU::ST::Profiler st_profiler;
 	return st_profiler;
 }
 
 EQP::CPU::MT::Profiler &EQP::CPU::MT::GetProfiler() {
+	static EQP::CPU::MT::Profiler mt_profiler;
 	return mt_profiler;
 }
 
