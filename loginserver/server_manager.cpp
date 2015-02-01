@@ -17,7 +17,6 @@
 */
 #include "server_manager.h"
 #include "login_server.h"
-#include "error_log.h"
 #include "login_structures.h"
 #include "../common/eqemu_logsys.h"
 #include <stdlib.h>
@@ -27,7 +26,7 @@ extern bool run_server;
 
 ServerManager::ServerManager()
 {
-	_eqp_mt
+	_eqp
 	char error_buffer[TCPConnection_ErrorBufferSize];
 
 	int listen_port = atoi(server.config->GetVariable("options", "listen_port").c_str());
@@ -45,7 +44,7 @@ ServerManager::ServerManager()
 
 ServerManager::~ServerManager()
 {
-	_eqp_mt
+	_eqp
 	if(tcps)
 	{
 		tcps->Close();
@@ -55,7 +54,7 @@ ServerManager::~ServerManager()
 
 void ServerManager::Process()
 {
-	_eqp_mt
+	_eqp
 	ProcessDisconnect();
 	EmuTCPConnection *tcp_c = nullptr;
 	while(tcp_c = tcps->NewQueuePop())
@@ -97,7 +96,7 @@ void ServerManager::Process()
 
 void ServerManager::ProcessDisconnect()
 {
-	_eqp_mt
+	_eqp
 	list<WorldServer*>::iterator iter = world_servers.begin();
 	while(iter != world_servers.end())
 	{
@@ -120,7 +119,7 @@ void ServerManager::ProcessDisconnect()
 
 WorldServer* ServerManager::GetServerByAddress(unsigned int address)
 {
-	_eqp_mt
+	_eqp
 	list<WorldServer*>::iterator iter = world_servers.begin();
 	while(iter != world_servers.end())
 	{
@@ -136,7 +135,7 @@ WorldServer* ServerManager::GetServerByAddress(unsigned int address)
 
 EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)
 {
-	_eqp_mt
+	_eqp
 	unsigned int packet_size = sizeof(ServerListHeader_Struct);
 	unsigned int server_count = 0;
 	in_addr in;
@@ -274,7 +273,7 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)
 
 void ServerManager::SendUserToWorldRequest(unsigned int server_id, unsigned int client_account_id)
 {
-	_eqp_mt
+	_eqp
 	list<WorldServer*>::iterator iter = world_servers.begin();
 	bool found = false;
 	while(iter != world_servers.end())
@@ -305,7 +304,7 @@ void ServerManager::SendUserToWorldRequest(unsigned int server_id, unsigned int 
 
 bool ServerManager::ServerExists(string l_name, string s_name, WorldServer *ignore)
 {
-	_eqp_mt
+	_eqp
 	list<WorldServer*>::iterator iter = world_servers.begin();
 	while(iter != world_servers.end())
 	{
@@ -327,7 +326,7 @@ bool ServerManager::ServerExists(string l_name, string s_name, WorldServer *igno
 
 void ServerManager::DestroyServerByName(string l_name, string s_name, WorldServer *ignore)
 {
-	_eqp_mt
+	_eqp
 	list<WorldServer*>::iterator iter = world_servers.begin();
 	while(iter != world_servers.end())
 	{

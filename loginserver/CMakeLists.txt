@@ -6,7 +6,6 @@ SET(eqlogin_sources
 	config.cpp
 	database_mysql.cpp
 	database_postgresql.cpp
-	error_log.cpp
 	main.cpp
 	server_manager.cpp
 	world_server.cpp
@@ -26,7 +25,6 @@ SET(eqlogin_headers
 	database_postgresql.h
 	encryption.h
 	eq_crypto_api.h
-	error_log.h
 	login_server.h
 	login_structures.h
 	options.h
@@ -48,6 +46,7 @@ TARGET_LINK_LIBRARIES(loginserver common ${PERF_LIBS} debug ${MySQL_LIBRARY_DEBU
 IF(MSVC)
 	SET_TARGET_PROPERTIES(loginserver PROPERTIES LINK_FLAGS_RELEASE "/OPT:REF /OPT:ICF")
 	TARGET_LINK_LIBRARIES(loginserver "Ws2_32.lib")
+	TARGET_LINK_LIBRARIES(loginserver "rpcrt4")
 ENDIF(MSVC)
 
 IF(MINGW)
@@ -62,6 +61,7 @@ IF(UNIX)
 		TARGET_LINK_LIBRARIES(loginserver "rt")
 	ENDIF(NOT DARWIN)
 	TARGET_LINK_LIBRARIES(loginserver "pthread")
+	TARGET_LINK_LIBRARIES(loginserver "uuid")
 	TARGET_LINK_LIBRARIES(loginserver "EQEmuAuthCrypto")
 	TARGET_LINK_LIBRARIES(loginserver "cryptopp")
 	ADD_DEFINITIONS(-fPIC)

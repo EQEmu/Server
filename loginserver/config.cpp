@@ -17,7 +17,6 @@
 */
 #include "../common/global_define.h"
 #include "config.h"
-#include "error_log.h"
 #include "../common/eqemu_logsys.h"
 
 /**
@@ -27,7 +26,7 @@
 */
 std::string Config::GetVariable(std::string title, std::string parameter)
 {
-	_eqp_mt
+	_eqp
 	std::map<std::string, std::map<std::string, std::string> >::iterator iter = vars.find(title);
 	if(iter != vars.end())
 	{
@@ -47,7 +46,7 @@ std::string Config::GetVariable(std::string title, std::string parameter)
 */
 void Config::Parse(const char *file_name)
 {
-	_eqp_mt
+	_eqp
 	if(file_name == nullptr)
 	{
 		Log.Out(Logs::Detail, Logs::Error, "Config::Parse(), file_name passed was null.");
@@ -146,7 +145,7 @@ void Config::Parse(const char *file_name)
 */
 void Config::Tokenize(FILE *input, std::list<std::string> &tokens)
 {
-	_eqp_mt
+	_eqp
 	char c = fgetc(input);
 	std::string lexeme;
 

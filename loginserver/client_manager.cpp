@@ -16,7 +16,6 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "client_manager.h"
-#include "error_log.h"
 #include "login_server.h"
 #include "../common/eqemu_logsys.h"
 
@@ -25,7 +24,7 @@ extern bool run_server;
 
 ClientManager::ClientManager()
 {
-	_eqp_mt
+	_eqp
 	int titanium_port = atoi(server.config->GetVariable("Titanium", "port").c_str());
 	titanium_stream = new EQStreamFactory(LoginStream, titanium_port);
 	titanium_ops = new RegularOpcodeManager;
@@ -69,7 +68,7 @@ ClientManager::ClientManager()
 
 ClientManager::~ClientManager()
 {
-	_eqp_mt
+	_eqp
 	if(titanium_stream)
 	{
 		titanium_stream->Close();
@@ -95,7 +94,7 @@ ClientManager::~ClientManager()
 
 void ClientManager::Process()
 {
-	_eqp_mt
+	_eqp
 	ProcessDisconnect();
 	std::shared_ptr<EQStream> cur = titanium_stream->Pop();
 	while(cur)
@@ -141,7 +140,7 @@ void ClientManager::Process()
 
 void ClientManager::ProcessDisconnect()
 {
-	_eqp_mt
+	_eqp
 	list<Client*>::iterator iter = clients.begin();
 	while(iter != clients.end())
 	{
@@ -161,7 +160,7 @@ void ClientManager::ProcessDisconnect()
 
 void ClientManager::UpdateServerList()
 {
-	_eqp_mt
+	_eqp
 	list<Client*>::iterator iter = clients.begin();
 	while(iter != clients.end())
 	{
@@ -172,7 +171,7 @@ void ClientManager::UpdateServerList()
 
 void ClientManager::RemoveExistingClient(unsigned int account_id)
 {
-	_eqp_mt
+	_eqp
 	list<Client*>::iterator iter = clients.begin();
 	while(iter != clients.end())
 	{
@@ -191,7 +190,7 @@ void ClientManager::RemoveExistingClient(unsigned int account_id)
 
 Client *ClientManager::GetClient(unsigned int account_id)
 {
-	_eqp_mt
+	_eqp
 	Client *cur = nullptr;
 	int count = 0;
 	list<Client*>::iterator iter = clients.begin();

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <stdint.h>
 #include "eqp_profile_function.h"
 
@@ -19,6 +20,7 @@ namespace EQP
 				const char *function_name_;
 				const char *name_;
 				uint64_t start_;
+				std::string identifier_;
 			};
 		}
 
@@ -34,6 +36,7 @@ namespace EQP
 				const char *function_name_;
 				const char *name_;
 				uint64_t start_;
+				std::string identifier_;
 			};
 		}
 	}

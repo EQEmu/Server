@@ -21,7 +21,7 @@ void EQP::CPU::ProfilerNode::Dump(std::ostream &stream, const std::string &func,
 		stream << std::setw(node_level * 2) << " ";
 	}
 
-	double m_cycles = time_ / 1000000.0;
+	double m_cycles = time_ / 1000.0;
 	double m_avg_cycles = m_cycles / count_;
 	double percentage = time_ * 100 / static_cast<double>(total_time);
 
@@ -29,7 +29,7 @@ void EQP::CPU::ProfilerNode::Dump(std::ostream &stream, const std::string &func,
 
 	stream << std::fixed;
 	stream.precision(2);
-	stream << m_cycles << "M cycles, " << count_ << " calls, " << m_avg_cycles << "M cycles avg, ";
+	stream << m_cycles << "k cycles, " << count_ << " calls, " << m_avg_cycles << "k cycles avg, ";
 	stream << func.c_str() << " ";
 	stream << percentage << "%";
 	stream << std::endl;

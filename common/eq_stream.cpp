@@ -49,7 +49,6 @@
 uint16 EQStream::MaxWindowSize=2048;
 
 void EQStream::init(bool resetSession) {
-	_eqp_mt
 	// we only reset these statistics if it is a 'new' connection
 	if ( resetSession )
 	{
@@ -92,7 +91,6 @@ void EQStream::init(bool resetSession) {
 
 EQRawApplicationPacket *EQStream::MakeApplicationPacket(EQProtocolPacket *p)
 {
-	_eqp_mt
 	EQRawApplicationPacket *ap=nullptr;
 	Log.Out(Logs::Detail, Logs::Netcode, _L "Creating new application packet, length %d" __L, p->size);
 	// _raw(NET__APP_CREATE_HEX, 0xFFFF, p);
@@ -102,7 +100,6 @@ EQRawApplicationPacket *EQStream::MakeApplicationPacket(EQProtocolPacket *p)
 
 EQRawApplicationPacket *EQStream::MakeApplicationPacket(const unsigned char *buf, uint32 len)
 {
-	_eqp_mt
 	EQRawApplicationPacket *ap=nullptr;
 	Log.Out(Logs::Detail, Logs::Netcode, _L "Creating new application packet, length %d" __L, len);
 	ap = new EQRawApplicationPacket(buf, len);
@@ -110,7 +107,6 @@ EQRawApplicationPacket *EQStream::MakeApplicationPacket(const unsigned char *buf
 }
 
 EQProtocolPacket *EQStream::MakeProtocolPacket(const unsigned char *buf, uint32 len) {
-	_eqp_mt
 	uint16 proto_opcode = ntohs(*(const uint16 *)buf);
 
 	//advance over opcode.
@@ -122,7 +118,6 @@ EQProtocolPacket *EQStream::MakeProtocolPacket(const unsigned char *buf, uint32 
 
 void EQStream::ProcessPacket(EQProtocolPacket *p)
 {
-	_eqp_mt
 	uint32 processed=0, subpacket_length=0;
 	if (p == nullptr)
 		return;
@@ -520,7 +515,6 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 
 void EQStream::QueuePacket(const EQApplicationPacket *p, bool ack_req)
 {
-	_eqp_mt
 	if(p == nullptr)
 		return;
 
@@ -532,7 +526,6 @@ void EQStream::QueuePacket(const EQApplicationPacket *p, bool ack_req)
 
 void EQStream::FastQueuePacket(EQApplicationPacket **p, bool ack_req)
 {
-	_eqp_mt
 	EQApplicationPacket *pack=*p;
 	*p = nullptr;		//clear caller's pointer.. effectively takes ownership
 
@@ -562,7 +555,6 @@ void EQStream::FastQueuePacket(EQApplicationPacket **p, bool ack_req)
 
 void EQStream::SendPacket(uint16 opcode, EQApplicationPacket *p)
 {
-	_eqp_mt
 	uint32 chunksize,used;
 	uint32 length;
 
@@ -607,7 +599,6 @@ void EQStream::SendPacket(uint16 opcode, EQApplicationPacket *p)
 
 void EQStream::SequencedPush(EQProtocolPacket *p)
 {
-	_eqp_mt
 #ifdef COLLECTOR
 	delete p;
 #else
@@ -636,7 +627,6 @@ if(NextSequencedSend > SequencedQueue.size()) {
 
 void EQStream::NonSequencedPush(EQProtocolPacket *p)
 {
-	_eqp_mt
 #ifdef COLLECTOR
 	delete p;
 #else
@@ -649,7 +639,6 @@ void EQStream::NonSequencedPush(EQProtocolPacket *p)
 
 void EQStream::SendAck(uint16 seq)
 {
-	_eqp_mt
 	uint16 Seq=htons(seq);
 	Log.Out(Logs::Detail, Logs::Netcode, _L "Sending ack with sequence %d" __L, seq);
 	SetLastAckSent(seq);
@@ -658,7 +647,6 @@ void EQStream::SendAck(uint16 seq)
 
 void EQStream::SendOutOfOrderAck(uint16 seq)
 {
-	_eqp_mt
 	Log.Out(Logs::Detail, Logs::Netcode, _L "Sending out of order ack with sequence %d" __L, seq);
 uint16 Seq=htons(seq);
 	NonSequencedPush(new EQProtocolPacket(OP_OutOfOrderAck,(unsigned char *)&Seq,sizeof(uint16)));
@@ -666,7 +654,6 @@ uint16 Seq=htons(seq);
 
 void EQStream::Write(int eq_fd)
 {
-	_eqp_mt
 	std::queue<EQProtocolPacket *> ReadyToSend;
 	bool SeqEmpty=false, NonSeqEmpty=false;
 	std::deque<EQProtocolPacket *>::iterator sitr;
@@ -862,7 +849,6 @@ void EQStream::Write(int eq_fd)
 
 void EQStream::WritePacket(int eq_fd, EQProtocolPacket *p)
 {
-	_eqp_mt
 	uint32 length;
 	sockaddr_in address;
 	address.sin_family = AF_INET;
@@ -901,7 +887,6 @@ void EQStream::WritePacket(int eq_fd, EQProtocolPacket *p)
 
 void EQStream::SendSessionResponse()
 {
-	_eqp_mt
 	EQProtocolPacket *out=new EQProtocolPacket(OP_SessionResponse,nullptr,sizeof(SessionResponse));
 	SessionResponse *Response=(SessionResponse *)out->pBuffer;
 	Response->Session=htonl(Session);
@@ -924,7 +909,6 @@ void EQStream::SendSessionResponse()
 
 void EQStream::SendSessionRequest()
 {
-	_eqp_mt
 	EQProtocolPacket *out=new EQProtocolPacket(OP_SessionRequest,nullptr,sizeof(SessionRequest));
 	SessionRequest *Request=(SessionRequest *)out->pBuffer;
 	memset(Request,0,sizeof(SessionRequest));
@@ -938,7 +922,6 @@ void EQStream::SendSessionRequest()
 
 void EQStream::_SendDisconnect()
 {
-	_eqp_mt
 	if(GetState() == CLOSED)
 		return;
 
@@ -951,7 +934,6 @@ void EQStream::_SendDisconnect()
 
 void EQStream::InboundQueuePush(EQRawApplicationPacket *p)
 {
-	_eqp_mt
 	MInboundQueue.lock();
 	InboundQueue.push_back(p);
 	MInboundQueue.unlock();
@@ -959,7 +941,6 @@ void EQStream::InboundQueuePush(EQRawApplicationPacket *p)
 
 EQApplicationPacket *EQStream::PopPacket()
 {
-	_eqp_mt
 	EQRawApplicationPacket *p=nullptr;
 
 	MInboundQueue.lock();
@@ -987,7 +968,6 @@ EQApplicationPacket *EQStream::PopPacket()
 
 EQRawApplicationPacket *EQStream::PopRawPacket()
 {
-	_eqp_mt
 	EQRawApplicationPacket *p=nullptr;
 
 	MInboundQueue.lock();
@@ -1015,7 +995,6 @@ EQRawApplicationPacket *EQStream::PopRawPacket()
 
 EQRawApplicationPacket *EQStream::PeekPacket()
 {
-	_eqp_mt
 	EQRawApplicationPacket *p=nullptr;
 
 	MInboundQueue.lock();
@@ -1030,7 +1009,6 @@ EQRawApplicationPacket *EQStream::PeekPacket()
 
 void EQStream::InboundQueueClear()
 {
-	_eqp_mt
 	EQApplicationPacket *p=nullptr;
 
 	Log.Out(Logs::Detail, Logs::Netcode, _L "Clearing inbound queue" __L);
@@ -1049,7 +1027,6 @@ void EQStream::InboundQueueClear()
 
 bool EQStream::HasOutgoingData()
 {
-	_eqp_mt
 	bool flag;
 
 	//once closed, we have nothing more to say
@@ -1075,7 +1052,6 @@ bool EQStream::HasOutgoingData()
 
 void EQStream::OutboundQueueClear()
 {
-	_eqp_mt
 	EQProtocolPacket *p=nullptr;
 
 	Log.Out(Logs::Detail, Logs::Netcode, _L "Clearing outbound queue" __L);
@@ -1098,7 +1074,6 @@ void EQStream::OutboundQueueClear()
 
 void EQStream::PacketQueueClear()
 {
-	_eqp_mt
 	EQProtocolPacket *p=nullptr;
 
 	Log.Out(Logs::Detail, Logs::Netcode, _L "Clearing future packet queue" __L);
@@ -1115,7 +1090,6 @@ void EQStream::PacketQueueClear()
 
 void EQStream::Process(const unsigned char *buffer, const uint32 length)
 {
-	_eqp_mt
 	static unsigned char newbuffer[2048];
 	uint32 newlength=0;
 	if (EQProtocolPacket::ValidateCRC(buffer,length,Key)) {
@@ -1140,7 +1114,6 @@ void EQStream::Process(const unsigned char *buffer, const uint32 length)
 
 long EQStream::GetNextAckToSend()
 {
-	_eqp_mt
 	MAcks.lock();
 	long l=NextAckToSend;
 	MAcks.unlock();
@@ -1150,7 +1123,6 @@ long EQStream::GetNextAckToSend()
 
 long EQStream::GetLastAckSent()
 {
-	_eqp_mt
 	MAcks.lock();
 	long l=LastAckSent;
 	MAcks.unlock();
@@ -1160,7 +1132,6 @@ long EQStream::GetLastAckSent()
 
 void EQStream::AckPackets(uint16 seq)
 {
-	_eqp_mt
 	std::deque<EQProtocolPacket *>::iterator itr, tmp;
 
 	MOutboundQueue.lock();
@@ -1215,7 +1186,6 @@ void EQStream::AckPackets(uint16 seq)
 
 void EQStream::SetNextAckToSend(uint32 seq)
 {
-	_eqp_mt
 	MAcks.lock();
 	Log.Out(Logs::Detail, Logs::Netcode, _L "Set Next Ack To Send to %lu" __L, (unsigned long)seq);
 	NextAckToSend=seq;
@@ -1224,7 +1194,6 @@ void EQStream::SetNextAckToSend(uint32 seq)
 
 void EQStream::SetLastAckSent(uint32 seq)
 {
-	_eqp_mt
 	MAcks.lock();
 	Log.Out(Logs::Detail, Logs::Netcode, _L "Set Last Ack Sent to %lu" __L, (unsigned long)seq);
 	LastAckSent=seq;
@@ -1233,7 +1202,6 @@ void EQStream::SetLastAckSent(uint32 seq)
 
 void EQStream::ProcessQueue()
 {
-	_eqp_mt
 	if(PacketQueue.empty()) {
 		return;
 	}
@@ -1249,7 +1217,6 @@ void EQStream::ProcessQueue()
 
 EQProtocolPacket *EQStream::RemoveQueue(uint16 seq)
 {
-	_eqp_mt
 	std::map<unsigned short,EQProtocolPacket *>::iterator itr;
 	EQProtocolPacket *qp=nullptr;
 	if ((itr=PacketQueue.find(seq))!=PacketQueue.end()) {
@@ -1262,7 +1229,6 @@ EQProtocolPacket *EQStream::RemoveQueue(uint16 seq)
 
 void EQStream::SetStreamType(EQStreamType type)
 {
-	_eqp_mt
 	Log.Out(Logs::Detail, Logs::Netcode, _L "Changing stream type from %s to %s" __L, StreamTypeString(StreamType), StreamTypeString(type));
 	StreamType=type;
 	switch (StreamType) {
@@ -1293,7 +1259,6 @@ void EQStream::SetStreamType(EQStreamType type)
 
 const char *EQStream::StreamTypeString(EQStreamType t)
 {
-	_eqp_mt
 	switch (t) {
 		case LoginStream:
 			return "Login";
@@ -1323,7 +1288,6 @@ const char *EQStream::StreamTypeString(EQStreamType t)
 //returns SeqFuture if `seq` is later than `expected_seq`
 EQStream::SeqOrder EQStream::CompareSequence(uint16 expected_seq , uint16 seq)
 {
-	_eqp_mt
 	if (expected_seq==seq) {
 		// Curent
 		return SeqInOrder;
@@ -1337,7 +1301,6 @@ EQStream::SeqOrder EQStream::CompareSequence(uint16 expected_seq , uint16 seq)
 }
 
 void EQStream::SetState(EQStreamState state) {
-	_eqp_mt
 	MState.lock();
 	Log.Out(Logs::Detail, Logs::Netcode, _L "Changing state from %d to %d" __L, State, state);
 	State=state;
@@ -1346,7 +1309,6 @@ void EQStream::SetState(EQStreamState state) {
 
 
 void EQStream::CheckTimeout(uint32 now, uint32 timeout) {
-	_eqp_mt
 	bool outgoing_data = HasOutgoingData();	//up here to avoid recursive locking
 
 	EQStreamState orig_state = GetState();
@@ -1385,7 +1347,6 @@ void EQStream::CheckTimeout(uint32 now, uint32 timeout) {
 
 void EQStream::Decay()
 {
-	_eqp_mt
 	MRate.lock();
 	uint32 rate=DecayRate;
 	MRate.unlock();
@@ -1398,7 +1359,6 @@ void EQStream::Decay()
 
 void EQStream::AdjustRates(uint32 average_delta)
 {
-	_eqp_mt
 	if(GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) {
 		if (average_delta && (average_delta <= AVERAGE_DELTA_MAX)) {
 			MRate.lock();
@@ -1424,7 +1384,6 @@ void EQStream::AdjustRates(uint32 average_delta)
 }
 
 void EQStream::Close() {
-	_eqp_mt
 	if(HasOutgoingData()) {
 		//there is pending data, wait for it to go out.
 		Log.Out(Logs::Detail, Logs::Netcode, _L "Stream requested to Close(), but there is pending data, waiting for it." __L);
@@ -1441,7 +1400,6 @@ void EQStream::Close() {
 //this could be expanded to check more than the fitst opcode if
 //we needed more complex matching
 EQStream::MatchState EQStream::CheckSignature(const Signature *sig) {
-	_eqp_mt
 	EQRawApplicationPacket *p = nullptr;
 	MatchState res = MatchNotReady;
 

@@ -26,13 +26,14 @@ namespace EQP
 				Profiler();
 				~Profiler();
 
-				void EventStarted(const char *func, const char *name);
-				void EventFinished(uint64_t time);
-				void Clear();
+				std::string EventStarted(const char *func, const char *name);
+				void EventFinished(uint64_t time, std::string ident);
 				void Dump(std::ostream &stream, int num = 0);
+				void Clear();
 			private:
 				Node *root_;
 				Node *current_;
+				std::string identifier_;
 			};
 
 			EQP_EXPORT Profiler &GetProfiler();
@@ -54,10 +55,10 @@ namespace EQP
 				Profiler();
 				~Profiler();
 
-				void EventStarted(const char *func, const char *name);
-				void EventFinished(uint64_t time);
-				void Clear();
+				std::string EventStarted(const char *func, const char *name);
+				void EventFinished(uint64_t time, std::string ident);
 				void Dump(std::ostream &stream, int num = 0);
+				void Clear();
 			private:
 				struct impl;
 				impl *imp_;

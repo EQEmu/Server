@@ -65,7 +65,6 @@ EQStreamFactory::EQStreamFactory(EQStreamType type, int port, uint32 timeout)
 
 void EQStreamFactory::Close()
 {
-	_eqp_mt
 	Stop();
 
 #ifdef _WINDOWS
@@ -78,7 +77,6 @@ void EQStreamFactory::Close()
 
 bool EQStreamFactory::Open()
 {
-	_eqp_mt
 	struct sockaddr_in address;
 #ifndef WIN32
 	pthread_t t1,t2;
@@ -120,7 +118,6 @@ bool EQStreamFactory::Open()
 
 std::shared_ptr<EQStream> EQStreamFactory::Pop()
 {
-	_eqp_mt
 	std::shared_ptr<EQStream> s = nullptr;
 	MNewStreams.lock();
 	if (NewStreams.size()) {
@@ -135,7 +132,6 @@ std::shared_ptr<EQStream> EQStreamFactory::Pop()
 
 void EQStreamFactory::Push(std::shared_ptr<EQStream> s)
 {
-	_eqp_mt
 	MNewStreams.lock();
 	NewStreams.push(s);
 	MNewStreams.unlock();
@@ -220,7 +216,6 @@ void EQStreamFactory::ReaderLoop()
 
 void EQStreamFactory::CheckTimeout()
 {
-	_eqp_mt
 	//lock streams the entire time were checking timeouts, it should be fast.
 	MStreams.lock();
 

@@ -9,7 +9,8 @@
 #endif
 
 #ifdef _MSC_VER
-#define EQP_EXPORT __declspec(dllexport)
+//#define EQP_EXPORT __declspec(dllexport)
+#define EQP_EXPORT
 #else
 #define EQP_EXPORT
 #endif

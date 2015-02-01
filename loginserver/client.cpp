@@ -16,7 +16,6 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "client.h"
-#include "error_log.h"
 #include "login_server.h"
 #include "login_structures.h"
 #include "../common/misc_functions.h"
@@ -26,7 +25,7 @@ extern LoginServer server;
 
 Client::Client(std::shared_ptr<EQStream> c, LSClientVersion v)
 {
-	_eqp_mt
+	_eqp
 	connection = c;
 	version = v;
 	status = cs_not_sent_session_ready;
@@ -37,7 +36,7 @@ Client::Client(std::shared_ptr<EQStream> c, LSClientVersion v)
 
 bool Client::Process()
 {
-	_eqp_mt
+	_eqp
 	EQApplicationPacket *app = connection->PopPacket();
 	while(app)
 	{
@@ -116,7 +115,7 @@ bool Client::Process()
 
 void Client::Handle_SessionReady(const char* data, unsigned int size)
 {
-	_eqp_mt
+	_eqp
 	if(status != cs_not_sent_session_ready)
 	{
 		Log.Out(Logs::General, Logs::Netcode, "Session ready received again after already being received.");
@@ -178,7 +177,7 @@ void Client::Handle_SessionReady(const char* data, unsigned int size)
 
 void Client::Handle_Login(const char* data, unsigned int size)
 {
-	_eqp_mt
+	_eqp
 	if(status != cs_waiting_for_login)
 	{
 		Log.Out(Logs::General, Logs::Netcode, "Login received after already having logged in.");
@@ -333,7 +332,7 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 void Client::Handle_Play(const char* data)
 {
-	_eqp_mt
+	_eqp
 	if(status != cs_logged_in)
 	{
 		Log.Out(Logs::General, Logs::Error, "Client sent a play request when they either were not logged in, discarding.");
@@ -357,7 +356,7 @@ void Client::Handle_Play(const char* data)
 
 void Client::SendServerListPacket()
 {
-	_eqp_mt
+	_eqp
 	EQApplicationPacket *outapp = server.SM->CreateServerListPacket(this);
 
 	if(server.options.IsDumpOutPacketsOn())
@@ -371,7 +370,7 @@ void Client::SendServerListPacket()
 
 void Client::SendPlayResponse(EQApplicationPacket *outapp)
 {
-	_eqp_mt
+	_eqp
 	if(server.options.IsTraceOn())
 	{
 		Log.Out(Logs::Detail, Logs::Netcode, "Sending play response for %s.", GetAccountName().c_str());
@@ -383,7 +382,7 @@ void Client::SendPlayResponse(EQApplicationPacket *outapp)
 
 void Client::GenerateKey()
 {
-	_eqp_mt
+	_eqp
 	key.clear();
 	int count = 0;
 	while(count < 10)

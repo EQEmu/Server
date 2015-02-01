@@ -49,7 +49,7 @@ void CatchSignal(int sig_num)
 
 	std::ofstream profile_out(prof_name, std::ofstream::out);
 	if(profile_out.good()) {
-		EQP::CPU::MT::GetProfiler().Dump(profile_out, 5);
+		EQP::CPU::ST::GetProfiler().Dump(profile_out, 10);
 	}
 #endif
 }

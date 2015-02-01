@@ -20,7 +20,6 @@
 
 #ifdef EQEMU_MYSQL_ENABLED
 #include "database_mysql.h"
-#include "error_log.h"
 #include "login_server.h"
 #include "../common/eqemu_logsys.h"
 
@@ -30,7 +29,7 @@ extern LoginServer server;
 
 DatabaseMySQL::DatabaseMySQL(string user, string pass, string host, string port, string name)
 {
-	_eqp_mt
+	_eqp
 	this->user = user;
 	this->pass = pass;
 	this->host = host;
@@ -56,7 +55,7 @@ DatabaseMySQL::DatabaseMySQL(string user, string pass, string host, string port,
 
 DatabaseMySQL::~DatabaseMySQL()
 {
-	_eqp_mt
+	_eqp
 	if(db)
 	{
 		mysql_close(db);
@@ -65,7 +64,7 @@ DatabaseMySQL::~DatabaseMySQL()
 
 bool DatabaseMySQL::GetLoginDataFromAccountName(string name, string &password, unsigned int &id)
 {
-	_eqp_mt
+	_eqp
 	if(!db)
 	{
 		return false;
@@ -104,7 +103,7 @@ bool DatabaseMySQL::GetLoginDataFromAccountName(string name, string &password, u
 bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, unsigned int &id, string &desc, unsigned int &list_id,
 		unsigned int &trusted, string &list_desc, string &account, string &password)
 {
-	_eqp_mt
+	_eqp
 	if(!db)
 	{
 		return false;
@@ -180,7 +179,7 @@ bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, un
 
 void DatabaseMySQL::UpdateLSAccountData(unsigned int id, string ip_address)
 {
-	_eqp_mt
+	_eqp
 	if(!db)
 	{
 		return;
@@ -200,7 +199,7 @@ void DatabaseMySQL::UpdateLSAccountData(unsigned int id, string ip_address)
 
 void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, string name, string password, string email)
 {
-	_eqp_mt
+	_eqp
 	if(!db)
 	{
 		return;
@@ -220,7 +219,7 @@ void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, string name, string pas
 
 void DatabaseMySQL::UpdateWorldRegistration(unsigned int id, string long_name, string ip_address)
 {
-	_eqp_mt
+	_eqp
 	if(!db)
 	{
 		return;
@@ -246,7 +245,7 @@ void DatabaseMySQL::UpdateWorldRegistration(unsigned int id, string long_name, s
 
 bool DatabaseMySQL::CreateWorldRegistration(string long_name, string short_name, unsigned int &id)
 {
-	_eqp_mt
+	_eqp
 	if(!db)
 	{
 		return false;

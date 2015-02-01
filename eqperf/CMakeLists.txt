@@ -15,8 +15,6 @@ SET(eqperf_headers
 	eqp_profiler_node.h
 )
 
-ADD_LIBRARY(eqperf SHARED ${eqperf_sources} ${eqperf_headers})
-
-INSTALL(TARGETS eqperf RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
+ADD_LIBRARY(eqperf ${eqperf_sources} ${eqperf_headers})
 
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
