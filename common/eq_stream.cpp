@@ -561,6 +561,9 @@ void EQStream::SendPacket(uint16 opcode, EQApplicationPacket *p)
 
 	// std::cout << "[Server -> Client] " << StringFormat("[%s - 0x%04x] [Size: %u]", OpcodeManager::EmuToName(p->GetOpcode()), p->GetOpcode(), p->Size()) << std::endl;
 	// DumpPacket(p);
+	if (Log.log_settings[Logs::Client_Server_Packet].is_category_enabled == 1)
+		Log.Out(Logs::General, Logs::Client_Server_Packet, "[%s - 0x%04x] [Size: %u] \n %s", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size(), DumpPacketToString(app).c_str());
+
 
 	// Convert the EQApplicationPacket to 1 or more EQProtocolPackets
 	if (p->size>(MaxLen-8)) { // proto-op(2), seq(2), app-op(2) ... data ... crc(2)

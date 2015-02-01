@@ -78,6 +78,7 @@ namespace Logs{
 		MySQLQuery,
 		Mercenaries,
 		QuestDebug,
+		Server_Client_Packet,
 		MaxCategoryID	/* Don't Remove this*/
 	};
 
@@ -122,6 +123,7 @@ namespace Logs{
 		"MySQL Query",
 		"Mercenaries",
 		"Quest Debug",
+		"Packet :: Server -> Client",
 	};
 }
 
