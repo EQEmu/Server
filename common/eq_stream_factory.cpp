@@ -23,7 +23,7 @@
 
 ThreadReturnType EQStreamFactoryReaderLoop(void *eqfs)
 {
-EQStreamFactory *fs=(EQStreamFactory *)eqfs;
+	EQStreamFactory *fs = (EQStreamFactory*)eqfs;
 
 #ifndef WIN32
 	Log.Out(Logs::Detail, Logs::None,  "Starting EQStreamFactoryReaderLoop with thread ID %d", pthread_self());
@@ -40,7 +40,7 @@ EQStreamFactory *fs=(EQStreamFactory *)eqfs;
 
 ThreadReturnType EQStreamFactoryWriterLoop(void *eqfs)
 {
-	EQStreamFactory *fs=(EQStreamFactory *)eqfs;
+	EQStreamFactory *fs = (EQStreamFactory*)eqfs;
 
 #ifndef WIN32
 	Log.Out(Logs::Detail, Logs::None,  "Starting EQStreamFactoryWriterLoop with thread ID %d", pthread_self());
@@ -65,6 +65,7 @@ EQStreamFactory::EQStreamFactory(EQStreamType type, int port, uint32 timeout)
 
 void EQStreamFactory::Close()
 {
+	_eqp_mt
 	Stop();
 
 #ifdef _WINDOWS
@@ -77,7 +78,8 @@ void EQStreamFactory::Close()
 
 bool EQStreamFactory::Open()
 {
-struct sockaddr_in address;
+	_eqp_mt
+	struct sockaddr_in address;
 #ifndef WIN32
 	pthread_t t1,t2;
 #endif
@@ -118,6 +120,7 @@ struct sockaddr_in address;
 
 std::shared_ptr<EQStream> EQStreamFactory::Pop()
 {
+	_eqp_mt
 	std::shared_ptr<EQStream> s = nullptr;
 	MNewStreams.lock();
 	if (NewStreams.size()) {
@@ -132,6 +135,7 @@ std::shared_ptr<EQStream> EQStreamFactory::Pop()
 
 void EQStreamFactory::Push(std::shared_ptr<EQStream> s)
 {
+	_eqp_mt
 	MNewStreams.lock();
 	NewStreams.push(s);
 	MNewStreams.unlock();
@@ -216,6 +220,7 @@ void EQStreamFactory::ReaderLoop()
 
 void EQStreamFactory::CheckTimeout()
 {
+	_eqp_mt
 	//lock streams the entire time were checking timeouts, it should be fast.
 	MStreams.lock();
 

@@ -18,31 +18,31 @@
 #include "client_manager.h"
 #include "error_log.h"
 #include "login_server.h"
+#include "../common/eqemu_logsys.h"
 
-extern ErrorLog *server_log;
 extern LoginServer server;
 extern bool run_server;
 
 ClientManager::ClientManager()
 {
-	_eqp
+	_eqp_mt
 	int titanium_port = atoi(server.config->GetVariable("Titanium", "port").c_str());
 	titanium_stream = new EQStreamFactory(LoginStream, titanium_port);
 	titanium_ops = new RegularOpcodeManager;
 	if(!titanium_ops->LoadOpcodes(server.config->GetVariable("Titanium", "opcodes").c_str()))
 	{
-		server_log->Log(log_error, "ClientManager fatal error: couldn't load opcodes for Titanium file %s.",
+		Log.Out(Logs::Detail, Logs::Error, "ClientManager fatal error: couldn't load opcodes for Titanium file %s.",
 			server.config->GetVariable("Titanium", "opcodes").c_str());
 		run_server = false;
 	}
 
 	if(titanium_stream->Open())
 	{
-		server_log->Log(log_network, "ClientManager listening on Titanium stream.");
+		Log.Out(Logs::General, Logs::Netcode, "ClientManager listening on Titanium stream.");
 	}
 	else
 	{
-		server_log->Log(log_error, "ClientManager fatal error: couldn't open Titanium stream.");
+		Log.Out(Logs::Detail, Logs::Error, "ClientManager fatal error: couldn't open Titanium stream.");
 		run_server = false;
 	}
 
@@ -51,25 +51,25 @@ ClientManager::ClientManager()
 	sod_ops = new RegularOpcodeManager;
 	if(!sod_ops->LoadOpcodes(server.config->GetVariable("SoD", "opcodes").c_str()))
 	{
-		server_log->Log(log_error, "ClientManager fatal error: couldn't load opcodes for SoD file %s.",
+		Log.Out(Logs::Detail, Logs::Error, "ClientManager fatal error: couldn't load opcodes for SoD file %s.",
 			server.config->GetVariable("SoD", "opcodes").c_str());
 		run_server = false;
 	}
 
 	if(sod_stream->Open())
 	{
-		server_log->Log(log_network, "ClientManager listening on SoD stream.");
+		Log.Out(Logs::General, Logs::Netcode, "ClientManager listening on SoD stream.");
 	}
 	else
 	{
-		server_log->Log(log_error, "ClientManager fatal error: couldn't open SoD stream.");
+		Log.Out(Logs::Detail, Logs::Error, "ClientManager fatal error: couldn't open SoD stream.");
 		run_server = false;
 	}
 }
 
 ClientManager::~ClientManager()
 {
-	_eqp
+	_eqp_mt
 	if(titanium_stream)
 	{
 		titanium_stream->Close();
@@ -95,14 +95,14 @@ ClientManager::~ClientManager()
 
 void ClientManager::Process()
 {
-	_eqp
+	_eqp_mt
 	ProcessDisconnect();
 	std::shared_ptr<EQStream> cur = titanium_stream->Pop();
 	while(cur)
 	{
 		struct in_addr in;
 		in.s_addr = cur->GetRemoteIP();
-		server_log->Log(log_network, "New Titanium client connection from %s:%d", inet_ntoa(in), ntohs(cur->GetRemotePort()));
+		Log.Out(Logs::General, Logs::Netcode, "New Titanium client connection from %s:%d", inet_ntoa(in), ntohs(cur->GetRemotePort()));
 
 		cur->SetOpcodeManager(&titanium_ops);
 		Client *c = new Client(cur, cv_titanium);
@@ -115,7 +115,7 @@ void ClientManager::Process()
 	{
 		struct in_addr in;
 		in.s_addr = cur->GetRemoteIP();
-		server_log->Log(log_network, "New SoD client connection from %s:%d", inet_ntoa(in), ntohs(cur->GetRemotePort()));
+		Log.Out(Logs::General, Logs::Netcode, "New SoD client connection from %s:%d", inet_ntoa(in), ntohs(cur->GetRemotePort()));
 
 		cur->SetOpcodeManager(&sod_ops);
 		Client *c = new Client(cur, cv_sod);
@@ -128,7 +128,7 @@ void ClientManager::Process()
 	{
 		if((*iter)->Process() == false)
 		{
-			server_log->Log(log_client, "Client had a fatal error and had to be removed from the login.");
+			Log.Out(Logs::General, Logs::LoginServer, "Client had a fatal error and had to be removed from the login.");
 			delete (*iter);
 			iter = clients.erase(iter);
 		}
@@ -141,14 +141,14 @@ void ClientManager::Process()
 
 void ClientManager::ProcessDisconnect()
 {
-	_eqp
+	_eqp_mt
 	list<Client*>::iterator iter = clients.begin();
 	while(iter != clients.end())
 	{
 		std::shared_ptr<EQStream> c = (*iter)->GetConnection();
 		if(c->CheckClosed())
 		{
-			server_log->Log(log_network, "Client disconnected from the server, removing client.");
+			Log.Out(Logs::General, Logs::Netcode, "Client disconnected from the server, removing client.");
 			delete (*iter);
 			iter = clients.erase(iter);
 		}
@@ -161,7 +161,7 @@ void ClientManager::ProcessDisconnect()
 
 void ClientManager::UpdateServerList()
 {
-	_eqp
+	_eqp_mt
 	list<Client*>::iterator iter = clients.begin();
 	while(iter != clients.end())
 	{
@@ -172,13 +172,13 @@ void ClientManager::UpdateServerList()
 
 void ClientManager::RemoveExistingClient(unsigned int account_id)
 {
-	_eqp
+	_eqp_mt
 	list<Client*>::iterator iter = clients.begin();
 	while(iter != clients.end())
 	{
 		if((*iter)->GetAccountID() == account_id)
 		{
-			server_log->Log(log_network, "Client attempting to log in and existing client already logged in, removing existing client.");
+			Log.Out(Logs::General, Logs::Netcode, "Client attempting to log in and existing client already logged in, removing existing client.");
 			delete (*iter);
 			iter = clients.erase(iter);
 		}
@@ -191,7 +191,7 @@ void ClientManager::RemoveExistingClient(unsigned int account_id)
 
 Client *ClientManager::GetClient(unsigned int account_id)
 {
-	_eqp
+	_eqp_mt
 	Client *cur = nullptr;
 	int count = 0;
 	list<Client*>::iterator iter = clients.begin();
@@ -207,7 +207,7 @@ Client *ClientManager::GetClient(unsigned int account_id)
 
 	if(count > 1)
 	{
-		server_log->Log(log_client_error, "More than one client with a given account_id existed in the client list.");
+		Log.Out(Logs::General, Logs::Error, "More than one client with a given account_id existed in the client list.");
 	}
 	return cur;
 }

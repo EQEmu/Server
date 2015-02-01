@@ -307,29 +307,7 @@ bool EQWHTTPServer::Start(uint16 port, const char *mime_file) {
 	m_running = true;
 	m_port = port;
 
-	/*
-
-#ifdef _WINDOWS
-	_beginthread(ThreadProc, 0, this);
-#else
-	pthread_create(&m_thread, nullptr, ThreadProc, this);
-#endif*/
-
 	return(true);
 }
 
-/*
-void EQWHTTPServer::Run() {
-	Log.LogDebugType(Logs::Detail, Logs::World_Server, "HTTP Processing thread started on port %d", m_port);
-	do {
-#warning DELETE THIS IF YOU DONT USE IT
-		Sleep(10);
-	} while(m_running);
-	Log.LogDebugType(Logs::Detail, Logs::World_Server, "HTTP Processing thread terminating on port %d", m_port);
-}
-
-ThreadReturnType EQWHTTPServer::ThreadProc(void *data) {
-	((EQWHTTPServer *) data)->Run();
-	THREAD_RETURN(nullptr);
-}*/
 

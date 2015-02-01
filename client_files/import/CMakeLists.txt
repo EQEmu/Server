@@ -11,7 +11,7 @@ ADD_EXECUTABLE(import_client_files ${import_sources} ${import_headers})
 
 INSTALL(TARGETS import_client_files RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
 
-TARGET_LINK_LIBRARIES(import_client_files common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY})
+TARGET_LINK_LIBRARIES(import_client_files common ${PERF_LIBS} debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY})
 
 IF(MSVC)
 	SET_TARGET_PROPERTIES(import_client_files PROPERTIES LINK_FLAGS_RELEASE "/OPT:REF /OPT:ICF")

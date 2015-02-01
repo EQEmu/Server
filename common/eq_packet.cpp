@@ -39,9 +39,11 @@ EQPacket::EQPacket(EmuOpcode op, const unsigned char *buf, uint32 len)
 :	BasePacket(buf, len),
 	emu_opcode(op)
 {
+	_eqp_mt
 }
 
 void EQPacket::build_raw_header_dump(char *buffer, uint16 seq) const {
+	_eqp_mt
 	BasePacket::build_raw_header_dump(buffer, seq);
 	buffer += strlen(buffer);
 
@@ -50,17 +52,20 @@ void EQPacket::build_raw_header_dump(char *buffer, uint16 seq) const {
 
 void EQPacket::DumpRawHeader(uint16 seq, FILE *to) const
 {
+	_eqp_mt
 	char buff[196];
 	build_raw_header_dump(buff, seq);
 	fprintf(to, "%s", buff);
 }
 
 void EQPacket::build_header_dump(char *buffer) const {
+	_eqp_mt
 	sprintf(buffer, "[EmuOpCode 0x%04x Size=%u]", emu_opcode, size);
 }
 
 void EQPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 {
+	_eqp_mt
 	if (src_ip) {
 		std::string sIP,dIP;;
 		sIP=long2ip(src_ip);
@@ -75,6 +80,7 @@ void EQPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 
 void EQProtocolPacket::build_raw_header_dump(char *buffer, uint16 seq) const
 {
+	_eqp_mt
 	BasePacket::build_raw_header_dump(buffer, seq);
 	buffer += strlen(buffer);
 
@@ -83,6 +89,7 @@ void EQProtocolPacket::build_raw_header_dump(char *buffer, uint16 seq) const
 
 void EQProtocolPacket::DumpRawHeader(uint16 seq, FILE *to) const
 {
+	_eqp_mt
 	char buff[196];
 	build_raw_header_dump(buff, seq);
 	fprintf(to, "%s", buff);
@@ -90,11 +97,13 @@ void EQProtocolPacket::DumpRawHeader(uint16 seq, FILE *to) const
 
 void EQProtocolPacket::build_header_dump(char *buffer) const
 {
+	_eqp_mt
 	sprintf(buffer, "[ProtoOpCode 0x%04x Size=%u]",opcode,size);
 }
 
 void EQProtocolPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 {
+	_eqp_mt
 	if (src_ip) {
 		std::string sIP,dIP;;
 		sIP=long2ip(src_ip);
@@ -109,6 +118,7 @@ void EQProtocolPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 
 void EQApplicationPacket::build_raw_header_dump(char *buffer, uint16 seq) const
 {
+	_eqp_mt
 	BasePacket::build_raw_header_dump(buffer, seq);
 	buffer += strlen(buffer);
 
@@ -121,6 +131,7 @@ void EQApplicationPacket::build_raw_header_dump(char *buffer, uint16 seq) const
 
 void EQApplicationPacket::DumpRawHeader(uint16 seq, FILE *to) const
 {
+	_eqp_mt
 	char buff[196];
 	build_raw_header_dump(buff, seq);
 	fprintf(to, "%s", buff);
@@ -128,6 +139,7 @@ void EQApplicationPacket::DumpRawHeader(uint16 seq, FILE *to) const
 
 void EQApplicationPacket::build_header_dump(char *buffer) const
 {
+	_eqp_mt
 #ifdef STATIC_OPCODE
 	sprintf(buffer, "[OpCode 0x%04x Size=%u]\n", emu_opcode,size);
 #else
@@ -137,6 +149,7 @@ void EQApplicationPacket::build_header_dump(char *buffer) const
 
 void EQApplicationPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 {
+	_eqp_mt
 	if (src_ip) {
 		std::string sIP,dIP;;
 		sIP=long2ip(src_ip);
@@ -155,6 +168,7 @@ void EQApplicationPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 
 void EQRawApplicationPacket::build_raw_header_dump(char *buffer, uint16 seq) const
 {
+	_eqp_mt
 	BasePacket::build_raw_header_dump(buffer, seq);
 	buffer += strlen(buffer);
 
@@ -167,6 +181,7 @@ void EQRawApplicationPacket::build_raw_header_dump(char *buffer, uint16 seq) con
 
 void EQRawApplicationPacket::DumpRawHeader(uint16 seq, FILE *to) const
 {
+	_eqp_mt
 	char buff[196];
 	build_raw_header_dump(buff, seq);
 	fprintf(to, "%s", buff);
@@ -174,6 +189,7 @@ void EQRawApplicationPacket::DumpRawHeader(uint16 seq, FILE *to) const
 
 void EQRawApplicationPacket::build_header_dump(char *buffer) const
 {
+	_eqp_mt
 #ifdef STATIC_OPCODE
 	sprintf(buffer, "[OpCode 0x%04x (0x%04x) Size=%u]\n", emu_opcode, opcode,size);
 #else
@@ -183,6 +199,7 @@ void EQRawApplicationPacket::build_header_dump(char *buffer) const
 
 void EQRawApplicationPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 {
+	_eqp_mt
 	if (src_ip) {
 		std::string sIP,dIP;;
 		sIP=long2ip(src_ip);
@@ -201,6 +218,7 @@ void EQRawApplicationPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 
 uint32 EQProtocolPacket::serialize(unsigned char *dest) const
 {
+	_eqp_mt
 	if (opcode>0xff) {
 		*(uint16 *)dest=opcode;
 	} else {
@@ -214,6 +232,7 @@ uint32 EQProtocolPacket::serialize(unsigned char *dest) const
 
 uint32 EQApplicationPacket::serialize(uint16 opcode, unsigned char *dest) const
 {
+	_eqp_mt
 	uint8 OpCodeBytes = app_opcode_size;
 
 	if (app_opcode_size==1)
@@ -235,29 +254,10 @@ uint32 EQApplicationPacket::serialize(uint16 opcode, unsigned char *dest) const
 	return size+OpCodeBytes;
 }
 
-/*EQProtocolPacket::EQProtocolPacket(uint16 op, const unsigned char *buf, uint32 len)
-:	BasePacket(buf, len),
-	opcode(op)
-{
-
-uint32 offset;
-	opcode=ntohs(*(const uint16 *)buf);
-	offset=2;
-
-	if (len-offset) {
-		pBuffer= new unsigned char[len-offset];
-		memcpy(pBuffer,buf+offset,len-offset);
-		size=len-offset;
-	} else {
-		pBuffer=nullptr;
-		size=0;
-	}
-	OpMgr=&RawOpcodeManager;
-}*/
-
 bool EQProtocolPacket::combine(const EQProtocolPacket *rhs)
 {
-bool result=false;
+	_eqp_mt
+	bool result=false;
 	if (opcode==OP_Combined && size+rhs->size+5<256) {
 		unsigned char *tmpbuffer=new unsigned char [size+rhs->size+3];
 		memcpy(tmpbuffer,pBuffer,size);
@@ -286,58 +286,10 @@ bool result=false;
 
 }
 
-/*
-this is the code to do app-layer combining, instead of protocol layer.
-this was taken out due to complex interactions with the opcode manager,
-and will require a bit more thinking (likely moving into EQStream) to
-get running again... but might be a good thing some day.
-
-bool EQApplicationPacket::combine(const EQApplicationPacket *rhs)
-{
-uint32 newsize=0, offset=0;
-unsigned char *tmpbuffer=nullptr;
-
-	if (opcode!=OP_AppCombined) {
-		newsize=app_opcode_size+size+(size>254?3:1)+app_opcode_size+rhs->size+(rhs->size>254?3:1);
-		tmpbuffer=new unsigned char [newsize];
-		offset=0;
-		if (size>254) {
-			tmpbuffer[offset++]=0xff;
-			*(uint16 *)(tmpbuffer+offset)=htons(size);
-			offset+=1;
-		} else {
-			tmpbuffer[offset++]=size;
-		}
-		offset+=serialize(tmpbuffer+offset);
-	} else {
-		newsize=size+app_opcode_size+rhs->size+(rhs->size>254?3:1);
-		tmpbuffer=new unsigned char [newsize];
-		memcpy(tmpbuffer,pBuffer,size);
-		offset=size;
-	}
-
-	if (rhs->size>254) {
-		tmpbuffer[offset++]=0xff;
-		*(uint16 *)(tmpbuffer+offset)=htons(rhs->size);
-		offset+=1;
-	} else {
-		tmpbuffer[offset++]=rhs->size;
-	}
-	offset+=rhs->serialize(tmpbuffer+offset);
-
-	size=offset;
-	opcode=OP_AppCombined;
-
-	delete[] pBuffer;
-	pBuffer=tmpbuffer;
-
-	return true;
-}
-*/
-
 bool EQProtocolPacket::ValidateCRC(const unsigned char *buffer, int length, uint32 Key)
 {
-bool valid=false;
+	_eqp_mt
+	bool valid=false;
 	// OP_SessionRequest, OP_SessionResponse, OP_OutOfSession are not CRC'd
 	if (buffer[0]==0x00 && (buffer[1]==OP_SessionRequest || buffer[1]==OP_SessionResponse || buffer[1]==OP_OutOfSession)) {
 		valid=true;
@@ -356,8 +308,9 @@ bool valid=false;
 
 uint32 EQProtocolPacket::Decompress(const unsigned char *buffer, const uint32 length, unsigned char *newbuf, uint32 newbufsize)
 {
-uint32 newlen=0;
-uint32 flag_offset=0;
+	_eqp_mt
+	uint32 newlen=0;
+	uint32 flag_offset=0;
 	newbuf[0]=buffer[0];
 	if (buffer[0]==0x00) {
 		flag_offset=2;
@@ -381,7 +334,8 @@ uint32 flag_offset=0;
 }
 
 uint32 EQProtocolPacket::Compress(const unsigned char *buffer, const uint32 length, unsigned char *newbuf, uint32 newbufsize) {
-uint32 flag_offset=1,newlength;
+	_eqp_mt
+	uint32 flag_offset=1,newlength;
 	//dump_message_column(buffer,length,"Before: ");
 	newbuf[0]=buffer[0];
 	if (buffer[0]==0) {
@@ -404,6 +358,7 @@ uint32 flag_offset=1,newlength;
 
 void EQProtocolPacket::ChatDecode(unsigned char *buffer, int size, int DecodeKey)
 {
+	_eqp_mt
 	if ((size >= 2) && buffer[1]!=0x01 && buffer[0]!=0x02 && buffer[0]!=0x1d) {
 		int Key=DecodeKey;
 		unsigned char *test=(unsigned char *)malloc(size);
@@ -429,6 +384,7 @@ void EQProtocolPacket::ChatDecode(unsigned char *buffer, int size, int DecodeKey
 
 void EQProtocolPacket::ChatEncode(unsigned char *buffer, int size, int EncodeKey)
 {
+	_eqp_mt
 	if (buffer[1]!=0x01 && buffer[0]!=0x02 && buffer[0]!=0x1d) {
 		int Key=EncodeKey;
 		char *test=(char*)malloc(size);
@@ -452,10 +408,12 @@ void EQProtocolPacket::ChatEncode(unsigned char *buffer, int size, int EncodeKey
 }
 
 EQApplicationPacket *EQApplicationPacket::Copy() const {
+	_eqp_mt
 	return(new EQApplicationPacket(*this));
 }
 
 EQRawApplicationPacket *EQProtocolPacket::MakeAppPacket() const {
+	_eqp_mt
 	EQRawApplicationPacket *res = new EQRawApplicationPacket(opcode, pBuffer, size);
 	res->copyInfo(this);
 	return(res);
@@ -465,10 +423,12 @@ EQRawApplicationPacket::EQRawApplicationPacket(uint16 opcode, const unsigned cha
 :	EQApplicationPacket(OP_Unknown, buf, len),
 	opcode(opcode)
 {
+	_eqp_mt
 }
 EQRawApplicationPacket::EQRawApplicationPacket(const unsigned char *buf, const uint32 len)
 : EQApplicationPacket(OP_Unknown, buf+sizeof(uint16), len-sizeof(uint16))
 {
+	_eqp_mt
 	if(GetExecutablePlatform() != ExePlatformUCS) {
 		opcode = *((const uint16 *) buf);
 		if(opcode == 0x0000)
@@ -502,11 +462,11 @@ EQRawApplicationPacket::EQRawApplicationPacket(const unsigned char *buf, const u
 }
 
 void DumpPacket(const EQApplicationPacket* app, bool iShowInfo) {
+	_eqp_mt
 	if (iShowInfo) {
 		std::cout << "Dumping Applayer: 0x" << std::hex << std::setfill('0') << std::setw(4) << app->GetOpcode() << std::dec;
 		std::cout << " size:" << app->size << std::endl;
 	}
 	DumpPacketHex(app->pBuffer, app->size);
-//	DumpPacketAscii(app->pBuffer, app->size);
 }
 

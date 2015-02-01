@@ -34,14 +34,14 @@ const char *eqLogTypes[_log_largest_type] =
 
 ErrorLog::ErrorLog(const char* file_name)
 {
-	_eqp
+	_eqp_mt
 	log_mutex = new Mutex();
 	error_log = fopen(file_name, "w");
 }
 
 ErrorLog::~ErrorLog()
 {
-	_eqp
+	_eqp_mt
 	log_mutex->lock();
 	if(error_log)
 	{
@@ -53,7 +53,7 @@ ErrorLog::~ErrorLog()
 
 void ErrorLog::Log(eqLogType type, const char *message, ...)
 {
-	_eqp
+	_eqp_mt
 	if(type >= _log_largest_type)
 	{
 		return;
@@ -101,7 +101,7 @@ void ErrorLog::Log(eqLogType type, const char *message, ...)
 
 void ErrorLog::LogPacket(eqLogType type, const char *data, size_t size)
 {
-	_eqp
+	_eqp_mt
 	if(type >= _log_largest_type)
 	{
 		return;

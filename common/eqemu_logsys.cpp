@@ -89,6 +89,7 @@ EQEmuLogSys::~EQEmuLogSys()
 
 void EQEmuLogSys::LoadLogSettingsDefaults()
 {
+	_eqp_mt
 	/* Get Executable platform currently running this code (Zone/World/etc) */
 	log_platform = GetExecutablePlatformInt();
 
@@ -96,6 +97,7 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	memset(log_settings, 0, sizeof(LogSettings) * Logs::LogCategory::MaxCategoryID);
 
 	/* Set Defaults */
+	log_settings[Logs::LoginServer].log_to_console = Logs::General;
 	log_settings[Logs::World_Server].log_to_console = Logs::General;
 	log_settings[Logs::Zone_Server].log_to_console = Logs::General;
 	log_settings[Logs::QS_Server].log_to_console = Logs::General;
@@ -116,12 +118,13 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 		platform_file_name = "ucs";
 	else if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformLogin)
 		platform_file_name = "login";
-	else if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformLogin)
+	else if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformLaunch)
 		platform_file_name = "launcher";
 }
 
 std::string EQEmuLogSys::FormatOutMessageString(uint16 log_category, const std::string &in_message)
 {
+	_eqp_mt
 	std::string category_string;
 	if (log_category > 0 && Logs::LogCategoryName[log_category])
 		category_string = StringFormat("[%s] ", Logs::LogCategoryName[log_category]);
@@ -130,6 +133,7 @@ std::string EQEmuLogSys::FormatOutMessageString(uint16 log_category, const std::
 
 void EQEmuLogSys::ProcessGMSay(uint16 debug_level, uint16 log_category, const std::string &message)
 {
+	_eqp_mt
 	/* Check if category enabled for process */
 	if (log_settings[log_category].log_to_gmsay == 0)
 		return;
@@ -149,6 +153,7 @@ void EQEmuLogSys::ProcessGMSay(uint16 debug_level, uint16 log_category, const st
 
 void EQEmuLogSys::ProcessLogWrite(uint16 debug_level, uint16 log_category, const std::string &message)
 {
+	_eqp_mt
 	if (log_category == Logs::Crash) {
 		char time_stamp[80];
 		EQEmuLogSys::SetCurrentTimeStamp(time_stamp);
@@ -175,6 +180,7 @@ void EQEmuLogSys::ProcessLogWrite(uint16 debug_level, uint16 log_category, const
 }
 
 uint16 EQEmuLogSys::GetWindowsConsoleColorFromCategory(uint16 log_category) {
+	_eqp_mt
 	switch (log_category) {
 		case Logs::Status:
 		case Logs::Normal:
@@ -198,6 +204,7 @@ uint16 EQEmuLogSys::GetWindowsConsoleColorFromCategory(uint16 log_category) {
 }
 
 std::string EQEmuLogSys::GetLinuxConsoleColorFromCategory(uint16 log_category) {
+	_eqp_mt
 	switch (log_category) {
 		case Logs::Status:
 		case Logs::Normal:
@@ -221,6 +228,7 @@ std::string EQEmuLogSys::GetLinuxConsoleColorFromCategory(uint16 log_category) {
 }
 
 uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category) {
+	_eqp_mt
 	switch (log_category) {
 		case Logs::Status:
 		case Logs::Normal:
@@ -245,6 +253,7 @@ uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category) {
 
 void EQEmuLogSys::ProcessConsoleMessage(uint16 debug_level, uint16 log_category, const std::string &message)
 {
+	_eqp_mt
 	/* Check if category enabled for process */
 	if (log_settings[log_category].log_to_console == 0)
 		return;
@@ -272,6 +281,7 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 debug_level, uint16 log_category,
 
 void EQEmuLogSys::Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...)
 {
+	_eqp_mt
 	const bool log_to_console = log_settings[log_category].log_to_console > 0;
 	const bool log_to_file = log_settings[log_category].log_to_file > 0;
 	const bool log_to_gmsay = log_settings[log_category].log_to_gmsay > 0;
@@ -293,6 +303,7 @@ void EQEmuLogSys::Out(Logs::DebugLevel debug_level, uint16 log_category, std::st
 
 void EQEmuLogSys::SetCurrentTimeStamp(char* time_stamp)
 {
+	_eqp_mt
 	time_t raw_time;
 	struct tm * time_info;
 	time(&raw_time);
@@ -302,6 +313,7 @@ void EQEmuLogSys::SetCurrentTimeStamp(char* time_stamp)
 
 void EQEmuLogSys::MakeDirectory(const std::string &directory_name)
 {
+	_eqp_mt
 #ifdef _WINDOWS
 	struct _stat st;
 	if (_stat(directory_name.c_str(), &st) == 0) // exists
@@ -317,6 +329,7 @@ void EQEmuLogSys::MakeDirectory(const std::string &directory_name)
 
 void EQEmuLogSys::CloseFileLogs()
 {
+	_eqp_mt
 	if (process_log.is_open()) {
 		process_log.close();
 	}
@@ -324,6 +337,7 @@ void EQEmuLogSys::CloseFileLogs()
 
 void EQEmuLogSys::StartFileLogs(const std::string &log_name)
 {
+	_eqp_mt
 	EQEmuLogSys::CloseFileLogs();
 
 	/* When loading settings, we must have been given a reason in category based logging to output to a file in order to even create or open one... */

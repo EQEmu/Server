@@ -20,13 +20,13 @@
 #include "login_server.h"
 #include "login_structures.h"
 #include "../common/misc_functions.h"
+#include "../common/eqemu_logsys.h"
 
-extern ErrorLog *server_log;
 extern LoginServer server;
 
 Client::Client(std::shared_ptr<EQStream> c, LSClientVersion v)
 {
-	_eqp
+	_eqp_mt
 	connection = c;
 	version = v;
 	status = cs_not_sent_session_ready;
@@ -37,13 +37,13 @@ Client::Client(std::shared_ptr<EQStream> c, LSClientVersion v)
 
 bool Client::Process()
 {
-	_eqp
+	_eqp_mt
 	EQApplicationPacket *app = connection->PopPacket();
 	while(app)
 	{
 		if(server.options.IsTraceOn())
 		{
-			server_log->Log(log_network, "Application packet received from client (size %u)", app->Size());
+			Log.Out(Logs::General, Logs::Netcode, "Application packet received from client (size %u)", app->Size());
 		}
 
 		if(server.options.IsDumpInPacketsOn())
@@ -57,7 +57,7 @@ bool Client::Process()
 			{
 				if(server.options.IsTraceOn())
 				{
-					server_log->Log(log_network, "Session ready received from client.");
+					Log.Out(Logs::General, Logs::Netcode, "Session ready received from client.");
 				}
 				Handle_SessionReady((const char*)app->pBuffer, app->Size());
 				break;
@@ -66,13 +66,13 @@ bool Client::Process()
 			{
 				if(app->Size() < 20)
 				{
-					server_log->Log(log_network_error, "Login received but it is too small, discarding.");
+					Log.Out(Logs::General, Logs::Netcode, "Login received but it is too small, discarding.");
 					break;
 				}
 
 				if(server.options.IsTraceOn())
 				{
-					server_log->Log(log_network, "Login received from client.");
+					Log.Out(Logs::General, Logs::Netcode, "Login received from client.");
 				}
 
 				Handle_Login((const char*)app->pBuffer, app->Size());
@@ -82,7 +82,7 @@ bool Client::Process()
 			{
 				if(server.options.IsTraceOn())
 				{
-					server_log->Log(log_network, "Server list request received from client.");
+					Log.Out(Logs::General, Logs::Netcode, "Server list request received from client.");
 				}
 
 				SendServerListPacket();
@@ -92,7 +92,7 @@ bool Client::Process()
 			{
 				if(app->Size() < sizeof(PlayEverquestRequest_Struct))
 				{
-					server_log->Log(log_network_error, "Play received but it is too small, discarding.");
+					Log.Out(Logs::General, Logs::Netcode, "Play received but it is too small, discarding.");
 					break;
 				}
 
@@ -103,7 +103,7 @@ bool Client::Process()
 			{
 				char dump[64];
 				app->build_header_dump(dump);
-				server_log->Log(log_network_error, "Recieved unhandled application packet from the client: %s.", dump);
+				Log.Out(Logs::General, Logs::Netcode, "Recieved unhandled application packet from the client: %s.", dump);
 			}
 		}
 
@@ -116,23 +116,23 @@ bool Client::Process()
 
 void Client::Handle_SessionReady(const char* data, unsigned int size)
 {
-	_eqp
+	_eqp_mt
 	if(status != cs_not_sent_session_ready)
 	{
-		server_log->Log(log_network_error, "Session ready received again after already being received.");
+		Log.Out(Logs::General, Logs::Netcode, "Session ready received again after already being received.");
 		return;
 	}
 
 	if(size < sizeof(unsigned int))
 	{
-		server_log->Log(log_network_error, "Session ready was too small.");
+		Log.Out(Logs::General, Logs::Netcode, "Session ready was too small.");
 		return;
 	}
 
 	unsigned int mode = *((unsigned int*)data);
 	if(mode == (unsigned int)lm_from_world)
 	{
-		server_log->Log(log_network, "Session ready indicated logged in from world(unsupported feature), disconnecting.");
+		Log.Out(Logs::General, Logs::Netcode, "Session ready indicated logged in from world(unsupported feature), disconnecting.");
 		connection->Close();
 		return;
 	}
@@ -178,16 +178,16 @@ void Client::Handle_SessionReady(const char* data, unsigned int size)
 
 void Client::Handle_Login(const char* data, unsigned int size)
 {
-	_eqp
+	_eqp_mt
 	if(status != cs_waiting_for_login)
 	{
-		server_log->Log(log_network_error, "Login received after already having logged in.");
+		Log.Out(Logs::General, Logs::Netcode, "Login received after already having logged in.");
 		return;
 	}
 
 	if((size - 12) % 8 != 0)
 	{
-		server_log->Log(log_network_error, "Login received packet of size: %u, this would cause a block corruption, discarding.", size);
+		Log.Out(Logs::General, Logs::Netcode, "Login received packet of size: %u, this would cause a block corruption, discarding.", size);
 		return;
 	}
 
@@ -208,8 +208,8 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 	if(server.options.IsTraceOn())
 	{
-		server_log->Log(log_client, "User: %s", e_user.c_str());
-		server_log->Log(log_client, "Hash: %s", e_hash.c_str());
+		Log.Out(Logs::General, Logs::LoginServer, "User: %s", e_user.c_str());
+		Log.Out(Logs::General, Logs::LoginServer, "Hash: %s", e_hash.c_str());
 	}
 
 	server.eq_crypto->DeleteHeap(e_buffer);
@@ -222,8 +222,8 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 	if(server.options.IsTraceOn())
 	{
-		server_log->Log(log_client, "User: %s", e_user.c_str());
-		server_log->Log(log_client, "Hash: %s", e_hash.c_str());
+		Log.Out(Logs::General, Logs::LoginServer, "User: %s", e_user.c_str());
+		Log.Out(Logs::General, Logs::LoginServer, "Hash: %s", e_hash.c_str());
 	}
 
 	_HeapDeleteCharBuffer(e_buffer);
@@ -232,7 +232,7 @@ void Client::Handle_Login(const char* data, unsigned int size)
 	bool result;
 	if(server.db->GetLoginDataFromAccountName(e_user, d_pass_hash, d_account_id) == false)
 	{
-		server_log->Log(log_client_error, "Error logging in, user %s does not exist in the database.", e_user.c_str());
+		Log.Out(Logs::General, Logs::Error, "Error logging in, user %s does not exist in the database.", e_user.c_str());
 		result = false;
 	}
 	else
@@ -333,10 +333,10 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 void Client::Handle_Play(const char* data)
 {
-	_eqp
+	_eqp_mt
 	if(status != cs_logged_in)
 	{
-		server_log->Log(log_client_error, "Client sent a play request when they either were not logged in, discarding.");
+		Log.Out(Logs::General, Logs::Error, "Client sent a play request when they either were not logged in, discarding.");
 		return;
 	}
 
@@ -346,7 +346,7 @@ void Client::Handle_Play(const char* data)
 
 	if(server.options.IsTraceOn())
 	{
-		server_log->Log(log_network, "Play received from client, server number %u sequence %u.", server_id_in, sequence_in);
+		Log.Out(Logs::General, Logs::Netcode, "Play received from client, server number %u sequence %u.", server_id_in, sequence_in);
 	}
 
 	this->play_server_id = (unsigned int)play->ServerNumber;
@@ -357,7 +357,7 @@ void Client::Handle_Play(const char* data)
 
 void Client::SendServerListPacket()
 {
-	_eqp
+	_eqp_mt
 	EQApplicationPacket *outapp = server.SM->CreateServerListPacket(this);
 
 	if(server.options.IsDumpOutPacketsOn())
@@ -371,11 +371,11 @@ void Client::SendServerListPacket()
 
 void Client::SendPlayResponse(EQApplicationPacket *outapp)
 {
-	_eqp
+	_eqp_mt
 	if(server.options.IsTraceOn())
 	{
-		server_log->Log(log_network_trace, "Sending play response for %s.", GetAccountName().c_str());
-		server_log->LogPacket(log_network_trace, (const char*)outapp->pBuffer, outapp->size);
+		Log.Out(Logs::Detail, Logs::Netcode, "Sending play response for %s.", GetAccountName().c_str());
+		//server_log->LogPacket(log_network_trace, (const char*)outapp->pBuffer, outapp->size);
 	}
 	connection->QueuePacket(outapp);
 	status = cs_logged_in;
@@ -383,7 +383,7 @@ void Client::SendPlayResponse(EQApplicationPacket *outapp)
 
 void Client::GenerateKey()
 {
-	_eqp
+	_eqp_mt
 	key.clear();
 	int count = 0;
 	while(count < 10)

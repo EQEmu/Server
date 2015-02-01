@@ -15,7 +15,7 @@ EQP::CPU::ProfilerNode::~ProfilerNode() {
 	}
 }
 
-void EQP::CPU::ProfilerNode::Dump(std::ostream &stream, const std::string &func, uint64_t total_time, int node_level) {
+void EQP::CPU::ProfilerNode::Dump(std::ostream &stream, const std::string &func, uint64_t total_time, int node_level, int num) {
 
 	if(node_level >= 1) {
 		stream << std::setw(node_level * 2) << " ";
@@ -48,7 +48,12 @@ void EQP::CPU::ProfilerNode::Dump(std::ostream &stream, const std::string &func,
 	std::sort(sorted_vec.begin(), sorted_vec.end(), 
 			  [](const ProfilerNodeDump& a, const ProfilerNodeDump& b) { return a.node->GetTime() > b.node->GetTime(); });
 
+	int i = 0;
 	for(auto &iter : sorted_vec) {
-		iter.node->Dump(stream, iter.name, total_time, node_level + 1);
+		if(num > 0 && i >= num) {
+			break;
+		}
+		iter.node->Dump(stream, iter.name, total_time, node_level + 1, num);
+		++i;
 	}
 }

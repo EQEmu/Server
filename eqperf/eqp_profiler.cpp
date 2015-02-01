@@ -67,7 +67,7 @@ void EQP::CPU::ST::Profiler::Clear() {
 	current_ = root_;
 }
 
-void EQP::CPU::ST::Profiler::Dump(std::ostream &stream) {
+void EQP::CPU::ST::Profiler::Dump(std::ostream &stream, int num) {
 	uint64_t total = 0;
 	std::vector<ProfilerNodeDump> sorted_vec;
 	sorted_vec.reserve(root_->GetNodes().size() + 1);
@@ -77,14 +77,21 @@ void EQP::CPU::ST::Profiler::Dump(std::ostream &stream) {
 		n.name = iter.first;
 		n.node = iter.second;
 		sorted_vec.push_back(n);
+
 		total += iter.second->GetTime();
 	}
 
 	std::sort(sorted_vec.begin(), sorted_vec.end(), 
 			  [](const ProfilerNodeDump& a, const ProfilerNodeDump& b) { return a.node->GetTime() > b.node->GetTime(); });
 
+	int i = 0;
 	for(auto &iter : sorted_vec) {
-		iter.node->Dump(stream, iter.name, total, 0);
+		if(num > 0 && i >= num) {
+			break;
+		}
+
+		iter.node->Dump(stream, iter.name, total, 0, num);
+		++i;
 	}
 }
 
@@ -164,7 +171,7 @@ void EQP::CPU::MT::Profiler::Clear() {
 	imp_->lock_.unlock();
 }
 
-void EQP::CPU::MT::Profiler::Dump(std::ostream &stream) {
+void EQP::CPU::MT::Profiler::Dump(std::ostream &stream, int num) {
 	imp_->lock_.lock();
 	for(auto &iter : imp_->nodes_) {
 		stream << "Thread: " << iter.first << std::endl;
@@ -177,14 +184,20 @@ void EQP::CPU::MT::Profiler::Dump(std::ostream &stream) {
 			n.name = t_iter.first;
 			n.node = t_iter.second;
 			sorted_vec.push_back(n);
+
 			total += t_iter.second->GetTime();
 		}
 		
 		std::sort(sorted_vec.begin(), sorted_vec.end(), 
 				  [](const ProfilerNodeDump& a, const ProfilerNodeDump& b) { return a.node->GetTime() > b.node->GetTime(); });
 
+		int i = 0;
 		for(auto &t_iter : sorted_vec) {
-			t_iter.node->Dump(stream, t_iter.name, total, 1);
+			if(num > 0 && i >= num) {
+				break;
+			}
+			t_iter.node->Dump(stream, t_iter.name, total, 1, num);
+			++i;
 		}
 
 		stream << std::endl;

@@ -16,18 +16,17 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/global_define.h"
+#include "../common/eqemu_logsys.h"
 #include "encryption.h"
 #include "error_log.h"
 #include <string>
 
-extern ErrorLog *server_log;
-
 bool Encryption::LoadCrypto(std::string name)
 {
-	_eqp
+	_eqp_mt
 	if(!Load(name.c_str()))
 	{
-		server_log->Log(log_error, "Failed to load %s from the operating system.", name.c_str());
+		Log.Out(Logs::Detail, Logs::Error, "Failed to load %s from the operating system.", name.c_str());
 		return false;
 	}
 	else
@@ -35,21 +34,21 @@ bool Encryption::LoadCrypto(std::string name)
 		encrypt_func = (DLLFUNC_Encrypt)GetSym("Encrypt");
 		if(encrypt_func == NULL)
 		{
-			server_log->Log(log_error, "Failed to attach Encrypt.");
+			Log.Out(Logs::Detail, Logs::Error, "Failed to attach Encrypt.");
 			Unload();
 			return false;
 		}
 		decrypt_func = (DLLFUNC_DecryptUsernamePassword)GetSym("DecryptUsernamePassword");
 		if(decrypt_func == NULL)
 		{
-			server_log->Log(log_error, "Failed to attach DecryptUsernamePassword.");
+			Log.Out(Logs::Detail, Logs::Error, "Failed to attach DecryptUsernamePassword.");
 			Unload();
 			return false;
 		}
 		delete_func = (DLLFUNC_HeapDelete)GetSym("_HeapDeleteCharBuffer");
 		if(delete_func == NULL)
 		{
-			server_log->Log(log_error, "Failed to attach _HeapDeleteCharBuffer.");
+			Log.Out(Logs::Detail, Logs::Error, "Failed to attach _HeapDeleteCharBuffer.");
 			Unload();
 			return false;
 		}
@@ -59,7 +58,7 @@ bool Encryption::LoadCrypto(std::string name)
 
 char *Encryption::DecryptUsernamePassword(const char* encrypted_buffer, unsigned int buffer_size, int mode)
 {
-	_eqp
+	_eqp_mt
 	if(decrypt_func)
 	{
 		return decrypt_func(encrypted_buffer, buffer_size, mode);
@@ -69,7 +68,7 @@ char *Encryption::DecryptUsernamePassword(const char* encrypted_buffer, unsigned
 
 char *Encryption::Encrypt(const char* buffer, unsigned int buffer_size, unsigned int &out_size)
 {
-	_eqp
+	_eqp_mt
 	if(encrypt_func)
 	{
 		return encrypt_func(buffer, buffer_size, out_size);
@@ -79,7 +78,7 @@ char *Encryption::Encrypt(const char* buffer, unsigned int buffer_size, unsigned
 
 void Encryption::DeleteHeap(char *buffer)
 {
-	_eqp
+	_eqp_mt
 	if(delete_func)
 	{
 		delete_func(buffer);
@@ -88,7 +87,7 @@ void Encryption::DeleteHeap(char *buffer)
 
 bool Encryption::Load(const char *name)
 {
-	_eqp
+	_eqp_mt
 	SetLastError(0);
 #ifdef UNICODE
 	int name_length = strlen(name);
@@ -116,7 +115,7 @@ bool Encryption::Load(const char *name)
 
 void Encryption::Unload()
 {
-	_eqp
+	_eqp_mt
 	if(h_dll)
 	{
 		FreeLibrary(h_dll);
@@ -126,7 +125,7 @@ void Encryption::Unload()
 
 bool Encryption::GetSym(const char *name, void **sym)
 {
-	_eqp
+	_eqp_mt
 	if(Loaded())
 	{
 		*sym = GetProcAddress(h_dll, name);
@@ -140,7 +139,7 @@ bool Encryption::GetSym(const char *name, void **sym)
 
 void *Encryption::GetSym(const char *name)
 {
-	_eqp
+	_eqp_mt
 	if(Loaded())
 	{
 		return GetProcAddress(h_dll, name);

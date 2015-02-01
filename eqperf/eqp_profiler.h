@@ -29,7 +29,7 @@ namespace EQP
 				void EventStarted(const char *func, const char *name);
 				void EventFinished(uint64_t time);
 				void Clear();
-				void Dump(std::ostream &stream);
+				void Dump(std::ostream &stream, int num = 0);
 			private:
 				Node *root_;
 				Node *current_;
@@ -57,7 +57,7 @@ namespace EQP
 				void EventStarted(const char *func, const char *name);
 				void EventFinished(uint64_t time);
 				void Clear();
-				void Dump(std::ostream &stream);
+				void Dump(std::ostream &stream, int num = 0);
 			private:
 				struct impl;
 				impl *imp_;

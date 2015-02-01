@@ -22,15 +22,15 @@
 #include "database_mysql.h"
 #include "error_log.h"
 #include "login_server.h"
+#include "../common/eqemu_logsys.h"
 
-extern ErrorLog *server_log;
 extern LoginServer server;
 
 #pragma comment(lib, "mysqlclient.lib")
 
 DatabaseMySQL::DatabaseMySQL(string user, string pass, string host, string port, string name)
 {
-	_eqp
+	_eqp_mt
 	this->user = user;
 	this->pass = pass;
 	this->host = host;
@@ -44,19 +44,19 @@ DatabaseMySQL::DatabaseMySQL(string user, string pass, string host, string port,
 		if(!mysql_real_connect(db, host.c_str(), user.c_str(), pass.c_str(), name.c_str(), atoi(port.c_str()), nullptr, 0))
 		{
 			mysql_close(db);
-			server_log->Log(log_database, "Failed to connect to MySQL database. Error: %s", mysql_error(db));
+			Log.Out(Logs::General, Logs::Database,"Failed to connect to MySQL database. Error: %s", mysql_error(db));
 			exit(1);
 		}
 	}
 	else
 	{
-		server_log->Log(log_database, "Failed to create db object in MySQL database.");
+		Log.Out(Logs::General, Logs::Database,"Failed to create db object in MySQL database.");
 	}
 }
 
 DatabaseMySQL::~DatabaseMySQL()
 {
-	_eqp
+	_eqp_mt
 	if(db)
 	{
 		mysql_close(db);
@@ -65,7 +65,7 @@ DatabaseMySQL::~DatabaseMySQL()
 
 bool DatabaseMySQL::GetLoginDataFromAccountName(string name, string &password, unsigned int &id)
 {
-	_eqp
+	_eqp_mt
 	if(!db)
 	{
 		return false;
@@ -80,7 +80,7 @@ bool DatabaseMySQL::GetLoginDataFromAccountName(string name, string &password, u
 
 	if(mysql_query(db, query.str().c_str()) != 0)
 	{
-		server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
+		Log.Out(Logs::General, Logs::Database,"Mysql query failed: %s", query.str().c_str());
 		return false;
 	}
 
@@ -97,14 +97,14 @@ bool DatabaseMySQL::GetLoginDataFromAccountName(string name, string &password, u
 		}
 	}
 
-	server_log->Log(log_database, "Mysql query returned no result: %s", query.str().c_str());
+	Log.Out(Logs::General, Logs::Database,"Mysql query returned no result: %s", query.str().c_str());
 	return false;
 }
 
 bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, unsigned int &id, string &desc, unsigned int &list_id,
 		unsigned int &trusted, string &list_desc, string &account, string &password)
 {
-	_eqp
+	_eqp_mt
 	if(!db)
 	{
 		return false;
@@ -126,7 +126,7 @@ bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, un
 
 	if(mysql_query(db, query.str().c_str()) != 0)
 	{
-		server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
+		Log.Out(Logs::General, Logs::Database,"Mysql query failed: %s", query.str().c_str());
 		return false;
 	}
 
@@ -151,7 +151,7 @@ bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, un
 
 				if(mysql_query(db, query.str().c_str()) != 0)
 				{
-					server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
+					Log.Out(Logs::General, Logs::Database,"Mysql query failed: %s", query.str().c_str());
 					return false;
 				}
 
@@ -167,20 +167,20 @@ bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, un
 					}
 				}
 
-				server_log->Log(log_database, "Mysql query returned no result: %s", query.str().c_str());
+				Log.Out(Logs::General, Logs::Database,"Mysql query returned no result: %s", query.str().c_str());
 				return false;
 			}
 			return true;
 		}
 	}
 
-	server_log->Log(log_database, "Mysql query returned no result: %s", query.str().c_str());
+	Log.Out(Logs::General, Logs::Database,"Mysql query returned no result: %s", query.str().c_str());
 	return false;
 }
 
 void DatabaseMySQL::UpdateLSAccountData(unsigned int id, string ip_address)
 {
-	_eqp
+	_eqp_mt
 	if(!db)
 	{
 		return;
@@ -194,13 +194,13 @@ void DatabaseMySQL::UpdateLSAccountData(unsigned int id, string ip_address)
 
 	if(mysql_query(db, query.str().c_str()) != 0)
 	{
-		server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
+		Log.Out(Logs::General, Logs::Database,"Mysql query failed: %s", query.str().c_str());
 	}
 }
 
 void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, string name, string password, string email)
 {
-	_eqp
+	_eqp_mt
 	if(!db)
 	{
 		return;
@@ -214,13 +214,13 @@ void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, string name, string pas
 
 	if(mysql_query(db, query.str().c_str()) != 0)
 	{
-		server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
+		Log.Out(Logs::General, Logs::Database,"Mysql query failed: %s", query.str().c_str());
 	}
 }
 
 void DatabaseMySQL::UpdateWorldRegistration(unsigned int id, string long_name, string ip_address)
 {
-	_eqp
+	_eqp_mt
 	if(!db)
 	{
 		return;
@@ -240,13 +240,13 @@ void DatabaseMySQL::UpdateWorldRegistration(unsigned int id, string long_name, s
 
 	if(mysql_query(db, query.str().c_str()) != 0)
 	{
-		server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
+		Log.Out(Logs::General, Logs::Database,"Mysql query failed: %s", query.str().c_str());
 	}
 }
 
 bool DatabaseMySQL::CreateWorldRegistration(string long_name, string short_name, unsigned int &id)
 {
-	_eqp
+	_eqp_mt
 	if(!db)
 	{
 		return false;
@@ -266,7 +266,7 @@ bool DatabaseMySQL::CreateWorldRegistration(string long_name, string short_name,
 
 	if(mysql_query(db, query.str().c_str()) != 0)
 	{
-		server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
+		Log.Out(Logs::General, Logs::Database,"Mysql query failed: %s", query.str().c_str());
 		return false;
 	}
 
@@ -285,13 +285,13 @@ bool DatabaseMySQL::CreateWorldRegistration(string long_name, string short_name,
 
 			if(mysql_query(db, query.str().c_str()) != 0)
 			{
-				server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
+				Log.Out(Logs::General, Logs::Database,"Mysql query failed: %s", query.str().c_str());
 				return false;
 			}
 			return true;
 		}
 	}
-	server_log->Log(log_database, "World registration did not exist in the database for %s %s", long_name.c_str(), short_name.c_str());
+	Log.Out(Logs::General, Logs::Database,"World registration did not exist in the database for %s %s", long_name.c_str(), short_name.c_str());
 	return false;
 }
 

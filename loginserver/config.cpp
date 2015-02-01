@@ -18,8 +18,8 @@
 #include "../common/global_define.h"
 #include "config.h"
 #include "error_log.h"
+#include "../common/eqemu_logsys.h"
 
-extern ErrorLog *server_log;
 /**
 * Retrieves the variable we want from our title or theme
 * First gets the map from the title
@@ -27,7 +27,7 @@ extern ErrorLog *server_log;
 */
 std::string Config::GetVariable(std::string title, std::string parameter)
 {
-	_eqp
+	_eqp_mt
 	std::map<std::string, std::map<std::string, std::string> >::iterator iter = vars.find(title);
 	if(iter != vars.end())
 	{
@@ -47,10 +47,10 @@ std::string Config::GetVariable(std::string title, std::string parameter)
 */
 void Config::Parse(const char *file_name)
 {
-	_eqp
+	_eqp_mt
 	if(file_name == nullptr)
 	{
-		server_log->Log(log_error, "Config::Parse(), file_name passed was null.");
+		Log.Out(Logs::Detail, Logs::Error, "Config::Parse(), file_name passed was null.");
 		return;
 	}
 
@@ -73,7 +73,7 @@ void Config::Parse(const char *file_name)
 				++iter;
 				if(iter == tokens.end())
 				{
-					server_log->Log(log_error, "Config::Parse(), EOF before title done parsing.");
+					Log.Out(Logs::Detail, Logs::Error, "Config::Parse(), EOF before title done parsing.");
 					fclose(input);
 					vars.clear();
 					return;
@@ -106,7 +106,7 @@ void Config::Parse(const char *file_name)
 				mode++;
 				if((*iter).compare("=") != 0)
 				{
-					server_log->Log(log_error, "Config::Parse(), invalid parse token where = should be.");
+					Log.Out(Logs::Detail, Logs::Error, "Config::Parse(), invalid parse token where = should be.");
 					fclose(input);
 					vars.clear();
 					return;
@@ -135,7 +135,7 @@ void Config::Parse(const char *file_name)
 	}
 	else
 	{
-		server_log->Log(log_error, "Config::Parse(), file was unable to be opened for parsing.");
+		Log.Out(Logs::Detail, Logs::Error, "Config::Parse(), file was unable to be opened for parsing.");
 	}
 }
 
@@ -146,7 +146,7 @@ void Config::Parse(const char *file_name)
 */
 void Config::Tokenize(FILE *input, std::list<std::string> &tokens)
 {
-	_eqp
+	_eqp_mt
 	char c = fgetc(input);
 	std::string lexeme;
 

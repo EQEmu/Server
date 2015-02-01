@@ -1620,7 +1620,7 @@ uint32 Database::GetGroupID(const char* name){
 	if (results.RowCount() == 0)
 	{
 		// Commenting this out until logging levels can prevent this from going to console
-		//Log.Out(Logs::General, Logs::None,, "Character not in a group: %s", name);
+		//Log.Out(Logs::General, Logs::None, "Character not in a group: %s", name);
 		return 0;
 	}
 

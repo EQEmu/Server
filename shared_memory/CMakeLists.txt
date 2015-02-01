@@ -23,7 +23,7 @@ ADD_EXECUTABLE(shared_memory ${shared_memory_sources} ${shared_memory_headers})
 
 INSTALL(TARGETS shared_memory RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
 
-TARGET_LINK_LIBRARIES(shared_memory common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY})
+TARGET_LINK_LIBRARIES(shared_memory common ${PERF_LIBS} debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY})
 
 IF(MSVC)
 	SET_TARGET_PROPERTIES(shared_memory PROPERTIES LINK_FLAGS_RELEASE "/OPT:REF /OPT:ICF")

@@ -48,12 +48,14 @@ namespace Logs {
 		Combat,
 		Commands,
 		Crash,
+		Database,
 		Debug,
 		Doors,
 		Error,
 		Guilds,
 		Inventory,
 		Launcher,
+		LoginServer,
 		Netcode,
 		Normal,
 		Object,
@@ -92,12 +94,14 @@ namespace Logs {
 		"Combat",
 		"Commands",
 		"Crash",
+		"Database",
 		"Debug",
 		"Doors",
 		"Error",
 		"Guilds",
 		"Inventory",
 		"Launcher",
+		"LoginServer",
 		"Netcode",
 		"Normal",
 		"Object",
@@ -118,10 +122,10 @@ namespace Logs {
 		"WebInterface Server",
 		"World Server",
 		"Zone Server",
-		"MySQL Error",
-		"MySQL Query",
+		"MySQLError",
+		"MySQLQuery",
 		"Mercenaries",
-		"Quest Debug"
+		"QuestDebug"
 	};
 }
 

@@ -25,7 +25,7 @@ namespace EQP
 
 			inline std::unordered_map<std::string, ProfilerNode*>& GetNodes() { return nodes_; }
 
-			void Dump(std::ostream &stream, const std::string &func, uint64_t total_time, int node_level);
+			void Dump(std::ostream &stream, const std::string &func, uint64_t total_time, int node_level, int num);
 		private:
 			uint64_t count_;
 			uint64_t time_;
