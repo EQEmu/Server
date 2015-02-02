@@ -6,7 +6,12 @@ demonstar55: Add quest debugging to lua
 	eq.debug("Test debug level explicit 1", 1)
 	eq.debug("Test debug level explicit 2", 2)
 	eq.debug("Test debug level explicit 3", 3)
-
+Akkadius: Add Packet Logging Categories
+	- 5 - Packet: Client -> Server - Logs::Client_Server_Packet
+	- 39 - Packet: Server -> Client - Logs::Server_Client_Packet
+	- 40 - Packet: Client -> Server Unhandled - Logs::Client_Server_Packet_Unhandled
+	See: http://wiki.eqemulator.org/p?Logging_System_Overhaul#packet-logging
+	
 == 01/31/2015 ==
 Trevius: Fixed FindGroundZ() and GetGroundZ() to once again utilize the X and Y arguments that are passed to them.
 
