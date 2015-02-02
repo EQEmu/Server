@@ -94,6 +94,9 @@ std::string DumpPacketHexToString(const uchar* buf, uint32 size, uint32 cols, ui
 	std::ostringstream out;
 	if (size == 0 || size > 39565)
 		return "";
+
+	out << "\n";
+	
 	// Output as HEX
 	char output[4];
 	int j = 0;

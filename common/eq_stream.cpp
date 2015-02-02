@@ -563,7 +563,7 @@ void EQStream::SendPacket(uint16 opcode, EQApplicationPacket *p)
 
 	if (Log.log_settings[Logs::Server_Client_Packet].is_category_enabled == 1){
 		if (p->GetOpcode() != OP_SpecialMesg){
-			Log.Out(Logs::General, Logs::Server_Client_Packet, "[%s - 0x%04x] [Size: %u] \n %s", OpcodeManager::EmuToName(p->GetOpcode()), p->GetOpcode(), p->Size(), DumpPacketToString(p).c_str());
+			Log.Out(Logs::General, Logs::Server_Client_Packet, "[%s - 0x%04x] [Size: %u] %s", OpcodeManager::EmuToName(p->GetOpcode()), p->GetOpcode(), p->Size(), DumpPacketToString(p).c_str());
 		}
 	}
 
@@ -961,14 +961,15 @@ EQRawApplicationPacket *p=nullptr;
 	MInboundQueue.unlock();
 
 	//resolve the opcode if we can.
-	if(p) {
-		if(OpMgr != nullptr && *OpMgr != nullptr) {
-			EmuOpcode emu_op = (*OpMgr)->EQToEmu(p->opcode);
-			if (emu_op == OP_Unknown) {
-				Log.Out(Logs::General, Logs::Netcode, "[ERROR] Unable to convert EQ opcode 0x%.4x to an Application opcode.", p->opcode);
+	if (Log.log_settings[Logs::Client_Server_Packet_Unhandled].is_category_enabled == 1){
+		if (p) {
+			if (OpMgr != nullptr && *OpMgr != nullptr) {
+				EmuOpcode emu_op = (*OpMgr)->EQToEmu(p->opcode);
+				if (emu_op == OP_Unknown) {
+					// Log.Out(Logs::General, Logs::Client_Server_Packet_Unhandled, "Unknown :: [%s - 0x%04x] [Size: %u] %s", OpcodeManager::EmuToName(p->GetOpcode()), p->opcode, p->Size(), DumpPacketToString(p).c_str());
+				} 
+				p->SetOpcode(emu_op);
 			}
-
-			p->SetOpcode(emu_op);
 		}
 	}
 

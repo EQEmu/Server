@@ -405,7 +405,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	}
 
 	if (Log.log_settings[Logs::Client_Server_Packet].is_category_enabled == 1)
-		Log.Out(Logs::General, Logs::Client_Server_Packet, "[%s - 0x%04x] [Size: %u] \n %s", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size(), DumpPacketToString(app).c_str());
+		Log.Out(Logs::General, Logs::Client_Server_Packet, "[%s - 0x%04x] [Size: %u] %s", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size(), DumpPacketToString(app).c_str());
 	
 	EmuOpcode opcode = app->GetOpcode();
 	if (opcode == OP_AckPacket) {
@@ -448,14 +448,16 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	case CLIENT_CONNECTED: {
 		ClientPacketProc p;
 		p = ConnectedOpcodes[opcode];
-		if(p == nullptr) {
+		if(p == nullptr) { 
 			std::vector<EQEmu::Any> args;
 			args.push_back(const_cast<EQApplicationPacket*>(app));
 			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 0, &args);
 
-			if (Log.log_settings[Logs::Client_Server_Packet_Unhandled].is_category_enabled == 1)
-				Log.Out(Logs::General, Logs::Client_Server_Packet_Unhandled, "Incoming OpCode :: [%s - 0x%04x] [Size: %u] \n%s", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size(), DumpPacketToString(app).c_str());
-
+			if (Log.log_settings[Logs::Client_Server_Packet_Unhandled].is_category_enabled == 1){
+				char buffer[64];
+				app->build_header_dump(buffer);
+				Log.Out(Logs::General, Logs::Client_Server_Packet_Unhandled, "%s %s", buffer, DumpPacketToString(app).c_str());
+			}
 			break;
 		}
 
