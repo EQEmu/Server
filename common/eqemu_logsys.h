@@ -80,6 +80,8 @@ namespace Logs {
 		QuestDebug,
 		Server_Client_Packet,
 		Client_Server_Packet_Unhandled,
+		Server_Client_Packet_With_Dump,
+		Client_Server_Packet_With_Dump,
 		MaxCategoryID	/* Don't Remove this*/
 	};
 
@@ -126,6 +128,8 @@ namespace Logs {
 		"Quest Debug",
 		"Packet :: Server -> Client",
 		"Packet :: Client -> Server Unhandled",
+		"Packet :: Server -> Client (Dump)",
+		"Packet :: Client -> Server (Dump)",
 	};
 }
 

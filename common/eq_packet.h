@@ -147,6 +147,6 @@ protected:
 };
 
 extern void DumpPacket(const EQApplicationPacket* app, bool iShowInfo = false);
-extern std::string DumpPacketToString(const EQApplicationPacket* app, bool iShowInfo = false);
+extern std::string DumpPacketToString(const EQApplicationPacket* app);
 
 #endif

@@ -1,5 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+
+== 02/02/2015 ==
+Akkadius: Implement Packet logs with dumps
+	- Category: 41: Packet: Server -> Client With Dump
+	- Category: 42: Packet: Server -> Client With Dump
+	See: http://wiki.eqemulator.org/p?Logging_System_Overhaul#packet-logging-levels
+
 == 02/01/2015 ==
 demonstar55: Add quest debugging to lua
 	eq.debug("Test debug level implicit 1")
