@@ -288,7 +288,7 @@ void EQEmuLogSys::Out(Logs::DebugLevel debug_level, uint16 log_category, std::st
 
 	if (log_to_console) EQEmuLogSys::ProcessConsoleMessage(debug_level, log_category, output_debug_message);
 	if (log_to_gmsay) EQEmuLogSys::ProcessGMSay(debug_level, log_category, output_debug_message);
-	if (log_to_file) EQEmuLogSys::ProcessLogWrite(debug_level, log_category, output_message);
+	if (log_to_file) EQEmuLogSys::ProcessLogWrite(debug_level, log_category, output_debug_message);
 }
 
 void EQEmuLogSys::SetCurrentTimeStamp(char* time_stamp)

@@ -124,7 +124,6 @@ namespace Logs {
 		"MySQL Query",
 		"Mercenaries",
 		"Quest Debug",
-		"Quest Debug"
 		"Packet :: Server -> Client",
 		"Packet :: Client -> Server Unhandled",
 	};
