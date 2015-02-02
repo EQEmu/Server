@@ -1118,11 +1118,9 @@ bool ZoneDatabase::LoadCharacterMaterialColor(uint32 character_id, PlayerProfile
 bool ZoneDatabase::LoadCharacterBandolier(uint32 character_id, PlayerProfile_Struct* pp){
 	std::string query = StringFormat("SELECT `bandolier_id`, `bandolier_slot`, `item_id`, `icon`, `bandolier_name` FROM `character_bandolier` WHERE `id` = %u LIMIT 16", character_id);
 	auto results = database.QueryDatabase(query); int i = 0; int r = 0; int si = 0;
-	for (i = 0; i <= EmuConstants::BANDOLIERS_COUNT; i++){
-		for (int si = 0; si < EmuConstants::BANDOLIER_SIZE; si++){
+	for (i = 0; i < EmuConstants::BANDOLIERS_COUNT; i++)
+		for (int si = 0; si < EmuConstants::BANDOLIER_SIZE; si++)
 			pp->bandoliers[i].items[si].icon = 0;
-		}
-	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		r = 0;
