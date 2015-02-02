@@ -1584,10 +1584,12 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 
 		//this generates a lot of 'updates' to the client that the client does not need
 		BuffFadeNonPersistDeath();
-		if((GetClientVersionBit() & BIT_SoFAndLater) && RuleB(Character, RespawnFromHover))
-			UnmemSpellAll(true);
-		else
-			UnmemSpellAll(false);
+		if (RuleB(Character, UnmemSpellsOnDeath)) {
+			if((GetClientVersionBit() & BIT_SoFAndLater) && RuleB(Character, RespawnFromHover))
+				UnmemSpellAll(true);
+			else
+				UnmemSpellAll(false);
+		}
 
 		if((RuleB(Character, LeaveCorpses) && GetLevel() >= RuleI(Character, DeathItemLossLevel)) || RuleB(Character, LeaveNakedCorpses))
 		{
