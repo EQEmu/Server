@@ -327,6 +327,7 @@
 9071|2015_01_29_merc_stats_table_update.sql|SHOW COLUMNS FROM `merc_stats` LIKE 'statscale'|empty|
 9072|2015_01_30_merc_attack_delay.sql|SHOW COLUMNS FROM `merc_stats` LIKE 'attack_delay'|empty|
 9073|2015_01_31_character_item_recast.sql|SHOW TABLES LIKE 'character_item_recast'|empty|
+9074|2015_02_01_logsys_packet_logs.sql|SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Packet: Server -> Client'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not 
