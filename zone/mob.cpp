@@ -300,6 +300,7 @@ Mob::Mob(const char* in_name,
 	focused = false;
 	_IsTempPet = false;
 	pet_owner_client = false;
+	pet_targetlock_id = 0;
 
 	attacked_count = 0;
 	mezzed = false;

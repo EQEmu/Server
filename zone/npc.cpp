@@ -2419,4 +2419,14 @@ void NPC::DepopSwarmPets()
 			}
 		}
 	}
+
+	if (IsPet() && GetPetType() == petTargetLock && GetPetTargetLockID()){
+			
+		Mob *targMob = entity_list.GetMob(GetPetTargetLockID());
+			
+		if(!targMob || (targMob && targMob->IsCorpse())){
+			Kill();
+			return;
+		}
+	}
 }
