@@ -1,7 +1,8 @@
-#include "../debug.h"
+#include "../global_define.h"
+#include "../eqemu_logsys.h"
 #include "sof.h"
 #include "../opcodemgr.h"
-#include "../logsys.h"
+
 #include "../eq_stream_ident.h"
 #include "../crc32.h"
 
@@ -24,12 +25,18 @@ namespace SoF
 	char* SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 depth);
 
 	// server to client inventory location converters
-	static inline uint32 ServerToSoFSlot(uint32 ServerSlot);
-	static inline uint32 ServerToSoFCorpseSlot(uint32 ServerCorpse);
+	static inline uint32 ServerToSoFSlot(uint32 serverSlot);
+	static inline uint32 ServerToSoFCorpseSlot(uint32 serverCorpseSlot);
 
 	// client to server inventory location converters
-	static inline uint32 SoFToServerSlot(uint32 SoFSlot);
-	static inline uint32 SoFToServerCorpseSlot(uint32 SoFCorpse);
+	static inline uint32 SoFToServerSlot(uint32 sofSlot);
+	static inline uint32 SoFToServerCorpseSlot(uint32 sofCorpseSlot);
+
+	// server to client text link converter
+	static inline void ServerToSoFTextLink(std::string& sofTextLink, const std::string& serverTextLink);
+
+	// client to server text link converter
+	static inline void SoFToServerTextLink(std::string& serverTextLink, const std::string& sofTextLink);
 
 	void Register(EQStreamIdentifier &into)
 	{
@@ -43,7 +50,7 @@ namespace SoF
 			//TODO: figure out how to support shared memory with multiple patches...
 			opcodes = new RegularOpcodeManager();
 			if (!opcodes->LoadOpcodes(opfile.c_str())) {
-				_log(NET__OPCODES, "Error loading opcodes file %s. Not registering patch %s.", opfile.c_str(), name);
+				Log.Out(Logs::General, Logs::Netcode, "[OPCODES] Error loading opcodes file %s. Not registering patch %s.", opfile.c_str(), name);
 				return;
 			}
 		}
@@ -69,7 +76,7 @@ namespace SoF
 
 
 
-		_log(NET__IDENTIFY, "Registered patch %s", name);
+		Log.Out(Logs::General, Logs::Netcode, "[IDENTIFY] Registered patch %s", name);
 	}
 
 	void Reload()
@@ -84,10 +91,10 @@ namespace SoF
 			opfile += name;
 			opfile += ".conf";
 			if (!opcodes->ReloadOpcodes(opfile.c_str())) {
-				_log(NET__OPCODES, "Error reloading opcodes file %s for patch %s.", opfile.c_str(), name);
+				Log.Out(Logs::General, Logs::Netcode, "[OPCODES] Error reloading opcodes file %s for patch %s.", opfile.c_str(), name);
 				return;
 			}
-			_log(NET__OPCODES, "Reloaded opcodes for patch %s", name);
+			Log.Out(Logs::General, Logs::Netcode, "[OPCODES] Reloaded opcodes for patch %s", name);
 		}
 	}
 
@@ -106,9 +113,9 @@ namespace SoF
 		return(r);
 	}
 
-	const EQClientVersion Strategy::ClientVersion() const
+	const ClientVersion Strategy::GetClientVersion() const
 	{
-		return EQClientSoF;
+		return ClientVersion::SoF;
 	}
 
 #include "ss_define.h"
@@ -207,7 +214,7 @@ namespace SoF
 		//determine and verify length
 		int entrycount = in->size / sizeof(BazaarSearchResults_Struct);
 		if (entrycount == 0 || (in->size % sizeof(BazaarSearchResults_Struct)) != 0) {
-			_log(NET__STRUCTS, "Wrong size on outbound %s: Got %d, expected multiple of %d",
+			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d",
 				opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(BazaarSearchResults_Struct));
 			delete in;
 			return;
@@ -278,6 +285,35 @@ namespace SoF
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_ChannelMessage)
+	{
+		EQApplicationPacket *in = *p;
+		*p = nullptr;
+
+		ChannelMessage_Struct *emu = (ChannelMessage_Struct *)in->pBuffer;
+
+		unsigned char *__emu_buffer = in->pBuffer;
+
+		std::string old_message = emu->message;
+		std::string new_message;
+		ServerToSoFTextLink(new_message, old_message);
+
+		in->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
+
+		in->pBuffer = new unsigned char[in->size];
+
+		char *OutBuffer = (char *)in->pBuffer;
+
+		memcpy(OutBuffer, __emu_buffer, sizeof(ChannelMessage_Struct));
+
+		OutBuffer += sizeof(ChannelMessage_Struct);
+
+		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
+
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
+	}
+
 	ENCODE(OP_CharInventory)
 	{
 		//consume the packet
@@ -301,7 +337,7 @@ namespace SoF
 
 		if (ItemCount == 0 || (in->size % sizeof(InternalSerializedItem_Struct)) != 0) {
 
-			_log(NET__STRUCTS, "Wrong size on outbound %s: Got %d, expected multiple of %d",
+			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d",
 				opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(InternalSerializedItem_Struct));
 
 			delete in;
@@ -335,14 +371,14 @@ namespace SoF
 
 			}
 			else {
-				_log(NET__ERROR, "Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
+				Log.Out(Logs::General, Logs::Netcode, "[ERROR] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
 			}
 		}
 
 		delete[] __emu_buffer;
 
-		//_log(NET__ERROR, "Sending inventory to client");
-		//_hex(NET__ERROR, in->pBuffer, in->size);
+		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Sending inventory to client");
+		//Log.Hex(Logs::Netcode, in->pBuffer, in->size);
 
 		dest->FastQueuePacket(&in, ack_req);
 	}
@@ -551,6 +587,34 @@ namespace SoF
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_Emote)
+	{
+		EQApplicationPacket *in = *p;
+		*p = nullptr;
+
+		Emote_Struct *emu = (Emote_Struct *)in->pBuffer;
+
+		unsigned char *__emu_buffer = in->pBuffer;
+
+		std::string old_message = emu->message;
+		std::string new_message;
+		ServerToSoFTextLink(new_message, old_message);
+
+		//if (new_message.length() > 512) // length restricted in packet building function due vari-length name size (no nullterm)
+		//	new_message = new_message.substr(0, 512);
+
+		in->size = new_message.length() + 5;
+		in->pBuffer = new unsigned char[in->size];
+
+		char *OutBuffer = (char *)in->pBuffer;
+
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->type);
+		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
+
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
+	}
+
 	ENCODE(OP_ExpansionInfo)
 	{
 		ENCODE_LENGTH_EXACT(ExpansionInfo_Struct);
@@ -559,6 +623,55 @@ namespace SoF
 		OUT(Expansions);
 
 		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_FormattedMessage)
+	{
+		EQApplicationPacket *in = *p;
+		*p = nullptr;
+
+		FormattedMessage_Struct *emu = (FormattedMessage_Struct *)in->pBuffer;
+
+		unsigned char *__emu_buffer = in->pBuffer;
+
+		char *old_message_ptr = (char *)in->pBuffer;
+		old_message_ptr += sizeof(FormattedMessage_Struct);
+
+		std::string old_message_array[9];
+
+		for (int i = 0; i < 9; ++i) {
+			if (*old_message_ptr == 0) { break; }
+			old_message_array[i] = old_message_ptr;
+			old_message_ptr += old_message_array[i].length() + 1;
+		}
+
+		uint32 new_message_size = 0;
+		std::string new_message_array[9];
+
+		for (int i = 0; i < 9; ++i) {
+			if (old_message_array[i].length() == 0) { break; }
+			ServerToSoFTextLink(new_message_array[i], old_message_array[i]);
+			new_message_size += new_message_array[i].length() + 1;
+		}
+
+		in->size = sizeof(FormattedMessage_Struct) + new_message_size + 1;
+		in->pBuffer = new unsigned char[in->size];
+
+		char *OutBuffer = (char *)in->pBuffer;
+
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->unknown0);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->string_id);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->type);
+
+		for (int i = 0; i < 9; ++i) {
+			if (new_message_array[i].length() == 0) { break; }
+			VARSTRUCT_ENCODE_STRING(OutBuffer, new_message_array[i].c_str());
+		}
+
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, 0);
+
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
 	}
 
 	ENCODE(OP_GroundSpawn)
@@ -730,7 +843,7 @@ namespace SoF
 		char *serialized = SerializeItem((ItemInst *)int_struct->inst, int_struct->slot_id, &length, 0);
 
 		if (!serialized) {
-			_log(NET__STRUCTS, "Serialization failed on item slot %d.", int_struct->slot_id);
+			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d.", int_struct->slot_id);
 			delete in;
 			return;
 		}
@@ -1609,6 +1722,54 @@ namespace SoF
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_SpecialMesg)
+	{
+		EQApplicationPacket *in = *p;
+		*p = nullptr;
+
+		SpecialMesg_Struct *emu = (SpecialMesg_Struct *)in->pBuffer;
+
+		unsigned char *__emu_buffer = in->pBuffer;
+
+		std::string old_message = &emu->message[strlen(emu->sayer)];
+		std::string new_message;
+
+		ServerToSoFTextLink(new_message, old_message);
+
+		//in->size = 3 + 4 + 4 + strlen(emu->sayer) + 1 + 12 + new_message.length() + 1;
+		in->size = strlen(emu->sayer) + new_message.length() + 25;
+		in->pBuffer = new unsigned char[in->size];
+
+		char *OutBuffer = (char *)in->pBuffer;
+
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->header[0]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->header[1]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->header[2]);
+
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->msg_type);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->target_spawn_id);
+
+		VARSTRUCT_ENCODE_STRING(OutBuffer, emu->sayer);
+
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[0]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[1]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[2]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[3]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[4]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[5]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[6]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[7]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[8]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[9]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[10]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[11]);
+
+		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
+
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
+	}
+
 	ENCODE(OP_Stun)
 	{
 		ENCODE_LENGTH_EXACT(Stun_Struct);
@@ -1619,6 +1780,49 @@ namespace SoF
 		eq->unknown006 = 67;
 
 		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_TaskDescription)
+	{
+		EQApplicationPacket *in = *p;
+		*p = nullptr;
+
+		unsigned char *__emu_buffer = in->pBuffer;
+
+		char *InBuffer = (char *)in->pBuffer;
+		char *block_start = InBuffer;
+
+		InBuffer += sizeof(TaskDescriptionHeader_Struct);
+		uint32 title_size = strlen(InBuffer) + 1;
+		InBuffer += title_size;
+		InBuffer += sizeof(TaskDescriptionData1_Struct);
+		uint32 description_size = strlen(InBuffer) + 1;
+		InBuffer += description_size;
+		InBuffer += sizeof(TaskDescriptionData2_Struct);
+
+		std::string old_message = InBuffer; // start 'Reward' as string
+		std::string new_message;
+		ServerToSoFTextLink(new_message, old_message);
+
+		in->size = sizeof(TaskDescriptionHeader_Struct) + sizeof(TaskDescriptionData1_Struct)+
+			sizeof(TaskDescriptionData2_Struct) + sizeof(TaskDescriptionTrailer_Struct)+
+			title_size + description_size + new_message.length() + 1;
+
+		in->pBuffer = new unsigned char[in->size];
+
+		char *OutBuffer = (char *)in->pBuffer;
+
+		memcpy(OutBuffer, block_start, (InBuffer - block_start));
+		OutBuffer += (InBuffer - block_start);
+
+		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
+
+		InBuffer += strlen(InBuffer) + 1;
+
+		memcpy(OutBuffer, InBuffer, sizeof(TaskDescriptionTrailer_Struct));
+
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
 	}
 
 	ENCODE(OP_Track)
@@ -1633,7 +1837,7 @@ namespace SoF
 
 		if (EntryCount == 0 || ((in->size % sizeof(Track_Struct))) != 0)
 		{
-			_log(NET__STRUCTS, "Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Track_Struct));
+			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Track_Struct));
 			delete in;
 			return;
 		}
@@ -1813,7 +2017,7 @@ namespace SoF
 		//determine and verify length
 		int entrycount = in->size / sizeof(Spawn_Struct);
 		if (entrycount == 0 || (in->size % sizeof(Spawn_Struct)) != 0) {
-			_log(NET__STRUCTS, "Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Spawn_Struct));
+			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Spawn_Struct));
 			delete in;
 			return;
 		}
@@ -2022,8 +2226,8 @@ namespace SoF
 		//kill off the emu structure and send the eq packet.
 		delete[] __emu_buffer;
 
-		//_log(NET__ERROR, "Sending zone spawns");
-		//_hex(NET__ERROR, in->pBuffer, in->size);
+		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Sending zone spawns");
+		//Log.Hex(Logs::Netcode, in->pBuffer, in->size);
 
 		dest->FastQueuePacket(&in, ack_req);
 	}
@@ -2129,6 +2333,25 @@ namespace SoF
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_ChannelMessage)
+	{
+		unsigned char *__eq_buffer = __packet->pBuffer;
+
+		std::string old_message = (char *)&__eq_buffer[sizeof(ChannelMessage_Struct)];
+		std::string new_message;
+		SoFToServerTextLink(new_message, old_message);
+
+		__packet->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
+		__packet->pBuffer = new unsigned char[__packet->size];
+
+		ChannelMessage_Struct *emu = (ChannelMessage_Struct *)__packet->pBuffer;
+
+		memcpy(emu, __eq_buffer, sizeof(ChannelMessage_Struct));
+		strcpy(emu->message, new_message.c_str());
+
+		delete[] __eq_buffer;
+	}
+
 	DECODE(OP_CharacterCreate)
 	{
 		DECODE_LENGTH_EXACT(structs::CharCreate_Struct);
@@ -2222,6 +2445,27 @@ namespace SoF
 		IN(number_in_stack);
 
 		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_Emote)
+	{
+		unsigned char *__eq_buffer = __packet->pBuffer;
+
+		std::string old_message = (char *)&__eq_buffer[4]; // unknown01 offset
+		std::string new_message;
+		SoFToServerTextLink(new_message, old_message);
+
+		__packet->size = sizeof(Emote_Struct);
+		__packet->pBuffer = new unsigned char[__packet->size];
+
+		char *InBuffer = (char *)__packet->pBuffer;
+
+		memcpy(InBuffer, __eq_buffer, 4);
+		InBuffer += 4;
+		strcpy(InBuffer, new_message.substr(0, 1023).c_str());
+		InBuffer[1023] = '\0';
+
+		delete[] __eq_buffer;
 	}
 
 	DECODE(OP_FaceChange)
@@ -2336,11 +2580,94 @@ namespace SoF
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		_log(NET__ERROR, "Moved item from %u to %u", eq->from_slot, eq->to_slot);
+		Log.Out(Logs::General, Logs::Netcode, "[SoF] Moved item from %u to %u", eq->from_slot, eq->to_slot);
 
 		emu->from_slot = SoFToServerSlot(eq->from_slot);
 		emu->to_slot = SoFToServerSlot(eq->to_slot);
 		IN(number_in_stack);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_PetCommands)
+	{
+		DECODE_LENGTH_EXACT(structs::PetCommand_Struct);
+		SETUP_DIRECT_DECODE(PetCommand_Struct, structs::PetCommand_Struct);
+
+		switch (eq->command)
+		{
+		case 0x04:
+			emu->command = 0x00;	// /pet health
+			break;
+		case 0x10:
+			emu->command = 0x01;	// /pet leader
+			break;
+		case 0x07:
+			emu->command = 0x02;	// /pet attack or Pet Window
+			break;
+		case 0x03:	// Case Guessed
+			emu->command = 0x03;	// /pet qattack
+		case 0x08:
+			emu->command = 0x04;	// /pet follow or Pet Window
+			break;
+		case 0x05:
+			emu->command = 0x05;	// /pet guard or Pet Window
+			break;
+		case 0x09:
+			emu->command = 0x07;	// /pet sit or Pet Window
+			break;
+		case 0x0a:
+			emu->command = 0x08;	// /pet stand or Pet Window
+			break;
+		case 0x06:
+			emu->command = 0x1e;	// /pet guard me
+			break;
+		case 0x0f:	// Case Made Up
+			emu->command = 0x09;	// Stop?
+			break;
+		case 0x0b:
+			emu->command = 0x0d;	// /pet taunt or Pet Window
+			break;
+		case 0x0e:
+			emu->command = 0x0e;	// /pet notaunt or Pet Window
+			break;
+		case 0x0c:
+			emu->command = 0x0f;	// /pet hold
+			break;
+		case 0x1b:
+			emu->command = 0x10;	// /pet hold on
+			break;
+		case 0x1c:
+			emu->command = 0x11;	// /pet hold off
+			break;
+		case 0x11:
+			emu->command = 0x12;	// Slumber?
+			break;
+		case 0x12:
+			emu->command = 0x15;	// /pet no cast
+			break;
+		case 0x0d:	// Case Made Up
+			emu->command = 0x16;	// Pet Window No Cast
+			break;
+		case 0x13:
+			emu->command = 0x18;	// /pet focus
+			break;
+		case 0x19:
+			emu->command = 0x19;	// /pet focus on
+			break;
+		case 0x1a:
+			emu->command = 0x1a;	// /pet focus off
+			break;
+		case 0x01:
+			emu->command = 0x1c;	// /pet back off
+			break;
+		case 0x02:
+			emu->command = 0x1d;	// /pet get lost
+			break;
+		default:
+			emu->command = eq->command;
+		}
+		OUT(unknown);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -2532,7 +2859,7 @@ namespace SoF
 		std::stringstream ss(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
 
 		const Item_Struct *item = inst->GetUnscaledItem();
-		//_log(NET__ERROR, "Serialize called for: %s", item->Name);
+		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Serialize called for: %s", item->Name);
 		SoF::structs::ItemSerializationHeader hdr;
 		hdr.stacksize = stackable ? charges : 1;
 		hdr.unknown004 = 0;
@@ -2545,7 +2872,7 @@ namespace SoF
 		hdr.scaled_value = inst->IsScaling() ? inst->GetExp() / 100 : 0;
 		hdr.instance_id = (merchant_slot == 0) ? inst->GetSerialNumber() : merchant_slot;
 		hdr.unknown028 = 0;
-		hdr.last_cast_time = ((item->RecastDelay > 1) ? 1212693140 : 0);
+		hdr.last_cast_time = inst->GetRecastTimestamp();
 		hdr.charges = (stackable ? (item->MaxCharges ? 1 : 0) : charges);
 		hdr.inst_nodrop = inst->IsAttuned() ? 1 : 0;
 		hdr.unknown044 = 0;
@@ -2954,56 +3281,132 @@ namespace SoF
 		return item_serial;
 	}
 
-	static inline uint32 ServerToSoFSlot(uint32 ServerSlot)
+	static inline uint32 ServerToSoFSlot(uint32 serverSlot)
 	{
 		uint32 SoFSlot = 0;
 
-		if (ServerSlot >= MainAmmo && ServerSlot <= 53) // Cursor/Ammo/Power Source and Normal Inventory Slots
-			SoFSlot = ServerSlot + 1;
-		else if (ServerSlot >= EmuConstants::GENERAL_BAGS_BEGIN && ServerSlot <= EmuConstants::CURSOR_BAG_END)
-			SoFSlot = ServerSlot + 11;
-		else if (ServerSlot >= EmuConstants::BANK_BAGS_BEGIN && ServerSlot <= EmuConstants::BANK_BAGS_END)
-			SoFSlot = ServerSlot + 1;
-		else if (ServerSlot >= EmuConstants::SHARED_BANK_BAGS_BEGIN && ServerSlot <= EmuConstants::SHARED_BANK_BAGS_END)
-			SoFSlot = ServerSlot + 1;
-		else if (ServerSlot == MainPowerSource)
+		if (serverSlot >= MainAmmo && serverSlot <= 53) // Cursor/Ammo/Power Source and Normal Inventory Slots
+			SoFSlot = serverSlot + 1;
+		else if (serverSlot >= EmuConstants::GENERAL_BAGS_BEGIN && serverSlot <= EmuConstants::CURSOR_BAG_END)
+			SoFSlot = serverSlot + 11;
+		else if (serverSlot >= EmuConstants::BANK_BAGS_BEGIN && serverSlot <= EmuConstants::BANK_BAGS_END)
+			SoFSlot = serverSlot + 1;
+		else if (serverSlot >= EmuConstants::SHARED_BANK_BAGS_BEGIN && serverSlot <= EmuConstants::SHARED_BANK_BAGS_END)
+			SoFSlot = serverSlot + 1;
+		else if (serverSlot == MainPowerSource)
 			SoFSlot = slots::MainPowerSource;
 		else
-			SoFSlot = ServerSlot;
+			SoFSlot = serverSlot;
 
 		return SoFSlot;
 	}
 
-	static inline uint32 ServerToSoFCorpseSlot(uint32 ServerCorpse)
+	static inline uint32 ServerToSoFCorpseSlot(uint32 serverCorpseSlot)
 	{
 		//uint32 SoFCorpse;
-		return (ServerCorpse + 1);
+		return (serverCorpseSlot + 1);
 	}
 
-	static inline uint32 SoFToServerSlot(uint32 SoFSlot)
+	static inline uint32 SoFToServerSlot(uint32 sofSlot)
 	{
 		uint32 ServerSlot = 0;
 
-		if (SoFSlot >= slots::MainAmmo && SoFSlot <= consts::CORPSE_END) // Cursor/Ammo/Power Source and Normal Inventory Slots
-			ServerSlot = SoFSlot - 1;
-		else if (SoFSlot >= consts::GENERAL_BAGS_BEGIN && SoFSlot <= consts::CURSOR_BAG_END)
-			ServerSlot = SoFSlot - 11;
-		else if (SoFSlot >= consts::BANK_BAGS_BEGIN && SoFSlot <= consts::BANK_BAGS_END)
-			ServerSlot = SoFSlot - 1;
-		else if (SoFSlot >= consts::SHARED_BANK_BAGS_BEGIN && SoFSlot <= consts::SHARED_BANK_BAGS_END)
-			ServerSlot = SoFSlot - 1;
-		else if (SoFSlot == slots::MainPowerSource)
+		if (sofSlot >= slots::MainAmmo && sofSlot <= consts::CORPSE_END) // Cursor/Ammo/Power Source and Normal Inventory Slots
+			ServerSlot = sofSlot - 1;
+		else if (sofSlot >= consts::GENERAL_BAGS_BEGIN && sofSlot <= consts::CURSOR_BAG_END)
+			ServerSlot = sofSlot - 11;
+		else if (sofSlot >= consts::BANK_BAGS_BEGIN && sofSlot <= consts::BANK_BAGS_END)
+			ServerSlot = sofSlot - 1;
+		else if (sofSlot >= consts::SHARED_BANK_BAGS_BEGIN && sofSlot <= consts::SHARED_BANK_BAGS_END)
+			ServerSlot = sofSlot - 1;
+		else if (sofSlot == slots::MainPowerSource)
 			ServerSlot = MainPowerSource;
 		else
-			ServerSlot = SoFSlot;
+			ServerSlot = sofSlot;
 
 		return ServerSlot;
 	}
 
-	static inline uint32 SoFToServerCorpseSlot(uint32 SoFCorpse)
+	static inline uint32 SoFToServerCorpseSlot(uint32 sofCorpseSlot)
 	{
 		//uint32 ServerCorpse;
-		return (SoFCorpse - 1);
+		return (sofCorpseSlot - 1);
+	}
+
+	static inline void ServerToSoFTextLink(std::string& sofTextLink, const std::string& serverTextLink)
+	{
+		if ((consts::TEXT_LINK_BODY_LENGTH == EmuConstants::TEXT_LINK_BODY_LENGTH) || (serverTextLink.find('\x12') == std::string::npos)) {
+			sofTextLink = serverTextLink;
+			return;
+		}
+
+		auto segments = SplitString(serverTextLink, '\x12');
+
+		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
+			if (segment_iter & 1) {
+				if (segments[segment_iter].length() <= EmuConstants::TEXT_LINK_BODY_LENGTH) {
+					sofTextLink.append(segments[segment_iter]);
+					// TODO: log size mismatch error
+					continue;
+				}
+
+				// Idx:  0 1     6     11    16    21    26    31    36 37   41 43    48       (Source)
+				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX XXXXX XXXXXXXX (56)
+				// SoF:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX       X  XXXX  X XXXXX XXXXXXXX (50)
+				// Diff:                                       ^^^^^         ^
+
+				sofTextLink.push_back('\x12');
+				sofTextLink.append(segments[segment_iter].substr(0, 31));
+				sofTextLink.append(segments[segment_iter].substr(36, 5));
+
+				if (segments[segment_iter][41] == '0')
+					sofTextLink.push_back(segments[segment_iter][42]);
+				else
+					sofTextLink.push_back('F');
+
+				sofTextLink.append(segments[segment_iter].substr(43));
+				sofTextLink.push_back('\x12');
+			}
+			else {
+				sofTextLink.append(segments[segment_iter]);
+			}
+		}
+	}
+
+	static inline void SoFToServerTextLink(std::string& serverTextLink, const std::string& sofTextLink)
+	{
+		if ((EmuConstants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) || (sofTextLink.find('\x12') == std::string::npos)) {
+			serverTextLink = sofTextLink;
+			return;
+		}
+
+		auto segments = SplitString(sofTextLink, '\x12');
+
+		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
+			if (segment_iter & 1) {
+				if (segments[segment_iter].length() <= consts::TEXT_LINK_BODY_LENGTH) {
+					serverTextLink.append(segments[segment_iter]);
+					// TODO: log size mismatch error
+					continue;
+				}
+
+				// Idx:  0 1     6     11    16    21    26          31 32    36 37    42       (Source)
+				// SoF:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX       X  XXXX  X  XXXXX XXXXXXXX (50)
+				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX  XXXXX XXXXXXXX (56)
+				// Diff:                                       ^^^^^         ^
+
+				serverTextLink.push_back('\x12');
+				serverTextLink.append(segments[segment_iter].substr(0, 31));
+				serverTextLink.append("00000");
+				serverTextLink.append(segments[segment_iter].substr(31, 5));
+				serverTextLink.push_back('0');
+				serverTextLink.append(segments[segment_iter].substr(36));
+				serverTextLink.push_back('\x12');
+			}
+			else {
+				serverTextLink.append(segments[segment_iter]);
+			}
+		}
 	}
 }
 // end namespace SoF

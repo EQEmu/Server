@@ -20,11 +20,11 @@
 
 #ifdef EMBPERL
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "eqw_parser.h"
 #include "eqw.h"
 #include "../common/eqdb.h"
-#include "../common/logsys.h"
+
 #include "worlddb.h"
 
 #ifndef GvCV_set
@@ -65,7 +65,7 @@ EQWParser::EQWParser() {
 	my_perl = perl_alloc();
 	_empty_sv = newSV(0);
 	if(!my_perl)
-		_log(WORLD__PERL_ERR, "Error: perl_alloc failed!");
+		Log.Out(Logs::Detail, Logs::World_Server, "Error: perl_alloc failed!");
 	else
 		DoInit();
 }
@@ -182,10 +182,10 @@ void EQWParser::DoInit() {
 
 
 #ifdef EMBPERL_PLUGIN
-	_log(WORLD__PERL, "Loading worldui perl plugins.");
+	Log.Out(Logs::Detail, Logs::World_Server, "Loading worldui perl plugins.");
 	std::string err;
 	if(!eval_file("world", "worldui.pl", err)) {
-		_log(WORLD__PERL_ERR, "Warning - world.pl: %s", err.c_str());
+		Log.Out(Logs::Detail, Logs::World_Server, "Warning - world.pl: %s", err.c_str());
 	}
 
 	eval_pv(
@@ -229,8 +229,7 @@ bool EQWParser::dosub(const char * subname, const std::vector<std::string> &args
 	PUSHMARK(SP);		// remember the stack pointer
 	if(args.size() > 0)
 	{
-		for(std::vector<std::string>::const_iterator i = args.begin(); i != args.end(); ++i)
-		{/* push the arguments onto the perl stack */
+		for (auto i = args.begin(); i != args.end(); ++i) { /* push the arguments onto the perl stack */
 			XPUSHs(sv_2mortal(newSVpv(i->c_str(), i->length())));
 		}
 	}

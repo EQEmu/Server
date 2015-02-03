@@ -16,7 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/misc_functions.h"
 #include "../common/features.h"
 
@@ -206,11 +206,11 @@ bool QuestParserCollection::ItemHasQuestSub(ItemInst *itm, QuestEventID evt) {
 	std::string item_script;
 	if(itm->GetItem()->ScriptFileID != 0) {
 		item_script = "script_";
-		item_script += std::to_string(static_cast<long long>(itm->GetItem()->ScriptFileID));
+		item_script += std::to_string(itm->GetItem()->ScriptFileID);
 	} else if(strlen(itm->GetItem()->CharmFile) > 0) {
 		item_script = itm->GetItem()->CharmFile;
 	} else {
-		item_script = std::to_string(static_cast<long long>(itm->GetID()));
+		item_script = std::to_string(itm->GetID());
 	}
 
 	uint32 item_id = itm->GetID();
@@ -358,11 +358,11 @@ int QuestParserCollection::EventItem(QuestEventID evt, Client *client, ItemInst 
 	std::string item_script;
 	if(item->GetItem()->ScriptFileID != 0) {
 		item_script = "script_";
-		item_script += std::to_string(static_cast<long long>(item->GetItem()->ScriptFileID));
+		item_script += std::to_string(item->GetItem()->ScriptFileID);
 	} else if(strlen(item->GetItem()->CharmFile) > 0) {
 		item_script = item->GetItem()->CharmFile;
 	} else {
-		item_script = std::to_string(static_cast<long long>(item->GetID()));
+		item_script = std::to_string(item->GetID());
 	}
 
 	uint32 item_id = item->GetID();

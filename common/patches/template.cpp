@@ -23,7 +23,7 @@ void Register(EQStreamIdentifier &into) {
 		//TODO: figure out how to support shared memory with multiple patches...
 		opcodes = new RegularOpcodeManager();
 		if(!opcodes->LoadOpcodes(opfile.c_str())) {
-			_log(NET__OPCODES, "Error loading opcodes file %s. Not registering patch %s.", opfile.c_str(), name);
+			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[OPCODES] Error loading opcodes file %s. Not registering patch %s.", opfile.c_str(), name);
 			return;
 		}
 	}
@@ -55,10 +55,10 @@ void Reload() {
 		opfile += name;
 		opfile += ".conf";
 		if(!opcodes->ReloadOpcodes(opfile.c_str())) {
-			_log(NET__OPCODES, "Error reloading opcodes file %s for patch %s.", opfile.c_str(), name);
+			logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[OPCODES] Error reloading opcodes file %s for patch %s.", opfile.c_str(), name);
 			return;
 		}
-		_log(NET__OPCODES, "Reloaded opcodes for patch %s", name);
+		logger.LogDebugType(EQEmuLogSys::General, EQEmuLogSys::Netcode, "[OPCODES] Reloaded opcodes for patch %s", name);
 	}
 }
 

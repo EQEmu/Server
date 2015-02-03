@@ -16,7 +16,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
+#include "../common/eqemu_logsys.h"
 
 #include <iostream>
 #include <string.h>
@@ -68,7 +69,7 @@ TCPConnection::TCPConnection()
 
 //server version
 TCPConnection::TCPConnection(uint32 ID, SOCKET in_socket, uint32 irIP, uint16 irPort)
-:	ConnectionType(Incomming),
+:	ConnectionType(Incoming),
 	connection_socket(in_socket),
 	id(ID),
 	rIP(irIP),
@@ -103,7 +104,7 @@ TCPConnection::~TCPConnection() {
 	}
 #if TCPN_DEBUG_Memory >= 5
 	else {
-		std::cout << "Deconstructor on incomming TCP# " << GetID() << std::endl;
+		std::cout << "Deconstructor on incoming TCP# " << GetID() << std::endl;
 	}
 #endif
 	safe_delete_array(recvbuf);
@@ -540,7 +541,6 @@ bool TCPConnection::Process() {
 		if (!RecvData(errbuf)) {
 			struct in_addr	in;
 			in.s_addr = GetrIP();
-			//std::cout << inet_ntoa(in) << ":" << GetrPort() << ": " << errbuf << std::endl;
 			return false;
 		}
 		/* we break to do the send */
@@ -899,7 +899,7 @@ ThreadReturnType TCPConnection::TCPConnectionLoop(void* tmp) {
 	}
 	TCPConnection* tcpc = (TCPConnection*) tmp;
 #ifndef WIN32
-	_log(COMMON__THREADS, "Starting TCPConnectionLoop with thread ID %d", pthread_self());
+	Log.Out(Logs::Detail, Logs::TCP_Connection, "%s Starting TCPConnectionLoop with thread ID %d", __FUNCTION__, pthread_self());
 #endif
 	tcpc->MLoopRunning.lock();
 	while (tcpc->RunLoop()) {
@@ -926,7 +926,7 @@ ThreadReturnType TCPConnection::TCPConnectionLoop(void* tmp) {
 	tcpc->MLoopRunning.unlock();
 
 #ifndef WIN32
-	_log(COMMON__THREADS, "Ending TCPConnectionLoop with thread ID %d", pthread_self());
+	Log.Out(Logs::Detail, Logs::TCP_Connection, "%s Ending TCPConnectionLoop with thread ID %d", __FUNCTION__, pthread_self());
 #endif
 
 	THREAD_RETURN(nullptr);

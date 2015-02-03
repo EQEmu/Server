@@ -51,7 +51,7 @@
 #define ServerOP_AcceptWorldEntrance 0x0024
 #define ServerOP_ZAAuth				0x0025
 #define ServerOP_ZAAuthFailed		0x0026
-#define ServerOP_ZoneIncClient		0x0027	// Incomming client
+#define ServerOP_ZoneIncClient		0x0027	// Incoming client
 #define ServerOP_ClientListKA		0x0028
 #define ServerOP_ChangeWID			0x0029
 #define ServerOP_IPLookup			0x002A
@@ -180,16 +180,17 @@
 #define ServerOP_CZSignalClientByName 0x4007
 #define ServerOP_CZMessagePlayer 0x4008
 #define ServerOP_ReloadWorld 0x4009
-
-#define ServerOP_QSPlayerLogTrades					0x4010
-#define ServerOP_QSPlayerLogHandins					0x4011
-#define ServerOP_QSPlayerLogNPCKills				0x4012
-#define ServerOP_QSPlayerLogDeletes					0x4013
-#define ServerOP_QSPlayerLogMoves					0x4014
-#define ServerOP_QSPlayerLogMerchantTransactions	0x4015
-#define ServerOP_QSSendQuery						0x4016
-#define ServerOP_CZSignalNPC						0x4017
-#define ServerOP_CZSetEntityVariableByNPCTypeID		0x4018
+#define ServerOP_ReloadLogs 0x4010
+/* Query Server OP Codes */
+#define ServerOP_QSPlayerLogTrades					0x5010
+#define ServerOP_QSPlayerLogHandins					0x5011
+#define ServerOP_QSPlayerLogNPCKills				0x5012
+#define ServerOP_QSPlayerLogDeletes					0x5013
+#define ServerOP_QSPlayerLogMoves					0x5014
+#define ServerOP_QSPlayerLogMerchantTransactions	0x5015
+#define ServerOP_QSSendQuery						0x5016
+#define ServerOP_CZSignalNPC						0x5017
+#define ServerOP_CZSetEntityVariableByNPCTypeID		0x5018
 
 #define ServerOP_WIRemoteCall 0x5001
 #define ServerOP_WIRemoteCallResponse 0x5002
@@ -312,7 +313,7 @@ struct ServerZoneStateChange_struct {
 	bool makestatic;
 };
 
-struct ServerZoneIncommingClient_Struct {
+struct ServerZoneIncomingClient_Struct {
 	uint32	zoneid;		// in case the zone shut down, boot it back up
 	uint16	instanceid; // instance id if it exists for booting up
 	uint32	ip;			// client's IP address

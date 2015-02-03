@@ -15,7 +15,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "eql_config.h"
 #include "worlddb.h"
 #include "launcher_link.h"
@@ -42,7 +42,7 @@ void EQLConfig::LoadSettings() {
     std::string query = StringFormat("SELECT dynamics FROM launcher WHERE name = '%s'", namebuf);
     auto results = database.QueryDatabase(query);
     if (!results.Success())
-        LogFile->write(EQEMuLog::Error, "EQLConfig::LoadSettings: %s", results.ErrorMessage().c_str());
+        Log.Out(Logs::General, Logs::Error, "EQLConfig::LoadSettings: %s", results.ErrorMessage().c_str());
     else {
         auto row = results.begin();
         m_dynamics = atoi(row[0]);
@@ -51,7 +51,7 @@ void EQLConfig::LoadSettings() {
 	query = StringFormat("SELECT zone, port FROM launcher_zones WHERE launcher = '%s'", namebuf);
 	results = database.QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "EQLConfig::LoadSettings: %s", results.ErrorMessage().c_str());
+        Log.Out(Logs::General, Logs::Error, "EQLConfig::LoadSettings: %s", results.ErrorMessage().c_str());
         return;
     }
 
@@ -73,7 +73,6 @@ EQLConfig *EQLConfig::CreateLauncher(const char *name, uint8 dynamic_count) {
     std::string query = StringFormat("INSERT INTO launcher (name, dynamics) VALUES('%s', %d)", namebuf, dynamic_count);
     auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error in CreateLauncher query: %s", results.ErrorMessage().c_str());
 		return nullptr;
 	}
 
@@ -118,14 +117,12 @@ void EQLConfig::DeleteLauncher() {
     std::string query = StringFormat("DELETE FROM launcher WHERE name = '%s'", namebuf);
     auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error in DeleteLauncher 1st query: %s", results.ErrorMessage().c_str());
 		return;
 	}
 
     query = StringFormat("DELETE FROM launcher_zones WHERE launcher = '%s'", namebuf);
     results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error in DeleteLauncher 2nd query: %s", results.ErrorMessage().c_str());
 		return;
 	}
 }
@@ -173,7 +170,6 @@ bool EQLConfig::BootStaticZone(Const_char *short_name, uint16 port) {
                                     "VALUES('%s', '%s', %d)", namebuf, zonebuf, port);
     auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error in BootStaticZone query: %s", results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -202,7 +198,7 @@ bool EQLConfig::ChangeStaticZone(Const_char *short_name, uint16 port) {
 	res = m_zones.find(short_name);
 	if(res == m_zones.end()) {
 		//not found.
-		LogFile->write(EQEMuLog::Error, "Update for unknown zone %s", short_name);
+		Log.Out(Logs::General, Logs::Error, "Update for unknown zone %s", short_name);
 		return false;
 	}
 
@@ -217,7 +213,6 @@ bool EQLConfig::ChangeStaticZone(Const_char *short_name, uint16 port) {
                                     "launcher = '%s' AND zone = '%s'",port, namebuf, zonebuf);
     auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error in ChangeStaticZone query: %s", results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -239,7 +234,7 @@ bool EQLConfig::DeleteStaticZone(Const_char *short_name) {
 	res = m_zones.find(short_name);
 	if(res == m_zones.end()) {
 		//not found.
-		LogFile->write(EQEMuLog::Error, "Update for unknown zone %s", short_name);
+		Log.Out(Logs::General, Logs::Error, "Update for unknown zone %s", short_name);
 		return false;
 	}
 
@@ -254,7 +249,6 @@ bool EQLConfig::DeleteStaticZone(Const_char *short_name) {
                                     "launcher = '%s' AND zone = '%s'", namebuf, zonebuf);
     auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error in DeleteStaticZone query: %s", results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -279,7 +273,6 @@ bool EQLConfig::SetDynamicCount(int count) {
     std::string query = StringFormat("UPDATE launcher SET dynamics=%d WHERE name='%s'", count, namebuf);
     auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error in SetDynamicCount query: %s", results.ErrorMessage().c_str());
 		return false;
 	}
 

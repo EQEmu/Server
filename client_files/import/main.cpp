@@ -16,7 +16,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "../../common/debug.h"
+#include "../../common/eqemu_logsys.h"
+#include "../../common/global_define.h"
 #include "../../common/shareddb.h"
 #include "../../common/eqemu_config.h"
 #include "../../common/platform.h"
@@ -24,38 +25,43 @@
 #include "../../common/rulesys.h"
 #include "../../common/string_util.h"
 
+EQEmuLogSys Log;
+
 void ImportSpells(SharedDatabase *db);
 void ImportSkillCaps(SharedDatabase *db);
 void ImportBaseData(SharedDatabase *db);
 
 int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformClientImport);
+	Log.LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	LogFile->write(EQEMuLog::Status, "Client Files Import Utility");
+	Log.Out(Logs::General, Logs::Status, "Client Files Import Utility");
 	if(!EQEmuConfig::LoadConfig()) {
-		LogFile->write(EQEMuLog::Error, "Unable to load configuration file.");
+		Log.Out(Logs::General, Logs::Error, "Unable to load configuration file.");
 		return 1;
 	}
 
 	const EQEmuConfig *config = EQEmuConfig::get();
-	if(!load_log_settings(config->LogSettingsFile.c_str())) {
-		LogFile->write(EQEMuLog::Error, "Warning: unable to read %s.", config->LogSettingsFile.c_str());
-	}
 
 	SharedDatabase database;
-	LogFile->write(EQEMuLog::Status, "Connecting to database...");
+	Log.Out(Logs::General, Logs::Status, "Connecting to database...");
 	if(!database.Connect(config->DatabaseHost.c_str(), config->DatabaseUsername.c_str(),
 		config->DatabasePassword.c_str(), config->DatabaseDB.c_str(), config->DatabasePort)) {
-		LogFile->write(EQEMuLog::Error, "Unable to connect to the database, cannot continue without a "
+		Log.Out(Logs::General, Logs::Error, "Unable to connect to the database, cannot continue without a "
 			"database connection");
 		return 1;
 	}
+
+	database.LoadLogSettings(Log.log_settings);
+	Log.StartFileLogs();
 
 	ImportSpells(&database);
 	ImportSkillCaps(&database);
 	ImportBaseData(&database);
 
+	Log.CloseFileLogs();
+	
 	return 0;
 }
 
@@ -64,7 +70,6 @@ int GetSpellColumns(SharedDatabase *db) {
 	const std::string query = "DESCRIBE spells_new";
 	auto results = db->QueryDatabase(query);
 	if(!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in GetSpellColumns query '%s' %s", query.c_str(), results.ErrorMessage().c_str());
         return 0;
     }
 
@@ -72,10 +77,10 @@ int GetSpellColumns(SharedDatabase *db) {
 }
 
 void ImportSpells(SharedDatabase *db) {
-	LogFile->write(EQEMuLog::Status, "Importing Spells...");
+	Log.Out(Logs::General, Logs::Status, "Importing Spells...");
 	FILE *f = fopen("import/spells_us.txt", "r");
 	if(!f) {
-		LogFile->write(EQEMuLog::Error, "Unable to open import/spells_us.txt to read, skipping.");
+		Log.Out(Logs::General, Logs::Error, "Unable to open import/spells_us.txt to read, skipping.");
 		return;
 	}
 
@@ -138,23 +143,23 @@ void ImportSpells(SharedDatabase *db) {
 
 		spells_imported++;
 		if(spells_imported % 1000 == 0) {
-			LogFile->write(EQEMuLog::Status, "%d spells imported.", spells_imported);
+			Log.Out(Logs::General, Logs::Status, "%d spells imported.", spells_imported);
 		}
 	}
 
 	if(spells_imported % 1000 != 0) {
-		LogFile->write(EQEMuLog::Status, "%d spells imported.", spells_imported);
+		Log.Out(Logs::General, Logs::Status, "%d spells imported.", spells_imported);
 	}
 
 	fclose(f);
 }
 
 void ImportSkillCaps(SharedDatabase *db) {
-	LogFile->write(EQEMuLog::Status, "Importing Skill Caps...");
+	Log.Out(Logs::General, Logs::Status, "Importing Skill Caps...");
 
 	FILE *f = fopen("import/SkillCaps.txt", "r");
 	if(!f) {
-		LogFile->write(EQEMuLog::Error, "Unable to open import/SkillCaps.txt to read, skipping.");
+		Log.Out(Logs::General, Logs::Error, "Unable to open import/SkillCaps.txt to read, skipping.");
 		return;
 	}
 
@@ -186,11 +191,11 @@ void ImportSkillCaps(SharedDatabase *db) {
 }
 
 void ImportBaseData(SharedDatabase *db) {
-	LogFile->write(EQEMuLog::Status, "Importing Base Data...");
+	Log.Out(Logs::General, Logs::Status, "Importing Base Data...");
 
 	FILE *f = fopen("import/BaseData.txt", "r");
 	if(!f) {
-		LogFile->write(EQEMuLog::Error, "Unable to open import/BaseData.txt to read, skipping.");
+		Log.Out(Logs::General, Logs::Error, "Unable to open import/BaseData.txt to read, skipping.");
 		return;
 	}
 

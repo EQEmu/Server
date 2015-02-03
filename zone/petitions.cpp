@@ -15,7 +15,8 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
+#include "../common/global_define.h"
+#include "../common/eqemu_logsys.h"
 #include <string.h>
 #ifdef _WINDOWS
 #include <process.h>
@@ -211,9 +212,6 @@ void ZoneDatabase::DeletePetitionFromDB(Petition* wpet) {
 
     std::string query = StringFormat("DELETE FROM petitions WHERE petid = %i", wpet->GetID());
     auto results = QueryDatabase(query);
-	if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Error in DeletePetitionFromDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
-
 }
 
 void ZoneDatabase::UpdatePetitionToDB(Petition* wpet) {
@@ -225,9 +223,6 @@ void ZoneDatabase::UpdatePetitionToDB(Petition* wpet) {
                                     wpet->GetCheckouts(), wpet->GetUnavails(),
                                     wpet->CheckedOut() ? 1: 0, wpet->GetID());
     auto results = QueryDatabase(query);
-	if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Error in UpdatePetitionToDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
-
 }
 
 void ZoneDatabase::InsertPetitionToDB(Petition* wpet)
@@ -253,12 +248,11 @@ void ZoneDatabase::InsertPetitionToDB(Petition* wpet)
     safe_delete_array(petitiontext);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error in InsertPetitionToDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
 #if EQDEBUG >= 5
-		LogFile->write(EQEMuLog::Debug, "New petition created");
+		Log.Out(Logs::General, Logs::None, "New petition created");
 #endif
 
 }
@@ -272,7 +266,6 @@ void ZoneDatabase::RefreshPetitionsFromDB()
                         "FROM petitions ORDER BY petid";
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error in RefreshPetitionsFromDB query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 

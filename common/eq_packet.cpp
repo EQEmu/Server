@@ -17,13 +17,14 @@
 */
 
 #include "crc16.h"
-#include "debug.h"
+#include "global_define.h"
 #include "eq_packet.h"
 #include "misc.h"
 #include "op_codes.h"
 #include "platform.h"
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <stdio.h>
 
 #ifndef STATIC_OPCODE
@@ -510,3 +511,8 @@ void DumpPacket(const EQApplicationPacket* app, bool iShowInfo) {
 //	DumpPacketAscii(app->pBuffer, app->size);
 }
 
+std::string DumpPacketToString(const EQApplicationPacket* app){
+	std::ostringstream out;
+	out << DumpPacketHexToString(app->pBuffer, app->size);
+	return out.str();
+}

@@ -99,7 +99,7 @@ void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bo
     auto results = database.QueryDatabase(query);
 
 	if(!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error inserting into raid members: %s", results.ErrorMessage().c_str());
+		Log.Out(Logs::General, Logs::Error, "Error inserting into raid members: %s", results.ErrorMessage().c_str());
 	}
 
 	LearnMembers();
@@ -233,12 +233,12 @@ void Raid::SetRaidLeader(const char *wasLead, const char *name)
 	std::string query = StringFormat("UPDATE raid_members SET israidleader = 0 WHERE name = '%s'", wasLead);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Set Raid Leader error: %s\n", results.ErrorMessage().c_str());
+		Log.Out(Logs::General, Logs::Error, "Set Raid Leader error: %s\n", results.ErrorMessage().c_str());
 
 	query = StringFormat("UPDATE raid_members SET israidleader = 1 WHERE name = '%s'", name);
 	results = database.QueryDatabase(query);
 	if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Set Raid Leader error: %s\n", results.ErrorMessage().c_str());
+		Log.Out(Logs::General, Logs::Error, "Set Raid Leader error: %s\n", results.ErrorMessage().c_str());
 
 	strn0cpy(leadername, name, 64);
 
@@ -271,7 +271,7 @@ void Raid::SaveGroupLeaderAA(uint32 gid)
 	safe_delete_array(queryBuffer);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Unable to store LeadershipAA: %s\n", results.ErrorMessage().c_str());
+		Log.Out(Logs::General, Logs::Error, "Unable to store LeadershipAA: %s\n", results.ErrorMessage().c_str());
 }
 
 void Raid::SaveRaidLeaderAA()
@@ -285,7 +285,7 @@ void Raid::SaveRaidLeaderAA()
 	safe_delete_array(queryBuffer);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Unable to store LeadershipAA: %s\n", results.ErrorMessage().c_str());
+		Log.Out(Logs::General, Logs::Error, "Unable to store LeadershipAA: %s\n", results.ErrorMessage().c_str());
 }
 
 void Raid::UpdateGroupAAs(uint32 gid)
@@ -489,7 +489,7 @@ void Raid::CastGroupSpell(Mob* caster, uint16 spellid, uint32 gid)
 		else if(members[x].member != nullptr)
 		{
 			if(members[x].GroupNumber == gid){
-				distance = caster->DistNoRoot(*members[x].member);
+				distance = DistanceSquared(caster->GetPosition(), members[x].member->GetPosition());
 				if(distance <= range2){
 					caster->SpellOnTarget(spellid, members[x].member);
 #ifdef GROUP_BUFF_PETS
@@ -498,7 +498,7 @@ void Raid::CastGroupSpell(Mob* caster, uint16 spellid, uint32 gid)
 #endif
 				}
 				else{
-					_log(SPELLS__CASTING, "Raid spell: %s is out of range %f at distance %f from %s", members[x].member->GetName(), range, distance, caster->GetName());
+					Log.Out(Logs::Detail, Logs::Spells, "Raid spell: %s is out of range %f at distance %f from %s", members[x].member->GetName(), range, distance, caster->GetName());
 				}
 			}
 		}
@@ -537,7 +537,7 @@ void Raid::HealGroup(uint32 heal_amt, Mob* caster, uint32 gid, float range)
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				distance = caster->DistNoRoot(*members[gi].member);
+				distance = DistanceSquared(caster->GetPosition(), members[gi].member->GetPosition());
 				if(distance <= range2){
 					numMem += 1;
 				}
@@ -551,7 +551,7 @@ void Raid::HealGroup(uint32 heal_amt, Mob* caster, uint32 gid, float range)
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				distance = caster->DistNoRoot(*members[gi].member);
+				distance = DistanceSquared(caster->GetPosition(), members[gi].member->GetPosition());
 				if(distance <= range2){
 					members[gi].member->SetHP(members[gi].member->GetHP() + heal_amt);
 					members[gi].member->SendHPUpdate();
@@ -581,7 +581,7 @@ void Raid::BalanceHP(int32 penalty, uint32 gid, float range, Mob* caster, int32 
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				distance = caster->DistNoRoot(*members[gi].member);
+				distance = DistanceSquared(caster->GetPosition(), members[gi].member->GetPosition());
 				if(distance <= range2){
 
 					dmgtaken_tmp = members[gi].member->GetMaxHP() - members[gi].member->GetHP();
@@ -602,7 +602,7 @@ void Raid::BalanceHP(int32 penalty, uint32 gid, float range, Mob* caster, int32 
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				distance = caster->DistNoRoot(*members[gi].member);
+				distance = DistanceSquared(caster->GetPosition(), members[gi].member->GetPosition());
 				if(distance <= range2){
 					if((members[gi].member->GetMaxHP() - dmgtaken) < 1){//this way the ability will never kill someone
 						members[gi].member->SetHP(1);					//but it will come darn close
@@ -637,7 +637,7 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, float range, Mob* caster, int3
 			if(members[gi].GroupNumber == gid)
 			{
 				if (members[gi].member->GetMaxMana() > 0) {
-					distance = caster->DistNoRoot(*members[gi].member);
+					distance = DistanceSquared(caster->GetPosition(), members[gi].member->GetPosition());
 					if(distance <= range2){
 
 						manataken_tmp = members[gi].member->GetMaxMana() - members[gi].member->GetMana();
@@ -660,7 +660,7 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, float range, Mob* caster, int3
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				distance = caster->DistNoRoot(*members[gi].member);
+				distance = DistanceSquared(caster->GetPosition(), members[gi].member->GetPosition());
 				if(distance <= range2){
 					if((members[gi].member->GetMaxMana() - manataken) < 1){
 						members[gi].member->SetMana(1);
@@ -791,7 +791,7 @@ void Raid::GroupBardPulse(Mob* caster, uint16 spellid, uint32 gid){
 		else if(members[z].member != nullptr)
 		{
 			if(members[z].GroupNumber == gid){
-				distance = caster->DistNoRoot(*members[z].member);
+				distance = DistanceSquared(caster->GetPosition(), members[z].member->GetPosition());
 				if(distance <= range2) {
 					members[z].member->BardPulse(spellid, caster);
 #ifdef GROUP_BUFF_PETS
@@ -799,7 +799,7 @@ void Raid::GroupBardPulse(Mob* caster, uint16 spellid, uint32 gid){
 						members[z].member->GetPet()->BardPulse(spellid, caster);
 #endif
 				} else
-					_log(SPELLS__BARDS, "Group bard pulse: %s is out of range %f at distance %f from %s", members[z].member->GetName(), range, distance, caster->GetName());
+					Log.Out(Logs::Detail, Logs::Spells, "Group bard pulse: %s is out of range %f at distance %f from %s", members[z].member->GetName(), range, distance, caster->GetName());
 			}
 		}
 	}
@@ -1407,7 +1407,7 @@ void Raid::GetRaidDetails()
         return;
 
     if (results.RowCount() == 0) {
-        LogFile->write(EQEMuLog::Error, "Error getting raid details for raid %lu: %s", (unsigned long)GetID(), results.ErrorMessage().c_str());
+        Log.Out(Logs::General, Logs::Error, "Error getting raid details for raid %lu: %s", (unsigned long)GetID(), results.ErrorMessage().c_str());
         return;
     }
 
@@ -1439,7 +1439,7 @@ bool Raid::LearnMembers()
         return false;
 
 	if(results.RowCount() == 0) {
-        LogFile->write(EQEMuLog::Error, "Error getting raid members for raid %lu: %s", (unsigned long)GetID(), results.ErrorMessage().c_str());
+        Log.Out(Logs::General, Logs::Error, "Error getting raid members for raid %lu: %s", (unsigned long)GetID(), results.ErrorMessage().c_str());
         disbandCheck = true;
         return false;
     }
@@ -1529,7 +1529,7 @@ void Raid::SendHPPacketsTo(Client *c)
 			{
 				members[x].member->CreateHPPacket(&hpapp);
 				c->QueuePacket(&hpapp, false);
-				if(c->GetClientVersion() >= EQClientSoD)
+				if(c->GetClientVersion() >= ClientVersion::SoD)
 				{
 					outapp.SetOpcode(OP_MobManaUpdate);
 					MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp.pBuffer;
@@ -1565,7 +1565,7 @@ void Raid::SendHPPacketsFrom(Mob *m)
 			if(!m->IsClient() || ((members[x].member != m->CastToClient()) && (members[x].GroupNumber == gid)))
 			{
 				members[x].member->QueuePacket(&hpapp, false);
-				if(members[x].member->GetClientVersion() >= EQClientSoD)
+				if(members[x].member->GetClientVersion() >= ClientVersion::SoD)
 				{
 					outapp.SetOpcode(OP_MobManaUpdate);
 					MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp.pBuffer;
@@ -1643,7 +1643,7 @@ void Raid::SetGroupMentor(uint32 group_id, int percent, char *name)
 			name, percent, group_id, GetID());
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Unable to set raid group mentor: %s\n", results.ErrorMessage().c_str());
+		Log.Out(Logs::General, Logs::Error, "Unable to set raid group mentor: %s\n", results.ErrorMessage().c_str());
 }
 
 void Raid::ClearGroupMentor(uint32 group_id)
@@ -1658,7 +1658,7 @@ void Raid::ClearGroupMentor(uint32 group_id)
 			group_id, GetID());
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
-		LogFile->write(EQEMuLog::Error, "Unable to clear raid group mentor: %s\n", results.ErrorMessage().c_str());
+		Log.Out(Logs::General, Logs::Error, "Unable to clear raid group mentor: %s\n", results.ErrorMessage().c_str());
 }
 
 // there isn't a nice place to add this in another function, unlike groups

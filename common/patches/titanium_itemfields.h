@@ -167,8 +167,8 @@ These fields must be in the order of how they are serialized!
 /* 156 */	I(Scroll.Level2)
 /* 157 */	I(Scroll.Level)
 /* 158 */	C("0")
+
 #undef I
 #undef C
 #undef S
 #undef F
-

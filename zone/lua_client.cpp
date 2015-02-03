@@ -242,17 +242,17 @@ void Lua_Client::SetBindPoint(int to_zone, int to_instance) {
 
 void Lua_Client::SetBindPoint(int to_zone, int to_instance, float new_x) {
 	Lua_Safe_Call_Void();
-	self->SetBindPoint(to_zone, to_instance, new_x);
+	self->SetBindPoint(to_zone, to_instance, glm::vec3(new_x,0.0f,0.0f));
 }
 
 void Lua_Client::SetBindPoint(int to_zone, int to_instance, float new_x, float new_y) {
 	Lua_Safe_Call_Void();
-	self->SetBindPoint(to_zone, to_instance, new_x, new_y);
+	self->SetBindPoint(to_zone, to_instance, glm::vec3(new_x, new_y, 0.0f));
 }
 
 void Lua_Client::SetBindPoint(int to_zone, int to_instance, float new_x, float new_y, float new_z) {
 	Lua_Safe_Call_Void();
-	self->SetBindPoint(to_zone, to_instance, new_x, new_y, new_z);
+	self->SetBindPoint(to_zone, to_instance, glm::vec3(new_x, new_y, new_z));
 }
 
 float Lua_Client::GetBindX() {
@@ -700,13 +700,13 @@ void Lua_Client::SummonItem(uint32 item_id, int charges, uint32 aug1, uint32 aug
 	self->SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5);
 }
 
-void Lua_Client::SummonItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, 
+void Lua_Client::SummonItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5,
 							bool attuned) {
 	Lua_Safe_Call_Void();
 	self->SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, 0, attuned);
 }
 
-void Lua_Client::SummonItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, 
+void Lua_Client::SummonItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5,
 							bool attuned, int to_slot) {
 	Lua_Safe_Call_Void();
 	self->SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, 0, attuned, to_slot);
@@ -834,7 +834,7 @@ void Lua_Client::SetAATitle(const char *title) {
 
 int Lua_Client::GetClientVersion() {
 	Lua_Safe_Call_Int();
-	return self->GetClientVersion();
+	return static_cast<unsigned int>(self->GetClientVersion());
 }
 
 uint32 Lua_Client::GetClientVersionBit() {
@@ -1396,7 +1396,7 @@ luabind::scope lua_register_client() {
 		.def("SummonItem", (void(Lua_Client::*)(uint32,int,uint32,uint32,uint32,uint32))&Lua_Client::SummonItem)
 		.def("SummonItem", (void(Lua_Client::*)(uint32,int,uint32,uint32,uint32,uint32,uint32))&Lua_Client::SummonItem)
 		.def("SummonItem", (void(Lua_Client::*)(uint32,int,uint32,uint32,uint32,uint32,uint32,bool))&Lua_Client::SummonItem)
-		.def("SummonItem", (void(Lua_Client::*)(uint32,int,uint32,uint32,uint32,uint32,uint32,bool,int))&Lua_Client::SummonItem) 
+		.def("SummonItem", (void(Lua_Client::*)(uint32,int,uint32,uint32,uint32,uint32,uint32,bool,int))&Lua_Client::SummonItem)
 		.def("SetStats", (void(Lua_Client::*)(int,int))&Lua_Client::SetStats)
 		.def("IncStats", (void(Lua_Client::*)(int,int))&Lua_Client::IncStats)
 		.def("DropItem", (void(Lua_Client::*)(int))&Lua_Client::DropItem)

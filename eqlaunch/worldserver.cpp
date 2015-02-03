@@ -15,7 +15,9 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
+
+#include "../common/global_define.h"
+#include "../common/eqemu_logsys.h"
 #include "../common/servertalk.h"
 #include "../common/eqemu_config.h"
 #include "../common/string_util.h"
@@ -72,14 +74,14 @@ void WorldServer::Process() {
 			break;
 		}
 		case ServerOP_ZAAuthFailed: {
-			_log(LAUNCHER__ERROR, "World server responded 'Not Authorized', disabling reconnect");
+			Log.Out(Logs::Detail, Logs::Launcher, "World server responded 'Not Authorized', disabling reconnect");
 			pTryReconnect = false;
 			Disconnect();
 			break;
 		}
 		case ServerOP_LauncherZoneRequest: {
 			if(pack->size != sizeof(LauncherZoneRequest)) {
-				_log(LAUNCHER__NET, "Invalid size of LauncherZoneRequest: %d", pack->size);
+				Log.Out(Logs::Detail, Logs::Launcher, "Invalid size of LauncherZoneRequest: %d", pack->size);
 				break;
 			}
 			const LauncherZoneRequest *lzr = (const LauncherZoneRequest *) pack->pBuffer;
@@ -88,9 +90,9 @@ void WorldServer::Process() {
 			switch(ZoneRequestCommands(lzr->command)) {
 			case ZR_Start: {
 				if(m_zones.find(lzr->short_name) != m_zones.end()) {
-					_log(LAUNCHER__ERROR, "World told us to start zone %s, but it is already running.", lzr->short_name);
+					Log.Out(Logs::Detail, Logs::Launcher, "World told us to start zone %s, but it is already running.", lzr->short_name);
 				} else {
-					_log(LAUNCHER__WORLD, "World told us to start zone %s.", lzr->short_name);
+					Log.Out(Logs::Detail, Logs::Launcher, "World told us to start zone %s.", lzr->short_name);
 					ZoneLaunch *l = new ZoneLaunch(this, m_name, lzr->short_name, m_config);
 					m_zones[lzr->short_name] = l;
 				}
@@ -99,9 +101,9 @@ void WorldServer::Process() {
 			case ZR_Restart: {
 				std::map<std::string, ZoneLaunch *>::iterator res = m_zones.find(lzr->short_name);
 				if(res == m_zones.end()) {
-					_log(LAUNCHER__ERROR, "World told us to restart zone %s, but it is not running.", lzr->short_name);
+					Log.Out(Logs::Detail, Logs::Launcher, "World told us to restart zone %s, but it is not running.", lzr->short_name);
 				} else {
-					_log(LAUNCHER__WORLD, "World told us to restart zone %s.", lzr->short_name);
+					Log.Out(Logs::Detail, Logs::Launcher, "World told us to restart zone %s.", lzr->short_name);
 					res->second->Restart();
 				}
 				break;
@@ -109,9 +111,9 @@ void WorldServer::Process() {
 			case ZR_Stop: {
 				std::map<std::string, ZoneLaunch *>::iterator res = m_zones.find(lzr->short_name);
 				if(res == m_zones.end()) {
-					_log(LAUNCHER__ERROR, "World told us to stop zone %s, but it is not running.", lzr->short_name);
+					Log.Out(Logs::Detail, Logs::Launcher, "World told us to stop zone %s, but it is not running.", lzr->short_name);
 				} else {
-					_log(LAUNCHER__WORLD, "World told us to stop zone %s.", lzr->short_name);
+					Log.Out(Logs::Detail, Logs::Launcher, "World told us to stop zone %s.", lzr->short_name);
 					res->second->Stop();
 				}
 				break;
@@ -125,7 +127,7 @@ void WorldServer::Process() {
 		}
 
 		default: {
-			_log(LAUNCHER__NET, "Unknown opcode 0x%x from World of len %d", pack->opcode, pack->size);
+			Log.Out(Logs::Detail, Logs::Launcher, "Unknown opcode 0x%x from World of len %d", pack->opcode, pack->size);
 			break;
 		}
 		}

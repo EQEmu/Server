@@ -28,7 +28,7 @@
 typedef const char Const_char;
 
 #ifdef EMBPERL
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "eqw_parser.h"
 #include "http_request.h"
 

@@ -19,8 +19,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-#ifndef RoF2_CONSTANTS_H_
-#define RoF2_CONSTANTS_H_
+#ifndef ROF2_CONSTANTS_H_
+#define ROF2_CONSTANTS_H_
 
 #include "../types.h"
 
@@ -181,6 +181,8 @@ namespace RoF2 {
 		static const uint32 BANDOLIERS_COUNT = 20;	// count = number of bandolier instances
 		static const uint32 BANDOLIER_SIZE = 4;		// size = number of equipment slots in bandolier instance
 		static const uint32 POTION_BELT_SIZE = 5;
+
+		static const size_t TEXT_LINK_BODY_LENGTH = 56;
 	}
 
 	namespace limits {
@@ -191,7 +193,7 @@ namespace RoF2 {
 
 };	//end namespace RoF2
 
-#endif /*RoF2_CONSTANTS_H_*/
+#endif /*ROF2_CONSTANTS_H_*/
 
 /*
 RoF2 Notes:

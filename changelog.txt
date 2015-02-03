@@ -1,5 +1,142 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+
+== 02/02/2015 ==
+Akkadius: Implement Packet logs with dumps
+	- Category: 41: Packet: Server -> Client With Dump
+	- Category: 42: Packet: Server -> Client With Dump
+	See: http://wiki.eqemulator.org/p?Logging_System_Overhaul#packet-logging-levels
+
+== 02/01/2015 ==
+demonstar55: Add quest debugging to lua
+	eq.debug("Test debug level implicit 1")
+	eq.debug("Test debug level explicit 1", 1)
+	eq.debug("Test debug level explicit 2", 2)
+	eq.debug("Test debug level explicit 3", 3)
+Akkadius: Add Packet Logging Categories
+	- 5 - Packet: Client -> Server - Logs::Client_Server_Packet
+	- 39 - Packet: Server -> Client - Logs::Server_Client_Packet
+	- 40 - Packet: Client -> Server Unhandled - Logs::Client_Server_Packet_Unhandled
+	See: http://wiki.eqemulator.org/p?Logging_System_Overhaul#packet-logging
+	
+== 01/31/2015 ==
+Trevius: Fixed FindGroundZ() and GetGroundZ() to once again utilize the X and Y arguments that are passed to them.
+
+== 01/30/2015 ==
+Akkadius: Implemented event type "EVENT_ENVIRONMENTAL_DAMAGE"
+	- This event triggers when taking any sort of environmental damage. Example use: 
+	sub EVENT_ENVIRONMENTAL_DAMAGE{
+		quest::debug("EVENT_ENVIRONMENTAL_DAMAGE");
+		quest::debug("env_damage is " . $env_damage);
+		quest::debug("env_damage_type is " . $env_damage_type);
+		quest::debug("env_final_damage is " . $env_final_damage);
+	} 
+	Result: (Test falling in Velks): http://i.imgur.com/tPRL7yL.png
+	- Implemented LUA counterpart of this same implementation above
+Akkadius (Bobaski): Add PoK New Merchant sql/git/optional/2015_01_30_poknowledge_spell_vendors.sql
+
+== 01/29/2015 ==
+Trevius: Added more information to Mercenary Logging.
+Trevius: Added potential fix for Mercenaries that fail to unsuspend.
+Trevius: Added a new "statscale" field to the merc_stats table that can be used to quickly balance Mercenary Stats based on Level.
+Trevius: The new "statscale" field now combines with the Mercs::ScaleRate rule value (default 100 percent for both).
+
+== 01/28/2015 ==
+Akkadius: Added Logs::DebugQuest category per request from Trevius (Great idea)
+	- Exported quest::debug(log_message, [debug_level = 1)
+	- Example:
+		quest::debug("This is a test debug message, level 1 (default)");
+		quest::debug("This is a test debug message, level 1", 1);
+		quest::debug("This is a test debug message, level 2", 2);
+		quest::debug("This is a test debug message, level 3", 3);
+		
+		Result: http://i.imgur.com/6VoafGE.png
+	- Uses traditional logging system to output this category
+	- Required MySQL Source in Database version 9070
+
+== 01/27/2015 ==
+Trevius: Removed "Mercenary Debug:" from the Mercenary Log entries.
+Trevius: Resolved duplicate "You have no Mercenaries" messages when zoning without owning a Mercenary.
+Trevius: Mercenaries should now always be able to unsuspend if the timer is up.
+Trevius: More work on Mercenaries and Grouping to reduce bugs and redundant queries.
+Uleat: Finished ClientVersion update to include patch file and namespace updates - don't forget to copy the renamed 'patch_UF.conf' into your eqemu directory.)
+
+== 01/26/2015 ==
+Uleat: Changed Corpse::MoveItemToCorpse() to allow 'by address' passing of removed item slot list. Fixed a bug that kept soul-bound items inside of bags from attuning properly
+
+== 01/25/2015 ==
+Trevius: Fixed an issue where Mercenaries were causing several DB queries per second while suspended.
+Trevius: Added Logs::Mercenaries to the new Logging System.  Logging of Mercenary information is off by default with the required SQL.
+
+== 01/24/2015 ==
+Uleat: Added equipment light source functionality to all mob derived classes (may still need tweaking...)
+Notes:
+	- In addition to equipment light sources, innate npc_type light sources have already been activated
+	- Valid light source values are 0 thru 15 (values are bitmask checked and limited to 0x0F)
+	- Not all classes handle equipment light sources the same way due to their equipment/loot list configurations
+	- Spell (casting?) light sources may be implemented at some point..more information is needed
+	- Currently, loot list (general inventory) light sources are limited to ItemTypeMisc and ItemTypeLight to avoid issues with worn-specific light sources emitting
+	- Augment light sources are not recognized by the client and, therefore, not implemented in the server code
+
+== 01/22/2015 ==
+Akkadius: Massive Log System overhaul, see: http://wiki.eqemulator.org/p?Logging_System_Overhaul&frm=Main
+	
+== 01/21/2015 ==
+Uleat: Added `light` field to npc_types load query (all six clients tested positive for functionality.)
+Note: This only affects 'innate' light. Equipment (other) light is still in-work.
+Optional SQL: utils/sql/git/optional/2015_01_21_NPC_Types_Light_Field_Primer.sql
+
+== 01/20/2015 ==
+Uleat: Fix for Inventory::_HasItemByUse(bucket) using the parent container when searching for bag container items.
+
+== 01/19/2015 ==
+Uleat: Changed 'enum EQClientVersion' to 'enum class ClientVersion.' Other light modifications were made to accommodate this namespace. Added 'RoF2' to the lua client version enumeration.
+
+== 01/15/2015 ==
+Uleat: Attempted fix for elusive inventory bug:
+  - Removed 'iter_queue' typedef and converted lcast to explicit or auto defines
+  - Reworked several functions that manipulate the cursor queue
+  - Found/corrected one occurrence of post-processing iterator incrementing in an ItemInstQueue handler
+  - Added many scope declarations in code that handles inventory manipulation (loose macros are bad...)
+Uleat: Added Item_Struct pointer checks to ItemInst methods that did not have them
+Uleat: Changed IsEquippable(race,class) to use bit-wise 'and' (&) over '(x%2)==1' in conditional check.
+Uleat: Changed DyeArmor() assignment of 'armor_color' to use bit-wise 'or' and bit-shifting (|,<<) over multiplication and addition (*,+).
+
+== 01/13/2015 ==
+Uleat: Placed an upper limit on the cursor queue save loop.
+Trevius: (RoF2) Guild invites now add new members as members instead of recruits, and /guild chat works properly.
+Trevius: (RoF2) Guild Promote is now functional.
+
+== 01/12/2015 ==
+Uleat: Fix for OP_FormattedMessage text link server crashes
+Uleat: Added text link translators for OP_TaskDescription (RoF+ -- all clients current)
+Uleat: Fix for load_bots.sql using '\\' as a delimiter (Changed to '$$')
+
+== 01/11/2015 ==
+Uleat: Added text link translators for OP_TaskDescription (Ti thru UF..RoF+ in-work)
+
+== 01/10/2015 ==
+Uleat: Added text link translators for OP_Emote
+
+== 01/09/2015 ==
+Uleat: Added text link translators for OP_FormattedMessage
+
+== 01/08/2015 ==
+Trevius: Added some extra checks and clean-up related to Groups and Mercenaries. 
+
+== 01/07/2015 ==
+Uleat: Excluded text link body from message scrambling in Client::GarbleMessage()
+Trevius: Mercenaries now load directly from tables only.  The vwMercNpcTypes view is no longer required and can be deleted.
+Trevius: Query fix for group_leaders table.  This may resolve some crashes/bugs related to Mercs/Bots and Groups.
+
+== 01/06/2015 ==
+Trevius: Changed the pet command #defines to be based on RoF2 list of pet commands and added decodes to Titanium, SoF and SoD.
+Trevius: (RoF+) The /pet focus on/off and /pet hold on/off commands are now functional.
+Trevius: Added defines for all remaining pet commands and some support for them as well.
+
+== 01/05/2015 ==
+Uleat: Fixed (added translators for) item/text links. Only 'OP_ChannelMessage' and 'OP_SpecialMesg' are currently handled..more text channels will be added as the need arises.
+
 == 01/03/2015 ==
 Trevius: (RoF2) /shield (shielding) and /key (key ring) are both now functional after opcode updates.
 

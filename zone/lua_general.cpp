@@ -17,6 +17,7 @@
 #include "questmgr.h"
 #include "qglobals.h"
 #include "../common/timer.h"
+#include "../common/eqemu_logsys.h"
 
 struct Events { };
 struct Factions { };
@@ -124,7 +125,7 @@ void register_event(std::string package_name, std::string name, int evt, luabind
 	e.encounter_name = name;
 	e.lua_reference = func;
 	e.event_id = static_cast<QuestEventID>(evt);
-	
+
 	auto liter = lua_encounter_events_registered.find(package_name);
 	if(liter == lua_encounter_events_registered.end()) {
 		std::list<lua_registered_event> elist;
@@ -200,8 +201,8 @@ void unregister_player_event(int evt) {
 
 void register_item_event(std::string name, int evt, int item_id, luabind::adl::object func) {
 	std::string package_name = "item_";
-	package_name += std::to_string(static_cast<long long>(item_id));
-	
+	package_name += std::to_string(item_id);
+
 	if(luabind::type(func) == LUA_TFUNCTION) {
 		register_event(package_name, name, evt, func);
 	}
@@ -214,7 +215,7 @@ void register_item_event(int evt, int item_id, luabind::adl::object func) {
 
 void unregister_item_event(std::string name, int evt, int item_id) {
 	std::string package_name = "item_";
-	package_name += std::to_string(static_cast<long long>(item_id));
+	package_name += std::to_string(item_id);
 
 	unregister_event(package_name, name, evt);
 }
@@ -251,13 +252,13 @@ void unregister_spell_event(int evt, int spell_id) {
 }
 
 Lua_Mob lua_spawn2(int npc_type, int grid, int unused, double x, double y, double z, double heading) {
-	return Lua_Mob(quest_manager.spawn2(npc_type, grid, unused,
-		static_cast<float>(x), static_cast<float>(y), static_cast<float>(z), static_cast<float>(heading)));
+	auto position = glm::vec4(x, y, z, heading);
+	return Lua_Mob(quest_manager.spawn2(npc_type, grid, unused, position));
 }
 
 Lua_Mob lua_unique_spawn(int npc_type, int grid, int unused, double x, double y, double z, double heading = 0.0) {
-	return Lua_Mob(quest_manager.unique_spawn(npc_type, grid, unused,
-		static_cast<float>(x), static_cast<float>(y), static_cast<float>(z), static_cast<float>(heading)));
+	auto position = glm::vec4(x, y, z, heading);
+	return Lua_Mob(quest_manager.unique_spawn(npc_type, grid, unused, position));
 }
 
 Lua_Mob lua_spawn_from_spawn2(uint32 spawn2_id) {
@@ -421,15 +422,15 @@ void lua_pause(int duration) {
 }
 
 void lua_move_to(float x, float y, float z) {
-	quest_manager.moveto(x, y, z, 0, false);
+	quest_manager.moveto(glm::vec4(x, y, z, 0.0f), false);
 }
 
 void lua_move_to(float x, float y, float z, float h) {
-	quest_manager.moveto(x, y, z, h, false);
+	quest_manager.moveto(glm::vec4(x, y, z, h), false);
 }
 
 void lua_move_to(float x, float y, float z, float h, bool save_guard_spot) {
-	quest_manager.moveto(x, y, z, h, save_guard_spot);
+	quest_manager.moveto(glm::vec4(x, y, z, h), save_guard_spot);
 }
 
 void lua_path_resume() {
@@ -485,11 +486,11 @@ void lua_toggle_spawn_event(int event_id, bool enable, bool strict, bool reset) 
 }
 
 void lua_summon_burried_player_corpse(uint32 char_id, float x, float y, float z, float h) {
-	quest_manager.summonburriedplayercorpse(char_id, x, y, z, h);
+	quest_manager.summonburriedplayercorpse(char_id, glm::vec4(x, y, z, h));
 }
 
 void lua_summon_all_player_corpses(uint32 char_id, float x, float y, float z, float h) {
-	quest_manager.summonallplayercorpses(char_id, x, y, z, h);
+	quest_manager.summonallplayercorpses(char_id, glm::vec4(x, y, z, h));
 }
 
 int lua_get_player_burried_corpse_count(uint32 char_id) {
@@ -685,23 +686,23 @@ int lua_get_level(int type) {
 }
 
 void lua_create_ground_object(uint32 item_id, float x, float y, float z, float h) {
-	quest_manager.CreateGroundObject(item_id, x, y, z, h);
+	quest_manager.CreateGroundObject(item_id, glm::vec4(x, y, z, h));
 }
 
 void lua_create_ground_object(uint32 item_id, float x, float y, float z, float h, uint32 decay_time) {
-	quest_manager.CreateGroundObject(item_id, x, y, z, h, decay_time);
+	quest_manager.CreateGroundObject(item_id, glm::vec4(x, y, z, h), decay_time);
 }
 
 void lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h) {
-	quest_manager.CreateGroundObjectFromModel(model, x, y, z, h);
+	quest_manager.CreateGroundObjectFromModel(model, glm::vec4(x, y, z, h));
 }
 
 void lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h, int type) {
-	quest_manager.CreateGroundObjectFromModel(model, x, y, z, h, type);
+	quest_manager.CreateGroundObjectFromModel(model, glm::vec4(x, y, z, h), type);
 }
 
 void lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h, int type, uint32 decay_time) {
-	quest_manager.CreateGroundObjectFromModel(model, x, y, z, h, type, decay_time);
+	quest_manager.CreateGroundObjectFromModel(model, glm::vec4(x, y, z, h), type, decay_time);
 }
 
 void lua_create_door(const char *model, float x, float y, float z, float h, int open_type, int size) {
@@ -1036,7 +1037,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		int condition_min_value = 0;
 		bool enabled = true;
 		int animation = 0;
-		
+
 		auto cur = table["spawn2_id"];
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
@@ -1221,7 +1222,6 @@ std::string lua_get_encounter() {
 	return quest_manager.GetEncounter();
 }
 
-
 void lua_map_opcodes() {
 	MapOpcodes();
 }
@@ -1247,6 +1247,17 @@ double lua_clock() {
 	gettimeofday(&read_time, nullptr);
 	uint32 t = read_time.tv_sec * 1000 + read_time.tv_usec / 1000;
 	return static_cast<double>(t) / 1000.0;
+}
+
+void lua_debug(std::string message) {
+	Log.Out(Logs::General, Logs::QuestDebug, message);
+}
+
+void lua_debug(std::string message, int level) {
+	if (level < Logs::General || level > Logs::Detail)
+		return;
+
+	Log.Out(static_cast<Logs::DebugLevel>(level), Logs::QuestDebug, message);
 }
 
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
@@ -1284,7 +1295,7 @@ void lua_create_npc(luabind::adl::object table, float x, float y, float z, float
 	if(luabind::type(table) != LUA_TTABLE) {
 		return;
 	}
-	
+
 	NPCType* npc_type = new NPCType;
 	memset(npc_type, 0, sizeof(NPCType));
 
@@ -1356,7 +1367,7 @@ void lua_create_npc(luabind::adl::object table, float x, float y, float z, float
 	LuaCreateNPCParseString(special_abilities, 512, "");
 	LuaCreateNPCParse(d_melee_texture1, uint16, 0);
 	LuaCreateNPCParse(d_melee_texture2, uint16, 0);
-	LuaCreateNPCParseString(ammo_idfile, 32, "");
+	LuaCreateNPCParseString(ammo_idfile, 30, "");
 	LuaCreateNPCParse(prim_melee_type, uint8, 0);
 	LuaCreateNPCParse(sec_melee_type, uint8, 0);
 	LuaCreateNPCParse(ranged_type, uint8, 0);
@@ -1391,7 +1402,7 @@ void lua_create_npc(luabind::adl::object table, float x, float y, float z, float
 	LuaCreateNPCParse(raid_target, bool, false);
 	LuaCreateNPCParse(probability, uint8, 0);
 
-	NPC* npc = new NPC(npc_type, nullptr, x, y, z, heading, FlyMode3);
+	NPC* npc = new NPC(npc_type, nullptr, glm::vec4(x, y, z, heading), FlyMode3);
 	npc->GiveNPCTypeData(npc_type);
 	entity_list.AddNPC(npc);
 }
@@ -1582,7 +1593,9 @@ luabind::scope lua_register_general() {
 		luabind::def("disable_recipe", &lua_disable_recipe),
 		luabind::def("clear_npctype_cache", &lua_clear_npctype_cache),
 		luabind::def("clock", &lua_clock),
-		luabind::def("create_npc", &lua_create_npc)
+		luabind::def("create_npc", &lua_create_npc),
+		luabind::def("debug", (void(*)(std::string))&lua_debug),
+		luabind::def("debug", (void(*)(std::string, int))&lua_debug)
 	];
 }
 
@@ -1612,6 +1625,7 @@ luabind::scope lua_register_events() {
 			luabind::value("cast_on", static_cast<int>(EVENT_CAST_ON)),
 			luabind::value("task_accepted", static_cast<int>(EVENT_TASK_ACCEPTED)),
 			luabind::value("task_stage_complete", static_cast<int>(EVENT_TASK_STAGE_COMPLETE)),
+			luabind::value("environmental_damage", static_cast<int>(EVENT_ENVIRONMENTAL_DAMAGE)),
 			luabind::value("task_update", static_cast<int>(EVENT_TASK_UPDATE)),
 			luabind::value("task_complete", static_cast<int>(EVENT_TASK_COMPLETE)),
 			luabind::value("task_fail", static_cast<int>(EVENT_TASK_FAIL)),
@@ -1758,12 +1772,14 @@ luabind::scope lua_register_client_version() {
 	return luabind::class_<ClientVersions>("ClientVersion")
 		.enum_("constants")
 		[
-			luabind::value("Unknown", static_cast<int>(EQClientUnknown)),
-			luabind::value("Titanium", static_cast<int>(EQClientTitanium)),
-			luabind::value("SoF", static_cast<int>(EQClientSoF)),
-			luabind::value("SoD", static_cast<int>(EQClientSoD)),
-			luabind::value("Underfoot", static_cast<int>(EQClientUnderfoot)),
-			luabind::value("RoF", static_cast<int>(EQClientRoF))
+			luabind::value("Unknown", static_cast<int>(ClientVersion::Unknown)),
+			luabind::value("Titanium", static_cast<int>(ClientVersion::Titanium)),
+			luabind::value("SoF", static_cast<int>(ClientVersion::SoF)),
+			luabind::value("SoD", static_cast<int>(ClientVersion::SoD)),
+			luabind::value("Underfoot", static_cast<int>(ClientVersion::UF)), // deprecated
+			luabind::value("UF", static_cast<int>(ClientVersion::UF)),
+			luabind::value("RoF", static_cast<int>(ClientVersion::RoF)),
+			luabind::value("RoF2", static_cast<int>(ClientVersion::RoF2))
 		];
 }
 

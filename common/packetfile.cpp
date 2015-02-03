@@ -221,7 +221,6 @@ OldPacketFileReader::~OldPacketFileReader() {
 bool OldPacketFileReader::OpenFile(const char *name) {
 	CloseFile();
 
-	//printf("Opening packet file: %s\n", name);
 
 	in = fopen(name, "rb");
 	if(in == NULL) {
@@ -263,7 +262,6 @@ void OldPacketFileReader::CloseFile() {
 	if(in != NULL) {
 		fclose(in);
 		in = NULL;
-		//printf("Closed packet file.\n");
 	}
 }
 
@@ -334,7 +332,6 @@ NewPacketFileReader::~NewPacketFileReader() {
 bool NewPacketFileReader::OpenFile(const char *name) {
 	CloseFile();
 
-	//printf("Opening packet file: %s\n", name);
 
 	in = fopen(name, "rb");
 	if(in == NULL) {
@@ -376,7 +373,6 @@ void NewPacketFileReader::CloseFile() {
 	if(in != NULL) {
 		fclose(in);
 		in = NULL;
-		//printf("Closed packet file.\n");
 	}
 }
 

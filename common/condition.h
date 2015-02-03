@@ -18,7 +18,8 @@
 #ifndef __CONDITION_H
 #define __CONDITION_H
 
-#include "debug.h"
+#include "global_define.h"
+#include "mutex.h"
 #ifndef WIN32
 #include <pthread.h>
 #endif

@@ -18,7 +18,7 @@
 
 #ifdef EMBPERL
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/seperator.h"
 #include "../common/misc_functions.h"
 #include "../common/string_util.h"
@@ -65,6 +65,7 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_AGGRO_SAY",
 	"EVENT_PLAYER_PICKUP",
 	"EVENT_POPUPRESPONSE",
+	"EVENT_ENVIRONMENTAL_DAMAGE",
 	"EVENT_PROXIMITY_SAY",
 	"EVENT_CAST",
 	"EVENT_CAST_BEGIN",
@@ -140,7 +141,7 @@ void PerlembParser::ReloadQuests() {
 			perl = nullptr;
 		}
 
-		LogFile->write(EQEMuLog::Status, "Error re-initializing perlembed: %s", e.what());
+		Log.Out(Logs::General, Logs::Status, "Error re-initializing perlembed: %s", e.what());
 		throw e.what();
 	}
 
@@ -1143,7 +1144,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 					ItemInst *inst = EQEmu::any_cast<ItemInst*>(extra_pointers->at(i));
 
 					std::string var_name = "item";
-					var_name += std::to_string(static_cast<long long>(i + 1));
+					var_name += std::to_string(i + 1);
 
 					if(inst) {
 						ExportVar(package_name.c_str(), var_name.c_str(), inst->GetItem()->ID);
@@ -1288,6 +1289,13 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 
 		case EVENT_POPUP_RESPONSE:{
 			ExportVar(package_name.c_str(), "popupid", data);
+			break;
+		}
+		case EVENT_ENVIRONMENTAL_DAMAGE:{
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "env_damage", sep.arg[0]);
+			ExportVar(package_name.c_str(), "env_damage_type", sep.arg[1]);
+			ExportVar(package_name.c_str(), "env_final_damage", sep.arg[2]);
 			break;
 		}
 

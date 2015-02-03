@@ -9,14 +9,13 @@ SET(zone_sources
 	bot.cpp
 	botspellsai.cpp
 	client.cpp
-	client_logs.cpp
 	client_mods.cpp
 	client_packet.cpp
 	client_process.cpp
 	command.cpp
 	corpse.cpp
 	doors.cpp
-	effects.cpp 
+	effects.cpp
 	embparser.cpp
 	embparser_api.cpp
 	embperl.cpp
@@ -92,6 +91,7 @@ SET(zone_sources
 	perlpacket.cpp
 	petitions.cpp
 	pets.cpp
+	position.cpp
 	qglobals.cpp
 	queryserv.cpp
 	questmgr.cpp
@@ -112,13 +112,13 @@ SET(zone_sources
 	trading.cpp
 	trap.cpp
 	tribute.cpp
+	tune.cpp
 	water_map.cpp
 	water_map_v1.cpp
 	water_map_v2.cpp
 	waypoints.cpp
 	worldserver.cpp
 	zone.cpp
-	zone_logsys.cpp
 	zone_config.cpp
 	zonedb.cpp
 	zoning.cpp
@@ -131,7 +131,6 @@ SET(zone_headers
 	bot.h
 	bot_structs.h
 	client.h
-	client_logs.h
 	client_packet.h
 	command.h
 	common.h
@@ -184,6 +183,7 @@ SET(zone_headers
 	perlpacket.h
 	petitions.h
 	pets.h
+	position.h
 	qglobals.h
 	quest_interface.h
 	queryserv.h

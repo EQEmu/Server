@@ -24,7 +24,7 @@
 extern ErrorLog *server_log;
 extern LoginServer server;
 
-Client::Client(EQStream *c, ClientVersion v)
+Client::Client(std::shared_ptr<EQStream> c, LSClientVersion v)
 {
 	connection = c;
 	version = v;

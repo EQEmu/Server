@@ -49,11 +49,7 @@ Mob::Mob(const char* in_name,
 		uint32		in_npctype_id,
 		float		in_size,
 		float		in_runspeed,
-		float		in_heading,
-		float		in_x_pos,
-		float		in_y_pos,
-		float		in_z_pos,
-
+		const glm::vec4& position,
 		uint8		in_light,
 		uint8		in_texture,
 		uint8		in_helmtexture,
@@ -102,29 +98,21 @@ Mob::Mob(const char* in_name,
 		bardsong_timer(6000),
 		gravity_timer(1000),
 		viral_timer(0),
-		flee_timer(FLEE_CHECK_TIMER)
-
+		m_FearWalkTarget(-999999.0f,-999999.0f,-999999.0f),
+		m_TargetLocation(glm::vec3()),
+		m_TargetV(glm::vec3()),
+		flee_timer(FLEE_CHECK_TIMER),
+		m_Position(position)
 {
 	targeted = 0;
 	tar_ndx=0;
 	tar_vector=0;
-	tar_vx=0;
-	tar_vy=0;
-	tar_vz=0;
-	tarx=0;
-	tary=0;
-	tarz=0;
-	fear_walkto_x = -999999;
-	fear_walkto_y = -999999;
-	fear_walkto_z = -999999;
 	curfp = false;
 
 	AI_Init();
 	SetMoving(false);
 	moved=false;
-	rewind_x = 0;		//Stored x_pos for /rewind
-	rewind_y = 0;		//Stored y_pos for /rewind
-	rewind_z = 0;		//Stored z_pos for /rewind
+	m_RewindLocation = glm::vec3();
 	move_tic_count = 0;
 
 	_egnode = nullptr;
@@ -161,11 +149,9 @@ Mob::Mob(const char* in_name,
 	if (runspeed < 0 || runspeed > 20)
 		runspeed = 1.25f;
 
-	heading		= in_heading;
-	x_pos		= in_x_pos;
-	y_pos		= in_y_pos;
-	z_pos		= in_z_pos;
-	light		= in_light;
+	active_light = innate_light = in_light;
+	spell_light = equip_light = NOT_USED;
+
 	texture		= in_texture;
 	helmtexture	= in_helmtexture;
 	haircolor	= in_haircolor;
@@ -259,10 +245,7 @@ Mob::Mob(const char* in_name,
 		}
 	}
 
-	delta_heading = 0;
-	delta_x = 0;
-	delta_y = 0;
-	delta_z = 0;
+	m_Delta = glm::vec4();
 	animation = 0;
 
 	logging_enabled = false;
@@ -335,17 +318,12 @@ Mob::Mob(const char* in_name,
 	wandertype=0;
 	pausetype=0;
 	cur_wp = 0;
-	cur_wp_x = 0;
-	cur_wp_y = 0;
-	cur_wp_z = 0;
+	m_CurrentWayPoint = glm::vec4();
 	cur_wp_pause = 0;
 	patrol=0;
 	follow=0;
 	follow_dist = 100;	// Default Distance for Follow
 	flee_mode = false;
-	fear_walkto_x = -999999;
-	fear_walkto_y = -999999;
-	fear_walkto_z = -999999;
 	curfp = false;
 	flee_timer.Start();
 
@@ -387,9 +365,7 @@ Mob::Mob(const char* in_name,
 	nimbus_effect3 = 0;
 	m_targetable = true;
 
-	targetring_x = 0.0f;
-	targetring_y = 0.0f; 
-	targetring_z = 0.0f;
+    m_TargetRing = glm::vec3();
 
 	flymode = FlyMode3;
 	// Pathing
@@ -908,10 +884,10 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
 	}
 
-	ns->spawn.heading	= FloatToEQ19(heading);
-	ns->spawn.x			= FloatToEQ19(x_pos);//((int32)x_pos)<<3;
-	ns->spawn.y			= FloatToEQ19(y_pos);//((int32)y_pos)<<3;
-	ns->spawn.z			= FloatToEQ19(z_pos);//((int32)z_pos)<<3;
+	ns->spawn.heading	= FloatToEQ19(m_Position.w);
+	ns->spawn.x			= FloatToEQ19(m_Position.x);//((int32)x_pos)<<3;
+	ns->spawn.y			= FloatToEQ19(m_Position.y);//((int32)y_pos)<<3;
+	ns->spawn.z			= FloatToEQ19(m_Position.z);//((int32)z_pos)<<3;
 	ns->spawn.spawnId	= GetID();
 	ns->spawn.curHp	= static_cast<uint8>(GetHPRatio());
 	ns->spawn.max_hp	= 100;		//this field needs a better name
@@ -924,7 +900,10 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.deity		= deity;
 	ns->spawn.animation	= 0;
 	ns->spawn.findable	= findable?1:0;
-	ns->spawn.light		= light;
+
+	UpdateActiveLightValue();
+	ns->spawn.light		= active_light;
+
 	ns->spawn.showhelm = (helmtexture && helmtexture != 0xFF) ? 1 : 0;
 
 	ns->spawn.invis		= (invisible || hidden) ? 1 : 0;	// TODO: load this before spawning players
@@ -966,13 +945,9 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	// 3 - Mobs in water do not sink. A value of 3 in this field appears to be the default setting for all mobs
 	// (in water or not) according to 6.2 era packet collects.
 	if(IsClient())
-	{
 		ns->spawn.flymode = FindType(SE_Levitate) ? 2 : 0;
-	}
 	else
-	{
 		ns->spawn.flymode = flymode;
-	}
 
 	ns->spawn.lastName[0] = '\0';
 
@@ -1240,13 +1215,13 @@ void Mob::SendPosUpdate(uint8 iSendToSelf) {
 void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu){
 	memset(spu,0xff,sizeof(PlayerPositionUpdateServer_Struct));
 	spu->spawn_id	= GetID();
-	spu->x_pos		= FloatToEQ19(x_pos);
-	spu->y_pos		= FloatToEQ19(y_pos);
-	spu->z_pos		= FloatToEQ19(z_pos);
+	spu->x_pos		= FloatToEQ19(m_Position.x);
+	spu->y_pos		= FloatToEQ19(m_Position.y);
+	spu->z_pos		= FloatToEQ19(m_Position.z);
 	spu->delta_x	= NewFloatToEQ13(0);
 	spu->delta_y	= NewFloatToEQ13(0);
 	spu->delta_z	= NewFloatToEQ13(0);
-	spu->heading	= FloatToEQ19(heading);
+	spu->heading	= FloatToEQ19(m_Position.w);
 	spu->animation	= 0;
 	spu->delta_heading = NewFloatToEQ13(0);
 	spu->padding0002	=0;
@@ -1271,13 +1246,13 @@ void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu){
 // this is for SendPosUpdate()
 void Mob::MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu) {
 	spu->spawn_id	= GetID();
-	spu->x_pos		= FloatToEQ19(x_pos);
-	spu->y_pos		= FloatToEQ19(y_pos);
-	spu->z_pos		= FloatToEQ19(z_pos);
-	spu->delta_x	= NewFloatToEQ13(delta_x);
-	spu->delta_y	= NewFloatToEQ13(delta_y);
-	spu->delta_z	= NewFloatToEQ13(delta_z);
-	spu->heading	= FloatToEQ19(heading);
+	spu->x_pos		= FloatToEQ19(m_Position.x);
+	spu->y_pos		= FloatToEQ19(m_Position.y);
+	spu->z_pos		= FloatToEQ19(m_Position.z);
+	spu->delta_x	= NewFloatToEQ13(m_Delta.x);
+	spu->delta_y	= NewFloatToEQ13(m_Delta.y);
+	spu->delta_z	= NewFloatToEQ13(m_Delta.z);
+	spu->heading	= FloatToEQ19(m_Position.w);
 	spu->padding0002	=0;
 	spu->padding0006	=7;
 	spu->padding0014	=0x7f;
@@ -1286,7 +1261,7 @@ void Mob::MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu) {
 		spu->animation = animation;
 	else
 		spu->animation	= pRunAnimSpeed;
-	spu->delta_heading = NewFloatToEQ13(static_cast<float>(delta_heading));
+	spu->delta_heading = NewFloatToEQ13(m_Delta.w);
 }
 
 void Mob::ShowStats(Client* client)
@@ -1308,7 +1283,7 @@ void Mob::ShowStats(Client* client)
 		client->Message(0, "  Mana: %i  Max Mana: %i", GetMana(), GetMaxMana());
 		client->Message(0, "  Total ATK: %i  Worn/Spell ATK (Cap %i): %i", GetATK(), RuleI(Character, ItemATKCap), GetATKBonus());
 		client->Message(0, "  STR: %i  STA: %i  DEX: %i  AGI: %i  INT: %i  WIS: %i  CHA: %i", GetSTR(), GetSTA(), GetDEX(), GetAGI(), GetINT(), GetWIS(), GetCHA());
-		client->Message(0, "  MR: %i  PR: %i  FR: %i  CR: %i  DR: %i Corruption: %i", GetMR(), GetPR(), GetFR(), GetCR(), GetDR(), GetCorrup());
+		client->Message(0, "  MR: %i  PR: %i  FR: %i  CR: %i  DR: %i Corruption: %i PhR: %i", GetMR(), GetPR(), GetFR(), GetCR(), GetDR(), GetCorrup(), GetPhR());
 		client->Message(0, "  Race: %i  BaseRace: %i  Texture: %i  HelmTexture: %i  Gender: %i  BaseGender: %i", GetRace(), GetBaseRace(), GetTexture(), GetHelmTexture(), GetGender(), GetBaseGender());
 		if (client->Admin() >= 100)
 			client->Message(0, "  EntityID: %i  PetID: %i  OwnerID: %i AIControlled: %i Targetted: %i", GetID(), GetPetID(), GetOwnerID(), IsAIControlled(), targeted);
@@ -1402,11 +1377,11 @@ void Mob::GMMove(float x, float y, float z, float heading, bool SendUpdate) {
 		entity_list.ProcessMove(CastToNPC(), x, y, z);
 	}
 
-	x_pos = x;
-	y_pos = y;
-	z_pos = z;
-	if (heading != 0.01)
-		this->heading = heading;
+	m_Position.x = x;
+	m_Position.y = y;
+	m_Position.z = z;
+	if (m_Position.w != 0.01)
+		this->m_Position.w = heading;
 	if(IsNPC())
 		CastToNPC()->SaveGuardSpot(true);
 	if(SendUpdate)
@@ -1570,7 +1545,6 @@ void Mob::SendIllusionPacket(uint16 in_race, uint8 in_gender, uint8 in_texture, 
 	}
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Illusion, sizeof(Illusion_Struct));
-	memset(outapp->pBuffer, 0, sizeof(outapp->pBuffer));
 	Illusion_Struct* is = (Illusion_Struct*) outapp->pBuffer;
 	is->spawnid = GetID();
 	strcpy(is->charname, GetCleanName());
@@ -1592,7 +1566,7 @@ void Mob::SendIllusionPacket(uint16 in_race, uint8 in_gender, uint8 in_texture, 
 
 	entity_list.QueueClients(this, outapp);
 	safe_delete(outapp);
-	mlog(CLIENT__SPELLS, "Illusion: Race = %i, Gender = %i, Texture = %i, HelmTexture = %i, HairColor = %i, BeardColor = %i, EyeColor1 = %i, EyeColor2 = %i, HairStyle = %i, Face = %i, DrakkinHeritage = %i, DrakkinTattoo = %i, DrakkinDetails = %i, Size = %f",
+	Log.Out(Logs::Detail, Logs::Spells, "Illusion: Race = %i, Gender = %i, Texture = %i, HelmTexture = %i, HairColor = %i, BeardColor = %i, EyeColor1 = %i, EyeColor2 = %i, HairStyle = %i, Face = %i, DrakkinHeritage = %i, DrakkinTattoo = %i, DrakkinDetails = %i, Size = %f",
 		race, gender, texture, helmtexture, haircolor, beardcolor, eyecolor1, eyecolor2, hairstyle, luclinface, drakkin_heritage, drakkin_tattoo, drakkin_details, size);
 }
 
@@ -1811,7 +1785,6 @@ bool Mob::IsPlayerRace(uint16 in_race) {
 
 
 uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
-//std::cout << "Gender in: " << (int)in_gender << std::endl; // undefined cout [CODEBUG]
 	if (Mob::IsPlayerRace(in_race) || in_race == 15 || in_race == 50 || in_race == 57 || in_race == 70 || in_race == 98 || in_race == 118) {
 		if (in_gender >= 2) {
 			// Male default for PC Races
@@ -1936,7 +1909,6 @@ void Mob::SendTargetable(bool on, Client *specific_target) {
 void Mob::QuestReward(Client *c, uint32 silver, uint32 gold, uint32 platinum) {
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Sound, sizeof(QuestReward_Struct));
-	memset(outapp->pBuffer, 0, sizeof(outapp->pBuffer));
 	QuestReward_Struct* qr = (QuestReward_Struct*) outapp->pBuffer;
 
 	qr->from_mob = GetID();		// Entity ID for the from mob name
@@ -1956,7 +1928,6 @@ void Mob::CameraEffect(uint32 duration, uint32 intensity, Client *c, bool global
 	if(global == true)
 	{
 		ServerPacket* pack = new ServerPacket(ServerOP_CameraShake, sizeof(ServerCameraShake_Struct));
-		memset(pack->pBuffer, 0, sizeof(pack->pBuffer));
 		ServerCameraShake_Struct* scss = (ServerCameraShake_Struct*) pack->pBuffer;
 		scss->duration = duration;
 		scss->intensity = intensity;
@@ -1966,7 +1937,6 @@ void Mob::CameraEffect(uint32 duration, uint32 intensity, Client *c, bool global
 	}
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CameraEffect, sizeof(Camera_Struct));
-	memset(outapp->pBuffer, 0, sizeof(outapp->pBuffer));
 	Camera_Struct* cs = (Camera_Struct*) outapp->pBuffer;
 	cs->duration = duration;	// Duration in milliseconds
 	cs->intensity = ((intensity * 6710886) + 1023410176);	// Intensity ranges from 1023410176 to 1090519040, so simplify it from 0 to 10.
@@ -1982,7 +1952,6 @@ void Mob::CameraEffect(uint32 duration, uint32 intensity, Client *c, bool global
 void Mob::SendSpellEffect(uint32 effectid, uint32 duration, uint32 finish_delay, bool zone_wide, uint32 unk020, bool perm_effect, Client *c) {
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpellEffect, sizeof(SpellEffect_Struct));
-	memset(outapp->pBuffer, 0, sizeof(outapp->pBuffer));
 	SpellEffect_Struct* se = (SpellEffect_Struct*) outapp->pBuffer;
 	se->EffectID = effectid;	// ID of the Particle Effect
 	se->EntityID = GetID();
@@ -2034,7 +2003,6 @@ void Mob::TempName(const char *newname)
 
 	// Send the new name to all clients
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_MobRename, sizeof(MobRename_Struct));
-	memset(outapp->pBuffer, 0, sizeof(outapp->pBuffer));
 	MobRename_Struct* mr = (MobRename_Struct*) outapp->pBuffer;
 	strn0cpy(mr->old_name, old_name, 64);
 	strn0cpy(mr->old_name_again, old_name, 64);
@@ -2075,6 +2043,39 @@ void Mob::SetAppearance(EmuAppearance app, bool iIgnoreSelf) {
 		if (this->IsClient() && this->IsAIControlled())
 			SendAppearancePacket(AT_Anim, ANIM_FREEZE, false, false);
 	}
+}
+
+bool Mob::UpdateActiveLightValue()
+{
+	/*	This is old information...
+		0 - "None"
+		1 - "Candle"
+		2 - "Torch"
+		3 - "Tiny Glowing Skull"
+		4 - "Small Lantern"
+		5 - "Stein of Moggok"
+		6 - "Large Lantern"
+		7 - "Flameless Lantern"
+		8 - "Globe of Stars"
+		9 - "Light Globe"
+		10 - "Lightstone"
+		11 - "Greater Lightstone"
+		12 - "Fire Beatle Eye"
+		13 - "Coldlight"
+		14 - "Unknown"
+		15 - "Unknown"
+	*/
+	
+	uint8 old_light = (active_light & 0x0F);
+	active_light = (innate_light & 0x0F);
+
+	if (equip_light > active_light) { active_light = equip_light; } // limiter in property handler
+	if (spell_light > active_light) { active_light = spell_light; } // limiter in property handler
+
+	if (active_light != old_light)
+		return true;
+
+	return false;
 }
 
 void Mob::ChangeSize(float in_size = 0, bool bNoRestriction) {
@@ -2319,59 +2320,7 @@ bool Mob::CanThisClassBlock(void) const
 		return(CastToClient()->HasSkill(SkillBlock));
 	}
 }
-
-float Mob::Dist(const Mob &other) const {
-	float xDiff = other.x_pos - x_pos;
-	float yDiff = other.y_pos - y_pos;
-	float zDiff = other.z_pos - z_pos;
-
-	return sqrtf( (xDiff * xDiff)
-				+ (yDiff * yDiff)
-				+ (zDiff * zDiff) );
-}
-
-float Mob::DistNoZ(const Mob &other) const {
-	float xDiff = other.x_pos - x_pos;
-	float yDiff = other.y_pos - y_pos;
-
-	return sqrtf( (xDiff * xDiff)
-				+ (yDiff * yDiff) );
-}
-
-float Mob::DistNoRoot(const Mob &other) const {
-	float xDiff = other.x_pos - x_pos;
-	float yDiff = other.y_pos - y_pos;
-	float zDiff = other.z_pos - z_pos;
-
-	return ( (xDiff * xDiff)
-			+ (yDiff * yDiff)
-			+ (zDiff * zDiff) );
-}
-
-float Mob::DistNoRoot(float x, float y, float z) const {
-	float xDiff = x - x_pos;
-	float yDiff = y - y_pos;
-	float zDiff = z - z_pos;
-
-	return ( (xDiff * xDiff)
-			+ (yDiff * yDiff)
-			+ (zDiff * zDiff) );
-}
-
-float Mob::DistNoRootNoZ(float x, float y) const {
-	float xDiff = x - x_pos;
-	float yDiff = y - y_pos;
-
-	return ( (xDiff * xDiff) + (yDiff * yDiff) );
-}
-
-float Mob::DistNoRootNoZ(const Mob &other) const {
-	float xDiff = other.x_pos - x_pos;
-	float yDiff = other.y_pos - y_pos;
-
-	return ( (xDiff * xDiff) + (yDiff * yDiff) );
-}
-
+/*
 float Mob::GetReciprocalHeading(Mob* target) {
 	float Result = 0;
 
@@ -2388,7 +2337,7 @@ float Mob::GetReciprocalHeading(Mob* target) {
 
 	return Result;
 }
-
+*/
 bool Mob::PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, float &z_dest, bool lookForAftArc) {
 	bool Result = false;
 
@@ -2396,7 +2345,7 @@ bool Mob::PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, fl
 		float look_heading = 0;
 
 		if(lookForAftArc)
-			look_heading = GetReciprocalHeading(target);
+			look_heading = GetReciprocalHeading(target->GetPosition());
 		else
 			look_heading = target->GetHeading();
 
@@ -2512,20 +2461,18 @@ bool Mob::HateSummon() {
 			entity_list.MessageClose(this, true, 500, MT_Say, "%s says,'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName() );
 
 			if (target->IsClient()) {
-				target->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x_pos, y_pos, z_pos, target->GetHeading(), 0, SummonPC);
+				target->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), m_Position.x, m_Position.y, m_Position.z, target->GetHeading(), 0, SummonPC);
 			}
 			else {
 #ifdef BOTS
 				if(target && target->IsBot()) {
 					// set pre summoning info to return to (to get out of melee range for caster)
 					target->CastToBot()->SetHasBeenSummoned(true);
-					target->CastToBot()->SetPreSummonX(target->GetX());
-					target->CastToBot()->SetPreSummonY(target->GetY());
-					target->CastToBot()->SetPreSummonZ(target->GetZ());
+					target->CastToBot()->SetPreSummonLocation(glm::vec3(target->GetPosition()));
 
 				}
 #endif //BOTS
-				target->GMMove(x_pos, y_pos, z_pos, target->GetHeading());
+				target->GMMove(m_Position.x, m_Position.y, m_Position.z, target->GetHeading());
 			}
 
 			return true;
@@ -2703,7 +2650,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 	int32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 	const Item_Struct *item;
 	item = database.GetItem(GetEquipment(material_slot));
-	
+
 	if (item != 0)
 	{
 		// For primary and secondary we need the model, not the material
@@ -2814,14 +2761,10 @@ uint32 Mob::GetEquipmentColor(uint8 material_slot) const
 	{
 		return armor_tint[material_slot];
 	}
-	else
-	{
-		item = database.GetItem(GetEquipment(material_slot));
-		if (item != 0)
-		{
-			return item->Color;
-		}
-	}
+
+	item = database.GetItem(GetEquipment(material_slot));
+	if (item != 0)
+		return item->Color;
 
 	return 0;
 }
@@ -2865,7 +2808,7 @@ void Mob::Say(const char *format, ...)
 }
 
 //
-// solar: this is like the above, but the first parameter is a string id
+// this is like the above, but the first parameter is a string id
 //
 void Mob::Say_StringID(uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
 {
@@ -2943,20 +2886,16 @@ void Mob::SetNextIncHPEvent( int inchpevent )
 	nextinchpevent = inchpevent;
 }
 //warp for quest function,from sandy
-void Mob::Warp( float x, float y, float z )
+void Mob::Warp(const glm::vec3& location)
 {
-	if(IsNPC()) {
-		entity_list.ProcessMove(CastToNPC(), x, y, z);
-	}
+	if(IsNPC())
+		entity_list.ProcessMove(CastToNPC(), location.x, location.y, location.z);
 
-	x_pos = x;
-	y_pos = y;
-	z_pos = z;
+	m_Position = glm::vec4(location, m_Position.w);
 
 	Mob* target = GetTarget();
-	if (target) {
+	if (target)
 		FaceTarget( target );
-	}
 
 	SendPosition();
 }
@@ -2994,7 +2933,6 @@ int16 Mob::GetResist(uint8 type) const
 
 uint32 Mob::GetLevelHP(uint8 tlevel)
 {
-	//std::cout<<"Tlevel: "<<(int)tlevel<<std::endl; // cout undefined [CODEBUG]
 	int multiplier = 0;
 	if (tlevel < 10)
 	{
@@ -3042,7 +2980,7 @@ int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
 	}
 
 	casttime = (casttime*(100 - cast_reducer)/100);
-	return(casttime);
+	return casttime;
 }
 
 void Mob::ExecWeaponProc(const ItemInst *inst, uint16 spell_id, Mob *on) {
@@ -3059,7 +2997,7 @@ void Mob::ExecWeaponProc(const ItemInst *inst, uint16 spell_id, Mob *on) {
 	if(!IsValidSpell(spell_id)) { // Check for a valid spell otherwise it will crash through the function
 		if(IsClient()){
 			Message(0, "Invalid spell proc %u", spell_id);
-			mlog(CLIENT__SPELLS, "Player %s, Weapon Procced invalid spell %u", this->GetName(), spell_id);
+			Log.Out(Logs::Detail, Logs::Spells, "Player %s, Weapon Procced invalid spell %u", this->GetName(), spell_id);
 		}
 		return;
 	}
@@ -3077,7 +3015,8 @@ void Mob::ExecWeaponProc(const ItemInst *inst, uint16 spell_id, Mob *on) {
 	bool twinproc = false;
 	int32 twinproc_chance = 0;
 
-	twinproc_chance = GetFocusEffect(focusTwincast, spell_id);
+	if(IsClient())
+		twinproc_chance = CastToClient()->GetFocusEffect(focusTwincast, spell_id);
 
 	if(twinproc_chance && zone->random.Roll(twinproc_chance))
 		twinproc = true;
@@ -3168,11 +3107,11 @@ float Mob::FindGroundZ(float new_x, float new_y, float z_offset)
 	float ret = -999999;
 	if (zone->zonemap != nullptr)
 	{
-		Map::Vertex me;
+		glm::vec3 me;
 		me.x = new_x;
 		me.y = new_y;
-		me.z = z_pos+z_offset;
-		Map::Vertex hit;
+		me.z = m_Position.z + z_offset;
+		glm::vec3 hit;
 		float best_z = zone->zonemap->FindBestZ(me, &hit);
 		if (best_z != -999999)
 		{
@@ -3188,11 +3127,11 @@ float Mob::GetGroundZ(float new_x, float new_y, float z_offset)
 	float ret = -999999;
 	if (zone->zonemap != 0)
 	{
-		Map::Vertex me;
+		glm::vec3 me;
 		me.x = new_x;
 		me.y = new_y;
-		me.z = z_pos+z_offset;
-		Map::Vertex hit;
+		me.z = m_Position.z+z_offset;
+		glm::vec3 hit;
 		float best_z = zone->zonemap->FindBestZ(me, &hit);
 		if (best_z != -999999)
 		{
@@ -3241,8 +3180,8 @@ int Mob::GetSnaredAmount()
 			{
 				int val = CalcSpellEffectValue_formula(spells[buffs[i].spellid].formula[j], spells[buffs[i].spellid].base[j], spells[buffs[i].spellid].max[j], buffs[i].casterlevel, buffs[i].spellid);
 				//int effect = CalcSpellEffectValue(buffs[i].spellid, spells[buffs[i].spellid].effectid[j], buffs[i].casterlevel);
-				if (val < 0 && abs(val) > worst_snare)
-					worst_snare = abs(val);
+				if (val < 0 && std::abs(val) > worst_snare)
+					worst_snare = std::abs(val);
 			}
 		}
 	}
@@ -3286,11 +3225,8 @@ void Mob::TriggerDefensiveProcs(const ItemInst* weapon, Mob *on, uint16 hand, in
 	}
 }
 
-void Mob::SetDeltas(float dx, float dy, float dz, float dh) {
-	delta_x = dx;
-	delta_y = dy;
-	delta_z = dz;
-	delta_heading = static_cast<int>(dh);
+void Mob::SetDelta(const glm::vec4& delta) {
+	m_Delta = delta;
 }
 
 void Mob::SetEntityVariable(const char *id, const char *m_var)
@@ -3399,7 +3335,7 @@ void Mob::TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger)
 
 		if(IsValidSpell(trigger_spell_id) && GetTarget()){
 			SpellFinished(trigger_spell_id, GetTarget(),10, 0, -1, spells[trigger_spell_id].ResistDiff);
-			CheckNumHitsRemaining(NUMHIT_MatchingSpells,-1, focus_spell);
+			CheckNumHitsRemaining(NumHit::MatchingSpells, -1, focus_spell);
 		}
 	}
 }
@@ -3631,7 +3567,7 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 		value += tmp_focus;
 
 		if (tmp_buffslot >= 0)
-			CheckNumHitsRemaining(NUMHIT_MatchingSpells, tmp_buffslot);
+			CheckNumHitsRemaining(NumHit::MatchingSpells, tmp_buffslot);
 	}
 	return value;
 }
@@ -3736,7 +3672,7 @@ void Mob::TrySympatheticProc(Mob *target, uint32 spell_id)
 					SpellFinished(focus_trigger, target, 10, 0, -1, spells[focus_trigger].ResistDiff);
 			}
 
-			CheckNumHitsRemaining(NUMHIT_MatchingSpells, -1, focus_spell);
+			CheckNumHitsRemaining(NumHit::MatchingSpells, -1, focus_spell);
 		}
 }
 
@@ -4552,7 +4488,7 @@ void Mob::MeleeLifeTap(int32 damage) {
 	if(lifetap_amt && damage > 0){
 
 		lifetap_amt = damage * lifetap_amt / 100;
-		mlog(COMBAT__DAMAGE, "Melee lifetap healing for %d damage.", damage);
+		Log.Out(Logs::Detail, Logs::Combat, "Melee lifetap healing for %d damage.", damage);
 
 		if (lifetap_amt > 0)
 			HealDamage(lifetap_amt); //Heal self for modified damage amount.
@@ -4611,7 +4547,8 @@ void Mob::DoGravityEffect()
 					if(value > 0)
 						away = 1;
 
-					amount = fabs(value) / (100.0f); // to bring the values in line, arbitarily picked
+					amount = std::abs(value) /
+						 (100.0f); // to bring the values in line, arbitarily picked
 
 					x_vector = cur_x - caster_x;
 					y_vector = cur_y - caster_y;
@@ -4630,7 +4567,7 @@ void Mob::DoGravityEffect()
 		}
 	}
 
-	if((fabs(my_x - cur_x) > 0.01) || (fabs(my_y - cur_y) > 0.01)) {
+	if ((std::abs(my_x - cur_x) > 0.01) || (std::abs(my_y - cur_y) > 0.01)) {
 		float new_ground = GetGroundZ(cur_x, cur_y);
 		// If we cant get LoS on our new spot then keep checking up to 5 units up.
 		if(!CheckLosFN(cur_x, cur_y, new_ground, GetSize())) {
@@ -5290,7 +5227,7 @@ bool Mob::IsFacingMob(Mob *other)
 	if (angle < 40.0 && heading > 472.0)
 		angle = heading;
 
-	if (fabs(angle - heading) <= 80.0)
+	if (std::abs(angle - heading) <= 80.0)
 		return true;
 
 	return false;
@@ -5304,8 +5241,8 @@ float Mob::HeadingAngleToMob(Mob *other)
 	float this_x = GetX();
 	float this_y = GetY();
 
-	float y_diff = fabs(this_y - mob_y);
-	float x_diff = fabs(this_x - mob_x);
+	float y_diff = std::abs(this_y - mob_y);
+	float x_diff = std::abs(this_x - mob_x);
 	if (y_diff < 0.0000009999999974752427)
 		y_diff = 0.0000009999999974752427;
 

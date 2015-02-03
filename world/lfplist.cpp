@@ -21,7 +21,7 @@
 #include "clientlist.h"
 #include "zoneserver.h"
 #include "zonelist.h"
-#include "../common/logsys.h"
+
 #include "../common/misc_functions.h"
 
 extern ClientList client_list;
@@ -30,11 +30,11 @@ extern ZSList zoneserver_list;
 GroupLFP::GroupLFP(uint32 inLeaderID) {
 
 	LeaderID = inLeaderID;
-	for(unsigned int i=0; i<MAX_GROUP_MEMBERS; i++) {
-		Members[i].Name[0] = '\0';
-		Members[i].Class = 0;
-		Members[i].Level = 0;
-		Members[i].Zone = 0;
+	for (auto &member : Members) {
+		member.Name[0] = '\0';
+		member.Class = 0;
+		member.Level = 0;
+		member.Zone = 0;
 	}
 	FromLevel = 1;
 	ToLevel = 100;
@@ -228,7 +228,7 @@ void GroupLFPList::SendLFPMatches(ServerLFPMatchesRequest_Struct* smrs) {
 		}
 	}
 
-	ServerPacket* Pack = new ServerPacket(ServerOP_LFPMatches, (sizeof(ServerLFPMatchesResponse_Struct) * Matches) + 4);
+	auto Pack = new ServerPacket(ServerOP_LFPMatches, (sizeof(ServerLFPMatchesResponse_Struct) * Matches) + 4);
 
 	char *Buf = (char *)Pack->pBuffer;
 

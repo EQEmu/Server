@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "../common/patches/titanium_constants.h"
 #include "../common/patches/sof_constants.h"
 #include "../common/patches/sod_constants.h"
-#include "../common/patches/underfoot_constants.h"
+#include "../common/patches/uf_constants.h"
 #include "../common/patches/rof_constants.h"
 #include "../common/patches/rof2_constants.h"
 
@@ -46,15 +46,15 @@ class EmuConstants {
 	// an immutable value is required to initialize arrays, etc... use this class as a repository for those
 public:
 	// database
-	static const EQClientVersion CHARACTER_CREATION_CLIENT = EQClientRoF; // adjust according to starting item placement and target client
+	static const ClientVersion CHARACTER_CREATION_CLIENT = ClientVersion::RoF2; // adjust according to starting item placement and target client
 
 	// inventory
-	static uint16 InventoryMapSize(int16 map);
+	static uint16 InventoryMapSize(int16 indexMap);
 	//static std::string InventoryLocationName(Location_Struct location);
-	static std::string InventoryMapName(int16 map);
-	static std::string InventoryMainName(int16 main);
-	static std::string InventorySubName(int16 sub);
-	static std::string InventoryAugName(int16 aug);
+	static std::string InventoryMapName(int16 indexMap);
+	static std::string InventoryMainName(int16 indexMain);
+	static std::string InventorySubName(int16 indexSub);
+	static std::string InventoryAugName(int16 indexAug);
 
 	// these are currently hard-coded for existing inventory system..do not use in place of special client version handlers until ready
 	static const uint16	MAP_POSSESSIONS_SIZE = _MainCount;
@@ -149,6 +149,8 @@ public:
 	static const uint32 BANDOLIER_SIZE = Titanium::consts::BANDOLIER_SIZE;		// size = number of equipment slots in bandolier instance
 	static const uint32 POTION_BELT_SIZE = Titanium::consts::POTION_BELT_SIZE;
 
+	static const size_t TEXT_LINK_BODY_LENGTH = 56;
+
 	// legacy-related functions
 	//static int ServerToPerlSlot(int slot);	// encode
 	//static int PerlToServerSlot(int slot);	// decode
@@ -161,44 +163,41 @@ class EQLimits {
 public:
 	// client version validation (checks to avoid crashing zone server when accessing reference arrays)
 	// use this inside of class Client (limits to actual clients)
-	static bool				IsValidClientVersion(uint32 version);
-	static uint32			ValidateClientVersion(uint32 version);
-	static EQClientVersion	ValidateClientVersion(EQClientVersion version);
+	static bool IsValidPCClientVersion(ClientVersion clientVersion);
+	static ClientVersion ValidatePCClientVersion(ClientVersion clientVersion);
 
 	// basically..any non-client classes - do not when setting a valid client
-	static bool				IsValidNPCVersion(uint32 version);
-	static uint32			ValidateNPCVersion(uint32 version);
-	static EQClientVersion	ValidateNPCVersion(EQClientVersion version);
+	static bool IsValidNPCClientVersion(ClientVersion clientVersion);
+	static ClientVersion ValidateNPCClientVersion(ClientVersion clientVersion);
 
 	// these are 'universal' - do not when setting a valid client
-	static bool				IsValidMobVersion(uint32 version);
-	static uint32			ValidateMobVersion(uint32 version);
-	static EQClientVersion	ValidateMobVersion(EQClientVersion version);
+	static bool IsValidMobClientVersion(ClientVersion clientVersion);
+	static ClientVersion ValidateMobClientVersion(ClientVersion clientVersion);
 
 	// inventory
-	static uint16	InventoryMapSize(int16 map, uint32 version);
-	static uint64	PossessionsBitmask(uint32 version);
-	static uint64	EquipmentBitmask(uint32 version);
-	static uint64	GeneralBitmask(uint32 version);
-	static uint64	CursorBitmask(uint32 version);
+	static uint16 InventoryMapSize(int16 indexMap, ClientVersion clientVersion);
+	static uint64 PossessionsBitmask(ClientVersion clientVersion);
+	static uint64 EquipmentBitmask(ClientVersion clientVersion);
+	static uint64 GeneralBitmask(ClientVersion clientVersion);
+	static uint64 CursorBitmask(ClientVersion clientVersion);
 
-	static bool	AllowsEmptyBagInBag(uint32 version);
-	static bool AllowsClickCastFromBag(uint32 version);
+	static bool AllowsEmptyBagInBag(ClientVersion clientVersion);
+	static bool AllowsClickCastFromBag(ClientVersion clientVersion);
 
 	// items
-	static uint16	ItemCommonSize(uint32 version);
-	static uint16	ItemContainerSize(uint32 version);
+	static uint16 ItemCommonSize(ClientVersion clientVersion);
+	static uint16 ItemContainerSize(ClientVersion clientVersion);
 
 	// player profile
-	static bool	CoinHasWeight(uint32 version);
+	static bool CoinHasWeight(ClientVersion clientVersion);
 
-	static uint32	BandoliersCount(uint32 version);
-	static uint32	BandolierSize(uint32 version);
+	static uint32 BandoliersCount(ClientVersion clientVersion);
+	static uint32 BandolierSize(ClientVersion clientVersion);
 
-	static uint32	PotionBeltSize(uint32 version);
+	static uint32 PotionBeltSize(ClientVersion clientVersion);
 };
 
-#endif /* EQ_LIMITS_H */
+#endif /* EQ_DICTIONARY_H */
 
 /*
 Working Notes:

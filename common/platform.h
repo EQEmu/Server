@@ -18,5 +18,6 @@ enum EQEmuExePlatform
 
 void RegisterExecutablePlatform(EQEmuExePlatform p);
 const EQEmuExePlatform& GetExecutablePlatform();
+int GetExecutablePlatformInt();
 
 #endif

@@ -15,7 +15,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "clientlist.h"
 #include "zoneserver.h"
 #include "zonelist.h"
@@ -56,7 +56,7 @@ void ClientList::Process() {
 		if (!iterator.GetData()->Process()) {
 			struct in_addr in;
 			in.s_addr = iterator.GetData()->GetIP();
-			_log(WORLD__CLIENTLIST,"Removing client from %s:%d", inet_ntoa(in), iterator.GetData()->GetPort());
+			Log.Out(Logs::Detail, Logs::World_Server,"Removing client from %s:%d", inet_ntoa(in), iterator.GetData()->GetPort());
 //the client destructor should take care of this.
 //			iterator.GetData()->Free();
 			iterator.RemoveCurrent();
@@ -116,7 +116,8 @@ void ClientList::EnforceSessionLimit(uint32 iLSAccountID) {
 				// If we have a char name, they are in a zone, so send a kick to the zone server
 				if(strlen(ClientEntry->name())) {
 
-					ServerPacket* pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
+					auto pack =
+					    new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
 					ServerKickPlayer_Struct* skp = (ServerKickPlayer_Struct*) pack->pBuffer;
 					strcpy(skp->adminname, "SessionLimit");
 					strcpy(skp->name, ClientEntry->name());
@@ -223,7 +224,7 @@ void ClientList::DisconnectByIP(uint32 iIP) {
 		countCLEIPs = iterator.GetData();
 		if ((countCLEIPs->GetIP() == iIP)) {
 			if(strlen(countCLEIPs->name())) {
-				ServerPacket* pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
+				auto pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
 				ServerKickPlayer_Struct* skp = (ServerKickPlayer_Struct*) pack->pBuffer;
 				strcpy(skp->adminname, "SessionLimit");
 				strcpy(skp->name, countCLEIPs->name());
@@ -328,7 +329,7 @@ void ClientList::SendCLEList(const int16& admin, const char* to, WorldTCPConnect
 
 
 void ClientList::CLEAdd(uint32 iLSID, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin, uint32 ip, uint8 local) {
-	ClientListEntry* tmp = new ClientListEntry(GetNextCLEID(), iLSID, iLoginName, iLoginKey, iWorldAdmin, ip, local);
+	auto tmp = new ClientListEntry(GetNextCLEID(), iLSID, iLoginName, iLoginKey, iWorldAdmin, ip, local);
 
 	clientlist.Append(tmp);
 }
@@ -424,13 +425,13 @@ ClientListEntry* ClientList::CheckAuth(const char* iName, const char* iPassword)
 	}
 	int16 tmpadmin;
 
-	//_log(WORLD__ZONELIST,"Login with '%s' and '%s'", iName, iPassword);
+	//Log.LogDebugType(Logs::Detail, Logs::World_Server,"Login with '%s' and '%s'", iName, iPassword);
 
 	uint32 accid = database.CheckLogin(iName, iPassword, &tmpadmin);
 	if (accid) {
 		uint32 lsid = 0;
 		database.GetAccountIDByName(iName, &tmpadmin, &lsid);
-		ClientListEntry* tmp = new ClientListEntry(GetNextCLEID(), lsid, iName, tmpMD5, tmpadmin, 0, 0);
+		auto tmp = new ClientListEntry(GetNextCLEID(), lsid, iName, tmpMD5, tmpadmin, 0, 0);
 		clientlist.Append(tmp);
 		return tmp;
 	}
@@ -446,7 +447,7 @@ void ClientList::SendOnlineGuildMembers(uint32 FromID, uint32 GuildID)
 
 	if(!from)
 	{
-		_log(WORLD__CLIENT_ERR,"Invalid client. FromID=%i GuildID=%i", FromID, GuildID);
+		Log.Out(Logs::Detail, Logs::World_Server,"Invalid client. FromID=%i GuildID=%i", FromID, GuildID);
 		return;
 	}
 
@@ -470,7 +471,7 @@ void ClientList::SendOnlineGuildMembers(uint32 FromID, uint32 GuildID)
 
 	Iterator.Reset();
 
-	ServerPacket* pack = new ServerPacket(ServerOP_OnlineGuildMembersResponse, PacketLength);
+	auto pack = new ServerPacket(ServerOP_OnlineGuildMembersResponse, PacketLength);
 
 	char *Buffer = (char *)pack->pBuffer;
 
@@ -572,7 +573,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	unknown44[1]=0;
 	uint32 unknown52=totalusers;
 	uint32 unknown56=1;
-	ServerPacket* pack2 = new ServerPacket(ServerOP_WhoAllReply,64+totallength+(49*totalusers));
+	auto pack2 = new ServerPacket(ServerOP_WhoAllReply, 64 + totallength + (49 * totalusers));
 	memset(pack2->pBuffer,0,pack2->size);
 	uchar *buffer=pack2->pBuffer;
 	uchar *bufptr=buffer;
@@ -750,7 +751,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	safe_delete(output);
 	}
 	catch(...){
-		_log(WORLD__ZONELIST_ERR,"Unknown error in world's SendWhoAll (probably mem error), ignoring...");
+		Log.Out(Logs::Detail, Logs::World_Server,"Unknown error in world's SendWhoAll (probably mem error), ignoring...");
 		return;
 	}
 }
@@ -801,7 +802,7 @@ void ClientList::SendFriendsWho(ServerFriendsWho_Struct *FriendsWho, WorldTCPCon
 		ClientListEntry* cle;
 		int FriendsOnline = FriendsCLEs.size();
 		int PacketLength = sizeof(WhoAllReturnStruct) + (47 * FriendsOnline) + TotalLength;
-		ServerPacket* pack2 = new ServerPacket(ServerOP_WhoAllReply, PacketLength);
+		auto pack2 = new ServerPacket(ServerOP_WhoAllReply, PacketLength);
 		memset(pack2->pBuffer,0,pack2->size);
 		uchar *buffer=pack2->pBuffer;
 		uchar *bufptr=buffer;
@@ -894,7 +895,7 @@ void ClientList::SendFriendsWho(ServerFriendsWho_Struct *FriendsWho, WorldTCPCon
 		safe_delete(pack2);
 	}
 	catch(...){
-		_log(WORLD__ZONELIST_ERR,"Unknown error in world's SendFriendsWho (probably mem error), ignoring...");
+		Log.Out(Logs::Detail, Logs::World_Server,"Unknown error in world's SendFriendsWho (probably mem error), ignoring...");
 		return;
 	}
 }
@@ -931,7 +932,7 @@ void ClientList::SendLFGMatches(ServerLFGMatchesRequest_Struct *smrs) {
 		}
 		Iterator.Advance();
 	}
-	ServerPacket* Pack = new ServerPacket(ServerOP_LFGMatches, (sizeof(ServerLFGMatchesResponse_Struct) * Matches) + 4);
+	auto Pack = new ServerPacket(ServerOP_LFGMatches, (sizeof(ServerLFGMatchesResponse_Struct) * Matches) + 4);
 
 	char *Buf = (char *)Pack->pBuffer;
 	// FromID is the Entity ID of the player doing the search.
@@ -1129,7 +1130,7 @@ Client* ClientList::FindByAccountID(uint32 account_id) {
 
 	iterator.Reset();
 	while(iterator.MoreElements()) {
-		_log(WORLD__CLIENTLIST, "ClientList[0x%08x]::FindByAccountID(%p) iterator.GetData()[%p]", this, account_id, iterator.GetData());
+		Log.Out(Logs::Detail, Logs::World_Server, "ClientList[0x%08x]::FindByAccountID(%p) iterator.GetData()[%p]", this, account_id, iterator.GetData());
 		if (iterator.GetData()->GetAccountID() == account_id) {
 			Client* tmp = iterator.GetData();
 			return tmp;
@@ -1144,7 +1145,7 @@ Client* ClientList::FindByName(char* charname) {
 
 	iterator.Reset();
 	while(iterator.MoreElements()) {
-		_log(WORLD__CLIENTLIST, "ClientList[0x%08x]::FindByName(\"%s\") iterator.GetData()[%p]", this, charname, iterator.GetData());
+		Log.Out(Logs::Detail, Logs::World_Server, "ClientList[0x%08x]::FindByName(\"%s\") iterator.GetData()[%p]", this, charname, iterator.GetData());
 		if (iterator.GetData()->GetCharName() == charname) {
 			Client* tmp = iterator.GetData();
 			return tmp;

@@ -1,10 +1,11 @@
-#include "../common/debug.h"
+#include "../common/global_define.h"
+#include "../common/eqemu_logsys.h"
 #include "queryserv.h"
 #include "world_config.h"
 #include "clientlist.h"
 #include "zonelist.h"
-#include "../common/logsys.h"
-#include "../common/logtypes.h"
+
+
 #include "../common/md5.h"
 #include "../common/emu_tcp_connection.h"
 #include "../common/packet_dump.h"
@@ -22,7 +23,7 @@ void QueryServConnection::SetConnection(EmuTCPConnection *inStream)
 {
 	if(Stream)
 	{
-		_log(QUERYSERV__ERROR, "Incoming QueryServ Connection while we were already connected to a QueryServ.");
+		Log.Out(Logs::Detail, Logs::QS_Server, "Incoming QueryServ Connection while we were already connected to a QueryServ.");
 		Stream->Disconnect();
 	}
 
@@ -56,8 +57,8 @@ bool QueryServConnection::Process()
 					{
 						struct in_addr in;
 						in.s_addr = GetIP();
-						_log(QUERYSERV__ERROR, "QueryServ authorization failed.");
-						ServerPacket* pack = new ServerPacket(ServerOP_ZAAuthFailed);
+						Log.Out(Logs::Detail, Logs::QS_Server, "QueryServ authorization failed.");
+						auto pack = new ServerPacket(ServerOP_ZAAuthFailed);
 						SendPacket(pack);
 						delete pack;
 						Disconnect();
@@ -68,8 +69,8 @@ bool QueryServConnection::Process()
 				{
 					struct in_addr in;
 					in.s_addr = GetIP();
-					_log(QUERYSERV__ERROR, "QueryServ authorization failed.");
-					ServerPacket* pack = new ServerPacket(ServerOP_ZAAuthFailed);
+					Log.Out(Logs::Detail, Logs::QS_Server, "QueryServ authorization failed.");
+					auto pack = new ServerPacket(ServerOP_ZAAuthFailed);
 					SendPacket(pack);
 					delete pack;
 					Disconnect();
@@ -78,7 +79,7 @@ bool QueryServConnection::Process()
 			}
 			else
 			{
-				_log(QUERYSERV__ERROR,"**WARNING** You have not configured a world shared key in your config file. You should add a <key>STRING</key> element to your <world> element to prevent unauthroized zone access.");
+				Log.Out(Logs::Detail, Logs::QS_Server,"**WARNING** You have not configured a world shared key in your config file. You should add a <key>STRING</key> element to your <world> element to prevent unauthroized zone access.");
 				authenticated = true;
 			}
 			delete pack;
@@ -96,7 +97,7 @@ bool QueryServConnection::Process()
 			}
 			case ServerOP_ZAAuth:
 			{
-				_log(QUERYSERV__ERROR, "Got authentication from QueryServ when they are already authenticated.");
+				Log.Out(Logs::Detail, Logs::QS_Server, "Got authentication from QueryServ when they are already authenticated.");
 				break;
 			}
 			case ServerOP_QueryServGeneric:
@@ -113,7 +114,7 @@ bool QueryServConnection::Process()
 			}
 			default:
 			{
-				_log(QUERYSERV__ERROR, "Unknown ServerOPcode from QueryServ 0x%04x, size %d", pack->opcode, pack->size);
+				Log.Out(Logs::Detail, Logs::QS_Server, "Unknown ServerOPcode from QueryServ 0x%04x, size %d", pack->opcode, pack->size);
 				DumpPacket(pack->pBuffer, pack->size);
 				break;
 			}

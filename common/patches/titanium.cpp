@@ -1,12 +1,14 @@
-#include "../debug.h"
+#include "../global_define.h"
+#include "../eqemu_logsys.h"
 #include "titanium.h"
 #include "../opcodemgr.h"
-#include "../logsys.h"
+
 #include "../eq_stream_ident.h"
 #include "../crc32.h"
 #include "../races.h"
 
 #include "../eq_packet_structs.h"
+#include "../misc_functions.h"
 #include "../string_util.h"
 #include "../item.h"
 #include "titanium_structs.h"
@@ -21,12 +23,18 @@ namespace Titanium
 	char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint8 depth);
 
 	// server to client inventory location converters
-	static inline int16 ServerToTitaniumSlot(uint32 ServerSlot);
-	static inline int16 ServerToTitaniumCorpseSlot(uint32 ServerCorpse);
+	static inline int16 ServerToTitaniumSlot(uint32 serverSlot);
+	static inline int16 ServerToTitaniumCorpseSlot(uint32 serverCorpseSlot);
 
 	// client to server inventory location converters
-	static inline uint32 TitaniumToServerSlot(int16 TitaniumSlot);
-	static inline uint32 TitaniumToServerCorpseSlot(int16 TitaniumCorpse);
+	static inline uint32 TitaniumToServerSlot(int16 titaniumSlot);
+	static inline uint32 TitaniumToServerCorpseSlot(int16 titaniumCorpseSlot);
+
+	// server to client text link converter
+	static inline void ServerToTitaniumTextLink(std::string& titaniumTextLink, const std::string& serverTextLink);
+
+	// client to server text link converter
+	static inline void TitaniumToServerTextLink(std::string& serverTextLink, const std::string& titaniumTextLink);
 
 	void Register(EQStreamIdentifier &into)
 	{
@@ -40,7 +48,7 @@ namespace Titanium
 			//TODO: figure out how to support shared memory with multiple patches...
 			opcodes = new RegularOpcodeManager();
 			if (!opcodes->LoadOpcodes(opfile.c_str())) {
-				_log(NET__OPCODES, "Error loading opcodes file %s. Not registering patch %s.", opfile.c_str(), name);
+				Log.Out(Logs::General, Logs::Netcode, "[OPCODES] Error loading opcodes file %s. Not registering patch %s.", opfile.c_str(), name);
 				return;
 			}
 		}
@@ -66,7 +74,7 @@ namespace Titanium
 
 
 
-		_log(NET__IDENTIFY, "Registered patch %s", name);
+		Log.Out(Logs::General, Logs::Netcode, "[IDENTIFY] Registered patch %s", name);
 	}
 
 	void Reload()
@@ -81,10 +89,10 @@ namespace Titanium
 			opfile += name;
 			opfile += ".conf";
 			if (!opcodes->ReloadOpcodes(opfile.c_str())) {
-				_log(NET__OPCODES, "Error reloading opcodes file %s for patch %s.", opfile.c_str(), name);
+				Log.Out(Logs::General, Logs::Netcode, "[OPCODES] Error reloading opcodes file %s for patch %s.", opfile.c_str(), name);
 				return;
 			}
-			_log(NET__OPCODES, "Reloaded opcodes for patch %s", name);
+			Log.Out(Logs::General, Logs::Netcode, "[OPCODES] Reloaded opcodes for patch %s", name);
 		}
 	}
 
@@ -103,9 +111,9 @@ namespace Titanium
 		return(r);
 	}
 
-	const EQClientVersion Strategy::ClientVersion() const
+	const ClientVersion Strategy::GetClientVersion() const
 	{
-		return EQClientTitanium;
+		return ClientVersion::Titanium;
 	}
 
 #include "ss_define.h"
@@ -179,7 +187,7 @@ namespace Titanium
 		//determine and verify length
 		int entrycount = in->size / sizeof(BazaarSearchResults_Struct);
 		if (entrycount == 0 || (in->size % sizeof(BazaarSearchResults_Struct)) != 0) {
-			_log(NET__STRUCTS, "Wrong size on outbound %s: Got %d, expected multiple of %d",
+			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d",
 				opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(BazaarSearchResults_Struct));
 			delete in;
 			return;
@@ -220,6 +228,35 @@ namespace Titanium
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_ChannelMessage)
+	{
+		EQApplicationPacket *in = *p;
+		*p = nullptr;
+
+		ChannelMessage_Struct *emu = (ChannelMessage_Struct *)in->pBuffer;
+
+		unsigned char *__emu_buffer = in->pBuffer;
+
+		std::string old_message = emu->message;
+		std::string new_message;
+		ServerToTitaniumTextLink(new_message, old_message);
+
+		in->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
+
+		in->pBuffer = new unsigned char[in->size];
+
+		char *OutBuffer = (char *)in->pBuffer;
+
+		memcpy(OutBuffer, __emu_buffer, sizeof(ChannelMessage_Struct));
+
+		OutBuffer += sizeof(ChannelMessage_Struct);
+
+		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
+
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
+	}
+
 	ENCODE(OP_CharInventory)
 	{
 		//consume the packet
@@ -231,7 +268,7 @@ namespace Titanium
 
 		int itemcount = in->size / sizeof(InternalSerializedItem_Struct);
 		if (itemcount == 0 || (in->size % sizeof(InternalSerializedItem_Struct)) != 0) {
-			_log(NET__STRUCTS, "Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(InternalSerializedItem_Struct));
+			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(InternalSerializedItem_Struct));
 			delete in;
 			return;
 		}
@@ -248,7 +285,7 @@ namespace Titanium
 				safe_delete_array(serialized);
 			}
 			else {
-				_log(NET__STRUCTS, "Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
+				Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
 			}
 
 		}
@@ -417,6 +454,83 @@ namespace Titanium
 		memcpy(__packet->pBuffer, ss.str().c_str(), __packet->size);
 
 		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_Emote)
+	{
+		EQApplicationPacket *in = *p;
+		*p = nullptr;
+
+		Emote_Struct *emu = (Emote_Struct *)in->pBuffer;
+
+		unsigned char *__emu_buffer = in->pBuffer;
+
+		std::string old_message = emu->message;
+		std::string new_message;
+		ServerToTitaniumTextLink(new_message, old_message);
+
+		//if (new_message.length() > 512) // length restricted in packet building function due vari-length name size (no nullterm)
+		//	new_message = new_message.substr(0, 512);
+
+		in->size = new_message.length() + 5;
+		in->pBuffer = new unsigned char[in->size];
+
+		char *OutBuffer = (char *)in->pBuffer;
+
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->type);
+		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
+
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
+	}
+
+	ENCODE(OP_FormattedMessage)
+	{
+		EQApplicationPacket *in = *p;
+		*p = nullptr;
+
+		FormattedMessage_Struct *emu = (FormattedMessage_Struct *)in->pBuffer;
+
+		unsigned char *__emu_buffer = in->pBuffer;
+
+		char *old_message_ptr = (char *)in->pBuffer;
+		old_message_ptr += sizeof(FormattedMessage_Struct);
+
+		std::string old_message_array[9];
+
+		for (int i = 0; i < 9; ++i) {
+			if (*old_message_ptr == 0) { break; }
+			old_message_array[i] = old_message_ptr;
+			old_message_ptr += old_message_array[i].length() + 1;
+		}
+
+		uint32 new_message_size = 0;
+		std::string new_message_array[9];
+
+		for (int i = 0; i < 9; ++i) {
+			if (old_message_array[i].length() == 0) { break; }
+			ServerToTitaniumTextLink(new_message_array[i], old_message_array[i]);
+			new_message_size += new_message_array[i].length() + 1;
+		}
+
+		in->size = sizeof(FormattedMessage_Struct) + new_message_size + 1;
+		in->pBuffer = new unsigned char[in->size];
+
+		char *OutBuffer = (char *)in->pBuffer;
+
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->unknown0);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->string_id);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->type);
+
+		for (int i = 0; i < 9; ++i) {
+			if (new_message_array[i].length() == 0) { break; }
+			VARSTRUCT_ENCODE_STRING(OutBuffer, new_message_array[i].c_str());
+		}
+
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, 0);
+
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
 	}
 
 	ENCODE(OP_GuildMemberList)
@@ -598,7 +712,7 @@ namespace Titanium
 		char *serialized = SerializeItem((ItemInst *)int_struct->inst, int_struct->slot_id, &length, 0);
 
 		if (!serialized) {
-			_log(NET__STRUCTS, "Serialization failed on item slot %d.", int_struct->slot_id);
+			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d.", int_struct->slot_id);
 			delete in;
 			return;
 		}
@@ -1070,6 +1184,97 @@ namespace Titanium
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_SpecialMesg)
+	{
+		EQApplicationPacket *in = *p;
+		*p = nullptr;
+
+		SpecialMesg_Struct *emu = (SpecialMesg_Struct *)in->pBuffer;
+
+		unsigned char *__emu_buffer = in->pBuffer;
+
+		std::string old_message = &emu->message[strlen(emu->sayer)];
+		std::string new_message;
+
+		ServerToTitaniumTextLink(new_message, old_message);
+
+		//in->size = 3 + 4 + 4 + strlen(emu->sayer) + 1 + 12 + new_message.length() + 1;
+		in->size = strlen(emu->sayer) + new_message.length() + 25;
+		in->pBuffer = new unsigned char[in->size];
+
+		char *OutBuffer = (char *)in->pBuffer;
+
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->header[0]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->header[1]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->header[2]);
+
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->msg_type);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->target_spawn_id);
+
+		VARSTRUCT_ENCODE_STRING(OutBuffer, emu->sayer);
+
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[0]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[1]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[2]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[3]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[4]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[5]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[6]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[7]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[8]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[9]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[10]);
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[11]);
+
+		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
+		
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
+	}
+
+	ENCODE(OP_TaskDescription)
+	{
+		EQApplicationPacket *in = *p;
+		*p = nullptr;
+
+		unsigned char *__emu_buffer = in->pBuffer;
+
+		char *InBuffer = (char *)in->pBuffer;
+		char *block_start = InBuffer;
+
+		InBuffer += sizeof(TaskDescriptionHeader_Struct);
+		uint32 title_size = strlen(InBuffer) + 1;
+		InBuffer += title_size;
+		InBuffer += sizeof(TaskDescriptionData1_Struct);
+		uint32 description_size = strlen(InBuffer) + 1;
+		InBuffer += description_size;
+		InBuffer += sizeof(TaskDescriptionData2_Struct);
+
+		std::string old_message = InBuffer; // start 'Reward' as string
+		std::string new_message;
+		ServerToTitaniumTextLink(new_message, old_message);
+
+		in->size = sizeof(TaskDescriptionHeader_Struct) + sizeof(TaskDescriptionData1_Struct) +
+			sizeof(TaskDescriptionData2_Struct) + sizeof(TaskDescriptionTrailer_Struct) +
+			title_size + description_size + new_message.length() + 1;
+
+		in->pBuffer = new unsigned char[in->size];
+
+		char *OutBuffer = (char *)in->pBuffer;
+
+		memcpy(OutBuffer, block_start, (InBuffer - block_start));
+		OutBuffer += (InBuffer - block_start);
+
+		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
+
+		InBuffer += strlen(InBuffer) + 1;
+
+		memcpy(OutBuffer, InBuffer, sizeof(TaskDescriptionTrailer_Struct));
+		
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
+	}
+
 	ENCODE(OP_Track)
 	{
 		EQApplicationPacket *in = *p;
@@ -1082,7 +1287,7 @@ namespace Titanium
 
 		if (EntryCount == 0 || ((in->size % sizeof(Track_Struct))) != 0)
 		{
-			_log(NET__STRUCTS, "Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Track_Struct));
+			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Track_Struct));
 			delete in;
 			return;
 		}
@@ -1199,7 +1404,7 @@ namespace Titanium
 		//determine and verify length
 		int entrycount = in->size / sizeof(Spawn_Struct);
 		if (entrycount == 0 || (in->size % sizeof(Spawn_Struct)) != 0) {
-			_log(NET__STRUCTS, "Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Spawn_Struct));
+			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Spawn_Struct));
 			delete in;
 			return;
 		}
@@ -1371,6 +1576,25 @@ namespace Titanium
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_ChannelMessage)
+	{
+		unsigned char *__eq_buffer = __packet->pBuffer;
+
+		std::string old_message = (char *)&__eq_buffer[sizeof(ChannelMessage_Struct)];
+		std::string new_message;
+		TitaniumToServerTextLink(new_message, old_message);
+
+		__packet->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
+		__packet->pBuffer = new unsigned char[__packet->size];
+
+		ChannelMessage_Struct *emu = (ChannelMessage_Struct *)__packet->pBuffer;
+
+		memcpy(emu, __eq_buffer, sizeof(ChannelMessage_Struct));
+		strcpy(emu->message, new_message.c_str());
+
+		delete[] __eq_buffer;
+	}
+
 	DECODE(OP_CharacterCreate)
 	{
 		DECODE_LENGTH_EXACT(structs::CharCreate_Struct);
@@ -1422,6 +1646,27 @@ namespace Titanium
 		IN(number_in_stack);
 
 		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_Emote)
+	{
+		unsigned char *__eq_buffer = __packet->pBuffer;
+
+		std::string old_message = (char *)&__eq_buffer[4]; // unknown01 offset
+		std::string new_message;
+		TitaniumToServerTextLink(new_message, old_message);
+
+		__packet->size = sizeof(Emote_Struct);
+		__packet->pBuffer = new unsigned char[__packet->size];
+
+		char *InBuffer = (char *)__packet->pBuffer;
+
+		memcpy(InBuffer, __eq_buffer, 4);
+		InBuffer += 4;
+		strcpy(InBuffer, new_message.substr(0, 1023).c_str());
+		InBuffer[1023] = '\0';
+
+		delete[] __eq_buffer;
 	}
 
 	DECODE(OP_FaceChange)
@@ -1529,11 +1774,94 @@ namespace Titanium
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		_log(NET__ERROR, "Moved item from %u to %u", eq->from_slot, eq->to_slot);
+		Log.Out(Logs::General, Logs::Netcode, "[Titanium] Moved item from %u to %u", eq->from_slot, eq->to_slot);
 
 		emu->from_slot = TitaniumToServerSlot(eq->from_slot);
 		emu->to_slot = TitaniumToServerSlot(eq->to_slot);
 		IN(number_in_stack);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_PetCommands)
+	{
+		DECODE_LENGTH_EXACT(structs::PetCommand_Struct);
+		SETUP_DIRECT_DECODE(PetCommand_Struct, structs::PetCommand_Struct);
+
+		switch (eq->command)
+		{
+		case 0x04:
+			emu->command = 0x00;	// /pet health
+			break;
+		case 0x10:
+			emu->command = 0x01;	// /pet leader
+			break;
+		case 0x07:
+			emu->command = 0x02;	// /pet attack or Pet Window
+			break;
+		case 0x03:	// Case Guessed
+			emu->command = 0x03;	// /pet qattack
+		case 0x08:
+			emu->command = 0x04;	// /pet follow or Pet Window
+			break;
+		case 0x05:
+			emu->command = 0x05;	// /pet guard or Pet Window
+			break;
+		case 0x09:
+			emu->command = 0x07;	// /pet sit or Pet Window
+			break;
+		case 0x0a:
+			emu->command = 0x08;	// /pet stand or Pet Window
+			break;
+		case 0x06:
+			emu->command = 0x1e;	// /pet guard me
+			break;
+		case 0x0f:	// Case Made Up
+			emu->command = 0x09;	// Stop?
+			break;
+		case 0x0b:
+			emu->command = 0x0d;	// /pet taunt or Pet Window
+			break;
+		case 0x0e:
+			emu->command = 0x0e;	// /pet notaunt or Pet Window
+			break;
+		case 0x0c:
+			emu->command = 0x0f;	// /pet hold
+			break;
+		case 0x1b:
+			emu->command = 0x10;	// /pet hold on
+			break;
+		case 0x1c:
+			emu->command = 0x11;	// /pet hold off
+			break;
+		case 0x11:
+			emu->command = 0x12;	// Slumber?
+			break;
+		case 0x12:
+			emu->command = 0x15;	// /pet no cast
+			break;
+		case 0x0d:	// Case Made Up
+			emu->command = 0x16;	// Pet Window No Cast
+			break;
+		case 0x13:
+			emu->command = 0x18;	// /pet focus
+			break;
+		case 0x19:
+			emu->command = 0x19;	// /pet focus on
+			break;
+		case 0x1a:
+			emu->command = 0x1a;	// /pet focus off
+			break;
+		case 0x01:
+			emu->command = 0x1c;	// /pet back off
+			break;
+		case 0x02:
+			emu->command = 0x1d;	// /pet get lost
+			break;
+		default:
+			emu->command = eq->command;
+		}
+		OUT(unknown);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -1676,7 +2004,7 @@ namespace Titanium
 			inst->IsScaling() ? inst->GetExp() / 100 : 0,
 			//merchant_slot,	//instance ID, bullshit for now
 			(merchant_slot == 0) ? inst->GetSerialNumber() : merchant_slot,
-			0, // item recast timer timestamp field (aka..last_cast_time field in SoF+ clients)
+			inst->GetRecastTimestamp(),
 			(stackable ? ((inst->GetItem()->ItemType == ItemTypePotion) ? 1 : 0) : charges),
 			inst->IsAttuned() ? 1 : 0,
 			0
@@ -1734,34 +2062,112 @@ namespace Titanium
 		return serialization;
 	}
 
-	static inline int16 ServerToTitaniumSlot(uint32 ServerSlot)
+	static inline int16 ServerToTitaniumSlot(uint32 serverSlot)
 	{
 		//int16 TitaniumSlot;
-		if (ServerSlot == INVALID_INDEX)
+		if (serverSlot == INVALID_INDEX)
 			return INVALID_INDEX;
 
-		return ServerSlot; // deprecated
+		return serverSlot; // deprecated
 	}
 	
-	static inline int16 ServerToTitaniumCorpseSlot(uint32 ServerCorpse)
+	static inline int16 ServerToTitaniumCorpseSlot(uint32 serverCorpseSlot)
 	{
 		//int16 TitaniumCorpse;
-		return ServerCorpse;
+		return serverCorpseSlot;
 	}
 
-	static inline uint32 TitaniumToServerSlot(int16 TitaniumSlot)
+	static inline uint32 TitaniumToServerSlot(int16 titaniumSlot)
 	{
 		//uint32 ServerSlot;
-		if (TitaniumSlot == INVALID_INDEX)
+		if (titaniumSlot == INVALID_INDEX)
 			return INVALID_INDEX;
 
-		return TitaniumSlot; // deprecated
+		return titaniumSlot; // deprecated
 	}
 	
-	static inline uint32 TitaniumToServerCorpseSlot(int16 TitaniumCorpse)
+	static inline uint32 TitaniumToServerCorpseSlot(int16 titaniumCorpseSlot)
 	{
 		//uint32 ServerCorpse;
-		return TitaniumCorpse;
+		return titaniumCorpseSlot;
+	}
+
+	static inline void ServerToTitaniumTextLink(std::string& titaniumTextLink, const std::string& serverTextLink)
+	{
+		if ((consts::TEXT_LINK_BODY_LENGTH == EmuConstants::TEXT_LINK_BODY_LENGTH) || (serverTextLink.find('\x12') == std::string::npos)) {
+			titaniumTextLink = serverTextLink;
+			return;
+		}
+
+		auto segments = SplitString(serverTextLink, '\x12');
+
+		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
+			if (segment_iter & 1) {
+				if (segments[segment_iter].length() <= EmuConstants::TEXT_LINK_BODY_LENGTH) {
+					titaniumTextLink.append(segments[segment_iter]);
+					// TODO: log size mismatch error
+					continue;
+				}
+
+				// Idx:  0 1     6     11    16    21    26    31    36 37   41 43    48       (Source)
+				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX XXXXX XXXXXXXX (56)
+				// 6.2:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX       X  XXXX  X       XXXXXXXX (45)
+				// Diff:                                       ^^^^^         ^  ^^^^^
+
+				titaniumTextLink.push_back('\x12');
+				titaniumTextLink.append(segments[segment_iter].substr(0, 31));
+				titaniumTextLink.append(segments[segment_iter].substr(36, 5));
+
+				if (segments[segment_iter][41] == '0')
+					titaniumTextLink.push_back(segments[segment_iter][42]);
+				else
+					titaniumTextLink.push_back('F');
+
+				titaniumTextLink.append(segments[segment_iter].substr(48));
+				titaniumTextLink.push_back('\x12');
+			}
+			else {
+				titaniumTextLink.append(segments[segment_iter]);
+			}
+		}
+	}
+
+	static inline void TitaniumToServerTextLink(std::string& serverTextLink, const std::string& titaniumTextLink)
+	{
+		if ((EmuConstants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) || (titaniumTextLink.find('\x12') == std::string::npos)) {
+			serverTextLink = titaniumTextLink;
+			return;
+		}
+
+		auto segments = SplitString(titaniumTextLink, '\x12');
+
+		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
+			if (segment_iter & 1) {
+				if (segments[segment_iter].length() <= consts::TEXT_LINK_BODY_LENGTH) {
+					serverTextLink.append(segments[segment_iter]);
+					// TODO: log size mismatch error
+					continue;
+				}
+
+				// Idx:  0 1     6     11    16    21    26          31 32    36       37       (Source)
+				// 6.2:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX       X  XXXX  X        XXXXXXXX (45)
+				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX  XXXXX XXXXXXXX (56)
+				// Diff:                                       ^^^^^         ^   ^^^^^
+
+				serverTextLink.push_back('\x12');
+				serverTextLink.append(segments[segment_iter].substr(0, 31));
+				serverTextLink.append("00000");
+				serverTextLink.append(segments[segment_iter].substr(31, 5));
+				serverTextLink.push_back('0');
+				serverTextLink.push_back(segments[segment_iter][36]);
+				serverTextLink.append("00000");
+				serverTextLink.append(segments[segment_iter].substr(37));
+				serverTextLink.push_back('\x12');
+			}
+			else {
+				serverTextLink.append(segments[segment_iter]);
+			}
+		}
 	}
 }
 // end namespace Titanium

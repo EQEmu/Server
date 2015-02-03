@@ -13,7 +13,6 @@ struct MercTemplate;
 struct NPCType;
 struct NewSpawn_Struct;
 
-#define MERC_DEBUG 0
 #define MAXMERCS 1
 #define TANK 1
 #define HEALER 2
@@ -138,8 +137,9 @@ public:
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 	static Merc* LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id, bool updateFromDB = false);
 	void UpdateMercInfo(Client *c);
-	void UpdateMercStats(Client *c);
+	void UpdateMercStats(Client *c, bool setmax = false);
 	void UpdateMercAppearance();
+	virtual void UpdateEquipLightValue();
 	void AddItem(uint8 slot, uint32 item_id);
 	static const char *GetRandomName();
 	bool Spawn(Client *owner);
@@ -189,6 +189,7 @@ public:
 	bool TryHide();
 
 	// stat functions
+	virtual void ScaleStats(int scalepercent, bool setmax = false);
 	virtual void CalcBonuses();
 	int32 GetEndurance() const {return cur_end;} //This gets our current endurance
 	inline virtual int32 GetAC() const { return AC; }
@@ -347,6 +348,7 @@ private:
 
 	// Private "base stats" Members
 	int32 base_mana;
+	int32 base_end;
 	int32 _baseAC;
 	uint32 _baseSTR;
 	uint32 _baseSTA;

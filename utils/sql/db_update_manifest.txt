@@ -320,6 +320,15 @@
 9064|2014_12_24_npc_types_table_update.sql|SHOW COLUMNS FROM `npc_types` LIKE 'herosforgemodel'|empty|
 9065|2014_12_26_merc_weaponinfo_table_update.sql|SHOW COLUMNS FROM `vwMercNpcTypes` LIKE 'd_melee_texture1'|empty|
 9066|2014_12_31_npc_types_default_values_update.sql|SHOW COLUMNS FROM `npc_types` LIKE 'bodytype'|contains|YES
+9067|2015_01_21_npc_types_update.sql|SHOW COLUMNS FROM `npc_types` LIKE 'light'|empty|
+9068|2015_01_15_logsys_categories_table.sql|SHOW TABLES LIKE 'logsys_categories'|empty|
+9069|2015_01_25_logsys_Mercenaries_category.sql|SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Mercenaries'|empty|
+9070|2015_01_28_quest_debug_log_category.sql|SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Quest Debug'|empty|
+9071|2015_01_29_merc_stats_table_update.sql|SHOW COLUMNS FROM `merc_stats` LIKE 'statscale'|empty|
+9072|2015_01_30_merc_attack_delay.sql|SHOW COLUMNS FROM `merc_stats` LIKE 'attack_delay'|empty|
+9073|2015_01_31_character_item_recast.sql|SHOW TABLES LIKE 'character_item_recast'|empty|
+9074|2015_02_01_logsys_packet_logs.sql|SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Packet: Server -> Client'|empty|
+9075|2015_02_02_logsys_packet_logs_with_dump.sql|SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Packet: Server -> Client With Dump'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not 

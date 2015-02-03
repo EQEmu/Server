@@ -16,7 +16,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
+#include "../common/eqemu_logsys.h"
 #include "../common/spdat.h"
 
 #include "client.h"
@@ -26,6 +27,7 @@
 #include "string_ids.h"
 #include "worldserver.h"
 #include "zonedb.h"
+#include "position.h"
 
 float Mob::GetActSpellRange(uint16 spell_id, float range, bool IsBard)
 {
@@ -460,7 +462,7 @@ bool Client::TrainDiscipline(uint32 itemid) {
 	const Item_Struct *item = database.GetItem(itemid);
 	if(item == nullptr) {
 		Message(13, "Unable to find the tome you turned in!");
-		LogFile->write(EQEMuLog::Error, "Unable to find turned in tome id %lu\n", (unsigned long)itemid);
+		Log.Out(Logs::General, Logs::Error, "Unable to find turned in tome id %lu\n", (unsigned long)itemid);
 		return(false);
 	}
 
@@ -673,7 +675,7 @@ void EntityList::AETaunt(Client* taunter, float range)
 			zdiff *= -1;
 		if (zdiff < 10
 				&& taunter->IsAttackAllowed(them)
-				&& taunter->DistNoRootNoZ(*them) <= range) {
+				&& DistanceSquaredNoZ(taunter->GetPosition(), them->GetPosition()) <= range) {
 			if (taunter->CheckLosFN(them)) {
 				taunter->Taunt(them, true);
 			}
@@ -682,7 +684,7 @@ void EntityList::AETaunt(Client* taunter, float range)
 	}
 }
 
-// solar: causes caster to hit every mob within dist range of center with
+// causes caster to hit every mob within dist range of center with
 // spell_id.
 // NPC spells will only affect other NPCs with compatible faction
 void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster, int16 resist_adjust)
@@ -720,10 +722,10 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 			continue;
 
 		if (spells[spell_id].targettype == ST_Ring) {
-			dist_targ = curmob->DistNoRoot(caster->GetTargetRingX(), caster->GetTargetRingY(), caster->GetTargetRingZ());
+			dist_targ = DistanceSquared(static_cast<glm::vec3>(curmob->GetPosition()), caster->GetTargetRingLocation());
 		}
 		else if (center) {
-			dist_targ = center->DistNoRoot(*curmob);
+			dist_targ = DistanceSquared(curmob->GetPosition(), center->GetPosition());
 		}
 
 		if (dist_targ > dist2)	//make sure they are in range
@@ -747,9 +749,9 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 		if (bad) {
 			if (!caster->IsAttackAllowed(curmob, true))
 				continue;
-			if (center && !center->CheckLosFN(curmob))
+			if (center &&  !spells[spell_id].npc_no_los && !center->CheckLosFN(curmob))
 				continue;
-			if (!center && !caster->CheckLosFN(caster->GetTargetRingX(), caster->GetTargetRingY(), caster->GetTargetRingZ(), curmob->GetSize()))
+			if (!center && !spells[spell_id].npc_no_los && !caster->CheckLosFN(caster->GetTargetRingX(), caster->GetTargetRingY(), caster->GetTargetRingZ(), curmob->GetSize()))
 				continue;
 		} else { // check to stop casting beneficial ae buffs (to wit: bard songs) on enemies...
 			// This does not check faction for beneficial AE buffs..only agro and attackable.
@@ -795,7 +797,7 @@ void EntityList::MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool a
 			continue;
 		if (curmob == caster && !affect_caster)	//watch for caster too
 			continue;
-		if (center->DistNoRoot(*curmob) > dist2)	//make sure they are in range
+		if (DistanceSquared(center->GetPosition(), curmob->GetPosition()) > dist2)	//make sure they are in range
 			continue;
 
 		//Only npcs mgb should hit are client pets...
@@ -818,7 +820,7 @@ void EntityList::MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool a
 	}
 }
 
-// solar: causes caster to hit every mob within dist range of center with
+// causes caster to hit every mob within dist range of center with
 // a bard pulse of spell_id.
 // NPC spells will only affect other NPCs with compatible faction
 void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster)
@@ -837,7 +839,7 @@ void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool aff
 			continue;
 		if (curmob == caster && !affect_caster)	//watch for caster too
 			continue;
-		if (center->DistNoRoot(*curmob) > dist2)	//make sure they are in range
+		if (DistanceSquared(center->GetPosition(), curmob->GetPosition()) > dist2)	//make sure they are in range
 			continue;
 		if (isnpc && curmob->IsNPC()) {	//check npc->npc casting
 			FACTION_VALUE f = curmob->GetReverseFactionCon(caster);
@@ -887,7 +889,7 @@ void EntityList::AEAttack(Mob *attacker, float dist, int Hand, int count, bool I
 				&& curmob != attacker //this is not needed unless NPCs can use this
 				&&(attacker->IsAttackAllowed(curmob))
 				&& curmob->GetRace() != 216 && curmob->GetRace() != 472 /* dont attack horses */
-				&& (curmob->DistNoRoot(*attacker) <= dist2)
+				&& (DistanceSquared(curmob->GetPosition(), attacker->GetPosition()) <= dist2)
 		) {
 			attacker->Attack(curmob, Hand, false, false, IsFromSpell);
 			hit++;

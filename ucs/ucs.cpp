@@ -17,7 +17,8 @@
 
 */
 
-#include "../common/debug.h"
+#include "../common/eqemu_logsys.h"
+#include "../common/global_define.h"
 #include "clientlist.h"
 #include "../common/opcodemgr.h"
 #include "../common/eq_stream_factory.h"
@@ -32,25 +33,21 @@
 #include <list>
 #include <signal.h>
 
-volatile bool RunLoops = true;
-
-uint32 MailMessagesSent = 0;
-uint32 ChatMessagesSent = 0;
-
-TimeoutManager timeout_manager;
-
-Clientlist *CL;
-
 ChatChannelList *ChannelList;
-
+Clientlist *CL;
+EQEmuLogSys Log;
+TimeoutManager timeout_manager;
 Database database;
-
-std::string WorldShortName;
+WorldServer *worldserver = nullptr;
 
 const ucsconfig *Config;
 
-WorldServer *worldserver = 0;
+std::string WorldShortName;
 
+uint32 ChatMessagesSent = 0;
+uint32 MailMessagesSent = 0;
+
+volatile bool RunLoops = true;
 
 void CatchSignal(int sig_num) {
 
@@ -68,6 +65,7 @@ std::string GetMailPrefix() {
 
 int main() {
 	RegisterExecutablePlatform(ExePlatformUCS);
+	Log.LoadLogSettingsDefaults();
 	set_exception_handler();
 
 	// Check every minute for unused channels we can delete
@@ -76,25 +74,18 @@ int main() {
 
 	Timer InterserverTimer(INTERSERVER_TIMER); // does auto-reconnect
 
-	_log(UCS__INIT, "Starting EQEmu Universal Chat Server.");
+	Log.Out(Logs::General, Logs::UCS_Server, "Starting EQEmu Universal Chat Server.");
 
-	if (!ucsconfig::LoadConfig()) {
-
-		_log(UCS__INIT, "Loading server configuration failed.");
-
+	if (!ucsconfig::LoadConfig()) { 
+		Log.Out(Logs::General, Logs::UCS_Server, "Loading server configuration failed."); 
 		return 1;
 	}
 
-	Config = ucsconfig::get();
-
-	if(!load_log_settings(Config->LogSettingsFile.c_str()))
-		_log(UCS__INIT, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
-	else
-		_log(UCS__INIT, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
+	Config = ucsconfig::get(); 
 
 	WorldShortName = Config->ShortName;
 
-	_log(UCS__INIT, "Connecting to MySQL...");
+	Log.Out(Logs::General, Logs::UCS_Server, "Connecting to MySQL...");
 
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),
@@ -102,22 +93,26 @@ int main() {
 		Config->DatabasePassword.c_str(),
 		Config->DatabaseDB.c_str(),
 		Config->DatabasePort)) {
-		_log(WORLD__INIT_ERR, "Cannot continue without a database connection.");
+		Log.Out(Logs::General, Logs::UCS_Server, "Cannot continue without a database connection.");
 		return 1;
 	}
+
+	/* Register Log System and Settings */
+	database.LoadLogSettings(Log.log_settings);
+	Log.StartFileLogs();
 
 	char tmp[64];
 
 	if (database.GetVariable("RuleSet", tmp, sizeof(tmp)-1)) {
-		_log(WORLD__INIT, "Loading rule set '%s'", tmp);
+		Log.Out(Logs::General, Logs::UCS_Server, "Loading rule set '%s'", tmp);
 		if(!RuleManager::Instance()->LoadRules(&database, tmp)) {
-			_log(UCS__ERROR, "Failed to load ruleset '%s', falling back to defaults.", tmp);
+			Log.Out(Logs::General, Logs::UCS_Server, "Failed to load ruleset '%s', falling back to defaults.", tmp);
 		}
 	} else {
 		if(!RuleManager::Instance()->LoadRules(&database, "default")) {
-			_log(UCS__INIT, "No rule set configured, using default rules");
+			Log.Out(Logs::General, Logs::UCS_Server, "No rule set configured, using default rules");
 		} else {
-			_log(UCS__INIT, "Loaded default rule set 'default'", tmp);
+			Log.Out(Logs::General, Logs::UCS_Server, "Loaded default rule set 'default'", tmp);
 		}
 	}
 
@@ -125,7 +120,7 @@ int main() {
 
 	if(Config->ChatPort != Config->MailPort)
 	{
-		_log(UCS__ERROR, "MailPort and CharPort must be the same in eqemu_config.xml for UCS.");
+		Log.Out(Logs::General, Logs::UCS_Server, "MailPort and CharPort must be the same in eqemu_config.xml for UCS.");
 		exit(1);
 	}
 
@@ -136,11 +131,11 @@ int main() {
 	database.LoadChatChannels();
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		_log(UCS__ERROR, "Could not set signal handler");
+		Log.Out(Logs::General, Logs::UCS_Server, "Could not set signal handler");
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		_log(UCS__ERROR, "Could not set signal handler");
+		Log.Out(Logs::General, Logs::UCS_Server, "Could not set signal handler");
 		return 1;
 	}
 
@@ -171,6 +166,8 @@ int main() {
 	ChannelList->RemoveAllChannels();
 
 	CL->CloseAllConnections();
+
+	Log.CloseFileLogs();
 
 }
 

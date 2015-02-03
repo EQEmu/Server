@@ -1,4 +1,4 @@
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/servertalk.h"
 #include "../common/extprofile.h"
 #include "../common/rulesys.h"
@@ -67,7 +67,7 @@ void Adventure::AddPlayer(std::string character_name, bool add_client_to_instanc
 
 void Adventure::RemovePlayer(std::string character_name)
 {
-	std::list<std::string>::iterator iter = players.begin();
+	auto iter = players.begin();
 	while(iter != players.end())
 	{
 		if((*iter).compare(character_name) == 0)
@@ -86,7 +86,7 @@ void Adventure::RemovePlayer(std::string character_name)
 
 bool Adventure::PlayerExists(std::string character_name)
 {
-	std::list<std::string>::iterator iter = players.begin();
+	auto iter = players.begin();
 	while(iter != players.end())
 	{
 		if(character_name.compare((*iter)) == 0)
@@ -172,7 +172,7 @@ void Adventure::SetStatus(AdventureStatus new_status)
 		safe_delete(current_timer);
 		current_timer = new Timer(adventure_template->duration * 1000);
 		database.SetInstanceDuration(instance_id, adventure_template->duration + 60);
-		ServerPacket *pack = new ServerPacket(ServerOP_InstanceUpdateTime, sizeof(ServerInstanceUpdateTime_Struct));
+		auto pack = new ServerPacket(ServerOP_InstanceUpdateTime, sizeof(ServerInstanceUpdateTime_Struct));
 		ServerInstanceUpdateTime_Struct *ut = (ServerInstanceUpdateTime_Struct*)pack->pBuffer;
 		ut->instance_id = instance_id;
 		ut->new_duration = adventure_template->duration + 60;
@@ -187,7 +187,7 @@ void Adventure::SetStatus(AdventureStatus new_status)
 		safe_delete(current_timer);
 		current_timer = new Timer(1800000);
 		database.SetInstanceDuration(instance_id, 1860);
-		ServerPacket *pack = new ServerPacket(ServerOP_InstanceUpdateTime, sizeof(ServerInstanceUpdateTime_Struct));
+		auto pack = new ServerPacket(ServerOP_InstanceUpdateTime, sizeof(ServerInstanceUpdateTime_Struct));
 		ServerInstanceUpdateTime_Struct *ut = (ServerInstanceUpdateTime_Struct*)pack->pBuffer;
 		ut->instance_id = instance_id;
 		ut->new_duration = 1860;
@@ -202,7 +202,7 @@ void Adventure::SetStatus(AdventureStatus new_status)
 		safe_delete(current_timer);
 		current_timer = new Timer(1800000);
 		database.SetInstanceDuration(instance_id, 1800);
-		ServerPacket *pack = new ServerPacket(ServerOP_InstanceUpdateTime, sizeof(ServerInstanceUpdateTime_Struct));
+		auto pack = new ServerPacket(ServerOP_InstanceUpdateTime, sizeof(ServerInstanceUpdateTime_Struct));
 		ServerInstanceUpdateTime_Struct *ut = (ServerInstanceUpdateTime_Struct*)pack->pBuffer;
 		ut->instance_id = instance_id;
 		ut->new_duration = 1860;
@@ -216,7 +216,7 @@ void Adventure::SetStatus(AdventureStatus new_status)
 		return;
 	}
 
-	std::list<std::string>::iterator iter = players.begin();
+	auto iter = players.begin();
 	while(iter != players.end())
 	{
 		adventure_manager.GetAdventureData((*iter).c_str());
@@ -226,11 +226,11 @@ void Adventure::SetStatus(AdventureStatus new_status)
 
 void Adventure::SendAdventureMessage(uint32 type, const char *msg)
 {
-	ServerPacket *pack = new ServerPacket(ServerOP_EmoteMessage, sizeof(ServerEmoteMessage_Struct) + strlen(msg) + 1);
+	auto pack = new ServerPacket(ServerOP_EmoteMessage, sizeof(ServerEmoteMessage_Struct) + strlen(msg) + 1);
 	ServerEmoteMessage_Struct *sms = (ServerEmoteMessage_Struct*)pack->pBuffer;
 	sms->type = type;
 	strcpy(sms->message, msg);
-	std::list<std::string>::iterator iter = players.begin();
+	auto iter = players.begin();
 	while(iter != players.end())
 	{
 		ClientListEntry *current = client_list.FindCharacter((*iter).c_str());
@@ -284,7 +284,7 @@ void Adventure::IncrementAssassinationCount()
 
 void Adventure::Finished(AdventureWinStatus ws)
 {
-	std::list<std::string>::iterator iter = players.begin();
+	auto iter = players.begin();
 	while(iter != players.end())
 	{
 		ClientListEntry *current = client_list.FindCharacter((*iter).c_str());
@@ -293,7 +293,8 @@ void Adventure::Finished(AdventureWinStatus ws)
 			if(current->Online() == CLE_Status_InZone)
 			{
 				//We can send our packets only.
-				ServerPacket *pack = new ServerPacket(ServerOP_AdventureFinish, sizeof(ServerAdventureFinish_Struct));
+				auto pack =
+				    new ServerPacket(ServerOP_AdventureFinish, sizeof(ServerAdventureFinish_Struct));
 				ServerAdventureFinish_Struct *af = (ServerAdventureFinish_Struct*)pack->pBuffer;
 				strcpy(af->player, (*iter).c_str());
 				af->theme = GetTemplate()->theme;
@@ -385,15 +386,13 @@ void Adventure::MoveCorpsesToGraveyard()
 	std::string query = StringFormat("SELECT id, charid FROM character_corpses WHERE instanceid=%d", GetInstanceID());
 	auto results = database.QueryDatabase(query);
 	if(!results.Success())
-        LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::MoveCorpsesToGraveyard: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 
 	for(auto row = results.begin(); row != results.end(); ++row) {
         dbid_list.push_back(atoi(row[0]));
         charid_list.push_back(atoi(row[1]));
     }
 
-	for (auto iter = dbid_list.begin(); iter != dbid_list.end(); ++iter)
-	{
+    for (auto &elem : dbid_list) {
 		float x = GetTemplate()->graveyard_x + emu_random.Real(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
 		float y = GetTemplate()->graveyard_y + emu_random.Real(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
 		float z = GetTemplate()->graveyard_z;
@@ -403,15 +402,14 @@ void Adventure::MoveCorpsesToGraveyard()
                             "x = %f, y = %f, z = %f WHERE instanceid = %d",
                             GetTemplate()->graveyard_zone_id,
                             x, y, z, GetInstanceID());
-		auto results = database.QueryDatabase(query);
-		if(!results.Success())
-			LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::MoveCorpsesToGraveyard: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+		database.QueryDatabase(query);
 	}
 
     auto c_iter = charid_list.begin();
 	for (auto iter = dbid_list.begin(); iter != dbid_list.end(); ++iter, ++c_iter)
 	{
-		ServerPacket* pack = new ServerPacket(ServerOP_DepopAllPlayersCorpses, sizeof(ServerDepopAllPlayersCorpses_Struct));
+		auto pack =
+		    new ServerPacket(ServerOP_DepopAllPlayersCorpses, sizeof(ServerDepopAllPlayersCorpses_Struct));
 		ServerDepopAllPlayersCorpses_Struct *dpc = (ServerDepopAllPlayersCorpses_Struct*)pack->pBuffer;
 		dpc->CharacterID = (*c_iter);
 		dpc->InstanceID = 0;

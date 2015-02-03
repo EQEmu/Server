@@ -16,7 +16,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
+#include "../common/eqemu_logsys.h"
 #include "../common/misc_functions.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
@@ -58,7 +59,6 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
                                     "LIMIT %i", ZoneID, skill, FORAGE_ITEM_LIMIT);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in Forage query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
 
@@ -69,7 +69,7 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 
         item[index] = atoi(row[0]);
         chance[index] = atoi(row[1]) + chancepool;
-        LogFile->write(EQEMuLog::Error, "Possible Forage: %d with a %d chance", item[index], chance[index]);
+        Log.Out(Logs::General, Logs::Error, "Possible Forage: %d with a %d chance", item[index], chance[index]);
         chancepool = chance[index];
     }
 
@@ -114,7 +114,6 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
                                     ZoneID, skill);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        std::cerr << "Error in Fishing query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
     }
 
@@ -174,7 +173,8 @@ bool Client::CanFish() {
 	}
 
 	if(zone->zonemap != nullptr && zone->watermap != nullptr && RuleB(Watermap, CheckForWaterWhenFishing)) {
-		float RodX, RodY, RodZ;
+
+		glm::vec3 rodPosition;
 		// Tweak Rod and LineLength if required
 		const float RodLength = RuleR(Watermap, FishingRodLength);
 		const float LineLength = RuleR(Watermap, FishingLineLength);
@@ -183,25 +183,25 @@ bool Client::CanFish() {
 		HeadingDegrees = (int) ((GetHeading()*360)/256);
 		HeadingDegrees = HeadingDegrees % 360;
 
-		RodX = x_pos + RodLength * sin(HeadingDegrees * M_PI/180.0f);
-		RodY = y_pos + RodLength * cos(HeadingDegrees * M_PI/180.0f);
+		rodPosition.x = m_Position.x + RodLength * sin(HeadingDegrees * M_PI/180.0f);
+		rodPosition.y = m_Position.y + RodLength * cos(HeadingDegrees * M_PI/180.0f);
 
 		// Do BestZ to find where the line hanging from the rod intersects the water (if it is water).
 		// and go 1 unit into the water.
-		Map::Vertex dest;
-		dest.x = RodX;
-		dest.y = RodY;
-		dest.z = z_pos+10;
+		glm::vec3 dest;
+		dest.x = rodPosition.x;
+		dest.y = rodPosition.y;
+		dest.z = m_Position.z+10;
 
-		RodZ = zone->zonemap->FindBestZ(dest, nullptr) + 4;
-		bool in_lava = zone->watermap->InLava(RodX, RodY, RodZ);
-		bool in_water = zone->watermap->InWater(RodX, RodY, RodZ) || zone->watermap->InVWater(RodX, RodY, RodZ);
+		rodPosition.z = zone->zonemap->FindBestZ(dest, nullptr) + 4;
+		bool in_lava = zone->watermap->InLava(rodPosition);
+		bool in_water = zone->watermap->InWater(rodPosition) || zone->watermap->InVWater(rodPosition);
 		//Message(0, "Rod is at %4.3f, %4.3f, %4.3f, InWater says %d, InLava says %d", RodX, RodY, RodZ, in_water, in_lava);
 		if (in_lava) {
 			Message_StringID(MT_Skills, FISHING_LAVA);	//Trying to catch a fire elemental or something?
 			return false;
 		}
-		if((!in_water) || (z_pos-RodZ)>LineLength) {	//Didn't hit the water OR the water is too far below us
+		if((!in_water) || (m_Position.z-rodPosition.z)>LineLength) {	//Didn't hit the water OR the water is too far below us
 			Message_StringID(MT_Skills, FISHING_LAND);	//Trying to catch land sharks perhaps?
 			return false;
 		}
@@ -272,7 +272,9 @@ void Client::GoFish()
 				if(npc_chance < zone->random.Int(0, 99)) {
 					const NPCType* tmp = database.GetNPCType(npc_id);
 					if(tmp != nullptr) {
-						NPC* npc = new NPC(tmp, nullptr, GetX()+3, GetY(), GetZ(), GetHeading(), FlyMode3);
+                        auto positionNPC = GetPosition();
+                        positionNPC.x = positionNPC.x + 3;
+						NPC* npc = new NPC(tmp, nullptr, positionNPC, FlyMode3);
 						npc->AddLootTable();
 
 						npc->AddToHateList(this, 1, 0, false);	//no help yelling
@@ -388,7 +390,7 @@ void Client::ForageItem(bool guarantee) {
 		const Item_Struct* food_item = database.GetItem(foragedfood);
 
 		if(!food_item) {
-			LogFile->write(EQEMuLog::Error, "nullptr returned from database.GetItem in ClientForageItem");
+			Log.Out(Logs::General, Logs::Error, "nullptr returned from database.GetItem in ClientForageItem");
 			return;
 		}
 

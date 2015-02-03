@@ -16,7 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "eqemu_config.h"
 #include "misc_functions.h"
 
@@ -277,10 +277,6 @@ void EQEmuConfig::do_files(TiXmlElement *ele)
 	if (text) {
 		OpCodesFile = text;
 	}
-	text = ParseTextBlock(ele, "logsettings", true);
-	if (text) {
-		LogSettingsFile = text;
-	}
 	text = ParseTextBlock(ele, "eqtime", true);
 	if (text) {
 		EQTimeFile = text;
@@ -438,9 +434,6 @@ std::string EQEmuConfig::GetByName(const std::string &var_name) const
 	if (var_name == "EQTimeFile") {
 		return (EQTimeFile);
 	}
-	if (var_name == "LogSettingsFile") {
-		return (LogSettingsFile);
-	}
 	if (var_name == "MapDir") {
 		return (MapDir);
 	}
@@ -512,7 +505,6 @@ void EQEmuConfig::Dump() const
 	std::cout << "SpellsFile = " << SpellsFile << std::endl;
 	std::cout << "OpCodesFile = " << OpCodesFile << std::endl;
 	std::cout << "EQTimeFile = " << EQTimeFile << std::endl;
-	std::cout << "LogSettingsFile = " << LogSettingsFile << std::endl;
 	std::cout << "MapDir = " << MapDir << std::endl;
 	std::cout << "QuestDir = " << QuestDir << std::endl;
 	std::cout << "PluginDir = " << PluginDir << std::endl;

@@ -16,7 +16,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
+#include "../common/eqemu_logsys.h"
 #include <iomanip>
 
 #include "worldconn.h"
@@ -43,7 +44,7 @@ bool WorldConnection::SendPacket(ServerPacket* pack) {
 
 void WorldConnection::OnConnected() {
 	const EQEmuConfig *Config=EQEmuConfig::get();
-	_log(NET__WORLD, "Connected to World: %s:%d", Config->WorldIP.c_str(), Config->WorldTCPPort);
+	Log.Out(Logs::General, Logs::Netcode, "[WORLD] Connected to World: %s:%d", Config->WorldIP.c_str(), Config->WorldTCPPort);
 
 	ServerPacket* pack = new ServerPacket(ServerOP_ZAAuth, 16);
 	MD5::Generate((const uchar*) m_password.c_str(), m_password.length(), pack->pBuffer);
@@ -75,7 +76,7 @@ bool WorldConnection::Connect() {
 	if (tcpc.Connect(Config->WorldIP.c_str(), Config->WorldTCPPort, errbuf)) {
 		return true;
 	} else {
-		_log(NET__WORLD, "WorldConnection connect: Connecting to the server %s:%d failed: %s", Config->WorldIP.c_str(), Config->WorldTCPPort, errbuf);
+		Log.Out(Logs::General, Logs::Netcode, "[WORLD] WorldConnection connect: Connecting to the server %s:%d failed: %s", Config->WorldIP.c_str(), Config->WorldTCPPort, errbuf);
 	}
 	return false;
 }

@@ -1,5 +1,5 @@
-#ifndef Titanium_H_
-#define Titanium_H_
+#ifndef TITANIUM_H_
+#define TITANIUM_H_
 
 #include "../struct_strategy.h"
 
@@ -23,7 +23,7 @@ namespace Titanium {
 	protected:
 
 		virtual std::string Describe() const;
-		virtual const EQClientVersion ClientVersion() const;
+		virtual const ClientVersion GetClientVersion() const;
 
 		//magic macro to declare our opcode processors
 		#include "ss_declare.h"
@@ -32,6 +32,4 @@ namespace Titanium {
 
 };
 
-
-
-#endif /*Titanium_H_*/
+#endif /*TITANIUM_H_*/

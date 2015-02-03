@@ -15,7 +15,8 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
+#include "../common/global_define.h"
+#include "../common/eqemu_logsys.h"
 #include <iostream>
 #include <string.h>
 #include <stdio.h>
@@ -51,7 +52,7 @@ WorldServer::~WorldServer()
 
 void WorldServer::OnConnected()
 {
-	_log(UCS__INIT, "Connected to World.");
+	Log.Out(Logs::Detail, Logs::UCS_Server, "Connected to World.");
 	WorldConnection::OnConnected();
 }
 
@@ -62,11 +63,11 @@ void WorldServer::Process()
 	if (!Connected())
 		return;
 
-	ServerPacket *pack = 0;
+	ServerPacket *pack = nullptr;
 
 	while((pack = tcpc.PopPacket()))
 	{
-		_log(UCS__TRACE, "Received Opcode: %4X", pack->opcode);
+		Log.Out(Logs::Detail, Logs::UCS_Server, "Received Opcode: %4X", pack->opcode);
 
 		switch(pack->opcode)
 		{
@@ -81,13 +82,13 @@ void WorldServer::Process()
 			{
 				char *Buffer = (char *)pack->pBuffer;
 
-				char *From = new char[strlen(Buffer) + 1];
+				auto From = new char[strlen(Buffer) + 1];
 
 				VARSTRUCT_DECODE_STRING(From, Buffer);
 
 				std::string Message = Buffer;
 
-				_log(UCS__TRACE, "Player: %s, Sent Message: %s", From, Message.c_str());
+				Log.Out(Logs::Detail, Logs::UCS_Server, "Player: %s, Sent Message: %s", From, Message.c_str());
 
 				Client *c = CL->FindCharacter(From);
 
@@ -98,7 +99,7 @@ void WorldServer::Process()
 
 				if(!c)
 				{
-					_log(UCS__TRACE, "Client not found.");
+					Log.Out(Logs::Detail, Logs::UCS_Server, "Client not found.");
 					break;
 				}
 

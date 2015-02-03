@@ -19,6 +19,7 @@
 #ifndef _EQEMU_LOOTTABLE_H
 #define _EQEMU_LOOTTABLE_H
 
+#include "types.h"
 
 #pragma pack(1)
 struct LootTableEntries_Struct {

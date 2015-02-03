@@ -22,7 +22,7 @@
 
 // Disgrace: for windows compile
 #ifdef _WINDOWS
-	#include "debug.h"
+	#include "global_define.h"
 	int gettimeofday (timeval *tp, ...);
 #endif
 

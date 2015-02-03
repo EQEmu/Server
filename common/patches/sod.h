@@ -1,5 +1,5 @@
-#ifndef SoD_H_
-#define SoD_H_
+#ifndef SOD_H_
+#define SOD_H_
 
 #include "../struct_strategy.h"
 
@@ -23,7 +23,7 @@ namespace SoD {
 	protected:
 
 		virtual std::string Describe() const;
-		virtual const EQClientVersion ClientVersion() const;
+		virtual const ClientVersion GetClientVersion() const;
 
 		//magic macro to declare our opcode processors
 		#include "ss_declare.h"
@@ -32,6 +32,4 @@ namespace SoD {
 
 };
 
-
-
-#endif /*SoD_H_*/
+#endif /*SOD_H_*/

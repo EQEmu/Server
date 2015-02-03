@@ -58,7 +58,7 @@ struct NPCType
 	uint32	alt_currency_type;
 	uint32	adventure_template;
 	uint32	trap_template;
-	uint8	light;		//not loaded from DB
+	uint8	light;
 	uint32	AC;
 	uint32	Mana;	//not loaded from DB
 	uint32	ATK;	//not loaded from DB

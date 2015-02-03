@@ -9,7 +9,7 @@
 extern volatile bool ZoneLoaded;
 
 // This constructor is used during the bot create command
-Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, 0, 0, 0, 0, 0, 0, false), rest_timer(1) {
+Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm::vec4(), 0, false), rest_timer(1) {
 	if(botOwner) {
 		this->SetBotOwner(botOwner);
 		this->_botOwnerCharacterID = botOwner->CharacterID();
@@ -96,10 +96,12 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, 0, 0, 0, 0, 
 	}
 
 	strcpy(this->name, this->GetCleanName());
+
+	active_light = spell_light = equip_light = innate_light = NOT_USED;
 }
 
 // This constructor is used when the bot is loaded out of the database
-Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType npcTypeData) : NPC(&npcTypeData, 0, 0, 0, 0, 0, 0, false), rest_timer(1) {
+Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType npcTypeData) : NPC(&npcTypeData, nullptr, glm::vec4(), 0, false), rest_timer(1) {
 	this->_botOwnerCharacterID = botOwnerCharacterID;
 
 	if(this->_botOwnerCharacterID > 0) {
@@ -211,6 +213,8 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	if(cur_mana > max_mana)
 		cur_mana = max_mana;
 	cur_end = max_end;
+
+	active_light = spell_light = equip_light = innate_light = NOT_USED;
 }
 
 Bot::~Bot() {
@@ -379,6 +383,8 @@ NPCType Bot::FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::str
 	BotNPCType.hp_regen = 1;
 	BotNPCType.mana_regen = 1;
 	BotNPCType.maxlevel = botLevel;
+
+	BotNPCType.light = NOT_USED; // due to the way that bots are coded..this is sent post-spawn
 
 	return BotNPCType;
 }
@@ -1225,7 +1231,7 @@ int32 Bot::acmod()
 		return (65 + ((agility-300) / 21));
 	}
 #if EQDEBUG >= 11
-	LogFile->write(EQEMuLog::Error, "Error in Bot::acmod(): Agility: %i, Level: %i",agility,level);
+	Log.Out(Logs::General, Logs::Error, "Error in Bot::acmod(): Agility: %i, Level: %i",agility,level);
 #endif
 	return 0;
 }
@@ -1375,7 +1381,7 @@ int32 Bot::GenerateBaseHitPoints()
 	uint32 Post255;
 	uint32 NormalSTA = GetSTA();
 
-	if(GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->GetClientVersion() >= EQClientSoD && RuleB(Character, SoDClientUseSoDHPManaEnd))
+	if(GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->GetClientVersion() >= ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd))
 	{
 		float SoDPost255;
 
@@ -1462,7 +1468,7 @@ void Bot::LoadAAs() {
     auto results = database.QueryDatabase(query);
 
 	if(!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error in Bot::LoadAAs()");
+		Log.Out(Logs::General, Logs::Error, "Error in Bot::LoadAAs()");
 		return;
 	}
 
@@ -1564,7 +1570,7 @@ void Bot::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 		if (effect == SE_Blank || (effect == SE_CHA && base1 == 0) || effect == SE_StackingCommand_Block || effect == SE_StackingCommand_Overwrite)
 			continue;
 
-		_log(AA__BONUSES, "Applying Effect %d from AA %u in slot %d (base1: %d, base2: %d) on %s", effect, aaid, slot, base1, base2, this->GetCleanName());
+		Log.Out(Logs::Detail, Logs::AA, "Applying Effect %d from AA %u in slot %d (base1: %d, base2: %d) on %s", effect, aaid, slot, base1, base2, this->GetCleanName());
 
 		uint8 focus = IsFocusEffect(0, 0, true,effect);
 		if (focus)
@@ -2774,7 +2780,7 @@ void Bot::LoadStance() {
 	std::string query = StringFormat("SELECT StanceID FROM botstances WHERE BotID = %u;", GetBotID());
 	auto results = database.QueryDatabase(query);
 	if(!results.Success() || results.RowCount() == 0) {
-		LogFile->write(EQEMuLog::Error, "Error in Bot::LoadStance()");
+		Log.Out(Logs::General, Logs::Error, "Error in Bot::LoadStance()");
 		SetDefaultBotStance();
 		return;
 	}
@@ -2792,7 +2798,7 @@ void Bot::SaveStance() {
                                     "VALUES(%u, %u);", GetBotID(), GetBotStance());
     auto results = database.QueryDatabase(query);
     if(!results.Success())
-        LogFile->write(EQEMuLog::Error, "Error in Bot::SaveStance()");
+        Log.Out(Logs::General, Logs::Error, "Error in Bot::SaveStance()");
 
 }
 
@@ -2807,7 +2813,7 @@ void Bot::LoadTimers() {
                                     GetBotID(), DisciplineReuseStart-1, DisciplineReuseStart-1, GetClass(), GetLevel());
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Error in Bot::LoadTimers()");
+		Log.Out(Logs::General, Logs::Error, "Error in Bot::LoadTimers()");
 		return;
 	}
 
@@ -2847,7 +2853,7 @@ void Bot::SaveTimers() {
 	}
 
 	if(hadError)
-		LogFile->write(EQEMuLog::Error, "Error in Bot::SaveTimers()");
+		Log.Out(Logs::General, Logs::Error, "Error in Bot::SaveTimers()");
 
 }
 
@@ -2979,7 +2985,7 @@ void Bot::BotRangedAttack(Mob* other) {
 	//make sure the attack and ranged timers are up
 	//if the ranged timer is disabled, then they have no ranged weapon and shouldent be attacking anyhow
 	if((attack_timer.Enabled() && !attack_timer.Check(false)) || (ranged_timer.Enabled() && !ranged_timer.Check())) {
-		mlog(COMBAT__RANGED, "Bot Archery attack canceled. Timer not up. Attack %d, ranged %d", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
+		Log.Out(Logs::Detail, Logs::Combat, "Bot Archery attack canceled. Timer not up. Attack %d, ranged %d", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
 		Message(0, "Error: Timer not up. Attack %d, ranged %d", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
 		return;
 	}
@@ -2997,7 +3003,7 @@ void Bot::BotRangedAttack(Mob* other) {
 	if(!RangeWeapon || !Ammo)
 		return;
 
-	mlog(COMBAT__RANGED, "Shooting %s with bow %s (%d) and arrow %s (%d)", other->GetCleanName(), RangeWeapon->Name, RangeWeapon->ID, Ammo->Name, Ammo->ID);
+	Log.Out(Logs::Detail, Logs::Combat, "Shooting %s with bow %s (%d) and arrow %s (%d)", other->GetCleanName(), RangeWeapon->Name, RangeWeapon->ID, Ammo->Name, Ammo->ID);
 
 	if(!IsAttackAllowed(other) ||
 		IsCasting() ||
@@ -3015,19 +3021,19 @@ void Bot::BotRangedAttack(Mob* other) {
 
 	//break invis when you attack
 	if(invisible) {
-		mlog(COMBAT__ATTACKS, "Removing invisibility due to melee attack.");
+		Log.Out(Logs::Detail, Logs::Combat, "Removing invisibility due to melee attack.");
 		BuffFadeByEffect(SE_Invisibility);
 		BuffFadeByEffect(SE_Invisibility2);
 		invisible = false;
 	}
 	if(invisible_undead) {
-		mlog(COMBAT__ATTACKS, "Removing invisibility vs. undead due to melee attack.");
+		Log.Out(Logs::Detail, Logs::Combat, "Removing invisibility vs. undead due to melee attack.");
 		BuffFadeByEffect(SE_InvisVsUndead);
 		BuffFadeByEffect(SE_InvisVsUndead2);
 		invisible_undead = false;
 	}
 	if(invisible_animals){
-		mlog(COMBAT__ATTACKS, "Removing invisibility vs. animals due to melee attack.");
+		Log.Out(Logs::Detail, Logs::Combat, "Removing invisibility vs. animals due to melee attack.");
 		BuffFadeByEffect(SE_InvisVsAnimals);
 		invisible_animals = false;
 	}
@@ -3184,7 +3190,7 @@ void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 		return;
 
 	if (damage > 0)
-		CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
+		CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 
 	if((skillinuse == SkillDragonPunch) && GetAA(aaDragonPunch) && zone->random.Int(0, 99) < 25){
 		SpellFinished(904, other, 10, 0, -1, spells[904].ResistDiff);
@@ -3354,7 +3360,7 @@ void Bot::AI_Process() {
 	if(GetHasBeenSummoned()) {
 		if(IsBotCaster() || IsBotArcher()) {
 			if (AImovement_timer->Check()) {
-				if(!GetTarget() || (IsBotCaster() && !IsBotCasterCombatRange(GetTarget())) || (IsBotArcher() && IsArcheryRange(GetTarget())) || (DistNoRootNoZ(GetPreSummonX(), GetPreSummonY()) < 10)) {
+				if(!GetTarget() || (IsBotCaster() && !IsBotCasterCombatRange(GetTarget())) || (IsBotArcher() && IsArcheryRange(GetTarget())) || (DistanceSquaredNoZ(static_cast<glm::vec3>(m_Position), m_PreSummonLocation) < 10)) {
 					if(GetTarget())
 						FaceTarget(GetTarget());
 					SetHasBeenSummoned(false);
@@ -3362,9 +3368,9 @@ void Bot::AI_Process() {
 				else if(!IsRooted()) {
 					if(GetTarget() && GetTarget()->GetHateTop() && GetTarget()->GetHateTop() != this)
 					{
-						mlog(AI__WAYPOINTS, "Returning to location prior to being summoned.");
-						CalculateNewPosition2(GetPreSummonX(), GetPreSummonY(), GetPreSummonZ(), GetRunspeed());
-						SetHeading(CalculateHeadingToTarget(GetPreSummonX(), GetPreSummonY()));
+						Log.Out(Logs::Detail, Logs::AI, "Returning to location prior to being summoned.");
+						CalculateNewPosition2(m_PreSummonLocation.x, m_PreSummonLocation.y, m_PreSummonLocation.z, GetRunspeed());
+						SetHeading(CalculateHeadingToTarget(m_PreSummonLocation.x, m_PreSummonLocation.y));
 						return;
 					}
 				}
@@ -3505,7 +3511,7 @@ void Bot::AI_Process() {
 			if(IsBotCasterCombatRange(GetTarget()))
 				atCombatRange = true;
 		}
-		else if(DistNoRoot(*GetTarget()) <= meleeDistance) {
+		else if(DistanceSquared(m_Position, GetTarget()->GetPosition())  <= meleeDistance) {
 			atCombatRange = true;
 		}
 
@@ -3533,7 +3539,7 @@ void Bot::AI_Process() {
 						return;
 					}
 				}
-				else if(!IsMoving() && GetClass() != ROGUE && (DistNoRootNoZ(*GetTarget()) < GetTarget()->GetSize())) {
+				else if(!IsMoving() && GetClass() != ROGUE && (DistanceSquaredNoZ(m_Position, GetTarget()->GetPosition()) < GetTarget()->GetSize())) {
 					// If we are not a rogue trying to backstab, let's try to adjust our melee range so we don't appear to be bunched up
 					float newX = 0;
 					float newY = 0;
@@ -3689,7 +3695,7 @@ void Bot::AI_Process() {
 
 			if (AImovement_timer->Check()) {
 				if(!IsRooted()) {
-					mlog(AI__WAYPOINTS, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
+					Log.Out(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
 					CalculateNewPosition2(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), GetRunspeed());
 					return;
 				}
@@ -3732,7 +3738,7 @@ void Bot::AI_Process() {
 				Mob* follow = entity_list.GetMob(GetFollowID());
 
 				if(follow) {
-					float dist = DistNoRoot(*follow);
+					float dist = DistanceSquared(m_Position, follow->GetPosition());
 					float speed = follow->GetRunspeed();
 
 					if(dist < GetFollowDistance() + 1000)
@@ -3865,7 +3871,7 @@ void Bot::PetAIProcess() {
 						return;
 					}
 				}
-				else if(botPet->DistNoRootNoZ(*botPet->GetTarget()) < botPet->GetTarget()->GetSize()) {
+				else if(DistanceSquaredNoZ(botPet->GetPosition(), botPet->GetTarget()->GetPosition()) < botPet->GetTarget()->GetSize()) {
 					// Let's try to adjust our melee range so we don't appear to be bunched up
 					bool isBehindMob = false;
 					bool moveBehindMob = false;
@@ -3972,7 +3978,7 @@ void Bot::PetAIProcess() {
 				{
 					botPet->SetRunAnimSpeed(0);
 					if(!botPet->IsRooted()) {
-						mlog(AI__WAYPOINTS, "Pursuing %s while engaged.", botPet->GetTarget()->GetCleanName());
+						Log.Out(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", botPet->GetTarget()->GetCleanName());
 						botPet->CalculateNewPosition2(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ(), botPet->GetOwner()->GetRunspeed());
 						return;
 					}
@@ -4003,7 +4009,7 @@ void Bot::PetAIProcess() {
 			switch(pStandingPetOrder) {
 				case SPO_Follow:
 					{
-						float dist = botPet->DistNoRoot(*botPet->GetTarget());
+						float dist = DistanceSquared(botPet->GetPosition(), botPet->GetTarget()->GetPosition());
 						botPet->SetRunAnimSpeed(0);
 						if(dist > 184) {
 							botPet->CalculateNewPosition2(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ(), botPet->GetTarget()->GetRunspeed());
@@ -4105,15 +4111,18 @@ void Bot::Spawn(Client* botCharacterOwner, std::string* errorMessage) {
 			this->GetBotOwner()->CastToClient()->Message(13, "%s save failed!", this->GetCleanName());
 
 		// Spawn the bot at the bow owner's loc
-		this->x_pos = botCharacterOwner->GetX();
-		this->y_pos = botCharacterOwner->GetY();
-		this->z_pos = botCharacterOwner->GetZ();
+		this->m_Position.x = botCharacterOwner->GetX();
+		this->m_Position.y = botCharacterOwner->GetY();
+		this->m_Position.z = botCharacterOwner->GetZ();
 
 		// Make the bot look at the bot owner
 		FaceTarget(botCharacterOwner);
 
 		// Level the bot to the same level as the bot owner
 		//this->SetLevel(botCharacterOwner->GetLevel());
+
+		UpdateEquipLightValue();
+		UpdateActiveLightValue();
 
 		entity_list.AddBot(this, true, true);
 
@@ -4178,6 +4187,7 @@ void Bot::RemoveBotItemBySlot(uint32 slotID, std::string *errorMessage) {
         *errorMessage = std::string(results.ErrorMessage());
 
     m_inv.DeleteItem(slotID);
+	UpdateEquipLightValue();
 }
 
 // Retrieves all the inventory records from the database for this bot.
@@ -4211,7 +4221,7 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
 
         ItemInst* inst = database.CreateItem(item_id, charges, aug[0], aug[1], aug[2], aug[3], aug[4]);
         if (!inst) {
-            LogFile->write(EQEMuLog::Error, "Warning: botid %i has an invalid item_id %i in inventory slot %i", this->GetBotID(), item_id, slot_id);
+            Log.Out(Logs::General, Logs::Error, "Warning: botid %i has an invalid item_id %i in inventory slot %i", this->GetBotID(), item_id, slot_id);
             continue;
         }
 
@@ -4235,10 +4245,11 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
 
         // Save ptr to item in inventory
         if (put_slot_id == INVALID_INDEX)
-            LogFile->write(EQEMuLog::Error, "Warning: Invalid slot_id for item in inventory: botid=%i, item_id=%i, slot_id=%i",this->GetBotID(), item_id, slot_id);
+            Log.Out(Logs::General, Logs::Error, "Warning: Invalid slot_id for item in inventory: botid=%i, item_id=%i, slot_id=%i",this->GetBotID(), item_id, slot_id);
 
     }
 
+	UpdateEquipLightValue();
 }
 
 // Returns the inventory record for this bot from the database for the specified equipment slot.
@@ -4363,6 +4374,9 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.flymode = 0;
 		ns->spawn.size = 0;
 		ns->spawn.NPC = 0;					// 0=player,1=npc,2=pc corpse,3=npc corpse
+
+		UpdateActiveLightValue();
+		ns->spawn.light = active_light;
 
 		ns->spawn.helm = helmtexture; //0xFF;
 		ns->spawn.equip_chest2 = texture; //0xFF;
@@ -5073,6 +5087,10 @@ void Bot::BotAddEquipItem(int slot, uint32 id) {
 			equipment[slot] = id; // npc has more than just material slots. Valid material should mean valid inventory index
 			SendWearChange(materialFromSlot);
 		}
+
+		UpdateEquipLightValue();
+		if (UpdateActiveLightValue())
+			SendAppearancePacket(AT_Light, GetActiveLightValue());
 	}
 }
 
@@ -5087,6 +5105,10 @@ void Bot::BotRemoveEquipItem(int slot) {
 			if(materialFromSlot == MaterialChest)
 				SendWearChange(MaterialArms);
 		}
+
+		UpdateEquipLightValue();
+		if (UpdateActiveLightValue())
+			SendAppearancePacket(AT_Light, GetActiveLightValue());
 	}
 }
 
@@ -5959,7 +5981,7 @@ void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, SkillUseTypes attack_
 
 	//handle EVENT_ATTACK. Resets after we have not been attacked for 12 seconds
 	if(attacked_timer.Check()) {
-		mlog(COMBAT__HITS, "Triggering EVENT_ATTACK due to attack by %s", from->GetName());
+		Log.Out(Logs::Detail, Logs::Combat, "Triggering EVENT_ATTACK due to attack by %s", from->GetName());
 		parse->EventNPC(EVENT_ATTACK, this, from, "", 0);
 	}
 
@@ -5972,7 +5994,7 @@ void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, SkillUseTypes attack_
 	// if spell is lifetap add hp to the caster
 	if (spell_id != SPELL_UNKNOWN && IsLifetapSpell(spell_id)) {
 		int healed = GetActSpellHealing(spell_id, damage);
-		mlog(COMBAT__DAMAGE, "Applying lifetap heal of %d to %s", healed, GetCleanName());
+		Log.Out(Logs::Detail, Logs::Combat, "Applying lifetap heal of %d to %s", healed, GetCleanName());
 		HealDamage(healed);
 		entity_list.MessageClose(this, true, 300, MT_Spells, "%s beams a smile at %s", GetCleanName(), from->GetCleanName() );
 	}
@@ -6017,14 +6039,14 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 {
 	if (!other) {
 		SetTarget(nullptr);
-		LogFile->write(EQEMuLog::Error, "A null Mob object was passed to Bot::Attack for evaluation!");
+		Log.Out(Logs::General, Logs::Error, "A null Mob object was passed to Bot::Attack for evaluation!");
 		return false;
 	}
 
 	if(!GetTarget() || GetTarget() != other)
 		SetTarget(other);
 
-	mlog(COMBAT__ATTACKS, "Attacking %s with hand %d %s", other?other->GetCleanName():"(nullptr)", Hand, FromRiposte?"(this is a riposte)":"");
+	Log.Out(Logs::Detail, Logs::Combat, "Attacking %s with hand %d %s", other?other->GetCleanName():"(nullptr)", Hand, FromRiposte?"(this is a riposte)":"");
 
 	if ((IsCasting() && (GetClass() != BARD) && !IsFromSpell) ||
 		other == nullptr ||
@@ -6036,13 +6058,13 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 			entity_list.MessageClose(this, 1, 200, 10, "%s says, '%s is not a legal target master.'", this->GetCleanName(), this->GetTarget()->GetCleanName());
 		if(other) {
 			RemoveFromHateList(other);
-			mlog(COMBAT__ATTACKS, "I am not allowed to attack %s", other->GetCleanName());
+			Log.Out(Logs::Detail, Logs::Combat, "I am not allowed to attack %s", other->GetCleanName());
 		}
 		return false;
 	}
 
 	if(DivineAura()) {//cant attack while invulnerable
-		mlog(COMBAT__ATTACKS, "Attack canceled, Divine Aura is in effect.");
+		Log.Out(Logs::Detail, Logs::Combat, "Attack canceled, Divine Aura is in effect.");
 		return false;
 	}
 
@@ -6068,19 +6090,19 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 
 	if(weapon != nullptr) {
 		if (!weapon->IsWeapon()) {
-			mlog(COMBAT__ATTACKS, "Attack canceled, Item %s (%d) is not a weapon.", weapon->GetItem()->Name, weapon->GetID());
+			Log.Out(Logs::Detail, Logs::Combat, "Attack canceled, Item %s (%d) is not a weapon.", weapon->GetItem()->Name, weapon->GetID());
 			return(false);
 		}
-		mlog(COMBAT__ATTACKS, "Attacking with weapon: %s (%d)", weapon->GetItem()->Name, weapon->GetID());
+		Log.Out(Logs::Detail, Logs::Combat, "Attacking with weapon: %s (%d)", weapon->GetItem()->Name, weapon->GetID());
 	} else {
-		mlog(COMBAT__ATTACKS, "Attacking without a weapon.");
+		Log.Out(Logs::Detail, Logs::Combat, "Attacking without a weapon.");
 	}
 
 	// calculate attack_skill and skillinuse depending on hand and weapon
 	// also send Packet to near clients
 	SkillUseTypes skillinuse;
 	AttackAnimation(skillinuse, Hand, weapon);
-	mlog(COMBAT__ATTACKS, "Attacking with %s in slot %d using skill %d", weapon?weapon->GetItem()->Name:"Fist", Hand, skillinuse);
+	Log.Out(Logs::Detail, Logs::Combat, "Attacking with %s in slot %d using skill %d", weapon?weapon->GetItem()->Name:"Fist", Hand, skillinuse);
 
 	/// Now figure out damage
 	int damage = 0;
@@ -6098,7 +6120,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		if(berserk && (GetClass() == BERSERKER)){
 			int bonus = 3 + GetLevel()/10;		//unverified
 			weapon_damage = weapon_damage * (100+bonus) / 100;
-			mlog(COMBAT__DAMAGE, "Berserker damage bonus increases DMG to %d", weapon_damage);
+			Log.Out(Logs::Detail, Logs::Combat, "Berserker damage bonus increases DMG to %d", weapon_damage);
 		}
 
 		//try a finishing blow.. if successful end the attack
@@ -6163,7 +6185,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		else
 			damage = zone->random.Int(min_hit, max_hit);
 
-		mlog(COMBAT__DAMAGE, "Damage calculated to %d (min %d, max %d, str %d, skill %d, DMG %d, lv %d)",
+		Log.Out(Logs::Detail, Logs::Combat, "Damage calculated to %d (min %d, max %d, str %d, skill %d, DMG %d, lv %d)",
 			damage, min_hit, max_hit, GetSTR(), GetSkill(skillinuse), weapon_damage, GetLevel());
 
 		if(opts) {
@@ -6175,7 +6197,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 
 		//check to see if we hit..
 		if(!other->CheckHitChance(other, skillinuse, Hand)) {
-			mlog(COMBAT__ATTACKS, "Attack missed. Damage set to 0.");
+			Log.Out(Logs::Detail, Logs::Combat, "Attack missed. Damage set to 0.");
 			damage = 0;
 			other->AddToHateList(this, 0);
 		} else {	//we hit, try to avoid it
@@ -6185,13 +6207,13 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 				ApplyMeleeDamageBonus(skillinuse, damage);
 				damage += (itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse);
 				TryCriticalHit(other, skillinuse, damage, opts);
-				mlog(COMBAT__HITS, "Generating hate %d towards %s", hate, GetCleanName());
+				Log.Out(Logs::Detail, Logs::Combat, "Generating hate %d towards %s", hate, GetCleanName());
 				// now add done damage to the hate list
 				//other->AddToHateList(this, hate);
 			}
 			else
 				other->AddToHateList(this, 0);
-			mlog(COMBAT__DAMAGE, "Final damage after all reductions: %d", damage);
+			Log.Out(Logs::Detail, Logs::Combat, "Final damage after all reductions: %d", damage);
 		}
 
 		//riposte
@@ -6249,23 +6271,23 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 	MeleeLifeTap(damage);
 
 	if (damage > 0)
-		CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
+		CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 
 	//break invis when you attack
 	if(invisible) {
-		mlog(COMBAT__ATTACKS, "Removing invisibility due to melee attack.");
+		Log.Out(Logs::Detail, Logs::Combat, "Removing invisibility due to melee attack.");
 		BuffFadeByEffect(SE_Invisibility);
 		BuffFadeByEffect(SE_Invisibility2);
 		invisible = false;
 	}
 	if(invisible_undead) {
-		mlog(COMBAT__ATTACKS, "Removing invisibility vs. undead due to melee attack.");
+		Log.Out(Logs::Detail, Logs::Combat, "Removing invisibility vs. undead due to melee attack.");
 		BuffFadeByEffect(SE_InvisVsUndead);
 		BuffFadeByEffect(SE_InvisVsUndead2);
 		invisible_undead = false;
 	}
 	if(invisible_animals){
-		mlog(COMBAT__ATTACKS, "Removing invisibility vs. animals due to melee attack.");
+		Log.Out(Logs::Detail, Logs::Combat, "Removing invisibility vs. animals due to melee attack.");
 		BuffFadeByEffect(SE_InvisVsAnimals);
 		invisible_animals = false;
 	}
@@ -7028,7 +7050,7 @@ int32 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 						return 0;
 					break;
 				default:
-					LogFile->write(EQEMuLog::Normal, "CalcFocusEffect: unknown limit spelltype %d", focus_spell.base[i]);
+					Log.Out(Logs::General, Logs::Normal, "CalcFocusEffect: unknown limit spelltype %d", focus_spell.base[i]);
 			}
 			break;
 
@@ -7332,12 +7354,10 @@ int32 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 
 			break;
 		}
-#if EQDEBUG >= 6
 		//this spits up a lot of garbage when calculating spell focuses
 		//since they have all kinds of extra effects on them.
 		default:
-			LogFile->write(EQEMuLog::Normal, "CalcFocusEffect: unknown effectid %d", focus_spell.effectid[i]);
-#endif
+			Log.Out(Logs::General, Logs::Spells, "CalcFocusEffect: unknown effectid %d", focus_spell.effectid[i]);
 		}
 	}
 	//Check for spell skill limits.
@@ -7380,13 +7400,13 @@ float Bot::GetProcChances(float ProcBonus, uint16 hand) {
 		ProcChance += ProcChance*ProcBonus / 100.0f;
 	}
 
-	mlog(COMBAT__PROCS, "Proc chance %.2f (%.2f from bonuses)", ProcChance, ProcBonus);
+	Log.Out(Logs::Detail, Logs::Combat, "Proc chance %.2f (%.2f from bonuses)", ProcChance, ProcBonus);
 	return ProcChance;
 }
 
 bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 {
-	/* solar: called when a mob is attacked, does the checks to see if it's a hit
+	/* called when a mob is attacked, does the checks to see if it's a hit
 	* and does other mitigation checks. 'this' is the mob being attacked.
 	*
 	* special return values:
@@ -7416,7 +7436,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	/////////////////////////////////////////////////////////
 	if (IsEnraged() && !other->BehindMob(this, other->GetX(), other->GetY())) {
 		damage = -3;
-		mlog(COMBAT__DAMAGE, "I am enraged, riposting frontal attack.");
+		Log.Out(Logs::Detail, Logs::Combat, "I am enraged, riposting frontal attack.");
 	}
 
 	/////////////////////////////////////////////////////////
@@ -7558,7 +7578,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		}
 	}
 
-	mlog(COMBAT__DAMAGE, "Final damage after all avoidances: %d", damage);
+	Log.Out(Logs::Detail, Logs::Combat, "Final damage after all avoidances: %d", damage);
 
 	if (damage < 0)
 		return true;
@@ -7611,14 +7631,14 @@ bool Bot::TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse)
 		uint16 levelreq = aabonuses.FinishingBlowLvl[0];
 
 		if(defender->GetLevel() <= levelreq && (chance >= zone->random.Int(0, 1000))){
-			mlog(COMBAT__ATTACKS, "Landed a finishing blow: levelreq at %d, other level %d", levelreq , defender->GetLevel());
+			Log.Out(Logs::Detail, Logs::Combat, "Landed a finishing blow: levelreq at %d, other level %d", levelreq , defender->GetLevel());
 			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FINISHING_BLOW, GetName());
 			defender->Damage(this, damage, SPELL_UNKNOWN, skillinuse);
 			return true;
 		}
 		else
 		{
-			mlog(COMBAT__ATTACKS, "FAILED a finishing blow: levelreq at %d, other level %d", levelreq , defender->GetLevel());
+			Log.Out(Logs::Detail, Logs::Combat, "FAILED a finishing blow: levelreq at %d, other level %d", levelreq , defender->GetLevel());
 			return false;
 		}
 	}
@@ -7626,7 +7646,7 @@ bool Bot::TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse)
 }
 
 void Bot::DoRiposte(Mob* defender) {
-	mlog(COMBAT__ATTACKS, "Preforming a riposte");
+	Log.Out(Logs::Detail, Logs::Combat, "Preforming a riposte");
 
 	if (!defender)
 		return;
@@ -7639,7 +7659,7 @@ void Bot::DoRiposte(Mob* defender) {
 							defender->GetItemBonuses().GiveDoubleRiposte[0];
 
 	if(DoubleRipChance && (DoubleRipChance >= zone->random.Int(0, 100))) {
-		mlog(COMBAT__ATTACKS, "Preforming a double riposte (%d percent chance)", DoubleRipChance);
+		Log.Out(Logs::Detail, Logs::Combat, "Preforming a double riposte (%d percent chance)", DoubleRipChance);
 
 		defender->Attack(this, MainPrimary, true);
 	}
@@ -7707,7 +7727,7 @@ void Bot::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 	if (HasDied())	return;
 
 	if (max_damage > 0)
-		CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
+		CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 
 	//[AA Dragon Punch] value[0] = 100 for 25%, chance value[1] = skill
 	if(aabonuses.SpecialAttackKBProc[0] && aabonuses.SpecialAttackKBProc[1] == skill){
@@ -7761,7 +7781,7 @@ void Bot::TryBackstab(Mob *other, int ReuseTime) {
 
 	if (bIsBehind || bCanFrontalBS){ // Bot is behind other OR can do Frontal Backstab
 
-		// solar - chance to assassinate
+		// chance to assassinate
 		int chance = 10 + (GetDEX()/10) + (itembonuses.HeroicDEX/10); //18.5% chance at 85 dex 40% chance at 300 dex
 		if(
 			level >= 60 && // bot is 60 or higher
@@ -8209,7 +8229,7 @@ bool Bot::TryHeadShot(Mob* defender, SkillUseTypes skillInUse) {
 			float AttackerChance = 0.20f + ((float)(rangerLevel - 51) * 0.005f);
 			float DefenderChance = (float)zone->random.Real(0.00f, 1.00f);
 			if(AttackerChance > DefenderChance) {
-				mlog(COMBAT__ATTACKS, "Landed a headshot: Attacker chance was %f and Defender chance was %f.", AttackerChance, DefenderChance);
+				Log.Out(Logs::Detail, Logs::Combat, "Landed a headshot: Attacker chance was %f and Defender chance was %f.", AttackerChance, DefenderChance);
 				// WildcardX: At the time I wrote this, there wasnt a string id for something like HEADSHOT_BLOW
 				//entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FINISHING_BLOW, GetName());
 				entity_list.MessageClose(this, false, 200, MT_CritMelee, "%s has scored a leathal HEADSHOT!", GetName());
@@ -8217,7 +8237,7 @@ bool Bot::TryHeadShot(Mob* defender, SkillUseTypes skillInUse) {
 				Result = true;
 			}
 			else {
-				mlog(COMBAT__ATTACKS, "FAILED a headshot: Attacker chance was %f and Defender chance was %f.", AttackerChance, DefenderChance);
+				Log.Out(Logs::Detail, Logs::Combat, "FAILED a headshot: Attacker chance was %f and Defender chance was %f.", AttackerChance, DefenderChance);
 			}
 		}
 	}
@@ -8386,6 +8406,8 @@ void Bot::EquipBot(std::string* errorMessage) {
 				return;
 		}
 	}
+
+	UpdateEquipLightValue();
 }
 
 //// This method is meant to be called by zone or client methods to clean up objects when a client camps, goes LD, zones out or something like that.
@@ -8420,7 +8442,7 @@ void Bot::ProcessBotOwnerRefDelete(Mob* botOwner) {
 			std::list<Bot*> BotList = entity_list.GetBotsByBotOwnerCharacterID(botOwner->CastToClient()->CharacterID());
 
 			if(!BotList.empty()) {
-				for(std::list<Bot*>::iterator botListItr = BotList.begin(); botListItr != BotList.end(); botListItr++) {
+				for(std::list<Bot*>::iterator botListItr = BotList.begin(); botListItr != BotList.end(); ++botListItr) {
 					Bot* tempBot = *botListItr;
 
 					if(tempBot) {
@@ -8443,11 +8465,11 @@ void Bot::ProcessGuildInvite(Client* guildOfficer, Bot* botToGuild) {
 				return;
 			}
 
-			// mlog(GUILDS__ACTIONS, "Inviting %s (%d) into guild %s (%d)", botToGuild->GetName(), botToGuild->GetBotID(), guild_mgr.GetGuildName(client->GuildID()), client->GuildID());
+			// Log.Out(Logs::Detail, Logs::Guilds, "Inviting %s (%d) into guild %s (%d)", botToGuild->GetName(), botToGuild->GetBotID(), guild_mgr.GetGuildName(client->GuildID()), client->GuildID());
 
 			SetBotGuildMembership(botToGuild->GetBotID(), guildOfficer->GuildID(), GUILD_MEMBER);
 
-			//_log(GUILDS__REFRESH, "Sending char refresh for BOT %s from guild %d to world", botToGuild->GetName(), guildOfficer->GuildID();
+			//Log.LogDebugType(Logs::Detail, Logs::Guilds, "Sending char refresh for BOT %s from guild %d to world", botToGuild->GetName(), guildOfficer->GuildID();
 
 			ServerPacket* pack = new ServerPacket(ServerOP_GuildCharRefresh, sizeof(ServerGuildCharRefresh_Struct));
 			ServerGuildCharRefresh_Struct *s = (ServerGuildCharRefresh_Struct *) pack->pBuffer;
@@ -8550,7 +8572,7 @@ int32 Bot::CalcMaxMana() {
 		}
 		default:
 		{
-			LogFile->write(EQEMuLog::Debug, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+			Log.Out(Logs::General, Logs::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
 			max_mana = 0;
 			break;
 		}
@@ -9076,9 +9098,9 @@ void Bot::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot, int16 *resist_adjust) {
 	bool Result = false;
 
-	if(zone && !zone->IsSpellBlocked(spell_id, GetX(), GetY(), GetZ())) {
+	if(zone && !zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
 
-		mlog(SPELLS__CASTING, "CastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item slot %d",
+		Log.Out(Logs::Detail, Logs::Spells, "CastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item slot %d",
 			spells[spell_id].name, spell_id, target_id, slot, cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);
 
 		if(casting_spell_id == spell_id)
@@ -9086,7 +9108,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_t
 
 		if(GetClass() != BARD) {
 			if(!IsValidSpell(spell_id) || casting_spell_id || delaytimer || spellend_timer.Enabled() || IsStunned() || IsFeared() || IsMezzed() || (IsSilenced() && !IsDiscipline(spell_id)) || (IsAmnesiad() && IsDiscipline(spell_id))) {
-				mlog(SPELLS__CASTING_ERR, "Spell casting canceled: not able to cast now. Valid? %d, casting %d, waiting? %d, spellend? %d, stunned? %d, feared? %d, mezed? %d, silenced? %d",
+				Log.Out(Logs::Detail, Logs::Spells, "Spell casting canceled: not able to cast now. Valid? %d, casting %d, waiting? %d, spellend? %d, stunned? %d, feared? %d, mezed? %d, silenced? %d",
 					IsValidSpell(spell_id), casting_spell_id, delaytimer, spellend_timer.Enabled(), IsStunned(), IsFeared(), IsMezzed(), IsSilenced() );
 				if(IsSilenced() && !IsDiscipline(spell_id))
 					Message_StringID(13, SILENCED_STRING);
@@ -9107,7 +9129,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_t
 
 		//cannot cast under deivne aura
 		if(DivineAura()) {
-			mlog(SPELLS__CASTING_ERR, "Spell casting canceled: cannot cast while Divine Aura is in effect.");
+			Log.Out(Logs::Detail, Logs::Spells, "Spell casting canceled: cannot cast while Divine Aura is in effect.");
 			InterruptSpell(173, 0x121, false);
 			return(false);
 		}
@@ -9121,7 +9143,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_t
 			InterruptSpell(fizzle_msg, 0x121, spell_id);
 
 			uint32 use_mana = ((spells[spell_id].mana) / 4);
-			mlog(SPELLS__CASTING_ERR, "Spell casting canceled: fizzled. %d mana has been consumed", use_mana);
+			Log.Out(Logs::Detail, Logs::Spells, "Spell casting canceled: fizzled. %d mana has been consumed", use_mana);
 
 			// fizzle 1/4 the mana away
 			SetMana(GetMana() - use_mana);
@@ -9129,7 +9151,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_t
 		}
 
 		if (HasActiveSong()) {
-			mlog(SPELLS__BARDS, "Casting a new spell/song while singing a song. Killing old song %d.", bardsong);
+			Log.Out(Logs::Detail, Logs::Spells, "Casting a new spell/song while singing a song. Killing old song %d.", bardsong);
 			//Note: this does NOT tell the client
 			//_StopSong();
 			bardsong = 0;
@@ -9258,7 +9280,7 @@ bool Bot::IsImmuneToSpell(uint16 spell_id, Mob *caster) {
 			if(caster->IsBot()) {
 				if(spells[spell_id].targettype == ST_Undead) {
 					if((GetBodyType() != BT_SummonedUndead) && (GetBodyType() != BT_Undead) && (GetBodyType() != BT_Vampire)) {
-							mlog(SPELLS__RESISTS, "Bot's target is not an undead.");
+							Log.Out(Logs::Detail, Logs::Spells, "Bot's target is not an undead.");
 							return true;
 					}
 				}
@@ -9268,13 +9290,13 @@ bool Bot::IsImmuneToSpell(uint16 spell_id, Mob *caster) {
 						&& (GetBodyType() != BT_Summoned2)
 						&& (GetBodyType() != BT_Summoned3)
 						) {
-							mlog(SPELLS__RESISTS, "Bot's target is not a summoned creature.");
+							Log.Out(Logs::Detail, Logs::Spells, "Bot's target is not a summoned creature.");
 							return true;
 					}
 				}
 			}
 
-			mlog(SPELLS__RESISTS, "No bot immunities to spell %d found.", spell_id);
+			Log.Out(Logs::Detail, Logs::Spells, "No bot immunities to spell %d found.", spell_id);
 		}
 	}
 
@@ -9332,7 +9354,7 @@ int32 Bot::GenerateBaseManaPoints()
 	{
 		case 'I':
 			WisInt = INT;
-			if(GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->GetClientVersion() >= EQClientSoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+			if(GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->GetClientVersion() >= ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 				if(WisInt > 100) {
 					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
 					if(WisInt > 201) {
@@ -9375,7 +9397,7 @@ int32 Bot::GenerateBaseManaPoints()
 
 		case 'W':
 			WisInt = WIS;
-			if(GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->GetClientVersion() >= EQClientSoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+			if(GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->GetClientVersion() >= ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 				if(WisInt > 100) {
 					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
 					if(WisInt > 201) {
@@ -9614,7 +9636,7 @@ int32 Bot::GetMaxStat() {
 	if (level < 61) {
 		base = 255;
 	}
-	else if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->GetClientVersion() >= EQClientSoF) {
+	else if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->GetClientVersion() >= ClientVersion::SoF) {
 		base = 255 + 5 * (level - 60);
 	}
 	else if (level < 71) {
@@ -10234,7 +10256,7 @@ int32 Bot::CalcBaseEndurance()
 	int32 sta_end = 0;
 	int Stats = 0;
 
-	if(GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->GetClientVersion() >= EQClientSoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+	if(GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->GetClientVersion() >= ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 		int HeroicStats = 0;
 
 		Stats = ((GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4);
@@ -10387,7 +10409,7 @@ bool Bot::IsArcheryRange(Mob *target) {
 
 		range *= range;
 
-		float targetDistance = DistNoRootNoZ(*target);
+		float targetDistance = DistanceSquaredNoZ(m_Position, target->GetPosition());
 
 		float minRuleDistance = RuleI(Combat, MinRangedAttackDist) * RuleI(Combat, MinRangedAttackDist);
 
@@ -10411,7 +10433,7 @@ bool Bot::IsBotCasterCombatRange(Mob *target) {
 		// half the max so the bot doesn't always stop at max range to allow combat movement
 		range *= .5;
 
-		float targetDistance = DistNoRootNoZ(*target);
+		float targetDistance = DistanceSquaredNoZ(m_Position, target->GetPosition());
 
 		if(targetDistance > range)
 			result = false;
@@ -10663,12 +10685,12 @@ void Bot::BotGroupSummon(Group* group, Client* client) {
 				if(botMember->GetBotOwnerCharacterID() == client->CharacterID()) {
 					botMember->SetTarget(botMember->GetBotOwner());
 					botMember->WipeHateList();
-					botMember->Warp(botMember->GetBotOwner()->GetX(), botMember->GetBotOwner()->GetY(), botMember->GetBotOwner()->GetZ());
+					botMember->Warp(glm::vec3(botMember->GetBotOwner()->GetPosition()));
 
 					if(botMember->HasPet() && botMember->GetPet()) {
 						botMember->GetPet()->SetTarget(botMember);
 						botMember->GetPet()->WipeHateList();
-						botMember->GetPet()->Warp(botMember->GetBotOwner()->GetX(), botMember->GetBotOwner()->GetY(), botMember->GetBotOwner()->GetZ());
+						botMember->GetPet()->Warp(glm::vec3(botMember->GetBotOwner()->GetPosition()));
 					}
 				}
 			}
@@ -11677,7 +11699,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				else
 				{
 					b->SetTarget(c->CastToMob());
-					b->Warp(c->GetX(), c->GetY(), c->GetZ());
+					b->Warp(glm::vec3(c->GetPosition()));
 				}
 			}
 		}
@@ -11707,7 +11729,6 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				std::string item_link;
 				Client::TextLink linker;
 				linker.SetLinkType(linker.linkItemInst);
-				linker.SetClientVersion(c->GetClientVersion());
 
 				for(int i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; ++i) {
 					if((i == MainSecondary) && is2Hweapon) {
@@ -15457,7 +15478,7 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 		// according to Rogean, Live NPCs will just cast through walls/floors, no problem..
 		//
 		// This check was put in to address an idle-mob CPU issue
-		_log(AI__ERROR, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
+		Log.Out(Logs::General, Logs::Error, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
 		return(false);
 	}
 
@@ -15742,47 +15763,38 @@ std::list<Bot*> EntityList::GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacte
 
 void EntityList::BotPickLock(Bot* rogue)
 {
-	auto it = door_list.begin();
 	for (auto it = door_list.begin(); it != door_list.end(); ++it) {
 		Doors *cdoor = it->second;
-		if(cdoor && !cdoor->IsDoorOpen()) {
-			float zdiff = rogue->GetZ() - cdoor->GetZ();
-			if(zdiff < 0)
-				zdiff = 0 - zdiff;
-			float curdist = 0;
-			float tmp = rogue->GetX() - cdoor->GetX();
-			curdist += (tmp * tmp);
-			tmp = rogue->GetY() - cdoor->GetY();
-			curdist += (tmp * tmp);
-			if((zdiff < 10) && (curdist <= 130)) {
-				// All rogue items with lock pick bonuses are hands or primary
-				const ItemInst* item1 = rogue->GetBotItem(MainHands);
-				const ItemInst* item2 = rogue->GetBotItem(MainPrimary);
+		if(!cdoor || cdoor->IsDoorOpen())
+            continue;
 
-				float bonus1 = 0.0f;
-				float bonus2 = 0.0f;
-				float skill = rogue->GetSkill(SkillPickLock);
+        auto diff = rogue->GetPosition() - cdoor->GetPosition();
 
-				if(item1) { // Hand slot item
-					if(item1->GetItem()->SkillModType == SkillPickLock) {
-						bonus1 = skill * (((float)item1->GetItem()->SkillModValue) / 100.0f);
-					}
-				}
+		float curdist = diff.x * diff.x + diff.y * diff.y;
 
-				if(item2) { // Primary slot item
-					if(item2->GetItem()->SkillModType == SkillPickLock) {
-						bonus2 = skill * (((float)item2->GetItem()->SkillModValue) / 100.0f);
-					}
-				}
+        if((diff.z * diff.z >= 10) || (curdist > 130))
+            continue;
 
-				if((skill+bonus1+bonus2) >= cdoor->GetLockpick()) {
-					cdoor->ForceOpen(rogue);
-				}
-				else {
-					rogue->Say("I am not skilled enough for this lock.");
-				}
-			}
-		}
+        // All rogue items with lock pick bonuses are hands or primary
+        const ItemInst* item1 = rogue->GetBotItem(MainHands);
+        const ItemInst* item2 = rogue->GetBotItem(MainPrimary);
+
+        float bonus1 = 0.0f;
+        float bonus2 = 0.0f;
+        float skill = rogue->GetSkill(SkillPickLock);
+
+        if(item1) // Hand slot item
+            if(item1->GetItem()->SkillModType == SkillPickLock)
+                bonus1 = skill * (((float)item1->GetItem()->SkillModValue) / 100.0f);
+
+        if(item2) // Primary slot item
+            if(item2->GetItem()->SkillModType == SkillPickLock)
+                bonus2 = skill * (((float)item2->GetItem()->SkillModValue) / 100.0f);
+
+        if((skill+bonus1+bonus2) >= cdoor->GetLockpick())
+            cdoor->ForceOpen(rogue);
+        else
+            rogue->Say("I am not skilled enough for this lock.");
 	}
 }
 
@@ -15820,7 +15832,7 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 
 	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
 	curMob = it->second;
-		if (curMob && curMob->DistNoZ(*client)<=Distance) {
+		if (curMob && DistanceNoZ(curMob->GetPosition(), client->GetPosition()) <= Distance) {
 			if(curMob->IsTrackable()) {
 				Mob* cur_entity = curMob;
 				int Extras = (cur_entity->IsBot() || cur_entity->IsPet() || cur_entity->IsFamiliar() || cur_entity->IsClient());
@@ -16169,11 +16181,9 @@ bool Bot::HasOrMayGetAggro() {
 
 void Bot::SetHasBeenSummoned(bool wasSummoned) {
 	_hasBeenSummoned = wasSummoned;
-	if(!wasSummoned) {
-		_preSummonX = 0;
-		_preSummonY = 0;
-		_preSummonZ = 0;
-	}
+	if(!wasSummoned)
+        m_PreSummonLocation = glm::vec3();
+
 }
 
 void Bot::SetDefaultBotStance() {
