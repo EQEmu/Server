@@ -1,5 +1,7 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/03/2015 ==
+Trevius: Crashfix for TempName() when numbers are passed at the end of the name.
 
 == 02/02/2015 ==
 Akkadius: Implement Packet logs with dumps

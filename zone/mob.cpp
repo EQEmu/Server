@@ -1982,9 +1982,10 @@ void Mob::TempName(const char *newname)
 		strn0cpy(temp_name, GetCleanName(), 64);
 	}
 
+	// Remove Numbers before making name unique
+	EntityList::RemoveNumbers(temp_name);
 	// Make the new name unique and set it
-	strn0cpy(temp_name, entity_list.MakeNameUnique(temp_name), 64);
-
+	entity_list.MakeNameUnique(temp_name);
 
 	// Send the new name to all clients
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_MobRename, sizeof(MobRename_Struct));
