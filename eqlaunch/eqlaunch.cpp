@@ -186,6 +186,8 @@ int main(int argc, char *argv[]) {
 void CatchSignal(int sig_num) {
 	Log.Out(Logs::Detail, Logs::Launcher, "Caught signal %d", sig_num);
 	RunLoops = false;
+
+
 }
 
 

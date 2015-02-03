@@ -12,6 +12,7 @@ extern Database database;
 
 PlayerLookingForGuild::PlayerLookingForGuild(char *Name, char *Comments, uint32 Level, uint32 Class, uint32 AACount, uint32 Timezone, uint32 TimePosted)
 {
+	_eqp
 	this->Name = Name;
 	this->Comments = Comments;
 	this->Level = Level;
@@ -23,6 +24,7 @@ PlayerLookingForGuild::PlayerLookingForGuild(char *Name, char *Comments, uint32 
 
 GuildLookingForPlayers::GuildLookingForPlayers(char *Name, char *Comments, uint32 FromLevel, uint32 ToLevel, uint32 Classes, uint32 AACount, uint32 Timezone, uint32 TimePosted)
 {
+	_eqp
 	this->Name = Name; 
 	this->Comments = Comments;
 	this->FromLevel = FromLevel;
@@ -35,6 +37,7 @@ GuildLookingForPlayers::GuildLookingForPlayers(char *Name, char *Comments, uint3
 
 bool LFGuildManager::LoadDatabase()
 {
+	_eqp
 	std::string query = "SELECT `type`,`name`,`comment`, "
                         "`fromlevel`, `tolevel`, `classes`, "
                         "`aacount`, `timezone`, `timeposted` FROM `lfguild`";
@@ -61,6 +64,7 @@ bool LFGuildManager::LoadDatabase()
 
 void LFGuildManager::HandlePacket(ServerPacket *pack)
 {
+	_eqp
 	char From[64];
 
 	pack->SetReadPosition(0);
@@ -150,6 +154,7 @@ void LFGuildManager::HandlePacket(ServerPacket *pack)
 
 void LFGuildManager::SendPlayerMatches(uint32 FromZoneID, uint32 FromInstanceID, char *From, uint32 FromLevel, uint32 ToLevel, uint32 MinAA, uint32 TimeZone, uint32 Classes)
 {
+	_eqp
 	std::list<PlayerLookingForGuild>::iterator it;
 	std::list<PlayerLookingForGuild> Matches;
 
@@ -193,6 +198,7 @@ void LFGuildManager::SendPlayerMatches(uint32 FromZoneID, uint32 FromInstanceID,
 
 void LFGuildManager::SendGuildMatches(uint32 FromZoneID, uint32 FromInstanceID, char *From, uint32 Level, uint32 AAPoints, uint32 TimeZone, uint32 Class)
 {
+	_eqp
 	std::list<GuildLookingForPlayers>::iterator it;
 	std::list<GuildLookingForPlayers> Matches;
 
@@ -232,6 +238,7 @@ void LFGuildManager::SendGuildMatches(uint32 FromZoneID, uint32 FromInstanceID, 
 
 void LFGuildManager::TogglePlayer(uint32 FromZoneID, uint32 FromInstanceID, char *From, uint32 Class, uint32 Level, uint32 AAPoints, char *Comments, uint32 Toggle, uint32 TimeZone)
 {
+	_eqp
 	for(auto it = Players.begin(); it != Players.end(); ++it)
 		if(!strcasecmp((*it).Name.c_str(), From)) {
 			Players.erase(it);
@@ -273,6 +280,7 @@ void LFGuildManager::TogglePlayer(uint32 FromZoneID, uint32 FromInstanceID, char
 
 void LFGuildManager::ToggleGuild(uint32 FromZoneID, uint32 FromInstanceID, char *From, char* GuildName, char *Comments, uint32 FromLevel, uint32 ToLevel, uint32 Classes, uint32 AACount, uint32 Toggle, uint32 TimeZone)
 {
+	_eqp
 	for(auto it = Guilds.begin(); it != Guilds.end(); ++it)
 		if(!strcasecmp((*it).Name.c_str(), GuildName))
 		{
@@ -318,6 +326,7 @@ void LFGuildManager::ToggleGuild(uint32 FromZoneID, uint32 FromInstanceID, char 
 
 void LFGuildManager::ExpireEntries()
 {
+	_eqp
 	for(auto it = Players.begin(); it != Players.end(); ++it)
 	{
 		if((*it).TimePosted + 604800 > (uint32)time(nullptr))
@@ -345,7 +354,7 @@ void LFGuildManager::ExpireEntries()
 
 void LFGuildManager::SendPlayerStatus(uint32 FromZoneID, uint32 FromInstanceID, char *From)
 {
-
+	_eqp
 	std::list<PlayerLookingForGuild>::iterator it;
 
 	for(it = Players.begin(); it != Players.end(); ++it)
@@ -373,6 +382,7 @@ void LFGuildManager::SendPlayerStatus(uint32 FromZoneID, uint32 FromInstanceID, 
 
 void LFGuildManager::SendGuildStatus(uint32 FromZoneID, uint32 FromInstanceID, char *From, char *GuildName)
 {
+	_eqp
 	std::list<GuildLookingForPlayers>::iterator it;
 
 	for(it = Guilds.begin(); it != Guilds.end(); ++it)

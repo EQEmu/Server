@@ -8,10 +8,17 @@
 
 #define eqp_comb_fin(x, y) x##y
 #define eqp_comb(x, y) eqp_comb_fin(x, y)
+#ifndef EQP_MULTITHREAD
 #define _eqp EQP::CPU::ST::Event eqp_comb(eq_perf_event_, __LINE__) (__PRETTY_FUNCTION__);
 #define _eqpn(x) EQP::CPU::ST::Event eqp_comb(eq_perf_event_, __LINE__) (__PRETTY_FUNCTION__, x);
-#define _eqp_mt EQP::CPU::MT::Event eqp_comb(eq_perf_event_, __LINE__) (__PRETTY_FUNCTION__);
-#define _eqpn_mt(x) EQP::CPU::MT::Event eqp_comb(eq_perf_event_, __LINE__) (__PRETTY_FUNCTION__, x);
+#define _eqp_clear() EQP::CPU::ST::GetProfiler().Clear()
+#define _eqp_dump(strm, count) EQP::CPU::ST::GetProfiler().Dump(strm, count)
+#else
+#define _eqp EQP::CPU::MT::Event eqp_comb(eq_perf_event_, __LINE__) (__PRETTY_FUNCTION__);
+#define _eqpn(x) EQP::CPU::MT::Event eqp_comb(eq_perf_event_, __LINE__) (__PRETTY_FUNCTION__, x);
+#define _eqp_clear() EQP::CPU::MT::GetProfiler().Clear()
+#define _eqp_dump(strm, count) EQP::CPU::MT::GetProfiler().Dump(strm, count)
+#endif
 
 namespace EQP
 {
@@ -73,7 +80,7 @@ namespace EQP
 
 #define _eqp 
 #define _eqpn(x) 
-#define _eqp_mt 
-#define _eqpn_mt(x) 
+#define _eqp_clear() 
+#define _eqp_dump(strm, count) 
 #endif
 

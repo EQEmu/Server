@@ -46,6 +46,21 @@ void CatchSignal(int sig_num) {
 	RunLoops = false; 
 	if(worldserver)
 		worldserver->Disconnect();
+
+#ifdef EQPERF_ENABLED
+	char time_str[128];
+	time_t result = time(nullptr);
+	strftime(time_str, sizeof(time_str), "%Y_%m_%d__%H_%M_%S", localtime(&result));
+
+	std::string prof_name = "./profile/queryserv_";
+	prof_name += time_str;
+	prof_name += ".log";
+
+	std::ofstream profile_out(prof_name, std::ofstream::out);
+	if(profile_out.good()) {
+		_eqp_dump(profile_out, 10);
+	}
+#endif
 }
 
 int main() {
@@ -54,16 +69,6 @@ int main() {
 	set_exception_handler(); 
 	Timer LFGuildExpireTimer(60000);  
 	Timer InterserverTimer(INTERSERVER_TIMER); // does auto-reconnect
-
-	/* Load XML from eqemu_config.xml 
-		<qsdatabase>
-			<host>127.0.0.1</host>
-			<port>3306</port>
-			<username>user</username>
-			<password>password</password>
-			<db>dbname</db>
-		</qsdatabase>
-	*/
 
 	Log.Out(Logs::General, Logs::QS_Server, "Starting EQEmu QueryServ.");
 	if (!queryservconfig::LoadConfig()) {
@@ -99,6 +104,10 @@ int main() {
 		Log.Out(Logs::General, Logs::QS_Server, "Could not set signal handler");
 		return 1;
 	}
+	if(signal(SIGBREAK, CatchSignal) == SIG_ERR)	{
+		Log.Out(Logs::General, Logs::QS_Server, "Could not set signal handler");
+		return 1;
+	}
 
 	/* Initial Connection to Worldserver */
 	worldserver = new WorldServer;
@@ -108,16 +117,19 @@ int main() {
 	lfguildmanager.LoadDatabase();
 
 	while(RunLoops) { 
-		Timer::SetCurrentTime(); 
-		if(LFGuildExpireTimer.Check())
-			lfguildmanager.ExpireEntries();
+		{
+			_eqpn("Main loop")
+			Timer::SetCurrentTime(); 
+			if(LFGuildExpireTimer.Check())
+				lfguildmanager.ExpireEntries();
 
-		if (InterserverTimer.Check()) {
-			if (worldserver->TryReconnect() && (!worldserver->Connected()))
-				worldserver->AsyncConnect();
+			if (InterserverTimer.Check()) {
+				if (worldserver->TryReconnect() && (!worldserver->Connected()))
+					worldserver->AsyncConnect();
+			}
+			worldserver->Process(); 
+			timeout_manager.CheckTimeouts(); 
 		}
-		worldserver->Process(); 
-		timeout_manager.CheckTimeouts(); 
 		Sleep(100);
 	}
 	Log.CloseFileLogs();

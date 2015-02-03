@@ -23,6 +23,7 @@
 queryservconfig *queryservconfig::_chat_config = nullptr;
 
 std::string queryservconfig::GetByName(const std::string &var_name) const {
+	_eqp
 	return(EQEmuConfig::GetByName(var_name));
 }
 

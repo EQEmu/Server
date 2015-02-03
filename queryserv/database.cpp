@@ -50,6 +50,7 @@
 
 Database::Database ()
 {
+	_eqp
 	DBInitVars();
 }
 
@@ -59,12 +60,14 @@ Establish a connection to a mysql database with the supplied parameters
 
 Database::Database(const char* host, const char* user, const char* passwd, const char* database, uint32 port)
 {
+	_eqp
 	DBInitVars();
 	Connect(host, user, passwd, database, port);
 }
 
 bool Database::Connect(const char* host, const char* user, const char* passwd, const char* database, uint32 port)
 {
+	_eqp
 	uint32 errnum= 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	if (!Open(host, user, passwd, database, port, &errnum, errbuf))
@@ -82,12 +85,13 @@ bool Database::Connect(const char* host, const char* user, const char* passwd, c
 }
 
 void Database::DBInitVars() {
-
+	_eqp
 }
 
 
 
 void Database::HandleMysqlError(uint32 errnum) {
+	_eqp
 }
 
 /*
@@ -96,10 +100,11 @@ Close the connection to the database
 */
 Database::~Database()
 {
+	_eqp
 }
 
 void Database::AddSpeech(const char* from, const char* to, const char* message, uint16 minstatus, uint32 guilddbid, uint8 type) {
-
+	_eqp
 	char *escapedFrom = new char[strlen(from) * 2 + 1];
 	char *escapedTo = new char[strlen(to) * 2 + 1];
 	char *escapedMessage = new char[strlen(message) * 2 + 1];
@@ -124,7 +129,7 @@ void Database::AddSpeech(const char* from, const char* to, const char* message, 
 }
 
 void Database::LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 detailCount) {
-
+	_eqp
 	std::string query = StringFormat("INSERT INTO `qs_player_trade_record` SET `time` = NOW(), "
                                     "`char1_id` = '%i', `char1_pp` = '%i', `char1_gp` = '%i', "
                                     "`char1_sp` = '%i', `char1_cp` = '%i', `char1_items` = '%i', "
@@ -165,7 +170,7 @@ void Database::LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 detailCount) {
 }
 
 void Database::LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 detailCount) {
-
+	_eqp
     std::string query = StringFormat("INSERT INTO `qs_player_handin_record` SET `time` = NOW(), "
                                     "`quest_id` = '%i', `char_id` = '%i', `char_pp` = '%i', "
                                     "`char_gp` = '%i', `char_sp` = '%i', `char_cp` = '%i', "
@@ -206,7 +211,7 @@ void Database::LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 detailCount)
 }
 
 void Database::LogPlayerNPCKill(QSPlayerLogNPCKill_Struct* QS, uint32 members){
-
+	_eqp
 	std::string query = StringFormat("INSERT INTO `qs_player_npc_kill_record` "
                                     "SET `npc_id` = '%i', `type` = '%i', "
                                     "`zone_id` = '%i', `time` = NOW()",
@@ -237,7 +242,7 @@ void Database::LogPlayerNPCKill(QSPlayerLogNPCKill_Struct* QS, uint32 members){
 }
 
 void Database::LogPlayerDelete(QSPlayerLogDelete_Struct* QS, uint32 items) {
-
+	_eqp
 	std::string query = StringFormat("INSERT INTO `qs_player_delete_record` SET `time` = NOW(), "
                                     "`char_id` = '%i', `stack_size` = '%i', `char_items` = '%i'",
                                     QS->char_id, QS->stack_size, QS->char_count, QS->char_count);
@@ -270,8 +275,8 @@ void Database::LogPlayerDelete(QSPlayerLogDelete_Struct* QS, uint32 items) {
 }
 
 void Database::LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 items) {
+	_eqp
 	/* These are item moves */
-
 	std::string query = StringFormat("INSERT INTO `qs_player_move_record` SET `time` = NOW(), "
                                     "`char_id` = '%i', `from_slot` = '%i', `to_slot` = '%i', "
                                     "`stack_size` = '%i', `char_items` = '%i', `postaction` = '%i'",
@@ -306,6 +311,7 @@ void Database::LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 items) {
 }
 
 void Database::LogMerchantTransaction(QSMerchantLogTransaction_Struct* QS, uint32 items) {
+	_eqp
 	/* Merchant transactions are from the perspective of the merchant, not the player -U */
 	std::string query = StringFormat("INSERT INTO `qs_merchant_transaction_record` SET `time` = NOW(), "
                                     "`zone_id` = '%i', `merchant_id` = '%i', `merchant_pp` = '%i', "
@@ -347,6 +353,7 @@ void Database::LogMerchantTransaction(QSMerchantLogTransaction_Struct* QS, uint3
 }
 
 void Database::GeneralQueryReceive(ServerPacket *pack) {
+	_eqp
 	/*
 		These are general queries passed from anywhere in zone instead of packing structures and breaking them down again and again
 	*/
@@ -364,7 +371,8 @@ void Database::GeneralQueryReceive(ServerPacket *pack) {
 	safe_delete(queryBuffer);
 }
 
-void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings){
+void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings) {
+	_eqp
 	std::string query =
 		"SELECT "
 		"log_category_id, "

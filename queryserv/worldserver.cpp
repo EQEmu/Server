@@ -44,21 +44,25 @@ extern LFGuildManager lfguildmanager;
 WorldServer::WorldServer()
 : WorldConnection(EmuTCPConnection::packetModeQueryServ, Config->SharedKey.c_str())
 {
+	_eqp
 	pTryReconnect = true;
 }
 
 WorldServer::~WorldServer()
 {
+	_eqp
 }
 
 void WorldServer::OnConnected()
 {
+	_eqp
 	Log.Out(Logs::Detail, Logs::QS_Server, "Connected to World.");
 	WorldConnection::OnConnected();
 }
 
 void WorldServer::Process()
 {
+	_eqp
 	WorldConnection::Process(); 
 	if (!Connected())
 		return;
