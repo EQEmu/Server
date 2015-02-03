@@ -623,6 +623,8 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 		params.push_back(std::to_string((double)npc->GetHeading())); 
 		params.push_back(std::to_string((double)npc->GetClass()));
 		params.push_back(std::to_string((double)npc->GetRace()));
+		params.push_back(std::to_string((double)npc->GetWalkspeed()));
+		params.push_back(std::to_string((double)npc->GetRunspeed()));
 		RemoteCallSubscriptionHandler::Instance()->OnEvent("NPC.Position", params);
 	}
 

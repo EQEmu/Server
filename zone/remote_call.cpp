@@ -144,6 +144,7 @@ void handle_rc_get_initial_entity_positions(const std::string &method, const std
 		res["z"] = std::to_string((double)npc->GetZ());
 		res["h"] = std::to_string((double)npc->GetHeading());
 		res["aggro_range"] = std::to_string((double)npc->GetAggroRange()); 
+		res["gender"] = std::to_string((double)npc->GetGender());
 		RemoteCallResponse(connection_id, request_id, res, error);
 	}
 	std::list<Client*> client_list;

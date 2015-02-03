@@ -1239,6 +1239,8 @@ void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu){
 		params.push_back(std::to_string((double)m_Position.w));
 		params.push_back(std::to_string((double)GetClass()));
 		params.push_back(std::to_string((double)GetRace()));
+		params.push_back(std::to_string((double)GetWalkspeed()));
+		params.push_back(std::to_string((double)GetRunspeed()));
 		RemoteCallSubscriptionHandler::Instance()->OnEvent("NPC.Position", params);
 	}
 }
