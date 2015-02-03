@@ -676,6 +676,8 @@ public:
 	bool IsAnimation() const { return(typeofpet == petAnimation); }
 	bool IsCharmed() const { return(typeofpet == petCharmed); }
 	bool IsTargetLockPet() const { return(typeofpet == petTargetLock); }
+	inline uint32 GetPetTargetLockID() { return pet_targetlock_id; };
+	inline void SetPetTargetLockID(uint32 value) { pet_targetlock_id = value; };
 	void SetOwnerID(uint16 NewOwnerID);
 	inline uint16 GetOwnerID() const { return ownerid; }
 	inline virtual bool HasOwner() { if(GetOwnerID()==0){return false;} return( entity_list.GetMob(GetOwnerID()) != 0); }
@@ -1245,6 +1247,7 @@ protected:
 	bool _IsTempPet;
 	int16 count_TempPet;
 	bool pet_owner_client; //Flags regular and pets as belonging to a client
+	uint32 pet_targetlock_id;
 
 	EGNode *_egnode; //the EG node we are in
 	glm::vec3 m_TargetLocation;
