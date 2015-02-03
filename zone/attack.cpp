@@ -1508,6 +1508,9 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 				}
 			}
 		}
+
+		if (killerMob && killerMob->IsPet() && killerMob->GetPetType() == petTargetLock && killerMob->GetID() != GetID())
+			killerMob->Kill();
 	}
 
 	entity_list.RemoveFromTargets(this);
@@ -2377,6 +2380,9 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 			killerMob->TrySpellOnKill(killed_level, spell);
 		}
 	}
+
+	if (killerMob && killerMob->IsPet() && killerMob->GetPetType() == petTargetLock && killerMob->GetID() != GetID())
+		killerMob->Kill();
 
 	WipeHateList();
 	p_depop = true;
