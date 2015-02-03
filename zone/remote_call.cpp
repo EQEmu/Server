@@ -1,7 +1,6 @@
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/emu_tcp_connection.h"
-#include "../common/logsys.h"
-#include "../common/logtypes.h"
+#include "../common/eqemu_logsys.h"
 #include "../common/md5.h"
 #include "../common/packet_dump.h"
 #include "../common/packet_functions.h"
@@ -184,10 +183,10 @@ void handle_rc_get_initial_entity_positions(const std::string &method, const std
 		res["ent_id"] = itoa(c->GetEntityID());
 		res["type"] = "Door";
 		res["name"] = c->GetDoorName();
-		res["x"] = itoa(c->GetX());
-		res["y"] = itoa(c->GetY());
-		res["z"] = itoa(c->GetZ());
-		res["h"] = itoa(c->GetHeading()); 
+		res["x"] = itoa(c->GetPosition().x);
+		res["y"] = itoa(c->GetPosition().y);
+		res["z"] = itoa(c->GetPosition().z);
+		res["h"] = itoa(c->GetPosition().w);
 		RemoteCallResponse(connection_id, request_id, res, error);
 	}
 	std::list<Object*> object_list;

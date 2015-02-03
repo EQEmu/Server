@@ -1233,10 +1233,10 @@ void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu){
 		std::vector<std::string> params;
 		params.push_back(std::to_string((long)GetID()));
 		params.push_back(GetCleanName());
-		params.push_back(std::to_string((double)x_pos));
-		params.push_back(std::to_string((double)y_pos));
-		params.push_back(std::to_string((double)z_pos));
-		params.push_back(std::to_string((double)heading));
+		params.push_back(std::to_string((double)m_Position.x));
+		params.push_back(std::to_string((double)m_Position.y));
+		params.push_back(std::to_string((double)m_Position.z));
+		params.push_back(std::to_string((double)m_Position.w));
 		params.push_back(std::to_string((double)GetClass()));
 		params.push_back(std::to_string((double)GetRace()));
 		RemoteCallSubscriptionHandler::Instance()->OnEvent("NPC.Position", params);

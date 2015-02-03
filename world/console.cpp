@@ -268,7 +268,7 @@ bool Console::Process() {
 		}  
 		else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeWebInterface)
 		{
-			_log(WORLD__CONSOLE, "New WI Connection from %s:%d", inet_ntoa(in), GetPort());
+			Log.Out(Logs::Detail, Logs::World_Server, "New WI Connection from %s:%d", inet_ntoa(in), GetPort());
 			WILink.SetConnection(tcpc);
 			tcpc = 0;
 		}

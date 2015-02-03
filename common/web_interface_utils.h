@@ -18,7 +18,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #ifndef COMMON_WEBINTUTIL_H
 #define COMMON_WEBINTUTIL_H
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
 #include <iostream>

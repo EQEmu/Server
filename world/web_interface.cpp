@@ -1,12 +1,11 @@
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "web_interface.h"
 #include "world_config.h"
 #include "clientlist.h"
 #include "zonelist.h"
 #include "zoneserver.h"
 #include "remote_call.h"
-#include "../common/logsys.h"
-#include "../common/logtypes.h"
+#include "../common/eqemu_logsys.h"
 #include "../common/md5.h"
 #include "../common/emu_tcp_connection.h"
 #include "../common/packet_dump.h"
@@ -25,7 +24,7 @@ void WebInterfaceConnection::SetConnection(EmuTCPConnection *inStream)
 {
 	if(stream)
 	{
-		_log(WEB_INTERFACE__ERROR, "Incoming WebInterface Connection while we were already connected to a WebInterface.");
+		Log.Out(Logs::General, Logs::WebInterface_Server, "Incoming WebInterface Connection while we were already connected to a WebInterface.");
 		stream->Disconnect();
 	}
 
@@ -59,7 +58,7 @@ bool WebInterfaceConnection::Process()
 					{
 						struct in_addr in;
 						in.s_addr = GetIP();
-						_log(WEB_INTERFACE__ERROR, "WebInterface authorization failed.");
+						Log.Out(Logs::General, Logs::Error, "WebInterface authorization failed.");
 						ServerPacket* pack = new ServerPacket(ServerOP_ZAAuthFailed);
 						SendPacket(pack);
 						delete pack;
@@ -71,7 +70,7 @@ bool WebInterfaceConnection::Process()
 				{
 					struct in_addr in;
 					in.s_addr = GetIP();
-					_log(WEB_INTERFACE__ERROR, "WebInterface authorization failed.");
+					Log.Out(Logs::General, Logs::Error, "WebInterface authorization failed.");
 					ServerPacket* pack = new ServerPacket(ServerOP_ZAAuthFailed);
 					SendPacket(pack);
 					delete pack;
@@ -81,7 +80,7 @@ bool WebInterfaceConnection::Process()
 			}
 			else
 			{
-				_log(WEB_INTERFACE__ERROR, "**WARNING** You have not configured a world shared key in your config file. You should add a <key>STRING</key> element to your <world> element to prevent unauthorized zone access.");
+				Log.Out(Logs::General, Logs::Error, "**WARNING** You have not configured a world shared key in your config file. You should add a <key>STRING</key> element to your <world> element to prevent unauthorized zone access.");
 				authenticated = true;
 			}
 			delete pack;
@@ -99,7 +98,7 @@ bool WebInterfaceConnection::Process()
 			}
 			case ServerOP_ZAAuth:
 			{
-				_log(WEB_INTERFACE__ERROR, "Got authentication from WebInterface when they are already authenticated.");
+				Log.Out(Logs::General, Logs::Error, "Got authentication from WebInterface when they are already authenticated.");
 				break;
 			}
 			case ServerOP_WIRemoteCall:
@@ -159,7 +158,7 @@ bool WebInterfaceConnection::Process()
 			}
 			default:
 			{
-				_log(WEB_INTERFACE__ERROR, "Unknown ServerOPcode from WebInterface 0x%04x, size %d", pack->opcode, pack->size);
+				Log.Out(Logs::General, Logs::Error, "Unknown ServerOPcode from WebInterface 0x%04x, size %d", pack->opcode, pack->size);
 				DumpPacket(pack->pBuffer, pack->size);
 				break;
 			}

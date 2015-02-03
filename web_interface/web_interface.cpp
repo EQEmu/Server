@@ -1,13 +1,16 @@
+#include "../common/eqemu_logsys.h"
 #include "web_interface.h"
 #include "method_handler.h"
 #include "remote_call.h"
 
+EQEmuLogSys Log;
 volatile bool run = true;
 TimeoutManager timeout_manager;
 const EQEmuConfig *config = nullptr;
 WorldServer *worldserver = nullptr;
 libwebsocket_context *context = nullptr;
 SharedDatabase *db = nullptr;
+
 std::map<std::string, per_session_data_eqemu*> sessions;
 std::map<std::string, std::pair<int, MethodHandler>> authorized_methods;
 std::map<std::string, MethodHandler> unauthorized_methods;
@@ -135,18 +138,20 @@ static struct libwebsocket_protocols protocols[] = {
 
 int main() {
 	RegisterExecutablePlatform(ExePlatformWebInterface);
+	Log.LoadLogSettingsDefaults();
+	
 	set_exception_handler();
 	register_methods();
 	Timer InterserverTimer(INTERSERVER_TIMER); // does auto-reconnect
-	_log(WEB_INTERFACE__INIT, "Starting EQEmu Web Server.");
+	Log.Out(Logs::General, Logs::WebInterface_Server, "Starting EQEmu Web Server.");
 	
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		_log(WEB_INTERFACE__ERROR, "Could not set signal handler");
+		Log.Out(Logs::General, Logs::Error, "Could not set signal handler");
 		return 1;
 	}
 	
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		_log(WEB_INTERFACE__ERROR, "Could not set signal handler");
+		Log.Out(Logs::General, Logs::Error, "Could not set signal handler");
 		return 1;
 	}
 
@@ -162,15 +167,15 @@ int main() {
 
 	context = libwebsocket_create_context(&info);
 	if (context == NULL) {
-		_log(WEB_INTERFACE__ERROR, "Could not create websocket handler.");
+		Log.Out(Logs::General, Logs::Error, "Could not create websocket handler.");
 		return 1;
 	}
 
 	db = new SharedDatabase();
-	_log(WEB_INTERFACE__TRACE, "Connecting to database...");
+	Log.Out(Logs::General, Logs::WebInterface_Server, "Connecting to database...");
 	if(!db->Connect(config->DatabaseHost.c_str(), config->DatabaseUsername.c_str(),
 		config->DatabasePassword.c_str(), config->DatabaseDB.c_str(), config->DatabasePort)) {
-		_log(WEB_INTERFACE__TRACE, "Unable to connect to the database, cannot continue without a database connection");
+		Log.Out(Logs::General, Logs::WebInterface_Server, "Unable to connect to the database, cannot continue without a database connection");
 		return 1;
 	}
 

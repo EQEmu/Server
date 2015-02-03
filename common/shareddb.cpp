@@ -2051,3 +2051,27 @@ void SharedDatabase::SetBotInspectMessage(uint32 botid, const InspectMessage_Str
 	std::string query = StringFormat("UPDATE bots SET BotInspectMessage = '%s' WHERE BotID = %i", msg.c_str(), botid);
     QueryDatabase(query);
 }
+
+bool SharedDatabase::VerifyToken(std::string token, int& status) {
+	status = 0;
+	if (token.length() > 64) {
+		token = token.substr(0, 64);
+	}
+
+	token = EscapeString(token);
+	std::string query = StringFormat("SELECT status FROM tokens WHERE token='%s'", token.c_str());
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+	{
+		std::cerr << "Error in SharedDatabase::VerifyToken query '" << query << "' " << results.ErrorMessage() << std::endl;
+		return false;
+	}
+
+	if (results.RowCount() != 1) {
+		return false;
+	}
+
+	auto row = results.begin();
+	status = atoi(row[0]);
+	return true;
+}

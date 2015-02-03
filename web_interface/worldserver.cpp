@@ -15,7 +15,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include <iostream>
 #include <string.h>
 #include <stdio.h>
@@ -44,7 +44,7 @@ WorldServer::~WorldServer(){
 }
 
 void WorldServer::OnConnected(){
-	_log(WEB_INTERFACE__INIT, "Connected to World.");
+	Log.Out(Logs::General, Logs::WebInterface_Server, "Connected to World.");
 	WorldConnection::OnConnected();
 }
 
@@ -55,7 +55,7 @@ void WorldServer::Process(){
 
 	ServerPacket *pack = nullptr;
 	while((pack = tcpc.PopPacket())){
-		_log(WEB_INTERFACE__TRACE, "Received Opcode: %4X", pack->opcode);
+		Log.Out(Logs::General, Logs::Netcode, "Received Opcode: %4X", pack->opcode);
 		switch(pack->opcode) {
 			case 0: { break; }
 			case ServerOP_KeepAlive: { break; }

@@ -18,7 +18,7 @@
 #ifndef WI_WEB_INTERFACE_H
 #define WI_WEB_INTERFACE_H
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/opcodemgr.h"
 #include "../common/eq_stream_factory.h"
 #include "../common/rulesys.h"

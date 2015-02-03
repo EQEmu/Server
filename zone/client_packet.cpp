@@ -4362,7 +4362,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 		params.push_back(std::to_string(ppu->x_pos));
 		params.push_back(std::to_string(ppu->y_pos));
 		params.push_back(std::to_string(ppu->z_pos));
-		params.push_back(std::to_string(heading));
+		params.push_back(std::to_string(m_Position.w));
 		params.push_back(std::to_string(GetClass()));
 		params.push_back(std::to_string(GetRace()));
 		RemoteCallSubscriptionHandler::Instance()->OnEvent("Client.Position", params);
