@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 02/03/2015 ==
 Trevius: Crashfix for TempName() when numbers are passed at the end of the name.
+Uleat: Tweaking of item type exclusions to alleviate strobing conditions with light sources
 
 == 02/02/2015 ==
 Akkadius: Implement Packet logs with dumps

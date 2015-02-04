@@ -1011,7 +1011,8 @@ uint8 Inventory::FindHighestLightValue()
 		if (inst == nullptr) { continue; }
 		auto item = inst->GetItem();
 		if (item == nullptr) { continue; }
-		if (item->ItemType != ItemTypeMisc && item->ItemType != ItemTypeLight) { continue; }
+		// 'Gloomingdeep lantern' is ItemTypeArmor in the database..there may be others instances and/or types that need to be handled
+		if (item->ItemType != ItemTypeMisc && item->ItemType != ItemTypeLight && item->ItemType != ItemTypeArmor) { continue; }
 		if (item->Light & 0xF0) { continue; }
 		if (item->Light > light_value) { light_value = item->Light; }
 	}
