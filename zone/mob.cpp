@@ -5364,3 +5364,26 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 	return stat;
 }
 
+bool Mob::CanClassEquipItem(uint32 item_id)
+{
+	const Item_Struct* itm = nullptr;
+	itm = database.GetItem(item_id);
+
+	if (!itm)
+		return false;
+
+	if(itm->Classes == 65535 )
+		return true;
+
+	if (GetClass() > 16)
+		return false;
+
+	int bitmask = 1;
+	bitmask = bitmask << (GetClass() - 1);
+	
+	if(!(itm->Classes & bitmask))
+		return false;
+	else
+		return true;
+}
+

@@ -8367,6 +8367,33 @@ XS(XS_Mob_ProcessSpecialAbilities)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Mob_CanClassEquipItem); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_CanClassEquipItem)
+{
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Mob::CanClassEquipItem(THIS, item_id)");
+	{
+		Mob *		THIS;
+		bool		RETVAL;
+		uint32		item_id = (uint32)SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Mob *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->CanClassEquipItem(item_id);
+		ST(0) = boolSV(RETVAL);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -8675,6 +8702,7 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "SetSpecialAbilityParam"), XS_Mob_SetSpecialAbilityParam, file, "$$$$");
 		newXSproto(strcpy(buf, "ClearSpecialAbilities"), XS_Mob_ClearSpecialAbilities, file, "$");
 		newXSproto(strcpy(buf, "ProcessSpecialAbilities"), XS_Mob_ProcessSpecialAbilities, file, "$$");
+		newXSproto(strcpy(buf, "CanClassEquipItem"), XS_Mob_CanClassEquipItem, file, "$$");
 	XSRETURN_YES;
 }
 
