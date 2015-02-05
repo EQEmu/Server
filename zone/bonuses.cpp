@@ -411,11 +411,11 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 			newbon->DSMitigation += item->DSMitigation;
 	}
 	if (item->Worn.Effect>0 && (item->Worn.Type == ET_WornEffect)) { // latent effects
-		ApplySpellsBonuses(item->Worn.Effect, item->Worn.Level, newbon, 0, true);
+		ApplySpellsBonuses(item->Worn.Effect, item->Worn.Level, newbon, 0, true, true);
 	}
 
 	if (item->Focus.Effect>0 && (item->Focus.Type == ET_Focus)) { // focus effects
-		ApplySpellsBonuses(item->Focus.Effect, item->Focus.Level, newbon, 0, true);
+		ApplySpellsBonuses(item->Focus.Effect, item->Focus.Level, newbon, 0, true, false);
 	}
 
 	switch(item->BardType)
@@ -639,7 +639,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 		uint8 focus = IsFocusEffect(0, 0, true,effect);
 		if (focus)
 		{
-			newbon->FocusEffects[focus] = effect;
+			newbon->FocusEffects[focus] = static_cast<uint8>(effect);
 			continue;
 		}
 
@@ -1393,7 +1393,7 @@ void Mob::CalcSpellBonuses(StatBonuses* newbon)
 	int buff_count = GetMaxTotalSlots();
 	for(i = 0; i < buff_count; i++) {
 		if(buffs[i].spellid != SPELL_UNKNOWN){
-			ApplySpellsBonuses(buffs[i].spellid, buffs[i].casterlevel, newbon, buffs[i].casterid, false, buffs[i].ticsremaining,i);
+			ApplySpellsBonuses(buffs[i].spellid, buffs[i].casterlevel, newbon, buffs[i].casterid, false, false, buffs[i].ticsremaining,i);
 
 			if (buffs[i].numhits > 0)
 				Numhits(true);
@@ -1416,7 +1416,7 @@ void Mob::CalcSpellBonuses(StatBonuses* newbon)
 	if (GetClass() == BARD) newbon->ManaRegen = 0; // Bards do not get mana regen from spells.
 }
 
-void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* new_bonus, uint16 casterId, bool item_bonus, uint32 ticsremaining, int buffslot,
+void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* new_bonus, uint16 casterId, bool item_bonus, bool IsWornEffect, uint32 ticsremaining, int buffslot,
 							 bool IsAISpellEffect, uint16 effect_id, int32 se_base, int32 se_limit, int32 se_max)
 {
 	int i, effect_value, base2, max, effectid;
@@ -1439,7 +1439,12 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			uint8 focus = IsFocusEffect(spell_id, i);
 			if (focus)
 			{
-				new_bonus->FocusEffects[focus] = spells[spell_id].effectid[i];
+				if (!IsWornEffect)
+					new_bonus->FocusEffects[focus] = static_cast<uint8>(spells[spell_id].effectid[i]);
+
+				else if (RuleB(Spells, UseAdditiveFocusFromWornSlot))
+					new_bonus->FocusEffectsWorn[focus] += spells[spell_id].base[i];
+
 				continue;
 			}
 

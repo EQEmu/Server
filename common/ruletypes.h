@@ -329,6 +329,7 @@ RULE_BOOL ( Spells, Jun182014HundredHandsRevamp, false) // this should be true f
 RULE_BOOL ( Spells, SwarmPetTargetLock, false) // Use old method of swarm pets target locking till target dies then despawning.
 RULE_BOOL ( Spells, NPC_UseFocusFromSpells, true) // Allow npcs to use most spell derived focus effects.
 RULE_BOOL ( Spells, NPC_UseFocusFromItems, false) // Allow npcs to use most item derived focus effects.
+RULE_BOOL ( Spells, UseAdditiveFocusFromWornSlot, false) // Allows an additive focus effect to be calculated from worn slot.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Combat )
