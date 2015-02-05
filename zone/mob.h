@@ -315,6 +315,7 @@ public:
 	virtual int32 GetHerosForgeModel(uint8 material_slot) const;
 	virtual uint32 GetEquipmentColor(uint8 material_slot) const;
 	virtual uint32 IsEliteMaterialItem(uint8 material_slot) const;
+	bool CanClassEquipItem(uint32 item_id);
 	bool AffectedBySpellExcludingSlot(int slot, int effect);
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill) = 0;
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill,
