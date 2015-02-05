@@ -253,7 +253,7 @@ public:
 
 	uint32	GetMaxDMG() const {return max_dmg;}
 	uint32	GetMinDMG() const {return min_dmg;}
-	int16	GetSlowMitigation() const {return slow_mitigation;}
+	float GetSlowMitigation() const { return slow_mitigation; }
 	float	GetAttackSpeed() const {return attack_speed;}
 	uint8	GetAttackDelay() const {return attack_delay;}
 	bool	IsAnimal() const { return(bodytype == BT_Animal); }
