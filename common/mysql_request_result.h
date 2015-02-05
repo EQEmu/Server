@@ -9,9 +9,6 @@
 #include <mysql.h>
 #include "types.h"
 #include "mysql_request_row.h"
-#include <string>
-#include <string.h>
-#include <limits.h>
 
 class MySQLRequestResult {
 private:
@@ -51,7 +48,7 @@ public:
 	const std::string FieldName(int columnIndex);
 
 	MySQLRequestRow& begin() { return m_CurrentRow; }
-	MySQLRequestRow& end() { return m_OneBeyondRow;}
+	MySQLRequestRow& end() { return m_OneBeyondRow; }
 
 private:
 	void FreeInternals();

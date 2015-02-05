@@ -1,0 +1,1 @@
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:SwarmPetTargetLock', 'false', 'Use old method of swarm pet AI, where they lock onto a set target then depop when target is dead.');

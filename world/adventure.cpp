@@ -1,9 +1,10 @@
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/servertalk.h"
 #include "../common/extprofile.h"
 #include "../common/rulesys.h"
 #include "../common/misc_functions.h"
 #include "../common/string_util.h"
+#include "../common/random.h"
 #include "adventure.h"
 #include "adventure_manager.h"
 #include "worlddb.h"
@@ -14,6 +15,7 @@
 extern ZSList zoneserver_list;
 extern ClientList client_list;
 extern AdventureManager adventure_manager;
+extern EQEmu::Random emu_random;
 
 Adventure::Adventure(AdventureTemplate *t)
 {
@@ -54,10 +56,10 @@ void Adventure::AddPlayer(std::string character_name, bool add_client_to_instanc
 {
 	if(!PlayerExists(character_name))
 	{
-		int client_id = database.GetCharacterID(character_name.c_str());
-		if(add_client_to_instance)
+		int32 character_id = database.GetCharacterID(character_name.c_str());
+		if(character_id && add_client_to_instance)
 		{
-			database.AddClientToInstance(instance_id, client_id);
+			database.AddClientToInstance(instance_id, character_id);
 		}
 		players.push_back(character_name);
 	}
@@ -65,13 +67,17 @@ void Adventure::AddPlayer(std::string character_name, bool add_client_to_instanc
 
 void Adventure::RemovePlayer(std::string character_name)
 {
-	std::list<std::string>::iterator iter = players.begin();
+	auto iter = players.begin();
 	while(iter != players.end())
 	{
 		if((*iter).compare(character_name) == 0)
 		{
-			database.RemoveClientFromInstance(instance_id, database.GetCharacterID(character_name.c_str()));
-			players.erase(iter);
+			int32 character_id = database.GetCharacterID(character_name.c_str());
+			if (character_id)
+			{
+				database.RemoveClientFromInstance(instance_id, character_id);
+				players.erase(iter);
+			}
 			return;
 		}
 		++iter;
@@ -80,7 +86,7 @@ void Adventure::RemovePlayer(std::string character_name)
 
 bool Adventure::PlayerExists(std::string character_name)
 {
-	std::list<std::string>::iterator iter = players.begin();
+	auto iter = players.begin();
 	while(iter != players.end())
 	{
 		if(character_name.compare((*iter)) == 0)
@@ -166,7 +172,7 @@ void Adventure::SetStatus(AdventureStatus new_status)
 		safe_delete(current_timer);
 		current_timer = new Timer(adventure_template->duration * 1000);
 		database.SetInstanceDuration(instance_id, adventure_template->duration + 60);
-		ServerPacket *pack = new ServerPacket(ServerOP_InstanceUpdateTime, sizeof(ServerInstanceUpdateTime_Struct));
+		auto pack = new ServerPacket(ServerOP_InstanceUpdateTime, sizeof(ServerInstanceUpdateTime_Struct));
 		ServerInstanceUpdateTime_Struct *ut = (ServerInstanceUpdateTime_Struct*)pack->pBuffer;
 		ut->instance_id = instance_id;
 		ut->new_duration = adventure_template->duration + 60;
@@ -181,7 +187,7 @@ void Adventure::SetStatus(AdventureStatus new_status)
 		safe_delete(current_timer);
 		current_timer = new Timer(1800000);
 		database.SetInstanceDuration(instance_id, 1860);
-		ServerPacket *pack = new ServerPacket(ServerOP_InstanceUpdateTime, sizeof(ServerInstanceUpdateTime_Struct));
+		auto pack = new ServerPacket(ServerOP_InstanceUpdateTime, sizeof(ServerInstanceUpdateTime_Struct));
 		ServerInstanceUpdateTime_Struct *ut = (ServerInstanceUpdateTime_Struct*)pack->pBuffer;
 		ut->instance_id = instance_id;
 		ut->new_duration = 1860;
@@ -196,7 +202,7 @@ void Adventure::SetStatus(AdventureStatus new_status)
 		safe_delete(current_timer);
 		current_timer = new Timer(1800000);
 		database.SetInstanceDuration(instance_id, 1800);
-		ServerPacket *pack = new ServerPacket(ServerOP_InstanceUpdateTime, sizeof(ServerInstanceUpdateTime_Struct));
+		auto pack = new ServerPacket(ServerOP_InstanceUpdateTime, sizeof(ServerInstanceUpdateTime_Struct));
 		ServerInstanceUpdateTime_Struct *ut = (ServerInstanceUpdateTime_Struct*)pack->pBuffer;
 		ut->instance_id = instance_id;
 		ut->new_duration = 1860;
@@ -210,7 +216,7 @@ void Adventure::SetStatus(AdventureStatus new_status)
 		return;
 	}
 
-	std::list<std::string>::iterator iter = players.begin();
+	auto iter = players.begin();
 	while(iter != players.end())
 	{
 		adventure_manager.GetAdventureData((*iter).c_str());
@@ -220,11 +226,11 @@ void Adventure::SetStatus(AdventureStatus new_status)
 
 void Adventure::SendAdventureMessage(uint32 type, const char *msg)
 {
-	ServerPacket *pack = new ServerPacket(ServerOP_EmoteMessage, sizeof(ServerEmoteMessage_Struct) + strlen(msg) + 1);
+	auto pack = new ServerPacket(ServerOP_EmoteMessage, sizeof(ServerEmoteMessage_Struct) + strlen(msg) + 1);
 	ServerEmoteMessage_Struct *sms = (ServerEmoteMessage_Struct*)pack->pBuffer;
 	sms->type = type;
 	strcpy(sms->message, msg);
-	std::list<std::string>::iterator iter = players.begin();
+	auto iter = players.begin();
 	while(iter != players.end())
 	{
 		ClientListEntry *current = client_list.FindCharacter((*iter).c_str());
@@ -278,7 +284,7 @@ void Adventure::IncrementAssassinationCount()
 
 void Adventure::Finished(AdventureWinStatus ws)
 {
-	std::list<std::string>::iterator iter = players.begin();
+	auto iter = players.begin();
 	while(iter != players.end())
 	{
 		ClientListEntry *current = client_list.FindCharacter((*iter).c_str());
@@ -287,7 +293,8 @@ void Adventure::Finished(AdventureWinStatus ws)
 			if(current->Online() == CLE_Status_InZone)
 			{
 				//We can send our packets only.
-				ServerPacket *pack = new ServerPacket(ServerOP_AdventureFinish, sizeof(ServerAdventureFinish_Struct));
+				auto pack =
+				    new ServerPacket(ServerOP_AdventureFinish, sizeof(ServerAdventureFinish_Struct));
 				ServerAdventureFinish_Struct *af = (ServerAdventureFinish_Struct*)pack->pBuffer;
 				strcpy(af->player, (*iter).c_str());
 				af->theme = GetTemplate()->theme;
@@ -358,6 +365,7 @@ void Adventure::Finished(AdventureWinStatus ws)
 				afe.points = 0;
 			}
 			adventure_manager.AddFinishedEvent(afe);
+			
 			database.UpdateAdventureStatsEntry(database.GetCharacterID((*iter).c_str()), GetTemplate()->theme, (ws != AWS_Lose) ? true : false);
 		}
 		++iter;
@@ -375,36 +383,33 @@ void Adventure::MoveCorpsesToGraveyard()
 	std::list<uint32> dbid_list;
 	std::list<uint32> charid_list;
 
-	std::string query = StringFormat("SELECT id, charid FROM player_corpses WHERE instanceid=%d", GetInstanceID());
+	std::string query = StringFormat("SELECT id, charid FROM character_corpses WHERE instanceid=%d", GetInstanceID());
 	auto results = database.QueryDatabase(query);
 	if(!results.Success())
-        LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::MoveCorpsesToGraveyard: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 
 	for(auto row = results.begin(); row != results.end(); ++row) {
         dbid_list.push_back(atoi(row[0]));
         charid_list.push_back(atoi(row[1]));
     }
 
-	for (auto iter = dbid_list.begin(); iter != dbid_list.end(); ++iter)
-	{
-		float x = GetTemplate()->graveyard_x + MakeRandomFloat(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
-		float y = GetTemplate()->graveyard_y + MakeRandomFloat(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
+    for (auto &elem : dbid_list) {
+		float x = GetTemplate()->graveyard_x + emu_random.Real(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
+		float y = GetTemplate()->graveyard_y + emu_random.Real(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
 		float z = GetTemplate()->graveyard_z;
 
-		query = StringFormat("UPDATE player_corpses "
+		query = StringFormat("UPDATE character_corpses "
                             "SET zoneid = %d, instanceid = 0, "
                             "x = %f, y = %f, z = %f WHERE instanceid = %d",
                             GetTemplate()->graveyard_zone_id,
                             x, y, z, GetInstanceID());
-		auto results = database.QueryDatabase(query);
-		if(!results.Success())
-			LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::MoveCorpsesToGraveyard: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
+		database.QueryDatabase(query);
 	}
 
     auto c_iter = charid_list.begin();
 	for (auto iter = dbid_list.begin(); iter != dbid_list.end(); ++iter, ++c_iter)
 	{
-		ServerPacket* pack = new ServerPacket(ServerOP_DepopAllPlayersCorpses, sizeof(ServerDepopAllPlayersCorpses_Struct));
+		auto pack =
+		    new ServerPacket(ServerOP_DepopAllPlayersCorpses, sizeof(ServerDepopAllPlayersCorpses_Struct));
 		ServerDepopAllPlayersCorpses_Struct *dpc = (ServerDepopAllPlayersCorpses_Struct*)pack->pBuffer;
 		dpc->CharacterID = (*c_iter);
 		dpc->InstanceID = 0;

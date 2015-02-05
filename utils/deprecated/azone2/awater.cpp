@@ -271,7 +271,6 @@ long BSPCountNodes(BSP_Node *tree, long node_number) {
 
 
 long BSPFindRegion(BSP_Node *tree, long node_number, long region) {
-	//printf("Find Region %ld in node %ld\n", region, node_number);
 	if(node_number<1) {
 		printf("Something went wrong\n");
 		exit(1);
@@ -343,7 +342,6 @@ long BSPFindNode(BSP_Node *tree, long node_number, float x, float y, float z) {
 
 
 long BSPMarkRegion(BSP_Node *tree, long node_number, long region, int region_type) {
-        //printf("Find Region %ld in node %ld\n", region, node_number);
         if(node_number<1) {
                 printf("Something went wrong\n");
                 exit(1);

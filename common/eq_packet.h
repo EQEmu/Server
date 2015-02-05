@@ -19,9 +19,8 @@
 #define _EQPACKET_H
 
 #include "base_packet.h"
-#include "eq_stream_type.h"
-#include "op_codes.h"
 #include "platform.h"
+#include <iostream>
 
 #ifdef STATIC_OPCODE
 	typedef unsigned short EmuOpcode;
@@ -29,9 +28,6 @@
 #else
 #include "emu_opcodes.h"
 #endif
-
-class EQStream;
-class EQStreamPair;
 
 class EQPacket : public BasePacket {
 	friend class EQStream;
@@ -151,6 +147,6 @@ protected:
 };
 
 extern void DumpPacket(const EQApplicationPacket* app, bool iShowInfo = false);
-
+extern std::string DumpPacketToString(const EQApplicationPacket* app);
 
 #endif

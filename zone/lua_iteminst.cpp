@@ -166,12 +166,12 @@ uint32 Lua_ItemInst::GetColor() {
 
 bool Lua_ItemInst::IsInstNoDrop() {
 	Lua_Safe_Call_Bool();
-	return self->IsInstNoDrop();
+	return self->IsAttuned();
 }
 
 void Lua_ItemInst::SetInstNoDrop(bool flag) {
 	Lua_Safe_Call_Void();
-	return self->SetInstNoDrop(flag);
+	return self->SetAttuned(flag);
 }
 
 std::string Lua_ItemInst::GetCustomDataString() {

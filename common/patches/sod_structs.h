@@ -1,5 +1,5 @@
-#ifndef SoD_STRUCTS_H_
-#define SoD_STRUCTS_H_
+#ifndef SOD_STRUCTS_H_
+#define SOD_STRUCTS_H_
 
 namespace SoD {
 	namespace structs {
@@ -118,9 +118,9 @@ struct Color_Struct
 
 struct CharSelectEquip {
 	//totally guessed;
-	uint32 equip0;
-	uint32 equip1;
-	uint32 itemid;
+	uint32 material;
+	uint32 unknown1;
+	uint32 elitematerial;
 	Color_Struct color;
 };
 
@@ -169,9 +169,9 @@ struct CharacterSelect_Struct {
 * Size: 12 Octets
 */
 struct EquipStruct {
-/*00*/ uint32 equip0;
-/*04*/ uint32 equip1;
-/*08*/ uint32 itemId;
+/*00*/ uint32 material;
+/*04*/ uint32 unknown1;
+/*08*/ uint32 elitematerial;
 /*12*/
 };
 
@@ -519,7 +519,7 @@ struct CastSpell_Struct
 	uint32	spell_id;
 	uint32	inventoryslot;  // slot for clicky item, 0xFFFF = normal cast
 	uint32	target_id;
-	uint8    cs_unknown[4];
+	uint8	cs_unknown[4];
 };
 
 /*
@@ -538,7 +538,7 @@ struct SpawnAppearance_Struct
 };
 
 
-// solar: this is used inside profile
+// this is used inside profile
 struct SpellBuff_Struct
 {
 /*000*/	uint8	slotid;		//badly named... seems to be 2 for a real buff, 0 otherwise
@@ -576,8 +576,8 @@ struct GMTrainee_Struct
 {
 	/*000*/ uint32 npcid;
 	/*004*/ uint32 playerid;
-	/*008*/ uint32 skills[73];
-	/*300*/ uint8 unknown300[148];
+	/*008*/ uint32 skills[PACKET_SKILL_ARRAY_SIZE];
+	/*408*/ uint8 unknown408[40];
 	/*448*/
 };
 
@@ -711,14 +711,62 @@ struct PotionBelt_Struct {
 static const uint32 MAX_GROUP_LEADERSHIP_AA_ARRAY = 16;
 static const uint32 MAX_RAID_LEADERSHIP_AA_ARRAY = 16;
 static const uint32 MAX_LEADERSHIP_AA_ARRAY = (MAX_GROUP_LEADERSHIP_AA_ARRAY+MAX_RAID_LEADERSHIP_AA_ARRAY);
-struct LeadershipAA_Struct {
-	uint32 ranks[MAX_LEADERSHIP_AA_ARRAY];
-};
 struct GroupLeadershipAA_Struct {
-	uint32 ranks[MAX_GROUP_LEADERSHIP_AA_ARRAY];
+	union {
+		struct {
+			uint32 groupAAMarkNPC;
+			uint32 groupAANPCHealth;
+			uint32 groupAADelegateMainAssist;
+			uint32 groupAADelegateMarkNPC;
+			uint32 groupAA4;
+			uint32 groupAA5;
+			uint32 groupAAInspectBuffs;
+			uint32 groupAA7;
+			uint32 groupAASpellAwareness;
+			uint32 groupAAOffenseEnhancement;
+			uint32 groupAAManaEnhancement;
+			uint32 groupAAHealthEnhancement;
+			uint32 groupAAHealthRegeneration;
+			uint32 groupAAFindPathToPC;
+			uint32 groupAAHealthOfTargetsTarget;
+			uint32 groupAA15;
+		};
+		uint32 ranks[MAX_GROUP_LEADERSHIP_AA_ARRAY];
+	};
 };
+
 struct RaidLeadershipAA_Struct {
-	uint32 ranks[MAX_RAID_LEADERSHIP_AA_ARRAY];
+	union {
+		struct {
+			uint32 raidAAMarkNPC;
+			uint32 raidAANPCHealth;
+			uint32 raidAADelegateMainAssist;
+			uint32 raidAADelegateMarkNPC;
+			uint32 raidAA4;
+			uint32 raidAA5;
+			uint32 raidAA6;
+			uint32 raidAASpellAwareness;
+			uint32 raidAAOffenseEnhancement;
+			uint32 raidAAManaEnhancement;
+			uint32 raidAAHealthEnhancement;
+			uint32 raidAAHealthRegeneration;
+			uint32 raidAAFindPathToPC;
+			uint32 raidAAHealthOfTargetsTarget;
+			uint32 raidAA14;
+			uint32 raidAA15;
+		};
+		uint32 ranks[MAX_RAID_LEADERSHIP_AA_ARRAY];
+	};
+};
+
+struct LeadershipAA_Struct {
+	union {
+		struct {
+			GroupLeadershipAA_Struct group;
+			RaidLeadershipAA_Struct raid;
+		};
+		uint32 ranks[MAX_LEADERSHIP_AA_ARRAY];
+	};
 };
 
  /**
@@ -744,7 +792,7 @@ struct BindStruct {
 static const uint32 MAX_PP_LANGUAGE		= 25; //
 static const uint32 MAX_PP_SPELLBOOK	= 480; // Confirmed 60 pages on Live now
 static const uint32 MAX_PP_MEMSPELL		= 10; //was 9 now 10 on Live
-static const uint32 MAX_PP_SKILL		= _SkillPacketArraySize;	// 100 - actual skills buffer size
+static const uint32 MAX_PP_SKILL		= PACKET_SKILL_ARRAY_SIZE;	// 100 - actual skills buffer size
 static const uint32 MAX_PP_AA_ARRAY		= 300; //was 299
 static const uint32 MAX_GROUP_MEMBERS	= 6;
 static const uint32 MAX_RECAST_TYPES	= 20;
@@ -1148,7 +1196,7 @@ struct Animation_Struct {
 /*04*/
 };
 
-// solar: this is what causes the caster to animate and the target to
+// this is what causes the caster to animate and the target to
 // get the particle effects around them when a spell is cast
 // also causes a buff icon
 struct Action_Struct
@@ -1200,7 +1248,7 @@ struct ActionAlt_Struct // ActionAlt_Struct - Size: 56 bytes
 /*0056*/
 };
 
-// solar: this is what prints the You have been struck. and the regular
+// this is what prints the You have been struck. and the regular
 // melee messages like You try to pierce, etc.  It's basically the melee
 // and spell damage message
 struct CombatDamage_Struct
@@ -1469,11 +1517,11 @@ struct BulkItemPacket_Struct
 
 struct Consume_Struct
 {
-/*0000*/ uint32 slot;
-/*0004*/ uint32 auto_consumed; // 0xffffffff when auto eating e7030000 when right click
-/*0008*/ uint8  c_unknown1[4];
-/*0012*/ uint8  type; // 0x01=Food 0x02=Water
-/*0013*/ uint8  unknown13[3];
+/*0000*/ uint32	slot;
+/*0004*/ uint32	auto_consumed; // 0xffffffff when auto eating e7030000 when right click
+/*0008*/ uint8	c_unknown1[4];
+/*0012*/ uint8	type; // 0x01=Food 0x02=Water
+/*0013*/ uint8	unknown13[3];
 /*0016*/
 };
 
@@ -1503,17 +1551,17 @@ struct ItemProperties_Struct {
 };
 
 struct DeleteItem_Struct {
-/*0000*/ uint32 from_slot;
-/*0004*/ uint32 to_slot;
-/*0008*/ uint32 number_in_stack;
+/*0000*/ uint32	from_slot;
+/*0004*/ uint32	to_slot;
+/*0008*/ uint32	number_in_stack;
 /*0012*/
 };
 
 struct MoveItem_Struct
 {
-/*0000*/ uint32 from_slot;
-/*0004*/ uint32 to_slot;
-/*0008*/ uint32 number_in_stack;
+/*0000*/ uint32	from_slot;
+/*0004*/ uint32	to_slot;
+/*0008*/ uint32	number_in_stack;
 /*0012*/
 };
 
@@ -1743,7 +1791,7 @@ struct RandomReq_Struct {
 	uint32 high;
 };
 
-/* solar: 9/23/03 reply to /random command; struct from Zaphod */
+/* 9/23/03 reply to /random command */
 struct RandomReply_Struct {
 /* 00 */	uint32 low;
 /* 04 */	uint32 high;
@@ -3090,10 +3138,10 @@ struct TributeInfo_Struct {
 };
 
 struct TributeItem_Struct {
-	uint32   slot;
-	uint32   quantity;
-	uint32   tribute_master_id;
-	int32  tribute_points;
+	uint32	slot;
+	uint32	quantity;
+	uint32	tribute_master_id;
+	int32	tribute_points;
 };
 
 struct TributePoint_Struct {
@@ -3129,7 +3177,7 @@ struct Split_Struct
 */
 struct NewCombine_Struct {
 /*00*/	int16	container_slot;
-/*02*/	char	unknown02[2];
+/*02*/	int16	guildtribute_slot;
 /*04*/
 };
 
@@ -3562,6 +3610,21 @@ struct RaidAddMember_Struct {
 /*139*/	uint8 flags[5]; //no idea if these are needed...
 };
 
+struct RaidMOTD_Struct {
+/*000*/ RaidGeneral_Struct general; // leader_name and action only used
+/*140*/ char motd[0]; // max size 1024, but reply is variable
+};
+
+struct RaidLeadershipUpdate_Struct {
+/*000*/	uint32 action;
+/*004*/	char player_name[64];
+/*068*/	uint32 Unknown068;
+/*072*/	char leader_name[64];
+/*136*/	GroupLeadershipAA_Struct group; //unneeded
+/*200*/	RaidLeadershipAA_Struct raid;
+/*264*/	char Unknown264[128];
+};
+
 struct RaidAdd_Struct {
 /*000*/	uint32		action;	//=0
 /*004*/	char		player_name[64];	//should both be the player's name
@@ -3868,7 +3931,7 @@ struct ItemSerializationHeader
 /*008*/	uint32 slot;
 /*012*/	uint32 price;
 /*016*/	uint32 merchant_slot; //1 if not a merchant item
-/*020*/	uint32 unknown020; //0
+/*020*/	uint32 scaled_value; //0
 /*024*/	uint32 instance_id; //unique instance id if not merchant item, else is merchant slot
 /*028*/	uint32 unknown028; //0
 /*032*/	uint32 last_cast_time;	// Unix Time from PP of last cast for this recast type if recast delay > 0
@@ -4109,10 +4172,10 @@ struct ItemQuaternaryBodyStruct
 
 struct AugmentInfo_Struct
 {
-/*000*/ uint32	itemid;		// id of the solvent needed
-/*004*/ uint8	window;		// window to display the information in
-/*005*/	uint8	unknown005[71];	// total packet length 76, all the rest were always 00
-/*076*/
+/*000*/ uint32	itemid;			// id of the solvent needed
+/*004*/ uint32	window;			// window to display the information in
+/*008*/ char	augment_info[64];	// total packet length 76, all the rest were always 00
+/*072*/ uint32	unknown072;
 };
 
 struct VeteranRewardItem
@@ -4346,8 +4409,7 @@ struct MercenaryAssign_Struct {
 /*0012*/
 };
 
-
 	};	//end namespace structs
 };	//end namespace SoD
 
-#endif /*SoD_STRUCTS_H_*/
+#endif /*SOD_STRUCTS_H_*/

@@ -24,7 +24,7 @@
 extern ErrorLog *server_log;
 extern LoginServer server;
 
-Client::Client(EQStream *c, ClientVersion v)
+Client::Client(std::shared_ptr<EQStream> c, LSClientVersion v)
 {
 	connection = c;
 	version = v;
@@ -389,7 +389,7 @@ void Client::GenerateKey()
 			'6', '7', '8', '9'
 		};
 
-		key.append((const char*)&key_selection[MakeRandomInt(0, 35)], 1);
+		key.append((const char*)&key_selection[random.Int(0, 35)], 1);
 		count++;
 	}
 }

@@ -16,20 +16,18 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "../common/debug.h"
-#include <iostream>
-#include <stdlib.h>
-
-#include "masterentity.h"
-#include "zonedb.h"
-#include "../common/packet_functions.h"
-#include "../common/packet_dump.h"
-#include "../common/misc_functions.h"
+#include "../common/global_define.h"
 #include "../common/string_util.h"
-#include "../common/features.h"
-#include "string_ids.h"
+
+#include "client.h"
+#include "entity.h"
+#include "mob.h"
+#include "object.h"
 
 #include "quest_parser_collection.h"
+#include "zonedb.h"
+
+#include <iostream>
 
 const char DEFAULT_OBJECT_NAME[] = "IT63_ACTORDEF";
 const char DEFAULT_OBJECT_NAME_SUFFIX[] = "_ACTORDEF";
@@ -88,7 +86,6 @@ Object::Object(const ItemInst* inst, char* name,float max_x,float min_x,float ma
 	// Set as much struct data as we can
 	memset(&m_data, 0, sizeof(Object_Struct));
 	m_data.heading = heading;
-	//printf("Spawning object %s at %f,%f,%f\n",name,m_data.x,m_data.y,m_data.z);
 	m_data.z = z;
 	m_data.zone_id = zone->GetZoneID();
 	respawn_timer.Disable();
@@ -120,7 +117,15 @@ Object::Object(Client* client, const ItemInst* inst)
 	m_data.heading = client->GetHeading();
 	m_data.x = client->GetX();
 	m_data.y = client->GetY();
-	m_data.z = client->GetZ();
+	if (client->GetClientVersion() >= ClientVersion::RoF2)
+	{
+		// RoF2 places items at player's Z, which is 0.625 of their height.
+		m_data.z = client->GetZ() - (client->GetSize() * 0.625f);
+	}
+	else
+	{
+		m_data.z = client->GetZ();
+	}
 	m_data.zone_id = zone->GetZoneID();
 
 	decay_timer.Start();
@@ -318,11 +323,19 @@ void Object::Delete(bool reset_state)
 	}
 }
 
+const ItemInst* Object::GetItem(uint8 index) {
+	if (index < EmuConstants::MAP_WORLD_SIZE) {
+		return m_inst->GetItem(index);
+	}
+
+	return nullptr;
+}
+
 // Add item to object (only logical for world tradeskill containers
 void Object::PutItem(uint8 index, const ItemInst* inst)
 {
 	if (index > 9) {
-		LogFile->write(EQEMuLog::Error, "Object::PutItem: Invalid index specified (%i)", index);
+		Log.Out(Logs::General, Logs::Error, "Object::PutItem: Invalid index specified (%i)", index);
 		return;
 	}
 
@@ -433,8 +446,8 @@ void Object::RandomSpawn(bool send_packet) {
 	if(!m_ground_spawn)
 		return;
 
-	m_data.x = MakeRandomFloat(m_min_x, m_max_x);
-	m_data.y = MakeRandomFloat(m_min_y, m_max_y);
+	m_data.x = zone->random.Real(m_min_x, m_max_x);
+	m_data.y = zone->random.Real(m_min_y, m_max_y);
 	respawn_timer.Disable();
 
 	if(send_packet) {
@@ -454,16 +467,21 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 		if (m_inst && sender) {
 			// if there is a lore conflict, delete the offending item from the server inventory
 			// the client updates itself and takes care of sending "duplicate lore item" messages
-			if(sender->CheckLoreConflict(m_inst->GetItem())) {
-				int16 loreslot = sender->GetInv().HasItem(m_inst->GetItem()->ID, 0, invWhereBank);
+			auto item = m_inst->GetItem();
+			if(sender->CheckLoreConflict(item)) {
+				int16 loreslot = sender->GetInv().HasItem(item->ID, 0, invWhereBank);
 				if (loreslot != INVALID_INDEX) // if the duplicate is in the bank, delete it.
 					sender->DeleteItemInInventory(loreslot);
 				else
 					cursordelete = true;	// otherwise, we delete the new one
 			}
 
+			if (item->RecastDelay)
+				m_inst->SetRecastTimestamp(
+				    database.GetItemRecastTimestamp(sender->CharacterID(), item->RecastType));
+
 			char buf[10];
-			snprintf(buf, 9, "%u", m_inst->GetItem()->ID);
+			snprintf(buf, 9, "%u", item->ID);
 			buf[9] = '\0';
 			std::vector<EQEmu::Any> args;
 			args.push_back(m_inst);
@@ -584,7 +602,7 @@ uint32 ZoneDatabase::AddObject(uint32 type, uint32 icon, const Object_Struct& ob
     safe_delete_array(object_name);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Unable to insert object: %s", results.ErrorMessage().c_str());
+		Log.Out(Logs::General, Logs::Error, "Unable to insert object: %s", results.ErrorMessage().c_str());
 		return 0;
 	}
 
@@ -621,7 +639,7 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
     safe_delete_array(object_name);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Unable to update object: %s", results.ErrorMessage().c_str());
+		Log.Out(Logs::General, Logs::Error, "Unable to update object: %s", results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -640,7 +658,6 @@ Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Gro
                                     "LIMIT 50", zone_id, version);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        std::cerr << "Error in LoadGroundSpawns query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return gs;
 	}
 
@@ -666,7 +683,7 @@ void ZoneDatabase::DeleteObject(uint32 id)
 	std::string query = StringFormat("DELETE FROM object WHERE id = %i", id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogFile->write(EQEMuLog::Error, "Unable to delete object: %s", results.ErrorMessage().c_str());
+		Log.Out(Logs::General, Logs::Error, "Unable to delete object: %s", results.ErrorMessage().c_str());
 	}
 }
 
@@ -788,6 +805,42 @@ void Object::SetModelName(const char* modelname)
 	entity_list.QueueClients(0, app2);
 	safe_delete(app);
 	safe_delete(app2);
+}
+
+void Object::SetSize(uint16 size)
+{
+	m_data.unknown008 = size;
+	EQApplicationPacket* app = new EQApplicationPacket();
+	EQApplicationPacket* app2 = new EQApplicationPacket();
+	this->CreateDeSpawnPacket(app);
+	this->CreateSpawnPacket(app2);
+	entity_list.QueueClients(0, app);
+	entity_list.QueueClients(0, app2);
+	safe_delete(app);
+	safe_delete(app2);
+}
+
+void Object::SetSolidType(uint16 solidtype)
+{
+	m_data.unknown010 = solidtype;
+	EQApplicationPacket* app = new EQApplicationPacket();
+	EQApplicationPacket* app2 = new EQApplicationPacket();
+	this->CreateDeSpawnPacket(app);
+	this->CreateSpawnPacket(app2);
+	entity_list.QueueClients(0, app);
+	entity_list.QueueClients(0, app2);
+	safe_delete(app);
+	safe_delete(app2);
+}
+
+uint16 Object::GetSize()
+{
+	return m_data.unknown008;
+}
+
+uint16 Object::GetSolidType()
+{
+	return m_data.unknown010;
 }
 
 const char* Object::GetModelName()

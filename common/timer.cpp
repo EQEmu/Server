@@ -15,15 +15,14 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
+
+
 // Disgrace: for windows compile
 #ifndef WIN32
 	#include <sys/time.h>
 #else
 	#include <sys/timeb.h>
 #endif
-
-#include <iostream>
 
 #include "timer.h"
 
@@ -142,11 +141,13 @@ uint32 Timer::GetRemainingTime() {
 	}
 }
 
-void Timer::SetAtTrigger(uint32 in_set_at_trigger, bool iEnableIfDisabled) {
+void Timer::SetAtTrigger(uint32 in_set_at_trigger, bool iEnableIfDisabled, bool ChangeTimerTime) {
 	set_at_trigger = in_set_at_trigger;
 	if (!Enabled() && iEnableIfDisabled) {
 		Enable();
 	}
+	if (ChangeTimerTime)
+		timer_time = set_at_trigger;
 }
 
 void Timer::Trigger()

@@ -16,17 +16,12 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "../common/debug.h"
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
-#include <cstdlib>
-
 #include "../common/rulesys.h"
-#include "../common/misc_functions.h"
+
 #include "map.h"
-#include "zone.h"
 #include "pathing.h"
+#include "zone.h"
+
 #ifdef _WINDOWS
 #define snprintf	_snprintf
 #endif
@@ -157,26 +152,24 @@ void Mob::CalculateNewFearpoint()
 	{
 		int Node = zone->pathing->GetRandomPathNode();
 
-		Map::Vertex Loc = zone->pathing->GetPathNodeCoordinates(Node);
+		glm::vec3 Loc = zone->pathing->GetPathNodeCoordinates(Node);
 
 		++Loc.z;
 
-		Map::Vertex CurrentPosition(GetX(), GetY(), GetZ());
+		glm::vec3 CurrentPosition(GetX(), GetY(), GetZ());
 
-		std::list<int> Route = zone->pathing->FindRoute(CurrentPosition, Loc);
+		std::deque<int> Route = zone->pathing->FindRoute(CurrentPosition, Loc);
 
 		if(Route.size() > 0)
 		{
-			fear_walkto_x = Loc.x;
-			fear_walkto_y = Loc.y;
-			fear_walkto_z = Loc.z;
+            m_FearWalkTarget = glm::vec3(Loc.x, Loc.y, Loc.z);
 			curfp = true;
 
-			mlog(PATHING__DEBUG, "Feared to node %i (%8.3f, %8.3f, %8.3f)", Node, Loc.x, Loc.y, Loc.z);
+			Log.Out(Logs::Detail, Logs::None, "Feared to node %i (%8.3f, %8.3f, %8.3f)", Node, Loc.x, Loc.y, Loc.z);
 			return;
 		}
 
-		mlog(PATHING__DEBUG, "No path found to selected node. Falling through to old fear point selection.");
+		Log.Out(Logs::Detail, Logs::None, "No path found to selected node. Falling through to old fear point selection.");
 	}
 
 	int loop = 0;
@@ -186,8 +179,8 @@ void Mob::CalculateNewFearpoint()
 	{
 		int ran = 250 - (loop*2);
 		loop++;
-		ranx = GetX()+MakeRandomInt(0, ran-1)-MakeRandomInt(0, ran-1);
-		rany = GetY()+MakeRandomInt(0, ran-1)-MakeRandomInt(0, ran-1);
+		ranx = GetX()+zone->random.Int(0, ran-1)-zone->random.Int(0, ran-1);
+		rany = GetY()+zone->random.Int(0, ran-1)-zone->random.Int(0, ran-1);
 		ranz = FindGroundZ(ranx,rany);
 		if (ranz == -999999)
 			continue;
@@ -199,14 +192,8 @@ void Mob::CalculateNewFearpoint()
 		}
 	}
 	if (curfp)
-	{
-		fear_walkto_x = ranx;
-		fear_walkto_y = rany;
-		fear_walkto_z = ranz;
-	}
+        m_FearWalkTarget = glm::vec3(ranx, rany, ranz);
 	else //Break fear
-	{
 		BuffFadeByEffect(SE_Fear);
-	}
 }
 

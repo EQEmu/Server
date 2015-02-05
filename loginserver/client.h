@@ -18,10 +18,11 @@
 #ifndef EQEMU_CLIENT_H
 #define EQEMU_CLIENT_H
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/opcodemgr.h"
 #include "../common/eq_stream_type.h"
 #include "../common/eq_stream_factory.h"
+#include "../common/random.h"
 #ifndef WIN32
 #include "eq_crypto_api.h"
 #endif
@@ -29,13 +30,13 @@
 
 using namespace std;
 
-enum ClientVersion
+enum LSClientVersion
 {
 	cv_titanium,
 	cv_sod
 };
 
-enum ClientStatus
+enum LSClientStatus
 {
 	cs_not_sent_session_ready,
 	cs_waiting_for_login,
@@ -58,7 +59,7 @@ public:
 	/**
 	* Constructor, sets our connection to c and version to v
 	*/
-	Client(EQStream *c, ClientVersion v);
+	Client(std::shared_ptr<EQStream> c, LSClientVersion v);
 
 	/**
 	* Destructor.
@@ -128,11 +129,13 @@ public:
 	/**
 	* Gets the connection for this client.
 	*/
-	EQStream *GetConnection() { return connection; }
+	std::shared_ptr<EQStream> GetConnection() { return connection; }
+
+	EQEmu::Random random;
 private:
-	EQStream *connection;
-	ClientVersion version;
-	ClientStatus status;
+	std::shared_ptr<EQStream> connection;
+	LSClientVersion version;
+	LSClientStatus status;
 
 	string account_name;
 	unsigned int account_id;

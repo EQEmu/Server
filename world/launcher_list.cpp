@@ -17,10 +17,10 @@
 */
 
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "launcher_list.h"
 #include "launcher_link.h"
-#include "../common/logsys.h"
+
 #include "eql_config.h"
 
 LauncherList::LauncherList()
@@ -57,10 +57,9 @@ void LauncherList::Process() {
 	cur = m_pendingLaunchers.begin();
 	while(cur != m_pendingLaunchers.end()) {
 		LauncherLink *l = *cur;
-//printf("ProcP %d: %p\n", l->GetID(), l);
 		if(!l->Process()) {
 			//launcher has died before it identified itself.
-			_log(WORLD__LAUNCH, "Removing pending launcher %d", l->GetID());
+			Log.Out(Logs::Detail, Logs::World_Server, "Removing pending launcher %d", l->GetID());
 			cur = m_pendingLaunchers.erase(cur);
 			delete l;
 		} else if(l->HasName()) {
@@ -72,10 +71,10 @@ void LauncherList::Process() {
 			std::map<std::string, LauncherLink *>::iterator res;
 			res = m_launchers.find(name);
 			if(res != m_launchers.end()) {
-				_log(WORLD__LAUNCH, "Ghosting launcher %s", name.c_str());
+				Log.Out(Logs::Detail, Logs::World_Server, "Ghosting launcher %s", name.c_str());
 				delete res->second;
 			}
-			_log(WORLD__LAUNCH, "Removing pending launcher %d. Adding %s to active list.", l->GetID(), name.c_str());
+			Log.Out(Logs::Detail, Logs::World_Server, "Removing pending launcher %d. Adding %s to active list.", l->GetID(), name.c_str());
 			//put the launcher in the list.
 			m_launchers[name] = l;
 		} else {
@@ -88,10 +87,9 @@ void LauncherList::Process() {
 	curl = m_launchers.begin();
 	while(curl != m_launchers.end()) {
 		LauncherLink *l = curl->second;
-//printf("Proc %s(%d): %p\n", l->GetName(), l->GetID(), l);
 		if(!l->Process()) {
 			//launcher has died before it identified itself.
-			_log(WORLD__LAUNCH, "Removing launcher %s (%d)", l->GetName(), l->GetID());
+			Log.Out(Logs::Detail, Logs::World_Server, "Removing launcher %s (%d)", l->GetName(), l->GetID());
 			curl = m_launchers.erase(curl);
 			delete l;
 		} else {
@@ -130,8 +128,8 @@ LauncherLink *LauncherList::FindByZone(const char *short_name) {
 }
 
 void LauncherList::Add(EmuTCPConnection *conn) {
-	LauncherLink *it = new LauncherLink(nextID++, conn);
-	_log(WORLD__LAUNCH, "Adding pending launcher %d", it->GetID());
+	auto it = new LauncherLink(nextID++, conn);
+	Log.Out(Logs::Detail, Logs::World_Server, "Adding pending launcher %d", it->GetID());
 	m_pendingLaunchers.push_back(it);
 }
 

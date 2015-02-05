@@ -21,17 +21,19 @@
 #ifdef EMBPERL
 #ifdef EMBPERL_XS
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/misc_functions.h"
+#include "../common/eqemu_logsys.h"
+
 #include "embparser.h"
-#include "questmgr.h"
 #include "embxs.h"
 #include "entity.h"
-#include "zone.h"
 #include "queryserv.h"
+#include "questmgr.h"
+#include "zone.h"
 
 extern Zone* zone;
-extern QueryServ* QServ; 
+extern QueryServ* QServ;
 
 /*
 
@@ -218,11 +220,9 @@ XS(XS__spawn)
 	int	npc_type = (int)SvIV(ST(0));
 	int	grid = (int)SvIV(ST(1));
 	int	unused = (int)SvIV(ST(2));
-	float	x = (float)SvNV(ST(3));
-	float	y = (float)SvNV(ST(4));
-	float	z = (float)SvNV(ST(5));
+	auto position = glm::vec4((float)SvNV(ST(3)), (float)SvNV(ST(4)), (float)SvNV(ST(5)), 0.0f);
 
-	Mob *r = quest_manager.spawn2(npc_type, grid, unused, x, y, z, 0);
+	Mob *r = quest_manager.spawn2(npc_type, grid, unused, position);
 	RETVAL = (r != nullptr) ? r->GetID() : 0;
 	XSprePUSH; PUSHu((UV)RETVAL);
 
@@ -242,12 +242,9 @@ XS(XS__spawn2)
 	int	npc_type = (int)SvIV(ST(0));
 	int	grid = (int)SvIV(ST(1));
 	int	unused = (int)SvIV(ST(2));
-	float	x = (float)SvNV(ST(3));
-	float	y = (float)SvNV(ST(4));
-	float	z = (float)SvNV(ST(5));
-	float	heading = (float)SvNV(ST(6));
+	auto position = glm::vec4((float)SvNV(ST(3)), (float)SvNV(ST(4)), (float)SvNV(ST(5)), (float)SvNV(ST(6)));
 
-	Mob *r = quest_manager.spawn2(npc_type, grid, unused, x, y, z, heading);
+	Mob *r = quest_manager.spawn2(npc_type, grid, unused, position);
 	RETVAL = (r != nullptr) ? r->GetID() : 0;
 	XSprePUSH; PUSHu((UV)RETVAL);
 
@@ -274,7 +271,7 @@ XS(XS__unique_spawn)
 	if(items == 7)
 		heading = (float)SvNV(ST(6));
 
-	Mob *r =  quest_manager.unique_spawn(npc_type, grid, unused, x, y, z, heading);
+	Mob *r =  quest_manager.unique_spawn(npc_type, grid, unused, glm::vec4(x, y, z, heading));
 	RETVAL = (r != nullptr) ? r->GetID() : 0;
 
 	XSprePUSH; PUSHu((UV)RETVAL);
@@ -1174,7 +1171,7 @@ XS(XS__createguild)
 		Perl_croak(aTHX_ "Usage: createguild(guild_name, leader)");
 
 		char *	guild_name = (char *)SvPV_nolen(ST(0));
-		char *	leader = (char *)SvPV_nolen(ST(1));		
+		char *	leader = (char *)SvPV_nolen(ST(1));
 
 	quest_manager.CreateGuild(guild_name, leader);
 
@@ -1321,11 +1318,9 @@ XS(XS__rebind)
 		Perl_croak(aTHX_ "Usage: rebind(zoneid, x, y, z)");
 
 	int	zoneid = (int)SvIV(ST(0));
-	float	x = (float)SvNV(ST(1));
-	float	y = (float)SvNV(ST(2));
-	float	z = (float)SvNV(ST(3));
+	auto location = glm::vec3((float)SvNV(ST(1)),(float)SvNV(ST(2)),(float)SvNV(ST(3)));
 
-	quest_manager.rebind(zoneid, x, y, z);
+	quest_manager.rebind(zoneid, location);
 
 	XSRETURN_EMPTY;
 }
@@ -1394,7 +1389,7 @@ XS(XS__moveto)
 	else
 		saveguard = false;
 
-	quest_manager.moveto(x, y, z, h, saveguard);
+	quest_manager.moveto(glm::vec4(x, y, z, h), saveguard);
 
 	XSRETURN_EMPTY;
 }
@@ -1521,7 +1516,7 @@ XS(XS__ChooseRandom)
 	if (items < 1)
 		Perl_croak(aTHX_ "Usage: ChooseRandom(... list ...)");
 
-	int index = MakeRandomInt(0, items-1);
+	int index = zone->random.Int(0, items-1);
 
 	SV *tmp = ST(0);
 	ST(0) = ST(index);
@@ -1749,12 +1744,9 @@ XS(XS__summonburriedplayercorpse)
 
 	bool RETVAL;
 	uint32	char_id = (int)SvIV(ST(0));
-	float	dest_x = (float)SvIV(ST(1));
-	float	dest_y = (float)SvIV(ST(2));
-	float	dest_z = (float)SvIV(ST(3));
-	float	dest_heading = (float)SvIV(ST(4));
+	auto position = glm::vec4((float)SvIV(ST(1)), (float)SvIV(ST(2)), (float)SvIV(ST(3)),(float)SvIV(ST(4)));
 
-	RETVAL = quest_manager.summonburriedplayercorpse(char_id, dest_x, dest_y, dest_z, dest_heading);
+	RETVAL = quest_manager.summonburriedplayercorpse(char_id, position);
 
 	ST(0) = boolSV(RETVAL);
 	sv_2mortal(ST(0));
@@ -1770,12 +1762,9 @@ XS(XS__summonallplayercorpses)
 
 	bool RETVAL;
 	uint32	char_id = (int)SvIV(ST(0));
-	float	dest_x = (float)SvIV(ST(1));
-	float	dest_y = (float)SvIV(ST(2));
-	float	dest_z = (float)SvIV(ST(3));
-	float	dest_heading = (float)SvIV(ST(4));
+	auto position = glm::vec4((float)SvIV(ST(1)),(float)SvIV(ST(2)),(float)SvIV(ST(3)),(float)SvIV(ST(4)));
 
-	RETVAL = quest_manager.summonallplayercorpses(char_id, dest_x, dest_y, dest_z, dest_heading);
+	RETVAL = quest_manager.summonallplayercorpses(char_id, position);
 
 	ST(0) = boolSV(RETVAL);
 	sv_2mortal(ST(0));
@@ -2278,18 +2267,22 @@ XS(XS__updatetaskactivity)
 	dXSARGS;
 	unsigned int task, activity;
 	int count = 1;
+	bool ignore_quest_update = false;
 	if(items == 2) {
 		task = (int)SvIV(ST(0));
 		activity = (int)SvIV(ST(1));
-		quest_manager.updatetaskactivity(task, activity, count);
+		quest_manager.updatetaskactivity(task, activity, count, false);
 	}
-	else if(items == 3) {
+	else if (items == 3 || items == 4) {
 		task = (int)SvIV(ST(0));
 		activity = (int)SvIV(ST(1));
 		count = (int)SvIV(ST(2));
-		quest_manager.updatetaskactivity(task, activity, count);
+		if (items == 4){
+			bool	ignore_quest_update = (bool)SvTRUE(ST(3)); 
+		}
+		quest_manager.updatetaskactivity(task, activity, count, ignore_quest_update);
 	} else {
-		Perl_croak(aTHX_ "Usage: updatetaskactivity(task, activity [,count])");
+		Perl_croak(aTHX_ "Usage: updatetaskactivity(task, activity, [count], [ignore_quest_update])");
 	}
 
 	XSRETURN_EMPTY;
@@ -2668,10 +2661,10 @@ XS(XS__CreateGroundObject)
 	uint16 id = 0;
 
 	if(items == 5)
-		id = quest_manager.CreateGroundObject(itemid, x, y, z, heading);
+		id = quest_manager.CreateGroundObject(itemid, glm::vec4(x, y, z, heading));
 	else{
 		uint32 decay_time = (uint32)SvIV(ST(5));
-		id = quest_manager.CreateGroundObject(itemid, x, y, z, heading, decay_time);
+		id = quest_manager.CreateGroundObject(itemid, glm::vec4(x, y, z, heading), decay_time);
 	}
 
 	XSRETURN_IV(id);
@@ -2699,7 +2692,7 @@ XS(XS__CreateGroundObjectFromModel)
 	if (items > 6)
 		decay_time = (uint32)SvIV(ST(6));
 
-	id = quest_manager.CreateGroundObjectFromModel(modelname, x, y, z, heading, type, decay_time);
+	id = quest_manager.CreateGroundObjectFromModel(modelname, glm::vec4(x, y, z, heading), type, decay_time);
 	XSRETURN_IV(id);
 }
 
@@ -2859,14 +2852,54 @@ XS(XS__GetInstanceID) {
 	XSRETURN_UV(id);
 }
 
+XS(XS__GetCharactersInInstance);
+XS(XS__GetCharactersInInstance) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: GetCharactersInInstance(instance_id)");
+	dXSTARG;
+
+	Const_char * RETVAL;
+	uint16 instance_id = (int)SvUV(ST(0));
+	std::list<uint32> charid_list;
+	std::string charid_string;
+
+	database.GetCharactersInInstance(instance_id, charid_list);
+
+	if (charid_list.size() > 0)
+	{
+		charid_string = itoa(charid_list.size());
+		charid_string += " player(s) in instance: ";
+		auto iter = charid_list.begin();
+		while (iter != charid_list.end())
+		{
+			char char_name[64];
+			database.GetCharName(*iter, char_name);
+			charid_string += char_name;
+			charid_string += "(";
+			charid_string += itoa(*iter);
+			charid_string += ")";
+			++iter;
+			if (iter != charid_list.end())
+				charid_string += ", ";
+		}
+		RETVAL = charid_string.c_str();
+	}
+	else
+		RETVAL = "No players in that instance.";
+
+	sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
+	XSRETURN(1);
+}
+
 XS(XS__AssignToInstance);
 XS(XS__AssignToInstance) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: AssignToInstance(id)");
+		Perl_croak(aTHX_ "Usage: AssignToInstance(instance_id)");
 
-	uint16 id = (int)SvUV(ST(0));
-	quest_manager.AssignToInstance(id);
+	uint16 instance_id = (int)SvUV(ST(0));
+	quest_manager.AssignToInstance(instance_id);
 
 	XSRETURN_EMPTY;
 }
@@ -2875,10 +2908,10 @@ XS(XS__AssignGroupToInstance);
 XS(XS__AssignGroupToInstance) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: AssignGroupToInstance(id)");
+		Perl_croak(aTHX_ "Usage: AssignGroupToInstance(instance_id)");
 
-	uint16 id = (int)SvUV(ST(0));
-	quest_manager.AssignGroupToInstance(id);
+	uint16 instance_id = (int)SvUV(ST(0));
+	quest_manager.AssignGroupToInstance(instance_id);
 
 	XSRETURN_EMPTY;
 }
@@ -2887,10 +2920,34 @@ XS(XS__AssignRaidToInstance);
 XS(XS__AssignRaidToInstance) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: AssignRaidToInstance(id)");
+		Perl_croak(aTHX_ "Usage: AssignRaidToInstance(instance_id)");
 
-	uint16 id = (int)SvUV(ST(0));
-	quest_manager.AssignRaidToInstance(id);
+	uint16 instance_id = (int)SvUV(ST(0));
+	quest_manager.AssignRaidToInstance(instance_id);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__RemoveFromInstance);
+XS(XS__RemoveFromInstance) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: RemoveFromInstance(instance_id)");
+
+	uint16 instance_id = (int)SvUV(ST(0));
+	quest_manager.RemoveFromInstance(instance_id);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__RemoveAllFromInstance);
+XS(XS__RemoveAllFromInstance) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: RemoveAllFromInstance(instance_id)");
+
+	uint16 instance_id = (int)SvUV(ST(0));
+	quest_manager.RemoveAllFromInstance(instance_id);
 
 	XSRETURN_EMPTY;
 }
@@ -2910,12 +2967,12 @@ XS(XS__MovePCInstance)
 
 	if (items == 4)
 	{
-		quest_manager.MovePCInstance(zoneid, instanceid, x, y, z, 0.0f);
+		quest_manager.MovePCInstance(zoneid, instanceid, glm::vec4(x, y, z, 0.0f));
 	}
 	else
 	{
 		float heading = (float)SvNV(ST(5));
-		quest_manager.MovePCInstance(zoneid, instanceid, x, y, z, heading);
+		quest_manager.MovePCInstance(zoneid, instanceid, glm::vec4(x, y, z, heading));
 	}
 
 	XSRETURN_EMPTY;
@@ -3225,7 +3282,7 @@ XS(XS__GetZoneID)
 
 	char *zone = (char *)SvPV_nolen(ST(0));
 	int32 id = quest_manager.GetZoneID(zone);
-	
+
 	XSRETURN_IV(id);
 }
 
@@ -3238,7 +3295,7 @@ XS(XS__GetZoneLongName)
 	dXSTARG;
 	char *zone = (char *)SvPV_nolen(ST(0));
 	Const_char* RETVAL = quest_manager.GetZoneLongName(zone);
-	
+
 	sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
 	XSRETURN(1);
 }
@@ -3368,7 +3425,7 @@ XS(XS__clear_npctype_cache)
 		int32 npctype_id = (int32)SvIV(ST(0));
 		quest_manager.ClearNPCTypeCache(npctype_id);
 	}
-	
+
 	XSRETURN_EMPTY;
 }
 
@@ -3391,11 +3448,11 @@ XS(XS__qs_player_event);
 XS(XS__qs_player_event)
 {
 	dXSARGS;
-	if (items != 2){ 
+	if (items != 2){
 		Perl_croak(aTHX_ "Usage: qs_player_event(char_id, event_desc)");
 	}
 	else{
-		int	char_id = (int)SvIV(ST(0)); 
+		int	char_id = (int)SvIV(ST(0));
 		std::string event_desc = (std::string)SvPV_nolen(ST(1));
 		QServ->PlayerLogEvent(Player_Log_Quest, char_id, event_desc);
 	}
@@ -3430,12 +3487,43 @@ XS(XS__crosszonesignalnpcbynpctypeid)
 
 	if (items == 2) {
 		uint32 npctype_id = (uint32)SvIV(ST(0));
-		uint32 data = (uint32)SvIV(ST(1)); 
+		uint32 data = (uint32)SvIV(ST(1));
 		quest_manager.CrossZoneSignalNPCByNPCTypeID(npctype_id, data);
 	}
 
 	XSRETURN_EMPTY;
 }
+
+XS(XS__debug);
+XS(XS__debug)
+{
+	dXSARGS;
+	if (items != 1 && items != 2){
+		Perl_croak(aTHX_ "Usage: debug(message, [debug_level])");
+	}
+	else{
+		std::string log_message = (std::string)SvPV_nolen(ST(0));
+		uint8 debug_level = 1;
+
+		if (items == 2)
+			debug_level = (uint8)SvIV(ST(1));
+
+		if (debug_level > Logs::Detail)
+			return;
+
+		if (debug_level == Logs::General){
+			Log.Out(Logs::General, Logs::QuestDebug, log_message);
+		}
+		else if (debug_level == Logs::Moderate){
+			Log.Out(Logs::Moderate, Logs::QuestDebug, log_message);
+		}
+		else if (debug_level == Logs::Detail){
+			Log.Out(Logs::Detail, Logs::QuestDebug, log_message);
+		}
+	}
+	XSRETURN_EMPTY;
+}
+
 
 /*
 This is the callback perl will look for to setup the
@@ -3450,218 +3538,223 @@ EXTERN_C XS(boot_quest)
 	file[255] = '\0';
 
 	if(items != 1)
-		LogFile->write(EQEMuLog::Error, "boot_quest does not take any arguments.");
+		Log.Out(Logs::General, Logs::Error, "boot_quest does not take any arguments.");
 
 	char buf[128];	//shouldent have any function names longer than this.
 
 	//add the strcpy stuff to get rid of const warnings....
 
 	XS_VERSION_BOOTCHECK ;
-		newXS(strcpy(buf, "echo"), XS__echo, file);
-		newXS(strcpy(buf, "say"), XS__say, file);
-		newXS(strcpy(buf, "me"), XS__me, file);
-		newXS(strcpy(buf, "summonitem"), XS__summonitem, file);
-		newXS(strcpy(buf, "write"), XS__write, file);
-		newXS(strcpy(buf, "spawn"), XS__spawn, file);
-		newXS(strcpy(buf, "spawn2"), XS__spawn2, file);
-		newXS(strcpy(buf, "unique_spawn"), XS__unique_spawn, file);
-		newXS(strcpy(buf, "spawn_from_spawn2"), XS__spawn_from_spawn2, file);
-		newXS(strcpy(buf, "enable_spawn2"), XS__enable_spawn2, file);
-		newXS(strcpy(buf, "disable_spawn2"), XS__disable_spawn2, file);
-		newXS(strcpy(buf, "setstat"), XS__setstat, file);
-		newXS(strcpy(buf, "incstat"), XS__incstat, file);
-		newXS(strcpy(buf, "castspell"), XS__castspell, file);
-		newXS(strcpy(buf, "selfcast"), XS__selfcast, file);
+
+#ifdef BOTS
+	newXS(strcpy(buf, "botquest"), XS__botquest, file);
+	newXS(strcpy(buf, "spawnbotcount"), XS__spawnbotcount, file);
+	newXS(strcpy(buf, "createbotcount"), XS__createbotcount, file);
+	newXS(strcpy(buf, "createBot"), XS__createBot, file);
+#endif //BOTS
+
+		newXS(strcpy(buf, "AssignGroupToInstance"), XS__AssignGroupToInstance, file);
+		newXS(strcpy(buf, "AssignRaidToInstance"), XS__AssignRaidToInstance, file);
+		newXS(strcpy(buf, "AssignToInstance"), XS__AssignToInstance, file);
+		newXS(strcpy(buf, "ChooseRandom"), XS__ChooseRandom, file);
+		newXS(strcpy(buf, "CreateInstance"), XS__CreateInstance, file);
+		newXS(strcpy(buf, "DestroyInstance"), XS__DestroyInstance, file);
+		newXS(strcpy(buf, "FlagInstanceByGroupLeader"), XS__FlagInstanceByGroupLeader, file);
+		newXS(strcpy(buf, "FlagInstanceByRaidLeader"), XS__FlagInstanceByRaidLeader, file);
+		newXS(strcpy(buf, "FlyMode"), XS__FlyMode, file);
+		newXS(strcpy(buf, "GetCharactersInInstance"), XS__GetCharactersInInstance, file);
+		newXS(strcpy(buf, "GetInstanceID"), XS__GetInstanceID, file);
+		newXS(strcpy(buf, "GetSpellResistType"), XS__GetSpellResistType, file);
+		newXS(strcpy(buf, "GetSpellTargetType"), XS__GetSpellTargetType, file);
+		newXS(strcpy(buf, "GetTimeSeconds"), XS__GetTimeSeconds, file);
+		newXS(strcpy(buf, "GetZoneID"), XS__GetZoneID, file);
+		newXS(strcpy(buf, "GetZoneLongName"), XS__GetZoneLongName, file);
+		newXS(strcpy(buf, "IsBeneficialSpell"), XS__IsBeneficialSpell, file);
+		newXS(strcpy(buf, "IsEffectInSpell"), XS__IsEffectInSpell, file);
+		newXS(strcpy(buf, "IsRunning"), XS__IsRunning, file);
+		newXS(strcpy(buf, "LearnRecipe"), XS__LearnRecipe, file);
+		newXS(strcpy(buf, "MerchantCountItem"), XS__MerchantCountItem, file);
+		newXS(strcpy(buf, "MerchantSetItem"), XS__MerchantSetItem, file);
+		newXS(strcpy(buf, "MovePCInstance"), XS__MovePCInstance, file);
+		newXS(strcpy(buf, "RemoveAllFromInstance"), XS__RemoveAllFromInstance, file);
+		newXS(strcpy(buf, "RemoveFromInstance"), XS__RemoveFromInstance, file);
+		newXS(strcpy(buf, "SendMail"), XS__SendMail, file);
+		newXS(strcpy(buf, "SetRunning"), XS__SetRunning, file);
+		newXS(strcpy(buf, "activespeakactivity"), XS__activespeakactivity, file);
+		newXS(strcpy(buf, "activespeaktask"), XS__activespeaktask, file);
+		newXS(strcpy(buf, "activetasksinset"), XS__activetasksinset, file);
+		newXS(strcpy(buf, "addldonloss"), XS__addldonpoints, file);
+		newXS(strcpy(buf, "addldonpoints"), XS__addldonpoints, file);
+		newXS(strcpy(buf, "addldonwin"), XS__addldonpoints, file);
 		newXS(strcpy(buf, "addloot"), XS__addloot, file);
-		newXS(strcpy(buf, "zone"), XS__zone, file);
-		newXS(strcpy(buf, "settimer"), XS__settimer, file);
-		newXS(strcpy(buf, "settimerMS"), XS__settimerMS, file);
-		newXS(strcpy(buf, "stoptimer"), XS__stoptimer, file);
-		newXS(strcpy(buf, "stopalltimers"), XS__stopalltimers, file);
-		newXS(strcpy(buf, "emote"), XS__emote, file);
-		newXS(strcpy(buf, "shout"), XS__shout, file);
-		newXS(strcpy(buf, "shout2"), XS__shout2, file);
-		newXS(strcpy(buf, "gmsay"), XS__gmsay, file);
-		newXS(strcpy(buf, "depop"), XS__depop, file);
-		newXS(strcpy(buf, "depop_withtimer"), XS__depop_withtimer, file);
-		newXS(strcpy(buf, "settarget"), XS__settarget, file);
-		newXS(strcpy(buf, "follow"), XS__follow, file);
-		newXS(strcpy(buf, "sfollow"), XS__sfollow, file);
-		newXS(strcpy(buf, "changedeity"), XS__changedeity, file);
-		newXS(strcpy(buf, "exp"), XS__exp, file);
-		newXS(strcpy(buf, "level"), XS__level, file);
-		newXS(strcpy(buf, "traindisc"), XS__traindisc, file);
-		newXS(strcpy(buf, "isdisctome"), XS__isdisctome, file);
-		newXS(strcpy(buf, "safemove"), XS__safemove, file);
-		newXS(strcpy(buf, "rain"), XS__rain, file);
-		newXS(strcpy(buf, "snow"), XS__snow, file);
-		newXS(strcpy(buf, "surname"), XS__surname, file);
-		newXS(strcpy(buf, "permaclass"), XS__permaclass, file);
-		newXS(strcpy(buf, "permarace"), XS__permarace, file);
-		newXS(strcpy(buf, "permagender"), XS__permagender, file);
-		newXS(strcpy(buf, "scribespells"), XS__scribespells, file);
-		newXS(strcpy(buf, "traindiscs"), XS__traindiscs, file);
-		newXS(strcpy(buf, "unscribespells"), XS__unscribespells, file);
-		newXS(strcpy(buf, "untraindiscs"), XS__untraindiscs, file);
-		newXS(strcpy(buf, "givecash"), XS__givecash, file);
-		newXS(strcpy(buf, "pvp"), XS__pvp, file);
-		newXS(strcpy(buf, "movepc"), XS__movepc, file);
-		newXS(strcpy(buf, "gmmove"), XS__gmmove, file);
-		newXS(strcpy(buf, "movegrp"), XS__movegrp, file);
-		newXS(strcpy(buf, "doanim"), XS__doanim, file);
 		newXS(strcpy(buf, "addskill"), XS__addskill, file);
-		newXS(strcpy(buf, "setlanguage"), XS__setlanguage, file);
-		newXS(strcpy(buf, "setskill"), XS__setskill, file);
-		newXS(strcpy(buf, "setallskill"), XS__setallskill, file);
+		newXS(strcpy(buf, "assigntask"), XS__assigntask, file);
 		newXS(strcpy(buf, "attack"), XS__attack, file);
 		newXS(strcpy(buf, "attacknpc"), XS__attacknpc, file);
 		newXS(strcpy(buf, "attacknpctype"), XS__attacknpctype, file);
-		newXS(strcpy(buf, "save"), XS__save, file);
-		newXS(strcpy(buf, "faction"), XS__faction, file);
-		newXS(strcpy(buf, "setsky"), XS__setsky, file);
-		newXS(strcpy(buf, "setguild"), XS__setguild, file);
-		newXS(strcpy(buf, "createguild"), XS__createguild, file);
-		newXS(strcpy(buf, "settime"), XS__settime, file);
-		newXS(strcpy(buf, "itemlink"), XS__itemlink, file);
-		newXS(strcpy(buf, "signal"), XS__signal, file);
-		newXS(strcpy(buf, "signalwith"), XS__signalwith, file);
-		newXS(strcpy(buf, "setglobal"), XS__setglobal, file);
-		newXS(strcpy(buf, "targlobal"), XS__targlobal, file);
-		newXS(strcpy(buf, "delglobal"), XS__delglobal, file);
-		newXS(strcpy(buf, "ding"), XS__ding, file);
-		newXS(strcpy(buf, "rebind"), XS__rebind, file);
-		newXS(strcpy(buf, "start"), XS__start, file);
-		newXS(strcpy(buf, "stop"), XS__stop, file);
-		newXS(strcpy(buf, "pause"), XS__pause, file);
-		newXS(strcpy(buf, "moveto"), XS__moveto, file);
-		newXS(strcpy(buf, "resume"), XS__resume, file);
-		newXS(strcpy(buf, "addldonpoints"), XS__addldonpoints, file);
-		newXS(strcpy(buf, "addldonwin"), XS__addldonpoints, file);
-		newXS(strcpy(buf, "addldonloss"), XS__addldonpoints, file);
-		newXS(strcpy(buf, "setnexthpevent"), XS__setnexthpevent, file);
-		newXS(strcpy(buf, "setnextinchpevent"), XS__setnextinchpevent, file);
-		newXS(strcpy(buf, "sethp"), XS__sethp, file);
-		newXS(strcpy(buf, "respawn"), XS__respawn, file);
-		newXS(strcpy(buf, "getItemName"), XS_qc_getItemName, file);
-		newXS(strcpy(buf, "ChooseRandom"), XS__ChooseRandom, file);
-		newXS(strcpy(buf, "set_proximity"), XS__set_proximity, file);
-		newXS(strcpy(buf, "clear_proximity"), XS__clear_proximity, file);
-		newXS(strcpy(buf, "enable_proximity_say"), XS__enable_proximity_say, file);
-		newXS(strcpy(buf, "disable_proximity_say"), XS__disable_proximity_say, file);
-		newXS(strcpy(buf, "setanim"), XS__setanim, file);
-		newXS(strcpy(buf, "showgrid"), XS__showgrid, file);
-		newXS(strcpy(buf, "spawn_condition"), XS__spawn_condition, file);
-		newXS(strcpy(buf, "get_spawn_condition"), XS__get_spawn_condition, file);
-		newXS(strcpy(buf, "toggle_spawn_event"), XS__toggle_spawn_event, file);
-		newXS(strcpy(buf, "has_zone_flag"), XS__has_zone_flag, file);
-		newXS(strcpy(buf, "set_zone_flag"), XS__set_zone_flag, file);
-		newXS(strcpy(buf, "clear_zone_flag"), XS__clear_zone_flag, file);
-		newXS(strcpy(buf, "summonburriedplayercorpse"), XS__summonburriedplayercorpse, file);
-		newXS(strcpy(buf, "summonallplayercorpses"), XS__summonallplayercorpses, file);
-		newXS(strcpy(buf, "getplayerburriedcorpsecount"), XS__getplayerburriedcorpsecount, file);
 		newXS(strcpy(buf, "buryplayercorpse"), XS__buryplayercorpse, file);
-		newXS(strcpy(buf, "forcedooropen"), XS__forcedooropen, file);
-		newXS(strcpy(buf, "forcedoorclose"), XS__forcedoorclose, file);
-		newXS(strcpy(buf, "toggledoorstate"), XS__toggledoorstate, file);
-		newXS(strcpy(buf, "isdooropen"), XS__isdooropen, file);
-		newXS(strcpy(buf, "depopall"), XS__depopall, file);
-		newXS(strcpy(buf, "depopzone"), XS__depopzone, file);
-		newXS(strcpy(buf, "repopzone"), XS__repopzone, file);
-		newXS(strcpy(buf, "npcrace"), XS__npcrace, file);
-		newXS(strcpy(buf, "npcgender"), XS__npcgender, file);
-		newXS(strcpy(buf, "npcsize"), XS__npcsize, file);
-		newXS(strcpy(buf, "npctexture"), XS__npctexture, file);
-		newXS(strcpy(buf, "playerrace"), XS__playerrace, file);
-		newXS(strcpy(buf, "playergender"), XS__playergender, file);
-		newXS(strcpy(buf, "playersize"), XS__playersize, file);
-		newXS(strcpy(buf, "playertexture"), XS__playertexture, file);
-		newXS(strcpy(buf, "playerfeature"), XS__playerfeature, file);
-		newXS(strcpy(buf, "npcfeature"), XS__npcfeature, file);
-
-#ifdef BOTS
-		newXS(strcpy(buf, "botquest"), XS__botquest, file);
-		newXS(strcpy(buf, "spawnbotcount"), XS__spawnbotcount, file);
-		newXS(strcpy(buf, "createbotcount"), XS__createbotcount, file);
-		newXS(strcpy(buf, "createBot"), XS__createBot, file);
-#endif //BOTS
-
-		newXS(strcpy(buf, "taskselector"), XS__taskselector, file);
-		newXS(strcpy(buf, "tasksetselector"), XS__tasksetselector, file);
-		newXS(strcpy(buf, "enabletask"), XS__enabletask, file);
-		newXS(strcpy(buf, "disabletask"), XS__disabletask, file);
-		newXS(strcpy(buf, "istaskenabled"), XS__istaskenabled, file);
-		newXS(strcpy(buf, "istaskactive"), XS__istaskactive, file);
-		newXS(strcpy(buf, "istaskactivityactive"), XS__istaskactivityactive, file);
-		newXS(strcpy(buf, "gettaskactivitydonecount"), XS__gettaskactivitydonecount, file);
-		newXS(strcpy(buf, "updatetaskactivity"), XS__updatetaskactivity, file);
-		newXS(strcpy(buf, "resettaskactivity"), XS__resettaskactivity, file);
-		newXS(strcpy(buf, "taskexploredarea"), XS__taskexploredarea, file);
-		newXS(strcpy(buf, "assigntask"), XS__assigntask, file);
-		newXS(strcpy(buf, "failtask"), XS__failtask, file);
-		newXS(strcpy(buf, "tasktimeleft"), XS__tasktimeleft, file);
-		newXS(strcpy(buf, "istaskcompleted"), XS__istaskcompleted, file);
-		newXS(strcpy(buf, "enabledtaskcount"), XS__enabledtaskcount, file);
-		newXS(strcpy(buf, "firsttaskinset"), XS__firsttaskinset, file);
-		newXS(strcpy(buf, "lasttaskinset"), XS__lasttaskinset, file);
-		newXS(strcpy(buf, "nexttaskinset"), XS__nexttaskinset, file);
-		newXS(strcpy(buf, "activespeaktask"), XS__activespeaktask, file);
-		newXS(strcpy(buf, "activespeakactivity"), XS__activespeakactivity, file);
-		newXS(strcpy(buf, "activetasksinset"), XS__activetasksinset, file);
-		newXS(strcpy(buf, "completedtasksinset"), XS__completedtasksinset, file);
-		newXS(strcpy(buf, "istaskappropriate"), XS__istaskappropriate, file);
-		newXS(strcpy(buf, "popup"), XS__popup, file);
+		newXS(strcpy(buf, "castspell"), XS__castspell, file);
+		newXS(strcpy(buf, "changedeity"), XS__changedeity, file);
+		newXS(strcpy(buf, "checktitle"), XS__checktitle, file);
+		newXS(strcpy(buf, "clear_npctype_cache"), XS__clear_npctype_cache, file);
+		newXS(strcpy(buf, "clear_proximity"), XS__clear_proximity, file);
+		newXS(strcpy(buf, "clear_zone_flag"), XS__clear_zone_flag, file);
 		newXS(strcpy(buf, "clearspawntimers"), XS__clearspawntimers, file);
-		newXS(strcpy(buf, "ze"), XS__ze, file);
-		newXS(strcpy(buf, "we"), XS__we, file);
-		newXS(strcpy(buf, "getlevel"), XS__getlevel, file);
+		newXS(strcpy(buf, "collectitems"), XS__collectitems, file);
+		newXS(strcpy(buf, "completedtasksinset"), XS__completedtasksinset, file);
+		newXS(strcpy(buf, "createdoor"), XS__CreateDoor, file);
 		newXS(strcpy(buf, "creategroundobject"), XS__CreateGroundObject, file);
 		newXS(strcpy(buf, "creategroundobjectfrommodel"), XS__CreateGroundObjectFromModel, file);
-		newXS(strcpy(buf, "createdoor"), XS__CreateDoor, file);
-		newXS(strcpy(buf, "modifynpcstat"), XS__ModifyNPCStat, file);
-		newXS(strcpy(buf, "collectitems"), XS__collectitems, file);
-		newXS(strcpy(buf, "updatespawntimer"), XS__UpdateSpawnTimer, file);
-		newXS(strcpy(buf, "MerchantSetItem"), XS__MerchantSetItem, file);
-		newXS(strcpy(buf, "MerchantCountItem"), XS__MerchantCountItem, file);
-		newXS(strcpy(buf, "varlink"), XS__varlink, file);
-		newXS(strcpy(buf, "saylink"), XS__saylink, file);
-		newXS(strcpy(buf, "getguildnamebyid"), XS__getguildnamebyid, file);
-		newXS(strcpy(buf, "CreateInstance"), XS__CreateInstance, file);
-		newXS(strcpy(buf, "DestroyInstance"), XS__DestroyInstance, file);
-		newXS(strcpy(buf, "GetInstanceID"), XS__GetInstanceID, file);
-		newXS(strcpy(buf, "AssignToInstance"), XS__AssignToInstance, file);
-		newXS(strcpy(buf, "AssignGroupToInstance"), XS__AssignGroupToInstance, file);
-		newXS(strcpy(buf, "AssignRaidToInstance"), XS__AssignRaidToInstance, file);
-		newXS(strcpy(buf, "MovePCInstance"), XS__MovePCInstance, file);
-		newXS(strcpy(buf, "FlagInstanceByGroupLeader"), XS__FlagInstanceByGroupLeader, file);
-		newXS(strcpy(buf, "FlagInstanceByRaidLeader"), XS__FlagInstanceByRaidLeader, file);
-		newXS(strcpy(buf, "SetRunning"), XS__SetRunning, file);
-		newXS(strcpy(buf, "IsRunning"), XS__IsRunning, file);
-		newXS(strcpy(buf, "IsEffectInSpell"), XS__IsEffectInSpell, file);
-		newXS(strcpy(buf, "IsBeneficialSpell"), XS__IsBeneficialSpell, file);
-		newXS(strcpy(buf, "GetSpellResistType"), XS__GetSpellResistType, file);
-		newXS(strcpy(buf, "GetSpellTargetType"), XS__GetSpellTargetType, file);
-		newXS(strcpy(buf, "FlyMode"), XS__FlyMode, file);
-		newXS(strcpy(buf, "factionvalue"), XS_FactionValue, file);
-		newXS(strcpy(buf, "checktitle"), XS__checktitle, file);
-		newXS(strcpy(buf, "enabletitle"), XS__enabletitle, file);
-		newXS(strcpy(buf, "removetitle"), XS__removetitle, file);
-		newXS(strcpy(buf, "wearchange"), XS__wearchange, file);
-		newXS(strcpy(buf, "voicetell"), XS__voicetell, file);
-		newXS(strcpy(buf, "LearnRecipe"), XS__LearnRecipe, file);
-		newXS(strcpy(buf, "SendMail"), XS__SendMail, file);
-		newXS(strcpy(buf, "GetZoneID"), XS__GetZoneID, file);
-		newXS(strcpy(buf, "GetZoneLongName"), XS__GetZoneLongName, file);
-		newXS(strcpy(buf, "GetTimeSeconds"), XS__GetTimeSeconds, file);
+		newXS(strcpy(buf, "createguild"), XS__createguild, file);
+		newXS(strcpy(buf, "crosszonemessageplayerbyname"), XS__crosszonemessageplayerbyname, file);
+		newXS(strcpy(buf, "crosszonesetentityvariablebynpctypeid"), XS__crosszonesetentityvariablebynpctypeid, file);
 		newXS(strcpy(buf, "crosszonesignalclientbycharid"), XS__crosszonesignalclientbycharid, file);
 		newXS(strcpy(buf, "crosszonesignalclientbyname"), XS__crosszonesignalclientbyname, file);
-		newXS(strcpy(buf, "crosszonemessageplayerbyname"), XS__crosszonemessageplayerbyname, file);
-		newXS(strcpy(buf, "enablerecipe"), XS__enablerecipe, file);
-		newXS(strcpy(buf, "disablerecipe"), XS__disablerecipe, file);
-		newXS(strcpy(buf, "clear_npctype_cache"), XS__clear_npctype_cache, file);
-		newXS(strcpy(buf, "qs_send_query"), XS__qs_send_query, file); 
-		newXS(strcpy(buf, "qs_player_event"), XS__qs_player_event, file); 
-		newXS(strcpy(buf, "crosszonesetentityvariablebynpctypeid"), XS__crosszonesetentityvariablebynpctypeid, file);
 		newXS(strcpy(buf, "crosszonesignalnpcbynpctypeid"), XS__crosszonesignalnpcbynpctypeid, file);
+		newXS(strcpy(buf, "debug"), XS__debug, file);
+		newXS(strcpy(buf, "delglobal"), XS__delglobal, file);
+		newXS(strcpy(buf, "depop"), XS__depop, file);
+		newXS(strcpy(buf, "depop_withtimer"), XS__depop_withtimer, file);
+		newXS(strcpy(buf, "depopall"), XS__depopall, file);
+		newXS(strcpy(buf, "depopzone"), XS__depopzone, file);
+		newXS(strcpy(buf, "ding"), XS__ding, file);
+		newXS(strcpy(buf, "disable_proximity_say"), XS__disable_proximity_say, file);
+		newXS(strcpy(buf, "disable_spawn2"), XS__disable_spawn2, file);
+		newXS(strcpy(buf, "disablerecipe"), XS__disablerecipe, file);
+		newXS(strcpy(buf, "disabletask"), XS__disabletask, file);
+		newXS(strcpy(buf, "doanim"), XS__doanim, file);
+		newXS(strcpy(buf, "echo"), XS__echo, file);
+		newXS(strcpy(buf, "emote"), XS__emote, file);
+		newXS(strcpy(buf, "enable_proximity_say"), XS__enable_proximity_say, file);
+		newXS(strcpy(buf, "enable_spawn2"), XS__enable_spawn2, file);
+		newXS(strcpy(buf, "enabledtaskcount"), XS__enabledtaskcount, file);
+		newXS(strcpy(buf, "enablerecipe"), XS__enablerecipe, file);
+		newXS(strcpy(buf, "enabletask"), XS__enabletask, file);
+		newXS(strcpy(buf, "enabletitle"), XS__enabletitle, file);
+		newXS(strcpy(buf, "exp"), XS__exp, file);
+		newXS(strcpy(buf, "faction"), XS__faction, file);
+		newXS(strcpy(buf, "factionvalue"), XS_FactionValue, file);
+		newXS(strcpy(buf, "failtask"), XS__failtask, file);
+		newXS(strcpy(buf, "firsttaskinset"), XS__firsttaskinset, file);
+		newXS(strcpy(buf, "follow"), XS__follow, file);
+		newXS(strcpy(buf, "forcedoorclose"), XS__forcedoorclose, file);
+		newXS(strcpy(buf, "forcedooropen"), XS__forcedooropen, file);
+		newXS(strcpy(buf, "getItemName"), XS_qc_getItemName, file);
+		newXS(strcpy(buf, "get_spawn_condition"), XS__get_spawn_condition, file);
+		newXS(strcpy(buf, "getguildnamebyid"), XS__getguildnamebyid, file);
+		newXS(strcpy(buf, "getlevel"), XS__getlevel, file);
+		newXS(strcpy(buf, "getplayerburriedcorpsecount"), XS__getplayerburriedcorpsecount, file);
+		newXS(strcpy(buf, "gettaskactivitydonecount"), XS__gettaskactivitydonecount, file);
+		newXS(strcpy(buf, "givecash"), XS__givecash, file);
+		newXS(strcpy(buf, "gmmove"), XS__gmmove, file);
+		newXS(strcpy(buf, "gmsay"), XS__gmsay, file);
+		newXS(strcpy(buf, "has_zone_flag"), XS__has_zone_flag, file);
+		newXS(strcpy(buf, "incstat"), XS__incstat, file);
+		newXS(strcpy(buf, "isdisctome"), XS__isdisctome, file);
+		newXS(strcpy(buf, "isdooropen"), XS__isdooropen, file);
+		newXS(strcpy(buf, "istaskactive"), XS__istaskactive, file);
+		newXS(strcpy(buf, "istaskactivityactive"), XS__istaskactivityactive, file);
+		newXS(strcpy(buf, "istaskappropriate"), XS__istaskappropriate, file);
+		newXS(strcpy(buf, "istaskcompleted"), XS__istaskcompleted, file);
+		newXS(strcpy(buf, "istaskenabled"), XS__istaskenabled, file);
+		newXS(strcpy(buf, "itemlink"), XS__itemlink, file);
+		newXS(strcpy(buf, "lasttaskinset"), XS__lasttaskinset, file);
+		newXS(strcpy(buf, "level"), XS__level, file);
+		newXS(strcpy(buf, "me"), XS__me, file);
+		newXS(strcpy(buf, "modifynpcstat"), XS__ModifyNPCStat, file);
+		newXS(strcpy(buf, "movegrp"), XS__movegrp, file);
+		newXS(strcpy(buf, "movepc"), XS__movepc, file);
+		newXS(strcpy(buf, "moveto"), XS__moveto, file);
+		newXS(strcpy(buf, "nexttaskinset"), XS__nexttaskinset, file);
+		newXS(strcpy(buf, "npcfeature"), XS__npcfeature, file);
+		newXS(strcpy(buf, "npcgender"), XS__npcgender, file);
+		newXS(strcpy(buf, "npcrace"), XS__npcrace, file);
+		newXS(strcpy(buf, "npcsize"), XS__npcsize, file);
+		newXS(strcpy(buf, "npctexture"), XS__npctexture, file);
+		newXS(strcpy(buf, "pause"), XS__pause, file);
+		newXS(strcpy(buf, "permaclass"), XS__permaclass, file);
+		newXS(strcpy(buf, "permagender"), XS__permagender, file);
+		newXS(strcpy(buf, "permarace"), XS__permarace, file);
+		newXS(strcpy(buf, "playerfeature"), XS__playerfeature, file);
+		newXS(strcpy(buf, "playergender"), XS__playergender, file);
+		newXS(strcpy(buf, "playerrace"), XS__playerrace, file);
+		newXS(strcpy(buf, "playersize"), XS__playersize, file);
+		newXS(strcpy(buf, "playertexture"), XS__playertexture, file);
+		newXS(strcpy(buf, "popup"), XS__popup, file);
+		newXS(strcpy(buf, "pvp"), XS__pvp, file);
+		newXS(strcpy(buf, "qs_player_event"), XS__qs_player_event, file); 
+		newXS(strcpy(buf, "qs_send_query"), XS__qs_send_query, file); 
+		newXS(strcpy(buf, "rain"), XS__rain, file);
+		newXS(strcpy(buf, "rebind"), XS__rebind, file);
+		newXS(strcpy(buf, "removetitle"), XS__removetitle, file);
+		newXS(strcpy(buf, "repopzone"), XS__repopzone, file);
+		newXS(strcpy(buf, "resettaskactivity"), XS__resettaskactivity, file);
+		newXS(strcpy(buf, "respawn"), XS__respawn, file);
+		newXS(strcpy(buf, "resume"), XS__resume, file);
+		newXS(strcpy(buf, "safemove"), XS__safemove, file);
+		newXS(strcpy(buf, "save"), XS__save, file);
+		newXS(strcpy(buf, "say"), XS__say, file);
+		newXS(strcpy(buf, "saylink"), XS__saylink, file);
+		newXS(strcpy(buf, "scribespells"), XS__scribespells, file);
+		newXS(strcpy(buf, "selfcast"), XS__selfcast, file);
+		newXS(strcpy(buf, "set_proximity"), XS__set_proximity, file);
+		newXS(strcpy(buf, "set_zone_flag"), XS__set_zone_flag, file);
+		newXS(strcpy(buf, "setallskill"), XS__setallskill, file);
+		newXS(strcpy(buf, "setanim"), XS__setanim, file);
+		newXS(strcpy(buf, "setglobal"), XS__setglobal, file);
+		newXS(strcpy(buf, "setguild"), XS__setguild, file);
+		newXS(strcpy(buf, "sethp"), XS__sethp, file);
+		newXS(strcpy(buf, "setlanguage"), XS__setlanguage, file);
+		newXS(strcpy(buf, "setnexthpevent"), XS__setnexthpevent, file);
+		newXS(strcpy(buf, "setnextinchpevent"), XS__setnextinchpevent, file);
+		newXS(strcpy(buf, "setskill"), XS__setskill, file);
+		newXS(strcpy(buf, "setsky"), XS__setsky, file);
+		newXS(strcpy(buf, "setstat"), XS__setstat, file);
+		newXS(strcpy(buf, "settarget"), XS__settarget, file);
+		newXS(strcpy(buf, "settime"), XS__settime, file);
+		newXS(strcpy(buf, "settimer"), XS__settimer, file);
+		newXS(strcpy(buf, "settimerMS"), XS__settimerMS, file);
+		newXS(strcpy(buf, "sfollow"), XS__sfollow, file);
+		newXS(strcpy(buf, "shout"), XS__shout, file);
+		newXS(strcpy(buf, "shout2"), XS__shout2, file);
+		newXS(strcpy(buf, "showgrid"), XS__showgrid, file);
+		newXS(strcpy(buf, "signal"), XS__signal, file);
+		newXS(strcpy(buf, "signalwith"), XS__signalwith, file);
+		newXS(strcpy(buf, "snow"), XS__snow, file);
+		newXS(strcpy(buf, "spawn"), XS__spawn, file);
+		newXS(strcpy(buf, "spawn2"), XS__spawn2, file);
+		newXS(strcpy(buf, "spawn_condition"), XS__spawn_condition, file);
+		newXS(strcpy(buf, "spawn_from_spawn2"), XS__spawn_from_spawn2, file);
+		newXS(strcpy(buf, "start"), XS__start, file);
+		newXS(strcpy(buf, "stop"), XS__stop, file);
+		newXS(strcpy(buf, "stopalltimers"), XS__stopalltimers, file);
+		newXS(strcpy(buf, "stoptimer"), XS__stoptimer, file);
+		newXS(strcpy(buf, "summonallplayercorpses"), XS__summonallplayercorpses, file);
+		newXS(strcpy(buf, "summonburriedplayercorpse"), XS__summonburriedplayercorpse, file);
+		newXS(strcpy(buf, "summonitem"), XS__summonitem, file);
+		newXS(strcpy(buf, "surname"), XS__surname, file);
+		newXS(strcpy(buf, "targlobal"), XS__targlobal, file);
+		newXS(strcpy(buf, "taskexploredarea"), XS__taskexploredarea, file);
+		newXS(strcpy(buf, "taskselector"), XS__taskselector, file);
+		newXS(strcpy(buf, "tasksetselector"), XS__tasksetselector, file);
+		newXS(strcpy(buf, "tasktimeleft"), XS__tasktimeleft, file);
+		newXS(strcpy(buf, "toggle_spawn_event"), XS__toggle_spawn_event, file);
+		newXS(strcpy(buf, "toggledoorstate"), XS__toggledoorstate, file);
+		newXS(strcpy(buf, "traindisc"), XS__traindisc, file);
+		newXS(strcpy(buf, "traindiscs"), XS__traindiscs, file);
+		newXS(strcpy(buf, "unique_spawn"), XS__unique_spawn, file);
+		newXS(strcpy(buf, "unscribespells"), XS__unscribespells, file);
+		newXS(strcpy(buf, "untraindiscs"), XS__untraindiscs, file);
+		newXS(strcpy(buf, "updatespawntimer"), XS__UpdateSpawnTimer, file);
+		newXS(strcpy(buf, "updatetaskactivity"), XS__updatetaskactivity, file);
+		newXS(strcpy(buf, "varlink"), XS__varlink, file);
+		newXS(strcpy(buf, "voicetell"), XS__voicetell, file);
+		newXS(strcpy(buf, "we"), XS__we, file);
+		newXS(strcpy(buf, "wearchange"), XS__wearchange, file);
+		newXS(strcpy(buf, "write"), XS__write, file);
+		newXS(strcpy(buf, "ze"), XS__ze, file);
+		newXS(strcpy(buf, "zone"), XS__zone, file);
+
 		XSRETURN_YES;
 }
 

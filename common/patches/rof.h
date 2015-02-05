@@ -1,5 +1,5 @@
-#ifndef RoF_H_
-#define RoF_H_
+#ifndef ROF_H_
+#define ROF_H_
 
 #include "../struct_strategy.h"
 
@@ -23,7 +23,7 @@ namespace RoF {
 	protected:
 
 		virtual std::string Describe() const;
-		virtual const EQClientVersion ClientVersion() const;
+		virtual const ClientVersion GetClientVersion() const;
 
 		//magic macro to declare our opcode processors
 		#include "ss_declare.h"
@@ -32,6 +32,4 @@ namespace RoF {
 
 };
 
-
-
-#endif /*RoF_H_*/
+#endif /*ROF_H_*/

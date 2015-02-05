@@ -1,13 +1,12 @@
 #ifndef PATHING_H
 #define PATHING_H
-#include <algorithm>
+
 #include "map.h"
-#include "../common/timer.h"
-#include <list>
-#include <vector>
-#include <algorithm>
+
+#include <deque>
 
 class Client;
+class Mob;
 
 #define PATHNODENEIGHBOURS 50
 
@@ -31,7 +30,7 @@ struct NeighbourNode {
 
 struct PathNode {
 	uint16 id;
-	Map::Vertex v;
+	glm::vec3 v;
 	float bestz;
 	NeighbourNode Neighbours[PATHNODENEIGHBOURS];
 };
@@ -61,17 +60,17 @@ public:
 	static PathManager *LoadPathFile(const char *ZoneName);
 	bool loadPaths(FILE *fp);
 	void PrintPathing();
-	std::list<int> FindRoute(Map::Vertex Start, Map::Vertex End);
-	std::list<int> FindRoute(int startID, int endID);
+	std::deque<int> FindRoute(glm::vec3 Start, glm::vec3 End);
+	std::deque<int> FindRoute(int startID, int endID);
 
-	Map::Vertex GetPathNodeCoordinates(int NodeNumber, bool BestZ = true);
-	bool CheckLosFN(Map::Vertex a, Map::Vertex b);
+	glm::vec3 GetPathNodeCoordinates(int NodeNumber, bool BestZ = true);
+	bool CheckLosFN(glm::vec3 a, glm::vec3 b);
 	void SpawnPathNodes();
 	void MeshTest();
 	void SimpleMeshTest();
-	int FindNearestPathNode(Map::Vertex Position);
-	bool NoHazards(Map::Vertex From, Map::Vertex To);
-	bool NoHazardsAccurate(Map::Vertex From, Map::Vertex To);
+	int FindNearestPathNode(glm::vec3 Position);
+	bool NoHazards(glm::vec3 From, glm::vec3 To);
+	bool NoHazardsAccurate(glm::vec3 From, glm::vec3 To);
 	void OpenDoors(int Node1, int Node2, Mob* ForWho);
 
 	PathNode* FindPathNodeByCoordinates(float x, float y, float z);

@@ -16,17 +16,16 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/misc_functions.h"
 #include "../common/features.h"
+
 #include "quest_parser_collection.h"
 #include "quest_interface.h"
 #include "zone.h"
 #include "questmgr.h"
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
 
 extern Zone* zone;
 extern void MapOpcodes();
@@ -201,14 +200,17 @@ bool QuestParserCollection::SpellHasQuestSub(uint32 spell_id, QuestEventID evt) 
 }
 
 bool QuestParserCollection::ItemHasQuestSub(ItemInst *itm, QuestEventID evt) {
+	if (itm == nullptr)
+		return false;
+
 	std::string item_script;
 	if(itm->GetItem()->ScriptFileID != 0) {
 		item_script = "script_";
-		item_script += std::to_string(static_cast<long long>(itm->GetItem()->ScriptFileID));
+		item_script += std::to_string(itm->GetItem()->ScriptFileID);
 	} else if(strlen(itm->GetItem()->CharmFile) > 0) {
 		item_script = itm->GetItem()->CharmFile;
 	} else {
-		item_script = std::to_string(static_cast<long long>(itm->GetID()));
+		item_script = std::to_string(itm->GetID());
 	}
 
 	uint32 item_id = itm->GetID();
@@ -351,14 +353,16 @@ int QuestParserCollection::EventPlayerGlobal(QuestEventID evt, Client *client, s
 
 int QuestParserCollection::EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
 									 std::vector<EQEmu::Any> *extra_pointers) {
+	// needs pointer validation check on 'item' argument
+	
 	std::string item_script;
 	if(item->GetItem()->ScriptFileID != 0) {
 		item_script = "script_";
-		item_script += std::to_string(static_cast<long long>(item->GetItem()->ScriptFileID));
+		item_script += std::to_string(item->GetItem()->ScriptFileID);
 	} else if(strlen(item->GetItem()->CharmFile) > 0) {
 		item_script = item->GetItem()->CharmFile;
 	} else {
-		item_script = std::to_string(static_cast<long long>(item->GetID()));
+		item_script = std::to_string(item->GetID());
 	}
 
 	uint32 item_id = item->GetID();

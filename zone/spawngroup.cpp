@@ -15,18 +15,18 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
-#include "spawngroup.h"
-#include "entity.h"
-#include <string.h>
-#include <stdlib.h>
-#include <iostream>
-#include "../common/types.h"
-#include "zonedb.h"
-#include "../common/misc_functions.h"
+
+#include "../common/global_define.h"
 #include "../common/string_util.h"
+#include "../common/types.h"
+
+#include "entity.h"
+#include "spawngroup.h"
+#include "zone.h"
+#include "zonedb.h"
 
 extern EntityList entity_list;
+extern Zone* zone;
 
 SpawnEntry::SpawnEntry( uint32 in_NPCType, int in_chance, uint8 in_npc_spawn_limit ) {
 	NPCType = in_NPCType;
@@ -51,7 +51,7 @@ SpawnGroup::SpawnGroup( uint32 in_id, char* name, int in_group_spawn_limit, floa
 
 uint32 SpawnGroup::GetNPCType() {
 #if EQDEBUG >= 10
-	LogFile->write(EQEMuLog::Debug, "SpawnGroup[%08x]::GetNPCType()", (uint32) this);
+	Log.Out(Logs::General, Logs::None, "SpawnGroup[%08x]::GetNPCType()", (uint32) this);
 #endif
 	int npcType = 0;
 	int totalchance = 0;
@@ -77,7 +77,7 @@ uint32 SpawnGroup::GetNPCType() {
 
 
 	int32 roll = 0;
-	roll = MakeRandomInt(0, totalchance-1);
+	roll = zone->random.Int(0, totalchance-1);
 
 	cur = possible.begin();
 	end = possible.end();
@@ -149,7 +149,6 @@ bool ZoneDatabase::LoadSpawnGroups(const char* zone_name, uint16 version, SpawnG
                                     "AND spawn2.version = %u and zone = '%s'", version, zone_name);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        _log(ZONE__SPAWNS, "Error2 in PopulateZoneLists query '%s' ", query.c_str());
 		return false;
     }
 
@@ -168,7 +167,7 @@ bool ZoneDatabase::LoadSpawnGroups(const char* zone_name, uint16 version, SpawnG
                         "AND zone = '%s'", zone_name);
     results = QueryDatabase(query);
     if (!results.Success()) {
-        _log(ZONE__SPAWNS, "Error2 in PopulateZoneLists query '%'", query.c_str());
+        Log.Out(Logs::General, Logs::Error, "Error2 in PopulateZoneLists query '%'", query.c_str());
 		return false;
     }
 
@@ -177,7 +176,6 @@ bool ZoneDatabase::LoadSpawnGroups(const char* zone_name, uint16 version, SpawnG
 		SpawnGroup *sg = spawn_group_list->GetSpawnGroup(atoi(row[0]));
 
 		if (!sg) {
-            _log(ZONE__SPAWNS, "Error in LoadSpawnGroups %s ", query.c_str());
             continue;
 		}
 
@@ -197,7 +195,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList* spawn_g
                                     "FROM spawngroup WHERE spawngroup.ID = '%i'", spawngroupid);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        _log(ZONE__SPAWNS, "Error2 in PopulateZoneLists query %s", query.c_str());
+        Log.Out(Logs::General, Logs::Error, "Error2 in PopulateZoneLists query %s", query.c_str());
 		return false;
     }
 
@@ -212,7 +210,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList* spawn_g
                         "ORDER BY chance", spawngroupid);
     results = QueryDatabase(query);
 	if (!results.Success()) {
-        _log(ZONE__SPAWNS, "Error3 in PopulateZoneLists query '%s'", query.c_str());
+        Log.Out(Logs::General, Logs::Error, "Error3 in PopulateZoneLists query '%s'", query.c_str());
 		return false;
 	}
 
@@ -220,7 +218,6 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList* spawn_g
         SpawnEntry* newSpawnEntry = new SpawnEntry( atoi(row[1]), atoi(row[2]), row[3]?atoi(row[3]):0);
         SpawnGroup *sg = spawn_group_list->GetSpawnGroup(atoi(row[0]));
         if (!sg) {
-            _log(ZONE__SPAWNS, "Error in SpawngroupID: %s ", row[0]);
             continue;
         }
 

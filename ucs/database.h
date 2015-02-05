@@ -23,7 +23,7 @@
 #define AUTHENTICATION_TIMEOUT	60
 #define INVALID_ID				0xFFFFFFFF
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/types.h"
 #include "../common/dbcore.h"
 #include "../common/linked_list.h"
@@ -57,7 +57,8 @@ public:
 	void ExpireMail();
 	void AddFriendOrIgnore(int CharID, int Type, std::string Name);
 	void RemoveFriendOrIgnore(int CharID, int Type, std::string Name);
-	void GetFriendsAndIgnore(int CharID, std::vector<std::string> &Friends, std::vector<std::string> &Ignorees);
+	void GetFriendsAndIgnore(int CharID, std::vector<std::string> &Friends, std::vector<std::string> &Ignorees); 
+	void LoadLogSettings(EQEmuLogSys::LogSettings* log_settings);
 
 
 protected:

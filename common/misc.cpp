@@ -2,20 +2,21 @@
 	// VS6 doesn't like the length of STL generated names: disabling
 	#pragma warning(disable:4786)
 #endif
-#include "debug.h"
+#include "global_define.h"
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
 #include <map>
 #include <iostream>
 #include <zlib.h>
+
 #ifndef WIN32
 #include <sys/time.h>
 #endif
+
 #include <time.h>
 #include "misc.h"
 #include "types.h"
-#include <cstdlib>
 #include <cstring>
 
 #define ENC(c) (((c) & 0x3f) + ' ')

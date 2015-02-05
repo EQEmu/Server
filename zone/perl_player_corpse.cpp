@@ -27,7 +27,7 @@
 
 #include "../common/features.h"
 #ifdef EMBPERL_XS_CLASSES
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "embperl.h"
 
 #ifdef seed
@@ -208,7 +208,7 @@ XS(XS_Corpse_GetDBID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetDBID();
+		RETVAL = THIS->GetCorpseDBID();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -662,7 +662,7 @@ XS(XS_Corpse_CompleteRezz)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->CompleteRezz();
+		THIS->CompleteResurrection();
 	}
 	XSRETURN_EMPTY;
 }
@@ -687,7 +687,7 @@ XS(XS_Corpse_CanMobLoot)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->CanMobLoot(charid);
+		RETVAL = THIS->CanPlayerLoot(charid);
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -723,7 +723,7 @@ XS(XS_Corpse_AllowMobLoot)
 		if(them == nullptr)
 			Perl_croak(aTHX_ "them is nullptr, avoiding crash.");
 
-		THIS->AllowMobLoot(them, slot);
+		THIS->AllowPlayerLoot(them, slot);
 	}
 	XSRETURN_EMPTY;
 }
@@ -780,7 +780,7 @@ XS(XS_Corpse_IsRezzed)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->Rezzed();
+		RETVAL = THIS->IsRezzed();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}

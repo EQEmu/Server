@@ -1,5 +1,5 @@
-#ifndef SoF_H_
-#define SoF_H_
+#ifndef SOF_H_
+#define SOF_H_
 
 #include "../struct_strategy.h"
 
@@ -23,7 +23,7 @@ namespace SoF {
 	protected:
 
 		virtual std::string Describe() const;
-		virtual const EQClientVersion ClientVersion() const;
+		virtual const ClientVersion GetClientVersion() const;
 
 		//magic macro to declare our opcode processors
 		#include "ss_declare.h"
@@ -32,6 +32,4 @@ namespace SoF {
 
 };
 
-
-
-#endif /*SoF_H_*/
+#endif /*SOF_H_*/

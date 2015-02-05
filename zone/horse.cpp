@@ -16,20 +16,21 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "../common/debug.h"
-#include "masterentity.h"
-#include "../common/item.h"
+#include "../common/global_define.h"
+#include "../common/eqemu_logsys.h"
 #include "../common/linked_list.h"
 #include "../common/string_util.h"
-#include <math.h>
-#include <assert.h>
-#include "worldserver.h"
+
+#include "client.h"
+#include "entity.h"
+#include "horse.h"
+#include "mob.h"
 
 std::map<uint16, const NPCType *> Horse::horse_types;
 LinkedList<NPCType *> horses_auto_delete;
 
-Horse::Horse(Client *_owner, uint16 spell_id, float x, float y, float z, float heading)
- : NPC(GetHorseType(spell_id), nullptr, x, y, z, heading, FlyMode3)
+Horse::Horse(Client *_owner, uint16 spell_id, const glm::vec4& position)
+ : NPC(GetHorseType(spell_id), nullptr, position, FlyMode3)
 {
 	//give the horse its proper name.
 	strn0cpy(name, _owner->GetCleanName(), 55);
@@ -72,12 +73,11 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id) {
 	std::string query = StringFormat("SELECT race, gender, texture, mountspeed FROM horses WHERE filename = '%s'", fileName);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in Mount query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return nullptr;
 	}
 
 	if (results.RowCount() != 1) {
-        LogFile->write(EQEMuLog::Error, "No Database entry for mount: %s, check the horses table", fileName);
+        Log.Out(Logs::General, Logs::Error, "No Database entry for mount: %s, check the horses table", fileName);
         return nullptr;
 	}
 
@@ -120,13 +120,13 @@ void Client::SummonHorse(uint16 spell_id) {
 		return;
 	}
 	if(!Horse::IsHorseSpell(spell_id)) {
-		LogFile->write(EQEMuLog::Error, "%s tried to summon an unknown horse, spell id %d", GetName(), spell_id);
+		Log.Out(Logs::General, Logs::Error, "%s tried to summon an unknown horse, spell id %d", GetName(), spell_id);
 		return;
 	}
 
 	// No Horse, lets get them one.
 
-	Horse* horse = new Horse(this, spell_id, GetX(), GetY(), GetZ(), GetHeading());
+	Horse* horse = new Horse(this, spell_id, GetPosition());
 
 	//we want to manage the spawn packet ourself.
 	//another reason is we dont want quests executing on it.

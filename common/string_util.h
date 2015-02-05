@@ -17,42 +17,40 @@
 #define _STRINGUTIL_H_
 
 #include <sstream>
+#include <string.h>
 #include <vector>
 #include <cstdarg>
-#include <string.h>
+
 #include "types.h"
 
-
-const std::string vStringFormat(const char* format, va_list args);
-const std::string StringFormat(const char* format, ...);
-std::string EscapeString(const std::string &s);
-std::string EscapeString(const char *src, size_t sz);
-
-const char *MakeLowerString(const char *source);
-
-void MakeLowerString(const char *source, char *target);
-
-int MakeAnyLenString(char** ret, const char* format, ...);
-uint32 AppendAnyLenString(char** ret, uint32* bufsize, uint32* strlen, const char* format, ...);
-
-uint32 hextoi(const char* num);
-uint64 hextoi64(const char* num);
 bool atobool(const char* iBool);
-
-char* strn0cpy(char* dest, const char* source, uint32 size);
-		// return value =true if entire string(source) fit, false if it was truncated
+bool isAlphaNumeric(const char *text);
 bool strn0cpyt(char* dest, const char* source, uint32 size);
 
 char *CleanMobName(const char *in, char *out);
+char *RemoveApostrophes(const char *s);
+char* strn0cpy(char* dest, const char* source, uint32 size);
 
 const char *ConvertArray(int input, char *returnchar);
 const char *ConvertArrayF(float input, char *returnchar);
+const char *MakeLowerString(const char *source);
+const std::string StringFormat(const char* format, ...);
+const std::string vStringFormat(const char* format, va_list args);
 
-void RemoveApostrophes(std::string &s);
-char *RemoveApostrophes(const char *s);
+int MakeAnyLenString(char** ret, const char* format, ...);
+
+std::string EscapeString(const char *src, size_t sz);
+std::string EscapeString(const std::string &s);
 
 std::vector<std::string> SplitString(const std::string &s, char delim);
 
-bool isAlphaNumeric(const char *text);
+uint32 AppendAnyLenString(char** ret, uint32* bufsize, uint32* strlen, const char* format, ...);
+uint32 hextoi(const char* num);
+
+uint64 hextoi64(const char* num);
+
+void MakeLowerString(const char *source, char *target);
+void RemoveApostrophes(std::string &s);
+void find_replace(std::string& string_subject, const std::string& search_string, const std::string& replace_string);
 
 #endif

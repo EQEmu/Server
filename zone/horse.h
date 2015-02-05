@@ -18,14 +18,18 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #ifndef HORSES_H
 #define HORSES_H
 
-#include "../common/debug.h"
 #include "npc.h"
 
 #include <map>
 
+class Client;
+class Mob;
+struct NPCType;
+struct NewSpawn_Struct;
+
 class Horse : public NPC {
 public:
-	Horse(Client *owner, uint16 spell_id, float x, float y, float z, float heading);
+	Horse(Client *owner, uint16 spell_id, const glm::vec4& position);
 
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 

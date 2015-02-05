@@ -19,7 +19,7 @@
 #include "../common/features.h"
 #include "client.h"
 #ifdef EMBPERL_XS_CLASSES
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "embperl.h"
 
 #ifdef seed
@@ -160,7 +160,7 @@ XS(XS_QuestItem_IsAttuned)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->IsInstNoDrop();
+		RETVAL = THIS->IsAttuned();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}

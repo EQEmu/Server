@@ -19,7 +19,7 @@
 #include "../common/features.h"
 #include "client.h"
 #ifdef EMBPERL_XS_CLASSES
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "embperl.h"
 
 #ifdef seed
@@ -40,19 +40,19 @@ XS(XS_HateEntry_GetEnt)
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: HateEntry::GetData(THIS)");
 	{
-		tHateEntry * THIS;
+		struct_HateList * THIS;
 		Mob * RETVAL;
 
 		if (sv_derived_from(ST(0), "HateEntry")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(tHateEntry *,tmp);
+			THIS = INT2PTR(struct_HateList *,tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type tHateEntry");
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->ent;
+		RETVAL = THIS->entity_on_hatelist;
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void*)RETVAL);
 	}
@@ -66,20 +66,20 @@ XS(XS_HateEntry_GetHate)
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: HateEntry::GetHate(THIS)");
 	{
-		tHateEntry * THIS;
+		struct_HateList * THIS;
 		int32 RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "HateEntry")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(tHateEntry *,tmp);
+			THIS = INT2PTR(struct_HateList *,tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type tHateEntry");
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->hate;
+		RETVAL = THIS->stored_hate_amount;
 		XSprePUSH; PUSHi((IV)RETVAL);
 	}
 	XSRETURN(1);
@@ -92,20 +92,20 @@ XS(XS_HateEntry_GetDamage)
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: HateEntry::GetDamage(THIS)");
 	{
-		tHateEntry * THIS;
+		struct_HateList * THIS;
 		int32 RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "HateEntry")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(tHateEntry *,tmp);
+			THIS = INT2PTR(struct_HateList *,tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type tHateEntry");
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->damage;
+		RETVAL = THIS->hatelist_damage;
 		XSprePUSH; PUSHi((IV)RETVAL);
 	}
 	XSRETURN(1);

@@ -18,7 +18,7 @@
 #ifndef EQEMU_CLIENTMANAGER_H
 #define EQEMU_CLIENTMANAGER_H
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/opcodemgr.h"
 #include "../common/eq_stream_type.h"
 #include "../common/eq_stream_factory.h"

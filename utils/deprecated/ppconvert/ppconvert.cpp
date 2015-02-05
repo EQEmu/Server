@@ -119,8 +119,6 @@ int main() {
 		snprintf(bptr, 128, "' WHERE id=%lu", id);
 		
 //		printf("Query: '%s'\n", outbuffer);
-//printf(outbuffer);
-//printf(";\n");
 /*		if(mysql_query(&out, outbuffer) != 0) {
 			failed_count++;
 			printf(" Error updating char id %lu: %s\n", id, mysql_error(&m));

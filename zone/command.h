@@ -20,9 +20,10 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
-#include "../common/seperator.h"
-#include "../common/eq_stream.h"
-#include "client.h"
+class Client;
+class Seperator;
+
+#include "../common/types.h"
 
 #define	COMMAND_CHAR	'#'
 #define CMDALIASES	5
@@ -75,6 +76,7 @@ void command_serversidename(Client *c, const Seperator *sep);
 void command_testspawnkill(Client *c, const Seperator *sep);
 void command_testspawn(Client *c, const Seperator *sep);
 void command_wc(Client *c, const Seperator *sep);
+void command_heromodel(Client *c, const Seperator *sep);
 void command_numauths(Client *c, const Seperator *sep);
 void command_setanim(Client *c, const Seperator *sep);
 void command_connectworldserver(Client *c, const Seperator *sep);
@@ -85,7 +87,6 @@ void command_chat(Client *c, const Seperator *sep);
 void command_showpetspell(Client *c, const Seperator *sep);
 void command_ipc(Client *c, const Seperator *sep);
 void command_npcloot(Client *c, const Seperator *sep);
-void command_log(Client *c, const Seperator *sep);
 void command_gm(Client *c, const Seperator *sep);
 void command_summon(Client *c, const Seperator *sep);
 void command_zone(Client *c, const Seperator *sep);
@@ -152,6 +153,7 @@ void command_heal(Client *c, const Seperator *sep);
 void command_appearance(Client *c, const Seperator *sep);
 void command_nukeitem(Client *c, const Seperator *sep);
 void command_peekinv(Client *c, const Seperator *sep);
+void command_interrogateinv(Client *c, const Seperator *sep);
 void command_findnpctype(Client *c, const Seperator *sep);
 void command_findzone(Client *c, const Seperator *sep);
 void command_viewnpctype(Client *c, const Seperator *sep);
@@ -256,9 +258,6 @@ void command_undye(Client *c, const Seperator *sep);
 void command_undyeme(Client *c, const Seperator *sep);
 void command_hp(Client *c, const Seperator *sep);
 void command_ginfo(Client *c, const Seperator *sep);
-void command_logs(Client *c, const Seperator *sep);
-void command_nologs(Client *c, const Seperator *sep);
-void command_logsql(Client *c, const Seperator *sep);
 void command_qglobal(Client *c, const Seperator *sep);
 void command_path(Client *c, const Seperator *sep);
 void command_ginfo(Client *c, const Seperator *sep);
@@ -269,7 +268,6 @@ void command_aggrozone(Client *c, const Seperator *sep);
 void command_reloadstatic(Client *c, const Seperator *sep);
 void command_flags(Client *c, const Seperator *sep);
 void command_flagedit(Client *c, const Seperator *sep);
-void command_mlog(Client *c, const Seperator *sep);
 void command_serverrules(Client *c, const Seperator *sep);
 void command_acceptrules(Client *c, const Seperator *sep);
 void command_guildcreate(Client *c, const Seperator *sep);
@@ -323,7 +321,11 @@ void command_npctype_cache(Client *c, const Seperator *sep);
 void command_merchantopenshop(Client *c, const Seperator *sep);
 void command_merchantcloseshop(Client *c, const Seperator *sep);
 void command_shownumhits(Client *c, const Seperator *sep);
-
+void command_tune(Client *c, const Seperator *sep);
+void command_logtest(Client *c, const Seperator *sep);
+void command_mysqltest(Client *c, const Seperator *sep);
+void command_logs(Client *c, const Seperator *sep);
+ 
 #ifdef EQPROFILE
 void command_profiledump(Client *c, const Seperator *sep);
 void command_profilereset(Client *c, const Seperator *sep);

@@ -13,7 +13,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 		return false;
 
 	if (iChance < 100) {
-		if (MakeRandomInt(0, 100) > iChance){
+		if (zone->random.Int(0, 100) > iChance){
 			return false;
 		}
 	}
@@ -485,7 +485,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 						if(botClass == PALADIN)
 							stunChance = 50;
 
-						if(!tar->GetSpecialAbility(UNSTUNABLE) && !tar->IsStunned() && (MakeRandomInt(1, 100) <= stunChance)) {
+						if(!tar->GetSpecialAbility(UNSTUNABLE) && !tar->IsStunned() && (zone->random.Int(1, 100) <= stunChance)) {
 							botSpell = GetBestBotSpellForStunByTargetType(this, ST_Target);
 						}
 					}
@@ -898,7 +898,7 @@ bool Bot::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 	if (AIspells[i].type & SpellType_Escape) {
 		dist2 = 0;
 	} else
-		dist2 = DistNoRoot(*tar);
+		dist2 = DistanceSquared(m_Position, tar->GetPosition());
 
 	if (((((spells[AIspells[i].spellid].targettype==ST_GroupTeleport && AIspells[i].type==2)
 				|| spells[AIspells[i].spellid].targettype==ST_AECaster
@@ -950,7 +950,7 @@ bool Bot::AI_PursueCastCheck() {
 
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
-		mlog(AI__SPELLS, "Bot Engaged (pursuing) autocast check triggered. Trying to cast offensive spells.");
+		Log.Out(Logs::Detail, Logs::AI, "Bot Engaged (pursuing) autocast check triggered. Trying to cast offensive spells.");
 
 		if(!AICastSpell(GetTarget(), 100, SpellType_Snare)) {
 			if(!AICastSpell(GetTarget(), 100, SpellType_Lifetap)) {
@@ -1055,7 +1055,7 @@ bool Bot::AI_EngagedCastCheck() {
 		BotStanceType botStance = GetBotStance();
 		bool mayGetAggro = HasOrMayGetAggro();
 
-		mlog(AI__SPELLS, "Engaged autocast check triggered (BOTS). Trying to cast healing spells then maybe offensive spells.");
+		Log.Out(Logs::Detail, Logs::AI, "Engaged autocast check triggered (BOTS). Trying to cast healing spells then maybe offensive spells.");
 
 		if(botClass == CLERIC) {
 			if(!AICastSpell(GetTarget(), GetChanceToCastBySpellType(SpellType_Escape), SpellType_Escape)) {
@@ -1755,7 +1755,7 @@ Mob* Bot::GetFirstIncomingMobToMez(Bot* botCaster, BotSpell botSpell) {
 		for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 			NPC* npc = *itr;
 
-			if(npc->DistNoRootNoZ(*botCaster) <= botCaster->GetActSpellRange(botSpell.SpellId, spells[botSpell.SpellId].range)) {
+			if(DistanceSquaredNoZ(npc->GetPosition(), botCaster->GetPosition()) <= botCaster->GetActSpellRange(botSpell.SpellId, spells[botSpell.SpellId].range)) {
 				if(!npc->IsMezzed()) {
 					if(botCaster->HasGroup()) {
 						Group* g = botCaster->GetGroup();
@@ -1843,7 +1843,7 @@ std::string Bot::GetBotMagicianPetType(Bot* botCaster) {
 				result = std::string("SumEarth");
 			else if(botCaster->GetLevel() < 30) {
 				// Under level 30
-				int counter = MakeRandomInt(0, 3);
+				int counter = zone->random.Int(0, 3);
 
 				switch(counter) {
 					case 0:
@@ -1865,7 +1865,7 @@ std::string Bot::GetBotMagicianPetType(Bot* botCaster) {
 			}
 			else {
 				// Over level 30
-				int counter = MakeRandomInt(0, 4);
+				int counter = zone->random.Int(0, 4);
 
 				switch(counter) {
 					case 0:

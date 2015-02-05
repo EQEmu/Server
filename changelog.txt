@@ -1,5 +1,473 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/03/2015 ==
+Trevius: Crashfix for TempName() when numbers are passed at the end of the name.
+Uleat: Tweaking of item type exclusions to alleviate strobing conditions with light sources
+
+== 02/02/2015 ==
+Akkadius: Implement Packet logs with dumps
+	- Category: 41: Packet: Server -> Client With Dump
+	- Category: 42: Packet: Server -> Client With Dump
+	See: http://wiki.eqemulator.org/p?Logging_System_Overhaul#packet-logging-levels
+
+== 02/01/2015 ==
+demonstar55: Add quest debugging to lua
+	eq.debug("Test debug level implicit 1")
+	eq.debug("Test debug level explicit 1", 1)
+	eq.debug("Test debug level explicit 2", 2)
+	eq.debug("Test debug level explicit 3", 3)
+Akkadius: Add Packet Logging Categories
+	- 5 - Packet: Client -> Server - Logs::Client_Server_Packet
+	- 39 - Packet: Server -> Client - Logs::Server_Client_Packet
+	- 40 - Packet: Client -> Server Unhandled - Logs::Client_Server_Packet_Unhandled
+	See: http://wiki.eqemulator.org/p?Logging_System_Overhaul#packet-logging
+	
+== 01/31/2015 ==
+Trevius: Fixed FindGroundZ() and GetGroundZ() to once again utilize the X and Y arguments that are passed to them.
+
+== 01/30/2015 ==
+Akkadius: Implemented event type "EVENT_ENVIRONMENTAL_DAMAGE"
+	- This event triggers when taking any sort of environmental damage. Example use: 
+	sub EVENT_ENVIRONMENTAL_DAMAGE{
+		quest::debug("EVENT_ENVIRONMENTAL_DAMAGE");
+		quest::debug("env_damage is " . $env_damage);
+		quest::debug("env_damage_type is " . $env_damage_type);
+		quest::debug("env_final_damage is " . $env_final_damage);
+	} 
+	Result: (Test falling in Velks): http://i.imgur.com/tPRL7yL.png
+	- Implemented LUA counterpart of this same implementation above
+Akkadius (Bobaski): Add PoK New Merchant sql/git/optional/2015_01_30_poknowledge_spell_vendors.sql
+
+== 01/29/2015 ==
+Trevius: Added more information to Mercenary Logging.
+Trevius: Added potential fix for Mercenaries that fail to unsuspend.
+Trevius: Added a new "statscale" field to the merc_stats table that can be used to quickly balance Mercenary Stats based on Level.
+Trevius: The new "statscale" field now combines with the Mercs::ScaleRate rule value (default 100 percent for both).
+
+== 01/28/2015 ==
+Akkadius: Added Logs::DebugQuest category per request from Trevius (Great idea)
+	- Exported quest::debug(log_message, [debug_level = 1)
+	- Example:
+		quest::debug("This is a test debug message, level 1 (default)");
+		quest::debug("This is a test debug message, level 1", 1);
+		quest::debug("This is a test debug message, level 2", 2);
+		quest::debug("This is a test debug message, level 3", 3);
+		
+		Result: http://i.imgur.com/6VoafGE.png
+	- Uses traditional logging system to output this category
+	- Required MySQL Source in Database version 9070
+
+== 01/27/2015 ==
+Trevius: Removed "Mercenary Debug:" from the Mercenary Log entries.
+Trevius: Resolved duplicate "You have no Mercenaries" messages when zoning without owning a Mercenary.
+Trevius: Mercenaries should now always be able to unsuspend if the timer is up.
+Trevius: More work on Mercenaries and Grouping to reduce bugs and redundant queries.
+Uleat: Finished ClientVersion update to include patch file and namespace updates - don't forget to copy the renamed 'patch_UF.conf' into your eqemu directory.)
+
+== 01/26/2015 ==
+Uleat: Changed Corpse::MoveItemToCorpse() to allow 'by address' passing of removed item slot list. Fixed a bug that kept soul-bound items inside of bags from attuning properly
+
+== 01/25/2015 ==
+Trevius: Fixed an issue where Mercenaries were causing several DB queries per second while suspended.
+Trevius: Added Logs::Mercenaries to the new Logging System.  Logging of Mercenary information is off by default with the required SQL.
+
+== 01/24/2015 ==
+Uleat: Added equipment light source functionality to all mob derived classes (may still need tweaking...)
+Notes:
+	- In addition to equipment light sources, innate npc_type light sources have already been activated
+	- Valid light source values are 0 thru 15 (values are bitmask checked and limited to 0x0F)
+	- Not all classes handle equipment light sources the same way due to their equipment/loot list configurations
+	- Spell (casting?) light sources may be implemented at some point..more information is needed
+	- Currently, loot list (general inventory) light sources are limited to ItemTypeMisc and ItemTypeLight to avoid issues with worn-specific light sources emitting
+	- Augment light sources are not recognized by the client and, therefore, not implemented in the server code
+
+== 01/22/2015 ==
+Akkadius: Massive Log System overhaul, see: http://wiki.eqemulator.org/p?Logging_System_Overhaul&frm=Main
+	
+== 01/21/2015 ==
+Uleat: Added `light` field to npc_types load query (all six clients tested positive for functionality.)
+Note: This only affects 'innate' light. Equipment (other) light is still in-work.
+Optional SQL: utils/sql/git/optional/2015_01_21_NPC_Types_Light_Field_Primer.sql
+
+== 01/20/2015 ==
+Uleat: Fix for Inventory::_HasItemByUse(bucket) using the parent container when searching for bag container items.
+
+== 01/19/2015 ==
+Uleat: Changed 'enum EQClientVersion' to 'enum class ClientVersion.' Other light modifications were made to accommodate this namespace. Added 'RoF2' to the lua client version enumeration.
+
+== 01/15/2015 ==
+Uleat: Attempted fix for elusive inventory bug:
+  - Removed 'iter_queue' typedef and converted lcast to explicit or auto defines
+  - Reworked several functions that manipulate the cursor queue
+  - Found/corrected one occurrence of post-processing iterator incrementing in an ItemInstQueue handler
+  - Added many scope declarations in code that handles inventory manipulation (loose macros are bad...)
+Uleat: Added Item_Struct pointer checks to ItemInst methods that did not have them
+Uleat: Changed IsEquippable(race,class) to use bit-wise 'and' (&) over '(x%2)==1' in conditional check.
+Uleat: Changed DyeArmor() assignment of 'armor_color' to use bit-wise 'or' and bit-shifting (|,<<) over multiplication and addition (*,+).
+
+== 01/13/2015 ==
+Uleat: Placed an upper limit on the cursor queue save loop.
+Trevius: (RoF2) Guild invites now add new members as members instead of recruits, and /guild chat works properly.
+Trevius: (RoF2) Guild Promote is now functional.
+
+== 01/12/2015 ==
+Uleat: Fix for OP_FormattedMessage text link server crashes
+Uleat: Added text link translators for OP_TaskDescription (RoF+ -- all clients current)
+Uleat: Fix for load_bots.sql using '\\' as a delimiter (Changed to '$$')
+
+== 01/11/2015 ==
+Uleat: Added text link translators for OP_TaskDescription (Ti thru UF..RoF+ in-work)
+
+== 01/10/2015 ==
+Uleat: Added text link translators for OP_Emote
+
+== 01/09/2015 ==
+Uleat: Added text link translators for OP_FormattedMessage
+
+== 01/08/2015 ==
+Trevius: Added some extra checks and clean-up related to Groups and Mercenaries. 
+
+== 01/07/2015 ==
+Uleat: Excluded text link body from message scrambling in Client::GarbleMessage()
+Trevius: Mercenaries now load directly from tables only.  The vwMercNpcTypes view is no longer required and can be deleted.
+Trevius: Query fix for group_leaders table.  This may resolve some crashes/bugs related to Mercs/Bots and Groups.
+
+== 01/06/2015 ==
+Trevius: Changed the pet command #defines to be based on RoF2 list of pet commands and added decodes to Titanium, SoF and SoD.
+Trevius: (RoF+) The /pet focus on/off and /pet hold on/off commands are now functional.
+Trevius: Added defines for all remaining pet commands and some support for them as well.
+
+== 01/05/2015 ==
+Uleat: Fixed (added translators for) item/text links. Only 'OP_ChannelMessage' and 'OP_SpecialMesg' are currently handled..more text channels will be added as the need arises.
+
+== 01/03/2015 ==
+Trevius: (RoF2) /shield (shielding) and /key (key ring) are both now functional after opcode updates.
+
+== 01/02/2015 ==
+Trevius: (RoF2) *Hopefully* Fixed looting incorrect items from NPCs.  Please report any issues!
+Trevius: (RoF2) Now able to loot items past the 10th slot on NPC corpses.
+Trevius: Attuned Items can now be auto-looted and will equip properly.
+Trevius: Mercenaries and Bots will no longer take a share from /split or /autosplit.
+
+== 12/30/2014 ==
+Trevius: (RoF2) Aug Type 21 no longer shows the "Buy Now" button in the aug slot of items.
+Trevius: (RoF2) Identified the "Copied" item flag with the help of Uleat.
+
+== 12/29/2014 ==
+Trevius: (RoF2) Identified a few Item Fields and resolved an issue with cloth armor not accepting certain augments that they should.
+Akkadius: Updated $client->UpdateTaskActivity to have optional argument ignore_quest_update IE: Client::UpdateTaskActivity(THIS, TaskID, ActivityID, Count, [ignore_quest_update])
+Akkadius: Also updated internal UpdateTaskActivity methods to optionally ignore quest based task updates to prevent feedback
+
+== 12/28/2014 ==
+Uleat: Implemented class Client::TextLink as a replacement for the dozens of individual link formatters.
+
+== 12/27/2014 ==
+Akkadius: Add option to automatic database upgrade script 5) Download latest Opcodes from Github
+Trevius: (RoF2) Fixed dropping items on the ground so they go to ground level instead of camera height.
+Trevius: Show Helm Option should be functional again.
+Kayen: Implemened npc special ability (43) CASTING_RESIST_DIFF which sets innate resist modifier on
+ALL spells used by that NPC. Ie. 43,1,-200 will set a -200 innate resist diff, so if your npc cast
+a spell that has a -10 resist modifier the final resist diff would be -210.
+
+== 12/25/2014 ==
+Uleat: Updated 'links' code for all clients
+
+== 12/24/2014 ==
+Trevius: (RoF+) Added herosforgemodel field to the npc_types table.
+Trevius: (RoF2) Updated item links from #npcstat command output.
+Trevius: (RoF+) Implemented Hero's Forge Armor for NPCs.  Set the herosforgemodel field in npc_types table to the model (example: 84 for full set, or 12107 for robe).
+Trevius: (RoF+) Hero's Forge Armor now overrides NPC texture settings.  To display Hero's Forge Armor Helms, set helmtexture field to anything other than 0.
+
+== 12/23/2014 ==
+Uleat: Tidied up some ItemInst* declarations and added some nullptr checks.
+Trevius: (RoF+) Added support for Hero's Forge Robe Models.  Set herosforgemodel field in items table to exact model such as 11607, 11707, etc.
+
+== 12/22/2014 ==
+Trevius: (RoF2) Fixed Tracking.
+Trevius: (RoF+) Added a work-around for the cursor buffer issue.
+
+== 12/21/2014 ==
+Trevius: (RoF2) Fixed Extended Targets Window by correcting opcodes.
+Trevius: (RoF/RoF2) Fixed Guild Rank in the Player Profile, which prevents the guild rank message on login/zone.
+
+== 12/20/2014 ==
+Akkadius: Updated #cvs to display RoF2 Client Stream count
+
+== 12/19/2014 ==
+Trevius: (RoF2) Fixed Leadership AA Purchasing and Recipe Search by correcting opcodes.
+Trevius: Fixed Armor Tinting (players and NPCs) that was broken during a previous update.
+Trevius: (RoF2) Fixed Rest Timer, Show Helm Option, Auto-Consent Options, and identified Krono in the PP.
+Trevius: Fixed Selling for Alternate Currency Merchants for RoF and RoF2.
+
+== 12/18/2014 ==
+Trevius: Finished lining up the RoF2 Player Profile Struct.  Zone times are now normal, and everything from the PP is accurate in game now.
+Trevius: Fixed zoning after death for RoF2.
+
+== 12/17/2014 ==
+demonstar55: Use vectors for route stuff, should be more CPU cache friendly so faster
+Secrets: EQStream changes as recommended by a community member in private.
+
+== 12/15/2014 ==
+Trevius: (RoF+) Implemented the 6th Augment Slot for Items.
+Trevius: Player Corpses now saved attuned settings for Items.
+
+Required SQL: utils/sql/git/required/2014_12_15_multiple_table_updates.sql
+
+== 12/13/2014 ==
+demonstar55: Fix guild rank spam on zone (needed to be in OP_PP).
+Trevius: (RoF+) Implemented Armor Ornamentation using Hero's Forge Armor Models.  To use, create an ornamentation augment and set the herosforgemodel field in the items table.
+Trevius: (RoF+) Added command #heromodel (#hm for short) - Usage: #heromodel [hero forge model] [ [slot] ] (example: #heromodel 63)
+
+Be sure to run this or there will be item loss:
+Required SQL: utils/sql/git/required/2014_12_13_inventory_table_update.sql
+
+== 12/12/2014 ==
+demonstar55: Add special attack 42, Ignore Root Aggro Rules. This allows you to root a mob and have them still use the normal aggro rules (so they will attack the one with most hate, not closest)
+
+== 12/09/2014 ==
+Trevius: (RoF+) Implemented Hero's Forge Armor Models for Items.  To use, set herosforgemodel field in the item table to a model number such as 63 (for example).
+demonstar55: SoF+ swarm pets will no longer be F8able (without a hack!)
+
+== 12/08/2014 ==
+Secrets: Added a feature that allows an EQ client to log in directly to World without having to enter the LoginServer, provided the 'password' field is set in WorldServer.
+
+== 12/04/2014 ==
+Kayen: Ranged attacks will now more accurately check MAX firing range, fixing the issue where you would
+hit ranged attack and nothing would happpen due to incorrect server side range checks.
+Trevius: Initial addition of the RoF2 client from May 10th 2013 (currently available on Steam as the F2P client).
+Trevius: RoF2 is disabled by default, but you can enable by editing /common/patches/patches.cpp (see comments)
+
+== 12/01/2014 ==
+Trevius: Mercenaries now spawn as the same Gender and Size of the Merchant they are purchased from.
+Trevius: Mercenaries now spawn with randomized facial features when purchased.
+Trevius: Setting a lastname for NPCs will now override any hard coded lastname (such as GM Trainers).
+
+Required SQL: utils/sql/git/required/2014_12_01_mercs_table_update.sql
+
+== 11/28/2014 ==
+Trevius: Fixed a zone crash related to numhits for spells.
+Trevius: Fixed a query related to group leaders logging in.
+Trevius (Natedog): Fixed a world crash related to attempting to join an adventure with Mercenaries.
+
+== 11/27/2014 ==
+Kayen: Projectiles (ie Arrows) fired from archery will now do damage upon impact instead of instantly (consistent w/ live).
+Optional SQL: utils/sql/git/optional/2014_11_27_ProjectileDmgOnImpact.sql
+
+== 11/25/2014 ==
+Trevius: Spells that modify model size are now limited to 2 size adjustments from the base size.
+Trevius: Fix to prevent Mercenaries from being set as Group Leader.
+
+== 11/24/2014 ==
+Trevius: Added Rule NPC:EnableMeritBasedFaction (disabled by default) - Allows faction gain to work similar to experience.
+
+== 11/22/2014 ==
+Trevius: Grouping with Mercenaries is now considerably less buggy.
+Trevius: Fixed an issue with Spell Globals related to high Character IDs.
+Trevius: Crash fix for Swarm Pets.
+
+== 11/19/2014 ==
+Trevius: Mercenaries now Dismiss, Suspend, Unsuspend, and Die correctly.
+
+== 11/18/2014 ==
+Trevius: Mercenaries can now zone once again.
+
+== 11/17/2014 ==
+demonstar55: Correct OP_AugmentInfo reply. This fixes RoF display issue with Adventurer's Stone. Still issues with UF/SoF/SoD though.
+
+== 11/16/2014 ==
+demonstar55: fix size issue with ControlBoat_Struct and exploit fix in OP_BoardBoat
+
+Akkadius: Implemented Automatic Database update and versioning system
+Akkadius: Created database revision define, this is located in version.h in common #define CURRENT_BINARY_DATABASE_VERSION 9057
+	- This revision define will need to be incremented each time a database update is made
+	- Along with a revision define increment, you will need to update the db_update manifest located in:
+		- https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt
+		- An entry needs to be made at the bottom of the manifest, the entry is quite simple
+		- Example: 9057|2014_11_13_spells_new_updates.sql|SHOW COLUMNS FROM `spells_new` LIKE 'disallow_sit'|empty|
+			- This latest example is checking to see if the spells_new table contains the column 'disallow_sit', if its empty, the update needs to be ran
+				- More examples of match types below:
+		# Example: Version|Filename.sql|Query_to_Check_Condition_For_Needed_Update|match type|text to match
+		#	0 = Database Version
+		#	1 = Filename.sql
+		#	2 = Query_to_Check_Condition_For_Needed_Update
+		#	3 = Match Type - If condition from match type to Value 4 is true, update will flag for needing to be ran
+		#		contains = If query results contains text from 4th value
+		#		match = If query results matches text from 4th value
+		#		missing = If query result is missing text from 4th value
+		#		empty = If the query results in no results
+		#		not_empty = If the query is not empty
+		#	4 = Text to match
+	- The manifest contains all database updates 'Required' to be made to the schema, and it will contain a working backport all the way back to SVN - 
+		currently it is tested and backported through the beginning of our Github repo
+	- On world bootup or standalone run of db_update.pl, users will be prompted with a simple menu that we will expand upon later:
+	
+		============================================================
+			   EQEmu: Automatic Database Upgrade Check
+		============================================================
+				Operating System is: MSWin32
+				(Windows) MySQL is in system path
+				Path = C:\Program Files\MariaDB 10.0\bin/mysql
+		============================================================
+				Binary Database Version: (9057)
+				Local Database Version: (9057)
+
+				Database up to Date: Continuing World Bootup...
+		============================================================
+		Retrieving latest database manifest...
+        URL:    https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt
+        Saved:  db_update/db_update_manifest.txt
+
+Database Management Menu (Please Select):
+        1) Backup Database - (Saves to Backups folder)
+                Ideal to perform before performing updates
+        2) Backup Database Compressed - (Saves to Backups folder)
+                Ideal to perform before performing updates
+        3) Check for pending Database updates
+                Stages updates for automatic upgrade...
+        0) Exit
+
+Akkadius: Created db_update.pl, placed in utils/scripts folder, used for the automatic database update routine (Linux/Windows)
+	- db_update.pl script created db_version table if not created, if old one is present it will remove it
+Akkadius: Created db_dumper.pl, placed in utils/scripts folder, used for the automatic database update routine backups and standalone backups (Linux/Windows)
+Akkadius: World will now check the db_update.pl script on bootup, if the db_update.pl script is not present, it will fetch it remotely before running - 
+	when db_update.pl is done running, world will continue with bootup
+
+== 11/15/2014 ==
+Uleat(Natedog): A better fix for OP_ShopPlayerBuy - doesn't cause the issues that I introduced
+Kayen: Implemented NPC Special Ability 41 'Allow To Tank', gives NPC opportunity to take aggro over a client in melee range.
+Kayen: Updated swarm pet AI to be consistent with live.
+
+*OLD AI: Swarm pet would lock on to target until target died, then depop as soon as target died.
+
+*NEW AI: Swarm pet will attack cast on target, NOT perma locked it can change targets if attacked
+by something else that generate more hate. When target dies swarm pet will follow owner, if owner is
+attacked by something else the swarm pet will attack it (until duration timer despawns the pet).
+
+Kayen: Updated perl quest function: MakeTempPet(Tspell_id, name=nullptr, duration=0, target=nullptr, sticktarg=0)
+Kayen: Implemented perl quest function:  Mob::TypesTempPet(npctypesid, name=nullptr, duration=0, follow=0, target=nullptr, sticktarg=0)
+Note: 'sticktarg' field will cause the swarm pet to use the OLD AI
+
+Rule to use OLD AI only - default is disabled.
+Optional SQL: utils/sql/git/optional/2014_11_15_SwarmPetTargetLock.sql
+
+== 11/14/2014 ==
+Secrets: Identified object size and solidtype as flags. Exported them as functions to Perl.
+demonstar55: Don't use the hack for charms that doesn't work on RoF
+demonstar55: UF too
+demonstar55: Tit
+demonstar55: SoF
+demonstar55: SoD
+demonstar55: 62 (untested)
+
+== 11/13/2014 ==
+Kayen: Implemented target type (44) 'Beams' (which projects an AE infront of caster with a specified length and width).
+Kayen: Implemented target type (32) AE Target HateList
+Kayen: Implemented target type (36) Area Client Only
+Kayen: Implemented target type (37) Area PC Only
+Kayen: Implemented target type (39) Group No Pet
+Uleat: PlayerLogMerchantTransactions does not support partial stack purchase logging at this time
+
+== 11/12/2014 ==
+Uleat: Changed 'GMTrainee' struct to reflect the actual client hard-coded max skill count (100) - applies to all currently supported clients (6.2->RoF)
+
+== 11/11/2014 ==
+Uleat: Third attempt at a fix for GM trainer zone crashes... (this is starting to look like a KLS fix...)
+
+== 11/10/2014 ==
+Uleat: Fix for GM Trainer crashing server (really!)
+JJ: Yellow faction messages.
+
+== 11/09/2014 ==
+Kayen: Implemented support for spell target type (45) 'Target Rings' on Underfoot (does work earlier expansions). Thanks to Lecht for figuring out the op_code side.
+JJ: Implement new Live-like faction adjustment message using rule Client:UseLiveFactionMessage.
+Optional SQL: utils/sql/git/optional/2014_11_09_LiveFactionMessages.sql
+
+== 11/06/2014 ==
+demonstar55: Tracking default sort will now be correct order
+Trevius: Fixed dynamic merchant list loading.  Allows any merchant to be used in any zone.
+
+== 11/03/2014 ==
+Secrets: Fixed an overflow in melee lifetap calculations (int16 vs int32)
+Secrets: Fixed overflow on AC and ATK values that can go out of range.
+Secrets: Merc/Bot fixes for previous updates.
+Secrets: Changed a lot of int16s for stat-related functions to int32 because they were causing combat formula overflows (int16/int32 mismatch).
+Secrets: Linux fix?
+
+== 11/02/2014 ==
+Akkadius: Added out of range checking for Spell Save/Loads
+
+== 11/01/2014 ==
+Trevius: Fixed potential crash related to Pets/Mercs buffs when targeting themselves.
+JJ: (noudess) Revamped faction system. See https://github.com/EQEmu/Server/pull/256
+
+== 10/28/2014 ==
+Uleat: Added Client::InterrogateInventory(). Can be invoked by #interrogateinv and is also called when Handle_OP_MoveItem() calls for SwapItemResync()
+
+== 10/22/2014 ==
+Uleat: Fix for stacking items in a world object..added a new command option: #peekinv world - will show world container contents, if one is in use by target.
+
+== 10/20/2014 ==
+demonstar55: Inspect Buffs rank 1 will now show NPC buffs in target window (SoD+)
+
+== 10/19/2014 ==
+Uleat: Updated command #peekinv to display item links properly in RoF clients
+demonstar55: Group Mentoring in raids
+demonstar55: Inspect Buffs (text only version) works in raid groups
+demonstar55: Make use of the Inspect Buffs op/packet. 62 SOL until someone finds its op
+
+== 10/18/2014==
+demonstar55: Implement group mentor, sharing leadership exp (SoF+ only)
+demonstar55: Add gaining of group leadership while in raids
+
+== 10/16/2014 ==
+Uleat: Fixed the auto-conversion view naming error and renamed the views in the script files. Added a fix sql for databases that auto-converted.
+Fix SQL: ../sql/git/bots/deprecated/2014_10_16_Lower_Case_View_Fix.sql
+
+== 10/15/2014 ==
+Uleat: Cleaned up load/drop bots sqls, added '../utils/sql/git/bots/deprecated' and '../deprecated/load_bots_old.sql' (use this file on pre-player blob conversion databases.)
+Notes: I modifed the behavior of both load and drop bots to fail on the first operation if their modifications have been performed already.
+       'load_bots.sql' will explicitly add bot schema, while 'drop_bots.sql' will explicitly drop it. I also added a few lines to change
+	   a few altered tables back to their original state - as of the date in the file.
+
+== 10/13/2014 ==
+demonstar55: Partially implement leadership and raids
+	Currently working: client side only effects and stat bonuses.
+	Not working: Mark NPC, and other stuff that need extra server side support
+	Currently only UF tested (Tit and 62 may just work, others need packet work)
+
+== 10/12/2014 ==
+Akkadius: Fix for LDON Character Stat load
+
+== 10/11/2014 ==
+demonstar55: Implement Raid MOTD for UF
+	Don't forget 2014_10_11_RaidMOTD.sql!
+
+== 10/09/2014 ==
+Uleat: Added 'BOTS' conversion code to supplement the database 'PlayerProfile' blob conversion that Akkadius recently implemented.
+Note: This automatic conversion uses the view `vwbotcharactermobs` as an update vector. If you need/would like for the converter to run on
+previously and/or manually changed code, or just have a need for it to re-run, change the following in the database view and save:
+	"c.`last_login`,"				to	"c.`timelaston`,"
+	"c.`zone_id`"					to	"c.`zoneid`"
+	"FROM `character_data` AS c"	to	"FROM `character_old` AS c"
+** This will only work if you haven't deleted your `character_old` table **
+
+== 10/07/2014 ==
+demonstar55: Identified tutorial flag in all charcreate packets, reworked logic to correctly set homes binds
+
+== 10/05/2014 ==
+Uleat: Added Server<->Corpse slot translators needed for re-enumeration (inactive until phased in)
+
+== 10/03/2014 ==
+Uleat: Fixed Ti(6.2) OP_AugmentInfo translation that I broke (does not currently need and I mis-read a process)
+Uleat: Moved client patch OP_LootItem slot translation to external handlers
+
+== 10/02/2014 ==
+Kayen: Exported to PERL $client->SendSpellAnim(targetid, spellid)
+This function sends the spell graphic of a spell without actually having to cast the spell.
+
+== 10/02/2014 ==
+Uleat: First round of Ti/6.2 translators added - needed for re-enumeration
+
 == 10/01/2014 ==
 Kayen: Exported to PERL $client->SendColoredText(color, msg)
 demonstar55: Exported SendColoredText to lua

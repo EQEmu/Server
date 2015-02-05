@@ -15,7 +15,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "cliententry.h"
 #include "clientlist.h"
 #include "login_server.h"
@@ -93,6 +93,8 @@ ClientListEntry::~ClientListEntry() {
 		Camp(); // updates zoneserver's numplayers
 		client_list.RemoveCLEReferances(this);
 	}
+	for (auto &elem : tell_queue)
+		safe_delete_array(elem);
 	tell_queue.clear();
 }
 
@@ -121,7 +123,7 @@ void ClientListEntry::SetOnline(int8 iOnline) {
 }
 void ClientListEntry::LSUpdate(ZoneServer* iZS){
 	if(WorldConfig::get()->UpdateStats){
-		ServerPacket* pack = new ServerPacket;
+		auto pack = new ServerPacket;
 		pack->opcode = ServerOP_LSZoneInfo;
 		pack->size = sizeof(ZoneInfo_Struct);
 		pack->pBuffer = new uchar[pack->size];
@@ -135,7 +137,7 @@ void ClientListEntry::LSUpdate(ZoneServer* iZS){
 }
 void ClientListEntry::LSZoneChange(ZoneToZone_Struct* ztz){
 	if(WorldConfig::get()->UpdateStats){
-		ServerPacket* pack = new ServerPacket;
+		auto pack = new ServerPacket;
 		pack->opcode = ServerOP_LSPlayerZoneChange;
 		pack->size = sizeof(ServerLSPlayerZoneChange_Struct);
 		pack->pBuffer = new uchar[pack->size];
@@ -234,6 +236,8 @@ void ClientListEntry::ClearVars(bool iAll) {
 	pLFG = 0;
 	gm = 0;
 	pClientVersion = 0;
+	for (auto &elem : tell_queue)
+		safe_delete_array(elem);
 	tell_queue.clear();
 }
 
@@ -267,7 +271,7 @@ bool ClientListEntry::CheckAuth(uint32 iLSID, const char* iKey) {
 			int16 tmpStatus = WorldConfig::get()->DefaultStatus;
 			paccountid = database.CreateAccount(plsname, 0, tmpStatus, LSID());
 			if (!paccountid) {
-				_log(WORLD__CLIENTLIST_ERR,"Error adding local account for LS login: '%s', duplicate name?" ,plsname);
+				Log.Out(Logs::Detail, Logs::World_Server,"Error adding local account for LS login: '%s', duplicate name?" ,plsname);
 				return false;
 			}
 			strn0cpy(paccountname, plsname, sizeof(paccountname));
@@ -310,6 +314,7 @@ void ClientListEntry::ProcessTellQueue()
 		pack->Deflate();
 		Server()->SendPacket(pack);
 		safe_delete(pack);
+		safe_delete_array(*it);
 		it = tell_queue.erase(it);
 	}
 	return;

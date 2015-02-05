@@ -15,18 +15,22 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "debug.h"
-#include <stdio.h>
-#include <iostream>
-#include <iomanip>
+
+#include "crc16.h"
+#include "global_define.h"
 #include "eq_packet.h"
 #include "misc.h"
 #include "op_codes.h"
-#include "crc16.h"
 #include "platform.h"
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <stdio.h>
+
 #ifndef STATIC_OPCODE
 #include "opcodemgr.h"
 #endif
+
 #include "packet_dump.h"
 #include "packet_functions.h"
 #include <cstdlib>
@@ -507,3 +511,8 @@ void DumpPacket(const EQApplicationPacket* app, bool iShowInfo) {
 //	DumpPacketAscii(app->pBuffer, app->size);
 }
 
+std::string DumpPacketToString(const EQApplicationPacket* app){
+	std::ostringstream out;
+	out << DumpPacketHexToString(app->pBuffer, app->size);
+	return out.str();
+}

@@ -537,6 +537,7 @@ namespace detail
   };
 
 // Needed because of some strange ADL issues.
+#if BOOST_VERSION < 105700
 
 #define LUABIND_OPERATOR_ADL_WKND(op) \
   inline bool operator op( \
@@ -557,7 +558,8 @@ namespace detail
   LUABIND_OPERATOR_ADL_WKND(!=)
 
 #undef LUABIND_OPERATOR_ADL_WKND
- 
+#endif
+
 } // namespace detail
 
 namespace adl

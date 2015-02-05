@@ -1,15 +1,15 @@
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/misc_functions.h"
+
 #include "map.h"
 #include "raycast_mesh.h"
 #include "zone.h"
-#include <stdint.h>
+
 #include <algorithm>
-#include <locale>
-#include <vector>
+#include <map>
 #include <memory>
 #include <tuple>
-#include <map>
+#include <vector>
 #include <zlib.h>
 
 uint32 InflateData(const char* buffer, uint32 len, char* out_buffer, uint32 out_len_max) {
@@ -58,20 +58,21 @@ Map::Map() {
 Map::~Map() {
 	if(imp) {
 		imp->rm->release();
+		safe_delete(imp);
 	}
 }
 
-float Map::FindBestZ(Vertex &start, Vertex *result) const {
+float Map::FindBestZ(glm::vec3 &start, glm::vec3 *result) const {
 	if (!imp)
 		return false;
 
-	Vertex tmp;
+	glm::vec3 tmp;
 	if(!result)
 		result = &tmp;
 
 	start.z += RuleI(Map, FindBestZHeightAdjust);
-	Vertex from(start.x, start.y, start.z);
-	Vertex to(start.x, start.y, BEST_Z_INVALID);
+	glm::vec3 from(start.x, start.y, start.z);
+	glm::vec3 to(start.x, start.y, BEST_Z_INVALID);
 	float hit_distance;
 	bool hit = false;
 
@@ -92,19 +93,19 @@ float Map::FindBestZ(Vertex &start, Vertex *result) const {
 	return BEST_Z_INVALID;
 }
 
-bool Map::LineIntersectsZone(Vertex start, Vertex end, float step, Vertex *result) const {
+bool Map::LineIntersectsZone(glm::vec3 start, glm::vec3 end, float step, glm::vec3 *result) const {
 	if(!imp)
 		return false;
 	return imp->rm->raycast((const RmReal*)&start, (const RmReal*)&end, (RmReal*)result, nullptr, nullptr);
 }
 
-bool Map::LineIntersectsZoneNoZLeaps(Vertex start, Vertex end, float step_mag, Vertex *result) const {
+bool Map::LineIntersectsZoneNoZLeaps(glm::vec3 start, glm::vec3 end, float step_mag, glm::vec3 *result) const {
 	if (!imp)
 		return false;
 	
 	float z = BEST_Z_INVALID;
-	Vertex step;
-	Vertex cur;
+	glm::vec3 step;
+	glm::vec3 cur;
 	cur.x = start.x;
 	cur.y = start.y;
 	cur.z = start.z;
@@ -138,11 +139,11 @@ bool Map::LineIntersectsZoneNoZLeaps(Vertex start, Vertex end, float step_mag, V
 	while(cur.x != end.x || cur.y != end.y || cur.z != end.z)
 	{
 		steps++;
-		Vertex me;
+		glm::vec3 me;
 		me.x = cur.x;
 		me.y = cur.y;
 		me.z = cur.z;
-		Vertex hit;
+		glm::vec3 hit;
 
 		float best_z = FindBestZ(me, &hit);
 		float diff = best_z - z;
@@ -183,7 +184,7 @@ bool Map::LineIntersectsZoneNoZLeaps(Vertex start, Vertex end, float step_mag, V
 	return false;
 }
 
-bool Map::CheckLoS(Vertex myloc, Vertex oloc) const {
+bool Map::CheckLoS(glm::vec3 myloc, glm::vec3 oloc) const {
 	if(!imp)
 		return false;
 
@@ -249,22 +250,22 @@ bool Map::LoadV1(FILE *f) {
 		return false;
 	}
 	
-	std::vector<Vertex> verts;
+	std::vector<glm::vec3> verts;
 	std::vector<uint32> indices;
 	for(uint32 i = 0; i < face_count; ++i) {
-		Vertex a;
-		Vertex b;
-		Vertex c;
+		glm::vec3 a;
+		glm::vec3 b;
+		glm::vec3 c;
 		float normals[4];
-		if(fread(&a, sizeof(Vertex), 1, f) != 1) {
+		if(fread(&a, sizeof(glm::vec3), 1, f) != 1) {
 			return false;
 		}
 
-		if(fread(&b, sizeof(Vertex), 1, f) != 1) {
+		if(fread(&b, sizeof(glm::vec3), 1, f) != 1) {
 			return false;
 		}
 
-		if(fread(&c, sizeof(Vertex), 1, f) != 1) {
+		if(fread(&c, sizeof(glm::vec3), 1, f) != 1) {
 			return false;
 		}
 
@@ -308,7 +309,7 @@ struct ModelEntry
 		uint32 v1, v2, v3;
 		uint8 vis;
 	};
-	std::vector<Map::Vertex> verts;
+	std::vector<glm::vec3> verts;
 	std::vector<Poly> polys;
 };
 
@@ -375,7 +376,7 @@ bool Map::LoadV2(FILE *f) {
 	units_per_vertex = *(float*)buf;
 	buf += sizeof(float);
 
-	std::vector<Vertex> verts;
+	std::vector<glm::vec3> verts;
 	std::vector<uint32> indices;
 
 	for (uint32 i = 0; i < vert_count; ++i) {
@@ -392,7 +393,7 @@ bool Map::LoadV2(FILE *f) {
 		z = *(float*)buf;
 		buf += sizeof(float);
 
-		Vertex vert(x, y, z);
+		glm::vec3 vert(x, y, z);
 		verts.push_back(vert);
 	}
 
@@ -412,9 +413,9 @@ bool Map::LoadV2(FILE *f) {
 		buf += sizeof(uint32);
 	}
 
-	std::map<std::string, std::shared_ptr<ModelEntry>> models;
+	std::map<std::string, std::unique_ptr<ModelEntry>> models;
 	for (uint32 i = 0; i < model_count; ++i) {
-		std::shared_ptr<ModelEntry> me(new ModelEntry);
+		std::unique_ptr<ModelEntry> me(new ModelEntry);
 		std::string name = buf;
 		buf += name.length() + 1;
 
@@ -433,7 +434,7 @@ bool Map::LoadV2(FILE *f) {
 			float z = *(float*)buf;
 			buf += sizeof(float);
 
-			me->verts[j] = Vertex(x, y, z);
+			me->verts[j] = glm::vec3(x, y, z);
 		}
 
 		me->polys.resize(poly_count);
@@ -455,7 +456,7 @@ bool Map::LoadV2(FILE *f) {
 			me->polys[j] = p;
 		}
 
-		models[name] = me;
+		models[name] = std::move(me);
 	}
 
 	for (uint32 i = 0; i < plac_count; ++i) {
@@ -486,7 +487,7 @@ bool Map::LoadV2(FILE *f) {
 		if (models.count(name) == 0)
 			continue;
 
-		auto model = models[name];
+		auto &model = models[name];
 		auto &mod_polys = model->polys;
 		auto &mod_verts = model->verts;
 		for (uint32 j = 0; j < mod_polys.size(); ++j) {
@@ -595,7 +596,7 @@ bool Map::LoadV2(FILE *f) {
 
 			for (size_t k = 0; k < model->polys.size(); ++k) {
 				auto &poly = model->polys[k];
-				Vertex v1, v2, v3;
+				glm::vec3 v1, v2, v3;
 
 				v1 = model->verts[poly.v1];
 				v2 = model->verts[poly.v2];
@@ -617,7 +618,7 @@ bool Map::LoadV2(FILE *f) {
 				RotateVertex(v2, 0, y_rot * 3.14159f / 180.0f, 0);
 				RotateVertex(v3, 0, y_rot * 3.14159f / 180.0f, 0);
 
-				Vertex correction(p_x, p_y, p_z);
+				glm::vec3 correction(p_x, p_y, p_z);
 
 				RotateVertex(correction, x_rot * 3.14159f / 180.0f, 0, 0);
 
@@ -723,10 +724,10 @@ bool Map::LoadV2(FILE *f) {
 			float QuadVertex4Z = QuadVertex1Z;
 
 			uint32 current_vert = (uint32)verts.size() + 3;
-			verts.push_back(Vertex(QuadVertex1X, QuadVertex1Y, QuadVertex1Z));
-			verts.push_back(Vertex(QuadVertex2X, QuadVertex2Y, QuadVertex2Z));
-			verts.push_back(Vertex(QuadVertex3X, QuadVertex3Y, QuadVertex3Z));
-			verts.push_back(Vertex(QuadVertex4X, QuadVertex4Y, QuadVertex4Z));
+			verts.push_back(glm::vec3(QuadVertex1X, QuadVertex1Y, QuadVertex1Z));
+			verts.push_back(glm::vec3(QuadVertex2X, QuadVertex2Y, QuadVertex2Z));
+			verts.push_back(glm::vec3(QuadVertex3X, QuadVertex3Y, QuadVertex3Z));
+			verts.push_back(glm::vec3(QuadVertex4X, QuadVertex4Y, QuadVertex4Z));
 
 			indices.push_back(current_vert);
 			indices.push_back(current_vert - 2);
@@ -789,7 +790,7 @@ bool Map::LoadV2(FILE *f) {
 				}
 				else {
 					i1 = (uint32)verts.size();
-					verts.push_back(Vertex(QuadVertex1X, QuadVertex1Y, QuadVertex1Z));
+					verts.push_back(glm::vec3(QuadVertex1X, QuadVertex1Y, QuadVertex1Z));
 					cur_verts[std::make_tuple(QuadVertex1X, QuadVertex1Y, QuadVertex1Z)] = i1;
 				}
 
@@ -800,7 +801,7 @@ bool Map::LoadV2(FILE *f) {
 				}
 				else {
 					i2 = (uint32)verts.size();
-					verts.push_back(Vertex(QuadVertex2X, QuadVertex2Y, QuadVertex2Z));
+					verts.push_back(glm::vec3(QuadVertex2X, QuadVertex2Y, QuadVertex2Z));
 					cur_verts[std::make_tuple(QuadVertex2X, QuadVertex2Y, QuadVertex2Z)] = i2;
 				}
 
@@ -811,7 +812,7 @@ bool Map::LoadV2(FILE *f) {
 				}
 				else {
 					i3 = (uint32)verts.size();
-					verts.push_back(Vertex(QuadVertex3X, QuadVertex3Y, QuadVertex3Z));
+					verts.push_back(glm::vec3(QuadVertex3X, QuadVertex3Y, QuadVertex3Z));
 					cur_verts[std::make_tuple(QuadVertex3X, QuadVertex3Y, QuadVertex3Z)] = i3;
 				}
 
@@ -822,7 +823,7 @@ bool Map::LoadV2(FILE *f) {
 				}
 				else {
 					i4 = (uint32)verts.size();
-					verts.push_back(Vertex(QuadVertex4X, QuadVertex4Y, QuadVertex4Z));
+					verts.push_back(glm::vec3(QuadVertex4X, QuadVertex4Y, QuadVertex4Z));
 					cur_verts[std::make_tuple(QuadVertex4X, QuadVertex4Y, QuadVertex4Z)] = i4;
 				}
 
@@ -858,8 +859,8 @@ bool Map::LoadV2(FILE *f) {
 	return true;
 }
 
-void Map::RotateVertex(Vertex &v, float rx, float ry, float rz) {
-	Vertex nv = v;
+void Map::RotateVertex(glm::vec3 &v, float rx, float ry, float rz) {
+	glm::vec3 nv = v;
 
 	nv.y = (cos(rx) * v.y) - (sin(rx) * v.z);
 	nv.z = (sin(rx) * v.y) + (cos(rx) * v.z);
@@ -877,13 +878,13 @@ void Map::RotateVertex(Vertex &v, float rx, float ry, float rz) {
 	v = nv;
 }
 
-void Map::ScaleVertex(Vertex &v, float sx, float sy, float sz) {
+void Map::ScaleVertex(glm::vec3 &v, float sx, float sy, float sz) {
 	v.x = v.x * sx;
 	v.y = v.y * sy;
 	v.z = v.z * sz;
 }
 
-void Map::TranslateVertex(Vertex &v, float tx, float ty, float tz) {
+void Map::TranslateVertex(glm::vec3 &v, float tx, float ty, float tz) {
 	v.x = v.x + tx;
 	v.y = v.y + ty;
 	v.z = v.z + tz;

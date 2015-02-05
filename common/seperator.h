@@ -23,8 +23,9 @@
 #ifndef SEPERATOR_H
 #define SEPERATOR_H
 
-#include <string.h>
+#include "types.h"
 #include <stdlib.h>
+#include <string.h>
 
 class Seperator
 {
@@ -126,7 +127,7 @@ public:
 				if (check[i] == '.' && !SeenDec) {
 					SeenDec = true;
 				}
-				else if (i == 0 && (check[i] == '-' || check[i] == '+') && !check[i+1] == 0) {
+				else if (i == 0 && (check[i] == '-' || check[i] == '+') && check[i + 1] != '\0') {
 					// this is ok, do nothin
 				}
 				else {

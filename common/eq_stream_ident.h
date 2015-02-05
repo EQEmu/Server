@@ -4,13 +4,14 @@
 #include "eq_stream.h"
 #include "timer.h"
 #include <vector>
-#include <string>
 #include <queue>
+#include <memory>
 
 #define STREAM_IDENT_WAIT_MS 10000
 
 class OpcodeManager;
 class StructStrategy;
+class EQStreamInterface;
 
 class EQStreamIdentifier {
 public:
@@ -21,7 +22,7 @@ public:
 
 	//main processing interface
 	void Process();
-	void AddStream(EQStream *& eqs);
+	void AddStream(std::shared_ptr<EQStream> &eqs);
 	EQStreamInterface *PopIdentified();
 
 protected:
@@ -39,11 +40,11 @@ protected:
 	//pending streams..
 	class Record {
 	public:
-		Record(EQStream *s);
-		EQStream *stream;		//we own this
+		Record(std::shared_ptr<EQStream> s);
+		std::shared_ptr<EQStream> stream;		//we own this
 		Timer expire;
 	};
-	std::vector<Record *> m_streams;	//we own these objects, and the streams contained in them.
+	std::vector<Record> m_streams;	//we own these objects, and the streams contained in them.
 	std::queue<EQStreamInterface *> m_identified;	//we own these objects
 };
 

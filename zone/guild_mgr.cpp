@@ -15,14 +15,15 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
-#include "guild_mgr.h"
-#include "zonedb.h"
-#include "worldserver.h"
+
 #include "../common/servertalk.h"
 #include "../common/string_util.h"
+
 #include "client.h"
 #include "entity.h"
+#include "guild_mgr.h"
+#include "worldserver.h"
+#include "zonedb.h"
 
 ZoneGuildManager guild_mgr;
 GuildBankManager *GuildBanks;
@@ -31,7 +32,7 @@ extern WorldServer worldserver;
 extern volatile bool ZoneLoaded;
 
 void ZoneGuildManager::SendGuildRefresh(uint32 guild_id, bool name, bool motd, bool rank, bool relation) {
-	_log(GUILDS__REFRESH, "Sending guild refresh for %d to world, changes: name=%d, motd=%d, rank=d, relation=%d", guild_id, name, motd, rank, relation);
+	Log.Out(Logs::Detail, Logs::Guilds, "Sending guild refresh for %d to world, changes: name=%d, motd=%d, rank=d, relation=%d", guild_id, name, motd, rank, relation);
 	ServerPacket* pack = new ServerPacket(ServerOP_RefreshGuild, sizeof(ServerGuildRefresh_Struct));
 	ServerGuildRefresh_Struct *s = (ServerGuildRefresh_Struct *) pack->pBuffer;
 	s->guild_id = guild_id;
@@ -45,7 +46,7 @@ void ZoneGuildManager::SendGuildRefresh(uint32 guild_id, bool name, bool motd, b
 
 void ZoneGuildManager::SendCharRefresh(uint32 old_guild_id, uint32 guild_id, uint32 charid) {
 	if(guild_id == 0) {
-		_log(GUILDS__REFRESH, "Guild lookup for char %d when sending char refresh.", charid);
+		Log.Out(Logs::Detail, Logs::Guilds, "Guild lookup for char %d when sending char refresh.", charid);
 
 		CharGuildInfo gci;
 		if(!GetCharInfo(charid, gci)) {
@@ -55,7 +56,7 @@ void ZoneGuildManager::SendCharRefresh(uint32 old_guild_id, uint32 guild_id, uin
 		}
 	}
 
-	_log(GUILDS__REFRESH, "Sending char refresh for %d from guild %d to world", charid, guild_id);
+	Log.Out(Logs::Detail, Logs::Guilds, "Sending char refresh for %d from guild %d to world", charid, guild_id);
 
 	ServerPacket* pack = new ServerPacket(ServerOP_GuildCharRefresh, sizeof(ServerGuildCharRefresh_Struct));
 	ServerGuildCharRefresh_Struct *s = (ServerGuildCharRefresh_Struct *) pack->pBuffer;
@@ -88,7 +89,7 @@ void ZoneGuildManager::SendRankUpdate(uint32 CharID)
 }
 
 void ZoneGuildManager::SendGuildDelete(uint32 guild_id) {
-	_log(GUILDS__REFRESH, "Sending guild delete for guild %d to world", guild_id);
+	Log.Out(Logs::Detail, Logs::Guilds, "Sending guild delete for guild %d to world", guild_id);
 	ServerPacket* pack = new ServerPacket(ServerOP_DeleteGuild, sizeof(ServerGuildID_Struct));
 	ServerGuildID_Struct *s = (ServerGuildID_Struct *) pack->pBuffer;
 	s->guild_id = guild_id;
@@ -260,12 +261,12 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 	switch(pack->opcode) {
 	case ServerOP_RefreshGuild: {
 		if(pack->size != sizeof(ServerGuildRefresh_Struct)) {
-			_log(GUILDS__ERROR, "Received ServerOP_RefreshGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildRefresh_Struct));
+			Log.Out(Logs::General, Logs::Error, "Received ServerOP_RefreshGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildRefresh_Struct));
 			return;
 		}
 		ServerGuildRefresh_Struct *s = (ServerGuildRefresh_Struct *) pack->pBuffer;
 
-		_log(GUILDS__REFRESH, "Received guild refresh from world for %d, changes: name=%d, motd=%d, rank=%d, relation=%d", s->guild_id, s->name_change, s->motd_change, s->rank_change, s->relation_change);
+		Log.Out(Logs::Detail, Logs::Guilds, "Received guild refresh from world for %d, changes: name=%d, motd=%d, rank=%d, relation=%d", s->guild_id, s->name_change, s->motd_change, s->rank_change, s->relation_change);
 
 		//reload all the guild details from the database.
 		RefreshGuild(s->guild_id);
@@ -294,12 +295,12 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 
 	case ServerOP_GuildCharRefresh: {
 		if(pack->size != sizeof(ServerGuildCharRefresh_Struct)) {
-			_log(GUILDS__ERROR, "Received ServerOP_RefreshGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildCharRefresh_Struct));
+			Log.Out(Logs::General, Logs::Error, "Received ServerOP_RefreshGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildCharRefresh_Struct));
 			return;
 		}
 		ServerGuildCharRefresh_Struct *s = (ServerGuildCharRefresh_Struct *) pack->pBuffer;
 
-		_log(GUILDS__REFRESH, "Received guild member refresh from world for char %d from guild %d", s->char_id, s->guild_id);
+		Log.Out(Logs::Detail, Logs::Guilds, "Received guild member refresh from world for char %d from guild %d", s->char_id, s->guild_id);
 
 		Client *c = entity_list.GetClientByCharID(s->char_id);
 
@@ -321,7 +322,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 		else if(c != nullptr && s->guild_id != GUILD_NONE) {
 			//char is in zone, and has changed into a new guild, send MOTD.
 			c->SendGuildMOTD();
-			if(c->GetClientVersion() >= EQClientRoF)
+			if(c->GetClientVersion() >= ClientVersion::RoF)
 			{
 				c->SendGuildRanks();
 			}
@@ -337,7 +338,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 		{
 			if(pack->size != sizeof(ServerGuildRankUpdate_Struct))
 			{
-				_log(GUILDS__ERROR, "Received ServerOP_RankUpdate of incorrect size %d, expected %d",
+				Log.Out(Logs::General, Logs::Error, "Received ServerOP_RankUpdate of incorrect size %d, expected %d",
 					pack->size, sizeof(ServerGuildRankUpdate_Struct));
 
 				return;
@@ -363,12 +364,12 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 
 	case ServerOP_DeleteGuild: {
 		if(pack->size != sizeof(ServerGuildID_Struct)) {
-			_log(GUILDS__ERROR, "Received ServerOP_DeleteGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildID_Struct));
+			Log.Out(Logs::General, Logs::Error, "Received ServerOP_DeleteGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildID_Struct));
 			return;
 		}
 		ServerGuildID_Struct *s = (ServerGuildID_Struct *) pack->pBuffer;
 
-		_log(GUILDS__REFRESH, "Received guild delete from world for guild %d", s->guild_id);
+		Log.Out(Logs::Detail, Logs::Guilds, "Received guild delete from world for guild %d", s->guild_id);
 
 		//clear all the guild tags.
 		entity_list.RefreshAllGuildInfo(s->guild_id);
@@ -416,10 +417,10 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 
 			if (!c || !c->IsInAGuild())
 			{
-				_log(GUILDS__ERROR,"Invalid Client or not in guild. ID=%i", FromID);
+				Log.Out(Logs::Detail, Logs::Guilds,"Invalid Client or not in guild. ID=%i", FromID);
 				break;
 			}
-			_log(GUILDS__IN_PACKETS,"Processing ServerOP_OnlineGuildMembersResponse");
+			Log.Out(Logs::Detail, Logs::Guilds,"Processing ServerOP_OnlineGuildMembersResponse");
 			EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildMemberUpdate, sizeof(GuildMemberUpdate_Struct));
 			GuildMemberUpdate_Struct *gmus = (GuildMemberUpdate_Struct*)outapp->pBuffer;
 			char Name[64];
@@ -432,7 +433,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 				VARSTRUCT_DECODE_STRING(Name, Buffer);
 				strn0cpy(gmus->MemberName, Name, sizeof(gmus->MemberName));
 				gmus->ZoneID = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
-				_log(GUILDS__OUT_PACKETS,"Sending OP_GuildMemberUpdate to %i. Name=%s ZoneID=%i",FromID,Name,gmus->ZoneID);
+				Log.Out(Logs::Detail, Logs::Guilds,"Sending OP_GuildMemberUpdate to %i. Name=%s ZoneID=%i",FromID,Name,gmus->ZoneID);
 				c->QueuePacket(outapp);
 			}
 			safe_delete(outapp);
@@ -602,7 +603,6 @@ bool GuildBankManager::Load(uint32 guildID)
                                     "FROM `guild_bank` WHERE `guildid` = %i", guildID);
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-        _log(GUILDS__BANK_ERROR, "Error Loading guild bank: %s, %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -683,7 +683,7 @@ void GuildBankManager::SendGuildBank(Client *c)
 
 	if(Iterator == Banks.end())
 	{
-		_log(GUILDS__BANK_ERROR, "Unable to find guild bank for guild ID %i", c->GuildID());
+		Log.Out(Logs::General, Logs::Error, "Unable to find guild bank for guild ID %i", c->GuildID());
 
 		return;
 	}
@@ -799,7 +799,7 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
 
 	if(Iterator == Banks.end())
 	{
-		_log(GUILDS__BANK_ERROR, "Unable to find guild bank for guild ID %i", GuildID);
+		Log.Out(Logs::General, Logs::Error, "Unable to find guild bank for guild ID %i", GuildID);
 
 		return false;
 	}
@@ -845,7 +845,7 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
 
 	if(Slot < 0)
 	{
-		_log(GUILDS__BANK_ERROR, "No space to add item to the guild bank.");
+		Log.Out(Logs::General, Logs::Error, "No space to add item to the guild bank.");
 
 		return false;
 	}
@@ -856,7 +856,6 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
                                     GuildID, Area, Slot, ItemID, QtyOrCharges, Donator, Permissions, WhoFor);
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		_log(GUILDS__BANK_ERROR, "Insert Error: %s : %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -921,7 +920,6 @@ int GuildBankManager::Promote(uint32 guildID, int slotID)
                                     "LIMIT 1", mainSlot, guildID, slotID);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-		_log(GUILDS__BANK_ERROR, "error promoting item: %s : %s", query.c_str(), results.ErrorMessage().c_str());
 		return -1;
 	}
 
@@ -973,7 +971,6 @@ void GuildBankManager::SetPermissions(uint32 guildID, uint16 slotID, uint32 perm
     auto results = database.QueryDatabase(query);
 	if(!results.Success())
 	{
-		_log(GUILDS__BANK_ERROR, "error changing permissions: %s : %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -1123,7 +1120,6 @@ bool GuildBankManager::DeleteItem(uint32 guildID, uint16 area, uint16 slotID, ui
                                         guildID, area, slotID);
         auto results = database.QueryDatabase(query);
 		if(!results.Success()) {
-			_log(GUILDS__BANK_ERROR, "Delete item failed. %s : %s", query.c_str(), results.ErrorMessage().c_str());
 			return false;
 		}
 
@@ -1135,7 +1131,6 @@ bool GuildBankManager::DeleteItem(uint32 guildID, uint16 area, uint16 slotID, ui
                                         BankArea[slotID].Quantity - quantity, guildID, area, slotID);
         auto results = database.QueryDatabase(query);
 		if(!results.Success()) {
-			_log(GUILDS__BANK_ERROR, "Update item failed. %s : %s", query.c_str(), results.ErrorMessage().c_str());
 			return false;
 		}
 
@@ -1298,7 +1293,6 @@ void GuildBankManager::UpdateItemQuantity(uint32 guildID, uint16 area, uint16 sl
                                     quantity, guildID, area, slotID);
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		_log(GUILDS__BANK_ERROR, "Update item quantity failed. %s : %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 

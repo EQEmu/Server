@@ -15,13 +15,12 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
+
+#include "../common/global_define.h"
 #include <iostream>
 #include <string.h>
 #include <stdio.h>
 #include <iomanip>
-#include <time.h>
-#include <stdlib.h>
 #include <stdarg.h>
 
 #ifdef _WINDOWS
@@ -32,25 +31,24 @@
 	#define strcasecmp	_stricmp
 #endif
 
-#include "../common/servertalk.h"
-#include "worldserver.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/packet_dump.h"
 #include "../common/misc_functions.h"
-#include "zonedb.h"
-#include "zone.h"
+#include "../common/rulesys.h"
+#include "../common/servertalk.h"
+
+#include "client.h"
+#include "corpse.h"
 #include "entity.h"
-#include "masterentity.h"
+#include "guild_mgr.h"
+#include "mob.h"
 #include "net.h"
 #include "petitions.h"
-#include "../common/packet_functions.h"
-#include "../common/md5.h"
-#include "zone_config.h"
+#include "raids.h"
 #include "string_ids.h"
-#include "guild_mgr.h"
-#include "../common/rulesys.h"
 #include "titles.h"
-#include "qglobals.h"
+#include "worldserver.h"
+#include "zone.h"
+#include "zone_config.h"
 
 
 extern EntityList entity_list;
@@ -133,7 +131,7 @@ void WorldServer::OnConnected() {
 	SendPacket(pack);
 	safe_delete(pack);
 }
-
+/* Zone Process Packets from World */
 void WorldServer::Process() {
 	WorldConnection::Process();
 
@@ -142,8 +140,7 @@ void WorldServer::Process() {
 
 	ServerPacket *pack = 0;
 	while((pack = tcpc.PopPacket())) {
-		_log(ZONE__WORLD_TRACE,"Got 0x%04x from world:",pack->opcode);
-		_hex(ZONE__WORLD_TRACE,pack->pBuffer,pack->size);
+		Log.Out(Logs::Detail, Logs::Zone_Server, "Got 0x%04x from world:", pack->opcode);
 		switch(pack->opcode) {
 		case 0: {
 			break;
@@ -157,12 +154,12 @@ void WorldServer::Process() {
 			if (pack->size != sizeof(ServerConnectInfo))
 				break;
 			ServerConnectInfo* sci = (ServerConnectInfo*) pack->pBuffer;
-			_log(ZONE__WORLD,"World indicated port %d for this zone.",sci->port);
+			Log.Out(Logs::Detail, Logs::Zone_Server, "World assigned Port: %d for this zone.", sci->port);
 			ZoneConfig::SetZonePort(sci->port);
 			break;
 		}
 		case ServerOP_ZAAuthFailed: {
-			std::cout << "World server responded 'Not Authorized', disabling reconnect" << std::endl;
+			Log.Out(Logs::Detail, Logs::Zone_Server, "World server responded 'Not Authorized', disabling reconnect");
 			pTryReconnect = false;
 			Disconnect();
 			break;
@@ -388,15 +385,12 @@ void WorldServer::Process() {
 					}
 				}
 				else {
-					#ifdef _EQDEBUG
-					_log(ZONE__WORLD, "Error: WhoAllReturnStruct did not point to a valid client! "
-						"id=%i, playerineqstring=%i, playersinzonestring=%i. Dumping WhoAllReturnStruct:",
+					Log.Out(Logs::Detail, Logs::None, "[CLIENT] id=%i, playerineqstring=%i, playersinzonestring=%i. Dumping WhoAllReturnStruct:",
 						wars->id, wars->playerineqstring, wars->playersinzonestring);
-					#endif
 				}
 			}
 			else
-				_log(ZONE__WORLD_ERR, "WhoAllReturnStruct: Could not get return struct!");
+				Log.Out(Logs::General, Logs::Error, "WhoAllReturnStruct: Could not get return struct!");
 			break;
 		}
 		case ServerOP_EmoteMessage: {
@@ -479,7 +473,7 @@ void WorldServer::Process() {
 			if (ZoneLoaded) {
 				SetZone(zone->GetZoneID(), zone->GetInstanceID());
 				if (zst->zoneid == zone->GetZoneID()) {
-					// This packet also doubles as "incomming client" notification, lets not shut down before they get here
+					// This packet also doubles as "incoming client" notification, lets not shut down before they get here
 					zone->StartShutdownTimer(AUTHENTICATION_TIMEOUT * 1000);
 				}
 				else {
@@ -494,22 +488,19 @@ void WorldServer::Process() {
 			if (!(Zone::Bootup(zst->zoneid, zst->instanceid, zst->makestatic))) {
 				SendChannelMessage(0, 0, 10, 0, 0, "%s:%i Zone::Bootup failed: %s", net.GetZoneAddress(), net.GetZonePort(), database.GetZoneName(zst->zoneid));
 			}
-			// Moved annoucement to ZoneBootup()
-			//			else
-			//				SendEmoteMessage(0, 0, 15, "Zone bootup: %s", zone->GetLongName());
 			break;
 		}
 		case ServerOP_ZoneIncClient: {
-			if (pack->size != sizeof(ServerZoneIncommingClient_Struct)) {
-				std::cout << "Wrong size on ServerOP_ZoneIncClient. Got: " << pack->size << ", Expected: " << sizeof(ServerZoneIncommingClient_Struct) << std::endl;
+			if (pack->size != sizeof(ServerZoneIncomingClient_Struct)) {
+				std::cout << "Wrong size on ServerOP_ZoneIncClient. Got: " << pack->size << ", Expected: " << sizeof(ServerZoneIncomingClient_Struct) << std::endl;
 				break;
 			}
-			ServerZoneIncommingClient_Struct* szic = (ServerZoneIncommingClient_Struct*) pack->pBuffer;
+			ServerZoneIncomingClient_Struct* szic = (ServerZoneIncomingClient_Struct*) pack->pBuffer;
 			if (ZoneLoaded) {
 				SetZone(zone->GetZoneID(), zone->GetInstanceID());
 				if (szic->zoneid == zone->GetZoneID()) {
 					zone->AddAuth(szic);
-					// This packet also doubles as "incomming client" notification, lets not shut down before they get here
+					// This packet also doubles as "incoming client" notification, lets not shut down before they get here
 					zone->StartShutdownTimer(AUTHENTICATION_TIMEOUT * 1000);
 				}
 			}
@@ -656,7 +647,7 @@ void WorldServer::Process() {
 		case ServerOP_Petition: {
 			std::cout << "Got Server Requested Petition List Refresh" << std::endl;
 			ServerPetitionUpdate_Struct* sus = (ServerPetitionUpdate_Struct*) pack->pBuffer;
-			// solar: this was typoed to = instead of ==, not that it acts any different now though..
+			// this was typoed to = instead of ==, not that it acts any different now though..
 			if (sus->status == 0) petition_list.ReadDatabase();
 			else if (sus->status == 1) petition_list.ReadDatabase(); // Until I fix this to be better....
 			break;
@@ -683,13 +674,12 @@ void WorldServer::Process() {
 					//pendingrezexp is the amount of XP on the corpse. Setting it to a value >= 0
 					//also serves to inform Client::OPRezzAnswer to expect a packet.
 					client->SetPendingRezzData(srs->exp, srs->dbid, srs->rez.spellid, srs->rez.corpse_name);
-							_log(SPELLS__REZ, "OP_RezzRequest in zone %s for %s, spellid:%i",
+							Log.Out(Logs::Detail, Logs::Spells, "OP_RezzRequest in zone %s for %s, spellid:%i",
 							zone->GetShortName(), client->GetName(), srs->rez.spellid);
 					EQApplicationPacket* outapp = new EQApplicationPacket(OP_RezzRequest,
 												sizeof(Resurrect_Struct));
 					memcpy(outapp->pBuffer, &srs->rez, sizeof(Resurrect_Struct));
 					client->QueuePacket(outapp);
-					_pkt(SPELLS__REZ, outapp);
 					safe_delete(outapp);
 					break;
 				}
@@ -699,13 +689,13 @@ void WorldServer::Process() {
 				// to the zone that the corpse is in.
 				Corpse* corpse = entity_list.GetCorpseByName(srs->rez.corpse_name);
 				if (corpse && corpse->IsCorpse()) {
-					_log(SPELLS__REZ, "OP_RezzComplete received in zone %s for corpse %s",
+					Log.Out(Logs::Detail, Logs::Spells, "OP_RezzComplete received in zone %s for corpse %s",
 								zone->GetShortName(), srs->rez.corpse_name);
 
-					_log(SPELLS__REZ, "Found corpse. Marking corpse as rezzed.");
+					Log.Out(Logs::Detail, Logs::Spells, "Found corpse. Marking corpse as rezzed.");
 					// I don't know why Rezzed is not set to true in CompleteRezz().
-					corpse->Rezzed(true);
-					corpse->CompleteRezz();
+					corpse->IsRezzed(true);
+					corpse->CompleteResurrection();
 				}
 			}
 
@@ -753,7 +743,7 @@ void WorldServer::Process() {
 		}
 		case ServerOP_SyncWorldTime: {
 			if(zone!=0) {
-				std::cout << "Received Message SyncWorldTime" << std::endl;
+				Log.Out(Logs::Moderate, Logs::Zone_Server, "%s Received Message SyncWorldTime", __FUNCTION__);
 				eqTimeOfDay* newtime = (eqTimeOfDay*) pack->pBuffer;
 				zone->zone_time.setEQTimeOfDay(newtime->start_eqtime, newtime->start_realtime);
 				EQApplicationPacket* outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
@@ -774,7 +764,7 @@ void WorldServer::Process() {
 						eqTime.minute,
 						(eqTime.hour >= 13) ? "pm" : "am"
 						);
-					std::cout << "Time Broadcast Packet: " << timeMessage << std::endl;
+					Log.Out(Logs::General, Logs::Zone_Server, "Time Broadcast Packet: %s", timeMessage);
 					zone->GotCurTime(true);
 				//}
 				//Test
@@ -831,12 +821,11 @@ void WorldServer::Process() {
 		}
 		case ServerOP_GroupInvite: {
 			// A player in another zone invited a player in this zone to join their group.
-			//
 			GroupInvite_Struct* gis = (GroupInvite_Struct*)pack->pBuffer;
 
 			Mob *Invitee = entity_list.GetMob(gis->invitee_name);
 
-			if(Invitee && Invitee->IsClient() && !Invitee->IsGrouped() && !Invitee->IsRaidGrouped())
+			if(Invitee && Invitee->IsClient() && Invitee->CastToClient()->MercOnlyOrNoGroup() && !Invitee->IsRaidGrouped())
 			{
 				EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupInvite, sizeof(GroupInvite_Struct));
 				memcpy(outapp->pBuffer, gis, sizeof(GroupInvite_Struct));
@@ -848,7 +837,6 @@ void WorldServer::Process() {
 		}
 		case ServerOP_GroupFollow: {
 			// Player in another zone accepted a group invitation from a player in this zone.
-			//
 			ServerGroupFollow_Struct* sgfs = (ServerGroupFollow_Struct*) pack->pBuffer;
 
 			Mob* Inviter = entity_list.GetClientByName(sgfs->gf.name1);
@@ -857,12 +845,15 @@ void WorldServer::Process() {
 			{
 				Group* group = entity_list.GetGroupByClient(Inviter->CastToClient());
 
-				if(!group){
-
+				if(!group)
+				{
+					//Make new group
 					group = new Group(Inviter);
 
-					if(!group)
+					if (!group)
+					{
 						break;
+					}
 
 					entity_list.AddGroup(group);
 
@@ -871,13 +862,11 @@ void WorldServer::Process() {
 						break;
 					}
 
-					database.SetGroupID(Inviter->GetName(), group->GetID(), Inviter->CastToClient()->CharacterID());
-
+					database.SetGroupID(Inviter->GetName(), group->GetID(), Inviter->CastToClient()->CharacterID(), false);
 					database.SetGroupLeaderName(group->GetID(), Inviter->GetName());
-
 					group->UpdateGroupAAs();
 
-					if(Inviter->CastToClient()->GetClientVersion() < EQClientSoD)
+					if(Inviter->CastToClient()->GetClientVersion() < ClientVersion::SoD)
 					{
 						EQApplicationPacket* outapp=new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
 						GroupJoin_Struct* outgj=(GroupJoin_Struct*)outapp->pBuffer;
@@ -891,25 +880,22 @@ void WorldServer::Process() {
 					else
 					{
 						// SoD and later
-						//
 						Inviter->CastToClient()->SendGroupCreatePacket();
 						Inviter->CastToClient()->SendGroupLeaderChangePacket(Inviter->GetName());
 						Inviter->CastToClient()->SendGroupJoinAcknowledge();
 					}
 				}
+
 				if(!group)
+				{
 					break;
+				}
 
 				EQApplicationPacket* outapp=new EQApplicationPacket(OP_GroupFollow, sizeof(GroupGeneric_Struct));
-
 				GroupGeneric_Struct *gg = (GroupGeneric_Struct *)outapp->pBuffer;
-
 				strn0cpy(gg->name1, sgfs->gf.name1, sizeof(gg->name1));
-
 				strn0cpy(gg->name2, sgfs->gf.name2, sizeof(gg->name2));
-
 				Inviter->CastToClient()->QueuePacket(outapp);
-
 				safe_delete(outapp);
 
 				if(!group->AddMember(nullptr, sgfs->gf.name2, sgfs->CharacterID))
@@ -919,46 +905,35 @@ void WorldServer::Process() {
 					Inviter->CastToClient()->UpdateLFP();
 
 				ServerPacket* pack2 = new ServerPacket(ServerOP_GroupJoin, sizeof(ServerGroupJoin_Struct));
-
 				ServerGroupJoin_Struct* gj = (ServerGroupJoin_Struct*)pack2->pBuffer;
-
 				gj->gid = group->GetID();
-
 				gj->zoneid = zone->GetZoneID();
-
 				gj->instance_id = zone->GetInstanceID();
-
 				strn0cpy(gj->member_name, sgfs->gf.name2, sizeof(gj->member_name));
-
 				worldserver.SendPacket(pack2);
-
 				safe_delete(pack2);
+				
+				
 
 				// Send acknowledgement back to the Invitee to let them know we have added them to the group.
-				//
 				ServerPacket* pack3 = new ServerPacket(ServerOP_GroupFollowAck, sizeof(ServerGroupFollowAck_Struct));
-
 				ServerGroupFollowAck_Struct* sgfas = (ServerGroupFollowAck_Struct*)pack3->pBuffer;
-
 				strn0cpy(sgfas->Name, sgfs->gf.name2, sizeof(sgfas->Name));
-
 				worldserver.SendPacket(pack3);
-
 				safe_delete(pack3);
 			}
 			break;
 		}
 		case ServerOP_GroupFollowAck: {
 			// The Inviter (in another zone) has successfully added the Invitee (in this zone) to the group.
-			//
 			ServerGroupFollowAck_Struct* sgfas = (ServerGroupFollowAck_Struct*)pack->pBuffer;
 
-			Client *c = entity_list.GetClientByName(sgfas->Name);
+			Client *client = entity_list.GetClientByName(sgfas->Name);
 
-			if(!c)
+			if(!client)
 				break;
 
-			uint32 groupid = database.GetGroupID(c->GetName());
+			uint32 groupid = database.GetGroupID(client->GetName());
 
 			Group* group = nullptr;
 
@@ -974,26 +949,30 @@ void WorldServer::Process() {
 						entity_list.AddGroup(group, groupid);
 					else
 						group = nullptr;
-				}	//else, somebody from our group is already here...
+				}
 
 				if(group)
-					group->UpdatePlayer(c);
+					group->UpdatePlayer(client);
 				else
 				{
-					if(c->GetMerc())
-						database.SetGroupID(c->GetMerc()->GetCleanName(), 0, c->CharacterID(), true);
-					database.SetGroupID(c->GetName(), 0, c->CharacterID());	//cannot re-establish group, kill it
+					if(client->GetMerc())
+						database.SetGroupID(client->GetMerc()->GetCleanName(), 0, client->CharacterID(), true);
+					database.SetGroupID(client->GetName(), 0, client->CharacterID(), false);	//cannot re-establish group, kill it
 				}
 
 			}
 
 			if(group)
 			{
-				database.RefreshGroupFromDB(c);
+				if (client->GetMerc())
+				{
+					client->GetMerc()->MercJoinClientGroup();
+				}
+				database.RefreshGroupFromDB(client);
 
-				group->SendHPPacketsTo(c);
+				group->SendHPPacketsTo(client);
 
-				// If the group leader is not set, pull the group leader infomrmation from the database.
+				// If the group leader is not set, pull the group leader information from the database.
 				if(!group->GetLeader())
 				{
 					char ln[64];
@@ -1001,9 +980,11 @@ void WorldServer::Process() {
 					char AssistName[64];
 					char PullerName[64];
 					char NPCMarkerName[64];
+					char mentoree_name[64];
+					int mentor_percent;
 					GroupLeadershipAA_Struct GLAA;
 					memset(ln, 0, 64);
-					strcpy(ln, database.GetGroupLeadershipInfo(group->GetID(), ln, MainTankName, AssistName, PullerName, NPCMarkerName, &GLAA));
+					strcpy(ln, database.GetGroupLeadershipInfo(group->GetID(), ln, MainTankName, AssistName, PullerName, NPCMarkerName, mentoree_name, &mentor_percent, &GLAA));
 					Client *lc = entity_list.GetClientByName(ln);
 					if(lc)
 						group->SetLeader(lc);
@@ -1013,8 +994,13 @@ void WorldServer::Process() {
 					group->SetPuller(PullerName);
 					group->SetNPCMarker(NPCMarkerName);
 					group->SetGroupAAs(&GLAA);
+					group->SetGroupMentor(mentor_percent, mentoree_name);
 
 				}
+			}
+			else if (client->GetMerc())
+			{
+				client->GetMerc()->MercJoinClientGroup();
 			}
 			break;
 
@@ -1372,13 +1358,25 @@ void WorldServer::Process() {
 			break;
 		}
 
+		case ServerOP_RaidMOTD: {
+			ServerRaidMOTD_Struct *rmotd = (ServerRaidMOTD_Struct *)pack->pBuffer;
+			if (!zone)
+				break;
+			Raid *r = entity_list.GetRaidByID(rmotd->rid);
+			if (!r)
+				break;
+			r->SetRaidMOTD(std::string(rmotd->motd));
+			r->SendRaidMOTD();
+			break;
+		}
+
 		case ServerOP_SpawnPlayerCorpse: {
 			SpawnPlayerCorpse_Struct* s = (SpawnPlayerCorpse_Struct*)pack->pBuffer;
-			Corpse* NewCorpse = database.LoadPlayerCorpse(s->player_corpse_id);
+			Corpse* NewCorpse = database.LoadCharacterCorpse(s->player_corpse_id);
 			if(NewCorpse)
 				NewCorpse->Spawn();
 			else
-				LogFile->write(EQEMuLog::Error,"Unable to load player corpse id %u for zone %s.", s->player_corpse_id, zone->GetShortName());
+				Log.Out(Logs::General, Logs::Error, "Unable to load player corpse id %u for zone %s.", s->player_corpse_id, zone->GetShortName());
 
 			break;
 		}
@@ -1747,6 +1745,10 @@ void WorldServer::Process() {
 			RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset());
 			break;
 		}
+		case ServerOP_ReloadLogs: {
+			database.LoadLogSettings(Log.log_settings);
+			break;
+		}
 		case ServerOP_CameraShake:
 		{
 			if(zone)
@@ -1971,7 +1973,7 @@ bool WorldServer::SendVoiceMacro(Client* From, uint32 Type, char* Target, uint32
 
 bool WorldServer::RezzPlayer(EQApplicationPacket* rpack, uint32 rezzexp, uint32 dbid, uint16 opcode)
 {
-	_log(SPELLS__REZ, "WorldServer::RezzPlayer rezzexp is %i (0 is normal for RezzComplete", rezzexp);
+	Log.Out(Logs::Detail, Logs::Spells, "WorldServer::RezzPlayer rezzexp is %i (0 is normal for RezzComplete", rezzexp);
 	ServerPacket* pack = new ServerPacket(ServerOP_RezzPlayer, sizeof(RezzPlayer_Struct));
 	RezzPlayer_Struct* sem = (RezzPlayer_Struct*) pack->pBuffer;
 	sem->rezzopcode = opcode;
@@ -1980,9 +1982,9 @@ bool WorldServer::RezzPlayer(EQApplicationPacket* rpack, uint32 rezzexp, uint32 
 	sem->dbid = dbid;
 	bool ret = SendPacket(pack);
 	if (ret)
-		_log(SPELLS__REZ, "Sending player rezz packet to world spellid:%i", sem->rez.spellid);
+		Log.Out(Logs::Detail, Logs::Spells, "Sending player rezz packet to world spellid:%i", sem->rez.spellid);
 	else
-		_log(SPELLS__REZ, "NOT Sending player rezz packet to world");
+		Log.Out(Logs::Detail, Logs::Spells, "NOT Sending player rezz packet to world");
 
 	safe_delete(pack);
 	return ret;
@@ -2002,14 +2004,14 @@ void WorldServer::HandleReloadTasks(ServerPacket *pack)
 {
 	ReloadTasks_Struct* rts = (ReloadTasks_Struct*) pack->pBuffer;
 
-	_log(TASKS__GLOBALLOAD, "Zone received ServerOP_ReloadTasks from World, Command %i", rts->Command);
+	Log.Out(Logs::General, Logs::Tasks, "[GLOBALLOAD] Zone received ServerOP_ReloadTasks from World, Command %i", rts->Command);
 
 	switch(rts->Command) {
 		case RELOADTASKS:
 			entity_list.SaveAllClientsTaskState();
 
 			if(rts->Parameter == 0) {
-				_log(TASKS__GLOBALLOAD, "Reload ALL tasks");
+				Log.Out(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload ALL tasks");
 				safe_delete(taskmanager);
 				taskmanager = new TaskManager;
 				taskmanager->LoadTasks();
@@ -2018,7 +2020,7 @@ void WorldServer::HandleReloadTasks(ServerPacket *pack)
 				entity_list.ReloadAllClientsTaskState();
 			}
 			else {
-				_log(TASKS__GLOBALLOAD, "Reload only task %i", rts->Parameter);
+				Log.Out(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload only task %i", rts->Parameter);
 				taskmanager->LoadTasks(rts->Parameter);
 				entity_list.ReloadAllClientsTaskState(rts->Parameter);
 			}
@@ -2027,23 +2029,23 @@ void WorldServer::HandleReloadTasks(ServerPacket *pack)
 
 		case RELOADTASKPROXIMITIES:
 			if(zone) {
-				_log(TASKS__GLOBALLOAD, "Reload task proximities");
+				Log.Out(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload task proximities");
 				taskmanager->LoadProximities(zone->GetZoneID());
 			}
 			break;
 
 		case RELOADTASKGOALLISTS:
-			_log(TASKS__GLOBALLOAD, "Reload task goal lists");
+			Log.Out(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload task goal lists");
 			taskmanager->ReloadGoalLists();
 			break;
 
 		case RELOADTASKSETS:
-			_log(TASKS__GLOBALLOAD, "Reload task sets");
+			Log.Out(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload task sets");
 			taskmanager->LoadTaskSets();
 			break;
 
 		default:
-			_log(TASKS__GLOBALLOAD, "Unhandled ServerOP_ReloadTasks command %i", rts->Command);
+			Log.Out(Logs::General, Logs::Tasks, "[GLOBALLOAD] Unhandled ServerOP_ReloadTasks command %i", rts->Command);
 
 	}
 
@@ -2058,7 +2060,7 @@ uint32 WorldServer::NextGroupID() {
 	if(cur_groupid >= last_groupid) {
 		//this is an error... This means that 50 groups were created before
 		//1 packet could make the zone->world->zone trip... so let it error.
-		_log(ZONE__WORLD_ERR, "Ran out of group IDs before the server sent us more.");
+		Log.Out(Logs::General, Logs::Error, "Ran out of group IDs before the server sent us more.");
 		return(0);
 	}
 	if(cur_groupid > (last_groupid - /*50*/995)) {

@@ -100,6 +100,9 @@ RULE_BOOL ( Character, KeepLevelOverMax, false) // Don't delevel a character tha
 RULE_INT ( Character, FoodLossPerUpdate, 35) // How much food/water you lose per stamina update
 RULE_INT ( Character, BaseInstrumentSoftCap, 36) // Softcap for instrument mods, 36 commonly referred to as "3.6" as well.
 RULE_INT ( Character, BaseRunSpeedCap, 158) // Base Run Speed Cap, on live it's 158% which will give you a runspeed of 1.580 hard capped to 225.
+RULE_INT ( Character, OrnamentationAugmentType, 20) //Ornamentation Augment Type
+RULE_REAL(Character, EnvironmentDamageMulipliter, 1)
+RULE_BOOL(Character, UnmemSpellsOnDeath, true)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Mercs )
@@ -123,7 +126,6 @@ RULE_INT ( Guild, PlayerCreationLimit, 1)		// Only allow use of the UF+ window i
 RULE_INT ( Guild, PlayerCreationRequiredStatus, 0)	// Required admin status.
 RULE_INT ( Guild, PlayerCreationRequiredLevel, 0)	// Required Level of the player attempting to create the guild.
 RULE_INT ( Guild, PlayerCreationRequiredTime, 0)	// Required Time Entitled On Account (in Minutes) to create the guild.
-
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Skills )
@@ -136,7 +138,6 @@ RULE_CATEGORY_END()
 RULE_CATEGORY( Pets )
 RULE_REAL( Pets, AttackCommandRange, 150 )
 RULE_BOOL( Pets, UnTargetableSwarmPet, false )
-RULE_BOOL( Pets, SwarmPetNotTargetableWithHotKey, false ) //On SOF+ clients this a semi-hack to make swarm pets not F8 targetable.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( GM )
@@ -166,6 +167,7 @@ RULE_INT ( World, ExemptAccountLimitStatus, -1 ) //Min status required to be exe
 RULE_BOOL ( World, GMAccountIPList, false) // Check ip list against GM Accounts, AntiHack GM Accounts.
 RULE_INT ( World, MinGMAntiHackStatus, 1 ) //Minimum GM status to check against AntiHack list
 RULE_INT ( World, SoFStartZoneID, -1 ) //Sets the Starting Zone for SoF Clients separate from Titanium Clients (-1 is disabled)
+RULE_INT ( World, TitaniumStartZoneID, -1) //Sets the Starting Zone for Titanium Clients (-1 is disabled). Replaces the old method.
 RULE_INT ( World, ExpansionSettings, 16383) // Sets the expansion settings for the server, This is sent on login to world and affects client expansion settings. Defaults to all expansions enabled up to TSS.
 RULE_INT ( World, PVPSettings, 0) // Sets the PVP settings for the server, 1 = Rallos Zek RuleSet, 2 = Tallon/Vallon Zek Ruleset, 4 = Sullon Zek Ruleset, 6 = Discord Ruleset, anything above 6 is the Discord Ruleset without the no-drop restrictions removed. TODO: Edit IsAttackAllowed in Zone to accomodate for these rules.
 RULE_BOOL (World, IsGMPetitionWindowEnabled, false)
@@ -201,6 +203,8 @@ RULE_INT ( Zone, EbonCrystalItemID, 40902)
 RULE_INT ( Zone, RadiantCrystalItemID, 40903)
 RULE_BOOL ( Zone, LevelBasedEXPMods, false) // Allows you to use the level_exp_mods table in consideration to your players EXP hits
 RULE_INT ( Zone, WeatherTimer, 600) // Weather timer when no duration is available
+RULE_BOOL ( Zone, EnableLoggedOffReplenishments, true)
+RULE_INT ( Zone, MinOfflineTimeToReplenishments, 21600) // 21600 seconds is 6 Hours
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Map )
@@ -245,7 +249,6 @@ RULE_INT ( Pathing, CullNodesFromStart, 1)		// Checks LOS from Start point to se
 RULE_INT ( Pathing, CullNodesFromEnd, 1)		// Checks LOS from End point to second to last node for this many nodes and removes last node if there is LOS
 RULE_REAL ( Pathing, CandidateNodeRangeXY, 400)		// When searching for path start/end nodes, only nodes within this range will be considered.
 RULE_REAL ( Pathing, CandidateNodeRangeZ, 10)		// When searching for path start/end nodes, only nodes within this range will be considered.
-
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Watermap )
@@ -323,7 +326,9 @@ RULE_INT ( Spells, AI_IdleNoSpellMaxRecast, 2000) // AI spell recast time(MS) ch
 RULE_INT ( Spells, AI_IdleBeneficialChance, 100) // Chance while idle to do a beneficial spell on self or others.
 RULE_BOOL ( Spells, SHDProcIDOffByOne, true) // pre June 2009 SHD spell procs were off by 1, they stopped doing this in June 2009 (so UF+ spell files need this false)
 RULE_BOOL ( Spells, Jun182014HundredHandsRevamp, false) // this should be true for if you import a spell file newer than June 18, 2014
-
+RULE_BOOL ( Spells, SwarmPetTargetLock, false) // Use old method of swarm pets target locking till target dies then despawning.
+RULE_BOOL ( Spells, NPC_UseFocusFromSpells, true) // Allow npcs to use most spell derived focus effects.
+RULE_BOOL ( Spells, NPC_UseFocusFromItems, false) // Allow npcs to use most item derived focus effects.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Combat )
@@ -418,6 +423,7 @@ RULE_INT ( Combat, ArcheryBonusChance, 50)
 RULE_INT ( Combat, BerserkerFrenzyStart, 35)
 RULE_INT ( Combat, BerserkerFrenzyEnd, 45)
 RULE_BOOL ( Combat, OneProcPerWeapon, true) //If enabled, One proc per weapon per round
+RULE_BOOL ( Combat, ProjectileDmgOnImpact, true) //If enabled, projectiles (ie arrows) will hit on impact, instead of instantly.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( NPC )
@@ -436,6 +442,7 @@ RULE_BOOL ( NPC, SmartLastFightingDelayMoving, true)
 RULE_BOOL ( NPC, ReturnNonQuestNoDropItems, false)	// Returns NO DROP items on NPCs that don't have an EVENT_TRADE sub in their script
 RULE_INT ( NPC, StartEnrageValue, 9) // % HP that an NPC will begin to enrage
 RULE_BOOL ( NPC, LiveLikeEnrage, false) // If set to true then only player controlled pets will enrage
+RULE_BOOL ( NPC, EnableMeritBasedFaction, false) // If set to true, faction will given in the same way as experience (solo/group/raid)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY ( Aggro )
@@ -503,7 +510,6 @@ RULE_INT ( Merchant, PricePenaltyPct, 4) // Determines maximum price penalty fro
 RULE_REAL( Merchant, ChaBonusMod, 3.45) // Determines CHA cap, from 104 CHA. 3.45 is 132 CHA at apprehensive. 0.34 is 400 CHA at apprehensive.
 RULE_REAL ( Merchant, ChaPenaltyMod, 1.52) // Determines CHA bottom, up to 102 CHA. 1.52 is 37 CHA at apprehensive. 0.98 is 0 CHA at apprehensive.
 RULE_BOOL ( Merchant, EnableAltCurrencySell, true) // Enables the ability to resell items to alternate currency merchants
-
 RULE_CATEGORY_END()
 
 RULE_CATEGORY ( Bazaar )
@@ -585,6 +591,12 @@ RULE_CATEGORY( Inventory )
 RULE_BOOL ( Inventory, EnforceAugmentRestriction, true) // Forces augment slot restrictions
 RULE_BOOL ( Inventory, EnforceAugmentUsability, true) // Forces augmented item usability
 RULE_BOOL ( Inventory, EnforceAugmentWear, true) // Forces augment wear slot validation
+RULE_BOOL ( Inventory, DeleteTransformationMold, true) //False if you want mold to last forever
+RULE_BOOL ( Inventory, AllowAnyWeaponTransformation, false) //Weapons can use any weapon transformation
+RULE_CATEGORY_END()
+
+RULE_CATEGORY( Client )
+RULE_BOOL( Client, UseLiveFactionMessage, false) // Allows players to see faction adjustments like Live
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY
@@ -592,4 +604,3 @@ RULE_CATEGORY_END()
 #undef RULE_REAL
 #undef RULE_BOOL
 #undef RULE_CATEGORY_END
-

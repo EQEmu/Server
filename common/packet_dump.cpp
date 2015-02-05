@@ -15,13 +15,13 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
+
 #include <iostream>
+#include <sstream>
 #include <iomanip>
 #include <stdio.h>
 
 #include "packet_dump.h"
-#include "eq_packet.h"
 #include "../common/servertalk.h"
 
 void DumpPacketAscii(const uchar* buf, uint32 size, uint32 cols, uint32 skip) {
@@ -88,6 +88,54 @@ void DumpPacketHex(const uchar* buf, uint32 size, uint32 cols, uint32 skip) {
 	}
 	std::cout << " | " << ascii << std::endl;
 	safe_delete_array(ascii);
+}
+
+std::string DumpPacketHexToString(const uchar* buf, uint32 size, uint32 cols, uint32 skip) {
+	std::ostringstream out;
+	if (size == 0 || size > 39565)
+		return "";
+
+	out << "\n";
+	
+	// Output as HEX
+	char output[4];
+	int j = 0;
+	char* ascii = new char[cols + 1];
+	memset(ascii, 0, cols + 1);
+	uint32 i;
+	for (i = skip; i < size; i++)
+	{
+		if ((i - skip) % cols == 0) {
+			if (i != skip)
+				out << " | " << ascii << std::endl;
+				out << std::setw(4) << std::setfill(' ') << i - skip << ": ";
+			memset(ascii, 0, cols + 1);
+			j = 0;
+		}
+		else if ((i - skip) % (cols / 2) == 0) {
+			out << "- ";
+		}
+		sprintf(output, "%02X ", (unsigned char)buf[i]);
+		out << output;
+
+		if (buf[i] >= 32 && buf[i] < 127) {
+			ascii[j++] = buf[i];
+		}
+		else {
+			ascii[j++] = '.';
+		}
+		//		std::cout << std::setfill(0) << std::setw(2) << std::hex << (int)buf[i] << " "; // unknown intent [CODEBUG]
+	}
+	uint32 k = ((i - skip) - 1) % cols;
+	if (k < 8)
+		out << "  ";
+	for (uint32 h = k + 1; h < cols; h++) {
+		out << "   ";
+	}
+	out << " | " << ascii << std::endl;
+	safe_delete_array(ascii);
+
+	return out.str();
 }
 
 void DumpPacket(const uchar* buf, uint32 size)

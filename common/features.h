@@ -163,7 +163,7 @@ enum {	//timer settings, all in milliseconds
 	CombatEventTimer_expire = 12000,
 	Tribute_duration = 600000,
 	ZoneTimerResolution = 3,			//sleep time between zone main loop runs (milliseconds)
-	FeignMemoryDuration = 120000, // EverHood - Duration player must feign death to clear zonewide agro.
+	FeignMemoryDuration = 120000, // Duration player must feign death to clear zonewide agro.
 	EnragedTimer = 360000,
 	EnragedDurationTimer = 10000
 };
@@ -208,12 +208,12 @@ enum {	//some random constants
 //chance ratio that a
 #define THREATENLY_ARRGO_CHANCE 32 // 32/128 (25%) chance that a mob will arrgo on con Threatenly
 
-// max factions per npc faction list
+//max factions per npc faction list
 #define MAX_NPC_FACTIONS 20
 
-//value caps
-#define MAX_FACTION 1500
-#define MIN_FACTION -1500
+//individual faction pool
+#define MAX_PERSONAL_FACTION 1200
+#define MIN_PERSONAL_FACTION -3000
 
 //The Level Cap:
 //#define LEVEL_CAP RuleI(Character, MaxLevel)	//hard cap is 127
@@ -261,7 +261,8 @@ enum {
 	commandChangeFlags = 200,		//ability to set/refresh flags
 	commandBanPlayers = 100,		//can set bans on players
 	commandChangeDatarate = 201,	//edit client's data rate
-	commandZoneToCoords = 0			//can #zone with coords
+	commandZoneToCoords = 0,		//can #zone with coords
+	commandInterrogateInv = 100		//below this == only log on error state and self-only target dump
 };
 
 //default states for logging flag on NPCs and clients (having NPCs on by default is prolly a bad idea)

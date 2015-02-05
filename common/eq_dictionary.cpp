@@ -25,8 +25,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 // class EmuConstants
 //
-uint16 EmuConstants::InventoryMapSize(int16 map) {
-	switch (map) {
+uint16 EmuConstants::InventoryMapSize(int16 indexMap) {
+	switch (indexMap) {
 	case MapPossessions:
 		return MAP_POSSESSIONS_SIZE;
 	case MapBank:
@@ -91,8 +91,8 @@ std::string EmuConstants::InventoryLocationName(Location_Struct location) {
 }
 */
 
-std::string EmuConstants::InventoryMapName(int16 map) {
-	switch (map) {
+std::string EmuConstants::InventoryMapName(int16 indexMap) {
+	switch (indexMap) {
 	case INVALID_INDEX:
 		return "Invalid Map";
 	case MapPossessions:
@@ -150,8 +150,8 @@ std::string EmuConstants::InventoryMapName(int16 map) {
 	}
 }
 
-std::string EmuConstants::InventoryMainName(int16 main) {
-	switch (main) {
+std::string EmuConstants::InventoryMainName(int16 indexMain) {
+	switch (indexMain) {
 	case INVALID_INDEX:
 		return "Invalid Main";
 	case MainCharm:
@@ -229,293 +229,83 @@ std::string EmuConstants::InventoryMainName(int16 main) {
 	}
 }
 
-std::string EmuConstants::InventorySubName(int16 sub) {
-	if (sub == INVALID_INDEX)
+std::string EmuConstants::InventorySubName(int16 indexSub) {
+	if (indexSub == INVALID_INDEX)
 		return "Invalid Sub";
 
-	if ((uint16)sub >= ITEM_CONTAINER_SIZE)
+	if ((uint16)indexSub >= ITEM_CONTAINER_SIZE)
 		return "Unknown Sub";
 
 	std::string ret_str;
-	ret_str = StringFormat("Container %i", (sub + 1)); // zero-based index..but, count starts at one
+	ret_str = StringFormat("Container %i", (indexSub + 1)); // zero-based index..but, count starts at one
 
 	return ret_str;
 }
 
-std::string EmuConstants::InventoryAugName(int16 aug) {
-	if (aug == INVALID_INDEX)
+std::string EmuConstants::InventoryAugName(int16 indexAug) {
+	if (indexAug == INVALID_INDEX)
 		return "Invalid Aug";
 
-	if ((uint16)aug >= ITEM_COMMON_SIZE)
+	if ((uint16)indexAug >= ITEM_COMMON_SIZE)
 		return "Unknown Aug";
 
 	std::string ret_str;
-	ret_str = StringFormat("Augment %i", (aug + 1)); // zero-based index..but, count starts at one
+	ret_str = StringFormat("Augment %i", (indexAug + 1)); // zero-based index..but, count starts at one
 
 	return ret_str;
 }
 
-// legacy-related functions
-//
-// these should work for the first-stage coversions..but, once the new system is up and going..conversions will be incompatible
-// without limiting server functions and other aspects, such as augment control, bag size, etc. A complete remapping will be
-// required when bag sizes over 10 and direct manipulation of augments are implemented, due to the massive increase in range usage.
-//
-// (current personal/cursor bag range {251..340}, or 90 slots ... conversion translated range would be {10000..12804}, or 2805 slots...
-// these would have to be hard-coded into all perl code to allow access to full range of the new system - actual limits would be
-// less, based on bag size..but, the range must be full and consistent to avoid translation issues -- similar changes to other ranges
-// (240 versus 6120 slots for bank bags, for example...))
-/*
-int EmuConstants::ServerToPerlSlot(int server_slot) { // set r/s
-	switch (server_slot) {
-	case legacy::SLOT_CURSOR_END:
-		return legacy::SLOT_CURSOR_END;
-	case INVALID_INDEX:
-		return legacy::SLOT_INVALID;
-	case MainPowerSource:
-		return legacy::SLOT_POWER_SOURCE;
-	case MainAmmo:
-		return legacy::SLOT_AMMO;
-	case MainCursor:
-		return legacy::SLOT_CURSOR;
-	case legacy::SLOT_TRADESKILL:
-		return legacy::SLOT_TRADESKILL;
-	case legacy::SLOT_AUGMENT:
-		return legacy::SLOT_AUGMENT;
-	default:
-		int perl_slot = legacy::SLOT_INVALID;
-
-		// activate the internal checks as needed
-		if (server_slot >= EmuConstants::EQUIPMENT_BEGIN && server_slot <= MainWaist) {
-			perl_slot = server_slot;
-		}
-		else if (server_slot >= EmuConstants::GENERAL_BEGIN && server_slot <= EmuConstants::GENERAL_END) {
-			perl_slot = server_slot;// + legacy::SLOT_PERSONAL_BEGIN - EmuConstants::GENERAL_BEGIN;
-			//if (perl_slot < legacy::SLOT_PERSONAL_BEGIN || perl_slot > legacy::SLOT_PERSONAL_END)
-			//	perl_slot = legacy::SLOT_INVALID;
-		}
-		else if (server_slot >= EmuConstants::GENERAL_BAGS_BEGIN && server_slot <= EmuConstants::GENERAL_BAGS_END) {
-			perl_slot = server_slot;// + legacy::SLOT_PERSONAL_BAGS_BEGIN - EmuConstants::GENERAL_BAGS_BEGIN;
-			//if (perl_slot < legacy::SLOT_PERSONAL_BAGS_BEGIN || perl_slot > legacy::SLOT_PERSONAL_BAGS_END)
-			//	perl_slot = legacy::SLOT_INVALID;
-		}
-		else if (server_slot >= EmuConstants::CURSOR_BAG_BEGIN && server_slot <= EmuConstants::CURSOR_BAG_END) {
-			perl_slot = server_slot;// + legacy::SLOT_CURSOR_BAG_BEGIN - EmuConstants::CURSOR_BAG_BEGIN;
-			//if (perl_slot < legacy::SLOT_CURSOR_BAG_BEGIN || perl_slot > legacy::SLOT_CURSOR_BAG_END)
-			//	perl_slot = legacy::SLOT_INVALID;
-		}
-		else if (server_slot >= EmuConstants::TRIBUTE_BEGIN && server_slot <= EmuConstants::TRIBUTE_END) {
-			perl_slot = server_slot;// + legacy::SLOT_TRIBUTE_BEGIN - EmuConstants::TRADE_BEGIN;
-			//if (perl_slot < legacy::SLOT_TRIBUTE_BEGIN || perl_slot > legacy::SLOT_TRIBUTE_END)
-			//	perl_slot = legacy::SLOT_INVALID;
-		}
-		else if (server_slot >= EmuConstants::BANK_BEGIN && server_slot <= EmuConstants::BANK_END) {
-			perl_slot = server_slot;// + legacy::SLOT_BANK_BEGIN - EmuConstants::BANK_BEGIN;
-			//if (perl_slot < legacy::SLOT_BANK_BEGIN || perl_slot > legacy::SLOT_BANK_END)
-			//	perl_slot = legacy::SLOT_INVALID;
-		}
-		else if (server_slot >= EmuConstants::BANK_BAGS_BEGIN && server_slot <= EmuConstants::BANK_BAGS_END) {
-			perl_slot = server_slot;// + legacy::SLOT_BANK_BAGS_BEGIN - EmuConstants::BANK_BAGS_BEGIN;
-			//if (perl_slot < legacy::SLOT_BANK_BAGS_BEGIN || perl_slot > legacy::SLOT_BANK_BAGS_END)
-			//	perl_slot = legacy::SLOT_INVALID;
-		}
-		else if (server_slot >= EmuConstants::SHARED_BANK_BEGIN && server_slot <= EmuConstants::SHARED_BANK_END) {
-			perl_slot = server_slot;// + legacy::SLOT_SHARED_BANK_BEGIN - EmuConstants::SHARED_BANK_BEGIN;
-			//if (perl_slot < legacy::SLOT_SHARED_BANK_BEGIN || perl_slot > legacy::SLOT_SHARED_BANK_END)
-			//	perl_slot = legacy::SLOT_INVALID;
-		}
-		else if (server_slot >= EmuConstants::SHARED_BANK_BAGS_BEGIN && server_slot <= EmuConstants::SHARED_BANK_BAGS_END) {
-			perl_slot = server_slot;// + legacy::SLOT_SHARED_BANK_BAGS_BEGIN - EmuConstants::SHARED_BANK_BAGS_BEGIN;
-			//if (perl_slot < legacy::SLOT_SHARED_BANK_BAGS_BEGIN || perl_slot > legacy::SLOT_SHARED_BANK_BAGS_END)
-			//	perl_slot = legacy::SLOT_INVALID;
-		}
-		else if (server_slot >= EmuConstants::TRADE_BEGIN && server_slot <= EmuConstants::TRADE_END) {
-			perl_slot = server_slot;// + legacy::SLOT_TRADE_BEGIN - EmuConstants::TRADE_BEGIN;
-			//if (perl_slot < legacy::SLOT_TRADE_BEGIN || perl_slot > legacy::SLOT_TRADE_END)
-			//	perl_slot = legacy::SLOT_INVALID;
-		}
-		else if (server_slot >= EmuConstants::TRADE_BAGS_BEGIN && server_slot <= EmuConstants::TRADE_BAGS_END) {
-			perl_slot = server_slot;// + legacy::SLOT_TRADE_BAGS_BEGIN - EmuConstants::TRADE_BAGS_BEGIN;
-			//if (perl_slot < legacy::SLOT_TRADE_BAGS_BEGIN || perl_slot > legacy::SLOT_TRADE_BAGS_END)
-			//	perl_slot = legacy::SLOT_INVALID;
-		}
-		else if (server_slot >= EmuConstants::WORLD_BEGIN && server_slot <= EmuConstants::WORLD_END) {
-			perl_slot = server_slot;// + legacy::SLOT_WORLD_BEGIN - EmuConstants::WORLD_BEGIN;
-			//if (perl_slot < legacy::SLOT_WORLD_BEGIN || perl_slot > legacy::SLOT_WORLD_END)
-			//	perl_slot = legacy::SLOT_INVALID;
-		}
-		else if (server_slot >= 8000 && server_slot <= 8999) { // this range may be limited to 36 in the future (client size)
-			perl_slot = server_slot;
-		}
-
-		return perl_slot;
-	}
-}
-*/
-/*
-int EmuConstants::PerlToServerSlot(int perl_slot) { // set r/s
-	switch (perl_slot) {
-	case legacy::SLOT_CURSOR_END:
-		return legacy::SLOT_CURSOR_END;
-	case legacy::SLOT_INVALID:
-		return INVALID_INDEX;
-	case legacy::SLOT_POWER_SOURCE:
-		return MainPowerSource;
-	case legacy::SLOT_AMMO:
-		return MainAmmo;
-	case legacy::SLOT_CURSOR:
-		return MainCursor;
-	case legacy::SLOT_TRADESKILL:
-		return legacy::SLOT_TRADESKILL;
-	case legacy::SLOT_AUGMENT:
-		return legacy::SLOT_AUGMENT;
-	default:
-		int server_slot = INVALID_INDEX;
-
-		// activate the internal checks as needed
-		if (perl_slot >= legacy::SLOT_EQUIPMENT_BEGIN && perl_slot <= legacy::SLOT_WAIST) {
-			server_slot = perl_slot;
-		}
-		else if (perl_slot >= legacy::SLOT_PERSONAL_BEGIN && perl_slot <= legacy::SLOT_PERSONAL_END) {
-			server_slot = perl_slot;// + EmuConstants::GENERAL_BEGIN - legacy::SLOT_PERSONAL_BEGIN;
-			//if (server_slot < EmuConstants::GENERAL_BEGIN || server_slot > EmuConstants::GENERAL_END)
-			//	server_slot = INVALID_INDEX;
-		}
-		else if (perl_slot >= legacy::SLOT_PERSONAL_BAGS_BEGIN && perl_slot <= legacy::SLOT_PERSONAL_BAGS_END) {
-			server_slot = perl_slot;// + EmuConstants::GENERAL_BAGS_BEGIN - legacy::SLOT_PERSONAL_BAGS_BEGIN;
-			//if (server_slot < EmuConstants::GENERAL_BAGS_BEGIN || server_slot > EmuConstants::GENERAL_BAGS_END)
-			//	server_slot = INVALID_INDEX;
-		}
-		else if (perl_slot >= legacy::SLOT_CURSOR_BAG_BEGIN && perl_slot <= legacy::SLOT_CURSOR_BAG_END) {
-			server_slot = perl_slot;// + EmuConstants::CURSOR_BAG_BEGIN - legacy::SLOT_CURSOR_BAG_BEGIN;
-			//if (server_slot < EmuConstants::CURSOR_BAG_BEGIN || server_slot > EmuConstants::CURSOR_BAG_END)
-			//	server_slot = INVALID_INDEX;
-		}
-		else if (perl_slot >= legacy::SLOT_TRIBUTE_BEGIN && perl_slot <= legacy::SLOT_TRIBUTE_END) {
-			server_slot = perl_slot;// + EmuConstants::TRIBUTE_BEGIN - legacy::SLOT_TRIBUTE_BEGIN;
-			//if (server_slot < EmuConstants::TRIBUTE_BEGIN || server_slot > EmuConstants::TRIBUTE_END)
-			//	server_slot = INVALID_INDEX;
-		}
-		else if (perl_slot >= legacy::SLOT_BANK_BEGIN && perl_slot <= legacy::SLOT_BANK_END) {
-			server_slot = perl_slot;// + EmuConstants::BANK_BEGIN - legacy::SLOT_BANK_BEGIN;
-			//if (server_slot < EmuConstants::BANK_BEGIN || server_slot > EmuConstants::BANK_END)
-			//	server_slot = INVALID_INDEX;
-		}
-		else if (perl_slot >= legacy::SLOT_BANK_BAGS_BEGIN && perl_slot <= legacy::SLOT_BANK_BAGS_END) {
-			server_slot = perl_slot;// + EmuConstants::BANK_BAGS_BEGIN - legacy::SLOT_BANK_BAGS_BEGIN;
-			//if (server_slot < EmuConstants::BANK_BAGS_BEGIN || server_slot > EmuConstants::BANK_BAGS_END)
-			//	server_slot = INVALID_INDEX;
-		}
-		else if (perl_slot >= legacy::SLOT_SHARED_BANK_BEGIN && perl_slot <= legacy::SLOT_SHARED_BANK_END) {
-			server_slot = perl_slot;// + EmuConstants::SHARED_BANK_BEGIN - legacy::SLOT_SHARED_BANK_BEGIN;
-			//if (server_slot < EmuConstants::SHARED_BANK_BEGIN || server_slot > EmuConstants::SHARED_BANK_END)
-			//	server_slot = INVALID_INDEX;
-		}
-		else if (perl_slot >= legacy::SLOT_SHARED_BANK_BAGS_BEGIN && perl_slot <= legacy::SLOT_SHARED_BANK_BAGS_END) {
-			server_slot = perl_slot;// + EmuConstants::SHARED_BANK_BAGS_BEGIN - legacy::SLOT_SHARED_BANK_BAGS_END;
-			//if (server_slot < EmuConstants::SHARED_BANK_BAGS_BEGIN || server_slot > EmuConstants::SHARED_BANK_BAGS_END)
-			//	server_slot = INVALID_INDEX;
-		}
-		else if (perl_slot >= legacy::SLOT_TRADE_BEGIN && perl_slot <= legacy::SLOT_TRADE_END) {
-			server_slot = perl_slot;// + EmuConstants::TRADE_BEGIN - legacy::SLOT_TRADE_BEGIN;
-			//if (server_slot < EmuConstants::TRADE_BEGIN || server_slot > EmuConstants::TRADE_END)
-			//	server_slot = INVALID_INDEX;
-		}
-		else if (perl_slot >= legacy::SLOT_TRADE_BAGS_BEGIN && perl_slot <= legacy::SLOT_TRADE_BAGS_END) {
-			server_slot = perl_slot;// + EmuConstants::TRADE_BAGS_BEGIN - legacy::SLOT_TRADE_BAGS_BEGIN;
-			//if (server_slot < EmuConstants::TRADE_BAGS_BEGIN || server_slot > EmuConstants::TRADE_BAGS_END)
-			//	server_slot = INVALID_INDEX;
-		}
-		else if (perl_slot >= legacy::SLOT_WORLD_BEGIN && perl_slot <= legacy::SLOT_WORLD_END) {
-			server_slot = perl_slot;// + EmuConstants::WORLD_BEGIN - legacy::SLOT_WORLD_BEGIN;
-			//if (server_slot < EmuConstants::WORLD_BEGIN || server_slot > EmuConstants::WORLD_END)
-			//	server_slot = INVALID_INDEX;
-		}
-		else if (perl_slot >= 8000 && perl_slot <= 8999) { // this range may be limited to 36 in the future (client size)
-			server_slot = perl_slot;
-		}
-
-		return server_slot;
-	}
-}
-*/
 
 // 
 // class EQLimits
 //
 // client validation
-bool EQLimits::IsValidClientVersion(uint32 version) {
-	if (version < _EQClientCount)
+bool EQLimits::IsValidPCClientVersion(ClientVersion clientVersion) {
+	if (clientVersion > ClientVersion::Unknown && clientVersion <= LAST_PC_CLIENT)
 		return true;
 
 	return false;
 }
 
-uint32 EQLimits::ValidateClientVersion(uint32 version) {
-	if (version < _EQClientCount)
-		return version;
+ClientVersion EQLimits::ValidatePCClientVersion(ClientVersion clientVersion) {
+	if (clientVersion > ClientVersion::Unknown && clientVersion <= LAST_PC_CLIENT)
+		return clientVersion;
 
-	return EQClientUnknown;
-}
-
-EQClientVersion EQLimits::ValidateClientVersion(EQClientVersion version) {
-	if (version >= EQClientUnknown)
-		if (version < _EQClientCount)
-			return version;
-
-	return EQClientUnknown;
+	return ClientVersion::Unknown;
 }
 
 // npc validation
-bool EQLimits::IsValidNPCVersion(uint32 version) {
-	if (version >= _EQClientCount)
-		if (version < _EmuClientCount)
-			return true;
-
-	return false;
-}
-
-uint32 EQLimits::ValidateNPCVersion(uint32 version) {
-	if (version >= _EQClientCount)
-		if (version < _EmuClientCount)
-			return version;
-
-	return EQClientUnknown;
-}
-
-EQClientVersion EQLimits::ValidateNPCVersion(EQClientVersion version) {
-	if (version >= _EQClientCount)
-		if (version < _EmuClientCount)
-			return version;
-
-	return EQClientUnknown;
-}
-
-// mob validation
-bool EQLimits::IsValidMobVersion(uint32 version) {
-	if (version < _EmuClientCount)
+bool EQLimits::IsValidNPCClientVersion(ClientVersion clientVersion) {
+	if (clientVersion > LAST_PC_CLIENT && clientVersion <= LAST_NPC_CLIENT)
 		return true;
 
 	return false;
 }
 
-uint32 EQLimits::ValidateMobVersion(uint32 version) {
-	if (version < _EmuClientCount)
-		return version;
+ClientVersion EQLimits::ValidateNPCClientVersion(ClientVersion clientVersion) {
+	if (clientVersion > LAST_PC_CLIENT && clientVersion <= LAST_NPC_CLIENT)
+		return clientVersion;
 
-	return EQClientUnknown;
+	return ClientVersion::Unknown;
 }
 
-EQClientVersion EQLimits::ValidateMobVersion(EQClientVersion version) {
-	if (version >= EQClientUnknown)
-		if (version < _EmuClientCount)
-			return version;
+// mob validation
+bool EQLimits::IsValidMobClientVersion(ClientVersion clientVersion) {
+	if (clientVersion > ClientVersion::Unknown && clientVersion <= LAST_NPC_CLIENT)
+		return true;
 
-	return EQClientUnknown;
+	return false;
+}
+
+ClientVersion EQLimits::ValidateMobClientVersion(ClientVersion clientVersion) {
+	if (clientVersion > ClientVersion::Unknown && clientVersion <= LAST_NPC_CLIENT)
+		return clientVersion;
+
+	return ClientVersion::Unknown;
 }
 
 // inventory
-uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
+uint16 EQLimits::InventoryMapSize(int16 indexMap, ClientVersion clientVersion) {
 	// not all maps will have an instantiated container..some are references for queue generators (i.e., bazaar, mail, etc...)
 	// a zero '0' indicates a needed value..otherwise, change to '_NOTUSED' for a null value so indices requiring research can be identified
 	// ALL of these values need to be verified before pushing to live
@@ -527,7 +317,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 	//
 	// when setting NPC-based values, try to adhere to an EmuConstants::<property> or NOT_USED value to avoid unnecessary issues
 
-	static const uint16 local[_MapCount][_EmuClientCount] = {
+	static const uint16 local[_MapCount][CLIENT_VERSION_COUNT] = {
 		// server and database are sync'd to current MapPossessions's client as set in 'using namespace RoF::slots;' and
 		// 'EmuConstants::MAP_POSSESSIONS_SIZE' - use/update EquipmentBitmask(), GeneralBitmask() and CursorBitmask()
 		// for partial range validation checks and 'EmuConstants::MAP_POSSESSIONS_SIZE' for full range iterations
@@ -539,7 +329,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			EmuConstants::MAP_POSSESSIONS_SIZE,
 /*Underfoot*/	EmuConstants::MAP_POSSESSIONS_SIZE,
 /*RoF*/			EmuConstants::MAP_POSSESSIONS_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_POSSESSIONS_SIZE,
 
 /*NPC*/			EmuConstants::MAP_POSSESSIONS_SIZE,
 /*Merc*/		EmuConstants::MAP_POSSESSIONS_SIZE,
@@ -548,13 +338,13 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapBank]
 /*Unknown*/		NOT_USED,
-/*62*/			Client62::consts::MAP_BANK_SIZE,
+/*62*/			NOT_USED,
 /*Titanium*/	Titanium::consts::MAP_BANK_SIZE,
 /*SoF*/			EmuConstants::MAP_BANK_SIZE,
 /*SoD*/			EmuConstants::MAP_BANK_SIZE,
 /*Underfoot*/	EmuConstants::MAP_BANK_SIZE,
 /*RoF*/			EmuConstants::MAP_BANK_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_BANK_SIZE,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
@@ -569,7 +359,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			EmuConstants::MAP_SHARED_BANK_SIZE,
 /*Underfoot*/	EmuConstants::MAP_SHARED_BANK_SIZE,
 /*RoF*/			EmuConstants::MAP_SHARED_BANK_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_SHARED_BANK_SIZE,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
@@ -584,7 +374,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			EmuConstants::MAP_TRADE_SIZE,
 /*Underfoot*/	EmuConstants::MAP_TRADE_SIZE,
 /*RoF*/			EmuConstants::MAP_TRADE_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_TRADE_SIZE,
 
 /*NPC*/			4,
 /*Merc*/		4,
@@ -599,7 +389,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			EmuConstants::MAP_WORLD_SIZE,
 /*Underfoot*/	EmuConstants::MAP_WORLD_SIZE,
 /*RoF*/			EmuConstants::MAP_WORLD_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_WORLD_SIZE,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
@@ -614,7 +404,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			EmuConstants::MAP_LIMBO_SIZE,
 /*Underfoot*/	EmuConstants::MAP_LIMBO_SIZE,
 /*RoF*/			EmuConstants::MAP_LIMBO_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_LIMBO_SIZE,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
@@ -629,7 +419,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			EmuConstants::MAP_TRIBUTE_SIZE,
 /*Underfoot*/	EmuConstants::MAP_TRIBUTE_SIZE,
 /*RoF*/			EmuConstants::MAP_TRIBUTE_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_TRIBUTE_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -644,7 +434,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_TROPHY_TRIBUTE_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_TROPHY_TRIBUTE_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -659,7 +449,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_GUILD_TRIBUTE_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_GUILD_TRIBUTE_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -674,7 +464,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_MERCHANT_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_MERCHANT_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -689,7 +479,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_DELETED_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_DELETED_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -698,13 +488,13 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapCorpse]
 /*Unknown*/		NOT_USED,
-/*62*/			Client62::consts::MAP_CORPSE_SIZE,
+/*62*/			NOT_USED,
 /*Titanium*/	Titanium::consts::MAP_CORPSE_SIZE,
 /*SoF*/			SoF::consts::MAP_CORPSE_SIZE,
 /*SoD*/			SoD::consts::MAP_CORPSE_SIZE,
-/*Underfoot*/	Underfoot::consts::MAP_CORPSE_SIZE,
+/*Underfoot*/	UF::consts::MAP_CORPSE_SIZE,
 /*RoF*/			RoF::consts::MAP_CORPSE_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		RoF2::consts::MAP_CORPSE_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -719,7 +509,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			EmuConstants::MAP_BAZAAR_SIZE,
 /*Underfoot*/	EmuConstants::MAP_BAZAAR_SIZE,
 /*RoF*/			EmuConstants::MAP_BAZAAR_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_BAZAAR_SIZE,
 
 /*NPC*/			0, // this may need to be 'EmuConstants::MAP_BAZAAR_SIZE' if offline client traders respawn as an npc
 /*Merc*/		0,
@@ -728,13 +518,13 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		},
 		{ // local[MapInspect]
 /*Unknown*/		NOT_USED,
-/*62*/			Client62::consts::MAP_INSPECT_SIZE,
+/*62*/			NOT_USED,
 /*Titanium*/	Titanium::consts::MAP_INSPECT_SIZE,
 /*SoF*/			SoF::consts::MAP_INSPECT_SIZE,
 /*SoD*/			SoD::consts::MAP_INSPECT_SIZE,
-/*Underfoot*/	Underfoot::consts::MAP_INSPECT_SIZE,
+/*Underfoot*/	UF::consts::MAP_INSPECT_SIZE,
 /*RoF*/			RoF::consts::MAP_INSPECT_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		RoF2::consts::MAP_INSPECT_SIZE,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
@@ -749,7 +539,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_REAL_ESTATE_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_REAL_ESTATE_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -764,7 +554,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_VIEW_MOD_PC_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_VIEW_MOD_PC_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -779,7 +569,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_VIEW_MOD_BANK_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_VIEW_MOD_BANK_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -794,7 +584,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_VIEW_MOD_SHARED_BANK_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_VIEW_MOD_SHARED_BANK_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -809,7 +599,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_VIEW_MOD_LIMBO_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_VIEW_MOD_LIMBO_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -824,7 +614,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_ALT_STORAGE_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_ALT_STORAGE_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -839,7 +629,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_ARCHIVED_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_ARCHIVED_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -854,7 +644,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_MAIL_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_MAIL_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -869,7 +659,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_GUILD_TROPHY_TRIBUTE_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_GUILD_TROPHY_TRIBUTE_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -884,7 +674,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			NOT_USED,
 /*Underfoot*/	NOT_USED,
 /*RoF*/			EmuConstants::MAP_KRONO_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_KRONO_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -899,7 +689,7 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 /*SoD*/			0,
 /*Underfoot*/	0,
 /*RoF*/			EmuConstants::MAP_OTHER_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::MAP_OTHER_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -908,19 +698,19 @@ uint16 EQLimits::InventoryMapSize(int16 map, uint32 version) {
 		}
 	};
 
-	if ((uint16)map < _MapCount)
-		return local[map][ValidateMobVersion(version)];
+	if ((uint16)indexMap < _MapCount)
+		return local[indexMap][static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
 
 	return NOT_USED;
 }
 
-uint64 EQLimits::PossessionsBitmask(uint32 version) {
+uint64 EQLimits::PossessionsBitmask(ClientVersion clientVersion) {
 	// these are for the new inventory system (RoF)..not the current (Ti) one...
 	// 0x0000000000200000 is SlotPowerSource (SoF+)
 	// 0x0000000080000000 is SlotGeneral9 (RoF+)
 	// 0x0000000100000000 is SlotGeneral10 (RoF+)
 
-	static const uint64 local[_EmuClientCount] = {
+	static const uint64 local[CLIENT_VERSION_COUNT] = {
 /*Unknown*/		NOT_USED,
 /*62*/			0x000000027FDFFFFF,
 /*Titanium*/	0x000000027FDFFFFF,
@@ -937,11 +727,11 @@ uint64 EQLimits::PossessionsBitmask(uint32 version) {
 	};
 
 	return NOT_USED;
-	//return local[ValidateMobVersion(version)];
+	//return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
 }
 
-uint64 EQLimits::EquipmentBitmask(uint32 version) {
-	static const uint64 local[_EmuClientCount] = {
+uint64 EQLimits::EquipmentBitmask(ClientVersion clientVersion) {
+	static const uint64 local[CLIENT_VERSION_COUNT] = {
 /*Unknown*/		NOT_USED,
 /*62*/			0x00000000005FFFFF,
 /*Titanium*/	0x00000000005FFFFF,
@@ -958,11 +748,11 @@ uint64 EQLimits::EquipmentBitmask(uint32 version) {
 	};
 
 	return NOT_USED;
-	//return local[ValidateMobVersion(version)];
+	//return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
 }
 
-uint64 EQLimits::GeneralBitmask(uint32 version) {
-	static const uint64 local[_EmuClientCount] = {
+uint64 EQLimits::GeneralBitmask(ClientVersion clientVersion) {
+	static const uint64 local[CLIENT_VERSION_COUNT] = {
 /*Unknown*/		NOT_USED,
 /*62*/			0x000000007F800000,
 /*Titanium*/	0x000000007F800000,
@@ -979,11 +769,11 @@ uint64 EQLimits::GeneralBitmask(uint32 version) {
 	};
 
 	return NOT_USED;
-	//return local[ValidateMobVersion(version)];
+	//return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
 }
 
-uint64 EQLimits::CursorBitmask(uint32 version) {
-	static const uint64 local[_EmuClientCount] = {
+uint64 EQLimits::CursorBitmask(ClientVersion clientVersion) {
+	static const uint64 local[CLIENT_VERSION_COUNT] = {
 /*Unknown*/		NOT_USED,
 /*62*/			0x0000000200000000,
 /*Titanium*/	0x0000000200000000,
@@ -1000,19 +790,19 @@ uint64 EQLimits::CursorBitmask(uint32 version) {
 	};
 
 	return NOT_USED;
-	//return local[ValidateMobVersion(version)];
+	//return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
 }
 
-bool EQLimits::AllowsEmptyBagInBag(uint32 version) {
-	static const bool local[_EmuClientCount] = {
+bool EQLimits::AllowsEmptyBagInBag(ClientVersion clientVersion) {
+	static const bool local[CLIENT_VERSION_COUNT] = {
 /*Unknown*/		false,
-/*62*/			Client62::limits::ALLOWS_EMPTY_BAG_IN_BAG,
+/*62*/			false,
 /*Titanium*/	Titanium::limits::ALLOWS_EMPTY_BAG_IN_BAG,
 /*SoF*/			SoF::limits::ALLOWS_EMPTY_BAG_IN_BAG,
 /*SoD*/			SoD::limits::ALLOWS_EMPTY_BAG_IN_BAG,
-/*Underfoot*/	Underfoot::limits::ALLOWS_EMPTY_BAG_IN_BAG,
+/*Underfoot*/	UF::limits::ALLOWS_EMPTY_BAG_IN_BAG,
 /*RoF*/			RoF::limits::ALLOWS_EMPTY_BAG_IN_BAG,
-/*RoF2*/		false,
+/*RoF2*/		RoF2::limits::ALLOWS_EMPTY_BAG_IN_BAG,
 
 /*NPC*/			false,
 /*Merc*/		false,
@@ -1021,19 +811,19 @@ bool EQLimits::AllowsEmptyBagInBag(uint32 version) {
 	};
 
 	return false; // not implemented
-	//return local[ValidateMobVersion(version)];
+	//return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
 }
 
-bool EQLimits::AllowsClickCastFromBag(uint32 version) {
-	static const bool local[_EmuClientCount] = {
+bool EQLimits::AllowsClickCastFromBag(ClientVersion clientVersion) {
+	static const bool local[CLIENT_VERSION_COUNT] = {
 /*Unknown*/		false,
-/*62*/			Client62::limits::ALLOWS_CLICK_CAST_FROM_BAG,
+/*62*/			false,
 /*Titanium*/	Titanium::limits::ALLOWS_CLICK_CAST_FROM_BAG,
 /*SoF*/			SoF::limits::ALLOWS_CLICK_CAST_FROM_BAG,
 /*SoD*/			SoD::limits::ALLOWS_CLICK_CAST_FROM_BAG,
-/*Underfoot*/	Underfoot::limits::ALLOWS_CLICK_CAST_FROM_BAG,
+/*Underfoot*/	UF::limits::ALLOWS_CLICK_CAST_FROM_BAG,
 /*RoF*/			RoF::limits::ALLOWS_CLICK_CAST_FROM_BAG,
-/*RoF2*/		false,
+/*RoF2*/		RoF2::limits::ALLOWS_CLICK_CAST_FROM_BAG,
 
 /*NPC*/			false,
 /*Merc*/		false,
@@ -1041,12 +831,12 @@ bool EQLimits::AllowsClickCastFromBag(uint32 version) {
 /*Pet*/			false
 	};
 
-	return local[ValidateMobVersion(version)];
+	return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
 }
 
 // items
-uint16 EQLimits::ItemCommonSize(uint32 version) {
-	static const uint16 local[_EmuClientCount] = {
+uint16 EQLimits::ItemCommonSize(ClientVersion clientVersion) {
+	static const uint16 local[CLIENT_VERSION_COUNT] = {
 /*Unknown*/		NOT_USED,
 /*62*/			EmuConstants::ITEM_COMMON_SIZE,
 /*Titanium*/	EmuConstants::ITEM_COMMON_SIZE,
@@ -1054,7 +844,7 @@ uint16 EQLimits::ItemCommonSize(uint32 version) {
 /*SoD*/			EmuConstants::ITEM_COMMON_SIZE,
 /*Underfoot*/	EmuConstants::ITEM_COMMON_SIZE,
 /*RoF*/			EmuConstants::ITEM_COMMON_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::ITEM_COMMON_SIZE,
 
 /*NPC*/			EmuConstants::ITEM_COMMON_SIZE,
 /*Merc*/		EmuConstants::ITEM_COMMON_SIZE,
@@ -1062,11 +852,11 @@ uint16 EQLimits::ItemCommonSize(uint32 version) {
 /*Pet*/			EmuConstants::ITEM_COMMON_SIZE
 	};
 
-	return local[ValidateMobVersion(version)];
+	return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
 }
 
-uint16 EQLimits::ItemContainerSize(uint32 version) {
-	static const uint16 local[_EmuClientCount] = {
+uint16 EQLimits::ItemContainerSize(ClientVersion clientVersion) {
+	static const uint16 local[CLIENT_VERSION_COUNT] = {
 /*Unknown*/		NOT_USED,
 /*62*/			EmuConstants::ITEM_CONTAINER_SIZE,
 /*Titanium*/	EmuConstants::ITEM_CONTAINER_SIZE,
@@ -1074,7 +864,7 @@ uint16 EQLimits::ItemContainerSize(uint32 version) {
 /*SoD*/			EmuConstants::ITEM_CONTAINER_SIZE,
 /*Underfoot*/	EmuConstants::ITEM_CONTAINER_SIZE,
 /*RoF*/			EmuConstants::ITEM_CONTAINER_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::ITEM_CONTAINER_SIZE,
 
 /*NPC*/			EmuConstants::ITEM_CONTAINER_SIZE,
 /*Merc*/		EmuConstants::ITEM_CONTAINER_SIZE,
@@ -1082,19 +872,19 @@ uint16 EQLimits::ItemContainerSize(uint32 version) {
 /*Pet*/			EmuConstants::ITEM_CONTAINER_SIZE
 	};
 
-	return local[ValidateMobVersion(version)];
+	return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
 }
 
-bool EQLimits::CoinHasWeight(uint32 version) {
-	static const bool local[_EmuClientCount] = {
+bool EQLimits::CoinHasWeight(ClientVersion clientVersion) {
+	static const bool local[CLIENT_VERSION_COUNT] = {
 /*Unknown*/		true,
-/*62*/			Client62::limits::COIN_HAS_WEIGHT,
+/*62*/			true,
 /*Titanium*/	Titanium::limits::COIN_HAS_WEIGHT,
 /*SoF*/			SoF::limits::COIN_HAS_WEIGHT,
 /*SoD*/			SoD::limits::COIN_HAS_WEIGHT,
-/*Underfoot*/	Underfoot::limits::COIN_HAS_WEIGHT,
+/*Underfoot*/	UF::limits::COIN_HAS_WEIGHT,
 /*RoF*/			RoF::limits::COIN_HAS_WEIGHT,
-/*RoF2*/		true,
+/*RoF2*/		RoF::limits::COIN_HAS_WEIGHT,
 
 /*NPC*/			true,
 /*Merc*/		true,
@@ -1102,11 +892,11 @@ bool EQLimits::CoinHasWeight(uint32 version) {
 /*Pet*/			true
 	};
 
-	return local[ValidateMobVersion(version)];
+	return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
 }
 
-uint32 EQLimits::BandoliersCount(uint32 version) {
-	static const uint32 local[_EmuClientCount] = {
+uint32 EQLimits::BandoliersCount(ClientVersion clientVersion) {
+	static const uint32 local[CLIENT_VERSION_COUNT] = {
 /*Unknown*/		NOT_USED,
 /*62*/			EmuConstants::BANDOLIERS_COUNT,
 /*Titanium*/	EmuConstants::BANDOLIERS_COUNT,
@@ -1114,7 +904,7 @@ uint32 EQLimits::BandoliersCount(uint32 version) {
 /*SoD*/			EmuConstants::BANDOLIERS_COUNT,
 /*Underfoot*/	EmuConstants::BANDOLIERS_COUNT,
 /*RoF*/			EmuConstants::BANDOLIERS_COUNT,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::BANDOLIERS_COUNT,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
@@ -1122,11 +912,11 @@ uint32 EQLimits::BandoliersCount(uint32 version) {
 /*Pet*/			NOT_USED
 	};
 
-	return local[ValidateMobVersion(version)];
+	return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
 }
 
-uint32 EQLimits::BandolierSize(uint32 version) {
-	static const uint32 local[_EmuClientCount] = {
+uint32 EQLimits::BandolierSize(ClientVersion clientVersion) {
+	static const uint32 local[CLIENT_VERSION_COUNT] = {
 /*Unknown*/		NOT_USED,
 /*62*/			EmuConstants::BANDOLIER_SIZE,
 /*Titanium*/	EmuConstants::BANDOLIER_SIZE,
@@ -1134,7 +924,7 @@ uint32 EQLimits::BandolierSize(uint32 version) {
 /*SoD*/			EmuConstants::BANDOLIER_SIZE,
 /*Underfoot*/	EmuConstants::BANDOLIER_SIZE,
 /*RoF*/			EmuConstants::BANDOLIER_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::BANDOLIER_SIZE,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
@@ -1142,11 +932,11 @@ uint32 EQLimits::BandolierSize(uint32 version) {
 /*Pet*/			NOT_USED
 	};
 
-	return local[ValidateMobVersion(version)];
+	return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
 }
 
-uint32 EQLimits::PotionBeltSize(uint32 version) {
-	static const uint32 local[_EmuClientCount] = {
+uint32 EQLimits::PotionBeltSize(ClientVersion clientVersion) {
+	static const uint32 local[CLIENT_VERSION_COUNT] = {
 /*Unknown*/		NOT_USED,
 /*62*/			EmuConstants::POTION_BELT_SIZE,
 /*Titanium*/	EmuConstants::POTION_BELT_SIZE,
@@ -1154,7 +944,7 @@ uint32 EQLimits::PotionBeltSize(uint32 version) {
 /*SoD*/			EmuConstants::POTION_BELT_SIZE,
 /*Underfoot*/	EmuConstants::POTION_BELT_SIZE,
 /*RoF*/			EmuConstants::POTION_BELT_SIZE,
-/*RoF2*/		0,
+/*RoF2*/		EmuConstants::POTION_BELT_SIZE,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
@@ -1162,5 +952,5 @@ uint32 EQLimits::PotionBeltSize(uint32 version) {
 /*Pet*/			NOT_USED
 	};
 
-	return local[ValidateMobVersion(version)];
+	return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
 }

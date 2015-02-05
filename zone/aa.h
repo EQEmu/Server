@@ -2,7 +2,9 @@
 #ifndef AA_H
 #define AA_H
 
-#include "../common/eq_packet_structs.h"
+struct AA_Ability;
+struct SendAA_Struct;
+
 
 #define MANA_BURN 664
 
@@ -50,7 +52,8 @@ typedef enum {	//AA Effect IDs
 	aaEffectFrostArrows,
 	aaEffectWarcry,
 	aaEffectLeechTouch,
-	aaEffectProjectIllusion // unused - Handled via spell effect
+	aaEffectProjectIllusion, // unused - Handled via spell effect
+	_maxaaEffectType = 32
 } aaEffectType;
 
 
@@ -2153,6 +2156,7 @@ enum {	//values of AA_Action.action
 };
 
 class Timer;
+class Mob;
 class AA_SwarmPetInfo {
 public:
 	AA_SwarmPetInfo();

@@ -14,8 +14,8 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
-#include "../common/debug.h"
+	*/
+#include "../common/global_define.h"
 #include "../common/classes.h"
 
 const char* GetEQClassName(uint8 class_, uint8 level) {
@@ -288,52 +288,5 @@ const char* GetEQClassName(uint8 class_, uint8 level) {
 		default:
 			return "Unknown";
 	}
-}
-
-uint32 GetArrayEQClass(uint8 eqclass) {
-	switch (eqclass) {
-		case WARRIOR:
-			return WARRIOR;
-		case CLERIC:
-			return CLERIC;
-		case PALADIN:
-			return PALADIN;
-		case RANGER:
-			return RANGER;
-		case SHADOWKNIGHT:
-			return SHADOWKNIGHT;
-		case DRUID:
-			return DRUID;
-		case MONK:
-			return MONK;
-		case BARD:
-			return BARD;
-		case ROGUE:
-			return ROGUE;
-		case SHAMAN:
-			return SHAMAN;
-		case NECROMANCER:
-			return NECROMANCER;
-		case WIZARD:
-			return WIZARD;
-		case MAGICIAN:
-			return MAGICIAN;
-		case ENCHANTER:
-			return ENCHANTER;
-		case BEASTLORD:
-			return BEASTLORD;
-		case BERSERKER:
-			return BERSERKER;
-		default:
-			return 0;
-	}
-}
-
-uint8 GetEQArrayEQClass(uint8 eqclass) {
-	if (eqclass >= WARRIOR && eqclass <= BERSERKER)
-		return eqclass - WARRIOR;
-	if (eqclass >= WARRIORGM && eqclass <= BERSERKERGM)
-		return eqclass - WARRIORGM;
-	return WARRIOR;
 }
 

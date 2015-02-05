@@ -21,16 +21,15 @@
 // Object Class:
 // Represents Zone Objects (forges, ovens, brew barrels, items dropped to ground, etc)
 
-#include "../common/types.h"
-#include "../common/linked_list.h"
-#include "../common/emu_opcodes.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/item.h"
-#include "client.h"
-#include "mob.h"
-#include "npc.h"
-#include "entity.h"
 #include "../common/timer.h"
+#include "../common/types.h"
+
+#include "entity.h"
+
+class Client;
+class EQApplicationPacket;
+class ItemInst;
 
 /*
 item icon numbers (showeq)
@@ -121,6 +120,7 @@ public:
 	void StartDecay() {decay_timer.Start();}
 
 	// Container functions
+	const ItemInst* GetItem(uint8 index);
 	void PutItem(uint8 index, const ItemInst* inst);
 	void DeleteItem(uint8 index); // Item inside container
 	ItemInst* PopItem(uint8 index); // Pop item out of container
@@ -156,6 +156,10 @@ public:
 	void SetZ(float pos);
 	void SetModelName(const char* modelname);
 	const char* GetModelName();
+	uint16 GetSize();
+	void SetSize(uint16 size);
+	uint16 GetSolidType();
+	void SetSolidType(uint16 size);
 
 	const char* GetEntityVariable(const char *id);
 	void SetEntityVariable(const char *id, const char *m_var);

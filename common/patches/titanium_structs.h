@@ -1,5 +1,5 @@
-#ifndef Titanium_STRUCTS_H_
-#define Titanium_STRUCTS_H_
+#ifndef TITANIUM_STRUCTS_H_
+#define TITANIUM_STRUCTS_H_
 
 namespace Titanium {
 	namespace structs {
@@ -419,7 +419,7 @@ struct CastSpell_Struct
 	uint32	spell_id;
 	uint32	inventoryslot;  // slot for clicky item, 0xFFFF = normal cast
 	uint32	target_id;
-	uint8    cs_unknown[4];
+	uint8	cs_unknown[4];
 };
 
 /*
@@ -438,7 +438,7 @@ struct SpawnAppearance_Struct
 };
 
 
-// solar: this is used inside profile
+// this is used inside profile
 struct SpellBuff_Struct
 {
 /*000*/	uint8	slotid;		//badly named... seems to be 2 for a real buff, 0 otherwise
@@ -485,8 +485,8 @@ struct GMTrainee_Struct
 {
 	/*000*/ uint32 npcid;
 	/*004*/ uint32 playerid;
-	/*008*/ uint32 skills[73];
-	/*300*/ uint8 unknown300[148];
+	/*008*/ uint32 skills[PACKET_SKILL_ARRAY_SIZE];
+	/*408*/ uint8 unknown408[40];
 	/*448*/
 };
 
@@ -565,7 +565,7 @@ struct CharCreate_Struct
 /*0064*/	uint32	face;		// Could be unknown0076
 /*0068*/	uint32	eyecolor1;	//its possiable we could have these switched
 /*0073*/	uint32	eyecolor2;	//since setting one sets the other we really can't check
-/*0076*/	uint32	unknown0076;	// Could be face
+/*0076*/	uint32	tutorial;
 /*0080*/
 };
 
@@ -619,14 +619,62 @@ struct PotionBelt_Struct {
 static const uint32 MAX_GROUP_LEADERSHIP_AA_ARRAY = 16;
 static const uint32 MAX_RAID_LEADERSHIP_AA_ARRAY = 16;
 static const uint32 MAX_LEADERSHIP_AA_ARRAY = (MAX_GROUP_LEADERSHIP_AA_ARRAY+MAX_RAID_LEADERSHIP_AA_ARRAY);
-struct LeadershipAA_Struct {
-	uint32 ranks[MAX_LEADERSHIP_AA_ARRAY];
-};
 struct GroupLeadershipAA_Struct {
-	uint32 ranks[MAX_GROUP_LEADERSHIP_AA_ARRAY];
+	union {
+		struct {
+			uint32 groupAAMarkNPC;
+			uint32 groupAANPCHealth;
+			uint32 groupAADelegateMainAssist;
+			uint32 groupAADelegateMarkNPC;
+			uint32 groupAA4;
+			uint32 groupAA5;
+			uint32 groupAAInspectBuffs;
+			uint32 groupAA7;
+			uint32 groupAASpellAwareness;
+			uint32 groupAAOffenseEnhancement;
+			uint32 groupAAManaEnhancement;
+			uint32 groupAAHealthEnhancement;
+			uint32 groupAAHealthRegeneration;
+			uint32 groupAAFindPathToPC;
+			uint32 groupAAHealthOfTargetsTarget;
+			uint32 groupAA15;
+		};
+		uint32 ranks[MAX_GROUP_LEADERSHIP_AA_ARRAY];
+	};
 };
+
 struct RaidLeadershipAA_Struct {
-	uint32 ranks[MAX_RAID_LEADERSHIP_AA_ARRAY];
+	union {
+		struct {
+			uint32 raidAAMarkNPC;
+			uint32 raidAANPCHealth;
+			uint32 raidAADelegateMainAssist;
+			uint32 raidAADelegateMarkNPC;
+			uint32 raidAA4;
+			uint32 raidAA5;
+			uint32 raidAA6;
+			uint32 raidAASpellAwareness;
+			uint32 raidAAOffenseEnhancement;
+			uint32 raidAAManaEnhancement;
+			uint32 raidAAHealthEnhancement;
+			uint32 raidAAHealthRegeneration;
+			uint32 raidAAFindPathToPC;
+			uint32 raidAAHealthOfTargetsTarget;
+			uint32 raidAA14;
+			uint32 raidAA15;
+		};
+		uint32 ranks[MAX_RAID_LEADERSHIP_AA_ARRAY];
+	};
+};
+
+struct LeadershipAA_Struct {
+	union {
+		struct {
+			GroupLeadershipAA_Struct group;
+			RaidLeadershipAA_Struct raid;
+		};
+		uint32 ranks[MAX_LEADERSHIP_AA_ARRAY];
+	};
 };
 
  /**
@@ -652,7 +700,7 @@ struct BindStruct {
 static const uint32 MAX_PP_LANGUAGE		= 28;
 static const uint32 MAX_PP_SPELLBOOK	= 400;
 static const uint32 MAX_PP_MEMSPELL		= 9;
-static const uint32 MAX_PP_SKILL		= _SkillPacketArraySize;	// 100 - actual skills buffer size
+static const uint32 MAX_PP_SKILL		= PACKET_SKILL_ARRAY_SIZE;	// 100 - actual skills buffer size
 static const uint32 MAX_PP_AA_ARRAY		= 240;
 static const uint32 MAX_GROUP_MEMBERS	= 6;
 static const uint32 MAX_RECAST_TYPES	= 20;
@@ -1006,7 +1054,7 @@ struct Animation_Struct {
 /*04*/
 };
 
-// solar: this is what causes the caster to animate and the target to
+// this is what causes the caster to animate and the target to
 // get the particle effects around them when a spell is cast
 // also causes a buff icon
 struct Action_Struct
@@ -1030,7 +1078,7 @@ struct Action_Struct
  /* 31 */
 };
 
-// solar: this is what prints the You have been struck. and the regular
+// this is what prints the You have been struck. and the regular
 // melee messages like You try to pierce, etc.  It's basically the melee
 // and spell damage message
 struct CombatDamage_Struct
@@ -1217,19 +1265,27 @@ struct BulkItemPacket_Struct
 
 struct Consume_Struct
 {
-/*0000*/ uint32 slot;
-/*0004*/ uint32 auto_consumed; // 0xffffffff when auto eating e7030000 when right click
-/*0008*/ uint8  c_unknown1[4];
-/*0012*/ uint8  type; // 0x01=Food 0x02=Water
-/*0013*/ uint8  unknown13[3];
+/*0000*/ uint32	slot;
+/*0004*/ uint32	auto_consumed; // 0xffffffff when auto eating e7030000 when right click
+/*0008*/ uint8	c_unknown1[4];
+/*0012*/ uint8	type; // 0x01=Food 0x02=Water
+/*0013*/ uint8	unknown13[3];
 };
 
+struct DeleteItem_Struct
+{
+/*0000*/ uint32	from_slot;
+/*0004*/ uint32	to_slot;
+/*0008*/ uint32	number_in_stack;
+/*0012*/
+};
 
 struct MoveItem_Struct
 {
-/*0000*/ uint32 from_slot;
-/*0004*/ uint32 to_slot;
-/*0008*/ uint32 number_in_stack;
+/*0000*/ uint32	from_slot;
+/*0004*/ uint32	to_slot;
+/*0008*/ uint32	number_in_stack;
+/*0012*/
 };
 
 //
@@ -1431,12 +1487,6 @@ struct CombatAbility_Struct {
 	uint32 m_skill;
 };
 
-struct DeleteItem_Struct {
-/*0000*/ uint32 from_slot;
-/*0004*/ uint32 to_slot;
-/*0008*/ uint32 number_in_stack;
-};
-
 //Instill Doubt
 struct Instill_Doubt_Struct {
 	uint8 i_id;
@@ -1466,7 +1516,7 @@ struct RandomReq_Struct {
 	uint32 high;
 };
 
-/* solar: 9/23/03 reply to /random command; struct from Zaphod */
+/* 9/23/03 reply to /random command */
 struct RandomReply_Struct {
 /* 00 */	uint32 low;
 /* 04 */	uint32 high;
@@ -1588,6 +1638,14 @@ struct Adventure_Purchase_Struct {
 /*000*/	uint32	npcid;
 /*004*/	uint32	itemid;
 /*008*/	uint32	variable;
+};
+
+struct Adventure_Sell_Struct {
+/*000*/	uint32	unknown000;	//0x01
+/*004*/	uint32	npcid;
+/*008*/	uint32	slot;
+/*012*/	uint32	charges;
+/*016*/	uint32	sell_price;
 };
 
 struct AdventurePoints_Update_Struct {
@@ -2261,8 +2319,8 @@ struct MobHealth
 };
 
 struct Track_Struct {
-	uint16 entityid;
-	uint16 padding002;
+	uint32 entityid;
+	//uint16 padding002;
 	float distance;
 };
 
@@ -2583,10 +2641,10 @@ struct TributeInfo_Struct {
 };
 
 struct TributeItem_Struct {
-	uint32   slot;
-	uint32   quantity;
-	uint32   tribute_master_id;
-	int32  tribute_points;
+	uint32	slot;
+	uint32	quantity;
+	uint32	tribute_master_id;
+	int32	tribute_points;
 };
 
 struct TributePoint_Struct {
@@ -2622,7 +2680,7 @@ struct Split_Struct
 */
 struct NewCombine_Struct {
 /*00*/	int16	container_slot;
-/*02*/	char	unknown02[2];
+/*02*/	int16	guildtribute_slot;
 /*04*/
 };
 
@@ -3154,6 +3212,11 @@ struct AnnoyingZoneUnknown_Struct {
 	uint32	value;		//always 4
 };
 
+struct ApplyPoison_Struct {
+	uint32 inventorySlot;
+	uint32 success;
+};
+
 struct GuildMemberUpdate_Struct {
 /*000*/	uint32 guild_id;	//not sure
 /*004*/	char	member_name[64];
@@ -3269,16 +3332,4 @@ struct LFGuild_GuildToggle_Struct
 	};	//end namespace structs
 };	//end namespace Titanium
 
-
-
-#endif /*Titanium_STRUCTS_H_*/
-
-
-
-
-
-
-
-
-
-
+#endif /*TITANIUM_STRUCTS_H_*/

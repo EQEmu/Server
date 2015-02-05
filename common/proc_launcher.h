@@ -18,7 +18,7 @@
 #ifndef PROCLAUNCHER_H_
 #define PROCLAUNCHER_H_
 
-#include "debug.h"
+#include "global_define.h"
 
 #include <string>
 #include <vector>

@@ -23,17 +23,14 @@ crap into its own subclass of this object, it will clean things up
 tremendously.
 */
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 
 #include <iostream>
 #include <string.h>
-#include <stdio.h>
-#include <iomanip>
 
 #include "emu_tcp_connection.h"
 #include "emu_tcp_server.h"
 #include "../common/servertalk.h"
-#include "../common/packet_dump.h"
 
 #ifdef FREEBSD //Timothy Whitman - January 7, 2003
 	#define MSG_NOSIGNAL 0
@@ -107,7 +104,7 @@ EmuTCPConnection::EmuTCPConnection(uint32 ID, EmuTCPServer* iServer, EmuTCPConne
 	RelayCount = 0;
 	RemoteID = iRemoteID;
 	pOldFormat = false;
-	ConnectionType = Incomming;
+	ConnectionType = Incoming;
 	TCPMode = modePacket;
 	PacketMode = packetModeZone;
 #if TCPN_DEBUG_Memory >= 7
@@ -717,7 +714,7 @@ void EmuTCPConnection::ProcessNetworkLayerPacket(ServerPacket* pack) {
 				SendNetErrorPacket("Switch to RelayServer mode by a Relay Client");
 				break;
 			}
-			if (ConnectionType != Incomming) {
+			if (ConnectionType != Incoming) {
 				SendNetErrorPacket("Switch to RelayServer mode on outgoing connection");
 				break;
 			}
@@ -738,7 +735,7 @@ void EmuTCPConnection::ProcessNetworkLayerPacket(ServerPacket* pack) {
 				SendNetErrorPacket("New RelayClient: wrong size, expected 11");
 				break;
 			}
-			if (ConnectionType != Incomming) {
+			if (ConnectionType != Incoming) {
 				SendNetErrorPacket("New RelayClient: illegal on outgoing connection");
 				break;
 			}
@@ -758,7 +755,7 @@ void EmuTCPConnection::ProcessNetworkLayerPacket(ServerPacket* pack) {
 			}
 			EmuTCPConnection* con = Server->FindConnection(*((uint32*)data));
 			if (con) {
-				if (ConnectionType == Incomming) {
+				if (ConnectionType == Incoming) {
 					if (con->GetRelayLink() != this) {
 						SendNetErrorPacket("Delete RelayClient: RelayLink != this");
 						break;

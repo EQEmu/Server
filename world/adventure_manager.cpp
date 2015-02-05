@@ -1,8 +1,9 @@
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/misc_functions.h"
 #include "../common/string_util.h"
 #include "../common/servertalk.h"
 #include "../common/rulesys.h"
+#include "../common/random.h"
 #include "adventure.h"
 #include "adventure_manager.h"
 #include "worlddb.h"
@@ -14,6 +15,7 @@
 
 extern ZSList zoneserver_list;
 extern ClientList client_list;
+extern EQEmu::Random emu_random;
 
 AdventureManager::AdventureManager()
 {
@@ -28,16 +30,15 @@ AdventureManager::~AdventureManager()
 	safe_delete(save_timer);
 	safe_delete(leaderboard_info_timer);
 
-	for (auto iter = adventure_templates.begin(); iter != adventure_templates.end(); ++iter) {
-		delete iter->second;
-	}
+	for (auto &elem : adventure_templates)
+		delete elem.second;
 }
 
 void AdventureManager::Process()
 {
 	if(process_timer->Check())
 	{
-		std::list<Adventure*>::iterator iter = adventure_list.begin();
+		auto iter = adventure_list.begin();
 		while(iter != adventure_list.end())
 		{
 			if(!(*iter)->Process())
@@ -75,10 +76,10 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	/**
 	* This block checks to see if we actually have any adventures for the requested theme.
 	*/
-	std::map<uint32, std::list<AdventureTemplate*> >::iterator adv_list_iter = adventure_entries.find(sar->template_id);
+	auto adv_list_iter = adventure_entries.find(sar->template_id);
 	if(adv_list_iter == adventure_entries.end())
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureRequestDeny, sizeof(ServerAdventureRequestDeny_Struct));
+		auto pack = new ServerPacket(ServerOP_AdventureRequestDeny, sizeof(ServerAdventureRequestDeny_Struct));
 		ServerAdventureRequestDeny_Struct *deny = (ServerAdventureRequestDeny_Struct*)pack->pBuffer;
 		strcpy(deny->leader, sar->leader);
 		strcpy(deny->reason, "There are currently no adventures set for this theme.");
@@ -93,7 +94,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	* Active being in progress, finished adventures that are still waiting to expire do not count
 	* Though they will count against you for which new adventure you can get.
 	*/
-	std::list<Adventure*>::iterator iter = adventure_list.begin();
+	auto iter = adventure_list.begin();
 	while(iter != adventure_list.end())
 	{
 		Adventure* current = (*iter);
@@ -103,7 +104,8 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 			{
 				if(current->PlayerExists((data + sizeof(ServerAdventureRequest_Struct) + (64 * i))))
 				{
-					ServerPacket *pack = new ServerPacket(ServerOP_AdventureRequestDeny, sizeof(ServerAdventureRequestDeny_Struct));
+					auto pack = new ServerPacket(ServerOP_AdventureRequestDeny,
+								     sizeof(ServerAdventureRequestDeny_Struct));
 					ServerAdventureRequestDeny_Struct *deny = (ServerAdventureRequestDeny_Struct*)pack->pBuffer;
 					strcpy(deny->leader, sar->leader);
 
@@ -157,7 +159,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	* Remove zones from eligible zones based on their difficulty and type.
 	* ie only use difficult zones for difficult, collect for collect, etc.
 	*/
-	std::list<AdventureTemplate*>::iterator ea_iter = eligible_adventures.begin();
+	auto ea_iter = eligible_adventures.begin();
 	while(ea_iter != eligible_adventures.end())
 	{
 		if((*ea_iter)->is_hard != ((sar->risk == 2) ? true : false))
@@ -239,7 +241,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 
 	if(valid_count == 0)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureRequestDeny, sizeof(ServerAdventureRequestDeny_Struct));
+		auto pack = new ServerPacket(ServerOP_AdventureRequestDeny, sizeof(ServerAdventureRequestDeny_Struct));
 		ServerAdventureRequestDeny_Struct *deny = (ServerAdventureRequestDeny_Struct*)pack->pBuffer;
 		strcpy(deny->leader, sar->leader);
 		strcpy(deny->reason, "The number of found players for this adventure was zero.");
@@ -253,7 +255,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 
 	if(max_level - min_level > RuleI(Adventure, MaxLevelRange))
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureRequestDeny, sizeof(ServerAdventureRequestDeny_Struct));
+		auto pack = new ServerPacket(ServerOP_AdventureRequestDeny, sizeof(ServerAdventureRequestDeny_Struct));
 		ServerAdventureRequestDeny_Struct *deny = (ServerAdventureRequestDeny_Struct*)pack->pBuffer;
 		strcpy(deny->leader, sar->leader);
 
@@ -270,10 +272,10 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	/**
 	* Remove the zones from our eligible zones based on the exclusion above
 	*/
-	std::list<AdventureZones>::iterator ez_iter = excluded_zones.begin();
+	auto ez_iter = excluded_zones.begin();
 	while(ez_iter != excluded_zones.end())
 	{
-		std::list<AdventureTemplate*>::iterator ea_iter = eligible_adventures.begin();
+		auto ea_iter = eligible_adventures.begin();
 		while(ea_iter != eligible_adventures.end())
 		{
 			if((*ez_iter).zone.compare((*ea_iter)->zone) == 0 && (*ez_iter).version == (*ea_iter)->zone_version)
@@ -286,10 +288,10 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 		++ez_iter;
 	}
 
-	std::list<AdventureZoneIn>::iterator ezi_iter = excluded_zone_ins.begin();
+	auto ezi_iter = excluded_zone_ins.begin();
 	while(ezi_iter != excluded_zone_ins.end())
 	{
-		std::list<AdventureTemplate*>::iterator ea_iter = eligible_adventures.begin();
+		auto ea_iter = eligible_adventures.begin();
 		while(ea_iter != eligible_adventures.end())
 		{
 			if((*ezi_iter).zone_id == (*ea_iter)->zone_in_zone_id && (*ezi_iter).door_id == (*ea_iter)->zone_in_object_id)
@@ -325,12 +327,13 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	if(eligible_adventures.size() > 0)
 	{
 		ea_iter = eligible_adventures.begin();
-		int c_index = MakeRandomInt(0, (eligible_adventures.size()-1));
+		int c_index = emu_random.Int(0, (eligible_adventures.size()-1));
 		for(int i = 0; i < c_index; ++i)
 		{
 			++ea_iter;
 		}
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureRequestAccept, sizeof(ServerAdventureRequestAccept_Struct) + (sar->member_count * 64));
+		auto pack = new ServerPacket(ServerOP_AdventureRequestAccept,
+					     sizeof(ServerAdventureRequestAccept_Struct) + (sar->member_count * 64));
 		ServerAdventureRequestAccept_Struct *sra = (ServerAdventureRequestAccept_Struct*)pack->pBuffer;
 		strcpy(sra->leader, sar->leader);
 		strcpy(sra->text, (*ea_iter)->text);
@@ -345,7 +348,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	}
 	else
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureRequestDeny, sizeof(ServerAdventureRequestDeny_Struct));
+		auto pack = new ServerPacket(ServerOP_AdventureRequestDeny, sizeof(ServerAdventureRequestDeny_Struct));
 		ServerAdventureRequestDeny_Struct *deny = (ServerAdventureRequestDeny_Struct*)pack->pBuffer;
 		strcpy(deny->leader, sar->leader);
 		strcpy(deny->reason, "The number of adventures returned was zero.");
@@ -368,7 +371,7 @@ void AdventureManager::TryAdventureCreate(const char *data)
 	AdventureTemplate *adv_template = GetAdventureTemplate(src->theme, src->id);
 	if(!adv_template)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureCreateDeny, 64);
+		auto pack = new ServerPacket(ServerOP_AdventureCreateDeny, 64);
 		strcpy((char*)pack->pBuffer, src->leader);
 		pack->Deflate();
 		zoneserver_list.SendPacket(leader->zone(), leader->instance(), pack);
@@ -376,10 +379,10 @@ void AdventureManager::TryAdventureCreate(const char *data)
 		return;
 	}
 
-	Adventure *adv = new Adventure(adv_template);
+	auto adv = new Adventure(adv_template);
 	if(!adv->CreateInstance())
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureCreateDeny, 64);
+		auto pack = new ServerPacket(ServerOP_AdventureCreateDeny, 64);
 		strcpy((char*)pack->pBuffer, src->leader);
 		pack->Deflate();
 		zoneserver_list.SendPacket(leader->zone(), leader->instance(), pack);
@@ -393,7 +396,7 @@ void AdventureManager::TryAdventureCreate(const char *data)
 		Adventure *a = GetActiveAdventure((data + sizeof(ServerAdventureRequestCreate_Struct) + (64 * i)));
 		if(a)
 		{
-			ServerPacket *pack = new ServerPacket(ServerOP_AdventureCreateDeny, 64);
+			auto pack = new ServerPacket(ServerOP_AdventureCreateDeny, 64);
 			strcpy((char*)pack->pBuffer, src->leader);
 			pack->Deflate();
 			zoneserver_list.SendPacket(leader->zone(), leader->instance(), pack);
@@ -414,8 +417,9 @@ void AdventureManager::TryAdventureCreate(const char *data)
 		{
 			int f_count = 0;
 			Adventure** finished_adventures = GetFinishedAdventures((data + sizeof(ServerAdventureRequestCreate_Struct) + (64 * i)), f_count);
-			ServerPacket *pack = new ServerPacket(ServerOP_AdventureData, sizeof(ServerSendAdventureData_Struct)
-				+ (sizeof(ServerFinishedAdventures_Struct) * f_count));
+			auto pack = new ServerPacket(ServerOP_AdventureData,
+						     sizeof(ServerSendAdventureData_Struct) +
+							 (sizeof(ServerFinishedAdventures_Struct) * f_count));
 			ServerSendAdventureData_Struct *sca = (ServerSendAdventureData_Struct*)pack->pBuffer;
 
 			strcpy(sca->player, (data + sizeof(ServerAdventureRequestCreate_Struct) + (64 * i)));
@@ -453,7 +457,7 @@ void AdventureManager::TryAdventureCreate(const char *data)
 void AdventureManager::GetAdventureData(Adventure *adv)
 {
 	std::list<std::string> player_list = adv->GetPlayers();
-	std::list<std::string>::iterator iter = player_list.begin();
+	auto iter = player_list.begin();
 	while(iter != player_list.end())
 	{
 		GetAdventureData((*iter).c_str());
@@ -469,8 +473,9 @@ void AdventureManager::GetAdventureData(const char *name)
 		int f_count = 0;
 		Adventure** finished_adventures = GetFinishedAdventures(name, f_count);
 		Adventure *current = GetActiveAdventure(name);
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureData, sizeof(ServerSendAdventureData_Struct)
-			+ (sizeof(ServerFinishedAdventures_Struct) * f_count));
+		auto pack =
+		    new ServerPacket(ServerOP_AdventureData, sizeof(ServerSendAdventureData_Struct) +
+								 (sizeof(ServerFinishedAdventures_Struct) * f_count));
 		ServerSendAdventureData_Struct *sca = (ServerSendAdventureData_Struct*)pack->pBuffer;
 
 		if(current)
@@ -499,7 +504,7 @@ void AdventureManager::GetAdventureData(const char *name)
 			if(f_count == 0)
 			{
 				delete pack;
-				ServerPacket *pack = new ServerPacket(ServerOP_AdventureDataClear, 64);
+				auto pack = new ServerPacket(ServerOP_AdventureDataClear, 64);
 				strcpy((char*)pack->pBuffer, name);
 				pack->Deflate();
 				zoneserver_list.SendPacket(player->zone(), player->instance(), pack);
@@ -530,7 +535,7 @@ void AdventureManager::GetAdventureData(const char *name)
 
 bool AdventureManager::IsInExcludedZoneList(std::list<AdventureZones> excluded_zones, std::string zone_name, int version)
 {
-	std::list<AdventureZones>::iterator iter = excluded_zones.begin();
+	auto iter = excluded_zones.begin();
 	while(iter != excluded_zones.end())
 	{
 		if(((*iter).zone.compare(zone_name) == 0) && ((*iter).version == version))
@@ -544,7 +549,7 @@ bool AdventureManager::IsInExcludedZoneList(std::list<AdventureZones> excluded_z
 
 bool AdventureManager::IsInExcludedZoneInList(std::list<AdventureZoneIn> excluded_zone_ins, int zone_id, int door_object)
 {
-	std::list<AdventureZoneIn>::iterator iter = excluded_zone_ins.begin();
+	auto iter = excluded_zone_ins.begin();
 	while(iter != excluded_zone_ins.end())
 	{
 		if(((*iter).zone_id == zone_id) && ((*iter).door_id == door_object))
@@ -561,7 +566,7 @@ Adventure **AdventureManager::GetFinishedAdventures(const char *player, int &cou
 	Adventure **ret = nullptr;
 	count = 0;
 
-	std::list<Adventure*>::iterator iter = adventure_list.begin();
+	auto iter = adventure_list.begin();
 	while(iter != adventure_list.end())
 	{
 		if((*iter)->PlayerExists(player))
@@ -570,7 +575,7 @@ Adventure **AdventureManager::GetFinishedAdventures(const char *player, int &cou
 			{
 				if(ret)
 				{
-					Adventure **t = new Adventure*[count + 1];
+					auto t = new Adventure *[count + 1];
 					for(int i = 0; i < count; i++)
 					{
 						t[i] = ret[i];
@@ -594,7 +599,7 @@ Adventure **AdventureManager::GetFinishedAdventures(const char *player, int &cou
 
 Adventure *AdventureManager::GetActiveAdventure(const char *player)
 {
-	std::list<Adventure*>::iterator iter = adventure_list.begin();
+	auto iter = adventure_list.begin();
 	while(iter != adventure_list.end())
 	{
 		if((*iter)->PlayerExists(player) && (*iter)->IsActive())
@@ -608,13 +613,13 @@ Adventure *AdventureManager::GetActiveAdventure(const char *player)
 
 AdventureTemplate *AdventureManager::GetAdventureTemplate(int theme, int id)
 {
-	std::map<uint32, std::list<AdventureTemplate*> >::iterator iter = adventure_entries.find(theme);
+	auto iter = adventure_entries.find(theme);
 	if(iter == adventure_entries.end())
 	{
 		return nullptr;
 	}
 
-	std::list<AdventureTemplate*>::iterator l_iter = (*iter).second.begin();
+	auto l_iter = (*iter).second.begin();
 	while(l_iter != (*iter).second.end())
 	{
 		if((*l_iter)->id == id)
@@ -628,7 +633,7 @@ AdventureTemplate *AdventureManager::GetAdventureTemplate(int theme, int id)
 
 AdventureTemplate *AdventureManager::GetAdventureTemplate(int id)
 {
-	std::map<uint32, AdventureTemplate*>::iterator iter = adventure_templates.find(id);
+	auto iter = adventure_templates.find(id);
 	if(iter == adventure_templates.end())
 	{
 		return nullptr;
@@ -647,12 +652,11 @@ bool AdventureManager::LoadAdventureTemplates()
 		"graveyard_radius FROM adventure_template";
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::LoadAdventures: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return false;
     }
 
     for (auto row = results.begin(); row != results.end(); ++row) {
-		AdventureTemplate *aTemplate = new AdventureTemplate;
+	    auto aTemplate = new AdventureTemplate;
 		aTemplate->id = atoi(row[0]);
 		strcpy(aTemplate->zone, row[1]);
 		aTemplate->zone_version = atoi(row[2]);
@@ -697,7 +701,6 @@ bool AdventureManager::LoadAdventureEntries()
     auto results = database.QueryDatabase(query);
     if (!results.Success())
 	{
-		LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::LoadAdventureEntries: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -727,7 +730,7 @@ bool AdventureManager::LoadAdventureEntries()
 
 void AdventureManager::PlayerClickedDoor(const char *player, int zone_id, int door_id)
 {
-	std::list<Adventure*>::iterator iter = adventure_list.begin();
+	auto iter = adventure_list.begin();
 	while(iter != adventure_list.end())
 	{
 		const AdventureTemplate *t = (*iter)->GetTemplate();
@@ -738,7 +741,9 @@ void AdventureManager::PlayerClickedDoor(const char *player, int zone_id, int do
 				ClientListEntry *pc = client_list.FindCharacter(player);
 				if(pc)
 				{
-					ServerPacket *pack = new ServerPacket(ServerOP_AdventureClickDoorReply, sizeof(ServerPlayerClickedAdventureDoorReply_Struct));
+					auto pack =
+					    new ServerPacket(ServerOP_AdventureClickDoorReply,
+							     sizeof(ServerPlayerClickedAdventureDoorReply_Struct));
 					ServerPlayerClickedAdventureDoorReply_Struct *sr = (ServerPlayerClickedAdventureDoorReply_Struct*)pack->pBuffer;
 					strcpy(sr->player, player);
 					sr->zone_id = database.GetZoneID(t->zone);
@@ -765,7 +770,7 @@ void AdventureManager::PlayerClickedDoor(const char *player, int zone_id, int do
 	ClientListEntry *pc = client_list.FindCharacter(player);
 	if(pc)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureClickDoorError, 64);
+		auto pack = new ServerPacket(ServerOP_AdventureClickDoorError, 64);
 		strcpy((char*)pack->pBuffer, player);
 		pack->Deflate();
 		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
@@ -783,7 +788,7 @@ void AdventureManager::LeaveAdventure(const char *name)
 		{
 			if(pc->instance() != 0 && pc->instance() == current->GetInstanceID())
 			{
-				ServerPacket *pack = new ServerPacket(ServerOP_AdventureLeaveDeny, 64);
+				auto pack = new ServerPacket(ServerOP_AdventureLeaveDeny, 64);
 				strcpy((char*)pack->pBuffer, name);
 				pack->Deflate();
 				zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
@@ -797,7 +802,7 @@ void AdventureManager::LeaveAdventure(const char *name)
 				}
 
 				current->RemovePlayer(name);
-				ServerPacket *pack = new ServerPacket(ServerOP_AdventureLeaveReply, 64);
+				auto pack = new ServerPacket(ServerOP_AdventureLeaveReply, 64);
 				strcpy((char*)pack->pBuffer, name);
 				pack->Deflate();
 				zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
@@ -806,7 +811,7 @@ void AdventureManager::LeaveAdventure(const char *name)
 		}
 		else
 		{
-			ServerPacket *pack = new ServerPacket(ServerOP_AdventureLeaveReply, 64);
+			auto pack = new ServerPacket(ServerOP_AdventureLeaveReply, 64);
 			strcpy((char*)pack->pBuffer, name);
 			pack->Deflate();
 			zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
@@ -817,7 +822,7 @@ void AdventureManager::LeaveAdventure(const char *name)
 
 void AdventureManager::IncrementCount(uint16 instance_id)
 {
-	std::list<Adventure*>::iterator iter = adventure_list.begin();
+	auto iter = adventure_list.begin();
 	Adventure *current = nullptr;
 	while(iter != adventure_list.end())
 	{
@@ -833,8 +838,8 @@ void AdventureManager::IncrementCount(uint16 instance_id)
 	{
 		current->IncrementCount();
 		std::list<std::string> slist = current->GetPlayers();
-		std::list<std::string>::iterator siter = slist.begin();
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureCountUpdate, sizeof(ServerAdventureCountUpdate_Struct));
+		auto siter = slist.begin();
+		auto pack = new ServerPacket(ServerOP_AdventureCountUpdate, sizeof(ServerAdventureCountUpdate_Struct));
 		ServerAdventureCountUpdate_Struct *ac = (ServerAdventureCountUpdate_Struct*)pack->pBuffer;
 		ac->count = current->GetCount();
 		ac->total = current->GetTemplate()->type_count;
@@ -857,7 +862,7 @@ void AdventureManager::IncrementCount(uint16 instance_id)
 
 void AdventureManager::IncrementAssassinationCount(uint16 instance_id)
 {
-	std::list<Adventure*>::iterator iter = adventure_list.begin();
+	auto iter = adventure_list.begin();
 	Adventure *current = nullptr;
 	while(iter != adventure_list.end())
 	{
@@ -878,7 +883,7 @@ void AdventureManager::IncrementAssassinationCount(uint16 instance_id)
 
 void AdventureManager::GetZoneData(uint16 instance_id)
 {
-	std::list<Adventure*>::iterator iter = adventure_list.begin();
+	auto iter = adventure_list.begin();
 	Adventure *current = nullptr;
 	while(iter != adventure_list.end())
 	{
@@ -892,7 +897,7 @@ void AdventureManager::GetZoneData(uint16 instance_id)
 
 	if(current)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureZoneData, sizeof(ServerZoneAdventureDataReply_Struct));
+		auto pack = new ServerPacket(ServerOP_AdventureZoneData, sizeof(ServerZoneAdventureDataReply_Struct));
 		ServerZoneAdventureDataReply_Struct *zd = (ServerZoneAdventureDataReply_Struct*)pack->pBuffer;
 
 		const AdventureTemplate* temp = current->GetTemplate();
@@ -1072,7 +1077,6 @@ void AdventureManager::LoadLeaderboardInfo()
 		"AS adv_stats LEFT JOIN `character_data` AS ch ON adv_stats.player_id = ch.id;";
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::GetLeaderboardInfo: %s (%s)", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -1240,7 +1244,7 @@ void AdventureManager::DoLeaderboardRequestWins(const char* player)
 	ClientListEntry *pc = client_list.FindCharacter(player);
 	if(pc)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
+		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
 		AdventureLeaderboard_Struct *al = (AdventureLeaderboard_Struct*)(pack->pBuffer + 64);
 		strcpy((char*)pack->pBuffer, player);
 
@@ -1248,7 +1252,7 @@ void AdventureManager::DoLeaderboardRequestWins(const char* player)
 		int our_successes = 0;
 		int our_failures = 0;
 		int i = 0;
-		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_wins.begin();
+		auto iter = leaderboard_info_wins.begin();
 		while(i < 100 && iter != leaderboard_info_wins.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -1307,7 +1311,7 @@ void AdventureManager::DoLeaderboardRequestPercentage(const char* player)
 	ClientListEntry *pc = client_list.FindCharacter(player);
 	if(pc)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
+		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
 		AdventureLeaderboard_Struct *al = (AdventureLeaderboard_Struct*)(pack->pBuffer + 64);
 		strcpy((char*)pack->pBuffer, player);
 
@@ -1315,7 +1319,7 @@ void AdventureManager::DoLeaderboardRequestPercentage(const char* player)
 		int our_successes = 0;
 		int our_failures = 0;
 		int i = 0;
-		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage.begin();
+		auto iter = leaderboard_info_percentage.begin();
 		while(i < 100 && iter != leaderboard_info_percentage.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -1374,7 +1378,7 @@ void AdventureManager::DoLeaderboardRequestWinsGuk(const char* player)
 	ClientListEntry *pc = client_list.FindCharacter(player);
 	if(pc)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
+		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
 		AdventureLeaderboard_Struct *al = (AdventureLeaderboard_Struct*)(pack->pBuffer + 64);
 		strcpy((char*)pack->pBuffer, player);
 
@@ -1382,7 +1386,7 @@ void AdventureManager::DoLeaderboardRequestWinsGuk(const char* player)
 		int our_successes = 0;
 		int our_failures = 0;
 		int i = 0;
-		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_wins_guk.begin();
+		auto iter = leaderboard_info_wins_guk.begin();
 		while(i < 100 && iter != leaderboard_info_wins_guk.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -1441,7 +1445,7 @@ void AdventureManager::DoLeaderboardRequestPercentageGuk(const char* player)
 	ClientListEntry *pc = client_list.FindCharacter(player);
 	if(pc)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
+		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
 		AdventureLeaderboard_Struct *al = (AdventureLeaderboard_Struct*)(pack->pBuffer + 64);
 		strcpy((char*)pack->pBuffer, player);
 
@@ -1449,7 +1453,7 @@ void AdventureManager::DoLeaderboardRequestPercentageGuk(const char* player)
 		int our_successes = 0;
 		int our_failures = 0;
 		int i = 0;
-		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage_guk.begin();
+		auto iter = leaderboard_info_percentage_guk.begin();
 		while(i < 100 && iter != leaderboard_info_percentage_guk.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -1508,7 +1512,7 @@ void AdventureManager::DoLeaderboardRequestWinsMir(const char* player)
 	ClientListEntry *pc = client_list.FindCharacter(player);
 	if(pc)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
+		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
 		AdventureLeaderboard_Struct *al = (AdventureLeaderboard_Struct*)(pack->pBuffer + 64);
 		strcpy((char*)pack->pBuffer, player);
 
@@ -1516,7 +1520,7 @@ void AdventureManager::DoLeaderboardRequestWinsMir(const char* player)
 		int our_successes = 0;
 		int our_failures = 0;
 		int i = 0;
-		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_wins_mir.begin();
+		auto iter = leaderboard_info_wins_mir.begin();
 		while(i < 100 && iter != leaderboard_info_wins_mir.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -1575,7 +1579,7 @@ void AdventureManager::DoLeaderboardRequestPercentageMir(const char* player)
 	ClientListEntry *pc = client_list.FindCharacter(player);
 	if(pc)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
+		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
 		AdventureLeaderboard_Struct *al = (AdventureLeaderboard_Struct*)(pack->pBuffer + 64);
 		strcpy((char*)pack->pBuffer, player);
 
@@ -1583,7 +1587,7 @@ void AdventureManager::DoLeaderboardRequestPercentageMir(const char* player)
 		int our_successes = 0;
 		int our_failures = 0;
 		int i = 0;
-		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage_mir.begin();
+		auto iter = leaderboard_info_percentage_mir.begin();
 		while(i < 100 && iter != leaderboard_info_percentage_mir.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -1642,7 +1646,7 @@ void AdventureManager::DoLeaderboardRequestWinsMmc(const char* player)
 	ClientListEntry *pc = client_list.FindCharacter(player);
 	if(pc)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
+		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
 		AdventureLeaderboard_Struct *al = (AdventureLeaderboard_Struct*)(pack->pBuffer + 64);
 		strcpy((char*)pack->pBuffer, player);
 
@@ -1650,7 +1654,7 @@ void AdventureManager::DoLeaderboardRequestWinsMmc(const char* player)
 		int our_successes = 0;
 		int our_failures = 0;
 		int i = 0;
-		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_wins_mmc.begin();
+		auto iter = leaderboard_info_wins_mmc.begin();
 		while(i < 100 && iter != leaderboard_info_wins_mmc.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -1709,7 +1713,7 @@ void AdventureManager::DoLeaderboardRequestPercentageMmc(const char* player)
 	ClientListEntry *pc = client_list.FindCharacter(player);
 	if(pc)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
+		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
 		AdventureLeaderboard_Struct *al = (AdventureLeaderboard_Struct*)(pack->pBuffer + 64);
 		strcpy((char*)pack->pBuffer, player);
 
@@ -1717,7 +1721,7 @@ void AdventureManager::DoLeaderboardRequestPercentageMmc(const char* player)
 		int our_successes = 0;
 		int our_failures = 0;
 		int i = 0;
-		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage_mmc.begin();
+		auto iter = leaderboard_info_percentage_mmc.begin();
 		while(i < 100 && iter != leaderboard_info_percentage_mmc.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -1776,7 +1780,7 @@ void AdventureManager::DoLeaderboardRequestWinsRuj(const char* player)
 	ClientListEntry *pc = client_list.FindCharacter(player);
 	if(pc)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
+		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
 		AdventureLeaderboard_Struct *al = (AdventureLeaderboard_Struct*)(pack->pBuffer + 64);
 		strcpy((char*)pack->pBuffer, player);
 
@@ -1784,7 +1788,7 @@ void AdventureManager::DoLeaderboardRequestWinsRuj(const char* player)
 		int our_successes = 0;
 		int our_failures = 0;
 		int i = 0;
-		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_wins_ruj.begin();
+		auto iter = leaderboard_info_wins_ruj.begin();
 		while(i < 100 && iter != leaderboard_info_wins_ruj.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -1843,7 +1847,7 @@ void AdventureManager::DoLeaderboardRequestPercentageRuj(const char* player)
 	ClientListEntry *pc = client_list.FindCharacter(player);
 	if(pc)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
+		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
 		AdventureLeaderboard_Struct *al = (AdventureLeaderboard_Struct*)(pack->pBuffer + 64);
 		strcpy((char*)pack->pBuffer, player);
 
@@ -1851,7 +1855,7 @@ void AdventureManager::DoLeaderboardRequestPercentageRuj(const char* player)
 		int our_successes = 0;
 		int our_failures = 0;
 		int i = 0;
-		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage_ruj.begin();
+		auto iter = leaderboard_info_percentage_ruj.begin();
 		while(i < 100 && iter != leaderboard_info_percentage_ruj.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -1910,7 +1914,7 @@ void AdventureManager::DoLeaderboardRequestWinsTak(const char* player)
 	ClientListEntry *pc = client_list.FindCharacter(player);
 	if(pc)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
+		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
 		AdventureLeaderboard_Struct *al = (AdventureLeaderboard_Struct*)(pack->pBuffer + 64);
 		strcpy((char*)pack->pBuffer, player);
 
@@ -1918,7 +1922,7 @@ void AdventureManager::DoLeaderboardRequestWinsTak(const char* player)
 		int our_successes = 0;
 		int our_failures = 0;
 		int i = 0;
-		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_wins_ruj.begin();
+		auto iter = leaderboard_info_wins_ruj.begin();
 		while(i < 100 && iter != leaderboard_info_wins_ruj.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -1977,7 +1981,7 @@ void AdventureManager::DoLeaderboardRequestPercentageTak(const char* player)
 	ClientListEntry *pc = client_list.FindCharacter(player);
 	if(pc)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
+		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
 		AdventureLeaderboard_Struct *al = (AdventureLeaderboard_Struct*)(pack->pBuffer + 64);
 		strcpy((char*)pack->pBuffer, player);
 
@@ -1985,7 +1989,7 @@ void AdventureManager::DoLeaderboardRequestPercentageTak(const char* player)
 		int our_successes = 0;
 		int our_failures = 0;
 		int i = 0;
-		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage_tak.begin();
+		auto iter = leaderboard_info_percentage_tak.begin();
 		while(i < 100 && iter != leaderboard_info_percentage_tak.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -2041,7 +2045,7 @@ void AdventureManager::DoLeaderboardRequestPercentageTak(const char* player)
 
 bool AdventureManager::PopFinishedEvent(const char *name, AdventureFinishEvent &fe)
 {
-	std::list<AdventureFinishEvent>::iterator iter = finished_list.begin();
+	auto iter = finished_list.begin();
 	while(iter != finished_list.end())
 	{
 		if((*iter).name.compare(name) == 0)
@@ -2064,7 +2068,7 @@ void AdventureManager::SendAdventureFinish(AdventureFinishEvent fe)
 	ClientListEntry *pc = client_list.FindCharacter(fe.name.c_str());
 	if(pc)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureFinish, sizeof(ServerAdventureFinish_Struct));
+		auto pack = new ServerPacket(ServerOP_AdventureFinish, sizeof(ServerAdventureFinish_Struct));
 		ServerAdventureFinish_Struct *af = (ServerAdventureFinish_Struct*)pack->pBuffer;
 		strcpy(af->player, fe.name.c_str());
 		af->theme = fe.theme;
@@ -2087,7 +2091,7 @@ void AdventureManager::Save()
 	ss.write((const char*)&number_of_elements, sizeof(int));
 
 	char null_term = 0;
-	std::list<Adventure*>::iterator a_iter = adventure_list.begin();
+	auto a_iter = adventure_list.begin();
 	while(a_iter != adventure_list.end())
 	{
 		int cur = (*a_iter)->GetCount();
@@ -2112,7 +2116,7 @@ void AdventureManager::Save()
 		cur = players.size();
 		ss.write((const char*)&cur, sizeof(int));
 
-		std::list<std::string>::iterator s_iter = players.begin();
+		auto s_iter = players.begin();
 		while(s_iter != players.end())
 		{
 			ss.write((const char*)(*s_iter).c_str(), (*s_iter).size());
@@ -2125,7 +2129,7 @@ void AdventureManager::Save()
 
 	number_of_elements = finished_list.size();
 	ss.write((const char*)&number_of_elements, sizeof(int));
-	std::list<AdventureFinishEvent>::iterator f_iter = finished_list.begin();
+	auto f_iter = finished_list.begin();
 	while(f_iter != finished_list.end())
 	{
 		ss.write((const char*)&(*f_iter).win, sizeof(bool));
@@ -2197,7 +2201,8 @@ void AdventureManager::Load()
 			AdventureTemplate *t = GetAdventureTemplate(template_id);
 			if(t)
 			{
-				Adventure *adv = new Adventure(t, count, a_count, (AdventureStatus)status, instance_id, rem_time);
+				auto adv =
+				    new Adventure(t, count, a_count, (AdventureStatus)status, instance_id, rem_time);
 				for(int j = 0; j < num_players; ++j)
 				{
 					adv->AddPlayer((const char*)ptr, false);

@@ -15,15 +15,24 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
-#include <stdio.h>
-#include <iostream>
-#include <stdlib.h>
-#include "npc.h"
-#include "masterentity.h"
-#include "zonedb.h"
+
+#include "../common/global_define.h"
+#include "../common/loottable.h"
 #include "../common/misc_functions.h"
 #include "../common/data_verification.h"
+
+#include "client.h"
+#include "entity.h"
+#include "mob.h"
+#include "npc.h"
+#include "zonedb.h"
+
+#include <iostream>
+#include <stdlib.h>
+
+#ifdef _WINDOWS
+#define snprintf	_snprintf
+#endif
 
 // Queries the loottable: adds item & coin to the npc
 void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* itemlist, uint32* copper, uint32* silver, uint32* gold, uint32* plat) {
@@ -46,17 +55,17 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* ite
 	}
 
 	uint32 cash = 0;
-	if(max_cash > 0 && EQEmu::ValueWithin(lts->avgcoin, min_cash, max_cash)) {
+	if(max_cash > 0 && lts->avgcoin > 0 && EQEmu::ValueWithin(lts->avgcoin, min_cash, max_cash)) {
 		float upper_chance = (float)(lts->avgcoin - min_cash) / (float)(max_cash - min_cash);
-		float avg_cash_roll = (float)MakeRandomFloat(0.0, 1.0);
-
-		if(avg_cash_roll <= upper_chance) {
-			cash = MakeRandomInt(lts->avgcoin, max_cash);
+		float avg_cash_roll = (float)zone->random.Real(0.0, 1.0);
+		
+		if(avg_cash_roll < upper_chance) {
+			cash = zone->random.Int(lts->avgcoin, max_cash);
 		} else {
-			cash = MakeRandomInt(min_cash, lts->avgcoin);
+			cash = zone->random.Int(min_cash, lts->avgcoin);
 		}
 	} else {
-		cash = MakeRandomInt(min_cash, max_cash);
+		cash = zone->random.Int(min_cash, max_cash);
 	}
 
 	if(cash != 0) {
@@ -84,7 +93,7 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* ite
 
 			float drop_chance = 0.0f;
 			if(ltchance > 0.0 && ltchance < 100.0) {
-				drop_chance = (float)MakeRandomFloat(0.0, 100.0);
+				drop_chance = (float)zone->random.Real(0.0, 100.0);
 			}
 
 			if (ltchance != 0.0 && (ltchance == 100.0 || drop_chance <= ltchance)) {
@@ -109,7 +118,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 		for(uint32 i = 0; i < lds->NumEntries; ++i) {
 			int charges = lds->Entries[i].multiplier;
 			for(int j = 0; j < charges; ++j) {
-				if(MakeRandomFloat(0.0, 100.0) <= lds->Entries[i].chance) {
+				if(zone->random.Real(0.0, 100.0) <= lds->Entries[i].chance) {
 					const Item_Struct* dbitem = GetItem(lds->Entries[i].item_id);
 					npc->AddLootDrop(dbitem, itemlist, lds->Entries[i].item_charges, lds->Entries[i].minlevel, 
 									lds->Entries[i].maxlevel, lds->Entries[i].equip_item > 0 ? true : false, false);
@@ -144,9 +153,9 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 	}
 
 	mindrop = EQEmu::ClampLower(mindrop, (uint8)1);
-	int item_count = MakeRandomInt(mindrop, droplimit);
+	int item_count = zone->random.Int(mindrop, droplimit);
 	for(int i = 0; i < item_count; ++i) {
-		float roll = (float)MakeRandomFloat(0.0, roll_t);
+		float roll = (float)zone->random.Real(0.0, roll_t);
 		for(uint32 j = 0; j < lds->NumEntries; ++j) {
 			const Item_Struct* db_item = GetItem(lds->Entries[j].item_id);
 			if(db_item) {
@@ -158,7 +167,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 					charges = EQEmu::ClampLower(charges, 1);
 
 					for(int k = 1; k < charges; ++k) {
-						float c_roll = (float)MakeRandomFloat(0.0, 100.0);
+						float c_roll = (float)zone->random.Real(0.0, 100.0);
 						if(c_roll <= lds->Entries[i].chance) {
 							npc->AddLootDrop(db_item, itemlist, lds->Entries[j].item_charges, lds->Entries[j].minlevel,
 											lds->Entries[j].maxlevel, lds->Entries[j].equip_item > 0 ? true : false, false);
@@ -173,7 +182,12 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 				}
 			}
 		}
-	}
+	} // We either ran out of items or reached our limit.
+
+	npc->UpdateEquipLightValue();
+	// no wearchange associated with this function..so, this should not be needed
+	//if (npc->UpdateActiveLightValue())
+	//	npc->SendAppearancePacket(AT_Light, npc->GetActiveLightValue());
 }
 
 //if itemlist is null, just send wear changes
@@ -187,7 +201,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 
 	ServerLootItem_Struct* item = new ServerLootItem_Struct;
 #if EQDEBUG>=11
-		LogFile->write(EQEMuLog::Debug, "Adding drop to npc: %s, Item: %i", GetName(), item2->ID);
+		Log.Out(Logs::General, Logs::None, "Adding drop to npc: %s, Item: %i", GetName(), item2->ID);
 #endif
 
 	EQApplicationPacket* outapp = nullptr;
@@ -200,14 +214,17 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 	}
 
 	item->item_id = item2->ID;
-	item->charges = (uint8)charges;
-	item->aug1 = 0;
-	item->aug2 = 0;
-	item->aug3 = 0;
-	item->aug4 = 0;
-	item->aug5 = 0;
-	item->minlevel = minlevel;
-	item->maxlevel = maxlevel;
+	item->charges = charges;
+	item->aug_1 = 0;
+	item->aug_2 = 0;
+	item->aug_3 = 0;
+	item->aug_4 = 0;
+	item->aug_5 = 0;
+	item->aug_6 = 0;
+	item->attuned = 0;
+	item->min_level = minlevel;
+	item->max_level = maxlevel;
+
 	if (equipit) {
 		uint8 eslot = 0xFF;
 		char newid[20];
@@ -287,7 +304,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 			eslot = MaterialPrimary;
 		}
 		else if (foundslot == MainSecondary
-			&& (GetOwner() != nullptr || (GetLevel() >= 13 && MakeRandomInt(0,99) < NPC_DW_CHANCE) || (item2->Damage==0)) &&
+			&& (GetOwner() != nullptr || (GetLevel() >= 13 && zone->random.Roll(NPC_DW_CHANCE)) || (item2->Damage==0)) &&
 			(item2->ItemType == ItemType1HSlash || item2->ItemType == ItemType1HBlunt || item2->ItemType == ItemTypeShield ||
 			item2->ItemType == ItemType1HPiercing))
 		{
@@ -322,7 +339,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		what was this about???
 
 		if (((npc->GetRace()==127) && (npc->CastToMob()->GetOwnerID()!=0)) && (item2->Slots==24576) || (item2->Slots==8192) || (item2->Slots==16384)){
-			npc->d_meele_texture2=atoi(newid);
+			npc->d_melee_texture2=atoi(newid);
 			wc->wear_slot_id=8;
 			if (item2->Material >0)
 				wc->material=item2->Material;
@@ -345,7 +362,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		if (found) {
 			CalcBonuses(); // This is less than ideal for bulk adding of items
 		}
-		item->equipSlot = item2->Slots;
+		item->equip_slot = item2->Slots;
 	}
 
 	if(itemlist != nullptr)
@@ -357,6 +374,10 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		entity_list.QueueClients(this, outapp);
 		safe_delete(outapp);
 	}
+
+	UpdateEquipLightValue();
+	if (UpdateActiveLightValue())
+		SendAppearancePacket(AT_Light, GetActiveLightValue());
 }
 
 void NPC::AddItem(const Item_Struct* item, uint16 charges, bool equipitem) {

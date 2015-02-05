@@ -15,75 +15,34 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
-#include <iostream>
-#include <stdlib.h>
-#include <math.h>
 
-#ifdef _WINDOWS
-#define snprintf	_snprintf
-#endif
-
-#include "forage.h"
-#include "entity.h"
-#include "masterentity.h"
-#include "npc.h"
-#include "water_map.h"
-#include "titles.h"
-#include "string_ids.h"
+#include "../common/global_define.h"
+#include "../common/eqemu_logsys.h"
 #include "../common/misc_functions.h"
-#include "../common/string_util.h"
 #include "../common/rulesys.h"
+#include "../common/string_util.h"
 
+#include "entity.h"
+#include "forage.h"
+#include "npc.h"
+#include "quest_parser_collection.h"
+#include "string_ids.h"
+#include "titles.h"
+#include "water_map.h"
 #include "zonedb.h"
+
+#include <iostream>
+
 #ifdef _WINDOWS
 #define snprintf	_snprintf
 #endif
 
-#include "quest_parser_collection.h"
+struct NPCType;
 
 //max number of items which can be in the foraging table
 //for a given zone.
 #define FORAGE_ITEM_LIMIT 50
 
-/*
-
-The fishing and foraging need some work...
-foraging currently gives each item an equal chance of dropping
-fishing gives items which come in last from the select a very
-very low chance of dropping.
-
-
-Schema:
-CREATE TABLE forage (
-  id int(11) NOT NULL auto_increment,
-  zoneid int(4) NOT NULL default '0',
-  Itemid int(11) NOT NULL default '0',
-  level smallint(6) NOT NULL default '0',
-  chance smallint(6) NOT NULL default '0',
-  PRIMARY KEY  (id)
-) TYPE=MyISAM;
-
-old table upgrade:
-alter table forage add chance smallint(6) NOT NULL default '0';
-update forage set chance=100;
-
-
-CREATE TABLE fishing (
-  id int(11) NOT NULL auto_increment,
-  zoneid int(4) NOT NULL default '0',
-  Itemid int(11) NOT NULL default '0',
-  skill_level smallint(6) NOT NULL default '0',
-  chance smallint(6) NOT NULL default '0',
-  npc_id int NOT NULL default 0,
-  npc_chance int NOT NULL default 0,
-  PRIMARY KEY  (id)
-) TYPE=MyISAM;
-
-
-*/
-
-// This allows EqEmu to have zone specific foraging - BoB
 uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 
 	uint32 item[FORAGE_ITEM_LIMIT];
@@ -100,7 +59,6 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
                                     "LIMIT %i", ZoneID, skill, FORAGE_ITEM_LIMIT);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in Forage query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return 0;
 	}
 
@@ -111,7 +69,7 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 
         item[index] = atoi(row[0]);
         chance[index] = atoi(row[1]) + chancepool;
-        LogFile->write(EQEMuLog::Error, "Possible Forage: %d with a %d chance", item[index], chance[index]);
+        Log.Out(Logs::General, Logs::Error, "Possible Forage: %d with a %d chance", item[index], chance[index]);
         chancepool = chance[index];
     }
 
@@ -125,7 +83,7 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 
 	ret = 0;
 
-	uint32 rindex = MakeRandomInt(1, chancepool);
+	uint32 rindex = zone->random.Int(1, chancepool);
 
 	for(int i = 0; i < index; i++) {
 		if(rindex <= chance[i]) {
@@ -156,7 +114,6 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
                                     ZoneID, skill);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        std::cerr << "Error in Fishing query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
     }
 
@@ -178,7 +135,7 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
 	if (index <= 0)
         return 0;
 
-    uint32 random = MakeRandomInt(1, chancepool);
+    uint32 random = zone->random.Int(1, chancepool);
     for (int i = 0; i < index; i++)
     {
         if (random > chance[i])
@@ -216,7 +173,8 @@ bool Client::CanFish() {
 	}
 
 	if(zone->zonemap != nullptr && zone->watermap != nullptr && RuleB(Watermap, CheckForWaterWhenFishing)) {
-		float RodX, RodY, RodZ;
+
+		glm::vec3 rodPosition;
 		// Tweak Rod and LineLength if required
 		const float RodLength = RuleR(Watermap, FishingRodLength);
 		const float LineLength = RuleR(Watermap, FishingLineLength);
@@ -225,25 +183,25 @@ bool Client::CanFish() {
 		HeadingDegrees = (int) ((GetHeading()*360)/256);
 		HeadingDegrees = HeadingDegrees % 360;
 
-		RodX = x_pos + RodLength * sin(HeadingDegrees * M_PI/180.0f);
-		RodY = y_pos + RodLength * cos(HeadingDegrees * M_PI/180.0f);
+		rodPosition.x = m_Position.x + RodLength * sin(HeadingDegrees * M_PI/180.0f);
+		rodPosition.y = m_Position.y + RodLength * cos(HeadingDegrees * M_PI/180.0f);
 
 		// Do BestZ to find where the line hanging from the rod intersects the water (if it is water).
 		// and go 1 unit into the water.
-		Map::Vertex dest;
-		dest.x = RodX;
-		dest.y = RodY;
-		dest.z = z_pos+10;
+		glm::vec3 dest;
+		dest.x = rodPosition.x;
+		dest.y = rodPosition.y;
+		dest.z = m_Position.z+10;
 
-		RodZ = zone->zonemap->FindBestZ(dest, nullptr) + 4;
-		bool in_lava = zone->watermap->InLava(RodX, RodY, RodZ);
-		bool in_water = zone->watermap->InWater(RodX, RodY, RodZ) || zone->watermap->InVWater(RodX, RodY, RodZ);
+		rodPosition.z = zone->zonemap->FindBestZ(dest, nullptr) + 4;
+		bool in_lava = zone->watermap->InLava(rodPosition);
+		bool in_water = zone->watermap->InWater(rodPosition) || zone->watermap->InVWater(rodPosition);
 		//Message(0, "Rod is at %4.3f, %4.3f, %4.3f, InWater says %d, InLava says %d", RodX, RodY, RodZ, in_water, in_lava);
 		if (in_lava) {
 			Message_StringID(MT_Skills, FISHING_LAVA);	//Trying to catch a fire elemental or something?
 			return false;
 		}
-		if((!in_water) || (z_pos-RodZ)>LineLength) {	//Didn't hit the water OR the water is too far below us
+		if((!in_water) || (m_Position.z-rodPosition.z)>LineLength) {	//Didn't hit the water OR the water is too far below us
 			Message_StringID(MT_Skills, FISHING_LAND);	//Trying to catch land sharks perhaps?
 			return false;
 		}
@@ -291,7 +249,7 @@ void Client::GoFish()
 		Bait = m_inv.GetItem(bslot);
 
 	//if the bait isnt equipped, need to add its skill bonus
-	if(bslot >= EmuConstants::GENERAL_BEGIN && Bait->GetItem()->SkillModType == SkillFishing) {
+	if(bslot >= EmuConstants::GENERAL_BEGIN && Bait != nullptr && Bait->GetItem()->SkillModType == SkillFishing) {
 		fishing_skill += Bait->GetItem()->SkillModValue;
 	}
 
@@ -300,21 +258,23 @@ void Client::GoFish()
 		fishing_skill = 100+((fishing_skill-100)/2);
 	}
 
-	if (MakeRandomInt(0,175) < fishing_skill) {
+	if (zone->random.Int(0,175) < fishing_skill) {
 		uint32 food_id = 0;
 
 		//25% chance to fish an item.
-		if (MakeRandomInt(0, 399) <= fishing_skill ) {
+		if (zone->random.Int(0, 399) <= fishing_skill ) {
 			uint32 npc_id = 0;
 			uint8 npc_chance = 0;
 			food_id = database.GetZoneFishing(m_pp.zone_id, fishing_skill, npc_id, npc_chance);
 
 			//check for add NPC
 			if(npc_chance > 0 && npc_id) {
-				if(npc_chance < MakeRandomInt(0, 99)) {
+				if(npc_chance < zone->random.Int(0, 99)) {
 					const NPCType* tmp = database.GetNPCType(npc_id);
 					if(tmp != nullptr) {
-						NPC* npc = new NPC(tmp, nullptr, GetX()+3, GetY(), GetZ(), GetHeading(), FlyMode3);
+                        auto positionNPC = GetPosition();
+                        positionNPC.x = positionNPC.x + 3;
+						NPC* npc = new NPC(tmp, nullptr, positionNPC, FlyMode3);
 						npc->AddLootTable();
 
 						npc->AddToHateList(this, 1, 0, false);	//no help yelling
@@ -331,7 +291,7 @@ void Client::GoFish()
 		DeleteItemInInventory(bslot, 1, true);	//do we need client update?
 
 		if(food_id == 0) {
-			int index = MakeRandomInt(0, MAX_COMMON_FISH_IDS-1);
+			int index = zone->random.Int(0, MAX_COMMON_FISH_IDS-1);
 			food_id = common_fish_ids[index];
 		}
 
@@ -366,11 +326,11 @@ void Client::GoFish()
 	else
 	{
 		//chance to use bait when you dont catch anything...
-		if (MakeRandomInt(0, 4) == 1) {
+		if (zone->random.Int(0, 4) == 1) {
 			DeleteItemInInventory(bslot, 1, true);	//do we need client update?
 			Message_StringID(MT_Skills, FISHING_LOST_BAIT);	//You lost your bait!
 		} else {
-			if (MakeRandomInt(0, 15) == 1)	//give about a 1 in 15 chance to spill your beer. we could make this a rule, but it doesn't really seem worth it
+			if (zone->random.Int(0, 15) == 1)	//give about a 1 in 15 chance to spill your beer. we could make this a rule, but it doesn't really seem worth it
 				//TODO: check for & consume an alcoholic beverage from inventory when this triggers, and set it as a rule that's disabled by default
 				Message_StringID(MT_Skills, FISHING_SPILL_BEER);	//You spill your beer while bringing in your line.
 			else
@@ -383,7 +343,7 @@ void Client::GoFish()
 	//chance to break fishing pole...
 	//this is potentially exploitable in that they can fish
 	//and then swap out items in primary slot... too lazy to fix right now
-	if (MakeRandomInt(0, 49) == 1) {
+	if (zone->random.Int(0, 49) == 1) {
 		Message_StringID(MT_Skills, FISHING_POLE_BROKE);	//Your fishing pole broke!
 		DeleteItemInInventory(MainPrimary, 0, true);
 	}
@@ -412,25 +372,25 @@ void Client::ForageItem(bool guarantee) {
 	};
 
 	// these may need to be fine tuned, I am just guessing here
-	if (guarantee || MakeRandomInt(0,199) < skill_level) {
+	if (guarantee || zone->random.Int(0,199) < skill_level) {
 		uint32 foragedfood = 0;
 		uint32 stringid = FORAGE_NOEAT;
 
-		if (MakeRandomInt(0,99) <= 25) {
+		if (zone->random.Roll(25)) {
 			foragedfood = database.GetZoneForage(m_pp.zone_id, skill_level);
 		}
 
 		//not an else in case theres no DB food
 		if(foragedfood == 0) {
 			uint8 index = 0;
-			index = MakeRandomInt(0, MAX_COMMON_FOOD_IDS-1);
+			index = zone->random.Int(0, MAX_COMMON_FOOD_IDS-1);
 			foragedfood = common_food_ids[index];
 		}
 
 		const Item_Struct* food_item = database.GetItem(foragedfood);
 
 		if(!food_item) {
-			LogFile->write(EQEMuLog::Error, "nullptr returned from database.GetItem in ClientForageItem");
+			Log.Out(Logs::General, Logs::Error, "nullptr returned from database.GetItem in ClientForageItem");
 			return;
 		}
 
@@ -480,7 +440,7 @@ void Client::ForageItem(bool guarantee) {
 		}
 
 		int ChanceSecondForage = aabonuses.ForageAdditionalItems + itembonuses.ForageAdditionalItems + spellbonuses.ForageAdditionalItems;
-		if(!guarantee && MakeRandomInt(0,99) < ChanceSecondForage) {
+		if(!guarantee && zone->random.Roll(ChanceSecondForage)) {
 			Message_StringID(MT_Skills, FORAGE_MASTERY);
 			ForageItem(true);
 		}

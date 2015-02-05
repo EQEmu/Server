@@ -15,13 +15,13 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
+
+#include "../common/global_define.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/features.h"
-#include "masterentity.h"
-#include "../common/packet_dump.h"
-#include "../common/misc_functions.h"
-#include <string>
+
+#include "client.h"
+
 #include <map>
 
 #ifdef _WINDOWS
@@ -220,7 +220,7 @@ void Client::ChangeTributeSettings(TributeInfo_Struct *t) {
 
 void Client::SendTributeDetails(uint32 client_id, uint32 tribute_id) {
 	if(tribute_list.count(tribute_id) != 1) {
-		LogFile->write(EQEMuLog::Error, "Details request for invalid tribute %lu", (unsigned long)tribute_id);
+		Log.Out(Logs::General, Logs::Error, "Details request for invalid tribute %lu", (unsigned long)tribute_id);
 		return;
 	}
 	TributeData &td = tribute_list[tribute_id];
@@ -390,7 +390,6 @@ bool ZoneDatabase::LoadTributes() {
 	const std::string query = "SELECT id, name, descr, unknown, isguild FROM tributes";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in LoadTributes first query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -407,7 +406,6 @@ bool ZoneDatabase::LoadTributes() {
 	const std::string query2 = "SELECT tribute_id, level, cost, item_id FROM tribute_levels ORDER BY tribute_id, level";
 	results = QueryDatabase(query2);
 	if (!results.Success()) {
-        LogFile->write(EQEMuLog::Error, "Error in LoadTributes level query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -415,14 +413,14 @@ bool ZoneDatabase::LoadTributes() {
         uint32 id = atoul(row[0]);
 
         if(tribute_list.count(id) != 1) {
-            LogFile->write(EQEMuLog::Error, "Error in LoadTributes: unknown tribute %lu in tribute_levels", (unsigned long)id);
+            Log.Out(Logs::General, Logs::Error, "Error in LoadTributes: unknown tribute %lu in tribute_levels", (unsigned long)id);
             continue;
         }
 
         TributeData &cur = tribute_list[id];
 
         if(cur.tier_count >= MAX_TRIBUTE_TIERS) {
-            LogFile->write(EQEMuLog::Error, "Error in LoadTributes: on tribute %lu: more tiers defined than permitted", (unsigned long)id);
+            Log.Out(Logs::General, Logs::Error, "Error in LoadTributes: on tribute %lu: more tiers defined than permitted", (unsigned long)id);
             continue;
         }
 

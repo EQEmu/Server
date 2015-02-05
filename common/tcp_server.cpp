@@ -1,5 +1,7 @@
-#include "debug.h"
+#include "global_define.h"
 #include "tcp_server.h"
+#include "../common/eqemu_logsys.h"
+
 #include <stdio.h>
 #include <cstdlib>
 #include <cstring>
@@ -66,7 +68,7 @@ ThreadReturnType BaseTCPServer::TCPServerLoop(void* tmp) {
 	BaseTCPServer* tcps = (BaseTCPServer*) tmp;
 
 #ifndef WIN32
-	_log(COMMON__THREADS, "Starting TCPServerLoop with thread ID %d", pthread_self());
+	Log.Out(Logs::Detail, Logs::None,  "Starting TCPServerLoop with thread ID %d", pthread_self());
 #endif
 
 	tcps->MLoopRunning.lock();
@@ -77,7 +79,7 @@ ThreadReturnType BaseTCPServer::TCPServerLoop(void* tmp) {
 	tcps->MLoopRunning.unlock();
 
 #ifndef WIN32
-	_log(COMMON__THREADS, "Ending TCPServerLoop with thread ID %d", pthread_self());
+	Log.Out(Logs::Detail, Logs::None,  "Ending TCPServerLoop with thread ID %d", pthread_self());
 #endif
 
 	THREAD_RETURN(nullptr);

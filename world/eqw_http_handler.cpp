@@ -15,13 +15,13 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "eqw_http_handler.h"
 #include "../common/SocketLib/Base64.h"
 #include "eqw_parser.h"
 #include "eqw.h"
 #include "http_request.h"
-#include "../common/logsys.h"
+
 #include "worlddb.h"
 #include "console.h"
 
@@ -139,11 +139,11 @@ bool EQWHTTPHandler::CheckAuth() const {
 	int16 status = 0;
 	uint32 acctid = database.CheckLogin(m_username.c_str(), m_password.c_str(), &status);
 	if(acctid == 0) {
-		_log(WORLD__HTTP_ERR, "Login autentication failed for %s with '%s'", m_username.c_str(), m_password.c_str());
+		Log.Out(Logs::Detail, Logs::World_Server, "Login autentication failed for %s with '%s'", m_username.c_str(), m_password.c_str());
 		return(false);
 	}
 	if(status < httpLoginStatus) {
-		_log(WORLD__HTTP_ERR, "Login of %s failed: status too low.", m_username.c_str());
+		Log.Out(Logs::Detail, Logs::World_Server, "Login of %s failed: status too low.", m_username.c_str());
 		return(false);
 	}
 
@@ -178,8 +178,7 @@ void EQWHTTPHandler::SendPage(const std::string &file) {
 	}
 #endif
 
-
-	char *buffer = new char[READ_BUFFER_LEN+1];
+	auto buffer = new char[READ_BUFFER_LEN + 1];
 	size_t len;
 	std::string to_process;
 	while((len = fread(buffer, 1, READ_BUFFER_LEN, f)) > 0) {
@@ -274,34 +273,34 @@ EQWHTTPServer::EQWHTTPServer()
 }
 
 void EQWHTTPServer::CreateNewConnection(uint32 ID, SOCKET in_socket, uint32 irIP, uint16 irPort) {
-	EQWHTTPHandler *conn = new EQWHTTPHandler(ID, in_socket, irIP, irPort);
+	auto conn = new EQWHTTPHandler(ID, in_socket, irIP, irPort);
 	AddConnection(conn);
 }
 
 void EQWHTTPServer::Stop() {
-	_log(WORLD__HTTP, "Requesting that HTTP Service stop.");
+	Log.Out(Logs::Detail, Logs::World_Server, "Requesting that HTTP Service stop.");
 	m_running = false;
 	Close();
 }
 
 bool EQWHTTPServer::Start(uint16 port, const char *mime_file) {
 	if(m_running) {
-		_log(WORLD__HTTP_ERR, "HTTP Service is already running on port %d", m_port);
+		Log.Out(Logs::Detail, Logs::World_Server, "HTTP Service is already running on port %d", m_port);
 		return(false);
 	}
 
 	//load up our nice mime types
 	if(!EQWHTTPHandler::LoadMimeTypes(mime_file)) {
-		_log(WORLD__HTTP_ERR, "Failed to load mime types from '%s'", mime_file);
+		Log.Out(Logs::Detail, Logs::World_Server, "Failed to load mime types from '%s'", mime_file);
 		return(false);
 	} else {
-		_log(WORLD__HTTP, "Loaded mime types from %s", mime_file);
+		Log.Out(Logs::Detail, Logs::World_Server, "Loaded mime types from %s", mime_file);
 	}
 
 	//fire up the server thread
 	char errbuf[TCPServer_ErrorBufferSize];
 	if(!Open(port, errbuf)) {
-		_log(WORLD__HTTP_ERR, "Unable to bind to port %d for HTTP service: %s", port, errbuf);
+		Log.Out(Logs::Detail, Logs::World_Server, "Unable to bind to port %d for HTTP service: %s", port, errbuf);
 		return(false);
 	}
 
@@ -321,12 +320,12 @@ bool EQWHTTPServer::Start(uint16 port, const char *mime_file) {
 
 /*
 void EQWHTTPServer::Run() {
-	_log(WORLD__HTTP, "HTTP Processing thread started on port %d", m_port);
+	Log.LogDebugType(Logs::Detail, Logs::World_Server, "HTTP Processing thread started on port %d", m_port);
 	do {
 #warning DELETE THIS IF YOU DONT USE IT
 		Sleep(10);
 	} while(m_running);
-	_log(WORLD__HTTP, "HTTP Processing thread terminating on port %d", m_port);
+	Log.LogDebugType(Logs::Detail, Logs::World_Server, "HTTP Processing thread terminating on port %d", m_port);
 }
 
 ThreadReturnType EQWHTTPServer::ThreadProc(void *data) {

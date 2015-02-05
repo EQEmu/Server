@@ -18,9 +18,10 @@
 #ifndef _TRAP_H
 #define _TRAP_H
 
-#include "../common/debug.h"
-
 #include "entity.h"
+
+class Mob;
+class NPC;
 
 //ID of the NPC type to spawn when a trap is set off, to do the damage
 #define TRAP_NPC_TYPE 1586
@@ -53,9 +54,7 @@ public:
 	Timer	respawn_timer; //Respawn Time when Trap's been disarmed
 	Timer	chkarea_timer;
 	uint32	trap_id; //Database ID of trap
-	float	x; //X position
-	float	y; //Y position
-	float	z; //Z position
+	glm::vec3 m_Position;
 	float	maxzdiff;	//maximum z diff to be triggerable
 	float	radius;		//radius around trap to be triggerable
 	uint8	chance;		//%chance that the trap is triggered each 'tick'

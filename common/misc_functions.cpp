@@ -15,11 +15,13 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
+
+
+#include "../common/global_define.h"
 #include "misc_functions.h"
 #include <string.h>
 #include <time.h>
-#include <math.h>
+
 #ifndef WIN32
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -53,20 +55,6 @@
 	#include <netdb.h>
 	#include <errno.h>
 #endif
-
-static bool WELLRNG_init = false;
-static int state_i = 0;
-static unsigned int STATE[R];
-static unsigned int z0, z1, z2;
-unsigned int (*WELLRNG19937)(void);
-static unsigned int case_1 (void);
-static unsigned int case_2 (void);
-static unsigned int case_3 (void);
-static unsigned int case_4 (void);
-static unsigned int case_5 (void);
-static unsigned int case_6 (void);
-uint32 rnd_hash(time_t t, clock_t c);
-void oneseed(const uint32 seed);
 
 void CoutTimestamp(bool ms) {
 	time_t rawtime;
@@ -179,41 +167,6 @@ const char * itoa(int num, char* a,int b) {
 }
 #endif
 
-/*
- * generate a random integer in the range low-high this
- * should be used instead of the rand()%limit method
- */
-int MakeRandomInt(int low, int high)
-{
-	if(low >= high)
-		return(low);
-
-	//return (rand()%(high-low+1) + (low));
-		if(!WELLRNG_init) {
-		WELLRNG_init = true;
-		oneseed( rnd_hash( time(nullptr), clock() ) );
-		WELLRNG19937 = case_1;
-	}
-	unsigned int randomnum = ((WELLRNG19937)());
-	if(randomnum == 0xffffffffUL)
-		return high;
-	return int ((randomnum / (double)0xffffffffUL) * (high - low + 1) + low);
-}
-
-double MakeRandomFloat(double low, double high)
-{
-	if(low >= high)
-		return(low);
-
-	//return (rand() / (double)RAND_MAX * (high - low) + low);
-		if(!WELLRNG_init) {
-		WELLRNG_init = true;
-		oneseed( rnd_hash( time(nullptr), clock() ) );
-		WELLRNG19937 = case_1;
-	}
-	return ((WELLRNG19937)() / (double)0xffffffffUL * (high - low) + low);
-}
-
 uint32 rnd_hash( time_t t, clock_t c )
 {
 	// Get a uint32 from t and c
@@ -238,111 +191,6 @@ uint32 rnd_hash( time_t t, clock_t c )
 	}
 	return ( h1 + differ++ ) ^ h2;
 }
-
-void oneseed( const uint32 seed )
-{
-	// Initialize generator state with seed
-	// See Knuth TAOCP Vol 2, 3rd Ed, p.106 for multiplier.
-	// In previous versions, most significant bits (MSBs) of the seed affect
-	// only MSBs of the state array. Modified 9 Jan 2002 by Makoto Matsumoto.
-	register int j = 0;
-	STATE[j] = seed & 0xffffffffUL;
-	for (j = 1; j < R; j++)
-	{
-		STATE[j] = ( 1812433253UL * ( STATE[j-1] ^ (STATE[j-1] >> 30) ) + j ) & 0xffffffffUL;
-	}
-}
-
-// WELL RNG code
-
-/* ***************************************************************************** */
-/* Copyright:      Francois Panneton and Pierre L'Ecuyer, University of Montreal */
-/*                 Makoto Matsumoto, Hiroshima University                        */
-/* Notice:         This code can be used freely for personal, academic,          */
-/*                 or non-commercial purposes. For commercial purposes,          */
-/*                 please contact P. L'Ecuyer at: lecuyer@iro.UMontreal.ca       */
-/*                 A modified "maximally equidistributed" implementation         */
-/*                 by Shin Harase, Hiroshima University.                         */
-/* ***************************************************************************** */
-
-unsigned int case_1 (void){
-	// state_i == 0
-	z0 = (VRm1Under & MASKL) | (VRm2Under & MASKU);
-	z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
-	z2 = MAT3POS (9, VM2) ^ MAT0POS (1, VM3);
-	newV1 = z1 ^ z2;
-	newV0Under = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
-	state_i = R - 1;
-	WELLRNG19937 = case_3;
-	return (STATE[state_i] ^ (newVM2Over & BITMASK));
-}
-
-static unsigned int case_2 (void){
-	// state_i == 1
-	z0 = (VRm1 & MASKL) | (VRm2Under & MASKU);
-	z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
-	z2 = MAT3POS (9, VM2) ^ MAT0POS (1, VM3);
-	newV1 = z1 ^ z2;
-	newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
-	state_i = 0;
-	WELLRNG19937 = case_1;
-	return (STATE[state_i] ^ (newVM2 & BITMASK));
-}
-
-static unsigned int case_3 (void){
-	// state_i+M1 >= R
-	z0 = (VRm1 & MASKL) | (VRm2 & MASKU);
-	z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1Over);
-	z2 = MAT3POS (9, VM2Over) ^ MAT0POS (1, VM3Over);
-	newV1 = z1 ^ z2;
-	newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
-	state_i--;
-	if (state_i + M1 < R)
-		WELLRNG19937 = case_5;
-	return (STATE[state_i] ^ (newVM2Over & BITMASK));
-}
-
-static unsigned int case_4 (void){
-	// state_i+M3 >= R
-	z0 = (VRm1 & MASKL) | (VRm2 & MASKU);
-	z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
-	z2 = MAT3POS (9, VM2) ^ MAT0POS (1, VM3Over);
-	newV1 = z1 ^ z2;
-	newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
-	state_i--;
-	if (state_i + M3 < R)
-		WELLRNG19937 = case_6;
-	return (STATE[state_i] ^ (newVM2 & BITMASK));
-}
-
-static unsigned int case_5 (void){
-	// state_i+M2 >= R
-	z0 = (VRm1 & MASKL) | (VRm2 & MASKU);
-	z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
-	z2 = MAT3POS (9, VM2Over) ^ MAT0POS (1, VM3Over);
-	newV1 = z1 ^ z2;
-	newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
-	state_i--;
-	if (state_i + M2 < R)
-		WELLRNG19937 = case_4;
-	return (STATE[state_i] ^ (newVM2Over & BITMASK));
-}
-
-static unsigned int case_6 (void){
-	// 2 <= state_i <= (R - M3 - 1)
-	z0 = (VRm1 & MASKL) | (VRm2 & MASKU);
-	z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
-	z2 = MAT3POS (9, VM2) ^ MAT0POS (1, VM3);
-	newV1 = z1 ^ z2;
-	newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
-	state_i--;
-	if (state_i == 1)
-		WELLRNG19937 = case_2;
-	return (STATE[state_i] ^ (newVM2 & BITMASK));
-}
-
-// end WELL RNG code
-
 
 float EQ13toFloat(int d)
 {

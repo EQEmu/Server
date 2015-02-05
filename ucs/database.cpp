@@ -18,7 +18,8 @@
 */
 
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
+#include "../common/eqemu_logsys.h"
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -73,14 +74,14 @@ bool Database::Connect(const char* host, const char* user, const char* passwd, c
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	if (!Open(host, user, passwd, database, port, &errnum, errbuf))
 	{
-		LogFile->write(EQEMuLog::Error, "Failed to connect to database: Error: %s", errbuf);
+		Log.Out(Logs::General, Logs::Error, "Failed to connect to database: Error: %s", errbuf);
 		HandleMysqlError(errnum);
 
 		return false;
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Status, "Using database '%s' at %s:%d",database,host,port);
+		Log.Out(Logs::General, Logs::Status, "Using database '%s' at %s:%d",database,host,port);
 		return true;
 	}
 }
@@ -109,15 +110,15 @@ void Database::GetAccountStatus(Client *client) {
                                     client->GetAccountID());
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-		_log(UCS__ERROR, "Unable to get account status for character %s, error %s", client->GetName().c_str(), results.ErrorMessage().c_str());
+		Log.Out(Logs::Detail, Logs::UCS_Server, "Unable to get account status for character %s, error %s", client->GetName().c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
-	_log(UCS__TRACE, "GetAccountStatus Query: %s", query.c_str());
+	Log.Out(Logs::Detail, Logs::UCS_Server, "GetAccountStatus Query: %s", query.c_str());
 
 	if(results.RowCount() != 1)
 	{
-		_log(UCS__ERROR, "Error in GetAccountStatus");
+		Log.Out(Logs::Detail, Logs::UCS_Server, "Error in GetAccountStatus");
 		return;
 	}
 
@@ -128,13 +129,13 @@ void Database::GetAccountStatus(Client *client) {
 	client->SetKarma(atoi(row[2]));
 	client->SetRevoked((atoi(row[3])==1?true:false));
 
-	_log(UCS__TRACE, "Set account status to %i, hideme to %i and karma to %i for %s", client->GetAccountStatus(), client->GetHideMe(), client->GetKarma(), client->GetName().c_str());
+	Log.Out(Logs::Detail, Logs::UCS_Server, "Set account status to %i, hideme to %i and karma to %i for %s", client->GetAccountStatus(), client->GetHideMe(), client->GetKarma(), client->GetName().c_str());
 
 }
 
 int Database::FindAccount(const char *characterName, Client *client) {
 
-	_log(UCS__TRACE, "FindAccount for character %s", characterName);
+	Log.Out(Logs::Detail, Logs::UCS_Server, "FindAccount for character %s", characterName);
 
 
 	client->ClearCharacters();
@@ -143,12 +144,12 @@ int Database::FindAccount(const char *characterName, Client *client) {
                                     characterName);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		_log(UCS__ERROR, "FindAccount query failed: %s", query.c_str());
+		Log.Out(Logs::Detail, Logs::UCS_Server, "FindAccount query failed: %s", query.c_str());
 		return -1;
 	}
 
 	if (results.RowCount() != 1) {
-		_log(UCS__ERROR, "Bad result from query");
+		Log.Out(Logs::Detail, Logs::UCS_Server, "Bad result from query");
 		return -1;
 	}
 
@@ -157,7 +158,7 @@ int Database::FindAccount(const char *characterName, Client *client) {
 
 	int accountID = atoi(row[1]);
 
-	_log(UCS__TRACE, "Account ID for %s is %i", characterName, accountID);
+	Log.Out(Logs::Detail, Logs::UCS_Server, "Account ID for %s is %i", characterName, accountID);
 
     query = StringFormat("SELECT `id`, `name`, `level` FROM `character_data` "
                         "WHERE `account_id` = %i AND `name` != '%s'",
@@ -178,7 +179,7 @@ bool Database::VerifyMailKey(std::string characterName, int IPAddress, std::stri
                                     characterName.c_str());
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		_log(UCS__ERROR, "Error retrieving mailkey from database: %s", results.ErrorMessage().c_str());
+		Log.Out(Logs::Detail, Logs::UCS_Server, "Error retrieving mailkey from database: %s", results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -194,7 +195,7 @@ bool Database::VerifyMailKey(std::string characterName, int IPAddress, std::stri
 	else
 		sprintf(combinedKey, "%s", MailKey.c_str());
 
-	_log(UCS__TRACE, "DB key is [%s], Client key is [%s]", row[0], combinedKey);
+	Log.Out(Logs::Detail, Logs::UCS_Server, "DB key is [%s], Client key is [%s]", (row[0] ? row[0] : ""), combinedKey);
 
 	return !strcmp(row[0], combinedKey);
 }
@@ -205,14 +206,13 @@ int Database::FindCharacter(const char *characterName) {
     std::string query = StringFormat("SELECT `id` FROM `character_data` WHERE `name`='%s' LIMIT 1", safeCharName);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		_log(UCS__ERROR, "FindCharacter failed. %s %s", query.c_str(), results.ErrorMessage().c_str());
 		safe_delete(safeCharName);
 		return -1;
 	}
     safe_delete(safeCharName);
 
 	if (results.RowCount() != 1) {
-		_log(UCS__ERROR, "Bad result from FindCharacter query for character %s", characterName);
+		Log.Out(Logs::Detail, Logs::UCS_Server, "Bad result from FindCharacter query for character %s", characterName);
 		return -1;
 	}
 
@@ -228,7 +228,6 @@ bool Database::GetVariable(const char* varname, char* varvalue, uint16 varvalue_
 	std::string query = StringFormat("SELECT `value` FROM `variables` WHERE `varname` = '%s'", varname);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		_log(UCS__ERROR, "Unable to get message count from database. %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -244,12 +243,11 @@ bool Database::GetVariable(const char* varname, char* varvalue, uint16 varvalue_
 
 bool Database::LoadChatChannels() {
 
-	_log(UCS__INIT, "Loading chat channels from the database.");
+	Log.Out(Logs::Detail, Logs::UCS_Server, "Loading chat channels from the database.");
 
 	const std::string query = "SELECT `name`, `owner`, `password`, `minstatus` FROM `chatchannels`";
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		_log(UCS__ERROR, "Failed to load channels. %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -266,26 +264,20 @@ bool Database::LoadChatChannels() {
 
 void Database::SetChannelPassword(std::string channelName, std::string password) {
 
-	_log(UCS__TRACE, "Database::SetChannelPassword(%s, %s)", channelName.c_str(), password.c_str());
+	Log.Out(Logs::Detail, Logs::UCS_Server, "Database::SetChannelPassword(%s, %s)", channelName.c_str(), password.c_str());
 
 	std::string query = StringFormat("UPDATE `chatchannels` SET `password` = '%s' WHERE `name` = '%s'",
                                     password.c_str(), channelName.c_str());
-    auto results = QueryDatabase(query);
-	if(!results.Success())
-		_log(UCS__ERROR, "Error updating password in database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
-
+    QueryDatabase(query);
 }
 
 void Database::SetChannelOwner(std::string channelName, std::string owner) {
 
-	_log(UCS__TRACE, "Database::SetChannelOwner(%s, %s)", channelName.c_str(), owner.c_str());
+	Log.Out(Logs::Detail, Logs::UCS_Server, "Database::SetChannelOwner(%s, %s)", channelName.c_str(), owner.c_str());
 
 	std::string query = StringFormat("UPDATE `chatchannels` SET `owner` = '%s' WHERE `name` = '%s'",
                                     owner.c_str(), channelName.c_str());
-    auto results = QueryDatabase(query);
-	if(!results.Success())
-		_log(UCS__ERROR, "Error updating Owner in database: %s, %s", query.c_str(), results.ErrorMessage().c_str());
-
+    QueryDatabase(query);
 }
 
 void Database::SendHeaders(Client *client) {
@@ -294,7 +286,7 @@ void Database::SendHeaders(Client *client) {
 	int unknownField3 = 1;
 	int characterID = FindCharacter(client->MailBoxName().c_str());
 
-	_log(UCS__TRACE, "Sendheaders for %s, CharID is %i", client->MailBoxName().c_str(), characterID);
+	Log.Out(Logs::Detail, Logs::UCS_Server, "Sendheaders for %s, CharID is %i", client->MailBoxName().c_str(), characterID);
 
 	if(characterID <= 0)
 		return;
@@ -321,7 +313,7 @@ void Database::SendHeaders(Client *client) {
 	sprintf(buffer, "%i", results.RowCount());
 	headerCountPacketLength += (strlen(buffer) + 1);
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MailHeaderCount, headerCountPacketLength);
+	auto outapp = new EQApplicationPacket(OP_MailHeaderCount, headerCountPacketLength);
 
 	char *packetBuffer = (char *)outapp->pBuffer;
 
@@ -330,7 +322,6 @@ void Database::SendHeaders(Client *client) {
 	VARSTRUCT_ENCODE_INTSTRING(packetBuffer, unknownField3);
 	VARSTRUCT_ENCODE_INTSTRING(packetBuffer, results.RowCount());
 
-	_pkt(UCS__PACKETS, outapp);
 
 	client->QueuePacket(outapp);
 
@@ -368,7 +359,6 @@ void Database::SendHeaders(Client *client) {
 		VARSTRUCT_ENCODE_STRING(packetBuffer, row[2]);
 		VARSTRUCT_ENCODE_STRING(packetBuffer, row[3]);
 
-		_pkt(UCS__PACKETS, outapp);
 
 		client->QueuePacket(outapp);
 
@@ -381,7 +371,7 @@ void Database::SendBody(Client *client, int messageNumber) {
 
 	int characterID = FindCharacter(client->MailBoxName().c_str());
 
-	_log(UCS__TRACE, "SendBody: MsgID %i, to %s, CharID is %i", messageNumber, client->MailBoxName().c_str(), characterID);
+	Log.Out(Logs::Detail, Logs::UCS_Server, "SendBody: MsgID %i, to %s, CharID is %i", messageNumber, client->MailBoxName().c_str(), characterID);
 
 	if(characterID <= 0)
 		return;
@@ -398,11 +388,11 @@ void Database::SendBody(Client *client, int messageNumber) {
 
 	auto row = results.begin();
 
-	_log(UCS__TRACE, "Message: %i  body (%i bytes)", messageNumber, strlen(row[1]));
+	Log.Out(Logs::Detail, Logs::UCS_Server, "Message: %i  body (%i bytes)", messageNumber, strlen(row[1]));
 
 	int packetLength = 12 + strlen(row[0]) + strlen(row[1]) + strlen(row[2]);
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MailSendBody,packetLength);
+	auto outapp = new EQApplicationPacket(OP_MailSendBody, packetLength);
 
 	char *packetBuffer = (char *)outapp->pBuffer;
 
@@ -418,7 +408,6 @@ void Database::SendBody(Client *client, int messageNumber) {
 	packetBuffer--; // Overwrite the null terminator
 	VARSTRUCT_ENCODE_TYPE(uint8, packetBuffer, 0x0a);
 
-	_pkt(UCS__PACKETS, outapp);
 
 	client->QueuePacket(outapp);
 
@@ -444,13 +433,13 @@ bool Database::SendMail(std::string recipient, std::string from, std::string sub
 
 	characterID = FindCharacter(characterName.c_str());
 
-	_log(UCS__TRACE, "SendMail: CharacterID for recipient %s is %i", characterName.c_str(), characterID);
+	Log.Out(Logs::Detail, Logs::UCS_Server, "SendMail: CharacterID for recipient %s is %i", characterName.c_str(), characterID);
 
 	if(characterID <= 0)
         return false;
 
-	char *escSubject = new char[subject.length() * 2 + 1];
-	char *escBody = new char[body.length() * 2 + 1];
+	auto escSubject = new char[subject.length() * 2 + 1];
+	auto escBody = new char[body.length() * 2 + 1];
 
 	DoEscapeString(escSubject, subject.c_str(), subject.length());
 	DoEscapeString(escBody, body.c_str(), body.length());
@@ -466,11 +455,10 @@ bool Database::SendMail(std::string recipient, std::string from, std::string sub
     safe_delete_array(escBody);
     auto results = QueryDatabase(query);
 	if(!results.Success()) {
-		_log(UCS__ERROR, "SendMail: Query %s failed with error %s", query.c_str(), results.ErrorMessage().c_str());
 		return false;
 	}
 
-	_log(UCS__TRACE, "MessageID %i generated, from %s, to %s", results.LastInsertedID(), from.c_str(), recipient.c_str());
+	Log.Out(Logs::Detail, Logs::UCS_Server, "MessageID %i generated, from %s, to %s", results.LastInsertedID(), from.c_str(), recipient.c_str());
 
 
 	Client *client = CL->IsCharacterOnline(characterName);
@@ -487,7 +475,7 @@ bool Database::SendMail(std::string recipient, std::string from, std::string sub
 
 void Database::SetMessageStatus(int messageNumber, int status) {
 
-	_log(UCS__TRACE, "SetMessageStatus %i %i", messageNumber, status);
+	Log.Out(Logs::Detail, Logs::UCS_Server, "SetMessageStatus %i %i", messageNumber, status);
 
 	if(status == 0) {
         std::string query = StringFormat("DELETE FROM `mail` WHERE `msgid` = %i", messageNumber);
@@ -496,26 +484,22 @@ void Database::SetMessageStatus(int messageNumber, int status) {
     }
 
     std::string query = StringFormat("UPDATE `mail` SET `status` = %i WHERE `msgid`=%i", status, messageNumber);
-    auto results = QueryDatabase(query);
-	if (!results.Success())
-		_log(UCS__ERROR, "Error updating status %s, %s", query.c_str(), results.ErrorMessage().c_str());
-
+    QueryDatabase(query);
 }
 
 void Database::ExpireMail() {
 
-	_log(UCS__INIT, "Expiring mail...");
+	Log.Out(Logs::Detail, Logs::UCS_Server, "Expiring mail...");
 
 	std::string query = "SELECT COUNT(*) FROM `mail`";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-		_log(UCS__ERROR, "Unable to get message count from database. %s %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
 	auto row = results.begin();
 
-	_log(UCS__INIT, "There are %s messages in the database.", row[0]);
+	Log.Out(Logs::Detail, Logs::UCS_Server, "There are %s messages in the database.", row[0]);
 
 	// Expire Trash
 	if(RuleI(Mail, ExpireTrash) >= 0) {
@@ -523,10 +507,7 @@ void Database::ExpireMail() {
                             time(nullptr) - RuleI(Mail, ExpireTrash));
         results = QueryDatabase(query);
 		if(results.Success())
-            _log(UCS__INIT, "Expired %i trash messages.", results.RowsAffected());
-		else
-            _log(UCS__ERROR, "Error expiring trash messages, %s %s", query.c_str(), results.ErrorMessage().c_str());
-
+            Log.Out(Logs::Detail, Logs::UCS_Server, "Expired %i trash messages.", results.RowsAffected());
 	}
 
 	// Expire Read
@@ -535,9 +516,7 @@ void Database::ExpireMail() {
                             time(nullptr) - RuleI(Mail, ExpireRead));
         results = QueryDatabase(query);
 		if(results.Success())
-            _log(UCS__INIT, "Expired %i read messages.", results.RowsAffected());
-		else
-			_log(UCS__ERROR, "Error expiring read messages, %s %s", query.c_str(), results.ErrorMessage().c_str());
+            Log.Out(Logs::Detail, Logs::UCS_Server, "Expired %i read messages.", results.RowsAffected());
 	}
 
 	// Expire Unread
@@ -546,9 +525,7 @@ void Database::ExpireMail() {
                             time(nullptr) - RuleI(Mail, ExpireUnread));
         results = QueryDatabase(query);
 		if(results.Success())
-            _log(UCS__INIT, "Expired %i unread messages.", results.RowsAffected());
-		else
-			_log(UCS__ERROR, "Error expiring unread messages, %s %s", query.c_str(), results.ErrorMessage().c_str());
+            Log.Out(Logs::Detail, Logs::UCS_Server, "Expired %i unread messages.", results.RowsAffected());
 	}
 }
 
@@ -558,10 +535,8 @@ void Database::AddFriendOrIgnore(int charID, int type, std::string name) {
                                     "VALUES('%i', %i, '%s')",
                                     charID, type, CapitaliseName(name).c_str());
     auto results = QueryDatabase(query);
-	if(!results.Success())
-		_log(UCS__ERROR, "Error adding friend/ignore, query was %s : %s", query.c_str(), results.ErrorMessage().c_str());
-	else
-		_log(UCS__TRACE, "Wrote Friend/Ignore entry for charid %i, type %i, name %s to database.", charID, type, name.c_str());
+	if(results.Success())
+		Log.Out(Logs::Detail, Logs::UCS_Server, "Wrote Friend/Ignore entry for charid %i, type %i, name %s to database.", charID, type, name.c_str());
 
 }
 
@@ -572,9 +547,9 @@ void Database::RemoveFriendOrIgnore(int charID, int type, std::string name) {
                                     charID, type, CapitaliseName(name).c_str());
     auto results = QueryDatabase(query);
 	if(!results.Success())
-		_log(UCS__ERROR, "Error removing friend/ignore, query was %s", query.c_str());
+		Log.Out(Logs::Detail, Logs::UCS_Server, "Error removing friend/ignore, query was %s", query.c_str());
 	else
-		_log(UCS__TRACE, "Removed Friend/Ignore entry for charid %i, type %i, name %s from database.", charID, type, name.c_str());
+		Log.Out(Logs::Detail, Logs::UCS_Server, "Removed Friend/Ignore entry for charid %i, type %i, name %s from database.", charID, type, name.c_str());
 
 }
 
@@ -583,7 +558,6 @@ void Database::GetFriendsAndIgnore(int charID, std::vector<std::string> &friends
 	std::string query = StringFormat("select `type`, `name` FROM `friends` WHERE `charid`=%i", charID);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		_log(UCS__ERROR, "GetFriendsAndIgnore query error %s, %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -594,13 +568,54 @@ void Database::GetFriendsAndIgnore(int charID, std::vector<std::string> &friends
 		if(atoi(row[0]) == 0)
 		{
 			ignorees.push_back(name);
-			_log(UCS__TRACE, "Added Ignoree from DB %s", name.c_str());
+			Log.Out(Logs::Detail, Logs::UCS_Server, "Added Ignoree from DB %s", name.c_str());
 			continue;
 		}
 
         friends.push_back(name);
-        _log(UCS__TRACE, "Added Friend from DB %s", name.c_str());
+        Log.Out(Logs::Detail, Logs::UCS_Server, "Added Friend from DB %s", name.c_str());
 	}
 
 }
 
+void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings){
+	std::string query =
+		"SELECT "
+		"log_category_id, "
+		"log_category_description, "
+		"log_to_console, "
+		"log_to_file, "
+		"log_to_gmsay "
+		"FROM "
+		"logsys_categories "
+		"ORDER BY log_category_id";
+	auto results = QueryDatabase(query);
+
+	int log_category = 0;
+	Log.file_logs_enabled = false;
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		log_category = atoi(row[0]);
+		log_settings[log_category].log_to_console = atoi(row[2]);
+		log_settings[log_category].log_to_file = atoi(row[3]);
+		log_settings[log_category].log_to_gmsay = atoi(row[4]);
+
+		/* Determine if any output method is enabled for the category
+			and set it to 1 so it can used to check if category is enabled */
+		const bool log_to_console = log_settings[log_category].log_to_console > 0;
+		const bool log_to_file = log_settings[log_category].log_to_file > 0;
+		const bool log_to_gmsay = log_settings[log_category].log_to_gmsay > 0;
+		const bool is_category_enabled = log_to_console || log_to_file || log_to_gmsay;
+
+		if (is_category_enabled)
+			log_settings[log_category].is_category_enabled = 1;
+
+		/*
+		This determines whether or not the process needs to actually file log anything.
+		If we go through this whole loop and nothing is set to any debug level, there is no point to create a file or keep anything open
+		*/
+		if (log_settings[log_category].log_to_file > 0){
+			Log.file_logs_enabled = true;
+		}
+	}
+}

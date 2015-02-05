@@ -18,9 +18,7 @@
 #ifndef TITLES_H
 #define TITLES_H
 
-#include "../common/types.h"
 #include <vector>
-#include <string>
 
 class Client;
 class EQApplicationPacket;

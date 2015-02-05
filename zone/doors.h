@@ -1,19 +1,23 @@
 #ifndef DOORS_H
 #define DOORS_H
-#include "../common/types.h"
-#include "../common/linked_list.h"
-#include "../common/timer.h"
+
 #include "../common/emu_opcodes.h"
 #include "../common/eq_packet_structs.h"
-#include "entity.h"
+#include "../common/linked_list.h"
+
 #include "mob.h"
 #include "zonedump.h"
+
+class Client;
+class Mob;
+class NPC;
+struct Door;
 
 class Doors : public Entity
 {
 public:
 	Doors(const Door* door);
-	Doors(const char *dmodel, float dx, float dy, float dz, float dheading, uint8 dopentype = 58, uint16 dsize = 100);
+	Doors(const char *dmodel, const glm::vec4& position, uint8 dopentype = 58, uint16 dsize = 100);
 	~Doors();
 	bool	IsDoor() const { return true; }
 	void	HandleClick(Client* sender, uint8 trigger);
@@ -25,10 +29,7 @@ public:
 	char*	GetDoorName() { return door_name; }
 	uint32	GetDoorParam() { return door_param; }
 	int		GetInvertState() { return invert_state; }
-	float	GetX() { return pos_x; }
-	float	GetY() { return pos_y; }
-	float	GetZ() { return pos_z; }
-	float	GetHeading() { return heading; }
+	const glm::vec4& GetPosition() const{ return m_Position; }
 	int		GetIncline() { return incline; }
 	bool	triggered;
 	void	SetOpenState(bool st) { isopen = st; }
@@ -50,10 +51,7 @@ public:
 	void	SetEntityID(uint32 entity) { entity_id = entity; }
 
 	void	DumpDoor();
-	float	GetDestX() { return dest_x; }
-	float	GetDestY() { return dest_y; }
-	float	GetDestZ() { return dest_z; }
-	float	GetDestHeading() { return dest_heading; }
+	const glm::vec4 GetDestination() const { return m_Destination; }
 
 	uint8	IsLDoNDoor() { return is_ldon_door; }
 	uint32	GetClientVersionMask() { return client_version_mask; }
@@ -63,14 +61,11 @@ public:
 	void	ForceClose(Mob *sender, bool alt_mode=false);
 	void	ToggleState(Mob *sender);
 
-	void	SetX(float in);
-	void	SetY(float in);
-	void	SetZ(float in);
-	void	SetHeading(float in);
+	void	SetPosition(const glm::vec4& position);
+	void	SetLocation(float x, float y, float z);
 	void	SetIncline(int in);
 	void	SetDoorName(const char* name);
 	void	SetOpenType(uint8 in);
-	void	SetLocation(float x, float y, float z);
 	void	SetSize(uint16 size);
 	void	CreateDatabaseEntry();
 
@@ -80,10 +75,7 @@ private:
 	uint8	door_id;
 	char	zone_name[32];
 	char	door_name[32];
-	float	pos_x;
-	float	pos_y;
-	float	pos_z;
-	float	heading;
+	glm::vec4 m_Position;
 	int		incline;
 	uint8	opentype;
 	uint32	guild_id;
@@ -102,10 +94,7 @@ private:
 
 	char	dest_zone[16];
 	int		dest_instance_id;
-	float	dest_x;
-	float	dest_y;
-	float	dest_z;
-	float	dest_heading;
+	glm::vec4 m_Destination;
 
 	uint8	is_ldon_door;
 	uint32	client_version_mask;

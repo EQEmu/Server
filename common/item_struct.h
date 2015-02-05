@@ -143,7 +143,7 @@ struct Item_Struct {
 	uint8	Delay;			// Delay * 10
 	uint8	RecLevel;		// Recommended level to use item
 	uint8	RecSkill;		// Recommended skill to use item (refers to primary skill of item)
-	uint8	ElemDmgType;		// Elemental Damage Type (1=magic, 2=fire)
+	uint8	ElemDmgType;	// Elemental Damage Type (1=magic, 2=fire)
 	uint8	ElemDmgAmt;		// Elemental Damage
 	uint8	Range;			// Range of item
 	uint32	Damage;			// Delay between item usage (in 0.1 sec increments)
@@ -154,6 +154,7 @@ struct Item_Struct {
 	int16	MaxCharges;		// Maximum charges items can hold: -1 if not a chargeable item
 	uint8	ItemType;		// Item Type/Skill (itemClass* from above)
 	uint8	Material;		// Item material type
+	uint32	HerosForgeModel;// Hero's Forge Armor Model Type (2-13?)
 	float	SellRate;		// Sell rate
 	//uint32	Unk059;
 	union {
@@ -182,9 +183,9 @@ struct Item_Struct {
 	int32	FactionAmt4;	// Faction Amt 4
 	char	CharmFile[32];	// ?
 	uint32	AugType;
-	uint8	AugSlotType[EmuConstants::ITEM_COMMON_SIZE];	// LDoN: Augment Slot 1-5 Type
-	uint8	AugSlotVisible[EmuConstants::ITEM_COMMON_SIZE];	// LDoN: Augment Slot 1-5 Visible
-	uint8	AugSlotUnk2[EmuConstants::ITEM_COMMON_SIZE];	// LDoN: Augment Slot 1-5 Unknown
+	uint8	AugSlotType[EmuConstants::ITEM_COMMON_SIZE];	// RoF: Augment Slot 1-6 Type
+	uint8	AugSlotVisible[EmuConstants::ITEM_COMMON_SIZE];	// RoF: Augment Slot 1-6 Visible
+	uint8	AugSlotUnk2[EmuConstants::ITEM_COMMON_SIZE];	// RoF: Augment Slot 1-6 Unknown
 	uint32	LDoNTheme;
 	uint32	LDoNPrice;
 	uint32	LDoNSold;
@@ -217,6 +218,7 @@ struct Item_Struct {
 	// Begin SoF Fields
 	int32 SVCorruption;
 	uint32 Purity;
+	uint8 EvolvingLevel;
 	uint32 BackstabDmg;
 	uint32 DSMitigation;
 	int32 HeroicStr;

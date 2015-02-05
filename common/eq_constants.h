@@ -19,6 +19,7 @@
 #define EQ_CONSTANTS_H
 
 #include "skills.h"
+#include "types.h"
 
 /*
 **	Item attributes
@@ -367,7 +368,7 @@ enum {
 #define AT_DamageState	44	// The damage state of a destructible object (0 through 4)
 //#define AT_Trader		300	// Bazzar Trader Mode
 
-// solar: animations for AT_Anim
+// animations for AT_Anim
 #define ANIM_FREEZE	102
 #define	ANIM_STAND		0x64
 #define	ANIM_SIT		0x6e
@@ -967,5 +968,7 @@ namespace legacy {
 		SLOT_WORLD_END		= 4009
 	} InventorySlot;
 }
+
+static const uint32 MAX_SPELL_DB_ID_VAL = 65535;
 
 #endif

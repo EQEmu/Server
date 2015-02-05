@@ -298,12 +298,12 @@ void Lua_EntityList::MessageGroup(Lua_Mob who, bool skip_close, uint32 type, con
 
 Lua_Client Lua_EntityList::GetRandomClient(float x, float y, float z, float dist) {
 	Lua_Safe_Call_Class(Lua_Client);
-	return self->GetRandomClient(x, y, z, dist);
+	return self->GetRandomClient(glm::vec3(x, y, z), dist);
 }
 
 Lua_Client Lua_EntityList::GetRandomClient(float x, float y, float z, float dist, Lua_Client exclude) {
 	Lua_Safe_Call_Class(Lua_Client);
-	return self->GetRandomClient(x, y, z, dist, exclude);
+	return self->GetRandomClient(glm::vec3(x, y, z), dist, exclude);
 }
 
 Lua_Mob_List Lua_EntityList::GetMobList() {

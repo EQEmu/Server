@@ -1226,4 +1226,3 @@
 0xFFFFFFFF,
 
 // 1217 (0x4c1) opcodes counted
-

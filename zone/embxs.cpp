@@ -17,7 +17,8 @@
 */
 #ifdef EMBPERL 
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
+#include "../common/eqemu_logsys.h"
 #include "masterentity.h"
 #include "command.h"
 
@@ -63,7 +64,7 @@ EXTERN_C XS(boot_qc)
 	file[255] = '\0';
 
 	if(items != 1)
-		LogFile->write(EQEMuLog::Error, "boot_qc does not take any arguments.");
+		Log.Out(Logs::General, Logs::Error, "boot_qc does not take any arguments.");
 	
 	char buf[128];	//shouldent have any function names longer than this.
 	
@@ -91,12 +92,15 @@ XS(XS_EQEmuIO_PRINT)
 		char *str = SvPV_nolen(ST(r));
 		char *cur = str;
 		
+		/* Strip newlines from log message 'str' */
+		*std::remove(str, str + strlen(str), '\n') = '\0';
+
 		int i;
 		int pos = 0;
 		int len = 0;
 		for(i = 0; *cur != '\0'; i++, cur++) {
 			if(*cur == '\n') {
-				LogFile->writebuf(EQEMuLog::Quest, str + pos, 1, len);
+				Log.Out(Logs::General, Logs::Quests, str);
 				len = 0;
 				pos = i+1;
 			} else {
@@ -104,7 +108,7 @@ XS(XS_EQEmuIO_PRINT)
 			}
 		}
 		if(len > 0) {
-			LogFile->writebuf(EQEMuLog::Quest, str + pos, 1, len);
+			Log.Out(Logs::General, Logs::Quests, str);
 		}
  	}
  	

@@ -18,14 +18,14 @@
 #ifndef GROUPS_H
 #define GROUPS_H
 
-#include "../common/types.h"
-#include "../common/linked_list.h"
-#include "../common/emu_opcodes.h"
 #include "../common/eq_packet_structs.h"
-#include "entity.h"
+#include "../common/types.h"
+
 #include "mob.h"
-#include "../common/features.h"
-#include "../common/servertalk.h"
+
+class Client;
+class EQApplicationPacket;
+class Mob;
 
 #define MAX_MARKED_NPCS 3
 
@@ -51,7 +51,7 @@ public:
 	Group(uint32 gid);
 	~Group();
 
-	bool	AddMember(Mob* newmember, const char* NewMemberName = nullptr, uint32 CharacterID = 0);
+	bool	AddMember(Mob* newmember, const char* NewMemberName = nullptr, uint32 CharacterID = 0, bool ismerc = false);
 	void	AddMember(const char* NewMemberName);
 	void	SendUpdate(uint32 type,Mob* member);
 	void	SendLeadershipAAUpdate();
@@ -63,6 +63,7 @@ public:
 	bool	IsGroupMember(const char *Name);
 	bool	Process();
 	bool	IsGroup()			{ return true; }
+	void	SendGroupJoinOOZ(Mob* NewMember);
 	void	CastGroupSpell(Mob* caster,uint16 spellid);
 	void	GroupBardPulse(Mob* caster,uint16 spellid);
 	void	SplitExp(uint32 exp, Mob* other);
@@ -86,9 +87,9 @@ public:
 	uint16	GetAvgLevel();
 	bool	LearnMembers();
 	void	VerifyGroup();
-	void	BalanceHP(int32 penalty, int32 range = 0, Mob* caster = nullptr, int32 limit = 0);
-	void	BalanceMana(int32 penalty, int32 range = 0, Mob* caster = nullptr, int32 limit = 0);
-	void	HealGroup(uint32 heal_amt, Mob* caster, int32 range = 0);
+	void	BalanceHP(int32 penalty, float range = 0, Mob* caster = nullptr, int32 limit = 0);
+	void	BalanceMana(int32 penalty, float range = 0, Mob* caster = nullptr, int32 limit = 0);
+	void	HealGroup(uint32 heal_amt, Mob* caster, float range = 0);
 	inline	void SetGroupAAs(GroupLeadershipAA_Struct *From) { memcpy(&LeaderAbilities, From, sizeof(GroupLeadershipAA_Struct)); }
 	inline	void GetGroupAAs(GroupLeadershipAA_Struct *Into) { memcpy(Into, &LeaderAbilities, sizeof(GroupLeadershipAA_Struct)); }
 	void	UpdateGroupAAs();
@@ -132,6 +133,11 @@ public:
 	const char *GetClientNameByIndex(uint8 index);
 	void UpdateXTargetMarkedNPC(uint32 Number, Mob *m);
 
+	void SetGroupMentor(int percent, char *name);
+	void ClearGroupMentor();
+	inline int GetMentorPercent() { return mentor_percent; }
+	inline Client *GetMentoree() { return mentoree; }
+
 	Mob* members[MAX_GROUP_MEMBERS];
 	char	membername[MAX_GROUP_MEMBERS][64];
 	uint8	MemberRoles[MAX_GROUP_MEMBERS];
@@ -151,6 +157,9 @@ private:
 	uint16	PullerTargetID;
 	uint16	MarkedNPCs[MAX_MARKED_NPCS];
 
+	std::string mentoree_name;
+	Client *mentoree;
+	int mentor_percent;
 };
 
 #endif

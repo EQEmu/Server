@@ -1,27 +1,26 @@
-#include "../common/debug.h"
-#include <string.h>
-#include <math.h>
-#include <list>
-#include <algorithm>
-#include <sstream>
-#include <fstream>
+#include "../common/global_define.h"
+
+#include "client.h"
+#include "doors.h"
 #include "pathing.h"
 #include "water_map.h"
-#include "../common/misc_functions.h"
-#include "doors.h"
-#include "client.h"
 #include "zone.h"
+
+#include <fstream>
+#include <list>
+#include <math.h>
+#include <sstream>
+#include <string.h>
 
 #ifdef _WINDOWS
 #define snprintf _snprintf
 #endif
 
-//#define PATHDEBUG
-#define ABS(x) ((x)<0?-(x):(x))
+//#define PATHDEBUG 
 
 extern Zone *zone;
 
-float VertexDistance(Map::Vertex a, Map::Vertex b)
+float VectorDistance(glm::vec3 a, glm::vec3 b)
 {
 	float xdist = a.x - b.x;
 	float ydist = a.y - b.y;
@@ -29,7 +28,7 @@ float VertexDistance(Map::Vertex a, Map::Vertex b)
 	return sqrtf(xdist * xdist + ydist * ydist + zdist * zdist);
 }
 
-float VertexDistanceNoRoot(Map::Vertex a, Map::Vertex b)
+float VectorDistanceNoRoot(glm::vec3 a, glm::vec3 b)
 {
 	float xdist = a.x - b.x;
 	float ydist = a.y - b.y;
@@ -61,19 +60,19 @@ PathManager* PathManager::LoadPathFile(const char* ZoneName)
 
 		if(Ret->loadPaths(PathFile))
 		{
-			LogFile->write(EQEMuLog::Status, "Path File %s loaded.", ZonePathFileName);
+			Log.Out(Logs::General, Logs::Status, "Path File %s loaded.", ZonePathFileName);
 
 		}
 		else
 		{
-			LogFile->write(EQEMuLog::Error, "Path File %s failed to load.", ZonePathFileName);
+			Log.Out(Logs::General, Logs::Error, "Path File %s failed to load.", ZonePathFileName);
 			safe_delete(Ret);
 		}
 		fclose(PathFile);
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Path File %s not found.", ZonePathFileName);
+		Log.Out(Logs::General, Logs::Error, "Path File %s not found.", ZonePathFileName);
 	}
 
 	return Ret;
@@ -103,18 +102,18 @@ bool PathManager::loadPaths(FILE *PathFile)
 
 	if(strncmp(Magic, "EQEMUPATH", 9))
 	{
-		LogFile->write(EQEMuLog::Error, "Bad Magic String in .path file.");
+		Log.Out(Logs::General, Logs::Error, "Bad Magic String in .path file.");
 		return false;
 	}
 
 	fread(&Head, sizeof(Head), 1, PathFile);
 
-	LogFile->write(EQEMuLog::Status, "Path File Header: Version %ld, PathNodes %ld",
+	Log.Out(Logs::General, Logs::Status, "Path File Header: Version %ld, PathNodes %ld",
 				(long)Head.version, (long)Head.PathNodeCount);
 
 	if(Head.version != 2)
 	{
-		LogFile->write(EQEMuLog::Error, "Unsupported path file version.");
+		Log.Out(Logs::General, Logs::Error, "Unsupported path file version.");
 		return false;
 	}
 
@@ -138,7 +137,7 @@ bool PathManager::loadPaths(FILE *PathFile)
 		{
 			if(PathNodes[i].Neighbours[j].id > MaxNodeID)
 			{
-				LogFile->write(EQEMuLog::Error, "Path Node %i, Neighbour %i (%i) out of range.", i, j, PathNodes[i].Neighbours[j].id);
+				Log.Out(Logs::General, Logs::Error, "Path Node %i, Neighbour %i (%i) out of range.", i, j, PathNodes[i].Neighbours[j].id);
 
 				PathFileValid = false;
 			}
@@ -187,9 +186,9 @@ void PathManager::PrintPathing()
 	}
 }
 
-Map::Vertex PathManager::GetPathNodeCoordinates(int NodeNumber, bool BestZ)
+glm::vec3 PathManager::GetPathNodeCoordinates(int NodeNumber, bool BestZ)
 {
-	Map::Vertex Result;
+	glm::vec3 Result;
 
 	if(NodeNumber < Head.PathNodeCount)
 	{
@@ -205,15 +204,15 @@ Map::Vertex PathManager::GetPathNodeCoordinates(int NodeNumber, bool BestZ)
 
 }
 
-std::list<int> PathManager::FindRoute(int startID, int endID)
-{
-	_log(PATHING__DEBUG, "FindRoute from node %i to %i", startID, endID);
+std::deque<int> PathManager::FindRoute(int startID, int endID)
+{ 
+	Log.Out(Logs::Detail, Logs::None, "FindRoute from node %i to %i", startID, endID);
 
-	memset(ClosedListFlag, 0, sizeof(int) * Head.PathNodeCount);
+	memset(ClosedListFlag, 0, sizeof(int) * Head.PathNodeCount); 
 
-	std::list<AStarNode> OpenList, ClosedList;
+	std::deque<AStarNode> OpenList, ClosedList;
 
-	std::list<int>Route;
+	std::deque<int>Route;
 
 	AStarNode AStarEntry, CurrentNode;
 
@@ -251,7 +250,7 @@ std::list<int> PathManager::FindRoute(int startID, int endID)
 
 				Route.push_back(endID);
 
-				std::list<AStarNode>::iterator RouteIterator;
+				std::deque<AStarNode>::iterator RouteIterator;
 
 				while(CurrentNode.PathNodeID != startID)
 				{
@@ -283,7 +282,7 @@ std::list<int> PathManager::FindRoute(int startID, int endID)
 			AStarEntry.Teleport = PathNodes[CurrentNode.PathNodeID].Neighbours[i].Teleport;
 
 			// HCost is the estimated cost to get from this node to the end.
-			AStarEntry.HCost = VertexDistance(PathNodes[PathNodes[CurrentNode.PathNodeID].Neighbours[i].id].v,
+			AStarEntry.HCost = VectorDistance(PathNodes[PathNodes[CurrentNode.PathNodeID].Neighbours[i].id].v,
 											PathNodes[endID].v);
 
 			AStarEntry.GCost = CurrentNode.GCost + PathNodes[CurrentNode.PathNodeID].Neighbours[i].distance;
@@ -300,7 +299,7 @@ std::list<int> PathManager::FindRoute(int startID, int endID)
 
 			bool AlreadyInOpenList = false;
 
-			std::list<AStarNode>::iterator OpenListIterator, InsertionPoint = OpenList.end();
+			std::deque<AStarNode>::iterator OpenListIterator, InsertionPoint = OpenList.end();
 
 			for(OpenListIterator = OpenList.begin(); OpenListIterator != OpenList.end(); ++OpenListIterator)
 			{
@@ -330,14 +329,14 @@ std::list<int> PathManager::FindRoute(int startID, int endID)
 		}
 
 	}
-	_log(PATHING__DEBUG, "Unable to find a route.");
+	Log.Out(Logs::Detail, Logs::None, "Unable to find a route.");
 	return Route;
 
 }
 
-bool CheckLOSBetweenPoints(Map::Vertex start, Map::Vertex end) {
+bool CheckLOSBetweenPoints(glm::vec3 start, glm::vec3 end) {
 
-	Map::Vertex hit;
+	glm::vec3 hit;
 
 	if((zone->zonemap) && (zone->zonemap->LineIntersectsZone(start, end, 1, &hit)))
 		return false;
@@ -345,16 +344,16 @@ bool CheckLOSBetweenPoints(Map::Vertex start, Map::Vertex end) {
 	return true;
 }
 
-bool SortPathNodesByDistance(PathNodeSortStruct n1, PathNodeSortStruct n2)
+auto path_compare = [](const PathNodeSortStruct& a, const PathNodeSortStruct& b)
 {
-	return n1.Distance < n2.Distance;
-}
+	return a.Distance < b.Distance;
+};
 
-std::list<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
+std::deque<int> PathManager::FindRoute(glm::vec3 Start, glm::vec3 End)
 {
-	_log(PATHING__DEBUG, "FindRoute(%8.3f, %8.3f, %8.3f, %8.3f, %8.3f, %8.3f)", Start.x, Start.y, Start.z, End.x, End.y, End.z);
+	Log.Out(Logs::Detail, Logs::None, "FindRoute(%8.3f, %8.3f, %8.3f, %8.3f, %8.3f, %8.3f)", Start.x, Start.y, Start.z, End.x, End.y, End.z);
 
-	std::list<int> noderoute;
+	std::deque<int> noderoute;
 
 	float CandidateNodeRangeXY = RuleR(Pathing, CandidateNodeRangeXY);
 
@@ -365,28 +364,27 @@ std::list<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 	//
 	int ClosestPathNodeToStart = -1;
 
-	std::list<PathNodeSortStruct> SortedByDistance;
+	std::deque<PathNodeSortStruct> SortedByDistance;
 
 	PathNodeSortStruct TempNode;
 
 	for(uint32 i = 0 ; i < Head.PathNodeCount; ++i)
 	{
-		if((ABS(Start.x - PathNodes[i].v.x) <= CandidateNodeRangeXY) &&
-			(ABS(Start.y - PathNodes[i].v.y) <= CandidateNodeRangeXY) &&
-			(ABS(Start.z - PathNodes[i].v.z) <= CandidateNodeRangeZ))
-		{
+		if ((std::abs(Start.x - PathNodes[i].v.x) <= CandidateNodeRangeXY) &&
+		    (std::abs(Start.y - PathNodes[i].v.y) <= CandidateNodeRangeXY) &&
+		    (std::abs(Start.z - PathNodes[i].v.z) <= CandidateNodeRangeZ)) {
 			TempNode.id = i;
-			TempNode.Distance = VertexDistanceNoRoot(Start, PathNodes[i].v);
+			TempNode.Distance = VectorDistanceNoRoot(Start, PathNodes[i].v);
 			SortedByDistance.push_back(TempNode);
 
 		}
 	}
 
-	SortedByDistance.sort(SortPathNodesByDistance);
+	std::sort(SortedByDistance.begin(), SortedByDistance.end(), path_compare);
 
-	for(std::list<PathNodeSortStruct>::iterator Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
+	for(auto Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
 	{
-		_log(PATHING__DEBUG, "Checking Reachability of Node %i from Start Position.", PathNodes[(*Iterator).id].id);
+		Log.Out(Logs::Detail, Logs::None, "Checking Reachability of Node %i from Start Position.", PathNodes[(*Iterator).id].id);
 
 		if(!zone->zonemap->LineIntersectsZone(Start, PathNodes[(*Iterator).id].v, 1.0f, nullptr))
 		{
@@ -396,11 +394,11 @@ std::list<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 	}
 
 	if(ClosestPathNodeToStart <0 ) {
-		_log(PATHING__DEBUG, "No LOS to any starting Path Node within range.");
+		Log.Out(Logs::Detail, Logs::None, "No LOS to any starting Path Node within range.");
 		return noderoute;
 	}
 
-	_log(PATHING__DEBUG, "Closest Path Node To Start: %2d", ClosestPathNodeToStart);
+	Log.Out(Logs::Detail, Logs::None, "Closest Path Node To Start: %2d", ClosestPathNodeToStart);
 
 	// Find the nearest PathNode the end point has LOS to
 
@@ -410,22 +408,21 @@ std::list<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 
 	for(uint32 i = 0 ; i < Head.PathNodeCount; ++i)
 	{
-		if((ABS(End.x - PathNodes[i].v.x) <= CandidateNodeRangeXY) &&
-			(ABS(End.y - PathNodes[i].v.y) <= CandidateNodeRangeXY) &&
-			(ABS(End.z - PathNodes[i].v.z) <= CandidateNodeRangeZ))
-		{
+		if ((std::abs(End.x - PathNodes[i].v.x) <= CandidateNodeRangeXY) &&
+		    (std::abs(End.y - PathNodes[i].v.y) <= CandidateNodeRangeXY) &&
+		    (std::abs(End.z - PathNodes[i].v.z) <= CandidateNodeRangeZ)) {
 			TempNode.id = i;
-			TempNode.Distance = VertexDistanceNoRoot(End, PathNodes[i].v);
+			TempNode.Distance = VectorDistanceNoRoot(End, PathNodes[i].v);
 			SortedByDistance.push_back(TempNode);
 		}
 	}
 
-	SortedByDistance.sort(SortPathNodesByDistance);
+	std::sort(SortedByDistance.begin(), SortedByDistance.end(), path_compare);
 
-	for(std::list<PathNodeSortStruct>::iterator Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
+	for(auto Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
 	{
-		_log(PATHING__DEBUG, "Checking Reachability of Node %i from End Position.", PathNodes[(*Iterator).id].id);
-		_log(PATHING__DEBUG, " (%8.3f, %8.3f, %8.3f) to (%8.3f, %8.3f, %8.3f)",
+		Log.Out(Logs::Detail, Logs::None, "Checking Reachability of Node %i from End Position.", PathNodes[(*Iterator).id].id);
+		Log.Out(Logs::Detail, Logs::None, " (%8.3f, %8.3f, %8.3f) to (%8.3f, %8.3f, %8.3f)",
 			End.x, End.y, End.z,
 			PathNodes[(*Iterator).id].v.x, PathNodes[(*Iterator).id].v.y, PathNodes[(*Iterator).id].v.z);
 
@@ -437,11 +434,11 @@ std::list<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 	}
 
 	if(ClosestPathNodeToEnd < 0) {
-		_log(PATHING__DEBUG, "No LOS to any end Path Node within range.");
+		Log.Out(Logs::Detail, Logs::None, "No LOS to any end Path Node within range.");
 		return noderoute;
 	}
 
-	_log(PATHING__DEBUG, "Closest Path Node To End: %2d", ClosestPathNodeToEnd);
+	Log.Out(Logs::Detail, Logs::None, "Closest Path Node To End: %2d", ClosestPathNodeToEnd);
 
 	if(ClosestPathNodeToStart == ClosestPathNodeToEnd)
 	{
@@ -456,7 +453,7 @@ std::list<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 	{
 		int CulledNodes = 0;
 
-		std::list<int>::iterator First, Second;
+		std::deque<int>::iterator First, Second;
 
 		while((noderoute.size() >= 2) && (CulledNodes < NodesToAttemptToCull))
 		{
@@ -487,7 +484,7 @@ std::list<int> PathManager::FindRoute(Map::Vertex Start, Map::Vertex End)
 	{
 		int CulledNodes = 0;
 
-		std::list<int>::iterator First, Second;
+		std::deque<int>::iterator First, Second;
 
 		while((noderoute.size() >= 2) && (CulledNodes < NodesToAttemptToCull))
 		{
@@ -573,8 +570,8 @@ void PathManager::SpawnPathNodes()
 		npc_type->texture = 1;
 		npc_type->light = 0;
 		npc_type->runspeed = 0;
-		npc_type->d_meele_texture1 = 1;
-		npc_type->d_meele_texture2 = 1;
+		npc_type->d_melee_texture1 = 1;
+		npc_type->d_melee_texture2 = 1;
 		npc_type->merchanttype = 1;
 		npc_type->bodytype = 1;
 
@@ -587,8 +584,8 @@ void PathManager::SpawnPathNodes()
 		npc_type->CHA = 150;
 
 		npc_type->findable = 1;
-
-		NPC* npc = new NPC(npc_type, 0, PathNodes[i].v.x, PathNodes[i].v.y, PathNodes[i].v.z, 0, FlyMode1);
+        auto position = glm::vec4(PathNodes[i].v.x, PathNodes[i].v.y, PathNodes[i].v.z, 0.0f);
+		NPC* npc = new NPC(npc_type, nullptr, position, FlyMode1);
 		npc->GiveNPCTypeData(npc_type);
 
 		entity_list.AddNPC(npc, true, true);
@@ -611,7 +608,7 @@ void PathManager::MeshTest()
 			if(j == i)
 				continue;
 
-			std::list<int> Route = FindRoute(PathNodes[i].id, PathNodes[j].id);
+			std::deque<int> Route = FindRoute(PathNodes[i].id, PathNodes[j].id);
 
 			if(Route.size() == 0)
 			{
@@ -638,7 +635,7 @@ void PathManager::SimpleMeshTest()
 
 	for(uint32 j = 1; j < Head.PathNodeCount; ++j)
 	{
-		std::list<int> Route = FindRoute(PathNodes[0].id, PathNodes[j].id);
+		std::deque<int> Route = FindRoute(PathNodes[0].id, PathNodes[j].id);
 
 		if(Route.size() == 0)
 		{
@@ -652,19 +649,19 @@ void PathManager::SimpleMeshTest()
 	fflush(stdout);
 }
 
-Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChanged, bool &NodeReached)
+glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChanged, bool &NodeReached)
 {
 	WaypointChanged = false;
 
 	NodeReached = false;
 
-	Map::Vertex NodeLoc;
+	glm::vec3 NodeLoc;
 
-	Map::Vertex From(GetX(), GetY(), GetZ());
+	glm::vec3 From(GetX(), GetY(), GetZ());
 
-	Map::Vertex HeadPosition(From.x, From.y, From.z + (GetSize() < 6.0 ? 6 : GetSize()) * HEAD_POSITION);
+	glm::vec3 HeadPosition(From.x, From.y, From.z + (GetSize() < 6.0 ? 6 : GetSize()) * HEAD_POSITION);
 
-	Map::Vertex To(ToX, ToY, ToZ);
+	glm::vec3 To(ToX, ToY, ToZ);
 
 	bool SameDestination = (To == PathingDestination);
 
@@ -673,7 +670,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 	if(To == From)
 		return To;
 
-	mlog(PATHING__DEBUG, "UpdatePath. From(%8.3f, %8.3f, %8.3f) To(%8.3f, %8.3f, %8.3f)", From.x, From.y, From.z, To.x, To.y, To.z);
+	Log.Out(Logs::Detail, Logs::None, "UpdatePath. From(%8.3f, %8.3f, %8.3f) To(%8.3f, %8.3f, %8.3f)", From.x, From.y, From.z, To.x, To.y, To.z);
 
 	if(From == PathingLastPosition)
 	{
@@ -681,7 +678,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 		if((PathingLoopCount > 5) && !IsRooted())
 		{
-			mlog(PATHING__DEBUG, "appears to be stuck. Teleporting them to next position.", GetName());
+			Log.Out(Logs::Detail, Logs::None, "appears to be stuck. Teleporting them to next position.", GetName());
 
 			if(Route.size() == 0)
 			{
@@ -721,7 +718,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 		// If we are already pathing, and the destination is the same as before ...
 		if(SameDestination)
 		{
-			mlog(PATHING__DEBUG, "  Still pathing to the same destination.");
+			Log.Out(Logs::Detail, Logs::None, "  Still pathing to the same destination.");
 
 			// Get the coordinates of the first path node we are going to.
 			NextNode = Route.front();
@@ -732,7 +729,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 			// We have reached the path node.
 			if(NodeLoc == From)
 			{
-				mlog(PATHING__DEBUG, "  Arrived at node %i", NextNode);
+				Log.Out(Logs::Detail, Logs::None, "  Arrived at node %i", NextNode);
 
 				NodeReached = true;
 
@@ -746,37 +743,36 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 				// target, and we may run past the target if we don't check LOS at this point.
 				int RouteSize = Route.size();
 
-				mlog(PATHING__DEBUG, "Route size is %i", RouteSize);
+				Log.Out(Logs::Detail, Logs::None, "Route size is %i", RouteSize);
 
 				if((RouteSize == 2)
 					|| ((PathingTraversedNodes >= RuleI(Pathing, MinNodesTraversedForLOSCheck))
 					&& (RouteSize <= RuleI(Pathing, MinNodesLeftForLOSCheck))
 					&& PathingLOSCheckTimer->Check()))
 				{
-					mlog(PATHING__DEBUG, "  Checking distance to target.");
-					float Distance = VertexDistanceNoRoot(From, To);
+					Log.Out(Logs::Detail, Logs::None, "  Checking distance to target.");
+					float Distance = VectorDistanceNoRoot(From, To);
 
-					mlog(PATHING__DEBUG, "  Distance between From and To (NoRoot) is %8.3f", Distance);
+					Log.Out(Logs::Detail, Logs::None, "  Distance between From and To (NoRoot) is %8.3f", Distance);
 
-					if((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort))
-						&& (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
-					{
+					if ((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort)) &&
+					    (std::abs(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold))) {
 						if(!zone->zonemap->LineIntersectsZone(HeadPosition, To, 1.0f, nullptr))
 							PathingLOSState = HaveLOS;
 						else
 							PathingLOSState = NoLOS;
-						mlog(PATHING__DEBUG, "  LOS stats is %s", (PathingLOSState == HaveLOS) ? "HaveLOS" : "NoLOS");
+						Log.Out(Logs::Detail, Logs::None, "NoLOS");
 
 						if((PathingLOSState == HaveLOS) && zone->pathing->NoHazards(From, To))
 						{
-							mlog(PATHING__DEBUG, "  No hazards. Running directly to target.");
+							Log.Out(Logs::Detail, Logs::None, "  No hazards. Running directly to target.");
 							Route.clear();
 
 							return To;
 						}
 						else
 						{
-							mlog(PATHING__DEBUG, "  Continuing on node path.");
+							Log.Out(Logs::Detail, Logs::None, "  Continuing on node path.");
 						}
 					}
 					else
@@ -802,7 +798,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 						if(Route.size() == 0)
 						{
-							mlog(PATHING__DEBUG, "Missing node after teleport.");
+							Log.Out(Logs::Detail, Logs::None, "Missing node after teleport.");
 							return To;
 						}
 
@@ -812,7 +808,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 						Teleport(NodeLoc);
 
-						mlog(PATHING__DEBUG, "  TELEPORTED to %8.3f, %8.3f, %8.3f\n", NodeLoc.x, NodeLoc.y, NodeLoc.z);
+						Log.Out(Logs::Detail, Logs::None, "  TELEPORTED to %8.3f, %8.3f, %8.3f\n", NodeLoc.x, NodeLoc.y, NodeLoc.z);
 
 						Route.pop_front();
 
@@ -823,7 +819,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 					}
 					zone->pathing->OpenDoors(PathingLastNodeVisited, NextNode, this);
 
-					mlog(PATHING__DEBUG, "  Now moving to node %i", NextNode);
+					Log.Out(Logs::Detail, Logs::None, "  Now moving to node %i", NextNode);
 
 					return zone->pathing->GetPathNodeCoordinates(NextNode);
 				}
@@ -831,7 +827,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 				{
 					// we have run all the nodes, all that is left is the direct path from the last node
 					// to the destination
-					mlog(PATHING__DEBUG, "  Reached end of node path, running direct to target.");
+					Log.Out(Logs::Detail, Logs::None, "  Reached end of node path, running direct to target.");
 
 					return To;
 				}
@@ -845,31 +841,30 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 				&& (RouteSize <= RuleI(Pathing, MinNodesLeftForLOSCheck))
 				&& PathingLOSCheckTimer->Check())
 			{
-				mlog(PATHING__DEBUG, "  Checking distance to target.");
+				Log.Out(Logs::Detail, Logs::None, "  Checking distance to target.");
 
-				float Distance = VertexDistanceNoRoot(From, To);
+				float Distance = VectorDistanceNoRoot(From, To);
 
-				mlog(PATHING__DEBUG, "  Distance between From and To (NoRoot) is %8.3f", Distance);
+				Log.Out(Logs::Detail, Logs::None, "  Distance between From and To (NoRoot) is %8.3f", Distance);
 
-				if((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort))
-					&& (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
-				{
+				if ((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort)) &&
+				    (std::abs(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold))) {
 					if(!zone->zonemap->LineIntersectsZone(HeadPosition, To, 1.0f, nullptr))
 						PathingLOSState = HaveLOS;
 					else
 						PathingLOSState = NoLOS;
-					mlog(PATHING__DEBUG, "  LOS stats is %s", (PathingLOSState == HaveLOS) ? "HaveLOS" : "NoLOS");
+					Log.Out(Logs::Detail, Logs::None, "NoLOS");
 
 					if((PathingLOSState == HaveLOS) && zone->pathing->NoHazards(From, To))
 					{
-						mlog(PATHING__DEBUG, "  No hazards. Running directly to target.");
+						Log.Out(Logs::Detail, Logs::None, "  No hazards. Running directly to target.");
 						Route.clear();
 
 						return To;
 					}
 					else
 					{
-						mlog(PATHING__DEBUG, "  Continuing on node path.");
+						Log.Out(Logs::Detail, Logs::None, "  Continuing on node path.");
 					}
 				}
 				else
@@ -881,34 +876,33 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 		{
 			// We get here if we were already pathing, but our destination has now changed.
 			//
-			mlog(PATHING__DEBUG, "  Target has changed position.");
+			Log.Out(Logs::Detail, Logs::None, "  Target has changed position.");
 			// Update our record of where we are going to.
 			PathingDestination = To;
 			// Check if we now have LOS etc to the new destination.
 			if(PathingLOSCheckTimer->Check())
 			{
-				float Distance = VertexDistanceNoRoot(From, To);
+				float Distance = VectorDistanceNoRoot(From, To);
 
-				if((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort))
-					&& (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
-				{
-					mlog(PATHING__DEBUG, "  Checking for short LOS at distance %8.3f.", Distance);
+				if ((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort)) &&
+				    (std::abs(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold))) {
+					Log.Out(Logs::Detail, Logs::None, "  Checking for short LOS at distance %8.3f.", Distance);
 					if(!zone->zonemap->LineIntersectsZone(HeadPosition, To, 1.0f, nullptr))
 						PathingLOSState = HaveLOS;
 					else
 						PathingLOSState = NoLOS;
 
-					mlog(PATHING__DEBUG, "  LOS stats is %s", (PathingLOSState == HaveLOS) ? "HaveLOS" : "NoLOS");
+					Log.Out(Logs::Detail, Logs::None, "NoLOS");
 
 					if((PathingLOSState == HaveLOS) && zone->pathing->NoHazards(From, To))
 					{
-						mlog(PATHING__DEBUG, "  No hazards. Running directly to target.");
+						Log.Out(Logs::Detail, Logs::None, "  No hazards. Running directly to target.");
 						Route.clear();
 						return To;
 					}
 					else
 					{
-						mlog(PATHING__DEBUG, "  Continuing on node path.");
+						Log.Out(Logs::Detail, Logs::None, "  Continuing on node path.");
 					}
 				}
 			}
@@ -919,19 +913,19 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 			{
 				if(!PathingRouteUpdateTimerShort->Check())
 				{
-					mlog(PATHING__DEBUG, "Short route update timer not yet expired.");
+					Log.Out(Logs::Detail, Logs::None, "Short route update timer not yet expired.");
 					return zone->pathing->GetPathNodeCoordinates(Route.front());
 				}
-				mlog(PATHING__DEBUG, "Short route update timer expired.");
+				Log.Out(Logs::Detail, Logs::None, "Short route update timer expired.");
 			}
 			else
 			{
 				if(!PathingRouteUpdateTimerLong->Check())
 				{
-					mlog(PATHING__DEBUG, "Long route update timer not yet expired.");
+					Log.Out(Logs::Detail, Logs::None, "Long route update timer not yet expired.");
 					return zone->pathing->GetPathNodeCoordinates(Route.front());
 				}
-				mlog(PATHING__DEBUG, "Long route update timer expired.");
+				Log.Out(Logs::Detail, Logs::None, "Long route update timer expired.");
 			}
 
 			// We are already pathing, destination changed, no LOS. Find the nearest node to our destination.
@@ -940,7 +934,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 			// Destination unreachable via pathing, return direct route.
 			if(DestinationPathNode == -1)
 			{
-				mlog(PATHING__DEBUG, "  Unable to find path node for new destination. Running straight to target.");
+				Log.Out(Logs::Detail, Logs::None, "  Unable to find path node for new destination. Running straight to target.");
 				Route.clear();
 				return To;
 			}
@@ -948,7 +942,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 			// one, we will carry on on our path.
 			if(DestinationPathNode == Route.back())
 			{
-				mlog(PATHING__DEBUG, "  Same destination Node (%i). Continue with current path.", DestinationPathNode);
+				Log.Out(Logs::Detail, Logs::None, "  Same destination Node (%i). Continue with current path.", DestinationPathNode);
 
 				NodeLoc = zone->pathing->GetPathNodeCoordinates(Route.front());
 
@@ -956,7 +950,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 				// Check if we have reached a path node.
 				if(NodeLoc == From)
 				{
-					mlog(PATHING__DEBUG, "  Arrived at node %i, moving to next one.\n", Route.front());
+					Log.Out(Logs::Detail, Logs::None, "  Arrived at node %i, moving to next one.\n", Route.front());
 
 					NodeReached = true;
 
@@ -979,7 +973,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 							if(Route.size() == 0)
 							{
-								mlog(PATHING__DEBUG, "Missing node after teleport.");
+								Log.Out(Logs::Detail, Logs::None, "Missing node after teleport.");
 								return To;
 							}
 
@@ -989,7 +983,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 							Teleport(NodeLoc);
 
-							mlog(PATHING__DEBUG, "  TELEPORTED to %8.3f, %8.3f, %8.3f\n", NodeLoc.x, NodeLoc.y, NodeLoc.z);
+							Log.Out(Logs::Detail, Logs::None, "  TELEPORTED to %8.3f, %8.3f, %8.3f\n", NodeLoc.x, NodeLoc.y, NodeLoc.z);
 
 							Route.pop_front();
 
@@ -999,7 +993,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 							NextNode = Route.front();
 						}
 						// Return the coords of our next path node on the route.
-						mlog(PATHING__DEBUG, "  Now moving to node %i", NextNode);
+						Log.Out(Logs::Detail, Logs::None, "  Now moving to node %i", NextNode);
 
 						zone->pathing->OpenDoors(PathingLastNodeVisited, NextNode, this);
 
@@ -1007,7 +1001,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 					}
 					else
 					{
-						mlog(PATHING__DEBUG, "  Reached end of path grid. Running direct to target.");
+						Log.Out(Logs::Detail, Logs::None, "  Reached end of path grid. Running direct to target.");
 						return To;
 					}
 				}
@@ -1015,7 +1009,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 			}
 			else
 			{
-				mlog(PATHING__DEBUG, "  Target moved. End node is different. Clearing route.");
+				Log.Out(Logs::Detail, Logs::None, "  Target moved. End node is different. Clearing route.");
 
 				Route.clear();
 				// We will now fall through to get a new route.
@@ -1025,11 +1019,11 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 
 	}
-	mlog(PATHING__DEBUG, "  Our route list is empty.");
+	Log.Out(Logs::Detail, Logs::None, "  Our route list is empty.");
 
 	if((SameDestination) && !PathingLOSCheckTimer->Check())
 	{
-		mlog(PATHING__DEBUG, "  Destination same as before, LOS check timer not reached. Returning To.");
+		Log.Out(Logs::Detail, Logs::None, "  Destination same as before, LOS check timer not reached. Returning To.");
 		return To;
 	}
 
@@ -1039,27 +1033,26 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 	WaypointChanged = true;
 
-	float Distance = VertexDistanceNoRoot(From, To);
+	float Distance = VectorDistanceNoRoot(From, To);
 
-	if((Distance <= RuleR(Pathing, MinDistanceForLOSCheckLong))
-		&& (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
-	{
-		mlog(PATHING__DEBUG, "  Checking for long LOS at distance %8.3f.", Distance);
+	if ((Distance <= RuleR(Pathing, MinDistanceForLOSCheckLong)) &&
+	    (std::abs(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold))) {
+		Log.Out(Logs::Detail, Logs::None, "  Checking for long LOS at distance %8.3f.", Distance);
 
 		if(!zone->zonemap->LineIntersectsZone(HeadPosition, To, 1.0f, nullptr))
 			PathingLOSState = HaveLOS;
 		else
 			PathingLOSState = NoLOS;
 
-		mlog(PATHING__DEBUG, "  LOS stats is %s", (PathingLOSState == HaveLOS) ? "HaveLOS" : "NoLOS");
+		Log.Out(Logs::Detail, Logs::None, "NoLOS");
 
 		if((PathingLOSState == HaveLOS) && zone->pathing->NoHazards(From, To))
 		{
-			mlog(PATHING__DEBUG, "Target is reachable. Running directly there.");
+			Log.Out(Logs::Detail, Logs::None, "Target is reachable. Running directly there.");
 			return To;
 		}
 	}
-	mlog(PATHING__DEBUG, "  Calculating new route to target.");
+	Log.Out(Logs::Detail, Logs::None, "  Calculating new route to target.");
 
 	Route = zone->pathing->FindRoute(From, To);
 
@@ -1067,14 +1060,14 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 	if(Route.size() == 0)
 	{
-		mlog(PATHING__DEBUG, "  No route available, running direct.");
+		Log.Out(Logs::Detail, Logs::None, "  No route available, running direct.");
 
 		return To;
 	}
 
 	if(SameDestination && (Route.front() == PathingLastNodeVisited))
 	{
-		mlog(PATHING__DEBUG, "  Probable loop detected. Same destination and Route.front() == PathingLastNodeVisited.");
+		Log.Out(Logs::Detail, Logs::None, "  Probable loop detected. Same destination and Route.front() == PathingLastNodeVisited.");
 
 		Route.clear();
 
@@ -1082,7 +1075,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 	}
 	NodeLoc = zone->pathing->GetPathNodeCoordinates(Route.front());
 
-	mlog(PATHING__DEBUG, "  New route determined, heading for node %i", Route.front());
+	Log.Out(Logs::Detail, Logs::None, "  New route determined, heading for node %i", Route.front());
 
 	PathingLoopCount = 0;
 
@@ -1090,7 +1083,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 }
 
-int PathManager::FindNearestPathNode(Map::Vertex Position)
+int PathManager::FindNearestPathNode(glm::vec3 Position)
 {
 
 	// Find the nearest PathNode we have LOS to.
@@ -1103,28 +1096,27 @@ int PathManager::FindNearestPathNode(Map::Vertex Position)
 
 	int ClosestPathNodeToStart = -1;
 
-	std::list<PathNodeSortStruct> SortedByDistance;
+	std::deque<PathNodeSortStruct> SortedByDistance;
 
 	PathNodeSortStruct TempNode;
 
 	for(uint32 i = 0 ; i < Head.PathNodeCount; ++i)
 	{
-		if((ABS(Position.x - PathNodes[i].v.x) <= CandidateNodeRangeXY) &&
-			(ABS(Position.y - PathNodes[i].v.y) <= CandidateNodeRangeXY) &&
-			(ABS(Position.z - PathNodes[i].v.z) <= CandidateNodeRangeZ))
-		{
+		if ((std::abs(Position.x - PathNodes[i].v.x) <= CandidateNodeRangeXY) &&
+		    (std::abs(Position.y - PathNodes[i].v.y) <= CandidateNodeRangeXY) &&
+		    (std::abs(Position.z - PathNodes[i].v.z) <= CandidateNodeRangeZ)) {
 			TempNode.id = i;
-			TempNode.Distance = VertexDistanceNoRoot(Position, PathNodes[i].v);
+			TempNode.Distance = VectorDistanceNoRoot(Position, PathNodes[i].v);
 			SortedByDistance.push_back(TempNode);
 
 		}
 	}
 
-	SortedByDistance.sort(SortPathNodesByDistance);
+	std::sort(SortedByDistance.begin(), SortedByDistance.end(), path_compare);
 
-	for(std::list<PathNodeSortStruct>::iterator Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
+	for(auto Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
 	{
-		_log(PATHING__DEBUG, "Checking Reachability of Node %i from Start Position.", PathNodes[(*Iterator).id].id);
+		Log.Out(Logs::Detail, Logs::None, "Checking Reachability of Node %i from Start Position.", PathNodes[(*Iterator).id].id);
 
 		if(!zone->zonemap->LineIntersectsZone(Position, PathNodes[(*Iterator).id].v, 1.0f, nullptr))
 		{
@@ -1134,40 +1126,39 @@ int PathManager::FindNearestPathNode(Map::Vertex Position)
 	}
 
 	if(ClosestPathNodeToStart <0 ) {
-		_log(PATHING__DEBUG, "No LOS to any starting Path Node within range.");
+		Log.Out(Logs::Detail, Logs::None, "No LOS to any starting Path Node within range.");
 		return -1;
 	}
 	return ClosestPathNodeToStart;
 }
 
-bool PathManager::NoHazards(Map::Vertex From, Map::Vertex To)
+bool PathManager::NoHazards(glm::vec3 From, glm::vec3 To)
 {
 	// Test the Z coordinate at the mid point.
 	//
-	Map::Vertex MidPoint((From.x + To.x) / 2, (From.y + To.y) / 2, From.z);
+	glm::vec3 MidPoint((From.x + To.x) / 2, (From.y + To.y) / 2, From.z);
 
 	float NewZ = zone->zonemap->FindBestZ(MidPoint, nullptr);
 
-	if(ABS(NewZ - From.z) > RuleR(Pathing, ZDiffThreshold))
-	{
-		_log(PATHING__DEBUG, "  HAZARD DETECTED moving from %8.3f, %8.3f, %8.3f to %8.3f, %8.3f, %8.3f. Z Change is %8.3f",
+	if (std::abs(NewZ - From.z) > RuleR(Pathing, ZDiffThreshold)) {
+		Log.Out(Logs::Detail, Logs::None, "  HAZARD DETECTED moving from %8.3f, %8.3f, %8.3f to %8.3f, %8.3f, %8.3f. Z Change is %8.3f",
 			From.x, From.y, From.z, MidPoint.x, MidPoint.y, MidPoint.z, NewZ - From.z);
 
 		return false;
 	}
 	else
 	{
-		_log(PATHING__DEBUG, "No HAZARD DETECTED moving from %8.3f, %8.3f, %8.3f to %8.3f, %8.3f, %8.3f. Z Change is %8.3f",
+		Log.Out(Logs::Detail, Logs::None, "No HAZARD DETECTED moving from %8.3f, %8.3f, %8.3f to %8.3f, %8.3f, %8.3f. Z Change is %8.3f",
 			From.x, From.y, From.z, MidPoint.x, MidPoint.y, MidPoint.z, NewZ - From.z);
 	}
 
 	return true;
 }
 
-bool PathManager::NoHazardsAccurate(Map::Vertex From, Map::Vertex To)
+bool PathManager::NoHazardsAccurate(glm::vec3 From, glm::vec3 To)
 {
 	float stepx, stepy, stepz, curx, cury, curz;
-	Map::Vertex cur = From;
+	glm::vec3 cur = From;
 	float last_z = From.z;
 	float step_size = 1.0;
 
@@ -1185,11 +1176,10 @@ bool PathManager::NoHazardsAccurate(Map::Vertex From, Map::Vertex To)
 		stepy = (stepy / factor)*step_size;
 		stepz = (stepz / factor)*step_size;
 
-		Map::Vertex TestPoint(curx, cury, curz);
+		glm::vec3 TestPoint(curx, cury, curz);
 		float NewZ = zone->zonemap->FindBestZ(TestPoint, nullptr);
-		if (ABS(NewZ - last_z) > 5.0f)
-		{
-			_log(PATHING__DEBUG, "  HAZARD DETECTED moving from %8.3f, %8.3f, %8.3f to %8.3f, %8.3f, %8.3f. Best Z %8.3f, Z Change is %8.3f",
+		if (std::abs(NewZ - last_z) > 5.0f) {
+			Log.Out(Logs::Detail, Logs::None, "  HAZARD DETECTED moving from %8.3f, %8.3f, %8.3f to %8.3f, %8.3f, %8.3f. Best Z %8.3f, Z Change is %8.3f",
 				From.x, From.y, From.z, TestPoint.x, TestPoint.y, TestPoint.z, NewZ, NewZ - From.z);
 			return false;
 		}
@@ -1197,16 +1187,18 @@ bool PathManager::NoHazardsAccurate(Map::Vertex From, Map::Vertex To)
 
 		if (zone->watermap)
 		{
-			if (zone->watermap->InLiquid(From.x, From.y, From.z) || zone->watermap->InLiquid(To.x, To.y, To.z))
+            auto from = glm::vec3(From.x, From.y, From.z);
+            auto to = glm::vec3(To.x, To.y, To.z);
+			if (zone->watermap->InLiquid(from) || zone->watermap->InLiquid(to))
 			{
 				break;
 			}
-
-			if (zone->watermap->InLiquid(TestPoint.x, TestPoint.y, NewZ))
+            auto testPointNewZ = glm::vec3(TestPoint.x, TestPoint.y, NewZ);
+			if (zone->watermap->InLiquid(testPointNewZ))
 			{
-				Map::Vertex TestPointWater(TestPoint.x, TestPoint.y, NewZ - 0.5f);
-				Map::Vertex TestPointWaterDest = TestPointWater;
-				Map::Vertex hit;
+				glm::vec3 TestPointWater(TestPoint.x, TestPoint.y, NewZ - 0.5f);
+				glm::vec3 TestPointWaterDest = TestPointWater;
+				glm::vec3 hit;
 				TestPointWaterDest.z -= 500;
 				float best_z2 = -999990;
 				if (zone->zonemap->LineIntersectsZone(TestPointWater, TestPointWaterDest, 1.0f, &hit))
@@ -1215,30 +1207,33 @@ bool PathManager::NoHazardsAccurate(Map::Vertex From, Map::Vertex To)
 				}
 				if (best_z2 == -999990)
 				{
-					_log(PATHING__DEBUG, "  HAZARD DETECTED, really deep water/lava!");
+					Log.Out(Logs::Detail, Logs::None, "  HAZARD DETECTED, really deep water/lava!");
 					return false;
 				}
 				else
 				{
-					if (ABS(NewZ - best_z2) > RuleR(Pathing, ZDiffThreshold))
-					{
-						_log(PATHING__DEBUG, "  HAZARD DETECTED, water is fairly deep at %8.3f units deep", ABS(NewZ - best_z2));
+					if (std::abs(NewZ - best_z2) > RuleR(Pathing, ZDiffThreshold)) {
+						Log.Out(Logs::Detail, Logs::None,
+							"  HAZARD DETECTED, water is fairly deep at %8.3f units deep",
+							std::abs(NewZ - best_z2));
 						return false;
 					}
 					else
 					{
-						_log(PATHING__DEBUG, "  HAZARD NOT DETECTED, water is shallow at %8.3f units deep", ABS(NewZ - best_z2));
+						Log.Out(Logs::Detail, Logs::None,
+							"  HAZARD NOT DETECTED, water is shallow at %8.3f units deep",
+							std::abs(NewZ - best_z2));
 					}
 				}
 			}
 			else
 			{
-				_log(PATHING__DEBUG, "Hazard point not in water or lava!");
+				Log.Out(Logs::Detail, Logs::None, "Hazard point not in water or lava!");
 			}
 		}
 		else
 		{
-			_log(PATHING__DEBUG, "No water map loaded for hazards!");
+			Log.Out(Logs::Detail, Logs::None, "No water map loaded for hazards!");
 		}
 
 		curx += stepx;
@@ -1249,9 +1244,12 @@ bool PathManager::NoHazardsAccurate(Map::Vertex From, Map::Vertex To)
 		cur.y = cury;
 		cur.z = curz;
 
-		if (ABS(curx - To.x) < step_size) cur.x = To.x;
-		if (ABS(cury - To.y) < step_size) cur.y = To.y;
-		if (ABS(curz - To.z) < step_size) cur.z = To.z;
+		if (std::abs(curx - To.x) < step_size)
+			cur.x = To.x;
+		if (std::abs(cury - To.y) < step_size)
+			cur.y = To.y;
+		if (std::abs(curz - To.z) < step_size)
+			cur.z = To.z;
 
 	} while (cur.x != To.x || cur.y != To.y || cur.z != To.z);
 	return true;
@@ -1262,9 +1260,7 @@ void Mob::PrintRoute()
 
 	printf("Route is : ");
 
-	std::list<int>::iterator Iterator;
-
-	for(Iterator = Route.begin(); Iterator !=Route.end(); ++Iterator)
+	for(auto Iterator = Route.begin(); Iterator !=Route.end(); ++Iterator)
 	{
 		printf("%i, ", (*Iterator));
 	}
@@ -1292,7 +1288,7 @@ void PathManager::OpenDoors(int Node1, int Node2, Mob *ForWho)
 
 			if(d && !d->IsDoorOpen() )
 			{
-				_log(PATHING__DEBUG, "Opening door %i for %s", PathNodes[Node1].Neighbours[i].DoorID, ForWho->GetName());
+				Log.Out(Logs::Detail, Logs::None, "Opening door %i for %s", PathNodes[Node1].Neighbours[i].DoorID, ForWho->GetName());
 
 				d->ForceOpen(ForWho);
 			}
@@ -1344,7 +1340,7 @@ PathNode* PathManager::FindPathNodeByCoordinates(float x, float y, float z)
 
 int PathManager::GetRandomPathNode()
 {
-	return MakeRandomInt(0, Head.PathNodeCount - 1);
+	return zone->random.Int(0, Head.PathNodeCount - 1);
 
 }
 
@@ -1563,8 +1559,8 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 		npc_type->texture = 1;
 		npc_type->light = 0;
 		npc_type->runspeed = 0;
-		npc_type->d_meele_texture1 = 1;
-		npc_type->d_meele_texture2 = 1;
+		npc_type->d_melee_texture1 = 1;
+		npc_type->d_melee_texture2 = 1;
 		npc_type->merchanttype = 1;
 		npc_type->bodytype = 1;
 		npc_type->STR = 150;
@@ -1576,7 +1572,8 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 		npc_type->CHA = 150;
 		npc_type->findable = 1;
 
-		NPC* npc = new NPC(npc_type, 0, new_node.v.x, new_node.v.y, new_node.v.z, 0, FlyMode1);
+        auto position = glm::vec4(new_node.v.x, new_node.v.y, new_node.v.z, 0.0f);
+		NPC* npc = new NPC(npc_type, nullptr, position, FlyMode1);
 		npc->GiveNPCTypeData(npc_type);
 		entity_list.AddNPC(npc, true, true);
 
@@ -1623,8 +1620,8 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 		npc_type->texture = 1;
 		npc_type->light = 0;
 		npc_type->runspeed = 0;
-		npc_type->d_meele_texture1 = 1;
-		npc_type->d_meele_texture2 = 1;
+		npc_type->d_melee_texture1 = 1;
+		npc_type->d_melee_texture2 = 1;
 		npc_type->merchanttype = 1;
 		npc_type->bodytype = 1;
 		npc_type->STR = 150;
@@ -1636,7 +1633,8 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 		npc_type->CHA = 150;
 		npc_type->findable = 1;
 
-		NPC* npc = new NPC(npc_type, 0, new_node.v.x, new_node.v.y, new_node.v.z, 0, FlyMode1);
+        auto position = glm::vec4(new_node.v.x, new_node.v.y, new_node.v.z, 0.0f);
+		NPC* npc = new NPC(npc_type, nullptr, position, FlyMode1);
 		npc->GiveNPCTypeData(npc_type);
 		entity_list.AddNPC(npc, true, true);
 
@@ -1795,7 +1793,7 @@ void PathManager::ConnectNodeToNode(int32 Node1, int32 Node2, int32 teleport, in
 				a->Neighbours[a_i].id = b->id;
 				a->Neighbours[a_i].DoorID = doorid;
 				a->Neighbours[a_i].Teleport = teleport;
-				a->Neighbours[a_i].distance = VertexDistance(a->v, b->v);
+				a->Neighbours[a_i].distance = VectorDistance(a->v, b->v);
 				break;
 			}
 		}
@@ -1810,7 +1808,7 @@ void PathManager::ConnectNodeToNode(int32 Node1, int32 Node2, int32 teleport, in
 				b->Neighbours[b_i].id = a->id;
 				b->Neighbours[b_i].DoorID = doorid;
 				b->Neighbours[b_i].Teleport = teleport;
-				b->Neighbours[b_i].distance = VertexDistance(a->v, b->v);
+				b->Neighbours[b_i].distance = VectorDistance(a->v, b->v);
 				break;
 			}
 		}
@@ -1880,7 +1878,7 @@ void PathManager::ConnectNode(int32 Node1, int32 Node2, int32 teleport, int32 do
 				a->Neighbours[a_i].id = b->id;
 				a->Neighbours[a_i].DoorID = doorid;
 				a->Neighbours[a_i].Teleport = teleport;
-				a->Neighbours[a_i].distance = VertexDistance(a->v, b->v);
+				a->Neighbours[a_i].distance = VectorDistance(a->v, b->v);
 				break;
 			}
 		}
@@ -1996,7 +1994,7 @@ void PathManager::MoveNode(Client *c)
 
 	if(zone->zonemap)
 	{
-		Map::Vertex loc(c->GetX(), c->GetY(), c->GetZ());
+		glm::vec3 loc(c->GetX(), c->GetY(), c->GetZ());
 		Node->bestz = zone->zonemap->FindBestZ(loc, nullptr);
 	}
 	else
@@ -2067,14 +2065,14 @@ bool PathManager::NodesConnected(PathNode *a, PathNode *b)
 	return false;
 }
 
-bool PathManager::CheckLosFN(Map::Vertex a, Map::Vertex b)
+bool PathManager::CheckLosFN(glm::vec3 a, glm::vec3 b)
 {
 	if(zone->zonemap)
 	{
-		Map::Vertex hit;
+		glm::vec3 hit;
 
-		Map::Vertex myloc;
-		Map::Vertex oloc;
+		glm::vec3 myloc;
+		glm::vec3 oloc;
 
 		myloc.x = a.x;
 		myloc.y = a.y;
@@ -2117,7 +2115,7 @@ void PathManager::ProcessNodesAndSave(std::string filename)
 
 				if(!NodesConnected(&PathNodes[x], &PathNodes[y]))
 				{
-					if(VertexDistance(PathNodes[x].v, PathNodes[y].v) <= 200)
+					if(VectorDistance(PathNodes[x].v, PathNodes[y].v) <= 200)
 					{
 						if(CheckLosFN(PathNodes[x].v, PathNodes[y].v))
 						{

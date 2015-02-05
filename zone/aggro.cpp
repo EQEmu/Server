@@ -15,18 +15,23 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
-#include <stdlib.h>
-#include <math.h>
-#include "masterentity.h"
+
+#include "../common/global_define.h"
+#include "../common/eqemu_logsys.h"
 #include "../common/faction.h"
-#include "map.h"
-#include "../common/spdat.h"
-#include "../common/skills.h"
-#include "../common/misc_functions.h"
 #include "../common/rulesys.h"
-#include "string_ids.h"
-#include <iostream>
+#include "../common/spdat.h"
+
+#include "client.h"
+#include "corpse.h"
+#include "entity.h"
+#include "mob.h"
+
+#ifdef BOTS
+#include "bot.h"
+#endif
+
+#include "map.h"
 
 extern Zone* zone;
 //#define LOSDEBUG 6
@@ -84,7 +89,7 @@ void EntityList::DescribeAggro(Client *towho, NPC *from_who, float d, bool verbo
 		if (mob->IsClient())	//also ensures that mob != around
 			continue;
 
-		if (mob->DistNoRoot(*from_who) > d2)
+		if (DistanceSquared(mob->GetPosition(), from_who->GetPosition()) > d2)
 			continue;
 
 		if (engaged) {
@@ -146,7 +151,8 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 		return;
 	}
 
-	float dist2 = mob->DistNoRoot(*this);
+	float dist2 = DistanceSquared(mob->GetPosition(), m_Position);
+
 	float iAggroRange2 = iAggroRange*iAggroRange;
 	if( dist2 > iAggroRange2 ) {
 		towho->Message(0, "...%s is out of range. %.3f > %.3f ", mob->GetName(),
@@ -291,7 +297,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		return(false);
 	}
 
-	float dist2 = mob->DistNoRoot(*this);
+	float dist2 = DistanceSquared(mob->GetPosition(), m_Position);
 	float iAggroRange2 = iAggroRange*iAggroRange;
 
 	if( dist2 > iAggroRange2 ) {
@@ -329,7 +335,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 			||
 			(
 				fv == FACTION_THREATENLY
-				&& MakeRandomInt(0,99) < THREATENLY_ARRGO_CHANCE - heroicCHA_mod
+				&& zone->random.Roll(THREATENLY_ARRGO_CHANCE - heroicCHA_mod)
 			)
 		)
 	)
@@ -337,22 +343,18 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	{
 		//FatherNiwtit: make sure we can see them. last since it is very expensive
 		if(CheckLosFN(mob)) {
-
-			// Aggro
-			#if EQDEBUG>=6
-				LogFile->write(EQEMuLog::Debug, "Check aggro for %s target %s.", GetName(), mob->GetName());
-			#endif
+			Log.Out(Logs::Detail, Logs::Aggro, "Check aggro for %s target %s.", GetName(), mob->GetName()); 
 			return( mod_will_aggro(mob, this) );
 		}
 	}
-#if EQDEBUG >= 6
-	printf("Is In zone?:%d\n", mob->InZone());
-	printf("Dist^2: %f\n", dist2);
-	printf("Range^2: %f\n", iAggroRange2);
-	printf("Faction: %d\n", fv);
-	printf("Int: %d\n", GetINT());
-	printf("Con: %d\n", GetLevelCon(mob->GetLevel()));
-#endif
+
+	Log.Out(Logs::Detail, Logs::Aggro, "Is In zone?:%d\n", mob->InZone());
+	Log.Out(Logs::Detail, Logs::Aggro, "Dist^2: %f\n", dist2);
+	Log.Out(Logs::Detail, Logs::Aggro, "Range^2: %f\n", iAggroRange2);
+	Log.Out(Logs::Detail, Logs::Aggro, "Faction: %d\n", fv);
+	Log.Out(Logs::Detail, Logs::Aggro, "Int: %d\n", GetINT());
+	Log.Out(Logs::Detail, Logs::Aggro, "Con: %d\n", GetLevelCon(mob->GetLevel()));
+
 	return(false);
 }
 
@@ -409,7 +411,7 @@ int EntityList::GetHatedCount(Mob *attacker, Mob *exclude)
 
 		AggroRange *= AggroRange;
 
-		if (mob->DistNoRoot(*attacker) > AggroRange)
+		if (DistanceSquared(mob->GetPosition(), attacker->GetPosition()) > AggroRange)
 			continue;
 
 		Count++;
@@ -439,7 +441,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 //			&& !mob->IsCorpse()
 //			&& mob->IsAIControlled()
 			&& mob->GetPrimaryFaction() != 0
-			&& mob->DistNoRoot(*sender) <= r
+			&& DistanceSquared(mob->GetPosition(), sender->GetPosition()) <= r
 			&& !mob->IsEngaged()
 			&& ((!mob->IsPet()) || (mob->IsPet() && mob->GetOwner() && !mob->GetOwner()->IsClient()))
 				// If we're a pet we don't react to any calls for help if our owner is a client
@@ -465,8 +467,10 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 					//Father Nitwit: make sure we can see them.
 					if(mob->CheckLosFN(sender)) {
 #if (EQDEBUG>=5)
-						LogFile->write(EQEMuLog::Debug, "AIYellForHelp(\"%s\",\"%s\") %s attacking %s Dist %f Z %f",
-						sender->GetName(), attacker->GetName(), mob->GetName(), attacker->GetName(), mob->DistNoRoot(*sender), fabs(sender->GetZ()+mob->GetZ()));
+						Log.Out(Logs::General, Logs::None, "AIYellForHelp(\"%s\",\"%s\") %s attacking %s Dist %f Z %f",
+							sender->GetName(), attacker->GetName(), mob->GetName(), 
+							attacker->GetName(), DistanceSquared(mob->GetPosition(), 
+							sender->GetPosition()), fabs(sender->GetZ()+mob->GetZ()));
 #endif
 						mob->AddToHateList(attacker, 1, 0, false);
 					}
@@ -477,7 +481,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 }
 
 /*
-solar: returns false if attack should not be allowed
+returns false if attack should not be allowed
 I try to list every type of conflict that's possible here, so it's easy
 to see how the decision is made. Yea, it could be condensed and made
 faster, but I'm doing it this way to make it readable and easy to modify
@@ -546,7 +550,7 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 		}
 	}
 
-	// solar: the format here is a matrix of mob type vs mob type.
+	// the format here is a matrix of mob type vs mob type.
 	// redundant ones are omitted and the reverse is tried if it falls through.
 
 	// first figure out if we're pets. we always look at the master's flags.
@@ -692,12 +696,12 @@ type', in which case, the answer is yes.
 	}
 	while( reverse++ == 0 );
 
-	LogFile->write(EQEMuLog::Debug, "Mob::IsAttackAllowed: don't have a rule for this - %s vs %s\n", this->GetName(), target->GetName());
+	Log.Out(Logs::General, Logs::None, "Mob::IsAttackAllowed: don't have a rule for this - %s vs %s\n", this->GetName(), target->GetName());
 	return false;
 }
 
 
-// solar: this is to check if non detrimental things are allowed to be done
+// this is to check if non detrimental things are allowed to be done
 // to the target. clients cannot affect npcs and vice versa, and clients
 // cannot affect other clients that are not of the same pvp flag as them.
 // also goes for their pets
@@ -713,7 +717,7 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 	if (target->GetAllowBeneficial())
 		return true;
 
-	// solar: see IsAttackAllowed for notes
+	// see IsAttackAllowed for notes
 
 	// first figure out if we're pets. we always look at the master's flags.
 	// no need to compare pets to anything
@@ -832,7 +836,7 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 	}
 	while( reverse++ == 0 );
 
-	LogFile->write(EQEMuLog::Debug, "Mob::IsBeneficialAllowed: don't have a rule for this - %s to %s\n", this->GetName(), target->GetName());
+	Log.Out(Logs::General, Logs::None, "Mob::IsBeneficialAllowed: don't have a rule for this - %s to %s\n", this->GetName(), target->GetName());
 	return false;
 }
 
@@ -873,7 +877,7 @@ bool Mob::CombatRange(Mob* other)
 	if (size_mod > 10000)
 		size_mod = size_mod / 7;
 
-	float _DistNoRoot = DistNoRoot(*other);
+	float _DistNoRoot = DistanceSquared(m_Position, other->GetPosition());
 
 	if (GetSpecialAbility(NPC_CHASE_DISTANCE)){
 		
@@ -881,7 +885,7 @@ bool Mob::CombatRange(Mob* other)
 		float max_dist = static_cast<float>(GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 0));
 		float min_dist = static_cast<float>(GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 1));
 		
-		if (GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 2));
+		if (GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 2))
 			DoLoSCheck = false; //Ignore line of sight check
 
 		if (max_dist == 1)
@@ -930,8 +934,8 @@ bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
 #endif
 	}
 
-	Map::Vertex myloc;
-	Map::Vertex oloc;
+	glm::vec3 myloc;
+	glm::vec3 oloc;
 
 #define LOS_DEFAULT_HEIGHT 6.0f
 
@@ -944,7 +948,7 @@ bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
 	oloc.z = posZ + (mobSize==0.0?LOS_DEFAULT_HEIGHT:mobSize)/2 * SEE_POSITION;
 
 #if LOSDEBUG>=5
-	LogFile->write(EQEMuLog::Debug, "LOS from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) sizes: (%.2f, %.2f)", myloc.x, myloc.y, myloc.z, oloc.x, oloc.y, oloc.z, GetSize(), mobSize);
+	Log.Out(Logs::General, Logs::None, "LOS from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) sizes: (%.2f, %.2f)", myloc.x, myloc.y, myloc.z, oloc.x, oloc.y, oloc.z, GetSize(), mobSize);
 #endif
 	return zone->zonemap->CheckLoS(myloc, oloc);
 }
@@ -1124,8 +1128,7 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, bool isproc)
 
 		int HateMod = RuleI(Aggro, SpellAggroMod);
 
-		if (IsClient())
-			HateMod += CastToClient()->GetFocusEffect(focusSpellHateMod, spell_id);
+		HateMod += GetFocusEffect(focusSpellHateMod, spell_id);
 
 		AggroAmount = (AggroAmount * HateMod) / 100;
 
@@ -1174,8 +1177,7 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, uint32 heal_possible)
 	if (AggroAmount > 0) {
 		int HateMod = RuleI(Aggro, SpellAggroMod);
 
-		if (IsClient())
-			HateMod += CastToClient()->GetFocusEffect(focusSpellHateMod, spell_id);
+		HateMod += GetFocusEffect(focusSpellHateMod, spell_id);
 
 		//Live AA - Spell casting subtlety
 		HateMod += aabonuses.hatemod + spellbonuses.hatemod + itembonuses.hatemod;
@@ -1231,7 +1233,7 @@ void Mob::ClearFeignMemory() {
 		AIfeignremember_timer->Disable();
 }
 
-bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
+bool Mob::PassCharismaCheck(Mob* caster, uint16 spell_id) {
 
 	/*
 	Charm formula is correct based on over 50 hours of personal live parsing - Kayen
@@ -1254,13 +1256,13 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 			return true;
 
 		//1: The mob has a default 25% chance of being allowed a resistance check against the charm.
-		if (MakeRandomInt(0, 99) > RuleI(Spells, CharmBreakCheckChance))
+		if (zone->random.Int(0, 99) > RuleI(Spells, CharmBreakCheckChance))
 			return true;
 
 		if (RuleB(Spells, CharismaCharmDuration))
-			resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster,0,0,true,true);
+			resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster,false,0,true,true);
 		else
-			resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster, 0,0, false, true);
+			resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster, false,0, false, true);
 
 		//2: The mob makes a resistance check against the charm
 		if (resist_check == 100) 
@@ -1273,7 +1275,7 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 				//3: At maxed ability, Total Domination has a 50% chance of preventing the charm break that otherwise would have occurred.
 				int16 TotalDominationBonus = caster->aabonuses.CharmBreakChance + caster->spellbonuses.CharmBreakChance + caster->itembonuses.CharmBreakChance;
 
-				if (MakeRandomInt(0, 99) < TotalDominationBonus)
+				if (zone->random.Int(0, 99) < TotalDominationBonus)
 					return true;
 
 			}
@@ -1284,8 +1286,7 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 	{
 		// Assume this is a harmony/pacify spell
 		// If 'Lull' spell resists, do a second resist check with a charisma modifier AND regular resist checks. If resists agian you gain aggro.
-		resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster, true);
-
+		resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster, false,0,true);
 		if (resist_check == 100)
 			return true;
 	}
@@ -1296,7 +1297,7 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 void Mob::RogueEvade(Mob *other)
 {
 	int amount = other->GetHateAmount(this) - (GetLevel() * 13);
-	other->SetHate(this, std::max(1, amount));
+	other->SetHateAmountOnEnt(this, std::max(1, amount));
 
 	return;
 }

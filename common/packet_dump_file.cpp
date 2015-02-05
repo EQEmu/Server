@@ -15,16 +15,18 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
+#include "../common/global_define.h"
+
 #include <fstream>
-#include <iostream>
 #include <iomanip>
-#include "../common/debug.h"
+#include <iostream>
 #include <stdio.h>
+
 //#ifdef _CRTDBG_MAP_ALLOC
 //	#undef new
 //	#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
 //#endif
-#include <time.h>
 #include <string.h>
 
 #ifdef _WINDOWS

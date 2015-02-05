@@ -15,7 +15,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "zonelist.h"
 #include "zoneserver.h"
 #include "world_tcp_connection.h"
@@ -24,10 +24,12 @@
 #include "world_config.h"
 #include "../common/servertalk.h"
 #include "../common/string_util.h"
+#include "../common/random.h"
 
 extern uint32			numzones;
 extern bool holdzones;
 extern ConsoleList		console_list;
+extern EQEmu::Random emu_random;
 void CatchSignal(int sig_num);
 
 ZSList::ZSList()
@@ -77,8 +79,8 @@ void ZSList::KillAll() {
 void ZSList::Process() {
 
 	if(shutdowntimer && shutdowntimer->Check()){
-		_log(WORLD__ZONELIST, "Shutdown timer has expired. Telling all zones to shut down and exiting. (fake sigint)");
-		ServerPacket* pack2 = new ServerPacket;
+		Log.Out(Logs::Detail, Logs::World_Server, "Shutdown timer has expired. Telling all zones to shut down and exiting. (fake sigint)");
+		auto pack2 = new ServerPacket;
 		pack2->opcode = ServerOP_ShutdownAll;
 		pack2->size=0;
 		SendPacket(pack2);
@@ -97,10 +99,10 @@ void ZSList::Process() {
 			ZoneServer* zs = iterator.GetData();
 			struct in_addr in;
 			in.s_addr = zs->GetIP();
-			_log(WORLD__ZONELIST,"Removing zoneserver #%d at %s:%d",zs->GetID(),zs->GetCAddress(),zs->GetCPort());
+			Log.Out(Logs::Detail, Logs::World_Server,"Removing zoneserver #%d at %s:%d",zs->GetID(),zs->GetCAddress(),zs->GetCPort());
 			zs->LSShutDownUpdate(zs->GetZoneID());
 			if (holdzones){
-				_log(WORLD__ZONELIST,"Hold Zones mode is ON - rebooting lost zone");
+				Log.Out(Logs::Detail, Logs::World_Server,"Hold Zones mode is ON - rebooting lost zone");
 				if(!zs->IsStaticZone())
 					RebootZone(inet_ntoa(in),zs->GetCPort(),zs->GetCAddress(),zs->GetID());
 				else
@@ -244,16 +246,16 @@ ZoneServer* ZSList::FindByInstanceID(uint32 InstanceID)
 }
 
 bool ZSList::SetLockedZone(uint16 iZoneID, bool iLock) {
-	for (int i=0; i<MaxLockedZones; i++) {
+	for (auto &zone : pLockedZones) {
 		if (iLock) {
-			if (pLockedZones[i] == 0) {
-				pLockedZones[i] = iZoneID;
+			if (zone == 0) {
+				zone = iZoneID;
 				return true;
 			}
 		}
 		else {
-			if (pLockedZones[i] == iZoneID) {
-				pLockedZones[i] = 0;
+			if (zone == iZoneID) {
+				zone = 0;
 				return true;
 			}
 		}
@@ -262,8 +264,8 @@ bool ZSList::SetLockedZone(uint16 iZoneID, bool iLock) {
 }
 
 bool ZSList::IsZoneLocked(uint16 iZoneID) {
-	for (int i=0; i<MaxLockedZones; i++) {
-		if (pLockedZones[i] == iZoneID)
+	for (auto &zone : pLockedZones) {
+		if (zone == iZoneID)
 			return true;
 	}
 	return false;
@@ -271,9 +273,9 @@ bool ZSList::IsZoneLocked(uint16 iZoneID) {
 
 void ZSList::ListLockedZones(const char* to, WorldTCPConnection* connection) {
 	int x = 0;
-	for (int i=0; i<MaxLockedZones; i++) {
-		if (pLockedZones[i]) {
-			connection->SendEmoteMessageRaw(to, 0, 0, 0, database.GetZoneName(pLockedZones[i], true));
+	for (auto &zone : pLockedZones) {
+		if (zone) {
+			connection->SendEmoteMessageRaw(to, 0, 0, 0, database.GetZoneName(zone, true));
 			x++;
 		}
 	}
@@ -397,7 +399,7 @@ void ZSList::SendChannelMessage(const char* from, const char* to, uint8 chan_num
 void ZSList::SendChannelMessageRaw(const char* from, const char* to, uint8 chan_num, uint8 language, const char* message) {
 	if (!message)
 		return;
-	ServerPacket* pack = new ServerPacket;
+	auto pack = new ServerPacket;
 
 	pack->opcode = ServerOP_ChannelMessage;
 	pack->size = sizeof(ServerChannelMessage_Struct)+strlen(message)+1;
@@ -451,7 +453,7 @@ void ZSList::SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to_mins
 void ZSList::SendEmoteMessageRaw(const char* to, uint32 to_guilddbid, int16 to_minstatus, uint32 type, const char* message) {
 	if (!message)
 		return;
-	ServerPacket* pack = new ServerPacket;
+	auto pack = new ServerPacket;
 
 	pack->opcode = ServerOP_EmoteMessage;
 	pack->size = sizeof(ServerEmoteMessage_Struct)+strlen(message)+1;
@@ -498,7 +500,7 @@ void ZSList::SendEmoteMessageRaw(const char* to, uint32 to_guilddbid, int16 to_m
 }
 
 void ZSList::SendTimeSync() {
-	ServerPacket* pack = new ServerPacket(ServerOP_SyncWorldTime, sizeof(eqTimeOfDay));
+	auto pack = new ServerPacket(ServerOP_SyncWorldTime, sizeof(eqTimeOfDay));
 	eqTimeOfDay* tod = (eqTimeOfDay*) pack->pBuffer;
 	tod->start_eqtime=worldclock.getStartEQTime();
 	tod->start_realtime=worldclock.getStartRealTime();
@@ -552,7 +554,7 @@ void ZSList::RebootZone(const char* ip1,uint16 port,const char* ip2, uint32 skip
 	}
 	if (x == 0)
 		return;
-	ZoneServer** tmp = new ZoneServer*[x];
+	auto tmp = new ZoneServer *[x];
 	uint32 y = 0;
 	iterator.Reset();
 	while(iterator.MoreElements()) {
@@ -565,16 +567,16 @@ void ZSList::RebootZone(const char* ip1,uint16 port,const char* ip2, uint32 skip
 		safe_delete(tmp);
 		return;
 	}
-	uint32 z = MakeRandomInt(0, y-1);
+	uint32 z = emu_random.Int(0, y-1);
 
-	ServerPacket* pack = new ServerPacket(ServerOP_ZoneReboot, sizeof(ServerZoneReboot_Struct));
+	auto pack = new ServerPacket(ServerOP_ZoneReboot, sizeof(ServerZoneReboot_Struct));
 	ServerZoneReboot_Struct* s = (ServerZoneReboot_Struct*) pack->pBuffer;
 //	strcpy(s->ip1,ip1);
 	strcpy(s->ip2,ip2);
 	s->port = port;
 	s->zoneid = zoneid;
 	if(zoneid != 0)
-		_log(WORLD__ZONELIST,"Rebooting static zone with the ID of: %i",zoneid);
+		Log.Out(Logs::Detail, Logs::World_Server,"Rebooting static zone with the ID of: %i",zoneid);
 	tmp[z]->SendPacket(pack);
 	delete pack;
 	safe_delete_array(tmp);
@@ -732,7 +734,7 @@ void ZSList::WorldShutDown(uint32 time, uint32 interval)
 	}
 	else {
 		SendEmoteMessage(0,0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down, everyone log out now.");
-		ServerPacket* pack = new ServerPacket;
+		auto pack = new ServerPacket;
 		pack->opcode = ServerOP_ShutdownAll;
 		pack->size=0;
 		SendPacket(pack);

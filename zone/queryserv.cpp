@@ -16,14 +16,13 @@ Copyright (C) 2001-2014 EQEMu Development Team (http://eqemulator.net)
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "../common/servertalk.h"
 #include "../common/string_util.h"
 #include "queryserv.h"
 #include "worldserver.h"
 #include "net.h"
 
-#include <iostream>
 
 extern WorldServer worldserver;
 extern QueryServ* QServ;

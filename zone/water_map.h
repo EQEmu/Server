@@ -2,7 +2,9 @@
 #define EQEMU_WATER_MAP_H
 
 #include "../common/types.h"
+#include "position.h"
 #include <string>
+
 
 enum WaterRegionType {
 	RegionTypeUnsupported = -2,
@@ -21,15 +23,15 @@ class WaterMap
 {
 public:
 	WaterMap() { }
-	~WaterMap() { }
-	
+	virtual ~WaterMap() { }
+
 	static WaterMap* LoadWaterMapfile(std::string zone_name);
-	virtual WaterRegionType ReturnRegionType(float y, float x, float z) const { return RegionTypeNormal; }
-	virtual bool InWater(float y, float x, float z) const { return false; }
-	virtual bool InVWater(float y, float x, float z) const { return false; }
-	virtual bool InLava(float y, float x, float z) const { return false; }
-	virtual bool InLiquid(float y, float x, float z) const { return false; }
-	
+	virtual WaterRegionType ReturnRegionType(const glm::vec3& location) const = 0;
+	virtual bool InWater(const glm::vec3& location) const = 0;
+	virtual bool InVWater(const glm::vec3& location) const = 0;
+	virtual bool InLava(const glm::vec3& location) const = 0;
+	virtual bool InLiquid(const glm::vec3& location) const = 0;
+
 protected:
 	virtual bool Load(FILE *fp) { return false; }
 };

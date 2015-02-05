@@ -48,8 +48,6 @@
 #include "queue.h"
 #include "misc_functions.h"
 
-class BaseTCPServer;
-class ServerPacket;
 
 #define TCPConnection_ErrorBufferSize	1024
 #define MaxTCPReceiveBuffferSize		524288
@@ -57,7 +55,7 @@ class ServerPacket;
 
 #ifndef DEF_eConnectionType
 #define DEF_eConnectionType
-enum eConnectionType {Incomming, Outgoing};
+enum eConnectionType {Incoming, Outgoing};
 #endif
 
 

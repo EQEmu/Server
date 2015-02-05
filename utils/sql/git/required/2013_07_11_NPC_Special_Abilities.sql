@@ -1,4 +1,5 @@
-ALTER TABLE `npc_types`  ADD COLUMN `special_abilities` TEXT NOT NULL DEFAULT '' AFTER `npcspecialattks`;
+ALTER TABLE `npc_types`  ADD COLUMN `special_abilities` TEXT NULL AFTER `npcspecialattks`;
+ALTER TABLE `npc_types` MODIFY COLUMN `special_abilities` text CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL;
 
 UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "1,1^") WHERE npcspecialattks LIKE BINARY '%S%';
 UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "2,1^") WHERE npcspecialattks LIKE BINARY '%E%';

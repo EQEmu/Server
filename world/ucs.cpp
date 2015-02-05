@@ -1,8 +1,9 @@
-#include "../common/debug.h"
+#include "../common/global_define.h"
+#include "../common/eqemu_logsys.h"
 #include "ucs.h"
 #include "world_config.h"
-#include "../common/logsys.h"
-#include "../common/logtypes.h"
+
+
 #include "../common/md5.h"
 #include "../common/emu_tcp_connection.h"
 #include "../common/packet_dump.h"
@@ -17,7 +18,7 @@ void UCSConnection::SetConnection(EmuTCPConnection *inStream)
 {
 	if(Stream)
 	{
-		_log(UCS__ERROR, "Incoming UCS Connection while we were already connected to a UCS.");
+		Log.Out(Logs::Detail, Logs::UCS_Server, "Incoming UCS Connection while we were already connected to a UCS.");
 		Stream->Disconnect();
 	}
 
@@ -51,8 +52,8 @@ bool UCSConnection::Process()
 					{
 						struct in_addr in;
 						in.s_addr = GetIP();
-						_log(UCS__ERROR, "UCS authorization failed.");
-						ServerPacket* pack = new ServerPacket(ServerOP_ZAAuthFailed);
+						Log.Out(Logs::Detail, Logs::UCS_Server, "UCS authorization failed.");
+						auto pack = new ServerPacket(ServerOP_ZAAuthFailed);
 						SendPacket(pack);
 						delete pack;
 						Disconnect();
@@ -63,8 +64,8 @@ bool UCSConnection::Process()
 				{
 					struct in_addr in;
 					in.s_addr = GetIP();
-					_log(UCS__ERROR, "UCS authorization failed.");
-					ServerPacket* pack = new ServerPacket(ServerOP_ZAAuthFailed);
+					Log.Out(Logs::Detail, Logs::UCS_Server, "UCS authorization failed.");
+					auto pack = new ServerPacket(ServerOP_ZAAuthFailed);
 					SendPacket(pack);
 					delete pack;
 					Disconnect();
@@ -73,7 +74,7 @@ bool UCSConnection::Process()
 			}
 			else
 			{
-				_log(UCS__ERROR,"**WARNING** You have not configured a world shared key in your config file. You should add a <key>STRING</key> element to your <world> element to prevent unauthroized zone access.");
+				Log.Out(Logs::Detail, Logs::UCS_Server,"**WARNING** You have not configured a world shared key in your config file. You should add a <key>STRING</key> element to your <world> element to prevent unauthroized zone access.");
 				authenticated = true;
 			}
 			delete pack;
@@ -91,12 +92,12 @@ bool UCSConnection::Process()
 			}
 			case ServerOP_ZAAuth:
 			{
-				_log(UCS__ERROR, "Got authentication from UCS when they are already authenticated.");
+				Log.Out(Logs::Detail, Logs::UCS_Server, "Got authentication from UCS when they are already authenticated.");
 				break;
 			}
 			default:
 			{
-				_log(UCS__ERROR, "Unknown ServerOPcode from UCS 0x%04x, size %d", pack->opcode, pack->size);
+				Log.Out(Logs::Detail, Logs::UCS_Server, "Unknown ServerOPcode from UCS 0x%04x, size %d", pack->opcode, pack->size);
 				DumpPacket(pack->pBuffer, pack->size);
 				break;
 			}
@@ -117,7 +118,7 @@ bool UCSConnection::SendPacket(ServerPacket* pack)
 
 void UCSConnection::SendMessage(const char *From, const char *Message)
 {
-	ServerPacket* pack = new ServerPacket(ServerOP_UCSMessage, strlen(From) + strlen(Message) + 2);
+	auto pack = new ServerPacket(ServerOP_UCSMessage, strlen(From) + strlen(Message) + 2);
 
 	char *Buffer = (char *)pack->pBuffer;
 

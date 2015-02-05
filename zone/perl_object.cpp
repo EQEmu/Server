@@ -27,7 +27,7 @@
 
 #include "../common/features.h"
 #ifdef EMBPERL_XS_CLASSES
-#include "../common/debug.h"
+#include "../common/global_define.h"
 #include "embperl.h"
 
 #ifdef seed
@@ -909,6 +909,107 @@ XS(XS_Object_SetEntityVariable)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Object_GetSolidType); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Object_GetSolidType)
+{
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Object::GetSolidType(THIS)");
+	{
+		Object *		THIS;
+		uint16		RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Object")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Object *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Object");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetSolidType();
+		XSprePUSH; PUSHu((UV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+
+XS(XS_Object_SetSolidType); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Object_SetSolidType)
+{
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Object::SetSolidType(THIS, type)");
+	{
+		Object *		THIS;
+		uint16		type = (uint16)SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Object")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Object *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Object");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->SetSolidType(type);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Object_GetSize); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Object_GetSize)
+{
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Object::GetSize(THIS)");
+	{
+		Object *		THIS;
+		uint16		RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Object")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Object *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Object");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetSize();
+		XSprePUSH; PUSHu((UV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+
+XS(XS_Object_SetSize); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Object_SetSize)
+{
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Object::SetSize(THIS, type)");
+	{
+		Object *		THIS;
+		uint16		size = (uint16)SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Object")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Object *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Object");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->SetSize(size);
+	}
+	XSRETURN_EMPTY;
+}
 
 #ifdef __cplusplus
 extern "C"
@@ -961,6 +1062,10 @@ XS(boot_Object)
 		newXSproto(strcpy(buf, "GetEntityVariable"), XS_Object_GetEntityVariable, file, "$$");
 		newXSproto(strcpy(buf, "SetEntityVariable"), XS_Object_SetEntityVariable, file, "$$$");
 		newXSproto(strcpy(buf, "EntityVariableExists"), XS_Object_EntityVariableExists, file, "$$");
+		newXSproto(strcpy(buf, "SetSolidType"),XS_Object_SetSolidType, file, "$$");
+		newXSproto(strcpy(buf, "GetSolidType"),XS_Object_GetSolidType, file, "$");
+		newXSproto(strcpy(buf, "SetSize"),XS_Object_SetSize, file, "$$");
+		newXSproto(strcpy(buf, "GetSize"),XS_Object_GetSize, file, "$");
 	XSRETURN_YES;
 }
 #endif //EMBPERL_XS_CLASSES

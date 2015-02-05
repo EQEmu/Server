@@ -17,6 +17,7 @@
 */
 #ifndef ENTITY_H
 #define ENTITY_H
+
 #include <unordered_map>
 #include <queue>
 
@@ -26,33 +27,38 @@
 #include "../common/bodytypes.h"
 #include "../common/eq_constants.h"
 
-#include "zonedb.h"
+#include "position.h"
 #include "zonedump.h"
-#include "qglobals.h"
 
-class EQApplicationPacket;
-
-class Client;
-class Mob;
-class NPC;
-class Merc;
-class Corpse;
 class Beacon;
-class Petition;
-class Object;
-class Group;
-class Raid;
+class Client;
+class Corpse;
 class Doors;
-class Trap;
+class EQApplicationPacket;
 class Entity;
 class EntityList;
+class Group;
+class Merc;
+class Mob;
+class NPC; 
+class Object;
+class Petition;
+class Raid;
+class Spawn2;
+class Trap;
+
+struct GuildBankItemUpdate_Struct;
+struct NewSpawn_Struct;
+struct QGlobal;
+struct UseAA_Struct;
+struct Who_All_Struct;
 
 #ifdef BOTS
 class Bot;
 class BotRaids;
 #endif
 
-extern EntityList entity_list; 
+extern EntityList entity_list;
 
 class Entity
 {
@@ -97,6 +103,7 @@ public:
 	const Beacon	*CastToBeacon() const;
 
 	inline const uint16& GetID() const { return id; }
+	inline const time_t& GetSpawnTimeStamp() const { return spawn_timestamp; }
 
 	virtual const char* GetName() { return ""; }
 	bool CheckCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z, float trg_x, float trg_y, float trg_z, float perwalk=1);
@@ -112,6 +119,7 @@ protected:
 	uint32 pDBAsyncWorkID;
 private:
 	uint16 id;
+	time_t spawn_timestamp;
 };
 
 class EntityList
@@ -134,7 +142,7 @@ public:
 	Mob *GetMob(const char* name);
 	Mob *GetMobByNpcTypeID(uint32 get_id);
 	bool IsMobSpawnedByNpcTypeID(uint32 get_id);
-	Mob *GetTargetForVirus(Mob* spreader);
+	Mob *GetTargetForVirus(Mob* spreader, int range);
 	inline NPC *GetNPCByID(uint16 id)
 		{ return npc_list.count(id) ? npc_list.at(id) : nullptr; }
 	NPC *GetNPCByNPCTypeID(uint32 npc_id);
@@ -147,7 +155,7 @@ public:
 	Client *GetClientByCharID(uint32 iCharID);
 	Client *GetClientByWID(uint32 iWID);
 	Client *GetClient(uint32 ip, uint16 port);
-	Client *GetRandomClient(float x, float y, float z, float Distance, Client *ExcludeClient = nullptr);
+	Client *GetRandomClient(const glm::vec3& location, float Distance, Client *ExcludeClient = nullptr);
 	Group *GetGroupByMob(Mob* mob);
 	Group *GetGroupByClient(Client* client);
 	Group *GetGroupByID(uint32 id);
@@ -195,7 +203,7 @@ public:
 	void	MobProcess();
 	void	TrapProcess();
 	void	BeaconProcess();
-	void	ProcessMove(Client *c, float x, float y, float z);
+	void	ProcessMove(Client *c, const glm::vec3& location);
 	void	ProcessMove(NPC *n, float x, float y, float z);
 	void	AddArea(int id, int type, float min_x, float max_x, float min_y, float max_y, float min_z, float max_z);
 	void	RemoveArea(int id);
@@ -249,6 +257,8 @@ public:
 	void	RemoveAllLocalities();
 	void	RemoveAllRaids();
 	void	DestroyTempPets(Mob *owner);
+	int16	CountTempPets(Mob *owner);
+	void	AddTempPetsToHateList(Mob *owner, Mob* other, bool bFrenzy = false);
 	Entity *GetEntityMob(uint16 id);
 	Entity *GetEntityMerc(uint16 id);
 	Entity *GetEntityDoor(uint16 id);
@@ -258,6 +268,8 @@ public:
 	Entity *GetEntityBeacon(uint16 id);
 	Entity *GetEntityMob(const char *name);
 	Entity *GetEntityCorpse(const char *name);
+
+	void	StopMobAI();
 
 	void DescribeAggro(Client *towho, NPC *from_who, float dist, bool verbose);
 
@@ -297,7 +309,7 @@ public:
 	void	QueueClientsGuild(Mob* sender, const EQApplicationPacket* app, bool ignore_sender = false, uint32 guildeqid = 0);
 	void	QueueClientsGuildBankItemUpdate(const GuildBankItemUpdate_Struct *gbius, uint32 GuildID);
 	void	QueueClientsByTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true, Mob* SkipThisMob = 0, bool ackreq = true,
-						bool HoTT = true, uint32 ClientVersionBits = 0xFFFFFFFF);
+						bool HoTT = true, uint32 ClientVersionBits = 0xFFFFFFFF, bool inspect_buffs = false);
 
 	void	QueueClientsByXTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true);
 	void	QueueToGroupsForNPCHealthAA(Mob* sender, const EQApplicationPacket* app);
@@ -308,8 +320,6 @@ public:
 	void	AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true, int16 resist_adjust = 0);
 	void	MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
 	void	AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
-
-	void	RadialSetLogging(Mob *around, bool enabled, bool clients, bool non_clients, float range = 0);
 
 	//trap stuff
 	Mob*	GetTrapTrigger(Trap* trap);
@@ -346,7 +356,7 @@ public:
 	void	ClearAggro(Mob* targ);
 	void	ClearFeignAggro(Mob* targ);
 	void	ClearZoneFeignAggro(Client* targ);
-	void	AggroZone(Mob* who, int hate = 0);
+	void	AggroZone(Mob* who, uint32 hate = 0);
 
 	bool	Fighting(Mob* targ);
 	void	RemoveFromHateLists(Mob* mob, bool settoone = false);
@@ -382,9 +392,9 @@ public:
 	void	SaveAllClientsTaskState();
 	void	ReloadAllClientsTaskState(int TaskID=0);
 
-	uint16	CreateGroundObject(uint32 itemid, float x, float y, float z, float heading, uint32 decay_time = 300000);
-	uint16	CreateGroundObjectFromModel(const char *model, float x, float y, float z, float heading, uint8 type = 0x00, uint32 decay_time = 0);
-	uint16	CreateDoor(const char *model, float x, float y, float z, float heading, uint8 type = 0, uint16 size = 100);
+	uint16	CreateGroundObject(uint32 itemid, const glm::vec4& position, uint32 decay_time = 300000);
+	uint16	CreateGroundObjectFromModel(const char *model, const glm::vec4& position, uint8 type = 0x00, uint32 decay_time = 0);
+	uint16	CreateDoor(const char *model, const glm::vec4& position, uint8 type = 0, uint16 size = 100);
 	void	ZoneWho(Client *c, Who_All_Struct* Who);
 	void	UnMarkNPC(uint16 ID);
 

@@ -22,7 +22,15 @@
 #define LOGIN_VERSION "0.8.0"
 #define EQEMU_PROTOCOL_VERSION "0.3.10"
 
-#define CURRENT_VERSION "1.0.0"
+#define CURRENT_VERSION "1.1.3"
+
+/* 
+	Everytime a Database SQL is added to Github, 
+		increment CURRENT_BINARY_DATABASE_VERSION number and make sure you update the manifest
+	Manifest: https://github.com/EQEmu/Server/blob/master/utils/sql/db_update_manifest.txt	
+*/
+
+#define CURRENT_BINARY_DATABASE_VERSION 9076
 #define COMPILE_DATE	__DATE__
 #define COMPILE_TIME	__TIME__
 #ifndef WIN32
