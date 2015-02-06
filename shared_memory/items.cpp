@@ -25,6 +25,7 @@
 #include "../common/item_struct.h"
 
 void LoadItems(SharedDatabase *database) {
+	_eqp
 	EQEmu::IPCMutex mutex("items");
 	mutex.Lock();
 

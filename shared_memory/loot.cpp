@@ -26,6 +26,7 @@
 #include "../common/loottable.h"
 
 void LoadLoot(SharedDatabase *database) {
+	_eqp
 	EQEmu::IPCMutex mutex("loot");
 	mutex.Lock();
 

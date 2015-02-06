@@ -24,6 +24,7 @@
 #include "../common/eqemu_exception.h"
 
 void LoadBaseData(SharedDatabase *database) {
+	_eqp
 	EQEmu::IPCMutex mutex("base_data");
 	mutex.Lock();
 	int records = (database->GetMaxBaseDataLevel() + 1);

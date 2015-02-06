@@ -25,6 +25,7 @@
 #include "../common/spdat.h"
 
 void LoadSpells(SharedDatabase *database) {
+	_eqp
 	EQEmu::IPCMutex mutex("spells");
 	mutex.Lock();
 	int records = database->GetMaxSpellID() + 1;

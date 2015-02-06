@@ -26,6 +26,7 @@
 #include "../common/features.h"
 
 void LoadSkillCaps(SharedDatabase *database) {
+	_eqp
 	EQEmu::IPCMutex mutex("skill_caps");
 	mutex.Lock();
 

@@ -17,6 +17,7 @@
 */
 
 #include <stdio.h>
+#include <signal.h>
 
 #include "../common/eqemu_logsys.h"
 #include "../common/global_define.h"
@@ -35,10 +36,42 @@
 
 EQEmuLogSys Log;
 
+void CatchSignal(int sig_num)
+{
+#ifdef EQPERF_ENABLED
+	char time_str[128];
+	time_t result = time(nullptr);
+	strftime(time_str, sizeof(time_str), "%Y_%m_%d__%H_%M_%S", localtime(&result));
+
+	std::string prof_name = "./profile/shared_memory_";
+	prof_name += time_str;
+	prof_name += ".log";
+
+	std::ofstream profile_out(prof_name, std::ofstream::out);
+	if(profile_out.good()) {
+		_eqp_dump(profile_out, 10);
+	}
+#endif
+}
+
 int main(int argc, char **argv) {
+	_eqp
 	RegisterExecutablePlatform(ExePlatformSharedMemory);
 	Log.LoadLogSettingsDefaults();
 	set_exception_handler();
+
+	if(signal(SIGINT, CatchSignal) == SIG_ERR)	{
+		Log.Out(Logs::Detail, Logs::Error, "Could not set signal handler");
+		return 1;
+	}
+	if(signal(SIGTERM, CatchSignal) == SIG_ERR)	{
+		Log.Out(Logs::Detail, Logs::Error, "Could not set signal handler");
+		return 1;
+	}
+	if(signal(SIGBREAK, CatchSignal) == SIG_ERR)	{
+		Log.Out(Logs::Detail, Logs::Error, "Could not set signal handler");
+		return 1;
+	}
 
 	Log.Out(Logs::General, Logs::Status, "Shared Memory Loader Program");
 	if(!EQEmuConfig::LoadConfig()) {
@@ -175,6 +208,5 @@ int main(int argc, char **argv) {
 	}
 
 	Log.CloseFileLogs();
-
 	return 0;
 }

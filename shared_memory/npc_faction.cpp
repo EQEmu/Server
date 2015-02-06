@@ -25,6 +25,7 @@
 #include "../common/faction.h"
 
 void LoadFactions(SharedDatabase *database) {
+	_eqp
 	EQEmu::IPCMutex mutex("faction");
 	mutex.Lock();
 
