@@ -16,10 +16,12 @@ TARGET_LINK_LIBRARIES(import_client_files common ${PERF_LIBS} debug ${MySQL_LIBR
 IF(MSVC)
 	SET_TARGET_PROPERTIES(import_client_files PROPERTIES LINK_FLAGS_RELEASE "/OPT:REF /OPT:ICF")
 	TARGET_LINK_LIBRARIES(import_client_files "Ws2_32.lib")
+	TARGET_LINK_LIBRARIES(import_client_files "rpcrt4")
 ENDIF(MSVC)
 
 IF(MINGW)
 	TARGET_LINK_LIBRARIES(import_client_files "WS2_32")
+	TARGET_LINK_LIBRARIES(import_client_files "rpcrt4")
 ENDIF(MINGW)
 
 IF(UNIX)
@@ -30,6 +32,7 @@ IF(UNIX)
 		TARGET_LINK_LIBRARIES(import_client_files "rt")
 	ENDIF(NOT DARWIN)
 	TARGET_LINK_LIBRARIES(import_client_files "pthread")
+	TARGET_LINK_LIBRARIES(import_client_files "uuid")
 	ADD_DEFINITIONS(-fPIC)
 ENDIF(UNIX)
 

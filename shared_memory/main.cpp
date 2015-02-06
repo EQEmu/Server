@@ -54,6 +54,10 @@ void CatchSignal(int sig_num)
 #endif
 }
 
+void OnExit() {
+	CatchSignal(SIGBREAK);
+}
+
 int main(int argc, char **argv) {
 	_eqp
 	RegisterExecutablePlatform(ExePlatformSharedMemory);
@@ -72,6 +76,8 @@ int main(int argc, char **argv) {
 		Log.Out(Logs::Detail, Logs::Error, "Could not set signal handler");
 		return 1;
 	}
+
+	atexit(OnExit);
 
 	Log.Out(Logs::General, Logs::Status, "Shared Memory Loader Program");
 	if(!EQEmuConfig::LoadConfig()) {
