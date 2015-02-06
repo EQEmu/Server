@@ -177,16 +177,16 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 }
 
 
-bool Client::CheckLoreConflict(const Item_Struct* item) {
-	if (!item)
-		return false;
-	if (!(item->LoreFlag))
-		return false;
+bool Client::CheckLoreConflict(const Item_Struct* item)
+{
+	if (!item) { return false; }
+	if (!item->LoreFlag) { return false; }
+	if (item->LoreGroup == 0) { return false; }
 
-	if (item->LoreGroup == -1)	// Standard lore items; look everywhere except the shared bank, return the result
+	if (item->LoreGroup == 0xFFFFFFFF) // Standard lore items; look everywhere except the shared bank, return the result
 		return (m_inv.HasItem(item->ID, 0, ~invWhereSharedBank) != INVALID_INDEX);
 
-	//If the item has a lore group, we check for other items with the same group and return the result
+	// If the item has a lore group, we check for other items with the same group and return the result
 	return (m_inv.HasItemByLoreGroup(item->LoreGroup, ~invWhereSharedBank) != INVALID_INDEX);
 }
 
@@ -680,20 +680,37 @@ int32 Client::GetAugmentIDAt(int16 slot_id, uint8 augslot) {
 	return INVALID_ID;
 }
 
-void Client::SendCursorBuffer() {
+void Client::SendCursorBuffer()
+{
 	// Temporary work-around for the RoF+ Client Buffer
 	// Instead of dealing with client moving items in cursor buffer,
 	// we can just send the next item in the cursor buffer to the cursor.
-	if (GetClientVersion() >= ClientVersion::RoF)
-	{
-		if (!GetInv().CursorEmpty())
-		{
-			const ItemInst* inst = GetInv().GetCursorItem();
-			if (inst)
-			{
-				SendItemPacket(MainCursor, inst, ItemPacketSummonItem);
-			}
-		}
+	if (GetClientVersion() < ClientVersion::RoF) { return; }
+	if (GetInv().CursorEmpty()) { return; }
+
+	auto test_inst = GetInv().GetCursorItem();
+	if (test_inst == nullptr) { return; }
+	auto test_item = test_inst->GetItem();
+	if (test_item == nullptr) { return; }
+
+	bool lore_pass = true;
+	if (test_item->LoreGroup == 0xFFFFFFFF) {
+		lore_pass = (m_inv.HasItem(test_item->ID, 0, ~(invWhereSharedBank | invWhereCursor)) == INVALID_INDEX);
+	}
+	else if (test_item->LoreGroup != 0) {
+		lore_pass = (m_inv.HasItemByLoreGroup(test_item->LoreGroup, ~(invWhereSharedBank | invWhereCursor)) == INVALID_INDEX);
+	}
+
+	if (!lore_pass) {
+		Log.Out(Logs::General, Logs::Inventory, "(%s) Duplicate lore items are not allowed - destroying item %s(id:%u) on cursor",
+			GetName(), test_item->Name, test_item->ID);
+		Message_StringID(MT_LootMessages, 290);
+		parse->EventItem(EVENT_DESTROY_ITEM, this, test_inst, nullptr, "", 0);
+		DeleteItemInInventory(MainCursor);
+		SendCursorBuffer();
+	}
+	else {
+		SendItemPacket(MainCursor, test_inst, ItemPacketSummonItem);
 	}
 }
 
@@ -1320,10 +1337,33 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		return false;
 	}
 
-	// This could be expounded upon at some point to let the server know that
-	// the client has moved a buffered cursor item onto the active cursor -U
 	if (move_in->from_slot == move_in->to_slot) { // Item summon, no further processing needed
 		if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
+		if (GetClientVersion() >= ClientVersion::RoF) { return true; } // Can't do RoF+
+
+		if (move_in->to_slot == MainCursor) {
+			auto test_inst = m_inv.GetItem(MainCursor);
+			if (test_inst == nullptr) { return true; }
+			auto test_item = test_inst->GetItem();
+			if (test_item == nullptr) { return true; }
+			if (!test_item->LoreFlag) { return true; }
+
+			bool lore_pass = true;
+			if (test_item->LoreGroup == 0xFFFFFFFF) {
+				lore_pass = (m_inv.HasItem(test_item->ID, 0, ~(invWhereSharedBank | invWhereCursor)) == INVALID_INDEX);
+			}
+			else if (test_item->LoreGroup != 0) {
+				lore_pass = (m_inv.HasItemByLoreGroup(test_item->LoreGroup, ~(invWhereSharedBank | invWhereCursor)) == INVALID_INDEX);
+			}
+
+			if (!lore_pass) {
+				Log.Out(Logs::General, Logs::Inventory, "(%s) Duplicate lore items are not allowed - destroying item %s(id:%u) on cursor",
+					GetName(), test_item->Name, test_item->ID);
+				Message_StringID(MT_LootMessages, 290);
+				parse->EventItem(EVENT_DESTROY_ITEM, this, test_inst, nullptr, "", 0);
+				DeleteItemInInventory(MainCursor, 0, true);
+			}
+		}
 		return true;
 	}
 

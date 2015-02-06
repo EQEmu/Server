@@ -506,6 +506,7 @@ int16 Inventory::HasItem(uint32 item_id, uint8 quantity, uint8 where)
 			return slot_id;
 	}
 
+	// Behavioral change - Limbo is no longer checked due to improper handling of return value
 	if (where & invWhereCursor) {
 		// Check cursor queue
 		slot_id = _HasItem(m_cursor, item_id, quantity);
@@ -552,6 +553,7 @@ int16 Inventory::HasItemByUse(uint8 use, uint8 quantity, uint8 where)
 			return slot_id;
 	}
 
+	// Behavioral change - Limbo is no longer checked due to improper handling of return value
 	if (where & invWhereCursor) {
 		// Check cursor queue
 		slot_id = _HasItemByUse(m_cursor, use, quantity);
@@ -597,6 +599,7 @@ int16 Inventory::HasItemByLoreGroup(uint32 loregroup, uint8 where)
 			return slot_id;
 	}
 
+	// Behavioral change - Limbo is no longer checked due to improper handling of return value
 	if (where & invWhereCursor) {
 		// Check cursor queue
 		slot_id = _HasItemByLoreGroup(m_cursor, loregroup);
@@ -1119,6 +1122,8 @@ ItemInst* Inventory::_GetItem(const std::map<int16, ItemInst*>& bucket, int16 sl
 // Assumes item has already been allocated
 int16 Inventory::_PutItem(int16 slot_id, ItemInst* inst)
 {
+	// What happens here when we _PutItem(MainCursor)? Bad things..really bad things...
+	//
 	// If putting a nullptr into slot, we need to remove slot without memory delete
 	if (inst == nullptr) {
 		//Why do we not delete the poped item here????
@@ -1263,6 +1268,9 @@ int16 Inventory::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity)
 					return legacy::SLOT_AUGMENT;
 			}
 		}
+
+		// We only check the visible cursor due to lack of queue processing ability (client allows duplicate in limbo)
+		break;
 	}
 
 	return INVALID_INDEX;
@@ -1327,6 +1335,9 @@ int16 Inventory::_HasItemByUse(ItemInstQueue& iqueue, uint8 use, uint8 quantity)
 					return Inventory::CalcSlotId(MainCursor, bag_iter->first);
 			}
 		}
+
+		// We only check the visible cursor due to lack of queue processing ability (client allows duplicate in limbo)
+		break;
 	}
 
 	return INVALID_INDEX;
@@ -1406,6 +1417,9 @@ int16 Inventory::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup)
 					return legacy::SLOT_AUGMENT;
 			}
 		}
+
+		// We only check the visible cursor due to lack of queue processing ability (client allows duplicate in limbo)
+		break;
 	}
 	
 	return INVALID_INDEX;
