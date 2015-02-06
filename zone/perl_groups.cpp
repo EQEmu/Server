@@ -342,8 +342,8 @@ XS(XS_Group_GetLeaderName)
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Group::GetLeaderName(THIS)");
 	{
-		Group *		THIS;
-		char *		RETVAL;
+		Group *			THIS;
+		const char *	RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Group")) {

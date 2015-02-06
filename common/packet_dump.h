@@ -24,6 +24,7 @@ class ServerPacket;
 
 void DumpPacketAscii(const uchar* buf, uint32 size, uint32 cols=16, uint32 skip=0);
 void DumpPacketHex(const uchar* buf, uint32 size, uint32 cols=16, uint32 skip=0);
+std::string DumpPacketHexToString(const uchar* buf, uint32 size, uint32 cols = 16, uint32 skip = 0);
 void DumpPacketBin(const void* data, uint32 len);
 void DumpPacket(const uchar* buf, uint32 size);
 void DumpPacket(const ServerPacket* pack, bool iShowInfo = false);

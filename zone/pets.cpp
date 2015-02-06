@@ -426,6 +426,20 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	entity_list.AddNPC(npc, true, true);
 	SetPetID(npc->GetID());
 	// We need to handle PetType 5 (petHatelist), add the current target to the hatelist of the pet
+	
+
+	if (record.petcontrol == petTargetLock)
+	{
+		Mob* target = GetTarget();
+
+		if (target){
+			npc->AddToHateList(target, 1);
+			npc->SetPetTargetLockID(target->GetID());
+			npc->SetSpecialAbility(IMMUNE_AGGRO, 1);
+		}
+		else
+			npc->Kill(); //On live casts spell 892 Unsummon (Kayen - Too limiting to use that for emu since pet can have more than 20k HP)
+	}
 }
 /* This is why the pets ghost - pets were being spawned too far away from its npc owner and some
 into walls or objects (+10), this sometimes creates the "ghost" effect. I changed to +2 (as close as I

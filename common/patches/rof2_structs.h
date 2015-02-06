@@ -2865,7 +2865,7 @@ struct SetRunMode_Struct {
 };
 
 // EnvDamage is EnvDamage2 without a few bytes at the end.
-// Size: 37 bytes
+// Size: 39 bytes
 struct EnvDamage2_Struct {
 /*0000*/	uint32 id;
 /*0004*/	uint16 unknown4;
@@ -2877,7 +2877,8 @@ struct EnvDamage2_Struct {
 /*0031*/	uint16 unknown31;	// New to Underfoot - Seen 66
 /*0033*/	uint16 constant;		// Always FFFF
 /*0035*/	uint16 unknown35;
-/*0037*/
+/*0037*/	uint16 unknown37;
+/*0039*/
 };
 
 //Bazaar Stuff

@@ -102,6 +102,7 @@ RULE_INT ( Character, BaseInstrumentSoftCap, 36) // Softcap for instrument mods,
 RULE_INT ( Character, BaseRunSpeedCap, 158) // Base Run Speed Cap, on live it's 158% which will give you a runspeed of 1.580 hard capped to 225.
 RULE_INT ( Character, OrnamentationAugmentType, 20) //Ornamentation Augment Type
 RULE_REAL(Character, EnvironmentDamageMulipliter, 1)
+RULE_BOOL(Character, UnmemSpellsOnDeath, true)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Mercs )
@@ -328,6 +329,7 @@ RULE_BOOL ( Spells, Jun182014HundredHandsRevamp, false) // this should be true f
 RULE_BOOL ( Spells, SwarmPetTargetLock, false) // Use old method of swarm pets target locking till target dies then despawning.
 RULE_BOOL ( Spells, NPC_UseFocusFromSpells, true) // Allow npcs to use most spell derived focus effects.
 RULE_BOOL ( Spells, NPC_UseFocusFromItems, false) // Allow npcs to use most item derived focus effects.
+RULE_BOOL ( Spells, UseAdditiveFocusFromWornSlot, false) // Allows an additive focus effect to be calculated from worn slot.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Combat )

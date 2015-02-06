@@ -5527,7 +5527,12 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 	//Summon Spells that require reagents are typically imbue type spells, enchant metal, sacrifice and shouldn't be affected
 	//by reagent conservation for obvious reasons.
 
-	return realTotal + realTotal2 + realTotal3;
+	//Non-Live like feature to allow for an additive focus bonus to be applied from foci that are placed in worn slot. (No limit checks)
+	int16 worneffect_bonus = 0;
+	if (RuleB(Spells, UseAdditiveFocusFromWornSlot))
+		worneffect_bonus = itembonuses.FocusEffectsWorn[type];
+
+	return realTotal + realTotal2 + realTotal3 + worneffect_bonus;
 }
 
 int16 NPC::GetFocusEffect(focusType type, uint16 spell_id) {

@@ -498,6 +498,8 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
 		return false;
 	}
 
+	auto timestamps = GetItemRecastTimestamps(char_id);
+
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		int16 slot_id = atoi(row[0]);
 		uint32 item_id = atoi(row[1]);
@@ -581,6 +583,13 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
 			inst->SetCharges(1);
 		else
 			inst->SetCharges(charges);
+
+		if (item->RecastDelay) {
+			if (timestamps.count(item->RecastType))
+				inst->SetRecastTimestamp(timestamps.at(item->RecastType));
+			else
+				inst->SetRecastTimestamp(0);
+		}
 
 		if (item->ItemClass == ItemClassCommon) {
 			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
@@ -723,6 +732,39 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, Inventory *inv)
 
 	// Retrieve shared inventory
 	return GetSharedBank(account_id, inv, false);
+}
+
+std::map<uint32, uint32> SharedDatabase::GetItemRecastTimestamps(uint32 char_id)
+{
+	std::map<uint32, uint32> timers;
+	std::string query = StringFormat("SELECT recast_type,timestamp FROM character_item_recast WHERE id=%u", char_id);
+	auto results = QueryDatabase(query);
+	if (!results.Success() || results.RowCount() == 0)
+		return timers;
+
+	for (auto row = results.begin(); row != results.end(); ++row)
+		timers[atoul(row[0])] = atoul(row[1]);
+	return timers; // RVO or move assigned
+}
+
+uint32 SharedDatabase::GetItemRecastTimestamp(uint32 char_id, uint32 recast_type)
+{
+	std::string query = StringFormat("SELECT timestamp FROM character_item_recast WHERE id=%u AND recast_type=%u",
+					 char_id, recast_type);
+	auto results = QueryDatabase(query);
+	if (!results.Success() || results.RowCount() == 0)
+		return 0;
+
+	auto row = results.begin();
+	return static_cast<uint32>(atoul(row[0]));
+}
+
+void SharedDatabase::ClearOldRecastTimestamps(uint32 char_id)
+{
+	// This actually isn't strictly live-like. Live your recast timestamps are forever
+	std::string query =
+	    StringFormat("DELETE FROM character_item_recast WHERE id = %u and timestamp < UNIX_TIMESTAMP()", char_id);
+	QueryDatabase(query);
 }
 
 void SharedDatabase::GetItemsCount(int32 &item_count, uint32 &max_id)

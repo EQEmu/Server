@@ -1118,11 +1118,9 @@ bool ZoneDatabase::LoadCharacterMaterialColor(uint32 character_id, PlayerProfile
 bool ZoneDatabase::LoadCharacterBandolier(uint32 character_id, PlayerProfile_Struct* pp){
 	std::string query = StringFormat("SELECT `bandolier_id`, `bandolier_slot`, `item_id`, `icon`, `bandolier_name` FROM `character_bandolier` WHERE `id` = %u LIMIT 16", character_id);
 	auto results = database.QueryDatabase(query); int i = 0; int r = 0; int si = 0;
-	for (i = 0; i <= EmuConstants::BANDOLIERS_COUNT; i++){
-		for (int si = 0; si < EmuConstants::BANDOLIER_SIZE; si++){
+	for (i = 0; i < EmuConstants::BANDOLIERS_COUNT; i++)
+		for (int si = 0; si < EmuConstants::BANDOLIER_SIZE; si++)
 			pp->bandoliers[i].items[si].icon = 0;
-		}
-	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		r = 0;
@@ -2999,6 +2997,14 @@ void ZoneDatabase::RemoveTempFactions(Client *client) {
 	QueryDatabase(query);
 }
 
+void ZoneDatabase::UpdateItemRecastTimestamps(uint32 char_id, uint32 recast_type, uint32 timestamp)
+{
+	std::string query =
+	    StringFormat("REPLACE INTO character_item_recast (id, recast_type, timestamp) VALUES (%u, %u, %u)", char_id,
+			 recast_type, timestamp);
+	QueryDatabase(query);
+}
+
 void ZoneDatabase::LoadPetInfo(Client *client) {
 
 	// Load current pet and suspended pet
@@ -3204,16 +3210,7 @@ bool ZoneDatabase::GetNPCFactionList(uint32 npcfaction_id, int32* faction_id, in
 bool ZoneDatabase::SetCharacterFactionLevel(uint32 char_id, int32 faction_id, int32 value, uint8 temp, faction_map &val_list)
 {
 
-	std::string query = StringFormat("DELETE FROM faction_values "
-                                    "WHERE char_id=%i AND faction_id = %i",
-                                    char_id, faction_id);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-		return false;
-    }
-
-	if(value == 0)
-		return true;
+	std::string query;
 
 	if(temp == 2)
 		temp = 0;
@@ -3221,17 +3218,18 @@ bool ZoneDatabase::SetCharacterFactionLevel(uint32 char_id, int32 faction_id, in
 	if(temp == 3)
 		temp = 1;
 
-    query = StringFormat("INSERT INTO faction_values (char_id, faction_id, current_value, temp) "
-                        "VALUES (%i, %i, %i, %i)", char_id, faction_id, value, temp);
-    results = QueryDatabase(query);
-	if (!results.Success()) {
+	query = StringFormat("INSERT INTO `faction_values` "
+						"(`char_id`, `faction_id`, `current_value`, `temp`) "
+						"VALUES (%i, %i, %i, %i) "
+						"ON DUPLICATE KEY UPDATE `current_value`=%i,`temp`=%i",
+						char_id, faction_id, value, temp, value, temp);
+    auto results = QueryDatabase(query);
+	
+	if (!results.Success())
 		return false;
-	}
+	else
+		val_list[faction_id] = value;
 
-	if (results.RowsAffected() == 0)
-		return false;
-
-	val_list[faction_id] = value;
 	return true;
 }
 

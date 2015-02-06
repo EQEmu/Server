@@ -110,7 +110,8 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
 
 		/* Implement Logging at the Root */
 		if (mysql_errno(&mysql) > 0 && strlen(query) > 0){
-			Log.Out(Logs::General, Logs::MySQLError, "%i: %s \n %s", mysql_errno(&mysql), mysql_error(&mysql), query);
+			if (Log.log_settings[Logs::MySQLError].is_category_enabled == 1)
+				Log.Out(Logs::General, Logs::MySQLError, "%i: %s \n %s", mysql_errno(&mysql), mysql_error(&mysql), query);
 		}
 
 		return MySQLRequestResult(nullptr, 0, 0, 0, 0, mysql_errno(&mysql),errorBuffer);
@@ -125,8 +126,9 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
         rowCount = (uint32)mysql_num_rows(res);
 
 	MySQLRequestResult requestResult(res, (uint32)mysql_affected_rows(&mysql), rowCount, (uint32)mysql_field_count(&mysql), (uint32)mysql_insert_id(&mysql));
-
-	Log.Out(Logs::General, Logs::MySQLQuery, "%s (%u rows returned)", query, rowCount, requestResult.RowCount());
+	
+	if (Log.log_settings[Logs::MySQLQuery].is_category_enabled == 1)
+		Log.Out(Logs::General, Logs::MySQLQuery, "%s (%u rows returned)", query, rowCount, requestResult.RowCount());
 
 	return requestResult;
 }

@@ -194,7 +194,7 @@ public:
 	bool IsBeneficialAllowed(Mob *target);
 	virtual int GetCasterLevel(uint16 spell_id);
 	void ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* newbon, uint16 casterID = 0,
-		bool item_bonus = false, uint32 ticsremaining = 0, int buffslot = -1,
+		bool item_bonus = false, bool IsWornEffect = false, uint32 ticsremaining = 0, int buffslot = -1,
 		bool IsAISpellEffect = false, uint16 effect_id = 0, int32 se_base = 0, int32 se_limit = 0, int32 se_max = 0);
 	void NegateSpellsBonuses(uint16 spell_id);
 	virtual float GetActSpellRange(uint16 spell_id, float range, bool IsBard = false);
@@ -315,6 +315,7 @@ public:
 	virtual int32 GetHerosForgeModel(uint8 material_slot) const;
 	virtual uint32 GetEquipmentColor(uint8 material_slot) const;
 	virtual uint32 IsEliteMaterialItem(uint8 material_slot) const;
+	bool CanClassEquipItem(uint32 item_id);
 	bool AffectedBySpellExcludingSlot(int slot, int effect);
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill) = 0;
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill,
@@ -621,7 +622,7 @@ public:
 	bool PassCastRestriction(bool UseCastRestriction = true, int16 value = 0, bool IsDamage = true);
 	bool ImprovedTaunt();
 	bool TryRootFadeByDamage(int buffslot, Mob* attacker);
-	int16 GetSlowMitigation() const {return slow_mitigation;}
+	float GetSlowMitigation() const { return slow_mitigation; }
 	void CalcSpellPowerDistanceMod(uint16 spell_id, float range, Mob* caster = nullptr);
 	inline int16 GetSpellPowerDistanceMod() const { return SpellPowerDistanceMod; };
 	inline void SetSpellPowerDistanceMod(int16 value) { SpellPowerDistanceMod = value; };
@@ -675,6 +676,9 @@ public:
 	bool IsFamiliar() const { return(typeofpet == petFamiliar); }
 	bool IsAnimation() const { return(typeofpet == petAnimation); }
 	bool IsCharmed() const { return(typeofpet == petCharmed); }
+	bool IsTargetLockPet() const { return(typeofpet == petTargetLock); }
+	inline uint32 GetPetTargetLockID() { return pet_targetlock_id; };
+	inline void SetPetTargetLockID(uint32 value) { pet_targetlock_id = value; };
 	void SetOwnerID(uint16 NewOwnerID);
 	inline uint16 GetOwnerID() const { return ownerid; }
 	inline virtual bool HasOwner() { if(GetOwnerID()==0){return false;} return( entity_list.GetMob(GetOwnerID()) != 0); }
@@ -1244,6 +1248,7 @@ protected:
 	bool _IsTempPet;
 	int16 count_TempPet;
 	bool pet_owner_client; //Flags regular and pets as belonging to a client
+	uint32 pet_targetlock_id;
 
 	EGNode *_egnode; //the EG node we are in
 	glm::vec3 m_TargetLocation;

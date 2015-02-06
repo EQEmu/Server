@@ -300,6 +300,7 @@ Mob::Mob(const char* in_name,
 	focused = false;
 	_IsTempPet = false;
 	pet_owner_client = false;
+	pet_targetlock_id = 0;
 
 	attacked_count = 0;
 	mezzed = false;
@@ -1981,9 +1982,10 @@ void Mob::TempName(const char *newname)
 		strn0cpy(temp_name, GetCleanName(), 64);
 	}
 
+	// Remove Numbers before making name unique
+	EntityList::RemoveNumbers(temp_name);
 	// Make the new name unique and set it
-	strn0cpy(temp_name, entity_list.MakeNameUnique(temp_name), 64);
-
+	entity_list.MakeNameUnique(temp_name);
 
 	// Send the new name to all clients
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_MobRename, sizeof(MobRename_Struct));
@@ -5360,5 +5362,28 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 	else if (id == "DamageShieldType") {return spells[spell_id].DamageShieldType; }
 	
 	return stat;
+}
+
+bool Mob::CanClassEquipItem(uint32 item_id)
+{
+	const Item_Struct* itm = nullptr;
+	itm = database.GetItem(item_id);
+
+	if (!itm)
+		return false;
+
+	if(itm->Classes == 65535 )
+		return true;
+
+	if (GetClass() > 16)
+		return false;
+
+	int bitmask = 1;
+	bitmask = bitmask << (GetClass() - 1);
+	
+	if(!(itm->Classes & bitmask))
+		return false;
+	else
+		return true;
 }
 

@@ -1,0 +1,1 @@
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:UseAdditiveFocusFromWornSlot', 'false', '[Not live like] If a focus effect is placed in a worn slot the base value will calculated as an additive bonus to regular focus effects.');

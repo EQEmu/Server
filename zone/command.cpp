@@ -10591,6 +10591,15 @@ void command_logs(Client *c, const Seperator *sep){
 				c->Message(15, "Your Log Settings have been applied");
 				c->Message(15, "Output Method: %s :: Debug Level: %i - Category: %s",  sep->arg[2], atoi(sep->arg[4]), Logs::LogCategoryName[atoi(sep->arg[3])]);
 			}
+			/* We use a general 'is_category_enabled' now, let's update when we update any output settings 
+				This is used in hot places of code to check if its enabled in any way before triggering logs
+			*/
+			if (sep->arg[4] > 0){
+				Log.log_settings[atoi(sep->arg[3])].is_category_enabled = 1;
+			}
+			else{
+				Log.log_settings[atoi(sep->arg[3])].is_category_enabled = 0;
+			}
 		}
 	}
 	else {

@@ -398,12 +398,18 @@ void ClearMappedOpcode(EmuOpcode op)
 // client methods
 int Client::HandlePacket(const EQApplicationPacket *app)
 {
-	if(Log.log_settings[Logs::LogCategory::Netcode].log_to_console > 0) {
+	if (Log.log_settings[Logs::LogCategory::Netcode].is_category_enabled == 1) {
 		char buffer[64];
 		app->build_header_dump(buffer);
 		Log.Out(Logs::Detail, Logs::Client_Server_Packet, "Dispatch opcode: %s", buffer);
 	}
 
+	if (Log.log_settings[Logs::Client_Server_Packet].is_category_enabled == 1)
+		Log.Out(Logs::General, Logs::Client_Server_Packet, "[%s - 0x%04x] [Size: %u]", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size());
+	
+	if (Log.log_settings[Logs::Client_Server_Packet_With_Dump].is_category_enabled == 1)
+		Log.Out(Logs::General, Logs::Client_Server_Packet_With_Dump, "[%s - 0x%04x] [Size: %u] %s", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size(), DumpPacketToString(app).c_str());
+	
 	EmuOpcode opcode = app->GetOpcode();
 	if (opcode == OP_AckPacket) {
 		return true;
@@ -445,23 +451,16 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	case CLIENT_CONNECTED: {
 		ClientPacketProc p;
 		p = ConnectedOpcodes[opcode];
-		if(p == nullptr) {
+		if(p == nullptr) { 
 			std::vector<EQEmu::Any> args;
 			args.push_back(const_cast<EQApplicationPacket*>(app));
 			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 0, &args);
 
-			char buffer[64]; 
-			Log.Out(Logs::Detail, Logs::Client_Server_Packet, "Unhandled incoming opcode: %s - 0x%04x", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode());
-			if (Log.log_settings[Logs::Client_Server_Packet].log_to_console > 0){
+			if (Log.log_settings[Logs::Client_Server_Packet_Unhandled].is_category_enabled == 1){
+				char buffer[64];
 				app->build_header_dump(buffer);
-				if (app->size < 1000)
-					DumpPacket(app, app->size);
-				else{
-					std::cout << "Dump limited to 1000 characters:\n";
-					DumpPacket(app, 1000);
-				}
+				Log.Out(Logs::General, Logs::Client_Server_Packet_Unhandled, "%s %s", buffer, DumpPacketToString(app).c_str());
 			}
-
 			break;
 		}
 
@@ -1392,6 +1391,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (RuleB(Character, SharedBankPlat))
 		m_pp.platinum_shared = database.GetSharedPlatinum(this->AccountID());
 
+	database.ClearOldRecastTimestamps(cid); /* Clear out our old recast timestamps to keep the DB clean */
 	loaditems = database.GetInventory(cid, &m_inv); /* Load Character Inventory */
 	database.LoadCharacterBandolier(cid, &m_pp); /* Load Character Bandolier */
 	database.LoadCharacterBindPoint(cid, &m_pp); /* Load Character Bind */
@@ -5516,7 +5516,7 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 	if (damage < 0)
 		damage = 31337;
 
-	if (admin >= minStatusToAvoidFalling && GetGM()){
+	if (admin >= minStatusToAvoidFalling && GetGM()) {
 		Message(13, "Your GM status protects you from %i points of type %i environmental damage.", ed->damage, ed->dmgtype);
 		SetHP(GetHP() - 1);//needed or else the client wont acknowledge
 		return;
@@ -5526,11 +5526,11 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 		SetHP(GetHP() - 1);//needed or else the client wont acknowledge
 		return;
 	}
-
-	else if (zone->GetZoneID() == 183 || zone->GetZoneID() == 184){
+	else if (zone->GetZoneID() == 183 || zone->GetZoneID() == 184) {
+		// Hard coded tutorial and load zones for no fall damage
 		return;
 	}
-	else{
+	else {
 		SetHP(GetHP() - (damage * RuleR(Character, EnvironmentDamageMulipliter)));
 
 		/* EVENT_ENVIRONMENTAL_DAMAGE */
@@ -9861,6 +9861,9 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 		return;
 	}
+
+	if (mypet->GetPetType() == petTargetLock && (pet->command != PET_HEALTHREPORT && pet->command != PET_GETLOST))
+		return;
 
 	if (mypet->GetPetType() == petAnimation && (pet->command != PET_HEALTHREPORT && pet->command != PET_GETLOST) && !GetAA(aaAnimationEmpathy))
 		return;
