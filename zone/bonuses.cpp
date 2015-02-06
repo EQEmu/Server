@@ -169,6 +169,17 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 			continue;
 		AddItemBonuses(inst, newbon, false, true);
 	}
+
+	//Optional ability to have worn effects calculate as an addititive bonus instead of highest value
+	if (RuleI(Spells, AdditiveBonusWornType) && RuleI(Spells, AdditiveBonusWornType) != ET_WornEffect){
+		for (i = MainCharm; i < MainAmmo; i++) {
+			const ItemInst* inst = m_inv[i];
+			if(inst == 0)
+				continue;
+			AdditiveWornBonuses(inst, newbon);
+		}
+	}
+
 	// Caps
 	if(newbon->HPRegen > CalcHPRegenCap())
 		newbon->HPRegen = CalcHPRegenCap();
@@ -410,12 +421,12 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 		else
 			newbon->DSMitigation += item->DSMitigation;
 	}
-	if (item->Worn.Effect>0 && (item->Worn.Type == ET_WornEffect)) { // latent effects
-		ApplySpellsBonuses(item->Worn.Effect, item->Worn.Level, newbon, 0, true, true);
+	if (item->Worn.Effect > 0 && item->Worn.Type == ET_WornEffect) {// latent effects
+		ApplySpellsBonuses(item->Worn.Effect, item->Worn.Level, newbon, 0, item->Worn.Type); 
 	}
 
 	if (item->Focus.Effect>0 && (item->Focus.Type == ET_Focus)) { // focus effects
-		ApplySpellsBonuses(item->Focus.Effect, item->Focus.Level, newbon, 0, true, false);
+		ApplySpellsBonuses(item->Focus.Effect, item->Focus.Level, newbon, 0);
 	}
 
 	switch(item->BardType)
@@ -535,6 +546,45 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 		}
 	}
 
+}
+
+void Client::AdditiveWornBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug) {
+
+	/*
+	Powerful Non-live like option allows developers to add worn effects on items that
+	can stack with other worn effects of the same spell effect type, instead of only taking the highest value.
+	Ie Cleave I = 40 pct cleave - So if you equip 3 cleave I items you will have a 120 pct cleave bonus. 
+	To enable use RuleI(Spells, AdditiveBonusWornType)
+	Setting value =  2  Will force all live items to automatically be calculated additivily
+	Setting value to anything else will indicate the item 'worntype' that if set to the same, will cause the bonuses to use this calculation
+	which will also stack with regular (worntype 2) effects. [Ie set rule = 3 and item worntype = 3]
+	*/
+
+	if(!inst || !inst->IsType(ItemClassCommon))
+		return;
+
+	if(inst->GetAugmentType()==0 && isAug == true)
+		return;
+
+	const Item_Struct *item = inst->GetItem();
+
+	if(!inst->IsEquipable(GetBaseRace(),GetClass()))
+		return;
+
+	if(GetLevel() < item->ReqLevel)
+		return;
+	
+	if (item->Worn.Effect > 0 && item->Worn.Type == RuleI(Spells, AdditiveBonusWornType))
+		ApplySpellsBonuses(item->Worn.Effect, item->Worn.Level, newbon, 0, item->Worn.Type);// Non-live like - Addititive latent effects
+
+
+	if (!isAug)
+	{
+		int i;
+		for (i = 0; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+			AdditiveWornBonuses(inst->GetAugment(i),newbon,true);
+		}
+	}
 }
 
 void Client::CalcEdibleBonuses(StatBonuses* newbon) {
@@ -1393,7 +1443,7 @@ void Mob::CalcSpellBonuses(StatBonuses* newbon)
 	int buff_count = GetMaxTotalSlots();
 	for(i = 0; i < buff_count; i++) {
 		if(buffs[i].spellid != SPELL_UNKNOWN){
-			ApplySpellsBonuses(buffs[i].spellid, buffs[i].casterlevel, newbon, buffs[i].casterid, false, false, buffs[i].ticsremaining,i);
+			ApplySpellsBonuses(buffs[i].spellid, buffs[i].casterlevel, newbon, buffs[i].casterid, false,0, buffs[i].ticsremaining,i);
 
 			if (buffs[i].numhits > 0)
 				Numhits(true);
@@ -1416,10 +1466,11 @@ void Mob::CalcSpellBonuses(StatBonuses* newbon)
 	if (GetClass() == BARD) newbon->ManaRegen = 0; // Bards do not get mana regen from spells.
 }
 
-void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* new_bonus, uint16 casterId, bool item_bonus, bool IsWornEffect, uint32 ticsremaining, int buffslot,
+void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* new_bonus, uint16 casterId, uint8 WornType, uint32 ticsremaining, int buffslot,
 							 bool IsAISpellEffect, uint16 effect_id, int32 se_base, int32 se_limit, int32 se_max)
 {
 	int i, effect_value, base2, max, effectid;
+	bool AdditiveWornBonus = false;
 	Mob *caster = nullptr;
 
 	if(!IsAISpellEffect && !IsValidSpell(spell_id))
@@ -1439,15 +1490,19 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			uint8 focus = IsFocusEffect(spell_id, i);
 			if (focus)
 			{
-				if (!IsWornEffect)
-					new_bonus->FocusEffects[focus] = static_cast<uint8>(spells[spell_id].effectid[i]);
+				if (WornType){
+					if (RuleB(Spells, UseAdditiveFocusFromWornSlot))
+						new_bonus->FocusEffectsWorn[focus] += spells[spell_id].base[i];
+				}
 
-				else if (RuleB(Spells, UseAdditiveFocusFromWornSlot))
-					new_bonus->FocusEffectsWorn[focus] += spells[spell_id].base[i];
+				else
+					new_bonus->FocusEffects[focus] = static_cast<uint8>(spells[spell_id].effectid[i]);
 
 				continue;
 			}
 
+			if (WornType && (RuleI(Spells, AdditiveBonusWornType) == WornType))
+				AdditiveWornBonus = true;
 		
 			effectid = spells[spell_id].effectid[i];
 			effect_value = CalcSpellEffectValue(spell_id, i, casterlevel, caster, ticsremaining);
@@ -1813,7 +1868,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_CriticalHitChance:
 			{
-				if (RuleB(Spells, AdditiveBonusValues) && item_bonus) {
+				if (AdditiveWornBonus) {
 					if(base2 == -1)
 						new_bonus->CriticalHitChance[HIGHEST_SKILL+1] += effect_value;
 					else
@@ -1839,7 +1894,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_CrippBlowChance:
 			{
-				if (RuleB(Spells, AdditiveBonusValues) && item_bonus)
+				if (AdditiveWornBonus)
 					new_bonus->CrippBlowChance += effect_value;
 
 				else if((effect_value < 0) && (new_bonus->CrippBlowChance > effect_value))
@@ -1853,7 +1908,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_AvoidMeleeChance:
 			{
-				if (RuleB(Spells, AdditiveBonusValues) && item_bonus)
+				if (AdditiveWornBonus)
 					new_bonus->AvoidMeleeChanceEffect += effect_value;
 
 				else if((effect_value < 0) && (new_bonus->AvoidMeleeChanceEffect > effect_value))
@@ -1866,7 +1921,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_RiposteChance:
 			{
-				if (RuleB(Spells, AdditiveBonusValues) && item_bonus)
+				if (AdditiveWornBonus)
 					new_bonus->RiposteChance += effect_value;
 
 				else if((effect_value < 0) && (new_bonus->RiposteChance > effect_value))
@@ -1879,7 +1934,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_DodgeChance:
 			{
-				if (RuleB(Spells, AdditiveBonusValues) && item_bonus)
+				if (AdditiveWornBonus)
 					new_bonus->DodgeChance += effect_value;
 
 				else if((effect_value < 0) && (new_bonus->DodgeChance > effect_value))
@@ -1892,7 +1947,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_ParryChance:
 			{
-				if (RuleB(Spells, AdditiveBonusValues) && item_bonus)
+				if (AdditiveWornBonus)
 					new_bonus->ParryChance += effect_value;
 
 				else if((effect_value < 0) && (new_bonus->ParryChance > effect_value))
@@ -1905,7 +1960,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_DualWieldChance:
 			{
-				if (RuleB(Spells, AdditiveBonusValues) && item_bonus)
+				if (AdditiveWornBonus)
 					new_bonus->DualWieldChance += effect_value;
 
 				else if((effect_value < 0) && (new_bonus->DualWieldChance > effect_value))
@@ -1919,7 +1974,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_DoubleAttackChance:
 			{
 
-				if (RuleB(Spells, AdditiveBonusValues) && item_bonus)
+				if (AdditiveWornBonus)
 					new_bonus->DoubleAttackChance += effect_value;
 
 				else if((effect_value < 0) && (new_bonus->DoubleAttackChance > effect_value))
@@ -1933,7 +1988,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_TripleAttackChance:
 			{
 
-				if (RuleB(Spells, AdditiveBonusValues) && item_bonus)
+				if (AdditiveWornBonus)
 					new_bonus->TripleAttackChance += effect_value;
 
 				else if((effect_value < 0) && (new_bonus->TripleAttackChance > effect_value))
@@ -1946,7 +2001,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_MeleeLifetap:
 			{
-				if (RuleB(Spells, AdditiveBonusValues) && item_bonus)
+				if (AdditiveWornBonus)
 					new_bonus->MeleeLifetap += spells[spell_id].base[i];
 
 				else if((effect_value < 0) && (new_bonus->MeleeLifetap > effect_value))
@@ -1995,7 +2050,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_HundredHands:
 			{
-				if (RuleB(Spells, AdditiveBonusValues) && item_bonus)
+				if (AdditiveWornBonus)
 					new_bonus->HundredHands += effect_value;
 
 				if (effect_value > 0 && effect_value > new_bonus->HundredHands)
@@ -2017,7 +2072,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_HitChance:
 			{
 
-				if (RuleB(Spells, AdditiveBonusValues) && item_bonus){
+				if (AdditiveWornBonus){
 					if(base2 == -1)
 						new_bonus->HitChanceEffect[HIGHEST_SKILL+1] += effect_value;
 					else
@@ -2084,7 +2139,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_ProcChance:
 			{
-				if (RuleB(Spells, AdditiveBonusValues) && item_bonus)
+				if (AdditiveWornBonus)
 					new_bonus->ProcChanceSPA += effect_value;
 
 				else if((effect_value < 0) && (new_bonus->ProcChanceSPA > effect_value))
@@ -2122,7 +2177,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_DivineSave:
 			{
-				if (RuleB(Spells, AdditiveBonusValues) && item_bonus) {
+				if (AdditiveWornBonus) {
 					new_bonus->DivineSaveChance[0] += effect_value;
 					new_bonus->DivineSaveChance[1] = 0;
 				}
@@ -2131,7 +2186,6 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				{
 					new_bonus->DivineSaveChance[0] = effect_value;
 					new_bonus->DivineSaveChance[1] = base2;
-					//SetDeathSaveChance(true);
 				}
 				break;
 			}
@@ -3051,12 +3105,12 @@ void NPC::CalcItemBonuses(StatBonuses *newbon)
 					newbon->ProcChance += cur->CombatEffects;
 				}
 				if (cur->Worn.Effect>0 && (cur->Worn.Type == ET_WornEffect)) { // latent effects
-					ApplySpellsBonuses(cur->Worn.Effect, cur->Worn.Level, newbon);
+					ApplySpellsBonuses(cur->Worn.Effect, cur->Worn.Level, newbon, cur->Worn.Type);
 				}
 
 				if (RuleB(Spells, NPC_UseFocusFromItems)){
 					if (cur->Focus.Effect>0 && (cur->Focus.Type == ET_Focus)){  // focus effects
-						ApplySpellsBonuses(cur->Focus.Effect, cur->Focus.Level, newbon, 0, true);
+						ApplySpellsBonuses(cur->Focus.Effect, cur->Focus.Level, newbon);
 					}
 				}
 
