@@ -5516,7 +5516,7 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 	if (damage < 0)
 		damage = 31337;
 
-	if (admin >= minStatusToAvoidFalling && GetGM()){
+	if (admin >= minStatusToAvoidFalling && GetGM()) {
 		Message(13, "Your GM status protects you from %i points of type %i environmental damage.", ed->damage, ed->dmgtype);
 		SetHP(GetHP() - 1);//needed or else the client wont acknowledge
 		return;
@@ -5526,11 +5526,11 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 		SetHP(GetHP() - 1);//needed or else the client wont acknowledge
 		return;
 	}
-
-	else if (zone->GetZoneID() == 183 || zone->GetZoneID() == 184){
+	else if (zone->GetZoneID() == 183 || zone->GetZoneID() == 184) {
+		// Hard coded tutorial and load zones for no fall damage
 		return;
 	}
-	else{
+	else {
 		SetHP(GetHP() - (damage * RuleR(Character, EnvironmentDamageMulipliter)));
 
 		/* EVENT_ENVIRONMENTAL_DAMAGE */
