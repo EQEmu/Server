@@ -619,7 +619,7 @@ void Client::DropItem(int16 slot_id)
 	// Save client inventory change to database
 	if (slot_id == MainCursor) {
 		SendCursorBuffer();
-		auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		database.SaveCursor(CharacterID(), s, e);
 	} else {
 		database.SaveInventory(CharacterID(), nullptr, slot_id);
@@ -772,7 +772,7 @@ void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_upd
 
 	const ItemInst* inst = nullptr;
 	if (slot_id == MainCursor) {
-		auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		if(update_db)
 			database.SaveCursor(character_id, s, e);
 	}
@@ -826,7 +826,7 @@ bool Client::PushItemOnCursor(const ItemInst& inst, bool client_update)
 		SendItemPacket(MainCursor, &inst, ItemPacketSummonItem);
 	}
 
-	auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+	auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 	return database.SaveCursor(CharacterID(), s, e);
 }
 
@@ -851,7 +851,7 @@ bool Client::PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client
 	}
 		
 	if (slot_id == MainCursor) {
-		auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		return database.SaveCursor(this->CharacterID(), s, e);
 	}
 	else {
@@ -870,7 +870,7 @@ void Client::PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootI
 	SendLootItemInPacket(&inst, slot_id);
 
 	if (slot_id == MainCursor) {
-		auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		database.SaveCursor(this->CharacterID(), s, e);
 	}
 	else {
@@ -1009,7 +1009,7 @@ void Client::MoveItemCharges(ItemInst &from, int16 to_slot, uint8 type)
 		from.SetCharges(from.GetCharges() - charges_to_move);
 		SendLootItemInPacket(tmp_inst, to_slot);
 		if (to_slot == MainCursor) {
-			auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+			auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 			database.SaveCursor(this->CharacterID(), s, e);
 		}
 		else {
@@ -1567,7 +1567,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				{
 					SendCursorBuffer();
 				}
-				auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+				auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 				database.SaveCursor(character_id, s, e);
 			}
 			else
@@ -1726,7 +1726,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		{
 			SendCursorBuffer();
 		}
-		auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		database.SaveCursor(character_id, s, e);
 	}
 	else {
@@ -1734,7 +1734,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	}
 
 	if (dst_slot_id == MainCursor) {
-		auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		database.SaveCursor(character_id, s, e);
 	}
 	else {
@@ -2170,7 +2170,7 @@ void Client::RemoveNoRent(bool client_update)
 		}
 		local.clear();
 
-		auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		database.SaveCursor(this->CharacterID(), s, e);
 	}
 }
@@ -2298,7 +2298,7 @@ void Client::RemoveDuplicateLore(bool client_update)
 		}
 		local_2.clear();
 
-		auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		database.SaveCursor(this->CharacterID(), s, e);
 	}
 }
@@ -2826,9 +2826,9 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 	}
 
 	int limbo = 0;
-	for (auto cursor_itr = m_inv.cursor_begin(); cursor_itr != m_inv.cursor_end(); ++cursor_itr, ++limbo) {
+	for (auto cursor_itr = m_inv.cursor_cbegin(); cursor_itr != m_inv.cursor_cend(); ++cursor_itr, ++limbo) {
 		// m_inv.cursor_begin() is referenced as MainCursor in MapPossessions above
-		if (cursor_itr == m_inv.cursor_begin())
+		if (cursor_itr == m_inv.cursor_cbegin())
 			continue;
 
 		instmap[8000 + limbo] = *cursor_itr;

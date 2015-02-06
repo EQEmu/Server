@@ -1060,7 +1060,7 @@ int Inventory::GetSlotByItemInstCollection(const std::map<int16, ItemInst*> &col
 		}
 
 		if (t_inst && !t_inst->IsType(ItemClassContainer)) {
-			for (auto b_iter = t_inst->_begin(); b_iter != t_inst->_end(); ++b_iter) {
+			for (auto b_iter = t_inst->_cbegin(); b_iter != t_inst->_cend(); ++b_iter) {
 				if (b_iter->second == inst) {
 					return Inventory::CalcSlotId(iter->first, b_iter->first);
 				}
@@ -1095,7 +1095,7 @@ void Inventory::dumpBagContents(ItemInst *inst, iter_inst *it) {
 		return;
 
 	// Go through bag, if bag
-	for (itb = inst->_begin(); itb != inst->_end(); ++itb) {
+	for (itb = inst->_cbegin(); itb != inst->_cend(); ++itb) {
 		ItemInst* baginst = itb->second;
 		if (!baginst || !baginst->GetItem())
 			continue;
@@ -1204,7 +1204,7 @@ int16 Inventory::_HasItem(std::map<int16, ItemInst*>& bucket, uint32 item_id, ui
 		
 		if (!inst->IsType(ItemClassContainer)) { continue; }
 
-		for (auto bag_iter = inst->_begin(); bag_iter != inst->_end(); ++bag_iter) {
+		for (auto bag_iter = inst->_cbegin(); bag_iter != inst->_cend(); ++bag_iter) {
 			auto bag_inst = bag_iter->second;
 			if (bag_inst == nullptr) { continue; }
 
@@ -1235,7 +1235,7 @@ int16 Inventory::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity)
 	
 	uint8 quantity_found = 0;
 
-	for (auto iter = iqueue.begin(); iter != iqueue.end(); ++iter) {
+	for (auto iter = iqueue.cbegin(); iter != iqueue.cend(); ++iter) {
 		auto inst = *iter;
 		if (inst == nullptr) { continue; }
 
@@ -1252,7 +1252,7 @@ int16 Inventory::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity)
 
 		if (!inst->IsType(ItemClassContainer)) { continue; }
 
-		for (auto bag_iter = inst->_begin(); bag_iter != inst->_end(); ++bag_iter) {
+		for (auto bag_iter = inst->_cbegin(); bag_iter != inst->_cend(); ++bag_iter) {
 			auto bag_inst = bag_iter->second;
 			if (bag_inst == nullptr) { continue; }
 
@@ -1289,7 +1289,7 @@ int16 Inventory::_HasItemByUse(std::map<int16, ItemInst*>& bucket, uint8 use, ui
 
 		if (!inst->IsType(ItemClassContainer)) { continue; }
 
-		for (auto bag_iter = inst->_begin(); bag_iter != inst->_end(); ++bag_iter) {
+		for (auto bag_iter = inst->_cbegin(); bag_iter != inst->_cend(); ++bag_iter) {
 			auto bag_inst = bag_iter->second;
 			if (bag_inst == nullptr) { continue; }
 
@@ -1309,7 +1309,7 @@ int16 Inventory::_HasItemByUse(ItemInstQueue& iqueue, uint8 use, uint8 quantity)
 {
 	uint8 quantity_found = 0;
 
-	for (auto iter = iqueue.begin(); iter != iqueue.end(); ++iter) {
+	for (auto iter = iqueue.cbegin(); iter != iqueue.cend(); ++iter) {
 		auto inst = *iter;
 		if (inst == nullptr) { continue; }
 
@@ -1321,7 +1321,7 @@ int16 Inventory::_HasItemByUse(ItemInstQueue& iqueue, uint8 use, uint8 quantity)
 
 		if (!inst->IsType(ItemClassContainer)) { continue; }
 
-		for (auto bag_iter = inst->_begin(); bag_iter != inst->_end(); ++bag_iter) {
+		for (auto bag_iter = inst->_cbegin(); bag_iter != inst->_cend(); ++bag_iter) {
 			auto bag_inst = bag_iter->second;
 			if (bag_inst == nullptr) { continue; }
 
@@ -1355,7 +1355,7 @@ int16 Inventory::_HasItemByLoreGroup(std::map<int16, ItemInst*>& bucket, uint32 
 
 		if (!inst->IsType(ItemClassContainer)) { continue; }
 
-		for (auto bag_iter = inst->_begin(); bag_iter != inst->_end(); ++bag_iter) {
+		for (auto bag_iter = inst->_cbegin(); bag_iter != inst->_cend(); ++bag_iter) {
 			auto bag_inst = bag_iter->second;
 			if (bag_inst == nullptr) { continue; }
 
@@ -1378,7 +1378,7 @@ int16 Inventory::_HasItemByLoreGroup(std::map<int16, ItemInst*>& bucket, uint32 
 // Internal Method: Checks an inventory queue type bucket for a particular item
 int16 Inventory::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup)
 {
-	for (auto iter = iqueue.begin(); iter != iqueue.end(); ++iter) {
+	for (auto iter = iqueue.cbegin(); iter != iqueue.cend(); ++iter) {
 		auto inst = *iter;
 		if (inst == nullptr) { continue; }
 
@@ -1395,7 +1395,7 @@ int16 Inventory::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup)
 
 		if (!inst->IsType(ItemClassContainer)) { continue; }
 
-		for (auto bag_iter = inst->_begin(); bag_iter != inst->_end(); ++bag_iter) {
+		for (auto bag_iter = inst->_cbegin(); bag_iter != inst->_cend(); ++bag_iter) {
 			auto bag_inst = bag_iter->second;
 			if (bag_inst == nullptr) { continue; }
 

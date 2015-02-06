@@ -2618,7 +2618,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		}
 		else {
 			int cursorDepth = 0;
-			for (auto it = targetClient->GetInv().cursor_begin(); (it != targetClient->GetInv().cursor_end()); ++it, ++cursorDepth) {
+			for (auto it = targetClient->GetInv().cursor_cbegin(); (it != targetClient->GetInv().cursor_cend()); ++it, ++cursorDepth) {
 				inst_main = *it;
 				item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
 				linker.SetItemInst(inst_main);
