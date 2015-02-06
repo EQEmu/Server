@@ -1071,13 +1071,10 @@ int Inventory::GetSlotByItemInstCollection(const std::map<int16, ItemInst*> &col
 	return -1;
 }
 
-void Inventory::dumpItemCollection(const std::map<int16, ItemInst*> &collection) {
-	iter_inst it;
-	iter_contents itb;
-	ItemInst* inst = nullptr;
-
-	for (it = collection.begin(); it != collection.end(); ++it) {
-		inst = it->second;
+void Inventory::dumpItemCollection(const std::map<int16, ItemInst*> &collection)
+{
+	for (auto it = collection.cbegin(); it != collection.cend(); ++it) {
+		auto inst = it->second;
 		if (!inst || !inst->GetItem())
 			continue;
 
@@ -1088,14 +1085,13 @@ void Inventory::dumpItemCollection(const std::map<int16, ItemInst*> &collection)
 	}
 }
 
-void Inventory::dumpBagContents(ItemInst *inst, iter_inst *it) {
-	iter_contents itb;
-
+void Inventory::dumpBagContents(ItemInst *inst, std::map<int16, ItemInst*>::const_iterator *it)
+{
 	if (!inst || !inst->IsType(ItemClassContainer))
 		return;
 
 	// Go through bag, if bag
-	for (itb = inst->_cbegin(); itb != inst->_cend(); ++itb) {
+	for (auto itb = inst->_cbegin(); itb != inst->_cend(); ++itb) {
 		ItemInst* baginst = itb->second;
 		if (!baginst || !baginst->GetItem())
 			continue;
@@ -1110,7 +1106,7 @@ void Inventory::dumpBagContents(ItemInst *inst, iter_inst *it) {
 // Internal Method: Retrieves item within an inventory bucket
 ItemInst* Inventory::_GetItem(const std::map<int16, ItemInst*>& bucket, int16 slot_id) const
 {
-	iter_inst it = bucket.find(slot_id);
+	auto it = bucket.find(slot_id);
 	if (it != bucket.end()) {
 		return it->second;
 	}
@@ -1505,8 +1501,7 @@ ItemInst::ItemInst(const ItemInst& copy)
 	m_attuned=copy.m_attuned;
 	m_merchantcount=copy.m_merchantcount;
 	// Copy container contents
-	iter_contents it;
-	for (it=copy.m_contents.begin(); it!=copy.m_contents.end(); ++it) {
+	for (auto it = copy.m_contents.begin(); it != copy.m_contents.end(); ++it) {
 		ItemInst* inst_old = it->second;
 		ItemInst* inst_new = nullptr;
 
@@ -1676,7 +1671,7 @@ bool ItemInst::IsAugmentSlotAvailable(int32 augtype, uint8 slot) const
 // Retrieve item inside container
 ItemInst* ItemInst::GetItem(uint8 index) const
 {
-	iter_contents it = m_contents.find(index);
+	auto it = m_contents.find(index);
 	if (it != m_contents.end()) {
 		return it->second;
 	}
@@ -1739,7 +1734,7 @@ void ItemInst::ClearByFlags(byFlagSetting is_nodrop, byFlagSetting is_norent)
 	// TODO: This needs work...
 
 	// Destroy container contents
-	iter_contents cur, end, del;
+	std::map<uint8, ItemInst*>::const_iterator cur, end, del;
 	cur = m_contents.begin();
 	end = m_contents.end();
 	for (; cur != end;) {

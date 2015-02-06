@@ -33,9 +33,6 @@ class EvolveInfo;			// Stores information about an evolving item family
 #include <list>
 #include <map>
 
-// Helper typedefs
-typedef std::map<int16, ItemInst*>::const_iterator			iter_inst;
-typedef std::map<uint8, ItemInst*>::const_iterator			iter_contents;
 
 namespace ItemField
 {
@@ -227,7 +224,7 @@ protected:
 
 	int GetSlotByItemInstCollection(const std::map<int16, ItemInst*> &collection, ItemInst *inst);
 	void dumpItemCollection(const std::map<int16, ItemInst*> &collection);
-	void dumpBagContents(ItemInst *inst, iter_inst *it);
+	void dumpBagContents(ItemInst *inst, std::map<int16, ItemInst*>::const_iterator *it);
 
 	// Retrieves item within an inventory bucket
 	ItemInst* _GetItem(const std::map<int16, ItemInst*>& bucket, int16 slot_id) const;
@@ -425,8 +422,8 @@ protected:
 	//////////////////////////
 	// Protected Members
 	//////////////////////////
-	iter_contents _cbegin()		{ return m_contents.cbegin(); }
-	iter_contents _cend()		{ return m_contents.cend(); }
+	std::map<uint8, ItemInst*>::const_iterator _cbegin() { return m_contents.cbegin(); }
+	std::map<uint8, ItemInst*>::const_iterator _cend() { return m_contents.cend(); }
 
 	friend class Inventory;
 
