@@ -12640,6 +12640,10 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	else if (sa->type == AT_Anim) {
 		if (IsAIControlled())
 			return;
+
+		if(!anim_change_timer.Check())
+			return;
+
 		if (sa->parameter == ANIM_STAND) {
 			SetAppearance(eaStanding);
 			playeraction = 0;
@@ -12673,15 +12677,6 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			SetFeigned(false);
 		}
 
-		// This is from old code
-		// I have no clue what it's for
-		/*
-		else if (sa->parameter == 0x05) {
-		// Illusion
-		std::cout << "Illusion packet recv'd:" << std::endl;
-		DumpPacket(app);
-		}
-		*/
 		else {
 			std::cerr << "Client " << name << " unknown apperance " << (int)sa->parameter << std::endl;
 			return;
@@ -12690,6 +12685,10 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		entity_list.QueueClients(this, app, true);
 	}
 	else if (sa->type == AT_Anon) {
+		if(!anon_toggle_timer.Check()) {
+			return;
+		}
+
 		// For Anon/Roleplay
 		if (sa->parameter == 1) { // Anon
 			m_pp.anon = 1;
@@ -12711,13 +12710,18 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		return;
 	}
 	else if (sa->type == AT_AFK) {
-		this->AFK = (sa->parameter == 1);
-		entity_list.QueueClients(this, app, true);
+		if(afk_toggle_timer.Check()) {
+			AFK = (sa->parameter == 1);
+			entity_list.QueueClients(this, app, true);
+		}
 	}
 	else if (sa->type == AT_Split) {
 		m_pp.autosplit = (sa->parameter == 1);
 	}
 	else if (sa->type == AT_Sneak) {
+		if(sneaking == 0)
+			return;
+
 		if (sa->parameter != 0)
 		{
 			if (!HasSkill(SkillSneak))
@@ -12729,7 +12733,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			}
 			return;
 		}
-		this->sneaking = 0;
+		sneaking = 0;
 		entity_list.QueueClients(this, app, true);
 	}
 	else if (sa->type == AT_Size)
@@ -12741,7 +12745,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	}
 	else if (sa->type == AT_Light)	// client emitting light (lightstone, shiny shield)
 	{
-		entity_list.QueueClients(this, app, false);
+		//don't do anything with this
 	}
 	else if (sa->type == AT_Levitate)
 	{
@@ -12750,8 +12754,10 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	}
 	else if (sa->type == AT_ShowHelm)
 	{
-		m_pp.showhelm = (sa->parameter == 1);
-		entity_list.QueueClients(this, app, true);
+		if(helm_toggle_timer.Check()) {
+			m_pp.showhelm = (sa->parameter == 1);
+			entity_list.QueueClients(this, app, true);
+		}
 	}
 	else {
 		std::cout << "Unknown SpawnAppearance type: 0x" << std::hex << std::setw(4) << std::setfill('0') << sa->type << std::dec

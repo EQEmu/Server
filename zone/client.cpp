@@ -141,6 +141,11 @@ Client::Client(EQStreamInterface* ieqs)
 	merc_timer(RuleI(Mercs, UpkeepIntervalMS)),
 	ItemTickTimer(10000),
 	ItemQuestTimer(500),
+	anim_change_timer(100),
+	anon_toggle_timer(250),
+	afk_toggle_timer(250),
+	helm_toggle_timer(250),
+	light_update_timer(250),
 	m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
 	m_ZoneSummonLocation(-2.0f,-2.0f,-2.0f),
 	m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
