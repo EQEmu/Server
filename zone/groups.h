@@ -73,7 +73,7 @@ public:
 	void	SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter = nullptr);
 	inline	void SetLeader(Mob* newleader){ leader=newleader; };
 	inline	Mob* GetLeader() { return leader; };
-	const char*	GetLeaderName() { return leader->GetName(); };
+	const char*	GetLeaderName() { return membername[0]; };
 	void	SendHPPacketsTo(Mob* newmember);
 	void	SendHPPacketsFrom(Mob* newmember);
 	bool	UpdatePlayer(Mob* update);
