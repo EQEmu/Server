@@ -195,11 +195,9 @@ void ZoneDatabase::UpdateSpawn2Timeleft(uint32 id, uint16 instance_id, uint32 ti
 	//if we pass timeleft as 0 that means we clear from respawn time
 	//otherwise we update with a REPLACE INTO
 	if(timeleft == 0) {
-        std::string query = StringFormat("DELETE FROM respawn_times WHERE id=%lu "
-                                        "AND instance_id = %lu",(unsigned long)id, (unsigned long)instance_id);
+        std::string query = StringFormat("DELETE FROM respawn_times WHERE id=%lu AND instance_id = %lu",(unsigned long)id, (unsigned long)instance_id);
         auto results = QueryDatabase(query);
-        if (!results.Success())
-
+        
 		return;
 	}
 
