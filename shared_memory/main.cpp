@@ -38,20 +38,7 @@ EQEmuLogSys Log;
 
 void CatchSignal(int sig_num)
 {
-#ifdef EQPERF_ENABLED
-	char time_str[128];
-	time_t result = time(nullptr);
-	strftime(time_str, sizeof(time_str), "%Y_%m_%d__%H_%M_%S", localtime(&result));
-
-	std::string prof_name = "./profile/shared_memory_";
-	prof_name += time_str;
-	prof_name += ".log";
-
-	std::ofstream profile_out(prof_name, std::ofstream::out);
-	if(profile_out.good()) {
-		_eqp_dump(profile_out, 10);
-	}
-#endif
+	_eqp_dump_file("shared_memory");
 }
 
 void OnExit() {

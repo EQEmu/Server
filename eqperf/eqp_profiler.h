@@ -3,6 +3,8 @@
 #ifdef EQPERF_ENABLED
 
 #include <string>
+#include <fstream>
+#include <time.h>
 #include "eqp_profile_event.h"
 #include "eqp_profiler_node.h"
 
@@ -13,11 +15,24 @@
 #define _eqpn(x) EQP::CPU::ST::Event eqp_comb(eq_perf_event_, __LINE__) (__PRETTY_FUNCTION__, x);
 #define _eqp_clear() EQP::CPU::ST::GetProfiler().Clear()
 #define _eqp_dump(strm, count) EQP::CPU::ST::GetProfiler().Dump(strm, count)
+#define _eqp_dump_file(name) char time_str[128]; \
+	time_t result = time(nullptr); \
+	strftime(time_str, sizeof(time_str), "%Y_%m_%d_%H:%M:%S", localtime(&result)); \
+	std::string prof_name = "./profile/"; \
+	prof_name += name; \
+	prof_name += "_"; \
+	prof_name += time_str; \
+	prof_name += ".log"; \
+	std::ofstream profile_out(prof_name, std::ofstream::out); \
+	if(profile_out.good()) { \
+		_eqp_dump(profile_out, 10); \
+	}
 #else
 #define _eqp EQP::CPU::MT::Event eqp_comb(eq_perf_event_, __LINE__) (__PRETTY_FUNCTION__);
 #define _eqpn(x) EQP::CPU::MT::Event eqp_comb(eq_perf_event_, __LINE__) (__PRETTY_FUNCTION__, x);
 #define _eqp_clear() EQP::CPU::MT::GetProfiler().Clear()
 #define _eqp_dump(strm, count) EQP::CPU::MT::GetProfiler().Dump(strm, count)
+#define _eqp_dump_file() 
 #endif
 
 namespace EQP

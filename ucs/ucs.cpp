@@ -19,13 +19,13 @@
 
 #include "../common/eqemu_logsys.h"
 #include "../common/global_define.h"
-#include "clientlist.h"
 #include "../common/opcodemgr.h"
 #include "../common/eq_stream_factory.h"
 #include "../common/rulesys.h"
 #include "../common/servertalk.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
+#include "clientlist.h"
 #include "database.h"
 #include "ucsconfig.h"
 #include "chatchannel.h"
@@ -56,20 +56,7 @@ void CatchSignal(int sig_num) {
 	if(worldserver)
 		worldserver->Disconnect();
 
-#ifdef EQPERF_ENABLED
-	char time_str[128];
-	time_t result = time(nullptr);
-	strftime(time_str, sizeof(time_str), "%Y_%m_%d__%H_%M_%S", localtime(&result));
-
-	std::string prof_name = "./profile/ucs_";
-	prof_name += time_str;
-	prof_name += ".log";
-
-	std::ofstream profile_out(prof_name, std::ofstream::out);
-	if(profile_out.good()) {
-		_eqp_dump(profile_out, 10);
-	}
-#endif
+	_eqp_dump_file("ucs");
 }
 
 std::string GetMailPrefix() {

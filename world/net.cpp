@@ -21,9 +21,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <signal.h>
-
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/queue.h"
@@ -34,7 +32,6 @@
 #include "../common/version.h"
 #include "../common/eqtime.h"
 #include "../common/timeoutmgr.h"
-
 #include "../common/opcodemgr.h"
 #include "../common/guilds.h"
 #include "../common/eq_stream_ident.h"
@@ -43,6 +40,7 @@
 #include "../common/crash.h"
 #include "client.h"
 #include "worlddb.h"
+
 #ifdef _WINDOWS
 	#include <process.h>
 	#define snprintf	_snprintf
@@ -144,6 +142,10 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
+		Log.Out(Logs::General, Logs::World_Server, "Could not set signal handler");
+		return 1;
+	}
+	if (signal(SIGBREAK, CatchSignal) == SIG_ERR)	{
 		Log.Out(Logs::General, Logs::World_Server, "Could not set signal handler");
 		return 1;
 	}
@@ -511,6 +513,8 @@ void CatchSignal(int sig_num) {
 	if(zoneserver_list.worldclock.saveFile(WorldConfig::get()->EQTimeFile.c_str())==false)
 		Log.Out(Logs::General, Logs::World_Server,"Failed to save time file.");
 	RunLoops = false;
+
+	_eqp_dump_file("world");
 }
 
 void UpdateWindowTitle(char* iNewTitle) {

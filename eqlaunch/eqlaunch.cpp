@@ -69,6 +69,10 @@ int main(int argc, char *argv[]) {
 		Log.Out(Logs::Detail, Logs::Launcher, "Could not set signal handler");
 		return 1;
 	}
+	if (signal(SIGBREAK, CatchSignal) == SIG_ERR)	{
+		Log.Out(Logs::Detail, Logs::Launcher, "Could not set signal handler");
+		return 1;
+	}
 	#ifndef WIN32
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)	{
 		Log.Out(Logs::Detail, Logs::Launcher, "Could not set signal handler");
@@ -187,7 +191,7 @@ void CatchSignal(int sig_num) {
 	Log.Out(Logs::Detail, Logs::Launcher, "Caught signal %d", sig_num);
 	RunLoops = false;
 
-
+	_eqp_dump_file("eqlaunch");
 }
 
 
