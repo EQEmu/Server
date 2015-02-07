@@ -2524,7 +2524,7 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 				}
 			}
 		} 
-		else if (bindwound_timer.Check()) // Did the timer finish? No? Then why the hell do they get free hpz?! -Lecht
+		else if (bindwound_timer.Check()) // Did the timer finish?
 		{ 
 		// finish bind
 			// disable complete timer

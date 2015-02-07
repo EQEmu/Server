@@ -12145,7 +12145,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 			mp->quantity = prevcharges;
 	}
 
-	// Item's stackable, but the quantity they want to buy exceeds the max stackable quantity. -Lecht
+	// Item's stackable, but the quantity they want to buy exceeds the max stackable quantity.
 	if (item->Stackable && mp->quantity > item->StackSize)
 		mp->quantity = item->StackSize;
 
