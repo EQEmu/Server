@@ -12145,6 +12145,10 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 			mp->quantity = prevcharges;
 	}
 
+	// Item's stackable, but the quantity they want to buy exceeds the max stackable quantity. -Lecht
+	if (item->Stackable && mp->quantity > item->StackSize)
+		mp->quantity = item->StackSize;
+
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopPlayerBuy, sizeof(Merchant_Sell_Struct));
 	Merchant_Sell_Struct* mpo = (Merchant_Sell_Struct*)outapp->pBuffer;
 	mpo->quantity = mp->quantity;
@@ -12171,6 +12175,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		mpo->price = SinglePrice;
 	else
 		mpo->price = SinglePrice * mp->quantity;
+
 	if (mpo->price < 0)
 	{
 		safe_delete(outapp);
