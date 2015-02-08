@@ -3105,7 +3105,7 @@ void NPC::CalcItemBonuses(StatBonuses *newbon)
 					newbon->ProcChance += cur->CombatEffects;
 				}
 				if (cur->Worn.Effect>0 && (cur->Worn.Type == ET_WornEffect)) { // latent effects
-					ApplySpellsBonuses(cur->Worn.Effect, cur->Worn.Level, newbon, cur->Worn.Type);
+					ApplySpellsBonuses(cur->Worn.Effect, cur->Worn.Level, newbon, 0, cur->Worn.Type);
 				}
 
 				if (RuleB(Spells, NPC_UseFocusFromItems)){
