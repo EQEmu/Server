@@ -361,8 +361,8 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 			database.QueryDatabase(ss.str().c_str());
 		}
 
-		auto start = client->GetInv().cursor_begin();
-		auto finish = client->GetInv().cursor_end();
+		auto start = client->GetInv().cursor_cbegin();
+		auto finish = client->GetInv().cursor_cend();
 		database.SaveCursor(client->CharacterID(), start, finish);
 
 		client->CalcBonuses();

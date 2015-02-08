@@ -260,6 +260,13 @@ bool Client::Process() {
 			}
 		}
 
+		if(light_update_timer.Check()) {
+			UpdateEquipLightValue();
+			if(UpdateActiveLightValue()) {
+				SendAppearancePacket(AT_Light, GetActiveLightValue());
+			}
+		}
+
 		bool may_use_attacks = false;
 		/*
 			Things which prevent us from attacking:

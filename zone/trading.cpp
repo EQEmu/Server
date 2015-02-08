@@ -1479,8 +1479,6 @@ static void BazaarAuditTrail(const char *seller, const char *buyer, const char *
 	database.QueryDatabase(query);
 }
 
-
-
 void Client::BuyTraderItem(TraderBuy_Struct* tbs,Client* Trader,const EQApplicationPacket* app){
 
 	if(!Trader) return;
@@ -1509,15 +1507,15 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs,Client* Trader,const EQApplicat
 					BuyItem->GetItem()->Name, BuyItem->IsStackable(), tbs->Quantity, BuyItem->GetCharges());
 	// If the item is not stackable, then we can only be buying one of them.
 	if(!BuyItem->IsStackable())
-		outtbs->Quantity = tbs->Quantity;
+		outtbs->Quantity = 1; // normally you can't send more than 1 here
 	else {
 		// Stackable items, arrows, diamonds, etc
-		int ItemCharges = BuyItem->GetCharges();
+		int32 ItemCharges = BuyItem->GetCharges();
 		// ItemCharges for stackables should not be <= 0
 		if(ItemCharges <= 0)
 			outtbs->Quantity = 1;
 		// If the purchaser requested more than is in the stack, just sell them how many are actually in the stack.
-		else if(ItemCharges < (int16)tbs->Quantity)
+		else if(static_cast<uint32>(ItemCharges) < tbs->Quantity)
 			outtbs->Quantity = ItemCharges;
 		else
 			outtbs->Quantity = tbs->Quantity;
@@ -1609,7 +1607,6 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs,Client* Trader,const EQApplicat
 
 	safe_delete(outapp);
 	safe_delete(outapp2);
-
 }
 
 void Client::SendBazaarWelcome()
