@@ -2476,11 +2476,13 @@ void Client::LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 
 
 bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 	EQApplicationPacket* outapp = 0;
-	if(!fail) {
+	if(!fail) 
+	{
 		outapp = new EQApplicationPacket(OP_Bind_Wound, sizeof(BindWound_Struct));
 		BindWound_Struct* bind_out = (BindWound_Struct*) outapp->pBuffer;
 		// Start bind
-		if(!bindwound_timer.Enabled()) {
+		if(!bindwound_timer.Enabled()) 
+		{
 			//make sure we actually have a bandage... and consume it.
 			int16 bslot = m_inv.HasItemByUse(ItemTypeBandage, 1, invWhereWorn|invWherePersonal);
 			if (bslot == INVALID_INDEX) {
@@ -2526,7 +2528,9 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 					; // Binding self
 				}
 			}
-		} else {
+		} 
+		else if (bindwound_timer.Check()) // Did the timer finish?
+		{ 
 		// finish bind
 			// disable complete timer
 			bindwound_timer.Disable();
