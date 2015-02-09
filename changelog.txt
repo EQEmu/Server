@@ -1,5 +1,14 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/08/2015 ==
+Kayen: Implemented npc specialability (44) COUNTER_AVOID_DAMAGE which when applied to the ATTACKING NPC will make their attacks more difficult to be avoided by riposte/dodge/parry/block.
+Parama0: Negative modifer value that affects ALL avoid damage types dodge/parry/riposte/block) chance on defender. Ie (44,50 = 50 pct reduction to ALL)
+Parama1: Negative modifer value that affects RIPOSTE chance on defender. Ie (44,1,0,50 = 50 pct reduction to riposte chance)
+Parama2: Negative modifer value that affects PARRY chance on defender.  Ie (44,1,0,0,50 = 50 pct reduction to parry chance)
+Parama3: Negative modifer value that affects BLOCK chance on defender.  Ie (44,1,0,0,0,50 = 50 pct reduction to block chance)
+Parama4: Negative modifer value that affects DODGE chance on defender.  e (44,1,0,0,0,0,50 = 50 pct reduction to dodge chance)
+Example of usage: Player has Improved Dodge V (+50 pct dodge chance), you want to negate this bonus you would set 44,1,0,0,0,0,50 on your NPC.
+
 == 02/07/2015 ==
 Akkadius: Reduced #repop time dramatically by taking down hundreds of individual SELECT/DELETE/INSERT queries in routines and bringing it down to very few
 	See: https://www.youtube.com/watch?v=9kSFbyTBuAk

@@ -139,7 +139,8 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 
 	// Clear item faction mods
 	ClearItemFactionBonuses();
-	ShieldEquiped(false);
+	SetShieldEquiped(false);
+	SetTwoHandBluntEquiped(false);
 
 	unsigned int i;
 	//should not include 21 (SLOT_AMMO)
@@ -149,9 +150,12 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 			continue;
 		AddItemBonuses(inst, newbon);
 
-		//Check if item is secondary slot is a 'shield'. Required for multiple spelll effects.
-		if (i == MainSecondary && (m_inv.GetItem(MainSecondary)->GetItem()->ItemType == ItemTypeShield))
-			ShieldEquiped(true);
+		//These are given special flags due to how often they are checked for various spell effects.
+		const Item_Struct *item = inst->GetItem();
+		if (i == MainSecondary && (item && item->ItemType == ItemTypeShield))
+			SetShieldEquiped(true);
+		else if (i == MainPrimary && (item && item->ItemType == ItemType2HBlunt))
+			SetTwoHandBluntEquiped(true);
 	}
 
 	//Power Source Slot

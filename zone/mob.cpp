@@ -170,6 +170,7 @@ Mob::Mob(const char* in_name,
 	findable	= false;
 	trackable	= true;
 	has_shieldequiped = false;
+	has_twohandbluntequiped = false;
 	has_numhits = false;
 	has_MGB = false;
 	has_ProjectIllusion = false;
