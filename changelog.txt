@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/07/2015 ==
+Akkadius: Reduced #repop time dramatically by taking down hundreds of individual SELECT/DELETE/INSERT queries in routines and bringing it down to very few
+	See: https://www.youtube.com/watch?v=9kSFbyTBuAk
+
 == 02/06/2015 ==
 Uleat: Updated returns for Inventory and ItemInst const iterators. (const == const)
 Uleat: Replaced 'iter_inst' and 'iter_contents' typedefs with their stl definitions

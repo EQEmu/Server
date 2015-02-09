@@ -185,28 +185,40 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 	return true;
 }
 
-//updates or clears the respawn time in the database for the current spawn id
-void ZoneDatabase::UpdateSpawn2Timeleft(uint32 id, uint16 instance_id, uint32 timeleft)
+void ZoneDatabase::UpdateRespawnTime(uint32 spawn2_id, uint16 instance_id, uint32 time_left)
 {
+
 	timeval tv;
 	gettimeofday(&tv, nullptr);
-	uint32 cur = tv.tv_sec;
+	uint32 current_time = tv.tv_sec;
 
-	//if we pass timeleft as 0 that means we clear from respawn time
-	//otherwise we update with a REPLACE INTO
-	if(timeleft == 0) {
-        std::string query = StringFormat("DELETE FROM respawn_times WHERE id=%lu AND instance_id = %lu",(unsigned long)id, (unsigned long)instance_id);
-        auto results = QueryDatabase(query);
-        
+	/*	If we pass timeleft as 0 that means we clear from respawn time
+			otherwise we update with a REPLACE INTO
+	*/
+
+	if(time_left == 0) {
+        std::string query = StringFormat("DELETE FROM `respawn_times` WHERE `id` = %u AND `instance_id` = %u", spawn2_id, instance_id);
+        QueryDatabase(query); 
 		return;
 	}
 
-    std::string query = StringFormat("REPLACE INTO respawn_times (id, start, duration, instance_id) "
-                                    "VALUES (%lu, %lu, %lu, %lu)",
-                                    (unsigned long)id, (unsigned long)cur,
-                                    (unsigned long)timeleft, (unsigned long)instance_id);
-    auto results = QueryDatabase(query);
-    if (!results.Success())
+    std::string query = StringFormat(
+		"REPLACE INTO `respawn_times` "
+		"(id, "
+		"start, "
+		"duration, "
+		"instance_id) "
+		"VALUES " 
+		"(%u, "
+		"%u, "
+		"%u, "
+		"%u)",
+		spawn2_id, 
+		current_time,
+		time_left, 
+		instance_id
+	);
+    QueryDatabase(query);
 
 	return;
 }
