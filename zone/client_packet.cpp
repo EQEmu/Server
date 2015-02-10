@@ -7298,6 +7298,16 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 				if (gc->guildeqid == 0)
 					gc->guildeqid = GuildID();
 
+				// Convert Membership Level between RoF and previous clients.
+				if (client->GetClientVersion() < ClientVersion::RoF && GetClientVersion() >= ClientVersion::RoF)
+				{
+					gc->officer = 0;
+				}
+				if (client->GetClientVersion() >= ClientVersion::RoF && GetClientVersion() < ClientVersion::RoF)
+				{
+					gc->officer = 8;
+				}
+
 				Log.Out(Logs::Detail, Logs::Guilds, "Sending OP_GuildInvite for invite to %s, length %d", client->GetName(), app->size);
 				client->SetPendingGuildInvitation(true);
 				client->QueuePacket(app);
@@ -7332,6 +7342,8 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 
 	GuildInviteAccept_Struct* gj = (GuildInviteAccept_Struct*)app->pBuffer;
 
+	uint32 guildrank = gj->response;
+
 	if (GetClientVersion() >= ClientVersion::RoF)
 	{
 		if (gj->response > 9)
@@ -7360,9 +7372,25 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 		Log.Out(Logs::Detail, Logs::Guilds, "Guild Invite Accept: guild %d, response %d, inviter %s, person %s",
 			gj->guildeqid, gj->response, gj->inviter, gj->newmember);
 
+		//ok, the invite is also used for changing rank as well.
+		Mob* inviter = entity_list.GetMob(gj->inviter);
+
+		if (inviter && inviter->IsClient())
+		{
+			Client* client = inviter->CastToClient();
+			// Convert Membership Level between RoF and previous clients.
+			if (client->GetClientVersion() < ClientVersion::RoF && GetClientVersion() >= ClientVersion::RoF)
+			{
+				guildrank = 0;
+			}
+			if (client->GetClientVersion() >= ClientVersion::RoF && GetClientVersion() < ClientVersion::RoF)
+			{
+				guildrank = 8;
+			}
+		}
 		//we dont really care a lot about what this packet means, as long as
 		//it has been authorized with the guild manager
-		if (!guild_mgr.VerifyAndClearInvite(CharacterID(), gj->guildeqid, gj->response)) {
+		if (!guild_mgr.VerifyAndClearInvite(CharacterID(), gj->guildeqid, guildrank)) {
 			worldserver.SendEmoteMessage(gj->inviter, 0, 0, "%s has sent an invalid response to your invite!", GetName());
 			Message(13, "Invalid invite response packet!");
 			return;
@@ -7390,7 +7418,7 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 
 			//change guild and rank
 
-			uint32 guildrank = gj->response;
+			guildrank = gj->response;
 
 			if (GetClientVersion() >= ClientVersion::RoF)
 			{

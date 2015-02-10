@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 02/09/2015 ==
 Trevius: (RoF+) Setting Alt flag on characters in the Guild Management Window is now saved and functional for filtering.
+Trevius: (RoF+) Guild Invites between RoF+ and previous Clients is now functional.
 
 == 02/08/2015 ==
 Kayen: Implemented npc specialability (44) COUNTER_AVOID_DAMAGE which when applied to the ATTACKING NPC will make their attacks more difficult to be avoided by riposte/dodge/parry/block.
