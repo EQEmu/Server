@@ -1216,10 +1216,72 @@ void Client::Handle_Connect_OP_WearChange(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_WorldObjectsSent(const EQApplicationPacket *app)
 {
-	// New for Secrets of Faydwer+
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_WorldObjectsSent, 0);
+	//This is a copy of SendExpZonein created for SoF+ due to packet order change
+
+	//////////////////////////////////////////////////////
+	// Spawn Appearance Packet
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+	SpawnAppearance_Struct* sa = (SpawnAppearance_Struct*)outapp->pBuffer;
+	sa->type = AT_SpawnID;			// Is 0x10 used to set the player id?
+	sa->parameter = GetID();	// Four bytes for this parameter...
+	outapp->priority = 6;
 	QueuePacket(outapp);
 	safe_delete(outapp);
+
+	// Inform the world about the client
+	outapp = new EQApplicationPacket();
+
+	CreateSpawnPacket(outapp);
+	outapp->priority = 6;
+	if (!GetHideMe()) entity_list.QueueClients(this, outapp, true);
+	safe_delete(outapp);
+	if (GetPVP())	//force a PVP update until we fix the spawn struct
+		SendAppearancePacket(AT_PVP, GetPVP(), true, false);
+
+	//Send AA Exp packet:
+	if (GetLevel() >= 51)
+		SendAAStats();
+
+	// Send exp packets
+	outapp = new EQApplicationPacket(OP_ExpUpdate, sizeof(ExpUpdate_Struct));
+	ExpUpdate_Struct* eu = (ExpUpdate_Struct*)outapp->pBuffer;
+	uint32 tmpxp1 = GetEXPForLevel(GetLevel() + 1);
+	uint32 tmpxp2 = GetEXPForLevel(GetLevel());
+
+	// Crash bug fix... Divide by zero when tmpxp1 and 2 equalled each other, most likely the error case from GetEXPForLevel() (invalid class, etc)
+	if (tmpxp1 != tmpxp2 && tmpxp1 != 0xFFFFFFFF && tmpxp2 != 0xFFFFFFFF) {
+		float tmpxp = (float)((float)m_pp.exp - tmpxp2) / ((float)tmpxp1 - tmpxp2);
+		eu->exp = (uint32)(330.0f * tmpxp);
+		outapp->priority = 6;
+		QueuePacket(outapp);
+	}
+	safe_delete(outapp);
+
+	SendAATimers();
+
+	// New for Secrets of Faydwer - Used in Place of OP_SendExpZonein
+	outapp = new EQApplicationPacket(OP_WorldObjectsSent, 0);
+	QueuePacket(outapp);
+	safe_delete(outapp);
+
+	outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(ZoneInSendName_Struct));
+	ZoneInSendName_Struct* zonesendname = (ZoneInSendName_Struct*)outapp->pBuffer;
+	strcpy(zonesendname->name, m_pp.name);
+	strcpy(zonesendname->name2, m_pp.name);
+	zonesendname->unknown0 = 0x0A;
+	QueuePacket(outapp);
+	safe_delete(outapp);
+
+	if (IsInAGuild()) {
+		SendGuildMembers();
+		SendGuildURL();
+		SendGuildChannel();
+		SendGuildLFGuildStatus();
+	}
+	SendLFGuildStatus();
+
+	//No idea why live sends this if even were not in a guild
+	SendGuildMOTD();
 
 	if (RuleB(Mercs, AllowMercs))
 	{
