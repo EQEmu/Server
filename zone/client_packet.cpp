@@ -12584,9 +12584,6 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		if (IsAIControlled())
 			return;
 
-		if(!anim_change_timer.Check())
-			return;
-
 		if (sa->parameter == ANIM_STAND) {
 			SetAppearance(eaStanding);
 			playeraction = 0;
