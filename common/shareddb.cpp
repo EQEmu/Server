@@ -1158,7 +1158,7 @@ void SharedDatabase::GetFactionListInfo(uint32 &list_count, uint32 &max_lists) {
     auto row = results.begin();
 
     list_count = static_cast<uint32>(atoul(row[0]));
-    max_lists = static_cast<uint32>(atoul(row[1]));
+    max_lists = static_cast<uint32>(atoul(row[1] ? row[1] : "0"));
 }
 
 const NPCFactionList* SharedDatabase::GetNPCFactionEntry(uint32 id) {
@@ -1235,9 +1235,6 @@ bool SharedDatabase::LoadNPCFactionLists() {
 		uint32 list_count = 0;
 		uint32 max_lists = 0;
 		GetFactionListInfo(list_count, max_lists);
-		if(list_count == 0) {
-			EQ_EXCEPT("SharedDatabase", "Database returned no result");
-		}
 		uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<NPCFactionList>::estimated_size(
 			list_count, max_lists));
 
@@ -1837,7 +1834,7 @@ void SharedDatabase::GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot
 	auto row = results.begin();
 
     loot_table_count = static_cast<uint32>(atoul(row[0]));
-	max_loot_table = static_cast<uint32>(atoul(row[1]));
+	max_loot_table = static_cast<uint32>(atoul(row[1] ? row[1] : "0"));
 	loot_table_entries = static_cast<uint32>(atoul(row[2]));
 }
 
@@ -1858,7 +1855,7 @@ void SharedDatabase::GetLootDropInfo(uint32 &loot_drop_count, uint32 &max_loot_d
     auto row =results.begin();
 
     loot_drop_count = static_cast<uint32>(atoul(row[0]));
-	max_loot_drop = static_cast<uint32>(atoul(row[1]));
+	max_loot_drop = static_cast<uint32>(atoul(row[1] ? row[1] : "0"));
 	loot_drop_entries = static_cast<uint32>(atoul(row[2]));
 }
 

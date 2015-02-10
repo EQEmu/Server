@@ -3256,7 +3256,7 @@ bool ZoneDatabase::LoadFactionData()
 
     auto row = results.begin();
 
-	max_faction = atoi(row[0]);
+	max_faction = row[0] ? atoi(row[0]) : 0;
     faction_array = new Faction*[max_faction+1];
     for(unsigned int index=0; index<max_faction; index++)
         faction_array[index] = nullptr;
