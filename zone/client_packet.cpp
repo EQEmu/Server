@@ -1089,76 +1089,15 @@ void Client::Handle_Connect_OP_SendAATable(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 {
-	//////////////////////////////////////////////////////
-	// Spawn Appearance Packet
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-	SpawnAppearance_Struct* sa = (SpawnAppearance_Struct*)outapp->pBuffer;
-	sa->type = AT_SpawnID;			// Is 0x10 used to set the player id?
-	sa->parameter = GetID();	// Four bytes for this parameter...
-	outapp->priority = 6;
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SendExpZonein, 0);
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	// Inform the world about the client
-	outapp = new EQApplicationPacket();
-
-	CreateSpawnPacket(outapp);
-	outapp->priority = 6;
-	if (!GetHideMe()) entity_list.QueueClients(this, outapp, true);
-	safe_delete(outapp);
-	if (GetPVP())	//force a PVP update until we fix the spawn struct
-		SendAppearancePacket(AT_PVP, GetPVP(), true, false);
-
-	//Send AA Exp packet:
-	if (GetLevel() >= 51)
-		SendAAStats();
-
-	// Send exp packets
-	outapp = new EQApplicationPacket(OP_ExpUpdate, sizeof(ExpUpdate_Struct));
-	ExpUpdate_Struct* eu = (ExpUpdate_Struct*)outapp->pBuffer;
-	uint32 tmpxp1 = GetEXPForLevel(GetLevel() + 1);
-	uint32 tmpxp2 = GetEXPForLevel(GetLevel());
-
-	// Crash bug fix... Divide by zero when tmpxp1 and 2 equalled each other, most likely the error case from GetEXPForLevel() (invalid class, etc)
-	if (tmpxp1 != tmpxp2 && tmpxp1 != 0xFFFFFFFF && tmpxp2 != 0xFFFFFFFF) {
-		float tmpxp = (float)((float)m_pp.exp - tmpxp2) / ((float)tmpxp1 - tmpxp2);
-		eu->exp = (uint32)(330.0f * tmpxp);
-		outapp->priority = 6;
-		QueuePacket(outapp);
+	// SoF+ Gets Zone-In packets after sending OP_WorldObjectsSent
+	if (GetClientVersion() < ClientVersion::SoF)
+	{
+		SendZoneInPackets();
 	}
-	safe_delete(outapp);
-
-	SendAATimers();
-
-	outapp = new EQApplicationPacket(OP_SendExpZonein, 0);
-	QueuePacket(outapp);
-	safe_delete(outapp);
-
-	outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(ZoneInSendName_Struct));
-	ZoneInSendName_Struct* zonesendname = (ZoneInSendName_Struct*)outapp->pBuffer;
-	strcpy(zonesendname->name, m_pp.name);
-	strcpy(zonesendname->name2, m_pp.name);
-	zonesendname->unknown0 = 0x0A;
-	QueuePacket(outapp);
-	safe_delete(outapp);
-
-	/* this is actually the guild MOTD
-	outapp = new EQApplicationPacket(OP_ZoneInSendName2, sizeof(ZoneInSendName_Struct2));
-	ZoneInSendName_Struct2* zonesendname2=(ZoneInSendName_Struct2*)outapp->pBuffer;
-	strcpy(zonesendname2->name,m_pp.name);
-	QueuePacket(outapp);
-	safe_delete(outapp);*/
-
-	if (IsInAGuild()) {
-		SendGuildMembers();
-		SendGuildURL();
-		SendGuildChannel();
-		SendGuildLFGuildStatus();
-	}
-	SendLFGuildStatus();
-
-	//No idea why live sends this if even were not in a guild
-	SendGuildMOTD();
 
 	return;
 }
@@ -1216,72 +1155,13 @@ void Client::Handle_Connect_OP_WearChange(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_WorldObjectsSent(const EQApplicationPacket *app)
 {
-	//This is a copy of SendExpZonein created for SoF+ due to packet order change
-
-	//////////////////////////////////////////////////////
-	// Spawn Appearance Packet
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-	SpawnAppearance_Struct* sa = (SpawnAppearance_Struct*)outapp->pBuffer;
-	sa->type = AT_SpawnID;			// Is 0x10 used to set the player id?
-	sa->parameter = GetID();	// Four bytes for this parameter...
-	outapp->priority = 6;
+	// New for SoF+
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_WorldObjectsSent, 0);
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	// Inform the world about the client
-	outapp = new EQApplicationPacket();
-
-	CreateSpawnPacket(outapp);
-	outapp->priority = 6;
-	if (!GetHideMe()) entity_list.QueueClients(this, outapp, true);
-	safe_delete(outapp);
-	if (GetPVP())	//force a PVP update until we fix the spawn struct
-		SendAppearancePacket(AT_PVP, GetPVP(), true, false);
-
-	//Send AA Exp packet:
-	if (GetLevel() >= 51)
-		SendAAStats();
-
-	// Send exp packets
-	outapp = new EQApplicationPacket(OP_ExpUpdate, sizeof(ExpUpdate_Struct));
-	ExpUpdate_Struct* eu = (ExpUpdate_Struct*)outapp->pBuffer;
-	uint32 tmpxp1 = GetEXPForLevel(GetLevel() + 1);
-	uint32 tmpxp2 = GetEXPForLevel(GetLevel());
-
-	// Crash bug fix... Divide by zero when tmpxp1 and 2 equalled each other, most likely the error case from GetEXPForLevel() (invalid class, etc)
-	if (tmpxp1 != tmpxp2 && tmpxp1 != 0xFFFFFFFF && tmpxp2 != 0xFFFFFFFF) {
-		float tmpxp = (float)((float)m_pp.exp - tmpxp2) / ((float)tmpxp1 - tmpxp2);
-		eu->exp = (uint32)(330.0f * tmpxp);
-		outapp->priority = 6;
-		QueuePacket(outapp);
-	}
-	safe_delete(outapp);
-
-	SendAATimers();
-
-	// New for Secrets of Faydwer - Used in Place of OP_SendExpZonein
-	outapp = new EQApplicationPacket(OP_WorldObjectsSent, 0);
-	QueuePacket(outapp);
-	safe_delete(outapp);
-
-	outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(ZoneInSendName_Struct));
-	ZoneInSendName_Struct* zonesendname = (ZoneInSendName_Struct*)outapp->pBuffer;
-	strcpy(zonesendname->name, m_pp.name);
-	strcpy(zonesendname->name2, m_pp.name);
-	zonesendname->unknown0 = 0x0A;
-	QueuePacket(outapp);
-	safe_delete(outapp);
-
-	if (IsInAGuild()) {
-		SendGuildMembers();
-		SendGuildURL();
-		SendGuildChannel();
-		SendGuildLFGuildStatus();
-	}
-	SendLFGuildStatus();
-
-	//No idea why live sends this if even were not in a guild
-	SendGuildMOTD();
+	// Packet order changed for SoF+, so below is sent here instead of OP_SendExpLogin
+	SendZoneInPackets();
 
 	if (RuleB(Mercs, AllowMercs))
 	{
@@ -1838,9 +1718,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (loaditems) { /* Dont load if a length error occurs */
 		BulkSendInventoryItems();
 		/* Send stuff on the cursor which isnt sent in bulk */
-		for (auto iter = m_inv.cursor_begin(); iter != m_inv.cursor_end(); ++iter) {
+		for (auto iter = m_inv.cursor_cbegin(); iter != m_inv.cursor_cend(); ++iter) {
 			/* First item cursor is sent in bulk inventory packet */
-			if (iter == m_inv.cursor_begin())
+			if (iter == m_inv.cursor_cbegin())
 				continue;
 			const ItemInst *inst = *iter;
 			SendItemPacket(MainCursor, inst, ItemPacketSummonItem);
@@ -7360,6 +7240,16 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 				if (gc->guildeqid == 0)
 					gc->guildeqid = GuildID();
 
+				// Convert Membership Level between RoF and previous clients.
+				if (client->GetClientVersion() < ClientVersion::RoF && GetClientVersion() >= ClientVersion::RoF)
+				{
+					gc->officer = 0;
+				}
+				if (client->GetClientVersion() >= ClientVersion::RoF && GetClientVersion() < ClientVersion::RoF)
+				{
+					gc->officer = 8;
+				}
+
 				Log.Out(Logs::Detail, Logs::Guilds, "Sending OP_GuildInvite for invite to %s, length %d", client->GetName(), app->size);
 				client->SetPendingGuildInvitation(true);
 				client->QueuePacket(app);
@@ -7394,6 +7284,8 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 
 	GuildInviteAccept_Struct* gj = (GuildInviteAccept_Struct*)app->pBuffer;
 
+	uint32 guildrank = gj->response;
+
 	if (GetClientVersion() >= ClientVersion::RoF)
 	{
 		if (gj->response > 9)
@@ -7422,9 +7314,25 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 		Log.Out(Logs::Detail, Logs::Guilds, "Guild Invite Accept: guild %d, response %d, inviter %s, person %s",
 			gj->guildeqid, gj->response, gj->inviter, gj->newmember);
 
+		//ok, the invite is also used for changing rank as well.
+		Mob* inviter = entity_list.GetMob(gj->inviter);
+
+		if (inviter && inviter->IsClient())
+		{
+			Client* client = inviter->CastToClient();
+			// Convert Membership Level between RoF and previous clients.
+			if (client->GetClientVersion() < ClientVersion::RoF && GetClientVersion() >= ClientVersion::RoF)
+			{
+				guildrank = 0;
+			}
+			if (client->GetClientVersion() >= ClientVersion::RoF && GetClientVersion() < ClientVersion::RoF)
+			{
+				guildrank = 8;
+			}
+		}
 		//we dont really care a lot about what this packet means, as long as
 		//it has been authorized with the guild manager
-		if (!guild_mgr.VerifyAndClearInvite(CharacterID(), gj->guildeqid, gj->response)) {
+		if (!guild_mgr.VerifyAndClearInvite(CharacterID(), gj->guildeqid, guildrank)) {
 			worldserver.SendEmoteMessage(gj->inviter, 0, 0, "%s has sent an invalid response to your invite!", GetName());
 			Message(13, "Invalid invite response packet!");
 			return;
@@ -7452,7 +7360,7 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 
 			//change guild and rank
 
-			uint32 guildrank = gj->response;
+			guildrank = gj->response;
 
 			if (GetClientVersion() >= ClientVersion::RoF)
 			{
@@ -12145,6 +12053,10 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 			mp->quantity = prevcharges;
 	}
 
+	// Item's stackable, but the quantity they want to buy exceeds the max stackable quantity.
+	if (item->Stackable && mp->quantity > item->StackSize)
+		mp->quantity = item->StackSize;
+
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopPlayerBuy, sizeof(Merchant_Sell_Struct));
 	Merchant_Sell_Struct* mpo = (Merchant_Sell_Struct*)outapp->pBuffer;
 	mpo->quantity = mp->quantity;
@@ -12171,6 +12083,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		mpo->price = SinglePrice;
 	else
 		mpo->price = SinglePrice * mp->quantity;
+
 	if (mpo->price < 0)
 	{
 		safe_delete(outapp);
@@ -12640,6 +12553,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	else if (sa->type == AT_Anim) {
 		if (IsAIControlled())
 			return;
+
 		if (sa->parameter == ANIM_STAND) {
 			SetAppearance(eaStanding);
 			playeraction = 0;
@@ -12673,15 +12587,6 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			SetFeigned(false);
 		}
 
-		// This is from old code
-		// I have no clue what it's for
-		/*
-		else if (sa->parameter == 0x05) {
-		// Illusion
-		std::cout << "Illusion packet recv'd:" << std::endl;
-		DumpPacket(app);
-		}
-		*/
 		else {
 			std::cerr << "Client " << name << " unknown apperance " << (int)sa->parameter << std::endl;
 			return;
@@ -12690,6 +12595,10 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		entity_list.QueueClients(this, app, true);
 	}
 	else if (sa->type == AT_Anon) {
+		if(!anon_toggle_timer.Check()) {
+			return;
+		}
+
 		// For Anon/Roleplay
 		if (sa->parameter == 1) { // Anon
 			m_pp.anon = 1;
@@ -12711,13 +12620,18 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		return;
 	}
 	else if (sa->type == AT_AFK) {
-		this->AFK = (sa->parameter == 1);
-		entity_list.QueueClients(this, app, true);
+		if(afk_toggle_timer.Check()) {
+			AFK = (sa->parameter == 1);
+			entity_list.QueueClients(this, app, true);
+		}
 	}
 	else if (sa->type == AT_Split) {
 		m_pp.autosplit = (sa->parameter == 1);
 	}
 	else if (sa->type == AT_Sneak) {
+		if(sneaking == 0)
+			return;
+
 		if (sa->parameter != 0)
 		{
 			if (!HasSkill(SkillSneak))
@@ -12729,7 +12643,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			}
 			return;
 		}
-		this->sneaking = 0;
+		sneaking = 0;
 		entity_list.QueueClients(this, app, true);
 	}
 	else if (sa->type == AT_Size)
@@ -12741,7 +12655,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	}
 	else if (sa->type == AT_Light)	// client emitting light (lightstone, shiny shield)
 	{
-		entity_list.QueueClients(this, app, false);
+		//don't do anything with this
 	}
 	else if (sa->type == AT_Levitate)
 	{
@@ -12750,8 +12664,10 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	}
 	else if (sa->type == AT_ShowHelm)
 	{
-		m_pp.showhelm = (sa->parameter == 1);
-		entity_list.QueueClients(this, app, true);
+		if(helm_toggle_timer.Check()) {
+			m_pp.showhelm = (sa->parameter == 1);
+			entity_list.QueueClients(this, app, true);
+		}
 	}
 	else {
 		std::cout << "Unknown SpawnAppearance type: 0x" << std::hex << std::setw(4) << std::setfill('0') << sa->type << std::dec

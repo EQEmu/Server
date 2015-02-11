@@ -1257,6 +1257,7 @@ protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);
 	void AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug = false, bool isTribute = false);
+	void AdditiveWornBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug = false);
 	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 	void CalcEdibleBonuses(StatBonuses* newbon);
 	void CalcAABonuses(StatBonuses* newbon);
@@ -1414,6 +1415,7 @@ private:
 
 	bool CanBeInZone();
 	void SendLogoutPackets();
+	void SendZoneInPackets();
 	bool AddPacket(const EQApplicationPacket *, bool);
 	bool AddPacket(EQApplicationPacket**, bool);
 	bool SendAllPackets();
@@ -1464,6 +1466,10 @@ private:
 	Timer TrackingTimer;
 	Timer RespawnFromHoverTimer;
 	Timer merc_timer;
+	Timer anon_toggle_timer;
+	Timer afk_toggle_timer;
+	Timer helm_toggle_timer;
+	Timer light_update_timer;
 
     glm::vec3 m_Proximity;
 

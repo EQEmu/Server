@@ -141,6 +141,10 @@ Client::Client(EQStreamInterface* ieqs)
 	merc_timer(RuleI(Mercs, UpkeepIntervalMS)),
 	ItemTickTimer(10000),
 	ItemQuestTimer(500),
+	anon_toggle_timer(250),
+	afk_toggle_timer(250),
+	helm_toggle_timer(250),
+	light_update_timer(600),
 	m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
 	m_ZoneSummonLocation(-2.0f,-2.0f,-2.0f),
 	m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
@@ -407,6 +411,69 @@ Client::~Client() {
 	safe_delete(eqs);
 
 	UninitializeBuffSlots();
+}
+
+void Client::SendZoneInPackets()
+{
+	//////////////////////////////////////////////////////
+	// Spawn Appearance Packet
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+	SpawnAppearance_Struct* sa = (SpawnAppearance_Struct*)outapp->pBuffer;
+	sa->type = AT_SpawnID;			// Is 0x10 used to set the player id?
+	sa->parameter = GetID();	// Four bytes for this parameter...
+	outapp->priority = 6;
+	QueuePacket(outapp);
+	safe_delete(outapp);
+
+	// Inform the world about the client
+	outapp = new EQApplicationPacket();
+
+	CreateSpawnPacket(outapp);
+	outapp->priority = 6;
+	if (!GetHideMe()) entity_list.QueueClients(this, outapp, true);
+	safe_delete(outapp);
+	if (GetPVP())	//force a PVP update until we fix the spawn struct
+		SendAppearancePacket(AT_PVP, GetPVP(), true, false);
+
+	//Send AA Exp packet:
+	if (GetLevel() >= 51)
+		SendAAStats();
+
+	// Send exp packets
+	outapp = new EQApplicationPacket(OP_ExpUpdate, sizeof(ExpUpdate_Struct));
+	ExpUpdate_Struct* eu = (ExpUpdate_Struct*)outapp->pBuffer;
+	uint32 tmpxp1 = GetEXPForLevel(GetLevel() + 1);
+	uint32 tmpxp2 = GetEXPForLevel(GetLevel());
+
+	// Crash bug fix... Divide by zero when tmpxp1 and 2 equalled each other, most likely the error case from GetEXPForLevel() (invalid class, etc)
+	if (tmpxp1 != tmpxp2 && tmpxp1 != 0xFFFFFFFF && tmpxp2 != 0xFFFFFFFF) {
+		float tmpxp = (float)((float)m_pp.exp - tmpxp2) / ((float)tmpxp1 - tmpxp2);
+		eu->exp = (uint32)(330.0f * tmpxp);
+		outapp->priority = 6;
+		QueuePacket(outapp);
+	}
+	safe_delete(outapp);
+
+	SendAATimers();
+
+	outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(ZoneInSendName_Struct));
+	ZoneInSendName_Struct* zonesendname = (ZoneInSendName_Struct*)outapp->pBuffer;
+	strcpy(zonesendname->name, m_pp.name);
+	strcpy(zonesendname->name2, m_pp.name);
+	zonesendname->unknown0 = 0x0A;
+	QueuePacket(outapp);
+	safe_delete(outapp);
+
+	if (IsInAGuild()) {
+		SendGuildMembers();
+		SendGuildURL();
+		SendGuildChannel();
+		SendGuildLFGuildStatus();
+	}
+	SendLFGuildStatus();
+
+	//No idea why live sends this if even were not in a guild
+	SendGuildMOTD();
 }
 
 void Client::SendLogoutPackets() {
@@ -2471,11 +2538,13 @@ void Client::LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 
 
 bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 	EQApplicationPacket* outapp = 0;
-	if(!fail) {
+	if(!fail) 
+	{
 		outapp = new EQApplicationPacket(OP_Bind_Wound, sizeof(BindWound_Struct));
 		BindWound_Struct* bind_out = (BindWound_Struct*) outapp->pBuffer;
 		// Start bind
-		if(!bindwound_timer.Enabled()) {
+		if(!bindwound_timer.Enabled()) 
+		{
 			//make sure we actually have a bandage... and consume it.
 			int16 bslot = m_inv.HasItemByUse(ItemTypeBandage, 1, invWhereWorn|invWherePersonal);
 			if (bslot == INVALID_INDEX) {
@@ -2521,7 +2590,9 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 					; // Binding self
 				}
 			}
-		} else {
+		} 
+		else if (bindwound_timer.Check()) // Did the timer finish?
+		{ 
 		// finish bind
 			// disable complete timer
 			bindwound_timer.Disable();

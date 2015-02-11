@@ -10959,7 +10959,7 @@ void Bot::CalcItemBonuses()
 						}
 					}
 					if ((itemtmp->Worn.Effect != 0) && (itemtmp->Worn.Type == ET_WornEffect)) { // latent effects
-						ApplySpellsBonuses(itemtmp->Worn.Effect, itemtmp->Worn.Level, &itembonuses);
+						ApplySpellsBonuses(itemtmp->Worn.Effect, itemtmp->Worn.Level, &itembonuses,0,itemtmp->Worn.Type);
 					}
 				}
 			}
@@ -11043,7 +11043,7 @@ void Bot::CalcItemBonuses()
 				}
 			}
 			if ((itemtmp->Worn.Effect != 0) && (itemtmp->Worn.Type == ET_WornEffect)) { // latent effects
-				ApplySpellsBonuses(itemtmp->Worn.Effect, itemtmp->Worn.Level, &itembonuses);
+				ApplySpellsBonuses(itemtmp->Worn.Effect, itemtmp->Worn.Level, &itembonuses,0,itemtmp->Worn.Type);
 			}
 		}
 	}

@@ -297,7 +297,7 @@ Mob* QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 			}
 		}
 
-		database.UpdateSpawn2Timeleft(spawn2_id, zone->GetInstanceID(), 0);
+		database.UpdateRespawnTime(spawn2_id, zone->GetInstanceID(), 0);
 		found_spawn->SetCurrentNPCID(npcid);
 
         auto position = glm::vec4(found_spawn->GetX(), found_spawn->GetY(), found_spawn->GetZ(), found_spawn->GetHeading());
@@ -2388,7 +2388,7 @@ void QuestManager::UpdateSpawnTimer(uint32 id, uint32 newTime)
 {
 	bool found = false;
 
-	database.UpdateSpawn2Timeleft(id, 0, (newTime/1000));
+	database.UpdateRespawnTime(id, 0, (newTime/1000));
 	LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
 	iterator.Reset();
 	while (iterator.MoreElements())

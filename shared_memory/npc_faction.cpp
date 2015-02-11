@@ -32,9 +32,6 @@ void LoadFactions(SharedDatabase *database) {
 	uint32 lists = 0;
 	uint32 max_list = 0;
 	database->GetFactionListInfo(lists, max_list);
-	if(lists == 0) {
-		EQ_EXCEPT("Shared Memory", "Unable to get any factions from the database.");
-	}
 
 	uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<NPCFactionList>::estimated_size(lists, max_list));
 	EQEmu::MemoryMappedFile mmf("shared/faction", size);

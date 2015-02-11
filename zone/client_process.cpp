@@ -239,7 +239,8 @@ bool Client::Process() {
 		if(IsAIControlled())
 			AI_Process();
 
-		if (bindwound_timer.Check() && bindwound_target != 0) {
+		// Don't reset the bindwound timer so we can check it in BindWound as well.
+		if (bindwound_timer.Check(false) && bindwound_target != 0) {
 			BindWound(bindwound_target, false);
 		}
 
@@ -257,6 +258,13 @@ bool Client::Process() {
 			if(qglobal_purge_timer.Check())
 			{
 				qGlobals->PurgeExpiredGlobals();
+			}
+		}
+
+		if(light_update_timer.Check()) {
+			UpdateEquipLightValue();
+			if(UpdateActiveLightValue()) {
+				SendAppearancePacket(AT_Light, GetActiveLightValue());
 			}
 		}
 
