@@ -1415,6 +1415,7 @@ private:
 
 	bool CanBeInZone();
 	void SendLogoutPackets();
+	void SendZoneInPackets();
 	bool AddPacket(const EQApplicationPacket *, bool);
 	bool AddPacket(EQApplicationPacket**, bool);
 	bool SendAllPackets();
