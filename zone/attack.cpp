@@ -3530,6 +3530,10 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 			Log.Out(Logs::Detail, Logs::Combat, "Melee Damage reduced to %d", damage);
 			damage = ReduceAllDamage(damage);
 			TryTriggerThreshHold(damage, SE_TriggerMeleeThreshold, attacker);
+
+			if (skill_used)
+				CheckNumHitsRemaining(NumHit::IncomingHitSuccess);
+
 		} else {
 			int32 origdmg = damage;
 			damage = AffectMagicalDamage(damage, spell_id, iBuffTic, attacker);
@@ -3544,9 +3548,6 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 			damage = ReduceAllDamage(damage);
 			TryTriggerThreshHold(damage, SE_TriggerSpellThreshold, attacker);
 		}
-
-		if (skill_used)
-			CheckNumHitsRemaining(NumHit::IncomingHitSuccess);
 
 		if(IsClient() && CastToClient()->sneaking){
 			CastToClient()->sneaking = false;
