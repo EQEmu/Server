@@ -1271,11 +1271,7 @@ void Corpse::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 	Mob::FillSpawnStruct(ns, ForWho);
 
 	ns->spawn.max_hp = 120;
-
-	if (IsPlayerCorpse())
-		ns->spawn.NPC = 3;
-	else
-		ns->spawn.NPC = 2;
+	ns->spawn.NPC = 2;
 
 	UpdateActiveLightValue();
 	ns->spawn.light = active_light;
