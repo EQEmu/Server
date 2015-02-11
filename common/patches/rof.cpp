@@ -2418,7 +2418,7 @@ namespace RoF
 		outapp->WriteUInt32(emu->silver_bank);
 		outapp->WriteUInt32(emu->copper_bank);
 
-		outapp->WriteUInt32(0);				// Unknown
+		outapp->WriteUInt32(emu->platinum_shared);
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
@@ -4983,7 +4983,7 @@ namespace RoF
 
 		//sprintf(hdr.unknown000, "06e0002Y1W00");
 
-		snprintf(hdr.unknown000, sizeof(hdr.unknown000), "%012d", item->ID);
+		snprintf(hdr.unknown000, sizeof(hdr.unknown000), "%016d", item->ID);
 
 		hdr.stacksize = stackable ? charges : 1;
 		hdr.unknown004 = 0;
