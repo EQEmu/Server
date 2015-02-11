@@ -2493,7 +2493,7 @@ namespace RoF2
 		outapp->WriteUInt32(emu->silver_bank);
 		outapp->WriteUInt32(emu->copper_bank);
 
-		outapp->WriteUInt32(0);				// Unknown
+		outapp->WriteUInt32(emu->platinum_shared);
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
