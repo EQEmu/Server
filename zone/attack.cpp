@@ -2404,8 +2404,8 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 
 void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, bool iYellForHelp /*= true*/, bool bFrenzy /*= false*/, bool iBuffTic /*= false*/)
 {
-
-	assert(other != nullptr);
+	if(!other)
+		return;
 
 	if (other == this)
 		return;
