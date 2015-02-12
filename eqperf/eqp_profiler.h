@@ -17,7 +17,7 @@
 #define _eqp_dump(strm, count) EQP::CPU::ST::GetProfiler().Dump(strm, count)
 #define _eqp_dump_file(name) char time_str[128]; \
 	time_t result = time(nullptr); \
-	strftime(time_str, sizeof(time_str), "%Y_%m_%d_%H:%M:%S", localtime(&result)); \
+	strftime(time_str, sizeof(time_str), "%Y_%m_%d_%H_%M_%S", localtime(&result)); \
 	std::string prof_name = "./profile/"; \
 	prof_name += name; \
 	prof_name += "_"; \
@@ -32,7 +32,18 @@
 #define _eqpn(x) EQP::CPU::MT::Event eqp_comb(eq_perf_event_, __LINE__) (__PRETTY_FUNCTION__, x);
 #define _eqp_clear() EQP::CPU::MT::GetProfiler().Clear()
 #define _eqp_dump(strm, count) EQP::CPU::MT::GetProfiler().Dump(strm, count)
-#define _eqp_dump_file() 
+#define _eqp_dump_file(name) char time_str[128]; \
+	time_t result = time(nullptr); \
+	strftime(time_str, sizeof(time_str), "%Y_%m_%d_%H_%M_%S", localtime(&result)); \
+	std::string prof_name = "./profile/"; \
+	prof_name += name; \
+	prof_name += "_"; \
+	prof_name += time_str; \
+	prof_name += ".log"; \
+	std::ofstream profile_out(prof_name, std::ofstream::out); \
+	if(profile_out.good()) { \
+		_eqp_dump(profile_out, 10); \
+	}
 #endif
 
 namespace EQP

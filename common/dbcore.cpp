@@ -30,6 +30,7 @@
 #endif
 
 DBcore::DBcore() {
+	_eqp
 	mysql_init(&mysql);
 	pHost = 0;
 	pUser = 0;
@@ -41,6 +42,7 @@ DBcore::DBcore() {
 }
 
 DBcore::~DBcore() {
+	_eqp
 	mysql_close(&mysql);
 	safe_delete_array(pHost);
 	safe_delete_array(pUser);
@@ -50,6 +52,7 @@ DBcore::~DBcore() {
 
 // Sends the MySQL server a keepalive
 void DBcore::ping() {
+	_eqp
 	if (!MDatabase.trylock()) {
 		// well, if's it's locked, someone's using it. If someone's using it, it doesnt need a keepalive
 		return;
@@ -60,11 +63,13 @@ void DBcore::ping() {
 
 MySQLRequestResult DBcore::QueryDatabase(std::string query, bool retryOnFailureOnce)
 {
+	_eqp
 	return QueryDatabase(query.c_str(), query.length(), retryOnFailureOnce);
 }
 
 MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, bool retryOnFailureOnce)
 {
+	_eqp
 	LockMutex lock(&MDatabase);
 
 	// Reconnect if we are not connected before hand.
@@ -134,24 +139,29 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
 }
 
 void DBcore::TransactionBegin() {
+	_eqp
 	QueryDatabase("START TRANSACTION");
 }
 
 void DBcore::TransactionCommit() {
+	_eqp
 	QueryDatabase("COMMIT");
 }
 
 void DBcore::TransactionRollback() {
+	_eqp
 	QueryDatabase("ROLLBACK");
 }
 
 uint32 DBcore::DoEscapeString(char* tobuf, const char* frombuf, uint32 fromlen) {
+	_eqp
 //	No good reason to lock the DB, we only need it in the first place to check char encoding.
 //	LockMutex lock(&MDatabase);
 	return mysql_real_escape_string(&mysql, tobuf, frombuf, fromlen);
 }
 
 bool DBcore::Open(const char* iHost, const char* iUser, const char* iPassword, const char* iDatabase,uint32 iPort, uint32* errnum, char* errbuf, bool iCompress, bool iSSL) {
+	_eqp
 	LockMutex lock(&MDatabase);
 	safe_delete(pHost);
 	safe_delete(pUser);
@@ -168,6 +178,7 @@ bool DBcore::Open(const char* iHost, const char* iUser, const char* iPassword, c
 }
 
 bool DBcore::Open(uint32* errnum, char* errbuf) {
+	_eqp
 	if (errbuf)
 		errbuf[0] = 0;
 	LockMutex lock(&MDatabase);

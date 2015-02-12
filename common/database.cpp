@@ -57,11 +57,13 @@ Establish a connection to a mysql database with the supplied parameters
 
 Database::Database(const char* host, const char* user, const char* passwd, const char* database, uint32 port)
 {
+	_eqp
 	DBInitVars();
 	Connect(host, user, passwd, database, port);
 }
 
 bool Database::Connect(const char* host, const char* user, const char* passwd, const char* database, uint32 port) {
+	_eqp
 	uint32 errnum= 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	if (!Open(host, user, passwd, database, port, &errnum, errbuf)) {
@@ -75,6 +77,7 @@ bool Database::Connect(const char* host, const char* user, const char* passwd, c
 }
 
 void Database::DBInitVars() { 
+	_eqp
 	varcache_array = 0;
 	varcache_max = 0;
 	varcache_lastupdate = 0;
@@ -86,6 +89,7 @@ void Database::DBInitVars() {
 
 Database::~Database()
 {
+	_eqp
 	unsigned int x;
 	if (varcache_array) {
 		for (x=0; x<varcache_max; x++) {
@@ -101,7 +105,7 @@ Database::~Database()
 	Zero will also be returned if there is a database error.
 */
 uint32 Database::CheckLogin(const char* name, const char* password, int16* oStatus) {
-
+	_eqp
 	if(strlen(name) >= 50 || strlen(password) >= 50)
 		return(0);
 
@@ -137,6 +141,7 @@ uint32 Database::CheckLogin(const char* name, const char* password, int16* oStat
 //Get Banned IP Address List - Only return false if the incoming connection's IP address is not present in the banned_ips table.
 bool Database::CheckBannedIPs(const char* loginIP)
 {
+	_eqp
 	std::string query = StringFormat("SELECT ip_address FROM Banned_IPs WHERE ip_address='%s'", loginIP);
 
 	auto results = QueryDatabase(query);
@@ -153,6 +158,7 @@ bool Database::CheckBannedIPs(const char* loginIP)
 }
 
 bool Database::AddBannedIP(char* bannedIP, const char* notes) {
+	_eqp
 	std::string query = StringFormat("INSERT into Banned_IPs SET ip_address='%s', notes='%s'", bannedIP, notes); 
 	auto results = QueryDatabase(query); 
 	if (!results.Success()) {
@@ -162,6 +168,7 @@ bool Database::AddBannedIP(char* bannedIP, const char* notes) {
 }
 
  bool Database::CheckGMIPs(const char* ip_address, uint32 account_id) {
+ 	_eqp
 	std::string query = StringFormat("SELECT * FROM `gm_ips` WHERE `ip_address` = '%s' AND `account_id` = %i", ip_address, account_id); 
 	auto results = QueryDatabase(query);
 
@@ -175,17 +182,20 @@ bool Database::AddBannedIP(char* bannedIP, const char* notes) {
 }
 
 bool Database::AddGMIP(char* ip_address, char* name) {
+	_eqp
 	std::string query = StringFormat("INSERT into `gm_ips` SET `ip_address` = '%s', `name` = '%s'", ip_address, name); 
 	auto results = QueryDatabase(query); 
 	return results.Success();
 }
 
 void Database::LoginIP(uint32 AccountID, const char* LoginIP) {
+	_eqp
 	std::string query = StringFormat("INSERT INTO account_ip SET accid=%i, ip='%s' ON DUPLICATE KEY UPDATE count=count+1, lastused=now()", AccountID, LoginIP); 
 	QueryDatabase(query); 
 }
 
 int16 Database::CheckStatus(uint32 account_id) {
+	_eqp
 	std::string query = StringFormat("SELECT `status`, UNIX_TIMESTAMP(`suspendeduntil`) as `suspendeduntil`, UNIX_TIMESTAMP() as `current`"
 							" FROM `account` WHERE `id` = %i", account_id);
 
@@ -215,6 +225,7 @@ int16 Database::CheckStatus(uint32 account_id) {
 }
 
 uint32 Database::CreateAccount(const char* name, const char* password, int16 status, uint32 lsaccount_id) {
+	_eqp
 	std::string query;
 
 	if (password)
@@ -238,6 +249,7 @@ uint32 Database::CreateAccount(const char* name, const char* password, int16 sta
 }
 
 bool Database::DeleteAccount(const char* name) {
+	_eqp
 	std::string query = StringFormat("DELETE FROM account WHERE name='%s';",name); 
 	Log.Out(Logs::General, Logs::World_Server, "Account Attempting to be deleted:'%s'", name);
 
@@ -250,6 +262,7 @@ bool Database::DeleteAccount(const char* name) {
 }
 
 bool Database::SetLocalPassword(uint32 accid, const char* password) {
+	_eqp
 	std::string query = StringFormat("UPDATE account SET password=MD5('%s') where id=%i;", EscapeString(password).c_str(), accid);
 
 	auto results = QueryDatabase(query);
@@ -262,6 +275,7 @@ bool Database::SetLocalPassword(uint32 accid, const char* password) {
 }
 
 bool Database::SetAccountStatus(const char* name, int16 status) {
+	_eqp
 	std::string query = StringFormat("UPDATE account SET status=%i WHERE name='%s';", status, name);
 
 	std::cout << "Account being GM Flagged:" << name << ", Level: " << (int16) status << std::endl;
@@ -282,6 +296,7 @@ bool Database::SetAccountStatus(const char* name, int16 status) {
 
 /* This initially creates the character during character create */
 bool Database::ReserveName(uint32 account_id, char* name) {
+	_eqp
 	std::string query = StringFormat("SELECT `account_id`, `name` FROM `character_data` WHERE `name` = '%s'", name);
 	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
@@ -302,6 +317,7 @@ bool Database::ReserveName(uint32 account_id, char* name) {
 	returns false on failure, true otherwise
 */
 bool Database::DeleteCharacter(char *name) {
+	_eqp
 	uint32 charid = 0;
 	if(!name ||	!strlen(name)) {
 		Log.Out(Logs::General, Logs::World_Server, "DeleteCharacter: request to delete without a name (empty char slot)");
@@ -359,6 +375,7 @@ bool Database::DeleteCharacter(char *name) {
 }
 
 bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp){
+	_eqp
 	std::string query = StringFormat(
 		"REPLACE INTO `character_data` ("
 		"id,"
@@ -678,6 +695,7 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 
 /* This only for new Character creation storing */
 bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inventory* inv) {
+	_eqp
 	uint32 charid = 0; 
 	char zone[50]; 
 	float x, y, z; 
@@ -732,6 +750,7 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 }
 
 uint32 Database::GetCharacterID(const char *name) {
+	_eqp
 	std::string query = StringFormat("SELECT `id` FROM `character_data` WHERE `name` = '%s'", name);
 	auto results = QueryDatabase(query);
 	auto row = results.begin();
@@ -748,6 +767,7 @@ uint32 Database::GetCharacterID(const char *name) {
 	Zero will also be returned if there is a database error.
 */
 uint32 Database::GetAccountIDByChar(const char* charname, uint32* oCharID) {
+	_eqp
 	std::string query = StringFormat("SELECT `account_id`, `id` FROM `character_data` WHERE name='%s'", EscapeString(charname).c_str());
 
 	auto results = QueryDatabase(query);
@@ -772,6 +792,7 @@ uint32 Database::GetAccountIDByChar(const char* charname, uint32* oCharID) {
 
 // Retrieve account_id for a given char_id
 uint32 Database::GetAccountIDByChar(uint32 char_id) {
+	_eqp
 	std::string query = StringFormat("SELECT `account_id` FROM `character_data` WHERE `id` = %i LIMIT 1", char_id); 
 	auto results = QueryDatabase(query); 
 	if (!results.Success()) {
@@ -786,6 +807,7 @@ uint32 Database::GetAccountIDByChar(uint32 char_id) {
 }
 
 uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* lsid) {
+	_eqp
 	if (!isAlphaNumeric(accname))
 		return 0;
 
@@ -817,6 +839,7 @@ uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* 
 }
 
 void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID) {
+	_eqp
 	std::string query = StringFormat("SELECT `name`, `lsaccount_id` FROM `account` WHERE `id` = '%i'", accountid); 
 	auto results = QueryDatabase(query);
 
@@ -837,6 +860,7 @@ void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID
 }
 
 void Database::GetCharName(uint32 char_id, char* name) { 
+	_eqp
 	std::string query = StringFormat("SELECT `name` FROM `character_data` WHERE id='%i'", char_id);
 	auto results = QueryDatabase(query);
 
@@ -851,6 +875,7 @@ void Database::GetCharName(uint32 char_id, char* name) {
 }
 
 bool Database::LoadVariables() {
+	_eqp
 	char *query = nullptr;
 
 	auto results = QueryDatabase(query, LoadVariables_MQ(&query));
@@ -867,12 +892,14 @@ bool Database::LoadVariables() {
 
 uint32 Database::LoadVariables_MQ(char** query)
 {
+	_eqp
 	return MakeAnyLenString(query, "SELECT varname, value, unix_timestamp() FROM variables where unix_timestamp(ts) >= %d", varcache_lastupdate);
 }
 
 // always returns true? not sure about this.
 bool Database::LoadVariables_result(MySQLRequestResult results)
 {
+	_eqp
 	uint32 i = 0;
 	LockMutex lock(&Mvarcache);
 
@@ -935,6 +962,7 @@ bool Database::LoadVariables_result(MySQLRequestResult results)
 
 // Gets variable from 'variables' table
 bool Database::GetVariable(const char* varname, char* varvalue, uint16 varvalue_len) {
+	_eqp
 	varvalue[0] = '\0';
 
 	LockMutex lock(&Mvarcache);
@@ -956,7 +984,7 @@ bool Database::GetVariable(const char* varname, char* varvalue, uint16 varvalue_
 }
 
 bool Database::SetVariable(const char* varname_in, const char* varvalue_in) {
-	
+	_eqp
 	char *varname,*varvalue;
 
 	varname=(char *)malloc(strlen(varname_in)*2+1);
@@ -996,6 +1024,7 @@ bool Database::SetVariable(const char* varname_in, const char* varvalue_in) {
 
 uint32 Database::GetMiniLoginAccount(char* ip)
 {
+	_eqp
 	std::string query = StringFormat("SELECT `id` FROM `account` WHERE `minilogin_ip` = '%s'", ip);
 	auto results = QueryDatabase(query);
 
@@ -1008,7 +1037,7 @@ uint32 Database::GetMiniLoginAccount(char* ip)
 
 // Get zone starting points from DB
 bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe_x, float* safe_y, float* safe_z, int16* minstatus, uint8* minlevel, char *flag_needed) {
-	
+	_eqp
 	std::string query = StringFormat("SELECT safe_x, safe_y, safe_z, min_status, min_level, flag_needed FROM zone "
 		" WHERE short_name='%s' AND (version=%i OR version=0) ORDER BY version DESC", short_name, version);
 	auto results = QueryDatabase(query);
@@ -1038,7 +1067,7 @@ bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe
 }
 
 bool Database::GetZoneLongName(const char* short_name, char** long_name, char* file_name, float* safe_x, float* safe_y, float* safe_z, uint32* graveyard_id, uint32* maxclients) {
-	
+	_eqp
 	std::string query = StringFormat("SELECT long_name, file_name, safe_x, safe_y, safe_z, graveyard_id, maxclients FROM zone WHERE short_name='%s' AND version=0", short_name);
 	auto results = QueryDatabase(query);
 
@@ -1076,7 +1105,7 @@ bool Database::GetZoneLongName(const char* short_name, char** long_name, char* f
 }
 
 uint32 Database::GetZoneGraveyardID(uint32 zone_id, uint32 version) {
-
+	_eqp
 	std::string query = StringFormat("SELECT graveyard_id FROM zone WHERE zoneidnumber='%u' AND (version=%i OR version=0) ORDER BY version DESC", zone_id, version);
 	auto results = QueryDatabase(query);
 
@@ -1091,7 +1120,7 @@ uint32 Database::GetZoneGraveyardID(uint32 zone_id, uint32 version) {
 }
 
 bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zoneid, float* graveyard_x, float* graveyard_y, float* graveyard_z, float* graveyard_heading) {
-	
+	_eqp
 	std::string query = StringFormat("SELECT zone_id, x, y, z, heading FROM graveyard WHERE id=%i", graveyard_id);
 	auto results = QueryDatabase(query);
 
@@ -1119,6 +1148,7 @@ bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zon
 }
 
 bool Database::LoadZoneNames() {
+	_eqp
 	std::string query("SELECT zoneidnumber, short_name FROM zone");
 
 	auto results = QueryDatabase(query);
@@ -1139,7 +1169,7 @@ bool Database::LoadZoneNames() {
 }
 
 uint32 Database::GetZoneID(const char* zonename) {
-
+	_eqp
 	if (zonename == nullptr)
 		return 0;
 
@@ -1151,6 +1181,7 @@ uint32 Database::GetZoneID(const char* zonename) {
 }
 
 const char* Database::GetZoneName(uint32 zoneID, bool ErrorUnknown) {
+	_eqp
 	auto iter = zonename_array.find(zoneID);
 
 	if (iter != zonename_array.end())
@@ -1163,7 +1194,7 @@ const char* Database::GetZoneName(uint32 zoneID, bool ErrorUnknown) {
 }
 
 uint8 Database::GetPEQZone(uint32 zoneID, uint32 version){
-	
+	_eqp
 	std::string query = StringFormat("SELECT peqzone from zone where zoneidnumber='%i' AND (version=%i OR version=0) ORDER BY version DESC", zoneID, version);
 	auto results = QueryDatabase(query);
 
@@ -1181,6 +1212,7 @@ uint8 Database::GetPEQZone(uint32 zoneID, uint32 version){
 
 bool Database::CheckNameFilter(const char* name, bool surname)
 {
+	_eqp
 	std::string str_name = name;
 
 	if(surname)
@@ -1257,7 +1289,7 @@ bool Database::CheckNameFilter(const char* name, bool surname)
 }
 
 bool Database::AddToNameFilter(const char* name) {
-	
+	_eqp
 	std::string query = StringFormat("INSERT INTO name_filter (name) values ('%s')", name);
 	auto results = QueryDatabase(query);
 
@@ -1273,6 +1305,7 @@ bool Database::AddToNameFilter(const char* name) {
 }
 
 uint32 Database::GetAccountIDFromLSID(uint32 iLSID, char* oAccountName, int16* oStatus) {
+	_eqp
 	uint32 account_id = 0;
 	std::string query = StringFormat("SELECT id, name, status FROM account WHERE lsaccount_id=%i", iLSID);
 	auto results = QueryDatabase(query);
@@ -1297,7 +1330,7 @@ uint32 Database::GetAccountIDFromLSID(uint32 iLSID, char* oAccountName, int16* o
 }
 
 void Database::GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus) {
-	
+	_eqp
 	std::string query = StringFormat("SELECT name, status FROM account WHERE id=%i", id);
 	auto results = QueryDatabase(query);
 
@@ -1317,10 +1350,12 @@ void Database::GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus) {
 }
 
 void Database::ClearMerchantTemp(){
+	_eqp
 	QueryDatabase("DELETE FROM merchantlist_temp");
 }
 
 bool Database::UpdateName(const char* oldname, const char* newname) { 
+	_eqp
 	std::cout << "Renaming " << oldname << " to " << newname << "..." << std::endl; 
 	std::string query = StringFormat("UPDATE `character_data` SET `name` = '%s' WHERE `name` = '%s';", newname, oldname);
 	auto results = QueryDatabase(query);
@@ -1336,6 +1371,7 @@ bool Database::UpdateName(const char* oldname, const char* newname) {
 
 // If the name is used or an error occurs, it returns false, otherwise it returns true
 bool Database::CheckUsedName(const char* name) {
+	_eqp
 	std::string query = StringFormat("SELECT `id` FROM `character_data` WHERE `name` = '%s'", name);
 	auto results = QueryDatabase(query); 
 	if (!results.Success()) {
@@ -1349,6 +1385,7 @@ bool Database::CheckUsedName(const char* name) {
 }
 
 uint8 Database::GetServerType() {
+	_eqp
 	std::string query("SELECT `value` FROM `variables` WHERE `varname` = 'ServerType' LIMIT 1");
 	auto results = QueryDatabase(query); 
 	if (!results.Success()) {
@@ -1363,6 +1400,7 @@ uint8 Database::GetServerType() {
 }
 
 bool Database::MoveCharacterToZone(const char* charname, const char* zonename, uint32 zoneid) {
+	_eqp
 	if(zonename == nullptr || strlen(zonename) == 0)
 		return false;
 
@@ -1380,10 +1418,12 @@ bool Database::MoveCharacterToZone(const char* charname, const char* zonename, u
 }
 
 bool Database::MoveCharacterToZone(const char* charname, const char* zonename) {
+	_eqp
 	return MoveCharacterToZone(charname, zonename, GetZoneID(zonename));
 }
 
 bool Database::MoveCharacterToZone(uint32 iCharID, const char* iZonename) { 
+	_eqp
 	std::string query = StringFormat("UPDATE `character_data` SET `zone_id` = %i, `x` = -1, `y` = -1, `z` = -1 WHERE `id` = %i", iZonename, GetZoneID(iZonename), iCharID);
 	auto results = QueryDatabase(query);
 
@@ -1395,6 +1435,7 @@ bool Database::MoveCharacterToZone(uint32 iCharID, const char* iZonename) {
 }
 
 bool Database::SetHackerFlag(const char* accountname, const char* charactername, const char* hacked) { 
+	_eqp
 	std::string query = StringFormat("INSERT INTO `hackers` (account, name, hacked) values('%s','%s','%s')", accountname, charactername, hacked);
 	auto results = QueryDatabase(query);
 
@@ -1406,6 +1447,7 @@ bool Database::SetHackerFlag(const char* accountname, const char* charactername,
 }
 
 bool Database::SetMQDetectionFlag(const char* accountname, const char* charactername, const char* hacked, const char* zone) { 
+	_eqp
 	//Utilize the "hacker" table, but also give zone information.
 	std::string query = StringFormat("INSERT INTO hackers(account,name,hacked,zone) values('%s','%s','%s','%s')", accountname, charactername, hacked, zone);
 	auto results = QueryDatabase(query);
@@ -1420,6 +1462,7 @@ bool Database::SetMQDetectionFlag(const char* accountname, const char* character
 
 uint8 Database::GetRaceSkill(uint8 skillid, uint8 in_race)
 {
+	_eqp
 	uint16 race_cap = 0;
 	
 	//Check for a racial cap!
@@ -1438,6 +1481,7 @@ uint8 Database::GetRaceSkill(uint8 skillid, uint8 in_race)
 
 uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16 in_level)
 {
+	_eqp
 	uint8 skill_level = 0, skill_formula = 0;
 	uint16 base_cap = 0, skill_cap = 0, skill_cap2 = 0, skill_cap3 = 0;
 	
@@ -1487,6 +1531,7 @@ uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16
 }
 
 uint32 Database::GetCharacterInfo(const char* iName, uint32* oAccID, uint32* oZoneID, uint32* oInstanceID, float* oX, float* oY, float* oZ) { 
+	_eqp
 	std::string query = StringFormat("SELECT `id`, `account_id`, `zone_id`, `zone_instance`, `x`, `y`, `z` FROM `character_data` WHERE `name` = '%s'", iName);
 	auto results = QueryDatabase(query);
 
@@ -1510,7 +1555,7 @@ uint32 Database::GetCharacterInfo(const char* iName, uint32* oAccID, uint32* oZo
 }
 
 bool Database::UpdateLiveChar(char* charname,uint32 lsaccount_id) {
-
+	_eqp
 	std::string query = StringFormat("UPDATE account SET charname='%s' WHERE id=%i;",charname, lsaccount_id);
 	auto results = QueryDatabase(query);
 
@@ -1522,7 +1567,7 @@ bool Database::UpdateLiveChar(char* charname,uint32 lsaccount_id) {
 }
 
 bool Database::GetLiveChar(uint32 account_id, char* cname) {
-
+	_eqp
 	std::string query = StringFormat("SELECT charname FROM account WHERE id=%i", account_id);
 	auto results = QueryDatabase(query);
 
@@ -1541,26 +1586,31 @@ bool Database::GetLiveChar(uint32 account_id, char* cname) {
 }
 
 void Database::SetLFP(uint32 CharID, bool LFP) { 
+	_eqp
 	std::string query = StringFormat("UPDATE `character_data` SET `lfp` = %i WHERE `id` = %i",LFP, CharID);
 	QueryDatabase(query); 
 }
 
 void Database::SetLoginFlags(uint32 CharID, bool LFP, bool LFG, uint8 firstlogon) { 
+	_eqp
 	std::string query = StringFormat("update `character_data` SET `lfp` = %i, `lfg` = %i, `firstlogon` = %i WHERE `id` = %i",LFP, LFG, firstlogon, CharID);
 	QueryDatabase(query); 
 }
 
 void Database::SetLFG(uint32 CharID, bool LFG) { 
+	_eqp
 	std::string query = StringFormat("update `character_data` SET `lfg` = %i WHERE `id` = %i",LFG, CharID);
 	QueryDatabase(query); 
 }
 
 void Database::SetFirstLogon(uint32 CharID, uint8 firstlogon) { 
+	_eqp
 	std::string query = StringFormat( "UPDATE `character_data` SET `firstlogon` = %i WHERE `id` = %i",firstlogon, CharID);
 	QueryDatabase(query); 
 }
 
 void Database::AddReport(std::string who, std::string against, std::string lines) { 
+	_eqp
 	char *escape_str = new char[lines.size()*2+1];
 	DoEscapeString(escape_str, lines.c_str(), lines.size());
 
@@ -1570,6 +1620,7 @@ void Database::AddReport(std::string who, std::string against, std::string lines
 }
 
 void Database::SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ismerc) {
+	_eqp
 	std::string query;
 	if (id == 0) {
 		// removing from group
@@ -1589,12 +1640,14 @@ void Database::SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ism
 
 void Database::ClearAllGroups(void)
 {
+	_eqp
 	std::string query("DELETE FROM `group_id`");
 	QueryDatabase(query);
 	return;
 }
 
 void Database::ClearGroup(uint32 gid) {
+	_eqp
 	ClearGroupLeader(gid);
 	
 	if(gid == 0)
@@ -1610,6 +1663,7 @@ void Database::ClearGroup(uint32 gid) {
 }
 
 uint32 Database::GetGroupID(const char* name){ 
+	_eqp
 	std::string query = StringFormat("SELECT groupid from group_id where name='%s'", name);
 	auto results = QueryDatabase(query);
 
@@ -1631,6 +1685,7 @@ uint32 Database::GetGroupID(const char* name){
 
 /* Is this really getting used properly... A half implementation ? Akkadius */
 char* Database::GetGroupLeaderForLogin(const char* name, char* leaderbuf) {
+	_eqp
 	strcpy(leaderbuf, "");
 	uint32 group_id = 0;
 
@@ -1655,6 +1710,7 @@ char* Database::GetGroupLeaderForLogin(const char* name, char* leaderbuf) {
 }
 
 void Database::SetGroupLeaderName(uint32 gid, const char* name) { 
+	_eqp
 	std::string query = StringFormat("UPDATE group_leaders SET leadername = '%s' WHERE gid = %u", EscapeString(name).c_str(), gid);
 	auto result = QueryDatabase(query);
 
@@ -1673,6 +1729,7 @@ void Database::SetGroupLeaderName(uint32 gid, const char* name) {
 
 char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank, char* assist, char* puller, char *marknpc, char *mentoree, int *mentor_percent, GroupLeadershipAA_Struct* GLAA)
 {
+	_eqp
 	std::string query = StringFormat("SELECT `leadername`, `maintank`, `assist`, `puller`, `marknpc`, `mentoree`, `mentor_percent`, `leadershipaa` FROM `group_leaders` WHERE `gid` = %lu",(unsigned long)gid);
 	auto results = QueryDatabase(query);
 
@@ -1732,6 +1789,7 @@ char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* mainta
 
 // Clearing all group leaders
 void Database::ClearAllGroupLeaders(void) {
+	_eqp
 	std::string query("DELETE from group_leaders");
 	auto results = QueryDatabase(query);
 
@@ -1742,7 +1800,7 @@ void Database::ClearAllGroupLeaders(void) {
 }
 
 void Database::ClearGroupLeader(uint32 gid) {
-	
+	_eqp
 	if(gid == 0)
 	{
 		ClearAllGroupLeaders();
@@ -1757,7 +1815,7 @@ void Database::ClearGroupLeader(uint32 gid) {
 }
 
 uint8 Database::GetAgreementFlag(uint32 acctid) {
-
+	_eqp
 	std::string query = StringFormat("SELECT rulesflag FROM account WHERE id=%i",acctid);
 	auto results = QueryDatabase(query);
 
@@ -1773,11 +1831,13 @@ uint8 Database::GetAgreementFlag(uint32 acctid) {
 }
 
 void Database::SetAgreementFlag(uint32 acctid) {
+	_eqp
 	std::string query = StringFormat("UPDATE account SET rulesflag=1 where id=%i", acctid);
 	QueryDatabase(query);
 }
 
 void Database::ClearRaid(uint32 rid) {
+	_eqp
 	if(rid == 0)
 	{
 		//clear all raids
@@ -1794,7 +1854,7 @@ void Database::ClearRaid(uint32 rid) {
 }
 
 void Database::ClearAllRaids(void) {
-
+	_eqp
 	std::string query("delete from raid_members");
 	auto results = QueryDatabase(query);
 
@@ -1804,7 +1864,7 @@ void Database::ClearAllRaids(void) {
 
 void Database::ClearAllRaidDetails(void)
 {
-
+	_eqp
 	std::string query("delete from raid_details");
 	auto results = QueryDatabase(query);
 
@@ -1813,7 +1873,7 @@ void Database::ClearAllRaidDetails(void)
 }
 
 void Database::ClearRaidDetails(uint32 rid) {
-	
+	_eqp
 	if(rid == 0)
 	{
 		//clear all raids
@@ -1832,7 +1892,8 @@ void Database::ClearRaidDetails(uint32 rid) {
 // returns 0 on error or no raid for that character, or
 // the raid id that the character is a member of.
 uint32 Database::GetRaidID(const char* name)
-{ 
+{
+	_eqp
 	std::string query = StringFormat("SELECT `raidid` FROM `raid_members` WHERE `name` = '%s'", name);
 	auto results = QueryDatabase(query);
 
@@ -1853,6 +1914,7 @@ uint32 Database::GetRaidID(const char* name)
 
 const char* Database::GetRaidLeaderName(uint32 raid_id)
 {
+	_eqp
 	// Would be a good idea to fix this to be a passed in variable and
 	// make the caller responsible. static local variables like this are
 	// not guaranteed to be thread safe (nor is the internal guard
@@ -1884,6 +1946,7 @@ const char* Database::GetRaidLeaderName(uint32 raid_id)
 void Database::GetGroupLeadershipInfo(uint32 gid, uint32 rid, char *maintank,
 		char *assist, char *puller, char *marknpc, char *mentoree, int *mentor_percent, GroupLeadershipAA_Struct *GLAA)
 {
+	_eqp
 	std::string query = StringFormat(
 			"SELECT maintank, assist, puller, marknpc, mentoree, mentor_percent, leadershipaa FROM raid_leaders WHERE gid = %lu AND rid = %lu",
 			(unsigned long)gid, (unsigned long)rid);
@@ -1941,6 +2004,7 @@ void Database::GetGroupLeadershipInfo(uint32 gid, uint32 rid, char *maintank,
 void Database::GetRaidLeadershipInfo(uint32 rid, char *maintank,
 		char *assist, char *puller, char *marknpc, RaidLeadershipAA_Struct *RLAA)
 {
+	_eqp
 	std::string query = StringFormat(
 			"SELECT maintank, assist, puller, marknpc, leadershipaa FROM raid_leaders WHERE gid = %lu AND rid = %lu",
 			(unsigned long)0xFFFFFFFF, (unsigned long)rid);
@@ -1984,6 +2048,7 @@ void Database::GetRaidLeadershipInfo(uint32 rid, char *maintank,
 
 void Database::SetRaidGroupLeaderInfo(uint32 gid, uint32 rid)
 {
+	_eqp
 	std::string query = StringFormat("UPDATE raid_leaders SET leadershipaa = '' WHERE gid = %lu AND rid = %lu",
 			(unsigned long)gid, (unsigned long)rid);
 	auto results = QueryDatabase(query);
@@ -2001,6 +2066,7 @@ void Database::SetRaidGroupLeaderInfo(uint32 gid, uint32 rid)
 // Clearing all raid leaders
 void Database::ClearAllRaidLeaders(void)
 {
+	_eqp
 	std::string query("DELETE from raid_leaders");
 	QueryDatabase(query);
 	return;
@@ -2008,6 +2074,7 @@ void Database::ClearAllRaidLeaders(void)
 
 void Database::ClearRaidLeader(uint32 gid, uint32 rid)
 {
+	_eqp
 	if (rid == 0) {
 		ClearAllRaidLeaders();
 		return;
@@ -2019,7 +2086,7 @@ void Database::ClearRaidLeader(uint32 gid, uint32 rid)
 
 void Database::UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win)
 {
-
+	_eqp
 	std::string field;
 
 	switch(theme)
@@ -2072,6 +2139,7 @@ void Database::UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win)
 
 bool Database::GetAdventureStats(uint32 char_id, AdventureStats_Struct *as)
 {
+	_eqp
 	std::string query = StringFormat(
 		"SELECT "
 		"`guk_wins`, "
@@ -2118,6 +2186,7 @@ bool Database::GetAdventureStats(uint32 char_id, AdventureStats_Struct *as)
 
 uint32 Database::GetGuildIDByCharID(uint32 character_id) 
 {
+	_eqp
 	std::string query = StringFormat("SELECT guild_id FROM guild_members WHERE char_id='%i'", character_id);
 	auto results = QueryDatabase(query);
 
@@ -2133,6 +2202,7 @@ uint32 Database::GetGuildIDByCharID(uint32 character_id)
 
 void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings)
 {
+	_eqp
 	std::string query = 
 		"SELECT "
 		"log_category_id, "

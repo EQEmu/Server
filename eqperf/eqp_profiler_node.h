@@ -19,6 +19,9 @@ namespace EQP
 
 			inline void SetTime(uint64_t t) { time_ = t; }
 			inline uint64_t& GetTime() { return time_; }
+			
+			inline void SetStarted(uint64_t t) { started_ = t; }
+			inline uint64_t& GetStarted() { return started_; }
 
 			inline void SetParent(ProfilerNode *p) { parent_ = p; }
 			inline ProfilerNode* GetParent() { return parent_; }
@@ -29,6 +32,7 @@ namespace EQP
 		private:
 			uint64_t count_;
 			uint64_t time_;
+			uint64_t started_;
 			ProfilerNode *parent_;
 			std::unordered_map<std::string, ProfilerNode*> nodes_;
 		};

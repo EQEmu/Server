@@ -1,4 +1,5 @@
 #include "eqp_profiler_node.h"
+#include "eqp_profile_timer.h"
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
@@ -6,6 +7,7 @@
 EQP::CPU::ProfilerNode::ProfilerNode() {
 	count_ = 0;
 	time_ = 0;
+	started_ = 0;
 	parent_ = nullptr;;
 }
 
@@ -18,12 +20,17 @@ EQP::CPU::ProfilerNode::~ProfilerNode() {
 void EQP::CPU::ProfilerNode::Dump(std::ostream &stream, const std::string &func, uint64_t total_time, int node_level, int num) {
 
 	if(node_level >= 1) {
-		stream << std::setw(node_level * 2) << " ";
+		stream << std::setw(node_level * 4) << " ";
 	}
 
-	double m_cycles = time_ / 1000.0;
+	double m_cycles = static_cast<double>(time_);
+	if(started_) {
+		m_cycles += GetCurrentTimer() - started_;
+	}
+
+	double percentage = m_cycles * 100 / static_cast<double>(total_time);
+	m_cycles = m_cycles / 1000.0;
 	double m_avg_cycles = m_cycles / count_;
-	double percentage = time_ * 100 / static_cast<double>(total_time);
 
 	std::streamsize p = stream.precision();
 

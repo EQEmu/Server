@@ -45,6 +45,8 @@ int main()
 {
 	RegisterExecutablePlatform(ExePlatformLogin);
 	set_exception_handler();
+	_eqp
+
 	Log.LoadLogSettingsDefaults();
 
 	//log_settings
@@ -262,13 +264,10 @@ int main()
 	Log.Out(Logs::General, Logs::Debug, "Server Started.");
 	while(run_server)
 	{
-		{
-			_eqpn("Main loop");
-			Timer::SetCurrentTime();
-			server.CM->Process();
-			server.SM->Process();
-		}
-		Sleep(100);
+		Timer::SetCurrentTime();
+		server.CM->Process();
+		server.SM->Process();
+		Sleep(50);
 	}
 
 	Log.Out(Logs::General, Logs::Debug, "Server Shutdown.");

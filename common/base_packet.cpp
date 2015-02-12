@@ -23,6 +23,7 @@
 
 BasePacket::BasePacket(const unsigned char *buf, uint32 len)
 {
+	_eqp
 	this->pBuffer=nullptr;
 	this->size=0;
 	this->_wpos = 0;
@@ -41,6 +42,7 @@ BasePacket::BasePacket(const unsigned char *buf, uint32 len)
 
 BasePacket::~BasePacket()
 {
+	_eqp
 	if (pBuffer)
 		delete[] pBuffer;
 	pBuffer=nullptr;
@@ -49,6 +51,7 @@ BasePacket::~BasePacket()
 
 void BasePacket::build_raw_header_dump(char *buffer, uint16 seq) const
 {
+	_eqp
 	if (timestamp.tv_sec) {
 		char temp[20];
 		strftime(temp,20,"%F %T",localtime((const time_t *)&timestamp.tv_sec));
@@ -66,6 +69,7 @@ void BasePacket::build_raw_header_dump(char *buffer, uint16 seq) const
 
 void BasePacket::DumpRawHeader(uint16 seq, FILE *to) const
 {
+	_eqp
 	char buff[128];
 	build_raw_header_dump(buff, seq);
 	fprintf(to, "%s", buff);
@@ -73,11 +77,13 @@ void BasePacket::DumpRawHeader(uint16 seq, FILE *to) const
 
 void BasePacket::build_header_dump(char *buffer) const
 {
+	_eqp
 	sprintf(buffer, "[packet]\n");
 }
 
 void BasePacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 {
+	_eqp
 	if (src_ip) {
 		std::string sIP,dIP;;
 		sIP=long2ip(src_ip);
@@ -90,6 +96,7 @@ void BasePacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 
 void BasePacket::DumpRaw(FILE *to) const
 {
+	_eqp
 	DumpRawHeader();
 	if (pBuffer && size)
 		dump_message_column(pBuffer, size, " ", to);
@@ -98,6 +105,7 @@ void BasePacket::DumpRaw(FILE *to) const
 
 void BasePacket::ReadString(char *str, uint32 Offset, uint32 MaxLength) const
 {
+	_eqp
 	uint32 i = 0, j = Offset;
 
 	do
@@ -111,15 +119,18 @@ void BasePacket::ReadString(char *str, uint32 Offset, uint32 MaxLength) const
 
 void DumpPacketHex(const BasePacket* app)
 {
+	_eqp
 	DumpPacketHex(app->pBuffer, app->size);
 }
 
 void DumpPacketAscii(const BasePacket* app)
 {
+	_eqp
 	DumpPacketAscii(app->pBuffer, app->size);
 }
 
 void DumpPacketBin(const BasePacket* app) {
+	_eqp
 	DumpPacketBin(app->pBuffer, app->size);
 }
 

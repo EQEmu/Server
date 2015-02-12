@@ -1,4 +1,5 @@
 #include "eqp_profiler.h"
+#include "eqp_profile_timer.h"
 #include <iostream>
 #include <thread>
 #include <mutex>
@@ -51,6 +52,8 @@ std::string EQP::CPU::ST::Profiler::EventStarted(const char *func, const char *n
 		current_ = t;
 	}
 
+	current_->GetCount()++;
+	current_->SetStarted(GetCurrentTimer());
 	return identifier_;
 }
 
@@ -58,8 +61,9 @@ void EQP::CPU::ST::Profiler::EventFinished(uint64_t time, std::string ident) {
 	if(ident.compare(identifier_) != 0) {
 		return;
 	}
+	
+	current_->SetStarted(0);
 	current_->GetTime() += time;
-	current_->GetCount()++;
 	current_ = current_->GetParent();
 }
 
@@ -87,6 +91,9 @@ void EQP::CPU::ST::Profiler::Dump(std::ostream &stream, int num) {
 		sorted_vec.push_back(n);
 
 		total += iter.second->GetTime();
+		if(iter.second->GetStarted() > 0) {
+			total += GetCurrentTimer() - iter.second->GetStarted();
+		}
 	}
 
 	std::sort(sorted_vec.begin(), sorted_vec.end(), 
@@ -158,6 +165,8 @@ std::string EQP::CPU::MT::Profiler::EventStarted(const char *func, const char *n
 		ti->current_ = t;
 	}
 
+	ti->current_->GetCount()++;
+	ti->current_->SetStarted(GetCurrentTimer());
 	return imp_->identifier_;
 }
 
@@ -176,8 +185,8 @@ void EQP::CPU::MT::Profiler::EventFinished(uint64_t time, std::string ident) {
 		ti = ti_search->second;
 	}
 
+	ti->current_->SetStarted(0);
 	ti->current_->GetTime() += time;
-	ti->current_->GetCount()++;
 	ti->current_ = ti->current_->GetParent();
 }
 
@@ -205,6 +214,9 @@ void EQP::CPU::MT::Profiler::Dump(std::ostream &stream, int num) {
 			sorted_vec.push_back(n);
 
 			total += t_iter.second->GetTime();
+			if(t_iter.second->GetStarted() > 0) {
+				total += GetCurrentTimer() - t_iter.second->GetStarted();
+			}
 		}
 		
 		std::sort(sorted_vec.begin(), sorted_vec.end(), 

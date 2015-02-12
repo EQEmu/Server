@@ -9,6 +9,7 @@ EmuTCPServer::EmuTCPServer(uint16 iPort, bool iOldFormat)
 }
 
 EmuTCPServer::~EmuTCPServer() {
+	_eqp
 	MInQueue.lock();
 	while(!m_InQueue.empty()) {
 		delete m_InQueue.front();
@@ -18,23 +19,27 @@ EmuTCPServer::~EmuTCPServer() {
 }
 
 void EmuTCPServer::Process() {
+	_eqp
 	CheckInQueue();
 	TCPServer<EmuTCPConnection>::Process();
 }
 
 void EmuTCPServer::CreateNewConnection(uint32 ID, SOCKET in_socket, uint32 irIP, uint16 irPort)
 {
+	_eqp
 	EmuTCPConnection *conn = new EmuTCPConnection(ID, this, in_socket, irIP, irPort, pOldFormat);
 	AddConnection(conn);
 }
 
 
 void EmuTCPServer::SendPacket(ServerPacket* pack) {
+	_eqp
 	EmuTCPNetPacket_Struct* tnps = EmuTCPConnection::MakePacket(pack);
 	SendPacket(&tnps);
 }
 
 void EmuTCPServer::SendPacket(EmuTCPNetPacket_Struct** tnps) {
+	_eqp
 	MInQueue.lock();
 	m_InQueue.push(*tnps);
 	MInQueue.unlock();
@@ -42,6 +47,7 @@ void EmuTCPServer::SendPacket(EmuTCPNetPacket_Struct** tnps) {
 }
 
 void EmuTCPServer::CheckInQueue() {
+	_eqp
 	EmuTCPNetPacket_Struct* tnps = 0;
 
 	while (( tnps = InQueuePop() )) {
@@ -57,6 +63,7 @@ void EmuTCPServer::CheckInQueue() {
 }
 
 EmuTCPNetPacket_Struct* EmuTCPServer::InQueuePop() {
+	_eqp
 	EmuTCPNetPacket_Struct* ret = nullptr;
 	MInQueue.lock();
 	if(!m_InQueue.empty()) {
@@ -69,6 +76,7 @@ EmuTCPNetPacket_Struct* EmuTCPServer::InQueuePop() {
 
 
 EmuTCPConnection *EmuTCPServer::FindConnection(uint32 iID) {
+	_eqp
 	vitr cur, end;
 	cur = m_list.begin();
 	end = m_list.end();

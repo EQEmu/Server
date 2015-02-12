@@ -50,6 +50,7 @@ EmuTCPConnection::EmuTCPConnection(uint32 ID, EmuTCPServer* iServer, SOCKET in_s
 	keepalive_timer(SERVER_TIMEOUT),
 	timeout_timer(SERVER_TIMEOUT * 2)
 {
+	_eqp
 	id = 0;
 	Server = nullptr;
 	pOldFormat = iOldFormat;
@@ -76,6 +77,7 @@ EmuTCPConnection::EmuTCPConnection(bool iOldFormat, EmuTCPServer* iRelayServer, 
 	keepalive_timer(SERVER_TIMEOUT),
 	timeout_timer(SERVER_TIMEOUT * 2)
 {
+	_eqp
 	Server = iRelayServer;
 	if (Server)
 		RelayServer = true;
@@ -98,6 +100,7 @@ EmuTCPConnection::EmuTCPConnection(uint32 ID, EmuTCPServer* iServer, EmuTCPConne
 	keepalive_timer(SERVER_TIMEOUT),
 	timeout_timer(SERVER_TIMEOUT * 2)
 {
+	_eqp
 	Server = iServer;
 	RelayLink = iRelayLink;
 	RelayServer = true;
@@ -117,6 +120,7 @@ EmuTCPConnection::~EmuTCPConnection() {
 }
 
 EmuTCPNetPacket_Struct* EmuTCPConnection::MakePacket(ServerPacket* pack, uint32 iDestination) {
+	_eqp
 	int32 size = sizeof(EmuTCPNetPacket_Struct) + pack->size;
 	if (pack->compressed) {
 		size += 4;
@@ -144,6 +148,7 @@ EmuTCPNetPacket_Struct* EmuTCPConnection::MakePacket(ServerPacket* pack, uint32 
 }
 
 SPackSendQueue* EmuTCPConnection::MakeOldPacket(ServerPacket* pack) {
+	_eqp
 	SPackSendQueue* spsq = (SPackSendQueue*) new uchar[sizeof(SPackSendQueue) + pack->size + 4];
 	if (pack->pBuffer != 0 && pack->size != 0)
 		memcpy((char *) &spsq->buffer[4], (char *) pack->pBuffer, pack->size);
@@ -154,6 +159,7 @@ SPackSendQueue* EmuTCPConnection::MakeOldPacket(ServerPacket* pack) {
 }
 
 bool EmuTCPConnection::SendPacket(ServerPacket* pack, uint32 iDestination) {
+	_eqp
 	if (!Connected())
 		return false;
 	eTCPMode tmp = GetMode();
@@ -214,6 +220,7 @@ bool EmuTCPConnection::SendPacket(ServerPacket* pack, uint32 iDestination) {
 }
 
 bool EmuTCPConnection::SendPacket(EmuTCPNetPacket_Struct* tnps) {
+	_eqp
 	if (RemoteID)
 		return false;
 	if (!Connected())
@@ -254,6 +261,7 @@ bool EmuTCPConnection::SendPacket(EmuTCPNetPacket_Struct* tnps) {
 }
 
 ServerPacket* EmuTCPConnection::PopPacket() {
+	_eqp
 	ServerPacket* ret;
 	if (!MOutQueueLock.trylock())
 		return nullptr;
@@ -263,12 +271,14 @@ ServerPacket* EmuTCPConnection::PopPacket() {
 }
 
 void EmuTCPConnection::InModeQueuePush(EmuTCPNetPacket_Struct* tnps) {
+	_eqp
 	MSendQueue.lock();
 	InModeQueue.push(tnps);
 	MSendQueue.unlock();
 }
 
 void EmuTCPConnection::OutQueuePush(ServerPacket* pack) {
+	_eqp
 	MOutQueueLock.lock();
 	OutQueue.push(pack);
 	MOutQueueLock.unlock();
@@ -276,6 +286,7 @@ void EmuTCPConnection::OutQueuePush(ServerPacket* pack) {
 
 
 bool EmuTCPConnection::LineOutQueuePush(char* line) {
+	_eqp
 	#if defined(GOTFRAGS) && 0
 		if (strcmp(line, "**CRASHME**") == 0) {
 			int i = 0;
@@ -369,6 +380,7 @@ bool EmuTCPConnection::LineOutQueuePush(char* line) {
 }
 
 void EmuTCPConnection::Disconnect(bool iSendRelayDisconnect) {
+	_eqp
 	TCPConnection::Disconnect();
 
 	if (RelayLink) {
@@ -378,6 +390,7 @@ void EmuTCPConnection::Disconnect(bool iSendRelayDisconnect) {
 }
 
 bool EmuTCPConnection::ConnectIP(uint32 irIP, uint16 irPort, char* errbuf) {
+	_eqp
 	if(!TCPConnection::ConnectIP(irIP, irPort, errbuf))
 		return(false);
 
@@ -432,6 +445,7 @@ bool EmuTCPConnection::ConnectIP(uint32 irIP, uint16 irPort, char* errbuf) {
 }
 
 void EmuTCPConnection::ClearBuffers() {
+	_eqp
 	TCPConnection::ClearBuffers();
 
 	LockMutex lock2(&MOutQueueLock);
@@ -448,6 +462,7 @@ void EmuTCPConnection::ClearBuffers() {
 }
 
 void EmuTCPConnection::SendNetErrorPacket(const char* reason) {
+	_eqp
 	#if TCPC_DEBUG >= 1
 		struct in_addr	in;
 		in.s_addr = GetrIP();
@@ -469,6 +484,7 @@ void EmuTCPConnection::SendNetErrorPacket(const char* reason) {
 }
 
 void EmuTCPConnection::RemoveRelay(EmuTCPConnection* relay, bool iSendRelayDisconnect) {
+	_eqp
 	if (iSendRelayDisconnect) {
 		ServerPacket* pack = new ServerPacket(0, 5);
 		pack->pBuffer[0] = 3;
@@ -482,6 +498,7 @@ void EmuTCPConnection::RemoveRelay(EmuTCPConnection* relay, bool iSendRelayDisco
 
 
 bool EmuTCPConnection::ProcessReceivedData(char* errbuf) {
+	_eqp
 	if (errbuf)
 		errbuf[0] = 0;
 	timeout_timer.Start();
@@ -505,6 +522,7 @@ bool EmuTCPConnection::ProcessReceivedData(char* errbuf) {
 
 
 bool EmuTCPConnection::ProcessReceivedDataAsPackets(char* errbuf) {
+	_eqp
 	if (errbuf)
 		errbuf[0] = 0;
 	int32 base = 0;
@@ -621,6 +639,7 @@ bool EmuTCPConnection::ProcessReceivedDataAsPackets(char* errbuf) {
 }
 
 bool EmuTCPConnection::ProcessReceivedDataAsOldPackets(char* errbuf) {
+	_eqp
 	int32 base = 0;
 	int32 size = 4;
 	uchar* buffer;
@@ -695,6 +714,7 @@ bool EmuTCPConnection::ProcessReceivedDataAsOldPackets(char* errbuf) {
 }
 
 void EmuTCPConnection::ProcessNetworkLayerPacket(ServerPacket* pack) {
+	_eqp
 	uint8 opcode = pack->pBuffer[0];
 	uint8* data = &pack->pBuffer[1];
 	switch (opcode) {
@@ -780,6 +800,7 @@ void EmuTCPConnection::ProcessNetworkLayerPacket(ServerPacket* pack) {
 }
 
 bool EmuTCPConnection::SendData(bool &sent_something, char* errbuf) {
+	_eqp
 	sent_something = false;
 	if(!TCPConnection::SendData(sent_something, errbuf))
 		return(false);
@@ -799,6 +820,7 @@ bool EmuTCPConnection::SendData(bool &sent_something, char* errbuf) {
 }
 
 bool EmuTCPConnection::RecvData(char* errbuf) {
+	_eqp
 	if(!TCPConnection::RecvData(errbuf)) {
 		if (OutQueue.count())
 			return(true);
