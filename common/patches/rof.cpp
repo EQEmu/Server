@@ -2296,7 +2296,15 @@ namespace RoF
 			{
 				outapp->WriteString(emu->bandoliers[r].items[j].item_name);
 				outapp->WriteUInt32(emu->bandoliers[r].items[j].item_id);
-				outapp->WriteUInt32(emu->bandoliers[r].items[j].icon);
+				if (emu->bandoliers[r].items[j].icon)
+				{
+					outapp->WriteSInt32(emu->bandoliers[r].items[j].icon);
+				}
+				else
+				{
+					// If no icon, it must send -1 or Treasure Chest Icon (836) is displayed
+					outapp->WriteSInt32(-1);
+				}
 			}
 		}
 
@@ -2308,7 +2316,7 @@ namespace RoF
 			{
 				outapp->WriteString("");
 				outapp->WriteUInt32(0);
-				outapp->WriteUInt32(0);
+				outapp->WriteSInt32(-1);
 			}
 		}
 
@@ -2318,14 +2326,21 @@ namespace RoF
 		{
 			outapp->WriteString(emu->potionbelt.items[r].item_name);
 			outapp->WriteUInt32(emu->potionbelt.items[r].item_id);
-			outapp->WriteUInt32(emu->potionbelt.items[r].icon);
+			if (emu->potionbelt.items[r].icon)
+			{
+				outapp->WriteSInt32(emu->potionbelt.items[r].icon);
+			}
+			else
+			{
+				outapp->WriteSInt32(-1);
+			}
 		}
 
 		for (uint32 r = 0; r < structs::MAX_POTIONS_IN_BELT - EmuConstants::POTION_BELT_SIZE; r++)
 		{
 			outapp->WriteString("");
 			outapp->WriteUInt32(0);
-			outapp->WriteUInt32(0);
+			outapp->WriteSInt32(-1);
 		}
 
 		outapp->WriteSInt32(-1);	// Unknown;

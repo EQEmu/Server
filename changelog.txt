@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/11/2015 ==
+Trevius: (RoF+) Bandolier no longer displays a Treasure Chest Icon when no Bandoliers are set.
+
 == 02/09/2015 ==
 Trevius: (RoF+) Setting Alt flag on characters in the Guild Management Window is now saved and functional for filtering.
 Trevius: (RoF+) Guild Invites between RoF+ and previous Clients is now functional.
