@@ -47,6 +47,7 @@ const ProcLauncher::ProcRef ProcLauncher::ProcError = -1;
 
 ProcLauncher::ProcLauncher()
 {
+	_eqp
 #ifndef WIN32
 	if(signal(SIGCHLD, ProcLauncher::HandleSigChild) == SIG_ERR)
 		fprintf(stderr, "Unable to register child signal handler. Thats bad.");
@@ -55,6 +56,7 @@ ProcLauncher::ProcLauncher()
 }
 
 void ProcLauncher::Process() {
+	_eqp
 #ifdef _WINDOWS
 	std::map<ProcRef, Spec *>::iterator cur, end, tmp;
 	cur = m_running.begin();
@@ -108,7 +110,7 @@ void ProcLauncher::Process() {
 }
 
 void ProcLauncher::ProcessTerminated(std::map<ProcRef, Spec *>::iterator &it) {
-
+	_eqp
 	if(it->second->handler != nullptr)
 		it->second->handler->OnTerminate(it->first, it->second);
 
@@ -121,6 +123,7 @@ void ProcLauncher::ProcessTerminated(std::map<ProcRef, Spec *>::iterator &it) {
 }
 
 ProcLauncher::ProcRef ProcLauncher::Launch(Spec *&to_launch) {
+	_eqp
 	//consume the pointer
 	Spec *it = to_launch;
 	to_launch = nullptr;
@@ -275,6 +278,7 @@ ProcLauncher::ProcRef ProcLauncher::Launch(Spec *&to_launch) {
 
 //if graceful is true, we try to be nice about it if possible
 bool ProcLauncher::Terminate(const ProcRef &proc, bool graceful) {
+	_eqp
 	//we are only willing to kill things we started...
 	std::map<ProcRef, Spec *>::iterator res = m_running.find(proc);
 	if(res == m_running.end())
@@ -301,6 +305,7 @@ bool ProcLauncher::Terminate(const ProcRef &proc, bool graceful) {
 }
 
 void ProcLauncher::TerminateAll(bool final) {
+	_eqp
 	if(!final) {
 		//send a nice terminate to each process, with intention of waiting for them
 		std::map<ProcRef, Spec *>::iterator cur, end;
@@ -332,8 +337,6 @@ void ProcLauncher::HandleSigChild(int signum) {
 	}
 }
 #endif
-
-
 
 ProcLauncher::Spec::Spec() {
 	handler = nullptr;

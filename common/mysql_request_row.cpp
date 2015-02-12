@@ -12,6 +12,7 @@ MySQLRequestRow::MySQLRequestRow()
 
 MySQLRequestRow::MySQLRequestRow(MySQLRequestRow&& moveItem)
 {
+	_eqp
 	m_Result = moveItem.m_Result;
 	m_MySQLRow = moveItem.m_MySQLRow;
 
@@ -21,6 +22,7 @@ MySQLRequestRow::MySQLRequestRow(MySQLRequestRow&& moveItem)
 
 MySQLRequestRow& MySQLRequestRow::operator=(MySQLRequestRow& moveItem)
 {
+	_eqp
 	m_Result = moveItem.m_Result;
 	m_MySQLRow = moveItem.m_MySQLRow;
 
@@ -33,12 +35,14 @@ MySQLRequestRow& MySQLRequestRow::operator=(MySQLRequestRow& moveItem)
 
 MySQLRequestRow MySQLRequestRow::operator*()
 {
+	_eqp
 	return *this;
 }
 
 MySQLRequestRow::MySQLRequestRow(MYSQL_RES *result)
 	: m_Result(result)
 {
+	_eqp
     if (result != nullptr)
         m_MySQLRow = mysql_fetch_row(result);
     else
@@ -47,12 +51,14 @@ MySQLRequestRow::MySQLRequestRow(MYSQL_RES *result)
 
 MySQLRequestRow& MySQLRequestRow::operator++()
 {
+	_eqp
 	m_MySQLRow = mysql_fetch_row(m_Result);
 	return *this;
 }
 
 MySQLRequestRow MySQLRequestRow::operator++(int)
 {
+	_eqp
 	MySQLRequestRow tmp(*this);
 	operator++();
 	return tmp;
@@ -60,15 +66,18 @@ MySQLRequestRow MySQLRequestRow::operator++(int)
 
 bool MySQLRequestRow::operator==(const MySQLRequestRow& rhs)
 {
+	_eqp
 	return m_MySQLRow == rhs.m_MySQLRow;
 }
 
 bool MySQLRequestRow::operator!=(const MySQLRequestRow& rhs)
 {
+	_eqp
 	return m_MySQLRow != rhs.m_MySQLRow;
 }
 
 char* MySQLRequestRow::operator[](int index)
 {
+	_eqp
 	return m_MySQLRow[index];
 }

@@ -24,18 +24,22 @@
 Timeoutable::Timeoutable(uint32 check_frequency)
  : next_check(check_frequency)
 {
+	_eqp
 	timeout_manager.AddMember(this);
 }
 
 Timeoutable::~Timeoutable() {
+	_eqp
 	timeout_manager.DeleteMember(this);
 }
 
 
 TimeoutManager::TimeoutManager() {
+	_eqp
 }
 
 void TimeoutManager::CheckTimeouts() {
+	_eqp
 	std::vector<Timeoutable *>::iterator cur,end;
 	cur = members.begin();
 	end = members.end();
@@ -52,6 +56,7 @@ void TimeoutManager::CheckTimeouts() {
 
 //methods called by Timeoutable objects:
 void TimeoutManager::AddMember(Timeoutable *who) {
+	_eqp
 	if(who == nullptr)
 		return;
 
@@ -63,6 +68,7 @@ void TimeoutManager::AddMember(Timeoutable *who) {
 }
 
 void TimeoutManager::DeleteMember(Timeoutable *who) {
+	_eqp
 #ifdef TIMEOUT_DEBUG
 	Log.Out(Logs::General, Logs::None, "Removing timeoutable 0x%x\n", who);
 #endif

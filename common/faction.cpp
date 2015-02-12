@@ -21,6 +21,7 @@
 
 const char *FactionValueToString(FACTION_VALUE fv)
 {
+	_eqp
 	switch (fv) {
 		case FACTION_ALLY:
 			return ("Ally");
@@ -55,6 +56,7 @@ const char *FactionValueToString(FACTION_VALUE fv)
 //o--------------------------------------------------------------
 FACTION_VALUE CalculateFaction(FactionMods* fm, int32 tmpCharacter_value)
 {
+	_eqp
 	int32 character_value = tmpCharacter_value;
 	if (fm) {
 		character_value += fm->base + fm->class_mod + fm->race_mod + fm->deity_mod;
@@ -92,6 +94,7 @@ FACTION_VALUE CalculateFaction(FactionMods* fm, int32 tmpCharacter_value)
 // this function should check if some races have more than one race define
 bool IsOfEqualRace(int r1, int r2)
 {
+	_eqp
 	if (r1 == r2) {
 		return true;
 	}
@@ -113,6 +116,7 @@ bool IsOfEqualRace(int r1, int r2)
 // trolls endure ogres, dark elves, ...
 bool IsOfIndiffRace(int r1, int r2)
 {
+	_eqp
 	if (r1 == r2) {
 		return true;
 	}

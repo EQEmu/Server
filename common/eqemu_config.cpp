@@ -28,6 +28,7 @@ EQEmuConfig *EQEmuConfig::_config = nullptr;
 
 void EQEmuConfig::do_world(TiXmlElement *ele)
 {
+	_eqp
 	const char *text;
 	TiXmlElement * sub_ele;;
 	text = ParseTextBlock(ele, "shortname");
@@ -145,6 +146,7 @@ void EQEmuConfig::do_world(TiXmlElement *ele)
 
 void EQEmuConfig::do_chatserver(TiXmlElement *ele)
 {
+	_eqp
 	const char *text;
 	text = ParseTextBlock(ele, "host", true);
 	if (text) {
@@ -158,6 +160,7 @@ void EQEmuConfig::do_chatserver(TiXmlElement *ele)
 
 void EQEmuConfig::do_mailserver(TiXmlElement *ele)
 {
+	_eqp
 	const char *text;
 	text = ParseTextBlock(ele, "host", true);
 	if (text) {
@@ -171,6 +174,7 @@ void EQEmuConfig::do_mailserver(TiXmlElement *ele)
 
 void EQEmuConfig::do_database(TiXmlElement *ele)
 {
+	_eqp
 	const char *text;
 	text = ParseTextBlock(ele, "host", true);
 	if (text) {
@@ -197,6 +201,7 @@ void EQEmuConfig::do_database(TiXmlElement *ele)
 
 void EQEmuConfig::do_qsdatabase(TiXmlElement *ele)
 {
+	_eqp
 	const char *text;
 	text = ParseTextBlock(ele, "host", true);
 	if (text) {
@@ -222,6 +227,7 @@ void EQEmuConfig::do_qsdatabase(TiXmlElement *ele)
 
 void EQEmuConfig::do_zones(TiXmlElement *ele)
 {
+	_eqp
 	const char *text;
 	TiXmlElement *sub_ele;
 //	TiXmlNode *node,*sub_node;
@@ -245,6 +251,7 @@ void EQEmuConfig::do_zones(TiXmlElement *ele)
 
 void EQEmuConfig::do_files(TiXmlElement *ele)
 {
+	_eqp
 	const char *text;
 	text = ParseTextBlock(ele, "spells", true);
 	if (text) {
@@ -262,6 +269,7 @@ void EQEmuConfig::do_files(TiXmlElement *ele)
 
 void EQEmuConfig::do_directories(TiXmlElement *ele)
 {
+	_eqp
 	const char *text;
 	text = ParseTextBlock(ele, "maps", true);
 	if (text) {
@@ -279,6 +287,7 @@ void EQEmuConfig::do_directories(TiXmlElement *ele)
 
 void EQEmuConfig::do_launcher(TiXmlElement *ele)
 {
+	_eqp
 	const char *text;
 	TiXmlElement *sub_ele;
 	text = ParseTextBlock(ele, "logprefix", true);
@@ -318,6 +327,7 @@ void EQEmuConfig::do_launcher(TiXmlElement *ele)
 
 std::string EQEmuConfig::GetByName(const std::string &var_name) const
 {
+	_eqp
 	if (var_name == "ShortName") {
 		return (ShortName);
 	}
@@ -445,6 +455,7 @@ std::string EQEmuConfig::GetByName(const std::string &var_name) const
 
 void EQEmuConfig::Dump() const
 {
+	_eqp
 	std::cout << "ShortName = " << ShortName << std::endl;
 	std::cout << "LongName = " << LongName << std::endl;
 	std::cout << "WorldAddress = " << WorldAddress << std::endl;

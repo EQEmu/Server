@@ -24,10 +24,6 @@ void decode(char *in, char *out);
 void encode_chunk(char *in, int len, char *out);
 void decode_chunk(char *in, char *out);
 
-#ifndef WIN32
-int print_stacktrace();
-#endif
-
 void dump_message_column(unsigned char *buffer, unsigned long length, std::string leader="", FILE *to = stdout);
 std::string string_from_time(std::string pattern, time_t now=0);
 std::string timestamp(time_t now=0);

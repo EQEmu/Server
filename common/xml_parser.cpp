@@ -23,6 +23,7 @@ XMLParser::XMLParser() {
 }
 
 bool XMLParser::ParseFile(const char *file, const char *root_ele) {
+	_eqp
 	std::map<std::string,ElementHandler>::iterator handler;
 	TiXmlDocument doc( file );
 	if(!doc.LoadFile()) {
@@ -70,6 +71,7 @@ bool XMLParser::ParseFile(const char *file, const char *root_ele) {
 }
 
 const char *XMLParser::ParseTextBlock(TiXmlNode *within, const char *name, bool optional) {
+	_eqp
 	TiXmlElement * txt = within->FirstChildElement(name);
 	if(txt == nullptr) {
 		if(!optional) {
@@ -88,6 +90,7 @@ const char *XMLParser::ParseTextBlock(TiXmlNode *within, const char *name, bool 
 }
 
 const char *XMLParser::GetText(TiXmlNode *within, bool optional) {
+	_eqp
 	TiXmlNode *contents = within->FirstChild();
 	if(contents == nullptr || contents->Type() != TiXmlNode::TEXT) {
 		if(!optional) {

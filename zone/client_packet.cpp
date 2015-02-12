@@ -41,7 +41,6 @@
 #include "../common/data_verification.h"
 #include "../common/faction.h"
 #include "../common/guilds.h"
-#include "../common/rdtsc.h"
 #include "../common/rulesys.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
@@ -11968,8 +11967,6 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 			sizeof(Merchant_Sell_Struct), app->size);
 		return;
 	}
-	RDTSC_Timer t1;
-	t1.start();
 	Merchant_Sell_Struct* mp = (Merchant_Sell_Struct*)app->pBuffer;
 #if EQDEBUG >= 5
 	Log.Out(Logs::General, Logs::None, "%s, purchase item..", GetName());
@@ -12220,8 +12217,6 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 			DiscoverItem(item_id);
 	}
 
-	t1.stop();
-	std::cout << "At 1: " << t1.getDuration() << std::endl;
 	return;
 }
 void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
@@ -12231,7 +12226,6 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 			sizeof(Merchant_Purchase_Struct), app->size);
 		return;
 	}
-	RDTSC_Timer t1(true);
 	Merchant_Purchase_Struct* mp = (Merchant_Purchase_Struct*)app->pBuffer;
 
 	Mob* vendor = entity_list.GetMob(mp->npcid);
@@ -12373,10 +12367,7 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	QueuePacket(outapp);
 	safe_delete(outapp);
 	SendMoneyUpdate();
-	t1.start();
 	Save(1);
-	t1.stop();
-	std::cout << "Save took: " << t1.getDuration() << std::endl;
 	return;
 }
 

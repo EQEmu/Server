@@ -11,6 +11,7 @@
 //note: all encoders and decoders must be valid functions.
 //so if you specify set_defaults=false
 StructStrategy::StructStrategy() {
+	_eqp
 	int r;
 	for(r = 0; r < _maxEmuOpcode; r++) {
 		encoders[r] = PassEncoder;
@@ -19,6 +20,7 @@ StructStrategy::StructStrategy() {
 }
 
 void StructStrategy::Encode(EQApplicationPacket **p, std::shared_ptr<EQStream> dest, bool ack_req) const {
+	_eqp
 	if((*p)->GetOpcodeBypass() != 0) {
 		PassEncoder(p, dest, ack_req);
 		return;
@@ -30,6 +32,7 @@ void StructStrategy::Encode(EQApplicationPacket **p, std::shared_ptr<EQStream> d
 }
 
 void StructStrategy::Decode(EQApplicationPacket *p) const {
+	_eqp
 	EmuOpcode op = p->GetOpcode();
 	Decoder proc = decoders[op];
 	proc(p);
@@ -37,6 +40,7 @@ void StructStrategy::Decode(EQApplicationPacket *p) const {
 
 
 void StructStrategy::ErrorEncoder(EQApplicationPacket **in_p, std::shared_ptr<EQStream> dest, bool ack_req) {
+	_eqp
 	EQApplicationPacket *p = *in_p;
 	*in_p = nullptr;
 
@@ -46,11 +50,13 @@ void StructStrategy::ErrorEncoder(EQApplicationPacket **in_p, std::shared_ptr<EQ
 }
 
 void StructStrategy::ErrorDecoder(EQApplicationPacket *p) {
+	_eqp
 	Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Error decoding opcode %s: no decoder provided. Invalidating.", OpcodeManager::EmuToName(p->GetOpcode()));
 	p->SetOpcode(OP_Unknown);
 }
 
 void StructStrategy::PassEncoder(EQApplicationPacket **p, std::shared_ptr<EQStream> dest, bool ack_req) {
+	_eqp
 	dest->FastQueuePacket(p, ack_req);
 }
 
@@ -67,10 +73,12 @@ namespace StructStrategyFactory {
 	static std::map<EmuOpcode, const StructStrategy *> strategies;
 
 	void RegisterPatch(EmuOpcode first_opcode, const StructStrategy *structs) {
+		_eqp
 		strategies[first_opcode] = structs;
 	}
 
 	const StructStrategy *FindPatch(EmuOpcode first_opcode) {
+		_eqp
 		std::map<EmuOpcode, const StructStrategy *>::const_iterator res;
 		res = strategies.find(first_opcode);
 		if(res == strategies.end())

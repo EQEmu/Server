@@ -41,6 +41,7 @@
 #include "packet_dump_file.h"
 
 void FileDumpPacketAscii(const char* filename, const uchar* buf, uint32 size, uint32 cols, uint32 skip) {
+	_eqp
 	std::ofstream logfile(filename, std::ios::app);
 	// Output as ASCII
 	for(uint32 i=skip; i<size; i++)
@@ -67,6 +68,7 @@ void FileDumpPacketAscii(const char* filename, const uchar* buf, uint32 size, ui
 
 void oldFileDumpPacketHex(const char* filename, const uchar* buf, uint32 size, uint32 cols, uint32 skip)
 {
+	_eqp
 	std::ofstream logfile(filename, std::ios::app);
 	// Output as HEX
 	char output[4];
@@ -89,6 +91,7 @@ void oldFileDumpPacketHex(const char* filename, const uchar* buf, uint32 size, u
 
 void FileDumpPacketHex(const char* filename, const uchar* buf, uint32 size, uint32 cols, uint32 skip)
 {
+	_eqp
 	if (size == 0)
 		return;
 	std::ofstream logfile(filename, std::ios::app);
@@ -131,16 +134,19 @@ void FileDumpPacketHex(const char* filename, const uchar* buf, uint32 size, uint
 
 void FileDumpPacketHex(const char* filename, const EQApplicationPacket* app)
 {
+	_eqp
 	FileDumpPacketHex(filename, app->pBuffer, app->size);
 }
 
 void FileDumpPacketAscii(const char* filename, const EQApplicationPacket* app)
 {
+	_eqp
 	FileDumpPacketAscii(filename, app->pBuffer, app->size);
 }
 
 void FileDumpPacket(const char* filename, const uchar* buf, uint32 size)
 {
+	_eqp
 	FilePrintLine(filename, true, "Size: %5i", size);
 	FileDumpPacketHex(filename, buf, size);
 //	FileDumpPacketAscii(filename, buf,size);
@@ -148,6 +154,7 @@ void FileDumpPacket(const char* filename, const uchar* buf, uint32 size)
 
 void FileDumpPacket(const char* filename, const EQApplicationPacket* app)
 {
+	_eqp
 	FilePrintLine(filename, true, "Size: %5i, OPCode: 0x%04x", app->size, app->GetOpcode());
 	FileDumpPacketHex(filename, app->pBuffer, app->size);
 //	FileDumpPacketAscii(filename, app->pBuffer, app->size);
@@ -158,6 +165,7 @@ void FileDumpPacket(const char* filename, const EQApplicationPacket* app)
 	if prefix_timestamp specified, prints the current date/time to the file + ": " + text
 */
 void FilePrintLine(const char* filename, bool prefix_timestamp, const char* text, ...) {
+	_eqp
 	std::ofstream logfile(filename, std::ios::app);
 	if (prefix_timestamp) {
 		time_t rawtime;
@@ -182,6 +190,7 @@ void FilePrintLine(const char* filename, bool prefix_timestamp, const char* text
 }
 
 void FilePrint(const char* filename, bool newline, bool prefix_timestamp, const char* text, ...) {
+	_eqp
 	std::ofstream logfile(filename, std::ios::app);
 	if (prefix_timestamp) {
 		time_t rawtime;

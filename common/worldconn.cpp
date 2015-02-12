@@ -28,21 +28,25 @@
 WorldConnection::WorldConnection(EmuTCPConnection::ePacketMode mode, const char *password)
 : m_password(password)
 {
+	_eqp
 	tcpc.SetPacketMode(mode);
 	pTryReconnect = true;
 	pConnected = false;
 }
 
 WorldConnection::~WorldConnection() {
+	_eqp
 }
 
 bool WorldConnection::SendPacket(ServerPacket* pack) {
+	_eqp
 	if (!Connected())
 		return false;
 	return tcpc.SendPacket(pack);
 }
 
 void WorldConnection::OnConnected() {
+	_eqp
 	const EQEmuConfig *Config=EQEmuConfig::get();
 	Log.Out(Logs::General, Logs::Netcode, "[WORLD] Connected to World: %s:%d", Config->WorldIP.c_str(), Config->WorldTCPPort);
 
@@ -53,6 +57,7 @@ void WorldConnection::OnConnected() {
 }
 
 void WorldConnection::Process() {
+	_eqp
 	//persistent connection....
 	if (!Connected()) {
 		pConnected = tcpc.Connected();
@@ -66,11 +71,13 @@ void WorldConnection::Process() {
 }
 
 void WorldConnection::AsyncConnect() {
+	_eqp
 	const EQEmuConfig *Config=EQEmuConfig::get();
 	tcpc.AsyncConnect(Config->WorldIP.c_str(), Config->WorldTCPPort);
 }
 
 bool WorldConnection::Connect() {
+	_eqp
 	const EQEmuConfig *Config=EQEmuConfig::get();
 	char errbuf[TCPConnection_ErrorBufferSize];
 	if (tcpc.Connect(Config->WorldIP.c_str(), Config->WorldTCPPort, errbuf)) {
@@ -82,6 +89,7 @@ bool WorldConnection::Connect() {
 }
 
 void WorldConnection::Disconnect() {
+	_eqp
 	tcpc.Disconnect();
 }
 

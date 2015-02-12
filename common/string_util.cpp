@@ -64,6 +64,7 @@ const std::string vStringFormat(const char* format, va_list args)
 
 const std::string StringFormat(const char* format, ...)
 {
+	_eqp
 	va_list args;
 	va_start(args, format);
 	std::string output = vStringFormat(format,args);
@@ -121,6 +122,7 @@ void MakeLowerString(const char *source, char *target) {
 }
 
 int MakeAnyLenString(char** ret, const char* format, ...) {
+	_eqp
 	int buf_len = 128;
 	int chars = -1;
 	va_list argptr, tmpargptr;
@@ -140,6 +142,7 @@ int MakeAnyLenString(char** ret, const char* format, ...) {
 }
 
 uint32 AppendAnyLenString(char** ret, uint32* bufsize, uint32* strlen, const char* format, ...) {
+	_eqp
 	if (*bufsize == 0)
 		*bufsize = 256;
 	if (*ret == 0)
@@ -258,6 +261,7 @@ bool atobool(const char* iBool) {
 // removes the crap and turns the underscores into spaces.
 char *CleanMobName(const char *in, char *out)
 {
+	_eqp
 	unsigned i, j;
 	
 	for(i = j = 0; i < strlen(in); i++)
@@ -312,6 +316,7 @@ const char *ConvertArrayF(float input, char *returnchar)
 }
 
 std::vector<std::string> SplitString(const std::string &str, char delim) {
+	_eqp
 	std::vector<std::string> ret;
 	std::stringstream ss(str);
     std::string item;
@@ -324,6 +329,7 @@ std::vector<std::string> SplitString(const std::string &str, char delim) {
 }
 
 std::string EscapeString(const std::string &s) {
+	_eqp
 	std::string ret;
 
 	size_t sz = s.length();
@@ -361,6 +367,7 @@ std::string EscapeString(const std::string &s) {
 }
 
 std::string EscapeString(const char *src, size_t sz) {
+	_eqp
 	std::string ret;
 
 	for(size_t i = 0; i < sz; ++i) {

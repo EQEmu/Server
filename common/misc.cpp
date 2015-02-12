@@ -24,36 +24,6 @@
 
 std::map<int,std::string> DBFieldNames;
 
-#ifndef WIN32
-#if defined(FREEBSD) || defined(__CYGWIN__)
-int print_stacktrace()
-{
-	printf("Insert stack trace here...\n");
-	return(0);
-}
-#else //!WIN32 && !FREEBSD == linux
-#include <execinfo.h>
-int print_stacktrace()
-{
-	void *ba[20];
-	int n = backtrace (ba, 20);
-	if (n != 0)
-	{
-		char **names = backtrace_symbols (ba, n);
-		if (names != nullptr)
-		{
-			int i;
-			std::cerr << "called from " << (char*)names[0] << std::endl;
-			for (i = 1; i < n; ++i)
-				std::cerr << "            " << (char*)names[i] << std::endl;
-			free (names);
-		}
-	}
-	return(0);
-}
-#endif //!FREEBSD
-#endif //!WIN32
-
 void Unprotect(std::string &s, char what)
 {
 	if (s.length()) {
@@ -78,12 +48,12 @@ void Protect(std::string &s, char what)
 */
 bool ItemParse(const char *data, int length, std::map<int,std::map<int,std::string> > &items, int id_pos, int name_pos, int max_field, int level)
 {
-int i;
-char *end,*ptr;
-std::map<int,std::string> field;
-static char *buffer=nullptr;
-static int buffsize=0;
-static char *temp=nullptr;
+	int i;
+	char *end,*ptr;
+	std::map<int,std::string> field;
+	static char *buffer=nullptr;
+	static int buffsize=0;
+	static char *temp=nullptr;
 	if (!buffsize || buffsize<(length+1)) {
 		buffer=(char *)realloc(buffer,length+1);
 		temp=(char *)realloc(temp,length+1);
@@ -186,10 +156,10 @@ static char *temp=nullptr;
 
 int Tokenize(std::string s,std::map<int,std::string> & tokens, char delim)
 {
-int i,len;
-std::string::size_type end;
-//char temp[1024];
-std::string x;
+	int i,len;
+	std::string::size_type end;
+	//char temp[1024];
+	std::string x;
 	tokens.clear();
 	i=0;
 	while(s.length()) {
@@ -335,14 +305,14 @@ void LoadItemDBFieldNames() {
 
 void encode_length(unsigned long length, char *out)
 {
-char buf[4];
+	char buf[4];
 	memcpy(buf,&length,sizeof(unsigned long));
 	encode_chunk(buf,3,out);
 }
 
 unsigned long encode(char *in, unsigned long length, char *out)
 {
-unsigned long used=0,len=0;
+	unsigned long used=0,len=0;
 	while(used<length) {
 		encode_chunk(in+used,length-used,out+len);
 		used+=3;
@@ -355,8 +325,8 @@ unsigned long used=0,len=0;
 
 unsigned long decode_length(char *in)
 {
-int length;
-char buf[4];
+	int length;
+	char buf[4];
 	decode_chunk(in,&buf[0]);
 	buf[3]=0;
 	memcpy(&length,buf,sizeof(unsigned long));
@@ -366,8 +336,8 @@ char buf[4];
 
 void decode(char *in, char *out)
 {
-char *ptr=in;
-char *outptr=out;
+	char *ptr=in;
+	char *outptr=out;
 	while(*ptr) {
 		decode_chunk(ptr,outptr);
 		ptr+=4;
@@ -393,8 +363,8 @@ void decode_chunk(char *in, char *out)
 
 void dump_message_column(unsigned char *buffer, unsigned long length, std::string leader, FILE *to)
 {
-unsigned long i,j;
-unsigned long rows,offset=0;
+	unsigned long i,j;
+	unsigned long rows,offset=0;
 	rows=(length/16)+1;
 	for(i=0;i<rows;i++) {
 		fprintf(to, "%s%05ld: ",leader.c_str(),i*16);
@@ -419,8 +389,8 @@ unsigned long rows,offset=0;
 
 std::string long2ip(unsigned long ip)
 {
-char temp[16];
-union { unsigned long ip; struct { unsigned char a,b,c,d; } octet;} ipoctet;
+	char temp[16];
+	union { unsigned long ip; struct { unsigned char a,b,c,d; } octet;} ipoctet;
 
 	ipoctet.ip=ip;
 	sprintf(temp,"%d.%d.%d.%d",ipoctet.octet.a,ipoctet.octet.b,ipoctet.octet.c,ipoctet.octet.d);
@@ -430,8 +400,8 @@ union { unsigned long ip; struct { unsigned char a,b,c,d; } octet;} ipoctet;
 
 std::string string_from_time(std::string pattern, time_t now)
 {
-struct tm *now_tm;
-char time_string[51];
+	struct tm *now_tm;
+	char time_string[51];
 
 	if (!now)
 		time(&now);
@@ -450,9 +420,9 @@ std::string timestamp(time_t now)
 
 std::string pop_arg(std::string &s, std::string seps, bool obey_quotes)
 {
-std::string ret;
-unsigned long i;
-bool in_quote=false;
+	std::string ret;
+	unsigned long i;
+	bool in_quote=false;
 
 	unsigned long length=s.length();
 	for(i=0;i<length;i++) {
@@ -481,8 +451,8 @@ bool in_quote=false;
 
 int EQsprintf(char *buffer, const char *pattern, const char *arg1, const char *arg2, const char *arg3, const char *arg4, const char *arg5, const char *arg6, const char *arg7, const char *arg8, const char *arg9)
 {
-const char *args[9],*ptr;
-char *bptr;
+	const char *args[9],*ptr;
+	char *bptr;
 	args[0]=arg1;
 	args[1]=arg2;
 	args[2]=arg3;
@@ -524,11 +494,11 @@ char *bptr;
 
 std::string generate_key(int length)
 {
-std::string key;
-//TODO: write this for win32...
+	std::string key;
+	//TODO: write this for win32...
 #ifndef WIN32
-int i;
-timeval now;
+	int i;
+	timeval now;
 	static const char *chars="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	for(i=0;i<length;i++) {
 		gettimeofday(&now,nullptr);
@@ -550,9 +520,9 @@ void print_hex(const char *data, unsigned long length) {
 
 void build_hex_line(const char *buffer, unsigned long length, unsigned long offset, char *out_buffer, unsigned char padding)
 {
-char *ptr=out_buffer;
-int i;
-char printable[17];
+	char *ptr=out_buffer;
+	int i;
+	char printable[17];
 	ptr+=sprintf(ptr,"%0*lu:",padding,offset);
 	for(i=0;i<16; i++) {
 		if (i==8) {

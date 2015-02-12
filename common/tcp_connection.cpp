@@ -75,6 +75,7 @@ TCPConnection::TCPConnection(uint32 ID, SOCKET in_socket, uint32 irIP, uint16 ir
 	rIP(irIP),
 	rPort(irPort)
 {
+	_eqp
 	pState = TCPS_Connected;
 	pFree = false;
 	pEcho = false;
@@ -90,6 +91,7 @@ TCPConnection::TCPConnection(uint32 ID, SOCKET in_socket, uint32 irIP, uint16 ir
 }
 
 TCPConnection::~TCPConnection() {
+	_eqp
 	FinishDisconnect();
 	ClearBuffers();
 	if (ConnectionType == Outgoing) {
@@ -113,12 +115,14 @@ TCPConnection::~TCPConnection() {
 }
 
 void TCPConnection::SetState(State_t in_state) {
+	_eqp
 	MState.lock();
 	pState = in_state;
 	MState.unlock();
 }
 
 TCPConnection::State_t TCPConnection::GetState() const {
+	_eqp
 	State_t ret;
 	MState.lock();
 	ret = pState;
@@ -128,6 +132,7 @@ TCPConnection::State_t TCPConnection::GetState() const {
 
 bool TCPConnection::GetSockName(char *host, uint16 *port)
 {
+	_eqp
 	bool result=false;
 	LockMutex lock(&MState);
 	if (!Connected())
@@ -165,11 +170,13 @@ bool TCPConnection::GetSockName(char *host, uint16 *port)
 }
 
 void TCPConnection::Free() {
+	_eqp
 	Disconnect();
 	pFree = true;
 }
 
 bool TCPConnection::Send(const uchar* data, int32 size) {
+	_eqp
 	if (!Connected())
 		return false;
 	if (!size)
@@ -179,6 +186,7 @@ bool TCPConnection::Send(const uchar* data, int32 size) {
 }
 
 void TCPConnection::ServerSendQueuePushEnd(const uchar* data, int32 size) {
+	_eqp
 	MSendQueue.lock();
 	if (sendbuf == nullptr) {
 		sendbuf = new uchar[size];
@@ -198,6 +206,7 @@ void TCPConnection::ServerSendQueuePushEnd(const uchar* data, int32 size) {
 }
 
 void TCPConnection::ServerSendQueuePushEnd(uchar** data, int32 size) {
+	_eqp
 	MSendQueue.lock();
 	if (sendbuf == 0) {
 		sendbuf = *data;
@@ -221,6 +230,7 @@ void TCPConnection::ServerSendQueuePushEnd(uchar** data, int32 size) {
 }
 
 void TCPConnection::ServerSendQueuePushFront(uchar* data, int32 size) {
+	_eqp
 	MSendQueue.lock();
 	if (sendbuf == 0) {
 		sendbuf = new uchar[size];
@@ -240,6 +250,7 @@ void TCPConnection::ServerSendQueuePushFront(uchar* data, int32 size) {
 }
 
 bool TCPConnection::ServerSendQueuePop(uchar** data, int32* size) {
+	_eqp
 	bool ret;
 	if (!MSendQueue.trylock())
 		return false;
@@ -257,6 +268,7 @@ bool TCPConnection::ServerSendQueuePop(uchar** data, int32* size) {
 }
 
 bool TCPConnection::ServerSendQueuePopForce(uchar** data, int32* size) {
+	_eqp
 	bool ret;
 	MSendQueue.lock();
 	if (sendbuf) {
@@ -273,6 +285,7 @@ bool TCPConnection::ServerSendQueuePopForce(uchar** data, int32* size) {
 }
 
 char* TCPConnection::PopLine() {
+	_eqp
 	char* ret;
 	if (!MLineOutQueue.trylock())
 		return 0;
@@ -282,6 +295,7 @@ char* TCPConnection::PopLine() {
 }
 
 bool TCPConnection::LineOutQueuePush(char* line) {
+	_eqp
 	MLineOutQueue.lock();
 	LineOutQueue.push(line);
 	MLineOutQueue.unlock();
@@ -290,6 +304,7 @@ bool TCPConnection::LineOutQueuePush(char* line) {
 
 
 void TCPConnection::FinishDisconnect() {
+	_eqp
 	MState.lock();
 	if (connection_socket != INVALID_SOCKET && connection_socket != 0) {
 		if (pState == TCPS_Connected || pState == TCPS_Disconnecting || pState == TCPS_Disconnected) {
@@ -314,6 +329,7 @@ void TCPConnection::FinishDisconnect() {
 }
 
 void TCPConnection::Disconnect() {
+	_eqp
 	MState.lock();
 	if(pState == TCPS_Connected || pState == TCPS_Connecting) {
 		pState = TCPS_Disconnecting;
@@ -322,6 +338,7 @@ void TCPConnection::Disconnect() {
 }
 
 bool TCPConnection::GetAsyncConnect() {
+	_eqp
 	bool ret;
 	MAsyncConnect.lock();
 	ret = pAsyncConnect;
@@ -330,6 +347,7 @@ bool TCPConnection::GetAsyncConnect() {
 }
 
 bool TCPConnection::SetAsyncConnect(bool iValue) {
+	_eqp
 	bool ret;
 	MAsyncConnect.lock();
 	ret = pAsyncConnect;
@@ -339,6 +357,7 @@ bool TCPConnection::SetAsyncConnect(bool iValue) {
 }
 
 bool TCPConnection::ConnectReady() const {
+	_eqp
 	State_t s = GetState();
 	if (s != TCPS_Ready && s != TCPS_Disconnected)
 		return(false);
@@ -346,6 +365,7 @@ bool TCPConnection::ConnectReady() const {
 }
 
 void TCPConnection::AsyncConnect(const char* irAddress, uint16 irPort) {
+	_eqp
 	safe_delete_array(charAsyncConnect);
 	charAsyncConnect = new char[strlen(irAddress) + 1];
 	strcpy(charAsyncConnect, irAddress);
@@ -353,6 +373,7 @@ void TCPConnection::AsyncConnect(const char* irAddress, uint16 irPort) {
 }
 
 void TCPConnection::AsyncConnect(uint32 irIP, uint16 irPort) {
+	_eqp
 	if (ConnectionType != Outgoing) {
 		// If this code runs, we got serious problems
 		// Crash and burn.
@@ -394,6 +415,7 @@ void TCPConnection::AsyncConnect(uint32 irIP, uint16 irPort) {
 }
 
 bool TCPConnection::Connect(const char* irAddress, uint16 irPort, char* errbuf) {
+	_eqp
 	if (errbuf)
 		errbuf[0] = 0;
 	uint32 tmpIP = ResolveIP(irAddress);
@@ -411,6 +433,7 @@ bool TCPConnection::Connect(const char* irAddress, uint16 irPort, char* errbuf) 
 }
 
 bool TCPConnection::ConnectIP(uint32 in_ip, uint16 in_port, char* errbuf) {
+	_eqp
 	if (errbuf)
 		errbuf[0] = 0;
 	if (ConnectionType != Outgoing) {
@@ -499,6 +522,7 @@ bool TCPConnection::ConnectIP(uint32 in_ip, uint16 in_port, char* errbuf) {
 }
 
 void TCPConnection::ClearBuffers() {
+	_eqp
 	LockMutex lock1(&MSendQueue);
 	LockMutex lock3(&MRunLoop);
 	LockMutex lock4(&MState);
@@ -511,6 +535,7 @@ void TCPConnection::ClearBuffers() {
 }
 
 bool TCPConnection::CheckNetActive() {
+	_eqp
 	MState.lock();
 	if (pState == TCPS_Connected || pState == TCPS_Disconnecting) {
 		MState.unlock();
@@ -523,6 +548,7 @@ bool TCPConnection::CheckNetActive() {
 /* This is always called from an IO thread. Either the server socket's thread, or a
  * special thread we create when we make an outbound connection. */
 bool TCPConnection::Process() {
+	_eqp
 	char errbuf[TCPConnection_ErrorBufferSize];
 	switch(GetState()) {
 	case TCPS_Ready:
@@ -594,6 +620,7 @@ bool TCPConnection::Process() {
 }
 
 bool TCPConnection::RecvData(char* errbuf) {
+	_eqp
 	if (errbuf)
 		errbuf[0] = 0;
 	if (!Connected()) {
@@ -666,16 +693,19 @@ bool TCPConnection::RecvData(char* errbuf) {
 
 
 bool TCPConnection::GetEcho() {
+	_eqp
 	bool ret;
 	ret = pEcho;
 	return ret;
 }
 
 void TCPConnection::SetEcho(bool iValue) {
+	_eqp
 	pEcho = iValue;
 }
 
 bool TCPConnection::ProcessReceivedData(char* errbuf) {
+	_eqp
 	if (errbuf)
 		errbuf[0] = 0;
 	if (!recvbuf)
@@ -810,6 +840,7 @@ bool TCPConnection::ProcessReceivedData(char* errbuf) {
 }
 
 bool TCPConnection::SendData(bool &sent_something, char* errbuf) {
+	_eqp
 	if (errbuf)
 		errbuf[0] = 0;
 	/************ Get first send packet on queue and send it! ************/
@@ -891,6 +922,7 @@ bool TCPConnection::SendData(bool &sent_something, char* errbuf) {
 }
 
 ThreadReturnType TCPConnection::TCPConnectionLoop(void* tmp) {
+	_eqp
 #ifdef _WINDOWS
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
 #endif
@@ -933,6 +965,7 @@ ThreadReturnType TCPConnection::TCPConnectionLoop(void* tmp) {
 }
 
 bool TCPConnection::RunLoop() {
+	_eqp
 	bool ret;
 	MRunLoop.lock();
 	ret = pRunLoop;

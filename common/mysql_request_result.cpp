@@ -10,6 +10,7 @@ MySQLRequestResult::MySQLRequestResult()
 MySQLRequestResult::MySQLRequestResult(MYSQL_RES* result, uint32 rowsAffected, uint32 rowCount, uint32 columnCount, uint32 lastInsertedID, uint32 errorNumber, char *errorBuffer)
 	: m_CurrentRow(result), m_OneBeyondRow()
 {
+	_eqp
 	m_Result = result;
 	m_RowsAffected = rowsAffected;
 	m_RowCount = rowCount;
@@ -32,7 +33,7 @@ MySQLRequestResult::MySQLRequestResult(MYSQL_RES* result, uint32 rowsAffected, u
 
 void MySQLRequestResult::FreeInternals()
 {
-
+	_eqp
 	safe_delete_array(m_ErrorBuffer);
 
 	if (m_Result != nullptr)
@@ -43,6 +44,7 @@ void MySQLRequestResult::FreeInternals()
 
 void MySQLRequestResult::ZeroOut()
 {
+	_eqp
 	m_Success = false;
 	m_Result = nullptr;
 	m_ErrorBuffer = nullptr;
@@ -55,11 +57,13 @@ void MySQLRequestResult::ZeroOut()
 
 MySQLRequestResult::~MySQLRequestResult()
 {
+	_eqp
 	FreeInternals();
 }
 
 uint32 MySQLRequestResult::LengthOfColumn(int columnIndex)
 {
+	_eqp
 	if (m_ColumnLengths == nullptr && m_Result != nullptr)
 		m_ColumnLengths = mysql_fetch_lengths(m_Result);
 
@@ -82,6 +86,7 @@ uint32 MySQLRequestResult::LengthOfColumn(int columnIndex)
 
 const std::string MySQLRequestResult::FieldName(int columnIndex)
 {
+	_eqp
 	if (columnIndex >= m_ColumnCount || m_Result == nullptr)
 		return std::string();
 
@@ -94,6 +99,7 @@ const std::string MySQLRequestResult::FieldName(int columnIndex)
 MySQLRequestResult::MySQLRequestResult(MySQLRequestResult&& moveItem)
 	: m_CurrentRow(moveItem.m_CurrentRow), m_OneBeyondRow()
 {
+	_eqp
 	m_Result = moveItem.m_Result;
 	m_ErrorBuffer = moveItem.m_ErrorBuffer;
 	m_Success = moveItem.m_Success;
@@ -111,6 +117,7 @@ MySQLRequestResult::MySQLRequestResult(MySQLRequestResult&& moveItem)
 
 MySQLRequestResult& MySQLRequestResult::operator=(MySQLRequestResult&& other)
 {
+	_eqp
 	// Assigning something to itself?
 	// Silly! (but happens)
 	if (this == &other)

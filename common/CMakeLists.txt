@@ -39,7 +39,6 @@ SET(common_sources
 	mutex.cpp
 	mysql_request_result.cpp
 	mysql_request_row.cpp
-	opcode_map.cpp
 	opcodemgr.cpp
 	packet_dump.cpp
 	packet_dump_file.cpp
@@ -49,7 +48,6 @@ SET(common_sources
 	proc_launcher.cpp
 	ptimer.cpp
 	races.cpp
-	rdtsc.cpp
 	rulesys.cpp
 	serverinfo.cpp
 	shareddb.cpp
@@ -163,7 +161,6 @@ SET(common_headers
 	queue.h
 	races.h
 	random.h
-	rdtsc.h
 	rulesys.h
 	ruletypes.h
 	seperator.h
