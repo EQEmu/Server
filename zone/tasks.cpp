@@ -2873,6 +2873,9 @@ int ClientTaskState::GetTaskActivityDoneCountFromTaskID(int TaskID, int Activity
 		}
 	}
 
+	if (ActiveTaskIndex == -1)
+		return 0;
+
 	if (ActiveTasks[ActiveTaskIndex].Activity[ActivityID].DoneCount){
 		return ActiveTasks[ActiveTaskIndex].Activity[ActivityID].DoneCount;
 	}
