@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/12/2015 ==
+Akkadius: Implement zone based gravity, required SQL DB change
+	- To test `zone` table `gravity` values, change the value and use #zheader <zoneshortname> to test
+
 == 02/11/2015 ==
 Trevius: (RoF+) Bandolier no longer displays a Treasure Chest Icon when no Bandoliers are set.
 

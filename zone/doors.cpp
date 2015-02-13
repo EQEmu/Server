@@ -655,6 +655,8 @@ bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name
 		into[rowIndex].db_id = atoi(row[0]);
 		into[rowIndex].door_id = atoi(row[1]);
 
+		Log.Out(Logs::Detail, Logs::Doors, "Door Load: db id: %u, door_id %u", into[rowIndex].db_id, into[rowIndex].door_id);
+
         strn0cpy(into[rowIndex].zone_name,row[2],32);
 		strn0cpy(into[rowIndex].door_name,row[3],32);
 

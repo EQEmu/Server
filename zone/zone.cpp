@@ -735,6 +735,7 @@ void Zone::LoadZoneDoors(const char* zone, int16 version)
 	for(r = 0; r < count; r++, d++) {
 		Doors* newdoor = new Doors(d);
 		entity_list.AddDoor(newdoor);
+		Log.Out(Logs::Detail, Logs::Doors, "Door Add to Entity List, index: %u db id: %u, door_id %u", r, dlist[r].db_id, dlist[r].door_id);
 	}
 	delete[] dlist;
 }
