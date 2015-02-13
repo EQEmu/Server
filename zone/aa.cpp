@@ -525,7 +525,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 
 	NPCType *made_npc = nullptr;
 
-	const NPCType *npc_type = database.GetNPCType(pet.npc_id);
+	const NPCType *npc_type = database.LoadNPCTypesData(pet.npc_id);
 	if(npc_type == nullptr) {
 		//log write
 		Log.Out(Logs::General, Logs::Error, "Unknown npc type for swarm pet spell id: %d", spell_id);
@@ -622,7 +622,7 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 
 	NPCType *made_npc = nullptr;
 
-	const NPCType *npc_type = database.GetNPCType(typesid);
+	const NPCType *npc_type = database.LoadNPCTypesData(typesid);
 	if(npc_type == nullptr) {
 		//log write
 		Log.Out(Logs::General, Logs::Error, "Unknown npc type for swarm pet type id: %d", typesid);
@@ -715,7 +715,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 		return;
 
 	//assuming we have pets in our table; we take the first pet as a base type.
-	const NPCType *base_type = database.GetNPCType(500);
+	const NPCType *base_type = database.LoadNPCTypesData(500);
 	NPCType *make_npc = new NPCType;
 	memcpy(make_npc, base_type, sizeof(NPCType));
 

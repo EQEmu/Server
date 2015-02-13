@@ -248,7 +248,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	}
 
 	//find the NPC data for the specified NPC type
-	const NPCType *base = database.GetNPCType(record.npc_type);
+	const NPCType *base = database.LoadNPCTypesData(record.npc_type);
 	if(base == nullptr) {
 		Message(13, "Unable to load NPC data for pet %s", pettype);
 		Log.Out(Logs::General, Logs::Error, "Unable to load NPC data for pet %s (NPC ID %d), check pets and npc_types tables.", pettype, record.npc_type);
@@ -384,7 +384,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 			monsterid = 567;
 
 		// give the summoned pet the attributes of the monster we found
-		const NPCType* monster = database.GetNPCType(monsterid);
+		const NPCType* monster = database.LoadNPCTypesData(monsterid);
 		if(monster) {
 			npc_type->race = monster->race;
 			npc_type->size = monster->size;

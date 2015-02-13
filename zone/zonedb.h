@@ -405,7 +405,7 @@ public:
 
 	DBnpcspells_Struct*				GetNPCSpells(uint32 iDBSpellsID);
 	DBnpcspellseffects_Struct*		GetNPCSpellsEffects(uint32 iDBSpellsEffectsID);
-	const NPCType*					GetNPCType(uint32 id);
+	const NPCType* LoadNPCTypesData(uint32 id, bool bulk_load = false);
 
 	/* Mercs   */
 	const	NPCType*	GetMercType(uint32 id, uint16 raceid, uint32 clientlevel);

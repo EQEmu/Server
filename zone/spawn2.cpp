@@ -183,7 +183,7 @@ bool Spawn2::Process() {
 		}
 
 		//try to find our NPC type.
-		const NPCType* tmp = database.GetNPCType(npcid);
+		const NPCType* tmp = database.LoadNPCTypesData(npcid);
 		if (tmp == nullptr) {
 			Log.Out(Logs::Detail, Logs::Spawns, "Spawn2 %d: Spawn group %d yeilded an invalid NPC type %d", spawn2_id, spawngroup_id_, npcid);
 			Reset();	//try again later
@@ -357,6 +357,9 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 
 	timeval tv;
 	gettimeofday(&tv, nullptr);
+
+	/* Bulk Load NPC Types Data into the cache */
+	database.LoadNPCTypesData(0, true);
 
 	std::string spawn_query = StringFormat(
 		"SELECT "

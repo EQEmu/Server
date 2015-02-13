@@ -2461,7 +2461,7 @@ void command_npctypespawn(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(1)) {
 		const NPCType* tmp = 0;
-		if ((tmp = database.GetNPCType(atoi(sep->arg[1])))) {
+		if ((tmp = database.LoadNPCTypesData(atoi(sep->arg[1])))) {
 			//tmp->fixedZ = 1;
 			NPC* npc = new NPC(tmp, 0, c->GetPosition(), FlyMode3);
 			if (npc && sep->IsNumber(2))
@@ -2923,7 +2923,7 @@ void command_viewnpctype(Client *c, const Seperator *sep)
 	else
 	{
 		uint32 npctypeid=atoi(sep->arg[1]);
-		const NPCType* npct = database.GetNPCType(npctypeid);
+		const NPCType* npct = database.LoadNPCTypesData(npctypeid);
 		if (npct) {
 			c->Message(0, " NPCType Info, ");
 			c->Message(0, "  NPCTypeID: %u",  npct->npc_id);
@@ -6687,7 +6687,7 @@ void command_qglobal(Client *c, const Seperator *sep) {
 	}
 
 	if(!strcasecmp(sep->arg[1], "view")) {
-		const NPCType *type = database.GetNPCType(target->GetNPCTypeID());
+		const NPCType *type = database.LoadNPCTypesData(target->GetNPCTypeID());
 		if(!type)
 			c->Message(15, "Invalid NPC type.");
 		else if(type->qglobal)
