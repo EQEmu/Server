@@ -30,7 +30,6 @@ uint32 current_time = 0;
 uint32 last_time = 0;
 
 Timer::Timer() {
-	_eqp
 	timer_time = 0;
 	start_time = current_time;
 	set_at_trigger = timer_time;
@@ -39,7 +38,6 @@ Timer::Timer() {
 }
 
 Timer::Timer(uint32 in_timer_time, bool iUseAcurateTiming) {
-	_eqp
 	timer_time = in_timer_time;
 	start_time = current_time;
 	set_at_trigger = timer_time;
@@ -53,7 +51,6 @@ Timer::Timer(uint32 in_timer_time, bool iUseAcurateTiming) {
 }
 
 Timer::Timer(uint32 start, uint32 timer, bool iUseAcurateTiming = false) {
-	_eqp
 	timer_time = timer;
 	start_time = start;
 	set_at_trigger = timer_time;
@@ -101,18 +98,15 @@ bool Timer::Check(bool iReset)
 
 /* This function disables the timer */
 void Timer::Disable() {
-	_eqp
 	enabled = false;
 }
 
 void Timer::Enable() {
-	_eqp
 	enabled = true;
 }
 
 /* This function set the timer and restart it */
 void Timer::Start(uint32 set_timer_time, bool ChangeResetTimer) {
-	_eqp
 	start_time = current_time;
 	enabled = true;
 	if (set_timer_time != 0)
@@ -125,7 +119,6 @@ void Timer::Start(uint32 set_timer_time, bool ChangeResetTimer) {
 
 /* This timer updates the timer without restarting it */
 void Timer::SetTimer(uint32 set_timer_time) {
-	_eqp
 	/* If we were disabled before => restart the timer */
 	if (!enabled) {
 		start_time = current_time;
@@ -138,7 +131,6 @@ void Timer::SetTimer(uint32 set_timer_time) {
 }
 
 uint32 Timer::GetRemainingTime() {
-	_eqp
 	if (enabled) {
 		if (current_time-start_time > timer_time)
 			return 0;
@@ -151,7 +143,6 @@ uint32 Timer::GetRemainingTime() {
 }
 
 void Timer::SetAtTrigger(uint32 in_set_at_trigger, bool iEnableIfDisabled, bool ChangeTimerTime) {
-	_eqp
 	set_at_trigger = in_set_at_trigger;
 	if (!Enabled() && iEnableIfDisabled) {
 		Enable();
@@ -162,7 +153,6 @@ void Timer::SetAtTrigger(uint32 in_set_at_trigger, bool iEnableIfDisabled, bool 
 
 void Timer::Trigger()
 {
-	_eqp
 	enabled = true;
 
 	timer_time = set_at_trigger;
@@ -171,13 +161,11 @@ void Timer::Trigger()
 
 const uint32 Timer::GetCurrentTime()
 {
-	_eqp
 	return current_time;
 }
 
 //just to keep all time related crap in one place... not really related to timers.
 const uint32 Timer::GetTimeSeconds() {
-	_eqp
 	struct timeval read_time;
 
 	gettimeofday(&read_time,0);
@@ -186,7 +174,6 @@ const uint32 Timer::GetTimeSeconds() {
 
 const uint32 Timer::SetCurrentTime()
 {
-	_eqp
 	struct timeval read_time;
 	uint32 this_time;
 

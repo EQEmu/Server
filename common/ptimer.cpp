@@ -88,7 +88,6 @@ CREATE TABLE timers (
 
 
 PersistentTimer *PersistentTimer::LoadTimer(Database *db, uint32 char_id, pTimerType type) {
-	_eqp
 	PersistentTimer *p;
 	p = new PersistentTimer(char_id, type, 0);
 	if(p->Load(db))
@@ -98,7 +97,6 @@ PersistentTimer *PersistentTimer::LoadTimer(Database *db, uint32 char_id, pTimer
 }
 
 PersistentTimer::PersistentTimer(uint32 char_id, pTimerType type, uint32 in_timer_time) {
-	_eqp
 	_char_id = char_id;
 	_type = type;
 
@@ -115,7 +113,6 @@ PersistentTimer::PersistentTimer(uint32 char_id, pTimerType type, uint32 in_time
 }
 
 PersistentTimer::PersistentTimer(uint32 char_id, pTimerType type, uint32 in_start_time, uint32 in_timer_time, bool in_enable) {
-	_eqp
 	_char_id = char_id;
 	_type = type;
 
@@ -128,7 +125,6 @@ PersistentTimer::PersistentTimer(uint32 char_id, pTimerType type, uint32 in_star
 }
 
 bool PersistentTimer::Load(Database *db) {
-	_eqp
 
 #ifdef DEBUG_PTIMERS
 	printf("Loading timer: char %lu of type %u\n", (unsigned long)_char_id, _type);
@@ -155,7 +151,6 @@ bool PersistentTimer::Load(Database *db) {
 }
 
 bool PersistentTimer::Store(Database *db) {
-	_eqp
 	if(Expired(db, false))	//dont need to store expired timers.
 		return true;
 
@@ -180,7 +175,6 @@ bool PersistentTimer::Store(Database *db) {
 }
 
 bool PersistentTimer::Clear(Database *db) {
-	_eqp
     std::string query = StringFormat("DELETE FROM timers "
                                     "WHERE char_id = %lu AND type = %u ",
                                     (unsigned long)_char_id, _type);
@@ -202,7 +196,6 @@ bool PersistentTimer::Clear(Database *db) {
 
 /* This function checks if the timer triggered */
 bool PersistentTimer::Expired(Database *db, bool iReset) {
-	_eqp
 	if (this == nullptr) {
 		Log.Out(Logs::General, Logs::Error, "Null timer during ->Check()!?\n");
 		return(true);
@@ -222,7 +215,6 @@ bool PersistentTimer::Expired(Database *db, bool iReset) {
 
 /* This function set the timer and restart it */
 void PersistentTimer::Start(uint32 set_timer_time) {
-	_eqp
 	start_time = get_current_time();
 	enabled = true;
 	if (set_timer_time != 0) {
@@ -235,7 +227,6 @@ void PersistentTimer::Start(uint32 set_timer_time) {
 
 // This timer updates the timer without restarting it
 void PersistentTimer::SetTimer(uint32 set_timer_time) {
-	_eqp
 	// If we were disabled before => restart the timer
 	timer_time = set_timer_time;
 	if (!enabled) {
@@ -248,7 +239,6 @@ void PersistentTimer::SetTimer(uint32 set_timer_time) {
 }
 
 uint32 PersistentTimer::GetRemainingTime() {
-	_eqp
 	if (enabled) {
 		uint32 current_time = get_current_time();
 		if (current_time-start_time > timer_time)
@@ -263,19 +253,16 @@ uint32 PersistentTimer::GetRemainingTime() {
 
 
 uint32 PersistentTimer::get_current_time() {
-	_eqp
 	timeval tv;
 	gettimeofday(&tv, nullptr);
 	return(tv.tv_sec);
 }
 
 PTimerList::PTimerList(uint32 char_id) {
-	_eqp
 	_char_id = char_id;
 }
 
 PTimerList::~PTimerList() {
-	_eqp
 	std::map<pTimerType, PersistentTimer *>::iterator s;
 	s = _list.begin();
 	while(s != _list.end()) {
@@ -287,7 +274,6 @@ PTimerList::~PTimerList() {
 
 
 bool PTimerList::Load(Database *db) {
-	_eqp
 
 	for (auto timerIterator = _list.begin(); timerIterator != _list.end(); ++timerIterator)
 		if(timerIterator->second != nullptr)
@@ -332,7 +318,6 @@ bool PTimerList::Load(Database *db) {
 }
 
 bool PTimerList::Store(Database *db) {
-	_eqp
 #ifdef DEBUG_PTIMERS
 	printf("Storing all timers for char %lu\n", (unsigned long)_char_id);
 #endif
@@ -354,7 +339,6 @@ bool PTimerList::Store(Database *db) {
 }
 
 bool PTimerList::Clear(Database *db) {
-	_eqp
 	_list.clear();
 
 	std::string query = StringFormat("DELETE FROM timers WHERE char_id=%lu ", (unsigned long)_char_id);
@@ -373,7 +357,6 @@ bool PTimerList::Clear(Database *db) {
 }
 
 void PTimerList::Start(pTimerType type, uint32 duration) {
-	_eqp
 	if(_list.count(type) == 1 && _list[type] != nullptr) {
 		_list[type]->Start(duration);
 	} else {
@@ -382,7 +365,6 @@ void PTimerList::Start(pTimerType type, uint32 duration) {
 }
 
 void PTimerList::Clear(Database *db, pTimerType type) {
-	_eqp
 	if(_list.count(type) == 1) {
 		if(_list[type] != nullptr) {
 			_list[type]->Clear(db);
@@ -393,7 +375,6 @@ void PTimerList::Clear(Database *db, pTimerType type) {
 }
 
 bool PTimerList::Expired(Database *db, pTimerType type, bool reset) {
-	_eqp
 	if(_list.count(type) != 1)
 		return(true);
 	if(_list[type] == nullptr)
@@ -402,7 +383,6 @@ bool PTimerList::Expired(Database *db, pTimerType type, bool reset) {
 }
 
 bool PTimerList::Enabled(pTimerType type) {
-	_eqp
 	if(_list.count(type) != 1)
 		return(false);
 	if(_list[type] == nullptr)
@@ -411,19 +391,16 @@ bool PTimerList::Enabled(pTimerType type) {
 }
 
 void PTimerList::Enable(pTimerType type) {
-	_eqp
 	if(_list.count(type) == 1 && _list[type] != nullptr)
 		_list[type]->Enable();
 }
 
 void PTimerList::Disable(pTimerType type) {
-	_eqp
 	if(_list.count(type) == 1 && _list[type] != nullptr)
 		_list[type]->Disable();
 }
 
 uint32 PTimerList::GetRemainingTime(pTimerType type) {
-	_eqp
 	if(_list.count(type) != 1)
 		return(0);
 	if(_list[type] == nullptr)
@@ -432,14 +409,12 @@ uint32 PTimerList::GetRemainingTime(pTimerType type) {
 }
 
 PersistentTimer *PTimerList::Get(pTimerType type) {
-	_eqp
 	if(_list.count(type) != 1)
 		return(nullptr);
 	return(_list[type]);
 }
 
 void PTimerList::ToVector(std::vector< std::pair<pTimerType, PersistentTimer *> > &out) {
-	_eqp
 	std::pair<pTimerType, PersistentTimer *> p;
 
 	std::map<pTimerType, PersistentTimer *>::iterator s;
@@ -455,7 +430,6 @@ void PTimerList::ToVector(std::vector< std::pair<pTimerType, PersistentTimer *> 
 }
 
 bool PTimerList::ClearOffline(Database *db, uint32 char_id, pTimerType type) {
-	_eqp
 	std::string query = StringFormat("DELETE FROM timers WHERE char_id=%lu AND type=%u ",(unsigned long)char_id, type);
 
 #ifdef DEBUG_PTIMERS

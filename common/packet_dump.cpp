@@ -25,7 +25,6 @@
 #include "../common/servertalk.h"
 
 void DumpPacketAscii(const uchar* buf, uint32 size, uint32 cols, uint32 skip) {
-	_eqp
 	// Output as ASCII
 	for(uint32 i=skip; i<size; i++)
 	{
@@ -50,7 +49,6 @@ void DumpPacketAscii(const uchar* buf, uint32 size, uint32 cols, uint32 skip) {
 }
 
 void DumpPacketHex(const uchar* buf, uint32 size, uint32 cols, uint32 skip) {
-	_eqp
 	if (size == 0 || size > 39565)
 		return;
 	// Output as HEX
@@ -93,7 +91,6 @@ void DumpPacketHex(const uchar* buf, uint32 size, uint32 cols, uint32 skip) {
 }
 
 std::string DumpPacketHexToString(const uchar* buf, uint32 size, uint32 cols, uint32 skip) {
-	_eqp
 	std::ostringstream out;
 	if (size == 0 || size > 39565)
 		return "";
@@ -143,13 +140,11 @@ std::string DumpPacketHexToString(const uchar* buf, uint32 size, uint32 cols, ui
 
 void DumpPacket(const uchar* buf, uint32 size)
 {
-	_eqp
 	DumpPacketHex(buf, size);
 //	DumpPacketAscii(buf,size);
 }
 
 void DumpPacket(const ServerPacket* pack, bool iShowInfo) {
-	_eqp
 	if (iShowInfo) {
 		std::cout << "Dumping ServerPacket: 0x" << std::hex << std::setfill('0') << std::setw(4) << pack->opcode << std::dec;
 		std::cout << " size:" << pack->size << std::endl;
@@ -158,28 +153,23 @@ void DumpPacket(const ServerPacket* pack, bool iShowInfo) {
 }
 
 void DumpPacketBin(const ServerPacket* pack) {
-	_eqp
 	DumpPacketBin(pack->pBuffer, pack->size);
 }
 
 void DumpPacketBin(uint32 data) {
-	_eqp
 	DumpPacketBin((uchar*)&data, sizeof(uint32));
 }
 
 void DumpPacketBin(uint16 data) {
-	_eqp
 	DumpPacketBin((uchar*)&data, sizeof(uint16));
 }
 
 void DumpPacketBin(uint8 data) {
-	_eqp
 	DumpPacketBin((uchar*)&data, sizeof(uint8));
 }
 
 
 void DumpPacketBin(const void* iData, uint32 len) {
-	_eqp
 	if (!len)
 		return;
 	const uint8* data = (const uint8*) iData;

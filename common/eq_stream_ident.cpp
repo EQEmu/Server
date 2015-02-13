@@ -5,7 +5,6 @@
 
 
 EQStreamIdentifier::~EQStreamIdentifier() {
-	_eqp
 	while(!m_identified.empty()) {
 		m_identified.front()->ReleaseFromUse();
 		m_identified.pop();
@@ -26,7 +25,6 @@ EQStreamIdentifier::~EQStreamIdentifier() {
 }
 
 void EQStreamIdentifier::RegisterPatch(const EQStream::Signature &sig, const char *name, OpcodeManager ** opcodes, const StructStrategy *structs) {
-	_eqp
 	Patch *p = new Patch;
 	p->signature = sig;
 	p->name = name;
@@ -36,7 +34,6 @@ void EQStreamIdentifier::RegisterPatch(const EQStream::Signature &sig, const cha
 }
 
 void EQStreamIdentifier::Process() {
-	_eqp
 	std::vector<Record>::iterator cur;
 	std::vector<Patch *>::iterator curp, endp;
 
@@ -146,13 +143,11 @@ void EQStreamIdentifier::Process() {
 }
 
 void EQStreamIdentifier::AddStream(std::shared_ptr<EQStream> &eqs) {
-	_eqp
 	m_streams.push_back(Record(eqs));
 	eqs = nullptr;
 }
 
 EQStreamInterface *EQStreamIdentifier::PopIdentified() {
-	_eqp
 	if(m_identified.empty())
 		return(nullptr);
 	EQStreamInterface *res = m_identified.front();
@@ -164,6 +159,5 @@ EQStreamIdentifier::Record::Record(std::shared_ptr<EQStream> s)
 :	stream(s),
 	expire(STREAM_IDENT_WAIT_MS)
 {
-	_eqp
 }
 
