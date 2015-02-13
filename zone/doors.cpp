@@ -41,14 +41,14 @@ extern EntityList entity_list;
 extern WorldServer worldserver;
 
 Doors::Doors(const Door* door) :
-    close_timer(5000),
-    m_Position(door->pos_x, door->pos_y, door->pos_z, door->heading),
-    m_Destination(door->dest_x, door->dest_y, door->dest_z, door->dest_heading)
+close_timer(5000),
+m_Position(door->pos_x, door->pos_y, door->pos_z, door->heading),
+m_Destination(door->dest_x, door->dest_y, door->dest_z, door->dest_heading)
 {
 	db_id = door->db_id;
 	door_id = door->door_id;
-	strn0cpy(zone_name,door->zone_name,32);
-	strn0cpy(door_name,door->door_name,32);
+	strn0cpy(zone_name, door->zone_name, 32);
+	strn0cpy(door_name, door->door_name, 32);
 	incline = door->incline;
 	opentype = door->opentype;
 	guild_id = door->guild_id;
@@ -57,7 +57,7 @@ Doors::Doors(const Door* door) :
 	nokeyring = door->nokeyring;
 	trigger_door = door->trigger_door;
 	trigger_type = door->trigger_type;
-	triggered=false;
+	triggered = false;
 	door_param = door->door_param;
 	size = door->size;
 	invert_state = door->invert_state;
@@ -65,7 +65,7 @@ Doors::Doors(const Door* door) :
 
 	close_timer.Disable();
 
-	strn0cpy(dest_zone,door->dest_zone,16);
+	strn0cpy(dest_zone, door->dest_zone, 16);
 	dest_instance_id = door->dest_instance_id;
 
 	is_ldon_door = door->is_ldon_door;
@@ -73,14 +73,14 @@ Doors::Doors(const Door* door) :
 }
 
 Doors::Doors(const char *dmodel, const glm::vec4& position, uint8 dopentype, uint16 dsize) :
-    close_timer(5000),
-    m_Position(position),
-    m_Destination(glm::vec4())
+close_timer(5000),
+m_Position(position),
+m_Destination(glm::vec4())
 {
 	db_id = database.GetDoorsCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion());
 	door_id = database.GetDoorsDBCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion());
-	strn0cpy(zone_name,zone->GetShortName(),32);
-	strn0cpy(door_name,dmodel,32);
+	strn0cpy(zone_name, zone->GetShortName(), 32);
+	strn0cpy(door_name, dmodel, 32);
 	incline = 0;
 	opentype = dopentype;
 	guild_id = 0;
@@ -89,7 +89,7 @@ Doors::Doors(const char *dmodel, const glm::vec4& position, uint8 dopentype, uin
 	nokeyring = 0;
 	trigger_door = 0;
 	trigger_type = 0;
-	triggered=false;
+	triggered = false;
 	door_param = 0;
 	size = dsize;
 	invert_state = 0;
@@ -97,7 +97,7 @@ Doors::Doors(const char *dmodel, const glm::vec4& position, uint8 dopentype, uin
 
 	close_timer.Disable();
 
-	strn0cpy(dest_zone,"NONE",32);
+	strn0cpy(dest_zone, "NONE", 32);
 	dest_instance_id = 0;
 
 	is_ldon_door = 0;
