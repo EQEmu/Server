@@ -653,9 +653,6 @@ struct Disciplines_Struct {
 };
 
 static const uint32 MAX_PLAYER_TRIBUTES = 5;
-static const uint32 MAX_PLAYER_BANDOLIER = 20;
-static const uint32 MAX_PLAYER_BANDOLIER_ITEMS = 4;
-static const uint32 MAX_POTIONS_IN_BELT = 5;
 static const uint32 TRIBUTE_NONE = 0xFFFFFFFF;
 
 struct Tribute_Struct {
@@ -684,7 +681,7 @@ struct BandolierItem_Struct
 struct Bandolier_Struct
 {
 	char Name[32];
-	BandolierItem_Struct Items[MAX_PLAYER_BANDOLIER_ITEMS];
+	BandolierItem_Struct Items[consts::BANDOLIER_ITEM_COUNT];
 };
 
 //len = 72
@@ -698,7 +695,7 @@ struct PotionBeltItem_Struct
 //len = 288
 struct PotionBelt_Struct
 {
-	PotionBeltItem_Struct Items[MAX_POTIONS_IN_BELT];
+	PotionBeltItem_Struct Items[consts::POTION_BELT_ITEM_COUNT];
 };
 
 static const uint32 MAX_GROUP_LEADERSHIP_AA_ARRAY = 16;
@@ -917,7 +914,7 @@ struct PlayerProfile_Struct //23576 Octets
 /*08288*/ uint32  aapoints_spent;		// Number of spent AA points
 /*08292*/ uint32  aapoints;				// Unspent AA points
 /*08296*/ uint8 unknown06160[4];
-/*08300*/ Bandolier_Struct bandoliers[MAX_PLAYER_BANDOLIER]; // [6400] bandolier contents
+/*08300*/ Bandolier_Struct bandoliers[consts::BANDOLIERS_SIZE]; // [6400] bandolier contents
 /*14700*/ PotionBelt_Struct  potionbelt;	// [360] potion belt 72 extra octets by adding 1 more belt slot
 /*15060*/ uint8 unknown12852[8];
 /*15068*/ uint32 available_slots;

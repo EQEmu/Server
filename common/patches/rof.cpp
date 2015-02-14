@@ -2286,13 +2286,13 @@ namespace RoF
 		outapp->WriteUInt8(0);				// Unknown
 		outapp->WriteUInt8(0);				// Unknown
 
-		outapp->WriteUInt32(structs::MAX_PLAYER_BANDOLIER);
+		outapp->WriteUInt32(consts::BANDOLIERS_SIZE);
 
-		for (uint32 r = 0; r < EmuConstants::BANDOLIERS_COUNT; r++)
+		for (uint32 r = 0; r < EmuConstants::BANDOLIERS_SIZE; r++)
 		{
 			outapp->WriteString(emu->bandoliers[r].Name);
 
-			for (uint32 j = 0; j < EmuConstants::BANDOLIER_SIZE; ++j)
+			for (uint32 j = 0; j < EmuConstants::BANDOLIER_ITEM_COUNT; ++j)
 			{
 				outapp->WriteString(emu->bandoliers[r].Items[j].Name);
 				outapp->WriteUInt32(emu->bandoliers[r].Items[j].ID);
@@ -2308,11 +2308,11 @@ namespace RoF
 			}
 		}
 
-		for (uint32 r = 0; r < structs::MAX_PLAYER_BANDOLIER - EmuConstants::BANDOLIERS_COUNT; r++)
+		for (uint32 r = 0; r < consts::BANDOLIERS_SIZE - EmuConstants::BANDOLIERS_SIZE; r++)
 		{
 			outapp->WriteString("");
 
-			for (uint32 j = 0; j < EmuConstants::BANDOLIER_SIZE; ++j)
+			for (uint32 j = 0; j < EmuConstants::BANDOLIER_ITEM_COUNT; ++j)
 			{
 				outapp->WriteString("");
 				outapp->WriteUInt32(0);
@@ -2320,9 +2320,9 @@ namespace RoF
 			}
 		}
 
-		outapp->WriteUInt32(structs::MAX_POTIONS_IN_BELT);
+		outapp->WriteUInt32(consts::POTION_BELT_ITEM_COUNT);
 
-		for (uint32 r = 0; r < EmuConstants::POTION_BELT_SIZE; r++)
+		for (uint32 r = 0; r < EmuConstants::POTION_BELT_ITEM_COUNT; r++)
 		{
 			outapp->WriteString(emu->potionbelt.Items[r].Name);
 			outapp->WriteUInt32(emu->potionbelt.Items[r].ID);
@@ -2336,7 +2336,7 @@ namespace RoF
 			}
 		}
 
-		for (uint32 r = 0; r < structs::MAX_POTIONS_IN_BELT - EmuConstants::POTION_BELT_SIZE; r++)
+		for (uint32 r = 0; r < consts::POTION_BELT_ITEM_COUNT - EmuConstants::POTION_BELT_ITEM_COUNT; r++)
 		{
 			outapp->WriteString("");
 			outapp->WriteUInt32(0);

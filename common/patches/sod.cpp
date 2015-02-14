@@ -1612,14 +1612,14 @@ namespace SoD
 		for (r = 0; r < 4; r++) {
 			OUT_str(bandoliers[r].Name);
 			uint32 k;
-			for (k = 0; k < structs::MAX_PLAYER_BANDOLIER_ITEMS; k++) {
+			for (k = 0; k < consts::BANDOLIER_ITEM_COUNT; k++) {
 				OUT(bandoliers[r].Items[k].ID);
 				OUT(bandoliers[r].Items[k].Icon);
 				OUT_str(bandoliers[r].Items[k].Name);
 			}
 		}
 		//	OUT(unknown07444[5120]);
-		for (r = 0; r < structs::MAX_POTIONS_IN_BELT; r++) {
+		for (r = 0; r < consts::POTION_BELT_ITEM_COUNT; r++) {
 			OUT(potionbelt.Items[r].ID);
 			OUT(potionbelt.Items[r].Icon);
 			OUT_str(potionbelt.Items[r].Name);

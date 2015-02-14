@@ -1179,8 +1179,8 @@ bool ZoneDatabase::LoadCharacterBandolier(uint32 character_id, PlayerProfile_Str
 {
 	std::string query = StringFormat("SELECT `bandolier_id`, `bandolier_slot`, `item_id`, `icon`, `bandolier_name` FROM `character_bandolier` WHERE `id` = %u LIMIT 16", character_id);
 	auto results = database.QueryDatabase(query); int i = 0; int r = 0; int si = 0;
-	for (i = 0; i < EmuConstants::BANDOLIERS_COUNT; i++)
-		for (int si = 0; si < EmuConstants::BANDOLIER_SIZE; si++)
+	for (i = 0; i < EmuConstants::BANDOLIERS_SIZE; i++)
+		for (int si = 0; si < EmuConstants::BANDOLIER_ITEM_COUNT; si++)
 			pp->bandoliers[i].Items[si].Icon = 0;
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
@@ -1218,7 +1218,7 @@ bool ZoneDatabase::LoadCharacterPotions(uint32 character_id, PlayerProfile_Struc
 {
 	std::string query = StringFormat("SELECT `potion_id`, `item_id`, `icon` FROM `character_potionbelt` WHERE `id` = %u LIMIT 4", character_id);
 	auto results = database.QueryDatabase(query); int i = 0;
-	for (i = 0; i < EmuConstants::POTION_BELT_SIZE; i++){
+	for (i = 0; i < EmuConstants::POTION_BELT_ITEM_COUNT; i++){
 		pp->potionbelt.Items[i].Icon = 0;
 		pp->potionbelt.Items[i].ID = 0;
 		strncpy(pp->potionbelt.Items[i].Name, "\0", 1);

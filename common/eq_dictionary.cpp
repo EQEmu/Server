@@ -924,13 +924,13 @@ uint32 EQLimits::BandoliersCount(ClientVersion clientVersion)
 {
 	static const uint32 local[CLIENT_VERSION_COUNT] = {
 /*Unknown*/		NOT_USED,
-/*62*/			EmuConstants::BANDOLIERS_COUNT,
-/*Titanium*/	EmuConstants::BANDOLIERS_COUNT,
-/*SoF*/			EmuConstants::BANDOLIERS_COUNT,
-/*SoD*/			EmuConstants::BANDOLIERS_COUNT,
-/*Underfoot*/	EmuConstants::BANDOLIERS_COUNT,
-/*RoF*/			EmuConstants::BANDOLIERS_COUNT,
-/*RoF2*/		EmuConstants::BANDOLIERS_COUNT,
+/*62*/			NOT_USED,
+/*Titanium*/	EmuConstants::BANDOLIERS_SIZE,
+/*SoF*/			EmuConstants::BANDOLIERS_SIZE,
+/*SoD*/			EmuConstants::BANDOLIERS_SIZE,
+/*Underfoot*/	EmuConstants::BANDOLIERS_SIZE,
+/*RoF*/			EmuConstants::BANDOLIERS_SIZE,
+/*RoF2*/		EmuConstants::BANDOLIERS_SIZE,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
@@ -945,13 +945,13 @@ uint32 EQLimits::BandolierSize(ClientVersion clientVersion)
 {
 	static const uint32 local[CLIENT_VERSION_COUNT] = {
 /*Unknown*/		NOT_USED,
-/*62*/			EmuConstants::BANDOLIER_SIZE,
-/*Titanium*/	EmuConstants::BANDOLIER_SIZE,
-/*SoF*/			EmuConstants::BANDOLIER_SIZE,
-/*SoD*/			EmuConstants::BANDOLIER_SIZE,
-/*Underfoot*/	EmuConstants::BANDOLIER_SIZE,
-/*RoF*/			EmuConstants::BANDOLIER_SIZE,
-/*RoF2*/		EmuConstants::BANDOLIER_SIZE,
+/*62*/			NOT_USED,
+/*Titanium*/	EmuConstants::BANDOLIER_ITEM_COUNT,
+/*SoF*/			EmuConstants::BANDOLIER_ITEM_COUNT,
+/*SoD*/			EmuConstants::BANDOLIER_ITEM_COUNT,
+/*Underfoot*/	EmuConstants::BANDOLIER_ITEM_COUNT,
+/*RoF*/			EmuConstants::BANDOLIER_ITEM_COUNT,
+/*RoF2*/		EmuConstants::BANDOLIER_ITEM_COUNT,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
@@ -966,13 +966,13 @@ uint32 EQLimits::PotionBeltSize(ClientVersion clientVersion)
 {
 	static const uint32 local[CLIENT_VERSION_COUNT] = {
 /*Unknown*/		NOT_USED,
-/*62*/			EmuConstants::POTION_BELT_SIZE,
-/*Titanium*/	EmuConstants::POTION_BELT_SIZE,
-/*SoF*/			EmuConstants::POTION_BELT_SIZE,
-/*SoD*/			EmuConstants::POTION_BELT_SIZE,
-/*Underfoot*/	EmuConstants::POTION_BELT_SIZE,
-/*RoF*/			EmuConstants::POTION_BELT_SIZE,
-/*RoF2*/		EmuConstants::POTION_BELT_SIZE,
+/*62*/			NOT_USED,
+/*Titanium*/	EmuConstants::POTION_BELT_ITEM_COUNT,
+/*SoF*/			EmuConstants::POTION_BELT_ITEM_COUNT,
+/*SoD*/			EmuConstants::POTION_BELT_ITEM_COUNT,
+/*Underfoot*/	EmuConstants::POTION_BELT_ITEM_COUNT,
+/*RoF*/			EmuConstants::POTION_BELT_ITEM_COUNT,
+/*RoF2*/		EmuConstants::POTION_BELT_ITEM_COUNT,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,

@@ -158,6 +158,8 @@ namespace Convert {
 		/*88*/
 	} PVPStatsEntry_Struct;
 
+	static const size_t BANDOLIERS_SIZE = 4;
+	static const size_t BANDOLIER_ITEM_COUNT = 4;
 	struct BandolierItem_Struct {
 		uint32 ID;
 		uint32 Icon;
@@ -165,16 +167,17 @@ namespace Convert {
 	};
 	struct Bandolier_Struct {
 		char Name[32];
-		Convert::BandolierItem_Struct Items[EmuConstants::BANDOLIER_SIZE];
+		Convert::BandolierItem_Struct Items[Convert::BANDOLIER_ITEM_COUNT];
 	};
 
+	static const size_t POTION_BELT_ITEM_COUNT = 4;
 	struct PotionBeltItem_Struct {
 		uint32 ID;
 		uint32 Icon;
 		char Name[64];
 	};
 	struct PotionBelt_Struct {
-		Convert::PotionBeltItem_Struct Items[EmuConstants::POTION_BELT_SIZE];
+		Convert::PotionBeltItem_Struct Items[Convert::POTION_BELT_ITEM_COUNT];
 	};
 
 	struct SuspendedMinion_Struct
@@ -354,7 +357,7 @@ namespace Convert {
 		/*12800*/	uint32							expAA;
 		/*12804*/	uint32							aapoints;			//avaliable, unspent
 		/*12808*/	uint8							unknown12844[36];
-		/*12844*/	Convert::Bandolier_Struct		bandoliers[EmuConstants::BANDOLIERS_COUNT];
+		/*12844*/	Convert::Bandolier_Struct		bandoliers[Convert::BANDOLIERS_SIZE];
 		/*14124*/	uint8							unknown14160[4506];
 		/*18630*/	Convert::SuspendedMinion_Struct	SuspendedMinion; // No longer in use
 		/*19240*/	uint32							timeentitledonaccount;
@@ -1438,9 +1441,9 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				if (rquery != ""){ results = QueryDatabase(rquery); }
 				/* Run Bandolier Convert */
 				first_entry = 0; rquery = "";
-				for (i = 0; i < EmuConstants::BANDOLIERS_COUNT; i++){
+				for (i = 0; i < Convert::BANDOLIERS_SIZE; i++){
 					if (strlen(pp->bandoliers[i].Name) < 32) {
-						for (int si = 0; si < EmuConstants::BANDOLIER_SIZE; si++){
+						for (int si = 0; si < Convert::BANDOLIER_ITEM_COUNT; si++){
 							if (pp->bandoliers[i].Items[si].ID > 0){
 								if (first_entry != 1) {
 									rquery = StringFormat("REPLACE INTO `character_bandolier` (id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name) VALUES (%i, %u, %i, %u, %u, '%s')", character_id, i, si, pp->bandoliers[i].Items[si].ID, pp->bandoliers[i].Items[si].Icon, pp->bandoliers[i].Name);
@@ -1454,7 +1457,7 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				if (rquery != ""){ results = QueryDatabase(rquery); }
 				/* Run Potion Belt Convert */
 				first_entry = 0; rquery = "";
-				for (i = 0; i < EmuConstants::POTION_BELT_SIZE; i++){
+				for (i = 0; i < Convert::POTION_BELT_ITEM_COUNT; i++){
 					if (pp->potionbelt.Items[i].ID > 0){
 						if (first_entry != 1){
 							rquery = StringFormat("REPLACE INTO `character_potionbelt` (id, potion_id, item_id, icon) VALUES (%i, %u, %u, %u)", character_id, i, pp->potionbelt.Items[i].ID, pp->potionbelt.Items[i].Icon);

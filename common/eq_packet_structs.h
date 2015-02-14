@@ -778,7 +778,7 @@ struct BandolierItem_Struct
 struct Bandolier_Struct
 {
 	char Name[32];
-	BandolierItem_Struct Items[EmuConstants::BANDOLIER_SIZE];
+	BandolierItem_Struct Items[EmuConstants::BANDOLIER_ITEM_COUNT];
 };
 
 //len = 72
@@ -792,7 +792,7 @@ struct PotionBeltItem_Struct
 //len = 288
 struct PotionBelt_Struct
 {
-	PotionBeltItem_Struct Items[EmuConstants::POTION_BELT_SIZE];
+	PotionBeltItem_Struct Items[EmuConstants::POTION_BELT_ITEM_COUNT];
 };
 
 struct MovePotionToBelt_Struct
@@ -1121,7 +1121,7 @@ struct PlayerProfile_Struct
 /*12800*/	uint32				expAA;
 /*12804*/	uint32				aapoints;			//avaliable, unspent
 /*12808*/	uint8				unknown12844[36];
-/*12844*/	Bandolier_Struct	bandoliers[EmuConstants::BANDOLIERS_COUNT];
+/*12844*/	Bandolier_Struct	bandoliers[EmuConstants::BANDOLIERS_SIZE];
 /*14124*/	uint8				unknown14160[4506];
 /*18630*/	SuspendedMinion_Struct	SuspendedMinion; // No longer in use
 /*19240*/	uint32				timeentitledonaccount;

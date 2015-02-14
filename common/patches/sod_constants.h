@@ -174,9 +174,10 @@ namespace SoD {
 		static const uint16 ITEM_COMMON_SIZE = 5;
 		static const uint16 ITEM_CONTAINER_SIZE = 10;
 
-		static const uint32 BANDOLIERS_COUNT = 20;	// count = number of bandolier instances
-		static const uint32 BANDOLIER_SIZE = 4;		// size = number of equipment slots in bandolier instance
-		static const uint32 POTION_BELT_SIZE = 5;
+		static const size_t BANDOLIERS_SIZE = 20;		// number of bandolier instances
+		static const size_t BANDOLIER_ITEM_COUNT = 4;	// number of equipment slots in bandolier instance
+
+		static const size_t POTION_BELT_ITEM_COUNT = 5;
 
 		static const size_t TEXT_LINK_BODY_LENGTH = 50;
 	}
