@@ -3200,6 +3200,13 @@ struct BecomeTrader_Struct {
 };
 
 struct Trader_ShowItems_Struct {
+	/*000*/	uint32 Code;
+	/*004*/	uint16 TraderID;
+	/*008*/	uint32 Unknown08;
+	/*012*/
+};
+
+struct Trader_ShowItems_Struct_WIP {
 /*000*/	uint32 Code;
 /*004*/	char   SerialNumber[17];
 /*021*/	uint8  Unknown21;
@@ -3262,9 +3269,10 @@ struct TraderDelItem_Struct{
 };
 
 struct TraderClick_Struct{
-	uint32 traderid;
-	uint32 unknown4[2];
-	uint32 approval;
+	/*000*/	uint32 Code;
+	/*004*/	uint32 TraderID;
+	/*008*/	uint32 Approval;
+	/*012*/	
 };
 
 struct FormattedMessage_Struct{

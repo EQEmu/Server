@@ -1138,7 +1138,6 @@ void Client::Trader_EndTrader() {
 
 	QueuePacket(outapp);
 
-
 	safe_delete(outapp);
 
 	WithCustomer(0);

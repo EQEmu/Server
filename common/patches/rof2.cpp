@@ -3578,7 +3578,9 @@ namespace RoF2
 			// Live actually has 200 items now, but 80 is the most our internal struct supports
 			for (uint32 i = 0; i < 200; i++)
 			{
-				strncpy(eq->items[i].SerialNumber, "0000000000000000", sizeof(eq->items[i].SerialNumber));
+				//strncpy(eq->items[i].SerialNumber, "0000000000000000", sizeof(eq->items[i].SerialNumber));
+				//snprintf(eq->items[i].SerialNumber, sizeof(eq->items[i].SerialNumber), "%016d", emu->SerialNumber[i]);
+				snprintf(eq->items[i].SerialNumber, sizeof(eq->items[i].SerialNumber), "%016d", 0);
 				eq->items[i].Unknown18 = 0;
 				if (i < 80) {
 					eq->ItemCost[i] = emu->ItemCost[i];
@@ -3596,10 +3598,11 @@ namespace RoF2
 			SETUP_DIRECT_ENCODE(Trader_ShowItems_Struct, structs::Trader_ShowItems_Struct);
 
 			eq->Code = emu->Code;
-			strncpy(eq->SerialNumber, "0000000000000000", sizeof(eq->SerialNumber));
+			//strncpy(eq->SerialNumber, "0000000000000000", sizeof(eq->SerialNumber));
+			//snprintf(eq->SerialNumber, sizeof(eq->SerialNumber), "%016d", 0);
 			eq->TraderID = emu->TraderID;
-			eq->Stacksize = 0;
-			eq->Price = 0;
+			//eq->Stacksize = 0;
+			//eq->Price = 0;
 
 			FINISH_ENCODE();
 		}
@@ -3630,6 +3633,18 @@ namespace RoF2
 		OUT(ItemID);
 		OUT(Quantity);
 		OUT(AlreadySold);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_TraderShop)
+	{
+		ENCODE_LENGTH_EXACT(TraderClick_Struct);
+		SETUP_DIRECT_ENCODE(TraderClick_Struct, structs::TraderClick_Struct);
+
+		//eq->Code = emu->Unknown004;
+		OUT(TraderID);
+		OUT(Approval);
 
 		FINISH_ENCODE();
 	}
@@ -4215,7 +4230,6 @@ namespace RoF2
 			return;
 
 		SETUP_DIRECT_DECODE(NewBazaarInspect_Struct, structs::NewBazaarInspect_Struct);
-		MEMSET_IN(structs::NewBazaarInspect_Struct);
 
 		IN(Beginning.Action);
 		memcpy(emu->Name, eq->Name, sizeof(emu->Name));
@@ -4912,7 +4926,6 @@ namespace RoF2
 		{
 			DECODE_LENGTH_EXACT(structs::ClickTrader_Struct);
 			SETUP_DIRECT_DECODE(ClickTrader_Struct, structs::ClickTrader_Struct);
-			MEMSET_IN(ClickTrader_Struct);
 
 			emu->Code = eq->Code;
 			// Live actually has 200 items now, but 80 is the most our internal struct supports
@@ -4928,7 +4941,6 @@ namespace RoF2
 		{
 			DECODE_LENGTH_EXACT(structs::Trader_ShowItems_Struct);
 			SETUP_DIRECT_DECODE(Trader_ShowItems_Struct, structs::Trader_ShowItems_Struct);
-			MEMSET_IN(Trader_ShowItems_Struct);
 
 			emu->Code = eq->Code;
 			emu->TraderID = eq->TraderID;
@@ -4939,9 +4951,8 @@ namespace RoF2
 		{
 			DECODE_LENGTH_EXACT(structs::TraderStatus_Struct);
 			SETUP_DIRECT_DECODE(TraderStatus_Struct, structs::TraderStatus_Struct);
-			MEMSET_IN(TraderStatus_Struct);
 
-			emu->Code = eq->Code;
+			emu->Code = eq->Code;	// 11 = Start Trader, 2 = End Trader, 22 = ? - Guessing
 
 			FINISH_DIRECT_DECODE();
 		}
@@ -4951,7 +4962,6 @@ namespace RoF2
 	{
 		DECODE_LENGTH_EXACT(structs::TraderBuy_Struct);
 		SETUP_DIRECT_DECODE(TraderBuy_Struct, structs::TraderBuy_Struct);
-		MEMSET_IN(TraderBuy_Struct);
 
 		IN(Action);
 		IN(Price);
@@ -4961,6 +4971,29 @@ namespace RoF2
 		IN(Quantity);
 
 		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_TraderShop)
+	{
+		uint32 psize = __packet->size;
+		if (psize == sizeof(structs::TraderClick_Struct))
+		{
+			DECODE_LENGTH_EXACT(structs::TraderClick_Struct);
+			SETUP_DIRECT_DECODE(TraderClick_Struct, structs::TraderClick_Struct);
+			//MEMSET_IN(TraderClick_Struct);
+
+			//emu->Unknown004 = eq->Code;
+			IN(TraderID);
+			IN(Approval);
+
+			Log.Out(Logs::Detail, Logs::Trading, "DECODE(OP_TraderShop): Decoded packet size (%d) to size (%d)", sizeof(structs::TraderClick_Struct), sizeof(TraderClick_Struct));
+
+			FINISH_DIRECT_DECODE();
+		}
+		else
+		{
+			Log.Out(Logs::Detail, Logs::Trading, "DECODE(OP_TraderShop): Decode Size Mismatch (%d), expected (%d)", psize, sizeof(structs::TraderClick_Struct));
+		}
 	}
 
 	DECODE(OP_TradeSkillCombine)

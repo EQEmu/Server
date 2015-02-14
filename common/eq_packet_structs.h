@@ -3146,6 +3146,7 @@ struct Trader_ShowItems_Struct{
 /*000*/	uint32 Code;
 /*004*/	uint32 TraderID;
 /*008*/	uint32 Unknown08[3];
+/*020*/
 };
 
 struct TraderBuy_Struct{
@@ -3194,6 +3195,7 @@ struct TraderClick_Struct{
 /*004*/	uint32 Unknown004;
 /*008*/	uint32 Unknown008;
 /*012*/	uint32 Approval;
+/*016*/
 };
 
 struct FormattedMessage_Struct{

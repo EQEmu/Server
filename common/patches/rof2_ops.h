@@ -2,9 +2,12 @@
 // Begin RoF2 Encodes
 
 E(OP_SendMembershipDetails)
+E(OP_TraderShop)
 
 // incoming packets that require a DECODE translation:
 // Begin RoF2 Decodes
+
+D(OP_TraderShop)
 
 // End RoF2 Encodes/Decodes
 
