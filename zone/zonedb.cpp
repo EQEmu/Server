@@ -1175,20 +1175,21 @@ bool ZoneDatabase::LoadCharacterMaterialColor(uint32 character_id, PlayerProfile
 	return true;
 }
 
-bool ZoneDatabase::LoadCharacterBandolier(uint32 character_id, PlayerProfile_Struct* pp){
+bool ZoneDatabase::LoadCharacterBandolier(uint32 character_id, PlayerProfile_Struct* pp)
+{
 	std::string query = StringFormat("SELECT `bandolier_id`, `bandolier_slot`, `item_id`, `icon`, `bandolier_name` FROM `character_bandolier` WHERE `id` = %u LIMIT 16", character_id);
 	auto results = database.QueryDatabase(query); int i = 0; int r = 0; int si = 0;
 	for (i = 0; i < EmuConstants::BANDOLIERS_COUNT; i++)
 		for (int si = 0; si < EmuConstants::BANDOLIER_SIZE; si++)
-			pp->bandoliers[i].items[si].icon = 0;
+			pp->bandoliers[i].Items[si].Icon = 0;
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		r = 0;
 		i = atoi(row[r]); /* Bandolier ID */ r++;
 		si = atoi(row[r]); /* Bandolier Slot */ r++;
-		pp->bandoliers[i].items[si].item_id = atoi(row[r]); r++;
-		pp->bandoliers[i].items[si].icon = atoi(row[r]); r++;
-		strcpy(pp->bandoliers[i].name, row[r]);  r++;
+		pp->bandoliers[i].Items[si].ID = atoi(row[r]); r++;
+		pp->bandoliers[i].Items[si].Icon = atoi(row[r]); r++;
+		strcpy(pp->bandoliers[i].Name, row[r]);  r++;
 		si++;
 	}
 	return true;
@@ -1213,13 +1214,14 @@ bool ZoneDatabase::LoadCharacterTribute(uint32 character_id, PlayerProfile_Struc
 	return true;
 }
 
-bool ZoneDatabase::LoadCharacterPotions(uint32 character_id, PlayerProfile_Struct* pp){
+bool ZoneDatabase::LoadCharacterPotions(uint32 character_id, PlayerProfile_Struct* pp)
+{
 	std::string query = StringFormat("SELECT `potion_id`, `item_id`, `icon` FROM `character_potionbelt` WHERE `id` = %u LIMIT 4", character_id);
 	auto results = database.QueryDatabase(query); int i = 0;
 	for (i = 0; i < EmuConstants::POTION_BELT_SIZE; i++){
-		pp->potionbelt.items[i].icon = 0;
-		pp->potionbelt.items[i].item_id = 0;
-		strncpy(pp->potionbelt.items[i].item_name, "\0", 1);
+		pp->potionbelt.Items[i].Icon = 0;
+		pp->potionbelt.Items[i].ID = 0;
+		strncpy(pp->potionbelt.Items[i].Name, "\0", 1);
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
@@ -1230,9 +1232,9 @@ bool ZoneDatabase::LoadCharacterPotions(uint32 character_id, PlayerProfile_Struc
 		if(!item)
 			continue;
 
-		pp->potionbelt.items[i].item_id = item_id;
-		pp->potionbelt.items[i].icon = atoi(row[2]);
-		strncpy(pp->potionbelt.items[i].item_name, item->Name, 64);
+		pp->potionbelt.Items[i].ID = item_id;
+		pp->potionbelt.Items[i].Icon = atoi(row[2]);
+		strncpy(pp->potionbelt.Items[i].Name, item->Name, 64);
 	}
 
 	return true;
@@ -1326,7 +1328,8 @@ bool ZoneDatabase::SaveCharacterTribute(uint32 character_id, PlayerProfile_Struc
 	return true;
 }
 
-bool ZoneDatabase::SaveCharacterBandolier(uint32 character_id, uint8 bandolier_id, uint8 bandolier_slot, uint32 item_id, uint32 icon, const char* bandolier_name){
+bool ZoneDatabase::SaveCharacterBandolier(uint32 character_id, uint8 bandolier_id, uint8 bandolier_slot, uint32 item_id, uint32 icon, const char* bandolier_name)
+{
 	char bandolier_name_esc[64];
 	DoEscapeString(bandolier_name_esc, bandolier_name, strlen(bandolier_name));
 	std::string query = StringFormat("REPLACE INTO `character_bandolier` (id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name) VALUES (%u, %u, %u, %u, %u,'%s')", character_id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name_esc);
@@ -1335,7 +1338,8 @@ bool ZoneDatabase::SaveCharacterBandolier(uint32 character_id, uint8 bandolier_i
 	return true;
 }
 
-bool ZoneDatabase::SaveCharacterPotionBelt(uint32 character_id, uint8 potion_id, uint32 item_id, uint32 icon) {
+bool ZoneDatabase::SaveCharacterPotionBelt(uint32 character_id, uint8 potion_id, uint32 item_id, uint32 icon)
+{
 	std::string query = StringFormat("REPLACE INTO `character_potionbelt` (id, potion_id, item_id, icon) VALUES (%u, %u, %u, %u)", character_id, potion_id, item_id, icon);
 	auto results = QueryDatabase(query);
 	return true;

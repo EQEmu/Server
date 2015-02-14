@@ -2476,97 +2476,99 @@ EQApplicationPacket* Client::ReturnItemPacket(int16 slot_id, const ItemInst* ins
 	return outapp;
 }
 
-static int16 BandolierSlotToWeaponSlot(int BandolierSlot) {
-
-	switch(BandolierSlot) {
-		case bandolierMainHand:
-			return MainPrimary;
-		case bandolierOffHand:
-			return MainSecondary;
-		case bandolierRange:
-			return MainRange;
-		default:
-			return MainAmmo;
+static int16 BandolierSlotToWeaponSlot(int BandolierSlot)
+{
+	switch (BandolierSlot)
+	{
+	case bandolierPrimary:
+		return MainPrimary;
+	case bandolierSecondary:
+		return MainSecondary;
+	case bandolierRange:
+		return MainRange;
+	default:
+		return MainAmmo;
 	}
 }
 
-void Client::CreateBandolier(const EQApplicationPacket *app) {
-
+void Client::CreateBandolier(const EQApplicationPacket *app)
+{
 	// Store bandolier set with the number and name passed by the client, along with the items that are currently
 	// in the players weapon slots.
 
 	BandolierCreate_Struct *bs = (BandolierCreate_Struct*)app->pBuffer;
 
-	Log.Out(Logs::Detail, Logs::Inventory, "Char: %s Creating Bandolier Set %i, Set Name: %s", GetName(), bs->number, bs->name);
-	strcpy(m_pp.bandoliers[bs->number].name, bs->name);
+	Log.Out(Logs::Detail, Logs::Inventory, "Char: %s Creating Bandolier Set %i, Set Name: %s", GetName(), bs->Number, bs->Name);
+	strcpy(m_pp.bandoliers[bs->Number].Name, bs->Name);
 
 	const ItemInst* InvItem = nullptr; 
 	const Item_Struct *BaseItem = nullptr; 
-	int16 WeaponSlot;
+	int16 WeaponSlot = 0;
 
-	for(int BandolierSlot = bandolierMainHand; BandolierSlot <= bandolierAmmo; BandolierSlot++) {
+	for(int BandolierSlot = bandolierPrimary; BandolierSlot <= bandolierAmmo; BandolierSlot++) {
 		WeaponSlot = BandolierSlotToWeaponSlot(BandolierSlot);
 		InvItem = GetInv()[WeaponSlot];
 		if(InvItem) {
 			BaseItem = InvItem->GetItem();
 			Log.Out(Logs::Detail, Logs::Inventory, "Char: %s adding item %s to slot %i", GetName(),BaseItem->Name, WeaponSlot);
-			m_pp.bandoliers[bs->number].items[BandolierSlot].item_id = BaseItem->ID;
-			m_pp.bandoliers[bs->number].items[BandolierSlot].icon = BaseItem->Icon;
-			database.SaveCharacterBandolier(this->CharacterID(), bs->number, BandolierSlot, m_pp.bandoliers[bs->number].items[BandolierSlot].item_id, m_pp.bandoliers[bs->number].items[BandolierSlot].icon, bs->name);
+			m_pp.bandoliers[bs->Number].Items[BandolierSlot].ID = BaseItem->ID;
+			m_pp.bandoliers[bs->Number].Items[BandolierSlot].Icon = BaseItem->Icon;
+			database.SaveCharacterBandolier(this->CharacterID(), bs->Number, BandolierSlot, m_pp.bandoliers[bs->Number].Items[BandolierSlot].ID, m_pp.bandoliers[bs->Number].Items[BandolierSlot].Icon, bs->Name);
 		}
 		else {
 			Log.Out(Logs::Detail, Logs::Inventory, "Char: %s no item in slot %i", GetName(), WeaponSlot);
-			m_pp.bandoliers[bs->number].items[BandolierSlot].item_id = 0;
-			m_pp.bandoliers[bs->number].items[BandolierSlot].icon = 0;
+			m_pp.bandoliers[bs->Number].Items[BandolierSlot].ID = 0;
+			m_pp.bandoliers[bs->Number].Items[BandolierSlot].Icon = 0;
 		}
 	}
 }
 
-void Client::RemoveBandolier(const EQApplicationPacket *app) {
+void Client::RemoveBandolier(const EQApplicationPacket *app)
+{
 	BandolierDelete_Struct *bds = (BandolierDelete_Struct*)app->pBuffer;
-	Log.Out(Logs::Detail, Logs::Inventory, "Char: %s removing set", GetName(), bds->number);
-	memset(m_pp.bandoliers[bds->number].name, 0, 32);
-	for(int i = bandolierMainHand; i <= bandolierAmmo; i++) {
-		m_pp.bandoliers[bds->number].items[i].item_id = 0;
-		m_pp.bandoliers[bds->number].items[i].icon = 0; 
+	Log.Out(Logs::Detail, Logs::Inventory, "Char: %s removing set", GetName(), bds->Number);
+	memset(m_pp.bandoliers[bds->Number].Name, 0, 32);
+	for(int i = bandolierPrimary; i <= bandolierAmmo; i++) {
+		m_pp.bandoliers[bds->Number].Items[i].ID = 0;
+		m_pp.bandoliers[bds->Number].Items[i].Icon = 0; 
 	}
-	database.DeleteCharacterBandolier(this->CharacterID(), bds->number);
+	database.DeleteCharacterBandolier(this->CharacterID(), bds->Number);
 }
 
-void Client::SetBandolier(const EQApplicationPacket *app) {
-
+void Client::SetBandolier(const EQApplicationPacket *app)
+{
 	// Swap the weapons in the given bandolier set into the character's weapon slots and return
 	// any items currently in the weapon slots to inventory.
 
 	BandolierSet_Struct *bss = (BandolierSet_Struct*)app->pBuffer;
-	Log.Out(Logs::Detail, Logs::Inventory, "Char: %s activating set %i", GetName(), bss->number);
-	int16 slot;
-	int16 WeaponSlot;
+	Log.Out(Logs::Detail, Logs::Inventory, "Char: %s activating set %i", GetName(), bss->Number);
+	int16 slot = 0;
+	int16 WeaponSlot = 0;
 	ItemInst *BandolierItems[4]; // Temporary holding area for the weapons we pull out of their inventory
 
 	// First we pull the items for this bandolier set out of their inventory, this makes space to put the
 	// currently equipped items back.
-	for(int BandolierSlot = bandolierMainHand; BandolierSlot <= bandolierAmmo; BandolierSlot++) {
+	for(int BandolierSlot = bandolierPrimary; BandolierSlot <= bandolierAmmo; BandolierSlot++) {
 		// If this bandolier set has an item in this position
-		if(m_pp.bandoliers[bss->number].items[BandolierSlot].item_id) {
+		if(m_pp.bandoliers[bss->Number].Items[BandolierSlot].ID) {
 			WeaponSlot = BandolierSlotToWeaponSlot(BandolierSlot);
 
 			// Check if the player has the item specified in the bandolier set on them.
 			//
-			slot = m_inv.HasItem(m_pp.bandoliers[bss->number].items[BandolierSlot].item_id, 1,
+			slot = m_inv.HasItem(m_pp.bandoliers[bss->Number].Items[BandolierSlot].ID, 1,
 							invWhereWorn|invWherePersonal);
 
 			// removed 'invWhereCursor' argument from above and implemented slots 30, 331-340 checks here
 			if (slot == INVALID_INDEX) {
 				if (m_inv.GetItem(MainCursor)) {
-					if (m_inv.GetItem(MainCursor)->GetItem()->ID == m_pp.bandoliers[bss->number].items[BandolierSlot].item_id &&
+					if (m_inv.GetItem(MainCursor)->GetItem()->ID == m_pp.bandoliers[bss->Number].Items[BandolierSlot].ID &&
 						m_inv.GetItem(MainCursor)->GetCharges() >= 1) { // '> 0' the same, but this matches Inventory::_HasItem conditional check
 						slot = MainCursor;
 					}
 					else if (m_inv.GetItem(MainCursor)->GetItem()->ItemClass == 1) {
 						for(int16 CursorBagSlot = EmuConstants::CURSOR_BAG_BEGIN; CursorBagSlot <= EmuConstants::CURSOR_BAG_END; CursorBagSlot++) {
 							if (m_inv.GetItem(CursorBagSlot)) {
-								if (m_inv.GetItem(CursorBagSlot)->GetItem()->ID == m_pp.bandoliers[bss->number].items[BandolierSlot].item_id &&
+								if (m_inv.GetItem(CursorBagSlot)->GetItem()->ID == m_pp.bandoliers[bss->Number].Items[BandolierSlot].ID &&
 									m_inv.GetItem(CursorBagSlot)->GetCharges() >= 1) { // ditto
 										slot = CursorBagSlot;
 										break;
@@ -2630,14 +2632,14 @@ void Client::SetBandolier(const EQApplicationPacket *app) {
 	// Now we move the required weapons into the character weapon slots, and return any items we are replacing
 	// back to inventory.
 	//
-	for(int BandolierSlot = bandolierMainHand; BandolierSlot <= bandolierAmmo; BandolierSlot++) {
+	for(int BandolierSlot = bandolierPrimary; BandolierSlot <= bandolierAmmo; BandolierSlot++) {
 
 		// Find the inventory slot corresponding to this bandolier slot
 
 		WeaponSlot = BandolierSlotToWeaponSlot(BandolierSlot);
 
 		// if there is an item in this Bandolier slot ?
-		if(m_pp.bandoliers[bss->number].items[BandolierSlot].item_id) {
+		if(m_pp.bandoliers[bss->Number].Items[BandolierSlot].ID) {
 			// if the player has this item in their inventory, and it is not already where it needs to be
 			if(BandolierItems[BandolierSlot]) {
 				// Pull the item that we are going to replace

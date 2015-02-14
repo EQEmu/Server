@@ -1,3 +1,24 @@
+/*
+EQEMu:  Everquest Server Emulator
+
+Copyright (C) 2001-2015 EQEMu Development Team (http://eqemulator.net)
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; version 2 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY except by those people which sell it, which
+are required to give you total support for your newly bought product;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*/
+
 #ifndef CLIENTVERSIONS_H
 #define CLIENTVERSIONS_H
 
@@ -46,29 +67,29 @@ static const char* ClientVersionName(ClientVersion version)
 	switch (version)
 	{
 	case ClientVersion::Unknown:
-		return "ClientVersion::Unknown";
+		return "Unknown";
 	case ClientVersion::Client62:
-		return "ClientVersion::Client62";
+		return "Client62";
 	case ClientVersion::Titanium:
-		return "ClientVersion::Titanium";
+		return "Titanium";
 	case ClientVersion::SoF:
-		return "ClientVersion::SoF";
+		return "SoF";
 	case ClientVersion::SoD:
-		return "ClientVersion::SoD";
+		return "SoD";
 	case ClientVersion::UF:
-		return "ClientVersion::UF";
+		return "UF";
 	case ClientVersion::RoF:
-		return "ClientVersion::RoF";
+		return "RoF";
 	case ClientVersion::RoF2:
-		return "ClientVersion::RoF2";
+		return "RoF2";
 	case ClientVersion::MobNPC:
-		return "ClientVersion::MobNPC";
+		return "MobNPC";
 	case ClientVersion::MobMerc:
-		return "ClientVersion::MobMerc";
+		return "MobMerc";
 	case ClientVersion::MobBot:
-		return "ClientVersion::MobBot";
+		return "MobBot";
 	case ClientVersion::MobPet:
-		return "ClientVersion::MobPet";
+		return "MobPet";
 	default:
 		return "<ERROR> Invalid ClientVersion";
 	};

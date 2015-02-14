@@ -2364,15 +2364,15 @@ namespace RoF2
 
 		for (uint32 r = 0; r < EmuConstants::BANDOLIERS_COUNT; r++)
 		{
-			outapp->WriteString(emu->bandoliers[r].name);
+			outapp->WriteString(emu->bandoliers[r].Name);
 
 			for (uint32 j = 0; j < EmuConstants::BANDOLIER_SIZE; ++j)
 			{
-				outapp->WriteString(emu->bandoliers[r].items[j].item_name);
-				outapp->WriteUInt32(emu->bandoliers[r].items[j].item_id);
-				if (emu->bandoliers[r].items[j].icon)
+				outapp->WriteString(emu->bandoliers[r].Items[j].Name);
+				outapp->WriteUInt32(emu->bandoliers[r].Items[j].ID);
+				if (emu->bandoliers[r].Items[j].Icon)
 				{
-					outapp->WriteSInt32(emu->bandoliers[r].items[j].icon);
+					outapp->WriteSInt32(emu->bandoliers[r].Items[j].Icon);
 				}
 				else
 				{
@@ -2398,11 +2398,11 @@ namespace RoF2
 
 		for (uint32 r = 0; r < EmuConstants::POTION_BELT_SIZE; r++)
 		{
-			outapp->WriteString(emu->potionbelt.items[r].item_name);
-			outapp->WriteUInt32(emu->potionbelt.items[r].item_id);
-			if (emu->potionbelt.items[r].icon)
+			outapp->WriteString(emu->potionbelt.Items[r].Name);
+			outapp->WriteUInt32(emu->potionbelt.Items[r].ID);
+			if (emu->potionbelt.Items[r].Icon)
 			{
-				outapp->WriteSInt32(emu->potionbelt.items[r].icon);
+				outapp->WriteSInt32(emu->potionbelt.Items[r].Icon);
 			}
 			else
 			{
