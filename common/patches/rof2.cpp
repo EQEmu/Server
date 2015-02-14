@@ -104,7 +104,7 @@ namespace RoF2
 	{
 		//all opcodes default to passthrough.
 #include "ss_register.h"
-#include "rof_ops.h"
+#include "rof2_ops.h"
 	}
 
 	std::string Strategy::Describe() const
