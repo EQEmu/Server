@@ -33,8 +33,9 @@ extern std::vector<RaceClassCombos> character_create_race_class_combos;
 
 
 // the current stuff is at the bottom of this function
-void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct* cs, uint32 ClientVersion) {
-	Inventory *inv;
+void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct* cs, uint32 ClientVersion)
+{
+	Inventory *inv = nullptr;
 	uint8 has_home = 0;
 	uint8 has_bind = 0;
 
@@ -74,7 +75,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 		"character_data             "
 		"WHERE `account_id` = %i ORDER BY `name` LIMIT 10   ", account_id);
 	auto results = database.QueryDatabase(cquery); int char_num = 0;
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto row = results.begin(); row != results.end() && char_num < 10; ++row, ++char_num) {
 		PlayerProfile_Struct pp;
 		memset(&pp, 0, sizeof(PlayerProfile_Struct));
 
@@ -167,6 +168,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 		}
 
 		/* Load Inventory */
+		// If we ensure that the material data is updated appropriately, we can do away with inventory loads
 		inv = new Inventory;
 		if (GetInventory(account_id, cs->name[char_num], inv))
 		{
@@ -237,11 +239,6 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 		}
 
 		safe_delete(inv);
-
-		if (++char_num > 10)
-		{
-			break;
-		}
 	}
 
 	return;

@@ -968,7 +968,7 @@ void Client::BulkSendInventoryItems()
 void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	const Item_Struct* handyitem = nullptr;
 	uint32 numItemSlots = 80; //The max number of items passed in the transaction.
-	if (ClientVersionBit & BIT_RoFAndLater) { // RoF+ can send 200 items
+	if (m_ClientVersionBit & BIT_RoFAndLater) { // RoF+ can send 200 items
 		numItemSlots = 200;
 	}
 	const Item_Struct *item;

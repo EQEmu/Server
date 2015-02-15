@@ -1191,8 +1191,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	conn_state = ReceivedZoneEntry;
 
 	SetClientVersion(Connection()->GetClientVersion());
-	if (m_ClientVersion != ClientVersion::Unknown)
-		ClientVersionBit = 1 << (static_cast<unsigned int>(m_ClientVersion) - 1);
+	m_ClientVersionBit = ClientBitFromVersion(Connection()->GetClientVersion());
 
 	bool siv = m_inv.SetInventoryVersion(m_ClientVersion);
 	Log.Out(Logs::General, Logs::None, "%s inventory version to %s(%i)", (siv ? "Succeeded in setting" : "Failed to set"), ClientVersionName(m_ClientVersion), m_ClientVersion);
@@ -1736,7 +1735,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		safe_delete(outapp);
 	}
 
-	if (ClientVersionBit & BIT_UFAndLater) {
+	if (m_ClientVersionBit & BIT_UFAndLater) {
 		outapp = new EQApplicationPacket(OP_XTargetResponse, 8);
 		outapp->WriteUInt32(GetMaxXTargets());
 		outapp->WriteUInt32(0);

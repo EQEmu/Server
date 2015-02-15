@@ -250,7 +250,7 @@ Client::Client(EQStreamInterface* ieqs)
 	AttemptedMessages = 0;
 	TotalKarma = 0;
 	m_ClientVersion = ClientVersion::Unknown;
-	ClientVersionBit = 0;
+	m_ClientVersionBit = 0;
 	AggroCount = 0;
 	RestRegenHP = 0;
 	RestRegenMana = 0;
@@ -7468,7 +7468,7 @@ void Client::SendClearMercInfo()
 
 void Client::DuplicateLoreMessage(uint32 ItemID)
 {
-	if(!(ClientVersionBit & BIT_RoFAndLater))
+	if (!(m_ClientVersionBit & BIT_RoFAndLater))
 	{
 		Message_StringID(0, PICK_LORE);
 		return;
