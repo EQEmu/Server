@@ -319,6 +319,28 @@ ClientVersion EQLimits::ValidateMobClientVersion(ClientVersion clientVersion)
 	return ClientVersion::Unknown;
 }
 
+// database
+size_t EQLimits::CharacterCreationLimit(ClientVersion clientVersion)
+{
+	static const size_t local[CLIENT_VERSION_COUNT] = {
+/*Unknown*/		NOT_USED,
+/*Client62*/	NOT_USED,
+/*Titanium*/	Titanium::consts::CHARACTER_CREATION_LIMIT,
+/*SoF*/			SoF::consts::CHARACTER_CREATION_LIMIT,
+/*SoD*/			SoD::consts::CHARACTER_CREATION_LIMIT,
+/*UF*/			UF::consts::CHARACTER_CREATION_LIMIT,
+/*RoF*/			RoF::consts::CHARACTER_CREATION_LIMIT,
+/*RoF2*/		RoF2::consts::CHARACTER_CREATION_LIMIT,
+
+/*MobNPC*/		NOT_USED,
+/*MobMerc*/		NOT_USED,
+/*MobBot*/		NOT_USED,
+/*MobPet*/		NOT_USED
+	};
+
+	return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
+}
+
 // inventory
 uint16 EQLimits::InventoryMapSize(int16 indexMap, ClientVersion clientVersion)
 {

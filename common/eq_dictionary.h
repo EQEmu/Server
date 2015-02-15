@@ -49,6 +49,9 @@ public:
 	// database
 	static const ClientVersion CHARACTER_CREATION_CLIENT = ClientVersion::RoF2; // adjust according to starting item placement and target client
 
+	// This value should be at least 8 or Titanium will have issues (tested at 6)
+	static const size_t CHARACTER_CREATION_LIMIT = RoF2::consts::CHARACTER_CREATION_LIMIT;
+
 	// inventory
 	static uint16 InventoryMapSize(int16 indexMap);
 	//static std::string InventoryLocationName(Location_Struct location);
@@ -169,6 +172,9 @@ public:
 	// these are 'universal' - do not when setting a valid client
 	static bool IsValidMobClientVersion(ClientVersion clientVersion);
 	static ClientVersion ValidateMobClientVersion(ClientVersion clientVersion);
+
+	// database
+	static size_t CharacterCreationLimit(ClientVersion clientVersion);
 
 	// inventory
 	static uint16 InventoryMapSize(int16 indexMap, ClientVersion clientVersion);
