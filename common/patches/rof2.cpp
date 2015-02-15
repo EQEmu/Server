@@ -2118,7 +2118,7 @@ namespace RoF2
 
 		for (int r = 0; r < 7; r++)
 		{
-			outapp->WriteUInt32(emu->item_tint[r].color);
+			outapp->WriteUInt32(emu->item_tint[r].Color);
 		}
 		// Write zeroes for extra two tint values
 		outapp->WriteUInt32(0);
@@ -2128,7 +2128,7 @@ namespace RoF2
 
 		for (int r = 0; r < 7; r++)
 		{
-			outapp->WriteUInt32(emu->item_tint[r].color);
+			outapp->WriteUInt32(emu->item_tint[r].Color);
 		}
 		// Write zeroes for extra two tint values
 		outapp->WriteUInt32(0);
@@ -2990,11 +2990,11 @@ namespace RoF2
 		int char_count;
 		int namelen = 0;
 		for (char_count = 0; char_count < 10; char_count++) {
-			if (emu->name[char_count][0] == '\0')
+			if (emu->Name[char_count][0] == '\0')
 				break;
-			if (strcmp(emu->name[char_count], "<none>") == 0)
+			if (strcmp(emu->Name[char_count], "<none>") == 0)
 				break;
-			namelen += strlen(emu->name[char_count]);
+			namelen += strlen(emu->Name[char_count]);
 		}
 
 		int total_length = sizeof(structs::CharacterSelect_Struct)
@@ -3006,58 +3006,58 @@ namespace RoF2
 		//unsigned char *eq_buffer = new unsigned char[total_length];
 		//structs::CharacterSelect_Struct *eq_head = (structs::CharacterSelect_Struct *) eq_buffer;
 
-		eq->char_count = char_count;
+		eq->CharCount = char_count;
 		//eq->total_chars = 10;
 
-		unsigned char *bufptr = (unsigned char *)eq->entries;
+		unsigned char *bufptr = (unsigned char *)eq->Entries;
 		int r;
 		for (r = 0; r < char_count; r++) {
 			{	//pre-name section...
 				structs::CharacterSelectEntry_Struct *eq2 = (structs::CharacterSelectEntry_Struct *) bufptr;
-				memcpy(eq2->name, emu->name[r], strlen(emu->name[r]) + 1);
+				memcpy(eq2->Name, emu->Name[r], strlen(emu->Name[r]) + 1);
 			}
 			//adjust for name.
-			bufptr += strlen(emu->name[r]);
+			bufptr += strlen(emu->Name[r]);
 			{	//post-name section...
 				structs::CharacterSelectEntry_Struct *eq2 = (structs::CharacterSelectEntry_Struct *) bufptr;
-				eq2->class_ = emu->class_[r];
-				eq2->race = emu->race[r];
-				eq2->level = emu->level[r];
-				eq2->class_2 = emu->class_[r];
-				eq2->race2 = emu->race[r];
-				eq2->zone = emu->zone[r];
-				eq2->instance = 0;
-				eq2->gender = emu->gender[r];
-				eq2->face = emu->face[r];
+				eq2->Class_ = emu->Class_[r];
+				eq2->Race = emu->Race[r];
+				eq2->Level = emu->Level[r];
+				eq2->Class_2 = emu->Class_[r];
+				eq2->Race2 = emu->Race[r];
+				eq2->Zone = emu->Zone[r];
+				eq2->Instance = 0;
+				eq2->Gender = emu->Gender[r];
+				eq2->Face = emu->Face[r];
 				int k;
 				for (k = 0; k < _MaterialCount; k++) {
-					eq2->equip[k].material = emu->equip[r][k].material;
-					eq2->equip[k].unknown1 = emu->equip[r][k].unknown1;
-					eq2->equip[k].elitematerial = emu->equip[r][k].elitematerial;
-					eq2->equip[k].heroforgemodel = emu->equip[r][k].heroforgemodel;
-					eq2->equip[k].material2 = emu->equip[r][k].material2;
-					eq2->equip[k].color.color = emu->equip[r][k].color.color;
+					eq2->Equip[k].Material = emu->Equip[r][k].Material;
+					eq2->Equip[k].Unknown1 = emu->Equip[r][k].Unknown1;
+					eq2->Equip[k].EliteMaterial = emu->Equip[r][k].EliteMaterial;
+					eq2->Equip[k].HeroForgeModel = emu->Equip[r][k].HeroForgeModel;
+					eq2->Equip[k].Material2 = emu->Equip[r][k].Material2;
+					eq2->Equip[k].Color.Color = emu->Equip[r][k].Color.Color;
 				}
-				eq2->u15 = 0xff;
-				eq2->u19 = 0xFF;
-				eq2->drakkin_tattoo = emu->drakkin_tattoo[r];
-				eq2->drakkin_details = emu->drakkin_details[r];
-				eq2->deity = emu->deity[r];
-				eq2->primary = emu->primary[r];
-				eq2->secondary = emu->secondary[r];
-				eq2->haircolor = emu->haircolor[r];
-				eq2->beardcolor = emu->beardcolor[r];
-				eq2->eyecolor1 = emu->eyecolor1[r];
-				eq2->eyecolor2 = emu->eyecolor2[r];
-				eq2->hairstyle = emu->hairstyle[r];
-				eq2->beard = emu->beard[r];
-				eq2->char_enabled = 1;
-				eq2->tutorial = emu->tutorial[r];
-				eq2->drakkin_heritage = emu->drakkin_heritage[r];
-				eq2->unknown1 = 0;
-				eq2->gohome = emu->gohome[r];
+				eq2->Unknown15 = 0xFF;
+				eq2->Unknown19 = 0xFF;
+				eq2->DrakkinTattoo = emu->DrakkinTattoo[r];
+				eq2->DrakkinDetails = emu->DrakkinDetails[r];
+				eq2->Deity = emu->Deity[r];
+				eq2->Primary = emu->Primary[r];
+				eq2->Secondary = emu->Secondary[r];
+				eq2->HairColor = emu->HairColor[r];
+				eq2->BeardColor = emu->BeardColor[r];
+				eq2->EyeColor1 = emu->EyeColor1[r];
+				eq2->EyeColor2 = emu->EyeColor2[r];
+				eq2->HairStyle = emu->HairStyle[r];
+				eq2->Beard = emu->Beard[r];
+				eq2->CharEnabled = 1;
+				eq2->Tutorial = emu->Tutorial[r];
+				eq2->DrakkinHeritage = emu->DrakkinHeritage[r];
+				eq2->Unknown1 = 0;
+				eq2->GoHome = emu->GoHome[r];
 				eq2->LastLogin = 1212696584;
-				eq2->unknown2 = 0;
+				eq2->Unknown2 = 0;
 			}
 			bufptr += sizeof(structs::CharacterSelectEntry_Struct);
 		}
@@ -3763,7 +3763,7 @@ namespace RoF2
 		OUT(elite_material);
 		OUT(hero_forge_model);
 		OUT(unknown18);
-		OUT(color.color);
+		OUT(color.Color);
 		OUT(wear_slot_id);
 
 		FINISH_ENCODE();
@@ -4078,18 +4078,18 @@ namespace RoF2
 				for (k = 0; k < 9; ++k)
 				{
 					{
-						VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->colors[k].color);
+						VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->colors[k].Color);
 					}
 				}
 
 				structs::EquipStruct *Equipment = (structs::EquipStruct *)Buffer;
 
 				for (k = 0; k < 9; k++) {
-					Equipment[k].material = emu->equipment[k].material;
-					Equipment[k].unknown1 = emu->equipment[k].unknown1;
-					Equipment[k].elitematerial = emu->equipment[k].elitematerial;
-					Equipment[k].heroforgemodel = emu->equipment[k].heroforgemodel;
-					Equipment[k].material2 = emu->equipment[k].material2;
+					Equipment[k].Material = emu->equipment[k].Material;
+					Equipment[k].Unknown1 = emu->equipment[k].Unknown1;
+					Equipment[k].EliteMaterial = emu->equipment[k].EliteMaterial;
+					Equipment[k].HeroForgeModel = emu->equipment[k].HeroForgeModel;
+					Equipment[k].Material2 = emu->equipment[k].Material2;
 				}
 
 				Buffer += (sizeof(structs::EquipStruct) * 9);
@@ -4102,13 +4102,13 @@ namespace RoF2
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialPrimary].material);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialPrimary].Material);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialSecondary].material);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialSecondary].Material);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);

@@ -1167,10 +1167,10 @@ bool ZoneDatabase::LoadCharacterMaterialColor(uint32 character_id, PlayerProfile
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		r = 0;
 		i = atoi(row[r]); /* Slot */ r++;
-		pp->item_tint[i].rgb.blue = atoi(row[r]); r++;
-		pp->item_tint[i].rgb.green = atoi(row[r]); r++;
-		pp->item_tint[i].rgb.red = atoi(row[r]); r++;
-		pp->item_tint[i].rgb.use_tint = atoi(row[r]);
+		pp->item_tint[i].RGB.Blue = atoi(row[r]); r++;
+		pp->item_tint[i].RGB.Green = atoi(row[r]); r++;
+		pp->item_tint[i].RGB.Red = atoi(row[r]); r++;
+		pp->item_tint[i].RGB.UseTint = atoi(row[r]);
 	}
 	return true;
 }
@@ -3546,9 +3546,9 @@ uint32 ZoneDatabase::UpdateCharacterCorpse(uint32 db_id, uint32 char_id, const c
                                     dbpc->plat, dbpc->haircolor, dbpc->beardcolor, dbpc->eyecolor1,
                                     dbpc->eyecolor2, dbpc->hairstyle, dbpc->face, dbpc->beard,
                                     dbpc->drakkin_heritage, dbpc->drakkin_tattoo, dbpc->drakkin_details,
-                                    dbpc->item_tint[0].color, dbpc->item_tint[1].color, dbpc->item_tint[2].color,
-                                    dbpc->item_tint[3].color, dbpc->item_tint[4].color, dbpc->item_tint[5].color,
-                                    dbpc->item_tint[6].color, dbpc->item_tint[7].color, dbpc->item_tint[8].color,
+                                    dbpc->item_tint[0].Color, dbpc->item_tint[1].Color, dbpc->item_tint[2].Color,
+                                    dbpc->item_tint[3].Color, dbpc->item_tint[4].Color, dbpc->item_tint[5].Color,
+                                    dbpc->item_tint[6].Color, dbpc->item_tint[7].Color, dbpc->item_tint[8].Color,
                                     db_id);
 	auto results = QueryDatabase(query);
 
@@ -3639,15 +3639,15 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 		dbpc->drakkin_heritage,
 		dbpc->drakkin_tattoo,
 		dbpc->drakkin_details,
-		dbpc->item_tint[0].color,
-		dbpc->item_tint[1].color,
-		dbpc->item_tint[2].color,
-		dbpc->item_tint[3].color,
-		dbpc->item_tint[4].color,
-		dbpc->item_tint[5].color,
-		dbpc->item_tint[6].color,
-		dbpc->item_tint[7].color,
-		dbpc->item_tint[8].color
+		dbpc->item_tint[0].Color,
+		dbpc->item_tint[1].Color,
+		dbpc->item_tint[2].Color,
+		dbpc->item_tint[3].Color,
+		dbpc->item_tint[4].Color,
+		dbpc->item_tint[5].Color,
+		dbpc->item_tint[6].Color,
+		dbpc->item_tint[7].Color,
+		dbpc->item_tint[8].Color
 	);
 	auto results = QueryDatabase(query);
 	uint32 last_insert_id = results.LastInsertedID();
@@ -3819,15 +3819,15 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 		pcs->drakkin_heritage = atoul(row[i++]);			// drakkin_heritage,
 		pcs->drakkin_tattoo = atoul(row[i++]);				// drakkin_tattoo,
 		pcs->drakkin_details = atoul(row[i++]);				// drakkin_details,
-		pcs->item_tint[0].color = atoul(row[i++]);			// wc_1,
-		pcs->item_tint[1].color = atoul(row[i++]);			// wc_2,
-		pcs->item_tint[2].color = atoul(row[i++]);			// wc_3,
-		pcs->item_tint[3].color = atoul(row[i++]);			// wc_4,
-		pcs->item_tint[4].color = atoul(row[i++]);			// wc_5,
-		pcs->item_tint[5].color = atoul(row[i++]);			// wc_6,
-		pcs->item_tint[6].color = atoul(row[i++]);			// wc_7,
-		pcs->item_tint[7].color = atoul(row[i++]);			// wc_8,
-		pcs->item_tint[8].color = atoul(row[i++]);			// wc_9
+		pcs->item_tint[0].Color = atoul(row[i++]);			// wc_1,
+		pcs->item_tint[1].Color = atoul(row[i++]);			// wc_2,
+		pcs->item_tint[2].Color = atoul(row[i++]);			// wc_3,
+		pcs->item_tint[3].Color = atoul(row[i++]);			// wc_4,
+		pcs->item_tint[4].Color = atoul(row[i++]);			// wc_5,
+		pcs->item_tint[5].Color = atoul(row[i++]);			// wc_6,
+		pcs->item_tint[6].Color = atoul(row[i++]);			// wc_7,
+		pcs->item_tint[7].Color = atoul(row[i++]);			// wc_8,
+		pcs->item_tint[8].Color = atoul(row[i++]);			// wc_9
 	}
 	query = StringFormat(
 		"SELECT                       \n"

@@ -724,9 +724,9 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 
 		for(int x = 0; x < 10; ++x)
 		{
-			if(strcasecmp(cs->name[x], char_name) == 0)
+			if(strcasecmp(cs->Name[x], char_name) == 0)
 			{
-				if(cs->gohome[x] == 1)
+				if(cs->GoHome[x] == 1)
 				{
 					home_enabled = true;
 					break;
@@ -754,9 +754,9 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 
 		for(int x = 0; x < 10; ++x)
 		{
-			if(strcasecmp(cs->name[x], char_name) == 0)
+			if(strcasecmp(cs->Name[x], char_name) == 0)
 			{
-				if(cs->tutorial[x] == 1)
+				if(cs->Tutorial[x] == 1)
 				{
 					tutorial_enabled = true;
 					break;

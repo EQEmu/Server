@@ -865,7 +865,7 @@ namespace Titanium
 		//	OUT(unknown00178[10]);
 		for (r = 0; r < 9; r++) {
 			OUT(item_material[r]);
-			OUT(item_tint[r].color);
+			OUT(item_tint[r].Color);
 		}
 		//	OUT(unknown00224[48]);
 		for (r = 0; r < structs::MAX_PP_AA_ARRAY; r++) {
@@ -1160,34 +1160,34 @@ namespace Titanium
 
 		int r;
 		for (r = 0; r < 10; r++) {
-			OUT(zone[r]);
-			OUT(eyecolor1[r]);
-			OUT(eyecolor2[r]);
-			OUT(hairstyle[r]);
-			OUT(primary[r]);
-			if (emu->race[r] > 473)
-				eq->race[r] = 1;
+			OUT(Zone[r]);
+			OUT(EyeColor1[r]);
+			OUT(EyeColor2[r]);
+			OUT(HairStyle[r]);
+			OUT(Primary[r]);
+			if (emu->Race[r] > 473)
+				eq->Race[r] = 1;
 			else
-				eq->race[r] = emu->race[r];
-			OUT(class_[r]);
-			OUT_str(name[r]);
-			OUT(gender[r]);
-			OUT(level[r]);
-			OUT(secondary[r]);
-			OUT(face[r]);
-			OUT(beard[r]);
+				eq->Race[r] = emu->Race[r];
+			OUT(Class_[r]);
+			OUT_str(Name[r]);
+			OUT(Gender[r]);
+			OUT(Level[r]);
+			OUT(Secondary[r]);
+			OUT(Face[r]);
+			OUT(Beard[r]);
 			int k;
 			for (k = 0; k < 9; k++) {
-				eq->equip[r][k] = emu->equip[r][k].material;
-				eq->cs_colors[r][k].color = emu->equip[r][k].color.color;
+				eq->Equip[r][k] = emu->Equip[r][k].Material;
+				eq->CS_Colors[r][k].Color = emu->Equip[r][k].Color.Color;
 			}
-			OUT(haircolor[r]);
-			OUT(gohome[r]);
-			OUT(tutorial[r]);
-			OUT(deity[r]);
-			OUT(beardcolor[r]);
-			eq->unknown820[r] = 0xFF;
-			eq->unknown902[r] = 0xFF;
+			OUT(HairColor[r]);
+			OUT(GoHome[r]);
+			OUT(Tutorial[r]);
+			OUT(Deity[r]);
+			OUT(BeardColor[r]);
+			eq->Unknown820[r] = 0xFF;
+			eq->Unknown902[r] = 0xFF;
 		}
 
 		FINISH_ENCODE();
@@ -1405,7 +1405,7 @@ namespace Titanium
 
 		OUT(spawn_id);
 		OUT(material);
-		OUT(color.color);
+		OUT(color.Color);
 		OUT(wear_slot_id);
 
 		FINISH_ENCODE();
@@ -1497,8 +1497,8 @@ namespace Titanium
 			eq->guildrank = emu->guildrank;
 			//		eq->unknown0194[3] = emu->unknown0194[3];
 			for (k = 0; k < 9; k++) {
-				eq->equipment[k] = emu->equipment[k].material;
-				eq->colors[k].color = emu->colors[k].color;
+				eq->equipment[k] = emu->equipment[k].Material;
+				eq->colors[k].Color = emu->colors[k].Color;
 			}
 			for (k = 0; k < 8; k++) {
 				eq->set_to_0xFF[k] = 0xFF;
@@ -1974,7 +1974,7 @@ namespace Titanium
 
 		IN(spawn_id);
 		IN(material);
-		IN(color.color);
+		IN(color.Color);
 		IN(wear_slot_id);
 		emu->unknown06 = 0;
 		emu->elite_material = 0;

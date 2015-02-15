@@ -142,83 +142,86 @@ struct AdventureInfo {
 */
 struct Color_Struct
 {
-	union
-	{
-		struct
-		{
-			uint8	blue;
-			uint8	green;
-			uint8	red;
-			uint8	use_tint;	// if there's a tint this is FF
-		} rgb;
-		uint32 color;
+	union {
+		struct {
+			uint8 Blue;
+			uint8 Green;
+			uint8 Red;
+			uint8 UseTint;	// if there's a tint this is FF
+		} RGB;
+		uint32 Color;
 	};
 };
 
-/*
-* Visible equiptment.
-* Size: 20 Octets
-*/
-struct EquipStruct {
-	/*00*/ uint32 material;
-	/*04*/ uint32 unknown1;
-	/*08*/ uint32 elitematerial;
-	/*12*/ uint32 heroforgemodel;
-	/*16*/ uint32 material2;	// Same as material?
-	/*20*/
+struct CharSelectEquip
+{
+	uint32 Material;
+	uint32 Unknown1;
+	uint32 EliteMaterial;
+	uint32 HeroForgeModel;
+	uint32 Material2;
+	Color_Struct Color;
 };
 
-struct CharSelectEquip {
-	uint32 material;
-	uint32 unknown1;
-	uint32 elitematerial;
-	uint32 heroforgemodel;
-	uint32 material2;
-	Color_Struct color;
-};
-
-struct CharacterSelectEntry_Struct {
-/*0000*/	char name[1];			// Name null terminated
-/*0000*/	uint8 class_;
-/*0000*/	uint32 race;
-/*0000*/	uint8 level;
-/*0000*/	uint8 class_2;
-/*0000*/	uint32 race2;
-/*0000*/	uint16 zone;
-/*0000*/	uint16 instance;
-/*0000*/	uint8 gender;
-/*0000*/	uint8 face;
-/*0000*/	CharSelectEquip	equip[9];
-/*0000*/	uint8 u15;				// Seen FF
-/*0000*/	uint8 u19;				// Seen FF
-/*0000*/	uint32 drakkin_tattoo;
-/*0000*/	uint32 drakkin_details;
-/*0000*/	uint32 deity;
-/*0000*/	uint32 primary;
-/*0000*/	uint32 secondary;
-/*0000*/	uint8 haircolor;
-/*0000*/	uint8 beardcolor;
-/*0000*/	uint8 eyecolor1;
-/*0000*/	uint8 eyecolor2;
-/*0000*/	uint8 hairstyle;
-/*0000*/	uint8 beard;
-/*0000*/	uint8 char_enabled;
-/*0000*/	uint8 tutorial;			// Seen 1 for new char or 0 for existing
-/*0000*/	uint32 drakkin_heritage;
-/*0000*/	uint8 unknown1;			// Seen 0
-/*0000*/	uint8 gohome;			// Seen 0 for new char and 1 for existing
+struct CharacterSelectEntry_Struct
+{
+/*0000*/	char Name[1];				// Name null terminated
+/*0000*/	uint8 Class_;
+/*0000*/	uint32 Race;
+/*0000*/	uint8 Level;
+/*0000*/	uint8 Class_2;
+/*0000*/	uint32 Race2;
+/*0000*/	uint16 Zone;
+/*0000*/	uint16 Instance;
+/*0000*/	uint8 Gender;
+/*0000*/	uint8 Face;
+/*0000*/	CharSelectEquip	Equip[9];
+/*0000*/	uint8 Unknown15;			// Seen FF
+/*0000*/	uint8 Unknown19;			// Seen FF
+/*0000*/	uint32 DrakkinTattoo;
+/*0000*/	uint32 DrakkinDetails;
+/*0000*/	uint32 Deity;
+/*0000*/	uint32 Primary;
+/*0000*/	uint32 Secondary;
+/*0000*/	uint8 HairColor;
+/*0000*/	uint8 BeardColor;
+/*0000*/	uint8 EyeColor1;
+/*0000*/	uint8 EyeColor2;
+/*0000*/	uint8 HairStyle;
+/*0000*/	uint8 Beard;
+/*0000*/	uint8 CharEnabled;
+/*0000*/	uint8 Tutorial;				// Seen 1 for new char or 0 for existing
+/*0000*/	uint32 DrakkinHeritage;
+/*0000*/	uint8 Unknown1;				// Seen 0
+/*0000*/	uint8 GoHome;				// Seen 0 for new char and 1 for existing
 /*0000*/	uint32 LastLogin;
-/*0000*/	uint8 unknown2;			// Seen 0
+/*0000*/	uint8 Unknown2;				// Seen 0
 };
 
 /*
 ** Character Selection Struct
 **
 */
-struct CharacterSelect_Struct {
-/*000*/	uint32	char_count;		//number of chars in this packet
-/*004*/	CharacterSelectEntry_Struct entries[0];
+struct CharacterSelect_Struct
+{
+/*000*/	uint32 CharCount;	//number of chars in this packet
+/*004*/	CharacterSelectEntry_Struct Entries[0];
 };
+
+/*
+* Visible equiptment.
+* Size: 20 Octets
+*/
+struct EquipStruct
+{
+	/*00*/ uint32 Material;
+	/*04*/ uint32 Unknown1;
+	/*08*/ uint32 EliteMaterial;
+	/*12*/ uint32 HeroForgeModel;
+	/*16*/ uint32 Material2;	// Same as material?
+	/*20*/
+};
+
 
 struct Membership_Entry_Struct
 {

@@ -1984,9 +1984,9 @@ void Client::QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call) {
 void Client::DyeArmor(DyeStruct* dye){
 	int16 slot=0;
 	for (int i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_TINT_END; i++) {
-		if (m_pp.item_tint[i].rgb.blue != dye->dye[i].rgb.blue ||
-			m_pp.item_tint[i].rgb.red != dye->dye[i].rgb.red ||
-			m_pp.item_tint[i].rgb.green != dye->dye[i].rgb.green
+		if (m_pp.item_tint[i].RGB.Blue != dye->dye[i].RGB.Blue ||
+			m_pp.item_tint[i].RGB.Red != dye->dye[i].RGB.Red ||
+			m_pp.item_tint[i].RGB.Green != dye->dye[i].RGB.Green
 			) {
 			slot = m_inv.HasItem(32557, 1, invWherePersonal);
 			if (slot != INVALID_INDEX){
@@ -1994,18 +1994,18 @@ void Client::DyeArmor(DyeStruct* dye){
 				uint8 slot2=SlotConvert(i);
 				ItemInst* inst = this->m_inv.GetItem(slot2);
 				if(inst){
-					uint32 armor_color = ((uint32)dye->dye[i].rgb.red << 16) | ((uint32)dye->dye[i].rgb.green << 8) | ((uint32)dye->dye[i].rgb.blue);
+					uint32 armor_color = ((uint32)dye->dye[i].RGB.Red << 16) | ((uint32)dye->dye[i].RGB.Green << 8) | ((uint32)dye->dye[i].RGB.Blue);
 					inst->SetColor(armor_color); 
 					database.SaveCharacterMaterialColor(this->CharacterID(), i, armor_color);
 					database.SaveInventory(CharacterID(),inst,slot2);
-					if(dye->dye[i].rgb.use_tint)
-						m_pp.item_tint[i].rgb.use_tint = 0xFF;
+					if(dye->dye[i].RGB.UseTint)
+						m_pp.item_tint[i].RGB.UseTint = 0xFF;
 					else
-						m_pp.item_tint[i].rgb.use_tint=0x00;
+						m_pp.item_tint[i].RGB.UseTint=0x00;
 				}
-				m_pp.item_tint[i].rgb.blue=dye->dye[i].rgb.blue;
-				m_pp.item_tint[i].rgb.red=dye->dye[i].rgb.red;
-				m_pp.item_tint[i].rgb.green=dye->dye[i].rgb.green;
+				m_pp.item_tint[i].RGB.Blue=dye->dye[i].RGB.Blue;
+				m_pp.item_tint[i].RGB.Red=dye->dye[i].RGB.Red;
+				m_pp.item_tint[i].RGB.Green=dye->dye[i].RGB.Green;
 				SendWearChange(i);
 			}
 			else{
@@ -2420,7 +2420,7 @@ uint32 Client::GetEquipmentColor(uint8 material_slot) const
 
 	const Item_Struct *item = database.GetItem(GetEquipment(material_slot));
 	if(item != nullptr)
-		return ((m_pp.item_tint[material_slot].rgb.use_tint) ? m_pp.item_tint[material_slot].color : item->Color);
+		return ((m_pp.item_tint[material_slot].RGB.UseTint) ? m_pp.item_tint[material_slot].Color : item->Color);
 
 	return 0;
 }

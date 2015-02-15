@@ -1791,13 +1791,13 @@ namespace UF
 		OUT(beard);
 		//	OUT(unknown00178[10]);
 		for (r = 0; r < 9; r++) {
-			eq->equipment[r].material = emu->item_material[r];
-			eq->equipment[r].unknown1 = 0;
-			eq->equipment[r].elitematerial = 0;
+			eq->equipment[r].Material = emu->item_material[r];
+			eq->equipment[r].Unknown1 = 0;
+			eq->equipment[r].EliteMaterial = 0;
 			//eq->colors[r].color = emu->colors[r].color;
 		}
 		for (r = 0; r < 7; r++) {
-			OUT(item_tint[r].color);
+			OUT(item_tint[r].Color);
 		}
 		//	OUT(unknown00224[48]);
 		//NOTE: new client supports 300 AAs, our internal rep/PP
@@ -2203,11 +2203,11 @@ namespace UF
 		int char_count;
 		int namelen = 0;
 		for (char_count = 0; char_count < 10; char_count++) {
-			if (emu->name[char_count][0] == '\0')
+			if (emu->Name[char_count][0] == '\0')
 				break;
-			if (strcmp(emu->name[char_count], "<none>") == 0)
+			if (strcmp(emu->Name[char_count], "<none>") == 0)
 				break;
-			namelen += strlen(emu->name[char_count]);
+			namelen += strlen(emu->Name[char_count]);
 		}
 
 		int total_length = sizeof(structs::CharacterSelect_Struct)
@@ -2219,49 +2219,49 @@ namespace UF
 		//unsigned char *eq_buffer = new unsigned char[total_length];
 		//structs::CharacterSelect_Struct *eq_head = (structs::CharacterSelect_Struct *) eq_buffer;
 
-		eq->char_count = char_count;
-		eq->total_chars = 10;
+		eq->CharCount = char_count;
+		eq->TotalChars = 10;
 
-		unsigned char *bufptr = (unsigned char *)eq->entries;
+		unsigned char *bufptr = (unsigned char *)eq->Entries;
 		int r;
 		for (r = 0; r < char_count; r++) {
 			{	//pre-name section...
 				structs::CharacterSelectEntry_Struct *eq2 = (structs::CharacterSelectEntry_Struct *) bufptr;
-				eq2->level = emu->level[r];
-				eq2->hairstyle = emu->hairstyle[r];
-				eq2->gender = emu->gender[r];
-				memcpy(eq2->name, emu->name[r], strlen(emu->name[r]) + 1);
+				eq2->Level = emu->Level[r];
+				eq2->HairStyle = emu->HairStyle[r];
+				eq2->Gender = emu->Gender[r];
+				memcpy(eq2->Name, emu->Name[r], strlen(emu->Name[r]) + 1);
 			}
 			//adjust for name.
-			bufptr += strlen(emu->name[r]);
+			bufptr += strlen(emu->Name[r]);
 			{	//post-name section...
 				structs::CharacterSelectEntry_Struct *eq2 = (structs::CharacterSelectEntry_Struct *) bufptr;
-				eq2->beard = emu->beard[r];
-				eq2->haircolor = emu->haircolor[r];
-				eq2->face = emu->face[r];
+				eq2->Beard = emu->Beard[r];
+				eq2->HairColor = emu->HairColor[r];
+				eq2->Face = emu->Face[r];
 				int k;
 				for (k = 0; k < _MaterialCount; k++) {
-					eq2->equip[k].material = emu->equip[r][k].material;
-					eq2->equip[k].unknown1 = emu->equip[r][k].unknown1;
-					eq2->equip[k].elitematerial = emu->equip[r][k].elitematerial;
-					eq2->equip[k].color.color = emu->equip[r][k].color.color;
+					eq2->Equip[k].Material = emu->Equip[r][k].Material;
+					eq2->Equip[k].Unknown1 = emu->Equip[r][k].Unknown1;
+					eq2->Equip[k].EliteMaterial = emu->Equip[r][k].EliteMaterial;
+					eq2->Equip[k].Color.Color = emu->Equip[r][k].Color.Color;
 				}
-				eq2->primary = emu->primary[r];
-				eq2->secondary = emu->secondary[r];
-				eq2->tutorial = emu->tutorial[r]; // was u15
-				eq2->u15 = 0xff;
-				eq2->deity = emu->deity[r];
-				eq2->zone = emu->zone[r];
-				eq2->u19 = 0xFF;
-				eq2->race = emu->race[r];
-				eq2->gohome = emu->gohome[r];
-				eq2->class_ = emu->class_[r];
-				eq2->eyecolor1 = emu->eyecolor1[r];
-				eq2->beardcolor = emu->beardcolor[r];
-				eq2->eyecolor2 = emu->eyecolor2[r];
-				eq2->drakkin_heritage = emu->drakkin_heritage[r];
-				eq2->drakkin_tattoo = emu->drakkin_tattoo[r];
-				eq2->drakkin_details = emu->drakkin_details[r];
+				eq2->Primary = emu->Primary[r];
+				eq2->Secondary = emu->Secondary[r];
+				eq2->Tutorial = emu->Tutorial[r]; // was u15
+				eq2->Unknown15 = 0xFF;
+				eq2->Deity = emu->Deity[r];
+				eq2->Zone = emu->Zone[r];
+				eq2->Unknown19 = 0xFF;
+				eq2->Race = emu->Race[r];
+				eq2->GoHome = emu->GoHome[r];
+				eq2->Class_ = emu->Class_[r];
+				eq2->EyeColor1 = emu->EyeColor1[r];
+				eq2->BeardColor = emu->BeardColor[r];
+				eq2->EyeColor2 = emu->EyeColor2[r];
+				eq2->DrakkinHeritage = emu->DrakkinHeritage[r];
+				eq2->DrakkinTattoo = emu->DrakkinTattoo[r];
+				eq2->DrakkinDetails = emu->DrakkinDetails[r];
 			}
 
 			bufptr += sizeof(structs::CharacterSelectEntry_Struct);
@@ -2641,7 +2641,7 @@ namespace UF
 		OUT(material);
 		OUT(unknown06);
 		OUT(elite_material);
-		OUT(color.color);
+		OUT(color.Color);
 		OUT(wear_slot_id);
 
 		FINISH_ENCODE();
@@ -3003,7 +3003,7 @@ namespace UF
 				for (k = 0; k < 9; ++k)
 				{
 					{
-						VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->colors[k].color);
+						VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->colors[k].Color);
 					}
 				}
 			}
@@ -3013,11 +3013,11 @@ namespace UF
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialPrimary].material);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialPrimary].Material);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialSecondary].material);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialSecondary].Material);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 			}
@@ -3027,9 +3027,9 @@ namespace UF
 				structs::EquipStruct *Equipment = (structs::EquipStruct *)Buffer;
 
 				for (k = 0; k < 9; k++) {
-					Equipment[k].material = emu->equipment[k].material;
-					Equipment[k].unknown1 = emu->equipment[k].unknown1;
-					Equipment[k].elitematerial = emu->equipment[k].elitematerial;
+					Equipment[k].Material = emu->equipment[k].Material;
+					Equipment[k].Unknown1 = emu->equipment[k].Unknown1;
+					Equipment[k].EliteMaterial = emu->equipment[k].EliteMaterial;
 				}
 
 				Buffer += (sizeof(structs::EquipStruct) * 9);
@@ -3729,7 +3729,7 @@ namespace UF
 		IN(material);
 		IN(unknown06);
 		IN(elite_material);
-		IN(color.color);
+		IN(color.Color);
 		IN(wear_slot_id);
 		emu->hero_forge_model = 0;
 		emu->unknown18 = 0;

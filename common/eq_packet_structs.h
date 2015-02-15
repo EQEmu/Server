@@ -124,83 +124,66 @@ struct LDoNTrapTemplate
 ///////////////////////////////////////////////////////////////////////////////
 
 
-/*
-** Color_Struct
-** Size: 4 bytes
-** Used for convenience
-** Merth: Gave struct a name so gcc 2.96 would compile
-**
-*/
+// All clients translate the character select information to some degree
+
 struct Color_Struct
 {
-	union
-	{
-		struct
-		{
-			uint8	blue;
-			uint8	green;
-			uint8	red;
-			uint8	use_tint;	// if there's a tint this is FF
-		} rgb;
-		uint32 color;
+	union {
+		struct {
+			uint8 Blue;
+			uint8 Green;
+			uint8 Red;
+			uint8 UseTint;	// if there's a tint this is FF
+		} RGB;
+		uint32 Color;
 	};
 };
 
-/*
-* Visible equiptment.
-* Size: 20 Octets
-*/
-struct EquipStruct {
-	/*00*/ uint32 material;
-	/*04*/ uint32 unknown1;
-	/*08*/ uint32 elitematerial;
-	/*12*/ uint32 heroforgemodel;
-	/*16*/ uint32 material2;	// Same as material?
-	/*20*/
+struct EquipStruct
+{
+	uint32 Material;
+	uint32 Unknown1;
+	uint32 EliteMaterial;
+	uint32 HeroForgeModel;
+	uint32 Material2;	// Same as material?
 };
 
-struct CharSelectEquip {
-	uint32 material;
-	uint32 unknown1;
-	uint32 elitematerial;
-	uint32 heroforgemodel;
-	uint32 material2;
-	Color_Struct color;
+struct CharSelectEquip
+{
+	uint32 Material;
+	uint32 Unknown1;
+	uint32 EliteMaterial;
+	uint32 HeroForgeModel;
+	uint32 Material2;
+	Color_Struct Color;
 };
 
-/*
-** Character Selection Struct
-** Length: 1704 Bytes
-**
-*/
-struct CharacterSelect_Struct {
-/*0000*/	uint32	race[10];				// Characters Race
-/*0040*/	//Color_Struct	cs_colors[10][9];	// Characters Equipment Colors
-/*0400*/	uint8	beardcolor[10];			// Characters beard Color
-/*0410*/	uint8	hairstyle[10];			// Characters hair style
-/*0420*/	//uint32	equip[10][9];			// 0=helm, 1=chest, 2=arm, 3=bracer, 4=hand, 5=leg, 6=boot, 7=melee1, 8=melee2 (Might not be)
-/*0000*/	CharSelectEquip	equip[10][9];
-/*0780*/	uint32	secondary[10];			// Characters secondary IDFile number
-/*0820*/	uint32	drakkin_heritage[10];		// added for SoF
-/*0860*/	uint32	drakkin_tattoo[10];			// added for SoF
-/*0900*/	uint32	drakkin_details[10];		// added for SoF
-/*0940*/	uint32	deity[10];				// Characters Deity
-/*0980*/	uint8	gohome[10];				// 1=Go Home available, 0=not
-/*0990*/	uint8	tutorial[10];			// 1=Tutorial available, 0=not
-/*1000*/	uint8	beard[10];				// Characters Beard Type
-/*1010*/	uint8	unknown902[10];			// 10x ff
-/*1020*/	uint32	primary[10];			// Characters primary IDFile number
-/*1060*/	uint8	haircolor[10];			// Characters Hair Color
-/*1070*/	uint8	unknown0962[2];			// 2x 00
-/*1072*/	uint32	zone[10];				// Characters Current Zone
-/*1112*/	uint8	class_[10];				// Characters Classes
-/*1022*/	uint8	face[10];				// Characters Face Type
-/*1032*/	char	name[10][64];			// Characters Names
-/*1672*/	uint8	gender[10];				// Characters Gender
-/*1682*/	uint8	eyecolor1[10];			// Characters Eye Color
-/*1692*/	uint8	eyecolor2[10];			// Characters Eye 2 Color
-/*1702*/	uint8	level[10];				// Characters Levels
-/*1712*/
+struct CharacterSelect_Struct
+{
+	uint32 Race[10];				// Characters Race
+	uint8 BeardColor[10];			// Characters beard Color
+	uint8 HairStyle[10];			// Characters hair style
+	CharSelectEquip Equip[10][9];
+	uint32 Secondary[10];			// Characters secondary IDFile number
+	uint32 DrakkinHeritage[10];		// added for SoF
+	uint32 DrakkinTattoo[10];			// added for SoF
+	uint32 DrakkinDetails[10];		// added for SoF
+	uint32 Deity[10];				// Characters Deity
+	uint8 GoHome[10];				// 1=Go Home available, 0=not
+	uint8 Tutorial[10];				// 1=Tutorial available, 0=not
+	uint8 Beard[10];				// Characters Beard Type
+	uint8 Unknown902[10];			// 10x ff
+	uint32 Primary[10];				// Characters primary IDFile number
+	uint8 HairColor[10];			// Characters Hair Color
+	uint8 Unknown0962[2];			// 2x 00
+	uint32 Zone[10];				// Characters Current Zone
+	uint8 Class_[10];				// Characters Classes
+	uint8 Face[10];					// Characters Face Type
+	char Name[10][64];				// Characters Names
+	uint8 Gender[10];				// Characters Gender
+	uint8 EyeColor1[10];			// Characters Eye Color
+	uint8 EyeColor2[10];			// Characters Eye 2 Color
+	uint8 Level[10];				// Characters Levels
 };
 
 /*

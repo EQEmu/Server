@@ -41,11 +41,11 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 
 	/* Initialize Variables */
 	for (int i=0; i<10; i++) {
-		strcpy(cs->name[i], "<none>");
-		cs->zone[i] = 0;
-		cs->level[i] = 0;
-		cs->tutorial[i] = 0;
-		cs->gohome[i] = 0;
+		strcpy(cs->Name[i], "<none>");
+		cs->Zone[i] = 0;
+		cs->Level[i] = 0;
+		cs->Tutorial[i] = 0;
+		cs->GoHome[i] = 0;
 	}
 
 	/* Get Character Info */
@@ -80,32 +80,32 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 		memset(&pp, 0, sizeof(PlayerProfile_Struct));
 
 		uint32 character_id = atoi(row[0]);
-		strcpy(cs->name[char_num], row[1]);
+		strcpy(cs->Name[char_num], row[1]);
 		uint8 lvl = atoi(row[5]);
-		cs->level[char_num] = lvl;
-		cs->class_[char_num] = atoi(row[4]);
-		cs->race[char_num] = atoi(row[3]);
-		cs->gender[char_num] = atoi(row[2]);
-		cs->deity[char_num] = atoi(row[6]);
-		cs->zone[char_num] = atoi(row[19]);
-		cs->face[char_num] = atoi(row[15]);
-		cs->haircolor[char_num] = atoi(row[9]);
-		cs->beardcolor[char_num] = atoi(row[10]);
-		cs->eyecolor2[char_num] = atoi(row[12]);
-		cs->eyecolor1[char_num] = atoi(row[11]);
-		cs->hairstyle[char_num] = atoi(row[13]);
-		cs->beard[char_num] = atoi(row[14]);
-		cs->drakkin_heritage[char_num] = atoi(row[16]);
-		cs->drakkin_tattoo[char_num] = atoi(row[17]);
-		cs->drakkin_details[char_num] = atoi(row[18]);
+		cs->Level[char_num] = lvl;
+		cs->Class_[char_num] = atoi(row[4]);
+		cs->Race[char_num] = atoi(row[3]);
+		cs->Gender[char_num] = atoi(row[2]);
+		cs->Deity[char_num] = atoi(row[6]);
+		cs->Zone[char_num] = atoi(row[19]);
+		cs->Face[char_num] = atoi(row[15]);
+		cs->HairColor[char_num] = atoi(row[9]);
+		cs->BeardColor[char_num] = atoi(row[10]);
+		cs->EyeColor2[char_num] = atoi(row[12]);
+		cs->EyeColor1[char_num] = atoi(row[11]);
+		cs->HairStyle[char_num] = atoi(row[13]);
+		cs->Beard[char_num] = atoi(row[14]);
+		cs->DrakkinHeritage[char_num] = atoi(row[16]);
+		cs->DrakkinTattoo[char_num] = atoi(row[17]);
+		cs->DrakkinDetails[char_num] = atoi(row[18]);
 
 		if (RuleB(World, EnableTutorialButton) && (lvl <= RuleI(World, MaxLevelForTutorial)))
-			cs->tutorial[char_num] = 1;
+			cs->Tutorial[char_num] = 1;
 
 		if (RuleB(World, EnableReturnHomeButton)) {
 			int now = time(nullptr);
 			if ((now - atoi(row[7])) >= RuleI(World, MinOfflineTimeToReturnHome))
-				cs->gohome[char_num] = 1;
+				cs->GoHome[char_num] = 1;
 		}
 
 		/* Set Bind Point Data for any character that may possibly be missing it for any reason */
@@ -118,7 +118,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 
 		if (has_home == 0 || has_bind == 0){
 			cquery = StringFormat("SELECT `zone_id`, `bind_id`, `x`, `y`, `z` FROM `start_zones` WHERE `player_class` = %i AND `player_deity` = %i AND `player_race` = %i",
-				cs->class_[char_num], cs->deity[char_num], cs->race[char_num]);
+				cs->Class_[char_num], cs->Deity[char_num], cs->Race[char_num]);
 			auto results_bind = database.QueryDatabase(cquery);
 			for (auto row_d = results_bind.begin(); row_d != results_bind.end(); ++row_d) {
 				/* If a bind_id is specified, make them start there */
@@ -161,16 +161,16 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 		for (auto row_b = results_b.begin(); row_b != results_b.end(); ++row_b)
 		{
 			slot = atoi(row_b[0]);
-			pp.item_tint[slot].rgb.red = atoi(row_b[1]);
-			pp.item_tint[slot].rgb.green = atoi(row_b[2]);
-			pp.item_tint[slot].rgb.blue = atoi(row_b[3]);
-			pp.item_tint[slot].rgb.use_tint = atoi(row_b[4]);
+			pp.item_tint[slot].RGB.Red = atoi(row_b[1]);
+			pp.item_tint[slot].RGB.Green = atoi(row_b[2]);
+			pp.item_tint[slot].RGB.Blue = atoi(row_b[3]);
+			pp.item_tint[slot].RGB.UseTint = atoi(row_b[4]);
 		}
 
 		/* Load Inventory */
 		// If we ensure that the material data is updated appropriately, we can do away with inventory loads
 		inv = new Inventory;
-		if (GetInventory(account_id, cs->name[char_num], inv))
+		if (GetInventory(account_id, cs->Name[char_num], inv))
 		{
 			const Item_Struct* item = nullptr;
 			const ItemInst* inst = nullptr;
@@ -194,31 +194,31 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 					if (inst->GetOrnamentationIDFile() != 0)
 					{
 						idfile = inst->GetOrnamentationIDFile();
-						cs->equip[char_num][matslot].material = idfile;
+						cs->Equip[char_num][matslot].Material = idfile;
 					}
 					else
 					{
 						if (strlen(item->IDFile) > 2)
 						{
 							idfile = atoi(&item->IDFile[2]);
-							cs->equip[char_num][matslot].material = idfile;
+							cs->Equip[char_num][matslot].Material = idfile;
 						}
 					}
 					if (matslot == MaterialPrimary)
 					{
-						cs->primary[char_num] = idfile;
+						cs->Primary[char_num] = idfile;
 					}
 					else
 					{
-						cs->secondary[char_num] = idfile;
+						cs->Secondary[char_num] = idfile;
 					}
 				}
 				else
 				{
 					uint32 color = 0;
-					if (pp.item_tint[matslot].rgb.use_tint)
+					if (pp.item_tint[matslot].RGB.UseTint)
 					{
-						color = pp.item_tint[matslot].color;
+						color = pp.item_tint[matslot].Color;
 					}
 					else
 					{
@@ -226,16 +226,16 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 					}
 
 					// Armor Materials/Models
-					cs->equip[char_num][matslot].material = item->Material;
-					cs->equip[char_num][matslot].elitematerial = item->EliteMaterial;
-					cs->equip[char_num][matslot].heroforgemodel = inst->GetOrnamentHeroModel(matslot);
-					cs->equip[char_num][matslot].color.color = color;
+					cs->Equip[char_num][matslot].Material = item->Material;
+					cs->Equip[char_num][matslot].EliteMaterial = item->EliteMaterial;
+					cs->Equip[char_num][matslot].HeroForgeModel = inst->GetOrnamentHeroModel(matslot);
+					cs->Equip[char_num][matslot].Color.Color = color;
 				}
 			}
 		}
 		else
 		{
-			printf("Error loading inventory for %s\n", cs->name[char_num]);
+			printf("Error loading inventory for %s\n", cs->Name[char_num]);
 		}
 
 		safe_delete(inv);
