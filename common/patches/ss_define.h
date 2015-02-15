@@ -41,6 +41,11 @@
 	memset(__packet->pBuffer, 0, len); \
 	eq_struct *eq = (eq_struct *) __packet->pBuffer; \
 
+#define ALLOC_LEN_ENCODE(len) \
+	__packet->pBuffer = new unsigned char[len]; \
+	__packet->size = len; \
+	memset(__packet->pBuffer, 0, len); \
+
 //a shorter assignment for direct mode
 #undef OUT
 #define OUT(x) eq->x = emu->x;

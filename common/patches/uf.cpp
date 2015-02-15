@@ -2693,42 +2693,23 @@ namespace UF
 
 	ENCODE(OP_ZonePlayerToBind)
 	{
-		ENCODE_LENGTH_ATLEAST(ZonePlayerToBind_Struct);
+		SETUP_VAR_ENCODE(ZonePlayerToBind_Struct);
+		ALLOC_LEN_ENCODE(sizeof(structs::ZonePlayerToBind_Struct) + strlen(emu->zone_name));
 
-		ZonePlayerToBind_Struct *zps = (ZonePlayerToBind_Struct*)(*p)->pBuffer;
+		__packet->SetWritePosition(0);
+		__packet->WriteUInt16(emu->bind_zone_id);
+		__packet->WriteUInt16(emu->bind_instance_id);
+		__packet->WriteFloat(emu->x);
+		__packet->WriteFloat(emu->y);
+		__packet->WriteFloat(emu->z);
+		__packet->WriteFloat(emu->heading);
+		__packet->WriteString(emu->zone_name);
+		__packet->WriteUInt8(0); // save items
+		__packet->WriteUInt32(0); // hp
+		__packet->WriteUInt32(0); // mana
+		__packet->WriteUInt32(0); // endurance
 
-		std::stringstream ss(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
-
-		unsigned char *buffer1 = new unsigned char[sizeof(structs::ZonePlayerToBindHeader_Struct) + strlen(zps->zone_name)];
-		structs::ZonePlayerToBindHeader_Struct *zph = (structs::ZonePlayerToBindHeader_Struct*)buffer1;
-		unsigned char *buffer2 = new unsigned char[sizeof(structs::ZonePlayerToBindFooter_Struct)];
-		structs::ZonePlayerToBindFooter_Struct *zpf = (structs::ZonePlayerToBindFooter_Struct*)buffer2;
-
-		zph->x = zps->x;
-		zph->y = zps->y;
-		zph->z = zps->z;
-		zph->heading = zps->heading;
-		zph->bind_zone_id = zps->bind_zone_id;
-		zph->bind_instance_id = zps->bind_instance_id;
-		strcpy(zph->zone_name, zps->zone_name);
-
-		zpf->unknown021 = 1;
-		zpf->unknown022 = 0;
-		zpf->unknown023 = 0;
-		zpf->unknown024 = 0;
-
-		ss.write((const char*)buffer1, (sizeof(structs::ZonePlayerToBindHeader_Struct) + strlen(zps->zone_name)));
-		ss.write((const char*)buffer2, sizeof(structs::ZonePlayerToBindFooter_Struct));
-
-		delete[] buffer1;
-		delete[] buffer2;
-		delete[](*p)->pBuffer;
-
-		(*p)->pBuffer = new unsigned char[ss.str().size()];
-		(*p)->size = ss.str().size();
-
-		memcpy((*p)->pBuffer, ss.str().c_str(), ss.str().size());
-		dest->FastQueuePacket(&(*p));
+		FINISH_ENCODE();
 	}
 
 	ENCODE(OP_ZoneServerInfo)
