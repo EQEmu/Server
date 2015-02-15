@@ -1962,7 +1962,7 @@ namespace SoF
 		__packet->WriteFloat(emu->z);
 		__packet->WriteFloat(emu->heading);
 		__packet->WriteString(emu->zone_name);
-		__packet->WriteUInt8(0); // save items
+		__packet->WriteUInt8(1); // save items
 		__packet->WriteUInt32(0); // hp
 		__packet->WriteUInt32(0); // mana
 		__packet->WriteUInt32(0); // endurance
